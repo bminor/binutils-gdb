@@ -1286,13 +1286,13 @@ detach_one_pid (int pid, int signo)
 			    pid, strsignal (signo));
 }
 
-/* Get pending signal of THREAD as a host signal number, for detaching
+/* Get pending signal of LP as a host signal number, for detaching
    purposes.  This is the signal the thread last stopped for, which we
    need to deliver to the thread when detaching, otherwise, it'd be
    suppressed/lost.  */
 
 static int
-get_detach_signal (struct lwp_info *lp)
+get_lwp_detach_signal (struct lwp_info *lp)
 {
   enum gdb_signal signo = GDB_SIGNAL_0;
 
@@ -1322,37 +1322,7 @@ get_detach_signal (struct lwp_info *lp)
   else if (lp->status)
     signo = gdb_signal_from_host (WSTOPSIG (lp->status));
   else
-    {
-      thread_info *tp = linux_target->find_thread (lp->ptid);
-
-      if (target_is_non_stop_p () && !tp->executing ())
-	{
-	  if (tp->has_pending_waitstatus ())
-	    {
-	      /* If the thread has a pending event, and it was stopped with a
-		 signal, use that signal to resume it.  If it has a pending
-		 event of another kind, it was not stopped with a signal, so
-		 resume it without a signal.  */
-	      if (tp->pending_waitstatus ().kind () == TARGET_WAITKIND_STOPPED)
-		signo = tp->pending_waitstatus ().sig ();
-	      else
-		signo = GDB_SIGNAL_0;
-	    }
-	  else
-	    signo = tp->stop_signal ();
-	}
-      else if (!target_is_non_stop_p ())
-	{
-	  ptid_t last_ptid;
-	  process_stratum_target *last_target;
-
-	  get_last_target_status (&last_target, &last_ptid, nullptr);
-
-	  if (last_target == linux_target
-	      && lp->ptid.lwp () == last_ptid.lwp ())
-	    signo = tp->stop_signal ();
-	}
-    }
+    signo = get_detach_signal (linux_target, lp->ptid);
 
   if (signo == GDB_SIGNAL_0)
     {

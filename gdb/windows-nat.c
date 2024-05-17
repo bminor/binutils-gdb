@@ -537,6 +537,13 @@ private:
   void stop_one_thread (windows_thread_info *th,
 			enum stopping_kind stopping_kind);
 
+  DWORD continue_status_for_event_detaching
+    (const DEBUG_EVENT &event, size_t *reply_later_events_left = nullptr);
+
+  DWORD prepare_resume (windows_thread_info *wth,
+			thread_info *tp,
+			int step, gdb_signal sig);
+
   BOOL windows_continue (DWORD continue_status, int id,
 			 windows_continue_flags cont_flags = 0);
 
@@ -1736,26 +1743,22 @@ windows_nat_target::fake_create_process (const DEBUG_EVENT &current_event)
   return current_event.dwThreadId;
 }
 
-void
-windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
+/* Prepare TH to be resumed.  TH and TP must point at the same thread.
+   Records the right dwContinueStatus for SIG in th->reply_later if we
+   used DBG_REPLY_LATER before on this thread, and sets of clears the
+   trace flag according to STEP.  Also returns the dwContinueStatus
+   argument to pass to ContinueDebugEvent.  The thread is still left
+   suspended -- a subsequent windows_continue/continue_one_thread call
+   is needed to flush the thread's register context and unsuspend.  */
+
+DWORD
+windows_nat_target::prepare_resume (windows_thread_info *th,
+				    thread_info *tp,
+				    int step, gdb_signal sig)
 {
-  windows_thread_info *th;
+  gdb_assert (th->tid == tp->ptid.lwp ());
+
   DWORD continue_status = DBG_CONTINUE;
-
-  /* A specific PTID means `step only this thread id'.  */
-  int resume_all = ptid == minus_one_ptid;
-
-  /* If we're continuing all threads, it's the current inferior that
-     should be handled specially.  */
-  if (resume_all)
-    ptid = inferior_ptid;
-
-  DEBUG_EXEC ("pid=%d, tid=0x%x, step=%d, sig=%d",
-	      ptid.pid (), (unsigned) ptid.lwp (), step, sig);
-
-  /* Get currently selected thread.  */
-  th = windows_process.find_thread (inferior_ptid);
-  gdb_assert (th != nullptr);
 
   if (sig != GDB_SIGNAL_0)
     {
@@ -1771,7 +1774,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 	 not exist in non-stop mode, so we don't even call it in that
 	 mode.  */
       if (!target_is_non_stop_p ()
-	  && inferior_ptid != get_last_debug_event_ptid ())
+	  && tp->ptid != get_last_debug_event_ptid ())
 	{
 	  /* In all-stop, ContinueDebugEvent will be for a different
 	     thread.  For non-stop, we've called ContinueDebugEvent
@@ -1834,7 +1837,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
      couldn't explain (because the thread wasn't supposed to be
      stepping), and end up reporting a spurious SIGTRAP to the
      user.  */
-  regcache *regcache = get_thread_regcache (inferior_thread ());
+  regcache *regcache = get_thread_regcache (tp);
   fetch_registers (regcache, gdbarch_ps_regnum (regcache->arch ()));
 
   DWORD *eflags;
@@ -1849,6 +1852,31 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
     *eflags |= FLAG_TRACE_BIT;
   else
     *eflags &= ~FLAG_TRACE_BIT;
+
+  return continue_status;
+}
+
+void
+windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
+{
+  windows_thread_info *th;
+
+  /* A specific PTID means `step only this thread id'.  */
+  int resume_all = ptid == minus_one_ptid;
+
+  /* If we're continuing all threads, it's the current inferior that
+     should be handled specially.  */
+  if (resume_all)
+    ptid = inferior_ptid;
+
+  DEBUG_EXEC ("pid=%d, tid=0x%x, step=%d, sig=%d",
+	      ptid.pid (), (unsigned) ptid.lwp (), step, sig);
+
+  /* Get currently selected thread.  */
+  th = windows_process.find_thread (inferior_ptid);
+  gdb_assert (th != nullptr);
+
+  DWORD continue_status = prepare_resume (th, inferior_thread (), step, sig);
 
   if (resume_all)
     windows_continue (continue_status, -1);
@@ -2815,16 +2843,77 @@ windows_nat_target::break_out_process_thread (bool &process_alive)
 
       DEBUG_EVENTS ("got unrelated event, code %u",
 		    current_event.dwDebugEventCode);
-      windows_continue (DBG_CONTINUE, -1, 0);
+
+      DWORD continue_status
+	= continue_status_for_event_detaching (current_event);
+      windows_continue (continue_status, -1, WCONT_CONTINUE_DEBUG_EVENT);
     }
 
   if (injected_thread_handle != NULL)
     CHECK (CloseHandle (injected_thread_handle));
 }
 
+
+/* Used while detaching.  Decide whether to pass the exception or not.
+   Returns the dwContinueStatus argument to pass to
+   ContinueDebugEvent.  */
+
+DWORD
+windows_nat_target::continue_status_for_event_detaching
+  (const DEBUG_EVENT &event, size_t *reply_later_events_left)
+{
+  ptid_t ptid (event.dwProcessId, event.dwThreadId, 0);
+  windows_thread_info *th = windows_process.find_thread (ptid);
+
+  /* This can be a thread that we don't know about, as we're not
+     tracking thread creation events at this point.  */
+  if (th != nullptr && th->reply_later != 0)
+    {
+      DWORD res = th->reply_later;
+      th->reply_later = 0;
+      if (reply_later_events_left != nullptr)
+	(*reply_later_events_left)--;
+      return res;
+    }
+  else if (event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT)
+    {
+      /* As the user asked to detach already, any new exception not
+	 seen by infrun before, is passed down to the inferior without
+	 considering "handle SIG pass/nopass".  We can just pretend
+	 the exception was raised after the inferior was detached.  */
+      return DBG_EXCEPTION_NOT_HANDLED;
+    }
+  else
+    return DBG_CONTINUE;
+}
+
 void
 windows_nat_target::detach (inferior *inf, int from_tty)
 {
+  DWORD continue_status = DBG_CONTINUE;
+
+  /* For any thread the core hasn't resumed, call prepare_resume with
+     the signal that the thread would be resumed with, so that we set
+     the right reply_later value, and also, so that we clear the trace
+     flag.  */
+  for (thread_info *tp : inf->non_exited_threads ())
+    {
+      if (!tp->executing ())
+	{
+	  windows_thread_info *wth = windows_process.find_thread (tp->ptid);
+	  gdb_signal signo = get_detach_signal (this, tp->ptid);
+
+	  if (signo != wth->last_sig
+	      || (signo != GDB_SIGNAL_0 && !signal_pass_state (signo)))
+	    signo = GDB_SIGNAL_0;
+
+	  DWORD cstatus = prepare_resume (wth, tp, 0, signo);
+
+	  if (!m_continued && tp->ptid == get_last_debug_event_ptid ())
+	    continue_status = cstatus;
+	}
+    }
+
   /* If we see the process exit while unblocking the process_thread
      helper thread, then we should skip the actual
      DebugActiveProcessStop call.  But don't report an error.  Just
@@ -2838,15 +2927,70 @@ windows_nat_target::detach (inferior *inf, int from_tty)
      that we can have it call DebugActiveProcessStop below, in the
      do_synchronously block.  */
   if (m_continued)
-    break_out_process_thread (process_alive);
+    {
+      break_out_process_thread (process_alive);
 
-  windows_continue (DBG_CONTINUE, -1, WCONT_LAST_CALL);
+      /* We're not either stopped at a thread exit event, or a process
+	 exit event.  */
+      continue_status = DBG_CONTINUE;
+    }
+
+  windows_continue (continue_status, -1,
+		    WCONT_LAST_CALL | WCONT_CONTINUE_DEBUG_EVENT);
 
   std::optional<unsigned> err;
   if (process_alive)
     do_synchronously ([&] ()
       {
-	if (!DebugActiveProcessStop (windows_process.process_id))
+	/* The kernel re-raises any exception previously intercepted
+	   and deferred with DBG_REPLY_LATER in the inferior after we
+	   detach.  We need to flush those, and suppress those which
+	   aren't meant to be seen by the inferior (e.g., breakpoints,
+	   single-steps, any with matching "handle SIG nopass", etc.),
+	   otherwise the inferior dies immediately after the detach,
+	   due to an unhandled exception.  */
+	DEBUG_EVENT event;
+
+	/* Count how many threads have pending reply-later events.  */
+	size_t reply_later_events_left = 0;
+	for (auto &th : windows_process.thread_list)
+	  if (th->reply_later != 0)
+	    reply_later_events_left++;
+
+	DEBUG_EVENTS ("flushing %zu reply-later events",
+		      reply_later_events_left);
+
+	/* Note we have to use a blocking wait (hence the need for the
+	   counter).  Just polling (timeout=0) until WaitForDebugEvent
+	   returns false would be racy -- the kernel may take a little
+	   bit to put the events in the pending queue.  That has been
+	   observed on Windows 11, where detaching would still very
+	   occasionally result in the inferior dying after the detach
+	   due to a reply-later event.  */
+	while (reply_later_events_left > 0
+	       && wait_for_debug_event (&event, INFINITE))
+	  {
+	    DEBUG_EVENTS ("flushed kernel event code %u",
+			  event.dwDebugEventCode);
+
+	    DWORD cstatus = (continue_status_for_event_detaching
+			     (event, &reply_later_events_left));
+	    if (!continue_last_debug_event (cstatus, debug_events))
+	      {
+		err = (unsigned) GetLastError ();
+		return false;
+	      }
+
+	    if (event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
+	      {
+		DEBUG_EVENTS ("got EXIT_PROCESS_DEBUG_EVENT, skipping detach");
+		process_alive = false;
+		break;
+	      }
+	  }
+
+	if (process_alive
+	    && !DebugActiveProcessStop (windows_process.process_id))
 	  err = (unsigned) GetLastError ();
 	else
 	  DebugSetProcessKillOnExit (FALSE);

@@ -365,6 +365,42 @@ update_signals_program_target (void)
   target_program_signals (signal_program);
 }
 
+/* See infrun.h.  */
+
+gdb_signal
+get_detach_signal (process_stratum_target *proc_target, ptid_t ptid)
+{
+  thread_info *tp = proc_target->find_thread (ptid);
+  gdb_signal signo = GDB_SIGNAL_0;
+
+  if (target_is_non_stop_p () && !tp->executing ())
+    {
+      if (tp->has_pending_waitstatus ())
+	{
+	  /* If the thread has a pending event, and it was stopped
+	     with a signal, use that signal to resume it.  If it has a
+	     pending event of another kind, it was not stopped with a
+	     signal, so resume it without a signal.  */
+	  if (tp->pending_waitstatus ().kind () == TARGET_WAITKIND_STOPPED)
+	    signo = tp->pending_waitstatus ().sig ();
+	}
+      else
+	signo = tp->stop_signal ();
+    }
+  else if (!target_is_non_stop_p ())
+    {
+      ptid_t last_ptid;
+      process_stratum_target *last_target;
+
+      get_last_target_status (&last_target, &last_ptid, nullptr);
+
+      if (last_target == proc_target && ptid == last_ptid)
+	signo = tp->stop_signal ();
+    }
+
+  return signo;
+}
+
 /* Value to pass to target_resume() to cause all threads to resume.  */
 
 #define RESUME_ALL minus_one_ptid
