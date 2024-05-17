@@ -126,11 +126,13 @@ extern "C"
      */
 
     int (*hwcdrv_get_descriptions)(hwcf_hwc_cb_t *hwc_find_action,
-				   hwcf_attr_cb_t *attr_find_action);
-    /* Initiate callbacks with all available HWC names and and HWC attributes.
+				   hwcf_attr_cb_t *attr_find_action,
+				   Hwcentry *raw_hwc_tbl);
+    /* Initiate callbacks with all available HWC names and HWC attributes.
        Input:
 	 <hwc_find_action>: if not NULL, will be called once for each HWC
 	 <attr_find_action>: if not NULL, will be called once for each attribute
+	 <raw_hwc_tbl>: counter definitions.
        Return: 0 if successful
 	  or a cpc return code upon error
      */
@@ -260,15 +262,6 @@ extern "C"
   ( (((eventsel_t)(evnum) & 0x0f00ULL) << 24) | ((eventsel_t)(evnum) & ~0x0f00ULL) )
 
   typedef uint64_t eventsel_t;
-  extern int  hwcfuncs_get_x86_eventsel (unsigned int regno, const char *int_name,
-			     eventsel_t *return_event, uint_t *return_pmc_sel);
-
-  typedef int (hwcdrv_get_events_fn_t) (hwcf_hwc_cb_t *hwc_cb);
-  typedef int (hwcdrv_get_eventnum_fn_t) (const char *eventname, uint_t pmc,
-					  eventsel_t *eventnum,
-					  eventsel_t *valid_umask, uint_t *pmc_sel);
-  extern hwcdrv_get_eventnum_fn_t *hwcdrv_get_x86_eventnum;
-
   typedef struct
   {
     const char * attrname;  // user-visible name of attribute
@@ -285,7 +278,7 @@ extern "C"
     uint_t (*hdrv_pcbe_ncounters)(void);
     const char *(*hdrv_pcbe_impl_name)(void);
     const char *(*hdrv_pcbe_cpuref)(void);
-    int (*hdrv_pcbe_get_events)(hwcf_hwc_cb_t *hwc_cb);
+    int (*hdrv_pcbe_get_events)(hwcf_hwc_cb_t *hwc_cb, Hwcentry *raw_hwc_tbl);
     int (*hdrv_pcbe_get_eventnum)(const char * eventname, uint_t pmc,
 				  eventsel_t *eventnum, eventsel_t *valid_umask,
 				  uint_t *pmc_sel);

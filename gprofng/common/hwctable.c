@@ -2369,81 +2369,85 @@ static Hwcentry amd_15h[] = {
 #define HWCE(nm, mtr, id, op, res) \
     INIT_HWC(nm, mtr, (id) | ((op) << 8) | ((res) << 16), PERF_TYPE_HW_CACHE)
 
-static Hwcentry	generic_list[] = {
-// Hardware event:
-  { HWE("usr_time", STXT("User CPU"), PERF_COUNT_HW_CPU_CYCLES), .timecvt = 1,
-    .int_name = "cycles" },
-  { HWE("sys_time", STXT("System CPU"), PERF_COUNT_HW_CPU_CYCLES), .timecvt = 1,
-    .int_name = "cycles~system=1~user=0" },
-  { HWE("branch-instructions", STXT("Branch-instructions"),
-	PERF_COUNT_HW_BRANCH_INSTRUCTIONS) },
-  { HWE("branch-misses", STXT("Branch-misses"), PERF_COUNT_HW_BRANCH_MISSES) },
-  { HWE("bus-cycles", STXT("Bus Cycles"), PERF_COUNT_HW_BUS_CYCLES),
-	  .timecvt = 1 },
-  { HWE("cache-misses", STXT("Cache-misses"), PERF_COUNT_HW_CACHE_MISSES) },
-  { HWE("cache-references", STXT("Cache-references"),
-	PERF_COUNT_HW_CACHE_REFERENCES) },
-  { HWE("cycles", STXT("CPU Cycles"), PERF_COUNT_HW_CPU_CYCLES), .timecvt = 1 },
-  { HWE("insts", STXT("Instructions Executed"), PERF_COUNT_HW_INSTRUCTIONS),
-	  .int_name = "instructions" },
-  { HWE("ref-cycles", STXT("Total Cycles"), PERF_COUNT_HW_REF_CPU_CYCLES),
-	  .timecvt = 1 },
-  { HWE("stalled-cycles-backend", STXT("Stalled Cycles during issue."),
-	PERF_COUNT_HW_STALLED_CYCLES_BACKEND), .timecvt = 1 },
-  { HWE("stalled-cycles-frontend", STXT("Stalled Cycles during retirement."),
-	PERF_COUNT_HW_STALLED_CYCLES_FRONTEND), .timecvt = 1 },
-// Software event:
-  { SWE("alignment-faults", STXT("Alignment Faults"),
-	PERF_COUNT_SW_ALIGNMENT_FAULTS) },
-  { SWE("context-switches", STXT("Context Switches"),
-	PERF_COUNT_SW_CONTEXT_SWITCHES) },
-  { SWE("cpu-clock", STXT("CPU Clock"), PERF_COUNT_SW_CPU_CLOCK),
-	  .timecvt = 1 },
-  { SWE("cpu-migrations", STXT("CPU Migrations"),
-	PERF_COUNT_SW_CPU_MIGRATIONS) },
-  { SWE("emulation-faults", STXT("Emulation Faults"),
-	PERF_COUNT_SW_EMULATION_FAULTS) },
-  { SWE("major-faults", STXT("Major Page Faults"),
-	PERF_COUNT_SW_PAGE_FAULTS_MAJ) },
-  { SWE("minor-faults", STXT("Minor Page Faults"),
-	PERF_COUNT_SW_PAGE_FAULTS_MIN) },
-  { SWE("page-faults", STXT("Page Faults"), PERF_COUNT_SW_PAGE_FAULTS) },
-  { SWE("task-clock", STXT("Clock Count Specific"), PERF_COUNT_SW_TASK_CLOCK),
-	  .timecvt = 1 },
-// Hardware cache event
-  { HWCE("L1-dcache-load-misses", STXT("L1 D-cache Load Misses"),
-	 PERF_COUNT_HW_CACHE_L1D,
-	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_MISS) },
-  { HWCE("L1-dcache-loads", STXT("L1 D-cache Loads"),
-	 PERF_COUNT_HW_CACHE_L1D,
-	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },
-  { HWCE("L1-dcache-store-misses", STXT("L1 D-cache Store Misses"),
-	 PERF_COUNT_HW_CACHE_L1D,
-	 PERF_COUNT_HW_CACHE_RESULT_MISS, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },
-  { HWCE("L1-dcache-stores", STXT("L1 D-cache Store Stores"),
-	 PERF_COUNT_HW_CACHE_L1D,
-	 PERF_COUNT_HW_CACHE_OP_WRITE, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },
-  { HWCE("L1-icache-load-misses", STXT("L1 Instructions Load Misses"),
-	 PERF_COUNT_HW_CACHE_L1I,
-	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_MISS) },
-  { HWCE("L1-icache-load-misses", STXT("L1 Instructions Loads"),
-	 PERF_COUNT_HW_CACHE_L1I,
-	 PERF_COUNT_HW_CACHE_OP_READ,  PERF_COUNT_HW_CACHE_RESULT_ACCESS) },
-  { HWCE("dTLB-load-misses", STXT("D-TLB Load Misses"),
-	 PERF_COUNT_HW_CACHE_DTLB,
-	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_MISS) },
-  { HWCE("dTLB-loads", STXT("D-TLB Loads"),
-	 PERF_COUNT_HW_CACHE_DTLB,
-	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },
-  { HWCE("iTLB-load-misses", STXT("The Instruction TLB Load Misses"),
-	 PERF_COUNT_HW_CACHE_ITLB,
-	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_MISS) },
-  { HWCE("iTLB-loads", STXT("The Instruction TLB Loads"),
-	 PERF_COUNT_HW_CACHE_ITLB,
+#define HWC_GENERIC \
+  /* Hardware event: */\
+  { HWE("usr_time", STXT("User CPU"), PERF_COUNT_HW_CPU_CYCLES), .timecvt = 1,\
+    .int_name = "cycles" },\
+  { HWE("sys_time", STXT("System CPU"), PERF_COUNT_HW_CPU_CYCLES), .timecvt = 1,\
+    .int_name = "cycles~system=1~user=0" },\
+  { HWE("branch-instructions", STXT("Branch-instructions"),\
+	PERF_COUNT_HW_BRANCH_INSTRUCTIONS) },\
+  { HWE("branch-misses", STXT("Branch-misses"), PERF_COUNT_HW_BRANCH_MISSES) },\
+  { HWE("bus-cycles", STXT("Bus Cycles"), PERF_COUNT_HW_BUS_CYCLES),\
+	  .timecvt = 1 },\
+  { HWE("cache-misses", STXT("Cache-misses"), PERF_COUNT_HW_CACHE_MISSES) },\
+  { HWE("cache-references", STXT("Cache-references"),\
+	PERF_COUNT_HW_CACHE_REFERENCES) },\
+  { HWE("cycles", STXT("CPU Cycles"), PERF_COUNT_HW_CPU_CYCLES), .timecvt = 1 },\
+  { HWE("insts", STXT("Instructions Executed"), PERF_COUNT_HW_INSTRUCTIONS),\
+	  .int_name = "instructions" },\
+  { HWE("ref-cycles", STXT("Total Cycles"), PERF_COUNT_HW_REF_CPU_CYCLES),\
+	  .timecvt = 1 },\
+  { HWE("stalled-cycles-backend", STXT("Stalled Cycles during issue."),\
+	PERF_COUNT_HW_STALLED_CYCLES_BACKEND), .timecvt = 1 },\
+  { HWE("stalled-cycles-frontend", STXT("Stalled Cycles during retirement."),\
+	PERF_COUNT_HW_STALLED_CYCLES_FRONTEND), .timecvt = 1 },\
+  /* Software event: */\
+  { SWE("alignment-faults", STXT("Alignment Faults"),\
+	PERF_COUNT_SW_ALIGNMENT_FAULTS) },\
+  { SWE("context-switches", STXT("Context Switches"),\
+	PERF_COUNT_SW_CONTEXT_SWITCHES) },\
+  { SWE("cpu-clock", STXT("CPU Clock"), PERF_COUNT_SW_CPU_CLOCK),\
+	  .timecvt = 1 },\
+  { SWE("cpu-migrations", STXT("CPU Migrations"),\
+	PERF_COUNT_SW_CPU_MIGRATIONS) },\
+  { SWE("emulation-faults", STXT("Emulation Faults"),\
+	PERF_COUNT_SW_EMULATION_FAULTS) },\
+  { SWE("major-faults", STXT("Major Page Faults"),\
+	PERF_COUNT_SW_PAGE_FAULTS_MAJ) },\
+  { SWE("minor-faults", STXT("Minor Page Faults"),\
+	PERF_COUNT_SW_PAGE_FAULTS_MIN) },\
+  { SWE("page-faults", STXT("Page Faults"), PERF_COUNT_SW_PAGE_FAULTS) },\
+  { SWE("task-clock", STXT("Clock Count Specific"), PERF_COUNT_SW_TASK_CLOCK),\
+	  .timecvt = 1 },\
+  /* Hardware cache event: */\
+  { HWCE("L1-dcache-load-misses", STXT("L1 D-cache Load Misses"),\
+	 PERF_COUNT_HW_CACHE_L1D,\
+	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_MISS) },\
+  { HWCE("L1-dcache-loads", STXT("L1 D-cache Loads"),\
+	 PERF_COUNT_HW_CACHE_L1D,\
+	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },\
+  { HWCE("L1-dcache-store-misses", STXT("L1 D-cache Store Misses"),\
+	 PERF_COUNT_HW_CACHE_L1D,\
+	 PERF_COUNT_HW_CACHE_RESULT_MISS, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },\
+  { HWCE("L1-dcache-stores", STXT("L1 D-cache Store Stores"),\
+	 PERF_COUNT_HW_CACHE_L1D,\
+	 PERF_COUNT_HW_CACHE_OP_WRITE, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },\
+  { HWCE("L1-icache-load-misses", STXT("L1 Instructions Load Misses"),\
+	 PERF_COUNT_HW_CACHE_L1I,\
+	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_MISS) },\
+  { HWCE("L1-icache-load-misses", STXT("L1 Instructions Loads"),\
+	 PERF_COUNT_HW_CACHE_L1I,\
+	 PERF_COUNT_HW_CACHE_OP_READ,  PERF_COUNT_HW_CACHE_RESULT_ACCESS) },\
+  { HWCE("dTLB-load-misses", STXT("D-TLB Load Misses"),\
+	 PERF_COUNT_HW_CACHE_DTLB,\
+	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_MISS) },\
+  { HWCE("dTLB-loads", STXT("D-TLB Loads"),\
+	 PERF_COUNT_HW_CACHE_DTLB,\
+	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },\
+  { HWCE("iTLB-load-misses", STXT("The Instruction TLB Load Misses"),\
+	 PERF_COUNT_HW_CACHE_ITLB,\
+	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_MISS) },\
+  { HWCE("iTLB-loads", STXT("The Instruction TLB Loads"),\
+	 PERF_COUNT_HW_CACHE_ITLB,\
 	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },
 
+static Hwcentry	generic_list[] = {
+  HWC_GENERIC
   {NULL, NULL, 0, NULL, 0, 0, 0, 0, ABST_NONE}
 };
+
+#include "hwc_amd_zen3.h"
 
 /* structure defining the counters for a CPU type */
 typedef struct
@@ -2516,6 +2520,7 @@ static cpu_list_t cputabs[] = {
   {CPC_KPROF, kproflist, {NULL}}, // OBSOLETE (To support 12.3 and earlier, TBR)
   {ARM_CPU_IMP_APM, generic_list, {"insts,,cycles", 0}},
   {CPC_AMD_Authentic, generic_list, {"insts,,cycles", 0}},
+  {CPC_AMD_FAM_19H_ZEN3, amd_zen3_list, {"insts,,cycles", 0}},
   {0, generic_list, {"insts,,cycles", 0}},
 };
 
@@ -3033,7 +3038,7 @@ setup_cpc_general (int skip_hwc_test)
   valid_cpu_tables[1] = papi_generic_list;
   Tprintf (DBG_LT2, "hwctable: setup_cpc(): getting descriptions \n");
   // populate cpcx_raw and cpcx_attr
-  hwcdrv->hwcdrv_get_descriptions (hwc_cb, attrs_cb);
+  hwcdrv->hwcdrv_get_descriptions (hwc_cb, attrs_cb, cputabs_entry->stdlist_table);
   for (int kk = 0; kk < 2; kk++)
     { // collect and er_kernel
       hwc_process_raw_ctrs (kk, &cpcx_std[kk], &cpcx_raw[kk], &cpcx_hidden[kk],

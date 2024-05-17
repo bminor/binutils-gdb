@@ -131,6 +131,10 @@ read_cpuinfo()
 	}
       fclose (procf);
     }
+  if (cpu_info.cpu_vendorstr == NULL)
+    cpu_info.cpu_vendorstr = GTXT ("Unknown processor");
+  if (cpu_info.cpu_modelstr == NULL)
+    cpu_info.cpu_modelstr = GTXT ("Unknown cpu model");
   return &cpu_info;
 }
 
@@ -176,7 +180,6 @@ Coll_Ctrl::Coll_Ctrl (int _interactive, bool _defHWC, bool _kernelHWC)
   /* set default clock parameters */
   hwcprof_enabled_cnt = 0; // must be set before calling determine_profile_params();
   determine_profile_params (); // inits clk_params which is used by clock profiling AND HWCs
-  cpc_cpuver = CPUVER_UNDEFINED;
 
   /* set default control values */
   debug_mode = 0;
@@ -271,7 +274,6 @@ Coll_Ctrl::Coll_Ctrl (Coll_Ctrl * cc)
   cpu_clk_freq = cc->cpu_clk_freq;
   npages = cc->npages;
   page_size = cc->page_size;
-  cpc_cpuver = cc->cpc_cpuver;
   debug_mode = cc->debug_mode;
   java_mode = cc->java_mode;
   java_default = cc->java_default;
@@ -1470,7 +1472,6 @@ Coll_Ctrl::add_hwcstring (const char *string, char **warnmsg)
     prev_cnt = 0;
 
   /* look up the CPU version */
-  cpc_cpuver = hwc_get_cpc_cpuver ();
   if (string && *string)
     {
       /* lookup counters */

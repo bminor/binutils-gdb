@@ -251,7 +251,6 @@ public:
   char *get_node_name ()        { return node_name; };
   long get_ncpus ()             { return ncpus; };
   int get_cpu_clk_freq ()       { return cpu_clk_freq; };
-  int get_cpc_cpuver ()         { return cpc_cpuver; };
 
     /* disable warning about non-local filesystems */
   void set_nofswarn ()          { nofswarn = 1; };

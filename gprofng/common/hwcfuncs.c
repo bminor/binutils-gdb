@@ -63,7 +63,7 @@ hwcdrv_enable_mt (hwcfuncs_tsd_get_fn_t tsd_ftn)
 
 HWCDRV_API int
 hwcdrv_get_descriptions (hwcf_hwc_cb_t *hwc_find_action,
-			 hwcf_attr_cb_t *attr_find_action)
+			 hwcf_attr_cb_t *attr_find_action, Hwcentry *hwcdef)
 {
   return 0;
 }
