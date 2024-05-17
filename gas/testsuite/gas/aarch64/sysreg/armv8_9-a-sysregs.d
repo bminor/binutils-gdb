@@ -7,8 +7,8 @@
 Disassembly of section \.text:
 
 0+ <.*>:
-.*:	d51c9a83 	msr	pmsdsfr_el1, x3
-.*:	d53c9a83 	mrs	x3, pmsdsfr_el1
+.*:	d5189a83 	msr	pmsdsfr_el1, x3
+.*:	d5389a83 	mrs	x3, pmsdsfr_el1
 .*:	d5385340 	mrs	x0, erxgsr_el1
 .*:	d5181063 	msr	sctlr2_el1, x3
 .*:	d5381063 	mrs	x3, sctlr2_el1
