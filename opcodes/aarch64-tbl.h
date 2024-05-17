@@ -6484,7 +6484,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SVE2p1_INSNC("ld2q",0xa490e000, 0xfff0e000, sve_misc, 0, OP3 (SME_Zt2, SVE_Pg3, SVE_ADDR_RI_S4x2xVL), OP_SVE_QZU, 0, C_SCAN_MOVPRFX, 0),
   SVE2p1_INSNC("ld3q",0xa510e000, 0xfff0e000, sve_misc, 0, OP3 (SME_Zt3, SVE_Pg3, SVE_ADDR_RI_S4x3xVL), OP_SVE_QZU, 0, C_SCAN_MOVPRFX, 0),
   SVE2p1_INSNC("ld4q",0xa590e000, 0xfff0e000, sve_misc, 0, OP3 (SME_Zt4, SVE_Pg3, SVE_ADDR_RI_S4x4xVL), OP_SVE_QZU, 0, C_SCAN_MOVPRFX, 0),
-  SVE2p1_INSNC("ld2q",0xa4a0e000, 0xffe0e000, sve_misc, 0, OP3 (SME_Zt2, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QZU, 0, C_SCAN_MOVPRFX, 0),
+  SVE2p1_INSNC("ld2q",0xa4a08000, 0xffe0e000, sve_misc, 0, OP3 (SME_Zt2, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QZU, 0, C_SCAN_MOVPRFX, 0),
   SVE2p1_INSNC("ld3q",0xa5208000, 0xffe0e000, sve_misc, 0, OP3 (SME_Zt3, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QZU, 0, C_SCAN_MOVPRFX, 0),
   SVE2p1_INSNC("ld4q",0xa5a08000, 0xffe0e000, sve_misc, 0, OP3 (SME_Zt4, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QZU, 0, C_SCAN_MOVPRFX, 0),
 

@@ -93,7 +93,7 @@
 .*:	a49ef000 	ld2q	{z0.q, z1.q}, p4/z, \[x0, #-4, mul vl\]
 .*:	a51ef000 	ld3q	{z0.q, z1.q, z2.q}, p4/z, \[x0, #-6, mul vl\]
 .*:	a59ef000 	ld4q	{z0.q, z1.q, z2.q, z3.q}, p4/z, \[x0, #-8, mul vl\]
-.*:	a4a2f000 	ld2h	{z0.h-z1.h}, p4/z, \[x0, #4, mul vl\]
+.*:	a4a29000 	ld2q	{z0.q, z1.q}, p4/z, \[x0, x2, lsl #4\]
 .*:	a5249000 	ld3q	{z0.q, z1.q, z2.q}, p4/z, \[x0, x4, lsl #4\]
 .*:	a5a69000 	ld4q	{z0.q, z1.q, z2.q, z3.q}, p4/z, \[x0, x6, lsl #4\]
 .*:	e4203200 	st1q	z0.q, p4, \[z16.d, x0\]

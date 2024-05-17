@@ -16985,21 +16985,32 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                     {
                                       if (((word >> 14) & 0x1) == 0)
                                         {
-                                          if (((word >> 23) & 0x1) == 0)
+                                          if (((word >> 15) & 0x1) == 0)
                                             {
-                                              /* 33222222222211111111110000000000
-                                                 10987654321098765432109876543210
-                                                 101001x00x1xxxxxx00xxxxxxxxxxxxx
-                                                 ld1rob.  */
-                                              return 3044;
+                                              if (((word >> 23) & 0x1) == 0)
+                                                {
+                                                  /* 33222222222211111111110000000000
+                                                     10987654321098765432109876543210
+                                                     101001x00x1xxxxx000xxxxxxxxxxxxx
+                                                     ld1rob.  */
+                                                  return 3044;
+                                                }
+                                              else
+                                                {
+                                                  /* 33222222222211111111110000000000
+                                                     10987654321098765432109876543210
+                                                     101001x01x1xxxxx000xxxxxxxxxxxxx
+                                                     ld1roh.  */
+                                                  return 3045;
+                                                }
                                             }
                                           else
                                             {
                                               /* 33222222222211111111110000000000
                                                  10987654321098765432109876543210
-                                                 101001x01x1xxxxxx00xxxxxxxxxxxxx
-                                                 ld1roh.  */
-                                              return 3045;
+                                                 101001x0xx1xxxxx100xxxxxxxxxxxxx
+                                                 ld2q.  */
+                                              return 3323;
                                             }
                                         }
                                       else
@@ -32880,8 +32891,6 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
     case 1696: return NULL;		/* ldff1b --> NULL.  */
     case 1714: value = 1715; break;	/* ldff1h --> ldff1h.  */
     case 1715: return NULL;		/* ldff1h --> NULL.  */
-    case 1669: value = 3323; break;	/* ld2h --> ld2q.  */
-    case 3323: return NULL;		/* ld2q --> NULL.  */
     case 2474: value = 3291; break;	/* fclamp --> bfclamp.  */
     case 3291: return NULL;		/* bfclamp --> NULL.  */
     case 1788: value = 1789; break;	/* ldr --> ldr.  */
