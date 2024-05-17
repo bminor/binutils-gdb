@@ -739,7 +739,7 @@ show_dwarf_max_cache_age (struct ui_file *file, int from_tty,
 }
 
 /* When true, wait for DWARF reading to be complete.  */
-static bool dwarf_synchronous = false;
+static bool dwarf_synchronous = true;
 
 /* "Show" callback for "maint set dwarf synchronous".  */
 static void
