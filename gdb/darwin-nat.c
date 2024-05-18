@@ -1943,16 +1943,20 @@ Because `startup-with-shell' is enabled, gdb tried to work around SIP by\n\
 caching a copy of your shell.  However, this failed:\n\
 %s\n\
 If you correct the problem, gdb will automatically try again the next time\n\
-you \"run\".  To prevent these attempts, you can use:\n\
-    set startup-with-shell off"),
-		   ex.what ());
+you \"%ps\".  To prevent these attempts, you can use:\n\
+    %ps"),
+		   ex.what (),
+		   styled_string (command_style.style (), "run"),
+		   styled_string (command_style.style (),
+				  "set startup-with-shell off"));
 	  return false;
 	}
 
       gdb_printf (_("Note: this version of macOS has System Integrity Protection.\n\
 Because `startup-with-shell' is enabled, gdb has worked around this by\n\
-caching a copy of your shell.  The shell used by \"run\" is now:\n\
+caching a copy of your shell.  The shell used by \"%ps\" is now:\n\
     %s\n"),
+		  styled_string (command_style.style (), "run"),
 		  new_name.c_str ());
     }
 

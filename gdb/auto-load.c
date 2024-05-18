@@ -477,19 +477,23 @@ file_is_auto_load_safe (const char *filename)
 
       gdb_printf (_("\
 To enable execution of this file add\n\
-\tadd-auto-load-safe-path %s\n\
+\t%p[add-auto-load-safe-path %s%p]\n\
 line to your configuration file \"%ps\".\n\
 To completely disable this security protection add\n\
-\tset auto-load safe-path /\n\
+\t%ps\n\
 line to your configuration file \"%ps\".\n\
 For more information about this security protection see the\n\
 \"Auto-loading safe path\" section in the GDB manual.  E.g., run from the shell:\n\
 \tinfo \"(gdb)Auto-loading safe path\"\n"),
-		       filename_real.get (),
-		       styled_string (file_name_style.style (),
-				      home_config.c_str ()),
-		       styled_string (file_name_style.style (),
-				      home_config.c_str ()));
+		  command_style.style ().ptr (),
+		  filename_real.get (),
+		  nullptr,
+		  styled_string (file_name_style.style (),
+				 home_config.c_str ()),
+		  styled_string (command_style.style (),
+				 "set auto-load safe-path /"),
+		  styled_string (file_name_style.style (),
+				 home_config.c_str ()));
       advice_printed = true;
     }
 

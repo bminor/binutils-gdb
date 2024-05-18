@@ -33,6 +33,7 @@
 #include "gdbsupport/agent.h"
 #include "gdbsupport/gdb_wait.h"
 #include "gdbsupport/filestuff.h"
+#include "cli/cli-style.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -160,7 +161,8 @@ inf_child_open_target (const char *arg, int from_tty)
   current_inferior ()->push_target (target);
   inf_child_explicitly_opened = 1;
   if (from_tty)
-    gdb_printf ("Done.  Use the \"run\" command to start a process.\n");
+    gdb_printf ("Done.  Use the \"%ps\" command to start a process.\n",
+		styled_string (command_style.style (), "run"));
 }
 
 /* Implement the to_disconnect target_ops method.  */

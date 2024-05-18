@@ -1330,8 +1330,9 @@ There is NO WARRANTY, to the extent permitted by law.",
   if (!interactive)
     return;
 
-  gdb_printf (stream, ("\nType \"show copying\" and "
-		       "\"show warranty\" for details.\n"));
+  gdb_printf (stream, ("\nType \"%ps\" and \"%ps\" for details.\n"),
+	      styled_string (command_style.style (), "show copying"),
+	      styled_string (command_style.style (), "show warranty"));
 
   /* After the required info we print the configuration information.  */
 
@@ -1347,8 +1348,8 @@ There is NO WARRANTY, to the extent permitted by law.",
     }
   gdb_printf (stream, "\".\n");
 
-  gdb_printf (stream, _("Type \"show configuration\" "
-			"for configuration details.\n"));
+  gdb_printf (stream, _("Type \"%ps\" for configuration details.\n"),
+	      styled_string (command_style.style (), "show configuration"));
 
   if (REPORT_BUGS_TO[0])
     {
@@ -1364,10 +1365,11 @@ resources online at:\n    <%ps>."),
 	      styled_string (file_name_style.style (),
 			     "http://www.gnu.org/software/gdb/documentation/"));
   gdb_printf (stream, "\n\n");
-  gdb_printf (stream, _("For help, type \"help\".\n"));
+  gdb_printf (stream, _("For help, type \"%ps\".\n"),
+	      styled_string (command_style.style (), "help"));
   gdb_printf (stream,
-	      _("Type \"apropos word\" to search for commands \
-related to \"word\"."));
+	      _("Type \"%ps\" to search for commands related to \"word\"."),
+	      styled_string (command_style.style (), "apropos word"));
 }
 
 /* Print the details of GDB build-time configuration.  */

@@ -860,18 +860,27 @@ update_solib_list (int from_tty)
 
       if (not_found == 1)
 	warning (_ ("Could not load shared library symbols for %ps.\n"
-		    "Do you need \"set solib-search-path\" "
-		    "or \"set sysroot\"?"),
+		    "Do you need \"%ps\" or \"%ps\"?"),
 		 styled_string (file_name_style.style (),
-				not_found_filename));
+				not_found_filename),
+		 styled_string (command_style.style (),
+				"set solib-search-path"),
+		 styled_string (command_style.style (), "set sysroot"));
       else if (not_found > 1)
 	warning (_ ("\
 Could not load shared library symbols for %d libraries, e.g. %ps.\n\
-Use the \"info sharedlibrary\" command to see the complete listing.\n\
-Do you need \"set solib-search-path\" or \"set sysroot\"?"),
+Use the \"%ps\" command to see the complete listing.\n\
+Do you need \"%ps\" or \"%ps\"?"),
 		 not_found,
 		 styled_string (file_name_style.style (),
-				not_found_filename));
+				not_found_filename),
+		 styled_string (command_style.style (),
+				"info sharedlibrary"),
+		 styled_string (command_style.style (),
+				"set solib-search-path"),
+		 styled_string (command_style.style (),
+				"set sysroot"));
+
     }
 }
 

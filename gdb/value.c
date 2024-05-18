@@ -2587,8 +2587,9 @@ show_convenience (const char *ignore, int from_tty)
       gdb_printf (_("No debugger convenience variables now defined.\n"
 		    "Convenience variables have "
 		    "names starting with \"$\";\n"
-		    "use \"set\" as in \"set "
-		    "$foo = 5\" to define them.\n"));
+		    "use \"%ps\" as in \"%ps\" to define them.\n"),
+		  styled_string (command_style.style (), "set"),
+		  styled_string (command_style.style (), "set $foo = 5"));
     }
 }
 

@@ -20,6 +20,7 @@
 #include "read-gdb-index.h"
 
 #include "cli/cli-cmds.h"
+#include "cli/cli-style.h"
 #include "complaints.h"
 #include "dwz.h"
 #include "event-top.h"
@@ -392,9 +393,11 @@ read_gdb_index_from_buffer (const char *filename,
 	{
 	  warning (_("\
 Skipping deprecated .gdb_index section in %s.\n\
-Do \"set use-deprecated-index-sections on\" before the file is read\n\
+Do \"%ps\" before the file is read\n\
 to use the section anyway."),
-		   filename);
+		   filename,
+		   styled_string (command_style.style (),
+				  "set use-deprecated-index-sections on"));
 	  warning_printed = 1;
 	}
       return 0;

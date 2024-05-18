@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "cli/cli-cmds.h"
+#include "cli/cli-style.h"
 #include "displaced-stepping.h"
 #include "infrun.h"
 #include <ctype.h>
@@ -463,8 +464,10 @@ follow_fork_inferior (bool follow_child, bool detach_fork)
 	 back the terminal, effectively hanging the debug session.  */
       gdb_printf (gdb_stderr, _("\
 Can not resume the parent process over vfork in the foreground while\n\
-holding the child stopped.  Try \"set detach-on-fork\" or \
-\"set schedule-multiple\".\n"));
+holding the child stopped.  Try \"set %ps\" or \"%ps\".\n"),
+		  styled_string (command_style.style (), "set detach-on-fork"),
+		  styled_string (command_style.style (),
+				 "set schedule-multiple"));
       return true;
     }
 
@@ -1308,8 +1311,9 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
      so that the user can specify a file manually before continuing.  */
   if (exec_file_host == nullptr)
     warning (_("Could not load symbols for executable %s.\n"
-	       "Do you need \"set sysroot\"?"),
-	     exec_file_target);
+	       "Do you need \"%ps\"?"),
+	     exec_file_target,
+	     styled_string (command_style.style (), "set sysroot"));
 
   /* Reset the shared library package.  This ensures that we get a
      shlib event when the child reaches "_start", at which point the
@@ -10039,8 +10043,8 @@ info_signals_command (const char *signum_exp, int from_tty)
 	sig_print_info (oursig);
     }
 
-  gdb_printf (_("\nUse the \"handle\" command "
-		"to change these tables.\n"));
+  gdb_printf (_("\nUse the \"%ps\" command to change these tables.\n"),
+	      styled_string (command_style.style (), "handle"));
 }
 
 /* The $_siginfo convenience variable is a bit special.  We don't know

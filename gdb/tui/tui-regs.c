@@ -22,6 +22,7 @@
 #include "arch-utils.h"
 #include "tui/tui.h"
 #include "symtab.h"
+#include "cli/cli-style.h"
 #include "frame.h"
 #include "regcache.h"
 #include "inferior.h"
@@ -532,9 +533,10 @@ tui_reg_command (const char *args, int from_tty)
     }
   else
     {
-      gdb_printf (_("\"tui reg\" must be followed by the name of "
+      gdb_printf (_("\"%ps\" must be followed by the name of "
 		    "either a register group,\nor one of 'next' "
-		    "or 'prev'.  Known register groups are:\n"));
+		    "or 'prev'.  Known register groups are:\n"),
+		  styled_string (command_style.style (), "tui reg"));
 
       bool first = true;
       for (const struct reggroup *group : gdbarch_reggroups (gdbarch))

@@ -91,6 +91,10 @@ cli_style_option title_style ("title", ui_file_style::BOLD);
 
 /* See cli-style.h.  */
 
+cli_style_option command_style ("command", ui_file_style::BOLD);
+
+/* See cli-style.h.  */
+
 cli_style_option tui_border_style ("tui-border", ui_file_style::CYAN);
 
 /* See cli-style.h.  */
@@ -438,6 +442,13 @@ Some commands (such as \"apropos -v REGEXP\") use the title style to improve\n\
 readability."),
 				    &style_set_list, &style_show_list,
 				    false);
+
+  command_style.add_setshow_commands (no_class, _("\
+Command display styling.\n\
+Configure the colors and display intensity for GDB commands mentioned\n\
+in the output."),
+				      &style_set_list, &style_show_list,
+				      false);
 
   highlight_style.add_setshow_commands (no_class, _("\
 Highlight display styling.\n\

@@ -327,7 +327,8 @@ exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
       warning (_("No executable has been specified and target does not "
 		 "support\n"
 		 "determining executable automatically.  "
-		 "Try using the \"file\" command."));
+		 "Try using the \"%ps\" command."),
+	       styled_string (command_style.style (), "file"));
       return;
     }
 

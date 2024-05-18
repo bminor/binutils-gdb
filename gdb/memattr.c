@@ -19,6 +19,7 @@
 
 #include "command.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-style.h"
 #include "memattr.h"
 #include "target.h"
 #include "target-dcache.h"
@@ -91,7 +92,8 @@ require_user_regions (int from_tty)
   /* Otherwise, let the user know how to get back.  */
   if (from_tty)
     warning (_("Switching to manual control of memory regions; use "
-	       "\"mem auto\" to fetch regions from the target again."));
+	       "\"%ps\" to fetch regions from the target again."),
+	     styled_string (command_style.style (), "mem auto"));
 
   /* And create a new list (copy of the target-supplied regions) for the user
      to modify.  */

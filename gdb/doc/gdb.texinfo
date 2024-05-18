@@ -27864,6 +27864,10 @@ their characteristics and the visual aspect of each style.
 
 The style-able objects are:
 @table @code
+@item command
+Control the styling of any @value{GDBN} commands that are displayed by
+@value{GDBN}.  By default, this style's intensity is bold.
+
 @item filename
 Control the styling of file names and URLs.  By default, this style's
 foreground color is green.

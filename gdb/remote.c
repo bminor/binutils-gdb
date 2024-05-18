@@ -39,6 +39,7 @@
 #include "solib.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
+#include "cli/cli-style.h"
 #include "target-descriptions.h"
 #include "gdb_bfd.h"
 #include "gdbsupport/filestuff.h"
@@ -12814,8 +12815,9 @@ remote_target::remote_hostio_open (inferior *inf, const char *filename,
       if (!warning_issued)
 	{
 	  warning (_("File transfers from remote targets can be slow."
-		     " Use \"set sysroot\" to access files locally"
-		     " instead."));
+		     " Use \"%ps\" to access files locally"
+		     " instead."),
+		   styled_string (command_style.style (), "set sysroot"));
 	  warning_issued = 1;
 	}
     }
