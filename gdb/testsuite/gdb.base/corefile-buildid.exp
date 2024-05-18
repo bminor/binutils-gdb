@@ -172,11 +172,9 @@ proc locate_exec_from_core_build_id {corefile buildid suffix \
 	"mkdir -p [file join $debugdir [file dirname $buildid]]"
 
     set files_list {}
+    lappend files_list $binfile $buildid
     if {$sepdebug} {
-	lappend files_list "$binfile.stripped" $buildid
 	lappend files_list "$binfile.debug" "$buildid.debug"
-    } else {
-	lappend files_list $binfile $buildid
     }
     if {$shared} {
 	global sharedir
@@ -200,12 +198,7 @@ proc locate_exec_from_core_build_id {corefile buildid suffix \
     gdb_test "core-file $corefile" "Program terminated with .*" \
 	"load core file"
     if {$symlink} {
-	if {$sepdebug} {
-	    set expected_file [file join $builddir \
-				   [file tail "$binfile.stripped"]]
-	} else {
-	    set expected_file [file join $builddir [file tail $binfile]]
-	}
+	set expected_file [file join $builddir [file tail $binfile]]
     } else {
 	set expected_file $buildid
     }
@@ -245,15 +238,12 @@ proc do_corefile_buildid_tests {args} {
 
     if {$sepdebug} {
 	# Strip debuginfo into its own file.
-	if {[gdb_gnu_strip_debug [standard_output_file $program_to_run]] \
-		!= 0} {
+	if {[gdb_gnu_strip_debug [standard_output_file $program_to_run] \
+		 no-debuglink] != 0} {
 	    untested "could not strip executable  for [join $suffix \ ]"
 	    return
 	}
 
-	# Run the stripped program instead of the original.
-	set program_to_run [file join $builddir \
-				[file tail "$binfile.stripped"]]
 	lappend suffix "sepdebug"
     }
 

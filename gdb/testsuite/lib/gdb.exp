@@ -8057,10 +8057,11 @@ proc build_id_debug_filename_get { filename } {
 }
 
 # DEST should be a file compiled with debug information.  This proc
-# creates two new files DEST.debug which contains the debug
-# information extracted from DEST, and DEST.stripped, which is a copy
-# of DEST with the debug information removed.  A '.gnu_debuglink'
-# section will be added to DEST.stripped that points to DEST.debug.
+# creates DEST.debug which contains the debug information extracted
+# from DEST, and DEST is updated with the debug information removed.
+#
+# By default a '.gnu_debuglink' section will be added to DEST that
+# points to DEST.debug.
 #
 # If ARGS is passed, it is a list of optional flags.  The currently
 # supported flags are:
@@ -8068,7 +8069,7 @@ proc build_id_debug_filename_get { filename } {
 #   - no-main : remove the symbol entry for main from the separate
 #               debug file DEST.debug,
 #   - no-debuglink : don't add the '.gnu_debuglink' section to
-#                    DEST.stripped.
+#                    DEST.
 #
 # Function returns zero on success.  Function will return non-zero failure code
 # on some targets not supporting separate debug info (such as i386-msdos).
@@ -8127,20 +8128,26 @@ proc gdb_gnu_strip_debug { dest args } {
     # Unless the "no-debuglink" flag is passed, then link the two
     # previous output files together, adding the .gnu_debuglink
     # section to the stripped_file, containing a pointer to the
-    # debug_file, save the new file in dest.
+    # debug_file.
     if {[lsearch -exact $args "no-debuglink"] == -1} {
-	set result [catch "exec $objcopy_program --add-gnu-debuglink=${debug_file} ${stripped_file} ${dest}" output]
+	set result [catch "exec $objcopy_program --add-gnu-debuglink=${debug_file} ${stripped_file} ${stripped_file}-tmp" output]
 	verbose "result is $result"
 	verbose "output is $output"
 	if {$result == 1} {
 	    return 1
 	}
+	file delete "${stripped_file}"
+	file rename "${stripped_file}-tmp" "${stripped_file}"
     }
 
     # Workaround PR binutils/10802:
     # Preserve the 'x' bit also for PIEs (Position Independent Executables).
-    set perm [file attributes ${stripped_file} -permissions]
-    file attributes ${dest} -permissions $perm
+    set perm [file attributes ${dest} -permissions]
+    file attributes ${stripped_file} -permissions $perm
+
+    # Move the stripped_file back into dest.
+    file delete ${dest}
+    file rename ${stripped_file} ${dest}
 
     return 0
 }
