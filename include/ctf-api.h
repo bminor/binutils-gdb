@@ -303,7 +303,26 @@ typedef struct ctf_dump_state ctf_dump_state_t;
 
 /* Iteration state for the _next functions, and allocators/copiers/freers for
    it.  (None of these are needed for the simple case of iterating to the end:
-   the _next function allocate and free the iterators for you.)  */
+   the _next functions allocate and free the iterators for you.)
+
+   The _next iterators all work in similar ways: they take things to query (a
+   dict, a name, a type ID, something like that), then a ctf_next_t iterator
+   arg which must be the address of a variable whose value is NULL on first
+   call, and will be set to NULL again once iteration has completed.
+
+   They return something important about the thing being iterated over (often a
+   type ID or a name); on end of iteration they instead return return CTF_ERR,
+   -1, or NULL and set the error ECTF_NEXT_END on the dict.  They can often
+   provide more information too: this is done via pointer parameters (e.g. the
+   membname and membtype in ctf_member_next()).  These parameters are always
+   optional and can be set to NULL if not needed.
+
+   Errors other than end-of-iteration will return CTF_ERR/-1/NULL and set the
+   error to something other than ECTF_NEXT_END, and *not* destroy the iterator:
+   you should either recover somehow and continue iterating, or call
+   ctf_next_destroy() on it.  (You can call ctf_next_destroy() on a NULL
+   iterator, so it's safe to just unconditionally do it after iteration has
+   completed.)  */
 
 typedef struct ctf_next ctf_next_t;
 extern ctf_next_t *ctf_next_create (void);
@@ -314,11 +333,10 @@ extern ctf_next_t *ctf_next_copy (ctf_next_t *);
    archives: so they can be used to open both.  CTF files will appear to be an
    archive with one member named '.ctf'.
 
-   Some of these functions take raw symtab and strtab section content in the
-   form of ctf_sect_t structures.  For CTF in ELF files, these should be
-   extracted from .dynsym and its associated string table (usually .dynsym)
-   whenever the CTF_F_DYNSTR flag is set in the CTF preamble (which it almost
-   always will be for linked objects, but not for .o files).  */
+   All these functions except for ctf_close use BFD and can open anything BFD
+   can open, hunting down the .ctf section for you, so are not available in the
+   libctf-nobfd flavour of the library.  If you want to provide the CTF section
+   yourself, you can do that with ctf_bfdopen_ctfsect.  */
 
 extern ctf_archive_t *ctf_bfdopen (struct bfd *, int *);
 extern ctf_archive_t *ctf_bfdopen_ctfsect (struct bfd *, const ctf_sect_t *,
@@ -334,8 +352,8 @@ extern ctf_sect_t ctf_getdatasect (const ctf_dict_t *);
 extern ctf_sect_t ctf_getsymsect (const ctf_dict_t *);
 extern ctf_sect_t ctf_getstrsect (const ctf_dict_t *);
 
-/* Symbol sections have an endianness which may be different from the
-   endianness of the CTF dict.  Called for you by ctf_open and ctf_fdopen,
+/* Set the endianness of the symbol section, which may be different from
+   the endianness of the CTF dict. Done for you by ctf_open and ctf_fdopen,
    but direct calls to ctf_bufopen etc with symbol sections provided must
    do so explicitly.  */
 
@@ -347,12 +365,23 @@ extern void ctf_arc_symsect_endianness (ctf_archive_t *, int little_endian);
    done until all dicts are finished with and closed themselves.
 
    Almost all functions that open archives will also open raw CTF dicts, which
-   are treated as if they were archives with only one member.  */
+   are treated as if they were archives with only one member.
+
+   Some of these functions take optional raw symtab and strtab section content
+   in the form of ctf_sect_t structures.  For CTF in ELF files, the more
+   convenient opening functions above extract these .dynsym and its associated
+   string table (usually .dynsym) whenever the CTF_F_DYNSTR flag is set in the
+   CTF preamble (which it almost always will be for linked objects, but not for
+   .o files).  If you use ctf_arc_bufopen and do not specify symbol/string
+   tables, the ctf_*_lookuup_symbol functions will fail with ECTF_NOSYMTAB.
+
+   Like many other convenient opening functions, ctf_arc_open needs BFD and is
+   not available in libctf-nobfd.  */
 
 extern ctf_archive_t *ctf_arc_open (const char *, int *);
-extern ctf_archive_t *ctf_arc_bufopen (const ctf_sect_t *,
-				       const ctf_sect_t *,
-				       const ctf_sect_t *,
+extern ctf_archive_t *ctf_arc_bufopen (const ctf_sect_t *ctfsect,
+				       const ctf_sect_t *symsect,
+				       const ctf_sect_t *strsect,
 				       int *);
 extern void ctf_arc_close (ctf_archive_t *);
 
@@ -378,8 +407,8 @@ extern size_t ctf_archive_count (const ctf_archive_t *);
 extern ctf_dict_t *ctf_dict_open (const ctf_archive_t *,
 				  const char *, int *);
 extern ctf_dict_t *ctf_dict_open_sections (const ctf_archive_t *,
-					   const ctf_sect_t *,
-					   const ctf_sect_t *,
+					   const ctf_sect_t *symsect,
+					   const ctf_sect_t *strsect,
 					   const char *, int *);
 
 /* Look up symbols' types in archives by index or name, returning the dict
@@ -400,10 +429,14 @@ extern void ctf_arc_flush_caches (ctf_archive_t *);
    ctf_dict_open_sections, they can be passed symbol and string table
    sections.  */
 
-extern ctf_dict_t *ctf_simple_open (const char *, size_t, const char *, size_t,
-				   size_t, const char *, size_t, int *);
-extern ctf_dict_t *ctf_bufopen (const ctf_sect_t *, const ctf_sect_t *,
-				const ctf_sect_t *, int *);
+extern ctf_dict_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
+				    const char *symsect, size_t symsect_size,
+				    size_t symsect_entsize,
+				    const char *strsect, size_t strsect_size,
+				    int *errp);
+extern ctf_dict_t *ctf_bufopen (const ctf_sect_t *ctfsect,
+				const ctf_sect_t *symsect,
+				const ctf_sect_t *strsect, int *);
 extern void ctf_ref (ctf_dict_t *);
 extern void ctf_dict_close (ctf_dict_t *);
 
@@ -484,14 +517,7 @@ extern ctf_id_t ctf_lookup_by_symbol (ctf_dict_t *, unsigned long);
 extern ctf_id_t ctf_lookup_by_symbol_name (ctf_dict_t *, const char *);
 
 /* Traverse all (function or data) symbols in a dict, one by one, and return the
-   type of each and (if NAME is non-NULL) optionally its name.
-
-   This is the first of a family of _next iterators that all work in similar
-   ways: the ctf_next_t iterator arg must be the address of a variable whose
-   value is NULL on first call, and will be set to NULL again once iteration has
-   completed (which also returns CTF_ERR as the type and sets the error
-   ECTF_NEXT_END on the dict).  If you want to exit earlier, call
-   ctf_next_destroy on the iterator.  */
+   type of each and (if NAME is non-NULL) optionally its name.  */
 
 extern ctf_id_t ctf_symbol_next (ctf_dict_t *, ctf_next_t **,
 				 const char **name, int functions);
@@ -525,14 +551,18 @@ extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 
 extern ctf_id_t ctf_type_resolve (ctf_dict_t *, ctf_id_t);
 
-/* Get the name of a type, including any cvr-quals, and return it as a new
-   dynamically-allocated string.  */
+/* Get the name of a type, including any const/volatile/restrict qualifiers
+   (cvr-quals), and return it as a new dynamically-allocated string.
+   (The 'a' stands for 'a'llocated.) */
 
 extern char *ctf_type_aname (ctf_dict_t *, ctf_id_t);
 
 /* As above, but with no cvr-quals.  */
 
 extern char *ctf_type_aname_raw (ctf_dict_t *, ctf_id_t);
+
+/* A raw name that is owned by the ctf_dict_t and will live as long as it
+   does.  Do not change the value this function returns!  */
 
 extern const char *ctf_type_name_raw (ctf_dict_t *, ctf_id_t);
 
@@ -915,10 +945,10 @@ extern void ctf_file_close (ctf_file_t *);
 extern ctf_dict_t *ctf_parent_file (ctf_dict_t *);
 extern ctf_dict_t *ctf_arc_open_by_name (const ctf_archive_t *,
 					 const char *, int *);
-extern ctf_dict_t *ctf_arc_open_by_name_sections (const ctf_archive_t *,
-						  const ctf_sect_t *,
-						  const ctf_sect_t *,
-						  const char *, int *);
+extern ctf_dict_t *ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
+						  const ctf_sect_t *symsect,
+						  const ctf_sect_t *strsect,
+						  const char *name, int *errp);
 
 /* Deprecated witeout function to write out a gzip-compressed dict.  Unlike all
    the other writeout functions, this even compresses the header (it has to,
