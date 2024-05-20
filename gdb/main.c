@@ -58,6 +58,7 @@
 #include "observable.h"
 #include "serial.h"
 #include "cli-out.h"
+#include "bt-utils.h"
 
 /* The selected interpreter.  */
 std::string interpreter_p;
@@ -676,6 +677,7 @@ captured_main_1 (struct captured_main_args *context)
   /* Note: `error' cannot be called before this point, because the
      caller will crash when trying to print the exception.  */
   main_ui = new ui (stdin, stdout, stderr);
+  gdb_internal_backtrace_init_str ();
   current_ui = main_ui;
 
   gdb_stdtarg = gdb_stderr;

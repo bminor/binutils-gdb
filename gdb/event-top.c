@@ -908,6 +908,51 @@ unblock_signal (int sig)
   return false;
 }
 
+/* Signal safe language specific strings.  */
+
+#ifdef GDB_PRINT_INTERNAL_BACKTRACE
+static const char *str_fatal_signal;
+static const char *str_sigsegv;
+#ifdef SIGFPE
+static const char *str_sigfpe;
+#endif
+#ifdef SIGBUS
+static const char *str_sigbus;
+#endif
+#ifdef SIGABRT
+static const char *str_sigabrt;
+#endif
+static const char *str_unknown_signal;
+static const char *str_fatal_error_detected_gdb_will_now_terminate;
+static const char *str_this_is_a_bug;
+static const char *str_for_instructions_see;
+
+/* Initialize language specific strings.  */
+
+static void
+init_str_handle_fatal_signal ()
+{
+  str_fatal_signal = _("Fatal signal: ");
+  str_sigsegv = strsignal (SIGSEGV);
+#ifdef SIGFPE
+  str_sigfpe = strsignal (SIGFPE);
+#endif
+#ifdef SIGBUS
+  str_sigbus = strsignal (SIGBUS);
+#endif
+#ifdef SIGABRT
+  str_sigabrt = strsignal (SIGABRT);
+#endif
+  str_unknown_signal = _("Unknown signal");
+  str_fatal_error_detected_gdb_will_now_terminate =
+	_("A fatal error internal to GDB has been detected, "
+	  "further\ndebugging is not possible.  GDB will now "
+	  "terminate.\n\n");
+  str_this_is_a_bug = _("This is a bug, please report it.");
+  str_for_instructions_see = _("  For instructions, see:\n");
+}
+#endif
+
 /* Called to handle fatal signals.  SIG is the signal number.  */
 
 [[noreturn]] static void
@@ -926,19 +971,40 @@ handle_fatal_signal (int sig)
   if (bt_on_fatal_signal)
     {
       sig_write ("\n\n");
-      sig_write (_("Fatal signal: "));
-      sig_write (strsignal (sig));
+      sig_write (str_fatal_signal);
+      switch (sig)
+	{
+	case SIGSEGV:
+	  sig_write (str_sigsegv);
+	  break;
+#ifdef SIGFPE
+	case SIGFPE:
+	  sig_write (str_sigfpe);
+	  break;
+#endif
+#ifdef SIGBUS
+	case SIGBUS:
+	  sig_write (str_sigbus);
+	  break;
+#endif
+#ifdef SIGABRT
+	case SIGABRT:
+	  sig_write (str_sigabrt);
+	  break;
+#endif
+	default:
+	  sig_write (str_unknown_signal);
+	  break;
+	}
       sig_write ("\n");
 
       gdb_internal_backtrace ();
 
-      sig_write (_("A fatal error internal to GDB has been detected, "
-		   "further\ndebugging is not possible.  GDB will now "
-		   "terminate.\n\n"));
-      sig_write (_("This is a bug, please report it."));
+      sig_write (str_fatal_error_detected_gdb_will_now_terminate);
+      sig_write (str_this_is_a_bug);
       if (REPORT_BUGS_TO[0] != '\0')
 	{
-	  sig_write (_("  For instructions, see:\n"));
+	  sig_write (str_for_instructions_see);
 	  sig_write (REPORT_BUGS_TO);
 	  sig_write (".");
 	}
@@ -1064,6 +1130,10 @@ gdb_init_signals (void)
 #ifdef SIGTSTP
   sigtstp_token =
     create_async_signal_handler (async_sigtstp_handler, NULL, "sigtstp");
+#endif
+
+#ifdef GDB_PRINT_INTERNAL_BACKTRACE
+  init_str_handle_fatal_signal ();
 #endif
 
 #ifdef SIGFPE
