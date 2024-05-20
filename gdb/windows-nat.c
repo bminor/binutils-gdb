@@ -41,6 +41,7 @@
 #include <cygwin/version.h>
 #endif
 #include <algorithm>
+#include <atomic>
 #include <vector>
 #include <queue>
 
