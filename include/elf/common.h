@@ -1037,6 +1037,9 @@
 /* Values for FDO .note.package notes as defined on https://systemd.io/COREDUMP_PACKAGE_METADATA/  */
 #define FDO_PACKAGING_METADATA	0xcafe1a7e
 
+/* Values for FDO .note.dlopen notes as defined on https://systemd.io/ELF_DLOPEN_METADATA/  */
+#define FDO_DLOPEN_METADATA 0x407c0c0a
+
 /* These three macros disassemble and assemble a symbol table st_info field,
    which contains the symbol binding and symbol type.  The STB_ and STT_
    defines identify the binding and type.  */
