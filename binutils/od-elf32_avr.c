@@ -36,12 +36,14 @@
 /* Index of the options in the options[] array.  */
 #define OPT_MEMUSAGE 0
 #define OPT_AVRPROP 1
+#define OPT_AVRDEVICEINFO 2
 
 /* List of actions.  */
 static struct objdump_private_option options[] =
   {
     { "mem-usage", 0 },
     { "avr-prop",  0},
+    { "avr-deviceinfo",  0},
     { NULL, 0 }
   };
 
@@ -52,8 +54,9 @@ elf32_avr_help (FILE *stream)
 {
   fprintf (stream, _("\
 For AVR ELF files:\n\
-  mem-usage   Display memory usage\n\
-  avr-prop    Display contents of .avr.prop section\n\
+  mem-usage       Display memory usage\n\
+  avr-prop        Display contents of .avr.prop section\n\
+  avr-deviceinfo  Display contents of .note.gnu.avr.deviceinfo section\n\
 "));
 }
 
@@ -347,6 +350,55 @@ elf32_avr_dump_avr_prop (bfd *abfd)
   free (r_list);
 }
 
+
+static void
+elf32_avr_dump_avr_deviceinfo (bfd *abfd)
+{
+  char *description = NULL;
+  bfd_size_type sec_size, desc_size;
+
+  deviceinfo dinfo = { 0, 0, 0, 0, 0, 0, NULL };
+  dinfo.name = "Unknown";
+
+  char *contents = elf32_avr_get_note_section_contents (abfd, &sec_size);
+
+  if (contents == NULL)
+    return;
+
+  description = elf32_avr_get_note_desc (abfd, contents, sec_size, &desc_size);
+  elf32_avr_get_device_info (abfd, description, desc_size, &dinfo);
+
+  printf ("AVR Device Info\n"
+	  "----------------\n"
+	  "Device: %s\n\n", dinfo.name);
+
+  printf ("Memory     Start      Size      Start      Size\n");
+
+  printf ("Flash  %9" PRIu32 " %9" PRIu32 "  %#9" PRIx32 " %#9" PRIx32 "\n",
+	  dinfo.flash_start, dinfo.flash_size,
+	  dinfo.flash_start, dinfo.flash_size);
+
+  /* FIXME: There are devices like ATtiny11 without RAM, and where the
+     avr/io*.h header has defines like
+	 #define RAMSTART    0x60
+	 // Last memory addresses
+	 #define RAMEND	     0x1F
+     which results in a negative RAM size.  The correct display would be to
+     show a size of 0, however we also want to show what's actually in the
+     note section as precise as possible.  Hence, display the decimal size
+     as %d, not as %u.	*/
+  printf ("RAM    %9" PRIu32 " %9" PRId32 "  %#9" PRIx32 " %#9" PRIx32 "\n",
+	  dinfo.ram_start, dinfo.ram_size,
+	  dinfo.ram_start, dinfo.ram_size);
+
+  printf ("EEPROM %9" PRIu32 " %9" PRIu32 "  %#9" PRIx32 " %#9" PRIx32 "\n",
+	  dinfo.eeprom_start, dinfo.eeprom_size,
+	  dinfo.eeprom_start, dinfo.eeprom_size);
+
+  free (contents);
+}
+
+
 static void
 elf32_avr_dump (bfd *abfd)
 {
@@ -354,6 +406,8 @@ elf32_avr_dump (bfd *abfd)
     elf32_avr_dump_mem_usage (abfd);
   if (options[OPT_AVRPROP].selected)
     elf32_avr_dump_avr_prop (abfd);
+  if (options[OPT_AVRDEVICEINFO].selected)
+    elf32_avr_dump_avr_deviceinfo (abfd);
 }
 
 const struct objdump_private_desc objdump_private_desc_elf32_avr =
