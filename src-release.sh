@@ -49,9 +49,11 @@ DEVO_SUPPORT="ar-lib ChangeLog compile config config-ml.in config.guess \
         multilib.am"
 
 # Files in devo/etc used in any net release.
-ETC_SUPPORT="Makefile.in configure configure.in standards.texi \
-	make-stds.texi standards.info* configure.texi configure.info* \
-	ChangeLog configbuild.* configdev.* fdl.texi texi2pod.pl gnu-oids.texi"
+ETC_SUPPORT="ChangeLog Makefile.am Makefile.in aclocal.m4 add-log.el \
+	add-log.vi configbuild.* configdev.* configure configure.ac \
+	configure.in configure.info* configure.texi fdl.texi gnu-oids.texi \
+	make-stds.texi standards.info* standards.texi texi2pod.pl \
+	update-copyright.py"
 
 # Get the version number of a given tool
 getver()
