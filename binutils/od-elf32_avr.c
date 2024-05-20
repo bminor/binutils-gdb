@@ -167,79 +167,60 @@ elf32_avr_get_device_info (bfd *abfd, char *description,
   device->name = str_table + device_name_index;
 }
 
+/* Get the size of section *SECNAME, truncated to a reasonable value in
+   order to catch PR 27285 and dysfunctional binaries.  */
+
+static bfd_size_type
+elf32_avr_get_truncated_size (bfd *abfd, const char *secname)
+{
+  /* Max size of around 1 MiB is more than any reasonable AVR will
+     ever be able to swallow.  And it's small enough so that we won't
+     get overflows / UB as demonstrated in PR 27285.  */
+  const bfd_size_type max_size = 1000000;
+  bfd_size_type size = 0;
+  asection *section;
+
+  section = bfd_get_section_by_name (abfd, secname);
+
+  if (section != NULL)
+    {
+      size = bfd_section_size (section);
+      if (size > INT32_MAX)
+	{
+	  fprintf (stderr, _("Warning: section %s has a negative size of"
+			     " %ld bytes, saturating to 0 bytes\n"),
+		   secname, (long) (int32_t) size);
+	  size = 0;
+	}
+      else if (size > max_size)
+	{
+	  fprintf (stderr, _("Warning: section %s has an impossible size of"
+			     " %lu bytes, truncating to %lu bytes\n"),
+		   secname, (unsigned long) size, (unsigned long) max_size);
+	  size = max_size;
+	}
+    }
+
+  return size;
+}
+
 static void
 elf32_avr_get_memory_usage (bfd *abfd,
 			    bfd_size_type *text_usage,
 			    bfd_size_type *data_usage,
 			    bfd_size_type *eeprom_usage)
 {
+  bfd_size_type avr_textsize = elf32_avr_get_truncated_size (abfd, ".text");
+  bfd_size_type avr_datasize = elf32_avr_get_truncated_size (abfd, ".data");;
+  bfd_size_type avr_bsssize  = elf32_avr_get_truncated_size (abfd, ".bss");
+  bfd_size_type noinitsize = elf32_avr_get_truncated_size (abfd, ".noinit");
+  bfd_size_type rodatasize = elf32_avr_get_truncated_size (abfd, ".rodata");
+  bfd_size_type eepromsize = elf32_avr_get_truncated_size (abfd, ".eeprom");
+  bfd_size_type bootloadersize = elf32_avr_get_truncated_size (abfd,
+							       ".bootloader");
 
-  bfd_size_type avr_datasize = 0;
-  bfd_size_type avr_textsize = 0;
-  bfd_size_type avr_bsssize = 0;
-  bfd_size_type bootloadersize = 0;
-  bfd_size_type noinitsize = 0;
-  bfd_size_type eepromsize = 0;
-  bfd_size_type res;
-  asection *section;
-
-  if ((section = bfd_get_section_by_name (abfd, ".data")) != NULL)
-    avr_datasize = bfd_section_size (section);
-  if ((section = bfd_get_section_by_name (abfd, ".text")) != NULL)
-    avr_textsize = bfd_section_size (section);
-  if ((section = bfd_get_section_by_name (abfd, ".bss")) != NULL)
-    avr_bsssize = bfd_section_size (section);
-  if ((section = bfd_get_section_by_name (abfd, ".bootloader")) != NULL)
-    bootloadersize = bfd_section_size (section);
-  if ((section = bfd_get_section_by_name (abfd, ".noinit")) != NULL)
-    noinitsize = bfd_section_size (section);
-  if ((section = bfd_get_section_by_name (abfd, ".eeprom")) != NULL)
-    eepromsize = bfd_section_size (section);
-
-  /* PR 27285: Check for overflow.  */
-  res = avr_textsize + avr_datasize;
-  if (res < avr_textsize || res < avr_datasize)
-    {
-      fprintf (stderr, _("Warning: textsize (%#lx) + datasize (%#lx) overflows size type\n"),
-	       (long) avr_textsize, (long) avr_datasize);
-      res = (bfd_size_type) -1;
-    }
-  else
-    {
-      bfd_size_type res2;
-      res2 = res + bootloadersize;
-      if (res2 < bootloadersize || res2 < res)
-	{
-	  fprintf (stderr, _("Warning: textsize (%#lx) + datasize (%#lx) + bootloadersize (%#lx) overflows size type\n"),
-		   (long) avr_textsize, (long) avr_datasize, (long) bootloadersize);
-	  res2 = (bfd_size_type) -1;
-	}
-      res = res2;
-    }
-  *text_usage = res;
-
-  res = avr_datasize + avr_bsssize;
-  if (res < avr_datasize || res < avr_bsssize)
-    {
-      fprintf (stderr, _("Warning: datatsize (%#lx) + bssssize (%#lx) overflows size type\n"),
-	       (long) avr_datasize, (long) avr_bsssize);
-      res = (bfd_size_type) -1;
-    }
-  else
-    {
-      bfd_size_type res2;
-
-      res2 = res + noinitsize;
-      if (res2 < res || res2 < noinitsize)
-	{
-	  fprintf (stderr, _("Warning: datasize (%#lx) + bsssize (%#lx) + noinitsize (%#lx) overflows size type\n"),
-		   (long) avr_datasize, (long) avr_bsssize, (long) noinitsize);
-	  res2 = (bfd_size_type) -1;
-	}
-      res = res2;
-    }
-  *data_usage = res;
-
+  *text_usage = avr_textsize + avr_datasize + rodatasize + bootloadersize;
+  *data_usage = avr_datasize + avr_bsssize + noinitsize;
   *eeprom_usage = eepromsize;
 }
 
@@ -277,7 +258,7 @@ elf32_avr_dump_mem_usage (bfd *abfd)
   if (device.flash_size > 0)
     printf (" (%2.1f%% Full)", (double) text_usage / device.flash_size * 100);
 
-  printf ("\n(.text + .data + .bootloader)\n\n");
+  printf ("\n(.text + .data + .rodata + .bootloader)\n\n");
 
   /* Data size */
   printf ("Data:   %8" PRIu64 " bytes", (uint64_t) data_usage);
@@ -350,7 +331,6 @@ elf32_avr_dump_avr_prop (bfd *abfd)
   free (r_list);
 }
 
-
 static void
 elf32_avr_dump_avr_deviceinfo (bfd *abfd)
 {
@@ -397,7 +377,6 @@ elf32_avr_dump_avr_deviceinfo (bfd *abfd)
 
   free (contents);
 }
-
 
 static void
 elf32_avr_dump (bfd *abfd)
