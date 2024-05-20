@@ -6191,6 +6191,13 @@ proc gdb_exit { } {
 # return 0 only if we cannot attach because it's unsupported.
 
 gdb_caching_proc can_spawn_for_attach_1 {} {
+    # For the benefit of gdb-caching-proc-consistency.exp, which
+    # calls can_spawn_for_attach_1 directly.  Keep in sync with
+    # can_spawn_for_attach.
+    if { [is_remote target] || [target_info exists use_gdb_stub] } {
+	return 0
+    }
+
     # Assume yes.
     set res 1
 
