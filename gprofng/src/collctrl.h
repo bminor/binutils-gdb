@@ -87,7 +87,6 @@ public:
   void set_clk_params(int min, int res, int max, int hi, int norm, int lo);
   char *set_clkprof(const char *valptr, char **warn);
   char *reset_clkprof(int val); /* called if profiler must reset value */
-  int get_sys_period()    { return clk_params.min; };
   int get_clk_min()       { return clk_params.min; };
   int get_clk_max()       { return clk_params.max; };
   int get_clk_res()       { return clk_params.res; };
@@ -275,7 +274,6 @@ private:
   int cpu_clk_freq;     /* chip clock (MHz.), as reported from processor_info */
   int cpc_cpuver;       /* chip version, as reported from libcpc */
   long sys_resolution;  /* system clock resolution */
-  int sys_period;       /* profiling clock resolution on the system */
   int sample_period;    /* period for sampling, seconds */
   int sample_default;    /* if period for sampling set by default */
   int size_limit;       /* experiment size limit, MB */
