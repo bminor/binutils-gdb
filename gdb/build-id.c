@@ -81,11 +81,7 @@ static gdb_bfd_ref_ptr
 build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
 			 const bfd_byte *build_id)
 {
-  if (separate_debug_file_debug)
-    {
-      gdb_printf (gdb_stdlog, _("  Trying %s..."), link.c_str ());
-      gdb_flush (gdb_stdlog);
-    }
+  separate_debug_file_debug_printf ("Trying %s...", link.c_str ());
 
   /* lrealpath() is expensive even for the usually non-existent files.  */
   gdb::unique_xmalloc_ptr<char> filename_holder;
@@ -100,10 +96,7 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
 
   if (filename == NULL)
     {
-      if (separate_debug_file_debug)
-	gdb_printf (gdb_stdlog,
-		    _(" no, unable to compute real path\n"));
-
+      separate_debug_file_debug_printf ("unable to compute real path");
       return {};
     }
 
@@ -112,23 +105,17 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
 
   if (debug_bfd == NULL)
     {
-      if (separate_debug_file_debug)
-	gdb_printf (gdb_stdlog, _(" no, unable to open.\n"));
-
+      separate_debug_file_debug_printf ("unable to open.");
       return {};
     }
 
   if (!build_id_verify (debug_bfd.get(), build_id_len, build_id))
     {
-      if (separate_debug_file_debug)
-	gdb_printf (gdb_stdlog, _(" no, build-id does not match.\n"));
-
+      separate_debug_file_debug_printf ("build-id does not match.");
       return {};
     }
 
-  if (separate_debug_file_debug)
-    gdb_printf (gdb_stdlog, _(" yes!\n"));
-
+  separate_debug_file_debug_printf ("found a match");
   return debug_bfd;
 }
 
@@ -140,6 +127,8 @@ static gdb_bfd_ref_ptr
 build_id_to_bfd_suffix (size_t build_id_len, const bfd_byte *build_id,
 			const char *suffix)
 {
+  SEPARATE_DEBUG_FILE_SCOPED_DEBUG_ENTER_EXIT;
+
   /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/.build-id/..." lookups.  */
 
@@ -223,10 +212,9 @@ find_separate_debug_file_by_buildid (struct objfile *objfile,
   build_id = build_id_bfd_get (objfile->obfd.get ());
   if (build_id != NULL)
     {
-      if (separate_debug_file_debug)
-	gdb_printf (gdb_stdlog,
-		    _("\nLooking for separate debug info (build-id) for "
-		      "%s\n"), objfile_name (objfile));
+      SEPARATE_DEBUG_FILE_SCOPED_DEBUG_START_END
+	("looking for separate debug info (build-id) for %s",
+	 objfile_name (objfile));
 
       gdb_bfd_ref_ptr abfd (build_id_to_debug_bfd (build_id->size,
 						   build_id->data));
@@ -235,9 +223,9 @@ find_separate_debug_file_by_buildid (struct objfile *objfile,
 	  && filename_cmp (bfd_get_filename (abfd.get ()),
 			   objfile_name (objfile)) == 0)
 	{
-	  if (separate_debug_file_debug)
-	    gdb_printf (gdb_stdlog, "\"%s\": separate debug info file has no "
-			"debug info", bfd_get_filename (abfd.get ()));
+	  separate_debug_file_debug_printf
+	    ("\"%s\": separate debug info file has no debug info",
+	     bfd_get_filename (abfd.get ()));
 	  warnings->warn (_("\"%ps\": separate debug info file has no "
 			    "debug info"),
 			  styled_string (file_name_style.style (),

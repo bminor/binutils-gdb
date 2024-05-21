@@ -1229,6 +1229,8 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 			    struct objfile *parent_objfile,
 			    deferred_warnings *warnings)
 {
+  SEPARATE_DEBUG_FILE_SCOPED_DEBUG_ENTER_EXIT;
+
   unsigned long file_crc;
   int file_crc_p;
   struct stat parent_stat, abfd_stat;
@@ -1243,19 +1245,13 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
   if (filename_cmp (name.c_str (), objfile_name (parent_objfile)) == 0)
     return 0;
 
-  if (separate_debug_file_debug)
-    {
-      gdb_printf (gdb_stdlog, _("  Trying %s..."), name.c_str ());
-      gdb_flush (gdb_stdlog);
-    }
+  separate_debug_file_debug_printf ("Trying %s...", name.c_str ());
 
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (name.c_str (), gnutarget));
 
   if (abfd == NULL)
     {
-      if (separate_debug_file_debug)
-	gdb_printf (gdb_stdlog, _(" no, unable to open.\n"));
-
+      separate_debug_file_debug_printf ("unable to open file");
       return 0;
     }
 
@@ -1277,10 +1273,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
       if (abfd_stat.st_dev == parent_stat.st_dev
 	  && abfd_stat.st_ino == parent_stat.st_ino)
 	{
-	  if (separate_debug_file_debug)
-	    gdb_printf (gdb_stdlog,
-			_(" no, same file as the objfile.\n"));
-
+	  separate_debug_file_debug_printf ("same file as the objfile");
 	  return 0;
 	}
       verified_as_different = 1;
@@ -1292,9 +1285,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 
   if (!file_crc_p)
     {
-      if (separate_debug_file_debug)
-	gdb_printf (gdb_stdlog, _(" no, error computing CRC.\n"));
-
+      separate_debug_file_debug_printf ("error computing CRC");
       return 0;
     }
 
@@ -1310,20 +1301,18 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 	{
 	  if (!gdb_bfd_crc (parent_objfile->obfd.get (), &parent_crc))
 	    {
-	      if (separate_debug_file_debug)
-		gdb_printf (gdb_stdlog,
-			    _(" no, error computing CRC.\n"));
-
+	      separate_debug_file_debug_printf ("error computing CRC");
 	      return 0;
 	    }
 	}
 
       if (verified_as_different || parent_crc != file_crc)
 	{
-	  if (separate_debug_file_debug)
-	    gdb_printf (gdb_stdlog, "the debug information found in \"%s\""
-			" does not match \"%s\" (CRC mismatch).\n",
-			name.c_str (), objfile_name (parent_objfile));
+	  separate_debug_file_debug_printf
+	    ("the debug information found in \"%s\" does not match "
+	     "\"%s\" (CRC mismatch).", name.c_str (),
+	     objfile_name (parent_objfile));
+
 	  warnings->warn (_("the debug information found in \"%ps\""
 			    " does not match \"%ps\" (CRC mismatch)."),
 			  styled_string (file_name_style.style (),
@@ -1335,8 +1324,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
       return 0;
     }
 
-  if (separate_debug_file_debug)
-    gdb_printf (gdb_stdlog, _(" yes!\n"));
+  separate_debug_file_debug_printf ("found a match");
 
   return 1;
 }
@@ -1377,10 +1365,9 @@ find_separate_debug_file (const char *dir,
 			  unsigned long crc32, struct objfile *objfile,
 			  deferred_warnings *warnings)
 {
-  if (separate_debug_file_debug)
-    gdb_printf (gdb_stdlog,
-		_("\nLooking for separate debug info (debug link) for "
-		  "%s\n"), objfile_name (objfile));
+  SEPARATE_DEBUG_FILE_SCOPED_DEBUG_START_END
+    ("looking for separate debug info (debug link) for %s",
+     objfile_name (objfile));
 
   /* First try in the same directory as the original file.  */
   std::string debugfile = dir;

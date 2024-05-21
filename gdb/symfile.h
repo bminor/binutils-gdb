@@ -371,6 +371,25 @@ extern gdb_bfd_ref_ptr find_separate_debug_file_in_section (struct objfile *);
 
 extern bool separate_debug_file_debug;
 
+/* Print a "separate-debug-file" debug statement.  */
+
+#define separate_debug_file_debug_printf(fmt, ...)		\
+  debug_prefixed_printf_cond (separate_debug_file_debug,	\
+			      "separate-debug-file",		\
+			      fmt, ##__VA_ARGS__)
+
+/* Print "separate-debug-file" enter/exit debug statements.  */
+
+#define SEPARATE_DEBUG_FILE_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (separate_debug_file_debug,	\
+			   "separate-debug-file")
+
+/* Print "separate-debug-file" start/end debug statements.  */
+
+#define SEPARATE_DEBUG_FILE_SCOPED_DEBUG_START_END(fmt, ...) \
+  scoped_debug_start_end (separate_debug_file_debug,	     \
+			  "separate-debug-file", fmt, ##__VA_ARGS__)
+
 /* Read full symbols immediately.  */
 
 extern int readnow_symbol_files;
