@@ -1869,8 +1869,9 @@ If available, this method should return the number of children.
 This is not a basic method, so @value{GDBN} will only ever call it for
 objects derived from @code{gdb.ValuePrinter}.
 
-If available, this method should return the child value indicated by
-@var{n}.  Indices start at zero.
+If available, this method should return the child item (that is, a
+tuple holding the name and value of this child) indicated by @var{n}.
+Indices start at zero.
 @end defun
 
 @value{GDBN} provides a function which can be used to look up the
