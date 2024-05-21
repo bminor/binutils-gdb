@@ -54,6 +54,7 @@
 #include "target-connection.h"
 #include "valprint.h"
 #include "cli/cli-decode.h"
+#include "cli/cli-style.h"
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
@@ -2397,8 +2398,9 @@ info_target_command (const char *args, int from_tty)
   if (current_program_space->symfile_object_file != NULL)
     {
       objfile *objf = current_program_space->symfile_object_file;
-      gdb_printf (_("Symbols from \"%s\".\n"),
-		  objfile_name (objf));
+      gdb_printf (_("Symbols from \"%ps\".\n"),
+		  styled_string (file_name_style.style (),
+				 objfile_name (objf)));
     }
 
   for (target_ops *t = current_inferior ()->top_target ();
@@ -3577,7 +3579,8 @@ target_announce_detach (int from_tty)
     gdb_printf ("Detaching from pid %s\n",
 		target_pid_to_str (ptid_t (pid)).c_str ());
   else
-    gdb_printf (_("Detaching from program: %s, %s\n"), exec_file,
+    gdb_printf (_("Detaching from program: %ps, %s\n"),
+		styled_string (file_name_style.style (), exec_file),
 		target_pid_to_str (ptid_t (pid)).c_str ());
 }
 
@@ -3592,7 +3595,8 @@ target_announce_attach (int from_tty, int pid)
   const char *exec_file = get_exec_file (0);
 
   if (exec_file != nullptr)
-    gdb_printf ("Attaching to program: %s, %s\n", exec_file,
+    gdb_printf ("Attaching to program: %ps, %s\n",
+		styled_string (file_name_style.style (), exec_file),
 		target_pid_to_str (ptid_t (pid)).c_str ());
   else
     gdb_printf ("Attaching to %s\n",

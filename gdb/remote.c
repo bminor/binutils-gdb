@@ -79,6 +79,7 @@
 #include <unordered_map>
 #include "async-event.h"
 #include "gdbsupport/selftest.h"
+#include "cli/cli-style.h"
 
 /* The remote target.  */
 
@@ -12751,8 +12752,8 @@ remote_target::remote_hostio_open (inferior *inf, const char *filename,
     {
       static int warning_issued = 0;
 
-      gdb_printf (_("Reading %s from remote target...\n"),
-		  filename);
+      gdb_printf (_("Reading %ps from remote target...\n"),
+		  styled_string (file_name_style.style (), filename));
 
       if (!warning_issued)
 	{
@@ -13291,7 +13292,8 @@ remote_target::remote_file_put (const char *local_file, const char *remote_file,
     remote_hostio_error (remote_errno);
 
   if (from_tty)
-    gdb_printf (_("Successfully sent file \"%s\".\n"), local_file);
+    gdb_printf (_("Successfully sent file \"%ps\".\n"),
+		styled_string (file_name_style.style (), local_file));
 }
 
 void
@@ -13351,7 +13353,8 @@ remote_target::remote_file_get (const char *remote_file, const char *local_file,
     remote_hostio_error (remote_errno);
 
   if (from_tty)
-    gdb_printf (_("Successfully fetched file \"%s\".\n"), remote_file);
+    gdb_printf (_("Successfully fetched file \"%ps\".\n"),
+		styled_string (file_name_style.style (), remote_file));
 }
 
 void
@@ -13376,7 +13379,8 @@ remote_target::remote_file_delete (const char *remote_file, int from_tty)
     remote_hostio_error (remote_errno);
 
   if (from_tty)
-    gdb_printf (_("Successfully deleted file \"%s\".\n"), remote_file);
+    gdb_printf (_("Successfully deleted file \"%ps\".\n"),
+		styled_string (file_name_style.style (), remote_file));
 }
 
 static void
