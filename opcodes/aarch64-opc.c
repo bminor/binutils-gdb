@@ -3700,8 +3700,8 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
   else
     tb[0] = '\0';
 
-  /* The hyphenated form is preferred for disassembly if there are
-     more than two registers in the list, and the register numbers
+  /* The hyphenated form is preferred for disassembly if there is
+     more than one register in the list, and the register numbers
      are monotonically increasing in increments of one.  */
   if (stride == 1 && num_regs > 1
       && ((opnd->type != AARCH64_OPND_SME_Zt2)
