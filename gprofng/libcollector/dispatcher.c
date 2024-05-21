@@ -109,6 +109,7 @@ enum
   DISPATCH_TST = 2      /* dispatcher installed, and enabled in testing mode */
 };
 
+static struct sigaction sigaction_0;
 static int dispatch_mode = DISPATCH_NYI;   /* controls SIGPROF dispatching */
 static int itimer_period_requested = 0;    /* dispatcher itimer period */
 static int itimer_period_actual = 0;       /* actual dispatcher itimer period */
@@ -263,8 +264,7 @@ __collector_sigprof_install ()
     TprintfT (DBG_LT1, "dispatcher: __collector_ext_dispatcher_install() collector_sigprof_dispatcher already installed\n");
   else
     {
-      struct sigaction c_act;
-      CALL_UTIL (memset)(&c_act, 0, sizeof c_act);
+      struct sigaction c_act = sigaction_0;
       sigemptyset (&c_act.sa_mask);
       sigaddset (&c_act.sa_mask, HWCFUNCS_SIGNAL); /* block SIGEMT delivery in handler */
       c_act.sa_sigaction = collector_sigprof_dispatcher;
@@ -358,8 +358,7 @@ void
 __collector_SIGDFL_handler (int sig)
 {
   /* remove our dispatcher, replacing it with the default disposition */
-  struct sigaction act;
-  CALL_UTIL (memset)(&act, 0, sizeof (act));
+  struct sigaction act =  sigaction_0;
   act.sa_handler = SIG_DFL;
   if (__collector_sigaction (sig, &act, NULL))
     {

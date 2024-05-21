@@ -32,7 +32,6 @@
 #include <signal.h>
 
 #include "gp-defs.h"
-#define _STRING_H 1  /* XXX MEZ: temporary workaround */
 #include "hwcdrv.h"
 #include "collector_module.h"
 #include "gp-experiment.h"
@@ -409,8 +408,8 @@ hwc_initialize_handlers (void)
   else
     {
       /* set our signal handler */
-      struct sigaction c_act;
-      CALL_UTIL (memset)(&c_act, 0, sizeof c_act);
+      static struct sigaction c_act_0 = {.sa_flags = SA_RESTART | SA_SIGINFO};
+      struct sigaction c_act = c_act_0;
       sigemptyset (&c_act.sa_mask);
       sigaddset (&c_act.sa_mask, SIGPROF); /* block SIGPROF delivery in handler */
       /* XXXX should probably also block sample_sig & pause_sig */
@@ -531,8 +530,9 @@ collector_record_counter_internal (ucontext_t *ucp, int timecvt,
 				   uint64_t va, uint64_t latency,
 				   uint64_t data_source)
 {
-  MHwcntr_packet pckt;
-  CALL_UTIL (memset)(&pckt, 0, sizeof ( MHwcntr_packet));
+  static MHwcntr_packet hwc_packet_0 = {.comm.type = HW_PCKT,
+					.comm.tsize = sizeof (Hwcntr_packet)};
+  MHwcntr_packet pckt = hwc_packet_0;
   pckt.comm.tstamp = time;
   pckt.tag = tag;
   if (timecvt > 1)
@@ -547,8 +547,6 @@ collector_record_counter_internal (ucontext_t *ucp, int timecvt,
 	value *= timecvt;
     }
   pckt.interval = value;
-  pckt.comm.type = HW_PCKT;
-  pckt.comm.tsize = sizeof (Hwcntr_packet);
   TprintfT (DBG_LT4, "hwprofile: %llu sample %lld tag %u recorded\n",
 	    (unsigned long long) time, (long long) value, tag);
   if (ABS_memop == ABST_NOPC)

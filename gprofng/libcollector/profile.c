@@ -272,10 +272,9 @@ __collector_ext_profile_handler (siginfo_t *info, ucontext_t *context)
       CALL_UTIL (getcontext) (context);     /* initialize dummy context */
       SETFUNCTIONCONTEXT (context, &__collector_lost_profile_context);
     }
-  ClockPacket pckt;
-  CALL_UTIL (memset)(&pckt, 0, sizeof ( pckt));
-  pckt.comm.tsize = sizeof ( pckt);
-  pckt.comm.type = CLOCK_TYPE;
+  static ClockPacket clock_pckt_0 = {.comm.type = CLOCK_TYPE,
+				     .comm.tsize = sizeof (ClockPacket)};
+  ClockPacket pckt = clock_pckt_0;
   pckt.lwp_id = __collector_lwp_self ();
   pckt.thr_id = __collector_thr_self ();
   pckt.cpu_id = CALL_UTIL (getcpuid)();

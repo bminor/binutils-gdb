@@ -1344,10 +1344,9 @@ __collector_close_experiment ()
       return;
     }
 
-  struct sigaction sa;
-  CALL_UTIL (memset)(&sa, 0, sizeof (struct sigaction));
+  static struct sigaction sigaction_0 = {.sa_flags = SA_SIGINFO };
+  struct sigaction sa = sigaction_0;
   sa.sa_sigaction = __collector_SIGCHLD_signal_handler;
-  sa.sa_flags = SA_SIGINFO;
   __collector_sigaction (SIGCHLD, &sa, &original_sigchld_sigaction);
 
   /* linetrace interposition takes care of unsetting Environment variables */
@@ -2319,7 +2318,6 @@ ovw_write ()
     return 0;
   int fd;
   int res;
-  struct prusage usage;
   struct rusage rusage;
   hrtime_t hrt, delta;
 
@@ -2335,9 +2333,9 @@ ovw_write ()
       return ( hrt);
     }
 
-  CALL_UTIL (memset)(&usage, 0, sizeof (struct prusage));
+  static struct prusage usage_0 = { .pr_count = 1 };
+  struct prusage usage = usage_0;
   usage.pr_lwpid = getpid ();
-  usage.pr_count = 1;
   usage.pr_tstamp.tv_sec = hrt / NANOSEC;
   usage.pr_tstamp.tv_nsec = hrt % NANOSEC;
   usage.pr_create.tv_sec = starttime / NANOSEC;

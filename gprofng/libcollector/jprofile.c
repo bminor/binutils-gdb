@@ -361,8 +361,8 @@ JVM_OnLoad (JavaVM *vm, char *options, void *reserved)
       err = (*jvmti)->GetPotentialCapabilities (jvmti, &cpblts);
       if (err == JVMTI_ERROR_NONE)
 	{
-	  jvmtiCapabilities cpblts_set;
-	  CALL_UTIL (memset)(&cpblts_set, 0, sizeof (cpblts_set));
+	  static jvmtiCapabilities cpblts_set_0;
+	  jvmtiCapabilities cpblts_set = cpblts_set_0;
 
 	  /* Add only those capabilities that are among potential ones */
 	  cpblts_set.can_get_source_file_name = cpblts.can_get_source_file_name;
