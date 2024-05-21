@@ -497,28 +497,25 @@ ginsn_src_print (struct ginsn_src *src)
 static char*
 ginsn_dst_print (struct ginsn_dst *dst)
 {
+  int str_size = 0;
   size_t len = GINSN_LISTING_OPND_LEN;
   char *dst_str = XNEWVEC (char, len);
 
   memset (dst_str, 0, len);
 
   if (dst->type == GINSN_DST_REG)
-    {
-      char *buf = XNEWVEC (char, 32);
-      sprintf (buf, "%%r%d", ginsn_get_dst_reg (dst));
-      strcat (dst_str, buf);
-      free (buf);
-    }
+    str_size = snprintf (dst_str, GINSN_LISTING_OPND_LEN,
+			 "%%r%d", ginsn_get_dst_reg (dst));
   else if (dst->type == GINSN_DST_INDIRECT)
-    {
-      char *buf = XNEWVEC (char, 32);
-      sprintf (buf, "[%%r%d+%lld]", ginsn_get_dst_reg (dst),
-		 (long long int) ginsn_get_dst_disp (dst));
-      strcat (dst_str, buf);
-      free (buf);
-    }
+    str_size = snprintf (dst_str, GINSN_LISTING_OPND_LEN,
+			 "[%%r%d+%lld]", ginsn_get_dst_reg (dst),
+			 (long long int) ginsn_get_dst_disp (dst));
+  else if (dst->type != GINSN_DST_UNKNOWN)
+    /* Other dst types are unexpected.  */
+    gas_assert (false);
 
-  gas_assert (strlen (dst_str) < GINSN_LISTING_OPND_LEN);
+  /* str_size will remain 0 when GINSN_DST_UNKNOWN.  */
+  gas_assert (str_size >= 0 && str_size < GINSN_LISTING_OPND_LEN);
 
   return dst_str;
 }
