@@ -78,9 +78,8 @@ proc_with_prefix lookup_via_build_id {} {
 	gdb_assert { $::gdb_file_cmd_debug_info eq "debug" } \
 	    "ensure debug information was found"
 
-	if { $sysroot_prefix eq "" } {
-	    set lookup_filename $debug_filename
-	} else {
+	if { $sysroot_prefix eq "target:"
+	     && [target_info gdb_protocol] == "extended-remote"} {
 	    # Only when using the extended-remote board will we have
 	    # started a remote target by this point.  In this case GDB
 	    # will see the 'target:' prefix as remote, and so the
@@ -89,11 +88,9 @@ proc_with_prefix lookup_via_build_id {} {
 	    # In all other cases we will still be using the default,
 	    # initial target, in which case GDB considers the
 	    # 'target:' prefix to indicate the local filesystem.
-	    if {[target_info gdb_protocol] == "extended-remote"} {
-		set lookup_filename $sysroot_prefix$debug_symlink
-	    } else {
-		set lookup_filename $debug_symlink
-	    }
+	    set lookup_filename $sysroot_prefix$debug_symlink
+	} else {
+	    set lookup_filename $debug_filename
 	}
 	set re [string_to_regexp "Reading symbols from $lookup_filename..."]
 	gdb_assert {[regexp $re $::gdb_file_cmd_msg]} \
