@@ -42,7 +42,7 @@ proc_with_prefix check_fork_catchpoints {} {
   global gdb_prompt
 
   if { ![setup] } {
-      return
+      return 0
   }
 
   # Verify that the system supports "catch fork".
