@@ -1181,7 +1181,7 @@ current script, otherwise the last, non-augmenting, @option{-T} option
 will be used.
 
 There are other ways of specifying linker scripts.  See
-@xref{--default-script}, @xref{--section-ordering-file} and
+@xref{--default-script}, @xref{--section-ordering-file}, and
 @xref{unrecognised-input-files}.
 
 @kindex -dT @var{script}
@@ -2470,7 +2470,7 @@ however that this only applies to additional libraries needed to
 satisfy already included shared libraries.  It does @emph{not}
 apply to libraries that are included via the @option{-l} command line
 option.  Searches for @option{-l} libraries are only conducted in
-directories specified by the @option{-L} option (@xref{-L}).
+directories specified by the @option{-L} option (@pxref{-L}).
 
 @enumerate
 @item
