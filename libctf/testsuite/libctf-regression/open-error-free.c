@@ -165,7 +165,7 @@ int main (void)
     fprintf (stderr, "Memory leak is present: %lli allocations (%lli allocations, %lli frees).\n",
 	     frozen_malloc_count - frozen_free_count, frozen_malloc_count, frozen_free_count);
   else if (frozen_malloc_count < frozen_free_count)
-    fprintf (stderr, "Possible double-free: %li allocations, %li frees.\n",
+    fprintf (stderr, "Possible double-free: %lli allocations, %lli frees.\n",
 	     frozen_malloc_count, frozen_free_count);
 
   printf ("All OK.\n");
