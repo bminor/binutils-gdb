@@ -49471,7 +49471,7 @@ describe additional @sc{xmm} registers:
 
 @itemize @minus
 @item
-@samp{xmm16h} through @samp{xmm31h}, only valid for amd64.
+@samp{xmm16} through @samp{xmm31}, only valid for amd64.
 @end itemize
 
 It should describe the upper 128 bits of additional @sc{ymm} registers:
@@ -49497,6 +49497,14 @@ describe the additional @sc{zmm} registers:
 @itemize @minus
 @item
 @samp{zmm16h} through @samp{zmm31h}, only valid for amd64.
+@end itemize
+
+It should
+describe the additional 64-bit @sc{k} registers:
+
+@itemize @minus
+@item
+@samp{k0} through @samp{k7}, valid for amd64 and i386.
 @end itemize
 
 The @samp{org.gnu.gdb.i386.pkeys} feature is optional.  It should
