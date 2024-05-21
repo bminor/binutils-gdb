@@ -81,6 +81,8 @@ public:
   int fileio_pread (int fd, gdb_byte *read_buf, int len,
 		    ULONGEST offset, fileio_error *target_errno) override;
   int fileio_fstat (int fd, struct stat *sb, fileio_error *target_errno) override;
+  int fileio_stat (struct inferior *inf, const char *filename,
+		   struct stat *sb, fileio_error *target_errno) override;
   int fileio_close (int fd, fileio_error *target_errno) override;
   int fileio_unlink (struct inferior *inf,
 		     const char *filename,

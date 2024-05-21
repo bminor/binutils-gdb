@@ -224,6 +224,11 @@ qIsAddressTagged
   file is about, this new packet provides a more generic way to perform such
   a check.
 
+vFile:stat
+  Return information about files on the remote system.  Like
+  vFile:fstat but takes a filename rather than an open file
+  descriptor.
+
 *** Changes in GDB 14
 
 * GDB now supports the AArch64 Scalable Matrix Extension 2 (SME2), which

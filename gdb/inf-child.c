@@ -320,6 +320,21 @@ inf_child_target::fileio_fstat (int fd, struct stat *sb, fileio_error *target_er
   return ret;
 }
 
+/* Implementation of to_fileio_stat.  */
+
+int
+inf_child_target::fileio_stat (struct inferior *inf, const char *filename,
+			       struct stat *sb, fileio_error *target_errno)
+{
+  int ret;
+
+  ret = lstat (filename, sb);
+  if (ret == -1)
+    *target_errno = host_to_fileio_error (errno);
+
+  return ret;
+}
+
 /* Implementation of to_fileio_close.  */
 
 int
