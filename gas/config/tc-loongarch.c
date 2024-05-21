@@ -541,6 +541,64 @@ s_dtprel (int bytes)
   demand_empty_rest_of_line ();
 }
 
+struct LARCH_option_stack
+{
+  struct LARCH_option_stack *next;
+  struct loongarch_ASEs_option options;
+};
+
+static struct LARCH_option_stack *LARCH_opts_stack = NULL;
+
+/* Handle the .option pseudo-op.
+   The alignment of .align is done by R_LARCH_ALIGN at link time.
+   If the .align directive is within the range controlled by
+   .option norelax, that is, relax is turned off, R_LARCH_ALIGN
+   cannot be generated, which may cause ld to be unable to handle
+   the alignment.  */
+static void
+s_loongarch_option (int x ATTRIBUTE_UNUSED)
+{
+  char *name = input_line_pointer, ch;
+  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+    ++input_line_pointer;
+  ch = *input_line_pointer;
+  *input_line_pointer = '\0';
+
+  if (strcmp (name, "relax") == 0)
+    LARCH_opts.relax = 1;
+  else if (strcmp (name, "norelax") == 0)
+    LARCH_opts.relax = 0;
+  else if (strcmp (name, "push") == 0)
+    {
+      struct LARCH_option_stack *s;
+
+      s = XNEW (struct LARCH_option_stack);
+      s->next = LARCH_opts_stack;
+      s->options = LARCH_opts;
+      LARCH_opts_stack = s;
+    }
+  else if (strcmp (name, "pop") == 0)
+    {
+      struct LARCH_option_stack *s;
+
+      s = LARCH_opts_stack;
+      if (s == NULL)
+	as_bad (_(".option pop with no .option push"));
+      else
+	{
+	  LARCH_opts_stack = s->next;
+	  LARCH_opts = s->options;
+	  free (s);
+	}
+    }
+  else
+    {
+      as_warn (_("unrecognized .option directive: %s"), name);
+    }
+  *input_line_pointer = ch;
+  demand_empty_rest_of_line ();
+}
+
 static const pseudo_typeS loongarch_pseudo_table[] =
 {
   { "dword", cons, 8 },
@@ -548,6 +606,7 @@ static const pseudo_typeS loongarch_pseudo_table[] =
   { "half", cons, 2 },
   { "dtprelword", s_dtprel, 4 },
   { "dtpreldword", s_dtprel, 8 },
+  { "option", s_loongarch_option, 0},
   { NULL, NULL, 0 },
 };
 

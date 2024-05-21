@@ -35,5 +35,6 @@ if [istarget loongarch*-*-*] {
 
   if [istarget loongarch64-*-*] {
     run_list_test "illegal-operand"
+    run_list_test "pseudo_op_option_fail"
   }
 }
