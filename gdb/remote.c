@@ -12663,6 +12663,9 @@ remote_target::remote_hostio_send_command (int command_bytes, int which_packet,
       return -1;
     }
 
+  if (*remote_errno != FILEIO_SUCCESS)
+    return -1;
+
   /* Make sure we saw an attachment if and only if we expected one.  */
   if ((attachment_tmp == NULL && attachment != NULL)
       || (attachment_tmp != NULL && attachment == NULL))
