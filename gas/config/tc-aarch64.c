@@ -3875,7 +3875,7 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
       if (! aarch64_get_expression (&inst.reloc.exp, str, GE_NO_PREFIX,
 				    REJECT_ABSENT))
 	return false;
-      
+
       /* Record the relocation type (use the ADD variant here).  */
       inst.reloc.type = entry->add_type;
       inst.reloc.pc_rel = entry->pc_rel;
@@ -8328,6 +8328,44 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
 	  && !(opnds[1].type == AARCH64_OPND_ADDR_SIMM13)
 	  && opnds[1].addr.writeback)
 	as_warn (_("unpredictable transfer with writeback -- `%s'"), str);
+      break;
+
+    case rcpc3:
+      {
+	const int nb_operands = aarch64_num_of_operands (opcode);
+	if (aarch64_get_operand_class (opnds[0].type)
+	    == AARCH64_OPND_CLASS_INT_REG)
+	  {
+	    /* Load Pair transfer with register overlap. */
+	    if (nb_operands == 3 && opnds[0].reg.regno == opnds[1].reg.regno)
+	      { // ldiapp, stilp
+		as_warn (_("unpredictable load pair transfer with register "
+			   "overlap -- `%s'"),
+			 str);
+	      }
+	    /* Loading/storing the base register is unpredictable if writeback. */
+	    else if ((nb_operands == 2
+		      && opnds[0].reg.regno == opnds[1].addr.base_regno
+		      && opnds[1].addr.base_regno != REG_SP
+		      && opnds[1].addr.writeback)
+		     || (nb_operands == 3
+			 && (opnds[0].reg.regno == opnds[2].addr.base_regno
+			     || opnds[1].reg.regno == opnds[2].addr.base_regno)
+			 && opnds[2].addr.base_regno != REG_SP
+			 && opnds[2].addr.writeback))
+	      {
+		if (strcmp (opcode->name, "ldapr") == 0
+		    || strcmp (opcode->name, "ldiapp") == 0)
+		  as_warn (
+		    _("unpredictable transfer with writeback (load) -- `%s'"),
+		    str);
+		else // stlr, stilp
+		  as_warn (
+		    _("unpredictable transfer with writeback (store) -- `%s'"),
+		    str);
+	      }
+	  }
+      }
       break;
 
     case ldstpair_off:
