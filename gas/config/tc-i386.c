@@ -4308,7 +4308,7 @@ static void establish_rex (void)
 	&& (i.op[first].regs->reg_flags & RegRex64) != 0)
        || (i.types[last].bitfield.class == Reg && i.types[last].bitfield.byte
 	   && (i.op[last].regs->reg_flags & RegRex64) != 0))
-      && !i.rex && !is_apx_rex2_encoding () && !is_any_vex_encoding (&i.tm))
+      && !is_apx_rex2_encoding () && !is_any_vex_encoding (&i.tm))
     i.rex |= REX_OPCODE;
 
   /* For REX/REX2/EVEX prefix instructions, we need to convert old registers
