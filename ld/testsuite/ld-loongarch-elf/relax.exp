@@ -308,6 +308,21 @@ if [istarget loongarch64-*-*] {
 		"relax-section-align-overflow" \
 	    ] \
 	]
+
+    # # loongarch*-elf target do not support -z separate-code
+    if [check_shared_lib_support] {
+      run_ld_link_tests \
+	  [list \
+	      [list \
+		  "loongarch relax separate code overflow" \
+		  "-e0 -z separate-code" "" \
+		  "" \
+		  {relax-separate-code-overflow.s} \
+		  {} \
+		  "relax-separate-code-overflow" \
+	      ] \
+	  ]
+    }
   }
 
   if [check_shared_lib_support] {

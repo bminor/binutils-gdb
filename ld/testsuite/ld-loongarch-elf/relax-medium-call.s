@@ -1,12 +1,12 @@
-.section "ta", "ax"
+.text
 a:
   ret
   ret
   ret
 b:
   ret
+  .fill 0x7fffff0
 
-.text
   call36 a	# min offset, can relax
   call36 a	# overflow, not relax
   tail36 $t0, b	# min offset, can relax
@@ -17,7 +17,7 @@ b:
   tail36 $t0, d	# overflow, no relax
   tail36 $t0, d # max offset, can relax
 
-.section "tb", "ax"
+  .fill 0x7ffffc8
   ret
   ret
   ret
