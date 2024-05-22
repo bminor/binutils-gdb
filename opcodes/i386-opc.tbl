@@ -400,15 +400,19 @@ imul, 0xfaf, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|U
 imul, 0xaf, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 imul, 0x6b, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 imul, 0x6b, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+imulzu, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|NF|ZU, { Imm8S, Reg16|Unspecified|BaseIndex, Reg16 }
 imul, 0x69, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 imul, 0x69, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|NF|ZU, { Imm16, Reg16|Unspecified|BaseIndex, Reg16 }
 // imul with 2 operands mimics imul with 3 by putting the register in
 // both i.rm.reg & i.rm.regmem fields.  RegKludge enables this
 // transformation.
 imul, 0x6b, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm8S, Reg16|Reg32|Reg64 }
 imul, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF, { Imm8S, Reg16|Reg32|Reg64 }
+imulzu, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF|ZU, { Imm8S, Reg16 }
 imul, 0x69, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
 imul, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
+imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF|ZU, { Imm16, Reg16 }
 
 <mul>
 
@@ -529,6 +533,8 @@ loopne, 0xe0, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
 
 // Set byte on flag instructions.
 set<cc>, 0xf9<cc:opc>/0, i386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Reg8|Unspecified|BaseIndex }
+set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4, { Reg8 }
+setzu<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4|ZU, { Reg8 }
 
 // String manipulation.
 cmps, 0xa6, 0, W|No_sSuf|RepPrefixOk, {}

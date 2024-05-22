@@ -1199,6 +1199,22 @@ enum
   PREFIX_EVEX_0F3A67,
   PREFIX_EVEX_0F3AC2,
 
+  PREFIX_EVEX_MAP4_40,
+  PREFIX_EVEX_MAP4_41,
+  PREFIX_EVEX_MAP4_42,
+  PREFIX_EVEX_MAP4_43,
+  PREFIX_EVEX_MAP4_44,
+  PREFIX_EVEX_MAP4_45,
+  PREFIX_EVEX_MAP4_46,
+  PREFIX_EVEX_MAP4_47,
+  PREFIX_EVEX_MAP4_48,
+  PREFIX_EVEX_MAP4_49,
+  PREFIX_EVEX_MAP4_4A,
+  PREFIX_EVEX_MAP4_4B,
+  PREFIX_EVEX_MAP4_4C,
+  PREFIX_EVEX_MAP4_4D,
+  PREFIX_EVEX_MAP4_4E,
+  PREFIX_EVEX_MAP4_4F,
   PREFIX_EVEX_MAP4_F0,
   PREFIX_EVEX_MAP4_F1,
   PREFIX_EVEX_MAP4_F2,
@@ -1816,6 +1832,7 @@ struct dis386 {
 	   instruction.
    "NF" => print "{nf} " pseudo prefix when EVEX.NF = 1 and print "{evex} "
 	   pseudo prefix when instructions without NF, EGPR and VVVV,
+   "ZU" => print 'zu' if EVEX.ZU=1.
    "YK" keep unused, to avoid ambiguity with the combined use of Y and K.
    "YX" keep unused, to avoid ambiguity with the combined use of Y and X.
    "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand, cond
@@ -10876,6 +10893,18 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	    default:
 	      abort ();
 	    }
+	  break;
+	case 'U':
+	  if (l == 1 && (last[0] == 'Z'))
+	    {
+	      /* Although IMUL/SETcc does not support NDD, the EVEX.ND bit is
+		 used to control whether its destination register has its upper
+		 bits zeroed.  */
+	      if (ins->vex.nd)
+		oappend (ins, "zu");
+	    }
+	  else
+	    abort ();
 	  break;
 	case 'V':
 	  if (l == 0)

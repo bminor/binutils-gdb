@@ -4285,8 +4285,9 @@ build_apx_evex_prefix (void)
     i.vex.bytes[3] &= ~0x08;
 
   /* Encode the NDD bit of the instruction promoted from the legacy
-     space.  */
-  if (i.vex.register_specifier && i.tm.opcode_space == SPACE_EVEXMAP4)
+     space. ZU shares the same bit with NDD.  */
+  if ((i.vex.register_specifier && i.tm.opcode_space == SPACE_EVEXMAP4)
+      || i.tm.opcode_modifier.zu)
     i.vex.bytes[3] |= 0x10;
 
   /* Encode the NF bit.  */

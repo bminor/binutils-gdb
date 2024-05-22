@@ -491,6 +491,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (NoEgpr),
   BITFIELD (NF),
   BITFIELD (Rex2),
+  BITFIELD (ZU),
 };
 
 #define CLASS(n) #n, n
