@@ -4314,7 +4314,7 @@ static void establish_rex (void)
   /* For REX/REX2/EVEX prefix instructions, we need to convert old registers
      (AL, CL, DL and BL) to new ones (AXL, CXL, DXL and BXL) and reject AH,
      CH, DH and BH.  */
-  if (i.rex || i.rex2)
+  if (i.rex || i.rex2 || i.tm.opcode_modifier.evex)
     {
       for (unsigned int x = first; x <= last; x++)
 	{
@@ -4326,8 +4326,9 @@ static void establish_rex (void)
 	      /* In case it is "hi" register, give up.  */
 	      if (i.op[x].regs->reg_num > 3)
 		as_bad (_("can't encode register '%s%s' in an "
-			  "instruction requiring REX/REX2 prefix"),
-			register_prefix, i.op[x].regs->reg_name);
+			  "instruction requiring %s prefix"),
+			register_prefix, i.op[x].regs->reg_name,
+			i.tm.opcode_modifier.evex ? "EVEX" : "REX/REX2");
 
 	      /* Otherwise it is equivalent to the extended register.
 		 Since the encoding doesn't change this is merely

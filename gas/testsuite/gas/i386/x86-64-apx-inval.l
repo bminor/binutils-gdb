@@ -12,3 +12,6 @@
 .*:13: Error: \{nf\} unsupported for `mulx'
 .*:14: Error: \{nf\} cannot be combined with \{vex\}/\{vex3\}
 .*:15: Error: \{nf\} cannot be combined with \{vex\}/\{vex3\}
+.*:16: Error: can't encode register '%ah' in an instruction requiring EVEX prefix
+.*:17: Error: can't encode register '%ah' in an instruction requiring EVEX prefix
+#pass

@@ -13,3 +13,5 @@
 	{nf} mulx %r15,%r15,%r11
 	{nf} {vex} bextr %ecx, %edx, %r10d
 	{vex} {nf} bextr %ecx, %edx, %r10d
+	{nf} add %dl,%ah
+	{evex} adc %dl,%ah
