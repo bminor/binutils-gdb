@@ -468,6 +468,14 @@ run_dump_test_lp64 "bti-far-2"
 run_dump_test_lp64 "bti-far-opt"
 run_dump_test_lp64 "bti-far-3"
 
+run_dump_test_lp64 "relr-align"
+run_dump_test_lp64 "relr-data-pie"
+run_dump_test_lp64 "relr-data-shared"
+run_dump_test_lp64 "relr-got-pie"
+run_dump_test_lp64 "relr-got-shared"
+run_dump_test_lp64 "relr-text-pie"
+run_dump_test_lp64 "relr-text-shared"
+
 if { ![skip_sframe_tests] } {
   run_dump_test "sframe-simple-1"
 }
