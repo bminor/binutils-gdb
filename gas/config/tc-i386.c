@@ -4303,22 +4303,20 @@ static void establish_rex (void)
   /* Respect a user-specified REX prefix.  */
   i.rex |= i.prefix[REX_PREFIX] & REX_OPCODE;
 
-  /* For 8 bit registers we need an empty rex prefix.  Also if the
-     instruction already has a prefix, we need to convert old
-     registers to new ones.  */
+  /* For 8 bit RegRex64 registers without a prefix, we need an empty rex prefix.  */
+  if (((i.types[first].bitfield.class == Reg && i.types[first].bitfield.byte
+	&& (i.op[first].regs->reg_flags & RegRex64) != 0)
+       || (i.types[last].bitfield.class == Reg && i.types[last].bitfield.byte
+	   && (i.op[last].regs->reg_flags & RegRex64) != 0))
+      && !i.rex && !is_apx_rex2_encoding () && !is_any_vex_encoding (&i.tm))
+    i.rex |= REX_OPCODE;
 
-  if ((i.types[first].bitfield.class == Reg && i.types[first].bitfield.byte
-       && ((i.op[first].regs->reg_flags & RegRex64) != 0 || i.rex != 0
-	   || i.rex2 != 0))
-      || (i.types[last].bitfield.class == Reg && i.types[last].bitfield.byte
-	  && ((i.op[last].regs->reg_flags & RegRex64) != 0 || i.rex != 0
-	      || i.rex2 != 0)))
+  /* For REX/REX2/EVEX prefix instructions, we need to convert old registers
+     (AL, CL, DL and BL) to new ones (AXL, CXL, DXL and BXL) and reject AH,
+     CH, DH and BH.  */
+  if (i.rex || i.rex2)
     {
-      unsigned int x;
-
-      if (!is_apx_rex2_encoding () && !is_any_vex_encoding(&i.tm))
-	i.rex |= REX_OPCODE;
-      for (x = first; x <= last; x++)
+      for (unsigned int x = first; x <= last; x++)
 	{
 	  /* Look for 8 bit operand that uses old registers.  */
 	  if (i.types[x].bitfield.class == Reg && i.types[x].bitfield.byte
