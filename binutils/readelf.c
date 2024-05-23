@@ -1539,7 +1539,6 @@ static const char *
 get_symbol_at (Elf_Internal_Sym *  symtab,
 	       uint64_t            nsyms,
 	       char *              strtab,
-	       uint64_t            strtablen,
 	       uint64_t            where,
 	       uint64_t *          offset_return)
 {
@@ -1547,10 +1546,6 @@ get_symbol_at (Elf_Internal_Sym *  symtab,
   Elf_Internal_Sym *  end = symtab + nsyms;
   Elf_Internal_Sym *  best = NULL;
   uint64_t            dist = 0x100000;
-
-  /* Paranoia.  */
-  if (symtab == NULL || nsyms == 0 || strtab == NULL || strtablen == 0)
-    return NULL;
 
   /* FIXME: Since this function is likely to be called repeatedly with
      slightly increasing addresses each time, we could speed things up by
@@ -1564,8 +1559,7 @@ get_symbol_at (Elf_Internal_Sym *  symtab,
 
       value = sym->st_value;
 
-      if (sym->st_name != 0
-	  && where >= value
+      if (where >= value
 	  && where - value < dist)
 	{
 	  best = sym;
@@ -1583,9 +1577,6 @@ get_symbol_at (Elf_Internal_Sym *  symtab,
   if (best == NULL)
     return NULL;
 
-  if (best->st_name >= strtablen)
-    return NULL;
-
   if (offset_return != NULL)
     * offset_return = dist;
 
@@ -1596,7 +1587,6 @@ static void
 print_relr_addr_and_sym (Elf_Internal_Sym *  symtab,
 			 uint64_t            nsyms,
 			 char *              strtab,
-			 uint64_t            strtablen,
 			 uint64_t            where)
 {
   const char * symname = NULL;
@@ -1605,7 +1595,7 @@ print_relr_addr_and_sym (Elf_Internal_Sym *  symtab,
   print_vma (where, ZERO_HEX);
   printf ("  ");
 
-  symname = get_symbol_at (symtab, nsyms, strtab, strtablen, where, & offset);
+  symname = get_symbol_at (symtab, nsyms, strtab, where, & offset);
 
   if (symname == NULL)
     printf ("<no sym>");
@@ -1617,6 +1607,117 @@ print_relr_addr_and_sym (Elf_Internal_Sym *  symtab,
       printf (" + ");
       print_vma (offset, PREFIX_HEX);
     }
+}
+
+/* See bfd_is_aarch64_special_symbol_name.  */
+
+static bool
+is_aarch64_special_symbol_name (const char *name)
+{
+  if (!name || name[0] != '$')
+    return false;
+  if (name[1] == 'x' || name[1] == 'd')
+    /* Map.  */;
+  else if (name[1] == 'm' || name[1] == 'f' || name[1] == 'p')
+    /* Tag.  */;
+  else
+    return false;
+  return name[2] == 0 || name[2] == '.';
+}
+
+static bool
+is_special_symbol_name (Filedata * filedata, const char * s)
+{
+  switch (filedata->file_header.e_machine)
+    {
+    case EM_AARCH64:
+      return is_aarch64_special_symbol_name (s);
+
+    default:
+      return false;
+    }
+}
+
+/* Allows selecting the best symbol from a set for displaying addresses.
+   BEST is the current best or NULL if there are no good symbols yet.
+   SYM is the next symbol to consider, if it is better than BEST then
+   return SYM else return BEST.  */
+
+static Elf_Internal_Sym *
+select_display_sym (Filedata *         filedata,
+		    char *             strtab,
+		    uint64_t           strtablen,
+		    Elf_Internal_Sym * best,
+		    Elf_Internal_Sym * sym)
+{
+  /* Ignore empty or invalid syms.  */
+  if (sym->st_name == 0)
+    return best;
+  if (sym->st_name >= strtablen)
+    return best;
+  /* Ignore undefined or TLS syms.  */
+  if (sym->st_shndx == SHN_UNDEF)
+    return best;
+  if (ELF_ST_TYPE (sym->st_info) == STT_TLS)
+    return best;
+
+  char *s = strtab + sym->st_name;
+
+  /* Don't display special symbols.  */
+  if (is_special_symbol_name (filedata, s))
+    return best;
+
+  /* Here SYM is good for display.  */
+
+  if (best == NULL)
+    return sym;
+
+  char *sbest = strtab + best->st_name;
+
+  /* Prefer non-local symbols.  */
+  if (ELF_ST_BIND (sym->st_info) == STB_LOCAL
+      && ELF_ST_BIND (best->st_info) != STB_LOCAL)
+    return best;
+  if (ELF_ST_BIND (sym->st_info) != STB_LOCAL
+      && ELF_ST_BIND (best->st_info) == STB_LOCAL)
+    return sym;
+
+  /* Select based on lexicographic order. */
+  return strcmp (s, sbest) < 0 ? sym : best;
+}
+
+/* Filter the sorted SYMTAB symbol array in-place to select at most one
+   symbol for an address and drop symbols that are not good to display.
+   Returns the new array length.  */
+
+static uint64_t
+filter_display_syms (Filedata *         filedata,
+		     Elf_Internal_Sym * symtab,
+		     uint64_t           nsyms,
+		     char *             strtab,
+		     uint64_t           strtablen)
+{
+  Elf_Internal_Sym *r = symtab;
+  Elf_Internal_Sym *w = symtab;
+  Elf_Internal_Sym *best = NULL;
+  Elf_Internal_Sym *end = symtab + nsyms;
+  while (r < end)
+    {
+      /* Select the best symbol for an address.  */
+      while (r < end
+	     && (best == NULL || best->st_value == r->st_value))
+	{
+	  best = select_display_sym (filedata, strtab, strtablen, best, r);
+	  r++;
+	}
+      if (best != NULL)
+	{
+	  *w = *best;
+	  w++;
+	  best = NULL;
+	}
+    }
+  return w - symtab;
 }
 
 static /* signed */ int
@@ -1730,13 +1831,20 @@ dump_relr_relocations (Filedata *          filedata,
   if (relrs == NULL)
     return false;
 
+  /* Paranoia.  */
+  if (strtab == NULL)
+    strtablen = 0;
+  if (symtab == NULL)
+    nsyms = 0;
+
   if (symtab != NULL)
     {
       /* Symbol tables are not sorted on address, but we want a quick lookup
 	 for the symbol associated with each address computed below, so sort
-	 the table now.  FIXME: This assumes that the symbol table will not
-	 be used later on for some other purpose.  */
+	 the table then filter out unwanted entries. FIXME: This assumes that
+	 the symbol table will not be used later on for some other purpose.  */
       qsort (symtab, nsyms, sizeof (Elf_Internal_Sym), symcmp);
+      nsyms = filter_display_syms (filedata, symtab, nsyms, strtab, strtablen);
     }
 
   if (relr_entsize == sizeof (Elf32_External_Relr))
@@ -1761,7 +1869,7 @@ dump_relr_relocations (Filedata *          filedata,
       if ((entry & 1) == 0)
 	{
 	  where = entry;
-	  print_relr_addr_and_sym (symtab, nsyms, strtab, strtablen, where);
+	  print_relr_addr_and_sym (symtab, nsyms, strtab, where);
 	  printf ("\n");
 	  where += relr_entsize;
 	}
@@ -1785,13 +1893,13 @@ dump_relr_relocations (Filedata *          filedata,
 		
 		if (first)
 		  {
-		    print_relr_addr_and_sym (symtab, nsyms, strtab, strtablen, addr);
+		    print_relr_addr_and_sym (symtab, nsyms, strtab, addr);
 		    first = false;
 		  }
 		else
 		  {
 		    printf (_("\n%*s "), relr_entsize == 4 ? 15 : 23, " ");
-		    print_relr_addr_and_sym (symtab, nsyms, strtab, strtablen, addr);
+		    print_relr_addr_and_sym (symtab, nsyms, strtab, addr);
 		  }
 	      }
 
