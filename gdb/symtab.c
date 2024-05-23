@@ -2251,7 +2251,7 @@ lookup_local_symbol (const char *name,
 	    return blocksym;
 	}
 
-      if (function != nullptr && block->inlined_p ())
+      if (block->inlined_p ())
 	break;
       block = block->superblock ();
     }
