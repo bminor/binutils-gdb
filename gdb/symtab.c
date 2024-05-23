@@ -2222,17 +2222,12 @@ lookup_local_symbol (const char *name,
   if (block == nullptr)
     return {};
 
-  struct symbol *sym;
-  const struct block *static_block = block->static_block ();
   const char *scope = block->scope ();
   
-  /* Check if it's a global block.  */
-  if (static_block == nullptr)
-    return {};
-
-  while (block != static_block)
+  while (!block->is_global_block () && !block->is_static_block ())
     {
-      sym = lookup_symbol_in_block (name, match_type, block, domain);
+      struct symbol *sym = lookup_symbol_in_block (name, match_type,
+						   block, domain);
       if (sym != NULL)
 	return (struct block_symbol) {sym, block};
 
