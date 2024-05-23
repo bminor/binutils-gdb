@@ -1346,7 +1346,11 @@ struct symbol : public general_symbol_info, public allocate_on_obstack<symbol>
     m_is_inlined = is_inlined;
   }
 
-  bool is_cplus_template_function () const
+  /* Return true if this symbol is a template function.  Template
+     functions actually are of type 'template_symbol' and have extra
+     symbols (the template parameters) attached.  */
+
+  bool is_template_function () const
   {
     return this->subclass == SYMBOL_TEMPLATE;
   }
@@ -1593,7 +1597,7 @@ extern int register_symbol_register_impl (enum address_class,
 
 /* An instance of this type is used to represent a C++ template
    function.  A symbol is really of this type iff
-   symbol::is_cplus_template_function is true.  */
+   symbol::is_template_function is true.  */
 
 struct template_symbol : public symbol
 {
