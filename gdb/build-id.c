@@ -176,9 +176,15 @@ build_id_to_bfd_suffix (size_t build_id_len, const bfd_byte *build_id,
 
       /* Try to look under the sysroot as well.  If the sysroot is
 	 "/the/sysroot", it will give
-	 "/the/sysroot/usr/lib/debug/.build-id/ab/cdef.debug".  */
+	 "/the/sysroot/usr/lib/debug/.build-id/ab/cdef.debug".
 
-      if (!gdb_sysroot.empty ())
+	 If the sysroot is 'target:' and the target filesystem is local to
+	 GDB then 'target:/path/to/check' becomes '/path/to/check' which
+	 we just checked above.  */
+
+      if (!gdb_sysroot.empty ()
+	  && (gdb_sysroot != TARGET_SYSROOT_PREFIX
+	      || !target_filesystem_is_local ()))
 	{
 	  link = gdb_sysroot + link;
 	  debug_bfd = build_id_to_debug_bfd_1 (link, build_id_len, build_id);
