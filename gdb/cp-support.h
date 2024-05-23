@@ -146,7 +146,7 @@ extern struct block_symbol
 			      const struct block *block,
 			      const domain_search_flags domain);
 
-extern struct block_symbol cp_lookup_symbol_imports_or_template
+extern struct block_symbol cp_lookup_symbol_imports
      (const char *scope,
       const char *name,
       const struct block *block,

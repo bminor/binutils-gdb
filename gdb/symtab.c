@@ -2236,17 +2236,27 @@ lookup_local_symbol (const char *name,
       if (sym != NULL)
 	return (struct block_symbol) {sym, block};
 
+      struct symbol *function = block->function ();
+      if (function != nullptr && function->is_template_function ())
+	{
+	  struct template_symbol *templ = (struct template_symbol *) function;
+	  sym = search_symbol_list (name,
+				    templ->n_template_arguments,
+				    templ->template_arguments);
+	  if (sym != nullptr)
+	    return (struct block_symbol) {sym, block};
+	}
+
       if (language == language_cplus || language == language_fortran)
 	{
 	  struct block_symbol blocksym
-	    = cp_lookup_symbol_imports_or_template (scope, name, block,
-						    domain);
+	    = cp_lookup_symbol_imports (scope, name, block, domain);
 
 	  if (blocksym.symbol != NULL)
 	    return blocksym;
 	}
 
-      if (block->function () != NULL && block->inlined_p ())
+      if (function != nullptr && block->inlined_p ())
 	break;
       block = block->superblock ();
     }
