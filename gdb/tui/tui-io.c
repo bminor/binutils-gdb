@@ -636,7 +636,6 @@ tui_redisplay_readline (void)
   tui_cmd_win ()->start_line -= height - 1;
 
   wrefresh (w);
-  fflush(stdout);
 }
 
 /* Readline callback to prepare the terminal.  It is called once each
