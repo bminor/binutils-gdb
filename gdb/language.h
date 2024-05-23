@@ -507,6 +507,23 @@ struct language_defn
       (tracker, mode, name_match_type, text, word, "", code);
   }
 
+  /* This is called by lookup_local_symbol after checking a block.  It
+     can be used by a language to augment the local lookup, for
+     instance for searching imported namespaces.  SCOPE is the current
+     scope (from block::scope), NAME is the name being searched for,
+     BLOCK is the block being searched, and DOMAIN is the search
+     domain.  Returns a block symbol, or an empty block symbol if not
+     found.  */
+
+  virtual struct block_symbol lookup_symbol_local
+       (const char *scope,
+	const char *name,
+	const struct block *block,
+	const domain_search_flags domain) const
+  {
+    return {};
+  }
+
   /* This is a function that lookup_symbol will call when it gets to
      the part of symbol lookup where C looks up static and global
      variables.  This default implements the basic C lookup rules.  */

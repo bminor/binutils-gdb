@@ -93,7 +93,7 @@ struct block_symbol lookup_local_symbol (const char *name,
 					 symbol_name_match_type match_type,
 					 const struct block *block,
 					 const domain_search_flags domain,
-					 enum language language);
+					 const struct language_defn *langdef);
 
 static struct block_symbol
   lookup_symbol_in_objfile (struct objfile *objfile,
@@ -2140,10 +2140,12 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
   if (is_a_field_of_this != NULL)
     memset (is_a_field_of_this, 0, sizeof (*is_a_field_of_this));
 
+  langdef = language_def (language);
+
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
-  result = lookup_local_symbol (name, match_type, block, domain, language);
+  result = lookup_local_symbol (name, match_type, block, domain, langdef);
   if (result.symbol != NULL)
     {
       symbol_lookup_debug_printf
@@ -2154,8 +2156,6 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 
   /* If requested to do so by the caller and if appropriate for LANGUAGE,
      check to see if NAME is a field of `this'.  */
-
-  langdef = language_def (language);
 
   /* Don't do this check if we are searching for a struct.  It will
      not be found by check_field, but will be found by other
@@ -2217,7 +2217,7 @@ lookup_local_symbol (const char *name,
 		     symbol_name_match_type match_type,
 		     const struct block *block,
 		     const domain_search_flags domain,
-		     enum language language)
+		     const struct language_defn *langdef)
 {
   if (block == nullptr)
     return {};
@@ -2242,14 +2242,10 @@ lookup_local_symbol (const char *name,
 	    return (struct block_symbol) {sym, block};
 	}
 
-      if (language == language_cplus || language == language_fortran)
-	{
-	  struct block_symbol blocksym
-	    = cp_lookup_symbol_imports (scope, name, block, domain);
-
-	  if (blocksym.symbol != NULL)
-	    return blocksym;
-	}
+      struct block_symbol blocksym
+	= langdef->lookup_symbol_local (scope, name, block, domain);
+      if (blocksym.symbol != nullptr)
+	return blocksym;
 
       if (block->inlined_p ())
 	break;
