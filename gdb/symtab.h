@@ -2980,4 +2980,11 @@ extern void info_sources_worker (struct ui_out *uiout,
 
 std::optional<CORE_ADDR> find_epilogue_using_linetable (CORE_ADDR func_addr);
 
+/* Search an array of symbols for one named NAME.  Name comparison is
+   done using strcmp -- i.e., this is only useful for simple names.
+   Returns the symbol, if found, or nullptr if not.  */
+
+extern struct symbol *search_symbol_list (const char *name, int num,
+					  struct symbol **syms);
+
 #endif /* !defined(SYMTAB_H) */

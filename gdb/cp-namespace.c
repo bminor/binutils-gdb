@@ -539,23 +539,6 @@ cp_lookup_symbol_via_imports (const char *scope,
     return {};
 }
 
-/* Helper function that searches an array of symbols for one named NAME.  */
-
-static struct symbol *
-search_symbol_list (const char *name, int num,
-		    struct symbol **syms)
-{
-  int i;
-
-  /* Maybe we should store a dictionary in here instead.  */
-  for (i = 0; i < num; ++i)
-    {
-      if (strcmp (name, syms[i]->natural_name ()) == 0)
-	return syms[i];
-    }
-  return NULL;
-}
-
 /* Search for symbols whose name match NAME in the given SCOPE.
    if BLOCK is a function, we'll search first through the template
    parameters and function type. Afterwards (or if BLOCK is not a function)

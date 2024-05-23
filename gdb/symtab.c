@@ -372,6 +372,19 @@ from_scripting_domain (int val)
 
 /* See symtab.h.  */
 
+struct symbol *
+search_symbol_list (const char *name, int num, struct symbol **syms)
+{
+  for (int i = 0; i < num; ++i)
+    {
+      if (strcmp (name, syms[i]->natural_name ()) == 0)
+	return syms[i];
+    }
+  return nullptr;
+}
+
+/* See symtab.h.  */
+
 CORE_ADDR
 linetable_entry::pc (const struct objfile *objfile) const
 {
