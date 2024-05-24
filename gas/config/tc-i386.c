@@ -9264,6 +9264,9 @@ match_template (char mnem_suffix)
 	 flipping VEX.W.  */
       i.tm.opcode_modifier.vexw ^= VEXW0 ^ VEXW1;
 
+      /* In 3-operand insns XOP.W changes which operand goes into XOP.vvvv.  */
+      i.tm.opcode_modifier.vexvvvv = VexVVVV_SRC1;
+
     swap_first_2:
       j = i.tm.operand_types[0].bitfield.imm8;
       i.tm.operand_types[j] = operand_types[j + 1];
@@ -10471,15 +10474,8 @@ build_modrm_byte (void)
     {
     /* VEX.vvvv encodes the last source register operand.  */
     case VexVVVV_SRC2:
-      if (source != op)
-	{
-	  v = source++;
-	  break;
-	}
-      /* For vprot*, vpshl*, and vpsha*, XOP.W controls the swapping of src1
-	 and src2, and it requires fall through when the operands are swapped.
-       */
-      /* Fall through.  */
+      v = source++;
+      break;
     /* VEX.vvvv encodes the first source register operand.  */
     case VexVVVV_SRC1:
       v =  dest - 1;
