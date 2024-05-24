@@ -2372,14 +2372,14 @@ vcvts<sdh>2usi, 0x<sdh:spfx>79, <sdh:cpu>, Modrm|EVexLIG|<sdh:spc1>|Disp8MemShif
 
 vcvtsd2ss, 0xF25A, AVX512F, Modrm|EVexLIG|Masking|Space0F|Src1VVVV|VexW1|Disp8MemShift=3|NoSuf|StaticRounding|SAE, { RegXMM|Qword|Unspecified|BaseIndex, RegXMM, RegXMM }
 
-vcvtsi2sd, 0xF22A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|ATTSyntax, { Reg32|Unspecified|BaseIndex, RegXMM, RegXMM }
-vcvtsi2sd, 0xF22A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|StaticRounding|SAE|ATTSyntax, { Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
-vcvtsi2sd, 0xF22A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_sSuf|IntelSyntax, { Reg32|Unspecified|BaseIndex, RegXMM, RegXMM }
-vcvtsi2sd, 0xF22A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_sSuf|StaticRounding|SAE|IntelSyntax, { Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
-vcvtusi2sd, 0xF27B, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|ATTSyntax, { Reg32|Unspecified|BaseIndex, RegXMM, RegXMM }
-vcvtusi2sd, 0xF27B, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|StaticRounding|SAE|ATTSyntax, { Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
-vcvtusi2sd, 0xF27B, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_sSuf|IntelSyntax, { Reg32|Unspecified|BaseIndex, RegXMM, RegXMM }
-vcvtusi2sd, 0xF27B, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_sSuf|StaticRounding|SAE|IntelSyntax, { Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
+vcvtsi2sd, 0xF22A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_qSuf|No_sSuf|ATTSyntax, { Reg32|Unspecified|BaseIndex, RegXMM, RegXMM }
+vcvtsi2sd, 0xF22A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|StaticRounding|SAE|ATTSyntax, { Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
+vcvtsi2sd, 0xF22A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_qSuf|No_sSuf|IntelSyntax, { Reg32|Unspecified|BaseIndex, RegXMM, RegXMM }
+vcvtsi2sd, 0xF22A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_lSuf|No_sSuf|StaticRounding|SAE|IntelSyntax, { Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
+vcvtusi2sd, 0xF27B, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_qSuf|No_sSuf|ATTSyntax, { Reg32|Unspecified|BaseIndex, RegXMM, RegXMM }
+vcvtusi2sd, 0xF27B, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|StaticRounding|SAE|ATTSyntax, { Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
+vcvtusi2sd, 0xF27B, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_qSuf|No_sSuf|IntelSyntax, { Reg32|Unspecified|BaseIndex, RegXMM, RegXMM }
+vcvtusi2sd, 0xF27B, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_lSuf|No_sSuf|StaticRounding|SAE|IntelSyntax, { Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
 
 vcvtsi2ss, 0xF32A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|StaticRounding|SAE|ATTSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
 vcvtsi2ss, 0xF32A, AVX512F, Modrm|EVexLIG|Space0F|Src1VVVV|Disp8ShiftVL|No_bSuf|No_wSuf|No_sSuf|StaticRounding|SAE|IntelSyntax, { Reg32|Reg64|Unspecified|BaseIndex, RegXMM, RegXMM }
