@@ -141,9 +141,32 @@ proc test {} {
 	    # attach.
 	    sleep 2
 
+	    set re_pr26286 \
+		[multi_line \
+		     [string_to_regexp \
+			  "Program terminated with signal SIGTRAP, Trace/breakpoint trap."] \
+		     [string_to_regexp \
+			  "The program no longer exists."]]
+
 	    set bps 3
+	    set exited 0
 	    for {set bp 1} { $bp <= $bps } { incr bp } {
-		gdb_test "continue" "Breakpoint.*" "break at break_fn: $bp"
+		gdb_test_multiple "continue" "break at break_fn: $bp" {
+		    -re -wrap "$re_pr26286" {
+			kfail threads/26286 $gdb_test_name
+			set exited 1
+		    }
+		    -re -wrap "Breakpoint.*" {
+			pass $gdb_test_name
+		    }
+		}
+		if { $exited } {
+		    break
+		}
+	    }
+
+	    if { $exited } {
+		return
 	    }
 
 	    if {$attempt < $attempts} {
