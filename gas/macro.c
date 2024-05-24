@@ -1369,12 +1369,6 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
     {
       bool in_quotes = false;
 
-      if (irpc && in->ptr[idx] == '"')
-	{
-	  in_quotes = true;
-	  ++idx;
-	}
-
       while (idx < in->len)
 	{
 	  if (!irpc)
@@ -1383,16 +1377,14 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
 	    {
 	      if (in->ptr[idx] == '"')
 		{
-		  size_t nxt;
+		  in_quotes = ! in_quotes;
+		  ++idx;
 
-		  if (irpc)
-		    in_quotes = ! in_quotes;
-
-		  nxt = sb_skip_white (idx + 1, in);
-		  if (nxt >= in->len)
+		  if (! in_quotes)
 		    {
-		      idx = nxt;
-		      break;
+		      idx = sb_skip_white (idx, in);
+		      if (idx >= in->len)
+			break;
 		    }
 		}
 	      sb_reset (&f.actual);

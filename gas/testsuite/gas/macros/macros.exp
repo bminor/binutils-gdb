@@ -109,3 +109,5 @@ run_list_test count
 # AIX targets need an extended regexp to match "\+".
 setup_xfail "avr-*-*" "cris*-*-*" "msp430-*-*" "z80-*-*" "*-*-aix*"
 run_list_test irp-count
+
+run_list_test irpc-quote

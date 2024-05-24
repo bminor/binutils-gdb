@@ -5859,7 +5859,7 @@ processing must also be performed upon the  symbols as well.
 @end ifset
 
 @node Irp
-@section @code{.irp @var{symbol},@var{values}}@dots{}
+@section @code{.irp @var{symbol},@var{value}}@dots{}
 
 @cindex @code{irp} directive
 Evaluate a sequence of statements assigning different values to @var{symbol}.
@@ -5893,12 +5893,13 @@ For some caveats with the spelling of @var{symbol}, see also @ref{Macro}.
 
 @cindex @code{irpc} directive
 Evaluate a sequence of statements assigning different values to @var{symbol}.
-The sequence of statements starts at the @code{.irpc} directive, and is
-terminated by an @code{.endr} directive.  For each character in @var{value},
-@var{symbol} is set to the character, and the sequence of statements is
-assembled.  If no @var{value} is listed, the sequence of statements is
-assembled once, with @var{symbol} set to the null string.  To refer to
-@var{symbol} within the sequence of statements, use @var{\symbol}.
+The sequence of statements starts at the line following the @code{.irpc}
+directive, and is terminated by an @code{.endr} directive.  For each character
+in each (possibly double quoted) @var{values}, @var{symbol} is set to the
+character, and the sequence of statements is assembled.  If no @var{values} is
+listed, the sequence of statements is assembled once, with @var{symbol} set to
+the null string.  To refer to @var{symbol} within the sequence of statements,
+use @var{\symbol}.
 
 For example, assembling
 
