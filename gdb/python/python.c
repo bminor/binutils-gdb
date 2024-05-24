@@ -804,10 +804,6 @@ gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
     }
 
   global_symbol_searcher spec (SEARCH_FUNCTION_DOMAIN, regex);
-  SCOPE_EXIT {
-    for (const char *elem : spec.filenames)
-      xfree ((void *) elem);
-  };
 
   /* The "symtabs" keyword is any Python iterable object that returns
      a gdb.Symtab on each iteration.  If specified, iterate through
@@ -852,10 +848,7 @@ gdbpy_rbreak (PyObject *self, PyObject *args, PyObject *kw)
 	  if (filename == NULL)
 	    return NULL;
 
-	  /* Make sure there is a definite place to store the value of
-	     filename before it is released.  */
-	  spec.filenames.push_back (nullptr);
-	  spec.filenames.back () = filename.release ();
+	  spec.add_filename (std::move (filename));
 	}
     }
 

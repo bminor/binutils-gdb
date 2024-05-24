@@ -4765,16 +4765,17 @@ info_sources_command (const char *args, int from_tty)
    true compare only lbasename of FILENAMES.  */
 
 static bool
-file_matches (const char *file, const std::vector<const char *> &filenames,
+file_matches (const char *file,
+	      const std::vector<gdb::unique_xmalloc_ptr<char>> &filenames,
 	      bool basenames)
 {
   if (filenames.empty ())
     return true;
 
-  for (const char *name : filenames)
+  for (const auto &name : filenames)
     {
-      name = (basenames ? lbasename (name) : name);
-      if (compare_filenames_for_search (file, name))
+      const char *lname = (basenames ? lbasename (name.get ()) : name.get ());
+      if (compare_filenames_for_search (file, lname))
 	return true;
     }
 
@@ -4867,10 +4868,10 @@ global_symbol_searcher::expand_symtabs
 
   auto do_file_match = [&] (const char *filename, bool basenames)
     {
-      return file_matches (filename, filenames, basenames);
+      return file_matches (filename, m_filenames, basenames);
     };
   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher = nullptr;
-  if (!filenames.empty ())
+  if (!m_filenames.empty ())
     file_matcher = do_file_match;
 
   objfile->expand_symtabs_matching
@@ -4899,7 +4900,7 @@ global_symbol_searcher::expand_symtabs
      We only search the objfile the msymbol came from, we no longer search
      all objfiles.  In large programs (1000s of shared libs) searching all
      objfiles is not worth the pain.  */
-  if (filenames.empty ()
+  if (m_filenames.empty ()
       && (kind & (SEARCH_VAR_DOMAIN | SEARCH_FUNCTION_DOMAIN)) != 0)
     {
       for (minimal_symbol *msymbol : objfile->msymbols ())
@@ -4965,12 +4966,12 @@ global_symbol_searcher::add_matching_symbols
 	      /* Check first sole REAL_SYMTAB->FILENAME.  It does
 		 not need to be a substring of symtab_to_fullname as
 		 it may contain "./" etc.  */
-	      if (!(file_matches (real_symtab->filename, filenames, false)
+	      if (!(file_matches (real_symtab->filename, m_filenames, false)
 		    || ((basenames_may_differ
 			 || file_matches (lbasename (real_symtab->filename),
-					  filenames, true))
+					  m_filenames, true))
 			&& file_matches (symtab_to_fullname (real_symtab),
-					 filenames, false))))
+					 m_filenames, false))))
 		continue;
 
 	      if (!sym->matches (kind))
@@ -5147,7 +5148,7 @@ global_symbol_searcher::search () const
      minimal symbol, as we assume that a minimal symbol does not have a
      type.  */
   if ((found_msymbol
-       || (filenames.empty () && (m_kind & SEARCH_VAR_DOMAIN) != 0))
+       || (m_filenames.empty () && (m_kind & SEARCH_VAR_DOMAIN) != 0))
       && !m_exclude_minsyms
       && !treg.has_value ())
     {
@@ -5556,7 +5557,7 @@ static void
 rbreak_command (const char *regexp, int from_tty)
 {
   std::string string;
-  const char *file_name = nullptr;
+  gdb::unique_xmalloc_ptr<char> file_name;
 
   if (regexp != nullptr)
     {
@@ -5569,23 +5570,18 @@ rbreak_command (const char *regexp, int from_tty)
 
       if (colon && *(colon + 1) != ':')
 	{
-	  int colon_index;
-	  char *local_name;
+	  int colon_index = colon - regexp;
+	  while (colon_index > 0 && isspace (regexp[colon_index - 1]))
+	    --colon_index;
 
-	  colon_index = colon - regexp;
-	  local_name = (char *) alloca (colon_index + 1);
-	  memcpy (local_name, regexp, colon_index);
-	  local_name[colon_index--] = 0;
-	  while (isspace (local_name[colon_index]))
-	    local_name[colon_index--] = 0;
-	  file_name = local_name;
+	  file_name = make_unique_xstrndup (regexp, colon_index);
 	  regexp = skip_spaces (colon + 1);
 	}
     }
 
   global_symbol_searcher spec (SEARCH_FUNCTION_DOMAIN, regexp);
   if (file_name != nullptr)
-    spec.filenames.push_back (file_name);
+    spec.add_filename (std::move (file_name));
   std::vector<symbol_search> symbols = spec.search ();
 
   scoped_rbreak_breakpoints finalize;

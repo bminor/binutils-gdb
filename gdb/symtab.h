@@ -2612,12 +2612,14 @@ public:
      removed.  */
   std::vector<symbol_search> search () const;
 
-  /* The set of source files to search in for matching symbols.  This is
-     currently public so that it can be populated after this object has
-     been constructed.  */
-  std::vector<const char *> filenames;
+  /* Add a filename to the list of file names to search.  */
+  void add_filename (gdb::unique_xmalloc_ptr<char> filename)
+  { m_filenames.push_back (std::move (filename)); }
 
 private:
+  /* The set of source files to search in for matching symbols.  */
+  std::vector<gdb::unique_xmalloc_ptr<char>> m_filenames;
+
   /* The kind of symbols are we searching for.
      VARIABLES_DOMAIN - Search all symbols, excluding functions, type
 			names, and constants (enums).
