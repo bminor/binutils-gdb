@@ -798,7 +798,8 @@ sub_actual (size_t start, sb *in, sb *t, struct htab *formal_hash,
 
 static const char *
 macro_expand_body (sb *in, sb *out, formal_entry *formals,
-		   struct htab *formal_hash, const macro_entry *macro)
+		   struct htab *formal_hash, const macro_entry *macro,
+		   unsigned int instance)
 {
   sb t;
   size_t src = 0;
@@ -854,13 +855,13 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	      sprintf (buffer, "%u", macro_number);
 	      sb_add_string (out, buffer);
 	    }
-	  else if (macro && src < in->len && in->ptr[src] == '+')
+	  else if (src < in->len && in->ptr[src] == '+')
 	    {
 	      /* Sub in the current macro invocation number.  */
 
 	      char buffer[12];
 	      src++;
-	      sprintf (buffer, "%d", macro->count);
+	      sprintf (buffer, "%d", instance);
 	      sb_add_string (out, buffer);
 	    }
 	  else if (src < in->len && in->ptr[src] == '&')
@@ -1213,7 +1214,8 @@ macro_expand (size_t idx, sb *in, macro_entry *m, sb *out)
 	    }
 	}
 
-      err = macro_expand_body (&m->sub, out, m->formals, m->formal_hash, m);
+      err = macro_expand_body (&m->sub, out, m->formals, m->formal_hash, m,
+			       m->count);
     }
 
   /* Discard any unnamed formal arguments.  */
@@ -1363,11 +1365,12 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
   if (idx >= in->len)
     {
       /* Expand once with a null string.  */
-      err = macro_expand_body (&sub, out, &f, h, 0);
+      err = macro_expand_body (&sub, out, &f, h, NULL, 0);
     }
   else
     {
       bool in_quotes = false;
+      unsigned int instance = 0;
 
       while (idx < in->len)
 	{
@@ -1392,7 +1395,8 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
 	      ++idx;
 	    }
 
-	  err = macro_expand_body (&sub, out, &f, h, 0);
+	  err = macro_expand_body (&sub, out, &f, h, NULL, instance);
+	  ++instance;
 	  if (err != NULL)
 	    break;
 	  if (!irpc)

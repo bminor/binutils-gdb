@@ -1,7 +1,7 @@
-	.irp i,1
-	.print "\+"
+	.irp i,a,a,b
+	.print "\i\+"
 	.endr
 	
-	.irpc i,1
-	.print "\+"
+	.irpc i,xxy
+	.print "\i\+"
 	.endr

@@ -1,8 +1,9 @@
 -*- text -*-
 
-* Assembler macros can now use the syntax \+ to access the number of times a
-  given macro has been executed.  This is similar to the already existing \@
-  syntax, except that the count is maintained on a per-macro basis.
+* Assembler macros as well as the bodies of .irp / .irpc can now use the
+  syntax \+ to access the number of times a given macro has been executed.
+  This is similar to the already existing \@ syntax, except that the count is
+  maintained on a per-macro basis.
   
 * Support the NF feature in Intel APX.
 
