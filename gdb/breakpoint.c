@@ -869,6 +869,24 @@ scoped_rbreak_breakpoints::~scoped_rbreak_breakpoints ()
   prev_breakpoint_count = rbreak_start_breakpoint_count;
 }
 
+/* See breakpoint.h.  */
+
+int
+scoped_rbreak_breakpoints::first_breakpoint () const
+{
+  return rbreak_start_breakpoint_count + 1;
+}
+
+/* See breakpoint.h.  */
+
+int
+scoped_rbreak_breakpoints::last_breakpoint () const
+{
+  return (rbreak_start_breakpoint_count == breakpoint_count
+	  ? -1
+	  : breakpoint_count);
+}
+
 /* Used in run_command to zero the hit count when a new run starts.  */
 
 void

@@ -525,7 +525,7 @@ if $use_gdb_stub {
 }
 
 #test rbreak
-gdb_test "rbreak" "rbreak"
+gdb_test "rbreak" "No breakpoints made."
 
 # test restore
 gdb_test "restore" "You can't do that without a process to debug\."

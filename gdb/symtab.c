@@ -46,6 +46,7 @@
 #include "fnmatch.h"
 #include "hashtab.h"
 #include "typeprint.h"
+#include "exceptions.h"
 
 #include "gdbsupport/gdb_obstack.h"
 #include "block.h"
@@ -5615,28 +5616,53 @@ rbreak_command (const char *regexp, int from_tty)
   std::vector<symbol_search> symbols = spec.search ();
 
   scoped_rbreak_breakpoints finalize;
+  int err_count = 0;
+
   for (const symbol_search &p : symbols)
     {
-      if (p.msymbol.minsym == NULL)
+      try
 	{
-	  struct symtab *symtab = p.symbol->symtab ();
-	  const char *fullname = symtab_to_fullname (symtab);
+	  if (p.msymbol.minsym == NULL)
+	    {
+	      struct symtab *symtab = p.symbol->symtab ();
+	      const char *fullname = symtab_to_fullname (symtab);
 
-	  string = string_printf ("%s:'%s'", fullname,
-				  p.symbol->linkage_name ());
-	  break_command (&string[0], from_tty);
-	  print_symbol_info (p.symbol, p.block, nullptr);
+	      string = string_printf ("%s:'%s'", fullname,
+				      p.symbol->linkage_name ());
+	      break_command (&string[0], from_tty);
+	      print_symbol_info (p.symbol, p.block, nullptr);
+	    }
+	  else
+	    {
+	      string = string_printf ("'%s'",
+				      p.msymbol.minsym->linkage_name ());
+
+	      break_command (&string[0], from_tty);
+	      gdb_printf ("<function, no debug info> %s;\n",
+			  p.msymbol.minsym->print_name ());
+	    }
 	}
-      else
+      catch (const gdb_exception_error &ex)
 	{
-	  string = string_printf ("'%s'",
-				  p.msymbol.minsym->linkage_name ());
-
-	  break_command (&string[0], from_tty);
-	  gdb_printf ("<function, no debug info> %s;\n",
-		      p.msymbol.minsym->print_name ());
+	  exception_print (gdb_stderr, ex);
+	  ++err_count;
 	}
     }
+
+  int first_bp = finalize.first_breakpoint ();
+  int last_bp = finalize.last_breakpoint ();
+
+  if (last_bp == -1)
+    gdb_printf (_("No breakpoints made.\n"));
+  else if (first_bp == last_bp)
+    gdb_printf (_("Successfully created breakpoint %d.\n"), first_bp);
+  else
+    gdb_printf (_("Successfully created breakpoints %d-%d.\n"),
+		first_bp, last_bp);
+
+  if (err_count > 0)
+    gdb_printf (_("%d breakpoints failed due to errors, see above.\n"),
+		err_count);
 }
 
 
