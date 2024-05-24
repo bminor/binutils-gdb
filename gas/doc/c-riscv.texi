@@ -435,7 +435,7 @@ instruction formats:
 
 @display
 @multitable @columnfractions .15 .40
-@item opcode @tab Unsigned immediate or opcode name for 7-bits opcode.
+@item opcode7 @tab Unsigned immediate or opcode name for 7-bits opcode.
 @item opcode2 @tab Unsigned immediate or opcode name for 2-bits opcode.
 @item func7 @tab Unsigned immediate for 7-bits function code.
 @item func6 @tab Unsigned immediate for 6-bits function code.
@@ -549,62 +549,62 @@ The following table lists the RISC-V instruction formats that are available
 with the @samp{.insn} pseudo directive:
 
 @table @code
-@item R type: .insn r opcode6, func3, func7, rd, rs1, rs2
+@item R type: .insn r opcode7, func3, func7, rd, rs1, rs2
 @verbatim
 +-------+-----+-----+-------+----+---------+
-| func7 | rs2 | rs1 | func3 | rd | opcode6 |
+| func7 | rs2 | rs1 | func3 | rd | opcode7 |
 +-------+-----+-----+-------+----+---------+
 31      25    20    15      12   7        0
 @end verbatim
 
-@item R type with 4 register operands: .insn r opcode6, func3, func2, rd, rs1, rs2, rs3
-@itemx R4 type: .insn r4 opcode6, func3, func2, rd, rs1, rs2, rs3
+@item R type with 4 register operands: .insn r opcode7, func3, func2, rd, rs1, rs2, rs3
+@itemx R4 type: .insn r4 opcode7, func3, func2, rd, rs1, rs2, rs3
 @verbatim
 +-----+-------+-----+-----+-------+----+---------+
-| rs3 | func2 | rs2 | rs1 | func3 | rd | opcode6 |
+| rs3 | func2 | rs2 | rs1 | func3 | rd | opcode7 |
 +-----+-------+-----+-----+-------+----+---------+
 31    27      25    20    15      12   7         0
 @end verbatim
 
-@item I type: .insn i opcode6, func3, rd, rs1, simm12
-@itemx I type: .insn i opcode6, func3, rd, simm12(rs1)
+@item I type: .insn i opcode7, func3, rd, rs1, simm12
+@itemx I type: .insn i opcode7, func3, rd, simm12(rs1)
 @verbatim
 +--------------+-----+-------+----+---------+
-| simm12[11:0] | rs1 | func3 | rd | opcode6 |
+| simm12[11:0] | rs1 | func3 | rd | opcode7 |
 +--------------+-----+-------+----+---------+
 31             20    15      12   7         0
 @end verbatim
 
-@item S type: .insn s opcode6, func3, rs2, simm12(rs1)
+@item S type: .insn s opcode7, func3, rs2, simm12(rs1)
 @verbatim
 +--------------+-----+-----+-------+-------------+---------+
-| simm12[11:5] | rs2 | rs1 | func3 | simm12[4:0] | opcode6 |
+| simm12[11:5] | rs2 | rs1 | func3 | simm12[4:0] | opcode7 |
 +--------------+-----+-----+-------+-------------+---------+
 31             25    20    15      12            7         0
 @end verbatim
 
-@item B type: .insn s opcode6, func3, rs1, rs2, symbol
-@itemx SB type: .insn sb opcode6, func3, rs1, rs2, symbol
+@item B type: .insn s opcode7, func3, rs1, rs2, symbol
+@itemx SB type: .insn sb opcode7, func3, rs1, rs2, symbol
 @verbatim
 +-----------------+-----+-----+-------+----------------+---------+
-| simm12[12|10:5] | rs2 | rs1 | func3 | simm12[4:1|11] | opcode6 |
+| simm12[12|10:5] | rs2 | rs1 | func3 | simm12[4:1|11] | opcode7 |
 +-----------------+-----+-----+-------+----------------+---------+
 31                25    20    15      12               7         0
 @end verbatim
 
-@item U type: .insn u opcode6, rd, simm20
+@item U type: .insn u opcode7, rd, simm20
 @verbatim
-+--------------------------+----+---------+
-| simm20[20|10:1|11|19:12] | rd | opcode6 |
-+--------------------------+----+---------+
-31                         12   7         0
++--------------+----+---------+
+| simm20[19:0] | rd | opcode7 |
++--------------+----+---------+
+31             12   7         0
 @end verbatim
 
-@item J type: .insn j opcode6, rd, symbol
-@itemx UJ type: .insn uj opcode6, rd, symbol
+@item J type: .insn j opcode7, rd, symbol
+@itemx UJ type: .insn uj opcode7, rd, symbol
 @verbatim
 +------------+--------------+------------+---------------+----+---------+
-| simm20[20] | simm20[10:1] | simm20[11] | simm20[19:12] | rd | opcode6 |
+| simm20[20] | simm20[10:1] | simm20[11] | simm20[19:12] | rd | opcode7 |
 +------------+--------------+------------+---------------+----+---------+
 31           30             21           20              12   7         0
 @end verbatim
