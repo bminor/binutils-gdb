@@ -658,17 +658,30 @@ annotate/index.html: $(ANNOTATE_DOC_FILES)
 		-I $(srcdir) \
 		$(srcdir)/annotate.texinfo
 
-# Man pages
-%.pod : gdb.texinfo $(GDB_DOC_FILES)
-	$(ECHO_TEXI2POD) $(TEXI2POD) $(MANCONF) -D$* < $(srcdir)/gdb.texinfo > $@
-
-$(MAN1S) : %.1 : %.pod $(GDB_DOC_FILES)
+# Man pages.  The TEXI2POD and TEXI2MAN steps are performed within a
+# single recipe to support how we distribute GDB releases.  A release
+# includes the .1 and .5 man pages in the source tree, but not the
+# .pod files.
+#
+# When building and installing a release of GDB it should not be
+# necessary to rebuild the .1 or .5 man page files, nor should it be
+# necessary to rebuild the .pod files.
+#
+# If we split the .pod creation from the creation of the .1 and .5
+# pages, then the .pod files must become a dependency, this will
+# trigger an attempt to rebuild these files while building and
+# installing a release of GDB, which is something we don't want.
+$(MAN1S) : %.1 : $(GDB_DOC_FILES)
+	$(ECHO_TEXI2POD) $(TEXI2POD) $(MANCONF) -D$* < $(srcdir)/gdb.texinfo > $*.pod
 	$(ECHO_TEXI2MAN) ($(POD2MAN1) $*.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	$(SILENCE) rm -f $*.pod
 
-$(MAN5S) : %.5 : %.pod $(GDB_DOC_FILES)
+$(MAN5S) : %.5 : $(GDB_DOC_FILES)
+	$(ECHO_TEXI2POD) $(TEXI2POD) $(MANCONF) -D$* < $(srcdir)/gdb.texinfo > $*.pod
 	$(ECHO_TEXI2MAN) ($(POD2MAN1) $*.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	$(SILENCE) rm -f $*.pod
 
 force:
 
