@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 14
+*** Changes since GDB 15
+
+*** Changes in GDB 15
 
 * The MPX commands "show/set mpx bound" have been deprecated, as Intel
   listed MPX as removed in 2019.
