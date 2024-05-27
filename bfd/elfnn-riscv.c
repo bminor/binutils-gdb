@@ -2358,7 +2358,6 @@ riscv_elf_relocate_section (bfd *output_bfd,
 		    || h->plt.offset == (bfd_vma) -1)
 		  {
 		    Elf_Internal_Rela outrel;
-		    asection *sreloc;
 
 		    /* Need a dynamic relocation to get the real function
 		       address.  */
@@ -2399,13 +2398,24 @@ riscv_elf_relocate_section (bfd *output_bfd,
 		       2. .rela.got section in dynamic executable.
 		       3. .rela.iplt section in static executable.  */
 		    if (bfd_link_pic (info))
-		      sreloc = htab->elf.irelifunc;
+		      riscv_elf_append_rela (output_bfd, htab->elf.irelifunc,
+					     &outrel);
 		    else if (htab->elf.splt != NULL)
-		      sreloc = htab->elf.srelgot;
+		      riscv_elf_append_rela (output_bfd, htab->elf.srelgot,
+					     &outrel);
 		    else
-		      sreloc = htab->elf.irelplt;
-
-		    riscv_elf_append_rela (output_bfd, sreloc, &outrel);
+		      {
+			/* Do not use riscv_elf_append_rela to add dynamic
+			   relocs into .rela.iplt, since it may cause the
+			   overwrite problems.  This is same as what we did
+			   in the riscv_elf_finish_dynamic_symbol.  */
+			const struct elf_backend_data *bed =
+				get_elf_backend_data (output_bfd);
+			bfd_vma iplt_idx = htab->last_iplt_index--;
+			bfd_byte *loc = htab->elf.irelplt->contents
+					+ iplt_idx * sizeof (ElfNN_External_Rela);
+			bed->s->swap_reloca_out (output_bfd, &outrel, loc);
+		      }
 
 		    /* If this reloc is against an external symbol, we
 		       do not want to fiddle with the addend.  Otherwise,

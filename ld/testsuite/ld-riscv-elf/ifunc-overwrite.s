@@ -13,6 +13,10 @@ foo_resolver:
 	.type	foo2, %gnu_indirect_function
 	.set	foo2, foo_resolver
 
+	.globl	foo3
+	.type	foo3, %gnu_indirect_function
+	.set	foo3, foo_resolver
+
 	.globl	bar
 	.type	bar, @function
 bar:
@@ -36,3 +40,11 @@ bar:
 .endif
 	ret
 	.size	bar, .-bar
+
+	.data
+foo3_addr:
+.ifdef __64_bit__
+	.quad	foo3
+.else
+	.long	foo3
+.endif

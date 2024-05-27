@@ -277,12 +277,12 @@ if [istarget "riscv*-*-*"] {
     run_dump_test_ifunc "ifunc-plt-02" rv64 pie
     run_dump_test_ifunc "ifunc-plt-02" rv64 pic
     # Check the .rela.iplt overwrite issue.
-    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv32 exe
-    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv32 pie
-    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv32 pic
-    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv64 exe
-    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv64 pie
-    run_dump_test_ifunc "ifunc-plt-got-overwrite" rv64 pic
+    run_dump_test_ifunc "ifunc-overwrite" rv32 exe
+    run_dump_test_ifunc "ifunc-overwrite" rv32 pie
+    run_dump_test_ifunc "ifunc-overwrite" rv32 pic
+    run_dump_test_ifunc "ifunc-overwrite" rv64 exe
+    run_dump_test_ifunc "ifunc-overwrite" rv64 pie
+    run_dump_test_ifunc "ifunc-overwrite" rv64 pic
 
     # TODO: Make the following tests work under RV32.
     if [istarget "riscv32-*-*"] {
