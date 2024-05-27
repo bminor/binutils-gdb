@@ -78,7 +78,7 @@ public:
   bool stopped_by_hw_breakpoint () override;
   bool supports_stopped_by_hw_breakpoint () override;
 
-  void thread_events (int) override;
+  void thread_events (bool) override;
 
   bool supports_set_thread_options (gdb_thread_options options) override;
 

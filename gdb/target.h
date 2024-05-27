@@ -755,7 +755,7 @@ struct target_ops
        potential optimization is missed.  */
     virtual bool has_pending_events ()
       TARGET_DEFAULT_RETURN (false);
-    virtual void thread_events (int)
+    virtual void thread_events (bool)
       TARGET_DEFAULT_IGNORE ();
     /* Returns true if the target supports setting thread options
        OPTIONS, false otherwise.  */
@@ -1920,7 +1920,7 @@ extern bool target_is_async_p ();
 extern void target_async (bool enable);
 
 /* Enables/disables thread create and exit events.  */
-extern void target_thread_events (int enable);
+extern void target_thread_events (bool enable);
 
 /* Returns true if the target supports setting thread options
    OPTIONS.  */

@@ -4286,7 +4286,7 @@ target_async (bool enable)
 /* See target.h.  */
 
 void
-target_thread_events (int enable)
+target_thread_events (bool enable)
 {
   current_inferior ()->top_target ()->thread_events (enable);
 }

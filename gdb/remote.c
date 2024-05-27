@@ -965,7 +965,7 @@ public:
 
   int async_wait_fd () override;
 
-  void thread_events (int) override;
+  void thread_events (bool) override;
 
   bool supports_set_thread_options (gdb_thread_options) override;
 
@@ -15191,7 +15191,7 @@ remote_target::async (bool enable)
 /* Implementation of the to_thread_events method.  */
 
 void
-remote_target::thread_events (int enable)
+remote_target::thread_events (bool enable)
 {
   struct remote_state *rs = get_remote_state ();
   size_t size = get_remote_packet_size ();

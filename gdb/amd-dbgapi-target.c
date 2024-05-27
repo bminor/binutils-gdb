@@ -269,7 +269,7 @@ struct amd_dbgapi_target final : public target_ops
 
   struct gdbarch *thread_architecture (ptid_t) override;
 
-  void thread_events (int enable) override;
+  void thread_events (bool enable) override;
 
   std::string pid_to_str (ptid_t ptid) override;
 
@@ -1805,7 +1805,7 @@ amd_dbgapi_target::thread_architecture (ptid_t ptid)
 }
 
 void
-amd_dbgapi_target::thread_events (int enable)
+amd_dbgapi_target::thread_events (bool enable)
 {
   m_report_thread_events = enable;
   beneath ()->thread_events (enable);
