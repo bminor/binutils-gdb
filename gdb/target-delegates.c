@@ -4377,16 +4377,14 @@ dummy_target::is_address_tagged (gdbarch *arg0, CORE_ADDR arg1)
 bool
 debug_target::is_address_tagged (gdbarch *arg0, CORE_ADDR arg1)
 {
-  gdb_printf (gdb_stdlog, "-> %s->is_address_tagged (...)\n", this->beneath ()->shortname ());
+  target_debug_printf_nofunc ("-> %s->is_address_tagged (...)", this->beneath ()->shortname ());
   bool result
     = this->beneath ()->is_address_tagged (arg0, arg1);
-  gdb_printf (gdb_stdlog, "<- %s->is_address_tagged (", this->beneath ()->shortname ());
-  target_debug_print_gdbarch_p (arg0);
-  gdb_puts (", ", gdb_stdlog);
-  target_debug_print_CORE_ADDR (arg1);
-  gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_bool (result);
-  gdb_puts ("\n", gdb_stdlog);
+  target_debug_printf_nofunc ("<- %s->is_address_tagged (%s, %s) = %s",
+	      this->beneath ()->shortname (),
+	      target_debug_print_gdbarch_p (arg0).c_str (),
+	      target_debug_print_CORE_ADDR (arg1).c_str (),
+	      target_debug_print_bool (result).c_str ());
   return result;
 }
 
