@@ -1536,7 +1536,8 @@ uses_msp430x_relocs (Filedata * filedata)
 
 
 static const char *
-get_symbol_at (Elf_Internal_Sym *  symtab,
+get_symbol_at (Filedata *          filedata,
+	       Elf_Internal_Sym *  symtab,
 	       uint64_t            nsyms,
 	       char *              strtab,
 	       uint64_t            where,
@@ -1574,17 +1575,32 @@ get_symbol_at (Elf_Internal_Sym *  symtab,
 	beg = sym + 1;
     }
 
-  if (best == NULL)
+  const char *name;
+
+  /* If there is a section start closer than the found symbol then
+     use that for symbolizing the address.  */
+  Elf_Internal_Shdr *sec = find_section_by_address (filedata, where);
+  if (sec != NULL
+      && where - sec->sh_addr < dist
+      && section_name_valid (filedata, sec))
+    {
+      name = section_name (filedata, sec);
+      dist = where - sec->sh_addr;
+    }
+  else if (best != NULL)
+    name = strtab + best->st_name;
+  else
     return NULL;
 
   if (offset_return != NULL)
     * offset_return = dist;
 
-  return strtab + best->st_name;
+  return name;
 }
 
 static void
-print_relr_addr_and_sym (Elf_Internal_Sym *  symtab,
+print_relr_addr_and_sym (Filedata *          filedata,
+			 Elf_Internal_Sym *  symtab,
 			 uint64_t            nsyms,
 			 char *              strtab,
 			 uint64_t            where)
@@ -1595,7 +1611,7 @@ print_relr_addr_and_sym (Elf_Internal_Sym *  symtab,
   print_vma (where, ZERO_HEX);
   printf ("  ");
 
-  symname = get_symbol_at (symtab, nsyms, strtab, where, & offset);
+  symname = get_symbol_at (filedata, symtab, nsyms, strtab, where, & offset);
 
   if (symname == NULL)
     printf ("<no sym>");
@@ -1869,7 +1885,7 @@ dump_relr_relocations (Filedata *          filedata,
       if ((entry & 1) == 0)
 	{
 	  where = entry;
-	  print_relr_addr_and_sym (symtab, nsyms, strtab, where);
+	  print_relr_addr_and_sym (filedata, symtab, nsyms, strtab, where);
 	  printf ("\n");
 	  where += relr_entsize;
 	}
@@ -1893,13 +1909,13 @@ dump_relr_relocations (Filedata *          filedata,
 		
 		if (first)
 		  {
-		    print_relr_addr_and_sym (symtab, nsyms, strtab, addr);
+		    print_relr_addr_and_sym (filedata, symtab, nsyms, strtab, addr);
 		    first = false;
 		  }
 		else
 		  {
 		    printf (_("\n%*s "), relr_entsize == 4 ? 15 : 23, " ");
-		    print_relr_addr_and_sym (symtab, nsyms, strtab, addr);
+		    print_relr_addr_and_sym (filedata, symtab, nsyms, strtab, addr);
 		  }
 	      }
 
