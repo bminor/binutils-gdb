@@ -27,7 +27,7 @@ m4_include([../../config/override.m4])
 AC_INIT(readline, 8.1, bug-readline@gnu.org)
 
 dnl make sure we are using a recent autoconf version
-AC_PREREQ(2.50)
+AC_PREREQ([2.50])
 
 AC_CONFIG_SRCDIR(readline.h)
 dnl GDB LOCAL

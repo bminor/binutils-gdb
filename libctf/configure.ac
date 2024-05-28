@@ -18,7 +18,7 @@ dnl along with this program; see the file COPYING.  If not see
 dnl <http://www.gnu.org/licenses/>.
 dnl
 
-AC_PREREQ(2.64)
+AC_PREREQ([2.64])
 AC_INIT([libctf], 1.2.0)
 AC_CONFIG_SRCDIR(ctf-impl.h)
 AC_CANONICAL_BUILD
