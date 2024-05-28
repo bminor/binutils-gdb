@@ -196,12 +196,15 @@ seh_get_target_kind (void)
 {
   if (!stdoutput)
     return seh_kind_unknown;
+
   switch (bfd_get_arch (stdoutput))
     {
+    case bfd_arch_aarch64:
     case bfd_arch_arm:
     case bfd_arch_powerpc:
     case bfd_arch_sh:
       return seh_kind_arm;
+
     case bfd_arch_i386:
       switch (bfd_get_mach (stdoutput))
 	{
@@ -214,9 +217,11 @@ seh_get_target_kind (void)
       /* FALL THROUGH.  */
     case bfd_arch_mips:
       return seh_kind_mips;
+
     case bfd_arch_ia64:
       /* Should return seh_kind_x64.  But not implemented yet.  */
       return seh_kind_unknown;
+
     default:
       break;
     }
