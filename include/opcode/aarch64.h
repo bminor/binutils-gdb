@@ -1313,7 +1313,14 @@ extern const aarch64_opcode aarch64_opcode_table[];
 #define F_OPD_SIZE (1ULL << 34)
 /* RCPC3 instruction has the field of 'size'.  */
 #define F_RCPC3_SIZE (1ULL << 35)
-/* Next bit is 36.  */
+/* 4-bit flag field to indicate subclass of operations.
+   Note that there is an (intended) overlap between the three flag sets
+   (F_LDST*, F_ARITH* and F_BRANCH*).  This allows space savings.  */
+#define F_LDST_LOAD (1ULL << 36)
+#define F_LDST_STORE (2ULL << 36)
+/* A load followed by a store (using the same address). */
+#define F_LDST_SWAP (F_LDST_LOAD | F_LDST_STORE)
+/* Next bit is 40.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
