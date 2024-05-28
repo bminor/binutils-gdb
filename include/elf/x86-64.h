@@ -118,7 +118,7 @@ END_RELOC_NUMBERS (R_X86_64_max)
 
 /* Processor specific section types.  */
 
-#define SHT_X86_64_UNWIND	0x70000001	/* unwind information */
+#define SHT_X86_64_UNWIND	(SHT_LOPROC + 1)  /* Unwind information.  */
 
 /* Like SHN_COMMON but the symbol will be allocated in the .lbss
    section.  */
