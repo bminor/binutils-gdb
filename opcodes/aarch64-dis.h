@@ -70,6 +70,7 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_reglane);
 AARCH64_DECL_OPD_EXTRACTOR (ext_reglist);
 AARCH64_DECL_OPD_EXTRACTOR (ext_ldst_reglist);
 AARCH64_DECL_OPD_EXTRACTOR (ext_ldst_reglist_r);
+AARCH64_DECL_OPD_EXTRACTOR (ext_lut_reglist);
 AARCH64_DECL_OPD_EXTRACTOR (ext_ldst_elemlist);
 AARCH64_DECL_OPD_EXTRACTOR (ext_advsimd_imm_shift);
 AARCH64_DECL_OPD_EXTRACTOR (ext_shll_imm);

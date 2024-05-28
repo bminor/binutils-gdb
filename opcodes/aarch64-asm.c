@@ -286,6 +286,17 @@ aarch64_ins_ldst_reglist_r (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return true;
 }
 
+/* Insert regnos of register list operand for AdvSIMD lut instructions.  */
+bool
+aarch64_ins_lut_reglist (const aarch64_operand *self, const aarch64_opnd_info *info,
+		     aarch64_insn *code,
+		     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  insert_field (self->fields[0], code, info->reglist.first_regno, 0);
+  return true;
+}
+
 /* Insert Q, opcode<2:1>, S, size and Rt fields for a register element list
    operand e.g. Vt in AdvSIMD load/store single element instructions.  */
 bool

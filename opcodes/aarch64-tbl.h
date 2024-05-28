@@ -1004,6 +1004,24 @@
   QLF3(V_16B, V_16B, V_16B),	\
 }
 
+/* e.g. luti2 <Vd>.16B, { <Vn>.16B }, <Vm>[index].  */
+/* The third operand is an AdvSIMD vector with a bit index
+   and without a type qualifier and is checked separately
+   based on operand enum.  */
+#define QL_VVUB			\
+{				\
+  QLF3(V_16B , V_16B , NIL),	\
+}
+
+/* e.g. luti2 <Vd>.8H, { <Vn>.8H }, <Vm>[index].  */
+/* The third operand is an AdvSIMD vector with a bit index
+   and without a type qualifier and is checked separately
+   based on operand enum.  */
+#define QL_VVUH			\
+{				\
+  QLF3(V_8H , V_8H , NIL),	\
+}
+
 /* e.g. EXT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>, #<index>.  */
 #define QL_VEXT			\
 {					\
@@ -2711,7 +2729,8 @@ static const aarch64_feature_set aarch64_feature_fp8_sve2 =
   AARCH64_FEATURES (2, FP8, SVE2);
 static const aarch64_feature_set aarch64_feature_fp8_sme2 =
   AARCH64_FEATURES (2, FP8, SME2);
-
+static const aarch64_feature_set aarch64_feature_lut =
+  AARCH64_FEATURE (LUT);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2786,6 +2805,7 @@ static const aarch64_feature_set aarch64_feature_fp8_sme2 =
 #define FP8	  &aarch64_feature_fp8
 #define FP8_SVE2   &aarch64_feature_fp8_sve2
 #define FP8_SME2   &aarch64_feature_fp8_sme2
+#define LUT &aarch64_feature_lut
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2979,6 +2999,8 @@ static const aarch64_feature_set aarch64_feature_fp8_sme2 =
 #define FP8_SME2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, FP8_SME2, OPS, QUALS,	      \
     F_STRICT | FLAGS, 0, TIED, NULL }
+#define LUT_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS)		\
+  { NAME, OPCODE, MASK, lut, 0, LUT, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -6551,6 +6573,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CPA_SVE_INSNC ("madpt", 0x44c0d800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zm_16, SVE_Za_5), OP_SVE_VVV_D, C_SCAN_MOVPRFX, 0),
   CPA_SVE_INSNC ("mlapt", 0x44c0d000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, C_SCAN_MOVPRFX, 0),
 
+  /* AdvSIMD lut.  */
+  LUT_INSN ("luti2", 0x4e801000, 0xffe09c00, OP3 (Vd, LVn_LUT, Em_INDEX2_13), QL_VVUB, F_OD(1)),
+  LUT_INSN ("luti2", 0x4ec00000, 0xffe08c00, OP3 (Vd, LVn_LUT, Em_INDEX3_12), QL_VVUH, F_OD(1)),
+  LUT_INSN ("luti4", 0x4e402000, 0xffe0bc00, OP3 (Vd, LVn_LUT, Em_INDEX1_14), QL_VVUB, F_OD(1)),
+  LUT_INSN ("luti4", 0x4e401000, 0xffe09c00, OP3 (Vd, LVn_LUT, Em_INDEX2_13), QL_VVUH, F_OD(2)),
+
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 
@@ -6626,11 +6654,19 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a SIMD vector element")						\
     Y(SIMD_ELEMENT, reglane, "Em16", 0, F(FLD_Rm),			\
       "a SIMD vector element limited to V0-V15")			\
+    Y(SIMD_ELEMENT, simple_index, "Em_INDEX1_14", 0, F(FLD_Rm, FLD_imm1_14),	\
+      "a SIMD vector without a type qualifier encoding a bit index")	\
+    Y(SIMD_ELEMENT, simple_index, "Em_INDEX2_13", 0, F(FLD_Rm, FLD_imm2_13),	\
+      "a SIMD vector without a type qualifier encoding a bit index")	\
+    Y(SIMD_ELEMENT, simple_index, "Em_INDEX3_12", 0, F(FLD_Rm, FLD_imm3_12),	\
+      "a SIMD vector without a type qualifier encoding a bit index")	\
     Y(SIMD_REGLIST, reglist, "LVn", 0, F(FLD_Rn),			\
       "a SIMD vector register list")					\
     Y(SIMD_REGLIST, ldst_reglist, "LVt", 0, F(),			\
       "a SIMD vector register list")					\
     Y(SIMD_REGLIST, ldst_reglist_r, "LVt_AL", 0, F(),			\
+      "a SIMD vector register list")					\
+    Y(SIMD_REGLIST, lut_reglist, "LVn_LUT", 0, F(FLD_Rn),		\
       "a SIMD vector register list")					\
     Y(SIMD_REGLIST, ldst_elemlist, "LEt", 0, F(),			\
       "a SIMD vector element list")					\

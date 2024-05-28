@@ -293,6 +293,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the Checked Pointer Arithmetic extension.
 @item @code{fp8} @tab
  @tab Enable the Floating Point 8 (FP8) extension.
+@item @code{lut} @tab
+ @tab Enable the Lookup Table (LUT) extension.
 @end multitable
 
 @multitable @columnfractions .20 .80

@@ -548,6 +548,21 @@ aarch64_ext_ldst_reglist_r (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return true;
 }
 
+/* Decode AdvSIMD vector register list for AdvSIMD lut instructions.
+   The number of of registers in the list is determined by the opcode
+   flag.  */
+bool
+aarch64_ext_lut_reglist (const aarch64_operand *self, aarch64_opnd_info *info,
+		     const aarch64_insn code,
+		     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  info->reglist.first_regno = extract_field (self->fields[0], code, 0);
+  info->reglist.num_regs = get_opcode_dependent_value (inst->opcode);
+  info->reglist.stride = 1;
+  return true;
+}
+
 /* Decode Q, opcode<2:1>, S, size and Rt fields of Vt in AdvSIMD
    load/store single element instructions.  */
 bool

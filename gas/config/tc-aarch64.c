@@ -1513,6 +1513,54 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   return error ? PARSE_FAIL : (ret_val << 2) | (nb_regs - 1);
 }
 
+/* Parse a SIMD vector register with a bit index. The SIMD vectors with
+   bit indices don't have type qualifiers.
+
+   Return null if the string pointed to by *CCP is not a valid AdvSIMD
+   vector register with a bit index.
+
+   Otherwise return the register and the bit index information
+   in *typeinfo.
+
+   The validity of the bit index itself is checked separately in encoding.
+ */
+
+static const reg_entry *
+parse_simd_vector_with_bit_index (char **ccp, struct vector_type_el *typeinfo)
+{
+  char *str = *ccp;
+  const reg_entry *reg = parse_reg (&str);
+  struct vector_type_el atype;
+
+  // Setting it here as this is the convention followed in the
+  // rest of the code with indices.
+  atype.defined = NTA_HASINDEX;
+  // This will be set to correct value in parse_index_expressions.
+  atype.index = 0;
+  // The rest of the fields are not applicable for this operand.
+  atype.type = NT_invtype;
+  atype.width = -1;
+  atype.element_size = 0;
+
+  if (reg == NULL)
+    return NULL;
+
+  if (reg->type != REG_TYPE_V)
+    return NULL;
+
+  // Parse the bit index.
+  if (!skip_past_char (&str, '['))
+    return NULL;
+  if (!parse_index_expression (&str, &atype.index))
+    return NULL;
+  if (!skip_past_char (&str, ']'))
+    return NULL;
+
+  *typeinfo = atype;
+  *ccp = str;
+  return reg;
+}
+
 /* Directives: register aliases.  */
 
 static reg_entry *
@@ -6790,6 +6838,23 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->reglane.index = vectype.index;
 	  break;
 
+	case AARCH64_OPND_Em_INDEX1_14:
+	case AARCH64_OPND_Em_INDEX2_13:
+	case AARCH64_OPND_Em_INDEX3_12:
+	  // These are SIMD vector operands with bit indices. For example,
+	  // 'V27[3]'. These operands don't have type qualifiers before
+	  // indices.
+	  reg = parse_simd_vector_with_bit_index(&str, &vectype);
+
+	  if (!reg)
+	    goto failure;
+	  gas_assert (vectype.defined & NTA_HASINDEX);
+
+	  info->qualifier = AARCH64_OPND_QLF_NIL;
+	  info->reglane.regno = reg->number;
+	  info->reglane.index = vectype.index;
+	  break;
+
 	case AARCH64_OPND_SVE_ZnxN:
 	case AARCH64_OPND_SVE_ZtxN:
 	case AARCH64_OPND_SME_Zdnx2:
@@ -6812,6 +6877,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  goto vector_reg_list;
 
 	case AARCH64_OPND_LVn:
+	case AARCH64_OPND_LVn_LUT:
 	case AARCH64_OPND_LVt:
 	case AARCH64_OPND_LVt_AL:
 	case AARCH64_OPND_LEt:
@@ -10481,6 +10547,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"cpa",		AARCH64_FEATURE (CPA), AARCH64_NO_FEATURES},
   {"faminmax",		AARCH64_FEATURE (FAMINMAX), AARCH64_FEATURE (SIMD)},
   {"fp8",		AARCH64_FEATURE (FP8), AARCH64_FEATURE (SIMD)},
+  {"lut",		AARCH64_FEATURE (LUT), AARCH64_FEATURE (SIMD)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

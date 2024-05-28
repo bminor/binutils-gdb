@@ -337,6 +337,7 @@ const aarch64_field fields[] =
     {  2,  1 },	/* imm1_2: general immediate in bits [2].  */
     {  8,  1 },	/* imm1_8: general immediate in bits [8].  */
     { 10,  1 },	/* imm1_10: general immediate in bits [10].  */
+    { 14,  1 },	/* imm1_14: general immediate in bits [14].  */
     { 15,  1 },	/* imm1_15: general immediate in bits [15].  */
     { 16,  1 },	/* imm1_16: general immediate in bits [16].  */
     {  0,  2 },	/* imm2_0: general immediate in bits [1:0].  */
@@ -344,6 +345,7 @@ const aarch64_field fields[] =
     {  8,  2 },	/* imm2_8: general immediate in bits [9:8].  */
     { 10,  2 }, /* imm2_10: 2-bit immediate, bits [11:10] */
     { 12,  2 }, /* imm2_12: 2-bit immediate, bits [13:12] */
+    { 13,  2 }, /* imm2_13: 2-bit immediate, bits [14:13] */
     { 15,  2 }, /* imm2_15: 2-bit immediate, bits [16:15] */
     { 16,  2 }, /* imm2_16: 2-bit immediate, bits [17:16] */
     { 19,  2 }, /* imm2_19: 2-bit immediate, bits [20:19] */
@@ -2554,6 +2556,10 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       num = get_opcode_dependent_value (opcode);
       switch (type)
 	{
+	case AARCH64_OPND_LVn_LUT:
+	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
+	    return 0;
+	  break;
 	case AARCH64_OPND_LVt:
 	  assert (num >= 1 && num <= 4);
 	  /* Unless LD1/ST1, the number of registers should be equal to that
@@ -3165,6 +3171,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	   and is halfed because complex numbers take two elements.  */
 	num = aarch64_get_qualifier_nelem (opnds[0].qualifier)
 	      * aarch64_get_qualifier_esize (opnds[0].qualifier) / 2;
+      else if (opcode->iclass == lut)
+	{
+	  size = get_operand_fields_width (get_operand_from_code (type)) - 5;
+	  if (!check_reglane (opnd, mismatch_detail, idx, "v", 0, 31,
+			      0, (1 << size) - 1))
+	    return 0;
+	  break;
+	}
       else
 	num = 16;
       num = num / aarch64_get_qualifier_esize (qualifier) - 1;
@@ -4069,6 +4083,14 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		style_imm (styler, "%" PRIi64, opnd->reglane.index));
       break;
 
+    case AARCH64_OPND_Em_INDEX1_14:
+    case AARCH64_OPND_Em_INDEX2_13:
+    case AARCH64_OPND_Em_INDEX3_12:
+      snprintf (buf, size, "%s[%s]",
+		style_reg (styler, "v%d", opnd->reglane.regno),
+		style_imm (styler, "%" PRIi64, opnd->reglane.index));
+      break;
+
     case AARCH64_OPND_VdD1:
     case AARCH64_OPND_VnD1:
       snprintf (buf, size, "%s[%s]",
@@ -4077,6 +4099,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_LVn:
+    case AARCH64_OPND_LVn_LUT:
     case AARCH64_OPND_LVt:
     case AARCH64_OPND_LVt_AL:
     case AARCH64_OPND_LEt:

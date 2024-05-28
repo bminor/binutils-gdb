@@ -47,6 +47,7 @@ AARCH64_DECL_OPD_INSERTER (ins_reglane);
 AARCH64_DECL_OPD_INSERTER (ins_reglist);
 AARCH64_DECL_OPD_INSERTER (ins_ldst_reglist);
 AARCH64_DECL_OPD_INSERTER (ins_ldst_reglist_r);
+AARCH64_DECL_OPD_INSERTER (ins_lut_reglist);
 AARCH64_DECL_OPD_INSERTER (ins_ldst_elemlist);
 AARCH64_DECL_OPD_INSERTER (ins_advsimd_imm_shift);
 AARCH64_DECL_OPD_INSERTER (ins_imm);
