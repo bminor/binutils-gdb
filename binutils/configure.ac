@@ -292,7 +292,7 @@ BFD_BINARY_FOPEN
 
 # Support for the msgpack C library.
 AC_ARG_WITH([msgpack],
-	    AC_HELP_STRING([--with-msgpack], [Enable msgpack support (auto/yes/no)]),
+	    AS_HELP_STRING([--with-msgpack], [Enable msgpack support (auto/yes/no)]),
 	    [],
 	    [with_msgpack=auto])
 
