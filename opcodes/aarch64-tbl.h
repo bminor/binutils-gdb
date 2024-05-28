@@ -2993,11 +2993,11 @@ static const aarch64_feature_set aarch64_feature_lut_sve2 =
   { NAME, OPCODE, MASK, the, 0, D128_THE, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define RCPC3_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, RCPC3, OPS, QUALS, FLAGS, 0, 0, NULL }
-#define CPA_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS) \
-  { NAME, OPCODE, MASK, CLASS, 0, CPA, OPS, QUALS, 0, 0, 0, NULL }
-#define CPA_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,CONSTRAINTS,TIED) \
+#define CPA_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, CPA, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define CPA_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS,CONSTRAINTS,TIED) \
   { NAME, OPCODE, MASK, CLASS, 0, CPA_SVE, OPS, QUALS, \
-    F_STRICT, CONSTRAINTS, TIED, NULL }
+    F_STRICT | FLAGS, CONSTRAINTS, TIED, NULL }
 #define FAMINMAX_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS)	\
   { NAME, OPCODE, MASK, asimdsame, 0, FAMINMAX, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define FAMINMAX_SVE2_INSN(NAME,OPCODE,MASK,OPS,QUALS,CONSTRAINTS) \
@@ -6578,18 +6578,18 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   FP8_SME2_INSN ("fscale", 0xc120b980, 0xff23ffe3, sme_size_22_hsd, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zmx4), OP_SVE_VVV_HSD, 0, 1),
 
 /* Checked Pointer Arithmetic Instructions.  */
-  CPA_INSN ("addpt",  0x9a002000, 0xffe0e000, aarch64_misc, OP3 (Rd_SP, Rn_SP, Rm_LSL), QL_I3SAMEX),
-  CPA_INSN ("subpt",  0xda002000, 0xffe0e000, aarch64_misc, OP3 (Rd_SP, Rn_SP, Rm_LSL), QL_I3SAMEX),
-  CPA_INSN ("maddpt", 0x9b600000, 0xffe08000, aarch64_misc, OP4 (Rd, Rn, Rm, Ra), QL_I4SAMEX),
-  CPA_INSN ("msubpt", 0x9b608000, 0xffe08000, aarch64_misc, OP4 (Rd, Rn, Rm, Ra), QL_I4SAMEX),
+  CPA_INSN ("addpt",  0x9a002000, 0xffe0e000, aarch64_misc, OP3 (Rd_SP, Rn_SP, Rm_LSL), QL_I3SAMEX, 0),
+  CPA_INSN ("subpt",  0xda002000, 0xffe0e000, aarch64_misc, OP3 (Rd_SP, Rn_SP, Rm_LSL), QL_I3SAMEX, 0),
+  CPA_INSN ("maddpt", 0x9b600000, 0xffe08000, aarch64_misc, OP4 (Rd, Rn, Rm, Ra), QL_I4SAMEX, 0),
+  CPA_INSN ("msubpt", 0x9b608000, 0xffe08000, aarch64_misc, OP4 (Rd, Rn, Rm, Ra), QL_I4SAMEX, 0),
 
-  CPA_SVE_INSNC ("addpt", 0x04c40000, 0xffffe000, sve_misc, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_D, C_SCAN_MOVPRFX, 2),
-  CPA_SVE_INSNC ("addpt", 0x04e00800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, 0),
-  CPA_SVE_INSNC ("subpt", 0x04c50000, 0xffffe000, sve_misc, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_D, C_SCAN_MOVPRFX, 2),
-  CPA_SVE_INSNC ("subpt", 0x04e00c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, 0),
+  CPA_SVE_INSNC ("addpt", 0x04c40000, 0xffffe000, sve_misc, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_D, 0, C_SCAN_MOVPRFX, 2),
+  CPA_SVE_INSNC ("addpt", 0x04e00800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, 0, 0),
+  CPA_SVE_INSNC ("subpt", 0x04c50000, 0xffffe000, sve_misc, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_VMVV_D, 0, C_SCAN_MOVPRFX, 2),
+  CPA_SVE_INSNC ("subpt", 0x04e00c00, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, 0, 0),
 
-  CPA_SVE_INSNC ("madpt", 0x44c0d800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zm_16, SVE_Za_5), OP_SVE_VVV_D, C_SCAN_MOVPRFX, 0),
-  CPA_SVE_INSNC ("mlapt", 0x44c0d000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, C_SCAN_MOVPRFX, 0),
+  CPA_SVE_INSNC ("madpt", 0x44c0d800, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zm_16, SVE_Za_5), OP_SVE_VVV_D, 0, C_SCAN_MOVPRFX, 0),
+  CPA_SVE_INSNC ("mlapt", 0x44c0d000, 0xffe0fc00, sve_misc, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_D, 0, C_SCAN_MOVPRFX, 0),
 
   /* AdvSIMD lut.  */
   LUT_INSN ("luti2", 0x4e801000, 0xffe09c00, OP3 (Vd, LVn_LUT, Em_INDEX2_13), QL_VVUB, F_OD(1)),
