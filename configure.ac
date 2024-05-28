@@ -70,14 +70,14 @@ ACX_NONCANONICAL_TARGET
 
 dnl Autoconf 2.5x and later will set a default program prefix if
 dnl --target was used, even if it was the same as --host.  Disable
-dnl that behavior.  This must be done before AC_CANONICAL_SYSTEM
+dnl that behavior.  This must be done before AC_CANONICAL_TARGET
 dnl to take effect.
 test "$host_noncanonical" = "$target_noncanonical" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_transform_name=s,y,y,
 
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_TARGET
 AC_ARG_PROGRAM
 
 m4_pattern_allow([^AS_FOR_TARGET$])dnl
