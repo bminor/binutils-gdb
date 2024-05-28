@@ -5433,8 +5433,6 @@ $as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
 
 
 
-
-
 if test "x$ac_cv_env_PKG_CONFIG_set" != "xset"; then
 	if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
@@ -11683,7 +11681,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11686 "configure"
+#line 11684 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11789,7 +11787,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11792 "configure"
+#line 11790 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

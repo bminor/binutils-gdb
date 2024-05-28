@@ -4520,8 +4520,6 @@ $as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
 
 
 
-
-
 case `pwd` in
   *\ * | *\	*)
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Libtool does not cope well with whitespace in \`pwd\`" >&5
@@ -10655,7 +10653,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10658 "configure"
+#line 10656 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10761,7 +10759,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10764 "configure"
+#line 10762 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

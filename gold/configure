@@ -6853,8 +6853,6 @@ fi
 
 
 
-
-
         MKINSTALLDIRS=
   if test -n "$ac_aux_dir"; then
     case "$ac_aux_dir" in

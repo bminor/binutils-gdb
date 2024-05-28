@@ -4770,8 +4770,6 @@ $as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
 
 
 
-
-
 if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}ar", so it can be a program name with args.
 set dummy ${ac_tool_prefix}ar; ac_word=$2
@@ -11092,7 +11090,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11095 "configure"
+#line 11093 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11198,7 +11196,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11201 "configure"
+#line 11199 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
