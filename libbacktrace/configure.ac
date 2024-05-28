@@ -29,7 +29,7 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-AC_INIT(package-unused, version-unused,, libbacktrace)
+AC_INIT([package-unused], [version-unused], [], [libbacktrace])
 AC_CONFIG_SRCDIR(backtrace.h)
 AC_CONFIG_HEADERS([config.h])
 

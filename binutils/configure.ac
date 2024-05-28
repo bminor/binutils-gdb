@@ -19,7 +19,7 @@ dnl
 
 m4_include([../bfd/version.m4])
 m4_include([../config/debuginfod.m4])
-AC_INIT([binutils], BFD_VERSION)
+AC_INIT([binutils], [BFD_VERSION])
 AC_CONFIG_SRCDIR(ar.c)
 
 AC_CANONICAL_TARGET

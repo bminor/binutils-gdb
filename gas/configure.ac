@@ -21,7 +21,7 @@ dnl <http://www.gnu.org/licenses/>.
 dnl
 dnl v2.5 needed for --bindir et al
 m4_include([../bfd/version.m4])
-AC_INIT([gas], BFD_VERSION)
+AC_INIT([gas], [BFD_VERSION])
 AC_CONFIG_SRCDIR(as.h)
 
 dnl Autoconf 2.57 will find the aux dir without this.  However, unless

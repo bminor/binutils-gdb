@@ -24,7 +24,7 @@ AC_REVISION([for Readline 8.1, version 2.90])
 
 m4_include([../../config/override.m4])
 
-AC_INIT(readline, 8.1, bug-readline@gnu.org)
+AC_INIT([readline], [8.1], [bug-readline@gnu.org])
 
 dnl make sure we are using a recent autoconf version
 AC_PREREQ([2.50])
