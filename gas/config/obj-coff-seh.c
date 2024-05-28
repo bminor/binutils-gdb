@@ -228,6 +228,20 @@ seh_get_target_kind (void)
   return seh_kind_unknown;
 }
 
+/* Verify that seh directives are supported.  */
+
+static bool
+verify_target (const char *directive)
+{
+  if (seh_get_target_kind () == seh_kind_unknown)
+    {
+      as_warn (_("%s ignored for this target"), directive);
+      ignore_rest_of_line ();
+      return false;
+    }
+  return true;
+}
+
 /* Verify that we're in the context of a seh_proc.  */
 
 static int
@@ -315,7 +329,8 @@ obj_coff_seh_handler (int what ATTRIBUTE_UNUSED)
   char *symbol_name;
   char name_end;
 
-  if (!verify_context (".seh_handler"))
+  if (!verify_target (".seh_handler")
+      || !verify_context (".seh_handler"))
     return;
 
   if (*input_line_pointer == 0 || *input_line_pointer == '\n')
@@ -408,6 +423,8 @@ do_seh_endproc (void)
 static void
 obj_coff_seh_endproc (int what ATTRIBUTE_UNUSED)
 {
+  if (!verify_target (".seh_endproc"))
+    return;
   demand_empty_rest_of_line ();
   if (seh_ctx_cur == NULL)
     {
@@ -426,6 +443,8 @@ obj_coff_seh_proc (int what ATTRIBUTE_UNUSED)
   char *symbol_name;
   char name_end;
 
+  if (!verify_target (".seh_proc"))
+    return;
   if (seh_ctx_cur != NULL)
     {
       as_bad (_("previous SEH entry not closed (missing .seh_endproc)"));
@@ -466,7 +485,8 @@ obj_coff_seh_proc (int what ATTRIBUTE_UNUSED)
 static void
 obj_coff_seh_endprologue (int what ATTRIBUTE_UNUSED)
 {
-  if (!verify_context (".seh_endprologue")
+  if (!verify_target (".seh_endprologue")
+      || !verify_context (".seh_endprologue")
       || !seh_validate_seg (".seh_endprologue"))
     return;
   demand_empty_rest_of_line ();
