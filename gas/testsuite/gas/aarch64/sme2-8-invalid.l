@@ -128,7 +128,7 @@
 [^ :]+:[0-9]+: Info:    	luti2 {z0\.h-z3\.h}, zt0, z0\[0\]
 [^ :]+:[0-9]+: Info:    	luti2 {z0\.s-z3\.s}, zt0, z0\[0\]
 [^ :]+:[0-9]+: Error: expected a register or register list at operand 1 -- `luti4 0,zt0,z0\[0\]'
-[^ :]+:[0-9]+: Error: expected a register at operand 2 -- `luti4 z0\.b,0,z0\[0\]'
+[^ :]+:[0-9]+: Error: expected a register or register list at operand 2 -- `luti4 z0\.b,0,z0\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `luti4 z0\.b,zt0,0'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `luti4 z0\.h,zt0,z0\[-1\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `luti4 z0\.h,zt0,z0\[8\]'

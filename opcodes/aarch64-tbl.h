@@ -1529,9 +1529,21 @@
 {							\
   QLF2(S_H,S_H),					\
 }
+/* e.g. luti2 <Zd>.B, { <Zn>.B }, <Zm>[index].  */
+/* The third operand is an index (e.g. immediate or bit)
+   without a type qualifier and is checked separately
+   based on operand enum.  */
 #define OP_SVE_BBU                                      \
 {                                                       \
-  QLF3(S_B,S_B,NIL),                                \
+  QLF3(S_B,S_B,NIL),					\
+}
+/* e.g. luti2 <Zd>.H, { <Zn>.H }, <Zm>[index].  */
+/* The third operand is an index (e.g. immediate or bit)
+   without a type qualifier and is checked separately
+   based on operand enum.  */
+#define OP_SVE_HHU                                      \
+{                                                       \
+  QLF3(S_H,S_H,NIL),					\
 }
 #define OP_SVE_BBB                                      \
 {                                                       \
@@ -2731,6 +2743,8 @@ static const aarch64_feature_set aarch64_feature_fp8_sme2 =
   AARCH64_FEATURES (2, FP8, SME2);
 static const aarch64_feature_set aarch64_feature_lut =
   AARCH64_FEATURE (LUT);
+static const aarch64_feature_set aarch64_feature_lut_sve2 =
+  AARCH64_FEATURES (2, LUT, SVE2);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2806,6 +2820,7 @@ static const aarch64_feature_set aarch64_feature_lut =
 #define FP8_SVE2   &aarch64_feature_fp8_sve2
 #define FP8_SME2   &aarch64_feature_fp8_sme2
 #define LUT &aarch64_feature_lut
+#define LUT_SVE2 &aarch64_feature_lut_sve2
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -3001,6 +3016,9 @@ static const aarch64_feature_set aarch64_feature_lut =
     F_STRICT | FLAGS, 0, TIED, NULL }
 #define LUT_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS)		\
   { NAME, OPCODE, MASK, lut, 0, LUT, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define LUT_SVE2_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS,CONSTRAINTS) \
+  { NAME, OPCODE, MASK, lut, 0, LUT_SVE2, OPS, QUALS, \
+    FLAGS, CONSTRAINTS, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -6579,6 +6597,13 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   LUT_INSN ("luti4", 0x4e402000, 0xffe0bc00, OP3 (Vd, LVn_LUT, Em_INDEX1_14), QL_VVUB, F_OD(1)),
   LUT_INSN ("luti4", 0x4e401000, 0xffe09c00, OP3 (Vd, LVn_LUT, Em_INDEX2_13), QL_VVUH, F_OD(2)),
 
+  /* SVE2 lut.  */
+  LUT_SVE2_INSN ("luti2", 0x4520b000, 0xff20fc00, OP3 (SVE_Zd, SVE_ZnxN, SVE_Zm2_22_INDEX), OP_SVE_BBU, F_OD(1), 0),
+  LUT_SVE2_INSN ("luti2", 0x4520a800, 0xff20ec00, OP3 (SVE_Zd, SVE_ZnxN, SVE_Zm3_12_INDEX), OP_SVE_HHU, F_OD(1), 0),
+  LUT_SVE2_INSN ("luti4", 0x4560a400, 0xff60fc00, OP3 (SVE_Zd, SVE_ZnxN, SVE_Zm1_23_INDEX), OP_SVE_BBU, F_OD(1), 0),
+  LUT_SVE2_INSN ("luti4", 0x4520b400, 0xff20fc00, OP3 (SVE_Zd, SVE_ZnxN, SVE_Zm2_22_INDEX), OP_SVE_HHU, F_OD(2), 0),
+  LUT_SVE2_INSN ("luti4", 0x4520bc00, 0xff20fc00, OP3 (SVE_Zd, SVE_ZnxN, SVE_Zm2_22_INDEX), OP_SVE_HHU, F_OD(1), 0),
+
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 
@@ -7052,11 +7077,20 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an SVE vector register")						\
     Y(SVE_REG, regno, "SVE_Zm_16", 0, F(FLD_SVE_Zm_16),			\
       "an SVE vector register")						\
+    Y(SVE_REG, simple_index, "SVE_Zm1_23_INDEX",			\
+      0, F(FLD_SVE_Zm_16, FLD_SVE_i1_23),				\
+      "an indexed SVE vector register")					\
+    Y(SVE_REG, simple_index, "SVE_Zm2_22_INDEX",			\
+      0, F(FLD_SVE_Zm_16, FLD_SVE_i2),					\
+      "an indexed SVE vector register")					\
     Y(SVE_REG, sve_quad_index, "SVE_Zm3_INDEX",				\
       3 << OPD_F_OD_LSB, F(FLD_SVE_Zm_16),				\
       "an indexed SVE vector register")					\
     Y(SVE_REG, sve_quad_index, "SVE_Zm3_11_INDEX", 			\
       3 << OPD_F_OD_LSB, F(FLD_SVE_i3h2, FLD_SVE_i3l, FLD_SVE_imm3),    \
+      "an indexed SVE vector register")					\
+    Y(SVE_REG, simple_index, "SVE_Zm3_12_INDEX",			\
+      0, F(FLD_SVE_Zm_16, FLD_SVE_i3h3, FLD_SVE_i3l2),			\
       "an indexed SVE vector register")					\
     Y(SVE_REG, sve_quad_index, "SVE_Zm3_19_INDEX", 			\
       3 << OPD_F_OD_LSB, F(FLD_imm2_19, FLD_SVE_imm3),			\

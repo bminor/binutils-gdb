@@ -294,10 +294,14 @@ const aarch64_field fields[] =
     {  5,  5 }, /* SVE_Zn: SVE vector register, bits [9,5].  */
     {  0,  5 }, /* SVE_Zt: SVE vector register, bits [4,0].  */
     {  5,  1 }, /* SVE_i1: single-bit immediate.  */
+    { 23,  1 }, /* SVE_i1_23: single-bit immediate.  */
+    { 22,  2 }, /* SVE_i2: 2-bit index, bits [23,22].  */
     { 20,  1 }, /* SVE_i2h: high bit of 2bit immediate, bits.  */
     { 22,  1 }, /* SVE_i3h: high bit of 3-bit immediate.  */
     { 19,  2 }, /* SVE_i3h2: two high bits of 3bit immediate, bits [20,19].  */
+    { 22,  2 }, /* SVE_i3h3: two high bits of 3bit immediate, bits [22,23].  */
     { 11,  1 }, /* SVE_i3l: low bit of 3-bit immediate.  */
+    { 12,  1 }, /* SVE_i3l2: low bit of 3-bit immediate, bit 12.  */
     { 16,  3 }, /* SVE_imm3: 3-bit immediate field.  */
     { 16,  4 }, /* SVE_imm4: 4-bit immediate field.  */
     {  5,  5 }, /* SVE_imm5: 5-bit immediate field.  */
@@ -1813,6 +1817,18 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
+	case AARCH64_OPND_SVE_Zm1_23_INDEX:
+	  size = get_operand_fields_width (get_operand_from_code (type));
+	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31, 0, 1))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SVE_Zm2_22_INDEX:
+	  size = get_operand_fields_width (get_operand_from_code (type));
+	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31, 0, 3))
+	    return 0;
+	  break;
+
 	case AARCH64_OPND_SVE_Zn_INDEX:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
@@ -1840,6 +1856,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
+	case AARCH64_OPND_SVE_Zm3_12_INDEX:
 	case AARCH64_OPND_SME_Zn_INDEX1_16:
 	case AARCH64_OPND_SME_Zn_INDEX2_15:
 	case AARCH64_OPND_SME_Zn_INDEX2_16:
@@ -4194,9 +4211,12 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       print_register_list (buf, size, opnd, "z", styler);
       break;
 
+    case AARCH64_OPND_SVE_Zm1_23_INDEX:
+    case AARCH64_OPND_SVE_Zm2_22_INDEX:
     case AARCH64_OPND_SVE_Zm3_INDEX:
     case AARCH64_OPND_SVE_Zm3_22_INDEX:
     case AARCH64_OPND_SVE_Zm3_19_INDEX:
+    case AARCH64_OPND_SVE_Zm3_12_INDEX:
     case AARCH64_OPND_SVE_Zm3_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_INDEX:
