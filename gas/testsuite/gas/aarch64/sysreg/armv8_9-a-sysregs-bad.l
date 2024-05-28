@@ -208,15 +208,321 @@
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'spmaccessr_el1'
 .*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmaccessr_el2'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmaccessr_el2'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmaccessr_el3'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmaccessr_el3'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmcfgr_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmcgcr0_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmcgcr1_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmcntenclr_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmcntenclr_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmcntenset_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmcntenset_el0'
+.*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'spmcr_el0'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'spmcr_el0'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'spmdevaff_el1'
 .*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmdevarch_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr0_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr0_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr1_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr1_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr2_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr2_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr3_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr3_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr4_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr4_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr5_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr5_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr6_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr6_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr7_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr7_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr8_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr8_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr9_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr9_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr10_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr10_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr11_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr11_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr12_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr12_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr13_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr13_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr14_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr14_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr15_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevcntr15_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r0_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r0_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r1_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r1_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r2_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r2_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r3_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r3_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r4_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r4_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r5_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r5_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r6_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r6_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r7_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r7_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r8_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r8_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r9_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r9_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r10_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r10_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r11_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r11_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r12_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r12_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r13_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r13_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r14_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r14_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r15_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfilt2r15_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr0_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr0_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr1_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr1_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr2_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr2_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr3_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr3_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr4_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr4_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr5_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr5_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr6_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr6_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr7_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr7_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr8_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr8_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr9_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr9_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr10_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr10_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr11_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr11_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr12_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr12_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr13_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr13_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr14_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr14_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr15_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevfiltr15_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper0_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper0_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper1_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper1_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper2_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper2_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper3_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper3_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper4_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper4_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper5_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper5_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper6_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper6_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper7_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper7_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper8_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper8_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper9_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper9_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper10_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper10_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper11_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper11_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper12_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper12_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper13_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper13_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper14_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper14_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper15_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmevtyper15_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmiidr_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmintenclr_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmintenclr_el1'
+.*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'spmintenset_el1'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'spmintenset_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmovsclr_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmovsclr_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmovsset_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmovsset_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmrootcr_el3'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmrootcr_el3'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmscr_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmscr_el1'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmselr_el0'
+.*:  Info: macro invoked from here
+.*: Error: selected processor does not support system register name 'spmselr_el0'
 .*:  Info: macro invoked from here
 .*: Error: selected processor does not support system register name 'pmecr_el1'
 .*:  Info: macro invoked from here

@@ -109,9 +109,88 @@
 
 	/* FEAT_SPMU */
 	rw_sys_reg sys_reg=spmaccessr_el1 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmaccessr_el2 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmaccessr_el3 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmcfgr_el1 xreg=x0 r=1 w=0
+	rw_sys_reg sys_reg=spmcgcr0_el1 xreg=x0 r=1 w=0
+	rw_sys_reg sys_reg=spmcgcr1_el1 xreg=x0 r=1 w=0
+	rw_sys_reg sys_reg=spmcntenclr_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmcntenset_el0 xreg=x0 r=1 w=1
 	rw_sys_reg sys_reg=spmcr_el0 xreg=x0 r=1 w=1
 	rw_sys_reg sys_reg=spmdevaff_el1 xreg=x0 r=1 w=0
+	rw_sys_reg sys_reg=spmdevarch_el1 xreg=x0 r=1 w=0
+	rw_sys_reg sys_reg=spmevcntr0_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr1_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr2_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr3_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr4_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr5_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr6_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr7_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr8_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr9_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr10_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr11_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr12_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr13_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr14_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevcntr15_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r0_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r1_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r2_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r3_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r4_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r5_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r6_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r7_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r8_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r9_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r10_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r11_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r12_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r13_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r14_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfilt2r15_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr0_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr1_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr2_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr3_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr4_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr5_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr6_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr7_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr8_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr9_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr10_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr11_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr12_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr13_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr14_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevfiltr15_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper0_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper1_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper2_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper3_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper4_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper5_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper6_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper7_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper8_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper9_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper10_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper11_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper12_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper13_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper14_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmevtyper15_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmiidr_el1 xreg=x0 r=1 w=0
+	rw_sys_reg sys_reg=spmintenclr_el1 xreg=x0 r=1 w=1
 	rw_sys_reg sys_reg=spmintenset_el1 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmovsclr_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmovsset_el0 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmrootcr_el3 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmscr_el1 xreg=x0 r=1 w=1
+	rw_sys_reg sys_reg=spmselr_el0 xreg=x0 r=1 w=1
 
 	/* FEAT_SEBEP Extension.  */
 	rw_sys_reg sys_reg=pmecr_el1 xreg=x0 r=1 w=1
