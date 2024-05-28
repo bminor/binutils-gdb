@@ -115,8 +115,7 @@ test -z "$CFLAGS" && want_auto_cflags=1
 
 AC_PROG_MAKE_SET
 AC_PROG_CC
-dnl AC_AIX
-AC_MINIX
+AC_USE_SYSTEM_EXTENSIONS
 
 # If we're using gcc and the user hasn't specified CFLAGS, add -O2 to CFLAGS
 if test -n "$want_auto_cflags" ; then
