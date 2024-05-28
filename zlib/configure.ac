@@ -60,7 +60,7 @@ m4_rename_force([real_PRECIOUS],[_AC_ARG_VAR_PRECIOUS])
 
 AC_SUBST(CFLAGS)
 
-AC_PROG_LIBTOOL
+LT_INIT
 
 # Find CPP now so that any conditional tests below won't do it and
 # thereby make the resulting definitions conditional.
