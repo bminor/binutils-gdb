@@ -936,7 +936,7 @@ Name the object-file output from @command{@value{AS}} @var{objfile}.
 Fold the data section into the text section.
 
 @item --reduce-memory-overheads
-Ignored.  Supported for compatibility with tools that apss the same option to
+Ignored.  Supported for compatibility with tools that pass the same option to
 both the assembler and the linker.
 
 @ifset ELF
