@@ -5528,21 +5528,6 @@ elf_loongarch64_hash_symbol (struct elf_link_hash_entry *h)
   return _bfd_elf_hash_symbol (h);
 }
 
-/* If a relocation is rela_normal and the symbol associated with the
-   relocation is STT_SECTION type, the addend of the relocation would add
-   sec->output_offset when partial linking (ld -r).
-   See elf_backend_data.rela_normal and elf_link_input_bfd().
-   The addend of R_LARCH_ALIGN is used to represent the first and third
-   expression of .align, it should be a constant when linking.  */
-
-static bool
-loongarch_elf_is_rela_normal (Elf_Internal_Rela *rel)
-{
-  if (R_LARCH_ALIGN == ELFNN_R_TYPE (rel->r_info))
-    return false;
-  return true;
-}
-
 #define TARGET_LITTLE_SYM loongarch_elfNN_vec
 #define TARGET_LITTLE_NAME "elfNN-loongarch"
 #define ELF_ARCH bfd_arch_loongarch
@@ -5578,7 +5563,6 @@ loongarch_elf_is_rela_normal (Elf_Internal_Rela *rel)
 #define elf_backend_grok_psinfo loongarch_elf_grok_psinfo
 #define elf_backend_hash_symbol elf_loongarch64_hash_symbol
 #define bfd_elfNN_bfd_relax_section loongarch_elf_relax_section
-#define elf_backend_is_rela_normal loongarch_elf_is_rela_normal
 
 #define elf_backend_dtrel_excludes_plt 1
 

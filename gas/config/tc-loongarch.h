@@ -32,6 +32,9 @@ extern unsigned long loongarch_mach (void);
 #define WORKING_DOT_WORD 1
 #define REPEAT_CONS_EXPRESSIONS
 
+#define md_end loongarch_md_end
+extern void loongarch_md_end (void);
+
 /* Early than md_begin.  */
 #define md_after_parse_args loongarch_after_parse_args
 extern void loongarch_after_parse_args (void);

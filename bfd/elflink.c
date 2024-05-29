@@ -11889,10 +11889,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		    {
 		      rel_hash = PTR_ADD (esdo->rela.hashes, esdo->rela.count);
 		      rela_hash_list = rel_hash;
-		      if (bed->is_rela_normal != NULL)
-			rela_normal = bed->is_rela_normal (irela);
-		      else
-			rela_normal = bed->rela_normal;
+		      rela_normal = bed->rela_normal;
 		    }
 
 		  irela->r_offset = _bfd_elf_section_offset (output_bfd,

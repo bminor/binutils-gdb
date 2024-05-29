@@ -1727,10 +1727,6 @@ struct elf_backend_data
      backend relocate_section routine for relocatable linking.  */
   unsigned rela_normal : 1;
 
-  /* Whether a relocation is rela_normal. Compared with rela_normal,
-     is_rela_normal can set part of relocations to rela_normal.  */
-  bool (*is_rela_normal) (Elf_Internal_Rela *);
-
   /* Set if DT_REL/DT_RELA/DT_RELSZ/DT_RELASZ should not include PLT
      relocations.  */
   unsigned dtrel_excludes_plt : 1;

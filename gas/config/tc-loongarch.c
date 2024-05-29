@@ -419,6 +419,55 @@ loongarch_target_format ()
   return LARCH_opts.ase_lp64 ? "elf64-loongarch" : "elf32-loongarch";
 }
 
+typedef struct
+{
+  unsigned int sec_id;
+  symbolS *s;
+} align_sec_sym;
+
+static htab_t align_hash;
+
+static hashval_t
+align_sec_sym_hash (const void *entry)
+{
+  const align_sec_sym *e = entry;
+  return (hashval_t) (e->sec_id);
+}
+
+static int
+align_sec_sym_eq (const void *entry1, const void *entry2)
+{
+  const align_sec_sym *e1 = entry1, *e2 = entry2;
+  return e1->sec_id == e2->sec_id;
+}
+
+/* Make align symbol be in same section with alignment directive.
+   If the symbol is only created at the first time to handle alignment
+   directive.  This means that all other sections may use this symbol.
+   If the section of this symbol is discarded, there may be problems.  */
+
+static symbolS *get_align_symbol (segT sec)
+{
+  align_sec_sym search = { sec->id, NULL };
+  align_sec_sym *pentry = htab_find (align_hash, &search);
+  if (pentry)
+    return pentry->s;
+
+  /* If we not find the symbol in this section.  Create and insert it.  */
+  symbolS *s = (symbolS *)local_symbol_make (".Lla-relax-align", sec,
+					     &zero_address_frag, 0);
+  align_sec_sym entry = { sec->id, s };
+  align_sec_sym **slot = (align_sec_sym **) htab_find_slot (align_hash,
+							    &entry, INSERT);
+  if (slot == NULL)
+    return NULL;
+  *slot = (align_sec_sym *) xmalloc (sizeof (align_sec_sym));
+  if (*slot == NULL)
+    return NULL;
+  **slot = entry;
+  return entry.s;
+}
+
 void
 md_begin ()
 {
@@ -440,9 +489,19 @@ md_begin ()
 		    it->name, it->format, it->macro);
       }
 
+  align_hash = htab_create (10, align_sec_sym_hash, align_sec_sym_eq, free);
+
   /* FIXME: expressionS use 'offsetT' as constant,
    * we want this is 64-bit type.  */
   assert (8 <= sizeof (offsetT));
+}
+
+/* Called just before the assembler exits.  */
+
+void
+loongarch_md_end (void)
+{
+  htab_delete (align_hash);
 }
 
 unsigned long
@@ -1826,7 +1885,9 @@ loongarch_frag_align_code (int n, int max)
      if (fragP->fr_subtype != 0 && offset > fragP->fr_subtype).  */
   if (align_max)
     {
-      s = symbol_find (now_seg->name);
+      s = get_align_symbol (now_seg);
+      if (!s)
+	as_fatal (_("internal error: cannot get align symbol"));
       addend = ALIGN_MAX_ADDEND (n, max);
     }
 
