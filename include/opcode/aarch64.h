@@ -1324,6 +1324,9 @@ extern const aarch64_opcode aarch64_opcode_table[];
 #define F_ARITH_ADD (1ULL << 36)
 #define F_ARITH_SUB (2ULL << 36)
 #define F_ARITH_MOV (4ULL << 36)
+/* Subclasses to denote call and ret insns.  */
+#define F_BRANCH_CALL (1ULL << 36)
+#define F_BRANCH_RET (2ULL << 36)
 /* Next bit is 40.  */
 
 /* Instruction constraints.  */
