@@ -733,6 +733,9 @@ enum
 #define ATT_MNEMONIC 3
   Dialect,
 
+  /* Mnemonic suffix permitted in Intel syntax.  */
+  IntelSuffix,
+
   /* ISA64: Don't change the order without other code adjustments.
 	0: Common to AMD64 and Intel64.
 	1: AMD64.
@@ -800,6 +803,7 @@ typedef struct i386_opcode_modifier
   unsigned int disp8memshift:3;
   unsigned int optimize:1;
   unsigned int dialect:2;
+  unsigned int intelsuffix:1;
   unsigned int isa64:2;
   unsigned int noegpr:1;
   unsigned int nf:1;

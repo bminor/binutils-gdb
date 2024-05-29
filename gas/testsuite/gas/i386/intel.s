@@ -195,8 +195,6 @@ foo:
  leave
  retf   0x9090
  retf
- lret   0x9090
- lret
  int3
  int    0x90
  into
@@ -517,8 +515,6 @@ foo:
  leavew
  retfw  0x9090
  retfw
- lretw  0x9090
- lretw
  iretw
  rcl    word ptr 0x90909090[eax]
  rcl    word ptr 0x90909090[eax], cl

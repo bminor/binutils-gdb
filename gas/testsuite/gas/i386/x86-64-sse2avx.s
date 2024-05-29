@@ -1340,10 +1340,10 @@ _start:
 	cvttsd2si rcx,QWORD PTR [rcx]
 
 # Tests for op regq/mem64, xmm[, xmm]
-	cvtsi2sdq xmm4,rcx
-	cvtsi2sdq xmm4,QWORD PTR [rcx]
-	cvtsi2ssq xmm4,rcx
-	cvtsi2ssq xmm4,QWORD PTR [rcx]
+	cvtsi2sd xmm4,rcx
+	cvtsi2sd xmm4,QWORD PTR [rcx]
+	cvtsi2ss xmm4,rcx
+	cvtsi2ss xmm4,QWORD PTR [rcx]
 
 # Tests for op imm8, regq/mem64, xmm[, xmm]
 	pinsrq xmm4,rcx,100

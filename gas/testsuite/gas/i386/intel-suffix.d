@@ -1,5 +1,6 @@
 #objdump: -dw
 #name: Intel syntax w/ suffixes
+#warning_output: intel-suffix.e
 
 .*: +file format .*
 

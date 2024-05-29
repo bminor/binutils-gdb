@@ -235,30 +235,30 @@ movzx, 0xfb6, i386, W|Modrm|No_lSuf|No_sSuf|No_qSuf, { Reg8|Reg16|Unspecified|Ba
 // Push instructions.
 push, 0x50, No64, ImplicitStackOp|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
 push, 0xff/6, No64, Modrm|ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32|Unspecified|BaseIndex }
-push, 0x6a, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm8S }
-push, 0x68, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16|Imm32 }
-push, 0x6, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { SReg }
+push, 0x6a, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Imm8S }
+push, 0x68, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Imm16|Imm32 }
+push, 0x6, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { SReg }
 // In 64bit mode, the operand size is implicitly 64bit.
 push, 0x50, x64, ImplicitStackOp|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64 }
 pushp, 0x50, APX_F, ImplicitStackOp|No_bSuf|No_wSuf|No_lSuf|No_sSuf|Rex2, { Reg64 }
 push, 0xff/6, x64, Modrm|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64|Unspecified|BaseIndex }
-push, 0x6a, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm8S }
-push, 0x68, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm16|Imm32S }
-push, 0xfa0, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { SReg }
+push, 0x6a, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|IntelSuffix, { Imm8S }
+push, 0x68, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|IntelSuffix, { Imm16|Imm32S }
+push, 0xfa0, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|IntelSuffix, { SReg }
 
-pusha, 0x60, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
+pusha, 0x60, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, {}
 
 // Pop instructions.
 pop, 0x58, No64, ImplicitStackOp|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32 }
 pop, 0x8f/0, No64, Modrm|ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32|Unspecified|BaseIndex }
-pop, 0x7, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { SReg }
+pop, 0x7, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { SReg }
 // In 64bit mode, the operand size is implicitly 64bit.
 pop, 0x58, x64, ImplicitStackOp|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64 }
 popp, 0x58, APX_F, ImplicitStackOp|No_bSuf|No_wSuf|No_lSuf|No_sSuf|Rex2, { Reg64 }
 pop, 0x8f/0, x64, Modrm|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Reg16|Reg64|Unspecified|BaseIndex }
-pop, 0xfa1, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { SReg }
+pop, 0xfa1, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|IntelSuffix, { SReg }
 
-popa, 0x61, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
+popa, 0x61, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, {}
 
 // Exchange instructions.
 // xchg commutes:  we allow both operand orders.
@@ -270,12 +270,12 @@ xchg, 0x86, 0, D|W|C|CheckOperandSize|Modrm|No_sSuf|HLEPrefixAny, { Reg8|Reg16|R
 // In/out from ports.
 in, 0xe4, 0, W|No_sSuf|No_qSuf, { Imm8, Acc|Byte|Word|Dword }
 in, 0xec, 0, W|No_sSuf|No_qSuf, { InOutPortReg, Acc|Byte|Word|Dword }
-in, 0xe4, 0, W|No_sSuf|No_qSuf, { Imm8 }
-in, 0xec, 0, W|No_sSuf|No_qSuf, { InOutPortReg }
+in, 0xe4, 0, W|No_sSuf|No_qSuf|IntelSuffix, { Imm8 }
+in, 0xec, 0, W|No_sSuf|No_qSuf|IntelSuffix, { InOutPortReg }
 out, 0xe6, 0, W|No_sSuf|No_qSuf, { Acc|Byte|Word|Dword, Imm8 }
 out, 0xee, 0, W|No_sSuf|No_qSuf, { Acc|Byte|Word|Dword, InOutPortReg }
-out, 0xe6, 0, W|No_sSuf|No_qSuf, { Imm8 }
-out, 0xee, 0, W|No_sSuf|No_qSuf, { InOutPortReg }
+out, 0xe6, 0, W|No_sSuf|No_qSuf|IntelSuffix, { Imm8 }
+out, 0xee, 0, W|No_sSuf|No_qSuf|IntelSuffix, { InOutPortReg }
 
 // Load effective address.
 lea, 0x8d, 0, Modrm|Anysize|No_bSuf|No_sSuf|Optimize, { BaseIndex, Reg16|Reg32|Reg64 }
@@ -300,10 +300,10 @@ lahf, 0x9f, No64, NoSuf, {}
 lahf, 0x9f, LAHF_SAHF, NoSuf, {}
 sahf, 0x9e, No64, NoSuf, {}
 sahf, 0x9e, LAHF_SAHF, NoSuf, {}
-pushf, 0x9c, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
-pushf, 0x9c, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
-popf, 0x9d, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
-popf, 0x9d, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
+pushf, 0x9c, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, {}
+pushf, 0x9c, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|IntelSuffix, {}
+popf, 0x9d, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, {}
+popf, 0x9d, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|IntelSuffix, {}
 stc, 0xf9, 0, NoSuf, {}
 std, 0xfd, 0, NoSuf, {}
 sti, 0xfb, 0, NoSuf, {}
@@ -461,14 +461,14 @@ sh<shd>d, 0x0fa5 | <shd:opc>, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Re
 <shd>
 
 // Control transfer instructions.
-call, 0xe8, No64, JumpDword|ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk, { Disp16|Disp32 }
-call, 0xe8, x64, Amd64|JumpDword|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk, { Disp16|Disp32 }
+call, 0xe8, No64, JumpDword|ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk|IntelSuffix, { Disp16|Disp32 }
+call, 0xe8, x64, Amd64|JumpDword|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|IntelSuffix, { Disp16|Disp32 }
 call, 0xe8, x64, Intel64|JumpDword|ImplicitStackOp|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk, { Disp32 }
 call, 0xff/2, No64, Modrm|JumpAbsolute|ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
 call, 0xff/2, x64, Amd64|Modrm|JumpAbsolute|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
 call, 0xff/2, x64, Intel64|Modrm|JumpAbsolute|ImplicitStackOp|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
 // Intel Syntax remaining call instances.
-call, 0x9a, No64, JumpInterSegment|ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
+call, 0x9a, No64, JumpInterSegment|ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Imm16, Imm16|Imm32 }
 call, 0xff/3, 0, Amd64|Modrm|JumpAbsolute|ImplicitStackOp|DefaultSize|NoSuf, { Dword|Fword|BaseIndex }
 call, 0xff/3, x64, Intel64|Modrm|JumpAbsolute|ImplicitStackOp|NoSuf, { Dword|Fword|Tbyte|BaseIndex }
 lcall, 0x9a, No64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
@@ -481,29 +481,29 @@ jmp, 0xff/4, No64, Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf|BNDPrefixOk|NoTrac
 jmp, 0xff/4, x64, Amd64|Modrm|JumpAbsolute|No_bSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
 jmp, 0xff/4, x64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
 // Intel Syntax remaining jmp instances.
-jmp, 0xea, No64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
+jmp, 0xea, No64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Imm16, Imm16|Imm32 }
 jmp, 0xff/5, 0, Amd64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|BaseIndex }
 jmp, 0xff/5, x64, Intel64|Modrm|JumpAbsolute|NoSuf, { Dword|Fword|Tbyte|BaseIndex }
 ljmp, 0xea, No64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32 }
 ljmp, 0xff/5, 0, Amd64|Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf, { Unspecified|BaseIndex }
 ljmp, 0xff/5, x64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_sSuf, { Unspecified|BaseIndex }
 
-ret, 0xc3, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk, {}
-ret, 0xc2, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk, { Imm16 }
-ret, 0xc3, x64, Amd64|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, {}
-ret, 0xc2, x64, Amd64|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { Imm16 }
-ret, 0xc3, x64, Intel64|ImplicitStackOp|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, {}
-ret, 0xc2, x64, Intel64|ImplicitStackOp|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk, { Imm16 }
+ret, 0xc3, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk|IntelSuffix, {}
+ret, 0xc2, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk|IntelSuffix, { Imm16 }
+ret, 0xc3, x64, Amd64|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk|IntelSuffix, {}
+ret, 0xc2, x64, Amd64|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk|IntelSuffix, { Imm16 }
+ret, 0xc3, x64, Intel64|ImplicitStackOp|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk|IntelSuffix, {}
+ret, 0xc2, x64, Intel64|ImplicitStackOp|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk|IntelSuffix, { Imm16 }
 lret, 0xcb, 0, DefaultSize|No_bSuf|No_sSuf, {}
 lret, 0xca, 0, DefaultSize|No_bSuf|No_sSuf, { Imm16 }
 // Intel Syntax.
-retf, 0xcb, 0, DefaultSize|No_bSuf|No_sSuf, {}
-retf, 0xca, 0, DefaultSize|No_bSuf|No_sSuf, { Imm16 }
+retf, 0xcb, 0, DefaultSize|No_bSuf|No_sSuf|IntelSuffix, {}
+retf, 0xca, 0, DefaultSize|No_bSuf|No_sSuf|IntelSuffix, { Imm16 }
 
-enter, 0xc8, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm8 }
-enter, 0xc8, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, { Imm16, Imm8 }
-leave, 0xc9, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf, {}
-leave, 0xc9, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64, {}
+enter, 0xc8, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Imm16, Imm8 }
+enter, 0xc8, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|IntelSuffix, { Imm16, Imm8 }
+leave, 0xc9, i186&No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, {}
+leave, 0xc9, x64, ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|IntelSuffix, {}
 
 <cc:opc, o:0, no:1, b:2, c:2, nae:2, nb:3, nc:3, ae:3, e:4, z:4, ne:5, nz:5, be:6, na:6, nbe:7, a:7, +
          s:8, ns:9, p:a, pe:a, np:b, po:b, l:c, nge:c, nl:d, ge:d, le:e, ng:e, nle:f, g:f>
@@ -520,16 +520,16 @@ jrcxz, 0xe3, x64, JumpByte|Size64|NoSuf|NoRex64, { Disp8 }
 // %cx rather than %ecx for the loop count, so the `w' form of these
 // instructions emit an address size prefix rather than a data size
 //  prefix.
-loop, 0xe2, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loop, 0xe2, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
-loopz, 0xe1, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loopz, 0xe1, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
-loope, 0xe1, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loope, 0xe1, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
-loopnz, 0xe0, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loopnz, 0xe0, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
-loopne, 0xe0, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf, { Disp8 }
-loopne, 0xe0, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64, { Disp8 }
+loop, 0xe2, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Disp8 }
+loop, 0xe2, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64|IntelSuffix, { Disp8 }
+loopz, 0xe1, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Disp8 }
+loopz, 0xe1, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64|IntelSuffix, { Disp8 }
+loope, 0xe1, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Disp8 }
+loope, 0xe1, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64|IntelSuffix, { Disp8 }
+loopnz, 0xe0, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Disp8 }
+loopnz, 0xe0, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64|IntelSuffix, { Disp8 }
+loopne, 0xe0, No64, JumpByte|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Disp8 }
+loopne, 0xe0, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64|IntelSuffix, { Disp8 }
 
 // Set byte on flag instructions.
 set<cc>, 0xf9<cc:opc>/0, i386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Reg8|Unspecified|BaseIndex }
@@ -537,38 +537,38 @@ set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EV
 setzu<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4|ZU, { Reg8 }
 
 // String manipulation.
-cmps, 0xa6, 0, W|No_sSuf|RepPrefixOk, {}
-cmps, 0xa6, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+cmps, 0xa6, 0, W|No_sSuf|RepPrefixOk|IntelSuffix, {}
+cmps, 0xa6, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk|IntelSuffix, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 scmp, 0xa6, 0, W|No_sSuf|RepPrefixOk, {}
 scmp, 0xa6, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-ins, 0x6c, i186, W|No_sSuf|No_qSuf|RepPrefixOk, {}
-ins, 0x6c, i186, W|No_sSuf|No_qSuf|IsStringEsOp1|RepPrefixOk, { InOutPortReg, Byte|Word|Dword|Unspecified|BaseIndex }
-outs, 0x6e, i186, W|No_sSuf|No_qSuf|RepPrefixOk, {}
-outs, 0x6e, i186, W|No_sSuf|No_qSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Unspecified|BaseIndex, InOutPortReg }
-lods, 0xac, 0, W|No_sSuf|RepPrefixOk, {}
-lods, 0xac, 0, W|No_sSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-lods, 0xac, 0, W|No_sSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
+ins, 0x6c, i186, W|No_sSuf|No_qSuf|RepPrefixOk|IntelSuffix, {}
+ins, 0x6c, i186, W|No_sSuf|No_qSuf|IsStringEsOp1|RepPrefixOk|IntelSuffix, { InOutPortReg, Byte|Word|Dword|Unspecified|BaseIndex }
+outs, 0x6e, i186, W|No_sSuf|No_qSuf|RepPrefixOk|IntelSuffix, {}
+outs, 0x6e, i186, W|No_sSuf|No_qSuf|IsString|RepPrefixOk|IntelSuffix, { Byte|Word|Dword|Unspecified|BaseIndex, InOutPortReg }
+lods, 0xac, 0, W|No_sSuf|RepPrefixOk|IntelSuffix, {}
+lods, 0xac, 0, W|No_sSuf|IsString|RepPrefixOk|IntelSuffix, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+lods, 0xac, 0, W|No_sSuf|IsString|RepPrefixOk|IntelSuffix, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
 slod, 0xac, 0, W|No_sSuf|RepPrefixOk, {}
 slod, 0xac, 0, W|No_sSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 slod, 0xac, 0, W|No_sSuf|IsString|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
-movs, 0xa4, 0, W|No_sSuf|RepPrefixOk, {}
-movs, 0xa4, 0, W|No_sSuf|IsStringEsOp1|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+movs, 0xa4, 0, W|No_sSuf|RepPrefixOk|IntelSuffix, {}
+movs, 0xa4, 0, W|No_sSuf|IsStringEsOp1|RepPrefixOk|IntelSuffix, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 smov, 0xa4, 0, W|No_sSuf|RepPrefixOk, {}
 smov, 0xa4, 0, W|No_sSuf|IsStringEsOp1|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-scas, 0xae, 0, W|No_sSuf|RepPrefixOk, {}
-scas, 0xae, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-scas, 0xae, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
+scas, 0xae, 0, W|No_sSuf|RepPrefixOk|IntelSuffix, {}
+scas, 0xae, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk|IntelSuffix, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+scas, 0xae, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk|IntelSuffix, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
 ssca, 0xae, 0, W|No_sSuf|RepPrefixOk, {}
 ssca, 0xae, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ssca, 0xae, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Acc|Byte|Word|Dword|Qword }
-stos, 0xaa, 0, W|No_sSuf|RepPrefixOk, {}
-stos, 0xaa, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-stos, 0xaa, 0, W|No_sSuf|IsStringEsOp1|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+stos, 0xaa, 0, W|No_sSuf|RepPrefixOk|IntelSuffix, {}
+stos, 0xaa, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk|IntelSuffix, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
+stos, 0xaa, 0, W|No_sSuf|IsStringEsOp1|RepPrefixOk|IntelSuffix, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ssto, 0xaa, 0, W|No_sSuf|RepPrefixOk, {}
 ssto, 0xaa, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ssto, 0xaa, 0, W|No_sSuf|IsStringEsOp1|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
-xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf, {}
-xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|IsString, { Byte|Unspecified|BaseIndex }
+xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|IntelSuffix, {}
+xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|IsString|IntelSuffix, { Byte|Unspecified|BaseIndex }
 
 // Bit manipulation.
 bsf, 0xfbc, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
@@ -589,7 +589,7 @@ int, 0xcd, 0, ImplicitStackOp|NoSuf, { Imm8 }
 int1, 0xf1, 0, ImplicitStackOp|NoSuf, {}
 int3, 0xcc, 0, ImplicitStackOp|NoSuf, {}
 into, 0xce, No64, ImplicitStackOp|NoSuf, {}
-iret, 0xcf, 0, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf, {}
+iret, 0xcf, 0, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|IntelSuffix, {}
 // i386sl, i486sl, later 486, and Pentium.
 rsm, 0xfaa, i386, NoSuf, {}
 
@@ -608,9 +608,9 @@ arpl, 0x63, i286&No64, RegMem|CheckOperandSize|IgnoreSize|No_bSuf|No_sSuf|No_qSu
 arpl, 0x63, i286&No64, Modrm|IgnoreSize|No_bSuf|No_sSuf|No_qSuf, { Reg16|Reg32, Word|Unspecified|BaseIndex }
 lar, 0xf02, i286, Modrm|CheckOperandSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
 lar, 0xf02, i286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-lgdt, 0xf01/2, i286&No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
+lgdt, 0xf01/2, i286&No64, Modrm|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Fword|Unspecified|BaseIndex }
 lgdt, 0xf01/2, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
-lidt, 0xf01/3, i286&No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
+lidt, 0xf01/3, i286&No64, Modrm|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Fword|Unspecified|BaseIndex }
 lidt, 0xf01/3, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
 lldt, 0xf00/2, i286, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
 lldt, 0xf00/2, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
@@ -620,9 +620,9 @@ lsl, 0xf03, i286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Unspecified|BaseIndex, 
 ltr, 0xf00/3, i286, Modrm|IgnoreSize|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
 ltr, 0xf00/3, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
 
-sgdt, 0xf01/0, i286&No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
+sgdt, 0xf01/0, i286&No64, Modrm|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Fword|Unspecified|BaseIndex }
 sgdt, 0xf01/0, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
-sidt, 0xf01/1, i286&No64, Modrm|No_bSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex }
+sidt, 0xf01/1, i286&No64, Modrm|No_bSuf|No_sSuf|No_qSuf|IntelSuffix, { Fword|Unspecified|BaseIndex }
 sidt, 0xf01/1, x64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64, { Tbyte|Unspecified|BaseIndex }
 sldt, 0xf00/0, i286, Modrm|No_bSuf|No_sSuf|NoRex64, { Reg16|Reg32|Reg64 }
 sldt, 0xf00/0, i286, Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf, { Word|Unspecified|BaseIndex }
@@ -834,12 +834,12 @@ fstsw, 0xdfe0, i287|i387, NoSuf|FWait, {}
 fnclex, 0xdbe2, FP, NoSuf, {}
 fclex, 0xdbe2, FP, NoSuf|FWait, {}
 // Short forms of fldenv, fstenv, fsave, and frstor use data size prefix.
-fnstenv, 0xd9/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
-fstenv, 0xd9/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|FWait, { Unspecified|BaseIndex }
-fldenv, 0xd9/4, FP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
-fnsave, 0xdd/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
-fsave, 0xdd/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|FWait, { Unspecified|BaseIndex }
-frstor, 0xdd/4, FP, Modrm|No_bSuf|No_wSuf|No_qSuf, { Unspecified|BaseIndex }
+fnstenv, 0xd9/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|IntelSuffix, { Unspecified|BaseIndex }
+fstenv, 0xd9/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|FWait|IntelSuffix, { Unspecified|BaseIndex }
+fldenv, 0xd9/4, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|IntelSuffix, { Unspecified|BaseIndex }
+fnsave, 0xdd/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|IntelSuffix, { Unspecified|BaseIndex }
+fsave, 0xdd/6, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|FWait|IntelSuffix, { Unspecified|BaseIndex }
+frstor, 0xdd/4, FP, Modrm|No_bSuf|No_wSuf|No_qSuf|IntelSuffix, { Unspecified|BaseIndex }
 // 8087 only
 fneni, 0xdbe0, i8087, NoSuf, {}
 feni, 0xdbe0, i8087, NoSuf|FWait, {}
@@ -943,11 +943,11 @@ cmpxchg8b, 0xfc7/1, i586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoRex64|HLEPrefi
 // Pentium II/Pentium Pro extensions.
 sysenter, 0xf34, x64, Intel64Only|NoSuf, {}
 sysenter, 0xf34, i686&No64, NoSuf, {}
-sysexit, 0xf35, x64, Intel64Only|No_bSuf|No_wSuf|No_sSuf, {}
+sysexit, 0xf35, x64, Intel64Only|No_bSuf|No_wSuf|No_sSuf|IntelSuffix, {}
 sysexit, 0xf35, i686&No64, NoSuf, {}
-fxsave, 0xfae/0, FXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Unspecified|BaseIndex }
+fxsave, 0xfae/0, FXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|IntelSuffix, { Unspecified|BaseIndex }
 fxsave64, 0xfae/0, FXSR&x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
-fxrstor, 0xfae/1, FXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Unspecified|BaseIndex }
+fxrstor, 0xfae/1, FXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|IntelSuffix, { Unspecified|BaseIndex }
 fxrstor64, 0xfae/1, FXSR&x64, Modrm|NoSuf|Size64, { Unspecified|BaseIndex }
 rdpmc, 0xf33, i686, NoSuf, {}
 // official undefined instr.
@@ -1539,11 +1539,11 @@ roundss<SSE41D>, 0x660f3a0a, <SSE41D:cpu>, Modrm|<SSE41D:scal>|<SSE41D:vvvv>|NoS
 
 pcmpgtq<sse42>, 0x660f3837, <sse42:cpu>, Modrm|<sse42:attr>|<sse42:vvvv>|NoSuf|Optimize, { RegXMM|Unspecified|BaseIndex, RegXMM }
 pcmpestri<sse42>, 0x660f3a61, <sse42:cpu>&No64, Modrm|<sse42:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-pcmpestri, 0x6661, AVX&x64, Modrm|Vex|Space0F3A|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-pcmpestri, 0x660f3a61, SSE4_2&x64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+pcmpestri, 0x6661, AVX&x64, Modrm|Vex|Space0F3A|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|IntelSuffix, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+pcmpestri, 0x660f3a61, SSE4_2&x64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|IntelSuffix, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 pcmpestrm<sse42>, 0x660f3a60, <sse42:cpu>&No64, Modrm|<sse42:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-pcmpestrm, 0x6660, AVX&x64, Modrm|Vex|Space0F3A|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|SSE2AVX, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-pcmpestrm, 0x660f3a60, SSE4_2&x64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+pcmpestrm, 0x6660, AVX&x64, Modrm|Vex|Space0F3A|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|SSE2AVX|IntelSuffix, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+pcmpestrm, 0x660f3a60, SSE4_2&x64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|IntelSuffix, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 pcmpistri<sse42>, 0x660f3a63, <sse42:cpu>, Modrm|<sse42:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 pcmpistrm<sse42>, 0x660f3a62, <sse42:cpu>, Modrm|<sse42:attr>|NoSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 crc32, 0xf20f38f0, SSE4_2, W|Modrm|No_sSuf|No_qSuf, { Reg8|Reg16|Reg32|Unspecified|BaseIndex, Reg32 }
@@ -1553,16 +1553,16 @@ crc32, 0xf0, APX_F, W|Modrm|No_wSuf|No_lSuf|No_sSuf|EVexMap4, { Reg8|Reg64|Unspe
 
 // xsave/xrstor New Instructions.
 
-xsave, 0xfae/4, Xsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoEgpr, { Unspecified|BaseIndex }
+xsave, 0xfae/4, Xsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|IntelSuffix|NoEgpr, { Unspecified|BaseIndex }
 xsave64, 0xfae/4, Xsave&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|BaseIndex }
-xrstor, 0xfae/5, Xsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoEgpr, { Unspecified|BaseIndex }
+xrstor, 0xfae/5, Xsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|IntelSuffix|NoEgpr, { Unspecified|BaseIndex }
 xrstor64, 0xfae/5, Xsave&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|BaseIndex }
 xgetbv, 0xf01d0, Xsave, NoSuf, {}
 xsetbv, 0xf01d1, Xsave, NoSuf, {}
 
 // xsaveopt
 
-xsaveopt, 0xfae/6, Xsaveopt, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|NoEgpr, { Unspecified|BaseIndex }
+xsaveopt, 0xfae/6, Xsaveopt, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|IntelSuffix|NoEgpr, { Unspecified|BaseIndex }
 xsaveopt64, 0xfae/6, Xsaveopt&x64, Modrm|NoSuf|Size64|NoEgpr, { Unspecified|BaseIndex }
 
 // AES instructions.
@@ -1738,9 +1738,9 @@ vpcmpeq<bw>, 0x6674 | <bw:opc>, AVX|AVX2, Modrm|C|Vex|Space0F|Src1VVVV|VexWIG|Ch
 vpcmpeqd, 0x6676, AVX|AVX2, Modrm|C|Vex|Space0F|Src1VVVV|VexWIG|CheckOperandSize|NoSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpcmpeqq, 0x6629, AVX|AVX2, Modrm|Vex|Space0F38|Src1VVVV|VexWIG|CheckOperandSize|NoSuf|Optimize, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpcmpestri, 0x6661, AVX&No64, Modrm|Vex|Space0F3A|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
-vpcmpestri, 0x6661, AVX&x64, Modrm|Vex|Space0F3A|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
+vpcmpestri, 0x6661, AVX&x64, Modrm|Vex|Space0F3A|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|IntelSuffix, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
 vpcmpestrm, 0x6660, AVX&No64, Modrm|Vex|Space0F3A|NoSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
-vpcmpestrm, 0x6660, AVX&x64, Modrm|Vex|Space0F3A|IgnoreSize|No_bSuf|No_wSuf|No_sSuf, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
+vpcmpestrm, 0x6660, AVX&x64, Modrm|Vex|Space0F3A|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|IntelSuffix, { Imm8, Unspecified|BaseIndex|RegXMM, RegXMM }
 vpcmpgt<bw>, 0x6664 | <bw:opc>, AVX|AVX2, Modrm|Vex|Space0F|Src1VVVV|VexWIG|CheckOperandSize|NoSuf|Optimize, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpcmpgtd, 0x6666, AVX|AVX2, Modrm|Vex|Space0F|Src1VVVV|VexWIG|CheckOperandSize|NoSuf|Optimize, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 vpcmpgtq, 0x6637, AVX|AVX2, Modrm|Vex|Space0F38|Src1VVVV|VexWIG|CheckOperandSize|NoSuf|Optimize, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
@@ -2117,7 +2117,7 @@ pswapd, 0xf0f/0xbb, 3dnowA, Modrm|NoSuf|ImmExt, { Qword|Unspecified|BaseIndex|Re
 
 // AMD extensions.
 syscall, 0xf05, SYSCALL, NoSuf, {}
-sysret, 0xf07, SYSCALL, No_bSuf|No_wSuf|No_sSuf, {}
+sysret, 0xf07, SYSCALL, No_bSuf|No_wSuf|No_sSuf|IntelSuffix, {}
 swapgs, 0xf01f8, x64, NoSuf, {}
 rdtscp, 0xf01f9, Rdtscp, NoSuf, {}
 

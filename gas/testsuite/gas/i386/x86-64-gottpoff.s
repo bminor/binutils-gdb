@@ -8,11 +8,11 @@ _start:
 
 	.intel_syntax noprefix
 
-	addq	rax, QWORD PTR [rip + foo@GOTTPOFF]
-	movq	rax, QWORD PTR [rip + foo@GOTTPOFF]
+	add	rax, QWORD PTR [rip + foo@GOTTPOFF]
+	mov	rax, QWORD PTR [rip + foo@GOTTPOFF]
 
-	addq	r16, QWORD PTR [rip + foo@GOTTPOFF]
-	movq	r20, QWORD PTR [rip + foo@GOTTPOFF]
+	add	r16, QWORD PTR [rip + foo@GOTTPOFF]
+	mov	r20, QWORD PTR [rip + foo@GOTTPOFF]
 
 	.att_syntax prefix
 
@@ -21,5 +21,5 @@ _start:
 
 	.intel_syntax noprefix
 
-	addq	r16, QWORD PTR [rip + foo@GOTTPOFF], r8
-	addq	r12, rax, QWORD PTR [rip + foo@GOTTPOFF]
+	add	r16, QWORD PTR [rip + foo@GOTTPOFF], r8
+	add	r12, rax, QWORD PTR [rip + foo@GOTTPOFF]

@@ -7,7 +7,7 @@ _start:
 
 	.intel_syntax noprefix
 
-	leaq	rax, QWORD PTR [rip + foo@TLSDESC]
+	lea	rax, QWORD PTR [rip + foo@TLSDESC]
 
-	leaq	r16, QWORD PTR [rip + foo@TLSDESC]
-	leaq	r20, QWORD PTR [rip + foo@TLSDESC]
+	lea	r16, QWORD PTR [rip + foo@TLSDESC]
+	lea	r20, QWORD PTR [rip + foo@TLSDESC]

@@ -1,5 +1,6 @@
 #objdump: -dw -mi8086
 #name: i386 intel16
+#warning_output: intel16.e
 
 .*: +file format .*
 

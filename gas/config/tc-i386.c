@@ -9209,6 +9209,19 @@ match_template (char mnem_suffix)
 	     affect assembly of the next line of code.  */
 	  as_warn (_("stand-alone `%s' prefix"), insn_name (t));
 	}
+
+      if (intel_syntax && mnem_suffix && !t->opcode_modifier.intelsuffix)
+	{
+	  static bool noticed;
+
+	  as_warn (_("mnemonic suffix used with `%s'"), insn_name (t));
+	  if (!noticed)
+	    {
+	      noticed = true;
+	      as_warn (_(
+"NOTE: Such forms are deprecated and will be rejected by a future version of the assembler"));
+	    }
+	}
     }
 
   /* Copy the template we found.  */
