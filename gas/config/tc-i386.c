@@ -5392,7 +5392,7 @@ static void init_globals (void)
 }
 
 /* Helper for md_assemble() to decide whether to prepare for a possible 2nd
-   parsing pass. Instead of introducing a rarely use new insn attribute this
+   parsing pass. Instead of introducing a rarely used new insn attribute this
    utilizes a common pattern between affected templates. It is deemed
    acceptable that this will lead to unnecessary pass 2 preparations in a
    limited set of cases.  */
@@ -5404,7 +5404,10 @@ static INLINE bool may_need_pass2 (const insn_template *t)
 	 : (t->opcode_space == SPACE_0F
 	    && (t->base_opcode | 1) == 0xbf)
 	   || (t->opcode_space == SPACE_BASE
-	       && t->base_opcode == 0x63);
+	       && t->base_opcode == 0x63)
+	   || (intel_syntax /* shld / shrd may mean suffixed shl / shr.  */
+	       && t->opcode_space == SPACE_EVEXMAP4
+	       && (t->base_opcode | 8) == 0x2c);
 }
 
 #if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
