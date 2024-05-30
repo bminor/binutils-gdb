@@ -148,7 +148,7 @@ pspy_get_exec_file (PyObject *self, void *closure)
 
   PSPY_REQUIRE_VALID (obj);
 
-  const char *filename = obj->pspace->exec_filename.get ();
+  const char *filename = obj->pspace->exec_filename ();
   if (filename != nullptr)
     return host_string_to_python_string (filename).release ();
 

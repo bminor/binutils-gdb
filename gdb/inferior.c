@@ -519,7 +519,7 @@ void
 print_selected_inferior (struct ui_out *uiout)
 {
   struct inferior *inf = current_inferior ();
-  const char *filename = inf->pspace->exec_filename.get ();
+  const char *filename = inf->pspace->exec_filename ();
 
   if (filename == NULL)
     filename = _("<noexec>");
@@ -613,8 +613,8 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
       std::string conn = uiout_field_connection (inf->process_target ());
       uiout->field_string ("connection-id", conn);
 
-      if (inf->pspace->exec_filename != nullptr)
-	uiout->field_string ("exec", inf->pspace->exec_filename.get (),
+      if (inf->pspace->exec_filename () != nullptr)
+	uiout->field_string ("exec", inf->pspace->exec_filename (),
 			     file_name_style.style ());
       else
 	uiout->field_skip ("exec");
@@ -750,7 +750,7 @@ inferior_command (const char *args, int from_tty)
     {
       inf = current_inferior ();
       gdb_assert (inf != nullptr);
-      const char *filename = inf->pspace->exec_filename.get ();
+      const char *filename = inf->pspace->exec_filename ();
 
       if (filename == nullptr)
 	filename = _("<noexec>");

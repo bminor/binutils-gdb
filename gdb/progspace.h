@@ -292,6 +292,15 @@ struct program_space
   intrusive_list<solib> &solibs ()
   { return so_list; }
 
+  /* Similar to `bfd_get_filename (exec_bfd ())` but in original form given
+     by user, without symbolic links and pathname resolved.  It is not nullptr
+     iff `exec_bfd ()` is not nullptr.  */
+  const char *exec_filename () const
+  { return m_exec_filename.get (); }
+
+  void set_exec_filename (gdb::unique_xmalloc_ptr<char> filename)
+  { m_exec_filename = std::move (filename); }
+
   /* Close and clear exec_bfd.  If we end up with no target sections
      to read memory from, this unpushes the exec_ops target.  */
   void exec_close ();
@@ -352,10 +361,6 @@ struct program_space
   gdb_bfd_ref_ptr ebfd;
   /* The last-modified time, from when the exec was brought in.  */
   long ebfd_mtime = 0;
-  /* Similar to bfd_get_filename (exec_bfd) but in original form given
-     by user, without symbolic links and pathname resolved.  It is not
-     NULL iff EBFD is not NULL.  */
-  gdb::unique_xmalloc_ptr<char> exec_filename;
 
   /* Binary file diddling handle for the core file.  */
   gdb_bfd_ref_ptr cbfd;
@@ -414,6 +419,9 @@ private:
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */
   std::vector<target_section> m_target_sections;
+
+  /* See `exec_filename`.  */
+  gdb::unique_xmalloc_ptr<char> m_exec_filename;
 };
 
 /* The list of all program spaces.  There's always at least one.  */

@@ -209,7 +209,7 @@ program_space::exec_close ()
 
       remove_target_sections (saved_ebfd);
 
-      exec_filename.reset (nullptr);
+      m_exec_filename.reset ();
     }
 }
 
@@ -223,8 +223,8 @@ clone_program_space (struct program_space *dest, struct program_space *src)
 
   set_current_program_space (dest);
 
-  if (src->exec_filename != NULL)
-    exec_file_attach (src->exec_filename.get (), 0);
+  if (src->exec_filename () != nullptr)
+    exec_file_attach (src->exec_filename (), 0);
 
   if (src->symfile_object_file != NULL)
     symbol_file_add_main (objfile_name (src->symfile_object_file),
@@ -277,8 +277,8 @@ print_program_space (struct ui_out *uiout, int requested)
       if (requested != -1 && pspace->num != requested)
 	continue;
 
-      if (pspace->exec_filename != nullptr)
-	longest_exec_name = std::max (strlen (pspace->exec_filename.get ()),
+      if (pspace->exec_filename () != nullptr)
+	longest_exec_name = std::max (strlen (pspace->exec_filename ()),
 				      longest_exec_name);
 
       ++count;
@@ -310,8 +310,8 @@ print_program_space (struct ui_out *uiout, int requested)
 
       uiout->field_signed ("id", pspace->num);
 
-      if (pspace->exec_filename != nullptr)
-	uiout->field_string ("exec", pspace->exec_filename.get (),
+      if (pspace->exec_filename () != nullptr)
+	uiout->field_string ("exec", pspace->exec_filename (),
 			     file_name_style.style ());
       else
 	uiout->field_skip ("exec");

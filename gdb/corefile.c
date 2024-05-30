@@ -81,8 +81,9 @@ validate_files (void)
 const char *
 get_exec_file (int err)
 {
-  if (current_program_space->exec_filename != nullptr)
-    return current_program_space->exec_filename.get ();
+  if (current_program_space->exec_filename () != nullptr)
+    return current_program_space->exec_filename ();
+
   if (!err)
     return NULL;
 

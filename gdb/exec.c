@@ -456,15 +456,15 @@ exec_file_attach (const char *filename, int from_tty)
 
       /* gdb_realpath_keepfile resolves symlinks on the local
 	 filesystem and so cannot be used for "target:" files.  */
-      gdb_assert (current_program_space->exec_filename == nullptr);
+      gdb_assert (current_program_space->exec_filename () == nullptr);
       if (load_via_target)
-	current_program_space->exec_filename
-	  = (make_unique_xstrdup
+	current_program_space->set_exec_filename
+	  (make_unique_xstrdup
 	     (bfd_get_filename (current_program_space->exec_bfd ())));
       else
-	current_program_space->exec_filename
-	  = make_unique_xstrdup (gdb_realpath_keepfile
-				   (scratch_pathname).c_str ());
+	current_program_space->set_exec_filename
+	  (make_unique_xstrdup (gdb_realpath_keepfile
+				  (scratch_pathname).c_str ()));
 
       if (!bfd_check_format_matches (current_program_space->exec_bfd (),
 				     bfd_object, &matching))
