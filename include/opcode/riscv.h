@@ -55,6 +55,7 @@ static inline unsigned int riscv_insn_length (insn_t insn)
 #define RV_X(x, s, n)  (((x) >> (s)) & ((1 << (n)) - 1))
 #define RV_IMM_SIGN(x) (-(((x) >> 31) & 1))
 #define RV_X_SIGNED(x, s, n) (RV_X(x, s, n) | ((-(RV_X(x, (s + n - 1), 1))) << (n)))
+#define RV_IMM_SIGN_N(x, s, n) (-(((x) >> ((s) + (n) - 1)) & 1))
 
 #define EXTRACT_ITYPE_IMM(x) \
   (RV_X(x, 20, 12) | (RV_IMM_SIGN(x) << 12))
@@ -119,6 +120,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 20, 5))
 #define EXTRACT_CV_IS3_UIMM5(x) \
   (RV_X(x, 25, 5))
+#define EXTRACT_CV_BI_IMM5(x) \
+  (RV_X(x, 20, 5) | (RV_IMM_SIGN_N(x, 20, 5) << 5))
 
 #define ENCODE_ITYPE_IMM(x) \
   (RV_X(x, 0, 12) << 20)
@@ -490,6 +493,7 @@ enum riscv_insn_class
   INSN_CLASS_XCVMAC,
   INSN_CLASS_XCVALU,
   INSN_CLASS_XCVELW,
+  INSN_CLASS_XCVBI,
   INSN_CLASS_XTHEADBA,
   INSN_CLASS_XTHEADBB,
   INSN_CLASS_XTHEADBS,

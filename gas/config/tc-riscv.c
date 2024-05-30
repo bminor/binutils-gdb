@@ -1660,7 +1660,7 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	      switch (*++oparg)
 		{
 		  case '2':
-		    /* ls2[4:0] */
+		  case '4':
 		    used_bits |= ENCODE_CV_IS2_UIMM5 (-1U);
 		    break;
 		  case '3':
@@ -3955,6 +3955,16 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			  break;
 			ip->insn_opcode
 			    |= ENCODE_CV_IS3_UIMM5 (imm_expr->X_add_number);
+			continue;
+		      case '4':
+			my_getExpression (imm_expr, asarg);
+			check_absolute_expr (ip, imm_expr, FALSE);
+			asarg = expr_parse_end;
+			if (imm_expr->X_add_number < -16
+			    || imm_expr->X_add_number > 15)
+			  break;
+			ip->insn_opcode
+			    |= ENCODE_CV_IS2_UIMM5 (imm_expr->X_add_number);
 			continue;
 		      default:
 			goto unknown_riscv_ip_operand;

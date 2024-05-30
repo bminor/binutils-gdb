@@ -2210,6 +2210,10 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Vendor-specific (CORE-V) Xcvelw instructions.  */
 {"cv.elw", 0, INSN_CLASS_XCVELW, "d,o(s)",  MATCH_CV_ELW, MASK_CV_ELW, match_opcode, 0},
 
+/* Vendor-specific (CORE-V) Xcvbi instructions.  */
+{"cv.beqimm", 0, INSN_CLASS_XCVBI, "s,Xc4,p", MATCH_CV_BEQIMM, MASK_CV_BEQIMM, match_opcode, 0},
+{"cv.bneimm", 0, INSN_CLASS_XCVBI, "s,Xc4,p", MATCH_CV_BNEIMM, MASK_CV_BNEIMM, match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 
