@@ -176,7 +176,7 @@ ANNOTATE_DOC_FILES = \
 MANCONF = -Dman
 
 TEXI2POD = perl $(srcdir)/../../etc/texi2pod.pl \
-		$(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
+		$(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS) -I $(srcdir)
 
 
 POD2MAN = pod2man --center="GNU Development Tools"
