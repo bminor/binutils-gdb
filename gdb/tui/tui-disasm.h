@@ -22,6 +22,7 @@
 #ifndef TUI_TUI_DISASM_H
 #define TUI_TUI_DISASM_H
 
+#include "gdbsupport/gdb-checked-static-cast.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 #include "tui-winsource.h"

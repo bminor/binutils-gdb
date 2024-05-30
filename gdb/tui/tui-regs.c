@@ -21,10 +21,7 @@
 
 #include "arch-utils.h"
 #include "tui/tui.h"
-#include "tui/tui-data.h"
 #include "symtab.h"
-#include "gdbtypes.h"
-#include "cli/cli-cmds.h"
 #include "frame.h"
 #include "regcache.h"
 #include "inferior.h"
@@ -32,11 +29,8 @@
 #include "tui/tui-layout.h"
 #include "tui/tui-win.h"
 #include "tui/tui-wingeneral.h"
-#include "tui/tui-file.h"
 #include "tui/tui-regs.h"
-#include "tui/tui-io.h"
 #include "reggroups.h"
-#include "valprint.h"
 #include "completer.h"
 
 #include "gdb_curses.h"

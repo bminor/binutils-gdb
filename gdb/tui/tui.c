@@ -28,7 +28,6 @@
 #include "tui/tui-data.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-io.h"
-#include "tui/tui-regs.h"
 #include "tui/tui-status.h"
 #include "tui/tui-win.h"
 #include "tui/tui-wingeneral.h"
@@ -36,18 +35,13 @@
 #include "tui/tui-source.h"
 #include "target.h"
 #include "frame.h"
-#include "breakpoint.h"
 #include "inferior.h"
 #include "symtab.h"
-#include "source.h"
 #include "terminal.h"
 #include "top.h"
 #include "ui.h"
 
-#include <ctype.h>
-#include <signal.h>
 #include <fcntl.h>
-#include <setjmp.h>
 
 #include "gdb_curses.h"
 #include "interps.h"

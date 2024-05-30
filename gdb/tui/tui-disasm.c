@@ -29,21 +29,15 @@
 #include "tui/tui.h"
 #include "tui/tui-command.h"
 #include "tui/tui-data.h"
-#include "tui/tui-win.h"
-#include "tui/tui-layout.h"
 #include "tui/tui-winsource.h"
 #include "tui/tui-status.h"
-#include "tui/tui-file.h"
 #include "tui/tui-disasm.h"
-#include "tui/tui-source.h"
 #include "progspace.h"
 #include "objfiles.h"
 #include "cli/cli-style.h"
 #include "tui/tui-location.h"
 #include "gdbsupport/selftest.h"
 #include "inferior.h"
-
-#include "gdb_curses.h"
 
 struct tui_asm_line
 {

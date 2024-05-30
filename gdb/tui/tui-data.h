@@ -24,8 +24,6 @@
 
 #include "tui/tui.h"
 #include "gdb_curses.h"
-#include "observable.h"
-#include "gdbsupport/gdb-checked-static-cast.h"
 
 /* A deleter that calls delwin.  */
 struct curses_deleter
