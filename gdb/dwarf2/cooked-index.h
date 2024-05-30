@@ -671,7 +671,7 @@ public:
   /* Look up ADDR in the address map, and return either the
      corresponding CU, or nullptr if the address could not be
      found.  */
-  dwarf2_per_cu_data *lookup (unrelocated_addr addr);
+  dwarf2_per_cu_data *lookup (unrelocated_addr addr) override;
 
   /* Return a new vector of all the addrmaps used by all the indexes
      held by this object.  */
@@ -736,9 +736,6 @@ struct cooked_index_functions : public dwarf2_base_index_functions
     table->wait (cooked_state::MAIN_AVAILABLE, allow_quit);
     return table;
   }
-
-  dwarf2_per_cu_data *find_per_cu (dwarf2_per_bfd *per_bfd,
-				   unrelocated_addr adjusted_pc) override;
 
   struct compunit_symtab *find_compunit_symtab_by_address
     (struct objfile *objfile, CORE_ADDR address) override;

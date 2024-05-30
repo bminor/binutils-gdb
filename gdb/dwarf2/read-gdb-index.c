@@ -91,6 +91,9 @@ struct mapped_gdb_index final : public mapped_index_base
   /* The shortcut table data.  */
   gdb::array_view<const gdb_byte> shortcut_table;
 
+  /* An address map that maps from PC to dwarf2_per_cu_data.  */
+  addrmap_fixed *index_addrmap = nullptr;
+
   /* Return the index into the constant pool of the name of the IDXth
      symbol in the symbol table.  */
   offset_type symbol_name_index (offset_type idx) const
@@ -128,6 +131,15 @@ struct mapped_gdb_index final : public mapped_index_base
   bool version_check () const override
   {
     return version >= 8;
+  }
+
+  dwarf2_per_cu_data *lookup (unrelocated_addr addr) override
+  {
+    if (index_addrmap == nullptr)
+      return nullptr;
+
+    void *obj = index_addrmap->find (static_cast<CORE_ADDR> (addr));
+    return static_cast<dwarf2_per_cu_data *> (obj);
   }
 };
 
@@ -528,8 +540,7 @@ create_signatured_type_table_from_gdb_index
   per_bfd->signatured_types = std::move (sig_types_hash);
 }
 
-/* Read the address map data from the mapped GDB index, and use it to
-   populate the index_addrmap.  */
+/* Read the address map data from the mapped GDB index.  */
 
 static void
 create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
@@ -570,7 +581,7 @@ create_addrmap_from_gdb_index (dwarf2_per_objfile *per_objfile,
       mutable_map.set_empty (lo, hi - 1, per_bfd->get_cu (cu_index));
     }
 
-  per_bfd->index_addrmap
+  index->index_addrmap
     = new (&per_bfd->obstack) addrmap_fixed (&per_bfd->obstack, &mutable_map);
 }
 

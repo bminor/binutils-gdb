@@ -2997,17 +2997,6 @@ recursively_find_pc_sect_compunit_symtab (struct compunit_symtab *cust,
   return NULL;
 }
 
-dwarf2_per_cu_data *
-dwarf2_base_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
-					  unrelocated_addr adjusted_pc)
-{
-  if (per_bfd->index_addrmap == nullptr)
-    return nullptr;
-
-  void *obj = per_bfd->index_addrmap->find ((CORE_ADDR) adjusted_pc);
-  return static_cast<dwarf2_per_cu_data *> (obj);
-}
-
 struct compunit_symtab *
 dwarf2_base_index_functions::find_pc_sect_compunit_symtab
      (struct objfile *objfile,
@@ -3019,10 +3008,14 @@ dwarf2_base_index_functions::find_pc_sect_compunit_symtab
   struct compunit_symtab *result;
 
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
+
+  if (per_bfd->index_table == nullptr)
+    return nullptr;
 
   CORE_ADDR baseaddr = objfile->text_section_offset ();
   struct dwarf2_per_cu_data *data
-    = find_per_cu (per_objfile->per_bfd, (unrelocated_addr) (pc - baseaddr));
+    = per_bfd->index_table->lookup ((unrelocated_addr) (pc - baseaddr));
   if (data == nullptr)
     return nullptr;
 
@@ -16557,16 +16550,6 @@ cooked_indexer::make_index (cutu_reader *reader)
   if (!reader->comp_unit_die->has_children)
     return;
   index_dies (reader, reader->info_ptr, nullptr, false);
-}
-
-dwarf2_per_cu_data *
-cooked_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
-				     unrelocated_addr adjusted_pc)
-{
-  cooked_index *table
-    = (gdb::checked_static_cast<cooked_index *>
-       (per_bfd->index_table.get ()));
-  return table->lookup (adjusted_pc);
 }
 
 struct compunit_symtab *

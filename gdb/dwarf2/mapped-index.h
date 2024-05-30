@@ -82,6 +82,11 @@ struct dwarf_scanner_base
   virtual void wait_completely ()
   {
   }
+
+  /* Look up ADDR, and return either the corresponding CU, or nullptr
+     if the address could not be found.  */
+  virtual dwarf2_per_cu_data *lookup (unrelocated_addr addr)
+  { return nullptr; }
 };
 
 /* Base class containing bits shared by both .gdb_index and
