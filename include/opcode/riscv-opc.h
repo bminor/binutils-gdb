@@ -2469,6 +2469,9 @@
 #define MASK_CV_SUBRN 0xc000707f
 #define MATCH_CV_SUBURN 0xc000305b
 #define MASK_CV_SUBURN 0xc000707f
+/* Vendor-specific (CORE-V) Xcvelw instructions. */
+#define MATCH_CV_ELW 0x600b
+#define MASK_CV_ELW 0x707f
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 #define MATCH_TH_ADDSL 0x0000100b
 #define MASK_TH_ADDSL 0xf800707f

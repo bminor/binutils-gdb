@@ -2207,6 +2207,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cv.subrnr",  0, INSN_CLASS_XCVALU, "d,s,t",     MATCH_CV_SUBRNR,  MASK_CV_SUBRNR, match_opcode, 0},
 {"cv.suburnr", 0, INSN_CLASS_XCVALU, "d,s,t",     MATCH_CV_SUBURNR, MASK_CV_SUBURNR, match_opcode, 0},
 
+/* Vendor-specific (CORE-V) Xcvelw instructions.  */
+{"cv.elw", 0, INSN_CLASS_XCVELW, "d,o(s)",  MATCH_CV_ELW, MASK_CV_ELW, match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 
