@@ -306,11 +306,11 @@ How to create the release.
 	   
       Then create the release tarballs:
   
-            ./src-release.sh -b -g -l -x binutils
+            ./src-release.sh -b -g -l -x -z binutils
 
       OR ... for a more reproducible tarball:
 
-            ./src-release.sh -b -g -l -x -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` binutils
+            ./src-release.sh -b -g -l -x -z -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` binutils
 
   24. Check that the files in the tarballs have the correct
       permissions.
@@ -600,7 +600,7 @@ looks like this:
 
        h. Create the release tarballs:
        
-            ./src-release -b -g -l -x binutils
+            ./src-release.sh -b -g -l -x -z binutils
 
        i. Check that the files in the tarballs have the correct
           permissions.
