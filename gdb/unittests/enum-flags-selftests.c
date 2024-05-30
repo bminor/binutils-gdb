@@ -85,7 +85,7 @@ static EF ef ATTRIBUTE_UNUSED;
 #define CHECK_VALID(VALID, EXPR_TYPE, EXPR)		\
   CHECK_VALID_EXPR_6 (EF, RE, EF2, RE2, UEF, URE, VALID, EXPR_TYPE, EXPR)
 
-typedef std::underlying_type<RE>::type und;
+using und = std::underlying_type<RE>::type;
 
 /* Test construction / conversion from/to different types.  */
 
@@ -253,7 +253,7 @@ CHECK_VALID (true,  int,  true ? RE2 () : EF ())
 
 /* Same, but with an unsigned enum.  */
 
-typedef unsigned int uns;
+using uns = unsigned int;
 
 CHECK_VALID (true,  uns,  true ? EF () : UEF ())
 CHECK_VALID (true,  uns,  true ? UEF () : EF ())

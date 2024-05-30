@@ -55,7 +55,7 @@
    enum_flags wrapper class for ENUM, and enables the global operator
    overloads for ENUM.  */
 #define DEF_ENUM_FLAGS_TYPE(enum_type, flags_type)	\
-  typedef enum_flags<enum_type> flags_type;		\
+  using flags_type = enum_flags<enum_type>;		\
   void is_enum_flags_enum_type (enum_type *)
 
 /* To enable the global enum_flags operators for enum, declare an
@@ -76,24 +76,24 @@
 /* Note that std::underlying_type<enum_type> is not what we want here,
    since that returns unsigned int even when the enum decays to signed
    int.  */
-template<int size, bool sign> class integer_for_size { typedef void type; };
-template<> struct integer_for_size<1, 0> { typedef uint8_t type; };
-template<> struct integer_for_size<2, 0> { typedef uint16_t type; };
-template<> struct integer_for_size<4, 0> { typedef uint32_t type; };
-template<> struct integer_for_size<8, 0> { typedef uint64_t type; };
-template<> struct integer_for_size<1, 1> { typedef int8_t type; };
-template<> struct integer_for_size<2, 1> { typedef int16_t type; };
-template<> struct integer_for_size<4, 1> { typedef int32_t type; };
-template<> struct integer_for_size<8, 1> { typedef int64_t type; };
+template<int size, bool sign> class integer_for_size { using type = void; };
+template<> struct integer_for_size<1, 0> { using type = uint8_t; };
+template<> struct integer_for_size<2, 0> { using type = uint16_t; };
+template<> struct integer_for_size<4, 0> { using type = uint32_t; };
+template<> struct integer_for_size<8, 0> { using type = uint64_t; };
+template<> struct integer_for_size<1, 1> { using type = int8_t; };
+template<> struct integer_for_size<2, 1> { using type = int16_t; };
+template<> struct integer_for_size<4, 1> { using type = int32_t; };
+template<> struct integer_for_size<8, 1> { using type = int64_t; };
 
 template<typename T>
 struct enum_underlying_type
 {
   DIAGNOSTIC_PUSH
   DIAGNOSTIC_IGNORE_ENUM_CONSTEXPR_CONVERSION
-  typedef typename
-    integer_for_size<sizeof (T), static_cast<bool>(T (-1) < T (0))>::type
-    type;
+  using type
+    = typename integer_for_size<sizeof (T),
+				static_cast<bool>(T (-1) < T (0))>::type;
   DIAGNOSTIC_POP
 };
 
@@ -128,8 +128,8 @@ template <typename E>
 class enum_flags
 {
 public:
-  typedef E enum_type;
-  typedef typename enum_underlying_type<enum_type>::type underlying_type;
+  using enum_type = E;
+  using underlying_type = typename enum_underlying_type<enum_type>::type;
 
   /* For to_string.  Maps one enumerator of E to a string.  */
   struct string_mapping
