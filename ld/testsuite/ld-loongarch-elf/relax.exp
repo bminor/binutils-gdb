@@ -51,6 +51,18 @@ if [istarget loongarch64-*-*] {
     run_dump_test "relax-align-ignore-start"
     run_partial_linking_align_test
 
+    run_ld_link_tests \
+	[list \
+	    [list \
+		"loongarch relax ttext" \
+		"" "" \
+		"" \
+		{relax-ttext.s} \
+		{} \
+		"relax-ttext" \
+	    ] \
+	]
+
     set testname "loongarch relax .exe build"
     set pre_builds [list \
       [list \

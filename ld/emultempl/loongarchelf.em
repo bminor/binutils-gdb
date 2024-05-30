@@ -25,6 +25,22 @@ fragment <<EOF
 #include "elf/loongarch.h"
 #include "elfxx-loongarch.h"
 
+EOF
+
+# Disable linker relaxation if set address of section or segment.
+PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
+    case OPTION_SECTION_START:
+    case OPTION_TTEXT:
+    case OPTION_TBSS:
+    case OPTION_TDATA:
+    case OPTION_TTEXT_SEGMENT:
+    case OPTION_TRODATA_SEGMENT:
+    case OPTION_TLDATA_SEGMENT:
+      link_info.disable_target_specific_optimizations = 2;
+      return false;
+'
+
+fragment <<EOF
 static void
 larch_elf_before_allocation (void)
 {
