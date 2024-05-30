@@ -41,6 +41,7 @@ TAGS.sub
 .clangd
 .cache
 compile_commands.json
+.vscode
 
 .gdbinit
 .gdb_history
