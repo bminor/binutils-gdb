@@ -760,6 +760,11 @@ The Xcvbi extension provides instructions for branch immediate operations.
 
 It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
 
+@item Xcvmem
+The Xcvmem extension provides instructions for post inc load/store operations.
+
+It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
+
 @item XTheadBa
 The XTheadBa extension provides instructions for address calculations.
 

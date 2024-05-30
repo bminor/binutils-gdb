@@ -2214,6 +2214,32 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cv.beqimm", 0, INSN_CLASS_XCVBI, "s,Xc4,p", MATCH_CV_BEQIMM, MASK_CV_BEQIMM, match_opcode, 0},
 {"cv.bneimm", 0, INSN_CLASS_XCVBI, "s,Xc4,p", MATCH_CV_BNEIMM, MASK_CV_BNEIMM, match_opcode, 0},
 
+/* Vendor-specific (CORE-V) Xcvmem instructions.  */
+{"cv.lb", 0, INSN_CLASS_XCVMEM, "d,(s),o", MATCH_CV_LBPOST,    MASK_CV_LBPOST,    match_opcode, 0},
+{"cv.lb", 0, INSN_CLASS_XCVMEM, "d,(s),t", MATCH_CV_LBRRPOST,  MASK_CV_LBRRPOST,  match_opcode, 0},
+{"cv.lb", 0, INSN_CLASS_XCVMEM, "d,t(s)",  MATCH_CV_LBRR,      MASK_CV_LBRR,      match_opcode, 0},
+{"cv.lbu",0, INSN_CLASS_XCVMEM, "d,(s),o", MATCH_CV_LBUPOST,   MASK_CV_LBUPOST,   match_opcode, 0},
+{"cv.lbu",0, INSN_CLASS_XCVMEM, "d,(s),t", MATCH_CV_LBURRPOST, MASK_CV_LBURRPOST, match_opcode, 0},
+{"cv.lbu",0, INSN_CLASS_XCVMEM, "d,t(s)",  MATCH_CV_LBURR,     MASK_CV_LBURR,     match_opcode, 0},
+{"cv.lh", 0, INSN_CLASS_XCVMEM, "d,(s),o", MATCH_CV_LHPOST,    MASK_CV_LHPOST,    match_opcode, 0},
+{"cv.lh", 0, INSN_CLASS_XCVMEM, "d,(s),t", MATCH_CV_LHRRPOST,  MASK_CV_LHRRPOST,  match_opcode, 0},
+{"cv.lh", 0, INSN_CLASS_XCVMEM, "d,t(s)",  MATCH_CV_LHRR,      MASK_CV_LHRR,      match_opcode, 0},
+{"cv.lhu",0, INSN_CLASS_XCVMEM, "d,(s),o", MATCH_CV_LHUPOST,   MASK_CV_LHUPOST,   match_opcode, 0},
+{"cv.lhu",0, INSN_CLASS_XCVMEM, "d,(s),t", MATCH_CV_LHURRPOST, MASK_CV_LHURRPOST, match_opcode, 0},
+{"cv.lhu",0, INSN_CLASS_XCVMEM, "d,t(s)",  MATCH_CV_LHURR,     MASK_CV_LHURR,     match_opcode, 0},
+{"cv.lw", 0, INSN_CLASS_XCVMEM, "d,(s),o", MATCH_CV_LWPOST,    MASK_CV_LWPOST,    match_opcode, 0},
+{"cv.lw", 0, INSN_CLASS_XCVMEM, "d,(s),t", MATCH_CV_LWRRPOST,  MASK_CV_LWRRPOST,  match_opcode, 0},
+{"cv.lw", 0, INSN_CLASS_XCVMEM, "d,t(s)",  MATCH_CV_LWRR,      MASK_CV_LWRR,      match_opcode, 0},
+{"cv.sb", 0, INSN_CLASS_XCVMEM, "t,(s),q", MATCH_CV_SBPOST,    MASK_CV_SBPOST,    match_opcode, 0},
+{"cv.sb", 0, INSN_CLASS_XCVMEM, "t,d(s)",  MATCH_CV_SBRR,      MASK_CV_SBRR,      match_opcode, 0},
+{"cv.sb", 0, INSN_CLASS_XCVMEM, "t,(s),d", MATCH_CV_SBRRPOST,  MASK_CV_SBRRPOST,  match_opcode, 0},
+{"cv.sh", 0, INSN_CLASS_XCVMEM, "t,(s),q", MATCH_CV_SHPOST,    MASK_CV_SHPOST,    match_opcode, 0},
+{"cv.sh", 0, INSN_CLASS_XCVMEM, "t,d(s)",  MATCH_CV_SHRR,      MASK_CV_SHRR,      match_opcode, 0},
+{"cv.sh", 0, INSN_CLASS_XCVMEM, "t,(s),d", MATCH_CV_SHRRPOST,  MASK_CV_SHRRPOST,  match_opcode, 0},
+{"cv.sw", 0, INSN_CLASS_XCVMEM, "t,(s),q", MATCH_CV_SWPOST,    MASK_CV_SWPOST,    match_opcode, 0},
+{"cv.sw", 0, INSN_CLASS_XCVMEM, "t,d(s)",  MATCH_CV_SWRR,      MASK_CV_SWRR,      match_opcode, 0},
+{"cv.sw", 0, INSN_CLASS_XCVMEM, "t,(s),d", MATCH_CV_SWRRPOST,  MASK_CV_SWRRPOST,  match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 

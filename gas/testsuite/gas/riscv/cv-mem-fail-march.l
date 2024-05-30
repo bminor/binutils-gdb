@@ -1,0 +1,25 @@
+.*: Assembler messages:
+.*: Error: unrecognized opcode `cv.lb t4,t2\(t0\)', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lbu t6,t1\(t4\)', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lh t2,t0\(t3\)', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lhu t0,t5\(t1\)', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lw t1,t3\(t6\)', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lb t4,\(t0\),t2', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lbu t6,\(t4\),t1', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lh t2,\(t3\),t0', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lhu t0,\(t1\),t5', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lw t1,\(t6\),t3', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lb t4,\(t0\),23', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lbu t6,\(t4\),0', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lh t2,\(t3\),77', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lhu t0,\(t1\),101', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.lw t1,\(t6\),6', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.sb t0,t1\(t2\)', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.sh t1,t3\(t4\)', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.sw t1,t2\(t4\)', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.sb t0,\(t2\),t1', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.sh t1,\(t2\),t6', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.sw t5,\(t2\),t6', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.sb t6,\(t1\),10', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.sh t3,\(t5\),80', extension `xcvmem' required
+.*: Error: unrecognized opcode `cv.sw t1,\(t4\),20', extension `xcvmem' required
