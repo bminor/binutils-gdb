@@ -50,6 +50,14 @@ private:
   std::string make_status_line () const;
 };
 
+/* Return the instance of the status window.  */
+
+inline tui_status_window *
+tui_status_win ()
+{
+  return dynamic_cast<tui_status_window *> (tui_win_list[STATUS_WIN]);
+}
+
 extern void tui_show_status_content (void);
 extern void tui_show_frame_info (const frame_info_ptr &);
 

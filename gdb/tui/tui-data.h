@@ -290,17 +290,6 @@ struct tui_always_visible_window : public virtual tui_win_info
 /* Global Data.  */
 extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
-#define TUI_SRC_WIN \
-  (gdb::checked_static_cast<tui_source_window *> (tui_win_list[SRC_WIN]))
-#define TUI_DISASM_WIN \
-  (gdb::checked_static_cast<tui_disasm_window *> (tui_win_list[DISASSEM_WIN]))
-#define TUI_DATA_WIN \
-  (gdb::checked_static_cast<tui_data_window *> (tui_win_list[DATA_WIN]))
-#define TUI_CMD_WIN \
-  (dynamic_cast<tui_cmd_window *> (tui_win_list[CMD_WIN]))
-#define TUI_STATUS_WIN \
-  (dynamic_cast<tui_status_window *> (tui_win_list[STATUS_WIN]))
-
 /* All the windows that are currently instantiated, in layout
    order.  */
 extern std::vector<tui_win_info *> tui_windows;

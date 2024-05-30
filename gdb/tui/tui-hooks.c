@@ -71,7 +71,7 @@ tui_register_changed (const frame_info_ptr &frame, int regno)
      up in the other.  So we always use the selected frame here, and ignore
      FRAME.  */
   fi = get_selected_frame (NULL);
-  TUI_DATA_WIN->check_register_values (fi);
+  tui_data_win ()->check_register_values (fi);
 }
 
 /* Breakpoint creation hook.
@@ -132,7 +132,7 @@ tui_refresh_frame_and_register_information ()
 
       /* Refresh the register window if it's visible.  */
       if (tui_is_window_visible (DATA_WIN))
-	TUI_DATA_WIN->check_register_values (fi);
+	tui_data_win ()->check_register_values (fi);
     }
   else
     {

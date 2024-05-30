@@ -470,9 +470,9 @@ tui_enable (void)
 
       tui_show_frame_info (deprecated_safe_get_selected_frame ());
       tui_set_initial_layout ();
-      tui_set_win_focus_to (TUI_SRC_WIN);
-      keypad (TUI_CMD_WIN->handle.get (), TRUE);
-      wrefresh (TUI_CMD_WIN->handle.get ());
+      tui_set_win_focus_to (tui_src_win ());
+      keypad (tui_cmd_win ()->handle.get (), TRUE);
+      wrefresh (tui_cmd_win ()->handle.get ());
       tui_finish_init = false;
     }
   else
@@ -595,11 +595,11 @@ bool
 tui_get_command_dimension (unsigned int *width, 
 			   unsigned int *height)
 {
-  if (!tui_active || (TUI_CMD_WIN == NULL))
+  if (!tui_active || (tui_cmd_win () == NULL))
     return false;
   
-  *width = TUI_CMD_WIN->width;
-  *height = TUI_CMD_WIN->height;
+  *width = tui_cmd_win ()->width;
+  *height = tui_cmd_win ()->height;
   return true;
 }
 

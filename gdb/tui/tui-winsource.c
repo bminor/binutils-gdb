@@ -465,7 +465,7 @@ tui_source_window_base::rerender ()
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
       struct symtab *s = find_pc_line_symtab (get_frame_pc (frame));
-      if (this != TUI_SRC_WIN)
+      if (this != tui_src_win ())
 	find_line_pc (s, cursal.line, &cursal.pc);
 
       /* This centering code is copied from tui_source_window::maybe_update.
@@ -498,7 +498,7 @@ tui_source_window_base::refill ()
 {
   symtab_and_line sal {};
 
-  if (this == TUI_SRC_WIN)
+  if (this == tui_src_win ())
     {
       sal = get_current_source_symtab_and_line ();
       if (sal.symtab == NULL)

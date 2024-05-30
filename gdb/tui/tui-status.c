@@ -315,7 +315,7 @@ void
 tui_show_status_content ()
 {
   if (tui_is_window_visible (STATUS_WIN))
-    TUI_STATUS_WIN->rerender ();
+    tui_status_win ()->rerender ();
 }
 
 /* Command to update the display with the current execution point.  */

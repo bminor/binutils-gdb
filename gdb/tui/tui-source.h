@@ -82,4 +82,12 @@ private:
   gdb::unique_xmalloc_ptr<char> m_fullname;
 };
 
+/* Return the instance of the source window.  */
+
+inline tui_source_window *
+tui_src_win ()
+{
+  return gdb::checked_static_cast<tui_source_window *> (tui_win_list[SRC_WIN]);
+}
+
 #endif /* TUI_TUI_SOURCE_H */
