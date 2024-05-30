@@ -368,7 +368,6 @@ enum run_how
 static void
 run_command_1 (const char *args, int from_tty, enum run_how run_how)
 {
-  const char *exec_file;
   struct ui_out *uiout = current_uiout;
   struct target_ops *run_target;
   int async_exec;
@@ -422,7 +421,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
       tbreak_command (arg.c_str (), 0);
     }
 
-  exec_file = get_exec_file (0);
+  const char *exec_file = current_program_space->exec_filename ();
 
   /* We keep symbols from add-symbol-file, on the grounds that the
      user might want to add some symbols before running the program
@@ -2498,7 +2497,7 @@ setup_inferior (int from_tty)
 
   /* If no exec file is yet known, try to determine it from the
      process itself.  */
-  if (get_exec_file (0) == nullptr)
+  if (current_program_space->exec_filename () == nullptr)
     exec_file_locate_attach (inferior_ptid.pid (), 1, from_tty);
   else
     {

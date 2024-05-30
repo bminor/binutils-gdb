@@ -282,7 +282,7 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
   /* If no exec file handed to us, get it from the exec-file command
      -- with a good, common error message if none is specified.  */
   if (exec_file_arg == NULL)
-    exec_file = get_exec_file (1);
+    exec_file = get_exec_file ();
   else
     exec_file = exec_file_arg;
 

@@ -285,9 +285,9 @@ get_exec_wrapper ()
 /* See gdbsupport/common-inferior.h.  */
 
 const char *
-get_exec_file (int err)
+get_exec_file ()
 {
-  if (err && program_path.get () == NULL)
+  if (program_path.get () == NULL)
     error (_("No executable file specified."));
 
   return program_path.get ();

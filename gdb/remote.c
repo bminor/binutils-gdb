@@ -2872,7 +2872,7 @@ remote_target::remote_add_inferior (bool fake_pid_p, int pid, int attached,
 
   /* If no main executable is currently open then attempt to
      open the file that was executed to create this inferior.  */
-  if (try_open_exec && get_exec_file (0) == NULL)
+  if (try_open_exec && current_program_space->exec_filename () == nullptr)
     exec_file_locate_attach (pid, 0, 1);
 
   /* Check for exec file mismatch, and let the user solve it.  */

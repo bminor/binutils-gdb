@@ -79,13 +79,10 @@ validate_files (void)
 /* See gdbsupport/common-inferior.h.  */
 
 const char *
-get_exec_file (int err)
+get_exec_file ()
 {
   if (current_program_space->exec_filename () != nullptr)
     return current_program_space->exec_filename ();
-
-  if (!err)
-    return NULL;
 
   error (_("No executable file specified.\n\
 Use the \"file\" or \"exec-file\" command."));

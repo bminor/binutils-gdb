@@ -3577,11 +3577,12 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
   gdb::unique_xmalloc_ptr<char> note_data;
   enum gdb_signal stop_signal;
 
-  if (get_exec_file (0))
+  if (const auto exec_filename = current_program_space->exec_filename ();
+      exec_filename != nullptr)
     {
-      strncpy (fname, lbasename (get_exec_file (0)), sizeof (fname));
+      strncpy (fname, lbasename (exec_filename), sizeof (fname));
       fname[sizeof (fname) - 1] = 0;
-      strncpy (psargs, get_exec_file (0), sizeof (psargs));
+      strncpy (psargs, exec_filename, sizeof (psargs));
       psargs[sizeof (psargs) - 1] = 0;
 
       const std::string &inf_args = current_inferior ()->args ();

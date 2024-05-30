@@ -685,9 +685,9 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 
   gdb_assert (gdbarch_iterate_over_regset_sections_p (gdbarch));
 
-  if (get_exec_file (0))
+  if (current_program_space->exec_filename () != nullptr)
     {
-      const char *fname = lbasename (get_exec_file (0));
+      const char *fname = lbasename (current_program_space->exec_filename ());
       std::string psargs = fname;
 
       const std::string &infargs = current_inferior ()->args ();

@@ -1190,7 +1190,7 @@ nto_procfs_target::create_inferior (const char *exec_file,
 
   argv = xmalloc ((allargs.size () / (unsigned) 2 + 2) *
 		  sizeof (*argv));
-  argv[0] = const_cast<char *> (get_exec_file (1));
+  argv[0] = const_cast<char *> (get_exec_file ());
   if (!argv[0])
     {
       if (exec_file)

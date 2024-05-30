@@ -28,9 +28,9 @@
 extern const char *get_exec_wrapper ();
 
 /* Return the name of the executable file as a string.
-   ERR nonzero means get error if there is none specified;
-   otherwise return 0 in that case.  */
-extern const char *get_exec_file (int err);
+
+   Error out if no executable is specified.  */
+extern const char *get_exec_file ();
 
 /* Return the inferior's current working directory.
 

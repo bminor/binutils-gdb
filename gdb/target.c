@@ -3574,7 +3574,7 @@ target_announce_detach (int from_tty)
     return;
 
   pid = inferior_ptid.pid ();
-  exec_file = get_exec_file (0);
+  exec_file = current_program_space->exec_filename ();
   if (exec_file == nullptr)
     gdb_printf ("Detaching from pid %s\n",
 		target_pid_to_str (ptid_t (pid)).c_str ());
@@ -3592,7 +3592,7 @@ target_announce_attach (int from_tty, int pid)
   if (!from_tty)
     return;
 
-  const char *exec_file = get_exec_file (0);
+  const char *exec_file = current_program_space->exec_filename ();
 
   if (exec_file != nullptr)
     gdb_printf ("Attaching to program: %ps, %s\n",

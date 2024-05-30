@@ -1835,7 +1835,7 @@ load_command (const char *arg, int from_tty)
     {
       const char *parg, *prev;
 
-      arg = get_exec_file (1);
+      arg = get_exec_file ();
 
       /* We may need to quote this string so buildargv can pull it
 	 apart.  */
