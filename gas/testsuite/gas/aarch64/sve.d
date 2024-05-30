@@ -380,12 +380,12 @@ Disassembly of section .*:
 [^:]+:	05b02000 	mov	z0.q, z0.q\[2\]
 [^:]+:	05f02000 	mov	z0.q, z0.q\[3\]
 [^:]+:	05f02000 	mov	z0.q, z0.q\[3\]
-[^:]+:	05c0+e0 	mov	z0.s, #0xff
-[^:]+:	05c0+e0 	mov	z0.s, #0xff
-[^:]+:	05c0+e0 	mov	z0.s, #0xff
-[^:]+:	05c0+e1 	mov	z1.s, #0xff
-[^:]+:	05c0+e1 	mov	z1.s, #0xff
-[^:]+:	05c0+e1 	mov	z1.s, #0xff
+[^:]+:	05c000e0 	mov	z0.s, #0xff
+[^:]+:	05c000e0 	mov	z0.s, #0xff
+[^:]+:	05c000e0 	mov	z0.s, #0xff
+[^:]+:	05c000e1 	mov	z1.s, #0xff
+[^:]+:	05c000e1 	mov	z1.s, #0xff
+[^:]+:	05c000e1 	mov	z1.s, #0xff
 [^:]+:	05c000ff 	mov	z31.s, #0xff
 [^:]+:	05c000ff 	mov	z31.s, #0xff
 [^:]+:	05c000ff 	mov	z31.s, #0xff
@@ -1799,11 +1799,11 @@ Disassembly of section .*:
 [^:]+:	05800c00 	and	z0.h, z0.h, #0x8000
 [^:]+:	05800c00 	and	z0.h, z0.h, #0x8000
 [^:]+:	05800c00 	and	z0.h, z0.h, #0x8000
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
 [^:]+:	05801e80 	and	z0.b, z0.b, #0xe3
 [^:]+:	05801e80 	and	z0.b, z0.b, #0xe3
 [^:]+:	05801e80 	and	z0.b, z0.b, #0xe3
@@ -4894,20 +4894,20 @@ Disassembly of section .*:
 [^:]+:	25d12010 	cmple	p0.d, p0/z, z0.d, #-15
 [^:]+:	25df2010 	cmple	p0.d, p0/z, z0.d, #-1
 [^:]+:	25df2010 	cmple	p0.d, p0/z, z0.d, #-1
-[^:]+:	240+e000 	cmplo	p0.b, p0/z, z0.b, z0.d
-[^:]+:	240+e000 	cmplo	p0.b, p0/z, z0.b, z0.d
-[^:]+:	240+e001 	cmplo	p1.b, p0/z, z0.b, z0.d
-[^:]+:	240+e001 	cmplo	p1.b, p0/z, z0.b, z0.d
-[^:]+:	240+e00f 	cmplo	p15.b, p0/z, z0.b, z0.d
-[^:]+:	240+e00f 	cmplo	p15.b, p0/z, z0.b, z0.d
-[^:]+:	240+e800 	cmplo	p0.b, p2/z, z0.b, z0.d
-[^:]+:	240+e800 	cmplo	p0.b, p2/z, z0.b, z0.d
+[^:]+:	2400e000 	cmplo	p0.b, p0/z, z0.b, z0.d
+[^:]+:	2400e000 	cmplo	p0.b, p0/z, z0.b, z0.d
+[^:]+:	2400e001 	cmplo	p1.b, p0/z, z0.b, z0.d
+[^:]+:	2400e001 	cmplo	p1.b, p0/z, z0.b, z0.d
+[^:]+:	2400e00f 	cmplo	p15.b, p0/z, z0.b, z0.d
+[^:]+:	2400e00f 	cmplo	p15.b, p0/z, z0.b, z0.d
+[^:]+:	2400e800 	cmplo	p0.b, p2/z, z0.b, z0.d
+[^:]+:	2400e800 	cmplo	p0.b, p2/z, z0.b, z0.d
 [^:]+:	2400fc00 	cmplo	p0.b, p7/z, z0.b, z0.d
 [^:]+:	2400fc00 	cmplo	p0.b, p7/z, z0.b, z0.d
-[^:]+:	240+e060 	cmplo	p0.b, p0/z, z3.b, z0.d
-[^:]+:	240+e060 	cmplo	p0.b, p0/z, z3.b, z0.d
-[^:]+:	240+e3e0 	cmplo	p0.b, p0/z, z31.b, z0.d
-[^:]+:	240+e3e0 	cmplo	p0.b, p0/z, z31.b, z0.d
+[^:]+:	2400e060 	cmplo	p0.b, p0/z, z3.b, z0.d
+[^:]+:	2400e060 	cmplo	p0.b, p0/z, z3.b, z0.d
+[^:]+:	2400e3e0 	cmplo	p0.b, p0/z, z31.b, z0.d
+[^:]+:	2400e3e0 	cmplo	p0.b, p0/z, z31.b, z0.d
 [^:]+:	2404e000 	cmplo	p0.b, p0/z, z0.b, z4.d
 [^:]+:	2404e000 	cmplo	p0.b, p0/z, z0.b, z4.d
 [^:]+:	241fe000 	cmplo	p0.b, p0/z, z0.b, z31.d
@@ -5036,20 +5036,20 @@ Disassembly of section .*:
 [^:]+:	24f06000 	cmplo	p0.d, p0/z, z0.d, #65
 [^:]+:	24ffe000 	cmplo	p0.d, p0/z, z0.d, #127
 [^:]+:	24ffe000 	cmplo	p0.d, p0/z, z0.d, #127
-[^:]+:	240+e010 	cmpls	p0.b, p0/z, z0.b, z0.d
-[^:]+:	240+e010 	cmpls	p0.b, p0/z, z0.b, z0.d
-[^:]+:	240+e011 	cmpls	p1.b, p0/z, z0.b, z0.d
-[^:]+:	240+e011 	cmpls	p1.b, p0/z, z0.b, z0.d
-[^:]+:	240+e01f 	cmpls	p15.b, p0/z, z0.b, z0.d
-[^:]+:	240+e01f 	cmpls	p15.b, p0/z, z0.b, z0.d
-[^:]+:	240+e810 	cmpls	p0.b, p2/z, z0.b, z0.d
-[^:]+:	240+e810 	cmpls	p0.b, p2/z, z0.b, z0.d
+[^:]+:	2400e010 	cmpls	p0.b, p0/z, z0.b, z0.d
+[^:]+:	2400e010 	cmpls	p0.b, p0/z, z0.b, z0.d
+[^:]+:	2400e011 	cmpls	p1.b, p0/z, z0.b, z0.d
+[^:]+:	2400e011 	cmpls	p1.b, p0/z, z0.b, z0.d
+[^:]+:	2400e01f 	cmpls	p15.b, p0/z, z0.b, z0.d
+[^:]+:	2400e01f 	cmpls	p15.b, p0/z, z0.b, z0.d
+[^:]+:	2400e810 	cmpls	p0.b, p2/z, z0.b, z0.d
+[^:]+:	2400e810 	cmpls	p0.b, p2/z, z0.b, z0.d
 [^:]+:	2400fc10 	cmpls	p0.b, p7/z, z0.b, z0.d
 [^:]+:	2400fc10 	cmpls	p0.b, p7/z, z0.b, z0.d
-[^:]+:	240+e070 	cmpls	p0.b, p0/z, z3.b, z0.d
-[^:]+:	240+e070 	cmpls	p0.b, p0/z, z3.b, z0.d
-[^:]+:	240+e3f0 	cmpls	p0.b, p0/z, z31.b, z0.d
-[^:]+:	240+e3f0 	cmpls	p0.b, p0/z, z31.b, z0.d
+[^:]+:	2400e070 	cmpls	p0.b, p0/z, z3.b, z0.d
+[^:]+:	2400e070 	cmpls	p0.b, p0/z, z3.b, z0.d
+[^:]+:	2400e3f0 	cmpls	p0.b, p0/z, z31.b, z0.d
+[^:]+:	2400e3f0 	cmpls	p0.b, p0/z, z31.b, z0.d
 [^:]+:	2404e010 	cmpls	p0.b, p0/z, z0.b, z4.d
 [^:]+:	2404e010 	cmpls	p0.b, p0/z, z0.b, z4.d
 [^:]+:	241fe010 	cmpls	p0.b, p0/z, z0.b, z31.d
@@ -7938,11 +7938,11 @@ Disassembly of section .*:
 [^:]+:	05c00c00 	dupm	z0.h, #0x8000
 [^:]+:	05c00c00 	dupm	z0.h, #0x8000
 [^:]+:	05c00c00 	dupm	z0.h, #0x8000
-[^:]+:	05c0+ec0 	dupm	z0.b, #0xbf
-[^:]+:	05c0+ec0 	dupm	z0.b, #0xbf
-[^:]+:	05c0+ec0 	dupm	z0.b, #0xbf
-[^:]+:	05c0+ec0 	dupm	z0.b, #0xbf
-[^:]+:	05c0+ec0 	dupm	z0.b, #0xbf
+[^:]+:	05c00ec0 	dupm	z0.b, #0xbf
+[^:]+:	05c00ec0 	dupm	z0.b, #0xbf
+[^:]+:	05c00ec0 	dupm	z0.b, #0xbf
+[^:]+:	05c00ec0 	dupm	z0.b, #0xbf
+[^:]+:	05c00ec0 	dupm	z0.b, #0xbf
 [^:]+:	05c01e80 	dupm	z0.b, #0xe3
 [^:]+:	05c01e80 	dupm	z0.b, #0xe3
 [^:]+:	05c01e80 	dupm	z0.b, #0xe3
@@ -8013,11 +8013,11 @@ Disassembly of section .*:
 [^:]+:	05400c00 	eor	z0.h, z0.h, #0x8000
 [^:]+:	05400c00 	eor	z0.h, z0.h, #0x8000
 [^:]+:	05400c00 	eor	z0.h, z0.h, #0x8000
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
 [^:]+:	05401e80 	eor	z0.b, z0.b, #0xe3
 [^:]+:	05401e80 	eor	z0.b, z0.b, #0xe3
 [^:]+:	05401e80 	eor	z0.b, z0.b, #0xe3
@@ -21353,37 +21353,37 @@ Disassembly of section .*:
 [^:]+:	a41ec000 	ldnt1b	{z0.b}, p0/z, \[x0, x30\]
 [^:]+:	a41ec000 	ldnt1b	{z0.b}, p0/z, \[x0, x30\]
 [^:]+:	a41ec000 	ldnt1b	{z0.b}, p0/z, \[x0, x30\]
-[^:]+:	a40+e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
-[^:]+:	a40+e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
-[^:]+:	a40+e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
-[^:]+:	a40+e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
-[^:]+:	a40+e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
-[^:]+:	a40+e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
-[^:]+:	a40+e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
-[^:]+:	a40+e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
-[^:]+:	a40+e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
-[^:]+:	a40+e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
-[^:]+:	a40+e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
-[^:]+:	a40+e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
-[^:]+:	a40+e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
-[^:]+:	a40+e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
-[^:]+:	a40+e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
-[^:]+:	a40+e800 	ldnt1b	{z0.b}, p2/z, \[x0\]
-[^:]+:	a40+e800 	ldnt1b	{z0.b}, p2/z, \[x0\]
-[^:]+:	a40+e800 	ldnt1b	{z0.b}, p2/z, \[x0\]
-[^:]+:	a40+e800 	ldnt1b	{z0.b}, p2/z, \[x0\]
+[^:]+:	a400e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
+[^:]+:	a400e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
+[^:]+:	a400e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
+[^:]+:	a400e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
+[^:]+:	a400e000 	ldnt1b	{z0.b}, p0/z, \[x0\]
+[^:]+:	a400e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
+[^:]+:	a400e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
+[^:]+:	a400e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
+[^:]+:	a400e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
+[^:]+:	a400e001 	ldnt1b	{z1.b}, p0/z, \[x0\]
+[^:]+:	a400e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
+[^:]+:	a400e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
+[^:]+:	a400e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
+[^:]+:	a400e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
+[^:]+:	a400e01f 	ldnt1b	{z31.b}, p0/z, \[x0\]
+[^:]+:	a400e800 	ldnt1b	{z0.b}, p2/z, \[x0\]
+[^:]+:	a400e800 	ldnt1b	{z0.b}, p2/z, \[x0\]
+[^:]+:	a400e800 	ldnt1b	{z0.b}, p2/z, \[x0\]
+[^:]+:	a400e800 	ldnt1b	{z0.b}, p2/z, \[x0\]
 [^:]+:	a400fc00 	ldnt1b	{z0.b}, p7/z, \[x0\]
 [^:]+:	a400fc00 	ldnt1b	{z0.b}, p7/z, \[x0\]
 [^:]+:	a400fc00 	ldnt1b	{z0.b}, p7/z, \[x0\]
 [^:]+:	a400fc00 	ldnt1b	{z0.b}, p7/z, \[x0\]
-[^:]+:	a40+e060 	ldnt1b	{z0.b}, p0/z, \[x3\]
-[^:]+:	a40+e060 	ldnt1b	{z0.b}, p0/z, \[x3\]
-[^:]+:	a40+e060 	ldnt1b	{z0.b}, p0/z, \[x3\]
-[^:]+:	a40+e060 	ldnt1b	{z0.b}, p0/z, \[x3\]
-[^:]+:	a40+e3e0 	ldnt1b	{z0.b}, p0/z, \[sp\]
-[^:]+:	a40+e3e0 	ldnt1b	{z0.b}, p0/z, \[sp\]
-[^:]+:	a40+e3e0 	ldnt1b	{z0.b}, p0/z, \[sp\]
-[^:]+:	a40+e3e0 	ldnt1b	{z0.b}, p0/z, \[sp\]
+[^:]+:	a400e060 	ldnt1b	{z0.b}, p0/z, \[x3\]
+[^:]+:	a400e060 	ldnt1b	{z0.b}, p0/z, \[x3\]
+[^:]+:	a400e060 	ldnt1b	{z0.b}, p0/z, \[x3\]
+[^:]+:	a400e060 	ldnt1b	{z0.b}, p0/z, \[x3\]
+[^:]+:	a400e3e0 	ldnt1b	{z0.b}, p0/z, \[sp\]
+[^:]+:	a400e3e0 	ldnt1b	{z0.b}, p0/z, \[sp\]
+[^:]+:	a400e3e0 	ldnt1b	{z0.b}, p0/z, \[sp\]
+[^:]+:	a400e3e0 	ldnt1b	{z0.b}, p0/z, \[sp\]
 [^:]+:	a407e000 	ldnt1b	{z0.b}, p0/z, \[x0, #7, mul vl\]
 [^:]+:	a407e000 	ldnt1b	{z0.b}, p0/z, \[x0, #7, mul vl\]
 [^:]+:	a408e000 	ldnt1b	{z0.b}, p0/z, \[x0, #-8, mul vl\]
@@ -21533,37 +21533,37 @@ Disassembly of section .*:
 [^:]+:	a504c000 	ldnt1w	{z0.s}, p0/z, \[x0, x4, lsl #2\]
 [^:]+:	a51ec000 	ldnt1w	{z0.s}, p0/z, \[x0, x30, lsl #2\]
 [^:]+:	a51ec000 	ldnt1w	{z0.s}, p0/z, \[x0, x30, lsl #2\]
-[^:]+:	a50+e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
-[^:]+:	a50+e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
-[^:]+:	a50+e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
-[^:]+:	a50+e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
-[^:]+:	a50+e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
-[^:]+:	a50+e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
-[^:]+:	a50+e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
-[^:]+:	a50+e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
-[^:]+:	a50+e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
-[^:]+:	a50+e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
-[^:]+:	a50+e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
-[^:]+:	a50+e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
-[^:]+:	a50+e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
-[^:]+:	a50+e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
-[^:]+:	a50+e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
-[^:]+:	a50+e800 	ldnt1w	{z0.s}, p2/z, \[x0\]
-[^:]+:	a50+e800 	ldnt1w	{z0.s}, p2/z, \[x0\]
-[^:]+:	a50+e800 	ldnt1w	{z0.s}, p2/z, \[x0\]
-[^:]+:	a50+e800 	ldnt1w	{z0.s}, p2/z, \[x0\]
+[^:]+:	a500e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
+[^:]+:	a500e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
+[^:]+:	a500e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
+[^:]+:	a500e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
+[^:]+:	a500e000 	ldnt1w	{z0.s}, p0/z, \[x0\]
+[^:]+:	a500e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
+[^:]+:	a500e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
+[^:]+:	a500e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
+[^:]+:	a500e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
+[^:]+:	a500e001 	ldnt1w	{z1.s}, p0/z, \[x0\]
+[^:]+:	a500e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
+[^:]+:	a500e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
+[^:]+:	a500e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
+[^:]+:	a500e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
+[^:]+:	a500e01f 	ldnt1w	{z31.s}, p0/z, \[x0\]
+[^:]+:	a500e800 	ldnt1w	{z0.s}, p2/z, \[x0\]
+[^:]+:	a500e800 	ldnt1w	{z0.s}, p2/z, \[x0\]
+[^:]+:	a500e800 	ldnt1w	{z0.s}, p2/z, \[x0\]
+[^:]+:	a500e800 	ldnt1w	{z0.s}, p2/z, \[x0\]
 [^:]+:	a500fc00 	ldnt1w	{z0.s}, p7/z, \[x0\]
 [^:]+:	a500fc00 	ldnt1w	{z0.s}, p7/z, \[x0\]
 [^:]+:	a500fc00 	ldnt1w	{z0.s}, p7/z, \[x0\]
 [^:]+:	a500fc00 	ldnt1w	{z0.s}, p7/z, \[x0\]
-[^:]+:	a50+e060 	ldnt1w	{z0.s}, p0/z, \[x3\]
-[^:]+:	a50+e060 	ldnt1w	{z0.s}, p0/z, \[x3\]
-[^:]+:	a50+e060 	ldnt1w	{z0.s}, p0/z, \[x3\]
-[^:]+:	a50+e060 	ldnt1w	{z0.s}, p0/z, \[x3\]
-[^:]+:	a50+e3e0 	ldnt1w	{z0.s}, p0/z, \[sp\]
-[^:]+:	a50+e3e0 	ldnt1w	{z0.s}, p0/z, \[sp\]
-[^:]+:	a50+e3e0 	ldnt1w	{z0.s}, p0/z, \[sp\]
-[^:]+:	a50+e3e0 	ldnt1w	{z0.s}, p0/z, \[sp\]
+[^:]+:	a500e060 	ldnt1w	{z0.s}, p0/z, \[x3\]
+[^:]+:	a500e060 	ldnt1w	{z0.s}, p0/z, \[x3\]
+[^:]+:	a500e060 	ldnt1w	{z0.s}, p0/z, \[x3\]
+[^:]+:	a500e060 	ldnt1w	{z0.s}, p0/z, \[x3\]
+[^:]+:	a500e3e0 	ldnt1w	{z0.s}, p0/z, \[sp\]
+[^:]+:	a500e3e0 	ldnt1w	{z0.s}, p0/z, \[sp\]
+[^:]+:	a500e3e0 	ldnt1w	{z0.s}, p0/z, \[sp\]
+[^:]+:	a500e3e0 	ldnt1w	{z0.s}, p0/z, \[sp\]
 [^:]+:	a507e000 	ldnt1w	{z0.s}, p0/z, \[x0, #7, mul vl\]
 [^:]+:	a507e000 	ldnt1w	{z0.s}, p0/z, \[x0, #7, mul vl\]
 [^:]+:	a508e000 	ldnt1w	{z0.s}, p0/z, \[x0, #-8, mul vl\]
@@ -23188,24 +23188,24 @@ Disassembly of section .*:
 [^:]+:	04c46000 	mls	z0.d, p0/m, z0.d, z4.d
 [^:]+:	04df6000 	mls	z0.d, p0/m, z0.d, z31.d
 [^:]+:	04df6000 	mls	z0.d, p0/m, z0.d, z31.d
-[^:]+:	040+e000 	msb	z0.b, p0/m, z0.b, z0.b
-[^:]+:	040+e000 	msb	z0.b, p0/m, z0.b, z0.b
-[^:]+:	040+e001 	msb	z1.b, p0/m, z0.b, z0.b
-[^:]+:	040+e001 	msb	z1.b, p0/m, z0.b, z0.b
-[^:]+:	040+e01f 	msb	z31.b, p0/m, z0.b, z0.b
-[^:]+:	040+e01f 	msb	z31.b, p0/m, z0.b, z0.b
-[^:]+:	040+e800 	msb	z0.b, p2/m, z0.b, z0.b
-[^:]+:	040+e800 	msb	z0.b, p2/m, z0.b, z0.b
+[^:]+:	0400e000 	msb	z0.b, p0/m, z0.b, z0.b
+[^:]+:	0400e000 	msb	z0.b, p0/m, z0.b, z0.b
+[^:]+:	0400e001 	msb	z1.b, p0/m, z0.b, z0.b
+[^:]+:	0400e001 	msb	z1.b, p0/m, z0.b, z0.b
+[^:]+:	0400e01f 	msb	z31.b, p0/m, z0.b, z0.b
+[^:]+:	0400e01f 	msb	z31.b, p0/m, z0.b, z0.b
+[^:]+:	0400e800 	msb	z0.b, p2/m, z0.b, z0.b
+[^:]+:	0400e800 	msb	z0.b, p2/m, z0.b, z0.b
 [^:]+:	0400fc00 	msb	z0.b, p7/m, z0.b, z0.b
 [^:]+:	0400fc00 	msb	z0.b, p7/m, z0.b, z0.b
 [^:]+:	0403e000 	msb	z0.b, p0/m, z3.b, z0.b
 [^:]+:	0403e000 	msb	z0.b, p0/m, z3.b, z0.b
 [^:]+:	041fe000 	msb	z0.b, p0/m, z31.b, z0.b
 [^:]+:	041fe000 	msb	z0.b, p0/m, z31.b, z0.b
-[^:]+:	040+e080 	msb	z0.b, p0/m, z0.b, z4.b
-[^:]+:	040+e080 	msb	z0.b, p0/m, z0.b, z4.b
-[^:]+:	040+e3e0 	msb	z0.b, p0/m, z0.b, z31.b
-[^:]+:	040+e3e0 	msb	z0.b, p0/m, z0.b, z31.b
+[^:]+:	0400e080 	msb	z0.b, p0/m, z0.b, z4.b
+[^:]+:	0400e080 	msb	z0.b, p0/m, z0.b, z4.b
+[^:]+:	0400e3e0 	msb	z0.b, p0/m, z0.b, z31.b
+[^:]+:	0400e3e0 	msb	z0.b, p0/m, z0.b, z31.b
 [^:]+:	0440e000 	msb	z0.h, p0/m, z0.h, z0.h
 [^:]+:	0440e000 	msb	z0.h, p0/m, z0.h, z0.h
 [^:]+:	0440e001 	msb	z1.h, p0/m, z0.h, z0.h
@@ -23668,11 +23668,11 @@ Disassembly of section .*:
 [^:]+:	05000c00 	orr	z0.h, z0.h, #0x8000
 [^:]+:	05000c00 	orr	z0.h, z0.h, #0x8000
 [^:]+:	05000c00 	orr	z0.h, z0.h, #0x8000
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
 [^:]+:	05001e80 	orr	z0.b, z0.b, #0xe3
 [^:]+:	05001e80 	orr	z0.b, z0.b, #0xe3
 [^:]+:	05001e80 	orr	z0.b, z0.b, #0xe3
@@ -23947,9 +23947,9 @@ Disassembly of section .*:
 [^:]+:	8400c00d 	prfb	pstl3strm, p0, \[x0, x0\]
 [^:]+:	8400c00d 	prfb	pstl3strm, p0, \[x0, x0\]
 [^:]+:	8400c00d 	prfb	pstl3strm, p0, \[x0, x0\]
-[^:]+:	8400c0+e 	prfb	#14, p0, \[x0, x0\]
-[^:]+:	8400c0+e 	prfb	#14, p0, \[x0, x0\]
-[^:]+:	8400c0+e 	prfb	#14, p0, \[x0, x0\]
+[^:]+:	8400c00e 	prfb	#14, p0, \[x0, x0\]
+[^:]+:	8400c00e 	prfb	#14, p0, \[x0, x0\]
+[^:]+:	8400c00e 	prfb	#14, p0, \[x0, x0\]
 [^:]+:	8400c00f 	prfb	#15, p0, \[x0, x0\]
 [^:]+:	8400c00f 	prfb	#15, p0, \[x0, x0\]
 [^:]+:	8400c00f 	prfb	#15, p0, \[x0, x0\]
@@ -24013,9 +24013,9 @@ Disassembly of section .*:
 [^:]+:	8420000d 	prfb	pstl3strm, p0, \[x0, z0.s, uxtw\]
 [^:]+:	8420000d 	prfb	pstl3strm, p0, \[x0, z0.s, uxtw\]
 [^:]+:	8420000d 	prfb	pstl3strm, p0, \[x0, z0.s, uxtw\]
-[^:]+:	8420+e 	prfb	#14, p0, \[x0, z0.s, uxtw\]
-[^:]+:	8420+e 	prfb	#14, p0, \[x0, z0.s, uxtw\]
-[^:]+:	8420+e 	prfb	#14, p0, \[x0, z0.s, uxtw\]
+[^:]+:	8420000e 	prfb	#14, p0, \[x0, z0.s, uxtw\]
+[^:]+:	8420000e 	prfb	#14, p0, \[x0, z0.s, uxtw\]
+[^:]+:	8420000e 	prfb	#14, p0, \[x0, z0.s, uxtw\]
 [^:]+:	8420000f 	prfb	#15, p0, \[x0, z0.s, uxtw\]
 [^:]+:	8420000f 	prfb	#15, p0, \[x0, z0.s, uxtw\]
 [^:]+:	8420000f 	prfb	#15, p0, \[x0, z0.s, uxtw\]
@@ -24079,9 +24079,9 @@ Disassembly of section .*:
 [^:]+:	8460000d 	prfb	pstl3strm, p0, \[x0, z0.s, sxtw\]
 [^:]+:	8460000d 	prfb	pstl3strm, p0, \[x0, z0.s, sxtw\]
 [^:]+:	8460000d 	prfb	pstl3strm, p0, \[x0, z0.s, sxtw\]
-[^:]+:	8460+e 	prfb	#14, p0, \[x0, z0.s, sxtw\]
-[^:]+:	8460+e 	prfb	#14, p0, \[x0, z0.s, sxtw\]
-[^:]+:	8460+e 	prfb	#14, p0, \[x0, z0.s, sxtw\]
+[^:]+:	8460000e 	prfb	#14, p0, \[x0, z0.s, sxtw\]
+[^:]+:	8460000e 	prfb	#14, p0, \[x0, z0.s, sxtw\]
+[^:]+:	8460000e 	prfb	#14, p0, \[x0, z0.s, sxtw\]
 [^:]+:	8460000f 	prfb	#15, p0, \[x0, z0.s, sxtw\]
 [^:]+:	8460000f 	prfb	#15, p0, \[x0, z0.s, sxtw\]
 [^:]+:	8460000f 	prfb	#15, p0, \[x0, z0.s, sxtw\]
@@ -24145,9 +24145,9 @@ Disassembly of section .*:
 [^:]+:	c420000d 	prfb	pstl3strm, p0, \[x0, z0.d, uxtw\]
 [^:]+:	c420000d 	prfb	pstl3strm, p0, \[x0, z0.d, uxtw\]
 [^:]+:	c420000d 	prfb	pstl3strm, p0, \[x0, z0.d, uxtw\]
-[^:]+:	c420+e 	prfb	#14, p0, \[x0, z0.d, uxtw\]
-[^:]+:	c420+e 	prfb	#14, p0, \[x0, z0.d, uxtw\]
-[^:]+:	c420+e 	prfb	#14, p0, \[x0, z0.d, uxtw\]
+[^:]+:	c420000e 	prfb	#14, p0, \[x0, z0.d, uxtw\]
+[^:]+:	c420000e 	prfb	#14, p0, \[x0, z0.d, uxtw\]
+[^:]+:	c420000e 	prfb	#14, p0, \[x0, z0.d, uxtw\]
 [^:]+:	c420000f 	prfb	#15, p0, \[x0, z0.d, uxtw\]
 [^:]+:	c420000f 	prfb	#15, p0, \[x0, z0.d, uxtw\]
 [^:]+:	c420000f 	prfb	#15, p0, \[x0, z0.d, uxtw\]
@@ -24211,9 +24211,9 @@ Disassembly of section .*:
 [^:]+:	c460000d 	prfb	pstl3strm, p0, \[x0, z0.d, sxtw\]
 [^:]+:	c460000d 	prfb	pstl3strm, p0, \[x0, z0.d, sxtw\]
 [^:]+:	c460000d 	prfb	pstl3strm, p0, \[x0, z0.d, sxtw\]
-[^:]+:	c460+e 	prfb	#14, p0, \[x0, z0.d, sxtw\]
-[^:]+:	c460+e 	prfb	#14, p0, \[x0, z0.d, sxtw\]
-[^:]+:	c460+e 	prfb	#14, p0, \[x0, z0.d, sxtw\]
+[^:]+:	c460000e 	prfb	#14, p0, \[x0, z0.d, sxtw\]
+[^:]+:	c460000e 	prfb	#14, p0, \[x0, z0.d, sxtw\]
+[^:]+:	c460000e 	prfb	#14, p0, \[x0, z0.d, sxtw\]
 [^:]+:	c460000f 	prfb	#15, p0, \[x0, z0.d, sxtw\]
 [^:]+:	c460000f 	prfb	#15, p0, \[x0, z0.d, sxtw\]
 [^:]+:	c460000f 	prfb	#15, p0, \[x0, z0.d, sxtw\]
@@ -24277,9 +24277,9 @@ Disassembly of section .*:
 [^:]+:	c460800d 	prfb	pstl3strm, p0, \[x0, z0.d\]
 [^:]+:	c460800d 	prfb	pstl3strm, p0, \[x0, z0.d\]
 [^:]+:	c460800d 	prfb	pstl3strm, p0, \[x0, z0.d\]
-[^:]+:	c46080+e 	prfb	#14, p0, \[x0, z0.d\]
-[^:]+:	c46080+e 	prfb	#14, p0, \[x0, z0.d\]
-[^:]+:	c46080+e 	prfb	#14, p0, \[x0, z0.d\]
+[^:]+:	c460800e 	prfb	#14, p0, \[x0, z0.d\]
+[^:]+:	c460800e 	prfb	#14, p0, \[x0, z0.d\]
+[^:]+:	c460800e 	prfb	#14, p0, \[x0, z0.d\]
 [^:]+:	c460800f 	prfb	#15, p0, \[x0, z0.d\]
 [^:]+:	c460800f 	prfb	#15, p0, \[x0, z0.d\]
 [^:]+:	c460800f 	prfb	#15, p0, \[x0, z0.d\]
@@ -24301,66 +24301,66 @@ Disassembly of section .*:
 [^:]+:	c47f8000 	prfb	pldl1keep, p0, \[x0, z31.d\]
 [^:]+:	c47f8000 	prfb	pldl1keep, p0, \[x0, z31.d\]
 [^:]+:	c47f8000 	prfb	pldl1keep, p0, \[x0, z31.d\]
-[^:]+:	840+e000 	prfb	pldl1keep, p0, \[z0.s\]
-[^:]+:	840+e000 	prfb	pldl1keep, p0, \[z0.s\]
-[^:]+:	840+e000 	prfb	pldl1keep, p0, \[z0.s\]
-[^:]+:	840+e001 	prfb	pldl1strm, p0, \[z0.s\]
-[^:]+:	840+e001 	prfb	pldl1strm, p0, \[z0.s\]
-[^:]+:	840+e001 	prfb	pldl1strm, p0, \[z0.s\]
-[^:]+:	840+e002 	prfb	pldl2keep, p0, \[z0.s\]
-[^:]+:	840+e002 	prfb	pldl2keep, p0, \[z0.s\]
-[^:]+:	840+e002 	prfb	pldl2keep, p0, \[z0.s\]
-[^:]+:	840+e003 	prfb	pldl2strm, p0, \[z0.s\]
-[^:]+:	840+e003 	prfb	pldl2strm, p0, \[z0.s\]
-[^:]+:	840+e003 	prfb	pldl2strm, p0, \[z0.s\]
-[^:]+:	840+e004 	prfb	pldl3keep, p0, \[z0.s\]
-[^:]+:	840+e004 	prfb	pldl3keep, p0, \[z0.s\]
-[^:]+:	840+e004 	prfb	pldl3keep, p0, \[z0.s\]
-[^:]+:	840+e005 	prfb	pldl3strm, p0, \[z0.s\]
-[^:]+:	840+e005 	prfb	pldl3strm, p0, \[z0.s\]
-[^:]+:	840+e005 	prfb	pldl3strm, p0, \[z0.s\]
-[^:]+:	840+e006 	prfb	#6, p0, \[z0.s\]
-[^:]+:	840+e006 	prfb	#6, p0, \[z0.s\]
-[^:]+:	840+e006 	prfb	#6, p0, \[z0.s\]
-[^:]+:	840+e007 	prfb	#7, p0, \[z0.s\]
-[^:]+:	840+e007 	prfb	#7, p0, \[z0.s\]
-[^:]+:	840+e007 	prfb	#7, p0, \[z0.s\]
-[^:]+:	840+e008 	prfb	pstl1keep, p0, \[z0.s\]
-[^:]+:	840+e008 	prfb	pstl1keep, p0, \[z0.s\]
-[^:]+:	840+e008 	prfb	pstl1keep, p0, \[z0.s\]
-[^:]+:	840+e009 	prfb	pstl1strm, p0, \[z0.s\]
-[^:]+:	840+e009 	prfb	pstl1strm, p0, \[z0.s\]
-[^:]+:	840+e009 	prfb	pstl1strm, p0, \[z0.s\]
-[^:]+:	840+e00a 	prfb	pstl2keep, p0, \[z0.s\]
-[^:]+:	840+e00a 	prfb	pstl2keep, p0, \[z0.s\]
-[^:]+:	840+e00a 	prfb	pstl2keep, p0, \[z0.s\]
-[^:]+:	840+e00b 	prfb	pstl2strm, p0, \[z0.s\]
-[^:]+:	840+e00b 	prfb	pstl2strm, p0, \[z0.s\]
-[^:]+:	840+e00b 	prfb	pstl2strm, p0, \[z0.s\]
-[^:]+:	840+e00c 	prfb	pstl3keep, p0, \[z0.s\]
-[^:]+:	840+e00c 	prfb	pstl3keep, p0, \[z0.s\]
-[^:]+:	840+e00c 	prfb	pstl3keep, p0, \[z0.s\]
-[^:]+:	840+e00d 	prfb	pstl3strm, p0, \[z0.s\]
-[^:]+:	840+e00d 	prfb	pstl3strm, p0, \[z0.s\]
-[^:]+:	840+e00d 	prfb	pstl3strm, p0, \[z0.s\]
-[^:]+:	840+e0+e 	prfb	#14, p0, \[z0.s\]
-[^:]+:	840+e0+e 	prfb	#14, p0, \[z0.s\]
-[^:]+:	840+e0+e 	prfb	#14, p0, \[z0.s\]
-[^:]+:	840+e00f 	prfb	#15, p0, \[z0.s\]
-[^:]+:	840+e00f 	prfb	#15, p0, \[z0.s\]
-[^:]+:	840+e00f 	prfb	#15, p0, \[z0.s\]
-[^:]+:	840+e800 	prfb	pldl1keep, p2, \[z0.s\]
-[^:]+:	840+e800 	prfb	pldl1keep, p2, \[z0.s\]
-[^:]+:	840+e800 	prfb	pldl1keep, p2, \[z0.s\]
+[^:]+:	8400e000 	prfb	pldl1keep, p0, \[z0.s\]
+[^:]+:	8400e000 	prfb	pldl1keep, p0, \[z0.s\]
+[^:]+:	8400e000 	prfb	pldl1keep, p0, \[z0.s\]
+[^:]+:	8400e001 	prfb	pldl1strm, p0, \[z0.s\]
+[^:]+:	8400e001 	prfb	pldl1strm, p0, \[z0.s\]
+[^:]+:	8400e001 	prfb	pldl1strm, p0, \[z0.s\]
+[^:]+:	8400e002 	prfb	pldl2keep, p0, \[z0.s\]
+[^:]+:	8400e002 	prfb	pldl2keep, p0, \[z0.s\]
+[^:]+:	8400e002 	prfb	pldl2keep, p0, \[z0.s\]
+[^:]+:	8400e003 	prfb	pldl2strm, p0, \[z0.s\]
+[^:]+:	8400e003 	prfb	pldl2strm, p0, \[z0.s\]
+[^:]+:	8400e003 	prfb	pldl2strm, p0, \[z0.s\]
+[^:]+:	8400e004 	prfb	pldl3keep, p0, \[z0.s\]
+[^:]+:	8400e004 	prfb	pldl3keep, p0, \[z0.s\]
+[^:]+:	8400e004 	prfb	pldl3keep, p0, \[z0.s\]
+[^:]+:	8400e005 	prfb	pldl3strm, p0, \[z0.s\]
+[^:]+:	8400e005 	prfb	pldl3strm, p0, \[z0.s\]
+[^:]+:	8400e005 	prfb	pldl3strm, p0, \[z0.s\]
+[^:]+:	8400e006 	prfb	#6, p0, \[z0.s\]
+[^:]+:	8400e006 	prfb	#6, p0, \[z0.s\]
+[^:]+:	8400e006 	prfb	#6, p0, \[z0.s\]
+[^:]+:	8400e007 	prfb	#7, p0, \[z0.s\]
+[^:]+:	8400e007 	prfb	#7, p0, \[z0.s\]
+[^:]+:	8400e007 	prfb	#7, p0, \[z0.s\]
+[^:]+:	8400e008 	prfb	pstl1keep, p0, \[z0.s\]
+[^:]+:	8400e008 	prfb	pstl1keep, p0, \[z0.s\]
+[^:]+:	8400e008 	prfb	pstl1keep, p0, \[z0.s\]
+[^:]+:	8400e009 	prfb	pstl1strm, p0, \[z0.s\]
+[^:]+:	8400e009 	prfb	pstl1strm, p0, \[z0.s\]
+[^:]+:	8400e009 	prfb	pstl1strm, p0, \[z0.s\]
+[^:]+:	8400e00a 	prfb	pstl2keep, p0, \[z0.s\]
+[^:]+:	8400e00a 	prfb	pstl2keep, p0, \[z0.s\]
+[^:]+:	8400e00a 	prfb	pstl2keep, p0, \[z0.s\]
+[^:]+:	8400e00b 	prfb	pstl2strm, p0, \[z0.s\]
+[^:]+:	8400e00b 	prfb	pstl2strm, p0, \[z0.s\]
+[^:]+:	8400e00b 	prfb	pstl2strm, p0, \[z0.s\]
+[^:]+:	8400e00c 	prfb	pstl3keep, p0, \[z0.s\]
+[^:]+:	8400e00c 	prfb	pstl3keep, p0, \[z0.s\]
+[^:]+:	8400e00c 	prfb	pstl3keep, p0, \[z0.s\]
+[^:]+:	8400e00d 	prfb	pstl3strm, p0, \[z0.s\]
+[^:]+:	8400e00d 	prfb	pstl3strm, p0, \[z0.s\]
+[^:]+:	8400e00d 	prfb	pstl3strm, p0, \[z0.s\]
+[^:]+:	8400e00e 	prfb	#14, p0, \[z0.s\]
+[^:]+:	8400e00e 	prfb	#14, p0, \[z0.s\]
+[^:]+:	8400e00e 	prfb	#14, p0, \[z0.s\]
+[^:]+:	8400e00f 	prfb	#15, p0, \[z0.s\]
+[^:]+:	8400e00f 	prfb	#15, p0, \[z0.s\]
+[^:]+:	8400e00f 	prfb	#15, p0, \[z0.s\]
+[^:]+:	8400e800 	prfb	pldl1keep, p2, \[z0.s\]
+[^:]+:	8400e800 	prfb	pldl1keep, p2, \[z0.s\]
+[^:]+:	8400e800 	prfb	pldl1keep, p2, \[z0.s\]
 [^:]+:	8400fc00 	prfb	pldl1keep, p7, \[z0.s\]
 [^:]+:	8400fc00 	prfb	pldl1keep, p7, \[z0.s\]
 [^:]+:	8400fc00 	prfb	pldl1keep, p7, \[z0.s\]
-[^:]+:	840+e060 	prfb	pldl1keep, p0, \[z3.s\]
-[^:]+:	840+e060 	prfb	pldl1keep, p0, \[z3.s\]
-[^:]+:	840+e060 	prfb	pldl1keep, p0, \[z3.s\]
-[^:]+:	840+e3e0 	prfb	pldl1keep, p0, \[z31.s\]
-[^:]+:	840+e3e0 	prfb	pldl1keep, p0, \[z31.s\]
-[^:]+:	840+e3e0 	prfb	pldl1keep, p0, \[z31.s\]
+[^:]+:	8400e060 	prfb	pldl1keep, p0, \[z3.s\]
+[^:]+:	8400e060 	prfb	pldl1keep, p0, \[z3.s\]
+[^:]+:	8400e060 	prfb	pldl1keep, p0, \[z3.s\]
+[^:]+:	8400e3e0 	prfb	pldl1keep, p0, \[z31.s\]
+[^:]+:	8400e3e0 	prfb	pldl1keep, p0, \[z31.s\]
+[^:]+:	8400e3e0 	prfb	pldl1keep, p0, \[z31.s\]
 [^:]+:	840fe000 	prfb	pldl1keep, p0, \[z0.s, #15\]
 [^:]+:	840fe000 	prfb	pldl1keep, p0, \[z0.s, #15\]
 [^:]+:	8410e000 	prfb	pldl1keep, p0, \[z0.s, #16\]
@@ -24425,10 +24425,10 @@ Disassembly of section .*:
 [^:]+:	85c0000d 	prfb	pstl3strm, p0, \[x0\]
 [^:]+:	85c0000d 	prfb	pstl3strm, p0, \[x0\]
 [^:]+:	85c0000d 	prfb	pstl3strm, p0, \[x0\]
-[^:]+:	85c0+e 	prfb	#14, p0, \[x0\]
-[^:]+:	85c0+e 	prfb	#14, p0, \[x0\]
-[^:]+:	85c0+e 	prfb	#14, p0, \[x0\]
-[^:]+:	85c0+e 	prfb	#14, p0, \[x0\]
+[^:]+:	85c0000e 	prfb	#14, p0, \[x0\]
+[^:]+:	85c0000e 	prfb	#14, p0, \[x0\]
+[^:]+:	85c0000e 	prfb	#14, p0, \[x0\]
+[^:]+:	85c0000e 	prfb	#14, p0, \[x0\]
 [^:]+:	85c0000f 	prfb	#15, p0, \[x0\]
 [^:]+:	85c0000f 	prfb	#15, p0, \[x0\]
 [^:]+:	85c0000f 	prfb	#15, p0, \[x0\]
@@ -24457,66 +24457,66 @@ Disassembly of section .*:
 [^:]+:	85e10000 	prfb	pldl1keep, p0, \[x0, #-31, mul vl\]
 [^:]+:	85ff0000 	prfb	pldl1keep, p0, \[x0, #-1, mul vl\]
 [^:]+:	85ff0000 	prfb	pldl1keep, p0, \[x0, #-1, mul vl\]
-[^:]+:	c40+e000 	prfb	pldl1keep, p0, \[z0.d\]
-[^:]+:	c40+e000 	prfb	pldl1keep, p0, \[z0.d\]
-[^:]+:	c40+e000 	prfb	pldl1keep, p0, \[z0.d\]
-[^:]+:	c40+e001 	prfb	pldl1strm, p0, \[z0.d\]
-[^:]+:	c40+e001 	prfb	pldl1strm, p0, \[z0.d\]
-[^:]+:	c40+e001 	prfb	pldl1strm, p0, \[z0.d\]
-[^:]+:	c40+e002 	prfb	pldl2keep, p0, \[z0.d\]
-[^:]+:	c40+e002 	prfb	pldl2keep, p0, \[z0.d\]
-[^:]+:	c40+e002 	prfb	pldl2keep, p0, \[z0.d\]
-[^:]+:	c40+e003 	prfb	pldl2strm, p0, \[z0.d\]
-[^:]+:	c40+e003 	prfb	pldl2strm, p0, \[z0.d\]
-[^:]+:	c40+e003 	prfb	pldl2strm, p0, \[z0.d\]
-[^:]+:	c40+e004 	prfb	pldl3keep, p0, \[z0.d\]
-[^:]+:	c40+e004 	prfb	pldl3keep, p0, \[z0.d\]
-[^:]+:	c40+e004 	prfb	pldl3keep, p0, \[z0.d\]
-[^:]+:	c40+e005 	prfb	pldl3strm, p0, \[z0.d\]
-[^:]+:	c40+e005 	prfb	pldl3strm, p0, \[z0.d\]
-[^:]+:	c40+e005 	prfb	pldl3strm, p0, \[z0.d\]
-[^:]+:	c40+e006 	prfb	#6, p0, \[z0.d\]
-[^:]+:	c40+e006 	prfb	#6, p0, \[z0.d\]
-[^:]+:	c40+e006 	prfb	#6, p0, \[z0.d\]
-[^:]+:	c40+e007 	prfb	#7, p0, \[z0.d\]
-[^:]+:	c40+e007 	prfb	#7, p0, \[z0.d\]
-[^:]+:	c40+e007 	prfb	#7, p0, \[z0.d\]
-[^:]+:	c40+e008 	prfb	pstl1keep, p0, \[z0.d\]
-[^:]+:	c40+e008 	prfb	pstl1keep, p0, \[z0.d\]
-[^:]+:	c40+e008 	prfb	pstl1keep, p0, \[z0.d\]
-[^:]+:	c40+e009 	prfb	pstl1strm, p0, \[z0.d\]
-[^:]+:	c40+e009 	prfb	pstl1strm, p0, \[z0.d\]
-[^:]+:	c40+e009 	prfb	pstl1strm, p0, \[z0.d\]
-[^:]+:	c40+e00a 	prfb	pstl2keep, p0, \[z0.d\]
-[^:]+:	c40+e00a 	prfb	pstl2keep, p0, \[z0.d\]
-[^:]+:	c40+e00a 	prfb	pstl2keep, p0, \[z0.d\]
-[^:]+:	c40+e00b 	prfb	pstl2strm, p0, \[z0.d\]
-[^:]+:	c40+e00b 	prfb	pstl2strm, p0, \[z0.d\]
-[^:]+:	c40+e00b 	prfb	pstl2strm, p0, \[z0.d\]
-[^:]+:	c40+e00c 	prfb	pstl3keep, p0, \[z0.d\]
-[^:]+:	c40+e00c 	prfb	pstl3keep, p0, \[z0.d\]
-[^:]+:	c40+e00c 	prfb	pstl3keep, p0, \[z0.d\]
-[^:]+:	c40+e00d 	prfb	pstl3strm, p0, \[z0.d\]
-[^:]+:	c40+e00d 	prfb	pstl3strm, p0, \[z0.d\]
-[^:]+:	c40+e00d 	prfb	pstl3strm, p0, \[z0.d\]
-[^:]+:	c40+e0+e 	prfb	#14, p0, \[z0.d\]
-[^:]+:	c40+e0+e 	prfb	#14, p0, \[z0.d\]
-[^:]+:	c40+e0+e 	prfb	#14, p0, \[z0.d\]
-[^:]+:	c40+e00f 	prfb	#15, p0, \[z0.d\]
-[^:]+:	c40+e00f 	prfb	#15, p0, \[z0.d\]
-[^:]+:	c40+e00f 	prfb	#15, p0, \[z0.d\]
-[^:]+:	c40+e800 	prfb	pldl1keep, p2, \[z0.d\]
-[^:]+:	c40+e800 	prfb	pldl1keep, p2, \[z0.d\]
-[^:]+:	c40+e800 	prfb	pldl1keep, p2, \[z0.d\]
+[^:]+:	c400e000 	prfb	pldl1keep, p0, \[z0.d\]
+[^:]+:	c400e000 	prfb	pldl1keep, p0, \[z0.d\]
+[^:]+:	c400e000 	prfb	pldl1keep, p0, \[z0.d\]
+[^:]+:	c400e001 	prfb	pldl1strm, p0, \[z0.d\]
+[^:]+:	c400e001 	prfb	pldl1strm, p0, \[z0.d\]
+[^:]+:	c400e001 	prfb	pldl1strm, p0, \[z0.d\]
+[^:]+:	c400e002 	prfb	pldl2keep, p0, \[z0.d\]
+[^:]+:	c400e002 	prfb	pldl2keep, p0, \[z0.d\]
+[^:]+:	c400e002 	prfb	pldl2keep, p0, \[z0.d\]
+[^:]+:	c400e003 	prfb	pldl2strm, p0, \[z0.d\]
+[^:]+:	c400e003 	prfb	pldl2strm, p0, \[z0.d\]
+[^:]+:	c400e003 	prfb	pldl2strm, p0, \[z0.d\]
+[^:]+:	c400e004 	prfb	pldl3keep, p0, \[z0.d\]
+[^:]+:	c400e004 	prfb	pldl3keep, p0, \[z0.d\]
+[^:]+:	c400e004 	prfb	pldl3keep, p0, \[z0.d\]
+[^:]+:	c400e005 	prfb	pldl3strm, p0, \[z0.d\]
+[^:]+:	c400e005 	prfb	pldl3strm, p0, \[z0.d\]
+[^:]+:	c400e005 	prfb	pldl3strm, p0, \[z0.d\]
+[^:]+:	c400e006 	prfb	#6, p0, \[z0.d\]
+[^:]+:	c400e006 	prfb	#6, p0, \[z0.d\]
+[^:]+:	c400e006 	prfb	#6, p0, \[z0.d\]
+[^:]+:	c400e007 	prfb	#7, p0, \[z0.d\]
+[^:]+:	c400e007 	prfb	#7, p0, \[z0.d\]
+[^:]+:	c400e007 	prfb	#7, p0, \[z0.d\]
+[^:]+:	c400e008 	prfb	pstl1keep, p0, \[z0.d\]
+[^:]+:	c400e008 	prfb	pstl1keep, p0, \[z0.d\]
+[^:]+:	c400e008 	prfb	pstl1keep, p0, \[z0.d\]
+[^:]+:	c400e009 	prfb	pstl1strm, p0, \[z0.d\]
+[^:]+:	c400e009 	prfb	pstl1strm, p0, \[z0.d\]
+[^:]+:	c400e009 	prfb	pstl1strm, p0, \[z0.d\]
+[^:]+:	c400e00a 	prfb	pstl2keep, p0, \[z0.d\]
+[^:]+:	c400e00a 	prfb	pstl2keep, p0, \[z0.d\]
+[^:]+:	c400e00a 	prfb	pstl2keep, p0, \[z0.d\]
+[^:]+:	c400e00b 	prfb	pstl2strm, p0, \[z0.d\]
+[^:]+:	c400e00b 	prfb	pstl2strm, p0, \[z0.d\]
+[^:]+:	c400e00b 	prfb	pstl2strm, p0, \[z0.d\]
+[^:]+:	c400e00c 	prfb	pstl3keep, p0, \[z0.d\]
+[^:]+:	c400e00c 	prfb	pstl3keep, p0, \[z0.d\]
+[^:]+:	c400e00c 	prfb	pstl3keep, p0, \[z0.d\]
+[^:]+:	c400e00d 	prfb	pstl3strm, p0, \[z0.d\]
+[^:]+:	c400e00d 	prfb	pstl3strm, p0, \[z0.d\]
+[^:]+:	c400e00d 	prfb	pstl3strm, p0, \[z0.d\]
+[^:]+:	c400e00e 	prfb	#14, p0, \[z0.d\]
+[^:]+:	c400e00e 	prfb	#14, p0, \[z0.d\]
+[^:]+:	c400e00e 	prfb	#14, p0, \[z0.d\]
+[^:]+:	c400e00f 	prfb	#15, p0, \[z0.d\]
+[^:]+:	c400e00f 	prfb	#15, p0, \[z0.d\]
+[^:]+:	c400e00f 	prfb	#15, p0, \[z0.d\]
+[^:]+:	c400e800 	prfb	pldl1keep, p2, \[z0.d\]
+[^:]+:	c400e800 	prfb	pldl1keep, p2, \[z0.d\]
+[^:]+:	c400e800 	prfb	pldl1keep, p2, \[z0.d\]
 [^:]+:	c400fc00 	prfb	pldl1keep, p7, \[z0.d\]
 [^:]+:	c400fc00 	prfb	pldl1keep, p7, \[z0.d\]
 [^:]+:	c400fc00 	prfb	pldl1keep, p7, \[z0.d\]
-[^:]+:	c40+e060 	prfb	pldl1keep, p0, \[z3.d\]
-[^:]+:	c40+e060 	prfb	pldl1keep, p0, \[z3.d\]
-[^:]+:	c40+e060 	prfb	pldl1keep, p0, \[z3.d\]
-[^:]+:	c40+e3e0 	prfb	pldl1keep, p0, \[z31.d\]
-[^:]+:	c40+e3e0 	prfb	pldl1keep, p0, \[z31.d\]
-[^:]+:	c40+e3e0 	prfb	pldl1keep, p0, \[z31.d\]
+[^:]+:	c400e060 	prfb	pldl1keep, p0, \[z3.d\]
+[^:]+:	c400e060 	prfb	pldl1keep, p0, \[z3.d\]
+[^:]+:	c400e060 	prfb	pldl1keep, p0, \[z3.d\]
+[^:]+:	c400e3e0 	prfb	pldl1keep, p0, \[z31.d\]
+[^:]+:	c400e3e0 	prfb	pldl1keep, p0, \[z31.d\]
+[^:]+:	c400e3e0 	prfb	pldl1keep, p0, \[z31.d\]
 [^:]+:	c40fe000 	prfb	pldl1keep, p0, \[z0.d, #15\]
 [^:]+:	c40fe000 	prfb	pldl1keep, p0, \[z0.d, #15\]
 [^:]+:	c410e000 	prfb	pldl1keep, p0, \[z0.d, #16\]
@@ -24553,8 +24553,8 @@ Disassembly of section .*:
 [^:]+:	8420600c 	prfd	pstl3keep, p0, \[x0, z0.s, uxtw #3\]
 [^:]+:	8420600d 	prfd	pstl3strm, p0, \[x0, z0.s, uxtw #3\]
 [^:]+:	8420600d 	prfd	pstl3strm, p0, \[x0, z0.s, uxtw #3\]
-[^:]+:	842060+e 	prfd	#14, p0, \[x0, z0.s, uxtw #3\]
-[^:]+:	842060+e 	prfd	#14, p0, \[x0, z0.s, uxtw #3\]
+[^:]+:	8420600e 	prfd	#14, p0, \[x0, z0.s, uxtw #3\]
+[^:]+:	8420600e 	prfd	#14, p0, \[x0, z0.s, uxtw #3\]
 [^:]+:	8420600f 	prfd	#15, p0, \[x0, z0.s, uxtw #3\]
 [^:]+:	8420600f 	prfd	#15, p0, \[x0, z0.s, uxtw #3\]
 [^:]+:	84206800 	prfd	pldl1keep, p2, \[x0, z0.s, uxtw #3\]
@@ -24597,8 +24597,8 @@ Disassembly of section .*:
 [^:]+:	8460600c 	prfd	pstl3keep, p0, \[x0, z0.s, sxtw #3\]
 [^:]+:	8460600d 	prfd	pstl3strm, p0, \[x0, z0.s, sxtw #3\]
 [^:]+:	8460600d 	prfd	pstl3strm, p0, \[x0, z0.s, sxtw #3\]
-[^:]+:	846060+e 	prfd	#14, p0, \[x0, z0.s, sxtw #3\]
-[^:]+:	846060+e 	prfd	#14, p0, \[x0, z0.s, sxtw #3\]
+[^:]+:	8460600e 	prfd	#14, p0, \[x0, z0.s, sxtw #3\]
+[^:]+:	8460600e 	prfd	#14, p0, \[x0, z0.s, sxtw #3\]
 [^:]+:	8460600f 	prfd	#15, p0, \[x0, z0.s, sxtw #3\]
 [^:]+:	8460600f 	prfd	#15, p0, \[x0, z0.s, sxtw #3\]
 [^:]+:	84606800 	prfd	pldl1keep, p2, \[x0, z0.s, sxtw #3\]
@@ -24641,8 +24641,8 @@ Disassembly of section .*:
 [^:]+:	8580c00c 	prfd	pstl3keep, p0, \[x0, x0, lsl #3\]
 [^:]+:	8580c00d 	prfd	pstl3strm, p0, \[x0, x0, lsl #3\]
 [^:]+:	8580c00d 	prfd	pstl3strm, p0, \[x0, x0, lsl #3\]
-[^:]+:	8580c0+e 	prfd	#14, p0, \[x0, x0, lsl #3\]
-[^:]+:	8580c0+e 	prfd	#14, p0, \[x0, x0, lsl #3\]
+[^:]+:	8580c00e 	prfd	#14, p0, \[x0, x0, lsl #3\]
+[^:]+:	8580c00e 	prfd	#14, p0, \[x0, x0, lsl #3\]
 [^:]+:	8580c00f 	prfd	#15, p0, \[x0, x0, lsl #3\]
 [^:]+:	8580c00f 	prfd	#15, p0, \[x0, x0, lsl #3\]
 [^:]+:	8580c800 	prfd	pldl1keep, p2, \[x0, x0, lsl #3\]
@@ -24685,8 +24685,8 @@ Disassembly of section .*:
 [^:]+:	c420600c 	prfd	pstl3keep, p0, \[x0, z0.d, uxtw #3\]
 [^:]+:	c420600d 	prfd	pstl3strm, p0, \[x0, z0.d, uxtw #3\]
 [^:]+:	c420600d 	prfd	pstl3strm, p0, \[x0, z0.d, uxtw #3\]
-[^:]+:	c42060+e 	prfd	#14, p0, \[x0, z0.d, uxtw #3\]
-[^:]+:	c42060+e 	prfd	#14, p0, \[x0, z0.d, uxtw #3\]
+[^:]+:	c420600e 	prfd	#14, p0, \[x0, z0.d, uxtw #3\]
+[^:]+:	c420600e 	prfd	#14, p0, \[x0, z0.d, uxtw #3\]
 [^:]+:	c420600f 	prfd	#15, p0, \[x0, z0.d, uxtw #3\]
 [^:]+:	c420600f 	prfd	#15, p0, \[x0, z0.d, uxtw #3\]
 [^:]+:	c4206800 	prfd	pldl1keep, p2, \[x0, z0.d, uxtw #3\]
@@ -24729,8 +24729,8 @@ Disassembly of section .*:
 [^:]+:	c460600c 	prfd	pstl3keep, p0, \[x0, z0.d, sxtw #3\]
 [^:]+:	c460600d 	prfd	pstl3strm, p0, \[x0, z0.d, sxtw #3\]
 [^:]+:	c460600d 	prfd	pstl3strm, p0, \[x0, z0.d, sxtw #3\]
-[^:]+:	c46060+e 	prfd	#14, p0, \[x0, z0.d, sxtw #3\]
-[^:]+:	c46060+e 	prfd	#14, p0, \[x0, z0.d, sxtw #3\]
+[^:]+:	c460600e 	prfd	#14, p0, \[x0, z0.d, sxtw #3\]
+[^:]+:	c460600e 	prfd	#14, p0, \[x0, z0.d, sxtw #3\]
 [^:]+:	c460600f 	prfd	#15, p0, \[x0, z0.d, sxtw #3\]
 [^:]+:	c460600f 	prfd	#15, p0, \[x0, z0.d, sxtw #3\]
 [^:]+:	c4606800 	prfd	pldl1keep, p2, \[x0, z0.d, sxtw #3\]
@@ -24773,8 +24773,8 @@ Disassembly of section .*:
 [^:]+:	c460e00c 	prfd	pstl3keep, p0, \[x0, z0.d, lsl #3\]
 [^:]+:	c460e00d 	prfd	pstl3strm, p0, \[x0, z0.d, lsl #3\]
 [^:]+:	c460e00d 	prfd	pstl3strm, p0, \[x0, z0.d, lsl #3\]
-[^:]+:	c460e0+e 	prfd	#14, p0, \[x0, z0.d, lsl #3\]
-[^:]+:	c460e0+e 	prfd	#14, p0, \[x0, z0.d, lsl #3\]
+[^:]+:	c460e00e 	prfd	#14, p0, \[x0, z0.d, lsl #3\]
+[^:]+:	c460e00e 	prfd	#14, p0, \[x0, z0.d, lsl #3\]
 [^:]+:	c460e00f 	prfd	#15, p0, \[x0, z0.d, lsl #3\]
 [^:]+:	c460e00f 	prfd	#15, p0, \[x0, z0.d, lsl #3\]
 [^:]+:	c460e800 	prfd	pldl1keep, p2, \[x0, z0.d, lsl #3\]
@@ -24831,9 +24831,9 @@ Disassembly of section .*:
 [^:]+:	8580e00d 	prfd	pstl3strm, p0, \[z0.s\]
 [^:]+:	8580e00d 	prfd	pstl3strm, p0, \[z0.s\]
 [^:]+:	8580e00d 	prfd	pstl3strm, p0, \[z0.s\]
-[^:]+:	8580e0+e 	prfd	#14, p0, \[z0.s\]
-[^:]+:	8580e0+e 	prfd	#14, p0, \[z0.s\]
-[^:]+:	8580e0+e 	prfd	#14, p0, \[z0.s\]
+[^:]+:	8580e00e 	prfd	#14, p0, \[z0.s\]
+[^:]+:	8580e00e 	prfd	#14, p0, \[z0.s\]
+[^:]+:	8580e00e 	prfd	#14, p0, \[z0.s\]
 [^:]+:	8580e00f 	prfd	#15, p0, \[z0.s\]
 [^:]+:	8580e00f 	prfd	#15, p0, \[z0.s\]
 [^:]+:	8580e00f 	prfd	#15, p0, \[z0.s\]
@@ -24913,10 +24913,10 @@ Disassembly of section .*:
 [^:]+:	85c0600d 	prfd	pstl3strm, p0, \[x0\]
 [^:]+:	85c0600d 	prfd	pstl3strm, p0, \[x0\]
 [^:]+:	85c0600d 	prfd	pstl3strm, p0, \[x0\]
-[^:]+:	85c060+e 	prfd	#14, p0, \[x0\]
-[^:]+:	85c060+e 	prfd	#14, p0, \[x0\]
-[^:]+:	85c060+e 	prfd	#14, p0, \[x0\]
-[^:]+:	85c060+e 	prfd	#14, p0, \[x0\]
+[^:]+:	85c0600e 	prfd	#14, p0, \[x0\]
+[^:]+:	85c0600e 	prfd	#14, p0, \[x0\]
+[^:]+:	85c0600e 	prfd	#14, p0, \[x0\]
+[^:]+:	85c0600e 	prfd	#14, p0, \[x0\]
 [^:]+:	85c0600f 	prfd	#15, p0, \[x0\]
 [^:]+:	85c0600f 	prfd	#15, p0, \[x0\]
 [^:]+:	85c0600f 	prfd	#15, p0, \[x0\]
@@ -24987,9 +24987,9 @@ Disassembly of section .*:
 [^:]+:	c580e00d 	prfd	pstl3strm, p0, \[z0.d\]
 [^:]+:	c580e00d 	prfd	pstl3strm, p0, \[z0.d\]
 [^:]+:	c580e00d 	prfd	pstl3strm, p0, \[z0.d\]
-[^:]+:	c580e0+e 	prfd	#14, p0, \[z0.d\]
-[^:]+:	c580e0+e 	prfd	#14, p0, \[z0.d\]
-[^:]+:	c580e0+e 	prfd	#14, p0, \[z0.d\]
+[^:]+:	c580e00e 	prfd	#14, p0, \[z0.d\]
+[^:]+:	c580e00e 	prfd	#14, p0, \[z0.d\]
+[^:]+:	c580e00e 	prfd	#14, p0, \[z0.d\]
 [^:]+:	c580e00f 	prfd	#15, p0, \[z0.d\]
 [^:]+:	c580e00f 	prfd	#15, p0, \[z0.d\]
 [^:]+:	c580e00f 	prfd	#15, p0, \[z0.d\]
@@ -25041,8 +25041,8 @@ Disassembly of section .*:
 [^:]+:	8420200c 	prfh	pstl3keep, p0, \[x0, z0.s, uxtw #1\]
 [^:]+:	8420200d 	prfh	pstl3strm, p0, \[x0, z0.s, uxtw #1\]
 [^:]+:	8420200d 	prfh	pstl3strm, p0, \[x0, z0.s, uxtw #1\]
-[^:]+:	842020+e 	prfh	#14, p0, \[x0, z0.s, uxtw #1\]
-[^:]+:	842020+e 	prfh	#14, p0, \[x0, z0.s, uxtw #1\]
+[^:]+:	8420200e 	prfh	#14, p0, \[x0, z0.s, uxtw #1\]
+[^:]+:	8420200e 	prfh	#14, p0, \[x0, z0.s, uxtw #1\]
 [^:]+:	8420200f 	prfh	#15, p0, \[x0, z0.s, uxtw #1\]
 [^:]+:	8420200f 	prfh	#15, p0, \[x0, z0.s, uxtw #1\]
 [^:]+:	84202800 	prfh	pldl1keep, p2, \[x0, z0.s, uxtw #1\]
@@ -25085,8 +25085,8 @@ Disassembly of section .*:
 [^:]+:	8460200c 	prfh	pstl3keep, p0, \[x0, z0.s, sxtw #1\]
 [^:]+:	8460200d 	prfh	pstl3strm, p0, \[x0, z0.s, sxtw #1\]
 [^:]+:	8460200d 	prfh	pstl3strm, p0, \[x0, z0.s, sxtw #1\]
-[^:]+:	846020+e 	prfh	#14, p0, \[x0, z0.s, sxtw #1\]
-[^:]+:	846020+e 	prfh	#14, p0, \[x0, z0.s, sxtw #1\]
+[^:]+:	8460200e 	prfh	#14, p0, \[x0, z0.s, sxtw #1\]
+[^:]+:	8460200e 	prfh	#14, p0, \[x0, z0.s, sxtw #1\]
 [^:]+:	8460200f 	prfh	#15, p0, \[x0, z0.s, sxtw #1\]
 [^:]+:	8460200f 	prfh	#15, p0, \[x0, z0.s, sxtw #1\]
 [^:]+:	84602800 	prfh	pldl1keep, p2, \[x0, z0.s, sxtw #1\]
@@ -25129,8 +25129,8 @@ Disassembly of section .*:
 [^:]+:	8480c00c 	prfh	pstl3keep, p0, \[x0, x0, lsl #1\]
 [^:]+:	8480c00d 	prfh	pstl3strm, p0, \[x0, x0, lsl #1\]
 [^:]+:	8480c00d 	prfh	pstl3strm, p0, \[x0, x0, lsl #1\]
-[^:]+:	8480c0+e 	prfh	#14, p0, \[x0, x0, lsl #1\]
-[^:]+:	8480c0+e 	prfh	#14, p0, \[x0, x0, lsl #1\]
+[^:]+:	8480c00e 	prfh	#14, p0, \[x0, x0, lsl #1\]
+[^:]+:	8480c00e 	prfh	#14, p0, \[x0, x0, lsl #1\]
 [^:]+:	8480c00f 	prfh	#15, p0, \[x0, x0, lsl #1\]
 [^:]+:	8480c00f 	prfh	#15, p0, \[x0, x0, lsl #1\]
 [^:]+:	8480c800 	prfh	pldl1keep, p2, \[x0, x0, lsl #1\]
@@ -25173,8 +25173,8 @@ Disassembly of section .*:
 [^:]+:	c420200c 	prfh	pstl3keep, p0, \[x0, z0.d, uxtw #1\]
 [^:]+:	c420200d 	prfh	pstl3strm, p0, \[x0, z0.d, uxtw #1\]
 [^:]+:	c420200d 	prfh	pstl3strm, p0, \[x0, z0.d, uxtw #1\]
-[^:]+:	c42020+e 	prfh	#14, p0, \[x0, z0.d, uxtw #1\]
-[^:]+:	c42020+e 	prfh	#14, p0, \[x0, z0.d, uxtw #1\]
+[^:]+:	c420200e 	prfh	#14, p0, \[x0, z0.d, uxtw #1\]
+[^:]+:	c420200e 	prfh	#14, p0, \[x0, z0.d, uxtw #1\]
 [^:]+:	c420200f 	prfh	#15, p0, \[x0, z0.d, uxtw #1\]
 [^:]+:	c420200f 	prfh	#15, p0, \[x0, z0.d, uxtw #1\]
 [^:]+:	c4202800 	prfh	pldl1keep, p2, \[x0, z0.d, uxtw #1\]
@@ -25217,8 +25217,8 @@ Disassembly of section .*:
 [^:]+:	c460200c 	prfh	pstl3keep, p0, \[x0, z0.d, sxtw #1\]
 [^:]+:	c460200d 	prfh	pstl3strm, p0, \[x0, z0.d, sxtw #1\]
 [^:]+:	c460200d 	prfh	pstl3strm, p0, \[x0, z0.d, sxtw #1\]
-[^:]+:	c46020+e 	prfh	#14, p0, \[x0, z0.d, sxtw #1\]
-[^:]+:	c46020+e 	prfh	#14, p0, \[x0, z0.d, sxtw #1\]
+[^:]+:	c460200e 	prfh	#14, p0, \[x0, z0.d, sxtw #1\]
+[^:]+:	c460200e 	prfh	#14, p0, \[x0, z0.d, sxtw #1\]
 [^:]+:	c460200f 	prfh	#15, p0, \[x0, z0.d, sxtw #1\]
 [^:]+:	c460200f 	prfh	#15, p0, \[x0, z0.d, sxtw #1\]
 [^:]+:	c4602800 	prfh	pldl1keep, p2, \[x0, z0.d, sxtw #1\]
@@ -25261,8 +25261,8 @@ Disassembly of section .*:
 [^:]+:	c460a00c 	prfh	pstl3keep, p0, \[x0, z0.d, lsl #1\]
 [^:]+:	c460a00d 	prfh	pstl3strm, p0, \[x0, z0.d, lsl #1\]
 [^:]+:	c460a00d 	prfh	pstl3strm, p0, \[x0, z0.d, lsl #1\]
-[^:]+:	c460a0+e 	prfh	#14, p0, \[x0, z0.d, lsl #1\]
-[^:]+:	c460a0+e 	prfh	#14, p0, \[x0, z0.d, lsl #1\]
+[^:]+:	c460a00e 	prfh	#14, p0, \[x0, z0.d, lsl #1\]
+[^:]+:	c460a00e 	prfh	#14, p0, \[x0, z0.d, lsl #1\]
 [^:]+:	c460a00f 	prfh	#15, p0, \[x0, z0.d, lsl #1\]
 [^:]+:	c460a00f 	prfh	#15, p0, \[x0, z0.d, lsl #1\]
 [^:]+:	c460a800 	prfh	pldl1keep, p2, \[x0, z0.d, lsl #1\]
@@ -25319,9 +25319,9 @@ Disassembly of section .*:
 [^:]+:	8480e00d 	prfh	pstl3strm, p0, \[z0.s\]
 [^:]+:	8480e00d 	prfh	pstl3strm, p0, \[z0.s\]
 [^:]+:	8480e00d 	prfh	pstl3strm, p0, \[z0.s\]
-[^:]+:	8480e0+e 	prfh	#14, p0, \[z0.s\]
-[^:]+:	8480e0+e 	prfh	#14, p0, \[z0.s\]
-[^:]+:	8480e0+e 	prfh	#14, p0, \[z0.s\]
+[^:]+:	8480e00e 	prfh	#14, p0, \[z0.s\]
+[^:]+:	8480e00e 	prfh	#14, p0, \[z0.s\]
+[^:]+:	8480e00e 	prfh	#14, p0, \[z0.s\]
 [^:]+:	8480e00f 	prfh	#15, p0, \[z0.s\]
 [^:]+:	8480e00f 	prfh	#15, p0, \[z0.s\]
 [^:]+:	8480e00f 	prfh	#15, p0, \[z0.s\]
@@ -25401,10 +25401,10 @@ Disassembly of section .*:
 [^:]+:	85c0200d 	prfh	pstl3strm, p0, \[x0\]
 [^:]+:	85c0200d 	prfh	pstl3strm, p0, \[x0\]
 [^:]+:	85c0200d 	prfh	pstl3strm, p0, \[x0\]
-[^:]+:	85c020+e 	prfh	#14, p0, \[x0\]
-[^:]+:	85c020+e 	prfh	#14, p0, \[x0\]
-[^:]+:	85c020+e 	prfh	#14, p0, \[x0\]
-[^:]+:	85c020+e 	prfh	#14, p0, \[x0\]
+[^:]+:	85c0200e 	prfh	#14, p0, \[x0\]
+[^:]+:	85c0200e 	prfh	#14, p0, \[x0\]
+[^:]+:	85c0200e 	prfh	#14, p0, \[x0\]
+[^:]+:	85c0200e 	prfh	#14, p0, \[x0\]
 [^:]+:	85c0200f 	prfh	#15, p0, \[x0\]
 [^:]+:	85c0200f 	prfh	#15, p0, \[x0\]
 [^:]+:	85c0200f 	prfh	#15, p0, \[x0\]
@@ -25475,9 +25475,9 @@ Disassembly of section .*:
 [^:]+:	c480e00d 	prfh	pstl3strm, p0, \[z0.d\]
 [^:]+:	c480e00d 	prfh	pstl3strm, p0, \[z0.d\]
 [^:]+:	c480e00d 	prfh	pstl3strm, p0, \[z0.d\]
-[^:]+:	c480e0+e 	prfh	#14, p0, \[z0.d\]
-[^:]+:	c480e0+e 	prfh	#14, p0, \[z0.d\]
-[^:]+:	c480e0+e 	prfh	#14, p0, \[z0.d\]
+[^:]+:	c480e00e 	prfh	#14, p0, \[z0.d\]
+[^:]+:	c480e00e 	prfh	#14, p0, \[z0.d\]
+[^:]+:	c480e00e 	prfh	#14, p0, \[z0.d\]
 [^:]+:	c480e00f 	prfh	#15, p0, \[z0.d\]
 [^:]+:	c480e00f 	prfh	#15, p0, \[z0.d\]
 [^:]+:	c480e00f 	prfh	#15, p0, \[z0.d\]
@@ -25529,8 +25529,8 @@ Disassembly of section .*:
 [^:]+:	8420400c 	prfw	pstl3keep, p0, \[x0, z0.s, uxtw #2\]
 [^:]+:	8420400d 	prfw	pstl3strm, p0, \[x0, z0.s, uxtw #2\]
 [^:]+:	8420400d 	prfw	pstl3strm, p0, \[x0, z0.s, uxtw #2\]
-[^:]+:	842040+e 	prfw	#14, p0, \[x0, z0.s, uxtw #2\]
-[^:]+:	842040+e 	prfw	#14, p0, \[x0, z0.s, uxtw #2\]
+[^:]+:	8420400e 	prfw	#14, p0, \[x0, z0.s, uxtw #2\]
+[^:]+:	8420400e 	prfw	#14, p0, \[x0, z0.s, uxtw #2\]
 [^:]+:	8420400f 	prfw	#15, p0, \[x0, z0.s, uxtw #2\]
 [^:]+:	8420400f 	prfw	#15, p0, \[x0, z0.s, uxtw #2\]
 [^:]+:	84204800 	prfw	pldl1keep, p2, \[x0, z0.s, uxtw #2\]
@@ -25573,8 +25573,8 @@ Disassembly of section .*:
 [^:]+:	8460400c 	prfw	pstl3keep, p0, \[x0, z0.s, sxtw #2\]
 [^:]+:	8460400d 	prfw	pstl3strm, p0, \[x0, z0.s, sxtw #2\]
 [^:]+:	8460400d 	prfw	pstl3strm, p0, \[x0, z0.s, sxtw #2\]
-[^:]+:	846040+e 	prfw	#14, p0, \[x0, z0.s, sxtw #2\]
-[^:]+:	846040+e 	prfw	#14, p0, \[x0, z0.s, sxtw #2\]
+[^:]+:	8460400e 	prfw	#14, p0, \[x0, z0.s, sxtw #2\]
+[^:]+:	8460400e 	prfw	#14, p0, \[x0, z0.s, sxtw #2\]
 [^:]+:	8460400f 	prfw	#15, p0, \[x0, z0.s, sxtw #2\]
 [^:]+:	8460400f 	prfw	#15, p0, \[x0, z0.s, sxtw #2\]
 [^:]+:	84604800 	prfw	pldl1keep, p2, \[x0, z0.s, sxtw #2\]
@@ -25617,8 +25617,8 @@ Disassembly of section .*:
 [^:]+:	8500c00c 	prfw	pstl3keep, p0, \[x0, x0, lsl #2\]
 [^:]+:	8500c00d 	prfw	pstl3strm, p0, \[x0, x0, lsl #2\]
 [^:]+:	8500c00d 	prfw	pstl3strm, p0, \[x0, x0, lsl #2\]
-[^:]+:	8500c0+e 	prfw	#14, p0, \[x0, x0, lsl #2\]
-[^:]+:	8500c0+e 	prfw	#14, p0, \[x0, x0, lsl #2\]
+[^:]+:	8500c00e 	prfw	#14, p0, \[x0, x0, lsl #2\]
+[^:]+:	8500c00e 	prfw	#14, p0, \[x0, x0, lsl #2\]
 [^:]+:	8500c00f 	prfw	#15, p0, \[x0, x0, lsl #2\]
 [^:]+:	8500c00f 	prfw	#15, p0, \[x0, x0, lsl #2\]
 [^:]+:	8500c800 	prfw	pldl1keep, p2, \[x0, x0, lsl #2\]
@@ -25661,8 +25661,8 @@ Disassembly of section .*:
 [^:]+:	c420400c 	prfw	pstl3keep, p0, \[x0, z0.d, uxtw #2\]
 [^:]+:	c420400d 	prfw	pstl3strm, p0, \[x0, z0.d, uxtw #2\]
 [^:]+:	c420400d 	prfw	pstl3strm, p0, \[x0, z0.d, uxtw #2\]
-[^:]+:	c42040+e 	prfw	#14, p0, \[x0, z0.d, uxtw #2\]
-[^:]+:	c42040+e 	prfw	#14, p0, \[x0, z0.d, uxtw #2\]
+[^:]+:	c420400e 	prfw	#14, p0, \[x0, z0.d, uxtw #2\]
+[^:]+:	c420400e 	prfw	#14, p0, \[x0, z0.d, uxtw #2\]
 [^:]+:	c420400f 	prfw	#15, p0, \[x0, z0.d, uxtw #2\]
 [^:]+:	c420400f 	prfw	#15, p0, \[x0, z0.d, uxtw #2\]
 [^:]+:	c4204800 	prfw	pldl1keep, p2, \[x0, z0.d, uxtw #2\]
@@ -25705,8 +25705,8 @@ Disassembly of section .*:
 [^:]+:	c460400c 	prfw	pstl3keep, p0, \[x0, z0.d, sxtw #2\]
 [^:]+:	c460400d 	prfw	pstl3strm, p0, \[x0, z0.d, sxtw #2\]
 [^:]+:	c460400d 	prfw	pstl3strm, p0, \[x0, z0.d, sxtw #2\]
-[^:]+:	c46040+e 	prfw	#14, p0, \[x0, z0.d, sxtw #2\]
-[^:]+:	c46040+e 	prfw	#14, p0, \[x0, z0.d, sxtw #2\]
+[^:]+:	c460400e 	prfw	#14, p0, \[x0, z0.d, sxtw #2\]
+[^:]+:	c460400e 	prfw	#14, p0, \[x0, z0.d, sxtw #2\]
 [^:]+:	c460400f 	prfw	#15, p0, \[x0, z0.d, sxtw #2\]
 [^:]+:	c460400f 	prfw	#15, p0, \[x0, z0.d, sxtw #2\]
 [^:]+:	c4604800 	prfw	pldl1keep, p2, \[x0, z0.d, sxtw #2\]
@@ -25749,8 +25749,8 @@ Disassembly of section .*:
 [^:]+:	c460c00c 	prfw	pstl3keep, p0, \[x0, z0.d, lsl #2\]
 [^:]+:	c460c00d 	prfw	pstl3strm, p0, \[x0, z0.d, lsl #2\]
 [^:]+:	c460c00d 	prfw	pstl3strm, p0, \[x0, z0.d, lsl #2\]
-[^:]+:	c460c0+e 	prfw	#14, p0, \[x0, z0.d, lsl #2\]
-[^:]+:	c460c0+e 	prfw	#14, p0, \[x0, z0.d, lsl #2\]
+[^:]+:	c460c00e 	prfw	#14, p0, \[x0, z0.d, lsl #2\]
+[^:]+:	c460c00e 	prfw	#14, p0, \[x0, z0.d, lsl #2\]
 [^:]+:	c460c00f 	prfw	#15, p0, \[x0, z0.d, lsl #2\]
 [^:]+:	c460c00f 	prfw	#15, p0, \[x0, z0.d, lsl #2\]
 [^:]+:	c460c800 	prfw	pldl1keep, p2, \[x0, z0.d, lsl #2\]
@@ -25765,66 +25765,66 @@ Disassembly of section .*:
 [^:]+:	c464c000 	prfw	pldl1keep, p0, \[x0, z4.d, lsl #2\]
 [^:]+:	c47fc000 	prfw	pldl1keep, p0, \[x0, z31.d, lsl #2\]
 [^:]+:	c47fc000 	prfw	pldl1keep, p0, \[x0, z31.d, lsl #2\]
-[^:]+:	850+e000 	prfw	pldl1keep, p0, \[z0.s\]
-[^:]+:	850+e000 	prfw	pldl1keep, p0, \[z0.s\]
-[^:]+:	850+e000 	prfw	pldl1keep, p0, \[z0.s\]
-[^:]+:	850+e001 	prfw	pldl1strm, p0, \[z0.s\]
-[^:]+:	850+e001 	prfw	pldl1strm, p0, \[z0.s\]
-[^:]+:	850+e001 	prfw	pldl1strm, p0, \[z0.s\]
-[^:]+:	850+e002 	prfw	pldl2keep, p0, \[z0.s\]
-[^:]+:	850+e002 	prfw	pldl2keep, p0, \[z0.s\]
-[^:]+:	850+e002 	prfw	pldl2keep, p0, \[z0.s\]
-[^:]+:	850+e003 	prfw	pldl2strm, p0, \[z0.s\]
-[^:]+:	850+e003 	prfw	pldl2strm, p0, \[z0.s\]
-[^:]+:	850+e003 	prfw	pldl2strm, p0, \[z0.s\]
-[^:]+:	850+e004 	prfw	pldl3keep, p0, \[z0.s\]
-[^:]+:	850+e004 	prfw	pldl3keep, p0, \[z0.s\]
-[^:]+:	850+e004 	prfw	pldl3keep, p0, \[z0.s\]
-[^:]+:	850+e005 	prfw	pldl3strm, p0, \[z0.s\]
-[^:]+:	850+e005 	prfw	pldl3strm, p0, \[z0.s\]
-[^:]+:	850+e005 	prfw	pldl3strm, p0, \[z0.s\]
-[^:]+:	850+e006 	prfw	#6, p0, \[z0.s\]
-[^:]+:	850+e006 	prfw	#6, p0, \[z0.s\]
-[^:]+:	850+e006 	prfw	#6, p0, \[z0.s\]
-[^:]+:	850+e007 	prfw	#7, p0, \[z0.s\]
-[^:]+:	850+e007 	prfw	#7, p0, \[z0.s\]
-[^:]+:	850+e007 	prfw	#7, p0, \[z0.s\]
-[^:]+:	850+e008 	prfw	pstl1keep, p0, \[z0.s\]
-[^:]+:	850+e008 	prfw	pstl1keep, p0, \[z0.s\]
-[^:]+:	850+e008 	prfw	pstl1keep, p0, \[z0.s\]
-[^:]+:	850+e009 	prfw	pstl1strm, p0, \[z0.s\]
-[^:]+:	850+e009 	prfw	pstl1strm, p0, \[z0.s\]
-[^:]+:	850+e009 	prfw	pstl1strm, p0, \[z0.s\]
-[^:]+:	850+e00a 	prfw	pstl2keep, p0, \[z0.s\]
-[^:]+:	850+e00a 	prfw	pstl2keep, p0, \[z0.s\]
-[^:]+:	850+e00a 	prfw	pstl2keep, p0, \[z0.s\]
-[^:]+:	850+e00b 	prfw	pstl2strm, p0, \[z0.s\]
-[^:]+:	850+e00b 	prfw	pstl2strm, p0, \[z0.s\]
-[^:]+:	850+e00b 	prfw	pstl2strm, p0, \[z0.s\]
-[^:]+:	850+e00c 	prfw	pstl3keep, p0, \[z0.s\]
-[^:]+:	850+e00c 	prfw	pstl3keep, p0, \[z0.s\]
-[^:]+:	850+e00c 	prfw	pstl3keep, p0, \[z0.s\]
-[^:]+:	850+e00d 	prfw	pstl3strm, p0, \[z0.s\]
-[^:]+:	850+e00d 	prfw	pstl3strm, p0, \[z0.s\]
-[^:]+:	850+e00d 	prfw	pstl3strm, p0, \[z0.s\]
-[^:]+:	850+e0+e 	prfw	#14, p0, \[z0.s\]
-[^:]+:	850+e0+e 	prfw	#14, p0, \[z0.s\]
-[^:]+:	850+e0+e 	prfw	#14, p0, \[z0.s\]
-[^:]+:	850+e00f 	prfw	#15, p0, \[z0.s\]
-[^:]+:	850+e00f 	prfw	#15, p0, \[z0.s\]
-[^:]+:	850+e00f 	prfw	#15, p0, \[z0.s\]
-[^:]+:	850+e800 	prfw	pldl1keep, p2, \[z0.s\]
-[^:]+:	850+e800 	prfw	pldl1keep, p2, \[z0.s\]
-[^:]+:	850+e800 	prfw	pldl1keep, p2, \[z0.s\]
+[^:]+:	8500e000 	prfw	pldl1keep, p0, \[z0.s\]
+[^:]+:	8500e000 	prfw	pldl1keep, p0, \[z0.s\]
+[^:]+:	8500e000 	prfw	pldl1keep, p0, \[z0.s\]
+[^:]+:	8500e001 	prfw	pldl1strm, p0, \[z0.s\]
+[^:]+:	8500e001 	prfw	pldl1strm, p0, \[z0.s\]
+[^:]+:	8500e001 	prfw	pldl1strm, p0, \[z0.s\]
+[^:]+:	8500e002 	prfw	pldl2keep, p0, \[z0.s\]
+[^:]+:	8500e002 	prfw	pldl2keep, p0, \[z0.s\]
+[^:]+:	8500e002 	prfw	pldl2keep, p0, \[z0.s\]
+[^:]+:	8500e003 	prfw	pldl2strm, p0, \[z0.s\]
+[^:]+:	8500e003 	prfw	pldl2strm, p0, \[z0.s\]
+[^:]+:	8500e003 	prfw	pldl2strm, p0, \[z0.s\]
+[^:]+:	8500e004 	prfw	pldl3keep, p0, \[z0.s\]
+[^:]+:	8500e004 	prfw	pldl3keep, p0, \[z0.s\]
+[^:]+:	8500e004 	prfw	pldl3keep, p0, \[z0.s\]
+[^:]+:	8500e005 	prfw	pldl3strm, p0, \[z0.s\]
+[^:]+:	8500e005 	prfw	pldl3strm, p0, \[z0.s\]
+[^:]+:	8500e005 	prfw	pldl3strm, p0, \[z0.s\]
+[^:]+:	8500e006 	prfw	#6, p0, \[z0.s\]
+[^:]+:	8500e006 	prfw	#6, p0, \[z0.s\]
+[^:]+:	8500e006 	prfw	#6, p0, \[z0.s\]
+[^:]+:	8500e007 	prfw	#7, p0, \[z0.s\]
+[^:]+:	8500e007 	prfw	#7, p0, \[z0.s\]
+[^:]+:	8500e007 	prfw	#7, p0, \[z0.s\]
+[^:]+:	8500e008 	prfw	pstl1keep, p0, \[z0.s\]
+[^:]+:	8500e008 	prfw	pstl1keep, p0, \[z0.s\]
+[^:]+:	8500e008 	prfw	pstl1keep, p0, \[z0.s\]
+[^:]+:	8500e009 	prfw	pstl1strm, p0, \[z0.s\]
+[^:]+:	8500e009 	prfw	pstl1strm, p0, \[z0.s\]
+[^:]+:	8500e009 	prfw	pstl1strm, p0, \[z0.s\]
+[^:]+:	8500e00a 	prfw	pstl2keep, p0, \[z0.s\]
+[^:]+:	8500e00a 	prfw	pstl2keep, p0, \[z0.s\]
+[^:]+:	8500e00a 	prfw	pstl2keep, p0, \[z0.s\]
+[^:]+:	8500e00b 	prfw	pstl2strm, p0, \[z0.s\]
+[^:]+:	8500e00b 	prfw	pstl2strm, p0, \[z0.s\]
+[^:]+:	8500e00b 	prfw	pstl2strm, p0, \[z0.s\]
+[^:]+:	8500e00c 	prfw	pstl3keep, p0, \[z0.s\]
+[^:]+:	8500e00c 	prfw	pstl3keep, p0, \[z0.s\]
+[^:]+:	8500e00c 	prfw	pstl3keep, p0, \[z0.s\]
+[^:]+:	8500e00d 	prfw	pstl3strm, p0, \[z0.s\]
+[^:]+:	8500e00d 	prfw	pstl3strm, p0, \[z0.s\]
+[^:]+:	8500e00d 	prfw	pstl3strm, p0, \[z0.s\]
+[^:]+:	8500e00e 	prfw	#14, p0, \[z0.s\]
+[^:]+:	8500e00e 	prfw	#14, p0, \[z0.s\]
+[^:]+:	8500e00e 	prfw	#14, p0, \[z0.s\]
+[^:]+:	8500e00f 	prfw	#15, p0, \[z0.s\]
+[^:]+:	8500e00f 	prfw	#15, p0, \[z0.s\]
+[^:]+:	8500e00f 	prfw	#15, p0, \[z0.s\]
+[^:]+:	8500e800 	prfw	pldl1keep, p2, \[z0.s\]
+[^:]+:	8500e800 	prfw	pldl1keep, p2, \[z0.s\]
+[^:]+:	8500e800 	prfw	pldl1keep, p2, \[z0.s\]
 [^:]+:	8500fc00 	prfw	pldl1keep, p7, \[z0.s\]
 [^:]+:	8500fc00 	prfw	pldl1keep, p7, \[z0.s\]
 [^:]+:	8500fc00 	prfw	pldl1keep, p7, \[z0.s\]
-[^:]+:	850+e060 	prfw	pldl1keep, p0, \[z3.s\]
-[^:]+:	850+e060 	prfw	pldl1keep, p0, \[z3.s\]
-[^:]+:	850+e060 	prfw	pldl1keep, p0, \[z3.s\]
-[^:]+:	850+e3e0 	prfw	pldl1keep, p0, \[z31.s\]
-[^:]+:	850+e3e0 	prfw	pldl1keep, p0, \[z31.s\]
-[^:]+:	850+e3e0 	prfw	pldl1keep, p0, \[z31.s\]
+[^:]+:	8500e060 	prfw	pldl1keep, p0, \[z3.s\]
+[^:]+:	8500e060 	prfw	pldl1keep, p0, \[z3.s\]
+[^:]+:	8500e060 	prfw	pldl1keep, p0, \[z3.s\]
+[^:]+:	8500e3e0 	prfw	pldl1keep, p0, \[z31.s\]
+[^:]+:	8500e3e0 	prfw	pldl1keep, p0, \[z31.s\]
+[^:]+:	8500e3e0 	prfw	pldl1keep, p0, \[z31.s\]
 [^:]+:	850fe000 	prfw	pldl1keep, p0, \[z0.s, #60\]
 [^:]+:	850fe000 	prfw	pldl1keep, p0, \[z0.s, #60\]
 [^:]+:	8510e000 	prfw	pldl1keep, p0, \[z0.s, #64\]
@@ -25889,10 +25889,10 @@ Disassembly of section .*:
 [^:]+:	85c0400d 	prfw	pstl3strm, p0, \[x0\]
 [^:]+:	85c0400d 	prfw	pstl3strm, p0, \[x0\]
 [^:]+:	85c0400d 	prfw	pstl3strm, p0, \[x0\]
-[^:]+:	85c040+e 	prfw	#14, p0, \[x0\]
-[^:]+:	85c040+e 	prfw	#14, p0, \[x0\]
-[^:]+:	85c040+e 	prfw	#14, p0, \[x0\]
-[^:]+:	85c040+e 	prfw	#14, p0, \[x0\]
+[^:]+:	85c0400e 	prfw	#14, p0, \[x0\]
+[^:]+:	85c0400e 	prfw	#14, p0, \[x0\]
+[^:]+:	85c0400e 	prfw	#14, p0, \[x0\]
+[^:]+:	85c0400e 	prfw	#14, p0, \[x0\]
 [^:]+:	85c0400f 	prfw	#15, p0, \[x0\]
 [^:]+:	85c0400f 	prfw	#15, p0, \[x0\]
 [^:]+:	85c0400f 	prfw	#15, p0, \[x0\]
@@ -25921,66 +25921,66 @@ Disassembly of section .*:
 [^:]+:	85e14000 	prfw	pldl1keep, p0, \[x0, #-31, mul vl\]
 [^:]+:	85ff4000 	prfw	pldl1keep, p0, \[x0, #-1, mul vl\]
 [^:]+:	85ff4000 	prfw	pldl1keep, p0, \[x0, #-1, mul vl\]
-[^:]+:	c50+e000 	prfw	pldl1keep, p0, \[z0.d\]
-[^:]+:	c50+e000 	prfw	pldl1keep, p0, \[z0.d\]
-[^:]+:	c50+e000 	prfw	pldl1keep, p0, \[z0.d\]
-[^:]+:	c50+e001 	prfw	pldl1strm, p0, \[z0.d\]
-[^:]+:	c50+e001 	prfw	pldl1strm, p0, \[z0.d\]
-[^:]+:	c50+e001 	prfw	pldl1strm, p0, \[z0.d\]
-[^:]+:	c50+e002 	prfw	pldl2keep, p0, \[z0.d\]
-[^:]+:	c50+e002 	prfw	pldl2keep, p0, \[z0.d\]
-[^:]+:	c50+e002 	prfw	pldl2keep, p0, \[z0.d\]
-[^:]+:	c50+e003 	prfw	pldl2strm, p0, \[z0.d\]
-[^:]+:	c50+e003 	prfw	pldl2strm, p0, \[z0.d\]
-[^:]+:	c50+e003 	prfw	pldl2strm, p0, \[z0.d\]
-[^:]+:	c50+e004 	prfw	pldl3keep, p0, \[z0.d\]
-[^:]+:	c50+e004 	prfw	pldl3keep, p0, \[z0.d\]
-[^:]+:	c50+e004 	prfw	pldl3keep, p0, \[z0.d\]
-[^:]+:	c50+e005 	prfw	pldl3strm, p0, \[z0.d\]
-[^:]+:	c50+e005 	prfw	pldl3strm, p0, \[z0.d\]
-[^:]+:	c50+e005 	prfw	pldl3strm, p0, \[z0.d\]
-[^:]+:	c50+e006 	prfw	#6, p0, \[z0.d\]
-[^:]+:	c50+e006 	prfw	#6, p0, \[z0.d\]
-[^:]+:	c50+e006 	prfw	#6, p0, \[z0.d\]
-[^:]+:	c50+e007 	prfw	#7, p0, \[z0.d\]
-[^:]+:	c50+e007 	prfw	#7, p0, \[z0.d\]
-[^:]+:	c50+e007 	prfw	#7, p0, \[z0.d\]
-[^:]+:	c50+e008 	prfw	pstl1keep, p0, \[z0.d\]
-[^:]+:	c50+e008 	prfw	pstl1keep, p0, \[z0.d\]
-[^:]+:	c50+e008 	prfw	pstl1keep, p0, \[z0.d\]
-[^:]+:	c50+e009 	prfw	pstl1strm, p0, \[z0.d\]
-[^:]+:	c50+e009 	prfw	pstl1strm, p0, \[z0.d\]
-[^:]+:	c50+e009 	prfw	pstl1strm, p0, \[z0.d\]
-[^:]+:	c50+e00a 	prfw	pstl2keep, p0, \[z0.d\]
-[^:]+:	c50+e00a 	prfw	pstl2keep, p0, \[z0.d\]
-[^:]+:	c50+e00a 	prfw	pstl2keep, p0, \[z0.d\]
-[^:]+:	c50+e00b 	prfw	pstl2strm, p0, \[z0.d\]
-[^:]+:	c50+e00b 	prfw	pstl2strm, p0, \[z0.d\]
-[^:]+:	c50+e00b 	prfw	pstl2strm, p0, \[z0.d\]
-[^:]+:	c50+e00c 	prfw	pstl3keep, p0, \[z0.d\]
-[^:]+:	c50+e00c 	prfw	pstl3keep, p0, \[z0.d\]
-[^:]+:	c50+e00c 	prfw	pstl3keep, p0, \[z0.d\]
-[^:]+:	c50+e00d 	prfw	pstl3strm, p0, \[z0.d\]
-[^:]+:	c50+e00d 	prfw	pstl3strm, p0, \[z0.d\]
-[^:]+:	c50+e00d 	prfw	pstl3strm, p0, \[z0.d\]
-[^:]+:	c50+e0+e 	prfw	#14, p0, \[z0.d\]
-[^:]+:	c50+e0+e 	prfw	#14, p0, \[z0.d\]
-[^:]+:	c50+e0+e 	prfw	#14, p0, \[z0.d\]
-[^:]+:	c50+e00f 	prfw	#15, p0, \[z0.d\]
-[^:]+:	c50+e00f 	prfw	#15, p0, \[z0.d\]
-[^:]+:	c50+e00f 	prfw	#15, p0, \[z0.d\]
-[^:]+:	c50+e800 	prfw	pldl1keep, p2, \[z0.d\]
-[^:]+:	c50+e800 	prfw	pldl1keep, p2, \[z0.d\]
-[^:]+:	c50+e800 	prfw	pldl1keep, p2, \[z0.d\]
+[^:]+:	c500e000 	prfw	pldl1keep, p0, \[z0.d\]
+[^:]+:	c500e000 	prfw	pldl1keep, p0, \[z0.d\]
+[^:]+:	c500e000 	prfw	pldl1keep, p0, \[z0.d\]
+[^:]+:	c500e001 	prfw	pldl1strm, p0, \[z0.d\]
+[^:]+:	c500e001 	prfw	pldl1strm, p0, \[z0.d\]
+[^:]+:	c500e001 	prfw	pldl1strm, p0, \[z0.d\]
+[^:]+:	c500e002 	prfw	pldl2keep, p0, \[z0.d\]
+[^:]+:	c500e002 	prfw	pldl2keep, p0, \[z0.d\]
+[^:]+:	c500e002 	prfw	pldl2keep, p0, \[z0.d\]
+[^:]+:	c500e003 	prfw	pldl2strm, p0, \[z0.d\]
+[^:]+:	c500e003 	prfw	pldl2strm, p0, \[z0.d\]
+[^:]+:	c500e003 	prfw	pldl2strm, p0, \[z0.d\]
+[^:]+:	c500e004 	prfw	pldl3keep, p0, \[z0.d\]
+[^:]+:	c500e004 	prfw	pldl3keep, p0, \[z0.d\]
+[^:]+:	c500e004 	prfw	pldl3keep, p0, \[z0.d\]
+[^:]+:	c500e005 	prfw	pldl3strm, p0, \[z0.d\]
+[^:]+:	c500e005 	prfw	pldl3strm, p0, \[z0.d\]
+[^:]+:	c500e005 	prfw	pldl3strm, p0, \[z0.d\]
+[^:]+:	c500e006 	prfw	#6, p0, \[z0.d\]
+[^:]+:	c500e006 	prfw	#6, p0, \[z0.d\]
+[^:]+:	c500e006 	prfw	#6, p0, \[z0.d\]
+[^:]+:	c500e007 	prfw	#7, p0, \[z0.d\]
+[^:]+:	c500e007 	prfw	#7, p0, \[z0.d\]
+[^:]+:	c500e007 	prfw	#7, p0, \[z0.d\]
+[^:]+:	c500e008 	prfw	pstl1keep, p0, \[z0.d\]
+[^:]+:	c500e008 	prfw	pstl1keep, p0, \[z0.d\]
+[^:]+:	c500e008 	prfw	pstl1keep, p0, \[z0.d\]
+[^:]+:	c500e009 	prfw	pstl1strm, p0, \[z0.d\]
+[^:]+:	c500e009 	prfw	pstl1strm, p0, \[z0.d\]
+[^:]+:	c500e009 	prfw	pstl1strm, p0, \[z0.d\]
+[^:]+:	c500e00a 	prfw	pstl2keep, p0, \[z0.d\]
+[^:]+:	c500e00a 	prfw	pstl2keep, p0, \[z0.d\]
+[^:]+:	c500e00a 	prfw	pstl2keep, p0, \[z0.d\]
+[^:]+:	c500e00b 	prfw	pstl2strm, p0, \[z0.d\]
+[^:]+:	c500e00b 	prfw	pstl2strm, p0, \[z0.d\]
+[^:]+:	c500e00b 	prfw	pstl2strm, p0, \[z0.d\]
+[^:]+:	c500e00c 	prfw	pstl3keep, p0, \[z0.d\]
+[^:]+:	c500e00c 	prfw	pstl3keep, p0, \[z0.d\]
+[^:]+:	c500e00c 	prfw	pstl3keep, p0, \[z0.d\]
+[^:]+:	c500e00d 	prfw	pstl3strm, p0, \[z0.d\]
+[^:]+:	c500e00d 	prfw	pstl3strm, p0, \[z0.d\]
+[^:]+:	c500e00d 	prfw	pstl3strm, p0, \[z0.d\]
+[^:]+:	c500e00e 	prfw	#14, p0, \[z0.d\]
+[^:]+:	c500e00e 	prfw	#14, p0, \[z0.d\]
+[^:]+:	c500e00e 	prfw	#14, p0, \[z0.d\]
+[^:]+:	c500e00f 	prfw	#15, p0, \[z0.d\]
+[^:]+:	c500e00f 	prfw	#15, p0, \[z0.d\]
+[^:]+:	c500e00f 	prfw	#15, p0, \[z0.d\]
+[^:]+:	c500e800 	prfw	pldl1keep, p2, \[z0.d\]
+[^:]+:	c500e800 	prfw	pldl1keep, p2, \[z0.d\]
+[^:]+:	c500e800 	prfw	pldl1keep, p2, \[z0.d\]
 [^:]+:	c500fc00 	prfw	pldl1keep, p7, \[z0.d\]
 [^:]+:	c500fc00 	prfw	pldl1keep, p7, \[z0.d\]
 [^:]+:	c500fc00 	prfw	pldl1keep, p7, \[z0.d\]
-[^:]+:	c50+e060 	prfw	pldl1keep, p0, \[z3.d\]
-[^:]+:	c50+e060 	prfw	pldl1keep, p0, \[z3.d\]
-[^:]+:	c50+e060 	prfw	pldl1keep, p0, \[z3.d\]
-[^:]+:	c50+e3e0 	prfw	pldl1keep, p0, \[z31.d\]
-[^:]+:	c50+e3e0 	prfw	pldl1keep, p0, \[z31.d\]
-[^:]+:	c50+e3e0 	prfw	pldl1keep, p0, \[z31.d\]
+[^:]+:	c500e060 	prfw	pldl1keep, p0, \[z3.d\]
+[^:]+:	c500e060 	prfw	pldl1keep, p0, \[z3.d\]
+[^:]+:	c500e060 	prfw	pldl1keep, p0, \[z3.d\]
+[^:]+:	c500e3e0 	prfw	pldl1keep, p0, \[z31.d\]
+[^:]+:	c500e3e0 	prfw	pldl1keep, p0, \[z31.d\]
+[^:]+:	c500e3e0 	prfw	pldl1keep, p0, \[z31.d\]
 [^:]+:	c50fe000 	prfw	pldl1keep, p0, \[z0.d, #60\]
 [^:]+:	c50fe000 	prfw	pldl1keep, p0, \[z0.d, #60\]
 [^:]+:	c510e000 	prfw	pldl1keep, p0, \[z0.d, #64\]
@@ -31201,37 +31201,37 @@ Disassembly of section .*:
 [^:]+:	e47e4000 	st1b	{z0.d}, p0, \[x0, x30\]
 [^:]+:	e47e4000 	st1b	{z0.d}, p0, \[x0, x30\]
 [^:]+:	e47e4000 	st1b	{z0.d}, p0, \[x0, x30\]
-[^:]+:	e40+e000 	st1b	{z0.b}, p0, \[x0\]
-[^:]+:	e40+e000 	st1b	{z0.b}, p0, \[x0\]
-[^:]+:	e40+e000 	st1b	{z0.b}, p0, \[x0\]
-[^:]+:	e40+e000 	st1b	{z0.b}, p0, \[x0\]
-[^:]+:	e40+e000 	st1b	{z0.b}, p0, \[x0\]
-[^:]+:	e40+e001 	st1b	{z1.b}, p0, \[x0\]
-[^:]+:	e40+e001 	st1b	{z1.b}, p0, \[x0\]
-[^:]+:	e40+e001 	st1b	{z1.b}, p0, \[x0\]
-[^:]+:	e40+e001 	st1b	{z1.b}, p0, \[x0\]
-[^:]+:	e40+e001 	st1b	{z1.b}, p0, \[x0\]
-[^:]+:	e40+e01f 	st1b	{z31.b}, p0, \[x0\]
-[^:]+:	e40+e01f 	st1b	{z31.b}, p0, \[x0\]
-[^:]+:	e40+e01f 	st1b	{z31.b}, p0, \[x0\]
-[^:]+:	e40+e01f 	st1b	{z31.b}, p0, \[x0\]
-[^:]+:	e40+e01f 	st1b	{z31.b}, p0, \[x0\]
-[^:]+:	e40+e800 	st1b	{z0.b}, p2, \[x0\]
-[^:]+:	e40+e800 	st1b	{z0.b}, p2, \[x0\]
-[^:]+:	e40+e800 	st1b	{z0.b}, p2, \[x0\]
-[^:]+:	e40+e800 	st1b	{z0.b}, p2, \[x0\]
+[^:]+:	e400e000 	st1b	{z0.b}, p0, \[x0\]
+[^:]+:	e400e000 	st1b	{z0.b}, p0, \[x0\]
+[^:]+:	e400e000 	st1b	{z0.b}, p0, \[x0\]
+[^:]+:	e400e000 	st1b	{z0.b}, p0, \[x0\]
+[^:]+:	e400e000 	st1b	{z0.b}, p0, \[x0\]
+[^:]+:	e400e001 	st1b	{z1.b}, p0, \[x0\]
+[^:]+:	e400e001 	st1b	{z1.b}, p0, \[x0\]
+[^:]+:	e400e001 	st1b	{z1.b}, p0, \[x0\]
+[^:]+:	e400e001 	st1b	{z1.b}, p0, \[x0\]
+[^:]+:	e400e001 	st1b	{z1.b}, p0, \[x0\]
+[^:]+:	e400e01f 	st1b	{z31.b}, p0, \[x0\]
+[^:]+:	e400e01f 	st1b	{z31.b}, p0, \[x0\]
+[^:]+:	e400e01f 	st1b	{z31.b}, p0, \[x0\]
+[^:]+:	e400e01f 	st1b	{z31.b}, p0, \[x0\]
+[^:]+:	e400e01f 	st1b	{z31.b}, p0, \[x0\]
+[^:]+:	e400e800 	st1b	{z0.b}, p2, \[x0\]
+[^:]+:	e400e800 	st1b	{z0.b}, p2, \[x0\]
+[^:]+:	e400e800 	st1b	{z0.b}, p2, \[x0\]
+[^:]+:	e400e800 	st1b	{z0.b}, p2, \[x0\]
 [^:]+:	e400fc00 	st1b	{z0.b}, p7, \[x0\]
 [^:]+:	e400fc00 	st1b	{z0.b}, p7, \[x0\]
 [^:]+:	e400fc00 	st1b	{z0.b}, p7, \[x0\]
 [^:]+:	e400fc00 	st1b	{z0.b}, p7, \[x0\]
-[^:]+:	e40+e060 	st1b	{z0.b}, p0, \[x3\]
-[^:]+:	e40+e060 	st1b	{z0.b}, p0, \[x3\]
-[^:]+:	e40+e060 	st1b	{z0.b}, p0, \[x3\]
-[^:]+:	e40+e060 	st1b	{z0.b}, p0, \[x3\]
-[^:]+:	e40+e3e0 	st1b	{z0.b}, p0, \[sp\]
-[^:]+:	e40+e3e0 	st1b	{z0.b}, p0, \[sp\]
-[^:]+:	e40+e3e0 	st1b	{z0.b}, p0, \[sp\]
-[^:]+:	e40+e3e0 	st1b	{z0.b}, p0, \[sp\]
+[^:]+:	e400e060 	st1b	{z0.b}, p0, \[x3\]
+[^:]+:	e400e060 	st1b	{z0.b}, p0, \[x3\]
+[^:]+:	e400e060 	st1b	{z0.b}, p0, \[x3\]
+[^:]+:	e400e060 	st1b	{z0.b}, p0, \[x3\]
+[^:]+:	e400e3e0 	st1b	{z0.b}, p0, \[sp\]
+[^:]+:	e400e3e0 	st1b	{z0.b}, p0, \[sp\]
+[^:]+:	e400e3e0 	st1b	{z0.b}, p0, \[sp\]
+[^:]+:	e400e3e0 	st1b	{z0.b}, p0, \[sp\]
 [^:]+:	e407e000 	st1b	{z0.b}, p0, \[x0, #7, mul vl\]
 [^:]+:	e407e000 	st1b	{z0.b}, p0, \[x0, #7, mul vl\]
 [^:]+:	e408e000 	st1b	{z0.b}, p0, \[x0, #-8, mul vl\]
@@ -39898,11 +39898,11 @@ Disassembly of section .*:
 [^:]+:	05800c00 	and	z0.h, z0.h, #0x8000
 [^:]+:	05800c00 	and	z0.h, z0.h, #0x8000
 [^:]+:	05800c00 	and	z0.h, z0.h, #0x8000
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
-[^:]+:	0580+ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
+[^:]+:	05800ec0 	and	z0.b, z0.b, #0xbf
 [^:]+:	05801e80 	and	z0.b, z0.b, #0xe3
 [^:]+:	05801e80 	and	z0.b, z0.b, #0xe3
 [^:]+:	05801e80 	and	z0.b, z0.b, #0xe3
@@ -40247,11 +40247,11 @@ Disassembly of section .*:
 [^:]+:	05400c00 	eor	z0.h, z0.h, #0x8000
 [^:]+:	05400c00 	eor	z0.h, z0.h, #0x8000
 [^:]+:	05400c00 	eor	z0.h, z0.h, #0x8000
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
-[^:]+:	0540+ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
+[^:]+:	05400ec0 	eor	z0.b, z0.b, #0xbf
 [^:]+:	05401e80 	eor	z0.b, z0.b, #0xe3
 [^:]+:	05401e80 	eor	z0.b, z0.b, #0xe3
 [^:]+:	05401e80 	eor	z0.b, z0.b, #0xe3
@@ -40572,11 +40572,11 @@ Disassembly of section .*:
 [^:]+:	05000c00 	orr	z0.h, z0.h, #0x8000
 [^:]+:	05000c00 	orr	z0.h, z0.h, #0x8000
 [^:]+:	05000c00 	orr	z0.h, z0.h, #0x8000
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
-[^:]+:	050+ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
+[^:]+:	05000ec0 	orr	z0.b, z0.b, #0xbf
 [^:]+:	05001e80 	orr	z0.b, z0.b, #0xe3
 [^:]+:	05001e80 	orr	z0.b, z0.b, #0xe3
 [^:]+:	05001e80 	orr	z0.b, z0.b, #0xe3
