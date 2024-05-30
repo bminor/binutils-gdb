@@ -27,11 +27,6 @@
    otherwise.  */
 extern const char *get_exec_wrapper ();
 
-/* Return the name of the executable file as a string.
-
-   Error out if no executable is specified.  */
-extern const char *get_exec_file ();
-
 /* Return the inferior's current working directory.
 
    If it is not set, the string is empty.  */

@@ -1969,6 +1969,9 @@ darwin_nat_target::create_inferior (const char *exec_file,
 				    const std::string &allargs,
 				    char **env, int from_tty)
 {
+  if (exec_file == nullptr)
+    no_executable_specified_error ();
+
   std::optional<scoped_restore_tmpl<bool>> restore_startup_with_shell;
   darwin_nat_target *the_target = this;
 

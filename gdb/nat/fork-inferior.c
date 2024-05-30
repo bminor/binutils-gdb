@@ -265,26 +265,20 @@ execv_argv::init_for_shell (const char *exec_file,
 /* See nat/fork-inferior.h.  */
 
 pid_t
-fork_inferior (const char *exec_file_arg, const std::string &allargs,
-	       char **env, traceme_ftype traceme_fun,
-	       init_trace_ftype init_trace_fun, pre_trace_ftype pre_trace_fun,
-	       const char *shell_file_arg, exec_ftype exec_fun)
+fork_inferior (const char *exec_file, const std::string &allargs, char **env,
+	       traceme_ftype traceme_fun, init_trace_ftype init_trace_fun,
+	       pre_trace_ftype pre_trace_fun, const char *shell_file_arg,
+	       exec_ftype exec_fun)
 {
   pid_t pid;
   /* Set debug_fork then attach to the child while it sleeps, to debug.  */
   int debug_fork = 0;
   const char *shell_file;
-  const char *exec_file;
   char **save_our_env;
   int i;
   int save_errno;
 
-  /* If no exec file handed to us, get it from the exec-file command
-     -- with a good, common error message if none is specified.  */
-  if (exec_file_arg == NULL)
-    exec_file = get_exec_file ();
-  else
-    exec_file = exec_file_arg;
+  gdb_assert (exec_file != nullptr);
 
   /* 'startup_with_shell' is declared in inferior.h and bound to the
      "set startup-with-shell" option.  If 0, we'll just do a

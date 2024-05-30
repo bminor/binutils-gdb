@@ -2103,6 +2103,9 @@ gnu_nat_target::create_inferior (const char *exec_file,
 				 char **env,
 				 int from_tty)
 {
+  if (exec_file == nullptr)
+    no_executable_specified_error ();
+
   struct inf *inf = cur_inf ();
   inferior *inferior = current_inferior ();
   int pid;

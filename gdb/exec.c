@@ -504,6 +504,15 @@ exec_file_attach (const char *filename, int from_tty)
   gdb::observers::executable_changed.notify (current_program_space, reload_p);
 }
 
+/* See exec.h.  */
+
+void
+no_executable_specified_error ()
+{
+  error (_("No executable file specified.\n\
+Use the \"file\" or \"exec-file\" command."));
+}
+
 /*  Process the first arg in ARGS as the new exec file.
 
    Note that we have to explicitly ignore additional args, since we can

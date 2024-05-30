@@ -105,4 +105,9 @@ extern void print_section_info (const std::vector<target_section> *table,
 extern void try_open_exec_file (const char *exec_file_host,
 				struct inferior *inf,
 				symfile_add_flags add_flags);
+
+/* Report a "No executable file specified" error.  */
+
+extern void no_executable_specified_error ();
+
 #endif

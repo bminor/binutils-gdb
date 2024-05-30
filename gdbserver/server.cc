@@ -282,17 +282,6 @@ get_exec_wrapper ()
   return !wrapper_argv.empty () ? wrapper_argv.c_str () : NULL;
 }
 
-/* See gdbsupport/common-inferior.h.  */
-
-const char *
-get_exec_file ()
-{
-  if (program_path.get () == NULL)
-    error (_("No executable file specified."));
-
-  return program_path.get ();
-}
-
 /* See server.h.  */
 
 gdb_environ *

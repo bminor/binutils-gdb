@@ -1835,7 +1835,9 @@ load_command (const char *arg, int from_tty)
     {
       const char *parg, *prev;
 
-      arg = get_exec_file ();
+      arg = current_program_space->exec_filename ();
+      if (arg == nullptr)
+	no_executable_specified_error ();
 
       /* We may need to quote this string so buildargv can pull it
 	 apart.  */

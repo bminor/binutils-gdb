@@ -1179,6 +1179,9 @@ nto_procfs_target::create_inferior (const char *exec_file,
 				    const std::string &allargs,
 				    char **env, int from_tty)
 {
+  if (exec_file == nullptr)
+    no_executable_specified_error ();
+
   struct inheritance inherit;
   pid_t pid;
   int flags, errn;
@@ -1190,9 +1193,9 @@ nto_procfs_target::create_inferior (const char *exec_file,
 
   argv = xmalloc ((allargs.size () / (unsigned) 2 + 2) *
 		  sizeof (*argv));
-  argv[0] = const_cast<char *> (get_exec_file ());
+  argv[0] = exec_file;
   args = xstrdup (allargs.c_str ());
-  breakup_args (args, (exec_file != NULL) ? &argv[1] : &argv[0]);
+  breakup_args (args, &argv[1]);
 
   argv = nto_parse_redirection (argv, &in, &out, &err);
 

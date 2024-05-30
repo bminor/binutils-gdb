@@ -2760,6 +2760,9 @@ procfs_target::create_inferior (const char *exec_file,
 				const std::string &allargs,
 				char **env, int from_tty)
 {
+  if (exec_file == nullptr)
+    no_executable_specified_error ();
+
   const char *shell_file = get_shell ();
   char *tryname;
   int pid;
