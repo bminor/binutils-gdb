@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#   Copyright (C) 1990-2020 Free Software Foundation
+#   Copyright (C) 1990-2024 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ BZIPPROG=bzip2
 GZIPPROG=gzip
 LZIPPROG=lzip
 XZPROG=xz
+ZSTDPROG=zstd
 SHA256PROG=sha256sum
 MAKE=make
 CC=gcc
@@ -241,6 +242,16 @@ do_xz()
     $XZPROG -k -v -9 $package-$ver.tar
 }
 
+# Compress the output with zstd
+do_zstd()
+{
+    package=$1
+    ver=$2
+    echo "==> Zzipping $package-$ver.tar.zst"
+    rm -f $package-$ver.tar.zst
+    $ZSTDPROG -k -v -19 -T0 $package-$ver.tar
+}
+
 # Compress the output with all selected compresion methods
 do_compress()
 {
@@ -257,6 +268,8 @@ do_compress()
 		do_lz $package $ver;;
 	    xz)
 		do_xz $package $ver;;
+	    zstd)
+		do_zstd $package $ver;;
 	    *)
 		echo "Unknown compression method: $comp" && exit 1;;
 	esac
@@ -352,6 +365,7 @@ usage()
     echo "  -g: Compress with gzip"
     echo "  -l: Compress with lzip"
     echo "  -x: Compress with xz"
+    echo "  -z: Compress with zstd"
     echo "  -r <date>: Create a reproducible tarball using <date> as the mtime"
     exit 1
 }
@@ -376,7 +390,7 @@ build_release()
 
 compressors=""
 
-while getopts ":bglr:x" opt; do
+while getopts ":bglr:xz" opt; do
     case $opt in
 	b)
 	    compressors="$compressors bz2";;
@@ -388,6 +402,8 @@ while getopts ":bglr:x" opt; do
 	    release_date=$OPTARG;;
 	x)
 	    compressors="$compressors xz";;
+	z)
+	    compressors="$compressors zstd";;
 	\?)
 	    echo "Invalid option: -$OPTARG" && usage;;
   esac
