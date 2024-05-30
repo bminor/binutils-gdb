@@ -239,7 +239,7 @@ do_xz()
     ver=$2
     echo "==> Xzipping $package-$ver.tar.xz"
     rm -f $package-$ver.tar.xz
-    $XZPROG -k -v -9 $package-$ver.tar
+    $XZPROG -k -v -9 -T0 $package-$ver.tar
 }
 
 # Compress the output with zstd
