@@ -178,8 +178,8 @@ MANCONF = -Dman
 TEXI2POD = perl $(srcdir)/../../etc/texi2pod.pl \
 		$(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
 
-POD2MAN = pod2man --center="GNU Development Tools" \
-		--release="gdb-`sed q version.subst`"
+
+POD2MAN = pod2man --center="GNU Development Tools"
 
 # List of man pages generated from gdb.texi
 MAN1S = gdb.1 gdbserver.1 gcore.1 gdb-add-index.1
@@ -435,9 +435,14 @@ refcard.pdf : refcard.tex $(REFEDITS)
 	$(SILENCE) rm -f sedref.log sedref.tex tmp.sed
 
 # File to record current GDB version number.
+#
+# It is important that version.subst be the first dependency so that
+# $< can be used in the recipe, this allows us to find version.subst
+# in either the source tree or the build tree as this file is
+# included, pre-built, as part of a release.
 GDBvn.texi : version.subst
 	$(ECHO_GEN)
-	$(SILENCE) echo "@set GDBVN `sed q version.subst`" > ./GDBvn.new
+	$(SILENCE) echo "@set GDBVN `sed q $<`" > ./GDBvn.new
 	$(SILENCE) if [ -n "$(PKGVERSION)" ]; then \
 	  echo "@set VERSION_PACKAGE $(PKGVERSION)" >> ./GDBvn.new; \
 	fi
@@ -652,11 +657,16 @@ annotate/index.html: $(ANNOTATE_DOC_FILES)
 # pages, then the .pod files must become a dependency, this will
 # trigger an attempt to rebuild these files while building and
 # installing a release of GDB, which is something we don't want.
+#
+# It is important that version.subst be the first dependency so that
+# $< can be used in the recipe, this allows us to find version.subst
+# in either the source tree or the build tree as this file is
+# included, pre-built, as part of a release.
 $(MAN1S) $(MAN5S) : version.subst $(GDB_DOC_FILES)
 	$(ECHO_TEXI2POD) $(TEXI2POD) $(MANCONF) -D$(basename $@) \
 		< $(srcdir)/gdb.texinfo > $(basename $@).pod
 	$(ECHO_TEXI2MAN) ($(POD2MAN) --section=$(subst .,,$(suffix $@)) \
-			$(basename $@).pod | \
+			--release="gdb-`sed q $<`" $(basename $@).pod | \
 		sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	$(SILENCE) rm -f $(basename $@).pod
