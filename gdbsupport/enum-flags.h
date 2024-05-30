@@ -51,8 +51,6 @@
     some_flags f = 1; // error
 */
 
-#ifdef __cplusplus
-
 /* Use this to mark an enum as flags enum.  It defines FLAGS_TYPE as
    enum_flags wrapper class for ENUM, and enables the global operator
    overloads for ENUM.  */
@@ -483,14 +481,5 @@ enum_flags<E>::to_string (const string_mapping (&mapping)[N]) const
 
   return res;
 }
-
-#else /* __cplusplus */
-
-/* In C, the flags type is just a typedef for the enum type.  */
-
-#define DEF_ENUM_FLAGS_TYPE(enum_type, flags_type) \
-  typedef enum_type flags_type
-
-#endif /* __cplusplus */
 
 #endif /* COMMON_ENUM_FLAGS_H */
