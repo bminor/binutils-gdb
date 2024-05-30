@@ -169,6 +169,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the Check Feature Status Extension.
 @item @code{compnum} @tab @code{simd}
  @tab Enable the complex number SIMD extensions.  An alias of @code{fcma}.
+@item @code{cpa} @tab
+ @tab Enable the Checked Pointer Arithmetic extension.
 @item @code{crc} @tab
  @tab Enable CRC instructions.
 @item @code{crypto} @tab @code{simd}
@@ -189,12 +191,14 @@ automatically cause those extensions to be disabled.
  @tab Enable Flag Manipulation instructions.
 @item @code{flagm2} @tab @code{flagm}
  @tab Enable FlagM2 flag conversion instructions.
+@item @code{fp} @tab
+ @tab Enable floating-point extensions.
+@item @code{fp8} @tab
+ @tab Enable the Floating Point 8 (FP8) extension.
 @item @code{fp16fml} @tab @code{fp16}
  @tab Enable Armv8.2 16-bit floating-point multiplication variant support.
 @item @code{fp16} @tab @code{fp}
  @tab Enable Armv8.2 16-bit floating-point support.
-@item @code{fp} @tab
- @tab Enable floating-point extensions.
 @item @code{frintts} @tab @code{simd}
  @tab Enable floating-point round to integral value instructions.
 @item @code{gcs} @tab
@@ -215,6 +219,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Large System extensions.
 @item @code{lse128} @tab @code{lse}
  @tab Enable the 128-bit Atomic Instructions extension.
+@item @code{lut} @tab
+ @tab Enable the Lookup Table (LUT) extension.
 @item @code{memtag} @tab
  @tab Enable Armv8.5-A Memory Tagging Extensions.
 @item @code{mops} @tab
@@ -289,12 +295,6 @@ automatically cause those extensions to be disabled.
  @tab Enable @code{wfet} and @code{wfit} instructions.
 @item @code{xs} @tab
  @tab Enable the XS memory attribute extension.
-@item @code{cpa} @tab
- @tab Enable the Checked Pointer Arithmetic extension.
-@item @code{fp8} @tab
- @tab Enable the Floating Point 8 (FP8) extension.
-@item @code{lut} @tab
- @tab Enable the Lookup Table (LUT) extension.
 @end multitable
 
 @multitable @columnfractions .20 .80
