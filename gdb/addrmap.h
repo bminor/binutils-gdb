@@ -20,6 +20,7 @@
 #ifndef ADDRMAP_H
 #define ADDRMAP_H
 
+#include "gdbsupport/gdb_obstack.h"
 #include "splay-tree.h"
 #include "gdbsupport/function-view.h"
 
