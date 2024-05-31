@@ -406,15 +406,9 @@ tui_source_window_base::show_source_content ()
   for (int lineno = 0; lineno < m_content.size (); lineno++)
     show_source_line (lineno);
 
-  if (can_box ())
-    {
-      /* Calling check_and_display_highlight_if_needed will call refresh_window
-	 (so long as the current window can be boxed), which will ensure that
-	 the newly loaded window content is copied to the screen.  */
-      check_and_display_highlight_if_needed ();
-    }
-  else
-    refresh_window ();
+  /* Calling check_and_display_highlight_if_needed will call
+     refresh_window.  */
+  check_and_display_highlight_if_needed ();
 }
 
 tui_source_window_base::tui_source_window_base ()
