@@ -168,7 +168,7 @@ public:
   const std::string &title () const
   { return m_title; }
 
-  /* Clear the window, maybe draw the boarder, and then display string
+  /* Clear the window, maybe draw the border, and then display string
      STR centered in the window, abbreviated if necessary.  */
   void center_string (const char *str);
 
