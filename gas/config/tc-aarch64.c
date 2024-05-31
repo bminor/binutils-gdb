@@ -33,6 +33,7 @@
 #include "dw2gencfi.h"
 #include "sframe.h"
 #include "gen-sframe.h"
+#include "scfi.h"
 #endif
 
 #include "dw2gencfi.h"
@@ -8614,6 +8615,10 @@ dump_opcode_operands (const aarch64_opcode *opcode)
 }
 #endif /* DEBUG_AARCH64 */
 
+#ifdef OBJ_ELF
+# include "tc-aarch64-ginsn.c"
+#endif
+
 /* This is the guts of the machine-dependent assembler.  STR points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
@@ -8750,6 +8755,16 @@ md_assemble (char *str)
 	      memcpy (copy, &inst.base, sizeof (struct aarch64_inst));
 	      output_inst (copy);
 	    }
+
+#ifdef OBJ_ELF
+	  if (flag_synth_cfi)
+	    {
+	      ginsnS *ginsn;
+	      ginsn = aarch64_ginsn_new (symbol_temp_new_now (),
+					 frch_ginsn_gen_mode ());
+	      frch_ginsn_data_append (ginsn);
+	    }
+#endif
 
 	  /* Issue non-fatal messages if any.  */
 	  output_operand_error_report (str, true);
