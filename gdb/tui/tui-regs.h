@@ -34,7 +34,6 @@ struct tui_register_info
     : m_regno (regno)
   {
     update (frame);
-    highlight = false;
   }
 
   DISABLE_COPY_AND_ASSIGN (tui_register_info);
@@ -48,13 +47,18 @@ struct tui_register_info
   bool visible () const
   { return y > 0; }
 
+  bool highlighted () const
+  { return m_highlight; }
+
   /* Location.  */
   int x = 0;
   int y = 0;
-  bool highlight = false;
   std::string content;
 
 private:
+
+  /* True if currently highlighted.  */
+  bool m_highlight = false;
 
   /* The register number.  */
   const int m_regno;

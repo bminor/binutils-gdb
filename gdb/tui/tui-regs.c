@@ -95,13 +95,13 @@ tui_register_format (const frame_info_ptr &frame, int regnum)
 }
 
 /* Compute the register value from the given frame and format it for
-   the display.  update 'content' and set 'highlight' if the contents
-   changed.  */
+   the display.  Update 'content' and set 'm_highlight' if the
+   contents changed.  */
 void
 tui_register_info::update (const frame_info_ptr &frame)
 {
   std::string new_content = tui_register_format (frame, m_regno);
-  highlight = content != new_content;
+  m_highlight = content != new_content;
   content = std::move (new_content);
 }
 
@@ -404,12 +404,11 @@ tui_data_window::check_register_values (const frame_info_ptr &frame)
 	{
 	  for (tui_register_info &data_item_win : m_regs_content)
 	    {
-	      bool was_hilighted = data_item_win.highlight;
+	      bool was_hilighted = data_item_win.highlighted ();
 
 	      data_item_win.update (frame);
 
-	      /* Register windows whose y == 0 are outside the visible area.  */
-	      if ((data_item_win.highlight || was_hilighted)
+	      if ((data_item_win.highlighted () || was_hilighted)
 		  && data_item_win.visible ())
 		data_item_win.rerender (handle.get (), m_item_width);
 	    }
@@ -418,12 +417,11 @@ tui_data_window::check_register_values (const frame_info_ptr &frame)
     }
 }
 
-/* Display a register in a window.  If hilite is TRUE, then the value
-   will be displayed in reverse video.  */
+/* Display a register in a window.  */
 void
 tui_register_info::rerender (WINDOW *handle, int field_width)
 {
-  if (highlight)
+  if (m_highlight)
     /* We ignore the return value, casting it to void in order to avoid
        a compiler warning.  The warning itself was introduced by a patch
        to ncurses 5.7 dated 2009-08-29, changing this macro to expand
@@ -435,7 +433,7 @@ tui_register_info::rerender (WINDOW *handle, int field_width)
   if (content.size () < field_width)
     waddstr (handle, n_spaces (field_width - content.size ()));
 
-  if (highlight)
+  if (m_highlight)
     /* We ignore the return value, casting it to void in order to avoid
        a compiler warning.  The warning itself was introduced by a patch
        to ncurses 5.7 dated 2009-08-29, changing this macro to expand
