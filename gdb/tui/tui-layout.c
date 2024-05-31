@@ -19,15 +19,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "arch-utils.h"
 #include "command.h"
 #include "symtab.h"
 #include "frame.h"
-#include "source.h"
-#include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
-#include <ctype.h>
 #include <unordered_set>
 
 #include "tui/tui.h"
@@ -37,7 +33,6 @@
 #include "tui/tui-status.h"
 #include "tui/tui-regs.h"
 #include "tui/tui-win.h"
-#include "tui/tui-winsource.h"
 #include "tui/tui-disasm.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-source.h"

@@ -20,21 +20,17 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "symtab.h"
-#include "breakpoint.h"
 #include "frame.h"
 #include "command.h"
 #include "inferior.h"
 #include "target.h"
 #include "top.h"
 #include "gdb-demangle.h"
-#include "source.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 #include "tui/tui-status.h"
 #include "tui/tui-wingeneral.h"
-#include "tui/tui-source.h"
 #include "tui/tui-winsource.h"
-#include "tui/tui-file.h"
 #include "tui/tui-location.h"
 
 #include "gdb_curses.h"

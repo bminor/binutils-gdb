@@ -19,18 +19,11 @@
 
 #include "symtab.h"
 #include "inferior.h"
-#include "command.h"
-#include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "target.h"
-#include "gdbcore.h"
-#include "gdbsupport/event-loop.h"
-#include "event-top.h"
 #include "frame.h"
 #include "breakpoint.h"
-#include "ui-out.h"
-#include "top.h"
 #include "observable.h"
 #include "source.h"
 #include <unistd.h>
@@ -38,15 +31,10 @@
 
 #include "tui/tui.h"
 #include "tui/tui-hooks.h"
-#include "tui/tui-data.h"
 #include "tui/tui-layout.h"
-#include "tui/tui-io.h"
 #include "tui/tui-regs.h"
-#include "tui/tui-win.h"
 #include "tui/tui-status.h"
 #include "tui/tui-winsource.h"
-
-#include "gdb_curses.h"
 
 static void
 tui_new_objfile_hook (struct objfile* objfile)

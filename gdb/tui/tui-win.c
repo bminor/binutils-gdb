@@ -26,14 +26,9 @@
 
 #include "command.h"
 #include "symtab.h"
-#include "breakpoint.h"
 #include "frame.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
-#include "top.h"
-#include "source.h"
-#include "gdbsupport/event-loop.h"
-#include "async-event.h"
 #include "ui-out.h"
 #include "utils.h"
 
@@ -43,8 +38,6 @@
 #include "tui/tui-data.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-wingeneral.h"
-#include "tui/tui-status.h"
-#include "tui/tui-regs.h"
 #include "tui/tui-disasm.h"
 #include "tui/tui-source.h"
 #include "tui/tui-winsource.h"
@@ -54,8 +47,6 @@
 #include <ctype.h>
 #include "readline/readline.h"
 #include <string_view>
-
-#include <signal.h>
 
 static void tui_set_tab_width_command (const char *, int);
 static void tui_refresh_all_command (const char *, int);

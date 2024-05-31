@@ -18,11 +18,6 @@
 #ifndef TUI_TUI_LOCATION_H
 #define TUI_TUI_LOCATION_H
 
-#include "tui/tui.h"
-#include "tui/tui.h"
-#include "gdb_curses.h"
-#include "observable.h"
-
 /* Class used to track the current location that the TUI is displaying.  An
    instance of this class will be created; as events occur within GDB the
    location information within this instance will be updated.  As windows

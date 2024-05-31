@@ -23,7 +23,6 @@
 #include "target.h"
 #include "gdbsupport/event-loop.h"
 #include "event-top.h"
-#include "command.h"
 #include "top.h"
 #include "ui.h"
 #include "tui/tui.h"

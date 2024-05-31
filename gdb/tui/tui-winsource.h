@@ -22,6 +22,7 @@
 #ifndef TUI_TUI_WINSOURCE_H
 #define TUI_TUI_WINSOURCE_H
 
+#include "gdbsupport/observable.h"
 #include "tui/tui-data.h"
 #include "symtab.h"
 

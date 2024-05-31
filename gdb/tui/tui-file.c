@@ -19,7 +19,6 @@
 #include "tui/tui-file.h"
 #include "tui/tui-io.h"
 #include "tui/tui-command.h"
-#include "tui.h"
 
 void
 tui_file::puts (const char *linebuffer)

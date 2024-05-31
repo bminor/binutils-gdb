@@ -22,6 +22,7 @@
 #ifndef TUI_TUI_REGS_H
 #define TUI_TUI_REGS_H
 
+#include "gdbsupport/gdb-checked-static-cast.h"
 #include "tui/tui-data.h"
 #include "reggroups.h"
 
