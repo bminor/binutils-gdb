@@ -145,4 +145,12 @@ private:
   gdbarch *m_gdbarch = nullptr;
 };
 
+/* Return the instance of the registers window.  */
+
+inline tui_data_window *
+tui_data_win ()
+{
+  return gdb::checked_static_cast<tui_data_window *> (tui_win_list[DATA_WIN]);
+}
+
 #endif /* TUI_TUI_REGS_H */

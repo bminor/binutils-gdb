@@ -61,7 +61,7 @@ tui_cmd_window::resize (int height_, int width_, int origin_x, int origin_y)
 void
 tui_refresh_cmd_win (void)
 {
-  WINDOW *w = TUI_CMD_WIN->handle.get ();
+  WINDOW *w = tui_cmd_win ()->handle.get ();
 
   tui_wrefresh (w);
 }

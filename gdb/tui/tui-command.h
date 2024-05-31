@@ -55,6 +55,14 @@ struct tui_cmd_window
   int start_line = 0;
 };
 
+/* Return the instance of the command windows.  */
+
+inline tui_cmd_window *
+tui_cmd_win ()
+{
+  return dynamic_cast<tui_cmd_window *> (tui_win_list[CMD_WIN]);
+}
+
 /* Refresh the command window.  */
 extern void tui_refresh_cmd_win (void);
 
