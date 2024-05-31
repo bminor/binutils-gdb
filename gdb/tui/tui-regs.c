@@ -151,8 +151,8 @@ tui_data_window::first_reg_element_no_inline (int line_no) const
     return (-1);
 }
 
-/* Show the registers of the given group in the data window
-   and refresh the window.  */
+/* See tui-regs.h.  */
+
 void
 tui_data_window::set_register_group (const reggroup *group)
 {
@@ -166,9 +166,6 @@ tui_data_window::set_register_group (const reggroup *group)
 void
 tui_data_window::update_register_data (const reggroup *group)
 {
-  if (group == nullptr)
-    group = general_reggroup;
-
   if (!target_has_registers ()
       || !target_has_stack ()
       || !target_has_memory ())
@@ -179,6 +176,9 @@ tui_data_window::update_register_data (const reggroup *group)
       m_regs_content.clear ();
       return;
     }
+
+  if (group == nullptr)
+    group = general_reggroup;
 
   frame_info_ptr frame = get_selected_frame (nullptr);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -269,8 +269,6 @@ tui_data_window::display_registers_from (int start_element_no)
   /* Mark register windows below the visible area.  */
   for (; i < m_regs_content.size (); i++)
     m_regs_content[i].y = 0;
-
-  refresh_window ();
 }
 
 /* See tui-regs.h.  */
@@ -359,7 +357,7 @@ tui_data_window::rerender ()
     erase_data_content ();
   else
     display_registers_from (0);
-  tui_wrefresh (handle.get ());
+  refresh_window ();
 }
 
 
@@ -382,6 +380,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
     {
       first_line += num_to_scroll;
       display_registers_from_line (first_line);
+      refresh_window ();
     }
 }
 
@@ -391,29 +390,23 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
 void
 tui_data_window::check_register_values (const frame_info_ptr &frame)
 {
-  if (frame == nullptr)
+  /* If the frame architecture changed, we need to reset the register
+     group.  */
+  if (frame == nullptr || get_frame_arch (frame) != m_gdbarch)
     set_register_group (nullptr);
   else
     {
-      /* If the frame architecture changed, we need to reset the
-	 register group.  */
-      struct gdbarch *gdbarch = get_frame_arch (frame);
-      if (gdbarch != m_gdbarch)
-	set_register_group (nullptr);
-      else
+      for (tui_register_info &data_item_win : m_regs_content)
 	{
-	  for (tui_register_info &data_item_win : m_regs_content)
-	    {
-	      bool was_hilighted = data_item_win.highlighted ();
+	  bool was_hilighted = data_item_win.highlighted ();
 
-	      data_item_win.update (frame);
+	  data_item_win.update (frame);
 
-	      if ((data_item_win.highlighted () || was_hilighted)
-		  && data_item_win.visible ())
-		data_item_win.rerender (handle.get (), m_item_width);
-	    }
+	  if ((data_item_win.highlighted () || was_hilighted)
+	      && data_item_win.visible ())
+	    data_item_win.rerender (handle.get (), m_item_width);
 	}
-      tui_wrefresh (handle.get ());
+      refresh_window ();
     }
 }
 

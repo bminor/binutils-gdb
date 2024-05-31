@@ -81,6 +81,8 @@ struct tui_data_window : public tui_win_info
 
   void check_register_values (const frame_info_ptr &frame);
 
+  /* Set the current register and redisplay the window.  If GROUP is
+     NULL, the general register group will be used.  */
   void set_register_group (const reggroup *group);
 
   const reggroup *get_current_group () const
