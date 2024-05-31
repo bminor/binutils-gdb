@@ -120,6 +120,8 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 	      docstring = python_string_to_host_string (ds_obj.get ());
 	      if (docstring == NULL)
 		return -1;
+	      docstring
+		= gdbpy_fix_doc_string_indentation (std::move (docstring));
 	    }
 	}
     }
