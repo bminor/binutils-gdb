@@ -7248,7 +7248,7 @@ the use of prologue scanners."),
 	       &maintenanceflushlist);
   c = add_alias_cmd ("flush-symbol-cache", maintenance_flush_symbol_cache_cmd,
 		     class_maintenance, 0, &maintenancelist);
-  deprecate_cmd (c, "maintenancelist flush symbol-cache");
+  deprecate_cmd (c, "maintenance flush symbol-cache");
 
   gdb::observers::new_objfile.attach (symtab_new_objfile_observer, "symtab");
   gdb::observers::all_objfiles_removed.attach (symtab_all_objfiles_removed,
