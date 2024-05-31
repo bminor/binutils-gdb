@@ -263,6 +263,27 @@ extern void aarch64_after_parse_args (void);
 
 #ifdef OBJ_ELF
 
+#define TARGET_USE_GINSN 1
+/* Allow GAS to synthesize DWARF CFI for hand-written asm.
+   PS: TARGET_USE_CFIPOP is a pre-condition.  */
+#define TARGET_USE_SCFI 1
+/* Identify the maximum DWARF register number of all the registers being
+   tracked for SCFI.  This is the last DWARF register number of the set
+   of SP, FP, and all callee-saved registers.  For Aarch64, this means 79
+   because FP/Advanced SIMD v8-v15 are also callee-saved registers.  */
+# define SCFI_MAX_REG_ID 79
+/* Identify the DWARF register number of the frame-pointer register.  */
+# define REG_FP 29
+/* Identify the DWARF register number of the link register.  */
+# define REG_LR 30
+/* Identify the DWARF register number of the stack-pointer register.  */
+# define REG_SP 31
+
+#define SCFI_INIT_CFA_OFFSET 0
+
+#define SCFI_CALLEE_SAVED_REG_P(dw2reg)  aarch64_scfi_callee_saved_p (dw2reg)
+extern bool aarch64_scfi_callee_saved_p (uint32_t dw2reg_num);
+
 /* Whether SFrame stack trace info is supported.  */
 extern bool aarch64_support_sframe_p (void);
 #define support_sframe_p aarch64_support_sframe_p
