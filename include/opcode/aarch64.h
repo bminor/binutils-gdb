@@ -1320,6 +1320,10 @@ extern const aarch64_opcode aarch64_opcode_table[];
 #define F_LDST_STORE (2ULL << 36)
 /* A load followed by a store (using the same address). */
 #define F_LDST_SWAP (F_LDST_LOAD | F_LDST_STORE)
+/* Subclasses to denote add, sub and mov insns.  */
+#define F_ARITH_ADD (1ULL << 36)
+#define F_ARITH_SUB (2ULL << 36)
+#define F_ARITH_MOV (4ULL << 36)
 /* Next bit is 40.  */
 
 /* Instruction constraints.  */
