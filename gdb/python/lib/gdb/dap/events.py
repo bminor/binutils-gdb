@@ -161,7 +161,7 @@ _expected_pause = False
 
 
 @in_gdb_thread
-def exec_and_expect_stop(cmd, expected_pause=False):
+def exec_and_expect_stop(cmd, expected_pause=False, propagate_exception=False):
     """A wrapper for exec_and_log that sets the continue-suppression flag.
 
     When EXPECTED_PAUSE is True, a stop that looks like a pause (e.g.,
@@ -174,7 +174,7 @@ def exec_and_expect_stop(cmd, expected_pause=False):
     # continuing.
     _suppress_cont = not expected_pause
     # FIXME if the call fails should we clear _suppress_cont?
-    exec_and_log(cmd)
+    exec_and_log(cmd, propagate_exception)
 
 
 # Map from gdb stop reasons to DAP stop reasons.  Some of these can't
