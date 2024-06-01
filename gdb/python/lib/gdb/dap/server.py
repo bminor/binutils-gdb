@@ -124,6 +124,8 @@ class Server:
         self.in_stream = in_stream
         self.out_stream = out_stream
         self.child_stream = child_stream
+        self.delayed_events_lock = threading.Lock()
+        self.defer_stop_events = False
         self.delayed_events = []
         # This queue accepts JSON objects that are then sent to the
         # DAP client.  Writing is done in a separate thread to avoid
@@ -177,8 +179,12 @@ class Server:
             log_stack()
             result["success"] = False
             result["message"] = str(e)
-        self.canceller.done(req)
         return result
+
+    @in_dap_thread
+    def _handle_command_finish(self, params):
+        req = params["seq"]
+        self.canceller.done(req)
 
     # Read inferior output and sends OutputEvents to the client.  It
     # is run in its own thread.
@@ -239,8 +245,12 @@ class Server:
                 break
             result = self._handle_command(cmd)
             self._send_json(result)
-            events = self.delayed_events
-            self.delayed_events = []
+            self._handle_command_finish(cmd)
+            events = None
+            with self.delayed_events_lock:
+                events = self.delayed_events
+                self.delayed_events = []
+                self.defer_stop_events = False
             for event, body in events:
                 self.send_event(event, body)
         # Got the terminate request.  This is handled by the
@@ -254,7 +264,22 @@ class Server:
     def send_event_later(self, event, body=None):
         """Send a DAP event back to the client, but only after the
         current request has completed."""
-        self.delayed_events.append((event, body))
+        with self.delayed_events_lock:
+            self.delayed_events.append((event, body))
+
+    @in_gdb_thread
+    def send_event_maybe_later(self, event, body=None):
+        """Send a DAP event back to the client, but if a request is in-flight
+        within the dap thread and that request is configured to delay the event,
+        wait until the response has been sent until the event is sent back to
+        the client."""
+        with self.canceller.lock:
+            if self.canceller.in_flight_dap_thread:
+                with self.delayed_events_lock:
+                    if self.defer_stop_events:
+                        self.delayed_events.append((event, body))
+                        return
+        self.send_event(event, body)
 
     # Note that this does not need to be run in any particular thread,
     # because it just creates an object and writes it to a thread-safe
@@ -287,6 +312,15 @@ def send_event(event, body=None):
     _server.send_event(event, body)
 
 
+def send_event_maybe_later(event, body=None):
+    """Send a DAP event back to the client, but if a request is in-flight
+    within the dap thread and that request is configured to delay the event,
+    wait until the response has been sent until the event is sent back to
+    the client."""
+    global _server
+    _server.send_event_maybe_later(event, body)
+
+
 # A helper decorator that checks whether the inferior is running.
 def _check_not_running(func):
     @functools.wraps(func)
@@ -307,7 +341,8 @@ def request(
     *,
     response: bool = True,
     on_dap_thread: bool = False,
-    expect_stopped: bool = True
+    expect_stopped: bool = True,
+    defer_stop_events: bool = False
 ):
     """A decorator for DAP requests.
 
@@ -328,6 +363,10 @@ def request(
     fail with the 'notStopped' reason if it is processed while the
     inferior is running.  When EXPECT_STOPPED is False, the request
     will proceed regardless of the inferior's state.
+
+    If DEFER_STOP_EVENTS is True, then make sure any stop events sent
+    during the request processing are not sent to the client until the
+    response has been sent.
     """
 
     # Validate the parameters.
@@ -355,6 +394,11 @@ def request(
             func = in_gdb_thread(func)
 
             if response:
+                if defer_stop_events:
+                    global _server
+                    if _server is not None:
+                        with _server.delayed_events_lock:
+                            _server.defer_stop_events = True
 
                 def sync_call(**args):
                     return send_gdb_with_response(lambda: func(**args))
