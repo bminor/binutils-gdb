@@ -79,4 +79,15 @@ gdb_assert {[dict get $varlist variablesReference] > 0} \
 gdb_assert {[dict get $varlist name] == "(return)"} \
     "variable is return value"
 
+set response_and_events [dap_request_and_response stepOut {o threadId [i 1]}]
+set response [lindex $response_and_events 0]
+if {[dict get $response success] == "true"} {
+    fail "stepOut from outermost frame should not succeed"
+} else {
+    pass "stepOut from outermost frame failed like it should"
+}
+
+dap_check_request_and_response "still stopped and may request backtrace" \
+    stackTrace {o threadId [i 1]}
+
 dap_shutdown
