@@ -469,6 +469,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.sh ver_test_13.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_14.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr23409.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr31830.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr31830_lto.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_as_needed.sh relro_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
@@ -526,6 +528,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_13.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_14.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr23409.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr31830_a.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr31830_b.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr31830_lto_a.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_pr31830_lto_b.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_as_needed.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test.stdout \
@@ -5900,6 +5906,20 @@ ver_test_pr23409.sh.log: ver_test_pr23409.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+ver_test_pr31830.sh.log: ver_test_pr31830.sh
+	@p='ver_test_pr31830.sh'; \
+	b='ver_test_pr31830.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+ver_test_pr31830_lto.sh.log: ver_test_pr31830_lto.sh
+	@p='ver_test_pr31830_lto.sh'; \
+	b='ver_test_pr31830_lto.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 weak_as_needed.sh.log: weak_as_needed.sh
 	@p='weak_as_needed.sh'; \
 	b='weak_as_needed.sh'; \
@@ -8900,6 +8920,22 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -shared -o $@ ver_test_1.o ver_test_pr23409_2.so --version-script $(srcdir)/ver_test_pr23409_1.script
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr23409_2.so: gcctestdir/ld ver_test_1.o $(srcdir)/ver_test_pr23409_2.script
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -shared -o $@ ver_test_1.o --version-script $(srcdir)/ver_test_pr23409_2.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr31830_a.syms: ver_test_pr31830_a.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --dyn-syms -W $< >$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr31830_b.syms: ver_test_pr31830_b.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --dyn-syms -W $< >$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr31830_a.so: gcctestdir/ld ver_test_pr31830_a.o ver_test_pr31830_b.o $(srcdir)/ver_test_pr31830.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -shared -o $@ ver_test_pr31830_a.o ver_test_pr31830_b.o --version-script $(srcdir)/ver_test_pr31830.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr31830_b.so: gcctestdir/ld ver_test_pr31830_a.o ver_test_pr31830_b.o $(srcdir)/ver_test_pr31830.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -shared -o $@ ver_test_pr31830_b.o ver_test_pr31830_a.o --version-script $(srcdir)/ver_test_pr31830.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr31830_lto_a.syms: ver_test_pr31830_lto_a.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --dyn-syms -W $< >$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr31830_lto_a.so: gcctestdir/ld $(srcdir)/ver_test_pr31830_lto.c $(srcdir)/ver_test_pr31830.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared -o $@ -O2 -fPIC -flto-partition=max $(srcdir)/ver_test_pr31830_lto.c -Wl,--version-script,$(srcdir)/ver_test_pr31830.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr31830_lto_b.syms: ver_test_pr31830_lto_b.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) --dyn-syms -W $< >$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_pr31830_lto_b.so: gcctestdir/ld $(srcdir)/ver_test_pr31830_lto.c $(srcdir)/ver_test_pr31830.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared -o $@ -O2 -fPIC -flto-partition=max -flto=2 $(srcdir)/ver_test_pr31830_lto.c -Wl,--version-script,$(srcdir)/ver_test_pr31830.script
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_as_needed.stdout: weak_as_needed_a.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -dW --dyn-syms $< >$@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_as_needed_a.so: gcctestdir/ld weak_as_needed_a.o weak_as_needed_b.so weak_as_needed_c.so

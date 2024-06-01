@@ -1963,6 +1963,28 @@ ver_test_pr23409_1.so: gcctestdir/ld ver_test_1.o $(srcdir)/ver_test_pr23409_1.s
 ver_test_pr23409_2.so: gcctestdir/ld ver_test_1.o $(srcdir)/ver_test_pr23409_2.script
 	gcctestdir/ld -shared -o $@ ver_test_1.o --version-script $(srcdir)/ver_test_pr23409_2.script
 
+check_SCRIPTS += ver_test_pr31830.sh
+check_DATA += ver_test_pr31830_a.syms ver_test_pr31830_b.syms
+ver_test_pr31830_a.syms: ver_test_pr31830_a.so
+	$(TEST_READELF) --dyn-syms -W $< >$@
+ver_test_pr31830_b.syms: ver_test_pr31830_b.so
+	$(TEST_READELF) --dyn-syms -W $< >$@
+ver_test_pr31830_a.so: gcctestdir/ld ver_test_pr31830_a.o ver_test_pr31830_b.o $(srcdir)/ver_test_pr31830.script
+	gcctestdir/ld -shared -o $@ ver_test_pr31830_a.o ver_test_pr31830_b.o --version-script $(srcdir)/ver_test_pr31830.script
+ver_test_pr31830_b.so: gcctestdir/ld ver_test_pr31830_a.o ver_test_pr31830_b.o $(srcdir)/ver_test_pr31830.script
+	gcctestdir/ld -shared -o $@ ver_test_pr31830_b.o ver_test_pr31830_a.o --version-script $(srcdir)/ver_test_pr31830.script
+
+check_SCRIPTS += ver_test_pr31830_lto.sh
+check_DATA += ver_test_pr31830_lto_a.syms ver_test_pr31830_lto_b.syms
+ver_test_pr31830_lto_a.syms: ver_test_pr31830_lto_a.so
+	$(TEST_READELF) --dyn-syms -W $< >$@
+ver_test_pr31830_lto_a.so: gcctestdir/ld $(srcdir)/ver_test_pr31830_lto.c $(srcdir)/ver_test_pr31830.script
+	$(LINK) -Bgcctestdir/ -shared -o $@ -O2 -fPIC -flto-partition=max $(srcdir)/ver_test_pr31830_lto.c -Wl,--version-script,$(srcdir)/ver_test_pr31830.script
+ver_test_pr31830_lto_b.syms: ver_test_pr31830_lto_b.so
+	$(TEST_READELF) --dyn-syms -W $< >$@
+ver_test_pr31830_lto_b.so: gcctestdir/ld $(srcdir)/ver_test_pr31830_lto.c $(srcdir)/ver_test_pr31830.script
+	$(LINK) -Bgcctestdir/ -shared -o $@ -O2 -fPIC -flto-partition=max -flto=2 $(srcdir)/ver_test_pr31830_lto.c -Wl,--version-script,$(srcdir)/ver_test_pr31830.script
+
 check_SCRIPTS += weak_as_needed.sh
 check_DATA += weak_as_needed.stdout
 weak_as_needed.stdout: weak_as_needed_a.so

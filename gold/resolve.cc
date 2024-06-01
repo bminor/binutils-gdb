@@ -250,20 +250,6 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   bool to_is_ordinary;
   const unsigned int to_shndx = to->shndx(&to_is_ordinary);
 
-  // It's possible for a symbol to be defined in an object file
-  // using .symver to give it a version, and for there to also be
-  // a linker script giving that symbol the same version.  We
-  // don't want to give a multiple-definition error for this
-  // harmless redefinition.
-  if (to->source() == Symbol::FROM_OBJECT
-      && to->object() == object
-      && to->is_defined()
-      && is_ordinary
-      && to_is_ordinary
-      && to_shndx == st_shndx
-      && to->value() == sym.get_st_value())
-    return;
-
   // Likewise for an absolute symbol defined twice with the same value.
   if (!is_ordinary
       && st_shndx == elfcpp::SHN_ABS
