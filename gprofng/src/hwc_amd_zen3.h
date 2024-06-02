@@ -18,6 +18,9 @@
    Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#ifndef _HWC_AMD_ZEN3_H
+#define _HWC_AMD_ZEN3_H
+
 #define I(nm, event, umask, mtr) INIT_HWC(nm, mtr, (event) | ((umask) << 8), PERF_TYPE_RAW)
 
 static Hwcentry	amd_zen3_list[] = {
@@ -629,4 +632,4 @@ static Hwcentry	amd_zen3_list[] = {
 };
 
 #undef I
-
+#endif

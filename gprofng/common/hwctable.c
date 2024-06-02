@@ -1303,6 +1303,7 @@ static Hwcentry	generic_list[] = {
 };
 
 #include "hwc_amd_zen3.h"
+#include "hwc_amd_zen4.h"
 
 /* structure defining the counters for a CPU type */
 typedef struct
@@ -1353,6 +1354,7 @@ static cpu_list_t cputabs[] = {
   {ARM_CPU_IMP_APM, generic_list, {"insts,,cycles", 0}},
   {CPC_AMD_Authentic, generic_list, {"insts,,cycles", 0}},
   {CPC_AMD_FAM_19H_ZEN3, amd_zen3_list, {"insts,,cycles", 0}},
+  {CPC_AMD_FAM_19H_ZEN4, amd_zen4_list, {"insts,,cycles", 0}},
   {0, generic_list, {"insts,,cycles", 0}},
 };
 
@@ -1824,6 +1826,26 @@ setup_cpc_general (int skip_hwc_test)
     }
   hwcdrv->hwcdrv_get_info (&cpcx_cpuver, &cpcx_cciname, &cpcx_npics,
 			   &cpcx_docref, &cpcx_support_bitmask);
+
+  /* Fix cpcx_cpuver for new Zen machines */
+  cpu_info_t *cpu_p = read_cpuinfo ();
+  if (strcmp (cpu_p->cpu_vendorstr, "AuthenticAMD") == 0)
+    {
+      if (cpu_p->cpu_family == AMD_ZEN3_FAMILY)
+	switch (cpu_p->cpu_model)
+	  {
+	  case AMD_ZEN3_RYZEN:
+	  case AMD_ZEN3_RYZEN2:
+	  case AMD_ZEN3_RYZEN3:
+	  case AMD_ZEN3_EPYC_TRENTO:
+	    cpcx_cpuver = CPC_AMD_FAM_19H_ZEN3;
+	    break;
+	  case AMD_ZEN4_RYZEN:
+	  case AMD_ZEN4_EPYC:
+	    cpcx_cpuver = CPC_AMD_FAM_19H_ZEN4;
+	    break;
+	  }
+    }
 
 #ifdef DISALLOW_PENTIUM_PRO_MMX_7007575
   if (cpcx_cpuver == CPC_PENTIUM_PRO_MMX)
