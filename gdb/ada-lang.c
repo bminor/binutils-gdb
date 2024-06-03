@@ -4792,7 +4792,7 @@ standard_lookup (const char *name, const struct block *block,
 
   if (lookup_cached_symbol (name, domain, &sym.symbol, NULL))
     return sym.symbol;
-  ada_lookup_encoded_symbol (name, block, domain, &sym);
+  sym = ada_lookup_encoded_symbol (name, block, domain);
   cache_symbol (name, domain, sym.symbol, sym.block);
   return sym.symbol;
 }
@@ -5703,15 +5703,11 @@ ada_lookup_symbol_list (const char *name, const struct block *block,
 
 /* The result is as for ada_lookup_symbol_list with FULL_SEARCH set
    to 1, but choosing the first symbol found if there are multiple
-   choices.
+   choices.  */
 
-   The result is stored in *INFO, which must be non-NULL.
-   If no match is found, INFO->SYM is set to NULL.  */
-
-void
+block_symbol
 ada_lookup_encoded_symbol (const char *name, const struct block *block,
-			   domain_search_flags domain,
-			   struct block_symbol *info)
+			   domain_search_flags domain)
 {
   /* Since we already have an encoded name, wrap it in '<>' to force a
      verbatim match.  Otherwise, if the name happens to not look like
@@ -5720,9 +5716,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
      would e.g., incorrectly lowercase object renaming names like
      "R28b" -> "r28b".  */
   std::string verbatim = add_angle_brackets (name);
-
-  gdb_assert (info != NULL);
-  *info = ada_lookup_symbol (verbatim.c_str (), block, domain);
+  return ada_lookup_symbol (verbatim.c_str (), block, domain);
 }
 
 /* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing

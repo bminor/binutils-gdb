@@ -1322,7 +1322,6 @@ write_object_renaming (struct parser_state *par_state,
 {
   char *name;
   enum { SIMPLE_INDEX, LOWER_BOUND, UPPER_BOUND } slice_state;
-  struct block_symbol sym_info;
 
   if (max_depth <= 0)
     error (_("Could not find renamed symbol"));
@@ -1332,7 +1331,8 @@ write_object_renaming (struct parser_state *par_state,
 
   name = obstack_strndup (&ada_parser->temp_space, renamed_entity,
 			  renamed_entity_len);
-  ada_lookup_encoded_symbol (name, orig_left_context, SEARCH_VFT, &sym_info);
+  block_symbol sym_info = ada_lookup_encoded_symbol (name, orig_left_context,
+						     SEARCH_VFT);
   if (sym_info.symbol == NULL)
     error (_("Could not find renamed variable: %s"), ada_decode (name).c_str ());
   else if (sym_info.symbol->aclass () == LOC_TYPEDEF)
@@ -1390,7 +1390,6 @@ write_object_renaming (struct parser_state *par_state,
 	  {
 	    const char *end;
 	    char *index_name;
-	    struct block_symbol index_sym_info;
 
 	    end = strchr (renaming_expr, 'X');
 	    if (end == NULL)
@@ -1401,8 +1400,9 @@ write_object_renaming (struct parser_state *par_state,
 					  end - renaming_expr);
 	    renaming_expr = end;
 
-	    ada_lookup_encoded_symbol (index_name, orig_left_context,
-				       SEARCH_VFT, &index_sym_info);
+	    block_symbol index_sym_info
+	      = ada_lookup_encoded_symbol (index_name, orig_left_context,
+					   SEARCH_VFT);
 	    if (index_sym_info.symbol == NULL)
 	      error (_("Could not find %s"), index_name);
 	    else if (index_sym_info.symbol->aclass () == LOC_TYPEDEF)
