@@ -70,8 +70,8 @@ proc gdb_do_cache {name args} {
     set cache_name [file join [target_info name] $name {*}$args]
 
     set is_cached 0
-    if {[info exists gdb_data_cache($cache_name)]} {
-	set cached $gdb_data_cache($cache_name)
+    if {[info exists gdb_data_cache(${cache_name},value)]} {
+	set cached $gdb_data_cache(${cache_name},value)
 	verbose "$name: returning '$cached' from cache" 2
 	if { $cache_verify == 0 } {
 	    return $cached
@@ -83,9 +83,9 @@ proc gdb_do_cache {name args} {
 	set cache_filename [make_gdb_parallel_path cache $cache_name]
 	if {[file exists $cache_filename]} {
 	    set fd [open $cache_filename]
-	    set gdb_data_cache($cache_name) [read -nonewline $fd]
+	    set gdb_data_cache(${cache_name},value) [read -nonewline $fd]
 	    close $fd
-	    set cached $gdb_data_cache($cache_name)
+	    set cached $gdb_data_cache(${cache_name},value)
 	    verbose "$name: returning '$cached' from file cache" 2
 	    if { $cache_verify == 0 } {
 		return $cached
@@ -95,9 +95,9 @@ proc gdb_do_cache {name args} {
     }
 
     set real_name gdb_real__$name
-    set gdb_data_cache($cache_name) [gdb_do_cache_wrap $real_name {*}$args]
+    set gdb_data_cache(${cache_name},value) [gdb_do_cache_wrap $real_name {*}$args]
     if { $cache_verify == 1 && $is_cached == 1 } {
-	set computed $gdb_data_cache($cache_name)
+	set computed $gdb_data_cache(${cache_name},value)
 	if { $cached != $computed } {
 	    error [join [list "Inconsistent results for $cache_name:"
 			 "cached: $cached vs. computed: $computed"]]
@@ -105,15 +105,15 @@ proc gdb_do_cache {name args} {
     }
 
     if {[info exists GDB_PARALLEL]} {
-	verbose "$name: returning '$gdb_data_cache($cache_name)' and writing file" 2
+	verbose "$name: returning '$gdb_data_cache(${cache_name},value)' and writing file" 2
 	file mkdir [file dirname $cache_filename]
 	# Make sure to write the results file atomically.
 	set fd [open $cache_filename.[pid] w]
-	puts $fd $gdb_data_cache($cache_name)
+	puts $fd $gdb_data_cache(${cache_name},value)
 	close $fd
 	file rename -force -- $cache_filename.[pid] $cache_filename
     }
-    return $gdb_data_cache($cache_name)
+    return $gdb_data_cache(${cache_name},value)
 }
 
 # Define a new proc named NAME, with optional args ARGS.  BODY is the body of
