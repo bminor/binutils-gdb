@@ -9327,6 +9327,8 @@ record_relr_non_got_relocs (bfd *input_bfd, struct bfd_link_info *info,
     return true;
   if (sec->alignment_power == 0)
     return true;
+  if (discarded_section (sec))
+    return true;
   sreloc = elf_section_data (sec)->sreloc;
   if (sreloc == NULL)
     return true;
@@ -9602,8 +9604,7 @@ elfNN_aarch64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  for (p = (struct elf_dyn_relocs *)
 	       (elf_section_data (s)->local_dynrel); p != NULL; p = p->next)
 	    {
-	      if (!bfd_is_abs_section (p->sec)
-		  && bfd_is_abs_section (p->sec->output_section))
+	      if (discarded_section (p->sec))
 		{
 		  /* Input section has been discarded, either because
 		     it is a copy of a linkonce section or due to
