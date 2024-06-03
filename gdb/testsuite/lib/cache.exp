@@ -46,6 +46,40 @@ proc gdb_do_cache_wrap {real_name args} {
     return $result
 }
 
+# Global written to by gdb_exit_called proc.  Is set to true to
+# indicate that a caching proc has called gdb_exit.
+
+set gdb_exit_called false
+
+# This proc is called via TCL's trace mechanism whenever gdb_exit is
+# called during the execution of a caching proc.  This sets the global
+# flag to indicate that gdb_exit has been called.
+
+proc gdb_exit_called { args } {
+    set ::gdb_exit_called true
+}
+
+# If DO_EXIT is false then this proc does nothing.  If DO_EXIT is true
+# then call gdb_exit the first time this proc is called for each
+# unique value of NAME within a single test.  Every subsequent time
+# this proc is called within a single test (for a given value of
+# NAME), don't call gdb_exit.
+
+proc gdb_cache_maybe_gdb_exit { name do_exit } {
+    if { !$do_exit } {
+	return
+    }
+
+    # To track if this proc has been called for NAME we create a
+    # global variable.  In gdb_cleanup_globals (see gdb.exp) this
+    # global will be deleted when the test has finished.
+    set global_name __${name}__cached_gdb_exit_called
+    if { ![info exists ::${global_name}] } {
+	gdb_exit
+	set ::${global_name} true
+    }
+}
+
 # A helper for gdb_caching_proc that handles the caching.
 
 proc gdb_do_cache {name args} {
@@ -71,10 +105,12 @@ proc gdb_do_cache {name args} {
 
     set is_cached 0
     if {[info exists gdb_data_cache(${cache_name},value)]} {
-	set cached $gdb_data_cache(${cache_name},value)
-	verbose "$name: returning '$cached' from cache" 2
+	set cached_value $gdb_data_cache(${cache_name},value)
+	set cached_exit $gdb_data_cache(${cache_name},exit)
+	verbose "$name: returning '$cached_value' from cache" 2
 	if { $cache_verify == 0 } {
-	    return $cached
+	    gdb_cache_maybe_gdb_exit $name $cached_exit
+	    return $cached_value
 	}
 	set is_cached 1
     }
@@ -83,24 +119,90 @@ proc gdb_do_cache {name args} {
 	set cache_filename [make_gdb_parallel_path cache $cache_name]
 	if {[file exists $cache_filename]} {
 	    set fd [open $cache_filename]
-	    set gdb_data_cache(${cache_name},value) [read -nonewline $fd]
+	    set content [split [read -nonewline $fd] \n]
 	    close $fd
-	    set cached $gdb_data_cache(${cache_name},value)
-	    verbose "$name: returning '$cached' from file cache" 2
+	    set gdb_data_cache(${cache_name},value) [lindex $content 0]
+	    set gdb_data_cache(${cache_name},exit) [lindex $content 1]
+	    set cached_value $gdb_data_cache(${cache_name},value)
+	    set cached_exit $gdb_data_cache(${cache_name},exit)
+	    verbose "$name: returning '$cached_value' from file cache" 2
 	    if { $cache_verify == 0 } {
-		return $cached
+		gdb_cache_maybe_gdb_exit $name $cached_exit
+		return $cached_value
 	    }
 	    set is_cached 1
 	}
     }
 
+    # Add a trace hook to gdb_exit.  In the case of recursive calls to
+    # gdb_do_cache we only want to install the trace hook once, so we
+    # set a global to indicate that the trace is in place.
+    #
+    # We also set a local flag to indicate that this is the scope in
+    # which the debug trace needs to be removed.
+    if { ![info exists ::gdb_exit_trace_in_place] } {
+	trace add execution gdb_exit enter gdb_exit_called
+	set ::gdb_exit_trace_in_place true
+	set gdb_exit_trace_created true
+    } else {
+	set gdb_exit_trace_created false
+    }
+
+    # As above, we need to consider recursive calls into gdb_do_cache.
+    # Store the old value of gdb_exit_called global and then set the
+    # flag to false.  Initially gdb_exit_called is always false, but
+    # for recursive calls to gdb_do_cache we can't know the state of
+    # gdb_exit_called.
+    #
+    # Before starting a recursive gdb_do_cache call we need
+    # gdb_exit_called to be false, that way the inner call can know if
+    # it invoked gdb_exit or not.
+    #
+    # Once the recursive call completes, if it did call gdb_exit then
+    # the outer, parent call to gdb_do_cache should also be considered
+    # as having called gdb_exit.
+    set old_gdb_exit_called $::gdb_exit_called
+    set ::gdb_exit_called false
+
     set real_name gdb_real__$name
     set gdb_data_cache(${cache_name},value) [gdb_do_cache_wrap $real_name {*}$args]
+    set gdb_data_cache(${cache_name},exit) $::gdb_exit_called
+
+    # See comment above where OLD_GDB_EXIT_CALLED is set: if
+    # GDB_EXIT_CALLED was previously true then this is a recursive
+    # call and the outer caching proc set the global true, so restore
+    # the true value now.
+    if { $old_gdb_exit_called } {
+	set ::gdb_exit_called true
+    }
+
+    # See comment above where GDB_EXIT_TRACE_CREATED is set: this is
+    # the frame in which the trace was installed.  This must be the
+    # outer caching proc call (if an recursion occurred).
+    if { $gdb_exit_trace_created } {
+	trace remove execution gdb_exit enter gdb_exit_called
+	unset ::gdb_exit_trace_in_place
+	set ::gdb_exit_called false
+    }
+
+    # If a value being stored in the cache contains a newline then
+    # when we try to read the value back from an on-disk cache file
+    # we'll interpret the second line of the value as the ',exit' value.
+    if { [regexp "\[\r\n\]" $gdb_data_cache(${cache_name},value)] } {
+	set computed_value $gdb_data_cache(${cache_name},value)
+	error "Newline found in value for $cache_name: $computed_value"
+    }
+
     if { $cache_verify == 1 && $is_cached == 1 } {
-	set computed $gdb_data_cache(${cache_name},value)
-	if { $cached != $computed } {
-	    error [join [list "Inconsistent results for $cache_name:"
-			 "cached: $cached vs. computed: $computed"]]
+	set computed_value $gdb_data_cache(${cache_name},value)
+	set computed_exit $gdb_data_cache(${cache_name},exit)
+	if { $cached_value != $computed_value } {
+	    error [join [list "Inconsistent value results for $cache_name:"
+			 "cached: $cached_value vs. computed: $computed_value"]]
+	}
+	if { $cached_exit != $computed_exit } {
+	    error [join [list "Inconsistent exit results for $cache_name:"
+			 "cached: $cached_exit vs. computed: $computed_exit"]]
 	}
     }
 
@@ -110,9 +212,11 @@ proc gdb_do_cache {name args} {
 	# Make sure to write the results file atomically.
 	set fd [open $cache_filename.[pid] w]
 	puts $fd $gdb_data_cache(${cache_name},value)
+	puts $fd $gdb_data_cache(${cache_name},exit)
 	close $fd
 	file rename -force -- $cache_filename.[pid] $cache_filename
     }
+    gdb_cache_maybe_gdb_exit $name $gdb_data_cache(${cache_name},exit)
     return $gdb_data_cache(${cache_name},value)
 }
 

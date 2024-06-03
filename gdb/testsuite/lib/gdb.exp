@@ -6321,14 +6321,23 @@ proc gdb_exit { } {
     catch default_gdb_exit
 }
 
-# Helper function for can_spawn_for_attach.  Try to spawn and attach, and
-# return 0 only if we cannot attach because it's unsupported.
+# Return true if we can spawn a program on the target and attach to
+# it.
 
-gdb_caching_proc can_spawn_for_attach_1 {} {
-    # For the benefit of gdb-caching-proc-consistency.exp, which
-    # calls can_spawn_for_attach_1 directly.  Keep in sync with
-    # can_spawn_for_attach.
-    if { [is_remote target] || [target_info exists use_gdb_stub] } {
+gdb_caching_proc can_spawn_for_attach {} {
+    # We use exp_pid to get the inferior's pid, assuming that gives
+    # back the pid of the program.  On remote boards, that would give
+    # us instead the PID of e.g., the ssh client, etc.
+    if {[is_remote target]} {
+	verbose -log "can't spawn for attach (target is remote)"
+	return 0
+    }
+
+    # The "attach" command doesn't make sense when the target is
+    # stub-like, where GDB finds the program already started on
+    # initial connection.
+    if {[target_info exists use_gdb_stub]} {
+	verbose -log "can't spawn for attach (target is stub)"
 	return 0
     }
 
@@ -6353,6 +6362,9 @@ gdb_caching_proc can_spawn_for_attach_1 {} {
     set test_spawn_id [spawn_wait_for_attach_1 $obj]
     remote_file build delete $obj
 
+    # In case GDB is already running.
+    gdb_exit
+
     gdb_start
 
     set test_pid [spawn_id_get_pid $test_spawn_id]
@@ -6372,61 +6384,6 @@ gdb_caching_proc can_spawn_for_attach_1 {} {
     kill_wait_spawned_process $test_spawn_id
 
     return $res
-}
-
-# Return true if we can spawn a program on the target and attach to
-# it.  Calls gdb_exit for the first call in a test-case.
-
-proc can_spawn_for_attach { } {
-    # We use exp_pid to get the inferior's pid, assuming that gives
-    # back the pid of the program.  On remote boards, that would give
-    # us instead the PID of e.g., the ssh client, etc.
-    if {[is_remote target]} {
-	verbose -log "can't spawn for attach (target is remote)"
-	return 0
-    }
-
-    # The "attach" command doesn't make sense when the target is
-    # stub-like, where GDB finds the program already started on
-    # initial connection.
-    if {[target_info exists use_gdb_stub]} {
-	verbose -log "can't spawn for attach (target is stub)"
-	return 0
-    }
-
-    # The normal sequence to use for a runtime test like
-    # can_spawn_for_attach_1 is:
-    # - gdb_exit (don't use a running gdb, we don't know what state it is in),
-    # - gdb_start (start a new gdb), and
-    # - gdb_exit (cleanup).
-    #
-    # By making can_spawn_for_attach_1 a gdb_caching_proc, we make it
-    # unpredictable which test-case will call it first, and consequently a
-    # test-case may pass in say a full test run, but fail when run
-    # individually, due to a can_spawn_for_attach call in a location where a
-    # gdb_exit (as can_spawn_for_attach_1 does) breaks things.
-    # To avoid this, we move the initial gdb_exit out of
-    # can_spawn_for_attach_1, guaranteeing that we end up in the same state
-    # regardless of whether can_spawn_for_attach_1 is called.  However, that
-    # is only necessary for the first call in a test-case, so cache the result
-    # in a global (which should be reset after each test-case) to keep track
-    # of that.
-    #
-    # In summary, we distinguish between three cases:
-    # - first call in first test-case.  Executes can_spawn_for_attach_1.
-    #   Calls gdb_exit, gdb_start, gdb_exit.
-    # - first call in following test-cases.  Uses cached result of
-    #   can_spawn_for_attach_1.  Calls gdb_exit.
-    # - rest.  Use cached result in cache_can_spawn_for_attach_1. Calls no
-    #   gdb_start or gdb_exit.
-    global cache_can_spawn_for_attach_1
-    if { [info exists cache_can_spawn_for_attach_1] } {
-	return $cache_can_spawn_for_attach_1
-    }
-    gdb_exit
-
-    set cache_can_spawn_for_attach_1 [can_spawn_for_attach_1]
-    return $cache_can_spawn_for_attach_1
 }
 
 # Centralize the failure checking of "attach" command.
