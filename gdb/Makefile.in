@@ -1949,7 +1949,7 @@ all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb gcore
 	$(POSTCOMPILE)
 
 $(CONFIG_DEP_SUBDIR):
-	$(SHELL) $(srcdir)/../mkinstalldirs $@
+	$(ECHO_GEN) $(SHELL) $(srcdir)/../install-sh -d $@
 
 # Python files need special flags.
 python/%.o: INTERNAL_CFLAGS += $(PYTHON_CFLAGS)
