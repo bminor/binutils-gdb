@@ -624,9 +624,9 @@ When set to \"ask\", prompt whether to enable or disable debuginfod." ),
   add_setshow_string_noescape_cmd ("urls", class_run, _("\
 Set the list of debuginfod server URLs."), _("\
 Show the list of debuginfod server URLs."), _("\
-Manage the space-separated list of debuginfod server URLs that GDB will query \
-when missing debuginfo, executables or source files.\nThe default value is \
-copied from the DEBUGINFOD_URLS environment variable."),
+Manage the space-separated list of debuginfod server URLs that GDB will\n\
+query when missing debuginfo, executables or source files.\n\
+The default value is copied from the DEBUGINFOD_URLS environment variable."),
 				   set_debuginfod_urls,
 				   get_debuginfod_urls,
 				   show_debuginfod_urls,
@@ -657,9 +657,9 @@ query.\nTo disable, set to zero.  Verbose output is displayed by default."),
   add_setshow_boolean_cmd ("download-sections", class_maintenance, _("\
 Set whether debuginfod may download individual ELF/DWARF sections."), _("\
 Show whether debuginfod may download individual ELF/DWARF sections."), _("\
-When enabled, debuginfod may attempt to download individual ELF/DWARF \
-sections from debug info files.\nIf disabled, only whole debug info files \
-may be downloaded."),
+When enabled, debuginfod may attempt to download individual ELF/DWARF\n\
+sections from debug info files.\n\
+If disabled, only whole debug info files may be downloaded."),
 			   maint_set_debuginfod_download_sections,
 			   maint_get_debuginfod_download_sections,
 			   nullptr,

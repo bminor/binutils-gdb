@@ -2987,8 +2987,8 @@ When ON, query if PREC cannot record memory change of next instruction."),
 	   _("\
 Print a recorded instruction.\n\
 If no argument is provided, print the last instruction recorded.\n\
-If a negative argument is given, prints how the nth previous \
+If a negative argument is given, prints how the nth previous\n\
 instruction will be undone.\n\
-If a positive argument is given, prints \
+If a positive argument is given, prints\n\
 how the nth following instruction will be redone."), &maintenanceprintlist);
 }

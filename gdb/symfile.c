@@ -3868,8 +3868,8 @@ to execute.\n" READNOW_READNEVER_HELP), &cmdlist);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
 Load symbols from FILE, assuming FILE has been dynamically loaded.\n\
-Usage: add-symbol-file FILE [-readnow | -readnever] [-o OFF] [ADDR] \
-[-s SECT-NAME SECT-ADDR]...\n\
+Usage: add-symbol-file FILE [-readnow|-readnever] [-o OFF] [ADDR]\n\
+                       [-s SECT-NAME SECT-ADDR]...\n\
 ADDR is the starting address of the file's text.\n\
 Each '-s' argument provides a section name and address, and\n\
 should be specified if the data and bss segments are not contiguous\n\
@@ -3975,8 +3975,9 @@ full  == print messages for the executable,\n\
 			   &separate_debug_file_debug, _("\
 Set printing of separate debug info file search debug."), _("\
 Show printing of separate debug info file search debug."), _("\
-When on, GDB prints the searched locations while looking for separate debug \
-info files."), NULL, NULL, &setdebuglist, &showdebuglist);
+When on, GDB prints the searched locations while looking for separate\n\
+debug info files."),
+			   NULL, NULL, &setdebuglist, &showdebuglist);
 
 #if GDB_SELF_TEST
   selftests::register_test

@@ -875,8 +875,8 @@ Show printing of typedefs defined in classes."), NULL,
   add_setshow_zuinteger_unlimited_cmd ("nested-type-limit", no_class,
 				       &print_nested_type_limit,
 				       _("\
-Set the number of recursive nested type definitions to print \
-(\"unlimited\" or -1 to show all)."), _("\
+Set the number of recursive nested type definitions to print.\n\
+Use \"unlimited\" or -1 to show all."), _("\
 Show the number of recursive nested type definitions to print."), NULL,
 				       set_print_type_nested_types,
 				       show_print_type_nested_types,

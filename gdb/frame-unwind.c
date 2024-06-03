@@ -376,7 +376,8 @@ _initialize_frame_unwind ()
   add_cmd ("frame-unwinders",
 	   class_maintenance,
 	   maintenance_info_frame_unwinders,
-	   _("List the frame unwinders currently in effect, "
-	     "starting with the highest priority."),
+	   _("\
+List the frame unwinders currently in effect.\n\
+Unwinders are listed starting with the highest priority."),
 	   &maintenanceinfolist);
 }

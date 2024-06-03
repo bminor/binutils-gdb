@@ -595,8 +595,7 @@ void
 _initialize_mem ()
 {
   add_com ("mem", class_vars, mem_command, _("\
-Define attributes for memory region or reset memory region handling to "
-"target-based.\n\
+Define or reset attributes for memory regions.\n\
 Usage: mem auto\n\
        mem LOW HIGH [MODE WIDTH CACHE],\n\
 where MODE  may be rw (read/write), ro (read-only) or wo (write-only),\n\

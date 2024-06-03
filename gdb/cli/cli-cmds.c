@@ -2644,9 +2644,9 @@ to be printed or after trailing whitespace."));
 Set mode for script filename extension recognition."), _("\
 Show mode for script filename extension recognition."), _("\
 off  == no filename extension recognition (all sourced files are GDB scripts)\n\
-soft == evaluate script according to filename extension, fallback to GDB script"
-  "\n\
-strict == evaluate script according to filename extension, error if not supported"
+soft == evaluate script according to filename extension, fallback to GDB script\n\
+strict == evaluate script according to filename extension,\n\
+          error if not supported"
   ),
 			NULL,
 			show_script_ext_mode,
@@ -2741,9 +2741,10 @@ as 0 or -1 depending on the setting."),
 			 gdb_setting_internal_fn, NULL);
 
   add_internal_function ("_gdb_maint_setting_str", _("\
-$_gdb_maint_setting_str - returns the value of a GDB maintenance setting as a string.\n\
+$_gdb_maint_setting_str - returns the value of a GDB maintenance setting.\n\
 Usage: $_gdb_maint_setting_str (setting)\n\
 \n\
+Like \"$_gdb_maint_setting\", but the return value is always a string.\n\
 auto-boolean values are \"off\", \"on\", \"auto\".\n\
 boolean values are \"off\", \"on\".\n\
 Some integer settings accept an unlimited value, returned\n\

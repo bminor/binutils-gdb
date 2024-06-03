@@ -3282,8 +3282,10 @@ frame."));
   add_com_alias ("u", until_cmd, class_run, 1);
 
   c = add_com ("advance", class_run, advance_command, _("\
-Continue the program up to the given location (same form as args for break \
-command).\n\
+Continue the program up to the given location.\n\
+Usage: advance LOCSPEC\n\
+The argument is a location specification, i.e., the same forms\n\
+accepted by the 'break' command.\n\
 Execution will also stop upon exit from the current stack frame."));
   set_cmd_completer (c, location_completer);
 

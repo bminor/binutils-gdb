@@ -13957,11 +13957,11 @@ this option to \"off\" unless necessary."),
 
   add_setshow_boolean_cmd ("print-signatures", class_vars,
 			   &print_signatures, _("\
-Enable or disable the output of formal and return types for functions in the \
-overloads selection menu."), _("\
-Show whether the output of formal and return types for functions in the \
-overloads selection menu is activated."),
-			   NULL, NULL, NULL, &set_ada_list, &show_ada_list);
+Control the display of functions in overloads selection menu."), _("\
+Show how functions in overloads selection menu will be displayed."),
+			   _("\
+When enabled, formal and return types are shown."),
+			   NULL, NULL, &set_ada_list, &show_ada_list);
 
   ada_source_charset = gnat_source_charsets[0];
   add_setshow_enum_cmd ("source-charset", class_files,

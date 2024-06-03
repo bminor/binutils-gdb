@@ -4124,13 +4124,13 @@ _initialize_dwarf2loc ()
 {
   add_setshow_zuinteger_cmd ("entry-values", class_maintenance,
 			     &entry_values_debug,
-			     _("Set entry values and tail call frames "
-			       "debugging."),
-			     _("Show entry values and tail call frames "
-			       "debugging."),
-			     _("When non-zero, the process of determining "
-			       "parameter values from function entry point "
-			       "and tail call frames will be printed."),
+			     _("\
+Set entry values and tail call frames debugging."),
+			     _("\
+Show entry values and tail call frames debugging."),
+			     _("\
+When non-zero, the process of determining parameter values from\n\
+function entry point and tail call frames will be printed."),
 			     NULL,
 			     show_entry_values_debug,
 			     &setdebuglist, &showdebuglist);

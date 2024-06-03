@@ -1560,7 +1560,8 @@ Usage: mt print psymbols [-objfile OBJFILE] [-pc ADDRESS] [--] [OUTFILE]\n\
        mt print psymbols [-objfile OBJFILE] [-source SOURCE] [--] [OUTFILE]\n\
 Entries in the partial symbol table are dumped to file OUTFILE,\n\
 or the terminal if OUTFILE is unspecified.\n\
-If ADDRESS is provided, dump only the symbols for the file with code at that address.\n\
+If ADDRESS is provided, dump only the symbols for the file\n\
+with code at that address.\n\
 If SOURCE is provided, dump only that file's symbols.\n\
 If OBJFILE is provided, dump only that object file's symbols."),
 	   &maintenanceprintlist);

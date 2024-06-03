@@ -1758,8 +1758,9 @@ _initialize_stap_probe ()
 			     &stap_expression_debug,
 			     _("Set SystemTap expression debugging."),
 			     _("Show SystemTap expression debugging."),
-			     _("When non-zero, the internal representation "
-			       "of SystemTap expressions will be printed."),
+			     _("\
+When non-zero, the internal representation of SystemTap expressions\n\
+will be printed."),
 			     NULL,
 			     show_stapexpressiondebug,
 			     &setdebuglist, &showdebuglist);

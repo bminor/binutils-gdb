@@ -1543,8 +1543,8 @@ Set whether CTF is always read."),
 			   _("\
 Show whether CTF is always read."),
 			   _("\
-When off, CTF is only read if DWARF is not present.  When on, CTF is read\
- regardless of whether DWARF is present."),
+When off, CTF is only read if DWARF is not present.  When on, CTF is read\n\
+regardless of whether DWARF is present."),
 			   nullptr /* set_func */, nullptr /* show_func */,
 			   &setlist, &showlist);
 }

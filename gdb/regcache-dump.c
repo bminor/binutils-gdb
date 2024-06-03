@@ -329,11 +329,11 @@ _initialize_regcache_dump ()
 	     "Takes an optional file parameter."),
 	   &maintenanceprintlist);
   add_cmd ("remote-registers", class_maintenance,
-	   maintenance_print_remote_registers,
-	   _("Print the internal register configuration including remote "
-	     "register number and g/G packets offset.\n"
-	     "Also prints which registers were sent in the last stop reply "
-	     "packet (i.e. expedited).\n"
-	     "Takes an optional file parameter."),
+	   maintenance_print_remote_registers, _("\
+Print the internal register configuration.\n\
+Usage: maintenance print remote-registers [FILE]\n\
+The remote register number and g/G packets offset are included,\n\
+as well as which registers were sent in the last stop reply packet\n\
+(i.e., expedited)."),
 	   &maintenanceprintlist);
 }
