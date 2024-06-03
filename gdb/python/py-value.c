@@ -1210,11 +1210,13 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  if (ftype->code () != TYPE_CODE_FUNC && ftype->code () != TYPE_CODE_METHOD)
+  if (ftype->code () != TYPE_CODE_FUNC && ftype->code () != TYPE_CODE_METHOD
+      && ftype->code () != TYPE_CODE_INTERNAL_FUNCTION)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Value is not callable (not TYPE_CODE_FUNC"
-			 " or TYPE_CODE_METHOD)."));
+			 " or TYPE_CODE_METHOD"
+			 " or TYPE_CODE_INTERNAL_FUNCTION)."));
       return NULL;
     }
 
@@ -1248,9 +1250,15 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
     {
       scoped_value_mark free_values;
 
-      value *return_value
-	= call_function_by_hand (function, NULL,
-				 gdb::make_array_view (vargs, args_count));
+      value *return_value;
+      if (ftype->code () == TYPE_CODE_INTERNAL_FUNCTION)
+	return_value = call_internal_function (gdbpy_enter::get_gdbarch (),
+					       current_language,
+					       function, args_count, vargs);
+      else
+	return_value
+	  = call_function_by_hand (function, NULL,
+				   gdb::make_array_view (vargs, args_count));
       result = value_to_value_object (return_value);
     }
   catch (const gdb_exception &except)
