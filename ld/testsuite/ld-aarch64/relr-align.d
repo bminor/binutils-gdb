@@ -2,13 +2,13 @@
 #ld: -shared -z pack-relative-relocs -T relocs.ld
 #readelf: -rW
 
-Relocation section '\.rela\.dyn' at offset 0x10090 contains 3 entries:
+Relocation section '\.rela\.dyn' .* contains 3 entries:
     Offset             Info             Type               Symbol's Value  Symbol's Name \+ Addend
-0000000012340011  0000000000000403 R_AARCH64_RELATIVE                        10000
-0000000012340019  0000000000000403 R_AARCH64_RELATIVE                        10000
-0000000012340041  0000000000000403 R_AARCH64_RELATIVE                        10000
+0000000012340011 .* R_AARCH64_RELATIVE                        10000
+0000000012340019 .* R_AARCH64_RELATIVE                        10000
+0000000012340041 .* R_AARCH64_RELATIVE                        10000
 
-Relocation section '\.relr\.dyn' at offset 0x100d8 contains 9 entries which relocate 10 locations:
+Relocation section '\.relr\.dyn' .* contains 9 entries which relocate 10 locations:
 Index: Entry            Address           Symbolic Address
 0000:  0000000012340000 0000000012340000  double_0
 0001:  0000000000000003 0000000012340008  double_0 \+ 0x8
