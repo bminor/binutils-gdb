@@ -29,6 +29,9 @@
 #include "gdbsupport/intrusive_list.h"
 #include "gdbsupport/buildargv.h"
 
+/* The allowed length of a line in a documentation string.  */
+constexpr int cli_help_line_length = 80;
+
 /* Not a set/show command.  Note that some commands which begin with
    "set" or "show" might be in this category, if their syntax does
    not fall into one of the following categories.  */

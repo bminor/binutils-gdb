@@ -732,52 +732,71 @@ process_options (const char **args,
     }
 }
 
-/* Helper for build_help.  Return a fragment of a help string showing
-   OPT's possible values.  Returns NULL if OPT doesn't take an
-   argument.  */
+/* Helper for build_help.  Append a fragment of a help string showing
+   OPT's possible values.  LEN_AT_START is the length of HELP at the
+   start of the current line.  This is used when wrapping is
+   needed.  */
 
-static const char *
-get_val_type_str (const option_def &opt, std::string &buffer)
+static void
+append_val_type_str (std::string &help, const option_def &opt,
+		     size_t len_at_start)
 {
   if (!opt.have_argument)
-    return nullptr;
+    return;
 
   switch (opt.type)
     {
     case var_boolean:
-      return "[on|off]";
+      help += " [on|off]";
+      break;
     case var_uinteger:
     case var_integer:
     case var_pinteger:
       {
-	buffer = "NUMBER";
+	help += " NUMBER";
 	if (opt.extra_literals != nullptr)
 	  for (const literal_def *l = opt.extra_literals;
 	       l->literal != nullptr;
 	       l++)
 	    {
-	      buffer += '|';
-	      buffer += l->literal;
+	      help += '|';
+	      help += l->literal;
 	    }
-	return buffer.c_str ();
       }
+      break;
     case var_enum:
       {
-	buffer = "";
+	help += ' ';
+	/* If wrapping is needed, subsequent lines will be indented
+	   this amount.  */
+	size_t indent = help.length () - len_at_start;
 	for (size_t i = 0; opt.enums[i] != nullptr; i++)
 	  {
 	    if (i != 0)
-	      buffer += "|";
-	    buffer += opt.enums[i];
+	      {
+		size_t new_len = help.length () + 1 + strlen (opt.enums[i]);
+
+		if (new_len - len_at_start >= cli_help_line_length)
+		  {
+		    help += "\n";
+		    len_at_start = help.length ();
+
+		    help.append (indent, ' ');
+		  }
+		help += "|";
+	      }
+	    help += opt.enums[i];
 	  }
-	return buffer.c_str ();
       }
+      break;
     case var_string:
-      return "STRING";
+      help += "STRING";
+      break;
     case var_filename:
-      return "FILENAME";
+      help += "FILENAME";
+      break;
     default:
-      return nullptr;
+      break;
     }
 }
 
@@ -815,15 +834,11 @@ build_help_option (gdb::array_view<const option_def> options,
       if (o.set_doc == nullptr)
 	continue;
 
+      size_t initial_len = help.length ();
       help += "  -";
       help += o.name;
 
-      const char *val_type_str = get_val_type_str (o, buffer);
-      if (val_type_str != nullptr)
-	{
-	  help += ' ';
-	  help += val_type_str;
-	}
+      append_val_type_str (help, o, initial_len);
       help += "\n";
       append_indented_doc (o.set_doc, help);
       if (o.help_doc != nullptr)
