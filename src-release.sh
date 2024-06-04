@@ -77,6 +77,52 @@ getver()
     fi
 }
 
+clean_sources()
+{
+    # Check that neither staged nor unstaged change remains.
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "There are uncommitted changes. Please commit or stash them."
+        exit 1
+    fi
+
+    echo "==> Cleaning sources."
+
+    # Remove all untracked files.
+    git clean -fdx
+
+    # Umask for any new file created by this script.
+    umask 0022
+
+    # Fix permissions of all tracked files and directories according to the previously set umask.
+    echo "==> Fixing permissions."
+    permreg=$(printf "%o" $((0666 & ~$(umask))))
+    permexe=$(printf "%o" $((0777 & ~$(umask))))
+    git ls-tree -rt --format "objectmode=%(objectmode) path=%(path)" HEAD | while read -r objectprop; do
+        eval $objectprop
+        case $objectmode in
+            100644)
+                # regular file
+                chmod $permreg $path
+                ;;
+            100755|040000)
+                # executable file or directory
+                chmod $permexe $path
+                ;;
+            120000)
+                # symlink, do nothing, always lrwxrwxrwx.
+                ;;
+            160000)
+                # submodule, currently do nothing
+                ;;
+            *)
+                # unlikely, might be a future version of Git
+                echo unsupported object at $path
+                exit 1
+                ;;
+        esac
+    done
+}
+
 # Setup build directory for building release tarball
 do_proto_toplev()
 {
@@ -85,8 +131,7 @@ do_proto_toplev()
     tool=$3
     support_files=$4
 
-    echo "==> Cleaning sources."
-    find \( -name "*.orig" -o  -name "*.rej" -o -name "*~" -o -name ".#*" -o -name "*~$bkpat" \) -exec rm {} \;
+    clean_sources
     
     echo "==> Making $package-$ver/"
     # Take out texinfo from a few places.
@@ -158,7 +203,6 @@ do_proto_toplev()
 	mkdir proto-toplev/texinfo/util && \
 	    ln -s ../../../texinfo/util/tex3patch proto-toplev/texinfo/util
     fi
-    chmod -R og=u . || chmod og=u `find . -print`
     #
     # Create .gmo files from .po files.
     for f in `find . -name '*.po' -type f -print`; do
@@ -406,7 +450,7 @@ while getopts ":bglr:xz" opt; do
 	    compressors="$compressors zstd";;
 	\?)
 	    echo "Invalid option: -$OPTARG" && usage;;
-  esac
+    esac
 done
 shift $((OPTIND -1))
 release=$1
