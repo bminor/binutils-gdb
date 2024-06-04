@@ -187,7 +187,6 @@ static const arm_feature_set fpu_arch_vfp_v1 ATTRIBUTE_UNUSED = FPU_ARCH_VFP_V1;
 static const arm_feature_set fpu_arch_vfp_v2 = FPU_ARCH_VFP_V2;
 static const arm_feature_set fpu_arch_vfp_v3 ATTRIBUTE_UNUSED = FPU_ARCH_VFP_V3;
 static const arm_feature_set fpu_arch_neon_v1 ATTRIBUTE_UNUSED = FPU_ARCH_NEON_V1;
-static const arm_feature_set fpu_arch_fpa = FPU_ARCH_FPA;
 static const arm_feature_set fpu_any_hard = FPU_ANY_HARD;
 static const arm_feature_set fpu_endian_pure = FPU_ARCH_ENDIAN_PURE;
 
@@ -30817,17 +30816,11 @@ md_begin (void)
 	selected_fpu = *mcpu_fpu_opt;
       else if (march_fpu_opt)
 	selected_fpu = *march_fpu_opt;
+      else
+	selected_fpu = fpu_default;
 #else
       selected_fpu = fpu_default;
 #endif
-    }
-
-  if (ARM_FEATURE_ZERO (selected_fpu))
-    {
-      if (!no_cpu_selected ())
-	selected_fpu = fpu_default;
-      else
-	selected_fpu = fpu_arch_fpa;
     }
 
 #ifdef CPU_DEFAULT
