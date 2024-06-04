@@ -1147,9 +1147,6 @@ instruction.
 @exdent @emph{core registers}
   .save @{r4, r5, r6, lr@}
   stmfd sp!, @{r4, r5, r6, lr@}
-@exdent @emph{FPA registers}
-  .save f4, 2
-  sfmfd f4, 2, [sp]!
 @exdent @emph{VFP registers}
   .save @{d8, d9, d10@}
   fstmdx sp!, @{d8, d9, d10@}
