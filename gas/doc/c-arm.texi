@@ -492,13 +492,6 @@ This option specifies the floating point format to assemble for.  The
 assembler will issue an error message if an attempt is made to assemble
 an instruction which will not execute on the target floating point unit.
 The following format options are recognized:
-@code{softfpa},
-@code{fpe},
-@code{fpe2},
-@code{fpe3},
-@code{fpa},
-@code{fpa10},
-@code{fpa11},
 @code{arm7500fe},
 @code{softvfp},
 @code{softvfp+vfp},
@@ -539,7 +532,7 @@ when assembling little-endian code.
 
 The default is dependent on the processor selected.  For Architecture 5 or
 later, the default is to assemble for VFP instructions; for earlier
-architectures the default is to assemble for FPA instructions.
+architectures the default is to assemble for no floating point.
 
 @cindex @code{-mfp16-format=} command-line option
 @item -mfp16-format=@var{format}

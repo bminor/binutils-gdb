@@ -31215,14 +31215,7 @@ const struct arm_legacy_option_table arm_legacy_opts[] =
   {"marmv5t",	 &legacy_cpu, ARM_ARCH_V5T, N_("use -march=armv5t")},
   {"mv5e",	 &legacy_cpu, ARM_ARCH_V5TE, N_("use -march=armv5te")},
   {"marmv5e",	 &legacy_cpu, ARM_ARCH_V5TE, N_("use -march=armv5te")},
-
-  /* Floating point variants -- don't add any more to this list either.	 */
-  {"mfpe-old",   &legacy_fpu, FPU_ARCH_FPE, N_("use -mfpu=fpe")},
-  {"mfpa10",     &legacy_fpu, FPU_ARCH_FPA, N_("use -mfpu=fpa10")},
-  {"mfpa11",     &legacy_fpu, FPU_ARCH_FPA, N_("use -mfpu=fpa11")},
-  {"mno-fpu",    &legacy_fpu, ARM_ARCH_NONE,
-   N_("use either -mfpu=softfpa or -mfpu=softvfp")},
-
+  {"mno-fpu",    &legacy_fpu, ARM_ARCH_NONE, N_("use -mfpu=softvfp")},
   {NULL, NULL, ARM_ARCH_NONE, NULL}
 };
 
@@ -32187,13 +32180,6 @@ struct arm_option_fpu_value_table
 static const struct arm_option_fpu_value_table arm_fpus[] =
 {
   {"softfpa",		FPU_NONE},
-  {"fpe",		FPU_ARCH_FPE},
-  {"fpe2",		FPU_ARCH_FPE},
-  {"fpe3",		FPU_ARCH_FPA},	/* Third release supports LFM/SFM.  */
-  {"fpa",		FPU_ARCH_FPA},
-  {"fpa10",		FPU_ARCH_FPA},
-  {"fpa11",		FPU_ARCH_FPA},
-  {"arm7500fe",		FPU_ARCH_FPA},
   {"softvfp",		FPU_ARCH_SOFTVFP},
   {"softvfp+vfp",	FPU_ARCH_VFP_V2},
   {"vfp",		FPU_ARCH_VFP_V2},
