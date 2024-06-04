@@ -5148,6 +5148,14 @@ set_fp16_format (int dummy ATTRIBUTE_UNUSED)
   ignore_rest_of_line ();
 }
 
+static void s_arm_float_cons (int float_type)
+{
+  /* We still parse the directive on error, so that any syntactic issues
+     are picked up.  */
+  if (ARM_FEATURE_ZERO (selected_fpu))
+    as_bad (_("the floating-point format has not been set (or has been disabled)"));
+  float_cons (float_type);
+}
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
      pseudo-op name without dot
@@ -5212,10 +5220,17 @@ const pseudo_typeS md_pseudo_table[] =
   { "loc",  dwarf2_directive_loc,  0 },
   { "loc_mark_labels", dwarf2_directive_loc_mark_labels, 0 },
 #endif
-  { "extend",	   float_cons, 'x' },
-  { "ldouble",	   float_cons, 'x' },
-  { "packed",	   float_cons, 'p' },
-  { "bfloat16",	   float_cons, 'b' },
+  /* Override the default float_cons handling so that we can validate
+     the FPU setting.  */
+  { "float",	   s_arm_float_cons, 'f' },
+  { "single",	   s_arm_float_cons, 'f' },
+  { "double",	   s_arm_float_cons, 'd' },
+  { "dc.s",	   s_arm_float_cons, 'f' },
+  { "dc.d",	   s_arm_float_cons, 'd' },
+  { "extend",	   s_arm_float_cons, 'x' },
+  { "ldouble",	   s_arm_float_cons, 'x' },
+  { "packed",	   s_arm_float_cons, 'p' },
+  { "bfloat16",	   s_arm_float_cons, 'b' },
 #ifdef TE_PE
   {"secrel32", pe_directive_secrel, 0},
 #endif
@@ -5226,7 +5241,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"asmfunc",      s_ccs_asmfunc,    0},
   {"endasmfunc",   s_ccs_endasmfunc, 0},
 
-  {"float16", float_cons, 'h' },
+  {"float16", s_arm_float_cons, 'h' },
   {"float16_format", set_fp16_format, 0 },
 
   { 0, 0, 0 }

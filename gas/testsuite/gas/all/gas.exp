@@ -47,6 +47,8 @@ if { ![istarget cris-*-*] && ![istarget crisv32-*-*]
      && ![istarget z80-*-*] } then {
     if { [istarget tic4x-*-*] } then {
 	set as_opt ""
+    } elseif { [istarget arm*-*-pe ] } then {
+	set as_opt "--defsym hasnan=1 -mfpu=softvfp"
     } else {
 	set as_opt "--defsym hasnan=1"
     }
