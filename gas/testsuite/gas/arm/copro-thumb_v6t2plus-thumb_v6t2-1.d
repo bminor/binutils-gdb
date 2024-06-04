@@ -8,11 +8,11 @@
 .*: +file format .*arm.*
 
 Disassembly of section .text:
-0+000 <[^>]*> ee42 1103 	dvfs	f1, f2, f3
+0+000 <[^>]*> ee42 1103 	cdp	1, 4, cr1, cr2, cr3, \{0\}
 0+004 <[^>]*> [^ ]*      	it	eq
 0+006 <[^>]*> ee34 14a5 	cdpeq	4, 3, cr1, cr4, cr5, \{5\}
 0+00a <[^>]*> ed93 9500 	ldc	5, cr9, \[r3\]
-0+00e <[^>]*> edd1 e108 	ldfp	f6, \[r1, #32\]
+0+00e <[^>]*> edd1 e108 	ldcl	1, cr14, \[r1, #32\]
 0+012 <[^>]*> [^ ]*      	ite	mi
 0+014 <[^>]*> edb2 00ff 	ldcmi	0, cr0, \[r2, #1020\]!.*
 0+018 <[^>]*> ecf3 1710 	ldclpl	7, cr1, \[r3\], #64.*
@@ -23,7 +23,7 @@ Disassembly of section .text:
 0+02a <[^>]*> eda2 c419 	stceq	4, cr12, \[r2, #100\]!	@.*
 0+02e <[^>]*> [^ ]*      	it	cc
 0+030 <[^>]*> eca4 860c 	stccc	6, cr8, \[r4\], #48.*
-0+034 <[^>]*> ed8f 7100 	stfs	f7, \[pc\]	@ .* <bar>
+0+034 <[^>]*> ed8f 7100 	stc	1, cr7, \[pc\]	@ .* <bar>
 0+038 <[^>]*> ee71 5212 	mrc	2, 3, r5, cr1, cr2, \{0\}
 0+03c <[^>]*> [^ ]*      	it	ge
 0+03e <[^>]*> eeb1 f4f2 	mrcge	4, 5, APSR_nzcv, cr1, cr2, \{7\}

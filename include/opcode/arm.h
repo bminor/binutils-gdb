@@ -105,8 +105,8 @@
 					   coprocessor version 2.	   */
 
 #define FPU_ENDIAN_PURE	     0x80000000	/* Pure-endian doubles.		   */
-#define FPU_FPA_EXT_V1	     0x40000000	/* Base FPA instruction set.	   */
-#define FPU_FPA_EXT_V2	     0x20000000	/* LFM/SFM.			   */
+/* unused		     0x40000000	*/
+/* unused		     0x20000000	*/
 /* unused		     0x10000000	*/
 #define FPU_VFP_EXT_V1xD     0x08000000	/* Base VFP instruction set.	   */
 #define FPU_VFP_EXT_V1	     0x04000000	/* Double-precision insns.	   */
@@ -244,7 +244,6 @@
 					     | FPU_VFP_EXT_V3	   \
 					     | FPU_NEON_EXT_V1	   \
 					     | FPU_VFP_EXT_D32)
-#define FPU_FPA		  (FPU_FPA_EXT_V1    | FPU_FPA_EXT_V2)
 
 /* Deprecated.  */
 #define FPU_ARCH_SOFTVFP	ARM_FEATURE_COPROC (FPU_ENDIAN_PURE)
@@ -404,7 +403,7 @@
 #define ARM_ARCH_UNKNOWN	ARM_FEATURE_ALL (-1, -1 & ~(ARM_EXT2_MVE | ARM_EXT2_MVE_FP), -1, -1)	/* Machine type is unknown.  */
 #define ARM_ANY		ARM_FEATURE_ALL (-1, -1 & ~(ARM_EXT2_MVE | ARM_EXT2_MVE_FP), -1, 0)	/* Any basic core.  */
 #define FPU_ANY		ARM_FEATURE_COPROC (-1 & ~(ARM_CEXT_XSCALE | ARM_CEXT_IWMMXT | ARM_CEXT_IWMMXT2)) /* Any FPU.  */
-#define FPU_ANY_HARD	ARM_FEATURE_COPROC (FPU_FPA | FPU_VFP_HARD)
+#define FPU_ANY_HARD	ARM_FEATURE_COPROC (FPU_VFP_HARD)
 /* Extensions containing some Thumb-2 instructions.  If any is present, Thumb
    ISA is Thumb-2.  */
 #define ARM_ARCH_THUMB2 ARM_FEATURE_CORE (ARM_EXT_V6T2 | ARM_EXT_V7	\
