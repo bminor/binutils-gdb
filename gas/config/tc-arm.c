@@ -311,10 +311,6 @@ static const arm_feature_set arm_cext_iwmmxt =
   ARM_FEATURE_COPROC (ARM_CEXT_IWMMXT);
 static const arm_feature_set arm_cext_xscale =
   ARM_FEATURE_COPROC (ARM_CEXT_XSCALE);
-static const arm_feature_set fpu_fpa_ext_v1 =
-  ARM_FEATURE_COPROC (FPU_FPA_EXT_V1);
-static const arm_feature_set fpu_fpa_ext_v2 =
-  ARM_FEATURE_COPROC (FPU_FPA_EXT_V2);
 static const arm_feature_set fpu_vfp_ext_v1xd =
   ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD);
 static const arm_feature_set fpu_vfp_ext_v1 =
@@ -706,7 +702,6 @@ const char * const reg_expected_msgs[] =
   [REG_TYPE_RN]	    = N_("ARM register expected"),
   [REG_TYPE_CP]	    = N_("bad or missing co-processor number"),
   [REG_TYPE_CN]	    = N_("co-processor register expected"),
-  [REG_TYPE_FN]	    = N_("FPA register expected"),
   [REG_TYPE_VFS]    = N_("VFP single precision register expected"),
   [REG_TYPE_VFD]    = N_("VFP/Neon double precision register expected"),
   [REG_TYPE_NQ]	    = N_("Neon quad precision register expected"),
@@ -4412,55 +4407,6 @@ parse_dot_save (char **str_p, int prev_reg)
     as_bad (BAD_SYNTAX);
 }
 
-/* Parse a directive saving FPA registers.  */
-
-static void
-s_arm_unwind_save_fpa (int reg)
-{
-  expressionS exp;
-  int num_regs;
-  valueT op;
-
-  /* Get Number of registers to transfer.  */
-  if (skip_past_comma (&input_line_pointer) != FAIL)
-    expression (&exp);
-  else
-    exp.X_op = O_illegal;
-
-  if (exp.X_op != O_constant)
-    {
-      as_bad (_("expected , <constant>"));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  num_regs = exp.X_add_number;
-
-  if (num_regs < 1 || num_regs > 4)
-    {
-      as_bad (_("number of registers must be in the range [1:4]"));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  demand_empty_rest_of_line ();
-
-  if (reg == 4)
-    {
-      /* Short form.  */
-      op = 0xb4 | (num_regs - 1);
-      add_unwind_opcode (op, 1);
-    }
-  else
-    {
-      /* Long form.  */
-      op = 0xc800 | (reg << 4) | (num_regs - 1);
-      add_unwind_opcode (op, 2);
-    }
-  unwind.frame_size += num_regs * 12;
-}
-
-
 /* Parse a directive saving VFP registers for ARMv6 and above.  */
 
 static void
@@ -4785,17 +4731,6 @@ s_arm_unwind_save (int arch_v6)
 
   switch (reg->type)
     {
-    case REG_TYPE_FN:
-      if (had_brace)
-	{
-	  as_bad (_("FPA .unwind_save does not take a register list"));
-	  ignore_rest_of_line ();
-	  return;
-	}
-      input_line_pointer = peek;
-      s_arm_unwind_save_fpa (reg->number);
-      return;
-
     case REG_TYPE_PSEUDO:
     case REG_TYPE_RN:
       {
@@ -5350,99 +5285,6 @@ parse_big_immediate (char **str, int i, expressionS *in_exp,
   *str = ptr;
 
   return SUCCESS;
-}
-
-/* Returns the pseudo-register number of an FPA immediate constant,
-   or FAIL if there isn't a valid constant here.  */
-
-static int
-parse_fpa_immediate (char ** str)
-{
-  LITTLENUM_TYPE words[MAX_LITTLENUMS];
-  char *	 save_in;
-  expressionS	 exp;
-  int		 i;
-  int		 j;
-
-  /* First try and match exact strings, this is to guarantee
-     that some formats will work even for cross assembly.  */
-
-  for (i = 0; fp_const[i]; i++)
-    {
-      if (strncmp (*str, fp_const[i], strlen (fp_const[i])) == 0)
-	{
-	  char *start = *str;
-
-	  *str += strlen (fp_const[i]);
-	  if (is_end_of_line[(unsigned char) **str])
-	    return i + 8;
-	  *str = start;
-	}
-    }
-
-  /* Just because we didn't get a match doesn't mean that the constant
-     isn't valid, just that it is in a format that we don't
-     automatically recognize.  Try parsing it with the standard
-     expression routines.  */
-
-  memset (words, 0, MAX_LITTLENUMS * sizeof (LITTLENUM_TYPE));
-
-  /* Look for a raw floating point number.  */
-  if ((save_in = atof_ieee (*str, 'x', words)) != NULL
-      && is_end_of_line[(unsigned char) *save_in])
-    {
-      for (i = 0; i < NUM_FLOAT_VALS; i++)
-	{
-	  for (j = 0; j < MAX_LITTLENUMS; j++)
-	    {
-	      if (words[j] != fp_values[i][j])
-		break;
-	    }
-
-	  if (j == MAX_LITTLENUMS)
-	    {
-	      *str = save_in;
-	      return i + 8;
-	    }
-	}
-    }
-
-  /* Try and parse a more complex expression, this will probably fail
-     unless the code uses a floating point prefix (eg "0f").  */
-  save_in = input_line_pointer;
-  input_line_pointer = *str;
-  if (expression (&exp) == absolute_section
-      && exp.X_op == O_big
-      && exp.X_add_number < 0)
-    {
-      /* FIXME: 5 = X_PRECISION, should be #define'd where we can use it.
-	 Ditto for 15.	*/
-#define X_PRECISION 5
-#define E_PRECISION 15L
-      if (gen_to_words (words, X_PRECISION, E_PRECISION) == 0)
-	{
-	  for (i = 0; i < NUM_FLOAT_VALS; i++)
-	    {
-	      for (j = 0; j < MAX_LITTLENUMS; j++)
-		{
-		  if (words[j] != fp_values[i][j])
-		    break;
-		}
-
-	      if (j == MAX_LITTLENUMS)
-		{
-		  *str = input_line_pointer;
-		  input_line_pointer = save_in;
-		  return i + 8;
-		}
-	    }
-	}
-    }
-
-  *str = input_line_pointer;
-  input_line_pointer = save_in;
-  inst.error = _("invalid FPA immediate expression");
-  return FAIL;
 }
 
 /* Returns 1 if a number has "quarter-precision" float format
@@ -7150,7 +6992,6 @@ enum operand_parse_code
   OP_RRw,	/* ARM register, not r15, optional trailing ! */
   OP_RCP,	/* Coprocessor number */
   OP_RCN,	/* Coprocessor register */
-  OP_RF,	/* FPA register */
   OP_RVS,	/* VFP single precision register */
   OP_RVD,	/* VFP double precision register (0..15) */
   OP_RND,       /* Neon double precision register (0..31) */
@@ -7284,7 +7125,6 @@ enum operand_parse_code
   OP_RRnpc_I0,	/* ARM register or literal 0 */
   OP_RR_EXr,	/* ARM register or expression with opt. reloc stuff. */
   OP_RR_EXi,	/* ARM register or expression with imm prefix */
-  OP_RF_IF,	/* FPA register or immediate */
   OP_RIWR_RIWC, /* iWMMXt R or C reg */
   OP_RIWC_RIWG, /* iWMMXt wC or wCG reg */
 
@@ -7504,7 +7344,6 @@ parse_operands (char *str, const unsigned int *pattern, bool thumb)
 	case OP_RR:    po_reg_or_fail (REG_TYPE_RN);	  break;
 	case OP_RCP:   po_reg_or_fail (REG_TYPE_CP);	  break;
 	case OP_RCN:   po_reg_or_fail (REG_TYPE_CN);	  break;
-	case OP_RF:    po_reg_or_fail (REG_TYPE_FN);	  break;
 	case OP_RVS:   po_reg_or_fail (REG_TYPE_VFS);	  break;
 	case OP_RVD:   po_reg_or_fail (REG_TYPE_VFD);	  break;
 	case OP_oRND:
@@ -7873,20 +7712,6 @@ parse_operands (char *str, const unsigned int *pattern, bool thumb)
 
 	case OP_RRnpcsp_I32: po_reg_or_goto (REG_TYPE_RN, I32);	break;
 	I32:		     po_imm_or_fail (1, 32, false);	break;
-
-	case OP_RF_IF:    po_reg_or_goto (REG_TYPE_FN, IF);   break;
-	IF:
-	  if (!is_immediate_prefix (*str))
-	    goto bad_args;
-	  str++;
-	  val = parse_fpa_immediate (&str);
-	  if (val == FAIL)
-	    goto failure;
-	  /* FPA immediates are encoded as registers 8-15.
-	     parse_fpa_immediate has already applied the offset.  */
-	  inst.operands[i].reg = val;
-	  inst.operands[i].isreg = 1;
-	  break;
 
 	case OP_RIWR_I32z: po_reg_or_goto (REG_TYPE_MMXWR, I32z); break;
 	I32z:		  po_imm_or_fail (0, 32, false);	  break;
@@ -9348,13 +9173,6 @@ static void
 do_imm0 (void)
 {
   inst.instruction |= inst.operands[0].imm;
-}
-
-static void
-do_rd_cpaddr (void)
-{
-  inst.instruction |= inst.operands[0].reg << 12;
-  encode_arm_cp_address (1, true, true, 0);
 }
 
 /* ARM instructions, in alphabetical order by function name (except
@@ -11061,54 +10879,6 @@ do_vfp_dp_conv_32 (void)
 {
   encode_arm_vfp_reg (inst.operands[0].reg, VFP_REG_Dd);
   vfp_conv (32);
-}
-
-/* FPA instructions.  Also in a logical order.	*/
-
-static void
-do_fpa_cmp (void)
-{
-  inst.instruction |= inst.operands[0].reg << 16;
-  inst.instruction |= inst.operands[1].reg;
-}
-
-static void
-do_fpa_ldmstm (void)
-{
-  inst.instruction |= inst.operands[0].reg << 12;
-  switch (inst.operands[1].imm)
-    {
-    case 1: inst.instruction |= CP_T_X;		 break;
-    case 2: inst.instruction |= CP_T_Y;		 break;
-    case 3: inst.instruction |= CP_T_Y | CP_T_X; break;
-    case 4:					 break;
-    default: abort ();
-    }
-
-  if (inst.instruction & (PRE_INDEX | INDEX_UP))
-    {
-      /* The instruction specified "ea" or "fd", so we can only accept
-	 [Rn]{!}.  The instruction does not really support stacking or
-	 unstacking, so we have to emulate these by setting appropriate
-	 bits and offsets.  */
-      constraint (inst.relocs[0].exp.X_op != O_constant
-		  || inst.relocs[0].exp.X_add_number != 0,
-		  _("this instruction does not support indexing"));
-
-      if ((inst.instruction & PRE_INDEX) || inst.operands[2].writeback)
-	inst.relocs[0].exp.X_add_number = 12 * inst.operands[1].imm;
-
-      if (!(inst.instruction & INDEX_UP))
-	inst.relocs[0].exp.X_add_number = -inst.relocs[0].exp.X_add_number;
-
-      if (!(inst.instruction & PRE_INDEX) && inst.operands[2].writeback)
-	{
-	  inst.operands[2].preind = 0;
-	  inst.operands[2].postind = 1;
-	}
-    }
-
-  encode_arm_cp_address (2, true, true, 0);
 }
 
 /* iWMMXt instructions: strictly in alphabetical order.	 */
@@ -23925,13 +23695,6 @@ static const struct reg_entry reg_names[] =
   REGDEF(spsr_hyp,768|(14<<16)|SPSR_BIT,RNB),
   REGDEF(SPSR_hyp,768|(14<<16)|SPSR_BIT,RNB),
 
-  /* FPA registers.  */
-  REGNUM(f,0,FN), REGNUM(f,1,FN), REGNUM(f,2,FN), REGNUM(f,3,FN),
-  REGNUM(f,4,FN), REGNUM(f,5,FN), REGNUM(f,6,FN), REGNUM(f,7, FN),
-
-  REGNUM(F,0,FN), REGNUM(F,1,FN), REGNUM(F,2,FN), REGNUM(F,3,FN),
-  REGNUM(F,4,FN), REGNUM(F,5,FN), REGNUM(F,6,FN), REGNUM(F,7, FN),
-
   /* VFP SP registers.	*/
   REGSET(s,VFS),  REGSET(S,VFS),
   REGSETH(s,VFS), REGSETH(S,VFS),
@@ -24307,19 +24070,6 @@ static struct asm_barrier_opt barrier_opt_names[] =
 /* mov instructions that are shared between coprocessor and MVE.  */
 #define mcCE(mnem,  op, nops, ops, ae)	\
   { #mnem, OPS##nops ops, OT_csuffix, 0x##op, 0xe##op, ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##ae, 0 }
-
-/* Legacy coprocessor instructions where conditional infix and conditional
-   suffix are ambiguous.  For consistency this includes all FPA instructions,
-   not just the potentially ambiguous ones.  */
-#define cCL(mnem, op, nops, ops, ae)	\
-  { mnem, OPS##nops ops, OT_cinfix3_legacy, \
-    0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae, 0 }
-
-/* Coprocessor, takes either a suffix or a position-3 infix
-   (for an FPA corner case). */
-#define C3E(mnem, op, nops, ops, ae) \
-  { mnem, OPS##nops ops, OT_csuf_or_in3, \
-    0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae, 0 }
 
 #define xCM_(m1, m2, m3, op, nops, ops, ae)	\
   { m1 #m2 m3, OPS##nops ops, \
@@ -25135,451 +24885,6 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT & fpu_neon_ext_dotprod
  NUF (vsdot, d00, 3, (RNDQ, RNDQ, RNDQ_RNSC), neon_dotproduct_s),
  NUF (vudot, d00, 3, (RNDQ, RNDQ, RNDQ_RNSC), neon_dotproduct_u),
-
-#undef  ARM_VARIANT
-#define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
-#undef  THUMB_VARIANT
-#define THUMB_VARIANT NULL
-
- cCE("wfs",	e200110, 1, (RR),	     rd),
- cCE("rfs",	e300110, 1, (RR),	     rd),
- cCE("wfc",	e400110, 1, (RR),	     rd),
- cCE("rfc",	e500110, 1, (RR),	     rd),
-
- cCL("ldfs",	c100100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL("ldfd",	c108100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL("ldfe",	c500100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL("ldfp",	c508100, 2, (RF, ADDRGLDC),  rd_cpaddr),
-
- cCL("stfs",	c000100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL("stfd",	c008100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL("stfe",	c400100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL("stfp",	c408100, 2, (RF, ADDRGLDC),  rd_cpaddr),
-
- cCL("mvfs",	e008100, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfsp",	e008120, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfsm",	e008140, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfsz",	e008160, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfd",	e008180, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfdp",	e0081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfdm",	e0081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfdz",	e0081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfe",	e088100, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfep",	e088120, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfem",	e088140, 2, (RF, RF_IF),     rd_rm),
- cCL("mvfez",	e088160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("mnfs",	e108100, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfsp",	e108120, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfsm",	e108140, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfsz",	e108160, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfd",	e108180, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfdp",	e1081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfdm",	e1081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfdz",	e1081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfe",	e188100, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfep",	e188120, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfem",	e188140, 2, (RF, RF_IF),     rd_rm),
- cCL("mnfez",	e188160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("abss",	e208100, 2, (RF, RF_IF),     rd_rm),
- cCL("abssp",	e208120, 2, (RF, RF_IF),     rd_rm),
- cCL("abssm",	e208140, 2, (RF, RF_IF),     rd_rm),
- cCL("abssz",	e208160, 2, (RF, RF_IF),     rd_rm),
- cCL("absd",	e208180, 2, (RF, RF_IF),     rd_rm),
- cCL("absdp",	e2081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("absdm",	e2081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("absdz",	e2081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("abse",	e288100, 2, (RF, RF_IF),     rd_rm),
- cCL("absep",	e288120, 2, (RF, RF_IF),     rd_rm),
- cCL("absem",	e288140, 2, (RF, RF_IF),     rd_rm),
- cCL("absez",	e288160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("rnds",	e308100, 2, (RF, RF_IF),     rd_rm),
- cCL("rndsp",	e308120, 2, (RF, RF_IF),     rd_rm),
- cCL("rndsm",	e308140, 2, (RF, RF_IF),     rd_rm),
- cCL("rndsz",	e308160, 2, (RF, RF_IF),     rd_rm),
- cCL("rndd",	e308180, 2, (RF, RF_IF),     rd_rm),
- cCL("rnddp",	e3081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("rnddm",	e3081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("rnddz",	e3081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("rnde",	e388100, 2, (RF, RF_IF),     rd_rm),
- cCL("rndep",	e388120, 2, (RF, RF_IF),     rd_rm),
- cCL("rndem",	e388140, 2, (RF, RF_IF),     rd_rm),
- cCL("rndez",	e388160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("sqts",	e408100, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtsp",	e408120, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtsm",	e408140, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtsz",	e408160, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtd",	e408180, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtdp",	e4081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtdm",	e4081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtdz",	e4081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("sqte",	e488100, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtep",	e488120, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtem",	e488140, 2, (RF, RF_IF),     rd_rm),
- cCL("sqtez",	e488160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("logs",	e508100, 2, (RF, RF_IF),     rd_rm),
- cCL("logsp",	e508120, 2, (RF, RF_IF),     rd_rm),
- cCL("logsm",	e508140, 2, (RF, RF_IF),     rd_rm),
- cCL("logsz",	e508160, 2, (RF, RF_IF),     rd_rm),
- cCL("logd",	e508180, 2, (RF, RF_IF),     rd_rm),
- cCL("logdp",	e5081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("logdm",	e5081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("logdz",	e5081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("loge",	e588100, 2, (RF, RF_IF),     rd_rm),
- cCL("logep",	e588120, 2, (RF, RF_IF),     rd_rm),
- cCL("logem",	e588140, 2, (RF, RF_IF),     rd_rm),
- cCL("logez",	e588160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("lgns",	e608100, 2, (RF, RF_IF),     rd_rm),
- cCL("lgnsp",	e608120, 2, (RF, RF_IF),     rd_rm),
- cCL("lgnsm",	e608140, 2, (RF, RF_IF),     rd_rm),
- cCL("lgnsz",	e608160, 2, (RF, RF_IF),     rd_rm),
- cCL("lgnd",	e608180, 2, (RF, RF_IF),     rd_rm),
- cCL("lgndp",	e6081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("lgndm",	e6081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("lgndz",	e6081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("lgne",	e688100, 2, (RF, RF_IF),     rd_rm),
- cCL("lgnep",	e688120, 2, (RF, RF_IF),     rd_rm),
- cCL("lgnem",	e688140, 2, (RF, RF_IF),     rd_rm),
- cCL("lgnez",	e688160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("exps",	e708100, 2, (RF, RF_IF),     rd_rm),
- cCL("expsp",	e708120, 2, (RF, RF_IF),     rd_rm),
- cCL("expsm",	e708140, 2, (RF, RF_IF),     rd_rm),
- cCL("expsz",	e708160, 2, (RF, RF_IF),     rd_rm),
- cCL("expd",	e708180, 2, (RF, RF_IF),     rd_rm),
- cCL("expdp",	e7081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("expdm",	e7081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("expdz",	e7081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("expe",	e788100, 2, (RF, RF_IF),     rd_rm),
- cCL("expep",	e788120, 2, (RF, RF_IF),     rd_rm),
- cCL("expem",	e788140, 2, (RF, RF_IF),     rd_rm),
- cCL("expdz",	e788160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("sins",	e808100, 2, (RF, RF_IF),     rd_rm),
- cCL("sinsp",	e808120, 2, (RF, RF_IF),     rd_rm),
- cCL("sinsm",	e808140, 2, (RF, RF_IF),     rd_rm),
- cCL("sinsz",	e808160, 2, (RF, RF_IF),     rd_rm),
- cCL("sind",	e808180, 2, (RF, RF_IF),     rd_rm),
- cCL("sindp",	e8081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("sindm",	e8081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("sindz",	e8081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("sine",	e888100, 2, (RF, RF_IF),     rd_rm),
- cCL("sinep",	e888120, 2, (RF, RF_IF),     rd_rm),
- cCL("sinem",	e888140, 2, (RF, RF_IF),     rd_rm),
- cCL("sinez",	e888160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("coss",	e908100, 2, (RF, RF_IF),     rd_rm),
- cCL("cossp",	e908120, 2, (RF, RF_IF),     rd_rm),
- cCL("cossm",	e908140, 2, (RF, RF_IF),     rd_rm),
- cCL("cossz",	e908160, 2, (RF, RF_IF),     rd_rm),
- cCL("cosd",	e908180, 2, (RF, RF_IF),     rd_rm),
- cCL("cosdp",	e9081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("cosdm",	e9081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("cosdz",	e9081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("cose",	e988100, 2, (RF, RF_IF),     rd_rm),
- cCL("cosep",	e988120, 2, (RF, RF_IF),     rd_rm),
- cCL("cosem",	e988140, 2, (RF, RF_IF),     rd_rm),
- cCL("cosez",	e988160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("tans",	ea08100, 2, (RF, RF_IF),     rd_rm),
- cCL("tansp",	ea08120, 2, (RF, RF_IF),     rd_rm),
- cCL("tansm",	ea08140, 2, (RF, RF_IF),     rd_rm),
- cCL("tansz",	ea08160, 2, (RF, RF_IF),     rd_rm),
- cCL("tand",	ea08180, 2, (RF, RF_IF),     rd_rm),
- cCL("tandp",	ea081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("tandm",	ea081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("tandz",	ea081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("tane",	ea88100, 2, (RF, RF_IF),     rd_rm),
- cCL("tanep",	ea88120, 2, (RF, RF_IF),     rd_rm),
- cCL("tanem",	ea88140, 2, (RF, RF_IF),     rd_rm),
- cCL("tanez",	ea88160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("asns",	eb08100, 2, (RF, RF_IF),     rd_rm),
- cCL("asnsp",	eb08120, 2, (RF, RF_IF),     rd_rm),
- cCL("asnsm",	eb08140, 2, (RF, RF_IF),     rd_rm),
- cCL("asnsz",	eb08160, 2, (RF, RF_IF),     rd_rm),
- cCL("asnd",	eb08180, 2, (RF, RF_IF),     rd_rm),
- cCL("asndp",	eb081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("asndm",	eb081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("asndz",	eb081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("asne",	eb88100, 2, (RF, RF_IF),     rd_rm),
- cCL("asnep",	eb88120, 2, (RF, RF_IF),     rd_rm),
- cCL("asnem",	eb88140, 2, (RF, RF_IF),     rd_rm),
- cCL("asnez",	eb88160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("acss",	ec08100, 2, (RF, RF_IF),     rd_rm),
- cCL("acssp",	ec08120, 2, (RF, RF_IF),     rd_rm),
- cCL("acssm",	ec08140, 2, (RF, RF_IF),     rd_rm),
- cCL("acssz",	ec08160, 2, (RF, RF_IF),     rd_rm),
- cCL("acsd",	ec08180, 2, (RF, RF_IF),     rd_rm),
- cCL("acsdp",	ec081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("acsdm",	ec081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("acsdz",	ec081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("acse",	ec88100, 2, (RF, RF_IF),     rd_rm),
- cCL("acsep",	ec88120, 2, (RF, RF_IF),     rd_rm),
- cCL("acsem",	ec88140, 2, (RF, RF_IF),     rd_rm),
- cCL("acsez",	ec88160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("atns",	ed08100, 2, (RF, RF_IF),     rd_rm),
- cCL("atnsp",	ed08120, 2, (RF, RF_IF),     rd_rm),
- cCL("atnsm",	ed08140, 2, (RF, RF_IF),     rd_rm),
- cCL("atnsz",	ed08160, 2, (RF, RF_IF),     rd_rm),
- cCL("atnd",	ed08180, 2, (RF, RF_IF),     rd_rm),
- cCL("atndp",	ed081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("atndm",	ed081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("atndz",	ed081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("atne",	ed88100, 2, (RF, RF_IF),     rd_rm),
- cCL("atnep",	ed88120, 2, (RF, RF_IF),     rd_rm),
- cCL("atnem",	ed88140, 2, (RF, RF_IF),     rd_rm),
- cCL("atnez",	ed88160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("urds",	ee08100, 2, (RF, RF_IF),     rd_rm),
- cCL("urdsp",	ee08120, 2, (RF, RF_IF),     rd_rm),
- cCL("urdsm",	ee08140, 2, (RF, RF_IF),     rd_rm),
- cCL("urdsz",	ee08160, 2, (RF, RF_IF),     rd_rm),
- cCL("urdd",	ee08180, 2, (RF, RF_IF),     rd_rm),
- cCL("urddp",	ee081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("urddm",	ee081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("urddz",	ee081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("urde",	ee88100, 2, (RF, RF_IF),     rd_rm),
- cCL("urdep",	ee88120, 2, (RF, RF_IF),     rd_rm),
- cCL("urdem",	ee88140, 2, (RF, RF_IF),     rd_rm),
- cCL("urdez",	ee88160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("nrms",	ef08100, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmsp",	ef08120, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmsm",	ef08140, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmsz",	ef08160, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmd",	ef08180, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmdp",	ef081a0, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmdm",	ef081c0, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmdz",	ef081e0, 2, (RF, RF_IF),     rd_rm),
- cCL("nrme",	ef88100, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmep",	ef88120, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmem",	ef88140, 2, (RF, RF_IF),     rd_rm),
- cCL("nrmez",	ef88160, 2, (RF, RF_IF),     rd_rm),
-
- cCL("adfs",	e000100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfsp",	e000120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfsm",	e000140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfsz",	e000160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfd",	e000180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfdp",	e0001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfdm",	e0001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfdz",	e0001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfe",	e080100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfep",	e080120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfem",	e080140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("adfez",	e080160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("sufs",	e200100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufsp",	e200120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufsm",	e200140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufsz",	e200160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufd",	e200180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufdp",	e2001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufdm",	e2001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufdz",	e2001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufe",	e280100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufep",	e280120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufem",	e280140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("sufez",	e280160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("rsfs",	e300100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfsp",	e300120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfsm",	e300140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfsz",	e300160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfd",	e300180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfdp",	e3001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfdm",	e3001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfdz",	e3001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfe",	e380100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfep",	e380120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfem",	e380140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rsfez",	e380160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("mufs",	e100100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufsp",	e100120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufsm",	e100140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufsz",	e100160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufd",	e100180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufdp",	e1001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufdm",	e1001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufdz",	e1001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufe",	e180100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufep",	e180120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufem",	e180140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("mufez",	e180160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("dvfs",	e400100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfsp",	e400120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfsm",	e400140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfsz",	e400160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfd",	e400180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfdp",	e4001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfdm",	e4001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfdz",	e4001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfe",	e480100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfep",	e480120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfem",	e480140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("dvfez",	e480160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("rdfs",	e500100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfsp",	e500120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfsm",	e500140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfsz",	e500160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfd",	e500180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfdp",	e5001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfdm",	e5001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfdz",	e5001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfe",	e580100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfep",	e580120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfem",	e580140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rdfez",	e580160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("pows",	e600100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powsp",	e600120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powsm",	e600140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powsz",	e600160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powd",	e600180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powdp",	e6001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powdm",	e6001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powdz",	e6001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powe",	e680100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powep",	e680120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powem",	e680140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("powez",	e680160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("rpws",	e700100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwsp",	e700120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwsm",	e700140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwsz",	e700160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwd",	e700180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwdp",	e7001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwdm",	e7001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwdz",	e7001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwe",	e780100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwep",	e780120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwem",	e780140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rpwez",	e780160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("rmfs",	e800100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfsp",	e800120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfsm",	e800140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfsz",	e800160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfd",	e800180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfdp",	e8001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfdm",	e8001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfdz",	e8001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfe",	e880100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfep",	e880120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfem",	e880140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("rmfez",	e880160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("fmls",	e900100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmlsp",	e900120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmlsm",	e900140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmlsz",	e900160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmld",	e900180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmldp",	e9001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmldm",	e9001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmldz",	e9001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmle",	e980100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmlep",	e980120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmlem",	e980140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fmlez",	e980160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("fdvs",	ea00100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvsp",	ea00120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvsm",	ea00140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvsz",	ea00160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvd",	ea00180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvdp",	ea001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvdm",	ea001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvdz",	ea001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdve",	ea80100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvep",	ea80120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvem",	ea80140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("fdvez",	ea80160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("frds",	eb00100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frdsp",	eb00120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frdsm",	eb00140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frdsz",	eb00160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frdd",	eb00180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frddp",	eb001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frddm",	eb001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frddz",	eb001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frde",	eb80100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frdep",	eb80120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frdem",	eb80140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("frdez",	eb80160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCL("pols",	ec00100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("polsp",	ec00120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("polsm",	ec00140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("polsz",	ec00160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("pold",	ec00180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("poldp",	ec001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("poldm",	ec001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("poldz",	ec001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("pole",	ec80100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("polep",	ec80120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("polem",	ec80140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL("polez",	ec80160, 3, (RF, RF, RF_IF), rd_rn_rm),
-
- cCE("cmf",	e90f110, 2, (RF, RF_IF),     fpa_cmp),
- C3E("cmfe",	ed0f110, 2, (RF, RF_IF),     fpa_cmp),
- cCE("cnf",	eb0f110, 2, (RF, RF_IF),     fpa_cmp),
- C3E("cnfe",	ef0f110, 2, (RF, RF_IF),     fpa_cmp),
-
- cCL("flts",	e000110, 2, (RF, RR),	     rn_rd),
- cCL("fltsp",	e000130, 2, (RF, RR),	     rn_rd),
- cCL("fltsm",	e000150, 2, (RF, RR),	     rn_rd),
- cCL("fltsz",	e000170, 2, (RF, RR),	     rn_rd),
- cCL("fltd",	e000190, 2, (RF, RR),	     rn_rd),
- cCL("fltdp",	e0001b0, 2, (RF, RR),	     rn_rd),
- cCL("fltdm",	e0001d0, 2, (RF, RR),	     rn_rd),
- cCL("fltdz",	e0001f0, 2, (RF, RR),	     rn_rd),
- cCL("flte",	e080110, 2, (RF, RR),	     rn_rd),
- cCL("fltep",	e080130, 2, (RF, RR),	     rn_rd),
- cCL("fltem",	e080150, 2, (RF, RR),	     rn_rd),
- cCL("fltez",	e080170, 2, (RF, RR),	     rn_rd),
-
-  /* The implementation of the FIX instruction is broken on some
-     assemblers, in that it accepts a precision specifier as well as a
-     rounding specifier, despite the fact that this is meaningless.
-     To be more compatible, we accept it as well, though of course it
-     does not set any bits.  */
- cCE("fix",	e100110, 2, (RR, RF),	     rd_rm),
- cCL("fixp",	e100130, 2, (RR, RF),	     rd_rm),
- cCL("fixm",	e100150, 2, (RR, RF),	     rd_rm),
- cCL("fixz",	e100170, 2, (RR, RF),	     rd_rm),
- cCL("fixsp",	e100130, 2, (RR, RF),	     rd_rm),
- cCL("fixsm",	e100150, 2, (RR, RF),	     rd_rm),
- cCL("fixsz",	e100170, 2, (RR, RF),	     rd_rm),
- cCL("fixdp",	e100130, 2, (RR, RF),	     rd_rm),
- cCL("fixdm",	e100150, 2, (RR, RF),	     rd_rm),
- cCL("fixdz",	e100170, 2, (RR, RF),	     rd_rm),
- cCL("fixep",	e100130, 2, (RR, RF),	     rd_rm),
- cCL("fixem",	e100150, 2, (RR, RF),	     rd_rm),
- cCL("fixez",	e100170, 2, (RR, RF),	     rd_rm),
-
-  /* Instructions that were new with the real FPA, call them V2.  */
-#undef  ARM_VARIANT
-#define ARM_VARIANT  & fpu_fpa_ext_v2
-
- cCE("lfm",	c100200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCL("lfmfd",	c900200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCL("lfmea",	d100200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCE("sfm",	c000200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCL("sfmfd",	d000200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCL("sfmea",	c800200, 3, (RF, I4b, ADDR), fpa_ldmstm),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1xd  /* VFP V1xD (single precision).  */
@@ -26664,8 +25969,6 @@ static const struct asm_opcode insns[] =
 #undef TUF
 #undef TCC
 #undef cCE
-#undef cCL
-#undef C3E
 #undef C3
 #undef CE
 #undef CM
@@ -31014,8 +30317,6 @@ md_begin (void)
 	      -m[arm]v[2345[t[e]]]    Arm architectures
 	      -mall		      All (except the ARM1)
       FP variants:
-	      -mfpa10, -mfpa11	      FPA10 and 11 co-processor instructions
-	      -mfpe-old		      (No float load/store multiples)
 	      -mvfpxd		      VFP Single precision
 	      -mvfp		      All VFP
 	      -mno-fpu		      Disable all floating point instructions
