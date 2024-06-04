@@ -16,6 +16,10 @@
   removed.  The CPU name ep9312 is still recognized, but treated as an alias
   for arm920t.
 
+* Support for the FPA co-procossor on Arm has been removed.  In cases where a
+  legacy CPU previously defaulted to using this instruction set extension, the
+  assembler now defaults to no-FPU to avoid quietly misassembling legacy code.
+
 Changes in 2.42:
 
 * The objdump program has a new command line option -Z/--decompress which
