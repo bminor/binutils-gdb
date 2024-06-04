@@ -32,16 +32,16 @@
 	ldctest stc2 c0
 	ldctest stc2l c0
 
-	.fpu 	fpa
 
-	ldctest2 ldfs f0
-	ldctest2 stfs f0
-	ldctest2 ldfd f0
-	ldctest2 stfd f0
-	ldctest2 ldfe f0
-	ldctest2 stfe f0
-	ldctest2 ldfp f0
-	ldctest2 stfp f0
+
+
+
+
+
+
+
+
+
 
 	.fpu	vfp
 

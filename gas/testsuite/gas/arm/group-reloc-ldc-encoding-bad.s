@@ -50,55 +50,55 @@
 	ldctest ldc2 stc2 0x808
 	ldctest ldc2l stc2l 0x808
 
-@ LDFS/STFS/LDFD/STFD/LDFE/STFE/LDFP/STFP
 
-	.fpu	fpa
 
-	.macro	fpa_test load store cst
 
-	\load	f0, [r0, #:pc_g0:(f + \cst)]
-	\load	f0, [r0, #:pc_g1:(f + \cst)]
-	\load	f0, [r0, #:pc_g2:(f + \cst)]
 
-	\load	f0, [r0, #:sb_g0:(f + \cst)]
-	\load	f0, [r0, #:sb_g1:(f + \cst)]
-	\load	f0, [r0, #:sb_g2:(f + \cst)]
 
-	\store	f0, [r0, #:pc_g0:(f + \cst)]
-	\store	f0, [r0, #:pc_g1:(f + \cst)]
-	\store	f0, [r0, #:pc_g2:(f + \cst)]
 
-	\store	f0, [r0, #:sb_g0:(f + \cst)]
-	\store	f0, [r0, #:sb_g1:(f + \cst)]
-	\store	f0, [r0, #:sb_g2:(f + \cst)]
 
-	\load	f0, [r0, #:pc_g0:(f - \cst)]
-	\load	f0, [r0, #:pc_g1:(f - \cst)]
-	\load	f0, [r0, #:pc_g2:(f - \cst)]
 
-	\load	f0, [r0, #:sb_g0:(f - \cst)]
-	\load	f0, [r0, #:sb_g1:(f - \cst)]
-	\load	f0, [r0, #:sb_g2:(f - \cst)]
 
-	\store	f0, [r0, #:pc_g0:(f - \cst)]
-	\store	f0, [r0, #:pc_g1:(f - \cst)]
-	\store	f0, [r0, #:pc_g2:(f - \cst)]
 
-	\store	f0, [r0, #:sb_g0:(f - \cst)]
-	\store	f0, [r0, #:sb_g1:(f - \cst)]
-	\store	f0, [r0, #:sb_g2:(f - \cst)]
 
-	.endm
 
-	fpa_test ldfs stfs 0x1
-	fpa_test ldfd stfd 0x1
-	fpa_test ldfe stfe 0x1
-	fpa_test ldfp stfp 0x1
 
-	fpa_test ldfs stfs 0x808
-	fpa_test ldfd stfd 0x808
-	fpa_test ldfe stfe 0x808
-	fpa_test ldfp stfp 0x808
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @ FLDS/FSTS
 
