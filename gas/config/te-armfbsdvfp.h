@@ -19,4 +19,4 @@
 
 #include "te-armfbsdeabi.h"
 
-#define FPU_DEFAULT FPU_ARCH_VFP
+#define FPU_DEFAULT FPU_ARCH_SOFTVFP
