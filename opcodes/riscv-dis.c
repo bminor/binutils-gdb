@@ -32,6 +32,11 @@
 #include <stdint.h>
 #include <ctype.h>
 
+/* The RISC-V disassembler produces styled output using
+   disassemble_info::fprintf_styled_func.  This define prevents use of
+   disassemble_info::fprintf_func which is for unstyled output.  */
+#define fprintf_func please_use_fprintf_styled_func_instead
+
 /* Current XLEN for the disassembler.  */
 static unsigned xlen = 0;
 
