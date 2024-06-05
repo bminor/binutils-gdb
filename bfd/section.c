@@ -1565,11 +1565,45 @@ bfd_get_section_contents (bfd *abfd,
 {
   bfd_size_type sz;
 
+  if (count == 0)
+    /* Don't bother.  */
+    return true;
+
+  if (section == NULL)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  if (location == NULL)
+    {
+      if (section->mmapped_p)
+	{
+	  /* Pass this request straight on to the target's function.
+	     All of the code below assumes that location != NULL.
+	     FIXME: Should we still check that count is sane ?  */
+	  return BFD_SEND (abfd, _bfd_get_section_contents,
+			   (abfd, section, location, offset, count));
+	}
+
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
   if (section->flags & SEC_CONSTRUCTOR)
     {
       memset (location, 0, (size_t) count);
       return true;
     }
+
+  if ((section->flags & SEC_HAS_CONTENTS) == 0)
+    {
+      memset (location, 0, (size_t) count);
+      return true;
+    }
+
+  if (abfd == NULL)
+    return false;
 
   sz = bfd_get_section_limit_octets (abfd, section);
   if ((bfd_size_type) offset > sz
@@ -1578,16 +1612,6 @@ bfd_get_section_contents (bfd *abfd,
     {
       bfd_set_error (bfd_error_bad_value);
       return false;
-    }
-
-  if (count == 0)
-    /* Don't bother.  */
-    return true;
-
-  if ((section->flags & SEC_HAS_CONTENTS) == 0)
-    {
-      memset (location, 0, (size_t) count);
-      return true;
     }
 
   if ((section->flags & SEC_IN_MEMORY) != 0)
