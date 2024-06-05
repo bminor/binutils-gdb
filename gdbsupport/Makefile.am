@@ -68,7 +68,6 @@ libgdbsupport_a_SOURCES = \
     filestuff.cc \
     format.cc \
     gdb-dlfcn.cc \
-    gdb-hashtab.cc \
     gdb_obstack.cc \
     gdb_regex.cc \
     gdb_tilde_expand.cc \
