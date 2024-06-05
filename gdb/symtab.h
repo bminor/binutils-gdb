@@ -1765,15 +1765,6 @@ struct symtab
 
   struct symtab *next;
 
-  /* Backlink to containing compunit symtab.  */
-
-  struct compunit_symtab *m_compunit;
-
-  /* Table mapping core addresses to line numbers for this file.
-     Can be NULL if none.  Never shared between different symtabs.  */
-
-  const struct linetable *m_linetable;
-
   /* Name of this source file, in a form appropriate to print to the user.
 
      This pointer is never nullptr.  */
@@ -1789,6 +1780,17 @@ struct symtab
 
      This pointer is never nullptr.*/
   const char *filename_for_id;
+
+private:
+
+  /* Backlink to containing compunit symtab.  */
+
+  struct compunit_symtab *m_compunit;
+
+  /* Table mapping core addresses to line numbers for this file.
+     Can be NULL if none.  Never shared between different symtabs.  */
+
+  const struct linetable *m_linetable;
 
   /* Language of this source file.  */
 
