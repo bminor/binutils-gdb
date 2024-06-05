@@ -154,10 +154,7 @@ objfile::forget_cached_source_info ()
 		objfile_debug_name (this));
 
   for (compunit_symtab *cu : compunits ())
-    {
-      for (symtab *s : cu->filetabs ())
-	s->release_fullname ();
-    }
+    cu->forget_cached_source_info ();
 
   for (const auto &iter : qf)
     iter->forget_cached_source_info (this);

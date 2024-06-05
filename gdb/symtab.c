@@ -485,6 +485,15 @@ compunit_symtab::language () const
   return symtab->language ();
 }
 
+/* See symtab.h.  */
+
+void
+compunit_symtab::forget_cached_source_info ()
+{
+  for (symtab *s : filetabs ())
+    s->release_fullname ();
+}
+
 /* The relocated address of the minimal symbol, using the section
    offsets from OBJFILE.  */
 
