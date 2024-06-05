@@ -1200,7 +1200,7 @@ maintenance_info_bfds (const char *arg, int from_tty)
   uiout->table_header (40, ui_left, "filename", "Filename");
 
   uiout->table_body ();
-  htab_traverse (all_bfds, print_one_bfd, uiout);
+  htab_traverse_noresize (all_bfds, print_one_bfd, uiout);
 }
 
 /* BFD related per-inferior data.  */

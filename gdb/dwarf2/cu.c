@@ -146,7 +146,8 @@ dwarf2_cu::mark ()
     {
       m_mark = true;
       if (m_dependencies != nullptr)
-	htab_traverse (m_dependencies.get (), dwarf2_mark_helper, per_objfile);
+	htab_traverse_noresize (m_dependencies.get (), dwarf2_mark_helper,
+				per_objfile);
     }
 }
 
