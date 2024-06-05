@@ -6233,7 +6233,7 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
       else
 	cust->set_epilogue_unwind_valid (true);
 
-      cust->set_call_site_htab (cu->call_site_htab);
+      cust->set_call_site_htab (std::move (cu->call_site_htab));
     }
 
   per_objfile->set_symtab (cu->per_cu, cust);
@@ -10208,13 +10208,12 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
   unrelocated_addr pc = attr->as_address ();
 
-  if (cu->call_site_htab == NULL)
-    cu->call_site_htab = htab_create_alloc_ex (16, call_site::hash,
-					       call_site::eq, NULL,
-					       &objfile->objfile_obstack,
-					       hashtab_obstack_allocate, NULL);
+  if (cu->call_site_htab == nullptr)
+    cu->call_site_htab.reset (htab_create_alloc (16, call_site::hash,
+						 call_site::eq, nullptr,
+						 xcalloc, xfree));
   struct call_site call_site_local (pc, nullptr, nullptr);
-  slot = htab_find_slot (cu->call_site_htab, &call_site_local, INSERT);
+  slot = htab_find_slot (cu->call_site_htab.get (), &call_site_local, INSERT);
   if (*slot != NULL)
     {
       complaint (_("Duplicate PC %s for DW_TAG_call_site "

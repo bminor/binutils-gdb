@@ -428,10 +428,10 @@ compunit_symtab::find_call_site (CORE_ADDR pc) const
 /* See symtab.h.  */
 
 void
-compunit_symtab::set_call_site_htab (htab_t call_site_htab)
+compunit_symtab::set_call_site_htab (htab_up call_site_htab)
 {
   gdb_assert (m_call_site_htab == nullptr);
-  m_call_site_htab = call_site_htab;
+  m_call_site_htab = call_site_htab.release ();
 }
 
 /* See symtab.h.  */
@@ -492,6 +492,16 @@ compunit_symtab::forget_cached_source_info ()
 {
   for (symtab *s : filetabs ())
     s->release_fullname ();
+}
+
+/* See symtab.h.  */
+
+void
+compunit_symtab::finalize ()
+{
+  this->forget_cached_source_info ();
+  if (m_call_site_htab != nullptr)
+    htab_delete (m_call_site_htab);
 }
 
 /* The relocated address of the minimal symbol, using the section

@@ -1957,7 +1957,7 @@ struct compunit_symtab
   symtab *primary_filetab () const;
 
   /* Set m_call_site_htab.  */
-  void set_call_site_htab (htab_t call_site_htab);
+  void set_call_site_htab (htab_up call_site_htab);
 
   /* Find call_site info for PC.  */
   call_site *find_call_site (CORE_ADDR pc) const;
@@ -1967,6 +1967,12 @@ struct compunit_symtab
 
   /* Clear any cached source file names.  */
   void forget_cached_source_info ();
+
+  /* This is called when an objfile is being destroyed and will free
+     any resources used by this compunit_symtab.  Normally a
+     destructor would be used instead, but at the moment
+     compunit_symtab objects are allocated on an obstack.  */
+  void finalize ();
 
   /* Unordered chain of all compunit symtabs of this objfile.  */
   struct compunit_symtab *next;

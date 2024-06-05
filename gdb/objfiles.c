@@ -530,6 +530,8 @@ objfile::~objfile ()
   /* It still may reference data modules have associated with the objfile and
      the symbol file data.  */
   forget_cached_source_info ();
+  for (compunit_symtab *cu : compunits ())
+    cu->finalize ();
 
   breakpoint_free_objfile (this);
   btrace_free_objfile (this);
