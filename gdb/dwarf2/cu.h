@@ -151,7 +151,7 @@ public:
 
   /* A hash table of DIE cu_offset for following references with
      die_info->offset.sect_off as hash.  */
-  htab_t die_hash = nullptr;
+  htab_up die_hash;
 
   /* Full DIEs if read in.  */
   struct die_info *dies = nullptr;

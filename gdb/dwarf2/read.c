@@ -995,9 +995,6 @@ static const char *dwarf2_physname (const char *name, struct die_info *die,
 static struct die_info *dwarf2_extension (struct die_info *die,
 					  struct dwarf2_cu **);
 
-static void store_in_ref_table (struct die_info *,
-				struct dwarf2_cu *);
-
 static struct die_info *follow_die_ref_or_sig (struct die_info *,
 					       const struct attribute *,
 					       struct dwarf2_cu **);
@@ -5492,14 +5489,10 @@ load_full_comp_unit (dwarf2_per_cu_data *this_cu,
   const gdb_byte *info_ptr = reader.info_ptr;
 
   gdb_assert (cu->die_hash == NULL);
-  cu->die_hash =
-    htab_create_alloc_ex (cu->header.get_length_without_initial () / 12,
-			  die_info::hash,
-			  die_info::eq,
-			  NULL,
-			  &cu->comp_unit_obstack,
-			  hashtab_obstack_allocate,
-			  dummy_obstack_deallocate);
+  cu->die_hash.reset (htab_create_alloc
+		      (cu->header.get_length_without_initial () / 12,
+		       die_info::hash, die_info::eq,
+		       nullptr, xcalloc, xfree));
 
   if (reader.comp_unit_die->has_children)
     reader.comp_unit_die->child
@@ -15773,7 +15766,11 @@ read_die_and_children (const struct die_reader_specs *reader,
       *new_info_ptr = cur_ptr;
       return NULL;
     }
-  store_in_ref_table (die, reader->cu);
+
+  void **slot = htab_find_slot_with_hash (reader->cu->die_hash.get (), die,
+					  to_underlying (die->sect_off),
+					  INSERT);
+  *slot = die;
 
   if (die->has_children)
     die->child = read_die_and_siblings_1 (reader, cur_ptr, new_info_ptr, die);
@@ -20250,18 +20247,6 @@ dwarf2_extension (struct die_info *die, struct dwarf2_cu **ext_cu)
   return follow_die_ref (die, attr, ext_cu);
 }
 
-static void
-store_in_ref_table (struct die_info *die, struct dwarf2_cu *cu)
-{
-  void **slot;
-
-  slot = htab_find_slot_with_hash (cu->die_hash, die,
-				   to_underlying (die->sect_off),
-				   INSERT);
-
-  *slot = die;
-}
-
 /* Follow reference or signature attribute ATTR of SRC_DIE.
    On entry *REF_CU is the CU of SRC_DIE.
    On exit *REF_CU is the CU of the result.  */
@@ -20353,7 +20338,7 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
   *ref_cu = target_cu;
   temp_die.sect_off = sect_off;
 
-  return (struct die_info *) htab_find_with_hash (target_cu->die_hash,
+  return (struct die_info *) htab_find_with_hash (target_cu->die_hash.get (),
 						  &temp_die,
 						  to_underlying (sect_off));
 }
@@ -20733,7 +20718,8 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
   gdb_assert (sig_cu != NULL);
   gdb_assert (to_underlying (sig_type->type_offset_in_section) != 0);
   temp_die.sect_off = sig_type->type_offset_in_section;
-  die = (struct die_info *) htab_find_with_hash (sig_cu->die_hash, &temp_die,
+  die = (struct die_info *) htab_find_with_hash (sig_cu->die_hash.get (),
+						 &temp_die,
 						 to_underlying (temp_die.sect_off));
   if (die)
     {
@@ -20921,14 +20907,10 @@ read_signatured_type (signatured_type *sig_type,
       const gdb_byte *info_ptr = reader.info_ptr;
 
       gdb_assert (cu->die_hash == NULL);
-      cu->die_hash =
-	htab_create_alloc_ex (cu->header.get_length_without_initial () / 12,
-			      die_info::hash,
-			      die_info::eq,
-			      NULL,
-			      &cu->comp_unit_obstack,
-			      hashtab_obstack_allocate,
-			      dummy_obstack_deallocate);
+      cu->die_hash.reset (htab_create_alloc
+			  (cu->header.get_length_without_initial () / 12,
+			   die_info::hash, die_info::eq,
+			   nullptr, xcalloc, xfree));
 
       if (reader.comp_unit_die->has_children)
 	reader.comp_unit_die->child
