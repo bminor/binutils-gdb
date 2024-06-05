@@ -122,7 +122,7 @@ private:
   /* A set of pointers to dwarf2_per_cu_data objects for compilation
      units referenced by this one.  Only set during full symbol processing;
      partial symbol tables do not have dependencies.  */
-  htab_t m_dependencies = nullptr;
+  htab_up m_dependencies;
 
 public:
   /* The generic symbol table building routines have separate lists for
