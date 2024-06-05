@@ -1716,10 +1716,10 @@ bplocpy_get_fullname (PyObject *py_self, void *closure)
   BPPY_REQUIRE_VALID (self->owner);
   BPLOCPY_REQUIRE_VALID (self->owner, self);
   const auto symtab = self->bp_loc->symtab;
-  if (symtab != nullptr && symtab->fullname != nullptr)
+  if (symtab != nullptr && symtab->fullname () != nullptr)
     {
       gdbpy_ref<> fullname
-	= host_string_to_python_string (symtab->fullname);
+	= host_string_to_python_string (symtab->fullname ());
       return fullname.release ();
     }
   Py_RETURN_NONE;

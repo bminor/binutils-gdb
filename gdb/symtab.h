@@ -1739,6 +1739,27 @@ struct symtab
     m_language = language;
   }
 
+  /* Return the current full name of this symtab.  */
+  const char *fullname () const
+  { return m_fullname; }
+
+  /* Transfer ownership of the current full name to the caller.  The
+     full name is reset to nullptr.  */
+  gdb::unique_xmalloc_ptr<char> release_fullname ()
+  {
+    gdb::unique_xmalloc_ptr<char> result (m_fullname);
+    m_fullname = nullptr;
+    return result;
+  }
+
+  /* Set the current full name to NAME, transferring ownership to this
+     symtab.  */
+  void set_fullname (gdb::unique_xmalloc_ptr<char> name)
+  {
+    gdb_assert (m_fullname == nullptr);
+    m_fullname = name.release ();
+  }
+
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 
@@ -1776,7 +1797,7 @@ struct symtab
   /* Full name of file as found by searching the source path.
      NULL if not yet known.  */
 
-  char *fullname;
+  char *m_fullname;
 };
 
 /* A range adapter to allowing iterating over all the file tables in a list.  */

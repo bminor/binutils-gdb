@@ -685,8 +685,8 @@ info_source_command (const char *ignore, int from_tty)
   gdb_printf (_("Current source file is %s\n"), s->filename);
   if (s->compunit ()->dirname () != NULL)
     gdb_printf (_("Compilation directory is %s\n"), s->compunit ()->dirname ());
-  if (s->fullname)
-    gdb_printf (_("Located in %s\n"), s->fullname);
+  if (s->fullname () != nullptr)
+    gdb_printf (_("Located in %s\n"), s->fullname ());
   const std::vector<off_t> *offsets;
   if (g_source_cache.get_line_charpos (s, &offsets))
     gdb_printf (_("Contains %d line%s.\n"), (int) offsets->size (),
@@ -1145,8 +1145,7 @@ open_source_file (struct symtab *s)
   if (!s)
     return scoped_fd (-EINVAL);
 
-  gdb::unique_xmalloc_ptr<char> fullname (s->fullname);
-  s->fullname = NULL;
+  gdb::unique_xmalloc_ptr<char> fullname = s->release_fullname ();
   scoped_fd fd = find_and_open_source (s->filename, s->compunit ()->dirname (),
 				       &fullname);
 
@@ -1182,14 +1181,14 @@ open_source_file (struct symtab *s)
 		 It handles the reporting of its own errors.  */
 	      if (query_fd.get () >= 0)
 		{
-		  s->fullname = fullname.release ();
+		  s->set_fullname (std::move (fullname));
 		  return query_fd;
 		}
 	    }
 	}
     }
 
-  s->fullname = fullname.release ();
+  s->set_fullname (std::move (fullname));
   return fd;
 }
 
@@ -1236,7 +1235,7 @@ symtab_to_fullname (struct symtab *s)
   /* Use cached copy if we have it.
      We rely on forget_cached_source_info being called appropriately
      to handle cases like the file being moved.  */
-  if (s->fullname == NULL)
+  if (s->fullname () == nullptr)
     {
       scoped_fd fd = open_source_file (s);
 
@@ -1254,13 +1253,13 @@ symtab_to_fullname (struct symtab *s)
 	    fullname.reset (concat (s->compunit ()->dirname (), SLASH_STRING,
 				    s->filename, (char *) NULL));
 
-	  s->fullname = rewrite_source_path (fullname.get ()).release ();
-	  if (s->fullname == NULL)
-	    s->fullname = fullname.release ();
+	  s->set_fullname (rewrite_source_path (fullname.get ()));
+	  if (s->fullname () == nullptr)
+	    s->set_fullname (std::move (fullname));
 	}
     } 
 
-  return s->fullname;
+  return s->fullname ();
 }
 
 /* See commentary in source.h.  */

@@ -156,13 +156,7 @@ objfile::forget_cached_source_info ()
   for (compunit_symtab *cu : compunits ())
     {
       for (symtab *s : cu->filetabs ())
-	{
-	  if (s->fullname != NULL)
-	    {
-	      xfree (s->fullname);
-	      s->fullname = NULL;
-	    }
-	}
+	s->release_fullname ();
     }
 
   for (const auto &iter : qf)

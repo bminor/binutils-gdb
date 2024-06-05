@@ -811,8 +811,8 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 		    gdb_printf ("((struct symtab *) %s)\n",
 				host_address_to_string (symtab));
 		    gdb_printf ("\t  fullname %s\n",
-				symtab->fullname != NULL
-				? symtab->fullname
+				symtab->fullname () != nullptr
+				? symtab->fullname ()
 				: "(null)");
 		    gdb_printf ("\t  "
 				"linetable ((struct linetable *) %s)\n",
