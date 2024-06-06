@@ -339,10 +339,6 @@ struct linespec_parser
   struct completion_tracker *completion_tracker = nullptr;
 };
 
-/* A convenience macro for accessing the explicit location spec result
-   of the parser.  */
-#define PARSER_EXPLICIT(PPTR) (&((PPTR)->result).explicit_loc)
-
 /* Prototypes for local functions.  */
 
 static void iterate_over_file_blocks
@@ -1730,7 +1726,7 @@ linespec_parse_basic (linespec_parser *parser)
 
       /* Record the line offset and get the next token.  */
       name = copy_token_string (token);
-      PARSER_EXPLICIT (parser)->line_offset
+      parser->result.explicit_loc.line_offset
 	= linespec_parse_line_offset (name.get ());
 
       /* Get the next token.  */
@@ -1781,9 +1777,9 @@ linespec_parse_basic (linespec_parser *parser)
 	{
 	  completion_tracker tmp_tracker (false);
 	  const char *source_filename
-	    = PARSER_EXPLICIT (parser)->source_filename.get ();
+	    = parser->result.explicit_loc.source_filename.get ();
 	  symbol_name_match_type match_type
-	    = PARSER_EXPLICIT (parser)->func_name_match_type;
+	    = parser->result.explicit_loc.func_name_match_type;
 
 	  linespec_complete_function (tmp_tracker,
 				      parser->completion_word,
@@ -1801,7 +1797,7 @@ linespec_parse_basic (linespec_parser *parser)
 	    }
 	}
 
-      PARSER_EXPLICIT (parser)->function_name = std::move (name);
+      parser->result.explicit_loc.function_name = std::move (name);
     }
   else
     {
@@ -1811,14 +1807,14 @@ linespec_parse_basic (linespec_parser *parser)
       /* Try looking it up as a function/method.  */
       find_linespec_symbols (&parser->state,
 			     parser->result.file_symtabs, name.get (),
-			     PARSER_EXPLICIT (parser)->func_name_match_type,
+			     parser->result.explicit_loc.func_name_match_type,
 			     &symbols, &minimal_symbols);
 
       if (!symbols.empty () || !minimal_symbols.empty ())
 	{
 	  parser->result.function_symbols = std::move (symbols);
 	  parser->result.minimal_symbols = std::move (minimal_symbols);
-	  PARSER_EXPLICIT (parser)->function_name = std::move (name);
+	  parser->result.explicit_loc.function_name = std::move (name);
 	}
       else
 	{
@@ -1832,20 +1828,21 @@ linespec_parse_basic (linespec_parser *parser)
 	    {
 	      parser->result.labels.label_symbols = std::move (labels);
 	      parser->result.labels.function_symbols = std::move (symbols);
-	      PARSER_EXPLICIT (parser)->label_name = std::move (name);
+	      parser->result.explicit_loc.label_name = std::move (name);
 	    }
 	  else if (token.type == LSTOKEN_STRING
 		   && *LS_TOKEN_STOKEN (token).ptr == '$')
 	    {
 	      /* User specified a convenience variable or history value.  */
-	      PARSER_EXPLICIT (parser)->line_offset
+	      parser->result.explicit_loc.line_offset
 		= linespec_parse_variable (&parser->state, name.get ());
 
-	      if (PARSER_EXPLICIT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN)
+	      if (parser->result.explicit_loc.line_offset.sign
+		  == LINE_OFFSET_UNKNOWN)
 		{
 		  /* The user-specified variable was not valid.  Do not
 		     throw an error here.  parse_linespec will do it for us.  */
-		  PARSER_EXPLICIT (parser)->function_name = std::move (name);
+		  parser->result.explicit_loc.function_name = std::move (name);
 		  return;
 		}
 	    }
@@ -1855,7 +1852,7 @@ linespec_parse_basic (linespec_parser *parser)
 		 an error here.  parse_linespec will do it for us.  */
 
 	      /* Save a copy of the name we were trying to lookup.  */
-	      PARSER_EXPLICIT (parser)->function_name = std::move (name);
+	      parser->result.explicit_loc.function_name = std::move (name);
 	      return;
 	    }
 	}
@@ -1883,7 +1880,7 @@ linespec_parse_basic (linespec_parser *parser)
 	  set_completion_after_number (parser, linespec_complete_what::KEYWORD);
 
 	  name = copy_token_string (token);
-	  PARSER_EXPLICIT (parser)->line_offset
+	  parser->result.explicit_loc.line_offset
 	    = linespec_parse_line_offset (name.get ());
 
 	  /* Get the next token.  */
@@ -1939,13 +1936,13 @@ linespec_parse_basic (linespec_parser *parser)
 		{
 		  parser->result.labels.label_symbols = std::move (labels);
 		  parser->result.labels.function_symbols = std::move (symbols);
-		  PARSER_EXPLICIT (parser)->label_name = std::move (name);
+		  parser->result.explicit_loc.label_name = std::move (name);
 		}
 	      else
 		{
 		  /* We don't know what it was, but it isn't a label.  */
 		  undefined_label_error
-		    (PARSER_EXPLICIT (parser)->function_name.get (),
+		    (parser->result.explicit_loc.function_name.get (),
 		     name.get ());
 		}
 
@@ -1965,7 +1962,7 @@ linespec_parse_basic (linespec_parser *parser)
 	      /* Record the line offset and get the next token.  */
 	      name = copy_token_string (token);
 
-	      PARSER_EXPLICIT (parser)->line_offset
+	      parser->result.explicit_loc.line_offset
 		= linespec_parse_line_offset (name.get ());
 
 	      /* Get the next token.  */
@@ -2474,7 +2471,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
   parser->lexer.stream = arg;
   parser->completion_word = arg;
   parser->complete_what = linespec_complete_what::FUNCTION;
-  PARSER_EXPLICIT (parser)->func_name_match_type = match_type;
+  parser->result.explicit_loc.func_name_match_type = match_type;
 
   /* Initialize the default symtab and line offset.  */
   initialize_defaults (&parser->state.default_symtab,
@@ -2512,12 +2509,12 @@ parse_linespec (linespec_parser *parser, const char *arg,
 
       /* User specified a convenience variable or history value.  */
       gdb::unique_xmalloc_ptr<char> var = copy_token_string (token);
-      PARSER_EXPLICIT (parser)->line_offset
+      parser->result.explicit_loc.line_offset
 	= linespec_parse_variable (&parser->state, var.get ());
 
       /* If a line_offset wasn't found (VAR is the name of a user
 	 variable/function), then skip to normal symbol processing.  */
-      if (PARSER_EXPLICIT (parser)->line_offset.sign != LINE_OFFSET_UNKNOWN)
+      if (parser->result.explicit_loc.line_offset.sign != LINE_OFFSET_UNKNOWN)
 	{
 	  /* Consume this token.  */
 	  linespec_lexer_consume_token (parser);
@@ -2561,7 +2558,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
       if (file_exception.reason >= 0)
 	{
 	  /* Symtabs were found for the file.  Record the filename.  */
-	  PARSER_EXPLICIT (parser)->source_filename = std::move (user_filename);
+	  parser->result.explicit_loc.source_filename = std::move (user_filename);
 
 	  /* Get the next token.  */
 	  token = linespec_lexer_consume_token (parser);
@@ -2597,7 +2594,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
   if (parser->completion_tracker == NULL
       && parser->result.function_symbols.empty ()
       && parser->result.labels.label_symbols.empty ()
-      && PARSER_EXPLICIT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN
+      && parser->result.explicit_loc.line_offset.sign == LINE_OFFSET_UNKNOWN
       && parser->result.minimal_symbols.empty ())
     {
       /* The linespec didn't parse.  Re-throw the file exception if
@@ -2607,8 +2604,8 @@ parse_linespec (linespec_parser *parser, const char *arg,
 
       /* Otherwise, the symbol is not found.  */
       symbol_not_found_error
-	(PARSER_EXPLICIT (parser)->function_name.get (),
-	 PARSER_EXPLICIT (parser)->source_filename.get ());
+	(parser->result.explicit_loc.function_name.get (),
+	 parser->result.explicit_loc.source_filename.get ());
     }
 
  convert_to_sals:
@@ -2670,9 +2667,9 @@ linespec_parser::linespec_parser (int flags,
 				  struct linespec_result *canonical)
 {
   lexer.current.type = LSTOKEN_CONSUMED;
-  PARSER_EXPLICIT (this)->func_name_match_type
+  result.explicit_loc.func_name_match_type
     = symbol_name_match_type::WILD;
-  PARSER_EXPLICIT (this)->line_offset.sign = LINE_OFFSET_UNKNOWN;
+  result.explicit_loc.line_offset.sign = LINE_OFFSET_UNKNOWN;
   linespec_state_constructor (&state, flags, language,
 			      search_pspace,
 			      default_symtab, default_line, canonical);
@@ -2771,7 +2768,7 @@ complete_linespec_component (linespec_parser *parser,
       completion_list fn_list;
 
       symbol_name_match_type match_type
-	= PARSER_EXPLICIT (parser)->func_name_match_type;
+	= parser->result.explicit_loc.func_name_match_type;
       linespec_complete_function (tracker, text, match_type, source_filename);
       if (source_filename == NULL)
 	{
@@ -2873,7 +2870,7 @@ linespec_complete (completion_tracker &tracker, const char *text,
 
   linespec_parser parser (0, current_language, NULL, NULL, 0, NULL);
   parser.lexer.saved_arg = text;
-  PARSER_EXPLICIT (&parser)->func_name_match_type = match_type;
+  parser.result.explicit_loc.func_name_match_type = match_type;
   PARSER_STREAM (&parser) = text;
 
   parser.completion_tracker = &tracker;
@@ -2924,7 +2921,7 @@ linespec_complete (completion_tracker &tracker, const char *text,
     {
       parser.complete_what = linespec_complete_what::NOTHING;
 
-      const char *func_name = PARSER_EXPLICIT (&parser)->function_name.get ();
+      const char *func_name = parser.result.explicit_loc.function_name.get ();
 
       std::vector<block_symbol> function_symbols;
       std::vector<bound_minimal_symbol> minimal_symbols;
@@ -2984,7 +2981,7 @@ linespec_complete (completion_tracker &tracker, const char *text,
 	(&parser, tracker,
 	 parser.completion_word,
 	 linespec_complete_what::FUNCTION,
-	 PARSER_EXPLICIT (&parser)->source_filename.get ());
+	 parser.result.explicit_loc.source_filename.get ());
 
       parser.complete_what = linespec_complete_what::NOTHING;
 
@@ -3028,7 +3025,7 @@ linespec_complete (completion_tracker &tracker, const char *text,
     (&parser, tracker,
      parser.completion_word,
      parser.complete_what,
-     PARSER_EXPLICIT (&parser)->source_filename.get ());
+     parser.result.explicit_loc.source_filename.get ());
 
   /* If we're past the "filename:function:label:offset" linespec, and
      didn't find any match, then assume the user might want to create
