@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "dwarf2/call-site.h"
+#include "exceptions.h"
 #include "symtab.h"
 #include "event-top.h"
 #include "gdbtypes.h"
@@ -74,6 +75,7 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/common-utils.h"
 #include <optional>
+#include <unordered_set>
 
 /* Forward declarations for local functions.  */
 
@@ -5587,7 +5589,6 @@ info_main_command (const char *args, int from_tty)
 static void
 rbreak_command (const char *regexp, int from_tty)
 {
-  std::string string;
   gdb::unique_xmalloc_ptr<char> file_name;
 
   if (regexp != nullptr)
@@ -5615,38 +5616,46 @@ rbreak_command (const char *regexp, int from_tty)
     spec.add_filename (std::move (file_name));
   std::vector<symbol_search> symbols = spec.search ();
 
+  std::unordered_set<std::string> seen_names;
   scoped_rbreak_breakpoints finalize;
   int err_count = 0;
 
   for (const symbol_search &p : symbols)
     {
-      try
+      std::string name;
+      if (p.msymbol.minsym == nullptr)
 	{
-	  if (p.msymbol.minsym == NULL)
+	  if (file_name != nullptr)
 	    {
 	      struct symtab *symtab = p.symbol->symtab ();
 	      const char *fullname = symtab_to_fullname (symtab);
-
-	      string = string_printf ("%s:'%s'", fullname,
-				      p.symbol->linkage_name ());
-	      break_command (&string[0], from_tty);
-	      print_symbol_info (p.symbol, p.block, nullptr);
+	      name = string_printf ("%s:'%s'", fullname,
+				    p.symbol->linkage_name ());
 	    }
 	  else
-	    {
-	      string = string_printf ("'%s'",
-				      p.msymbol.minsym->linkage_name ());
+	    name = p.symbol->linkage_name ();
+	}
+      else
+	name = p.msymbol.minsym->linkage_name ();
 
-	      break_command (&string[0], from_tty);
-	      gdb_printf ("<function, no debug info> %s;\n",
-			  p.msymbol.minsym->print_name ());
-	    }
+      if (!seen_names.insert (name).second)
+	continue;
+
+      try
+	{
+	  break_command (name.c_str (), from_tty);
 	}
       catch (const gdb_exception_error &ex)
 	{
 	  exception_print (gdb_stderr, ex);
 	  ++err_count;
+	  continue;
 	}
+
+      if (p.msymbol.minsym == nullptr)
+	print_symbol_info (p.symbol, p.block, nullptr);
+      else
+	gdb_printf ("<function, no debug info> %s;\n", name.c_str ());
     }
 
   int first_bp = finalize.first_breakpoint ();
