@@ -275,8 +275,6 @@ struct linespec_token
   } data;
 };
 
-#define LS_TOKEN_STOKEN(TOK) (TOK).data.string
-
 /* An instance of the linespec parser.  */
 
 struct linespec_parser
@@ -426,19 +424,19 @@ static int
 linespec_lexer_lex_number (linespec_parser *parser, linespec_token *tokenp)
 {
   tokenp->type = LSTOKEN_NUMBER;
-  LS_TOKEN_STOKEN (*tokenp).length = 0;
-  LS_TOKEN_STOKEN (*tokenp).ptr = parser->lexer.stream;
+  tokenp->data.string.length = 0;
+  tokenp->data.string.ptr = parser->lexer.stream;
 
   /* Keep any sign at the start of the stream.  */
   if (*parser->lexer.stream == '+' || *parser->lexer.stream == '-')
     {
-      ++LS_TOKEN_STOKEN (*tokenp).length;
+      ++tokenp->data.string.length;
       ++(parser->lexer.stream);
     }
 
   while (isdigit (*parser->lexer.stream))
     {
-      ++LS_TOKEN_STOKEN (*tokenp).length;
+      ++tokenp->data.string.length;
       ++(parser->lexer.stream);
     }
 
@@ -449,7 +447,7 @@ linespec_lexer_lex_number (linespec_parser *parser, linespec_token *tokenp)
       && *parser->lexer.stream != ':'
       && !strchr (linespec_quote_characters, *parser->lexer.stream))
     {
-      parser->lexer.stream = LS_TOKEN_STOKEN (*tokenp).ptr;
+      parser->lexer.stream = tokenp->data.string.ptr;
       return 0;
     }
 
@@ -573,8 +571,8 @@ copy_token_string (linespec_token token)
   if (token.type == LSTOKEN_KEYWORD)
     return make_unique_xstrdup (token.data.keyword);
 
-  str = LS_TOKEN_STOKEN (token).ptr;
-  s = remove_trailing_whitespace (str, str + LS_TOKEN_STOKEN (token).length);
+  str = token.data.string.ptr;
+  s = remove_trailing_whitespace (str, str + token.data.string.length);
 
   return gdb::unique_xmalloc_ptr<char> (savestring (str, s - str));
 }
@@ -681,8 +679,8 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	    {
 	      /* The input is an Ada operator.  Return the quoted string
 		 as-is.  */
-	      LS_TOKEN_STOKEN (token).ptr = parser->lexer.stream;
-	      LS_TOKEN_STOKEN (token).length = len;
+	      token.data.string.ptr = parser->lexer.stream;
+	      token.data.string.length = len;
 	      parser->lexer.stream += len;
 	      return token;
 	    }
@@ -695,7 +693,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
       ++(parser->lexer.stream);
 
       /* Mark the start of the string.  */
-      LS_TOKEN_STOKEN (token).ptr = parser->lexer.stream;
+      token.data.string.ptr = parser->lexer.stream;
 
       /* Skip to the ending quote.  */
       end = skip_quote_char (parser->lexer.stream, quote_char);
@@ -717,13 +715,13 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	  token.type = LSTOKEN_STRING;
 	  while (*parser->lexer.stream != '\0')
 	    parser->lexer.stream++;
-	  LS_TOKEN_STOKEN (token).length = parser->lexer.stream - 1 - start;
+	  token.data.string.length = parser->lexer.stream - 1 - start;
 	}
       else
 	{
 	  /* Skip over the ending quote and mark the length of the string.  */
 	  parser->lexer.stream = (char *) ++end;
-	  LS_TOKEN_STOKEN (token).length = parser->lexer.stream - 2 - start;
+	  token.data.string.length = parser->lexer.stream - 2 - start;
 	}
     }
   else
@@ -749,8 +747,8 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		 say, a function name.  */
 	      if (linespec_lexer_lex_keyword (p) != NULL)
 		{
-		  LS_TOKEN_STOKEN (token).ptr = start;
-		  LS_TOKEN_STOKEN (token).length
+		  token.data.string.ptr = start;
+		  token.data.string.length
 		    = parser->lexer.stream - start;
 		  return token;
 		}
@@ -763,8 +761,8 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	     string is complete;  return the token.  */
 	  if (*parser->lexer.stream == 0)
 	    {
-	      LS_TOKEN_STOKEN (token).ptr = start;
-	      LS_TOKEN_STOKEN (token).length = parser->lexer.stream - start;
+	      token.data.string.ptr = start;
+	      token.data.string.length = parser->lexer.stream - start;
 	      return token;
 	    }
 	  else if (parser->lexer.stream[0] == ':')
@@ -787,8 +785,8 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	      else if ((parser->lexer.stream - start) != 1
 		       || !IS_DIR_SEPARATOR (parser->lexer.stream[1]))
 		{
-		  LS_TOKEN_STOKEN (token).ptr = start;
-		  LS_TOKEN_STOKEN (token).length
+		  token.data.string.ptr = start;
+		  token.data.string.length
 		    = parser->lexer.stream - start;
 		  return token;
 		}
@@ -799,8 +797,8 @@ linespec_lexer_lex_string (linespec_parser *parser)
 			      *parser->lexer.stream)
 		   && is_closing_quote_enclosed (parser->lexer.stream))
 	    {
-	      LS_TOKEN_STOKEN (token).ptr = start;
-	      LS_TOKEN_STOKEN (token).length = parser->lexer.stream - start;
+	      token.data.string.ptr = start;
+	      token.data.string.length = parser->lexer.stream - start;
 	      return token;
 	    }
 	  /* Because commas may terminate a linespec and appear in
@@ -846,8 +844,8 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		 function(thread<tab>" in completion mode.  */
 	      if (*end == '\0')
 		{
-		  LS_TOKEN_STOKEN (token).ptr = start;
-		  LS_TOKEN_STOKEN (token).length
+		  token.data.string.ptr = start;
+		  token.data.string.length
 		    = parser->lexer.stream - start;
 		  return token;
 		}
@@ -873,8 +871,8 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		}
 
 	      /* Comma terminates the string.  */
-	      LS_TOKEN_STOKEN (token).ptr = start;
-	      LS_TOKEN_STOKEN (token).length = parser->lexer.stream - start;
+	      token.data.string.ptr = start;
+	      token.data.string.length = parser->lexer.stream - start;
 	      return token;
 	    }
 
@@ -953,9 +951,9 @@ linespec_lexer_lex_one (linespec_parser *parser)
 
 	case ',':
 	  parser->lexer.current.type = LSTOKEN_COMMA;
-	  LS_TOKEN_STOKEN (parser->lexer.current).ptr
+	  parser->lexer.current.data.string.ptr
 	    = parser->lexer.stream;
-	  LS_TOKEN_STOKEN (parser->lexer.current).length = 1;
+	  parser->lexer.current.data.string.length = 1;
 	  ++(parser->lexer.stream);
 	  break;
 
@@ -1004,7 +1002,7 @@ linespec_lexer_consume_token (linespec_parser *parser)
     {
       /* Advance the completion word past a potential initial
 	 quote-char.  */
-      parser->completion_word = LS_TOKEN_STOKEN (parser->lexer.current).ptr;
+      parser->completion_word = parser->lexer.current.data.string.ptr;
     }
   else if (advance_word)
     {
@@ -1787,7 +1785,7 @@ linespec_parse_basic (linespec_parser *parser)
 	  if (tmp_tracker.have_completions ())
 	    {
 	      parser->lexer.stream++;
-	      LS_TOKEN_STOKEN (token).length++;
+	      token.data.string.length++;
 
 	      name.reset (savestring (parser->completion_word,
 				      (parser->lexer.stream
@@ -1829,7 +1827,7 @@ linespec_parse_basic (linespec_parser *parser)
 	      parser->result.explicit_loc.label_name = std::move (name);
 	    }
 	  else if (token.type == LSTOKEN_STRING
-		   && *LS_TOKEN_STOKEN (token).ptr == '$')
+		   && *token.data.string.ptr == '$')
 	    {
 	      /* User specified a convenience variable or history value.  */
 	      parser->result.explicit_loc.line_offset
@@ -1899,12 +1897,12 @@ linespec_parse_basic (linespec_parser *parser)
 	     garbage.  */
 	  if (parser->completion_quote_char == '\0')
 	    {
-	      const char *ptr = LS_TOKEN_STOKEN (token).ptr;
-	      for (size_t i = 0; i < LS_TOKEN_STOKEN (token).length; i++)
+	      const char *ptr = token.data.string.ptr;
+	      for (size_t i = 0; i < token.data.string.length; i++)
 		{
 		  if (ptr[i] == ' ')
 		    {
-		      LS_TOKEN_STOKEN (token).length = i;
+		      token.data.string.length = i;
 		      parser->lexer.stream = skip_spaces (ptr + i + 1);
 		      break;
 		    }
@@ -2499,7 +2497,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
   linespec_token token = linespec_lexer_consume_token (parser);
 
   /* It must be either LSTOKEN_STRING or LSTOKEN_NUMBER.  */
-  if (token.type == LSTOKEN_STRING && *LS_TOKEN_STOKEN (token).ptr == '$')
+  if (token.type == LSTOKEN_STRING && *token.data.string.ptr == '$')
     {
       /* A NULL entry means to use GLOBAL_DEFAULT_SYMTAB.  */
       if (parser->completion_tracker == NULL)
