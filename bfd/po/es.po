@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: bfd 2.41.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
 "POT-Creation-Date: 2024-01-15 14:55+0000\n"
-"PO-Revision-Date: 2024-05-27 15:10+0200\n"
+"PO-Revision-Date: 2024-06-05 12:52+0200\n"
 "Last-Translator: Rodrigo Lledó Milanca <rodhos92@gmail.com>\n"
 "Language-Team: Spanish <es@tp.org.es>\n"
 "Language: es\n"
@@ -27,26 +27,22 @@ msgid "%pB: unsupported relocation type exported: %#x"
 msgstr "%pB: tipo de reubicación 0x%02x no admitido"
 
 #: aout-cris.c:242
-#, fuzzy, c-format
-#| msgid "%B: unsupported relocation type %s"
+#, c-format
 msgid "%pB: unsupported relocation type imported: %#x"
-msgstr "%pB: no se admite el tipo de reubicación %s"
+msgstr "%pB: se ha importado un tipo de reubicación no admitido: %#x"
 
 #: aout-cris.c:254
-#, fuzzy, c-format
-#| msgid "%B: Bad relocation record imported: %d"
+#, c-format
 msgid "%pB: bad relocation record imported: %d"
-msgstr "%pB: equivocación de registro reubicable importado: %d"
+msgstr "%pB: se ha importado un registro de reubicaciones incorrecto: %d"
 
 #: aoutx.h:1265 aoutx.h:1612 pdp11.c:1237 pdp11.c:1510
-#, fuzzy, c-format
-#| msgid "%B: can not represent section `%A' in a.out object file format"
+#, c-format
 msgid "%pB: can not represent section `%pA' in a.out object file format"
-msgstr "%pB: no se puede representar la sección «%pA» dentro del formato de fichero objeto a.out"
+msgstr "%pB: no se puede representar la sección «%pA» en un formato de fichero objeto a.out"
 
 #: aoutx.h:1576 pdp11.c:1482
-#, fuzzy, c-format
-#| msgid "%B: can not represent section for symbol `%s' in a.out object file format"
+#, c-format
 msgid "%pB: can not represent section for symbol `%s' in a.out object file format"
 msgstr "%pB: no se puede representar la sección para el símbolo «%s» en el formato de fichero objeto a.out"
 
@@ -55,10 +51,9 @@ msgid "*unknown*"
 msgstr "*desconocido*"
 
 #: aoutx.h:1715 pdp11.c:1578
-#, fuzzy, c-format
-#| msgid "%B: invalid string offset %u >= %Lu for section `%s'"
+#, c-format
 msgid "%pB: invalid string offset %<PRIu64> >= %<PRIu64>"
-msgstr "%pB: desplazamiento de cadena no válido %u >= %Lu para la sección «%s»"
+msgstr "%pB: desplazamiento de cadena no válido %<PRIu64> >= %<PRIu64>"
 
 #: aoutx.h:1963
 #, fuzzy, c-format
@@ -67,16 +62,14 @@ msgid "%pB: unsupported AOUT relocation size: %d"
 msgstr "%pB: tipo de reubicación %d no admitido"
 
 #: aoutx.h:2407 aoutx.h:2425 pdp11.c:2059
-#, fuzzy, c-format
-#| msgid "%B: attempt to write out unknown reloc type"
+#, c-format
 msgid "%pB: attempt to write out unknown reloc type"
-msgstr "%pB: intenta escribir fuera de tipo de reubicación desconocida"
+msgstr "%pB: intento de escribir un tipo de reubicación desconocido"
 
 #: aoutx.h:4080 pdp11.c:3443
-#, fuzzy, c-format
-#| msgid "%B: unsupported relocation type %s"
+#, c-format
 msgid "%pB: unsupported relocation type"
-msgstr "%pB: no se admite el tipo de reubicación %s"
+msgstr "%pB: no se admite el tipo de reubicación"
 
 #. Unknown relocation.
 #: aoutx.h:4400 coff-alpha.c:601 coff-mips.c:356 coff-rs6000.c:3050
@@ -109,10 +102,9 @@ msgstr "%pB: no se admite el tipo de reubicación %s"
 #: elfxx-ia64.c:324 elfxx-loongarch.c:1895 elfxx-riscv.c:989 elfxx-sparc.c:589
 #: elfxx-sparc.c:639 elfxx-tilegx.c:907 elfxx-tilegx.c:947 elfnn-aarch64.c:2215
 #: elfnn-aarch64.c:2313 elfnn-ia64.c:214 elfnn-ia64.c:3821 elfnn-kvx.c:259
-#, fuzzy, c-format
-#| msgid "%B: unsupported relocation type %s"
+#, c-format
 msgid "%pB: unsupported relocation type %#x"
-msgstr "%pB: no se admite el tipo de reubicación %s"
+msgstr "%pB: no se admite el tipo de reubicación %#x"
 
 #: aoutx.h:5427 pdp11.c:3866
 #, c-format
@@ -136,10 +128,9 @@ msgid "warning: writing archive was slow: rewriting timestamp"
 msgstr "aviso: la escritura del fichero fue lenta: se reescribe la marca de tiempo\n"
 
 #: archive.c:2362 archive.c:2423 elflink.c:4800 linker.c:1434
-#, fuzzy, c-format
-#| msgid "%B: plugin needed to handle lto object"
+#, c-format
 msgid "%pB: plugin needed to handle lto object"
-msgstr "%pB: complementos requeridos para manipular objeto lto"
+msgstr "%pB: complemento necesario para manejar el objeto lto"
 
 # ¡Uff! Si utilizáramos file=archivo, esta traducción sería imposible. cfuga
 #: archive.c:2655
@@ -151,10 +142,8 @@ msgid "Writing updated armap timestamp"
 msgstr "Se escribe la marca temporal actualizada de ‘armap’"
 
 #: bfd.c:740
-#, fuzzy
-#| msgid "No error"
 msgid "no error"
-msgstr "No hay error"
+msgstr "no hay error"
 
 #: bfd.c:741
 #, fuzzy
@@ -163,10 +152,8 @@ msgid "system call error"
 msgstr "Error en llamada al sistema"
 
 #: bfd.c:742
-#, fuzzy
-#| msgid "Invalid bfd target"
 msgid "invalid bfd target"
-msgstr "Objetivo bfd no válido"
+msgstr "objetivo bfd no válido"
 
 #: bfd.c:743
 msgid "file in wrong format"
@@ -176,25 +163,19 @@ msgstr "fichero en formato incorrecto"
 #, fuzzy
 #| msgid "Archive object file in wrong format"
 msgid "archive object file in wrong format"
-msgstr "Fichero de ficheros objeto en formato equivocado"
+msgstr "Fichero de ficheros objeto en formato incorrecto"
 
 #: bfd.c:745
-#, fuzzy
-#| msgid "Invalid operation"
 msgid "invalid operation"
-msgstr "Operación no válida"
+msgstr "operación no válida"
 
 #: bfd.c:746
-#, fuzzy
-#| msgid "Memory exhausted"
 msgid "memory exhausted"
-msgstr "Memoria agotada"
+msgstr "memoria agotada"
 
 #: bfd.c:747
-#, fuzzy
-#| msgid "No symbols"
 msgid "no symbols"
-msgstr "No hay símbolos"
+msgstr "no hay símbolos"
 
 #: bfd.c:748
 #, fuzzy
@@ -203,36 +184,28 @@ msgid "archive has no index; run ranlib to add one"
 msgstr "Fichero no tiene índice; ejecute ranlib para añadir uno"
 
 #: bfd.c:749
-#, fuzzy
-#| msgid "No more archived files"
 msgid "no more archived files"
-msgstr "No hay más ficheros archivados"
+msgstr "no hay más ficheros archivados"
 
 #: bfd.c:750
-#, fuzzy
-#| msgid "Malformed archive"
 msgid "malformed archive"
-msgstr "Fichero malformado"
+msgstr "fichero mal formado"
 
 #: bfd.c:751
 msgid "DSO missing from command line"
 msgstr "Falta DSO en la línea de ordenes"
 
 #: bfd.c:752
-#, fuzzy
-#| msgid "File format not recognized"
 msgid "file format not recognized"
-msgstr "No se reconoce el formato del fichero"
+msgstr "no se reconoce el formato del fichero"
 
 #: bfd.c:753
 msgid "file format is ambiguous"
 msgstr "el formato del fichero es ambiguo"
 
 #: bfd.c:754
-#, fuzzy
-#| msgid "Section has no contents"
 msgid "section has no contents"
-msgstr "La sección no tiene contenido"
+msgstr "la sección no tiene contenidos"
 
 #: bfd.c:755
 #, fuzzy
@@ -250,7 +223,7 @@ msgstr "Un símbolo requiere de una sección de depuración, la cual no existe"
 #, fuzzy
 #| msgid "Bad value"
 msgid "bad value"
-msgstr "Valor equivocado"
+msgstr "Valor incorrecto"
 
 #: bfd.c:758
 msgid "file truncated"
@@ -312,20 +285,14 @@ msgid "warning: writing section `%pA' at huge (ie negative) file offset"
 msgstr "aviso: escribiendo sección «%pA» en desplazamiento de fichero enorme (pe negativo)"
 
 #: cache.c:275
-#, fuzzy, c-format
-#| msgid "reopening %B: %s\n"
+#, c-format
 msgid "reopening %pB: %s"
-msgstr "se reabre %pB: %s\n"
+msgstr "reabriendo %pB: %s"
 
 #: coff-alpha.c:450
-#, fuzzy, c-format
-#| msgid ""
-#| "%B: Cannot handle compressed Alpha binaries.\n"
-#| "   Use compiler flags, or objZ, to generate uncompressed binaries."
+#, c-format
 msgid "%pB: cannot handle compressed Alpha binaries; use compiler flags, or objZ, to generate uncompressed binaries"
-msgstr ""
-"%pB: No se pueden manejar binarios Alpha comprimidos.\n"
-"   Emplee opciones del compilador, o objZ, para generar binarios sin comprimir."
+msgstr "%pB: no se pueden manejar binarios Alpha comprimidos. Use marcas del compilador, o objZ, para generar binarios sin comprimir"
 
 #: coff-alpha.c:867 coff-alpha.c:894 coff-alpha.c:2004 coff-mips.c:948
 msgid "GP relative relocation used when GP not defined"
@@ -389,16 +356,14 @@ msgid "%pB: unsupported swap_aux_out for storage class %#x"
 msgstr "%pB: unsupported swap_aux_out for storage class %#x"
 
 #: coff-rs6000.c:3140
-#, fuzzy, c-format
-#| msgid "%B: TOC reloc at %#Lx to symbol `%s' with no TOC entry"
+#, c-format
 msgid "%pB: TOC reloc at %#<PRIx64> to symbol `%s' with no TOC entry"
-msgstr "%pB: reubicación de TOC en %#<PRIx64> al símbolo «%s» sin ninguna entrada TOC"
+msgstr "%pB: reubicación TOC en %#<PRIx64> al símbolo «%s» sin ninguna entrada TOC"
 
 #: coff-rs6000.c:3264 coff64-rs6000.c:848
-#, fuzzy, c-format
-#| msgid "%B: unable to find name for empty section"
+#, c-format
 msgid "Unable to find the stub entry targeting %s"
-msgstr "%pB: no se puede encontrar nombre para sección vacía"
+msgstr "No se puede encontrar la entrada de stub con objetivo %s"
 
 #: coff-rs6000.c:3379
 #, c-format
@@ -416,10 +381,9 @@ msgid "%pB: relocation (%d) at 0x%<PRIx64> has wrong r_rsize (0x%x)\n"
 msgstr "%pB: la reubicación (%d) en 0x%<PRIx64> tiene r_rsize erróneo (0x%x)\n"
 
 #: coff-rs6000.c:4060 coff64-rs6000.c:2030
-#, fuzzy, c-format
-#| msgid "%B: symbol `%s' has unrecognized smclas %d"
+#, c-format
 msgid "%pB: symbol `%s' has unrecognized smclas %d"
-msgstr "%pB: el símbolo «%s» tiene smclas %d que no se reconoce"
+msgstr "%pB: el símbolo «%s» tiene smclas %d no reconocidas"
 
 #: coff-sh.c:781 elf32-sh.c:521
 #, c-format
@@ -462,16 +426,14 @@ msgid "%pB: %#<PRIx64>: fatal: reloc overflow while relaxing"
 msgstr "%pB: %#<PRIx64>: fatal: desbordamiento de reubicación durante la relajación"
 
 #: coff-sh.c:1443
-#, fuzzy, c-format
-#| msgid "%B: fatal: generic symbols retrieved before relaxing"
+#, c-format
 msgid "%pB: fatal: generic symbols retrieved before relaxing"
-msgstr "%pB: fatal: símbolos genéricos obtenidos antes de relajar"
+msgstr "%pB: fatal: se han recuperado símbolos genéricos antes de relajar"
 
 #: coff-sh.c:2773 cofflink.c:2947
-#, fuzzy, c-format
-#| msgid "%B: illegal symbol index %ld in relocs"
+#, c-format
 msgid "%pB: illegal symbol index %ld in relocs"
-msgstr "%pB: índice simbólico %ld ilegal en reubicaciones"
+msgstr "%pB: índice de símbolos %ld ilegal en reubicaciones"
 
 #: coff-tic30.c:172 coff-tic4x.c:228 coff-tic54x.c:338 coff-z80.c:325
 #: coff-z8k.c:188 coffcode.h:5314
@@ -499,10 +461,9 @@ msgid "%pB: relocation (%d) at (0x%<PRIx64>) has wrong r_rsize (0x%x)\n"
 msgstr "%pB: la reubicación (%d) en (0x%<PRIx64>) tiene r_rsize erróneo (0x%x)\n"
 
 #: coffcode.h:951
-#, fuzzy, c-format
-#| msgid "%B: unable to load COMDAT section name"
+#, c-format
 msgid "%pB: unable to load COMDAT section name"
-msgstr "%pB: incapaz de cargar nombre de sección COMDAT"
+msgstr "%pB: incapaz de cargar el nombre de la sección COMDAT"
 
 #: coffcode.h:976
 #, c-format
@@ -510,10 +471,9 @@ msgid "%pB: warning: no symbol for section '%s' found"
 msgstr "%pB: aviso: no se ha encontrado ningún símbolo para la sección «%s»"
 
 #: coffcode.h:1148
-#, fuzzy, c-format
-#| msgid "%B: error: unexpected symbol '%s' in COMDAT section"
+#, c-format
 msgid "%pB: error: unexpected symbol '%s' in COMDAT section"
-msgstr "%pB: error: símbolo «%s» sin esperado en la sección COMDAT"
+msgstr "%pB: error: símbolo «%s» inesperado en la sección COMDAT"
 
 #: coffcode.h:1159
 #, c-format
@@ -524,10 +484,9 @@ msgstr "%pB: aviso: el símbolo COMDAT «%s» no coincide con el nombre de secci
 #. variable as this will allow some .sys files generate by
 #. other toolchains to be processed.  See bugzilla issue 196.
 #: coffcode.h:1267
-#, fuzzy, c-format
-#| msgid "%B: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"
+#, c-format
 msgid "%pB: warning: ignoring section flag %s in section %s"
-msgstr "%pB: aviso: Se descarta la opción de sección IMAGE_SCN_MEM_NOT_PAGED en la sección %s"
+msgstr "%pB: aviso: ignorando la marca de sección %s en la sección %s"
 
 #: coffcode.h:1337
 #, c-format
@@ -541,10 +500,9 @@ msgid "%pB: overflow reloc count too small"
 msgstr "%pB:%d: contador de byte %d demasiado pequeño\n"
 
 #: coffcode.h:1963 coffcode.h:2028
-#, fuzzy, c-format
-#| msgid "%B: warning: claims to have 0xffff relocs, without overflow"
+#, c-format
 msgid "%pB: warning: claims to have 0xffff relocs, without overflow"
-msgstr "%pB: aviso: reclama tener reubicados 0xffff, sin desbordamiento superior"
+msgstr "%pB: aviso: afirma tener 0xffff reubicaciones, sin desbordamiento"
 
 #: coffcode.h:2411
 #, fuzzy, c-format
@@ -553,16 +511,14 @@ msgid "unrecognized TI COFF target id '0x%x'"
 msgstr "No se reconoce el id de objetivo COFF TI »0x%x»"
 
 #: coffcode.h:2690
-#, fuzzy, c-format
-#| msgid "%B: reloc against a non-existent symbol index: %ld"
+#, c-format
 msgid "%pB: reloc against a non-existent symbol index: %ld"
 msgstr "%pB: reubicación contra un índice de símbolo inexistente: %ld"
 
 #: coffcode.h:3162
-#, fuzzy, c-format
-#| msgid "%B: too many sections (%d)"
+#, c-format
 msgid "%pB: too many sections (%d)"
-msgstr "%pB: Demasiadas secciones (%d)"
+msgstr "%pB: demasiadas secciones (%d)"
 
 #: coffcode.h:3690
 #, fuzzy, c-format
@@ -587,10 +543,9 @@ msgid "%pB: warning: illegal symbol index 0x%lx in line number entry %d"
 msgstr "%pB: aviso: índice de símbolo 0x%lx ilegal en la entrada con número de línea %d"
 
 #: coffcode.h:4606
-#, fuzzy, c-format
-#| msgid "%B: warning: illegal symbol in line number entry %d"
+#, c-format
 msgid "%pB: warning: illegal symbol in line number entry %d"
-msgstr "%pB: aviso: símbolos ilegal en la entrada del número de línea %d"
+msgstr "%pB: aviso: símbolo ilegal en la entrada del número de línea %d"
 
 #: coffcode.h:4619
 #, c-format
@@ -598,10 +553,9 @@ msgid "%pB: warning: duplicate line number information for `%s'"
 msgstr "%pB: aviso: información de número de línea duplicada para «%s»"
 
 #: coffcode.h:5043
-#, fuzzy, c-format
-#| msgid "%B: Unrecognized storage class %d for %s symbol `%s'"
+#, c-format
 msgid "%pB: unrecognized storage class %d for %s symbol `%s'"
-msgstr "%pB: Clase de almacenamiento %d no reconocida para %s símbolo «%s»"
+msgstr "%pB: clase de almacenamiento %d no reconocida para el símbolo %s «%s»"
 
 #: coffcode.h:5183
 #, fuzzy, c-format
@@ -616,22 +570,20 @@ msgid "%pB: illegal relocation type %d at address %#<PRIx64>"
 msgstr "%pB: tipo de reubicación %d ilegal en dirección %#<PRIx64>"
 
 #: coffgen.c:255 elf.c:1226
-#, fuzzy, c-format
-#| msgid "%B: unable to get decompressed section %A"
+#, c-format
 msgid "%pB: unable to compress section %s"
-msgstr "%pB: no se puede obtener la sección %pA descomprimida"
+msgstr "%pB: no se puede comprimir la sección %s"
 
 #: coffgen.c:265 elf.c:1236
-#, fuzzy, c-format
-#| msgid "%B: unable to get decompressed section %A"
+#, c-format
 msgid "%pB: unable to decompress section %s"
-msgstr "%pB: no se puede obtener la sección %pA descomprimida"
+msgstr "%pB: no se puede descomprimir la sección %s"
 
 #: coffgen.c:1781
 #, fuzzy, c-format
 #| msgid "%B: bad string table size %Lu"
 msgid "%pB: bad string table size %<PRIu64>"
-msgstr "%pB: tamaño equivocado de segmento de cadenas %Lu"
+msgstr "%pB: tamaño incorrecto de segmento de cadenas %<PRIu64>"
 
 #: coffgen.c:1931 coffgen.c:1981 coffgen.c:2031 coffgen.c:2050 cofflink.c:2012
 #: elf.c:2478 xcofflink.c:5532
@@ -699,10 +651,9 @@ msgid "%pB: warning: %pA: line number overflow: %#x > 0xffff"
 msgstr "%pB: aviso: %pA: desbordamiento de número de línea: %#x > 0xffff"
 
 #: cofflink.c:3118
-#, fuzzy, c-format
-#| msgid "%B: bad reloc address %#Lx in section `%A'"
+#, c-format
 msgid "%pB: bad reloc address %#<PRIx64> in section `%pA'"
-msgstr "%pB: dirección de reubicación %#<PRIx64> equivocada en la sección «%pA»"
+msgstr "%pB: dirección de reubicación %#<PRIx64> incorrecta en la sección «%pA»"
 
 #: coffswap.h:826
 #, c-format
@@ -731,7 +682,7 @@ msgstr "aviso: no se puede actualizar el contenido de la sección %s en %pB"
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Can't find %s section."
 msgid "DWARF error: can't find %s section."
-msgstr "Error enano: no se puede encontrar la sección %s."
+msgstr "Error DWARF: no se puede encontrar la sección %s."
 
 #: dwarf2.c:713
 #, fuzzy, c-format
@@ -741,153 +692,152 @@ msgstr "%pB: sección agrupada »%pA» no tiene contenidos"
 
 #. PR 26946
 #: dwarf2.c:722
-#, fuzzy, c-format
-#| msgid "%B: error: Alignment power %d of section `%A' is too big"
+#, c-format
 msgid "DWARF error: section %s is too big"
-msgstr "%pB: error: alineamiento potencial %s de sección «%pA» es demasiado grande"
+msgstr "error DWARF: la sección %s es demasiado grande"
 
 #: dwarf2.c:757
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Offset (%llu) greater than or equal to %s size (%Lu)."
 msgid "DWARF error: offset (%<PRIu64>) greater than or equal to %s size (%<PRIu64>)"
-msgstr "Error enano: desplazamiento (%llu) es mayor que o igual que el tamaño de %s (%Lu)."
+msgstr "Error DWARF: desplazamiento (%llu) es mayor que o igual que el tamaño de %s (%<PRIu64>)."
 
 #: dwarf2.c:1504
 #, fuzzy
 #| msgid "Dwarf Error: Info pointer extends beyond end of attributes"
 msgid "DWARF error: info pointer extends beyond end of attributes"
-msgstr "Error enano: puntero info extiende más allá del final de atributos"
+msgstr "Error DWARF: puntero info extiende más allá del final de atributos"
 
 #: dwarf2.c:1696
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Invalid or unhandled FORM value: %#x."
 msgid "DWARF error: invalid or unhandled FORM value: %#x"
-msgstr "Error enano: valor de FORM no manipulado o no válido: %#x."
+msgstr "Error DWARF: valor de FORM no manipulado o no válido: %#x."
 
 #: dwarf2.c:2043
 #, fuzzy
 #| msgid "Dwarf Error: mangled line number section (bad file number)."
 msgid "DWARF error: mangled line number section (bad file number)"
-msgstr "Error enano: sección de números de línea revuelta (número de fichero equivocado)."
+msgstr "Error DWARF: sección de números de línea revuelta (número de fichero incorrecto)."
 
 #: dwarf2.c:2585
 #, fuzzy
 #| msgid "Dwarf Error: Zero format count."
 msgid "DWARF error: zero format count"
-msgstr "Error enano: formato contador cero."
+msgstr "Error DWARF: formato contador cero."
 
 #: dwarf2.c:2595
 #, fuzzy, c-format
 #| msgid "Dwarf Error: data count (%Lx) larger than buffer size."
 msgid "DWARF error: data count (%<PRIx64>) larger than buffer size"
-msgstr "Error enano: contador de datos (%Lx) más grande que tamaño de búfer."
+msgstr "Error DWARF: contador de datos (%#<PRIx64>) más grande que tamaño de búfer."
 
 #: dwarf2.c:2634
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Unknown format content type %Lu."
 msgid "DWARF error: unknown format content type %<PRIu64>"
-msgstr "Error enano: formato de tipo continente %Lu desconocido."
+msgstr "Error DWARF: formato de tipo continente %<PRIu64> desconocido."
 
 #: dwarf2.c:2707
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Line info section is too small (%Ld)"
 msgid "DWARF error: line info section is too small (%<PRId64>)"
-msgstr "Error enano: Línea informativa de sección es demasiado corta (%<PRId64>)"
+msgstr "Error DWARF: Línea informativa de sección es demasiado corta (%<PRId64>)"
 
 #: dwarf2.c:2734
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Line info data is bigger (%#Lx) than the space remaining in the section (%#lx)"
 msgid "DWARF error: line info data is bigger (%#<PRIx64>) than the space remaining in the section (%#lx)"
-msgstr "Error enano: información lineal de datos es más grande (%#<PRIx64>) que el espacio restante en la sección (%#lx)"
+msgstr "Error DWARF: información lineal de datos es más grande (%#<PRIx64>) que el espacio restante en la sección (%#lx)"
 
 #: dwarf2.c:2747
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Unhandled .debug_line version %d."
 msgid "DWARF error: unhandled .debug_line version %d"
-msgstr "Error enano: .debug_line versión %d sin manipular."
+msgstr "Error DWARF: .debug_line versión %d sin manipular."
 
 #: dwarf2.c:2756
 #, fuzzy
 #| msgid "Dwarf Error: Ran out of room reading prologue"
 msgid "DWARF error: ran out of room reading prologue"
-msgstr "Error enano: Agotado espacio leyendo prólogo"
+msgstr "Error DWARF: Agotado espacio leyendo prólogo"
 
 #: dwarf2.c:2772
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Line info unsupported segment selector size %u."
 msgid "DWARF error: line info unsupported segment selector size %u"
-msgstr "Error enano: línea informativa incompatible con segmento seleccionador de tamaño %u."
+msgstr "Error DWARF: línea informativa incompatible con segmento seleccionador de tamaño %u."
 
 #: dwarf2.c:2794
 #, fuzzy
 #| msgid "Dwarf Error: Invalid maximum operations per instruction."
 msgid "DWARF error: invalid maximum operations per instruction"
-msgstr "Error enano: máximo de operaciones por instrucción no válido."
+msgstr "Error DWARF: máximo de operaciones por instrucción no válido."
 
 #: dwarf2.c:2806
 #, fuzzy
 #| msgid "Dwarf Error: Ran out of room reading opcodes"
 msgid "DWARF error: ran out of room reading opcodes"
-msgstr "Error enano: Agotado de espacio leyendo opcodes"
+msgstr "Error DWARF: Agotado de espacio leyendo opcodes"
 
 #: dwarf2.c:2984
 #, fuzzy
 #| msgid "Dwarf Error: mangled line number section."
 msgid "DWARF error: mangled line number section"
-msgstr "Error enano: sección de números de línea revuelta."
+msgstr "Error DWARF: sección de números de línea revuelta."
 
 #: dwarf2.c:3455
 #, fuzzy
 #| msgid "Dwarf Error: Abstract instance recursion detected."
 msgid "DWARF error: abstract instance recursion detected"
-msgstr "Error enano: Recursión de instancia abstracta detectada."
+msgstr "Error DWARF: Recursión de instancia abstracta detectada."
 
 #: dwarf2.c:3489 dwarf2.c:3579
 #, fuzzy
 #| msgid "Dwarf Error: Invalid abstract instance DIE ref."
 msgid "DWARF error: invalid abstract instance DIE ref"
-msgstr "Error enano: instancia DIE abstracta no válida referenciada."
+msgstr "Error DWARF: instancia DIE abstracta no válida referenciada."
 
 #: dwarf2.c:3505
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Unable to read alt ref %llu."
 msgid "DWARF error: unable to read alt ref %<PRIu64>"
-msgstr "Error enano: incapaz de leer referencia alt %llu."
+msgstr "Error DWARF: incapaz de leer referencia alt %llu."
 
 #: dwarf2.c:3557
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Invalid abstract instance DIE ref."
 msgid "DWARF error: unable to locate abstract instance DIE ref %<PRIu64>"
-msgstr "Error enano: instancia DIE abstracta no válida referenciada."
+msgstr "Error DWARF: instancia DIE abstracta no válida referenciada."
 
 #: dwarf2.c:3594 dwarf2.c:3910 dwarf2.c:4483
 #, fuzzy, c-format
 #| msgid "Dwarf Error: Could not find abbrev number %u."
 msgid "DWARF error: could not find abbrev number %u"
-msgstr "Error enano: no se pudo encontrar el número de abreviatura %u."
+msgstr "Error DWARF: no se pudo encontrar el número de abreviatura %u."
 
 #: dwarf2.c:4183
 #, c-format
 msgid "DWARF error: could not find variable specification at offset 0x%lx"
-msgstr "Error de DWARF: no se pudo encontrar la especificación de la variable en el desplazamiento 0x%lx"
+msgstr "Error DWARF: no se pudo encontrar la especificación de la variable en el desplazamiento 0x%lx"
 
 #: dwarf2.c:4329 dwarf2.c:4583
 #, fuzzy
 #| msgid "Dwarf Error: DW_AT_comp_dir attribute encountered with a non-string form."
 msgid "DWARF error: DW_AT_comp_dir attribute encountered with a non-string form"
-msgstr "Error enano: atributo DW_AT_comp_dir encontrado con un formato no encadenado."
+msgstr "Error DWARF: atributo DW_AT_comp_dir encontrado con un formato no encadenado."
 
 #: dwarf2.c:4400
 #, fuzzy, c-format
 #| msgid "Dwarf Error: found dwarf version '%u', this reader only handles version 2, 3, 4 and 5 information."
 msgid "DWARF error: found dwarf version '%u', this reader only handles version 2, 3, 4 and 5 information"
-msgstr "Error enano: encontrada versión dwarf «%u», este lector solamente manipula información de las versiones 2, 3, 4 y 5."
+msgstr "Error DWARF: encontrada versión dwarf «%u», este lector solamente manipula información de las versiones 2, 3, 4 y 5."
 
 #: dwarf2.c:4447
 #, fuzzy, c-format
 #| msgid "Dwarf Error: found address size '%u', this reader can not handle sizes greater than '%u'."
 msgid "DWARF error: found address size '%u', this reader can not handle sizes greater than '%u'"
-msgstr "Error enano: se encontró el tamaño de dirección «%u», este lector no puede manipular tamaños más grandes que »%u»."
+msgstr "Error DWARF: se encontró el tamaño de dirección «%u», este lector no puede manipular tamaños más grandes que »%u»."
 
 #: ecoff.c:1016
 #, c-format
@@ -973,22 +923,18 @@ msgstr ""
 "      Tipo: %s"
 
 #: elf-attrs.c:417 elf-attrs.c:447 elf-attrs.c:623
-#, fuzzy
-#| msgid "error: %B: conflicting attributes %s.\n"
 msgid "error adding attribute"
-msgstr "error: %pB: conflicto de atributos %s.\n"
+msgstr "error al añadir atributo"
 
 #: elf-attrs.c:503
-#, fuzzy, c-format
-#| msgid "%B: error: attribute section length too small: %ld"
+#, c-format
 msgid "%pB: error: attribute section '%pA' too big: %#llx"
-msgstr "%pB: error: longitud de sección atributiva demasiado pequeña: %ld"
+msgstr "%pB: error: sección de atributo «%pA» demasiado grande: %#llx"
 
 #: elf-attrs.c:540
-#, fuzzy, c-format
-#| msgid "%B: error: attribute section length too small: %ld"
+#, c-format
 msgid "%pB: error: attribute section length too small: %ld"
-msgstr "%pB: error: longitud de sección atributiva demasiado pequeña: %ld"
+msgstr "%pB: error: longitud de sección de atributo demasiado pequeña: %ld"
 
 #: elf-attrs.c:673
 #, fuzzy, c-format
@@ -1151,10 +1097,9 @@ msgid "%P%F: --relax and -r may not be used together\n"
 msgstr "%P%F: --relax y -r no se pueden usar juntos\n"
 
 #: elf-properties.c:65
-#, fuzzy, c-format
-#| msgid "%B: out of memory in _bfd_elf_get_property"
+#, c-format
 msgid "%pB: out of memory in _bfd_elf_get_property"
-msgstr "%pB: memoria agotada en propiedad _bfd_elf_get_property"
+msgstr "%pB: memoria agotada en _bfd_elf_get_property"
 
 #: elf-properties.c:91
 #, fuzzy, c-format
@@ -1253,16 +1198,14 @@ msgstr "las secciones de entrada SFrame con diferentes versiones de formato evit
 
 #. PR 17512: file: f057ec89.
 #: elf.c:328
-#, fuzzy, c-format
-#| msgid "%B: attempt to load strings from a non-string section (number %d)"
+#, c-format
 msgid "%pB: attempt to load strings from a non-string section (number %d)"
-msgstr "%pB: intenta cargar cadenas desde una sección no-cadena (número %d)"
+msgstr "%pB: intento de cargar cadenas desde una sección sin cadenas (número %d)"
 
 #: elf.c:353
-#, fuzzy, c-format
-#| msgid "%B: invalid string offset %u >= %Lu for section `%s'"
+#, c-format
 msgid "%pB: invalid string offset %u >= %<PRIu64> for section `%s'"
-msgstr "%pB: desplazamiento de cadena no válido %u >= %Lu para la sección «%s»"
+msgstr "%pB: desplazamiento de cadena no válido %u >= %<PRIu64> para la sección «%s»"
 
 #: elf.c:517 elf32-arm.c:17731 elfnn-aarch64.c:8322 elfnn-loongarch.c:5102
 #, c-format
@@ -1270,22 +1213,19 @@ msgid "%pB symbol number %lu references nonexistent SHT_SYMTAB_SHNDX section"
 msgstr "%pB número simbólico %lu hace referencia a la sección inexistente SHT_SYMTAB_SHNDX"
 
 #: elf.c:679
-#, fuzzy, c-format
-#| msgid "%B: invalid size field in group section header: %#Lx"
+#, c-format
 msgid "%pB: invalid size field in group section header: %#<PRIx64>"
 msgstr "%pB: campo de tamaño no válido en el encabezado de la sección de grupo: %#<PRIx64>"
 
 #: elf.c:724
-#, fuzzy, c-format
-#| msgid "%B: invalid SHT_GROUP entry"
+#, c-format
 msgid "%pB: invalid entry in SHT_GROUP section [%u]"
-msgstr "%pB: entrada SHT_GROUP no válida"
+msgstr "%pB: entrada no válida en sección SHT_GROUP [%u]"
 
 #: elf.c:743
-#, fuzzy, c-format
-#| msgid "%B: no valid group sections found"
+#, c-format
 msgid "%pB: no valid group sections found"
-msgstr "%pB: encontradas secciones agrupadas no válidas"
+msgstr "%pB: no se han encontrado secciones de grupo válidas"
 
 #. See PR 21957 for a reproducer.
 #: elf.c:772
@@ -1295,10 +1235,9 @@ msgid "%pB: group section '%pA' has no contents"
 msgstr "%pB: sección agrupada »%pA» no tiene contenidos"
 
 #: elf.c:833
-#, fuzzy, c-format
-#| msgid "%B: no group info for section '%A'"
+#, c-format
 msgid "%pB: no group info for section '%pA'"
-msgstr "%pB: ningún grupo informado para sección «%pA»"
+msgstr "%pB: no hay información del grupo para la sección «%pA»"
 
 #: elf.c:885
 #, fuzzy, c-format
@@ -1313,10 +1252,9 @@ msgid "%pB: SHT_GROUP section [index %d] has no SHF_GROUP sections"
 msgstr "%pB: sección SHT_GROUP [índice %d] no tiene ninguna sección SHF_GROUP"
 
 #: elf.c:920
-#, fuzzy, c-format
-#| msgid "%B: section group entry number %u is corrupt"
+#, c-format
 msgid "%pB: section group entry number %u is corrupt"
-msgstr "%pB: número de entrada de grupo de sección %u está corrupto"
+msgstr "%pB: el número de entrada del grupo de sección %u está corrupto"
 
 #: elf.c:943
 #, fuzzy, c-format
@@ -1330,22 +1268,19 @@ msgid "%pB: section %s is compressed with zstd, but BFD is not built with zstd s
 msgstr "%pB: la sección %s está comprimida con zstd, pero BFD no está construido con soporte para zstd"
 
 #: elf.c:1440
-#, fuzzy, c-format
-#| msgid "%B: Invalid sh_link field (%d) in section number %d"
+#, c-format
 msgid "%pB: invalid sh_link field (%d) in section number %d"
 msgstr "%pB: campo sh_link no válido (%d) en número de sección %d"
 
 #: elf.c:1456
-#, fuzzy, c-format
-#| msgid "%B: Failed to find link section for section %d"
+#, c-format
 msgid "%pB: failed to find link section for section %d"
-msgstr "%pB: fallado para encontrar sección de enlace para sección %d"
+msgstr "%pB: no se pudo encontrar la sección de enlace para la sección %d"
 
 #: elf.c:1483
-#, fuzzy, c-format
-#| msgid "%B: Failed to find info section for section %d"
+#, c-format
 msgid "%pB: failed to find info section for section %d"
-msgstr "%pB: fallaba al encontrar sección de información para la sección %d"
+msgstr "%pB: no se pudo encontrar la sección de información para la sección %d"
 
 #: elf.c:1660
 #, c-format
@@ -1404,16 +1339,14 @@ msgid "%pB: warning: multiple dynamic symbol tables detected - ignoring the tabl
 msgstr "%pB: aviso: se han detectado varias tablas de símbolos dinámicos - ignorando la tabla en la sección %u"
 
 #: elf.c:2925
-#, fuzzy, c-format
-#| msgid "%B: invalid link %u for reloc section %s (index %u)"
+#, c-format
 msgid "%pB: invalid link %u for reloc section %s (index %u)"
 msgstr "%pB: enlace %u no válido para la sección de reubicación %s (índice %u)"
 
 #: elf.c:2982
-#, fuzzy, c-format
-#| msgid "%B: warning: %s relocation to %#Lx from %A section"
+#, c-format
 msgid "%pB: warning: secondary relocation section '%s' for section %pA found - ignoring"
-msgstr "%pB: aviso: reubicación %s a %#<PRIx64> desde sección %pA"
+msgstr "%pB: aviso: se ha encontrado una sección de reubicación secundaria «%s» para la sección %pA - ignorando"
 
 #: elf.c:3070 elf.c:3084 elf.c:3095 elf.c:3108
 #, fuzzy, c-format
@@ -1422,10 +1355,9 @@ msgid "%pB: unknown type [%#x] section `%s'"
 msgstr "%pB: tipo desconocido [%#x] sección «%s»"
 
 #: elf.c:3770
-#, fuzzy, c-format
-#| msgid "%B: error: Alignment power %d of section `%A' is too big"
+#, c-format
 msgid "%pB: error: alignment power %d of section `%pA' is too big"
-msgstr "%pB: error: alineamiento potencial %s de sección «%pA» es demasiado grande"
+msgstr "%pB: error: el alineamiento de potencia %d de la sección «%pA» es demasiado grande"
 
 #: elf.c:3805
 #, fuzzy, c-format
@@ -1434,8 +1366,7 @@ msgid "warning: section `%pA' type changed to PROGBITS"
 msgstr "aviso: el tipo de la sección «%pA» cambió a PROGBITS"
 
 #: elf.c:4311
-#, fuzzy, c-format
-#| msgid "%B: too many sections: %u"
+#, c-format
 msgid "%pB: too many sections: %u"
 msgstr "%pB: demasiadas secciones: %u"
 
@@ -1478,16 +1409,14 @@ msgid "\tnon-TLS: %pA"
 msgstr "\tno-TLS: %pA"
 
 #: elf.c:6256
-#, fuzzy, c-format
-#| msgid "%B: The first section in the PT_DYNAMIC segment is not the .dynamic section"
+#, c-format
 msgid "%pB: The first section in the PT_DYNAMIC segment is not the .dynamic section"
 msgstr "%pB: La primera sección en el segmento PT_DYNAMIC no es la sección .dynamic"
 
 #: elf.c:6282
-#, fuzzy, c-format
-#| msgid "%B: Not enough room for program headers, try linking with -N"
+#, c-format
 msgid "%pB: not enough room for program headers, try linking with -N"
-msgstr "%pB: No hay suficiente espacio para los encabezados del programa, pruebe enlazar con -N"
+msgstr "%pB: no hay suficiente espacio para los encabezados del programa, intente enlazar con -N"
 
 #: elf.c:6399
 #, fuzzy, c-format
@@ -1499,34 +1428,29 @@ msgstr "%pB: sección %pA lma %#lx ajustado a %#<PRIx64>"
 #. used and set up the program headers manually.  Either that or
 #. leave room for the headers at the start of the SECTIONS.
 #: elf.c:6539
-#, fuzzy, c-format
-#| msgid "%B: error: PHDR segment not covered by LOAD segment"
+#, c-format
 msgid "%pB: error: PHDR segment not covered by LOAD segment"
-msgstr "%pB: error: segmento PHDR no cubierto por segmento LOAD"
+msgstr "%pB: error: el segmento PHDR no está cubierto por el segmento LOAD"
 
 #: elf.c:6579
-#, fuzzy, c-format
-#| msgid "%B: section `%A' can't be allocated in segment %d"
+#, c-format
 msgid "%pB: section `%pA' can't be allocated in segment %d"
 msgstr "%pB: la sección «%pA» no se puede asignar en el segmento %d"
 
 #: elf.c:6720
-#, fuzzy, c-format
-#| msgid "%B: warning: allocated section `%s' not in segment"
+#, c-format
 msgid "%pB: warning: allocated section `%s' not in segment"
-msgstr "%pB: aviso: sección asignada «%s» no dentro del segmento"
+msgstr "%pB: aviso: la sección asignada «%s» no está en el segmento"
 
 #: elf.c:6855
-#, fuzzy, c-format
-#| msgid "%B: warning: allocated section `%s' not in segment"
+#, c-format
 msgid "%pB: warning: unable to allocate any sections to PT_GNU_RELRO segment"
-msgstr "%pB: aviso: sección asignada «%s» no dentro del segmento"
+msgstr "%pB: aviso: no se puede asignar ninguna sección al segmento PT_GNU_RELRO"
 
 #: elf.c:6886
-#, fuzzy, c-format
-#| msgid "%B: error: non-load segment %d includes file header and/or program header"
+#, c-format
 msgid "%pB: error: non-load segment %d includes file header and/or program header"
-msgstr "%pB: error: segmento no-cargado %d incluye cabecera de fichero y/o cabecera de programa"
+msgstr "%pB: error: el segmento no cargado %d incluye cabecera de fichero y/o cabecera de programa"
 
 #: elf.c:7034
 #, c-format
@@ -1549,16 +1473,14 @@ msgid "warning: %pB has a LOAD segment with RWX permissions"
 msgstr "aviso: %pB tiene un segmento LOAD con permisos RWX"
 
 #: elf.c:7454
-#, fuzzy, c-format
-#| msgid "%B: symbol `%s' required but not present"
+#, c-format
 msgid "%pB: symbol `%s' required but not present"
-msgstr "%pB: el símbolo «%s» se requiere pero no está presente"
+msgstr "%pB: el símbolo «%s» es necesario pero no está presente"
 
 #: elf.c:7832
-#, fuzzy, c-format
-#| msgid "%B: warning: Empty loadable segment detected at vaddr=%#Lx, is this intentional?"
+#, c-format
 msgid "%pB: warning: empty loadable segment detected at vaddr=%#<PRIx64>, is this intentional?"
-msgstr "%pB: aviso: Se detectó un segmento cargable vacío en vaddr=%#<PRIx64>, ¿esto es intencional?"
+msgstr "%pB: aviso: se ha detectado un segmento cargable vacío en vaddr=%#<PRIx64>, ¿esto es intencional?"
 
 #: elf.c:8492
 #, c-format
@@ -1577,16 +1499,14 @@ msgid "unable to find equivalent output section for symbol '%s' from section '%s
 msgstr "No se puede encontrar la sección de salida equivalente para el símbolo «%s» de la sección «%s»"
 
 #: elf.c:9464
-#, fuzzy, c-format
-#| msgid "%B: .gnu.version_r invalid entry"
+#, c-format
 msgid "%pB: .gnu.version_r invalid entry"
 msgstr "%pB: entrada .gnu.version_r no válida"
 
 #: elf.c:9639
-#, fuzzy, c-format
-#| msgid "%B: .gnu.version_d invalid entry"
+#, c-format
 msgid "%pB: .gnu.version_d invalid entry"
-msgstr "%pB: entrada  .gnu.version_d no válida"
+msgstr "%pB: entrada .gnu.version_d no válida"
 
 #: elf.c:10139
 #, c-format
@@ -1694,10 +1614,9 @@ msgid "%pB(%pA): error: secondary reloc %zu references a deleted symbol"
 msgstr "%pB(%pA): error: la reubicación secundaria %zu hace referencia a un símbolo eliminado"
 
 #: elf.c:14341
-#, fuzzy, c-format
-#| msgid "%B: Unable to sort relocs - they are of an unknown size"
+#, c-format
 msgid "%pB(%pA): error: secondary reloc %zu is of an unknown type"
-msgstr "%pB: no se pueden ordenar las reubicaciones - son de tamaño desconocido"
+msgstr "%pB(%pA): error: la reubicación secundaria %zu es de un tipo desconocido"
 
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
@@ -1760,10 +1679,9 @@ msgstr "ERROR: intentando enlazar %pB con un binario %pB de arquitectura distint
 
 #: elf32-arc.c:938 elf32-iq2000.c:844 elf32-m32c.c:889 elf32-m68hc1x.c:1390
 #: elf32-ppc.c:3856 elf64-sparc.c:737 elfxx-mips.c:15692
-#, fuzzy, c-format
-#| msgid "%B: uses different e_flags (%#x) fields than previous modules (%#x)"
+#, c-format
 msgid "%pB: uses different e_flags (%#x) fields than previous modules (%#x)"
-msgstr "%pB: emplea diferentes campos e_flags (%#x) que módulos (%#x) anteriores"
+msgstr "%pB: emplea campos e_flags (%#x) diferentes a los módulos anteriores (%#x)"
 
 #: elf32-arc.c:1027
 #, fuzzy
@@ -1831,10 +1749,9 @@ msgstr "%pB(%pA): error interno: error desconocido"
 
 #: elf32-arc.c:2036 elf32-arc.c:2104 elf32-arm.c:15580 elf32-metag.c:2251
 #: elf32-nds32.c:5543 elfnn-aarch64.c:7959 elfnn-riscv.c:720
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"
+#, c-format
 msgid "%pB: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"
-msgstr "%pB: reubicación %s frente a «%s» no puede emplearse cuando se crea un objeto compartido; recompile con -fPIC"
+msgstr "%pB: la reubicación %s frente a «%s» no se puede usar cuando se crea un objeto compartido; recompile con -fPIC"
 
 #: elf32-arc.c:2923
 #, c-format
@@ -1848,10 +1765,9 @@ msgid "warning: %pB: unknown ARC object attribute %d"
 msgstr "aviso: %pB: Atributo de objeto ARC %d desconocido."
 
 #: elf32-arm.c:4346 elf32-arm.c:4380 elf32-arm.c:4399 elf32-arm.c:4451
-#, fuzzy, c-format
-#| msgid "%B(%A): warning: long branch veneers used in section with SHF_ARM_PURECODE section attribute is only supported for M-profile targets that implement the movw instruction."
+#, c-format
 msgid "%pB(%pA): warning: long branch veneers used in section with SHF_ARM_PURECODE section attribute is only supported for M-profile targets that implement the movw instruction"
-msgstr "%pB(%pA): aviso: rama larga recubierta utilizada en sección con atributo de sección SHF_ARM_PURECODE solo está soportado para objetivos M-profile que implementa la instrucción “movw”."
+msgstr "%pB(%pA): aviso: los recubrimientos de rama larga usados en la sección con atributo de sección SHF_ARM_PURECODE solo están admitidos para objetivos M-profile que implementa la instrucción movw"
 
 #: elf32-arm.c:4411 elf32-arm.c:4465 elf32-arm.c:9163 elf32-arm.c:9253
 #, fuzzy, c-format
@@ -1869,18 +1785,16 @@ msgid "ERROR: CMSE stub (%s section) too far (%#<PRIx64>) from destination (%#<P
 msgstr "ERROR: trozo CMSE (sección %s) demasiado lejos (%#<PRIx64>) del destino (%#<PRIx64>)"
 
 #: elf32-arm.c:4760
-#, fuzzy, c-format
-#| msgid "No address assigned to the veneers output section %s"
+#, c-format
 msgid "no address assigned to the veneers output section %s"
-msgstr "Ninguna dirección asignada a la sección de salida recubierta %s"
+msgstr "ninguna dirección asignada a la sección de salida del recubrimiento %s"
 
 #: elf32-arm.c:4835 elf32-arm.c:6984 elf32-csky.c:3389 elf32-hppa.c:582
 #: elf32-m68hc1x.c:164 elf32-metag.c:1180 elf32-nios2.c:2201 elf64-ppc.c:3907
 #: elf64-ppc.c:14157 elfnn-aarch64.c:3203 elfnn-kvx.c:895
-#, fuzzy, c-format
-#| msgid "%B: cannot create stub entry %s"
+#, c-format
 msgid "%pB: cannot create stub entry %s"
-msgstr "%pB: no se puede crear la entrada de cabo %s"
+msgstr "%pB: no se puede crear la entrada de stub %s"
 
 #: elf32-arm.c:5056 elf32-csky.c:3731 elf32-hppa.c:732 elf32-hppa.c:761
 #: elf32-hppa.c:842 elf32-m68hc11.c:422 elf32-m68hc12.c:542 elf32-metag.c:3345
@@ -1919,16 +1833,14 @@ msgid "%pB: `%s' and its special symbol are in different sections"
 msgstr "%pB: «%s» y su símbolo especial están en secciones diferentes"
 
 #: elf32-arm.c:6105
-#, fuzzy, c-format
-#| msgid "%B: entry function `%s' not output."
+#, c-format
 msgid "%pB: entry function `%s' not output"
-msgstr "%pB: función entrante «%s» no de salida."
+msgstr "%pB: función de entrada «%s» no de salida"
 
 #: elf32-arm.c:6112
-#, fuzzy, c-format
-#| msgid "%B: entry function `%s' is empty."
+#, c-format
 msgid "%pB: entry function `%s' is empty"
-msgstr "%pB: función entrante «%s» está vacía."
+msgstr "%pB: la función de entrada «%s» está vacía"
 
 #: elf32-arm.c:6241
 #, c-format
@@ -1964,10 +1876,9 @@ msgid "%pB: incorrect size for symbol `%s'"
 msgstr "%pB: tamaño incorrecto para símbolo «%s»."
 
 #: elf32-arm.c:6379
-#, fuzzy, c-format
-#| msgid "Offset of veneer for entry function `%s' not a multiple of its size."
+#, c-format
 msgid "offset of veneer for entry function `%s' not a multiple of its size"
-msgstr "Desplazamiento de recubrimiento para función de entrante «%s» no un múltiplo de su tamaño."
+msgstr "el desplazamiento del recubrimiento para la función de entrada «%s» no es múltiplo de su tamaño"
 
 #: elf32-arm.c:6399
 msgid "new entry function(s) introduced but no output import library specified:"
@@ -1986,39 +1897,30 @@ msgid "unable to find %s glue '%s' for '%s'"
 msgstr "no se puede encontrar el pegamento ARM «%s» para «%s»"
 
 #: elf32-arm.c:7868
-#, fuzzy, c-format
-#| msgid "%B: BE8 images only valid in big-endian mode."
+#, c-format
 msgid "%pB: BE8 images only valid in big-endian mode"
-msgstr "%pB: las imágenes BE8 sólo son válidas en modo big-endian."
+msgstr "%pB: las imágenes BE8 sólo son válidas en el modo big-endian"
 
 #. Give a warning, but do as the user requests anyway.
 #: elf32-arm.c:8096
-#, fuzzy, c-format
-#| msgid "%B: warning: selected VFP11 erratum workaround is not necessary for target architecture"
+#, c-format
 msgid "%pB: warning: selected VFP11 erratum workaround is not necessary for target architecture"
-msgstr "%pB: aviso: no se necesita la alternativa para evitar la errata del VFP11 seleccionado para la arquitectura objetivo"
+msgstr "%pB: aviso: la solución alternativa de erratas seleccionada VFP11 no es necesaria para la arquitectura objetivo"
 
 #: elf32-arm.c:8123
-#, fuzzy, c-format
-#| msgid "%B: warning: selected STM32L4XX erratum workaround is not necessary for target architecture"
+#, c-format
 msgid "%pB: warning: selected STM32L4XX erratum workaround is not necessary for target architecture"
-msgstr "%pB: aviso: no se necesita la alternativa para evitar la errata del STM32L4XX seleccionado para arquitectura objetivo"
+msgstr "%pB: aviso: la solución alternativa de erratas seleccionada STM32L4XX no es necesaria para la arquitectura objetivo"
 
 #: elf32-arm.c:8659 elf32-arm.c:8679 elf32-arm.c:8746 elf32-arm.c:8765
-#, fuzzy, c-format
-#| msgid "%B: unable to find VFP11 veneer `%s'"
+#, c-format
 msgid "%pB: unable to find %s veneer `%s'"
-msgstr "%pB: no se puede encontrar la chapa de VFP11 «%s»"
+msgstr "%pB: no se puede encontrar el recubrimiento %s «%s»"
 
 #: elf32-arm.c:8972
-#, fuzzy, c-format
-#| msgid ""
-#| "%B(%A+%#x): error: multiple load detected in non-last IT block instruction : STM32L4XX veneer cannot be generated.\n"
-#| "Use gcc option -mrestrict-it to generate only one instruction per IT block.\n"
+#, c-format
 msgid "%pB(%pA+%#x): error: multiple load detected in non-last IT block instruction: STM32L4XX veneer cannot be generated; use gcc option -mrestrict-it to generate only one instruction per IT block"
-msgstr ""
-"%pB(%pA+%#x): error: carga múltiple detectada en bloque IT no última instrucción : STM32L4XX no puede ser generada.\n"
-"Emplee opción gcc -mrestrict-it para generar solo una instrucción por bloque IT.\n"
+msgstr "%pB(%pA+%#x): error: carga múltiple detectada en instrucción de bloque IT que no es el último: no se puede generar el recubrimiento STM32L4XX. Use la opción de gcc -mrestrict-it para generar solo una instrucción por bloque IT"
 
 #: elf32-arm.c:9070
 #, fuzzy, c-format
@@ -2048,10 +1950,9 @@ msgid "PIE executable"
 msgstr "PIE ejecutable"
 
 #: elf32-arm.c:10547
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against external or undefined symbol `%s' can not be used when making a %s; recompile with -fPIC"
+#, c-format
 msgid "%pB: relocation %s against external or undefined symbol `%s' can not be used when making a %s; recompile with -fPIC"
-msgstr "%pB: reubicación %s frente símbolos externos o indefinidos «%s» pueden no ser empleados cuando hacen un %s; recompile con -fPIC"
+msgstr "%pB: la reubicación %s frente al símbolo externo o indefinido «%s» no se puede usar cuando se crea un %s; recompile con -fPIC"
 
 #: elf32-arm.c:10649
 #, c-format
@@ -2393,10 +2294,9 @@ msgstr "<No se reconoce el conjunto de bits de opción>"
 #: elf64-x86-64.c:2050 elfxx-sparc.c:1386 elfxx-tilegx.c:1662 elfxx-x86.c:970
 #: elfnn-aarch64.c:7826 elfnn-kvx.c:3250 elfnn-loongarch.c:756
 #: elfnn-riscv.c:764
-#, fuzzy, c-format
-#| msgid "%B: bad symbol index: %d"
+#, c-format
 msgid "%pB: bad symbol index: %d"
-msgstr "%pB: índice de símbolos equivocado: %d"
+msgstr "%pB: índice de símbolos incorrecto: %d"
 
 #: elf32-arm.c:15753
 #, c-format
@@ -2420,36 +2320,31 @@ msgid "%pB: Number of symbols in input file has increased from %lu to %u\n"
 msgstr "%pB: El número de símbolos en el fichero de entrada ha aumentado de %lu a %u\n"
 
 #: elf32-arm.c:18619
-#, fuzzy, c-format
-#| msgid "%B: error: Cortex-A8 erratum stub is allocated in unsafe location"
+#, c-format
 msgid "%pB: error: Cortex-A8 erratum stub is allocated in unsafe location"
-msgstr "%pB: error: el cabo de errores Cortex-A8 se aloja en una ubicación insegura"
+msgstr "%pB: error: el stub de erratas del Cortex-A8 está asignado en una ubicación insegura"
 
 #. There's not much we can do apart from complain if this
 #. happens.
 #: elf32-arm.c:18646
-#, fuzzy, c-format
-#| msgid "%B: error: Cortex-A8 erratum stub out of range (input file too large)"
+#, c-format
 msgid "%pB: error: Cortex-A8 erratum stub out of range (input file too large)"
-msgstr "%pB: error: el cabo de errores Cortex-A8 está fuera de rango (el fichero de entrada es demasiado grande)"
+msgstr "%pB: error: el stub de erratas del Cortex-A8 está fuera de rango (el fichero de entrada es demasiado grande)"
 
 #: elf32-arm.c:19473 elf32-arm.c:19495
-#, fuzzy, c-format
-#| msgid "%B: error: VFP11 veneer out of range"
+#, c-format
 msgid "%pB: error: VFP11 veneer out of range"
-msgstr "%pB: error: la chapa VFP11 está fuera de rango"
+msgstr "%pB: error: el recubrimiento VFP11 está fuera de rango"
 
 #: elf32-arm.c:19546
-#, fuzzy, c-format
-#| msgid "%B(%#Lx): error: Cannot create STM32L4XX veneer. Jump out of range by %Ld bytes. Cannot encode branch instruction. "
+#, c-format
 msgid "%pB(%#<PRIx64>): error: cannot create STM32L4XX veneer; jump out of range by %<PRId64> bytes; cannot encode branch instruction"
-msgstr "%pB(%#<PRIx64>): error: no puede crear veneer STM32L4XX. Omisión de límite por %<PRId64> bytes. No puede codificar intrucción de rama. "
+msgstr "%pB(%#<PRIx64>): error: no se puede crear el recubrimiento STM32L4XX. Salto fuera de rango por %<PRId64> bytes. No se puede codificar la instrucción de la rama"
 
 #: elf32-arm.c:19585
-#, fuzzy, c-format
-#| msgid "%B: error: Cannot create STM32L4XX veneer."
+#, c-format
 msgid "%pB: error: cannot create STM32L4XX veneer"
-msgstr "%pB: error: no puede crear recubrimiento STM32L4XX."
+msgstr "%pB: error: no se puede crear el recubrimiento STM32L4XX"
 
 #: elf32-arm.c:20668
 #, fuzzy, c-format
@@ -2534,7 +2429,7 @@ msgstr "%pB(%pA): error interno: no se admite el error de reubicación"
 #: elf32-avr.c:3340 elfnn-aarch64.c:3234
 #, c-format
 msgid "cannot create stub entry %s"
-msgstr "no puede crear la entrada de cabo %s"
+msgstr "no puede crear la entrada de stub %s"
 
 #: elf32-bfin.c:107 elf32-bfin.c:364
 msgid "relocation should be even number"
@@ -2554,8 +2449,7 @@ msgid "%pB(%pA+%#<PRIx64>): reloc against `%s': error %d"
 msgstr "%pB(%pA+%#<PRIx64>): reubicar frente «%s»: error %d"
 
 #: elf32-bfin.c:2647
-#, fuzzy, c-format
-#| msgid "%B: relocation at `%A+%#Lx' references symbol `%s' with nonzero addend"
+#, c-format
 msgid "%pB: relocation at `%pA+%#<PRIx64>' references symbol `%s' with nonzero addend"
 msgstr "%pB: la reubicación en «%pA+%#<PRIx64>» referencia al símbolo «%s» con sumando distinto de cero"
 
@@ -2605,16 +2499,14 @@ msgid "private flags = %lx:"
 msgstr "opciones privadas = %lx:"
 
 #: elf32-bfin.c:4779 elf32-frv.c:6585
-#, fuzzy, c-format
-#| msgid "%B: cannot link non-fdpic object file into fdpic executable"
+#, c-format
 msgid "%pB: cannot link non-fdpic object file into fdpic executable"
 msgstr "%pB: no se puede enlazar el fichero objeto que no es fdpic en un ejecutable fdpic"
 
 #: elf32-bfin.c:4783 elf32-frv.c:6589
-#, fuzzy, c-format
-#| msgid "%B: cannot link fdpic object file into non-fdpic executable"
+#, c-format
 msgid "%pB: cannot link fdpic object file into non-fdpic executable"
-msgstr "%pB: no se puede enlazar el fichero objeto ‘fdpic’ en un ejecutable que no es fdpic"
+msgstr "%pB: no se puede enlazar el fichero objeto fdpic en un ejecutable que no es fdpic"
 
 #: elf32-bfin.c:4920
 #, c-format
@@ -2626,10 +2518,8 @@ msgid "the bfin target does not currently support the generation of copy relocat
 msgstr "el destino bfin no soporta actualmente la generación de copia reubicable"
 
 #: elf32-bfin.c:5329 elf32-cr16.c:2720 elf32-m68k.c:4420
-#, fuzzy
-#| msgid "unsupported relocation"
 msgid "unsupported relocation type"
-msgstr "no se admite la reubicación"
+msgstr "no se admite el tipo de reubicación"
 
 #: elf32-cris.c:1120
 #, c-format
@@ -2720,10 +2610,8 @@ msgid "%pB, section `%pA', to symbol `%s': relocation %s should not be used in a
 msgstr "%pB, sección «%pA», para el símbolo «%s»: la reubicación %s no se debe usar en un objeto compartido; recompile con -fPIC"
 
 #: elf32-cris.c:3813
-#, fuzzy
-#| msgid "Unexpected machine number"
 msgid "unexpected machine number"
-msgstr "Número de máquina inesperado"
+msgstr "número de máquina inesperado"
 
 #: elf32-cris.c:3865
 #, c-format
@@ -2755,12 +2643,12 @@ msgstr "%pB: se usan símbolos sin prefijo, pero se escribe el fichero con símb
 #: elf32-cris.c:3935
 #, c-format
 msgid "%pB contains CRIS v32 code, incompatible with previous objects"
-msgstr "%pB contiene código CRIS v32, incompatible con objetos previos"
+msgstr "%pB contiene código CRIS v32, incompatible con objetos anteriores"
 
 #: elf32-cris.c:3937
 #, c-format
 msgid "%pB contains non-CRIS-v32 code, incompatible with previous objects"
-msgstr "%pB contiene código que no es CRIS v32, incompatible con objetos previos"
+msgstr "%pB contiene código que no es CRIS v32, incompatible con objetos anteriores"
 
 #: elf32-csky.c:2018
 msgid "GOT table size out of range"
@@ -2769,12 +2657,12 @@ msgstr "tamaño de tabla GOT fuera de rango"
 #: elf32-csky.c:2830
 #, c-format
 msgid "warning: unrecognized arch eflag '%#lx'"
-msgstr "aviso: eflag arch no reconocida «%#lx»"
+msgstr "aviso: arquitectura eflag «%#lx» no reconocida"
 
 #: elf32-csky.c:2853
 #, c-format
 msgid "warning: unrecognised arch name '%#x'"
-msgstr "aviso: nombre de arch «%#x» no reconocido"
+msgstr "aviso: nombre de arquitectura «%#x» no reconocido"
 
 #: elf32-csky.c:2918 elf32-csky.c:3078
 #, c-format
@@ -2784,7 +2672,7 @@ msgstr "%pB: conflicto de marca de máquina con el objetivo"
 #: elf32-csky.c:2931
 #, c-format
 msgid "warning: file %pB's arch flag %s conflict with target %s,set target arch flag to %s"
-msgstr "aviso: la marca arch del fichero %pB %s entra en conflicto con el objetivo %s, establezca la marca del arco de destino en %s"
+msgstr "aviso: la marca de arquitectura del fichero %pB %s entra en conflicto con el objetivo %s, establezca la marca de arquitectura de destino en %s"
 
 #: elf32-csky.c:2960
 #, c-format
@@ -2804,14 +2692,13 @@ msgstr "Error: %pB y %pB tienen diferente FPU ABI"
 #: elf32-csky.c:3092
 #, c-format
 msgid "warning: file %pB's arch flag %s conflicts with target ck%s, using %s"
-msgstr "aviso: la marca arch del fichero %pB %s entra en conflicto con el objetivo ck%s, usando %s"
+msgstr "aviso: la marca de arquitectura del fichero %pB %s entra en conflicto con el objetivo ck%s, usando %s"
 
 #. The r_type is error, not support it.
 #: elf32-csky.c:4331 elf32-i386.c:344
-#, fuzzy, c-format
-#| msgid "%B: unsupported relocation type %s"
+#, c-format
 msgid "%pB: unsupported relocation type: %#x"
-msgstr "%pB: no se admite el tipo de reubicación %s"
+msgstr "%pB: no se admite el tipo de reubicación: %#x"
 
 #: elf32-dlx.c:141
 #, fuzzy, c-format
@@ -2914,22 +2801,19 @@ msgid "%H: reloc against `%s': %s\n"
 msgstr "%H: reubicación contra «%s»: %s\n"
 
 #: elf32-frv.c:6496
-#, fuzzy, c-format
-#| msgid "%B: compiled with %s and linked with modules that use non-pic relocations"
+#, c-format
 msgid "%pB: compiled with %s and linked with modules that use non-pic relocations"
 msgstr "%pB: compilado con %s y enlazado con módulos que usan reubicaciones que no son pic"
 
 #: elf32-frv.c:6550 elf32-iq2000.c:830 elf32-m32c.c:876
-#, fuzzy, c-format
-#| msgid "%B: compiled with %s and linked with modules compiled with %s"
+#, c-format
 msgid "%pB: compiled with %s and linked with modules compiled with %s"
 msgstr "%pB: compilado con %s y enlazado con módulos compilados con %s"
 
 #: elf32-frv.c:6563
-#, fuzzy, c-format
-#| msgid "%B: uses different unknown e_flags (%#x) fields than previous modules (%#x)"
+#, c-format
 msgid "%pB: uses different unknown e_flags (%#x) fields than previous modules (%#x)"
-msgstr "%pB: emplea campos e_flags (%#x) desconocidos diferentes a aquellos de los módulos previos (%#x)"
+msgstr "%pB: emplea campos e_flags (%#x) desconocidos diferentes a aquellos de los módulos anteriores (%#x)"
 
 #: elf32-gen.c:71
 #, fuzzy, c-format
@@ -2944,16 +2828,15 @@ msgid "%pB(%pA+%#<PRIx64>): cannot reach %s, recompile with -ffunction-sections"
 msgstr "%pB(%pA+%#<PRIx64>): no puede alcanzar %s, recompile con -ffuntion-sections"
 
 #: elf32-hppa.c:1241
-#, fuzzy, c-format
-#| msgid "%B: relocation %s can not be used when making a shared object; recompile with -fPIC"
+#, c-format
 msgid "%pB: relocation %s can not be used when making a shared object; recompile with -fPIC"
-msgstr "%pB: reubicación %s no puede utilizarse cuando se crea un objeto compartido; recompile con -fPIC"
+msgstr "%pB: la reubicación %s no se puede usar cuando se crea un objeto compartido; recompile con -fPIC"
 
 #: elf32-hppa.c:2580
 #, fuzzy, c-format
 #| msgid "%B: duplicate export stub %s"
 msgid "%pB: duplicate export stub %s"
-msgstr "%pB: cabo de exportación %s duplicado"
+msgstr "%pB: stub de exportación %s duplicado"
 
 #: elf32-hppa.c:3236
 #, fuzzy, c-format
@@ -3003,10 +2886,9 @@ msgid "%pB: `%s' accessed both as normal and thread local symbol"
 msgstr "%pB: se accedió «%s» como un símbolo normal y un símbolo local de hilo"
 
 #: elf32-i386.c:1791
-#, fuzzy, c-format
-#| msgid "%B: unsupported non-PIC call to IFUNC `%s'"
+#, c-format
 msgid "%pB: unsupported non-PIC call to IFUNC `%s'"
-msgstr "%pB: llamada no-PIC a IFUNC «%s» sin apoyo"
+msgstr "%pB: llamada no-PIC a IFUNC «%s» no admitida"
 
 #: elf32-i386.c:1846 elf64-x86-64.c:2436
 #, c-format
@@ -3014,10 +2896,9 @@ msgid "%pB: non-canonical reference to canonical protected function `%s' in %pB"
 msgstr "%pB: referencia no canónica a la función canónica protegida «%s» en %pB"
 
 #: elf32-i386.c:2410 elf64-x86-64.c:2900 elfnn-riscv.c:2455
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against STT_GNU_IFUNC symbol `%s' isn't supported"
+#, c-format
 msgid "%pB: relocation %s against STT_GNU_IFUNC symbol `%s' isn't supported"
-msgstr "%pB: reubicación %s frente al símbolo STT_GNU_IFUNC «%s» no está apoyado"
+msgstr "%pB: la reubicación %s frente al símbolo STT_GNU_IFUNC «%s» no está admitida"
 
 #: elf32-i386.c:2443 elf32-i386.c:3745 elf32-i386.c:3893 elf64-x86-64.c:2957
 #: elf64-x86-64.c:4597 elf64-x86-64.c:4765 elfnn-riscv.c:2328
@@ -3050,8 +2931,7 @@ msgid "symbol"
 msgstr "símbolo"
 
 #: elf32-i386.c:2671
-#, fuzzy, c-format
-#| msgid "%B: relocation R_386_GOTOFF against undefined %s `%s' can not be used when making a shared object"
+#, c-format
 msgid "%pB: relocation R_386_GOTOFF against undefined %s `%s' can not be used when making a shared object"
 msgstr "%pB: no se puede usar la reubicación R_386_GOTOFF contra %s indefinida «%s» cuando se hace un objeto compartido"
 
@@ -3062,18 +2942,16 @@ msgid "%pB: relocation R_386_GOTOFF against protected %s `%s' can not be used wh
 msgstr "%pB: reubicación R_386_GOTOFF contra %s protegida «%s» no puede ser utilizada cuando crea un objeto compartido"
 
 #: elf32-i386.c:4096 elf64-x86-64.c:4976
-#, fuzzy
-#| msgid "discarded output section: `%A'"
 msgid "%F%P: discarded output section: `%pA'\n"
-msgstr "se descarta la sección de salida: «%pA»"
+msgstr "%F%P: sección de salida descartada: «%pA»\n"
 
 #: elf32-ip2k.c:855 elf32-ip2k.c:861 elf32-ip2k.c:928 elf32-ip2k.c:934
 msgid "ip2k relaxer: switch table without complete matching relocation information."
-msgstr "ip2k relajante: tabla de switch sin información completa de reubicación de coincidencias."
+msgstr "ip2k laxo: tabla de switch sin información completa de reubicación de coincidencias."
 
 #: elf32-ip2k.c:878 elf32-ip2k.c:961
 msgid "ip2k relaxer: switch table header corrupt."
-msgstr "ip2k relajante: encabezado de la tabla de switch corrupto."
+msgstr "ip2k laxo: encabezado de la tabla de switch corrupto."
 
 #: elf32-ip2k.c:1298
 #, fuzzy, c-format
@@ -3106,16 +2984,14 @@ msgid "SDA relocation when _SDA_BASE_ not defined"
 msgstr "SDA reubicable cuando _SDA_BASE_ no está definido"
 
 #: elf32-m32r.c:2776 elf32-microblaze.c:1152 elf32-microblaze.c:1200
-#, fuzzy, c-format
-#| msgid "%B: The target (%s) of an %s relocation is in the wrong section (%A)"
+#, c-format
 msgid "%pB: the target (%s) of an %s relocation is in the wrong section (%pA)"
-msgstr "%pB: El objetivo (%s) de una reubicación %s está en la sección equivocada (%pA)"
+msgstr "%pB: el objetivo (%s) de una reubicación %s está en la sección incorrecta (%pA)"
 
 #: elf32-m32r.c:3279
-#, fuzzy, c-format
-#| msgid "%B: Instruction set mismatch with previous modules"
+#, c-format
 msgid "%pB: instruction set mismatch with previous modules"
-msgstr "%pB: Conjunto de instrucciones no coincide con módulos previos"
+msgstr "%pB: el conjunto de instrucciones no coincide con módulos anteriores"
 
 #: elf32-m32r.c:3300 elf32-nds32.c:6900
 #, c-format
@@ -3242,16 +3118,14 @@ msgid "unknown"
 msgstr "desconocido"
 
 #: elf32-m68k.c:1731
-#, fuzzy, c-format
-#| msgid "%B: GOT overflow: Number of relocations with 8-bit offset > %d"
+#, c-format
 msgid "%pB: GOT overflow: number of relocations with 8-bit offset > %d"
-msgstr "%pB: desbordamiento de GOT: Número de reubicaciones con desplazamiento de 8-bit > %d"
+msgstr "%pB: desbordamiento de GOT: número de reubicaciones con desplazamiento de 8 bits > %d"
 
 #: elf32-m68k.c:1738
-#, fuzzy, c-format
-#| msgid "%B: GOT overflow: Number of relocations with 8- or 16-bit offset > %d"
+#, c-format
 msgid "%pB: GOT overflow: number of relocations with 8- or 16-bit offset > %d"
-msgstr "%pB: desbordamiento de GOT: Número de reubicaciones con desplazamiento de 8 o 16-bit > %d"
+msgstr "%pB: desbordamiento de GOT: número de reubicaciones con desplazamiento de 8 o 16 bits > %d"
 
 #. Pacify gcc -Wall.
 #: elf32-mep.c:139
@@ -3385,10 +3259,9 @@ msgid "%pB: warning: unaligned access to GOT entry"
 msgstr "%pB: aviso: acceso no alineado a la entrada GOT"
 
 #: elf32-nds32.c:5740
-#, fuzzy, c-format
-#| msgid "%B: warning: relocate SDA_BASE failed."
+#, c-format
 msgid "%pB: warning: relocate SDA_BASE failed"
-msgstr "%pB: aviso: reubicación SDA_BASE fallada."
+msgstr "%pB: aviso: la reubicación de SDA_BASE ha fallado"
 
 #: elf32-nds32.c:5762
 #, fuzzy, c-format
@@ -3400,36 +3273,32 @@ msgstr "%pB(%pA): aviso: acceso sin alinear al símbolo «%s» en el área de da
 #, fuzzy, c-format
 #| msgid "%B: ISR vector size mismatch with previous modules, previous %u-byte, current %u-byte"
 msgid "%pB: ISR vector size mismatch with previous modules, previous %u-byte, current %u-byte"
-msgstr "%pB: tamaño de vector ISR no coincide con módulos previos, previos %u-byte, actual %u-byte"
+msgstr "%pB: tamaño de vector ISR no coincide con módulos anteriores, anteriores %u-byte, actual %u-byte"
 
 #: elf32-nds32.c:6736
 #, c-format
 msgid "%pB: warning: endian mismatch with previous modules"
-msgstr "%pB: aviso: falta de coincidencia endian con módulos previos"
+msgstr "%pB: aviso: falta de coincidencia endian con módulos anteriores"
 
 #: elf32-nds32.c:6750
-#, fuzzy, c-format
-#| msgid "%B: warning: Older version of object file encountered, Please recompile with current tool chain."
+#, c-format
 msgid "%pB: warning: older version of object file encountered, please recompile with current tool chain"
-msgstr "%pB: aviso: versión de fichero objeto anterior encontrado, por favor recompile con la cadena de herramientas actuales."
+msgstr "%pB: aviso: se ha encontrado una versión del fichero objeto anterior, por favor recompile con la cadena de herramientas actuales"
 
 #: elf32-nds32.c:6838
-#, fuzzy, c-format
-#| msgid "%B: error: ABI mismatch with previous modules."
+#, c-format
 msgid "%pB: error: ABI mismatch with previous modules"
-msgstr "%pB: error: ABI no coincide con módulos previos."
+msgstr "%pB: error: ABI no coincide con módulos anteriores"
 
 #: elf32-nds32.c:6848
-#, fuzzy, c-format
-#| msgid "%B: error: Instruction set mismatch with previous modules."
+#, c-format
 msgid "%pB: error: instruction set mismatch with previous modules"
-msgstr "%pB: error: conjunto de instrucciones no coincide con módulos previos."
+msgstr "%pB: error: el conjunto de instrucciones no coincide con módulos anteriores"
 
 #: elf32-nds32.c:6875
-#, fuzzy, c-format
-#| msgid "%B: warning: Incompatible elf-versions %s and  %s."
+#, c-format
 msgid "%pB: warning: incompatible elf-versions %s and %s"
-msgstr "%pB: aviso: versiones elf incompatibles %s y %s."
+msgstr "%pB: aviso: versiones elf incompatibles %s y %s"
 
 #: elf32-nds32.c:6906
 #, c-format
@@ -3442,10 +3311,9 @@ msgid ": n1h instructions"
 msgstr ": instrucciones n1h"
 
 #: elf32-nds32.c:9358
-#, fuzzy, c-format
-#| msgid "%B: Error: search_nds32_elf_blank reports wrong node\n"
+#, c-format
 msgid "%pB: error: search_nds32_elf_blank reports wrong node"
-msgstr "%pB: Error: search_nds32_elf_blank devuelve nodo equivocado\n"
+msgstr "%pB: error: search_nds32_elf_blank informa de un nodo incorrecto"
 
 #: elf32-nds32.c:9622
 #, c-format
@@ -3453,16 +3321,14 @@ msgid "%pB: warning: %s points to unrecognized reloc at %#<PRIx64>"
 msgstr "%pB: aviso: %s apunta a reubicación no reconocida en %#<PRIx64>"
 
 #: elf32-nds32.c:12887
-#, fuzzy, c-format
-#| msgid "%B: Nested OMIT_FP in %A."
+#, c-format
 msgid "%pB: nested OMIT_FP in %pA"
-msgstr "%pB: OMIT_FP anidado en %pA."
+msgstr "%pB: OMIT_FP anidado en %pA"
 
 #: elf32-nds32.c:12906
-#, fuzzy, c-format
-#| msgid "%B: Unmatched OMIT_FP in %A."
+#, c-format
 msgid "%pB: unmatched OMIT_FP in %pA"
-msgstr "%pB: OMIT_FP desemparejado en %pA."
+msgstr "%pB: OMIT_FP desemparejado en %pA"
 
 #: elf32-nios2.c:2934
 #, fuzzy, c-format
@@ -3547,22 +3413,19 @@ msgid "%pB: support for local dynamic not implemented"
 msgstr "%pB: la compatibilidad con dinámica local no está implementada"
 
 #: elf32-or1k.c:1867
-#, fuzzy, c-format
-#| msgid "%B: will not resolve runtime TLS relocation"
+#, c-format
 msgid "%pB: will not resolve runtime TLS relocation"
-msgstr "%pB: no resolverá reubicación TLS en tiempo de ejecución"
+msgstr "%pB: no resolverá la reubicación TLS en tiempo de ejecución"
 
 #: elf32-or1k.c:2201
-#, fuzzy, c-format
-#| msgid "%B: bad relocation section name `%s'"
+#, c-format
 msgid "%pB: bad relocation section name `%s'"
-msgstr "%pB: equivocado nombre de sección de reubicación «%s»"
+msgstr "%pB: nombre de sección de reubicación incorrecto «%s»"
 
 #: elf32-or1k.c:3315
-#, fuzzy, c-format
-#| msgid "%B: EF_OR1K_NODELAY flag mismatch with previous modules"
+#, c-format
 msgid "%pB: %s flag mismatch with previous modules"
-msgstr "%pB: marca EF_OR1K_NODELAY no coincide con los módulos previos"
+msgstr "%pB: la marca %s no coincide con los módulos anteriores"
 
 #: elf32-ppc.c:990 elf64-ppc.c:1753
 #, c-format
@@ -3570,8 +3433,7 @@ msgid "generic linker can't handle %s"
 msgstr "el enlazador genérico no puede manipular %s"
 
 #: elf32-ppc.c:1628
-#, fuzzy, c-format
-#| msgid "corrupt %s section in %B"
+#, c-format
 msgid "corrupt %s section in %pB"
 msgstr "sección %s corrupta en %pB"
 
@@ -3606,10 +3468,9 @@ msgid "failed to install new APUinfo section"
 msgstr "no se puede instalar la nueva sección APUinfo."
 
 #: elf32-ppc.c:2869
-#, fuzzy, c-format
-#| msgid "%B: relocation %s cannot be used when making a shared object"
+#, c-format
 msgid "%pB: relocation %s cannot be used when making a shared object"
-msgstr "%pB: reubicación %s no puede utilizarse cuando se crea un objeto compartido"
+msgstr "%pB: la reubicación %s no se puede usar cuando se crea un objeto compartido"
 
 #: elf32-ppc.c:3588 elf32-ppc.c:3596
 #, fuzzy, c-format
@@ -3642,14 +3503,12 @@ msgid "%pB uses r3/r4 for small structure returns, %pB uses memory"
 msgstr "aviso: %pB emplea r3/r4 para devoluciones de estructura small, %pB emplea memoria"
 
 #: elf32-ppc.c:3820
-#, fuzzy, c-format
-#| msgid "%B: compiled with -mrelocatable and linked with modules compiled normally"
+#, c-format
 msgid "%pB: compiled with -mrelocatable and linked with modules compiled normally"
 msgstr "%pB: compilado con -mrelocatable y enlazado con módulos compilados de forma normal"
 
 #: elf32-ppc.c:3828
-#, fuzzy, c-format
-#| msgid "%B: compiled normally and linked with modules compiled with -mrelocatable"
+#, c-format
 msgid "%pB: compiled normally and linked with modules compiled with -mrelocatable"
 msgstr "%pB: compilado de forma normal y enlazado con módulos compilados con -mrelocatable"
 
@@ -3749,10 +3608,9 @@ msgid "%H: relocation %s for indirect function %s unsupported\n"
 msgstr "%H: reubicación %s para función indirecta %s no admitida\n"
 
 #: elf32-ppc.c:8511 elf32-ppc.c:8542 elf32-ppc.c:8645 elf32-ppc.c:8745
-#, fuzzy, c-format
-#| msgid "%B: the target (%s) of a %s relocation is in the wrong output section (%s)"
+#, c-format
 msgid "%pB: the target (%s) of a %s relocation is in the wrong output section (%s)"
-msgstr "%pB: el objetivo (%s) de una reubicación %s está en la sección de salida equivocada (%s)"
+msgstr "%pB: el objetivo (%s) de una reubicación %s está en la sección de salida incorrecta (%s)"
 
 #: elf32-ppc.c:8923 elf32-ppc.c:8944
 msgid "%X%P: %H: %s relocation unsupported for bss-plt\n"
@@ -3932,16 +3790,14 @@ msgid "address not word aligned"
 msgstr "la dirección no está alineada a word"
 
 #: elf32-score.c:2828 elf32-score7.c:2635
-#, fuzzy, c-format
-#| msgid "%B: Malformed reloc detected for section %A"
+#, c-format
 msgid "%pB: malformed reloc detected for section %pA"
-msgstr "%pB: detectada reubicación malformada para sección %pA"
+msgstr "%pB: detectada reubicación mal formada para la sección %pA"
 
 #: elf32-score.c:2882 elf32-score7.c:2689
-#, fuzzy, c-format
-#| msgid "%B: CALL15 reloc at %#Lx not against global symbol"
+#, c-format
 msgid "%pB: CALL15 reloc at %#<PRIx64> not against global symbol"
-msgstr "%pB: reubicación CALL15 en %Lx no contra símbolo global"
+msgstr "%pB: reubicación CALL15 en %#<PRIx64> no contra símbolo global"
 
 #: elf32-score.c:3990 elf32-score7.c:3797
 #, c-format
@@ -3954,8 +3810,7 @@ msgid " [fix dep]"
 msgstr " [fix dep]"
 
 #: elf32-score.c:4041 elf32-score7.c:3848
-#, fuzzy, c-format
-#| msgid "%B: warning: linking PIC files with non-PIC files"
+#, c-format
 msgid "%pB: warning: linking PIC files with non-PIC files"
 msgstr "%pB: aviso: se enlazan ficheros PIC con ficheros que no son PIC"
 
@@ -4095,20 +3950,17 @@ msgid "%pB: `%s' accessed both as FDPIC and thread local symbol"
 msgstr "%pB: se accedió «%s» como un símbolo FDPIC y un símbolo local de hilo"
 
 #: elf32-sh.c:5525
-#, fuzzy, c-format
-#| msgid "%B: Function descriptor relocation with non-zero addend"
+#, c-format
 msgid "%pB: Function descriptor relocation with non-zero addend"
-msgstr "%pB: reubicación de descriptor de función con sumando que no es cero"
+msgstr "%pB: reubicación de descriptor de función con sumando distinto de cero"
 
 #: elf32-sh.c:5732 elf64-alpha.c:4646
-#, fuzzy, c-format
-#| msgid "%B: TLS local exec code cannot be linked into shared objects"
+#, c-format
 msgid "%pB: TLS local exec code cannot be linked into shared objects"
-msgstr "%pB: código local ejecutable TLS no se puede ser enlazado dentro de objetos compartidos"
+msgstr "%pB: el código local ejecutable TLS no se puede enlazar dentro de objetos compartidos"
 
 #: elf32-sh.c:5847
-#, fuzzy, c-format
-#| msgid "%B: uses %s instructions while previous modules use %s instructions"
+#, c-format
 msgid "%pB: uses %s instructions while previous modules use %s instructions"
 msgstr "%pB: emplea %s instrucciones mientras que módulos anteriores emplean %s instrucciones"
 
@@ -4121,17 +3973,15 @@ msgstr "error interno: combinación de arquitectura «%s» con arquitectura «%s
 #, fuzzy, c-format
 #| msgid "%B: uses instructions which are incompatible with instructions used in previous modules"
 msgid "%pB: uses instructions which are incompatible with instructions used in previous modules"
-msgstr "%pB: utiliza instrucciones las cuales son incompatibles con instrucciones utilizadas en módulos previos"
+msgstr "%pB: utiliza instrucciones las cuales son incompatibles con instrucciones utilizadas en módulos anteriores"
 
 #: elf32-sh.c:5913
-#, fuzzy, c-format
-#| msgid "%B: attempt to mix FDPIC and non-FDPIC objects"
+#, c-format
 msgid "%pB: attempt to mix FDPIC and non-FDPIC objects"
-msgstr "%pB: intenta mezclar objetos FDPIC y no-FDPIC"
+msgstr "%pB: intento de mezclar objetos FDPIC y no FDPIC"
 
 #: elf32-sparc.c:89
-#, fuzzy, c-format
-#| msgid "%B: compiled for a 64 bit system and target is 32 bit"
+#, c-format
 msgid "%pB: compiled for a 64 bit system and target is 32 bit"
 msgstr "%pB: compilado para un sistema de 64 bit y el objetivo es de 32 bit"
 
@@ -4198,11 +4048,11 @@ msgstr "%s en la sección de sobreescritura"
 
 #: elf32-spu.c:1983
 msgid "overlay stub relocation overflow"
-msgstr "desbordamiento de la reubicación de cabo de sobreescritura"
+msgstr "desbordamiento de la reubicación de stub de sobreescritura"
 
 #: elf32-spu.c:1992 elf64-ppc.c:15341
 msgid "stubs don't match calculated size"
-msgstr "los cabos no coinciden con el tamaño calculado"
+msgstr "los stubs no coinciden con el tamaño calculado"
 
 #: elf32-spu.c:2575
 #, c-format
@@ -4287,7 +4137,7 @@ msgstr "%X%P: pila/lrlive error de análisis: %E\n"
 #: elf32-spu.c:4746
 msgid "%F%P: can not build overlay stubs: %E\n"
 msgstr ""
-"%F%P: no se puede construir sobrecarga de cabos %E\n"
+"%F%P: no se puede construir sobrecarga de stubs %E\n"
 "\n"
 
 #: elf32-spu.c:4815
@@ -4315,8 +4165,7 @@ msgid "%pB: SB-relative relocation but __c6xabi_DSBT_BASE not defined"
 msgstr "%pB: reubicación relativa a SB pero __c6xabi_DSBT_BASE no está definido"
 
 #: elf32-tic6x.c:3498
-#, fuzzy, c-format
-#| msgid "%B: error: unknown mandatory EABI object attribute %d"
+#, c-format
 msgid "%pB: error: unknown mandatory EABI object attribute %d"
 msgstr "%pB: error: atributo de objeto EABI obligatorio %d desconocido"
 
@@ -4364,10 +4213,9 @@ msgstr "aviso: %pB y %pB difieren en si el código está compilado para DSBT"
 #: elf32-tilepro.c:3627 elfxx-tilegx.c:4017 elfxx-x86.c:2729
 #: elfnn-aarch64.c:10030 elfnn-kvx.c:4636 elfnn-loongarch.c:5032
 #: elfnn-riscv.c:3481
-#, fuzzy, c-format
-#| msgid "discarded output section: `%A'"
+#, c-format
 msgid "discarded output section: `%pA'"
-msgstr "se descarta la sección de salida: «%pA»"
+msgstr "sección de salida descartada: «%pA»"
 
 #: elf32-v850.c:152
 #, fuzzy, c-format
@@ -4522,10 +4370,9 @@ msgid "MMU use: "
 msgstr "Utilización de MMU: "
 
 #: elf32-v850.c:2823 elf32-v850.c:2879
-#, fuzzy, c-format
-#| msgid "%B: Architecture mismatch with previous modules"
+#, c-format
 msgid "%pB: architecture mismatch with previous modules"
-msgstr "%pB: No coincide la arquitectura con los módulos previos"
+msgstr "%pB: no coincide la arquitectura con los módulos anteriores"
 
 #. xgettext:c-format.
 #: elf32-v850.c:2897
@@ -4614,22 +4461,19 @@ msgid "%pB: warning: GOT addend of %<PRId64> to `%s' does not match previous GOT
 msgstr "%pB: aviso: el sumando GOT de %<PRId64> a «%s» no coincide con la sumando GOT anterior de %<PRId64>"
 
 #: elf32-vax.c:1388
-#, fuzzy, c-format
-#| msgid "%B: warning: PLT addend of %Ld to `%s' from %A section ignored"
+#, c-format
 msgid "%pB: warning: PLT addend of %<PRId64> to `%s' from %pA section ignored"
-msgstr "%pB: aviso: sumando PLT de %<PRId64> a «%s» desde sección %pA ignorada"
+msgstr "%pB: aviso: se ha ignorado el sumando PLT de %<PRId64> a «%s» desde la sección %pA"
 
 #: elf32-vax.c:1514
-#, fuzzy, c-format
-#| msgid "%B: warning: %s relocation against symbol `%s' from %A section"
+#, c-format
 msgid "%pB: warning: %s relocation against symbol `%s' from %pA section"
-msgstr "%pB: aviso: reubicación %s frente a símbolo «%s» desde sección %pA"
+msgstr "%pB: aviso: reubicación %s frente a símbolo «%s» desde la sección %pA"
 
 #: elf32-vax.c:1521
-#, fuzzy, c-format
-#| msgid "%B: warning: %s relocation to %#Lx from %A section"
+#, c-format
 msgid "%pB: warning: %s relocation to %#<PRIx64> from %pA section"
-msgstr "%pB: aviso: reubicación %s a %#<PRIx64> desde sección %pA"
+msgstr "%pB: aviso: reubicación %s a %#<PRIx64> desde la sección %pA"
 
 #: elf32-visium.c:824
 #, c-format
@@ -4648,7 +4492,7 @@ msgstr "error leyendo tipo de cpu desde datos privados elf"
 
 #: elf32-xstormy16.c:457 elf64-ia64-vms.c:2077 elfnn-ia64.c:2346
 msgid "non-zero addend in @fptr reloc"
-msgstr "sumando que no es cero en la reubicación @fptr"
+msgstr "sumando distinto de cero en la reubicación @fptr"
 
 #: elf32-xtensa.c:998
 #, fuzzy, c-format
@@ -4719,36 +4563,31 @@ msgid "%pB: unsupported bfd mach %#lx"
 msgstr "no se admite la orden STA %s"
 
 #: elf32-z80.c:518
-#, fuzzy, c-format
-#| msgid "%B: unsupported relocation type %s"
+#, c-format
 msgid "%pB: unsupported mach %#x"
-msgstr "%pB: no se admite el tipo de reubicación %s"
+msgstr "%pB: mach no admitido %#x"
 
 #: elf32-z80.c:546
-#, fuzzy, c-format
-#| msgid "%B: unsupported relocation type %s"
+#, c-format
 msgid "%pB: unsupported arch %#x"
-msgstr "%pB: no se admite el tipo de reubicación %s"
+msgstr "%pB: arquitectura %#x no admitida"
 
 #: elf64-alpha.c:474
 msgid "GPDISP relocation did not find ldah and lda instructions"
 msgstr "Reubicación GPDISP no encontró las instrucciones ldah y lda"
 
 #: elf64-alpha.c:1985
-#, fuzzy, c-format
-#| msgid "%B: dynamic relocation against `%T' in read-only section `%A'\n"
+#, c-format
 msgid "%pB: dynamic relocation against a local symbol in read-only section `%pA'\n"
-msgstr "%pB: reubicación dinámica frente a «%pT» en sección de sólo lectura «%pA»\n"
+msgstr "%pB: reubicación dinámica frente a un símbolo local en sección de sólo lectura «%pA»\n"
 
 #: elf64-alpha.c:2437
-#, fuzzy, c-format
-#| msgid "%B: .got subsegment exceeds 64K (size %d)"
+#, c-format
 msgid "%pB: .got subsegment exceeds 64K (size %d)"
 msgstr "%pB: el subsegmento .got excede los 64K (tamaño %d)"
 
 #: elf64-alpha.c:2680 elflink.c:15481 elfnn-kvx.c:4022 elfnn-loongarch.c:1715
-#, fuzzy, c-format
-#| msgid "%B: dynamic relocation against `%T' in read-only section `%A'\n"
+#, c-format
 msgid "%pB: dynamic relocation against `%pT' in read-only section `%pA'\n"
 msgstr "%pB: reubicación dinámica frente a «%pT» en sección de sólo lectura «%pA»\n"
 
@@ -4764,10 +4603,9 @@ msgid "%pB: gp-relative relocation against dynamic symbol %s"
 msgstr "%pB: reubicación relativa a gp contra el símbolo dinámico %s"
 
 #: elf64-alpha.c:4439
-#, fuzzy, c-format
-#| msgid "%B: change in gp: BRSGP %s"
+#, c-format
 msgid "%pB: change in gp: BRSGP %s"
-msgstr "%pB: modifica en gp: BRSGP %s"
+msgstr "%pB: cambio en gp: BRSGP %s"
 
 #: elf64-alpha.c:4464 mach-o.c:625 elfnn-riscv.c:722 elfnn-riscv.c:921
 #: elfnn-riscv.c:963
@@ -4775,16 +4613,14 @@ msgid "<unknown>"
 msgstr "<desconocido>"
 
 #: elf64-alpha.c:4470
-#, fuzzy, c-format
-#| msgid "%B: !samegp reloc against symbol without .prologue: %s"
+#, c-format
 msgid "%pB: !samegp reloc against symbol without .prologue: %s"
 msgstr "%pB: reubicación !samegp contra un símbolo sin .prologue: %s"
 
 #: elf64-alpha.c:4528
-#, fuzzy, c-format
-#| msgid "%B: unhandled dynamic relocation against %s"
+#, c-format
 msgid "%pB: unhandled dynamic relocation against %s"
-msgstr "%pB: reubicación dinámica sin manipular contra %s"
+msgstr "%pB: reubicación dinámica sin manejar contra %s"
 
 #: elf64-alpha.c:4563
 #, fuzzy, c-format
@@ -4806,10 +4642,8 @@ msgstr "%pB: reubicación tp-relativa contra el símbolo dinámico %s"
 
 #. Only if it's not an unresolved symbol.
 #: elf64-bpf.c:344
-#, fuzzy
-#| msgid "internal error: unsupported relocation error"
 msgid "internal error: relocation not supported"
-msgstr "error interno: no se admite el error de reubicación"
+msgstr "Error interno: reubicación no admitida"
 
 #: elf64-gen.c:71
 #, fuzzy, c-format
@@ -4821,7 +4655,7 @@ msgstr "%pB: Reubicaciones en ELF genérico (EM: %d)"
 #, fuzzy, c-format
 #| msgid "stub entry for %s cannot load .plt, dp offset = %Ld"
 msgid "stub entry for %s cannot load .plt, dp offset = %<PRId64>"
-msgstr "la entrada de cabo para %s no puede cargar .plt, desplazamiento dp = %<PRId64>"
+msgstr "la entrada de stub para %s no puede cargar .plt, desplazamiento dp = %<PRId64>"
 
 #: elf64-hppa.c:3236
 #, fuzzy, c-format
@@ -4830,10 +4664,9 @@ msgid "%pB(%pA+%#<PRIx64>): cannot reach %s"
 msgstr "%pB(%pA+%#<PRIx64>): no se pueden alcanzar %s"
 
 #: elf64-ia64-vms.c:600 elfnn-ia64.c:641
-#, fuzzy, c-format
-#| msgid "%B: Can't relax br at %#Lx in section `%A'. Please use brl or indirect branch."
+#, c-format
 msgid "%pB: can't relax br at %#<PRIx64> in section `%pA'; please use brl or indirect branch"
-msgstr "%pB: no se puede relajar br en %#<PRIx64> en la sección «%pA». Utilice brl o ramificación indirecta."
+msgstr "%pB: no se puede relajar br en %#<PRIx64> en la sección «%pA». Utilice brl o una rama indirecta"
 
 #: elf64-ia64-vms.c:2032 elfnn-ia64.c:2294
 msgid "@pltoff reloc against local symbol"
@@ -4846,14 +4679,12 @@ msgid "%pB: short data segment overflowed (%#<PRIx64> >= 0x400000)"
 msgstr "%pB: segmento de datos short sobredesbordado (%#<PRIx64> >= 0x400000)"
 
 #: elf64-ia64-vms.c:3288 elfnn-ia64.c:3681
-#, fuzzy, c-format
-#| msgid "%B: __gp does not cover short data segment"
+#, c-format
 msgid "%pB: __gp does not cover short data segment"
 msgstr "%pB: __gp no cubre el segmento corto de datos"
 
 #: elf64-ia64-vms.c:3558 elfnn-ia64.c:3954
-#, fuzzy, c-format
-#| msgid "%B: non-pic code with imm relocation against dynamic symbol `%s'"
+#, c-format
 msgid "%pB: non-pic code with imm relocation against dynamic symbol `%s'"
 msgstr "%pB: código que no es pic con reubicación imm contra el símbolo dinámico «%s»"
 
@@ -4874,10 +4705,9 @@ msgid "%pB: @internal branch to dynamic symbol %s"
 msgstr "%pB: rama @internal al símbolo dinámico %s"
 
 #: elf64-ia64-vms.c:3786 elfnn-ia64.c:4226
-#, fuzzy, c-format
-#| msgid "%B: speculation fixup to dynamic symbol %s"
+#, c-format
 msgid "%pB: speculation fixup to dynamic symbol %s"
-msgstr "%pB: compostura de especulación al símbolo dinámico %s"
+msgstr "%pB: corrección de especulación del símbolo dinámico %s"
 
 #: elf64-ia64-vms.c:3789 elfnn-ia64.c:4229
 #, c-format
@@ -4889,16 +4719,14 @@ msgid "unsupported reloc"
 msgstr "no se admite la reubicación"
 
 #: elf64-ia64-vms.c:3950 elfnn-ia64.c:4464
-#, fuzzy, c-format
-#| msgid "%B: missing TLS section for relocation %s against `%s' at %#Lx in section `%A'."
+#, c-format
 msgid "%pB: missing TLS section for relocation %s against `%s' at %#<PRIx64> in section `%pA'."
 msgstr "%pB: falta la sección TLS para la reubicación %s contra «%s» en %#<PRIx64> en la sección «%pA»."
 
 #: elf64-ia64-vms.c:3967 elfnn-ia64.c:4481
-#, fuzzy, c-format
-#| msgid "%B: Can't relax br (%s) to `%s' at %#Lx in section `%A' with size %#Lx (> 0x1000000)."
+#, c-format
 msgid "%pB: Can't relax br (%s) to `%s' at %#<PRIx64> in section `%pA' with size %#<PRIx64> (> 0x1000000)."
-msgstr "%pB: no se puede relajar br (%s) a «%s» en %#<PRIx64> en la sección «%pA» con tamaño %#<PRIx64> (> 0x1000000)."
+msgstr "%pB: No se puede relajar br (%s) a «%s» en %#<PRIx64> en la sección «%pA» con tamaño %#<PRIx64> (> 0x1000000)."
 
 #: elf64-ia64-vms.c:4263 elfnn-ia64.c:4742
 #, fuzzy, c-format
@@ -4946,7 +4774,7 @@ msgstr "aviso: la alineación %u del símbolo «%s» en %pB es más pequeña que
 #, fuzzy, c-format
 #| msgid "Warning: size of symbol `%s' changed from %Lu in %B to %Lu in %B"
 msgid "warning: size of symbol `%s' changed from %<PRIu64> in %pB to %<PRIu64> in %pB"
-msgstr "aviso: el tamaño del símbolo «%s» modificado de %Lu en %pB a %Lu en %pB"
+msgstr "aviso: el tamaño del símbolo «%s» modificado de %<PRIu64> en %pB a %<PRIu64> en %pB"
 
 #: elf64-mips.c:4102
 #, fuzzy, c-format
@@ -4979,28 +4807,23 @@ msgstr ""
 " ELF o mmo, o compile utilizando la opción de gcc \"-mno-base-addresses\"."
 
 #: elf64-mmix.c:1195
-#, fuzzy, c-format
-#| msgid ""
-#| "%B: Internal inconsistency error for value for\n"
-#| " linker-allocated global register: linked: %#Lx != relaxed: %#Lx"
+#, c-format
 msgid ""
 "%pB: Internal inconsistency error for value for\n"
 " linker-allocated global register: linked: %#<PRIx64> != relaxed: %#<PRIx64>"
 msgstr ""
 "%pB: error de inconsistencia interna para el valor para\n"
-" un registro global colocado por el enlazador: enlazado: %#<PRIx64> != relajado: %#<PRIx64>"
+" un registro global asignado por el enlazador: enlazado: %#<PRIx64> != relajado: %#<PRIx64>"
 
 #: elf64-mmix.c:1619
-#, fuzzy, c-format
-#| msgid "%B: base-plus-offset relocation against register symbol: (unknown) in %A"
+#, c-format
 msgid "%pB: base-plus-offset relocation against register symbol: (unknown) in %pA"
-msgstr "%pB: reubicación base-suma-desplazamiento contra símbolo registrador: (desconocido) en %pA"
+msgstr "%pB: reubicación base-más-desplazamiento contra el símbolo registrador: (desconocido) en %pA"
 
 #: elf64-mmix.c:1625
-#, fuzzy, c-format
-#| msgid "%B: base-plus-offset relocation against register symbol: %s in %A"
+#, c-format
 msgid "%pB: base-plus-offset relocation against register symbol: %s in %pA"
-msgstr "%pB: reubicación base-suma-desplazamiento contra símbolo registrador: %s en %pA"
+msgstr "%pB: reubicación base-más-desplazamiento contra el símbolo registrador: %s en %pA"
 
 #: elf64-mmix.c:1670
 #, fuzzy, c-format
@@ -5015,28 +4838,23 @@ msgid "%pB: register relocation against non-register symbol: %s in %pA"
 msgstr "%pB: reubicación registrada frente símbolo no registrado: %s en %pA"
 
 #: elf64-mmix.c:1713
-#, fuzzy, c-format
-#| msgid "%B: directive LOCAL valid only with a register or absolute value"
+#, c-format
 msgid "%pB: directive LOCAL valid only with a register or absolute value"
 msgstr "%pB: directiva LOCAL válida sólo con un registro o un valor absoluto"
 
 #: elf64-mmix.c:1742
-#, fuzzy, c-format
-#| msgid "%B: LOCAL directive: Register $%Ld is not a local register.  First global register is $%Ld."
+#, c-format
 msgid "%pB: LOCAL directive: register $%<PRId64> is not a local register; first global register is $%<PRId64>"
-msgstr "%pB: directiva LOCAL: El registro $%<PRId64> no es un registro local.  El primer registro global es $%<PRId64>."
+msgstr "%pB: directiva LOCAL: el registro $%<PRId64> no es un registro local; el primer registro global es $%<PRId64>"
 
 #: elf64-mmix.c:2157
-#, fuzzy, c-format
-#| msgid "%B: Error: multiple definition of `%s'; start of %s is set in a earlier linked file\n"
+#, c-format
 msgid "%pB: error: multiple definition of `%s'; start of %s is set in a earlier linked file"
-msgstr "%pB: error: definición múltiple de «%s»; el inicio de %s está definido dentro de un fichero enlazado con anterioridad\n"
+msgstr "%pB: error: definición múltiple de «%s»; el inicio de %s está definido dentro de un fichero enlazado con anterioridad"
 
 #: elf64-mmix.c:2212
-#, fuzzy
-#| msgid "Register section has contents\n"
 msgid "register section has contents\n"
-msgstr "La sección de registros no tiene contenido\n"
+msgstr "la sección de registro tiene contenido\n"
 
 #: elf64-mmix.c:2402
 #, fuzzy, c-format
@@ -5186,7 +5004,7 @@ msgstr "no se puede construir el intermediario de la rama «%s»"
 #: elf64-ppc.c:13384
 #, c-format
 msgid "%pB section %pA exceeds stub group size"
-msgstr "%pB sección %pA excede el tamaño de grupo de cabos"
+msgstr "%pB sección %pA excede el tamaño de grupo de stubs"
 
 #: elf64-ppc.c:14904
 msgid "__tls_get_addr call offset overflow"
@@ -5363,16 +5181,14 @@ msgid "; recompile with -fPIE"
 msgstr "; recompile con -fPIE"
 
 #: elf64-x86-64.c:1580
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against %s%s`%s' can not be used when making %s%s"
+#, c-format
 msgid "%pB: relocation %s against %s%s`%s' can not be used when making %s%s"
-msgstr "%pB: reubicación %s frente a %s%s «%s» no puede emplearse cuando se crea %s%s"
+msgstr "%pB: la reubicación %s frente a %s%s «%s» no se puede usar cuando se crea %s%s"
 
 #: elf64-x86-64.c:2116
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against symbol `%s' isn't supported in x32 mode"
+#, c-format
 msgid "%pB: relocation %s against symbol `%s' isn't supported in x32 mode"
-msgstr "%pB: reubicación %s frente al símbolo «%s» no se admite en modo x32"
+msgstr "%pB: la reubicación %s frente al símbolo «%s» no se admite en el modo x32"
 
 #: elf64-x86-64.c:2266
 #, c-format
@@ -5380,16 +5196,14 @@ msgid "%pB: '%s' accessed both as normal and thread local symbol"
 msgstr "%pB: «%s» ha accedido como ambos un símbolo común y local de hilo"
 
 #: elf64-x86-64.c:2926 elfnn-aarch64.c:5754 elfnn-riscv.c:2295
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against STT_GNU_IFUNC symbol `%s' has non-zero addend: %Ld"
+#, c-format
 msgid "%pB: relocation %s against STT_GNU_IFUNC symbol `%s' has non-zero addend: %<PRId64>"
-msgstr "%pB: reubicación %s frente al símbolo STT_GNU_IFUNC «%s» tiene añadido algo distinto de cero: %<PRId64>"
+msgstr "%pB: la reubicación %s frente al símbolo STT_GNU_IFUNC «%s» tiene sumando distinto de cero: %<PRId64>"
 
 #: elf64-x86-64.c:3189
-#, fuzzy, c-format
-#| msgid "%B: relocation R_X86_64_GOTOFF64 against undefined %s `%s' can not be used when making a shared object"
+#, c-format
 msgid "%pB: relocation R_X86_64_GOTOFF64 against undefined %s `%s' can not be used when making a shared object"
-msgstr "%pB: no se puede usar la reubicación R_X86_64_GOTOFF64  contra %s indefinida «%s» cuando se hace un objeto compartido"
+msgstr "%pB: no se puede usar la reubicación R_X86_64_GOTOFF64 contra %s indefinida «%s» cuando se hace un objeto compartido"
 
 #: elf64-x86-64.c:3203
 #, fuzzy, c-format
@@ -5450,10 +5264,9 @@ msgid "%pB: %pA+%<PRIx64>: relocation addend %<PRIx64> too large"
 msgstr "%pB: %pA+%<PRIx64>: sumando de reubicación %<PRIx64> demasiado grande"
 
 #: elfcode.h:1322
-#, fuzzy, c-format
-#| msgid "%B: version count (%Ld) does not match symbol count (%ld)"
+#, c-format
 msgid "%pB: version count (%<PRId64>) does not match symbol count (%ld)"
-msgstr "%pB: contador de versión (%<PRId64>) no coincide con la cuenta simbólica (%ld)"
+msgstr "%pB: el contador de versión (%<PRId64>) no coincide con la cuenta de símbolos (%ld)"
 
 #: elfcore.h:280
 #, fuzzy, c-format
@@ -5486,32 +5299,27 @@ msgid "%s: TLS reference in %pB mismatches non-TLS definition in %pB section %pA
 msgstr "%s: la referencia TLS en %pB no coincide con la definición que no es TLS en %pB sección %pA"
 
 #: elflink.c:2127
-#, fuzzy, c-format
-#| msgid "%B: unexpected redefinition of indirect versioned symbol `%s'"
+#, c-format
 msgid "%pB: unexpected redefinition of indirect versioned symbol `%s'"
 msgstr "%pB: redefinición inesperada del símbolo con versión indirecta «%s»"
 
 #: elflink.c:2626
-#, fuzzy, c-format
-#| msgid "%B: version node not found for symbol %s"
+#, c-format
 msgid "%pB: version node not found for symbol %s"
-msgstr "%pB: no se encuentra la versión del nodo para el símbolo %s"
+msgstr "%pB: no se encuentra el nodo de versión para el símbolo %s"
 
 #: elflink.c:2717
-#, fuzzy, c-format
-#| msgid "%B: bad reloc symbol index (%#Lx >= %#lx) for offset %#Lx in section `%A'"
+#, c-format
 msgid "%pB: bad reloc symbol index (%#<PRIx64> >= %#lx) for offset %#<PRIx64> in section `%pA'"
-msgstr "%pB: indexado simbólico de reubicación equivocado (%#<PRIx64> >= %#lx)  para desplazar %#<PRIx64> dentro de sección «%pA»"
+msgstr "%pB: índice de símbolo de reubicación incorrecto (%#<PRIx64> >= %#lx) para el desplazamiento %#<PRIx64> en la sección «%pA»"
 
 #: elflink.c:2729
-#, fuzzy, c-format
-#| msgid "%B: non-zero symbol index (%#Lx) for offset %#Lx in section `%A' when the object file has no symbol table"
+#, c-format
 msgid "%pB: non-zero symbol index (%#<PRIx64>) for offset %#<PRIx64> in section `%pA' when the object file has no symbol table"
-msgstr "%pB: índice simbólicos distinto de cero (%#<PRIx64>) para desplazamiento %#<PRIx64> en la sección «%pA» cuando el fichero objeto no tiene ningún segmento simbólico"
+msgstr "%pB: índice de símbolos distinto de cero (%#<PRIx64>) para el desplazamiento %#<PRIx64> en la sección «%pA» cuando el fichero objeto no tiene ninguna tabla de símbolos"
 
 #: elflink.c:2940
-#, fuzzy, c-format
-#| msgid "%B: relocation size mismatch in %B section %A"
+#, c-format
 msgid "%pB: relocation size mismatch in %pB section %pA"
 msgstr "%pB: el tamaño de reubicación no coincide en %pB sección %pA"
 
@@ -5535,10 +5343,9 @@ msgid "%pB: invalid version offset %lx (max %lx)"
 msgstr "%pB: desplazamiento de versión no válida %lx (máx. %lx)"
 
 #: elflink.c:4857
-#, fuzzy, c-format
-#| msgid "%B: illegal symbol index %ld in relocs"
+#, c-format
 msgid "%pB: %s local symbol at index %lu (>= sh_info of %lu)"
-msgstr "%pB: índice simbólico %ld ilegal en reubicaciones"
+msgstr "%pB: símbolo local %s en el índice %lu (>= sh_info de %lu)"
 
 #: elflink.c:5005
 #, fuzzy, c-format
@@ -5571,10 +5378,9 @@ msgid "warning: NOTE: size discrepancies can cause real problems.  Investigation
 msgstr "aviso: NOTE: las discrepancias de tamaño pueden causar problemas reales.  Se recomienda investigar."
 
 #: elflink.c:5516
-#, fuzzy, c-format
-#| msgid "%B: undefined reference to symbol '%s'"
+#, c-format
 msgid "%pB: undefined reference to symbol '%s'"
-msgstr "%pB: referencia sin definir al símbolo «%s»"
+msgstr "%pB: referencia indefinida al símbolo «%s»"
 
 #: elflink.c:6576
 #, fuzzy, c-format
@@ -5625,8 +5431,7 @@ msgid "NOTE: This behaviour is deprecated and will be removed in a future versio
 msgstr "NOTA: Este comportamiento está obsoleto y se eliminará en una versión futura del enlazador"
 
 #: elflink.c:7426
-#, fuzzy, c-format
-#| msgid "%B: .preinit_array section is not allowed in DSO"
+#, c-format
 msgid "%pB: .preinit_array section is not allowed in DSO"
 msgstr "%pB: no se permite la sección .preinit_array en DSO"
 
@@ -5660,34 +5465,28 @@ msgid "%pB:%pA: error: try relinking with --gc-keep-exported enabled"
 msgstr "%pB:%pA: error: intente reenlazar con --gc-keep-exported activado."
 
 #: elflink.c:9792 elflink.c:9810 elflink.c:9849 elflink.c:9867
-#, fuzzy, c-format
-#| msgid "%B: Unable to sort relocs - they are in more than one size"
+#, c-format
 msgid "%pB: unable to sort relocs - they are in more than one size"
 msgstr "%pB: no se pueden ordenar las reubicaciones - son de tamaños diferentes"
 
 #. The section size is not divisible by either -
 #. something is wrong.
 #: elflink.c:9826 elflink.c:9883
-#, fuzzy, c-format
-#| msgid "%B: Unable to sort relocs - they are of an unknown size"
+#, c-format
 msgid "%pB: unable to sort relocs - they are of an unknown size"
 msgstr "%pB: no se pueden ordenar las reubicaciones - son de tamaño desconocido"
 
 #: elflink.c:9935
-#, fuzzy
-#| msgid "Not enough memory to sort relocations"
 msgid "not enough memory to sort relocations"
-msgstr "No hay suficiente memoria para ordenar las reubicaciones"
+msgstr "no hay suficiente memoria para ordenar las reubicaciones"
 
 #: elflink.c:10273
-#, fuzzy, c-format
-#| msgid "%B: Too many sections: %d (>= %d)"
+#, c-format
 msgid "%pB: too many sections: %d (>= %d)"
-msgstr "%pB: Demasiadas secciones:  %d (>= %d)"
+msgstr "%pB: demasiadas secciones: %d (>= %d)"
 
 #: elflink.c:10549
-#, fuzzy, c-format
-#| msgid "%B: internal symbol `%s' in %B is referenced by DSO"
+#, c-format
 msgid "%pB: internal symbol `%s' in %pB is referenced by DSO"
 msgstr "%pB: el símbolo interno «%s» en %pB está referenciado por DSO"
 
@@ -5698,26 +5497,22 @@ msgid "%pB: hidden symbol `%s' in %pB is referenced by DSO"
 msgstr "%pB: símbolo oculto «%s» en %pB está referenciado por DSO"
 
 #: elflink.c:10555
-#, fuzzy, c-format
-#| msgid "%B: local symbol `%s' in %B is referenced by DSO"
+#, c-format
 msgid "%pB: local symbol `%s' in %pB is referenced by DSO"
 msgstr "%pB: el símbolo local «%s» en %pB está referenciado por DSO"
 
 #: elflink.c:10641
-#, fuzzy, c-format
-#| msgid "%B: could not find output section %A for input section %A"
+#, c-format
 msgid "%pB: could not find output section %pA for input section %pA"
-msgstr "%pB: no se puede encontrar la sección de salida %pA para la sección de entrada %pA"
+msgstr "%pB: no se pudo encontrar la sección de salida %pA para la sección de entrada %pA"
 
 #: elflink.c:10795
-#, fuzzy, c-format
-#| msgid "%B: protected symbol `%s' isn't defined"
+#, c-format
 msgid "%pB: protected symbol `%s' isn't defined"
 msgstr "%pB: el símbolo protegido «%s» no está definido"
 
 #: elflink.c:10798
-#, fuzzy, c-format
-#| msgid "%B: internal symbol `%s' isn't defined"
+#, c-format
 msgid "%pB: internal symbol `%s' isn't defined"
 msgstr "%pB: el símbolo interno «%s» no está definido"
 
@@ -5728,10 +5523,9 @@ msgid "%pB: hidden symbol `%s' isn't defined"
 msgstr "%pB: símbolo oculto «%s» no está definido"
 
 #: elflink.c:10833
-#, fuzzy, c-format
-#| msgid "%B: No symbol version section for versioned symbol `%s'"
+#, c-format
 msgid "%pB: no symbol version section for versioned symbol `%s'"
-msgstr "%pB: ninguna sección de versión simbólica para símbolo «%s» versionado"
+msgstr "%pB: ninguna sección de versión de símbolo para el símbolo «%s» versionado"
 
 #: elflink.c:11514
 #, fuzzy, c-format
@@ -5746,10 +5540,9 @@ msgid "error: %pB: size of section %pA is not multiple of address size"
 msgstr "error: %pB: el tamaño de la sección %pA no es un múltiplo del tamaño de la dirección"
 
 #: elflink.c:12261
-#, fuzzy, c-format
-#| msgid "%B: no symbol found for import library"
+#, c-format
 msgid "%pB: no symbol found for import library"
-msgstr "%pB: ningún símbolo encontrado para importar biblioteca"
+msgstr "%pB: no se encontró ningún símbolo para la biblioteca de importación"
 
 #: elflink.c:12836
 msgid "%F%P: %pB: failed to finish relative relocations\n"
@@ -5761,10 +5554,9 @@ msgid "%pB: file class %s incompatible with %s"
 msgstr "%pB: fichero de clase %s es incompatible con %s"
 
 #: elflink.c:13162
-#, fuzzy, c-format
-#| msgid "%B: failed to generate import library"
+#, c-format
 msgid "%pB: failed to generate import library"
-msgstr "%pB: fallaba al generar biblioteca importada"
+msgstr "%pB: no se pudo generar la biblioteca de importación"
 
 #: elflink.c:13330
 #, c-format
@@ -5797,10 +5589,8 @@ msgid "%P%X: can not read symbols: %E\n"
 msgstr "%P%X: no se pueden leer símbolos: %E\n"
 
 #: elflink.c:14042
-#, fuzzy
-#| msgid "%B: Failed to find link section for section %d"
 msgid "%F%P: %pB(%pA): error: need linked-to section for --gc-sections\n"
-msgstr "%pB: fallado para encontrar sección de enlace para sección %d"
+msgstr "%F%P: %pB(%pA): error: es necesaria la sección enlazado-a para --gc-sections\n"
 
 #: elflink.c:14520
 #, c-format
@@ -5844,22 +5634,19 @@ msgid "error: %pB: <corrupt AArch64 used size: 0x%x>"
 msgstr "error: %pB: <corrompe tamaño ISA x86 utilizado: 0x%x>"
 
 #: elfxx-loongarch.c:1909
-#, fuzzy, c-format
-#| msgid "%B: unsupported relocation type %s"
+#, c-format
 msgid "%pB: unsupported relocation type %s"
 msgstr "%pB: no se admite el tipo de reubicación %s"
 
 #: elfxx-loongarch.c:1937
-#, fuzzy, c-format
-#| msgid "%B: unsupported relocation type %s"
+#, c-format
 msgid "%pB: unsupported bfd relocation type %#x"
-msgstr "%pB: no se admite el tipo de reubicación %s"
+msgstr "%pB: no se admite el tipo de reubicación bfd %#x"
 
 #: elfxx-loongarch.c:2009
-#, fuzzy, c-format
-#| msgid "%B: relocation size mismatch in %B section %A"
+#, c-format
 msgid "%pB: relocation %s right shift %d error 0x%lx"
-msgstr "%pB: el tamaño de reubicación no coincide en %pB sección %pA"
+msgstr "%pB: reubicación %s desplazamiento a la derecha %d error 0x%lx"
 
 #: elfxx-loongarch.c:2028
 #, c-format
@@ -5875,10 +5662,8 @@ msgid "MIPS16 and microMIPS functions cannot call each other"
 msgstr "Funciones MIPS16 y microMIPS no se pueden llamar unas a otras"
 
 #: elfxx-mips.c:6627
-#, fuzzy
-#| msgid "%X%H: Unsupported JALX to the same ISA mode\n"
 msgid "%X%H: unsupported JALX to the same ISA mode\n"
-msgstr "%X%H: JALX no soportado para el mismo modo ISA\n"
+msgstr "%X%H: JALX no admitido para el mismo modo ISA\n"
 
 #: elfxx-mips.c:6660
 #, fuzzy
@@ -5893,10 +5678,8 @@ msgid "%X%H: cannot convert branch between ISA modes to JALX: relocation out of 
 msgstr "%X%H: no puede convertir rama entre modos ISA a JALX: reubicando fuera de límite\n"
 
 #: elfxx-mips.c:6717
-#, fuzzy
-#| msgid "%X%H: Unsupported branch between ISA modes\n"
 msgid "%X%H: unsupported branch between ISA modes\n"
-msgstr "%X%H: rama no soportada entre modos ISA\n"
+msgstr "%X%H: rama no admitida entre modos ISA\n"
 
 #: elfxx-mips.c:7350
 #, c-format
@@ -5906,19 +5689,17 @@ msgstr "%pB: tamaño de sección «.reginfo» incorrecto; esperado %<PRIu64>, ob
 #: elfxx-mips.c:7394
 #, c-format
 msgid "%pB: warning: bad `%s' option size %u smaller than its header"
-msgstr "%pB: aviso: el tamaño de opción «%s» %u equivocado es más pequeño que su encabezado"
+msgstr "%pB: aviso: el tamaño de opción «%s» %u incorrecto es más pequeño que su encabezado"
 
 #: elfxx-mips.c:7630
-#, fuzzy, c-format
-#| msgid "%B: warning: allocated section `%s' not in segment"
+#, c-format
 msgid "%pB: warning: truncated `%s' option"
-msgstr "%pB: aviso: sección asignada «%s» no dentro del segmento"
+msgstr "%pB: aviso: opción «%s» truncada"
 
 #: elfxx-mips.c:8454 elfxx-mips.c:8580
-#, fuzzy, c-format
-#| msgid "%B: Warning: cannot determine the target function for stub section `%s'"
+#, c-format
 msgid "%pB: warning: cannot determine the target function for stub section `%s'"
-msgstr "%pB: aviso: no se puede determinar la función objetivo para la sección de cabo «%s»"
+msgstr "%pB: aviso: no se puede determinar la función objetivo para la sección de stub «%s»"
 
 #: elfxx-mips.c:8712
 #, fuzzy, c-format
@@ -5933,16 +5714,14 @@ msgid "%pB: GOT reloc at %#<PRIx64> not expected in executables"
 msgstr "%pB: reubicación GOT en %#<PRIx64> no esperado en ejecutables"
 
 #: elfxx-mips.c:8952
-#, fuzzy, c-format
-#| msgid "%B: CALL16 reloc at %#Lx not against global symbol"
+#, c-format
 msgid "%pB: CALL16 reloc at %#<PRIx64> not against global symbol"
-msgstr "%pB: reubicación CALL16 en %Lx no contra símbolo global"
+msgstr "%pB: reubicación CALL16 en %#<PRIx64> no contra símbolo global"
 
 #: elfxx-mips.c:9255
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against `%s' can not be used when making a shared object; recompile with -fPIC"
+#, c-format
 msgid "%X%H: relocation %s against `%s' cannot be used when making a shared object; recompile with -fPIC\n"
-msgstr "%pB: reubicación %s frente a «%s» no puede emplearse cuando se crea un objeto compartido; recompile con -fPIC"
+msgstr "%X%H: la reubicación %s frente a «%s» no se puede usar cuando se crea un objeto compartido; recompile con -fPIC\n"
 
 #: elfxx-mips.c:9381
 #, c-format
@@ -5961,8 +5740,7 @@ msgid "non-dynamic relocations refer to dynamic symbol %s"
 msgstr "reubicaciones que no son dinámicas se refieren al símbolo dinámico %s"
 
 #: elfxx-mips.c:10539
-#, fuzzy, c-format
-#| msgid "%B: Can't find matching LO16 reloc against `%s' for %s at %#Lx in section `%A'"
+#, c-format
 msgid "%pB: can't find matching LO16 reloc against `%s' for %s at %#<PRIx64> in section `%pA'"
 msgstr "%pB: no se puede encontrar una reubicación LO16 coincidente contra «%s» para %s en %#<PRIx64> en la sección «%pA»"
 
@@ -6012,10 +5790,9 @@ msgid "%pB: `%pA' entry VMA of %#<PRIx64> outside the 32-bit range supported; co
 msgstr "%pB: VMA de entrada «%pA» de %#<PRIx64> fuera del rango de 32 bits admitido; considere usar «-Ttext-segment=...»"
 
 #: elfxx-mips.c:11124 elfxx-mips.c:11711
-#, fuzzy, c-format
-#| msgid "%B: `%A' offset of %Ld from `%A' beyond the range of ADDIUPC"
+#, c-format
 msgid "%pB: `%pA' offset of %<PRId64> from `%pA' beyond the range of ADDIUPC"
-msgstr "%pB: desplazamiento «%pA» de %<PRId64> desde «%pA» más allá que el rango de ADDIUPC"
+msgstr "%pB: desplazamiento «%pA» de %<PRId64> desde «%pA» más allá del rango de ADDIUPC"
 
 #: elfxx-mips.c:11683
 #, c-format
@@ -6034,14 +5811,12 @@ msgid "%pB: unknown architecture %s"
 msgstr "%pB: arquitectura %s desconocida"
 
 #: elfxx-mips.c:15269
-#, fuzzy, c-format
-#| msgid "%B: illegal section name `%A'"
+#, c-format
 msgid "%pB: illegal section name `%pA'"
 msgstr "%pB: nombre de sección ilegal «%pA»"
 
 #: elfxx-mips.c:15546
-#, fuzzy, c-format
-#| msgid "%B: warning: linking abicalls files with non-abicalls files"
+#, c-format
 msgid "%pB: warning: linking abicalls files with non-abicalls files"
 msgstr "%pB: aviso: se enlazan ficheros de llamadas ABI con ficheros que no son de llamadas ABI"
 
@@ -6055,19 +5830,17 @@ msgstr "%pB: se enlaza código de 32-bit con código de 64-bit"
 #, fuzzy, c-format
 #| msgid "%B: linking %s module with previous %s modules"
 msgid "%pB: linking %s module with previous %s modules"
-msgstr "%pB: se enlaza el módulo %s con módulos %s previos"
+msgstr "%pB: se enlaza el módulo %s con módulos %s anteriores"
 
 #: elfxx-mips.c:15619
-#, fuzzy, c-format
-#| msgid "%B: ABI mismatch: linking %s module with previous %s modules"
+#, c-format
 msgid "%pB: ABI mismatch: linking %s module with previous %s modules"
-msgstr "%pB: no coincide ABI: se enlaza el módulo %s con módulos %s previos"
+msgstr "%pB: no coincide ABI: enlazando el módulo %s con módulos %s anteriores"
 
 #: elfxx-mips.c:15644
-#, fuzzy, c-format
-#| msgid "%B: ASE mismatch: linking %s module with previous %s modules"
+#, c-format
 msgid "%pB: ASE mismatch: linking %s module with previous %s modules"
-msgstr "%pB: no coincide ASE: se enlaza el módulo %s con módulos %s previos"
+msgstr "%pB: no coincide ASE: enlazando el módulo %s con módulos %s anteriores"
 
 #: elfxx-mips.c:15778
 #, fuzzy, c-format
@@ -6112,16 +5885,14 @@ msgid "warning: %pB uses unknown MSA ABI %d (set by %pB), %pB uses unknown MSA A
 msgstr "aviso: %pB emplea MSA ABI %d desconocida (establece por %pB), %pB emplea MSA ABI %d"
 
 #: elfxx-mips.c:15906
-#, fuzzy, c-format
-#| msgid "%B: endianness incompatible with that of the selected emulation"
+#, c-format
 msgid "%pB: endianness incompatible with that of the selected emulation"
-msgstr "%pB: endianez es incompatible con aquella de la emulación seleccionada"
+msgstr "%pB: la endianidad es incompatible con la de la emulación seleccionada"
 
 #: elfxx-mips.c:15920
-#, fuzzy, c-format
-#| msgid "%B: ABI is incompatible with that of the selected emulation"
+#, c-format
 msgid "%pB: ABI is incompatible with that of the selected emulation"
-msgstr "%pB: la ABI es incompatible con aquella de la emulación seleccionada"
+msgstr "%pB: ABI es incompatible con el de la emulación seleccionada"
 
 #: elfxx-mips.c:15973
 #, c-format
@@ -6326,17 +6097,17 @@ msgstr "%s: la cadena ISA debe comenzar con rv32 o rv64"
 #: elfxx-riscv.c:2339
 #, c-format
 msgid "invalid ISA extension ends with <number>p in .option arch `%s'"
-msgstr "la extensión ISA no válida termina con <number>p en el arch .option «%s»"
+msgstr "la extensión ISA no válida termina con <number>p en la arquitectura de .option «%s»"
 
 #: elfxx-riscv.c:2362
 #, c-format
 msgid "unknown ISA extension `%s' in .option arch `%s'"
-msgstr "extensión ISA desconocida «%s» en el arch .option «%s»"
+msgstr "extensión ISA desconocida «%s» en arquitectura de .option «%s»"
 
 #: elfxx-riscv.c:2373
 #, c-format
 msgid "cannot + or - base extension `%s' in .option arch `%s'"
-msgstr "no se puede + o - la extensión base «%s» en arch .option «%s»"
+msgstr "no se puede + o - la extensión base «%s» en arquitectura de .option «%s»"
 
 #: elfxx-riscv.c:2613 elfxx-riscv.c:2861
 msgid "internal: unreachable INSN_CLASS_*"
@@ -6487,16 +6258,14 @@ msgid "h"
 msgstr "h"
 
 #: elfxx-sparc.c:3021 elfnn-aarch64.c:5738
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against STT_GNU_IFUNC symbol `%s' isn't handled by %s"
+#, c-format
 msgid "%pB: relocation %s against STT_GNU_IFUNC symbol `%s' isn't handled by %s"
-msgstr "%pB: reubicación %s frente al símbolo STT_GNU_IFUNC «%s» no es manipulada por %s"
+msgstr "%pB: la reubicación %s frente al símbolo STT_GNU_IFUNC «%s» no es manejado por %s"
 
 #: elfxx-tilegx.c:4126
-#, fuzzy, c-format
-#| msgid "%B: Cannot link together %s and %s objects."
+#, c-format
 msgid "%pB: cannot link together %s and %s objects"
-msgstr "%pB: No se pueden enlazar juntos los objetos %s y %s."
+msgstr "%pB: no se pueden enlazar juntos los objetos %s y %s"
 
 #: elfxx-x86.c:536 elfxx-x86.c:3440
 #, fuzzy, c-format
@@ -6672,38 +6441,32 @@ msgid "%pB:%u: unrecognized ihex type %u in Intel Hex file"
 msgstr "%pB:%u: no se reconoce el tipo ihex %u en el fichero Hex Intel"
 
 #: ihex.c:581
-#, fuzzy, c-format
-#| msgid "%B: internal error in ihex_read_section"
+#, c-format
 msgid "%pB: internal error in ihex_read_section"
 msgstr "%pB: error interno en ihex_read_section"
 
 #: ihex.c:614
-#, fuzzy, c-format
-#| msgid "%B: bad section length in ihex_read_section"
+#, c-format
 msgid "%pB: bad section length in ihex_read_section"
-msgstr "%pB: longitud de sección equivocada en ihex_read_section"
+msgstr "%pB: longitud de sección incorrecta en ihex_read_section"
 
 #: ihex.c:785
-#, fuzzy, c-format
-#| msgid "%B: address %#Lx out of range for Intel Hex file"
+#, c-format
 msgid "%pB 64-bit address %#<PRIx64> out of range for Intel Hex file"
-msgstr "%pB: dirección %#<PRIx64> está fuera de rango para el fichero Hexadecimal de Intel"
+msgstr "%pB: la dirección de 64 bits %#<PRIx64> está fuera de rango para el fichero Hexadecimal de Intel"
 
 #: ihex.c:843
-#, fuzzy, c-format
-#| msgid "%B: address %#Lx out of range for Intel Hex file"
+#, c-format
 msgid "%pB: address %#<PRIx64> out of range for Intel Hex file"
-msgstr "%pB: dirección %#<PRIx64> está fuera de rango para el fichero Hexadecimal de Intel"
+msgstr "%pB: la dirección %#<PRIx64> está fuera de rango para el fichero Hexadecimal de Intel"
 
 #: libbfd.c:1058
-#, fuzzy, c-format
-#| msgid "%B: unable to get decompressed section %A"
+#, c-format
 msgid "%pB: unable to get decompressed section %pA"
 msgstr "%pB: no se puede obtener la sección %pA descomprimida"
 
 #: linker.c:1713
-#, fuzzy, c-format
-#| msgid "%B: indirect symbol `%s' to `%s' is a loop"
+#, c-format
 msgid "%pB: indirect symbol `%s' to `%s' is a loop"
 msgstr "%pB: el símbolo indirecto «%s» para «%s» es un bucle"
 
@@ -6724,63 +6487,58 @@ msgid "%pB: ignoring duplicate section `%pA'\n"
 msgstr "%pB: se descarta la sección duplicada «%pA»\n"
 
 #: linker.c:2880 linker.c:2890
-#, fuzzy, c-format
-#| msgid "%B: duplicate section `%A' has different size\n"
+#, c-format
 msgid "%pB: duplicate section `%pA' has different size\n"
 msgstr "%pB: la sección duplicada «%pA» tiene tamaño diferente\n"
 
 #: linker.c:2904 linker.c:2912
-#, fuzzy, c-format
-#| msgid "%B: could not read contents of section `%A'\n"
+#, c-format
 msgid "%pB: could not read contents of section `%pA'\n"
-msgstr "%pB: no se puede leer el contenido de la sección «%pA»\n"
+msgstr "%pB: no se pudo leer el contenido de la sección «%pA»\n"
 
 #: linker.c:2921
-#, fuzzy, c-format
-#| msgid "%B: duplicate section `%A' has different contents\n"
+#, c-format
 msgid "%pB: duplicate section `%pA' has different contents\n"
-msgstr "%pB: la sección duplicada «%pA» tiene contenido diferente\n"
+msgstr "%pB: la sección duplicada «%pA» tiene contenidos diferentes\n"
 
 #: linker.c:3440
-#, fuzzy, c-format
-#| msgid "%B: compiled for a big endian system and target is little endian"
+#, c-format
 msgid "%pB: compiled for a big endian system and target is little endian"
 msgstr "%pB: compilado para un sistema big endian y el objetivo es little endian"
 
 #: linker.c:3443
-#, fuzzy, c-format
-#| msgid "%B: compiled for a little endian system and target is big endian"
+#, c-format
 msgid "%pB: compiled for a little endian system and target is big endian"
 msgstr "%pB: compilado para un sistema little endian y el objetivo es big endian"
 
 #: mach-o-arm.c:169 mach-o-arm.c:301
 msgid "malformed mach-o ARM reloc pair: reloc is first reloc"
-msgstr "Par de reubicación ARM mach-o mal formado: la reubicación es la primera reubicación"
+msgstr "par de reubicación de ARM mach-o mal formado: la reubicación es la primera reubicación"
 
 #: mach-o-arm.c:185
 #, c-format
 msgid "malformed mach-o ARM reloc pair: invalid length: %d"
-msgstr "Par de reubicación ARM mach-o mal formado: longitud no válida: %d"
+msgstr "par de reubicación de ARM mach-o mal formado: longitud no válida: %d"
 
 #: mach-o-arm.c:200
 #, c-format
 msgid "malformed mach-o ARM sectdiff reloc: invalid length: %d"
-msgstr "Reubicación de sectdiff de mach-o ARM con formato incorrecto: longitud no válida: %d"
+msgstr "reubicación de sectdiff de ARM mach-o mal formada: longitud no válida: %d"
 
 #: mach-o-arm.c:215
 #, c-format
 msgid "malformed mach-o ARM local sectdiff reloc: invalid length: %d"
-msgstr "Reubicación de sectdiff local de mach-o ARM con formato incorrecto: longitud no válida: %d"
+msgstr "reubicación de sectdiff local de ARM mach-o mal formada: longitud no válida: %d"
 
 #: mach-o-arm.c:230
 #, c-format
 msgid "malformed mach-o ARM half sectdiff reloc: invalid length: %d"
-msgstr "Reubicación media sectdiff de mach-o ARM mal formada: longitud no válida: %d"
+msgstr "reubicación de medio sectdiff de ARM mach-o mal formada: longitud no válida: %d"
 
 #: mach-o-arm.c:262
 #, c-format
 msgid "malformed mach-o ARM vanilla reloc: invalid length: %d (pcrel: %d)"
-msgstr "Reubicación de vainilla de mach-o ARM mal formado: longitud no válida: %d (pcrel: %d)"
+msgstr "reubicación estándar de ARM mach-o mal formada: longitud no válida: %d (pcrel: %d)"
 
 #: mach-o-arm.c:332
 #, fuzzy, c-format
@@ -6824,7 +6582,7 @@ msgstr "   subtipocpu: %#lx%s\n"
 #: mach-o.c:713
 #, c-format
 msgid "   filetype:   %#lx\n"
-msgstr " tipoarch    %#lx\n"
+msgstr "   tipoarchiv: %#lx\n"
 
 #: mach-o.c:714
 #, c-format
@@ -6858,7 +6616,7 @@ msgstr "bfd_mach_o_canonicalize_symtab: no se pueden cargar símbolos"
 
 #: mach-o.c:1513
 msgid "malformed mach-o reloc: section index is greater than the number of sections"
-msgstr "Reubicación mach-o mal formado: el índice de sección es mayor que el número de secciones"
+msgstr "reubicación de mach-o mal formada: el índice de sección es mayor que el número de secciones"
 
 #: mach-o.c:2155
 msgid "sorry: modtab, toc and extrefsyms are not yet implemented for dysymtab commands."
@@ -6923,8 +6681,7 @@ msgid "bfd_mach_o_read_symtab_symbol: symbol \"%s\" specified invalid type field
 msgstr "bfd_mach_o_read_symtab_symbol: el símbolo «%s» especificó el campo de tipo 0x%x no válido: se cambia a indefinido"
 
 #: mach-o.c:5075
-#, fuzzy, c-format
-#| msgid "%B: unknown load command %#x"
+#, c-format
 msgid "%pB: unknown load command %#x"
 msgstr "%pB: orden de carga desconocida %#x"
 
@@ -6944,16 +6701,14 @@ msgid "%pB: access beyond end of merged section (%<PRId64>)"
 msgstr "%pB: acceso más allá de sección combinada (%<PRId64>)"
 
 #: mmo.c:535
-#, fuzzy, c-format
-#| msgid "%B: No core to allocate a symbol %d bytes long\n"
+#, c-format
 msgid "%pB: no core to allocate a symbol %d bytes long"
-msgstr "%pB: ningún núcleo para reservar un símbolo de %d bytes de longitud\n"
+msgstr "%pB: ningún núcleo para asignar un símbolo de %d bytes de longitud"
 
 #: mmo.c:956
-#, fuzzy, c-format
-#| msgid "%B: attempt to emit contents at non-multiple-of-4 address %#Lx"
+#, c-format
 msgid "%pB: attempt to emit contents at non-multiple-of-4 address %#<PRIx64>"
-msgstr "%pB: intenta emitir contenidos en dirección no múltiplo de 4 %#<PRIx64>"
+msgstr "%pB: intento de emitir contenidos en una dirección que no es múltiplo de 4 %#<PRIx64>"
 
 #: mmo.c:1251
 #, c-format
@@ -7007,10 +6762,9 @@ msgid "%pB: invalid mmo file: leading byte of operand word must be 0 or 1, got %
 msgstr "%pB: fichero mmo no válido: el byte inicial del operando word debe ser 0 o 1, se obtuvo %d para lop_fixrx\n"
 
 #: mmo.c:1863
-#, fuzzy, c-format
-#| msgid "%B: cannot allocate file name for file number %d, %d bytes\n"
+#, c-format
 msgid "%pB: cannot allocate file name for file number %d, %d bytes\n"
-msgstr "%pB: no se puede reservar el nombre de fichero para el número de fichero %d, %d bytes\n"
+msgstr "%pB: no se puede asignar el nombre de fichero para el número de fichero %d, %d bytes\n"
 
 #: mmo.c:1885
 #, c-format
@@ -7044,28 +6798,24 @@ msgid "%pB: invalid symbol table: duplicate symbol `%s'\n"
 msgstr "%pB: segmento simbólico no válido: símbolo duplicado «%s»\n"
 
 #: mmo.c:3015
-#, fuzzy, c-format
-#| msgid "%B: Bad symbol definition: `Main' set to %s rather than the start address %s\n"
+#, c-format
 msgid "%pB: bad symbol definition: `Main' set to %<PRIx64> rather than the start address %<PRIx64>\n"
-msgstr "%pB: Definición de símbolo equivocada: «Main» se estableció como %s en lugar de la dirección de inicio %s\n"
+msgstr "%pB: definición de símbolo incorrecta: «Main» se estableció como %<PRIx64> en lugar de la dirección de inicio %<PRIx64>\n"
 
 #: mmo.c:3114
-#, fuzzy, c-format
-#| msgid "%B: warning: symbol table too large for mmo, larger than 65535 32-bit words: %d.  Only `Main' will be emitted.\n"
+#, c-format
 msgid "%pB: warning: symbol table too large for mmo, larger than 65535 32-bit words: %d.  Only `Main' will be emitted.\n"
-msgstr "%pB: aviso: segmento simbólico es muy grande para mmo, más grande que 65535 words de 32-bit: %d.  Solamente será emitida «Main».\n"
+msgstr "%pB: aviso: la tabla de símbolos es muy grande para mmo, más grande que 65535 palabras de 32-bit: %d.  Solamente se emitirá «Main».\n"
 
 #: mmo.c:3160
-#, fuzzy, c-format
-#| msgid "%B: internal error, symbol table changed size from %d to %d words\n"
+#, c-format
 msgid "%pB: internal error, symbol table changed size from %d to %d words\n"
-msgstr "%pB: error interno, el segmento simbólico modificó el tamaño desde %d hasta %d words\n"
+msgstr "%pB: error interno, la tabla de símbolos modificó su tamaño desde %d hasta %d palabras\n"
 
 #: mmo.c:3213
-#, fuzzy, c-format
-#| msgid "%B: internal error, internal register section %A had contents\n"
+#, c-format
 msgid "%pB: internal error, internal register section %pA had contents\n"
-msgstr "%pB: error interno, sección interna registrada %pA tuvo contenidos\n"
+msgstr "%pB: error interno, la sección interna registrada %pA tenía contenidos\n"
 
 #: mmo.c:3264
 #, fuzzy, c-format
@@ -7074,14 +6824,12 @@ msgid "%pB: no initialized registers; section length 0\n"
 msgstr "%pB: sin registros inicializados: longitud de sección 0\n"
 
 #: mmo.c:3271
-#, fuzzy, c-format
-#| msgid "%B: too many initialized registers; section length %Ld"
+#, c-format
 msgid "%pB: too many initialized registers; section length %<PRId64>"
 msgstr "%pB: demasiados registros iniciados: longitud de sección %<PRId64>"
 
 #: mmo.c:3276
-#, fuzzy, c-format
-#| msgid "%B: invalid start address for initialized registers of length %Ld: %#Lx"
+#, c-format
 msgid "%pB: invalid start address for initialized registers of length %<PRId64>: %#<PRIx64>"
 msgstr "%pB: dirección de inicio no válida para los registros inicializados de longitud %<PRId64>: %#<PRIx64>"
 
@@ -7171,22 +6919,19 @@ msgid "%pB: unhandled import type; %x"
 msgstr "%pB: Tipo de importación sin manejar; %x"
 
 #: peicode.h:826
-#, fuzzy, c-format
-#| msgid "%B: Unrecognised import type; %x"
+#, c-format
 msgid "%pB: unrecognized import type; %x"
-msgstr "%pB: No se reconoce el tipo de importación; %x"
+msgstr "%pB: no se reconoce el tipo de importación; %x"
 
 #: peicode.h:841
-#, fuzzy, c-format
-#| msgid "%B: Unrecognised import name type; %x"
+#, c-format
 msgid "%pB: unrecognized import name type; %x"
-msgstr "%pB: No se reconoce el tipo de nombre de importación; %x"
+msgstr "%pB: no se reconoce el tipo de nombre de importación; %x"
 
 #: peicode.h:1280
-#, fuzzy, c-format
-#| msgid "%B: Unrecognised machine type (0x%x) in Import Library Format archive"
+#, c-format
 msgid "%pB: unrecognised machine type (0x%x) in Import Library Format archive"
-msgstr "%pB: No se reconoce el tipo de máquina (0x%x) en el fichero de Formato de Importación de Bibliotecas"
+msgstr "%pB: no se reconoce el tipo de máquina (0x%x) en el fichero de Formato de Importación de Bibliotecas"
 
 #: peicode.h:1293
 #, fuzzy, c-format
@@ -7195,22 +6940,19 @@ msgid "%pB: recognised but unhandled machine type (0x%x) in Import Library Forma
 msgstr "%pB: Se reconoce el tipo de máquina (0x%x) pero no se manipula en el fichero de Formato de Importación de Bibliotecas"
 
 #: peicode.h:1311
-#, fuzzy, c-format
-#| msgid "%B: size field is zero in Import Library Format header"
+#, c-format
 msgid "%pB: size field is zero in Import Library Format header"
 msgstr "%pB: el tamaño del campo es cero en el encabezado del Formato de Importación de Bibliotecas"
 
 #: peicode.h:1337
-#, fuzzy, c-format
-#| msgid "%B: string not null terminated in ILF object file."
+#, c-format
 msgid "%pB: string not null terminated in ILF object file"
-msgstr "%pB: cadena que no termina en null en el fichero objeto ILF."
+msgstr "%pB: cadena que no termina en null en el fichero objeto ILF"
 
 #: peicode.h:1393
-#, fuzzy, c-format
-#| msgid "%B: Error: Debug Data ends beyond end of debug directory."
+#, c-format
 msgid "%pB: error: debug data ends beyond end of debug directory"
-msgstr "%pB: Error: Depura Datos finales más allá del final del directorio depurante."
+msgstr "%pB: error: los datos de depuración terminan más allá del final del directorio de depuración"
 
 #: peicode.h:1563
 #, c-format
@@ -7285,10 +7027,8 @@ msgid "Partition[%d] length = 0x%.8lx (%ld)\n"
 msgstr "Partición[%d] longitud = 0x%.8lx (%ld)\n"
 
 #: reloc.c:8504
-#, fuzzy
-#| msgid "INPUT_SECTION_FLAGS are not supported.\n"
 msgid "INPUT_SECTION_FLAGS are not supported"
-msgstr "No se admite INPUT_SECTION_FLAGS.\n"
+msgstr "no se admiten INPUT_SECTION_FLAGS"
 
 #: reloc.c:8770
 #, fuzzy, c-format
@@ -7321,10 +7061,9 @@ msgstr "%pB(%pA+%#<PRIx64>): desplazamiento de reubicación fuera de rango (tama
 
 #. User has specified a subspace without its containing space.
 #: som.c:5405
-#, fuzzy, c-format
-#| msgid "%B: could not find output section %A for input section %A"
+#, c-format
 msgid "%pB[%pA]: no output section for space %pA"
-msgstr "%pB: no se puede encontrar la sección de salida %pA para la sección de entrada %pA"
+msgstr "%pB[%pA]: no hay sección de salida para el espacio %pA"
 
 #: som.c:5451
 #, c-format
@@ -7361,19 +7100,15 @@ msgstr "%pB:%d: Equivocación de suma comprobante en el fichero S-record\n"
 #, fuzzy, c-format
 #| msgid "%B(%A+%#lx): Stabs entry has invalid string index."
 msgid "%pB(%pA+%#lx): stabs entry has invalid string index"
-msgstr "%pB(%pA+%#lx): Entrada de cabos tiene cadena indexada."
+msgstr "%pB(%pA+%#lx): Entrada de stubs tiene cadena indexada."
 
 #: syms.c:1112
-#, fuzzy
-#| msgid "Unsupported .stab relocation"
 msgid "unsupported .stab relocation"
-msgstr "No se admite la reubicación .stab"
+msgstr "no se admite la reubicación .stab"
 
 #: vms-alpha.c:479
-#, fuzzy
-#| msgid "Corrupt EIHD record - size is too small"
 msgid "corrupt EIHD record - size is too small"
-msgstr "Registro corrupto EIHD - tamaño es demasiado pequeño"
+msgstr "registro EIHD corrupto - el tamaño es demasiado pequeño"
 
 #: vms-alpha.c:665
 #, fuzzy, c-format
@@ -7386,28 +7121,24 @@ msgid "record is too small for symbol name length"
 msgstr "el registro es demasiado pequeño para la longitud del nombre del símbolo"
 
 #: vms-alpha.c:1190
-#, fuzzy, c-format
-#| msgid "Corrupt EGSD record: its size (%#x) is too small"
+#, c-format
 msgid "corrupt EGSD record: its size (%#x) is too small"
-msgstr "Registro corrupto EGSD: su tamaño (%#x) es demasiado pequeño"
+msgstr "registro EGSD corrupto: su tamaño (%#x) es demasiado pequeño"
 
 #: vms-alpha.c:1214
-#, fuzzy, c-format
-#| msgid "Corrupt EGSD record: size (%#x) is larger than remaining space (%#x)"
+#, c-format
 msgid "corrupt EGSD record type %d: size (%#x) is larger than remaining space (%#x)"
-msgstr "Registro corrupto EGSD: tamaño (%#x) es mayor que el espacio restante (%#x)"
+msgstr "registro EGSD corrupto de tipo %d: su tamaño (%#x) es mayor que el espacio restante (%#x)"
 
 #: vms-alpha.c:1224
-#, fuzzy, c-format
-#| msgid "Corrupt EGSD record: size (%#x) is too small"
+#, c-format
 msgid "corrupt EGSD record type %d: size (%#x) is too small"
-msgstr "Registro corrupto EGSD: tamaño (%#x) es demasiado pequeño"
+msgstr "registro EGSD corrupto de tipo %d: su tamaño (%#x) es demasiado pequeño"
 
 #: vms-alpha.c:1366
-#, fuzzy, c-format
-#| msgid "Corrupt EGSD record: its psindx field is too big (%#lx)"
+#, c-format
 msgid "corrupt EGSD record: its psindx field is too big (%#lx)"
-msgstr "Registro corrupto EGSD: su campo ‘psindx’ es demasiado grande (%#lx)"
+msgstr "registro EGSD corrupto: su campo psindx es demasiado grande (%#lx)"
 
 #: vms-alpha.c:1441
 #, fuzzy, c-format
@@ -7428,10 +7159,9 @@ msgid "stack underflow in _bfd_vms_pop"
 msgstr "Pila desbordada inferior en _bfd_vms_pop"
 
 #: vms-alpha.c:1562
-#, fuzzy, c-format
-#| msgid "relocation out of range"
+#, c-format
 msgid "dst_define_location %u too large"
-msgstr "reubicación fuera de rango"
+msgstr "dst_define_location %u demasiado grande"
 
 #. These names have not yet been added to this switch statement.
 #: vms-alpha.c:1765
@@ -7454,7 +7184,7 @@ msgstr "Encontrado registro ETIR corrupto"
 #: vms-alpha.c:1989
 #, c-format
 msgid "bad section index in %s"
-msgstr "índice de sección equivocado en %s"
+msgstr "índice de sección incorrecto en %s"
 
 #: vms-alpha.c:2003
 #, c-format
@@ -7500,10 +7230,8 @@ msgid "reserved cmd %d"
 msgstr "orden %d reservada"
 
 #: vms-alpha.c:2665
-#, fuzzy
-#| msgid "Corrupt EEOM record - size is too small"
 msgid "corrupt EEOM record - size is too small"
-msgstr "Registro corrupto EEOM - tamaño es demasiado pequeño"
+msgstr "registro EEOM corrupto - el tamaño es demasiado pequeño"
 
 #: vms-alpha.c:2674
 msgid "object module not error-free !"
@@ -7528,10 +7256,9 @@ msgid "spurious ALPHA_R_BSR reloc"
 msgstr "Reubicación ALPHA_R_BSR espuria"
 
 #: vms-alpha.c:4278
-#, fuzzy, c-format
-#| msgid "Unhandled relocation %s"
+#, c-format
 msgid "unhandled relocation %s"
-msgstr "Reubicación %s sin manipular"
+msgstr "reubicación %s no manejada"
 
 #: vms-alpha.c:4643
 #, c-format
@@ -7559,16 +7286,14 @@ msgstr "Encontrado registro ETIR corrupto"
 
 #: vms-alpha.c:5358 vms-alpha.c:5376 vms-alpha.c:5393 vms-alpha.c:5411
 #: vms-alpha.c:5424 vms-alpha.c:5436 vms-alpha.c:5449
-#, fuzzy, c-format
-#| msgid "Unknown reloc %s + %s"
+#, c-format
 msgid "unknown reloc %s + %s"
-msgstr "Reubicación %s + %s desconocida"
+msgstr "reubicación %s + %s desconocida"
 
 #: vms-alpha.c:5508
-#, fuzzy, c-format
-#| msgid "Unknown reloc %s"
+#, c-format
 msgid "unknown reloc %s"
-msgstr "Reubicación %s desconocida"
+msgstr "reubicación %s desconocida"
 
 #: vms-alpha.c:5522
 #, fuzzy
@@ -7577,10 +7302,8 @@ msgid "invalid section index in ETIR"
 msgstr "Índice de sección no válido en ETIR"
 
 #: vms-alpha.c:5531
-#, fuzzy
-#| msgid "Relocation for non-REL psect"
 msgid "relocation for non-REL psect"
-msgstr "Reubicación para psect que no-REL"
+msgstr "reubicación para psect que no es REL"
 
 #: vms-alpha.c:5584
 #, fuzzy, c-format
@@ -9443,16 +9166,14 @@ msgid "_bfd_vms_output_counted called with too many bytes"
 msgstr "se llamó _bfd_vms_output_counted con demasiados bytes"
 
 #: xcofflink.c:889
-#, fuzzy, c-format
-#| msgid "%B: XCOFF shared object when not producing XCOFF output"
+#, c-format
 msgid "%pB: XCOFF shared object when not producing XCOFF output"
 msgstr "%pB: objeto compartido XCOFF cuando no se produce salida XCOFF"
 
 #: xcofflink.c:910
-#, fuzzy, c-format
-#| msgid "%B: dynamic object with no .loader section"
+#, c-format
 msgid "%pB: dynamic object with no .loader section"
-msgstr "%pB: objeto dinámico sin sección cargadora .loader"
+msgstr "%pB: objeto dinámico sin sección .loader"
 
 #: xcofflink.c:1492
 #, c-format
@@ -9460,22 +9181,20 @@ msgid "%pB: `%s' has line numbers but no enclosing section"
 msgstr "%pB: «%s» tiene números de línea pero no una sección de cierre"
 
 #: xcofflink.c:1548
-#, fuzzy, c-format
-#| msgid "%B: class %d symbol `%s' has no aux entries"
+#, c-format
 msgid "%pB: class %d symbol `%s' has no aux entries"
 msgstr "%pB: clase %d símbolo «%s» no tiene entradas auxiliares"
 
 #: xcofflink.c:1571
-#, fuzzy, c-format
-#| msgid "%B: symbol `%s' has unrecognized csect type %d"
+#, c-format
 msgid "%pB: symbol `%s' has unrecognized csect type %d"
-msgstr "%pB: el símbolo «%s» tiene un tipo csect %d que no se reconoce"
+msgstr "%pB: el símbolo «%s» tiene un tipo csect %d no reconocido"
 
 #: xcofflink.c:1584
 #, fuzzy, c-format
 #| msgid "%B: bad XTY_ER symbol `%s': class %d scnum %d scnlen %Ld"
 msgid "%pB: bad XTY_ER symbol `%s': class %d scnum %d scnlen %<PRId64>"
-msgstr "%pB: símbolo XTY_ER «%s» equivocado: clase %d scnum %d scnlen %<PRId64>"
+msgstr "%pB: símbolo XTY_ER «%s» incorrecto: clase %d scnum %d scnlen %<PRId64>"
 
 #: xcofflink.c:1615
 #, fuzzy, c-format
@@ -9489,8 +9208,7 @@ msgid "%pB: TOC entry `%s' has a R_TLSMLrelocation not targeting itself"
 msgstr "%pB: La entrada TOC «%s» tiene una reubicación R_TLSML que no se dirige a sí misma"
 
 #: xcofflink.c:1784
-#, fuzzy, c-format
-#| msgid "%B: csect `%s' not in enclosing section"
+#, c-format
 msgid "%pB: csect `%s' not in enclosing section"
 msgstr "%pB: csect «%s» no está contenido en un cierre de sección"
 
@@ -9531,10 +9249,9 @@ msgid "%pB: Unable to find a stub csect in rangeof relocation at %#<PRIx64> targ
 msgstr "%pB: No se puede encontrar un csect de código auxiliar en el rango de reubicación en %#<PRIx64> dirigido a «%s»"
 
 #: xcofflink.c:4892
-#, fuzzy, c-format
-#| msgid "%B: cannot create stub entry %s"
+#, c-format
 msgid "%pB: Cannot create stub entry '%s'"
-msgstr "%pB: no se puede crear la entrada de cabo %s"
+msgstr "%pB: No se puede crear la entrada de stub «%s»"
 
 #: xcofflink.c:5012
 #, fuzzy
@@ -9543,10 +9260,9 @@ msgid "TOC overflow during stub generation; try -mminimal-toc when compiling"
 msgstr "Desbordamiento superior de TOC: %#<PRIx64> > 0x10000; intente -mminimal-toc al compilar"
 
 #: xcofflink.c:5080
-#, fuzzy, c-format
-#| msgid "%B: loader reloc in unrecognized section `%s'"
+#, c-format
 msgid "%pB: loader reloc in unrecognized section `%s'"
-msgstr "%pB: reubicación del cargador en la sección que no se reconoce «%s»"
+msgstr "%pB: reubicación de cargador en sección no reconocida «%s»"
 
 #: xcofflink.c:5092
 #, c-format
@@ -9554,10 +9270,9 @@ msgid "%pB: `%s' in loader reloc but not loader sym"
 msgstr "%pB: «%s» en la reubicación del cargador pero no es un símbolo del cargador"
 
 #: xcofflink.c:5109
-#, fuzzy, c-format
-#| msgid "%B: loader reloc in read-only section %A"
+#, c-format
 msgid "%pB: loader reloc in read-only section %pA"
-msgstr "%pB: reubicación del cargador en la sección de sólo lectura %pA"
+msgstr "%pB: reubicación de cargador en sección de sólo lectura %pA"
 
 #: xcofflink.c:6182
 #, fuzzy, c-format
@@ -9597,16 +9312,14 @@ msgid "unknown attribute for symbol `%s': 0x%02x"
 msgstr "%pB: tipo de reubicación %d desconocida para el símbolo %s"
 
 #: elfnn-aarch64.c:5456
-#, fuzzy, c-format
-#| msgid "%B: error: Erratum 835769 stub out of range (input file too large)"
+#, c-format
 msgid "%pB: error: erratum 835769 stub out of range (input file too large)"
-msgstr "%pB: error: error 835769 de cabo está fuera de rango (fichero entrante demasiado grande)"
+msgstr "%pB: error: errata 835769 de stub fuera de rango (fichero de entrada demasiado grande)"
 
 #: elfnn-aarch64.c:5548
-#, fuzzy, c-format
-#| msgid "%B: error: Erratum 843419 stub out of range (input file too large)"
+#, c-format
 msgid "%pB: error: erratum 843419 stub out of range (input file too large)"
-msgstr "%pB: error: error 843419 de cabo está fuera de rango (fichero entrante demasiado grande)"
+msgstr "%pB: error: errata 843419 de stub fuera de rango (fichero de entrada demasiado grande)"
 
 #: elfnn-aarch64.c:5561
 #, c-format
@@ -9614,10 +9327,9 @@ msgid "%pB: error: erratum 843419 immediate 0x%<PRIx64> out of range for ADR (in
 msgstr "%pB: error: errata 843419 inmediata 0x%<PRIx64> fuera de rango para ADR (fichero de entrada demasiado grande) y --fix-cortex-a53-843419=adr usado.  Ejecute el enlazador con --fix-cortex-a53-843419=full en su lugar"
 
 #: elfnn-aarch64.c:6096
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against symbol `%s' which may bind externally can not be used when making a shared object; recompile with -fPIC"
+#, c-format
 msgid "%pB: relocation %s against symbol `%s' which may bind externally can not be used when making a shared object; recompile with -fPIC"
-msgstr "%pB: reubicación %s frente al símbolo «%s» el cual quizá externamente enlazado no puede ser empleada cuando se cra un objeto compartido; recompile con -fPIC"
+msgstr "%pB: la reubicación %s frente al símbolo «%s» que puede unirse externamente no se puede usar cuando se crea un objeto compartido; recompile con -fPIC"
 
 #: elfnn-aarch64.c:6116
 #, c-format
@@ -9649,10 +9361,9 @@ msgid "one possible cause of this error is that the symbol is being referenced i
 msgstr "Una causa posible de este error es que el símbolo está siendo referenciado dentro del código indicado como si tuvo un alineamiento mayor que lo que fue declarado donde estuvo definido."
 
 #: elfnn-aarch64.c:7940
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against `%s' can not be used when making a shared object"
+#, c-format
 msgid "%pB: relocation %s against `%s' can not be used when making a shared object"
-msgstr "%pB: reubicación %s frente a «%s» no puede emplearse cuando se crea un objeto compartido"
+msgstr "%pB: la reubicación %s frente a «%s» no se puede usar cuando se crea un objeto compartido"
 
 #: elfnn-aarch64.c:9013
 #, c-format
@@ -9675,16 +9386,14 @@ msgid "%s: Bad ELF id: `%d'"
 msgstr "%s: ID de ELF incorrecto: «%d»"
 
 #: elfnn-kvx.c:2908
-#, fuzzy, c-format
-#| msgid "%B: compiled as 32-bit object and %B is 64-bit"
+#, c-format
 msgid "%s: compiled as 32-bit object and %s is 64-bit"
-msgstr "%pB: compilado como objeto de 32-bit y %pB es de 64-bit"
+msgstr "%s: compilado como objeto de 32-bit y %s es de 64-bit"
 
 #: elfnn-kvx.c:2911
-#, fuzzy, c-format
-#| msgid "%B: compiled as 64-bit object and %B is 32-bit"
+#, c-format
 msgid "%s: compiled as 64-bit object and %s is 32-bit"
-msgstr "%pB: compilado como objeto de 64-bit y %pB es de 32-bit"
+msgstr "%s: compilado como objeto de 64-bit y %s es de 32-bit"
 
 #: elfnn-kvx.c:2913
 #, fuzzy, c-format
@@ -9695,10 +9404,9 @@ msgstr "%pB: tamaño del objeto no coincide con el tamaño objetivo %pB"
 #. Ignore init flag - it may not be set, despite the flags field
 #. containing valid data.
 #: elfnn-kvx.c:3001
-#, fuzzy, c-format
-#| msgid "private flags = 0x%lx:"
+#, c-format
 msgid "Private flags = 0x%lx : "
-msgstr "marcas privadas = 0x%lx:"
+msgstr "Marcas privadas = 0x%lx: "
 
 #: elfnn-kvx.c:3005
 #, c-format
@@ -9741,28 +9449,22 @@ msgid "%#<PRIx64> invaild imm"
 msgstr "%#<PRIx64> imm no válido"
 
 #: elfnn-loongarch.c:403 elfnn-riscv.c:4028
-#, fuzzy, c-format
-#| msgid ""
-#| "%B: ABI is incompatible with that of the selected emulation:\n"
-#| "  target emulation `%s' does not match `%s'"
+#, c-format
 msgid ""
 "%pB: ABI is incompatible with that of the selected emulation:\n"
 "  target emulation `%s' does not match `%s'"
 msgstr ""
-"%pB: la ABI es incompatible con esa de la emulación seleccionada:\n"
-"  emulación objetivo «%s» no coincide con «%s»"
+"%pB: ABI es incompatible con el de la emulación seleccionada:\n"
+"  la emulación objetivo «%s» no coincide con «%s»"
 
 #: elfnn-loongarch.c:458
-#, fuzzy, c-format
-#| msgid "%B: Cannot link together %s and %s objects."
+#, c-format
 msgid "%pB: can't link different ABI object."
-msgstr "%pB: No se pueden enlazar juntos los objetos %s y %s."
+msgstr "%pB: no se puede enlazar un objeto ABI diferente."
 
 #: elfnn-loongarch.c:600
-#, fuzzy
-#| msgid "internal error: unknown error"
 msgid "Internal error: unreachable."
-msgstr "error interno: error desconocido"
+msgstr "Error interno: inalcanzable."
 
 #: elfnn-loongarch.c:4339 elfnn-riscv.c:4789
 #, fuzzy, c-format
@@ -9776,16 +9478,14 @@ msgid "%pB: warning: RVE PLT generation not supported"
 msgstr "%pB: aviso: la generación PLT RVE no es compatible"
 
 #: elfnn-riscv.c:919
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against `%s' can not be used when making a shared object"
+#, c-format
 msgid "%pB: relocation %s against absolute symbol `%s' can not be used when making a shared object"
-msgstr "%pB: reubicación %s frente a «%s» no puede emplearse cuando se crea un objeto compartido"
+msgstr "%pB: la reubicación %s frente al símbolo absoluto «%s» no se puede usar cuando se crea un objeto compartido"
 
 #: elfnn-riscv.c:961
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against `%s' can not be used when making a shared object"
+#, c-format
 msgid "%pB: relocation %s against non-absolute symbol `%s' can not be used in RV32 when making a shared object"
-msgstr "%pB: reubicación %s frente a «%s» no puede emplearse cuando se crea un objeto compartido"
+msgstr "%pB: la reubicación %s frente al símbolo no absoluto «%s» no se puede usar en RV32 cuando se crea un objeto compartido"
 
 #: elfnn-riscv.c:1847
 #, c-format
@@ -9837,10 +9537,9 @@ msgstr "El sumando no está permitido para R_RISCV_GOT_HI20"
 #. Perhaps we also need the similar checks for the
 #. R_RISCV_BRANCH and R_RISCV_RVC_BRANCH relocations.
 #: elfnn-riscv.c:2730
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against symbol `%s' which may bind externally can not be used when making a shared object; recompile with -fPIC"
+#, c-format
 msgid "%%X%%P: relocation %s against `%s' which may bind externally can not be used when making a shared object; recompile with -fPIC\n"
-msgstr "%pB: reubicación %s frente al símbolo «%s» el cual quizá externamente enlazado no puede ser empleada cuando se cra un objeto compartido; recompile con -fPIC"
+msgstr "%%X%%P: la reubicación %s frente a «%s» que puede unirse externamente no se puede usar cuando se crea un objeto compartido; recompile con -fPIC\n"
 
 #: elfnn-riscv.c:2812
 #, c-format
@@ -9865,10 +9564,8 @@ msgid "%X%P: internal error: unsupported relocation error\n"
 msgstr "%pB(%pA): error interno: no se admite el error de reubicación"
 
 #: elfnn-riscv.c:3068
-#, fuzzy
-#| msgid "dangerous relocation"
 msgid "dangerous relocation error"
-msgstr "reubicación peligrosa"
+msgstr "error de reubicación peligroso"
 
 #: elfnn-riscv.c:3074
 #, fuzzy
@@ -9887,10 +9584,9 @@ msgid "error: %pB: mis-matched ISA string to merge '%s' and '%s'"
 msgstr "error: %pB: cadena ISA no coincidente para combinar «%s» y «%s»"
 
 #: elfnn-riscv.c:3800
-#, fuzzy, c-format
-#| msgid "%B: version count (%Ld) does not match symbol count (%ld)"
+#, c-format
 msgid "error: %pB: ISA string of input (%s) doesn't match output (%s)"
-msgstr "%pB: contador de versión (%<PRId64>) no coincide con la cuenta simbólica (%ld)"
+msgstr "error: %pB: la cadena ISA de entrada (%s) no coincide con la salida (%s)"
 
 #: elfnn-riscv.c:3820
 #, c-format
@@ -9921,7 +9617,7 @@ msgstr "error: %pB necesita alineación de 8-byte pero %pB está establecido par
 #, fuzzy, c-format
 #| msgid "%B: linking %s module with previous %s modules"
 msgid "%pB: can't link %s modules with %s modules"
-msgstr "%pB: se enlaza el módulo %s con módulos %s previos"
+msgstr "%pB: se enlaza el módulo %s con módulos %s anteriores"
 
 #: elfnn-riscv.c:4094
 #, c-format
@@ -9929,28 +9625,24 @@ msgid "%pB: can't link RVE with other target"
 msgstr "%pB: no se puede enlazar RVE con otro objetivo"
 
 #: elfnn-riscv.c:961
-#, fuzzy, c-format
-#| msgid "%B: relocation %s against `%s' can not be used when making a shared object"
+#, c-format
 msgid "%pB: relocation %s against non-absolute symbol `%s' can not be used in RV64 when making a shared object"
-msgstr "%pB: reubicación %s frente a «%s» no puede emplearse cuando se crea un objeto compartido"
+msgstr "%pB: la reubicación %s frente al símbolo no absoluto «%s» no se puede usar en RV64 cuando se crea un objeto compartido"
 
 #: peXXigen.c:161
-#, fuzzy, c-format
-#| msgid "%B: unable to find name for empty section"
+#, c-format
 msgid "%pB: unable to find name for empty section"
-msgstr "%pB: no se puede encontrar nombre para sección vacía"
+msgstr "%pB: no se puede encontrar el nombre para la sección vacía"
 
 #: peXXigen.c:188
-#, fuzzy, c-format
-#| msgid "%B: out of memory creating name for empty section"
+#, c-format
 msgid "%pB: out of memory creating name for empty section"
 msgstr "%pB: memoria agotada al crear nombre para sección vacía"
 
 #: peXXigen.c:199
-#, fuzzy, c-format
-#| msgid "%B: unable to create fake empty section"
+#, c-format
 msgid "%pB: unable to create fake empty section"
-msgstr "%pB: incapaz de crear sección vacía simulada"
+msgstr "%pB: incapaz de crear una sección vacía simulada"
 
 #: peXXigen.c:924
 #, c-format
@@ -9963,10 +9655,9 @@ msgid "%pB:%.8s: RVA truncated"
 msgstr "%pB:%.8s: RVA truncado"
 
 #: peXXigen.c:1060
-#, fuzzy, c-format
-#| msgid "%B: line number overflow: 0x%lx > 0xffff"
+#, c-format
 msgid "%pB: line number overflow: 0x%lx > 0xffff"
-msgstr "%pB: número de línea del desbordamiento superior: 0x%lx > 0xffff"
+msgstr "%pB: desbordamiento del número de línea: 0x%lx > 0xffff"
 
 #: peXXigen.c:1226
 msgid "Export Directory [.edata (or where ever we found it)]"
@@ -10482,10 +10173,9 @@ msgid "failed to update file offsets in debug directory"
 msgstr "Fallado al actualizar desplazamiento en directorio depurante"
 
 #: peXXigen.c:3081
-#, fuzzy, c-format
-#| msgid "%B: Failed to read debug data section"
+#, c-format
 msgid "%pB: failed to read debug data section"
-msgstr "%pB: fallaba al leer sección de datos depurados"
+msgstr "%pB: no se pudo leer la sección de datos de depuración"
 
 #: peXXigen.c:3884
 #, c-format
@@ -10535,38 +10225,32 @@ msgid "%pB: .rsrc merge failure: unexpected .rsrc size"
 msgstr "%pB: unión .rsrc fallada: tamaño inesperado .rsrc"
 
 #: peXXigen.c:4417
-#, fuzzy, c-format
-#| msgid "%B: unable to fill in DataDictionary[1] because .idata$2 is missing"
+#, c-format
 msgid "%pB: unable to fill in DataDictionary[1] because .idata$2 is missing"
 msgstr "%pB: no se puede llenar DataDictionary[1] porque falta .idata$2"
 
 #: peXXigen.c:4437
-#, fuzzy, c-format
-#| msgid "%B: unable to fill in DataDictionary[1] because .idata$4 is missing"
+#, c-format
 msgid "%pB: unable to fill in DataDictionary[1] because .idata$4 is missing"
 msgstr "%pB: no se puede llenar DataDictionary[1] porque falta .idata$4"
 
 #: peXXigen.c:4458
-#, fuzzy, c-format
-#| msgid "%B: unable to fill in DataDictionary[12] because .idata$5 is missing"
+#, c-format
 msgid "%pB: unable to fill in DataDictionary[12] because .idata$5 is missing"
 msgstr "%pB: no se puede llenar DataDictionary[12] porque falta .idata$5"
 
 #: peXXigen.c:4478
-#, fuzzy, c-format
-#| msgid "%B: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] because .idata$6 is missing"
+#, c-format
 msgid "%pB: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] because .idata$6 is missing"
 msgstr "%pB: no se puede llenar DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] porque falta .idata$6"
 
 #: peXXigen.c:4520
-#, fuzzy, c-format
-#| msgid "%B: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE(12)] because .idata$6 is missing"
+#, c-format
 msgid "%pB: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE(12)] because .idata$6 is missing"
 msgstr "%pB: no se puede llenar DataDictionary[PE_IMPORT_ADDRESS_TABLE(12)] porque falta .idata$6"
 
 #: peXXigen.c:4545
-#, fuzzy, c-format
-#| msgid "%B: unable to fill in DataDictionary[9] because __tls_used is missing"
+#, c-format
 msgid "%pB: unable to fill in DataDictionary[9] because __tls_used is missing"
 msgstr "%pB: no se puede llenar DataDictionary[9] porque falta __tls_used"
 
