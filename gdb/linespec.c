@@ -276,7 +276,6 @@ struct linespec_token
 };
 
 #define LS_TOKEN_STOKEN(TOK) (TOK).data.string
-#define LS_TOKEN_KEYWORD(TOK) (TOK).data.keyword
 
 /* An instance of the linespec parser.  */
 
@@ -572,7 +571,7 @@ copy_token_string (linespec_token token)
   const char *str, *s;
 
   if (token.type == LSTOKEN_KEYWORD)
-    return make_unique_xstrdup (LS_TOKEN_KEYWORD (token));
+    return make_unique_xstrdup (token.data.keyword);
 
   str = LS_TOKEN_STOKEN (token).ptr;
   s = remove_trailing_whitespace (str, str + LS_TOKEN_STOKEN (token).length);
@@ -905,7 +904,7 @@ linespec_lexer_lex_one (linespec_parser *parser)
       if (keyword != NULL)
 	{
 	  parser->lexer.current.type = LSTOKEN_KEYWORD;
-	  LS_TOKEN_KEYWORD (parser->lexer.current) = keyword;
+	  parser->lexer.current.data.keyword = keyword;
 	  /* We do not advance the stream here intentionally:
 	     we would like lexing to stop when a keyword is seen.
 
