@@ -178,10 +178,8 @@ MANCONF = -Dman
 TEXI2POD = perl $(srcdir)/../../etc/texi2pod.pl \
 		$(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
 
-POD2MAN1 = pod2man --center="GNU Development Tools" \
-		   --release="gdb-`sed q version.subst`" --section=1
-POD2MAN5 = pod2man --center="GNU Development Tools" \
-		   --release="gdb-`sed q version.subst`" --section=5
+POD2MAN = pod2man --center="GNU Development Tools" \
+		--release="gdb-`sed q version.subst`"
 
 # List of man pages generated from gdb.texi
 MAN1S = gdb.1 gdbserver.1 gcore.1 gdb-add-index.1
@@ -654,17 +652,14 @@ annotate/index.html: $(ANNOTATE_DOC_FILES)
 # pages, then the .pod files must become a dependency, this will
 # trigger an attempt to rebuild these files while building and
 # installing a release of GDB, which is something we don't want.
-$(MAN1S) : %.1 : $(GDB_DOC_FILES)
-	$(ECHO_TEXI2POD) $(TEXI2POD) $(MANCONF) -D$* < $(srcdir)/gdb.texinfo > $*.pod
-	$(ECHO_TEXI2MAN) ($(POD2MAN1) $*.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+$(MAN1S) $(MAN5S) : version.subst $(GDB_DOC_FILES)
+	$(ECHO_TEXI2POD) $(TEXI2POD) $(MANCONF) -D$(basename $@) \
+		< $(srcdir)/gdb.texinfo > $(basename $@).pod
+	$(ECHO_TEXI2MAN) ($(POD2MAN) --section=$(subst .,,$(suffix $@)) \
+			$(basename $@).pod | \
+		sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
-	$(SILENCE) rm -f $*.pod
-
-$(MAN5S) : %.5 : $(GDB_DOC_FILES)
-	$(ECHO_TEXI2POD) $(TEXI2POD) $(MANCONF) -D$* < $(srcdir)/gdb.texinfo > $*.pod
-	$(ECHO_TEXI2MAN) ($(POD2MAN5) $*.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
-		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
-	$(SILENCE) rm -f $*.pod
+	$(SILENCE) rm -f $(basename $@).pod
 
 force:
 
