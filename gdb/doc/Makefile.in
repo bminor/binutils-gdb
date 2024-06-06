@@ -679,7 +679,7 @@ $(MAN1S) : %.1 : $(GDB_DOC_FILES)
 
 $(MAN5S) : %.5 : $(GDB_DOC_FILES)
 	$(ECHO_TEXI2POD) $(TEXI2POD) $(MANCONF) -D$* < $(srcdir)/gdb.texinfo > $*.pod
-	$(ECHO_TEXI2MAN) ($(POD2MAN1) $*.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+	$(ECHO_TEXI2MAN) ($(POD2MAN5) $*.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	$(SILENCE) rm -f $*.pod
 
