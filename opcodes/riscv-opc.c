@@ -829,6 +829,11 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fcvt.h.lu", 64, INSN_CLASS_ZFH_INX,   "D,s",       MATCH_FCVT_H_LU|MASK_RM, MASK_FCVT_H_LU|MASK_RM, match_opcode, 0 },
 {"fcvt.h.lu", 64, INSN_CLASS_ZFH_INX,   "D,s,m",     MATCH_FCVT_H_LU, MASK_FCVT_H_LU, match_opcode, 0 },
 
+/* Zfbfmin instructions.  */
+{"fcvt.bf16.s", 0, INSN_CLASS_ZFBFMIN, "D,S",   MATCH_FCVT_BF16_S|MASK_RM, MASK_FCVT_BF16_S|MASK_RM, match_opcode, 0 },
+{"fcvt.bf16.s", 0, INSN_CLASS_ZFBFMIN, "D,S,m", MATCH_FCVT_BF16_S, MASK_FCVT_BF16_S, match_opcode, 0 },
+{"fcvt.s.bf16", 0, INSN_CLASS_ZFBFMIN, "D,S",   MATCH_FCVT_S_BF16, MASK_FCVT_S_BF16|MASK_RM, match_opcode, 0 },
+
 /* Single-precision floating-point instruction subset.  */
 {"frcsr",      0, INSN_CLASS_F_INX,   "d",         MATCH_FRCSR, MASK_FRCSR, match_opcode, INSN_ALIAS },
 {"frsr",       0, INSN_CLASS_F_INX,   "d",         MATCH_FRCSR, MASK_FRCSR, match_opcode, INSN_ALIAS },

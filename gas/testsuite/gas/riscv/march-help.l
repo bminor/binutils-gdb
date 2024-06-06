@@ -25,6 +25,7 @@ All available -march extensions for RISC-V:
 	zabha                                   1.0
 	zalrsc                                  1.0
 	zawrs                                   1.0
+	zfbfmin                                 1.0
 	zfa                                     1.0
 	zfh                                     1.0
 	zfhmin                                  1.0
