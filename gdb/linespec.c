@@ -300,7 +300,6 @@ struct linespec_parser
 
     /* Head of the input stream.  */
     const char *stream;
-#define PARSER_STREAM(P) ((P)->lexer.stream)
 
     /* The current token.  */
     linespec_token current;
@@ -429,29 +428,29 @@ linespec_lexer_lex_number (linespec_parser *parser, linespec_token *tokenp)
 {
   tokenp->type = LSTOKEN_NUMBER;
   LS_TOKEN_STOKEN (*tokenp).length = 0;
-  LS_TOKEN_STOKEN (*tokenp).ptr = PARSER_STREAM (parser);
+  LS_TOKEN_STOKEN (*tokenp).ptr = parser->lexer.stream;
 
   /* Keep any sign at the start of the stream.  */
-  if (*PARSER_STREAM (parser) == '+' || *PARSER_STREAM (parser) == '-')
+  if (*parser->lexer.stream == '+' || *parser->lexer.stream == '-')
     {
       ++LS_TOKEN_STOKEN (*tokenp).length;
-      ++(PARSER_STREAM (parser));
+      ++(parser->lexer.stream);
     }
 
-  while (isdigit (*PARSER_STREAM (parser)))
+  while (isdigit (*parser->lexer.stream))
     {
       ++LS_TOKEN_STOKEN (*tokenp).length;
-      ++(PARSER_STREAM (parser));
+      ++(parser->lexer.stream);
     }
 
   /* If the next character in the input buffer is not a space, comma,
      quote, or colon, this input does not represent a number.  */
-  if (*PARSER_STREAM (parser) != '\0'
-      && !isspace (*PARSER_STREAM (parser)) && *PARSER_STREAM (parser) != ','
-      && *PARSER_STREAM (parser) != ':'
-      && !strchr (linespec_quote_characters, *PARSER_STREAM (parser)))
+  if (*parser->lexer.stream != '\0'
+      && !isspace (*parser->lexer.stream) && *parser->lexer.stream != ','
+      && *parser->lexer.stream != ':'
+      && !strchr (linespec_quote_characters, *parser->lexer.stream))
     {
-      PARSER_STREAM (parser) = LS_TOKEN_STOKEN (*tokenp).ptr;
+      parser->lexer.stream = LS_TOKEN_STOKEN (*tokenp).ptr;
       return 0;
     }
 
@@ -662,30 +661,30 @@ static linespec_token
 linespec_lexer_lex_string (linespec_parser *parser)
 {
   linespec_token token;
-  const char *start = PARSER_STREAM (parser);
+  const char *start = parser->lexer.stream;
 
   token.type = LSTOKEN_STRING;
 
   /* If the input stream starts with a quote character, skip to the next
      quote character, regardless of the content.  */
-  if (strchr (linespec_quote_characters, *PARSER_STREAM (parser)))
+  if (strchr (linespec_quote_characters, *parser->lexer.stream))
     {
       const char *end;
-      char quote_char = *PARSER_STREAM (parser);
+      char quote_char = *parser->lexer.stream;
 
       /* Special case: Ada operators.  */
       if (parser->state.language->la_language == language_ada
 	  && quote_char == '\"')
 	{
-	  int len = is_ada_operator (PARSER_STREAM (parser));
+	  int len = is_ada_operator (parser->lexer.stream);
 
 	  if (len != 0)
 	    {
 	      /* The input is an Ada operator.  Return the quoted string
 		 as-is.  */
-	      LS_TOKEN_STOKEN (token).ptr = PARSER_STREAM (parser);
+	      LS_TOKEN_STOKEN (token).ptr = parser->lexer.stream;
 	      LS_TOKEN_STOKEN (token).length = len;
-	      PARSER_STREAM (parser) += len;
+	      parser->lexer.stream += len;
 	      return token;
 	    }
 
@@ -694,13 +693,13 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	}
 
       /* Skip past the beginning quote.  */
-      ++(PARSER_STREAM (parser));
+      ++(parser->lexer.stream);
 
       /* Mark the start of the string.  */
-      LS_TOKEN_STOKEN (token).ptr = PARSER_STREAM (parser);
+      LS_TOKEN_STOKEN (token).ptr = parser->lexer.stream;
 
       /* Skip to the ending quote.  */
-      end = skip_quote_char (PARSER_STREAM (parser), quote_char);
+      end = skip_quote_char (parser->lexer.stream, quote_char);
 
       /* This helps the completer mode decide whether we have a
 	 complete string.  */
@@ -717,15 +716,15 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	  /* In completion mode, we'll try to complete the incomplete
 	     token.  */
 	  token.type = LSTOKEN_STRING;
-	  while (*PARSER_STREAM (parser) != '\0')
-	    PARSER_STREAM (parser)++;
-	  LS_TOKEN_STOKEN (token).length = PARSER_STREAM (parser) - 1 - start;
+	  while (*parser->lexer.stream != '\0')
+	    parser->lexer.stream++;
+	  LS_TOKEN_STOKEN (token).length = parser->lexer.stream - 1 - start;
 	}
       else
 	{
 	  /* Skip over the ending quote and mark the length of the string.  */
-	  PARSER_STREAM (parser) = (char *) ++end;
-	  LS_TOKEN_STOKEN (token).length = PARSER_STREAM (parser) - 2 - start;
+	  parser->lexer.stream = (char *) ++end;
+	  LS_TOKEN_STOKEN (token).length = parser->lexer.stream - 2 - start;
 	}
     }
   else
@@ -742,9 +741,9 @@ linespec_lexer_lex_string (linespec_parser *parser)
 
       while (1)
 	{
-	  if (isspace (*PARSER_STREAM (parser)))
+	  if (isspace (*parser->lexer.stream))
 	    {
-	      p = skip_spaces (PARSER_STREAM (parser));
+	      p = skip_spaces (parser->lexer.stream);
 	      /* When we get here we know we've found something followed by
 		 a space (we skip over parens and templates below).
 		 So if we find a keyword now, we know it is a keyword and not,
@@ -753,31 +752,31 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		{
 		  LS_TOKEN_STOKEN (token).ptr = start;
 		  LS_TOKEN_STOKEN (token).length
-		    = PARSER_STREAM (parser) - start;
+		    = parser->lexer.stream - start;
 		  return token;
 		}
 
 	      /* Advance past the whitespace.  */
-	      PARSER_STREAM (parser) = p;
+	      parser->lexer.stream = p;
 	    }
 
 	  /* If the next character is EOI or (single) ':', the
 	     string is complete;  return the token.  */
-	  if (*PARSER_STREAM (parser) == 0)
+	  if (*parser->lexer.stream == 0)
 	    {
 	      LS_TOKEN_STOKEN (token).ptr = start;
-	      LS_TOKEN_STOKEN (token).length = PARSER_STREAM (parser) - start;
+	      LS_TOKEN_STOKEN (token).length = parser->lexer.stream - start;
 	      return token;
 	    }
-	  else if (PARSER_STREAM (parser)[0] == ':')
+	  else if (parser->lexer.stream[0] == ':')
 	    {
 	      /* Do not tokenize the C++ scope operator. */
-	      if (PARSER_STREAM (parser)[1] == ':')
-		++(PARSER_STREAM (parser));
+	      if (parser->lexer.stream[1] == ':')
+		++(parser->lexer.stream);
 
 	      /* Do not tokenize ABI tags such as "[abi:cxx11]".  */
-	      else if (PARSER_STREAM (parser) - start > 4
-		       && startswith (PARSER_STREAM (parser) - 4, "[abi"))
+	      else if (parser->lexer.stream - start > 4
+		       && startswith (parser->lexer.stream - 4, "[abi"))
 		{
 		  /* Nothing.  */
 		}
@@ -786,39 +785,39 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		 (i.e, a single-letter drive name) and the next character
 		 is a directory separator.  This allows Windows-style
 		 paths to be recognized as filenames without quoting it.  */
-	      else if ((PARSER_STREAM (parser) - start) != 1
-		       || !IS_DIR_SEPARATOR (PARSER_STREAM (parser)[1]))
+	      else if ((parser->lexer.stream - start) != 1
+		       || !IS_DIR_SEPARATOR (parser->lexer.stream[1]))
 		{
 		  LS_TOKEN_STOKEN (token).ptr = start;
 		  LS_TOKEN_STOKEN (token).length
-		    = PARSER_STREAM (parser) - start;
+		    = parser->lexer.stream - start;
 		  return token;
 		}
 	    }
 	  /* Special case: permit quote-enclosed linespecs.  */
 	  else if (parser->is_quote_enclosed
 		   && strchr (linespec_quote_characters,
-			      *PARSER_STREAM (parser))
-		   && is_closing_quote_enclosed (PARSER_STREAM (parser)))
+			      *parser->lexer.stream)
+		   && is_closing_quote_enclosed (parser->lexer.stream))
 	    {
 	      LS_TOKEN_STOKEN (token).ptr = start;
-	      LS_TOKEN_STOKEN (token).length = PARSER_STREAM (parser) - start;
+	      LS_TOKEN_STOKEN (token).length = parser->lexer.stream - start;
 	      return token;
 	    }
 	  /* Because commas may terminate a linespec and appear in
 	     the middle of valid string input, special cases for
 	     '<' and '(' are necessary.  */
-	  else if (*PARSER_STREAM (parser) == '<'
-		   || *PARSER_STREAM (parser) == '(')
+	  else if (*parser->lexer.stream == '<'
+		   || *parser->lexer.stream == '(')
 	    {
 	      /* Don't interpret 'operator<' / 'operator<<' as a
 		 template parameter list though.  */
-	      if (*PARSER_STREAM (parser) == '<'
+	      if (*parser->lexer.stream == '<'
 		  && (parser->state.language->la_language
 		      == language_cplus)
-		  && (PARSER_STREAM (parser) - start) >= CP_OPERATOR_LEN)
+		  && (parser->lexer.stream - start) >= CP_OPERATOR_LEN)
 		{
-		  const char *op = PARSER_STREAM (parser);
+		  const char *op = parser->lexer.stream;
 
 		  while (op > start && isspace (op[-1]))
 		    op--;
@@ -830,16 +829,16 @@ linespec_lexer_lex_string (linespec_parser *parser)
 			      || !(isalnum (op[-1]) || op[-1] == '_')))
 			{
 			  /* This is an operator name.  Keep going.  */
-			  ++(PARSER_STREAM (parser));
-			  if (*PARSER_STREAM (parser) == '<')
-			    ++(PARSER_STREAM (parser));
+			  ++(parser->lexer.stream);
+			  if (*parser->lexer.stream == '<')
+			    ++(parser->lexer.stream);
 			  continue;
 			}
 		    }
 		}
 
-	      const char *end = find_parameter_list_end (PARSER_STREAM (parser));
-	      PARSER_STREAM (parser) = end;
+	      const char *end = find_parameter_list_end (parser->lexer.stream);
+	      parser->lexer.stream = end;
 
 	      /* Don't loop around to the normal \0 case above because
 		 we don't want to misinterpret a potential keyword at
@@ -850,7 +849,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
 		{
 		  LS_TOKEN_STOKEN (token).ptr = start;
 		  LS_TOKEN_STOKEN (token).length
-		    = PARSER_STREAM (parser) - start;
+		    = parser->lexer.stream - start;
 		  return token;
 		}
 	      else
@@ -858,31 +857,31 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	    }
 	  /* Commas are terminators, but not if they are part of an
 	     operator name.  */
-	  else if (*PARSER_STREAM (parser) == ',')
+	  else if (*parser->lexer.stream == ',')
 	    {
 	      if ((parser->state.language->la_language
 		   == language_cplus)
-		  && (PARSER_STREAM (parser) - start) > CP_OPERATOR_LEN)
+		  && (parser->lexer.stream - start) > CP_OPERATOR_LEN)
 		{
 		  const char *op = strstr (start, CP_OPERATOR_STR);
 
 		  if (op != NULL && is_operator_name (op))
 		    {
 		      /* This is an operator name.  Keep going.  */
-		      ++(PARSER_STREAM (parser));
+		      ++(parser->lexer.stream);
 		      continue;
 		    }
 		}
 
 	      /* Comma terminates the string.  */
 	      LS_TOKEN_STOKEN (token).ptr = start;
-	      LS_TOKEN_STOKEN (token).length = PARSER_STREAM (parser) - start;
+	      LS_TOKEN_STOKEN (token).length = parser->lexer.stream - start;
 	      return token;
 	    }
 
 	  /* Advance the stream.  */
-	  gdb_assert (*(PARSER_STREAM (parser)) != '\0');
-	  ++(PARSER_STREAM (parser));
+	  gdb_assert (*(parser->lexer.stream) != '\0');
+	  ++(parser->lexer.stream);
 	}
     }
 
@@ -899,10 +898,10 @@ linespec_lexer_lex_one (linespec_parser *parser)
   if (parser->lexer.current.type == LSTOKEN_CONSUMED)
     {
       /* Skip any whitespace.  */
-      PARSER_STREAM (parser) = skip_spaces (PARSER_STREAM (parser));
+      parser->lexer.stream = skip_spaces (parser->lexer.stream);
 
       /* Check for a keyword, they end the linespec.  */
-      keyword = linespec_lexer_lex_keyword (PARSER_STREAM (parser));
+      keyword = linespec_lexer_lex_keyword (parser->lexer.stream);
       if (keyword != NULL)
 	{
 	  parser->lexer.current.type = LSTOKEN_KEYWORD;
@@ -910,13 +909,13 @@ linespec_lexer_lex_one (linespec_parser *parser)
 	  /* We do not advance the stream here intentionally:
 	     we would like lexing to stop when a keyword is seen.
 
-	     PARSER_STREAM (parser) +=  strlen (keyword);  */
+	     parser->lexer.stream +=  strlen (keyword);  */
 
 	  return parser->lexer.current;
 	}
 
       /* Handle other tokens.  */
-      switch (*PARSER_STREAM (parser))
+      switch (*parser->lexer.stream)
 	{
 	case 0:
 	  parser->lexer.current.type = LSTOKEN_EOI;
@@ -932,21 +931,21 @@ linespec_lexer_lex_one (linespec_parser *parser)
 	case ':':
 	  /* If we have a scope operator, lex the input as a string.
 	     Otherwise, return LSTOKEN_COLON.  */
-	  if (PARSER_STREAM (parser)[1] == ':')
+	  if (parser->lexer.stream[1] == ':')
 	    parser->lexer.current = linespec_lexer_lex_string (parser);
 	  else
 	    {
 	      parser->lexer.current.type = LSTOKEN_COLON;
-	      ++(PARSER_STREAM (parser));
+	      ++(parser->lexer.stream);
 	    }
 	  break;
 
 	case '\'': case '\"':
 	  /* Special case: permit quote-enclosed linespecs.  */
 	  if (parser->is_quote_enclosed
-	      && is_closing_quote_enclosed (PARSER_STREAM (parser)))
+	      && is_closing_quote_enclosed (parser->lexer.stream))
 	    {
-	      ++(PARSER_STREAM (parser));
+	      ++(parser->lexer.stream);
 	      parser->lexer.current.type = LSTOKEN_EOI;
 	    }
 	  else
@@ -956,9 +955,9 @@ linespec_lexer_lex_one (linespec_parser *parser)
 	case ',':
 	  parser->lexer.current.type = LSTOKEN_COMMA;
 	  LS_TOKEN_STOKEN (parser->lexer.current).ptr
-	    = PARSER_STREAM (parser);
+	    = parser->lexer.stream;
 	  LS_TOKEN_STOKEN (parser->lexer.current).length = 1;
-	  ++(PARSER_STREAM (parser));
+	  ++(parser->lexer.stream);
 	  break;
 
 	default:
@@ -982,7 +981,7 @@ linespec_lexer_consume_token (linespec_parser *parser)
   gdb_assert (parser->lexer.current.type != LSTOKEN_EOI);
 
   bool advance_word = (parser->lexer.current.type != LSTOKEN_STRING
-		       || *PARSER_STREAM (parser) != '\0');
+		       || *parser->lexer.stream != '\0');
 
   /* If we're moving past a string to some other token, it must be the
      quote was terminated.  */
@@ -992,7 +991,7 @@ linespec_lexer_consume_token (linespec_parser *parser)
 
       /* If the string was the last (non-EOI) token, we're past the
 	 quote, but remember that for later.  */
-      if (*PARSER_STREAM (parser) != '\0')
+      if (*parser->lexer.stream != '\0')
 	{
 	  parser->completion_quote_char = '\0';
 	  parser->completion_quote_end = NULL;;
@@ -1011,7 +1010,7 @@ linespec_lexer_consume_token (linespec_parser *parser)
   else if (advance_word)
     {
       /* Advance the completion word past any whitespace.  */
-      parser->completion_word = PARSER_STREAM (parser);
+      parser->completion_word = parser->lexer.stream;
     }
 
   return parser->lexer.current;
@@ -1023,14 +1022,14 @@ static linespec_token
 linespec_lexer_peek_token (linespec_parser *parser)
 {
   linespec_token next;
-  const char *saved_stream = PARSER_STREAM (parser);
+  const char *saved_stream = parser->lexer.stream;
   linespec_token saved_token = parser->lexer.current;
   int saved_completion_quote_char = parser->completion_quote_char;
   const char *saved_completion_quote_end = parser->completion_quote_end;
   const char *saved_completion_word = parser->completion_word;
 
   next = linespec_lexer_consume_token (parser);
-  PARSER_STREAM (parser) = saved_stream;
+  parser->lexer.stream = saved_stream;
   parser->lexer.current = saved_token;
   parser->completion_quote_char = saved_completion_quote_char;
   parser->completion_quote_end = saved_completion_quote_end;
@@ -1645,7 +1644,7 @@ static linespec_token
 save_stream_and_consume_token (linespec_parser *parser)
 {
   if (linespec_lexer_peek_token (parser).type != LSTOKEN_EOI)
-    parser->completion_word = PARSER_STREAM (parser);
+    parser->completion_word = parser->lexer.stream;
   return linespec_lexer_consume_token (parser);
 }
 
@@ -1686,14 +1685,14 @@ static void
 set_completion_after_number (linespec_parser *parser,
 			     linespec_complete_what next)
 {
-  if (*PARSER_STREAM (parser) == ' ')
+  if (*parser->lexer.stream == ' ')
     {
-      parser->completion_word = skip_spaces (PARSER_STREAM (parser) + 1);
+      parser->completion_word = skip_spaces (parser->lexer.stream + 1);
       parser->complete_what = next;
     }
   else
     {
-      parser->completion_word = PARSER_STREAM (parser);
+      parser->completion_word = parser->lexer.stream;
       parser->complete_what = linespec_complete_what::NOTHING;
     }
 }
@@ -1773,7 +1772,7 @@ linespec_parse_basic (linespec_parser *parser)
 	 it part of the function name/token.  */
 
       if (!parser->completion_quote_char
-	  && strcmp (PARSER_STREAM (parser), ":") == 0)
+	  && strcmp (parser->lexer.stream, ":") == 0)
 	{
 	  completion_tracker tmp_tracker (false);
 	  const char *source_filename
@@ -1788,11 +1787,11 @@ linespec_parse_basic (linespec_parser *parser)
 
 	  if (tmp_tracker.have_completions ())
 	    {
-	      PARSER_STREAM (parser)++;
+	      parser->lexer.stream++;
 	      LS_TOKEN_STOKEN (token).length++;
 
 	      name.reset (savestring (parser->completion_word,
-				      (PARSER_STREAM (parser)
+				      (parser->lexer.stream
 				       - parser->completion_word)));
 	    }
 	}
@@ -1907,7 +1906,7 @@ linespec_parse_basic (linespec_parser *parser)
 		  if (ptr[i] == ' ')
 		    {
 		      LS_TOKEN_STOKEN (token).length = i;
-		      PARSER_STREAM (parser) = skip_spaces (ptr + i + 1);
+		      parser->lexer.stream = skip_spaces (ptr + i + 1);
 		      break;
 		    }
 		}
@@ -1915,9 +1914,9 @@ linespec_parse_basic (linespec_parser *parser)
 
 	  if (parser->completion_tracker != NULL)
 	    {
-	      if (PARSER_STREAM (parser)[-1] == ' ')
+	      if (parser->lexer.stream[-1] == ' ')
 		{
-		  parser->completion_word = PARSER_STREAM (parser);
+		  parser->completion_word = parser->lexer.stream;
 		  parser->complete_what = linespec_complete_what::KEYWORD;
 		}
 	    }
@@ -2621,7 +2620,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
 	 advances past a keyword automatically, so skip it
 	 manually.  */
       parser->completion_word
-	= skip_spaces (skip_to_space (PARSER_STREAM (parser)));
+	= skip_spaces (skip_to_space (parser->lexer.stream));
       parser->complete_what = linespec_complete_what::EXPRESSION;
     }
 
@@ -2704,7 +2703,7 @@ linespec_lex_to_end (const char **stringp)
 
   linespec_parser parser (0, current_language, NULL, NULL, 0, NULL);
   parser.lexer.saved_arg = *stringp;
-  PARSER_STREAM (&parser) = orig = *stringp;
+  parser.lexer.stream = orig = *stringp;
 
   do
     {
@@ -2717,7 +2716,7 @@ linespec_lex_to_end (const char **stringp)
     }
   while (token.type != LSTOKEN_EOI && token.type != LSTOKEN_KEYWORD);
 
-  *stringp += PARSER_STREAM (&parser) - orig;
+  *stringp += parser.lexer.stream - orig;
 }
 
 /* See linespec.h.  */
@@ -2871,7 +2870,7 @@ linespec_complete (completion_tracker &tracker, const char *text,
   linespec_parser parser (0, current_language, NULL, NULL, 0, NULL);
   parser.lexer.saved_arg = text;
   parser.result.explicit_loc.func_name_match_type = match_type;
-  PARSER_STREAM (&parser) = text;
+  parser.lexer.stream = text;
 
   parser.completion_tracker = &tracker;
   parser.state.is_linespec = 1;
