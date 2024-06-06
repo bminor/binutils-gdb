@@ -59,6 +59,7 @@ All available -march extensions for RISC-V:
 	zvbb                                    1.0
 	zvbc                                    1.0
 	zvfbfmin                                1.0
+	zvfbfwma                                1.0
 	zvfh                                    1.0
 	zvfhmin                                 1.0
 	zvkb                                    1.0

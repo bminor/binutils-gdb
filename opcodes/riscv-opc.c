@@ -2021,6 +2021,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vfncvtbf16.f.f.w", 0, INSN_CLASS_ZVFBFMIN, "Vd,VtVm", MATCH_VFNCVTBF16_F_F_W, MASK_VFNCVTBF16_F_F_W, match_opcode, 0},
 {"vfwcvtbf16.f.f.v", 0, INSN_CLASS_ZVFBFMIN, "Vd,VtVm", MATCH_VFWCVTBF16_F_F_V, MASK_VFWCVTBF16_F_F_V, match_opcode, 0},
 
+/* Zvfbfwma instructions.  */
+{"vfwmaccbf16.vf",  0, INSN_CLASS_ZVFBFWMA, "Vd,S,VtVm",  MATCH_VFWMACCBF16_VF, MASK_VFWMACCBF16_VF, match_opcode, 0},
+{"vfwmaccbf16.vv",  0, INSN_CLASS_ZVFBFWMA, "Vd,Vs,VtVm", MATCH_VFWMACCBF16_VV, MASK_VFWMACCBF16_VV, match_opcode, 0},
+
 /* Zvbb/Zvkb instructions.  */
 {"vandn.vv",   0, INSN_CLASS_ZVKB, "Vd,Vt,VsVm", MATCH_VANDN_VV, MASK_VANDN_VV, match_opcode, 0},
 {"vandn.vx",   0, INSN_CLASS_ZVKB, "Vd,Vt,sVm", MATCH_VANDN_VX, MASK_VANDN_VX, match_opcode, 0},
