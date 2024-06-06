@@ -311,7 +311,6 @@ struct linespec_parser
 
   /* The state of the parse.  */
   struct linespec_state state {};
-#define PARSER_STATE(PPTR) (&(PPTR)->state)
 
   /* The result of the parse.  */
   linespec result;
@@ -680,7 +679,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
       char quote_char = *PARSER_STREAM (parser);
 
       /* Special case: Ada operators.  */
-      if (PARSER_STATE (parser)->language->la_language == language_ada
+      if (parser->state.language->la_language == language_ada
 	  && quote_char == '\"')
 	{
 	  int len = is_ada_operator (PARSER_STREAM (parser));
@@ -820,7 +819,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	      /* Don't interpret 'operator<' / 'operator<<' as a
 		 template parameter list though.  */
 	      if (*PARSER_STREAM (parser) == '<'
-		  && (PARSER_STATE (parser)->language->la_language
+		  && (parser->state.language->la_language
 		      == language_cplus)
 		  && (PARSER_STREAM (parser) - start) >= CP_OPERATOR_LEN)
 		{
@@ -866,7 +865,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	     operator name.  */
 	  else if (*PARSER_STREAM (parser) == ',')
 	    {
-	      if ((PARSER_STATE (parser)->language->la_language
+	      if ((parser->state.language->la_language
 		   == language_cplus)
 		  && (PARSER_STREAM (parser) - start) > CP_OPERATOR_LEN)
 		{
@@ -1811,7 +1810,7 @@ linespec_parse_basic (linespec_parser *parser)
       std::vector<bound_minimal_symbol> minimal_symbols;
 
       /* Try looking it up as a function/method.  */
-      find_linespec_symbols (PARSER_STATE (parser),
+      find_linespec_symbols (&parser->state,
 			     PARSER_RESULT (parser)->file_symtabs, name.get (),
 			     PARSER_EXPLICIT (parser)->func_name_match_type,
 			     &symbols, &minimal_symbols);
@@ -1827,7 +1826,7 @@ linespec_parse_basic (linespec_parser *parser)
 	  /* NAME was not a function or a method.  So it must be a label
 	     name or user specified variable like "break foo.c:$zippo".  */
 	  std::vector<block_symbol> labels
-	    = find_label_symbols (PARSER_STATE (parser), {}, &symbols,
+	    = find_label_symbols (&parser->state, {}, &symbols,
 				  name.get ());
 
 	  if (!labels.empty ())
@@ -1842,7 +1841,7 @@ linespec_parse_basic (linespec_parser *parser)
 	    {
 	      /* User specified a convenience variable or history value.  */
 	      PARSER_EXPLICIT (parser)->line_offset
-		= linespec_parse_variable (PARSER_STATE (parser), name.get ());
+		= linespec_parse_variable (&parser->state, name.get ());
 
 	      if (PARSER_EXPLICIT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN)
 		{
@@ -1934,7 +1933,7 @@ linespec_parse_basic (linespec_parser *parser)
 	      /* Grab a copy of the label's name and look it up.  */
 	      name = copy_token_string (token);
 	      std::vector<block_symbol> labels
-		= find_label_symbols (PARSER_STATE (parser),
+		= find_label_symbols (&parser->state,
 				      PARSER_RESULT (parser)->function_symbols,
 				      &symbols, name.get ());
 
@@ -2482,14 +2481,14 @@ parse_linespec (linespec_parser *parser, const char *arg,
   PARSER_EXPLICIT (parser)->func_name_match_type = match_type;
 
   /* Initialize the default symtab and line offset.  */
-  initialize_defaults (&PARSER_STATE (parser)->default_symtab,
-		       &PARSER_STATE (parser)->default_line);
+  initialize_defaults (&parser->state.default_symtab,
+		       &parser->state.default_line);
 
   /* Objective-C shortcut.  */
   if (parser->completion_tracker == NULL)
     {
       std::vector<symtab_and_line> values
-	= decode_objc (PARSER_STATE (parser), PARSER_RESULT (parser), arg);
+	= decode_objc (&parser->state, PARSER_RESULT (parser), arg);
       if (!values.empty ())
 	return values;
     }
@@ -2518,7 +2517,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
       /* User specified a convenience variable or history value.  */
       gdb::unique_xmalloc_ptr<char> var = copy_token_string (token);
       PARSER_EXPLICIT (parser)->line_offset
-	= linespec_parse_variable (PARSER_STATE (parser), var.get ());
+	= linespec_parse_variable (&parser->state, var.get ());
 
       /* If a line_offset wasn't found (VAR is the name of a user
 	 variable/function), then skip to normal symbol processing.  */
@@ -2556,7 +2555,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
 	{
 	  PARSER_RESULT (parser)->file_symtabs
 	    = symtabs_from_filename (user_filename.get (),
-				     PARSER_STATE (parser)->search_pspace);
+				     parser->state.search_pspace);
 	}
       catch (gdb_exception_error &ex)
 	{
@@ -2635,7 +2634,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
 
   /* Convert the data in PARSER_RESULT to SALs.  */
   if (parser->completion_tracker == NULL)
-    return convert_linespec_to_sals (PARSER_STATE (parser),
+    return convert_linespec_to_sals (&parser->state,
 				     PARSER_RESULT (parser));
 
   return {};
@@ -2679,7 +2678,7 @@ linespec_parser::linespec_parser (int flags,
   PARSER_EXPLICIT (this)->func_name_match_type
     = symbol_name_match_type::WILD;
   PARSER_EXPLICIT (this)->line_offset.sign = LINE_OFFSET_UNKNOWN;
-  linespec_state_constructor (PARSER_STATE (this), flags, language,
+  linespec_state_constructor (&state, flags, language,
 			      search_pspace,
 			      default_symtab, default_line, canonical);
 }
@@ -2697,7 +2696,7 @@ linespec_state_destructor (struct linespec_state *self)
 
 linespec_parser::~linespec_parser ()
 {
-  linespec_state_destructor (PARSER_STATE (this));
+  linespec_state_destructor (&state);
 }
 
 /* See description in linespec.h.  */
@@ -2826,7 +2825,7 @@ complete_label (completion_tracker &tracker,
 {
   std::vector<block_symbol> label_function_symbols;
   std::vector<block_symbol> labels
-    = find_label_symbols (PARSER_STATE (parser),
+    = find_label_symbols (&parser->state,
 			  PARSER_RESULT (parser)->function_symbols,
 			  &label_function_symbols,
 			  label_name, true);
@@ -2854,7 +2853,7 @@ linespec_complete_label (completion_tracker &tracker,
 
   try
     {
-      convert_explicit_location_spec_to_linespec (PARSER_STATE (&parser),
+      convert_explicit_location_spec_to_linespec (&parser.state,
 						  PARSER_RESULT (&parser),
 						  source_filename,
 						  function_name,
@@ -2883,7 +2882,7 @@ linespec_complete (completion_tracker &tracker, const char *text,
   PARSER_STREAM (&parser) = text;
 
   parser.completion_tracker = &tracker;
-  PARSER_STATE (&parser)->is_linespec = 1;
+  parser.state.is_linespec = 1;
 
   /* Parse as much as possible.  parser.completion_word will hold
      furthest completion point we managed to parse to.  */
@@ -2934,7 +2933,7 @@ linespec_complete (completion_tracker &tracker, const char *text,
 
       std::vector<block_symbol> function_symbols;
       std::vector<bound_minimal_symbol> minimal_symbols;
-      find_linespec_symbols (PARSER_STATE (&parser),
+      find_linespec_symbols (&parser.state,
 			     PARSER_RESULT (&parser)->file_symtabs,
 			     func_name, match_type,
 			     &function_symbols, &minimal_symbols);
@@ -3075,7 +3074,7 @@ location_spec_to_sals (linespec_parser *parser,
     case LINESPEC_LOCATION_SPEC:
       {
 	const linespec_location_spec *ls = as_linespec_location_spec (locspec);
-	PARSER_STATE (parser)->is_linespec = 1;
+	parser->state.is_linespec = 1;
 	result = parse_linespec (parser, ls->spec_string.get (),
 				 ls->match_type);
       }
@@ -3091,13 +3090,13 @@ location_spec_to_sals (linespec_parser *parser,
 	if (addr_string != NULL)
 	  {
 	    addr = linespec_expression_to_pc (&addr_string);
-	    if (PARSER_STATE (parser)->canonical != NULL)
-	      PARSER_STATE (parser)->canonical->locspec	= locspec->clone ();
+	    if (parser->state.canonical != NULL)
+	      parser->state.canonical->locspec	= locspec->clone ();
 	  }
 	else
 	  addr = addr_spec->address;
 
-	result = convert_address_location_to_sals (PARSER_STATE (parser),
+	result = convert_address_location_to_sals (&parser->state,
 						   addr);
       }
       break;
@@ -3106,7 +3105,7 @@ location_spec_to_sals (linespec_parser *parser,
       {
 	const explicit_location_spec *explicit_locspec
 	  = as_explicit_location_spec (locspec);
-	result = convert_explicit_location_spec_to_sals (PARSER_STATE (parser),
+	result = convert_explicit_location_spec_to_sals (&parser->state,
 							 PARSER_RESULT (parser),
 							 explicit_locspec);
       }
@@ -3135,7 +3134,6 @@ decode_line_full (struct location_spec *locspec, int flags,
 		  const char *filter)
 {
   std::vector<const char *> filters;
-  struct linespec_state *state;
 
   gdb_assert (canonical != NULL);
   /* The filter only makes sense for 'all'.  */
@@ -3154,7 +3152,7 @@ decode_line_full (struct location_spec *locspec, int flags,
 
   std::vector<symtab_and_line> result = location_spec_to_sals (&parser,
 							       locspec);
-  state = PARSER_STATE (&parser);
+  linespec_state *state = &parser.state;
 
   if (result.size () == 0)
     throw_error (NOT_SUPPORTED_ERROR, _("Location %s not available"),
