@@ -966,6 +966,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
       if (fdr_ptr->isymBase < 0
 	  || fdr_ptr->isymBase > symhdr->isymMax
 	  || fdr_ptr->csym < 0
+	  || fdr_ptr->csym > symhdr->isymMax - fdr_ptr->isymBase
 	  || fdr_ptr->csym > ((long) bfd_get_symcount (abfd)
 			      - (internal_ptr - internal))
 	  || fdr_ptr->issBase < 0
