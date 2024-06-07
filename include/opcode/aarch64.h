@@ -899,7 +899,8 @@ enum aarch64_opnd
 /* Qualifier constrains an operand.  It either specifies a variant of an
    operand type or limits values available to an operand type.
 
-   N.B. Order is important; keep aarch64_opnd_qualifiers synced.  */
+   N.B. Order is important.
+   Keep aarch64_opnd_qualifiers (opcodes/aarch64-opc.c) synced.  */
 
 enum aarch64_opnd_qualifier
 {
