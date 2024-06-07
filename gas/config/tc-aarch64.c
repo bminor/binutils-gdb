@@ -6245,7 +6245,7 @@ lookup_mnemonic (const char *start, int len)
    (if any) and END points to the end of the mnemonic.  */
 
 static templates *
-opcode_lookup (char *base, char *dot, char *end)
+opcode_lookup (const char *base, const char *dot, const char *end)
 {
   const aarch64_cond *cond;
   char condname[16];
