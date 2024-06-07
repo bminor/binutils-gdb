@@ -1620,6 +1620,55 @@ check_reglist (const aarch64_opnd_info *opnd,
   return true;
 }
 
+typedef struct
+{
+  int64_t min;
+  int64_t max;
+} imm_range_t;
+
+static imm_range_t
+imm_range_min_max (unsigned size, bool signed_rng)
+{
+  assert (size < 63);
+  imm_range_t r;
+  if (signed_rng)
+    {
+      r.max = (((int64_t) 0x1) << (size - 1)) - 1;
+      r.min = - r.max - 1;
+    }
+  else
+    {
+      r.max = (((int64_t) 0x1) << size) - 1;
+      r.min = 0;
+    }
+  return r;
+}
+
+/* Check that an immediate value is in the range provided by the
+   operand type.  */
+static bool
+check_immediate_out_of_range (int64_t imm,
+			      enum aarch64_opnd type,
+			      aarch64_operand_error *mismatch_detail,
+			      int idx)
+{
+  const aarch64_operand *operand = get_operand_from_code (type);
+  uint8_t size = get_operand_fields_width (operand);
+  bool unsigned_imm = operand_need_unsigned_offset (operand);
+  bool (*value_fit_field) (int64_t, unsigned)
+    = (unsigned_imm
+      ? value_fit_unsigned_field_p
+      : value_fit_signed_field_p);
+
+  if (!value_fit_field (imm, size))
+    {
+      imm_range_t rng = imm_range_min_max (size, !unsigned_imm);
+      set_imm_out_of_range_error (mismatch_detail, idx, rng.min, rng.max);
+      return false;
+    }
+  return true;
+}
+
 /* Check that indexed ZA operand OPND has:
 
    - a selection register in the range [MIN_WREG, MIN_WREG + 3]
@@ -2375,27 +2424,25 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_ADDR_PCREL19:
 	case AARCH64_OPND_ADDR_PCREL21:
 	case AARCH64_OPND_ADDR_PCREL26:
-	  imm = opnd->imm.value;
-	  if (operand_need_shift_by_two (get_operand_from_code (type)))
-	    {
-	      /* The offset value in a PC-relative branch instruction is alway
-		 4-byte aligned and is encoded without the lowest 2 bits.  */
-	      if (!value_aligned_p (imm, 4))
-		{
-		  set_unaligned_error (mismatch_detail, idx, 4);
-		  return false;
-		}
-	      /* Right shift by 2 so that we can carry out the following check
-		 canonically.  */
-	      imm >>= 2;
-	    }
-	  size = get_operand_fields_width (get_operand_from_code (type));
-	  if (!value_fit_signed_field_p (imm, size))
-	    {
-	      set_other_error (mismatch_detail, idx,
-			       _("immediate out of range"));
+	  {
+	    imm = opnd->imm.value;
+	    if (operand_need_shift_by_two (get_operand_from_code (type)))
+	      {
+		/* The offset value in a PC-relative branch instruction is alway
+		   4-byte aligned and is encoded without the lowest 2 bits.  */
+		if (!value_aligned_p (imm, 4))
+		  {
+		    set_unaligned_error (mismatch_detail, idx, 4);
+		    return false;
+		  }
+		/* Right shift by 2 so that we can carry out the following check
+		   canonically.  */
+		imm >>= 2;
+	      }
+
+	    if (!check_immediate_out_of_range (imm, type, mismatch_detail, idx))
 	      return false;
-	    }
+	  }
 	  break;
 
 	case AARCH64_OPND_SME_ADDR_RI_U4xVL:
@@ -2809,9 +2856,9 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  assert (size < 32);
 	  if (!value_fit_signed_field_p (opnd->imm.value, size))
 	    {
-	      set_imm_out_of_range_error (mismatch_detail, idx,
-					  -(1 << (size - 1)),
-					  (1 << (size - 1)) - 1);
+	      imm_range_t rng = imm_range_min_max (size, true);
+	      set_imm_out_of_range_error (mismatch_detail, idx, rng.min,
+					  rng.max);
 	      return false;
 	    }
 	  break;

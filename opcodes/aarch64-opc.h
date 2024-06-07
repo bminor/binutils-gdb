@@ -298,6 +298,7 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #define OPD_F_SHIFT_BY_4	0x00000800	/* Need to left shift the field
 						   value by 4 to get the value
 						   of an immediate operand.  */
+#define OPD_F_UNSIGNED		0x00001000	/* Expect an unsigned value.  */
 
 
 /* Register flags.  */
@@ -399,6 +400,12 @@ static inline bool
 operand_need_shift_by_four (const aarch64_operand *operand)
 {
   return (operand->flags & OPD_F_SHIFT_BY_4) != 0;
+}
+
+static inline bool
+operand_need_unsigned_offset (const aarch64_operand *operand)
+{
+  return (operand->flags & OPD_F_UNSIGNED) != 0;
 }
 
 static inline bool
