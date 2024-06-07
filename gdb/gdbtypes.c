@@ -6185,10 +6185,10 @@ _initialize_gdbtypes ()
   /* Add user knob for controlling resolution of opaque types.  */
   add_setshow_boolean_cmd ("opaque-type-resolution", class_support,
 			   &opaque_type_resolution,
-			   _("Set resolution of opaque struct/class/union"
-			     " types (if set before loading symbols)."),
-			   _("Show resolution of opaque struct/class/union"
-			     " types (if set before loading symbols)."),
+			   _("\
+Set resolution of opaque struct/class/union types."),
+			   _("\
+Show resolution of opaque struct/class/union types."),
 			   NULL, NULL,
 			   show_opaque_type_resolution,
 			   &setlist, &showlist);
