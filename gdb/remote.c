@@ -2503,11 +2503,9 @@ add_packet_config_cmd (const unsigned int which_packet, const char *name,
   packet_config *config = &remote_protocol_packets[which_packet];
 
   gdb::unique_xmalloc_ptr<char> set_doc
-    = xstrprintf ("Set use of remote protocol `%s' (%s) packet.",
-		  name, title);
+    = xstrprintf ("Set use of remote protocol `%s' packet.", name);
   gdb::unique_xmalloc_ptr<char> show_doc
-    = xstrprintf ("Show current use of remote protocol `%s' (%s) packet.",
-		  name, title);
+    = xstrprintf ("Show current use of remote protocol `%s' packet.", name);
   /* set/show TITLE-packet {auto,on,off} */
   gdb::unique_xmalloc_ptr<char> cmd_name = xstrprintf ("%s-packet", title);
   set_show_commands cmds
