@@ -101,12 +101,26 @@ static const gdb_byte arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa
    particular the FP model) and also (possibly) the C Library.
 
    For glibc, eglibc, and uclibc the following holds:  If the FP model is 
-   SoftVFP or VFP (which implies EABI) then the PC is at offset 9 in the 
+   SoftVFP or VFP (which implies EABI) then the PC is at offset 1 or 9 in the
    buffer.  This is also true for the SoftFPA model.  However, for the FPA 
    model the PC is at offset 21 in the buffer.  */
 #define ARM_LINUX_JB_ELEMENT_SIZE	ARM_INT_REGISTER_SIZE
 #define ARM_LINUX_JB_PC_FPA		21
-#define ARM_LINUX_JB_PC_EABI		9
+#ifdef __UCLIBC__
+# define ARM_LINUX_JB_PC_EABI		9
+#else
+# ifdef __GLIBC__
+#  if __GLIBC_PREREQ(2, 20)
+/* This has been 1 since glibc 2.20, see glibc commit 80a56cc3ee ("ARM: Add
+   SystemTap probes to longjmp and setjmp.").  */
+#   define ARM_LINUX_JB_PC_EABI		1
+#  else
+#   define ARM_LINUX_JB_PC_EABI		9
+#  endif
+# else
+#  define ARM_LINUX_JB_PC_EABI		9
+# endif
+#endif
 
 /*
    Dynamic Linking on ARM GNU/Linux
