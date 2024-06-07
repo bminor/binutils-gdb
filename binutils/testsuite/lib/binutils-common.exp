@@ -472,7 +472,8 @@ proc supports_persistent_section {} {
 proc supports_dt_relr {} {
     if { ([istarget x86_64-*-*]
 	  || [istarget i?86-*-*]
-	  || [istarget powerpc64*-*-*])
+	  || [istarget powerpc64*-*-*]
+	  || [istarget aarch64*-*-*])
 	 && ([istarget *-*-linux*]
 	     || [istarget *-*-gnu*]) } {
 	return 1
