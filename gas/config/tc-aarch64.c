@@ -346,10 +346,6 @@ struct reloc_entry
 		 | REG_TYPE(FP_B) | REG_TYPE(FP_H)			\
 		 | REG_TYPE(FP_S) | REG_TYPE(FP_D) | REG_TYPE(FP_Q)	\
 		 | REG_TYPE(Z) | REG_TYPE(P) | REG_TYPE(PN))		\
-  /* Any integer register; used for error messages only.  */		\
-  MULTI_REG_TYPE(R_N, REG_TYPE(R_32) | REG_TYPE(R_64)			\
-		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
-		 | REG_TYPE(ZR_32) | REG_TYPE(ZR_64))			\
   /* Any vector register.  */						\
   MULTI_REG_TYPE(VZ, REG_TYPE(V) | REG_TYPE(Z))				\
   /* An SVE vector or predicate register.  */				\
@@ -4640,7 +4636,7 @@ static bool
 parse_sme_immediate (char **str, int64_t *imm)
 {
   int64_t val;
-  if (! parse_constant_immediate (str, &val, REG_TYPE_R_N))
+  if (! parse_constant_immediate (str, &val, REG_TYPE_R_ZR_SP))
     return false;
 
   *imm = val;
