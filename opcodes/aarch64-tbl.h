@@ -100,6 +100,11 @@
   QLF1(NIL),			\
 }
 
+#define QL_IMM_NIL_NIL		\
+{				\
+  QLF2(NIL, NIL),		\
+}
+
 /* e.g. B.<cond> <label>.  */
 #define QL_PCREL_NIL		\
 {				\
@@ -2745,6 +2750,8 @@ static const aarch64_feature_set aarch64_feature_lut =
   AARCH64_FEATURE (LUT);
 static const aarch64_feature_set aarch64_feature_lut_sve2 =
   AARCH64_FEATURES (2, LUT, SVE2);
+static const aarch64_feature_set aarch64_feature_brbe =
+  AARCH64_FEATURE (BRBE);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2821,6 +2828,7 @@ static const aarch64_feature_set aarch64_feature_lut_sve2 =
 #define FP8_SME2   &aarch64_feature_fp8_sme2
 #define LUT &aarch64_feature_lut
 #define LUT_SVE2 &aarch64_feature_lut_sve2
+#define BRBE		&aarch64_feature_brbe
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -3019,6 +3027,8 @@ static const aarch64_feature_set aarch64_feature_lut_sve2 =
 #define LUT_SVE2_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS,CONSTRAINTS) \
   { NAME, OPCODE, MASK, lut, 0, LUT_SVE2, OPS, QUALS, \
     FLAGS, CONSTRAINTS, 0, NULL }
+#define BRBE_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, ic_system, 0, BRBE, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -4443,6 +4453,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   PREDRES_INSN ("dvp", 0xd50b73a0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
   PREDRES_INSN ("cpp", 0xd50b73e0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
   PREDRES2_INSN ("cosp", 0xd50b73c0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
+  BRBE_INSN ("brb", 0xd5097280, 0xffffffc0, OP2 (BRBOP, Rt_IN_SYS_ALIASES), QL_IMM_NIL_NIL, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
   /* Armv8.4-a flag setting instruction, However this encoding has an encoding clash with the msr
      below it.  Usually we can resolve this by setting an alias condition on the flags, however that
      depends on the disassembly masks to be able to quickly find the alias.  The problem is the
@@ -6836,6 +6847,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "the GCSB option name DSYNC")					\
     Y(SYSTEM, hint, "BTI_TARGET", 0, F (),				\
       "BTI targets j/c/jc")						\
+    Y(SYSTEM, imm, "BRBOP", 0, F(FLD_brbop),				\
+      "Branch Record Buffer operation operand")				\
+    Y(INT_REG, regno, "Rt_IN_SYS_ALIASES", 0, F(FLD_Rt),		\
+      "Rt register with defaults for SYS aliases")			\
     Y(INT_REG, regno, "LSE128_Rt", 0, F(FLD_LSE128_Rt), "an integer register") \
     Y(INT_REG, regno, "LSE128_Rt2", 0, F(FLD_LSE128_Rt2), "an integer register") \
     Y(ADDRESS, sve_addr_ri_s4, "SVE_ADDR_RI_S4x16",			\

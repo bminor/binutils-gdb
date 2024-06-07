@@ -6235,6 +6235,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Rs:
     case AARCH64_OPND_Ra:
     case AARCH64_OPND_Rt_SYS:
+    case AARCH64_OPND_Rt_IN_SYS_ALIASES:
     case AARCH64_OPND_Rd_SP:
     case AARCH64_OPND_Rn_SP:
     case AARCH64_OPND_Rm_SP:
@@ -6619,6 +6620,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Ra:
 	case AARCH64_OPND_Rt_LS64:
 	case AARCH64_OPND_Rt_SYS:
+	case AARCH64_OPND_Rt_IN_SYS_ALIASES:
 	case AARCH64_OPND_PAIRREG:
 	case AARCH64_OPND_PAIRREG_OR_XZR:
 	case AARCH64_OPND_SVE_Rm:
@@ -8073,6 +8075,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SME_VLxN_10:
 	case AARCH64_OPND_SME_VLxN_13:
 	  po_strict_enum_or_fail (aarch64_sme_vlxn_array);
+	  info->imm.value = val;
+	  break;
+
+	case AARCH64_OPND_BRBOP:
+	  po_strict_enum_or_fail (aarch64_brbop_array);
 	  info->imm.value = val;
 	  break;
 
@@ -10589,6 +10596,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"faminmax",		AARCH64_FEATURE (FAMINMAX), AARCH64_FEATURE (SIMD)},
   {"fp8",		AARCH64_FEATURE (FP8), AARCH64_FEATURE (SIMD)},
   {"lut",		AARCH64_FEATURE (LUT), AARCH64_FEATURE (SIMD)},
+  {"brbe",		AARCH64_FEATURE (BRBE), AARCH64_NO_FEATURES},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

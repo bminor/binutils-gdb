@@ -117,6 +117,12 @@ const char *const aarch64_sme_vlxn_array[2] = {
   "vlx4"
 };
 
+/* Values accepted by the brb alias.  */
+const char *const aarch64_brbop_array[] = {
+  "iall",
+  "inj",
+};
+
 /* Helper functions to determine which operand to be used to encode/decode
    the size:Q fields for AdvSIMD instructions.  */
 
@@ -418,6 +424,7 @@ const aarch64_field fields[] =
     {  6,  1 }, /* ZAn: name of the bit encoded ZA tile.  */
     { 12,  4 },	/* opc2: in rcpc3 ld/st inst deciding the pre/post-index.  */
     { 30,  2 },	/* rcpc3_size: in rcpc3 ld/st, field controls Rt/Rt2 width.  */
+    { 5,  1 },	/* FLD_brbop: used in BRB to mean IALL or INJ.  */
 };
 
 enum aarch64_operand_class
@@ -3958,6 +3965,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Rt2:
     case AARCH64_OPND_Rs:
     case AARCH64_OPND_Ra:
+    case AARCH64_OPND_Rt_IN_SYS_ALIASES:
     case AARCH64_OPND_Rt_LS64:
     case AARCH64_OPND_Rt_SYS:
     case AARCH64_OPND_PAIRREG:
@@ -3972,6 +3980,15 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	{
 	  if (!opnd->present)
 	    break;
+	}
+      else if ((opnd->type == AARCH64_OPND_Rt_IN_SYS_ALIASES)
+	       && (opnd->reg.regno
+		   != get_optional_operand_default_value (opcode)))
+	{
+	  /* Avoid printing an invalid additional value for Rt in SYS aliases such as
+	     BRB, provide a helpful comment instead */
+	  snprintf (comment, comment_size, "unpredictable encoding (Rt!=31): #%" PRIi64, opnd->imm.value);
+	  break;
 	}
       /* Omit the operand, e.g. RET.  */
       else if (optional_operand_p (opcode, idx)
@@ -4353,6 +4370,13 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       assert (enum_value < ARRAY_SIZE (aarch64_sme_vlxn_array));
       snprintf (buf, size, "%s",
 		style_sub_mnem (styler, aarch64_sme_vlxn_array[enum_value]));
+      break;
+
+    case AARCH64_OPND_BRBOP:
+      enum_value = opnd->imm.value;
+      assert (enum_value < ARRAY_SIZE (aarch64_brbop_array));
+      snprintf (buf, size, "%s",
+		style_sub_mnem (styler, aarch64_brbop_array[enum_value]));
       break;
 
     case AARCH64_OPND_CRn:

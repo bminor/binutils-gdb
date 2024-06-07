@@ -165,6 +165,8 @@ automatically cause those extensions to be disabled.
  @tab Enable BFloat16 to BFloat16 arithmetic for SVE2 and SME2.
 @item @code{bf16} @tab @code{fp}
  @tab Enable BFloat16 extension.
+@item @code{brbe} @tab
+ @tab Enable the Branch Record Buffer extension.
 @item @code{chk} @tab
  @tab Enable the Check Feature Status Extension.
 @item @code{compnum} @tab @code{simd}
