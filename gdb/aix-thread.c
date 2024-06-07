@@ -78,7 +78,6 @@ static bool debug_aix_thread;
 struct aix_thread_info : public private_thread_info
 {
   pthdb_pthread_t pdtid;	 /* thread's libpthdebug id */
-  pthdb_tid_t tid;			/* kernel thread id */
 };
 
 /* Return the aix_thread_info attached to THREAD.  */
@@ -805,7 +804,9 @@ sync_threadlists (pid_t pid)
       if (status != PTHDB_SUCCESS || pthid == PTHDB_INVALID_PTID)
 	continue;
 
-      ptid_t ptid (pid, 0, pthid);
+      status = pthdb_pthread_tid (data->pd_session, pdtid, &tid);
+      ptid_t ptid (pid, tid, pthid);
+
       status = pthdb_pthread_state (data->pd_session, pdtid, &state);
       in_queue_threads.insert (pdtid);
 
@@ -822,8 +823,6 @@ sync_threadlists (pid_t pid)
 	  aix_thread_info *priv = new aix_thread_info;
 	  /* init priv */
 	  priv->pdtid = pdtid;
-	  status = pthdb_pthread_tid (data->pd_session, pdtid, &tid);
-	  priv->tid = tid;
 	  /* Check if this is the main thread.  If it is, then change
 	     its ptid and add its private data.  */
 	  if (in_thread_list (proc_target, ptid_t (pid)))
@@ -875,9 +874,7 @@ static int
 iter_tid (struct thread_info *thread, void *tidp)
 {
   const pthdb_tid_t tid = *(pthdb_tid_t *)tidp;
-  aix_thread_info *priv = get_aix_thread_info (thread);
-
-  return priv->tid == tid;
+  return thread->ptid.lwp () == tid;
 }
 
 /* Synchronize libpthdebug's state with the inferior and with GDB,
@@ -1079,7 +1076,7 @@ aix_thread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 
       aix_thread_info *priv = get_aix_thread_info (thread);
 
-      tid[0] = priv->tid;
+      tid[0] = ptid.lwp ();
       if (tid[0] == PTHDB_INVALID_TID)
 	error (_("aix-thread resume: no tid for pthread %ld"),
 	       ptid.lwp ());
@@ -1468,7 +1465,7 @@ aix_thread_target::fetch_registers (struct regcache *regcache, int regno)
     {
       thread = current_inferior ()->find_thread (regcache->ptid ());
       aix_thread_info *priv = get_aix_thread_info (thread);
-      tid = priv->tid;
+      tid = regcache->ptid().lwp ();
 
       if (tid == PTHDB_INVALID_TID)
 	fetch_regs_user_thread (regcache, priv->pdtid);
@@ -1933,7 +1930,7 @@ aix_thread_target::store_registers (struct regcache *regcache, int regno)
     {
       thread = current_inferior ()->find_thread (regcache->ptid ());
       aix_thread_info *priv = get_aix_thread_info (thread);
-      tid = priv->tid;
+      tid = regcache->ptid ().lwp ();
 
       if (tid == PTHDB_INVALID_TID)
 	store_regs_user_thread (regcache, priv->pdtid);
@@ -1997,7 +1994,7 @@ aix_thread_target::pid_to_str (ptid_t ptid)
       aix_thread_info *priv = get_aix_thread_info (thread_info);
 
       return string_printf (_("Thread %s (tid %s)"), pulongest (ptid.tid ()),
-		pulongest (priv->tid));
+		pulongest (ptid.lwp ()));
     }
 
   return beneath ()->pid_to_str (ptid);
