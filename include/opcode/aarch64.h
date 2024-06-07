@@ -984,7 +984,7 @@ enum aarch64_opnd_qualifier
 
   /* Special qualifier used for indicating error in qualifier retrieval.  */
   AARCH64_OPND_QLF_ERR,
-};
+} ATTRIBUTE_PACKED;
 
 /* Instruction class.  */
 
@@ -1235,8 +1235,8 @@ enum err_type
 #define AARCH64_MAX_OPND_NUM 7
 /* Maximum number of qualifier sequences an instruction can have.  */
 #define AARCH64_MAX_QLF_SEQ_NUM 10
-/* Operand qualifier typedef; optimized for the size.  */
-typedef unsigned char aarch64_opnd_qualifier_t;
+/* Operand qualifier typedef  */
+typedef enum aarch64_opnd_qualifier aarch64_opnd_qualifier_t;
 /* Operand qualifier sequence typedef.  */
 typedef aarch64_opnd_qualifier_t	\
 	  aarch64_opnd_qualifier_seq_t [AARCH64_MAX_OPND_NUM];

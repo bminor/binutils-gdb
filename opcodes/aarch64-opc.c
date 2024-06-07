@@ -768,9 +768,9 @@ aarch64_get_expected_qualifier (const aarch64_opnd_qualifier_seq_t *qseq_list,
      it can mean no qualifier for the operand, or the qualifer sequence is
      not in use (when all qualifiers in the sequence are NILs), we have to
      handle this special case here.  */
-  if (known_qlf == AARCH64_OPND_NIL)
+  if (((enum aarch64_opnd) known_qlf) == AARCH64_OPND_NIL)
     {
-      assert (qseq_list[0][known_idx] == AARCH64_OPND_NIL);
+      assert (((enum aarch64_opnd) qseq_list[0][known_idx]) == AARCH64_OPND_NIL);
       return qseq_list[0][idx];
     }
 
@@ -781,7 +781,7 @@ aarch64_get_expected_qualifier (const aarch64_opnd_qualifier_seq_t *qseq_list,
 	  if (saved_i != -1)
 	    /* More than one sequences are found to have KNOWN_QLF at
 	       KNOWN_IDX.  */
-	    return AARCH64_OPND_NIL;
+	    return AARCH64_OPND_QLF_NIL;
 	  saved_i = i;
 	}
     }
