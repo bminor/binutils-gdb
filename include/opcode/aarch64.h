@@ -1971,7 +1971,7 @@ aarch64_is_destructive_by_operands (const aarch64_opcode *);
 extern int
 aarch64_num_of_operands (const aarch64_opcode *);
 
-extern int
+extern bool
 aarch64_stack_pointer_p (const aarch64_opnd_info *);
 
 extern int

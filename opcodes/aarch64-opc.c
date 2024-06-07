@@ -644,21 +644,21 @@ const struct aarch64_name_value_pair aarch64_prfops[32] =
 
 /* Utilities on value constraint.  */
 
-static inline int
-value_in_range_p (int64_t value, int low, int high)
+static inline bool
+value_in_range_p (int64_t value, int64_t low, int64_t high)
 {
-  return (value >= low && value <= high) ? 1 : 0;
+  return (low <= value) && (value <= high);
 }
 
 /* Return true if VALUE is a multiple of ALIGN.  */
-static inline int
+static inline bool
 value_aligned_p (int64_t value, int align)
 {
   return (value % align) == 0;
 }
 
 /* A signed value fits in a field.  */
-static inline int
+static inline bool
 value_fit_signed_field_p (int64_t value, unsigned width)
 {
   assert (width < 32);
@@ -666,13 +666,13 @@ value_fit_signed_field_p (int64_t value, unsigned width)
     {
       int64_t lim = (uint64_t) 1 << (width - 1);
       if (value >= -lim && value < lim)
-	return 1;
+	return true;
     }
-  return 0;
+  return false;
 }
 
 /* An unsigned value fits in a field.  */
-static inline int
+static inline bool
 value_fit_unsigned_field_p (int64_t value, unsigned width)
 {
   assert (width < 32);
@@ -680,13 +680,13 @@ value_fit_unsigned_field_p (int64_t value, unsigned width)
     {
       int64_t lim = (uint64_t) 1 << width;
       if (value >= 0 && value < lim)
-	return 1;
+	return true;
     }
-  return 0;
+  return false;
 }
 
-/* Return 1 if OPERAND is SP or WSP.  */
-int
+/* Return true if OPERAND is SP or WSP.  */
+bool
 aarch64_stack_pointer_p (const aarch64_opnd_info *operand)
 {
   return ((aarch64_get_operand_class (operand->type)
@@ -709,7 +709,7 @@ aarch64_zero_register_p (const aarch64_opnd_info *operand)
    OPERAND->TYPE and been qualified by OPERAND->QUALIFIER can be also
    qualified by the qualifier TARGET.  */
 
-static inline int
+static inline bool
 operand_also_qualified_p (const struct aarch64_opnd_info *operand,
 			  aarch64_opnd_qualifier_t target)
 {
@@ -717,27 +717,27 @@ operand_also_qualified_p (const struct aarch64_opnd_info *operand,
     {
     case AARCH64_OPND_QLF_W:
       if (target == AARCH64_OPND_QLF_WSP && aarch64_stack_pointer_p (operand))
-	return 1;
+	return true;
       break;
     case AARCH64_OPND_QLF_X:
       if (target == AARCH64_OPND_QLF_SP && aarch64_stack_pointer_p (operand))
-	return 1;
+	return true;
       break;
     case AARCH64_OPND_QLF_WSP:
       if (target == AARCH64_OPND_QLF_W
 	  && operand_maybe_stack_pointer (aarch64_operands + operand->type))
-	return 1;
+	return true;
       break;
     case AARCH64_OPND_QLF_SP:
       if (target == AARCH64_OPND_QLF_X
 	  && operand_maybe_stack_pointer (aarch64_operands + operand->type))
-	return 1;
+	return true;
       break;
     default:
       break;
     }
 
-  return 0;
+  return false;
 }
 
 /* Given qualifier sequence list QSEQ_LIST and the known qualifier KNOWN_QLF
@@ -1736,7 +1736,7 @@ calc_ldst_datasize (const aarch64_opnd_info *opnds)
    use a combination of error code, static string and some integer data to
    represent an error.  */
 
-static int
+static bool
 operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 				  enum aarch64_opnd type,
 				  const aarch64_opcode *opcode,
@@ -1764,7 +1764,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      set_syntax_error (mismatch_detail, idx - 1,
 				_("second reg in pair should be xzr if first is"
 				  " xzr"));
-	      return 0;
+	      return false;
 	    }
 	}
       /* Check pair reg constraints for instructions taking a pair of
@@ -1777,13 +1777,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_syntax_error (mismatch_detail, idx - 1,
 				_("reg pair must start from even reg"));
-	      return 0;
+	      return false;
 	    }
 	  if (opnds[idx].reg.regno != opnds[idx - 1].reg.regno + 1)
 	    {
 	      set_syntax_error (mismatch_detail, idx,
 				_("reg pair must be contiguous"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 	}
@@ -1797,13 +1797,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      && !aarch64_sys_ins_reg_has_xt (opnds[0].sysins_op))
 	    {
 	      set_other_error (mismatch_detail, idx, _("extraneous register"));
-	      return 0;
+	      return false;
 	    }
 	  if (!opnds[1].present
 	      && aarch64_sys_ins_reg_has_xt (opnds[0].sysins_op))
 	    {
 	      set_other_error (mismatch_detail, idx, _("missing register"));
-	      return 0;
+	      return false;
 	    }
 	}
       switch (qualifier)
@@ -1814,7 +1814,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 		       _("stack pointer register expected"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 	default:
@@ -1837,7 +1837,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!check_reglane (opnd, mismatch_detail, idx,
 			      "z", 0, (1 << shift) - 1,
 			      0, (1u << (size - shift)) - 1))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SVE_Zm1_23_INDEX:
@@ -1856,14 +1856,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
 			      0, 64 / size - 1))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SVE_Zn_5_INDEX:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
 			      0, 16 / size - 1))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_PNn3_INDEX1:
@@ -1871,7 +1871,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  size = get_operand_field_width (get_operand_from_code (type), 1);
 	  if (!check_reglane (opnd, mismatch_detail, idx, "pn", 8, 15,
 			      0, (1 << size) - 1))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SVE_Zm3_12_INDEX:
@@ -1892,7 +1892,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  size = get_operand_fields_width (get_operand_from_code (type)) - 5;
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
 			      0, (1 << size) - 1))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_Zm_INDEX1:
@@ -1909,14 +1909,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  size = get_operand_fields_width (get_operand_from_code (type)) - 4;
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 15,
 			      0, (1 << size) - 1))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_Zm:
 	  if (opnd->reg.regno > 15)
 	    {
 	      set_invalid_regno_error (mismatch_detail, idx, "z", 0, 15);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -1925,7 +1925,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  max_value = 16 / size - 1;
 	  if (!check_za_access (opnd, mismatch_detail, idx,
 				12, max_value, 1, 0, get_opcode_dependent_value (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	default:
@@ -1946,12 +1946,12 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_Znx4:
 	  num = get_operand_specific_data (&aarch64_operands[type]);
 	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
-	    return 0;
+	    return false;
 	  if ((opnd->reglist.first_regno % num) != 0)
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("start register out of range"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -1962,13 +1962,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	     have a stride of 4.  */
 	  num = get_operand_specific_data (&aarch64_operands[type]);
 	  if (!check_reglist (opnd, mismatch_detail, idx, num, 16 / num))
-	    return 0;
+	    return false;
 	  num = 16 | (opnd->reglist.stride - 1);
 	  if ((opnd->reglist.first_regno & ~num) != 0)
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("start register out of range"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -1977,7 +1977,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_ZtxN:
 	  num = get_opcode_dependent_value (opcode);
 	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
-	    return 0;
+	    return false;
 	  break;
 
 	default:
@@ -1996,14 +1996,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value, 1,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15, 1,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off3_0:
@@ -2011,84 +2011,84 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 7, 1,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off1x4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 1, 4,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off2x2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 3, 2,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off2x4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 3, 4,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off3x2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 7, 2,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsb_1:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 7, 2,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsh_1:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 3, 2,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrss_1:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 1, 2,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsd_1:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 0, 2,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsb_2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 3, 4,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsh_2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 1, 4,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_ARRAY4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15, 1,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrss_2:
@@ -2096,7 +2096,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 0, 4,
 				get_opcode_dependent_value (opcode),
 				get_opcode_dependent_vg_status (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_HV_idx_srcxN:
@@ -2108,7 +2108,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    max_value -= 1;
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value, num,
 				0, get_opcode_dependent_value (opcode)))
-	    return 0;
+	    return false;
 	  break;
 
 	default:
@@ -2124,7 +2124,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (opnd->reg.regno < 8)
 	    {
 	      set_invalid_regno_error (mismatch_detail, idx, "pn", 8, 15);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2133,7 +2133,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      && get_operand_fields_width (get_operand_from_code (type)) == 3)
 	    {
 	      set_invalid_regno_error (mismatch_detail, idx, "p", 0, 7);
-	      return 0;
+	      return false;
 	    }
 	  break;
 	}
@@ -2161,7 +2161,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_syntax_error (mismatch_detail, idx,
 				_("unexpected address writeback"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 	case ldst_imm10:
@@ -2169,7 +2169,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_syntax_error (mismatch_detail, idx,
 				_("unexpected address writeback"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 	case ldst_imm9:
@@ -2180,7 +2180,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_syntax_error (mismatch_detail, idx,
 				_("address writeback expected"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 	case rcpc3:
@@ -2192,7 +2192,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      {
 		set_syntax_error (mismatch_detail, idx,
 				  _("unexpected address writeback"));
-		return 0;
+		return false;
 	      }
 
 	  break;
@@ -2212,12 +2212,12 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_offset_out_of_range_error (mismatch_detail, idx,
 					     -64 * size, 63 * size);
-	      return 0;
+	      return false;
 	    }
 	  if (!value_aligned_p (opnd->addr.offset.imm, size))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, size);
-	      return 0;
+	      return false;
 	    }
 	  break;
 	case AARCH64_OPND_ADDR_OFFSET:
@@ -2226,7 +2226,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->addr.offset.imm, -256, 255))
 	    {
 	      set_offset_out_of_range_error (mismatch_detail, idx, -256, 255);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2237,22 +2237,22 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if ((value_in_range_p (opnd->addr.offset.imm, 0, 255)
 	       && !value_aligned_p (opnd->addr.offset.imm, size))
 	      || value_in_range_p (opnd->addr.offset.imm, -256, -1))
-	    return 1;
+	    return true;
 	  set_other_error (mismatch_detail, idx,
 			   _("negative or unaligned offset expected"));
-	  return 0;
+	  return false;
 
 	case AARCH64_OPND_ADDR_SIMM10:
 	  /* Scaled signed 10 bits immediate offset.  */
 	  if (!value_in_range_p (opnd->addr.offset.imm, -4096, 4088))
 	    {
 	      set_offset_out_of_range_error (mismatch_detail, idx, -4096, 4088);
-	      return 0;
+	      return false;
 	    }
 	  if (!value_aligned_p (opnd->addr.offset.imm, 8))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, 8);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2261,13 +2261,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->addr.offset.imm, -1024, 1008))
 	    {
 	      set_offset_out_of_range_error (mismatch_detail, idx, -1024, 1008);
-	      return 0;
+	      return false;
 	    }
 
 	  if (!value_aligned_p (opnd->addr.offset.imm, 16))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, 16);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2276,13 +2276,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->addr.offset.imm, -4096, 4080))
 	    {
 	      set_offset_out_of_range_error (mismatch_detail, idx, -4096, 4080);
-	      return 0;
+	      return false;
 	    }
 
 	  if (!value_aligned_p (opnd->addr.offset.imm, 16))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, 16);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2292,12 +2292,12 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (opnd->addr.offset.is_reg)
 	    {
 	      if (value_in_range_p (opnd->addr.offset.regno, 0, 30))
-		return 1;
+		return true;
 	      else
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("invalid register offset"));
-		  return 0;
+		  return false;
 		}
 	    }
 	  else
@@ -2319,7 +2319,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("invalid post-increment amount"));
-		  return 0;
+		  return false;
 		}
 	    }
 	  break;
@@ -2335,7 +2335,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid shift amount"));
-	      return 0;
+	      return false;
 	    }
 	  /* Only UXTW, LSL, SXTW and SXTX are the accepted extending
 	     operators.  */
@@ -2348,7 +2348,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    default:
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid extend/shift operator"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2362,12 +2362,12 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_offset_out_of_range_error (mismatch_detail, idx,
 					     0, 4095 * size);
-	      return 0;
+	      return false;
 	    }
 	  if (!value_aligned_p (opnd->addr.offset.imm, size))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, size);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2383,7 +2383,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      if (!value_aligned_p (imm, 4))
 		{
 		  set_unaligned_error (mismatch_detail, idx, 4);
-		  return 0;
+		  return false;
 		}
 	      /* Right shift by 2 so that we can carry out the following check
 		 canonically.  */
@@ -2394,7 +2394,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("immediate out of range"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2402,7 +2402,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->addr.offset.imm, 0, 15))
 	    {
 	      set_offset_out_of_range_error (mismatch_detail, idx, 0, 15);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2424,18 +2424,18 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid addressing mode"));
-	      return 0;
+	      return false;
 	    }
 	  if (!value_in_range_p (opnd->addr.offset.imm, min_value, max_value))
 	    {
 	      set_offset_out_of_range_error (mismatch_detail, idx,
 					     min_value, max_value);
-	      return 0;
+	      return false;
 	    }
 	  if (!value_aligned_p (opnd->addr.offset.imm, num))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, num);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2466,18 +2466,18 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid addressing mode"));
-	      return 0;
+	      return false;
 	    }
 	  if (!value_in_range_p (opnd->addr.offset.imm, min_value, max_value))
 	    {
 	      set_offset_out_of_range_error (mismatch_detail, idx,
 					     min_value, max_value);
-	      return 0;
+	      return false;
 	    }
 	  if (!value_aligned_p (opnd->addr.offset.imm, num))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, num);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2522,7 +2522,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("index register xzr is not allowed"));
-	      return 0;
+	      return false;
 	    }
 	  if (((1 << opnd->shifter.kind) & modifiers) == 0
 	      || (opnd->shifter.amount
@@ -2530,7 +2530,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid addressing mode"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2564,7 +2564,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid addressing mode"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2591,7 +2591,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      {
 		set_other_error (mismatch_detail, idx,
 				 _("invalid increment amount"));
-		return 0;
+		return false;
 	      }
 	  }
 	  break;
@@ -2600,7 +2600,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->addr.offset.imm, -256, 255))
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, -256, 255);
-	      return 0;
+	      return false;
 	    }
 
 	default:
@@ -2616,7 +2616,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->reglist.index, 0, num))
 	    {
 	      set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, num);
-	      return 0;
+	      return false;
 	    }
 	}
       /* The opcode dependent area stores the number of elements in
@@ -2633,7 +2633,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  /* Unless LD1/ST1, the number of registers should be equal to that
 	     of the structure elements.  */
 	  if (num != 1 && !check_reglist (opnd, mismatch_detail, idx, num, 1))
-	    return 0;
+	    return false;
 	  break;
 	case AARCH64_OPND_LVt_AL:
 	case AARCH64_OPND_LEt:
@@ -2641,7 +2641,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  /* The number of registers should be equal to that of the structure
 	     elements.  */
 	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
-	    return 0;
+	    return false;
 	  break;
 	default:
 	  break;
@@ -2649,7 +2649,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       if (opnd->reglist.stride != 1)
 	{
 	  set_reg_list_stride_error (mismatch_detail, idx, 1);
-	  return 0;
+	  return false;
 	}
       break;
 
@@ -2664,7 +2664,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  set_imm_out_of_range_error (mismatch_detail, idx,
 				      get_lower_bound (qualifier),
 				      get_upper_bound (qualifier));
-	  return 0;
+	  return false;
 	}
 
       switch (type)
@@ -2674,19 +2674,19 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid shift operator"));
-	      return 0;
+	      return false;
 	    }
 	  if (opnd->shifter.amount != 0 && opnd->shifter.amount != 12)
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("shift amount must be 0 or 12"));
-	      return 0;
+	      return false;
 	    }
 	  if (!value_fit_unsigned_field_p (opnd->imm.value, 12))
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("immediate out of range"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2696,32 +2696,32 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid shift operator"));
-	      return 0;
+	      return false;
 	    }
 	  size = aarch64_get_qualifier_esize (opnds[0].qualifier);
 	  if (!value_aligned_p (opnd->shifter.amount, 16))
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("shift amount must be a multiple of 16"));
-	      return 0;
+	      return false;
 	    }
 	  if (!value_in_range_p (opnd->shifter.amount, 0, size * 8 - 16))
 	    {
 	      set_sft_amount_out_of_range_error (mismatch_detail, idx,
 						 0, size * 8 - 16);
-	      return 0;
+	      return false;
 	    }
 	  if (opnd->imm.value < 0)
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("negative immediate value not allowed"));
-	      return 0;
+	      return false;
 	    }
 	  if (!value_fit_unsigned_field_p (opnd->imm.value, 16))
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("immediate out of range"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2740,7 +2740,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		    {
 		      set_other_error (mismatch_detail, idx,
 				       _("immediate out of range"));
-		      return 0;
+		      return false;
 		    }
 		  break;
 		case OP_MOV_IMM_LOG:
@@ -2748,12 +2748,12 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		    {
 		      set_other_error (mismatch_detail, idx,
 				       _("immediate out of range"));
-		      return 0;
+		      return false;
 		    }
 		  break;
 		default:
 		  assert (0);
-		  return 0;
+		  return false;
 		}
 	    }
 	  break;
@@ -2780,7 +2780,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0,
 					  (1u << size) - 1);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2789,13 +2789,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->imm.value, 0, 1008))
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0, 1008);
-	      return 0;
+	      return false;
 	    }
 
 	  if (!value_aligned_p (opnd->imm.value, 16))
 	    {
 	      set_unaligned_error (mismatch_detail, idx, 16);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2812,7 +2812,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      set_imm_out_of_range_error (mismatch_detail, idx,
 					  -(1 << (size - 1)),
 					  (1 << (size - 1)) - 1);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2825,7 +2825,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 1,
 					  size - opnds[idx-1].imm.value);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2840,7 +2840,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      {
 		set_other_error (mismatch_detail, idx,
 				 _("immediate out of range"));
-		return 0;
+		return false;
 	      }
 	  }
 	  break;
@@ -2851,7 +2851,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("immediate zero expected"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2865,7 +2865,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("rotate expected to be 0, 90, 180 or 270"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2876,7 +2876,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("rotate expected to be 90 or 270"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2887,7 +2887,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid shift amount"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2897,7 +2897,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0,
 					  size * 8 - 1);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2906,7 +2906,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->imm.value, 1, size * 8))
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 1, size * 8);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -2920,7 +2920,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("invalid shift operator"));
-		  return 0;
+		  return false;
 		}
 	      break;
 	    case AARCH64_OPND_QLF_MSL:
@@ -2928,7 +2928,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("invalid shift operator"));
-		  return 0;
+		  return false;
 		}
 	      break;
 	    case AARCH64_OPND_QLF_NIL:
@@ -2936,12 +2936,12 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("shift is not permitted"));
-		  return 0;
+		  return false;
 		}
 	      break;
 	    default:
 	      assert (0);
-	      return 0;
+	      return false;
 	    }
 	  /* Is the immediate valid?  */
 	  assert (idx == 1);
@@ -2951,7 +2951,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      if (!value_in_range_p (opnd->imm.value, -128, 255))
 		{
 		  set_imm_out_of_range_error (mismatch_detail, idx, -128, 255);
-		  return 0;
+		  return false;
 		}
 	    }
 	  else if (aarch64_shrink_expanded_imm8 (opnd->imm.value) < 0)
@@ -2961,7 +2961,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		 ffffffffgggggggghhhhhhhh'.  */
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid value for immediate"));
-	      return 0;
+	      return false;
 	    }
 	  /* Is the shift amount valid?  */
 	  switch (opnd->shifter.kind)
@@ -2972,12 +2972,12 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		  set_sft_amount_out_of_range_error (mismatch_detail, idx, 0,
 						     (size - 1) * 8);
-		  return 0;
+		  return false;
 		}
 	      if (!value_aligned_p (opnd->shifter.amount, 8))
 		{
 		  set_unaligned_error (mismatch_detail, idx, 8);
-		  return 0;
+		  return false;
 		}
 	      break;
 	    case AARCH64_MOD_MSL:
@@ -2986,7 +2986,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("shift amount must be 0 or 16"));
-		  return 0;
+		  return false;
 		}
 	      break;
 	    default:
@@ -2994,7 +2994,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("invalid shift operator"));
-		  return 0;
+		  return false;
 		}
 	      break;
 	    }
@@ -3007,7 +3007,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("floating-point immediate expected"));
-	      return 0;
+	      return false;
 	    }
 	  /* The value is expected to be an 8-bit floating-point constant with
 	     sign, 3-bit exponent and normalized 4 bits of precision, encoded
@@ -3017,13 +3017,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("immediate out of range"));
-	      return 0;
+	      return false;
 	    }
 	  if (opnd->shifter.kind != AARCH64_MOD_NONE)
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid shift operator"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3042,7 +3042,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		  set_other_error (mismatch_detail, idx,
 				   _("no shift amount allowed for"
 				     " 8-bit constants"));
-		  return 0;
+		  return false;
 		}
 	    }
 	  else
@@ -3051,7 +3051,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("shift amount must be 0 or 8"));
-		  return 0;
+		  return false;
 		}
 	      if (shift == 0 && (uvalue & 0xff) == 0)
 		{
@@ -3064,14 +3064,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("immediate too big for element size"));
-	      return 0;
+	      return false;
 	    }
 	  uvalue = (uvalue - min_value) & mask;
 	  if (uvalue > 0xff)
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("invalid arithmetic immediate"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3085,7 +3085,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("floating-point value must be 0.5 or 1.0"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3095,7 +3095,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("floating-point value must be 0.5 or 2.0"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3105,7 +3105,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("floating-point value must be 0.0 or 1.0"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3117,7 +3117,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      {
 		set_other_error (mismatch_detail, idx,
 				 _("immediate out of range"));
-		return 0;
+		return false;
 	      }
 	  }
 	  break;
@@ -3130,13 +3130,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      {
 		set_other_error (mismatch_detail, idx,
 				 _("immediate out of range"));
-		return 0;
+		return false;
 	      }
 	    if (!aarch64_sve_dupm_mov_immediate_p (uimm, esize))
 	      {
 		set_other_error (mismatch_detail, idx,
 				 _("invalid replicated MOV immediate"));
-		return 0;
+		return false;
 	      }
 	  }
 	  break;
@@ -3146,7 +3146,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->shifter.amount, 1, 16))
 	    {
 	      set_multiplier_out_of_range_error (mismatch_detail, idx, 1, 16);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3158,7 +3158,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx,
 					  0, 8 * size - 1);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3167,7 +3167,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->imm.value, 1, size))
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 1, size);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3180,7 +3180,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->imm.value, 1, 8 * size))
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 1, 8*size);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3188,13 +3188,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->imm.value, 0, 56))
 	    {
 	      set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, 56);
-	      return 0;
+	      return false;
 	    }
 	  if (opnd->imm.value % 8 != 0)
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("byte index must be a multiple of 8"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3224,7 +3224,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (opnds[1].imm.value < 0 || opnds[1].imm.value > max_value)
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, 1, 0, max_value);
-	      return 0;
+	      return false;
 	    }
 	  break;
 	case AARCH64_OPND_PRFOP:
@@ -3233,7 +3233,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      set_other_error (mismatch_detail, idx,
 			       _("the register-index form of PRFM does"
 				 " not accept opcodes in the range 24-31"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 	default:
@@ -3265,7 +3265,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       if (!value_in_range_p (opnd->reglane.index, 0, num))
 	{
 	  set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, num);
-	  return 0;
+	  return false;
 	}
       /* SMLAL<Q> <Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Ts>[<index>].
 	 <Vm>	Is the vector register (V0-V31) or (V0-V15), whose
@@ -3281,7 +3281,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  && !value_in_range_p (opnd->reglane.regno, 0, 15))
 	{
 	  set_regno_out_of_range_error (mismatch_detail, idx, 0, 15);
-	  return 0;
+	  return false;
 	}
       if (type == AARCH64_OPND_Em8
 	  && !value_in_range_p (opnd->reglane.regno, 0, 7))
@@ -3301,7 +3301,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("extend operator expected"));
-	      return 0;
+	      return false;
 	    }
 	  /* It is not optional unless at least one of "Rd" or "Rn" is '11111'
 	     (i.e. SP), in which case it defaults to LSL. The LSL alias is
@@ -3314,13 +3314,13 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("missing extend operator"));
-		  return 0;
+		  return false;
 		}
 	      else if (opnd->shifter.kind == AARCH64_MOD_LSL)
 		{
 		  set_other_error (mismatch_detail, idx,
 				   _("'LSL' operator not allowed"));
-		  return 0;
+		  return false;
 		}
 	    }
 	  assert (opnd->shifter.operator_present	/* Default to LSL.  */
@@ -3328,7 +3328,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->shifter.amount, 0, 4))
 	    {
 	      set_sft_amount_out_of_range_error (mismatch_detail, idx, 0, 4);
-	      return 0;
+	      return false;
 	    }
 	  /* In the 64-bit form, the final register operand is written as Wm
 	     for all but the (possibly omitted) UXTX/LSL and SXTX
@@ -3341,7 +3341,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	      && opnd->shifter.kind != AARCH64_MOD_SXTX)
 	    {
 	      set_other_error (mismatch_detail, idx, _("W register expected"));
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3352,20 +3352,20 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("shift operator expected"));
-	      return 0;
+	      return false;
 	    }
 	  if (opnd->shifter.kind == AARCH64_MOD_ROR
 	      && opcode->iclass != log_shift)
 	    {
 	      set_other_error (mismatch_detail, idx,
 			       _("'ROR' operator not allowed"));
-	      return 0;
+	      return false;
 	    }
 	  num = qualifier == AARCH64_OPND_QLF_W ? 31 : 63;
 	  if (!value_in_range_p (opnd->shifter.amount, 0, num))
 	    {
 	      set_sft_amount_out_of_range_error (mismatch_detail, idx, 0, num);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3376,7 +3376,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!value_in_range_p (opnd->shifter.amount, 0, 7))
 	    {
 	      set_sft_amount_out_of_range_error (mismatch_detail, idx, 0, 7);
-	      return 0;
+	      return false;
 	    }
 	  break;
 
@@ -3389,7 +3389,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       break;
     }
 
-  return 1;
+  return true;
 }
 
 /* Main entrypoint for the operand constraint checking.
@@ -3403,7 +3403,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
    Un-determined operand qualifiers may get established during the process.  */
 
-int
+bool
 aarch64_match_operands_constraint (aarch64_inst *inst,
 				   aarch64_operand_error *mismatch_detail)
 {
@@ -3433,7 +3433,7 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
                   mismatch_detail->kind = AARCH64_OPDE_UNTIED_IMMS;
                   mismatch_detail->index = i;
                 }
-              return 0;
+              return false;
             }
           break;
 
@@ -3465,7 +3465,7 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
 		    mismatch_detail->index = i;
 		    mismatch_detail->error = NULL;
 		  }
-		return 0;
+		return false;
 	      }
 	    break;
 	  }
@@ -3497,7 +3497,7 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
 	  mismatch_detail->error = NULL;
 	  mismatch_detail->data[0].i = invalid_count;
 	}
-      return 0;
+      return false;
     }
 
   /* Match operands' constraint.  */
@@ -3511,17 +3511,17 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
 	  DEBUG_TRACE ("skip the incomplete operand %d", i);
 	  continue;
 	}
-      if (operand_general_constraint_met_p (inst->operands, i, type,
-					    inst->opcode, mismatch_detail) == 0)
+      if (!operand_general_constraint_met_p (inst->operands, i, type,
+					     inst->opcode, mismatch_detail))
 	{
 	  DEBUG_TRACE ("FAIL on operand %d", i);
-	  return 0;
+	  return false;
 	}
     }
 
   DEBUG_TRACE ("PASS");
 
-  return 1;
+  return true;
 }
 
 /* Replace INST->OPCODE with OPCODE and return the replaced OPCODE.

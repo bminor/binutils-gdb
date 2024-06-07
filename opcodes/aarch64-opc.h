@@ -442,7 +442,7 @@ get_operand_from_code (enum aarch64_opnd code)
 
 /* Operand qualifier and operand constraint checking.  */
 
-int aarch64_match_operands_constraint (aarch64_inst *,
+bool aarch64_match_operands_constraint (aarch64_inst *,
 				       aarch64_operand_error *);
 
 /* Operand qualifier related functions.  */
