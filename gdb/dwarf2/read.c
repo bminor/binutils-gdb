@@ -17916,8 +17916,8 @@ public:
      we're processing the end of a sequence.  */
   void record_line (bool end_sequence);
 
-  /* Check ADDRESS is -1, or zero and less than UNRELOCATED_LOWPC, and if true
-     nop-out rest of the lines in this sequence.  */
+  /* Check ADDRESS is -1, -2, or zero and less than UNRELOCATED_LOWPC, and if
+     true nop-out rest of the lines in this sequence.  */
   void check_line_address (struct dwarf2_cu *cu,
 			   const gdb_byte *line_ptr,
 			   unrelocated_addr unrelocated_lowpc,
@@ -18327,13 +18327,16 @@ lnp_state_machine::check_line_address (struct dwarf2_cu *cu,
 				       unrelocated_addr unrelocated_lowpc,
 				       unrelocated_addr address)
 {
-  /* Linkers resolve a symbolic relocation referencing a GC'd function to 0 or
-     -1.  If ADDRESS is 0, ignoring the opcode will err if the text section is
+  /* Linkers resolve a symbolic relocation referencing a GC'd function to 0,
+     -1 or -2 (-2 is used by certain lld versions, see
+     https://github.com/llvm/llvm-project/commit/e618ccbf431f6730edb6d1467a127c3a52fd57f7).
+     If ADDRESS is 0, ignoring the opcode will err if the text section is
      located at 0x0.  In this case, additionally check that if
      ADDRESS < UNRELOCATED_LOWPC.  */
 
   if ((address == (unrelocated_addr) 0 && address < unrelocated_lowpc)
-      || address == (unrelocated_addr) -1)
+      || address == (unrelocated_addr) -1
+      || address == (unrelocated_addr) -2)
     {
       /* This line table is for a function which has been
 	 GCd by the linker.  Ignore it.  PR gdb/12528 */
