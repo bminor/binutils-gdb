@@ -33003,8 +33003,8 @@ $as_echo_n "checking whether to use babeltrace... " >&6; }
 $as_echo "$with_babeltrace" >&6; }
 
 if test "x$with_babeltrace" = "xno"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: babletrace support disabled; GDB is unable to read CTF data." >&5
-$as_echo "$as_me: WARNING: babletrace support disabled; GDB is unable to read CTF data." >&2;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: babeltrace support disabled; GDB is unable to read CTF data." >&5
+$as_echo "$as_me: WARNING: babeltrace support disabled; GDB is unable to read CTF data." >&2;}
 else
   # Append -Werror to CFLAGS so that configure can catch the warning
   # "assignment from incompatible pointer type", which is related to

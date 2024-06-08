@@ -2136,7 +2136,7 @@ AC_MSG_CHECKING([whether to use babeltrace])
 AC_MSG_RESULT([$with_babeltrace])
 
 if test "x$with_babeltrace" = "xno"; then
-  AC_MSG_WARN([babletrace support disabled; GDB is unable to read CTF data.])
+  AC_MSG_WARN([babeltrace support disabled; GDB is unable to read CTF data.])
 else
   # Append -Werror to CFLAGS so that configure can catch the warning
   # "assignment from incompatible pointer type", which is related to
