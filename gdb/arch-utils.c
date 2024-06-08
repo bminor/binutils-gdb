@@ -1499,6 +1499,32 @@ gdbarch_initialized_p (gdbarch *arch)
   return arch->initialized_p;
 }
 
+/* See arch-utils.h.  */
+
+gdb_environ
+core_file_exec_context::environment () const
+{
+  gdb_environ e;
+
+  for (const auto &entry : m_environment)
+    {
+      char *eq = strchr (entry.get (), '=');
+
+      /* If there's no '=' character, then skip this entry.  */
+      if (eq == nullptr)
+	continue;
+
+      const char *value = eq + 1;
+      const char *var = entry.get ();
+
+      *eq = '\0';
+      e.set (var, value);
+      *eq = '=';
+    }
+
+  return e;
+}
+
 void _initialize_gdbarch_utils ();
 void
 _initialize_gdbarch_utils ()

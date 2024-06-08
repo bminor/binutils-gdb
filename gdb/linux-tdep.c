@@ -2074,8 +2074,7 @@ linux_corefile_parse_exec_context_1 (struct gdbarch *gdbarch, bfd *cbfd)
      be pointing at the first environment string.  */
   ptr += ptr_bytes;
 
-  /* Parse the environment strings.  Nothing is done with this yet, but
-     will be in a later commit.  */
+  /* Parse the environment strings.  */
   std::vector<gdb::unique_xmalloc_ptr<char>> environment;
   while ((v = deref (ptr)) != 0)
     {
@@ -2092,7 +2091,8 @@ linux_corefile_parse_exec_context_1 (struct gdbarch *gdbarch, bfd *cbfd)
     return {};
 
   return core_file_exec_context (std::move (execfn),
-				 std::move (arguments));
+				 std::move (arguments),
+				 std::move (environment));
 }
 
 /* Parse and return execution context details from core file CBFD.  */

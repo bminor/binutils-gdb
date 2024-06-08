@@ -1073,6 +1073,9 @@ core_target_open (const char *arg, int from_tty)
 	argv.push_back (a.get ());
       gdb::array_view<char * const> view (argv.data (), argv.size ());
       current_inferior ()->set_args (view);
+
+      /* And now copy the environment.  */
+      current_inferior ()->environment = ctx.environment ();
     }
   else
     {

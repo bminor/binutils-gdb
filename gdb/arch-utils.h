@@ -21,6 +21,7 @@
 #define GDB_ARCH_UTILS_H
 
 #include "gdbarch.h"
+#include "gdbsupport/environ.h"
 
 class frame_info_ptr;
 struct minimal_symbol;
@@ -88,9 +89,11 @@ struct core_file_exec_context
      found but not ARGV then use the no-argument constructor to create an
      empty context object.  */
   core_file_exec_context (gdb::unique_xmalloc_ptr<char> exec_name,
-			  std::vector<gdb::unique_xmalloc_ptr<char>> argv)
+			  std::vector<gdb::unique_xmalloc_ptr<char>> argv,
+			  std::vector<gdb::unique_xmalloc_ptr<char>> envp)
     : m_exec_name (std::move (exec_name)),
-      m_arguments (std::move (argv))
+      m_arguments (std::move (argv)),
+      m_environment (std::move (envp))
   {
     gdb_assert (m_exec_name != nullptr);
   }
@@ -115,6 +118,9 @@ struct core_file_exec_context
   const std::vector<gdb::unique_xmalloc_ptr<char>> &args () const
   { return m_arguments; }
 
+  /* Return the environment variables from this context.  */
+  gdb_environ environment () const;
+
 private:
 
   /* The executable filename as reported in the core file.  Can be nullptr
@@ -124,6 +130,9 @@ private:
   /* List of arguments.  Doesn't include argv[0] which is the executable
      name, for this look at m_exec_name field.  */
   std::vector<gdb::unique_xmalloc_ptr<char>> m_arguments;
+
+  /* List of environment strings.  */
+  std::vector<gdb::unique_xmalloc_ptr<char>> m_environment;
 };
 
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
