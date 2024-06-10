@@ -7511,6 +7511,8 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
       /* xgettext:c-format */
       fprintf (file, _(" type: %3u, len: %3u (at 0x%08x): "),
 	       type, len, off);
+      if (len > dst_size)
+	len = dst_size;
       if (len < sizeof (dsth))
 	{
 	  fputc ('\n', file);
