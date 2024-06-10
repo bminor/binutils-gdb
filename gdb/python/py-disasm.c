@@ -667,12 +667,13 @@ disasmpy_info_read_memory (PyObject *self, PyObject *args, PyObject *kw)
   disasm_info_object *obj = (disasm_info_object *) self;
   DISASMPY_DISASM_INFO_REQUIRE_VALID (obj);
 
-  LONGEST length, offset = 0;
+  gdb_py_longest length, offset = 0;
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;
   static const char *keywords[] = { "length", "offset", nullptr };
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "L|L", keywords,
-					&length, &offset))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw,
+					GDB_PY_LL_ARG "|" GDB_PY_LL_ARG,
+					keywords, &length, &offset))
     return nullptr;
 
   /* The apparent address from which we are reading memory.  Note that in
@@ -849,13 +850,14 @@ gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
   /* The DisassembleInfo.read_memory method expects an offset from the
      address stored within the DisassembleInfo object; calculate that
      offset here.  */
-  LONGEST offset = (LONGEST) memaddr - (LONGEST) obj->address;
+  gdb_py_longest offset
+    = (gdb_py_longest) memaddr - (gdb_py_longest) obj->address;
 
   /* Now call the DisassembleInfo.read_memory method.  This might have been
      overridden by the user.  */
   gdbpy_ref<> result_obj (PyObject_CallMethod ((PyObject *) obj,
 					       "read_memory",
-					       "KL", len, offset));
+					       "I" GDB_PY_LL_ARG, len, offset));
 
   /* Handle any exceptions.  */
   if (result_obj == nullptr)

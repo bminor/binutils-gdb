@@ -65,7 +65,7 @@ proc py_remove_all_disassemblers {} {
 #
 # Each different disassembler tests some different feature of the
 # Python disassembler API.
-set nop "(nop|nop\t0)"
+set nop "(nop|nop\t0|[string_to_regexp nop\t{0}])"
 set unknown_error_pattern "unknown disassembler error \\(error = -1\\)"
 set addr_pattern "\r\n=> ${curr_pc_pattern} <\[^>\]+>:\\s+"
 set base_pattern "${addr_pattern}${nop}"

@@ -46,7 +46,7 @@ def check_building_disassemble_result():
 
 
 def is_nop(s):
-    return s == "nop" or s == "nop\t0"
+    return s == "nop" or s == "nop\t0" or s == "nop\t{0}"
 
 
 # Remove all currently registered disassemblers.
