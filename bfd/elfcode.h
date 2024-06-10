@@ -1614,11 +1614,11 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
 
       relent->addend = rela.r_addend;
 
-      if ((entsize == sizeof (Elf_External_Rela)
-	   && ebd->elf_info_to_howto != NULL)
-	  || ebd->elf_info_to_howto_rel == NULL)
+      res = false;
+      if (entsize == sizeof (Elf_External_Rela)
+	  && ebd->elf_info_to_howto != NULL)
 	res = ebd->elf_info_to_howto (abfd, relent, &rela);
-      else
+      else if (ebd->elf_info_to_howto_rel != NULL)
 	res = ebd->elf_info_to_howto_rel (abfd, relent, &rela);
 
       if (! res || relent->howto == NULL)
