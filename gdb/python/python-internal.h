@@ -125,8 +125,8 @@ typedef unsigned PY_LONG_LONG gdb_py_ulongest;
 
 #else /* HAVE_LONG_LONG */
 
-#define GDB_PY_LL_ARG "L"
-#define GDB_PY_LLU_ARG "K"
+#define GDB_PY_LL_ARG "l"
+#define GDB_PY_LLU_ARG "k"
 typedef long gdb_py_longest;
 typedef unsigned long gdb_py_ulongest;
 #define gdb_py_long_as_ulongest PyLong_AsUnsignedLong
