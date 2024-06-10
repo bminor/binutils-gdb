@@ -1030,7 +1030,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"daddu",		"d,v,t",	0x0000002d, 0xfc0007ff, WR_1|RD_2|RD_3,		0,		I3,		0,	0 },
 {"daddu",		"t,r,I",	0,    (int) M_DADDU_I,	INSN_MACRO,		0,		I3,		0,	0 },
 {"daddwc",		"d,s,t", 	0x70000038, 0xfc0007ff, WR_1|RD_2|RD_3|WR_C0|RD_C0, 0,		XLR,		0,	0 },
-{"dbreak",		"",		0x7000003f, 0xffffffff,	0,			0,		N5|AL,		0,	0 },
+{"dbreak",		"",		0x7000003f, 0xffffffff,	0,			0,		N5,		0,	0 },
 {"dclo",		"d,s",		0x00000053, 0xfc1f07ff, WR_1|RD_2,		0,		I69,		0,	0 },
 {"dclo",		"U,s",	 	0x70000025, 0xfc0007ff, WR_1|RD_2, 	0,		I64|N55,	0,	I69 },
 {"dclz",		"d,s",		0x00000052, 0xfc1f07ff, WR_1|RD_2,		0,		I69,		0,	0 },
