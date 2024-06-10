@@ -160,6 +160,7 @@ struct instr_info
   unsigned char rex2_payload;
 
   bool need_modrm;
+  unsigned char condition_code;
   unsigned char need_vex;
   bool has_sib;
 
@@ -1199,22 +1200,7 @@ enum
   PREFIX_EVEX_0F3A67,
   PREFIX_EVEX_0F3AC2,
 
-  PREFIX_EVEX_MAP4_40,
-  PREFIX_EVEX_MAP4_41,
-  PREFIX_EVEX_MAP4_42,
-  PREFIX_EVEX_MAP4_43,
-  PREFIX_EVEX_MAP4_44,
-  PREFIX_EVEX_MAP4_45,
-  PREFIX_EVEX_MAP4_46,
-  PREFIX_EVEX_MAP4_47,
-  PREFIX_EVEX_MAP4_48,
-  PREFIX_EVEX_MAP4_49,
-  PREFIX_EVEX_MAP4_4A,
-  PREFIX_EVEX_MAP4_4B,
-  PREFIX_EVEX_MAP4_4C,
-  PREFIX_EVEX_MAP4_4D,
-  PREFIX_EVEX_MAP4_4E,
-  PREFIX_EVEX_MAP4_4F,
+  PREFIX_EVEX_MAP4_4x,
   PREFIX_EVEX_MAP4_F0,
   PREFIX_EVEX_MAP4_F1,
   PREFIX_EVEX_MAP4_F2,
@@ -1315,22 +1301,7 @@ enum
   X86_64_VEX_0F385C,
   X86_64_VEX_0F385E,
   X86_64_VEX_0F386C,
-  X86_64_VEX_0F38E0,
-  X86_64_VEX_0F38E1,
-  X86_64_VEX_0F38E2,
-  X86_64_VEX_0F38E3,
-  X86_64_VEX_0F38E4,
-  X86_64_VEX_0F38E5,
-  X86_64_VEX_0F38E6,
-  X86_64_VEX_0F38E7,
-  X86_64_VEX_0F38E8,
-  X86_64_VEX_0F38E9,
-  X86_64_VEX_0F38EA,
-  X86_64_VEX_0F38EB,
-  X86_64_VEX_0F38EC,
-  X86_64_VEX_0F38ED,
-  X86_64_VEX_0F38EE,
-  X86_64_VEX_0F38EF,
+  X86_64_VEX_0F38Ex,
 
   X86_64_VEX_MAP7_F8_L_0_W_0_R_0,
 };
@@ -1816,6 +1787,7 @@ struct dis386 {
 	  nothing otherwise; behave as 'P' in all other cases
 
    2 upper case letter macros:
+   "CC" => print condition code
    "XY" => print 'x' or 'y' if suffix_always is true or no register
 	   operands and no broadcast.
    "XZ" => print 'x', 'y', or 'z' if suffix_always is true or no
@@ -4512,100 +4484,10 @@ static const struct dis386 x86_64_table[][2] = {
     { VEX_LEN_TABLE (VEX_LEN_0F386C_X86_64) },
   },
 
-  /* X86_64_VEX_0F38E0 */
+  /* X86_64_VEX_0F38Ex */
   {
     { Bad_Opcode },
-    { "%XEcmpoxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38E1 */
-  {
-    { Bad_Opcode },
-    { "%XEcmpnoxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38E2 */
-  {
-    { Bad_Opcode },
-    { "%XEcmpbxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38E3 */
-  {
-    { Bad_Opcode },
-    { "%XEcmpnbxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38E4 */
-  {
-    { Bad_Opcode },
-    { "%XEcmpzxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38E5 */
-  {
-    { Bad_Opcode },
-    { "%XEcmpnzxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38E6 */
-  {
-    { Bad_Opcode },
-    { "%XEcmpbexadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38E7 */
-  {
-    { Bad_Opcode },
-    { "%XEcmpnbexadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38E8 */
-  {
-    { Bad_Opcode },
-    { "%XEcmpsxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38E9 */
-  {
-    { Bad_Opcode },
-    { "%XEcmpnsxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38EA */
-  {
-    { Bad_Opcode },
-    { "%XEcmppxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38EB */
-  {
-    { Bad_Opcode },
-    { "%XEcmpnpxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38EC */
-  {
-    { Bad_Opcode },
-    { "%XEcmplxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38ED */
-  {
-    { Bad_Opcode },
-    { "%XEcmpnlxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38EE */
-  {
-    { Bad_Opcode },
-    { "%XEcmplexadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
-  },
-
-  /* X86_64_VEX_0F38EF */
-  {
-    { Bad_Opcode },
-    { "%XEcmpnlexadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
+    { "%XEcmp%CCxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
   },
 
   /* X86_64_VEX_MAP7_F8_L_0_W_0_R_0 */
@@ -6624,23 +6506,23 @@ static const struct dis386 vex_table[][256] = {
     { "vaesdec",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "vaesdeclast",	{ XM, Vex, EXx }, PREFIX_DATA },
     /* e0 */
-    { X86_64_TABLE (X86_64_VEX_0F38E0) },
-    { X86_64_TABLE (X86_64_VEX_0F38E1) },
-    { X86_64_TABLE (X86_64_VEX_0F38E2) },
-    { X86_64_TABLE (X86_64_VEX_0F38E3) },
-    { X86_64_TABLE (X86_64_VEX_0F38E4) },
-    { X86_64_TABLE (X86_64_VEX_0F38E5) },
-    { X86_64_TABLE (X86_64_VEX_0F38E6) },
-    { X86_64_TABLE (X86_64_VEX_0F38E7) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
     /* e8 */
-    { X86_64_TABLE (X86_64_VEX_0F38E8) },
-    { X86_64_TABLE (X86_64_VEX_0F38E9) },
-    { X86_64_TABLE (X86_64_VEX_0F38EA) },
-    { X86_64_TABLE (X86_64_VEX_0F38EB) },
-    { X86_64_TABLE (X86_64_VEX_0F38EC) },
-    { X86_64_TABLE (X86_64_VEX_0F38ED) },
-    { X86_64_TABLE (X86_64_VEX_0F38EE) },
-    { X86_64_TABLE (X86_64_VEX_0F38EF) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
+    { X86_64_TABLE (X86_64_VEX_0F38Ex) },
     /* f0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -9031,6 +8913,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       ins->need_vex = 3;
       ins->codep++;
       vindex = *ins->codep++;
+      ins->condition_code = vindex & 0xf;
       if (vex_table_index != VEX_MAP7)
 	dp = &vex_table[vex_table_index][vindex];
       else if (vindex == 0xf8)
@@ -9199,6 +9082,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 
       ins->codep++;
       vindex = *ins->codep++;
+      ins->condition_code = vindex & 0xf;
       if (vex_table_index != EVEX_MAP7)
 	dp = &evex_table[vex_table_index][vindex];
       else if (vindex == 0xf8)
@@ -9591,6 +9475,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
       dp = &dis386[*ins.codep];
       ins.need_modrm = onebyte_has_modrm[*ins.codep];
     }
+  ins.condition_code = *ins.codep & 0xf;
   ins.codep++;
 
   /* Save sizeflag for printing the extra ins.prefixes later before updating
@@ -10505,6 +10390,16 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	    abort ();
 	  break;
 	case 'C':
+	  if (l == 1 && last[0] == 'C')
+	    {
+	      /* Condition code (taken from the map-0 Jcc entries).  */
+	      for (const char *q = dis386[0x70 | ins->condition_code].name + 1;
+		   ISLOWER(*q); ++q)
+		*ins->obufp++ = *q;
+	      break;
+	    }
+	  if (l)
+	    abort ();
 	  if (ins->intel_syntax && !alt)
 	    break;
 	  if ((ins->prefixes & PREFIX_DATA) || (sizeflag & SUFFIX_ALWAYS))
