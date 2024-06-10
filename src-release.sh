@@ -79,8 +79,8 @@ getver()
 
 clean_sources()
 {
-    # Check that neither staged nor unstaged change remains.
-    if [ -n "$(git status --porcelain)" ]; then
+    # Check that neither staged nor unstaged changes of any tracked file remains.
+    if [ -n "$(git status --porcelain -uno)" ]; then
         echo "There are uncommitted changes. Please commit or stash them."
         exit 1
     fi
