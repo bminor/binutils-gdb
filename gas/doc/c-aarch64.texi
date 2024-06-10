@@ -116,7 +116,7 @@ following architecture names are recognized: @code{armv8-a},
 @code{armv8.1-a}, @code{armv8.2-a}, @code{armv8.3-a}, @code{armv8.4-a}
 @code{armv8.5-a}, @code{armv8.6-a}, @code{armv8.7-a}, @code{armv8.8-a},
 @code{armv8.9-a}, @code{armv8-r}, @code{armv9-a}, @code{armv9.1-a},
-@code{armv9.2-a}, @code{armv9.3-a} and @code{armv9.4-a}.
+@code{armv9.2-a}, @code{armv9.3-a}, @code{armv9.4-a} and @code{armv9.5-a}.
 
 If both @option{-mcpu} and @option{-march} are specified, the
 assembler will use the setting for @option{-mcpu}.  If neither are
@@ -334,6 +334,7 @@ automatically cause those extensions to be disabled.
 @item @code{armv9.2-a} @tab @code{armv9.1-a}, @code{armv8.7-a}
 @item @code{armv9.3-a} @tab @code{armv9.2-a}, @code{armv8.8-a}
 @item @code{armv9.4-a} @tab @code{armv9.3-a}, @code{armv8.9-a}
+@item @code{armv9.5-a} @tab @code{armv9.4-a}, @code{cpa}, @code{lut}, @code{faminmax}
 @item @code{armv8-r} @tab @code{armv8.4-a+nolor}
 @end multitable
 

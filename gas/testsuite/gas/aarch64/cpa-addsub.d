@@ -1,4 +1,5 @@
 #name: Tests for CPA instructions ((M)ADDPT and (M)SUBPT).
+#as: -march=armv9.5-a
 #as: -march=armv8-a+cpa
 #objdump: -dr
 

@@ -1,4 +1,5 @@
 #name: Tests for CPA+SVE instructions.
+#as: -march=armv9.5-a+sve
 #as: -march=armv8-a+sve+cpa
 #objdump: -dr
 

@@ -269,6 +269,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_FP8DOT2_SVE,
   /* +sme-f16f16 or +sme-f8f16  */
   AARCH64_FEATURE_SME_F16F16_F8F16,
+  /* Armv9.5-A processors.  */
+  AARCH64_FEATURE_V9_5A,
   AARCH64_NUM_FEATURES
 };
 
@@ -361,6 +363,10 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_V9_3A_FEATURES(X)	AARCH64_ARCH_V8_8A_FEATURES (X)
 #define AARCH64_ARCH_V9_4A_FEATURES(X)	(AARCH64_ARCH_V8_9A_FEATURES (X) \
 					 | AARCH64_FEATBIT (X, SVE2p1))
+#define AARCH64_ARCH_V9_5A_FEATURES(X)	(AARCH64_FEATBIT (X, V9_5A)	\
+					 | AARCH64_FEATBIT (X, CPA)	\
+					 | AARCH64_FEATBIT (X, LUT)	\
+					 | AARCH64_FEATBIT (X, FAMINMAX))
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8A(X)	(AARCH64_FEATBIT (X, V8) \
@@ -398,6 +404,8 @@ enum aarch64_feature_bit {
 				 | AARCH64_ARCH_V9_3A_FEATURES (X))
 #define AARCH64_ARCH_V9_4A(X)	(AARCH64_ARCH_V9_3A (X) \
 				 | AARCH64_ARCH_V9_4A_FEATURES (X))
+#define AARCH64_ARCH_V9_5A(X)	(AARCH64_ARCH_V9_4A (X) \
+				 | AARCH64_ARCH_V9_5A_FEATURES (X))
 
 #define AARCH64_ARCH_NONE(X)	0
 

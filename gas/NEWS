@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for 'armv9.5-a' for -march in AArch64 GAS.
+
 * In x86 Intel syntax undue mnemonic suffixes are now warned about.  This is
   a first step towards rejecting their use where unjustified.
 
