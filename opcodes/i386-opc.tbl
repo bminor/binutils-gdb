@@ -533,8 +533,11 @@ loopne, 0xe0, x64, JumpByte|No_bSuf|No_wSuf|No_sSuf|NoRex64|IntelSuffix, { Disp8
 
 // Set byte on flag instructions.
 set<cc>, 0xf9<cc:opc>/0, i386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Reg8|Unspecified|BaseIndex }
-set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4, { Reg8 }
+set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4, { Reg8|Unspecified|BaseIndex }
 setzu<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4|ZU, { Reg8 }
+// As an extension, allow SETcc without the ZU infix, instead taking the full
+// register as operand.
+set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|ZU, { Reg32|Reg64 }
 
 // String manipulation.
 cmps, 0xa6, 0, W|No_sSuf|RepPrefixOk|IntelSuffix, {}

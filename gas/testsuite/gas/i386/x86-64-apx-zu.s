@@ -36,6 +36,9 @@ _start:
 	setzug   %r25b
 	setg     %r25b
 	{evex} setg  %al
+	{evex} setg  (%rax)
+	setpe    %eax
+	setpo    %rax
 
 	.intel_syntax noprefix
 	imulzu ax,bx, 10

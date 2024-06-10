@@ -42,6 +42,9 @@ Disassembly of section .text:
 \s*[a-f0-9]+:\s*62 dc 7f 18 4f c1[ 	]+setzug r25b
 \s*[a-f0-9]+:\s*d5 91 9f c1[ 	]+setg   r25b
 \s*[a-f0-9]+:\s*62 f4 7f 08 4f c0[ 	]+\{evex\} setg al
+\s*[a-f0-9]+:\s*62 f4 7f 08 4f 00[ 	]+\{evex\} setg (BYTE PTR )?\[rax\]
+\s*[a-f0-9]+:\s*62 f4 7f 18 4a c0[ 	]+setzup al
+\s*[a-f0-9]+:\s*62 f4 ff 18 4b c0[ 	]+setzunp al
 \s*[a-f0-9]+:\s*62 f4 7d 18 6b c3 0a[ 	]+imulzu ax,bx,0xa
 \s*[a-f0-9]+:\s*67 62 f4 7d 18 6b 00 0a[ 	]+imulzu ax,WORD PTR \[eax\],0xa
 \s*[a-f0-9]+:\s*62 ec 7d 18 6b c1 0a[ 	]+imulzu r16w,r17w,0xa
