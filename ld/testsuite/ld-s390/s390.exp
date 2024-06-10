@@ -54,6 +54,11 @@ set s390tests {
      "-m31" {gotreloc-1.s}
      {{objdump -dzrj.text gotreloc_31-1.dd}}
      "gotreloc_31-1"}
+    {"GOT: no-pie symbol address load from got to larl"
+     "-shared -melf_s390 --no-pie --hash-style=sysv --version-script=gotreloc-1.ver" ""
+     "-m31" {gotreloc-1.s}
+     {{objdump -dzrj.text gotreloc_31-no-pie-1.dd}}
+     "gotreloc_31-1"}
 }
 
 set s390xtests {
@@ -79,6 +84,11 @@ set s390xtests {
      "-shared -melf64_s390 -z relro --hash-style=sysv --version-script=gotreloc-1.ver" ""
      "-m64" {gotreloc-1.s}
      {{objdump -dzrj.text gotreloc_64-relro-1.dd}}
+     "gotreloc_64-1"}
+    {"GOT: no-pie symbol address load from got to larl"
+     "-shared -melf64_s390 --no-pie --hash-style=sysv --version-script=gotreloc-1.ver" ""
+     "-m64" {gotreloc-1.s}
+     {{objdump -dzrj.text gotreloc_64-no-pie-1.dd}}
      "gotreloc_64-1"}
     {"PLT: offset test"
      "-shared -m elf64_s390 -dT pltoffset-1.ld --no-error-rwx-segments" ""
