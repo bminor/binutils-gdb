@@ -482,7 +482,7 @@ static const pseudo_typeS potable[] = {
   {"quad", cons, 8},
   {"reloc", s_reloc, 0},
   {"rep", s_rept, 0},
-  {"rept", s_rept, 0},
+  {"rept", s_rept, 1},
   {"rva", s_rva, 4},
   {"sbttl", listing_title, 1},	/* Subtitle of listing.  */
 /* scl  */
@@ -3066,19 +3066,21 @@ s_bad_end (int endr)
 /* Handle the .rept pseudo-op.  */
 
 void
-s_rept (int ignore ATTRIBUTE_UNUSED)
+s_rept (int expand_count)
 {
   size_t count;
 
   count = (size_t) get_absolute_expression ();
 
-  do_repeat (count, "REPT", "ENDR", NULL);
+  do_repeat (count, "REPT", "ENDR", expand_count ? "" : NULL);
 }
 
 /* This function provides a generic repeat block implementation.   It allows
    different directives to be used as the start/end keys.  Any text matching
    the optional EXPANDER in the block is replaced by the remaining iteration
-   count.  */
+   count.  Except when EXPANDER is the empty string, in which case \+ will
+   be looked for (as also recognized in macros as well as .irp and .irpc),
+   where the replacement will be the number of iterations done so far.  */
 
 void
 do_repeat (size_t count, const char *start, const char *end,
@@ -3101,7 +3103,58 @@ do_repeat (size_t count, const char *start, const char *end,
       return;
     }
 
-  if (expander == NULL || strstr (one.ptr, expander) == NULL)
+  if (expander != NULL && !*expander && strstr (one.ptr, "\\+") != NULL)
+    {
+      /* The 3 here and below are arbitrary, added in an attempt to limit
+	 re-allocation needs in sb_add_...() for moderate repeat counts.  */
+      sb_build (&many, count * (one.len + 3));
+
+      for (size_t done = 0; count-- > 0; ++done)
+	{
+	  const char *ptr, *bs;
+	  sb processed;
+
+	  sb_build (&processed, one.len + 3);
+
+	  for (ptr = one.ptr;
+	       (bs = memchr (ptr, '\\', one.ptr + one.len - ptr)) != NULL; )
+	    {
+	      sb_add_buffer (&processed, ptr, bs - ptr);
+	      switch (bs[1])
+		{
+		  char scratch[24];
+
+		default:
+		  sb_add_char (&processed, '\\');
+		  sb_add_char (&processed, bs[1]);
+		  ptr = bs + 2;
+		  break;
+
+		case '\0':
+		  as_warn (_("`\\' at end of line/statement; ignored"));
+		  ptr = bs + 1;
+		  break;
+
+		case '\\':
+		  sb_add_char (&processed, '\\');
+		  ptr = bs + 2;
+		  break;
+
+		case '+':
+		  snprintf (scratch, ARRAY_SIZE (scratch), "%zu", done);
+		  sb_add_string (&processed, scratch);
+		  ptr = bs + 2;
+		  break;
+		}
+	    }
+
+	  sb_add_buffer (&processed, ptr, one.ptr + one.len - ptr);
+
+	  sb_add_sb (&many, &processed);
+	  sb_kill (&processed);
+	}
+    }
+  else if (expander == NULL || !*expander || strstr (one.ptr, expander) == NULL)
     {
       sb_build (&many, count * one.len);
       while (count-- > 0)

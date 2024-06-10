@@ -3,8 +3,8 @@
 * In x86 Intel syntax undue mnemonic suffixes are now warned about.  This is
   a first step towards rejecting their use where unjustified.
 
-* Assembler macros as well as the bodies of .irp / .irpc can now use the
-  syntax \+ to access the number of times a given macro has been executed.
+* Assembler macros as well as the bodies of .irp / .irpc / .rept can now use
+  the syntax \+ to access the number of times a given macro has been executed.
   This is similar to the already existing \@ syntax, except that the count is
   maintained on a per-macro basis.
   

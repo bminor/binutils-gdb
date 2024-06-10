@@ -6739,6 +6739,13 @@ is equivalent to assembling
 A count of zero is allowed, but nothing is generated.  Negative counts are not
 allowed and if encountered will be treated as if they were zero.
 
+Much like for macros, @code{.irp}, and @code{.irpc} the @samp{\+} sequence can
+be used to substitute in the number of iterations done so far.  In such cases,
+i.e. when any @samp{\+} character sequence is present between @code{.rept} and
+the corresponding @code{.endr}, other backslashes also need escaping by
+backslashes.  Naturally the amount of escaping necessary may increase when
+using nested constructs.
+
 @node Sbttl
 @section @code{.sbttl "@var{subheading}"}
 
