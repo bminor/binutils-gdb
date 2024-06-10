@@ -579,6 +579,8 @@ enum
 #define DISTINCT_DEST 8
   /* Instruction updates stack pointer implicitly.  */
 #define IMPLICIT_STACK_OP 9
+  /* Instruction zeroes upper part of register.  */
+#define ZERO_UPPER 10
   OperandConstraint,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */
@@ -757,9 +759,6 @@ enum
   /* Instrucion requires REX2 prefix.  */
   Rex2,
 
-  /* Support zero upper */
-  ZU,
-
   /* The last bitfield in i386_opcode_modifier.  */
   Opcode_Modifier_Num
 };
@@ -808,7 +807,6 @@ typedef struct i386_opcode_modifier
   unsigned int noegpr:1;
   unsigned int nf:1;
   unsigned int rex2:1;
-  unsigned int zu:1;
 } i386_opcode_modifier;
 
 /* Operand classes.  */

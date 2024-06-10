@@ -85,6 +85,7 @@
 #define RegKludge         OperandConstraint=REG_KLUDGE
 #define Ugh               OperandConstraint=UGH
 #define ImplicitStackOp   OperandConstraint=IMPLICIT_STACK_OP
+#define ZU                OperandConstraint=ZERO_UPPER
 
 #define ATTSyntax         Dialect=ATT_SYNTAX
 #define ATTMnemonic       Dialect=ATT_MNEMONIC
@@ -409,10 +410,12 @@ imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|NF|ZU, { Imm16, Reg16|Unspec
 // transformation.
 imul, 0x6b, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm8S, Reg16|Reg32|Reg64 }
 imul, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF, { Imm8S, Reg16|Reg32|Reg64 }
-imulzu, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF|ZU, { Imm8S, Reg16 }
 imul, 0x69, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
 imul, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
-imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF|ZU, { Imm16, Reg16 }
+// ZU is omitted here, for colliding with RegKludge.  process_operands() will
+// replace the constraint value after processing RegKludge.
+imulzu, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF/*|ZU*/, { Imm8S, Reg16 }
+imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF/*|ZU*/, { Imm16, Reg16 }
 
 <mul>
 

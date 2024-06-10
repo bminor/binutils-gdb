@@ -4287,7 +4287,7 @@ build_apx_evex_prefix (void)
   /* Encode the NDD bit of the instruction promoted from the legacy
      space. ZU shares the same bit with NDD.  */
   if ((i.vex.register_specifier && i.tm.opcode_space == SPACE_EVEXMAP4)
-      || i.tm.opcode_modifier.zu)
+      || i.tm.opcode_modifier.operandconstraint == ZERO_UPPER)
     i.vex.bytes[3] |= 0x10;
 
   /* Encode the NF bit.  */
@@ -10301,6 +10301,10 @@ process_operands (void)
       i.types[first_reg_op + 1] = i.types[first_reg_op];
       i.operands++;
       i.reg_operands++;
+
+      /* For IMULZU switch around the constraint.  */
+      if (i.tm.mnem_off == MN_imulzu)
+	i.tm.opcode_modifier.operandconstraint = ZERO_UPPER;
     }
 
   if (i.tm.opcode_modifier.modrm)
