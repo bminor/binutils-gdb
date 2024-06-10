@@ -324,7 +324,7 @@ sti, 0xfb, 0, NoSuf, {}
 <alu2>, <alu2:opc> << 3, APX_F, D|W|CheckOperandSize|Modrm|No_sSuf|EVexMap4|<alu2:nf>, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 <alu2>, 0x83/<alu2:opc>, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|<alu2:nf>, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 <alu2>, 0x83/<alu2:opc>, 0, Modrm|No_bSuf|No_sSuf|HLEPrefixLock|<alu2:opti>, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-<alu2>, 0x83/<alu2:opc>, 0, Modrm|No_bSuf|No_sSuf|EVexMap4|<alu2:nf>, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<alu2>, 0x83/<alu2:opc>, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|<alu2:nf>, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 <alu2>, 0x04 | (<alu2:opc> << 3), 0, W|No_sSuf|<alu2:opti>, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 <alu2>, 0x80/<alu2:opc>, APX_F, W|Modrm|CheckOperandSize|No_sSuf|DstVVVV|EVexMap4|<alu2:nf>, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 <alu2>, 0x80/<alu2:opc>, 0, W|Modrm|No_sSuf|HLEPrefixLock|<alu2:opti>, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
