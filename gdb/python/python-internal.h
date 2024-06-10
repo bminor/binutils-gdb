@@ -102,13 +102,24 @@
 
 /* Python supplies HAVE_LONG_LONG and some `long long' support when it
    is available.  These defines let us handle the differences more
-   cleanly.  */
-#ifdef HAVE_LONG_LONG
+   cleanly.
+
+   Starting with python 3.6, support for platforms without long long support
+   has been removed [1].  HAVE_LONG_LONG and PY_LONG_LONG are still defined,
+   but only for compatibility, so we no longer rely on them.
+
+   [1] https://github.com/python/cpython/issues/72148.  */
+#if PY_VERSION_HEX >= 0x03060000 || defined (HAVE_LONG_LONG)
 
 #define GDB_PY_LL_ARG "L"
 #define GDB_PY_LLU_ARG "K"
+#if PY_VERSION_HEX >= 0x03060000
+typedef long long gdb_py_longest;
+typedef unsigned long long gdb_py_ulongest;
+#else
 typedef PY_LONG_LONG gdb_py_longest;
 typedef unsigned PY_LONG_LONG gdb_py_ulongest;
+#endif
 #define gdb_py_long_as_ulongest PyLong_AsUnsignedLongLong
 #define gdb_py_long_as_long_and_overflow PyLong_AsLongLongAndOverflow
 
