@@ -363,6 +363,18 @@ proc test_shifts {} {
 	    test_rshift_tl $lang \
 		"print -1 >> [make_uint64 $lang 0xffffffffffffffff]" " = -1"
 	}
+
+	# Check if shift value isn't silently truncated to 32bit.
+	with_test_prefix "lower-32bit-zero" {
+	    test_lshift_tl $lang \
+		"print 1 << [make_uint64 $lang 0x100000000]" " = 0"
+	    test_rshift_tl $lang \
+		"print 1 >> [make_uint64 $lang 0x100000000]" " = 0"
+	    test_lshift_tl $lang \
+		"print -1 << [make_uint64 $lang 0x100000000]" " = 0"
+	    test_rshift_tl $lang \
+		"print -1 >> [make_uint64 $lang 0x100000000]" " = -1"
+	}
     }
 }
 
