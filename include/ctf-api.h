@@ -219,7 +219,7 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOLABEL, "No label found corresponding to name.") \
   _CTF_ITEM (ECTF_NOLABELDATA, "File does not contain any labels.") \
   _CTF_ITEM (ECTF_NOTSUP, "Feature not supported.") \
-  _CTF_ITEM (ECTF_NOENUMNAM, "Enum element name not found.") \
+  _CTF_ITEM (ECTF_NOENUMNAM, "Enumerator name not found.") \
   _CTF_ITEM (ECTF_NOMEMBNAM, "Member name not found.") \
   _CTF_ITEM (ECTF_RDONLY, "CTF container is read-only.") \
   _CTF_ITEM (ECTF_DTFULL, "CTF type is full (no more members allowed).") \
