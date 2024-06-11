@@ -62,9 +62,6 @@ loongarch_dr_change_callback (struct lwp_info *lwp, int is_watchpoint,
   dr_changed_t *dr_changed_ptr;
   dr_changed_t dr_changed;
 
-  if (!is_watchpoint)
-    return -1;
-
   if (info == NULL)
     {
       info = XCNEW (struct arch_lwp_info);
@@ -74,14 +71,19 @@ loongarch_dr_change_callback (struct lwp_info *lwp, int is_watchpoint,
   if (show_debug_regs)
     {
       debug_printf ("loongarch_dr_change_callback: \n\tOn entry:\n");
-      debug_printf ("\ttid%d, dr_changed_wp=0x%s\n",
-		    tid, phex (info->dr_changed_wp, 8));
+      debug_printf ("\ttid%d, dr_changed_bp=0x%s, "
+		    "dr_changed_wp=0x%s\n", tid,
+		    phex (info->dr_changed_bp, 8),
+		    phex (info->dr_changed_wp, 8));
     }
 
-  dr_changed_ptr = &info->dr_changed_wp;
+  dr_changed_ptr = is_watchpoint ? &info->dr_changed_wp
+		   : &info->dr_changed_bp;
   dr_changed = *dr_changed_ptr;
 
-  gdb_assert (idx >= 0 && idx <= loongarch_num_wp_regs);
+  gdb_assert (idx >= 0
+	      && (idx <= (is_watchpoint ? loongarch_num_wp_regs
+			  : loongarch_num_bp_regs)));
 
   /* The actual update is done later just before resuming the lwp,
      we just mark that one register pair needs updating.  */
@@ -95,8 +97,10 @@ loongarch_dr_change_callback (struct lwp_info *lwp, int is_watchpoint,
 
   if (show_debug_regs)
     {
-      debug_printf ("\tOn exit:\n\ttid%d, dr_changed_wp=0x%s\n",
-		    tid, phex (info->dr_changed_wp, 8));
+      debug_printf ("\tOn exit:\n\ttid%d, dr_changed_bp=0x%s, "
+		    "dr_changed_wp=0x%s\n", tid,
+		    phex (info->dr_changed_bp, 8),
+		    phex (info->dr_changed_wp, 8));
     }
 
   return 0;
@@ -136,9 +140,9 @@ loongarch_linux_set_debug_regs (struct loongarch_debug_reg_state *state,
 
   memset (&regs, 0, sizeof (regs));
   iov.iov_base = &regs;
-  count = watchpoint ? loongarch_num_wp_regs : 0;
-  addr = watchpoint ? state->dr_addr_wp : 0;
-  ctrl = watchpoint ? state->dr_ctrl_wp : 0;
+  count = watchpoint ? loongarch_num_wp_regs : loongarch_num_bp_regs;
+  addr = watchpoint ? state->dr_addr_wp : state->dr_addr_bp;
+  ctrl = watchpoint ? state->dr_ctrl_wp : state->dr_ctrl_bp;
 
   if (count == 0)
     return;
@@ -151,7 +155,9 @@ loongarch_linux_set_debug_regs (struct loongarch_debug_reg_state *state,
       regs.dbg_regs[i].ctrl = ctrl[i];
     }
 
-  if (ptrace(PTRACE_SETREGSET, tid, NT_LOONGARCH_HW_WATCH, (void *) &iov))
+  if (ptrace(PTRACE_SETREGSET, tid,
+	     watchpoint ? NT_LOONGARCH_HW_WATCH : NT_LOONGARCH_HW_BREAK,
+	     (void *) &iov))
     {
       if (errno == EINVAL)
 	error (_("Invalid argument setting hardware debug registers"));
@@ -194,6 +200,25 @@ loongarch_linux_get_debug_reg_capacity (int tid)
       loongarch_num_wp_regs = 0;
     }
 
+  /* Get hardware breakpoint register info.  */
+  result = ptrace (PTRACE_GETREGSET, tid, NT_LOONGARCH_HW_BREAK, &iov);
+  if ( result == 0)
+    {
+      loongarch_num_bp_regs = LOONGARCH_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
+      if (loongarch_num_bp_regs > LOONGARCH_HBP_MAX_NUM)
+	{
+	  warning (_("Unexpected number of hardware breakpoint registers"
+		     " reported by ptrace, got %d, expected %d."),
+		   loongarch_num_bp_regs, LOONGARCH_HBP_MAX_NUM);
+	  loongarch_num_bp_regs = LOONGARCH_HBP_MAX_NUM;
+	}
+    }
+  else
+    {
+      warning (_("Unable to determine the number of hardware breakpoints"
+		 " available."));
+      loongarch_num_bp_regs = 0;
+    }
 }
 
 /* Return the debug register state for process PID.  If no existing

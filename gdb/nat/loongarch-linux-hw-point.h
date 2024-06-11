@@ -93,6 +93,7 @@ struct arch_lwp_info
   /* When bit N is 1, it indicates the Nth hardware breakpoint or
      watchpoint register pair needs to be updated when the thread is
      resumed; see loongarch_linux_prepare_to_resume.  */
+  dr_changed_t dr_changed_bp;
   dr_changed_t dr_changed_wp;
 };
 

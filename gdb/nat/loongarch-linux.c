@@ -43,7 +43,8 @@ loongarch_linux_prepare_to_resume (struct lwp_info *lwp)
   if (info == NULL)
     return;
 
-  if (DR_HAS_CHANGED (info->dr_changed_wp))
+  if (DR_HAS_CHANGED (info->dr_changed_bp)
+      || DR_HAS_CHANGED (info->dr_changed_wp))
     {
       ptid_t ptid = ptid_of_lwp (lwp);
       int tid = ptid.lwp ();
@@ -53,9 +54,19 @@ loongarch_linux_prepare_to_resume (struct lwp_info *lwp)
       if (show_debug_regs)
 	debug_printf ("prepare_to_resume thread %d\n", tid);
 
-      loongarch_linux_set_debug_regs (state, tid, 1);
-      DR_CLEAR_CHANGED (info->dr_changed_wp);
+      /* Watchpoints.  */
+      if (DR_HAS_CHANGED (info->dr_changed_wp))
+	{
+	  loongarch_linux_set_debug_regs (state, tid, 1);
+	  DR_CLEAR_CHANGED (info->dr_changed_wp);
+	}
 
+      /* Breakpoints.  */
+      if (DR_HAS_CHANGED (info->dr_changed_bp))
+	{
+	  loongarch_linux_set_debug_regs (state, tid, 0);
+	  DR_CLEAR_CHANGED (info->dr_changed_bp);
+	}
     }
 }
 
@@ -72,6 +83,8 @@ loongarch_linux_new_thread (struct lwp_info *lwp)
   /* If there are hardware breakpoints/watchpoints in the process then mark that
      all the hardware breakpoint/watchpoint register pairs for this thread need
      to be initialized (with data from arch_process_info.debug_reg_state).  */
+  if (loongarch_any_set_debug_regs_state (state, false))
+    DR_MARK_ALL_CHANGED (info->dr_changed_bp, loongarch_num_bp_regs);
   if (loongarch_any_set_debug_regs_state (state, true))
     DR_MARK_ALL_CHANGED (info->dr_changed_wp, loongarch_num_wp_regs);
 

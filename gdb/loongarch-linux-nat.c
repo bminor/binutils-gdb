@@ -54,6 +54,11 @@ public:
   bool stopped_by_watchpoint () override;
   bool stopped_data_address (CORE_ADDR *) override;
 
+  int insert_hw_breakpoint (struct gdbarch *gdbarch,
+			    struct bp_target_info *bp_tgt) override;
+  int remove_hw_breakpoint (struct gdbarch *gdbarch,
+			    struct bp_target_info *bp_tgt) override;
+
   /* Override the GNU/Linux inferior startup hook.  */
   void post_startup_inferior (ptid_t) override;
 
@@ -489,7 +494,8 @@ loongarch_linux_nat_target::can_use_hw_breakpoint (enum bptype type, int cnt,
     }
   else if (type == bp_hardware_breakpoint)
     {
-      return 0;
+      if (loongarch_num_bp_regs == 0)
+	return 0;
     }
   else
     gdb_assert_not_reached ("unexpected breakpoint type");
@@ -622,6 +628,72 @@ loongarch_linux_nat_target::stopped_by_watchpoint ()
   CORE_ADDR addr;
 
   return stopped_data_address (&addr);
+}
+
+/* Insert a hardware-assisted breakpoint at BP_TGT->reqstd_address.
+   Return 0 on success, -1 on failure.  */
+
+int
+loongarch_linux_nat_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
+						  struct bp_target_info *bp_tgt)
+{
+  int ret;
+  CORE_ADDR addr = bp_tgt->placed_address = bp_tgt->reqstd_address;
+  int len;
+  const enum target_hw_bp_type type = hw_execute;
+  struct loongarch_debug_reg_state *state
+	= loongarch_get_debug_reg_state (inferior_ptid.pid ());
+
+  gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
+
+  if (show_debug_regs)
+    gdb_printf (gdb_stdlog,
+		"insert_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
+		(unsigned long) addr, len);
+
+  ret = loongarch_handle_breakpoint (type, addr, len, 1 /* is_insert */,
+				     inferior_ptid, state);
+
+  if (show_debug_regs)
+    {
+      loongarch_show_debug_reg_state (state,
+				      "insert_hw_breakpoint", addr, len, type);
+    }
+
+  return ret;
+}
+
+/* Remove a hardware-assisted breakpoint at BP_TGT->placed_address.
+   Return 0 on success, -1 on failure.  */
+
+int
+loongarch_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
+						  struct bp_target_info *bp_tgt)
+{
+  int ret;
+  CORE_ADDR addr = bp_tgt->placed_address;
+  int len = 4;
+  const enum target_hw_bp_type type = hw_execute;
+  struct loongarch_debug_reg_state *state
+    = loongarch_get_debug_reg_state (inferior_ptid.pid ());
+
+  gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
+
+  if (show_debug_regs)
+    gdb_printf (gdb_stdlog,
+		"remove_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
+		(unsigned long) addr, len);
+
+  ret = loongarch_handle_breakpoint (type, addr, len, 0 /* is_insert */,
+				     inferior_ptid, state);
+
+  if (show_debug_regs)
+    {
+      loongarch_show_debug_reg_state (state,
+				      "remove_hw_watchpoint", addr, len, type);
+    }
+
+  return ret;
 }
 
 /* Implement the virtual inf_ptrace_target::post_startup_inferior method.  */

@@ -27,6 +27,7 @@
 /* Number of hardware breakpoints/watchpoints the target supports.
    They are initialized with values obtained via ptrace.  */
 
+int loongarch_num_bp_regs;
 int loongarch_num_wp_regs;
 
 /* Given the hardware breakpoint or watchpoint type TYPE and its
@@ -112,7 +113,10 @@ loongarch_dr_state_insert_one_point (ptid_t ptid,
     }
   else
     {
-      return -1;
+      num_regs = loongarch_num_bp_regs;
+      dr_addr_p = state->dr_addr_bp;
+      dr_ctrl_p = state->dr_ctrl_bp;
+      dr_ref_count = state->dr_ref_count_bp;
     }
 
   ctrl = loongarch_point_encode_ctrl_reg (type, len);
@@ -184,7 +188,10 @@ loongarch_dr_state_remove_one_point (ptid_t ptid,
     }
   else
     {
-      return -1;
+      num_regs = loongarch_num_bp_regs;
+      dr_addr_p = state->dr_addr_bp;
+      dr_ctrl_p = state->dr_ctrl_bp;
+      dr_ref_count = state->dr_ref_count_bp;
     }
 
   ctrl = loongarch_point_encode_ctrl_reg (type, len);
@@ -215,6 +222,20 @@ loongarch_dr_state_remove_one_point (ptid_t ptid,
 }
 
 int
+loongarch_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
+			   int len, int is_insert, ptid_t ptid,
+			   struct loongarch_debug_reg_state *state)
+{
+  if (is_insert)
+    return loongarch_dr_state_insert_one_point (ptid, state, type, addr,
+						len, -1);
+  else
+    return loongarch_dr_state_remove_one_point (ptid, state, type, addr,
+						len, -1);
+}
+
+
+int
 loongarch_handle_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 			     int len, int is_insert, ptid_t ptid,
 			     struct loongarch_debug_reg_state *state)
@@ -234,12 +255,12 @@ bool
 loongarch_any_set_debug_regs_state (loongarch_debug_reg_state *state,
 				    bool watchpoint)
 {
-  int count = watchpoint ? loongarch_num_wp_regs : 0;
+  int count = watchpoint ? loongarch_num_wp_regs : loongarch_num_bp_regs;
   if (count == 0)
     return false;
 
-  const CORE_ADDR *addr = watchpoint ? state->dr_addr_wp : 0;
-  const unsigned int *ctrl = watchpoint ? state->dr_ctrl_wp : 0;
+  const CORE_ADDR *addr = watchpoint ? state->dr_addr_wp : state->dr_addr_bp;
+  const unsigned int *ctrl = watchpoint ? state->dr_ctrl_wp : state->dr_ctrl_bp;
 
   for (int i = 0; i < count; i++)
     if (addr[i] != 0 || ctrl[i] != 0)
@@ -267,6 +288,12 @@ loongarch_show_debug_reg_state (struct loongarch_debug_reg_state *state,
 			: (type == hw_execute ? "hw-breakpoint"
 			   : "??unknown??"))));
   debug_printf (":\n");
+
+  debug_printf ("\tBREAKPOINTs:\n");
+  for (i = 0; i < loongarch_num_bp_regs; i++)
+    debug_printf ("\tBP%d: addr=%s, ctrl=0x%08x, ref.count=%d\n",
+		  i, core_addr_to_string_nz (state->dr_addr_bp[i]),
+		  state->dr_ctrl_bp[i], state->dr_ref_count_bp[i]);
 
   debug_printf ("\tWATCHPOINTs:\n");
   for (i = 0; i < loongarch_num_wp_regs; i++)

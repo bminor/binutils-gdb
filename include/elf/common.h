@@ -751,6 +751,8 @@
 					/*   note name must be "LINUX".  */
 #define NT_LARCH_LBT    0xa04		/* LoongArch Binary Translation registers */
 					/*   note name must be "CORE".  */
+#define NT_LOONGARCH_HW_BREAK   0xa05	/* LoongArch hardware breakpoint registers */
+					/*   note name must be "LINUX".  */
 #define NT_LOONGARCH_HW_WATCH   0xa06	/* LoongArch hardware watchpoint registers */
 					/*   note name must be "LINUX".  */
 #define NT_RISCV_CSR    0x900		/* RISC-V Control and Status Registers */

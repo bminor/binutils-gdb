@@ -33,6 +33,7 @@
    Neither of these values may exceed the width of dr_changed_t
    measured in bits.  */
 
+#define LOONGARCH_HBP_MAX_NUM 8
 #define LOONGARCH_HWP_MAX_NUM 8
 
 
@@ -53,12 +54,18 @@
 
 struct loongarch_debug_reg_state
 {
+  /* hardware breakpoint */
+  CORE_ADDR dr_addr_bp[LOONGARCH_HBP_MAX_NUM];
+  unsigned int dr_ctrl_bp[LOONGARCH_HBP_MAX_NUM];
+  unsigned int dr_ref_count_bp[LOONGARCH_HBP_MAX_NUM];
+
   /* hardware watchpoint */
   CORE_ADDR dr_addr_wp[LOONGARCH_HWP_MAX_NUM];
   unsigned int dr_ctrl_wp[LOONGARCH_HWP_MAX_NUM];
   unsigned int dr_ref_count_wp[LOONGARCH_HWP_MAX_NUM];
 };
 
+extern int loongarch_num_bp_regs;
 extern int loongarch_num_wp_regs;
 
 /* Invoked when IDXth breakpoint/watchpoint register pair needs to be
@@ -67,6 +74,10 @@ extern int loongarch_num_wp_regs;
 void loongarch_notify_debug_reg_change (ptid_t ptid, int is_watchpoint,
 				      unsigned int idx);
 
+
+int loongarch_handle_breakpoint (enum target_hw_bp_type type, CORE_ADDR addr,
+				 int len, int is_insert, ptid_t ptid,
+				 struct loongarch_debug_reg_state *state);
 
 int loongarch_handle_watchpoint (enum target_hw_bp_type type, CORE_ADDR addr,
 				 int len, int is_insert, ptid_t ptid,
