@@ -46,5 +46,6 @@ Disassembly of section .text:
 0x00000094 7002003d 	mfdr	\$2,\$0
 0x00000098 7002083d 	mfdr	\$2,\$1
 0x0000009c 7083083d 	mtdr	\$3,\$1
-0x000000a0 7000003e 	dret
+0x000000a0 7000003f 	dbreak
+0x000000a4 7000003e 	dret
 	\.\.\.
