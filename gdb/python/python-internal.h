@@ -207,6 +207,15 @@ gdbpy_call_method (PyObject *o, const char *method,
 					   arg, args...));
 }
 
+/* An overload that takes a gdbpy_ref<> rather than a raw 'PyObject *'.  */
+
+template<typename... Args>
+static inline gdbpy_ref<>
+gdbpy_call_method (const gdbpy_ref<> &o, const char *method, Args... args)
+{
+  return gdbpy_call_method (o.get (), method, args...);
+}
+
 /* Poison PyObject_CallMethod.  The typesafe wrapper gdbpy_call_method should be
    used instead.  */
 #undef PyObject_CallMethod
