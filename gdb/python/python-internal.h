@@ -176,14 +176,14 @@ gdbpy_make_fmt ()
 
    This variant accepts no arguments.  */
 
-static inline PyObject *
+static inline gdbpy_ref<>
 gdbpy_call_method (PyObject *o, const char *method)
 {
   /* PyObject_CallMethod's 'method' and 'format' parameters were missing the
      'const' qualifier before Python 3.4.  */
-  return PyObject_CallMethod (o,
-			      const_cast<char *> (method),
-			      nullptr);
+  return gdbpy_ref<> (PyObject_CallMethod (o,
+					   const_cast<char *> (method),
+					   nullptr));
 }
 
 /* Typesafe wrapper around PyObject_CallMethod.
@@ -193,7 +193,7 @@ gdbpy_call_method (PyObject *o, const char *method)
    mismatches are impossible.  */
 
 template<typename Arg, typename... Args>
-static inline PyObject *
+static inline gdbpy_ref<>
 gdbpy_call_method (PyObject *o, const char *method,
 		   Arg arg, Args... args)
 {
@@ -201,10 +201,10 @@ gdbpy_call_method (PyObject *o, const char *method,
 
   /* PyObject_CallMethod's 'method' and 'format' parameters were missing the
      'const' qualifier before Python 3.4.  */
-  return PyObject_CallMethod (o,
-			      const_cast<char *> (method),
-			      const_cast<char *> (fmt.data ()),
-			      arg, args...);
+  return gdbpy_ref<> (PyObject_CallMethod (o,
+					   const_cast<char *> (method),
+					   const_cast<char *> (fmt.data ()),
+					   arg, args...));
 }
 
 /* Poison PyObject_CallMethod.  The typesafe wrapper gdbpy_call_method should be

@@ -1174,7 +1174,7 @@ gdbpy_breakpoint_cond_says_stop (const struct extension_language_defn *extlang,
 
   if (PyObject_HasAttrString (py_bp, stop_func))
     {
-      gdbpy_ref<> result (gdbpy_call_method (py_bp, stop_func));
+      gdbpy_ref<> result = gdbpy_call_method (py_bp, stop_func);
 
       stop = 1;
       if (result != NULL)

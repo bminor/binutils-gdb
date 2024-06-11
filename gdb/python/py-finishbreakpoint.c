@@ -344,7 +344,7 @@ bpfinishpy_out_of_scope (struct finish_breakpoint_object *bpfinish_obj)
   if (bpfinish_obj->py_bp.bp->enable_state == bp_enabled
       && PyObject_HasAttrString (py_obj, outofscope_func))
     {
-      gdbpy_ref<> meth_result (gdbpy_call_method (py_obj, outofscope_func));
+      gdbpy_ref<> meth_result = gdbpy_call_method (py_obj, outofscope_func);
       if (meth_result == NULL)
 	gdbpy_print_stack ();
     }

@@ -855,8 +855,8 @@ gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
 
   /* Now call the DisassembleInfo.read_memory method.  This might have been
      overridden by the user.  */
-  gdbpy_ref<> result_obj (gdbpy_call_method ((PyObject *) obj, "read_memory",
-					     len, offset));
+  gdbpy_ref<> result_obj = gdbpy_call_method ((PyObject *) obj, "read_memory",
+					      len, offset);
 
   /* Handle any exceptions.  */
   if (result_obj == nullptr)
