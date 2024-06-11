@@ -1969,6 +1969,8 @@ typedef struct
   bfd_vma value;
   /* Original reloc type.  */
   int type;
+  /* True if changed to R_RISCV_HI20.  */
+  bool absolute;
 } riscv_pcrel_hi_reloc;
 
 typedef struct riscv_pcrel_lo_reloc
@@ -1976,7 +1978,7 @@ typedef struct riscv_pcrel_lo_reloc
   /* PC value of auipc.  */
   bfd_vma address;
   /* Internal relocation.  */
-  const Elf_Internal_Rela *reloc;
+  Elf_Internal_Rela *reloc;
   /* Record the following information helps to resolve the %pcrel
      which cross different input section.  For now we build a hash
      for pcrel at the start of riscv_elf_relocate_section, and then
@@ -2043,7 +2045,7 @@ static bool
 riscv_zero_pcrel_hi_reloc (Elf_Internal_Rela *rel,
 			   struct bfd_link_info *info,
 			   bfd_vma pc,
-			   bfd_vma addr,
+			   bfd_vma *addr,
 			   bfd_byte *contents,
 			   const reloc_howto_type *howto)
 {
@@ -2059,17 +2061,22 @@ riscv_zero_pcrel_hi_reloc (Elf_Internal_Rela *rel,
 
   /* If it's possible to reference the symbol using auipc we do so, as that's
      more in the spirit of the PC-relative relocations we're processing.  */
-  bfd_vma offset = addr - pc;
+  bfd_vma offset = *addr - pc;
   if (ARCH_SIZE == 32 || VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (offset)))
     return false;
 
   /* If it's impossible to reference this with a LUI-based offset then don't
      bother to convert it at all so users still see the PC-relative relocation
      in the truncation message.  */
-  if (ARCH_SIZE > 32 && !VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (addr)))
+  if (ARCH_SIZE > 32 && !VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (*addr)))
     return false;
 
-  rel->r_info = ELFNN_R_INFO (addr, R_RISCV_HI20);
+  /* PR27180, encode target absolute address into r_addend rather than
+     r_sym.  Clear the ADDR to avoid duplicate relocate in the
+     perform_relocation.  */
+  rel->r_info = ELFNN_R_INFO (0, R_RISCV_HI20);
+  rel->r_addend += *addr;
+  *addr = 0;
 
   bfd_vma insn = riscv_get_insn (howto->bitsize, contents + rel->r_offset);
   insn = (insn & ~MASK_AUIPC) | MATCH_LUI;
@@ -2085,7 +2092,7 @@ riscv_record_pcrel_hi_reloc (riscv_pcrel_relocs *p,
 			     bool absolute)
 {
   bfd_vma offset = absolute ? value : value - addr;
-  riscv_pcrel_hi_reloc entry = {addr, offset, type};
+  riscv_pcrel_hi_reloc entry = {addr, offset, type, absolute};
   riscv_pcrel_hi_reloc **slot =
     (riscv_pcrel_hi_reloc **) htab_find_slot (p->hi_relocs, &entry, INSERT);
 
@@ -2100,7 +2107,7 @@ riscv_record_pcrel_hi_reloc (riscv_pcrel_relocs *p,
 static bool
 riscv_record_pcrel_lo_reloc (riscv_pcrel_relocs *p,
 			     bfd_vma addr,
-			     const Elf_Internal_Rela *reloc,
+			     Elf_Internal_Rela *reloc,
 			     asection *input_section,
 			     struct bfd_link_info *info,
 			     reloc_howto_type *howto,
@@ -2125,7 +2132,7 @@ riscv_resolve_pcrel_lo_relocs (riscv_pcrel_relocs *p)
     {
       bfd *input_bfd = r->input_section->owner;
 
-      riscv_pcrel_hi_reloc search = {r->address, 0, 0};
+      riscv_pcrel_hi_reloc search = {r->address, 0, 0, 0};
       riscv_pcrel_hi_reloc *entry = htab_find (p->hi_relocs, &search);
       /* There may be a risk if the %pcrel_lo with addend refers to
 	 an IFUNC symbol.  The %pcrel_hi has been relocated to plt,
@@ -2160,6 +2167,27 @@ riscv_resolve_pcrel_lo_relocs (riscv_pcrel_relocs *p)
 
       perform_relocation (r->howto, r->reloc, entry->value, r->input_section,
 			  input_bfd, r->contents);
+
+      /* The corresponding R_RISCV_GOT_PCREL_HI20 and R_RISCV_PCREL_HI20 are
+	 converted to R_RISCV_HI20, so try to convert R_RISCV_PCREL_LO12_I/S
+	 to R_RISCV_LO12_I/S.  */
+      if (entry->absolute)
+	{
+	  switch (ELFNN_R_TYPE (r->reloc->r_info))
+	    {
+	    case R_RISCV_PCREL_LO12_I:
+	      r->reloc->r_info = ELFNN_R_INFO (0, R_RISCV_LO12_I);
+	      r->reloc->r_addend += entry->value;
+	      break;
+	    case R_RISCV_PCREL_LO12_S:
+	      r->reloc->r_info = ELFNN_R_INFO (0, R_RISCV_LO12_S);
+	      r->reloc->r_addend += entry->value;
+	      break;
+	    default:
+	      /* This shouldn't happen, so just skip it.  */
+	      break;
+	    }
+	}
     }
 
   return true;
@@ -2698,7 +2726,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	      /* Address of got entry.  */
 	      relocation = sec_addr (htab->elf.sgot) + off;
 	      absolute = riscv_zero_pcrel_hi_reloc (rel, info, pc,
-						    relocation, contents,
+						    &relocation, contents,
 						    howto);
 	      /* Update howto if relocation is changed.  */
 	      howto = riscv_elf_rtype_to_howto (input_bfd,
@@ -2706,8 +2734,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	      if (howto == NULL)
 		r = bfd_reloc_notsupported;
 	      else if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
-						     relocation, r_type,
-						     absolute))
+						     relocation + rel->r_addend,
+						     r_type, absolute))
 		r = bfd_reloc_overflow;
 	    }
 	  break;
@@ -2849,7 +2877,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  }
 
 	case R_RISCV_PCREL_HI20:
-	  absolute = riscv_zero_pcrel_hi_reloc (rel, info, pc, relocation,
+	  absolute = riscv_zero_pcrel_hi_reloc (rel, info, pc, &relocation,
 						contents, howto);
 	  /* Update howto if relocation is changed.  */
 	  howto = riscv_elf_rtype_to_howto (input_bfd,

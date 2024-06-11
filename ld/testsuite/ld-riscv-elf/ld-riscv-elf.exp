@@ -131,6 +131,7 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "pcrel-lo-addend-2a"
     run_dump_test "pcrel-lo-addend-2b"
     run_dump_test "pcrel-lo-addend-3a"
+    run_dump_test "pcrel-lo-addend-3a-emit-relocs"
     run_dump_test "pcrel-lo-addend-3b"
     run_dump_test "pcrel-lo-addend-3c"
     run_dump_test "code-model-medlow-01"
