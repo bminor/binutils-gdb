@@ -544,13 +544,15 @@ struct ctf_next
   uint32_t ctn_n;
 
   /* Some iterators contain other iterators, in addition to their other
-     state.  */
+     state.  We allow for inner and outer iterators, for two-layer nested loops
+     like those found in ctf_arc_lookup_enumerator_next.  */
   ctf_next_t *ctn_next;
+  ctf_next_t *ctn_next_inner;
 
-  /* We can save space on this side of things by noting that a dictionary is
-     either dynamic or not, as a whole, and a given iterator can only iterate
-     over one kind of thing at once: so we can overlap the DTD and non-DTD
-     members, and the structure, variable and enum members, etc.  */
+  /* We can save space on this side of things by noting that a type is either
+     dynamic or not, as a whole, and a given iterator can only iterate over one
+     kind of thing at once: so we can overlap the DTD and non-DTD members, and
+     the structure, variable and enum members, etc.  */
   union
   {
     unsigned char *ctn_vlen;

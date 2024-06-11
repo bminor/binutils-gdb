@@ -25,6 +25,7 @@
 #define	_CTF_API_H
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <ctf.h>
 #include <zlib.h>
 
@@ -538,6 +539,16 @@ extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
 
 extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 
+/* Look up a single enumerator by enumeration constant name.  Returns the ID of
+   the enum it is contained within and optionally its value.  Error out with
+   ECTF_DUPLICATE if multiple exist (which can happen in some older dicts).  See
+   ctf_lookup_enumerator_next in that case.  Enumeration constants in non-root
+   types are not returned, but constants in parents are, if not overridden by
+   an enum in the child.  */
+
+extern ctf_id_t ctf_lookup_enumerator (ctf_dict_t *, const char *,
+				       int64_t *enum_value);
+
 /* Type lookup functions.  */
 
 /* Strip qualifiers and typedefs off a type, returning the base type.
@@ -668,6 +679,33 @@ extern ssize_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 extern int ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);
 extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				  int *);
+
+/* Return all enumeration constants with a given name in a given dict, similar
+   to ctf_lookup_enumerator above but capable of returning multiple values.
+   Enumerators in parent dictionaries are not returned: enumerators in non-root
+   types *are* returned.  This operation internally iterates over all types in
+   the dict, so is relatively expensive in large dictionaries.
+
+   There is nothing preventing NAME from being changed by the caller in the
+   middle of iteration: the results might be slightly confusing, but they are
+   well-defined.  */
+
+extern ctf_id_t ctf_lookup_enumerator_next (ctf_dict_t *, const char *name,
+					    ctf_next_t **, int64_t *enum_value);
+
+/* Likewise, across all dicts in an archive (parent first).  The DICT and ERRP
+   arguments are not optional: without the forer you can't tell which dict the
+   returned type is in, and without the latter you can't distinguish real errors
+   from end-of-iteration.  DICT should be NULL before the first call and is set
+   to NULL after the last and on error: on successful call it is set to the dict
+   containing the returned enum, and it is the caller's responsibility to
+   ctf_dict_close() it.  The caller should otherwise pass it back in unchanged
+   (do not reassign it during iteration, just as with the ctf_next_t iterator
+   itself).  */
+
+extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *name,
+						ctf_next_t **, int64_t *enum_value,
+						ctf_dict_t **dict, int *errp);
 
 /* Iterate over all types in a dict.  ctf_type_iter_all recurses over all types:
    ctf_type_iter recurses only over types with user-visible names (for which
