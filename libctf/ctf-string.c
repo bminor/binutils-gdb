@@ -195,6 +195,8 @@ ctf_str_create_atoms (ctf_dict_t *fp)
       atom->csa_offset = i;
     }
 
+  fp->ctf_str_prov_offset = fp->ctf_str[CTF_STRTAB_0].cts_len + 1;
+
   return 0;
 
  oom_str_add:
