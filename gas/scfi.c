@@ -706,6 +706,13 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
   struct ginsn_src *src2;
   struct ginsn_dst *dst;
 
+  unsigned int src1_reg;
+  unsigned int dst_reg;
+
+  enum ginsn_src_type src1_type;
+  enum ginsn_src_type src2_type;
+  enum ginsn_dst_type dst_type;
+
   if (!ginsn || !state)
     ret = 1;
 
@@ -723,6 +730,13 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
   src2 = ginsn_get_src2 (ginsn);
   dst = ginsn_get_dst (ginsn);
 
+  src1_reg = ginsn_get_src_reg (src1);
+  dst_reg = ginsn_get_dst_reg (dst);
+
+  src1_type = ginsn_get_src_type (src1);
+  src2_type = ginsn_get_src_type (src2);
+  dst_type = ginsn_get_dst_type (dst);
+
   ret = verify_heuristic_traceable_stack_manipulation (ginsn, state);
   if (ret)
     return ret;
@@ -731,68 +745,63 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
   if (ret)
     return ret;
 
-  switch (ginsn->dst.type)
+  switch (dst_type)
     {
     case GINSN_DST_REG:
       switch (ginsn->type)
 	{
 	case GINSN_TYPE_MOV:
-	  if (ginsn_get_src_type (src1) == GINSN_SRC_REG
-	      && ginsn_get_src_reg (src1) == REG_SP
-	      && ginsn_get_dst_reg (dst) == REG_FP
+	  if (src1_type == GINSN_SRC_REG && src1_reg == REG_SP
+	      && dst_type == GINSN_DST_REG && dst_reg == REG_FP
 	      && state->regs[REG_CFA].base == REG_SP)
 	    {
 	      /* mov %rsp, %rbp.  */
-	      scfi_op_add_def_cfa_reg (state, ginsn, ginsn_get_dst_reg (dst));
+	      scfi_op_add_def_cfa_reg (state, ginsn, dst_reg);
 	    }
-	  else if (ginsn_get_src_type (src1) == GINSN_SRC_REG
-		   && ginsn_get_src_reg (src1) == REG_FP
-		   && ginsn_get_dst_reg (dst) == REG_SP
+	  else if (src1_type == GINSN_SRC_REG && src1_reg == REG_FP
+		   && dst_type == GINSN_DST_REG && dst_reg == REG_SP
 		   && state->regs[REG_CFA].base == REG_FP)
 	    {
 	      /* mov %rbp, %rsp.  */
 	      state->stack_size = -state->regs[REG_FP].offset;
-	      scfi_op_add_def_cfa_reg (state, ginsn, ginsn_get_dst_reg (dst));
+	      scfi_op_add_def_cfa_reg (state, ginsn, dst_reg);
 	      state->traceable_p = true;
 	    }
-	  else if (ginsn_get_src_type (src1) == GINSN_SRC_INDIRECT
-		   && (ginsn_get_src_reg (src1) == REG_SP
-		       || ginsn_get_src_reg (src1) == REG_FP)
-		   && ginsn_track_reg_p (ginsn_get_dst_reg (dst), GINSN_GEN_SCFI))
+	  else if (src1_type == GINSN_SRC_INDIRECT
+		   && (src1_reg == REG_SP || src1_reg == REG_FP)
+		   && ginsn_track_reg_p (dst_reg, GINSN_GEN_SCFI))
 	    {
 	      /* mov disp(%rsp), reg.  */
 	      /* mov disp(%rbp), reg.  */
 	      if (verify_heuristic_symmetrical_restore_reg (state, ginsn))
 		{
-		  scfi_state_restore_reg (state, ginsn_get_dst_reg (dst));
-		  scfi_op_add_cfa_restore (ginsn, ginsn_get_dst_reg (dst));
+		  scfi_state_restore_reg (state, dst_reg);
+		  scfi_op_add_cfa_restore (ginsn, dst_reg);
 		}
 	      else
 		as_warn_where (ginsn->file, ginsn->line,
 			       _("SCFI: asymetrical register restore"));
 	    }
-	  else if (ginsn_get_src_type (src1) == GINSN_SRC_REG
-		   && ginsn_get_dst_type (dst) == GINSN_DST_REG
-		   && ginsn_get_src_reg (src1) == REG_SP)
+	  else if (src1_type == GINSN_SRC_REG && src1_reg == REG_SP
+		   && dst_type == GINSN_DST_REG)
 	    {
 	      /* mov %rsp, %reg.  */
 	      /* The value of rsp is taken directly from state->stack_size.
 		 IMP: The workflow in gen_scfi_ops must keep it updated.
 		 PS: Not taking the value from state->scratch[REG_SP] is
 		 intentional.  */
-	      state->scratch[ginsn_get_dst_reg (dst)].base = REG_CFA;
-	      state->scratch[ginsn_get_dst_reg (dst)].offset = -state->stack_size;
-	      state->scratch[ginsn_get_dst_reg (dst)].state = CFI_IN_REG;
+	      state->scratch[dst_reg].base = REG_CFA;
+	      state->scratch[dst_reg].offset = -state->stack_size;
+	      state->scratch[dst_reg].state = CFI_IN_REG;
 	    }
-	  else if (ginsn_get_src_type (src1) == GINSN_SRC_REG
-		   && ginsn_get_dst_type (dst) == GINSN_DST_REG
-		   && ginsn_get_dst_reg (dst) == REG_SP)
+	  else if (src1_type == GINSN_SRC_REG
+		   && dst_type == GINSN_DST_REG && dst_reg == REG_SP)
 	    {
 	      /* mov %reg, %rsp.  */
 	      /* Keep the value of REG_SP updated.  */
-	      if (state->scratch[ginsn_get_src_reg (src1)].state == CFI_IN_REG)
+	      if (state->scratch[src1_reg].state == CFI_IN_REG)
 		{
-		  state->stack_size = -state->scratch[ginsn_get_src_reg (src1)].offset;
+		  state->stack_size = -state->scratch[src1_reg].offset;
 		  state->traceable_p = true;
 		}
 # if 0
@@ -804,8 +813,9 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
 	    }
 	  break;
 	case GINSN_TYPE_SUB:
-	  if (ginsn_get_src_reg (src1) == REG_SP
-	      && ginsn_get_dst_reg (dst) == REG_SP)
+	  if (src1_type == GINSN_SRC_REG && src1_reg == REG_SP
+	      && dst_type == GINSN_DST_REG && dst_reg == REG_SP
+	      && src2_type == GINSN_SRC_IMM)
 	    {
 	      /* Stack inc/dec offset, when generated due to stack push and pop is
 		 target-specific.  Use the value encoded in the ginsn.  */
@@ -818,8 +828,9 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
 	    }
 	  break;
 	case GINSN_TYPE_ADD:
-	  if (ginsn_get_src_reg (src1) == REG_SP
-	      && ginsn_get_dst_reg (dst) == REG_SP)
+	  if (src1_type == GINSN_SRC_REG && src1_reg == REG_SP
+	      && dst_type == GINSN_DST_REG && dst_reg == REG_SP
+	      && src2_type == GINSN_SRC_IMM)
 	    {
 	      /* Stack inc/dec offset is target-specific.  Use the value
 		 encoded in the ginsn.  */
@@ -831,8 +842,8 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
 		  scfi_op_add_cfa_offset_inc (state, ginsn, ginsn_get_src_imm (src2));
 		}
 	    }
-	  else if (ginsn_get_src_reg (src1) == REG_FP
-		   && ginsn_get_dst_reg (dst) == REG_SP
+	  else if (src1_type == GINSN_SRC_REG && src1_reg == REG_FP
+		   && dst_type == GINSN_DST_REG && dst_reg == REG_SP
 		   && state->regs[REG_CFA].base == REG_FP)
 	    {
 	      /* FIXME - what is this for ? */
@@ -841,13 +852,13 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
 	  break;
 	case GINSN_TYPE_LOAD:
 	  /* If this is a load from stack.  */
-	  if (ginsn_get_src_type (src1) == GINSN_SRC_INDIRECT
-	      && (ginsn_get_src_reg (src1) == REG_SP
-		  || (ginsn_get_src_reg (src1) == REG_FP
+	  if (src1_type == GINSN_SRC_INDIRECT
+	      && (src1_reg == REG_SP
+		  || (src1_reg == REG_FP
 		      && state->regs[REG_CFA].base == REG_FP)))
 	    {
 	      /* pop %rbp when CFA tracking is REG_FP based.  */
-	      if (ginsn_get_dst_reg (dst) == REG_FP
+	      if (dst_reg == REG_FP
 		  && state->regs[REG_CFA].base == REG_FP)
 		{
 		  scfi_op_add_def_cfa_reg (state, ginsn, REG_SP);
@@ -855,12 +866,12 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
 		    scfi_op_add_cfa_offset_inc (state, ginsn,
 						(state->regs[REG_CFA].offset - state->stack_size));
 		}
-	      if (ginsn_track_reg_p (ginsn_get_dst_reg (dst), GINSN_GEN_SCFI))
+	      if (ginsn_track_reg_p (dst_reg, GINSN_GEN_SCFI))
 		{
 		  if (verify_heuristic_symmetrical_restore_reg (state, ginsn))
 		    {
-		      scfi_state_restore_reg (state, ginsn_get_dst_reg (dst));
-		      scfi_op_add_cfa_restore (ginsn, ginsn_get_dst_reg (dst));
+		      scfi_state_restore_reg (state, dst_reg);
+		      scfi_op_add_cfa_restore (ginsn, dst_reg);
 		    }
 		  else
 		    as_warn_where (ginsn->file, ginsn->line,
@@ -889,20 +900,20 @@ gen_scfi_ops (ginsnS *ginsn, scfi_stateS *state)
       /* mov reg, disp(%rsp) */
       if (ginsn_scfi_save_reg_p (ginsn, state))
 	{
-	  if (ginsn_get_dst_reg (dst) == REG_SP)
+	  if (dst_reg == REG_SP)
 	    {
 	      /* mov reg, disp(%rsp) */
 	      offset = 0 - state->stack_size + ginsn_get_dst_disp (dst);
-	      scfi_state_save_reg (state, ginsn_get_src_reg (src1), REG_CFA, offset);
-	      scfi_op_add_cfi_offset (state, ginsn, ginsn_get_src_reg (src1));
+	      scfi_state_save_reg (state, src1_reg, REG_CFA, offset);
+	      scfi_op_add_cfi_offset (state, ginsn, src1_reg);
 	    }
-	  else if (ginsn_get_dst_reg (dst) == REG_FP)
+	  else if (dst_reg == REG_FP)
 	    {
 	      gas_assert (state->regs[REG_CFA].base == REG_FP);
 	      /* mov reg, disp(%rbp) */
 	      offset = 0 - state->regs[REG_CFA].offset + ginsn_get_dst_disp (dst);
-	      scfi_state_save_reg (state, ginsn_get_src_reg (src1), REG_CFA, offset);
-	      scfi_op_add_cfi_offset (state, ginsn, ginsn_get_src_reg (src1));
+	      scfi_state_save_reg (state, src1_reg, REG_CFA, offset);
+	      scfi_op_add_cfi_offset (state, ginsn, src1_reg);
 	    }
 	}
       break;
