@@ -663,6 +663,8 @@ extern int ctf_member_iter (ctf_dict_t *, ctf_id_t, ctf_member_f *, void *);
 extern ssize_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				const char **name, ctf_id_t *membtype,
 				int flags);
+
+/* Return all enumeration constants in a given enum type.  */
 extern int ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);
 extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				  int *);
@@ -672,8 +674,9 @@ extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
    CTF_ADD_ROOT was passed).  All such types are returned, even if they are
    things like pointers that intrinsically have no name: this is the only effect
    of CTF_ADD_ROOT for such types.  ctf_type_next allows you to choose whether
-   to see hidden types or not with the want_hidden arg: if set, the flag (if
-   passed) returns the hidden state of each type in turn.  */
+   to see non-root types or not with the want_hidden arg: if set, the flag (if
+   passed) returns the non-root state of each type in turn.  Types in parent
+   dictionaries are not returned.  */
 
 extern int ctf_type_iter (ctf_dict_t *, ctf_type_f *, void *);
 extern int ctf_type_iter_all (ctf_dict_t *, ctf_type_all_f *, void *);
