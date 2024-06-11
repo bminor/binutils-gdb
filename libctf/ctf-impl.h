@@ -560,11 +560,13 @@ struct ctf_next
     void **ctn_hash_slot;
   } u;
 
-  /* This union is of various sorts of dict we can iterate over:
-     currently dictionaries and archives, dynhashes, and dynsets.  */
+  /* This union is of various sorts of dict we can iterate over: currently
+     archives, dictionaries, dynhashes, and dynsets.  ctn_fp is non-const
+     because we need to set errors on it.  */
+
   union
   {
-    const ctf_dict_t *ctn_fp;
+    ctf_dict_t *ctn_fp;
     const ctf_archive_t *ctn_arc;
     const ctf_dynhash_t *ctn_h;
     const ctf_dynset_t *ctn_s;
