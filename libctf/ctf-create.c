@@ -1944,10 +1944,15 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	}
       else
 	{
+	  ctf_snapshot_id_t snap = ctf_snapshot (dst_fp);
+
 	  dst_type = ctf_add_enum (dst_fp, flag, name);
 	  if ((dst.ctb_type = dst_type) == CTF_ERR
 	      || ctf_enum_iter (src_fp, src_type, enumadd, &dst))
-	    return CTF_ERR;			/* errno is set for us */
+	    {
+	      ctf_rollback (dst_fp, snap);
+	      return CTF_ERR;			/* errno is set for us */
+	    }
 	}
       break;
 
