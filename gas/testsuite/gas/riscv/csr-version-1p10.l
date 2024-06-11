@@ -823,13 +823,13 @@
 .*Info: macro .*
 .*Warning: invalid CSR `vsatp', needs `h' extension
 .*Info: macro .*
-.*Warning: invalid CSR `miselect', needs `smaia' extension
+.*Warning: invalid CSR `miselect', needs `smaia or smcsrind' extension
 .*Info: macro .*
-.*Warning: invalid CSR `miselect', needs `smaia' extension
+.*Warning: invalid CSR `miselect', needs `smaia or smcsrind' extension
 .*Info: macro .*
-.*Warning: invalid CSR `mireg', needs `smaia' extension
+.*Warning: invalid CSR `mireg', needs `smaia or smcsrind' extension
 .*Info: macro .*
-.*Warning: invalid CSR `mireg', needs `smaia' extension
+.*Warning: invalid CSR `mireg', needs `smaia or smcsrind' extension
 .*Info: macro .*
 .*Warning: invalid CSR `mtopei', needs `smaia' extension
 .*Info: macro .*
@@ -889,6 +889,34 @@
 .*Info: macro .*
 .*Warning: invalid CSR `miph', needs `smaia' extension
 .*Info: macro .*
+.*Warning: invalid CSR `miselect', needs `smaia or smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `miselect', needs `smaia or smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg', needs `smaia or smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg', needs `smaia or smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg2', needs `smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg2', needs `smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg3', needs `smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg3', needs `smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg4', needs `smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg4', needs `smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg5', needs `smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg5', needs `smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg6', needs `smcsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mireg6', needs `smcsrind' extension
+.*Info: macro .*
 .*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
 .*Info: macro .*
 .*Warning: invalid CSR `mcyclecfg', needs `smcntrpmf' extension
@@ -1057,13 +1085,13 @@
 .*Info: macro .*
 .*Warning: invalid CSR `hstateen3h', needs `ssstateen' extension
 .*Info: macro .*
-.*Warning: invalid CSR `siselect', needs `ssaia' extension
+.*Warning: invalid CSR `siselect', needs `ssaia or sscsrind' extension
 .*Info: macro .*
-.*Warning: invalid CSR `siselect', needs `ssaia' extension
+.*Warning: invalid CSR `siselect', needs `ssaia or sscsrind' extension
 .*Info: macro .*
-.*Warning: invalid CSR `sireg', needs `ssaia' extension
+.*Warning: invalid CSR `sireg', needs `ssaia or sscsrind' extension
 .*Info: macro .*
-.*Warning: invalid CSR `sireg', needs `ssaia' extension
+.*Warning: invalid CSR `sireg', needs `ssaia or sscsrind' extension
 .*Info: macro .*
 .*Warning: invalid CSR `stopei', needs `ssaia' extension
 .*Info: macro .*
@@ -1125,19 +1153,19 @@
 .*Info: macro .*
 .*Warning: invalid CSR `vsiselect', needs `h' extension
 .*Info: macro .*
-.*Warning: invalid CSR `vsiselect', needs `ssaia' extension
+.*Warning: invalid CSR `vsiselect', needs `ssaia or sscsrind' extension
 .*Info: macro .*
 .*Warning: invalid CSR `vsiselect', needs `h' extension
 .*Info: macro .*
-.*Warning: invalid CSR `vsiselect', needs `ssaia' extension
+.*Warning: invalid CSR `vsiselect', needs `ssaia or sscsrind' extension
 .*Info: macro .*
 .*Warning: invalid CSR `vsireg', needs `h' extension
 .*Info: macro .*
-.*Warning: invalid CSR `vsireg', needs `ssaia' extension
+.*Warning: invalid CSR `vsireg', needs `ssaia or sscsrind' extension
 .*Info: macro .*
 .*Warning: invalid CSR `vsireg', needs `h' extension
 .*Info: macro .*
-.*Warning: invalid CSR `vsireg', needs `ssaia' extension
+.*Warning: invalid CSR `vsireg', needs `ssaia or sscsrind' extension
 .*Info: macro .*
 .*Warning: invalid CSR `vstopei', needs `h' extension
 .*Info: macro .*
@@ -1240,6 +1268,90 @@
 .*Warning: invalid CSR `vsiph', needs `h' extension
 .*Info: macro .*
 .*Warning: invalid CSR `vsiph', needs `ssaia' extension
+.*Info: macro .*
+.*Warning: invalid CSR `siselect', needs `ssaia or sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `siselect', needs `ssaia or sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg', needs `ssaia or sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg', needs `ssaia or sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg2', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg2', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg3', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg3', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg4', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg4', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg5', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg5', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg6', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sireg6', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsiselect', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsiselect', needs `ssaia or sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsiselect', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsiselect', needs `ssaia or sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg', needs `ssaia or sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg', needs `ssaia or sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg2', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg2', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg2', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg2', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg3', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg3', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg3', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg3', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg4', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg4', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg4', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg4', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg5', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg5', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg5', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg5', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg6', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg6', needs `sscsrind' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg6', needs `h' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsireg6', needs `sscsrind' extension
 .*Info: macro .*
 .*Warning: invalid CSR `scountovf', needs `sscofpmf' extension
 .*Info: macro .*

@@ -77,6 +77,8 @@ enum riscv_csr_class
   CSR_CLASS_H_32,	/* hypervisor, rv32 only */
   CSR_CLASS_SMAIA,		/* Smaia */
   CSR_CLASS_SMAIA_32,		/* Smaia, rv32 only */
+  CSR_CLASS_SMAIA_OR_SMCSRIND,		/* Smaia/Smcsrind */
+  CSR_CLASS_SMCSRIND,		/* Smcsrind */
   CSR_CLASS_SMCNTRPMF,		/* Smcntrpmf */
   CSR_CLASS_SMCNTRPMF_32,	/* Smcntrpmf, rv32 only */
   CSR_CLASS_SMSTATEEN,		/* Smstateen only */
@@ -85,6 +87,10 @@ enum riscv_csr_class
   CSR_CLASS_SSAIA_AND_H,	/* Ssaia with H */
   CSR_CLASS_SSAIA_32,		/* Ssaia, rv32 only */
   CSR_CLASS_SSAIA_AND_H_32,	/* Ssaia with H, rv32 only */
+  CSR_CLASS_SSAIA_OR_SSCSRIND,		/* Ssaia/Smcsrind */
+  CSR_CLASS_SSAIA_OR_SSCSRIND_AND_H,	/* Ssaia/Smcsrind with H */
+  CSR_CLASS_SSCSRIND,		/* Sscsrind */
+  CSR_CLASS_SSCSRIND_AND_H,	/* Sscsrind with H */
   CSR_CLASS_SSSTATEEN,		/* S[ms]stateen only */
   CSR_CLASS_SSSTATEEN_AND_H,	/* S[ms]stateen only (with H) */
   CSR_CLASS_SSSTATEEN_AND_H_32,	/* S[ms]stateen RV32 only (with H) */
@@ -1059,6 +1065,12 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_SMAIA:
       extension = "smaia";
       break;
+    case CSR_CLASS_SMAIA_OR_SMCSRIND:
+      extension = "smaia or smcsrind";
+      break;
+    case CSR_CLASS_SMCSRIND:
+      extension = "smcsrind";
+      break;
     case CSR_CLASS_SMCNTRPMF_32:
       is_rv32_only = true;
       /* Fall through.  */
@@ -1081,6 +1093,16 @@ riscv_csr_address (const char *csr_name,
       is_h_required = (csr_class == CSR_CLASS_SSAIA_AND_H
 		       || csr_class == CSR_CLASS_SSAIA_AND_H_32);
       extension = "ssaia";
+      break;
+    case CSR_CLASS_SSAIA_OR_SSCSRIND:
+    case CSR_CLASS_SSAIA_OR_SSCSRIND_AND_H:
+      is_h_required = (csr_class == CSR_CLASS_SSAIA_OR_SSCSRIND_AND_H);
+      extension = "ssaia or sscsrind";
+      break;
+    case CSR_CLASS_SSCSRIND:
+    case CSR_CLASS_SSCSRIND_AND_H:
+      is_h_required = (csr_class == CSR_CLASS_SSCSRIND_AND_H);
+      extension = "sscsrind";
       break;
     case CSR_CLASS_SSSTATEEN_AND_H_32:
       is_rv32_only = true;

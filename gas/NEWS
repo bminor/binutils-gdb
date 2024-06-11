@@ -27,6 +27,8 @@
 
 * Add support for RISC-V Zvfbfwma extension with version 1.0.
 
+* Add support for RISC-V Smcsrind/Sscsrind extension with version 1.0.
+
 * The base register operand in D(X,B) and D(L,B) may be explicitly omitted
   in assembly on s390. It can now be coded as D(X,) or D(L,) instead of D(X,0)
   D(X,%r0), D(L,0), and D(L,%r0).

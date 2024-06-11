@@ -350,6 +350,15 @@
 	csr mviph
 	csr miph
 
+	# Smcsrind
+	csr miselect
+	csr mireg
+	csr mireg2
+	csr mireg3
+	csr mireg4
+	csr mireg5
+	csr mireg6
+
 	# Smcntrpmf extension
 	csr mcyclecfg
 	csr minstretcfg
@@ -400,6 +409,22 @@
 	csr hviprio2h
 	csr vsieh
 	csr vsiph
+
+	# Sscsrind
+	csr siselect
+	csr sireg
+	csr sireg2
+	csr sireg3
+	csr sireg4
+	csr sireg5
+	csr sireg6
+	csr vsiselect
+	csr vsireg
+	csr vsireg2
+	csr vsireg3
+	csr vsireg4
+	csr vsireg5
+	csr vsireg6
 
 	# Sscofpmf extension
 	csr scountovf
