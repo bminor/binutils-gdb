@@ -123,10 +123,12 @@ proc make_val_cast {lang signed bits val} {
 	return "$val as ${sign_prefix}$bits"
     } else {
 	# C-like cast.
-	if {$signed} {
+	if {!$signed} {
+	    set sign_prefix "unsigned "
+	} elseif {$lang == "opencl"} {
 	    set sign_prefix ""
 	} else {
-	    set sign_prefix "un"
+	    set sign_prefix "signed "
 	}
 	if {$bits == 8} {
 	    set type "char"
@@ -143,7 +145,7 @@ proc make_val_cast {lang signed bits val} {
 	} else {
 	    error "$lang: unsupported bits"
 	}
-	return "(${sign_prefix}signed $type) $val"
+	return "(${sign_prefix}$type) $val"
     }
 }
 
