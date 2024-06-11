@@ -1149,6 +1149,9 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
   return NULL;
 }
 
+static int
+ctf_dedup_count_name (ctf_dict_t *fp, const char *name, void *id);
+
 /* Populate a number of useful mappings not directly used by the hashing
    machinery: the output mapping, the cd_name_counts mapping from name -> hash
    -> count of hashval deduplication state for a given hashed type, and the
@@ -1164,8 +1167,6 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
   ctf_dynset_t *type_ids;
-  ctf_dynhash_t *name_counts;
-  long int count;
 
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
   ctf_dprintf ("Hash %s, %s, into output mapping for %i/%lx @ %s\n",
@@ -1258,24 +1259,53 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
       && ctf_dynset_insert (type_ids, id) < 0)
     return ctf_set_errno (fp, errno);
 
+  if (ctf_type_kind_unsliced (input, type) == CTF_K_ENUM)
+    {
+      ctf_next_t *i = NULL;
+      const char *enumerator;
+
+      while ((enumerator = ctf_enum_next (input, type, &i, NULL)) != NULL)
+	{
+	  if (ctf_dedup_count_name (fp, enumerator, id) < 0)
+	    {
+	      ctf_next_destroy (i);
+	      return -1;
+	    }
+	}
+      if (ctf_errno (input) != ECTF_NEXT_END)
+	return ctf_set_errno (fp, ctf_errno (input));
+    }
+
   /* The rest only needs to happen for types with names.  */
   if (!decorated_name)
     return 0;
+
+  if (ctf_dedup_count_name (fp, decorated_name, id) < 0)
+    return -1;					/* errno is set for us. */
+
+  return 0;
+}
+
+static int
+ctf_dedup_count_name (ctf_dict_t *fp, const char *name, void *id)
+{
+  ctf_dedup_t *d = &fp->ctf_dedup;
+  ctf_dynhash_t *name_counts;
+  long int count;
+  const char *hval;
 
   /* Count the number of occurrences of the hash value for this GID.  */
 
   hval = ctf_dynhash_lookup (d->cd_type_hashes, id);
 
   /* Mapping from name -> hash(hashval, count) not already present?  */
-  if ((name_counts = ctf_dynhash_lookup (d->cd_name_counts,
-					 decorated_name)) == NULL)
+  if ((name_counts = ctf_dynhash_lookup (d->cd_name_counts, name)) == NULL)
     {
       if ((name_counts = ctf_dynhash_create (ctf_hash_string,
 					     ctf_hash_eq_string,
 					     NULL, NULL)) == NULL)
 	  return ctf_set_errno (fp, errno);
-      if (ctf_dynhash_cinsert (d->cd_name_counts, decorated_name,
-			       name_counts) < 0)
+      if (ctf_dynhash_cinsert (d->cd_name_counts, name, name_counts) < 0)
 	{
 	  ctf_dynhash_destroy (name_counts);
 	  return ctf_set_errno (fp, errno);

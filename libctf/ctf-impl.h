@@ -294,7 +294,8 @@ typedef struct ctf_dedup
   ctf_dynhash_t *cd_decorated_names[4];
 
   /* Map type names to a hash from type hash value -> number of times each value
-     has appeared.  */
+     has appeared.  Enumeration constants are tracked via the enum they appear
+     in.  */
   ctf_dynhash_t *cd_name_counts;
 
   /* Map global type IDs to type hash values.  Used to determine if types are
