@@ -348,6 +348,7 @@ proc test_shifts {} {
 	    test_shift $lang "print -3 >> 1" " = -2"
 	    test_shift $lang "print -8 >> 1" " = -4"
 	    test_shift $lang "print [make_int64 $lang -8] >> 1" " = -4"
+	    test_rshift_tl $lang "print -8 >> 100" " = -1"
 	}
 
 	# Make sure an unsigned 64-bit value with high bit set isn't

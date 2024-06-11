@@ -1303,7 +1303,21 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  {
 	    unsigned long nbits;
 	    if (!check_valid_shift_count (op, result_type, type2, v2, nbits))
-	      v = 0;
+	      {
+		/* Pretend the too-large shift was decomposed in a
+		   number of smaller shifts.  An arithmetic signed
+		   right shift of a negative number always yields -1
+		   with such semantics.  This is the right thing to
+		   do for Go, and we might as well do it for
+		   languages where it is undefined.  Also, pretend a
+		   shift by a negative number was a shift by the
+		   negative number cast to unsigned, which is the
+		   same as shifting by a too-large number.  */
+		if (v1 < 0 && !result_type->is_unsigned ())
+		  v = -1;
+		else
+		  v = 0;
+	      }
 	    else
 	      v = v1 >> nbits;
 	  }
