@@ -1608,6 +1608,9 @@ HFILES_NO_SRCDIR = \
 	nat/linux-personality.h \
 	nat/linux-ptrace.h \
 	nat/linux-waitpid.h \
+	nat/loongarch-hw-point.h \
+	nat/loongarch-linux.h \
+	nat/loongarch-linux-hw-point.h \
 	nat/mips-linux-watch.h \
 	nat/ppc-linux.h \
 	nat/x86-cpuid.h \

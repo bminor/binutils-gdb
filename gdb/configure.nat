@@ -266,7 +266,9 @@ case ${gdb_host} in
 		;;
 	    loongarch)
 		# Host: LoongArch, running GNU/Linux.
-		NATDEPFILES="${NATDEPFILES} loongarch-linux-nat.o linux-nat-trad.o"
+		NATDEPFILES="${NATDEPFILES} loongarch-linux-nat.o linux-nat-trad.o \
+		nat/loongarch-hw-point.o nat/loongarch-linux.o \
+		nat/loongarch-linux-hw-point.o"
 		;;
 	    m32r)
 		# Host: M32R based machine running GNU/Linux
