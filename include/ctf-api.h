@@ -268,9 +268,11 @@ _CTF_ERRORS
 #endif
 
 /* Dynamic CTF containers can be created using ctf_create.  The ctf_add_*
-   routines can be used to add new definitions to the dynamic container.
-   New types are labeled as root or non-root to determine whether they are
-   visible at the top-level program scope when subsequently doing a lookup.  */
+   routines can be used to add new definitions to the dynamic container.  New
+   types are labeled as root or non-root to determine whether they are visible
+   at the top-level program scope when subsequently doing a lookup.
+   (Identifiers contained within non-root types, like enumeration constants, are
+   also not visible.)  */
 
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
@@ -785,9 +787,8 @@ extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t, const char *,
 extern ctf_id_t ctf_add_unknown (ctf_dict_t *, uint32_t, const char *);
 extern ctf_id_t ctf_add_volatile (ctf_dict_t *, uint32_t, ctf_id_t);
 
-/* Add an enumerator to an enum (the name is a misnomer).  We do not currently
-   validate that enumerators have unique names, even though C requires it: in
-   future this may change.  */
+/* Add an enumerator to an enum.  If the enum is non-root, so are all the
+   constants added to it by ctf_add_enumerator.  */
 
 extern int ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int);
 

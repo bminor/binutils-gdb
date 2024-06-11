@@ -651,6 +651,12 @@ ctf_dynset_remove (ctf_dynset_t *hp, const void *key)
   htab_remove_elt ((struct htab *) hp, key_to_internal (key));
 }
 
+size_t
+ctf_dynset_elements (ctf_dynset_t *hp)
+{
+  return htab_elements ((struct htab *) hp);
+}
+
 void
 ctf_dynset_destroy (ctf_dynset_t *hp)
 {

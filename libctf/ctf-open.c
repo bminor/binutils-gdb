@@ -670,24 +670,50 @@ upgrade_types (ctf_dict_t *fp, ctf_header_t *cth)
   return 0;
 }
 
+static int
+init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
+			    ctf_dynset_t *all_enums);
+
 /* Populate statically-defined types (those loaded from a saved buffer).
 
    Initialize the type ID translation table with the byte offset of each type,
    and initialize the hash tables of each named type.  Upgrade the type table to
    the latest supported representation in the process, if needed, and if this
-   recension of libctf supports upgrading.  */
+   recension of libctf supports upgrading.
+
+   This is a wrapper to simplify memory allocation on error in the _internal
+   function that does all the actual work.  */
 
 static int
 init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
+{
+  ctf_dynset_t *all_enums;
+  int err;
+
+  if ((all_enums = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer,
+				      NULL)) == NULL)
+    return ENOMEM;
+
+  err = init_static_types_internal (fp, cth, all_enums);
+  ctf_dynset_destroy (all_enums);
+  return err;
+}
+
+static int
+init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
+			    ctf_dynset_t *all_enums)
 {
   const ctf_type_t *tbuf;
   const ctf_type_t *tend;
 
   unsigned long pop[CTF_K_MAX + 1] = { 0 };
+  int pop_enumerators = 0;
   const ctf_type_t *tp;
   uint32_t id;
   uint32_t *xp;
   unsigned long typemax = 0;
+  ctf_next_t *i = NULL;
+  void *k;
 
   /* We determine whether the dict is a child or a parent based on the value of
      cth_parname.  */
@@ -706,8 +732,10 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
   tbuf = (ctf_type_t *) (fp->ctf_buf + cth->cth_typeoff);
   tend = (ctf_type_t *) (fp->ctf_buf + cth->cth_stroff);
 
-  /* We make two passes through the entire type section.  In this first
-     pass, we count the number of each type and the total number of types.  */
+  /* We make two passes through the entire type section, and one third pass
+     through part of it.  In this first pass, we count the number of each type
+     and type-like identifier (like enumerators) and the total number of
+     types.  */
 
   for (tp = tbuf; tp < tend; typemax++)
     {
@@ -728,6 +756,9 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 
       tp = (ctf_type_t *) ((uintptr_t) tp + increment + vbytes);
       pop[kind]++;
+
+      if (kind == CTF_K_ENUM)
+	pop_enumerators += vlen;
     }
 
   if (child)
@@ -765,9 +796,14 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 				   pop[CTF_K_POINTER] +
 				   pop[CTF_K_VOLATILE] +
 				   pop[CTF_K_CONST] +
-				   pop[CTF_K_RESTRICT],
+				   pop[CTF_K_RESTRICT] +
+				   pop_enumerators,
 				   ctf_hash_string,
 				   ctf_hash_eq_string, NULL, NULL)) == NULL)
+    return ENOMEM;
+
+  if ((fp->ctf_conflicting_enums
+       = ctf_dynset_create (htab_hash_string, htab_eq_string, NULL)) == NULL)
     return ENOMEM;
 
   /* The ptrtab and txlate can be appropriately sized for precisely this set
@@ -792,6 +828,8 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 
   /* In the second pass through the types, we fill in each entry of the
      type and pointer tables and add names to the appropriate hashes.
+
+     (Not all names are added in this pass, only type names.  See below.)
 
      Bump ctf_typemax as we go, but keep it one higher than normal, so that
      the type being read in is considered a valid type and it is at least
@@ -902,16 +940,25 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 	  break;
 
 	case CTF_K_ENUM:
-	  if (!isroot)
+	  {
+	    if (!isroot)
+	      break;
+
+	    err = ctf_dynhash_insert_type (fp, fp->ctf_enums,
+					   LCTF_INDEX_TO_TYPE (fp, id, child),
+					   tp->ctt_name);
+
+	    if (err != 0)
+	      return err;
+
+	    /* Remember all enums for later rescanning.  */
+
+	    err = ctf_dynset_insert (all_enums, (void *) (ptrdiff_t)
+				     LCTF_INDEX_TO_TYPE (fp, id, child));
+	    if (err != 0)
+	      return err;
 	    break;
-
-	  err = ctf_dynhash_insert_type (fp, fp->ctf_enums,
-					 LCTF_INDEX_TO_TYPE (fp, id, child),
-					 tp->ctt_name);
-
-	  if (err != 0)
-	    return err;
-	  break;
+	  }
 
 	case CTF_K_TYPEDEF:
 	  if (!isroot)
@@ -976,13 +1023,71 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
   assert (fp->ctf_typemax == typemax);
 
   ctf_dprintf ("%lu total types processed\n", fp->ctf_typemax);
+
+  /* In the third pass, we traverse the enums we spotted earlier and add all
+     the enumeration constants therein either to the types table (if no
+     type exists with that name) or to ctf_conflciting_enums (otherwise).
+
+     Doing this in a third pass is necessary to avoid the case where an
+     enum appears with a constant FOO, then later a type named FOO appears,
+     too late to spot the conflict by checking the enum's constants.  */
+
+  while ((err = ctf_dynset_next (all_enums, &i, &k)) == 0)
+    {
+      ctf_id_t enum_id = (uintptr_t) k;
+      ctf_next_t *i_constants = NULL;
+      const char *cte_name;
+
+      while ((cte_name = ctf_enum_next (fp, enum_id, &i_constants, NULL)) != NULL)
+	{
+	  /* Add all the enumeration constants as identifiers.  They all appear
+	     as types that cite the original enum.
+
+	     Constants that appear in more than one enum, or which are already
+	     the names of types, appear in ctf_conflicting_enums as well.  */
+
+	  if (ctf_dynhash_lookup_type (fp->ctf_names, cte_name) == 0)
+	    {
+	      uint32_t name = ctf_str_add (fp, cte_name);
+
+	      if (name == 0)
+		goto enum_err;
+
+	      err = ctf_dynhash_insert_type (fp, fp->ctf_names, enum_id, name);
+	    }
+	  else
+	    {
+	      err = ctf_dynset_insert (fp->ctf_conflicting_enums, (void *)
+				       cte_name);
+
+	      if (err != 0)
+		goto enum_err;
+	    }
+	  continue;
+
+	enum_err:
+	  ctf_next_destroy (i_constants);
+	  ctf_next_destroy (i);
+	  return ctf_errno (fp);
+	}
+      if (ctf_errno (fp) != ECTF_NEXT_END)
+	{
+	  ctf_next_destroy (i);
+	  return ctf_errno (fp);
+	}
+    }
+  if (err != ECTF_NEXT_END)
+    return err;
+
   ctf_dprintf ("%zu enum names hashed\n",
 	       ctf_dynhash_elements (fp->ctf_enums));
+  ctf_dprintf ("%zu conflicting enumerators identified\n",
+	       ctf_dynset_elements (fp->ctf_conflicting_enums));
   ctf_dprintf ("%zu struct names hashed (%d long)\n",
 	       ctf_dynhash_elements (fp->ctf_structs), nlstructs);
   ctf_dprintf ("%zu union names hashed (%d long)\n",
 	       ctf_dynhash_elements (fp->ctf_unions), nlunions);
-  ctf_dprintf ("%zu base type names hashed\n",
+  ctf_dprintf ("%zu base type names and identifiers hashed\n",
 	       ctf_dynhash_elements (fp->ctf_names));
 
   return 0;
@@ -1786,6 +1891,7 @@ ctf_dict_close (ctf_dict_t *fp)
     }
   ctf_dynhash_destroy (fp->ctf_dthash);
 
+  ctf_dynset_destroy (fp->ctf_conflicting_enums);
   ctf_dynhash_destroy (fp->ctf_structs);
   ctf_dynhash_destroy (fp->ctf_unions);
   ctf_dynhash_destroy (fp->ctf_enums);

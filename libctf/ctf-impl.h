@@ -387,7 +387,8 @@ struct ctf_dict
   ctf_dynhash_t *ctf_structs;	    /* Hash table of struct types.  */
   ctf_dynhash_t *ctf_unions;	    /* Hash table of union types.  */
   ctf_dynhash_t *ctf_enums;	    /* Hash table of enum types.  */
-  ctf_dynhash_t *ctf_names;	    /* Hash table of remaining type names.  */
+  ctf_dynhash_t *ctf_names;	    /* Hash table of remaining types, plus
+				       enumeration constants.  */
   ctf_lookup_t ctf_lookups[5];	    /* Pointers to nametabs for name lookup.  */
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
   ctf_strs_writable_t *ctf_dynstrtab; /* Dynamically allocated string table, if any. */
@@ -407,6 +408,7 @@ struct ctf_dict
   uint32_t *ctf_pptrtab;	  /* Parent types pointed to by child dicts.  */
   size_t ctf_pptrtab_len;	  /* Num types storable in pptrtab currently.  */
   uint32_t ctf_pptrtab_typemax;	  /* Max child type when pptrtab last updated.  */
+  ctf_dynset_t *ctf_conflicting_enums;	/* Tracks enum constants that conflict.  */
   uint32_t *ctf_funcidx_names;	  /* Name of each function symbol in symtypetab
 				     (if indexed).  */
   uint32_t *ctf_objtidx_names;	  /* Likewise, for object symbols.  */
@@ -669,6 +671,7 @@ extern int ctf_dynhash_next_sorted (ctf_dynhash_t *, ctf_next_t **,
 extern ctf_dynset_t *ctf_dynset_create (htab_hash, htab_eq, ctf_hash_free_fun);
 extern int ctf_dynset_insert (ctf_dynset_t *, void *);
 extern void ctf_dynset_remove (ctf_dynset_t *, const void *);
+extern size_t ctf_dynset_elements (ctf_dynset_t *);
 extern void ctf_dynset_destroy (ctf_dynset_t *);
 extern void *ctf_dynset_lookup (ctf_dynset_t *, const void *);
 extern int ctf_dynset_exists (ctf_dynset_t *, const void *key,
