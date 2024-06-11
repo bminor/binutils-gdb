@@ -280,13 +280,13 @@ struct gdb_mpz
   gdb_mpz operator>> (unsigned long nbits) const
   {
     gdb_mpz result;
-    mpz_tdiv_q_2exp (result.m_val, m_val, nbits);
+    mpz_fdiv_q_2exp (result.m_val, m_val, nbits);
     return result;
   }
 
   gdb_mpz &operator>>= (unsigned long nbits)
   {
-    mpz_tdiv_q_2exp (m_val, m_val, nbits);
+    mpz_fdiv_q_2exp (m_val, m_val, nbits);
     return *this;
   }
 
