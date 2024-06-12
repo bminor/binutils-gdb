@@ -1683,6 +1683,21 @@ Specify the x86-64 ISA level needed in .note.gnu.property section.
 @option{x86-64-v4} generates @code{GNU_PROPERTY_X86_ISA_1_V4}.
 Supported for Linux/i386 and Linux/x86_64.
 
+@item isa-level-report=none
+@itemx isa-level-report=all
+@itemx isa-level-report=needed
+@itemx isa-level-report=used
+Specify how to report x86-64 ISA levels in input relocatable files.
+@option{isa-level-report=none}, which is the default, will make the
+linker not report x86-64 ISA levels in input files.
+@option{isa-level-report=all} will make the linker report needed and
+used x86-64 ISA levels in input files.
+@option{isa-level-report=needed} will make the linker report needed
+x86-64 ISA levels in input files.
+@option{isa-level-report=used} will make the linker report used
+x86-64 ISA levels in input files.
+Supported for Linux/i386 and Linux/x86_64.
+
 @end table
 
 Other keywords are ignored for Solaris compatibility.

@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add -z isa-level-report=[none|all|needed|used] to the x86 ELF linker
+  to report needed and used x86-64 ISA levels.
+
 * Add --rosegment option which changes the -z separate-code option so that
   only one read-only segment is created (instead of two).  (The option name
   is misleading, but it matches the name used by LLD and GOLD).

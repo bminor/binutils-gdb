@@ -531,6 +531,12 @@ run_dump_test "dt-relr-1b-x32"
 run_dump_test "pr30787"
 run_dump_test "pr31047"
 run_dump_test "pr31047-x32"
+run_dump_test "pr31868a"
+run_dump_test "pr31868a-x32"
+run_dump_test "pr31868b"
+run_dump_test "pr31868b-x32"
+run_dump_test "pr31868c"
+run_dump_test "pr31868c-x32"
 
 if { ![skip_sframe_tests] } {
     run_dump_test "sframe-simple-1"

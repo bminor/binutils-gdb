@@ -541,6 +541,9 @@ run_dump_test "tlsdesc2"
 run_dump_test "report-reloc-1"
 run_dump_test "pr27998a"
 run_dump_test "pr27998b"
+run_dump_test "pr31868a"
+run_dump_test "pr31868b"
+run_dump_test "pr31868c"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"
