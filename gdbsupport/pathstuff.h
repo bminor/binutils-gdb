@@ -80,8 +80,10 @@ extern const char *child_path (const char *parent, const char *child);
 
 /* Join elements in PATHS into a single path.
 
-   The first element can be absolute or relative.  All the others must be
-   relative.  */
+   The first element can be absolute or relative.  Only a single directory
+   separator will be placed between elements of PATHS, if one element ends
+   with a directory separator, or an element starts with a directory
+   separator, then these will be collapsed into a single separator.  */
 
 extern std::string path_join (gdb::array_view<const char *> paths);
 

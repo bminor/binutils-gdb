@@ -180,13 +180,15 @@ proc_with_prefix lookup_via_debuglink {} {
 	#
 	# Bug PR gdb/30866 seems to be the (or a) relevant bug for
 	# this problem.
-	if { $sysroot_prefix ne "" } {
+	if { $sysroot_prefix ne ""
+	     && [target_info gdb_protocol] ne "extended-remote" } {
 	    setup_kfail "*-*-*" 31804
 	}
 	gdb_assert { $::gdb_file_cmd_debug_info eq "debug" } \
 	    "ensure debug information was found"
 
-	if { $sysroot_prefix ne "" } {
+	if { $sysroot_prefix ne ""
+	     && [target_info gdb_protocol] ne "extended-remote"  } {
 	    setup_kfail "*-*-*" 31804
 	}
 	set re [string_to_regexp "Reading symbols from ${sysroot_prefix}$debug_symlink..."]
