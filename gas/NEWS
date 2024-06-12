@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for RISC-V Zimop extension with version 1.0.
+
 Changes in 2.43:
 
 * Add support for LoongArch .option for fine-grained control of assembly
