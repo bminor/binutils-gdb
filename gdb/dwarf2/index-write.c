@@ -678,7 +678,7 @@ public:
   {
     /* These entries are synthesized by the reader, and so should not
        be written.  */
-    if (entry->lang == language_ada && entry->tag == DW_TAG_namespace)
+    if (entry->lang == language_ada && entry->tag == DW_TAG_module)
       return;
 
     m_name_to_value_set[entry->name].emplace_back (entry);

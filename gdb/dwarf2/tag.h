@@ -135,7 +135,10 @@ tag_matches_domain (dwarf_tag tag, domain_search_flags search, language lang)
       break;
 
     case DW_TAG_module:
-      flags = SEARCH_MODULE_DOMAIN;
+      if (lang == language_ada)
+	flags = SEARCH_TYPE_DOMAIN;
+      else
+	flags = SEARCH_MODULE_DOMAIN;
       break;
     }
 
