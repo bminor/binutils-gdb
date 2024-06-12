@@ -957,6 +957,7 @@ ctf_arc_lookup_sym_or_name (ctf_archive_t *wrapper, unsigned long symidx,
 	{
 	  if (errp)
 	    *errp = ctf_errno (fp);
+	  ctf_dict_close (fp);
 	  ctf_next_destroy (i);
 	  return NULL;				/* errno is set for us.  */
 	}
