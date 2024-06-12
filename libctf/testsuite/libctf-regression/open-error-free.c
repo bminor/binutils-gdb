@@ -1,12 +1,17 @@
 /* Make sure that, on error, an opened dict is properly freed.  */
 
 #define _GNU_SOURCE 1
+#include "config.h"
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctf-api.h>
 #include <ctf.h>
+
+#ifdef HAVE_VALGRIND_VALGRIND_H
+#include <valgrind/valgrind.h>
+#endif
 
 static unsigned long long malloc_count;
 static unsigned long long free_count;
@@ -110,6 +115,14 @@ int main (void)
   char *foo;
   ctf_next_t *it = NULL;
   unsigned long long frozen_malloc_count, frozen_free_count;
+
+#ifdef HAVE_VALGRIND_VALGRIND_H
+  if (RUNNING_ON_VALGRIND)
+    {
+      printf ("UNSUPPORTED: valgrind interferes with malloc counting\n");
+      return 0;
+    }
+#endif
 
   if ((fp = ctf_create (&err)) == NULL)
     goto open_err;

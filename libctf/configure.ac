@@ -109,7 +109,7 @@ if test $ac_cv_libctf_bfd_elf = yes; then
 fi
 
 AC_C_BIGENDIAN
-AC_CHECK_HEADERS(byteswap.h endian.h)
+AC_CHECK_HEADERS(byteswap.h endian.h valgrind/valgrind.h)
 AC_CHECK_FUNCS(pread)
 
 dnl Check for bswap_{16,32,64}

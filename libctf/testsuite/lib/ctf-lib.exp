@@ -270,6 +270,11 @@ proc run_lookup_test { name } {
 	set results [run_host_cmd "$opts(wrapper) tmpdir/lookup" $lookup_output]
     }
 
+    if { [regexp {^UNSUPPORTED: (.*)$} $results -> reason] } {
+	unsupported "$testname: $reason"
+	return 0
+    }
+
     set f [open "tmpdir/lookup.out" "w"]
     puts $f $results
     close $f
