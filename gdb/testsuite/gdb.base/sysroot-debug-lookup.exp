@@ -171,26 +171,9 @@ proc_with_prefix lookup_via_debuglink {} {
 	# in the sysroot.
 	gdb_file_cmd ${sysroot_prefix}$exec_in_sysroot
 
-	# Giving a sysroot a 'target:' prefix doesn't seem to work as
-	# might be expected for debug-link based lookups.  For this
-	# style of lookup GDB only seems to care if the original file
-	# itself had a 'target:' prefix.  The 'target:' prefix on the
-	# sysroot just seems to cause GDB to bail on looking up via
-	# the 'target:' prefixed sysroot.
-	#
-	# Bug PR gdb/30866 seems to be the (or a) relevant bug for
-	# this problem.
-	if { $sysroot_prefix ne ""
-	     && [target_info gdb_protocol] ne "extended-remote" } {
-	    setup_kfail "*-*-*" 31804
-	}
 	gdb_assert { $::gdb_file_cmd_debug_info eq "debug" } \
 	    "ensure debug information was found"
 
-	if { $sysroot_prefix ne ""
-	     && [target_info gdb_protocol] ne "extended-remote"  } {
-	    setup_kfail "*-*-*" 31804
-	}
 	set re [string_to_regexp "Reading symbols from ${sysroot_prefix}$debug_symlink..."]
 	gdb_assert {[regexp $re $::gdb_file_cmd_msg]} \
 	    "debug symbols read from correct file"

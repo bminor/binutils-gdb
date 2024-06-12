@@ -1393,8 +1393,10 @@ find_separate_debug_file (const char *dir,
   const char *target_prefix_str = target_prefix ? TARGET_SYSROOT_PREFIX : "";
   std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
     = dirnames_to_char_ptr_vec (debug_file_directory.c_str ());
-  gdb::unique_xmalloc_ptr<char> canon_sysroot
-    = gdb_realpath (gdb_sysroot.c_str ());
+  const char *sysroot_str = gdb_sysroot.c_str ();
+  if (is_target_filename (sysroot_str) && target_filesystem_is_local ())
+    sysroot_str += strlen (TARGET_SYSROOT_PREFIX);
+  gdb::unique_xmalloc_ptr<char> canon_sysroot = gdb_realpath (sysroot_str);
 
  /* MS-Windows/MS-DOS don't allow colons in file names; we must
     convert the drive letter into a one-letter directory, so that the
@@ -1444,24 +1446,11 @@ find_separate_debug_file (const char *dir,
 	    return debugfile;
 
 	  /* If the file is in the sysroot, try using its base path in
-	     the sysroot's global debugfile directory.  GDB_SYSROOT
-	     might refer to a target: path; we strip the "target:"
-	     prefix -- but if that would yield the empty string, we
-	     don't bother at all, because that would just give the
-	     same result as above.  */
+	     the sysroot's global debugfile directory.  */
 	  if (gdb_sysroot != TARGET_SYSROOT_PREFIX)
 	    {
-	      std::string root;
-	      if (is_target_filename (gdb_sysroot))
-		{
-		  root = gdb_sysroot.substr (strlen (TARGET_SYSROOT_PREFIX));
-		  gdb_assert (!root.empty ());
-		}
-	      else
-		root = gdb_sysroot;
-
-	      debugfile = path_join (target_prefix_str, root.c_str (),
-				     debugdir.get (), base_path, debuglink);
+	      debugfile = path_join (gdb_sysroot.c_str (), debugdir.get (),
+				     base_path, debuglink);
 
 	      if (separate_debug_file_exists (debugfile, crc32, objfile,
 					      warnings))
