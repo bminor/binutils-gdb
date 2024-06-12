@@ -164,8 +164,7 @@ tui_py_window::~tui_py_window ()
   if (m_window != nullptr
       && PyObject_HasAttrString (m_window.get (), "close"))
     {
-      gdbpy_ref<> result (PyObject_CallMethod (m_window.get (), "close",
-					       nullptr));
+      gdbpy_ref<> result (gdbpy_call_method (m_window.get (), "close"));
       if (result == nullptr)
 	gdbpy_print_stack ();
     }
@@ -198,8 +197,7 @@ tui_py_window::rerender ()
 
   if (PyObject_HasAttrString (m_window.get (), "render"))
     {
-      gdbpy_ref<> result (PyObject_CallMethod (m_window.get (), "render",
-					       nullptr));
+      gdbpy_ref<> result (gdbpy_call_method (m_window.get (), "render"));
       if (result == nullptr)
 	gdbpy_print_stack ();
     }
@@ -212,8 +210,8 @@ tui_py_window::do_scroll_horizontal (int num_to_scroll)
 
   if (PyObject_HasAttrString (m_window.get (), "hscroll"))
     {
-      gdbpy_ref<> result (PyObject_CallMethod (m_window.get(), "hscroll",
-					       "i", num_to_scroll, nullptr));
+      gdbpy_ref<> result (gdbpy_call_method (m_window.get (), "hscroll",
+					     num_to_scroll));
       if (result == nullptr)
 	gdbpy_print_stack ();
     }
@@ -226,8 +224,8 @@ tui_py_window::do_scroll_vertical (int num_to_scroll)
 
   if (PyObject_HasAttrString (m_window.get (), "vscroll"))
     {
-      gdbpy_ref<> result (PyObject_CallMethod (m_window.get (), "vscroll",
-					       "i", num_to_scroll, nullptr));
+      gdbpy_ref<> result (gdbpy_call_method (m_window.get (), "vscroll",
+					     num_to_scroll));
       if (result == nullptr)
 	gdbpy_print_stack ();
     }
@@ -248,9 +246,8 @@ tui_py_window::click (int mouse_x, int mouse_y, int mouse_button)
 
   if (PyObject_HasAttrString (m_window.get (), "click"))
     {
-      gdbpy_ref<> result (PyObject_CallMethod (m_window.get (), "click",
-					       "iii", mouse_x, mouse_y,
-					       mouse_button));
+      gdbpy_ref<> result (gdbpy_call_method (m_window.get (), "click",
+					     mouse_x, mouse_y, mouse_button));
       if (result == nullptr)
 	gdbpy_print_stack ();
     }

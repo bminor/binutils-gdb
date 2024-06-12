@@ -59,7 +59,7 @@ extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
 	     struct symbol **sym, const struct block **sym_block,
 	     const struct language_defn **language)
 {
-  gdbpy_ref<> result (PyObject_CallMethod (obj, "symbol", NULL));
+  gdbpy_ref<> result (gdbpy_call_method (obj, "symbol"));
 
   if (result == NULL)
     return EXT_LANG_BT_ERROR;
@@ -130,7 +130,7 @@ extract_value (PyObject *obj, struct value **value)
 {
   if (PyObject_HasAttrString (obj, "value"))
     {
-      gdbpy_ref<> vresult (PyObject_CallMethod (obj, "value", NULL));
+      gdbpy_ref<> vresult (gdbpy_call_method (obj, "value"));
 
       if (vresult == NULL)
 	return EXT_LANG_BT_ERROR;
@@ -264,7 +264,7 @@ get_py_iter_from_func (PyObject *filter, const char *func)
 {
   if (PyObject_HasAttrString (filter, func))
     {
-      gdbpy_ref<> result (PyObject_CallMethod (filter, func, NULL));
+      gdbpy_ref<> result (gdbpy_call_method (filter, func));
 
       if (result != NULL)
 	{
@@ -790,8 +790,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
   /* Get the underlying frame.  This is needed to determine GDB
   architecture, and also, in the cases of frame variables/arguments to
   read them if they returned filter object requires us to do so.  */
-  gdbpy_ref<> py_inf_frame (PyObject_CallMethod (filter, "inferior_frame",
-						 NULL));
+  gdbpy_ref<> py_inf_frame (gdbpy_call_method (filter, "inferior_frame"));
   if (py_inf_frame == NULL)
     return EXT_LANG_BT_ERROR;
 
@@ -831,7 +830,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	 address printing.  */
       if (PyObject_HasAttrString (filter, "address"))
 	{
-	  gdbpy_ref<> paddr (PyObject_CallMethod (filter, "address", NULL));
+	  gdbpy_ref<> paddr (gdbpy_call_method (filter, "address"));
 
 	  if (paddr == NULL)
 	    return EXT_LANG_BT_ERROR;
@@ -906,7 +905,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
       /* Print frame function name.  */
       if (PyObject_HasAttrString (filter, "function"))
 	{
-	  gdbpy_ref<> py_func (PyObject_CallMethod (filter, "function", NULL));
+	  gdbpy_ref<> py_func (gdbpy_call_method (filter, "function"));
 	  const char *function = NULL;
 
 	  if (py_func == NULL)
@@ -970,7 +969,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
       if (PyObject_HasAttrString (filter, "filename"))
 	{
-	  gdbpy_ref<> py_fn (PyObject_CallMethod (filter, "filename", NULL));
+	  gdbpy_ref<> py_fn (gdbpy_call_method (filter, "filename"));
 
 	  if (py_fn == NULL)
 	    return EXT_LANG_BT_ERROR;
@@ -994,7 +993,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
       if (PyObject_HasAttrString (filter, "line"))
 	{
-	  gdbpy_ref<> py_line (PyObject_CallMethod (filter, "line", NULL));
+	  gdbpy_ref<> py_line (gdbpy_call_method (filter, "line"));
 	  int line;
 
 	  if (py_line == NULL)
