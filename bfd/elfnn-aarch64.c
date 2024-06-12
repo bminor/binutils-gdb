@@ -9451,6 +9451,11 @@ sort_relr (struct bfd_link_info *info,
   return true;
 }
 
+/* Size of a relr entry and a relocated location.  */
+#define RELR_SZ (ARCH_SIZE / 8)
+/* Number of consecutive locations a relr bitmap entry references.  */
+#define RELR_N (ARCH_SIZE - 1)
+
 /* Size .relr.dyn whenever the layout changes, the number of packed
    relocs are unchanged but the packed representation can.  */
 
@@ -9473,19 +9478,19 @@ elfNN_aarch64_size_relative_relocs (struct bfd_link_info *info,
     {
       bfd_vma base = addr[i];
       i++;
-      srelrdyn->size += 8;
-      base += 8;
+      srelrdyn->size += RELR_SZ;
+      base += RELR_SZ;
       for (;;)
 	{
 	  bfd_size_type start_i = i;
 	  while (i < htab->relr_count
-		 && addr[i] - base < 63 * 8
-		 && (addr[i] - base) % 8 == 0)
+		 && addr[i] - base < RELR_N * RELR_SZ
+		 && (addr[i] - base) % RELR_SZ == 0)
 	    i++;
 	  if (i == start_i)
 	    break;
-	  srelrdyn->size += 8;
-	  base += 63 * 8;
+	  srelrdyn->size += RELR_SZ;
+	  base += RELR_N * RELR_SZ;
 	}
     }
   if (srelrdyn->size != oldsize)
@@ -9522,25 +9527,25 @@ elfNN_aarch64_finish_relative_relocs (struct bfd_link_info *info)
     {
       bfd_vma base = addr[i];
       i++;
-      bfd_put_64 (dynobj, base, loc);
-      loc += 8;
-      base += 8;
+      bfd_put_NN (dynobj, base, loc);
+      loc += RELR_SZ;
+      base += RELR_SZ;
       for (;;)
 	{
 	  bfd_vma bits = 0;
 	  while (i < htab->relr_count)
 	    {
 	      bfd_vma delta = addr[i] - base;
-	      if (delta >= 63 * 8 || delta % 8 != 0)
+	      if (delta >= RELR_N * RELR_SZ || delta % RELR_SZ != 0)
 		break;
-	      bits |= (bfd_vma) 1 << (delta / 8);
+	      bits |= (bfd_vma) 1 << (delta / RELR_SZ);
 	      i++;
 	    }
 	  if (bits == 0)
 	    break;
-	  bfd_put_64 (dynobj, (bits << 1) | 1, loc);
-	  loc += 8;
-	  base += 63 * 8;
+	  bfd_put_NN (dynobj, (bits << 1) | 1, loc);
+	  loc += RELR_SZ;
+	  base += RELR_N * RELR_SZ;
 	}
     }
   free (addr);
@@ -9548,8 +9553,8 @@ elfNN_aarch64_finish_relative_relocs (struct bfd_link_info *info)
   /* Pad any excess with 1's, a do-nothing encoding.  */
   while (loc < srelrdyn->contents + srelrdyn->size)
     {
-      bfd_put_64 (dynobj, 1, loc);
-      loc += 8;
+      bfd_put_NN (dynobj, 1, loc);
+      loc += RELR_SZ;
     }
   return true;
 }
