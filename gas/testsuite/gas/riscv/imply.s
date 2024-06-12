@@ -47,6 +47,7 @@ imply zcb
 imply zcd
 imply zcf
 imply zcmp
+imply zcmop
 
 imply shcounterenw
 imply shgatpa

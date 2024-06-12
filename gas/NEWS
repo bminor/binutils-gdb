@@ -1,6 +1,6 @@
 -*- text -*-
 
-* Add support for RISC-V Zimop extension with version 1.0.
+* Add support for RISC-V Zimop, Zcmop extensions with version 1.0.
 
 Changes in 2.43:
 

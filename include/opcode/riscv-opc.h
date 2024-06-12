@@ -2275,6 +2275,23 @@
 #define MASK_C_NOT 0xfc7f
 #define MATCH_C_MUL 0x9c41
 #define MASK_C_MUL 0xfc63
+/* Zcmop instructions.  */
+#define MATCH_C_MOP_1 0x6081
+#define MASK_C_MOP_1 0xffff
+#define MATCH_C_MOP_3 0x6181
+#define MASK_C_MOP_3 0xffff
+#define MATCH_C_MOP_5 0x6281
+#define MASK_C_MOP_5 0xffff
+#define MATCH_C_MOP_7 0x6381
+#define MASK_C_MOP_7 0xffff
+#define MATCH_C_MOP_9 0x6481
+#define MASK_C_MOP_9 0xffff
+#define MATCH_C_MOP_11 0x6581
+#define MASK_C_MOP_11 0xffff
+#define MATCH_C_MOP_13 0x6681
+#define MASK_C_MOP_13 0xffff
+#define MATCH_C_MOP_15 0x6781
+#define MASK_C_MOP_15 0xffff
 /* Zcmp instructions.  */
 #define MATCH_CM_PUSH 0xb802
 #define MASK_CM_PUSH 0xff03
@@ -4213,6 +4230,15 @@ DECLARE_INSN(c_lhu, MATCH_C_LHU, MASK_C_LHU)
 DECLARE_INSN(c_lh, MATCH_C_LH, MASK_C_LH)
 DECLARE_INSN(c_sb, MATCH_C_SB, MASK_C_SB)
 DECLARE_INSN(c_sh, MATCH_C_SH, MASK_C_SH)
+/* Zcmop instructions.  */
+DECLARE_INSN(c_mop_1, MATCH_C_MOP_1, MASK_C_MOP_1)
+DECLARE_INSN(c_mop_3, MATCH_C_MOP_3, MASK_C_MOP_3)
+DECLARE_INSN(c_mop_5, MATCH_C_MOP_5, MASK_C_MOP_5)
+DECLARE_INSN(c_mop_7, MATCH_C_MOP_7, MASK_C_MOP_7)
+DECLARE_INSN(c_mop_9, MATCH_C_MOP_9, MASK_C_MOP_9)
+DECLARE_INSN(c_mop_11, MATCH_C_MOP_11, MASK_C_MOP_11)
+DECLARE_INSN(c_mop_13, MATCH_C_MOP_13, MASK_C_MOP_13)
+DECLARE_INSN(c_mop_15, MATCH_C_MOP_15, MASK_C_MOP_15)
 /* Zcmp instructions.  */
 DECLARE_INSN(cm_push, MATCH_CM_PUSH, MASK_CM_PUSH)
 DECLARE_INSN(cm_pop, MATCH_CM_POP, MASK_CM_POP)

@@ -44,6 +44,7 @@ SYMBOL TABLE:
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_d2p2_zicsr2p0_zca1p0_zcd1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_f2p2_zicsr2p0_zca1p0_zcf1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_zca1p0_zcmp1p0
+[0-9a-f]+ l       .text	0+000 \$xrv32i2p1_zca1p0_zcmop1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_h1p0_zicsr2p0_shcounterenw1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_h1p0_zicsr2p0_shgatpa1p0
 [0-9a-f]+ l       .text	0+000 \$xrv32i2p1_h1p0_zicsr2p0_shtvala1p0

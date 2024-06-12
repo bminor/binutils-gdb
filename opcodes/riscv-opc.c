@@ -2171,6 +2171,16 @@ const struct riscv_opcode riscv_opcodes[] =
 {"c.zext.b",   0, INSN_CLASS_ZCB, "Cs",  MATCH_C_ZEXT_B, MASK_C_ZEXT_B, match_opcode, 0 },
 {"c.sext.w",  64, INSN_CLASS_ZCB, "d",  MATCH_C_ADDIW, MASK_C_ADDIW|MASK_RVC_IMM, match_rd_nonzero, INSN_ALIAS },
 
+/* Zcmop instructions.  */
+{"c.mop.1",     0,  INSN_CLASS_ZCMOP, "",  MATCH_C_MOP_1,  MASK_C_MOP_1, match_opcode, 0 },
+{"c.mop.3",     0,  INSN_CLASS_ZCMOP, "",  MATCH_C_MOP_3,  MASK_C_MOP_3, match_opcode, 0 },
+{"c.mop.5",     0,  INSN_CLASS_ZCMOP, "",  MATCH_C_MOP_5,  MASK_C_MOP_5, match_opcode, 0 },
+{"c.mop.7",     0,  INSN_CLASS_ZCMOP, "",  MATCH_C_MOP_7,  MASK_C_MOP_7, match_opcode, 0 },
+{"c.mop.9",     0,  INSN_CLASS_ZCMOP, "",  MATCH_C_MOP_9,  MASK_C_MOP_9, match_opcode, 0 },
+{"c.mop.11",    0,  INSN_CLASS_ZCMOP, "",  MATCH_C_MOP_11, MASK_C_MOP_11, match_opcode, 0 },
+{"c.mop.13",    0,  INSN_CLASS_ZCMOP, "",  MATCH_C_MOP_13, MASK_C_MOP_13, match_opcode, 0 },
+{"c.mop.15",    0,  INSN_CLASS_ZCMOP, "",  MATCH_C_MOP_15, MASK_C_MOP_15, match_opcode, 0 },
+
 /* Zcmp instructions.  */
 {"cm.push",    0,  INSN_CLASS_ZCMP, "{Wcr},Wcp",  MATCH_CM_PUSH, MASK_CM_PUSH, match_opcode, 0 },
 {"cm.pop",     0,  INSN_CLASS_ZCMP, "{Wcr},Wcp",  MATCH_CM_POP, MASK_CM_POP, match_opcode, 0 },
