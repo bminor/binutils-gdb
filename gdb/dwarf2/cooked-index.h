@@ -338,12 +338,14 @@ private:
 			      cooked_index_entry_ref parent_entry,
 			      dwarf2_per_cu *per_cu);
 
-  /* GNAT only emits mangled ("encoded") names in the DWARF, and does
-     not emit the module structure.  However, we need this structure
-     to do lookups.  This function recreates that structure for an
-     existing entry, modifying ENTRY as appropriate.  */
+  /* When GNAT emits mangled ("encoded") names in the DWARF, and does
+     not emit the module structure, we still need this structuring to
+     do lookups.  This function recreates that information for an
+     existing entry, modifying ENTRY as appropriate.  Any new entries
+     are added to NEW_ENTRIES.  */
   void handle_gnat_encoded_entry
-       (cooked_index_entry *entry, htab_t gnat_entries);
+       (cooked_index_entry *entry, htab_t gnat_entries,
+	std::vector<cooked_index_entry *> &new_entries);
 
   /* Finalize the index.  This should be called a single time, when
      the index has been fully populated.  It enters all the entries

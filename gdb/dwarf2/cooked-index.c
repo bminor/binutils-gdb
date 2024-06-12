@@ -327,8 +327,10 @@ cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
 /* See cooked-index.h.  */
 
 void
-cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
-					       htab_t gnat_entries)
+cooked_index_shard::handle_gnat_encoded_entry
+     (cooked_index_entry *entry,
+      htab_t gnat_entries,
+      std::vector<cooked_index_entry *> &new_entries)
 {
   /* We decode Ada names in a particular way: operators and wide
      characters are left as-is.  This is done to make name matching a
@@ -363,6 +365,7 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
 			 entry->per_cu);
 	  last->canonical = last->name;
 	  m_names.push_back (std::move (new_name));
+	  new_entries.push_back (last);
 	  *slot = last;
 	}
 
@@ -416,6 +419,7 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
 
   htab_up gnat_entries (htab_create_alloc (10, hash_entry, eq_entry,
 					   nullptr, xcalloc, xfree));
+  std::vector<cooked_index_entry *> new_gnat_entries;
 
   for (cooked_index_entry *entry : m_entries)
     {
@@ -432,7 +436,8 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
       if ((entry->flags & IS_LINKAGE) != 0)
 	entry->canonical = entry->name;
       else if (entry->lang == language_ada)
-	handle_gnat_encoded_entry (entry, gnat_entries.get ());
+	handle_gnat_encoded_entry (entry, gnat_entries.get (),
+				   new_gnat_entries);
       else if (entry->lang == language_cplus || entry->lang == language_c)
 	{
 	  void **slot = htab_find_slot (seen_names.get (), entry,
@@ -462,6 +467,12 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
       else
 	entry->canonical = entry->name;
     }
+
+  /* Make sure any new Ada entries end up in the results.  This isn't
+     done when creating these new entries to avoid invalidating the
+     m_entries iterator used in the foreach above.  */
+  m_entries.insert (m_entries.end (), new_gnat_entries.begin (),
+		    new_gnat_entries.end ());
 
   m_names.shrink_to_fit ();
   m_entries.shrink_to_fit ();
