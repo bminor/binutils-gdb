@@ -40,7 +40,7 @@ save_vars { env(ASAN_OPTIONS) } {
     # ASan runtime does not come first in initial library list; you should
     # either link runtime to your application or manually preload it with
     # LD_PRELOAD.
-    set_sanitizer_default ASAN_OPTIONS verify_asan_link_order 0
+    append_environment_default ASAN_OPTIONS verify_asan_link_order 0
 
     clean_restart $binfile
 }
