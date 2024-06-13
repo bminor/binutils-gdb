@@ -5335,7 +5335,9 @@ _bfd_elf_map_sections_to_segments (bfd *abfd,
 		 thus not executable, and the first section is
 		 executable then put the file and program headers in
 		 their own PT_LOAD.  */
-	      separate_phdr = true;
+	      if (!info->one_rosegment)
+		separate_phdr = true;
+
 	      if ((((phdr_lma + phdr_size - 1) & addr_mask & -maxpagesize)
 		   == (sections[0]->lma & addr_mask & -maxpagesize)))
 		{

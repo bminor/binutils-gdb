@@ -1121,6 +1121,21 @@ For compatibility with other ELF linkers, if the @option{-R} option is
 followed by a directory name, rather than a file name, it is treated as
 the @option{-rpath} option.
 
+@item --rosegment
+@itemx --no-rosegment
+Attempt to ensure that only a single read-only, non-code segment is
+created.  Only useful when used in conjunction with the @option{-z
+separate-code} option.  The resulting binaries should be smaller than
+if @option{-z separate-code} is used on its own.  Without this option,
+or if @option{--no-rosegment} is specified, the @option{-z separate-code}
+option will create two read-only segments, one before the code segment
+and one after it.
+
+The name of the options are misleading, but they have been chosen in
+order for the linker to be compatible with the LLD and GOLD linkers.
+
+Thse options are only supported by ELF targets.
+
 @kindex -s
 @kindex --strip-all
 @cindex strip all symbols

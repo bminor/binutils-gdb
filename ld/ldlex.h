@@ -287,6 +287,8 @@ enum option_values
   OPTION_PACKAGE_METADATA,
   OPTION_AUDIT,
   OPTION_COMPRESS_DEBUG,
+  OPTION_ROSEGMENT,
+  OPTION_NO_ROSEGMENT,
   /* Used by emultempl/hppaelf.em.  */
   OPTION_MULTI_SUBSPACE,
   /* Used by emultempl/ia64elf.em.  */

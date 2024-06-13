@@ -212,6 +212,16 @@ AC_ARG_ENABLE(separate-code,
   no) ac_default_ld_z_separate_code=0 ;;
 esac])
 
+# Decide if --rosegment should be enabled in the ELF linker by default.
+ac_default_ld_rosegment=unset
+AC_ARG_ENABLE(rosegment,
+	      AS_HELP_STRING([--enable-rosegment],
+	      [enable --rosegment in the ELF linker by default]),
+[case "${enableval}" in
+  yes) ac_default_ld_rosegment=1 ;;
+  no)  ac_default_ld_rosegment=0 ;;
+esac])
+
 # Decide if -z mark-plt should be enabled in ELF x86-64 linker by default.
 ac_default_ld_z_mark_plt=unset
 AC_ARG_ENABLE(mark-plt,
@@ -570,6 +580,13 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_SEPARATE_CODE,
   $ac_default_ld_z_separate_code,
   [Define to 1 if you want to enable -z separate-code in ELF linker by default.])
+
+if test "${ac_default_ld_rosegment}" = unset; then
+  ac_default_ld_rosegment=0
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_ROSEGMENT,
+  $ac_default_ld_rosegment,
+  [Define to 1 if you want to enable --rosegment in the ELF linker by default.])
 
 if test "${ac_default_ld_z_mark_plt}" = unset; then
   ac_default_ld_z_mark_plt=0

@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add --rosegment option which changes the -z separate-code option so that
+  only one read-only segment is created (instead of two).  (The option name
+  is misleading, but it matches the name used by LLD and GOLD).
+
 * Add --section-ordering-file <FILE> option to add extra mapping of input
   sections to output sections.
 

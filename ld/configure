@@ -852,6 +852,7 @@ enable_new_dtags
 enable_relro
 enable_textrel_check
 enable_separate_code
+enable_rosegment
 enable_mark_plt
 enable_warn_execstack
 enable_error_execstack
@@ -1547,6 +1548,7 @@ Optional Features:
   --enable-textrel-check=[yes|no|warning|error]
                           enable DT_TEXTREL check in ELF linker
   --enable-separate-code  enable -z separate-code in ELF linker by default
+  --enable-rosegment      enable --rosegment in the ELF linker by default
   --enable-mark-plt       enable -z mark-plt in ELF x86-64 linker by default
   --enable-warn-execstack enable warnings when creating an executable stack
   --enable-error-execstack
@@ -15682,6 +15684,17 @@ esac
 fi
 
 
+# Decide if --rosegment should be enabled in the ELF linker by default.
+ac_default_ld_rosegment=unset
+# Check whether --enable-rosegment was given.
+if test "${enable_rosegment+set}" = set; then :
+  enableval=$enable_rosegment; case "${enableval}" in
+  yes) ac_default_ld_rosegment=1 ;;
+  no)  ac_default_ld_rosegment=0 ;;
+esac
+fi
+
+
 # Decide if -z mark-plt should be enabled in ELF x86-64 linker by default.
 ac_default_ld_z_mark_plt=unset
 # Check whether --enable-mark-plt was given.
@@ -19378,6 +19391,15 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_LD_Z_SEPARATE_CODE $ac_default_ld_z_separate_code
+_ACEOF
+
+
+if test "${ac_default_ld_rosegment}" = unset; then
+  ac_default_ld_rosegment=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_ROSEGMENT $ac_default_ld_rosegment
 _ACEOF
 
 
