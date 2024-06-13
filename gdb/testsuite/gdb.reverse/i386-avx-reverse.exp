@@ -237,3 +237,32 @@ if {[record_full_function "vpunpck"] == true} {
 gdb_test "record stop" "Process record is stopped.*" \
     "delete history for vpunpck_test"
 gdb_test "finish" "Run till exit from.*vpunpck_test.*" "leaving vpunpck_test"
+
+# Start vpbroadcast tests
+gdb_test_no_output "set \$ymm0.v2_int128 = {0x0, 0x0}" "set xmm0 for vpbroadcast"
+gdb_test_no_output "set \$xmm1.v2_int64 = {0x1716151413121110, 0x1f1e1d1c1b1a1918}" \
+    "set xmm1 for vpbroadcast"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0x0, 0x0}" "set xmm15 for vpbroadcast"
+if {[record_full_function "vpbroadcast"] == true} {
+    test_one_register "vpbroadcastq" "ymm15" "0x13121110131211101312111013121110, 0x0"
+    test_one_register "vpbroadcastq" "ymm0"  "0x13121110131211101312111013121110, 0x0"
+
+    test_one_register "vpbroadcastd" "ymm15" \
+	"0x11101110111011101110111011101110, 0x11101110111011101110111011101110"
+    test_one_register "vpbroadcastd" "ymm0"  \
+	"0x11101110111011101110111011101110, 0x11101110111011101110111011101110"
+
+    test_one_register "vpbroadcastw" "ymm15" "0x10101010101010101010101010101010, 0x0"
+    test_one_register "vpbroadcastw" "ymm0"  "0x10101010101010101010101010101010, 0x0"
+
+    test_one_register "vpbroadcastb" "ymm15" "0x0, 0x0"
+    test_one_register "vpbroadcastb" "ymm0"  "0x0, 0x0"
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for vpbroadcast_test"
+} else {
+    untested "couldn't run vpbroadcast tests"
+}
+
+gdb_test "finish" "Run till exit from.*vpbroadcast_test.*" \
+    "leaving vpbroadcast"

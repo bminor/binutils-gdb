@@ -130,6 +130,34 @@ vpunpck_test  ()
   return 0; /* end vpunpck_test */
 }
 
+/* Test if we can record vpbroadcast instructions.  */
+int
+vpbroadcast_test ()
+{
+  /* Using GDB, load this value onto the register, for ease of testing.
+     xmm0.uint128  = 0x0
+     xmm1.uint128  = 0x1f1e1d1c1b1a19181716151413121110
+     xmm15.uint128 = 0x0
+     this way it's easy to confirm we're undoing things correctly.  */
+  /* start vpbroadcast_test.  */
+
+  asm volatile ("vpbroadcastb %xmm1, %xmm0");
+  asm volatile ("vpbroadcastb %xmm1, %xmm15");
+
+  asm volatile ("vpbroadcastw %xmm1, %ymm0");
+  asm volatile ("vpbroadcastw %xmm1, %ymm15");
+
+  asm volatile ("vpbroadcastd %xmm1, %xmm0");
+  asm volatile ("vpbroadcastd %xmm1, %xmm15");
+
+  asm volatile ("vpbroadcastq %xmm1, %ymm0");
+  asm volatile ("vpbroadcastq %xmm1, %ymm15");
+
+  /* We have a return statement to deal with
+     epilogue in different compilers.  */
+  return 0; /* end vpbroadcast_test */
+}
+
 int
 main ()
 {
@@ -148,5 +176,6 @@ main ()
 
   vmov_test ();
   vpunpck_test ();
+  vpbroadcast_test ();
   return 0;	/* end of main */
 }
