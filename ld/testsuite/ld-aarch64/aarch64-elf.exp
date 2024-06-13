@@ -478,6 +478,10 @@ if { [supports_dt_relr] } {
   run_dump_test_lp64 "relr-text-shared"
   run_dump_test_lp64 "relr-discard-pie"
   run_dump_test_lp64 "relr-discard-shared"
+
+  run_dump_test "relr-align-ilp32"
+  run_dump_test "relr-got-pie-ilp32"
+  run_dump_test "relr-got-shared-ilp32"
 }
 
 if { ![skip_sframe_tests] } {

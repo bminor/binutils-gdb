@@ -473,7 +473,7 @@ proc supports_dt_relr {} {
     if { ([istarget x86_64-*-*]
 	  || [istarget i?86-*-*]
 	  || [istarget powerpc64*-*-*]
-	  || ([istarget aarch64*-*-*] && ![istarget *-*-*ilp32]))
+	  || [istarget aarch64*-*-*])
 	 && ([istarget *-*-linux*]
 	     || [istarget *-*-gnu*]) } {
 	return 1
