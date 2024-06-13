@@ -1142,7 +1142,7 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    they were introduced in.  INSN_ISA_MASK masks an enumeration that
    specifies the base ISA level(s).  The remainder of a 32-bit
    word constructed using these macros is a bitmask of the remaining
-   INSN_* values below.  */
+   INSN_* values below, as indicated by INSN_CHIP_MASK.  */
 
 #define INSN_ISA_MASK		  0x0000001ful
 
@@ -1225,48 +1225,45 @@ static const unsigned int mips_isa_table[] = {
 #undef ISAF
 
 /* Masks used for Chip specific instructions.  */
-#define INSN_CHIP_MASK		  0xcfff4f60
-
-/* Cavium Networks Octeon instructions.  */
-#define INSN_OCTEON		  0x00000800
-#define INSN_OCTEONP		  0x00000200
-#define INSN_OCTEON2		  0x00000100
-#define INSN_OCTEON3		  0x00000040
-
-/* MIPS R5900 instruction */
-#define INSN_5900                 0x00004000
+#define INSN_CHIP_MASK		0x01ffffe0
 
 /* MIPS R4650 instruction.  */
-#define INSN_4650                 0x00010000
+#define INSN_4650		0x00000020
 /* LSI R4010 instruction.  */
-#define INSN_4010                 0x00020000
+#define INSN_4010		0x00000040
 /* NEC VR4100 instruction.  */
-#define INSN_4100                 0x00040000
+#define INSN_4100		0x00000080
 /* Toshiba R3900 instruction.  */
-#define INSN_3900                 0x00080000
+#define INSN_3900		0x00000100
 /* MIPS R10000 instruction.  */
-#define INSN_10000                0x00100000
+#define INSN_10000		0x00000200
 /* Broadcom SB-1 instruction.  */
-#define INSN_SB1                  0x00200000
+#define INSN_SB1		0x00000400
 /* NEC VR4111/VR4181 instruction.  */
-#define INSN_4111                 0x00400000
+#define INSN_4111		0x00000800
 /* NEC VR4120 instruction.  */
-#define INSN_4120                 0x00800000
+#define INSN_4120		0x00001000
 /* NEC VR5400 instruction.  */
-#define INSN_5400		  0x01000000
+#define INSN_5400		0x00002000
 /* NEC VR5500 instruction.  */
-#define INSN_5500		  0x02000000
-
+#define INSN_5500		0x00004000
+/* MIPS R5900 instruction.  */
+#define INSN_5900		0x00008000
 /* ST Microelectronics Loongson 2E.  */
-#define INSN_LOONGSON_2E          0x40000000
+#define INSN_LOONGSON_2E	0x00010000
 /* ST Microelectronics Loongson 2F.  */
-#define INSN_LOONGSON_2F          0x80000000
-/* RMI Xlr instruction */
-#define INSN_XLR                 0x00000020
+#define INSN_LOONGSON_2F	0x00020000
+/* Cavium Networks Octeon instructions.  */
+#define INSN_OCTEON		0x00040000
+#define INSN_OCTEONP		0x00080000
+#define INSN_OCTEON2		0x00100000
+#define INSN_OCTEON3		0x00200000
+/* RMI XLR instruction.  */
+#define INSN_XLR		0x00400000
 /* Imagination interAptiv MR2.  */
-#define INSN_INTERAPTIV_MR2	  0x04000000
+#define INSN_INTERAPTIV_MR2	0x00800000
 /* Sony PSP Allegrex instruction.  */
-#define INSN_ALLEGREX		  0x08000000
+#define INSN_ALLEGREX		0x01000000
 
 /* DSP ASE */
 #define ASE_DSP			0x00000001
