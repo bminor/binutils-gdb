@@ -2,7 +2,7 @@
 #source: sframe-foo.s
 #source: sframe-bar.s
 #objdump: --sframe=.sframe
-#ld: -shared
+#ld: -shared --no-rosegment
 #name: SFrame for plt0 and pltN
 
 .*: +file format .*
