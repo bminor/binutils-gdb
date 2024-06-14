@@ -282,20 +282,40 @@ clear_warnmsg (struct per_xvec_message **list)
 /* Free all the storage in LIST.  Note that the first element of LIST
    is special and is assumed to be stack-allocated.  TARG is used for
    re-issuing warning messages.  If TARG is PER_XVEC_NO_TARGET, then
-   it acts like a sort of wildcard -- messages are only reissued if
-   they are all associated with a single BFD target, regardless of
-   which one it is.  If TARG is anything else, then only messages
-   associated with TARG are emitted.  */
+   it acts like a sort of wildcard -- messages are reissued if all
+   targets with messages have identical messages.  One copy of the
+   messages are then reissued.  If TARG is anything else, then only
+   messages associated with TARG are emitted.  */
 
 static void
 print_and_clear_messages (struct per_xvec_messages *list,
 			  const bfd_target *targ)
 {
-  struct per_xvec_messages *iter = list;
+  struct per_xvec_messages *iter;
 
-  if (targ == PER_XVEC_NO_TARGET && list->next == NULL)
-    print_warnmsg (&list->messages);
+  if (targ == PER_XVEC_NO_TARGET)
+    {
+      iter = list->next;
+      while (iter != NULL)
+	{
+	  struct per_xvec_message *msg1 = list->messages;
+	  struct per_xvec_message *msg2 = iter->messages;
+	  do
+	    {
+	      if (strcmp (msg1->message, msg2->message))
+		break;
+	      msg1 = msg1->next;
+	      msg2 = msg2->next;
+	    } while (msg1 && msg2);
+	  if (msg1 || msg2)
+	    break;
+	  iter = iter->next;
+	}
+      if (iter == NULL)
+	targ = list->targ;
+    }
 
+  iter = list;
   while (iter != NULL)
     {
       struct per_xvec_messages *next = iter->next;
