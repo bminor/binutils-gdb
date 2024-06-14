@@ -1884,6 +1884,8 @@ bfin_gen_loop (Expr_Node *exp, REG_T reg, int rop, REG_T preg)
   if (!S_IS_LOCAL (sym) || (S_IS_LOCAL (sym) && !symbol_used_p (sym)))
     symbol_remove (sym, &symbol_rootP, &symbol_lastP);
 
+  free(lbeginsym);
+  free(lendsym);
   return bfin_gen_loopsetup (lbegin, reg, rop, lend, preg);
 }
 
@@ -1919,6 +1921,8 @@ bfin_loop_beginend (Expr_Node *exp, int begin)
      Adjust label address.  */
   if (!begin)
     *symbol_X_add_number (linelabel) -= last_insn_size;
+
+  free(label_name);
 }
 
 bool

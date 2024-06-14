@@ -92,15 +92,15 @@ msgstr "移位操作数"
 
 #: aarch64-opc.c:1363
 msgid "multiplier"
-msgstr ""
+msgstr "乘数"
 
 #: aarch64-opc.c:1436
 msgid "reg pair must start from even reg"
-msgstr ""
+msgstr "成对寄存器必须从偶数寄存器开始"
 
 #: aarch64-opc.c:1442
 msgid "reg pair must be contiguous"
-msgstr ""
+msgstr "成对寄存器必须是连续的"
 
 #: aarch64-opc.c:1456
 msgid "extraneous register"
@@ -231,7 +231,7 @@ msgstr "预期的浮点常量立即数"
 
 #: aarch64-opc.c:2325
 msgid "no shift amount allowed for 8-bit constants"
-msgstr ""
+msgstr "8位常量不允许有移位量"
 
 #: aarch64-opc.c:2335
 msgid "shift amount must be 0 or 8"
@@ -239,7 +239,7 @@ msgstr "移位量必须为 0 或 8"
 
 #: aarch64-opc.c:2348
 msgid "immediate too big for element size"
-msgstr ""
+msgstr "立即数对于元素大小来说太大"
 
 #: aarch64-opc.c:2355
 msgid "invalid arithmetic immediate"
@@ -304,6 +304,10 @@ msgid ""
 "Use -M<class[,class]> to select the correct opcode class(es).\n"
 "\t\t\t\t"
 msgstr ""
+"\n"
+"警告：由于猜测的操作码类别选择有误，反汇编可能不正确。\n"
+"使用 -M<class[,class]> 选择正确的操作码类别。\n"
+"\t\t\t\t"
 
 #: arc-dis.c:823
 #, c-format
@@ -372,19 +376,19 @@ msgstr "  fpud            识别双精度 FPU 指令。\n"
 #: arc-dis.c:1411
 #, c-format
 msgid "  hex             Use only hexadecimal number to print immediates.\n"
-msgstr ""
+msgstr "  hex             仅使用十六进制数打印立即数。\n"
 
 #: arc-opc.c:41 arc-opc.c:64 arc-opc.c:90
 msgid "LP_COUNT register cannot be used as destination register"
-msgstr ""
+msgstr "LP_COUNT 寄存器不能用作目标寄存器"
 
 #: arc-opc.c:88
 msgid "cannot use odd number destination register"
-msgstr ""
+msgstr "不能使用奇数数量的寄存器"
 
 #: arc-opc.c:101
 msgid "cannot use odd number source register"
-msgstr ""
+msgstr "不能使用奇数数量的源寄存器"
 
 #: arc-opc.c:114
 msgid "operand is not zero"
@@ -458,7 +462,7 @@ msgstr "%q+D的寄存器名无效"
 
 #: arc-opc.c:537
 msgid "last register of the range doesn't fit"
-msgstr ""
+msgstr "范围内的最后一个寄存器不合适"
 
 #: arc-opc.c:557 arc-opc.c:572
 msgid "invalid register number, should be fp"
@@ -561,11 +565,11 @@ msgstr "选择 ARM 的 ISA 文档中使用的寄存器名称"
 
 #: arm-dis.c:3235
 msgid "Assume all insns are Thumb insns"
-msgstr ""
+msgstr "假设所有指令都是Thumb指令"
 
 #: arm-dis.c:3236
 msgid "Examine preceding label to determine an insn's type"
-msgstr ""
+msgstr "检查前面的标签以确定指令的类型"
 
 #: arm-dis.c:3237
 #, fuzzy
@@ -1048,7 +1052,7 @@ msgstr ""
 #: i386-gen.c:1574
 #, c-format
 msgid "%d unused bits in i386_cpu_flags.\n"
-msgstr ""
+msgstr "i386_cpu_flags 中有 %d 个未使用的位。"
 
 #: i386-gen.c:1581
 #, fuzzy, c-format
@@ -1150,12 +1154,12 @@ msgstr "%s 已不可访问"
 #: ia64-gen.c:2464
 #, c-format
 msgid "IC note %d in opcode %s (IC:%s) conflicts with resource %s note %d\n"
-msgstr ""
+msgstr "操作码 %s 中的 IC 注释 %d（IC：%s）与资源 %s 的注释 %d 冲突\n"
 
 #: ia64-gen.c:2492
 #, c-format
 msgid "IC note %d for opcode %s (IC:%s) conflicts with resource %s note %d\n"
-msgstr ""
+msgstr "操作码 %s 中的 IC 注释 %d（IC：%s）与资源 %s 的注释 %d 冲突\n"
 
 #: ia64-gen.c:2506
 #, fuzzy, c-format
@@ -1202,11 +1206,11 @@ msgstr "无效的‘asm’："
 
 #: ip2k-asm.c:296
 msgid "Byte address required. - must be even."
-msgstr ""
+msgstr "请求字节地址 - 必须是偶数。"
 
 #: ip2k-asm.c:305
 msgid "cgen_parse_address returned a symbol. Literal required."
-msgstr ""
+msgstr "cgen_parse_address 返回了一个符号。请求常量。"
 
 #: ip2k-asm.c:360
 #, fuzzy
@@ -1215,7 +1219,7 @@ msgstr "%%L处的 .not. 运算符的操作数为 %s"
 
 #: ip2k-asm.c:413
 msgid "Attempt to find bit index of 0"
-msgstr ""
+msgstr "尝试查找 0 的位索引"
 
 #: iq2000-asm.c:112 iq2000-asm.c:142
 msgid "immediate value cannot be register"
@@ -1236,15 +1240,15 @@ msgstr "不能使用非 GP 相对的绝对地址"
 
 #: lm32-asm.c:196
 msgid "expecting got relative address: got(symbol)"
-msgstr ""
+msgstr "期望得到相对地址：得到了(symbol)"
 
 #: lm32-asm.c:226
 msgid "expecting got relative address: gotoffhi16(symbol)"
-msgstr ""
+msgstr "期望得到相对地址：得到了偏移高16位(symbol)"
 
 #: lm32-asm.c:256
 msgid "expecting got relative address: gotofflo16(symbol)"
-msgstr ""
+msgstr "期望得到相对地址：得到了偏移低16位(symbol)"
 
 #: m10200-dis.c:157 m10300-dis.c:580
 #, c-format
@@ -1312,7 +1316,7 @@ msgstr "立即数越界 2-9"
 
 #: m32c-asm.c:568
 msgid "Bit number for indexing general register is out of range 0-15"
-msgstr ""
+msgstr "用于索引通用寄存器的位数超出0-15范围"
 
 #: m32c-asm.c:606 m32c-asm.c:662
 #, fuzzy
@@ -1354,11 +1358,11 @@ msgstr "# <反汇编出错: %08lx>"
 
 #: mep-asm.c:129
 msgid "Only $tp or $13 allowed for this opcode"
-msgstr ""
+msgstr "此操作码只允许使用$tp或$13"
 
 #: mep-asm.c:143
 msgid "Only $sp or $15 allowed for this opcode"
-msgstr ""
+msgstr "此操作码只允许使用$sp或$15"
 
 #: mep-asm.c:308 mep-asm.c:504
 #, fuzzy, c-format
@@ -1444,6 +1448,9 @@ msgid ""
 "  xpa                      Recognize the eXtended Physical Address (XPA)\n"
 "                           ASE instructions.\n"
 msgstr ""
+"\n"
+"  xpa                      识别扩展物理地址 (XPA)\n"
+"                           ASE 指令。\n"
 
 #: mips-dis.c:2570
 #, fuzzy, c-format
@@ -1551,7 +1558,7 @@ msgstr "行 %d: 不当的 no%s 数字：%d\n"
 #: mmix-dis.c:44
 #, c-format
 msgid "Internal: Non-debugged code (test-case missing): %s:%d"
-msgstr ""
+msgstr "内部：未调试的代码（缺少测试用例）：%s:%d"
 
 #: mmix-dis.c:53
 msgid "(unknown)"
@@ -1591,7 +1598,7 @@ msgstr "无效寻址模式"
 #: msp430-dis.c:1303 msp430-dis.c:1324 msp430-dis.c:1345
 #, c-format
 msgid "Warning: reserved use of A/L and B/W bits detected"
-msgstr ""
+msgstr "警告：检测到A/L和B/W位被保留"
 
 #: mt-asm.c:110 mt-asm.c:190
 #, fuzzy
@@ -1600,7 +1607,7 @@ msgstr "操作数越界(%lu 不在 0 和 %lu 之间)"
 
 #: mt-asm.c:149
 msgid "Biiiig Trouble in parse_imm16!"
-msgstr ""
+msgstr "parse_imm16 出现问题！"
 
 #: mt-asm.c:157
 #, fuzzy
@@ -1609,7 +1616,7 @@ msgstr "%%L处的 .not. 运算符的操作数为 %s"
 
 #: mt-asm.c:395
 msgid "invalid operand.  type may have values 0,1,2 only."
-msgstr ""
+msgstr "无效操作数。  type 值只能为 0、1、2。"
 
 #. I and Z are output operands and can`t be immediate
 #. A is an address and we can`t have the address of
@@ -1651,7 +1658,7 @@ msgstr "没有访问权限"
 
 #: ppc-opc.c:409
 msgid "attempt to set y bit when using + or - modifier"
-msgstr ""
+msgstr "使用 + 或 - 修饰符时尝试设置 y 位"
 
 #: ppc-opc.c:500
 msgid "invalid mask field"
@@ -1669,7 +1676,7 @@ msgstr "立即数"
 
 #: ppc-opc.c:642
 msgid "incompatible L operand value"
-msgstr ""
+msgstr "不兼容的 L 操作数值"
 
 #: ppc-opc.c:686 ppc-opc.c:721
 msgid "illegal bitmask"
@@ -1687,11 +1694,11 @@ msgstr "寄存器元素下标"
 
 #: ppc-opc.c:903 ppc-opc.c:984
 msgid "source and target register operands must be different"
-msgstr ""
+msgstr "源寄存器和目标寄存器操作数必须不同"
 
 #: ppc-opc.c:931
 msgid "invalid register operand when updating"
-msgstr ""
+msgstr "更新时无效的寄存器操作数"
 
 #: ppc-opc.c:1047
 msgid "illegal immediate value"
@@ -1715,19 +1722,19 @@ msgstr "%<#pragma pack%>中有无效常量 - 已忽略"
 
 #: ppc-opc.c:1478 ppc-opc.c:1505 ppc-opc.c:1532 ppc-opc.c:1559
 msgid "UIMM = 00000 is illegal"
-msgstr ""
+msgstr "UIMM = 00000 是非法的"
 
 #: ppc-opc.c:1586
 msgid "UIMM values >7 are illegal"
-msgstr ""
+msgstr "UIMM > 7 是非法的"
 
 #: ppc-opc.c:1613
 msgid "UIMM values >15 are illegal"
-msgstr ""
+msgstr "UIMM > 15 是非法的"
 
 #: ppc-opc.c:1640
 msgid "GPR odd is illegal"
-msgstr ""
+msgstr "GPR 为奇数是非法的"
 
 #: ppc-opc.c:1667 ppc-opc.c:1694
 #, fuzzy
@@ -1772,7 +1779,7 @@ msgstr ""
 msgid ""
 "\n"
 "  numeric       Print numeric register names, rather than ABI names.\n"
-msgstr ""
+msgstr "numeric 打印数字寄存器名称，而不是 ABI 名称。\n"
 
 #: riscv-dis.c:505
 #, c-format
@@ -1781,6 +1788,8 @@ msgid ""
 "  no-aliases    Disassemble only into canonical instructions, rather\n"
 "                than into pseudoinstructions.\n"
 msgstr ""
+"\n"
+"  no-aliases    仅反汇编成规范指令，而不是伪指令。\n"
 
 #: s390-dis.c:42
 #, fuzzy
@@ -1795,7 +1804,7 @@ msgstr "z/Architecture 模式在 %s 上不受支持"
 
 #: s390-dis.c:44
 msgid "Print unknown instructions according to length from first two bits"
-msgstr ""
+msgstr "从前两位开始根据长度打印未知指令"
 
 #: s390-dis.c:409
 #, c-format
@@ -1930,7 +1939,7 @@ msgstr "无效寄存器名"
 
 #: wasm32-dis.c:89
 msgid "Name well-known globals"
-msgstr ""
+msgstr "命名公认的全局变量"
 
 #: wasm32-dis.c:503
 #, fuzzy, c-format

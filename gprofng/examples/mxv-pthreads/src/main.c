@@ -370,5 +370,6 @@ int64_t check_results (int64_t m, int64_t n, double *c, double *ref)
       printf ("  %c c[%ld] = %f ref[%ld] = %f\n",marker[i],i,c[i],i,ref[i]);
   }
 
+  free(marker);
   return (errors);
 }
