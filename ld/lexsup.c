@@ -2320,7 +2320,7 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   --error-execstack           Turn warnings about executable stacks into errors\n"));
   fprintf (file, _("\
-  --no-error-execstack         Do not turn warnings about executable stacks into errors\n"));
+  --no-error-execstack        Do not turn warnings about executable stacks into errors\n"));
   
 #if DEFAULT_LD_WARN_RWX_SEGMENTS
   fprintf (file, _("\
