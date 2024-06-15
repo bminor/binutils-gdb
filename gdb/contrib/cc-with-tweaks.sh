@@ -136,10 +136,10 @@ do
     # doing a link and what the output file is.
     # It's not perfect, but it seems to work well enough for the task at hand.
     case "$arg" in
-    "-c") have_link=no ;;
-    "-E") have_link=no ;;
-    "-S") have_link=no ;;
-    "-o") next_is_output_file=yes ;;
+	"-c") have_link=no ;;
+	"-E") have_link=no ;;
+	"-S") have_link=no ;;
+	"-o") next_is_output_file=yes ;;
     esac
 done
 
@@ -214,9 +214,9 @@ fi
 
 if [ "$want_index_cache" = true ]; then
     $GDB -q -batch \
-	-ex "set index-cache directory $INDEX_CACHE_DIR" \
-	-ex "set index-cache enabled on" \
-	-ex "file $output_file"
+	 -ex "set index-cache directory $INDEX_CACHE_DIR" \
+	 -ex "set index-cache enabled on" \
+	 -ex "file $output_file"
     rc=$?
     [ $rc != 0 ] && exit $rc
 fi
@@ -248,18 +248,18 @@ if [ "$want_dwz" = true ]; then
     rm -f "${output_file}.copy"
 
     case $cmp_rc in
-    0)
-	echo "$myname: dwz did not modify ${output_file}."
-        exit 1
-	;;
-    1)
-	# File was modified, great.
-	;;
-    *)
-	# Other cmp error, it presumably has already printed something on
-	# stderr.
-	exit 1
-	;;
+	0)
+	    echo "$myname: dwz did not modify ${output_file}."
+	    exit 1
+	    ;;
+	1)
+	    # File was modified, great.
+	    ;;
+	*)
+	    # Other cmp error, it presumably has already printed something on
+	    # stderr.
+	    exit 1
+	    ;;
     esac
 elif [ "$want_multi" = true ]; then
     get_tmpdir
@@ -326,7 +326,7 @@ if [ "$want_gnu_debuglink" = true ]; then
 	# Overwrite output_file with stripped version containing
 	# .gnu_debuglink to debug_file.
 	$OBJCOPY --add-gnu-debuglink="$link" "${stripped_file}" \
-		"${output_file}"
+		 "${output_file}"
     )
     rc=$?
     [ $rc != 0 ] && exit $rc
