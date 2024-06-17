@@ -8145,7 +8145,7 @@ display_debug_rnglists_list (unsigned char * start,
 	  READ_ULEB (base_address, start, finish);
 	  print_hex (base_address, pointer_size);
 	  printf (_("(base address index) "));
-	  base_address = fetch_indexed_addr ((base_address * pointer_size) + addr_base,
+	  base_address = fetch_indexed_addr (base_address * pointer_size + addr_base,
 					     pointer_size);
 	  print_hex (base_address, pointer_size);
 	  printf (_("(base address)\n"));
@@ -8153,15 +8153,15 @@ display_debug_rnglists_list (unsigned char * start,
 	case DW_RLE_startx_endx:
 	  READ_ULEB (begin, start, finish);
 	  READ_ULEB (end, start, finish);
-	  begin = fetch_indexed_addr ((begin * pointer_size) + addr_base,
+	  begin = fetch_indexed_addr (begin * pointer_size + addr_base,
 				      pointer_size);
-	  end   = fetch_indexed_addr ((begin * pointer_size) + addr_base,
+	  end   = fetch_indexed_addr (end * pointer_size + addr_base,
 				      pointer_size);
 	  break;
 	case DW_RLE_startx_length:
 	  READ_ULEB (begin, start, finish);
 	  READ_ULEB (length, start, finish);
-	  begin = fetch_indexed_addr ((begin * pointer_size) + addr_base,
+	  begin = fetch_indexed_addr (begin * pointer_size + addr_base,
 				      pointer_size);
 	  end = begin + length;
 	  break;
