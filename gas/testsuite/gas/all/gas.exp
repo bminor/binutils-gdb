@@ -86,9 +86,18 @@ gas_test_error "equiv1.s" "" ".equiv for symbol already set to another one"
 gas_test_error "equiv2.s" "" ".equiv for symbol already set to an expression"
 
 # The inode comparison used to detect identical input and output files
-# doesn't work on non-Posix hosts.
+# doesn't work on non-Posix hosts.  Make a copy of the input file and
+# operate on it so as not to clobber the source tree should this test
+# fail.
 if { ![ishost "*-*-mingw*"] } then {
-    gas_test_error "none.s" "-o $srcdir/$subdir/none.s" "Output file must be distinct from input"
+    set testname "Output file must be distinct from input"
+    set filename tmpdir/none.s
+    if [catch {file copy -force $srcdir/$subdir/none.s $filename}] {
+	perror "Could not make a copy of the input file"
+	unresolved $testname
+    } else {
+	gas_test_error [gas_srcdir_path $filename] "-o $filename" $testname
+    }
 }
 
 # .equ works differently on some targets.
