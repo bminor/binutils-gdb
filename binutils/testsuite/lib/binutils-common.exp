@@ -481,6 +481,38 @@ proc supports_dt_relr {} {
     return 0
 }
 
+# get_relative_path FROM TO
+#
+# Return a relative path to TO starting from FROM, which is usually
+# supposed to be a directory.  The result is optimised in that both
+# paths are normalized and any leading part shared between the two
+# discarded, and then a suitable number of "../" elements prepended
+# to the remaining part of TO to get to the point of divergence from
+# FROM.
+
+proc get_relative_path { from to } {
+    set split_from [file split [file normalize $from]]
+    set split_to [file split [file normalize [file dirname $to]]]
+    set from_len [llength $split_from]
+    set to_len [llength $split_to]
+    set len [expr { $to_len < $from_len } ? $to_len : $from_len]
+    set relative_path {}
+
+    for { set i 0 } { $i < $len } { incr i } {
+	if { ![string equal [lindex $split_from $i] [lindex $split_to $i]] } {
+	    break
+	}
+    }
+    for { set j $i } { $j < $from_len } { incr j } {
+	lappend relative_path ".."
+    }
+    for { set j $i } { $j < $to_len } { incr j } {
+	lappend relative_path [lindex $split_to $j]
+    }
+
+    return [eval file join $relative_path [file tail $to]]
+}
+
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2
 # is the expected output.  Ignore blank lines in either file.
 #
