@@ -372,7 +372,7 @@ if test -z "$TINY_READONLY_SECTION"; then
     *ro*textonly*)
       ALL_TEXT_BEFORE_RO=" "
       SEPARATE_TEXT=" "
-      TEXT_SEGMENT_ALIGN=
+      TEXT_SEGMENT_ALIGN=". = ALIGN(${MAXPAGESIZE});"
       ;;
     *textonly*)
       SEPARATE_TEXT=" "
