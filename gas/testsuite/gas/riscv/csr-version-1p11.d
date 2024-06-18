@@ -831,6 +831,16 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+24d59073[ 	]+csrw[ 	]+vstimecmp,a1
 [ 	]+[0-9a-f]+:[ 	]+25d02573[ 	]+csrr[ 	]+a0,vstimecmph
 [ 	]+[0-9a-f]+:[ 	]+25d59073[ 	]+csrw[ 	]+vstimecmph,a1
+[ 	]+[0-9a-f]+:[ 	]+14e02573[ 	]+csrr[ 	]+a0,sctrctl
+[ 	]+[0-9a-f]+:[ 	]+14e59073[ 	]+csrw[ 	]+sctrctl,a1
+[ 	]+[0-9a-f]+:[ 	]+14f02573[ 	]+csrr[ 	]+a0,sctrstatus
+[ 	]+[0-9a-f]+:[ 	]+14f59073[ 	]+csrw[ 	]+sctrstatus,a1
+[ 	]+[0-9a-f]+:[ 	]+15f02573[ 	]+csrr[ 	]+a0,sctrdepth
+[ 	]+[0-9a-f]+:[ 	]+15f59073[ 	]+csrw[ 	]+sctrdepth,a1
+[ 	]+[0-9a-f]+:[ 	]+24e02573[ 	]+csrr[ 	]+a0,vsctrctl
+[ 	]+[0-9a-f]+:[ 	]+24e59073[ 	]+csrw[ 	]+vsctrctl,a1
+[ 	]+[0-9a-f]+:[ 	]+34e02573[ 	]+csrr[ 	]+a0,mctrctl
+[ 	]+[0-9a-f]+:[ 	]+34e59073[ 	]+csrw[ 	]+mctrctl,a1
 [ 	]+[0-9a-f]+:[ 	]+00002573[ 	]+csrr[ 	]+a0,ustatus
 [ 	]+[0-9a-f]+:[ 	]+00059073[ 	]+csrw[ 	]+ustatus,a1
 [ 	]+[0-9a-f]+:[ 	]+00402573[ 	]+csrr[ 	]+a0,uie

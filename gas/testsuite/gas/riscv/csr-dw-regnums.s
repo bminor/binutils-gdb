@@ -405,6 +405,12 @@ _start:
 	.cfi_offset stimecmph, 1396
 	.cfi_offset vstimecmp, 2356
 	.cfi_offset vstimecmph, 2420
+	# Ssctr/Smctr extension
+	.cfi_offset sctrctl, 1336
+	.cfi_offset sctrstatus, 1340
+	.cfi_offset sctrdepth, 1404
+	.cfi_offset vsctrctl, 2360
+	.cfi_offset mctrctl, 3384
 	# dropped
 	.cfi_offset ustatus, 0
 	.cfi_offset uie, 16

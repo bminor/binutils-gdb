@@ -403,6 +403,11 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4445 \(stimecmph\) at cfa\+1396
   DW_CFA_offset_extended_sf: r4685 \(vstimecmp\) at cfa\+2356
   DW_CFA_offset_extended_sf: r4701 \(vstimecmph\) at cfa\+2420
+  DW_CFA_offset_extended_sf: r4430 \(sctrctl\) at cfa\+1336
+  DW_CFA_offset_extended_sf: r4431 \(sctrstatus\) at cfa\+1340
+  DW_CFA_offset_extended_sf: r4447 \(sctrdepth\) at cfa\+1404
+  DW_CFA_offset_extended_sf: r4686 \(vsctrctl\) at cfa\+2360
+  DW_CFA_offset_extended_sf: r4942 \(mctrctl\) at cfa\+3384
   DW_CFA_offset_extended: r4096 \(ustatus\) at cfa\+0
   DW_CFA_offset_extended_sf: r4100 \(uie\) at cfa\+16
   DW_CFA_offset_extended_sf: r4101 \(utvec\) at cfa\+20

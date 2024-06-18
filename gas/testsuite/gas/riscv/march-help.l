@@ -114,6 +114,7 @@ All available -march extensions for RISC-V:
 	smaia                                   1.0
 	smcsrind                                1.0
 	smcntrpmf                               1.0
+	smctr                                   1.0
 	smepmp                                  1.0
 	smrnmi                                  1.0
 	smstateen                               1.0
@@ -123,6 +124,7 @@ All available -march extensions for RISC-V:
 	sscsrind                                1.0
 	sscofpmf                                1.0
 	sscounterenw                            1.0
+	ssctr                                   1.0
 	ssstateen                               1.0
 	sstc                                    1.0
 	sstvala                                 1.0

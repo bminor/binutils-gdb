@@ -1635,6 +1635,26 @@
 .*Info: macro .*
 .*Warning: invalid CSR `vstimecmph', needs `sstc' extension
 .*Info: macro .*
+.*Warning: invalid CSR `sctrctl', needs `ssctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sctrctl', needs `ssctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sctrstatus', needs `ssctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sctrstatus', needs `ssctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sctrdepth', needs `ssctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `sctrdepth', needs `ssctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsctrctl', needs `ssctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `vsctrctl', needs `ssctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mctrctl', needs `smctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mctrctl', needs `smctr' extension
+.*Info: macro .*
 .*Warning: invalid CSR `fflags', needs `f' extension
 .*Info: macro .*
 .*Warning: invalid CSR `fflags', needs `f' extension

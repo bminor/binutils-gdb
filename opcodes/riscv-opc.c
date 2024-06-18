@@ -2244,12 +2244,13 @@ const struct riscv_opcode riscv_opcodes[] =
 {"hret",       0, INSN_CLASS_I, "",    MATCH_HRET, MASK_HRET, match_opcode, 0 },
 {"mret",       0, INSN_CLASS_I, "",    MATCH_MRET, MASK_MRET, match_opcode, 0 },
 {"dret",       0, INSN_CLASS_I, "",    MATCH_DRET, MASK_DRET, match_opcode, 0 },
-{"sfence.vm",  0, INSN_CLASS_I, "",    MATCH_SFENCE_VM, MASK_SFENCE_VM | MASK_RS1, match_opcode, 0 },
-{"sfence.vm",  0, INSN_CLASS_I, "s",   MATCH_SFENCE_VM, MASK_SFENCE_VM, match_opcode, 0 },
 {"sfence.vma", 0, INSN_CLASS_I, "",    MATCH_SFENCE_VMA, MASK_SFENCE_VMA|MASK_RS1|MASK_RS2, match_opcode, INSN_ALIAS },
 {"sfence.vma", 0, INSN_CLASS_I, "s",   MATCH_SFENCE_VMA, MASK_SFENCE_VMA|MASK_RS2, match_opcode, INSN_ALIAS },
 {"sfence.vma", 0, INSN_CLASS_I, "s,t", MATCH_SFENCE_VMA, MASK_SFENCE_VMA, match_opcode, 0 },
 {"wfi",        0, INSN_CLASS_I, "",    MATCH_WFI, MASK_WFI, match_opcode, 0 },
+
+/* Smctr/Ssctr instruction.  */
+{"sctrclr", 0, INSN_CLASS_SMCTR_OR_SSCTR, "", MATCH_SCTRCLR, MASK_SCTRCLR, match_opcode, 0 },
 
 /* Svinval instructions.  */
 {"sinval.vma",      0, INSN_CLASS_SVINVAL, "s,t", MATCH_SINVAL_VMA, MASK_SINVAL_VMA, match_opcode, 0 },

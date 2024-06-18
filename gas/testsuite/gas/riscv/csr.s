@@ -470,6 +470,13 @@
 	csr vstimecmp
 	csr vstimecmph
 
+	# Smctr/Ssctr
+	csr sctrctl
+	csr sctrstatus
+	csr sctrdepth
+	csr vsctrctl
+	csr mctrctl
+
 	# Supported in previous priv spec, but dropped now
 
 	csr ustatus		# 0x0   in 1.10, dropped in 1.12
