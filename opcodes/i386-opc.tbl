@@ -86,6 +86,7 @@
 #define Ugh               OperandConstraint=UGH
 #define ImplicitStackOp   OperandConstraint=IMPLICIT_STACK_OP
 #define ZU                OperandConstraint=ZERO_UPPER
+#define Scc               OperandConstraint=SCC
 
 #define ATTSyntax         Dialect=ATT_SYNTAX
 #define ATTMnemonic       Dialect=ATT_MNEMONIC
@@ -341,10 +342,28 @@ cmp, 0x38, 0, D|W|CheckOperandSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8
 cmp, 0x83/7, 0, Modrm|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 cmp, 0x3c, 0, W|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 cmp, 0x80/7, 0, W|Modrm|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+cmp, 0x380a, APX_F, D|W|CheckOperandSize|EVexMap4|Scc|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+cmp, 0x830a/7, APX_F, Modrm|EVexMap4|Scc|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+cmp, 0x800a/7, APX_F, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+
+<scc:opc, o:0, no:1, b:2, c:2, nae:2, nb:3, nc:3, ae:3, e:4, z:4, ne:5, nz:5, be:6, na:6, nbe:7, a:7, +
+         s:8, ns:9, t:a, f:b, l:c, nge:c, nl:d, ge:d, le:e, ng:e, nle:f, g:f>
+
+ccmp<scc>, 0x380<scc:opc>, APX_F, D|W|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+ccmp<scc>, 0x830<scc:opc>/7, APX_F, Modrm|EVexMap4|Scc|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+ccmp<scc>, 0x800<scc:opc>/7, APX_F, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 test, 0x84, 0, D|W|C|CheckOperandSize|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 test, 0xa8, 0, W|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 test, 0xf6/0, 0, W|Modrm|No_sSuf|Optimize, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+test, 0x840a, 0, D|W|C|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+test, 0xf60a/0, 0, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+
+ctest<scc>, 0x840<scc:opc>, APX_F, D|W|C|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+ctest<scc>, 0xf60<scc:opc>/0, APX_F, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+ctest<scc>, 0xf60<scc:opc>/1, APX_F, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+
+<scc>
 
 <incdec:opc, inc:0, dec:1>
 

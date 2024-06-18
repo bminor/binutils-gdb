@@ -416,6 +416,16 @@ struct _i386_insn
     /* Compressed disp8*N attribute.  */
     unsigned int memshift;
 
+    /* SCC = EVEX.[SC3,SC2,SC1,SC0].  */
+    unsigned int scc;
+
+    /* Store 4 bits of EVEX.[OF,SF,ZF,CF].  */
+#define OSZC_CF 1
+#define OSZC_ZF 2
+#define OSZC_SF 4
+#define OSZC_OF 8
+    unsigned int oszc_flags;
+
     /* Prefer load or store in encoding.  */
     enum
       {
@@ -1928,6 +1938,110 @@ static INLINE bool need_evex_encoding (const insn_template *t)
 
 #define CPU_FLAGS_PERFECT_MATCH \
   (CPU_FLAGS_ARCH_MATCH | CPU_FLAGS_64BIT_MATCH)
+
+static INLINE bool set_oszc_flags (unsigned int oszc_shift)
+{
+  if (i.oszc_flags & oszc_shift)
+    {
+      as_bad (_("same oszc flag used twice"));
+      return false;
+    }
+  i.oszc_flags |= oszc_shift;
+  return true;
+}
+
+/* Handle SCC OSZC flags.  */
+
+static int
+check_Scc_OszcOperations (const char *l)
+{
+  const char *suffix_string = l;
+
+  while (is_space_char (*suffix_string))
+    suffix_string++;
+
+  /* If {oszc flags} is absent, just return.  */
+  if (*suffix_string != '{')
+    return 0;
+
+  /* Skip '{'.  */
+  suffix_string++;
+
+  /* Parse 'dfv='.  */
+  while (is_space_char (*suffix_string))
+    suffix_string++;
+
+  if (strncasecmp (suffix_string, "dfv", 3) == 0)
+    suffix_string += 3;
+  else
+    {
+      as_bad (_("unrecognized pseudo-suffix"));
+      return -1;
+    }
+
+  while (is_space_char (*suffix_string))
+    suffix_string++;
+
+  if (*suffix_string == '=')
+    suffix_string++;
+  else
+    {
+      as_bad (_("unrecognized pseudo-suffix"));
+      return -1;
+    }
+
+  /* Parse 'of, sf, zf, cf}'.  */
+  while (*suffix_string)
+    {
+      while (is_space_char (*suffix_string))
+	suffix_string++;
+
+      /* Return for '{dfv=}'.  */
+      if (*suffix_string == '}')
+	return suffix_string + 1 - l;
+
+      if (strncasecmp (suffix_string, "of", 2) == 0)
+	{
+	  if (!set_oszc_flags (OSZC_OF))
+	    return -1;
+	}
+      else if (strncasecmp (suffix_string, "sf", 2) == 0)
+	{
+	  if (!set_oszc_flags (OSZC_SF))
+	    return -1;
+	}
+      else if (strncasecmp (suffix_string, "zf", 2) == 0)
+	{
+	  if (!set_oszc_flags (OSZC_ZF))
+	    return -1;
+	}
+      else if (strncasecmp (suffix_string, "cf", 2) == 0)
+	{
+	  if (!set_oszc_flags (OSZC_CF))
+	    return -1;
+	}
+      else
+	{
+	  as_bad (_("unrecognized oszc flags or illegal `,' in pseudo-suffix"));
+	  return -1;
+	}
+
+      suffix_string += 2;
+
+      while (is_space_char (*suffix_string))
+	suffix_string++;
+
+      if (*suffix_string == '}')
+	return ++suffix_string - l;
+
+      if (*suffix_string != ',')
+	break;
+      suffix_string ++;
+    }
+
+  as_bad (_("missing `}' or `,' in pseudo-suffix"));
+  return -1;
+}
 
 /* Return CPU flags match bits. */
 
@@ -3793,10 +3907,19 @@ install_template (const insn_template *t)
 	}
     }
 
+  /* For CCMP and CTEST the template has EVEX.SCC in base_opcode. Move it out of
+     there, to then adjust base_opcode to obtain its normal meaning.  */
+  if (i.tm.opcode_modifier.operandconstraint == SCC)
+    {
+      /* Get EVEX.SCC value from the lower 4 bits of base_opcode.  */
+      i.scc = i.tm.base_opcode & 0xf;
+      i.tm.base_opcode >>= 8;
+    }
+
   /* Note that for pseudo prefixes this produces a length of 1. But for them
      the length isn't interesting at all.  */
   for (l = 1; l < 4; ++l)
-    if (!(t->base_opcode >> (8 * l)))
+    if (!(i.tm.base_opcode >> (8 * l)))
       break;
 
   i.opcode_length = l;
@@ -4289,6 +4412,18 @@ build_apx_evex_prefix (void)
   if ((i.vex.register_specifier && i.tm.opcode_space == SPACE_EVEXMAP4)
       || i.tm.opcode_modifier.operandconstraint == ZERO_UPPER)
     i.vex.bytes[3] |= 0x10;
+
+  /* Encode SCC and oszc flags bits.  */
+  if (i.tm.opcode_modifier.operandconstraint == SCC)
+    {
+      /* The default value of vvvv is 1111 and needs to be cleared.  */
+      i.vex.bytes[2] &= ~0x78;
+      i.vex.bytes[2] |= (i.oszc_flags << 3);
+      /* ND and aaa bits shold be 0.  */
+      know (!(i.vex.bytes[3] & 0x17));
+      /* The default value of V' is 1 and needs to be cleared.  */
+      i.vex.bytes[3] = (i.vex.bytes[3] & ~0x08) | i.scc;
+    }
 
   /* Encode the NF bit.  */
   if (i.has_nf)
@@ -7426,6 +7561,15 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	    as_bad (_("no such instruction: `%s'"), token_start);
 	  return NULL;
 	}
+    }
+
+  /* Handle SCC OSZC flgs.  */
+  if (current_templates.start->opcode_modifier.operandconstraint == SCC)
+    {
+      int length = check_Scc_OszcOperations (l);
+      if (length < 0)
+	return NULL;
+      l += length;
     }
 
   if (current_templates.start->opcode_modifier.jump == JUMP

@@ -581,6 +581,8 @@ enum
 #define IMPLICIT_STACK_OP 9
   /* Instruction zeroes upper part of register.  */
 #define ZERO_UPPER 10
+  /* Instruction support SCC.  */
+#define SCC 11
   OperandConstraint,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */
