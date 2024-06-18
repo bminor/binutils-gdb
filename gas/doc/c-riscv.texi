@@ -850,4 +850,9 @@ VCIX as a low-latency, high-throughput interface to a coprocessor.
 
 It is documented in @url{https://sifive.cdn.prismic.io/sifive/c3829e36-8552-41f0-a841-79945784241b_vcix-spec-software.pdf}.
 
+@item XSfCease
+XSfCease provides an instruction to instigates power-down sequence.
+
+It is documented in @url{https://sifive.cdn.prismic.io/sifive/767804da-53b2-4893-97d5-b7c030ae0a94_s76mc_core_complex_manual_21G3.pdf}.
+
 @end table

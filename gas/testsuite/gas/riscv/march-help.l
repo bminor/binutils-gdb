@@ -130,3 +130,4 @@ All available -march extensions for RISC-V:
 	xtheadzvamo                             1.0
 	xventanacondops                         1.0
 	xsfvcp                                  1.0
+	xsfcease                                1.0

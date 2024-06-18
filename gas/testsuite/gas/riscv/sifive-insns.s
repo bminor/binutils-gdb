@@ -31,3 +31,9 @@
 	sf.vc.v.ivw 0x3, v0, v2, 15
 	sf.vc.v.fvw 0x1, v0, v2, fa1
 	.option pop
+
+	# xscease
+	.option push
+	.option arch, +xsfcease1p0
+	sf.cease
+	.option pop

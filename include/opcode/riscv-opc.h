@@ -3155,6 +3155,9 @@
 #define MASK_SF_VC_FVW 0xfa00707f
 #define MATCH_SF_VC_V_FVW 0xf800505b
 #define MASK_SF_VC_V_FVW 0xfa00707f
+/* Vendor-specific (SiFive) cease instruction.  */
+#define MATCH_SF_CEASE 0x30500073
+#define MASK_SF_CEASE 0xffffffff
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01

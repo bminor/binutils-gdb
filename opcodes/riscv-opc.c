@@ -3113,6 +3113,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vc.fvw",   0, INSN_CLASS_XSFVCP, "XsO1,Vd,Vt,S",  MATCH_SF_VC_FVW, MASK_SF_VC_FVW, match_opcode, 0 },
 {"sf.vc.v.fvw", 0, INSN_CLASS_XSFVCP, "XsO1,Vd,Vt,S",  MATCH_SF_VC_V_FVW, MASK_SF_VC_V_FVW, match_opcode, 0 },
 
+/* Vendor-specific (SiFive) cease instruction.  */
+{"sf.cease", 0, INSN_CLASS_XSFCEASE, "", MATCH_SF_CEASE, MASK_SF_CEASE, match_opcode, 0 },
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };
