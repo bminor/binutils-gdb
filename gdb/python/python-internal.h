@@ -148,19 +148,31 @@ typedef long Py_hash_t;
 /* A template variable holding the format character (as for
    Py_BuildValue) for a given type.  */
 template<typename T>
-constexpr char gdbpy_method_format;
+struct gdbpy_method_format {};
 
 template<>
-constexpr char gdbpy_method_format<gdb_py_longest> = GDB_PY_LL_ARG[0];
+struct gdbpy_method_format<gdb_py_longest>
+{
+  static constexpr char format = GDB_PY_LL_ARG[0];
+};
 
 template<>
-constexpr char gdbpy_method_format<gdb_py_ulongest> = GDB_PY_LLU_ARG[0];
+struct gdbpy_method_format<gdb_py_ulongest>
+{
+  static constexpr char format = GDB_PY_LLU_ARG[0];
+};
 
 template<>
-constexpr char gdbpy_method_format<int> = 'i';
+struct gdbpy_method_format<int>
+{
+  static constexpr char format = 'i';
+};
 
 template<>
-constexpr char gdbpy_method_format<unsigned> = 'I';
+struct gdbpy_method_format<unsigned>
+{
+  static constexpr char format = 'I';
+};
 
 /* A helper function to compute the PyObject_CallMethod /
    Py_BuildValue format given the argument types.  */
@@ -169,7 +181,7 @@ template<typename... Args>
 constexpr std::array<char, sizeof... (Args) + 1>
 gdbpy_make_fmt ()
 {
-  return { gdbpy_method_format<Args>..., '\0' };
+  return { gdbpy_method_format<Args>::format..., '\0' };
 }
 
 /* Typesafe wrapper around PyObject_CallMethod.
