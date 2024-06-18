@@ -960,6 +960,8 @@ enum
 
   MOD_VEX_0F3849_X86_64_L_0_W_0,
 
+  MOD_EVEX_MAP4_60,
+  MOD_EVEX_MAP4_61,
   MOD_EVEX_MAP4_F8_P_1,
   MOD_EVEX_MAP4_F8_P_3,
 };
@@ -1800,9 +1802,6 @@ struct dis386 {
    "XV" => print "{vex} " pseudo prefix
    "XE" => print "{evex} " pseudo prefix if no EVEX-specific functionality is
 	   is used by an EVEX-encoded (AVX512VL) instruction.
-   "ME" => print "{evex} " pseudo prefix for ins->modrm.mod != 3,if no
-	   EVEX-specific functionality is used by an EVEX-encoded (AVX512VL)
-	   instruction.
    "NF" => print "{nf} " pseudo prefix when EVEX.NF = 1 and print "{evex} "
 	   pseudo prefix when instructions without NF, EGPR and VVVV,
    "NE" => don't print "{evex} " pseudo prefix for some special instructions
@@ -10525,11 +10524,6 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 		  break;
 		case 'N':
 		  /* Skip printing {evex} for some special instructions in MAP4.  */
-		  evex_printed = true;
-		  break;
-		case 'M':
-		  if (ins->modrm.mod != 3 && !(ins->rex2 & 7))
-		    oappend (ins, "{evex} ");
 		  evex_printed = true;
 		  break;
 		default:

@@ -1,3 +1,13 @@
+  /* MOD_EVEX_MAP4_60 */
+  {
+    { "movbeS",		{ Gv, Mv }, PREFIX_NP_OR_DATA },
+    { "%NEmovbeS",	{ Gv, Ev }, PREFIX_NP_OR_DATA },
+  },
+  /* MOD_EVEX_MAP4_61 */
+  {
+    { "movbeS",		{ Mv, Gv }, PREFIX_NP_OR_DATA },
+    { "%NEmovbeS",	{ Ev, Gv }, PREFIX_NP_OR_DATA },
+  },
   /* MOD_EVEX_MAP4_F8_P1 */
   {
     { "enqcmds",	{ Gva, M }, 0 },
