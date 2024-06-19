@@ -501,7 +501,7 @@ create_process (const char *program, char *args,
 			/* current directory */
 			(inferior_cwd.empty ()
 			 ? NULL
-			 : gdb_tilde_expand (inferior_cwd.c_str ()).c_str()),
+			 : gdb_tilde_expand (inferior_cwd).c_str()),
 			get_client_state ().disable_randomization,
 			&si,               /* start info */
 			pi);               /* proc info */

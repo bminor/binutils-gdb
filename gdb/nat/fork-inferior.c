@@ -321,7 +321,7 @@ fork_inferior (const char *exec_file, const std::string &allargs, char **env,
     {
       /* Expand before forking because between fork and exec, the child
 	 process may only execute async-signal-safe operations.  */
-      inferior_cwd = gdb_tilde_expand (inferior_cwd.c_str ());
+      inferior_cwd = gdb_tilde_expand (inferior_cwd);
     }
 
   /* If there's any initialization of the target layers that must
