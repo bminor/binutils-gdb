@@ -63,6 +63,10 @@ remove-symbol-file -a ADDRESS
   multiple terms, e.g. 'function + 0x1000' (without quotes),
   previously only a single term could be given.
 
+target core
+target exec
+target tfile
+target ctf
 compile file
 maint print c-tdesc
 save gdb-index

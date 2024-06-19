@@ -16245,6 +16245,9 @@ the data was saved, as well as the current trace frame you are examining.
 Both @var{filename} and @var{dirname} must be on a filesystem accessible to
 the host.
 
+The @var{filename} and @var{dirname} arguments supports escaping and
+quoting, see @ref{Filename Arguments,,Filenames As Command Arguments}.
+
 @smallexample
 (@value{GDBP}) target ctf ctf.ctf
 (@value{GDBP}) tfind
@@ -23167,10 +23170,16 @@ configuration):
 An executable file.  @samp{target exec @var{program}} is the same as
 @samp{exec-file @var{program}}.
 
+The @var{program} argument supports escaping and quoting, see
+@ref{Filename Arguments,,Filenames As Command Arguments}.
+
 @item target core @var{filename}
 @cindex core dump file target
 A core dump file.  @samp{target core @var{filename}} is the same as
 @samp{core-file @var{filename}}.
+
+The @var{filename} argument supports escaping and quoting, see
+@ref{Filename Arguments,,Filenames As Command Arguments}.
 
 @item target remote @var{medium}
 @cindex remote target

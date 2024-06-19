@@ -143,7 +143,10 @@ static void
 exec_target_open (const char *args, int from_tty)
 {
   target_preopen (from_tty);
-  exec_file_attach (args, from_tty);
+
+  std::string filename = extract_single_filename_arg (args);
+  exec_file_attach (filename.empty () ? nullptr : filename.c_str (),
+		    from_tty);
 }
 
 /* This is the target_close implementation.  Clears all target
@@ -1120,5 +1123,5 @@ will be loaded as well."),
 			&setlist, &showlist);
 
   add_target (exec_target_info, exec_target_open,
-	      deprecated_filename_completer);
+	      filename_maybe_quoted_completer);
 }

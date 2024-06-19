@@ -860,7 +860,10 @@ core_target_open (const char *arg, int from_tty)
   int flags;
 
   target_preopen (from_tty);
-  if (!arg)
+
+  std::string filename = extract_single_filename_arg (arg);
+
+  if (filename.empty ())
     {
       if (current_program_space->core_bfd ())
 	error (_("No core file specified.  (Use `detach' "
@@ -869,25 +872,23 @@ core_target_open (const char *arg, int from_tty)
 	error (_("No core file specified."));
     }
 
-  gdb::unique_xmalloc_ptr<char> filename (tilde_expand (arg));
-  if (strlen (filename.get ()) != 0
-      && !IS_ABSOLUTE_PATH (filename.get ()))
-    filename = make_unique_xstrdup (gdb_abspath (filename).c_str ());
+  if (!IS_ABSOLUTE_PATH (filename.c_str ()))
+    filename = gdb_abspath (filename);
 
   flags = O_BINARY | O_LARGEFILE;
   if (write_files)
     flags |= O_RDWR;
   else
     flags |= O_RDONLY;
-  scratch_chan = gdb_open_cloexec (filename.get (), flags, 0).release ();
+  scratch_chan = gdb_open_cloexec (filename.c_str (), flags, 0).release ();
   if (scratch_chan < 0)
-    perror_with_name (filename.get ());
+    perror_with_name (filename.c_str ());
 
-  gdb_bfd_ref_ptr temp_bfd (gdb_bfd_fopen (filename.get (), gnutarget,
+  gdb_bfd_ref_ptr temp_bfd (gdb_bfd_fopen (filename.c_str (), gnutarget,
 					   write_files ? FOPEN_RUB : FOPEN_RB,
 					   scratch_chan));
   if (temp_bfd == NULL)
-    perror_with_name (filename.get ());
+    perror_with_name (filename.c_str ());
 
   if (!bfd_check_format (temp_bfd.get (), bfd_core))
     {
@@ -896,7 +897,7 @@ core_target_open (const char *arg, int from_tty)
 	 thing, on error it does not free all the storage associated
 	 with the bfd).  */
       error (_("\"%s\" is not a core dump: %s"),
-	     filename.get (), bfd_errmsg (bfd_get_error ()));
+	     filename.c_str (), bfd_errmsg (bfd_get_error ()));
     }
 
   current_program_space->cbfd = std::move (temp_bfd);
@@ -1940,7 +1941,7 @@ void
 _initialize_corelow ()
 {
   add_target (core_target_info, core_target_open,
-	      deprecated_filename_completer);
+	      filename_maybe_quoted_completer);
   add_cmd ("core-file-backed-mappings", class_maintenance,
 	   maintenance_print_core_file_backed_mappings,
 	   _("Print core file's file-backed mappings."),
