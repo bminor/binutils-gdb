@@ -130,7 +130,9 @@ if [istarget "loongarch64-*-*"] {
 if [istarget "loongarch64-*-*"] {
   if [check_shared_lib_support] {
     run_dump_test "desc-ie"
+    run_dump_test "desc-ie-reloc"
     run_dump_test "tlsdesc-dso"
+    run_dump_test "tlsdesc-dso-reloc"
     run_dump_test "desc-norelax"
     run_dump_test "desc-relax"
     run_dump_test "data-got"

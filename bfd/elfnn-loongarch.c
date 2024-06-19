@@ -1353,7 +1353,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    {
 	      s->size += GOT_ENTRY_SIZE;
 	      if (need_reloc)
-		htab->elf.srelgot->size += 2 * sizeof (ElfNN_External_Rela);
+		htab->elf.srelgot->size += sizeof (ElfNN_External_Rela);
 	    }
 
 	  /* TLS_DESC needs one dynamic reloc and two GOT slot.  */
