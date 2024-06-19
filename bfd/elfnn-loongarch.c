@@ -756,10 +756,6 @@ loongarch_tls_transition (bfd *input_bfd,
   return loongarch_tls_transition_without_check (info, r_type, h);
 }
 
-/* Look through the relocs for a section during the first phase, and
-   allocate space in the global offset table or procedure linkage
-   table.  */
-
 static bool
 bad_static_reloc (bfd *abfd, const Elf_Internal_Rela *rel, asection *sec,
 		  unsigned r_type, struct elf_link_hash_entry *h,
@@ -786,6 +782,10 @@ bad_static_reloc (bfd *abfd, const Elf_Internal_Rela *rel, asection *sec,
   bfd_set_error (bfd_error_bad_value);
   return false;
 }
+
+/* Look through the relocs for a section during the first phase, and
+   allocate space in the global offset table or procedure linkage
+   table.  */
 
 static bool
 loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
@@ -948,10 +948,11 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_LARCH_ABS_HI20:
-	case R_LARCH_SOP_PUSH_ABSOLUTE:
 	  if (bfd_link_pic (info))
 	    return bad_static_reloc (abfd, rel, sec, r_type, h, isym);
 
+	  /* Fall through.  */
+	case R_LARCH_SOP_PUSH_ABSOLUTE:
 	  if (h != NULL)
 	    /* If this reloc is in a read-only section, we might
 	       need a copy reloc.  We can't check reliably at this
