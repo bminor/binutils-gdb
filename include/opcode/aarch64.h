@@ -183,6 +183,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_LSE128,
   /* ARMv8.9-A RAS Extensions.  */
   AARCH64_FEATURE_RASv2,
+  /* Delegated SError exceptions for EL3. */
+  AARCH64_FEATURE_E3DSE,
   /* System Control Register2.  */
   AARCH64_FEATURE_SCTLR2,
   /* Fine Grained Traps.  */
@@ -366,7 +368,9 @@ enum aarch64_feature_bit {
 #define AARCH64_ARCH_V9_5A_FEATURES(X)	(AARCH64_FEATBIT (X, V9_5A)	\
 					 | AARCH64_FEATBIT (X, CPA)	\
 					 | AARCH64_FEATBIT (X, LUT)	\
-					 | AARCH64_FEATBIT (X, FAMINMAX))
+					 | AARCH64_FEATBIT (X, FAMINMAX)\
+					 | AARCH64_FEATBIT (X, E3DSE)	\
+					)
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8A(X)	(AARCH64_FEATBIT (X, V8) \
