@@ -109,7 +109,7 @@ static struct {
 	   its name with CURRENT_DIRECTORY.  Otherwise, we leave the
 	   name as-is because we'll try searching for it in $PATH.  */
 	if (is_regular_file (m_path.c_str (), &reg_file_errno))
-	  m_path = gdb_abspath (m_path.c_str ());
+	  m_path = gdb_abspath (m_path);
       }
   }
 

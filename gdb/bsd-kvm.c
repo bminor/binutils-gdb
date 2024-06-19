@@ -117,7 +117,7 @@ bsd_kvm_target_open (const char *arg, int from_tty)
     {
       filename = gdb_tilde_expand (arg);
       if (!IS_ABSOLUTE_PATH (filename))
-	filename = gdb_abspath (filename.c_str ());
+	filename = gdb_abspath (filename);
     }
 
   const char *execfile = current_program_space->exec_filename ();

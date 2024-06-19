@@ -626,7 +626,7 @@ core_target_open (const char *arg, int from_tty)
   gdb::unique_xmalloc_ptr<char> filename (tilde_expand (arg));
   if (strlen (filename.get ()) != 0
       && !IS_ABSOLUTE_PATH (filename.get ()))
-    filename = make_unique_xstrdup (gdb_abspath (filename.get ()).c_str ());
+    filename = make_unique_xstrdup (gdb_abspath (filename).c_str ());
 
   flags = O_BINARY | O_LARGEFILE;
   if (write_files)

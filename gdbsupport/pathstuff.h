@@ -56,6 +56,22 @@ extern std::string gdb_realpath_keepfile (const char *filename);
 
 extern std::string gdb_abspath (const char *path);
 
+/* Overload of gdb_abspath which takes std::string.  */
+
+static inline std::string
+gdb_abspath (const std::string &path)
+{
+  return gdb_abspath (path.c_str ());
+}
+
+/* Overload of gdb_abspath which takes gdb::unique_xmalloc_ptr<char>.  */
+
+static inline std::string
+gdb_abspath (const gdb::unique_xmalloc_ptr<char> &path)
+{
+  return gdb_abspath (path.get ());
+}
+
 /* If the path in CHILD is a child of the path in PARENT, return a
    pointer to the first component in the CHILD's pathname below the
    PARENT.  Otherwise, return NULL.  */
