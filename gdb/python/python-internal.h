@@ -231,9 +231,11 @@ gdbpy_call_method (const gdbpy_ref<> &o, const char *method, Args... args)
 /* Poison PyObject_CallMethod.  The typesafe wrapper gdbpy_call_method should be
    used instead.  */
 #undef PyObject_CallMethod
-template<typename... Args>
-PyObject *
-PyObject_CallMethod (Args...);
+#ifdef __GNUC__
+# pragma GCC poison PyObject_CallMethod
+#else
+# define PyObject_CallMethod POISONED_PyObject_CallMethod
+#endif
 
 /* The 'name' parameter of PyErr_NewException was missing the 'const'
    qualifier in Python <= 3.4.  Hence, we wrap it in a function to
