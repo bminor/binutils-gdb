@@ -656,7 +656,6 @@ INSTOBJEXT
 DATADIRNAME
 CATALOGS
 INCINTL
-LIBINTL_DEP
 POSUB
 LTLIBINTL
 LIBINTL
@@ -11090,7 +11089,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11093 "configure"
+#line 11092 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11196,7 +11195,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11199 "configure"
+#line 11198 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13646,7 +13645,6 @@ fi
 
 
 
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether NLS is requested" >&5
 $as_echo_n "checking whether NLS is requested... " >&6; }
 if test x"$USE_NLS" != xyes; then
@@ -14346,8 +14344,6 @@ else
   BUILD_LIBS=-liberty
   BUILD_LIB_DEPS=
 fi
-BUILD_LIBS="$BUILD_LIBS $LIBINTL"
-BUILD_LIB_DEPS="$BUILD_LIB_DEPS $LIBINTL_DEP"
 
 
 

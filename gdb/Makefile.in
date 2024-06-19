@@ -234,7 +234,6 @@ RDYNAMIC = @RDYNAMIC@
 
 # Where is the INTL library?  Typically in ../intl.
 INTL = @LIBINTL@
-INTL_DEPS = @LIBINTL_DEP@
 INTL_CFLAGS = @INCINTL@
 
 # Where is the ICONV library?  This will be empty if in libc or not available.
@@ -682,7 +681,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) $(ZSTD_LIBS) \
 	$(GMPLIBS) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
 	$(DEBUGINFOD_LIBS) $(LIBBABELTRACE_LIB)
 CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
-	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
+	$(OPCODES) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
 	$(LIBSUPPORT)
 
 DIST = gdb

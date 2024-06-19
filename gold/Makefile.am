@@ -185,7 +185,7 @@ libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES) $(DEFFILES)
 libgold_a_LIBADD = $(LIBOBJS)
 
 sources_var = main.cc
-deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
+deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY)
 ldadd_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(GOLD_LDADD) $(LIBINTL) \
 	 $(THREADLIBS) $(LIBDL) $(ZLIB) $(ZSTD_LIBS) $(JANSSON_LIBS)
 ldflags_var = $(GOLD_LDFLAGS)
@@ -198,13 +198,12 @@ ld_new_LDFLAGS = $(ldflags_var)
 EXTRA_ld_new_SOURCES = $(TARGETSOURCES)
 
 incremental_dump_SOURCES = incremental-dump.cc
-incremental_dump_DEPENDENCIES = $(TARGETOBJS) libgold.a $(LIBIBERTY) \
-	$(LIBINTL_DEP)
+incremental_dump_DEPENDENCIES = $(TARGETOBJS) libgold.a $(LIBIBERTY)
 incremental_dump_LDADD = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL) \
 	 $(THREADLIBS) $(LIBDL) $(ZLIB) $(ZSTD_LIBS) $(JANSSON_LIBS)
 
 dwp_SOURCES = dwp.cc
-dwp_DEPENDENCIES = libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
+dwp_DEPENDENCIES = libgold.a $(LIBIBERTY)
 dwp_LDADD = libgold.a $(LIBIBERTY) $(GOLD_LDADD) $(LIBINTL) $(THREADLIBS) \
 	$(LIBDL) $(ZLIB) $(ZSTD_LIBS) $(JANSSON_LIBS)
 dwp_LDFLAGS = $(GOLD_LDFLAGS)
