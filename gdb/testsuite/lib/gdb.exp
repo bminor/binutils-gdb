@@ -1607,13 +1607,23 @@ proc python_version_at_least { major minor } {
 		<= [list $python_version_major $python_version_minor]]
 }
 
-# Return 1 if tcl version used is at least MAJOR.MINOR
-proc tcl_version_at_least { major minor } {
-    global tcl_version
-    regexp {^([0-9]+)\.([0-9]+)$} $tcl_version \
-	dummy tcl_version_major tcl_version_minor
-    return [version_compare [list $major $minor] \
-		<= [list $tcl_version_major $tcl_version_minor]]
+# Return 1 if tcl version used is at least MAJOR.MINOR.PATCHLEVEL.
+proc tcl_version_at_least { major minor {patchlevel 0} } {
+    global tcl_patchLevel
+    regexp {^([0-9]+)\.([0-9]+)\.([0-9]+)$} \
+	$tcl_patchLevel dummy \
+	tcl_version_major tcl_version_minor tcl_version_patchlevel
+    return \
+	[version_compare \
+	     [list \
+		  $major \
+		  $minor \
+		  $patchlevel] \
+	     <= \
+	     [list \
+		  $tcl_version_major \
+		  $tcl_version_minor \
+		  $tcl_version_patchlevel]]
 }
 
 if { [tcl_version_at_least 8 5] == 0 } {
@@ -1645,6 +1655,19 @@ if { [tcl_version_at_least 8 6] == 0 } {
 	}
 
 	return $res
+    }
+}
+
+if { [tcl_version_at_least 8 6 2] == 0 } {
+    # string cat was added in tcl 8.6.2.  Only add if missing.
+
+    rename string tcl_proc_string
+
+    proc string { what args } {
+	if { $what == "cat" } {
+	    return [join $args ""]
+	}
+	return [tcl_proc_string $what {*}$args]
     }
 }
 
