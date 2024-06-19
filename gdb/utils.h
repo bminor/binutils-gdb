@@ -371,6 +371,20 @@ assign_return_if_changed (T &lval, const T &val)
   return true;
 }
 
+/* ARG is an argument string as passed to a GDB command which is expected
+   to contain a single, possibly quoted, filename argument.  Extract the
+   filename and return it as a string.  If the filename is quoted then the
+   quotes will have been removed.  If the filename is not quoted then any
+   escaping within the filename will have been removed.
+
+   If there is any content in ARG after the filename then an error will be
+   thrown complaining about the extra content.
+
+   If there is no filename in ARG, or if ARG is nullptr, then an empty
+   string will be returned.  */
+
+extern std::string extract_single_filename_arg (const char *arg);
+
 /* A class that can be used to intercept warnings.  A class is used
    here, rather than a gdb::function_view because it proved difficult
    to use a function view in conjunction with ATTRIBUTE_PRINTF in a

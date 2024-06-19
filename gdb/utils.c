@@ -80,6 +80,7 @@
 #include "gdbsupport/buildargv.h"
 #include "pager.h"
 #include "run-on-main-thread.h"
+#include "gdbsupport/gdb_tilde_expand.h"
 
 void (*deprecated_error_begin_hook) (void);
 
@@ -3665,6 +3666,23 @@ copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
       buf &= (1 << nbits) - 1;
       *dest = (*dest & (~0U << nbits)) | buf;
     }
+}
+
+/* See utils.h.  */
+
+std::string
+extract_single_filename_arg (const char *args)
+{
+  if (args == nullptr)
+    return {};
+
+  std::string filename = extract_string_maybe_quoted (&args);
+  args = skip_spaces (args);
+  if (*args != '\0')
+    error (_("Junk after filename \"%s\": %s"), filename.c_str (), args);
+  if (!filename.empty ())
+    filename = gdb_tilde_expand (filename.c_str ());
+  return filename;
 }
 
 #if GDB_SELF_TEST
