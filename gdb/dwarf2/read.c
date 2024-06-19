@@ -15109,7 +15109,15 @@ dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
 	  tt = builtin_type (gdbarch)->builtin_float;
 	  break;
 	case 64:
-	  tt = builtin_type (gdbarch)->builtin_double;
+	  if (builtin_type (gdbarch)->builtin_long_double->length () == 8
+	      && name_hint != nullptr
+	      && strstr (name_hint, "long") != nullptr)
+	    {
+	      /* Use "long double" for "complex long double".  */
+	      tt = builtin_type (gdbarch)->builtin_long_double;
+	    }
+	  else
+	    tt = builtin_type (gdbarch)->builtin_double;
 	  break;
 	case 96:	/* The x86-32 ABI specifies 96-bit long double.  */
 	case 128:
