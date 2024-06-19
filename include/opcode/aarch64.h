@@ -222,6 +222,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_PMUv3_ICNTR,
   /* System Performance Monitors Extension */
   AARCH64_FEATURE_SPMU,
+  /* System Performance Monitors Extension version 2 */
+  AARCH64_FEATURE_SPMU2,
   /* Performance Monitors Synchronous-Exception-Based Event Extension.  */
   AARCH64_FEATURE_SEBEP,
   /* SVE2.1 and SME2.1 non-widening BFloat16 instructions.  */
@@ -370,6 +372,7 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, LUT)	\
 					 | AARCH64_FEATBIT (X, FAMINMAX)\
 					 | AARCH64_FEATBIT (X, E3DSE)	\
+					 | AARCH64_FEATBIT (X, SPMU2)	\
 					)
 
 /* Architectures are the sum of the base and extensions.  */
