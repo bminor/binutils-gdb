@@ -361,7 +361,6 @@ test, 0xf60a/0, 0, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8
 
 ctest<scc>, 0x840<scc:opc>, APX_F, D|W|C|CheckOperandSize|Modrm|EVexMap4|Scc|No_sSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 ctest<scc>, 0xf60<scc:opc>/0, APX_F, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-ctest<scc>, 0xf60<scc:opc>/1, APX_F, W|Modrm|EVexMap4|Scc|No_sSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 <scc>
 
