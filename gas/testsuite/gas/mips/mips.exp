@@ -2180,4 +2180,6 @@ if { [istarget mips*-*-vxworks*] } {
     if [istarget *-*-irix*] {
       run_dump_test "irix-no-pdr"
     }
+
+    run_dump_test_arches "cond-trap-imm-zero" [mips_arch_list_matching mips32r6]
 }
