@@ -23,8 +23,8 @@ print_constants (ctf_archive_t *ctf, const char *name)
     {
       char *foo;
 
-      printf ("%s in %s has value %i\n", name,
-	      foo = ctf_type_aname (fp, type), val);
+      printf ("%s in %s has value %li\n", name,
+	      foo = ctf_type_aname (fp, type), (long int) val);
       free (foo);
 
       ctf_dict_close (fp);
@@ -44,7 +44,6 @@ main (int argc, char *argv[])
   int err;
   ctf_id_t type;
   ctf_next_t *i = NULL;
-  const char *name;
   int64_t val;
   int counter = 0;
 
@@ -71,8 +70,8 @@ main (int argc, char *argv[])
     {
       char *foo;
 
-      printf ("IENUMSAMPLE2_2 in %s has value %i\n",
-	      foo = ctf_type_aname (fp, type), val);
+      printf ("IENUMSAMPLE2_2 in %s has value %li\n",
+	      foo = ctf_type_aname (fp, type), (long int) val);
       free (foo);
 
       if ((type = ctf_add_enum (fp, CTF_ADD_ROOT, "ie3")) == CTF_ERR)
@@ -117,13 +116,13 @@ main (int argc, char *argv[])
 	  if (type != CTF_ERR)
 	    {
 	      char *foo;
-	      printf ("direct lookup: hidden lookup did not return ECTF_NOENUMNAM but rather %i in %s\n",
-		      val, foo = ctf_type_aname (fp, type));
+	      printf ("direct lookup: hidden lookup did not return ECTF_NOENUMNAM but rather %li in %s\n",
+		      (long int) val, foo = ctf_type_aname (fp, type));
 	      free (foo);
 	    }
 	  else
 	    printf ("direct lookup: hidden lookup did not return ECTF_NOENUMNAM but rather %s\n",
-		    ctf_errno (fp));
+		    ctf_errmsg (ctf_errno (fp)));
 	}
 
       ctf_dict_close (fp);
