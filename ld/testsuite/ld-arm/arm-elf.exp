@@ -653,10 +653,10 @@ set armeabitests_nonacl {
      {{objdump -d thumb2-bl-bad.d}}
      "thumb2-bl-bad"}
     {"Branch to linker script symbol with BL for thumb-only target" "-T branch-lks-sym.ld" "" "" {thumb-bl-lks-sym.s}
-     {{objdump -d thumb-bl-lks-sym.d}}
+     {{ld thumb-bl-lks-sym.output} {objdump -d thumb-bl-lks-sym.d}}
      "thumb-bl-lks-sym"}
     {"Branch to linker script symbol with B for thumb-only target" "-T branch-lks-sym.ld" "" "" {thumb-b-lks-sym.s}
-     {{objdump -d thumb-b-lks-sym.d}}
+     {{ld thumb-b-lks-sym.output} {objdump -d thumb-b-lks-sym.d}}
      "thumb-b-lks-sym"}
 
     {"erratum 760522 fix (default for v6z)" "--section-start=.foo=0x2001014" ""
@@ -1207,6 +1207,7 @@ run_dump_test "attr-merge-wchar-40-nowarn"
 run_dump_test "attr-merge-wchar-42-nowarn"
 run_dump_test "attr-merge-wchar-44-nowarn"
 run_dump_test "farcall-section"
+run_dump_test "farcall-missing-type"
 run_dump_test "attr-merge-unknown-1"
 run_dump_test "attr-merge-unknown-2"
 run_dump_test "attr-merge-unknown-2r"
