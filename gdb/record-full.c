@@ -370,6 +370,15 @@ record_full_is_used (void)
 	  || t == &record_full_core_ops);
 }
 
+/* see record-full.h.  */
+bool
+record_full_is_replaying ()
+{
+  auto target = dynamic_cast<record_full_target *>
+		  (current_inferior ()->target_at (record_stratum));
+  return target != nullptr && RECORD_FULL_IS_REPLAY;
+}
+
 
 /* Command lists for "set/show record full".  */
 static struct cmd_list_element *set_record_full_cmdlist;

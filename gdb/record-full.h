@@ -31,6 +31,9 @@ extern int record_full_arch_list_add_end (void);
 /* Returns true if the process record target is open.  */
 extern int record_full_is_used (void);
 
+/* Whether the inferior is being replayed, or is executing normally.  */
+extern bool record_full_is_replaying ();
+
 extern scoped_restore_tmpl<int> record_full_gdb_operation_disable_set ();
 
 #endif /* RECORD_FULL_H */
