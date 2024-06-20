@@ -21345,6 +21345,9 @@ Like @code{compile code}, but take the source code from @var{filename}.
 @smallexample
 compile file /home/user/example.c
 @end smallexample
+
+The @var{filename} argument supports escaping and quoting, see
+@ref{Filename Arguments,,Filenames As Command Arguments}.
 @end table
 
 @table @code
@@ -22791,6 +22794,9 @@ the @option{-dwarf-5} option, it produces 2 files:
 @file{@var{symbol-file}.debug_names} and
 @file{@var{symbol-file}.debug_str}.  The files are created in the
 given @var{directory}.
+
+The @var{directory} argument supports escaping and quoting, see
+@ref{Filename Arguments,,Filenames As Command Arguments}.
 @end table
 
 Once you have created an index file you can merge it into your symbol
@@ -41791,6 +41797,9 @@ When the optional flag @samp{-single-feature} is provided then the
 target description being processed (either the default, or from
 @var{file}) must only contain a single feature.  The source file
 produced is different in this case.
+
+The @var{file} argument supports escaping and quoting, see
+@ref{Filename Arguments,,Filenames As Command Arguments}.
 
 @kindex maint print xml-tdesc
 @item maint print xml-tdesc  @r{[}@var{file}@r{]}

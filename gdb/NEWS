@@ -63,6 +63,13 @@ remove-symbol-file -a ADDRESS
   multiple terms, e.g. 'function + 0x1000' (without quotes),
   previously only a single term could be given.
 
+compile file
+maint print c-tdesc
+save gdb-index
+  These commands now require their filename argument to be quoted if
+  it contains white space or quote characters.  If the argument
+  contains no such special characters then quoting is not required.
+
 * New remote packets
 
 vFile:stat

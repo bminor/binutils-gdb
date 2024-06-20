@@ -123,7 +123,9 @@ proc run_quoting_and_escaping_tests { root } {
     # Test all the commands which allow quoting of filenames, and
     # which require whitespace to be escaped in unquoted filenames.
     foreach_with_prefix cmd { file exec-file symbol-file add-symbol-file \
-			      remove-symbol-file } {
+				  remove-symbol-file \
+				  "maint print c-tdesc" "compile file" \
+				  "save gdb-index" "save gdb-index -dwarf-5" } {
 	gdb_start
 
 	# Completing 'thread apply all ...' commands uses a custom word
@@ -298,7 +300,7 @@ proc run_unquoted_tests_core { root cmd { prefix "" } } {
 proc run_unquoted_tests { root } {
     # Test all the commands which allow quoting of filenames, and
     # which require whitespace to be escaped in unquoted filenames.
-    foreach_with_prefix cmd { "maint print c-tdesc" "set logging file" \
+    foreach_with_prefix cmd { "set logging file" \
 				  "target core" "add-auto-load-safe-path" } {
 	run_unquoted_tests_core $root $cmd
     }

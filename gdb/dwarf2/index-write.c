@@ -1618,8 +1618,8 @@ gdb_save_index_cmd_completer (struct cmd_list_element *ignore,
       (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp))
     return;
 
-  word = advance_to_deprecated_filename_complete_word_point (tracker, text);
-  deprecated_filename_completer (ignore, tracker, text, word);
+  word = advance_to_filename_maybe_quoted_complete_word_point (tracker, text);
+  filename_maybe_quoted_completer (ignore, tracker, text, word);
 }
 
 /* Implementation of the `save gdb-index' command.
@@ -1636,10 +1636,10 @@ save_gdb_index_command (const char *args, int from_tty)
   gdb::option::process_options
     (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group);
 
-  if (args == nullptr || *args == '\0')
+  std::string directory = extract_single_filename_arg (args);
+  if (directory.empty ())
     error (_("usage: save gdb-index [-dwarf-5] DIRECTORY"));
 
-  std::string directory (gdb_tilde_expand (args));
   dw_index_kind index_kind
     = (opts.dwarf_5 ? dw_index_kind::DEBUG_NAMES : dw_index_kind::GDB_INDEX);
 

@@ -303,14 +303,13 @@ compile_file_command (const char *args, int from_tty)
   enum compile_i_scope_types scope
     = options.raw ? COMPILE_I_RAW_SCOPE : COMPILE_I_SIMPLE_SCOPE;
 
-  args = skip_spaces (args);
+  std::string filename = extract_single_filename_arg (args);
 
   /* After processing options, check whether we have a filename.  */
-  if (args == nullptr || args[0] == '\0')
+  if (filename.empty ())
     error (_("You must provide a filename for this command."));
 
-  args = skip_spaces (args);
-  std::string abspath = gdb_abspath (args);
+  std::string abspath = gdb_abspath (filename.c_str ());
   std::string buffer = string_printf ("#include \"%s\"\n", abspath.c_str ());
   eval_compile_command (NULL, buffer.c_str (), scope, NULL);
 }
@@ -328,8 +327,8 @@ compile_file_command_completer (struct cmd_list_element *ignore,
       (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group))
     return;
 
-  word = advance_to_deprecated_filename_complete_word_point (tracker, text);
-  deprecated_filename_completer (ignore, tracker, text, word);
+  word = advance_to_filename_maybe_quoted_complete_word_point (tracker, text);
+  filename_maybe_quoted_completer (ignore, tracker, text, word);
 }
 
 /* Handle the input from the 'compile code' command.  The
