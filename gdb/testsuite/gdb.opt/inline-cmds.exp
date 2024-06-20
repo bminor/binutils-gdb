@@ -243,13 +243,13 @@ gdb_test "step" ".*set breakpoint 2 here.*" "step into finish marker"
 # the call instruction which still are part of the call sequence,
 # so it should be expected to return to the caller line after issue 
 # a 'finish' command.
-gdb_test_multiple "finish" "finish from marker" {
-    -re "func1 \\\(\\\);.*\r\n$gdb_prompt $" {
-	pass "finish from marker to func1"
+gdb_test_multiple "finish" "finish from marker to func1" {
+    -re -wrap "func1 \\(\\);" {
+	pass $gdb_test_name
     }
-    -re "marker \\\(\\\);.*\r\n$gdb_prompt $" {
-	pass "finish from marker"
-	gdb_test "step" "func1 \\\(\\\);.*" "step after marker to reach func1"
+    -re -wrap "marker \\(\\);" {
+	send_gdb "step\n"
+	exp_continue
     }
 }
 
@@ -261,13 +261,13 @@ set line6 [gdb_get_line_number "set breakpoint 6 here"]
 gdb_breakpoint $line6
 gdb_continue_to_breakpoint "before the outer_inline call"
 gdb_test "step" "marker \\\(\\\) at .*" "reach 1 the outer_inline call"
-gdb_test_multiple "finish" "finish from marker" {
-    -re "main \\\(\\\) at .*outer_inline2 \\\(\\\);.*\r\n$gdb_prompt $" {
-	pass "reach outer_inline2"
+gdb_test_multiple "finish" "reach outer_inline2" {
+    -re -wrap "outer_inline2 \\(\\);" {
+	pass $gdb_test_name
     }
-    -re "main \\\(\\\) at .*marker \\\(\\\);.*\r\n$gdb_prompt $" {
-	pass "finish from marker"
-	gdb_test "step" "outer_inline2 \\\(\\\);.*" "step after marker to reach outer_inline2"
+    -re -wrap "marker \\(\\); .*" {
+	send_gdb "step\n"
+	exp_continue
     }
 }
 gdb_test "bt" "#0  main.*" "backtrace at main of outer_inline"
