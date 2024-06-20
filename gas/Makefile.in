@@ -413,6 +413,7 @@ LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
+LIBINTL_DEP = @LIBINTL_DEP@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
@@ -910,7 +911,7 @@ as_new_LDADD = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 	$(extra_objects) $(GASLIBS) $(LIBINTL) $(LIBM) $(ZLIB) $(ZSTD_LIBS)
 
 as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
-	$(extra_objects) $(GASLIBS)
+	$(extra_objects) $(GASLIBS) $(LIBINTL_DEP)
 
 
 # The LoongArch lexical analyzer and parser.

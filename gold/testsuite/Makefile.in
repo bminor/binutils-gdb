@@ -2671,6 +2671,7 @@ LDFLAGS = @LDFLAGS@
 LFS_CFLAGS = @LFS_CFLAGS@
 LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
+LIBINTL_DEP = @LIBINTL_DEP@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LN_S = @LN_S@
@@ -2903,7 +2904,7 @@ TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 check_LIBRARIES = libgoldtest.a
 libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 DEPENDENCIES = \
-	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a
+	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
 
 @NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_SOURCES = object_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_LDFLAGS = $(THREADFLAGS)

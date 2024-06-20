@@ -114,6 +114,7 @@ include $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
 
 # Where is the INTL library?  Typically in ../intl.
 INTL = @LIBINTL@
+INTL_DEPS = @LIBINTL_DEP@
 INTL_CFLAGS = @INCINTL@
 
 INCSUPPORT = \
@@ -366,7 +367,7 @@ install-html:
 clean-info:
 
 gdbserver$(EXEEXT): $(sort $(OBS)) ${CDEPS} $(LIBGNU) $(LIBIBERTY) \
-		$(GDBSUPPORT)
+		$(INTL_DEPS) $(GDBSUPPORT)
 	$(SILENCE) rm -f gdbserver$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
 		$(CXXFLAGS) \
@@ -375,7 +376,7 @@ gdbserver$(EXEEXT): $(sort $(OBS)) ${CDEPS} $(LIBGNU) $(LIBIBERTY) \
 		$(GDBSERVER_LIBS) $(XM_CLIBS) $(WIN32APILIBS) $(MAYBE_LIBICONV)
 
 gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY) \
-		$(GDBSUPPORT)
+		$(INTL_DEPS) $(GDBSUPPORT)
 	$(SILENCE) rm -f gdbreplay$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
 		$(CXXFLAGS) \

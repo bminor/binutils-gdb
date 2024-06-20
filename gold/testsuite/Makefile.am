@@ -118,7 +118,7 @@ check_LIBRARIES = libgoldtest.a
 libgoldtest_a_SOURCES = test.cc testmain.cc testfile.cc
 
 DEPENDENCIES = \
-	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a
+	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL_DEP)
 
 # The unittests themselves
 if NATIVE_OR_CROSS_LINKER
