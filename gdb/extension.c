@@ -33,6 +33,7 @@
 #include "guile/guile.h"
 #include <array>
 #include "inferior.h"
+#include "gdbsupport/scoped_signal_handler.h"
 
 static script_sourcer_func source_gdb_script;
 static objfile_script_sourcer_func source_gdb_objfile_script;
@@ -297,28 +298,6 @@ ext_lang_auto_load_enabled (const struct extension_language_defn *extlang)
 }
 
 
-/* RAII class used to temporarily return SIG to its default handler.  */
-
-template<int SIG>
-struct scoped_default_signal
-{
-  scoped_default_signal ()
-  { m_old_sig_handler = signal (SIG, SIG_DFL); }
-
-  ~scoped_default_signal ()
-  { signal (SIG, m_old_sig_handler); }
-
-  DISABLE_COPY_AND_ASSIGN (scoped_default_signal);
-
-private:
-  /* The previous signal handler that needs to be restored.  */
-  sighandler_t m_old_sig_handler;
-};
-
-/* Class to temporarily return SIGINT to its default handler.  */
-
-using scoped_default_sigint = scoped_default_signal<SIGINT>;
-
 /* Functions that iterate over all extension languages.
    These only iterate over external extension languages, not including
    GDB's own extension/scripting language, unless otherwise indicated.  */
@@ -334,7 +313,7 @@ ext_lang_initialization (void)
       if (extlang->ops != nullptr
 	  && extlang->ops->initialize != NULL)
 	{
-	  scoped_default_sigint set_sigint_to_default_handler;
+	  scoped_signal_handler<SIGINT> set_sigint_to_default_handler (SIG_DFL);
 	  extlang->ops->initialize (extlang);
 	}
     }

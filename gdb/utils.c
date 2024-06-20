@@ -19,6 +19,7 @@
 
 #include <ctype.h>
 #include "gdbsupport/gdb_wait.h"
+#include "gdbsupport/scoped_signal_handler.h"
 #include "event-top.h"
 #include "gdbthread.h"
 #include "fnmatch.h"
@@ -3468,18 +3469,7 @@ wait_to_die_with_timeout (pid_t pid, int *status, int timeout)
   if (timeout > 0)
     {
 #ifdef SIGALRM
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-      struct sigaction sa, old_sa;
-
-      sa.sa_handler = sigalrm_handler;
-      sigemptyset (&sa.sa_mask);
-      sa.sa_flags = 0;
-      sigaction (SIGALRM, &sa, &old_sa);
-#else
-      sighandler_t ofunc;
-
-      ofunc = signal (SIGALRM, sigalrm_handler);
-#endif
+      scoped_signal_handler<SIGALRM> alarm_restore (sigalrm_handler);
 
       alarm (timeout);
 #endif
@@ -3488,11 +3478,6 @@ wait_to_die_with_timeout (pid_t pid, int *status, int timeout)
 
 #ifdef SIGALRM
       alarm (0);
-#if defined (HAVE_SIGACTION) && defined (SA_RESTART)
-      sigaction (SIGALRM, &old_sa, NULL);
-#else
-      signal (SIGALRM, ofunc);
-#endif
 #endif
     }
   else
