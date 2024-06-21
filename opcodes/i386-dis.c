@@ -9004,6 +9004,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	  ins->evex_type = evex_from_legacy;
 	  if (ins->address_mode != mode_64bit)
 	    return &bad_opcode;
+	  ins->rex |= REX_OPCODE;
 	  break;
 	case 0x5:
 	  vex_table_index = EVEX_MAP5;
