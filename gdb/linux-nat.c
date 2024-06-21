@@ -454,6 +454,12 @@ linux_init_ptrace_procfs (pid_t pid, int attached)
   linux_ptrace_init_warnings ();
   linux_proc_init_warnings ();
   proc_mem_file_is_writable ();
+
+  /* Let the arch-specific native code do any needed initialization.
+     Some architectures need to call ptrace to check for hardware
+     watchpoints support, etc.  Call it now, when we know the tracee
+     is ptrace-stopped.  */
+  linux_target->low_init_process (pid);
 }
 
 linux_nat_target::~linux_nat_target ()
