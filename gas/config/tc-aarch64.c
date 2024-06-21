@@ -6869,10 +6869,14 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Zn_5_INDEX:
 	case AARCH64_OPND_SME_Zm_INDEX1:
 	case AARCH64_OPND_SME_Zm_INDEX2:
+	case AARCH64_OPND_SME_Zm_INDEX2_3:
 	case AARCH64_OPND_SME_Zm_INDEX3_1:
 	case AARCH64_OPND_SME_Zm_INDEX3_2:
+	case AARCH64_OPND_SME_Zm_INDEX3_3:
 	case AARCH64_OPND_SME_Zm_INDEX3_10:
 	case AARCH64_OPND_SME_Zm_INDEX4_1:
+	case AARCH64_OPND_SME_Zm_INDEX4_2:
+	case AARCH64_OPND_SME_Zm_INDEX4_3:
 	case AARCH64_OPND_SME_Zm_INDEX4_10:
 	case AARCH64_OPND_SME_Zn_INDEX1_16:
 	case AARCH64_OPND_SME_Zn_INDEX2_15:
@@ -8104,6 +8108,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 	  break;
 
+	case AARCH64_OPND_SME_ZAda_1b:
 	case AARCH64_OPND_SME_ZAda_2b:
 	case AARCH64_OPND_SME_ZAda_3b:
 	  reg = parse_reg_with_qual (&str, REG_TYPE_ZAT, &qualifier, 0);
@@ -10698,6 +10703,10 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_FEATURE (SSVE_FP8FMA)},
   {"ssve-fp8dot2",	AARCH64_FEATURE (SSVE_FP8DOT2),
 			AARCH64_FEATURE (SSVE_FP8DOT4)},
+  {"sme-f8f32",		AARCH64_FEATURE (SME_F8F32),
+			AARCH64_FEATURES (2, FP8, SME2)},
+  {"sme-f8f16",		AARCH64_FEATURE (SME_F8F16),
+			AARCH64_FEATURE (SME_F8F32)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 
@@ -10716,6 +10725,8 @@ static const struct aarch64_virtual_dependency_table aarch64_dependencies[] = {
   {AARCH64_FEATURE (SSVE_FP8DOT4), AARCH64_FEATURE (FP8DOT4_SVE)},
   {AARCH64_FEATURES (2, FP8DOT2, SVE2), AARCH64_FEATURE (FP8DOT2_SVE)},
   {AARCH64_FEATURE (SSVE_FP8DOT2), AARCH64_FEATURE (FP8DOT2_SVE)},
+  /* TODO: Add SME_F16F16->SME_F16F16_F8F16 when SME_F16F16 is added.  */
+  {AARCH64_FEATURE (SME_F8F16), AARCH64_FEATURE (SME_F16F16_F8F16)},
 };
 
 static aarch64_feature_set

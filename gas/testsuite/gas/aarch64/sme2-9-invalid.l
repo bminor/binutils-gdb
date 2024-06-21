@@ -172,8 +172,4 @@
 [^ :]+:[0-9]+: Info:    	fadd za\.s\[w8, 0\], {z0\.s-z1\.s}
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
 [^ :]+:[0-9]+: Info:    	fadd za\.d\[w8, 0\], {z0\.d-z1\.d}
-[^ :]+:[0-9]+: Error: operand mismatch -- `fadd za\.h\[w8,0\],{z0\.h-z1\.h}'
-[^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	fadd za\.s\[w8, 0\], {z0\.s-z1\.s}
-[^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	fadd za\.d\[w8, 0\], {z0\.d-z1\.d}
+[^ :]+:[0-9]+: Error: selected processor does not support `fadd za\.h\[w8,0\],{z0\.h-z1\.h}'

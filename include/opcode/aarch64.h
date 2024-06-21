@@ -254,6 +254,10 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SSVE_FP8DOT4,
   /* SSVE FP8DOT2 instructions.  */
   AARCH64_FEATURE_SSVE_FP8DOT2,
+  /* SME F8F32 instructions.  */
+  AARCH64_FEATURE_SME_F8F32,
+  /* SME F8F16 instructions.  */
+  AARCH64_FEATURE_SME_F8F16,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
@@ -263,6 +267,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_FP8DOT4_SVE,
   /* +fp8dot2+sve or +ssve-fp8dot2  */
   AARCH64_FEATURE_FP8DOT2_SVE,
+  /* +sme-f16f16 or +sme-f8f16  */
+  AARCH64_FEATURE_SME_F16F16_F8F16,
   AARCH64_NUM_FEATURES
 };
 
@@ -795,6 +801,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_Znx4,	/* SVE vector register list from [9:7]*4.  */
   AARCH64_OPND_SME_Ztx2_STRIDED, /* SVE vector register list in [4:0]&23.  */
   AARCH64_OPND_SME_Ztx4_STRIDED, /* SVE vector register list in [4:0]&19.  */
+  AARCH64_OPND_SME_ZAda_1b,	/* SME <ZAda>.H, 1-bits.  */
   AARCH64_OPND_SME_ZAda_2b,	/* SME <ZAda>.S, 2-bits.  */
   AARCH64_OPND_SME_ZAda_3b,	/* SME <ZAda>.D, 3-bits.  */
   AARCH64_OPND_SME_ZA_HV_idx_src,	/* SME source ZA tile vector.  */
@@ -825,10 +832,14 @@ enum aarch64_opnd
   AARCH64_OPND_SME_SHRIMM5,	    /* size + 5-bit right shift, bits [23:22,20:16].  */
   AARCH64_OPND_SME_Zm_INDEX1,	    /* Zn.T[index], bits [19:16,10].  */
   AARCH64_OPND_SME_Zm_INDEX2,	    /* Zn.T[index], bits [19:16,11:10].  */
+  AARCH64_OPND_SME_Zm_INDEX2_3,	    /* Zn.T[index], bits [19:16,10,3].  */
   AARCH64_OPND_SME_Zm_INDEX3_1,     /* Zn.T[index], bits [19:16,10,2:1].  */
   AARCH64_OPND_SME_Zm_INDEX3_2,     /* Zn.T[index], bits [19:16,11:10,2].  */
+  AARCH64_OPND_SME_Zm_INDEX3_3,     /* Zn.T[index], bits [19:16,11:10,3].  */
   AARCH64_OPND_SME_Zm_INDEX3_10,    /* Zn.T[index], bits [19:16,15,11:10].  */
   AARCH64_OPND_SME_Zm_INDEX4_1,     /* Zn.T[index], bits [19:16,11:10,2:1].  */
+  AARCH64_OPND_SME_Zm_INDEX4_2,     /* Zn.T[index], bits [19:16,11:10,3:2].  */
+  AARCH64_OPND_SME_Zm_INDEX4_3,     /* Zn.T[index], bits [19:16,15,11,10,3].  */
   AARCH64_OPND_SME_Zm_INDEX4_10,    /* Zn.T[index], bits [19:16,15,12:10].  */
   AARCH64_OPND_SME_Zn_INDEX1_16,    /* Zn[index], bits [9:5] and [16:16].  */
   AARCH64_OPND_SME_Zn_INDEX2_15,    /* Zn[index], bits [9:5] and [16:15].  */

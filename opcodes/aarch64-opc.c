@@ -256,6 +256,7 @@ const aarch64_field fields[] =
     { 15,  1 }, /* SME_V: (horizontal / vertical tiles), bit 15.  */
     { 10,  1 }, /* SME_VL_10: VLx2 or VLx4, bit [10].  */
     { 13,  1 }, /* SME_VL_13: VLx2 or VLx4, bit [13].  */
+    {  0,  1 }, /* SME_ZAda_1b: tile ZA0-ZA1.  */
     {  0,  2 }, /* SME_ZAda_2b: tile ZA0-ZA3.  */
     {  0,  3 }, /* SME_ZAda_3b: tile ZA0-ZA7.  */
     {  4,  1 }, /* SME_ZdnT: upper bit of Zt, bit [4].  */
@@ -348,6 +349,7 @@ const aarch64_field fields[] =
     { 21,  2 },	/* hw: in move wide constant instructions.  */
     {  0,  1 },	/* imm1_0: general immediate in bits [0].  */
     {  2,  1 },	/* imm1_2: general immediate in bits [2].  */
+    {  3,  1 },	/* imm1_3: general immediate in bits [3].  */
     {  8,  1 },	/* imm1_8: general immediate in bits [8].  */
     { 10,  1 },	/* imm1_10: general immediate in bits [10].  */
     { 14,  1 },	/* imm1_14: general immediate in bits [14].  */
@@ -355,6 +357,7 @@ const aarch64_field fields[] =
     { 16,  1 },	/* imm1_16: general immediate in bits [16].  */
     {  0,  2 },	/* imm2_0: general immediate in bits [1:0].  */
     {  1,  2 },	/* imm2_1: general immediate in bits [2:1].  */
+    {  2,  2 },	/* imm2_2: general immediate in bits [3:2].  */
     {  8,  2 },	/* imm2_8: general immediate in bits [9:8].  */
     { 10,  2 }, /* imm2_10: 2-bit immediate, bits [11:10] */
     { 12,  2 }, /* imm2_12: 2-bit immediate, bits [13:12] */
@@ -1884,10 +1887,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	case AARCH64_OPND_SME_Zm_INDEX1:
 	case AARCH64_OPND_SME_Zm_INDEX2:
+	case AARCH64_OPND_SME_Zm_INDEX2_3:
 	case AARCH64_OPND_SME_Zm_INDEX3_1:
 	case AARCH64_OPND_SME_Zm_INDEX3_2:
+	case AARCH64_OPND_SME_Zm_INDEX3_3:
 	case AARCH64_OPND_SME_Zm_INDEX3_10:
 	case AARCH64_OPND_SME_Zm_INDEX4_1:
+	case AARCH64_OPND_SME_Zm_INDEX4_2:
+	case AARCH64_OPND_SME_Zm_INDEX4_3:
 	case AARCH64_OPND_SME_Zm_INDEX4_10:
 	  size = get_operand_fields_width (get_operand_from_code (type)) - 4;
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 15,
@@ -4273,11 +4280,15 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zn_INDEX:
     case AARCH64_OPND_SME_Zm_INDEX1:
     case AARCH64_OPND_SME_Zm_INDEX2:
+    case AARCH64_OPND_SME_Zm_INDEX2_3:
     case AARCH64_OPND_SME_Zm_INDEX3_1:
     case AARCH64_OPND_SME_Zm_INDEX3_2:
+    case AARCH64_OPND_SME_Zm_INDEX3_3:
     case AARCH64_OPND_SME_Zm_INDEX3_10:
     case AARCH64_OPND_SVE_Zn_5_INDEX:
     case AARCH64_OPND_SME_Zm_INDEX4_1:
+    case AARCH64_OPND_SME_Zm_INDEX4_2:
+    case AARCH64_OPND_SME_Zm_INDEX4_3:
     case AARCH64_OPND_SME_Zm_INDEX4_10:
     case AARCH64_OPND_SME_Zn_INDEX1_16:
     case AARCH64_OPND_SME_Zn_INDEX2_15:
@@ -4294,6 +4305,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		style_imm (styler, "%" PRIi64, opnd->reglane.index));
       break;
 
+    case AARCH64_OPND_SME_ZAda_1b:
     case AARCH64_OPND_SME_ZAda_2b:
     case AARCH64_OPND_SME_ZAda_3b:
       snprintf (buf, size, "%s",
