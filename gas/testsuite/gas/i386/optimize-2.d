@@ -24,6 +24,18 @@ Disassembly of section .text:
  +[a-f0-9]+:	09 f6                	or     %esi,%esi
  +[a-f0-9]+:	87 0a                	xchg   %ecx,\(%edx\)
  +[a-f0-9]+:	87 11                	xchg   %edx,\(%ecx\)
+ +[a-f0-9]+:	d0 e2                	shl    \$1,%dl
+ +[a-f0-9]+:	d0 e2                	shl    \$1,%dl
+ +[a-f0-9]+:	66 d1 e2             	shl    \$1,%dx
+ +[a-f0-9]+:	66 d1 e2             	shl    \$1,%dx
+ +[a-f0-9]+:	d1 e2                	shl    \$1,%edx
+ +[a-f0-9]+:	d1 e2                	shl    \$1,%edx
+ +[a-f0-9]+:	d0 e2                	shl    \$1,%dl
+ +[a-f0-9]+:	d0 e2                	shl    \$1,%dl
+ +[a-f0-9]+:	66 d1 e2             	shl    \$1,%dx
+ +[a-f0-9]+:	66 d1 e2             	shl    \$1,%dx
+ +[a-f0-9]+:	d1 e2                	shl    \$1,%edx
+ +[a-f0-9]+:	d1 e2                	shl    \$1,%edx
  +[a-f0-9]+:	c5 f1 55 e9          	vandnpd %xmm1,%xmm1,%xmm5
  +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
  +[a-f0-9]+:	c5 f9 6f d1          	vmovdqa %xmm1,%xmm2
@@ -164,5 +176,17 @@ Disassembly of section .text:
  +[a-f0-9]+:	66 .*	pcmpeqd %xmm2,%xmm2
  +[a-f0-9]+:	c5 .*	vpcmpeqd %xmm2,%xmm2,%xmm0
  +[a-f0-9]+:	c5 .*	vpcmpeqd %ymm2,%ymm2,%ymm0
+ +[a-f0-9]+:	0f .*	paddw  %mm2,%mm2
+ +[a-f0-9]+:	66 .*	paddw  %xmm2,%xmm2
+ +[a-f0-9]+:	c5 .*	vpaddw %xmm2,%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vpaddw %xmm2,%xmm2,%xmm3\{%k4\}
+ +[a-f0-9]+:	0f .*	paddd  %mm2,%mm2
+ +[a-f0-9]+:	66 .*	paddd  %xmm2,%xmm2
+ +[a-f0-9]+:	c5 .*	vpaddd %ymm2,%ymm2,%ymm3
+ +[a-f0-9]+:	62 .*	vpaddd %ymm2,%ymm2,%ymm3\{%k4\}
+ +[a-f0-9]+:	0f .*	psllq  \$(0x)?1,%mm2
+ +[a-f0-9]+:	66 .*	paddq  %xmm2,%xmm2
+ +[a-f0-9]+:	c5 .*	vpaddq %xmm2,%xmm2,%xmm3
+ +[a-f0-9]+:	62 .*	vpaddq %zmm2,%zmm2,%zmm3
  +[a-f0-9]+:	c5 .*	vpunpcklqdq %xmm2,%xmm2,%xmm0
 #pass

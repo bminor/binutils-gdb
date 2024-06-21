@@ -95,4 +95,28 @@ Disassembly of section .text:
  +[a-f0-9]+:	d5 50 29 c9          	sub    %r17d,%r17d
  +[a-f0-9]+:	62 ec 74 10 28 d1    	sub    %r18b,%r17b,%r17b
  +[a-f0-9]+:	d5 50 29 c9          	sub    %r17d,%r17d
+ +[a-f0-9]+:	00 d2                	add    %dl,%dl
+ +[a-f0-9]+:	66 01 d2             	add    %dx,%dx
+ +[a-f0-9]+:	01 d2                	add    %edx,%edx
+ +[a-f0-9]+:	48 01 d2             	add    %rdx,%rdx
+ +[a-f0-9]+:	00 d2                	add    %dl,%dl
+ +[a-f0-9]+:	66 01 d2             	add    %dx,%dx
+ +[a-f0-9]+:	01 d2                	add    %edx,%edx
+ +[a-f0-9]+:	48 01 d2             	add    %rdx,%rdx
+ +[a-f0-9]+:	62 f4 7c 18 00 d2    	add    %dl,%dl,%al
+ +[a-f0-9]+:	62 f4 7d 18 01 d2    	add    %dx,%dx,%ax
+ +[a-f0-9]+:	62 f4 7c 18 01 d2    	add    %edx,%edx,%eax
+ +[a-f0-9]+:	62 f4 fc 18 01 d2    	add    %rdx,%rdx,%rax
+ +[a-f0-9]+:	00 d2                	add    %dl,%dl
+ +[a-f0-9]+:	66 01 d2             	add    %dx,%dx
+ +[a-f0-9]+:	01 d2                	add    %edx,%edx
+ +[a-f0-9]+:	48 01 d2             	add    %rdx,%rdx
+ +[a-f0-9]+:	00 d2                	add    %dl,%dl
+ +[a-f0-9]+:	66 01 d2             	add    %dx,%dx
+ +[a-f0-9]+:	01 d2                	add    %edx,%edx
+ +[a-f0-9]+:	48 01 d2             	add    %rdx,%rdx
+ +[a-f0-9]+:	62 f4 7c 18 00 d2    	add    %dl,%dl,%al
+ +[a-f0-9]+:	62 f4 7d 18 01 d2    	add    %dx,%dx,%ax
+ +[a-f0-9]+:	62 f4 7c 18 01 d2    	add    %edx,%edx,%eax
+ +[a-f0-9]+:	62 f4 fc 18 01 d2    	add    %rdx,%rdx,%rax
 #pass

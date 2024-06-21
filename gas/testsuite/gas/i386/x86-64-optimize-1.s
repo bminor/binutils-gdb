@@ -89,3 +89,33 @@ _start:
 	sub	%r17b, %r17b, %r17b
 	sub	%r18b, %r17b, %r17b
 	sub	%r18b, %r18b, %r17b
+
+	shl	$1, %dl
+	shl	$1, %dx
+	shl	$1, %edx
+	shl	$1, %rdx
+
+	shl	%dl
+	shl	%dx
+	shl	%edx
+	shl	%rdx
+
+	shl	$1, %dl, %al
+	shl	$1, %dx, %ax
+	shl	$1, %edx, %eax
+	shl	$1, %rdx, %rax
+
+	sal	$1, %dl
+	sal	$1, %dx
+	sal	$1, %edx
+	sal	$1, %rdx
+
+	sal	%dl
+	sal	%dx
+	sal	%edx
+	sal	%rdx
+
+	sal	$1, %dl, %al
+	sal	$1, %dx, %ax
+	sal	$1, %edx, %eax
+	sal	$1, %rdx, %rax
