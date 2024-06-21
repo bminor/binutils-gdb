@@ -1253,7 +1253,6 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zks", "zksh",	check_implicit_always},
   {"zvbb", "zvkb",	check_implicit_always},
   {"zvkn", "zvkned",	check_implicit_always},
-  {"zvkn", "zvknha",	check_implicit_always},
   {"zvkn", "zvknhb",	check_implicit_always},
   {"zvkn", "zvkb",	check_implicit_always},
   {"zvkn", "zvkt",	check_implicit_always},
