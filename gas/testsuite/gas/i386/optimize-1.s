@@ -189,6 +189,11 @@ _start:
 	vpcmpgtq	%xmm2, %xmm2, %xmm0
 	vpcmpgtq	%ymm2, %ymm2, %ymm0
 
+	pextrd		$0, %xmm1, %edx
+	pextrd		$0, %xmm1, (%edx)
+	vpextrd		$0, %xmm1, %edx
+	vpextrd		$0, %xmm1, (%edx)
+
 	bt	$15, %ax
 	bt	$16, %ax
 	btc	$15, %ax

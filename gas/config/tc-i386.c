@@ -5287,6 +5287,44 @@ optimize_encoding (void)
 
       swap_2_operands (1, 2);
     }
+  else if (i.tm.base_opcode == 0x16
+	   && i.tm.opcode_space == SPACE_0F3A
+	   && i.op[0].imms->X_op == O_constant
+	   && i.op[0].imms->X_add_number == 0)
+    {
+      /* Optimize: -O:
+         pextrd $0, %xmmN, ...   -> movd %xmmN, ...
+         pextrq $0, %xmmN, ...   -> movq %xmmN, ...
+         vpextrd $0, %xmmN, ...  -> vmovd %xmmN, ...
+         vpextrq $0, %xmmN, ...  -> vmovq %xmmN, ...
+       */
+      i.tm.opcode_space = SPACE_0F;
+      if (!i.mem_operands
+	  || i.tm.opcode_modifier.evex
+	  || (i.tm.opcode_modifier.vexw != VEXW1
+	      && i.tm.opcode_modifier.size != SIZE64))
+	i.tm.base_opcode = 0x7e;
+      else
+	{
+	  i.tm.base_opcode = 0xd6;
+	  i.tm.opcode_modifier.size = 0;
+	  i.tm.opcode_modifier.vexw
+	    = i.tm.opcode_modifier.sse2avx ? VEXW0 : VEXWIG;
+	}
+
+      i.op[0].regs = i.op[1].regs;
+      i.types[0] = i.types[1];
+      i.flags[0] = i.flags[1];
+      i.tm.operand_types[0] = i.tm.operand_types[1];
+
+      i.op[1].regs = i.op[2].regs;
+      i.types[1] = i.types[2];
+      i.flags[1] = i.flags[2];
+      i.tm.operand_types[1] = i.tm.operand_types[2];
+
+      i.operands = 2;
+      i.imm_operands = 0;
+    }
 }
 
 static void
