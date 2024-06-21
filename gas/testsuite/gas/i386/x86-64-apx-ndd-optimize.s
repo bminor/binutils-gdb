@@ -1,5 +1,6 @@
 # Check 64bit APX NDD instructions with optimized encoding
 
+	.allow_index_reg
 	.text
 _start:
 add    %r31,%r8,%r8
@@ -120,9 +121,11 @@ adcx   %rbx,%rax,%rax
 adcx   %eax,%r8d,%r8d
 adcx   %r15d,%eax,%eax
 adcx   (%edx,%ecx,1),%eax,%eax
+adcx   (%rdx,%riz,1),%eax,%eax
 adox   %ebx,%eax,%eax
 adox   %eax,%ebx,%eax
 adox   %rbx,%rax,%rax
 adox   %eax,%r8d,%r8d
 adox   %r15d,%eax,%eax
 adox   (%edx,%ecx,1),%eax,%eax
+adox   sym(%rip),%eax,%eax

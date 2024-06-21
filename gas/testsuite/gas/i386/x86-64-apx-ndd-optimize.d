@@ -127,10 +127,12 @@ Disassembly of section .text:
 \s*[a-f0-9]+:\s*62 74 3d 18 66 c0    	adcx   %eax,%r8d,%r8d
 \s*[a-f0-9]+:\s*62 d4 7d 18 66 c7    	adcx   %r15d,%eax,%eax
 \s*[a-f0-9]+:\s*67 66 0f 38 f6 04 0a 	adcx   \(%edx,%ecx,1\),%eax
+\s*[a-f0-9]+:\s*66 0f 38 f6 04 22    	adcx   \(%rdx,%riz,1\),%eax
 \s*[a-f0-9]+:\s*f3 0f 38 f6 c3       	adox   %ebx,%eax
 \s*[a-f0-9]+:\s*f3 0f 38 f6 c3       	adox   %ebx,%eax
 \s*[a-f0-9]+:\s*62 f4 fe 18 66 c3    	adox   %rbx,%rax,%rax
 \s*[a-f0-9]+:\s*62 74 3e 18 66 c0    	adox   %eax,%r8d,%r8d
 \s*[a-f0-9]+:\s*62 d4 7e 18 66 c7    	adox   %r15d,%eax,%eax
 \s*[a-f0-9]+:\s*67 f3 0f 38 f6 04 0a 	adox   \(%edx,%ecx,1\),%eax
+\s*[a-f0-9]+:\s*f3 0f 38 f6 05 00 00 00 00 	adox   (0x)?0\(%rip\),%eax[ 	]+# .*	sym.*
 #pass

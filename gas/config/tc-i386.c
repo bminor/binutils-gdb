@@ -8683,8 +8683,8 @@ check_Rex_required (void)
 	return true;
     }
 
-  if ((i.index_reg && (i.index_reg->reg_flags & (RegRex | RegRex64)))
-      || (i.base_reg && (i.base_reg->reg_flags & (RegRex | RegRex64))))
+  if ((i.index_reg && (i.index_reg->reg_flags & RegRex))
+      || (i.base_reg && (i.base_reg->reg_flags & RegRex)))
     return true;
 
   /* Check pseudo prefix {rex} are valid.  */
