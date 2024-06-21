@@ -10684,14 +10684,6 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 
-struct aarch64_long_option_table
-{
-  const char *option;			/* Substring to match.  */
-  const char *help;			/* Help information.  */
-  int (*func) (const char *subopt);	/* Function to decode sub-option.  */
-  char *deprecated;		/* If non-null, print this message.  */
-};
-
 /* Transitive closure of features depending on set.  */
 static aarch64_feature_set
 aarch64_feature_disable_set (aarch64_feature_set set)
@@ -10923,6 +10915,14 @@ aarch64_parse_abi (const char *str)
   as_bad (_("unknown abi `%s'\n"), str);
   return 0;
 }
+
+struct aarch64_long_option_table
+{
+  const char *option;			/* Substring to match.  */
+  const char *help;			/* Help information.  */
+  int (*func) (const char *subopt);	/* Function to decode sub-option.  */
+  char *deprecated;		/* If non-null, print this message.  */
+};
 
 static struct aarch64_long_option_table aarch64_long_opts[] = {
   {"mabi=", N_("<abi name>\t  specify for ABI <abi name>"),
