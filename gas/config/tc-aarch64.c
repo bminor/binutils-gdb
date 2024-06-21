@@ -10684,6 +10684,32 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 
+/* If all features in the TEST feature set are present, then every virtual
+   feature in the ENABLES feature set should also be enabled.  */
+struct aarch64_virtual_dependency_table
+{
+  const aarch64_feature_set test;
+  const aarch64_feature_set enables;
+};
+
+static const struct aarch64_virtual_dependency_table aarch64_dependencies[] = {
+  {AARCH64_NO_FEATURES, AARCH64_NO_FEATURES}
+};
+
+static aarch64_feature_set
+aarch64_update_virtual_dependencies (aarch64_feature_set set)
+{
+  unsigned int i;
+  for (i = 0; i < ARRAY_SIZE (aarch64_dependencies); i++)
+    AARCH64_CLEAR_FEATURES (set, set, aarch64_dependencies[i].enables);
+
+  for (i = 0; i < ARRAY_SIZE (aarch64_dependencies); i++)
+    if (AARCH64_CPU_HAS_ALL_FEATURES (set, aarch64_dependencies[i].test))
+      AARCH64_MERGE_FEATURE_SETS (set, set, aarch64_dependencies[i].enables);
+
+  return set;
+}
+
 /* Transitive closure of features depending on set.  */
 static aarch64_feature_set
 aarch64_feature_disable_set (aarch64_feature_set set)
@@ -10722,16 +10748,23 @@ static int
 aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
 			bool ext_only)
 {
+  /* Copy the feature set, so that we can modify it.  */
+  aarch64_feature_set *ext_set = XNEW (aarch64_feature_set);
+  *ext_set = **opt_p;
+  *opt_p = ext_set;
+
+  if (str == NULL)
+    {
+      /* No extensions, so just set the virtual feature bits and return.  */
+      *ext_set = aarch64_update_virtual_dependencies (*ext_set);
+      return 1;
+    }
+
   /* We insist on extensions being added before being removed.  We achieve
      this by using the ADDING_VALUE variable to indicate whether we are
      adding an extension (1) or removing it (0) and only allowing it to
      change in the order -1 -> 1 -> 0.  */
   int adding_value = -1;
-  aarch64_feature_set *ext_set = XNEW (aarch64_feature_set);
-
-  /* Copy the feature set, so that we can modify it.  */
-  *ext_set = **opt_p;
-  *opt_p = ext_set;
 
   while (str != NULL && *str != 0)
     {
@@ -10811,6 +10844,7 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
       str = ext;
     };
 
+  *ext_set = aarch64_update_virtual_dependencies (*ext_set);
   return 1;
 }
 
@@ -10836,10 +10870,7 @@ aarch64_parse_cpu (const char *str)
     if (strlen (opt->name) == optlen && strncmp (str, opt->name, optlen) == 0)
       {
 	mcpu_cpu_opt = &opt->value;
-	if (ext != NULL)
-	  return aarch64_parse_features (ext, &mcpu_cpu_opt, false);
-
-	return 1;
+	return aarch64_parse_features (ext, &mcpu_cpu_opt, false);
       }
 
   as_bad (_("unknown cpu `%s'"), str);
@@ -10868,10 +10899,7 @@ aarch64_parse_arch (const char *str)
     if (strlen (opt->name) == optlen && strncmp (str, opt->name, optlen) == 0)
       {
 	march_cpu_opt = &opt->value;
-	if (ext != NULL)
-	  return aarch64_parse_features (ext, &march_cpu_opt, false);
-
-	return 1;
+	return aarch64_parse_features (ext, &march_cpu_opt, false);
       }
 
   as_bad (_("unknown architecture `%s'\n"), str);
@@ -11057,9 +11085,8 @@ s_aarch64_cpu (int ignored ATTRIBUTE_UNUSED)
 	&& strncmp (name, opt->name, optlen) == 0)
       {
 	mcpu_cpu_opt = &opt->value;
-	if (ext != NULL)
-	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, false))
-	    return;
+	if (!aarch64_parse_features (ext, &mcpu_cpu_opt, false))
+	  return;
 
 	cpu_variant = *mcpu_cpu_opt;
 
@@ -11102,9 +11129,8 @@ s_aarch64_arch (int ignored ATTRIBUTE_UNUSED)
 	&& strncmp (name, opt->name, optlen) == 0)
       {
 	mcpu_cpu_opt = &opt->value;
-	if (ext != NULL)
-	  if (!aarch64_parse_features (ext, &mcpu_cpu_opt, false))
-	    return;
+	if (!aarch64_parse_features (ext, &mcpu_cpu_opt, false))
+	  return;
 
 	cpu_variant = *mcpu_cpu_opt;
 
