@@ -3103,6 +3103,8 @@ do_repeat (size_t count, const char *start, const char *end,
       return;
     }
 
+  sb_terminate (&one);
+
   if (expander != NULL && !*expander && strstr (one.ptr, "\\+") != NULL)
     {
       /* The 3 here and below are arbitrary, added in an attempt to limit
@@ -3116,8 +3118,7 @@ do_repeat (size_t count, const char *start, const char *end,
 
 	  sb_build (&processed, one.len + 3);
 
-	  for (ptr = one.ptr;
-	       (bs = memchr (ptr, '\\', one.ptr + one.len - ptr)) != NULL; )
+	  for (ptr = one.ptr; (bs = strchr (ptr, '\\')) != NULL; )
 	    {
 	      sb_add_buffer (&processed, ptr, bs - ptr);
 	      switch (bs[1])
@@ -3148,7 +3149,7 @@ do_repeat (size_t count, const char *start, const char *end,
 		}
 	    }
 
-	  sb_add_buffer (&processed, ptr, one.ptr + one.len - ptr);
+	  sb_add_string (&processed, ptr);
 
 	  sb_add_sb (&many, &processed);
 	  sb_kill (&processed);
