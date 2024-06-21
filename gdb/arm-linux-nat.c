@@ -103,6 +103,7 @@ public:
 
   /* Handle process creation and exit.  */
   void low_new_fork (struct lwp_info *parent, pid_t child_pid) override;
+  void low_init_process (pid_t pid) override;
   void low_forget_process (pid_t pid) override;
 };
 
@@ -803,6 +804,19 @@ arm_linux_process_info_get (pid_t pid)
     proc = arm_linux_add_process (pid);
 
   return proc;
+}
+
+/* Implement the "low_init_process" target_ops method.  */
+
+void
+arm_linux_nat_target::low_init_process (pid_t pid)
+{
+  /* Set the hardware debug register capacity.  This requires the process to be
+     ptrace-stopped, otherwise detection will fail and software watchpoints will
+     be used instead of hardware.  If we allow this to be done lazily, we
+     cannot guarantee that it's called when the process is ptrace-stopped, so
+     do it now.  */
+  arm_linux_get_hwbp_cap ();
 }
 
 /* Called whenever GDB is no longer debugging process PID.  It deletes

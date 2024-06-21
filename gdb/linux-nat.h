@@ -164,6 +164,12 @@ public:
   virtual void low_new_clone (struct lwp_info *parent, pid_t child_lwp)
   {}
 
+  /* The method to call, if any, when we have a new (from run/attach,
+     not fork) process to debug.  The process is ptrace-stopped when
+     this is called.  */
+  virtual void low_init_process (pid_t pid)
+  {}
+
   /* The method to call, if any, when a process is no longer
      attached.  */
   virtual void low_forget_process (pid_t pid)
