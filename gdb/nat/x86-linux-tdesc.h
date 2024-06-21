@@ -44,8 +44,7 @@ struct x86_xsave_layout;
    i386_linux_read_description for cases when nullptr might be
    returned.  */
 
-extern const target_desc *
-x86_linux_tdesc_for_tid (int tid, uint64_t *xcr0_storage,
-			 x86_xsave_layout *xsave_layout_storage);
+extern const target_desc *x86_linux_tdesc_for_tid
+  (int tid, uint64_t *xcr0_storage, x86_xsave_layout *xsave_layout_storage);
 
 #endif /* NAT_X86_LINUX_TDESC_H */
