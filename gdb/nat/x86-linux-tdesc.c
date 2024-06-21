@@ -90,8 +90,13 @@ x86_linux_tdesc_for_tid (int tid, uint64_t *xcr0_storage,
       if (ptrace (PTRACE_GETREGSET, tid,
 		  (unsigned int) NT_X86_XSTATE, &iov) < 0)
 	{
+	  /* Can't fetch the xcr0 value so pick a simple default.  This
+	     default has x87 and sse bits set.  These bits are ignored for
+	     amd64 and x32 targets, but are checked for on i386.  Without
+	     these bits being set we generate a completely empty tdesc for
+	     i386 which will be rejected by GDB.  */
 	  have_ptrace_getregset = TRIBOOL_FALSE;
-	  *xcr0_storage = 0;
+	  *xcr0_storage = X86_XSTATE_SSE_MASK;
 	}
       else
 	{
@@ -112,15 +117,8 @@ x86_linux_tdesc_for_tid (int tid, uint64_t *xcr0_storage,
 	}
     }
 
-  /* Check the native XCR0 only if PTRACE_GETREGSET is available.  If
-     PTRACE_GETREGSET is not available then set xcr0_features_bits to
-     zero so that the "no-features" descriptions are returned by the
-     code below.  */
-  uint64_t xcr0_features_bits;
-  if (have_ptrace_getregset == TRIBOOL_TRUE)
-    xcr0_features_bits = *xcr0_storage & X86_XSTATE_ALL_MASK;
-  else
-    xcr0_features_bits = 0;
+  /* Use cached xcr0 value.  */
+  uint64_t xcr0_features_bits = *xcr0_storage & X86_XSTATE_ALL_MASK;
 
 #ifdef __x86_64__
   if (is_64bit)
