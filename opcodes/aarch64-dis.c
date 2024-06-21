@@ -402,6 +402,12 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	  info->reglane.index = extract_fields (code, 0, 2, FLD_H, FLD_L);
 	  info->reglane.regno &= 0x1f;
 	  break;
+	case AARCH64_OPND_QLF_S_2B:
+	  /* h:l:m */
+	  info->reglane.index = extract_fields (code, 0, 3, FLD_H, FLD_L,
+						FLD_M);
+	  info->reglane.regno &= 0xf;
+	  break;
 	default:
 	  return false;
 	}
@@ -422,7 +428,15 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	return 0;
       switch (info->qualifier)
 	{
+	case AARCH64_OPND_QLF_S_B:
+	  /* H:imm3 */
+	  info->reglane.index = extract_fields (code, 0, 2, FLD_H,
+						FLD_imm3_19);
+	  info->reglane.regno &= 0x7;
+	  break;
+
 	case AARCH64_OPND_QLF_S_H:
+	case AARCH64_OPND_QLF_S_2B:
 	  if (info->type == AARCH64_OPND_Em16)
 	    {
 	      /* h:l:m */
@@ -437,6 +451,7 @@ aarch64_ext_reglane (const aarch64_operand *self, aarch64_opnd_info *info,
 	    }
 	  break;
 	case AARCH64_OPND_QLF_S_S:
+	case AARCH64_OPND_QLF_S_4B:
 	  /* h:l */
 	  info->reglane.index = extract_fields (code, 0, 2, FLD_H, FLD_L);
 	  break;

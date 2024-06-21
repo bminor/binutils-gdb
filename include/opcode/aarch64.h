@@ -242,6 +242,27 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_BRBE,
   /* SME LUTv2 instructions.  */
   AARCH64_FEATURE_SME_LUTv2,
+  /* FP8FMA instructions.  */
+  AARCH64_FEATURE_FP8FMA,
+  /* FP8DOT4 instructions.  */
+  AARCH64_FEATURE_FP8DOT4,
+  /* FP8DOT2 instructions.  */
+  AARCH64_FEATURE_FP8DOT2,
+  /* SSVE FP8FMA instructions.  */
+  AARCH64_FEATURE_SSVE_FP8FMA,
+  /* SSVE FP8DOT4 instructions.  */
+  AARCH64_FEATURE_SSVE_FP8DOT4,
+  /* SSVE FP8DOT2 instructions.  */
+  AARCH64_FEATURE_SSVE_FP8DOT2,
+
+  /* Virtual features.  These are used to gate instructions that are enabled
+     by either of two (or more) sets of command line flags.  */
+  /* +fp8fma+sve or +ssve-fp8fma  */
+  AARCH64_FEATURE_FP8FMA_SVE,
+  /* +fp8dot4+sve or +ssve-fp8dot4  */
+  AARCH64_FEATURE_FP8DOT4_SVE,
+  /* +fp8dot2+sve or +ssve-fp8dot2  */
+  AARCH64_FEATURE_FP8DOT2_SVE,
   AARCH64_NUM_FEATURES
 };
 
@@ -529,7 +550,9 @@ enum aarch64_opnd
   AARCH64_OPND_En,	/* AdvSIMD Vector Element Vn.  */
   AARCH64_OPND_Em,	/* AdvSIMD Vector Element Vm.  */
   AARCH64_OPND_Em16,	/* AdvSIMD Vector Element Vm restricted to V0 - V15 when
-			   qualifier is S_H.  */
+			   qualifier is S_H or S_2B.  */
+  AARCH64_OPND_Em8,	/* AdvSIMD Vector Element Vm restricted to V0 - V7,
+			   used only with qualifier S_B.  */
   AARCH64_OPND_Em_INDEX1_14,  /* AdvSIMD 1-bit encoded index in Vm at [14]  */
   AARCH64_OPND_Em_INDEX2_13,  /* AdvSIMD 2-bit encoded index in Vm at [14:13]  */
   AARCH64_OPND_Em_INDEX3_12,  /* AdvSIMD 3-bit encoded index in Vm at [14:12]  */
@@ -751,6 +774,7 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_Zm3_12_INDEX, /* SVE bit index in Zm, bits 12 plus bit [23,22].  */
   AARCH64_OPND_SVE_Zm3_19_INDEX, /* z0-z7[0-3] in Zm3_INDEX plus bit 19.  */
   AARCH64_OPND_SVE_Zm3_22_INDEX, /* z0-z7[0-7] in Zm3_INDEX plus bit 22.  */
+  AARCH64_OPND_SVE_Zm3_10_INDEX, /* z0-z7[0-15] in Zm3_INDEX plus bit 11:10.  */
   AARCH64_OPND_SVE_Zm4_11_INDEX, /* z0-z15[0-3] in Zm plus bit 11.  */
   AARCH64_OPND_SVE_Zm_imm4,     /* SVE vector register with 4bit index.  */
   AARCH64_OPND_SVE_Zm4_INDEX,	/* z0-z15[0-1] in Zm, bits [20,16].  */
@@ -868,11 +892,12 @@ enum aarch64_opnd_qualifier
   AARCH64_OPND_QLF_S_S,
   AARCH64_OPND_QLF_S_D,
   AARCH64_OPND_QLF_S_Q,
-  /* These type qualifiers have a special meaning in that they mean 4 x 1 byte
-     or 2 x 2 byte are selected by the instruction.  Other than that they have
-     no difference with AARCH64_OPND_QLF_S_B in encoding.  They are here purely
-     for syntactical reasons and is an exception from normal AArch64
-     disassembly scheme.  */
+  /* These type qualifiers have a special meaning in that they mean 2 x 1 byte,
+     4 x 1 byte or 2 x 2 byte are selected by the instruction.  Other than that
+     they have no difference with AARCH64_OPND_QLF_S_B in encoding.  They are
+     here purely for syntactical reasons and is an exception from normal
+     AArch64 disassembly scheme.  */
+  AARCH64_OPND_QLF_S_2B,
   AARCH64_OPND_QLF_S_4B,
   AARCH64_OPND_QLF_S_2H,
 

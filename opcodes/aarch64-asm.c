@@ -153,9 +153,14 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
 	{
 	case AARCH64_OPND_QLF_S_4B:
 	case AARCH64_OPND_QLF_S_2H:
-	  /* L:H */
+	  /* H:L */
 	  assert (reglane_index < 4);
 	  insert_fields (code, reglane_index, 0, 2, FLD_L, FLD_H);
+	  break;
+	case AARCH64_OPND_QLF_S_2B:
+	  /* H:L:M */
+	  assert (reglane_index < 8);
+	  insert_fields (code, reglane_index, 0, 3, FLD_M, FLD_L, FLD_H);
 	  break;
 	default:
 	  return false;
@@ -180,6 +185,11 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
 
       switch (info->qualifier)
 	{
+	case AARCH64_OPND_QLF_S_B:
+	  /* H:imm3 */
+	  assert (reglane_index < 16);
+	  insert_fields (code, reglane_index, 0, 2, FLD_imm3_19, FLD_H);
+	  break;
 	case AARCH64_OPND_QLF_S_H:
 	  /* H:L:M */
 	  assert (reglane_index < 8);

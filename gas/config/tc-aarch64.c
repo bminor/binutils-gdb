@@ -820,6 +820,10 @@ vectype_to_qualifier (const struct vector_type_el *vectype)
 
   if (vectype->defined & (NTA_HASINDEX | NTA_HASVARWIDTH))
     {
+      /* Special case S_2B.  */
+      if (vectype->type == NT_b && vectype->width == 2)
+	return AARCH64_OPND_QLF_S_2B;
+
       /* Special case S_4B.  */
       if (vectype->type == NT_b && vectype->width == 4)
 	return AARCH64_OPND_QLF_S_4B;
@@ -1010,7 +1014,7 @@ aarch64_reg_parse_32_64 (char **ccp, aarch64_opnd_qualifier_t *qualifier)
    succeeds; otherwise return FALSE.
 
    Accept only one occurrence of:
-   4b 8b 16b 2h 4h 8h 2s 4s 1d 2d
+   2b 4b 8b 16b 2h 4h 8h 2s 4s 1d 2d
    b h s d q  */
 static bool
 parse_vector_type_for_operand (aarch64_reg_type reg_type,
@@ -1074,6 +1078,7 @@ parse_vector_type_for_operand (aarch64_reg_type reg_type,
   if (width != 0 && width * element_size != 64
       && width * element_size != 128
       && !(width == 2 && element_size == 16)
+      && !(width == 2 && element_size == 8)
       && !(width == 4 && element_size == 8))
     {
       first_error_fmt (_
@@ -6334,6 +6339,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_En:
     case AARCH64_OPND_Em:
     case AARCH64_OPND_Em16:
+    case AARCH64_OPND_Em8:
     case AARCH64_OPND_SM3_IMM2:
       operand->reglane.regno = default_value;
       break;
@@ -6855,6 +6861,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Zm3_22_INDEX:
 	case AARCH64_OPND_SVE_Zm3_19_INDEX:
 	case AARCH64_OPND_SVE_Zm3_11_INDEX:
+	case AARCH64_OPND_SVE_Zm3_10_INDEX:
 	case AARCH64_OPND_SVE_Zm4_11_INDEX:
 	case AARCH64_OPND_SVE_Zm4_INDEX:
 	case AARCH64_OPND_SVE_Zn_INDEX:
@@ -6880,6 +6887,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_En:
 	case AARCH64_OPND_Em:
 	case AARCH64_OPND_Em16:
+	case AARCH64_OPND_Em8:
 	case AARCH64_OPND_SM3_IMM2:
 	  reg_type = REG_TYPE_V;
 	vector_reg_index:
@@ -10681,6 +10689,15 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"lut",		AARCH64_FEATURE (LUT), AARCH64_FEATURE (SIMD)},
   {"brbe",		AARCH64_FEATURE (BRBE), AARCH64_NO_FEATURES},
   {"sme-lutv2",		AARCH64_FEATURE (SME_LUTv2), AARCH64_FEATURE (SME2)},
+  {"fp8fma",		AARCH64_FEATURE (FP8FMA), AARCH64_FEATURE (FP8)},
+  {"fp8dot4",		AARCH64_FEATURE (FP8DOT4), AARCH64_FEATURE (FP8FMA)},
+  {"fp8dot2",		AARCH64_FEATURE (FP8DOT2), AARCH64_FEATURE (FP8DOT4)},
+  {"ssve-fp8fma",	AARCH64_FEATURE (SSVE_FP8FMA),
+			AARCH64_FEATURES (2, FP8, SME2)},
+  {"ssve-fp8dot4",	AARCH64_FEATURE (SSVE_FP8DOT4),
+			AARCH64_FEATURE (SSVE_FP8FMA)},
+  {"ssve-fp8dot2",	AARCH64_FEATURE (SSVE_FP8DOT2),
+			AARCH64_FEATURE (SSVE_FP8DOT4)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 
@@ -10693,7 +10710,12 @@ struct aarch64_virtual_dependency_table
 };
 
 static const struct aarch64_virtual_dependency_table aarch64_dependencies[] = {
-  {AARCH64_NO_FEATURES, AARCH64_NO_FEATURES}
+  {AARCH64_FEATURES (2, FP8FMA, SVE2), AARCH64_FEATURE (FP8FMA_SVE)},
+  {AARCH64_FEATURE (SSVE_FP8FMA), AARCH64_FEATURE (FP8FMA_SVE)},
+  {AARCH64_FEATURES (2, FP8DOT4, SVE2), AARCH64_FEATURE (FP8DOT4_SVE)},
+  {AARCH64_FEATURE (SSVE_FP8DOT4), AARCH64_FEATURE (FP8DOT4_SVE)},
+  {AARCH64_FEATURES (2, FP8DOT2, SVE2), AARCH64_FEATURE (FP8DOT2_SVE)},
+  {AARCH64_FEATURE (SSVE_FP8DOT2), AARCH64_FEATURE (FP8DOT2_SVE)},
 };
 
 static aarch64_feature_set

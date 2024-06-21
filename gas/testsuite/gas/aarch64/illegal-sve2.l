@@ -419,11 +419,11 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `fmlalb z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `fmlalb z0\.s,z0\.h,z8\.h\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `fmlalb z0\.s,z32\.h,z0\.h\[0\]'
-[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fmlalb z32\.s,z0\.h,z0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `fmlalb z32\.s,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `fmlalb z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	fmlalb z0\.s, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fmlalb z32\.s,z0\.h,z0\.h'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `fmlalb z32\.s,z0\.h,z0\.h'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `fmlalb z0\.s,z32\.h,z0\.h'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `fmlalb z0\.s,z0\.h,z32\.h'
 [^ :]+:[0-9]+: Error: operand mismatch -- `fmlalb z0\.s,z0\.h,z0\.d'
@@ -432,11 +432,11 @@
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `fmlalt z0\.s,z0\.h,z0\.h\[8\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `fmlalt z0\.s,z0\.h,z8\.h\[0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `fmlalt z0\.s,z32\.h,z0\.h\[0\]'
-[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fmlalt z32\.s,z0\.h,z0\.h\[0\]'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `fmlalt z32\.s,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `fmlalt z0\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	fmlalt z0\.s, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `fmlalt z32\.s,z0\.h,z0\.h'
+[^ :]+:[0-9]+: Error: expected a vector register at operand 1 -- `fmlalt z32\.s,z0\.h,z0\.h'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 2 -- `fmlalt z0\.s,z32\.h,z0\.h'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 3 -- `fmlalt z0\.s,z0\.h,z32\.h'
 [^ :]+:[0-9]+: Error: operand mismatch -- `fmlalt z0\.s,z0\.h,z0\.d'

@@ -197,6 +197,12 @@ automatically cause those extensions to be disabled.
  @tab Enable floating-point extensions.
 @item @code{fp8} @tab
  @tab Enable the Floating Point 8 (FP8) extension.
+@item @code{fp8dot2} @tab @code{fp8dot4}
+ @tab Enable the FP8 2-way dot product instructions.
+@item @code{fp8dot4} @tab @code{fp8fma}
+ @tab Enable the FP8 4-way dot product instructions.
+@item @code{fp8fma} @tab @code{fp8}
+ @tab Enable the FP8 FMA instructions.
 @item @code{fp16fml} @tab @code{fp16}
  @tab Enable Armv8.2 16-bit floating-point multiplication variant support.
 @item @code{fp16} @tab @code{fp}
@@ -277,6 +283,12 @@ automatically cause those extensions to be disabled.
  @tab Enable SME2.1.
 @item @code{ssbs} @tab
  @tab Enable Speculative Store Bypassing Safe state read and write.
+@item @code{ssve-fp8dot2} @tab @code{ssve-fp8dot4}
+ @tab Enable the Streaming SVE FP8 2-way dot product instructions.  These can also be enabled using @code{+fp8dot2+sme2}.
+@item @code{ssve-fp8dot4} @tab @code{ssve-fp8fma}
+ @tab Enable the Streaming SVE FP8 4-way dot product instructions.  These can also be enabled using @code{+fp8dot4+sme2}.
+@item @code{ssve-fp8fma} @tab @code{sme2}, @code{fp8}
+ @tab Enable the Streaming SVE FP8 FMA instructions.  These can also be enabled using @code{+fp8fma+sme2}.
 @item @code{sve} @tab @code{fcma}
  @tab Enable the Scalable Vector Extension.
 @item @code{sve2} @tab @code{sve}

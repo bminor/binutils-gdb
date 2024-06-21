@@ -310,6 +310,7 @@ const aarch64_field fields[] =
     { 22,  2 }, /* SVE_i3h3: two high bits of 3bit immediate, bits [22,23].  */
     { 11,  1 }, /* SVE_i3l: low bit of 3-bit immediate.  */
     { 12,  1 }, /* SVE_i3l2: low bit of 3-bit immediate, bit 12.  */
+    { 10,  2 }, /* SVE_i4l2: two low bits of 4bit immediate, bits [11,10].  */
     { 16,  3 }, /* SVE_imm3: 3-bit immediate field.  */
     { 16,  4 }, /* SVE_imm4: 4-bit immediate field.  */
     {  5,  5 }, /* SVE_imm5: 5-bit immediate field.  */
@@ -367,6 +368,7 @@ const aarch64_field fields[] =
     { 12,  3 },	/* imm3_12: general immediate in bits [14:12].  */
     { 14,  3 },	/* imm3_14: general immediate in bits [16:14].  */
     { 15,  3 },	/* imm3_15: general immediate in bits [17:15].  */
+    { 19,  3 },	/* imm3_19: general immediate in bits [21:19].  */
     {  0,  4 },	/* imm4_0: in rmif instructions.  */
     {  5,  4 }, /* imm4_5: in SME instructions.  */
     { 10,  4 },	/* imm4_10: in adddg/subg instructions.  */
@@ -818,6 +820,7 @@ struct operand_qualifier_data aarch64_opnd_qualifiers[] =
   {4, 1, 0x2, "s", OQK_OPD_VARIANT},
   {8, 1, 0x3, "d", OQK_OPD_VARIANT},
   {16, 1, 0x4, "q", OQK_OPD_VARIANT},
+  {2, 1, 0x0, "2b", OQK_OPD_VARIANT},
   {4, 1, 0x0, "4b", OQK_OPD_VARIANT},
   {4, 1, 0x0, "2h", OQK_OPD_VARIANT},
 
@@ -1816,6 +1819,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_Zm3_22_INDEX:
 	case AARCH64_OPND_SVE_Zm3_19_INDEX:
 	case AARCH64_OPND_SVE_Zm3_11_INDEX:
+	case AARCH64_OPND_SVE_Zm3_10_INDEX:
 	case AARCH64_OPND_SVE_Zm4_11_INDEX:
 	case AARCH64_OPND_SVE_Zm4_INDEX:
 	  size = get_operand_fields_width (get_operand_from_code (type));
@@ -3234,10 +3238,18 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	 01		0:Rm
 	 10		M:Rm
 	 11		RESERVED  */
-      if (type == AARCH64_OPND_Em16 && qualifier == AARCH64_OPND_QLF_S_H
+      if (type == AARCH64_OPND_Em16
+	  && (qualifier == AARCH64_OPND_QLF_S_H
+	      || qualifier == AARCH64_OPND_QLF_S_2B)
 	  && !value_in_range_p (opnd->reglane.regno, 0, 15))
 	{
 	  set_regno_out_of_range_error (mismatch_detail, idx, 0, 15);
+	  return 0;
+	}
+      if (type == AARCH64_OPND_Em8
+	  && !value_in_range_p (opnd->reglane.regno, 0, 7))
+	{
+	  set_regno_out_of_range_error (mismatch_detail, idx, 0, 7);
 	  return 0;
 	}
       break;
@@ -4127,6 +4139,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_En:
     case AARCH64_OPND_Em:
     case AARCH64_OPND_Em16:
+    case AARCH64_OPND_Em8:
     case AARCH64_OPND_SM3_IMM2:
       snprintf (buf, size, "%s[%s]",
 		style_reg (styler, "v%d.%s", opnd->reglane.regno,
@@ -4254,6 +4267,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zm3_19_INDEX:
     case AARCH64_OPND_SVE_Zm3_12_INDEX:
     case AARCH64_OPND_SVE_Zm3_11_INDEX:
+    case AARCH64_OPND_SVE_Zm3_10_INDEX:
     case AARCH64_OPND_SVE_Zm4_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_INDEX:
     case AARCH64_OPND_SVE_Zn_INDEX:
