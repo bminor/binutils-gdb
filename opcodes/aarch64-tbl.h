@@ -1814,6 +1814,13 @@
 {                                                       \
   QLF2(S_S,NIL),                                        \
 }
+/* e.g. movt ZT0{[<offs>, MUL VL]}, <Zt>  */
+/* The second operand doesn't have a qualifier and
+   is checked separetely during encoding.  */
+#define OP_SVE_SU_Q					\
+{                                                       \
+  QLF2(S_Q,NIL),                                        \
+}
 #define OP_SVE_SUS                                      \
 {                                                       \
   QLF3(S_S,NIL,S_S),                                    \
@@ -2049,6 +2056,13 @@
   QLF3(S_H,NIL,W),                                      \
   QLF3(S_S,NIL,W),                                      \
   QLF3(S_D,NIL,X),                                      \
+}
+/* e.g. luti4 { <Zd1>.B-<Zd4>.B }, ZT0, { <Zn1>-<Zn2> }  */
+/* The second and third operands don't have qualifiers and
+   are checked separetely during encoding.  */
+#define OP_SVE_VUU_B					\
+{                                                       \
+  QLF3(S_B,NIL,NIL),                                    \
 }
 #define OP_SVE_VUU_BHS                                  \
 {                                                       \
@@ -2752,6 +2766,8 @@ static const aarch64_feature_set aarch64_feature_lut_sve2 =
   AARCH64_FEATURES (2, LUT, SVE2);
 static const aarch64_feature_set aarch64_feature_brbe =
   AARCH64_FEATURE (BRBE);
+static const aarch64_feature_set aarch64_feature_sme_lutv2 =
+  AARCH64_FEATURES (3, SME_LUTv2, SME2, SME2p1);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2829,6 +2845,7 @@ static const aarch64_feature_set aarch64_feature_brbe =
 #define LUT &aarch64_feature_lut
 #define LUT_SVE2 &aarch64_feature_lut_sve2
 #define BRBE		&aarch64_feature_brbe
+#define LUTv2_SME2 &aarch64_feature_sme_lutv2
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -3029,6 +3046,9 @@ static const aarch64_feature_set aarch64_feature_brbe =
     FLAGS, CONSTRAINTS, 0, NULL }
 #define BRBE_INSN(NAME,OPCODE,MASK,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, ic_system, 0, BRBE, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define LUTv2_SME2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS)	\
+  { NAME, OPCODE, MASK, CLASS, 0, LUTv2_SME2, OPS, QUALS, \
+    FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -6615,6 +6635,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   LUT_SVE2_INSN ("luti4", 0x4520b400, 0xff20fc00, OP3 (SVE_Zd, SVE_ZnxN, SVE_Zm2_22_INDEX), OP_SVE_HHU, F_OD(2), 0),
   LUT_SVE2_INSN ("luti4", 0x4520bc00, 0xff20fc00, OP3 (SVE_Zd, SVE_ZnxN, SVE_Zm2_22_INDEX), OP_SVE_HHU, F_OD(1), 0),
 
+  /* SME2 lutv2.  */
+  LUTv2_SME2_INSN ("luti4", 0xc08b0000, 0xffffcc23, sme_size_12_b, OP3 (SME_Zdnx4, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_VUU_B, F_STRICT | 0),
+  LUTv2_SME2_INSN ("luti4", 0xc09b0000, 0xffffcc2c, sme_size_12_b, OP3 (SME_Zdnx4_STRIDED, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_VUU_B, F_STRICT | 0),
+  LUTv2_SME2_INSN ("movt", 0xc04f03e0, 0xffffcfe0, sme_misc, OP2 (SME_ZT0_INDEX2_12, SVE_Zt), {}, 0),
+
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 
@@ -7139,6 +7164,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_SME_Zdn2), "a list of SVE vector registers")		\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zdnx4", 4 << OPD_F_OD_LSB,	\
       F(FLD_SME_Zdn4), "a list of SVE vector registers")		\
+    Y(SVE_REGLIST, sve_strided_reglist, "SME_Zdnx4_STRIDED",		\
+      4 << OPD_F_OD_LSB, F(FLD_SME_ZdnT, FLD_SME_Zdn2_0),		\
+      "a list of SVE vector registers")					\
     Y(SVE_REG, regno, "SME_Zm", 0, F(FLD_SME_Zm),			\
       "an SVE vector register")						\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zmx2", 2 << OPD_F_OD_LSB,	\
@@ -7147,6 +7175,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_SME_Zm4), "a list of SVE vector registers")			\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Znx2", 2 << OPD_F_OD_LSB,	\
       F(FLD_SME_Zn2), "a list of SVE vector registers")			\
+    Y(SVE_REGLIST, sve_aligned_reglist, "SME_Znx2_BIT_INDEX",		\
+      2 << OPD_F_OD_LSB, F(FLD_SME_Zn2),				\
+      "a list of SVE vector registers")					\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Znx4", 4 << OPD_F_OD_LSB,	\
       F(FLD_SME_Zn4), "a list of SVE vector registers")			\
     Y(SVE_REGLIST, sve_strided_reglist, "SME_Ztx2_STRIDED",		\
@@ -7256,6 +7287,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "VLx2 or VLx4")							\
     Y(SYSTEM, none, "SME_ZT0", 0, F (), "ZT0")				\
     Y(IMMEDIATE, imm, "SME_ZT0_INDEX", OPD_F_SHIFT_BY_3,		\
+      F (FLD_imm3_12), "a ZT0 index")					\
+    Y(IMMEDIATE, imm, "SME_ZT0_INDEX2_12", 0,				\
       F (FLD_imm3_12), "a ZT0 index")					\
     Y(SYSTEM, none, "SME_ZT0_LIST", 0, F (), "{ ZT0 }")			\
     Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16_5),			\

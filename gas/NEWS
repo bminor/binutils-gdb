@@ -50,6 +50,8 @@
 
 * Add support for the AArch64 Lookup Table Extension (LUT).
 
+* Add support for the AArch64 Lookup Table Extension v2 (LUTv2).
+
 Changes in 2.42:
 
 * Add support for AMD znver5 processor.

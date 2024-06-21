@@ -1365,6 +1365,11 @@ reg_type_mask (aarch64_reg_type reg_type)
 
    It returns PARSE_FAIL if the register list is invalid.
 
+   If HAS_QUALIFIER is true, the registers in the list must have qualifiers
+   or the list is invalid.
+   If HAS_QUALIFIER is false, the registers in the list must not have
+   qualifiers or the list is invalid.
+
    The list contains one to four registers.
    Each register can be one of:
    <Vt>.<T>[<index>]
@@ -1376,7 +1381,8 @@ reg_type_mask (aarch64_reg_type reg_type)
 
 static int
 parse_vector_reg_list (char **ccp, aarch64_reg_type type,
-		       struct vector_type_el *vectype)
+		       struct vector_type_el *vectype,
+		       bool has_qualifier)
 {
   char *str = *ccp;
   int nb_regs;
@@ -1413,8 +1419,15 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	  str++;		/* skip over '-' */
 	  val_range = val;
 	}
-      const reg_entry *reg = parse_typed_reg (&str, type, &typeinfo,
-					      ptr_flags);
+
+      const reg_entry *reg;
+      if (has_qualifier)
+	reg = parse_typed_reg (&str, type, &typeinfo, ptr_flags);
+      else
+	{
+	  reg = parse_reg (&str);
+	  typeinfo.defined = 0;
+	}
       if (!reg)
 	{
 	  set_first_syntax_error (_("invalid vector register in list"));
@@ -3891,6 +3904,55 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
     }
 
   return parse_shifter_operand (str, operand, mode);
+}
+
+/* Parse a ZT0 vector with an optional bit index and a shifter operand.
+      zt0
+      zt0[0, mul vl]
+      zt0[2, mul vl]
+
+   We only support 'mul vl' as shifter operand and it is handled by
+   parse_shift.
+
+   Return TRUE on success; otherwise return FALSE.  */
+
+static bool
+parse_shifter_zt0_with_bit_index (char **str,
+				  aarch64_opnd_info *operand,
+				  enum parse_shift_mode mode)
+{
+  const reg_entry *reg = parse_reg (str);
+  if (reg == NULL)
+    return false;
+
+  if (reg->type != REG_TYPE_ZT0)
+    return false;
+
+  operand->reglane.regno = reg->number;
+
+  if (!skip_past_char (str, '['))
+    {
+      // It is not an error if the index is not present.
+      // Default to 0.
+      operand->imm.value = 0;
+      return true;
+    }
+
+  int64_t index;
+  if (!parse_index_expression (str, &index))
+      return false;
+  operand->imm.value = index;
+
+  if (!skip_past_comma (str))
+      return true;
+
+  if (!parse_shift (str, operand, mode))
+    return false;
+
+  if (!skip_past_char (str, ']'))
+    return false;
+
+  return true;
 }
 
 /* Parse all forms of an address expression.  Information is written
@@ -6860,10 +6922,26 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->reglane.index = vectype.index;
 	  break;
 
+	case AARCH64_OPND_SME_Znx2_BIT_INDEX:
+	  // A vector register list encoding a bit index.
+	  reg_type = REG_TYPE_Z;
+	  val = parse_vector_reg_list (&str, reg_type, &vectype, false);
+	  if (val == PARSE_FAIL)
+	    goto failure;
+
+	  if (! reg_list_valid_p (val, &info->reglist, reg_type))
+	    {
+	      set_fatal_syntax_error (_("invalid register list"));
+	      goto failure;
+	    }
+
+	  break;
+
 	case AARCH64_OPND_SVE_ZnxN:
 	case AARCH64_OPND_SVE_ZtxN:
 	case AARCH64_OPND_SME_Zdnx2:
 	case AARCH64_OPND_SME_Zdnx4:
+	case AARCH64_OPND_SME_Zdnx4_STRIDED:
 	case AARCH64_OPND_SME_Zt2:
 	case AARCH64_OPND_SME_Zt3:
 	case AARCH64_OPND_SME_Zt4:
@@ -6901,7 +6979,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  else
 	    {
-	      val = parse_vector_reg_list (&str, reg_type, &vectype);
+	      val = parse_vector_reg_list (&str, reg_type, &vectype, true);
 	      if (val == PARSE_FAIL)
 		goto failure;
 
@@ -7966,6 +8044,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      goto failure;
 	    }
 	  info->imm.value = vectype.index;
+	  break;
+
+	case AARCH64_OPND_SME_ZT0_INDEX2_12:
+	  po_misc_or_fail (parse_shifter_zt0_with_bit_index
+			   (&str, info, SHIFTED_MUL_VL));
 	  break;
 
 	case AARCH64_OPND_SME_ZT0_LIST:
@@ -10597,6 +10680,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"fp8",		AARCH64_FEATURE (FP8), AARCH64_FEATURE (SIMD)},
   {"lut",		AARCH64_FEATURE (LUT), AARCH64_FEATURE (SIMD)},
   {"brbe",		AARCH64_FEATURE (BRBE), AARCH64_NO_FEATURES},
+  {"sme-lutv2",		AARCH64_FEATURE (SME_LUTv2), AARCH64_FEATURE (SME2)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 

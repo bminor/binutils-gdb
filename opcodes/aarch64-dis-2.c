@@ -204,32 +204,54 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                             }
                                           else
                                             {
-                                              if (((word >> 22) & 0x1) == 0)
+                                              if (((word >> 20) & 0x1) == 0)
                                                 {
-                                                  if (((word >> 14) & 0x1) == 0)
+                                                  if (((word >> 22) & 0x1) == 0)
                                                     {
-                                                      /* 33222222222211111111110000000000
-                                                         10987654321098765432109876543210
-                                                         x1000000x00x101xx0xxxxxxxxxxxxxx
-                                                         luti4.  */
-                                                      return 2671;
+                                                      if (((word >> 14) & 0x1) == 0)
+                                                        {
+                                                          if (((word >> 15) & 0x1) == 0)
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 x1000000x000101x00xxxxxxxxxxxxxx
+                                                                 luti4.  */
+                                                              return 3394;
+                                                            }
+                                                          else
+                                                            {
+                                                              /* 33222222222211111111110000000000
+                                                                 10987654321098765432109876543210
+                                                                 x1000000x000101x10xxxxxxxxxxxxxx
+                                                                 luti4.  */
+                                                              return 2671;
+                                                            }
+                                                        }
+                                                      else
+                                                        {
+                                                          /* 33222222222211111111110000000000
+                                                             10987654321098765432109876543210
+                                                             x1000000x000101xx1xxxxxxxxxxxxxx
+                                                             luti4.  */
+                                                          return 2670;
+                                                        }
                                                     }
                                                   else
                                                     {
                                                       /* 33222222222211111111110000000000
                                                          10987654321098765432109876543210
-                                                         x1000000x00x101xx1xxxxxxxxxxxxxx
+                                                         x1000000x100101xxxxxxxxxxxxxxxxx
                                                          luti4.  */
-                                                      return 2670;
+                                                      return 2669;
                                                     }
                                                 }
                                               else
                                                 {
                                                   /* 33222222222211111111110000000000
                                                      10987654321098765432109876543210
-                                                     x1000000x10x101xxxxxxxxxxxxxxxxx
+                                                     x1000000xx01101xxxxxxxxxxxxxxxxx
                                                      luti4.  */
-                                                  return 2669;
+                                                  return 3395;
                                                 }
                                             }
                                         }
@@ -328,21 +350,32 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                     {
                                                       if (((word >> 23) & 0x1) == 0)
                                                         {
-                                                          if (((word >> 17) & 0x1) == 0)
+                                                          if (((word >> 16) & 0x1) == 0)
                                                             {
-                                                              /* 33222222222211111111110000000000
-                                                                 10987654321098765432109876543210
-                                                                 x1000000010x110xxxxx00xxxxxxxxxx
-                                                                 movt.  */
-                                                              return 2689;
+                                                              if (((word >> 17) & 0x1) == 0)
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     x1000000010x1100xxxx00xxxxxxxxxx
+                                                                     movt.  */
+                                                                  return 2689;
+                                                                }
+                                                              else
+                                                                {
+                                                                  /* 33222222222211111111110000000000
+                                                                     10987654321098765432109876543210
+                                                                     x1000000010x1110xxxx00xxxxxxxxxx
+                                                                     movt.  */
+                                                                  return 2688;
+                                                                }
                                                             }
                                                           else
                                                             {
                                                               /* 33222222222211111111110000000000
                                                                  10987654321098765432109876543210
-                                                                 x1000000010x111xxxxx00xxxxxxxxxx
+                                                                 x1000000010x11x1xxxx00xxxxxxxxxx
                                                                  movt.  */
-                                                              return 2688;
+                                                              return 3396;
                                                             }
                                                         }
                                                       else
@@ -33676,19 +33709,19 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 226:
     case 237:
     case 241:
-    case 245:
-    case 252:
-    case 253:
-    case 260:
-    case 261:
+    case 246:
+    case 254:
+    case 255:
     case 262:
     case 263:
+    case 264:
+    case 265:
       return aarch64_ext_regno (self, info, code, inst, errors);
     case 6:
     case 118:
     case 119:
-    case 295:
     case 297:
+    case 300:
       return aarch64_ext_none (self, info, code, inst, errors);
     case 11:
       return aarch64_ext_regrt_sysins (self, info, code, inst, errors);
@@ -33707,7 +33740,7 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 36:
     case 37:
     case 38:
-    case 299:
+    case 302:
       return aarch64_ext_reglane (self, info, code, inst, errors);
     case 39:
     case 40:
@@ -33715,10 +33748,8 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 227:
     case 228:
     case 231:
-    case 264:
-    case 265:
-    case 280:
-    case 281:
+    case 266:
+    case 267:
     case 282:
     case 283:
     case 284:
@@ -33730,6 +33761,8 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 290:
     case 291:
     case 292:
+    case 293:
+    case 294:
       return aarch64_ext_simple_index (self, info, code, inst, errors);
     case 42:
       return aarch64_ext_reglist (self, info, code, inst, errors);
@@ -33779,13 +33812,14 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 207:
     case 208:
     case 209:
-    case 266:
-    case 293:
-    case 294:
+    case 268:
+    case 295:
     case 296:
     case 298:
-    case 303:
-    case 304:
+    case 299:
+    case 301:
+    case 306:
+    case 307:
       return aarch64_ext_imm (self, info, code, inst, errors);
     case 51:
     case 52:
@@ -33935,7 +33969,7 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 199:
     case 200:
     case 201:
-    case 279:
+    case 281:
       return aarch64_ext_sve_shrimm (self, info, code, inst, errors);
     case 214:
     case 215:
@@ -33961,56 +33995,58 @@ aarch64_extract_operand (const aarch64_operand *self,
       return aarch64_ext_sve_index (self, info, code, inst, errors);
     case 240:
     case 242:
-    case 259:
+    case 261:
       return aarch64_ext_sve_reglist (self, info, code, inst, errors);
     case 243:
     case 244:
-    case 246:
     case 247:
     case 248:
     case 249:
-    case 258:
-      return aarch64_ext_sve_aligned_reglist (self, info, code, inst, errors);
     case 250:
     case 251:
+    case 260:
+      return aarch64_ext_sve_aligned_reglist (self, info, code, inst, errors);
+    case 245:
+    case 252:
+    case 253:
       return aarch64_ext_sve_strided_reglist (self, info, code, inst, errors);
-    case 254:
     case 256:
-    case 267:
-      return aarch64_ext_sme_za_hv_tiles (self, info, code, inst, errors);
-    case 255:
-    case 257:
-      return aarch64_ext_sme_za_hv_tiles_range (self, info, code, inst, errors);
-    case 268:
+    case 258:
     case 269:
+      return aarch64_ext_sme_za_hv_tiles (self, info, code, inst, errors);
+    case 257:
+    case 259:
+      return aarch64_ext_sme_za_hv_tiles_range (self, info, code, inst, errors);
     case 270:
     case 271:
     case 272:
     case 273:
     case 274:
-      return aarch64_ext_sme_za_array (self, info, code, inst, errors);
     case 275:
-      return aarch64_ext_sme_addr_ri_u4xvl (self, info, code, inst, errors);
     case 276:
-      return aarch64_ext_sme_sm_za (self, info, code, inst, errors);
+      return aarch64_ext_sme_za_array (self, info, code, inst, errors);
     case 277:
-      return aarch64_ext_sme_pred_reg_with_index (self, info, code, inst, errors);
+      return aarch64_ext_sme_addr_ri_u4xvl (self, info, code, inst, errors);
     case 278:
+      return aarch64_ext_sme_sm_za (self, info, code, inst, errors);
+    case 279:
+      return aarch64_ext_sme_pred_reg_with_index (self, info, code, inst, errors);
+    case 280:
       return aarch64_ext_plain_shrimm (self, info, code, inst, errors);
-    case 300:
-    case 301:
-    case 302:
-      return aarch64_ext_x0_to_x30 (self, info, code, inst, errors);
+    case 303:
+    case 304:
     case 305:
-    case 306:
-    case 307:
-      return aarch64_ext_sve_reglist_zt (self, info, code, inst, errors);
+      return aarch64_ext_x0_to_x30 (self, info, code, inst, errors);
     case 308:
     case 309:
     case 310:
+      return aarch64_ext_sve_reglist_zt (self, info, code, inst, errors);
     case 311:
-      return aarch64_ext_rcpc3_addr_opt_offset (self, info, code, inst, errors);
     case 312:
+    case 313:
+    case 314:
+      return aarch64_ext_rcpc3_addr_opt_offset (self, info, code, inst, errors);
+    case 315:
       return aarch64_ext_rcpc3_addr_offset (self, info, code, inst, errors);
     default: assert (0); abort ();
     }

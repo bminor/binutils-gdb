@@ -258,7 +258,9 @@ const aarch64_field fields[] =
     { 13,  1 }, /* SME_VL_13: VLx2 or VLx4, bit [13].  */
     {  0,  2 }, /* SME_ZAda_2b: tile ZA0-ZA3.  */
     {  0,  3 }, /* SME_ZAda_3b: tile ZA0-ZA7.  */
+    {  4,  1 }, /* SME_ZdnT: upper bit of Zt, bit [4].  */
     {  1,  4 }, /* SME_Zdn2: Z0-Z31, multiple of 2, bits [4:1].  */
+    {  0,  2 }, /* SME_Zdn2_0: lower 2 bits of Zt, bits [1:0].  */
     {  2,  3 }, /* SME_Zdn4: Z0-Z31, multiple of 4, bits [4:2].  */
     { 16,  4 }, /* SME_Zm: Z0-Z15, bits [19:16].  */
     { 17,  4 }, /* SME_Zm2: Z0-Z31, multiple of 2, bits [20:17].  */
@@ -1919,6 +1921,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_Zmx2:
 	case AARCH64_OPND_SME_Zmx4:
 	case AARCH64_OPND_SME_Znx2:
+	case AARCH64_OPND_SME_Znx2_BIT_INDEX:
 	case AARCH64_OPND_SME_Znx4:
 	case AARCH64_OPND_SME_Zt2:
 	case AARCH64_OPND_SME_Zt3:
@@ -1934,6 +1937,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_Zdnx4_STRIDED:
 	case AARCH64_OPND_SME_Ztx2_STRIDED:
 	case AARCH64_OPND_SME_Ztx4_STRIDED:
 	  /* 2-register lists have a stride of 8 and 4-register lists
@@ -3153,6 +3157,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_ZT0_INDEX2_12:
+	  if (!value_in_range_p (opnd->imm.value, 0, 3))
+	    {
+	      set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, 3);
+	      return 0;
+	    }
+	  break;
+
 	default:
 	  break;
 	}
@@ -3745,9 +3757,14 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
       && ((opnd->type != AARCH64_OPND_SME_Zt2)
 	  && (opnd->type != AARCH64_OPND_SME_Zt3)
 	  && (opnd->type != AARCH64_OPND_SME_Zt4)))
-    snprintf (buf, size, "{%s-%s}%s",
-	      style_reg (styler, "%s%d.%s", prefix, first_reg, qlf_name),
-	      style_reg (styler, "%s%d.%s", prefix, last_reg, qlf_name), tb);
+    if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
+      snprintf (buf, size, "{%s-%s}%s",
+		style_reg (styler, "%s%d", prefix, first_reg),
+		style_reg (styler, "%s%d", prefix, last_reg), tb);
+    else
+      snprintf (buf, size, "{%s-%s}%s",
+		style_reg (styler, "%s%d.%s", prefix, first_reg, qlf_name),
+		style_reg (styler, "%s%d.%s", prefix, last_reg, qlf_name), tb);
   else
     {
       const int reg0 = first_reg;
@@ -4216,9 +4233,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_ZtxN:
     case AARCH64_OPND_SME_Zdnx2:
     case AARCH64_OPND_SME_Zdnx4:
+    case AARCH64_OPND_SME_Zdnx4_STRIDED:
     case AARCH64_OPND_SME_Zmx2:
     case AARCH64_OPND_SME_Zmx4:
     case AARCH64_OPND_SME_Znx2:
+    case AARCH64_OPND_SME_Znx2_BIT_INDEX:
     case AARCH64_OPND_SME_Znx4:
     case AARCH64_OPND_SME_Ztx2_STRIDED:
     case AARCH64_OPND_SME_Ztx4_STRIDED:
@@ -4905,6 +4924,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_ZT0_INDEX:
       snprintf (buf, size, "%s[%s]", style_reg (styler, "zt0"),
 		style_imm (styler, "%d", (int) opnd->imm.value));
+      break;
+    case AARCH64_OPND_SME_ZT0_INDEX2_12:
+      snprintf (buf, size, "%s[%s, %s]", style_reg (styler, "zt0"),
+		style_imm (styler, "%d", (int) opnd->imm.value),
+		style_sub_mnem (styler, "mul vl"));
       break;
 
     case AARCH64_OPND_SME_ZT0_LIST:

@@ -269,6 +269,8 @@ automatically cause those extensions to be disabled.
  @tab Enable SME F64F64 Extension.
 @item @code{sme-i16i64} @tab @code{sme}
  @tab Enable SME I16I64 Extension.
+@item @code{sme-lutv2} @tab
+ @tab Enable SME Lookup Table v2 (LUTv2) extension.
 @item @code{sme2} @tab @code{sme}
  @tab Enable SME2.
 @item @code{sme2p1} @tab @code{sme2}
