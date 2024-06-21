@@ -4573,6 +4573,20 @@ check_hle (void)
     }
 }
 
+/* Helper for optimization (running ahead of process_suffix()), to make sure we
+   convert only well-formed insns.  @OP is the sized operand to cross check
+   against (typically a register).  Checking against a single operand typically
+   suffices, as match_template() has already honored CheckOperandSize.  */
+
+static bool is_plausible_suffix (unsigned int op)
+{
+  return !i.suffix
+	 || (i.suffix == BYTE_MNEM_SUFFIX && i.types[op].bitfield.byte)
+	 || (i.suffix == WORD_MNEM_SUFFIX && i.types[op].bitfield.word)
+	 || (i.suffix == LONG_MNEM_SUFFIX && i.types[op].bitfield.dword)
+	 || (i.suffix == QWORD_MNEM_SUFFIX && i.types[op].bitfield.qword);
+}
+
 /* Encode aligned vector move as unaligned vector move.  */
 
 static void
@@ -4758,6 +4772,7 @@ optimize_encoding (void)
       && i.reg_operands == 1
       && i.imm_operands == 1
       && !i.types[1].bitfield.byte
+      && is_plausible_suffix (1)
       && i.op[0].imms->X_op == O_constant
       && fits_in_imm7 (i.op[0].imms->X_add_number))
     {
@@ -4768,7 +4783,7 @@ optimize_encoding (void)
       if (flag_code == CODE_64BIT || base_regnum < 4)
 	{
 	  i.types[1].bitfield.byte = 1;
-	  /* Ignore the suffix.  */
+	  /* Squash the suffix.  */
 	  i.suffix = 0;
 	  /* Convert to byte registers. 8-bit registers are special,
 	     RegRex64 and non-RegRex64 each have 8 registers.  */
