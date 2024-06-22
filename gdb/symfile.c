@@ -3814,7 +3814,7 @@ Usage: symbol-file [-readnow | -readnever] [-o OFF] FILE\n\
 OFF is an optional offset which is added to each section address.\n\
 The `file' command can also load symbol tables, as well as setting the file\n\
 to execute.\n" READNOW_READNEVER_HELP), &cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, filename_maybe_quoted_completer);
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command, _("\
 Load symbols from FILE, assuming FILE has been dynamically loaded.\n\
@@ -3828,7 +3828,7 @@ OFF is an optional offset which is added to the default load addresses\n\
 of all sections for which no other address was specified.\n"
 READNOW_READNEVER_HELP),
 	       &cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, filename_maybe_quoted_completer);
 
   c = add_cmd ("remove-symbol-file", class_files,
 	       remove_symbol_file_command, _("\

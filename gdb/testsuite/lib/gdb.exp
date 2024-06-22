@@ -1702,6 +1702,16 @@ if { [tcl_version_at_least 8 6] == 0 } {
 
 	return $res
     }
+
+    # ::tcl_platform(pathSeparator) was added in 8.6.
+    switch $::tcl_platform(platform) {
+	windows {
+	    set ::tcl_platform(pathSeparator) ;
+	}
+	default {
+	    set ::tcl_platform(pathSeparator) :
+	}
+    }
 }
 
 if { [tcl_version_at_least 8 6 2] == 0 } {

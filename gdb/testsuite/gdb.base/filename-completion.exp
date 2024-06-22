@@ -23,8 +23,16 @@ load_lib completion-support.exp
 #
 # root/			[ DIRECTORY ]
 #   aaa/		[ DIRECTORY ]
+#     aa bb		[ FILE ]
+#     aa cc		[ FILE ]
+#   aaa/		[ DIRECTORY ]
 #   bb1/		[ DIRECTORY ]
 #   bb2/		[ DIRECTORY ]
+#     dir 1/		[ DIRECTORY ]
+#       unique file	[ FILE ]
+#     dir 2/		[ DIRECTORY ]
+#       file 1		[ FILE ]
+#       file 2		[ FILE ]
 #   cc1/		[ DIRECTORY ]
 #   cc2			[ FILE ]
 proc setup_directory_tree {} {
@@ -36,68 +44,170 @@ proc setup_directory_tree {} {
     remote_exec host "mkdir -p ${root}/bb2"
     remote_exec host "mkdir -p ${root}/cc1"
     remote_exec host "touch ${root}/cc2"
-
     remote_exec host "touch \"${root}/aaa/aa bb\""
     remote_exec host "touch \"${root}/aaa/aa cc\""
+    remote_exec host "mkdir -p \"${root}/bb2/dir 1\""
+    remote_exec host "mkdir -p \"${root}/bb2/dir 2\""
+    remote_exec host "touch \"${root}/bb2/dir 1/unique file\""
+    remote_exec host "touch \"${root}/bb2/dir 2/file 1\""
+    remote_exec host "touch \"${root}/bb2/dir 2/file 2\""
 
     return $root
 }
 
-# Run filename completetion tests.  ROOT is the base directory as
-# returned from setup_directory_tree, though, if ROOT is a
-# sub-directory of the user's home directory ROOT might have been
-# modified to replace the $HOME prefix with a single "~" character.
-proc run_tests { root } {
+# Run filename completetion tests for those command that accept quoting and
+# escaping of the filename argument.
+#
+# ROOT is the base directory as returned from setup_directory_tree, though,
+# if ROOT is a sub-directory of the user's home directory ROOT might have
+# been modified to replace the $HOME prefix with a single "~" character.
+proc run_quoting_and_escaping_tests { root } {
+    # Test all the commands which allow quoting of filenames, and
+    # which require whitespace to be escaped in unquoted filenames.
+    foreach_with_prefix cmd { file exec-file symbol-file add-symbol-file } {
+	gdb_start
 
-    # Completing 'thread apply all ...' commands uses a custom word
-    # point.  At one point we had a bug where doing this would break
-    # completion of quoted filenames that contained white space.
-    test_gdb_complete_unique "thread apply all hel" \
-	"thread apply all help" " " false \
-	"complete a 'thread apply all' command"
+	# Completing 'thread apply all ...' commands uses a custom word
+	# point.  At one point we had a bug where doing this would break
+	# completion of quoted filenames that contained white space.
+	test_gdb_complete_unique "thread apply all hel" \
+	    "thread apply all help" " " false \
+	    "complete a 'thread apply all' command"
 
-    foreach_with_prefix qc [list "" "'" "\""] {
-	test_gdb_complete_none "file ${qc}${root}/xx" \
-	    "expand a non-existent filename"
+	foreach_with_prefix qc [list "" "'" "\""] {
+	    test_gdb_complete_none "$cmd ${qc}${root}/xx" \
+		"expand a non-existent filename"
 
-	test_gdb_complete_unique "file ${qc}${root}/a" \
-	    "file ${qc}${root}/aaa/" "" false \
-	    "expand a unique filename"
+	    test_gdb_complete_unique "$cmd ${qc}${root}/a" \
+		"$cmd ${qc}${root}/aaa/" "" false \
+		"expand a unique filename"
 
-	test_gdb_complete_multiple "file ${qc}${root}/" \
-	    "b" "b" {
-		"bb1/"
-		"bb2/"
-	    } "" "${qc}" false \
-	    "expand multiple directory names"
-
-	test_gdb_complete_multiple "file ${qc}${root}/" \
-	    "c" "c" {
-		"cc1/"
-		"cc2"
-	    } "" "${qc}" false \
-	    "expand mixed directory and file names"
-
-	# GDB does not currently escape word break characters
-	# (e.g. white space) correctly in unquoted filenames.
-	if { $qc ne "" } {
-	    set sp " "
-
-	    test_gdb_complete_multiple "file ${qc}${root}/aaa/" \
-		"a" "a${sp}" {
-		    "aa bb"
-		    "aa cc"
+	    test_gdb_complete_multiple "$cmd ${qc}${root}/" \
+		"b" "b" {
+		    "bb1/"
+		    "bb2/"
 		} "" "${qc}" false \
-		"expand filenames containing spaces"
+		"expand multiple directory names"
+
+	    test_gdb_complete_multiple "$cmd ${qc}${root}/" \
+		"c" "c" {
+		    "cc1/"
+		    "cc2"
+		} "" "${qc}" false \
+		"expand mixed directory and file names"
+
+	    # GDB does not currently escape word break characters
+	    # (e.g. white space) correctly in unquoted filenames.
+	    if { $qc ne "" } {
+		set sp " "
+
+		test_gdb_complete_multiple "$cmd ${qc}${root}/aaa/" \
+		    "a" "a${sp}" {
+			"aa bb"
+			"aa cc"
+		    } "" "${qc}" false \
+		    "expand filenames containing spaces"
+	    }
+	}
+
+	gdb_exit
+    }
+}
+
+# Helper for run_unquoted_tests.  ROOT is the root directory as setup
+# by setup_directory_tree.  CMD is the GDB command to test.  PREFIX is
+# a possible prefix filename to prepend to the filename being
+# completed.
+proc run_unquoted_tests_core { root cmd { prefix "" } } {
+    gdb_start
+
+    if { $prefix != "" } {
+	# Platform specific path separator (':' on UNIX, ';' on MS-DOS).
+	set pathsep $::tcl_platform(pathSeparator)
+
+	set prefix ${prefix}${pathsep}
+    }
+
+    test_gdb_complete_none "$cmd ${prefix}${root}${root}/xx" \
+	"expand a non-existent filename"
+
+    test_gdb_complete_unique "$cmd ${prefix}${root}/a" \
+	"$cmd ${prefix}${root}/aaa/" "" false \
+	"expand a unique filename"
+
+    test_gdb_complete_unique "$cmd ${prefix}${root}/bb2/dir 1/uni" \
+	"$cmd ${prefix}${root}/bb2/dir 1/unique file" " " false \
+	"expand a unique filename containing whitespace"
+
+    test_gdb_complete_multiple "$cmd ${prefix}${root}/" \
+	"b" "b" {
+	    "bb1/"
+	    "bb2/"
+	} "" "" false \
+	"expand multiple directory names"
+
+    test_gdb_complete_multiple "$cmd ${prefix}${root}/" \
+	"c" "c" {
+	    "cc1/"
+	    "cc2"
+	} "" "" false \
+	"expand mixed directory and file names"
+
+    test_gdb_complete_multiple "$cmd ${prefix}${root}/aaa/" \
+	"a" "a " {
+	    "aa bb"
+	    "aa cc"
+	} "" "" false \
+	"expand filenames containing spaces"
+
+    test_gdb_complete_multiple "$cmd ${prefix}${root}/bb2/dir 2/" \
+	"fi" "le " {
+	    "file 1"
+	    "file 2"
+	} "" "" false \
+	"expand filenames containing spaces in path"
+
+    gdb_exit
+}
+
+
+# Run filename completetion tests for a sample of commands that take an
+# unquoted, unescaped filename as an argument.  Only a sample of commands
+# are (currently) tested as there's a lot of commands that accept this style
+# of filename argument.
+#
+# ROOT is the base directory as returned from setup_directory_tree, though,
+# if ROOT is a sub-directory of the user's home directory ROOT might have
+# been modified to replace the $HOME prefix with a single "~" character.
+proc run_unquoted_tests { root } {
+    # Test all the commands which allow quoting of filenames, and
+    # which require whitespace to be escaped in unquoted filenames.
+    foreach_with_prefix cmd { "maint print c-tdesc" "set logging file" \
+				  "target core" "add-auto-load-safe-path" } {
+	run_unquoted_tests_core $root $cmd
+    }
+
+    foreach prefix [list \
+			"${root}/bb2/dir 1" \
+			"${root}/bb2/dir 1/unique file" \
+			"${root}/cc1" \
+			"${root}/cc2"] {
+
+	# Don't use the full path in the test name, just use the
+	# part after the ROOT directory.
+	set id [string range $prefix [string length ${root}] end]
+	with_test_prefix "prefix=$id" {
+	    foreach_with_prefix cmd { "add-auto-load-safe-path" "path" } {
+		run_unquoted_tests_core $root $cmd $prefix
+	    }
 	}
     }
 }
 
-gdb_start
-
 set root [setup_directory_tree]
 
-run_tests $root
+run_quoting_and_escaping_tests $root
+run_unquoted_tests $root
 
 # This test relies on using the $HOME directory.  We could make this
 # work for remote hosts, but right now, this isn't supported.
@@ -114,7 +224,8 @@ if {![is_remote host]} {
 
 	with_test_prefix "with tilde" {
 	    # And rerun the tests.
-	    run_tests $tilde_root
+	    run_quoting_and_escaping_tests $tilde_root
+	    run_unquoted_tests $tilde_root
 	}
     }
 }

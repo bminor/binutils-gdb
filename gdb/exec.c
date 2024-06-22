@@ -1074,14 +1074,14 @@ and it is the program executed when you use the `run' command.\n\
 If FILE cannot be found as specified, your execution directory path\n\
 ($PATH) is searched for a command of that name.\n\
 No arg means to have no executable file and no symbols."), &cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, filename_maybe_quoted_completer);
 
   c = add_cmd ("exec-file", class_files, exec_file_command, _("\
 Use FILE as program for getting contents of pure memory.\n\
 If FILE cannot be found as specified, your execution directory path\n\
 is searched for a command of that name.\n\
 No arg means have no executable file."), &cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, filename_maybe_quoted_completer);
 
   add_com ("section", class_files, set_section_command, _("\
 Change the base address of section SECTION of the exec file to ADDR.\n\

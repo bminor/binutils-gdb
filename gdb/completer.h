@@ -563,9 +563,10 @@ extern completion_result
 const char *advance_to_expression_complete_word_point
   (completion_tracker &tracker, const char *text);
 
-/* Assuming TEXT is an filename, find the completion word point for
-   TEXT, emulating the algorithm readline uses to find the word
-   point.  */
+/* Assuming TEXT is a filename, find the completion word point for TEXT,
+   emulating the algorithm readline uses to find the word point.  The
+   filenames that are located by this function assume no filename
+   quoting, this function should be paired with filename_completer.  */
 extern const char *advance_to_filename_complete_word_point
   (completion_tracker &tracker, const char *text);
 
@@ -573,9 +574,26 @@ extern void noop_completer (struct cmd_list_element *,
 			    completion_tracker &tracker,
 			    const char *, const char *);
 
+/* Filename completer for commands that don't accept quoted filenames.
+   This completer does support completing a list of filenames that are
+   separated with the path separator (':' for UNIX and ';' for MS-DOS).
+
+   When adding a new command it is better to write the command so it
+   accepts quoted filenames and use filename_maybe_quoted_completer, for
+   examples see the 'exec' and 'exec-file' commands.  */
+
 extern void filename_completer (struct cmd_list_element *,
 				completion_tracker &tracker,
 				const char *, const char *);
+
+/* Filename completer for commands where the filename argument can be
+   quoted.  This completer also supports completing a list of filenames
+   that are separated with the path separator (':' for UNIX and ';' for
+   MS-DOS).  */
+
+extern void filename_maybe_quoted_completer (struct cmd_list_element *,
+					     completion_tracker &tracker,
+					     const char *, const char *);
 
 extern void expression_completer (struct cmd_list_element *,
 				  completion_tracker &tracker,

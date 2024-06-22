@@ -182,6 +182,17 @@ static const char gdb_completer_file_name_break_characters[] =
   " \t\n*|\"';:?><";
 #endif
 
+/* When completing on file names, for commands that don't accept quoted
+   file names, the only character that can be used as a word separator is
+   the path separator.  Every other character is treated as a literal
+   character within the filename.  */
+static const char gdb_completer_path_break_characters[] =
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  ";";
+#else
+  ":";
+#endif
+
 /* Characters that can be used to quote expressions.  Note that we can't
    include '"' (double quote) because the gdb C parser treats such quoted
    sequences as strings.  */
@@ -203,15 +214,15 @@ noop_completer (struct cmd_list_element *ignore,
 {
 }
 
-/* Complete on filenames.  */
+/* Generate filename completions of WORD, storing the completions into
+   TRACKER.  This is used for generating completions for commands that
+   only accept unquoted filenames as well as for commands that accept
+   quoted and escaped filenames.  */
 
-void
-filename_completer (struct cmd_list_element *ignore,
-		    completion_tracker &tracker,
-		    const char *text, const char *word)
+static void
+filename_completer_generate_completions (completion_tracker &tracker,
+					 const char *word)
 {
-  rl_completer_quote_characters = gdb_completer_file_name_quote_characters;
-
   int subsequent_name = 0;
   while (1)
     {
@@ -249,18 +260,62 @@ filename_completer (struct cmd_list_element *ignore,
     }
 }
 
-/* The corresponding completer_handle_brkchars
-   implementation.  */
+/* The brkchars callback used when completing filenames that can be
+   quoted.  */
 
 static void
-filename_completer_handle_brkchars (struct cmd_list_element *ignore,
-				    completion_tracker &tracker,
-				    const char *text, const char *word)
+filename_maybe_quoted_completer_handle_brkchars
+	(struct cmd_list_element *ignore, completion_tracker &tracker,
+	 const char *text, const char *word)
 {
   set_rl_completer_word_break_characters
     (gdb_completer_file_name_break_characters);
 
   rl_completer_quote_characters = gdb_completer_file_name_quote_characters;
+}
+
+/* Complete on filenames.  This is for commands that accepts possibly
+   quoted filenames.  */
+
+void
+filename_maybe_quoted_completer (struct cmd_list_element *ignore,
+				 completion_tracker &tracker,
+				 const char *text, const char *word)
+{
+  filename_maybe_quoted_completer_handle_brkchars (ignore, tracker,
+						   text, word);
+  filename_completer_generate_completions (tracker, word);
+}
+
+/* The brkchars callback used by commands that don't accept quoted
+   filenames.  */
+
+static void
+filename_completer_handle_brkchars
+	(struct cmd_list_element *ignore, completion_tracker &tracker,
+	 const char *text, const char *word)
+{
+  gdb_assert (word == nullptr);
+
+  set_rl_completer_word_break_characters (gdb_completer_path_break_characters);
+  rl_completer_quote_characters = nullptr;
+  rl_filename_quoting_desired = 0;
+
+  tracker.set_use_custom_word_point (true);
+  word = advance_to_filename_complete_word_point (tracker, text);
+  filename_completer (ignore, tracker, text, word);
+}
+
+/* See completer.h.  */
+
+void
+filename_completer
+	(struct cmd_list_element *ignore, completion_tracker &tracker,
+	 const char *text, const char *word)
+{
+  gdb_assert (tracker.use_custom_word_point ());
+  gdb_assert (word != nullptr);
+  filename_completer_generate_completions (tracker, word);
 }
 
 /* Find the bounds of the current word for completion purposes, and
@@ -447,8 +502,8 @@ const char *
 advance_to_filename_complete_word_point (completion_tracker &tracker,
 					 const char *text)
 {
-  const char *brk_chars = gdb_completer_file_name_break_characters;
-  const char *quote_chars = gdb_completer_file_name_quote_characters;
+  const char *brk_chars = gdb_completer_path_break_characters;
+  const char *quote_chars = nullptr;
   return advance_to_completion_word (tracker, brk_chars, quote_chars, text);
 }
 
@@ -1879,6 +1934,9 @@ completer_handle_brkchars_func_for_completer (completer_ftype *fn)
 {
   if (fn == filename_completer)
     return filename_completer_handle_brkchars;
+
+  if (fn == filename_maybe_quoted_completer)
+    return filename_maybe_quoted_completer_handle_brkchars;
 
   if (fn == location_completer)
     return location_completer_handle_brkchars;
