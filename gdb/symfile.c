@@ -3846,7 +3846,7 @@ Usage: load [FILE] [OFFSET]\n\
 An optional load OFFSET may also be given as a literal address.\n\
 When OFFSET is provided, FILE must also be provided.  FILE can be provided\n\
 on its own."), &cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, deprecated_filename_completer);
 
   cmd_list_element *overlay_cmd
     = add_basic_prefix_cmd ("overlay", class_support,

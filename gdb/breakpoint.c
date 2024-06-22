@@ -15126,14 +15126,14 @@ This includes all types of breakpoints (breakpoints, watchpoints,\n\
 catchpoints, tracepoints).  Use the 'source' command in another debug\n\
 session to restore them."),
 	       &save_cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, deprecated_filename_completer);
 
   cmd_list_element *save_tracepoints_cmd
     = add_cmd ("tracepoints", class_trace, save_tracepoints_command, _("\
 Save current tracepoint definitions as a script.\n\
 Use the 'source' command in another debug session to restore them."),
 	       &save_cmdlist);
-  set_cmd_completer (save_tracepoints_cmd, filename_completer);
+  set_cmd_completer (save_tracepoints_cmd, deprecated_filename_completer);
 
   c = add_com_alias ("save-tracepoints", save_tracepoints_cmd, class_trace, 0);
   deprecate_cmd (c, "save tracepoints");

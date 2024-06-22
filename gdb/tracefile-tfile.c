@@ -1120,5 +1120,6 @@ void _initialize_tracefile_tfile ();
 void
 _initialize_tracefile_tfile ()
 {
-  add_target (tfile_target_info, tfile_target_open, filename_completer);
+  add_target (tfile_target_info, tfile_target_open,
+	      deprecated_filename_completer);
 }

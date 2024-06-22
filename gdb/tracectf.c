@@ -1721,6 +1721,7 @@ void
 _initialize_ctf ()
 {
 #if HAVE_LIBBABELTRACE
-  add_target (ctf_target_info, ctf_target_open, filename_completer);
+  add_target (ctf_target_info, ctf_target_open,
+	      deprecated_filename_completer);
 #endif
 }

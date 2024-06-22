@@ -567,7 +567,7 @@ const char *advance_to_expression_complete_word_point
    emulating the algorithm readline uses to find the word point.  The
    filenames that are located by this function assume no filename
    quoting, this function should be paired with filename_completer.  */
-extern const char *advance_to_filename_complete_word_point
+extern const char *advance_to_deprecated_filename_complete_word_point
   (completion_tracker &tracker, const char *text);
 
 extern void noop_completer (struct cmd_list_element *,
@@ -582,9 +582,9 @@ extern void noop_completer (struct cmd_list_element *,
    accepts quoted filenames and use filename_maybe_quoted_completer, for
    examples see the 'exec' and 'exec-file' commands.  */
 
-extern void filename_completer (struct cmd_list_element *,
-				completion_tracker &tracker,
-				const char *, const char *);
+extern void deprecated_filename_completer
+  (struct cmd_list_element *, completion_tracker &tracker,
+   const char *, const char *);
 
 /* Filename completer for commands where the filename argument can be
    quoted.  This completer also supports completing a list of filenames

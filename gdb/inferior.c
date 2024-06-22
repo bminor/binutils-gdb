@@ -1116,7 +1116,7 @@ as main program.\n\
 By default, the new inferior inherits the current inferior's connection.\n\
 If -no-connection is specified, the new inferior begins with\n\
 no target connection yet."));
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, deprecated_filename_completer);
 
   add_com ("remove-inferiors", no_class, remove_inferior_command, _("\
 Remove inferior ID (or list of IDs).\n\

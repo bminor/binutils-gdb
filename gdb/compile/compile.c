@@ -328,8 +328,8 @@ compile_file_command_completer (struct cmd_list_element *ignore,
       (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group))
     return;
 
-  word = advance_to_filename_complete_word_point (tracker, text);
-  filename_completer (ignore, tracker, text, word);
+  word = advance_to_deprecated_filename_complete_word_point (tracker, text);
+  deprecated_filename_completer (ignore, tracker, text, word);
 }
 
 /* Handle the input from the 'compile code' command.  The

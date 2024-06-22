@@ -1629,7 +1629,7 @@ This option has security implications for untrusted inferiors."),
 See the commands 'set auto-load safe-path' and 'show auto-load safe-path' to\n\
 access the current full list setting."),
 		 &cmdlist);
-  set_cmd_completer (cmd, filename_completer);
+  set_cmd_completer (cmd, deprecated_filename_completer);
 
   cmd = add_cmd ("add-auto-load-scripts-directory", class_support,
 		 add_auto_load_dir,
@@ -1638,7 +1638,7 @@ access the current full list setting."),
 See the commands 'set auto-load scripts-directory' and\n\
 'show auto-load scripts-directory' to access the current full list setting."),
 		 &cmdlist);
-  set_cmd_completer (cmd, filename_completer);
+  set_cmd_completer (cmd, deprecated_filename_completer);
 
   add_setshow_boolean_cmd ("auto-load", class_maintenance,
 			   &debug_auto_load, _("\

@@ -2643,7 +2643,7 @@ The debugger's current working directory specifies where scripts and other\n\
 files that can be loaded by GDB are located.\n\
 In order to change the inferior's current working directory, the recommended\n\
 way is to use the \"set cwd\" command."), &cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, deprecated_filename_completer);
 
   add_com ("echo", class_support, echo_command, _("\
 Print a constant string.  Give string as argument.\n\
@@ -2809,7 +2809,7 @@ the previous command number shown."),
     = add_com ("shell", class_support, shell_command, _("\
 Execute the rest of the line as a shell command.\n\
 With no arguments, run an inferior shell."));
-  set_cmd_completer (shell_cmd, filename_completer);
+  set_cmd_completer (shell_cmd, deprecated_filename_completer);
 
   add_com_alias ("!", shell_cmd, class_support, 0);
 
@@ -2898,7 +2898,8 @@ you must type \"disassemble 'foo.c'::bar\" and not \"disassemble foo.c:bar\"."))
 
   c = add_com ("make", class_support, make_command, _("\
 Run the ``make'' program using the rest of the line as arguments."));
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, deprecated_filename_completer);
+
   c = add_cmd ("user", no_class, show_user, _("\
 Show definitions of non-python/scheme user defined commands.\n\
 Argument is the name of the user defined command.\n\
@@ -2982,5 +2983,5 @@ Note that the file \"%s\" is read automatically in this way\n\
 when GDB is started."), GDBINIT).release ();
   c = add_cmd ("source", class_support, source_command,
 	       source_help_text, &cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, deprecated_filename_completer);
 }

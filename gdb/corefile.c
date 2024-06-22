@@ -391,9 +391,8 @@ Use FILE as core dump for examining memory and registers.\n\
 Usage: core-file FILE\n\
 No arg means have no core file.  This command has been superseded by the\n\
 `target core' and `detach' commands."), &cmdlist);
-  set_cmd_completer (core_file_cmd, filename_completer);
+  set_cmd_completer (core_file_cmd, deprecated_filename_completer);
 
-  
   set_show_commands set_show_gnutarget
     = add_setshow_string_noescape_cmd ("gnutarget", class_files,
 				       &gnutarget_string, _("\

@@ -827,7 +827,7 @@ A size of \"unlimited\" means unlimited lines.  The default is 10."),
 Usage: record save [FILENAME]\n\
 Default filename is 'gdb_record.PROCESS_ID'."),
 	       &record_cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, deprecated_filename_completer);
 
   cmd_list_element *record_delete_cmd
     =  add_cmd ("delete", class_obscure, cmd_record_delete,

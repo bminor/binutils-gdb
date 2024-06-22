@@ -1915,7 +1915,7 @@ directory in which the source file was compiled into object code.\n\
 With no argument, reset the search path to $cdir:$cwd, the default."),
 	       &cmdlist);
 
-  set_cmd_completer (directory_cmd, filename_completer);
+  set_cmd_completer (directory_cmd, deprecated_filename_completer);
 
   add_setshow_optional_filename_cmd ("directories",
 				     class_files,

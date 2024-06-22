@@ -1119,5 +1119,6 @@ will be loaded as well."),
 			show_exec_file_mismatch_command,
 			&setlist, &showlist);
 
-  add_target (exec_target_info, exec_target_open, filename_completer);
+  add_target (exec_target_info, exec_target_open,
+	      deprecated_filename_completer);
 }

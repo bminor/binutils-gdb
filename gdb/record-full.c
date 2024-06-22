@@ -2892,12 +2892,12 @@ _initialize_record_full ()
 	       _("Restore the execution log from a file.\n\
 Argument is filename.  File must be created with 'record save'."),
 	       &record_full_cmdlist);
-  set_cmd_completer (record_full_restore_cmd, filename_completer);
+  set_cmd_completer (record_full_restore_cmd, deprecated_filename_completer);
 
   /* Deprecate the old version without "full" prefix.  */
   c = add_alias_cmd ("restore", record_full_restore_cmd, class_obscure, 1,
 		     &record_cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (c, deprecated_filename_completer);
   deprecate_cmd (c, "record full restore");
 
   add_setshow_prefix_cmd ("full", class_support,
