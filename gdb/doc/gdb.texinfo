@@ -21893,6 +21893,7 @@ Remove symbol table from file "/home/user/gdb/mylib.so"? (y or n) y
 (@value{GDBP})
 @end smallexample
 
+The @var{address} can be any expression which evaluates to an address.
 
 @code{remove-symbol-file} does not repeat if you press @key{RET} after using it.
 

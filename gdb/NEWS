@@ -53,6 +53,16 @@ maintenance info blocks [ADDRESS]
   are listed starting at the inner global block out to the most inner
   block.
 
+* Changed commands
+
+remove-symbol-file
+  This command now supports file-name completion.
+
+remove-symbol-file -a ADDRESS
+  The ADDRESS expression can now be a full expression consisting of
+  multiple terms, e.g. 'function + 0x1000' (without quotes),
+  previously only a single term could be given.
+
 * New remote packets
 
 vFile:stat

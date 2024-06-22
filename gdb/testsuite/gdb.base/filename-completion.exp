@@ -122,7 +122,8 @@ proc test_gdb_complete_filename_multiple {
 proc run_quoting_and_escaping_tests { root } {
     # Test all the commands which allow quoting of filenames, and
     # which require whitespace to be escaped in unquoted filenames.
-    foreach_with_prefix cmd { file exec-file symbol-file add-symbol-file } {
+    foreach_with_prefix cmd { file exec-file symbol-file add-symbol-file \
+			      remove-symbol-file } {
 	gdb_start
 
 	# Completing 'thread apply all ...' commands uses a custom word

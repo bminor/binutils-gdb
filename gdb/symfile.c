@@ -2330,39 +2330,90 @@ add_symbol_file_command (const char *args, int from_tty)
 }
 
 
+/* Option support for 'remove-symbol-file' command.  */
+
+struct remove_symbol_file_options
+{
+  /* True when the '-a' flag was passed.  */
+  bool address_flag = false;
+};
+
+using remove_symbol_file_options_opt_def
+  = gdb::option::flag_option_def<remove_symbol_file_options>;
+
+static const gdb::option::option_def remove_symbol_file_opt_defs[] = {
+  remove_symbol_file_options_opt_def {
+    "a",
+    [] (remove_symbol_file_options *opt) { return &opt->address_flag; },
+    N_("Select a symbol file containing ADDRESS.")
+  },
+};
+
+static inline gdb::option::option_def_group
+make_remove_symbol_file_def_group (remove_symbol_file_options *opts)
+{
+  return {{remove_symbol_file_opt_defs}, opts};
+}
+
+/* Completion function for 'remove-symbol-file' command.  */
+
+static void
+remove_symbol_file_command_completer (struct cmd_list_element *ignore,
+				      completion_tracker &tracker,
+				      const char *text, const char * /* word */)
+{
+  /* Unlike many command completion functions we do gather the option
+     values here.  How we complete the rest of the command depends on
+     whether the '-a' flag has been given or not.  */
+  remove_symbol_file_options opts;
+  auto grp = make_remove_symbol_file_def_group (&opts);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp))
+    return;
+
+  /* Complete the rest of the command line as either a filename or an
+     expression (which will evaluate to an address) if the '-a' flag was
+     given.  */
+  if (!opts.address_flag)
+    {
+      const char *word
+	= advance_to_filename_maybe_quoted_complete_word_point (tracker, text);
+      filename_maybe_quoted_completer (ignore, tracker, text, word);
+    }
+  else
+    {
+      const char *word
+	= advance_to_expression_complete_word_point (tracker, text);
+      symbol_completer (ignore, tracker, text, word);
+    }
+}
+
 /* This function removes a symbol file that was added via add-symbol-file.  */
 
 static void
 remove_symbol_file_command (const char *args, int from_tty)
 {
-  struct objfile *objf = NULL;
-  struct program_space *pspace = current_program_space;
-
   dont_repeat ();
 
-  if (args == NULL)
-    error (_("remove-symbol-file: no symbol file provided"));
+  remove_symbol_file_options opts;
+  auto grp = make_remove_symbol_file_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp);
 
-  gdb_argv argv (args);
+  struct objfile *objf = nullptr;
 
-  if (strcmp (argv[0], "-a") == 0)
+  if (opts.address_flag)
     {
-      /* Interpret the next argument as an address.  */
-      CORE_ADDR addr;
+      if (args == nullptr || *args == '\0')
+	error (_("remove-symbol-file: no address provided"));
 
-      if (argv[1] == NULL)
-	error (_("Missing address argument"));
-
-      if (argv[2] != NULL)
-	error (_("Junk after %s"), argv[1]);
-
-      addr = parse_and_eval_address (argv[1]);
+      CORE_ADDR addr = parse_and_eval_address (args);
 
       for (objfile *objfile : current_program_space->objfiles ())
 	{
 	  if ((objfile->flags & OBJF_USERLOADED) != 0
 	      && (objfile->flags & OBJF_SHARED) != 0
-	      && objfile->pspace () == pspace
+	      && objfile->pspace () == current_program_space
 	      && is_addr_in_objfile (addr, objfile))
 	    {
 	      objf = objfile;
@@ -2370,21 +2421,18 @@ remove_symbol_file_command (const char *args, int from_tty)
 	    }
 	}
     }
-  else if (argv[0] != NULL)
+  else
     {
-      /* Interpret the current argument as a file name.  */
-
-      if (argv[1] != NULL)
-	error (_("Junk after %s"), argv[0]);
-
-      gdb::unique_xmalloc_ptr<char> filename (tilde_expand (argv[0]));
+      std::string filename = extract_single_filename_arg (args);
+      if (filename.empty ())
+	error (_("remove-symbol-file: no symbol file provided"));
 
       for (objfile *objfile : current_program_space->objfiles ())
 	{
 	  if ((objfile->flags & OBJF_USERLOADED) != 0
 	      && (objfile->flags & OBJF_SHARED) != 0
-	      && objfile->pspace () == pspace
-	      && filename_cmp (filename.get (), objfile_name (objfile)) == 0)
+	      && objfile->pspace () == current_program_space
+	      && filename_cmp (filename.c_str (), objfile_name (objfile)) == 0)
 	    {
 	      objf = objfile;
 	      break;
@@ -3830,14 +3878,22 @@ READNOW_READNEVER_HELP),
 	       &cmdlist);
   set_cmd_completer (c, filename_maybe_quoted_completer);
 
-  c = add_cmd ("remove-symbol-file", class_files,
-	       remove_symbol_file_command, _("\
+  const auto remove_symbol_file_opts
+    = make_remove_symbol_file_def_group (nullptr);
+  static std::string remove_symbol_file_cmd_help
+    = gdb::option::build_help (_("\
 Remove a symbol file added via the add-symbol-file command.\n\
 Usage: remove-symbol-file FILENAME\n\
        remove-symbol-file -a ADDRESS\n\
 The file to remove can be identified by its filename or by an address\n\
-that lies within the boundaries of this symbol file in memory."),
+that lies within the boundaries of this symbol file in memory.\n\
+Options:\n\
+%OPTIONS%"), remove_symbol_file_opts);
+  c = add_cmd ("remove-symbol-file", class_files,
+	       remove_symbol_file_command,
+	       remove_symbol_file_cmd_help.c_str (),
 	       &cmdlist);
+  set_cmd_completer_handle_brkchars (c, remove_symbol_file_command_completer);
 
   c = add_cmd ("load", class_files, load_command, _("\
 Dynamically load FILE into the running program.\n\
