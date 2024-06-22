@@ -3,5 +3,3 @@
 #as: -mno-relax
 #ld:  -e _start
 #error_output: anno-sym.l
-# The mips-irix6 target fails this test because it does not find any function symbols.  Not sure why.
-#skip: *-*-irix*
