@@ -36,6 +36,7 @@
 %{
 
 #include <ctype.h>
+#include <unordered_map>
 #include "expression.h"
 #include "value.h"
 #include "parser-defs.h"
