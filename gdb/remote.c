@@ -8275,12 +8275,12 @@ remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
     {
       result = std::move (*iter);
       rs->stop_reply_queue.erase (iter);
-    }
 
-  if (notif_debug)
-    gdb_printf (gdb_stdlog,
-		"notif: discard queued event: 'Stop' in %s\n",
-		ptid.to_string ().c_str ());
+      if (notif_debug)
+	gdb_printf (gdb_stdlog,
+		    "notif: discard queued event: 'Stop' in %s\n",
+		    ptid.to_string ().c_str ());
+    }
 
   return result;
 }
@@ -9186,8 +9186,6 @@ ptid_t
 remote_target::wait (ptid_t ptid, struct target_waitstatus *status,
 		     target_wait_flags options)
 {
-  REMOTE_SCOPED_DEBUG_ENTER_EXIT;
-
   remote_state *rs = get_remote_state ();
 
   /* Start by clearing the flag that asks for our wait method to be called,
