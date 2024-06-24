@@ -994,6 +994,28 @@ Use @var{output} as the name for the program produced by @command{ld}; if this
 option is not specified, the name @file{a.out} is used by default.  The
 script command @code{OUTPUT} can also specify the output file name.
 
+Note - the linker will delete the output file before it starts to
+write to it.  It will do this even if it turns out that the link
+cannot be completed due to errors.
+
+Note - the linker will check to make sure that the output file name
+does not match the name of any of the input files, but that is all.
+In particular it will not complain if the output file might overwrite
+a source file or some other important file.  Therefore in build
+systems it is recommended to use the @option{-o} option as the last
+option on the linker command line.  For example consider:
+
+@smallexample
+  ld -o $(EXE) $(OBJS)
+  ld $(OBJS) -o $(EXE)
+@end smallexample
+
+If the @samp{EXE} variable is not defined for some reason, the first
+version of the linker command could end up deleting one of the object
+files (the first one in the @samp{OBJS} list) whereas the second
+version of the linker command will generate an error message and not
+delete anything.
+
 @kindex --dependency-file=@var{depfile}
 @cindex dependency file
 @item --dependency-file=@var{depfile}
