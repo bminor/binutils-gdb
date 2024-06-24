@@ -118,6 +118,11 @@ main ()
   c.a_method (0, 1);
   c.a_const_method (0, 1);
   C::a_static_method (0, 1);
+
+  struct Local { int g; } l;
+  l.g = 5;
+  typedef int IntType;
+  IntType it = 6;
 #endif
   enum E e;
 

@@ -85,6 +85,12 @@ proc test_fields {lang} {
       gdb_test "python print (gdb.parse_and_eval ('C::a_static_method').type.fields ()\[0\].type)" "int"
       gdb_test "python print (gdb.parse_and_eval ('C::a_static_method').type.fields ()\[1\].type)" "char"
       gdb_test "python print (gdb.parse_and_eval ('c')\['a_static_method'\].type.fields ()\[0\].type)" "int"
+
+      # Test function-local types.
+      gdb_test "python print (gdb.lookup_type ('main()::Local'))" "Local"
+      gdb_test "python print (gdb.lookup_type ('main()::Local').fields ()\[0\].type)" "int"
+      gdb_test "python print (gdb.lookup_type ('main()::IntType'))" "IntType"
+      gdb_test "python print (gdb.lookup_type ('main()::IntType').target ())" "int"
     }
 
     # Test normal fields usage in structs.
