@@ -170,12 +170,24 @@ proc run_quoting_and_escaping_tests { root } {
 		set dq "\\\""
 	    }
 
+	    test_gdb_complete_unique "${cmd} ${qc}${root}/bb2/dir${sp}1/" \
+		"${cmd} ${qc}${root}/bb2/dir${sp}1/unique${sp}file${qc}" " " \
+		false \
+		"expand a unique file name in a directory containing a space"
+
 	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/bb2/" \
 		"d" "ir${sp}" {
 		    "dir 1/"
 		    "dir 2/"
 		} "" "${qc}" false \
 		"expand multiple directory names containing spaces"
+
+	    test_gdb_complete_filename_multiple "${cmd} ${qc}${root}/bb2/dir${sp}2/" \
+		"f" "ile${sp}" {
+		    "file 1"
+		    "file 2"
+		} "" "${qc}" false \
+		"expand contents of a directory containing a space"
 
 	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/aaa/" \
 		"a" "a${sp}" {

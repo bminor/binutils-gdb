@@ -321,6 +321,26 @@ gdb_completer_file_name_dequote (char *filename, int quote_char)
   return strdup (tmp.c_str ());
 }
 
+/* Implement readline's rl_directory_rewrite_hook.  Remove any quoting from
+   the string *DIRNAME,update *DIRNAME, and return non-zero.  If *DIRNAME
+   doesn't need updating then return zero.  See readline docs for more
+   information.  */
+
+static int
+gdb_completer_directory_rewrite (char **dirname)
+{
+  if (!rl_completion_found_quote)
+    return 0;
+
+  int quote_char = rl_completion_quote_character;
+  char *new_dirname
+    = gdb_completer_file_name_dequote (*dirname, quote_char);
+  free (*dirname);
+  *dirname = new_dirname;
+
+  return 1;
+}
+
 /* Apply character escaping to the filename in TEXT and return a newly
    allocated buffer containing the possibly updated filename.
 
@@ -3416,6 +3436,7 @@ _initialize_completer ()
   rl_filename_quote_characters = " \t\n\\\"'";
   rl_filename_dequoting_function = gdb_completer_file_name_dequote;
   rl_filename_quoting_function = gdb_completer_file_name_quote;
+  rl_directory_rewrite_hook = gdb_completer_directory_rewrite;
 
   add_setshow_zuinteger_unlimited_cmd ("max-completions", no_class,
 				       &max_completions, _("\
