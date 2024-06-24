@@ -247,7 +247,7 @@ Doxyfile-gdb-xref:	$(srcdir)/Doxyfile-gdb-xref.in
 Doxyfile-gdbserver:	$(srcdir)/Doxyfile-gdbserver.in
 	$(doxyedit) $(srcdir)/Doxyfile-gdbserver.in >Doxyfile-gdbserver
 
-all-doc: info dvi ps pdf
+all-doc: info man dvi ps pdf html
 diststuff: info man
 
 install-info: $(INFO_DEPS)
