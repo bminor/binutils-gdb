@@ -1,12 +1,11 @@
-	/* sme-fp8.s Test file for AArch64 SME 8-bit floating-point
+	/* sme2-fp8.s Test file for AArch64 SME 8-bit floating-point
 	vector instructions.  */
 
 	.macro cvt_pat1, op
-	\op	{z0.h-z1.h}, z2.b
+	\op	{z0.h-z1.h}, z3.b
 	\op	{z0.h-z1.h}, z4.b
-	\op	{z2.h-z3.h}, z2.b
 	\op	{z2.h-z3.h}, z4.b
-	\op	{z28.h-z29.h}, z30.b
+	\op	{z28.h-z29.h}, z31.b
 	.endm
 
 	/* Multi-vector floating-point convert from 8-bit floating-point.  */
@@ -28,11 +27,10 @@
 	cvt_pat1 f2cvtl
 
 	.macro cvt_pat2, op
-	\op	z2.b, {z0.h-z1.h}
+	\op	z3.b, {z0.h-z1.h}
 	\op	z4.b, {z0.h-z1.h}
-	\op	z2.b, {z2.h-z3.h}
 	\op	z4.b, {z2.h-z3.h}
-	\op	z30.b, {z28.h-z29.h}
+	\op	z31.b, {z28.h-z29.h}
 	.endm
 
 	/* Multi-vector floating-point convert to packed 8-bit floating-point
@@ -45,11 +43,11 @@
 	cvt_pat2 fcvt
 
 	.macro cvt_pat3, op
-	\op	z4.b, {z0.s-z3.s}
+	\op	z7.b, {z0.s-z3.s}
 	\op	z8.b, {z0.s-z3.s}
-	\op	z4.b, {z4.s-z7.s}
-	\op	z8.b, {z4.s-z7.s}
-	\op	z28.b, {z24.s-z27.s}
+	\op	z1.b, {z4.s-z7.s}
+	\op	z2.b, {z4.s-z7.s}
+	\op	z31.b, {z24.s-z27.s}
 	.endm
 
 	/* Multi-vector floating-point convert from single-precision to
@@ -65,13 +63,13 @@
 	fscale { z2.\w - z3.\w }, { z2.\w - z3.\w }, z2.\w
 	fscale { z0.\w - z1.\w }, { z0.\w - z1.\w }, z4.\w
 	fscale { z2.\w - z3.\w }, { z2.\w - z3.\w }, z4.\w
-	fscale { z24.\w-z25.\w }, { z24.\w-z25.\w }, z15.\w
+	fscale { z30.\w-z31.\w }, { z30.\w-z31.\w }, z15.\w
 	/* quad.  */
 	fscale { z0.\w-z3.\w }, { z0.\w-z3.\w }, z4.\w
 	fscale { z4.\w-z7.\w }, { z4.\w-z7.\w }, z4.\w
 	fscale { z0.\w-z3.\w }, { z0.\w-z3.\w }, z8.\w
 	fscale { z4.\w-z7.\w }, { z4.\w-z7.\w }, z8.\w
-	fscale { z24.\w-z27.\w }, { z24.\w-z27.\w }, z15.\w
+	fscale { z28.\w-z31.\w }, { z28.\w-z31.\w }, z15.\w
 	.endm
 
 	/* Multi-vector floating-point adjust exponent by vector.
@@ -91,13 +89,13 @@
 	fscale { z2.\w - z3.\w }, { z2.\w - z3.\w }, { z2.\w-z3.\w }
 	fscale { z0.\w - z1.\w }, { z0.\w - z1.\w }, { z4.\w-z5.\w }
 	fscale { z2.\w - z3.\w }, { z2.\w - z3.\w }, { z4.\w-z5.\w }
-	fscale { z20.\w-z21.\w }, { z20.\w-z21.\w }, { z22.\w-z23.\w }
+	fscale { z30.\w-z31.\w }, { z30.\w-z31.\w }, { z30.\w-z31.\w }
 	/* quad.  */
 	fscale { z0.\w-z3.\w }, { z0.\w-z3.\w }, { z4.\w-z7.\w }
 	fscale { z4.\w-z7.\w }, { z4.\w-z7.\w }, { z4.\w-z7.\w }
 	fscale { z0.\w-z3.\w }, { z0.\w-z3.\w }, { z8.\w-z11.\w }
 	fscale { z4.\w-z7.\w }, { z4.\w-z7.\w }, { z8.\w-z11.\w }
-	fscale { z20.\w-z23.\w }, { z20.\w-z23.\w }, { z24.\w-z27.\w }
+	fscale { z28.\w-z31.\w }, { z28.\w-z31.\w }, { z24.\w-z27.\w }
 	.endm
 
 	/* Multi-vector floating-point adjust exponent.

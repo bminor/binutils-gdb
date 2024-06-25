@@ -6,10 +6,9 @@
 
 	.macro cvrt_lowerhalf, op
 	\op 	v0.8h, v0.8b
-	\op 	v1.8h, v0.8b
-	\op 	v0.8h, v1.8b
-	\op 	v1.8h, v1.8b
-	\op 	v16.8h, v17.8b
+	\op 	v31.8h, v0.8b
+	\op 	v0.8h, v31.8b
+	\op 	v31.8h, v31.8b
 	.endm
 
 	cvrt_lowerhalf	bf1cvtl
@@ -22,10 +21,9 @@
 
 	.macro cvrt_upperhalf, op
 	\op 	v0.8h, v0.16b
-	\op 	v1.8h, v0.16b
-	\op 	v0.8h, v1.16b
-	\op 	v1.8h, v1.16b
-	\op 	v16.8h, v17.16b
+	\op 	v31.8h, v0.16b
+	\op 	v0.8h, v31.16b
+	\op 	v31.8h, v31.16b
 	.endm
 
 	cvrt_upperhalf	bf1cvtl2
@@ -37,13 +35,13 @@
 
 	.macro fscale_gen, op_var
 	fscale	v0.\op_var, v0.\op_var, v0.\op_var
-	fscale	v1.\op_var, v0.\op_var, v0.\op_var
-	fscale	v0.\op_var, v1.\op_var, v0.\op_var
-	fscale	v0.\op_var, v0.\op_var, v1.\op_var
-	fscale	v1.\op_var, v1.\op_var, v0.\op_var
-	fscale	v0.\op_var, v1.\op_var, v1.\op_var
-	fscale	v1.\op_var, v1.\op_var, v1.\op_var
-	fscale	v16.\op_var, v17.\op_var, v18.\op_var
+	fscale	v31.\op_var, v0.\op_var, v0.\op_var
+	fscale	v0.\op_var, v31.\op_var, v0.\op_var
+	fscale	v0.\op_var, v0.\op_var, v31.\op_var
+	fscale	v31.\op_var, v31.\op_var, v0.\op_var
+	fscale	v0.\op_var, v31.\op_var, v31.\op_var
+	fscale	v31.\op_var, v31.\op_var, v0.\op_var
+	fscale	v31.\op_var, v31.\op_var, v31.\op_var
 	.endm
 
 	/* Half-precision variant.  */
@@ -58,13 +56,12 @@
 
 	.macro fcvtn_to_fp8, op, sd, ss
 	\op	v0.\sd, v0.\ss, v0.\ss
-	\op	v1.\sd, v0.\ss, v0.\ss
-	\op	v0.\sd, v1.\ss, v0.\ss
-	\op	v0.\sd, v0.\ss, v1.\ss
-	\op	v1.\sd, v1.\ss, v0.\ss
-	\op	v0.\sd, v1.\ss, v1.\ss
-	\op	v1.\sd, v1.\ss, v1.\ss
-	\op	v16.\sd, v17.\ss, v18.\ss
+	\op	v31.\sd, v0.\ss, v0.\ss
+	\op	v0.\sd, v31.\ss, v0.\ss
+	\op	v0.\sd, v0.\ss, v31.\ss
+	\op	v31.\sd, v31.\ss, v0.\ss
+	\op	v0.\sd, v31.\ss, v31.\ss
+	\op	v31.\sd, v31.\ss, v31.\ss
 	.endm
 
 	/* Half-precision variant.  */

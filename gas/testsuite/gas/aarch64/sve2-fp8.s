@@ -2,7 +2,6 @@
 	instructions.  */
 
 	.macro cvt_pat1, op
-	\op	z0.h, z0.b
 	\op	z1.h, z0.b
 	\op	z0.h, z1.b
 	\op	z30.h, z31.b
@@ -10,9 +9,9 @@
 
 	.macro cvt_pat2, op, width
 	\op	z0.b, { z0.\width - z1.\width }
-	\op	z1.b, { z0.\width - z1.\width }
+	\op	z4.b, { z0.\width - z1.\width }
 	\op	z0.b, { z2.\width - z3.\width }
-	\op	z29.b, { z30.\width - z31.\width }
+	\op	z27.b, { z28.\width - z29.\width }
 	.endm
 
 	/* 8-bit floating-point convert to BFloat16 (top/bottom) with scaling by
