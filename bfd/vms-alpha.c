@@ -7721,16 +7721,19 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DST__K_RECBEG:
 	  {
 	    struct vms_dst_recbeg *recbeg = (void *)buf;
-	    unsigned char *name = buf + sizeof (*recbeg);
 
 	    if (len > sizeof (*recbeg))
 	      {
+		unsigned char *name = buf + sizeof (*recbeg);
 		int nlen = len - sizeof (*recbeg) - 1;
+
 		if (name[0] < nlen)
 		  nlen = name[0];
 		fprintf (file, _("recbeg: name: %.*s\n"), nlen, name + 1);
+
 		evax_bfd_print_valspec (buf, len, 4, file);
-		len -= 1 + nlen;
+
+		len -= 1 + nlen + sizeof (*recbeg);
 		if (len >= 4)
 		  fprintf (file, _("    len: %u bits\n"),
 			   (unsigned) bfd_getl32 (name + 1 + nlen));
