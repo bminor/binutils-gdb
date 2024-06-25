@@ -598,7 +598,7 @@ if { ![is_elf_format] } then {
     file_on_host delete $output
 }
 
-proc test_build_id_debuglink {} {
+proc test_build_id_debuglink {option} {
     global srcdir
     global subdir
     global env
@@ -608,13 +608,13 @@ proc test_build_id_debuglink {} {
     global CFLAGS_FOR_TARGET
     global exe
     
-    set test "build-id-debuglink"
+    set test "build-id-debuglink ($option)"
 
     # Use a fixed build-id.
     if { [info exists CFLAGS_FOR_TARGET] } {
 	set save_CFLAGS_FOR_TARGET $CFLAGS_FOR_TARGET
     }
-    set CFLAGS_FOR_TARGET "-g -Wl,--build-id=0x12345678abcdef01"
+    set CFLAGS_FOR_TARGET "-g -Wl,--build-id=0x12345678abcdef01,--compress-debug-sections=$option"
 
     if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog${exe} executable debug] != "" } {
 	unsupported "$test (build)"
@@ -676,7 +676,8 @@ proc test_build_id_debuglink {} {
 }
 
 if {[is_elf_format]} then {
-    test_build_id_debuglink
+    test_build_id_debuglink none
+    test_build_id_debuglink zlib
 }
 
 # Test objdump -Wk on a file containing debug links.

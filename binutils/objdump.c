@@ -4446,6 +4446,10 @@ open_debug_file (const char * pathname)
   if (data == NULL)
     return NULL;
 
+  /* Decompress sections unless dumping the section contents.  */
+  if (!dump_section_contents || decompressed_dumps)
+    data->flags |= BFD_DECOMPRESS;
+
   if (! bfd_check_format (data, bfd_object))
     return NULL;
 
