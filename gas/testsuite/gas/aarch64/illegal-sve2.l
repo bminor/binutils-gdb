@@ -491,7 +491,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1b {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1b {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1b {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1b {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1b {z0\.d},p0/z,\[z32\.d\]'
@@ -501,14 +501,14 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1b {z0\.d},p0/z,\[z0\.d,z0\.d\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1b {z0\.s},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.s}, p0/z, \[z0\.s\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1b {z0\.d},p0/z,\[z0\.s\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.s}, p0/z, \[z0\.s\]
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 1 -- `ldnt1b {z0\.s,z1\.d},p0/z,\[z0\.s,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1b {z0\.s},p0/m,\[z0\.s\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1b {z0\.s}, p0/z, \[z0\.s\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1b {z32\.s},p0/z,\[z0\.s\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1b {z0\.s},p8/z,\[z0\.s\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1b {z0\.s},p0/z,\[z32\.s\]'
@@ -518,7 +518,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1d {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1d {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1d {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1d {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1d {z0\.d},p0/z,\[z32\.d\]'
@@ -528,17 +528,17 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1d {z0\.d},p0/z,\[z0\.d,z0\.d\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1d {z0\.s},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1d {z0\.d},p0/z,\[z0\.s\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1d {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1d {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1h {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1h {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1h {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1h {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1h {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1h {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1h {z0\.d},p0/z,\[z32\.d\]'
@@ -548,7 +548,7 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1h {z0\.d},p0/z,\[z0\.d,z0\.d\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1h {z0\.s},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1h {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1h {z0\.s}, p0/z, \[z0\.s\]
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 1 -- `ldnt1h {z0\.s,z1\.d},p0/z,\[z0\.s,x0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1h {z32\.s},p0/z,\[z0\.s\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1h {z0\.s},p8/z,\[z0\.s\]'
@@ -559,9 +559,9 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1sb {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1sb {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1sb {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1sb {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	ldnt1sb {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1sb {z0\.s}, p0/z, \[z0\.s\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1sb {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1sb {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1sb {z0\.d},p0/z,\[z32\.d\]'
@@ -572,9 +572,9 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1sh {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1sh {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.s}, p0/z, \[z0\.s\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1sh {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1sh {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1sh {z0\.d},p0/z,\[z32\.d\]'
@@ -585,9 +585,9 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1sh {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1sh {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Info:    other valid variant\(s\):
-[^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1sh {z0\.s}, p0/z, \[z0\.s\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1sh {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1sh {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1sh {z0\.d},p0/z,\[z32\.d\]'
@@ -598,7 +598,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `ldnt1w {z0\.d,z1\.d},p0/z,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1w {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1w {z0\.d}, p0/z, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1w {z0\.d}, p0/z, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1w {z32\.d},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1w {z0\.d},p8/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `ldnt1w {z0\.d},p0/z,\[z32\.d\]'
@@ -608,7 +608,7 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `ldnt1w {z0\.d},p0/z,\[z0\.d,z0\.d\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `ldnt1w {z0\.s},p0/z,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	ldnt1w {z0\.s}, p0/z, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	ldnt1w {z0\.s}, p0/z, \[z0\.s\]
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 1 -- `ldnt1w {z0\.s,z1\.d},p0/z,\[z0\.s,x0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `ldnt1w {z32\.s},p0/z,\[z0\.s\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `ldnt1w {z0\.s},p8/z,\[z0\.s\]'
@@ -2219,7 +2219,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1b {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1b {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1b {z0\.d}, p0, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1b {z0\.d}, p0, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1b {z32\.d},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1b {z0\.d},p8,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `stnt1b {z0\.d},p0,\[z32\.d\]'
@@ -2229,7 +2229,7 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `stnt1b {z0\.d},p0,\[z0\.d,z0\.d\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1b {z0\.s},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1b {z0\.s}, p0, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1b {z0\.s}, p0, \[z0\.s\]
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 1 -- `stnt1b {z0\.s,z1\.d},p0,\[z0\.s,x0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1b {z32\.s},p0,\[z0\.s\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1b {z0\.s},p8,\[z0\.s\]'
@@ -2240,7 +2240,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1d {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1d {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1d {z0\.d}, p0, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1d {z0\.d}, p0, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1d {z32\.d},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1d {z0\.d},p8,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `stnt1d {z0\.d},p0,\[z32\.d\]'
@@ -2250,11 +2250,11 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `stnt1d {z0\.d},p0,\[z0\.d,z0\.d\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1d {z0\.s},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1d {z0\.d}, p0, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1d {z0\.d}, p0, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1h {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1h {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1h {z0\.d}, p0, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1h {z0\.d}, p0, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1h {z32\.d},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1h {z0\.d},p8,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `stnt1h {z0\.d},p0,\[z32\.d\]'
@@ -2264,7 +2264,7 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `stnt1h {z0\.d},p0,\[z0\.d,z0\.d\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1h {z0\.s},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1h {z0\.s}, p0, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1h {z0\.s}, p0, \[z0\.s\]
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 1 -- `stnt1h {z0\.s,z1\.d},p0,\[z0\.s,x0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1h {z32\.s},p0,\[z0\.s\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1h {z0\.s},p8,\[z0\.s\]'
@@ -2275,7 +2275,7 @@
 [^ :]+:[0-9]+: Error: expected a single-register list at operand 1 -- `stnt1w {z0\.d,z1\.d},p0,\[z0\.d,x0\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1w {z0\.d},p0/m,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1w {z0\.d}, p0, \[z0\.d, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1w {z0\.d}, p0, \[z0\.d\]
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1w {z32\.d},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1w {z0\.d},p8,\[z0\.d\]'
 [^ :]+:[0-9]+: Error: invalid base register at operand 3 -- `stnt1w {z0\.d},p0,\[z32\.d\]'
@@ -2285,7 +2285,7 @@
 [^ :]+:[0-9]+: Error: invalid addressing mode at operand 3 -- `stnt1w {z0\.d},p0,\[z0\.d,z0\.d\]'
 [^ :]+:[0-9]+: Error: operand mismatch -- `stnt1w {z0\.s},p0,\[z0\.d\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
-[^ :]+:[0-9]+: Info:    	stnt1w {z0\.s}, p0, \[z0\.s, xzr\]
+[^ :]+:[0-9]+: Info:    	stnt1w {z0\.s}, p0, \[z0\.s\]
 [^ :]+:[0-9]+: Error: type mismatch in vector register list at operand 1 -- `stnt1w {z0\.s,z1\.d},p0,\[z0\.s,x0\]'
 [^ :]+:[0-9]+: Error: expected an SVE vector register at operand 1 -- `stnt1w {z32\.s},p0,\[z0\.s\]'
 [^ :]+:[0-9]+: Error: p0-p7 expected at operand 2 -- `stnt1w {z0\.s},p8,\[z0\.s\]'

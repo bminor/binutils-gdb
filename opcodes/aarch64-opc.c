@@ -1929,9 +1929,6 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_Znx2:
 	case AARCH64_OPND_SME_Znx2_BIT_INDEX:
 	case AARCH64_OPND_SME_Znx4:
-	case AARCH64_OPND_SME_Zt2:
-	case AARCH64_OPND_SME_Zt3:
-	case AARCH64_OPND_SME_Zt4:
 	  num = get_operand_specific_data (&aarch64_operands[type]);
 	  if (!check_reglist (opnd, mismatch_detail, idx, num, 1))
 	    return 0;
@@ -2475,6 +2472,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_ADDR_RX_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL2:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RX_LSL4:
 	case AARCH64_OPND_SVE_ADDR_RZ:
 	case AARCH64_OPND_SVE_ADDR_RZ_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RZ_LSL2:
@@ -3768,10 +3766,7 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
   /* The hyphenated form is preferred for disassembly if there is
      more than one register in the list, and the register numbers
      are monotonically increasing in increments of one.  */
-  if (stride == 1 && num_regs > 1
-      && ((opnd->type != AARCH64_OPND_SME_Zt2)
-	  && (opnd->type != AARCH64_OPND_SME_Zt3)
-	  && (opnd->type != AARCH64_OPND_SME_Zt4)))
+  if (stride == 1 && num_regs > 1)
     if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
       snprintf (buf, size, "{%s-%s}%s",
 		style_reg (styler, "%s%d", prefix, first_reg),
@@ -3877,36 +3872,51 @@ print_register_offset_address (char *buf, size_t size,
   bool print_amount_p = true;
   const char *shift_name = aarch64_operand_modifiers[opnd->shifter.kind].name;
 
-  if (!opnd->shifter.amount && (opnd->qualifier != AARCH64_OPND_QLF_S_B
-				|| !opnd->shifter.amount_present))
+  /* This is the case where offset is the optional argument and the optional
+     argument is ignored in the disassembly.  */
+  if (opnd->type == AARCH64_OPND_SVE_ADDR_ZX && offset != NULL
+      && strcmp (offset,"xzr") == 0)
     {
-      /* Not print the shift/extend amount when the amount is zero and
-         when it is not the special case of 8-bit load/store instruction.  */
-      print_amount_p = false;
-      /* Likewise, no need to print the shift operator LSL in such a
-	 situation.  */
-      if (opnd->shifter.kind == AARCH64_MOD_LSL)
-	print_extend_p = false;
-    }
-
-  /* Prepare for the extend/shift.  */
-  if (print_extend_p)
-    {
-      if (print_amount_p)
-	snprintf (tb, sizeof (tb), ", %s %s",
-		  style_sub_mnem (styler, shift_name),
-		  style_imm (styler, "#%" PRIi64,
-  /* PR 21096: The %100 is to silence a warning about possible truncation.  */
-			     (opnd->shifter.amount % 100)));
-      else
-	snprintf (tb, sizeof (tb), ", %s",
-		  style_sub_mnem (styler, shift_name));
+      /* Example: [<Zn>.S{, <Xm>}].
+	 When the assembly is [Z0.S, XZR] or [Z0.S], Xm is XZR in both the cases
+	 and the preferred disassembly is [Z0.S], ignoring the optional	Xm.  */
+      snprintf (buf, size, "[%s]", style_reg (styler, base));
     }
   else
-    tb[0] = '\0';
+    {
+      if (!opnd->shifter.amount && (opnd->qualifier != AARCH64_OPND_QLF_S_B
+				    || !opnd->shifter.amount_present))
+	{
+	  /* Not print the shift/extend amount when the amount is zero and
+	     when it is not the special case of 8-bit load/store
+	     instruction.  */
+	 print_amount_p = false;
+	 /* Likewise, no need to print the shift operator LSL in such a
+	    situation.  */
+	 if (opnd->shifter.kind == AARCH64_MOD_LSL)
+	   print_extend_p = false;
+	}
 
-  snprintf (buf, size, "[%s, %s%s]", style_reg (styler, base),
-	    style_reg (styler, offset), tb);
+      /* Prepare for the extend/shift.  */
+      if (print_extend_p)
+	{
+	  if (print_amount_p)
+	    snprintf (tb, sizeof (tb), ", %s %s",
+		      style_sub_mnem (styler, shift_name),
+		      style_imm (styler, "#%" PRIi64,
+	  /* PR 21096: The %100 is to silence a warning about possible
+	     truncation.  */
+				 (opnd->shifter.amount % 100)));
+	  else
+	    snprintf (tb, sizeof (tb), ", %s",
+		      style_sub_mnem (styler, shift_name));
+	}
+      else
+	tb[0] = '\0';
+
+      snprintf (buf, size, "[%s, %s%s]", style_reg (styler, base),
+		style_reg (styler, offset), tb);
+    }
 }
 
 /* Print ZA tiles from imm8 in ZERO instruction.
@@ -4257,9 +4267,6 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_Znx4:
     case AARCH64_OPND_SME_Ztx2_STRIDED:
     case AARCH64_OPND_SME_Ztx4_STRIDED:
-    case AARCH64_OPND_SME_Zt2:
-    case AARCH64_OPND_SME_Zt3:
-    case AARCH64_OPND_SME_Zt4:
       print_register_list (buf, size, opnd, "z", styler);
       break;
 
@@ -4724,6 +4731,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_ADDR_RX_LSL1:
     case AARCH64_OPND_SVE_ADDR_RX_LSL2:
     case AARCH64_OPND_SVE_ADDR_RX_LSL3:
+    case AARCH64_OPND_SVE_ADDR_RX_LSL4:
       print_register_offset_address
 	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1),
 	 get_offset_int_reg_name (opnd), styler);

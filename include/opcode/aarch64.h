@@ -686,6 +686,7 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ADDR_RX_LSL1,    /* SVE [<Xn|SP>, <Xm>, LSL #1].  */
   AARCH64_OPND_SVE_ADDR_RX_LSL2,    /* SVE [<Xn|SP>, <Xm>, LSL #2].  */
   AARCH64_OPND_SVE_ADDR_RX_LSL3,    /* SVE [<Xn|SP>, <Xm>, LSL #3].  */
+  AARCH64_OPND_SVE_ADDR_RX_LSL4,    /* SVE [<Xn|SP>, <Xm>, LSL #4].  */
   AARCH64_OPND_SVE_ADDR_ZX,	    /* SVE [Zn.<T>{, <Xm>}].  */
   AARCH64_OPND_SVE_ADDR_RZ,	    /* SVE [<Xn|SP>, Zm.D].  */
   AARCH64_OPND_SVE_ADDR_RZ_LSL1,    /* SVE [<Xn|SP>, Zm.D, LSL #1].  */
@@ -861,9 +862,6 @@ enum aarch64_opnd
   AARCH64_OPND_MOPS_WB_Rn,	/* Rn!, in bits [5, 9].  */
   AARCH64_OPND_CSSC_SIMM8,	/* CSSC signed 8-bit immediate.  */
   AARCH64_OPND_CSSC_UIMM8,	/* CSSC unsigned 8-bit immediate.  */
-  AARCH64_OPND_SME_Zt2,		/* Qobule SVE vector register list.  */
-  AARCH64_OPND_SME_Zt3,		/* Trible SVE vector register list.  */
-  AARCH64_OPND_SME_Zt4,		/* Quad SVE vector register list.  */
   AARCH64_OPND_RCPC3_ADDR_OPT_POSTIND,   /* [<Xn|SP>]{, #<imm>}.  */
   AARCH64_OPND_RCPC3_ADDR_OPT_PREIND_WB, /* [<Xn|SP>] or [<Xn|SP>, #<imm>]!.  */
   AARCH64_OPND_RCPC3_ADDR_POSTIND,	 /* [<Xn|SP>], #<imm>.  */

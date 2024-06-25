@@ -6953,9 +6953,6 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SME_Zdnx2:
 	case AARCH64_OPND_SME_Zdnx4:
 	case AARCH64_OPND_SME_Zdnx4_STRIDED:
-	case AARCH64_OPND_SME_Zt2:
-	case AARCH64_OPND_SME_Zt3:
-	case AARCH64_OPND_SME_Zt4:
 	case AARCH64_OPND_SME_Zmx2:
 	case AARCH64_OPND_SME_Zmx4:
 	case AARCH64_OPND_SME_Znx2:
@@ -7793,6 +7790,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_ADDR_RX_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL2:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RX_LSL4:
 	  /* [<Xn|SP>, <R><m>{, lsl #<amount>}]
 	     but recognizing SVE registers.  */
 	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
