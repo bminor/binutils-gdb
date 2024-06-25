@@ -44,14 +44,14 @@
 .*:	04cf2c44 	uminqv	v4.2d, p3, z2.d
 .*:	04cf3028 	uminqv	v8.2d, p4, z1.d
 .*:	048f3c10 	uminqv	v16.4s, p7, z0.s
-.*:	0530268a 	dupq	z10.b, z20.b\[0\]
+.*:	0521268a 	dupq	z10.b, z20.b\[0\]
 .*:	053f268a 	dupq	z10.b, z20.b\[15\]
-.*:	0521268a 	dupq	z10.h, z20.h\[0\]
-.*:	052f268a 	dupq	z10.h, z20.h\[7\]
-.*:	0522268a 	dupq	z10.s, z20.s\[0\]
-.*:	052e268a 	dupq	z10.s, z20.s\[3\]
-.*:	0524268a 	dupq	z10.d, z20.d\[0\]
-.*:	052c268a 	dupq	z10.d, z20.d\[1\]
+.*:	0522268a 	dupq	z10.h, z20.h\[0\]
+.*:	053e268a 	dupq	z10.h, z20.h\[7\]
+.*:	0524268a 	dupq	z10.s, z20.s\[0\]
+.*:	053c268a 	dupq	z10.s, z20.s\[3\]
+.*:	0528268a 	dupq	z10.d, z20.d\[0\]
+.*:	0538268a 	dupq	z10.d, z20.d\[1\]
 .*:	041d2200 	eorqv	v0.16b, p0, z16.b
 .*:	045d2501 	eorqv	v1.8h, p1, z8.h
 .*:	049d2882 	eorqv	v2.4s, p2, z4.s

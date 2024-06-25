@@ -34756,7 +34756,6 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 238:
       return aarch64_ext_sve_quad_index (self, info, code, inst, errors);
     case 240:
-      return aarch64_ext_sve_index_imm (self, info, code, inst, errors);
     case 241:
       return aarch64_ext_sve_index (self, info, code, inst, errors);
     case 242:

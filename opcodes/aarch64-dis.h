@@ -119,7 +119,6 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_sve_float_half_one);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_float_half_two);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_float_zero_one);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_index);
-AARCH64_DECL_OPD_EXTRACTOR (ext_sve_index_imm);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_limm_mov);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_quad_index);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_reglist);

@@ -1291,23 +1291,8 @@ aarch64_ins_sve_index (const aarch64_operand *self,
 {
   unsigned int esize = aarch64_get_qualifier_esize (info->qualifier);
   insert_field (self->fields[0], code, info->reglane.regno, 0);
-  insert_fields (code, (info->reglane.index * 2 + 1) * esize, 0,
-		 2, FLD_imm5, FLD_SVE_tszh);
-  return true;
-}
-
-/* Encode Zn.<T>[<imm>], where <imm> is an immediate with range of 0 to one less
-   than the number of elements in 128 bit, which can encode il:tsz.  */
-bool
-aarch64_ins_sve_index_imm (const aarch64_operand *self,
-			   const aarch64_opnd_info *info, aarch64_insn *code,
-			   const aarch64_inst *inst ATTRIBUTE_UNUSED,
-			   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
-{
-  insert_field (self->fields[0], code, info->reglane.regno, 0);
-  unsigned int esize = aarch64_get_qualifier_esize (info->qualifier);
-  insert_fields (code, (info->reglane.index * 2 + 1) * esize, 0,
-		 2, self->fields[1],self->fields[2]);
+  insert_all_fields_after (self, 1, code,
+			   (info->reglane.index * 2 + 1) * esize);
   return true;
 }
 
