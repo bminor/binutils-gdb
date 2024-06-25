@@ -1,5 +1,5 @@
 #name: Test of SVE2.1 instructions
-#as: -march=armv9.4-a+sve2p1
+#as: -march=armv9.4-a
 #objdump: -dr
 
 [^:]+:     file format .*
