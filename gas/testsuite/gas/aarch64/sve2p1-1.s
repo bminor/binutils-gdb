@@ -55,12 +55,12 @@ eorqv v4.2d, p3, z2.d
 eorqv v8.2d, p4, z1.d
 eorqv v16.4s, p7, z0.s
 
-extq z0.b, z0.b, z10.b[15]
-extq z1.b, z1.b, z15.b[7]
-extq z2.b, z2.b, z5.b[3]
-extq z4.b, z4.b, z12.b[1]
-extq z8.b, z8.b, z7.b[4]
-extq z16.b, z16.b, z1.b[8]
+extq z0.b, z0.b, z0.b, #0
+extq z31.b, z31.b, z0.b, #0
+extq z0.b, z0.b, z31.b, #0
+extq z0.b, z0.b, z0.b, #15
+extq z31.b, z31.b, z31.b, #15
+extq z15.b, z15.b, z31.b, #7
 faddqv v1.8h, p1, z8.h
 faddqv v2.4s, p2, z4.s
 faddqv v4.2d, p3, z2.d

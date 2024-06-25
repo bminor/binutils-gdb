@@ -1852,11 +1852,6 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
-	case AARCH64_OPND_SVE_Zm_imm4:
-	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31, 0, 15))
-	    return 0;
-	  break;
-
 	case AARCH64_OPND_SVE_Zn_5_INDEX:
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
@@ -2742,6 +2737,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_UIMM3:
 	case AARCH64_OPND_SVE_UIMM7:
 	case AARCH64_OPND_SVE_UIMM8:
+	case AARCH64_OPND_SVE_UIMM4:
 	case AARCH64_OPND_SVE_UIMM8_53:
 	case AARCH64_OPND_CSSC_UIMM8:
 	  size = get_operand_fields_width (get_operand_from_code (type));
@@ -4296,7 +4292,6 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_Zn_INDEX3_14:
     case AARCH64_OPND_SME_Zn_INDEX3_15:
     case AARCH64_OPND_SME_Zn_INDEX4_14:
-    case AARCH64_OPND_SVE_Zm_imm4:
       snprintf (buf, size, "%s[%s]",
 		(opnd->qualifier == AARCH64_OPND_QLF_NIL
 		 ? style_reg (styler, "z%d", opnd->reglane.regno)
@@ -4463,6 +4458,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_UIMM3:
     case AARCH64_OPND_SVE_UIMM7:
     case AARCH64_OPND_SVE_UIMM8:
+    case AARCH64_OPND_SVE_UIMM4:
     case AARCH64_OPND_SVE_UIMM8_53:
     case AARCH64_OPND_IMM_ROT1:
     case AARCH64_OPND_IMM_ROT2:
@@ -5590,7 +5586,8 @@ verify_constraints (const struct aarch64_inst *inst,
 	     instruction for better error messages.  */
 	  if (!opcode->avariant
 	      || (!AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE)
-		  && !AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE2)))
+		  && !AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE2)
+		  && !AARCH64_CPU_HAS_FEATURE (*opcode->avariant, SVE2p1)))
 	    {
 	      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
 	      mismatch_detail->error = _("SVE instruction expected after "

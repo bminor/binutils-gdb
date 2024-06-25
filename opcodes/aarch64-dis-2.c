@@ -34457,15 +34457,15 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 194:
     case 195:
     case 196:
-    case 211:
     case 212:
     case 213:
     case 214:
-    case 223:
+    case 215:
     case 224:
     case 225:
     case 226:
     case 227:
+    case 228:
     case 239:
     case 243:
     case 248:
@@ -34506,9 +34506,9 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 40:
     case 41:
     case 42:
-    case 228:
     case 229:
-    case 232:
+    case 230:
+    case 233:
     case 269:
     case 270:
     case 285:
@@ -34577,6 +34577,7 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 208:
     case 209:
     case 210:
+    case 211:
     case 271:
     case 302:
     case 303:
@@ -34736,19 +34737,18 @@ aarch64_extract_operand (const aarch64_operand *self,
     case 202:
     case 284:
       return aarch64_ext_sve_shrimm (self, info, code, inst, errors);
-    case 215:
     case 216:
     case 217:
     case 218:
-      return aarch64_ext_sme_za_vrs1 (self, info, code, inst, errors);
     case 219:
+      return aarch64_ext_sme_za_vrs1 (self, info, code, inst, errors);
     case 220:
     case 221:
     case 222:
+    case 223:
       return aarch64_ext_sme_za_vrs2 (self, info, code, inst, errors);
-    case 230:
     case 231:
-    case 233:
+    case 232:
     case 234:
     case 235:
     case 236:
