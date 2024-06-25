@@ -4029,7 +4029,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	{
 	  /* Avoid printing an invalid additional value for Rt in SYS aliases such as
 	     BRB, provide a helpful comment instead */
-	  snprintf (comment, comment_size, "unpredictable encoding (Rt!=31): #%" PRIi64, opnd->imm.value);
+	  snprintf (comment, comment_size, "unpredictable encoding (Rt!=31): #%u", opnd->reg.regno);
 	  break;
 	}
       /* Omit the operand, e.g. RET.  */
