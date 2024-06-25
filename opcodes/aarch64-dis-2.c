@@ -17566,7 +17566,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              011001x00x1xxxxx000x10xxxxxxxxxx
                                                              bfmla.  */
-                                                          return 3295;
+                                                          return 3292;
                                                         }
                                                     }
                                                   else
@@ -17585,7 +17585,7 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                              10987654321098765432109876543210
                                                              011001x00x1xxxxx000x11xxxxxxxxxx
                                                              bfmls.  */
-                                                          return 3296;
+                                                          return 3293;
                                                         }
                                                     }
                                                 }
@@ -33782,16 +33782,16 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
     case 1697: return NULL;		/* ldff1b --> NULL.  */
     case 1715: value = 1716; break;	/* ldff1h --> ldff1h.  */
     case 1716: return NULL;		/* ldff1h --> NULL.  */
-    case 2475: value = 3292; break;	/* fclamp --> bfclamp.  */
-    case 3292: return NULL;		/* bfclamp --> NULL.  */
+    case 2475: value = 3291; break;	/* fclamp --> bfclamp.  */
+    case 3291: return NULL;		/* bfclamp --> NULL.  */
     case 1789: value = 1790; break;	/* ldr --> ldr.  */
     case 1790: return NULL;		/* ldr --> NULL.  */
-    case 1445: value = 3291; break;	/* fadd --> bfadd.  */
-    case 3291: return NULL;		/* bfadd --> NULL.  */
-    case 1512: value = 3293; break;	/* fmul --> bfmul.  */
-    case 3293: return NULL;		/* bfmul --> NULL.  */
-    case 1538: value = 3294; break;	/* fsub --> bfsub.  */
-    case 3294: return NULL;		/* bfsub --> NULL.  */
+    case 1445: value = 3294; break;	/* fadd --> bfadd.  */
+    case 3294: return NULL;		/* bfadd --> NULL.  */
+    case 1512: value = 3295; break;	/* fmul --> bfmul.  */
+    case 3295: return NULL;		/* bfmul --> NULL.  */
+    case 1538: value = 3296; break;	/* fsub --> bfsub.  */
+    case 3296: return NULL;		/* bfsub --> NULL.  */
     case 1503: value = 3287; break;	/* fmla --> bfmla.  */
     case 3287: return NULL;		/* bfmla --> NULL.  */
     case 2008: value = 2009; break;	/* str --> str.  */

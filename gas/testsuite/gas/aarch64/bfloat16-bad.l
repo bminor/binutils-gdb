@@ -95,3 +95,6 @@
 .*: Error: selected processor does not support `bfsub z4.h,z16.h,z2.h'
 .*: Error: selected processor does not support `bfsub z8.h,z20.h,z1.h'
 .*: Error: selected processor does not support `bfsub z16.h,z24.h,z0.h'
+.*: Error: selected processor does not support `bfclamp z3.h,z4.h,z16.h'
+.*: Error: selected processor does not support `bfmla z3.h,z16.h,z6.h\[7\]'
+.*: Error: selected processor does not support `bfmls z3.h,z16.h,z6.h\[7\]'

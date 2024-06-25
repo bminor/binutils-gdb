@@ -104,3 +104,9 @@
 .*:	65020604 	bfsub	z4.h, z16.h, z2.h
 .*:	65010688 	bfsub	z8.h, z20.h, z1.h
 .*:	65000710 	bfsub	z16.h, z24.h, z0.h
+.*:	0420bca3 	movprfx	z3, z5
+.*:	64302483 	bfclamp	z3.h, z4.h, z16.h
+.*:	0420bca3 	movprfx	z3, z5
+.*:	647e0a03 	bfmla	z3.h, z16.h, z6.h\[7\]
+.*:	0420bca3 	movprfx	z3, z5
+.*:	647e0e03 	bfmls	z3.h, z16.h, z6.h\[7\]
