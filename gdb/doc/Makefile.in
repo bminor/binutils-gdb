@@ -71,6 +71,7 @@ TEXI2ROFF=texi2roff
 TEXI2DVI=texi2dvi
 TEXI2DVI_TMPDIR=texi2dvi_tmpdir
 TEXI2DVI_CMD = rm -fr $(TEXI2DVI_TMPDIR)/$(subst .,_,$@) \
+		&& mkdir -p $(TEXI2DVI_TMPDIR)/$(subst .,_,$@) \
 		&& $(TEXI2DVI) --build=tidy \
 			       --build-dir=$(TEXI2DVI_TMPDIR)/$(subst .,_,$@)
 
