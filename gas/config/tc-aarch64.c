@@ -8509,7 +8509,7 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
 		  (_("unpredictable: identical transfer and status registers"
 		     " --`%s'"),str);
 
-	      if (opnds[0].reg.regno == opnds[2].reg.regno)
+	      if (opnds[0].reg.regno == opnds[2].addr.base_regno)
 		{
 		  if (!(opcode->opcode & (1 << 21)))
 	            /*  Store-Exclusive is unpredictable if Rn == Rs.  */
@@ -8526,8 +8526,8 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
 
 	      /* Store-Exclusive pair is unpredictable if Rn == Rs.  */
 	      if ((opcode->opcode & (1 << 21))
-		  && opnds[0].reg.regno == opnds[3].reg.regno
-		  && opnds[3].reg.regno != REG_SP)
+		  && opnds[0].reg.regno == opnds[3].addr.base_regno
+		  && opnds[3].addr.base_regno != REG_SP)
 		as_warn (_("unpredictable: identical base and status registers"
 			   " --`%s'"),str);
 	    }
