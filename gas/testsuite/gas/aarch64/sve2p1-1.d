@@ -8,42 +8,41 @@
 [^:]+:
 
 [^:]+:
-.*:	04052200 	addqv	v0.16b, p0, z16.b
-.*:	04452501 	addqv	v1.8h, p1, z8.h
-.*:	04852882 	addqv	v2.4s, p2, z4.s
-.*:	04c52c44 	addqv	v4.2d, p3, z2.d
-.*:	04c53028 	addqv	v8.2d, p4, z1.d
-.*:	04853c10 	addqv	v16.4s, p7, z0.s
-.*:	041e2200 	andqv	v0.16b, p0, z16.b
-.*:	045e2501 	andqv	v1.8h, p1, z8.h
-.*:	049e2882 	andqv	v2.4s, p2, z4.s
-.*:	04de2c44 	andqv	v4.2d, p3, z2.d
-.*:	04de3028 	andqv	v8.2d, p4, z1.d
-.*:	049e3c10 	andqv	v16.4s, p7, z0.s
-.*:	040c2200 	smaxqv	v0.16b, p0, z16.b
-.*:	044c2501 	smaxqv	v1.8h, p1, z8.h
-.*:	048c2882 	smaxqv	v2.4s, p2, z4.s
-.*:	04cc2c44 	smaxqv	v4.2d, p3, z2.d
-.*:	04cc3028 	smaxqv	v8.2d, p4, z1.d
-.*:	048c3c10 	smaxqv	v16.4s, p7, z0.s
-.*:	040d2200 	umaxqv	v0.16b, p0, z16.b
-.*:	044d2501 	umaxqv	v1.8h, p1, z8.h
-.*:	048d2882 	umaxqv	v2.4s, p2, z4.s
-.*:	04cd2c44 	umaxqv	v4.2d, p3, z2.d
-.*:	04cd3028 	umaxqv	v8.2d, p4, z1.d
-.*:	048d3c10 	umaxqv	v16.4s, p7, z0.s
-.*:	040e2200 	sminqv	v0.16b, p0, z16.b
-.*:	044e2501 	sminqv	v1.8h, p1, z8.h
-.*:	048e2882 	sminqv	v2.4s, p2, z4.s
-.*:	04ce2c44 	sminqv	v4.2d, p3, z2.d
-.*:	04ce3028 	sminqv	v8.2d, p4, z1.d
-.*:	048e3c10 	sminqv	v16.4s, p7, z0.s
-.*:	040f2200 	uminqv	v0.16b, p0, z16.b
-.*:	044f2501 	uminqv	v1.8h, p1, z8.h
-.*:	048f2882 	uminqv	v2.4s, p2, z4.s
-.*:	04cf2c44 	uminqv	v4.2d, p3, z2.d
-.*:	04cf3028 	uminqv	v8.2d, p4, z1.d
-.*:	048f3c10 	uminqv	v16.4s, p7, z0.s
+.*:	04052000 	addqv	v0.16b, p0, z0.b
+.*:	0405201f 	addqv	v31.16b, p0, z0.b
+.*:	04c52000 	addqv	v0.2d, p0, z0.d
+.*:	04053c00 	addqv	v0.16b, p7, z0.b
+.*:	040523e0 	addqv	v0.16b, p0, z31.b
+.*:	04c53fff 	addqv	v31.2d, p7, z31.d
+.*:	04852e8a 	addqv	v10.4s, p3, z20.s
+.*:	041e2000 	andqv	v0.16b, p0, z0.b
+.*:	041e201f 	andqv	v31.16b, p0, z0.b
+.*:	04de2000 	andqv	v0.2d, p0, z0.d
+.*:	041e3c00 	andqv	v0.16b, p7, z0.b
+.*:	041e23e0 	andqv	v0.16b, p0, z31.b
+.*:	04de3fff 	andqv	v31.2d, p7, z31.d
+.*:	049e2e8a 	andqv	v10.4s, p3, z20.s
+.*:	040c2000 	smaxqv	v0.16b, p0, z0.b
+.*:	040c201f 	smaxqv	v31.16b, p0, z0.b
+.*:	04cc2000 	smaxqv	v0.2d, p0, z0.d
+.*:	040c3c00 	smaxqv	v0.16b, p7, z0.b
+.*:	040c23e0 	smaxqv	v0.16b, p0, z31.b
+.*:	04cc3fff 	smaxqv	v31.2d, p7, z31.d
+.*:	048c2e8a 	smaxqv	v10.4s, p3, z20.s
+.*:	040d2000 	umaxqv	v0.16b, p0, z0.b
+.*:	040d201f 	umaxqv	v31.16b, p0, z0.b
+.*:	04cd2000 	umaxqv	v0.2d, p0, z0.d
+.*:	040d3c00 	umaxqv	v0.16b, p7, z0.b
+.*:	040d23e0 	umaxqv	v0.16b, p0, z31.b
+.*:	04cd3fff 	umaxqv	v31.2d, p7, z31.d
+.*:	048d2e8a 	umaxqv	v10.4s, p3, z20.s
+.*:	040e2000 	sminqv	v0.16b, p0, z0.b
+.*:	040e201f 	sminqv	v31.16b, p0, z0.b
+.*:	04ce2000 	sminqv	v0.2d, p0, z0.d
+.*:	040e3c00 	sminqv	v0.16b, p7, z0.b
+.*:	040e23e0 	sminqv	v0.16b, p0, z31.b
+.*:	04ce3fff 	sminqv	v31.2d, p7, z31.d
+.*:	048e2e8a 	sminqv	v10.4s, p3, z20.s
 .*:	0521268a 	dupq	z10.b, z20.b\[0\]
 .*:	053f268a 	dupq	z10.b, z20.b\[15\]
 .*:	0522268a 	dupq	z10.h, z20.h\[0\]
@@ -52,40 +51,58 @@
 .*:	053c268a 	dupq	z10.s, z20.s\[3\]
 .*:	0528268a 	dupq	z10.d, z20.d\[0\]
 .*:	0538268a 	dupq	z10.d, z20.d\[1\]
-.*:	041d2200 	eorqv	v0.16b, p0, z16.b
-.*:	045d2501 	eorqv	v1.8h, p1, z8.h
-.*:	049d2882 	eorqv	v2.4s, p2, z4.s
-.*:	04dd2c44 	eorqv	v4.2d, p3, z2.d
-.*:	04dd3028 	eorqv	v8.2d, p4, z1.d
-.*:	049d3c10 	eorqv	v16.4s, p7, z0.s
+.*:	040f2000 	uminqv	v0.16b, p0, z0.b
+.*:	040f201f 	uminqv	v31.16b, p0, z0.b
+.*:	04cf2000 	uminqv	v0.2d, p0, z0.d
+.*:	040f3c00 	uminqv	v0.16b, p7, z0.b
+.*:	040f23e0 	uminqv	v0.16b, p0, z31.b
+.*:	04cf3fff 	uminqv	v31.2d, p7, z31.d
+.*:	048f2e8a 	uminqv	v10.4s, p3, z20.s
 .*:	05602400 	extq	z0.b, z0.b, z0.b, #0
 .*:	0560241f 	extq	z31.b, z31.b, z0.b, #0
 .*:	056027e0 	extq	z0.b, z0.b, z31.b, #0
 .*:	056f2400 	extq	z0.b, z0.b, z0.b, #15
 .*:	056f27ff 	extq	z31.b, z31.b, z31.b, #15
 .*:	056727ef 	extq	z15.b, z15.b, z31.b, #7
-.*:	6450a501 	faddqv	v1.8h, p1, z8.h
-.*:	6490a882 	faddqv	v2.4s, p2, z4.s
-.*:	64d0ac44 	faddqv	v4.2d, p3, z2.d
-.*:	64d0b028 	faddqv	v8.2d, p4, z1.d
-.*:	6490bc10 	faddqv	v16.4s, p7, z0.s
-.*:	6454a501 	fmaxnmqv	v1.8h, p1, z8.h
-.*:	6494a882 	fmaxnmqv	v2.4s, p2, z4.s
-.*:	64d4ac44 	fmaxnmqv	v4.2d, p3, z2.d
-.*:	64d4b028 	fmaxnmqv	v8.2d, p4, z1.d
-.*:	6494bc10 	fmaxnmqv	v16.4s, p7, z0.s
-.*:	6456a501 	fmaxqv	v1.8h, p1, z8.h
-.*:	6496a882 	fmaxqv	v2.4s, p2, z4.s
-.*:	64d6ac44 	fmaxqv	v4.2d, p3, z2.d
-.*:	64d6b028 	fmaxqv	v8.2d, p4, z1.d
-.*:	6496bc10 	fmaxqv	v16.4s, p7, z0.s
-.*:	6455a501 	fminnmqv	v1.8h, p1, z8.h
-.*:	6495a882 	fminnmqv	v2.4s, p2, z4.s
-.*:	64d5ac44 	fminnmqv	v4.2d, p3, z2.d
-.*:	64d5b028 	fminnmqv	v8.2d, p4, z1.d
-.*:	6495bc10 	fminnmqv	v16.4s, p7, z0.s
-.*:	6457a501 	fminqv	v1.8h, p1, z8.h
-.*:	6497a882 	fminqv	v2.4s, p2, z4.s
-.*:	64d7ac44 	fminqv	v4.2d, p3, z2.d
-.*:	64d7b028 	fminqv	v8.2d, p4, z1.d
-.*:	6497bc10 	fminqv	v16.4s, p7, z0.s
+.*:	041d2000 	eorqv	v0.16b, p0, z0.b
+.*:	041d201f 	eorqv	v31.16b, p0, z0.b
+.*:	04dd2000 	eorqv	v0.2d, p0, z0.d
+.*:	041d3c00 	eorqv	v0.16b, p7, z0.b
+.*:	041d23e0 	eorqv	v0.16b, p0, z31.b
+.*:	04dd3fff 	eorqv	v31.2d, p7, z31.d
+.*:	049d2e8a 	eorqv	v10.4s, p3, z20.s
+.*:	6450a000 	faddqv	v0.8h, p0, z0.h
+.*:	6450a01f 	faddqv	v31.8h, p0, z0.h
+.*:	64d0a000 	faddqv	v0.2d, p0, z0.d
+.*:	6450bc00 	faddqv	v0.8h, p7, z0.h
+.*:	6450a3e0 	faddqv	v0.8h, p0, z31.h
+.*:	64d0bfff 	faddqv	v31.2d, p7, z31.d
+.*:	6490ae8a 	faddqv	v10.4s, p3, z20.s
+.*:	6454a000 	fmaxnmqv	v0.8h, p0, z0.h
+.*:	6454a01f 	fmaxnmqv	v31.8h, p0, z0.h
+.*:	64d4a000 	fmaxnmqv	v0.2d, p0, z0.d
+.*:	6454bc00 	fmaxnmqv	v0.8h, p7, z0.h
+.*:	6454a3e0 	fmaxnmqv	v0.8h, p0, z31.h
+.*:	64d4bfff 	fmaxnmqv	v31.2d, p7, z31.d
+.*:	6494ae8a 	fmaxnmqv	v10.4s, p3, z20.s
+.*:	6456a000 	fmaxqv	v0.8h, p0, z0.h
+.*:	6456a01f 	fmaxqv	v31.8h, p0, z0.h
+.*:	64d6a000 	fmaxqv	v0.2d, p0, z0.d
+.*:	6456bc00 	fmaxqv	v0.8h, p7, z0.h
+.*:	6456a3e0 	fmaxqv	v0.8h, p0, z31.h
+.*:	64d6bfff 	fmaxqv	v31.2d, p7, z31.d
+.*:	6496ae8a 	fmaxqv	v10.4s, p3, z20.s
+.*:	6455a000 	fminnmqv	v0.8h, p0, z0.h
+.*:	6455a01f 	fminnmqv	v31.8h, p0, z0.h
+.*:	64d5a000 	fminnmqv	v0.2d, p0, z0.d
+.*:	6455bc00 	fminnmqv	v0.8h, p7, z0.h
+.*:	6455a3e0 	fminnmqv	v0.8h, p0, z31.h
+.*:	64d5bfff 	fminnmqv	v31.2d, p7, z31.d
+.*:	6495ae8a 	fminnmqv	v10.4s, p3, z20.s
+.*:	6457a000 	fminqv	v0.8h, p0, z0.h
+.*:	6457a01f 	fminqv	v31.8h, p0, z0.h
+.*:	64d7a000 	fminqv	v0.2d, p0, z0.d
+.*:	6457bc00 	fminqv	v0.8h, p7, z0.h
+.*:	6457a3e0 	fminqv	v0.8h, p0, z31.h
+.*:	64d7bfff 	fminqv	v31.2d, p7, z31.d
+.*:	6497ae8a 	fminqv	v10.4s, p3, z20.s
