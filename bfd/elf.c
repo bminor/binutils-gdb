@@ -559,15 +559,6 @@ bfd_elf_sym_name (bfd *abfd,
   return name;
 }
 
-/* Elf_Internal_Shdr->contents is an array of these for SHT_GROUP
-   sections.  The first element is the flags, the rest are section
-   pointers.  */
-
-typedef union elf_internal_group {
-  Elf_Internal_Shdr *shdr;
-  unsigned int flags;
-} Elf_Internal_Group;
-
 /* Return the name of the group signature symbol.  Why isn't the
    signature just a string?  */
 
@@ -597,249 +588,110 @@ group_signature (bfd *abfd, Elf_Internal_Shdr *ghdr)
   return bfd_elf_sym_name (abfd, hdr, &isym, NULL);
 }
 
-/* Set next_in_group list pointer, and group name for NEWSECT.  */
+static bool
+is_valid_group_section_header (Elf_Internal_Shdr *shdr, size_t minsize)
+{
+  return (shdr->sh_size >= minsize
+	  && shdr->sh_entsize == GRP_ENTRY_SIZE
+	  && shdr->sh_size % GRP_ENTRY_SIZE == 0
+	  && shdr->bfd_section != NULL);
+}
+
+
+/* Set next_in_group, sec_group list pointers, and group names.  */
 
 static bool
-setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
+process_sht_group_entries (bfd *abfd,
+			   Elf_Internal_Shdr *ghdr, unsigned int gidx)
 {
-  unsigned int num_group = elf_tdata (abfd)->num_group;
+  unsigned char *contents;
 
-  /* If num_group is zero, read in all SHT_GROUP sections.  The count
-     is set to -1 if there are no SHT_GROUP sections.  */
-  if (num_group == 0)
+  /* Read the raw contents.  */
+  if (!bfd_malloc_and_get_section (abfd, ghdr->bfd_section, &contents))
     {
-      unsigned int i, shnum;
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%pB: could not read contents of group [%u]"), abfd, gidx);
+      return false;
+    }
 
-      /* First count the number of groups.  If we have a SHT_GROUP
-	 section with just a flag word (ie. sh_size is 4), ignore it.  */
-      shnum = elf_numsections (abfd);
-      num_group = 0;
+  asection *last_elt = NULL;
+  const char *gname = NULL;
+  unsigned char *p = contents + ghdr->sh_size;
+  while (1)
+    {
+      unsigned int idx;
+      Elf_Internal_Shdr *shdr;
 
-#define IS_VALID_GROUP_SECTION_HEADER(shdr, minsize)	\
-	(   (shdr)->sh_type == SHT_GROUP		\
-	 && (shdr)->sh_size >= minsize			\
-	 && (shdr)->sh_entsize == GRP_ENTRY_SIZE	\
-	 && ((shdr)->sh_size % GRP_ENTRY_SIZE) == 0)
-
-      for (i = 0; i < shnum; i++)
+      p -= 4;
+      idx = H_GET_32 (abfd, p);
+      if (p == contents)
 	{
-	  Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
-
-	  if (IS_VALID_GROUP_SECTION_HEADER (shdr, 2 * GRP_ENTRY_SIZE))
-	    num_group += 1;
+	  if ((idx & GRP_COMDAT) != 0)
+	    ghdr->bfd_section->flags
+	      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+	  break;
 	}
+      if (idx < elf_numsections (abfd))
+	shdr = elf_elfsections (abfd)[idx];
 
-      if (num_group == 0)
+      if (idx >= elf_numsections (abfd)
+	  || shdr->sh_type == SHT_GROUP)
 	{
-	  num_group = (unsigned) -1;
-	  elf_tdata (abfd)->num_group = num_group;
-	  elf_tdata (abfd)->group_sect_ptr = NULL;
+	  _bfd_error_handler
+	    (_("%pB: invalid entry in SHT_GROUP section [%u]"), abfd, gidx);
 	}
       else
 	{
-	  /* We keep a list of elf section headers for group sections,
-	     so we can find them quickly.  */
-	  size_t amt;
+	  /* PR binutils/23199: All sections in a section group should
+	     be marked with SHF_GROUP.  But some tools generate broken
+	     objects without SHF_GROUP.  Fix them up here.  */
+	  shdr->sh_flags |= SHF_GROUP;
 
-	  elf_tdata (abfd)->num_group = num_group;
-	  amt = num_group * sizeof (Elf_Internal_Shdr *);
-	  elf_tdata (abfd)->group_sect_ptr
-	    = (Elf_Internal_Shdr **) bfd_zalloc (abfd, amt);
-	  if (elf_tdata (abfd)->group_sect_ptr == NULL)
-	    return false;
-	  num_group = 0;
-
-	  for (i = 0; i < shnum; i++)
+	  asection *elt = shdr->bfd_section;
+	  if (elt != NULL)
 	    {
-	      Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
-
-	      if (IS_VALID_GROUP_SECTION_HEADER (shdr, 2 * GRP_ENTRY_SIZE))
+	      if (last_elt == NULL)
 		{
-		  unsigned char *src;
-		  Elf_Internal_Group *dest;
-
-		  /* Make sure the group section has a BFD section
-		     attached to it.  */
-		  if (!bfd_section_from_shdr (abfd, i))
-		    return false;
-
-		  /* Add to list of sections.  */
-		  elf_tdata (abfd)->group_sect_ptr[num_group] = shdr;
-		  num_group += 1;
-
-		  /* Read the raw contents.  */
-		  BFD_ASSERT (sizeof (*dest) >= 4 && sizeof (*dest) % 4 == 0);
-		  shdr->contents = NULL;
-		  if (_bfd_mul_overflow (shdr->sh_size,
-					 sizeof (*dest) / 4, &amt)
-		      || bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0
-		      || !(shdr->contents
-			   = _bfd_alloc_and_read (abfd, amt, shdr->sh_size)))
+		  /* Start a circular list with one element.
+		     It will be in reverse order to match what gas does.  */
+		  elf_next_in_group (elt) = elt;
+		  /* Point the group section to it.  */
+		  elf_next_in_group (ghdr->bfd_section) = elt;
+		  gname = group_signature (abfd, ghdr);
+		  if (gname == NULL)
 		    {
-		      _bfd_error_handler
-			/* xgettext:c-format */
-			(_("%pB: invalid size field in group section"
-			   " header: %#" PRIx64 ""),
-			 abfd, (uint64_t) shdr->sh_size);
-		      bfd_set_error (bfd_error_bad_value);
-		      -- num_group;
-		      continue;
-		    }
-
-		  /* Translate raw contents, a flag word followed by an
-		     array of elf section indices all in target byte order,
-		     to the flag word followed by an array of elf section
-		     pointers.  */
-		  src = shdr->contents + shdr->sh_size;
-		  dest = (Elf_Internal_Group *) (shdr->contents + amt);
-
-		  while (1)
-		    {
-		      unsigned int idx;
-
-		      src -= 4;
-		      --dest;
-		      idx = H_GET_32 (abfd, src);
-		      if (src == shdr->contents)
-			{
-			  dest->shdr = NULL;
-			  dest->flags = idx;
-			  if (shdr->bfd_section != NULL && (idx & GRP_COMDAT))
-			    shdr->bfd_section->flags
-			      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
-			  break;
-			}
-		      if (idx < shnum)
-			{
-			  dest->shdr = elf_elfsections (abfd)[idx];
-			  /* PR binutils/23199: All sections in a
-			     section group should be marked with
-			     SHF_GROUP.  But some tools generate
-			     broken objects without SHF_GROUP.  Fix
-			     them up here.  */
-			  dest->shdr->sh_flags |= SHF_GROUP;
-			}
-		      if (idx >= shnum
-			  || dest->shdr->sh_type == SHT_GROUP)
-			{
-			  _bfd_error_handler
-			    (_("%pB: invalid entry in SHT_GROUP section [%u]"),
-			       abfd, i);
-			  dest->shdr = NULL;
-			}
-		    }
-		}
-	    }
-
-	  /* PR 17510: Corrupt binaries might contain invalid groups.  */
-	  if (num_group != (unsigned) elf_tdata (abfd)->num_group)
-	    {
-	      elf_tdata (abfd)->num_group = num_group;
-
-	      /* If all groups are invalid then fail.  */
-	      if (num_group == 0)
-		{
-		  elf_tdata (abfd)->group_sect_ptr = NULL;
-		  elf_tdata (abfd)->num_group = num_group = -1;
-		  _bfd_error_handler
-		    (_("%pB: no valid group sections found"), abfd);
-		  bfd_set_error (bfd_error_bad_value);
-		}
-	    }
-	}
-    }
-
-  if (num_group != (unsigned) -1)
-    {
-      unsigned int search_offset = elf_tdata (abfd)->group_search_offset;
-      unsigned int j;
-
-      for (j = 0; j < num_group; j++)
-	{
-	  /* Begin search from previous found group.  */
-	  unsigned i = (j + search_offset) % num_group;
-
-	  Elf_Internal_Shdr *shdr = elf_tdata (abfd)->group_sect_ptr[i];
-	  Elf_Internal_Group *idx;
-	  bfd_size_type n_elt;
-
-	  if (shdr == NULL)
-	    continue;
-
-	  idx = (Elf_Internal_Group *) shdr->contents;
-	  if (idx == NULL || shdr->sh_size < 4)
-	    {
-	      /* See PR 21957 for a reproducer.  */
-	      /* xgettext:c-format */
-	      _bfd_error_handler (_("%pB: group section '%pA' has no contents"),
-				  abfd, shdr->bfd_section);
-	      elf_tdata (abfd)->group_sect_ptr[i] = NULL;
-	      bfd_set_error (bfd_error_bad_value);
-	      return false;
-	    }
-	  n_elt = shdr->sh_size / 4;
-
-	  /* Look through this group's sections to see if current
-	     section is a member.  */
-	  while (--n_elt != 0)
-	    if ((++idx)->shdr == hdr)
-	      {
-		asection *s = NULL;
-
-		/* We are a member of this group.  Go looking through
-		   other members to see if any others are linked via
-		   next_in_group.  */
-		idx = (Elf_Internal_Group *) shdr->contents;
-		n_elt = shdr->sh_size / 4;
-		while (--n_elt != 0)
-		  if ((++idx)->shdr != NULL
-		      && (s = idx->shdr->bfd_section) != NULL
-		      && elf_next_in_group (s) != NULL)
-		    break;
-		if (n_elt != 0)
-		  {
-		    /* Snarf the group name from other member, and
-		       insert current section in circular list.  */
-		    elf_group_name (newsect) = elf_group_name (s);
-		    elf_next_in_group (newsect) = elf_next_in_group (s);
-		    elf_next_in_group (s) = newsect;
-		  }
-		else
-		  {
-		    const char *gname;
-
-		    gname = group_signature (abfd, shdr);
-		    if (gname == NULL)
+		      free (contents);
 		      return false;
-		    elf_group_name (newsect) = gname;
-
-		    /* Start a circular list with one element.  */
-		    elf_next_in_group (newsect) = newsect;
-		  }
-
-		/* If the group section has been created, point to the
-		   new member.  */
-		if (shdr->bfd_section != NULL)
-		  elf_next_in_group (shdr->bfd_section) = newsect;
-
-		elf_tdata (abfd)->group_search_offset = i;
-		j = num_group - 1;
-		break;
-	      }
+		    }
+		}
+	      else
+		{
+		  elf_next_in_group (elt) = elf_next_in_group (last_elt);
+		  elf_next_in_group (last_elt) = elt;
+		}
+	      last_elt = elt;
+	      elf_group_name (elt) = gname;
+	      elf_sec_group (elt) = ghdr->bfd_section;
+	    }
+	  else if (shdr->sh_type != SHT_RELA
+		   && shdr->sh_type != SHT_REL)
+	    {
+	      /* There are some unknown sections in the group.  */
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB: unknown type [%#x] section `%s' in group [%u]"),
+		 abfd,
+		 shdr->sh_type,
+		 bfd_elf_string_from_elf_section (abfd,
+						  (elf_elfheader (abfd)
+						   ->e_shstrndx),
+						  shdr->sh_name),
+		 gidx);
+	    }
 	}
     }
-
-  if (elf_group_name (newsect) == NULL)
-    {
-      /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: no group info for section '%pA'"),
-			  abfd, newsect);
-      /* PR 29532: Return true here, even though the group info has not been
-	 read.  Separate debug info files can have empty group sections, but
-	 we do not want this to prevent them from being loaded as otherwise
-	 GDB will not be able to use them.  */
-      return true;
-    }
+  free (contents);
   return true;
 }
 
@@ -847,7 +699,6 @@ bool
 _bfd_elf_setup_sections (bfd *abfd)
 {
   unsigned int i;
-  unsigned int num_group = elf_tdata (abfd)->num_group;
   bool result = true;
   asection *s;
 
@@ -892,66 +743,49 @@ _bfd_elf_setup_sections (bfd *abfd)
 	      elf_linked_to_section (s) = linksec;
 	    }
 	}
-      else if (this_hdr->sh_type == SHT_GROUP
-	       && elf_next_in_group (s) == NULL)
-	{
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%pB: SHT_GROUP section [index %d] has no SHF_GROUP sections"),
-	     abfd, elf_section_data (s)->this_idx);
-	  result = false;
-	}
     }
 
   /* Process section groups.  */
-  if (num_group == (unsigned) -1)
-    return result;
 
-  for (i = 0; i < num_group; i++)
+  /* First count the number of groups.  If we have a SHT_GROUP
+     section with just a flag word (ie. sh_size is 4), ignore it.  */
+  unsigned int num_group = 0;
+  for (i = 1; i < elf_numsections (abfd); i++)
     {
-      Elf_Internal_Shdr *shdr = elf_tdata (abfd)->group_sect_ptr[i];
-      Elf_Internal_Group *idx;
-      unsigned int n_elt;
+      Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
 
-      /* PR binutils/18758: Beware of corrupt binaries with invalid
-	 group data.  */
-      if (shdr == NULL || shdr->bfd_section == NULL || shdr->contents == NULL)
+      if (shdr && shdr->sh_type == SHT_GROUP)
 	{
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%pB: section group entry number %u is corrupt"),
-	     abfd, i);
-	  result = false;
-	  continue;
-	}
-
-      idx = (Elf_Internal_Group *) shdr->contents;
-      n_elt = shdr->sh_size / 4;
-
-      while (--n_elt != 0)
-	{
-	  ++ idx;
-
-	  if (idx->shdr == NULL)
-	    continue;
-	  else if (idx->shdr->bfd_section)
-	    elf_sec_group (idx->shdr->bfd_section) = shdr->bfd_section;
-	  else if (idx->shdr->sh_type != SHT_RELA
-		   && idx->shdr->sh_type != SHT_REL)
+	  if (!is_valid_group_section_header (shdr, GRP_ENTRY_SIZE))
 	    {
-	      /* There are some unknown sections in the group.  */
+	      /* PR binutils/18758: Beware of corrupt binaries with invalid
+		 group data.  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: unknown type [%#x] section `%s' in group [%pA]"),
-		 abfd,
-		 idx->shdr->sh_type,
-		 bfd_elf_string_from_elf_section (abfd,
-						  (elf_elfheader (abfd)
-						   ->e_shstrndx),
-						  idx->shdr->sh_name),
-		 shdr->bfd_section);
+		(_("%pB: section group entry number %u is corrupt"),
+		 abfd, i);
 	      result = false;
+	      continue;
 	    }
+	  if (shdr->sh_size >= 2 * GRP_ENTRY_SIZE)
+	    ++num_group;
+	}
+    }
+
+  if (num_group == 0)
+    return result;
+
+  for (i = 1; i < elf_numsections (abfd); i++)
+    {
+      Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
+
+      if (shdr && shdr->sh_type == SHT_GROUP
+	  && is_valid_group_section_header (shdr, 2 * GRP_ENTRY_SIZE))
+	{
+	  if (!process_sht_group_entries (abfd, shdr, i))
+	    result = false;
+	  if (--num_group == 0)
+	    break;
 	}
     }
 
@@ -1027,9 +861,6 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
     }
   if ((hdr->sh_flags & SHF_STRINGS) != 0)
     flags |= SEC_STRINGS;
-  if (hdr->sh_flags & SHF_GROUP)
-    if (!setup_group (abfd, hdr, newsect))
-      return false;
   if ((hdr->sh_flags & SHF_TLS) != 0)
     flags |= SEC_THREAD_LOCAL;
   if ((hdr->sh_flags & SHF_EXCLUDE) != 0)
@@ -3033,9 +2864,6 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       goto success;
 
     case SHT_GROUP:
-      if (! IS_VALID_GROUP_SECTION_HEADER (hdr, GRP_ENTRY_SIZE))
-	goto fail;
-
       if (!_bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	goto fail;
 

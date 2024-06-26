@@ -2156,13 +2156,6 @@ struct elf_obj_tdata
      in the list.  */
   struct sdt_note *sdt_note_head;
 
-  Elf_Internal_Shdr **group_sect_ptr;
-  unsigned int num_group;
-
-  /* Index into group_sect_ptr, updated by setup_group when finding a
-     section's group.  Used to optimize subsequent group searches.  */
-  unsigned int group_search_offset;
-
   unsigned int symtab_section, dynsymtab_section;
   unsigned int dynversym_section, dynverdef_section, dynverref_section;
 
