@@ -293,9 +293,6 @@ struct lang_input_statement_flags
 
   /* Set if the file was claimed from an archive.  */
   unsigned int claim_archive : 1;
-
-  /* Set if added by the lto plugin add_input_file callback.  */
-  unsigned int lto_output : 1;
 #endif /* BFD_SUPPORTS_PLUGINS */
 
   /* Head of list of pushed flags.  */
@@ -332,6 +329,11 @@ typedef struct lang_input_statement_struct
   const char *target;
 
   struct lang_input_statement_flags flags;
+
+#if BFD_SUPPORTS_PLUGINS
+  /* If non-NULL the plugin that added this file.  */
+  void * plugin;
+#endif  
 } lang_input_statement_type;
 
 typedef struct

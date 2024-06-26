@@ -457,7 +457,7 @@ Specify dependencies of this library.  The dependencies must immediately
 follow this option character, must use the same syntax as the linker
 command line, and must be specified within a single argument.  I.e., if
 multiple items are needed, they must be quoted to form a single command
-line argument.  For example @samp{L "-L/usr/local/lib -lmydep1 -lmydep2"}
+line argument.  For example @samp{l "-L/usr/local/lib -lmydep1 -lmydep2"}
 
 @item N
 Uses the @var{count} parameter.  This is used if there are multiple

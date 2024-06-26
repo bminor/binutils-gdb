@@ -1052,7 +1052,8 @@ parse_args (unsigned argc, char **argv)
 	  xexit (0);
 	  break;
 	case 'L':
-	  ldfile_add_library_path (optarg, true);
+	  /* FIXME: Check the return value ?  */
+	  (void) ldfile_add_library_path (optarg, search_dir_cmd_line);
 	  break;
 	case 'l':
 	  lang_add_input_file (optarg, lang_input_file_is_l_enum, NULL);
@@ -2086,7 +2087,8 @@ set_default_dirlist (char *dirlist_ptr)
       if (p != NULL)
 	*p = '\0';
       if (*dirlist_ptr != '\0')
-	ldfile_add_library_path (dirlist_ptr, true);
+	/* FIXME: Check the return value ?  */
+	(void) ldfile_add_library_path (dirlist_ptr, search_dir_cmd_line);
       if (p == NULL)
 	break;
       dirlist_ptr = p + 1;

@@ -40,12 +40,6 @@
 #include "plugin.h"
 #endif /* BFD_SUPPORTS_PLUGINS */
 
-bool ldfile_assumed_script = false;
-const char *ldfile_output_machine_name = "";
-unsigned long ldfile_output_machine;
-enum bfd_architecture ldfile_output_architecture;
-search_dirs_type *search_head;
-
 #ifdef VMS
 static char *slash = "";
 #else
@@ -61,6 +55,12 @@ typedef struct search_arch
   char *name;
   struct search_arch *next;
 } search_arch_type;
+
+bool                   ldfile_assumed_script = false;
+const char *           ldfile_output_machine_name = "";
+unsigned long          ldfile_output_machine;
+enum bfd_architecture  ldfile_output_architecture;
+search_dirs_type *     search_head;
 
 static search_dirs_type **search_tail_ptr = &search_head;
 static search_arch_type *search_arch_head;
@@ -303,21 +303,20 @@ is_sysrooted_pathname (const char *name)
 }
 
 /* Adds NAME to the library search path.
-   Makes a copy of NAME using xmalloc().  */
+   Makes a copy of NAME using xmalloc().
+   Returns a pointer to the newly created search_dirs_type structure
+   or NULL if there was a problem.  */
 
-void
-ldfile_add_library_path (const char *name, bool cmdline)
+search_dirs_type *
+ldfile_add_library_path (const char *name, enum search_dir_source source)
 {
   search_dirs_type *new_dirs;
 
-  if (!cmdline && config.only_cmd_line_lib_dirs)
-    return;
+  if (source != search_dir_cmd_line && config.only_cmd_line_lib_dirs)
+    return NULL;
 
   new_dirs = (search_dirs_type *) xmalloc (sizeof (search_dirs_type));
-  new_dirs->next = NULL;
-  new_dirs->cmdline = cmdline;
-  *search_tail_ptr = new_dirs;
-  search_tail_ptr = &new_dirs->next;
+  new_dirs->source = source;
 
   /* If a directory is marked as honoring sysroot, prepend the sysroot path
      now.  */
@@ -327,6 +326,25 @@ ldfile_add_library_path (const char *name, bool cmdline)
     new_dirs->name = concat (ld_sysroot, name + strlen ("$SYSROOT"), (const char *) NULL);
   else
     new_dirs->name = xstrdup (name);
+
+  /* Accumulate script and command line sourced
+     search paths at the end of the current list.  */
+#if BFD_SUPPORTS_PLUGINS
+  /* PR 31904: But put plugin sourced paths at the start of the list.  */
+  if (source == search_dir_plugin)
+    {
+      new_dirs->next = search_head;
+      search_head = new_dirs;
+    }
+  else
+#endif
+    {
+      new_dirs->next = NULL;
+      *search_tail_ptr = new_dirs;
+      search_tail_ptr = &new_dirs->next;
+    }
+
+  return new_dirs;
 }
 
 /* Try to open a BFD for a lang_input_statement.  */
@@ -352,9 +370,9 @@ ldfile_try_open_bfd (const char *attempt,
       return false;
     }
 
-  /* PR 30568: Do not track lto generated temporary object files.  */
+  /* PR 30568: Do not track plugin generated object files.  */
 #if BFD_SUPPORTS_PLUGINS
-  if (!entry->flags.lto_output)
+  if (entry->plugin != NULL)
 #endif
     track_dependency_files (attempt);
 
@@ -365,7 +383,7 @@ ldfile_try_open_bfd (const char *attempt,
   entry->the_bfd->is_linker_input = 1;
 
 #if BFD_SUPPORTS_PLUGINS
-  if (entry->flags.lto_output)
+  if (entry->plugin != NULL)
     entry->the_bfd->lto_output = 1;
 #endif
 
@@ -575,6 +593,14 @@ ldfile_open_file_search (const char *arch,
   for (search = search_head; search != NULL; search = search->next)
     {
       char *string;
+
+#if BFD_SUPPORTS_PLUGINS
+      /* PR 31904: Only check a plugin sourced search
+	 directory if the file is from the same plugin.  */
+      if (search->source == search_dir_plugin
+	  && entry->plugin != search->plugin)
+	continue;
+#endif
 
       if (entry->flags.dynamic && !bfd_link_relocatable (&link_info))
 	{
@@ -844,7 +870,7 @@ ldfile_find_command_file (const char *name,
 	{
 	  search_dirs_type **save_tail_ptr = search_tail_ptr;
 	  search_tail_ptr = &script_search;
-	  ldfile_add_library_path (script_dir, true);
+	  (void) ldfile_add_library_path (script_dir, search_dir_cmd_line);
 	  search_tail_ptr = save_tail_ptr;
 	}
     }
@@ -858,6 +884,11 @@ ldfile_find_command_file (const char *name,
        search != NULL;
        search = search->next)
     {
+#if BFD_SUPPORTS_PLUGINS
+      /* Do not search for linker commands in plugin sourced search directories.  */
+      if (search->source == search_dir_plugin)
+	continue;
+#endif
       path = concat (search->name, slash, name, (const char *) NULL);
       result = try_open (path, sysrooted);
       free (path);
