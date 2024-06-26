@@ -68,6 +68,15 @@ proc test {continue_cmd} {
     # stopped.
     gdb_test "print 1" " = 1" "input still accepted"
 
+    # With gdbserver, we cannot set memory while the inferior is running, so
+    # enable the "set var" command with an interrupt / continue& pair.
+    gdb_test -no-prompt-anchor "interrupt"
+
+    # Allow the breakpoint to trigger.
+    gdb_test -no-prompt-anchor "set var do_wait=0"
+
+    gdb_test -no-prompt-anchor "continue&"
+
     # Make sure we see a stop after the print, and not before.  Don't
     # expect a prompt, as we had resumed the inferior in the background.
     set test "breakpoint hit 2"
