@@ -54,6 +54,9 @@ low-overhead mechanism to generate stack traces.
 * SFrame Section::
 * ABI/arch-specific Definition::
 
+Appendices
+* Generating Stack Traces using SFrame::
+
 * Index::
 @end menu
 
@@ -822,6 +825,87 @@ Hence, in summary:
 @item 2 @tab RA = CFA + offset2
 @item 3 @tab FP = CFA + offset3
 @end multitable
+
+@node Generating Stack Traces using SFrame
+@appendix Generating Stack Traces using SFrame
+
+Using some C-like pseudocode, this section highlights how SFrame provides a
+simple, fast and low-overhead mechanism to generate stack traces.  Needless to
+say that for generating accurate and useful stack traces, several other aspects
+will need attention: finding and decoding bits of SFrame section(s) in the
+program binary, symbolization of addresses, to name a few.
+
+In the current context, a @code{frame} is the abstract construct that
+encapsulates the following information:
+@itemize @minus
+@item
+program counter (PC),
+@item
+stack pointer (SP), and
+@item
+frame pointer (FP)
+@end itemize
+
+With that said, establishing the first @code{frame} should be trivial:
+
+@example
+    // frame 0
+    frame->pc = current_IP;
+    frame->sp = get_reg_value (REG_SP);
+    frame->fp = get_reg_value (REG_FP);
+@end example
+
+where @code{REG_SP} and @code{REG_FP} are are ABI-designated stack pointer and
+frame pointer registers respectively.
+
+Next, given frame N, generating stack trace needs us to get frame N+1.  This
+can be done as follows:
+
+@example
+     // Get the PC, SP, and FP for frame N.
+     pc = frame->pc;
+     sp = frame->sp;
+     fp = frame->fp;
+     // Populate frame N+1.
+     int err = get_next_frame (&next_frame, pc, sp, fp);
+@end example
+
+where given the values of the program counter, stack pointer and frame pointer
+from frame N, @code{get_next_frame} populates the provided @code{next_frame}
+object and returns the error code, if any. In the following pseudocode for
+@code{get_next_frame}, the @code{sframe_*} functions fetch information from the
+SFrame section.
+
+@example
+    fre = sframe_find_fre (pc);
+    if (fre)
+        // Whether the base register for CFA tracking is REG_FP.
+        base_reg_val = sframe_fre_base_reg_fp_p (fre) ? fp : sp;
+        // Get the CFA stack offset from the FRE.
+        cfa_offset = sframe_fre_get_cfa_offset (fre);
+        // Get the fixed RA offset or FRE stack offset as applicable.
+        ra_offset = sframe_fre_get_ra_offset (fre);
+        // Get the fixed FP offset or FRE stack offset as applicable.
+        fp_offset = sframe_fre_get_fp_offset (fre);
+
+        cfa = base_reg_val + cfa_offset;
+        next_frame->sp = cfa;
+
+        ra_stack_loc = cfa + ra_offset;
+        // Get the address stored in the stack location.
+        next_frame->pc = read_value (ra_stack_loc);
+
+        if (fp_offset is VALID)
+            fp_stack_loc = cfa + fp_offset;
+            // Get the value stored in the stack location.
+            next_frame->fp = read_value (fp_stack_loc);
+        else
+            // Continue to use the value of fp as it has not
+            // been clobbered by the current frame yet.
+            next_frame->fp = fp;
+    else
+        ret = ERR_NO_SFRAME_FRE;
+@end example
 
 @node Index
 @unnumbered Index
