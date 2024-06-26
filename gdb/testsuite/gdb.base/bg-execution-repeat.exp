@@ -41,14 +41,9 @@ proc test {continue_cmd} {
 
     gdb_breakpoint "$linenum"
 
-    set test $continue_cmd
-    gdb_test_multiple $test $test {
-	-re "Continuing\\.\r\n$gdb_prompt " {
-	    # Note no end anchor.  If the breakpoint triggers soon enough
-	    # enough we see further output after the prompt.
-	    pass $test
-	}
-    }
+    # If the breakpoint triggers soon enough we see further output after the
+    # prompt, so no prompt anchor.
+    gdb_test -no-prompt-anchor $continue_cmd [string_to_regexp "Continuing."]
 
     # Wait for the stop.  Don't expect a prompt, as we had resumed the
     # inferior in the background.
