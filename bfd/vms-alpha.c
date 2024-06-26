@@ -7733,7 +7733,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 
 		evax_bfd_print_valspec (buf, len, 4, file);
 
-		len -= 1 + nlen + sizeof (*recbeg);
+		len -= sizeof (*recbeg) + 1 + nlen;
 		if (len >= 4)
 		  fprintf (file, _("    len: %u bits\n"),
 			   (unsigned) bfd_getl32 (name + 1 + nlen));
