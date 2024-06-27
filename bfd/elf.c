@@ -636,7 +636,9 @@ process_sht_group_entries (bfd *abfd,
 	shdr = elf_elfsections (abfd)[idx];
 
       if (idx >= elf_numsections (abfd)
-	  || shdr->sh_type == SHT_GROUP)
+	  || shdr->sh_type == SHT_GROUP
+	  || (shdr->bfd_section != NULL
+	      && elf_next_in_group (shdr->bfd_section) != NULL))
 	{
 	  _bfd_error_handler
 	    (_("%pB: invalid entry in SHT_GROUP section [%u]"), abfd, gidx);
@@ -698,12 +700,10 @@ process_sht_group_entries (bfd *abfd,
 bool
 _bfd_elf_setup_sections (bfd *abfd)
 {
-  unsigned int i;
   bool result = true;
-  asection *s;
 
   /* Process SHF_LINK_ORDER.  */
-  for (s = abfd->sections; s != NULL; s = s->next)
+  for (asection *s = abfd->sections; s != NULL; s = s->next)
     {
       Elf_Internal_Shdr *this_hdr = &elf_section_data (s)->this_hdr;
       if ((this_hdr->sh_flags & SHF_LINK_ORDER) != 0)
@@ -746,46 +746,27 @@ _bfd_elf_setup_sections (bfd *abfd)
     }
 
   /* Process section groups.  */
-
-  /* First count the number of groups.  If we have a SHT_GROUP
-     section with just a flag word (ie. sh_size is 4), ignore it.  */
-  unsigned int num_group = 0;
-  for (i = 1; i < elf_numsections (abfd); i++)
+  for (unsigned int i = 1; i < elf_numsections (abfd); i++)
     {
       Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
 
       if (shdr && shdr->sh_type == SHT_GROUP)
 	{
-	  if (!is_valid_group_section_header (shdr, GRP_ENTRY_SIZE))
+	  if (is_valid_group_section_header (shdr, GRP_ENTRY_SIZE))
 	    {
-	      /* PR binutils/18758: Beware of corrupt binaries with invalid
-		 group data.  */
+	      if (shdr->sh_size >= 2 * GRP_ENTRY_SIZE
+		  && !process_sht_group_entries (abfd, shdr, i))
+		result = false;
+	    }
+	  else
+	    {
+	      /* PR binutils/18758: Beware of corrupt binaries with
+		 invalid group data.  */
 	      _bfd_error_handler
 		/* xgettext:c-format */
-		(_("%pB: section group entry number %u is corrupt"),
-		 abfd, i);
+		(_("%pB: section group entry number %u is corrupt"), abfd, i);
 	      result = false;
-	      continue;
 	    }
-	  if (shdr->sh_size >= 2 * GRP_ENTRY_SIZE)
-	    ++num_group;
-	}
-    }
-
-  if (num_group == 0)
-    return result;
-
-  for (i = 1; i < elf_numsections (abfd); i++)
-    {
-      Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[i];
-
-      if (shdr && shdr->sh_type == SHT_GROUP
-	  && is_valid_group_section_header (shdr, 2 * GRP_ENTRY_SIZE))
-	{
-	  if (!process_sht_group_entries (abfd, shdr, i))
-	    result = false;
-	  if (--num_group == 0)
-	    break;
 	}
     }
 
