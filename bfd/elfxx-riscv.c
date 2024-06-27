@@ -2549,6 +2549,9 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zabha");
     case INSN_CLASS_ZACAS:
       return riscv_subset_supports (rps, "zacas");
+    case INSN_CLASS_ZABHA_AND_ZACAS:
+      return (riscv_subset_supports (rps, "zabha")
+	      && riscv_subset_supports (rps, "zacas"));
     case INSN_CLASS_ZALRSC:
       return riscv_subset_supports (rps, "zalrsc");
     case INSN_CLASS_ZAWRS:
