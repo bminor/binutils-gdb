@@ -138,6 +138,9 @@ void
 as_info_where (const char *file, unsigned int line, unsigned int indent,
 	       const char *format, ...)
 {
+  if (flag_no_information)
+    return;
+
   va_list args;
   char buffer[2000];
 

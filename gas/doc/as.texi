@@ -243,6 +243,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--gsframe}]
  [@b{--hash-size}=@var{N}]
  [@b{--help}] [@b{--target-help}]
+ [@b{--info}] [@b{--no-info}]
  [@b{-I} @var{dir}]
  [@b{-J}]
  [@b{-K}]
@@ -866,6 +867,12 @@ Print a summary of the command-line options and exit.
 
 @item --target-help
 Print a summary of all target specific options and exit.
+
+@item --info
+Don't suppress informational messages.
+
+@item --no-info
+Suppress informational messages.
 
 @item -I @var{dir}
 Add directory @var{dir} to the search list for @code{.include} directives.
@@ -2422,6 +2429,7 @@ assembler.)
 * alternate::     --alternate enable alternate macro syntax
 * D::             -D for compatibility and debugging
 * f::             -f to work faster
+* info::          --info, --no-info to control informational messages
 * I::             -I for .include search path
 @ifclear DIFF-TBL-KLUGE
 * K::             -K for compatibility
@@ -2533,6 +2541,32 @@ the input file(s) before assembling them.  @xref{Preprocessing,
 preprocessed (if they contain comments, for example), @command{@value{AS}} does
 not work correctly.
 @end quotation
+
+@node info
+@section Control Informational Messages: @option{--info}, @option{--no-info}
+
+In some cases, @command{@value{AS}} might give additional informational messages
+associated to a context that generated a warning or error message when assembling.
+The informational message provides additional details about an earlier diagnostic
+message, usually in the form of some context (such as when the earlier diagnostic
+was within a macro).
+All such information are directed to the standard error file.
+This flag only affects the informational messages, it does not change any particular
+of how @command{@value{AS}} assembles your file.
+
+@kindex --info
+@cindex diagnostic information, switching on (default behavior)
+The option @option{--info} is enabled by default, and enables printing of additional
+diagnostic information.
+
+@kindex --no-info
+@cindex diagnostic informations, switching off
+You can switch the option @option{--info} off by specifying @option{--no-info},
+which disables printing of additional information in the context of an earlier
+diagnostic.
+
+Specifying @option{--info} after @option{--no-info} will turn on again printing
+of additional diagnostic information.
 
 @node I
 @section @code{.include} Search Path: @option{-I} @var{path}

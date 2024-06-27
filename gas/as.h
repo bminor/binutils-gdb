@@ -323,6 +323,9 @@ COMMON int flag_no_warnings; /* -W, --no-warn */
 /* True if warnings count as errors.  */
 COMMON int flag_fatal_warnings; /* --fatal-warnings */
 
+/* True if infos should be inhibited.  */
+COMMON bool flag_no_information; /* --no-info */
+
 /* True if we should attempt to generate output even if non-fatal errors
    are detected.  */
 COMMON unsigned char flag_always_generate_output; /* -Z */

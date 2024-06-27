@@ -5667,6 +5667,9 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 static void
 output_info (const char *format, ...)
 {
+  if (flag_no_information)
+    return;
+
   const char *file;
   unsigned int line;
   va_list args;

@@ -382,6 +382,10 @@ Options:\n\
   --warn                  don't suppress warnings\n"));
   fprintf (stream, _("\
   --fatal-warnings        treat warnings as errors\n"));
+  fprintf (stream, _("\
+  --no-info               suppress information messages\n"));
+  fprintf (stream, _("\
+  --info                  don't suppress information messages\n"));
 #ifdef HAVE_ITBL_CPU
   fprintf (stream, _("\
   --itbl INSTTBL          extend instruction set to include instructions\n\
@@ -499,7 +503,9 @@ parse_args (int * pargc, char *** pargv)
       OPTION_NO_PAD_SECTIONS,
       OPTION_MULTIBYTE_HANDLING,  /* = STD_BASE + 40 */
       OPTION_SFRAME,
-      OPTION_SCFI
+      OPTION_SCFI,
+      OPTION_INFO,
+      OPTION_NOINFO
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -575,6 +581,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"mri", no_argument, NULL, 'M'}
     ,{"nocpp", no_argument, NULL, OPTION_NOCPP}
     ,{"no-pad-sections", no_argument, NULL, OPTION_NO_PAD_SECTIONS}
+    ,{"no-info", no_argument, NULL, OPTION_NOINFO}
     ,{"no-warn", no_argument, NULL, 'W'}
     ,{"reduce-memory-overheads", no_argument, NULL, OPTION_REDUCE_MEMORY_OVERHEADS}
     ,{"statistics", no_argument, NULL, OPTION_STATISTICS}
@@ -583,6 +590,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"verbose", no_argument, NULL, 'v'}
     ,{"target-help", no_argument, NULL, OPTION_TARGET_HELP}
     ,{"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT}
+    ,{"info", no_argument, NULL, OPTION_INFO}
     ,{"warn", no_argument, NULL, OPTION_WARN}
     ,{"multibyte-handling", required_argument, NULL, OPTION_MULTIBYTE_HANDLING}
   };
@@ -953,6 +961,14 @@ This program has absolutely no warranty.\n"));
 	case OPTION_WARN_FATAL:
 	  flag_no_warnings = 0;
 	  flag_fatal_warnings = 1;
+	  break;
+
+	case OPTION_NOINFO:
+	  flag_no_information = true;
+	  break;
+
+	case OPTION_INFO:
+	  flag_no_information = false;
 	  break;
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
