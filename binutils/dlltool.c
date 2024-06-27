@@ -213,12 +213,15 @@
    .idata$3 = null terminating entry for .idata$2.
 
    .idata$4 = Import Lookup Table
-   = array of array of pointers to hint name table.
+   = array of array of numbers, which has meaning based on its highest bit:
+     - when cleared - pointer to entry in Hint Name Table
+     - when set - 16-bit function's ordinal number (rest of the bits are zeros)
+   Function ordinal number subtracted by Export Directory Table's
+   Ordinal Base is an index entry into the Export Address Table.
    There is one for each dll being imported from, and each dll's set is
    terminated by a trailing NULL.
 
    .idata$5 = Import Address Table
-   = array of array of pointers to hint name table.
    There is one for each dll being imported from, and each dll's set is
    terminated by a trailing NULL.
    Initially, this table is identical to the Import Lookup Table.  However,
@@ -227,7 +230,11 @@
 
    .idata$6 = Hint Name Table
    = Array of { short, asciz } entries, one for each imported function.
-   The `short' is the function's ordinal number.
+   The `short' is the name hint - index into Export Name Pointer Table.
+   The `asciz` is the name string - value in Export Name Table referenced
+   by some entry in Export Name Pointer Table.  Name hint should be the
+   index of that entry in Export Name Pointer Table.  It has no connection
+   with the function's ordinal number.
 
    .idata$7 = dll name (eg: "kernel32.dll").  */
 

@@ -2534,7 +2534,7 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
     }
   else
     {
-      /* { short, asciz }  */
+      /* { short, asciz } = { hint, name }  */
       if (exp->its_name)
 	len = 2 + strlen (exp->its_name) + 1;
       else
