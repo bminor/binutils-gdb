@@ -87,20 +87,21 @@ proc run_test { } {
     set lt_objdir [regsub "objdir=" "$lt_objdir" ""]
 
     if { [ file exists "$base_dir/$lt_objdir/libdep.so" ] } {
-	set libdep "$base_dir/$lt_objdir/libdep.so"
+	set libdep_plugin "$base_dir/$lt_objdir/libdep.so"
     } else {
 	# FIXME: Check in the system bfd-plugin directory ?
 	fail "$testname - could not locate libdep plugin"
+	return
     }
 
-    verbose "Full plugin path: $libdep" 1
+    verbose "Full plugin path: $libdep_plugin" 1
     
     # Link the main object file with the liba.a library.
     # Use the libdep plugin to read the __.LIBDEP element in the liba.a library
     # and so bring in the libdep-b.o object file from the libc.a library.
     # Failure to locate the libc.a library, or loading the wrong libc.a library
     # will result in an unresolved reference error.
-    set exec_output [run_host_cmd "$ld" "-plugin $libdep -o libdep.exe libdep-main.o -L libdep-a -la -e 0"]
+    set exec_output [run_host_cmd "$ld" "-plugin $libdep_plugin -o libdep.exe libdep-main.o -L libdep-a -la -e 0"]
     set exec_output [prune_warnings $exec_output]
 
     set expected_output "got deps for library libdep-a/liba.a: -Llibdep-b -lc"
