@@ -5990,8 +5990,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    {
 	      /* Don't emit a relative relocation that is packed, only
 		 apply the addend.  */
-	      if (globals->no_apply_dynamic_relocs)
-		return bfd_reloc_ok;
 	      return _bfd_final_link_relocate (howto, input_bfd, input_section,
 					       contents, rel->r_offset, value,
 					       signed_addend);
