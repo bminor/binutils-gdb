@@ -456,6 +456,9 @@ struct _i386_insn
     /* Disable instruction size optimization.  */
     bool no_optimize;
 
+    /* Invert the condition encoded in a base opcode.  */
+    bool invert_cond;
+
     /* How to encode instructions.  */
     enum
       {
@@ -3917,6 +3920,11 @@ install_template (const insn_template *t)
       i.scc = i.tm.base_opcode & 0xf;
       i.tm.base_opcode >>= 8;
     }
+
+  /* For CMOVcc having undergone NDD-to-legacy optimization with its source
+     operands being swapped, we need to invert the encoded condition.  */
+  if (i.invert_cond)
+    i.tm.base_opcode ^= 1;
 
   /* Note that for pseudo prefixes this produces a length of 1. But for them
      the length isn't interesting at all.  */
@@ -9845,7 +9853,14 @@ match_template (char mnem_suffix)
 			  && !i.op[i.operands - 1].regs->reg_type.bitfield.qword)))
 		{
 		  if (i.operands > 2 && match_dest_op == i.operands - 3)
-		    swap_2_operands (match_dest_op, i.operands - 2);
+		    {
+		      swap_2_operands (match_dest_op, i.operands - 2);
+
+		      /* CMOVcc is marked commutative, but then also needs its
+			 encoded condition inverted.  */
+		      if ((t->base_opcode | 0xf) == 0x4f)
+			i.invert_cond = true;
+		    }
 
 		  --i.operands;
 		  --i.reg_operands;

@@ -985,7 +985,10 @@ ud2b, 0xfb9, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|U
 // 3rd official undefined instr (older CPUs don't take a ModR/M byte)
 ud0, 0xfff, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
-cmov<cc>, 0x4<cc:opc>, CMOV&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
+// C (commutative) isn't quite correct here on its own; the condition also
+// needs inverting when source operands are swapped in order to convert to
+// legacy encoding.  The assembler will take care of that.
+cmov<cc>, 0x4<cc:opc>, CMOV&APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|Optimize, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
 cmov<cc>, 0xf4<cc:opc>, CMOV, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 fcmovb, 0xda/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }

@@ -118,6 +118,22 @@ Disassembly of section .text:
 \s*[a-f0-9]+:\s*67 0f 4d 90 90 90 90 90 	cmovge -0x6f6f6f70\(%eax\),%edx
 \s*[a-f0-9]+:\s*67 0f 4e 90 90 90 90 90 	cmovle -0x6f6f6f70\(%eax\),%edx
 \s*[a-f0-9]+:\s*67 0f 4f 90 90 90 90 90 	cmovg  -0x6f6f6f70\(%eax\),%edx
+\s*[a-f0-9]+:\s*0f 41 d1             	cmovno %ecx,%edx
+\s*[a-f0-9]+:\s*0f 40 d1             	cmovo  %ecx,%edx
+\s*[a-f0-9]+:\s*0f 43 d1             	cmovae %ecx,%edx
+\s*[a-f0-9]+:\s*0f 42 d1             	cmovb  %ecx,%edx
+\s*[a-f0-9]+:\s*0f 45 d1             	cmovne %ecx,%edx
+\s*[a-f0-9]+:\s*0f 44 d1             	cmove  %ecx,%edx
+\s*[a-f0-9]+:\s*0f 47 d1             	cmova  %ecx,%edx
+\s*[a-f0-9]+:\s*0f 46 d1             	cmovbe %ecx,%edx
+\s*[a-f0-9]+:\s*0f 49 d1             	cmovns %ecx,%edx
+\s*[a-f0-9]+:\s*0f 48 d1             	cmovs  %ecx,%edx
+\s*[a-f0-9]+:\s*0f 4b d1             	cmovnp %ecx,%edx
+\s*[a-f0-9]+:\s*0f 4a d1             	cmovp  %ecx,%edx
+\s*[a-f0-9]+:\s*0f 4d d1             	cmovge %ecx,%edx
+\s*[a-f0-9]+:\s*0f 4c d1             	cmovl  %ecx,%edx
+\s*[a-f0-9]+:\s*0f 4f d1             	cmovg  %ecx,%edx
+\s*[a-f0-9]+:\s*0f 4e d1             	cmovle %ecx,%edx
 \s*[a-f0-9]+:\s*62 f4 7d 08 60 c0    	movbe  %ax,%ax
 \s*[a-f0-9]+:\s*49 0f c8             	bswap  %r8
 \s*[a-f0-9]+:\s*d5 98 c8             	bswap  %r16
