@@ -118,6 +118,18 @@ if [istarget "loongarch64-*-*"] {
 	      "abi1_max_imm" \
 	  ] \
       ]
+
+  run_ld_link_tests \
+      [list \
+	   [list \
+		"binary output format" \
+		"-T binary.ld" "" \
+		"" \
+		{binary.s} \
+		{} \
+		"a.binary" \
+	   ] \
+      ]
 }
 
 if [istarget "loongarch64-*-*"] {

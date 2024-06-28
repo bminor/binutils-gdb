@@ -157,9 +157,7 @@ loongarch_elf_new_section_hook (bfd *abfd, asection *sec)
 
 /* Get the LoongArch ELF linker hash table from a link_info structure.  */
 #define loongarch_elf_hash_table(p)					\
-  (elf_hash_table_id (elf_hash_table (p)) == LARCH_ELF_DATA		\
-   ? ((struct loongarch_elf_link_hash_table *) ((p)->hash))		\
-   : NULL)
+    ((struct loongarch_elf_link_hash_table *) ((p)->hash))		\
 
 #define MINUS_ONE ((bfd_vma) 0 - 1)
 
