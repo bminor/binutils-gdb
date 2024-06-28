@@ -296,10 +296,9 @@ appropriate time, normally when the linker is invoked with the @code{-shared
 
 @item wshared
 Like @emph{cshared} but in addition to needing the @option{-shared}
-and @option {-z combreloc} options, it also needs the
-@option{-z relro} option.  If the @option{-z now} option is also used
-then the output has an extension of @file{.xsw}, otherwise it is
-@file{.xsco}.
+and @option{-z combreloc} options, it also needs the @option{-z relro}
+option.  If the @option{-z now} option is also used then the output has
+an extension of @file{.xsw}, otherwise it is @file{.xsco}.
 
 @item pie
 The @file{scripttempl} script is only invoked with @code{LD_FLAG} set to
