@@ -11,19 +11,19 @@ Disassembly of section .text:
  +[a-f0-9]+:	48 25 00 00 00 00    	and    \$0x0,%rax	2: R_X86_64_32S	foo
  +[a-f0-9]+:	25 ff ff ff 7f       	and    \$0x7fffffff,%eax
  +[a-f0-9]+:	81 e3 ff ff ff 7f    	and    \$0x7fffffff,%ebx
- +[a-f0-9]+:	41 81 e6 ff ff ff 7f 	and    \$0x7fffffff,%r14d
+ +[a-f0-9]+:	49 81 e6 ff ff ff 7f 	and    \$0x7fffffff,%r14
  +[a-f0-9]+:	48 25 00 00 00 80    	and    \$0xffffffff80000000,%rax
  +[a-f0-9]+:	48 81 e3 00 00 00 80 	and    \$0xffffffff80000000,%rbx
  +[a-f0-9]+:	49 81 e6 00 00 00 80 	and    \$0xffffffff80000000,%r14
  +[a-f0-9]+:	83 e0 7f             	and    \$0x7f,%eax
  +[a-f0-9]+:	83 e3 7f             	and    \$0x7f,%ebx
- +[a-f0-9]+:	41 83 e6 7f          	and    \$0x7f,%r14d
+ +[a-f0-9]+:	49 83 e6 7f          	and    \$0x7f,%r14
  +[a-f0-9]+:	48 83 e0 80          	and    \$0xffffffffffffff80,%rax
  +[a-f0-9]+:	48 83 e3 80          	and    \$0xffffffffffffff80,%rbx
  +[a-f0-9]+:	49 83 e6 80          	and    \$0xffffffffffffff80,%r14
  +[a-f0-9]+:	a9 ff ff ff 7f       	test   \$0x7fffffff,%eax
  +[a-f0-9]+:	f7 c3 ff ff ff 7f    	test   \$0x7fffffff,%ebx
- +[a-f0-9]+:	41 f7 c6 ff ff ff 7f 	test   \$0x7fffffff,%r14d
+ +[a-f0-9]+:	49 f7 c6 ff ff ff 7f 	test   \$0x7fffffff,%r14
  +[a-f0-9]+:	48 a9 00 00 00 80    	test   \$0xffffffff80000000,%rax
  +[a-f0-9]+:	48 f7 c3 00 00 00 80 	test   \$0xffffffff80000000,%rbx
  +[a-f0-9]+:	49 f7 c6 00 00 00 80 	test   \$0xffffffff80000000,%r14

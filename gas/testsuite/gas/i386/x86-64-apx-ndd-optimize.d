@@ -35,7 +35,7 @@ Disassembly of section .text:
 \s*[a-f0-9]+:\s*62 7c 74 10 20 f9    	and    %r15b,%r17b,%r17b
 \s*[a-f0-9]+:\s*4d 23 38             	and    \(%r8\),%r15
 \s*[a-f0-9]+:\s*d5 49 23 04 07       	and    \(%r15,%rax,1\),%r16
-\s*[a-f0-9]+:\s*d5 11 81 e6 34 12 00 00 	and    \$0x1234,%r30d
+\s*[a-f0-9]+:\s*d5 19 81 e6 34 12 00 00 	and    \$0x1234,%r30
 \s*[a-f0-9]+:\s*d5 1c 09 f9          	or     %r15,%r17
 \s*[a-f0-9]+:\s*62 7c 74 10 08 f9    	or     %r15b,%r17b,%r17b
 \s*[a-f0-9]+:\s*4d 0b 38             	or     \(%r8\),%r15

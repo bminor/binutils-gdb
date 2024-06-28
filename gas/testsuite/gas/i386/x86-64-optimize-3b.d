@@ -21,11 +21,11 @@ Disassembly of section .text:
  +[a-f0-9]+:	f7 c7 7f 00 00 00    	test   \$0x7f,%edi
  +[a-f0-9]+:	66 f7 c7 7f 00       	test   \$0x7f,%di
  +[a-f0-9]+:	40 f6 c7 7f          	test   \$0x7f,%dil
- +[a-f0-9]+:	41 f7 c1 7f 00 00 00 	test   \$0x7f,%r9d
+ +[a-f0-9]+:	49 f7 c1 7f 00 00 00 	test   \$0x7f,%r9
  +[a-f0-9]+:	41 f7 c1 7f 00 00 00 	test   \$0x7f,%r9d
  +[a-f0-9]+:	66 41 f7 c1 7f 00    	test   \$0x7f,%r9w
  +[a-f0-9]+:	41 f6 c1 7f          	test   \$0x7f,%r9b
- +[a-f0-9]+:	41 f7 c4 7f 00 00 00 	test   \$0x7f,%r12d
+ +[a-f0-9]+:	49 f7 c4 7f 00 00 00 	test   \$0x7f,%r12
  +[a-f0-9]+:	41 f7 c4 7f 00 00 00 	test   \$0x7f,%r12d
  +[a-f0-9]+:	66 41 f7 c4 7f 00    	test   \$0x7f,%r12w
  +[a-f0-9]+:	41 f6 c4 7f          	test   \$0x7f,%r12b

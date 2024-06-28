@@ -4809,8 +4809,8 @@ optimize_encoding (void)
     }
   else if (flag_code == CODE_64BIT
 	   && i.tm.opcode_space == SPACE_BASE
-	   && ((i.types[1].bitfield.qword
-		&& i.reg_operands == 1
+	   && i.types[i.operands - 1].bitfield.qword
+	   && ((i.reg_operands == 1
 		&& i.imm_operands == 1
 		&& i.op[0].imms->X_op == O_constant
 		&& ((i.tm.base_opcode == 0xb8
@@ -4818,26 +4818,29 @@ optimize_encoding (void)
 		     && fits_in_unsigned_long (i.op[0].imms->X_add_number))
 		    || (fits_in_imm31 (i.op[0].imms->X_add_number)
 			&& (i.tm.base_opcode == 0x24
-			    || (i.tm.base_opcode == 0x80
-				&& i.tm.extension_opcode == 0x4)
-			    || i.tm.mnem_off == MN_test
+			    || (((i.tm.base_opcode == 0x80
+				  && i.tm.extension_opcode == 0x4)
+				 || i.tm.mnem_off == MN_test)
+				&& !(i.op[1].regs->reg_flags
+				     & (RegRex | RegRex2)))
 			    || ((i.tm.base_opcode | 1) == 0xc7
 				&& i.tm.extension_opcode == 0x0)))
 		    || (fits_in_imm7 (i.op[0].imms->X_add_number)
 			&& i.tm.base_opcode == 0x83
-			&& i.tm.extension_opcode == 0x4)))
-	       || (i.types[0].bitfield.qword
-		   && ((i.reg_operands == 2
-			&& i.op[0].regs == i.op[1].regs
-			&& (i.tm.mnem_off == MN_xor
-			    || i.tm.mnem_off == MN_sub))
-		       || i.tm.mnem_off == MN_clr))))
+			&& i.tm.extension_opcode == 0x4
+			&& !(i.op[1].regs->reg_flags & (RegRex | RegRex2)))))
+	       || ((i.reg_operands == 2
+		    && i.op[0].regs == i.op[1].regs
+		    && (i.tm.mnem_off == MN_xor
+			|| i.tm.mnem_off == MN_sub))
+		   || i.tm.mnem_off == MN_clr)))
     {
       /* Optimize: -O:
 	   andq $imm31, %r64   -> andl $imm31, %r32
 	   andq $imm7, %r64    -> andl $imm7, %r32
 	   testq $imm31, %r64  -> testl $imm31, %r32
 	   xorq %r64, %r64     -> xorl %r32, %r32
+	   clrq %r64           -> clrl %r32
 	   subq %r64, %r64     -> subl %r32, %r32
 	   movq $imm31, %r64   -> movl $imm31, %r32
 	   movq $imm32, %r64   -> movl $imm32, %r32
