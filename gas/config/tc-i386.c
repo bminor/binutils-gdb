@@ -4770,7 +4770,9 @@ optimize_encoding (void)
     }
 
   if (optimize_for_space
-      && i.tm.mnem_off == MN_test
+      && (i.tm.mnem_off == MN_test
+          || (i.tm.base_opcode == 0xf6
+              && i.tm.opcode_space == SPACE_EVEXMAP4))
       && i.reg_operands == 1
       && i.imm_operands == 1
       && !i.types[1].bitfield.byte
@@ -4779,9 +4781,13 @@ optimize_encoding (void)
       && fits_in_imm7 (i.op[0].imms->X_add_number))
     {
       /* Optimize: -Os:
-	   test $imm7, %r64/%r32/%r16  -> test $imm7, %r8
+	   test      $imm7, %r64/%r32/%r16  -> test      $imm7, %r8
+	   ctest<cc> $imm7, %r64/%r32/%r16  -> ctest<cc> $imm7, %r8
        */
       unsigned int base_regnum = i.op[1].regs->reg_num;
+
+      gas_assert (!i.tm.opcode_modifier.modrm || i.tm.extension_opcode == 0);
+
       if (flag_code == CODE_64BIT || base_regnum < 4)
 	{
 	  i.types[1].bitfield.byte = 1;
