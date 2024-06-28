@@ -5452,6 +5452,75 @@ optimize_nf_encoding (void)
       i.tm.operand_types[0].bitfield.imm1 = 1;
       i.imm_operands = 0;
     }
+  else if ((i.tm.base_opcode | 2) == 0x6b
+	   && i.op[0].imms->X_op == O_constant
+	   && (i.op[0].imms->X_add_number > 0
+	       ? !(i.op[0].imms->X_add_number & (i.op[0].imms->X_add_number - 1))
+	       /* optimize_imm() converts to sign-extended representation where
+		  possible (and input can also come with these specific numbers).  */
+	       : (i.types[i.operands - 1].bitfield.word
+		  && i.op[0].imms->X_add_number == -0x8000)
+		 || (i.types[i.operands - 1].bitfield.dword
+		     && i.op[0].imms->X_add_number + 1 == -0x7fffffff))
+	   /* 16-bit 3-operand non-ZU forms need leaviong alone, to prevent
+	      zero-extension of the result.  Unless, of course, both non-
+	      immediate operands match (which can be converted to the non-NDD
+	      form).  */
+	   && (i.operands < 3
+	       || !i.types[2].bitfield.word
+	       || i.tm.mnem_off == MN_imulzu
+	       || i.op[2].regs == i.op[1].regs)
+	   /* When merely optimizing for size, exclude cases where we'd convert
+	      from Imm8S to Imm8 encoding, thus not actually reducing size.  */
+	   && (!optimize_for_space
+	       || i.tm.base_opcode == 0x69
+	       || !(i.op[0].imms->X_add_number & 0x7d)))
+    {
+      /* Optimize: -O:
+	   {nf} imul   $1<<N, ...   -> {nf} shl $N, ...
+	   {nf} imulzu $1<<N, ...   -> {nf} shl $N, ...
+       */
+      if (i.op[0].imms->X_add_number != 2)
+	{
+	  i.tm.base_opcode = 0xc0;
+	  i.op[0].imms->X_add_number = ffs (i.op[0].imms->X_add_number) - 1;
+	  i.tm.operand_types[0].bitfield.imm8 = 1;
+	  i.tm.operand_types[0].bitfield.imm16 = 0;
+	  i.tm.operand_types[0].bitfield.imm32 = 0;
+	  i.tm.operand_types[0].bitfield.imm32s = 0;
+	}
+      else
+	{
+	  i.tm.base_opcode = 0xd0;
+	  i.tm.operand_types[0].bitfield.imm1 = 1;
+	}
+      i.types[0] = i.tm.operand_types[0];
+      i.tm.extension_opcode = 4;
+      i.tm.opcode_modifier.w = 1;
+      i.tm.opcode_modifier.operandconstraint = 0;
+      if (i.operands == 3)
+	{
+	  if (i.op[2].regs == i.op[1].regs && i.tm.mnem_off != MN_imulzu)
+	    {
+	      /* Convert to non-NDD form.  This is required for 16-bit insns
+	         (to prevent zero-extension) and benign for others.  */
+	      i.operands = 2;
+	      i.reg_operands = 1;
+	    }
+	  else
+	    i.tm.opcode_modifier.vexvvvv = VexVVVV_DST;
+	}
+      else if (i.tm.mnem_off == MN_imulzu)
+	{
+	  /* Convert to NDD form, to effect zero-extension of the result.  */
+	  i.tm.opcode_modifier.vexvvvv = VexVVVV_DST;
+	  i.operands = 3;
+	  i.reg_operands = 2;
+	  i.op[2].regs = i.op[1].regs;
+ 	  i.tm.operand_types[2] = i.tm.operand_types[1];
+ 	  i.types[2] = i.types[1];
+	}
+    }
 
   if (optimize_for_space
       && i.encoding != encoding_evex
@@ -5598,6 +5667,7 @@ optimize_nf_encoding (void)
   else if (i.tm.base_opcode == 0x6b
 	   && !i.mem_operands
 	   && i.encoding != encoding_evex
+	   && i.tm.mnem_off != MN_imulzu
 	   && is_plausible_suffix (1)
 	   /* %rsp can't be the index.  */
 	   && is_index (i.op[1].regs)

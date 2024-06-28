@@ -1472,4 +1472,40 @@ optimize:
 	{nf} imul $5, %r21w, %dx
 	{nf} imul $9, %r21w
 	.endif
+
+	# Note: 2-6 want leaving alone with -Os.
+	.irp n, 1, 2, 6, 7
+	# Note: 16-bit 3-operand src!=dst non-ZU form needs leaving alone.
+	{nf} imul $1<<\n, %\r\()dx, %\r\()cx
+	{nf} imul $1<<\n, (%rdx), %\r\()cx
+	{nf} imul $1<<\n, %\r\()cx, %\r\()cx
+	{nf} imul $1<<\n, %\r\()cx
+
+	.ifeqs "\r",""
+	{nf} imulzu $1<<\n, %dx, %cx
+	{nf} imulzu $1<<\n, (%rdx), %cx
+	{nf} imulzu $1<<\n, %cx, %cx
+	{nf} imulzu $1<<\n, %cx
+	.endif
+	.endr
+
+	.ifeqs "\r",""
+	# Note: 3-operand src!=dst non-ZU form needs leaving alone.
+	{nf} imul $1<<15, %dx, %cx
+	{nf} imul $-1<<15, (%rdx), %cx
+	{nf} imul $1<<15, %cx, %cx
+	{nf} imul $-1<<15, %cx
+	{nf} imulzu $1<<15, %cx
+	.endif
+
+	.ifeqs "\r","e"
+	{nf} imul $1<<31, %edx, %ecx
+	{nf} imul $-1<<31, (%rdx), %ecx
+	.endif
+
+	.ifeqs "\r","r"
+	{nf} imul $1<<30, %rdx, %rcx
+	# Needs leaving alone.
+	{nf} imul $-1<<31, %rdx, %rcx
+	.endif
 	.endr

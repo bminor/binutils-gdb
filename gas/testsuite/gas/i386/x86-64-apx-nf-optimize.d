@@ -1522,14 +1522,87 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*66 d5 40 8d 44 6d 00[ 	]+lea    0x0\(%rbp,%rbp,2\),%r16w
 [ 	]*[a-f0-9]+:[ 	]*66 d5 30 8d 54 ad 00[ 	]+lea    0x0\(%r21,%r21,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*66 d5 70 8d 6c ed 00[ 	]+lea    0x0\(%r21,%r21,8\),%r21w
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b ca 02 	\{nf\} imul \$0x2,%dx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b 0a 02 	\{nf\} imul \$0x2,\(%rdx\),%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 01 c9    	\{nf\} add %cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 01 c9    	\{nf\} add %cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c 01 d2    	\{nf\} add %dx,%dx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c d1 22    	\{nf\} shl \$1,\(%rdx\),%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c 01 c9    	\{nf\} add %cx,%cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c 01 c9    	\{nf\} add %cx,%cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b ca 04 	\{nf\} imul \$0x4,%dx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b 0a 04 	\{nf\} imul \$0x4,\(%rdx\),%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 02 	\{nf\} shl \$0x2,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 02 	\{nf\} shl \$0x2,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e2 02 	\{nf\} shl \$0x2,%dx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 22 02 	\{nf\} shl \$0x2,\(%rdx\),%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 02 	\{nf\} shl \$0x2,%cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 02 	\{nf\} shl \$0x2,%cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b ca 40 	\{nf\} imul \$0x40,%dx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b 0a 40 	\{nf\} imul \$0x40,\(%rdx\),%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 06 	\{nf\} shl \$0x6,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 06 	\{nf\} shl \$0x6,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e2 06 	\{nf\} shl \$0x6,%dx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 22 06 	\{nf\} shl \$0x6,\(%rdx\),%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 06 	\{nf\} shl \$0x6,%cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 06 	\{nf\} shl \$0x6,%cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 69 ca 80 00 	\{nf\} imul \$0x80,%dx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 69 0a 80 00 	\{nf\} imul \$0x80,\(%rdx\),%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 07 	\{nf\} shl \$0x7,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 07 	\{nf\} shl \$0x7,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e2 07 	\{nf\} shl \$0x7,%dx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 22 07 	\{nf\} shl \$0x7,\(%rdx\),%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 07 	\{nf\} shl \$0x7,%cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 07 	\{nf\} shl \$0x7,%cx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 69 ca 00 80 	\{nf\} imul \$0x8000,%dx,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 69 0a 00 80 	\{nf\} imul \$0x8000,\(%rdx\),%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 0f 	\{nf\} shl \$0xf,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 0f 	\{nf\} shl \$0xf,%cx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 0f 	\{nf\} shl \$0xf,%cx,%cx
 [ 	]*[a-f0-9]+:[ 	]*8d 14 49[ 	]+lea    \(%rcx,%rcx,2\),%edx
 [ 	]*[a-f0-9]+:[ 	]*8d 54 ad 00[ 	]+lea    0x0\(%rbp,%rbp,4\),%edx
 [ 	]*[a-f0-9]+:[ 	]*8d 2c c9[ 	]+lea    \(%rcx,%rcx,8\),%ebp
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b d4 03[ 	]+\{nf\} imul \$0x3,%esp,%edx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b e4 05[ 	]+\{nf\} imul \$0x5,%esp,%esp
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c 01 d2    	\{nf\} add %edx,%edx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c d1 22    	\{nf\} shl \$1,\(%rdx\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 01 c9    	\{nf\} add %ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 01 c9    	\{nf\} add %ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 e2 02 	\{nf\} shl \$0x2,%edx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 22 02 	\{nf\} shl \$0x2,\(%rdx\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 e1 02 	\{nf\} shl \$0x2,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 e1 02 	\{nf\} shl \$0x2,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 e2 06 	\{nf\} shl \$0x6,%edx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 22 06 	\{nf\} shl \$0x6,\(%rdx\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 e1 06 	\{nf\} shl \$0x6,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 e1 06 	\{nf\} shl \$0x6,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 e2 07 	\{nf\} shl \$0x7,%edx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 22 07 	\{nf\} shl \$0x7,\(%rdx\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 e1 07 	\{nf\} shl \$0x7,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 e1 07 	\{nf\} shl \$0x7,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 e2 1f 	\{nf\} shl \$0x1f,%edx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 22 1f 	\{nf\} shl \$0x1f,\(%rdx\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*48 8d 14 49[ 	]+lea    \(%rcx,%rcx,2\),%rdx
 [ 	]*[a-f0-9]+:[ 	]*48 8d 54 ad 00[ 	]+lea    0x0\(%rbp,%rbp,4\),%rdx
 [ 	]*[a-f0-9]+:[ 	]*48 8d 2c c9[ 	]+lea    \(%rcx,%rcx,8\),%rbp
 [ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b d4 03[ 	]+\{nf\} imul \$0x3,%rsp,%rdx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b e4 05[ 	]+\{nf\} imul \$0x5,%rsp,%rsp
+[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c 01 d2    	\{nf\} add %rdx,%rdx,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c d1 22    	\{nf\} shl \$1,\(%rdx\),%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 01 c9    	\{nf\} add %rcx,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 01 c9    	\{nf\} add %rcx,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 e2 02 	\{nf\} shl \$0x2,%rdx,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 22 02 	\{nf\} shl \$0x2,\(%rdx\),%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c c1 e1 02 	\{nf\} shl \$0x2,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c c1 e1 02 	\{nf\} shl \$0x2,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 e2 06 	\{nf\} shl \$0x6,%rdx,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 22 06 	\{nf\} shl \$0x6,\(%rdx\),%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c c1 e1 06 	\{nf\} shl \$0x6,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c c1 e1 06 	\{nf\} shl \$0x6,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 e2 07 	\{nf\} shl \$0x7,%rdx,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 22 07 	\{nf\} shl \$0x7,\(%rdx\),%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c c1 e1 07 	\{nf\} shl \$0x7,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c c1 e1 07 	\{nf\} shl \$0x7,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 e2 1e 	\{nf\} shl \$0x1e,%rdx,%rcx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 69 ca 00 00 00 80 	\{nf\} imul \$0xffffffff80000000,%rdx,%rcx
 #pass

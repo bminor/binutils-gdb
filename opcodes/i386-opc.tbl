@@ -419,21 +419,21 @@ imul, 0xfaf, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|U
 imul, 0xaf, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 imul, 0x6b, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 imul, 0x6b, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF|Optimize, { Imm8S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-imulzu, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|NF|ZU, { Imm8S, Reg16|Unspecified|BaseIndex, Reg16 }
+imulzu, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|NF|ZU|Optimize, { Imm8S, Reg16|Unspecified|BaseIndex, Reg16 }
 imul, 0x69, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-imul, 0x69, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|NF|ZU, { Imm16, Reg16|Unspecified|BaseIndex, Reg16 }
+imul, 0x69, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF|Optimize, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|NF|ZU|Optimize, { Imm16, Reg16|Unspecified|BaseIndex, Reg16 }
 // imul with 2 operands mimics imul with 3 by putting the register in
 // both i.rm.reg & i.rm.regmem fields.  RegKludge enables this
 // transformation.
 imul, 0x6b, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm8S, Reg16|Reg32|Reg64 }
 imul, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF|Optimize, { Imm8S, Reg16|Reg32|Reg64 }
 imul, 0x69, i186, Modrm|No_bSuf|No_sSuf|RegKludge, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
-imul, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
+imul, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF|Optimize, { Imm16|Imm32|Imm32S, Reg16|Reg32|Reg64 }
 // ZU is omitted here, for colliding with RegKludge.  process_operands() will
 // replace the constraint value after processing RegKludge.
-imulzu, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF/*|ZU*/, { Imm8S, Reg16 }
-imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF/*|ZU*/, { Imm16, Reg16 }
+imulzu, 0x6b, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF/*|ZU*/|Optimize, { Imm8S, Reg16 }
+imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF/*|ZU*/|Optimize, { Imm16, Reg16 }
 
 <mul>
 
