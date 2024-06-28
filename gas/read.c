@@ -262,7 +262,7 @@ static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
 static void poend (void);
-static size_t get_non_macro_line_sb (sb *);
+static size_t get_macro_line_sb (sb *);
 static void generate_file_debug (void);
 static char *_find_end_of_line (char *, int, int, int);
 
@@ -2402,7 +2402,7 @@ s_irp (int irpc)
 
   sb_new (&out);
 
-  err = expand_irp (irpc, 0, &s, &out, get_non_macro_line_sb);
+  err = expand_irp (irpc, 0, &s, &out, get_macro_line_sb);
   if (err != NULL)
     as_bad_where (file, line, "%s", err);
 
