@@ -697,7 +697,8 @@ _start:
 	{nf}	xor	291(%r8, %rax, 4), %r9
 	{nf}	xor	291(%r8, %rax, 4), %r9, %r31
 
-.intel_syntax noprefix
+	.intel_syntax noprefix
+intel:
 	{nf}	add	bl, 123
 	{nf}	add	dl, bl, 123
 	{nf}	add	dx, 123
@@ -1377,3 +1378,58 @@ _start:
 	{nf}	xor	edx, ecx, DWORD PTR [r8+rax*4+291]
 	{nf}	xor	r9, QWORD PTR [r8+rax*4+291]
 	{nf}	xor	r31, r9, QWORD PTR [r8+rax*4+291]
+
+	.att_syntax prefix
+optimize:
+	.irp op, add, sub
+	{nf}	\op	$128, %bl
+	{nf}	\op	$128, %bl, %dl
+	{nf}	\op	$128, %dx
+	{nf}	\op	$128, %dx, %ax
+	{nf}	\op	$128, %ecx
+	{nf}	\op	$128, %ecx, %edx
+	{nf}	\op	$128, %r9
+	{nf}	\op	$128, %r9, %r31
+	{nf}	\op\()b	$128, (%rax)
+	{nf}	\op	$128, (%rax), %bl
+	{nf}	\op\()w	$128, (%rax)
+	{nf}	\op	$128, (%rax), %dx
+	{nf}	\op\()l	$128, (%rax)
+	{nf}	\op	$128, (%rax), %ecx
+	{nf}	\op\()q	$128, (%rax)
+	{nf}	\op	$128, (%rax), %r9
+
+	{nf}	\op	$1, %bl
+	{nf}	\op	$1, %bl, %dl
+	{nf}	\op	$1, %dx
+	{nf}	\op	$1, %dx, %ax
+	{nf}	\op	$1, %ecx
+	{nf}	\op	$1, %ecx, %edx
+	{nf}	\op	$1, %r9
+	{nf}	\op	$1, %r9, %r31
+	{nf}	\op\()b	$1, (%rax)
+	{nf}	\op	$1, (%rax), %bl
+	{nf}	\op\()w	$1, (%rax)
+	{nf}	\op	$1, (%rax), %dx
+	{nf}	\op\()l	$1, (%rax)
+	{nf}	\op	$1, (%rax), %ecx
+	{nf}	\op\()q	$1, (%rax)
+	{nf}	\op	$1, (%rax), %r9
+
+	{nf}	\op	$0xff, %bl
+	{nf}	\op	$-1, %bl, %dl
+	{nf}	\op	$0xffff, %dx
+	{nf}	\op	$-1, %dx, %ax
+	{nf}	\op	$0xffffffff, %ecx
+	{nf}	\op	$-1, %ecx, %edx
+	{nf}	\op	$-1, %r9
+	{nf}	\op	$-1, %r9, %r31
+	{nf}	\op\()b	$0xff, (%rax)
+	{nf}	\op	$-1, (%rax), %bl
+	{nf}	\op\()w	$0xffff, (%rax)
+	{nf}	\op	$-1, (%rax), %dx
+	{nf}	\op\()l	$0xffffffff, (%rax)
+	{nf}	\op	$-1, (%rax), %ecx
+	{nf}	\op\()q	$-1, (%rax)
+	{nf}	\op	$-1, (%rax), %r9
+	.endr

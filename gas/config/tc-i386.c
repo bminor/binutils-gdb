@@ -5327,6 +5327,84 @@ optimize_encoding (void)
     }
 }
 
+/* Try to shorten {nf} encodings, by shortening operand size or switching to
+   functionally identical encodings.  */
+
+static void
+optimize_nf_encoding (void)
+{
+  if (i.tm.base_opcode == 0x80
+      && (i.tm.extension_opcode == 0 || i.tm.extension_opcode == 5)
+      && i.suffix != BYTE_MNEM_SUFFIX
+      && !i.types[1].bitfield.byte
+      && !i.types[2].bitfield.byte
+      && i.op[0].imms->X_op == O_constant
+      && i.op[0].imms->X_add_number == 0x80)
+    {
+      /* Optimize: -O:
+	   {nf} addw $0x80, ...  -> {nf} subw $-0x80, ...
+	   {nf} addl $0x80, ...  -> {nf} subl $-0x80, ...
+	   {nf} addq $0x80, ...  -> {nf} subq $-0x80, ...
+
+	   {nf} subw $0x80, ...  -> {nf} addw $-0x80, ...
+	   {nf} subl $0x80, ...  -> {nf} addl $-0x80, ...
+	   {nf} subq $0x80, ...  -> {nf} addq $-0x80, ...
+       */
+      i.tm.base_opcode |= 3;
+      i.tm.extension_opcode ^= 5;
+      i.tm.opcode_modifier.w = 0;
+      i.op[0].imms->X_add_number = -i.op[0].imms->X_add_number;
+
+      i.tm.operand_types[0].bitfield.imm8 = 0;
+      i.tm.operand_types[0].bitfield.imm8s = 1;
+      i.tm.operand_types[0].bitfield.imm16 = 0;
+      i.tm.operand_types[0].bitfield.imm32 = 0;
+      i.tm.operand_types[0].bitfield.imm32s = 0;
+
+      i.types[0] = i.tm.operand_types[0];
+    }
+  else if ((i.tm.base_opcode | 3) == 0x83
+      && (i.tm.extension_opcode == 0 || i.tm.extension_opcode == 5)
+      && i.op[0].imms->X_op == O_constant
+      && (i.op[0].imms->X_add_number == 1
+	  || i.op[0].imms->X_add_number == -1
+	  /* While for wider than byte operations immediates were suitably
+	     adjusted earlier on, 0xff in the byte case needs covering
+	     explicitly.  */
+	  || (i.op[0].imms->X_add_number == 0xff
+	      && (i.suffix == BYTE_MNEM_SUFFIX
+		  || i.types[i.operands - 1].bitfield.byte))))
+    {
+      /* Optimize: -O:
+	   {nf} add $1, ...        -> {nf} inc ...
+	   {nf} add $-1, ...       -> {nf} dec ...
+	   {nf} add $0xf...f, ...  -> {nf} dec ...
+
+	   {nf} sub $1, ...        -> {nf} dec ...
+	   {nf} sub $-1, ...       -> {nf} inc ...
+	   {nf} sub $0xf...f, ...  -> {nf} inc ...
+       */
+      i.tm.base_opcode = 0xfe;
+      i.tm.extension_opcode
+	= (i.op[0].imms->X_add_number == 1) != (i.tm.extension_opcode == 0);
+      i.tm.opcode_modifier.w = 1;
+
+      i.types[0] = i.types[1];
+      i.types[1] = i.types[2];
+      i.tm.operand_types[0] = i.tm.operand_types[1];
+      i.tm.operand_types[1] = i.tm.operand_types[2];
+      i.op[0] = i.op[1];
+      i.op[1] = i.op[2];
+      i.flags[0] = i.flags[1];
+      i.flags[1] = i.flags[2];
+      i.reloc[0] = i.reloc[1];
+      i.reloc[1] = NO_RELOC;
+
+      i.imm_operands = 0;
+      --i.operands;
+    }
+}
+
 static void
 s_noopt (int dummy ATTRIBUTE_UNUSED)
 {
@@ -7206,7 +7284,11 @@ md_assemble (char *line)
     }
 
   if (optimize && !i.no_optimize && i.tm.opcode_modifier.optimize)
-    optimize_encoding ();
+    {
+      if (i.has_nf)
+	optimize_nf_encoding ();
+      optimize_encoding ();
+    }
 
   /* Past optimization there's no need to distinguish encoding_evex,
      encoding_evex512, and encoding_egpr anymore.  */

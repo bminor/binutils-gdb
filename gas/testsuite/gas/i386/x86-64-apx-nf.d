@@ -701,6 +701,8 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 d4 6c 1c 33 8c 80 23 01 00 00\s+\{nf\} xor 0x123\(%r8,%rax,4\),%ecx,%edx
 \s*[a-f0-9]+:\s*62 54 fc 0c 33 8c 80 23 01 00 00\s+\{nf\} xor 0x123\(%r8,%rax,4\),%r9
 \s*[a-f0-9]+:\s*62 54 84 14 33 8c 80 23 01 00 00\s+\{nf\} xor 0x123\(%r8,%rax,4\),%r9,%r31
+
+0[0-9a-f]+ <intel>:
 \s*[a-f0-9]+:\s*62 f4 7c 0c 80 c3 7b\s+\{nf\} add\s+\$0x7b,%bl
 \s*[a-f0-9]+:\s*62 f4 6c 1c 80 c3 7b\s+\{nf\} add\s+\$0x7b,%bl,%dl
 \s*[a-f0-9]+:\s*62 f4 7d 0c 83 c2 7b\s+\{nf\} add\s+\$0x7b,%dx
