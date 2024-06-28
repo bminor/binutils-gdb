@@ -1433,3 +1433,23 @@ optimize:
 	{nf}	\op\()q	$-1, (%rax)
 	{nf}	\op	$-1, (%rax), %r9
 	.endr
+
+	.irp dir, l, r
+	{nf}	ro\dir	$7, %dl
+	{nf}	ro\dir	$7, %dl, %al
+	{nf}	ro\dir	$15, %dx
+	{nf}	ro\dir	$15, %dx, %ax
+	{nf}	ro\dir	$31, %edx
+	{nf}	ro\dir	$31, %edx, %eax
+	{nf}	ro\dir	$63, %rdx
+	{nf}	ro\dir	$63, %rdx, %rax
+
+	{nf}	ro\dir\()b	$7, (%rdx)
+	{nf}	ro\dir		$7, (%rdx), %al
+	{nf}	ro\dir\()w	$15, (%rdx)
+	{nf}	ro\dir		$15, (%rdx), %ax
+	{nf}	ro\dir\()l	$31, (%rdx)
+	{nf}	ro\dir		$31, (%rdx), %eax
+	{nf}	ro\dir\()q	$63, (%rdx)
+	{nf}	ro\dir		$63, (%rdx), %rax
+	.endr

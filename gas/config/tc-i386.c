@@ -4927,6 +4927,7 @@ optimize_encoding (void)
     }
   else if (!optimize_for_space
 	   && i.tm.base_opcode == 0xd0
+	   && i.tm.extension_opcode == 4
 	   && (i.tm.opcode_space == SPACE_BASE
 	       || i.tm.opcode_space == SPACE_EVEXMAP4)
 	   && !i.mem_operands)
@@ -4942,7 +4943,6 @@ optimize_encoding (void)
 	   shll $1, %rN, %rM  -> addl %rN, %rN, %rM
 	   shlq $1, %rN, %rM  -> addq %rN, %rN, %rM
        */
-      gas_assert (i.tm.extension_opcode == 4);
       i.tm.base_opcode = 0x00;
       i.tm.extension_opcode = None;
       if (i.operands >= 2)
@@ -5402,6 +5402,26 @@ optimize_nf_encoding (void)
 
       i.imm_operands = 0;
       --i.operands;
+    }
+  else if (i.tm.base_opcode == 0xc0
+	   && i.op[0].imms->X_op == O_constant
+	   && i.op[0].imms->X_add_number
+	      == (i.types[i.operands - 1].bitfield.byte
+		  || i.suffix == BYTE_MNEM_SUFFIX
+		  ? 7 : i.types[i.operands - 1].bitfield.word
+			|| i.suffix == WORD_MNEM_SUFFIX
+			? 15 : 63 >> (i.types[i.operands - 1].bitfield.dword
+				      || i.suffix == LONG_MNEM_SUFFIX)))
+    {
+      /* Optimize: -O:
+	   {nf} rol $osz-1, ...   -> {nf} ror $1, ...
+	   {nf} ror $osz-1, ...   -> {nf} rol $1, ...
+       */
+      gas_assert (i.tm.extension_opcode <= 1);
+      i.tm.extension_opcode ^= 1;
+      i.tm.base_opcode = 0xd0;
+      i.tm.operand_types[0].bitfield.imm1 = 1;
+      i.imm_operands = 0;
     }
 }
 
