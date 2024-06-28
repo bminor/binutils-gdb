@@ -1453,3 +1453,23 @@ optimize:
 	{nf}	ro\dir\()q	$63, (%rdx)
 	{nf}	ro\dir		$63, (%rdx), %rax
 	.endr
+
+	.irp r, "", e, r
+	{nf} imul $3, %\r\(cx), %\r\(dx)
+	{nf} imul $5, %\r\(bp), %\r\(dx)
+	{nf} imul $9, %\r\(cx), %\r\(bp)
+
+	# Note: %\r\(sp) source form needs leaving alone.
+	{nf} imul $3, %\r\(sp), %\r\(dx)
+	{nf} imul $5, %\r\(sp)
+
+	.ifeqs "\r",""
+	# Note: (16-bit) ZU form needs leaving alone.
+	{nf} imulzu $3, %cx, %dx
+	{nf} imulzu $5, %cx
+	# Note: 16-bit forms requiring REX2 and Disp8 want leaving alone with -Os.
+	{nf} imul $3, %bp, %r16w
+	{nf} imul $5, %r21w, %dx
+	{nf} imul $9, %r21w
+	.endif
+	.endr

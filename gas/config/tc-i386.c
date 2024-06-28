@@ -1929,6 +1929,7 @@ static INLINE bool need_evex_encoding (const insn_template *t)
 {
   return i.encoding == encoding_evex
 	|| i.encoding == encoding_evex512
+	|| i.has_nf
 	|| (t->opcode_modifier.vex && i.encoding == encoding_egpr)
 	|| i.mask.reg;
 }
@@ -3804,9 +3805,10 @@ want_disp32 (const insn_template *t)
 {
   return flag_code != CODE_64BIT
 	 || i.prefix[ADDR_PREFIX]
-	 || (t->mnem_off == MN_lea
+	 || ((t->mnem_off == MN_lea
+	      || (i.tm.base_opcode == 0x8d && i.tm.opcode_space == SPACE_BASE))
 	     && (!i.types[1].bitfield.qword
-		|| t->opcode_modifier.size == SIZE32));
+		 || t->opcode_modifier.size == SIZE32));
 }
 
 static int
@@ -5327,6 +5329,30 @@ optimize_encoding (void)
     }
 }
 
+/* Check whether the promoted (to address size) register is usable as index
+   register in ModR/M SIB addressing.  */
+
+static bool is_index (const reg_entry *r)
+{
+  gas_assert (flag_code == CODE_64BIT);
+
+  if (r->reg_type.bitfield.byte)
+    {
+      if (!(r->reg_flags & RegRex64))
+	{
+	  if (r->reg_num >= 4)
+	    return false;
+	  r += 8;
+	}
+      r += 32;
+    }
+  if (r->reg_type.bitfield.word)
+    r += 32;
+  /* No need to further check .dword here.  */
+
+  return r->reg_type.bitfield.baseindex;
+}
+
 /* Try to shorten {nf} encodings, by shortening operand size or switching to
    functionally identical encodings.  */
 
@@ -5422,6 +5448,203 @@ optimize_nf_encoding (void)
       i.tm.base_opcode = 0xd0;
       i.tm.operand_types[0].bitfield.imm1 = 1;
       i.imm_operands = 0;
+    }
+
+  if (optimize_for_space
+      && i.encoding != encoding_evex
+      && (i.tm.base_opcode == 0x00
+	  || (i.tm.base_opcode == 0xd0 && i.tm.extension_opcode == 4))
+      && !i.mem_operands
+      && !i.types[1].bitfield.byte
+      /* 16-bit operand size has extra restrictions: If REX2 was needed,
+	 no size reduction would be possible.  Plus 3-operand forms zero-
+	 extend the result, which can't be expressed with LEA.  */
+      && (!i.types[1].bitfield.word
+	  || (i.operands == 2 && i.encoding != encoding_egpr))
+      && is_plausible_suffix (1)
+      /* %rsp can't be the index.  */
+      && (is_index (i.op[1].regs)
+	  || (i.imm_operands == 0 && is_index (i.op[0].regs)))
+      /* While %rbp, %r13, %r21, and %r29 can be made the index in order to
+	 avoid the otherwise necessary Disp8, if the other operand is also
+	 from that set and REX2 would be required to encode the insn, the
+	 resulting encoding would be no smaller than the EVEX one.  */
+      && (i.op[1].regs->reg_num != 5
+	  || i.encoding != encoding_egpr
+	  || i.imm_operands > 0
+	  || i.op[0].regs->reg_num != 5))
+    {
+      /* Optimize: -Os:
+	   {nf} addw %N, %M    -> leaw (%rM,%rN), %M
+	   {nf} addl %eN, %eM  -> leal (%rM,%rN), %eM
+	   {nf} addq %rN, %rM  -> leaq (%rM,%rN), %rM
+
+	   {nf} shlw $1, %N   -> leaw (%rN,%rN), %N
+	   {nf} shll $1, %eN  -> leal (%rN,%rN), %eN
+	   {nf} shlq $1, %rN  -> leaq (%rN,%rN), %rN
+
+	   {nf} addl %eK, %eN, %eM  -> leal (%rN,%rK), %eM
+	   {nf} addq %rK, %rN, %rM  -> leaq (%rN,%rK), %rM
+
+	   {nf} shll $1, %eN, %eM  -> leal (%rN,%rN), %eM
+	   {nf} shlq $1, %rN, %rM  -> leaq (%rN,%rN), %rM
+       */
+      i.tm.opcode_space = SPACE_BASE;
+      i.tm.base_opcode = 0x8d;
+      i.tm.extension_opcode = None;
+      i.tm.opcode_modifier.evex = 0;
+      i.tm.opcode_modifier.vexvvvv = 0;
+      if (i.imm_operands != 0)
+	i.index_reg = i.base_reg = i.op[1].regs;
+      else if (!is_index (i.op[0].regs)
+	       || (i.op[1].regs->reg_num == 5
+		   && i.op[0].regs->reg_num != 5))
+	{
+	  i.base_reg = i.op[0].regs;
+	  i.index_reg = i.op[1].regs;
+	}
+      else
+	{
+	  i.base_reg = i.op[1].regs;
+	  i.index_reg = i.op[0].regs;
+	}
+      if (i.types[1].bitfield.word)
+	{
+	  /* NB: No similar adjustment is needed when operand size is 32-bit.  */
+	  i.base_reg += 64;
+	  i.index_reg += 64;
+	}
+      i.op[1].regs = i.op[i.operands - 1].regs;
+
+      operand_type_set (&i.types[0], 0);
+      i.types[0].bitfield.baseindex = 1;
+      i.tm.operand_types[0] = i.types[0];
+      i.op[0].disps = NULL;
+      i.flags[0] = Operand_Mem;
+
+      i.operands = 2;
+      i.mem_operands = i.reg_operands = 1;
+      i.imm_operands = 0;
+      i.has_nf = false;
+    }
+  else if (optimize_for_space
+	   && i.encoding != encoding_evex
+	   && (i.tm.base_opcode == 0x80 || i.tm.base_opcode == 0x83)
+	   && (i.tm.extension_opcode == 0
+	       || (i.tm.extension_opcode == 5
+		   && i.op[0].imms->X_op == O_constant
+		   /* Subtraction of -0x80 will end up smaller only if neither
+		      operand size nor REX/REX2 prefixes are needed.  */
+		   && (i.op[0].imms->X_add_number != -0x80
+		       || (i.types[1].bitfield.dword
+		           && !(i.op[1].regs->reg_flags & RegRex)
+		           && !(i.op[i.operands - 1].regs->reg_flags & RegRex)
+		           && i.encoding != encoding_egpr))))
+	   && !i.mem_operands
+	   && !i.types[1].bitfield.byte
+	   /* 16-bit operand size has extra restrictions: If REX2 was needed,
+	      no size reduction would be possible.  Plus 3-operand forms zero-
+	      extend the result, which can't be expressed with LEA.  */
+	   && (!i.types[1].bitfield.word
+	       || (i.operands == 2 && i.encoding != encoding_egpr))
+	   && is_plausible_suffix (1))
+    {
+      /* Optimize: -Os:
+	   {nf} addw $N, %M   -> leaw N(%rM), %M
+	   {nf} addl $N, %eM  -> leal N(%rM), %eM
+	   {nf} addq $N, %rM  -> leaq N(%rM), %rM
+
+	   {nf} subw $N, %M   -> leaw -N(%rM), %M
+	   {nf} subl $N, %eM  -> leal -N(%rM), %eM
+	   {nf} subq $N, %rM  -> leaq -N(%rM), %rM
+
+	   {nf} addl $N, %eK, %eM  -> leal N(%rK), %eM
+	   {nf} addq $N, %rK, %rM  -> leaq N(%rK), %rM
+
+	   {nf} subl $N, %eK, %eM  -> leal -N(%rK), %eM
+	   {nf} subq $N, %rK, %rM  -> leaq -N(%rK), %rM
+       */
+      i.tm.opcode_space = SPACE_BASE;
+      i.tm.base_opcode = 0x8d;
+      if (i.tm.extension_opcode == 5)
+	i.op[0].imms->X_add_number = -i.op[0].imms->X_add_number;
+      i.tm.extension_opcode = None;
+      i.tm.opcode_modifier.evex = 0;
+      i.tm.opcode_modifier.vexvvvv = 0;
+      i.base_reg = i.op[1].regs;
+      if (i.types[1].bitfield.word)
+	{
+	  /* NB: No similar adjustment is needed when operand size is 32-bit.  */
+	  i.base_reg += 64;
+	}
+      i.op[1].regs = i.op[i.operands - 1].regs;
+
+      operand_type_set (&i.types[0], 0);
+      i.types[0].bitfield.baseindex = 1;
+      i.types[0].bitfield.disp32 = 1;
+      i.op[0].disps = i.op[0].imms;
+      i.flags[0] = Operand_Mem;
+      optimize_disp (&i.tm);
+      i.tm.operand_types[0] = i.types[0];
+
+      i.operands = 2;
+      i.disp_operands = i.mem_operands = i.reg_operands = 1;
+      i.imm_operands = 0;
+      i.has_nf = false;
+    }
+  else if (i.tm.base_opcode == 0x6b
+	   && !i.mem_operands
+	   && i.encoding != encoding_evex
+	   && is_plausible_suffix (1)
+	   /* %rsp can't be the index.  */
+	   && is_index (i.op[1].regs)
+	   /* There's no reduction in size for 16-bit forms requiring Disp8 and
+	      REX2.  */
+	   && (!optimize_for_space
+	       || !i.types[1].bitfield.word
+	       || i.op[1].regs->reg_num != 5
+	       || i.encoding != encoding_egpr)
+	   && i.op[0].imms->X_op == O_constant
+	   && (i.op[0].imms->X_add_number == 3
+	       || i.op[0].imms->X_add_number == 5
+	       || i.op[0].imms->X_add_number == 9))
+    {
+      /* Optimize: -O:
+        For n one of 3, 5, or 9
+	   {nf} imulw $n, %N, %M    -> leaw (%rN,%rN,n-1), %M
+	   {nf} imull $n, %eN, %eM  -> leal (%rN,%rN,n-1), %eM
+	   {nf} imulq $n, %rN, %rM  -> leaq (%rN,%rN,n-1), %rM
+
+	   {nf} imulw $n, %N   -> leaw (%rN,%rN,s), %N
+	   {nf} imull $n, %eN  -> leal (%rN,%rN,s), %eN
+	   {nf} imulq $n, %rN  -> leaq (%rN,%rN,s), %rN
+       */
+      i.tm.opcode_space = SPACE_BASE;
+      i.tm.base_opcode = 0x8d;
+      i.tm.extension_opcode = None;
+      i.tm.opcode_modifier.evex = 0;
+      i.base_reg = i.op[1].regs;
+      /* NB: No similar adjustment is needed when operand size is 32 bits.  */
+      if (i.types[1].bitfield.word)
+	i.base_reg += 64;
+      i.index_reg = i.base_reg;
+      i.log2_scale_factor = i.op[0].imms->X_add_number == 9
+			    ? 3 : i.op[0].imms->X_add_number >> 1;
+
+      operand_type_set (&i.types[0], 0);
+      i.types[0].bitfield.baseindex = 1;
+      i.tm.operand_types[0] = i.types[0];
+      i.op[0].disps = NULL;
+      i.flags[0] = Operand_Mem;
+
+      i.tm.operand_types[1] = i.tm.operand_types[i.operands - 1];
+      i.op[1].regs = i.op[i.operands - 1].regs;
+      i.types[1] = i.types[i.operands - 1];
+
+      i.operands = 2;
+      i.mem_operands = i.reg_operands = 1;
+      i.imm_operands = 0;
+      i.has_nf = false;
     }
 }
 
@@ -7318,6 +7541,10 @@ md_assemble (char *line)
     i.encoding = is_any_vex_encoding (&i.tm) ? encoding_evex
 					     : encoding_default;
 
+  /* Similarly {nf} can now be taken to imply {evex}.  */
+  if (i.has_nf && i.encoding == encoding_default)
+    i.encoding = encoding_evex;
+
   if (use_unaligned_vector_move)
     encode_with_unaligned_vector_move ();
 
@@ -7631,8 +7858,6 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		case Prefix_NF:
 		  /* {nf} */
 		  i.has_nf = true;
-		  if (i.encoding == encoding_default)
-		    i.encoding = encoding_evex;
 		  break;
 		case Prefix_NoOptimize:
 		  /* {nooptimize} */
@@ -7641,7 +7866,9 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 		default:
 		  abort ();
 		}
-	      if (i.has_nf && i.encoding != encoding_evex)
+	      if (i.has_nf
+		  && i.encoding != encoding_default
+		  && i.encoding != encoding_evex)
 		{
 		  as_bad (_("{nf} cannot be combined with {vex}/{vex3}"));
 		  return NULL;
@@ -8784,9 +9011,6 @@ VEX_check_encoding (const insn_template *t)
 
   switch (i.encoding)
     {
-    case encoding_default:
-      break;
-
     case encoding_vex:
     case encoding_vex3:
       /* This instruction must be encoded with VEX prefix.  */
@@ -8797,6 +9021,10 @@ VEX_check_encoding (const insn_template *t)
 	}
       break;
 
+    case encoding_default:
+      if (!i.has_nf)
+	break;
+      /* Fall through.  */
     case encoding_evex:
     case encoding_evex512:
       /* This instruction must be encoded with EVEX prefix.  */
