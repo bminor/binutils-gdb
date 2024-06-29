@@ -3574,15 +3574,15 @@ skip_attribute (unsigned long    form,
 		int              dwarf_version)
 {
   uint64_t temp;
-  int64_t stemp;
+  size_t inc;
 
   switch (form)
     {
     case DW_FORM_ref_addr:
-      data += dwarf_version == 2 ? pointer_size : offset_size;
+      inc = dwarf_version == 2 ? pointer_size : offset_size;
       break;
     case DW_FORM_addr:
-      data += pointer_size;
+      inc = pointer_size;
       break;
     case DW_FORM_strp_sup:
     case DW_FORM_strp:
@@ -3590,44 +3590,44 @@ skip_attribute (unsigned long    form,
     case DW_FORM_sec_offset:
     case DW_FORM_GNU_ref_alt:
     case DW_FORM_GNU_strp_alt:
-      data += offset_size;
+      inc = offset_size;
       break;
     case DW_FORM_ref1:
     case DW_FORM_flag:
     case DW_FORM_data1:
     case DW_FORM_strx1:
     case DW_FORM_addrx1:      
-      data += 1;
+      inc = 1;
       break;
     case DW_FORM_ref2:
     case DW_FORM_data2:
     case DW_FORM_strx2:
     case DW_FORM_addrx2:      
-      data += 2;
+      inc = 2;
       break;
     case DW_FORM_strx3:
     case DW_FORM_addrx3:      
-      data += 3;
+      inc = 3;
       break;
     case DW_FORM_ref_sup4:
     case DW_FORM_ref4:
     case DW_FORM_data4:
     case DW_FORM_strx4:
     case DW_FORM_addrx4:
-      data += 4;
+      inc = 4;
       break;
     case DW_FORM_ref_sup8:
     case DW_FORM_ref8:
     case DW_FORM_data8:
     case DW_FORM_ref_sig8:
-      data += 8;
+      inc = 8;
       break;
     case DW_FORM_data16:      
-      data += 16;
+      inc = 16;
       break;
     case DW_FORM_sdata:
-      READ_SLEB (stemp, data, end);
-      break;
+      SKIP_SLEB (data, end);
+      return data;
     case DW_FORM_GNU_str_index:
     case DW_FORM_strx:
     case DW_FORM_ref_udata:
@@ -3636,41 +3636,45 @@ skip_attribute (unsigned long    form,
     case DW_FORM_addrx:
     case DW_FORM_loclistx:
     case DW_FORM_rnglistx:
-      READ_ULEB (temp, data, end);
-      break;
-
+      SKIP_ULEB (data, end);
+      return data;
     case DW_FORM_indirect:
       while (form == DW_FORM_indirect)
         READ_ULEB (form, data, end);
-      return skip_attribute (form, data, end, pointer_size, offset_size, dwarf_version);
+      return skip_attribute (form, data, end, pointer_size, offset_size,
+			     dwarf_version);
 
     case DW_FORM_string:
-      data += strnlen ((char *) data, end - data);    
+      inc = strnlen ((char *) data, end - data);
       break;
     case DW_FORM_block:
     case DW_FORM_exprloc:
       READ_ULEB (temp, data, end);
-      data += temp;
+      inc = temp;
       break;
     case DW_FORM_block1:
       SAFE_BYTE_GET_AND_INC (temp, data, 1, end);
-      data += temp;
+      inc = temp;
       break;
     case DW_FORM_block2:
       SAFE_BYTE_GET_AND_INC (temp, data, 2, end);
-      data += temp;
+      inc = temp;
       break;
     case DW_FORM_block4:
       SAFE_BYTE_GET_AND_INC (temp, data, 4, end);
-      data += temp;
+      inc = temp;
       break;
     case DW_FORM_implicit_const:
     case DW_FORM_flag_present:
-      break;
+      return data;
     default:
       warn (_("Unexpected form in top DIE\n"));
-      break;
+      return data;
     }
+  if (inc <= (size_t) (end - data))
+    data += inc;
+  else
+    data = end;
   return data;
 }
 
@@ -3701,7 +3705,8 @@ read_bases (abbrev_entry *   entry,
 	  else
 	    warn (_("Unexpected form of DW_AT_rnglists_base in the top DIE\n"));
 	}
-      else if (attr->attribute == DW_AT_addr_base || attr->attribute == DW_AT_GNU_addr_base)
+      else if (attr->attribute == DW_AT_addr_base
+	       || attr->attribute == DW_AT_GNU_addr_base)
 	{
 	  if (attr->form == DW_FORM_sec_offset)
 	    {
