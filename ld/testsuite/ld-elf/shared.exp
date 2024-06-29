@@ -552,7 +552,7 @@ set build_tests {
    "-shared" "-fPIC"
    {begin.c end.c} {} "libbar.so"}
   {"Build warn libbar.so"
-   "-shared" "-fPIC"
+   "-shared" "-fPIC -g"
   {beginwarn.c end.c}
   {{readelf {-S --wide} libbarw.rd}
    {warning {^.*beginwarn.c:7:\(.*\): warning: function foo is deprecated\n?$}}}
