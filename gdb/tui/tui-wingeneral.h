@@ -50,8 +50,4 @@ private:
   bool m_saved_suppress;
 };
 
-/* Call wrefresh on the given window.  However, if output is being
-   suppressed via tui_suppress_output, do not call wrefresh.  */
-extern void tui_wrefresh (WINDOW *win);
-
 #endif /* TUI_TUI_WINGENERAL_H */

@@ -53,18 +53,10 @@ tui_batch_rendering::~tui_batch_rendering ()
 /* See tui-data.h.  */
 
 void
-tui_wrefresh (WINDOW *win)
-{
-  wnoutrefresh (win);
-}
-
-/* See tui-data.h.  */
-
-void
 tui_win_info::refresh_window ()
 {
   if (handle != NULL)
-    tui_wrefresh (handle.get ());
+    wnoutrefresh (handle.get ());
 }
 
 /* Draw a border around the window.  */

@@ -95,7 +95,7 @@ public:
       {
 	wnoutrefresh (handle.get ());
 	touchwin (m_inner_window.get ());
-	tui_wrefresh (m_inner_window.get ());
+	wnoutrefresh (m_inner_window.get ());
       }
     else
       tui_win_info::refresh_window ();
@@ -275,7 +275,7 @@ tui_py_window::output (const char *text, bool full_window)
       if (full_window)
 	check_and_display_highlight_if_needed ();
       else
-	tui_wrefresh (m_inner_window.get ());
+	wnoutrefresh (m_inner_window.get ());
     }
 }
 

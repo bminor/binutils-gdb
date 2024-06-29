@@ -253,15 +253,6 @@ struct tui_nobox_window : public virtual tui_win_info
   }
 };
 
-/* A TUI window that is not refreshed.  */
-
-struct tui_norefresh_window : public virtual tui_win_info
-{
-  virtual void refresh_window () final override
-  {
-  }
-};
-
 /* A TUI window that is always visible.  */
 
 struct tui_always_visible_window : public virtual tui_win_info
