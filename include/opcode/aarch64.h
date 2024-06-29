@@ -1367,7 +1367,31 @@ extern const aarch64_opcode aarch64_opcode_table[];
 #define F_OPD_SIZE (1ULL << 34)
 /* RCPC3 instruction has the field of 'size'.  */
 #define F_RCPC3_SIZE (1ULL << 35)
-/* Next bit is 36.  */
+
+/* 4-bit flag field to indicate subclass of instructions.
+   The available 14 nonzero values are consecutive, with room for
+   more subclasses in future.  */
+#define F_SUBCLASS (15ULL << 36)
+
+#define F_SUBCLASS_OTHER (F_SUBCLASS)
+
+#define F_LDST_LOAD (1ULL << 36)
+#define F_LDST_STORE (2ULL << 36)
+/* A load followed by a store (using the same address). */
+#define F_LDST_SWAP (3ULL << 36)
+/* Subclasses to denote add, sub and mov insns.  */
+#define F_ARITH_ADD (4ULL << 36)
+#define F_ARITH_SUB (5ULL << 36)
+#define F_ARITH_MOV (6ULL << 36)
+/* Subclasses to denote call and ret insns.  */
+#define F_BRANCH_CALL (7ULL << 36)
+#define F_BRANCH_RET (8ULL << 36)
+
+#define F_SUBCLASS_OTHER (F_SUBCLASS)
+/* PS: To perform some sanity checks, the last declared subclass flag is used.
+   Keep F_MAX_SUBCLASS updated when declaring new subclasses.  */
+#define F_MAX_SUBCLASS (F_BRANCH_RET)
+/* Next bit is 40.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
@@ -1404,6 +1428,12 @@ static inline bool
 pseudo_opcode_p (const aarch64_opcode *opcode)
 {
   return (opcode->flags & F_PSEUDO) != 0lu;
+}
+
+static inline bool
+aarch64_opcode_subclass_p (const aarch64_opcode* opcode, uint64_t flag)
+{
+  return ((opcode->flags & F_SUBCLASS) == flag);
 }
 
 /* Deal with two possible scenarios: If F_OP_PAIR_OPT not set, as is the case
