@@ -62,7 +62,4 @@ tui_cmd_win ()
   return dynamic_cast<tui_cmd_window *> (tui_win_list[CMD_WIN]);
 }
 
-/* Refresh the command window.  */
-extern void tui_refresh_cmd_win (void);
-
 #endif /* TUI_TUI_COMMAND_H */
