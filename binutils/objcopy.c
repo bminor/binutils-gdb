@@ -1730,14 +1730,6 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
       if (keep)
 	{
-	  if (((flags & (BSF_GLOBAL | BSF_GNU_UNIQUE))
-	       || undefined)
-	      && (weaken || is_specified_symbol (name, weaken_specific_htab)))
-	    {
-	      sym->flags &= ~ (BSF_GLOBAL | BSF_GNU_UNIQUE);
-	      sym->flags |= BSF_WEAK;
-	    }
-
 	  if (!undefined
 	      && (flags & (BSF_GLOBAL | BSF_WEAK))
 	      && (is_specified_symbol (name, localize_specific_htab)
@@ -1745,18 +1737,27 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 		      && ! is_specified_symbol (name, keepglobal_specific_htab))
 		  || (localize_hidden && is_hidden_symbol (sym))))
 	    {
-	      sym->flags &= ~ (BSF_GLOBAL | BSF_WEAK);
-	      sym->flags |= BSF_LOCAL;
+	      flags &= ~(BSF_GLOBAL | BSF_WEAK);
+	      flags |= BSF_LOCAL;
 	    }
 
-	  if (!undefined
-	      && (flags & BSF_LOCAL)
-	      && is_specified_symbol (name, globalize_specific_htab))
+	  else if (!undefined
+		   && (flags & BSF_LOCAL)
+		   && is_specified_symbol (name, globalize_specific_htab))
 	    {
-	      sym->flags &= ~ BSF_LOCAL;
-	      sym->flags |= BSF_GLOBAL;
+	      flags &= ~BSF_LOCAL;
+	      flags |= BSF_GLOBAL;
 	    }
 
+	  if (((flags & (BSF_GLOBAL | BSF_GNU_UNIQUE))
+	       || undefined)
+	      && (weaken || is_specified_symbol (name, weaken_specific_htab)))
+	    {
+	      flags &= ~(BSF_GLOBAL | BSF_GNU_UNIQUE);
+	      flags |= BSF_WEAK;
+	    }
+
+	  sym->flags = flags;
 	  to[dst_count++] = sym;
 	}
     }
