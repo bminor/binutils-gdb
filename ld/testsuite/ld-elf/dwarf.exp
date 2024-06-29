@@ -50,7 +50,7 @@ set build_tests {
    "-s -shared" "-fPIC -g -feliminate-dwarf2-dups"
    {dwarf1.c} {} "libdwarf1.so"}
   {"DWARF parse during linker error"
-   "" "-fno-toplevel-reorder"
+   "" "-g -fno-toplevel-reorder"
    {dwarf2a.c dwarf2b.c} {{error_output "dwarf2.err"}} "dwarf2.x"}
 }
 
