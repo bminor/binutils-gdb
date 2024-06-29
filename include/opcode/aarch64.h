@@ -1392,6 +1392,27 @@ extern const aarch64_opcode aarch64_opcode_table[];
 #define F_VG_REQ (1ULL << 36)
 /* Next bit is 37.  */
 
+/* 4-bit flag field to indicate subclass of instructions.
+   Note the overlap between the set of subclass flags in each logical category
+   (F_LDST_*, F_ARITH_*, F_BRANCH_* etc.);  The usage of flags as
+   iclass-specific enums is intentional.  */
+#define F_SUBCLASS (15ULL << 36)
+
+#define F_LDST_LOAD (1ULL << 36)
+#define F_LDST_STORE (2ULL << 36)
+/* Subclasses to denote add, sub and mov insns.  */
+#define F_ARITH_ADD (1ULL << 36)
+#define F_ARITH_SUB (2ULL << 36)
+#define F_ARITH_MOV (3ULL << 36)
+/* Subclasses to denote call and ret insns.  */
+#define F_BRANCH_CALL (1ULL << 36)
+#define F_BRANCH_RET (2ULL << 36)
+/* Subclass to denote that only tag update is involved.  */
+#define F_DP_TAG_ONLY (1ULL << 36)
+
+#define F_SUBCLASS_OTHER (F_SUBCLASS)
+/* Next bit is 40.  */
+
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
 #define C_SCAN_MOVPRFX (1U << 0)
@@ -1427,6 +1448,16 @@ static inline bool
 pseudo_opcode_p (const aarch64_opcode *opcode)
 {
   return (opcode->flags & F_PSEUDO) != 0lu;
+}
+
+/* Whether the opcode has the specific subclass flag.
+   N.B. The overlap between F_LDST_*, F_ARITH_*, and F_BRANCH_* etc. subclass
+   flags means that the callers of this function have the responsibility of
+   checking for the flags appropriate for the specific iclass.  */
+static inline bool
+aarch64_opcode_subclass_p (const aarch64_opcode* opcode, uint64_t flag)
+{
+  return ((opcode->flags & F_SUBCLASS) == flag);
 }
 
 /* Deal with two possible scenarios: If F_OP_PAIR_OPT not set, as is the case
