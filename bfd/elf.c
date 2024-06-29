@@ -622,6 +622,7 @@ process_sht_group_entries (bfd *abfd,
     {
       unsigned int idx;
       Elf_Internal_Shdr *shdr;
+      asection *elt;
 
       p -= 4;
       idx = H_GET_32 (abfd, p);
@@ -632,67 +633,68 @@ process_sht_group_entries (bfd *abfd,
 	      |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 	  break;
 	}
-      if (idx < elf_numsections (abfd))
-	shdr = elf_elfsections (abfd)[idx];
 
-      if (idx >= elf_numsections (abfd)
-	  || shdr->sh_type == SHT_GROUP
-	  || (shdr->bfd_section != NULL
-	      && elf_next_in_group (shdr->bfd_section) != NULL))
+      if (idx == 0
+	  || idx >= elf_numsections (abfd)
+	  || (shdr = elf_elfsections (abfd)[idx])->sh_type == SHT_GROUP
+	  || ((elt = shdr->bfd_section) != NULL
+	      && elf_sec_group (elt) != NULL
+	      && elf_sec_group (elt) != ghdr->bfd_section))
 	{
 	  _bfd_error_handler
-	    (_("%pB: invalid entry in SHT_GROUP section [%u]"), abfd, gidx);
+	    (_("%pB: invalid entry (%#x) in group [%u]"),
+	     abfd, idx, gidx);
+	  continue;
+	}
+
+      /* PR binutils/23199: According to the ELF gABI all sections in
+	 a group must be marked with SHF_GROUP, but some tools
+	 generate broken objects.  Fix them up here.  */
+      shdr->sh_flags |= SHF_GROUP;
+
+      if (elt == NULL)
+	{
+	  if (shdr->sh_type != SHT_RELA && shdr->sh_type != SHT_REL)
+	    {
+	      const char *name = bfd_elf_string_from_elf_section
+		(abfd, elf_elfheader (abfd)->e_shstrndx, shdr->sh_name);
+
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB: unexpected type (%#x) section `%s' in group [%u]"),
+		 abfd, shdr->sh_type, name, gidx);
+	    }
+	  continue;
+	}
+
+      /* Don't try to add a section to elf_next_in_group list twice.  */
+      if (elf_sec_group (elt) != NULL)
+	continue;
+
+      if (last_elt == NULL)
+	{
+	  /* Start a circular list with one element.
+	     It will be in reverse order to match what gas does.  */
+	  elf_next_in_group (elt) = elt;
+	  /* Point the group section to it.  */
+	  elf_next_in_group (ghdr->bfd_section) = elt;
+	  gname = group_signature (abfd, ghdr);
+	  if (gname == NULL)
+	    {
+	      free (contents);
+	      return false;
+	    }
 	}
       else
 	{
-	  /* PR binutils/23199: All sections in a section group should
-	     be marked with SHF_GROUP.  But some tools generate broken
-	     objects without SHF_GROUP.  Fix them up here.  */
-	  shdr->sh_flags |= SHF_GROUP;
-
-	  asection *elt = shdr->bfd_section;
-	  if (elt != NULL)
-	    {
-	      if (last_elt == NULL)
-		{
-		  /* Start a circular list with one element.
-		     It will be in reverse order to match what gas does.  */
-		  elf_next_in_group (elt) = elt;
-		  /* Point the group section to it.  */
-		  elf_next_in_group (ghdr->bfd_section) = elt;
-		  gname = group_signature (abfd, ghdr);
-		  if (gname == NULL)
-		    {
-		      free (contents);
-		      return false;
-		    }
-		}
-	      else
-		{
-		  elf_next_in_group (elt) = elf_next_in_group (last_elt);
-		  elf_next_in_group (last_elt) = elt;
-		}
-	      last_elt = elt;
-	      elf_group_name (elt) = gname;
-	      elf_sec_group (elt) = ghdr->bfd_section;
-	    }
-	  else if (shdr->sh_type != SHT_RELA
-		   && shdr->sh_type != SHT_REL)
-	    {
-	      /* There are some unknown sections in the group.  */
-	      _bfd_error_handler
-		/* xgettext:c-format */
-		(_("%pB: unknown type [%#x] section `%s' in group [%u]"),
-		 abfd,
-		 shdr->sh_type,
-		 bfd_elf_string_from_elf_section (abfd,
-						  (elf_elfheader (abfd)
-						   ->e_shstrndx),
-						  shdr->sh_name),
-		 gidx);
-	    }
+	  elf_next_in_group (elt) = elf_next_in_group (last_elt);
+	  elf_next_in_group (last_elt) = elt;
 	}
+      last_elt = elt;
+      elf_group_name (elt) = gname;
+      elf_sec_group (elt) = ghdr->bfd_section;
     }
+
   free (contents);
   return true;
 }
