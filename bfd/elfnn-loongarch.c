@@ -1716,9 +1716,10 @@ local_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
    ifunc dynamic relocs.  */
 
 static bool
-elfNN_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+elfNN_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
+				struct bfd_link_info *info,
+				bool ref_local)
 {
-  struct bfd_link_info *info;
   /* An example of a bfd_link_hash_indirect symbol is versioned
      symbol. For example: __gxx_personality_v0(bfd_link_hash_indirect)
      -> __gxx_personality_v0(bfd_link_hash_defined)
@@ -1734,20 +1735,18 @@ elfNN_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  info = (struct bfd_link_info *) inf;
-
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
   if (h->type == STT_GNU_IFUNC && h->def_regular)
     {
-      if (SYMBOL_REFERENCES_LOCAL (info, h))
+      if (ref_local && SYMBOL_REFERENCES_LOCAL (info, h))
 	return local_allocate_ifunc_dyn_relocs (info, h,
 						&h->dyn_relocs,
 						PLT_ENTRY_SIZE,
 						PLT_HEADER_SIZE,
 						GOT_ENTRY_SIZE,
 						false);
-      else
+      else if (!ref_local && !SYMBOL_REFERENCES_LOCAL (info, h))
 	return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 						   &h->dyn_relocs,
 						   PLT_ENTRY_SIZE,
@@ -1758,6 +1757,23 @@ elfNN_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   return true;
 }
+
+static bool
+elfNN_allocate_ifunc_dynrelocs_ref_local (struct elf_link_hash_entry *h,
+					  void *info)
+{
+  return elfNN_allocate_ifunc_dynrelocs (h, (struct bfd_link_info *) info,
+					 true);
+}
+
+static bool
+elfNN_allocate_ifunc_dynrelocs_ref_global (struct elf_link_hash_entry *h,
+					   void *info)
+{
+  return elfNN_allocate_ifunc_dynrelocs (h, (struct bfd_link_info *) info,
+					 false);
+}
+
 
 /* Allocate space in .plt, .got and associated reloc sections for
    ifunc dynamic relocs.  */
@@ -1774,7 +1790,7 @@ elfNN_allocate_local_ifunc_dynrelocs (void **slot, void *inf)
       || h->root.type != bfd_link_hash_defined)
     abort ();
 
-  return elfNN_allocate_ifunc_dynrelocs (h, inf);
+  return elfNN_allocate_ifunc_dynrelocs_ref_local (h, inf);
 }
 
 /* Set DF_TEXTREL if we find any dynamic relocs that apply to
@@ -1934,11 +1950,48 @@ loongarch_elf_late_size_sections (bfd *output_bfd,
      sym dynamic relocs.  */
   elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, info);
 
-  /* Allocate global ifunc sym .plt and .got entries, and space for global
-     ifunc sym dynamic relocs.  */
-  elf_link_hash_traverse (&htab->elf, elfNN_allocate_ifunc_dynrelocs, info);
+  /* Allocate global ifunc sym .plt and .got entries, and space for
+     *preemptible* ifunc sym dynamic relocs.  Note that we must do it
+     for *all* preemptible ifunc (including local ifuncs and STV_HIDDEN
+     ifuncs) before doing it for any non-preemptible ifunc symbol:
+     assuming we are not so careful, when we link a shared library the
+     correlation of .plt and .rela.plt might look like:
 
-  /* Allocate .plt and .got entries, and space for local ifunc symbols.  */
+				idx in .plt	idx in .rela.plt
+	ext_func1@plt		0		0
+	ext_func2@plt		1		1
+	ext_func3@plt		2		2
+	hidden_ifunc1@plt	3		None: it's in .rela.got
+	hidden_ifunc2@plt	4		None: it's in .rela.got
+	normal_ifunc1@plt	5	!=	3
+	normal_ifunc2@plt	6	!=	4
+	local_ifunc@plt		7		None: it's in .rela.got
+
+     Now oops the indices for normal_ifunc{1,2} in .rela.plt were different
+     from the indices in .plt :(.  This would break finish_dynamic_symbol
+     which assumes the index in .rela.plt matches the index in .plt.
+
+     So let's be careful and make it correct:
+
+				idx in .plt	idx in .rela.plt
+	ext_func1@plt		0		0
+	ext_func2@plt		1		1
+	ext_func3@plt		2		2
+	normal_ifunc1@plt	3		3
+	normal_ifunc2@plt	4		4
+	hidden_ifunc1@plt	5		None: it's in .rela.got
+	hidden_ifunc2@plt	6		None: it's in .rela.got
+	local_ifunc@plt		7		None: it's in .rela.got
+
+     Now normal_ifuncs first.  */
+  elf_link_hash_traverse (&htab->elf,
+			  elfNN_allocate_ifunc_dynrelocs_ref_global, info);
+
+  /* Next hidden_ifuncs follows.  */
+  elf_link_hash_traverse (&htab->elf,
+			  elfNN_allocate_ifunc_dynrelocs_ref_local, info);
+
+  /* Finally local_ifuncs.  */
   htab_traverse (htab->loc_hash_table,
 		 elfNN_allocate_local_ifunc_dynrelocs, info);
 
