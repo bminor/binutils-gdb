@@ -1036,8 +1036,32 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  only_need_pcrel = 1;
 	  break;
 
-	case R_LARCH_JUMP_SLOT:
 	case R_LARCH_32:
+	  if (ARCH_SIZE > 32
+	      && bfd_link_pic (info)
+	      && (sec->flags & SEC_ALLOC) != 0)
+	    {
+	      bool is_abs_symbol = false;
+
+	      if (r_symndx < symtab_hdr->sh_info)
+		is_abs_symbol = isym->st_shndx == SHN_ABS;
+	      else
+		is_abs_symbol = bfd_is_abs_symbol (&h->root);
+
+	      if (!is_abs_symbol)
+		{
+		  _bfd_error_handler
+		    (_("%pB: relocation R_LARCH_32 against non-absolute "
+		       "symbol `%s' cannot be used in ELFCLASS64 when "
+		       "making a shared object or PIE"),
+		     abfd, h ? h->root.root.string : "a local symbol");
+		  bfd_set_error (bfd_error_bad_value);
+		  return false;
+		}
+	    }
+
+	  /* Fall through.  */
+	case R_LARCH_JUMP_SLOT:
 	case R_LARCH_64:
 
 	  need_dynreloc = 1;
@@ -2859,8 +2883,10 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  outrel.r_addend = relocation + rel->r_addend;
 		}
 
-	      /* No alloc space of func allocate_dynrelocs.  */
+	      /* No alloc space of func allocate_dynrelocs.
+		 No alloc space of invalid R_LARCH_32 in ELFCLASS64.  */
 	      if (unresolved_reloc
+		  && (ARCH_SIZE == 32 || r_type != R_LARCH_32)
 		  && !(h && (h->is_weakalias || !h->dyn_relocs)))
 		loongarch_elf_append_rela (output_bfd, sreloc, &outrel);
 	    }

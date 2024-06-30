@@ -132,6 +132,7 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "reloc_le_with_shared"
     run_dump_test "reloc_ler_with_shared"
     run_dump_test "reloc_abs_with_shared"
+    run_dump_test "r_larch_32_elf64"
   }
 
   if [check_pie_support] {
