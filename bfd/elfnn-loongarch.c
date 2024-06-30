@@ -181,6 +181,44 @@ struct loongarch_elf_link_hash_table
     } \
     while (0)
 
+/* TL;DR always use it in this file instead when you want to type
+   SYMBOL_REFERENCES_LOCAL.
+
+   It's like SYMBOL_REFERENCES_LOCAL, but it returns true for local
+   protected functions.  It happens to be same as SYMBOL_CALLS_LOCAL but
+   let's not reuse SYMBOL_CALLS_LOCAL or "CALLS" may puzzle people.
+
+   We do generate a PLT entry when someone attempts to la.pcrel an external
+   function.  But we never really implemented "R_LARCH_COPY", thus we've
+   never supported la.pcrel an external symbol unless the loaded address is
+   only used for locating a function to be called.  Thus the PLT entry is
+   a normal PLT entry, not intended to be a so-called "canonical PLT entry"
+   on the ports supporting copy relocation.  So attempting to la.pcrel an
+   external function will just break pointer equality, even it's a
+   STV_DEFAULT function:
+
+   $ cat t.c
+   #include <assert.h>
+   void check(void *p) {assert(p == check);}
+   $ cat main.c
+   extern void check(void *);
+   int main(void) { check(check); }
+   $ cc t.c -fPIC -shared -o t.so
+   $ cc main.c -mdirect-extern-access t.so -Wl,-rpath=. -fpie -pie
+   $ ./a.out
+   a.out: t.c:2: check: Assertion `p == check' failed.
+   Aborted
+
+   Thus handling STV_PROTECTED function specially just fixes nothing:
+   adding -fvisibility=protected compiling t.c will not magically fix
+   the inequality.  The only possible and correct fix is not to use
+   -mdirect-extern-access.
+
+   So we should remove this special handling, because it's only an
+   unsuccessful workaround for invalid code and it's penalizing valid
+   code.  */
+#define LARCH_REF_LOCAL(info, h) \
+  (_bfd_elf_symbol_refs_local_p ((h), (info), true))
 
 /* Generate a PLT header.  */
 
@@ -712,7 +750,7 @@ loongarch_tls_transition_without_check (struct bfd_link_info *info,
 					struct elf_link_hash_entry *h)
 {
   bool local_exec = bfd_link_executable (info)
-		    && SYMBOL_REFERENCES_LOCAL (info, h);
+		    && LARCH_REF_LOCAL (info, h);
 
   switch (r_type)
     {
@@ -1221,7 +1259,7 @@ loongarch_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       if (h->plt.refcount <= 0
 	  || (h->type != STT_GNU_IFUNC
-	      && (SYMBOL_REFERENCES_LOCAL (info, h)
+	      && (LARCH_REF_LOCAL (info, h)
 		  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 		      && h->root.type == bfd_link_hash_undefweak))))
 	{
@@ -1739,14 +1777,14 @@ elfNN_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
      here if it is defined and referenced in a non-shared object.  */
   if (h->type == STT_GNU_IFUNC && h->def_regular)
     {
-      if (ref_local && SYMBOL_REFERENCES_LOCAL (info, h))
+      if (ref_local && LARCH_REF_LOCAL (info, h))
 	return local_allocate_ifunc_dyn_relocs (info, h,
 						&h->dyn_relocs,
 						PLT_ENTRY_SIZE,
 						PLT_HEADER_SIZE,
 						GOT_ENTRY_SIZE,
 						false);
-      else if (!ref_local && !SYMBOL_REFERENCES_LOCAL (info, h))
+      else if (!ref_local && !LARCH_REF_LOCAL (info, h))
 	return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 						   &h->dyn_relocs,
 						   PLT_ENTRY_SIZE,
@@ -1773,7 +1811,6 @@ elfNN_allocate_ifunc_dynrelocs_ref_global (struct elf_link_hash_entry *h,
   return elfNN_allocate_ifunc_dynrelocs (h, (struct bfd_link_info *) info,
 					 false);
 }
-
 
 /* Allocate space in .plt, .got and associated reloc sections for
    ifunc dynamic relocs.  */
@@ -2687,7 +2724,6 @@ tlsoff (struct bfd_link_info *info, bfd_vma addr)
   return addr - elf_hash_table (info)->tls_sec->vma;
 }
 
-
 static int
 loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				bfd *input_bfd, asection *input_section,
@@ -2813,7 +2849,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    {
 	      defined_local = !unresolved_reloc && !ignored;
 	      resolved_local =
-		defined_local && SYMBOL_REFERENCES_LOCAL (info, h);
+		defined_local && LARCH_REF_LOCAL (info, h);
 	      resolved_dynly = !resolved_local;
 	      resolved_to_const = !resolved_local && !resolved_dynly;
 	    }
@@ -2902,7 +2938,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      outrel.r_addend = 0;
 		    }
 
-		  if (SYMBOL_REFERENCES_LOCAL (info, h))
+		  if (LARCH_REF_LOCAL (info, h))
 		    {
 
 		      if (htab->elf.splt != NULL)
@@ -3252,7 +3288,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (is_dyn,
 							bfd_link_pic (info), h)
 		      && ((bfd_link_pic (info)
-			   && SYMBOL_REFERENCES_LOCAL (info, h))))
+			   && LARCH_REF_LOCAL (info, h))))
 		    {
 		      /* This is actually a static link, or it is a
 			 -Bsymbolic link and the symbol is defined
@@ -3397,7 +3433,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		asection *srel = htab->elf.srelgot;
 		bfd_vma tls_block_off = 0;
 
-		if (SYMBOL_REFERENCES_LOCAL (info, h))
+		if (LARCH_REF_LOCAL (info, h))
 		  {
 		    BFD_ASSERT (elf_hash_table (info)->tls_sec);
 		    tls_block_off = relocation
@@ -3408,7 +3444,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  {
 		    rela.r_offset = sec_addr (got) + got_off;
 		    rela.r_addend = 0;
-		    if (SYMBOL_REFERENCES_LOCAL (info, h))
+		    if (LARCH_REF_LOCAL (info, h))
 		      {
 			/* Local sym, used in exec, set module id 1.  */
 			if (bfd_link_executable (info))
@@ -3441,7 +3477,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		if (tls_type & GOT_TLS_IE)
 		  {
 		    rela.r_offset = sec_addr (got) + got_off + ie_off;
-		    if (SYMBOL_REFERENCES_LOCAL (info, h))
+		    if (LARCH_REF_LOCAL (info, h))
 		      {
 			/* Local sym, used in exec, set module id 1.  */
 			if (!bfd_link_executable (info))
@@ -3643,7 +3679,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 							    bfd_link_pic (info),
 							    h)
 			  && bfd_link_pic (info)
-			  && SYMBOL_REFERENCES_LOCAL (info, h))
+			  && LARCH_REF_LOCAL (info, h))
 			{
 			  Elf_Internal_Rela rela;
 			  rela.r_offset = sec_addr (got) + got_off;
@@ -4184,7 +4220,7 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 {
   unsigned long insn;
   bool local_exec = bfd_link_executable (info)
-		      && SYMBOL_REFERENCES_LOCAL (info, h);
+		      && LARCH_REF_LOCAL (info, h);
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
   unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
@@ -4896,7 +4932,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  else
 	    continue;
 
-	  if (h && SYMBOL_REFERENCES_LOCAL (info, h))
+	  if (h && LARCH_REF_LOCAL (info, h))
 	    local_got = true;
 	  symtype = h->type;
 	}
@@ -5033,12 +5069,12 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
       if (htab->elf.splt)
 	{
 	  BFD_ASSERT ((h->type == STT_GNU_IFUNC
-		       && SYMBOL_REFERENCES_LOCAL (info, h))
+		       && LARCH_REF_LOCAL (info, h))
 		      || h->dynindx != -1);
 
 	  plt = htab->elf.splt;
 	  gotplt = htab->elf.sgotplt;
-	  if (h->type == STT_GNU_IFUNC && SYMBOL_REFERENCES_LOCAL (info, h))
+	  if (h->type == STT_GNU_IFUNC && LARCH_REF_LOCAL (info, h))
 	    relplt = htab->elf.srelgot;
 	  else
 	    relplt = htab->elf.srelplt;
@@ -5049,7 +5085,7 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
       else /* if (htab->elf.iplt) */
 	{
 	  BFD_ASSERT (h->type == STT_GNU_IFUNC
-		      && SYMBOL_REFERENCES_LOCAL (info, h));
+		      && LARCH_REF_LOCAL (info, h));
 
 	  plt = htab->elf.iplt;
 	  gotplt = htab->elf.igotplt;
@@ -5137,7 +5173,7 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 	      if (htab->elf.splt == NULL)
 		srela = htab->elf.irelplt;
 
-	      if (SYMBOL_REFERENCES_LOCAL (info, h))
+	      if (LARCH_REF_LOCAL (info, h))
 		{
 		  asection *sec = h->root.u.def.section;
 		  rela.r_info = ELFNN_R_INFO (0, R_LARCH_IRELATIVE);
@@ -5174,7 +5210,7 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 	      return true;
 	    }
 	}
-      else if (bfd_link_pic (info) && SYMBOL_REFERENCES_LOCAL (info, h))
+      else if (bfd_link_pic (info) && LARCH_REF_LOCAL (info, h))
 	{
 	  asection *sec = h->root.u.def.section;
 	  rela.r_info = ELFNN_R_INFO (0, R_LARCH_RELATIVE);
