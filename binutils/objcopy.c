@@ -1743,6 +1743,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
 	  else if (!undefined
 		   && (flags & BSF_LOCAL)
+		   && !(flags & BSF_FILE)
 		   && is_specified_symbol (name, globalize_specific_htab))
 	    {
 	      flags &= ~BSF_LOCAL;
