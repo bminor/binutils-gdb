@@ -84,6 +84,12 @@ struct _bfd_loongarch_elf_obj_tdata
    && elf_tdata (bfd) != NULL						\
    && elf_object_id (bfd) == LARCH_ELF_DATA)
 
+struct relr_entry
+{
+  asection *sec;
+  bfd_vma off;
+};
+
 struct loongarch_elf_link_hash_table
 {
   struct elf_link_hash_table elf;
@@ -104,7 +110,50 @@ struct loongarch_elf_link_hash_table
   /* The data segment phase, don't relax the section
      when it is exp_seg_relro_adjust.  */
   int *data_segment_phase;
+
+  /* Array of relative relocs to be emitted in DT_RELR format.  */
+  bfd_size_type relr_alloc;
+  bfd_size_type relr_count;
+  struct relr_entry *relr;
+
+  /* Sorted output addresses of above relative relocs.  */
+  bfd_vma *relr_sorted;
+
+  /* Layout recomputation count.  */
+  bfd_size_type relr_layout_iter;
 };
+
+struct loongarch_elf_section_data
+{
+  struct bfd_elf_section_data elf;
+
+  /* &htab->relr[i] where i is the smallest number s.t.
+     elf_section_data (htab->relr[i].sec) == &elf.
+     NULL if there exists no such i.  */
+  struct relr_entry *relr;
+};
+
+/* We need an additional field in elf_section_data to handle complex
+   interactions between DT_RELR and relaxation.  */
+static bool
+loongarch_elf_new_section_hook (bfd *abfd, asection *sec)
+{
+  if (!sec->used_by_bfd)
+    {
+      struct loongarch_elf_section_data *sdata;
+      size_t amt = sizeof (*sdata);
+
+      sdata = bfd_zalloc (abfd, amt);
+      if (!sdata)
+	return false;
+      sec->used_by_bfd = sdata;
+    }
+
+  return _bfd_elf_new_section_hook (abfd, sec);
+}
+
+#define loongarch_elf_section_data(x) \
+  ((struct loongarch_elf_section_data *) elf_section_data (x))
 
 /* Get the LoongArch ELF linker hash table from a link_info structure.  */
 #define loongarch_elf_hash_table(p)					\
@@ -927,6 +976,20 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (rel + 1 != relocs + sec->reloc_count
 	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX)
 	r_type = loongarch_tls_transition (abfd, info, h, r_symndx, r_type);
+
+      /* I don't want to spend time supporting DT_RELR with old object
+	 files doing stack-based relocs.  */
+      if (info->enable_dt_relr
+	  && r_type >= R_LARCH_SOP_PUSH_PCREL
+	  && r_type <= R_LARCH_SOP_POP_32_U)
+	{
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB: stack based reloc type (%u) is not "
+				"supported with -z pack-relative-relocs"),
+			      abfd, r_type);
+	  return false;
+	}
+
       switch (r_type)
 	{
 	case R_LARCH_GOT_PC_HI20:
@@ -1141,6 +1204,20 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_LARCH_GNU_VTENTRY:
 	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
 	    return false;
+	  break;
+
+	case R_LARCH_ALIGN:
+	  /* Check against irrational R_LARCH_ALIGN relocs which may cause
+	     removing an odd number of bytes and disrupt DT_RELR.  */
+	  if (rel->r_offset % 4 != 0)
+	    {
+	      /* xgettext:c-format */
+	      _bfd_error_handler (
+		_("%pB: R_LARCH_ALIGN with offset %" PRId64 " not aligned "
+		  "to instruction boundary"),
+		abfd, (uint64_t) rel->r_offset);
+	      return false;
+	    }
 	  break;
 
 	default:
@@ -1858,6 +1935,343 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
 }
 
 static bool
+record_relr (struct loongarch_elf_link_hash_table *htab, asection *sec,
+	     bfd_vma off, asection *sreloc)
+{
+  struct relr_entry **sec_relr = &loongarch_elf_section_data (sec)->relr;
+
+  /* Undo the relocation section size accounting.  */
+  BFD_ASSERT (sreloc->size >= sizeof (ElfNN_External_Rela));
+  sreloc->size -= sizeof (ElfNN_External_Rela);
+
+  BFD_ASSERT (off % 2 == 0 && sec->alignment_power > 0);
+  if (htab->relr_count >= htab->relr_alloc)
+    {
+      if (htab->relr_alloc == 0)
+	htab->relr_alloc = 4096;
+      else
+	htab->relr_alloc *= 2;
+
+      htab->relr = bfd_realloc (htab->relr,
+				htab->relr_alloc * sizeof (*htab->relr));
+      if (!htab->relr)
+	return false;
+    }
+  htab->relr[htab->relr_count].sec = sec;
+  htab->relr[htab->relr_count].off = off;
+  if (*sec_relr == NULL)
+    *sec_relr = &htab->relr[htab->relr_count];
+  htab->relr_count++;
+  return true;
+}
+
+static bool
+record_relr_local_got_relocs (bfd *input_bfd, struct bfd_link_info *info)
+{
+  bfd_vma *local_got_offsets = elf_local_got_offsets (input_bfd);
+  char *local_tls_type = _bfd_loongarch_elf_local_got_tls_type (input_bfd);
+  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (input_bfd);
+  struct loongarch_elf_link_hash_table *htab =
+    loongarch_elf_hash_table (info);
+
+  if (!local_got_offsets || !local_tls_type || !bfd_link_pic (info))
+    return true;
+
+  for (unsigned i = 0; i < symtab_hdr->sh_info; i++)
+    {
+      bfd_vma off = local_got_offsets[i];
+
+      /* FIXME: If the local symbol is in SHN_ABS then emitting
+	 a relative relocation is not correct, but it seems to be wrong
+	 in loongarch_elf_relocate_section too.  */
+      if (local_tls_type[i] == GOT_NORMAL
+	  && !record_relr (htab, htab->elf.sgot, off, htab->elf.srelgot))
+	return false;
+    }
+
+  return true;
+}
+
+static bool
+record_relr_dyn_got_relocs (struct elf_link_hash_entry *h, void *inf)
+{
+  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+  struct loongarch_elf_link_hash_table *htab =
+    loongarch_elf_hash_table (info);
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return true;
+  if (h->type == STT_GNU_IFUNC && h->def_regular)
+    return true;
+  if (h->got.refcount <= 0)
+    return true;
+  if (loongarch_elf_hash_entry (h)->tls_type
+      & (GOT_TLS_GD | GOT_TLS_IE | GOT_TLS_GDESC))
+    return true;
+  if (!bfd_link_pic (info))
+    return true;
+
+  /* On LoongArch a GOT entry for undefined weak symbol is never relocated
+     with R_LARCH_RELATIVE: we don't have -z dynamic-undefined-weak, thus
+     the GOT entry is either const 0 (if the symbol is LARCH_REF_LOCAL) or
+     relocated with R_LARCH_NN (otherwise).  */
+  if (h->root.type == bfd_link_hash_undefweak)
+    return true;
+
+  if (!LARCH_REF_LOCAL (info, h))
+    return true;
+  if (bfd_is_abs_symbol (&h->root))
+    return true;
+
+  if (!record_relr (htab, htab->elf.sgot, h->got.offset,
+		    htab->elf.srelgot))
+    return false;
+
+  return true;
+}
+
+static bool
+record_relr_non_got_relocs (bfd *input_bfd, struct bfd_link_info *info,
+			    asection *sec)
+{
+  asection *sreloc;
+  struct loongarch_elf_link_hash_table *htab;
+  Elf_Internal_Rela *relocs, *rel, *rel_end;
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+
+  if (!bfd_link_pic (info))
+    return true;
+  if (sec->reloc_count == 0)
+    return true;
+  if ((sec->flags & (SEC_RELOC | SEC_ALLOC | SEC_DEBUGGING))
+       != (SEC_RELOC | SEC_ALLOC))
+    return true;
+  if (sec->alignment_power == 0)
+    return true;
+  if (discarded_section (sec))
+    return true;
+
+  sreloc = elf_section_data (sec)->sreloc;
+  if (sreloc == NULL)
+    return true;
+
+  htab = loongarch_elf_hash_table (info);
+  symtab_hdr = &elf_symtab_hdr (input_bfd);
+  sym_hashes = elf_sym_hashes (input_bfd);
+  relocs = _bfd_elf_link_info_read_relocs (input_bfd, info, sec, NULL,
+					   NULL, info->keep_memory);
+  BFD_ASSERT (relocs != NULL);
+  rel_end = relocs + sec->reloc_count;
+  for (rel = relocs; rel < rel_end; rel++)
+    {
+      unsigned r_symndx = ELFNN_R_SYM (rel->r_info);
+      unsigned int r_type = ELFNN_R_TYPE (rel->r_info);
+      struct elf_link_hash_entry *h = NULL;
+      asection *def_sec = NULL;
+
+      if ((r_type != R_LARCH_64 && r_type != R_LARCH_32)
+	  || rel->r_offset % 2 != 0)
+	continue;
+
+      /* The logical below must match loongarch_elf_relocate_section.  */
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  /* A local symbol.  */
+	  Elf_Internal_Sym *isym;
+	  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache, input_bfd,
+					r_symndx);
+	  BFD_ASSERT(isym != NULL);
+
+	  /* Local STT_GNU_IFUNC symbol uses R_LARCH_IRELATIVE for
+	     R_LARCH_NN, not R_LARCH_RELATIVE.  */
+	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+	    continue;
+	  def_sec = bfd_section_from_elf_index (input_bfd, isym->st_shndx);
+	}
+      else
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* Filter out symbols that cannot have a relative reloc.  */
+	  if (h->dyn_relocs == NULL)
+	    continue;
+	  if (bfd_is_abs_symbol (&h->root))
+	    continue;
+	  if (h->type == STT_GNU_IFUNC)
+	    continue;
+
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    def_sec = h->root.u.def.section;
+
+	  /* On LoongArch an R_LARCH_NN against undefined weak symbol
+	     is never converted to R_LARCH_RELATIVE: we don't have
+	     -z dynamic-undefined-weak, thus the reloc is either removed
+	     (if the symbol is LARCH_REF_LOCAL) or kept (otherwise).  */
+	  if (h->root.type == bfd_link_hash_undefweak)
+	    continue;
+
+	  if (!LARCH_REF_LOCAL (info, h))
+	    continue;
+	}
+
+      if (!def_sec || discarded_section (def_sec))
+	continue;
+
+      if (!record_relr (htab, sec, rel->r_offset, sreloc))
+	return false;
+    }
+
+  return true;
+}
+
+static int
+cmp_relr_addr (const void *p, const void *q)
+{
+  const bfd_vma *a = p, *b = q;
+  return (*a > *b) - (*a < *b);
+}
+
+static bool
+sort_relr (struct bfd_link_info *info,
+	   struct loongarch_elf_link_hash_table *htab)
+{
+  if (htab->relr_count == 0)
+    return true;
+
+  bfd_vma *addr = htab->relr_sorted;
+  if (!addr)
+    {
+      addr = bfd_malloc (htab->relr_count * sizeof (*addr));
+      if (!addr)
+	return false;
+      htab->relr_sorted = addr;
+    }
+
+  for (bfd_size_type i = 0; i < htab->relr_count; i++)
+    {
+      bfd_vma off = _bfd_elf_section_offset (info->output_bfd, info,
+					     htab->relr[i].sec,
+					     htab->relr[i].off);
+      addr[i] = htab->relr[i].sec->output_section->vma
+		+ htab->relr[i].sec->output_offset + off;
+    }
+  qsort(addr, htab->relr_count, sizeof (*addr), cmp_relr_addr);
+  return true;
+}
+
+static bool
+loongarch_elf_size_relative_relocs (struct bfd_link_info *info,
+				    bool *need_layout)
+{
+  struct loongarch_elf_link_hash_table *htab =
+    loongarch_elf_hash_table (info);
+  asection *srelrdyn = htab->elf.srelrdyn;
+
+  *need_layout = false;
+
+  if (!sort_relr (info, htab))
+    return false;
+  bfd_vma *addr = htab->relr_sorted;
+
+  BFD_ASSERT (srelrdyn != NULL);
+  bfd_size_type oldsize = srelrdyn->size;
+  srelrdyn->size = 0;
+  for (bfd_size_type i = 0; i < htab->relr_count; )
+    {
+      bfd_vma base = addr[i];
+      i++;
+      srelrdyn->size += NN / 8;
+      base += NN / 8;
+      while (1)
+	{
+	  bfd_size_type start_i = i;
+	  while (i < htab->relr_count
+		 && addr[i] - base < (NN - 1) * (NN / 8)
+		 && (addr[i] - base) % (NN / 8) == 0)
+	    i++;
+	  if (i == start_i)
+	    break;
+	  srelrdyn->size += NN / 8;
+	  base += (NN - 1) * (NN / 8);
+	}
+    }
+  if (srelrdyn->size != oldsize)
+    {
+      *need_layout = true;
+      /* Stop after a few iterations in case the layout does not converge,
+	 but we can only stop when the size would shrink (and pad the
+	 spare space with 1.  */
+      if (htab->relr_layout_iter++ > 5 && srelrdyn->size < oldsize)
+	{
+	  srelrdyn->size = oldsize;
+	  *need_layout = false;
+	}
+    }
+  return true;
+}
+
+static bool
+loongarch_elf_finish_relative_relocs (struct bfd_link_info *info)
+{
+  struct loongarch_elf_link_hash_table *htab =
+    loongarch_elf_hash_table (info);
+  asection *srelrdyn = htab->elf.srelrdyn;
+  bfd *dynobj = htab->elf.dynobj;
+
+  if (!srelrdyn || srelrdyn->size == 0)
+    return true;
+
+  srelrdyn->contents = bfd_alloc (dynobj, srelrdyn->size);
+  if (!srelrdyn->contents)
+    return false;
+
+  bfd_vma *addr = htab->relr_sorted;
+  bfd_byte *loc = srelrdyn->contents;
+  for (bfd_size_type i = 0; i < htab->relr_count; )
+    {
+      bfd_vma base = addr[i];
+      i++;
+      bfd_put_NN (dynobj, base, loc);
+      loc += NN / 8;
+      base += NN / 8;
+      while (1)
+	{
+	  uintNN_t bits = 0;
+	  while (i < htab->relr_count)
+	    {
+	      bfd_vma delta = addr[i] - base;
+	      if (delta >= (NN - 1) * (NN / 8) || delta % (NN / 8) != 0)
+		break;
+	      bits |= (uintNN_t) 1 << (delta / (NN / 8));
+	      i++;
+	    }
+	  if (bits == 0)
+	    break;
+	  bfd_put_NN (dynobj, (bits << 1) | 1, loc);
+	  loc += NN / 8;
+	  base += (NN - 1) * (NN / 8);
+	}
+    }
+
+  free (addr);
+  htab->relr_sorted = NULL;
+
+  /* Pad any excess with 1's, a do-nothing encoding.  */
+  while (loc < srelrdyn->contents + srelrdyn->size)
+    {
+      bfd_put_NN (dynobj, 1, loc);
+      loc += NN / 8;
+    }
+
+  return true;
+}
+
+static bool
 loongarch_elf_late_size_sections (bfd *output_bfd,
 				  struct bfd_link_info *info)
 {
@@ -2037,6 +2451,24 @@ loongarch_elf_late_size_sections (bfd *output_bfd,
       && (htab->elf.splt == NULL || htab->elf.splt->size == 0))
     htab->elf.sgotplt->size = 0;
 
+  if (info->enable_dt_relr && !bfd_link_relocatable (info))
+    {
+      elf_link_hash_traverse (&htab->elf, record_relr_dyn_got_relocs, info);
+
+      for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
+	{
+	  if (!is_loongarch_elf (ibfd))
+	    continue;
+
+	  for (s = ibfd->sections; s != NULL; s = s->next)
+	    if (!record_relr_non_got_relocs (ibfd, info, s))
+	      return false;
+
+	  if (!record_relr_local_got_relocs (ibfd, info))
+	    return false;
+	}
+    }
+
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
@@ -2060,6 +2492,14 @@ loongarch_elf_late_size_sections (bfd *output_bfd,
 		 to copy relocs into the output file.  */
 	      s->reloc_count = 0;
 	    }
+	}
+      else if (s == htab->elf.srelrdyn && htab->relr_count == 0)
+	{
+	  /* Remove .relr.dyn based on relr_count, not size, since
+	     it is not sized yet.  */
+	  s->flags |= SEC_EXCLUDE;
+	  /* Allocate contents later.  */
+	  continue;
 	}
       else
 	{
@@ -2977,7 +3417,21 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      if (unresolved_reloc
 		  && (ARCH_SIZE == 32 || r_type != R_LARCH_32)
 		  && !(h && (h->is_weakalias || !h->dyn_relocs)))
-		loongarch_elf_append_rela (output_bfd, sreloc, &outrel);
+		{
+		  if (info->enable_dt_relr
+		      && (ELFNN_R_TYPE (outrel.r_info) == R_LARCH_RELATIVE)
+		      && input_section->alignment_power != 0
+		      && rel->r_offset % 2 == 0)
+		    /* Don't emit a relative relocation that is packed,
+		       only apply the addend (as if we are applying the
+		       original R_LARCH_NN reloc in a PDE).  */
+		    r = perform_relocation (rel, input_section, howto,
+					    relocation, input_bfd,
+					    contents);
+		  else
+		    loongarch_elf_append_rela (output_bfd, sreloc,
+					       &outrel);
+		}
 	    }
 
 	  relocation += rel->r_addend;
@@ -3701,7 +4155,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  got_off = local_got_offsets[r_symndx] & (~(bfd_vma)1);
 		  if ((local_got_offsets[r_symndx] & 1) == 0)
 		    {
-		      if (bfd_link_pic (info))
+		      if (bfd_link_pic (info) && !info->enable_dt_relr)
 			{
 			  Elf_Internal_Rela rela;
 			  rela.r_offset = sec_addr (got) + got_off;
@@ -4113,6 +4567,13 @@ loongarch_relax_delete_bytes (bfd *abfd,
   unsigned int sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
   struct bfd_elf_section_data *data = elf_section_data (sec);
   bfd_byte *contents = data->this_hdr.contents;
+  struct relr_entry *relr = loongarch_elf_section_data (sec)->relr;
+  struct loongarch_elf_link_hash_table *htab =
+    loongarch_elf_hash_table (link_info);
+  struct relr_entry *relr_end = NULL;
+
+  if (htab->relr_count)
+    relr_end = htab->relr + htab->relr_count;
 
   /* Actually delete the bytes.  */
   sec->size -= count;
@@ -4124,6 +4585,11 @@ loongarch_relax_delete_bytes (bfd *abfd,
   for (i = 0; i < sec->reloc_count; i++)
     if (data->relocs[i].r_offset > addr && data->relocs[i].r_offset < toaddr)
       data->relocs[i].r_offset -= count;
+
+  /* Likewise for relative relocs to be packed into .relr.  */
+  for (; relr && relr < relr_end && relr->sec == sec; relr++)
+    if (relr->off > addr && relr->off < toaddr)
+      relr->off -= count;
 
   /* Adjust the local symbols defined in this section.  */
   for (i = 0; i < symtab_hdr->sh_info; i++)
@@ -5213,9 +5679,18 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
       else if (bfd_link_pic (info) && LARCH_REF_LOCAL (info, h))
 	{
 	  asection *sec = h->root.u.def.section;
+	  bfd_vma linkaddr = h->root.u.def.value + sec->output_section->vma
+			     + sec->output_offset;
+
+	  /* Don't emit relative relocs if they are packed, but we need
+	     to write the addend (link-time addr) into the GOT then.  */
+	  if (info->enable_dt_relr)
+	    {
+	      bfd_put_NN (output_bfd, linkaddr, sgot->contents + off);
+	      goto skip_got_reloc;
+	    }
 	  rela.r_info = ELFNN_R_INFO (0, R_LARCH_RELATIVE);
-	  rela.r_addend = (h->root.u.def.value + sec->output_section->vma
-			   + sec->output_offset);
+	  rela.r_addend = linkaddr;
 	}
       else
 	{
@@ -5226,6 +5701,7 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       loongarch_elf_append_rela (output_bfd, srela, &rela);
     }
+skip_got_reloc:
 
   /* Mark some specially defined symbols as absolute.  */
   if (h == htab->elf.hdynamic || h == htab->elf.hgot || h == htab->elf.hplt)
@@ -5679,6 +6155,10 @@ elf_loongarch64_hash_symbol (struct elf_link_hash_entry *h)
 #define elf_backend_grok_psinfo loongarch_elf_grok_psinfo
 #define elf_backend_hash_symbol elf_loongarch64_hash_symbol
 #define bfd_elfNN_bfd_relax_section loongarch_elf_relax_section
+#define elf_backend_size_relative_relocs loongarch_elf_size_relative_relocs
+#define elf_backend_finish_relative_relocs \
+  loongarch_elf_finish_relative_relocs
+#define bfd_elfNN_new_section_hook loongarch_elf_new_section_hook
 
 #define elf_backend_dtrel_excludes_plt 1
 
