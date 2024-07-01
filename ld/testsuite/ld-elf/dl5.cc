@@ -35,8 +35,8 @@ int
 main (void)
 {
   A *bb = new A[10];
-  delete [] bb;
   foo (bb);
+  delete [] bb;
   bb = new (std::nothrow) A [10];
   foo (bb);
   delete [] bb;
