@@ -18,8 +18,12 @@ _start:
 
 	addq	%r8, foo@GOTTPOFF(%rip), %r16
 	addq	foo@GOTTPOFF(%rip), %rax, %r12
+	{nf} addq	%r8, foo@GOTTPOFF(%rip), %r16
+	{nf} addq	foo@GOTTPOFF(%rip), %rax, %r12
 
 	.intel_syntax noprefix
 
 	add	r16, QWORD PTR [rip + foo@GOTTPOFF], r8
 	add	r12, rax, QWORD PTR [rip + foo@GOTTPOFF]
+	{nf} add	r16, QWORD PTR [rip + foo@GOTTPOFF], r8
+	{nf} add	r12, rax, QWORD PTR [rip + foo@GOTTPOFF]
