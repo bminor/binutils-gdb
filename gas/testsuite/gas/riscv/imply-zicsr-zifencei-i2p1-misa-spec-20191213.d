@@ -1,4 +1,6 @@
-.*Assembler messages:
+#as: -march=rv32i -march-attr -misa-spec=20191213
+#source: imply-zicsr-zifencei.s
+#error: .*Assembler messages:
 .*Error: unrecognized opcode `csrr t0,ustatus', extension `zicsr' required
 .*Error: unrecognized opcode `csrwi ustatus,0x0', extension `zicsr' required
 .*Error: unrecognized opcode `csrsi ustatus,0x0', extension `zicsr' required
