@@ -111,20 +111,19 @@ class _ScopeReference(BaseReference):
         return symbol_value(self.var_list[idx], self.frame)
 
 
-# A _ScopeReference that prepends the most recent return value.  Note
-# that this object is only created if such a value actually exists.
+# A _ScopeReference that wraps the 'finish' value.  Note that this
+# object is only created if such a value actually exists.
 class _FinishScopeReference(_ScopeReference):
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, frame):
+        super().__init__("Return", "returnValue", frame, ())
 
     def child_count(self):
-        return super().child_count() + 1
+        return 1
 
     def fetch_one_child(self, idx):
-        if idx == 0:
-            global _last_return_value
-            return ("(return)", _last_return_value)
-        return super().fetch_one_child(idx - 1)
+        assert idx == 0
+        global _last_return_value
+        return ("(return)", _last_return_value)
 
 
 class _RegisterReference(_ScopeReference):
@@ -159,11 +158,11 @@ def scopes(*, frameId: int, **extra):
         # Make sure to handle the None case as well as the empty
         # iterator case.
         locs = tuple(frame.frame_locals() or ())
-        if has_return_value:
-            scopes.append(_FinishScopeReference("Locals", "locals", frame, locs))
-        elif locs:
+        if locs:
             scopes.append(_ScopeReference("Locals", "locals", frame, locs))
         scopes.append(_RegisterReference("Registers", frame))
+        if has_return_value:
+            scopes.append(_FinishScopeReference(frame))
         frame_to_scope[frameId] = scopes
         global_scope = get_global_scope(frame)
         if global_scope is not None:

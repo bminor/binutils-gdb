@@ -59,15 +59,21 @@ set scopes [dap_check_request_and_response "get scopes" scopes \
 		[format {o frameId [i %d]} $frame_id]]
 set scopes [dict get [lindex $scopes 0] body scopes]
 
-gdb_assert {[llength $scopes] == 2} "two scopes"
+gdb_assert {[llength $scopes] == 3} "three scopes"
 
-lassign $scopes scope reg_scope
+lassign $scopes scope reg_scope return_scope
 gdb_assert {[dict get $scope name] == "Locals"} "scope is locals"
 gdb_assert {[dict get $scope presentationHint] == "locals"} \
     "locals presentation hint"
-gdb_assert {[dict get $scope namedVariables] == 2} "two vars in scope"
+gdb_assert {[dict get $scope namedVariables] == 1} "one var in scope"
 
-set num [dict get $scope variablesReference]
+gdb_assert {[dict get $return_scope name] == "Return"} "scope is return"
+gdb_assert {[dict get $return_scope presentationHint] == "returnValue"} \
+    "returnValue presentation hint"
+gdb_assert {[dict get $return_scope namedVariables] == 1} \
+    "one var in return scope"
+
+set num [dict get $return_scope variablesReference]
 set refs [lindex [dap_check_request_and_response "fetch arguments" \
 		      "variables" \
 		      [format {o variablesReference [i %d]} $num]] \

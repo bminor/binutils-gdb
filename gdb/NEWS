@@ -8,6 +8,10 @@
   ** The "scopes" request will now return a scope holding global
      variables from the stack frame's compilation unit.
 
+  ** The "scopes" request will return a "returnValue" scope holding
+     the return value from the latest "stepOut" command, when
+     appropriate.
+
 * For ARM targets, the offset of the pc in the jmp_buf has been fixed to match
   glibc 2.20 and later.  This should only matter when not using libc probes.
   This may cause breakage when using an incompatible libc, like uclibc or
