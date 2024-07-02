@@ -730,13 +730,23 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 
 /* Find the completion word point for TEXT, emulating the algorithm
    readline uses to find the word point, using WORD_BREAK_CHARACTERS
-   as word break characters.  */
+   as word break characters.
+
+   The output argument *FOUND_ANY_QUOTING is set to true if the completion
+   word found either has an opening quote, or contains backslash escaping
+   within it.  Otherwise *FOUND_ANY_QUOTING is set to false.
+
+   The output argument *QC is set to the opening quote character for the
+   completion word that is found, or to the null character if there is no
+   opening quote.  */
 
 static const char *
 advance_to_completion_word (completion_tracker &tracker,
 			    const char *word_break_characters,
 			    const char *quote_characters,
-			    const char *text)
+			    const char *text,
+			    bool *found_any_quoting,
+			    int *qc)
 {
   gdb_rl_completion_word_info info;
 
@@ -746,7 +756,8 @@ advance_to_completion_word (completion_tracker &tracker,
 
   int delimiter;
   const char *start
-    = gdb_rl_find_completion_word (&info, nullptr, &delimiter, nullptr, text);
+    = gdb_rl_find_completion_word (&info, qc, &delimiter, found_any_quoting,
+				   text);
 
   tracker.advance_custom_word_point_by (start - text);
 
@@ -767,18 +778,54 @@ advance_to_expression_complete_word_point (completion_tracker &tracker,
 {
   const char *brk_chars = current_language->word_break_characters ();
   const char *quote_chars = gdb_completer_expression_quote_characters;
-  return advance_to_completion_word (tracker, brk_chars, quote_chars, text);
+  return advance_to_completion_word (tracker, brk_chars, quote_chars,
+				     text, nullptr, nullptr);
 }
 
 /* See completer.h.  */
 
 const char *
-advance_to_deprecated_filename_complete_word_point
+advance_to_filename_maybe_quoted_complete_word_point
   (completion_tracker &tracker, const char *text)
+{
+  const char *brk_chars = gdb_completer_file_name_break_characters;
+  const char *quote_chars = gdb_completer_file_name_quote_characters;
+  rl_char_is_quoted_p = gdb_completer_file_name_char_is_quoted;
+  bool found_any_quoting = false;
+  int qc;
+  const char *result
+    = advance_to_completion_word (tracker, brk_chars, quote_chars,
+				  text, &found_any_quoting, &qc);
+  rl_completion_found_quote = found_any_quoting ? 1 : 0;
+  if (qc != '\0')
+    {
+      tracker.set_quote_char (qc);
+      /* If we're completing for readline (not the 'complete' command) then
+	 we want readline to correctly detect the opening quote.  The set
+	 of quote characters will have been set during the brkchars phase,
+	 so now we move the word point back by one (so it's pointing at
+	 the quote character) and now readline will correctly spot the
+	 opening quote.  For the 'complete' command setting the quote
+	 character in the tracker is enough, so there's no need to move
+	 the word point back here.  */
+      if (tracker.from_readline ())
+	tracker.advance_custom_word_point_by (-1);
+    }
+  return result;
+}
+
+/* See completer.h.  */
+
+const char *
+advance_to_deprecated_filename_complete_word_point (completion_tracker &tracker,
+						    const char *text)
 {
   const char *brk_chars = gdb_completer_path_break_characters;
   const char *quote_chars = nullptr;
-  return advance_to_completion_word (tracker, brk_chars, quote_chars, text);
+  rl_filename_quoting_desired = 0;
+
+  return advance_to_completion_word (tracker, brk_chars, quote_chars,
+				     text, nullptr, nullptr);
 }
 
 /* See completer.h.  */
@@ -2283,7 +2330,21 @@ gdb_completion_word_break_characters_throw ()
 
       gdb_custom_word_point_brkchars[0] = rl_line_buffer[rl_point];
       rl_completer_word_break_characters = gdb_custom_word_point_brkchars;
-      rl_completer_quote_characters = NULL;
+
+      /* When performing filename completion we have two options, unquoted
+	 filename completion, in which case the quote characters will have
+	 already been set to nullptr, or quoted filename completion in
+	 which case the quote characters will be set to a string of
+	 characters.  In this second case we need readline to perform the
+	 check for a quoted string so that it sets its internal notion of
+	 the quote character correctly, this allows readline to correctly
+	 add the trailing quote (if necessary) after completing a
+	 filename.
+
+	 For non-filename completion we manually add a trailing quote if
+	 needed, so we clear the quote characters set here.  */
+      if (!rl_filename_completion_desired)
+	rl_completer_quote_characters = NULL;
 
       /* Clear this too, so that if we're completing a quoted string,
 	 readline doesn't consider the quote character a delimiter.
@@ -2330,7 +2391,12 @@ gdb_completion_word_break_characters () noexcept
    handle_brkchars phase (using TRACKER) to figure out the right work break
    characters for the command in TEXT.  QUOTE_CHAR, if non-null, is set to
    the opening quote character if we found an unclosed quoted substring,
-   '\0' otherwise.  */
+   '\0' otherwise.
+
+   The argument *FOUND_ANY_QUOTING is set to true if the completion word is
+   either surrounded by quotes, or contains any backslash escapes, but is
+   only set if TRACKER.use_custom_word_point() is false, otherwise
+   *FOUND_ANY_QUOTING is just set to false.  */
 
 static const char *
 completion_find_completion_word (completion_tracker &tracker, const char *text,
@@ -2344,13 +2410,12 @@ completion_find_completion_word (completion_tracker &tracker, const char *text,
     {
       gdb_assert (tracker.custom_word_point () > 0);
       *quote_char = tracker.quote_char ();
-      /* This isn't really correct, we're ignoring the case where we found
-	 a backslash escaping a character.  However, this isn't an issue
-	 right now as we only rely on *FOUND_ANY_QUOTING being set when
-	 performing filename completion, which doesn't go through this
-	 path.  */
+      /* If use_custom_word_point is set then the completions have already
+	 been calculated, in which case we don't need to have this flag
+	 set correctly, which is lucky as we don't currently have any way
+	 to know if the completion word included any backslash escapes.  */
       if (found_any_quoting != nullptr)
-	*found_any_quoting = *quote_char != '\0';
+	*found_any_quoting = false;
       return text + tracker.custom_word_point ();
     }
 
@@ -2527,7 +2592,10 @@ completion_tracker::build_completion_result (const char *text,
     {
       bool completion_suppress_append;
 
-      if (from_readline ())
+      /* For filename completion we rely on readline to append the closing
+	 quote.  While for other types of completion we append the closing
+	 quote here.  */
+      if (from_readline () && !rl_filename_completion_desired)
 	{
 	  /* We don't rely on readline appending the quote char as
 	     delimiter as then readline wouldn't append the ' ' after the
