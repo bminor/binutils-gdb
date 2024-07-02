@@ -27,3 +27,13 @@ _start:
 	add	r12, rax, QWORD PTR [rip + foo@GOTTPOFF]
 	{nf} add	r16, QWORD PTR [rip + foo@GOTTPOFF], r8
 	{nf} add	r12, rax, QWORD PTR [rip + foo@GOTTPOFF]
+
+	.att_syntax prefix
+
+	{nf} addq	foo@GOTTPOFF(%rip), %rax
+	{nf} addq	foo@GOTTPOFF(%rip), %r16
+
+	.intel_syntax noprefix
+
+	{nf} add	rax, QWORD PTR [rip + foo@GOTTPOFF]
+	{nf} add	r16, QWORD PTR [rip + foo@GOTTPOFF]

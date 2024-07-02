@@ -7545,8 +7545,14 @@ md_assemble (char *line)
 		&& i.base_reg
 		&& i.base_reg->reg_num == RegIP
 		&& i.tm.operand_types[0].bitfield.class == Reg
-		&& i.tm.operand_types[2].bitfield.class == Reg)
-	      /* Allow APX: add %reg1, foo@gottpoff(%rip), %reg2.  */
+		&& (i.tm.operand_types[2].bitfield.class == Reg
+		    || i.tm.operands == 2))
+	      /* Allow APX:
+		 add %reg1, foo@gottpoff(%rip), %reg2
+		 add foo@gottpoff(%rip), %reg, %reg2
+		 {nf} add foo@gottpoff(%rip), %reg
+		 {nf} add %reg1, foo@gottpoff(%rip), %reg2
+		 {nf} add foo@gottpoff(%rip), %reg, %reg2.  */
 	      break;
 	    /* Fall through.  */
 	  case BFD_RELOC_386_TLS_GOTIE:

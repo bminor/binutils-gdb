@@ -29,5 +29,6 @@ grep -q "add[ \t]\+\$0x[a-f0-9]\+,%r16" x86_64_ie_to_le.stdout
 grep -q "mov[ \t]\+\$0x[a-f0-9]\+,%r20" x86_64_ie_to_le.stdout
 grep -q "add[ \t]\+\$0x[a-f0-9]\+,%r30,%r8" x86_64_ie_to_le.stdout
 grep -q "add[ \t]\+\$0x[a-f0-9]\+,%rax,%r20" x86_64_ie_to_le.stdout
+grep -q "\{nf\} add[ \t]\+\$0x[a-f0-9]\+,%r16" x86_64_ie_to_le.stdout
 grep -q "\{nf\} add[ \t]\+\$0x[a-f0-9]\+,%r30,%r8" x86_64_ie_to_le.stdout
 grep -q "\{nf\} add[ \t]\+\$0x[a-f0-9]\+,%rax,%r20" x86_64_ie_to_le.stdout

@@ -131,6 +131,7 @@ fn2:
 	addq	sG2@gottpoff(%rip), %r16
 	addq	%rax, sG2@gottpoff(%rip), %r16
 	addq	sG2@gottpoff(%rip), %rax, %r16
+	{nf} addq	sG2@gottpoff(%rip), %r16
 	{nf} addq	%rax, sG2@gottpoff(%rip), %r16
 	{nf} addq	sG2@gottpoff(%rip), %rax, %r16
 
@@ -138,6 +139,7 @@ fn2:
 	addq	sg1@gottpoff(%rip), %r17
 	addq	%r8, sg1@gottpoff(%rip), %r17
 	addq	sg1@gottpoff(%rip), %r8, %r17
+	{nf} addq	sg1@gottpoff(%rip), %r17
 	{nf} addq	%r8, sg1@gottpoff(%rip), %r17
 	{nf} addq	sg1@gottpoff(%rip), %r8, %r17
 
@@ -145,6 +147,7 @@ fn2:
 	addq	sl1@gottpoff(%rip), %r18
 	addq	%r8, sl1@gottpoff(%rip), %rax
 	addq	sl1@gottpoff(%rip), %r8, %rax
+	{nf} addq	sl1@gottpoff(%rip), %r18
 	{nf} addq	%r8, sl1@gottpoff(%rip), %rax
 	{nf} addq	sl1@gottpoff(%rip), %r8, %rax
 
@@ -152,6 +155,7 @@ fn2:
 	addq	sh1@gottpoff(%rip), %r19
 	addq	%r19, sh1@gottpoff(%rip), %r8
 	addq	sh1@gottpoff(%rip), %r19, %r8
+	{nf} addq	sh1@gottpoff(%rip), %r19
 	{nf} addq	%r19, sh1@gottpoff(%rip), %r8
 	{nf} addq	sh1@gottpoff(%rip), %r19, %r8
 
