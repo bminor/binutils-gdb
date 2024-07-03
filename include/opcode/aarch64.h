@@ -234,6 +234,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SVE2p1,
   /* RCPC3 instructions.  */
   AARCH64_FEATURE_RCPC3,
+  /* Enhanced Software Step Extension. */
+  AARCH64_FEATURE_STEP2,
   /* Checked Pointer Arithmetic instructions. */
   AARCH64_FEATURE_CPA,
   /* FAMINMAX instructions.  */
@@ -373,6 +375,7 @@ enum aarch64_feature_bit {
 					 | AARCH64_FEATBIT (X, FAMINMAX)\
 					 | AARCH64_FEATBIT (X, E3DSE)	\
 					 | AARCH64_FEATBIT (X, SPMU2)	\
+					 | AARCH64_FEATBIT (X, STEP2)	\
 					)
 
 /* Architectures are the sum of the base and extensions.  */

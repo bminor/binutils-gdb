@@ -13,3 +13,5 @@ Disassembly of section \.text:
 .*:	d53e5260 	mrs	x0, vsesr_el3
 .*:	d5139c80 	msr	spmzr_el0, x0
 .*:	d5339c80 	mrs	x0, spmzr_el0
+.*:	d5100540 	msr	mdstepop_el1, x0
+.*:	d5300540 	mrs	x0, mdstepop_el1
