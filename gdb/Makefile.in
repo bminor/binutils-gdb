@@ -603,11 +603,12 @@ CONFIG_DEP_SUBDIR = $(addsuffix /$(DEPDIR),$(CONFIG_SRC_SUBDIR))
 # your system doesn't have fcntl.h in /usr/include (which is where it
 # should be according to Posix).
 DEFS = @DEFS@
+GDB_INCLUDED_HEADER = -include $(srcdir)/defs.h
 GDB_CFLAGS = \
 	-I. \
 	-I$(srcdir) \
 	-I$(srcdir)/config \
-	-include $(srcdir)/defs.h \
+	$(GDB_INCLUDED_HEADER) \
 	-DLOCALEDIR="\"$(localedir)\"" \
 	$(DEFS)
 
