@@ -11,6 +11,11 @@ Disassembly of section \.text:
 .*:	d53b9c60 	mrs	x0, pmovsclr_el0
 .*:	d51b9e60 	msr	pmovsset_el0, x0
 .*:	d53b9e60 	mrs	x0, pmovsset_el0
+.*:	d5380580 	mrs	x0, id_aa64afr0_el1
+.*:	d53805a0 	mrs	x0, id_aa64afr1_el1
+.*:	d5380500 	mrs	x0, id_aa64dfr0_el1
+.*:	d5380520 	mrs	x0, id_aa64dfr1_el1
+.*:	d5380540 	mrs	x0, id_aa64dfr2_el1
 .*:	d5380140 	mrs	x0, id_dfr0_el1
 .*:	d5380100 	mrs	x0, id_pfr0_el1
 .*:	d5380120 	mrs	x0, id_pfr1_el1

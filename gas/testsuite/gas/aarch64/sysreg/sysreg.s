@@ -5,6 +5,11 @@
 	rw_sys_reg sys_reg=pmovsclr_el0
 	rw_sys_reg sys_reg=pmovsset_el0
 
+	rw_sys_reg sys_reg=id_aa64afr0_el1 w=0
+	rw_sys_reg sys_reg=id_aa64afr1_el1 w=0
+	rw_sys_reg sys_reg=id_aa64dfr0_el1 w=0
+	rw_sys_reg sys_reg=id_aa64dfr1_el1 w=0
+	rw_sys_reg sys_reg=id_aa64dfr2_el1 w=0
 	rw_sys_reg sys_reg=id_dfr0_el1 w=0
 	rw_sys_reg sys_reg=id_pfr0_el1 w=0
 	rw_sys_reg sys_reg=id_pfr1_el1 w=0
