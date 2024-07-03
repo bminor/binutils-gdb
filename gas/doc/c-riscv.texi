@@ -673,7 +673,7 @@ with the @samp{.insn} pseudo directive:
 15      13             10     7                  2         0
 @end verbatim
 
-@item CJ type: .insn cj opcode2, symbol
+@item CJ type: .insn cj opcode2, func3, symbol
 @verbatim
 +-------+-------------------------------+---------+
 | func3 | simm11[11|4|9:8|10|6|7|3:1|5] | opcode2 |
