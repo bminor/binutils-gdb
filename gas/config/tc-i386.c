@@ -642,7 +642,6 @@ static int shared = 0;
 unsigned int x86_sframe_cfa_sp_reg;
 /* The other CFA base register for SFrame stack trace info.  */
 unsigned int x86_sframe_cfa_fp_reg;
-unsigned int x86_sframe_cfa_ra_reg;
 
 #endif
 
