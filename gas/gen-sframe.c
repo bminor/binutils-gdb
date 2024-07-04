@@ -346,7 +346,8 @@ get_fre_num_offsets (struct sframe_row_entry *sframe_fre)
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     fre_num_offsets++;
 #ifdef SFRAME_FRE_RA_TRACKING
-  if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+  if (sframe_ra_tracking_p ()
+      && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
     fre_num_offsets++;
 #endif
   return fre_num_offsets;
@@ -536,7 +537,8 @@ output_sframe_row_entry (symbolS *fde_start_addr,
   fre_write_offsets++;
 
 #ifdef SFRAME_FRE_RA_TRACKING
-  if (sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
+  if (sframe_ra_tracking_p ()
+      && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
     {
       fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
       fre_write_offsets++;
