@@ -869,7 +869,7 @@ sframe_row_entry_new (void)
   struct sframe_row_entry *fre = XCNEW (struct sframe_row_entry);
   /* Reset cfa_base_reg to -1.  A value of 0 will imply some valid register
      for the supported arches.  */
-  fre->cfa_base_reg = -1;
+  fre->cfa_base_reg = SFRAME_FRE_BASE_REG_INVAL;
   fre->merge_candidate = true;
   /* Reset the mangled RA status bit to zero by default.  We will initialize it in
      sframe_row_entry_initialize () with the sticky bit if set.  */
@@ -922,6 +922,23 @@ sframe_row_entry_initialize (struct sframe_row_entry *cur_fre,
   /* Treat RA mangling as a sticky bit.  It retains its value until another
      .cfi_negate_ra_state is seen.  */
   cur_fre->mangled_ra_p = prev_fre->mangled_ra_p;
+}
+
+/* Return SFrame register name for SP, FP, and RA, or NULL if other.  */
+
+static const char *
+sframe_register_name (unsigned int reg)
+{
+  if (reg == SFRAME_CFA_SP_REG)
+    return "SP";
+  else if (reg == SFRAME_CFA_FP_REG)
+    return "FP";
+#ifdef SFRAME_FRE_RA_TRACKING
+  else if (reg == SFRAME_CFA_RA_REG)
+    return "RA";
+#endif
+  else
+    return NULL;
 }
 
 /* Translate DW_CFA_advance_loc into SFrame context.
@@ -992,7 +1009,11 @@ sframe_xlate_do_def_cfa (struct sframe_xlate_ctx *xlate_ctx,
      SFrame stack trace info for the function.  */
   if (cfi_insn->u.r != SFRAME_CFA_SP_REG
       && cfi_insn->u.r != SFRAME_CFA_FP_REG)
-    return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
+    {
+      as_warn (_("skipping SFrame FDE; non-SP/FP register %u in .cfi_def_cfa"),
+	       cfi_insn->u.r);
+      return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
+    }
   sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
   sframe_fre_set_cfa_offset (cur_fre, cfi_insn->u.ri.offset);
   cur_fre->merge_candidate = false;
@@ -1017,7 +1038,12 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
      skip creating SFrame stack trace info for the function.  */
   if (cfi_insn->u.r != SFRAME_CFA_SP_REG
       && cfi_insn->u.r != SFRAME_CFA_FP_REG)
-    return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
+    {
+      as_warn (_("skipping SFrame FDE; "
+		 "non-SP/FP register %u in .cfi_def_cfa_register"),
+	       cfi_insn->u.r);
+      return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
+    }
   sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
   sframe_fre_set_cfa_offset (cur_fre, last_fre->cfa_offset);
   cur_fre->merge_candidate = false;
@@ -1048,7 +1074,13 @@ sframe_xlate_do_def_cfa_offset (struct sframe_xlate_ctx *xlate_ctx,
       cur_fre->merge_candidate = false;
     }
   else
-    return SFRAME_XLATE_ERR_NOTREPRESENTED;
+    {
+      /* No CFA base register in effect.  Non-SP/FP CFA base register should
+	 not occur, as sframe_xlate_do_def_cfa[_register] would detect this.  */
+      as_warn (_("skipping SFrame FDE; "
+		 ".cfi_def_cfa_offset without CFA base register in effect"));
+      return SFRAME_XLATE_ERR_NOTREPRESENTED;
+    }
 
   return SFRAME_XLATE_OK;
 }
@@ -1098,13 +1130,16 @@ sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
      register is not interesting (FP or RA reg), the current DW_CFA_val_offset
      instruction can be safely skipped without sacrificing the asynchronicity of
      stack trace information.  */
-  if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
-    return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
+  if (cfi_insn->u.r == SFRAME_CFA_FP_REG
 #ifdef SFRAME_FRE_RA_TRACKING
-  else if (sframe_ra_tracking_p ()
-	   && cfi_insn->u.r == SFRAME_CFA_RA_REG)
-    return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
+      || (sframe_ra_tracking_p () && cfi_insn->u.r == SFRAME_CFA_RA_REG)
 #endif
+      )
+    {
+      as_warn (_("skipping SFrame FDE; %s register %u in .cfi_val_offset"),
+	       sframe_register_name (cfi_insn->u.r), cfi_insn->u.r);
+      return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
+    }
 
   /* Safe to skip.  */
   return SFRAME_XLATE_OK;
@@ -1126,7 +1161,11 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
       || (cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
 #endif
       || cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
-    return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
+    {
+      as_warn (_("skipping SFrame FDE; %s register %u in .cfi_register"),
+	       sframe_register_name (cfi_insn->u.rr.reg1), cfi_insn->u.rr.reg1);
+      return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
+    }
 
   /* Safe to skip.  */
   return SFRAME_XLATE_OK;
@@ -1144,7 +1183,11 @@ sframe_xlate_do_remember_state (struct sframe_xlate_ctx *xlate_ctx)
      early with non-zero error code, this will cause no SFrame stack trace
      info for the function involved.  */
   if (!last_fre)
-    return SFRAME_XLATE_ERR_INVAL;
+    {
+      as_warn (_("skipping SFrame FDE; "
+		 ".cfi_remember_state without prior SFrame FRE state"));
+      return SFRAME_XLATE_ERR_INVAL;
+    }
 
   if (!xlate_ctx->remember_fre)
     xlate_ctx->remember_fre = sframe_row_entry_new ();
@@ -1332,21 +1375,19 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
     default:
       /* Following skipped operations do, however, impact the asynchronicity:
 	  - CFI_escape.  */
-      err = SFRAME_XLATE_ERR_NOTREPRESENTED;
+      {
+	const char *cfi_name = sframe_get_cfi_name (op);
+
+	if (!cfi_name)
+	  cfi_name = _("(unknown)");
+	as_warn (_("skipping SFrame FDE; CFI insn %s (%#x)"),
+		 cfi_name, op);
+	err = SFRAME_XLATE_ERR_NOTREPRESENTED;
+      }
     }
 
-  /* An error here will cause no SFrame FDE later.  Warn the user because this
-     will affect the overall coverage and hence, asynchronicity.  */
-  if (err)
-    {
-      const char *cfi_name = sframe_get_cfi_name (op);
-
-      if (!cfi_name)
-	cfi_name = _("(unknown)");
-      as_warn (_("skipping SFrame FDE; CFI insn %s (%#x)"),
-	       cfi_name, op);
-    }
-
+  /* Any error will cause no SFrame FDE later.  The user has already been
+     warned.  */
   return err;
 }
 
@@ -1363,7 +1404,8 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
   /* SFrame format cannot represent a non-default DWARF return column reg.  */
   if (xlate_ctx->dw_fde->return_column != DWARF2_DEFAULT_RETURN_COLUMN)
     {
-      as_warn (_("skipping SFrame FDE due to non-default DWARF return column"));
+      as_warn (_("skipping SFrame FDE; non-default RA register %u"),
+	       xlate_ctx->dw_fde->return_column);
       return SFRAME_XLATE_ERR_NOTREPRESENTED;
     }
 

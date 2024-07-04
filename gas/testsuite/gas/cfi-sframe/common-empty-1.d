@@ -1,5 +1,5 @@
 #as: --gsframe
-#warning: skipping SFrame FDE; CFI insn DW_CFA_remember_state \(0xa\)
+#warning: skipping SFrame FDE; \.cfi_remember_state without prior SFrame FRE state
 #objdump: --sframe=.sframe
 #name: Uninteresting cfi directives generate an empty SFrame section
 #...

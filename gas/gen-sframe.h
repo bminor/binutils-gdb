@@ -24,6 +24,8 @@
 #define SFRAME_FRE_ELEM_LOC_REG		0
 #define SFRAME_FRE_ELEM_LOC_STACK	1
 
+#define SFRAME_FRE_BASE_REG_INVAL	((unsigned int)-1)
+
 /* SFrame Frame Row Entry (FRE).
 
    A frame row entry is a slice of the frame and can be valid for a set of
