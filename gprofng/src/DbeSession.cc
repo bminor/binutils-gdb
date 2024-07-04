@@ -94,6 +94,8 @@ Platform_t DbeSession::platform =
 	Sparc;
 #elif ARCH(Aarch64)
 	Aarch64;
+#elif ARCH(RISCV)
+	RISCV;
 #else   // ARCH(Intel)
 	Intel;
 #endif

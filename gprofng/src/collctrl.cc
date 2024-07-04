@@ -91,6 +91,9 @@ read_cpuinfo ()
 
 #if defined(__aarch64__)
   asm volatile("mrs %0, cntfrq_el0" : "=r" (cpu_info.cpu_clk_freq));
+#elif defined(__riscv)
+  // Set 1000 MHz for minimal support RISC-V, will fix with a better method to get cpu clock frequency.
+  cpu_info.cpu_clk_freq = 1000;
 #endif
 
   // Read /proc/cpuinfo to get CPU info and clock rate
@@ -106,7 +109,7 @@ read_cpuinfo ()
 	    cpu_info.cpu_clk_freq = read_int (temp + 9);
 	  else if (strncmp (temp, "cpu family", 10) == 0)
 	    cpu_info.cpu_family = read_int (temp + 10);
-	  else if (strncmp (temp, "vendor_id", 9) == 0)
+	  else if ((strncmp (temp, "vendor_id", 9) || strncmp (temp, "mvendorid", 9)) == 0)
 	    {
 	      if (cpu_info.cpu_vendorstr == NULL)
 		read_str (temp + 9, &cpu_info.cpu_vendorstr);

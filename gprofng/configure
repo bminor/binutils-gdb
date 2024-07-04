@@ -15789,6 +15789,10 @@ build_src=
       build_src=true
       build_collector=true
       ;;
+    riscv*-*-linux*)
+      build_src=true
+      build_collector=true
+      ;;
   esac
   # Check whether --enable-gprofng-tools was given.
 if test "${enable_gprofng_tools+set}" = set; then :

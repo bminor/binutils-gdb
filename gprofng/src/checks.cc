@@ -332,6 +332,10 @@ collect::check_executable_arch (Elf *elf)
     case EM_AARCH64:
       is_64 = true;
       break;
+#elif ARCH(RISCV)
+    case EM_RISCV:
+      is_64 = true;
+      break;
 #endif
     default:
       return EXEC_ELF_ARCH;

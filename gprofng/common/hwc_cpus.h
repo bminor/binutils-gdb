@@ -168,6 +168,13 @@ enum {
     ARM_CPU_IMP_AMPERE  = 0xC0
 };
 
+// riscv Constants from arch/riscv/include/asm/vendorid_list.h
+enum {
+    ANDES_VENDOR_ID		= 0x31e,
+    SIFIVE_VENDOR_ID	        = 0x489,
+    THEAD_VENDOR_ID		= 0x5b7
+};
+
 #define	AARCH64_VENDORSTR_ARM	"ARM"
 
   /* strings below must match those returned by cpc_getcpuver() */

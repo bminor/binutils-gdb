@@ -270,7 +270,7 @@ __collector_cas_ptr (void *mem, void *cmp, void *new)
   return r;
 }
 
-#elif ARCH(Aarch64)
+#elif ARCH(Aarch64) || ARCH(RISCV)
 static __attribute__ ((always_inline)) inline uint32_t
 __collector_inc_32 (volatile uint32_t *ptr)
 {

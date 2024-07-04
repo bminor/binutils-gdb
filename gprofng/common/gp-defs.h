@@ -32,6 +32,7 @@
  */
 #define ARCH(x)             TOK_A_##x(ARCH)
 #define TOK_A_Aarch64(x)    x##_Aarch64
+#define TOK_A_RISCV(x)      x##_RISCV
 #define TOK_A_SPARC(x)      x##_SPARC
 #define TOK_A_Intel(x)      x##_Intel
 
@@ -45,11 +46,13 @@
 #define ARCH_Intel          1
 #elif defined(__aarch64__)
 #define ARCH_Aarch64        1
+#elif defined(__riscv)
+#define ARCH_RISCV          1
 #else
 #error "Undefined platform"
 #endif
 
-#if defined(__sparcv9) || defined(__x86_64) || defined(__aarch64__)
+#if defined(__sparcv9) || defined(__x86_64) || defined(__aarch64__) || defined(__riscv)
 #define WSIZE_64            1
 #else
 #define WSIZE_32            1

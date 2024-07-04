@@ -542,6 +542,8 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
 	    exp->platform = Intel;
 	  else if (strcmp (str, "aarch64") == 0)
 	    exp->platform = Aarch64;
+	  else if (strcmp (str, "riscv64") == 0)
+	    exp->platform = RISCV;
 	  else
 	    exp->platform = Sparc;
 	  exp->need_swap_endian = (DbeSession::platform == Sparc) ?

@@ -42,7 +42,8 @@ enum Platform_t
   Sparcv8plus,
   Java,
   Amd64,
-  Aarch64
+  Aarch64,
+  RISCV
 };
 
 enum WSize_t

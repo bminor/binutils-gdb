@@ -96,7 +96,6 @@ typedef struct {                                /* supplementary data fields */
 
 #define HW_INTERVAL_MAX         UINT64_MAX
 #define HW_INTERVAL_PRESET(x)   (HW_INTERVAL_MAX - ((uint64_t)(x) - 1))
-#define HW_INTERVAL_TYPE(x)     ((uint64_t) (x)
 
 /* parsing */
 #define HWCFUNCS_MAX_ATTRS              20

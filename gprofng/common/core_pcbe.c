@@ -2752,6 +2752,9 @@ core_pcbe_init (void)
       return 0;
     case X86_VENDOR_Intel:
       break;
+    case ANDES_VENDOR_ID:
+    case SIFIVE_VENDOR_ID:
+    case THEAD_VENDOR_ID:
     default:
       return -1;
     }
@@ -2913,7 +2916,7 @@ core_pcbe_impl_name (void)
 static const char *
 core_pcbe_cpuref (void)
 {
-#if defined(__aarch64__)
+#if defined(__aarch64__) || defined(__riscv)
   return "";
 #elif defined(__i386__) || defined(__x86_64)
   switch (cpuid_getmodel ())

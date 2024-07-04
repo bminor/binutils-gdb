@@ -208,6 +208,7 @@ Disasm::disasm_open ()
     case Amd64:
       need_swap_endian = (DbeSession::platform == Sparc);
       break;
+    case RISCV:
     case Sparcv8plus:
     case Sparcv9:
     case Sparc:
@@ -246,6 +247,7 @@ Disasm::disasm_open ()
       dis_info.arch = bfd_arch_i386;
       dis_info.mach = bfd_mach_x86_64;
       break;
+    case RISCV:
     case Sparcv8plus:
     case Sparcv9:
     case Sparc:

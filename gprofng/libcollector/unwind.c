@@ -180,6 +180,11 @@ memory_error_func (int status ATTRIBUTE_UNUSED, bfd_vma addr ATTRIBUTE_UNUSED,
 #define GET_PC(ctx) (((ucontext_t*)ctx)->uc_mcontext.regs[15])
 #define GET_SP(ctx) (((ucontext_t*)ctx)->uc_mcontext.regs[13])
 #define GET_FP(ctx) (((ucontext_t*)ctx)->uc_mcontext.regs[14])
+
+#elif ARCH(RISCV)
+#define GET_PC(ctx) (((ucontext_t*)ctx)->uc_mcontext.__gregs[REG_PC])
+#define GET_SP(ctx) (((ucontext_t*)ctx)->uc_mcontext.__gregs[2])
+#define GET_FP(ctx) (((ucontext_t*)ctx)->uc_mcontext.__gregs[8])
 #endif /* ARCH() */
 
 /*
@@ -232,6 +237,12 @@ typedef uint64_t __u64;
 #define FILL_CONTEXT(context) \
     { CALL_UTIL (getcontext) (context);  \
       context->uc_mcontext.sp = (__u64) __builtin_frame_address(0); \
+    }
+
+#elif ARCH(RISCV)
+#define FILL_CONTEXT(context) \
+    { CALL_UTIL(getcontext)(context);  \
+      context->uc_mcontext.__gregs[2] = (uint64_t) __builtin_frame_address(0); \
     }
 
 #endif /* ARCH() */
