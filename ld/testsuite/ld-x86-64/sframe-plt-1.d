@@ -19,12 +19,12 @@ Contents of the SFrame section .sframe:
 
     func idx \[0\]: pc = 0x1000, size = 16 bytes
     STARTPC +CFA +FP +RA +
-    0+1000 +sp\+16 +u +u +
-    0+1006 +sp\+24 +u +u +
+    0+1000 +sp\+16 +u +f +
+    0+1006 +sp\+24 +u +f +
 
     func idx \[1\]: pc = 0x1010, size = 16 bytes
     STARTPC\[m\] +CFA +FP +RA +
-    0+0000 +sp\+8 +u +u +
-    0+000b +sp\+16 +u +u +
+    0+0000 +sp\+8 +u +f +
+    0+000b +sp\+16 +u +f +
 
 #...
