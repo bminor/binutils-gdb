@@ -4717,7 +4717,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  {
 	    bfd_vma target = entry->target;
 	    bfd_vma value = target - entry->address;
-	    bfd_putl32 (bfd_getl32 (buf) | ENCODE_ITYPE_IMM (value), buf);
+	    if (fixP->fx_r_type == BFD_RELOC_RISCV_PCREL_LO12_S)
+	      bfd_putl32 (bfd_getl32 (buf) | ENCODE_STYPE_IMM (value), buf);
+	    else
+	      bfd_putl32 (bfd_getl32 (buf) | ENCODE_ITYPE_IMM (value), buf);
 	    /* Relaxations should never be enabled by `.option relax'.  */
 	    if (!riscv_opts.relax)
 	      fixP->fx_done = 1;
