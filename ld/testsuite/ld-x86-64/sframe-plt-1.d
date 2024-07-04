@@ -12,6 +12,7 @@ Contents of the SFrame section .sframe:
 
     Version: SFRAME_VERSION_2
     Flags: SFRAME_F_FDE_SORTED
+    CFA fixed RA offset: \-8
 #...
 
   Function Index :
