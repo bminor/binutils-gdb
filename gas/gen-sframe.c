@@ -1256,12 +1256,12 @@ sframe_xlate_do_restore (struct sframe_xlate_ctx *xlate_ctx,
   return SFRAME_XLATE_OK;
 }
 
-/* Translate DW_CFA_GNU_window_save into SFrame context.
+/* Translate DW_CFA_AARCH64_negate_ra_state into SFrame context.
    Return SFRAME_XLATE_OK if success.  */
 
 static int
-sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
-				 struct cfi_insn_data *cfi_insn ATTRIBUTE_UNUSED)
+sframe_xlate_do_aarch64_negate_ra_state (struct sframe_xlate_ctx *xlate_ctx,
+					 struct cfi_insn_data *cfi_insn ATTRIBUTE_UNUSED)
 {
   struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
 
@@ -1271,6 +1271,25 @@ sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
   cur_fre->merge_candidate = false;
 
   return SFRAME_XLATE_OK;
+}
+
+/* Translate DW_CFA_GNU_window_save into SFrame context.
+   DW_CFA_AARCH64_negate_ra_state is multiplexed with DW_CFA_GNU_window_save.
+   Return SFRAME_XLATE_OK if success.  */
+
+static int
+sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
+				 struct cfi_insn_data *cfi_insn)
+{
+  unsigned char abi_arch = sframe_get_abi_arch ();
+
+  /* Translate DW_CFA_AARCH64_negate_ra_state into SFrame context.  */
+  if (abi_arch == SFRAME_ABI_AARCH64_ENDIAN_BIG
+      || abi_arch == SFRAME_ABI_AARCH64_ENDIAN_LITTLE)
+    return sframe_xlate_do_aarch64_negate_ra_state (xlate_ctx, cfi_insn);
+
+  as_warn (_("skipping SFrame FDE; .cfi_window_save"));
+  return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
 }
 
 /* Returns the DWARF call frame instruction name or fake CFI name for the
