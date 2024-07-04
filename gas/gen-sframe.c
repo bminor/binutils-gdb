@@ -1100,6 +1100,7 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
   gas_assert (cur_fre);
   /* Change the rule for the register indicated by the register number to
      be the specified offset.  */
+  /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
   if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
     {
       gas_assert (!cur_fre->base_reg);
@@ -1134,6 +1135,7 @@ sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
 #ifdef SFRAME_FRE_RA_TRACKING
       || (sframe_ra_tracking_p () && cfi_insn->u.r == SFRAME_CFA_RA_REG)
 #endif
+      /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
       )
     {
       as_warn (_("skipping SFrame FDE; %s register %u in .cfi_val_offset"),
@@ -1153,14 +1155,15 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
 			  struct cfi_insn_data *cfi_insn)
 {
   /* Previous value of register1 is register2.  However, if the specified
-     register1 is not interesting (SP, FP, or RA reg), the current DW_CFA_register
+     register1 is not interesting (FP or RA reg), the current DW_CFA_register
      instruction can be safely skipped without sacrificing the asynchronicity of
      stack trace information.  */
-  if (cfi_insn->u.rr.reg1 == SFRAME_CFA_SP_REG
+  if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG
 #ifdef SFRAME_FRE_RA_TRACKING
       || (sframe_ra_tracking_p () && cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
 #endif
-      || cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
+      /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
+      )
     {
       as_warn (_("skipping SFrame FDE; %s register %u in .cfi_register"),
 	       sframe_register_name (cfi_insn->u.rr.reg1), cfi_insn->u.rr.reg1);
