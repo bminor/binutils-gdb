@@ -1,4 +1,5 @@
 #as: --gsframe
+#warning: skipping SFrame FDE due to non-default DWARF return column
 #objdump: --sframe=.sframe
 #name: SFrame supports only default return column
 #...
