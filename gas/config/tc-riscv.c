@@ -1784,6 +1784,7 @@ init_opcode_hash (const struct riscv_opcode *opcodes,
    help us resolve the corresponding low-part relocation later.  */
 typedef struct
 {
+  const asection *sec;
   bfd_vma address;
   symbolS *symbol;
   bfd_vma target;
@@ -1798,7 +1799,13 @@ static hashval_t
 riscv_pcrel_fixup_hash (const void *entry)
 {
   const riscv_pcrel_hi_fixup *e = entry;
-  return (hashval_t) (e->address);
+
+  /* the pcrel_hi with same address may reside in different segments,
+     to ensure uniqueness, the segment ID needs to be included in the
+     hash key calculation.
+     Temporarily using the prime number 499 as a multiplier, but it
+     might not be large enough.  */
+  return e->address + 499 * e->sec->id;
 }
 
 /* Compare the keys between two entries fo the pcrel_hi hash table.  */
@@ -1807,16 +1814,17 @@ static int
 riscv_pcrel_fixup_eq (const void *entry1, const void *entry2)
 {
   const riscv_pcrel_hi_fixup *e1 = entry1, *e2 = entry2;
-  return e1->address == e2->address;
+  return e1->sec->id == e2->sec->id
+	  && e1->address == e2->address;
 }
 
 /* Record the pcrel_hi relocation.  */
 
 static bool
-riscv_record_pcrel_fixup (htab_t p, bfd_vma address, symbolS *symbol,
-			  bfd_vma target)
+riscv_record_pcrel_fixup (htab_t p, const asection *sec, bfd_vma address,
+			  symbolS *symbol, bfd_vma target)
 {
-  riscv_pcrel_hi_fixup entry = {address, symbol, target};
+  riscv_pcrel_hi_fixup entry = {sec, address, symbol, target};
   riscv_pcrel_hi_fixup **slot =
 	(riscv_pcrel_hi_fixup **) htab_find_slot (p, &entry, INSERT);
   if (slot == NULL)
@@ -4426,7 +4434,7 @@ md_pcrel_from (fixS *fixP)
 /* Apply a fixup to the object file.  */
 
 void
-md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
+md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
   unsigned int subtype;
   bfd_byte *buf = (bfd_byte *) (fixP->fx_frag->fr_literal + fixP->fx_where);
@@ -4677,6 +4685,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
 	  /* Record PCREL_HI20.  */
 	  if (!riscv_record_pcrel_fixup (riscv_pcrel_hi_fixup_hash,
+					 (const asection *) seg,
 					 md_pcrel_from (fixP),
 					 fixP->fx_addsy,
 					 target))
@@ -4698,7 +4707,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 and set fx_done for -mno-relax.  */
       {
 	bfd_vma location_pcrel_hi = S_GET_VALUE (fixP->fx_addsy) + *valP;
-	riscv_pcrel_hi_fixup search = {location_pcrel_hi, 0, 0};
+	riscv_pcrel_hi_fixup search =
+		{(const asection *) seg, location_pcrel_hi, 0, 0};
 	riscv_pcrel_hi_fixup *entry = htab_find (riscv_pcrel_hi_fixup_hash,
 						 &search);
 	if (entry && entry->symbol
