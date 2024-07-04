@@ -267,24 +267,24 @@ extern void aarch64_after_parse_args (void);
 extern bool aarch64_support_sframe_p (void);
 #define support_sframe_p aarch64_support_sframe_p
 
-/* The stack-pointer register number for SFrame stack trace info.  */
+/* The stack pointer DWARF register number for SFrame CFA tracking.  */
 extern unsigned int aarch64_sframe_cfa_sp_reg;
 #define SFRAME_CFA_SP_REG aarch64_sframe_cfa_sp_reg
 
-/* The base-pointer register number for CFA stack trace info.  */
+/* The frame pointer DWARF register number for SFrame CFA and FP tracking.  */
 extern unsigned int aarch64_sframe_cfa_fp_reg;
 #define SFRAME_CFA_FP_REG aarch64_sframe_cfa_fp_reg
 
-/* The return address register number for CFA stack trace info.  */
+/* The return address DWARF register number for SFrame RA tracking.  */
 extern unsigned int aarch64_sframe_cfa_ra_reg;
 #define SFRAME_CFA_RA_REG aarch64_sframe_cfa_ra_reg
 
-/* Specify if RA tracking is needed.  */
+/* Whether SFrame return address tracking is needed.  */
 extern bool aarch64_sframe_ra_tracking_p (void);
 #define sframe_ra_tracking_p aarch64_sframe_ra_tracking_p
 
-/* Specify the fixed offset to recover RA from CFA.
-   (useful only when RA tracking is not needed).  */
+/* The fixed offset from CFA for SFrame to recover the return address.
+   (useful only when SFrame RA tracking is not needed).  */
 extern offsetT aarch64_sframe_cfa_ra_offset (void);
 #define sframe_cfa_ra_offset aarch64_sframe_cfa_ra_offset
 

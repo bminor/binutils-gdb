@@ -11987,6 +11987,7 @@ x86_cleanup (void)
     subseg_set (seg, subseg);
 }
 
+/* Whether SFrame stack trace info is supported.  */
 bool
 x86_support_sframe_p (void)
 {
@@ -11994,6 +11995,7 @@ x86_support_sframe_p (void)
   return (x86_elf_abi == X86_64_ABI);
 }
 
+/* Whether SFrame return address tracking is needed.  */
 bool
 x86_sframe_ra_tracking_p (void)
 {
@@ -12003,6 +12005,8 @@ x86_sframe_ra_tracking_p (void)
   return false;
 }
 
+/* The fixed offset from CFA for SFrame to recover the return address.
+   (useful only when SFrame RA tracking is not needed).  */
 offsetT
 x86_sframe_cfa_ra_offset (void)
 {
@@ -12010,6 +12014,7 @@ x86_sframe_cfa_ra_offset (void)
   return (offsetT) -8;
 }
 
+/* The abi/arch indentifier for SFrame.  */
 unsigned char
 x86_sframe_get_abi_arch (void)
 {

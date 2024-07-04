@@ -9078,7 +9078,7 @@ aarch64_support_sframe_p (void)
   return (aarch64_abi == AARCH64_ABI_LP64);
 }
 
-/* Specify if RA tracking is needed.  */
+/* Whether SFrame return address tracking is needed.  */
 
 bool
 aarch64_sframe_ra_tracking_p (void)
@@ -9086,8 +9086,8 @@ aarch64_sframe_ra_tracking_p (void)
   return true;
 }
 
-/* Specify the fixed offset to recover RA from CFA.
-   (useful only when RA tracking is not needed).  */
+/* The fixed offset from CFA for SFrame to recover the return address.
+   (useful only when SFrame RA tracking is not needed).  */
 
 offsetT
 aarch64_sframe_cfa_ra_offset (void)

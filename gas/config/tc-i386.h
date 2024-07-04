@@ -441,20 +441,20 @@ extern bool x86_scfi_callee_saved_p (uint32_t dw2reg_num);
 extern bool x86_support_sframe_p (void);
 #define support_sframe_p x86_support_sframe_p
 
-/* The stack-pointer register number for SFrame stack trace info.  */
+/* The stack pointer DWARF register number for SFrame CFA tracking.  */
 extern unsigned int x86_sframe_cfa_sp_reg;
 #define SFRAME_CFA_SP_REG x86_sframe_cfa_sp_reg
 
-/* The frame-pointer register number for SFrame stack trace info.  */
+/* The frame pointer DWARF register number for SFrame CFA and FP tracking.  */
 extern unsigned int x86_sframe_cfa_fp_reg;
 #define SFRAME_CFA_FP_REG x86_sframe_cfa_fp_reg
 
-/* Specify if RA tracking is needed.  */
+/* Whether SFrame return address tracking is needed.  */
 extern bool x86_sframe_ra_tracking_p (void);
 #define sframe_ra_tracking_p x86_sframe_ra_tracking_p
 
-/* Specify the fixed offset to recover RA from CFA.
-   (useful only when RA tracking is not needed).  */
+/* The fixed offset from CFA for SFrame to recover the return address.
+   (useful only when SFrame RA tracking is not needed).  */
 extern offsetT x86_sframe_cfa_ra_offset (void);
 #define sframe_cfa_ra_offset x86_sframe_cfa_ra_offset
 
