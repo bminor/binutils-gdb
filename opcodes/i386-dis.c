@@ -107,6 +107,7 @@ static bool DistinctDest_Fixup (instr_info *, int, int);
 static bool PREFETCHI_Fixup (instr_info *, int, int);
 static bool PUSH2_POP2_Fixup (instr_info *, int, int);
 static bool JMPABS_Fixup (instr_info *, int, int);
+static bool CFCMOV_Fixup (instr_info *, int, int);
 
 static void ATTRIBUTE_PRINTF_3 i386_dis_printf (const disassemble_info *,
 						enum disassembler_style,
@@ -4041,7 +4042,7 @@ static const struct dis386 prefix_table[][4] = {
     { "vbcstnebf162ps", { XM, Mw }, 0 },
     { "vbcstnesh2ps", { XM, Mw }, 0 },
   },
- 
+
   /* PREFIX_VEX_0F38D2_W_0 */
   {
     { "vpdpwuud",	{ XM, Vex, EXx }, 0 },
@@ -10560,7 +10561,14 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 		}
 	    }
 	  else if (l == 1 && last[0] == 'C')
-	    break;
+	    {
+	      if (ins->vex.nd && !ins->vex.nf)
+		break;
+	      *ins->obufp++ = 'c';
+	      *ins->obufp++ = 'f';
+	      /* Skip printing {evex} */
+	      evex_printed = true;
+	    }
 	  else if (l == 1 && last[0] == 'N')
 	    {
 	      if (ins->vex.nf)
@@ -14039,4 +14047,27 @@ JMPABS_Fixup (instr_info *ins, int bytemode, int sizeflag)
   if (bytemode == eAX_reg)
     return OP_IMREG (ins, bytemode, sizeflag);
   return OP_OFF64 (ins, bytemode, sizeflag);
+}
+
+static bool
+CFCMOV_Fixup (instr_info *ins, int opnd, int sizeflag)
+{
+  /* EVEX.NF is used as a direction bit in the 2-operand case to reverse the
+     source and destination operands.  */
+  bool dstmem = !ins->vex.nd && ins->vex.nf;
+
+  if (opnd == 0)
+    {
+      if (dstmem)
+	return OP_E (ins, v_swap_mode, sizeflag);
+      return OP_G (ins, v_mode, sizeflag);
+    }
+
+  /* These bits have been consumed and should be cleared.  */
+  ins->vex.nf = false;
+  ins->vex.mask_register_specifier = 0;
+
+  if (dstmem)
+    return OP_G (ins, v_mode, sizeflag);
+  return OP_E (ins, v_mode, sizeflag);
 }

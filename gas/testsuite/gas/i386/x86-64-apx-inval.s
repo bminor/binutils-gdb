@@ -11,6 +11,9 @@
 	{nf} push2 %rbx, %rax
 	{nf} adcx %r15,%r15
 	{nf} mulx %r15,%r15,%r11
+	{nf} cfcmovl %dx,291(%r8,%rax,4)
+	{nf} cfcmovl 291(%r8,%rax,4),%dx
+	{nf} cfcmovb %dx,%ax,%r31w
 	{nf} {vex} bextr %ecx, %edx, %r10d
 	{vex} {nf} bextr %ecx, %edx, %r10d
 	{nf} add %dl,%ah

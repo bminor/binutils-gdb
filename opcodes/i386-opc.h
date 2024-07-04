@@ -583,6 +583,8 @@ enum
 #define ZERO_UPPER 10
   /* Instruction support SCC.  */
 #define SCC 11
+  /* Instruction requires EVEX.NF to be 1.  */
+#define EVEX_NF 12
   OperandConstraint,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */

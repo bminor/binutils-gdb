@@ -87,6 +87,7 @@
 #define ImplicitStackOp   OperandConstraint=IMPLICIT_STACK_OP
 #define ZU                OperandConstraint=ZERO_UPPER
 #define Scc               OperandConstraint=SCC
+#define EVexNF            OperandConstraint=EVEX_NF
 
 #define ATTSyntax         Dialect=ATT_SYNTAX
 #define ATTMnemonic       Dialect=ATT_MNEMONIC
@@ -990,6 +991,10 @@ ud0, 0xfff, i186, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Un
 // legacy encoding.  The assembler will take care of that.
 cmov<cc>, 0x4<cc:opc>, CMOV&APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|Optimize, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
 cmov<cc>, 0xf4<cc:opc>, CMOV, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+
+cfcmov<cc>, 0x4<cc:opc>, CMOV&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|EVexNF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
+cfcmov<cc>, 0x4<cc:opc>, CMOV&APX_F, Load|Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+cfcmov<cc>, 0x4<cc:opc>, CMOV&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|EVexNF, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 fcmovb, 0xda/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 fcmovnae, 0xda/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }

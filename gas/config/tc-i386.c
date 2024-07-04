@@ -4436,7 +4436,7 @@ build_apx_evex_prefix (void)
     }
 
   /* Encode the NF bit.  */
-  if (i.has_nf)
+  if (i.has_nf || i.tm.opcode_modifier.operandconstraint == EVEX_NF)
     i.vex.bytes[3] |= 0x04;
 }
 
