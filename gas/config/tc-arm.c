@@ -19233,13 +19233,22 @@ do_neon_cvttb_1 (bool t)
 	  return;
 	}
 
+      unsigned op0 = inst.operands[0].reg;
+      unsigned op1 = inst.operands[1].reg;
+      /* NS_QQ so both registers are quads but inst.operands has their
+	 D-register values, so halve before encoding.  */
+      if (rs == NS_QQ)
+	{
+	  op0 >>= 1;
+	  op1 >>= 1;
+	}
       inst.instruction = 0xee3f0e01;
       inst.instruction |= single_to_half << 28;
-      inst.instruction |= HI1 (inst.operands[0].reg) << 22;
-      inst.instruction |= LOW4 (inst.operands[0].reg) << 13;
+      inst.instruction |= HI1 (op0) << 22;
+      inst.instruction |= LOW4 (op0) << 13;
       inst.instruction |= t << 12;
-      inst.instruction |= HI1 (inst.operands[1].reg) << 5;
-      inst.instruction |= LOW4 (inst.operands[1].reg) << 1;
+      inst.instruction |= HI1 (op1) << 5;
+      inst.instruction |= LOW4 (op1) << 1;
       inst.is_neon = 1;
     }
   else if (neon_check_type (2, rs, N_F16, N_F32 | N_VFP).type != NT_invtype)
