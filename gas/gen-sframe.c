@@ -1158,7 +1158,7 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
      stack trace information.  */
   if (cfi_insn->u.rr.reg1 == SFRAME_CFA_SP_REG
 #ifdef SFRAME_FRE_RA_TRACKING
-      || (cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
+      || (sframe_ra_tracking_p () && cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
 #endif
       || cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG)
     {
