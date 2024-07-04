@@ -667,12 +667,16 @@ output_sframe_internal (void)
      -fno-omit-frame-pointer is used.  */
   out_one (fixed_fp_offset);
 
-  /* Offset for the return address from CFA is fixed for some ABIs
-     (e.g., AMD64), output a SFRAME_CFA_FIXED_RA_INVALID otherwise.  */
-#ifdef sframe_ra_tracking_p
+  /* All ABIs participating in SFrame generation must define
+     sframe_ra_tracking_p.
+     When RA tracking (in FREs) is not needed (e.g., AMD64), SFrame assumes
+     the RA is going to be at a fixed offset from CFA.  Check that the fixed RA
+     offset is appropriately defined in all cases.  */
   if (!sframe_ra_tracking_p ())
-    fixed_ra_offset = sframe_cfa_ra_offset ();
-#endif
+    {
+      fixed_ra_offset = sframe_cfa_ra_offset ();
+      gas_assert (fixed_ra_offset != SFRAME_CFA_FIXED_RA_INVALID);
+    }
   out_one (fixed_ra_offset);
 
   /* None of the AMD64, or AARCH64 ABIs need the auxiliary header.
