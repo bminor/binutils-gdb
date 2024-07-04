@@ -1,5 +1,5 @@
 #as: --gsframe
-#warning: skipping SFrame FDE due to DWARF CFI op 0xe
+#warning: skipping SFrame FDE; CFI insn DW_CFA_def_cfa_offset \(0xe\)
 #objdump: --sframe=.sframe
 #name: SFrame supports only FP/SP based CFA
 #...
