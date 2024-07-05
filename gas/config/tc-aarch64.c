@@ -3943,10 +3943,10 @@ parse_shifter_zt0_with_bit_index (char **str,
       return true;
     }
 
-  int64_t index;
-  if (!parse_index_expression (str, &index))
+  int64_t idx;
+  if (!parse_index_expression (str, &idx))
       return false;
-  operand->imm.value = index;
+  operand->imm.value = idx;
 
   if (!skip_past_comma (str))
       return true;
