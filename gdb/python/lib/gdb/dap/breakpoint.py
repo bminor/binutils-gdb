@@ -104,11 +104,16 @@ breakpoint_map = {}
 @in_gdb_thread
 def _breakpoint_descriptor(bp):
     "Return the Breakpoint object descriptor given a gdb Breakpoint."
+    # If there are no objfiles (that is, before the launch request),
+    # we consider all breakpoints to be pending.  This is done to work
+    # around the gdb oddity that setting a breakpoint by address will
+    # always succeed.
+    pending = bp.pending or len(gdb.objfiles()) == 0
     result = {
         "id": bp.number,
-        "verified": not bp.pending,
+        "verified": not pending,
     }
-    if bp.pending:
+    if pending:
         result["reason"] = "pending"
     if bp.locations:
         # Just choose the first location, because DAP doesn't allow
