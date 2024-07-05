@@ -57,6 +57,12 @@ foreach spec $bps {
 	    gdb_assert {[dict get $spec source path] != "null"} \
 		"breakpoint $i path"
 	}
+
+	# Breakpoint should be unverified and pending.
+	gdb_assert {[dict get $spec verified] == "false"} \
+	    "catchpoint $i is unverified"
+	gdb_assert {[dict get $spec reason] == "pending"} \
+	    "catchpoint $i is pending"
     }
     incr i
 }

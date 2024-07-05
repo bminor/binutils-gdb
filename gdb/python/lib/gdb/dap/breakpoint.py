@@ -381,9 +381,12 @@ def _catch_exception(filterId, **args):
     else:
         raise DAPException("Invalid exception filterID: " + str(filterId))
     result = exec_mi_and_log(cmd)
+    # While the Ada catchpoints emit a "bkptno" field here, the C++
+    # ones do not.  So, instead we look at the "number" field.
+    num = result["bkpt"]["number"]
     # A little lame that there's no more direct way.
     for bp in gdb.breakpoints():
-        if bp.number == result["bkptno"]:
+        if bp.number == num:
             return bp
     # Not a DAPException because this is definitely unexpected.
     raise Exception("Could not find catchpoint after creating")

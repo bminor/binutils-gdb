@@ -37,6 +37,16 @@ set bps [dict get [lindex $obj 0] body breakpoints]
 # breakpoints.
 gdb_assert {[llength $bps] == 3} "three breakpoints"
 
+# Each breakpoint should be unverified and pending.
+foreach bp $bps {
+    with_test_prefix [dict get $bp id] {
+	gdb_assert {[dict get $bp verified] == "false"} \
+	    "catchpoint is unverified"
+	gdb_assert {[dict get $bp reason] == "pending"} \
+	    "catchpoint is pending"
+    }
+}
+
 dap_check_request_and_response "configurationDone" configurationDone
 
 if {[dap_launch $testfile] == ""} {
