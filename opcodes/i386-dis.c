@@ -1809,6 +1809,8 @@ struct dis386 {
 	   in MAP4.
    "ZU" => print 'zu' if EVEX.ZU=1.
    "SC" => print suffix SCC for SCC insns
+   "SW" => print '.s' to indicate operands were swapped when suffix_always is
+	   true.
    "YK" keep unused, to avoid ambiguity with the combined use of Y and K.
    "YX" keep unused, to avoid ambiguity with the combined use of Y and X.
    "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand, cond
@@ -10927,6 +10929,14 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 		*ins->obufp++ = ins->vex.w ? 'd': 's';
 	      else if (last[0] == 'B')
 		*ins->obufp++ = ins->vex.w ? 'w': 'b';
+	      else if (last[0] == 'S')
+		{
+		  if (ins->modrm.mod == 3 && (sizeflag & SUFFIX_ALWAYS))
+		    {
+		      *ins->obufp++ = '.';
+		      *ins->obufp++ = 's';
+		    }
+		}
 	      else
 		abort ();
 	    }

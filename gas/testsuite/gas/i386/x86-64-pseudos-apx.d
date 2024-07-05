@@ -80,6 +80,11 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 dc 7c 08 21 cf[	 ]+andl   %ecx,%r31d
 [	 ]*[a-f0-9]+:[	 ]*67 62 64 7c 08 23 39[	 ]+andl   \(%ecx\),%r31d
 [	 ]*[a-f0-9]+:[	 ]*67 62 64 7c 08 21 39[	 ]+andl   %r31d,\(%ecx\)
+[	 ]*[a-f0-9]+:[	 ]*62 dc 04 0a 39 cf[	 ]+ccmptl \{dfv=\} %ecx,%r31d
+[	 ]*[a-f0-9]+:[	 ]*62 64 04 0a 3b f9[	 ]+ccmptl.s \{dfv=\} %ecx,%r31d
+[	 ]*[a-f0-9]+:[	 ]*62 dc 04 0a 39 cf[	 ]+ccmptl \{dfv=\} %ecx,%r31d
+[	 ]*[a-f0-9]+:[	 ]*67 62 64 04 0a 3b 39[	 ]+ccmptl \{dfv=\} \(%ecx\),%r31d
+[	 ]*[a-f0-9]+:[	 ]*67 62 64 04 0a 39 39[	 ]+ccmptl \{dfv=\} %r31d,\(%ecx\)
 [	 ]*[a-f0-9]+:[	 ]*62 dc 7c 08 09 cf[	 ]+orl    %ecx,%r31d
 [	 ]*[a-f0-9]+:[	 ]*62 64 7c 08 0b f9[	 ]+orl.s  %ecx,%r31d
 [	 ]*[a-f0-9]+:[	 ]*62 dc 7c 08 09 cf[	 ]+orl    %ecx,%r31d
@@ -149,10 +154,14 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 44 fc 10 33 38[	 ]+xorq   \(%r8\),%r31,%r16
 [	 ]*[a-f0-9]+:[	 ]*62 44 fc 10 31 38[	 ]+xorq   %r31,\(%r8\),%r16
 [	 ]*[a-f0-9]+:[	 ]*62 44 fc 10 33 38[	 ]+xorq   \(%r8\),%r31,%r16
+[	 ]*[a-f0-9]+:[	 ]*62 f4 04 02 39 d0[	 ]+ccmpbl \{dfv=\} %edx,%eax
+[	 ]*[a-f0-9]+:[	 ]*62 f4 04 02 3b c2[	 ]+ccmpbl.s \{dfv=\} %edx,%eax
+[	 ]*[a-f0-9]+:[	 ]*62 f4 04 02 39 d0[	 ]+ccmpbl \{dfv=\} %edx,%eax
+[	 ]*[a-f0-9]+:[	 ]*67 62 f4 04 02 3b 02[	 ]+ccmpbl \{dfv=\} \(%edx\),%eax
+[	 ]*[a-f0-9]+:[	 ]*67 62 f4 04 02 39 02[	 ]+ccmpbl \{dfv=\} %eax,\(%edx\)
 [	 ]*[a-f0-9]+:[	 ]*62 f4 7c 08 42 c2[	 ]+cfcmovbl %edx,%eax
 [	 ]*[a-f0-9]+:[	 ]*62 f4 7c 08 42 c2[	 ]+cfcmovbl %edx,%eax
 [	 ]*[a-f0-9]+:[	 ]*62 f4 7c 0c 42 d0[	 ]+cfcmovbl.s %edx,%eax
 [	 ]*[a-f0-9]+:[	 ]*67 62 f4 7c 08 42 02[	 ]+cfcmovbl \(%edx\),%eax
 [	 ]*[a-f0-9]+:[	 ]*67 62 f4 7c 0c 42 02[	 ]+cfcmovbl %eax,\(%edx\)
-
 #pass
