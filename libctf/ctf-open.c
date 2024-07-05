@@ -1474,18 +1474,12 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
      First, we validate the preamble (common to all versions).  At that point,
      we know the endianness and specific header version, and can validate the
-     version-specific parts including section offsets and alignments.
-
-     We specifically do not support foreign-endian old versions.  */
+     version-specific parts including section offsets and alignments.  */
 
   if (_libctf_unlikely_ (pp->ctp_magic != CTF_MAGIC))
     {
       if (pp->ctp_magic == bswap_16 (CTF_MAGIC))
-	{
-	  if (pp->ctp_version != CTF_VERSION_3)
-	    return (ctf_set_open_errno (errp, ECTF_CTFVERS));
-	  foreign_endian = 1;
-	}
+	foreign_endian = 1;
       else
 	return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
     }
