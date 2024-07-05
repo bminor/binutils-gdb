@@ -217,3 +217,10 @@ def exec_and_log(cmd, propagate_exception=False):
             raise DAPException(str(e)) from e
         else:
             log_stack()
+
+
+@in_gdb_thread
+def exec_mi_and_log(*args):
+    """Wrap gdb.execute_mi, logging the command."""
+    log("+++ " + str(args))
+    return gdb.execute_mi(*args)

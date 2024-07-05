@@ -23,7 +23,14 @@ import gdb
 
 from .server import capability, request, send_event
 from .sources import make_source
-from .startup import DAPException, LogLevel, in_gdb_thread, log_stack, parse_and_eval
+from .startup import (
+    DAPException,
+    LogLevel,
+    exec_mi_and_log,
+    in_gdb_thread,
+    log_stack,
+    parse_and_eval,
+)
 from .typecheck import type_check
 
 # True when suppressing new breakpoint events.
@@ -368,7 +375,7 @@ def _catch_exception(filterId, **args):
         cmd = "-catch-" + filterId
     else:
         raise DAPException("Invalid exception filterID: " + str(filterId))
-    result = gdb.execute_mi(cmd)
+    result = exec_mi_and_log(cmd)
     # A little lame that there's no more direct way.
     for bp in gdb.breakpoints():
         if bp.number == result["bkptno"]:
