@@ -899,6 +899,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       unsigned int r_type;
       unsigned int r_symndx;
       struct elf_link_hash_entry *h;
+      bool is_abs_symbol = false;
       Elf_Internal_Sym *isym = NULL;
 
       r_symndx = ELFNN_R_SYM (rel->r_info);
@@ -917,6 +918,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (isym == NULL)
 	    return false;
 
+	  is_abs_symbol = isym->st_shndx == SHN_ABS;
 	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
 	    {
 	      h = elfNN_loongarch_get_local_sym_hash (htab, abfd, rel, true);
@@ -935,6 +937,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  is_abs_symbol = bfd_is_abs_symbol (&h->root);
 	}
 
       /* It is referenced by a non-shared object.  */
@@ -1142,13 +1145,6 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      && bfd_link_pic (info)
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
-	      bool is_abs_symbol = false;
-
-	      if (r_symndx < symtab_hdr->sh_info)
-		is_abs_symbol = isym->st_shndx == SHN_ABS;
-	      else
-		is_abs_symbol = bfd_is_abs_symbol (&h->root);
-
 	      if (!is_abs_symbol)
 		{
 		  _bfd_error_handler
@@ -1164,6 +1160,10 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* Fall through.  */
 	case R_LARCH_JUMP_SLOT:
 	case R_LARCH_64:
+
+	  /* Resolved to const.  */
+	  if (is_abs_symbol)
+	    break;
 
 	  need_dynreloc = 1;
 

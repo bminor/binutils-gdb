@@ -141,6 +141,7 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "relr-discard-shared"
     run_dump_test "relr-got-shared"
     run_dump_test "relr-text-shared"
+    run_dump_test "abssym_shared"
   }
 
   if [check_pie_support] {
@@ -149,6 +150,7 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "relr-discard-pie"
     run_dump_test "relr-got-pie"
     run_dump_test "relr-text-pie"
+    run_dump_test "abssym_pie"
   }
 
   run_dump_test "max_imm_b16"
