@@ -3397,6 +3397,12 @@ aarch64_decode_variant_using_iclass (aarch64_inst *inst)
       i = extract_field (FLD_SVE_tszh, inst->value, 0);
       goto sve_shift;
 
+    case sme_size_12_bh:
+      variant = extract_field (FLD_S, inst->value, 0);
+      if (variant > 1)
+	return false;
+      break;
+
     case sme_size_12_bhs:
       variant = extract_field (FLD_SME_size_12, inst->value, 0);
       if (variant >= 3)

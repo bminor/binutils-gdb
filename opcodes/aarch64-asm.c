@@ -2139,6 +2139,10 @@ aarch64_encode_variant_using_iclass (struct aarch64_inst *inst)
       /* The variant is encoded as part of the immediate.  */
       break;
 
+    case sme_size_12_bh:
+      insert_field (FLD_S, &inst->value, aarch64_get_variant (inst), 0);
+      break;
+
     case sme_size_12_bhs:
     case sme_size_12_b:
       insert_field (FLD_SME_size_12, &inst->value,

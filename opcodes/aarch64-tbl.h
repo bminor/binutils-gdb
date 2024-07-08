@@ -2084,6 +2084,11 @@
 {                                                       \
   QLF3(S_B,NIL,NIL),                                    \
 }
+#define OP_SVE_VUU_BH					\
+{                                                       \
+  QLF3(S_B,NIL,NIL),                                    \
+  QLF3(S_H,NIL,NIL),                                    \
+}
 #define OP_SVE_VUU_BHS                                  \
 {                                                       \
   QLF3(S_B,NIL,NIL),                                    \
@@ -6640,6 +6645,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2p1_INSN ("movaz", 0xc0460200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsh_1), OP_SVE_HH, 0, 0),
   SME2p1_INSN ("movaz", 0xc0860200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrss_1), OP_SVE_SS, 0, 0),
   SME2p1_INSN ("movaz", 0xc0c60200, 0xffff1f01, sme2_movaz, 0, OP2 (SME_Zdnx2, SME_ZA_array_vrsd_1), OP_SVE_DD, 0, 0),
+
+  SME2p1_INSN ("luti2", 0xc09c4000, 0xfffc4c08, sme_size_12_bh, 0, OP3 (SME_Ztx2_STRIDED, SME_ZT0, SME_Zn_INDEX3_15), OP_SVE_VUU_BH, 0, 0),
+  SME2p1_INSN ("luti2", 0xc09c8000, 0xfffccc0c, sme_size_12_bh, 0, OP3 (SME_Ztx4_STRIDED, SME_ZT0, SME_Zn_INDEX2_16), OP_SVE_VUU_BH, 0, 0),
+  SME2p1_INSN ("luti4", 0xc09a4000, 0xfffe4c08, sme_size_12_bh, 0, OP3 (SME_Ztx2_STRIDED, SME_ZT0, SME_Zn_INDEX2_15), OP_SVE_VUU_BH, 0, 0),
+  SME2p1_INSN ("luti4", 0xc09a9000, 0xfffefc0c, sme_misc, 0, OP3 (SME_Ztx4_STRIDED, SME_ZT0, SME_Zn_INDEX1_16), OP_SVE_HUU, 0, 0),
 
 /* SVE2p1 Instructions.  */
   SVE2p1_INSN("addqv",0x04052000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, 0),

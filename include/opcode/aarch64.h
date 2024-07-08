@@ -1067,6 +1067,7 @@ enum aarch64_insn_class
   sme_ldr,
   sme_psel,
   sme_shift,
+  sme_size_12_bh,
   sme_size_12_bhs,
   sme_size_12_hs,
   sme_size_12_b,
