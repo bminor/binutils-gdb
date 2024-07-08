@@ -39,6 +39,11 @@ if {[dap_initialize] == ""} {
     return
 }
 
+set obj [dap_check_request_and_response "set breakpoint on main" \
+	     setFunctionBreakpoints \
+	     {o breakpoints [a [o name [s main]]]}]
+set fn_bpno [dap_get_breakpoint_number $obj]
+
 set obj [dap_check_request_and_response "set breakpoint by address" \
 	     setInstructionBreakpoints \
 	     [format {o breakpoints [a [o instructionReference [s %s]]]} \
@@ -54,15 +59,20 @@ dap_check_request_and_response "configurationDone" configurationDone
 if {[dap_launch $testfile] == ""} {
     return
 }
-dap_wait_for_event_and_check "inferior started" thread "body reason" started
 
-# While waiting for the stopped event, we should receive breakpoint
-# changed events.
+# The event we're looking for should occur during startup, but we want
+# to leave open the possibility that it occurs when waiting for the
+# stopped event.  So, keep both event lists around and search them
+# once below.
+lassign [dap_wait_for_event_and_check "inferior started" \
+	     thread "body reason" started] \
+    unused objs1
 lassign [dap_wait_for_event_and_check "stopped at breakpoint" stopped \
 	    "body reason" breakpoint \
-	    "body hitBreakpointIds" $bpno] unused objs
+	    "body hitBreakpointIds" $fn_bpno] unused objs2
+
 set found_bp_event 0
-foreach obj $objs {
+foreach obj [concat $objs1 $objs2] {
     if { [dict get $obj "type"] != "event" } {
 	continue
     }
@@ -78,11 +88,11 @@ foreach obj $objs {
     }
 
     set breakpoint [dict get $body breakpoint]
-    gdb_assert {[dict get $breakpoint id] == $bpno} \
-	"breakpoint modification event has correct id"
-    gdb_assert {[dict get $breakpoint source name] == "basic-dap.c"} \
-	"breakpoint modification event has source"
-    set found_bp_event 1
+    if {[dict get $breakpoint id] == $bpno} {
+	gdb_assert {[dict get $breakpoint source name] == "basic-dap.c"} \
+	    "breakpoint modification event has source"
+	set found_bp_event 1
+    }
 }
 
 gdb_assert {$found_bp_event} "found the breakpoint event"
