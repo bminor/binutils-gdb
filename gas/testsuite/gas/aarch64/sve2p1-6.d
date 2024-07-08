@@ -1,4 +1,4 @@
-#name: Test of SVE2.1 tblq, uzpq[1-2] and zipq[1-2] instruction.
+#name: Test of SVE2.1 tblq, tbxq, uzpq[1-2] and zipq[1-2] instruction.
 #as: -march=armv9.4-a
 #objdump: -dr
 
@@ -16,6 +16,14 @@
 .*:	44dffbff 	tblq	z31.d, {z31.d}, z31.d
 .*:	444ff945 	tblq	z5.h, {z10.h}, z15.h
 .*:	4487f861 	tblq	z1.s, {z3.s}, z7.s
+.*:	05203400 	tbxq	z0.b, z0.b, z0.b
+.*:	0520341f 	tbxq	z31.b, z0.b, z0.b
+.*:	05e03400 	tbxq	z0.d, z0.d, z0.d
+.*:	052037e0 	tbxq	z0.b, z31.b, z0.b
+.*:	053f3400 	tbxq	z0.b, z0.b, z31.b
+.*:	05ff37ff 	tbxq	z31.d, z31.d, z31.d
+.*:	05af3545 	tbxq	z5.s, z10.s, z15.s
+.*:	057435ea 	tbxq	z10.h, z15.h, z20.h
 .*:	4400e800 	uzpq1	z0.b, z0.b, z0.b
 .*:	4400e81f 	uzpq1	z31.b, z0.b, z0.b
 .*:	44c0e800 	uzpq1	z0.d, z0.d, z0.d
