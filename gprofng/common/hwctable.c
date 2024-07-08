@@ -1304,6 +1304,7 @@ static Hwcentry	generic_list[] = {
 
 #include "hwc_amd_zen3.h"
 #include "hwc_amd_zen4.h"
+#include "hwc_intel_icelake.h"
 
 /* structure defining the counters for a CPU type */
 typedef struct
@@ -1343,6 +1344,7 @@ static cpu_list_t cputabs[] = {
       "insts,,cycles,,l3m,,dtlbm", 0}},
   {CPC_INTEL_SKYLAKE, intelSkylakeList, {"insts,,cycles,,+l2m_latency,,dtlbm_stall",
       "insts,,cycles,,l2m_stall,,dtlbm_stall", 0}},
+  {CPC_INTEL_ICELAKE, intelIcelakeList, {"insts,,cycles,,dTLB-load-misses", 0}},
   {CPC_INTEL_UNKNOWN, intelLinuxUnknown, {"cycles,,insts,,llm",
       "user_time,,system_time,,cycles,,insts,,llm", 0}},
   {CPC_INTEL_ATOM, intelAtomList, {"insts", 0}},
@@ -1827,7 +1829,7 @@ setup_cpc_general (int skip_hwc_test)
   hwcdrv->hwcdrv_get_info (&cpcx_cpuver, &cpcx_cciname, &cpcx_npics,
 			   &cpcx_docref, &cpcx_support_bitmask);
 
-  /* Fix cpcx_cpuver for new Zen machines */
+  /* Fix cpcx_cpuver for new Zen and Intel machines */
   cpu_info_t *cpu_p = read_cpuinfo ();
   if (strcmp (cpu_p->cpu_vendorstr, "AuthenticAMD") == 0)
     {
@@ -1845,6 +1847,14 @@ setup_cpc_general (int skip_hwc_test)
 	    cpcx_cpuver = CPC_AMD_FAM_19H_ZEN4;
 	    break;
 	  }
+    }
+  else if (strcmp (cpu_p->cpu_vendorstr, "GenuineIntel") == 0)
+    {
+      if (cpu_p->cpu_family == 6)
+	{
+	  if (cpu_p->cpu_model == 106)
+	    cpcx_cpuver = CPC_INTEL_ICELAKE;
+	}
     }
 
 #ifdef DISALLOW_PENTIUM_PRO_MMX_7007575

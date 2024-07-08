@@ -107,6 +107,7 @@ extern cpu_info_t *read_cpuinfo();
 #define CPC_INTEL_HASWELL       2060
 #define CPC_INTEL_BROADWELL     2070
 #define CPC_INTEL_SKYLAKE       2080
+#define CPC_INTEL_ICELAKE       2081
 #define CPC_INTEL_UNKNOWN       2499
 #define CPC_AMD_K8C             2500 /* Opteron, Athlon... */
 #define CPC_AMD_FAM_10H         2501 /* Barcelona, Shanghai... */

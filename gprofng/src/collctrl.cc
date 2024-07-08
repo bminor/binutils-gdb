@@ -1688,8 +1688,9 @@ Coll_Ctrl::build_data_desc ()
 	    min_time = h->min_time_default;
 	  if (ii > 0)
 	    sb.append (',');
-	  sb.appendf ("%d:%d:%lld:%s:%s:%lld:%d:m%lld:%d:%d:0x%x",
+	  sb.appendf ("%d:%d:%lld:%lld:%s:%s:%lld:%d:m%lld:%d:%d:0x%x",
 		  h->use_perf_event_type, h->type, (long long) h->config,
+		  (long long) h->config1,
 		  strcmp (h->name, h->int_name) ? h->name : "",
 		  h->int_name, (long long) h->reg_num, h->val,
 		  (long long) min_time, ii, /*tag*/ h->timecvt, h->memop);

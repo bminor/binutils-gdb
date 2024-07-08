@@ -3017,8 +3017,7 @@ core_pcbe_get_eventnum (const char *eventname, uint_t pmc, eventsel_t *eventnum,
 	  return 0;
 	}
     }
-  *eventnum = (eventsel_t) - 1;
-  return -1;
+  return 0;
 }
 
 static hdrv_pcbe_api_t hdrv_pcbe_core_api = {

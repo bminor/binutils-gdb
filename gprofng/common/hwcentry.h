@@ -118,6 +118,7 @@ extern "C"
     unsigned int use_perf_event_type : 16; /* Set 1 to use two fields below */
     unsigned int type : 16; /* Type of perf_event_attr */
     long long config;   /* perf_event_type -specific configuration */
+    long long config1;  /* perf_event_type -specific configuration */
     int sort_order;     /* "tag" to associate experiment record with HWC def */
     hrtime_t min_time;  /* target minimum time between overflow events.  0 is off.  See HWCTIME_* macros */
     hrtime_t min_time_default; /* if min_time==HWCTIME_AUTO, use this value instead.  0 is off. */

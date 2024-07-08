@@ -215,29 +215,29 @@ set_x86_attr_bits (eventsel_t *result_mask, eventsel_t evnt_valid_umask,
 }
 
 static int
-hwcfuncs_get_x86_eventsel (unsigned int regno, const char *int_name,
+hwcfuncs_get_x86_eventsel (Hwcentry *h,
 			   eventsel_t *return_event, uint_t *return_pmc_sel)
 {
   hwcfuncs_attr_t attrs[HWCFUNCS_MAX_ATTRS + 1];
   unsigned nattrs = 0;
   char *nameOnly = NULL;
-  eventsel_t evntsel = 0; // event number
+  eventsel_t evntsel = h->config;
   eventsel_t evnt_valid_umask = 0;
   uint_t pmc_sel = 0;
   int rc = -1;
   *return_event = 0;
   *return_pmc_sel = 0;
-  void *attr_mem = hwcfuncs_parse_attrs (int_name, attrs, HWCFUNCS_MAX_ATTRS,
+  void *attr_mem = hwcfuncs_parse_attrs (h->int_name, attrs, HWCFUNCS_MAX_ATTRS,
 				   &nattrs, NULL);
   if (!attr_mem)
     {
       logerr (GTXT ("out of memory, could not parse attributes\n"));
       return -1;
     }
-  hwcfuncs_parse_ctr (int_name, NULL, &nameOnly, NULL, NULL, NULL);
+  hwcfuncs_parse_ctr (h->int_name, NULL, &nameOnly, NULL, NULL, NULL);
 
   /* look up evntsel */
-  if (myperfctr_get_x86_eventnum (nameOnly, regno,
+  if (myperfctr_get_x86_eventnum (nameOnly, h->reg_num,
 				  &evntsel, &evnt_valid_umask, &pmc_sel))
     {
       logerr (GTXT ("counter `%s' is not valid\n"), nameOnly);
@@ -335,6 +335,7 @@ typedef struct
   hrtime_t min_time;            // minimum time we're targeting between events
   char *name;
 } perf_event_def_t;
+static perf_event_def_t event_def_0;
 
 typedef struct
 { // runtime state of perf_event buffer
@@ -601,11 +602,17 @@ static void
 init_perf_event (struct perf_event_attr *hw, uint64_t event, uint64_t period,
 		 Hwcentry *hwce)
 {
-  memset (hw, 0, sizeof (struct perf_event_attr));
-  hw->size = sizeof (struct perf_event_attr);
+  static struct perf_event_attr perf_event_attr_0 = {
+    .size = sizeof (struct perf_event_attr),
+    .disabled = 1, /* off by default */
+    .exclude_hv = 1,
+    .wakeup_events = 1 /* wakeup every n events */
+  };
+  *hw = perf_event_attr_0;
   if (hwce && hwce->use_perf_event_type)
     {
       hw->config = hwce->config;
+      hw->config1 = hwce->config1;
       hw->type = hwce->type;
     }
   else
@@ -632,13 +639,10 @@ init_perf_event (struct perf_event_attr *hw, uint64_t event, uint64_t period,
 	  // PERF_FORMAT_ID		|
 	  // PERF_FORMAT_GROUP		|
 	  0;
-  hw->disabled = 1; /* off by default */
 
   // Note: the following override config.priv bits!
   hw->exclude_user = (event & (1 << 16)) == 0;      /* don't count user */
   hw->exclude_kernel = (event & (1 << 17)) == 0;    /* ditto kernel */
-  hw->exclude_hv = 1;       /* ditto hypervisor */
-  hw->wakeup_events = 1;    /* wakeup every n events */
   dump_perf_event_attr (hw);
 }
 
@@ -773,8 +777,7 @@ hdrv_pcl_internal_open ()
     }
 
   // determine if PCL is available
-  perf_event_def_t tmp_event_def;
-  memset (&tmp_event_def, 0, sizeof (tmp_event_def));
+  perf_event_def_t tmp_event_def = event_def_0;
   struct perf_event_attr *pe_attr = &tmp_event_def.hw;
   init_perf_event (pe_attr, 0, 0, NULL);
   pe_attr->type = PERF_TYPE_HARDWARE; // specify abstracted HW event
@@ -1186,11 +1189,10 @@ hwcdrv_create_counters (unsigned hwcdef_cnt, Hwcentry *hwcdef)
   for (unsigned idx = 0; idx < hwcdef_cnt; idx++)
     {
       perf_event_def_t *glb_event_def = &global_perf_event_def[idx];
-      memset (glb_event_def, 0, sizeof (perf_event_def_t));
+      *glb_event_def = event_def_0;
       unsigned int pmc_sel;
       eventsel_t evntsel;
-      if (hwcfuncs_get_x86_eventsel (hwcdef[idx].reg_num,
-				     hwcdef[idx].int_name, &evntsel, &pmc_sel))
+      if (hwcfuncs_get_x86_eventsel (hwcdef + idx, &evntsel, &pmc_sel))
 	{
 	  TprintfT (0, "hwcdrv: ERROR: hwcfuncs_get_x86_eventsel() failed\n");
 	  return HWCFUNCS_ERROR_HWCARGS;

@@ -293,6 +293,12 @@ process_data_descriptor (const char *defstring)
 	  err = HWCFUNCS_ERROR_HWCARGS;
 	  break;
 	}
+      hwcdef[idx].config1 = strtol (dsp, &dsp, 0);
+      if (*dsp++ != ':')
+	{
+	  err = HWCFUNCS_ERROR_HWCARGS;
+	  break;
+	}
 
       /* name */
       name = dsp;
