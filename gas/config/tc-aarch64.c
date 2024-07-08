@@ -113,6 +113,7 @@ enum vector_el_type
 #define NTA_HASTYPE     1
 #define NTA_HASINDEX    2
 #define NTA_HASVARWIDTH 4
+#define NTA_NOINDEX    8
 
 struct vector_type_el
 {
@@ -1185,11 +1186,15 @@ parse_index_expression (char **str, int64_t *imm)
    register index.
 
    FLAGS includes PTR_GOOD_MATCH if we are sufficiently far into parsing
-   an operand that we can be confident that it is a good match.  */
+   an operand that we can be confident that it is a good match.
+
+   FLAGS includes PTR_OPTIONAL_INDEX to handle instructions with optional index
+   operands.  */
 
 #define PTR_IN_REGLIST (1U << 0)
 #define PTR_FULL_REG (1U << 1)
 #define PTR_GOOD_MATCH (1U << 2)
+#define PTR_OPTIONAL_INDEX (1U << 3)
 
 static const reg_entry *
 parse_typed_reg (char **ccp, aarch64_reg_type type,
@@ -1277,7 +1282,10 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
       atype.width = parsetype.width;
     }
 
-  if (!(flags & PTR_FULL_REG) && skip_past_char (&str, '['))
+  if ((flags & PTR_OPTIONAL_INDEX) && (*str == '\0' || *str == ','))
+    atype.defined |= NTA_NOINDEX;
+  else if ((!(flags & PTR_FULL_REG) || (flags & PTR_OPTIONAL_INDEX))
+	    && skip_past_char (&str, '['))
     {
       /* Reject Sn[index] syntax.  */
       if (reg->type != REG_TYPE_Z
@@ -6886,6 +6894,20 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  reg_type = REG_TYPE_Z;
 	  goto vector_reg_index;
 
+	case AARCH64_OPND_SVE_Zn0_INDEX:
+	case AARCH64_OPND_SVE_Zn1_17_INDEX:
+	case AARCH64_OPND_SVE_Zn2_18_INDEX:
+	case AARCH64_OPND_SVE_Zn3_22_INDEX:
+	case AARCH64_OPND_SVE_Zd0_INDEX:
+	case AARCH64_OPND_SVE_Zd1_17_INDEX:
+	case AARCH64_OPND_SVE_Zd2_18_INDEX:
+	case AARCH64_OPND_SVE_Zd3_22_INDEX:
+	  reg_type = REG_TYPE_Z;
+	  reg = parse_typed_reg (&str, reg_type, &vectype, PTR_OPTIONAL_INDEX);
+	  if (!reg || !(vectype.defined & (NTA_HASINDEX | NTA_NOINDEX)))
+	    goto failure;
+	  goto vector_reg_optional_index;
+
 	case AARCH64_OPND_Ed:
 	case AARCH64_OPND_En:
 	case AARCH64_OPND_Em:
@@ -6899,7 +6921,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 	  if (!(vectype.defined & NTA_HASINDEX))
 	    goto failure;
-
+	vector_reg_optional_index:
 	  if (reg->type == REG_TYPE_Z && vectype.type == NT_invtype)
 	    /* Unqualified Zn[index] is allowed in LUTI2 instructions.  */
 	    info->qualifier = AARCH64_OPND_QLF_NIL;

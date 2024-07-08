@@ -687,12 +687,14 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 267:
     case 268:
     case 269:
+    case 303:
+    case 307:
       return aarch64_ins_regno (self, info, code, inst, errors);
     case 6:
     case 119:
     case 120:
-    case 305:
-    case 308:
+    case 313:
+    case 316:
       return aarch64_ins_none (self, info, code, inst, errors);
     case 17:
       return aarch64_ins_reg_extended (self, info, code, inst, errors);
@@ -707,7 +709,7 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 37:
     case 38:
     case 39:
-    case 310:
+    case 318:
       return aarch64_ins_reglane (self, info, code, inst, errors);
     case 40:
     case 41:
@@ -734,6 +736,12 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 300:
     case 301:
     case 302:
+    case 304:
+    case 305:
+    case 306:
+    case 308:
+    case 309:
+    case 310:
       return aarch64_ins_simple_index (self, info, code, inst, errors);
     case 43:
       return aarch64_ins_reglist (self, info, code, inst, errors);
@@ -784,13 +792,13 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 211:
     case 212:
     case 272:
-    case 303:
-    case 304:
-    case 306:
-    case 307:
-    case 309:
+    case 311:
+    case 312:
     case 314:
     case 315:
+    case 317:
+    case 322:
+    case 323:
       return aarch64_ins_imm (self, info, code, inst, errors);
     case 52:
     case 53:
@@ -1002,16 +1010,16 @@ aarch64_insert_operand (const aarch64_operand *self,
       return aarch64_ins_sme_pred_reg_with_index (self, info, code, inst, errors);
     case 284:
       return aarch64_ins_plain_shrimm (self, info, code, inst, errors);
-    case 311:
-    case 312:
-    case 313:
-      return aarch64_ins_x0_to_x30 (self, info, code, inst, errors);
-    case 316:
-    case 317:
-    case 318:
     case 319:
-      return aarch64_ins_rcpc3_addr_opt_offset (self, info, code, inst, errors);
     case 320:
+    case 321:
+      return aarch64_ins_x0_to_x30 (self, info, code, inst, errors);
+    case 324:
+    case 325:
+    case 326:
+    case 327:
+      return aarch64_ins_rcpc3_addr_opt_offset (self, info, code, inst, errors);
+    case 328:
       return aarch64_ins_rcpc3_addr_offset (self, info, code, inst, errors);
     default: assert (0); abort ();
     }

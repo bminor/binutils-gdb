@@ -867,6 +867,14 @@ enum aarch64_opnd
   AARCH64_OPND_SME_Zn_INDEX3_14,    /* Zn[index], bits [9:5] and [16:14].  */
   AARCH64_OPND_SME_Zn_INDEX3_15,    /* Zn[index], bits [9:5] and [17:15].  */
   AARCH64_OPND_SME_Zn_INDEX4_14,    /* Zn[index], bits [9:5] and [17:14].  */
+  AARCH64_OPND_SVE_Zn0_INDEX,	    /* Zn[index], bits [9:5].  */
+  AARCH64_OPND_SVE_Zn1_17_INDEX,    /* Zn[index], bits [9:5,17].  */
+  AARCH64_OPND_SVE_Zn2_18_INDEX,    /* Zn[index], bits [9:5,18:17].  */
+  AARCH64_OPND_SVE_Zn3_22_INDEX,    /* Zn[index], bits [9:5,18:17,22].  */
+  AARCH64_OPND_SVE_Zd0_INDEX,	    /* Zn[index], bits [4:0].  */
+  AARCH64_OPND_SVE_Zd1_17_INDEX,    /* Zn[index], bits [4:0,17].  */
+  AARCH64_OPND_SVE_Zd2_18_INDEX,    /* Zn[index], bits [4:0,18:17].  */
+  AARCH64_OPND_SVE_Zd3_22_INDEX,    /* Zn[index], bits [4:0,18:17,22].  */
   AARCH64_OPND_SME_VLxN_10,	/* VLx2 or VLx4, in bit 10.  */
   AARCH64_OPND_SME_VLxN_13,	/* VLx2 or VLx4, in bit 13.  */
   AARCH64_OPND_SME_ZT0,		/* The fixed token zt0/ZT0 (not encoded).  */

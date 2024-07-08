@@ -387,6 +387,8 @@ const aarch64_field fields[] =
     {  5, 14 },	/* imm14: in test bit and branch instructions.  */
     {  0, 16 },	/* imm16_0: in udf instruction. */
     {  5, 16 },	/* imm16_5: in exception instructions.  */
+    { 17,  1 }, /* imm17_1: in 1 bit element index.  */
+    { 17,  2 }, /* imm17_2: in 2 bits element index.  */
     {  5, 19 },	/* imm19: e.g. in CBZ.  */
     {  0, 26 },	/* imm26: in unconditional branch instructions.  */
     { 16,  3 },	/* immb: in advsimd shift by immediate instructions.  */
@@ -1874,6 +1876,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SME_Zn_INDEX3_14:
 	case AARCH64_OPND_SME_Zn_INDEX3_15:
 	case AARCH64_OPND_SME_Zn_INDEX4_14:
+	case AARCH64_OPND_SVE_Zn0_INDEX:
+	case AARCH64_OPND_SVE_Zn1_17_INDEX:
+	case AARCH64_OPND_SVE_Zn2_18_INDEX:
+	case AARCH64_OPND_SVE_Zn3_22_INDEX:
+	case AARCH64_OPND_SVE_Zd0_INDEX:
+	case AARCH64_OPND_SVE_Zd1_17_INDEX:
+	case AARCH64_OPND_SVE_Zd2_18_INDEX:
+	case AARCH64_OPND_SVE_Zd3_22_INDEX:
 	  size = get_operand_fields_width (get_operand_from_code (type)) - 5;
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31,
 			      0, (1 << size) - 1))
@@ -4248,11 +4258,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zt:
     case AARCH64_OPND_SME_Zm:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
-	snprintf (buf, size, "%s", style_reg (styler, "z%d", opnd->reg.regno));
+       snprintf (buf, size, "%s", style_reg (styler, "z%d", opnd->reg.regno));
       else
-	snprintf (buf, size, "%s",
-		  style_reg (styler, "z%d.%s", opnd->reg.regno,
-			     aarch64_get_qualifier_name (opnd->qualifier)));
+       snprintf (buf, size, "%s",
+		 style_reg (styler, "z%d.%s", opnd->reg.regno,
+			    aarch64_get_qualifier_name (opnd->qualifier)));
       break;
 
     case AARCH64_OPND_SVE_ZnxN:
@@ -4305,6 +4315,22 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		 : style_reg (styler, "z%d.%s", opnd->reglane.regno,
 			      aarch64_get_qualifier_name (opnd->qualifier))),
 		style_imm (styler, "%" PRIi64, opnd->reglane.index));
+      break;
+
+    case AARCH64_OPND_SVE_Zn0_INDEX:
+    case AARCH64_OPND_SVE_Zn1_17_INDEX:
+    case AARCH64_OPND_SVE_Zn2_18_INDEX:
+    case AARCH64_OPND_SVE_Zn3_22_INDEX:
+    case AARCH64_OPND_SVE_Zd0_INDEX:
+    case AARCH64_OPND_SVE_Zd1_17_INDEX:
+    case AARCH64_OPND_SVE_Zd2_18_INDEX:
+    case AARCH64_OPND_SVE_Zd3_22_INDEX:
+      if (opnd->reglane.index == 0)
+	snprintf (buf, size, "%s", style_reg (styler, "z%d", opnd->reg.regno));
+      else
+	snprintf (buf, size, "%s[%s]",
+		  style_reg (styler, "z%d", opnd->reglane.regno),
+		  style_imm (styler, "%" PRIi64, opnd->reglane.index));
       break;
 
     case AARCH64_OPND_SME_ZAda_1b:
