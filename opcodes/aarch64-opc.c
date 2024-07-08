@@ -433,7 +433,11 @@ const aarch64_field fields[] =
     {  6,  1 }, /* ZAn: name of the bit encoded ZA tile.  */
     { 12,  4 },	/* opc2: in rcpc3 ld/st inst deciding the pre/post-index.  */
     { 30,  2 },	/* rcpc3_size: in rcpc3 ld/st, field controls Rt/Rt2 width.  */
-    { 5,  1 },	/* FLD_brbop: used in BRB to mean IALL or INJ.  */
+    {  5,  1 },	/* FLD_brbop: used in BRB to mean IALL or INJ.  */
+    {  8,  1 }, /* ZA8_1: name of the 1 bit encoded ZA tile ZA0-ZA1.  */
+    {  7,  2 }, /* ZA7_2: name of the 2 bits encoded ZA tile ZA0-ZA3.  */
+    {  6,  3 }, /* ZA6_3: name of the 3 bits encoded ZA tile ZA0-ZA7.  */
+    {  5,  4 }, /* ZA5_4: name of the 4 bits encoded ZA tile ZA0-ZA15.  */
 };
 
 enum aarch64_operand_class
@@ -2062,6 +2066,12 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 
 	case AARCH64_OPND_SME_ZA_array_vrsh_2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 1, 4,
+				get_opcode_dependent_value (opcode)))
+	    return 0;
+	  break;
+
+	case AARCH64_OPND_SME_ZA_ARRAY4:
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15, 1,
 				get_opcode_dependent_value (opcode)))
 	    return 0;
 	  break;
@@ -4408,6 +4418,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_ZA_array_vrsh_2:
     case AARCH64_OPND_SME_ZA_array_vrss_2:
     case AARCH64_OPND_SME_ZA_array_vrsd_2:
+    case AARCH64_OPND_SME_ZA_ARRAY4:
       snprintf (buf, size, "%s [%s, %s%s%s]",
 		style_reg (styler, "za%d%c%s%s",
 			   opnd->indexed_za.regno,

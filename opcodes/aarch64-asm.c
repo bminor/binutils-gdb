@@ -1521,6 +1521,49 @@ aarch64_ins_sme_za_vrs2 (const aarch64_operand *self,
   return true;
 }
 
+/* Encode in SME instruction such as MOVZA ZA tile slice to vector.  */
+bool
+aarch64_ins_sme_za_tile_to_vec (const aarch64_operand *self,
+				const aarch64_opnd_info *info,
+				aarch64_insn *code,
+				const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int fld_v = info->indexed_za.v;
+  int fld_rv = info->indexed_za.index.regno - 12;
+  int fld_zan_imm = info->indexed_za.index.imm;
+  int regno = info->indexed_za.regno;
+
+  switch (info->qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      insert_field (FLD_imm4_5, code, fld_zan_imm, 0);
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      insert_field (FLD_ZA8_1, code, regno, 0);
+      insert_field (FLD_imm3_5, code, fld_zan_imm, 0);
+      break;
+    case AARCH64_OPND_QLF_S_S:
+      insert_field (FLD_ZA7_2, code, regno, 0);
+      insert_field (FLD_off2, code, fld_zan_imm, 0);
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      insert_field (FLD_ZA6_3, code, regno, 0);
+      insert_field (FLD_ol, code, fld_zan_imm, 0);
+      break;
+    case AARCH64_OPND_QLF_S_Q:
+      insert_field (FLD_ZA5_4, code, regno, 0);
+      break;
+    default:
+      return false;
+    }
+
+  insert_field (self->fields[0], code, fld_v, 0);
+  insert_field (self->fields[1], code, fld_rv, 0);
+
+  return true;
+}
+
 /* Encode in SME instruction such as MOVA ZA tile vector register number,
    vector indicator, vector selector and immediate.  */
 bool

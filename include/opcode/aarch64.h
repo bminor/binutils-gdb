@@ -789,6 +789,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ZA_array_vrsh_2, /* Tile to vector, four registers (H).  */
   AARCH64_OPND_SME_ZA_array_vrss_2, /* Tile to vector, four registers (S). */
   AARCH64_OPND_SME_ZA_array_vrsd_2, /* Tile to vector, four registers (D).  */
+  AARCH64_OPND_SME_ZA_ARRAY4, /* Tile to vector, single (BHSDQ).  */
   AARCH64_OPND_SVE_Za_5,	/* SVE vector register in Za, bits [9,5].  */
   AARCH64_OPND_SVE_Za_16,	/* SVE vector register in Za, bits [20,16].  */
   AARCH64_OPND_SVE_Zd,		/* SVE vector register in Zd.  */

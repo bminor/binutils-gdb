@@ -235,6 +235,10 @@ enum aarch64_field_kind
   FLD_opc2,
   FLD_rcpc3_size,
   FLD_brbop,
+  FLD_ZA8_1,
+  FLD_ZA7_2,
+  FLD_ZA6_3,
+  FLD_ZA5_4,
 };
 
 /* Field description.  */

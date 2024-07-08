@@ -8181,6 +8181,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SME_ZA_array_vrsh_2:
 	case AARCH64_OPND_SME_ZA_array_vrss_2:
 	case AARCH64_OPND_SME_ZA_array_vrsd_2:
+	case AARCH64_OPND_SME_ZA_ARRAY4:
 	  if (!parse_dual_indexed_reg (&str, REG_TYPE_ZATHV,
 				       &info->indexed_za, &qualifier, 0))
 	    goto failure;

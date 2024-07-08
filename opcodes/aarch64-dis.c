@@ -1956,6 +1956,55 @@ aarch64_ext_sve_float_zero_one (const aarch64_operand *self,
   return true;
 }
 
+/* Decode SME instruction such as MOVZA ZA tile slice to vector.  */
+bool
+aarch64_ext_sme_za_tile_to_vec (const aarch64_operand *self,
+				aarch64_opnd_info *info, aarch64_insn code,
+				const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  aarch64_insn Qsize;		/* fields Q:S:size.  */
+  int fld_v = extract_field (self->fields[0], code, 0);
+  int fld_rv = extract_field (self->fields[1], code, 0);
+  int fld_zan_imm =  extract_field (FLD_imm4_5, code, 0);
+
+  Qsize = extract_fields (inst->value, 0, 2, FLD_SME_size_22, FLD_SME_Q);
+  switch (Qsize)
+    {
+    case 0x0:
+      info->qualifier = AARCH64_OPND_QLF_S_B;
+      info->indexed_za.regno = 0;
+      info->indexed_za.index.imm = fld_zan_imm;
+      break;
+    case 0x2:
+      info->qualifier = AARCH64_OPND_QLF_S_H;
+      info->indexed_za.regno = fld_zan_imm >> 3;
+      info->indexed_za.index.imm = fld_zan_imm & 0x07;
+      break;
+    case 0x4:
+      info->qualifier = AARCH64_OPND_QLF_S_S;
+      info->indexed_za.regno = fld_zan_imm >> 2;
+      info->indexed_za.index.imm = fld_zan_imm & 0x03;
+      break;
+    case 0x6:
+      info->qualifier = AARCH64_OPND_QLF_S_D;
+      info->indexed_za.regno = fld_zan_imm >> 1;
+      info->indexed_za.index.imm = fld_zan_imm & 0x01;
+      break;
+    case 0x7:
+      info->qualifier = AARCH64_OPND_QLF_S_Q;
+      info->indexed_za.regno = fld_zan_imm;
+      break;
+    default:
+      return false;
+    }
+
+  info->indexed_za.index.regno = fld_rv + 12;
+  info->indexed_za.v = fld_v;
+
+  return true;
+}
+
 /* Decode ZA tile vector, vector indicator, vector selector, qualifier and
    immediate on numerous SME instruction fields such as MOVA.  */
 bool
