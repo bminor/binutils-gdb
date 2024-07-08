@@ -40,3 +40,27 @@
 .*: Error: expected an SVE vector register at operand 2 -- `uzpq2 z0.h,{z0.h-z1.h},z0.h'
 .*: Error: expected an SVE vector register at operand 1 -- `uzpq2 {z0.s},z31.s,z0.b'
 .*: Error: expected an SVE vector register at operand 2 -- `uzpq2 z0.b,{z0.b},{z31.b}'
+.*: Error: expected an SVE vector register at operand 2 -- `zipq1 z0.s,{z0.b},z0.b'
+.*: Error: operand mismatch -- `zipq1 z31.s,z0.b,z0.h'
+.*: Info:    did you mean this\?
+.*: Info:    	zipq1 z31.b, z0.b, z0.b
+.*: Info:    other valid variant\(s\):
+.*: Info:    	zipq1 z31.h, z0.h, z0.h
+.*: Info:    	zipq1 z31.s, z0.s, z0.s
+.*: Info:    	zipq1 z31.d, z0.d, z0.d
+.*: Error: expected an SVE vector register at operand 2 -- `zipq1 z0.s,{z0.s,z1.s},z0.s'
+.*: Error: expected an SVE vector register at operand 2 -- `zipq1 z0.h,{z0.b-z1.h},z0.h'
+.*: Error: expected an SVE vector register at operand 1 -- `zipq1 {z0.s},z31.s,z0.b'
+.*: Error: expected an SVE vector register at operand 2 -- `zipq1 z0.b,{z0.b},{z31.b}'
+.*: Error: expected an SVE vector register at operand 2 -- `zipq2 z0.s,{z0.b},z0.b'
+.*: Error: operand mismatch -- `zipq2 z31.s,z0.b,z0.h'
+.*: Info:    did you mean this\?
+.*: Info:    	zipq2 z31.b, z0.b, z0.b
+.*: Info:    other valid variant\(s\):
+.*: Info:    	zipq2 z31.h, z0.h, z0.h
+.*: Info:    	zipq2 z31.s, z0.s, z0.s
+.*: Info:    	zipq2 z31.d, z0.d, z0.d
+.*: Error: expected an SVE vector register at operand 2 -- `zipq2 z0.s,{z0.s,z1.s},z0.s'
+.*: Error: expected an SVE vector register at operand 2 -- `zipq2 z0.h,{z0.b-z1.h},z0.h'
+.*: Error: expected an SVE vector register at operand 1 -- `zipq2 {z0.s},z31.s,z0.b'
+.*: Error: expected an SVE vector register at operand 2 -- `zipq2 z0.b,{z0.b},{z31.b}'
