@@ -1629,13 +1629,14 @@ check_reglist (const aarch64_opnd_info *opnd,
    - an initial immediate offset that is a multiple of RANGE_SIZE
      in the range [0, MAX_VALUE * RANGE_SIZE]
 
-   - a vector group size of GROUP_SIZE.  */
+   - a vector group size of GROUP_SIZE.
 
+   - STATUS_VG for cases where VGx2 or VGx4 is mandatory.  */
 static bool
 check_za_access (const aarch64_opnd_info *opnd,
 		 aarch64_operand_error *mismatch_detail, int idx,
 		 int min_wreg, int max_value, unsigned int range_size,
-		 int group_size)
+		 int group_size, bool status_vg)
 {
   if (!value_in_range_p (opnd->indexed_za.index.regno, min_wreg, min_wreg + 3))
     {
@@ -1687,8 +1688,8 @@ check_za_access (const aarch64_opnd_info *opnd,
     }
 
   /* The vector group specifier is optional in assembly code.  */
-  if (opnd->indexed_za.group_size != 0
-      && opnd->indexed_za.group_size != group_size)
+  if (opnd->indexed_za.group_size != group_size
+      && (status_vg || opnd->indexed_za.group_size != 0 ))
     {
       set_invalid_vg_size (mismatch_detail, idx, group_size);
       return false;
@@ -1923,7 +1924,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
 	  if (!check_za_access (opnd, mismatch_detail, idx,
-				12, max_value, 1, 0))
+				12, max_value, 1, 0, get_opcode_dependent_value (opcode)))
 	    return 0;
 	  break;
 
@@ -1993,93 +1994,108 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  size = aarch64_get_qualifier_esize (opnd->qualifier);
 	  max_value = 16 / size - 1;
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value, 1,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15, 1,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off3_0:
 	case AARCH64_OPND_SME_ZA_array_off3_5:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 7, 1,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off1x4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 1, 4,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off2x2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 3, 2,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off2x4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 3, 4,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_off3x2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 8, 7, 2,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsb_1:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 7, 2,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsh_1:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 3, 2,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrss_1:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 1, 2,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsd_1:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 0, 2,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsb_2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 3, 4,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrsh_2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 1, 4,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_ARRAY4:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 15, 1,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
 	case AARCH64_OPND_SME_ZA_array_vrss_2:
 	case AARCH64_OPND_SME_ZA_array_vrsd_2:
 	  if (!check_za_access (opnd, mismatch_detail, idx, 12, 0, 4,
-				get_opcode_dependent_value (opcode)))
+				get_opcode_dependent_value (opcode),
+				get_opcode_dependent_vg_status (opcode)))
 	    return 0;
 	  break;
 
@@ -2090,8 +2106,8 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  max_value = 16 / num / size;
 	  if (max_value > 0)
 	    max_value -= 1;
-	  if (!check_za_access (opnd, mismatch_detail, idx,
-				12, max_value, num, 0))
+	  if (!check_za_access (opnd, mismatch_detail, idx, 12, max_value, num,
+				0, get_opcode_dependent_value (opcode)))
 	    return 0;
 	  break;
 

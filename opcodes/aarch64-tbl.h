@@ -1606,6 +1606,10 @@
 {                                                       \
   QLF3(S_B,P_Z,NIL),                                    \
 }
+#define OP_SVE_D					\
+{                                                       \
+  QLF1(S_D),						\
+}
 #define OP_SVE_DD                                       \
 {                                                       \
   QLF2(S_D,S_D),                                        \
@@ -6667,6 +6671,20 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME2p1_INSN ("movaz", 0xc0820200, 0xffff1e00, sme2_movaz, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_SS, 0, 0),
   SME2p1_INSN ("movaz", 0xc0c20200, 0xffff1e00, sme2_movaz, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_DD, 0, 0),
   SME2p1_INSN ("movaz", 0xc0c30200, 0xffff1e00, sme2_movaz, 0, OP2 (SVE_Zd, SME_ZA_ARRAY4), OP_SVE_QQ, 0, 0),
+
+  /* ZERO (single-vector).  */
+  SME2p1_INSN ("zero", 0xc00c0000, 0xffff9ff8, sme2_movaz, 0, OP1 (SME_ZA_array_off3_0), OP_SVE_D, F_OD (2) | F_VG_REQ, 0),
+  SME2p1_INSN ("zero", 0xc00e0000, 0xffff9ff8, sme2_movaz, 0, OP1 (SME_ZA_array_off3_0), OP_SVE_D, F_OD (4) | F_VG_REQ, 0),
+
+  /* ZERO (double-vector).  */
+  SME2p1_INSN ("zero", 0xc00c8000, 0xffff9ff8, sme2_movaz, 0, OP1 (SME_ZA_array_off3x2), OP_SVE_D, 0, 0),
+  SME2p1_INSN ("zero", 0xc00d0000, 0xffff9ffc, sme2_movaz, 0, OP1 (SME_ZA_array_off2x2), OP_SVE_D, F_OD (2) | F_VG_REQ, 0),
+  SME2p1_INSN ("zero", 0xc00d8000, 0xffff9ffc, sme2_movaz, 0, OP1 (SME_ZA_array_off2x2), OP_SVE_D, F_OD (4) | F_VG_REQ, 0),
+
+  /* ZERO (quad-vector).  */
+  SME2p1_INSN ("zero", 0xc00e8000, 0xffff9ffc, sme2_movaz, 0, OP1 (SME_ZA_array_off2x4), OP_SVE_D, 0, 0),
+  SME2p1_INSN ("zero", 0xc00f0000, 0xffff9ffe, sme2_movaz, 0, OP1 (SME_ZA_array_off1x4), OP_SVE_D, F_OD (2) | F_VG_REQ, 0),
+  SME2p1_INSN ("zero", 0xc00f8000, 0xffff9ffe, sme2_movaz, 0, OP1 (SME_ZA_array_off1x4), OP_SVE_D, F_OD (4) | F_VG_REQ, 0),
 
 /* SVE2p1 Instructions.  */
   SVE2p1_INSN("addqv",0x04052000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, 0),

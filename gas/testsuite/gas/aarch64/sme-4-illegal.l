@@ -1,5 +1,5 @@
 [^:]*: Assembler messages:
-[^:]*:[0-9]+: Error: expected '{' at operand 1 -- `zero za'
+[^:]*:[0-9]+: Error: expected '\[' at operand 1 -- `zero za'
 [^:]*:[0-9]+: Error: ZA tile number out of range at operand 1 -- `zero {za8\.d}'
 [^:]*:[0-9]+: Error: ZA tile number out of range at operand 1 -- `zero {za0\.d,za8.d}'
 [^:]*:[0-9]+: Error: ZA tile number out of range at operand 1 -- `zero {za2\.h}'

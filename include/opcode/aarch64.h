@@ -1387,7 +1387,10 @@ extern const aarch64_opcode aarch64_opcode_table[];
 #define F_OPD_SIZE (1ULL << 34)
 /* RCPC3 instruction has the field of 'size'.  */
 #define F_RCPC3_SIZE (1ULL << 35)
-/* Next bit is 36.  */
+/* This instruction need VGx2 or VGx4 mandatorily in the operand passed to
+   assembler.  */
+#define F_VG_REQ (1ULL << 36)
+/* Next bit is 37.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
@@ -1448,6 +1451,12 @@ static inline unsigned int
 get_opcode_dependent_value (const aarch64_opcode *opcode)
 {
   return (opcode->flags >> 24) & 0x7;
+}
+
+static inline bool
+get_opcode_dependent_vg_status (const aarch64_opcode *opcode)
+{
+  return (opcode->flags >> 36) & 0x1;
 }
 
 static inline bool
