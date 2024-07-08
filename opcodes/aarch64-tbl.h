@@ -6641,6 +6641,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
 
   SVE2p1_INSN("dupq",0x05202400, 0xffe0fc00, sve_index, 0, OP2 (SVE_Zd, SVE_Zn_5_INDEX), OP_SVE_VV_BHSD, 0, 0),
   SVE2p1_INSN("orqv",0x041c2000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, 0),
+  SVE2p1_INSN("tblq",0x4400f800, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_ZnxN, SVE_Zm_16), OP_SVE_VVV_BHSD, F_OD(1), 0),
   SVE2p1_INSNC("extq",0x05602400, 0xfff0fc00, sve_misc, 0, OP4 (SVE_Zd, SVE_Zd, SVE_Zm_5, SVE_UIMM4), OP_SVE_BBBU, 0, C_SCAN_MOVPRFX, 1),
 
   SVE2p1_INSN("ld1q",0xc400a000, 0xffe0e000, sve_misc, 0, OP3 (SVE_ZtxN, SVE_Pg3, SVE_ADDR_ZX), OP_SVE_QZD, F_OD (1), 0),
