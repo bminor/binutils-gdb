@@ -1242,7 +1242,7 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 	 dictionary.  */
       ctf_cuname_set (out, out_name);
 
-      if (ctf_dedup (out, inputs, ninputs, parents, 1) < 0)
+      if (ctf_dedup (out, inputs, ninputs, 1) < 0)
 	{
 	  ctf_set_errno (fp, ctf_errno (out));
 	  ctf_err_warn (fp, 0, 0, _("CU-mapped deduplication failed for %s"),
@@ -1401,7 +1401,7 @@ ctf_link_deduplicating (ctf_dict_t *fp)
   if (ninputs == 1 && ctf_cuname (inputs[0]) != NULL)
     ctf_cuname_set (fp, ctf_cuname (inputs[0]));
 
-  if (ctf_dedup (fp, inputs, ninputs, parents, 0) < 0)
+  if (ctf_dedup (fp, inputs, ninputs, 0) < 0)
     {
       ctf_err_warn (fp, 0, 0, _("deduplication failed for %s"),
 		    ctf_link_input_name (fp));

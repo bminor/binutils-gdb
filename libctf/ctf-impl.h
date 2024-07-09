@@ -715,11 +715,11 @@ extern int ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
 
 extern int ctf_dedup_atoms_init (ctf_dict_t *);
 extern int ctf_dedup (ctf_dict_t *, ctf_dict_t **, uint32_t ninputs,
-		      uint32_t *parents, int cu_mapped);
-extern void ctf_dedup_fini (ctf_dict_t *, ctf_dict_t **, uint32_t);
+		      int cu_mapped);
 extern ctf_dict_t **ctf_dedup_emit (ctf_dict_t *, ctf_dict_t **,
 				    uint32_t ninputs, uint32_t *parents,
 				    uint32_t *noutputs, int cu_mapped);
+extern void ctf_dedup_fini (ctf_dict_t *, ctf_dict_t **, uint32_t);
 extern ctf_id_t ctf_dedup_type_mapping (ctf_dict_t *fp, ctf_dict_t *src_fp,
 					ctf_id_t src_type);
 
