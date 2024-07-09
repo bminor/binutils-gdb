@@ -485,9 +485,8 @@ ctf_dedup_sha1_add (ctf_sha1_t *sha1, const void *buf, size_t len,
 
 static const char *
 ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
-		     ctf_dict_t **inputs, uint32_t *parents,
-		     int input_num, ctf_id_t type, int flags,
-		     unsigned long depth,
+		     ctf_dict_t **inputs, int input_num,
+		     ctf_id_t type, int flags, unsigned long depth,
 		     int (*populate_fun) (ctf_dict_t *fp,
 					  ctf_dict_t *input,
 					  ctf_dict_t **inputs,
@@ -552,8 +551,8 @@ ctf_dedup_record_origin (ctf_dict_t *fp, int input_num, const char *decorated,
 
 static const char *
 ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
-		      uint32_t *parents, int input_num, ctf_id_t type,
-		      void *type_id, const ctf_type_t *tp, const char *name,
+		      int input_num, ctf_id_t type, void *type_id,
+		      const ctf_type_t *tp, const char *name,
 		      const char *decorated, int kind, int flags,
 		      unsigned long depth,
 		      int (*populate_fun) (ctf_dict_t *fp,
@@ -711,9 +710,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
     case CTF_K_POINTER:
       /* Hash the referenced type, if not already hashed, and mix it in.  */
       child_type = ctf_type_reference (input, type);
-      if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents, input_num,
-				       child_type, flags, depth,
-				       populate_fun)) == NULL)
+      if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
+				       flags, depth, populate_fun)) == NULL)
 	{
 	  whaterr = N_("error doing referenced type hashing");
 	  goto err;
@@ -740,7 +738,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	ctf_get_ctt_size (input, tp, &size, &increment);
 	ctf_dedup_sha1_add (&hash, &size, sizeof (ssize_t), "size", depth);
 
-	if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents, input_num,
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num,
 					 child_type, flags, depth,
 					 populate_fun)) == NULL)
 	  {
@@ -773,7 +771,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	    goto input_err;
 	  }
 
-	if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents, input_num,
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num,
 					 ar.ctr_contents, flags, depth,
 					 populate_fun)) == NULL)
 	  {
@@ -784,7 +782,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 			    depth);
 	ADD_CITER (citers, hval);
 
-	if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents, input_num,
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num,
 					 ar.ctr_index, flags, depth,
 					 populate_fun)) == NULL)
 	  {
@@ -811,7 +809,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	    goto input_err;
 	  }
 
-	if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents, input_num,
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num,
 					 fi.ctc_return, flags, depth,
 					 populate_fun)) == NULL)
 	  {
@@ -841,8 +839,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  }
 	for (j = 0; j < fi.ctc_argc; j++)
 	  {
-	    if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents,
-					     input_num, args[j], flags, depth,
+	    if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num,
+					     args[j], flags, depth,
 					     populate_fun)) == NULL)
 	      {
 		free (args);
@@ -900,8 +898,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
 	    ctf_dprintf ("%lu: Traversing to member %s\n", depth, mname);
 #endif
-	    if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents,
-					     input_num, membtype, flags, depth,
+	    if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num,
+					     membtype, flags, depth,
 					     populate_fun)) == NULL)
 	      {
 		whaterr = N_("error doing struct/union member type hashing");
@@ -990,8 +988,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 
 /* Hash a TYPE in the INPUT: FP is the eventual output, where the ctf_dedup
    state is stored.  INPUT_NUM is the number of this input in the set of inputs.
-   Record its hash in FP's cd_type_hashes once it is known.  PARENTS is
-   described in the comment above ctf_dedup.
+   Record its hash in FP's cd_type_hashes once it is known.
 
    (The flags argument currently accepts only the flag
    CTF_DEDUP_HASH_INTERNAL_CHILD, an implementation detail used to prevent
@@ -1011,9 +1008,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 
 static const char *
 ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
-		     ctf_dict_t **inputs, uint32_t *parents,
-		     int input_num, ctf_id_t type, int flags,
-		     unsigned long depth,
+		     ctf_dict_t **inputs, int input_num, ctf_id_t type,
+		     int flags, unsigned long depth,
 		     int (*populate_fun) (ctf_dict_t *fp,
 					  ctf_dict_t *input,
 					  ctf_dict_t **inputs,
@@ -1103,7 +1099,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
      Hash this type, and call ourselves recursively.  (The hashing part is
      optional, and is disabled if overidden_hval is set.)  */
 
-  if ((hval = ctf_dedup_rhash_type (fp, input, inputs, parents, input_num,
+  if ((hval = ctf_dedup_rhash_type (fp, input, inputs, input_num,
 				    type, type_id, tp, name, decorated,
 				    kind, flags, depth, populate_fun)) == NULL)
     return NULL;				/* errno is set for us.  */
@@ -1911,13 +1907,11 @@ ctf_dedup_conflictify_unshared (ctf_dict_t *output, ctf_dict_t **inputs)
   return ctf_set_errno (output, err);
 }
 
-/* The core deduplicator.  Populate cd_output_mapping in the output ctf_dedup
-   with a mapping of all types that belong in this dictionary and where they
-   come from, and cd_conflicting_types with an indication of whether each type
-   is conflicted or not.  OUTPUT is the top-level output: INPUTS is the array of
-   input dicts; NINPUTS is the size of that array; PARENTS is an NINPUTS-element
-   array with each element corresponding to a input which is a child dict set to
-   the number in the INPUTS array of that input's parent.
+/* The core deduplicator.  Populate cd_output_mapping in the output ctf_dedup with a
+   mapping of all types that belong in this dictionary and where they come from, and
+   cd_conflicting_types with an indication of whether each type is conflicted or not.
+   OUTPUT is the top-level output: INPUTS is the array of input dicts; NINPUTS is the
+   size of that array.
 
    If CU_MAPPED is set, this is a first pass for a link with a non-empty CU
    mapping: only one output will result.
@@ -1927,7 +1921,7 @@ ctf_dedup_conflictify_unshared (ctf_dict_t *output, ctf_dict_t **inputs)
 
 int
 ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
-	   uint32_t *parents, int cu_mapped)
+	   int cu_mapped)
 {
   ctf_dedup_t *d = &output->ctf_dedup;
   size_t i;
@@ -1973,7 +1967,7 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
       while ((id = ctf_type_next (inputs[i], &it, NULL, 1)) != CTF_ERR)
 	{
 	  if (ctf_dedup_hash_type (output, inputs[i], inputs,
-				   parents, i, id, 0, 0,
+				   i, id, 0, 0,
 				   ctf_dedup_populate_mappings) == NULL)
 	    goto err;				/* errno is set for us.  */
 	}
@@ -3085,7 +3079,7 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
    OUTPUT, on which the ctf_dedup function must have already been called.  The
    PARENTS array contains the INPUTS index of the parent dict for every child
    dict at the corresponding index in the INPUTS (for non-child dicts, the value
-   is undefined).
+   is undefined and can just be left at zero).
 
    Return an array of fps with content emitted into them (starting with OUTPUT,
    which is the parent of all others, then all the newly-generated outputs).
