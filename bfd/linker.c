@@ -573,6 +573,8 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
 	  strcat (n, WRAP);
 	  strcat (n, l);
 	  h = bfd_link_hash_lookup (info->hash, n, create, true, follow);
+	  if (h != NULL)
+	    h->wrapper_symbol = true;
 	  free (n);
 	  return h;
 	}

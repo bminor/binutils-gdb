@@ -777,14 +777,9 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
       if (syms[n].def != LDPK_UNDEF && syms[n].def != LDPK_WEAKUNDEF)
 	{
 	  blhe = h;
-	  if (blhe && link_info.wrap_hash != NULL)
-	    {
-	      /* Check if a symbol is a wrapper symbol.  */
-	      struct bfd_link_hash_entry *unwrap
-		= unwrap_hash_lookup (&link_info, (bfd *) abfd, blhe);
-	      if (unwrap && unwrap != h)
-		wrap_status = wrapper;
-	     }
+	  /* Check if a symbol is a wrapper symbol.  */
+	  if (blhe && blhe->wrapper_symbol)
+	    wrap_status = wrapper;
 	}
       else
 	{

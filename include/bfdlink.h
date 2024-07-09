@@ -117,6 +117,9 @@ struct bfd_link_hash_entry
   /* The symbol, SYM, is referenced by __real_SYM in an object file.  */
   unsigned int ref_real : 1;
 
+  /* The symbol is a wrapper symbol, __wrap_SYM.  */
+  unsigned int wrapper_symbol : 1;
+
   /* Symbol is a built-in define.  These will be overridden by PROVIDE
      in a linker script.  */
   unsigned int linker_def : 1;

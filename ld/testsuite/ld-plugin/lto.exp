@@ -531,6 +531,22 @@ set lto_link_elf_tests [list \
    "pr29086" \
   ] \
   [list \
+   "PR ld/31956 (a)" \
+   "-Wl,--wrap=parse_line" \
+   "-O2 -flto" \
+   {pr31956a.c pr31956b.c} \
+   {} \
+   "pr31956a" \
+  ] \
+  [list \
+   "PR ld/31956 (b)" \
+   "-Wl,--wrap=parse_line" \
+   "-O2 -flto" \
+   {pr31956b.c pr31956a.c} \
+   {} \
+   "pr31956b" \
+  ] \
+  [list \
    "Build pr30281.so" \
    "-shared -Wl,--version-script,pr30281.t \
     -O2 -fPIC -flto-partition=max -flto=2" \
