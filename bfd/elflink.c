@@ -2247,16 +2247,19 @@ _bfd_elf_export_symbol (struct elf_link_hash_entry *h, void *data)
 
 /* Return the glibc version reference if VERSION_DEP is added to the
    list of glibc version dependencies successfully.  VERSION_DEP will
-   be put into the .gnu.version_r section.  */
+   be put into the .gnu.version_r section.  GLIBC_MINOR_BASE is the
+   pointer to the glibc minor base version.  */
 
 static Elf_Internal_Verneed *
 elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
 			    Elf_Internal_Verneed *glibc_verref,
-			    const char *version_dep)
+			    const char *version_dep,
+			    int *glibc_minor_base)
 {
   Elf_Internal_Verneed *t;
   Elf_Internal_Vernaux *a;
   size_t amt;
+  int minor_version = -1;
 
   if (glibc_verref != NULL)
     {
@@ -2272,8 +2275,6 @@ elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
     }
   else
     {
-      bool is_glibc;
-
       for (t = elf_tdata (rinfo->info->output_bfd)->verref;
 	   t != NULL;
 	   t = t->vn_nextref)
@@ -2287,7 +2288,6 @@ elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
       if (t == NULL)
 	return t;
 
-      is_glibc = false;
       for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
 	{
 	  /* Return if VERSION_DEP dependency has been added.  */
@@ -2296,12 +2296,24 @@ elf_link_add_glibc_verneed (struct elf_find_verdep_info *rinfo,
 	    return t;
 
 	  /* Check if libc.so provides GLIBC_2.XX version.  */
-	  if (!is_glibc && startswith (a->vna_nodename, "GLIBC_2."))
-	    is_glibc = true;
+	  if (startswith (a->vna_nodename, "GLIBC_2."))
+	    {
+	      minor_version = strtol (a->vna_nodename + 8, NULL, 10);
+	      if (minor_version < *glibc_minor_base)
+		*glibc_minor_base = minor_version;
+	    }
 	}
 
       /* Skip if it isn't linked against glibc.  */
-      if (!is_glibc)
+      if (minor_version < 0)
+	return NULL;
+    }
+
+  /* Skip if 2.GLIBC_MINOR_BASE includes VERSION_DEP.  */
+  if (startswith (version_dep, "GLIBC_2."))
+    {
+      minor_version = strtol (version_dep + 8, NULL, 10);
+      if (minor_version <= *glibc_minor_base)
 	return NULL;
     }
 
@@ -2333,10 +2345,12 @@ _bfd_elf_link_add_glibc_version_dependency
    const char *version_dep[])
 {
   Elf_Internal_Verneed *t = NULL;
+  int glibc_minor_base = INT_MAX;
 
   do
     {
-      t = elf_link_add_glibc_verneed (rinfo, t, *version_dep);
+      t = elf_link_add_glibc_verneed (rinfo, t, *version_dep,
+				      &glibc_minor_base);
       /* Return if there is no glibc version reference.  */
       if (t == NULL)
 	return;
