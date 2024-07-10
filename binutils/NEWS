@@ -20,6 +20,13 @@
   legacy CPU previously defaulted to using this instruction set extension, the
   assembler now defaults to no-FPU to avoid quietly misassembling legacy code.
 
+* gprofng:
+  Improved the support for hardware event counters:
+    - Re-designed and streamlined the implementation.
+    - Defined a common set of events for ARM processors.
+    - Added specific events for AMD ZEN3 / ZEN4, and Intel Ice Lake processors.
+  Added a minimal support for RISC-V.
+
 Changes in 2.42:
 
 * The objdump program has a new command line option -Z/--decompress which
