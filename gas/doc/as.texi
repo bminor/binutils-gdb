@@ -4497,6 +4497,7 @@ Some machine configurations provide additional directives.
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
 * Attach_to_group::             @code{.attach_to_group @var{name}}
 * Balign::                      @code{.balign [@var{abs-expr}[, @var{abs-expr}]]}
+* Base64::                      @code{.base64 "@var{string}"[, @dots{}]}
 @ifset ELF
 * Bss::                         @code{.bss @var{subsection}}
 @end ifset
@@ -4850,6 +4851,19 @@ fill pattern as a four byte longword value.  For example, @code{.balignw
 filled in with the value 0x368d (the exact placement of the bytes depends upon
 the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
 undefined.
+
+@node Base64
+@section @code{.base64 "@var{string}"[, @dots{}]}
+Allows binary data to be entered into a section encoded as a base64 string.
+There is no maximum length to the strings, but they must be a multiple of four
+bytes long.  If necessary the ends of the strings can be padded with @code{=}
+characters.  Line breaks, control characters and escaped characters are not
+allowed in the strings.  The strings must be enclosed between double quote
+characters.  Multiple strings are allowed, but they must be separated by
+commas.
+
+As an example of how to create a base64 encoded string, see the
+@command{base64} program (with its @option{-w0} option to disable line breaks.
 
 @ifset ELF
 @node Bss

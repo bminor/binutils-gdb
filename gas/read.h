@@ -215,6 +215,7 @@ extern void s_nops (int);
 extern void s_stab (int what);
 extern void s_struct (int);
 extern void s_text (int);
+extern void s_base64 (int);
 extern void stringer (int append_zero);
 extern void s_xstab (int what);
 extern void s_rva (int);
