@@ -1,5 +1,11 @@
 -*- text -*-
 
+* Support CFCMOV feature in Intel APX.
+
+* Support CCMP and CTEST feature in Intel APX.
+
+* Support zero-upper feature in Intel APX.
+
 * Add a .base64 directive to the assembler which allows base64 encoded
   binary data to be provided as strings.
   
