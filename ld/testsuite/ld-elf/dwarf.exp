@@ -52,9 +52,6 @@ set build_tests {
   {"DWARF parse during linker error"
    "" "-g -fno-toplevel-reorder"
    {dwarf2a.c dwarf2b.c} {{error_output "dwarf2.err"}} "dwarf2.x"}
-}
-
-set build_tests_dwarf3 {
   {"Handle no DWARF information"
    "" "-g0"
    {dwarf3.c} {{error_output "dwarf3.err"}} "dwarf3.x"}
@@ -75,8 +72,6 @@ set run_tests {
 set old_CFLAGS "$CFLAGS_FOR_TARGET"
 append CFLAGS_FOR_TARGET " $NOSANITIZE_CFLAGS"
 run_cc_link_tests $build_tests
-setup_xfail loongarch*-*-*
-run_cc_link_tests $build_tests_dwarf3
 run_ld_link_exec_tests $run_tests
 set CFLAGS_FOR_TARGET "$old_CFLAGS"
 
