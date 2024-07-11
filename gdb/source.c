@@ -27,6 +27,7 @@
 #include "value.h"
 #include "gdbsupport/filestuff.h"
 
+#include <list>
 #include <sys/types.h>
 #include <fcntl.h>
 #include "gdbcore.h"

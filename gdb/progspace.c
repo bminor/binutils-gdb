@@ -124,6 +124,15 @@ program_space::~program_space ()
 
 /* See progspace.h.  */
 
+bool
+program_space::multi_objfile_p () const
+{
+  return (!objfiles_list.empty ()
+	  && std::next (objfiles_list.begin ()) != objfiles_list.end ());
+}
+
+/* See progspace.h.  */
+
 void
 program_space::free_all_objfiles ()
 {
@@ -132,7 +141,7 @@ program_space::free_all_objfiles ()
     gdb_assert (so.objfile == NULL);
 
   while (!objfiles_list.empty ())
-    objfiles_list.front ()->unlink ();
+    this->remove_objfile (&objfiles_list.front ());
 }
 
 /* See progspace.h.  */
@@ -145,13 +154,9 @@ program_space::add_objfile (std::unique_ptr<objfile> &&objfile,
     objfiles_list.push_back (std::move (objfile));
   else
     {
-      auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
-				[=] (const std::unique_ptr<::objfile> &objf)
-				{
-				  return objf.get () == before;
-				});
-      gdb_assert (iter != objfiles_list.end ());
-      objfiles_list.insert (iter, std::move (objfile));
+      gdb_assert (before->is_linked ());
+      objfiles_list.insert (objfiles_list.iterator_to (*before),
+			    std::move (objfile));
     }
 }
 
@@ -166,16 +171,11 @@ program_space::remove_objfile (struct objfile *objfile)
      reference stale info.  */
   reinit_frame_cache ();
 
-  auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
-			    [=] (const std::unique_ptr<::objfile> &objf)
-			    {
-			      return objf.get () == objfile;
-			    });
-  gdb_assert (iter != objfiles_list.end ());
-  objfiles_list.erase (iter);
-
   if (objfile == symfile_object_file)
     symfile_object_file = NULL;
+
+  gdb_assert (objfile->is_linked ());
+  objfiles_list.erase (objfiles_list.iterator_to (*objfile));
 }
 
 /* See progspace.h.  */

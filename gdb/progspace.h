@@ -29,7 +29,6 @@
 #include "gdbsupport/intrusive_list.h"
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/gdb_ref_ptr.h"
-#include <list>
 #include <vector>
 
 struct target_ops;
@@ -40,8 +39,6 @@ struct exec;
 struct address_space;
 struct program_space;
 struct solib;
-
-typedef std::list<std::unique_ptr<objfile>> objfile_list;
 
 /* An address space.  It is used for comparing if
    pspaces/inferior/threads see the same address space and for
@@ -76,55 +73,6 @@ new_address_space ()
 {
   return address_space_ref_ptr::new_reference (new address_space);
 }
-
-/* An iterator that wraps an iterator over std::unique_ptr<objfile>,
-   and dereferences the returned object.  This is useful for iterating
-   over a list of shared pointers and returning raw pointers -- which
-   helped avoid touching a lot of code when changing how objfiles are
-   managed.  */
-
-class unwrapping_objfile_iterator
-{
-public:
-
-  typedef unwrapping_objfile_iterator self_type;
-  typedef typename ::objfile *value_type;
-  typedef typename ::objfile &reference;
-  typedef typename ::objfile **pointer;
-  typedef typename objfile_list::iterator::iterator_category iterator_category;
-  typedef typename objfile_list::iterator::difference_type difference_type;
-
-  unwrapping_objfile_iterator (objfile_list::iterator iter)
-    : m_iter (std::move (iter))
-  {
-  }
-
-  objfile *operator* () const
-  {
-    return m_iter->get ();
-  }
-
-  unwrapping_objfile_iterator operator++ ()
-  {
-    ++m_iter;
-    return *this;
-  }
-
-  bool operator!= (const unwrapping_objfile_iterator &other) const
-  {
-    return m_iter != other.m_iter;
-  }
-
-private:
-
-  /* The underlying iterator.  */
-  objfile_list::iterator m_iter;
-};
-
-
-/* A range that returns unwrapping_objfile_iterators.  */
-
-using unwrapping_objfile_range = iterator_range<unwrapping_objfile_iterator>;
 
 /* A program space represents a symbolic view of an address space.
    Roughly speaking, it holds all the data associated with a
@@ -235,7 +183,9 @@ struct program_space
      a program space.  */
   ~program_space ();
 
-  using objfiles_range = unwrapping_objfile_range;
+  using objfiles_iterator
+    = reference_to_pointer_iterator<intrusive_list<objfile>::iterator>;
+  using objfiles_range = iterator_range<objfiles_iterator>;
 
   /* Return an iterable object that can be used to iterate over all
      objfiles.  The basic use is in a foreach, like:
@@ -243,9 +193,7 @@ struct program_space
      for (objfile *objf : pspace->objfiles ()) { ... }  */
   objfiles_range objfiles ()
   {
-    return objfiles_range
-      (unwrapping_objfile_iterator (objfiles_list.begin ()),
-       unwrapping_objfile_iterator (objfiles_list.end ()));
+    return objfiles_range (objfiles_iterator (objfiles_list.begin ()));
   }
 
   using objfiles_safe_range = basic_safe_range<objfiles_range>;
@@ -260,9 +208,7 @@ struct program_space
   objfiles_safe_range objfiles_safe ()
   {
     return objfiles_safe_range
-      (objfiles_range
-	 (unwrapping_objfile_iterator (objfiles_list.begin ()),
-	  unwrapping_objfile_iterator (objfiles_list.end ())));
+      (objfiles_range (objfiles_iterator (objfiles_list.begin ())));
   }
 
   /* Add OBJFILE to the list of objfiles, putting it just before
@@ -276,10 +222,7 @@ struct program_space
 
   /* Return true if there is more than one object file loaded; false
      otherwise.  */
-  bool multi_objfile_p () const
-  {
-    return objfiles_list.size () > 1;
-  }
+  bool multi_objfile_p () const;
 
   /* Free all the objfiles associated with this program space.  */
   void free_all_objfiles ();
@@ -395,7 +338,7 @@ struct program_space
   struct objfile *symfile_object_file = NULL;
 
   /* All known objfiles are kept in a linked list.  */
-  std::list<std::unique_ptr<objfile>> objfiles_list;
+  owning_intrusive_list<objfile> objfiles_list;
 
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */

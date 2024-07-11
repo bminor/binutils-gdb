@@ -418,7 +418,7 @@ struct obj_section
    symbols, lookup_symbol is used to check if we only have a partial
    symbol and if so, read and expand the full compunit.  */
 
-struct objfile
+struct objfile : intrusive_list_node<objfile>
 {
 private:
 
