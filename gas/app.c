@@ -406,7 +406,8 @@ scan_for_multibyte_characters (const unsigned char *  start,
    This is the way the old code used to work.  */
 
 size_t
-do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
+do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
+		bool check_multibyte)
 {
   char *to = tostart;
   char *toend = tostart + tolen;
@@ -510,7 +511,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
       from = input_buffer;
       fromend = from + fromlen;
 
-      if (multibyte_handling == multibyte_warn)
+      if (check_multibyte)
 	(void) scan_for_multibyte_characters ((const unsigned char *) from,
 					      (const unsigned char* ) fromend,
 					      true /* Generate warnings.  */);

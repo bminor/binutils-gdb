@@ -386,11 +386,6 @@ input_scrub_next_buffer (char **bufp)
 	  ++p;
 	}
 
-      if (multibyte_handling == multibyte_warn)
-	(void) scan_for_multibyte_characters ((const unsigned char *) p,
-					      (const unsigned char *) limit,
-					      true /* Generate warnings */);
-
       /* We found a newline in the newly read chars.  */
       partial_where = p;
       partial_size = limit - p;

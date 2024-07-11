@@ -124,7 +124,7 @@ sb_scrub_and_add_sb (sb *ptr, sb *s)
 	break;
       sb_check (ptr, copy);
       ptr->len += do_scrub_chars (scrub_from_sb, ptr->ptr + ptr->len,
-				  ptr->max - ptr->len);
+				  ptr->max - ptr->len, false);
     }
 
   sb_to_scrub = 0;
