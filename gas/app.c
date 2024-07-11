@@ -431,10 +431,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 	 11: After seeing a symbol character in state 0 (eg a label definition)
 	 -1: output string in out_string and go to the state in old_state
 	 -2: flush text until a '*' '/' is seen, then go to state old_state
-#ifdef TC_V850
-	 12: After seeing a dash, looking for a second dash as a start
-	     of comment.
-#endif
+	 12: no longer used
 #ifdef DOUBLEBAR_PARALLEL
 	 13: After seeing a vertical bar, looking for a second
 	     vertical bar as a parallel expression separator.
