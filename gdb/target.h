@@ -2427,7 +2427,7 @@ struct target_unpusher
 
 typedef std::unique_ptr<struct target_ops, target_unpusher> target_unpush_up;
 
-extern void target_pre_inferior (int);
+extern void target_pre_inferior ();
 
 extern void target_preopen (int);
 

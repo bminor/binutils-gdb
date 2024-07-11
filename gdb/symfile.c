@@ -1209,7 +1209,7 @@ symbol_file_clear (int from_tty)
 
   /* solib descriptors may have handles to objfiles.  Wipe them before their
      objfiles get stale by free_all_objfiles.  */
-  no_shared_libraries (NULL, from_tty);
+  no_shared_libraries ();
 
   current_program_space->free_all_objfiles ();
 

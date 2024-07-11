@@ -383,7 +383,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   /* Clean up any leftovers from other runs.  Some other things from
      this function should probably be moved into target_pre_inferior.  */
-  target_pre_inferior (from_tty);
+  target_pre_inferior ();
 
   /* The comment here used to read, "The exec file is re-read every
      time we do a generic_mourn_inferior, so we just have to worry
@@ -2628,7 +2628,7 @@ attach_command (const char *args, int from_tty)
 
   /* Clean up any leftovers from other runs.  Some other things from
      this function should probably be moved into target_pre_inferior.  */
-  target_pre_inferior (from_tty);
+  target_pre_inferior ();
 
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (args, &async_exec);
   args = stripped.get ();
@@ -2827,7 +2827,7 @@ detach_command (const char *args, int from_tty)
   /* If the solist is global across inferiors, don't clear it when we
      detach from a single inferior.  */
   if (!gdbarch_has_global_solist (inf->arch ()))
-    no_shared_libraries (nullptr, from_tty);
+    no_shared_libraries ();
 
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
@@ -2853,7 +2853,7 @@ disconnect_command (const char *args, int from_tty)
   query_if_trace_running (from_tty);
   disconnect_tracing ();
   target_disconnect (args, from_tty);
-  no_shared_libraries (nullptr, from_tty);
+  no_shared_libraries ();
   init_thread_list ();
   update_previous_thread ();
   if (deprecated_detach_hook)
