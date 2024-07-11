@@ -80,9 +80,9 @@ extern bool solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size);
 
 extern bool in_solib_dynsym_resolve_code (CORE_ADDR);
 
-/* Discard symbols that were auto-loaded from shared libraries.  */
+/* Discard symbols that were auto-loaded from shared libraries in PSPACE.  */
 
-extern void no_shared_libraries ();
+extern void no_shared_libraries (program_space *pspace);
 
 /* Synchronize GDB's shared object list with inferior's.
 

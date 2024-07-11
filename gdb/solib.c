@@ -1237,15 +1237,15 @@ sharedlibrary_command (const char *args, int from_tty)
 /* See solib.h.  */
 
 void
-no_shared_libraries ()
+no_shared_libraries (program_space *pspace)
 {
   /* The order of the two routines below is important: clear_solib notifies
      the solib_unloaded observers, and some of these observers might need
      access to their associated objfiles.  Therefore, we can not purge the
      solibs' objfiles before clear_solib has been called.  */
 
-  clear_solib (current_program_space);
-  objfile_purge_solibs (current_program_space);
+  clear_solib (pspace);
+  objfile_purge_solibs (pspace);
 }
 
 /* Implements the command "nosharedlibrary", which discards symbols
@@ -1256,7 +1256,7 @@ no_shared_libraries ()
 static void
 no_shared_libraries_command (const char *ignored, int from_tty)
 {
-  no_shared_libraries ();
+  no_shared_libraries (current_program_space);
 }
 
 /* See solib.h.  */

@@ -2452,7 +2452,7 @@ target_pre_inferior ()
      memory regions and features.  */
   if (!gdbarch_has_global_solist (current_inferior ()->arch ()))
     {
-      no_shared_libraries ();
+      no_shared_libraries (current_program_space);
 
       invalidate_target_mem_regions ();
 
