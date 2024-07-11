@@ -4863,7 +4863,12 @@ characters.  Multiple strings are allowed, but they must be separated by
 commas.
 
 As an example of how to create a base64 encoded string, see the
-@command{base64} program (with its @option{-w0} option to disable line breaks.
+@command{base64} program (with its @option{-w0} option to disable line breaks).
+
+Note: for targets where the size of a byte is larger than the size of an octet
+the @code{.base64} directive will, if necessary, pad the end of the @emph{last}
+string so that the total number of octets generated are a multiple the number
+of octets in a byte.
 
 @ifset ELF
 @node Bss

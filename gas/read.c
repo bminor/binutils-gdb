@@ -5413,42 +5413,6 @@ s_leb128 (int sign)
   demand_empty_rest_of_line ();
 }
 
-static void
-stringer_append_char (int c, int bitsize)
-{
-  if (c && in_bss ())
-    as_bad (_("attempt to store non-empty string in section `%s'"),
-	    segment_name (now_seg));
-
-  if (!target_big_endian)
-    FRAG_APPEND_1_CHAR (c);
-
-  switch (bitsize)
-    {
-    case 64:
-      FRAG_APPEND_1_CHAR (0);
-      FRAG_APPEND_1_CHAR (0);
-      FRAG_APPEND_1_CHAR (0);
-      FRAG_APPEND_1_CHAR (0);
-      /* Fall through.  */
-    case 32:
-      FRAG_APPEND_1_CHAR (0);
-      FRAG_APPEND_1_CHAR (0);
-      /* Fall through.  */
-    case 16:
-      FRAG_APPEND_1_CHAR (0);
-      /* Fall through.  */
-    case 8:
-      break;
-    default:
-      /* Called with invalid bitsize argument.  */
-      abort ();
-      break;
-    }
-  if (target_big_endian)
-    FRAG_APPEND_1_CHAR (c);
-}
-
 /* Code for handling base64 encoded strings.
    Based upon code in sharutils' lib/base64.c source file, written by
    Simon Josefsson.  Which was partially adapted from GNU MailUtils
@@ -5602,9 +5566,15 @@ decode_base64_and_append (unsigned int b[4], int len)
   gas_assert (len > 1);
 
   FRAG_APPEND_1_CHAR ((b64[b[0]] << 2) | (b64[b[1]] >> 4));
-  if (len == 2) return;
+
+  if (len == 2)
+    return; /* FIXME: Check for unused bits in b[1] ?  */
+
   FRAG_APPEND_1_CHAR (((b64[b[1]] << 4) & 0xf0) | (b64[b[2]] >> 2));
-  if (len == 3) return;
+
+  if (len == 3)
+    return; /* FIXME: Check for unused bits in b[2] ?  */
+
   FRAG_APPEND_1_CHAR (((b64[b[2]] << 6) & 0xc0) | b64[b[3]]);
 }
 
@@ -5620,6 +5590,7 @@ void
 s_base64 (int dummy ATTRIBUTE_UNUSED)
 {
   unsigned int c;
+  unsigned long num_octets = 0;
 
   /* If we have been switched into the abs_section then we
      will not have an obstack onto which we can hang strings.  */
@@ -5736,6 +5707,7 @@ s_base64 (int dummy ATTRIBUTE_UNUSED)
 
       /* We have a block of up to four valid base64 encoded bytes.  */
       decode_base64_and_append (b, i);
+      num_octets += (i - 1);
 
       /* Check the next character.  */
       c = * input_line_pointer ++;
@@ -5765,11 +5737,59 @@ s_base64 (int dummy ATTRIBUTE_UNUSED)
     }
   while (c == ',');
 
+  /* Make sure that we have not skipped the EOL marker.  */
   -- input_line_pointer;
+
+  while (num_octets % OCTETS_PER_BYTE)
+    {
+      /* We have finished emiting the octets for this .base64 pseudo-op, but
+	 we have not filled up enough bytes for the target architecture.  So
+	 we emit padding octets here.  This is done after all of the arguments
+	 to the pseudo-op have been processed, rather than at the end of each
+	 argument, as it is likely that the user wants the arguments to be
+	 contiguous.  */
+      FRAG_APPEND_1_CHAR (0);
+      ++ num_octets;
+    }
 
   demand_empty_rest_of_line ();
 }
 
+static void
+stringer_append_char (int c, int bitsize)
+{
+  if (c && in_bss ())
+    as_bad (_("attempt to store non-empty string in section `%s'"),
+	    segment_name (now_seg));
+
+  if (!target_big_endian)
+    FRAG_APPEND_1_CHAR (c);
+
+  switch (bitsize)
+    {
+    case 64:
+      FRAG_APPEND_1_CHAR (0);
+      FRAG_APPEND_1_CHAR (0);
+      FRAG_APPEND_1_CHAR (0);
+      FRAG_APPEND_1_CHAR (0);
+      /* Fall through.  */
+    case 32:
+      FRAG_APPEND_1_CHAR (0);
+      FRAG_APPEND_1_CHAR (0);
+      /* Fall through.  */
+    case 16:
+      FRAG_APPEND_1_CHAR (0);
+      /* Fall through.  */
+    case 8:
+      break;
+    default:
+      /* Called with invalid bitsize argument.  */
+      abort ();
+      break;
+    }
+  if (target_big_endian)
+    FRAG_APPEND_1_CHAR (c);
+}
 
 /* Worker to do .ascii etc statements.
    Reads 0 or more ',' separated, double-quoted strings.

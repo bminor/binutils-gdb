@@ -1,7 +1,7 @@
 	.data
 	.global hello
 hello:
-	.base64 "aGVsbG8gd29ybGQK", "cGFkZGluZyBoZXJlCg==" 
+	.base64 "aGVsbG8gd29ybGQK", "cGFkZGluZyBoZXJlCg==" , "ABCD" 
 
 	.global very_long
 very_long:
