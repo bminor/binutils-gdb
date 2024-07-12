@@ -95,9 +95,12 @@ set s390xtests {
      "-m64" {pltoffset-1.s}
      {{objdump "-dzrj.text --stop-address=16" pltoffset-1.dd}}
      "pltoffset-1"}
-    {"WEAKUNDEF1: overflow test"
+    {"WEAKUNDEF1: overflow test (PC32DBL)"
      "-m elf64_s390 -dT 8GB.ld --no-error-rwx-segments" "" "-m64" {weakundef-1.s}
      {{objdump "-dzrj.text" weakundef-1.dd}} "weakundef-1"}
+    {"WEAKUNDEF2: overflow test (PLT32DBL)"
+     "-m elf64_s390 -dT 8GB.ld --no-error-rwx-segments -no-pie" "" "-m64" {weakundef-2.s}
+     {{objdump "-dzrj.text" weakundef-2.dd}} "weakundef-2"}
 }
 
 if [istarget "s390-*-*"] {

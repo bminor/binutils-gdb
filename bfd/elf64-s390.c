@@ -2399,6 +2399,43 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      /* We didn't make a PLT entry for this symbol.  This
 		 happens when statically linking PIC code, or when
 		 using -Bsymbolic.  */
+
+	      /* Replace relative long addressing instructions of weak
+		 symbols, which will definitely resolve to zero, with
+		 either a load address of 0 or a trapping insn.
+		 This prevents the PLT32DBL relocation from overflowing in
+		 case the binary will be loaded at 4GB or more.  */
+	      if (h->root.type == bfd_link_hash_undefweak
+		  && !h->root.linker_def
+		  && (bfd_link_executable (info)
+		      || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+		  && r_type == R_390_PLT32DBL
+		  && rel->r_offset >= 2)
+		{
+		  void *insn_start = contents + rel->r_offset - 2;
+		  uint16_t op = bfd_get_16 (input_bfd, insn_start) & 0xff0f;
+		  uint8_t reg = bfd_get_8 (input_bfd, insn_start + 1) & 0xf0;
+
+		  /* NOTE: The order of the if's is important!  */
+		  /* Replace load address relative long (larl) with load
+		     address (lay) */
+		  if (op == 0xc000)
+		    {
+		      /* larl rX,<weak sym> -> lay rX,0(0)  */
+		      bfd_put_16 (output_bfd, 0xe300 | reg, insn_start);
+		      bfd_put_32 (output_bfd, 0x71, insn_start + 2);
+		      continue;
+		    }
+		  /* Replace branch relative and save long (brasl) with a trap.  */
+		  else if (op == 0xc005)
+		    {
+		      /* brasl rX,<weak sym> -> jg .+2 (6-byte trap)  */
+		      bfd_put_16 (output_bfd, 0xc0f4, insn_start);
+		      bfd_put_32 (output_bfd, 0x1, insn_start + 2);
+		      continue;
+		    }
+		}
+
 	      break;
 	    }
 	  if (s390_is_ifunc_symbol_p (h))
