@@ -9674,22 +9674,26 @@ match_template (char mnem_suffix)
 		  goto check_operands_345;
 		}
 	      else if (t->opcode_space == SPACE_EVEXMAP4
-		       && t->opcode_modifier.w)
+		       && t->operands >= 3)
 		{
 		  found_reverse_match = Opcode_D;
 		  goto check_operands_345;
 		}
+	      else if (t->opcode_modifier.commutative)
+		found_reverse_match = ~0;
 	      else if (t->opcode_space != SPACE_BASE
+		       && (t->opcode_space != SPACE_EVEXMAP4
+			   /* MOVBE, originating from SPACE_0F38, also
+			      belongs here.  */
+			   || t->mnem_off == MN_movbe)
 		       && (t->opcode_space != SPACE_0F
 			   /* MOV to/from CR/DR/TR, as an exception, follow
 			      the base opcode space encoding model.  */
 			   || (t->base_opcode | 7) != 0x27))
 		found_reverse_match = (t->base_opcode & 0xee) != 0x6e
 				      ? Opcode_ExtD : Opcode_SIMD_IntD;
-	      else if (!t->opcode_modifier.commutative)
-		found_reverse_match = Opcode_D;
 	      else
-		found_reverse_match = ~0;
+		found_reverse_match = Opcode_D;
 	    }
 	  else
 	    {

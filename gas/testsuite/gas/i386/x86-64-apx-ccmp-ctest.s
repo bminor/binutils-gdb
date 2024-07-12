@@ -66,11 +66,12 @@ _start:
 	ctestbl  {dfv=of, sf} $0x7b,0x123(%r8,%rax,4)
 	ctestb   {dfv=of, sf} %r15w,0x123(%r8,%rax,4)
 	ctestbw  {dfv=of, zf, cf} $0x7b,0x123(%r8,%rax,4)
-	ctestb   {dfv=of, zf, cf} %r15w,0x123(%r8,%rax,4)
+	ctestb   {dfv=of, zf, cf} 0x123(%r8,%rax,4),%r15w
 	ctestbb  {dfv=of, zf} $0x7b,0x123(%r8,%rax,4)
 	ctestb   {dfv=of, zf} %r15,0x123(%r8,%rax,4)
 	ctestb   {dfv=of} %r15d,0x123(%r8,%rax,4)
 	ctestb   {dfv=of} %r8b,0x123(%r8,%rax,4)
+	ctestb   {dfv=of} 0x123(%r8,%rax,4),%r8b
 	ctestbl  {dfv=sf, cf} $0x7b,0x123(%r8,%rax,4)
 	ctestb   {dfv=sf, cf} %r15d,%edx
 	ctestb   {dfv=sf, zf, cf} %r15d,0x123(%r8,%rax,4)
@@ -106,6 +107,8 @@ _start:
 	{evex} cmp $0x7b,%r18
 	{evex} cmp $0x7b,%r18b
 	{evex} test %r15d,%edx
+	{evex} test (%r15),%edx
+	{evex} test %r15d,(%rdx)
 	{evex} test $0x7b,%r18
 	{evex} test $0x7b,%r18b
 

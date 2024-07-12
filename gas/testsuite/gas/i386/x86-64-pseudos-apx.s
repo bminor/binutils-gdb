@@ -16,7 +16,7 @@ _start:
         {store} movaps %xmm2, (%r31)
 
         #APX EVEX promoted from legacy
-        .irp m, adc, add, and, cmp, or, sbb, sub, xor
+        .irp m, adc, add, and, cmp, or, sbb, sub, test, xor
         {evex}         \m %ecx, %r31d
         {evex} {load}  \m %ecx, %r31d
         {evex} {store} \m %ecx, %r31d
@@ -36,7 +36,7 @@ _start:
         .endr
 
         #APX News.
-        .irp m, ccmpb, cfcmovb
+        .irp m, ccmpb, cfcmovb, ctestb
         \m %edx, %eax
         {load}  \m %edx, %eax
         {store} \m %edx, %eax

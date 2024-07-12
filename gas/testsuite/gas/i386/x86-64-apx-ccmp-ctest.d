@@ -77,6 +77,7 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 54 d4 02 85 bc 80 23 01 00 00[ 	]+ctestb \{dfv=of, zf\} %r15,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 54 44 02 85 bc 80 23 01 00 00[ 	]+ctestb \{dfv=of\} %r15d,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 54 44 02 84 84 80 23 01 00 00[ 	]+ctestb \{dfv=of\} %r8b,0x123\(%r8,%rax,4\)
+[ 	]*[a-f0-9]+:[ 	]*62 54 44 02 84 84 80 23 01 00 00[ 	]+ctestb \{dfv=of\} %r8b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 2c 02 f7 84 80 23 01 00 00 7b 00 00 00[ 	]+ctestbl \{dfv=sf, cf\}\s+\$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 74 2c 02 85 fa[ 	]+ctestb \{dfv=sf, cf\} %r15d,%edx
 [ 	]*[a-f0-9]+:[ 	]*62 54 3c 02 85 bc 80 23 01 00 00[ 	]+ctestb \{dfv=sf, zf, cf\} %r15d,0x123\(%r8,%rax,4\)
@@ -111,7 +112,9 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 74 04 0a 39 fa[ 	]+ccmpt \{dfv=\} %r15d,%edx
 [ 	]*[a-f0-9]+:[ 	]*62 fc 84 0a 83 fa 7b[ 	]+ccmpt \{dfv=\} \$0x7b,%r18
 [ 	]*[a-f0-9]+:[ 	]*62 fc 04 0a 80 fa 7b[ 	]+ccmpt \{dfv=\} \$0x7b,%r18b
-[ 	]*[a-f0-9]+:[ 	]*62 74 04 0a 85 fa[ 	]+ctestt \{dfv=\} \%r15d,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 74 04 0a 85 fa[ 	]+ctestt \{dfv=\} %r15d,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 d4 04 0a 85 17[ 	]+ctestt \{dfv=\} %edx,\(%r15\)
+[ 	]*[a-f0-9]+:[ 	]*62 74 04 0a 85 3a[ 	]+ctestt \{dfv=\} %r15d,\(%rdx\)
 [ 	]*[a-f0-9]+:[ 	]*62 fc 84 0a f7 c2 7b 00 00 00[ 	]+ctestt \{dfv=\} \$0x7b,%r18
 [ 	]*[a-f0-9]+:[ 	]*62 fc 04 0a f6 c2 7b[ 	]+ctestt \{dfv=\} \$0x7b,%r18b
 [ 	]*[a-f0-9]+:[ 	]*62 d4 8c 02 83 bc 80 23 01 00 00 7b[ 	]+ccmpbq \{dfv=cf\}\s+\$0x7b,0x123\(%r8,%rax,4\)
@@ -220,3 +223,4 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 74 04 0a 85 fa[ 	]+ctestt \{dfv=\} \%r15d,%edx
 [ 	]*[a-f0-9]+:[ 	]*62 fc 84 0a f7 c2 7b 00 00 00[ 	]+ctestt \{dfv=\} \$0x7b,%r18
 [ 	]*[a-f0-9]+:[ 	]*62 fc 04 0a f6 c2 7b[ 	]+ctestt \{dfv=\} \$0x7b,%r18b
+#pass
