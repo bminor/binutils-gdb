@@ -4399,9 +4399,24 @@ build_rex2_prefix (void)
    | W | v`v`v`v | `x' | pp |
    | z| L'L | b | `v | aaa |
 */
-static void
+static bool
 build_apx_evex_prefix (void)
 {
+  /* To mimic behavior for legacy insns, transform use of DATA16 into its
+     embedded-prefix representation.  */
+  if (i.prefix[DATA_PREFIX] && i.tm.opcode_space == SPACE_EVEXMAP4)
+    {
+      if (i.tm.opcode_modifier.opcodeprefix)
+	{
+	  as_bad (i.tm.opcode_modifier.opcodeprefix == PREFIX_0X66
+		  ? _("same type of prefix used twice")
+		  : _("conflicting use of `data16' prefix"));
+	  return false;
+	}
+      i.tm.opcode_modifier.opcodeprefix = PREFIX_0X66;
+      i.prefix[DATA_PREFIX] = 0;
+    }
+
   build_evex_prefix ();
   if (i.rex2 & REX_R)
     i.vex.bytes[1] &= ~0x10;
@@ -4437,6 +4452,8 @@ build_apx_evex_prefix (void)
   /* Encode the NF bit.  */
   if (i.has_nf || i.tm.opcode_modifier.operandconstraint == EVEX_NF)
     i.vex.bytes[3] |= 0x04;
+
+  return true;
 }
 
 static void establish_rex (void)
@@ -7522,7 +7539,7 @@ md_assemble (char *line)
 	i.prefix[LOCK_PREFIX] = 0;
     }
 
-  if (is_any_vex_encoding (&i.tm)
+  if ((is_any_vex_encoding (&i.tm) && i.tm.opcode_space != SPACE_EVEXMAP4)
       || i.tm.operand_types[i.imm_operands].bitfield.class >= RegMMX
       || i.tm.operand_types[i.imm_operands + 1].bitfield.class >= RegMMX)
     {
@@ -7538,21 +7555,6 @@ md_assemble (char *line)
 	switch (i.reloc[j])
 	  {
 	  case BFD_RELOC_X86_64_GOTTPOFF:
-	    if (i.tm.mnem_off == MN_add
-		&& i.tm.opcode_space == SPACE_EVEXMAP4
-		&& i.mem_operands == 1
-		&& i.base_reg
-		&& i.base_reg->reg_num == RegIP
-		&& i.reg_operands == (i.operands - 1)
-		&& i.types[i.operands - 1].bitfield.class == Reg)
-	      /* Allow APX:
-		 add %reg1, foo@gottpoff(%rip), %reg2
-		 add foo@gottpoff(%rip), %reg, %reg2
-		 {nf} add foo@gottpoff(%rip), %reg
-		 {nf} add %reg1, foo@gottpoff(%rip), %reg2
-		 {nf} add foo@gottpoff(%rip), %reg, %reg2.  */
-	      break;
-	    /* Fall through.  */
 	  case BFD_RELOC_386_TLS_GOTIE:
 	  case BFD_RELOC_386_TLS_LE_32:
 	  case BFD_RELOC_X86_64_TLSLD:
@@ -7721,7 +7723,10 @@ md_assemble (char *line)
 	}
 
       if (is_apx_evex_encoding ())
-	build_apx_evex_prefix ();
+	{
+	  if (!build_apx_evex_prefix ())
+	    return;
+	}
       else if (i.tm.opcode_modifier.vex)
 	build_vex_prefix (t);
       else
