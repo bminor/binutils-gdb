@@ -177,11 +177,16 @@ if {! [info exists env(CCC_OVERRIDE_OPTIONS)]} {
 # installed, but to the O32 ABI in the build tree, because of some
 # specs-file hacks.  Make sure we use an ABI that is compatible with
 # the one we expect.
-if {[istarget mips64*-*-linux*] &&
+# mips*64*-*linux-gnuabi64 compiler defaults to N64 ABI.
+if {([istarget mips64*-*-linux*] || [istarget mips*64*-*-linux-gnuabi64]) &&
     (![board_info [target_info name] exists multilib_flags] ||
      ![string match "*-mabi" [board_info [target_info name] multilib_flags]])
    } {
-    append gcc_B_opt " -mabi=n32"
+    if { [istarget *-*-gnuabi64] } {
+      append gcc_B_opt " -mabi=64"
+    } else {
+      append gcc_B_opt " -mabi=n32"
+    }
 }
 
 if { [istarget rx-*-*] } {
