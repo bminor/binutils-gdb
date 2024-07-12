@@ -2517,10 +2517,9 @@ elf_s390_relocate_section (bfd *output_bfd,
 		 - store halfword relative long (sthrl)
 		 - execute relative long (exrl)
 		 - compare (logical) relative long (crl, clrl, cgrl, clgrl, cgfrl, clgfrl)
-		 - compare (logical) halfword relative long (chrl, cghrl, clhrl, clghrl)
-		 - branch relative on count high (brcth)  */
+		 - compare (logical) halfword relative long (chrl, cghrl, clhrl, clghrl)  */
 	      else if (op == 0xc005 || (op & 0xff00) == 0xc400
-		       || (op & 0xff00) == 0xc600 || op == 0xcc06)
+		       || (op & 0xff00) == 0xc600)
 		{
 		  /* Emit a 6-byte trap: jg .+2  */
 		  bfd_put_16 (output_bfd, 0xc0f4, insn_start);

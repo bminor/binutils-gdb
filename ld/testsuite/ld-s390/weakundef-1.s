@@ -9,7 +9,6 @@ foo:
 	lrl	%r1,wu
 	strl	%r1,wu
 	exrl	%r1,wu
-	brcth	%r1,wu
 	pfdrl	%r1,wu
 	.weak	wd
 	.weak	wu
