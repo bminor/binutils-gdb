@@ -161,8 +161,8 @@ automatically cause those extensions to be disabled.
 @headitem Extension @tab Depends upon @tab Description
 @item @code{aes} @tab @code{simd}
  @tab Enable the AES and PMULL cryptographic extensions.
-@item @code{b16b16} @tab @code{sve2}
- @tab Enable BFloat16 to BFloat16 arithmetic for SVE2 and SME2.
+@c @item @code{b16b16} @tab @code{sve2}
+@c  @tab Enable BFloat16 to BFloat16 arithmetic for SVE2 and SME2.
 @item @code{bf16} @tab @code{fp}
  @tab Enable BFloat16 extension.
 @item @code{brbe} @tab
