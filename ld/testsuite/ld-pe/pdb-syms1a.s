@@ -1,6 +1,7 @@
 .equ CV_SIGNATURE_C13, 4
 .equ DEBUG_S_SYMBOLS, 0xf1
 
+.equ T_VOID, 0x0003
 .equ T_UINT4, 0x0075
 
 .equ LF_MODIFIER, 0x1001
