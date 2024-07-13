@@ -872,7 +872,7 @@ add_globals_ref (struct globals *glob, bfd *sym_rec_stream, const char *name,
 
   *slot = xmalloc (offsetof (struct global, data) + len);
 
-  hash = crc32 ((const uint8_t *) name, name_len);
+  hash = calc_hash (name, name_len);
   hash %= NUM_GLOBALS_HASH_BUCKETS;
 
   g = *slot;
