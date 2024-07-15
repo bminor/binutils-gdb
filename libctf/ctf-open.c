@@ -1066,6 +1066,7 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	  continue;
 
 	enum_err:
+	  ctf_set_errno (fp, err);
 	  ctf_next_destroy (i_constants);
 	  ctf_next_destroy (i);
 	  return ctf_errno (fp);
