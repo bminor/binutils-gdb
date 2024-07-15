@@ -2073,6 +2073,7 @@ record_full_core_target::resume (ptid_t ptid, int step,
 				 enum gdb_signal signal)
 {
   record_full_resume_step = step;
+  record_full_resume_ptid = ptid;
   record_full_resumed = 1;
   record_full_execution_dir = ::execution_direction;
 }
