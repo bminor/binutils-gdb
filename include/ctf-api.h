@@ -196,7 +196,7 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOCTFDATA, "File does not contain CTF data.") \
   _CTF_ITEM (ECTF_NOCTFBUF, "Buffer does not contain CTF data.") \
   _CTF_ITEM (ECTF_NOSYMTAB, "Symbol table information is not available.") \
-  _CTF_ITEM (ECTF_NOPARENT, "The parent CTF dictionary is unavailable.") \
+  _CTF_ITEM (ECTF_NOPARENT, "The parent CTF dictionary is needed but unavailable.") \
   _CTF_ITEM (ECTF_DMODEL, "Data model mismatch.") \
   _CTF_ITEM (ECTF_LINKADDEDLATE, "File added to link too late.") \
   _CTF_ITEM (ECTF_ZALLOC, "Failed to allocate (de)compression buffer.") \
