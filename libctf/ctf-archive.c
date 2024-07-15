@@ -769,7 +769,10 @@ ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp, int *errp)
 
       if (parent)
 	{
-	  ctf_import (fp, parent);
+	  if (ctf_import (fp, parent) < 0)
+	    ctf_err_warn (NULL, 1, ctf_errno (fp),
+			  "ctf_arc_import_parent: cannot import: %s",
+			  ctf_errmsg (ctf_errno (fp)));
 	  ctf_dict_close (parent);
 	}
       else if (err != ECTF_ARNNAME)

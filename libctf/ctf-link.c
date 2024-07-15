@@ -711,6 +711,10 @@ ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
   return count;
 }
 
+static int
+ctf_link_deduplicating_close_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
+				     ctf_dict_t **inputs, ssize_t ninputs);
+
 /* Allocate and populate an inputs array big enough for a given set of inputs:
    either a specific set of CU names (those from that set found in the
    ctf_link_inputs), or the entire ctf_link_inputs (if cu_names is not set).
@@ -763,9 +767,10 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
       const char *one_name = (const char *) name;
       ctf_link_input_t *one_input;
       ctf_dict_t *one_fp;
-      ctf_dict_t *parent_fp = NULL;
-      uint32_t parent_i = 0;
       ctf_next_t *j = NULL;
+      ssize_t parent_i;
+      int parent_set = 0;
+      ctf_dict_t *parent_fp = NULL;
 
       /* If we are processing CU names, get the real input.  All the inputs
 	 will have been opened, if they contained any CTF at all.  */
@@ -777,7 +782,7 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
       if (!one_input || (!one_input->clin_arc && !one_input->clin_fp))
 	continue;
 
-      /* Short-circuit: if clin_fp is set, just use it.   */
+      /* Short-circuit: if clin_fp is set, just use it.  */
       if (one_input->clin_fp)
 	{
 	  parents_[walk - dedup_inputs] = walk - dedup_inputs;
@@ -786,48 +791,73 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 	  continue;
 	}
 
-      /* Get and insert the parent archive (if any), if this archive has
-	 multiple members.  We assume, as elsewhere, that the parent is named
-	 _CTF_SECTION.  */
+      if (one_input->clin_filename)
+	ctf_dprintf ("Opening %s\n", one_input->clin_filename);
 
-      if ((parent_fp = ctf_dict_open (one_input->clin_arc, _CTF_SECTION,
-				      &err)) == NULL)
+      /* We disregard the input archive name: either it is the parent (which we can get
+	 via ctf_parent_dict), or we want to put everything into one TU sharing the
+	 cuname anyway (if this is a CU-mapped link), or this is the final phase of a
+	 relink with CU-mapping off (i.e. ld -r) in which case the cuname is correctly
+	 set regardless.  */
+
+      while ((one_fp = ctf_archive_next (one_input->clin_arc, &j, NULL,
+					 0, &err)) != NULL)
 	{
-	  if (err != ECTF_NOMEMBNAM)
+	  /* ctf_archive_next either auto-imports the parent, or this *is* the parent.
+	     In both cases, we can set the parent up if it's not already set.
+
+	     If parent importing failed, we must report an error.
+
+	     We must do it first, so we can set later elements of the parents_ array to
+	     the parent.  */
+
+	  if (one_fp->ctf_flags & LCTF_CHILD && one_fp->ctf_parent == NULL)
 	    {
 	      ctf_next_destroy (i);
-	      ctf_set_errno (fp, err);
+	      ctf_set_errno (fp, ECTF_NOPARENT);
+	      ctf_err_warn (fp, 0, 0, _("cannot open linker inputs"));
+	      goto reported_err;
+	    }
+
+	  if (!parent_set)
+	    {
+	      if (one_fp->ctf_flags & LCTF_CHILD)
+		parent_fp = one_fp->ctf_parent;
+	      else
+		parent_fp = one_fp;
+
+	      *walk = parent_fp;
+	      parent_i = walk - dedup_inputs;
+	      parents_[parent_i] = parent_i;
+	      walk++;
+
+	      parent_set = 1;
+
+	      /* If this is the parent, we don't need to process the child dict itself
+		 (because there isn't one).  */
+
+	      if (!(one_fp->ctf_flags & LCTF_CHILD))
+		continue;
+	    }
+
+	  if (!ctf_assert (fp, one_fp->ctf_parent == parent_fp))
+	    {
+	      ctf_next_destroy (i);
+	      goto err;				/* errno is set for us. */
+	    }
+
+	  parents_[walk - dedup_inputs] = parent_i;
+
+	  /* This should never happen, but if it *does*, we want to know, because it
+	     breaks string lookup and thus eventually everything.  */
+	  if (one_fp->ctf_flags & LCTF_NO_STR)
+	    {
+	      ctf_next_destroy (j);
+	      ctf_next_destroy (i);
+	      ctf_set_errno (fp, ECTF_NOPARENT);
 	      goto err;
 	    }
-	}
-      else
-	{
-	  *walk = parent_fp;
-	  parent_i = walk - dedup_inputs;
-	  walk++;
-	}
 
-      /* We disregard the input archive name: either it is the parent (which we
-	 already have), or we want to put everything into one TU sharing the
-	 cuname anyway (if this is a CU-mapped link), or this is the final phase
-	 of a relink with CU-mapping off (i.e. ld -r) in which case the cuname
-	 is correctly set regardless.  */
-      while ((one_fp = ctf_archive_next (one_input->clin_arc, &j, NULL,
-					 1, &err)) != NULL)
-	{
-	  if (one_fp->ctf_flags & LCTF_CHILD)
-	    {
-	      /* The contents of the parents array for elements not
-		 corresponding to children is undefined.  If there is no parent
-		 (itself a sign of a likely linker bug or corrupt input), we set
-		 it to itself.  */
-
-	      ctf_import (one_fp, parent_fp);
-	      if (parent_fp)
-		parents_[walk - dedup_inputs] = parent_i;
-	      else
-		parents_[walk - dedup_inputs] = walk - dedup_inputs;
-	    }
 	  *walk = one_fp;
 	  walk++;
 	}
@@ -851,10 +881,14 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
   ctf_set_errno (fp, err);
 
  err:
-  free (dedup_inputs);
-  free (parents_);
   ctf_err_warn (fp, 0, 0, _("error in deduplicating CTF link "
 			    "input allocation"));
+ reported_err:
+  ctf_link_deduplicating_close_inputs (fp, cu_names, dedup_inputs, ninputs);
+  /* UPTODO XXX fix pre-existing leak of the parents on error.  */
+
+  free (dedup_inputs);
+  free (parents_);
   return NULL;
 }
 
