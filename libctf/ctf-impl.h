@@ -202,12 +202,21 @@ typedef struct ctf_err_warning
    string, so that ctf_serialize() can instantiate all the strings using the
    ctf_str_atoms and then reassociate them with the real string later.
 
+   The csa_offset is the offset within *this particular strtab*: no matter
+   how many strings the parent has, the childrens' csa_offsets are unchanged.
+   So csa_offset may not be the value actually returned as the offset of this
+   string.
+
    Strings can be interned into ctf_str_atom without having refs associated
    with them, for values that are returned to callers, etc.  Items are only
    removed from this table on ctf_close(), but on every ctf_serialize(), all
-   the csa_refs in all entries are purged.  */
+   the csa_refs in all entries are purged.  Refs may also be removed if they are
+   migrated from one atoms table to another as a consequence of strtab
+   deduplication.  */
 
 #define CTF_STR_ATOM_FREEABLE	0x1
+#define CTF_STR_ATOM_IN_PARENT	0x2
+#define CTF_STR_ATOM_NO_DEDUP	0x4
 
 typedef struct ctf_str_atom
 {
@@ -228,7 +237,7 @@ typedef struct ctf_str_atom_ref
   uint32_t *caf_ref;		/* A single ref to this string.  */
 } ctf_str_atom_ref_t;
 
-  /* Like a ctf_str_atom_ref_t, but specific to movable refs.  */
+/* Like a ctf_str_atom_ref_t, but specific to movable refs.  */
 
 typedef struct ctf_str_atom_ref_movable
 {
@@ -750,7 +759,10 @@ extern const char *ctf_strptr_validate (ctf_dict_t *, uint32_t);
 extern int ctf_str_create_atoms (ctf_dict_t *);
 extern void ctf_str_free_atoms (ctf_dict_t *);
 extern uint32_t ctf_str_add (ctf_dict_t *, const char *);
+extern uint32_t ctf_str_add_copy (ctf_dict_t *, const char *);
 extern uint32_t ctf_str_add_ref (ctf_dict_t *, const char *, uint32_t *ref);
+extern uint32_t ctf_str_add_no_dedup_ref (ctf_dict_t *, const char *,
+					  uint32_t *ref);
 extern uint32_t ctf_str_add_movable_ref (ctf_dict_t *, const char *,
 					 uint32_t *ref);
 extern int ctf_str_move_refs (ctf_dict_t *fp, void *src, size_t len, void *dest);

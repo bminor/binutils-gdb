@@ -248,7 +248,8 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_CTFVERS_NO_SERIALIZE, "CTFv1 dicts are too old to serialize.") \
   _CTF_ITEM (ECTF_UNSTABLE, "Attempt to write unstable file format version: set I_KNOW_LIBCTF_IS_UNSTABLE in the environment.") \
   _CTF_ITEM (ECTF_HASPARENT, "Cannot ctf_import: dict already has a parent.") \
-  _CTF_ITEM (ECTF_WRONGPARENT, "Cannot ctf_import: incorrect parent provided.")
+  _CTF_ITEM (ECTF_WRONGPARENT, "Cannot ctf_import: incorrect parent provided.") \
+  _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -261,7 +262,7 @@ _CTF_ERRORS
 #undef _CTF_FIRST
   };
 
-#define ECTF_NERR (ECTF_WRONGPARENT - ECTF_BASE + 1) /* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_NOTSERIALIZED - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */
