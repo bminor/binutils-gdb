@@ -2387,7 +2387,7 @@ remove_symbol_file_command (const char *args, int from_tty)
 	{
 	  if ((objfile->flags & OBJF_USERLOADED) != 0
 	      && (objfile->flags & OBJF_SHARED) != 0
-	      && objfile->pspace == pspace
+	      && objfile->pspace () == pspace
 	      && is_addr_in_objfile (addr, objfile))
 	    {
 	      objf = objfile;
@@ -2408,7 +2408,7 @@ remove_symbol_file_command (const char *args, int from_tty)
 	{
 	  if ((objfile->flags & OBJF_USERLOADED) != 0
 	      && (objfile->flags & OBJF_SHARED) != 0
-	      && objfile->pspace == pspace
+	      && objfile->pspace () == pspace
 	      && filename_cmp (filename.get (), objfile_name (objfile)) == 0)
 	    {
 	      objf = objfile;
@@ -3722,7 +3722,7 @@ static void
 symfile_free_objfile (struct objfile *objfile)
 {
   /* Remove the target sections owned by this objfile.  */
-  objfile->pspace->remove_target_sections (objfile);
+  objfile->pspace ()->remove_target_sections (objfile);
 }
 
 /* Wrapper around the quick_symbol_functions expand_symtabs_matching "method".

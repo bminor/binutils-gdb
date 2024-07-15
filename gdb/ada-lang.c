@@ -13884,7 +13884,7 @@ static struct cmd_list_element *show_ada_list;
 static void
 ada_new_objfile_observer (struct objfile *objfile)
 {
-  ada_clear_symbol_cache (objfile->pspace);
+  ada_clear_symbol_cache (objfile->pspace ());
 }
 
 /* This module's 'free_objfile' observer.  */
@@ -13892,7 +13892,7 @@ ada_new_objfile_observer (struct objfile *objfile)
 static void
 ada_free_objfile_observer (struct objfile *objfile)
 {
-  ada_clear_symbol_cache (objfile->pspace);
+  ada_clear_symbol_cache (objfile->pspace ());
 }
 
 /* Charsets known to GNAT.  */

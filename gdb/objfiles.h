@@ -445,6 +445,9 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (objfile);
 
+  /* Return the program space associated with this objfile.  */
+  program_space *pspace () { return m_pspace; }
+
   /* A range adapter that makes it possible to iterate over all
      compunits in one objfile.  */
 
@@ -716,10 +719,12 @@ public:
 
   objfile_flags flags;
 
+private:
   /* The program space associated with this objfile.  */
 
-  struct program_space *pspace;
+  program_space *m_pspace;
 
+public:
   /* List of compunits.
      These are used to do symbol lookups and file/line-number lookups.  */
 

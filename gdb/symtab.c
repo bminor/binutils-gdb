@@ -1755,7 +1755,7 @@ maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
 static void
 symtab_new_objfile_observer (struct objfile *objfile)
 {
-  symbol_cache_flush (objfile->pspace);
+  symbol_cache_flush (objfile->pspace ());
 }
 
 /* This module's 'all_objfiles_removed' observer.  */
@@ -1774,7 +1774,7 @@ symtab_all_objfiles_removed (program_space *pspace)
 static void
 symtab_free_objfile_observer (struct objfile *objfile)
 {
-  symbol_cache_flush (objfile->pspace);
+  symbol_cache_flush (objfile->pspace ());
 }
 
 /* See symtab.h.  */

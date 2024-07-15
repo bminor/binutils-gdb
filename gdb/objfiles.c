@@ -308,7 +308,7 @@ build_objfile_section_table (struct objfile *objfile)
 
 objfile::objfile (gdb_bfd_ref_ptr bfd_, const char *name, objfile_flags flags_)
   : flags (flags_),
-    pspace (current_program_space),
+    m_pspace (current_program_space),
     obfd (std::move (bfd_))
 {
   const char *expanded_name;
@@ -568,7 +568,7 @@ objfile::~objfile ()
   }
 
   /* Rebuild section map next time we need it.  */
-  get_objfile_pspace_data (pspace)->section_map_dirty = 1;
+  get_objfile_pspace_data (m_pspace)->section_map_dirty = 1;
 }
 
 
@@ -646,7 +646,7 @@ objfile_relocate1 (struct objfile *objfile,
     objfile->section_offsets[i] = new_offsets[i];
 
   /* Rebuild section map next time we need it.  */
-  get_objfile_pspace_data (objfile->pspace)->section_map_dirty = 1;
+  get_objfile_pspace_data (objfile->pspace ())->section_map_dirty = 1;
 
   /* Update the table in exec_ops, used to read memory.  */
   for (obj_section *s : objfile->sections ())

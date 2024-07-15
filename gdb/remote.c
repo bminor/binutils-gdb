@@ -15444,7 +15444,7 @@ remote_objfile_changed_check_symbols (program_space *pspace)
 static void
 remote_new_objfile (struct objfile *objfile)
 {
-  remote_objfile_changed_check_symbols (objfile->pspace);
+  remote_objfile_changed_check_symbols (objfile->pspace ());
 }
 
 /* Pull all the tracepoints defined on the target and create local

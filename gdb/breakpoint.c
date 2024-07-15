@@ -8092,7 +8092,7 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
 	  if (loc.shlib_disabled != 0)
 	    continue;
 
-	  if (objfile->pspace != loc.pspace)
+	  if (objfile->pspace () != loc.pspace)
 	    continue;
 
 	  if (loc.loc_type != bp_loc_hardware_breakpoint

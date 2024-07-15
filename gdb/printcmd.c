@@ -2294,11 +2294,11 @@ disable_display_command (const char *args, int from_tty)
 static void
 clear_dangling_display_expressions (struct objfile *objfile)
 {
-  program_space *pspace = objfile->pspace;
+  program_space *pspace = objfile->pspace ();
   if (objfile->separate_debug_objfile_backlink)
     {
       objfile = objfile->separate_debug_objfile_backlink;
-      gdb_assert (objfile->pspace == pspace);
+      gdb_assert (objfile->pspace () == pspace);
     }
 
   for (auto &d : all_displays)
