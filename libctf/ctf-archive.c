@@ -265,15 +265,9 @@ arc_write_one_ctf (ctf_dict_t *f, int fd, size_t threshold)
   uint64_t ctfsz = 0;
   char *ctfszp;
   size_t ctfsz_len;
-  int (*writefn) (ctf_dict_t * fp, int fd);
 
   if ((off = lseek (fd, 0, SEEK_CUR)) < 0)
     return errno * -1;
-
-  if (f->ctf_size > threshold)
-    writefn = ctf_compress_write;
-  else
-    writefn = ctf_write;
 
   /* This zero-write turns into the size in a moment. */
   ctfsz_len = sizeof (ctfsz);
@@ -287,7 +281,7 @@ arc_write_one_ctf (ctf_dict_t *f, int fd, size_t threshold)
       ctfszp += writelen;
     }
 
-  if (writefn (f, fd) != 0)
+  if (ctf_write_thresholded (f, fd, threshold) != 0)
     return f->ctf_errno * -1;
 
   if ((end_off = lseek (fd, 0, SEEK_CUR)) < 0)
