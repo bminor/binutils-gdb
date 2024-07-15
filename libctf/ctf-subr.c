@@ -231,11 +231,11 @@ ctf_err_warn (ctf_dict_t *fp, int is_warning, int err,
      lead to unwinding up to the user.)  */
   if ((!is_warning && (err != 0 || (fp && ctf_errno (fp) != 0)))
       || (is_warning && err != 0))
-    ctf_dprintf ("%s: %s (%s)\n", is_warning ? _("error") : _("warning"),
+    ctf_dprintf ("%s: %s (%s)\n", is_warning ? _("warning") : _("error"),
 		 cew->cew_text, err != 0 ? ctf_errmsg (err)
 		 : ctf_errmsg (ctf_errno (fp)));
   else
-    ctf_dprintf ("%s: %s\n", is_warning ? _("error") : _("warning"),
+    ctf_dprintf ("%s: %s\n", is_warning ? _("warning") : _("error"),
 		 cew->cew_text);
 
   if (fp != NULL)
