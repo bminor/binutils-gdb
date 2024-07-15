@@ -2040,6 +2040,10 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 	goto err_no;
       }
 
+  /* Turn off the is-linking flag on all the dicts in this link.  */
+  for (i = 0; i < arg.i; i++)
+    arg.files[i]->ctf_flags &= ~LCTF_LINKING;
+
   *size = fsize;
   free (arg.names);
   free (arg.files);
