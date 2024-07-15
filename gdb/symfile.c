@@ -91,8 +91,6 @@ static void symbol_file_add_main_1 (const char *args, symfile_add_flags add_flag
 
 static const struct sym_fns *find_sym_fns (bfd *);
 
-static void overlay_invalidate_all (void);
-
 static void simple_free_overlay_table (void);
 
 static void read_target_long_array (CORE_ADDR, unsigned int *, int, int,
@@ -2972,13 +2970,13 @@ section_is_overlay (struct obj_section *section)
   return 0;
 }
 
-/* Function: overlay_invalidate_all (void)
-   Invalidate the mapped state of all overlay sections (mark it as stale).  */
+/* Invalidate the mapped state of all overlay sections (mark it as stale) in
+   PSPACE.  */
 
 static void
-overlay_invalidate_all (void)
+overlay_invalidate_all (program_space *pspace)
 {
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile *objfile : pspace->objfiles ())
     for (obj_section *sect : objfile->sections ())
       if (section_is_overlay (sect))
 	sect->ovly_mapped = -1;
@@ -3014,7 +3012,7 @@ section_is_mapped (struct obj_section *osect)
 	{
 	  if (overlay_cache_invalid)
 	    {
-	      overlay_invalidate_all ();
+	      overlay_invalidate_all (current_program_space);
 	      overlay_cache_invalid = 0;
 	    }
 	  if (osect->ovly_mapped == -1)
