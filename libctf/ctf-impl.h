@@ -762,6 +762,8 @@ extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *, int);
 
 extern int ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp);
 
+extern int ctf_write_thresholded (ctf_dict_t *fp, int fd, size_t threshold);
+
 _libctf_malloc_
 extern void *ctf_mmap (size_t length, size_t offset, int fd);
 extern void ctf_munmap (void *, size_t);
