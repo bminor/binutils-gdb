@@ -739,6 +739,7 @@ extern int ctf_dedup (ctf_dict_t *, ctf_dict_t **, uint32_t ninputs,
 extern ctf_dict_t **ctf_dedup_emit (ctf_dict_t *, ctf_dict_t **,
 				    uint32_t ninputs, uint32_t *parents,
 				    uint32_t *noutputs, int cu_mapped);
+extern int ctf_dedup_strings (ctf_dict_t *fp);
 extern void ctf_dedup_fini (ctf_dict_t *, ctf_dict_t **, uint32_t);
 extern ctf_id_t ctf_dedup_type_mapping (ctf_dict_t *fp, ctf_dict_t *src_fp,
 					ctf_id_t src_type);

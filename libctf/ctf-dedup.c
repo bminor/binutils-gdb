@@ -48,6 +48,12 @@
        least a forward emitted into the shared dict so that other dicts can cite
        it if needed.
 
+    [ctf_dedup_strings]
+    4) deduplicate all the strings.  (Called later, during late link time:
+       this must be done right before serialization, and after
+       'preserialization' has written out all the strings that all the dicts
+       will need.)
+
    [id_to_packed_id]
    This all works over an array of inputs (usually in the same order as the
    inputs on the link line).  We don't use the ctf_link_inputs hash directly
@@ -247,15 +253,18 @@
    structures.
 
    [ctf_dedup_emit_struct_members]
-   The final stage of emission is to walk over all structures with members
-   that need emission and emit all of them. Every type has been emitted at
-   this stage, so emission cannot fail.
+   Walk over all structures with members that need emission and emit all of
+   them. Every type has been emitted at this stage, so emission cannot
+   fail.
 
-   [ctf_dedup_populate_type_mappings, ctf_dedup_populate_type_mapping]
-   Finally, we update the input -> output type ID mappings used by the ctf-link
-   machinery to update all the other sections.  This is surprisingly expensive
-   and may be replaced with a scheme which lets the ctf-link machinery extract
-   the needed info directly from the deduplicator.  */
+   [ctf_dedup_strings]
+   Accumulate a (string -> dict count) hash for all strings with refs in
+   child dicts, then add all strings with counts > 1 to the parent dict,
+   transplanting all their refs (strings already in the parent are also
+   treated in the obvious way).  Since refs are just pointers, as long as
+   the parent dict is written out first, the children will automatically get
+   all their refs to parent strings appropriately updated without having to
+   do anything at all at child write time.  */
 
 /* Possible future optimizations are flagged with 'optimization opportunity'
    below.  */
@@ -3083,6 +3092,8 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
    dict at the corresponding index in the INPUTS (for non-child dicts, the value
    is undefined and can just be left at zero).
 
+   The strtabs are not deduplicated yet.
+
    Return an array of fps with content emitted into them (starting with OUTPUT,
    which is the parent of all others, then all the newly-generated outputs).
 
@@ -3141,6 +3152,150 @@ ctf_dedup_emit (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
     }
 
   return outputs;
+}
+
+/* Deduplicate strings.  The child dict ctf_parent_strlen is not updated
+   yet: this must be done after parent serialization.  */
+
+int
+ctf_dedup_strings (ctf_dict_t *fp)
+{
+  ctf_dynhash_t *str_counts;
+  int err;
+  ctf_next_t *i = NULL;
+  void *dict;
+
+  str_counts = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+				   NULL, NULL);
+  if (!str_counts)
+    return ctf_set_errno (fp, ENOMEM);
+
+  /* Count the strings.  */
+
+  while ((err = ctf_dynhash_next (fp->ctf_link_outputs, &i, NULL, &dict)) == 0)
+    {
+      ctf_dict_t *out = (ctf_dict_t *) dict;
+      ctf_next_t *j = NULL;
+      void *v;
+
+      while ((err = ctf_dynhash_next (out->ctf_str_atoms, &j, NULL, &v)) == 0)
+	{
+	  ctf_str_atom_t *atom = (ctf_str_atom_t *) v;
+	  uintptr_t count = 0;
+
+	  if (ctf_list_empty_p (&atom->csa_refs)
+	      && ctf_list_empty_p (&atom->csa_movable_refs))
+	    continue;
+
+	  if (atom->csa_external_offset
+	      || atom->csa_str[0] == '\0'
+	      || atom->csa_flags & CTF_STR_ATOM_NO_DEDUP)
+	    continue;
+
+	  if (ctf_dynhash_lookup_kv (str_counts, atom->csa_str, NULL, &v))
+	    {
+	      count = (uintptr_t) v;
+	    }
+	  else
+	    {
+	      /* First reference.  Check the parent too -- if the parent has a
+		 string already, bump the count once more.  */
+
+	      if (ctf_dynhash_lookup (fp->ctf_str_atoms, atom->csa_str) != NULL)
+		count++;
+	    }
+	  count++;
+
+	  if ((err = ctf_dynhash_insert (str_counts, atom->csa_str, (void *) count)) < 0)
+	    {
+	      ctf_set_errno (fp, err);
+	      ctf_next_destroy (j);
+	      goto err;
+	    }
+	}
+      if (err != ECTF_NEXT_END)
+	goto iterr;
+    }
+  if (err != ECTF_NEXT_END)
+    goto iterr;
+
+  /* Deduplicate the strings, adding them to the parent and transplanting
+     their ref lists there.  After transplantation, some of the movable refs
+     in the parent will contain references to a ctf_str_movable_refs hashtab
+     in the child dicts, but that's fine: it only means we can still do things
+     that involve ref movement in children without trouble.  */
+
+  while ((err = ctf_dynhash_next (fp->ctf_link_outputs, &i, NULL, &dict)) == 0)
+    {
+      ctf_dict_t *out = (ctf_dict_t *) dict;
+      ctf_next_t *j = NULL;
+      void *v;
+
+      while ((err = ctf_dynhash_next (out->ctf_str_atoms, &j, NULL, &v)) == 0)
+	{
+	  ctf_str_atom_t *atom = (ctf_str_atom_t *) v;
+	  ctf_str_atom_t *dedupped_atom;
+
+	  if (ctf_list_empty_p (&atom->csa_refs)
+	      && ctf_list_empty_p (&atom->csa_movable_refs))
+	      continue;
+
+	  if (atom->csa_external_offset
+	      || atom->csa_str[0] == '\0'
+	      || atom->csa_flags & CTF_STR_ATOM_NO_DEDUP)
+	    continue;
+
+	  if ((uintptr_t) ctf_dynhash_lookup (str_counts, atom->csa_str) <= 1)
+	    continue;
+
+	  if (ctf_str_add_copy (fp, atom->csa_str) == 0)
+	    {
+	      ctf_set_errno (fp, ENOMEM);
+	      ctf_next_destroy (j);
+	      goto err;
+	    }
+
+	  dedupped_atom = ctf_dynhash_lookup (fp->ctf_str_atoms,
+					      atom->csa_str);
+	  if (!ctf_assert (fp, dedupped_atom))
+	    {
+	      ctf_next_destroy (j);
+	      goto err;
+	    }
+
+	  /* Splice all refs into the new atom.  */
+
+	  ctf_list_splice (&dedupped_atom->csa_refs, &atom->csa_refs);
+	  ctf_list_splice (&dedupped_atom->csa_movable_refs,
+			   &atom->csa_movable_refs);
+
+	  /* This atom is now "external" from the perspective of the child:
+	     mostly, this means the child will not try to write it to its
+	     strtab.  */
+	  atom->csa_external_offset = atom->csa_offset;
+	  atom->csa_offset = 0;
+
+	  /* Further ref additions of this atom will use the parent's offset
+	     instead (but augment the child's ref list).  */
+	  atom->csa_flags |= CTF_STR_ATOM_IN_PARENT;
+	}
+    }
+  if (err != ECTF_NEXT_END)
+    goto iterr;
+
+  ctf_dynhash_destroy (str_counts);
+  return 0;
+
+ err:
+  ctf_dynhash_destroy (str_counts);
+  ctf_err_warn (fp, 0, 0, _("error deduplicating strings"));
+  return -1;
+
+ iterr:
+  ctf_dynhash_destroy (str_counts);
+  ctf_set_errno (fp, err);
+  ctf_err_warn (fp, 0, 0, _("Iteration failure deduplicating strings"));
+  return -1;
 }
 
 /* Determine what type SRC_FP / SRC_TYPE was emitted as in the FP, which
