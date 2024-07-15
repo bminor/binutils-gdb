@@ -19,7 +19,7 @@ Contents of CTF section .ctf:
     Version: 5 \(CTF_VERSION_4\)
 #...
     Type section:	.* \(0x94 bytes\)
-    String section:	.* \(0x1d bytes\)
+    String section:	.*
 
   Labels:
 

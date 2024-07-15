@@ -1826,7 +1826,7 @@ typedef struct ctf_name_list_accum_cb_arg
   char **names;
   ctf_dict_t *fp;
   ctf_dict_t **files;
-  size_t i;
+  ssize_t i;
   char **dynames;
   size_t ndynames;
 } ctf_name_list_accum_cb_arg_t;
@@ -1961,11 +1961,12 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
   char *transformed_name = NULL;
   ctf_dict_t **files;
   FILE *f = NULL;
-  size_t i;
+  ssize_t i;
   int err;
   long fsize;
   const char *errloc;
   unsigned char *buf = NULL;
+  uint64_t old_parent_strlen, all_strlens = 0;
 
   memset (&arg, 0, sizeof (ctf_name_list_accum_cb_arg_t));
   arg.fp = fp;
@@ -1983,7 +1984,7 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 	}
     }
 
-  /* No extra outputs? Just write a simple ctf_dict_t.  */
+  /* No extra outputs?  Just write a simple ctf_dict_t.  */
   if (arg.i == 0)
     {
       unsigned char *ret = ctf_write_mem (fp, size, threshold);
@@ -1992,7 +1993,9 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
     }
 
   /* Writing an archive.  Stick ourselves (the shared repository, parent of all
-     other archives) on the front of it with the default name.  */
+     other archives) on the front of it with the default name.  (Writing the parent
+     dict out first is essential for strings in child dicts shared with the parent
+     to get their proper offsets.)  */
   if ((names = realloc (arg.names, sizeof (char *) * (arg.i + 1))) == NULL)
     {
       errloc = "name reallocation";
@@ -2034,6 +2037,39 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
   memmove (&(arg.files[1]), arg.files, sizeof (ctf_dict_t *) * (arg.i));
   arg.files[0] = fp;
 
+  /* Preserialize everything, doing everything but strtab generation and things that
+     depend on that.  */
+  for (i = 0; i < arg.i + 1; i++)
+    {
+      if (ctf_preserialize (arg.files[i]) < 0)
+	{
+	  errno = ctf_errno (arg.files[i]);
+	  for (i--; i >= 0; i--)
+	    ctf_depreserialize (arg.files[i]);
+	  errloc = "preserialization";
+	  goto err_no;
+	}
+    }
+
+  ctf_dprintf ("Deduplicating strings.\n");
+
+  for (i = 0; i < arg.i; i++)
+    all_strlens += arg.files[i]->ctf_str_prov_offset;
+  old_parent_strlen = arg.files[0]->ctf_str_prov_offset;
+
+  if (ctf_dedup_strings (fp) < 0)
+    {
+      for (i = 0; i < arg.i + 1; i++)
+	ctf_depreserialize (arg.files[i]);
+      errloc = "string deduplication";
+      goto err_str_dedup;
+    }
+
+  ctf_dprintf ("Deduplicated strings: original parent strlen: %zu; "
+	       "original lengths: %zu; final length: %zu.\n",
+	       (size_t) old_parent_strlen, (size_t) all_strlens,
+	       (size_t) arg.files[0]->ctf_str_prov_offset);
+
   if ((f = tmpfile ()) == NULL)
     {
       errloc = "tempfile creation";
@@ -2045,8 +2081,8 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 			       threshold)) < 0)
     {
       errloc = "archive writing";
-      ctf_set_errno (fp, err);
-      goto err;
+      errno = err;
+      goto err_no;
     }
 
   if (fseek (f, 0, SEEK_END) < 0)
@@ -2105,7 +2141,7 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 
  err_no:
   ctf_set_errno (fp, errno);
-
+ err_str_dedup:
   /* Turn off the is-linking flag on all the dicts in this link, as above.  */
   for (i = 0; i < arg.i; i++)
     {

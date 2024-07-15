@@ -36,5 +36,4 @@ CTF archive member: .*/A.c:
         *\[0x0\] b: ID 0x[0-9a-f]*: \(kind 3\) struct B \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 
   Strings:
-    0x0: 
 #...

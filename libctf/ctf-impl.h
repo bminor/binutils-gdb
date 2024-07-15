@@ -769,6 +769,7 @@ extern uint32_t ctf_str_add_movable_ref (ctf_dict_t *, const char *,
 extern int ctf_str_move_refs (ctf_dict_t *fp, void *src, size_t len, void *dest);
 extern int ctf_str_add_external (ctf_dict_t *, const char *, uint32_t offset);
 extern void ctf_str_remove_ref (ctf_dict_t *, const char *, uint32_t *ref);
+extern void ctf_str_purge_refs (ctf_dict_t *fp);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
 extern const ctf_strs_writable_t *ctf_str_write_strtab (ctf_dict_t *);
 

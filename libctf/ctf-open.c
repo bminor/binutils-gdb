@@ -2013,6 +2013,20 @@ ctf_dict_close (ctf_dict_t *fp)
       free (did);
     }
 
+  /* The lifetime rules here are delicate.  We must destroy the outputs before
+     the atoms (since in a link the outputs contain references to the parent's
+     atoms), but we must destroy the inputs after that (since many type strings
+     ultimately come from the inputs).  In addition, if there are
+     ctf_link_outputs, the parent dict's atoms table may have movable refs that
+     refer to the outputs: so purge the refs first, including the movable
+     ones.  */
+
+  if (fp->ctf_link_outputs && ctf_dynhash_elements (fp->ctf_link_outputs) > 0)
+    ctf_str_purge_refs (fp);
+
+  ctf_dynhash_destroy (fp->ctf_link_outputs);
+  ctf_dynhash_destroy (fp->ctf_link_out_cu_mapping);
+
   ctf_str_free_atoms (fp);
   free (fp->ctf_tmp_typeslice);
 
@@ -2031,10 +2045,8 @@ ctf_dict_close (ctf_dict_t *fp)
 
   ctf_dynhash_destroy (fp->ctf_syn_ext_strtab);
   ctf_dynhash_destroy (fp->ctf_link_inputs);
-  ctf_dynhash_destroy (fp->ctf_link_outputs);
   ctf_dynhash_destroy (fp->ctf_link_type_mapping);
   ctf_dynhash_destroy (fp->ctf_link_in_cu_mapping);
-  ctf_dynhash_destroy (fp->ctf_link_out_cu_mapping);
   ctf_dynhash_destroy (fp->ctf_add_processing);
   ctf_dedup_fini (fp, NULL, 0);
   ctf_dynset_destroy (fp->ctf_dedup_atoms_alloc);
