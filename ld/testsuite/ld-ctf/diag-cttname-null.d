@@ -10,7 +10,7 @@ Contents of CTF section .ctf:
 
   Header:
     Magic number: 0xdff2
-    Version: 4 \(CTF_VERSION_3\)
+    Version: 5 \(CTF_VERSION_4\)
 #...
   Data objects:
     a -> 0x[0-9a-f]*: \(kind 6\) struct  \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)

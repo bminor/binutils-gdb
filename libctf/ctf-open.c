@@ -215,6 +215,8 @@ static const ctf_dictops_t ctf_dictops[] = {
   {get_kind_v2, get_root_v2, get_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
   /* CTF_VERSION_3, identical to 2: only new type kinds */
   {get_kind_v2, get_root_v2, get_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
+  /* UPTODO: CTF_VERSION_4, identical to 3 at present (but not for long) */
+  {get_kind_v2, get_root_v2, get_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
 };
 
 /* Initialize the symtab translation table as appropriate for its indexing
@@ -394,9 +396,10 @@ ctf_set_version (ctf_dict_t *fp, ctf_header_t *cth, int ctf_version)
 }
 
 
-/* Upgrade the header to CTF_VERSION_3.  The upgrade is done in-place.  */
+/* Upgrade the header to CTF_VERSION_4.  The upgrade is done in-place,
+   end-to-start.  */
 static void
-upgrade_header (ctf_header_t *hp)
+upgrade_header_v2 (ctf_header_t *hp)
 {
   ctf_header_v2_t *oldhp = (ctf_header_v2_t *) hp;
 
@@ -410,6 +413,26 @@ upgrade_header (ctf_header_t *hp)
   hp->cth_objtoff = oldhp->cth_objtoff;
   hp->cth_lbloff = oldhp->cth_lbloff;
   hp->cth_cuname = 0;				/* No CU name.  */
+}
+
+/* Ditto, for CTFv3.  */
+static void
+upgrade_header_v3 (ctf_header_t *hp)
+{
+  ctf_header_v3_t *oldhp = (ctf_header_v3_t *) hp;
+
+  hp->cth_strlen = oldhp->cth_strlen;
+  hp->cth_stroff = oldhp->cth_stroff;
+  hp->cth_typeoff = oldhp->cth_typeoff;
+  hp->cth_varoff = oldhp->cth_varoff;
+  hp->cth_funcidxoff = oldhp->cth_funcidxoff;
+  hp->cth_objtidxoff = oldhp->cth_objtidxoff;
+  hp->cth_funcoff = oldhp->cth_funcoff;
+  hp->cth_objtoff = oldhp->cth_objtoff;
+  hp->cth_lbloff = oldhp->cth_lbloff;
+  hp->cth_cuname = oldhp->cth_cuname;
+  hp->cth_parname = oldhp->cth_parname;
+  hp->cth_parlabel = oldhp->cth_parlabel;
 }
 
 /* Upgrade the type table to CTF_VERSION_3 (really CTF_VERSION_1_UPGRADED_3)
@@ -661,10 +684,15 @@ upgrade_types (ctf_dict_t *fp, ctf_header_t *cth)
 
     case CTF_VERSION_1_UPGRADED_3:
       fp->ctf_parmax = CTF_MAX_PTYPE_V1;
+      fp->ctf_flags |= LCTF_NO_SERIALIZE;
+      break;
 
-      /* v2 is just the same as v3 except for new types and sections:
-	 no upgrading required. */
+      /* v2 and v3 are currently just the same as v4 except for new types and
+	 sections: no upgrading required.
+
+	 UPTODO: this is really going to change.  */
     case CTF_VERSION_2: ;
+    case CTF_VERSION_3: ;
       /* FALLTHRU */
     }
   return 0;
@@ -724,7 +752,7 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
   int nlstructs = 0, nlunions = 0;
   int err;
 
-  if (_libctf_unlikely_ (fp->ctf_version == CTF_VERSION_1))
+  if (fp->ctf_version < CTF_VERSION_4)
     {
       int err;
       if ((err = upgrade_types (fp, cth)) != 0)
@@ -1463,7 +1491,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     }
 
   if (_libctf_unlikely_ ((pp->ctp_version < CTF_VERSION_1)
-			 || (pp->ctp_version > CTF_VERSION_3)))
+			 || (pp->ctp_version > CTF_VERSION_4)))
     return (ctf_set_open_errno (errp, ECTF_CTFVERS));
 
   if ((symsect != NULL) && (pp->ctp_version < CTF_VERSION_2))
@@ -1478,8 +1506,24 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       return (ctf_set_open_errno (errp, ECTF_NOTSUP));
     }
 
-  if (pp->ctp_version < CTF_VERSION_3)
-    hdrsz = sizeof (ctf_header_v2_t);
+  switch (pp->ctp_version)
+    {
+    case CTF_VERSION_1:
+    case CTF_VERSION_2:
+      hdrsz = sizeof (ctf_header_v2_t);
+      break;
+    case CTF_VERSION_1_UPGRADED_3:
+    case CTF_VERSION_3:
+      hdrsz = sizeof (ctf_header_v3_t);
+      break;
+    case CTF_VERSION_4:
+      hdrsz = sizeof (ctf_header_t);
+      break;
+    default:
+      ctf_err_warn (NULL, ECTF_INTERNAL, 0, "ctf_bufopen: CTF version %d "
+		    "not handled in header-length switch", pp->ctp_version);
+      return (ctf_set_open_errno (errp, ECTF_INTERNAL));
+    }
 
   if (_libctf_unlikely_ (pp->ctp_flags > CTF_F_MAX))
     {
@@ -1488,6 +1532,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 		    (unsigned int) pp->ctp_flags);
       return (ctf_set_open_errno (errp, ECTF_FLAGS));
     }
+
+  /* UPTODO: v4 flags: none valid, new header field likely needed.  */
 
   if (ctfsect->cts_size < hdrsz)
     return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
@@ -1505,7 +1551,11 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   hp = fp->ctf_header;
   memcpy (hp, ctfsect->cts_data, hdrsz);
   if (pp->ctp_version < CTF_VERSION_3)
-    upgrade_header (hp);
+    upgrade_header_v2 (hp);
+  else if (pp->ctp_version < CTF_VERSION_4)
+    upgrade_header_v3 (hp);
+
+  /* UPTODO: header "upgrade" from BTF -> CTFv4.  */
 
   if (foreign_endian)
     ctf_flip_header (hp);
@@ -1546,7 +1596,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       return (ctf_set_open_errno (errp, ECTF_CORRUPT));
     }
 
-  /* This invariant will be lifted in v4, but for now it is true.  */
+  /* This invariant may be lifted in v5, but for now it is true.  */
 
   if ((hp->cth_funcidxoff - hp->cth_objtidxoff != 0) &&
       (hp->cth_funcidxoff - hp->cth_objtidxoff
@@ -1580,6 +1630,9 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   /* Note: if this is a v1 buffer, it will be reallocated and expanded by
      init_static_types().  */
+
+  /* UPTODO: may need to try unconditionally for BTF, and get flags from
+     somewhere else.  */
 
   if (hp->cth_flags & CTF_F_COMPRESS)
     {
@@ -1678,7 +1731,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       goto bad;
     }
 
-  fp->ctf_parmax = CTF_MAX_PTYPE;
+  fp->ctf_parmax = CTF_MAX_PTYPE;		/* May be reset by upgrade_types.  */
   memcpy (&fp->ctf_data, ctfsect, sizeof (ctf_sect_t));
 
   if (symsect != NULL)

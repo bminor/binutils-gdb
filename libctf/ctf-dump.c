@@ -298,7 +298,9 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
      "CTF_VERSION_1_UPGRADED_3 (latest format, version 1 type "
      "boundaries)",
      "CTF_VERSION_2",
-     "CTF_VERSION_3", NULL
+     "CTF_VERSION_3",
+     "CTF_VERSION_4",
+     NULL
     };
   const char *verstr = NULL;
 

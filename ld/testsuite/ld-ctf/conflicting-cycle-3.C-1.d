@@ -16,7 +16,7 @@ CTF archive member: .*/C.c:
 
   Header:
     Magic number: 0xdff2
-    Version: 4 \(CTF_VERSION_3\)
+    Version: 5 \(CTF_VERSION_4\)
 #...
     Parent name: .*
     Compilation unit name: .*/C.c

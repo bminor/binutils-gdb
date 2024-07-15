@@ -10,7 +10,7 @@ Contents of CTF section .ctf:
 
   Header:
     Magic number: 0xdff2
-    Version: 4 \(CTF_VERSION_3\)
+    Version: 5 \(CTF_VERSION_4\)
 #...
     Compilation unit name: .*A.c
     Data object section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)

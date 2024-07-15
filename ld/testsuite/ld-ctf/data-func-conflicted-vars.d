@@ -12,7 +12,7 @@ Contents of CTF section \.ctf:
 
   Header:
     Magic number: 0xdff2
-    Version: 4 \(CTF_VERSION_3\)
+    Version: 5 \(CTF_VERSION_4\)
 #...
     Data object section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)
     Function info section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)
@@ -41,7 +41,7 @@ CTF archive member: .*/data-func-1\.c:
 
   Header:
     Magic number: 0xdff2
-    Version: 4 \(CTF_VERSION_3\)
+    Version: 5 \(CTF_VERSION_4\)
 #...
     Parent name: \.ctf
     Compilation unit name: .*/data-func-1\.c

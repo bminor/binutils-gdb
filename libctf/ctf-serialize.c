@@ -961,9 +961,28 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   emit_symtypetab_state_t symstate;
   memset (&symstate, 0, sizeof (emit_symtypetab_state_t));
 
-  /* Fill in an initial CTF header.  We will leave the label, object,
-     and function sections empty and only output a header, type section,
-     and string table.  The type section begins at a 4-byte aligned
+  /* Stop unstable file formats (subject to change) getting out into the
+     wild.  */
+#if CTF_VERSION != CTF_STABLE_VERSION
+  if (!getenv ("I_KNOW_LIBCTF_IS_UNSTABLE"))
+    {
+      ctf_set_errno (fp, ECTF_UNSTABLE);
+      return NULL;
+    }
+#endif
+
+  /* Prohibit reserialization of dicts for which we have dynamic state inherited
+     from the upgrade process which we cannot record in the dict.  Right now,
+     this applies only to CTFv1 dicts, which have a different parent/child type
+     offset to v2 and higher, and nowhere to record this in CTFv4.  */
+
+  if (fp->ctf_flags & LCTF_NO_SERIALIZE)
+    {
+      ctf_set_errno (fp, ECTF_CTFVERS_NO_SERIALIZE);
+      return NULL;
+    }
+
+  /* Fill in an initial CTF header.  The type section begins at a 4-byte aligned
      boundary past the CTF header itself (at relative offset zero).  The flag
      indicating a new-style function info section (an array of CTF_K_FUNCTION
      type IDs in the types section) is flipped on.  */
@@ -974,6 +993,8 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
 
   /* This is a new-format func info section, and the symtab and strtab come out
      of the dynsym and dynstr these days.  */
+
+  /* UPTODO: remove.  */
   hdr.cth_flags = (CTF_F_NEWFUNCINFO | CTF_F_DYNSTR);
 
   /* Propagate all symbols in the symtypetabs into the dynamic state, so that

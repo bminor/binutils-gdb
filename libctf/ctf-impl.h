@@ -602,8 +602,8 @@ struct ctf_next
   ((fp)->ctf_dictops->ctfo_get_vbytes(fp, kind, size, vlen))
 
 #define LCTF_CHILD	0x0001	/* CTF dict is a child.  */
-#define LCTF_LINKING	0x0002	/* CTF link is underway: respect ctf_link_flags.  */
 #define LCTF_STRICT_NO_DUP_ENUMERATORS 0x0004 /* Duplicate enums prohibited.  */
+#define LCTF_NO_SERIALIZE	0x0010  /* Serialization of this dict prohibited.  */
 
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t);
