@@ -265,6 +265,24 @@ ctf_dump_header_strfield (ctf_dict_t *fp, ctf_dump_state_t *state,
   return (ctf_set_errno (fp, errno));
 }
 
+/* Dump one size field from the file header into the cds_items.  */
+static int
+ctf_dump_header_sizefield (ctf_dict_t *fp, ctf_dump_state_t *state,
+			  const char *name, uint32_t value)
+{
+  char *str;
+  if (value)
+    {
+      if (asprintf (&str, "%s: %x\n", name, value) < 0)
+	goto err;
+      ctf_dump_append (state, str);
+    }
+  return 0;
+
+ err:
+  return (ctf_set_errno (fp, errno));
+}
+
 /* Dump one section-offset field from the file header into the cds_items.  */
 static int
 ctf_dump_header_sectfield (ctf_dict_t *fp, ctf_dump_state_t *state,
@@ -364,6 +382,9 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 
   if (ctf_dump_header_strfield (fp, state, "Compilation unit name",
 				hp->cth_cuname) < 0)
+    goto err;
+
+  if (ctf_dump_header_sizefield (fp, state, "Parent strlen", hp->cth_parent_strlen) < 0)
     goto err;
 
   if (ctf_dump_header_sectfield (fp, state, "Label section", hp->cth_lbloff,

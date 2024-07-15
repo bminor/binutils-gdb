@@ -40,6 +40,7 @@ CTF archive member: .*/data-func-1\.c:
 #...
     Parent name: \.ctf
     Compilation unit name: .*/data-func-1\.c
+#...
     Data object section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)
     Type section:	.* \(0xc bytes\)
     String section:	.*

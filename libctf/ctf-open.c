@@ -412,6 +412,7 @@ upgrade_header_v2 (ctf_header_t *hp)
   hp->cth_funcoff = oldhp->cth_funcoff;
   hp->cth_objtoff = oldhp->cth_objtoff;
   hp->cth_lbloff = oldhp->cth_lbloff;
+  hp->cth_parent_strlen = 0;			/* Strings start at offset 0.  */
   hp->cth_cuname = 0;				/* No CU name.  */
 }
 
@@ -430,6 +431,7 @@ upgrade_header_v3 (ctf_header_t *hp)
   hp->cth_funcoff = oldhp->cth_funcoff;
   hp->cth_objtoff = oldhp->cth_objtoff;
   hp->cth_lbloff = oldhp->cth_lbloff;
+  hp->cth_parent_strlen = 0;			/* Strings start at offset 0.  */
   hp->cth_cuname = oldhp->cth_cuname;
   hp->cth_parname = oldhp->cth_parname;
   hp->cth_parlabel = oldhp->cth_parlabel;
@@ -1115,6 +1117,7 @@ ctf_flip_header (ctf_header_t *cth)
   swap_thing (cth->cth_parlabel);
   swap_thing (cth->cth_parname);
   swap_thing (cth->cth_cuname);
+  swap_thing (cth->cth_parent_strlen);
   swap_thing (cth->cth_objtoff);
   swap_thing (cth->cth_funcoff);
   swap_thing (cth->cth_objtidxoff);
@@ -1446,7 +1449,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	     const ctf_sect_t *strsect, int *errp)
 {
   const ctf_preamble_t *pp;
-  size_t hdrsz = sizeof (ctf_header_t);
+  size_t hdrsz;
   ctf_header_t *hp;
   ctf_dict_t *fp;
   int foreign_endian = 0;
@@ -1620,6 +1623,18 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 		      "same length as the function section: %u versus %u "
 		      "bytes"), hp->cth_objtidxoff - hp->cth_funcoff,
 		    hp->cth_varoff - hp->cth_funcidxoff);
+      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+    }
+
+  if ((hp->cth_parname != 0 && hp->cth_parname < hp->cth_parent_strlen)
+      || (hp->cth_cuname != 0 && hp->cth_cuname < hp->cth_parent_strlen))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+		    _("Parent dict or CU name string offsets "
+		      "(at %x and %x, respectively) are themselves "
+		      "within the parent (upper bound: %x), thus "
+		      "unreachable.\n"), hp->cth_parname, hp->cth_cuname,
+		      hp->cth_parent_strlen);
       return (ctf_set_open_errno (errp, ECTF_CORRUPT));
     }
 

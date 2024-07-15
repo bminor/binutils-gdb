@@ -1104,7 +1104,14 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_stroff);
 
   /* Construct the final string table and fill out all the string refs with the
-     final offsets.  */
+     final offsets.  At link time, before the strtab can be constructed, child
+     dicts also need their cth_parent_strlen header field updated to match the
+     parent's.  (These are always newly-created dicts, so we don't need to worry
+     about the upgraded-from-v3 case, which must always retain a
+     cth_parent_strlen value of 0.)  */
+
+  if ((fp->ctf_flags & LCTF_LINKING) && fp->ctf_parent)
+    fp->ctf_header->cth_parent_strlen = fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len;
 
   strtab = ctf_str_write_strtab (fp);
 
@@ -1126,6 +1133,7 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   hdrp->cth_strlen = strtab->cts_len;
   buf_size += hdrp->cth_strlen;
   *bufsiz = buf_size;
+  hdrp->cth_parent_strlen = fp->ctf_header->cth_parent_strlen;
 
   return buf;
 
