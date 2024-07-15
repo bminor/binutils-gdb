@@ -1048,9 +1048,9 @@ ctf_preserialize (ctf_dict_t *fp)
 
   hdrp = (ctf_header_t *) buf;
   if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parname != NULL))
-    ctf_str_add_ref (fp, fp->ctf_parname, &hdrp->cth_parname);
+    ctf_str_add_no_dedup_ref (fp, fp->ctf_parname, &hdrp->cth_parname);
   if (fp->ctf_cuname != NULL)
-    ctf_str_add_ref (fp, fp->ctf_cuname, &hdrp->cth_cuname);
+    ctf_str_add_no_dedup_ref (fp, fp->ctf_cuname, &hdrp->cth_cuname);
 
   if (ctf_emit_symtypetab_sects (fp, &symstate, &t, objt_size, func_size,
 				 objtidx_size, funcidx_size) < 0)

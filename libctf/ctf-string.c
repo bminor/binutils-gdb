@@ -202,7 +202,9 @@ ctf_str_free_atom (void *a)
    pulled in.)
 
    Note that the *final strtab* may be entirely empty, if all its strings are
-   shared with the parent: the atoms table is a superset.  */
+   shared with the parent: the atoms table is a superset.  (But this will never
+   happen in practice, because some header fields are explicitly never
+   deduplicated.)  */
 int
 ctf_str_create_atoms (ctf_dict_t *fp)
 {

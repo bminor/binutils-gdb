@@ -364,7 +364,12 @@ ctf_set_base (ctf_dict_t *fp, const ctf_header_t *hp, unsigned char *base)
 
   /* Note: before conversion, these will be set to values that will be
      immediately invalidated by the conversion process, but the conversion
-     process will call ctf_set_base() again to fix things up.  */
+     process will call ctf_set_base() again to fix things up.
+
+     These labels are explicitly constrained from being deduplicated (even though
+     .ctf is usually a duplicated name), because they are the key to identifying
+     the parent dict (and determining that this dict is a child) in the first
+     place.  */
 
   if (hp->cth_parlabel != 0)
     fp->ctf_parlabel = ctf_strptr (fp, hp->cth_parlabel);
