@@ -626,7 +626,7 @@ ctf_dynset_insert (ctf_dynset_t *hp, void *key)
   struct htab *htab = (struct htab *) hp;
   void **slot;
 
-  slot = htab_find_slot (htab, key, INSERT);
+  slot = htab_find_slot (htab, key_to_internal (key), INSERT);
 
   if (!slot)
     {
