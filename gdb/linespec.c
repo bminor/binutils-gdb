@@ -1156,7 +1156,7 @@ iterate_over_all_matching_symtabs
 
       set_current_program_space (pspace);
 
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile *objfile : pspace->objfiles ())
 	{
 	  objfile->expand_symtabs_matching (NULL, &lookup_name, NULL, NULL,
 					    (SEARCH_GLOBAL_BLOCK
@@ -4213,7 +4213,7 @@ search_minsyms_for_name (struct collect_info *info,
 
 	  set_current_program_space (pspace);
 
-	  for (objfile *objfile : current_program_space->objfiles ())
+	  for (objfile *objfile : pspace->objfiles ())
 	    {
 	      iterate_over_minimal_symbols (objfile, name,
 					    [&] (struct minimal_symbol *msym)

@@ -3710,7 +3710,7 @@ create_longjmp_master_breakpoint (void)
     {
       set_current_program_space (pspace);
 
-      for (objfile *obj : current_program_space->objfiles ())
+      for (objfile *obj : pspace->objfiles ())
 	{
 	  /* Skip separate debug object, it's handled in the loop below.  */
 	  if (obj->separate_debug_objfile_backlink != nullptr)
@@ -3743,7 +3743,7 @@ create_std_terminate_master_breakpoint (void)
     {
       set_current_program_space (pspace);
 
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile *objfile : pspace->objfiles ())
 	{
 	  struct breakpoint *b;
 	  struct breakpoint_objfile_data *bp_objfile_data;
