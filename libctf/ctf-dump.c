@@ -106,7 +106,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       const char *idstr = "";
 
       id = new_id;
-      if (flag == CTF_ADD_NONROOT)
+      if (!(flag & CTF_ADD_ROOT))
 	{
 	  nonroot_leader = "{";
 	  nonroot_trailer = "}";
