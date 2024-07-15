@@ -11,7 +11,7 @@ Contents of CTF section .ctf:
 
   Header:
     Magic number: 0xdff2
-    Version: 4 \(CTF_VERSION_3\)
+    Version: 5 \(CTF_VERSION_4\)
 #...
   Types:
     0x1: \(kind 8\) enum day_of_the_week \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)

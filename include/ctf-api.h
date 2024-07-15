@@ -244,7 +244,9 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NEEDSBFD, "This feature needs a libctf with BFD support.") \
   _CTF_ITEM (ECTF_INCOMPLETE, "Type is not a complete type.") \
   _CTF_ITEM (ECTF_NONAME, "Type name must not be empty.") \
-  _CTF_ITEM (ECTF_BADFLAG, "Invalid CTF dict flag specified.")
+  _CTF_ITEM (ECTF_BADFLAG, "Invalid CTF dict flag specified.") \
+  _CTF_ITEM (ECTF_CTFVERS_NO_SERIALIZE, "CTFv1 dicts are too old to serialize.") \
+  _CTF_ITEM (ECTF_UNSTABLE, "Attempt to write unstable file format version: set I_KNOW_LIBCTF_IS_UNSTABLE in the environment.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -257,7 +259,7 @@ _CTF_ERRORS
 #undef _CTF_FIRST
   };
 
-#define ECTF_NERR (ECTF_BADFLAG - ECTF_BASE + 1) /* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_UNSTABLE - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */

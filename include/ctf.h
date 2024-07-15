@@ -138,10 +138,13 @@ extern "C"
 # define CTF_MAX_SIZE_V1	0xfffe	/* Max size of a type in bytes. */
 # define CTF_LSIZE_SENT_V1	0xffff	/* Sentinel for v1 ctt_size.  */
 
-  /* Start of actual data structure definitions.
+/* Start of actual data structure definitions.
 
-     Every field in these structures must have corresponding code in the
-     endianness-swapping machinery in libctf/ctf-open.c.  */
+   Every field in these structures must have corresponding code in the
+   endianness-swapping machinery in libctf/ctf-open.c.  */
+
+/* UPTODO: v4/BTF preamble in different order! at least the magic number is in the
+   same place.  */
 
 typedef struct ctf_preamble
 {
@@ -163,6 +166,23 @@ typedef struct ctf_header_v2
   uint32_t cth_stroff;		/* Offset of string section.  */
   uint32_t cth_strlen;		/* Length of string section in bytes.  */
 } ctf_header_v2_t;
+
+typedef struct ctf_header_v3
+{
+  ctf_preamble_t cth_preamble;
+  uint32_t cth_parlabel;	/* Ref to name of parent lbl uniq'd against.  */
+  uint32_t cth_parname;		/* Ref to basename of parent.  */
+  uint32_t cth_cuname;		/* Ref to CU name (may be 0).  */
+  uint32_t cth_lbloff;		/* Offset of label section.  */
+  uint32_t cth_objtoff;		/* Offset of object section.  */
+  uint32_t cth_funcoff;		/* Offset of function section.  */
+  uint32_t cth_objtidxoff;	/* Offset of object index section.  */
+  uint32_t cth_funcidxoff;	/* Offset of function index section.  */
+  uint32_t cth_varoff;		/* Offset of variable section.  */
+  uint32_t cth_typeoff;		/* Offset of type section.  */
+  uint32_t cth_stroff;		/* Offset of string section.  */
+  uint32_t cth_strlen;		/* Length of string section in bytes.  */
+} ctf_header_v3_t;
 
 typedef struct ctf_header
 {
@@ -196,14 +216,19 @@ typedef struct ctf_header
    writing the header from scratch, we would add a *pair* of version number
    fields to allow for this, but this will do for now.  (A flag will not do,
    because we need to encode both the version we came from and the version we
-   went to, not just "we were upgraded".) */
+   went to, not just "we were upgraded".)
 
-# define CTF_VERSION_1 1
-# define CTF_VERSION_1_UPGRADED_3 2
-# define CTF_VERSION_2 3
+   The same problem applies to v2 and v3 upgraded to v4, but here we can apply
+   some common sense and simply record the boundary in a new header field.  */
 
+#define CTF_VERSION_1 1
+#define CTF_VERSION_1_UPGRADED_3 2
+#define CTF_VERSION_2 3
 #define CTF_VERSION_3 4
-#define CTF_VERSION CTF_VERSION_3 /* Current version.  */
+
+#define CTF_VERSION_4 5
+#define CTF_VERSION CTF_VERSION_4 /* Current version.  */
+#define CTF_STABLE_VERSION 4
 
 /* All of these flags bar CTF_F_COMPRESS and CTF_F_IDXSORTED are bug-workaround
    flags and are valid only in format v3: in v2 and below they cannot occur and
