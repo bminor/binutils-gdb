@@ -69,6 +69,8 @@ with_timeout_factor 10 {
 gdb_test "kill" "" "kill process, prepare to debug log file" \
     "Kill the program being debugged\\? \\(y or n\\) " "y"
 
+clean_restart ${binfile}
+
 gdb_test "record restore $precsave" \
     "Restored records from core file .*" \
     "reload core file"
