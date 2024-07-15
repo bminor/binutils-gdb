@@ -399,6 +399,10 @@ struct ctf_dict
   unsigned char *ctf_dynbase;	  /* Freeable CTF file pointer. */
   unsigned char *ctf_buf;	  /* Uncompressed CTF data buffer.  */
   size_t ctf_size;		  /* Size of CTF header + uncompressed data.  */
+  unsigned char *ctf_serializing_buf; /* CTF buffer in mid-serialization.  */
+  size_t ctf_serializing_buf_size; /* Length of that buffer.  */
+  ctf_varent_t *ctf_serializing_vars; /* Unsorted vars in mid-serialization.  */
+  size_t ctf_serializing_nvars;	  /* Number of those vars.  */
   uint32_t *ctf_sxlate;		  /* Translation table for unindexed symtypetab
 				     entries.  */
   unsigned long ctf_nsyms;	  /* Number of entries in symtab xlate table.  */
@@ -440,6 +444,7 @@ struct ctf_dict
   uint32_t ctf_parmax;		  /* Highest type ID of a parent type.  */
   uint32_t ctf_refcnt;		  /* Reference count (for parent links).  */
   uint32_t ctf_flags;		  /* Libctf flags (see below).  */
+  uint32_t ctf_max_children;	  /* Max number of child dicts.  */
   int ctf_errno;		  /* Error code for most recent error.  */
   int ctf_version;		  /* CTF data version.  */
   ctf_dynhash_t *ctf_dthash;	  /* Hash of dynamic type definitions.  */
@@ -606,6 +611,7 @@ struct ctf_next
 #define LCTF_STRICT_NO_DUP_ENUMERATORS 0x0004 /* Duplicate enums prohibited.  */
 #define LCTF_NO_STR		0x0008  /* No string lookup possible yet.  */
 #define LCTF_NO_SERIALIZE	0x0010  /* Serialization of this dict prohibited.  */
+#define LCTF_PRESERIALIZED	0x0020  /* Already serialized all but the strtab.  */
 
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t);
@@ -752,6 +758,9 @@ extern int ctf_str_add_external (ctf_dict_t *, const char *, uint32_t offset);
 extern void ctf_str_remove_ref (ctf_dict_t *, const char *, uint32_t *ref);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
 extern const ctf_strs_writable_t *ctf_str_write_strtab (ctf_dict_t *);
+
+extern int ctf_preserialize (ctf_dict_t *fp);
+extern void ctf_depreserialize (ctf_dict_t *fp);
 
 extern struct ctf_archive_internal *
 ctf_new_archive_internal (int is_archive, int unmap_on_close,

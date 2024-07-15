@@ -933,22 +933,16 @@ ctf_sort_var (const void *one_, const void *two_, void *arg_)
 
 /* Overall serialization.  */
 
-/* Emit a new CTF dict which is a serialized copy of this one: also reify
-   the string table and update all offsets in the current dict suitably.
-   (This simplifies ctf-string.c a little, at the cost of storing a second
-   copy of the strtab if this dict was originally read in via ctf_open.)
+/* Do all aspects of serialization up to strtab writeout and variable table
+   sorting.  The resulting dict will have the LCTF_PRESERIALIZED flag on and
+   must not be modified in any way before serialization.  (This is not enforced,
+   as this feature is internal-only, employed by the linker machinery.)  */
 
-   Other aspects of the existing dict are unchanged, although some
-   static entries may be duplicated in the dynamic state (which should
-   have no effect on visible operation).  */
-
-static unsigned char *
-ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
+int
+ctf_preserialize (ctf_dict_t *fp)
 {
   ctf_header_t hdr, *hdrp;
   ctf_dvdef_t *dvd;
-  ctf_varent_t *dvarents;
-  const ctf_strs_writable_t *strtab;
   int sym_functions = 0;
 
   unsigned char *t;
@@ -956,20 +950,13 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   size_t buf_size, type_size, objt_size, func_size;
   size_t funcidx_size, objtidx_size;
   size_t nvars;
-  unsigned char *buf = NULL, *newbuf;
+  unsigned char *buf = NULL;
 
   emit_symtypetab_state_t symstate;
   memset (&symstate, 0, sizeof (emit_symtypetab_state_t));
 
-  /* Stop unstable file formats (subject to change) getting out into the
-     wild.  */
-#if CTF_VERSION != CTF_STABLE_VERSION
-  if (!getenv ("I_KNOW_LIBCTF_IS_UNSTABLE"))
-    {
-      ctf_set_errno (fp, ECTF_UNSTABLE);
-      return NULL;
-    }
-#endif
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   /* Prohibit reserialization of dicts for which we have dynamic state inherited
      from the upgrade process which we cannot record in the dict.  Right now,
@@ -977,10 +964,7 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
      offset to v2 and higher, and nowhere to record this in CTFv4.  */
 
   if (fp->ctf_flags & LCTF_NO_SERIALIZE)
-    {
-      ctf_set_errno (fp, ECTF_CTFVERS_NO_SERIALIZE);
-      return NULL;
-    }
+    return (ctf_set_errno (fp, ECTF_CTFVERS_NO_SERIALIZE));
 
   /* Fill in an initial CTF header.  The type section begins at a 4-byte aligned
      boundary past the CTF header itself (at relative offset zero).  The flag
@@ -1010,17 +994,17 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
 					    sym_functions)) != CTF_ERR)
 	if ((ctf_add_funcobjt_sym_forced (fp, sym_functions, sym_name, sym)) < 0)
 	  if (ctf_errno (fp) != ECTF_DUPLICATE)
-	    return NULL;			/* errno is set for us.  */
+	    return -1;				/* errno is set for us.  */
 
       if (ctf_errno (fp) != ECTF_NEXT_END)
-	return NULL;				/* errno is set for us.  */
+	return -1;				/* errno is set for us.  */
     } while (sym_functions++ < 1);
 
   /* Figure out how big the symtypetabs are now.  */
 
   if (ctf_symtypetab_sect_sizes (fp, &symstate, &hdr, &objt_size, &func_size,
 				 &objtidx_size, &funcidx_size) < 0)
-    return NULL;				/* errno is set for us.  */
+    return -1;					/* errno is set for us.  */
 
   /* Propagate all vars into the dynamic state, so we can put them back later.
      Variables already in the dynamic state, likely due to repeated
@@ -1032,7 +1016,7 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
 
       if (name != NULL && !ctf_dvd_lookup (fp, name))
 	if (ctf_add_variable_forced (fp, name, fp->ctf_vars[i].ctv_type) < 0)
-	  return NULL;				/* errno is set for us.  */
+	  return -1;				/* errno is set for us.  */
     }
 
   for (nvars = 0, dvd = ctf_list_next (&fp->ctf_dvdefs);
@@ -1052,14 +1036,12 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   hdr.cth_typeoff = hdr.cth_varoff + (nvars * sizeof (ctf_varent_t));
   hdr.cth_stroff = hdr.cth_typeoff + type_size;
   hdr.cth_strlen = 0;
+  hdr.cth_parent_strlen = 0;
 
   buf_size = sizeof (ctf_header_t) + hdr.cth_stroff + hdr.cth_strlen;
 
   if ((buf = malloc (buf_size)) == NULL)
-    {
-      ctf_set_errno (fp, EAGAIN);
-      return NULL;
-    }
+    return (ctf_set_errno (fp, EAGAIN));
 
   memcpy (buf, &hdr, sizeof (ctf_header_t));
   t = (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_objtoff;
@@ -1072,18 +1054,21 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
 
   if (ctf_emit_symtypetab_sects (fp, &symstate, &t, objt_size, func_size,
 				 objtidx_size, funcidx_size) < 0)
-    goto err;
+    {
+      free (buf);
+      return -1;				/* errno is set for us.  */
+    }
 
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_varoff);
 
   /* Work over the variable list, translating everything into ctf_varent_t's and
      prepping the string table.  */
 
-  dvarents = (ctf_varent_t *) t;
+  fp->ctf_serializing_vars = (ctf_varent_t *) t;
   for (i = 0, dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL;
        dvd = ctf_list_next (dvd), i++)
     {
-      ctf_varent_t *var = &dvarents[i];
+      ctf_varent_t *var = &fp->ctf_serializing_vars[i];
 
       ctf_str_add_ref (fp, dvd->dvd_name, &var->ctv_name);
       var->ctv_type = (uint32_t) dvd->dvd_type;
@@ -1091,6 +1076,7 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   assert (i == nvars);
 
   t += sizeof (ctf_varent_t) * nvars;
+  fp->ctf_serializing_nvars = nvars;
 
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_typeoff);
 
@@ -1103,6 +1089,65 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
 
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_stroff);
 
+  fp->ctf_serializing_buf = buf;
+  fp->ctf_serializing_buf_size = buf_size;
+
+  /* Prohibit additions and the like from this point on.  */
+  fp->ctf_flags |= LCTF_NO_STR;
+
+  return 0;
+}
+
+/* Undo preserialization (called on error).  */
+void
+ctf_depreserialize (ctf_dict_t *fp)
+{
+  fp->ctf_flags &= ~LCTF_NO_STR;
+  free (fp->ctf_serializing_buf);
+  fp->ctf_serializing_buf = NULL;
+  fp->ctf_serializing_vars = NULL;
+  fp->ctf_serializing_buf_size = 0;
+  fp->ctf_serializing_nvars = 0;
+}
+
+/* Emit a new CTF dict which is a serialized copy of this one: also reify
+   the string table and update all offsets in the current dict suitably.
+   (This simplifies ctf-string.c a little, at the cost of storing a second
+   copy of the strtab if this dict was originally read in via ctf_open.)
+
+   Other aspects of the existing dict are unchanged, although some
+   static entries may be duplicated in the dynamic state (which should
+   have no effect on visible operation).  */
+
+static unsigned char *
+ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
+{
+  const ctf_strs_writable_t *strtab;
+  unsigned char *buf, *newbuf;
+  ctf_header_t *hdrp;
+
+  /* Stop unstable file formats (subject to change) getting out into the
+     wild.  */
+#if CTF_VERSION != CTF_STABLE_VERSION
+  if (!getenv ("I_KNOW_LIBCTF_IS_UNSTABLE"))
+    {
+      ctf_depreserialize (fp);
+      ctf_set_errno (fp, ECTF_UNSTABLE);
+      return NULL;
+    }
+#endif
+
+  /* Preserialize, if we need to.  */
+
+  if (!fp->ctf_serializing_buf)
+    if (ctf_preserialize (fp) < 0)
+      return NULL;				/* errno is set for us.  */
+
+  /* UPTODO: prevent writing of BTF dicts when upgrading from CTFv3.  */
+
+  /* Allow string lookup again, now we need it to sort the vartab.  */
+  fp->ctf_flags &= ~LCTF_NO_STR;
+
   /* Construct the final string table and fill out all the string refs with the
      final offsets.  At link time, before the strtab can be constructed, child
      dicts also need their cth_parent_strlen header field updated to match the
@@ -1113,34 +1158,45 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   if ((fp->ctf_flags & LCTF_LINKING) && fp->ctf_parent)
     fp->ctf_header->cth_parent_strlen = fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len;
 
+  hdrp = (ctf_header_t *) fp->ctf_serializing_buf;
+
   strtab = ctf_str_write_strtab (fp);
 
   if (strtab == NULL)
-    goto oom;
+    goto err;
 
   /* Now the string table is constructed, we can sort the buffer of
      ctf_varent_t's.  */
   ctf_sort_var_arg_cb_t sort_var_arg = { fp, (ctf_strs_t *) strtab };
-  ctf_qsort_r (dvarents, nvars, sizeof (ctf_varent_t), ctf_sort_var,
-	       &sort_var_arg);
+  ctf_qsort_r (fp->ctf_serializing_vars, fp->ctf_serializing_nvars,
+	       sizeof (ctf_varent_t), ctf_sort_var, &sort_var_arg);
 
-  if ((newbuf = realloc (buf, buf_size + strtab->cts_len)) == NULL)
+  if ((newbuf = realloc (fp->ctf_serializing_buf, fp->ctf_serializing_buf_size
+			 + strtab->cts_len)) == NULL)
     goto oom;
 
-  buf = newbuf;
-  memcpy (buf + buf_size, strtab->cts_strs, strtab->cts_len);
-  hdrp = (ctf_header_t *) buf;
+  fp->ctf_serializing_buf = newbuf;
+  memcpy (fp->ctf_serializing_buf + fp->ctf_serializing_buf_size, strtab->cts_strs,
+	  strtab->cts_len);
+  hdrp = (ctf_header_t *) fp->ctf_serializing_buf;
   hdrp->cth_strlen = strtab->cts_len;
-  buf_size += hdrp->cth_strlen;
-  *bufsiz = buf_size;
   hdrp->cth_parent_strlen = fp->ctf_header->cth_parent_strlen;
+  fp->ctf_serializing_buf_size += hdrp->cth_strlen;
+  *bufsiz = fp->ctf_serializing_buf_size;
+
+  buf = fp->ctf_serializing_buf;
+
+  fp->ctf_serializing_buf = NULL;
+  fp->ctf_serializing_vars = NULL;
+  fp->ctf_serializing_buf_size = 0;
+  fp->ctf_serializing_nvars = 0;
 
   return buf;
 
 oom:
   ctf_set_errno (fp, EAGAIN);
 err:
-  free (buf);
+  ctf_depreserialize (fp);
   return NULL;					/* errno is set for us.  */
 }
 
