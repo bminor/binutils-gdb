@@ -246,7 +246,9 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NONAME, "Type name must not be empty.") \
   _CTF_ITEM (ECTF_BADFLAG, "Invalid CTF dict flag specified.") \
   _CTF_ITEM (ECTF_CTFVERS_NO_SERIALIZE, "CTFv1 dicts are too old to serialize.") \
-  _CTF_ITEM (ECTF_UNSTABLE, "Attempt to write unstable file format version: set I_KNOW_LIBCTF_IS_UNSTABLE in the environment.")
+  _CTF_ITEM (ECTF_UNSTABLE, "Attempt to write unstable file format version: set I_KNOW_LIBCTF_IS_UNSTABLE in the environment.") \
+  _CTF_ITEM (ECTF_HASPARENT, "Cannot ctf_import: dict already has a parent.") \
+  _CTF_ITEM (ECTF_WRONGPARENT, "Cannot ctf_import: incorrect parent provided.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -259,7 +261,7 @@ _CTF_ERRORS
 #undef _CTF_FIRST
   };
 
-#define ECTF_NERR (ECTF_UNSTABLE - ECTF_BASE + 1) /* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_WRONGPARENT - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */
@@ -461,7 +463,11 @@ extern void ctf_dict_close (ctf_dict_t *);
    contain the name of their originating compilation unit and the name of
    their parent.  Dicts opened from CTF archives have this relationship set
    up already, but if opening via raw low-level calls, you need to figure
-   out which dict is the parent and set it on the child via ctf_import(). */
+   out which dict is the parent and set it on the child via ctf_import().
+
+   Almost all operations other than ctf_import and ctf_close do not work on
+   child dicts that have not yet had ctf_import called on them; in particular,
+   name lookups and type lookup in general are broken, as is type addition.  */
 
 extern const char *ctf_cuname (ctf_dict_t *);
 extern ctf_dict_t *ctf_parent_dict (ctf_dict_t *);

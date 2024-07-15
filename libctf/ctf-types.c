@@ -105,6 +105,9 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   uint32_t max_vlen;
   ctf_next_t *i = *it;
 
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
   if (!i)
     {
       const ctf_type_t *tp;
@@ -273,6 +276,12 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   uint32_t kind;
   const char *name;
   ctf_next_t *i = *it;
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    {
+      ctf_set_errno (fp, ECTF_NOPARENT);
+      return NULL;
+    }
 
   if (!i)
     {
@@ -494,6 +503,9 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
   ctf_next_t *i = *it;
   ctf_id_t id;
 
+  /* (No need for a LCTF_NO_STR check: checking for a missing parent covers more
+     cases, and we need to do that anyway.)  */
+
   if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent == NULL))
     return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
 
@@ -648,6 +660,12 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 
   if (fp == NULL && type == CTF_ERR)
     return NULL;	/* Simplify caller code by permitting CTF_ERR.  */
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    {
+      ctf_set_errno (fp, ECTF_NOPARENT);
+      return NULL;
+    }
 
   ctf_decl_init (&cd);
   ctf_decl_push (&cd, fp, type);
@@ -866,6 +884,12 @@ const char *
 ctf_type_name_raw (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    {
+      ctf_set_errno (fp, ECTF_NOPARENT);
+      return NULL;
+    }
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
     return NULL;		/* errno is set for us.  */
@@ -1268,6 +1292,12 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
   uint32_t lkind, rkind;
   int same_names = 0;
 
+  if (lfp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (lfp, ECTF_NOPARENT));
+
+  if (rfp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (rfp, ECTF_NOPARENT));
+
   if (ctf_type_cmp (lfp, ltype, rfp, rtype) == 0)
     return 1;
 
@@ -1368,6 +1398,9 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
   ssize_t size, increment, vbytes;
   uint32_t kind, n, i = 0;
 
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
 
@@ -1466,6 +1499,12 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int value)
   ssize_t increment;
   uint32_t n;
 
+  if (fp->ctf_flags & LCTF_NO_STR)
+    {
+      ctf_set_errno (fp, ECTF_NOPARENT);
+      return NULL;
+    }
+
   if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
     return NULL;		/* errno is set for us.  */
 
@@ -1507,6 +1546,9 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int *valp)
   const ctf_dtdef_t *dtd;
   ssize_t increment;
   uint32_t n;
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
@@ -1633,6 +1675,9 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
   uint32_t kind, n, i = 0;
   int nonrepresentable = 0;
   int rc;
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR) {
     if (ctf_errno (fp) != ECTF_NONREPRESENTABLE)

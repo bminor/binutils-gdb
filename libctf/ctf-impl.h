@@ -601,8 +601,10 @@ struct ctf_next
 #define LCTF_VBYTES(fp, kind, size, vlen) \
   ((fp)->ctf_dictops->ctfo_get_vbytes(fp, kind, size, vlen))
 
-#define LCTF_CHILD	0x0001	/* CTF dict is a child.  */
+#define LCTF_CHILD		0x0001	/* CTF dict is a child.  */
+#define LCTF_LINKING		0x0002  /* CTF link is underway: respect ctf_link_flags.  */
 #define LCTF_STRICT_NO_DUP_ENUMERATORS 0x0004 /* Duplicate enums prohibited.  */
+#define LCTF_NO_STR		0x0008  /* No string lookup possible yet.  */
 #define LCTF_NO_SERIALIZE	0x0010  /* Serialization of this dict prohibited.  */
 
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);

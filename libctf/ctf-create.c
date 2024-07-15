@@ -365,6 +365,9 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
   ctf_dtdef_t *dtd, *ntd;
   ctf_dvdef_t *dvd, *nvd;
 
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
   if (id.snapshot_id < fp->ctf_stypes)
     return (ctf_set_errno (fp, ECTF_RDONLY));
 
@@ -431,6 +434,9 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
 
   if (LCTF_INDEX_TO_TYPE (fp, fp->ctf_typemax, 1) == (CTF_MAX_PTYPE - 1))
     return (ctf_set_typed_errno (fp, ECTF_FULL));
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   /* Prohibit addition of a root-visible type that is already present
      in the non-dynamic portion. */
@@ -788,6 +794,9 @@ ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   ctf_id_t type = 0;
   size_t initial_vlen = sizeof (ctf_lmember_t) * INITIAL_VLEN;
 
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
   /* Promote root-visible forwards to structs.  */
   if (name != NULL)
     type = ctf_lookup_by_rawname (fp, CTF_K_STRUCT, name);
@@ -832,6 +841,9 @@ ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   ctf_id_t type = 0;
   size_t initial_vlen = sizeof (ctf_lmember_t) * INITIAL_VLEN;
 
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
   /* Promote root-visible forwards to unions.  */
   if (name != NULL)
     type = ctf_lookup_by_rawname (fp, CTF_K_UNION, name);
@@ -874,6 +886,9 @@ ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
   size_t initial_vlen = sizeof (ctf_enum_t) * INITIAL_VLEN;
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   /* Promote root-visible forwards to enums.  */
   if (name != NULL)
@@ -944,6 +959,9 @@ ctf_add_forward (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (name == NULL || name[0] == '\0')
     return (ctf_set_typed_errno (fp, ECTF_NONAME));
 
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
   /* If the type is already defined or exists as a forward tag, just return
      the ctf_id_t of the existing definition.  Since this changes nothing,
      it's safe to do even on the read-only portion of the dict.  */
@@ -967,6 +985,9 @@ ctf_add_unknown (ctf_dict_t *fp, uint32_t flag, const char *name)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   /* If a type is already defined with this name, error (if not CTF_K_UNKNOWN)
      or just return it.  */
@@ -1060,6 +1081,9 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (enid < fp->ctf_stypes)
     return (ctf_set_errno (ofp, ECTF_RDONLY));
 
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
   if (dtd == NULL)
     return (ctf_set_errno (ofp, ECTF_BADID));
 
@@ -1144,6 +1168,9 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   int is_incomplete = 0;
   unsigned char *old_vlen;
   ctf_lmember_t *memb;
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, souid))
     {
@@ -1377,6 +1404,9 @@ ctf_add_variable_forced (ctf_dict_t *fp, const char *name, ctf_id_t ref)
 int
 ctf_add_variable (ctf_dict_t *fp, const char *name, ctf_id_t ref)
 {
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
   if (ctf_lookup_variable_here (fp, name) != CTF_ERR)
     return (ctf_set_errno (fp, ECTF_DUPLICATE));
 
@@ -1396,6 +1426,9 @@ ctf_add_funcobjt_sym_forced (ctf_dict_t *fp, int is_function, const char *name, 
   ctf_dict_t *tmp = fp;
   char *dupname;
   ctf_dynhash_t *h = is_function ? fp->ctf_funchash : fp->ctf_objthash;
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   if (ctf_lookup_by_id (&tmp, id) == NULL)
     return -1;				/* errno is set for us.  */
@@ -2064,6 +2097,9 @@ ctf_id_t
 ctf_add_type (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type)
 {
   ctf_id_t id;
+
+  if ((src_fp->ctf_flags & LCTF_NO_STR) || (dst_fp->ctf_flags & LCTF_NO_STR))
+    return (ctf_set_errno (dst_fp, ECTF_NOPARENT));
 
   if (!src_fp->ctf_add_processing)
     src_fp->ctf_add_processing = ctf_dynhash_create (ctf_hash_integer,

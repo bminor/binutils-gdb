@@ -700,6 +700,12 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
   char *line;
   ctf_dump_state_t *state = NULL;
 
+  if (fp->ctf_flags & LCTF_NO_STR)
+    {
+      ctf_set_errno (fp, ECTF_NOPARENT);
+      return NULL;
+    }
+
   if (*statep == NULL)
     {
       /* Data collection.  Transforming a call-at-a-time iterator into a
