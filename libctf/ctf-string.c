@@ -682,7 +682,7 @@ ctf_str_purge_one_atom_refs (void *key _libctf_unused_, void *value,
 }
 
 /* Remove all the recorded refs from the atoms table.  */
-static void
+void
 ctf_str_purge_refs (ctf_dict_t *fp)
 {
   ctf_dynhash_iter (fp->ctf_str_atoms, ctf_str_purge_one_atom_refs, NULL);

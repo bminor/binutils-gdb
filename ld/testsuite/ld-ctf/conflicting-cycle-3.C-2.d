@@ -36,5 +36,4 @@ CTF archive member: .*/C-2.c:
                 \[0x[0-9a-f]*\] wombat: ID 0x[0-9a-f]*: \(kind 1\) int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 
   Strings:
-    0x0: 
 #...
