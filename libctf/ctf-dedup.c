@@ -1470,9 +1470,8 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
       if (decorated[0] != '\0' && decorated[1] == ' ')
 	{
 	  ctf_dedup_type_counter_t counters = { fp, inputs, 0 };
-	  ctf_dynhash_t *counts = (ctf_dynhash_t *) v;
 
-	  ctf_dynhash_iter_find (counts, ctf_dedup_count_types, &counters);
+	  ctf_dynhash_iter_find (name_counts, ctf_dedup_count_types, &counters);
 
 	  /* Check for assertion failure and pass it up.  */
 	  if (ctf_errno (fp) == ECTF_INTERNAL)
@@ -1482,7 +1481,7 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 	    {
 	      const void *hval_;
 
-	      while ((err = ctf_dynhash_cnext (counts, &j, &hval_, NULL)) == 0)
+	      while ((err = ctf_dynhash_cnext (name_counts, &j, &hval_, NULL)) == 0)
 		{
 		  const char *hval = (const char *) hval_;
 		  ctf_dynset_t *type_ids;
@@ -2265,7 +2264,7 @@ ctf_dedup_rwalk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
     }
 
   /* If this type is marked conflicted, traverse members and call
-     ctf_dedup_rwalk_output_mapping_once on all the unique ones: otherwise, just
+     ctf_dedup_rwalk_one_output_mapping on all the unique ones: otherwise, just
      pick a random one and use it.  */
 
   if (!ctf_dynset_exists (d->cd_conflicting_types, hval, NULL))
