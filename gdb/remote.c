@@ -6150,7 +6150,7 @@ remote_unpush_target (remote_target *target)
   fileio_handles_invalidate_target (target);
 }
 
-static void
+static void ATTRIBUTE_NORETURN
 remote_unpush_and_throw (remote_target *target)
 {
   remote_unpush_target (target);
