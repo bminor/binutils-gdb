@@ -5950,7 +5950,7 @@ remote_target::remote_query_supported ()
 
       if (m_features.packet_set_cmd_state (PACKET_accept_error_message)
 	  != AUTO_BOOLEAN_FALSE)
-      remote_query_supported_append (&q, "error-message+");
+	remote_query_supported_append (&q, "error-message+");
 
       q = "qSupported:" + q;
       putpkt (q.c_str ());
