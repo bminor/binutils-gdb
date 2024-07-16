@@ -421,7 +421,7 @@ gdbreplay_usage (FILE *stream)
 /* Main function.  This is called by the real "main" function,
    wrapped in a TRY_CATCH that handles any uncaught exceptions.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 captured_main (int argc, char *argv[])
 {
   FILE *fp;

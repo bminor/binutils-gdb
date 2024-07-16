@@ -191,8 +191,9 @@ void gdb_xml_debug (struct gdb_xml_parser *parser, const char *format, ...)
 /* Issue an error message from one of PARSER's handlers, and stop
    parsing.  */
 
-void gdb_xml_error (struct gdb_xml_parser *parser, const char *format, ...)
-  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
+[[noreturn]] void gdb_xml_error (struct gdb_xml_parser *parser,
+				 const char *format, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 /* Find the attribute named NAME in the set of parsed attributes
    ATTRIBUTES.  Returns NULL if not found.  */

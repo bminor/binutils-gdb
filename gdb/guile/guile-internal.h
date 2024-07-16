@@ -326,32 +326,32 @@ extern SCM gdbscm_make_type_error (const char *subr, int arg_pos,
 extern SCM gdbscm_make_invalid_object_error (const char *subr, int arg_pos,
 					     SCM bad_value, const char *error);
 
-extern void gdbscm_invalid_object_error (const char *subr, int arg_pos,
-					 SCM bad_value, const char *error)
-   ATTRIBUTE_NORETURN;
+[[noreturn]] extern void gdbscm_invalid_object_error (const char *subr,
+						      int arg_pos,
+						      SCM bad_value,
+						      const char *error);
 
 extern SCM gdbscm_make_out_of_range_error (const char *subr, int arg_pos,
 					   SCM bad_value, const char *error);
 
-extern void gdbscm_out_of_range_error (const char *subr, int arg_pos,
-				       SCM bad_value, const char *error)
-   ATTRIBUTE_NORETURN;
+[[noreturn]] extern void gdbscm_out_of_range_error (const char *subr,
+						    int arg_pos, SCM bad_value,
+						    const char *error);
 
 extern SCM gdbscm_make_misc_error (const char *subr, int arg_pos,
 				   SCM bad_value, const char *error);
 
-extern void gdbscm_misc_error (const char *subr, int arg_pos,
-			       SCM bad_value, const char *error)
-   ATTRIBUTE_NORETURN;
+[[noreturn]] extern void gdbscm_misc_error (const char *subr, int arg_pos,
+					    SCM bad_value, const char *error);
 
-extern void gdbscm_throw (SCM exception) ATTRIBUTE_NORETURN;
+[[noreturn]] extern void gdbscm_throw (SCM exception);
 
 struct gdbscm_gdb_exception;
 extern SCM gdbscm_scm_from_gdb_exception
   (const gdbscm_gdb_exception &exception);
 
-extern void gdbscm_throw_gdb_exception (gdbscm_gdb_exception exception)
-  ATTRIBUTE_NORETURN;
+[[noreturn]] extern void gdbscm_throw_gdb_exception
+  (gdbscm_gdb_exception exception);
 
 extern void gdbscm_print_exception_with_stack (SCM port, SCM stack,
 					       SCM key, SCM args);
@@ -368,8 +368,8 @@ extern excp_matcher_func gdbscm_user_error_p;
 extern SCM gdbscm_make_memory_error (const char *subr, const char *msg,
 				     SCM args);
 
-extern void gdbscm_memory_error (const char *subr, const char *msg, SCM args)
-  ATTRIBUTE_NORETURN;
+[[noreturn]] extern void gdbscm_memory_error (const char *subr,
+					      const char *msg, SCM args);
 
 /* scm-safe-call.c */
 

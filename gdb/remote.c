@@ -1539,7 +1539,7 @@ static void remote_console_output (const char *msg, ui_file *stream);
 
 static void remote_btrace_reset (remote_state *rs);
 
-static void remote_unpush_and_throw (remote_target *target);
+[[noreturn]] static void remote_unpush_and_throw (remote_target *target);
 
 /* For "remote".  */
 
@@ -6150,7 +6150,7 @@ remote_unpush_target (remote_target *target)
   fileio_handles_invalidate_target (target);
 }
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 remote_unpush_and_throw (remote_target *target)
 {
   remote_unpush_target (target);

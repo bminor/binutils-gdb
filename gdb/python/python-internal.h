@@ -948,7 +948,7 @@ private:
 int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
 void gdbpy_print_stack_or_quit ();
-void gdbpy_handle_exception () ATTRIBUTE_NORETURN;
+[[noreturn]] void gdbpy_handle_exception ();
 
 /* A wrapper around calling 'error'.  Prefixes the error message with an
    'Error occurred in Python' string.  Use this in C++ code if we spot
@@ -958,8 +958,7 @@ void gdbpy_handle_exception () ATTRIBUTE_NORETURN;
 
    This always calls error, and never returns.  */
 
-void gdbpy_error (const char *fmt, ...)
-  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
+[[noreturn]] void gdbpy_error (const char *fmt, ...) ATTRIBUTE_PRINTF (1, 2);
 
 gdbpy_ref<> python_string_to_unicode (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> unicode_to_target_string (PyObject *unicode_str);

@@ -192,7 +192,7 @@ verror (const char *string, va_list args)
 
 /* Emit a message and abort.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 abort_with_message (const char *msg)
 {
   if (current_ui == NULL)

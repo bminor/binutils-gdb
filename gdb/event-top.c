@@ -894,7 +894,7 @@ unblock_signal (int sig)
 
 /* Called to handle fatal signals.  SIG is the signal number.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 handle_fatal_signal (int sig)
 {
 #ifdef TUI

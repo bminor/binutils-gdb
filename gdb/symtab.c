@@ -2439,7 +2439,7 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
 /* A helper function that throws an exception when a symbol was found
    in a psymtab but not in a symtab.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 error_in_psymtab_expansion (enum block_enum block_index, const char *name,
 			    struct compunit_symtab *cust)
 {

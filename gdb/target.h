@@ -2490,7 +2490,7 @@ extern int default_memory_insert_breakpoint (struct gdbarch *,
 
 extern void initialize_targets (void);
 
-extern void noprocess (void) ATTRIBUTE_NORETURN;
+[[noreturn]] extern void noprocess (void);
 
 extern void target_require_runnable (void);
 

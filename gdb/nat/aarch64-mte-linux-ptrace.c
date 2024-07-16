@@ -31,7 +31,7 @@
 /* Helper function to display various possible errors when reading
    MTE tags.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 aarch64_mte_linux_peek_error (int error)
 {
   switch (error)
@@ -53,7 +53,7 @@ aarch64_mte_linux_peek_error (int error)
 /* Helper function to display various possible errors when writing
    MTE tags.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 aarch64_mte_linux_poke_error (int error)
 {
   switch (error)

@@ -548,7 +548,7 @@ mnsh_handle_readlink (int sock, const char *filename)
 
 /* The helper process.  Never returns.  Must be async-signal-safe.  */
 
-static void mnsh_main (int sock) ATTRIBUTE_NORETURN;
+[[noreturn]] static void mnsh_main (int sock);
 
 static void
 mnsh_main (int sock)

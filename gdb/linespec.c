@@ -1544,7 +1544,7 @@ decode_line_2 (struct linespec_state *self,
 /* Throw an appropriate error when SYMBOL is not found (optionally in
    FILENAME).  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 symbol_not_found_error (const char *symbol, const char *filename)
 {
   if (symbol == NULL)
@@ -1586,7 +1586,7 @@ symbol_not_found_error (const char *symbol, const char *filename)
 /* Throw an appropriate error when an unexpected token is encountered 
    in the input.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 unexpected_linespec_error (linespec_parser *parser)
 {
   linespec_token token;
@@ -1613,7 +1613,7 @@ unexpected_linespec_error (linespec_parser *parser)
 
 /* Throw an undefined label error.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 undefined_label_error (const char *function, const char *label)
 {
   if (function != NULL)
@@ -1628,7 +1628,7 @@ undefined_label_error (const char *function, const char *label)
 
 /* Throw a source file not found error.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 source_file_not_found_error (const char *name)
 {
   throw_error (NOT_FOUND_ERROR, _("No source file named %s."), name);

@@ -24,7 +24,7 @@
 
 /* See tid-parse.h.  */
 
-void ATTRIBUTE_NORETURN
+[[noreturn]] void
 invalid_thread_id_error (const char *string)
 {
   error (_("Invalid thread ID: %s"), string);

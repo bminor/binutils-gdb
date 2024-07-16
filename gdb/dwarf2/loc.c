@@ -2253,7 +2253,7 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
 /* A helper function that throws an unimplemented error mentioning a
    given DWARF operator.  */
 
-static void ATTRIBUTE_NORETURN
+[[noreturn]] static void
 unimplemented (unsigned int op)
 {
   const char *name = get_DW_OP_name (op);

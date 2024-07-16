@@ -42,7 +42,7 @@ extern void read_command_file (FILE *);
 extern void init_history (void);
 extern void command_loop (void);
 extern int quit_confirm (void);
-extern void quit_force (int *, int) ATTRIBUTE_NORETURN;
+[[noreturn]] extern void quit_force (int *, int);
 extern void quit_command (const char *, int);
 extern void quit_cover (void);
 extern void execute_command (const char *, int);

@@ -56,7 +56,7 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-style.h"
 
-static void generic_tls_error (void) ATTRIBUTE_NORETURN;
+[[noreturn]] static void generic_tls_error (void);
 
 static void default_rcmd (struct target_ops *, const char *, struct ui_file *);
 
@@ -64,7 +64,7 @@ static int default_verify_memory (struct target_ops *self,
 				  const gdb_byte *data,
 				  CORE_ADDR memaddr, ULONGEST size);
 
-static void tcomplain (void) ATTRIBUTE_NORETURN;
+[[noreturn]] static void tcomplain (void);
 
 /* Mapping between target_info objects (which have address identity)
    and corresponding open/factory function/callback.  Each add_target
