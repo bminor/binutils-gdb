@@ -359,8 +359,7 @@ lookup_minimal_symbol_demangled (const lookup_name_info &lookup_name,
    but the demangled names are all the same: S::S or S::~S.  */
 
 bound_minimal_symbol
-lookup_minimal_symbol (const char *name, const char *sfile,
-		       struct objfile *objf)
+lookup_minimal_symbol (const char *name, objfile *objf, const char *sfile)
 {
   found_minimal_symbols found;
 
@@ -479,7 +478,7 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 bound_minimal_symbol
 lookup_bound_minimal_symbol (const char *name)
 {
-  return lookup_minimal_symbol (name, NULL, NULL);
+  return lookup_minimal_symbol (name);
 }
 
 /* See gdbsupport/symbol.h.  */
@@ -488,7 +487,7 @@ int
 find_minimal_symbol_address (const char *name, CORE_ADDR *addr,
 			     struct objfile *objfile)
 {
-  bound_minimal_symbol sym = lookup_minimal_symbol (name, NULL, objfile);
+  bound_minimal_symbol sym = lookup_minimal_symbol (name, objfile);
   if (sym.minsym != NULL)
     *addr = sym.value_address ();
 

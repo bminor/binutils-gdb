@@ -759,7 +759,7 @@ ps_err_e
 ps_pglobal_lookup (struct ps_prochandle *ph, const char *ld_object_name,
 		   const char *ld_symbol_name, psaddr_t *ld_symbol_addr)
 {
-  bound_minimal_symbol ms = lookup_minimal_symbol (ld_symbol_name, NULL, NULL);
+  bound_minimal_symbol ms = lookup_minimal_symbol (ld_symbol_name);
   if (!ms.minsym)
     return PS_NOSYM;
 

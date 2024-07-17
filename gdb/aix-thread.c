@@ -395,7 +395,7 @@ pdc_symbol_addrs (pthdb_user_t user_current_pid, pthdb_symbol_t *symbols, int co
 	symbols[i].addr = 0;
       else
 	{
-	  bound_minimal_symbol ms = lookup_minimal_symbol (name, NULL, NULL);
+	  bound_minimal_symbol ms = lookup_minimal_symbol (name);
 	  if (ms.minsym == NULL)
 	    {
 	      if (debug_aix_thread)
@@ -978,7 +978,7 @@ pd_enable (inferior *inf)
     return;
 
   /* Set a breakpoint on the returned stub function.  */
-  bound_minimal_symbol ms = lookup_minimal_symbol (stub_name, NULL, NULL);
+  bound_minimal_symbol ms = lookup_minimal_symbol (stub_name);
   if (ms.minsym == NULL)
     return;
   data->pd_brk_addr = ms.value_address ();

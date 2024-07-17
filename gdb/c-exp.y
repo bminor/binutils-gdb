@@ -3150,7 +3150,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
   if (bsym.symbol == NULL
       && par_state->language ()->la_language == language_cplus
       && is_a_field_of_this.type == NULL
-      && lookup_minimal_symbol (copy.c_str (), NULL, NULL).minsym == NULL)
+      && lookup_minimal_symbol (copy.c_str ()).minsym == nullptr)
     return UNKNOWN_CPP_NAME;
 
   return NAME;

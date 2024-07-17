@@ -1954,7 +1954,7 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
   if (value_as_long (target) == 0)
     return value_from_longest (long_type, 0);
 
-  if (lookup_minimal_symbol ("objc_msg_lookup", 0, 0).minsym)
+  if (lookup_minimal_symbol ("objc_msg_lookup").minsym != nullptr)
     gnu_runtime = 1;
 
   /* Find the method dispatch (Apple runtime) or method lookup

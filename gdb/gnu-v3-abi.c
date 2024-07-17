@@ -1160,8 +1160,7 @@ gnuv3_get_typeid (struct value *value)
   else
     {
       std::string sym_name = std::string ("typeinfo for ") + name;
-      bound_minimal_symbol minsym
-	= lookup_minimal_symbol (sym_name.c_str (), NULL, NULL);
+      bound_minimal_symbol minsym = lookup_minimal_symbol (sym_name.c_str ());
 
       if (minsym.minsym == NULL)
 	error (_("could not find typeinfo symbol for '%s'"), name);
@@ -1250,7 +1249,7 @@ gnuv3_skip_trampoline (const frame_info_ptr &frame, CORE_ADDR stop_pc)
 
   fn_name = strstr (thunk_name, " thunk to ") + strlen (" thunk to ");
   bound_minimal_symbol fn_sym
-    = lookup_minimal_symbol (fn_name, NULL, section->objfile);
+    = lookup_minimal_symbol (fn_name, section->objfile);
   if (fn_sym.minsym == NULL)
     return 0;
 

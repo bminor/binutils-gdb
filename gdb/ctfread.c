@@ -323,7 +323,7 @@ get_bitsize (ctf_dict_t *fp, ctf_id_t tid, uint32_t kind)
 static void
 set_symbol_address (struct objfile *of, struct symbol *sym, const char *name)
 {
-  bound_minimal_symbol msym = lookup_minimal_symbol (name, nullptr, of);
+  bound_minimal_symbol msym = lookup_minimal_symbol (name, of);
   if (msym.minsym != NULL)
     {
       sym->set_value_address (msym.value_address ());

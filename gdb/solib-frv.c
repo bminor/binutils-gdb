@@ -280,7 +280,7 @@ lm_base (void)
     return lm_base_cache;
 
   bound_minimal_symbol got_sym
-    = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL,
+    = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_",
 			     current_program_space->symfile_object_file);
   if (got_sym.minsym == 0)
     {
@@ -842,7 +842,7 @@ main_got (void)
 {
   objfile *objf = current_program_space->symfile_object_file;
   bound_minimal_symbol got_sym
-    = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL, objf);
+    = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", objf);
   if (got_sym.minsym == 0)
     return 0;
 

@@ -3433,8 +3433,7 @@ simple_read_overlay_table (void)
   enum bfd_endian byte_order;
 
   simple_free_overlay_table ();
-  bound_minimal_symbol novlys_msym
-    = lookup_minimal_symbol ("_novlys", NULL, NULL);
+  bound_minimal_symbol novlys_msym = lookup_minimal_symbol ("_novlys");
   if (! novlys_msym.minsym)
     {
       error (_("Error reading inferior's overlay table: "
@@ -3523,8 +3522,7 @@ simple_overlay_update (struct obj_section *osect)
       {
 	/* Does its cached location match what's currently in the
 	   symtab?  */
-	bound_minimal_symbol minsym
-	  = lookup_minimal_symbol ("_ovly_table", NULL, NULL);
+	bound_minimal_symbol minsym = lookup_minimal_symbol ("_ovly_table");
 
 	if (minsym.minsym == NULL)
 	  error (_("Error reading inferior's overlay table: couldn't "

@@ -806,7 +806,7 @@ ada_main_name ()
      that string, then most probably the main procedure is not written
      in Ada.  */
   bound_minimal_symbol msym
-    = lookup_minimal_symbol (ADA_MAIN_PROGRAM_SYMBOL_NAME, NULL, NULL);
+    = lookup_minimal_symbol (ADA_MAIN_PROGRAM_SYMBOL_NAME);
 
   if (msym.minsym != NULL)
     {
@@ -11696,7 +11696,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
 	 the catchpoint message, and is also used when trying to catch
 	 a specific exception).  We do not handle this case for now.  */
       bound_minimal_symbol msym
-	= lookup_minimal_symbol (einfo->catch_exception_sym, NULL, NULL);
+	= lookup_minimal_symbol (einfo->catch_exception_sym);
 
       if (msym.minsym && msym.minsym->type () != mst_solib_trampoline)
 	error (_("Your Ada runtime appears to be missing some debugging "
@@ -11716,7 +11716,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
   if (sym == NULL)
     {
       bound_minimal_symbol msym
-	= lookup_minimal_symbol (einfo->catch_handlers_sym, NULL, NULL);
+	= lookup_minimal_symbol (einfo->catch_handlers_sym);
 
       if (msym.minsym && msym.minsym->type () != mst_solib_trampoline)
 	error (_("Your Ada runtime appears to be missing some debugging "

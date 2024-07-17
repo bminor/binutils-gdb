@@ -920,8 +920,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 
   /* Try array.  */
 
-  bound_minimal_symbol msym
-    = lookup_minimal_symbol (KNOWN_TASKS_NAME, NULL, NULL);
+  bound_minimal_symbol msym = lookup_minimal_symbol (KNOWN_TASKS_NAME);
   if (msym.minsym != NULL)
     {
       data->known_tasks_kind = ADA_TASKS_ARRAY;
@@ -968,7 +967,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 
   /* Try list.  */
 
-  msym = lookup_minimal_symbol (KNOWN_TASKS_LIST, NULL, NULL);
+  msym = lookup_minimal_symbol (KNOWN_TASKS_LIST);
   if (msym.minsym != NULL)
     {
       data->known_tasks_kind = ADA_TASKS_LIST;

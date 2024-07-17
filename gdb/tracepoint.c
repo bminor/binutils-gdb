@@ -2580,8 +2580,7 @@ info_scope_command (const char *args_in, int from_tty)
 		case LOC_UNRESOLVED:
 		  {
 		    bound_minimal_symbol msym
-		      = lookup_minimal_symbol (sym->linkage_name (), NULL,
-					       NULL);
+		      = lookup_minimal_symbol (sym->linkage_name ());
 		    if (msym.minsym == NULL)
 		      gdb_printf ("Unresolved Static");
 		    else

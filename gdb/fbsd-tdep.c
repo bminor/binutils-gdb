@@ -1943,7 +1943,7 @@ fbsd_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
 static LONGEST
 fbsd_read_integer_by_name (struct gdbarch *gdbarch, const char *name)
 {
-  bound_minimal_symbol ms = lookup_minimal_symbol (name, NULL, NULL);
+  bound_minimal_symbol ms = lookup_minimal_symbol (name);
   if (ms.minsym == NULL)
     error (_("Unable to resolve symbol '%s'"), name);
 

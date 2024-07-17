@@ -623,7 +623,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
       pc_offset += 2;
 
       bound_minimal_symbol msymbol
-	= lookup_minimal_symbol ("__prologue_saves__", NULL, NULL);
+	= lookup_minimal_symbol ("__prologue_saves__");
       if (!msymbol.minsym)
 	break;
 

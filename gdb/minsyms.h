@@ -205,8 +205,9 @@ unsigned int msymbol_hash_iw (const char *);
    symbols are still preferred).  Returns a bound minimal symbol that
    matches, or an empty bound minimal symbol if no match is found.  */
 
-bound_minimal_symbol lookup_minimal_symbol (const char *, const char *,
-					    struct objfile *);
+bound_minimal_symbol lookup_minimal_symbol (const char *name,
+					    objfile *obj = nullptr,
+					    const char *sfile = nullptr);
 
 /* Like lookup_minimal_symbol, but searches all files and
    objfiles.  */

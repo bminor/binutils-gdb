@@ -396,7 +396,7 @@ macho_resolve_oso_sym_with_minsym (struct objfile *main_objfile, asymbol *sym)
       && *name == bfd_get_symbol_leading_char (main_objfile->obfd.get ()))
     ++name;
 
-  bound_minimal_symbol msym = lookup_minimal_symbol (name, NULL, main_objfile);
+  bound_minimal_symbol msym = lookup_minimal_symbol (name, main_objfile);
   if (msym.minsym == NULL)
     {
       warning (_("can't find symbol '%s' in minsymtab"), name);

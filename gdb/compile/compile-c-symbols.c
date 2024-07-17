@@ -355,8 +355,7 @@ gcc_convert_symbol (void *datum,
 	}
       else if (request == GCC_C_ORACLE_SYMBOL)
 	{
-	  bound_minimal_symbol bmsym
-	    = lookup_minimal_symbol (identifier, NULL, NULL);
+	  bound_minimal_symbol bmsym = lookup_minimal_symbol (identifier);
 	  if (bmsym.minsym != NULL)
 	    {
 	      convert_symbol_bmsym (context, bmsym);

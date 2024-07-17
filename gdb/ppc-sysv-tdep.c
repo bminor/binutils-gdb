@@ -1060,7 +1060,7 @@ convert_code_addr_to_desc_addr (CORE_ADDR code_addr, CORE_ADDR *desc_addr)
      - avoids problems when two object files (i.e., shared libraries)
      contain a minimal symbol with the same name.  */
   bound_minimal_symbol fn
-    = lookup_minimal_symbol (dot_fn.minsym->linkage_name () + 1, NULL,
+    = lookup_minimal_symbol (dot_fn.minsym->linkage_name () + 1,
 			     dot_fn_section->objfile);
   if (fn.minsym == NULL)
     return 0;

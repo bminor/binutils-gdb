@@ -329,14 +329,13 @@ ravenscar_thread_target::add_active_thread ()
 static bound_minimal_symbol
 get_running_thread_msymbol ()
 {
-  bound_minimal_symbol msym
-    = lookup_minimal_symbol (running_thread_name, NULL, NULL);
+  bound_minimal_symbol msym = lookup_minimal_symbol (running_thread_name);
   if (!msym.minsym)
     /* Older versions of the GNAT runtime were using a different
        (less ideal) name for the symbol where the active thread ID
        is stored.  If we couldn't find the symbol using the latest
        name, then try the old one.  */
-    msym = lookup_minimal_symbol ("running_thread", NULL, NULL);
+    msym = lookup_minimal_symbol ("running_thread");
 
   return msym;
 }
@@ -348,11 +347,11 @@ static bool
 has_ravenscar_runtime ()
 {
   bound_minimal_symbol msym_ravenscar_runtime_initializer
-    = lookup_minimal_symbol (ravenscar_runtime_initializer, NULL, NULL);
+    = lookup_minimal_symbol (ravenscar_runtime_initializer);
   bound_minimal_symbol msym_known_tasks
-    = lookup_minimal_symbol (known_tasks_name, NULL, NULL);
+    = lookup_minimal_symbol (known_tasks_name);
   bound_minimal_symbol msym_first_task
-    = lookup_minimal_symbol (first_task_name, NULL, NULL);
+    = lookup_minimal_symbol (first_task_name);
   bound_minimal_symbol msym_running_thread = get_running_thread_msymbol ();
 
   return (msym_ravenscar_runtime_initializer.minsym

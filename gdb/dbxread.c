@@ -907,7 +907,7 @@ find_stab_function (const char *namestring, const char *filename,
   strncpy (p, namestring, n);
   p[n] = 0;
 
-  bound_minimal_symbol msym = lookup_minimal_symbol (p, filename, objfile);
+  bound_minimal_symbol msym = lookup_minimal_symbol (p, objfile, filename);
   if (msym.minsym == NULL)
     {
       /* Sun Fortran appends an underscore to the minimal symbol name,
@@ -915,21 +915,21 @@ find_stab_function (const char *namestring, const char *filename,
 	 was not found.  */
       p[n] = '_';
       p[n + 1] = 0;
-      msym = lookup_minimal_symbol (p, filename, objfile);
+      msym = lookup_minimal_symbol (p, objfile, filename);
     }
 
   if (msym.minsym == NULL && filename != NULL)
     {
       /* Try again without the filename.  */
       p[n] = 0;
-      msym = lookup_minimal_symbol (p, NULL, objfile);
+      msym = lookup_minimal_symbol (p, objfile);
     }
   if (msym.minsym == NULL && filename != NULL)
     {
       /* And try again for Sun Fortran, but without the filename.  */
       p[n] = '_';
       p[n + 1] = 0;
-      msym = lookup_minimal_symbol (p, NULL, objfile);
+      msym = lookup_minimal_symbol (p, objfile);
     }
 
   return msym;
@@ -2044,7 +2044,7 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
       p[n] = 0;
 
       bound_minimal_symbol minsym
-	= lookup_minimal_symbol (p, pst->filename, objfile);
+	= lookup_minimal_symbol (p, objfile, pst->filename);
       if (minsym.minsym == NULL)
 	{
 	  /* Sun Fortran appends an underscore to the minimal symbol name,
@@ -2052,7 +2052,7 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
 	     was not found.  */
 	  p[n] = '_';
 	  p[n + 1] = 0;
-	  minsym = lookup_minimal_symbol (p, pst->filename, objfile);
+	  minsym = lookup_minimal_symbol (p, objfile, pst->filename);
 	}
 
       if (minsym.minsym)

@@ -59,11 +59,11 @@ glibc_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       /* The dynamic linker began using this name in early 2005.  */
       bound_minimal_symbol fixup
-	= lookup_minimal_symbol ("_dl_fixup", NULL, resolver.objfile);
-      
+	= lookup_minimal_symbol ("_dl_fixup", resolver.objfile);
+
       /* This is the name used in older versions.  */
       if (! fixup.minsym)
-	fixup = lookup_minimal_symbol ("fixup", NULL, resolver.objfile);
+	fixup = lookup_minimal_symbol ("fixup", resolver.objfile);
 
       if (fixup.minsym && fixup.value_address () == pc)
 	return frame_unwind_caller_pc (get_current_frame ());

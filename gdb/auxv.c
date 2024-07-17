@@ -90,7 +90,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   LONGEST retval;
   size_t block;
 
-  bound_minimal_symbol msym = lookup_minimal_symbol ("_dl_auxv", NULL, NULL);
+  bound_minimal_symbol msym = lookup_minimal_symbol ("_dl_auxv");
   if (msym.minsym == NULL)
     return TARGET_XFER_E_IO;
 
