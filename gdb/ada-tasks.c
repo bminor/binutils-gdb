@@ -600,7 +600,7 @@ ada_get_tcb_types_info (void)
 
   /* Check for the CPU offset.  */
   bound_minimal_symbol first_id_sym
-    = lookup_bound_minimal_symbol ("__gnat_gdb_cpu_first_id");
+    = lookup_minimal_symbol ("__gnat_gdb_cpu_first_id");
   unsigned int first_id = 0;
   if (first_id_sym.minsym != nullptr)
     {

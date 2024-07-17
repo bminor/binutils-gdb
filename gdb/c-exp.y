@@ -1210,7 +1210,7 @@ variable:	name_not_typename
 			      std::string arg = copy_name ($1.stoken);
 
 			      bound_minimal_symbol msymbol
-				= lookup_bound_minimal_symbol (arg.c_str ());
+				= lookup_minimal_symbol (arg.c_str ());
 			      if (msymbol.minsym == NULL)
 				{
 				  if (!have_full_symbols (current_program_space)

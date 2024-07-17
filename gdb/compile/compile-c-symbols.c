@@ -410,7 +410,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	}
       else
 	{
-	  bound_minimal_symbol msym = lookup_bound_minimal_symbol (identifier);
+	  bound_minimal_symbol msym = lookup_minimal_symbol (identifier);
 	  if (msym.minsym != NULL)
 	    {
 	      if (compile_debug)

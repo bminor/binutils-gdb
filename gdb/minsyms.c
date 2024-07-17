@@ -473,14 +473,6 @@ lookup_minimal_symbol (const char *name, objfile *objf, const char *sfile)
   return {};
 }
 
-/* See minsyms.h.  */
-
-bound_minimal_symbol
-lookup_bound_minimal_symbol (const char *name)
-{
-  return lookup_minimal_symbol (name);
-}
-
 /* See gdbsupport/symbol.h.  */
 
 int

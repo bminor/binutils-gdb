@@ -3442,8 +3442,7 @@ simple_read_overlay_table (void)
       return 0;
     }
 
-  bound_minimal_symbol ovly_table_msym
-    = lookup_bound_minimal_symbol ("_ovly_table");
+  bound_minimal_symbol ovly_table_msym = lookup_minimal_symbol ("_ovly_table");
   if (! ovly_table_msym.minsym)
     {
       error (_("Error reading inferior's overlay table: couldn't find "

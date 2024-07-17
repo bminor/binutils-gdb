@@ -1241,11 +1241,10 @@ find_objc_msgsend (void)
   for (i = 0; i < nmethcalls; i++)
     {
       /* Try both with and without underscore.  */
-      bound_minimal_symbol func
-	= lookup_bound_minimal_symbol (methcalls[i].name);
+      bound_minimal_symbol func = lookup_minimal_symbol (methcalls[i].name);
       if ((func.minsym == NULL) && (methcalls[i].name[0] == '_'))
 	{
-	  func = lookup_bound_minimal_symbol (methcalls[i].name + 1);
+	  func = lookup_minimal_symbol (methcalls[i].name + 1);
 	}
       if (func.minsym == NULL)
 	{ 

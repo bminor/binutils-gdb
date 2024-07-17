@@ -908,7 +908,7 @@ z80_read_overlay_region_table ()
     }
 
   bound_minimal_symbol ovly_region_table_msym
-    = lookup_bound_minimal_symbol ("_ovly_region_table");
+    = lookup_minimal_symbol ("_ovly_region_table");
   if (! ovly_region_table_msym.minsym)
     {
       error (_("Error reading inferior's overlay table: couldn't find "

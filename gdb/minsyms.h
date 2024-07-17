@@ -209,11 +209,6 @@ bound_minimal_symbol lookup_minimal_symbol (const char *name,
 					    objfile *obj = nullptr,
 					    const char *sfile = nullptr);
 
-/* Like lookup_minimal_symbol, but searches all files and
-   objfiles.  */
-
-bound_minimal_symbol lookup_bound_minimal_symbol (const char *);
-
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and has text type.  If OBJF
    is non-NULL, limit the search to that objfile.  Returns a bound

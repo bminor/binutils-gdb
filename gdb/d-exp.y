@@ -464,7 +464,7 @@ PrimaryExpression:
 		    {
 		      /* Lookup foreign name in global static symbols.  */
 		      bound_minimal_symbol msymbol
-			= lookup_bound_minimal_symbol (copy.c_str ());
+			= lookup_minimal_symbol (copy.c_str ());
 		      if (msymbol.minsym != NULL)
 			pstate->push_new<var_msym_value_operation> (msymbol);
 		      else if (!have_full_symbols (current_program_space)

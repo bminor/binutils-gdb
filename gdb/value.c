@@ -3176,7 +3176,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 		       nullptr).symbol;
   if (sym == nullptr)
     {
-      msym = lookup_bound_minimal_symbol (physname);
+      msym = lookup_minimal_symbol (physname);
       if (msym.minsym == NULL)
 	return NULL;
     }

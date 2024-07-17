@@ -145,7 +145,7 @@ parser_state::push_symbol (const char *name, block_symbol sym)
     }
   else
     {
-      bound_minimal_symbol msymbol = lookup_bound_minimal_symbol (name);
+      bound_minimal_symbol msymbol = lookup_minimal_symbol (name);
       if (msymbol.minsym != NULL)
 	push_new<expr::var_msym_value_operation> (msymbol);
       else if (!have_full_symbols (current_program_space)
@@ -231,7 +231,7 @@ parser_state::push_dollar (struct stoken str)
       push_new<expr::var_value_operation> (sym);
       return;
     }
-  bound_minimal_symbol msym = lookup_bound_minimal_symbol (copy.c_str ());
+  bound_minimal_symbol msym = lookup_minimal_symbol (copy.c_str ());
   if (msym.minsym)
     {
       push_new<expr::var_msym_value_operation> (msym);

@@ -1600,7 +1600,7 @@ info_address_command (const char *exp, int from_tty)
 	  return;
 	}
 
-      bound_minimal_symbol msymbol = lookup_bound_minimal_symbol (exp);
+      bound_minimal_symbol msymbol = lookup_minimal_symbol (exp);
 
       if (msymbol.minsym != NULL)
 	{
@@ -1753,7 +1753,7 @@ info_address_command (const char *exp, int from_tty)
     case LOC_UNRESOLVED:
       {
 	bound_minimal_symbol msym
-	  = lookup_bound_minimal_symbol (sym->linkage_name ());
+	  = lookup_minimal_symbol (sym->linkage_name ());
 	if (msym.minsym == NULL)
 	  gdb_printf ("unresolved");
 	else
