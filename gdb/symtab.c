@@ -3174,7 +3174,9 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
     if (msymbol.minsym->type () == mst_solib_trampoline)
       {
 	bound_minimal_symbol mfunsym
-	  = lookup_minimal_symbol_text (msymbol.minsym->linkage_name (), NULL);
+	  = lookup_minimal_symbol_text (section->objfile->pspace (),
+					msymbol.minsym->linkage_name (),
+					nullptr);
 
 	if (mfunsym.minsym == NULL)
 	  /* I eliminated this warning since it is coming out

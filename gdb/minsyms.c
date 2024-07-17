@@ -607,7 +607,8 @@ lookup_minimal_symbol_linkage (program_space *pspace, const char *name,
 /* See minsyms.h.  */
 
 bound_minimal_symbol
-lookup_minimal_symbol_text (const char *name, struct objfile *objf)
+lookup_minimal_symbol_text (program_space *pspace, const char *name,
+			    objfile *objf)
 {
   struct minimal_symbol *msymbol;
   bound_minimal_symbol found_symbol;
@@ -643,7 +644,7 @@ lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 
   if (objf == nullptr)
     {
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile *objfile : pspace->objfiles ())
 	{
 	  if (found_symbol.minsym != NULL)
 	    break;

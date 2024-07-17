@@ -3571,7 +3571,8 @@ create_overlay_event_breakpoint (void)
       if (bp_objfile_data->overlay_msym.minsym == NULL)
 	{
 	  bound_minimal_symbol m
-	    = lookup_minimal_symbol_text (func_name, objfile);
+	    = lookup_minimal_symbol_text (current_program_space, func_name,
+					  objfile);
 	  if (m.minsym == NULL)
 	    {
 	      /* Avoid future lookups in this objfile.  */
@@ -3675,7 +3676,8 @@ create_longjmp_master_breakpoint_names (objfile *objfile)
       if (bp_objfile_data->longjmp_msym[i].minsym == NULL)
 	{
 	  bound_minimal_symbol m
-	    = lookup_minimal_symbol_text (func_name, objfile);
+	    = lookup_minimal_symbol_text (objfile->pspace (), func_name,
+					  objfile);
 	  if (m.minsym == NULL)
 	    {
 	      /* Prevent future lookups in this objfile.  */
@@ -3845,7 +3847,7 @@ create_exception_master_breakpoint_hook (objfile *objfile)
   if (bp_objfile_data->exception_msym.minsym == NULL)
     {
       bound_minimal_symbol debug_hook
-	= lookup_minimal_symbol_text (func_name, objfile);
+	= lookup_minimal_symbol_text (objfile->pspace (), func_name, objfile);
       if (debug_hook.minsym == NULL)
 	{
 	  bp_objfile_data->exception_msym.minsym = &msym_not_found;

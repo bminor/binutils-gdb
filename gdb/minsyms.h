@@ -211,7 +211,7 @@ bound_minimal_symbol lookup_minimal_symbol (program_space *pspace,
 					    objfile *obj = nullptr,
 					    const char *sfile = nullptr);
 
-/* Look through all the current minimal symbol tables and find the
+/* Look through all the minimal symbol tables in PSPACE and find the
    first minimal symbol that matches NAME and has text type.  If OBJF
    is non-NULL, limit the search to that objfile.  Returns a bound
    minimal symbol that matches, or an "empty" bound minimal symbol
@@ -219,8 +219,9 @@ bound_minimal_symbol lookup_minimal_symbol (program_space *pspace,
 
    This function only searches the mangled (linkage) names.  */
 
-bound_minimal_symbol lookup_minimal_symbol_text (const char *,
-						 struct objfile *);
+bound_minimal_symbol lookup_minimal_symbol_text (program_space *pspace,
+						 const char *name,
+						 objfile *objf);
 
 /* Look through the minimal symbols in OBJF (and its separate debug
    objfiles) for a global (not file-local) minsym whose linkage name
