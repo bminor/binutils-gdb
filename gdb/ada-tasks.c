@@ -600,7 +600,7 @@ ada_get_tcb_types_info (void)
 
   /* Check for the CPU offset.  */
   bound_minimal_symbol first_id_sym
-    = lookup_minimal_symbol ("__gnat_gdb_cpu_first_id");
+    = lookup_minimal_symbol (current_program_space, "__gnat_gdb_cpu_first_id");
   unsigned int first_id = 0;
   if (first_id_sym.minsym != nullptr)
     {
@@ -920,7 +920,8 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 
   /* Try array.  */
 
-  bound_minimal_symbol msym = lookup_minimal_symbol (KNOWN_TASKS_NAME);
+  bound_minimal_symbol msym
+    = lookup_minimal_symbol (current_program_space, KNOWN_TASKS_NAME);
   if (msym.minsym != NULL)
     {
       data->known_tasks_kind = ADA_TASKS_ARRAY;
@@ -967,7 +968,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 
   /* Try list.  */
 
-  msym = lookup_minimal_symbol (KNOWN_TASKS_LIST);
+  msym = lookup_minimal_symbol (current_program_space, KNOWN_TASKS_LIST);
   if (msym.minsym != NULL)
     {
       data->known_tasks_kind = ADA_TASKS_LIST;

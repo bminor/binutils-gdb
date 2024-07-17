@@ -403,7 +403,7 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
       if (addr == 0)
 	{
 	  bound_minimal_symbol main_symbol
-	    = lookup_minimal_symbol (main_name ());
+	    = lookup_minimal_symbol (current_program_space, main_name ());
 	  if (main_symbol.minsym != nullptr)
 	    addr = main_symbol.value_address ();
 	}

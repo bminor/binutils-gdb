@@ -157,7 +157,8 @@ static int bsd_uthread_active;
 static CORE_ADDR
 bsd_uthread_lookup_address (const char *name, struct objfile *objfile)
 {
-  bound_minimal_symbol sym = lookup_minimal_symbol (name, objfile);
+  bound_minimal_symbol sym
+    = lookup_minimal_symbol (current_program_space, name, objfile);
   if (sym.minsym)
     return sym.value_address ();
 

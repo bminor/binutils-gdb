@@ -194,7 +194,8 @@ hppa_extract_17 (unsigned word)
 CORE_ADDR 
 hppa_symbol_address(const char *sym)
 {
-  bound_minimal_symbol minsym = lookup_minimal_symbol (sym);
+  bound_minimal_symbol minsym
+    = lookup_minimal_symbol (current_program_space, sym);
   if (minsym.minsym)
     return minsym.value_address ();
   else

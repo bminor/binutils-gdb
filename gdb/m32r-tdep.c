@@ -806,7 +806,8 @@ m32r_frame_this_id (const frame_info_ptr &this_frame,
   func = get_frame_func (this_frame);
 
   /* Check if the stack is empty.  */
-  bound_minimal_symbol msym_stack = lookup_minimal_symbol ("_stack");
+  bound_minimal_symbol msym_stack
+    = lookup_minimal_symbol (current_program_space, "_stack");
   if (msym_stack.minsym && info->base == msym_stack.value_address ())
     return;
 

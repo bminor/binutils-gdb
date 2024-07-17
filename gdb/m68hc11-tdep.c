@@ -210,7 +210,8 @@ static int soft_reg_initialized = 0;
 static void
 m68hc11_get_register_info (struct m68hc11_soft_reg *reg, const char *name)
 {
-  bound_minimal_symbol msymbol = lookup_minimal_symbol (name);
+  bound_minimal_symbol msymbol
+    = lookup_minimal_symbol (current_program_space, name);
   if (msymbol.minsym)
     {
       reg->addr = msymbol.value_address ();

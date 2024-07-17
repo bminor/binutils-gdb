@@ -451,7 +451,7 @@ lm_base (void)
     return info->lm_base_cache;
 
   bound_minimal_symbol got_sym
-    = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_",
+    = lookup_minimal_symbol (current_program_space, "_GLOBAL_OFFSET_TABLE_",
 			     current_program_space->symfile_object_file);
 
   if (got_sym.minsym != 0)

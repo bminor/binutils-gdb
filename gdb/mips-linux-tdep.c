@@ -700,7 +700,7 @@ static CORE_ADDR
 mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   bound_minimal_symbol resolver
-    = lookup_minimal_symbol ("__dl_runtime_resolve");
+    = lookup_minimal_symbol (current_program_space, "__dl_runtime_resolve");
 
   if (resolver.minsym && resolver.value_address () == pc)
     return frame_unwind_caller_pc (get_current_frame ());

@@ -3752,7 +3752,8 @@ create_std_terminate_master_breakpoint (void)
 	  if (bp_objfile_data->terminate_msym.minsym == NULL)
 	    {
 	      bound_minimal_symbol m
-		= lookup_minimal_symbol (func_name, objfile);
+		= lookup_minimal_symbol (current_program_space, func_name,
+					 objfile);
 	      if (m.minsym == NULL || (m.minsym->type () != mst_text
 				       && m.minsym->type () != mst_file_text))
 		{

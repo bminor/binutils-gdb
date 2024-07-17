@@ -129,7 +129,8 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
     }
   else
     {
-      bound_minimal_symbol msymbol = lookup_minimal_symbol (name);
+      bound_minimal_symbol msymbol
+	= lookup_minimal_symbol (current_program_space, name);
 
       if (msymbol.minsym != NULL)
 	{

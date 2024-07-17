@@ -120,9 +120,11 @@ lookup_objc_class (struct gdbarch *gdbarch, const char *classname)
       return 0;
     }
 
-  if (lookup_minimal_symbol ("objc_lookUpClass").minsym != nullptr)
+  if (lookup_minimal_symbol (current_program_space,
+			     "objc_lookUpClass").minsym != nullptr)
     function = find_function_in_inferior("objc_lookUpClass", NULL);
-  else if (lookup_minimal_symbol ("objc_lookup_class").minsym != nullptr)
+  else if (lookup_minimal_symbol (current_program_space,
+				  "objc_lookup_class").minsym != nullptr)
     function = find_function_in_inferior("objc_lookup_class", NULL);
   else
     {
@@ -149,9 +151,11 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
       return 0;
     }
 
-  if (lookup_minimal_symbol ("sel_getUid").minsym != nullptr)
+  if (lookup_minimal_symbol (current_program_space, "sel_getUid").minsym
+      != nullptr)
     function = find_function_in_inferior("sel_getUid", NULL);
-  else if (lookup_minimal_symbol ("sel_get_any_uid").minsym != nullptr)
+  else if (lookup_minimal_symbol (current_program_space,
+				  "sel_get_any_uid").minsym != nullptr)
     function = find_function_in_inferior("sel_get_any_uid", NULL);
   else
     {
@@ -180,17 +184,20 @@ value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
   stringValue[2] = value_string(ptr, len, char_type);
   stringValue[2] = value_coerce_array(stringValue[2]);
   /* _NSNewStringFromCString replaces "istr" after Lantern2A.  */
-  if (lookup_minimal_symbol ("_NSNewStringFromCString").minsym != nullptr)
+  if (lookup_minimal_symbol (current_program_space,
+			     "_NSNewStringFromCString").minsym != nullptr)
     {
       function = find_function_in_inferior("_NSNewStringFromCString", NULL);
       nsstringValue = call_function_by_hand(function, NULL, stringValue[2]);
     }
-  else if (lookup_minimal_symbol ("istr").minsym != nullptr)
+  else if (lookup_minimal_symbol (current_program_space,
+				  "istr").minsym != nullptr)
     {
       function = find_function_in_inferior("istr", NULL);
       nsstringValue = call_function_by_hand(function, NULL, stringValue[2]);
     }
-  else if (lookup_minimal_symbol ("+[NSString stringWithCString:]").minsym
+  else if (lookup_minimal_symbol (current_program_space,
+				  "+[NSString stringWithCString:]").minsym
 	   != nullptr)
     {
       function
@@ -1138,7 +1145,8 @@ find_imps (const char *method, std::vector<const char *> *symbol_names)
 	symbol_names->push_back (sym->natural_name ());
       else
 	{
-	  bound_minimal_symbol msym = lookup_minimal_symbol (selector);
+	  bound_minimal_symbol msym
+	    = lookup_minimal_symbol (current_program_space, selector);
 
 	  if (msym.minsym != NULL) 
 	    symbol_names->push_back (msym.minsym->natural_name ());
@@ -1241,10 +1249,12 @@ find_objc_msgsend (void)
   for (i = 0; i < nmethcalls; i++)
     {
       /* Try both with and without underscore.  */
-      bound_minimal_symbol func = lookup_minimal_symbol (methcalls[i].name);
+      bound_minimal_symbol func
+	= lookup_minimal_symbol (current_program_space, methcalls[i].name);
       if ((func.minsym == NULL) && (methcalls[i].name[0] == '_'))
 	{
-	  func = lookup_minimal_symbol (methcalls[i].name + 1);
+	  func = lookup_minimal_symbol (current_program_space,
+					methcalls[i].name + 1);
 	}
       if (func.minsym == NULL)
 	{ 

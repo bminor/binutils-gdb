@@ -579,7 +579,8 @@ coff_read_minsyms (file_ptr symtab_offset, unsigned int nsyms,
 		    name1 += 1;
 
 		  bound_minimal_symbol found
-		    = lookup_minimal_symbol (name1, objfile);
+		    = lookup_minimal_symbol (current_program_space, name1,
+					     objfile);
 
 		  /* If found, there are symbols named "_imp_foo" and "foo"
 		     respectively in OBJFILE.  Set the type of symbol "foo"

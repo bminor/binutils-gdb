@@ -710,7 +710,8 @@ call_site_target::iterate_over_addresses (gdbarch *call_site_gdbarch,
 	physname = m_loc.physname;
 
 	/* Handle both the mangled and demangled PHYSNAME.  */
-	bound_minimal_symbol msym = lookup_minimal_symbol (physname);
+	bound_minimal_symbol msym
+	  = lookup_minimal_symbol (current_program_space, physname);
 	if (msym.minsym == NULL)
 	  {
 	    msym = lookup_minimal_symbol_by_pc (call_site->pc () - 1);

@@ -9388,7 +9388,8 @@ arm_skip_cmse_entry (CORE_ADDR pc, const char *name, struct objfile *objfile)
   char *target_name = (char *) alloca (target_len);
   xsnprintf (target_name, target_len, "%s%s", "__acle_se_", name);
 
-  bound_minimal_symbol minsym = lookup_minimal_symbol (target_name, objfile);
+  bound_minimal_symbol minsym
+    = lookup_minimal_symbol (current_program_space, target_name, objfile);
   if (minsym.minsym != nullptr)
     return minsym.value_address ();
 
@@ -9477,7 +9478,7 @@ arm_skip_stub (const frame_info_ptr &frame, CORE_ADDR pc)
       sec = find_pc_section (pc);
       objfile = (sec == NULL) ? NULL : sec->objfile;
       bound_minimal_symbol minsym
-	= lookup_minimal_symbol (target_name, objfile);
+	= lookup_minimal_symbol (current_program_space, target_name, objfile);
       if (minsym.minsym != NULL)
 	return minsym.value_address ();
       else

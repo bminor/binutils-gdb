@@ -53,17 +53,19 @@ glibc_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
      debugging programs that use shared libraries.  */
 
   bound_minimal_symbol resolver
-    = lookup_minimal_symbol ("_dl_runtime_resolve");
+    = lookup_minimal_symbol (current_program_space, "_dl_runtime_resolve");
 
   if (resolver.minsym)
     {
       /* The dynamic linker began using this name in early 2005.  */
       bound_minimal_symbol fixup
-	= lookup_minimal_symbol ("_dl_fixup", resolver.objfile);
+	= lookup_minimal_symbol (current_program_space, "_dl_fixup",
+				 resolver.objfile);
 
       /* This is the name used in older versions.  */
       if (! fixup.minsym)
-	fixup = lookup_minimal_symbol ("fixup", resolver.objfile);
+	fixup = lookup_minimal_symbol (current_program_space, "fixup",
+				       resolver.objfile);
 
       if (fixup.minsym && fixup.value_address () == pc)
 	return frame_unwind_caller_pc (get_current_frame ());

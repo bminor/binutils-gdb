@@ -844,7 +844,8 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
 	 gdb_byte *buf = (gdb_byte *) alloca (ptr_size);
 
 	 bound_minimal_symbol msym
-	   = lookup_minimal_symbol (name_got_plt, objfile);
+	   = lookup_minimal_symbol (current_program_space, name_got_plt,
+				    objfile);
 	 if (msym.minsym == NULL)
 	   return 0;
 	 if (msym.minsym->type () != mst_slot_got_plt)

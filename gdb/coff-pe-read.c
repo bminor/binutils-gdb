@@ -183,14 +183,16 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
 						      forward_func_name);
 
   bound_minimal_symbol msymbol
-    = lookup_minimal_symbol (forward_qualified_name.c_str ());
+    = lookup_minimal_symbol (current_program_space,
+			     forward_qualified_name.c_str ());
   if (!msymbol.minsym)
     {
       int i;
 
       for (i = 0; i < forward_dll_name_len; i++)
 	forward_qualified_name[i] = tolower (forward_qualified_name[i]);
-      msymbol = lookup_minimal_symbol (forward_qualified_name.c_str ());
+      msymbol = lookup_minimal_symbol (current_program_space,
+				       forward_qualified_name.c_str ());
     }
 
   if (!msymbol.minsym)

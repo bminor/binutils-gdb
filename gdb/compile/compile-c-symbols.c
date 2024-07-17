@@ -355,7 +355,8 @@ gcc_convert_symbol (void *datum,
 	}
       else if (request == GCC_C_ORACLE_SYMBOL)
 	{
-	  bound_minimal_symbol bmsym = lookup_minimal_symbol (identifier);
+	  bound_minimal_symbol bmsym
+	    = lookup_minimal_symbol (current_program_space, identifier);
 	  if (bmsym.minsym != NULL)
 	    {
 	      convert_symbol_bmsym (context, bmsym);
@@ -410,7 +411,8 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	}
       else
 	{
-	  bound_minimal_symbol msym = lookup_minimal_symbol (identifier);
+	  bound_minimal_symbol msym
+	    = lookup_minimal_symbol (current_program_space, identifier);
 	  if (msym.minsym != NULL)
 	    {
 	      if (compile_debug)

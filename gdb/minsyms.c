@@ -359,7 +359,8 @@ lookup_minimal_symbol_demangled (const lookup_name_info &lookup_name,
    but the demangled names are all the same: S::S or S::~S.  */
 
 bound_minimal_symbol
-lookup_minimal_symbol (const char *name, objfile *objf, const char *sfile)
+lookup_minimal_symbol (program_space *pspace, const char *name, objfile *objf,
+		       const char *sfile)
 {
   found_minimal_symbols found;
 
@@ -375,7 +376,7 @@ lookup_minimal_symbol (const char *name, objfile *objf, const char *sfile)
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile *objfile : pspace->objfiles ())
     {
       if (found.external_symbol.minsym != NULL)
 	break;
@@ -383,7 +384,8 @@ lookup_minimal_symbol (const char *name, objfile *objf, const char *sfile)
       if (objf == NULL || objf == objfile
 	  || objf == objfile->separate_debug_objfile_backlink)
 	{
-	  symbol_lookup_debug_printf ("lookup_minimal_symbol (%s, %s, %s)",
+	  symbol_lookup_debug_printf ("lookup_minimal_symbol (%s, %s, %s, %s)",
+				      host_address_to_string (pspace),
 				      name, sfile != NULL ? sfile : "NULL",
 				      objfile_debug_name (objfile));
 
@@ -479,7 +481,8 @@ int
 find_minimal_symbol_address (const char *name, CORE_ADDR *addr,
 			     struct objfile *objfile)
 {
-  bound_minimal_symbol sym = lookup_minimal_symbol (name, objfile);
+  bound_minimal_symbol sym
+    = lookup_minimal_symbol (current_program_space, name, objfile);
   if (sym.minsym != NULL)
     *addr = sym.value_address ();
 

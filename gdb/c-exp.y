@@ -1210,7 +1210,7 @@ variable:	name_not_typename
 			      std::string arg = copy_name ($1.stoken);
 
 			      bound_minimal_symbol msymbol
-				= lookup_minimal_symbol (arg.c_str ());
+				= lookup_minimal_symbol (current_program_space, arg.c_str ());
 			      if (msymbol.minsym == NULL)
 				{
 				  if (!have_full_symbols (current_program_space)
@@ -3150,7 +3150,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
   if (bsym.symbol == NULL
       && par_state->language ()->la_language == language_cplus
       && is_a_field_of_this.type == NULL
-      && lookup_minimal_symbol (copy.c_str ()).minsym == nullptr)
+      && lookup_minimal_symbol (current_program_space, copy.c_str ()).minsym == nullptr)
     return UNKNOWN_CPP_NAME;
 
   return NAME;

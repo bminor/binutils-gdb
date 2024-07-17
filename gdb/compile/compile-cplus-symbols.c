@@ -453,7 +453,8 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 	}
       else
 	{
-	  bound_minimal_symbol msym = lookup_minimal_symbol (identifier);
+	  bound_minimal_symbol msym
+	    = lookup_minimal_symbol (current_program_space, identifier);
 	  if (msym.minsym != nullptr)
 	    {
 	      if (compile_debug)

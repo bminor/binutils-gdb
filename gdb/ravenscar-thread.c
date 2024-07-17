@@ -329,13 +329,14 @@ ravenscar_thread_target::add_active_thread ()
 static bound_minimal_symbol
 get_running_thread_msymbol ()
 {
-  bound_minimal_symbol msym = lookup_minimal_symbol (running_thread_name);
+  bound_minimal_symbol msym
+    = lookup_minimal_symbol (current_program_space, running_thread_name);
   if (!msym.minsym)
     /* Older versions of the GNAT runtime were using a different
        (less ideal) name for the symbol where the active thread ID
        is stored.  If we couldn't find the symbol using the latest
        name, then try the old one.  */
-    msym = lookup_minimal_symbol ("running_thread");
+    msym = lookup_minimal_symbol (current_program_space, "running_thread");
 
   return msym;
 }
@@ -347,11 +348,12 @@ static bool
 has_ravenscar_runtime ()
 {
   bound_minimal_symbol msym_ravenscar_runtime_initializer
-    = lookup_minimal_symbol (ravenscar_runtime_initializer);
+    = lookup_minimal_symbol (current_program_space,
+			     ravenscar_runtime_initializer);
   bound_minimal_symbol msym_known_tasks
-    = lookup_minimal_symbol (known_tasks_name);
+    = lookup_minimal_symbol (current_program_space, known_tasks_name);
   bound_minimal_symbol msym_first_task
-    = lookup_minimal_symbol (first_task_name);
+    = lookup_minimal_symbol (current_program_space, first_task_name);
   bound_minimal_symbol msym_running_thread = get_running_thread_msymbol ();
 
   return (msym_ravenscar_runtime_initializer.minsym
@@ -639,7 +641,8 @@ ravenscar_thread_target::get_fpu_state (struct regcache *regcache,
     return NOTHING_SPECIAL;
 
   bound_minimal_symbol fpu_context
-    = lookup_minimal_symbol ("system__bb__cpu_primitives__current_fpu_context",
+    = lookup_minimal_symbol (current_program_space,
+			     "system__bb__cpu_primitives__current_fpu_context",
 			     nullptr, nullptr);
   /* If the symbol can't be found, just fall back.  */
   if (fpu_context.minsym == nullptr)

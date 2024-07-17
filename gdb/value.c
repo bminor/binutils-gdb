@@ -2988,7 +2988,8 @@ value_static_field (struct type *type, int fieldno)
 	{
 	  /* With some compilers, e.g. HP aCC, static data members are
 	     reported as non-debuggable symbols.  */
-	  bound_minimal_symbol msym = lookup_minimal_symbol (phys_name);
+	  bound_minimal_symbol msym
+	    = lookup_minimal_symbol (current_program_space, phys_name);
 	  struct type *field_type = type->field (fieldno).type ();
 
 	  if (!msym.minsym)
@@ -3176,7 +3177,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 		       nullptr).symbol;
   if (sym == nullptr)
     {
-      msym = lookup_minimal_symbol (physname);
+      msym = lookup_minimal_symbol (current_program_space, physname);
       if (msym.minsym == NULL)
 	return NULL;
     }

@@ -5508,7 +5508,8 @@ remote_target::remote_check_symbols ()
       end = hex2bin (tmp, reinterpret_cast <gdb_byte *> (msg.data ()),
 		     strlen (tmp) / 2);
       msg[end] = '\0';
-      bound_minimal_symbol sym = lookup_minimal_symbol (msg.data ());
+      bound_minimal_symbol sym
+	= lookup_minimal_symbol (current_program_space, msg.data ());
       if (sym.minsym == NULL)
 	xsnprintf (msg.data (), get_remote_packet_size (), "qSymbol::%s",
 		   &reply[8]);

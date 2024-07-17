@@ -751,7 +751,7 @@ elf_locate_base (void)
   /* This may be a static executable.  Look for the symbol
      conventionally named _r_debug, as a last resort.  */
   bound_minimal_symbol msymbol
-    = lookup_minimal_symbol ("_r_debug",
+    = lookup_minimal_symbol (current_program_space, "_r_debug",
 			     current_program_space->symfile_object_file);
   if (msymbol.minsym != NULL)
     return msymbol.value_address ();
@@ -2481,7 +2481,8 @@ enable_break (struct svr4_info *info, int from_tty)
   objfile *objf = current_program_space->symfile_object_file;
   for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
     {
-      bound_minimal_symbol msymbol = lookup_minimal_symbol (*bkpt_namep, objf);
+      bound_minimal_symbol msymbol
+	= lookup_minimal_symbol (current_program_space, *bkpt_namep, objf);
       if ((msymbol.minsym != NULL)
 	  && (msymbol.value_address () != 0))
 	{
@@ -2501,7 +2502,7 @@ enable_break (struct svr4_info *info, int from_tty)
       for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
 	  bound_minimal_symbol msymbol
-	    = lookup_minimal_symbol (*bkpt_namep, objf);
+	    = lookup_minimal_symbol (current_program_space, *bkpt_namep, objf);
 	  if ((msymbol.minsym != NULL)
 	      && (msymbol.value_address () != 0))
 	    {

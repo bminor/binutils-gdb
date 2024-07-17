@@ -1943,7 +1943,8 @@ fbsd_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
 static LONGEST
 fbsd_read_integer_by_name (struct gdbarch *gdbarch, const char *name)
 {
-  bound_minimal_symbol ms = lookup_minimal_symbol (name);
+  bound_minimal_symbol ms
+    = lookup_minimal_symbol (current_program_space, name);
   if (ms.minsym == NULL)
     error (_("Unable to resolve symbol '%s'"), name);
 
@@ -2059,7 +2060,8 @@ fbsd_get_thread_local_address (struct gdbarch *gdbarch, CORE_ADDR dtv_addr,
 CORE_ADDR
 fbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  bound_minimal_symbol msym = lookup_minimal_symbol ("_rtld_bind");
+  bound_minimal_symbol msym
+    = lookup_minimal_symbol (current_program_space, "_rtld_bind");
   if (msym.minsym != nullptr && msym.value_address () == pc)
     return frame_unwind_caller_pc (get_current_frame ());
 

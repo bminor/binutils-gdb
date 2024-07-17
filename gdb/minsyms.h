@@ -20,6 +20,7 @@
 #ifndef MINSYMS_H
 #define MINSYMS_H
 
+struct program_space;
 struct type;
 
 /* Several lookup functions return both a minimal symbol and the
@@ -205,7 +206,8 @@ unsigned int msymbol_hash_iw (const char *);
    symbols are still preferred).  Returns a bound minimal symbol that
    matches, or an empty bound minimal symbol if no match is found.  */
 
-bound_minimal_symbol lookup_minimal_symbol (const char *name,
+bound_minimal_symbol lookup_minimal_symbol (program_space *pspace,
+					    const char *name,
 					    objfile *obj = nullptr,
 					    const char *sfile = nullptr);
 
