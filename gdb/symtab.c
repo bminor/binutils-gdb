@@ -6775,10 +6775,12 @@ symbol::get_maybe_copied_address () const
   gdb_assert (this->aclass () == LOC_STATIC);
 
   const char *linkage_name = this->linkage_name ();
-  bound_minimal_symbol minsym = lookup_minimal_symbol_linkage (linkage_name,
-							       false);
+  bound_minimal_symbol minsym
+    = lookup_minimal_symbol_linkage (this->objfile ()->pspace (), linkage_name,
+				     false);
   if (minsym.minsym != nullptr)
     return minsym.value_address ();
+
   return this->m_value.address;
 }
 
@@ -6791,10 +6793,11 @@ minimal_symbol::get_maybe_copied_address (objfile *objf) const
   gdb_assert ((objf->flags & OBJF_MAINLINE) == 0);
 
   const char *linkage_name = this->linkage_name ();
-  bound_minimal_symbol found = lookup_minimal_symbol_linkage (linkage_name,
-							      true);
+  bound_minimal_symbol found
+    = lookup_minimal_symbol_linkage (objf->pspace (), linkage_name, true);
   if (found.minsym != nullptr)
     return found.value_address ();
+
   return (this->m_value.address
 	  + objf->section_offsets[this->section_index ()]);
 }

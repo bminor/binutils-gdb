@@ -584,9 +584,10 @@ lookup_minimal_symbol_linkage (const char *name, struct objfile *objf)
 /* See minsyms.h.  */
 
 bound_minimal_symbol
-lookup_minimal_symbol_linkage (const char *name, bool only_main)
+lookup_minimal_symbol_linkage (program_space *pspace, const char *name,
+			       bool only_main)
 {
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile *objfile : pspace->objfiles ())
     {
       if (objfile->separate_debug_objfile_backlink != nullptr)
 	continue;

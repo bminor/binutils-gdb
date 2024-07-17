@@ -234,11 +234,11 @@ extern bound_minimal_symbol lookup_minimal_symbol_linkage (const char *name,
   ATTRIBUTE_NONNULL (1) ATTRIBUTE_NONNULL (2);
 
 /* A variant of lookup_minimal_symbol_linkage that iterates over all
-   objfiles.  If ONLY_MAIN is true, then only an objfile with
+   objfiles of PSPACE.  If ONLY_MAIN is true, then only an objfile with
    OBJF_MAINLINE will be considered.  */
 
-extern bound_minimal_symbol lookup_minimal_symbol_linkage (const char *name,
-							   bool only_main)
+extern bound_minimal_symbol lookup_minimal_symbol_linkage
+  (program_space *pspace, const char *name, bool only_main)
   ATTRIBUTE_NONNULL (1);
 
 /* Look through all the current minimal symbol tables and find the
