@@ -435,11 +435,10 @@ amd64_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       if (target_read_memory (pc + 1, buf, sizeof buf) == 0)
 	{
-	  struct bound_minimal_symbol s;
 	  CORE_ADDR call_dest;
 
 	  call_dest = pc + 5 + extract_signed_integer (buf, 4, byte_order);
-	  s = lookup_minimal_symbol_by_pc (call_dest);
+	  bound_minimal_symbol s = lookup_minimal_symbol_by_pc (call_dest);
 	  if (s.minsym != NULL
 	      && s.minsym->linkage_name () != NULL
 	      && strcmp (s.minsym->linkage_name (), "__main") == 0)

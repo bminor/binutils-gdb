@@ -390,13 +390,13 @@ static CORE_ADDR
 macho_resolve_oso_sym_with_minsym (struct objfile *main_objfile, asymbol *sym)
 {
   /* For common symbol and global symbols, use the min symtab.  */
-  struct bound_minimal_symbol msym;
   const char *name = sym->name;
 
   if (*name != '\0'
       && *name == bfd_get_symbol_leading_char (main_objfile->obfd.get ()))
     ++name;
-  msym = lookup_minimal_symbol (name, NULL, main_objfile);
+
+  bound_minimal_symbol msym = lookup_minimal_symbol (name, NULL, main_objfile);
   if (msym.minsym == NULL)
     {
       warning (_("can't find symbol '%s' in minsymtab"), name);

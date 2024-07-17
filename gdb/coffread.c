@@ -574,12 +574,12 @@ coff_read_minsyms (file_ptr symtab_offset, unsigned int nsyms,
 		{
 		  int lead
 		    = bfd_get_symbol_leading_char (objfile->obfd.get ());
-		  struct bound_minimal_symbol found;
 
 		  if (lead != '\0' && *name1 == lead)
 		    name1 += 1;
 
-		  found = lookup_minimal_symbol (name1, NULL, objfile);
+		  bound_minimal_symbol found
+		    = lookup_minimal_symbol (name1, NULL, objfile);
 
 		  /* If found, there are symbols named "_imp_foo" and "foo"
 		     respectively in OBJFILE.  Set the type of symbol "foo"

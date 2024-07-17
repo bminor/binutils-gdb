@@ -399,7 +399,7 @@ objfile::expand_symtabs_matching
 }
 
 struct compunit_symtab *
-objfile::find_pc_sect_compunit_symtab (struct bound_minimal_symbol msymbol,
+objfile::find_pc_sect_compunit_symtab (bound_minimal_symbol msymbol,
 				       CORE_ADDR pc,
 				       struct obj_section *section,
 				       int warn_if_readin)

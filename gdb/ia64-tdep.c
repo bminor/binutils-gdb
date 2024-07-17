@@ -3615,9 +3615,7 @@ ia64_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
   /* There are also descriptors embedded in vtables.  */
   if (s)
     {
-      struct bound_minimal_symbol minsym;
-
-      minsym = lookup_minimal_symbol_by_pc (addr);
+      bound_minimal_symbol minsym = lookup_minimal_symbol_by_pc (addr);
 
       if (minsym.minsym
 	  && is_vtable_name (minsym.minsym->linkage_name ()))

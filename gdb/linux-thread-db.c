@@ -467,11 +467,11 @@ verbose_dlsym (void *handle, const char *name)
 static int
 inferior_has_bug (const char *ver_symbol, int ver_major_min, int ver_minor_min)
 {
-  struct bound_minimal_symbol version_msym;
   CORE_ADDR version_addr;
   int got, retval = 0;
 
-  version_msym = lookup_minimal_symbol (ver_symbol, NULL, NULL);
+  bound_minimal_symbol version_msym
+    = lookup_minimal_symbol (ver_symbol, NULL, NULL);
   if (version_msym.minsym == NULL)
     return 0;
 

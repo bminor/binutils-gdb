@@ -798,7 +798,6 @@ ada_get_decoded_type (struct type *type)
 const char *
 ada_main_name ()
 {
-  struct bound_minimal_symbol msym;
   static gdb::unique_xmalloc_ptr<char> main_program_name;
 
   /* For Ada, the name of the main procedure is stored in a specific
@@ -806,7 +805,8 @@ ada_main_name ()
      extract its address, and then read that string.  If we didn't find
      that string, then most probably the main procedure is not written
      in Ada.  */
-  msym = lookup_minimal_symbol (ADA_MAIN_PROGRAM_SYMBOL_NAME, NULL, NULL);
+  bound_minimal_symbol msym
+    = lookup_minimal_symbol (ADA_MAIN_PROGRAM_SYMBOL_NAME, NULL, NULL);
 
   if (msym.minsym != NULL)
     {
@@ -4921,10 +4921,10 @@ add_defn_to_vec (std::vector<struct block_symbol> &result,
    specially: "standard__" is first stripped off, and only static and
    global symbols are searched.  */
 
-struct bound_minimal_symbol
+bound_minimal_symbol
 ada_lookup_simple_minsym (const char *name, struct objfile *objfile)
 {
-  struct bound_minimal_symbol result;
+  bound_minimal_symbol result;
 
   symbol_name_match_type match_type = name_match_type_from_name (name);
   lookup_name_info lookup_name (name, match_type);
@@ -11695,7 +11695,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
 	 the name of the exception being raised (this name is printed in
 	 the catchpoint message, and is also used when trying to catch
 	 a specific exception).  We do not handle this case for now.  */
-      struct bound_minimal_symbol msym
+      bound_minimal_symbol msym
 	= lookup_minimal_symbol (einfo->catch_exception_sym, NULL, NULL);
 
       if (msym.minsym && msym.minsym->type () != mst_solib_trampoline)
@@ -11715,7 +11715,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
   sym = standard_lookup (einfo->catch_handlers_sym, NULL, SEARCH_VFT);
   if (sym == NULL)
     {
-      struct bound_minimal_symbol msym
+      bound_minimal_symbol msym
 	= lookup_minimal_symbol (einfo->catch_handlers_sym, NULL, NULL);
 
       if (msym.minsym && msym.minsym->type () != mst_solib_trampoline)

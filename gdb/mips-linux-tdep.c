@@ -699,9 +699,8 @@ mips_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 static CORE_ADDR
 mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct bound_minimal_symbol resolver;
-
-  resolver = lookup_minimal_symbol ("__dl_runtime_resolve", NULL, NULL);
+  bound_minimal_symbol resolver
+    = lookup_minimal_symbol ("__dl_runtime_resolve", NULL, NULL);
 
   if (resolver.minsym && resolver.value_address () == pc)
     return frame_unwind_caller_pc (get_current_frame ());

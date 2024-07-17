@@ -606,7 +606,6 @@ build_address_symbolic (struct gdbarch *gdbarch,
 			int *line,       /* OUT */
 			int *unmapped)   /* OUT */
 {
-  struct bound_minimal_symbol msymbol;
   struct symbol *symbol;
   CORE_ADDR name_location = 0;
   struct obj_section *section = NULL;
@@ -638,7 +637,8 @@ build_address_symbolic (struct gdbarch *gdbarch,
      save some memory, but for many debug format--ELF/DWARF or
      anything/stabs--it would be inconvenient to eliminate those minimal
      symbols anyway).  */
-  msymbol = lookup_minimal_symbol_by_pc_section (addr, section);
+  bound_minimal_symbol msymbol
+    = lookup_minimal_symbol_by_pc_section (addr, section);
   symbol = find_pc_sect_function (addr, section);
 
   if (symbol)
@@ -1575,7 +1575,6 @@ info_address_command (const char *exp, int from_tty)
   struct gdbarch *gdbarch;
   int regno;
   struct symbol *sym;
-  struct bound_minimal_symbol msymbol;
   long val;
   struct obj_section *section;
   CORE_ADDR load_addr, context_pc = 0;
@@ -1601,7 +1600,7 @@ info_address_command (const char *exp, int from_tty)
 	  return;
 	}
 
-      msymbol = lookup_bound_minimal_symbol (exp);
+      bound_minimal_symbol msymbol = lookup_bound_minimal_symbol (exp);
 
       if (msymbol.minsym != NULL)
 	{
@@ -1753,9 +1752,8 @@ info_address_command (const char *exp, int from_tty)
 
     case LOC_UNRESOLVED:
       {
-	struct bound_minimal_symbol msym;
-
-	msym = lookup_bound_minimal_symbol (sym->linkage_name ());
+	bound_minimal_symbol msym
+	  = lookup_bound_minimal_symbol (sym->linkage_name ());
 	if (msym.minsym == NULL)
 	  gdb_printf ("unresolved");
 	else

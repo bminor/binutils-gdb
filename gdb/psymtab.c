@@ -87,7 +87,7 @@ static struct partial_symtab *
 find_pc_sect_psymtab_closer (struct objfile *objfile,
 			     CORE_ADDR pc, struct obj_section *section,
 			     struct partial_symtab *pst,
-			     struct bound_minimal_symbol msymbol)
+			     bound_minimal_symbol msymbol)
 {
   struct partial_symtab *tpst;
   struct partial_symtab *best_pst = pst;
@@ -161,7 +161,7 @@ struct partial_symtab *
 psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 					 CORE_ADDR pc,
 					 struct obj_section *section,
-					 struct bound_minimal_symbol msymbol)
+					 bound_minimal_symbol msymbol)
 {
   for (partial_symtab *pst : partial_symbols (objfile))
     if (pc >= pst->text_low (objfile) && pc < pst->text_high (objfile))
@@ -181,12 +181,11 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
    the definition of quick_symbol_functions in symfile.h.  */
 
 struct compunit_symtab *
-psymbol_functions::find_pc_sect_compunit_symtab
-     (struct objfile *objfile,
-      struct bound_minimal_symbol msymbol,
-      CORE_ADDR pc,
-      struct obj_section *section,
-      int warn_if_readin)
+psymbol_functions::find_pc_sect_compunit_symtab (struct objfile *objfile,
+						 bound_minimal_symbol msymbol,
+						 CORE_ADDR pc,
+						 struct obj_section *section,
+						 int warn_if_readin)
 {
   struct partial_symtab *ps = find_pc_sect_psymtab (objfile,
 						    pc, section,
@@ -1281,7 +1280,7 @@ maintenance_print_psymbols (const char *args, int from_tty)
 
 	  if (address_arg != NULL)
 	    {
-	      struct bound_minimal_symbol msymbol;
+	      bound_minimal_symbol msymbol;
 
 	      /* We don't assume each pc has a unique objfile (this is for
 		 debugging).  */

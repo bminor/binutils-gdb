@@ -1299,13 +1299,12 @@ find_frame_funname (const frame_info_ptr &frame, enum language *funlang,
     }
   else
     {
-      struct bound_minimal_symbol msymbol;
       CORE_ADDR pc;
 
       if (!get_frame_address_in_block_if_available (frame, &pc))
 	return funname;
 
-      msymbol = lookup_minimal_symbol_by_pc (pc);
+      bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (pc);
       if (msymbol.minsym != NULL)
 	{
 	  funname.reset (xstrdup (msymbol.minsym->print_name ()));
@@ -1529,9 +1528,7 @@ info_frame_command_core (const frame_info_ptr &fi, bool selected_frame_p)
     }
   else if (frame_pc_p)
     {
-      struct bound_minimal_symbol msymbol;
-
-      msymbol = lookup_minimal_symbol_by_pc (frame_pc);
+      bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (frame_pc);
       if (msymbol.minsym != NULL)
 	{
 	  funname = msymbol.minsym->print_name ();

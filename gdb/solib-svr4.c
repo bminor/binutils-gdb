@@ -695,7 +695,6 @@ scan_dyntag_auxv (const int desired_dyntag, CORE_ADDR *ptr,
 static CORE_ADDR
 elf_locate_base (void)
 {
-  struct bound_minimal_symbol msymbol;
   CORE_ADDR dyn_ptr, dyn_ptr_addr;
 
   if (!svr4_have_link_map_offsets ())
@@ -751,8 +750,9 @@ elf_locate_base (void)
 
   /* This may be a static executable.  Look for the symbol
      conventionally named _r_debug, as a last resort.  */
-  msymbol = lookup_minimal_symbol ("_r_debug", NULL,
-				   current_program_space->symfile_object_file);
+  bound_minimal_symbol msymbol
+    = lookup_minimal_symbol ("_r_debug", NULL,
+			     current_program_space->symfile_object_file);
   if (msymbol.minsym != NULL)
     return msymbol.value_address ();
 
@@ -2227,7 +2227,6 @@ svr4_create_solib_event_breakpoints (svr4_info *info, struct gdbarch *gdbarch,
 static int
 enable_break (struct svr4_info *info, int from_tty)
 {
-  struct bound_minimal_symbol msymbol;
   const char * const *bkpt_namep;
   asection *interp_sect;
   CORE_ADDR sym_addr;
@@ -2482,7 +2481,8 @@ enable_break (struct svr4_info *info, int from_tty)
   objfile *objf = current_program_space->symfile_object_file;
   for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
     {
-      msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objf);
+      bound_minimal_symbol msymbol
+	= lookup_minimal_symbol (*bkpt_namep, NULL, objf);
       if ((msymbol.minsym != NULL)
 	  && (msymbol.value_address () != 0))
 	{
@@ -2501,7 +2501,8 @@ enable_break (struct svr4_info *info, int from_tty)
     {
       for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
-	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objf);
+	  bound_minimal_symbol msymbol
+	    = lookup_minimal_symbol (*bkpt_namep, NULL, objf);
 	  if ((msymbol.minsym != NULL)
 	      && (msymbol.value_address () != 0))
 	    {

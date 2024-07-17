@@ -759,9 +759,7 @@ ps_err_e
 ps_pglobal_lookup (struct ps_prochandle *ph, const char *ld_object_name,
 		   const char *ld_symbol_name, psaddr_t *ld_symbol_addr)
 {
-  struct bound_minimal_symbol ms;
-
-  ms = lookup_minimal_symbol (ld_symbol_name, NULL, NULL);
+  bound_minimal_symbol ms = lookup_minimal_symbol (ld_symbol_name, NULL, NULL);
   if (!ms.minsym)
     return PS_NOSYM;
 
@@ -1068,7 +1066,7 @@ info_cb (const td_thrhandle_t *th, void *s)
       /* Print thr_create start function.  */
       if (ti.ti_startfunc != 0)
 	{
-	  const struct bound_minimal_symbol msym
+	  const bound_minimal_symbol msym
 	    = lookup_minimal_symbol_by_pc (ti.ti_startfunc);
 
 	  gdb_printf ("   startfunc=%s",
@@ -1081,7 +1079,7 @@ info_cb (const td_thrhandle_t *th, void *s)
       /* If thread is asleep, print function that went to sleep.  */
       if (ti.ti_state == TD_THR_SLEEP)
 	{
-	  const struct bound_minimal_symbol msym
+	  const bound_minimal_symbol msym
 	    = lookup_minimal_symbol_by_pc (ti.ti_pc);
 
 	  gdb_printf ("   sleepfunc=%s",

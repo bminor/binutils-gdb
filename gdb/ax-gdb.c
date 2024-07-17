@@ -598,9 +598,8 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 
     case LOC_UNRESOLVED:
       {
-	struct bound_minimal_symbol msym
+	bound_minimal_symbol msym
 	  = lookup_minimal_symbol (var->linkage_name (), NULL, NULL);
-
 	if (!msym.minsym)
 	  error (_("Couldn't resolve symbol `%s'."), var->print_name ());
 

@@ -239,8 +239,7 @@ extern struct block_symbol ada_lookup_symbol (const char *,
 extern block_symbol ada_lookup_encoded_symbol
   (const char *name, const struct block *block, domain_search_flags domain);
 
-extern struct bound_minimal_symbol ada_lookup_simple_minsym (const char *,
-							     objfile *);
+extern bound_minimal_symbol ada_lookup_simple_minsym (const char *, objfile *);
 
 extern int ada_scan_number (const char *, int, LONGEST *, int *);
 

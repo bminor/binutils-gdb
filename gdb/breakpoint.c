@@ -3466,7 +3466,7 @@ create_internal_breakpoint (struct gdbarch *gdbarch,
 
 static struct breakpoint *
 create_internal_breakpoint (struct gdbarch *gdbarch,
-			    struct bound_minimal_symbol &msym, enum bptype type)
+			    bound_minimal_symbol &msym, enum bptype type)
 {
   CORE_ADDR address;
 
@@ -3498,10 +3498,10 @@ static const char *const longjmp_names[] =
 struct breakpoint_objfile_data
 {
   /* Minimal symbol for "_ovly_debug_event" (if any).  */
-  struct bound_minimal_symbol overlay_msym;
+  bound_minimal_symbol overlay_msym;
 
   /* Minimal symbol(s) for "longjmp", "siglongjmp", etc. (if any).  */
-  struct bound_minimal_symbol longjmp_msym[NUM_LONGJMP_NAMES];
+  bound_minimal_symbol longjmp_msym[NUM_LONGJMP_NAMES];
 
   /* True if we have looked for longjmp probes.  */
   int longjmp_searched = 0;
@@ -3511,10 +3511,10 @@ struct breakpoint_objfile_data
   std::vector<probe *> longjmp_probes;
 
   /* Minimal symbol for "std::terminate()" (if any).  */
-  struct bound_minimal_symbol terminate_msym;
+  bound_minimal_symbol terminate_msym;
 
   /* Minimal symbol for "_Unwind_DebugHook" (if any).  */
-  struct bound_minimal_symbol exception_msym;
+  bound_minimal_symbol exception_msym;
 
   /* True if we have looked for exception probes.  */
   int exception_searched = 0;
@@ -3570,9 +3570,8 @@ create_overlay_event_breakpoint (void)
 
       if (bp_objfile_data->overlay_msym.minsym == NULL)
 	{
-	  struct bound_minimal_symbol m;
-
-	  m = lookup_minimal_symbol_text (func_name, objfile);
+	  bound_minimal_symbol m
+	    = lookup_minimal_symbol_text (func_name, objfile);
 	  if (m.minsym == NULL)
 	    {
 	      /* Avoid future lookups in this objfile.  */
@@ -3675,9 +3674,8 @@ create_longjmp_master_breakpoint_names (objfile *objfile)
       func_name = longjmp_names[i];
       if (bp_objfile_data->longjmp_msym[i].minsym == NULL)
 	{
-	  struct bound_minimal_symbol m;
-
-	  m = lookup_minimal_symbol_text (func_name, objfile);
+	  bound_minimal_symbol m
+	    = lookup_minimal_symbol_text (func_name, objfile);
 	  if (m.minsym == NULL)
 	    {
 	      /* Prevent future lookups in this objfile.  */
@@ -3753,9 +3751,8 @@ create_std_terminate_master_breakpoint (void)
 
 	  if (bp_objfile_data->terminate_msym.minsym == NULL)
 	    {
-	      struct bound_minimal_symbol m;
-
-	      m = lookup_minimal_symbol (func_name, NULL, objfile);
+	      bound_minimal_symbol m
+		= lookup_minimal_symbol (func_name, NULL, objfile);
 	      if (m.minsym == NULL || (m.minsym->type () != mst_text
 				       && m.minsym->type () != mst_file_text))
 		{
@@ -3846,9 +3843,8 @@ create_exception_master_breakpoint_hook (objfile *objfile)
 
   if (bp_objfile_data->exception_msym.minsym == NULL)
     {
-      struct bound_minimal_symbol debug_hook;
-
-      debug_hook = lookup_minimal_symbol_text (func_name, objfile);
+      bound_minimal_symbol debug_hook
+	= lookup_minimal_symbol_text (func_name, objfile);
       if (debug_hook.minsym == NULL)
 	{
 	  bp_objfile_data->exception_msym.minsym = &msym_not_found;

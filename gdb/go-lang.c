@@ -54,9 +54,7 @@ static const char GO_MAIN_MAIN[] = "main.main";
 const char *
 go_main_name (void)
 {
-  struct bound_minimal_symbol msym;
-
-  msym = lookup_minimal_symbol (GO_MAIN_MAIN, NULL, NULL);
+  bound_minimal_symbol msym = lookup_minimal_symbol (GO_MAIN_MAIN, NULL, NULL);
   if (msym.minsym != NULL)
     return GO_MAIN_MAIN;
 

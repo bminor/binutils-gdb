@@ -1831,7 +1831,7 @@ write_var_or_type (struct parser_state *par_state,
 	      if (block != nullptr)
 		objfile = block->objfile ();
 
-	      struct bound_minimal_symbol msym
+	      bound_minimal_symbol msym
 		= ada_lookup_simple_minsym (decoded_name.c_str (), objfile);
 	      if (msym.minsym != NULL)
 		{

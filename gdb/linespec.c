@@ -4165,7 +4165,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 static void
 add_minsym (struct minimal_symbol *minsym, struct objfile *objfile,
 	    struct symtab *symtab, int list_mode,
-	    std::vector<struct bound_minimal_symbol> *msyms)
+	    std::vector<bound_minimal_symbol> *msyms)
 {
   if (symtab != NULL)
     {
@@ -4202,7 +4202,7 @@ search_minsyms_for_name (struct collect_info *info,
 			 struct program_space *search_pspace,
 			 struct symtab *symtab)
 {
-  std::vector<struct bound_minimal_symbol> minsyms;
+  std::vector<bound_minimal_symbol> minsyms;
 
   if (symtab == NULL)
     {

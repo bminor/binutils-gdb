@@ -1137,8 +1137,7 @@ find_imps (const char *method, std::vector<const char *> *symbol_names)
 	symbol_names->push_back (sym->natural_name ());
       else
 	{
-	  struct bound_minimal_symbol msym
-	    = lookup_minimal_symbol (selector, 0, 0);
+	  bound_minimal_symbol msym = lookup_minimal_symbol (selector, 0, 0);
 
 	  if (msym.minsym != NULL) 
 	    symbol_names->push_back (msym.minsym->natural_name ());
@@ -1240,10 +1239,9 @@ find_objc_msgsend (void)
 
   for (i = 0; i < nmethcalls; i++)
     {
-      struct bound_minimal_symbol func;
-
       /* Try both with and without underscore.  */
-      func = lookup_bound_minimal_symbol (methcalls[i].name);
+      bound_minimal_symbol func
+	= lookup_bound_minimal_symbol (methcalls[i].name);
       if ((func.minsym == NULL) && (methcalls[i].name[0] == '_'))
 	{
 	  func = lookup_bound_minimal_symbol (methcalls[i].name + 1);

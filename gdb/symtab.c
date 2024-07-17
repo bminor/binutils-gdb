@@ -2892,14 +2892,14 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 {
   struct compunit_symtab *best_cust = NULL;
   CORE_ADDR best_cust_range = 0;
-  struct bound_minimal_symbol msymbol;
 
   /* If we know that this is not a text address, return failure.  This is
      necessary because we loop based on the block's high and low code
      addresses, which do not include the data ranges, and because
      we call find_pc_sect_psymtab which has a similar restriction based
      on the partial_symtab's texthigh and textlow.  */
-  msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
+  bound_minimal_symbol msymbol
+    = lookup_minimal_symbol_by_pc_section (pc, section);
   if (msymbol.minsym && msymbol.minsym->data_p ())
     return NULL;
 
@@ -3091,7 +3091,6 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   int len;
   const linetable_entry *item;
   const struct blockvector *bv;
-  struct bound_minimal_symbol msymbol;
 
   /* Info on best line seen so far, and where it starts, and its file.  */
 
@@ -3170,13 +3169,12 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
    *      check for the address being the same, to avoid an
    *      infinite recursion.
    */
-  msymbol = lookup_minimal_symbol_by_pc (pc);
+  bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (pc);
   if (msymbol.minsym != NULL)
     if (msymbol.minsym->type () == mst_solib_trampoline)
       {
-	struct bound_minimal_symbol mfunsym
-	  = lookup_minimal_symbol_text (msymbol.minsym->linkage_name (),
-					NULL);
+	bound_minimal_symbol mfunsym
+	  = lookup_minimal_symbol_text (msymbol.minsym->linkage_name (), NULL);
 
 	if (mfunsym.minsym == NULL)
 	  /* I eliminated this warning since it is coming out
@@ -3919,7 +3917,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
     }
   else
     {
-      struct bound_minimal_symbol msymbol
+      bound_minimal_symbol msymbol
 	= lookup_minimal_symbol_by_pc_section (sal->pc, sal->section);
 
       if (msymbol.minsym == NULL)
@@ -5290,7 +5288,7 @@ print_symbol_info (struct symbol *sym, int block, const char *last)
    for non-debugging symbols to gdb_stdout.  */
 
 static void
-print_msymbol_info (struct bound_minimal_symbol msymbol)
+print_msymbol_info (bound_minimal_symbol msymbol)
 {
   struct gdbarch *gdbarch = msymbol.objfile->arch ();
   const char *tmp;

@@ -600,11 +600,10 @@ public:
      domain_search_flags domain);
 
   /* See quick_symbol_functions.  */
-  struct compunit_symtab *find_pc_sect_compunit_symtab
-    (struct bound_minimal_symbol msymbol,
-     CORE_ADDR pc,
-     struct obj_section *section,
-     int warn_if_readin);
+  struct compunit_symtab *
+  find_pc_sect_compunit_symtab (bound_minimal_symbol msymbol, CORE_ADDR pc,
+				struct obj_section *section,
+				int warn_if_readin);
 
   /* See quick_symbol_functions.  */
   void map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,

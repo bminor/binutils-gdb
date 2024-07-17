@@ -163,8 +163,8 @@ struct quick_symbol_functions
      compunit that contains a symbol whose address is closest to
      PC.  */
   virtual struct compunit_symtab *find_pc_sect_compunit_symtab
-    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
-     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) = 0;
+    (struct objfile *objfile, bound_minimal_symbol msymbol, CORE_ADDR pc,
+     struct obj_section *section, int warn_if_readin) = 0;
 
   /* Return the comp unit from OBJFILE that contains a symbol at
      ADDRESS.  Return NULL if there is no such comp unit.  Unlike

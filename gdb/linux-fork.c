@@ -638,9 +638,7 @@ info_checkpoints_command (const char *arg, int from_tty)
 	gdb_printf (_(", line %d"), sal.line);
       if (!sal.symtab && !sal.line)
 	{
-	  struct bound_minimal_symbol msym;
-
-	  msym = lookup_minimal_symbol_by_pc (pc);
+	  bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (pc);
 	  if (msym.minsym)
 	    gdb_printf (", <%s>", msym.minsym->linkage_name ());
 	}

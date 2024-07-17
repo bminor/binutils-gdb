@@ -95,8 +95,7 @@ output_debug_symbol (ui_out *uiout, domain_search_flags kind,
    and then outputs the fields for this msymbol.  */
 
 static void
-output_nondebug_symbol (ui_out *uiout,
-			const struct bound_minimal_symbol &msymbol)
+output_nondebug_symbol (ui_out *uiout, const bound_minimal_symbol &msymbol)
 {
   struct gdbarch *gdbarch = msymbol.objfile->arch ();
   ui_out_emit_tuple tuple_emitter (uiout, NULL);

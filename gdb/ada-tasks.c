@@ -712,9 +712,7 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
 			       sizeof (task_info->name) - 1);
       else
 	{
-	  struct bound_minimal_symbol msym;
-
-	  msym = lookup_minimal_symbol_by_pc (task_id);
+	  bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (task_id);
 	  if (msym.minsym)
 	    {
 	      const char *full_name = msym.minsym->linkage_name ();
@@ -914,7 +912,6 @@ read_known_tasks_list (struct ada_tasks_inferior_data *data)
 static void
 ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 {
-  struct bound_minimal_symbol msym;
   struct symbol *sym;
 
   /* Return now if already set.  */
@@ -923,7 +920,8 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 
   /* Try array.  */
 
-  msym = lookup_minimal_symbol (KNOWN_TASKS_NAME, NULL, NULL);
+  bound_minimal_symbol msym
+    = lookup_minimal_symbol (KNOWN_TASKS_NAME, NULL, NULL);
   if (msym.minsym != NULL)
     {
       data->known_tasks_kind = ADA_TASKS_ARRAY;

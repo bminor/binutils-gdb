@@ -2455,7 +2455,6 @@ tfind_outside_command (const char *args, int from_tty)
 static void
 info_scope_command (const char *args_in, int from_tty)
 {
-  struct bound_minimal_symbol msym;
   const struct block *block;
   const char *symname;
   const char *save_args = args_in;
@@ -2579,17 +2578,20 @@ info_scope_command (const char *args_in, int from_tty)
 					sym->value_block ()->entry_pc ()));
 		  break;
 		case LOC_UNRESOLVED:
-		  msym = lookup_minimal_symbol (sym->linkage_name (),
-						NULL, NULL);
-		  if (msym.minsym == NULL)
-		    gdb_printf ("Unresolved Static");
-		  else
-		    {
-		      gdb_printf ("static storage at address ");
-		      gdb_printf ("%s",
-				  paddress (gdbarch, msym.value_address ()));
-		    }
-		  break;
+		  {
+		    bound_minimal_symbol msym
+		      = lookup_minimal_symbol (sym->linkage_name (), NULL,
+					       NULL);
+		    if (msym.minsym == NULL)
+		      gdb_printf ("Unresolved Static");
+		    else
+		      {
+			gdb_printf ("static storage at address ");
+			gdb_printf ("%s",
+				    paddress (gdbarch, msym.value_address ()));
+		      }
+		    break;
+		  }
 		case LOC_OPTIMIZED_OUT:
 		  gdb_printf ("optimized out.\n");
 		  continue;

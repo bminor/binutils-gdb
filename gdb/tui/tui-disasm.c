@@ -157,11 +157,11 @@ tui_disassemble (struct gdbarch *gdbarch,
 static CORE_ADDR
 tui_find_backward_disassembly_start_address (CORE_ADDR addr)
 {
-  struct bound_minimal_symbol msym, msym_prev;
-
-  msym = lookup_minimal_symbol_by_pc_section (addr - 1, nullptr,
-					      lookup_msym_prefer::TEXT,
-					      &msym_prev);
+  bound_minimal_symbol msym_prev;
+  bound_minimal_symbol msym
+    = lookup_minimal_symbol_by_pc_section (addr - 1, nullptr,
+					   lookup_msym_prefer::TEXT,
+					   &msym_prev);
   if (msym.minsym != nullptr)
     return msym.value_address ();
   else if (msym_prev.minsym != nullptr)
@@ -402,7 +402,7 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 
       if (addr == 0)
 	{
-	  struct bound_minimal_symbol main_symbol
+	  bound_minimal_symbol main_symbol
 	    = lookup_minimal_symbol (main_name (), nullptr, nullptr);
 	  if (main_symbol.minsym != nullptr)
 	    addr = main_symbol.value_address ();

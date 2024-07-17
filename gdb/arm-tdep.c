@@ -712,7 +712,6 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
 int
 arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
-  struct bound_minimal_symbol sym;
   char type;
   arm_displaced_step_copy_insn_closure *dsc = nullptr;
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
@@ -752,7 +751,7 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
     return type == 't';
 
   /* Thumb functions have a "special" bit set in minimal symbols.  */
-  sym = lookup_minimal_symbol_by_pc (memaddr);
+  bound_minimal_symbol sym = lookup_minimal_symbol_by_pc (memaddr);
   if (sym.minsym)
     return (MSYMBOL_IS_SPECIAL (sym.minsym));
 
@@ -913,9 +912,8 @@ static int
 skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  struct bound_minimal_symbol msym;
 
-  msym = lookup_minimal_symbol_by_pc (pc);
+  bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (pc);
   if (msym.minsym != NULL
       && msym.value_address () == pc
       && msym.minsym->linkage_name () != NULL)
@@ -1684,7 +1682,6 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int basereg;
-  struct bound_minimal_symbol stack_chk_guard;
   int offset;
   int is_thumb = arm_pc_is_thumb (gdbarch, pc);
   CORE_ADDR addr;
@@ -1695,7 +1692,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
   if (!addr)
     return pc;
 
-  stack_chk_guard = lookup_minimal_symbol_by_pc (addr);
+  bound_minimal_symbol stack_chk_guard = lookup_minimal_symbol_by_pc (addr);
   /* ADDR must correspond to a symbol whose name is __stack_chk_guard.
      Otherwise, this sequence cannot be for stack protector.  */
   if (stack_chk_guard.minsym == NULL
@@ -9391,9 +9388,8 @@ arm_skip_cmse_entry (CORE_ADDR pc, const char *name, struct objfile *objfile)
   char *target_name = (char *) alloca (target_len);
   xsnprintf (target_name, target_len, "%s%s", "__acle_se_", name);
 
-  struct bound_minimal_symbol minsym
-   = lookup_minimal_symbol (target_name, NULL, objfile);
-
+  bound_minimal_symbol minsym
+    = lookup_minimal_symbol (target_name, NULL, objfile);
   if (minsym.minsym != nullptr)
     return minsym.value_address ();
 
@@ -9467,7 +9463,6 @@ arm_skip_stub (const frame_info_ptr &frame, CORE_ADDR pc)
     {
       char *target_name;
       int target_len = namelen - 2;
-      struct bound_minimal_symbol minsym;
       struct objfile *objfile;
       struct obj_section *sec;
 
@@ -9482,7 +9477,8 @@ arm_skip_stub (const frame_info_ptr &frame, CORE_ADDR pc)
 
       sec = find_pc_section (pc);
       objfile = (sec == NULL) ? NULL : sec->objfile;
-      minsym = lookup_minimal_symbol (target_name, NULL, objfile);
+      bound_minimal_symbol minsym
+	= lookup_minimal_symbol (target_name, NULL, objfile);
       if (minsym.minsym != NULL)
 	return minsym.value_address ();
       else

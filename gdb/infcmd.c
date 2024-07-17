@@ -1360,7 +1360,7 @@ until_next_command (int from_tty)
 
   if (!func)
     {
-      struct bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (pc);
+      bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (pc);
 
       if (msymbol.minsym == nullptr)
 	error (_("Execution is not within a known function."));

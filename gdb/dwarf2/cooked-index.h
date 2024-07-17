@@ -788,7 +788,7 @@ struct cooked_index_functions : public dwarf2_base_index_functions
      domain_search_flags domain) override;
 
   struct compunit_symtab *find_pc_sect_compunit_symtab
-    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
+    (struct objfile *objfile, bound_minimal_symbol msymbol,
      CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override
   {
     wait (objfile, true);

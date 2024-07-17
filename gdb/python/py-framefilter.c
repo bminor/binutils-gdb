@@ -923,12 +923,12 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	  else if (PyLong_Check (py_func.get ()))
 	    {
 	      CORE_ADDR addr;
-	      struct bound_minimal_symbol msymbol;
 
 	      if (get_addr_from_python (py_func.get (), &addr) < 0)
 		return EXT_LANG_BT_ERROR;
 
-	      msymbol = lookup_minimal_symbol_by_pc (addr);
+	      bound_minimal_symbol msymbol
+		= lookup_minimal_symbol_by_pc (addr);
 	      if (msymbol.minsym != NULL)
 		function = msymbol.minsym->print_name ();
 	    }

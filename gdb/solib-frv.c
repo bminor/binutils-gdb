@@ -264,7 +264,6 @@ static CORE_ADDR
 lm_base (void)
 {
   bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
-  struct bound_minimal_symbol got_sym;
   CORE_ADDR addr;
   gdb_byte buf[FRV_PTR_SIZE];
 
@@ -280,8 +279,9 @@ lm_base (void)
   if (lm_base_cache)
     return lm_base_cache;
 
-  got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL,
-				   current_program_space->symfile_object_file);
+  bound_minimal_symbol got_sym
+    = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL,
+			     current_program_space->symfile_object_file);
   if (got_sym.minsym == 0)
     {
       solib_debug_printf ("_GLOBAL_OFFSET_TABLE_ not found.");
@@ -840,10 +840,9 @@ frv_relocate_section_addresses (solib &so, target_section *sec)
 static CORE_ADDR
 main_got (void)
 {
-  struct bound_minimal_symbol got_sym;
-
   objfile *objf = current_program_space->symfile_object_file;
-  got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL, objf);
+  bound_minimal_symbol got_sym
+    = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL, objf);
   if (got_sym.minsym == 0)
     return 0;
 

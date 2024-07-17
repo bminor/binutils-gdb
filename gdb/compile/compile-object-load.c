@@ -604,7 +604,6 @@ compile_object_load (const compile_file_names &file_names,
   CORE_ADDR regs_addr, out_value_addr = 0;
   struct symbol *func_sym;
   struct type *func_type;
-  struct bound_minimal_symbol bmsym;
   long storage_needed;
   asymbol **symbol_table, **symp;
   long number_of_symbols, missing_symbols;
@@ -765,7 +764,8 @@ compile_object_load (const compile_file_names &file_names,
 	  continue;
 	}
 
-      bmsym = lookup_minimal_symbol (sym->name, NULL, NULL);
+      bound_minimal_symbol bmsym
+	= lookup_minimal_symbol (sym->name, NULL, NULL);
       switch (bmsym.minsym == NULL
 	      ? mst_unknown : bmsym.minsym->type ())
 	{

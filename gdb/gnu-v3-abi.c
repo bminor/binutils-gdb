@@ -1178,14 +1178,13 @@ static std::string
 gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
 {
   struct gdbarch *gdbarch = type_info_ptr->type ()->arch ();
-  struct bound_minimal_symbol typeinfo_sym;
   CORE_ADDR addr;
   const char *symname;
   const char *class_name;
   const char *atsign;
 
   addr = value_as_address (type_info_ptr);
-  typeinfo_sym = lookup_minimal_symbol_by_pc (addr);
+  bound_minimal_symbol typeinfo_sym = lookup_minimal_symbol_by_pc (addr);
   if (typeinfo_sym.minsym == NULL)
     error (_("could not find minimal symbol for typeinfo address %s"),
 	   paddress (gdbarch, addr));
@@ -1229,7 +1228,6 @@ gnuv3_skip_trampoline (const frame_info_ptr &frame, CORE_ADDR stop_pc)
 {
   CORE_ADDR real_stop_pc, method_stop_pc, func_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct bound_minimal_symbol thunk_sym, fn_sym;
   struct obj_section *section;
   const char *thunk_name, *fn_name;
   
@@ -1238,7 +1236,7 @@ gnuv3_skip_trampoline (const frame_info_ptr &frame, CORE_ADDR stop_pc)
     real_stop_pc = stop_pc;
 
   /* Find the linker symbol for this potential thunk.  */
-  thunk_sym = lookup_minimal_symbol_by_pc (real_stop_pc);
+  bound_minimal_symbol thunk_sym = lookup_minimal_symbol_by_pc (real_stop_pc);
   section = find_pc_section (real_stop_pc);
   if (thunk_sym.minsym == NULL || section == NULL)
     return 0;
@@ -1251,7 +1249,8 @@ gnuv3_skip_trampoline (const frame_info_ptr &frame, CORE_ADDR stop_pc)
     return 0;
 
   fn_name = strstr (thunk_name, " thunk to ") + strlen (" thunk to ");
-  fn_sym = lookup_minimal_symbol (fn_name, NULL, section->objfile);
+  bound_minimal_symbol fn_sym
+    = lookup_minimal_symbol (fn_name, NULL, section->objfile);
   if (fn_sym.minsym == NULL)
     return 0;
 

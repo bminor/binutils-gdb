@@ -636,8 +636,8 @@ struct psymbol_functions : public quick_symbol_functions
      domain_search_flags kind) override;
 
   struct compunit_symtab *find_pc_sect_compunit_symtab
-    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
-     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override;
+    (struct objfile *objfile, bound_minimal_symbol msymbol, CORE_ADDR pc,
+     struct obj_section *section, int warn_if_readin) override;
 
   struct compunit_symtab *find_compunit_symtab_by_address
     (struct objfile *objfile, CORE_ADDR address) override
@@ -672,11 +672,10 @@ struct psymbol_functions : public quick_symbol_functions
      exactly matches PC, or, if we cannot find an exact match, the
      psymtab that contains a symbol whose address is closest to PC.  */
 
-  struct partial_symtab *find_pc_sect_psymtab
-       (struct objfile *objfile,
-	CORE_ADDR pc,
-	struct obj_section *section,
-	struct bound_minimal_symbol msymbol);
+  struct partial_symtab *find_pc_sect_psymtab (struct objfile *objfile,
+					       CORE_ADDR pc,
+					       struct obj_section *section,
+					       bound_minimal_symbol msymbol);
 
 private:
 

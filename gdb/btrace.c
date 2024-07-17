@@ -547,7 +547,6 @@ ftrace_new_gap (struct btrace_thread_info *btinfo, int errcode,
 static struct btrace_function *
 ftrace_update_function (struct btrace_thread_info *btinfo, CORE_ADDR pc)
 {
-  struct bound_minimal_symbol bmfun;
   struct minimal_symbol *mfun;
   struct symbol *fun;
   struct btrace_function *bfun;
@@ -556,7 +555,7 @@ ftrace_update_function (struct btrace_thread_info *btinfo, CORE_ADDR pc)
      to avoid surprises when we sometimes get a full symbol and sometimes
      only a minimal symbol.  */
   fun = find_pc_function (pc);
-  bmfun = lookup_minimal_symbol_by_pc (pc);
+  bound_minimal_symbol bmfun = lookup_minimal_symbol_by_pc (pc);
   mfun = bmfun.minsym;
 
   if (fun == NULL && mfun == NULL)

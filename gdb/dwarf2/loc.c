@@ -667,9 +667,8 @@ call_site_target::iterate_over_addresses (gdbarch *call_site_gdbarch,
 	dwarf_block = m_loc.dwarf_block;
 	if (dwarf_block == NULL)
 	  {
-	    struct bound_minimal_symbol msym;
-	    
-	    msym = lookup_minimal_symbol_by_pc (call_site->pc () - 1);
+	    bound_minimal_symbol msym
+	      = lookup_minimal_symbol_by_pc (call_site->pc () - 1);
 	    throw_error (NO_ENTRY_VALUE_ERROR,
 			 _("DW_AT_call_target is not specified at %s in %s"),
 			 paddress (call_site_gdbarch, call_site->pc ()),
@@ -679,9 +678,8 @@ call_site_target::iterate_over_addresses (gdbarch *call_site_gdbarch,
 	  }
 	if (caller_frame == NULL)
 	  {
-	    struct bound_minimal_symbol msym;
-	    
-	    msym = lookup_minimal_symbol_by_pc (call_site->pc () - 1);
+	    bound_minimal_symbol msym
+	      = lookup_minimal_symbol_by_pc (call_site->pc () - 1);
 	    throw_error (NO_ENTRY_VALUE_ERROR,
 			 _("DW_AT_call_target DWARF block resolving "
 			   "requires known frame which is currently not "
@@ -708,12 +706,12 @@ call_site_target::iterate_over_addresses (gdbarch *call_site_gdbarch,
     case call_site_target::PHYSNAME:
       {
 	const char *physname;
-	struct bound_minimal_symbol msym;
 
 	physname = m_loc.physname;
 
 	/* Handle both the mangled and demangled PHYSNAME.  */
-	msym = lookup_minimal_symbol (physname, NULL, NULL);
+	bound_minimal_symbol msym
+	  = lookup_minimal_symbol (physname, NULL, NULL);
 	if (msym.minsym == NULL)
 	  {
 	    msym = lookup_minimal_symbol_by_pc (call_site->pc () - 1);
@@ -820,9 +818,8 @@ func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
 	    {
 	      if (target_addr == verify_addr)
 		{
-		  struct bound_minimal_symbol msym;
-
-		  msym = lookup_minimal_symbol_by_pc (verify_addr);
+		  bound_minimal_symbol msym
+		    = lookup_minimal_symbol_by_pc (verify_addr);
 		  throw_error (NO_ENTRY_VALUE_ERROR,
 			       _("DW_OP_entry_value resolving has found "
 				 "function \"%s\" at %s can call itself via tail "
@@ -846,7 +843,7 @@ static void
 tailcall_dump (struct gdbarch *gdbarch, const struct call_site *call_site)
 {
   CORE_ADDR addr = call_site->pc ();
-  struct bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (addr - 1);
+  bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (addr - 1);
 
   gdb_printf (gdb_stdlog, " %s(%s)", paddress (gdbarch, addr),
 	      (msym.minsym == NULL ? "???"
@@ -1064,10 +1061,10 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 
   if (retval == NULL)
     {
-      struct bound_minimal_symbol msym_caller, msym_callee;
-      
-      msym_caller = lookup_minimal_symbol_by_pc (caller_pc);
-      msym_callee = lookup_minimal_symbol_by_pc (callee_pc);
+      bound_minimal_symbol msym_caller
+	= lookup_minimal_symbol_by_pc (caller_pc);
+      bound_minimal_symbol msym_callee
+	= lookup_minimal_symbol_by_pc (callee_pc);
       throw_error (NO_ENTRY_VALUE_ERROR,
 		   _("There are no unambiguously determinable intermediate "
 		     "callers or callees between caller function \"%s\" at %s "
@@ -1165,8 +1162,7 @@ dwarf_expr_reg_to_entry_parameter (const frame_info_ptr &initial_frame,
   caller_frame = get_prev_frame (frame);
   if (gdbarch != frame_unwind_arch (frame))
     {
-      struct bound_minimal_symbol msym
-	= lookup_minimal_symbol_by_pc (func_addr);
+      bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (func_addr);
       struct gdbarch *caller_gdbarch = frame_unwind_arch (frame);
 
       throw_error (NO_ENTRY_VALUE_ERROR,
@@ -1181,8 +1177,7 @@ dwarf_expr_reg_to_entry_parameter (const frame_info_ptr &initial_frame,
 
   if (caller_frame == NULL)
     {
-      struct bound_minimal_symbol msym
-	= lookup_minimal_symbol_by_pc (func_addr);
+      bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (func_addr);
 
       throw_error (NO_ENTRY_VALUE_ERROR, _("DW_OP_entry_value resolving "
 					   "requires caller of %s (%s)"),

@@ -259,8 +259,7 @@ convert_symbol_sym (compile_c_instance *context, const char *identifier,
    to use and BMSYM is the minimal symbol to convert.  */
 
 static void
-convert_symbol_bmsym (compile_c_instance *context,
-		      struct bound_minimal_symbol bmsym)
+convert_symbol_bmsym (compile_c_instance *context, bound_minimal_symbol bmsym)
 {
   struct minimal_symbol *msym = bmsym.minsym;
   struct objfile *objfile = bmsym.objfile;
@@ -356,9 +355,8 @@ gcc_convert_symbol (void *datum,
 	}
       else if (request == GCC_C_ORACLE_SYMBOL)
 	{
-	  struct bound_minimal_symbol bmsym;
-
-	  bmsym = lookup_minimal_symbol (identifier, NULL, NULL);
+	  bound_minimal_symbol bmsym
+	    = lookup_minimal_symbol (identifier, NULL, NULL);
 	  if (bmsym.minsym != NULL)
 	    {
 	      convert_symbol_bmsym (context, bmsym);
@@ -413,9 +411,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	}
       else
 	{
-	  struct bound_minimal_symbol msym;
-
-	  msym = lookup_bound_minimal_symbol (identifier);
+	  bound_minimal_symbol msym = lookup_bound_minimal_symbol (identifier);
 	  if (msym.minsym != NULL)
 	    {
 	      if (compile_debug)

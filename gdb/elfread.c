@@ -694,13 +694,12 @@ elf_gnu_ifunc_cache_eq (const void *a_voidp, const void *b_voidp)
 static int
 elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
 {
-  struct bound_minimal_symbol msym;
   struct objfile *objfile;
   htab_t htab;
   struct elf_gnu_ifunc_cache entry_local, *entry_p;
   void **slot;
 
-  msym = lookup_minimal_symbol_by_pc (addr);
+  bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (addr);
   if (msym.minsym == NULL)
     return 0;
   if (msym.value_address () != addr)

@@ -326,12 +326,11 @@ ravenscar_thread_target::add_active_thread ()
    and return its associated minimal symbol.
    Return NULL if not found.  */
 
-static struct bound_minimal_symbol
+static bound_minimal_symbol
 get_running_thread_msymbol ()
 {
-  struct bound_minimal_symbol msym;
-
-  msym = lookup_minimal_symbol (running_thread_name, NULL, NULL);
+  bound_minimal_symbol msym
+    = lookup_minimal_symbol (running_thread_name, NULL, NULL);
   if (!msym.minsym)
     /* Older versions of the GNAT runtime were using a different
        (less ideal) name for the symbol where the active thread ID
@@ -348,14 +347,13 @@ get_running_thread_msymbol ()
 static bool
 has_ravenscar_runtime ()
 {
-  struct bound_minimal_symbol msym_ravenscar_runtime_initializer
+  bound_minimal_symbol msym_ravenscar_runtime_initializer
     = lookup_minimal_symbol (ravenscar_runtime_initializer, NULL, NULL);
-  struct bound_minimal_symbol msym_known_tasks
+  bound_minimal_symbol msym_known_tasks
     = lookup_minimal_symbol (known_tasks_name, NULL, NULL);
-  struct bound_minimal_symbol msym_first_task
+  bound_minimal_symbol msym_first_task
     = lookup_minimal_symbol (first_task_name, NULL, NULL);
-  struct bound_minimal_symbol msym_running_thread
-    = get_running_thread_msymbol ();
+  bound_minimal_symbol msym_running_thread = get_running_thread_msymbol ();
 
   return (msym_ravenscar_runtime_initializer.minsym
 	  && (msym_known_tasks.minsym || msym_first_task.minsym)
@@ -377,7 +375,7 @@ ravenscar_thread_target::runtime_initialized ()
 static CORE_ADDR
 get_running_thread_id (int cpu)
 {
-  struct bound_minimal_symbol object_msym = get_running_thread_msymbol ();
+  bound_minimal_symbol object_msym = get_running_thread_msymbol ();
   int object_size;
   int buf_size;
   gdb_byte *buf;

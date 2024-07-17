@@ -891,11 +891,10 @@ set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
   return namestring;
 }
 
-static struct bound_minimal_symbol
+static bound_minimal_symbol
 find_stab_function (const char *namestring, const char *filename,
 		    struct objfile *objfile)
 {
-  struct bound_minimal_symbol msym;
   int n;
 
   const char *colon = strchr (namestring, ':');
@@ -908,7 +907,7 @@ find_stab_function (const char *namestring, const char *filename,
   strncpy (p, namestring, n);
   p[n] = 0;
 
-  msym = lookup_minimal_symbol (p, filename, objfile);
+  bound_minimal_symbol msym = lookup_minimal_symbol (p, filename, objfile);
   if (msym.minsym == NULL)
     {
       /* Sun Fortran appends an underscore to the minimal symbol name,
@@ -1678,10 +1677,9 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	      if (nlist.n_value == 0
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
-		  struct bound_minimal_symbol minsym
+		  bound_minimal_symbol minsym
 		    = find_stab_function (namestring,
-					  pst ? pst->filename : NULL,
-					  objfile);
+					  pst ? pst->filename : NULL, objfile);
 		  if (minsym.minsym != NULL)
 		    nlist.n_value
 		      = CORE_ADDR (minsym.minsym->unrelocated_address ());
@@ -1737,10 +1735,9 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	      if (nlist.n_value == 0
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
-		  struct bound_minimal_symbol minsym
+		  bound_minimal_symbol minsym
 		    = find_stab_function (namestring,
-					  pst ? pst->filename : NULL,
-					  objfile);
+					  pst ? pst->filename : NULL, objfile);
 		  if (minsym.minsym != NULL)
 		    nlist.n_value
 		      = CORE_ADDR (minsym.minsym->unrelocated_address ());
@@ -2036,7 +2033,6 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
       && gdbarch_sofun_address_maybe_missing (gdbarch))
     {
       int n;
-      struct bound_minimal_symbol minsym;
 
       const char *colon = strchr (last_function_name, ':');
       if (colon == NULL)
@@ -2047,7 +2043,8 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
       strncpy (p, last_function_name, n);
       p[n] = 0;
 
-      minsym = lookup_minimal_symbol (p, pst->filename, objfile);
+      bound_minimal_symbol minsym
+	= lookup_minimal_symbol (p, pst->filename, objfile);
       if (minsym.minsym == NULL)
 	{
 	  /* Sun Fortran appends an underscore to the minimal symbol name,
@@ -2840,7 +2837,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		  && valu == section_offsets[SECT_OFF_TEXT (objfile)]
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
-		  struct bound_minimal_symbol minsym
+		  bound_minimal_symbol minsym
 		    = find_stab_function (name, get_last_source_file (),
 					  objfile);
 		  if (minsym.minsym != NULL)

@@ -2997,7 +2997,7 @@ recursively_find_pc_sect_compunit_symtab (struct compunit_symtab *cust,
 struct compunit_symtab *
 dwarf2_base_index_functions::find_pc_sect_compunit_symtab
      (struct objfile *objfile,
-      struct bound_minimal_symbol msymbol,
+      bound_minimal_symbol msymbol,
       CORE_ADDR pc,
       struct obj_section *section,
       int warn_if_readin)
