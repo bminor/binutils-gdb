@@ -93,17 +93,6 @@ set link_tests [list \
     "nopic-global" \
   ] \
   [list \
-    "$testname readelf -s/-r nopic-global-so" \
-    "-L./tmpdir -lnopic-global -L/usr/lib -lc" "" \
-    "" \
-    {nopic-global.s} \
-      [list \
-	[list readelf -s nopic-global-so.sd] \
-	[list readelf -r nopic-global-so.rd] \
-      ] \
-    "nopic-global-so" \
-  ] \
-  [list \
     "$testname readelf -s/-x nopic-weak-global" \
     "-T pic.ld" "" \
     "" \
@@ -114,18 +103,34 @@ set link_tests [list \
       ] \
     "nopic-weak-global" \
   ] \
+]
+
+# Since the c library path may be different in different
+# Distributions, the test program can link to the c library
+# using the gcc instead of ld to avoid system impact.
+run_ld_link_tests $link_tests
+
+
+
+set link_tests_libc [list \
+  [list \
+    "$testname readelf -s/-r nopic-global-so" \
+    "-L./tmpdir -lnopic-global -L/usr/lib -lc" "" \
+    {nopic-global.s} \
+    {{readelf {-s} nopic-global-so.sd} \
+     {readelf {-r} nopic-global-so.rd}} \
+    "nopic-global-so" \
+  ] \
   [list \
     "$testname readelf -s/-x nopic-weak-global-so" \
     "-L./tmpdir -lnopic-global -L/usr/lib -lc" "" \
-    "" \
     {nopic-weak-global.s} \
-      [list \
-	[list readelf -s nopic-weak-global-so.sd] \
-	[list readelf -r nopic-weak-global-so.rd] \
-      ] \
+    {{readelf {-s} nopic-weak-global-so.sd} \
+     {readelf {-r} nopic-weak-global-so.rd}} \
     "nopic-weak-global-so" \
   ] \
 ]
+
 
 #  0:name
 #  1:ld/ar leading options, placed before object files
@@ -135,7 +140,9 @@ set link_tests [list \
 #  5:list of actions, options and expected outputs.
 #  6:name of output file
 #  7:compiler flags (optional)
-run_ld_link_tests $link_tests
+run_cc_link_tests $link_tests_libc
+
+
 
 set testname "nopic link exec test"
 
