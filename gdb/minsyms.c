@@ -1066,20 +1066,19 @@ const struct gnu_ifunc_fns *gnu_ifunc_fns_p = &stub_gnu_ifunc_fns;
 
 
 
-/* Return leading symbol character for a BFD.  If BFD is NULL,
-   return the leading symbol character from the main objfile.  */
+/* Return the leading symbol character for BFD ABFD.  If ABFD is nullptr,
+   return the leading symbol character from the the main objfile of PSPACE..  */
 
 static int
-get_symbol_leading_char (bfd *abfd)
+get_symbol_leading_char (program_space *pspace, bfd *abfd)
 {
   if (abfd != NULL)
     return bfd_get_symbol_leading_char (abfd);
-  if (current_program_space->symfile_object_file != NULL)
-    {
-      objfile *objf = current_program_space->symfile_object_file;
-      if (objf->obfd != NULL)
-	return bfd_get_symbol_leading_char (objf->obfd.get ());
-    }
+
+  if (objfile *objf = pspace->symfile_object_file;
+      objf != nullptr && objf->obfd != nullptr)
+    return bfd_get_symbol_leading_char (objf->obfd.get ());
+
   return 0;
 }
 
@@ -1194,7 +1193,8 @@ minimal_symbol_reader::record_full (std::string_view name,
 
   /* It's safe to strip the leading char here once, since the name
      is also stored stripped in the minimal symbol table.  */
-  if (name[0] == get_symbol_leading_char (m_objfile->obfd.get ()))
+  if (name[0] == get_symbol_leading_char (m_objfile->pspace (),
+					  m_objfile->obfd.get ()))
     name = name.substr (1);
 
   if (ms_type == mst_file_text && startswith (name, "__gnu_compiled"))
