@@ -1,6 +1,6 @@
 -*- text -*-
 
-* Support CFCMOV feature in Intel APX.
+* Support CFCMOV feature in Intel APX. Now, APX_F is fully supportted.
 
 * Support CCMP and CTEST feature in Intel APX.
 
