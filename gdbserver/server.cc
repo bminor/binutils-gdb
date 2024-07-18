@@ -4209,6 +4209,10 @@ captured_main (int argc, char *argv[])
 	  /* "-" specifies a stdio connection and is a form of port
 	     specification.  */
 	  port = STDIO_CONNECTION_NAME;
+
+	  /* Implying --once here prevents a hang after stdin has been closed.  */
+	  run_once = true;
+
 	  next_arg++;
 	  break;
 	}
