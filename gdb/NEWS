@@ -47,6 +47,12 @@ maintenance info inline-frames [ADDRESS]
   current address, or for ADDRESS if specified.  The output identifies
   inlined frames which start at the specified address.
 
+maintenance info blocks [ADDRESS]
+  New command which displays information about all of the blocks at
+  ADDRESS, or at the current address if ADDRESS is not given.  Blocks
+  are listed starting at the inner global block out to the most inner
+  block.
+
 *** Changes in GDB 15
 
 * The MPX commands "show/set mpx bound" have been deprecated, as Intel

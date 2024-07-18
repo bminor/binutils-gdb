@@ -25,6 +25,8 @@
 #include "addrmap.h"
 #include "gdbtypes.h"
 #include "objfiles.h"
+#include "cli/cli-cmds.h"
+#include "inferior.h"
 
 /* This is used by struct block to store namespace-related info for
    C++ files, namely using declarations and the current namespace in
@@ -819,3 +821,124 @@ make_blockranges (struct objfile *objfile,
   return blr;
 }
 
+/* Implement 'maint info blocks' command.  If passed an argument then
+   print a list of all blocks at the given address.  With no arguments
+   then list all blocks at the current address of the current inferior.  */
+
+static void
+maintenance_info_blocks (const char *arg, int from_tty)
+{
+  CORE_ADDR address;
+
+  /* With no argument use the program counter of the current thread.  If
+     there is an argument then use this as the address to examine.  */
+  if (arg == nullptr)
+    {
+      if (inferior_ptid == null_ptid)
+	error (_("no inferior thread"));
+
+      struct regcache *regcache = get_thread_regcache (inferior_thread ());
+      address = regcache_read_pc (regcache);
+    }
+  else
+    address = parse_and_eval_address (arg);
+
+  /* Find the inner most block for ADDRESS.  */
+  const struct block *cur_block = block_for_pc (address);
+  if (cur_block == nullptr)
+    {
+      gdb_printf (_("No blocks at %s\n"), core_addr_to_string_nz (address));
+      return;
+    }
+
+  gdb_printf (_("Blocks at %s:\n"), core_addr_to_string_nz (address));
+
+  const struct objfile *toplevel_objfile = cur_block->objfile ();
+  if (toplevel_objfile != nullptr)
+    gdb_printf (_("  from objfile: [(objfile *) %s] %s\n"),
+		host_address_to_string (toplevel_objfile),
+		objfile_name (toplevel_objfile));
+
+  gdb_printf ("\n");
+
+  /* List the blocks backwards; global block (widest scope) first, down to
+     the smallest scoped block last.  To do this we need to build the list
+     of blocks starting from the inner block, then print that list
+     backwards.  */
+  std::vector<const struct block *> blocks;
+  while (cur_block != nullptr)
+    {
+      blocks.emplace_back (cur_block);
+      cur_block = cur_block->superblock ();
+    }
+
+  for (auto it = blocks.rbegin (); it != blocks.rend (); ++it)
+    {
+      cur_block = *it;
+
+      gdb_assert (cur_block->objfile () == toplevel_objfile);
+
+      gdb_printf (_("[(block *) %s] %s..%s\n"),
+		  host_address_to_string (cur_block),
+		  core_addr_to_string_nz (cur_block->start ()),
+		  core_addr_to_string_nz (cur_block->end ()));
+      gdb_printf (_("  entry pc: %s\n"),
+		  core_addr_to_string_nz (cur_block->entry_pc ()));
+
+      if (cur_block->is_static_block ())
+	gdb_printf (_("  is static block\n"));
+
+      if (cur_block->is_global_block ())
+	gdb_printf (_("  is global block\n"));
+
+      if (cur_block->function () != nullptr)
+	{
+	  if (cur_block->inlined_p ())
+	    gdb_printf (_("  inline function: %s\n"),
+			cur_block->function ()->print_name ());
+	  else
+	    gdb_printf (_("  function: %s\n"),
+			cur_block->function ()->print_name ());
+	}
+
+      if (cur_block->scope () != nullptr
+	  && *cur_block->scope () != '\0')
+	gdb_printf (_("  scope: %s\n"), cur_block->scope ());
+
+      if (int symbol_count = mdict_size (cur_block->multidict ());
+	  symbol_count > 0)
+	gdb_printf (_("  symbol count: %d\n"), symbol_count);
+
+      if (cur_block->is_contiguous ())
+	gdb_printf (_("  is contiguous\n"));
+      else
+	{
+	  gdb_printf (_("  address ranges:\n"));
+	  for (const blockrange &rng : cur_block->ranges ())
+	    gdb_printf (_("    %s..%s\n"),
+			core_addr_to_string_nz (rng.start ()),
+			core_addr_to_string_nz (rng.end ()));
+	}
+    }
+}
+
+
+
+void _initialize_block ();
+void
+_initialize_block ()
+{
+  add_cmd ("blocks", class_maintenance, maintenance_info_blocks,
+	   _("\
+Display block information for current thread.\n\
+\n\
+Usage:\n\
+\n\
+  maintenance info blocks [ADDRESS]\n\
+\n\
+With no ADDRESS show all blocks at the current address, starting with the\n\
+global block and working down to the inner most block.\n\
+\n\
+When ADDRESS is given, list the blocks at ADDRESS."),
+	   &maintenanceinfolist);
+}

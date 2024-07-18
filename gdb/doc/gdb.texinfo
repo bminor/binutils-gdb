@@ -20419,6 +20419,7 @@ libraries.  When set to @code{off} no messages are printed.
 Show whether messages will be printed when a @value{GDBN} command
 entered from the keyboard causes symbol information to be loaded.
 
+@anchor{maint print symbols}
 @kindex maint print symbols
 @cindex symbol dump
 @kindex maint print psymbols
@@ -41968,6 +41969,65 @@ skipped frames = 0
   main
 @end group
 @end smallexample
+
+@kindex maint info blocks
+@item maint info blocks
+@itemx maint info blocks @var{address}
+Print information about all blocks at @var{address}, or at the current
+@code{$pc} if @var{address} is not given.
+
+For information about what blocks are in @value{GDBN} see @ref{Blocks
+In Python}.
+
+Blocks are listed starting from the global block, then the static
+block, and then proceeding through progressively narrower scopes.
+
+Here is an example of the command's output:
+@smallexample
+@group
+(@value{GDBP}) maintenance info blocks
+Blocks at 0x401137:
+  from objfile: [(objfile *) 0x50507d0] /tmp/inline_func_demo
+
+[(block *) 0x504da90] 0x401106..0x40119a
+  entry pc: 0x401106
+  is global block
+  symbol count: 2
+  is contiguous
+@end group
+@group
+[(block *) 0x504d9f0] 0x401106..0x40119a
+  entry pc: 0x401106
+  is static block
+  symbol count: 1
+  is contiguous
+@end group
+@group
+[(block *) 0x504d9a0] 0x401106..0x40119a
+  entry pc: 0x401106
+  function: main
+  is contiguous
+@end group
+@group
+[(block *) 0x504d900] 0x401137..0x401166
+  entry pc: 0x401137
+  inline function: foo
+  symbol count: 1
+  is contiguous
+@end group
+@group
+[(block *) 0x504d860] 0x401137..0x401165
+  entry pc: 0x401137
+  inline function: bar
+  symbol count: 1
+  is contiguous
+@end group
+@end smallexample
+
+The command @kbd{maint info blocks} lists the symbol count for each
+block but doesn't print the symbols themselves.  The symbol names can
+be found using @kbd{maint print symbols} (@pxref{maint print
+symbols}).
 
 @kindex maint print registers
 @kindex maint print raw-registers

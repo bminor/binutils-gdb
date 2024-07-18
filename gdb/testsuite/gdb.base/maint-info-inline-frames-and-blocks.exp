@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Check the 'maint info inline-frames' command.
+# Check the 'maint info inline-frames' and 'maint info blocks'
+# commands.
 
 standard_testfile
 
@@ -25,6 +26,45 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 if {![runto normal_func]} {
     return 0
 }
+
+# Make a pattern to match 'maint info blocks' output.  ARGS is the
+# list of function names we expect to see.  If the function name
+# starts with 'inline_func' then we expect to see an inline block,
+# otherwise blocks are not expected to be inline.
+proc make_blocks_result { args } {
+    set result \
+	[list \
+	     "Blocks at $::hex:" \
+	     "  from objfile: \\\[\\(objfile \\*\\) $::hex\\\] [string_to_regexp $::binfile]" \
+	     ""\
+	     "\\\[\\(block \\*\\) $::hex\\\] $::hex\\.\\.$::hex" \
+	     "  entry pc: $::hex" \
+	     "  is global block" \
+	     ".*" \
+	     "\\\[\\(block \\*\\) $::hex\\\] $::hex\\.\\.$::hex" \
+	     "  entry pc: $::hex" \
+	     "  is static block" \
+	     ".*" ]
+
+    foreach func $args {
+	lappend result \
+	    "\\\[\\(block \\*\\) $::hex\\\] $::hex\\.\\.$::hex" \
+	    "  entry pc: $::hex"
+
+	if { [string range $func 0 10] eq "inline_func" } {
+	    lappend result"  inline function: $func"
+	} else {
+	    lappend result"  function: $func"
+	}
+
+	lappend result ".*"
+    }
+
+    return [multi_line {*}$result]
+}
+
+gdb_test "maint info blocks" [make_blocks_result normal_func] \
+    "maint info blocks in normal_func only"
 
 # Next forward until we find the call to inline_func_a().  The hope is
 # that when we see the 'inline_func_a()' line this will be the start of
@@ -53,6 +93,10 @@ gdb_test_multiple "next" "next forward to inline_func_a" {
 	exp_continue
     }
 }
+
+gdb_test "maint info blocks" [make_blocks_result normal_func \
+				  inline_func_a inline_func_b] \
+    "maint info blocks when all blocks visible"
 
 # View the inline frame information.  This should display that we are
 # at the start of inline_func_a() within normal_func().
@@ -108,6 +152,10 @@ gdb_test "maint info inline-frames" \
 	 "  normal_func"] \
     "check inline-frames state when just entered inline_func_b"
 
+gdb_test "maint info blocks" [make_blocks_result normal_func \
+				  inline_func_a inline_func_b] \
+    "maint info blocks when all blocks still visible"
+
 gdb_test "step" ".*" \
     "step into the body of inline_func_b"
 
@@ -121,6 +169,10 @@ gdb_test "maint info inline-frames" \
 	 "> inline_func_b"] \
     "check inline-frames state when within inline_func_b"
 
+gdb_test "maint info blocks" [make_blocks_result normal_func \
+				  inline_func_a inline_func_b] \
+    "maint info blocks within inline function, all blocks still visible"
+
 # Use the recorded $pc value to check inline frames.
 gdb_test "maint info inline-frames $pc" \
     [multi_line \
@@ -130,6 +182,10 @@ gdb_test "maint info inline-frames $pc" \
 	 "  inline_func_a" \
 	 "> normal_func"] \
     "check inline-frames state at recorded \$pc"
+
+gdb_test "maint info blocks" [make_blocks_result normal_func \
+				  inline_func_a inline_func_b] \
+    "maint info blocks using stored \$pc, inferior still running"
 
 clean_restart $binfile
 
@@ -144,8 +200,15 @@ gdb_test "maint info inline-frames $pc" \
 	 "> normal_func"] \
     "check inline-frames state at recorded \$pc before execution starts"
 
+gdb_test "maint info blocks $pc" [make_blocks_result normal_func \
+				      inline_func_a inline_func_b] \
+    "maint info blocks using stored \$pc, inferior not running"
+
 # Trying to read the $pc from the current thread should fail if the
 # inferior is not yet running.
 gdb_test "maint info inline-frames" \
     "^no inferior thread" \
     "check inline-frames state of current thread before execution starts"
+
+gdb_test "maint info blocks" "^no inferior thread" \
+    "maint info blocks with no \$pc and inferior not running"
