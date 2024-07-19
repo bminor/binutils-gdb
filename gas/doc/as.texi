@@ -2990,11 +2990,11 @@ as exactly one space.
 @section Comments
 
 @cindex comments
-There are two ways of rendering comments to @command{@value{AS}}.  In both
-cases the comment is equivalent to one space.
+There are two ways of rendering comments to @command{@value{AS}}.
 
 Anything from @samp{/*} through the next @samp{*/} is a comment.
-This means you may not nest these comments.
+This means you may not nest these comments.  Such a comment is equivalent to
+one space, plus bumping the line counter accordingly.
 
 @smallexample
 /*

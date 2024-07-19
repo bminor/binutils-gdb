@@ -87,6 +87,7 @@ static char last_char;
 #define IS_PARALLEL_SEPARATOR(c)	(lex[c] == LEX_IS_PARALLEL_SEPARATOR)
 #define IS_COMMENT(c)			(lex[c] == LEX_IS_COMMENT_START)
 #define IS_LINE_COMMENT(c)		(lex[c] == LEX_IS_LINE_COMMENT_START)
+#define IS_TWOCHAR_COMMENT_1ST(c)	(lex[c] == LEX_IS_TWOCHAR_COMMENT_1ST)
 #define	IS_NEWLINE(c)			(lex[c] == LEX_IS_NEWLINE)
 
 static char lex[256] = {
@@ -197,6 +198,9 @@ do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
   for (p = tc_comment_chars; *p; p++)
     lex[(unsigned char) *p] = LEX_IS_COMMENT_START;
 
+  /* While counter intuitive to have more special purpose line comment chars
+     override more general purpose ordinary ones, logic in do_scrub_chars()
+     depends on this ordering.   */
   for (p = line_comment_chars; *p; p++)
     lex[(unsigned char) *p] = LEX_IS_LINE_COMMENT_START;
 
@@ -962,7 +966,12 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 		}
 	    }
 #endif
+
+	  /* Prune trailing whitespace.  */
 	  if (IS_COMMENT (ch)
+	      || (IS_LINE_COMMENT (ch)
+	          && (state < 1 || strchr (tc_comment_chars, ch)))
+	      || IS_NEWLINE (ch)
 	      || IS_LINE_SEPARATOR (ch)
 	      || IS_PARALLEL_SEPARATOR (ch))
 	    {
@@ -975,6 +984,16 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 		}
 	      goto recycle;
 	    }
+#ifdef DOUBLESLASH_LINE_COMMENTS
+	  if (IS_TWOCHAR_COMMENT_1ST (ch))
+	    {
+	      ch2 = GET ();
+	      if (ch2 != EOF)
+	        UNGET (ch2);
+	      if (ch2 == '/')
+		goto recycle;
+	    }
+#endif
 
 	  /* If we're in state 2 or 11, we've seen a non-white
 	     character followed by whitespace.  If the next character
