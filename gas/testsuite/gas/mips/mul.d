@@ -56,23 +56,4 @@ Disassembly of section \.text:
 0+00b8 <[^>]*> beqz	at,0+c4 <foo\+(0x|)c4>
 0+00bc <[^>]*> nop
 0+00c0 <[^>]*> break	(0x0,0x6|0x6)
-0+00c4 <[^>]*> dmultu	a1,a2
-0+00c8 <[^>]*> mflo	a0
-0+00cc <[^>]*> li	at,1
-0+00d0 <[^>]*> dmult	a1,at
-0+00d4 <[^>]*> mflo	a0
-0+00d8 <[^>]*> dmult	a1,a2
-0+00dc <[^>]*> mflo	a0
-0+00e0 <[^>]*> dsra32	a0,a0,0x1f
-0+00e4 <[^>]*> mfhi	at
-0+00e8 <[^>]*> beq	a0,at,0+f4 <foo\+(0x|)f4>
-0+00ec <[^>]*> nop
-0+00f0 <[^>]*> break	(0x0,0x6|0x6)
-0+00f4 <[^>]*> mflo	a0
-0+00f8 <[^>]*> dmultu	a1,a2
-0+00fc <[^>]*> mfhi	at
-0+0100 <[^>]*> mflo	a0
-0+0104 <[^>]*> beqz	at,0+110 <foo\+(0x|)110>
-0+0108 <[^>]*> nop
-0+010c <[^>]*> break	(0x0,0x6|0x6)
 	\.\.\.

@@ -8,8 +8,8 @@
 .*: +file format .*mips.*
 
 Disassembly of section \.text:
-0+0000 <[^>]*> mul	a0,a0,a1
-0+0004 <[^>]*> mul	a0,a1,a2
+0+0000 <[^>]*> multu	a0,a0,a1
+0+0004 <[^>]*> multu	a0,a1,a2
 0+0008 <[^>]*> li	at,0
 0+000c <[^>]*> mult	a1,at
 0+0010 <[^>]*> mflo	a0
@@ -57,22 +57,4 @@ Disassembly of section \.text:
 0+00b8 <[^>]*> beqz	at,0+c4 <foo\+(0x|)c4>
 0+00bc <[^>]*> nop
 0+00c0 <[^>]*> break	(0x0,0x6|0x6)
-0+00c4 <[^>]*> dmul	a0,a1,a2
-0+00c8 <[^>]*> li	at,1
-0+00cc <[^>]*> dmult	a1,at
-0+00d0 <[^>]*> mflo	a0
-0+00d4 <[^>]*> dmult	a1,a2
-0+00d8 <[^>]*> mflo	a0
-0+00dc <[^>]*> dsra32	a0,a0,0x1f
-0+00e0 <[^>]*> mfhi	at
-0+00e4 <[^>]*> beq	a0,at,0+f0 <foo\+(0x|)f0>
-0+00e8 <[^>]*> nop
-0+00ec <[^>]*> break	(0x0,0x6|0x6)
-0+00f0 <[^>]*> mflo	a0
-0+00f4 <[^>]*> dmultu	a1,a2
-0+00f8 <[^>]*> mfhi	at
-0+00fc <[^>]*> mflo	a0
-0+0100 <[^>]*> beqz	at,0+10c <foo\+(0x|)10c>
-0+0104 <[^>]*> nop
-0+0108 <[^>]*> break	(0x0,0x6|0x6)
 	\.\.\.

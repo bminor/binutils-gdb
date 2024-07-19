@@ -888,7 +888,9 @@ if { [istarget mips*-*-vxworks*] } {
 					[mips_arch_list_matching fpisa5]
     run_dump_test_arches "mips5-fp" "-mabi=o64" \
 					[mips_arch_list_matching fpisa5 gpr64]
-    run_dump_test_arches "mul"		[mips_arch_list_matching mips3 !r5900 \
+    run_dump_test_arches "mul"		[mips_arch_list_matching mips1 \
+						!mips32r6]
+    run_dump_test_arches "mul64"	[mips_arch_list_matching mips3 !r5900 \
 						!mips64r6]
 
     run_dump_test_arches "rol"		[mips_arch_list_matching mips1 !ror]
