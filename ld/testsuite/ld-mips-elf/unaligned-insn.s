@@ -6,7 +6,7 @@ bar\@ :
 	.insn
 	.hword	0
 	.size	bar\@, . - bar\@
-	sym	\n - 1
+	sym	(\n - 1)
 	.endif
 	.endm
 
