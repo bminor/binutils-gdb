@@ -117,7 +117,6 @@ decode_mips_operand (const char *p)
 	case 'q': REG (0, 0, R5900_Q);
 	case 'r': REG (0, 0, R5900_R);
 	case 's': MSB (5, 11, 0, false, 31);	/* (0 .. 31) */
-	case 't': REG (5, 16, COPRO);
 	case 'u': SPECIAL (3, 16, IMM_INDEX);
 	case 'v': SPECIAL (2, 16, IMM_INDEX);
 	case 'w': SPECIAL (1, 16, IMM_INDEX);
@@ -1406,7 +1405,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mfps",		"t,P",		0x4000c800, 0xffe0ffc1,	WR_1|RD_C0|LC,		0,		M1|N5|EE,	0,	0 },
 {"mftacx",		"d",		0x41020021, 0xffff07ff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
 {"mftacx",		"d,*",		0x41020021, 0xfff307ff, WR_1|RD_a|TRAP,		0,		0,		MT32,	0 },
-{"mftc0",		"d,+t",		0x41000000, 0xffe007ff, WR_1|RD_C0|TRAP|LC,	0,		0,		MT32,	0 },
+{"mftc0",		"d,E",		0x41000000, 0xffe007ff, WR_1|RD_C0|TRAP|LC,	0,		0,		MT32,	0 },
 {"mftc0",		"d,E,H",	0x41000000, 0xffe007f8, WR_1|RD_C0|TRAP|LC,	0,		0,		MT32,	0 },
 {"mftc1",		"d,T",		0x41000022, 0xffe007ff, WR_1|RD_2|TRAP|LC|FP_S, 0,		0,		MT32,	0 },
 {"mftc1",		"d,E",		0x41000022, 0xffe007ff, WR_1|RD_2|TRAP|LC|FP_S, 0,		0,		MT32,	0 },

@@ -653,7 +653,6 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    "*" 2 bit dsp/smartmips accumulator register (OP_*_MTACC_T)
    "&" 2 bit dsp/smartmips accumulator register (OP_*_MTACC_D)
    "y" 5 bit control target register (OP_*_RT)
-   "+t" 5 bit coprocessor 0 destination register (OP_*_RT)
 
    MCU ASE usage:
    "~" 12 bit offset (OP_*_OFFSET12)
@@ -760,7 +759,7 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    "1234567890"
    "~!@#$%^&*|:'";\"
    "ABCEFGHIJKLMNOPQRSTUVWXZ"
-   "abcdefghijklmnopqrstuvwxyz"
+   "abcdefghijklmnopqrs uvwxyz"
 
    Extension character sequences used so far ("-" followed by the
    following), for quick reference when adding more:
