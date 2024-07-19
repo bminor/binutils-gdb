@@ -769,16 +769,6 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	     line from just after the first white space.  */
 	  state = 1;
 	  PUT ('|');
-#ifdef TC_TIC6X
-	  /* "||^" is used for SPMASKed instructions.  */
-	  ch = GET ();
-	  if (ch == EOF)
-	    goto fromeof;
-	  else if (ch == '^')
-	    PUT ('^');
-	  else
-	    UNGET (ch);
-#endif
 	  continue;
 #endif
 #ifdef TC_Z80
