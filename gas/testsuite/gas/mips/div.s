@@ -30,7 +30,6 @@ foo:
 	remu	$4,$5,2
 
 # Sanity check the 64 bit versions.
-	.set	mips3
 	ddiv	$4,$5,$6
 	ddivu	$4,$5,2
 	drem	$4,$5,0x8000
@@ -38,4 +37,5 @@ foo:
 
 # force some padding, to make objdump consistently report that there's some
 # here...
-	.space	8
+	.align	4, 0
+	.space	16

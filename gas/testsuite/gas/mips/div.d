@@ -1,5 +1,5 @@
-#as: -march=r4000 -mtune=r4000
-#objdump: -dr --prefix-addresses -mmips:4000
+#as: -32
+#objdump: -dr --prefix-addresses
 #name: MIPS div
 
 # Test the div macro.
@@ -18,108 +18,93 @@ Disassembly of section .text:
 0+0020 <[^>]*> nop
 0+0024 <[^>]*> break	(0x0,0x6|0x6)
 0+0028 <[^>]*> mflo	a0
-0+002c <[^>]*> nop
-0+0030 <[^>]*> bnez	a2,0+003c <foo\+0x3c>
-0+0034 <[^>]*> div	zero,a1,a2
-0+0038 <[^>]*> break	(0x0,0x7|0x7)
-0+003c <[^>]*> li	at,-1
-0+0040 <[^>]*> bne	a2,at,0+0054 <foo\+0x54>
-0+0044 <[^>]*> lui	at,0x8000
-0+0048 <[^>]*> bne	a1,at,0+0054 <foo\+0x54>
-0+004c <[^>]*> nop
-0+0050 <[^>]*> break	(0x0,0x6|0x6)
-0+0054 <[^>]*> mflo	a0
-0+0058 <[^>]*> move	a0,a0
-0+005c <[^>]*> move	a0,a1
-0+0060 <[^>]*> neg	a0,a0
-0+0064 <[^>]*> neg	a0,a1
-0+0068 <[^>]*> li	at,2
-0+006c <[^>]*> div	zero,a0,at
-0+0070 <[^>]*> mflo	a0
-0+0074 <[^>]*> li	at,2
-0+0078 <[^>]*> nop
-0+007c <[^>]*> div	zero,a1,at
-0+0080 <[^>]*> mflo	a0
-0+0084 <[^>]*> li	at,0x8000
-0+0088 <[^>]*> nop
-0+008c <[^>]*> div	zero,a0,at
+0+002c <[^>]*> bnez	a2,0+0038 <foo\+0x38>
+0+0030 <[^>]*> div	zero,a1,a2
+0+0034 <[^>]*> break	(0x0,0x7|0x7)
+0+0038 <[^>]*> li	at,-1
+0+003c <[^>]*> bne	a2,at,0+0050 <foo\+0x50>
+0+0040 <[^>]*> lui	at,0x8000
+0+0044 <[^>]*> bne	a1,at,0+0050 <foo\+0x50>
+0+0048 <[^>]*> nop
+0+004c <[^>]*> break	(0x0,0x6|0x6)
+0+0050 <[^>]*> mflo	a0
+0+0054 <[^>]*> move	a0,a0
+0+0058 <[^>]*> move	a0,a1
+0+005c <[^>]*> neg	a0,a0
+0+0060 <[^>]*> neg	a0,a1
+0+0064 <[^>]*> li	at,2
+0+0068 <[^>]*> div	zero,a0,at
+0+006c <[^>]*> mflo	a0
+0+0070 <[^>]*> li	at,2
+0+0074 <[^>]*> div	zero,a1,at
+0+0078 <[^>]*> mflo	a0
+0+007c <[^>]*> li	at,0x8000
+0+0080 <[^>]*> div	zero,a0,at
+0+0084 <[^>]*> mflo	a0
+0+0088 <[^>]*> li	at,0x8000
+0+008c <[^>]*> div	zero,a1,at
 0+0090 <[^>]*> mflo	a0
-0+0094 <[^>]*> li	at,0x8000
-0+0098 <[^>]*> nop
-0+009c <[^>]*> div	zero,a1,at
-0+00a0 <[^>]*> mflo	a0
-0+00a4 <[^>]*> li	at,-32768
-0+00a8 <[^>]*> nop
-0+00ac <[^>]*> div	zero,a0,at
-0+00b0 <[^>]*> mflo	a0
-0+00b4 <[^>]*> li	at,-32768
-0+00b8 <[^>]*> nop
+0+0094 <[^>]*> li	at,-32768
+0+0098 <[^>]*> div	zero,a0,at
+0+009c <[^>]*> mflo	a0
+0+00a0 <[^>]*> li	at,-32768
+0+00a4 <[^>]*> div	zero,a1,at
+0+00a8 <[^>]*> mflo	a0
+0+00ac <[^>]*> lui	at,0x1
+0+00b0 <[^>]*> div	zero,a0,at
+0+00b4 <[^>]*> mflo	a0
+0+00b8 <[^>]*> lui	at,0x1
 0+00bc <[^>]*> div	zero,a1,at
 0+00c0 <[^>]*> mflo	a0
 0+00c4 <[^>]*> lui	at,0x1
-0+00c8 <[^>]*> nop
+0+00c8 <[^>]*> ori	at,at,0xa5a5
 0+00cc <[^>]*> div	zero,a0,at
 0+00d0 <[^>]*> mflo	a0
 0+00d4 <[^>]*> lui	at,0x1
-0+00d8 <[^>]*> nop
+0+00d8 <[^>]*> ori	at,at,0xa5a5
 0+00dc <[^>]*> div	zero,a1,at
 0+00e0 <[^>]*> mflo	a0
-0+00e4 <[^>]*> lui	at,0x1
-0+00e8 <[^>]*> ori	at,at,0xa5a5
-0+00ec <[^>]*> div	zero,a0,at
-0+00f0 <[^>]*> mflo	a0
-0+00f4 <[^>]*> lui	at,0x1
-0+00f8 <[^>]*> ori	at,at,0xa5a5
-0+00fc <[^>]*> div	zero,a1,at
-0+0100 <[^>]*> mflo	a0
-	...
-0+010c <[^>]*> divu	zero,a0,a1
-0+0110 <[^>]*> bnez	a1,0+011c <foo\+0x11c>
-0+0114 <[^>]*> divu	zero,a0,a1
-0+0118 <[^>]*> break	(0x0,0x7|0x7)
-0+011c <[^>]*> mflo	a0
-0+0120 <[^>]*> nop
-0+0124 <[^>]*> bnez	a2,0+0130 <foo\+0x130>
-0+0128 <[^>]*> divu	zero,a1,a2
-0+012c <[^>]*> break	(0x0,0x7|0x7)
-0+0130 <[^>]*> mflo	a0
-0+0134 <[^>]*> move	a0,a0
-0+0138 <[^>]*> bnez	a2,0+0144 <foo\+0x144>
-0+013c <[^>]*> div	zero,a1,a2
-0+0140 <[^>]*> break	(0x0,0x7|0x7)
-0+0144 <[^>]*> li	at,-1
-0+0148 <[^>]*> bne	a2,at,0+015c <foo\+0x15c>
-0+014c <[^>]*> lui	at,0x8000
-0+0150 <[^>]*> bne	a1,at,0+015c <foo\+0x15c>
-0+0154 <[^>]*> nop
-0+0158 <[^>]*> break	(0x0,0x6|0x6)
-0+015c <[^>]*> mfhi	a0
-0+0160 <[^>]*> li	at,2
-0+0164 <[^>]*> nop
-0+0168 <[^>]*> divu	zero,a1,at
-0+016c <[^>]*> mfhi	a0
-0+0170 <[^>]*> nop
-0+0174 <[^>]*> bnez	a2,0+0180 <foo\+0x180>
-0+0178 <[^>]*> ddiv	zero,a1,a2
-0+017c <[^>]*> break	(0x0,0x7|0x7)
-0+0180 <[^>]*> (daddiu	at,zero,-1|li	at,-1)
-0+0184 <[^>]*> bne	a2,at,0+019c <foo\+0x19c>
-0+0188 <[^>]*> (daddiu	at,zero,1|li	at,1)
-0+018c <[^>]*> dsll32	at,at,0x1f
-0+0190 <[^>]*> bne	a1,at,0+019c <foo\+0x19c>
-0+0194 <[^>]*> nop
-0+0198 <[^>]*> break	(0x0,0x6|0x6)
-0+019c <[^>]*> mflo	a0
-0+01a0 <[^>]*> li	at,2
-0+01a4 <[^>]*> nop
-0+01a8 <[^>]*> ddivu	zero,a1,at
-0+01ac <[^>]*> mflo	a0
-0+01b0 <[^>]*> li	at,0x8000
-0+01b4 <[^>]*> nop
-0+01b8 <[^>]*> ddiv	zero,a1,at
-0+01bc <[^>]*> mfhi	a0
-0+01c0 <[^>]*> li	at,-32768
-0+01c4 <[^>]*> nop
-0+01c8 <[^>]*> ddivu	zero,a1,at
-0+01cc <[^>]*> mfhi	a0
+0+00e4 <[^>]*> divu	zero,a0,a1
+0+00e8 <[^>]*> bnez	a1,0+0f4 <foo\+0xf4>
+0+00ec <[^>]*> divu	zero,a0,a1
+0+00f0 <[^>]*> break	(0x0,0x7|0x7)
+0+00f4 <[^>]*> mflo	a0
+0+00f8 <[^>]*> bnez	a2,0+0104 <foo\+0x104>
+0+00fc <[^>]*> divu	zero,a1,a2
+0+0100 <[^>]*> break	(0x0,0x7|0x7)
+0+0104 <[^>]*> mflo	a0
+0+0108 <[^>]*> move	a0,a0
+0+010c <[^>]*> bnez	a2,0+0118 <foo\+0x118>
+0+0110 <[^>]*> div	zero,a1,a2
+0+0114 <[^>]*> break	(0x0,0x7|0x7)
+0+0118 <[^>]*> li	at,-1
+0+011c <[^>]*> bne	a2,at,0+0130 <foo\+0x130>
+0+0120 <[^>]*> lui	at,0x8000
+0+0124 <[^>]*> bne	a1,at,0+0130 <foo\+0x130>
+0+0128 <[^>]*> nop
+0+012c <[^>]*> break	(0x0,0x6|0x6)
+0+0130 <[^>]*> mfhi	a0
+0+0134 <[^>]*> li	at,2
+0+0138 <[^>]*> divu	zero,a1,at
+0+013c <[^>]*> mfhi	a0
+0+0140 <[^>]*> bnez	a2,0+014c <foo\+0x14c>
+0+0144 <[^>]*> ddiv	zero,a1,a2
+0+0148 <[^>]*> break	(0x0,0x7|0x7)
+0+014c <[^>]*> (daddiu	at,zero,-1|li	at,-1)
+0+0150 <[^>]*> bne	a2,at,0+0168 <foo\+0x168>
+0+0154 <[^>]*> (daddiu	at,zero,1|li	at,1)
+0+0158 <[^>]*> dsll32	at,at,0x1f
+0+015c <[^>]*> bne	a1,at,0+0168 <foo\+0x168>
+0+0160 <[^>]*> nop
+0+0164 <[^>]*> break	(0x0,0x6|0x6)
+0+0168 <[^>]*> mflo	a0
+0+016c <[^>]*> li	at,2
+0+0170 <[^>]*> ddivu	zero,a1,at
+0+0174 <[^>]*> mflo	a0
+0+0178 <[^>]*> li	at,0x8000
+0+017c <[^>]*> ddiv	zero,a1,at
+0+0180 <[^>]*> mfhi	a0
+0+0184 <[^>]*> li	at,-32768
+0+0188 <[^>]*> ddivu	zero,a1,at
+0+018c <[^>]*> mfhi	a0
 	...
