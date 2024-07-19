@@ -209,11 +209,11 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	      || i386_types[j].sz[0] > 8
 	      || (i386_types[j].sz[0] & (i386_types[j].sz[0] - 1)))
 	    return O_illegal;
-	  switch (i.encoding)
+	  switch (pp.encoding)
 	    {
 	    case encoding_default:
 	    case encoding_egpr:
-	      i.encoding = encoding_evex;
+	      pp.encoding = encoding_evex;
 	      break;
 	    case encoding_evex:
 	    case encoding_evex512:
