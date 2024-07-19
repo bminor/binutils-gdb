@@ -1919,6 +1919,8 @@ bfin_loop_beginend (Expr_Node *exp, int begin)
      Adjust label address.  */
   if (!begin)
     *symbol_X_add_number (linelabel) -= last_insn_size;
+
+  free (label_name);
 }
 
 bool
