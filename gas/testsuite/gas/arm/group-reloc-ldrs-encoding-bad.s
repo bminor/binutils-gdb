@@ -14,7 +14,7 @@
 
 	.macro ldrtest load store sym offset
 
-	ldrtest2 \load \sym \offset
+	ldrtest2 \load \sym "\offset"
 
 	\store	r0, [r0, #:pc_g1:(\sym \offset)]
 	\store	r0, [r0, #:pc_g2:(\sym \offset)]
