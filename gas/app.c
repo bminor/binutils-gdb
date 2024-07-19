@@ -58,10 +58,6 @@ static const char * symver_state;
 
 static char last_char;
 
-static char lex[256];
-static const char symbol_chars[] =
-"$._ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
 #define LEX_IS_SYMBOL_COMPONENT		1
 #define LEX_IS_WHITESPACE		2
 #define LEX_IS_LINE_SEPARATOR		3
@@ -93,23 +89,73 @@ static const char symbol_chars[] =
 #define IS_LINE_COMMENT(c)		(lex[c] == LEX_IS_LINE_COMMENT_START)
 #define	IS_NEWLINE(c)			(lex[c] == LEX_IS_NEWLINE)
 
-static int process_escape (int);
-
-/* FIXME-soon: The entire lexer/parser thingy should be
-   built statically at compile time rather than dynamically
-   each and every time the assembler is run.  xoxorich.  */
+static char lex[256] = {
+  [' ']  = LEX_IS_WHITESPACE,
+  ['\t'] = LEX_IS_WHITESPACE,
+  ['\r'] = LEX_IS_WHITESPACE,
+  ['\n'] = LEX_IS_NEWLINE,
+  [':'] = LEX_IS_COLON,
+  ['$'] = LEX_IS_SYMBOL_COMPONENT,
+  ['.'] = LEX_IS_SYMBOL_COMPONENT,
+  ['_'] = LEX_IS_SYMBOL_COMPONENT,
+  ['A'] = LEX_IS_SYMBOL_COMPONENT, ['a'] = LEX_IS_SYMBOL_COMPONENT,
+  ['B'] = LEX_IS_SYMBOL_COMPONENT, ['b'] = LEX_IS_SYMBOL_COMPONENT,
+  ['C'] = LEX_IS_SYMBOL_COMPONENT, ['c'] = LEX_IS_SYMBOL_COMPONENT,
+  ['D'] = LEX_IS_SYMBOL_COMPONENT, ['d'] = LEX_IS_SYMBOL_COMPONENT,
+  ['E'] = LEX_IS_SYMBOL_COMPONENT, ['e'] = LEX_IS_SYMBOL_COMPONENT,
+  ['F'] = LEX_IS_SYMBOL_COMPONENT, ['f'] = LEX_IS_SYMBOL_COMPONENT,
+  ['G'] = LEX_IS_SYMBOL_COMPONENT, ['g'] = LEX_IS_SYMBOL_COMPONENT,
+  ['H'] = LEX_IS_SYMBOL_COMPONENT, ['h'] = LEX_IS_SYMBOL_COMPONENT,
+  ['I'] = LEX_IS_SYMBOL_COMPONENT, ['i'] = LEX_IS_SYMBOL_COMPONENT,
+  ['J'] = LEX_IS_SYMBOL_COMPONENT, ['j'] = LEX_IS_SYMBOL_COMPONENT,
+  ['K'] = LEX_IS_SYMBOL_COMPONENT, ['k'] = LEX_IS_SYMBOL_COMPONENT,
+  ['L'] = LEX_IS_SYMBOL_COMPONENT, ['l'] = LEX_IS_SYMBOL_COMPONENT,
+  ['M'] = LEX_IS_SYMBOL_COMPONENT, ['m'] = LEX_IS_SYMBOL_COMPONENT,
+  ['N'] = LEX_IS_SYMBOL_COMPONENT, ['n'] = LEX_IS_SYMBOL_COMPONENT,
+  ['O'] = LEX_IS_SYMBOL_COMPONENT, ['o'] = LEX_IS_SYMBOL_COMPONENT,
+  ['P'] = LEX_IS_SYMBOL_COMPONENT, ['p'] = LEX_IS_SYMBOL_COMPONENT,
+  ['Q'] = LEX_IS_SYMBOL_COMPONENT, ['q'] = LEX_IS_SYMBOL_COMPONENT,
+  ['R'] = LEX_IS_SYMBOL_COMPONENT, ['r'] = LEX_IS_SYMBOL_COMPONENT,
+  ['S'] = LEX_IS_SYMBOL_COMPONENT, ['s'] = LEX_IS_SYMBOL_COMPONENT,
+  ['T'] = LEX_IS_SYMBOL_COMPONENT, ['t'] = LEX_IS_SYMBOL_COMPONENT,
+  ['U'] = LEX_IS_SYMBOL_COMPONENT, ['u'] = LEX_IS_SYMBOL_COMPONENT,
+  ['V'] = LEX_IS_SYMBOL_COMPONENT, ['v'] = LEX_IS_SYMBOL_COMPONENT,
+  ['W'] = LEX_IS_SYMBOL_COMPONENT, ['w'] = LEX_IS_SYMBOL_COMPONENT,
+  ['X'] = LEX_IS_SYMBOL_COMPONENT, ['x'] = LEX_IS_SYMBOL_COMPONENT,
+  ['Y'] = LEX_IS_SYMBOL_COMPONENT, ['y'] = LEX_IS_SYMBOL_COMPONENT,
+  ['Z'] = LEX_IS_SYMBOL_COMPONENT, ['z'] = LEX_IS_SYMBOL_COMPONENT,
+  ['0'] = LEX_IS_SYMBOL_COMPONENT,
+  ['1'] = LEX_IS_SYMBOL_COMPONENT,
+  ['2'] = LEX_IS_SYMBOL_COMPONENT,
+  ['3'] = LEX_IS_SYMBOL_COMPONENT,
+  ['4'] = LEX_IS_SYMBOL_COMPONENT,
+  ['5'] = LEX_IS_SYMBOL_COMPONENT,
+  ['6'] = LEX_IS_SYMBOL_COMPONENT,
+  ['7'] = LEX_IS_SYMBOL_COMPONENT,
+  ['8'] = LEX_IS_SYMBOL_COMPONENT,
+  ['9'] = LEX_IS_SYMBOL_COMPONENT,
+#define INIT2(n) [n] = LEX_IS_SYMBOL_COMPONENT, \
+		 [(n) + 1] = LEX_IS_SYMBOL_COMPONENT
+#define INIT4(n)    INIT2 (n),  INIT2 ((n) +  2)
+#define INIT8(n)    INIT4 (n),  INIT4 ((n) +  4)
+#define INIT16(n)   INIT8 (n),  INIT8 ((n) +  8)
+#define INIT32(n)  INIT16 (n), INIT16 ((n) + 16)
+#define INIT64(n)  INIT32 (n), INIT32 ((n) + 32)
+#define INIT128(n) INIT64 (n), INIT64 ((n) + 64)
+  INIT128 (128),
+#undef INIT128
+#undef INIT64
+#undef INIT32
+#undef INIT16
+#undef INIT8
+#undef INIT4
+#undef INIT2
+};
 
 void
 do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
 {
   const char *p;
-  int c;
-
-  lex[' '] = LEX_IS_WHITESPACE;
-  lex['\t'] = LEX_IS_WHITESPACE;
-  lex['\r'] = LEX_IS_WHITESPACE;
-  lex['\n'] = LEX_IS_NEWLINE;
-  lex[':'] = LEX_IS_COLON;
 
 #ifdef TC_M68K
   scrub_m68k_mri = m68k_mri;
@@ -133,11 +179,6 @@ do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
 
   /* Note that these override the previous defaults, e.g. if ';' is a
      comment char, then it isn't a line separator.  */
-  for (p = symbol_chars; *p; ++p)
-    lex[(unsigned char) *p] = LEX_IS_SYMBOL_COMPONENT;
-
-  for (c = 128; c < 256; ++c)
-    lex[c] = LEX_IS_SYMBOL_COMPONENT;
 
 #ifdef tc_symbol_chars
   /* This macro permits the processor to specify all characters which
