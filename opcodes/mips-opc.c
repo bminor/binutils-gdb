@@ -217,6 +217,8 @@ decode_mips_operand (const char *p)
 
 /* Short hand so the lines aren't too long.  */
 
+#define AL	INSN2_ALIAS
+
 #define LC	INSN_LOAD_COPROC
 #define UBD     INSN_UNCOND_BRANCH_DELAY
 #define CBD	INSN_COND_BRANCH_DELAY
@@ -450,19 +452,19 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"pref",		"k,o(b)",	0xcc000000, 0xfc000000, RD_3|LM,           	0,		I4_32|G3,	0,	I37 },
 {"pref",		"k,A(b)",	0,    (int) M_PREF_AB,	INSN_MACRO,		0,		I4_32|G3,	0,	0 },
 {"prefx",		"h,t(b)",	0x4c00000f, 0xfc0007ff, RD_2|RD_3|FP_S|LM,		0,		I4_33,		0,	I37 },
-{"nop",			"",		0x00000000, 0xffffffff, 0,              	INSN2_ALIAS,	I1,		0,	0 }, /* sll */
-{"ssnop",		"",		0x00000040, 0xffffffff, 0,              	INSN2_ALIAS,	I1,		0,	0 }, /* sll */
-{"ehb",			"",		0x000000c0, 0xffffffff, 0,              	INSN2_ALIAS,	I1,		0,	0 }, /* sll */
-{"li",			"t,j",		0x24000000, 0xffe00000, WR_1,			INSN2_ALIAS,	I1,		0,	0 }, /* addiu */
-{"li",			"t,i",		0x34000000, 0xffe00000, WR_1,			INSN2_ALIAS,	I1,		0,	0 }, /* ori */
+{"nop",			"",		0x00000000, 0xffffffff, 0,              	AL,		I1,		0,	0 }, /* sll */
+{"ssnop",		"",		0x00000040, 0xffffffff, 0,              	AL,		I1,		0,	0 }, /* sll */
+{"ehb",			"",		0x000000c0, 0xffffffff, 0,              	AL,		I1,		0,	0 }, /* sll */
+{"li",			"t,j",		0x24000000, 0xffe00000, WR_1,			AL,		I1,		0,	0 }, /* addiu */
+{"li",			"t,i",		0x34000000, 0xffe00000, WR_1,			AL,		I1,		0,	0 }, /* ori */
 {"li",			"t,I",		0,    (int) M_LI,	INSN_MACRO,		0,		I1,		0,	0 },
 {"move",		"d,s",		0,    (int) M_MOVE,	INSN_MACRO,		0,		I1,		0,	0 },
-{"move",		"d,s",		0x00000025, 0xfc1f07ff,	WR_1|RD_2,		INSN2_ALIAS,	I1,		0,	0 },/* or */
-{"move",		"d,s",		0x0000002d, 0xfc1f07ff, WR_1|RD_2,		INSN2_ALIAS,	I3,		0,	0 },/* daddu */
-{"move",		"d,s",		0x00000021, 0xfc1f07ff, WR_1|RD_2,		INSN2_ALIAS,	I1,		0,	0 },/* addu */
-{"b",			"p",		0x10000000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1,		0,	0 },/* beq 0,0 */
-{"b",			"p",		0x04010000, 0xffff0000,	UBD,			INSN2_ALIAS,	I1,		0,	0 },/* bgez 0 */
-{"bal",			"p",		0x04110000, 0xffff0000,	WR_31|UBD,		INSN2_ALIAS,	I1,		0,	I37 }, /* bgezal 0 */
+{"move",		"d,s",		0x00000025, 0xfc1f07ff,	WR_1|RD_2,		AL,		I1,		0,	0 },/* or */
+{"move",		"d,s",		0x0000002d, 0xfc1f07ff, WR_1|RD_2,		AL,		I3,		0,	0 },/* daddu */
+{"move",		"d,s",		0x00000021, 0xfc1f07ff, WR_1|RD_2,		AL,		I1,		0,	0 },/* addu */
+{"b",			"p",		0x10000000, 0xffff0000,	UBD,			AL,		I1,		0,	0 },/* beq 0,0 */
+{"b",			"p",		0x04010000, 0xffff0000,	UBD,			AL,		I1,		0,	0 },/* bgez 0 */
+{"bal",			"p",		0x04110000, 0xffff0000,	WR_31|UBD,		AL,		I1,		0,	I37 }, /* bgezal 0 */
 {"bal",			"p",		0x04110000, 0xffff0000,	WR_31|UBD,		0,		I37,		0,	0 },
 {"bc",			"+'",		0xc8000000, 0xfc000000,	NODS,			0,		I37,		0,	0 },
 {"balc",		"+'",		0xe8000000, 0xfc000000,	WR_31|NODS,		0,		I37,		0,	0 },
@@ -736,8 +738,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"bc1tl",		"N,p",		0x45030000, 0xffe30000, RD_CC|CBL|FP_S, 	0,		I4_32,		0,	I37 },
 /* bc2* are at the bottom of the table.  */
 /* bc3* are at the bottom of the table.  */
-{"beqz",		"s,p",		0x10000000, 0xfc1f0000,	RD_1|CBD,		INSN2_ALIAS,	I1,		0,	0 },
-{"beqzl",		"s,p",		0x50000000, 0xfc1f0000,	RD_1|CBL,		INSN2_ALIAS,	I2|T3,		0,	I37 },
+{"beqz",		"s,p",		0x10000000, 0xfc1f0000,	RD_1|CBD,		AL,		I1,		0,	0 },
+{"beqzl",		"s,p",		0x50000000, 0xfc1f0000,	RD_1|CBL,		AL,		I2|T3,		0,	I37 },
 {"beq",			"s,t,p",	0x10000000, 0xfc000000,	RD_1|RD_2|CBD,		0,		I1,		0,	0 },
 {"beq",			"s,I,p",	0,    (int) M_BEQ_I,	INSN_MACRO,		0,		I1,		0,	0 },
 {"beql",		"s,t,p",	0x50000000, 0xfc000000,	RD_1|RD_2|CBL,		0,		I2|T3,		0,	I37 },
@@ -787,8 +789,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"bltzal",		"s,p",		0x04100000, 0xfc1f0000,	RD_1|WR_31|CBD,		0,		I1,		0,	I37 },
 {"nal",			"",		0x04100000, 0xffffffff,	WR_31|CBD,		0,		I1,		0,	0 }, /* bltzal 0,.+4 */
 {"bltzall",		"s,p",		0x04120000, 0xfc1f0000,	RD_1|WR_31|CBL,		0,		I2|T3,		0,	I37 },
-{"bnez",		"s,p",		0x14000000, 0xfc1f0000,	RD_1|CBD,		INSN2_ALIAS,	I1,		0,	0 },
-{"bnezl",		"s,p",		0x54000000, 0xfc1f0000,	RD_1|CBL,		INSN2_ALIAS,	I2|T3,		0,	I37 },
+{"bnez",		"s,p",		0x14000000, 0xfc1f0000,	RD_1|CBD,		AL,		I1,		0,	0 },
+{"bnezl",		"s,p",		0x54000000, 0xfc1f0000,	RD_1|CBL,		AL,		I2|T3,		0,	I37 },
 {"bne",			"s,t,p",	0x14000000, 0xfc000000,	RD_1|RD_2|CBD,		0,		I1,		0,	0 },
 {"bne",			"s,I,p",	0,    (int) M_BNE_I,	INSN_MACRO,		0,		I1,		0,	0 },
 {"bnel",		"s,t,p",	0x54000000, 0xfc000000,	RD_1|RD_2|CBL, 		0,		I2|T3,		0,	I37 },
@@ -1210,14 +1212,14 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"hypcall",		"+J",		0x42000028, 0xffe007ff, TRAP,			0,		0,		IVIRT,	0 },
 {"ins",			"t,r,+A,+B",	0x7c000004, 0xfc00003f, WR_1|RD_2,    		0,		I33|ALX,		0,	0 },
 {"iret",		"",		0x42000038, 0xffffffff,	NODS,			0,		0,		MC,	0 },
-{"jr",			"s",		0x00000009, 0xfc1fffff,	RD_1|UBD,		INSN2_ALIAS,	I37,		0,	0 }, /* jalr $0 */
+{"jr",			"s",		0x00000009, 0xfc1fffff,	RD_1|UBD,		AL,		I37,		0,	0 }, /* jalr $0 */
 {"jr",			"s",		0x00000008, 0xfc1fffff,	RD_1|UBD,		0,		I1,		0,	I37 },
 /* MIPS R6 jic appears before beqzc and jialc appears before bnezc */
 /* jr.hb is officially MIPS{32,64}R2, but it works on R1 as jr with
    the same hazard barrier effect.  */
-{"jr.hb",		"s",		0x00000409, 0xfc1fffff,	RD_1|UBD,		INSN2_ALIAS,	I37,		0,	0 }, /* jalr.hb $0 */
+{"jr.hb",		"s",		0x00000409, 0xfc1fffff,	RD_1|UBD,		AL,		I37,		0,	0 }, /* jalr.hb $0 */
 {"jr.hb",		"s",		0x00000408, 0xfc1fffff,	RD_1|UBD,		0,		I32,		0,	I37 },
-{"j",			"s",		0x00000009, 0xfc1fffff,	RD_1|UBD,		INSN2_ALIAS,	I37,		0,	0 }, /* jalr $0 */
+{"j",			"s",		0x00000009, 0xfc1fffff,	RD_1|UBD,		AL,		I37,		0,	0 }, /* jalr $0 */
 {"j",			"s",		0x00000008, 0xfc1fffff,	RD_1|UBD,		0,		I1,		0,	I37 }, /* jr */
 /* SVR4 PIC code requires special handling for j, so it must be a
    macro.  */
@@ -1787,10 +1789,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"recip2.d",		"D,S,T",	0x4620001c, 0xffe0003f,	WR_1|RD_2|RD_3|FP_D,	0,		0,		M3D,	0 },
 {"recip2.ps",		"D,S,T",	0x46c0001c, 0xffe0003f,	WR_1|RD_2|RD_3|FP_S,	0,		0,		M3D,	0 },
 {"recip2.s",		"D,S,T",	0x4600001c, 0xffe0003f,	WR_1|RD_2|RD_3|FP_S,	0,		0,		M3D,	0 },
-{"rem",			"z,s,t",	0x0000001a, 0xfc00ffff, RD_2|RD_3|WR_HILO,      INSN2_ALIAS,	I1,		0,	I37 },
+{"rem",			"z,s,t",	0x0000001a, 0xfc00ffff, RD_2|RD_3|WR_HILO,      AL,		I1,		0,	I37 },
 {"rem",			"d,v,t",	0,    (int) M_REM_3,	INSN_MACRO,		0,		I1,		0,	I37 },
 {"rem",			"d,v,I",	0,    (int) M_REM_3I,	INSN_MACRO,		0,		I1,		0,	I37 },
-{"remu",		"z,s,t",	0x0000001b, 0xfc00ffff, RD_2|RD_3|WR_HILO,      INSN2_ALIAS,	I1,		0,	I37 },
+{"remu",		"z,s,t",	0x0000001b, 0xfc00ffff, RD_2|RD_3|WR_HILO,      AL,		I1,		0,	I37 },
 {"remu",		"d,v,t",	0,    (int) M_REMU_3,	INSN_MACRO,		0,		I1,		0,	I37 },
 {"remu",		"d,v,I",	0,    (int) M_REMU_3I,	INSN_MACRO,		0,		I1,		0,	I37 },
 {"rdhwr",		"t,K",		0x7c00003b, 0xffe007ff, WR_1,			0,		I33,		0,	0 },
@@ -2011,15 +2013,15 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"invalidate",		"t,o(b)",	0xb8000000, 0xfc000000,	RD_1|RD_3,		0,		I2,		0,	I37 }, /* same */
 {"invalidate",		"t,A(b)",	0,    (int) M_SWR_AB,	INSN_MACRO,		0,		I2,		0,	I37 }, /* as swr */
 {"swxc1",		"S,t(b)",	0x4c000008, 0xfc0007ff, RD_1|RD_2|RD_3|SM|FP_S,	0,		I4_33,		0,	I37 },
-{"synciobdma",		"",		0x0000008f, 0xffffffff,	NODS,			INSN2_ALIAS,	IOCT,		0,	0 },
-{"syncs",		"",		0x0000018f, 0xffffffff,	NODS,			INSN2_ALIAS,	IOCT,		0,	0 },
-{"syncw",		"",		0x0000010f, 0xffffffff,	NODS,			INSN2_ALIAS,	IOCT,		0,	0 },
-{"syncws",		"",		0x0000014f, 0xffffffff,	NODS,			INSN2_ALIAS,	IOCT,		0,	0 },
-{"sync_acquire",	"",		0x0000044f, 0xffffffff,	NODS,			INSN2_ALIAS,	I33,		0,	0 },
-{"sync_mb",		"",		0x0000040f, 0xffffffff,	NODS,			INSN2_ALIAS,	I33,		0,	0 },
-{"sync_release",	"",		0x0000048f, 0xffffffff,	NODS,			INSN2_ALIAS,	I33,		0,	0 },
-{"sync_rmb",		"",		0x000004cf, 0xffffffff,	NODS,			INSN2_ALIAS,	I33,		0,	0 },
-{"sync_wmb",		"",		0x0000010f, 0xffffffff,	NODS,			INSN2_ALIAS,	I33,		0,	0 },
+{"synciobdma",		"",		0x0000008f, 0xffffffff,	NODS,			AL,		IOCT,		0,	0 },
+{"syncs",		"",		0x0000018f, 0xffffffff,	NODS,			AL,		IOCT,		0,	0 },
+{"syncw",		"",		0x0000010f, 0xffffffff,	NODS,			AL,		IOCT,		0,	0 },
+{"syncws",		"",		0x0000014f, 0xffffffff,	NODS,			AL,		IOCT,		0,	0 },
+{"sync_acquire",	"",		0x0000044f, 0xffffffff,	NODS,			AL,		I33,		0,	0 },
+{"sync_mb",		"",		0x0000040f, 0xffffffff,	NODS,			AL,		I33,		0,	0 },
+{"sync_release",	"",		0x0000048f, 0xffffffff,	NODS,			AL,		I33,		0,	0 },
+{"sync_rmb",		"",		0x000004cf, 0xffffffff,	NODS,			AL,		I33,		0,	0 },
+{"sync_wmb",		"",		0x0000010f, 0xffffffff,	NODS,			AL,		I33,		0,	0 },
 {"sync",		"",		0x0000000f, 0xffffffff,	NODS,			0,		I2|G1,		0,	0 },
 {"sync",		"1",		0x0000000f, 0xfffff83f,	NODS,			0,		I32,		0,	0 },
 {"sync.p",		"",		0x0000040f, 0xffffffff,	NODS,			0,		I2,		0,	0 },
@@ -3223,15 +3225,15 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"dbitswap",		"d,t",		0x7c000024, 0xffe007ff,	WR_1|RD_2,		0,		I69,		0,	0 },
 
 {"bovc",		"s,-w,p",	0x20000000, 0xfc000000,	RD_1|RD_2|NODS,		FS,		I37,		0,	0 },
-{"bovc",		"t,-x,p",	0x20000000, 0xfc000000,	RD_1|RD_2|NODS,		FS|INSN2_ALIAS,	I37,		0,	0 },
+{"bovc",		"t,-x,p",	0x20000000, 0xfc000000,	RD_1|RD_2|NODS,		FS|AL,		I37,		0,	0 },
 {"beqzalc",		"-t,p",		0x20000000, 0xffe00000,	RD_1|WR_31|NODS,	FS,		I37,		0,	0 },
 {"beqc",		"-s,-u,p",	0x20000000, 0xfc000000,	RD_1|RD_2|NODS,		FS,		I37,		0,	0 },
-{"beqc",		"t,-y,p",	0x20000000, 0xfc000000,	RD_1|RD_2|NODS,		FS|INSN2_ALIAS,	I37,		0,	0 },
+{"beqc",		"t,-y,p",	0x20000000, 0xfc000000,	RD_1|RD_2|NODS,		FS|AL,		I37,		0,	0 },
 {"bnvc",		"s,-w,p",	0x60000000, 0xfc000000,	RD_1|RD_2|NODS,		FS,		I37,		0,	0 },
-{"bnvc",		"t,-x,p",	0x60000000, 0xfc000000,	RD_1|RD_2|NODS,		FS|INSN2_ALIAS,	I37,		0,	0 },
+{"bnvc",		"t,-x,p",	0x60000000, 0xfc000000,	RD_1|RD_2|NODS,		FS|AL,		I37,		0,	0 },
 {"bnezalc",		"-t,p",		0x60000000, 0xffe00000,	RD_1|WR_31|NODS,	FS,		I37,		0,	0 },
 {"bnec",		"-s,-u,p",	0x60000000, 0xfc000000,	RD_1|RD_2|NODS,		FS,		I37,		0,	0 },
-{"bnec",		"t,-y,p",	0x60000000, 0xfc000000,	RD_1|RD_2|NODS,		FS|INSN2_ALIAS,	I37,		0,	0 },
+{"bnec",		"t,-y,p",	0x60000000, 0xfc000000,	RD_1|RD_2|NODS,		FS|AL,		I37,		0,	0 },
 
 {"blezc",		"-t,p",		0x58000000, 0xffe00000,	RD_1|NODS,		FS,		I37,		0,	0 },
 {"bgezc",		"+;,p",		0x58000000, 0xfc000000,	RD_1|NODS,		FS,		I37,		0,	0 },
@@ -3247,7 +3249,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"bltuc",		"-s,-v,p",	0x1c000000, 0xfc000000,	RD_1|RD_2|NODS,		FS,		I37,		0,	0 },
 
 {"beqzc",		"-s,+\"",	0xd8000000, 0xfc000000,	RD_1|NODS,		FS,		I37,		0,	0 },
-{"jrc",			"t",		0xd8000000, 0xffe0ffff,	RD_1|NODS,		INSN2_ALIAS,	I37,		0,	0 },
+{"jrc",			"t",		0xd8000000, 0xffe0ffff,	RD_1|NODS,		AL,		I37,		0,	0 },
 {"jic",			"t,j",		0xd8000000, 0xffe00000,	RD_1|NODS,		0,		I37,		0,	0 },
 
 {"bnezc",		"-s,+\"",	0xf8000000, 0xfc000000,	RD_1|NODS,		FS,		I37,		0,	0 },
