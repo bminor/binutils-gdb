@@ -1,6 +1,6 @@
+#as: -32
 #objdump: -dr --prefix-addresses
-#name: MIPS mul-ilocks
-#as: -march=r4000 -mtune=r4000
+#name: MIPS mul
 #source: mul.s
 
 # Test the mul macro.

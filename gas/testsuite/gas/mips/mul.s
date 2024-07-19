@@ -18,10 +18,10 @@ foo:
 	mulou	$4,$5,$6
 
 # Sanity check the 64 bit versions.
-	.set	mips3
 	dmul	$4,$5,$6
 	dmul	$4,$5,1
 	dmulo	$4,$5,$6
 	dmulou	$4,$5,$6
 
-        .space	8
+	.align	4, 0
+	.space	16
