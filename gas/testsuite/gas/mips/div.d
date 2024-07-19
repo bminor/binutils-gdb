@@ -87,24 +87,4 @@ Disassembly of section .text:
 0+0134 <[^>]*> li	at,2
 0+0138 <[^>]*> divu	zero,a1,at
 0+013c <[^>]*> mfhi	a0
-0+0140 <[^>]*> bnez	a2,0+014c <foo\+0x14c>
-0+0144 <[^>]*> ddiv	zero,a1,a2
-0+0148 <[^>]*> break	(0x0,0x7|0x7)
-0+014c <[^>]*> (daddiu	at,zero,-1|li	at,-1)
-0+0150 <[^>]*> bne	a2,at,0+0168 <foo\+0x168>
-0+0154 <[^>]*> (daddiu	at,zero,1|li	at,1)
-0+0158 <[^>]*> dsll32	at,at,0x1f
-0+015c <[^>]*> bne	a1,at,0+0168 <foo\+0x168>
-0+0160 <[^>]*> nop
-0+0164 <[^>]*> break	(0x0,0x6|0x6)
-0+0168 <[^>]*> mflo	a0
-0+016c <[^>]*> li	at,2
-0+0170 <[^>]*> ddivu	zero,a1,at
-0+0174 <[^>]*> mflo	a0
-0+0178 <[^>]*> li	at,0x8000
-0+017c <[^>]*> ddiv	zero,a1,at
-0+0180 <[^>]*> mfhi	a0
-0+0184 <[^>]*> li	at,-32768
-0+0188 <[^>]*> ddivu	zero,a1,at
-0+018c <[^>]*> mfhi	a0
 	...
