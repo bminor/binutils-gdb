@@ -1110,7 +1110,8 @@ enum aarch64_insn_class
   sve2_urqvs,
   sve_index1,
   rcpc3,
-  lut
+  lut,
+  last_iclass = lut
 };
 
 /* Opcode enumerators.  */
