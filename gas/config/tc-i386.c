@@ -4402,19 +4402,32 @@ build_rex2_prefix (void)
 static bool
 build_apx_evex_prefix (void)
 {
-  /* To mimic behavior for legacy insns, transform use of DATA16 into its
-     embedded-prefix representation.  */
-  if (i.prefix[DATA_PREFIX] && i.tm.opcode_space == SPACE_EVEXMAP4)
+  /* To mimic behavior for legacy insns, transform use of DATA16 and REX64 into
+     their embedded-prefix representations.  */
+  if (i.tm.opcode_space == SPACE_EVEXMAP4)
     {
-      if (i.tm.opcode_modifier.opcodeprefix)
+      if (i.prefix[DATA_PREFIX])
 	{
-	  as_bad (i.tm.opcode_modifier.opcodeprefix == PREFIX_0X66
-		  ? _("same type of prefix used twice")
-		  : _("conflicting use of `data16' prefix"));
-	  return false;
+	  if (i.tm.opcode_modifier.opcodeprefix)
+	    {
+	      as_bad (i.tm.opcode_modifier.opcodeprefix == PREFIX_0X66
+		      ? _("same type of prefix used twice")
+		      : _("conflicting use of `data16' prefix"));
+	      return false;
+	    }
+	  i.tm.opcode_modifier.opcodeprefix = PREFIX_0X66;
+	  i.prefix[DATA_PREFIX] = 0;
 	}
-      i.tm.opcode_modifier.opcodeprefix = PREFIX_0X66;
-      i.prefix[DATA_PREFIX] = 0;
+      if (i.prefix[REX_PREFIX] & REX_W)
+	{
+	  if (i.suffix == QWORD_MNEM_SUFFIX)
+	    {
+	      as_bad (_("same type of prefix used twice"));
+	      return false;
+	    }
+	  i.tm.opcode_modifier.vexw = VEXW1;
+	  i.prefix[REX_PREFIX] = 0;
+	}
     }
 
   build_evex_prefix ();
@@ -7709,7 +7722,12 @@ md_assemble (char *line)
 	}
 
       /* Check for explicit REX prefix.  */
-      if (i.prefix[REX_PREFIX] || i.rex_encoding)
+      if ((i.prefix[REX_PREFIX]
+	   && (i.tm.opcode_space != SPACE_EVEXMAP4
+	       /* To mimic behavior for legacy insns, permit use of REX64 for promoted
+		  legacy instructions.  */
+	       || i.prefix[REX_PREFIX] != (REX_OPCODE | REX_W)))
+	  || i.rex_encoding)
 	{
 	  as_bad (_("REX prefix invalid with `%s'"), insn_name (&i.tm));
 	  return;

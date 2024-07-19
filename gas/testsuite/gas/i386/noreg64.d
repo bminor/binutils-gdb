@@ -24,6 +24,10 @@ Disassembly of section .text:
  *[a-f0-9]+:	0f ba 30 01          	btrl   \$0x1,\(%rax\)
  *[a-f0-9]+:	0f ba 28 01          	btsl   \$0x1,\(%rax\)
  *[a-f0-9]+:	ff 10                	call   \*\(%rax\)
+ *[a-f0-9]+:	62 f4 04 07 83 38 01 	ccmpal \{dfv=\} \$0x1,\(%rax\)
+ *[a-f0-9]+:	62 f4 04 07 81 38 89 00 00 00 	ccmpal \{dfv=\} \$0x89,\(%rax\)
+ *[a-f0-9]+:	62 f4 04 07 81 38 34 12 00 00 	ccmpal \{dfv=\} \$0x1234,\(%rax\)
+ *[a-f0-9]+:	62 f4 04 07 81 38 78 56 34 12 	ccmpal \{dfv=\} \$0x12345678,\(%rax\)
  *[a-f0-9]+:	83 38 01             	cmpl   \$0x1,\(%rax\)
  *[a-f0-9]+:	81 38 89 00 00 00    	cmpl   \$0x89,\(%rax\)
  *[a-f0-9]+:	81 38 34 12 00 00    	cmpl   \$0x1234,\(%rax\)
@@ -32,6 +36,9 @@ Disassembly of section .text:
  *[a-f0-9]+:	a7                   	cmpsl  %es:\(%rdi\),%ds:\(%rsi\)
  *[a-f0-9]+:	f2 0f 38 f1 00       	crc32l \(%rax\),%eax
  *[a-f0-9]+:	f2 48 0f 38 f1 00    	crc32q \(%rax\),%rax
+ *[a-f0-9]+:	62 f4 04 07 f7 00 89 00 00 00 	ctestal \{dfv=\} \$0x89,\(%rax\)
+ *[a-f0-9]+:	62 f4 04 07 f7 00 34 12 00 00 	ctestal \{dfv=\} \$0x1234,\(%rax\)
+ *[a-f0-9]+:	62 f4 04 07 f7 00 78 56 34 12 	ctestal \{dfv=\} \$0x12345678,\(%rax\)
  *[a-f0-9]+:	ff 08                	decl   \(%rax\)
  *[a-f0-9]+:	f7 30                	divl   \(%rax\)
  *[a-f0-9]+:	d8 00                	fadds  \(%rax\)

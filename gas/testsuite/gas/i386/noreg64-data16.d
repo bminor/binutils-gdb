@@ -26,6 +26,10 @@ Disassembly of section .text:
  *[a-f0-9]+:	66 0f ba 30 01       	btrw   \$0x1,\(%rax\)
  *[a-f0-9]+:	66 0f ba 28 01       	btsw   \$0x1,\(%rax\)
  *[a-f0-9]+:	66 ff 10             	callw  \*\(%rax\)
+ *[a-f0-9]+:	62 f4 05 07 83 38 01[	 ]+ccmpaw \{dfv=\} \$0x1,\(%rax\)
+ *[a-f0-9]+:	62 f4 05 07 81 38 89 00[	 ]+ccmpaw \{dfv=\} \$0x89,\(%rax\)
+ *[a-f0-9]+:	62 f4 05 07 81 38 34 12[	 ]+ccmpaw \{dfv=\} \$0x1234,\(%rax\)
+ *[a-f0-9]+:	62 f4 05 07 81 38 78 56[	 ]+ccmpaw \{dfv=\} \$0x5678,\(%rax\)
  *[a-f0-9]+:	66 83 38 01          	cmpw   \$0x1,\(%rax\)
  *[a-f0-9]+:	66 81 38 89 00       	cmpw   \$0x89,\(%rax\)
  *[a-f0-9]+:	66 81 38 34 12       	cmpw   \$0x1234,\(%rax\)
@@ -34,6 +38,9 @@ Disassembly of section .text:
  *[a-f0-9]+:	66 a7                	cmpsw  %es:\(%rdi\),%ds:\(%rsi\)
  *[a-f0-9]+:	66 f2 0f 38 f1 00    	crc32w \(%rax\),%eax
  *[a-f0-9]+:	66 f2 48 0f 38 f1 00 	data16 crc32q \(%rax\),%rax
+ *[a-f0-9]+:	62 f4 05 07 f7 00 89 00[	 ]+ctestaw \{dfv=\} \$0x89,\(%rax\)
+ *[a-f0-9]+:	62 f4 05 07 f7 00 34 12[	 ]+ctestaw \{dfv=\} \$0x1234,\(%rax\)
+ *[a-f0-9]+:	62 f4 05 07 f7 00 78 56[	 ]+ctestaw \{dfv=\} \$0x5678,\(%rax\)
  *[a-f0-9]+:	66 ff 08             	decw   \(%rax\)
  *[a-f0-9]+:	66 f7 30             	divw   \(%rax\)
  *[a-f0-9]+:	66 d8 00             	data16 fadds \(%rax\)
