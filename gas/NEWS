@@ -1,5 +1,12 @@
 -*- text -*-
 
+* The MIPS '--trap' command-line option now causes GAS to dynamically
+  track the ISA setting as code is assembled and to emit either trap or
+  breakpoint instructions according to whether the currently selected ISA
+  permits the use of trap instructions or not.  Previously the ISA was
+  only checked at startup and GAS bailed out if the initial ISA was
+  incompatible with the '--trap' option.
+
 * Support CFCMOV feature in Intel APX. Now, APX_F is fully supportted.
 
 * Support CCMP and CTEST feature in Intel APX.

@@ -399,6 +399,12 @@ static int mips_32bitmode = 0;
    || (ISA) == ISA_MIPS64R5		\
    || (ISA) == ISA_MIPS64R6)
 
+/* Return true if the ISA and CPU support trap instructions.  */
+#define ISA_HAS_TRAPS(ISA, CPU)		\
+  (((ISA) != ISA_MIPS1			\
+    && (CPU) != CPU_ALLEGREX)		\
+   || mips_opts.micromips)		\
+
 /* Return true if ISA supports 64-bit right rotate (dror et al.)
    instructions.  */
 #define ISA_HAS_DROR(ISA)		\
@@ -4152,9 +4158,6 @@ file_mips_check_options (void)
       && ((mips_abi == NO_ABI && file_mips_opts.gp == 32)
 	  || mips_abi == O32_ABI))
     mips_32bitmode = 1;
-
-  if (file_mips_opts.isa == ISA_MIPS1 && mips_trap)
-    as_bad (_("trap exception not supported at ISA 1"));
 
   /* If the selected architecture includes support for ASEs, enable
      generation of code for them.  */
@@ -10269,6 +10272,16 @@ small_offset_p (unsigned int range, unsigned int align, unsigned int offbits)
   return false;
 }
 
+/* Return true if the ISA, CPU, and --trap settings imply using trap
+   rather than breakpoint instructions in the expansion of multiply
+   and divide macros.  */
+
+static bool
+mips_use_trap (void)
+{
+  return ISA_HAS_TRAPS (mips_opts.isa, mips_opts.arch) && mips_trap;
+}
+
 /*
  *			Build macros
  *   This routine implements the seemingly endless macro or synthesized
@@ -10787,7 +10800,7 @@ macro (struct mips_cl_insn *ip, char *str)
       if (op[2] == 0)
 	{
 	  as_warn (_("divide by zero"));
-	  if (mips_trap)
+	  if (mips_use_trap ())
 	    macro_build (NULL, "teq", TRAP_FMT, ZERO, ZERO, 7);
 	  else
 	    macro_build (NULL, "break", BRK_FMT, 7);
@@ -10795,7 +10808,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	}
 
       start_noreorder ();
-      if (mips_trap)
+      if (mips_use_trap ())
 	{
 	  macro_build (NULL, "teq", TRAP_FMT, op[2], ZERO, 7);
 	  macro_build (NULL, dbl ? "ddiv" : "div", "z,s,t", op[1], op[2]);
@@ -10818,7 +10831,8 @@ macro (struct mips_cl_insn *ip, char *str)
       if (mips_opts.micromips)
 	micromips_label_expr (&label_expr);
       else
-	label_expr.X_add_number = mips_trap ? (dbl ? 12 : 8) : (dbl ? 20 : 16);
+	label_expr.X_add_number = (mips_use_trap ()
+				   ? (dbl ? 12 : 8) : (dbl ? 20 : 16));
       macro_build (&label_expr, "bne", "s,t,p", op[2], AT);
       if (dbl)
 	{
@@ -10831,7 +10845,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	  expr1.X_add_number = 0x80000000;
 	  macro_build (&expr1, "lui", LUI_FMT, AT, BFD_RELOC_HI16);
 	}
-      if (mips_trap)
+      if (mips_use_trap ())
 	{
 	  macro_build (NULL, "teq", TRAP_FMT, op[1], AT, 6);
 	  /* We want to close the noreorder block as soon as possible, so
@@ -10897,7 +10911,7 @@ macro (struct mips_cl_insn *ip, char *str)
       if (imm_expr.X_add_number == 0)
 	{
 	  as_warn (_("divide by zero"));
-	  if (mips_trap)
+	  if (mips_use_trap ())
 	    macro_build (NULL, "teq", TRAP_FMT, ZERO, ZERO, 7);
 	  else
 	    macro_build (NULL, "break", BRK_FMT, 7);
@@ -10943,7 +10957,7 @@ macro (struct mips_cl_insn *ip, char *str)
       s2 = "mfhi";
     do_divu3:
       start_noreorder ();
-      if (mips_trap)
+      if (mips_use_trap ())
 	{
 	  macro_build (NULL, "teq", TRAP_FMT, op[2], ZERO, 7);
 	  macro_build (NULL, s, "z,s,t", op[1], op[2]);
@@ -13308,7 +13322,7 @@ macro (struct mips_cl_insn *ip, char *str)
       macro_build (NULL, "mflo", MFHL_FMT, op[0]);
       macro_build (NULL, dbl ? "dsra32" : "sra", SHFT_FMT, op[0], op[0], 31);
       macro_build (NULL, "mfhi", MFHL_FMT, AT);
-      if (mips_trap)
+      if (mips_use_trap ())
 	macro_build (NULL, "tne", TRAP_FMT, op[0], AT, 6);
       else
 	{
@@ -13346,7 +13360,7 @@ macro (struct mips_cl_insn *ip, char *str)
 		   op[1], imm ? AT : op[2]);
       macro_build (NULL, "mfhi", MFHL_FMT, AT);
       macro_build (NULL, "mflo", MFHL_FMT, op[0]);
-      if (mips_trap)
+      if (mips_use_trap ())
 	macro_build (NULL, "tne", TRAP_FMT, AT, ZERO, 6);
       else
 	{
