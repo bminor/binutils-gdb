@@ -1368,14 +1368,10 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	     start of a line.  If this is also a normal comment
 	     character, fall through.  Otherwise treat it as a default
 	     character.  */
-	  if (strchr (tc_comment_chars, ch) == NULL
-	      && (! scrub_m68k_mri
-		  || (ch != '!' && ch != '*')))
+	  if (strchr (tc_comment_chars, ch) == NULL)
 	    goto de_fault;
 	  if (scrub_m68k_mri
-	      && (ch == '!' || ch == '*' || ch == '#')
-	      && state != 1
-	      && state != 10)
+	      && (ch == '!' || ch == '*' || ch == '#'))
 	    goto de_fault;
 	  /* Fall through.  */
 	case LEX_IS_COMMENT_START:
