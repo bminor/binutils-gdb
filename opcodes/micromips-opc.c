@@ -191,7 +191,7 @@ decode_micromips_operand (const char *p)
     case 'u': HINT (16, 0);
     case 'v': OPTIONAL_REG (5, 16, GP);
     case 'w': OPTIONAL_REG (5, 21, GP);
-    case 'y': REG (5, 6, GP);
+    case 'x': REG (5, 6, GP);
     case 'z': MAPPED_REG (0, 0, GP, reg_0_map);
     }
   return 0;
@@ -347,7 +347,7 @@ const struct mips_opcode micromips_opcodes[] =
 {"addu",		"md,me,ml",	    0x0400,     0xfc01,	WR_1|RD_2|RD_3,		0,		I1,		0,	0 },
 {"addu",		"d,v,t",	0x00000150, 0xfc0007ff,	WR_1|RD_2|RD_3,		0,		I1,		0,	0 },
 {"addu",		"t,r,I",	0,    (int) M_ADDU_I,	INSN_MACRO,		0,		I1,		0,	0 },
-{"alnv.ps",		"D,V,T,y",	0x54000019, 0xfc00003f,	WR_1|RD_2|RD_3|RD_4|FP_D, 0,		I1,		0,	0 },
+{"alnv.ps",		"D,V,T,x",	0x54000019, 0xfc00003f,	WR_1|RD_2|RD_3|RD_4|FP_D, 0,		I1,		0,	0 },
 {"and",			"mf,mt,mg",	    0x4480,     0xffc0,	MOD_1|RD_3,		0,		I1,		0,	0 },
 {"and",			"mf,mg,mx",	    0x4480,     0xffc0,	MOD_1|RD_2,		0,		I1,		0,	0 },
 {"and",			"d,v,t",	0x00000250, 0xfc0007ff,	WR_1|RD_2|RD_3,		0,		I1,		0,	0 },

@@ -1798,7 +1798,7 @@ extern const int bfd_mips16_num_opcodes;
        (MICROMIPSOP_*_RS)
    "w" 5-bit same register used as both target and destination
        (MICROMIPSOP_*_RT)
-   "y" 5-bit source 3 register for ALNV.PS (MICROMIPSOP_*_RS3)
+   "x" 5-bit source 3 register for ALNV.PS (MICROMIPSOP_*_RS3)
    "z" must be zero register
    "C" 23-bit coprocessor function code (MICROMIPSOP_*_COPZ)
    "K" 5-bit Hardware Register (RDHWR instruction) (MICROMIPSOP_*_RS)
@@ -1908,7 +1908,7 @@ extern const int bfd_mips16_num_opcodes;
    "12345678 0"
    "<>(),+-.@\^|~"
    "ABCDEFGHI KLMN   RST V    "
-   "abcd fghijklmnopqrstuvw yz"
+   "abcd fghijklmnopqrstuvwx z"
 
    Extension character sequences used so far ("+" followed by the
    following), for quick reference when adding more:
