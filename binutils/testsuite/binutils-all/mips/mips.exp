@@ -256,6 +256,8 @@ run_dump_test_o32 "mips32r6-branch-alias"
 run_dump_test_o32 "mips32r6-branch-noalias"
 run_dump_test_o32 "micromips-branch-alias"
 run_dump_test_o32 "micromips-branch-noalias"
+run_dump_test_o32 "mips32-mt-alias"
+run_dump_test_o32 "mips32-mt-noalias"
 
 run_dump_test_o32 "mips-note-2"
 run_dump_test_n32 "mips-note-2-n32"
