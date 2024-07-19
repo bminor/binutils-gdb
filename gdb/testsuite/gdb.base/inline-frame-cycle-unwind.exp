@@ -37,7 +37,7 @@
 # mechanism such that the fact that "inline_frame" was inlined into
 # "normal_frame" would cause GDB to trigger an assertion.
 #
-# This text makes use of a Python unwinder which can fake the cyclic
+# This test makes use of a Python unwinder which can fake the cyclic
 # stack cycle, further the test sets up multiple levels of normal and
 # inline frames.  At the point of testing the stack looks like this:
 #
