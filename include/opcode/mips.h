@@ -67,272 +67,20 @@ extern "C" {
 #define OP_SH_OP		26
 #define OP_MASK_RS		0x1f
 #define OP_SH_RS		21
-#define OP_MASK_FR		0x1f
-#define OP_SH_FR		21
-#define OP_MASK_FMT		0x1f
-#define OP_SH_FMT		21
 #define OP_MASK_BCC		0x7
 #define OP_SH_BCC		18
-#define OP_MASK_CODE		0x3ff
-#define OP_SH_CODE		16
-#define OP_MASK_CODE2		0x3ff
-#define OP_SH_CODE2		6
 #define OP_MASK_RT		0x1f
 #define OP_SH_RT		16
-#define OP_MASK_FT		0x1f
-#define OP_SH_FT		16
-#define OP_MASK_CACHE		0x1f
-#define OP_SH_CACHE		16
 #define OP_MASK_RD		0x1f
 #define OP_SH_RD		11
-#define OP_MASK_FS		0x1f
-#define OP_SH_FS		11
-#define OP_MASK_PREFX		0x1f
-#define OP_SH_PREFX		11
-#define OP_MASK_CCC		0x7
-#define OP_SH_CCC		8
-#define OP_MASK_CODE20		0xfffff /* 20 bit syscall/breakpoint code.  */
-#define OP_SH_CODE20		6
-#define OP_MASK_SHAMT		0x1f
-#define OP_SH_SHAMT		6
-#define OP_MASK_EXTLSB		OP_MASK_SHAMT
-#define OP_SH_EXTLSB		OP_SH_SHAMT
-#define OP_MASK_STYPE		OP_MASK_SHAMT
-#define OP_SH_STYPE		OP_SH_SHAMT
-#define OP_MASK_FD		0x1f
-#define OP_SH_FD		6
-#define OP_MASK_TARGET		0x3ffffff
-#define OP_SH_TARGET		0
-#define OP_MASK_COPZ		0x1ffffff
-#define OP_SH_COPZ		0
 #define OP_MASK_IMMEDIATE	0xffff
 #define OP_SH_IMMEDIATE		0
-#define OP_MASK_DELTA		0xffff
-#define OP_SH_DELTA		0
-#define OP_MASK_FUNCT		0x3f
-#define OP_SH_FUNCT		0
-#define OP_MASK_SPEC		0x3f
-#define OP_SH_SPEC		0
-#define OP_SH_LOCC              8       /* FP condition code.  */
-#define OP_SH_HICC              18      /* FP condition code.  */
-#define OP_MASK_CC              0x7
-#define OP_SH_COP1NORM          25      /* Normal COP1 encoding.  */
-#define OP_MASK_COP1NORM        0x1     /* a single bit.  */
-#define OP_SH_COP1SPEC          21      /* COP1 encodings.  */
-#define OP_MASK_COP1SPEC        0xf
-#define OP_MASK_COP1SCLR        0x4
-#define OP_MASK_COP1CMP         0x3
-#define OP_SH_COP1CMP           4
-#define OP_SH_FORMAT            21      /* FP short format field.  */
-#define OP_MASK_FORMAT          0x7
-#define OP_SH_TRUE              16
-#define OP_MASK_TRUE            0x1
-#define OP_SH_GE                17
-#define OP_MASK_GE              0x01
-#define OP_SH_UNSIGNED          16
-#define OP_MASK_UNSIGNED        0x1
-#define OP_SH_HINT              16
-#define OP_MASK_HINT            0x1f
-#define OP_SH_MMI               0       /* Multimedia (parallel) op.  */
-#define OP_MASK_MMI             0x3f
-#define OP_SH_MMISUB            6
-#define OP_MASK_MMISUB          0x1f
-#define OP_MASK_PERFREG		0x1f	/* Performance monitoring.  */
-#define OP_SH_PERFREG		1
-#define OP_SH_SEL		0	/* Coprocessor select field.  */
-#define OP_MASK_SEL		0x7	/* The sel field of mfcZ and mtcZ.  */
-#define OP_SH_CODE19		6       /* 19 bit wait code.  */
-#define OP_MASK_CODE19		0x7ffff
-#define OP_SH_ALN		21
-#define OP_MASK_ALN		0x7
-#define OP_SH_VSEL		21
-#define OP_MASK_VSEL		0x1f
-#define OP_MASK_VECBYTE		0x7	/* Selector field is really 4 bits,
-					   but 0x8-0xf don't select bytes.  */
-#define OP_SH_VECBYTE		22
-#define OP_MASK_VECALIGN	0x7	/* Vector byte-align (alni.ob) op.  */
-#define OP_SH_VECALIGN		21
-#define OP_MASK_INSMSB		0x1f	/* "ins" MSB.  */
-#define OP_SH_INSMSB		11
-#define OP_MASK_EXTMSBD		0x1f	/* "ext" MSBD.  */
-#define OP_SH_EXTMSBD		11
-
-/* MIPS DSP ASE */
-#define OP_SH_DSPACC		11
-#define OP_MASK_DSPACC  	0x3
-#define OP_SH_DSPACC_S  	21
-#define OP_MASK_DSPACC_S	0x3
-#define OP_SH_DSPSFT		20
-#define OP_MASK_DSPSFT  	0x3f
-#define OP_SH_DSPSFT_7  	19
-#define OP_MASK_DSPSFT_7	0x7f
-#define OP_SH_SA3		21
-#define OP_MASK_SA3		0x7
-#define OP_SH_SA4		21
-#define OP_MASK_SA4		0xf
-#define OP_SH_IMM8		16
-#define OP_MASK_IMM8		0xff
-#define OP_SH_IMM10		16
-#define OP_MASK_IMM10		0x3ff
-#define OP_SH_WRDSP		11
-#define OP_MASK_WRDSP		0x3f
-#define OP_SH_RDDSP		16
-#define OP_MASK_RDDSP		0x3f
-#define OP_SH_BP		11
-#define OP_MASK_BP		0x3
-
-/* MIPS MT ASE */
-#define OP_SH_MT_U		5
-#define OP_MASK_MT_U		0x1
-#define OP_SH_MT_H		4
-#define OP_MASK_MT_H		0x1
-#define OP_SH_MTACC_T		18
-#define OP_MASK_MTACC_T		0x3
-#define OP_SH_MTACC_D		13
-#define OP_MASK_MTACC_D		0x3
-
-/* MIPS MCU ASE */
-#define OP_MASK_3BITPOS		0x7
-#define OP_SH_3BITPOS		12
-#define OP_MASK_OFFSET12	0xfff
-#define OP_SH_OFFSET12		0
-
-#define	OP_OP_COP0		0x10
-#define	OP_OP_COP1		0x11
-#define	OP_OP_COP2		0x12
-#define	OP_OP_COP3		0x13
-#define	OP_OP_LWC1		0x31
-#define	OP_OP_LWC2		0x32
-#define	OP_OP_LWC3		0x33	/* a.k.a. pref */
-#define	OP_OP_LDC1		0x35
-#define	OP_OP_LDC2		0x36
-#define	OP_OP_LDC3		0x37	/* a.k.a. ld */
-#define	OP_OP_SWC1		0x39
-#define	OP_OP_SWC2		0x3a
-#define	OP_OP_SWC3		0x3b
-#define	OP_OP_SDC1		0x3d
-#define	OP_OP_SDC2		0x3e
-#define	OP_OP_SDC3		0x3f	/* a.k.a. sd */
-
-/* MIPS VIRT ASE */
-#define OP_MASK_CODE10		0x3ff
-#define OP_SH_CODE10		11
 
 /* Values in the 'VSEL' field.  */
 #define MDMX_FMTSEL_IMM_QH	0x1d
 #define MDMX_FMTSEL_IMM_OB	0x1e
 #define MDMX_FMTSEL_VEC_QH	0x15
 #define MDMX_FMTSEL_VEC_OB	0x16
-
-/* UDI */
-#define OP_SH_UDI1		6
-#define OP_MASK_UDI1		0x1f
-#define OP_SH_UDI2		6
-#define OP_MASK_UDI2		0x3ff
-#define OP_SH_UDI3		6
-#define OP_MASK_UDI3		0x7fff
-#define OP_SH_UDI4		6
-#define OP_MASK_UDI4		0xfffff
-
-/* Octeon */
-#define OP_SH_BBITIND		16
-#define OP_MASK_BBITIND		0x1f
-#define OP_SH_CINSPOS		6
-#define OP_MASK_CINSPOS		0x1f
-#define OP_SH_CINSLM1		11
-#define OP_MASK_CINSLM1		0x1f
-#define OP_SH_SEQI		6
-#define OP_MASK_SEQI		0x3ff
-
-/* Loongson */
-#define OP_SH_OFFSET_A		6
-#define OP_MASK_OFFSET_A	0xff
-#define OP_SH_OFFSET_B		3
-#define OP_MASK_OFFSET_B	0xff
-#define OP_SH_OFFSET_C		6
-#define OP_MASK_OFFSET_C	0x1ff
-#define OP_SH_RZ		0
-#define OP_MASK_RZ		0x1f
-#define OP_SH_FZ		0
-#define OP_MASK_FZ		0x1f
-
-/* Every MICROMIPSOP_X definition requires a corresponding OP_X
-   definition, and vice versa.  This simplifies various parts
-   of the operand handling in GAS.  The fields below only exist
-   in the microMIPS encoding, so define each one to have an empty
-   range.  */
-#define OP_MASK_TRAP		0
-#define OP_SH_TRAP		0
-#define OP_MASK_OFFSET10	0
-#define OP_SH_OFFSET10		0
-#define OP_MASK_RS3		0
-#define OP_SH_RS3		0
-#define OP_MASK_MB		0
-#define OP_SH_MB		0
-#define OP_MASK_MC		0
-#define OP_SH_MC		0
-#define OP_MASK_MD		0
-#define OP_SH_MD		0
-#define OP_MASK_ME		0
-#define OP_SH_ME		0
-#define OP_MASK_MF		0
-#define OP_SH_MF		0
-#define OP_MASK_MG		0
-#define OP_SH_MG		0
-#define OP_MASK_MH		0
-#define OP_SH_MH		0
-#define OP_MASK_MJ		0
-#define OP_SH_MJ		0
-#define OP_MASK_ML		0
-#define OP_SH_ML		0
-#define OP_MASK_MM		0
-#define OP_SH_MM		0
-#define OP_MASK_MN		0
-#define OP_SH_MN		0
-#define OP_MASK_MP		0
-#define OP_SH_MP		0
-#define OP_MASK_MQ		0
-#define OP_SH_MQ		0
-#define OP_MASK_IMMA		0
-#define OP_SH_IMMA		0
-#define OP_MASK_IMMB		0
-#define OP_SH_IMMB		0
-#define OP_MASK_IMMC		0
-#define OP_SH_IMMC		0
-#define OP_MASK_IMMF		0
-#define OP_SH_IMMF		0
-#define OP_MASK_IMMG		0
-#define OP_SH_IMMG		0
-#define OP_MASK_IMMH		0
-#define OP_SH_IMMH		0
-#define OP_MASK_IMMI		0
-#define OP_SH_IMMI		0
-#define OP_MASK_IMMJ		0
-#define OP_SH_IMMJ		0
-#define OP_MASK_IMML		0
-#define OP_SH_IMML		0
-#define OP_MASK_IMMM		0
-#define OP_SH_IMMM		0
-#define OP_MASK_IMMN		0
-#define OP_SH_IMMN		0
-#define OP_MASK_IMMO		0
-#define OP_SH_IMMO		0
-#define OP_MASK_IMMP		0
-#define OP_SH_IMMP		0
-#define OP_MASK_IMMQ		0
-#define OP_SH_IMMQ		0
-#define OP_MASK_IMMU		0
-#define OP_SH_IMMU		0
-#define OP_MASK_IMMW		0
-#define OP_SH_IMMW		0
-#define OP_MASK_IMMX		0
-#define OP_SH_IMMX		0
-#define OP_MASK_IMMY		0
-#define OP_SH_IMMY		0
-
-/* Enhanced VA Scheme */
-#define OP_SH_EVAOFFSET		7
-#define OP_MASK_EVAOFFSET	0x1ff
 
 /* Enumerates the various types of MIPS operand.  */
 enum mips_operand_type {
@@ -1835,31 +1583,12 @@ extern int bfd_mips_num_opcodes;
    The RI64 format uses RY and IMM5.
    */
 
-#define MIPS16OP_MASK_OP	0x1f
-#define MIPS16OP_SH_OP		11
-#define MIPS16OP_MASK_IMM11	0x7ff
-#define MIPS16OP_SH_IMM11	0
 #define MIPS16OP_MASK_RX	0x7
 #define MIPS16OP_SH_RX		8
-#define MIPS16OP_MASK_IMM8	0xff
-#define MIPS16OP_SH_IMM8	0
 #define MIPS16OP_MASK_RY	0x7
 #define MIPS16OP_SH_RY		5
-#define MIPS16OP_MASK_IMM5	0x1f
-#define MIPS16OP_SH_IMM5	0
 #define MIPS16OP_MASK_RZ	0x7
 #define MIPS16OP_SH_RZ		2
-#define MIPS16OP_MASK_IMM4	0xf
-#define MIPS16OP_SH_IMM4	0
-#define MIPS16OP_MASK_REGR32	0x1f
-#define MIPS16OP_SH_REGR32	0
-#define MIPS16OP_MASK_REG32R	0x1f
-#define MIPS16OP_SH_REG32R	3
-#define MIPS16OP_EXTRACT_REG32R(i) ((((i) >> 5) & 7) | ((i) & 0x18))
-#define MIPS16OP_MASK_MOVE32Z	0x7
-#define MIPS16OP_SH_MOVE32Z	0
-#define MIPS16OP_MASK_IMM6	0x3f
-#define MIPS16OP_SH_IMM6	5
 
 /* These are the characters which may appears in the args field of a MIPS16
    instruction.  They appear in the order in which the fields appear when the
@@ -1972,201 +1701,18 @@ extern const int bfd_mips16_num_opcodes;
    in the microMIPS instruction formats.  No masks are provided for the
    fixed portions of an instruction, since they are not needed.  */
 
-#define MICROMIPSOP_MASK_IMMEDIATE	0xffff
-#define MICROMIPSOP_SH_IMMEDIATE	0
-#define MICROMIPSOP_MASK_DELTA		0xffff
-#define MICROMIPSOP_SH_DELTA		0
-#define MICROMIPSOP_MASK_CODE10		0x3ff
-#define MICROMIPSOP_SH_CODE10		16	/* 10-bit wait code.  */
-#define MICROMIPSOP_MASK_TRAP		0xf
-#define MICROMIPSOP_SH_TRAP		12	/* 4-bit trap code.  */
-#define MICROMIPSOP_MASK_SHAMT		0x1f
-#define MICROMIPSOP_SH_SHAMT		11
-#define MICROMIPSOP_MASK_TARGET		0x3ffffff
-#define MICROMIPSOP_SH_TARGET		0
-#define MICROMIPSOP_MASK_EXTLSB		0x1f	/* "ext" LSB.  */
-#define MICROMIPSOP_SH_EXTLSB		6
-#define MICROMIPSOP_MASK_EXTMSBD	0x1f	/* "ext" MSBD.  */
-#define MICROMIPSOP_SH_EXTMSBD		11
-#define MICROMIPSOP_MASK_INSMSB		0x1f	/* "ins" MSB.  */
-#define MICROMIPSOP_SH_INSMSB		11
-#define MICROMIPSOP_MASK_CODE		0x3ff
-#define MICROMIPSOP_SH_CODE		16	/* 10-bit higher break code. */
-#define MICROMIPSOP_MASK_CODE2		0x3ff
-#define MICROMIPSOP_SH_CODE2		6	/* 10-bit lower break code.  */
-#define MICROMIPSOP_MASK_CACHE		0x1f
-#define MICROMIPSOP_SH_CACHE		21	/* 5-bit cache op.  */
-#define MICROMIPSOP_MASK_SEL		0x7
-#define MICROMIPSOP_SH_SEL		11
-#define MICROMIPSOP_MASK_OFFSET12	0xfff
-#define MICROMIPSOP_SH_OFFSET12		0
-#define MICROMIPSOP_MASK_3BITPOS	0x7
-#define MICROMIPSOP_SH_3BITPOS		21
-#define MICROMIPSOP_MASK_STYPE		0x1f
-#define MICROMIPSOP_SH_STYPE		16
-#define MICROMIPSOP_MASK_OFFSET10	0x3ff
-#define MICROMIPSOP_SH_OFFSET10		6
 #define MICROMIPSOP_MASK_RS		0x1f
 #define MICROMIPSOP_SH_RS		16
 #define MICROMIPSOP_MASK_RT		0x1f
 #define MICROMIPSOP_SH_RT		21
 #define MICROMIPSOP_MASK_RD		0x1f
 #define MICROMIPSOP_SH_RD		11
-#define MICROMIPSOP_MASK_FS		0x1f
-#define MICROMIPSOP_SH_FS		16
-#define MICROMIPSOP_MASK_FT		0x1f
-#define MICROMIPSOP_SH_FT		21
-#define MICROMIPSOP_MASK_FD		0x1f
-#define MICROMIPSOP_SH_FD		11
-#define MICROMIPSOP_MASK_FR		0x1f
-#define MICROMIPSOP_SH_FR		6
-#define MICROMIPSOP_MASK_RS3		0x1f
-#define MICROMIPSOP_SH_RS3		6
-#define MICROMIPSOP_MASK_PREFX		0x1f
-#define MICROMIPSOP_SH_PREFX		11
 #define MICROMIPSOP_MASK_BCC		0x7
 #define MICROMIPSOP_SH_BCC		18
-#define MICROMIPSOP_MASK_CCC		0x7
-#define MICROMIPSOP_SH_CCC		13
-#define MICROMIPSOP_MASK_COPZ		0x7fffff
-#define MICROMIPSOP_SH_COPZ		3
-
-#define MICROMIPSOP_MASK_MB		0x7
-#define MICROMIPSOP_SH_MB		23
-#define MICROMIPSOP_MASK_MC		0x7
-#define MICROMIPSOP_SH_MC		4
 #define MICROMIPSOP_MASK_MD		0x7
 #define MICROMIPSOP_SH_MD		7
-#define MICROMIPSOP_MASK_ME		0x7
-#define MICROMIPSOP_SH_ME		1
-#define MICROMIPSOP_MASK_MF		0x7
-#define MICROMIPSOP_SH_MF		3
-#define MICROMIPSOP_MASK_MG		0x7
-#define MICROMIPSOP_SH_MG		0
-#define MICROMIPSOP_MASK_MH		0x7
-#define MICROMIPSOP_SH_MH		7
 #define MICROMIPSOP_MASK_MJ		0x1f
 #define MICROMIPSOP_SH_MJ		0
-#define MICROMIPSOP_MASK_ML		0x7
-#define MICROMIPSOP_SH_ML		4
-#define MICROMIPSOP_MASK_MM		0x7
-#define MICROMIPSOP_SH_MM		1
-#define MICROMIPSOP_MASK_MN		0x7
-#define MICROMIPSOP_SH_MN		4
-#define MICROMIPSOP_MASK_MP		0x1f
-#define MICROMIPSOP_SH_MP		5
-#define MICROMIPSOP_MASK_MQ		0x7
-#define MICROMIPSOP_SH_MQ		7
-
-#define MICROMIPSOP_MASK_IMMA		0x7f
-#define MICROMIPSOP_SH_IMMA		0
-#define MICROMIPSOP_MASK_IMMB		0x7
-#define MICROMIPSOP_SH_IMMB		1
-#define MICROMIPSOP_MASK_IMMC		0xf
-#define MICROMIPSOP_SH_IMMC		0
-#define MICROMIPSOP_MASK_IMMD		0x3ff
-#define MICROMIPSOP_SH_IMMD		0
-#define MICROMIPSOP_MASK_IMME		0x7f
-#define MICROMIPSOP_SH_IMME		0
-#define MICROMIPSOP_MASK_IMMF		0xf
-#define MICROMIPSOP_SH_IMMF		0
-#define MICROMIPSOP_MASK_IMMG		0xf
-#define MICROMIPSOP_SH_IMMG		0
-#define MICROMIPSOP_MASK_IMMH		0xf
-#define MICROMIPSOP_SH_IMMH		0
-#define MICROMIPSOP_MASK_IMMI		0x7f
-#define MICROMIPSOP_SH_IMMI		0
-#define MICROMIPSOP_MASK_IMMJ		0xf
-#define MICROMIPSOP_SH_IMMJ		0
-#define MICROMIPSOP_MASK_IMML		0xf
-#define MICROMIPSOP_SH_IMML		0
-#define MICROMIPSOP_MASK_IMMM		0x7
-#define MICROMIPSOP_SH_IMMM		1
-#define MICROMIPSOP_MASK_IMMN		0x3
-#define MICROMIPSOP_SH_IMMN		4
-#define MICROMIPSOP_MASK_IMMO		0xf
-#define MICROMIPSOP_SH_IMMO		0
-#define MICROMIPSOP_MASK_IMMP		0x1f
-#define MICROMIPSOP_SH_IMMP		0
-#define MICROMIPSOP_MASK_IMMQ		0x7fffff
-#define MICROMIPSOP_SH_IMMQ		0
-#define MICROMIPSOP_MASK_IMMU		0x1f
-#define MICROMIPSOP_SH_IMMU		0
-#define MICROMIPSOP_MASK_IMMW		0x3f
-#define MICROMIPSOP_SH_IMMW		1
-#define MICROMIPSOP_MASK_IMMX		0xf
-#define MICROMIPSOP_SH_IMMX		1
-#define MICROMIPSOP_MASK_IMMY		0x1ff
-#define MICROMIPSOP_SH_IMMY		1
-
-/* MIPS DSP ASE */
-#define MICROMIPSOP_MASK_DSPACC		0x3
-#define MICROMIPSOP_SH_DSPACC		14
-#define MICROMIPSOP_MASK_DSPSFT		0x3f
-#define MICROMIPSOP_SH_DSPSFT		16
-#define MICROMIPSOP_MASK_SA3		0x7
-#define MICROMIPSOP_SH_SA3		13
-#define MICROMIPSOP_MASK_SA4		0xf
-#define MICROMIPSOP_SH_SA4		12
-#define MICROMIPSOP_MASK_IMM8		0xff
-#define MICROMIPSOP_SH_IMM8		13
-#define MICROMIPSOP_MASK_IMM10		0x3ff
-#define MICROMIPSOP_SH_IMM10		16
-#define MICROMIPSOP_MASK_WRDSP		0x3f
-#define MICROMIPSOP_SH_WRDSP		14
-#define MICROMIPSOP_MASK_BP		0x3
-#define MICROMIPSOP_SH_BP		14
-
-/* Placeholders for fields that only exist in the traditional 32-bit
-   instruction encoding; see the comment above for details.  */
-#define MICROMIPSOP_MASK_CODE20		0
-#define MICROMIPSOP_SH_CODE20		0
-#define MICROMIPSOP_MASK_PERFREG	0
-#define MICROMIPSOP_SH_PERFREG		0
-#define MICROMIPSOP_MASK_CODE19		0
-#define MICROMIPSOP_SH_CODE19		0
-#define MICROMIPSOP_MASK_ALN		0
-#define MICROMIPSOP_SH_ALN		0
-#define MICROMIPSOP_MASK_VECBYTE	0
-#define MICROMIPSOP_SH_VECBYTE		0
-#define MICROMIPSOP_MASK_VECALIGN	0
-#define MICROMIPSOP_SH_VECALIGN		0
-#define MICROMIPSOP_MASK_DSPACC_S	0
-#define MICROMIPSOP_SH_DSPACC_S	 	0
-#define MICROMIPSOP_MASK_DSPSFT_7	0
-#define MICROMIPSOP_SH_DSPSFT_7	 	0
-#define MICROMIPSOP_MASK_RDDSP		0
-#define MICROMIPSOP_SH_RDDSP		0
-#define MICROMIPSOP_MASK_MT_U		0
-#define MICROMIPSOP_SH_MT_U		0
-#define MICROMIPSOP_MASK_MT_H		0
-#define MICROMIPSOP_SH_MT_H		0
-#define MICROMIPSOP_MASK_MTACC_T	0
-#define MICROMIPSOP_SH_MTACC_T		0
-#define MICROMIPSOP_MASK_MTACC_D	0
-#define MICROMIPSOP_SH_MTACC_D		0
-#define MICROMIPSOP_MASK_BBITIND	0
-#define MICROMIPSOP_SH_BBITIND		0
-#define MICROMIPSOP_MASK_CINSPOS	0
-#define MICROMIPSOP_SH_CINSPOS		0
-#define MICROMIPSOP_MASK_CINSLM1	0
-#define MICROMIPSOP_SH_CINSLM1		0
-#define MICROMIPSOP_MASK_SEQI		0
-#define MICROMIPSOP_SH_SEQI		0
-#define MICROMIPSOP_SH_OFFSET_A		0
-#define MICROMIPSOP_MASK_OFFSET_A	0
-#define MICROMIPSOP_SH_OFFSET_B		0
-#define MICROMIPSOP_MASK_OFFSET_B	0
-#define MICROMIPSOP_SH_OFFSET_C		0
-#define MICROMIPSOP_MASK_OFFSET_C	0
-#define MICROMIPSOP_SH_RZ		0
-#define MICROMIPSOP_MASK_RZ		0
-#define MICROMIPSOP_SH_FZ		0
-#define MICROMIPSOP_MASK_FZ		0
-
-/* microMIPS Enhanced VA Scheme */
-#define MICROMIPSOP_SH_EVAOFFSET	0
-#define MICROMIPSOP_MASK_EVAOFFSET	0x1ff
 
 /* These are the characters which may appears in the args field of a microMIPS
    instruction.  They appear in the order in which the fields appear
