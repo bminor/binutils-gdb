@@ -52,7 +52,7 @@ decode_mips_operand (const char *p)
 	case 'u': PREV_CHECK (5, 16, true, false, false, false);
 	case 'v': PREV_CHECK (5, 16, true, true, false, false);
 	case 'w': PREV_CHECK (5, 16, false, true, true, true);
-	case 'x': PREV_CHECK (5, 21, true, false, false, true);
+	case 'x': PREV_CHECK (5, 21, true, false, false, false);
 	case 'y': PREV_CHECK (5, 21, false, true, false, false);
 	case 'A': PCREL (19, 0, true, 2, 2, false, false);
 	case 'B': PCREL (18, 0, true, 3, 3, false, false);
