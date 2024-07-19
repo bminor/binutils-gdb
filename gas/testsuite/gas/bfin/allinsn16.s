@@ -12,16 +12,16 @@
 # iterate 0x20 times
 .macro _dw b, i, e
 	.if \i < \e
-		__dw \b, \i, \i + 0x40
-		_dw \b, \i + 0x40, \e
+		__dw \b, \i, (\i + 0x40)
+		_dw \b, (\i + 0x40), \e
 	.endif
 .endm
 
 # iterate 0x4 times
 .macro dw b, i, e
 	.if \i < \e
-		_dw \b, \i, \i + 0x800
-		dw \b, \i + 0x800, \e
+		_dw \b, \i, (\i + 0x800)
+		dw \b, (\i + 0x800), \e
 	.endif
 .endm
 
