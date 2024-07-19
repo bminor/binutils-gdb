@@ -984,13 +984,12 @@ mips_opcode_32bit_p (const struct mips_opcode *mo)
    "-b" (-131072 .. 131071) << 3 at bit 0
    "-d" Same as destination register GP
    "-s" 5 bit source register specifier (OP_*_RS) not $0
-   "-t" 5 bit source register specifier (OP_*_RT) not $0
-   "-u" 5 bit source register specifier (OP_*_RT) greater than OP_*_RS
-   "-v" 5 bit source register specifier (OP_*_RT) not $0 not OP_*_RS
-   "-w" 5 bit source register specifier (OP_*_RT) less than or equal to OP_*_RS
-   "-x" 5 bit source register specifier (OP_*_RT) greater than or
-        equal to OP_*_RS
-   "-y" 5 bit source register specifier (OP_*_RT) not $0 less than OP_*_RS
+   "-t" 5 bit target register specifier (OP_*_RT) not $0
+   "-u" 5 bit target register specifier (OP_*_RT) greater than OP_*_RS
+   "-v" 5 bit target register specifier (OP_*_RT) not $0 not OP_*_RS
+   "-w" 5 bit target register specifier (OP_*_RT) less than or equal to OP_*_RS
+   "-x" 5 bit source register specifier (OP_*_RS) greater than OP_*_RT
+   "-y" 5 bit source register specifier (OP_*_RS) not $0 less than OP_*_RT
    "-A" symbolic offset (-262144 .. 262143) << 2 at bit 0
    "-B" symbolic offset (-131072 .. 131071) << 3 at bit 0
 
