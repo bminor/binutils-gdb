@@ -727,7 +727,11 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test_arches "div"		[mips_arch_list_matching mips1 \
 						!mips32r6]
+    run_dump_test_arches "div-trap"	[mips_arch_list_matching mips1 \
+						!mips32r6]
     run_dump_test_arches "div64"	[mips_arch_list_matching mips3 !r5900 \
+						!mips64r6]
+    run_dump_test_arches "div64-trap"	[mips_arch_list_matching mips3 !r5900 \
 						!mips64r6]
 
     if { !$addr32 && $has_newabi } {
