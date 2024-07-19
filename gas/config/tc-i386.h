@@ -183,6 +183,16 @@ extern int tc_i386_fix_adjustable (struct fix *);
    || (FIX)->fx_r_type == BFD_RELOC_X86_64_REX_GOTPCRELX	\
    || (FIX)->fx_r_type == BFD_RELOC_X86_64_CODE_4_GOTPCRELX)
 
+extern void i386_start_line (void);
+#define md_start_line_hook i386_start_line
+
+extern bool i386_check_label (void);
+#define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR) \
+  (NEXT_CHAR == ':' && i386_check_label ())
+
+extern int i386_unrecognized_line (int);
+#define tc_unrecognized_line i386_unrecognized_line
+
 extern int i386_parse_name (char *, expressionS *, char *);
 #define md_parse_name(s, e, m, c) i386_parse_name (s, e, c)
 

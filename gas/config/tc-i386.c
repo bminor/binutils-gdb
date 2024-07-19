@@ -138,6 +138,13 @@ typedef struct
 }
 arch_entry;
 
+/* Modes for parse_insn() to operate in.  */
+enum parse_mode {
+  parse_all,
+  parse_prefix,
+  parse_pseudo_prefix,
+};
+
 static void update_code_flag (int, int);
 static void s_insn (int);
 static void s_noopt (int);
@@ -163,7 +170,7 @@ static int i386_intel_operand (char *, int);
 static int i386_intel_simplify (expressionS *);
 static int i386_intel_parse_name (const char *, expressionS *);
 static const reg_entry *parse_register (const char *, char **);
-static const char *parse_insn (const char *, char *, bool);
+static const char *parse_insn (const char *, char *, enum parse_mode);
 static char *parse_operands (char *, const char *);
 static void swap_operands (void);
 static void swap_2_operands (unsigned int, unsigned int);
@@ -3317,8 +3324,8 @@ op_lookup (const char *mnemonic)
 void
 md_begin (void)
 {
-  /* Support pseudo prefixes like {disp32}.  */
-  lex_type ['{'] = LEX_BEGIN_NAME;
+  /* Make sure possible padding space is clear.  */
+  memset (&pp, 0, sizeof (pp));
 
   /* Initialize op_hash hash table.  */
   op_hash = str_htab_create ();
@@ -6087,7 +6094,6 @@ static void init_globals (void)
   unsigned int j;
 
   memset (&i, '\0', sizeof (i));
-  memset (&pp, 0, sizeof (pp));
   i.rounding.type = rc_none;
   for (j = 0; j < MAX_OPERANDS; j++)
     i.reloc[j] = NO_RELOC;
@@ -7221,14 +7227,15 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
 
-void
-md_assemble (char *line)
+static void
+i386_assemble (char *line)
 {
   unsigned int j;
   char mnemonic[MAX_MNEM_SIZE], mnem_suffix = 0, *copy = NULL;
   char *xstrdup_copy = NULL;
   const char *end, *pass1_mnem = NULL;
   enum i386_error pass1_err = 0;
+  struct pseudo_prefixes orig_pp = pp;
   const insn_template *t;
   struct last_insn *last_insn
     = &seg_info(now_seg)->tc_segment_info_data.last_insn;
@@ -7247,7 +7254,7 @@ md_assemble (char *line)
      We assume that the scrubber has arranged it so that line[0] is the valid
      start of a (possibly prefixed) mnemonic.  */
 
-  end = parse_insn (line, mnemonic, false);
+  end = parse_insn (line, mnemonic, parse_all);
   if (end == NULL)
     {
       if (pass1_mnem != NULL)
@@ -7354,6 +7361,7 @@ md_assemble (char *line)
   no_match:
 	  pass1_err = i.error;
 	  pass1_mnem = insn_name (current_templates.start);
+	  pp = orig_pp;
 	  goto retry;
 	}
 
@@ -7808,6 +7816,14 @@ md_assemble (char *line)
     last_insn->kind = last_insn_other;
 }
 
+void
+md_assemble (char *line)
+{
+  i386_assemble (line);
+  current_templates.start = NULL;
+  memset (&pp, 0, sizeof (pp));
+}
+
 /* The Q suffix is generally valid only in 64-bit mode, with very few
    exceptions: fild, fistp, fisttp, and cmpxchg8b.  Note that for fild
    and fisttp only one of their two templates is matched below: That's
@@ -7823,7 +7839,7 @@ static INLINE bool q_suffix_allowed(const insn_template *t)
 }
 
 static const char *
-parse_insn (const char *line, char *mnemonic, bool prefix_only)
+parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 {
   const char *l = line, *token_start = l;
   char *mnem_p;
@@ -7841,6 +7857,8 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	  ++mnem_p;
 	  ++l;
 	}
+      else if (mode == parse_pseudo_prefix)
+	break;
       while ((*mnem_p = mnemonic_chars[(unsigned char) *l]) != 0)
 	{
 	  if (*mnem_p == '.')
@@ -7872,7 +7890,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	       && (intel_syntax
 		   || (*l != PREFIX_SEPARATOR && *l != ',')))
 	{
-	  if (prefix_only)
+	  if (mode != parse_all)
 	    break;
 	  as_bad (_("invalid character %s in mnemonic"),
 		  output_invalid (*l));
@@ -8019,7 +8037,7 @@ parse_insn (const char *line, char *mnemonic, bool prefix_only)
 	break;
     }
 
-  if (prefix_only)
+  if (mode != parse_all)
     return token_start;
 
   if (!current_templates.start)
@@ -11894,6 +11912,65 @@ output_interseg_jump (void)
 		 i.op[0].imms, 0, reloc (2, 0, 0, i.reloc[0]));
 }
 
+/* Hook used to reject pseudo-prefixes misplaced at the start of a line.  */
+
+void i386_start_line (void)
+{
+  struct pseudo_prefixes last_pp;
+
+  memcpy (&last_pp, &pp, sizeof (pp));
+  memset (&pp, 0, sizeof (pp));
+  if (memcmp (&pp, &last_pp, sizeof (pp)))
+    as_bad_where (frag_now->fr_file, frag_now->fr_line,
+		  _("pseudo prefix without instruction"));
+}
+
+/* Hook used to warn about pseudo-prefixes ahead of a label.  */
+
+bool i386_check_label (void)
+{
+  struct pseudo_prefixes last_pp;
+
+  memcpy (&last_pp, &pp, sizeof (pp));
+  memset (&pp, 0, sizeof (pp));
+  if (memcmp (&pp, &last_pp, sizeof (pp)))
+    as_warn (_("pseudo prefix ahead of label; ignoring"));
+  return true;
+}
+
+/* Hook used to parse pseudo-prefixes off of the start of a line.  */
+
+int
+i386_unrecognized_line (int ch)
+{
+  char mnemonic[MAX_MNEM_SIZE];
+  const char *end;
+
+  if (ch != '{')
+    return 0;
+
+  --input_line_pointer;
+  know (*input_line_pointer == ch);
+
+  end = parse_insn (input_line_pointer, mnemonic, parse_pseudo_prefix);
+  if (end == NULL)
+    {
+      /* Diagnostic was already issued.  */
+      ignore_rest_of_line ();
+      memset (&pp, 0, sizeof (pp));
+      return 1;
+    }
+
+  if (end == input_line_pointer)
+    {
+      ++input_line_pointer;
+      return 0;
+    }
+
+  input_line_pointer += end - input_line_pointer;
+  return 1;
+}
+
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 void
 x86_cleanup (void)
@@ -13495,13 +13572,14 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
   saved_char = *saved_ilp;
   *saved_ilp = 0;
 
-  end = parse_insn (line, mnemonic, true);
+  end = parse_insn (line, mnemonic, parse_prefix);
   if (end == NULL)
     {
   bad:
       *saved_ilp = saved_char;
       ignore_rest_of_line ();
       i.tm.mnem_off = 0;
+      memset (&pp, 0, sizeof (pp));
       return;
     }
   line += end - line;
@@ -14291,6 +14369,9 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 
   /* Make sure dot_insn() won't yield "true" anymore.  */
   i.tm.mnem_off = 0;
+
+  current_templates.start = NULL;
+  memset (&pp, 0, sizeof (pp));
 }
 
 #ifdef TE_PE
@@ -16701,7 +16782,8 @@ static bool check_register (const reg_entry *r)
       if (vector_size < VSZ512)
 	return false;
 
-      switch (pp.encoding)
+      /* Don't update pp when not dealing with insn operands.  */
+      switch (current_templates.start ? pp.encoding : encoding_evex)
 	{
 	case encoding_default:
 	case encoding_egpr:
@@ -16739,7 +16821,8 @@ static bool check_register (const reg_entry *r)
 	  || flag_code != CODE_64BIT)
 	return false;
 
-      switch (pp.encoding)
+      /* Don't update pp when not dealing with insn operands.  */
+      switch (current_templates.start ? pp.encoding : encoding_evex)
 	{
 	  case encoding_default:
 	  case encoding_egpr:
@@ -16760,7 +16843,8 @@ static bool check_register (const reg_entry *r)
 	  || flag_code != CODE_64BIT)
 	return false;
 
-      switch (pp.encoding)
+      /* Don't update pp when not dealing with insn operands.  */
+      switch (current_templates.start ? pp.encoding : encoding_egpr)
 	{
 	case encoding_default:
 	  pp.encoding = encoding_egpr;
