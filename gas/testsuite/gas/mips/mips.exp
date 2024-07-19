@@ -519,6 +519,9 @@ mips_arch_create allegrex 32	mips2	{ ror singlefloat oddspreg } \
 			{ -mmips:allegrex }
 mips_arch_create r4000 	64	mips3	{} \
 			{ -march=r4000 -mtune=r4000 } { -mmips:4000 }
+mips_arch_create r5900	64	mips3	{ gpr_ilocks singlefloat nollsc } \
+			{ -march=r5900 -mtune=r5900 } { -mmips:5900 } \
+			{ mipsr5900el-*-* mips64r5900el-*-* }
 mips_arch_create vr5400	64	mips4	{ ror } \
 			{ -march=vr5400 -mtune=vr5400 } { -mmips:5400 }
 mips_arch_create interaptiv-mr2 32 mips32r3	{} \
@@ -541,9 +544,6 @@ mips_arch_create octeon3 64	octeon2 { oddspreg } \
 			{ }
 mips_arch_create xlr 	64	mips64	{ oddspreg } \
 			{ -march=xlr -mtune=xlr } { -mmips:xlr }
-mips_arch_create r5900 	64	mips3	{ gpr_ilocks singlefloat nollsc } \
-			{ -march=r5900 -mtune=r5900 } { -mmips:5900 } \
-			{ mipsr5900el-*-* mips64r5900el-*-* }
 mips_arch_create mips16e2-interaptiv-mr2 32 mips16e2-32 {} \
 			{ -march=interaptiv-mr2 -mips16 } \
 			{ -mmips:interaptiv-mr2 }
