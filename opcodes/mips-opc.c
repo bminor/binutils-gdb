@@ -1677,7 +1677,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ori",			"t,r,i",	0x34000000, 0xfc000000,	WR_1|RD_2,		0,		I1,		0,	0 },
 {"pabsdiff.ob",		"X,Y,Q",	0x78000009, 0xfc20003f,	WR_1|RD_2|RD_3|FP_D,	0,		SB1,		0,	0 },
 {"pabsdiffc.ob",	"Y,Q",		0x78000035, 0xfc2007ff,	RD_1|RD_2|FP_D,		WR_MACC,	SB1,		0,	0 },
-{"pause",		"",		0x00000140, 0xffffffff, TRAP,			0,		I33,		0,	0 },
+{"pause",		"",		0x00000140, 0xffffffff, TRAP,			AL,		I33,		0,	0 },
 {"pavg.ob",		"X,Y,Q",	0x78000008, 0xfc20003f,	WR_1|RD_2|RD_3|FP_D,	0,		SB1,		0,	0 },
 {"pabsh",		"d,t",		0x70000168, 0xffe007ff, WR_1|RD_2,		0,		MMI,		0,	0 },
 {"pabsw",		"d,t",		0x70000068, 0xffe007ff, WR_1|RD_2,		0,		MMI,		0,	0 },
