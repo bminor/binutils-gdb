@@ -287,7 +287,6 @@ int yylex (void);
 "%"                     return PERCENT;
 "!"                     return BANG;
 ";"                     return SEMICOLON;
-"=!"			return _ASSIGN_BANG;
 "||"			return DOUBLE_BAR;
 "@"			return AT;
 <KEYWORD>[pP][rR][eE][fF][eE][tT][cC][hH]        return PREFETCH;
