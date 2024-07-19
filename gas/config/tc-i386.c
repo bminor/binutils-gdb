@@ -526,7 +526,7 @@ static const unsigned char i386_seg_prefixes[] = {
 
 /* List of chars besides those in app.c:symbol_chars that can start an
    operand.  Used to prevent the scrubber eating vital white-space.  */
-const char extra_symbol_chars[] = "*%-([{}"
+const char extra_symbol_chars[] = "*%-(["
 #ifdef LEX_AT
 	"@"
 #endif
@@ -587,7 +587,7 @@ static char operand_chars[256];
 
 /* All non-digit non-letter characters that may occur in an operand and
    which aren't already in extra_symbol_chars[].  */
-static const char operand_special_chars[] = "$+,)._~/<>|&^!=:@]";
+static const char operand_special_chars[] = "$+,)._~/<>|&^!=:@]{}";
 
 /* md_assemble() always leaves the strings it's passed unaltered.  To
    effect this we maintain a stack of saved characters that we've smashed
@@ -7856,6 +7856,8 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	{
 	  ++mnem_p;
 	  ++l;
+	  if (is_space_char (*l))
+	    ++l;
 	}
       else if (mode == parse_pseudo_prefix)
 	break;
@@ -7873,6 +7875,8 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	  l++;
 	}
       /* Pseudo-prefixes end with a closing figure brace.  */
+      if (*mnemonic == '{' && is_space_char (*l))
+	++l;
       if (*mnemonic == '{' && *l == '}')
 	{
 	  *mnem_p++ = *l++;
@@ -14468,6 +14472,8 @@ check_VecOperations (char *op_string)
       if (*op_string == '{')
 	{
 	  op_string++;
+	  if (is_space_char (*op_string))
+	    op_string++;
 
 	  /* Check broadcasts.  */
 	  if (startswith (op_string, "1to"))
@@ -14638,6 +14644,8 @@ check_VecOperations (char *op_string)
 	  else
 	    goto unknown_vec_op;
 
+	  if (is_space_char (*op_string))
+	    op_string++;
 	  if (*op_string != '}')
 	    {
 	      as_bad (_("missing `}' in `%s'"), saved);
@@ -14645,8 +14653,6 @@ check_VecOperations (char *op_string)
 	    }
 	  op_string++;
 
-	  /* Strip whitespace since the addition of pseudo prefixes
-	     changed how the scrubber treats '{'.  */
 	  if (is_space_char (*op_string))
 	    ++op_string;
 
@@ -15308,9 +15314,16 @@ RC_SAE_immediate (const char *imm_start)
   if (*pstr != '{')
     return 0;
 
-  pstr = RC_SAE_specifier (pstr + 1);
+  pstr++;
+  if (is_space_char (*pstr))
+    pstr++;
+
+  pstr = RC_SAE_specifier (pstr);
   if (pstr == NULL)
     return 0;
+
+  if (is_space_char (*pstr))
+    pstr++;
 
   if (*pstr++ != '}')
     {
