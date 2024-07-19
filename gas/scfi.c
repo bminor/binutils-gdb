@@ -223,11 +223,12 @@ scfi_state_restore_reg (scfi_stateS *state, unsigned int reg)
   gas_assert (state->regs[reg].state == CFI_ON_STACK);
   gas_assert (state->regs[reg].base == REG_CFA);
 
-  state->regs[reg].base = reg;
+  /* PS: the register may still be on stack much after the restore.  Reset the
+     SCFI state to CFI_UNDEFINED, however, to indicate that the most updated
+     source of value is register itself from here onwards.  */
+  state->regs[reg].base = 0;
   state->regs[reg].offset = 0;
-  /* PS: the register may still be on stack much after the restore, but the
-     SCFI state keeps the state as 'in register'.  */
-  state->regs[reg].state = CFI_IN_REG;
+  state->regs[reg].state = CFI_UNDEFINED;
 }
 
 /* Identify if the given GAS instruction GINSN saves a register
