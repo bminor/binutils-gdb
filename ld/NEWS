@@ -1,6 +1,6 @@
 -*- text -*-
 
-Changes in 2.42:
+Changes in 2.43:
 
 * Add -z isa-level-report=[none|all|needed|used] to the x86 ELF linker
   to report needed and used x86-64 ISA levels.
