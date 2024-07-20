@@ -1,6 +1,6 @@
 -*- text -*-
 
-Changes in 2.42:
+Changes in 2.43:
 
 * Readelf now displays RELR relocations in full detail.
 
