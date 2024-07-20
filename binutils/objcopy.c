@@ -2203,6 +2203,7 @@ merge_gnu_build_notes (bfd *          abfd,
   unsigned long       previous_open_end = 0;
   long                relsize;
 
+  *new_size = size;
   relsize = bfd_get_reloc_upper_bound (abfd, sec);
   if (relsize > 0)
     {
