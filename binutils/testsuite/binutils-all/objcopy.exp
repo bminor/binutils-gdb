@@ -1273,6 +1273,11 @@ if [is_elf_format] {
     run_dump_test "strip-7"
     run_dump_test "strip-8"
     run_dump_test "strip-9"
+    # This requires STB_GNU_UNIQUE support with OSABI set to GNU.
+    if { [supports_gnu_unique] } {
+	run_dump_test "strip-10"
+    }
+    run_dump_test "strip-11"
     run_dump_test "strip-12"
 
     if { [istarget "mips64*-*-openbsd*"] \
@@ -1308,12 +1313,7 @@ if [is_elf_format] {
     run_dump_test "strip-15" [list \
 				  [list source strip-15${reloc_format}.s] \
 				  [list as "${elf64} --defsym RELOC=${reloc}"]]
-
-    # This requires STB_GNU_UNIQUE support with OSABI set to GNU.
-    if { [supports_gnu_unique] } {
-	run_dump_test "strip-10"
-    }
-    run_dump_test "strip-11"
+    run_dump_test "strip-16"
 
     if { [istarget "i*86-*"] || [istarget "x86_64-*-*"] } {
 	# Check to make sure we don't strip a symbol named in relocations.

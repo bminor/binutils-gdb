@@ -1,4 +1,5 @@
 #PROG: strip
+#strip: --strip-unneeded --merge-notes
 #as: --generate-missing-build-notes=yes
 #readelf: --notes --wide
 #name: strip with build notes
