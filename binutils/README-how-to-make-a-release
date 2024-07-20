@@ -55,8 +55,8 @@ Approx time to complete from here: 2 hours ...
 
   4. Create the release branch using:
 
-	git branch binutils-2_43-branch
-        git push origin binutils-2_43-branch
+	git branch binutils-2_44-branch
+        git push origin binutils-2_44-branch
 
      If you get a message like:
      
@@ -66,7 +66,7 @@ Approx time to complete from here: 2 hours ...
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_43-branch 2.43
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_44-branch 2.44
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -88,8 +88,8 @@ Approx time to complete from here: 2 hours ...
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.43 (HEAD)" to 2.43, and create
-     "2.44 (HEAD)":
+     new one.  E.g. rename "2.44 (HEAD)" to 2.44, and create
+     "2.45 (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
@@ -97,18 +97,18 @@ Approx time to complete from here: 2 hours ...
      of the next release and the BRANCH to indicate that it is almost
      ready for the release.
 
-     So if the release is going to be 2.43 then the version number on
-     the BRANCH should be set to 2.42.90 - ie almost, but not quite 2.43,
-     and the version number on the MAINLINE should be set to 2.43.50 -
-     ie half way to 2.44 release.
+     So if the release is going to be 2.44 then the version number on
+     the BRANCH should be set to 2.43.90 - ie almost, but not quite 2.44,
+     and the version number on the MAINLINE should be set to 2.44.50 -
+     ie half way to 2.45 release.
 
      So the BRANCH bfd/version.m4 has:
      
-       m4_define([BFD_VERSION], [2.42.90])
+       m4_define([BFD_VERSION], [2.43.90])
        
      and the MAINLINE has:
 
-       m4_define([BFD_VERSION], [2.43.50])
+       m4_define([BFD_VERSION], [2.44.50])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
