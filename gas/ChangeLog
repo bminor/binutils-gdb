@@ -1,3 +1,7 @@
+2024-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* 2.43 branch point.
+
 2024-02-19 Will Hawkins  <hawkinsw@obs.cr>
 
 	* config/tc-bpf.c (parse_expression): Change switch to if so that

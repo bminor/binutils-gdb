@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.42:
+
 * Readelf now displays RELR relocations in full detail.
 
 * Readelf now has a -j/--display-section option which takes the name or index
