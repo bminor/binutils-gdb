@@ -59,9 +59,9 @@ set scopes [dap_check_request_and_response "get scopes" scopes \
 		[format {o frameId [i %d]} $frame_id]]
 set scopes [dict get [lindex $scopes 0] body scopes]
 
-# There are three scopes because an artificial symbol ends up in the
-# DWARF.  See https://github.com/rust-lang/rust/issues/125126.
-gdb_assert {[llength $scopes] == 3} "three scopes"
+# There may be three scopes instead of two if an artificial symbol ends up in
+# the DWARF.  See https://github.com/rust-lang/rust/issues/125126.
+gdb_assert { [llength $scopes] == 2 || [llength $scopes] == 3 } "two scopes"
 
 lassign $scopes scope ignore
 gdb_assert {[dict get $scope name] == "Locals"} "scope is locals"
