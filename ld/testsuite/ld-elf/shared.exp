@@ -1687,7 +1687,7 @@ proc mix_pic_and_non_pic {xfails cflags ldflags exe} {
     }
 
     set exec_output [run_host_cmd "tmpdir/$exe" ""]
-    if {![string match "PASS" $exec_output]} {
+    if {![string match "PASS\n" $exec_output]} {
 	fail "Run $exe fun undefined"
     } else {
 	pass "Run $exe fun undefined"

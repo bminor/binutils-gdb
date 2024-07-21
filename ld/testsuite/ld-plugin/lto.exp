@@ -895,7 +895,7 @@ set exec_output [prune_warnings $exec_output]
 if [string match "" $exec_output] then {
     if { [isnative] } {
 	set exec_output [run_host_cmd "tmpdir/pr28138" ""]
-	if [string match "PASS" $exec_output] then {
+	if [string match "PASS\n" $exec_output] then {
 	    pass "PR ld/28138 (build & run)"
 	} else {
 	    fail "PR ld/28138 (built ok, run failed)"

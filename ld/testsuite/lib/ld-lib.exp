@@ -109,12 +109,12 @@ proc run_host_cmd { prog command } {
 	set gccflags "$gcc_B_opt $gccflags $ld_L_opt"
 	if {![info exists gcc_ld_B_opt_tested]} {
 	    set gcc_ld_B_opt_tested 1
-	    set ld_version_message [run_host_cmd "$ld" "--version"]
+	    set ld_version_message [string trim [run_host_cmd "$ld" "--version"]]
 	    set ver "-Wl,--version"
 	    if [check_lto_available] {
 		set ver "-fno-lto $ver"
 	    }
-	    set gcc_ld_version_message [run_host_cmd "$prog" "$gccflags $ver"]
+	    set gcc_ld_version_message [string trim [run_host_cmd "$prog" "$gccflags $ver"]]
 	    if {[string first $ld_version_message $gcc_ld_version_message] < 0} {
 		perror "************************************************************************"
 		perror "Your compiler apparently ignores -B when choosing ld."
@@ -123,7 +123,7 @@ proc run_host_cmd { prog command } {
 		    perror "Hint: don't configure gcc using --with-ld (or --with-as)"
 		}
 		perror "You will not be testing the new ld in many of the following tests."
-		set gcc_ld_version [run_host_cmd "$prog" "$gccflags --print-prog-name=ld"]
+		set gcc_ld_version [string trim [run_host_cmd "$prog" "$gccflags --print-prog-name=ld"]]
 		if {![string match "" $gcc_ld_version] && ![string match "ld" $gcc_ld_version]} {
 		    perror "It seems you will be testing $gcc_ld_version instead."
 		}
@@ -136,9 +136,8 @@ proc run_host_cmd { prog command } {
     set status [remote_exec host [concat sh -c [list "$prog $gccflags $command 2>&1"]] "" "/dev/null" "ld.tmp"]
     remote_upload host "ld.tmp"
     set link_output [file_contents "ld.tmp"]
-    regsub "\n$" $link_output "" link_output
     if { [lindex $status 0] != 0 && [string match "" $link_output] } then {
-	append link_output "child process exited abnormally"
+	set link_output "child process exited abnormally"
     }
     remote_file build delete ld.tmp
     remote_file host delete ld.tmp

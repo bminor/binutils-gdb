@@ -519,9 +519,9 @@ if { [check_compiler_available] } {
 	cyglto_plugin-0.dll
     }
     foreach plug $plugin_names {
-	set plug_so [run_host_cmd $CC_FOR_TARGET "--print-prog-name $plug"]
+	set plug_so [string trim [run_host_cmd $CC_FOR_TARGET "--print-prog-name $plug"]]
 	if { $plug_so eq $plug } then {
-	    set plug_so [run_host_cmd $CC_FOR_TARGET "--print-file-name $plug"]
+	    set plug_so [string trim [run_host_cmd $CC_FOR_TARGET "--print-file-name $plug"]]
 	}
 	if { $plug_so ne $plug } then {
 	    set plug_opt "--plugin $plug_so"
