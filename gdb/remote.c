@@ -2532,9 +2532,6 @@ packet_check_result (const char *buf)
 	/* "Enn"  - definitely an error.  */
 	return packet_result::make_numeric_error (buf + 1);
 
-      /* Not every request accepts an error in a E.msg form.
-	 Some packets accepts only Enn, in this case E. is not
-	 defined and E. is treated as PACKET_OK.  */
       /* Always treat "E." as an error.  This will be used for
 	 more verbose error messages, such as E.memtypes.  */
       if (buf[0] == 'E' && buf[1] == '.')
