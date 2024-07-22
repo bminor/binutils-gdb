@@ -570,7 +570,6 @@ struct intrusive_list_test
 
     {
       /* Both lists empty.  */
-      item_type a ("a"), b ("b"), c ("c");
       ListType list1;
       ListType list2;
       std::vector<const item_type *> expected;
