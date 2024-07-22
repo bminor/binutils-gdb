@@ -382,6 +382,8 @@ frv_current_sos ()
 	  li->map = loadmap;
 	  li->got_value = got_addr;
 	  li->lm_addr = lm_addr;
+	  sop->lm_info = std::move (li);
+
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,
 					   sizeof (lm_buf.l_name),
