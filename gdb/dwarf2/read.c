@@ -19338,7 +19338,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			 apply.  */
 		      bound_minimal_symbol found
 			= (lookup_minimal_symbol_linkage
-			   (sym->linkage_name (), objfile));
+			   (sym->linkage_name (), objfile, false));
 		      if (found.minsym != nullptr)
 			sym->maybe_copied = 1;
 		    }

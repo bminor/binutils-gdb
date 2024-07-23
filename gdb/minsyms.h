@@ -227,11 +227,12 @@ bound_minimal_symbol lookup_minimal_symbol_text (program_space *pspace,
    objfiles) for a global (not file-local) minsym whose linkage name
    is NAME.  This is somewhat similar to lookup_minimal_symbol_text,
    only data symbols (not text symbols) are considered, and a non-NULL
-   objfile is not accepted.  Returns a bound minimal symbol that
-   matches, or an "empty" bound minimal symbol otherwise.  */
+   objfile is not accepted.  The boolean argument allows matching the
+   static types of data symbols also.  Returns a bound minimal symbol
+   that matches, or an "empty" bound minimal symbol otherwise.  */
 
-extern bound_minimal_symbol lookup_minimal_symbol_linkage (const char *name,
-							   struct objfile *objf)
+extern bound_minimal_symbol lookup_minimal_symbol_linkage
+  (const char *name, struct objfile *objf, bool match_static_type)
   ATTRIBUTE_NONNULL (1) ATTRIBUTE_NONNULL (2);
 
 /* A variant of lookup_minimal_symbol_linkage that iterates over all
