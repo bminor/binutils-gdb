@@ -27,10 +27,38 @@ if ![runto_main] {
 
 set breakline [gdb_get_line_number "break-at-exit"]
 
-gdb_test "hbreak ${srcfile}:${breakline}" \
-	 "Hardware assisted breakpoint \[0-9\]+ at 0x\[0-9a-f\]+: file .*${srcfile}, line ${breakline}\\." \
-	 "hbreak"
+set re_loc "file \[^\r\n\]*$srcfile, line $breakline"
+set re_dot [string_to_regexp .]
 
-gdb_test "continue" \
-	 "Continuing\\.\[ \r\n\]+Breakpoint \[0-9\]+, .*break-at-exit.*" \
-	 "continue to break-at-exit after hbreak"
+set addr 0x0
+gdb_test_multiple "hbreak ${srcfile}:${breakline}" "hbreak" {
+    -re -wrap "Hardware assisted breakpoint $decimal at ($hex): $re_loc$re_dot" {
+	set addr $expect_out(1,string)
+	pass $gdb_test_name
+    }
+}
+
+set have_xfail 0
+if { [istarget arm*-*-*] } {
+    # When running 32-bit userland on aarch64 kernel, thumb instructions that
+    # are not 4-byte aligned may not be supported for setting a hardware
+    # breakpoint on.
+    set have_xfail [expr ($addr & 0x2) == 2]
+}
+
+set re_xfail \
+    [string_to_regexp \
+	 "Unexpected error setting breakpoint: Invalid argument."]
+
+gdb_test_multiple "continue" "continue to break-at-exit after hbreak" {
+    -re -wrap "Continuing\\.\[ \r\n\]+Breakpoint \[0-9\]+, .*break-at-exit.*" {
+	pass $gdb_test_name
+    }
+    -re -wrap $re_xfail {
+	if { $have_xfail } {
+	    xfail $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
