@@ -29228,9 +29228,21 @@ files.
 @cindex arguments, to user-defined commands
 A @dfn{user-defined command} is a sequence of @value{GDBN} commands to
 which you assign a new name as a command.  This is done with the
-@code{define} command.  User commands may accept an unlimited number of arguments
-separated by whitespace.  Arguments are accessed within the user command
-via @code{$arg0@dots{}$argN}.  A trivial example:
+@code{define} command.
+
+User commands may accept an unlimited number of arguments separated by
+whitespace.  Arguments are accessed within the user command via
+@code{$arg0@dots{}$argN}.  The arguments are text substitutions, so
+they may reference variables, use complex expressions, or even perform
+inferior functions calls.  Note, however, that this textual
+substitution means that working with certain arguments is difficult.
+For example, there is no way for the user to pass an argument
+containing a space; and while stringifying an argument can be done
+using an expression like @code{"$arg1"}, this will fail if the
+argument contains a quote.  For more complicated and robust commands,
+we recommend writing them in Python; see @ref{CLI Commands In Python}.
+
+A trivial example:
 
 @smallexample
 define adder
@@ -29247,9 +29259,7 @@ adder 1 2 3
 
 @noindent
 This defines the command @code{adder}, which prints the sum of
-its three arguments.  Note the arguments are text substitutions, so they may
-reference variables, use complex expressions, or even perform inferior
-functions calls.
+its three arguments.
 
 @cindex argument count in user-defined commands
 @cindex how many arguments (user-defined commands)
