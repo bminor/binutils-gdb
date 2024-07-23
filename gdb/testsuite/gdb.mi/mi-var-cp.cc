@@ -42,7 +42,7 @@ struct S2 : S {};
 int base_in_reference_test (S2& s2)
 {
   /*: BEGIN: base_in_reference :*/
-  return s2.i;
+  int x = s2.i + s2.j;
   /*: 
     mi_create_varobj "S2" "s2" "create varobj for s2"
     mi_list_varobj_children "S2" {
@@ -62,6 +62,7 @@ int base_in_reference_test (S2& s2)
     
   :*/
   /*: END: base_in_reference :*/
+  return x;
 }
         
 void base_in_reference_test_main ()
