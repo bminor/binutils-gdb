@@ -12415,9 +12415,9 @@ OP_I (instr_info *ins, int bytemode, int sizeflag)
       break;
     case const_1_mode:
       if (ins->intel_syntax)
-	oappend (ins, "1");
+	oappend_with_style (ins, "1", dis_style_immediate);
       else
-	oappend (ins, "$1");
+	oappend_with_style (ins, "$1", dis_style_immediate);
       return true;
     default:
       oappend (ins, INTERNAL_DISASSEMBLER_ERROR);
