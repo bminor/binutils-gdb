@@ -227,6 +227,17 @@ pe_filter (bfd *abfd)
   return bfd_get_flavour (abfd) == bfd_target_coff_flavour;
 }
 
+/* Return string representation of the platform id
+   stored in upper 2 bits of Win32Version field.  */
+
+static const char *
+pe_platform_id_str (unsigned int platform_id)
+{
+  static const char *const platform_id_str_table[4] =
+    { "WinNT", "WinCE", "Win32s", "Win9x" };
+  return platform_id_str_table[platform_id & 0x3];
+}
+
 /* Display the list of name (from TABLE) for FLAGS, using comma to
    separate them.  A name is displayed if FLAGS & VAL is not 0.  */
 
@@ -424,8 +435,10 @@ dump_pe_file_header (bfd *                            abfd,
 	  printf (_("Magic:\t\t\t\t%x\t\t- %s\n"), data,
 		    data == 0x020b ? "PE32+" : _("Unknown"));
 	  
-	  printf (_("Version:\t\t\t%x\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.standard.vstamp));
+	  printf (_("Linker Version:\t\t\t%x\t\t- %u.%02u\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.standard.vstamp),
+		  (int) (bfd_h_get_16 (abfd, xhdr.standard.vstamp) & 0xff),
+		  (int) (bfd_h_get_16 (abfd, xhdr.standard.vstamp) >> 8));
 
 	  printf (_("Text Size:\t\t\t%#lx\n"),
 		  (long) bfd_h_get_32 (abfd, xhdr.standard.tsize));
@@ -448,18 +461,33 @@ dump_pe_file_header (bfd *                            abfd,
 		  (long) bfd_h_get_32 (abfd, xhdr.SectionAlignment));
 	  printf (_("File Alignment:\t\t\t%#lx\n"),
 		  (long) bfd_h_get_32 (abfd, xhdr.FileAlignment));
-	  printf (_("Major OS Version:\t\t%d\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.MajorOperatingSystemVersion));
-	  printf (_("Minor OS ersion:\t\t%d\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.MinorOperatingSystemVersion));
-	  printf (_("Major Image Version:\t\t%d\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.MajorImageVersion));
-	  printf (_("Minor Image Version:\t\t%d\n"),
+
+	  printf (_("Image Version:\t\t\t%lx\t\t- %u.%02u\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.MajorImageVersion),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorImageVersion),
 		  (int) bfd_h_get_16 (abfd, xhdr.MinorImageVersion));
-	  printf (_("Major Subsystem Version:\t%d\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.MajorSubsystemVersion));
-	  printf (_("Minor Subsystem Version:\t%d\n"),
+
+	  printf (_("Minimal Subsystem Version:\t%lx\t\t- %u.%02u\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.MajorSubsystemVersion),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorSubsystemVersion),
 		  (int) bfd_h_get_16 (abfd, xhdr.MinorSubsystemVersion));
+
+	  printf (_("Minimal OS Version:\t\t%lx\t\t- %u.%02u\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.MajorOperatingSystemVersion),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorOperatingSystemVersion),
+		  (int) bfd_h_get_16 (abfd, xhdr.MinorOperatingSystemVersion));
+
+	  printf (_("Overwrite OS Version:\t\t%lx\t\t- "),
+		  (long) bfd_h_get_32 (abfd, xhdr.Win32Version));
+	  if (bfd_h_get_32 (abfd, xhdr.Win32Version) == 0)
+	    printf (_("(default)\n"));
+	  else
+	    printf (_("%u.%02u (build %u, platform %s)\n"),
+		    ((int) (bfd_h_get_32 (abfd, xhdr.Win32Version) & 0xff)),
+		    ((int) ((bfd_h_get_32 (abfd, xhdr.Win32Version) >> 8) & 0xff)),
+		    ((int) ((bfd_h_get_32 (abfd, xhdr.Win32Version) >> 16) & 0x3fff)),
+		    pe_platform_id_str ((bfd_h_get_32 (abfd, xhdr.Win32Version) >> 30) & 0x3));
+
 	  printf (_("Size Of Image:\t\t\t%#lx\n"),
 		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfImage));
 	  printf (_("Size Of Headers:\t\t%#lx\n"),
@@ -509,8 +537,10 @@ dump_pe_file_header (bfd *                            abfd,
 	  printf (_("Magic:\t\t\t\t%x\t\t- %s\n"), data,
 		    data == 0x010b ? "PE32" : _("Unknown"));
 	  
-	  printf (_("Version:\t\t\t%x\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.standard.vstamp));
+	  printf (_("Linker Version:\t\t\t%x\t\t- %u.%02u\n"),
+		  (int) bfd_h_get_16 (abfd, xhdr.standard.vstamp),
+		  (int) (bfd_h_get_16 (abfd, xhdr.standard.vstamp) & 0xff),
+		  (int) (bfd_h_get_16 (abfd, xhdr.standard.vstamp) >> 8));
 
 	  printf (_("Text Size:\t\t\t%#lx\n"),
 		  (long) bfd_h_get_32 (abfd, xhdr.standard.tsize));
@@ -544,18 +574,33 @@ dump_pe_file_header (bfd *                            abfd,
 		  (long) bfd_h_get_32 (abfd, xhdr.SectionAlignment));
 	  printf (_("File Alignment:\t\t\t%#lx\n"),
 		  (long) bfd_h_get_32 (abfd, xhdr.FileAlignment));
-	  printf (_("Major OS Version:\t\t%d\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.MajorOperatingSystemVersion));
-	  printf (_("Minor OS ersion:\t\t%d\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.MinorOperatingSystemVersion));
-	  printf (_("Major Image Version:\t\t%d\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.MajorImageVersion));
-	  printf (_("Minor Image Version:\t\t%d\n"),
+
+	  printf (_("Image Version:\t\t\t%lx\t\t- %u.%02u\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.MajorImageVersion),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorImageVersion),
 		  (int) bfd_h_get_16 (abfd, xhdr.MinorImageVersion));
-	  printf (_("Major Subsystem Version:\t%d\n"),
-		  (int) bfd_h_get_16 (abfd, xhdr.MajorSubsystemVersion));
-	  printf (_("Minor Subsystem Version:\t%d\n"),
+
+	  printf (_("Minimal Subsystem Version:\t%lx\t\t- %u.%02u\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.MajorSubsystemVersion),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorSubsystemVersion),
 		  (int) bfd_h_get_16 (abfd, xhdr.MinorSubsystemVersion));
+
+	  printf (_("Minimal OS Version:\t\t%lx\t\t- %u.%02u\n"),
+		  (long) bfd_h_get_32 (abfd, xhdr.MajorOperatingSystemVersion),
+		  (int) bfd_h_get_16 (abfd, xhdr.MajorOperatingSystemVersion),
+		  (int) bfd_h_get_16 (abfd, xhdr.MinorOperatingSystemVersion));
+
+	  printf (_("Overwrite OS Version:\t\t%lx\t\t- "),
+		  (long) bfd_h_get_32 (abfd, xhdr.Win32Version));
+	  if (bfd_h_get_32 (abfd, xhdr.Win32Version) == 0)
+	    printf (_("(default)\n"));
+	  else
+	    printf (_("%u.%02u (build %u, platform %s)\n"),
+		    ((int) (bfd_h_get_32 (abfd, xhdr.Win32Version) & 0xff)),
+		    ((int) ((bfd_h_get_32 (abfd, xhdr.Win32Version) >> 8) & 0xff)),
+		    ((int) ((bfd_h_get_32 (abfd, xhdr.Win32Version) >> 16) & 0x3fff)),
+		    pe_platform_id_str ((bfd_h_get_32 (abfd, xhdr.Win32Version) >> 30) & 0x3));
+	  
 	  printf (_("Size Of Image:\t\t\t%#lx\n"),
 		  (long) bfd_h_get_32 (abfd, xhdr.SizeOfImage));
 	  printf (_("Size Of Headers:\t\t%#lx\n"),

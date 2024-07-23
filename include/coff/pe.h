@@ -264,7 +264,7 @@ typedef struct
   char  MinorImageVersion[2];
   char  MajorSubsystemVersion[2];
   char  MinorSubsystemVersion[2];
-  char  Reserved1[4];
+  char  Win32Version[4];
   char  SizeOfImage[4];
   char  SizeOfHeaders[4];
   char  CheckSum[4];
@@ -303,7 +303,7 @@ typedef struct
   char  MinorImageVersion[2];
   char  MajorSubsystemVersion[2];
   char  MinorSubsystemVersion[2];
-  char  Reserved1[4];
+  char  Win32Version[4];
   char  SizeOfImage[4];
   char  SizeOfHeaders[4];
   char  CheckSum[4];
