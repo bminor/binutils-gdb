@@ -2386,7 +2386,7 @@ riscv_update_subset1 (riscv_parse_subset_t *rps,
 		      const char *implicit_exts)
 {
   const char *p = implicit_exts;
-  const char *errmsg_internal = explicit_subset == NULL ? "" : "internal: ";
+  const char *errmsg_internal = explicit_subset == NULL ? "" : _("internal: ");
   const char *errmsg_caller = explicit_subset == NULL
 			      ? ".option arch" : "riscv_implicit_subsets";
 
