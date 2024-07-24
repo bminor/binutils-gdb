@@ -41,33 +41,45 @@ if {[test_compiler_info clang-*-*]} { setup_xfail *-*-* }
 gdb_test "ptype z3" " = complex long double"
 
 with_test_prefix "double imaginary" {
-    gdb_test {p $_cimag (z1)} " = 4.5"
+    set expr {$_cimag (z1)}
+    gdb_test "p $expr" " = 4.5"
     gdb_test {ptype $} " = double"
+    gdb_test "ptype $expr" " = double"
 }
 
 with_test_prefix "float imaginary" {
-    gdb_test {p $_cimag (z2)} " = -5.5"
+    set expr {$_cimag (z2)}
+    gdb_test "p $expr" " = -5.5"
     gdb_test {ptype $} " = float"
+    gdb_test "ptype $expr" " = float"
 }
 
 with_test_prefix "long double imaginary" {
-    gdb_test {p $_cimag (z3)} " = 6.5"
+    set expr {$_cimag (z3)}
+    gdb_test "p $expr" " = 6.5"
     gdb_test {ptype $} " = long double"
+    gdb_test "ptype $expr" " = long double"
 }
 
 with_test_prefix "double real" {
-    gdb_test {p $_creal (z1)} " = 1.5"
+    set expr {$_creal (z1)}
+    gdb_test "p $expr" " = 1.5"
     gdb_test {ptype $} " = double"
+    gdb_test "ptype $expr" " = double"
 }
 
 with_test_prefix "float real" {
-    gdb_test {p $_creal (z2)} " = 2.5"
+    set expr {$_creal (z2)}
+    gdb_test "p $expr" " = 2.5"
     gdb_test {ptype $} " = float"
+    gdb_test "ptype $expr" " = float"
 }
 
 with_test_prefix "long double real" {
-    gdb_test {p $_creal (z3)} " = 3.5"
+    set expr {$_creal (z3)}
+    gdb_test "p $expr" " = 3.5"
     gdb_test {ptype $} " = long double"
+    gdb_test "ptype $expr" " = long double"
 }
 
 gdb_test {p $_cimag (d1)} "expected a complex number"

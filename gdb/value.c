@@ -4295,7 +4295,8 @@ isvoid_internal_fn (struct gdbarch *gdbarch,
 static struct value *
 creal_internal_fn (struct gdbarch *gdbarch,
 		   const struct language_defn *language,
-		   void *cookie, int argc, struct value **argv)
+		   void *cookie, int argc, struct value **argv,
+		   enum noside noside)
 {
   if (argc != 1)
     error (_("You must provide one argument for $_creal."));
@@ -4304,6 +4305,8 @@ creal_internal_fn (struct gdbarch *gdbarch,
   type *ctype = check_typedef (cval->type ());
   if (ctype->code () != TYPE_CODE_COMPLEX)
     error (_("expected a complex number"));
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value::zero (ctype->target_type (), not_lval);
   return value_real_part (cval);
 }
 
@@ -4314,7 +4317,7 @@ static struct value *
 cimag_internal_fn (struct gdbarch *gdbarch,
 		   const struct language_defn *language,
 		   void *cookie, int argc,
-		   struct value **argv)
+		   struct value **argv, enum noside noside)
 {
   if (argc != 1)
     error (_("You must provide one argument for $_cimag."));
@@ -4323,6 +4326,8 @@ cimag_internal_fn (struct gdbarch *gdbarch,
   type *ctype = check_typedef (cval->type ());
   if (ctype->code () != TYPE_CODE_COMPLEX)
     error (_("expected a complex number"));
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value::zero (ctype->target_type (), not_lval);
   return value_imaginary_part (cval);
 }
 
