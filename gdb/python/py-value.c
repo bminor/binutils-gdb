@@ -1258,7 +1258,8 @@ valpy_call (PyObject *self, PyObject *args, PyObject *keywords)
       if (ftype->code () == TYPE_CODE_INTERNAL_FUNCTION)
 	return_value = call_internal_function (gdbpy_enter::get_gdbarch (),
 					       current_language,
-					       function, args_count, vargs);
+					       function, args_count, vargs,
+					       EVAL_NORMAL);
       else
 	return_value
 	  = call_function_by_hand (function, NULL,

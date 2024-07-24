@@ -622,11 +622,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 
       if (ftype->code () == TYPE_CODE_INTERNAL_FUNCTION)
 	{
-	  /* We don't know anything about what the internal
-	     function might return, but we have to return
-	     something.  */
-	  return value::zero (builtin_type (exp->gdbarch)->builtin_int,
-			     not_lval);
+	  /* The call to call_internal_function below handles noside.  */
 	}
       else if (ftype->code () == TYPE_CODE_XMETHOD)
 	{
@@ -666,7 +662,8 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
     {
     case TYPE_CODE_INTERNAL_FUNCTION:
       return call_internal_function (exp->gdbarch, exp->language_defn,
-				     callee, argvec.size (), argvec.data ());
+				     callee, argvec.size (), argvec.data (),
+				     noside);
     case TYPE_CODE_XMETHOD:
       return callee->call_xmethod (argvec);
     default:

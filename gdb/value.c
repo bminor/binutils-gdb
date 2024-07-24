@@ -61,7 +61,7 @@ struct internal_function
   char *name;
 
   /* The handler.  */
-  internal_function_fn handler;
+  internal_function_fn_noside handler;
 
   /* User data for the handler.  */
   void *cookie;
@@ -2336,9 +2336,9 @@ internalvar_name (const struct internalvar *var)
 
 static struct internal_function *
 create_internal_function (const char *name,
-			  internal_function_fn handler, void *cookie)
+			  internal_function_fn_noside handler, void *cookie)
 {
-  struct internal_function *ifn = XNEW (struct internal_function);
+  struct internal_function *ifn = new (struct internal_function);
 
   ifn->name = xstrdup (name);
   ifn->handler = handler;
@@ -2362,7 +2362,8 @@ value_internal_function_name (struct value *val)
 struct value *
 call_internal_function (struct gdbarch *gdbarch,
 			const struct language_defn *language,
-			struct value *func, int argc, struct value **argv)
+			struct value *func, int argc, struct value **argv,
+			enum noside noside)
 {
   struct internal_function *ifn;
   int result;
@@ -2371,7 +2372,7 @@ call_internal_function (struct gdbarch *gdbarch,
   result = get_internalvar_function (VALUE_INTERNALVAR (func), &ifn);
   gdb_assert (result);
 
-  return (*ifn->handler) (gdbarch, language, ifn->cookie, argc, argv);
+  return ifn->handler (gdbarch, language, ifn->cookie, argc, argv, noside);
 }
 
 /* The 'function' command.  This does nothing -- it is just a
@@ -2388,7 +2389,7 @@ function_command (const char *command, int from_tty)
 
 static struct cmd_list_element *
 do_add_internal_function (const char *name, const char *doc,
-			  internal_function_fn handler, void *cookie)
+			  internal_function_fn_noside handler, void *cookie)
 {
   struct internal_function *ifn;
   struct internalvar *var = lookup_internalvar (name);
@@ -2403,9 +2404,42 @@ do_add_internal_function (const char *name, const char *doc,
 
 void
 add_internal_function (const char *name, const char *doc,
-		       internal_function_fn handler, void *cookie)
+		       internal_function_fn_noside handler, void *cookie)
 {
   do_add_internal_function (name, doc, handler, cookie);
+}
+
+/* By default, internal functions are assumed to return int.  Return a value
+   with that type to reflect this.  If this is not correct for a specific
+   internal function, it should use an internal_function_fn_noside handler to
+   bypass this default.  */
+
+static struct value *
+internal_function_default_return_type (struct gdbarch *gdbarch)
+{
+  return value::zero (builtin_type (gdbarch)->builtin_int, not_lval);
+}
+
+/* See value.h.  */
+
+void
+add_internal_function (const char *name, const char *doc,
+		       internal_function_fn handler, void *cookie)
+{
+  internal_function_fn_noside fn
+    = [=] (struct gdbarch *gdbarch,
+	   const struct language_defn *language,
+	   void *_cookie,
+	   int argc,
+	   struct value **argv,
+	   enum noside noside)
+    {
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return internal_function_default_return_type (gdbarch);
+      return handler (gdbarch, language, _cookie, argc, argv);
+    };
+
+  do_add_internal_function (name, doc, fn, cookie);
 }
 
 /* See value.h.  */
@@ -2413,7 +2447,7 @@ add_internal_function (const char *name, const char *doc,
 void
 add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
 		       gdb::unique_xmalloc_ptr<char> &&doc,
-		       internal_function_fn handler, void *cookie)
+		       internal_function_fn_noside handler, void *cookie)
 {
   struct cmd_list_element *cmd
     = do_add_internal_function (name.get (), doc.get (), handler, cookie);
@@ -2424,6 +2458,31 @@ add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
   cmd->doc_allocated = 1;
   (void) name.release ();
   cmd->name_allocated = 1;
+}
+
+/* See value.h.  */
+
+void
+add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
+		       gdb::unique_xmalloc_ptr<char> &&doc,
+		       internal_function_fn handler, void *cookie)
+{
+  internal_function_fn_noside fn
+    = [=] (struct gdbarch *gdbarch,
+	   const struct language_defn *language,
+	   void *_cookie,
+	   int argc,
+	   struct value **argv,
+	   enum noside noside)
+    {
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return internal_function_default_return_type (gdbarch);
+      return handler (gdbarch, language, _cookie, argc, argv);
+    };
+
+  add_internal_function (std::forward<gdb::unique_xmalloc_ptr<char>>(name),
+			 std::forward<gdb::unique_xmalloc_ptr<char>>(doc),
+			 fn, cookie);
 }
 
 void

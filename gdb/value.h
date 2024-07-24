@@ -1598,13 +1598,24 @@ extern struct value *find_function_in_inferior (const char *,
 
 extern struct value *value_allocate_space_in_inferior (int);
 
-/* User function handler.  */
+/* User function handler.  The internal_function_fn variant assumes return
+   type int.  The internal_function_fn_noside returns some value with the
+   return type when passed noside == EVAL_AVOID_SIDE_EFFECTS.  */
 
-typedef struct value *(*internal_function_fn) (struct gdbarch *gdbarch,
-					       const struct language_defn *language,
-					       void *cookie,
-					       int argc,
-					       struct value **argv);
+using internal_function_fn
+  = std::function<struct value *(struct gdbarch *gdbarch,
+				 const struct language_defn *language,
+				 void *cookie,
+				 int argc,
+				 struct value **argv)>;
+
+using internal_function_fn_noside
+  = std::function<struct value *(struct gdbarch *gdbarch,
+				 const struct language_defn *language,
+				 void *cookie,
+				 int argc,
+				 struct value **argv,
+				 enum noside noside)>;
 
 /* Add a new internal function.  NAME is the name of the function; DOC
    is a documentation string describing the function.  HANDLER is
@@ -1615,6 +1626,9 @@ typedef struct value *(*internal_function_fn) (struct gdbarch *gdbarch,
 extern void add_internal_function (const char *name, const char *doc,
 				   internal_function_fn handler,
 				   void *cookie);
+extern void add_internal_function (const char *name, const char *doc,
+				   internal_function_fn_noside handler,
+				   void *cookie);
 
 /* This overload takes an allocated documentation string.  */
 
@@ -1622,11 +1636,16 @@ extern void add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
 				   gdb::unique_xmalloc_ptr<char> &&doc,
 				   internal_function_fn handler,
 				   void *cookie);
+extern void add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
+				   gdb::unique_xmalloc_ptr<char> &&doc,
+				   internal_function_fn_noside handler,
+				   void *cookie);
 
 struct value *call_internal_function (struct gdbarch *gdbarch,
 				      const struct language_defn *language,
 				      struct value *function,
-				      int argc, struct value **argv);
+				      int argc, struct value **argv,
+				      enum noside noside);
 
 const char *value_internal_function_name (struct value *);
 
