@@ -38,6 +38,14 @@ proc string_to_regexp {str} {
     return $result
 }
 
+# Convenience function that calls string_to_regexp for each arg, and
+# joins the results using "\r\n".
+
+proc multi_line_string_to_regexp { args } {
+    set res [lmap arg $args {string_to_regexp $arg}]
+    return [multi_line {*}$res]
+}
+
 # Given a list of strings, adds backslashes as needed to each string to
 # create a regexp that will match the string, and join the result.
 
