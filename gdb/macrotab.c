@@ -545,10 +545,10 @@ macro_lookup_inclusion (struct macro_source_file *source, const char *name)
 
 /* Construct a definition for a macro in table T.  Cache all strings,
    and the macro_definition structure itself, in T's bcache.  */
-static struct macro_definition *
-new_macro_definition (struct macro_table *t,
-		      enum macro_kind kind,
-		      int argc, const char **argv,
+static macro_definition *
+new_macro_definition (macro_table *t, macro_kind kind,
+		      macro_special_kind special_kind,
+		      const std::vector<std::string> &argv,
 		      const char *replacement)
 {
   struct macro_definition *d
@@ -558,22 +558,24 @@ new_macro_definition (struct macro_table *t,
   d->table = t;
   d->kind = kind;
   d->replacement = macro_bcache_str (t, replacement);
-  d->argc = argc;
 
   if (kind == macro_function_like)
     {
-      int i;
-      const char **cached_argv;
-      int cached_argv_size = argc * sizeof (*cached_argv);
+      d->argc = argv.size ();
 
       /* Bcache all the arguments.  */
-      cached_argv = (const char **) alloca (cached_argv_size);
-      for (i = 0; i < argc; i++)
-	cached_argv[i] = macro_bcache_str (t, argv[i]);
+      int i = 0;
+      int cached_argv_size = argv.size () * sizeof (const char *);
+      const char **cached_argv = (const char **) alloca (cached_argv_size);
+
+      for (const auto &arg : argv)
+	cached_argv[i++] = macro_bcache_str (t, arg.c_str ());
 
       /* Now bcache the array of argument pointers itself.  */
       d->argv = macro_bcache (t, cached_argv, cached_argv_size);
     }
+  else
+    d->argc = special_kind;
 
   /* We don't bcache the entire definition structure because it's got
      a pointer to the macro table in it; since each compilation unit
@@ -677,13 +679,12 @@ find_definition (const char *name,
 
 /* If NAME already has a definition in scope at LINE in SOURCE, return
    the key.  If the old definition is different from the definition
-   given by KIND, ARGC, ARGV, and REPLACEMENT, complain, too.
-   Otherwise, return zero.  (ARGC and ARGV are meaningless unless KIND
+   given by KIND, ARGV, and REPLACEMENT, complain, too.
+   Otherwise, return nullptr.  (ARGV is meaningless unless KIND
    is `macro_function_like'.)  */
-static struct macro_key *
-check_for_redefinition (struct macro_source_file *source, int line,
-			const char *name, enum macro_kind kind,
-			int argc, const char **argv,
+static macro_key *
+check_for_redefinition (macro_source_file *source, int line, const char *name,
+			macro_kind kind, const std::vector<std::string> &argv,
 			const char *replacement)
 {
   splay_tree_node n = find_definition (name, source, line);
@@ -708,14 +709,14 @@ check_for_redefinition (struct macro_source_file *source, int line,
 	same = 0;
       else if (kind == macro_function_like)
 	{
-	  if (argc != found_def->argc)
+	  if (argv.size () != found_def->argc)
 	    same = 0;
 	  else
 	    {
-	      int i;
+	      int i = 0;
 
-	      for (i = 0; i < argc; i++)
-		if (strcmp (argv[i], found_def->argv[i]))
+	      for (const auto &arg : argv)
+		if (arg != found_def->argv[i++])
 		  same = 0;
 	    }
 	}
@@ -739,15 +740,18 @@ check_for_redefinition (struct macro_source_file *source, int line,
 }
 
 /* A helper function to define a new object-like or function-like macro
-   according to KIND.  When KIND is macro_object_like,
-   the macro_special_kind must be provided as ARGC, and ARGV must be NULL.
-   When KIND is macro_function_like, ARGC and ARGV are giving the function
-   arguments.  */
+   according to KIND.
+
+   When KIND is macro_object_like, the possible special kind is given by
+   SPECIAL_KIND, and ARGV is meaningless.
+
+   When KIND is macro_function_like, ARGV gives the macro argument names, and
+   SPECIAL_KIND is meaningless.  */
 
 static void
-macro_define_internal (struct macro_source_file *source, int line,
-		       const char *name, enum macro_kind kind,
-		       int argc, const char **argv,
+macro_define_internal (macro_source_file *source, int line, const char *name,
+		       macro_kind kind, macro_special_kind special_kind,
+		       const std::vector<std::string> &argv,
 		       const char *replacement)
 {
   struct macro_table *t = source->table;
@@ -755,10 +759,7 @@ macro_define_internal (struct macro_source_file *source, int line,
   struct macro_definition *d;
 
   if (! t->redef_ok)
-    k = check_for_redefinition (source, line,
-				name, kind,
-				argc, argv,
-				replacement);
+    k = check_for_redefinition (source, line, name, kind, argv, replacement);
 
   /* If we're redefining a symbol, and the existing key would be
      identical to our new key, then the splay_tree_insert function
@@ -774,7 +775,7 @@ macro_define_internal (struct macro_source_file *source, int line,
     return;
 
   k = new_macro_key (t, name, source, line);
-  d = new_macro_definition (t, kind, argc, argv, replacement);
+  d = new_macro_definition (t, kind, special_kind, argv, replacement);
   splay_tree_insert (t->definitions, (splay_tree_key) k, (splay_tree_value) d);
 }
 
@@ -785,10 +786,8 @@ macro_define_object_internal (struct macro_source_file *source, int line,
 			      const char *name, const char *replacement,
 			      enum macro_special_kind special_kind)
 {
-  macro_define_internal (source, line,
-			 name, macro_object_like,
-			 special_kind, NULL,
-			 replacement);
+  macro_define_internal (source, line, name, macro_object_like, special_kind,
+			 {}, replacement);
 }
 
 void
@@ -811,14 +810,12 @@ macro_define_special (struct macro_table *table)
 }
 
 void
-macro_define_function (struct macro_source_file *source, int line,
-		       const char *name, int argc, const char **argv,
+macro_define_function (macro_source_file *source, int line, const char *name,
+		       const std::vector<std::string> &argv,
 		       const char *replacement)
 {
-  macro_define_internal (source, line,
-			 name, macro_function_like,
-			 argc, argv,
-			 replacement);
+  macro_define_internal (source, line, name, macro_function_like,
+			 macro_ordinary, argv, replacement);
 }
 
 void

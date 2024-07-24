@@ -160,9 +160,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
   /* It's a function-like macro.  */
   gdb_assert (*p == '(');
   std::string name (body, p - body);
-  int argc = 0;
-  int argv_size = 1;
-  char **argv = XNEWVEC (char *, argv_size);
+  std::vector<std::string> argv;
 
   p++;
 
@@ -180,16 +178,7 @@ parse_macro_definition (struct macro_source_file *file, int line,
       if (! *p || p == arg_start)
 	dwarf2_macro_malformed_definition_complaint (body);
       else
-	{
-	  /* Make sure argv has room for the new argument.  */
-	  if (argc >= argv_size)
-	    {
-	      argv_size *= 2;
-	      argv = XRESIZEVEC (char *, argv, argv_size);
-	    }
-
-	  argv[argc++] = savestring (arg_start, p - arg_start);
-	}
+	argv.emplace_back (arg_start, p);
 
       p = consume_improper_spaces (p, body);
 
@@ -208,16 +197,12 @@ parse_macro_definition (struct macro_source_file *file, int line,
 
       if (*p == ' ')
 	/* Perfectly formed definition, no complaints.  */
-	macro_define_function (file, line, name.c_str (),
-			       argc, (const char **) argv,
-			       p + 1);
+	macro_define_function (file, line, name.c_str (), argv, p + 1);
       else if (*p == '\0')
 	{
 	  /* Complain, but do define it.  */
 	  dwarf2_macro_malformed_definition_complaint (body);
-	  macro_define_function (file, line, name.c_str (),
-				 argc, (const char **) argv,
-				 p);
+	  macro_define_function (file, line, name.c_str (), argv, p);
 	}
       else
 	/* Just complain.  */
@@ -226,11 +211,6 @@ parse_macro_definition (struct macro_source_file *file, int line,
   else
     /* Just complain.  */
     dwarf2_macro_malformed_definition_complaint (body);
-
-  for (int i = 0; i < argc; i++)
-    xfree (argv[i]);
-
-  xfree (argv);
 }
 
 /* Skip some bytes from BYTES according to the form given in FORM.
