@@ -3200,6 +3200,91 @@ _bfd_x86_elf_link_report_relative_reloc
        asect, abfd);
 }
 
+/* Report TLS transition error.  */
+
+void
+_bfd_x86_elf_link_report_tls_transition_error
+  (struct bfd_link_info *info, bfd *abfd, asection *asect,
+   Elf_Internal_Shdr *symtab_hdr, struct elf_link_hash_entry *h,
+   Elf_Internal_Sym *sym, const Elf_Internal_Rela *rel,
+   const char *from_reloc_name, const char *to_reloc_name,
+   enum elf_x86_tls_error_type tls_error)
+{
+  const char *name;
+
+  if (h)
+    name = h->root.root.string;
+  else
+    {
+      const struct elf_backend_data *bed
+	= get_elf_backend_data (abfd);
+      struct elf_x86_link_hash_table *htab
+	= elf_x86_hash_table (info, bed->target_id);
+      if (htab == NULL)
+	name = "*unknown*";
+      else
+	name = bfd_elf_sym_name (abfd, symtab_hdr, sym, NULL);
+    }
+
+  switch (tls_error)
+    {
+    case elf_x86_tls_error_yes:
+      info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%pB: TLS transition from %s to %s against `%s' at 0x%v in "
+	   "section `%pA' failed"),
+	 abfd, from_reloc_name, to_reloc_name, name, rel->r_offset,
+	 asect);
+      break;
+
+    case elf_x86_tls_error_add:
+      info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
+	   "in ADD only"),
+	 abfd, asect, rel->r_offset, from_reloc_name, name);
+      break;
+
+    case elf_x86_tls_error_add_mov:
+      info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
+	   "in ADD or MOV only"),
+	 abfd, asect, rel->r_offset, from_reloc_name, name);
+      break;
+
+    case elf_x86_tls_error_add_sub_mov:
+      info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
+	   "in ADD, SUB or MOV only"),
+	 abfd, asect, rel->r_offset, from_reloc_name, name);
+      break;
+
+    case elf_x86_tls_error_indirect_call:
+      info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
+	   "in indirect CALL only"),
+	 abfd, asect, rel->r_offset, from_reloc_name, name);
+      break;
+
+    case elf_x86_tls_error_lea:
+      info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
+	   "in LEA only"),
+	 abfd, asect, rel->r_offset, from_reloc_name, name);
+      break;
+
+    default:
+      abort ();
+      break;
+    }
+
+  bfd_set_error (bfd_error_bad_value);
+}
+
 /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
 
 bool

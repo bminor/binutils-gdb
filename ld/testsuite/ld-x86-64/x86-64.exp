@@ -537,6 +537,9 @@ run_dump_test "pr31868b"
 run_dump_test "pr31868b-x32"
 run_dump_test "pr31868c"
 run_dump_test "pr31868c-x32"
+run_dump_test "tlsie5"
+run_dump_test "tlsdesc3"
+run_dump_test "tlsdesc4"
 
 if { ![skip_sframe_tests] } {
     run_dump_test "sframe-simple-1"

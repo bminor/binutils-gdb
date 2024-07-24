@@ -767,6 +767,17 @@ struct elf_x86_plt
   long count;
 };
 
+enum elf_x86_tls_error_type
+{
+  elf_x86_tls_error_none,
+  elf_x86_tls_error_add,
+  elf_x86_tls_error_add_mov,
+  elf_x86_tls_error_add_sub_mov,
+  elf_x86_tls_error_indirect_call,
+  elf_x86_tls_error_lea,
+  elf_x86_tls_error_yes
+};
+
 /* Set if a relocation is converted from a GOTPCREL relocation.  */
 #define R_X86_64_converted_reloc_bit (1 << 7)
 
@@ -914,6 +925,12 @@ extern void _bfd_x86_elf_link_fixup_ifunc_symbol
 extern void _bfd_x86_elf_link_report_relative_reloc
   (struct bfd_link_info *, asection *, struct elf_link_hash_entry *,
    Elf_Internal_Sym *, const char *, const void *) ATTRIBUTE_HIDDEN;
+
+extern void _bfd_x86_elf_link_report_tls_transition_error
+  (struct bfd_link_info *, bfd *, asection *, Elf_Internal_Shdr *,
+   struct elf_link_hash_entry *, Elf_Internal_Sym *,
+   const Elf_Internal_Rela *, const char *, const char *,
+   enum elf_x86_tls_error_type);
 
 #define bfd_elf64_mkobject \
   _bfd_x86_elf_mkobject
