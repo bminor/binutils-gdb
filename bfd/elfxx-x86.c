@@ -3232,7 +3232,7 @@ _bfd_x86_elf_link_report_tls_transition_error
       info->callbacks->einfo
 	/* xgettext:c-format */
 	(_("%pB: TLS transition from %s to %s against `%s' at 0x%v in "
-	   "section `%pA' failed"),
+	   "section `%pA' failed\n"),
 	 abfd, from_reloc_name, to_reloc_name, name, rel->r_offset,
 	 asect);
       break;
@@ -3241,7 +3241,7 @@ _bfd_x86_elf_link_report_tls_transition_error
       info->callbacks->einfo
 	/* xgettext:c-format */
 	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
-	   "in ADD only"),
+	   "in ADD only\n"),
 	 abfd, asect, rel->r_offset, from_reloc_name, name);
       break;
 
@@ -3249,7 +3249,7 @@ _bfd_x86_elf_link_report_tls_transition_error
       info->callbacks->einfo
 	/* xgettext:c-format */
 	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
-	   "in ADD or MOV only"),
+	   "in ADD or MOV only\n"),
 	 abfd, asect, rel->r_offset, from_reloc_name, name);
       break;
 
@@ -3257,7 +3257,7 @@ _bfd_x86_elf_link_report_tls_transition_error
       info->callbacks->einfo
 	/* xgettext:c-format */
 	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
-	   "in ADD, SUB or MOV only"),
+	   "in ADD, SUB or MOV only\n"),
 	 abfd, asect, rel->r_offset, from_reloc_name, name);
       break;
 
@@ -3265,7 +3265,7 @@ _bfd_x86_elf_link_report_tls_transition_error
       info->callbacks->einfo
 	/* xgettext:c-format */
 	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
-	   "in indirect CALL only"),
+	   "in indirect CALL only\n"),
 	 abfd, asect, rel->r_offset, from_reloc_name, name);
       break;
 
@@ -3273,7 +3273,7 @@ _bfd_x86_elf_link_report_tls_transition_error
       info->callbacks->einfo
 	/* xgettext:c-format */
 	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
-	   "in LEA only"),
+	   "in LEA only\n"),
 	 abfd, asect, rel->r_offset, from_reloc_name, name);
       break;
 
