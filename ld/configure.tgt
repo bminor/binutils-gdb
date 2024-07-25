@@ -1113,7 +1113,7 @@ case "${target}" in
   ;;
 
 *-*-freebsd*)
-  NATIVE_LIB_DIRS='/lib /usr/lib /usr/local/lib'
+  NATIVE_LIB_DIRS='/lib /usr/lib /usr/local/lib /usr/lib32'
   ;;
 
 hppa*64*-*-hpux11*)
