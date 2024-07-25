@@ -132,14 +132,6 @@ struct solib_ops
   /* Find and open shared library binary file.  */
   gdb_bfd_ref_ptr (*bfd_open) (const char *pathname);
 
-  /* Optional extra hook for finding and opening a solib.
-     If TEMP_PATHNAME is non-NULL: If the file is successfully opened a
-     pointer to a malloc'd and realpath'd copy of SONAME is stored there,
-     otherwise NULL is stored there.  */
-  int (*find_and_open_solib) (const char *soname,
-			      unsigned o_flags,
-			      gdb::unique_xmalloc_ptr<char> *temp_pathname);
-
   /* Given two so_list objects, one from the GDB thread list
      and another from the list returned by current_sos, return 1
      if they represent the same library.

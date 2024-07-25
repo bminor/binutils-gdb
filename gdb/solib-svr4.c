@@ -3364,7 +3364,6 @@ const struct solib_ops svr4_so_ops =
   open_symbol_file_object,
   svr4_in_dynsym_resolve_code,
   solib_bfd_open,
-  nullptr,
   svr4_same,
   svr4_keep_data_in_core,
   svr4_update_solib_event_breakpoints,

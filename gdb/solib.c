@@ -114,7 +114,6 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 static gdb::unique_xmalloc_ptr<char>
 solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
 {
-  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
   int found_file = -1;
   gdb::unique_xmalloc_ptr<char> temp_pathname;
   const char *fskind = effective_target_file_system_kind ();
@@ -296,12 +295,6 @@ solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
 			OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH,
 			target_lbasename (fskind, in_pathname),
 			O_RDONLY | O_BINARY, &temp_pathname);
-
-  /* If not found, and we're looking for a solib, try to use target
-     supplied solib search method.  */
-  if (is_solib && found_file < 0 && ops->find_and_open_solib)
-    found_file = ops->find_and_open_solib (in_pathname, O_RDONLY | O_BINARY,
-					   &temp_pathname);
 
   /* If not found, next search the inferior's $PATH environment variable.  */
   if (found_file < 0 && sysroot == NULL)
