@@ -426,15 +426,6 @@ case ${gdb_host} in
 
 	esac
 	;;
-    nto)
-	case ${gdb_host_cpu} in
-	    i386)
-		# Host: Intel 386 running QNX.
-		NATDEPFILES='nto-procfs.o'
-		NAT_FILE='config/nm-nto.h'
-		;;
-	esac
-	;;
     obsd)
 	case ${gdb_host_cpu} in
 	    i386)

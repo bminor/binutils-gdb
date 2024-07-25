@@ -305,11 +305,6 @@ i[34567]86-*-openbsd*)
 	# Target: OpenBSD/i386
 	gdb_target_obs="i386-bsd-tdep.o i386-obsd-tdep.o bsd-uthread.o"
 	;;
-i[34567]86-*-nto*)
-	# Target: Intel 386 running qnx6.
-	gdb_target_obs="solib-svr4.o \
-			i386-nto-tdep.o nto-tdep.o"
-	;;
 i[34567]86-*-solaris2* | x86_64-*-solaris2*)
 	# Target: Solaris x86_64
 	gdb_target_obs="${i386_tobjs} ${amd64_tobjs} \
@@ -809,7 +804,6 @@ case "${targ}" in
 		gdb_osabi=GDB_OSABI_FREEBSD ;;
 *-*-linux* | *-*-uclinux*)
 		gdb_osabi=GDB_OSABI_LINUX ;;
-*-*-nto*)	gdb_osabi=GDB_OSABI_QNXNTO ;;
 m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
 *-*-openbsd*)	gdb_osabi=GDB_OSABI_OPENBSD ;;
 *-*-solaris*)	gdb_osabi=GDB_OSABI_SOLARIS ;;

@@ -832,7 +832,6 @@ ALL_TARGET_OBS = \
 	i386-go32-tdep.o \
 	i386-linux-tdep.o \
 	i386-netbsd-tdep.o \
-	i386-nto-tdep.o \
 	i386-obsd-tdep.o \
 	i386-sol2-tdep.o \
 	i386-tdep.o \
@@ -860,7 +859,6 @@ ALL_TARGET_OBS = \
 	nds32-tdep.o \
 	nios2-linux-tdep.o \
 	nios2-tdep.o \
-	nto-tdep.o \
 	obsd-tdep.o \
 	or1k-linux-tdep.o \
 	or1k-tdep.o \
@@ -1444,7 +1442,6 @@ HFILES_NO_SRCDIR = \
 	nds32-tdep.h \
 	nios2-tdep.h \
 	elf-none-tdep.h \
-	nto-tdep.h \
 	objc-lang.h \
 	objfiles.h \
 	obsd-nat.h \
@@ -1581,7 +1578,6 @@ HFILES_NO_SRCDIR = \
 	compile/gcc-c-plugin.h \
 	compile/gcc-cp-plugin.h \
 	config/nm-linux.h \
-	config/nm-nto.h \
 	config/djgpp/langinfo.h \
 	config/djgpp/nl_types.h \
 	config/i386/nm-i386gnu.h \

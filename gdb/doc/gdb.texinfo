@@ -2742,7 +2742,7 @@ environment:
 @end smallexample
 
 This command is available when debugging locally on most targets, excluding
-@sc{djgpp}, Cygwin, MS Windows, and QNX Neutrino.
+@sc{djgpp}, Cygwin, and MS Windows.
 
 @kindex set startup-with-shell
 @anchor{set startup-with-shell}
@@ -22011,7 +22011,7 @@ name and remembers it that way.
 @cindex shared libraries
 @anchor{Shared Libraries}
 @value{GDBN} supports @sc{gnu}/Linux, MS-Windows, SunOS,
-Darwin/Mach-O, SVr4, IBM RS/6000 AIX, QNX Neutrino, FDPIC (FR-V), and
+Darwin/Mach-O, SVr4, IBM RS/6000 AIX, FDPIC (FR-V), and
 DSBT (TIC6X) shared libraries.
 
 On MS-Windows @value{GDBN} must be linked with the Expat library to support
@@ -25207,16 +25207,6 @@ Show the file to which @code{procfs} API trace is written.
 These commands enable and disable tracing of entries into and exits
 from the @code{syscall} interface.
 
-@item info pidlist
-@kindex info pidlist
-@cindex process list, QNX Neutrino
-For QNX Neutrino only, this command displays the list of all the
-processes and all the threads within each process.
-
-@item info meminfo
-@kindex info meminfo
-@cindex mapinfo list, QNX Neutrino
-For QNX Neutrino only, this command displays the list of all mapinfos.
 @end table
 
 @node DJGPP Native

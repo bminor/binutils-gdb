@@ -8113,7 +8113,6 @@ gdb_caching_proc gdb_has_argv0 {} {
 	  || [istarget *-wince-pe] || [istarget *-*-mingw32ce*]
 	  || [istarget *-*-osf*]
 	  || [istarget *-*-dicos*]
-	  || [istarget *-*-nto*]
 	  || [istarget *-*-*vms*]
 	  || [istarget *-*-lynx*178]) } {
 	fail "argv\[0\] should be available on this target"
