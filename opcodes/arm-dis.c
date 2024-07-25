@@ -9887,23 +9887,8 @@ print_insn_mve (struct disassemble_info *info, long given)
 			    if (mve_shift_insn_p (insn->mve_op))
 			      print_mve_shift_n (info, given, insn->mve_op);
 			    else if (insn->mve_op == MVE_VSHLL_T2)
-			      {
-				switch (value)
-				  {
-				  case 0x00:
-				    func (stream, dis_style_immediate, "8");
-				    break;
-				  case 0x01:
-				    func (stream, dis_style_immediate, "16");
-				    break;
-				  case 0x10:
-				    print_mve_undefined (info, UNDEF_SIZE_0);
-				    break;
-				  default:
-				    assert (0);
-				    break;
-				  }
-			      }
+			      func (stream, dis_style_immediate, "%s",
+				    mve_vec_sizename[value]);
 			    else
 			      {
 				if (insn->mve_op == MVE_VSHLC && value == 0)
