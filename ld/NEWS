@@ -2,6 +2,10 @@
 
 Changes in 2.43:
 
+* Add support for LoongArch DT_RELR (compressed R_LARCH_RELATIVE).
+
+* Put .got .got.plt in the relro to make it read-only after relocation.
+
 * Add -z isa-level-report=[none|all|needed|used] to the x86 ELF linker
   to report needed and used x86-64 ISA levels.
 

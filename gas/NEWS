@@ -2,6 +2,9 @@
 
 Changes in 2.43:
 
+* Add support for LoongArch .option for fine-grained control of assembly
+  code options.
+
 * The MIPS '--trap' command-line option now causes GAS to dynamically
   track the ISA setting as code is assembled and to emit either trap or
   breakpoint instructions according to whether the currently selected ISA
