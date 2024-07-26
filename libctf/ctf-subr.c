@@ -152,6 +152,43 @@ ctf_version (int version)
   return _libctf_version;
 }
 
+/* Get and set CTF dict-wide flags.  We are fairly strict about returning
+   errors here, to make it easier to determine programmatically which flags are
+   valid.  */
+
+int
+ctf_dict_set_flag (ctf_dict_t *fp, uint64_t flag, int set)
+{
+  if (set < 0 || set > 1)
+    return (ctf_set_errno (fp, ECTF_BADFLAG));
+
+  switch (flag)
+    {
+    case CTF_STRICT_NO_DUP_ENUMERATORS:
+      if (set)
+	fp->ctf_flags |= LCTF_STRICT_NO_DUP_ENUMERATORS;
+      else
+	fp->ctf_flags &= ~LCTF_STRICT_NO_DUP_ENUMERATORS;
+      break;
+    default:
+      return (ctf_set_errno (fp, ECTF_BADFLAG));
+    }
+  return 0;
+}
+
+int
+ctf_dict_get_flag (ctf_dict_t *fp, uint64_t flag)
+{
+  switch (flag)
+    {
+    case CTF_STRICT_NO_DUP_ENUMERATORS:
+      return (fp->ctf_flags & LCTF_STRICT_NO_DUP_ENUMERATORS) != 0;
+    default:
+      return (ctf_set_errno (fp, ECTF_BADFLAG));
+    }
+  return 0;
+}
+
 void
 libctf_init_debug (void)
 {
