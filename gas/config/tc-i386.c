@@ -7957,6 +7957,8 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 
   while (1)
     {
+      const char *split;
+
       mnem_p = mnemonic;
       /* Pseudo-prefixes start with an opening figure brace.  */
       if ((*mnem_p = *l) == '{')
@@ -7981,9 +7983,10 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	    }
 	  l++;
 	}
-      /* Pseudo-prefixes end with a closing figure brace.  */
-      if (*mnemonic == '{' && is_space_char (*l))
+      split = l;
+      if (is_space_char (*l))
 	++l;
+      /* Pseudo-prefixes end with a closing figure brace.  */
       if (*mnemonic == '{' && *l == '}')
 	{
 	  *mnem_p++ = *l++;
@@ -7991,12 +7994,10 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	    goto too_long;
 	  *mnem_p = '\0';
 
-	  /* Point l at the closing brace if there's no other separator.  */
-	  if (*l != END_OF_INSN && !is_space_char (*l)
-	      && *l != PREFIX_SEPARATOR)
-	    --l;
+	  if (is_space_char (*l))
+	    ++l;
 	}
-      else if (!is_space_char (*l)
+      else if (l == split
 	       && *l != END_OF_INSN
 	       && (intel_syntax
 		   || (*l != PREFIX_SEPARATOR && *l != ',')))
@@ -8004,7 +8005,7 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	  if (mode != parse_all)
 	    break;
 	  as_bad (_("invalid character %s in mnemonic"),
-		  output_invalid (*l));
+		  output_invalid (*split));
 	  return NULL;
 	}
       if (token_start == l)
@@ -8020,7 +8021,6 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
       op_lookup (mnemonic);
 
       if (*l != END_OF_INSN
-	  && (!is_space_char (*l) || l[1] != END_OF_INSN)
 	  && current_templates.start
 	  && current_templates.start->opcode_modifier.isprefix)
 	{
@@ -8142,7 +8142,10 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 		}
 	    }
 	  /* Skip past PREFIX_SEPARATOR and reset token_start.  */
-	  token_start = ++l;
+	  l += (!intel_syntax && *l == PREFIX_SEPARATOR);
+	  if (is_space_char (*l))
+	    ++l;
+	  token_start = l;
 	}
       else
 	break;
@@ -8234,8 +8237,7 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 		}
 	      /* For compatibility reasons accept MOVSD and CMPSD without
 	         operands even in AT&T mode.  */
-	      else if (*l == END_OF_INSN
-		       || (is_space_char (*l) && l[1] == END_OF_INSN))
+	      else if (*l == END_OF_INSN)
 		{
 		  mnem_p[-1] = '\0';
 		  op_lookup (mnemonic);
@@ -8277,8 +8279,9 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
       l += length;
     }
 
-  if (current_templates.start->opcode_modifier.jump == JUMP
-      || current_templates.start->opcode_modifier.jump == JUMP_BYTE)
+  if ((current_templates.start->opcode_modifier.jump == JUMP
+       || current_templates.start->opcode_modifier.jump == JUMP_BYTE)
+      && *l == ',')
     {
       /* Check for a branch hint.  We allow ",pt" and ",pn" for
 	 predict taken and predict not taken respectively.
@@ -8286,21 +8289,29 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	 and jcxz insns (JumpByte) for current Pentium4 chips.  They
 	 may work in the future and it doesn't hurt to accept them
 	 now.  */
-      if (l[0] == ',' && l[1] == 'p')
+      token_start = l++;
+      if (is_space_char (*l))
+	++l;
+      if (TOLOWER (*l) == 'p' && ISALPHA (l[1])
+	  && (l[2] == END_OF_INSN || is_space_char (l[2])))
 	{
-	  if (l[2] == 't')
+	  if (TOLOWER (l[1]) == 't')
 	    {
 	      if (!add_prefix (DS_PREFIX_OPCODE))
 		return NULL;
-	      l += 3;
+	      l += 2;
 	    }
-	  else if (l[2] == 'n')
+	  else if (TOLOWER (l[1]) == 'n')
 	    {
 	      if (!add_prefix (CS_PREFIX_OPCODE))
 		return NULL;
-	      l += 3;
+	      l += 2;
 	    }
+	  else
+	    l = token_start;
 	}
+      else
+	l = token_start;
     }
   /* Any other comma loses.  */
   if (*l == ',')
