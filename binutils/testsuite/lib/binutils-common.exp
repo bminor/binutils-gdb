@@ -814,6 +814,9 @@ proc prune_dump_output { output } {
 #       the "as" flags for their corresponding files, and any extra processing
 #       (e.g. with "ld" and "objcopy") is repeated for each test.
 #
+#   dlltool: FLAGS
+#       Before linking, run dlltool with FLAGS.
+#
 #   ld: FLAGS
 #	Link assembled files using FLAGS, in the order of the "source"
 #	directives, when using multiple files.
@@ -956,7 +959,7 @@ proc run_dump_test { name {extra_options {}} } {
     global ELFEDIT ELFEDITFLAGS LD LDFLAGS NM NMFLAGS OBJCOPY OBJCOPYFLAGS
     global OBJDUMP OBJDUMPFLAGS READELF READELFFLAGS STRIP STRIPFLAGS
     global SIZE SIZEFLAGS
-    global copyfile env runtests srcdir subdir verbose
+    global copyfile env runtests srcdir subdir verbose base_dir
     global DT_RELR_LDFLAGS NO_DT_RELR_LDFLAGS
 
     if [string match "*/*" $name] {
@@ -990,6 +993,7 @@ proc run_dump_test { name {extra_options {}} } {
     set as_final_flags {}
     set as_additional_flags {}
     set opts(cc) {}
+    set opts(dlltool) {}
     set opts(dump) {}
     set opts(elfedit) {}
     set opts(error) {}
@@ -1036,12 +1040,14 @@ proc run_dump_test { name {extra_options {}} } {
 	# Allow more substitutions, including tcl functions, for as, ld,
 	# and cc.  Not done in general because extra quoting is needed for glob
 	# args used for example in binutils-all/remove-relocs-04.d.
-	if { $opt_name == "as" || $opt_name == "ld" || $opt_name == "cc" } {
+	if { $opt_name == "as" || $opt_name == "ld" || $opt_name == "ld_after_inputfiles" || $opt_name == "cc" } {
 	    set opt_val [subst $opt_val]
 	} else {
 	    # Just substitute $srcdir and $subdir
 	    regsub -all {\$srcdir} "$opt_val" "$srcdir" opt_val
 	    regsub -all {\$subdir} "$opt_val" "$subdir" opt_val
+	    regsub -all {\$\{srcdir\}} "$opt_val" "$srcdir" opt_val
+	    regsub -all {\$\{subdir\}} "$opt_val" "$subdir" opt_val
 	}
 
 	switch -- $opt_name {
@@ -1379,6 +1385,19 @@ proc run_dump_test { name {extra_options {}} } {
 		remote_file build delete "dump.tmp"
 		set cmdret [lindex $cmdret 0]
 	    }
+	}
+
+	# Run dlltool.
+	if { $cmdret == 0 && $opts(dlltool) != "" } {
+	    set dlltool [findfile $base_dir/../binutils/dlltool]
+	    set cmd "$dlltool -S $AS $opts(dlltool)"
+	    send_log "$cmd\n"
+	    set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "dump.tmp"]
+	    remote_upload host "dump.tmp"
+	    append comp_output [prune_warnings [file_contents "dump.tmp"]]
+	    remote_file host delete "dump.tmp"
+	    remote_file build delete "dump.tmp"
+	    set cmdret [lindex $cmdret 0]
 	}
 
 	# Perhaps link the file(s).

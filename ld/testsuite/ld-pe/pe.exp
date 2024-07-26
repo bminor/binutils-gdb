@@ -144,3 +144,8 @@ run_dump_test "exclude-symbols-embedded-i386"
 run_dump_test "exclude-symbols-embedded-x86_64"
 run_dump_test "exclude-symbols-def-i386"
 run_dump_test "exclude-symbols-def-x86_64"
+
+run_dump_test "symbols-ordinals-hints-exports-ld"
+run_dump_test "symbols-ordinals-hints-exports-dlltool"
+run_dump_test "symbols-ordinals-hints-imports-ld"
+run_dump_test "symbols-ordinals-hints-imports-dlltool"

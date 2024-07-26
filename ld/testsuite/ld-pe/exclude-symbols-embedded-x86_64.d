@@ -4,7 +4,9 @@
 #objdump: -p
 
 #...
-.*\[[ 	]*0\].*sym1
-.*\[[ 	]*1\].*sym3
-.*\[[ 	]*2\].*sym5
+.*      Ordinal   Hint Name
+.*\+base\[   1\]  0000 sym1
+.*\+base\[   2\]  0001 sym3
+.*\+base\[   3\]  0002 sym5
+
 #pass
