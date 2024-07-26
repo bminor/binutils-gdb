@@ -57,7 +57,7 @@ extern void sb_kill (sb *);
 extern void sb_add_sb (sb *, sb *);
 extern void sb_scrub_and_add_sb (sb *, sb *);
 extern void sb_reset (sb *);
-extern void sb_add_char (sb *, size_t);
+extern void sb_add_char (sb *, char);
 extern void sb_add_string (sb *, const char *);
 extern void sb_add_buffer (sb *, const char *, size_t);
 extern char *sb_terminate (sb *);

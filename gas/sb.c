@@ -173,7 +173,7 @@ sb_reset (sb *ptr)
 /* Add character c to the end of the sb at ptr.  */
 
 void
-sb_add_char (sb *ptr, size_t c)
+sb_add_char (sb *ptr, char c)
 {
   sb_check (ptr, 1);
   ptr->ptr[ptr->len++] = c;
