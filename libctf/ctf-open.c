@@ -681,6 +681,8 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
    the latest supported representation in the process, if needed, and if this
    recension of libctf supports upgrading.
 
+   Returns zero on success and a *positive* ECTF_* or errno value on error.
+
    This is a wrapper to simplify memory allocation on error in the _internal
    function that does all the actual work.  */
 
@@ -886,7 +888,7 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 					       LCTF_INDEX_TO_TYPE (fp, id, child),
 					       tp->ctt_name);
 		if (err != 0)
-		  return err;
+		  return err * -1;
 	      }
 	    break;
 	  }
@@ -905,7 +907,7 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 					 LCTF_INDEX_TO_TYPE (fp, id, child),
 					 tp->ctt_name);
 	  if (err != 0)
-	    return err;
+	    return err * -1;
 	  break;
 
 	case CTF_K_STRUCT:
@@ -920,7 +922,7 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 					 tp->ctt_name);
 
 	  if (err != 0)
-	    return err;
+	    return err * -1;
 
 	  break;
 
@@ -936,7 +938,7 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 					 tp->ctt_name);
 
 	  if (err != 0)
-	    return err;
+	    return err * -1;
 	  break;
 
 	case CTF_K_ENUM:
@@ -949,14 +951,14 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 					   tp->ctt_name);
 
 	    if (err != 0)
-	      return err;
+	      return err * -1;
 
 	    /* Remember all enums for later rescanning.  */
 
 	    err = ctf_dynset_insert (all_enums, (void *) (ptrdiff_t)
 				     LCTF_INDEX_TO_TYPE (fp, id, child));
 	    if (err != 0)
-	      return err;
+	      return err * -1;
 	    break;
 	  }
 
@@ -968,7 +970,7 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 					 LCTF_INDEX_TO_TYPE (fp, id, child),
 					 tp->ctt_name);
 	  if (err != 0)
-	    return err;
+	    return err * -1;
 	  break;
 
 	case CTF_K_FORWARD:
@@ -985,7 +987,7 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 		err = ctf_dynhash_insert_type (fp, h, LCTF_INDEX_TO_TYPE (fp, id, child),
 					       tp->ctt_name);
 		if (err != 0)
-		  return err;
+		  return err * -1;
 	      }
 	    break;
 	  }
@@ -1010,7 +1012,7 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 					 LCTF_INDEX_TO_TYPE (fp, id, child),
 					 tp->ctt_name);
 	  if (err != 0)
-	    return err;
+	    return err * -1;
 	  break;
 	default:
 	  ctf_err_warn (fp, 0, ECTF_CORRUPT,

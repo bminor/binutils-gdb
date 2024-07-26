@@ -256,7 +256,7 @@ ctf_dynhash_insert (ctf_dynhash_t *hp, void *key, void *value)
 			     key_free, value_free);
 
   if (!slot)
-    return errno;
+    return -errno;
 
   /* Keep track of the owner, so that the del function can get at the key_free
      and value_free functions.  Only do this if one of those functions is set:
@@ -786,7 +786,7 @@ ctf_dynhash_insert_type (ctf_dict_t *fp, ctf_dynhash_t *hp, uint32_t type,
     return EINVAL;
 
   if ((str = ctf_strptr_validate (fp, name)) == NULL)
-    return ctf_errno (fp);
+    return ctf_errno (fp) * -1;
 
   if (str[0] == '\0')
     return 0;		   /* Just ignore empty strings on behalf of caller.  */
@@ -795,6 +795,9 @@ ctf_dynhash_insert_type (ctf_dict_t *fp, ctf_dynhash_t *hp, uint32_t type,
 				 (void *) (ptrdiff_t) type)) == 0)
     return 0;
 
+  /* ctf_dynhash_insert returns a negative error value: negate it for
+     ctf_set_errno.  */
+  ctf_set_errno (fp, err * -1);
   return err;
 }
 
