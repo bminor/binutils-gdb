@@ -3089,14 +3089,23 @@ find_sal_for_pc_sect (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  best = prev;
 	  best_symtab = iter_s;
 
-	  /* If during the binary search we land on a non-statement entry,
-	     scan backward through entries at the same address to see if
-	     there is an entry marked as is-statement.  In theory this
-	     duplication should have been removed from the line table
-	     during construction, this is just a double check.  If the line
-	     table has had the duplication removed then this should be
-	     pretty cheap.  */
-	  if (!best->is_stmt)
+	  /* If NOTCURRENT is false then the address we are looking for is
+	     the address the inferior is currently stopped at.  In this
+	     case our preference is to report a stop at a line marked as
+	     is_stmt.  If BEST is not marked as a statement then scan
+	     backwards through entries at this address looking for one that
+	     is marked as a statement; if one is found then use that.
+
+	     If NOTCURRENT is true then the address we're looking for is
+	     not the inferior's current address, but is an address from a
+	     previous stack frame (i.e. frames 1, 2, 3, ... etc).  In this
+	     case scanning backwards for an is_stmt line table entry is not
+	     the desired behaviour.  If an inline function terminated at
+	     this address then the last is_stmt line will be within the
+	     inline function, while the following non-statement line will
+	     be for the outer function.  When looking up the stack we
+	     expect to see the outer function.  */
+	  if (!best->is_stmt && !notcurrent)
 	    {
 	      const linetable_entry *tmp = best;
 	      while (tmp > first
