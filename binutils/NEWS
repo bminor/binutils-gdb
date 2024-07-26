@@ -2,6 +2,9 @@
 
 Changes in 2.43:
 
+* The MIPS port now supports microMIPS MT Application Specific Extension
+  instructions for assembly and disassembly.
+
 * Readelf now displays RELR relocations in full detail.
 
 * Readelf now has a -j/--display-section option which takes the name or index
