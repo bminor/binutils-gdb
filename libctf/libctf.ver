@@ -204,4 +204,6 @@ LIBCTF_1.3 {
 	ctf_lookup_enumerator;
 	ctf_lookup_enumerator_next;
 	ctf_arc_lookup_enumerator_next;
+	ctf_dict_set_flag;
+	ctf_dict_get_flag;
 } LIBCTF_1.2;

@@ -56,19 +56,40 @@ main (int argc, char *argv[])
   if ((ctf = ctf_open (argv[1], NULL, &err)) == NULL)
     goto open_err;
 
-  /* Look for all instances of ENUMSAMPLE2_1, and add some new enums to all
+  /* Look for all instances of ENUMSAMPLE2_2, and add some new enums to all
      dicts found, to test dynamic enum iteration as well as static.
 
      Add two enums with a different name and constants to any that should
      already be there (one hidden), and one with the same constants, but hidden,
      to test ctf_lookup_enumerator_next()'s multiple-lookup functionality and
-     ctf_lookup_enumerator() in the presence of hidden types.  */
+     ctf_lookup_enumerator() in the presence of hidden types.
+
+     This also tests that you can add to enums under iteration without causing
+     disaster.  */
 
   printf ("First iteration: addition of enums.\n");
   while ((type = ctf_arc_lookup_enumerator_next (ctf, "IENUMSAMPLE2_2", &i,
 						 &val, &fp, &err)) != CTF_ERR)
     {
       char *foo;
+      int dynadd2_value;
+      int old_dynadd2_flag;
+
+      /* Make sure that getting and setting a garbage flag, and setting one to a
+	 garbage value, fails properly.  */
+      if (ctf_dict_set_flag (fp, CTF_STRICT_NO_DUP_ENUMERATORS, 666) >= 0
+	  || ctf_errno (fp) != ECTF_BADFLAG)
+	fprintf (stderr, "Invalid flag value setting did not fail as it ought to\n");
+
+      if (ctf_dict_set_flag (fp, 0, 1) >= 0 || ctf_errno (fp) != ECTF_BADFLAG)
+	fprintf (stderr, "Invalid flag setting did not fail as it ought to\n");
+
+      if (ctf_dict_get_flag (fp, 0) >= 0 || ctf_errno (fp) != ECTF_BADFLAG)
+	fprintf (stderr, "Invalid flag getting did not fail as it ought to\n");
+
+      /* Set it strict for now.  */
+      if (ctf_dict_set_flag (fp, CTF_STRICT_NO_DUP_ENUMERATORS, 1) < 0)
+	goto set_flag_err;
 
       printf ("IENUMSAMPLE2_2 in %s has value %li\n",
 	      foo = ctf_type_aname (fp, type), (long int) val);
@@ -79,12 +100,40 @@ main (int argc, char *argv[])
 
       if (ctf_add_enumerator (fp, type, "DYNADD", counter += 10) < 0)
 	goto enumerator_add_err;
+
       if (ctf_add_enumerator (fp, type, "DYNADD2", counter += 10) < 0)
 	goto enumerator_add_err;
+      dynadd2_value = counter;
 
       /* Make sure that overlapping enumerator addition fails as it should.  */
 
       if (ctf_add_enumerator (fp, type, "IENUMSAMPLE2_2", 666) >= 0
+	  || ctf_errno (fp) != ECTF_DUPLICATE)
+	fprintf (stderr, "Duplicate enumerator addition did not fail as it ought to\n");
+
+      /* Make sure that it still fails if you set an enum value to the value it
+	 already has.  */
+      if (ctf_add_enumerator (fp, type, "DYNADD2", dynadd2_value) >= 0
+	  || ctf_errno (fp) != ECTF_DUPLICATE)
+	fprintf (stderr, "Duplicate enumerator addition did not fail as it ought to\n");
+
+      /* Flip the strict flag and try again.  This time, it should succeed.  */
+
+      if ((old_dynadd2_flag = ctf_dict_get_flag (fp, CTF_STRICT_NO_DUP_ENUMERATORS)) < 0)
+	goto get_flag_err;
+
+      if (ctf_dict_set_flag (fp, CTF_STRICT_NO_DUP_ENUMERATORS, 0) < 0)
+	goto set_flag_err;
+
+      if (ctf_add_enumerator (fp, type, "DYNADD2", dynadd2_value) < 0)
+	goto enumerator_add_err;
+
+      /* Flip it again and try *again*.  This time it should fail again.  */
+
+      if (ctf_dict_set_flag (fp, CTF_STRICT_NO_DUP_ENUMERATORS, old_dynadd2_flag) < 0)
+	goto set_flag_err;
+
+      if (ctf_add_enumerator (fp, type, "DYNADD2", dynadd2_value) >= 0
 	  || ctf_errno (fp) != ECTF_DUPLICATE)
 	fprintf (stderr, "Duplicate enumerator addition did not fail as it ought to\n");
 
@@ -104,11 +153,17 @@ main (int argc, char *argv[])
       if (ctf_add_enumerator (fp, type, "DYNADD2", counter += 10) < 0)
 	goto enumerator_add_err;
 
-      /* Look them up via ctf_lookup_enumerator.  */
+      /* Look them up via ctf_lookup_enumerator.  DYNADD2 should fail because
+	 it has duplicate enumerators.  */
 
       if (ctf_lookup_enumerator (fp, "DYNADD", &val) == CTF_ERR)
 	goto enumerator_lookup_err;
       printf ("direct lookup: DYNADD value: %i\n", (int) val);
+
+      if ((err = ctf_lookup_enumerator (fp, "DYNADD2", &val)) >= 0 ||
+	  ctf_errno (fp) != ECTF_DUPLICATE)
+	fprintf (stderr, "Duplicate enumerator lookup did not fail as it ought to: %i, %s\n",
+		 err, ctf_errmsg (ctf_errno (fp)));
 
       if ((type = ctf_lookup_enumerator (fp, "DYNADD3", &val) != CTF_ERR) ||
 	  ctf_errno (fp) != ECTF_NOENUMNAM)
@@ -163,5 +218,11 @@ main (int argc, char *argv[])
  enumerator_lookup_err:
   fprintf (stderr, "Cannot look up enumerator in dict \"%s\": %s\n",
 	   ctf_cuname (fp) ? ctf_cuname (fp) : "(null: parent)", ctf_errmsg (ctf_errno (fp)));
+  return 1;
+ get_flag_err:
+  fprintf (stderr, "ctf_dict_get_flag failed: %s\n", ctf_errmsg (ctf_errno (fp)));
+  return 1;
+ set_flag_err:
+  fprintf (stderr, "ctf_dict_set_flag failed: %s\n", ctf_errmsg (ctf_errno (fp)));
   return 1;
 }

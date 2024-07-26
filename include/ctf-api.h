@@ -243,7 +243,8 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_FLAGS, "CTF header contains flags unknown to libctf.") \
   _CTF_ITEM (ECTF_NEEDSBFD, "This feature needs a libctf with BFD support.") \
   _CTF_ITEM (ECTF_INCOMPLETE, "Type is not a complete type.") \
-  _CTF_ITEM (ECTF_NONAME, "Type name must not be empty.")
+  _CTF_ITEM (ECTF_NONAME, "Type name must not be empty.") \
+  _CTF_ITEM (ECTF_BADFLAG, "Invalid CTF dict flag specified.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -256,7 +257,7 @@ _CTF_ERRORS
 #undef _CTF_FIRST
   };
 
-#define ECTF_NERR (ECTF_NONAME - ECTF_BASE + 1) /* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_BADFLAG - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */
@@ -281,6 +282,12 @@ _CTF_ERRORS
 /* Flags for ctf_member_next.  */
 
 #define CTF_MN_RECURSE 0x1	/* Recurse into unnamed members.  */
+
+/* Flags for ctf_dict_set_flag.  */
+
+/* If set, duplicate enumerators in a single dict fail with ECTF_DUPLICATE.  */
+
+#define CTF_STRICT_NO_DUP_ENUMERATORS	0x1
 
 /* These typedefs are used to define the signature for callback functions that
    can be used with the iteration and visit functions below.  There is also a
@@ -349,6 +356,11 @@ extern ctf_archive_t *ctf_fdopen (int fd, const char *filename,
 extern ctf_archive_t *ctf_open (const char *filename,
 				const char *target, int *errp);
 extern void ctf_close (ctf_archive_t *);
+
+/* Set or unset dict-wide boolean flags, and get the value of these flags.  */
+
+extern int ctf_dict_set_flag (ctf_dict_t *, uint64_t flag, int set);
+extern int ctf_dict_get_flag (ctf_dict_t *, uint64_t flag);
 
 /* Return the data, symbol, or string sections used by a given CTF dict.  */
 extern ctf_sect_t ctf_getdatasect (const ctf_dict_t *);

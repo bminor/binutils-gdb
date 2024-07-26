@@ -2683,6 +2683,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	      return ctf_set_errno (output, err);
 	    }
 
+	  target->ctf_flags |= LCTF_STRICT_NO_DUP_ENUMERATORS;
 	  ctf_import_unref (target, output);
 	  if (ctf_cuname (input) != NULL)
 	    ctf_cuname_set (target, ctf_cuname (input));

@@ -602,7 +602,8 @@ struct ctf_next
   ((fp)->ctf_dictops->ctfo_get_vbytes(fp, kind, size, vlen))
 
 #define LCTF_CHILD	0x0001	/* CTF dict is a child.  */
-#define LCTF_LINKING	0x0002  /* CTF link is underway: respect ctf_link_flags.  */
+#define LCTF_LINKING	0x0002	/* CTF link is underway: respect ctf_link_flags.  */
+#define LCTF_STRICT_NO_DUP_ENUMERATORS 0x0004 /* Duplicate enums prohibited.  */
 
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t);
@@ -712,6 +713,8 @@ extern ctf_id_t ctf_add_reftype (ctf_dict_t *, uint32_t, ctf_id_t,
 extern int ctf_add_variable_forced (ctf_dict_t *, const char *, ctf_id_t);
 extern int ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
 					const char *, ctf_id_t);
+
+extern int ctf_track_enumerator (ctf_dict_t *, ctf_id_t, const char *);
 
 extern int ctf_dedup_atoms_init (ctf_dict_t *);
 extern int ctf_dedup (ctf_dict_t *, ctf_dict_t **, uint32_t ninputs,

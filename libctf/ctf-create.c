@@ -1071,7 +1071,13 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
      if the enum they are part of is a root-visible type.  */
 
   if (root == CTF_ADD_ROOT && ctf_dynhash_lookup (fp->ctf_names, name))
-    return (ctf_set_errno (ofp, ECTF_DUPLICATE));
+    {
+      if (fp->ctf_flags & LCTF_STRICT_NO_DUP_ENUMERATORS)
+	return (ctf_set_errno (ofp, ECTF_DUPLICATE));
+
+      if (ctf_track_enumerator (fp, enid, name) < 0)
+	return (ctf_set_errno (ofp, ctf_errno (fp)));
+    }
 
   if (kind != CTF_K_ENUM)
     return (ctf_set_errno (ofp, ECTF_NOTENUM));
@@ -1094,7 +1100,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
      non-root-visible types, since the duplicate detection above does the job
      for root-visible types just fine.  */
 
-  if (root == CTF_ADD_NONROOT)
+  if (root == CTF_ADD_NONROOT && (fp->ctf_flags & LCTF_STRICT_NO_DUP_ENUMERATORS))
     {
       size_t i;
 
@@ -1427,6 +1433,42 @@ int
 ctf_add_func_sym (ctf_dict_t *fp, const char *name, ctf_id_t id)
 {
   return (ctf_add_funcobjt_sym (fp, 1, name, id));
+}
+
+/* Add an enumeration constant observed in a given enum type as an identifier.
+   They appear as names that cite the enum type.
+
+   Constants that appear in more than one enum, or which are already the names
+   of types, appear in ctf_conflicting_enums as well.
+
+   This is done for all enumeration types at open time, and for newly-added ones
+   as well: if the strict-enum flag is turned on, this table must be kept up to
+   date with enums added in the interim.  */
+
+int
+ctf_track_enumerator (ctf_dict_t *fp, ctf_id_t type, const char *cte_name)
+{
+  int err;
+
+  if (ctf_dynhash_lookup_type (fp->ctf_names, cte_name) == 0)
+    {
+      uint32_t name = ctf_str_add (fp, cte_name);
+
+      if (name == 0)
+	return -1;				/* errno is set for us.  */
+
+      err = ctf_dynhash_insert_type (fp, fp->ctf_names, type, name);
+    }
+  else
+    {
+      err = ctf_dynset_insert (fp->ctf_conflicting_enums, (void *)
+			       cte_name);
+      if (err != 0)
+	ctf_set_errno (fp, err * -1);
+    }
+  if (err != 0)
+    return -1;					/* errno is set for us.  */
+  return 0;
 }
 
 typedef struct ctf_bundle

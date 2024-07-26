@@ -1024,9 +1024,8 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
   ctf_dprintf ("%lu total types processed\n", fp->ctf_typemax);
 
-  /* In the third pass, we traverse the enums we spotted earlier and add all
-     the enumeration constants therein either to the types table (if no
-     type exists with that name) or to ctf_conflciting_enums (otherwise).
+  /* In the third pass, we traverse the enums we spotted earlier and track all
+     the enumeration constants to aid in future detection of duplicates.
 
      Doing this in a third pass is necessary to avoid the case where an
      enum appears with a constant FOO, then later a type named FOO appears,
@@ -1040,36 +1039,12 @@ init_static_types_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
       while ((cte_name = ctf_enum_next (fp, enum_id, &i_constants, NULL)) != NULL)
 	{
-	  /* Add all the enumeration constants as identifiers.  They all appear
-	     as types that cite the original enum.
-
-	     Constants that appear in more than one enum, or which are already
-	     the names of types, appear in ctf_conflicting_enums as well.  */
-
-	  if (ctf_dynhash_lookup_type (fp->ctf_names, cte_name) == 0)
+	  if (ctf_track_enumerator (fp, enum_id, cte_name) < 0)
 	    {
-	      uint32_t name = ctf_str_add (fp, cte_name);
-
-	      if (name == 0)
-		goto enum_err;
-
-	      err = ctf_dynhash_insert_type (fp, fp->ctf_names, enum_id, name);
+	      ctf_next_destroy (i_constants);
+	      ctf_next_destroy (i);
+	      return ctf_errno (fp);
 	    }
-	  else
-	    {
-	      err = ctf_dynset_insert (fp->ctf_conflicting_enums, (void *)
-				       cte_name);
-
-	      if (err != 0)
-		goto enum_err;
-	    }
-	  continue;
-
-	enum_err:
-	  ctf_set_errno (fp, err);
-	  ctf_next_destroy (i_constants);
-	  ctf_next_destroy (i);
-	  return ctf_errno (fp);
 	}
       if (ctf_errno (fp) != ECTF_NEXT_END)
 	{
