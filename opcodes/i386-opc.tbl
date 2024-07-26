@@ -411,10 +411,10 @@ cqto, 0x99, x64, Size64|NoSuf, {}
 // expanding 64-bit multiplies, and *cannot* be selected to accomplish
 // 'imul %ebx, %eax' (opcode 0x0faf must be used in this case)
 // These multiplies can only be selected with single operand forms.
-<mul:opc, mul:4, imul:5>
+<mul:opc:opt, mul:4:Optimize, imul:5:>
 
 <mul>, 0xf6/<mul:opc>, 0, W|Modrm|No_sSuf, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-<mul>, 0xf6/<mul:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|NF, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<mul>, 0xf6/<mul:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|NF|<mul:opt>, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 imul, 0xaf, APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
 imul, 0xfaf, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 imul, 0xaf, APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|NF, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
@@ -447,15 +447,15 @@ imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF/*|ZU*/|Optimize
 
 <div>
 
-<sr:opc:imm8:opt1:opti:nf, +
-    rol:0:Imm8|Imm8S::Optimize:NF, +
-    ror:1:Imm8|Imm8S::Optimize:NF, +
-    rcl:2:Imm8:::, +
-    rcr:3:Imm8:::, +
-    sal:4:Imm8:Optimize::NF, +
-    shl:4:Imm8:Optimize::NF, +
-    shr:5:Imm8:::NF, +
-    sar:7:Imm8:::NF>
+<sr:opc:imm8:opt1:opti:optc:nf, +
+    rol:0:Imm8|Imm8S::Optimize::NF, +
+    ror:1:Imm8|Imm8S::Optimize::NF, +
+    rcl:2:Imm8::::, +
+    rcr:3:Imm8::::, +
+    sal:4:Imm8:Optimize::Optimize:NF, +
+    shl:4:Imm8:Optimize::Optimize:NF, +
+    shr:5:Imm8:::Optimize:NF, +
+    sar:7:Imm8:::Optimize:NF>
 
 <sr>, 0xd0/<sr:opc>, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|<sr:opt1>|<sr:nf>, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 <sr>, 0xd0/<sr:opc>, 0, W|Modrm|No_sSuf|<sr:opt1>, { Imm1, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
@@ -463,9 +463,9 @@ imulzu, 0x69, APX_F, Modrm|No_bSuf|No_sSuf|RegKludge|EVexMap4|NF/*|ZU*/|Optimize
 <sr>, 0xc0/<sr:opc>, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|<sr:opti>|<sr:nf>, { <sr:imm8>, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
 <sr>, 0xc0/<sr:opc>, i186, W|Modrm|No_sSuf, { <sr:imm8>, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 <sr>, 0xc0/<sr:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|<sr:opti>|<sr:nf>, { <sr:imm8>, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-<sr>, 0xd2/<sr:opc>, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|<sr:nf>, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
-<sr>, 0xd2/<sr:opc>, 0, W|Modrm|No_sSuf, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
-<sr>, 0xd2/<sr:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|<sr:nf>, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>, 0xd2/<sr:opc>, APX_F, W|Modrm|No_sSuf|CheckOperandSize|DstVVVV|EVexMap4|<sr:optc>|<sr:nf>, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
+<sr>, 0xd2/<sr:opc>, 0, W|Modrm|No_sSuf|<sr:optc>, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+<sr>, 0xd2/<sr:opc>, APX_F, W|Modrm|No_sSuf|EVexMap4|<sr:optc>|<sr:nf>, { ShiftCount, Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 <sr>, 0xd0/<sr:opc>, 0, W|Modrm|No_sSuf|<sr:opt1>, { Reg8|Reg16|Reg32|Reg64|Unspecified|BaseIndex }
 
 <sr>

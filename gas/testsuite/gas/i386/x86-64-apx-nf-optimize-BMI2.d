@@ -1,6 +1,6 @@
-#as: -Os
+#as: -O -march=+bmi2
 #objdump: -dw
-#name: x86_64 APX_F insns with nf pseudo prefix and -Os
+#name: x86_64 APX_F insns with nf pseudo prefix, -O, and BMI2
 #source: x86-64-apx-nf.s
 
 .*: +file format .*
@@ -10,12 +10,12 @@ Disassembly of section \.text:
 0+ <_start>:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 80 c3 7b[ 	]+\{nf\} add \$0x7b,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 80 c3 7b[ 	]+\{nf\} add \$0x7b,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 52 7b[ 	]+lea    0x7b\(%rdx\),%dx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 83 c2 7b[ 	]+\{nf\} add \$0x7b,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 83 c2 7b[ 	]+\{nf\} add \$0x7b,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 49 7b[ 	]+lea    0x7b\(%rcx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 51 7b[ 	]+lea    0x7b\(%rcx\),%edx
-[ 	]*[a-f0-9]+:[ 	]*4d 8d 49 7b[ 	]+lea    0x7b\(%r9\),%r9
-[ 	]*[a-f0-9]+:[ 	]*d5 4d 8d 79 7b[ 	]+lea    0x7b\(%r9\),%r31
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 83 c1 7b[ 	]+\{nf\} add \$0x7b,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 83 c1 7b[ 	]+\{nf\} add \$0x7b,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c 83 c1 7b[ 	]+\{nf\} add \$0x7b,%r9
+[ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 83 c1 7b[ 	]+\{nf\} add \$0x7b,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 80 84 80 23 01 00 00 7b[ 	]+\{nf\} addb \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c 80 84 80 23 01 00 00 7b[ 	]+\{nf\} add \$0x7b,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 83 84 80 23 01 00 00 7b[ 	]+\{nf\} addw \$0x7b,0x123\(%r8,%rax,4\)
@@ -28,16 +28,16 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 3c 1c 00 da[ 	]+\{nf\} add %bl,%dl,%r8b
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 00 9c 80 23 01 00 00[ 	]+\{nf\} add %bl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6c 1c 00 9c 80 23 01 00 00[ 	]+\{nf\} add %bl,0x123\(%r8,%rax,4\),%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 04 10[ 	]+lea[ 	]+\(%rax,%rdx,1\),%ax
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 01 d0[ 	]+\{nf\} add %dx,%ax
 [ 	]*[a-f0-9]+:[ 	]*62 f4 35 1c 01 d0[ 	]+\{nf\} add %dx,%ax,%r9w
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 01 94 80 23 01 00 00[ 	]+\{nf\} add %dx,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 1c 01 94 80 23 01 00 00[ 	]+\{nf\} add %dx,0x123\(%r8,%rax,4\),%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 14 0a[ 	]+lea[ 	]+\(%rdx,%rcx,1\),%edx
-[ 	]*[a-f0-9]+:[ 	]*44 8d 14 0a[ 	]+lea[ 	]+\(%rdx,%rcx,1\),%r10d
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 01 ca[ 	]+\{nf\} add %ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 2c 1c 01 ca[ 	]+\{nf\} add %ecx,%edx,%r10d
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 01 8c 80 23 01 00 00[ 	]+\{nf\} add %ecx,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6c 1c 01 8c 80 23 01 00 00[ 	]+\{nf\} add %ecx,0x123\(%r8,%rax,4\),%edx
-[ 	]*[a-f0-9]+:[ 	]*d5 5f 8d 3c 0f[ 	]+lea[ 	]+\(%r31,%r9,1\),%r31
-[ 	]*[a-f0-9]+:[ 	]*d5 1f 8d 1c 0f[ 	]+lea[ 	]+\(%r31,%r9,1\),%r11
+[ 	]*[a-f0-9]+:[ 	]*62 5c fc 0c 01 cf[ 	]+\{nf\} add %r9,%r31
+[ 	]*[a-f0-9]+:[ 	]*62 5c a4 1c 01 cf[ 	]+\{nf\} add %r9,%r31,%r11
 [ 	]*[a-f0-9]+:[ 	]*62 54 fc 0c 01 8c 80 23 01 00 00[ 	]+\{nf\} add %r9,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 54 84 14 01 8c 80 23 01 00 00[ 	]+\{nf\} add %r9,0x123\(%r8,%rax,4\),%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 02 9c 80 23 01 00 00[ 	]+\{nf\} add 0x123\(%r8,%rax,4\),%bl
@@ -212,7 +212,7 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c f6 e3[ 	]+\{nf\} mul %bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c f7 e2[ 	]+\{nf\} mul %dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c f7 e1[ 	]+\{nf\} mul %ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c f7 e2[ 	]+\{nf\} mul %rdx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 fb f6 d0[ 	]+mulx[ 	]+%rax,%rax,%rdx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c f6 a4 80 23 01 00 00[ 	]+\{nf\} mulb 0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c f7 a4 80 23 01 00 00[ 	]+\{nf\} mulw 0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c f7 a4 80 23 01 00 00[ 	]+\{nf\} mull 0x123\(%r8,%rax,4\)
@@ -299,18 +299,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c c0 c3 7b[ 	]+\{nf\} rol \$0x7b,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 c2 7b[ 	]+\{nf\} rol \$0x7b,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c c1 c2 7b[ 	]+\{nf\} rol \$0x7b,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 c1 7b[ 	]+\{nf\} rol \$0x7b,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c c1 c1 7b[ 	]+\{nf\} rol \$0x7b,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c c1 c1 7b[ 	]+\{nf\} rol \$0x7b,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e3 7b f0 c9 a5[ 	]+rorx[ 	]+\$0xa5,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e3 7b f0 d1 a5[ 	]+rorx[ 	]+\$0xa5,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 43 fb f0 c9 c5[ 	]+rorx[ 	]+\$0xc5,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 c1 c1 7b[ 	]+\{nf\} rol \$0x7b,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c c0 84 80 23 01 00 00 7b[ 	]+\{nf\} rolb \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c c0 84 80 23 01 00 00 7b[ 	]+\{nf\} rol \$0x7b,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rolw \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rol \$0x7b,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} roll \$0x7b,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rol \$0x7b,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c3 7b f0 8c 80 23 01 00 00 a5[ 	]+rorx[ 	]+\$0xa5,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rolq \$0x7b,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rol \$0x7b,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 43 fb f0 8c 80 23 01 00 00 c5[ 	]+rorx[ 	]+\$0xc5,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d2 c3[ 	]+\{nf\} rol %cl,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 c3[ 	]+\{nf\} rol %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 c2[ 	]+\{nf\} rol %cl,%dx
@@ -347,18 +347,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c c0 cb 7b[ 	]+\{nf\} ror \$0x7b,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 ca 7b[ 	]+\{nf\} ror \$0x7b,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c c1 ca 7b[ 	]+\{nf\} ror \$0x7b,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 c9 7b[ 	]+\{nf\} ror \$0x7b,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c c1 c9 7b[ 	]+\{nf\} ror \$0x7b,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c c1 c9 7b[ 	]+\{nf\} ror \$0x7b,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e3 7b f0 c9 7b[ 	]+rorx[ 	]+\$0x7b,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e3 7b f0 d1 7b[ 	]+rorx[ 	]+\$0x7b,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 43 fb f0 c9 7b[ 	]+rorx[ 	]+\$0x7b,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 c1 c9 7b[ 	]+\{nf\} ror \$0x7b,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c c0 8c 80 23 01 00 00 7b[ 	]+\{nf\} rorb \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c c0 8c 80 23 01 00 00 7b[ 	]+\{nf\} ror \$0x7b,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} rorw \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} ror \$0x7b,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} rorl \$0x7b,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} ror \$0x7b,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c3 7b f0 8c 80 23 01 00 00 7b[ 	]+rorx[ 	]+\$0x7b,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} rorq \$0x7b,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} ror \$0x7b,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 43 fb f0 8c 80 23 01 00 00 7b[ 	]+rorx[ 	]+\$0x7b,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d2 cb[ 	]+\{nf\} ror %cl,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 cb[ 	]+\{nf\} ror %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 ca[ 	]+\{nf\} ror %cl,%dx
@@ -375,14 +375,14 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 8c 80 23 01 00 00[ 	]+\{nf\} ror %cl,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 8c 80 23 01 00 00[ 	]+\{nf\} rorq %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 8c 80 23 01 00 00[ 	]+\{nf\} ror %cl,0x123\(%r8,%rax,4\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 e3[ 	]+\{nf\} shl \$1,%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d0 e3[ 	]+\{nf\} shl \$1,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 14 12[ 	]+lea[ 	]+\(%rdx,%rdx,1\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d1 e2[ 	]+\{nf\} shl \$1,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 0c 09[ 	]+lea[ 	]+\(%rcx,%rcx,1\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 14 09[ 	]+lea[ 	]+\(%rcx,%rcx,1\),%edx
-[ 	]*[a-f0-9]+:[ 	]*4f 8d 0c 09[ 	]+lea[ 	]+\(%r9,%r9,1\),%r9
-[ 	]*[a-f0-9]+:[ 	]*d5 4f 8d 3c 09[ 	]+lea[ 	]+\(%r9,%r9,1\),%r31
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 00 db[ 	]+\{nf\} add %bl,%bl
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 00 db[ 	]+\{nf\} add %bl,%bl,%dl
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 01 d2[ 	]+\{nf\} add %dx,%dx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 01 d2[ 	]+\{nf\} add %dx,%dx,%ax
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 01 c9[ 	]+\{nf\} add %ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 01 c9[ 	]+\{nf\} add %ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 54 fc 0c 01 c9[ 	]+\{nf\} add %r9,%r9
+[ 	]*[a-f0-9]+:[ 	]*62 54 84 14 01 c9[ 	]+\{nf\} add %r9,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d0 a4 80 23 01 00 00[ 	]+\{nf\} shlb \$1,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d0 a4 80 23 01 00 00[ 	]+\{nf\} shl \$1,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d1 a4 80 23 01 00 00[ 	]+\{nf\} shlw \$1,0x123\(%r8,%rax,4\)
@@ -411,18 +411,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 e3[ 	]+\{nf\} shl %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 e2[ 	]+\{nf\} shl %cl,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d3 e2[ 	]+\{nf\} shl %cl,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d3 e1[ 	]+\{nf\} shl %cl,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d3 e1[ 	]+\{nf\} shl %cl,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 e1[ 	]+\{nf\} shl %cl,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 71 f7 c9[ 	]+shlx[ 	]+%ecx,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 71 f7 d1[ 	]+shlx[ 	]+%ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f1 f7 c9[ 	]+shlx[ 	]+%rcx,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 d3 e1[ 	]+\{nf\} shl %cl,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d2 a4 80 23 01 00 00[ 	]+\{nf\} shlb %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d2 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shlw %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shll %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 71 f7 8c 80 23 01 00 00[ 	]+shlx[ 	]+%ecx,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shlq %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f1 f7 8c 80 23 01 00 00[ 	]+shlx[ 	]+%rcx,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 fb[ 	]+\{nf\} sar \$1,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d0 fb[ 	]+\{nf\} sar \$1,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d1 fa[ 	]+\{nf\} sar \$1,%dx
@@ -459,26 +459,26 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 fb[ 	]+\{nf\} sar %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 fa[ 	]+\{nf\} sar %cl,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d3 fa[ 	]+\{nf\} sar %cl,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d3 f9[ 	]+\{nf\} sar %cl,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d3 f9[ 	]+\{nf\} sar %cl,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 f9[ 	]+\{nf\} sar %cl,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 72 f7 c9[ 	]+sarx[ 	]+%ecx,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 72 f7 d1[ 	]+sarx[ 	]+%ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f2 f7 c9[ 	]+sarx[ 	]+%rcx,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 d3 f9[ 	]+\{nf\} sar %cl,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d2 bc 80 23 01 00 00[ 	]+\{nf\} sarb %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d2 bc 80 23 01 00 00[ 	]+\{nf\} sar %cl,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d3 bc 80 23 01 00 00[ 	]+\{nf\} sarw %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c d3 bc 80 23 01 00 00[ 	]+\{nf\} sar %cl,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d3 bc 80 23 01 00 00[ 	]+\{nf\} sarl %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 bc 80 23 01 00 00[ 	]+\{nf\} sar %cl,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 72 f7 8c 80 23 01 00 00[ 	]+sarx[ 	]+%ecx,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 bc 80 23 01 00 00[ 	]+\{nf\} sarq %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 bc 80 23 01 00 00[ 	]+\{nf\} sar %cl,0x123\(%r8,%rax,4\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 e3[ 	]+\{nf\} shl \$1,%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d0 e3[ 	]+\{nf\} shl \$1,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 14 12[ 	]+lea[ 	]+\(%rdx,%rdx,1\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d1 e2[ 	]+\{nf\} shl \$1,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 0c 09[ 	]+lea[ 	]+\(%rcx,%rcx,1\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 14 09[ 	]+lea[ 	]+\(%rcx,%rcx,1\),%edx
-[ 	]*[a-f0-9]+:[ 	]*4f 8d 0c 09[ 	]+lea[ 	]+\(%r9,%r9,1\),%r9
-[ 	]*[a-f0-9]+:[ 	]*d5 4f 8d 3c 09[ 	]+lea[ 	]+\(%r9,%r9,1\),%r31
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f2 f7 8c 80 23 01 00 00[ 	]+sarx[ 	]+%rcx,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 00 db[ 	]+\{nf\} add %bl,%bl
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 00 db[ 	]+\{nf\} add %bl,%bl,%dl
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 01 d2[ 	]+\{nf\} add %dx,%dx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 01 d2[ 	]+\{nf\} add %dx,%dx,%ax
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 01 c9[ 	]+\{nf\} add %ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 01 c9[ 	]+\{nf\} add %ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 54 fc 0c 01 c9[ 	]+\{nf\} add %r9,%r9
+[ 	]*[a-f0-9]+:[ 	]*62 54 84 14 01 c9[ 	]+\{nf\} add %r9,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d0 a4 80 23 01 00 00[ 	]+\{nf\} shlb \$1,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d0 a4 80 23 01 00 00[ 	]+\{nf\} shl \$1,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d1 a4 80 23 01 00 00[ 	]+\{nf\} shlw \$1,0x123\(%r8,%rax,4\)
@@ -507,18 +507,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 e3[ 	]+\{nf\} shl %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 e2[ 	]+\{nf\} shl %cl,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d3 e2[ 	]+\{nf\} shl %cl,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d3 e1[ 	]+\{nf\} shl %cl,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d3 e1[ 	]+\{nf\} shl %cl,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 e1[ 	]+\{nf\} shl %cl,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 71 f7 c9[ 	]+shlx[ 	]+%ecx,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 71 f7 d1[ 	]+shlx[ 	]+%ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f1 f7 c9[ 	]+shlx[ 	]+%rcx,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 d3 e1[ 	]+\{nf\} shl %cl,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d2 a4 80 23 01 00 00[ 	]+\{nf\} shlb %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d2 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shlw %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shll %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 71 f7 8c 80 23 01 00 00[ 	]+shlx[ 	]+%ecx,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shlq %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f1 f7 8c 80 23 01 00 00[ 	]+shlx[ 	]+%rcx,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 24 d0 7b[ 	]+\{nf\} shld \$0x7b,%dx,%ax
 [ 	]*[a-f0-9]+:[ 	]*62 f4 35 1c 24 d0 7b[ 	]+\{nf\} shld \$0x7b,%dx,%ax,%r9w
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 24 94 80 23 01 00 00 7b[ 	]+\{nf\} shld \$0x7b,%dx,0x123\(%r8,%rax,4\)
@@ -579,18 +579,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 eb[ 	]+\{nf\} shr %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 ea[ 	]+\{nf\} shr %cl,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d3 ea[ 	]+\{nf\} shr %cl,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d3 e9[ 	]+\{nf\} shr %cl,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d3 e9[ 	]+\{nf\} shr %cl,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 e9[ 	]+\{nf\} shr %cl,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 73 f7 c9[ 	]+shrx[ 	]+%ecx,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 73 f7 d1[ 	]+shrx[ 	]+%ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f3 f7 c9[ 	]+shrx[ 	]+%rcx,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 d3 e9[ 	]+\{nf\} shr %cl,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d2 ac 80 23 01 00 00[ 	]+\{nf\} shrb %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d2 ac 80 23 01 00 00[ 	]+\{nf\} shr %cl,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d3 ac 80 23 01 00 00[ 	]+\{nf\} shrw %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c d3 ac 80 23 01 00 00[ 	]+\{nf\} shr %cl,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d3 ac 80 23 01 00 00[ 	]+\{nf\} shrl %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 ac 80 23 01 00 00[ 	]+\{nf\} shr %cl,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 73 f7 8c 80 23 01 00 00[ 	]+shrx[ 	]+%ecx,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 ac 80 23 01 00 00[ 	]+\{nf\} shrq %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 ac 80 23 01 00 00[ 	]+\{nf\} shr %cl,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f3 f7 8c 80 23 01 00 00[ 	]+shrx[ 	]+%rcx,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 2c d0 7b[ 	]+\{nf\} shrd \$0x7b,%dx,%ax
 [ 	]*[a-f0-9]+:[ 	]*62 f4 35 1c 2c d0 7b[ 	]+\{nf\} shrd \$0x7b,%dx,%ax,%r9w
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 2c 94 80 23 01 00 00 7b[ 	]+\{nf\} shrd \$0x7b,%dx,0x123\(%r8,%rax,4\)
@@ -617,12 +617,12 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 54 84 14 ad 8c 80 23 01 00 00[ 	]+\{nf\} shrd %cl,%r9,0x123\(%r8,%rax,4\),%r31
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 80 eb 7b[ 	]+\{nf\} sub \$0x7b,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 80 eb 7b[ 	]+\{nf\} sub \$0x7b,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 52 85[ 	]+lea    -0x7b\(%rdx\),%dx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 83 ea 7b[ 	]+\{nf\} sub \$0x7b,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 83 ea 7b[ 	]+\{nf\} sub \$0x7b,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 49 85[ 	]+lea    -0x7b\(%rcx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 51 85[ 	]+lea    -0x7b\(%rcx\),%edx
-[ 	]*[a-f0-9]+:[ 	]*4d 8d 49 85[ 	]+lea    -0x7b\(%r9\),%r9
-[ 	]*[a-f0-9]+:[ 	]*d5 4d 8d 79 85[ 	]+lea    -0x7b\(%r9\),%r31
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 83 e9 7b[ 	]+\{nf\} sub \$0x7b,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 83 e9 7b[ 	]+\{nf\} sub \$0x7b,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c 83 e9 7b[ 	]+\{nf\} sub \$0x7b,%r9
+[ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 83 e9 7b[ 	]+\{nf\} sub \$0x7b,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 80 ac 80 23 01 00 00 7b[ 	]+\{nf\} subb \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c 80 ac 80 23 01 00 00 7b[ 	]+\{nf\} sub \$0x7b,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 83 ac 80 23 01 00 00 7b[ 	]+\{nf\} subw \$0x7b,0x123\(%r8,%rax,4\)
@@ -705,12 +705,12 @@ Disassembly of section \.text:
 0[0-9a-f]+ <intel>:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 80 c3 7b[ 	]+\{nf\} add \$0x7b,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 80 c3 7b[ 	]+\{nf\} add \$0x7b,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 52 7b[ 	]+lea    0x7b\(%rdx\),%dx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 83 c2 7b[ 	]+\{nf\} add \$0x7b,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 83 c2 7b[ 	]+\{nf\} add \$0x7b,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 49 7b[ 	]+lea    0x7b\(%rcx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 51 7b[ 	]+lea    0x7b\(%rcx\),%edx
-[ 	]*[a-f0-9]+:[ 	]*4d 8d 49 7b[ 	]+lea    0x7b\(%r9\),%r9
-[ 	]*[a-f0-9]+:[ 	]*d5 4d 8d 79 7b[ 	]+lea    0x7b\(%r9\),%r31
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 83 c1 7b[ 	]+\{nf\} add \$0x7b,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 83 c1 7b[ 	]+\{nf\} add \$0x7b,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c 83 c1 7b[ 	]+\{nf\} add \$0x7b,%r9
+[ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 83 c1 7b[ 	]+\{nf\} add \$0x7b,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 80 84 80 23 01 00 00 7b[ 	]+\{nf\} addb \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c 80 84 80 23 01 00 00 7b[ 	]+\{nf\} add \$0x7b,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 83 84 80 23 01 00 00 7b[ 	]+\{nf\} addw \$0x7b,0x123\(%r8,%rax,4\)
@@ -723,16 +723,16 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 3c 1c 00 da[ 	]+\{nf\} add %bl,%dl,%r8b
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 00 9c 80 23 01 00 00[ 	]+\{nf\} add %bl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6c 1c 00 9c 80 23 01 00 00[ 	]+\{nf\} add %bl,0x123\(%r8,%rax,4\),%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 04 10[ 	]+lea[ 	]+\(%rax,%rdx,1\),%ax
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 01 d0[ 	]+\{nf\} add %dx,%ax
 [ 	]*[a-f0-9]+:[ 	]*62 f4 35 1c 01 d0[ 	]+\{nf\} add %dx,%ax,%r9w
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 01 94 80 23 01 00 00[ 	]+\{nf\} add %dx,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 1c 01 94 80 23 01 00 00[ 	]+\{nf\} add %dx,0x123\(%r8,%rax,4\),%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 14 0a[ 	]+lea[ 	]+\(%rdx,%rcx,1\),%edx
-[ 	]*[a-f0-9]+:[ 	]*44 8d 14 0a[ 	]+lea[ 	]+\(%rdx,%rcx,1\),%r10d
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 01 ca[ 	]+\{nf\} add %ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 2c 1c 01 ca[ 	]+\{nf\} add %ecx,%edx,%r10d
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 01 8c 80 23 01 00 00[ 	]+\{nf\} add %ecx,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6c 1c 01 8c 80 23 01 00 00[ 	]+\{nf\} add %ecx,0x123\(%r8,%rax,4\),%edx
-[ 	]*[a-f0-9]+:[ 	]*d5 5f 8d 3c 0f[ 	]+lea[ 	]+\(%r31,%r9,1\),%r31
-[ 	]*[a-f0-9]+:[ 	]*d5 1f 8d 1c 0f[ 	]+lea[ 	]+\(%r31,%r9,1\),%r11
+[ 	]*[a-f0-9]+:[ 	]*62 5c fc 0c 01 cf[ 	]+\{nf\} add %r9,%r31
+[ 	]*[a-f0-9]+:[ 	]*62 5c a4 1c 01 cf[ 	]+\{nf\} add %r9,%r31,%r11
 [ 	]*[a-f0-9]+:[ 	]*62 54 fc 0c 01 8c 80 23 01 00 00[ 	]+\{nf\} add %r9,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 54 84 14 01 8c 80 23 01 00 00[ 	]+\{nf\} add %r9,0x123\(%r8,%rax,4\),%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 02 9c 80 23 01 00 00[ 	]+\{nf\} add 0x123\(%r8,%rax,4\),%bl
@@ -892,7 +892,7 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 54 fc 0c f5 8c 80 23 01 00 00[ 	]+\{nf\} lzcnt 0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c f6 e3[ 	]+\{nf\} mul %bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c f7 e2[ 	]+\{nf\} mul %dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c f7 e2[ 	]+\{nf\} mul %edx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 7b f6 d0[ 	]+mulx[ 	]+%eax,%eax,%edx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c f7 e1[ 	]+\{nf\} mul %r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c f6 a4 80 23 01 00 00[ 	]+\{nf\} mulb 0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c f7 a4 80 23 01 00 00[ 	]+\{nf\} mulw 0x123\(%r8,%rax,4\)
@@ -980,18 +980,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c c0 c3 7b[ 	]+\{nf\} rol \$0x7b,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 c2 7b[ 	]+\{nf\} rol \$0x7b,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c c1 c2 7b[ 	]+\{nf\} rol \$0x7b,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 c1 7b[ 	]+\{nf\} rol \$0x7b,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c c1 c1 7b[ 	]+\{nf\} rol \$0x7b,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c c1 c1 7b[ 	]+\{nf\} rol \$0x7b,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e3 7b f0 c9 a5[ 	]+rorx[ 	]+\$0xa5,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e3 7b f0 d1 a5[ 	]+rorx[ 	]+\$0xa5,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 43 fb f0 c9 c5[ 	]+rorx[ 	]+\$0xc5,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 c1 c1 7b[ 	]+\{nf\} rol \$0x7b,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c c0 84 80 23 01 00 00 7b[ 	]+\{nf\} rolb \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c c0 84 80 23 01 00 00 7b[ 	]+\{nf\} rol \$0x7b,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rolw \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rol \$0x7b,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} roll \$0x7b,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rol \$0x7b,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c3 7b f0 8c 80 23 01 00 00 a5[ 	]+rorx[ 	]+\$0xa5,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rolq \$0x7b,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c c1 84 80 23 01 00 00 7b[ 	]+\{nf\} rol \$0x7b,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 43 fb f0 8c 80 23 01 00 00 c5[ 	]+rorx[ 	]+\$0xc5,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d2 c3[ 	]+\{nf\} rol %cl,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 c3[ 	]+\{nf\} rol %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 c2[ 	]+\{nf\} rol %cl,%dx
@@ -1028,18 +1028,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c c0 cb 7b[ 	]+\{nf\} ror \$0x7b,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 ca 7b[ 	]+\{nf\} ror \$0x7b,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c c1 ca 7b[ 	]+\{nf\} ror \$0x7b,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 c9 7b[ 	]+\{nf\} ror \$0x7b,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c c1 c9 7b[ 	]+\{nf\} ror \$0x7b,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c c1 c9 7b[ 	]+\{nf\} ror \$0x7b,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e3 7b f0 c9 7b[ 	]+rorx[ 	]+\$0x7b,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e3 7b f0 d1 7b[ 	]+rorx[ 	]+\$0x7b,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 43 fb f0 c9 7b[ 	]+rorx[ 	]+\$0x7b,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 c1 c9 7b[ 	]+\{nf\} ror \$0x7b,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c c0 8c 80 23 01 00 00 7b[ 	]+\{nf\} rorb \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c c0 8c 80 23 01 00 00 7b[ 	]+\{nf\} ror \$0x7b,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} rorw \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} ror \$0x7b,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} rorl \$0x7b,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} ror \$0x7b,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c3 7b f0 8c 80 23 01 00 00 7b[ 	]+rorx[ 	]+\$0x7b,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} rorq \$0x7b,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c c1 8c 80 23 01 00 00 7b[ 	]+\{nf\} ror \$0x7b,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 43 fb f0 8c 80 23 01 00 00 7b[ 	]+rorx[ 	]+\$0x7b,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d2 cb[ 	]+\{nf\} ror %cl,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 cb[ 	]+\{nf\} ror %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 ca[ 	]+\{nf\} ror %cl,%dx
@@ -1056,14 +1056,14 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 8c 80 23 01 00 00[ 	]+\{nf\} ror %cl,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 8c 80 23 01 00 00[ 	]+\{nf\} rorq %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 8c 80 23 01 00 00[ 	]+\{nf\} ror %cl,0x123\(%r8,%rax,4\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 e3[ 	]+\{nf\} shl \$1,%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d0 e3[ 	]+\{nf\} shl \$1,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 14 12[ 	]+lea[ 	]+\(%rdx,%rdx,1\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d1 e2[ 	]+\{nf\} shl \$1,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 0c 09[ 	]+lea[ 	]+\(%rcx,%rcx,1\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 14 09[ 	]+lea[ 	]+\(%rcx,%rcx,1\),%edx
-[ 	]*[a-f0-9]+:[ 	]*4f 8d 0c 09[ 	]+lea[ 	]+\(%r9,%r9,1\),%r9
-[ 	]*[a-f0-9]+:[ 	]*d5 4f 8d 3c 09[ 	]+lea[ 	]+\(%r9,%r9,1\),%r31
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 00 db[ 	]+\{nf\} add %bl,%bl
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 00 db[ 	]+\{nf\} add %bl,%bl,%dl
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 01 d2[ 	]+\{nf\} add %dx,%dx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 01 d2[ 	]+\{nf\} add %dx,%dx,%ax
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 01 c9[ 	]+\{nf\} add %ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 01 c9[ 	]+\{nf\} add %ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 54 fc 0c 01 c9[ 	]+\{nf\} add %r9,%r9
+[ 	]*[a-f0-9]+:[ 	]*62 54 84 14 01 c9[ 	]+\{nf\} add %r9,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d0 a4 80 23 01 00 00[ 	]+\{nf\} shlb \$1,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d0 a4 80 23 01 00 00[ 	]+\{nf\} shl \$1,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d1 a4 80 23 01 00 00[ 	]+\{nf\} shlw \$1,0x123\(%r8,%rax,4\)
@@ -1092,18 +1092,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 e3[ 	]+\{nf\} shl %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 e2[ 	]+\{nf\} shl %cl,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d3 e2[ 	]+\{nf\} shl %cl,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d3 e1[ 	]+\{nf\} shl %cl,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d3 e1[ 	]+\{nf\} shl %cl,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 e1[ 	]+\{nf\} shl %cl,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 71 f7 c9[ 	]+shlx[ 	]+%ecx,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 71 f7 d1[ 	]+shlx[ 	]+%ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f1 f7 c9[ 	]+shlx[ 	]+%rcx,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 d3 e1[ 	]+\{nf\} shl %cl,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d2 a4 80 23 01 00 00[ 	]+\{nf\} shlb %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d2 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shlw %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shll %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 71 f7 8c 80 23 01 00 00[ 	]+shlx[ 	]+%ecx,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shlq %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f1 f7 8c 80 23 01 00 00[ 	]+shlx[ 	]+%rcx,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 fb[ 	]+\{nf\} sar \$1,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d0 fb[ 	]+\{nf\} sar \$1,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d1 fa[ 	]+\{nf\} sar \$1,%dx
@@ -1140,26 +1140,26 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 fb[ 	]+\{nf\} sar %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 fa[ 	]+\{nf\} sar %cl,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d3 fa[ 	]+\{nf\} sar %cl,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d3 f9[ 	]+\{nf\} sar %cl,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d3 f9[ 	]+\{nf\} sar %cl,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 f9[ 	]+\{nf\} sar %cl,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 72 f7 c9[ 	]+sarx[ 	]+%ecx,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 72 f7 d1[ 	]+sarx[ 	]+%ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f2 f7 c9[ 	]+sarx[ 	]+%rcx,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 d3 f9[ 	]+\{nf\} sar %cl,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d2 bc 80 23 01 00 00[ 	]+\{nf\} sarb %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d2 bc 80 23 01 00 00[ 	]+\{nf\} sar %cl,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d3 bc 80 23 01 00 00[ 	]+\{nf\} sarw %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c d3 bc 80 23 01 00 00[ 	]+\{nf\} sar %cl,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d3 bc 80 23 01 00 00[ 	]+\{nf\} sarl %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 bc 80 23 01 00 00[ 	]+\{nf\} sar %cl,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 72 f7 8c 80 23 01 00 00[ 	]+sarx[ 	]+%ecx,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 bc 80 23 01 00 00[ 	]+\{nf\} sarq %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 bc 80 23 01 00 00[ 	]+\{nf\} sar %cl,0x123\(%r8,%rax,4\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 e3[ 	]+\{nf\} shl \$1,%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d0 e3[ 	]+\{nf\} shl \$1,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 14 12[ 	]+lea[ 	]+\(%rdx,%rdx,1\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d1 e2[ 	]+\{nf\} shl \$1,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 0c 09[ 	]+lea[ 	]+\(%rcx,%rcx,1\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 14 09[ 	]+lea[ 	]+\(%rcx,%rcx,1\),%edx
-[ 	]*[a-f0-9]+:[ 	]*4f 8d 0c 09[ 	]+lea[ 	]+\(%r9,%r9,1\),%r9
-[ 	]*[a-f0-9]+:[ 	]*d5 4f 8d 3c 09[ 	]+lea[ 	]+\(%r9,%r9,1\),%r31
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f2 f7 8c 80 23 01 00 00[ 	]+sarx[ 	]+%rcx,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 00 db[ 	]+\{nf\} add %bl,%bl
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 00 db[ 	]+\{nf\} add %bl,%bl,%dl
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 01 d2[ 	]+\{nf\} add %dx,%dx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 01 d2[ 	]+\{nf\} add %dx,%dx,%ax
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 01 c9[ 	]+\{nf\} add %ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 01 c9[ 	]+\{nf\} add %ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 54 fc 0c 01 c9[ 	]+\{nf\} add %r9,%r9
+[ 	]*[a-f0-9]+:[ 	]*62 54 84 14 01 c9[ 	]+\{nf\} add %r9,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d0 a4 80 23 01 00 00[ 	]+\{nf\} shlb \$1,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d0 a4 80 23 01 00 00[ 	]+\{nf\} shl \$1,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d1 a4 80 23 01 00 00[ 	]+\{nf\} shlw \$1,0x123\(%r8,%rax,4\)
@@ -1188,18 +1188,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 e3[ 	]+\{nf\} shl %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 e2[ 	]+\{nf\} shl %cl,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d3 e2[ 	]+\{nf\} shl %cl,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d3 e1[ 	]+\{nf\} shl %cl,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d3 e1[ 	]+\{nf\} shl %cl,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 e1[ 	]+\{nf\} shl %cl,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 71 f7 c9[ 	]+shlx[ 	]+%ecx,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 71 f7 d1[ 	]+shlx[ 	]+%ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f1 f7 c9[ 	]+shlx[ 	]+%rcx,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 d3 e1[ 	]+\{nf\} shl %cl,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d2 a4 80 23 01 00 00[ 	]+\{nf\} shlb %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d2 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shlw %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shll %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 71 f7 8c 80 23 01 00 00[ 	]+shlx[ 	]+%ecx,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 a4 80 23 01 00 00[ 	]+\{nf\} shlq %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 a4 80 23 01 00 00[ 	]+\{nf\} shl %cl,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f1 f7 8c 80 23 01 00 00[ 	]+shlx[ 	]+%rcx,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 24 d0 7b[ 	]+\{nf\} shld \$0x7b,%dx,%ax
 [ 	]*[a-f0-9]+:[ 	]*62 f4 35 1c 24 d0 7b[ 	]+\{nf\} shld \$0x7b,%dx,%ax,%r9w
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 24 94 80 23 01 00 00 7b[ 	]+\{nf\} shld \$0x7b,%dx,0x123\(%r8,%rax,4\)
@@ -1260,18 +1260,18 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d2 eb[ 	]+\{nf\} shr %cl,%bl,%dl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d3 ea[ 	]+\{nf\} shr %cl,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d3 ea[ 	]+\{nf\} shr %cl,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d3 e9[ 	]+\{nf\} shr %cl,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c d3 e9[ 	]+\{nf\} shr %cl,%ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 e9[ 	]+\{nf\} shr %cl,%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 73 f7 c9[ 	]+shrx[ 	]+%ecx,%ecx,%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 73 f7 d1[ 	]+shrx[ 	]+%ecx,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f3 f7 c9[ 	]+shrx[ 	]+%rcx,%r9,%r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 d3 e9[ 	]+\{nf\} shr %cl,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d2 ac 80 23 01 00 00[ 	]+\{nf\} shrb %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c d2 ac 80 23 01 00 00[ 	]+\{nf\} shr %cl,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c d3 ac 80 23 01 00 00[ 	]+\{nf\} shrw %cl,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6d 1c d3 ac 80 23 01 00 00[ 	]+\{nf\} shr %cl,0x123\(%r8,%rax,4\),%dx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c d3 ac 80 23 01 00 00[ 	]+\{nf\} shrl %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 74 1c d3 ac 80 23 01 00 00[ 	]+\{nf\} shr %cl,0x123\(%r8,%rax,4\),%ecx
+[ 	]*[a-f0-9]+:[ 	]*c4 c2 73 f7 8c 80 23 01 00 00[ 	]+shrx[ 	]+%ecx,0x123\(%r8,%rax,4\),%ecx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c d3 ac 80 23 01 00 00[ 	]+\{nf\} shrq %cl,0x123\(%r8,%rax,4\)
-[ 	]*[a-f0-9]+:[ 	]*62 d4 b4 1c d3 ac 80 23 01 00 00[ 	]+\{nf\} shr %cl,0x123\(%r8,%rax,4\),%r9
+[ 	]*[a-f0-9]+:[ 	]*c4 42 f3 f7 8c 80 23 01 00 00[ 	]+shrx[ 	]+%rcx,0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 2c d0 7b[ 	]+\{nf\} shrd \$0x7b,%dx,%ax
 [ 	]*[a-f0-9]+:[ 	]*62 f4 35 1c 2c d0 7b[ 	]+\{nf\} shrd \$0x7b,%dx,%ax,%r9w
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 2c 94 80 23 01 00 00 7b[ 	]+\{nf\} shrd \$0x7b,%dx,0x123\(%r8,%rax,4\)
@@ -1298,12 +1298,12 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 54 84 14 ad 8c 80 23 01 00 00[ 	]+\{nf\} shrd %cl,%r9,0x123\(%r8,%rax,4\),%r31
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 80 eb 7b[ 	]+\{nf\} sub \$0x7b,%bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 80 eb 7b[ 	]+\{nf\} sub \$0x7b,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 52 85[ 	]+lea    -0x7b\(%rdx\),%dx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 83 ea 7b[ 	]+\{nf\} sub \$0x7b,%dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 83 ea 7b[ 	]+\{nf\} sub \$0x7b,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 49 85[ 	]+lea    -0x7b\(%rcx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 51 85[ 	]+lea    -0x7b\(%rcx\),%edx
-[ 	]*[a-f0-9]+:[ 	]*4d 8d 49 85[ 	]+lea    -0x7b\(%r9\),%r9
-[ 	]*[a-f0-9]+:[ 	]*d5 4d 8d 79 85[ 	]+lea    -0x7b\(%r9\),%r31
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 83 e9 7b[ 	]+\{nf\} sub \$0x7b,%ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 83 e9 7b[ 	]+\{nf\} sub \$0x7b,%ecx,%edx
+[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c 83 e9 7b[ 	]+\{nf\} sub \$0x7b,%r9
+[ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 83 e9 7b[ 	]+\{nf\} sub \$0x7b,%r9,%r31
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c 80 ac 80 23 01 00 00 7b[ 	]+\{nf\} subb \$0x7b,0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 64 1c 80 ac 80 23 01 00 00 7b[ 	]+\{nf\} sub \$0x7b,0x123\(%r8,%rax,4\),%bl
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c 83 ac 80 23 01 00 00 7b[ 	]+\{nf\} subw \$0x7b,0x123\(%r8,%rax,4\)
@@ -1382,227 +1382,4 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 d4 6c 1c 33 8c 80 23 01 00 00[ 	]+\{nf\} xor 0x123\(%r8,%rax,4\),%ecx,%edx
 [ 	]*[a-f0-9]+:[ 	]*62 54 fc 0c 33 8c 80 23 01 00 00[ 	]+\{nf\} xor 0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 54 84 14 33 8c 80 23 01 00 00[ 	]+\{nf\} xor 0x123\(%r8,%rax,4\),%r9,%r31
-
-0[0-9a-f]+ <optimize>:
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 80 c3 80[ 	]+\{nf\} add \$0x80,%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 80 c3 80[ 	]+\{nf\} add \$0x80,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 83 ea 80[ 	]+\{nf\} sub \$0xf+80,%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 83 ea 80[ 	]+\{nf\} sub \$0xf+80,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 89 80 00 00 00[ 	]+lea    0x80\(%rcx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 91 80 00 00 00[ 	]+lea    0x80\(%rcx\),%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c 83 e9 80[ 	]+\{nf\} sub \$0xf+80,%r9
-[ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 83 e9 80[ 	]+\{nf\} sub \$0xf+80,%r9,%r31
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 80 00 80[ 	]+\{nf\} addb \$0x80,\(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 64 1c 80 00 80[ 	]+\{nf\} add \$0x80,\(%rax\),%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 83 28 80[ 	]+\{nf\} subw \$0xf+80,\(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6d 1c 83 28 80[ 	]+\{nf\} sub \$0xf+80,\(%rax\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 83 28 80[ 	]+\{nf\} subl \$0xf+80,\(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c 83 28 80[ 	]+\{nf\} sub \$0xf+80,\(%rax\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 83 28 80[ 	]+\{nf\} subq \$0xf+80,\(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 b4 1c 83 28 80[ 	]+\{nf\} sub \$0xf+80,\(%rax\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c fe c3[ 	]+\{nf\} inc %bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c fe c3[ 	]+\{nf\} inc %bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c ff c2[ 	]+\{nf\} inc %dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c ff c2[ 	]+\{nf\} inc %dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c ff c1[ 	]+\{nf\} inc %ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c ff c1[ 	]+\{nf\} inc %ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c ff c1[ 	]+\{nf\} inc %r9
-[ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 ff c1[ 	]+\{nf\} inc %r9,%r31
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c fe 00[ 	]+\{nf\} incb \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 64 1c fe 00[ 	]+\{nf\} inc \(%rax\),%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c ff 00[ 	]+\{nf\} incw \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6d 1c ff 00[ 	]+\{nf\} inc \(%rax\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c ff 00[ 	]+\{nf\} incl \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c ff 00[ 	]+\{nf\} inc \(%rax\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c ff 00[ 	]+\{nf\} incq \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 b4 1c ff 00[ 	]+\{nf\} inc \(%rax\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c fe cb[ 	]+\{nf\} dec %bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c fe cb[ 	]+\{nf\} dec %bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c ff ca[ 	]+\{nf\} dec %dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c ff ca[ 	]+\{nf\} dec %dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c ff c9[ 	]+\{nf\} dec %ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c ff c9[ 	]+\{nf\} dec %ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c ff c9[ 	]+\{nf\} dec %r9
-[ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 ff c9[ 	]+\{nf\} dec %r9,%r31
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c fe 08[ 	]+\{nf\} decb \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 64 1c fe 08[ 	]+\{nf\} dec \(%rax\),%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c ff 08[ 	]+\{nf\} decw \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6d 1c ff 08[ 	]+\{nf\} dec \(%rax\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c ff 08[ 	]+\{nf\} decl \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c ff 08[ 	]+\{nf\} dec \(%rax\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c ff 08[ 	]+\{nf\} decq \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 b4 1c ff 08[ 	]+\{nf\} dec \(%rax\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 80 eb 80[ 	]+\{nf\} sub \$0x80,%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c 80 eb 80[ 	]+\{nf\} sub \$0x80,%bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*66 8d 52 80[ 	]+lea    -0x80\(%rdx\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 83 c2 80[ 	]+\{nf\} add \$0xf+80,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*8d 49 80[ 	]+lea    -0x80\(%rcx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 51 80[ 	]+lea    -0x80\(%rcx\),%edx
-[ 	]*[a-f0-9]+:[ 	]*4d 8d 49 80[ 	]+lea    -0x80\(%r9\),%r9
-[ 	]*[a-f0-9]+:[ 	]*d5 4d 8d 79 80[ 	]+lea    -0x80\(%r9\),%r31
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 80 28 80[ 	]+\{nf\} subb \$0x80,\(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 64 1c 80 28 80[ 	]+\{nf\} sub \$0x80,\(%rax\),%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 83 00 80[ 	]+\{nf\} addw \$0xf+80,\(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6d 1c 83 00 80[ 	]+\{nf\} add \$0xf+80,\(%rax\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 83 00 80[ 	]+\{nf\} addl \$0xf+80,\(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c 83 00 80[ 	]+\{nf\} add \$0xf+80,\(%rax\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 83 00 80[ 	]+\{nf\} addq \$0xf+80,\(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 b4 1c 83 00 80[ 	]+\{nf\} add \$0xf+80,\(%rax\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c fe cb[ 	]+\{nf\} dec %bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c fe cb[ 	]+\{nf\} dec %bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c ff ca[ 	]+\{nf\} dec %dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c ff ca[ 	]+\{nf\} dec %dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c ff c9[ 	]+\{nf\} dec %ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c ff c9[ 	]+\{nf\} dec %ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c ff c9[ 	]+\{nf\} dec %r9
-[ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 ff c9[ 	]+\{nf\} dec %r9,%r31
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c fe 08[ 	]+\{nf\} decb \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 64 1c fe 08[ 	]+\{nf\} dec \(%rax\),%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c ff 08[ 	]+\{nf\} decw \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6d 1c ff 08[ 	]+\{nf\} dec \(%rax\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c ff 08[ 	]+\{nf\} decl \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c ff 08[ 	]+\{nf\} dec \(%rax\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c ff 08[ 	]+\{nf\} decq \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 b4 1c ff 08[ 	]+\{nf\} dec \(%rax\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c fe c3[ 	]+\{nf\} inc %bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c fe c3[ 	]+\{nf\} inc %bl,%dl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c ff c2[ 	]+\{nf\} inc %dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c ff c2[ 	]+\{nf\} inc %dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c ff c1[ 	]+\{nf\} inc %ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6c 1c ff c1[ 	]+\{nf\} inc %ecx,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c ff c1[ 	]+\{nf\} inc %r9
-[ 	]*[a-f0-9]+:[ 	]*62 d4 84 14 ff c1[ 	]+\{nf\} inc %r9,%r31
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c fe 00[ 	]+\{nf\} incb \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 64 1c fe 00[ 	]+\{nf\} inc \(%rax\),%bl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c ff 00[ 	]+\{nf\} incw \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 6d 1c ff 00[ 	]+\{nf\} inc \(%rax\),%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c ff 00[ 	]+\{nf\} incl \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c ff 00[ 	]+\{nf\} inc \(%rax\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c ff 00[ 	]+\{nf\} incq \(%rax\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 b4 1c ff 00[ 	]+\{nf\} inc \(%rax\),%r9
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 ca[ 	]+\{nf\} ror \$1,%dl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 1c d0 ca[ 	]+\{nf\} ror \$1,%dl,%al
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d1 ca[ 	]+\{nf\} ror \$1,%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d1 ca[ 	]+\{nf\} ror \$1,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d1 ca[ 	]+\{nf\} ror \$1,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 1c d1 ca[ 	]+\{nf\} ror \$1,%edx,%eax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c d1 ca[ 	]+\{nf\} ror \$1,%rdx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 1c d1 ca[ 	]+\{nf\} ror \$1,%rdx,%rax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 0a[ 	]+\{nf\} rorb \$1,\(%rdx\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 1c d0 0a[ 	]+\{nf\} ror \$1,\(%rdx\),%al
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d1 0a[ 	]+\{nf\} rorw \$1,\(%rdx\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d1 0a[ 	]+\{nf\} ror \$1,\(%rdx\),%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d1 0a[ 	]+\{nf\} rorl \$1,\(%rdx\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 1c d1 0a[ 	]+\{nf\} ror \$1,\(%rdx\),%eax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c d1 0a[ 	]+\{nf\} rorq \$1,\(%rdx\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 1c d1 0a[ 	]+\{nf\} ror \$1,\(%rdx\),%rax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 c2[ 	]+\{nf\} rol \$1,%dl
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 1c d0 c2[ 	]+\{nf\} rol \$1,%dl,%al
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d1 c2[ 	]+\{nf\} rol \$1,%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d1 c2[ 	]+\{nf\} rol \$1,%dx,%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d1 c2[ 	]+\{nf\} rol \$1,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 1c d1 c2[ 	]+\{nf\} rol \$1,%edx,%eax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c d1 c2[ 	]+\{nf\} rol \$1,%rdx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 1c d1 c2[ 	]+\{nf\} rol \$1,%rdx,%rax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d0 02[ 	]+\{nf\} rolb \$1,\(%rdx\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 1c d0 02[ 	]+\{nf\} rol \$1,\(%rdx\),%al
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c d1 02[ 	]+\{nf\} rolw \$1,\(%rdx\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c d1 02[ 	]+\{nf\} rol \$1,\(%rdx\),%ax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c d1 02[ 	]+\{nf\} roll \$1,\(%rdx\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 1c d1 02[ 	]+\{nf\} rol \$1,\(%rdx\),%eax
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c d1 02[ 	]+\{nf\} rolq \$1,\(%rdx\)
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 1c d1 02[ 	]+\{nf\} rol \$1,\(%rdx\),%rax
-[ 	]*[a-f0-9]+:[ 	]*66 8d 14 49[ 	]+lea    \(%rcx,%rcx,2\),%dx
-[ 	]*[a-f0-9]+:[ 	]*66 8d 54 ad 00[ 	]+lea    0x0\(%rbp,%rbp,4\),%dx
-[ 	]*[a-f0-9]+:[ 	]*66 8d 2c c9[ 	]+lea    \(%rcx,%rcx,8\),%bp
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b d4 03[ 	]+\{nf\} imul \$0x3,%sp,%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b e4 05[ 	]+\{nf\} imul \$0x5,%sp,%sp
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b d1 03[ 	]+\{nf\} imulzu \$0x3,%cx,%dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b c9 05[ 	]+\{nf\} imulzu \$0x5,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 e4 7d 0c 6b c5 03[ 	]+\{nf\} imul \$0x3,%bp,%r16w
-[ 	]*[a-f0-9]+:[ 	]*62 fc 7d 0c 6b d5 05[ 	]+\{nf\} imul \$0x5,%r21w,%dx
-[ 	]*[a-f0-9]+:[ 	]*62 ec 7d 0c 6b ed 09[ 	]+\{nf\} imul \$0x9,%r21w,%r21w
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b ca 02 	\{nf\} imul \$0x2,%dx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b 0a 02 	\{nf\} imul \$0x2,\(%rdx\),%cx
-[ 	]*[a-f0-9]+:[ 	]*66 8d 0c 09[ 	]+lea    \(%rcx,%rcx,1\),%cx
-[ 	]*[a-f0-9]+:[ 	]*66 8d 0c 09[ 	]+lea    \(%rcx,%rcx,1\),%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c d1 e2    	\{nf\} shl \$1,%dx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c d1 22    	\{nf\} shl \$1,\(%rdx\),%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c d1 e1    	\{nf\} shl \$1,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c d1 e1    	\{nf\} shl \$1,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b ca 04 	\{nf\} imul \$0x4,%dx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b 0a 04 	\{nf\} imul \$0x4,\(%rdx\),%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b c9 04 	\{nf\} imul \$0x4,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b c9 04 	\{nf\} imul \$0x4,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b ca 04 	\{nf\} imulzu \$0x4,%dx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b 0a 04 	\{nf\} imulzu \$0x4,\(%rdx\),%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b c9 04 	\{nf\} imulzu \$0x4,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b c9 04 	\{nf\} imulzu \$0x4,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b ca 40 	\{nf\} imul \$0x40,%dx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b 0a 40 	\{nf\} imul \$0x40,\(%rdx\),%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b c9 40 	\{nf\} imul \$0x40,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 6b c9 40 	\{nf\} imul \$0x40,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b ca 40 	\{nf\} imulzu \$0x40,%dx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b 0a 40 	\{nf\} imulzu \$0x40,\(%rdx\),%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b c9 40 	\{nf\} imulzu \$0x40,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 1c 6b c9 40 	\{nf\} imulzu \$0x40,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 69 ca 80 00 	\{nf\} imul \$0x80,%dx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 69 0a 80 00 	\{nf\} imul \$0x80,\(%rdx\),%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 07 	\{nf\} shl \$0x7,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 07 	\{nf\} shl \$0x7,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e2 07 	\{nf\} shl \$0x7,%dx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 22 07 	\{nf\} shl \$0x7,\(%rdx\),%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 07 	\{nf\} shl \$0x7,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 07 	\{nf\} shl \$0x7,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 69 ca 00 80 	\{nf\} imul \$0x8000,%dx,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c 69 0a 00 80 	\{nf\} imul \$0x8000,\(%rdx\),%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 0f 	\{nf\} shl \$0xf,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c c1 e1 0f 	\{nf\} shl \$0xf,%cx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 75 1c c1 e1 0f 	\{nf\} shl \$0xf,%cx,%cx
-[ 	]*[a-f0-9]+:[ 	]*8d 14 49[ 	]+lea    \(%rcx,%rcx,2\),%edx
-[ 	]*[a-f0-9]+:[ 	]*8d 54 ad 00[ 	]+lea    0x0\(%rbp,%rbp,4\),%edx
-[ 	]*[a-f0-9]+:[ 	]*8d 2c c9[ 	]+lea    \(%rcx,%rcx,8\),%ebp
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b d4 03[ 	]+\{nf\} imul \$0x3,%esp,%edx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b e4 05[ 	]+\{nf\} imul \$0x5,%esp,%esp
-[ 	]*[a-f0-9]+:[ 	]*8d 0c 12[ 	]+lea    \(%rdx,%rdx,1\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c d1 22    	\{nf\} shl \$1,\(%rdx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 0c 09[ 	]+lea    \(%rcx,%rcx,1\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*8d 0c 09[ 	]+lea    \(%rcx,%rcx,1\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b ca 04 	\{nf\} imul \$0x4,%edx,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b 0a 04 	\{nf\} imul \$0x4,\(%rdx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b c9 04 	\{nf\} imul \$0x4,%ecx,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b c9 04 	\{nf\} imul \$0x4,%ecx,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b ca 40 	\{nf\} imul \$0x40,%edx,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b 0a 40 	\{nf\} imul \$0x40,\(%rdx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b c9 40 	\{nf\} imul \$0x40,%ecx,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c 6b c9 40 	\{nf\} imul \$0x40,%ecx,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 e2 07 	\{nf\} shl \$0x7,%edx,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 22 07 	\{nf\} shl \$0x7,\(%rdx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 e1 07 	\{nf\} shl \$0x7,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c c1 e1 07 	\{nf\} shl \$0x7,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 e2 1f 	\{nf\} shl \$0x1f,%edx,%ecx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 74 1c c1 22 1f 	\{nf\} shl \$0x1f,\(%rdx\),%ecx
-[ 	]*[a-f0-9]+:[ 	]*48 8d 14 49[ 	]+lea    \(%rcx,%rcx,2\),%rdx
-[ 	]*[a-f0-9]+:[ 	]*48 8d 54 ad 00[ 	]+lea    0x0\(%rbp,%rbp,4\),%rdx
-[ 	]*[a-f0-9]+:[ 	]*48 8d 2c c9[ 	]+lea    \(%rcx,%rcx,8\),%rbp
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b d4 03[ 	]+\{nf\} imul \$0x3,%rsp,%rdx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b e4 05[ 	]+\{nf\} imul \$0x5,%rsp,%rsp
-[ 	]*[a-f0-9]+:[ 	]*48 8d 0c 12[ 	]+lea    \(%rdx,%rdx,1\),%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c d1 22    	\{nf\} shl \$1,\(%rdx\),%rcx
-[ 	]*[a-f0-9]+:[ 	]*48 8d 0c 09[ 	]+lea    \(%rcx,%rcx,1\),%rcx
-[ 	]*[a-f0-9]+:[ 	]*48 8d 0c 09[ 	]+lea    \(%rcx,%rcx,1\),%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b ca 04 	\{nf\} imul \$0x4,%rdx,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b 0a 04 	\{nf\} imul \$0x4,\(%rdx\),%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b c9 04 	\{nf\} imul \$0x4,%rcx,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b c9 04 	\{nf\} imul \$0x4,%rcx,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b ca 40 	\{nf\} imul \$0x40,%rdx,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b 0a 40 	\{nf\} imul \$0x40,\(%rdx\),%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b c9 40 	\{nf\} imul \$0x40,%rcx,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 6b c9 40 	\{nf\} imul \$0x40,%rcx,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 e2 07 	\{nf\} shl \$0x7,%rdx,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 22 07 	\{nf\} shl \$0x7,\(%rdx\),%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c c1 e1 07 	\{nf\} shl \$0x7,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c c1 e1 07 	\{nf\} shl \$0x7,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 f4 1c c1 e2 1e 	\{nf\} shl \$0x1e,%rdx,%rcx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c 69 ca 00 00 00 80 	\{nf\} imul \$0xffffffff80000000,%rdx,%rcx
 #pass

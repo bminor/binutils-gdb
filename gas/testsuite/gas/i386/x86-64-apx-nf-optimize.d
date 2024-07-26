@@ -212,7 +212,7 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c f6 e3[ 	]+\{nf\} mul %bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c f7 e2[ 	]+\{nf\} mul %dx
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c f7 e1[ 	]+\{nf\} mul %ecx
-[ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c f7 e1[ 	]+\{nf\} mul %r9
+[ 	]*[a-f0-9]+:[ 	]*62 f4 fc 0c f7 e2[ 	]+\{nf\} mul %rdx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c f6 a4 80 23 01 00 00[ 	]+\{nf\} mulb 0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c f7 a4 80 23 01 00 00[ 	]+\{nf\} mulw 0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c f7 a4 80 23 01 00 00[ 	]+\{nf\} mull 0x123\(%r8,%rax,4\)
@@ -892,7 +892,7 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 54 fc 0c f5 8c 80 23 01 00 00[ 	]+\{nf\} lzcnt 0x123\(%r8,%rax,4\),%r9
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c f6 e3[ 	]+\{nf\} mul %bl
 [ 	]*[a-f0-9]+:[ 	]*62 f4 7d 0c f7 e2[ 	]+\{nf\} mul %dx
-[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c f7 e1[ 	]+\{nf\} mul %ecx
+[ 	]*[a-f0-9]+:[ 	]*62 f4 7c 0c f7 e2[ 	]+\{nf\} mul %edx
 [ 	]*[a-f0-9]+:[ 	]*62 d4 fc 0c f7 e1[ 	]+\{nf\} mul %r9
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7c 0c f6 a4 80 23 01 00 00[ 	]+\{nf\} mulb 0x123\(%r8,%rax,4\)
 [ 	]*[a-f0-9]+:[ 	]*62 d4 7d 0c f7 a4 80 23 01 00 00[ 	]+\{nf\} mulw 0x123\(%r8,%rax,4\)

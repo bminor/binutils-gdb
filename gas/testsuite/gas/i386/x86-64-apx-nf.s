@@ -207,7 +207,7 @@ _start:
 	{nf}	mul	%bl
 	{nf}	mul	%dx
 	{nf}	mul	%ecx
-	{nf}	mul	%r9
+	{nf}	mul	%rdx
 	{nf}	mulb	291(%r8, %rax, 4)
 	{nf}	mulw	291(%r8, %rax, 4)
 	{nf}	mull	291(%r8, %rax, 4)
@@ -888,7 +888,7 @@ intel:
 	{nf}	lzcnt	r9, QWORD PTR [r8+rax*4+291]
 	{nf}	mul	bl
 	{nf}	mul	dx
-	{nf}	mul	ecx
+	{nf}	mul	edx
 	{nf}	mul	r9
 	{nf}	mul	BYTE PTR [r8+rax*4+291]
 	{nf}	mul	WORD PTR [r8+rax*4+291]
