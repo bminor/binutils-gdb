@@ -225,7 +225,7 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_RDONLY, "CTF container is read-only.") \
   _CTF_ITEM (ECTF_DTFULL, "CTF type is full (no more members allowed).") \
   _CTF_ITEM (ECTF_FULL, "CTF container is full.") \
-  _CTF_ITEM (ECTF_DUPLICATE, "Duplicate member or variable name.") \
+  _CTF_ITEM (ECTF_DUPLICATE, "Duplicate member, enumerator, or variable name.") \
   _CTF_ITEM (ECTF_CONFLICT, "Conflicting type is already defined.") \
   _CTF_ITEM (ECTF_OVERROLLBACK, "Attempt to roll back past a ctf_update.") \
   _CTF_ITEM (ECTF_COMPRESS, "Failed to compress CTF data.") \
