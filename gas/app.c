@@ -217,7 +217,8 @@ do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
     lex[(unsigned char) *p] = LEX_IS_PARALLEL_SEPARATOR;
 #endif
 
-  /* Only allow slash-star comments if slash is not in use.
+  /* Only allow slash-star comments if slash is not in use.  Certain
+     other cases are dealt with in LEX_IS_LINE_COMMENT_START handling.
      FIXME: This isn't right.  We should always permit them.  */
   if (lex['/'] == 0)
     lex['/'] = LEX_IS_TWOCHAR_COMMENT_1ST;
@@ -476,7 +477,6 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	 10: After seeing whitespace in state 9 (keep white before symchar)
 	 11: After seeing a symbol character in state 0 (eg a label definition)
 	 -1: output string in out_string and go to the state in old_state
-	 -2: flush text until a '*' '/' is seen, then go to state old_state
 	 12: no longer used
 #ifdef DOUBLEBAR_PARALLEL
 	 13: After seeing a vertical bar, looking for a second
@@ -577,43 +577,6 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	      old_state = 3;
 	    }
 	  PUT (ch);
-	  continue;
-
-	case -2:
-	  for (;;)
-	    {
-	      do
-		{
-		  ch = GET ();
-
-		  if (ch == EOF)
-		    {
-		      as_warn (_("end of file in comment"));
-		      goto fromeof;
-		    }
-
-		  if (ch == '\n')
-		    PUT ('\n');
-		}
-	      while (ch != '*');
-
-	      while ((ch = GET ()) == '*')
-		;
-
-	      if (ch == EOF)
-		{
-		  as_warn (_("end of file in comment"));
-		  goto fromeof;
-		}
-
-	      if (ch == '/')
-		break;
-
-	      UNGET (ch);
-	    }
-
-	  state = old_state;
-	  UNGET (' ');
 	  continue;
 
 	case 4:
@@ -1076,6 +1039,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	  ch2 = GET ();
 	  if (ch2 == '*')
 	    {
+	twochar_comment:
 	      for (;;)
 		{
 		  do
@@ -1290,15 +1254,9 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	    {
 	      ch2 = GET ();
 	      if (ch2 == '*')
-		{
-		  old_state = 3;
-		  state = -2;
-		  break;
-		}
-	      else if (ch2 != EOF)
-		{
-		  UNGET (ch2);
-		}
+		goto twochar_comment;
+	      if (ch2 != EOF)
+		UNGET (ch2);
 	    }
 
 	  if (state == 0 || state == 1)	/* Only comment at start of line.  */
