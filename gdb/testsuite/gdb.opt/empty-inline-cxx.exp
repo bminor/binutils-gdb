@@ -82,7 +82,6 @@ proc run_test { opt_level } {
     # Backtrace.  Check frame #1 looks right.  Bug gdb/25987 would report
     # frame #1 as being the correct function, but would report the line for
     # ptr::get_myclass(), which is not correct.
-    setup_xfail *-*-* gdb/25987
     gdb_test "bt" \
 	[multi_line \
 	     "#0\\s+MyClass::call\[^\r\n\]+/$::srcfile:$::final_bp_line" \
