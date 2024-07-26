@@ -19,7 +19,7 @@
 standard_testfile .c -2.c
 
 if { [build_executable "failed to prepare" $testfile [list $srcfile $srcfile2] \
-	  {debug ldflags=-Wl,--build-id}] } {
+	  {debug build-id}] } {
     return
 }
 

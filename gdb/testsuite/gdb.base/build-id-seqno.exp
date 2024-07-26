@@ -29,7 +29,8 @@ require {!is_remote host}
 
 standard_testfile
 
-if {[build_executable "failed to prepare" $testfile $srcfile] == -1} {
+if {[build_executable "failed to prepare" $testfile $srcfile \
+	 {debug build-id}] == -1} {
     return -1
 }
 

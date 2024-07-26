@@ -5469,12 +5469,12 @@ proc gdb_compile {source dest type options} {
     # enable it now.
     if {[lsearch -exact $options build-id] > 0
 	&& [test_compiler_info "clang-*"]} {
-	lappend new_options "additional_flags=-Wl,--build-id"
+	lappend new_options "ldflags=-Wl,--build-id"
     }
 
     # If the 'no-build-id' option is used then disable the build-id.
     if {[lsearch -exact $options no-build-id] > 0} {
-	lappend new_options "additional_flags=-Wl,--build-id=none"
+	lappend new_options "ldflags=-Wl,--build-id=none"
     }
 
     # Sanity check.  If both 'build-id' and 'no-build-id' are used
