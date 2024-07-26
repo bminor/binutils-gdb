@@ -1898,6 +1898,14 @@ extern const int bfd_mips16_num_opcodes;
    "+*" 5-bit register vector element index at bit 16
    "+|" 8-bit mask at bit 16
 
+   MT ASE usage:
+   "!" 1-bit usermode flag at bit 10.
+   "$" 1-bit load high flag at bit 9.
+   "*" 2-bit DSP accumulator register at bit 23.
+   "&" 2-bit DSP accumulator register at bit 18.
+   "J" 3-bit MFTR and MTTR sel at bit 4.
+   "y" 5-bit control target register at bit 21 (RT).
+
    Other:
    "()" parens surrounding optional value
    ","  separates operands
@@ -1906,9 +1914,9 @@ extern const int bfd_mips16_num_opcodes;
 
    Characters used so far, for quick reference when adding more:
    "12345678 0"
-   "<>(),+-.@\^|~"
-   "ABCDEFGHI KLMN   RST V    "
-   "abcd fghijklmnopqrstuvwx z"
+   "<>(),+-.@!$&*\^|~"
+   "ABCDEFGHIJKLMN   RST V    "
+   "abcd fghijklmnopqrstuvwxyz"
 
    Extension character sequences used so far ("+" followed by the
    following), for quick reference when adding more:

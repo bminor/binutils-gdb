@@ -1814,7 +1814,7 @@ static const struct mips_ase mips_ases[] = {
 
   { "mt", ASE_MT, 0,
     OPTION_MT, OPTION_NO_MT,
-     2,  2, -1, -1,
+    2, 2, 2, 2,
     -1 },
 
   { "smartmips", ASE_SMARTMIPS, 0,
