@@ -20,8 +20,12 @@
 #include <stdlib.h>
 
 char global_buf0[] = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+		      0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
+		      0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
 		      0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f};
 char global_buf1[] = {0, 0, 0, 0, 0, 0, 0, 0,
+		      0, 0, 0, 0, 0, 0, 0, 0,
+		      0, 0, 0, 0, 0, 0, 0, 0,
 		      0, 0, 0, 0, 0, 0, 0, 0};
 char *dyn_buf0;
 char *dyn_buf1;
@@ -30,8 +34,12 @@ int
 vmov_test ()
 {
   char buf0[] = {0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
+		 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
+		 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37,
 		 0x38, 0x39, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f};
   char buf1[] = {0, 0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0, 0,
+		 0, 0, 0, 0, 0, 0, 0, 0,
 		 0, 0, 0, 0, 0, 0, 0, 0};
 
   /*start vmov_test.  */
@@ -72,6 +80,32 @@ vmov_test ()
   asm volatile ("vmovd %0, %%xmm15": "=m" (buf1));
   asm volatile ("vmovq %0, %%xmm15": "=m" (buf0));
   asm volatile ("vmovq %0, %%xmm15": "=m" (buf1));
+
+  /* Test vmovdq style instructions.  */
+  /* For local and dynamic buffers, we can't guarantee they will be aligned.
+     However, the aligned and unaligned versions seem to be encoded the same,
+     so testing one is enough to validate both.  */
+
+  /* Operations based on local buffers.  */
+  asm volatile ("vmovdqu %0, %%ymm0": : "m"(buf0));
+  asm volatile ("vmovdqu %%ymm0, %0": "=m"(buf1));
+
+  /* Operations based on global buffers.  */
+  /* Global buffers seem to always be aligned, lets sanity check vmovdqa.  */
+  asm volatile ("vmovdqa %0, %%ymm15": : "m"(global_buf0));
+  asm volatile ("vmovdqa %%ymm15, %0": "=m"(global_buf1));
+  asm volatile ("vmovdqu %0, %%ymm0": : "m"(global_buf0));
+  asm volatile ("vmovdqu %%ymm0, %0": "=m"(global_buf1));
+
+  /* Operations based on dynamic buffers.  */
+  /* The dynamic buffers are not aligned, so we skip vmovdqa.  */
+  asm volatile ("vmovdqu %0, %%ymm0": : "m"(*dyn_buf0));
+  asm volatile ("vmovdqu %%ymm0, %0": "=m"(*dyn_buf1));
+
+  /* Operations between 2 registers.  */
+  asm volatile ("vmovdqu %ymm15, %ymm0");
+  asm volatile ("vmovdqu %ymm2, %ymm15");
+  asm volatile ("vmovdqa %ymm15, %ymm0");
 
   /* We have a return statement to deal with
      epilogue in different compilers.  */
@@ -161,11 +195,11 @@ vpbroadcast_test ()
 int
 main ()
 {
-  dyn_buf0 = (char *) malloc(sizeof(char) * 16);
-  dyn_buf1 = (char *) malloc(sizeof(char) * 16);
-  for (int i =0; i < 16; i++)
+  dyn_buf0 = (char *) malloc(sizeof(char) * 32);
+  dyn_buf1 = (char *) malloc(sizeof(char) * 32);
+  for (int i =0; i < 32; i++)
     {
-      dyn_buf0[i] = 0x20 + i;
+      dyn_buf0[i] = 0x20 + (i % 16);
       dyn_buf1[i] = 0;
     }
   /* Zero relevant xmm registers, se we know what to look for.  */

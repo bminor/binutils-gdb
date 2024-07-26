@@ -4886,6 +4886,55 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	}
       break;
 
+    case 0x6f: /* VMOVDQ (U|A)  */
+    case 0x7f: /* VMOVDQ (U|A)  */
+      /* vmovdq instructions have information about source/destination
+	 spread over many places, so this code ended up messier than
+	 I'd like.  */
+      /* The VEX.pp bits identify if the move is aligned or not, but this
+	 doesn't influence the recording so we can ignore it.  */
+      i386_record_modrm (ir);
+      /* The first bit of modrm identifies if both operands of the instruction
+	 are registers (bit = 1) or if one of the operands is memory.  */
+      if (ir->mod & 2)
+	{
+	  if (opcode == 0x6f)
+	    {
+	      /* vex_r will identify the high bit of the destination
+		 register.  Source is identified by ir->rex_b, but that
+		 doesn't matter for recording.  */
+	      record_full_arch_list_add_reg (ir->regcache,
+					     tdep->ymm0_regnum + 8*vex_r + ir->reg);
+	    }
+	  else
+	    {
+	      /* The origin operand is >7 and destination operand is <= 7.
+		 This is special cased because in this one vex_r is used to
+		 identify the high bit of the SOURCE operand, not destination
+		 which would mess the previous expression.  */
+	      record_full_arch_list_add_reg (ir->regcache,
+					     tdep->ymm0_regnum + ir->rm);
+	    }
+	}
+      else
+	{
+	  /* This is the easy branch.  We just need to check the opcode
+	     to see if the source or destination is memory.  */
+	  if (opcode == 0x6f)
+	    {
+	      record_full_arch_list_add_reg (ir->regcache,
+					     tdep->ymm0_regnum
+					      + ir->reg + vex_r * 8);
+	    }
+	  else
+	    {
+	      /* We're writing 256 bits, so 1<<8.  */
+	      ir->ot = 8;
+	      i386_record_lea_modrm (ir);
+	    }
+	}
+      break;
+
     case 0x60:	/* VPUNPCKLBW  */
     case 0x61:	/* VPUNPCKLWD  */
     case 0x62:	/* VPUNPCKLDQ  */

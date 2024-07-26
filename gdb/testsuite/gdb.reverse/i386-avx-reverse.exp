@@ -134,6 +134,34 @@ global decimal
 
 if {[record_full_function "vmov"] == true} {
     # Now execute backwards, checking all instructions.
+    test_one_register "vmovdqa" "ymm0" \
+	"0x1f1e1d1c1b1a19181716151413121110, 0x1f1e1d1c1b1a19181716151413121110" \
+	"from register: "
+    test_one_register "vmovdqu" "ymm15" \
+	"0x1f1e1d1c1b1a19181716151413121110, 0x1f1e1d1c1b1a19181716151413121110" \
+	"from register: "
+    test_one_register "vmovdqu" "ymm0" \
+	"0x2f2e2d2c2b2a29282726252423222120, 0x2f2e2d2c2b2a29282726252423222120" \
+	"from register: "
+
+    test_one_memory "vmovdqu" "dyn_buf1" "0x0 .repeats 32 times" \
+	true "dynamic buffer: "
+    test_one_register "vmovdqu" "ymm0" \
+	"0x1f1e1d1c1b1a19181716151413121110, 0x1f1e1d1c1b1a19181716151413121110" \
+	"dynamic buffer: "
+
+    # Don't check the full buffer because that'd be too long
+    test_one_memory "vmovdqu" "global_buf1" \
+	"0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19" \
+	"global buffer: "
+    test_one_register "vmovdqu" "ymm0" \
+	"0x3f3e3d3c3b3a39383736353433323130, 0x3f3e3d3c3b3a39383736353433323130" \
+	"global buffer: "
+    test_one_memory "vmovdqa" "global_buf1" "0x0 .repeats 32 times"
+    test_one_register "vmovdqa" "ymm15" "0x0, 0x0"
+
+    test_one_memory "vmovdqu" "buf1" "0x0 .repeats 32 times"
+    test_one_register "vmovdqu" "ymm0" "0x2726252423222120, 0x0" "local buffer: "
 
     test_one_register "vmovq" "xmm15" "0x3736353433323130" "reg_reset: "
     test_one_register "vmovq" "xmm15" "0x0"
