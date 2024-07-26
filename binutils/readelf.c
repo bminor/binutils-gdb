@@ -9428,15 +9428,16 @@ display_relocations (Elf_Internal_Shdr *  section,
 	 misleading, since this is not the number of locations relocated, but
 	 the number of words in the compressed RELR format.  So also provide
 	 the number of locations affected.  */
-      if (num_rela == 1)
-	/* This is unlikely, but possible.  */
-	printf (_(" at offset %#" PRIx64
-		  " contains 1 entry which relocates 1 location:\n"),
-		rel_offset);
-      else
-	printf (_(" at offset %#" PRIx64 " contains %" PRIu64
-		  " entries which relocate %" PRIu64 " locations:\n"),
-		rel_offset, num_rela, count_relr_relocations (filedata, section));
+
+      uint64_t num_reloc = count_relr_relocations (filedata, section);
+
+      printf (_(" at offset %#" PRIx64), rel_offset);
+      printf (ngettext (" contains %" PRIu64 " entry which relocates",
+			" contains %" PRIu64 " entries which relocate",
+			num_rela), num_rela);
+      printf (ngettext (" %" PRIu64 " location:\n",
+			" %" PRIu64 " locations:\n",
+			num_reloc), num_reloc);
     }
   else
     {
