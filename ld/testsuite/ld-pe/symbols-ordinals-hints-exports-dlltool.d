@@ -1,6 +1,6 @@
 #source: symbols-ordinals-hints-exports.s
-#dlltool: -d ${srcdir}/${subdir}/symbols-ordinals-hints.def -e exports-dlltool.o
-#ld: -shared exports-dlltool.o
+#dlltool: -d ${srcdir}/${subdir}/symbols-ordinals-hints.def -e tmpdir/exports-dlltool.o
+#ld: -shared tmpdir/exports-dlltool.o
 #objdump: -p
 
 # Rules for Ordinal/Name Pointer Table:

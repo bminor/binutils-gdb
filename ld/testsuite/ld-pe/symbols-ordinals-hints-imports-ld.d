@@ -1,6 +1,6 @@
 #source: symbols-ordinals-hints-exports.s
-#ld: -shared ${srcdir}/${subdir}/symbols-ordinals-hints.def --out-implib libimports-ld.a
-#ld_after_inputfiles: && $AS ${srcdir}/${subdir}/symbols-ordinals-hints-call-imports.s -o call-imports-ld.o && $LD -shared call-imports-ld.o libimports-ld.a -o tmpdir/dump
+#ld: -shared ${srcdir}/${subdir}/symbols-ordinals-hints.def --out-implib tmpdir/libimports-ld.a
+#ld_after_inputfiles: && $AS $ASFLAGS ${srcdir}/${subdir}/symbols-ordinals-hints-call-imports.s -o tmpdir/call-imports-ld.o && $LD -shared tmpdir/call-imports-ld.o tmpdir/libimports-ld.a -o tmpdir/dump
 #objdump: -p
 
 # Rules for Import Tables:

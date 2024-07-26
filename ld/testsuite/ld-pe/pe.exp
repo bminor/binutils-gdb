@@ -145,7 +145,17 @@ run_dump_test "exclude-symbols-embedded-x86_64"
 run_dump_test "exclude-symbols-def-i386"
 run_dump_test "exclude-symbols-def-x86_64"
 
-run_dump_test "symbols-ordinals-hints-exports-ld"
-run_dump_test "symbols-ordinals-hints-exports-dlltool"
-run_dump_test "symbols-ordinals-hints-imports-ld"
-run_dump_test "symbols-ordinals-hints-imports-dlltool"
+if [check_shared_lib_support] {
+    set old_ASFLAGS $ASFLAGS
+    if [is_underscore_target] {
+	append ASFLAGS " --defsym UNDERSCORE=1"
+    }
+    run_dump_test "symbols-ordinals-hints-exports-ld"
+    # no dlltool for these two
+    setup_xfail aarch64-*-* sh-*-*
+    run_dump_test "symbols-ordinals-hints-exports-dlltool"
+    run_dump_test "symbols-ordinals-hints-imports-ld"
+    setup_xfail aarch64-*-* sh-*-*
+    run_dump_test "symbols-ordinals-hints-imports-dlltool"
+    set ASFLAGS $old_ASFLAGS
+}

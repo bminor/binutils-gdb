@@ -1,7 +1,7 @@
 #source: symbols-ordinals-hints-call-imports.s
-#dlltool: -d ${srcdir}/${subdir}/symbols-ordinals-hints.def -l libimports-dlltool.a
+#dlltool: -d ${srcdir}/${subdir}/symbols-ordinals-hints.def -l tmpdir/libimports-dlltool.a
 #ld: -shared
-#ld_after_inputfiles: libimports-dlltool.a
+#ld_after_inputfiles: tmpdir/libimports-dlltool.a
 #objdump: -p
 
 # Rules for Import Tables:
