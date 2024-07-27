@@ -819,6 +819,34 @@ arm_target::low_new_fork (process_info *parent, process_info *child)
     child_lwp_info->wpts_changed[i] = 1;
 }
 
+/* For PID, set the address register of hardware breakpoint pair I to
+   ADDRESS.  */
+
+static void
+sethbpregs_hwbp_address (int pid, int i, unsigned int address)
+{
+  PTRACE_TYPE_ARG3 address_reg = (PTRACE_TYPE_ARG3) ((i << 1) + 1);
+
+  errno = 0;
+
+  if (ptrace (PTRACE_SETHBPREGS, pid, address_reg, &address) < 0)
+    perror_with_name (_("Unexpected error updating breakpoint address"));
+}
+
+/* For PID, set the control register of hardware breakpoint pair I to
+   CONTROL.  */
+
+static void
+sethbpregs_hwbp_control (int pid, int i, arm_hwbp_control_t control)
+{
+  PTRACE_TYPE_ARG3 control_reg = (PTRACE_TYPE_ARG3) ((i << 1) + 2);
+
+  errno = 0;
+
+  if (ptrace (PTRACE_SETHBPREGS, pid, control_reg, &control) < 0)
+    perror_with_name (_("Unexpected error setting breakpoint control"));
+}
+
 /* Called when resuming a thread.
    If the debug regs have changed, update the thread's copies.  */
 void
@@ -834,19 +862,32 @@ arm_target::low_prepare_to_resume (lwp_info *lwp)
   for (i = 0; i < arm_linux_get_hw_breakpoint_count (); i++)
     if (lwp_info->bpts_changed[i])
       {
-	errno = 0;
+	unsigned int address = proc_info->bpts[i].address;
+	arm_hwbp_control_t control = proc_info->bpts[i].control;
 
-	if (arm_hwbp_control_is_enabled (proc_info->bpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid,
-		      (PTRACE_TYPE_ARG3) ((i << 1) + 1),
-		      &proc_info->bpts[i].address) < 0)
-	    perror_with_name ("Unexpected error setting breakpoint address");
-
-	if (arm_hwbp_control_is_initialized (proc_info->bpts[i].control))
-	  if (ptrace (PTRACE_SETHBPREGS, pid,
-		      (PTRACE_TYPE_ARG3) ((i << 1) + 2),
-		      &proc_info->bpts[i].control) < 0)
-	    perror_with_name ("Unexpected error setting breakpoint");
+	if (!arm_hwbp_control_is_initialized (control))
+	  {
+	    /* Nothing to do.  */
+	  }
+	else if (!arm_hwbp_control_is_enabled (control))
+	  {
+	    /* Disable hardware breakpoint, just write the control
+	       register.  */
+	    sethbpregs_hwbp_control (pid, i, control);
+	  }
+	else
+	  {
+	    /* See arm_linux_nat_target::low_prepare_to_resume for detailed
+	       comment.  */
+	    unsigned int aligned_address = address & ~0x7U;
+	    if (aligned_address != address)
+	      {
+		sethbpregs_hwbp_address (pid, i, aligned_address);
+		sethbpregs_hwbp_control (pid, i, control);
+	      }
+	    sethbpregs_hwbp_address (pid, i, address);
+	    sethbpregs_hwbp_control (pid, i, control);
+	  }
 
 	lwp_info->bpts_changed[i] = 0;
       }
