@@ -294,3 +294,40 @@ if {[record_full_function "vpbroadcast"] == true} {
 
 gdb_test "finish" "Run till exit from.*vpbroadcast_test.*" \
     "leaving vpbroadcast"
+
+# Preparation and testing of vzeroupper
+gdb_test_no_output "set \$ymm0.v2_int128 = {0x0, 0x12345}" "set ymm0 for vzeroupper"
+gdb_test_no_output "set \$ymm1.v2_int128 = {0x1f1e1d1c1b1a1918, 0x0}" \
+    "set ymm1 for vzeroupper"
+gdb_test_no_output "set \$ymm2.v2_int128 = {0x0, 0xbeef}" "set ymm2 for vzeroupper"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0x0, 0xcafeface}" "set ymm15 for vpbroadcast"
+if {[record_full_function "vzeroupper"] == true} {
+    # Since vzeroupper needs to save 8 or 16 registers, let's check what was
+    # actually recorded, instead of just undoing an instruction.  Only
+    # really check the values of egisters 0, 1, 2 and 15 because those are
+    # the only ones we're setting.
+    gdb_test "maint print record-instruction" \
+	[multi_line "Register ymm0h changed: 74565" \
+	    "Register ymm1h changed: 0" \
+	    "Register ymm2h changed: 48879" \
+	    "Register ymm3h changed: ${decimal}" \
+	    "Register ymm4h changed: ${decimal}" \
+	    "Register ymm5h changed: ${decimal}" \
+	    "Register ymm6h changed: ${decimal}" \
+	    "Register ymm7h changed: ${decimal}" \
+	    "Register ymm8h changed: ${decimal}" \
+	    "Register ymm9h changed: ${decimal}" \
+	    "Register ymm10h changed: ${decimal}" \
+	    "Register ymm11h changed: ${decimal}" \
+	    "Register ymm12h changed: ${decimal}" \
+	    "Register ymm13h changed: ${decimal}" \
+	    "Register ymm14h changed: ${decimal}" \
+	    "Register ymm15h changed: 3405707982" \
+	    "Register rip changed: \[^\r\n\]+" ] \
+	"verify vzeroupper recording"
+} else {
+    untested "couldn't run vzeroupper tests"
+}
+
+gdb_test "finish" "Run till exit from.*vzeroupper_test.*" \
+    "leaving vzeroupper"

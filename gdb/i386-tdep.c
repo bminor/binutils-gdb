@@ -4964,6 +4964,23 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
       }
       break;
 
+    case 0x77:/* VZEROUPPER  */
+      {
+	int num_regs = tdep->num_ymm_regs;
+	/* This instruction only works on ymm0..15, even if 16..31 are
+	   available.  */
+	if (num_regs > 16)
+	  num_regs = 16;
+	for (int i = 0; i < num_regs; i++)
+	  {
+	    /* We only need to record ymm_h, because the low bits
+	       are not touched.  */
+	    record_full_arch_list_add_reg (ir->regcache,
+					   tdep->ymm0h_regnum + i);
+	  }
+	break;
+      }
+
     default:
       gdb_printf (gdb_stderr,
 		  _("Process record does not support VEX instruction 0x%02x "

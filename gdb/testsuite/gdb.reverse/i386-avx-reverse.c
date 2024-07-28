@@ -193,6 +193,24 @@ vpbroadcast_test ()
 }
 
 int
+vzeroupper_test ()
+{
+  /* start vzeroupper_test.  */
+  /* Using GDB, load this value onto the register, for ease of testing.
+     ymm0.v2_int128  = {0x0, 0x12345}
+     ymm1.v2_int128  = {0x1f1e1d1c1b1a1918, 0x0}
+     ymm2.v2_int128  = {0x0, 0xbeef}
+     ymm15.v2_int128 = {0x0, 0xcafeface}
+     this way it's easy to confirm we're undoing things correctly.  */
+
+  asm volatile ("vzeroupper");
+
+  /* We have a return statement to deal with
+     epilogue in different compilers.  */
+  return 0; /* end vzeroupper_test  */
+}
+
+int
 main ()
 {
   dyn_buf0 = (char *) malloc(sizeof(char) * 32);
@@ -211,5 +229,6 @@ main ()
   vmov_test ();
   vpunpck_test ();
   vpbroadcast_test ();
+  vzeroupper_test ();
   return 0;	/* end of main */
 }
