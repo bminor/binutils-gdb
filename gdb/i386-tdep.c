@@ -4816,6 +4816,76 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 
   switch (opcode)
     {
+    case 0x6e:	/* VMOVD XMM, reg/mem  */
+      /* This is moving from a regular register or memory region into an
+	 XMM register. */
+      i386_record_modrm (ir);
+      /* ModR/M only has the 3 least significant bits of the destination
+	 register, the last one is indicated by VEX.R (stored inverted).  */
+      record_full_arch_list_add_reg (ir->regcache,
+				     tdep->ymm0_regnum
+				       + ir->reg + vex_r * 8);
+      break;
+    case 0x7e:	/* VMOV(D/Q)  */
+      i386_record_modrm (ir);
+      /* Both the intel and AMD manual are wrong about this.  According to
+	 it, the only difference between vmovq and vmovd should be the rex_w
+	 bit, but in empirical testing, it seems that they share this opcode,
+	 and the way to differentiate it here is looking at VEX.PP.  */
+      if (ir->pp == 2)
+	{
+	  /* This is vmovq moving from a regular register or memory
+	     into an XMM register.  As above, VEX.R is the final bit for
+	     destination register.  */
+	  record_full_arch_list_add_reg (ir->regcache,
+					 tdep->ymm0_regnum
+					 + ir->reg + vex_r * 8);
+	}
+      else if (ir->pp == 1)
+	{
+	  /* This is the vmovd version that stores into a regular register
+	     or memory region.  */
+	  /* If ModRM.mod is 11 we are saving into a register.  */
+	  if (ir->mod == 3)
+	    record_full_arch_list_add_reg (ir->regcache, ir->regmap[ir->rm]);
+	  else
+	    {
+	      /* Calculate the size of memory that will be modified
+		 and store it in the form of 1 << ir->ot, since that
+		 is how the function uses it.  In theory, VEX.W is supposed
+		 to indicate the size of the memory. In practice, I only
+		 ever seen it set to 0, and for 16 bytes, 0xD6 opcode
+		 is used.  */
+	      if (vex_w)
+		ir->ot = 4;
+	      else
+		ir->ot = 3;
+
+	      i386_record_lea_modrm (ir);
+	    }
+	}
+      else
+	{
+	  gdb_printf ("Unrecognized VEX.PP value %d at address %s.",
+		      ir->pp, paddress(gdbarch, ir->orig_addr));
+	  return -1;
+	}
+      break;
+    case 0xd6: /* VMOVQ reg/mem XMM  */
+      i386_record_modrm (ir);
+      /* This is the vmovq version that stores into a regular register
+	 or memory region.  */
+      /* If ModRM.mod is 11 we are saving into a register.  */
+      if (ir->mod == 3)
+	record_full_arch_list_add_reg (ir->regcache, ir->regmap[ir->rm]);
+      else
+	{
+	  /* We know that this operation is always 64 bits.  */
+	  ir->ot = 4;
+	  i386_record_lea_modrm (ir);
+	}
+      break;
+
     default:
       gdb_printf (gdb_stderr,
 		  _("Process record does not support VEX instruction 0x%02x "

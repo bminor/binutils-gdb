@@ -632,7 +632,7 @@ record_full_arch_list_add_reg (struct regcache *regcache, int regnum)
 
   rec = record_full_reg_alloc (regcache, regnum);
 
-  regcache->raw_read (regnum, record_full_get_loc (rec));
+  regcache->cooked_read (regnum, record_full_get_loc (rec));
 
   record_full_arch_list_add (rec);
 

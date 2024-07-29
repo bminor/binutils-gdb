@@ -47,7 +47,7 @@ with_timeout_factor 20 {
 	    pass $gdb_test_name
 	}
 	-re -wrap "Process record does not support VEX instruction.*" {
-	    kfail "record/23188" $gdb_test_name
+	    kfail "record/17346" $gdb_test_name
 	}
 	-re -wrap "Process record does not support instruction 0xfae64 at.*" {
 	    kfail "record/25038" $gdb_test_name

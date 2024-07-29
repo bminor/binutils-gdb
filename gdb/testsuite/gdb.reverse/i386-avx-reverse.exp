@@ -1,0 +1,190 @@
+# Copyright 2009-2023 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file is part of the gdb testsuite.
+
+#
+# This test tests some i386 general instructions for reverse execution.
+#
+
+require supports_reverse
+
+if {![istarget "*86*-*linux*"]} {
+    verbose "Skipping i386 reverse tests."
+    return
+}
+
+# TODO: this is the case because I used xmm15 all over the test.
+# Some parts of the test require xmm15 to validate some code paths, but
+# that could be done only on 64bit targets and the rest could use xmm7
+# instead.
+if {![istarget "x86_64-*-*"]} {
+    verbose "avx-reverse requires 64 bit targets"
+    return
+}
+
+standard_testfile
+
+# some targets have leading underscores on assembly symbols.
+set additional_flags [gdb_target_symbol_prefix_flags]
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 [list debug $additional_flags]]} {
+    return -1
+}
+
+# Shorthand to test reversing through one instruction and
+# testing if a register has the expected value.
+# Prefix, if included, should end with a colon and space.
+
+proc test_one_register {insn register value {prefix ""}} {
+    gdb_test "reverse-step" "$insn.*" \
+	"${prefix}reverse-step from $insn to test register $register"
+
+    gdb_test "info register $register" \
+	"$register.*uint128 = $value.*" \
+	"${prefix}verify $register before $insn"
+}
+
+# Shorthand to test reversing through one instruction and
+# testing if a variable has the expected value.
+# Prefix, if used, should end with a colon and space.
+
+proc test_one_memory {insn mem value {dynamic false} {prefix ""}} {
+    gdb_test "reverse-step" "$insn.*" \
+	"${prefix}reverse-step from $insn to test memory $mem"
+
+    # For the dynamic buffer, we have to cast and dereference the pointer
+    set cast ""
+    if {$dynamic == true} {
+	set cast {(char [32]) *}
+    }
+
+    gdb_test "p/x $cast$mem" \
+	".*$value.*" \
+	"${prefix}verify $mem before $insn"
+
+}
+
+# Record the execution for the whole function, and stop at its end
+# to check if we can correctly reconstruct the state.
+# In the source code, the function must be FUNCTION_test, and
+# at the end, it must have a comment in the form:
+# /* end FUNCTION_test */
+# Returns true if the full function could be recorded, false otherwise.
+proc record_full_function {function} {
+    set end [gdb_get_line_number "end ${function}_test "]
+    set start [gdb_get_line_number "start ${function}_test"]
+    gdb_breakpoint $start temporary
+    gdb_breakpoint $end temporary
+    gdb_continue_to_breakpoint "start ${function}_test"
+
+    if [supports_process_record] {
+	# Activate process record/replay.
+	gdb_test_no_output "record" "${function}: turn on process record"
+    }
+
+    # We return early in gdb_test_multiple because the rest of the
+    # function is aborting recording and cleaning up to put us back in
+    # a known location.
+    gdb_test_multiple "continue" "continue to end of ${function}_test" {
+	-re " end ${function}_test .*\r\n$::gdb_prompt $" {
+	    pass $gdb_test_name
+	    return true
+	}
+	-re " Illegal instruction.*\r\n$::gdb_prompt $" {
+	    fail $gdb_test_name
+	}
+	-re "Process record does not support VEX instruction.*" {
+	    fail $gdb_test_name
+	}
+    }
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete failed record history"
+    # If we didn't exit early, the temporary breakpoint at the end of
+    # the function hasn't been hit yet, so we can just continue.
+    gdb_continue_to_breakpoint "end ${function}_test" ".*end ${function}_test.*"
+
+    return false
+}
+
+runto_main
+
+global hex
+global decimal
+
+# Record all the execution for vmov tests first.
+
+if {[record_full_function "vmov"] == true} {
+    # Now execute backwards, checking all instructions.
+
+    test_one_register "vmovq" "xmm15" "0x3736353433323130" "reg_reset: "
+    test_one_register "vmovq" "xmm15" "0x0"
+    test_one_register "vmovd" "xmm15" "0x33323130" "reg_reset: "
+    test_one_register "vmovd" "xmm15" "0x0"
+
+    with_test_prefix buffer_reset {
+	test_one_memory "vmovq" "dyn_buf1" \
+	    "0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x0" true
+	test_one_memory "vmovq" "global_buf1" \
+	    "0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x0"
+	test_one_memory "vmovq" "buf1" \
+	    "0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x0"
+    }
+
+    with_test_prefix dynamic_buffers {
+	test_one_memory "vmovq" "dyn_buf1" "0x20, 0x21, 0x22, 0x23, 0x0" true
+	test_one_register "vmovq" "xmm0" "0x23222120"
+	test_one_memory "vmovd" "dyn_buf1" "0x0 .repeats 32 times" true
+	test_one_register "vmovd" "xmm0" "0x1716151413121110"
+    }
+
+    with_test_prefix global_buffers {
+	test_one_memory "vmovq" "global_buf1" "0x10, 0x11, 0x12, 0x13, 0x0"
+	test_one_register "vmovq" "xmm0" "0x13121110"
+	test_one_memory "vmovd" "global_buf1" "0x0 .repeats 32 times"
+	test_one_register "vmovd" "xmm0" "0x3736353433323130"
+    }
+
+    with_test_prefix local_buffers {
+	test_one_memory "vmovq" "buf1" "0x30, 0x31, 0x32, 0x33, 0x0"
+	test_one_register "vmovq" "xmm0" "0x33323130"
+	test_one_memory "vmovd" "buf1" "0x0 .repeats 32 times"
+	test_one_register "vmovd" "xmm0" "0xbeef"
+    }
+
+    # regular registers don't have uint128 members, so do it manually.
+    with_test_prefix registers {
+	test_one_register "vmovq" "xmm15" "0xbeef" "reset xmm15: "
+
+	test_one_register "vmovq" "xmm15" "0x0" "xmm0 to xmm15: "
+
+	gdb_test "reverse-step" "vmovd %xmm0, %rcx.*" \
+	    "reverse step to check rcx recording"
+	gdb_test "print/x \$rcx" "= 0x0" "rcx was recorded"
+
+	test_one_register "vmovd" "xmm0" "0x0"
+    }
+
+    # Stop recording to get a clean history.
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for vmov_test"
+} else {
+    untested "could not record vmov_test"
+}
+
+# Move to the end of vmov_test to set up next.
+gdb_test "finish" "Run till exit from.*vmov_test.*" "leaving vmov_test"
