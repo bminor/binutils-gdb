@@ -39,11 +39,10 @@ void target_find_description (void);
 
 void target_clear_description (void);
 
-/* Return the current inferior's target description.  This should only
-   be used by gdbarch initialization code; most access should be
-   through an existing gdbarch.  */
+/* Return INF's target description.  This should only be used by gdbarch
+   initialization code; most access should be through an existing gdbarch.  */
 
-const struct target_desc *target_current_description (void);
+const target_desc *target_current_description (inferior *inf);
 
 /* Record architecture-specific functions to call for pseudo-register
    support.  If tdesc_use_registers is called and gdbarch_num_pseudo_regs

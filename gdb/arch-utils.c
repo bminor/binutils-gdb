@@ -595,7 +595,7 @@ gdbarch_update_p (struct gdbarch_info info)
 
   /* Check for the current target description.  */
   if (info.target_desc == NULL)
-    info.target_desc = target_current_description ();
+    info.target_desc = target_current_description (current_inferior ());
 
   new_gdbarch = gdbarch_find_by_info (info);
 
@@ -654,7 +654,7 @@ set_gdbarch_from_file (bfd *abfd)
   struct gdbarch *gdbarch;
 
   info.abfd = abfd;
-  info.target_desc = target_current_description ();
+  info.target_desc = target_current_description (current_inferior ());
   gdbarch = gdbarch_find_by_info (info);
 
   if (gdbarch == NULL)

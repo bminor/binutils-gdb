@@ -541,14 +541,12 @@ target_clear_description (void)
     internal_error (_("Could not remove target-supplied description"));
 }
 
-/* Return the global current target description.  This should only be
-   used by gdbarch initialization code; most access should be through
-   an existing gdbarch.  */
+/* See target-descriptions.h.  */
 
-const struct target_desc *
-target_current_description (void)
+const target_desc *
+target_current_description (inferior *inf)
 {
-  target_desc_info *tdesc_info = &current_inferior ()->tdesc_info;
+  target_desc_info *tdesc_info = &inf->tdesc_info;
 
   if (tdesc_info->fetched)
     return tdesc_info->tdesc;
