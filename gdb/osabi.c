@@ -25,6 +25,7 @@
 #include "gdb_bfd.h"
 
 #include "elf-bfd.h"
+#include "inferior.h"
 
 #ifndef GDB_OSABI_DEFAULT
 #define GDB_OSABI_DEFAULT GDB_OSABI_UNKNOWN
@@ -644,7 +645,7 @@ set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
   /* NOTE: At some point (true multiple architectures) we'll need to be more
      graceful here.  */
   gdbarch_info info;
-  if (! gdbarch_update_p (info))
+  if (!gdbarch_update_p (current_inferior (), info))
     internal_error (_("Updating OS ABI failed."));
 }
 

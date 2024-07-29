@@ -500,7 +500,7 @@ target_find_description (void)
       struct gdbarch_info info;
 
       info.target_desc = tdesc_info->tdesc;
-      if (!gdbarch_update_p (info))
+      if (!gdbarch_update_p (current_inferior (), info))
 	{
 	  warning (_("Architecture rejected target-supplied description"));
 	  tdesc_info->tdesc = nullptr;
@@ -537,7 +537,7 @@ target_clear_description (void)
   tdesc_info->tdesc = nullptr;
 
   gdbarch_info info;
-  if (!gdbarch_update_p (info))
+  if (!gdbarch_update_p (current_inferior (), info))
     internal_error (_("Could not remove target-supplied description"));
 }
 

@@ -316,7 +316,7 @@ extern obstack *gdbarch_obstack (gdbarch *arch);
 
 extern char *gdbarch_obstack_strdup (struct gdbarch *arch, const char *string);
 
-/* Helper function.  Force an update of the current architecture.
+/* Helper function.  Force an update of INF's architecture.
 
    The actual architecture selected is determined by INFO, ``(gdb) set
    architecture'' et.al., the existing architecture and BFD's default
@@ -325,8 +325,7 @@ extern char *gdbarch_obstack_strdup (struct gdbarch *arch, const char *string);
 
    Returns non-zero if the update succeeds.  */
 
-extern int gdbarch_update_p (struct gdbarch_info info);
-
+extern int gdbarch_update_p (inferior *inf, gdbarch_info info);
 
 /* Helper function.  Find an architecture matching info.
 

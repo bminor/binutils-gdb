@@ -896,7 +896,7 @@ set_mips64_transfers_32bit_regs (const char *args, int from_tty,
   /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
      instead of relying on globals.  Doing that would let generic code
      handle the search for this specific architecture.  */
-  if (!gdbarch_update_p (info))
+  if (!gdbarch_update_p (current_inferior (), info))
     {
       mips64_transfers_32bit_regs_p = 0;
       error (_("32-bit compatibility mode not supported"));
@@ -6968,7 +6968,7 @@ set_mipsfpu_single_command (const char *args, int from_tty)
   /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
      instead of relying on globals.  Doing that would let generic code
      handle the search for this specific architecture.  */
-  if (!gdbarch_update_p (info))
+  if (!gdbarch_update_p (current_inferior (), info))
     internal_error (_("set mipsfpu failed"));
 }
 
@@ -6981,7 +6981,7 @@ set_mipsfpu_double_command (const char *args, int from_tty)
   /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
      instead of relying on globals.  Doing that would let generic code
      handle the search for this specific architecture.  */
-  if (!gdbarch_update_p (info))
+  if (!gdbarch_update_p (current_inferior (), info))
     internal_error (_("set mipsfpu failed"));
 }
 
@@ -6994,7 +6994,7 @@ set_mipsfpu_none_command (const char *args, int from_tty)
   /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
      instead of relying on globals.  Doing that would let generic code
      handle the search for this specific architecture.  */
-  if (!gdbarch_update_p (info))
+  if (!gdbarch_update_p (current_inferior (), info))
     internal_error (_("set mipsfpu failed"));
 }
 
@@ -8840,7 +8840,7 @@ mips_abi_update (const char *ignore_args,
 
   /* Force the architecture to update, and (if it's a MIPS architecture)
      mips_gdbarch_init will take care of the rest.  */
-  gdbarch_update_p (info);
+  gdbarch_update_p (current_inferior (), info);
 }
 
 /* Print out which MIPS ABI is in use.  */

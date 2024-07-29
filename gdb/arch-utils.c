@@ -405,13 +405,13 @@ set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
   if (set_endian_string == endian_auto)
     {
       target_byte_order_user = BFD_ENDIAN_UNKNOWN;
-      if (! gdbarch_update_p (info))
+      if (!gdbarch_update_p (current_inferior (), info))
 	internal_error (_("set_endian: architecture update failed"));
     }
   else if (set_endian_string == endian_little)
     {
       info.byte_order = BFD_ENDIAN_LITTLE;
-      if (! gdbarch_update_p (info))
+      if (!gdbarch_update_p (current_inferior (), info))
 	gdb_printf (gdb_stderr,
 		    _("Little endian target not supported by GDB\n"));
       else
@@ -420,7 +420,7 @@ set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
   else if (set_endian_string == endian_big)
     {
       info.byte_order = BFD_ENDIAN_BIG;
-      if (! gdbarch_update_p (info))
+      if (!gdbarch_update_p (current_inferior (), info))
 	gdb_printf (gdb_stderr,
 		    _("Big endian target not supported by GDB\n"));
       else
@@ -562,7 +562,7 @@ set_architecture (const char *ignore_args,
   if (strcmp (set_architecture_string, "auto") == 0)
     {
       target_architecture_user = NULL;
-      if (!gdbarch_update_p (info))
+      if (!gdbarch_update_p (current_inferior (), info))
 	internal_error (_("could not select an architecture automatically"));
     }
   else
@@ -570,7 +570,7 @@ set_architecture (const char *ignore_args,
       info.bfd_arch_info = bfd_scan_arch (set_architecture_string);
       if (info.bfd_arch_info == NULL)
 	internal_error (_("set_architecture: bfd_scan_arch failed"));
-      if (gdbarch_update_p (info))
+      if (gdbarch_update_p (current_inferior (), info))
 	target_architecture_user = info.bfd_arch_info;
       else
 	gdb_printf (gdb_stderr,
@@ -580,22 +580,23 @@ set_architecture (const char *ignore_args,
   show_architecture (gdb_stdout, from_tty, NULL, NULL);
 }
 
-/* Try to select a global architecture that matches "info".  Return
-   non-zero if the attempt succeeds.  */
+/* See arch-utils.h.  */
+
 int
-gdbarch_update_p (struct gdbarch_info info)
+gdbarch_update_p (inferior *inf, struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
 
   /* Check for the current file.  */
   if (info.abfd == NULL)
-    info.abfd = current_program_space->exec_bfd ();
+    info.abfd = inf->pspace->exec_bfd ();
+
   if (info.abfd == NULL)
-    info.abfd = current_program_space->core_bfd ();
+    info.abfd = inf->pspace->core_bfd ();
 
   /* Check for the current target description.  */
   if (info.target_desc == NULL)
-    info.target_desc = target_current_description (current_inferior ());
+    info.target_desc = target_current_description (inf);
 
   new_gdbarch = gdbarch_find_by_info (info);
 
@@ -610,7 +611,7 @@ gdbarch_update_p (struct gdbarch_info info)
 
   /* If it is the same old architecture, accept the request (but don't
      swap anything).  */
-  if (new_gdbarch == current_inferior ()->arch ())
+  if (new_gdbarch == inf->arch ())
     {
       if (gdbarch_debug)
 	gdb_printf (gdb_stdlog, "gdbarch_update_p: "
@@ -627,7 +628,7 @@ gdbarch_update_p (struct gdbarch_info info)
 		host_address_to_string (new_gdbarch),
 		gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
 
-  current_inferior ()->set_arch (new_gdbarch);
+  inf->set_arch (new_gdbarch);
 
   return 1;
 }
@@ -752,7 +753,7 @@ initialize_current_architecture (void)
   info.byte_order = default_byte_order;
   info.byte_order_for_code = info.byte_order;
 
-  if (! gdbarch_update_p (info))
+  if (!gdbarch_update_p (current_inferior (), info))
     internal_error (_("initialize_current_architecture: Selection of "
 		      "initial architecture failed"));
 

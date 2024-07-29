@@ -9504,7 +9504,7 @@ arm_update_current_architecture (void)
 
   /* Update the architecture.  */
   gdbarch_info info;
-  if (!gdbarch_update_p (info))
+  if (!gdbarch_update_p (current_inferior (), info))
     internal_error (_("could not update architecture"));
 }
 
