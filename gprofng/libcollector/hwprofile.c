@@ -216,13 +216,13 @@ open_experiment (const char *exp)
 	  params += 2;
 	  break;
 	}
-      params = CALL_UTIL (strchr)(params, ';');
+      params = __collector_strchr (params, ';');
       if (params)
 	params++;
     }
   if (params == NULL)  /* HWC profiling not specified */
     return COL_ERROR_HWCINIT;
-  char *s = CALL_UTIL (strchr)(params, (int) ';');
+  char *s = __collector_strchr (params, (int) ';');
   int sz = s ? s - params : CALL_UTIL (strlen)(params);
   char *defstring = (char*) alloca (sz + 1);
   CALL_UTIL (strlcpy)(defstring, params, sz + 1);
