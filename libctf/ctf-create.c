@@ -258,10 +258,10 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
   dtd->dtd_vlen_alloc = 0;
 
   if (dtd->dtd_data.ctt_name
-      && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL
-      && LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
+      && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL)
     {
-      ctf_dynhash_remove (ctf_name_table (fp, name_kind), name);
+      if (LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
+	ctf_dynhash_remove (ctf_name_table (fp, name_kind), name);
       ctf_str_remove_ref (fp, name, &dtd->dtd_data.ctt_name);
     }
 
