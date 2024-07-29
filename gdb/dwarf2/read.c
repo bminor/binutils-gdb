@@ -863,9 +863,10 @@ static struct type *read_type_die_1 (struct die_info *, struct dwarf2_cu *);
 
 static const char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
 
-static char *typename_concat (struct obstack *obs, const char *prefix,
-			      const char *suffix, int physname,
-			      struct dwarf2_cu *cu);
+static gdb::unique_xmalloc_ptr<char> typename_concat (const char *prefix,
+						      const char *suffix,
+						      int physname,
+						      struct dwarf2_cu *cu);
 
 static void read_file_scope (struct die_info *, struct dwarf2_cu *);
 
@@ -6673,7 +6674,7 @@ dwarf2_compute_name (const char *name,
 	  if (*prefix != '\0')
 	    {
 	      gdb::unique_xmalloc_ptr<char> prefixed_name
-		(typename_concat (NULL, prefix, name, physname, cu));
+		= typename_concat (prefix, name, physname, cu);
 
 	      buf.puts (prefixed_name.get ());
 	    }
@@ -13986,9 +13987,12 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
   /* Now build the name of the current namespace.  */
 
   previous_prefix = determine_prefix (die, cu);
+  gdb::unique_xmalloc_ptr<char> name_storage;
   if (previous_prefix[0] != '\0')
-    name = typename_concat (&objfile->objfile_obstack,
-			    previous_prefix, name, 0, cu);
+    {
+      name_storage = typename_concat (previous_prefix, name, 0, cu);
+      name = name_storage.get ();
+    }
 
   /* Create the type.  */
   type = type_allocator (objfile, cu->lang ()).new_type (TYPE_CODE_NAMESPACE,
@@ -19998,17 +20002,15 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
       }
 }
 
-/* Return a newly-allocated string formed by concatenating PREFIX and SUFFIX
-   with appropriate separator.  If PREFIX or SUFFIX is NULL or empty, then
-   simply copy the SUFFIX or PREFIX, respectively.  If OBS is non-null, perform
-   an obconcat, otherwise allocate storage for the result.  The CU argument is
-   used to determine the language and hence, the appropriate separator.  */
+/* Return a newly-allocated string formed by concatenating PREFIX and
+   SUFFIX with appropriate separator.  If PREFIX or SUFFIX is NULL or
+   empty, then simply copy the SUFFIX or PREFIX, respectively.  The CU
+   argument is used to determine the language and hence, the
+   appropriate separator.  */
 
-#define MAX_SEP_LEN 7  /* strlen ("__") + strlen ("_MOD_")  */
-
-static char *
-typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
-		 int physname, struct dwarf2_cu *cu)
+static gdb::unique_xmalloc_ptr<char>
+typename_concat (const char *prefix, const char *suffix, int physname,
+		 struct dwarf2_cu *cu)
 {
   const char *lead = "";
   const char *sep;
@@ -20044,23 +20046,8 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
   if (suffix == NULL)
     suffix = "";
 
-  if (obs == NULL)
-    {
-      char *retval
-	= ((char *)
-	   xmalloc (strlen (prefix) + MAX_SEP_LEN + strlen (suffix) + 1));
-
-      strcpy (retval, lead);
-      strcat (retval, prefix);
-      strcat (retval, sep);
-      strcat (retval, suffix);
-      return retval;
-    }
-  else
-    {
-      /* We have an obstack.  */
-      return obconcat (obs, lead, prefix, sep, suffix, (char *) NULL);
-    }
+  return gdb::unique_xmalloc_ptr<char> (concat (lead, prefix, sep, suffix,
+						nullptr));
 }
 
 /* Return a generic name for a DW_TAG_template_type_param or
