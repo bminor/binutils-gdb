@@ -1838,6 +1838,9 @@ Dwp_output_file::finalize()
 {
   unsigned char* buf;
 
+  if (this->fd_ == NULL)
+    return;
+
   // Write the accumulated output sections.
   for (unsigned int i = 0; i < this->sections_.size(); i++)
     {
@@ -1919,11 +1922,8 @@ Dwp_output_file::finalize()
   this->write_ehdr();
 
   // Close the file.
-  if (this->fd_ != NULL)
-    {
-      if (::fclose(this->fd_) != 0)
-	gold_fatal(_("%s: %s"), this->name_, strerror(errno));
-    }
+  if (::fclose(this->fd_) != 0)
+    gold_fatal(_("%s: %s"), this->name_, strerror(errno));
   this->fd_ = NULL;
 }
 
