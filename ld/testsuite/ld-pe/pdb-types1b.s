@@ -593,7 +593,7 @@
 
 /* Type 102a, virtual function table */
 .vftable1:
-.short .types_end - .vftable1 - 2
+.short .fieldlist12 - .vftable1 - 2
 .short LF_VFTABLE
 .long 0x1029 /* type */
 .long 0 /* base vftable */
@@ -605,6 +605,24 @@
 .asciz "AddRef"
 .asciz "Release"
 .vftable1_names_end:
+.byte 0xf1 /* padding */
+
+/* Type 102b, empty LF_FIELDLIST */
+.fieldlist12:
+.short .struct7 - .fieldlist12 - 2
+.short LF_FIELDLIST
+
+/* Type 102c, empty struct */
+.struct7:
+.short .types_end - .struct7 - 2
+.short LF_STRUCTURE
+.short 0 /* no. members */
+.short 0 /* property */
+.long 0x102b /* field list */
+.long 0 /* type derived from */
+.long 0 /* type of vshape table */
+.short 1 /* size */
+.asciz "empty_struct" /* name */
 .byte 0xf1 /* padding */
 
 .types_end:

@@ -3582,7 +3582,7 @@ handle_debugt_section (asection *s, bfd *mod, struct types *types,
       size = bfd_getl16 (data + off);
       off += sizeof (uint16_t);
 
-      if (size + off > s->size || size <= sizeof (uint16_t))
+      if (size + off > s->size || size < sizeof (uint16_t))
 	{
 	  free (data);
 	  bfd_set_error (bfd_error_bad_value);
