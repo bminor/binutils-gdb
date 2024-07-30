@@ -564,14 +564,17 @@ new_macro_definition (macro_table *t, macro_kind kind,
       d->argc = argv.size ();
 
       /* Bcache all the arguments.  */
-      std::vector<const char *> cached_argv;
+      if (d->argc > 0)
+	{
+	  std::vector<const char *> cached_argv;
 
-      for (const auto &arg : argv)
-	cached_argv.push_back (macro_bcache_str (t, arg.c_str ()));
+	  for (const auto &arg : argv)
+	    cached_argv.push_back (macro_bcache_str (t, arg.c_str ()));
 
-      /* Now bcache the array of argument pointers itself.  */
-      d->argv = macro_bcache (t, cached_argv.data (),
-			      cached_argv.size () * sizeof (const char *));
+	  /* Now bcache the array of argument pointers itself.  */
+	  d->argv = macro_bcache (t, cached_argv.data (),
+				  cached_argv.size () * sizeof (const char *));
+	}
     }
   else
     d->argc = special_kind;
