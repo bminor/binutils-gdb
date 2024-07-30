@@ -264,24 +264,25 @@ struct block : public allocate_on_obstack<block>
     return sup->is_global_block ();
   }
 
-  /* Return the static block associated with block.  */
+  /* Return the global block associated with block.  */
 
-  const struct block *global_block () const;
+  const struct global_block *global_block () const;
 
   /* Return true if this block is a global block.  */
 
   bool is_global_block () const
   { return superblock () == nullptr; }
 
+  /* Return this block as a global_block.  This block must be a global
+     block.  */
+  struct global_block *as_global_block ();
+  const struct global_block *as_global_block () const;
+
   /* Return the function block for this block.  Returns nullptr if
      there is no enclosing function, i.e., if this block is a static
      or global block.  */
 
   const struct block *function_block () const;
-
-  /* Set the compunit of this block, which must be a global block.  */
-
-  void set_compunit_symtab (struct compunit_symtab *);
 
   /* Return a property to evaluate the static link associated to this
      block.
@@ -346,13 +347,31 @@ private:
 };
 
 /* The global block is singled out so that we can provide a back-link
-   to the compunit symtab.  */
+   to the compunit.  */
 
 struct global_block : public block
 {
-  /* This holds a pointer to the compunit symtab holding this block.  */
+  /* Set the compunit of this global block.
 
-  struct compunit_symtab *compunit_symtab = nullptr;
+     The compunit must not have been set previously.  */
+  void set_compunit (compunit_symtab *cu)
+  {
+    gdb_assert (m_compunit == nullptr);
+    m_compunit = cu;
+  }
+
+  /* Return the compunit of this global block.
+
+     The compunit must have been set previously.  */
+  compunit_symtab *compunit () const
+  {
+    gdb_assert (m_compunit != nullptr);
+    return m_compunit;
+  }
+
+private:
+  /* This holds a pointer to the compunit holding this block.  */
+  compunit_symtab *m_compunit = nullptr;
 };
 
 struct blockvector
@@ -394,12 +413,15 @@ struct blockvector
   { return m_num_blocks; }
 
   /* Return the global block of this blockvector.  */
-  struct block *global_block ()
-  { return this->block (GLOBAL_BLOCK); }
+  struct global_block *global_block ()
+  { return static_cast<struct global_block *> (this->block (GLOBAL_BLOCK)); }
 
   /* Const version of the above.  */
-  const struct block *global_block () const
-  { return this->block (GLOBAL_BLOCK); }
+  const struct global_block *global_block () const
+  {
+    return static_cast<const struct global_block *>
+      (this->block (GLOBAL_BLOCK));
+  }
 
   /* Return the static block of this blockvector.  */
   struct block *static_block ()

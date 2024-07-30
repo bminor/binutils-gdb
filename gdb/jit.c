@@ -613,6 +613,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 	new_block = new (&objfile->objfile_obstack) global_block;
       else
 	new_block = new (&objfile->objfile_obstack) block;
+
       new_block->set_multidict
 	(mdict_create_linear (&objfile->objfile_obstack, NULL));
       new_block->set_superblock (block_iter);
@@ -624,7 +625,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       bv->set_block (i, new_block);
 
       if (i == GLOBAL_BLOCK)
-	new_block->set_compunit_symtab (cust);
+	new_block->as_global_block ()->set_compunit (cust);
     }
 
   /* Fill up the superblock fields for the real blocks, using the

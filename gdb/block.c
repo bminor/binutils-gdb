@@ -41,13 +41,10 @@ struct block_namespace_info : public allocate_on_obstack<block_namespace_info>
 struct objfile *
 block::objfile () const
 {
-  const struct global_block *global_block;
-
   if (function () != nullptr)
     return function ()->objfile ();
 
-  global_block = (struct global_block *) this->global_block ();
-  return global_block->compunit_symtab->objfile ();
+  return this->global_block ()->compunit ()->objfile ();
 }
 
 /* See block.  */
@@ -364,7 +361,7 @@ block::static_block () const
 
 /* See block.h.  */
 
-const struct block *
+const struct global_block *
 block::global_block () const
 {
   const block *block = this;
@@ -372,7 +369,27 @@ block::global_block () const
   while (block->superblock () != NULL)
     block = block->superblock ();
 
-  return block;
+  return block->as_global_block ();
+}
+
+/* See block.h.  */
+
+struct global_block *
+block::as_global_block ()
+{
+  gdb_assert (this->is_global_block ());
+
+  return static_cast<struct global_block *>(this);
+}
+
+/* See block.h.  */
+
+const struct global_block *
+block::as_global_block () const
+{
+  gdb_assert (this->is_global_block ());
+
+  return static_cast<const struct global_block *>(this);
 }
 
 /* See block.h.  */
@@ -390,19 +407,6 @@ block::function_block () const
 
 /* See block.h.  */
 
-void
-block::set_compunit_symtab (struct compunit_symtab *cu)
-{
-  struct global_block *gb;
-
-  gdb_assert (superblock () == NULL);
-  gb = (struct global_block *) this;
-  gdb_assert (gb->compunit_symtab == NULL);
-  gb->compunit_symtab = cu;
-}
-
-/* See block.h.  */
-
 struct dynamic_prop *
 block::static_link () const
 {
@@ -416,21 +420,6 @@ block::static_link () const
   return (struct dynamic_prop *) objfile_lookup_static_link (objfile, this);
 }
 
-/* Return the compunit of the global block.  */
-
-static struct compunit_symtab *
-get_block_compunit_symtab (const struct block *block)
-{
-  struct global_block *gb;
-
-  gdb_assert (block->superblock () == NULL);
-  gb = (struct global_block *) block;
-  gdb_assert (gb->compunit_symtab != NULL);
-  return gb->compunit_symtab;
-}
-
-
-
 /* Initialize a block iterator, either to iterate over a single block,
    or, for static and global blocks, all the included symtabs as
    well.  */
@@ -441,29 +430,25 @@ initialize_block_iterator (const struct block *block,
 			   const lookup_name_info *name)
 {
   enum block_enum which;
-  struct compunit_symtab *cu;
 
   iter->idx = -1;
   iter->name = name;
 
-  if (block->superblock () == NULL)
-    {
-      which = GLOBAL_BLOCK;
-      cu = get_block_compunit_symtab (block);
-    }
-  else if (block->superblock ()->superblock () == NULL)
-    {
-      which = STATIC_BLOCK;
-      cu = get_block_compunit_symtab (block->superblock ());
-    }
+  if (block->is_global_block ())
+    which = GLOBAL_BLOCK;
+  else if (block->is_static_block ())
+    which = STATIC_BLOCK;
   else
     {
       iter->d.block = block;
+
       /* A signal value meaning that we're iterating over a single
 	 block.  */
       iter->which = FIRST_LOCAL_BLOCK;
       return;
     }
+
+  compunit_symtab *cu = block->global_block ()->compunit ();
 
   /* If this is an included symtab, find the canonical includer and
      use it instead.  */
