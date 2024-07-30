@@ -41444,7 +41444,8 @@ This command is useful for debugging the agent version of dynamic
 printf (@pxref{Dynamic Printf}).
 
 @kindex maint info breakpoints
-@item @anchor{maint info breakpoints}maint info breakpoints
+@anchor{maint info breakpoints}
+@item maint info breakpoints
 Using the same format as @samp{info breakpoints}, display both the
 breakpoints you've set explicitly, and those @value{GDBN} is using for
 internal purposes.  Internal breakpoints are shown with negative
