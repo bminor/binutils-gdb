@@ -33,27 +33,14 @@ proc at_least_gcc_version { major minor } {
 	return 0
     }
     # Filter out -Wl, options.
-    regsub -all -- "-Wl,\[^ ^\t\]+" $CC_FOR_TARGET "" cc_cmd
-    set state [remote_exec host $cc_cmd --version]
+    regsub -all -- {-Wl,[^ \t]+} $CC_FOR_TARGET {} cc_cmd
+    set prog "\"#if $major < __GNUC__ + ($minor <= __GNUC_MINOR__)\nyes\n#endif\""
+    set cmd "echo $prog | $cc_cmd -E -"
+    set state [remote_exec host [concat sh -c [list "$cmd 2>/dev/null"]]]
     if { [lindex $state 0] != 0 } {
 	return 0;
     }
-    set tmp "[lindex $state 1]\n"
-    # Look for (eg) 4.6.1 in the version output.
-    set ver_re "\[^\\.0-9\]+(\[1-9\]\[0-9\]*)\\.(\[0-9\]+)(?:\\.\[0-9\]+)?"
-    regexp $ver_re $tmp fred maj min
-    verbose "gcc version: $tmp"
-    if { ![info exists maj] || ![info exists min] } then {
-	perror "can't decipher gcc version number, fix the framework!"
-	return 0
-    }
-    verbose "major gcc version is $maj, want at least $major"
-    if { $maj == $major } then {
-	verbose "minor gcc version is $min, want at least $minor"
-	return [expr $min >= $minor]
-    } else {
-	return [expr $maj > $major]
-    }
+    return [regexp {(?x)yes} [lindex $state 1]]
 }
 
 # Extract and print the version number of ld.
