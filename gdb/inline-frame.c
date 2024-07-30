@@ -35,9 +35,9 @@
    keep our own list.  */
 struct inline_state
 {
-  inline_state (thread_info *thread_, int skipped_frames_, CORE_ADDR saved_pc_,
+  inline_state (thread_info *thread_, CORE_ADDR saved_pc_,
 		std::vector<symbol *> &&skipped_symbols_)
-    : thread (thread_), skipped_frames (skipped_frames_), saved_pc (saved_pc_),
+    : thread (thread_), saved_pc (saved_pc_),
       skipped_symbols (std::move (skipped_symbols_))
   {}
 
@@ -45,19 +45,14 @@ struct inline_state
      stopped thread.  */
   thread_info *thread;
 
-  /* The number of inlined functions we are skipping.  Each of these
-     functions can be stepped in to.  */
-  int skipped_frames;
-
-  /* Only valid if SKIPPED_FRAMES is non-zero.  This is the PC used
-     when calculating SKIPPED_FRAMES; used to check whether we have
+  /* Only valid if SKIPPED_SYMBOLS is not empty.  This is the PC used
+     when calculating SKIPPED_SYMBOLS; used to check whether we have
      moved to a new location by user request.  If so, we invalidate
      any skipped frames.  */
   CORE_ADDR saved_pc;
 
-  /* Only valid if SKIPPED_FRAMES is non-zero.  This is the list of all
-     function symbols that have been skipped, from inner most to outer
-     most.  It is used to find the call site of the current frame.  */
+  /* The list of all function symbols that have been skipped, from inner most
+     to outer most.  It is used to find the call site of the current frame.  */
   std::vector<struct symbol *> skipped_symbols;
 };
 
@@ -247,10 +242,12 @@ inline_frame_sniffer (const struct frame_unwind *self,
   /* If this is the topmost frame, or all frames above us are inlined,
      then check whether we were requested to skip some frames (so they
      can be stepped into later).  */
-  if (state != NULL && state->skipped_frames > 0 && next_frame == NULL)
+  if (state != nullptr
+      && !state->skipped_symbols.empty ()
+      && next_frame == nullptr)
     {
-      gdb_assert (depth >= state->skipped_frames);
-      depth -= state->skipped_frames;
+      gdb_assert (depth >= state->skipped_symbols.size ());
+      depth -= state->skipped_symbols.size ();
     }
 
   /* If all the inlined functions here already have frames, then pass
@@ -343,7 +340,6 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
 {
   const struct block *frame_block, *cur_block;
   std::vector<struct symbol *> skipped_syms;
-  int skip_count = 0;
 
   /* This function is called right after reinitializing the frame
      cache.  We try not to do more unwinding than absolutely
@@ -369,7 +365,6 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
 		  if (stopped_by_user_bp_inline_frame (cur_block, stop_chain))
 		    break;
 
-		  skip_count++;
 		  skipped_syms.push_back (cur_block->function ());
 		}
 	      else
@@ -383,11 +378,11 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
     }
 
   gdb_assert (find_inline_frame_state (thread) == NULL);
-  inline_states.emplace_back (thread, skip_count, this_pc,
-			      std::move (skipped_syms));
 
-  if (skip_count != 0)
+  if (!skipped_syms.empty ())
     reinit_frame_cache ();
+
+  inline_states.emplace_back (thread, this_pc, std::move (skipped_syms));
 }
 
 /* Step into an inlined function by unhiding it.  */
@@ -397,8 +392,10 @@ step_into_inline_frame (thread_info *thread)
 {
   inline_state *state = find_inline_frame_state (thread);
 
-  gdb_assert (state != NULL && state->skipped_frames > 0);
-  state->skipped_frames--;
+  gdb_assert (state != nullptr);
+  gdb_assert (!state->skipped_symbols.empty ());
+
+  state->skipped_symbols.pop_back ();
   reinit_frame_cache ();
 }
 
@@ -413,7 +410,7 @@ inline_skipped_frames (thread_info *thread)
   if (state == NULL)
     return 0;
   else
-    return state->skipped_frames;
+    return state->skipped_symbols.size ();
 }
 
 /* If one or more inlined functions are hidden, return the symbol for
@@ -426,13 +423,9 @@ inline_skipped_symbol (thread_info *thread)
   gdb_assert (state != NULL);
 
   /* This should only be called when we are skipping at least one frame,
-     hence SKIPPED_FRAMES will be greater than zero when we get here.
-     We initialise SKIPPED_FRAMES at the same time as we build
-     SKIPPED_SYMBOLS, hence it should be true that SKIPPED_FRAMES never
-     indexes outside of the SKIPPED_SYMBOLS vector.  */
-  gdb_assert (state->skipped_frames > 0);
-  gdb_assert (state->skipped_frames <= state->skipped_symbols.size ());
-  return state->skipped_symbols[state->skipped_frames - 1];
+     hence SKIPPED_SYMBOLS will have at least one item when we get here.  */
+  gdb_assert (!state->skipped_symbols.empty ());
+  return state->skipped_symbols.back ();
 }
 
 /* Return the number of functions inlined into THIS_FRAME.  Some of
