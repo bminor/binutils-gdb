@@ -785,7 +785,7 @@ ctf_archive_count (const ctf_archive_t *wrapper)
   if (!wrapper->ctfi_is_archive)
     return 1;
 
-  return wrapper->ctfi_archive->ctfa_ndicts;
+  return le64toh (wrapper->ctfi_archive->ctfa_ndicts);
 }
 
 /* Look up a symbol in an archive by name or index (if the name is set, a lookup
