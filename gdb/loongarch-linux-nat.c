@@ -18,6 +18,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "cli/cli-cmds.h"
 #include "elf/common.h"
 #include "gregset.h"
 #include "inferior.h"
@@ -765,4 +766,19 @@ _initialize_loongarch_linux_nat ()
 {
   linux_target = &the_loongarch_linux_nat_target;
   add_inf_child_target (&the_loongarch_linux_nat_target);
+
+  /* Add a maintenance command to enable printing the LoongArch internal
+     debug registers mirror variables.  */
+  add_setshow_boolean_cmd ("show-debug-regs", class_maintenance,
+			   &show_debug_regs, _("\
+Set whether to show the LoongArch debug registers state."), _("\
+Show whether to show the LoongArch debug registers state."), _("\
+Use \"on\" to enable, \"off\" to disable.\n\
+If enabled, the debug registers values are shown when GDB inserts\n\
+or removes a hardware breakpoint or watchpoint, and when the inferior\n\
+triggers a breakpoint or watchpoint."),
+			   NULL,
+			   NULL,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 }
