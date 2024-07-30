@@ -746,6 +746,7 @@ ALL_64_TARGET_OBS = \
 	amd64-windows-tdep.o \
 	arch/aarch64.o \
 	arch/aarch64-insn.o \
+	arch/aarch64-mte.o \
 	arch/aarch64-mte-linux.o \
 	arch/aarch64-scalable-linux.o \
 	arch/amd64-linux-tdesc.o \
@@ -1551,6 +1552,7 @@ HFILES_NO_SRCDIR = \
 	arch/aarch32.h \
 	arch/aarch64.h \
 	arch/aarch64-insn.h \
+	arch/aarch64-mte.h \
 	arch/aarch64-mte-linux.h \
 	arch/aarch64-scalable-linux.h \
 	arch/amd64-linux-tdesc.h \
@@ -1664,6 +1666,7 @@ ALLDEPFILES = \
 	arch/aarch32.c \
 	arch/aarch64.c \
 	arch/aarch64-insn.c \
+	arch/aarch64-mte.c \
 	arch/aarch64-mte-linux.c \
 	arch/aarch64-scalable-linux.c \
 	arch/amd64.c \

@@ -59,7 +59,8 @@ amd64_tobjs="ravenscar-thread.o amd64-ravenscar-thread.o \
 case "${targ}" in
 aarch64*-*-*)
 	cpu_obs="aarch32-tdep.o aarch64-tdep.o arch/aarch32.o \
-		 arch/aarch64-insn.o arch/aarch64.o  ravenscar-thread.o \
+		 arch/aarch64-insn.o arch/aarch64.o arch/aarch64-mte.o \
+		 ravenscar-thread.o \
 		 aarch64-ravenscar-thread.o";;
 
 alpha*-*-*)

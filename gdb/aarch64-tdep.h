@@ -203,4 +203,6 @@ void aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 
 bool aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch);
 
+std::optional<CORE_ADDR> aarch64_mte_get_atag (CORE_ADDR address);
+
 #endif /* aarch64-tdep.h */

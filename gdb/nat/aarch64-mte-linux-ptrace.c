@@ -22,6 +22,7 @@
 #include "linux-ptrace.h"
 
 #include "arch/aarch64.h"
+#include "arch/aarch64-mte.h"
 #include "arch/aarch64-mte-linux.h"
 #include "nat/aarch64-linux.h"
 #include "nat/aarch64-mte-linux-ptrace.h"

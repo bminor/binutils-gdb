@@ -17,6 +17,9 @@
   This may cause breakage when using an incompatible libc, like uclibc or
   newlib, or an older glibc.
 
+* MTE (Memory Tagging Extension) debugging is now supported on AArch64 baremetal
+  targets.
+
 *** Changes in GDB 15
 
 * The MPX commands "show/set mpx bound" have been deprecated, as Intel

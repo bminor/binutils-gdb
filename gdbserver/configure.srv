@@ -48,6 +48,7 @@ case "${gdbserver_host}" in
 			srv_tgtobj="$srv_tgtobj nat/aarch64-linux.o"
 			srv_tgtobj="$srv_tgtobj arch/aarch64-insn.o"
 			srv_tgtobj="$srv_tgtobj arch/aarch64.o"
+			srv_tgtobj="$srv_tgtobj arch/aarch64-mte.o"
 			srv_tgtobj="$srv_tgtobj arch/aarch64-mte-linux.o"
 			srv_tgtobj="$srv_tgtobj arch/aarch64-scalable-linux.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch64-tdesc.o"
