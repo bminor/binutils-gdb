@@ -1728,16 +1728,15 @@ pass_in_v (struct gdbarch *gdbarch,
     {
       int regnum = AARCH64_V0_REGNUM + info->nsrn;
       /* Enough space for a full vector register.  */
-      gdb_byte reg[register_size (gdbarch, regnum)];
-      gdb_assert (len <= sizeof (reg));
+      gdb::byte_vector reg (register_size (gdbarch, regnum), 0);
+      gdb_assert (len <= reg.size ());
 
       info->argnum++;
       info->nsrn++;
 
-      memset (reg, 0, sizeof (reg));
       /* PCS C.1, the argument is allocated to the least significant
 	 bits of V register.  */
-      memcpy (reg, buf, len);
+      memcpy (reg.data (), buf, len);
       regcache->cooked_write (regnum, reg);
 
       aarch64_debug_printf ("arg %d in %s", info->argnum,
@@ -2544,8 +2543,8 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	{
 	  int regno = AARCH64_V0_REGNUM + i;
 	  /* Enough space for a full vector register.  */
-	  gdb_byte buf[register_size (gdbarch, regno)];
-	  gdb_assert (len <= sizeof (buf));
+	  gdb::byte_vector buf (register_size (gdbarch, regno));
+	  gdb_assert (len <= buf.size ());
 
 	  aarch64_debug_printf
 	    ("read HFA or HVA return value element %d from %s",
@@ -2553,7 +2552,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 
 	  regs->cooked_read (regno, buf);
 
-	  memcpy (valbuf, buf, len);
+	  memcpy (valbuf, buf.data (), len);
 	  valbuf += len;
 	}
     }
@@ -2658,8 +2657,8 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	{
 	  int regno = AARCH64_V0_REGNUM + i;
 	  /* Enough space for a full vector register.  */
-	  gdb_byte tmpbuf[register_size (gdbarch, regno)];
-	  gdb_assert (len <= sizeof (tmpbuf));
+	  gdb::byte_vector tmpbuf (register_size (gdbarch, regno));
+	  gdb_assert (len <= tmpbuf.size ());
 
 	  aarch64_debug_printf
 	    ("write HFA or HVA return value element %d to %s",
@@ -2670,7 +2669,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	     original contents of the register before overriding it with a new
 	     value that has a potential size <= 16 bytes.  */
 	  regs->cooked_read (regno, tmpbuf);
-	  memcpy (tmpbuf, valbuf,
+	  memcpy (tmpbuf.data (), valbuf,
 		  len > V_REGISTER_SIZE ? V_REGISTER_SIZE : len);
 	  regs->cooked_write (regno, tmpbuf);
 	  valbuf += len;
@@ -3303,18 +3302,16 @@ aarch64_pseudo_write_1 (gdbarch *gdbarch, const frame_info_ptr &next_frame,
 {
   unsigned raw_regnum = AARCH64_V0_REGNUM + regnum_offset;
 
-  /* Enough space for a full vector register.  */
-  int raw_reg_size = register_size (gdbarch, raw_regnum);
-  gdb_byte raw_buf[raw_reg_size];
-  static_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
+  /* Enough space for a full vector register.
 
-  /* Ensure the register buffer is zero, we want gdb writes of the
+     Ensure the register buffer is zero, we want gdb writes of the
      various 'scalar' pseudo registers to behavior like architectural
      writes, register width bytes are written the remainder are set to
      zero.  */
-  memset (raw_buf, 0, register_size (gdbarch, AARCH64_V0_REGNUM));
+  gdb::byte_vector raw_buf (register_size (gdbarch, raw_regnum), 0);
+  static_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
 
-  gdb::array_view<gdb_byte> raw_view (raw_buf, raw_reg_size);
+  gdb::array_view<gdb_byte> raw_view (raw_buf);
   copy (buf, raw_view.slice (0, buf.size ()));
   put_frame_register (next_frame, raw_regnum, raw_view);
 }

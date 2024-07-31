@@ -2034,21 +2034,23 @@ fbsd_get_thread_local_address (struct gdbarch *gdbarch, CORE_ADDR dtv_addr,
 {
   LONGEST tls_index = fbsd_get_tls_index (gdbarch, lm_addr);
 
-  gdb_byte buf[gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT];
-  if (target_read_memory (dtv_addr, buf, sizeof buf) != 0)
+  gdb::byte_vector buf (gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
+  if (target_read_memory (dtv_addr, buf.data (), buf.size ()) != 0)
     throw_error (TLS_GENERIC_ERROR,
 		 _("Cannot find thread-local variables on this target"));
 
   const struct builtin_type *builtin = builtin_type (gdbarch);
-  CORE_ADDR addr = gdbarch_pointer_to_address (gdbarch,
-					       builtin->builtin_data_ptr, buf);
+  CORE_ADDR addr
+    = gdbarch_pointer_to_address (gdbarch, builtin->builtin_data_ptr,
+				  buf.data ());
 
   addr += (tls_index + 1) * builtin->builtin_data_ptr->length ();
-  if (target_read_memory (addr, buf, sizeof buf) != 0)
+  if (target_read_memory (addr, buf.data (), buf.size ()) != 0)
     throw_error (TLS_GENERIC_ERROR,
 		 _("Cannot find thread-local variables on this target"));
 
-  addr = gdbarch_pointer_to_address (gdbarch, builtin->builtin_data_ptr, buf);
+  addr = gdbarch_pointer_to_address (gdbarch, builtin->builtin_data_ptr,
+				     buf.data ());
   return addr + offset;
 }
 

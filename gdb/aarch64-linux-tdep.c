@@ -1298,8 +1298,7 @@ aarch64_linux_supply_za_regset (const struct regset *regset,
     }
   else
     {
-      gdb_byte za_zeroed[za_bytes];
-      memset (za_zeroed, 0, za_bytes);
+      gdb::byte_vector za_zeroed (za_bytes, 0);
       regcache->raw_supply (tdep->sme_za_regnum, za_zeroed);
     }
 }
