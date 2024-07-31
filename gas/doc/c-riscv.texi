@@ -178,7 +178,12 @@ instead of just
 It's not expected that options are changed in this manner during regular use,
 but there are a handful of esoteric cases like the one above where users need
 to disable particular features of the assembler for particular code sequences.
-The complete list of option arguments is shown below:
+However, it's also useful to enable/disable the extensions for some specific
+code regions by @samp{.option arch, +-}.  This is very common in the ifunc
+libraries.  We can support functions which are implemented by different
+extensions in the same library, but these should not affect any file-level
+settings, like the elf architecture attribute.  The complete list of option
+arguments is shown below:
 
 @table @code
 @item push
