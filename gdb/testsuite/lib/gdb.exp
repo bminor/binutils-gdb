@@ -982,6 +982,31 @@ proc fill_in_default_prompt {prompt_regexp with_anchor} {
     return $prompt_regexp
 }
 
+# Generate message from COMMAND.
+#
+# This is not trivial in the case that the command contains parentheses.
+# Trailing text between parentheses prefixed with a space is interpreted as
+# extra information, and not as part of the test name [1].  Consequently,
+# "PASS: print (1)" and "PASS: print (2)" count as duplicates.
+#
+# We fix this here by using "PASS: gdb-command<print (1)>" and
+# "PASS: gdb-command<print (2)>".
+#
+# A trivial way to fix this in a test-case is by using gdb_test "print(1)",
+# which produces the nicer-looking "PASS: print(1)".
+#
+# [1] https://sourceware.org/gdb/wiki/GDBTestcaseCookbook#Do_not_use_.22tail_parentheses.22_on_test_messages
+
+proc command_to_message { command } {
+    set message $command
+
+    if { [regexp { \(([^()]*)\)$} $message] } {
+	set message gdb-command<$message>
+    }
+
+    return $message
+}
+
 # gdb_test_multiple COMMAND MESSAGE [ -prompt PROMPT_REGEXP] [ -lbl ]
 #                   EXPECT_ARGUMENTS
 # Send a command to gdb; test the result.
@@ -1112,7 +1137,7 @@ proc gdb_test_multiple { command message args } {
     set prompt_regexp [fill_in_default_prompt $prompt_regexp true]
 
     if { $message == "" } {
-	set message $command
+	set message [command_to_message $command]
     }
 
     if [string match "*\[\r\n\]" $command] {
@@ -1488,7 +1513,6 @@ proc gdb_test_multiline { name args } {
     return 0
 }
 
-
 # gdb_test [-prompt PROMPT_REGEXP] [-lbl]
 #          COMMAND [PATTERN] [MESSAGE] [QUESTION RESPONSE]
 # Send a command to gdb; test the result.
@@ -1546,7 +1570,7 @@ proc gdb_test { args } {
     }
 
     if { $message == "" } {
-	set message $command
+	set message [command_to_message $command]
     }
 
     set prompt [fill_in_default_prompt $prompt [expr !${no-prompt-anchor}]]
@@ -1812,7 +1836,7 @@ proc gdb_test_lines { command message re args } {
     }
 
     if { $message == ""} {
-	set message $command
+	set message [command_to_message $command]
     }
 
     set lines ""
@@ -2029,7 +2053,7 @@ proc gdb_test_stdio {command inferior_pattern {gdb_pattern ""} {message ""}} {
     global gdb_prompt
 
     if {$message == ""} {
-	set message $command
+	set message [command_to_message $command]
     }
 
     set inferior_matched 0
