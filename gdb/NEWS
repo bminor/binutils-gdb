@@ -58,6 +58,17 @@
 
   ** Added the new event source gdb.tui_enabled.
 
+  ** New module gdb.missing_objfile that facilitates dealing with
+     missing objfiles when opening a core-file.
+
+  ** New function gdb.missing_objfile.register_handler that can
+     register an instance of a sub-class of
+     gdb.missing_debug.MissingObjfileHandler as a handler for missing
+     objfiles.
+
+  ** New class gdb.missing_objfile.MissingObjfileHandler which can be
+     sub-classed to create handlers for missing objfiles.
+
 * Debugger Adapter Protocol changes
 
   ** The "scopes" request will now return a scope holding global
@@ -84,6 +95,19 @@ maintenance info blocks [ADDRESS]
   ADDRESS, or at the current address if ADDRESS is not given.  Blocks
   are listed starting at the inner global block out to the most inner
   block.
+
+info missing-objfile-handlers
+  List all the registered missing-objfile handlers.
+
+enable missing-objfile-handler LOCUS HANDLER
+disable missing-objfile-handler LOCUS HANDLER
+  Enable or disable a missing-objfile handler with a name matching the
+  regular expression HANDLER, in LOCUS.
+
+  LOCUS can be 'global' to operate on global missing-objfile handler,
+  'progspace' to operate on handlers within the current program space,
+  or can be a regular expression which is matched against the filename
+  of the primary executable in each program space.
 
 * Changed commands
 

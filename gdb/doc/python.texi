@@ -231,6 +231,7 @@ optional arguments while skipping others.  Example:
 * TUI Windows In Python::       Implementing new TUI windows.
 * Disassembly In Python::       Instruction Disassembly In Python
 * Missing Debug Info In Python:: Handle missing debug info from Python.
+* Missing Objfiles In Python::  Handle objfiles from Python.
 @end menu
 
 @node Basic Python
@@ -5398,10 +5399,11 @@ The @code{frame_filters} attribute is a dictionary of frame filter
 objects.  @xref{Frame Filter API}, for more information.
 @end defvar
 
-@defvar Progspace.missing_debug_handlers
-The @code{missing_debug_handlers} attribute is a list of the missing
-debug handler objects for this program space.  @xref{Missing Debug
-Info In Python}, for more information.
+@defvar Progspace.missing_file_handlers
+The @code{missing_file_handlers} attribute is a list of tuples.  Each
+tuple holds a missing-file handler object for this program space.  For
+more information, @pxref{Missing Debug Info In Python}, and
+@ref{Missing Objfiles In Python}.
 @end defvar
 
 A program space has the following methods:
@@ -5577,6 +5579,7 @@ Separate debug info objfiles are added with the
 @code{gdb.Objfile.add_separate_debug_file} method, described below.
 @end defvar
 
+@anchor{Objfile.build_id}
 @defvar Objfile.build_id
 The build ID of the objfile as a string.
 If the objfile does not have a build ID then the value is @code{None}.
@@ -8164,6 +8167,189 @@ and then the globally registered handlers.  As soon as a handler
 returns a value other than @code{None}, no further handlers are called
 for this objfile.
 @end defun
+
+@node Missing Objfiles In Python
+@subsubsection Missing Objfiles In Python
+@cindex python, handle missing objfiles
+
+When @value{GDBN} opens a core file, for example with the
+@kbd{core-file} command (@pxref{core-file command}), @value{GDBN} will
+attempt to load the corresponding executable and shared libraries.
+Often these files can be found on the local machine, but sometimes
+these files cannot be found, in which case the debugging experience
+will be restricted.
+
+If @value{GDBN} fails to locate a particular file then there is an
+opportunity for a Python extension to step in.  A Python extension can
+potentially locate the missing file using some platform- or
+project-specific steps, and inform @value{GDBN} of its location.  Or a
+Python extension might provide some platform- or project-specific
+advice to the user about how to obtain the missing file.
+
+A missing-objfile Python extension consists of a handler object which
+has the @code{name} and @code{enabled} attributes, and implements the
+@code{__call__} method.  When @value{GDBN} encounters a situation
+where a file cannot be found, but the build-id (@pxref{build ID}) for
+the missing file is known, then the @code{__call__} method is invoked
+to try and find the file.  Full details of how handlers are written
+can be found below.
+
+@subheading The @code{gdb.missing_objfile} Module
+
+@value{GDBN} comes with a @code{gdb.missing_objfile} module which
+contains the following class and global function:
+
+@deftp{class} gdb.missing_objfile.MissingObjfileHandler
+
+@code{MissingObjfileHandler} is a base class from which user-created
+handlers can derive, though it is not required that handlers derive
+from this class, so long as any user created handler has the
+@code{name} and @code{enabled} attributes, and implements the
+@code{__call__} method.
+
+@defun MissingObjfileHandler.__init__ (name)
+The @var{name} is a string used to reference this missing-objfile
+handler within some @value{GDBN} commands.  Valid names consist of the
+characters @samp{[-_a-zA-Z0-9]}, creating a handler with an invalid
+name raises a @code{ValueError} exception.
+@end defun
+
+@defun MissingObjfileHandler.__call__ (pspace, build_id, filename)
+
+Sub-classes must override the @code{__call__} method.  The
+@var{pspace} argument will be a @code{gdb.Progspace}
+(@pxref{Progspaces In Python}), this is the program space in which
+@value{GDBN} is looking for the missing file.
+
+The @var{build_id} argument is a string containing the build-id of the
+file that is missing, this will be in the same format as returned by
+@code{Objfile.build_id} (@pxref{Objfile.build_id}).
+
+The @var{filename} argument contains the name of the file that
+@value{GDBN} is looking for.  This information is provided to allow
+handlers to generate informative messages for the user.  A handler is
+not required to place the missing file at this location.  There might
+already be a file present at this location, but it might not match the
+required build-id, in which case @value{GDBN} will have ignored it.
+In some limited cases @value{GDBN} might not be able to establish the
+@var{filename} of the file it is searching for, in this case
+@value{GDBN} will use a string @samp{with build-id @var{build_id}} as a
+replacement.
+
+The return value from the @code{__call__} method indicates what
+@value{GDBN} should do next.  The possible return values are:
+
+@itemize @bullet
+@item @code{None}
+
+This indicates that this handler could not locate the missing file and
+@value{GDBN} should call any other registered handlers.
+
+@item @code{True}
+
+This indicates that this handler has installed the missing file into a
+location where @value{GDBN} would normally expect to find it.  The
+only location in which @value{GDBN} will look is within the
+@file{.build-id} sub-directory within the @var{debug-file-directory}
+(@pxref{debug-file-directory}).
+
+@value{GDBN} will repeat the normal lookup process, which should now
+find the previously missing file.
+
+If @value{GDBN} still doesn't find file after this second attempt,
+then the Python missing-objfile handlers are not invoked a second
+time, this prevents a badly behaved handler causing @value{GDBN} to
+get stuck in a loop.  @value{GDBN} will continue without the missing
+file, though this will degrade the debugging experience.
+
+@item @code{False}
+
+This indicates that this handler has done everything that it intends
+to do but the missing file could not be found.  @value{GDBN} will not
+call any other registered handlers to look for the missing file.
+@value{GDBN} will continue without the missing file, though this will
+degrade the debugging experience.
+
+@item A string
+
+The returned string should contain a filename.  @value{GDBN} will not
+call any further registered handlers, and will instead use the
+returned filename as the missing file.
+@end itemize
+
+Invoking the @code{__call__} method from this base class will raise a
+@code{NotImplementedError} exception.
+@end defun
+
+@defvar MissingObjfileHandler.name
+A read-only attribute which is a string, the name of this handler
+passed to the @code{__init__} method.
+@end defvar
+
+@defvar MissingObjfileHandler.enabled
+A modifiable attribute containing a boolean; when @code{True}, the
+handler is enabled, and will be used by @value{GDBN}.  When
+@code{False}, the handler has been disabled, and will not be used.
+@end defvar
+@end deftp
+
+@defun gdb.missing_objfile.register_handler (locus, handler, replace=@code{False})
+Register a new missing-objfile handler with @value{GDBN}.
+
+@var{handler} is an instance of a sub-class of
+@code{MissingObjfileHandler}, or at least an instance of an object that
+has the same attributes and methods as @code{MissingObjfileHandler}.
+
+@var{locus} specifies to which handler list to prepend @var{handler}.
+It can be either a @code{gdb.Progspace} (@pxref{Progspaces In Python})
+or @code{None}, in which case the handler is registered globally.  The
+newly registered @var{handler} will be called before any other handler
+from the same locus.  Two handlers in the same locus cannot have the
+same name, an attempt to add a handler with an already existing name
+raises an exception unless @var{replace} is @code{True}, in which case
+the old handler is deleted and the new handler is prepended to the
+selected handler list.
+
+@value{GDBN} first calls the handlers for the current program space,
+and then the globally registered handlers.  As soon as a handler
+returns a value other than @code{None}, no further handlers are
+called.
+@end defun
+
+@subheading Managing Missing-Objfile Handlers
+
+@value{GDBN} defines the following commands to manage registered
+missing-objfile handlers:
+
+@table @code
+
+@kindex info missing-objfile-handlers
+@item info missing-objfile-handlers @r{[} @var{locus} @r{[} @var{name-regexp} @r{]} @r{]}
+Lists all registered missing-objfile handlers.  Arguments @var{locus}
+and @var{name-regexp} are both optional and can be used to filter
+which handlers are listed.
+
+The @var{locus} argument should be either @kbd{global},
+@kbd{progspace}, or the name of an object file.  Only handlers
+registered for the specified locus will be listed.
+
+The @var{name-regexp} is a regular expression used to match against
+handler names.
+
+@kindex disable missing-objfile-handler
+@item disable missing-objfile-handler @r{[} @var{locus} @r{[} @var{name-regexp} @r{]} @r{]}
+The @var{locus} and @var{name-regexp} are interpreted as in @kbd{info
+missing-objfile-handlers} above, but instead of listing the matching
+handlers, all of the matching handlers are disabled.  The
+@code{enabled} field of each matching handler is set to @code{False}.
+
+@kindex enable missing-objfile-handler
+@item enable missing-objfile-handler @r{[} @var{locus} @r{[} @var{name-regexp} @r{]} @r{]}
+The @var{locus} and @var{name-regexp} are interpreted as in @kbd{info
+missing-objfile-handlers} above, but instead of listing the matching
+handlers, all of the matching handlers are enabled.  The
+@code{enabled} field of each matching handler is set to @code{True}.
+@end table
 
 @node Python Auto-loading
 @subsection Python Auto-loading

@@ -21792,6 +21792,7 @@ contained in @var{filename} by using the @samp{-readnever} option.
 @c (eg rooted in val of env var GDBSYMS) could exist for mappable symbol
 @c files.
 
+@anchor{core-file command}
 @kindex core-file
 @item core-file @r{[}@var{filename}@r{]}
 @itemx core

@@ -1,4 +1,4 @@
-# Missing debug related commands.
+# Missing debug and objfile related commands.
 #
 # Copyright 2023-2024 Free Software Foundation, Inc.
 #
@@ -21,7 +21,7 @@ import gdb
 
 
 def validate_regexp(exp, idstring):
-    """Compile exp into a compiler regular expression object.
+    """Compile exp into a compiled regular expression object.
 
     Arguments:
         exp: The string to compile into a re.Pattern object.
@@ -33,14 +33,15 @@ def validate_regexp(exp, idstring):
     Raises:
         SyntaxError: If exp is an invalid regexp.
     """
+
     try:
         return re.compile(exp)
     except SyntaxError:
         raise SyntaxError("Invalid %s regexp: %s." % (idstring, exp))
 
 
-def parse_missing_debug_command_args(arg):
-    """Internal utility to parse missing debug handler command argv.
+def parse_missing_file_command_args(arg):
+    """Internal utility to parse missing file handler command argv.
 
     Arguments:
         arg: The arguments to the command. The format is:
@@ -52,6 +53,7 @@ def parse_missing_debug_command_args(arg):
     Raises:
         SyntaxError: an error processing ARG
     """
+
     argv = gdb.string_to_argv(arg)
     argc = len(argv)
     if argc > 2:
@@ -68,10 +70,10 @@ def parse_missing_debug_command_args(arg):
     )
 
 
-class InfoMissingDebugHanders(gdb.Command):
-    """GDB command to list missing debug handlers.
+class InfoMissingFileHandlers(gdb.Command):
+    """GDB command to list missing HTYPE handlers.
 
-    Usage: info missing-debug-handlers [LOCUS-REGEXP [NAME-REGEXP]]
+    Usage: info missing-HTYPE-handlers [LOCUS-REGEXP [NAME-REGEXP]]
 
     LOCUS-REGEXP is a regular expression matching the location of the
     handler.  If it is omitted, all registered handlers from all
@@ -79,38 +81,47 @@ class InfoMissingDebugHanders(gdb.Command):
     the handlers from the current progspace, or a regular expression
     matching filenames of progspaces.
 
-    NAME-REGEXP is a regular expression to filter missing debug
+    NAME-REGEXP is a regular expression to filter missing HTYPE
     handler names.  If this omitted for a specified locus, then all
     registered handlers in the locus are listed.
     """
 
-    def __init__(self):
-        super().__init__("info missing-debug-handlers", gdb.COMMAND_FILES)
+    def __init__(self, handler_type):
+        # Update the doc string before calling the parent constructor,
+        # replacing the string 'HTYPE' with the value of HANDLER_TYPE.
+        # The parent constructor will grab a copy of this string to
+        # use as the commands help text.
+        self.__doc__ = self.__doc__.replace("HTYPE", handler_type)
+        super().__init__(
+            "info missing-" + handler_type + "-handlers", gdb.COMMAND_FILES
+        )
+        self.handler_type = handler_type
 
     def list_handlers(self, title, handlers, name_re):
-        """Lists the missing debug handlers whose name matches regexp.
+        """Lists the missing file handlers whose name matches regexp.
 
         Arguments:
             title: The line to print before the list.
-            handlers: The list of the missing debug handlers.
+            handlers: The list of the missing file handlers.
             name_re: handler name filter.
         """
+
         if not handlers:
             return
         print(title)
-        for handler in handlers:
+        for handler in gdb._filter_missing_file_handlers(handlers, self.handler_type):
             if name_re.match(handler.name):
                 print(
                     "  %s%s" % (handler.name, "" if handler.enabled else " [disabled]")
                 )
 
     def invoke(self, arg, from_tty):
-        locus_re, name_re = parse_missing_debug_command_args(arg)
+        locus_re, name_re = parse_missing_file_command_args(arg)
 
         if locus_re.match("progspace") and locus_re.pattern != "":
             cp = gdb.current_progspace()
             self.list_handlers(
-                "Progspace %s:" % cp.filename, cp.missing_debug_handlers, name_re
+                "Progspace %s:" % cp.filename, cp.missing_file_handlers, name_re
             )
 
         for progspace in gdb.progspaces():
@@ -125,80 +136,71 @@ class InfoMissingDebugHanders(gdb.Command):
                     msg = "Progspace %s:" % filename
                 self.list_handlers(
                     msg,
-                    progspace.missing_debug_handlers,
+                    progspace.missing_file_handlers,
                     name_re,
                 )
 
         # Print global handlers last, as these are invoked last.
         if locus_re.match("global"):
-            self.list_handlers("Global:", gdb.missing_debug_handlers, name_re)
+            self.list_handlers("Global:", gdb.missing_file_handlers, name_re)
 
 
-def do_enable_handler1(handlers, name_re, flag):
-    """Enable/disable missing debug handlers whose names match given regex.
+def do_enable_handler1(handlers, name_re, flag, handler_type):
+    """Enable/disable missing file handlers whose names match given regex.
 
     Arguments:
-        handlers: The list of missing debug handlers.
+        handlers: The list of missing file handlers.
         name_re: Handler name filter.
         flag: A boolean indicating if we should enable or disable.
+        handler_type: A string, either 'debug' or 'objfile', use to control
+            which handlers are modified.
 
     Returns:
         The number of handlers affected.
     """
+
     total = 0
-    for handler in handlers:
+    for handler in gdb._filter_missing_file_handlers(handlers, handler_type):
         if name_re.match(handler.name) and handler.enabled != flag:
             handler.enabled = flag
             total += 1
     return total
 
 
-def do_enable_handler(arg, flag):
-    """Enable or disable missing debug handlers."""
-    (locus_re, name_re) = parse_missing_debug_command_args(arg)
+def do_enable_handler(arg, flag, handler_type):
+    """Enable or disable missing file handlers."""
+
+    (locus_re, name_re) = parse_missing_file_command_args(arg)
     total = 0
     if locus_re.match("global"):
-        total += do_enable_handler1(gdb.missing_debug_handlers, name_re, flag)
+        total += do_enable_handler1(
+            gdb.missing_file_handlers, name_re, flag, handler_type
+        )
     if locus_re.match("progspace") and locus_re.pattern != "":
         total += do_enable_handler1(
-            gdb.current_progspace().missing_debug_handlers, name_re, flag
+            gdb.current_progspace().missing_file_handlers, name_re, flag, handler_type
         )
     for progspace in gdb.progspaces():
         filename = progspace.filename or ""
         if locus_re.match(filename):
-            total += do_enable_handler1(progspace.missing_debug_handlers, name_re, flag)
+            total += do_enable_handler1(
+                progspace.missing_file_handlers, name_re, flag, handler_type
+            )
     print(
-        "%d missing debug handler%s %s"
-        % (total, "" if total == 1 else "s", "enabled" if flag else "disabled")
+        "%d missing %s handler%s %s"
+        % (
+            total,
+            handler_type,
+            "" if total == 1 else "s",
+            "enabled" if flag else "disabled",
+        )
     )
 
 
-class EnableMissingDebugHandler(gdb.Command):
-    """GDB command to enable missing debug handlers.
+class EnableMissingFileHandler(gdb.Command):
+    """GDB command to enable missing HTYPE handlers.
 
-    Usage: enable missing-debug-handler [LOCUS-REGEXP [NAME-REGEXP]]
-
-    LOCUS-REGEXP is a regular expression specifying the handlers to
-    enable.  It can be 'global', 'progspace' for the current
-    progspace, or the filename for a file associated with a progspace.
-
-    NAME_REGEXP is a regular expression to filter handler names.  If
-    this omitted for a specified locus, then all registered handlers
-    in the locus are affected.
-    """
-
-    def __init__(self):
-        super().__init__("enable missing-debug-handler", gdb.COMMAND_FILES)
-
-    def invoke(self, arg, from_tty):
-        """GDB calls this to perform the command."""
-        do_enable_handler(arg, True)
-
-
-class DisableMissingDebugHandler(gdb.Command):
-    """GDB command to disable missing debug handlers.
-
-    Usage: disable missing-debug-handler [LOCUS-REGEXP [NAME-REGEXP]]
+    Usage: enable missing-HTYPE-handler [LOCUS-REGEXP [NAME-REGEXP]]
 
     LOCUS-REGEXP is a regular expression specifying the handlers to
     enable.  It can be 'global', 'progspace' for the current
@@ -209,19 +211,58 @@ class DisableMissingDebugHandler(gdb.Command):
     in the locus are affected.
     """
 
-    def __init__(self):
-        super().__init__("disable missing-debug-handler", gdb.COMMAND_FILES)
+    def __init__(self, handler_type):
+        # Update the doc string before calling the parent constructor,
+        # replacing the string 'HTYPE' with the value of HANDLER_TYPE.
+        # The parent constructor will grab a copy of this string to
+        # use as the commands help text.
+        self.__doc__ = self.__doc__.replace("HTYPE", handler_type)
+        super().__init__(
+            "enable missing-" + handler_type + "-handler", gdb.COMMAND_FILES
+        )
+        self.handler_type = handler_type
 
     def invoke(self, arg, from_tty):
         """GDB calls this to perform the command."""
-        do_enable_handler(arg, False)
+        do_enable_handler(arg, True, self.handler_type)
 
 
-def register_missing_debug_handler_commands():
-    """Installs the missing debug handler commands."""
-    InfoMissingDebugHanders()
-    EnableMissingDebugHandler()
-    DisableMissingDebugHandler()
+class DisableMissingFileHandler(gdb.Command):
+    """GDB command to disable missing HTYPE handlers.
+
+    Usage: disable missing-HTYPE-handler [LOCUS-REGEXP [NAME-REGEXP]]
+
+    LOCUS-REGEXP is a regular expression specifying the handlers to
+    enable.  It can be 'global', 'progspace' for the current
+    progspace, or the filename for a file associated with a progspace.
+
+    NAME_REGEXP is a regular expression to filter handler names.  If
+    this omitted for a specified locus, then all registered handlers
+    in the locus are affected.
+    """
+
+    def __init__(self, handler_type):
+        # Update the doc string before calling the parent constructor,
+        # replacing the string 'HTYPE' with the value of HANDLER_TYPE.
+        # The parent constructor will grab a copy of this string to
+        # use as the commands help text.
+        self.__doc__ = self.__doc__.replace("HTYPE", handler_type)
+        super().__init__(
+            "disable missing-" + handler_type + "-handler", gdb.COMMAND_FILES
+        )
+        self.handler_type = handler_type
+
+    def invoke(self, arg, from_tty):
+        """GDB calls this to perform the command."""
+        do_enable_handler(arg, False, self.handler_type)
 
 
-register_missing_debug_handler_commands()
+def register_missing_file_handler_commands():
+    """Installs the missing file handler commands."""
+    for handler_type in ["debug", "objfile"]:
+        InfoMissingFileHandlers(handler_type)
+        EnableMissingFileHandler(handler_type)
+        DisableMissingFileHandler(handler_type)
+
+
+register_missing_file_handler_commands()

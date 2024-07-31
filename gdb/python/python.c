@@ -35,6 +35,7 @@
 #include "location.h"
 #include "run-on-main-thread.h"
 #include "observable.h"
+#include "build-id.h"
 
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
@@ -130,6 +131,9 @@ static std::optional<std::string> gdbpy_colorize_disasm
 (const std::string &content, gdbarch *gdbarch);
 static ext_lang_missing_file_result gdbpy_handle_missing_debuginfo
   (const struct extension_language_defn *extlang, struct objfile *objfile);
+static ext_lang_missing_file_result gdbpy_find_objfile_from_buildid
+  (const struct extension_language_defn *extlang, program_space *pspace,
+   const struct bfd_build_id *build_id, const char *missing_filename);
 
 /* The interface between gdb proper and loading of python scripts.  */
 
@@ -179,7 +183,8 @@ static const struct extension_language_ops python_extension_ops =
 
   gdbpy_print_insn,
 
-  gdbpy_handle_missing_debuginfo
+  gdbpy_handle_missing_debuginfo,
+  gdbpy_find_objfile_from_buildid
 };
 
 #endif /* HAVE_PYTHON */
@@ -1814,6 +1819,107 @@ gdbpy_handle_missing_debuginfo (const struct extension_language_defn *extlang,
       PyErr_SetString (PyExc_ValueError,
 		       "return value from _handle_missing_debuginfo should "
 		       "be None, a Bool, or a String");
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  gdb::unique_xmalloc_ptr<char> filename
+    = python_string_to_host_string (pyo_execute_ret.get ());
+  if (filename == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  return ext_lang_missing_file_result (std::string (filename.get ()));
+}
+
+/* Implement the find_objfile_from_buildid hook for Python.  PSPACE is the
+   program space in which GDB is trying to find an objfile, BUILD_ID is the
+   build-id for the missing objfile, and EXPECTED_FILENAME is a non-NULL
+   string which can be used (if needed) in messages to the user, and
+   represents the file GDB is looking for.  */
+
+static ext_lang_missing_file_result
+gdbpy_find_objfile_from_buildid (const struct extension_language_defn *extlang,
+				 program_space *pspace,
+				 const struct bfd_build_id *build_id,
+				 const char *missing_filename)
+{
+  gdb_assert (pspace != nullptr);
+  gdb_assert (build_id != nullptr);
+  gdb_assert (missing_filename != nullptr);
+
+  /* Early exit if Python is not initialised.  */
+  if (!gdb_python_initialized || gdb_python_module == nullptr)
+    return {};
+
+  gdbpy_enter enter_py;
+
+  /* Convert BUILD_ID into a Python object.  */
+  std::string hex_form = bin2hex (build_id->data, build_id->size);
+  gdbpy_ref<> pyo_buildid = host_string_to_python_string (hex_form.c_str ());
+  if (pyo_buildid == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  /* Convert MISSING_FILENAME to a Python object.  */
+  gdbpy_ref<> pyo_filename = host_string_to_python_string (missing_filename);
+  if (pyo_filename == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  /* Convert PSPACE to a Python object.  */
+  gdbpy_ref<> pyo_pspace = pspace_to_pspace_object (pspace);
+  if (pyo_pspace == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  /* Lookup the helper function within the GDB module.  */
+  gdbpy_ref<> pyo_handler
+    (PyObject_GetAttrString (gdb_python_module, "_handle_missing_objfile"));
+  if (pyo_handler == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  /* Call the function, passing in the Python objfile object.  */
+  gdbpy_ref<> pyo_execute_ret
+    (PyObject_CallFunctionObjArgs (pyo_handler.get (), pyo_pspace.get (),
+				   pyo_buildid.get (), pyo_filename.get (),
+				   nullptr));
+  if (pyo_execute_ret == nullptr)
+    {
+      /* If the handler is cancelled due to a Ctrl-C, then propagate
+	 the Ctrl-C as a GDB exception instead of swallowing it.  */
+      gdbpy_print_stack_or_quit ();
+      return {};
+    }
+
+  /* Parse the result, and convert it back to the C++ object.  */
+  if (pyo_execute_ret == Py_None)
+    return {};
+
+  if (PyBool_Check (pyo_execute_ret.get ()))
+    {
+      /* We know the value is a bool, so it must be either Py_True or
+	 Py_False.  Anything else would not get past the above check.  */
+      bool try_again = pyo_execute_ret.get () == Py_True;
+      return ext_lang_missing_file_result (try_again);
+    }
+
+  if (!gdbpy_is_string (pyo_execute_ret.get ()))
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       "return value from _find_objfile_by_buildid should "
+		       "be None, a bool, or a str");
       gdbpy_print_stack ();
       return {};
     }
