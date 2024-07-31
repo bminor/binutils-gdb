@@ -1053,7 +1053,7 @@ ext_lang_print_insn (struct gdbarch *gdbarch, CORE_ADDR address,
 
 /* See extension.h.  */
 
-ext_lang_missing_debuginfo_result
+ext_lang_missing_file_result
 ext_lang_handle_missing_debuginfo (struct objfile *objfile)
 {
   for (const struct extension_language_defn *extlang : extension_languages)
@@ -1061,7 +1061,7 @@ ext_lang_handle_missing_debuginfo (struct objfile *objfile)
       if (extlang->ops == nullptr
 	  || extlang->ops->handle_missing_debuginfo == nullptr)
 	continue;
-      ext_lang_missing_debuginfo_result result
+      ext_lang_missing_file_result result
 	= extlang->ops->handle_missing_debuginfo (extlang, objfile);
       if (!result.filename ().empty () || result.try_again ())
 	return result;

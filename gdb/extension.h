@@ -361,23 +361,23 @@ extern std::optional<int> ext_lang_print_insn
    it.  And the third option is for the extension to just return a null
    result, indication there is nothing the extension can do to provide the
    missing debug information.  */
-struct ext_lang_missing_debuginfo_result
+struct ext_lang_missing_file_result
 {
   /* Default result.  The extension was unable to provide the missing debug
      info.  */
-  ext_lang_missing_debuginfo_result ()
+  ext_lang_missing_file_result ()
   { /* Nothing.  */ }
 
   /* When TRY_AGAIN is true GDB should try searching again, the extension
      may have installed the missing debug info into a suitable location.
      When TRY_AGAIN is false this is equivalent to the default, no
      argument, constructor.  */
-  ext_lang_missing_debuginfo_result (bool try_again)
+  ext_lang_missing_file_result (bool try_again)
     : m_try_again (try_again)
   { /* Nothing.  */ }
 
   /* Look in FILENAME for the missing debug info.  */
-  ext_lang_missing_debuginfo_result (std::string &&filename)
+  ext_lang_missing_file_result (std::string &&filename)
     : m_filename (std::move (filename))
   { /* Nothing.  */ }
 
@@ -407,7 +407,7 @@ private:
 
 /* Called when GDB failed to find any debug information for OBJFILE.  */
 
-extern ext_lang_missing_debuginfo_result ext_lang_handle_missing_debuginfo
+extern ext_lang_missing_file_result ext_lang_handle_missing_debuginfo
   (struct objfile *objfile);
 
 #if GDB_SELF_TEST

@@ -292,7 +292,7 @@ struct extension_language_ops
   /* Give extension languages a chance to deal with missing debug
      information.  OBJFILE is the file for which GDB was unable to find
      any debug information.  */
-  ext_lang_missing_debuginfo_result
+  ext_lang_missing_file_result
     (*handle_missing_debuginfo) (const struct extension_language_defn *,
 				 struct objfile *objfile);
 };

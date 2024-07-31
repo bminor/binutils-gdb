@@ -630,7 +630,7 @@ objfile::find_and_add_separate_symbol_file (symfile_add_flags symfile_flags)
 	     the user a system specific message that guides them to finding
 	     the missing debug info.  */
 
-	  ext_lang_missing_debuginfo_result ext_result
+	  ext_lang_missing_file_result ext_result
 	    = ext_lang_handle_missing_debuginfo (this);
 	  if (!ext_result.filename ().empty ())
 	    {

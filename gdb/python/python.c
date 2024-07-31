@@ -128,7 +128,7 @@ static std::optional<std::string> gdbpy_colorize
   (const std::string &filename, const std::string &contents);
 static std::optional<std::string> gdbpy_colorize_disasm
 (const std::string &content, gdbarch *gdbarch);
-static ext_lang_missing_debuginfo_result gdbpy_handle_missing_debuginfo
+static ext_lang_missing_file_result gdbpy_handle_missing_debuginfo
   (const struct extension_language_defn *extlang, struct objfile *objfile);
 
 /* The interface between gdb proper and loading of python scripts.  */
@@ -1755,10 +1755,10 @@ gdbpy_get_current_objfile (PyObject *unused1, PyObject *unused2)
 /* Implement the 'handle_missing_debuginfo' hook for Python.  GDB has
    failed to find any debug information for OBJFILE.  The extension has a
    chance to record this, or even install the required debug information.
-   See the description of ext_lang_missing_debuginfo_result in
-   extension-priv.h for details of the return value.  */
+   See the description of ext_lang_missing_file_result in extension-priv.h
+   for details of the return value.  */
 
-static ext_lang_missing_debuginfo_result
+static ext_lang_missing_file_result
 gdbpy_handle_missing_debuginfo (const struct extension_language_defn *extlang,
 				struct objfile *objfile)
 {
@@ -1806,7 +1806,7 @@ gdbpy_handle_missing_debuginfo (const struct extension_language_defn *extlang,
   if (PyBool_Check (pyo_execute_ret.get ()))
     {
       bool try_again = PyObject_IsTrue (pyo_execute_ret.get ());
-      return ext_lang_missing_debuginfo_result (try_again);
+      return ext_lang_missing_file_result (try_again);
     }
 
   if (!gdbpy_is_string (pyo_execute_ret.get ()))
@@ -1826,7 +1826,7 @@ gdbpy_handle_missing_debuginfo (const struct extension_language_defn *extlang,
       return {};
     }
 
-  return ext_lang_missing_debuginfo_result (std::string (filename.get ()));
+  return ext_lang_missing_file_result (std::string (filename.get ()));
 }
 
 /* Compute the list of active python type printers and store them in
