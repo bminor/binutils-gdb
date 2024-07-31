@@ -28,6 +28,7 @@
 #include "cli/cli-style.h"
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
+#include "extension.h"
 
 /* See build-id.h.  */
 
@@ -343,32 +344,73 @@ find_separate_debug_file_by_buildid (struct objfile *objfile,
 /* See build-id.h.  */
 
 gdb_bfd_ref_ptr
-find_objfile_by_build_id (const bfd_build_id *build_id,
+find_objfile_by_build_id (program_space *pspace,
+			  const bfd_build_id *build_id,
 			  const char *expected_filename)
 {
-  /* Try to find the executable (or shared object) by looking for a
-     (sym)link on disk from the build-id to the object file.  */
-  gdb_bfd_ref_ptr abfd = build_id_to_exec_bfd (build_id->size,
-					       build_id->data);
+  gdb_bfd_ref_ptr abfd;
 
-  if (abfd != nullptr)
-    return abfd;
-
-  /* Attempt to query debuginfod for the executable.  */
-  gdb::unique_xmalloc_ptr<char> path;
-  scoped_fd fd = debuginfod_exec_query (build_id->data, build_id->size,
-					expected_filename, &path);
-  if (fd.get () >= 0)
+  for (unsigned attempt = 0, max_attempts = 1;
+       attempt < max_attempts && abfd == nullptr;
+       ++attempt)
     {
-      abfd = gdb_bfd_open (path.get (), gnutarget);
+      /* Try to find the executable (or shared object) by looking for a
+	 (sym)link on disk from the build-id to the object file.  */
+      abfd = build_id_to_exec_bfd (build_id->size, build_id->data);
 
-      if (abfd == nullptr)
-	warning (_("\"%ps\" from debuginfod cannot be opened as bfd: %s"),
-		 styled_string (file_name_style.style (), path.get ()),
-		 gdb_bfd_errmsg (bfd_get_error (), nullptr).c_str ());
-      else if (!build_id_verify (abfd.get (), build_id->size,
-				 build_id->data))
-	abfd = nullptr;
+      if (abfd != nullptr || attempt > 0)
+	break;
+
+      /* Attempt to query debuginfod for the executable.  This will only
+	 get run during the first attempt, if an extension language hook
+	 (see below) asked for a second attempt then we will have already
+	 broken out of the loop above.  */
+      gdb::unique_xmalloc_ptr<char> path;
+      scoped_fd fd = debuginfod_exec_query (build_id->data, build_id->size,
+					    expected_filename, &path);
+      if (fd.get () >= 0)
+	{
+	  abfd = gdb_bfd_open (path.get (), gnutarget);
+
+	  if (abfd == nullptr)
+	    warning (_("\"%ps\" from debuginfod cannot be opened as bfd: %s"),
+		     styled_string (file_name_style.style (), path.get ()),
+		     gdb_bfd_errmsg (bfd_get_error (), nullptr).c_str ());
+	  else if (!build_id_verify (abfd.get (), build_id->size,
+				     build_id->data))
+	    abfd = nullptr;
+	}
+
+      if (abfd != nullptr)
+	break;
+
+      ext_lang_missing_file_result ext_result
+	= ext_lang_find_objfile_from_buildid (pspace, build_id,
+					      expected_filename);
+      if (!ext_result.filename ().empty ())
+	{
+	  /* The extension identified the file for us.  */
+	  abfd = gdb_bfd_open (ext_result.filename ().c_str (), gnutarget);
+	  if (abfd == nullptr)
+	    {
+	      warning (_("\"%ps\" from extension cannot be opened as bfd: %s"),
+		       styled_string (file_name_style.style (),
+				      ext_result.filename ().c_str ()),
+		       gdb_bfd_errmsg (bfd_get_error (), nullptr).c_str ());
+	      break;
+	    }
+
+	  /* If the extension gave us a path to a file then we always
+	     assume that it is the correct file, we do no additional check
+	     of its build-id.  */
+	}
+      else if (ext_result.try_again ())
+	{
+	  /* The extension might have installed the file in the expected
+	     location, we should try again.  */
+	  max_attempts = 2;
+	  continue;
+	}
     }
 
   return abfd;

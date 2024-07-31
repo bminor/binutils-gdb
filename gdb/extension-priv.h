@@ -295,6 +295,19 @@ struct extension_language_ops
   ext_lang_missing_file_result
     (*handle_missing_debuginfo) (const struct extension_language_defn *,
 				 struct objfile *objfile);
+
+  /* Give extension languages a chance to deal with missing objfiles.
+     PSPACE is the program space in which GDB is searching for a missing
+     objfile, and will not be NULL.  BUILD_ID is the build-id of the
+     objfile we're looking for, and will not be NULL.  FILENAME is the name
+     of the file we're looking for, and will not be NULL.  See
+     ext_lang_find_objfile_from_buildid for some additional information
+     about the meaning of FILENAME.  */
+  ext_lang_missing_file_result
+    (*find_objfile_from_buildid) (const struct extension_language_defn *,
+				  program_space *pspace,
+				  const struct bfd_build_id *build_id,
+				  const char *filename);
 };
 
 /* State necessary to restore a signal handler to its previous value.  */

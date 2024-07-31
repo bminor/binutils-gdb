@@ -36,6 +36,7 @@ struct ui_file;
 struct ui_out;
 struct value;
 struct value_print_options;
+struct program_space;
 
 /* A function to load and process a script file.
    The file has been opened and is ready to be read from the beginning.
@@ -409,6 +410,25 @@ private:
 
 extern ext_lang_missing_file_result ext_lang_handle_missing_debuginfo
   (struct objfile *objfile);
+
+/* Called when GDB opens a core-file to find any object files for which a
+   build-id could be extracted from the core-file, but the matching file
+   could not otherwise be found by GDB.
+
+   PSPACE is the program space in which GDB is opening the core-file and
+   is looking for a missing object file.  BUILD_ID is the build-id of the
+   file being looked for, and will not be NULL.  FILENAME is the name of
+   the file GDB is looking for, this will not be NULL.  The FILENAME is
+   provided only for creating helpful messages for the user.  FILENAME
+   might already exist on disk but have the wrong build-id, of FILENAME
+   might not exist on disk.  If the missing objfile can be found then it
+   does not have to be placed at the location FILENAME.
+
+   The returned object indicates if the file could be found or not.  */
+
+extern ext_lang_missing_file_result ext_lang_find_objfile_from_buildid
+  (program_space *pspace, const struct bfd_build_id *build_id,
+   const char *filename);
 
 #if GDB_SELF_TEST
 namespace selftests {

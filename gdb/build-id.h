@@ -66,7 +66,8 @@ extern std::string find_separate_debug_file_by_buildid
    should be the file we were looking for but couldn't find.  */
 
 extern gdb_bfd_ref_ptr find_objfile_by_build_id
-  (const bfd_build_id *build_id, const char *expected_filename);
+  (struct program_space *pspace, const bfd_build_id *build_id,
+   const char *expected_filename);
 
 /* Return an hex-string representation of BUILD_ID.  */
 

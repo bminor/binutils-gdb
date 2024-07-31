@@ -525,7 +525,8 @@ solib_map_sections (solib &so)
 	    abfd = nullptr;
 
 	  if (abfd == nullptr)
-	    abfd = find_objfile_by_build_id (mapped_file_info->build_id (),
+	    abfd = find_objfile_by_build_id (current_program_space,
+					     mapped_file_info->build_id (),
 					     so.so_name.c_str ());
 
 	  if (abfd == nullptr && mismatch)

@@ -506,7 +506,8 @@ core_target::build_file_mappings ()
 	   || !bfd_check_format (abfd.get (), bfd_object))
 	  && file_data.build_id != nullptr)
 	{
-	  abfd = find_objfile_by_build_id (file_data.build_id,
+	  abfd = find_objfile_by_build_id (current_program_space,
+					   file_data.build_id,
 					   filename.c_str ());
 
 	  if (abfd != nullptr)
@@ -892,7 +893,8 @@ locate_exec_from_corefile_build_id (bfd *abfd, core_target *target,
     }
 
   gdb_bfd_ref_ptr execbfd
-    = find_objfile_by_build_id (build_id, filename.c_str ());
+    = find_objfile_by_build_id (current_program_space, build_id,
+				filename.c_str ());
 
   if (execbfd != nullptr)
     {

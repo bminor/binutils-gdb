@@ -1070,6 +1070,28 @@ ext_lang_handle_missing_debuginfo (struct objfile *objfile)
   return {};
 }
 
+/* See extension.h.  */
+
+ext_lang_missing_file_result
+ext_lang_find_objfile_from_buildid (program_space *pspace,
+				    const struct bfd_build_id *build_id,
+				    const char *filename)
+{
+  for (const struct extension_language_defn *extlang : extension_languages)
+    {
+      if (extlang->ops == nullptr
+	  || extlang->ops->find_objfile_from_buildid == nullptr)
+	continue;
+      ext_lang_missing_file_result result
+	= extlang->ops->find_objfile_from_buildid (extlang, pspace, build_id,
+						   filename);
+      if (!result.filename ().empty () || result.try_again ())
+	return result;
+    }
+
+  return {};
+}
+
 /* Called via an observer before gdb prints its prompt.
    Iterate over the extension languages giving them a chance to
    change the prompt.  The first one to change the prompt wins,
