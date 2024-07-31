@@ -94,7 +94,24 @@ proc test_primitive_types_known {} {
 	# While TYPE_KIND is allowed as input, GDB will always return the
 	# Fortran notation TYPE*KIND
 	regsub -all "_" $type "\*" type_res
-	gdb_test "ptype $type" [string_to_regexp "type = $type_res"]
+	set re [string_to_regexp "type = $type_res"]
+	switch $type {
+	    real*16 - complex*16 {
+		regexp {^[^*_]*} $type base
+		set re_unsupported \
+		    [string_to_regexp \
+			 "unsupported kind 16 for type $base*4"]
+		set re ($re|$re_unsupported)
+	    }
+	    real_16 - complex_16 {
+		set re_unsupported \
+		    [string_to_regexp \
+			 "unsupported type $type_res"]
+		set re ($re|$re_unsupported)
+	    }
+	}
+
+	gdb_test "ptype $type" $re
     }
 }
 
