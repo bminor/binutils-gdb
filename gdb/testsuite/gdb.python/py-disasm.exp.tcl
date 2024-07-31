@@ -20,26 +20,54 @@ load_lib gdb-python.exp
 
 require allow_python_tests
 
-standard_testfile
+standard_testfile py-disasm.c
 
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} "debug"] } {
-    return -1
+if { $kind == "obj" } {
+
+    set obj [standard_output_file ${gdb_test_file_name}.o]
+
+    if { [gdb_compile "$srcdir/$subdir/$srcfile" $obj object "debug"] != "" } {
+	untested "failed to compile object file [file tail $obj]"
+	return -1
+    }
+
+    clean_restart $obj
+
+} else {
+
+    if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+	return -1
+    }
+
+    if { ![runto_main] } {
+	fail "can't run to main"
+	return 0
+    }
+
 }
 
-if {![runto_main]} {
-    fail "can't run to main"
-    return 0
-}
-
-set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
+set pyfile [gdb_remote_download host ${srcdir}/${subdir}/py-disasm.py]
 
 gdb_test "source ${pyfile}" "Python script imported" \
          "import python scripts"
 
-gdb_breakpoint [gdb_get_line_number "Break here."]
-gdb_continue_to_breakpoint "Break here."
+set line [gdb_get_line_number "Break here."]
 
-set curr_pc [get_valueof "/x" "\$pc" "*unknown*"]
+if { $kind == "obj" } {
+    set curr_pc "*unknown*"
+    set line [gdb_get_line_number "Break here."]
+    gdb_test_multiple "info line $line" "" {
+	-re -wrap "starts at address ($hex) \[^\r\n\]*" {
+	    set curr_pc $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+} else {
+    gdb_breakpoint $line
+    gdb_continue_to_breakpoint "Break here."
+
+    set curr_pc [get_valueof "/x" "\$pc" "*unknown*"]
+}
 
 gdb_test_no_output "python current_pc = ${curr_pc}"
 
@@ -67,7 +95,11 @@ proc py_remove_all_disassemblers {} {
 # Python disassembler API.
 set nop "(nop|nop\t0|[string_to_regexp nop\t{0}])"
 set unknown_error_pattern "unknown disassembler error \\(error = -1\\)"
-set addr_pattern "\r\n=> ${curr_pc_pattern} <\[^>\]+>:\\s+"
+if { $kind == "obj" } {
+    set addr_pattern "\r\n   ${curr_pc_pattern} <\[^>\]+>:\\s+"
+} else {
+    set addr_pattern "\r\n=> ${curr_pc_pattern} <\[^>\]+>:\\s+"
+}
 set base_pattern "${addr_pattern}${nop}"
 
 # Helper proc to format a Python exception of TYPE with MSG.
