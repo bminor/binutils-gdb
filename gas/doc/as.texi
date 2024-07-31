@@ -4788,7 +4788,7 @@ and use the result as a string.
 
 @item No passing arguments to macros based upon keyword assignment.
 In altmacro mode arguments cannot be passed to macros by keyword assignment.
-See @xref{altmacro-keyword-arguments} for more details
+See @xref{altmacro-keyword-arguments}.
 @end ftable
 
 @node Ascii
