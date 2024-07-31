@@ -108,9 +108,9 @@ proc test_backtrace { expect_fail } {
     set total_expected 5
 
     if { $expect_fail } {
-	set testname "backtrace (with wrong libs)"
+	set testname "backtrace, with wrong libs"
     } else {
-	set testname "backtrace (with right libs)"
+	set testname "backtrace, with right libs"
     }
     # N.B. The order of the tests here is important.
     # We need to count each function in the backtrace, and expect matches
@@ -137,7 +137,7 @@ proc test_backtrace { expect_fail } {
 	    exp_continue
 	}
 	-re "\[\r\n\]$gdb_prompt $" {
-	    pass "$testname (data collection)"
+	    pass "$testname, data collection"
 	}
     }
 

@@ -175,12 +175,12 @@ if {[test_compiler_info {gcc-[0-3]-*}]
     # and DW_AT_MIPS_linkage_name = _ZN9gnu_obj_47nowhereE .
     setup_xfail *-*-*
 }
-gdb_test "print test4.nowhere" "<optimized out>" "static const int initialized nowhere (print field)"
+gdb_test "print test4.nowhere" "<optimized out>" "static const int initialized nowhere, print field"
 gdb_test "ptype test4.nowhere" "type = const int"
 gdb_test "print test4.nowhere.nowhere" "Attempt to extract a component of a value that is not a structure."
 
 # Same, but print the whole struct.
-gdb_test "print test4" "static nowhere = <optimized out>.*" "static const int initialized nowhere (whole struct)"
+gdb_test "print test4" "static nowhere = <optimized out>.*" "static const int initialized nowhere, whole struct"
 
 # static const initialized in the class definition, PR gdb/11702.
 if { $non_dwarf } { setup_xfail *-*-* }

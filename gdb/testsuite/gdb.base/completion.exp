@@ -543,10 +543,10 @@ gdb_test_multiple "" "$test" {
 		# Eat the prompt
 		gdb_expect {
 		    -re "$gdb_prompt " {
-			pass "$test (eat prompt)"
+			pass "$test, eat prompt"
 		    }
 		    timeout {
-			fail "(timeout) $test (eat prompt)"
+			fail "$test, eat prompt (timeout)"
 		    }
 		}
 
@@ -572,10 +572,10 @@ gdb_test_multiple "" "$test" {
 		# Eat the prompt
 		gdb_expect {
 		    -re "$gdb_prompt " {
-			pass "$test (eat prompt)"
+			pass "$test, eat prompt"
 		    }
 		    timeout {
-			fail "(timeout) $test (eat prompt)"
+			fail "$test, eat prompt (timeout)"
 		    }
 		}
 

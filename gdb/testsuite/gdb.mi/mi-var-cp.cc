@@ -19,15 +19,15 @@ void reference_update_tests ()
   int x = 167;
   /*: mi_create_varobj "RX" "rx" "create varobj for rx" :*/
   int& rx = x;
-  /*: mi_varobj_update RX {RX} "update RX (1)"
+  /*: mi_varobj_update RX {RX} "update RX, 1"
       mi_check_varobj_value RX 167 "check RX: expect 167"
       :*/
   x = 567;
-  /*: mi_varobj_update RX {RX} "update RX (2)"
+  /*: mi_varobj_update RX {RX} "update RX, 2"
       mi_check_varobj_value RX 567 "check RX: expect 567"
       :*/  
   x = 567;
-  /*: mi_varobj_update RX {} "update RX (3)"
+  /*: mi_varobj_update RX {} "update RX, 3"
       mi_delete_varobj RX "delete RX"
     :*/
   /* Dummy assignment to keep 'x' in scope.  */

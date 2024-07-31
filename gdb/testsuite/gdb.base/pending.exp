@@ -39,7 +39,7 @@ clean_restart
 
 gdb_test_multiple "break pendfunc1" "set pending breakpoint" {
      -re ".*Make breakpoint pending.*y or \\\[n\\\]. $" {
-	    gdb_test "y" "Breakpoint.*pendfunc1.*pending." "set pending breakpoint (without symbols)"
+	    gdb_test "y" "Breakpoint.*pendfunc1.*pending." "set pending breakpoint, without symbols"
      }
 }
 
@@ -49,7 +49,7 @@ gdb_test "complete condition " "condition 1"
 gdb_test "info break" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*pendfunc1.*" \
-"single pending breakpoint info (without symbols)"
+"single pending breakpoint info, without symbols"
 
 with_test_prefix "first load" {
     gdb_load ${binfile}

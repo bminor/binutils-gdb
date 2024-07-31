@@ -195,7 +195,7 @@ gdb_test "x/wx buf3" "$hex:\[ \t\]+0x00000000" \
 # test reinit_frame_cache
 
 gdb_load ${binfile}
-gdb_test "up" "#\[0-9\]* *(\[0-9xa-fH'\]* in)? .* \\(.*\\).*" "up (reinit)"
+gdb_test "up" "#\[0-9\]* *(\[0-9xa-fH'\]* in)? .* \\(.*\\).*" "up, reinit"
 
 gdb_test "core" "No core file now."
 
