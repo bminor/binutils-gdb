@@ -370,7 +370,7 @@ with_debuginfod_env $cache {
     gdb_load $binfile
 
     load_core_file "load corefile, download library from debuginfod" \
-	"Downloading\[^\r\n\]* executable for [string_to_regexp $library_filename]\\.\\.\\."
+	"Downloading\[^\r\n\]* file [string_to_regexp $library_filename]\\.\\.\\."
 
     set ptr_value [read_ptr_value]
     gdb_assert { $ptr_value == $ptr_expected_value } \

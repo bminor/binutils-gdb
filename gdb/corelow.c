@@ -255,6 +255,27 @@ public:
     return m_mapped_file_info.lookup (filename, addr);
   }
 
+  /* Return a string containing the expected executable filename obtained
+     from the mapped file information within the core file.  The filename
+     returned will be for the mapped file whose ELF headers are mapped at
+     the lowest address (i.e. which GDB encounters first).
+
+     If no suitable filename can be found then the returned string will be
+     empty.
+
+     If there are no build-ids embedded into the core file then the
+     returned string will be empty.
+
+     If a non-empty string is returned then there is no guarantee that the
+     named file exists on disk, or if it does exist on disk, then the
+     on-disk file might have a different build-id to the desired
+     build-id.  */
+  const std::string &
+  expected_exec_filename () const
+  {
+    return m_expected_exec_filename;
+  }
+
 private: /* per-core data */
 
   /* Get rid of the core inferior.  */
@@ -289,6 +310,11 @@ private: /* per-core data */
   /* FIXME: kettenis/20031023: Eventually this field should
      disappear.  */
   struct gdbarch *m_core_gdbarch = NULL;
+
+  /* If not empty then this contains the name of the executable discovered
+     when processing the memory-mapped file information.  This will only
+     be set if we find a mapped with a suitable build-id.  */
+  std::string m_expected_exec_filename;
 };
 
 core_target::core_target ()
@@ -418,10 +444,22 @@ core_target::build_file_mappings ()
 	  }
       });
 
+  /* Get the build-id of the core file.  */
+  const bfd_build_id *core_build_id
+    = build_id_bfd_get (current_program_space->core_bfd ());
+
   for (const auto &iter : mapped_files)
     {
       const std::string &filename = iter.first;
       const mapped_file &file_data = iter.second;
+
+      /* If this mapped file has the same build-id as was discovered for
+	 the core-file itself, then we assume this is the main
+	 executable.  Record the filename as we can use this later.  */
+      if (file_data.build_id != nullptr
+	  && m_expected_exec_filename.empty ()
+	  && build_id_equal (file_data.build_id, core_build_id))
+	m_expected_exec_filename = filename;
 
       /* Use exec_file_find() to do sysroot expansion.  It'll
 	 also strip the potential sysroot "target:" prefix.  If
@@ -832,14 +870,29 @@ rename_vmcore_idle_reg_sections (bfd *abfd, inferior *inf)
    BFD ABFD.  */
 
 static void
-locate_exec_from_corefile_build_id (bfd *abfd, int from_tty)
+locate_exec_from_corefile_build_id (bfd *abfd, core_target *target,
+				    int from_tty)
 {
   const bfd_build_id *build_id = build_id_bfd_get (abfd);
   if (build_id == nullptr)
     return;
 
+  /* The filename used for the find_objfile_by_build_id call.  */
+  std::string filename;
+
+  if (!target->expected_exec_filename ().empty ())
+    filename = target->expected_exec_filename ();
+  else
+    {
+      /* We didn't find an executable name from the mapped file
+	 information, so as a stand-in build a string based on the
+	 build-id.  */
+      std::string build_id_hex_str = bin2hex (build_id->data, build_id->size);
+      filename = string_printf ("with build-id %s", build_id_hex_str.c_str ());
+    }
+
   gdb_bfd_ref_ptr execbfd
-    = find_objfile_by_build_id (build_id, abfd->filename);
+    = find_objfile_by_build_id (build_id, filename.c_str ());
 
   if (execbfd != nullptr)
     {
@@ -972,7 +1025,7 @@ core_target_open (const char *arg, int from_tty)
 
   if (current_program_space->exec_bfd () == nullptr)
     locate_exec_from_corefile_build_id (current_program_space->core_bfd (),
-					from_tty);
+					target, from_tty);
 
   post_create_inferior (from_tty);
 

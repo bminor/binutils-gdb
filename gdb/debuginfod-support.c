@@ -409,7 +409,7 @@ debuginfod_exec_query (const unsigned char *build_id,
   std::optional<target_terminal::scoped_restore_terminal_state> term_state;
 
   {
-    user_data data ("executable for", filename);
+    user_data data ("file", filename);
 
     debuginfod_set_user_data (c, &data);
     if (target_supports_terminal_ours ())
@@ -423,7 +423,7 @@ debuginfod_exec_query (const unsigned char *build_id,
     debuginfod_set_user_data (c, nullptr);
   }
 
-  print_outcome (fd.get (), "executable for", filename);
+  print_outcome (fd.get (), "file", filename);
 
   if (fd.get () >= 0)
     destname->reset (dname);
