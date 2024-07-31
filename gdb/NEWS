@@ -40,6 +40,13 @@
   history has been reached.  It also specifies that the forward execution can
   continue, and the recording will also continue.
 
+* New commands
+
+maintenance info inline-frames [ADDRESS]
+  New command which displays GDB's inline-frame information for the
+  current address, or for ADDRESS if specified.  The output identifies
+  inlined frames which start at the specified address.
+
 *** Changes in GDB 15
 
 * The MPX commands "show/set mpx bound" have been deprecated, as Intel

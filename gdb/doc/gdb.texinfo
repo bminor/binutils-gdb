@@ -41858,6 +41858,117 @@ frame-id for frame #0: @{stack=0x7fffffffac70,code=0x0000000000401106,!special@}
 frame-id for frame #2: @{stack=0x7fffffffac90,code=0x000000000040111c,!special@}
 @end smallexample
 
+@item maint info inline-frames
+@itemx maint info inline-frames @var{address}
+@cindex frames of inlined functions
+@kindex maint info inline-frames
+Print information about inlined frames which start at the current
+address, or @var{address} if specified.
+
+In order to allow the user to correctly step into inlined functions,
+@value{GDBN} needs to identify which inlined functions start at a
+particular address, and @value{GDBN} also needs to track which of
+these functions was last displayed to the user as the current frame.
+
+Imagine a situation where function @code{main} calls @code{foo}, which
+then calls @code{bar}, something like this:
+
+@smallexample
+@group
+int
+main ()
+@{
+  /* Some interesting code here...  */
+
+  foo ();
+
+  /* More interesting code here... */
+@}
+
+void
+foo ()
+@{
+  bar ();
+@}
+
+void
+bar ()
+@{
+  /* Some interesting code here...  */
+@}
+@end group
+@end smallexample
+
+As both @code{foo} and @code{bar} are inlined within @code{main} then
+there could be one address within @code{main} which is also the start
+of @code{foo} and also the start of @code{bar}.  When the user stops
+at this address they will initially be told the inferior is in
+@code{main}, if the user does a @kbd{step} then @value{GDBN} doesn't
+actually step the inferior, instead the user is told the inferior
+entered @code{foo}.  After the next @kbd{step} the user is told the
+inferior entered @code{bar}.  The @kbd{maint info inline-frames}
+command can be used to view this internal @value{GDBN} state, like
+this:
+
+@smallexample
+@group
+(@value{GDBP}) step
+24	  foo ();
+(@value{GDBP}) maintenance info inline-frames
+Cached inline state information for thread 1.
+program counter = 0x401137
+skipped frames = 2
+  bar
+  foo
+> main
+@end group
+@end smallexample
+
+Here the user is stopped in @code{main} at the call to @code{foo}.  The
+inline-frames information shows that at this address @value{GDBN} has
+found the start of inlined functions @code{bar} and @code{foo}, but
+currently @value{GDBN} has skipped 2 frames and considers @code{main}
+to be the current frame, this is indicated with the @samp{>}.
+
+If the user performs a @kbd{step} to enter @code{foo} then the
+situation is updated:
+
+@smallexample
+@group
+(@value{GDBP}) step
+foo () at inline.c:14
+14	  bar ();
+(@value{GDBP}) maintenance info inline-frames
+Cached inline state information for thread 1.
+program counter = 0x401137
+skipped frames = 1
+  bar
+> foo
+  main
+@end group
+@end smallexample
+
+Notice that the program counter value @code{0x401137} hasn't change,
+but now @value{GDBN} considers @code{foo} to be the current frame, and
+it is marked as such with the @samp{>}.
+
+Finally, the user performs another @kbd{step} to enter @code{bar}:
+
+@smallexample
+@group
+(@value{GDBP}) step
+bar () at inline.c:6
+6	  ++global_counter;
+(@value{GDBP}) maintenance info inline-frames
+Cached inline state information for thread 1.
+program counter = 0x401137
+skipped frames = 0
+> bar
+  foo
+  main
+@end group
+@end smallexample
+
 @kindex maint print registers
 @kindex maint print raw-registers
 @kindex maint print cooked-registers
