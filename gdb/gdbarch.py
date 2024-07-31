@@ -119,7 +119,7 @@ with open("gdbarch-gen.h", "w") as f:
                 file=f,
             )
 
-with open("gdbarch.c", "w") as f:
+with open("gdbarch-gen.c", "w") as f:
     print(copyright, file=f)
     print(file=f)
     print(file=f)

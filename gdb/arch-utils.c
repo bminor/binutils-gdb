@@ -1192,7 +1192,7 @@ pstring_list (const char *const *list)
   return ret;
 }
 
-#include "gdbarch.c"
+#include "gdbarch-gen.c"
 
 enum return_value_convention
 default_gdbarch_return_value
