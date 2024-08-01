@@ -19,7 +19,7 @@ AARCH64 GAS  .*
   11 \?\?\?\? 02000014 		b       .L3
   11              	ginsn: JMP 
   12 \?\?\?\? 20021FD6 		br      x17
-  12              	ginsn: JMP %r17, 
+  12              	ginsn: JMP %r17
   13              	.L3:
   13              	ginsn: SYM .L3
   14 \?\?\?\? 60003FD6 		blr     x3

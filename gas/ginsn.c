@@ -477,14 +477,14 @@ ginsn_src_print (struct ginsn_src *src)
   switch (src->type)
     {
     case GINSN_SRC_REG:
-      snprintf (src_str, len, "%%r%d, ", ginsn_get_src_reg (src));
+      snprintf (src_str, len, "%%r%d", ginsn_get_src_reg (src));
       break;
     case GINSN_SRC_IMM:
-      snprintf (src_str, len, "%lld, ",
+      snprintf (src_str, len, "%lld",
 		(long long int) ginsn_get_src_imm (src));
       break;
     case GINSN_SRC_INDIRECT:
-      snprintf (src_str, len, "[%%r%d+%lld], ", ginsn_get_src_reg (src),
+      snprintf (src_str, len, "[%%r%d+%lld]", ginsn_get_src_reg (src),
 		(long long int) ginsn_get_src_disp (src));
       break;
     default:
@@ -578,16 +578,22 @@ ginsn_print (ginsnS *ginsn)
   /* src 2.  */
   src = ginsn_get_src2 (ginsn);
   src_buf = ginsn_src_print (src);
-  str_size += snprintf (ginsn_str + str_size, GINSN_LISTING_LEN - str_size,
-			"%s", src_buf);
+  if (strlen (src_buf))
+    {
+      str_size += snprintf (ginsn_str + str_size, GINSN_LISTING_LEN - str_size,
+			    ", %s", src_buf);
+    }
   free (src_buf);
   gas_assert (str_size >= 0 && str_size < GINSN_LISTING_LEN);
 
   /* dst.  */
   dst = ginsn_get_dst (ginsn);
   char *dst_buf = ginsn_dst_print (dst);
-  str_size += snprintf (ginsn_str + str_size, GINSN_LISTING_LEN - str_size,
-			"%s", dst_buf);
+  if (strlen (dst_buf))
+    {
+      str_size += snprintf (ginsn_str + str_size, GINSN_LISTING_LEN - str_size,
+			    ", %s", dst_buf);
+    }
   free (dst_buf);
 
 end:
