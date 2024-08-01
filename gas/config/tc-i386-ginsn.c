@@ -469,6 +469,61 @@ x86_ginsn_jump (const symbolS *insn_end_sym, bool cond_p)
 }
 
 static ginsnS *
+x86_ginsn_indirect_branch (const symbolS *insn_end_sym)
+{
+  ginsnS *ginsn = NULL;
+  const reg_entry *mem_reg;
+  unsigned int dw2_regnum;
+
+  ginsnS * (*ginsn_func) (const symbolS *sym, bool real_p,
+			  enum ginsn_src_type src_type, unsigned int src_reg,
+			  const symbolS *src_ginsn_sym);
+
+  /* Other cases are not expected.  */
+  gas_assert (i.tm.extension_opcode == 4 || i.tm.extension_opcode == 2);
+
+  if (i.tm.extension_opcode == 4)
+    /* 0xFF /4 (jmp r/m).  */
+    ginsn_func = ginsn_new_jump;
+  else if (i.tm.extension_opcode == 2)
+    /* 0xFF /2 (call r/m).  */
+    ginsn_func = ginsn_new_call;
+
+  if (i.reg_operands)
+    {
+      dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
+      ginsn = ginsn_func (insn_end_sym, true,
+			  GINSN_SRC_REG, dw2_regnum, NULL);
+      ginsn_set_where (ginsn);
+    }
+  else if (i.mem_operands)
+    {
+      /* Handle jump/call near, absolute indirect, address.
+	 E.g., jmp/call *imm(%rN),  jmp/call *sym(,%rN,imm)
+	 or  jmp/call *sym(%rN) etc.  */
+      mem_reg = i.base_reg ? i.base_reg : i.index_reg;
+      /* Generate a ginsn, even if it is with TBD_GINSN_INFO_LOSS.  Otherwise,
+	 the user gets the impression of missing functionality due to this
+	 being a COFI and alerted for via the x86_ginsn_unhandled () workflow
+	 as unhandled operation (which can be misleading for users).
+
+	 Indirect branches make the code block ineligible for SCFI; Hence, an
+	 approximate ginsn will not affect SCFI correctness:
+	   - Use dummy register if no base or index
+	   - Skip symbol information, if any.
+	 Note this case of TBD_GINSN_GEN_NOT_SCFI.  */
+      dw2_regnum = (mem_reg
+		    ? ginsn_dw2_regnum (mem_reg)
+		    : GINSN_DW2_REGNUM_RSI_DUMMY);
+      ginsn = ginsn_func (insn_end_sym, true,
+			  GINSN_SRC_REG, dw2_regnum, NULL);
+      ginsn_set_where (ginsn);
+    }
+
+  return ginsn;
+}
+
+static ginsnS *
 x86_ginsn_enter (const symbolS *insn_end_sym)
 {
   ginsnS *ginsn = NULL;
@@ -977,50 +1032,8 @@ x86_ginsn_new (const symbolS *insn_end_sym, enum ginsn_gen_mode gmode)
 	  ginsn_set_where (ginsn_next);
 	  gas_assert (!ginsn_link_next (ginsn, ginsn_next));
 	}
-      else if (i.tm.extension_opcode == 4)
-	{
-	  /* jmp r/m.  E.g., notrack jmp *%rax.  */
-	  if (i.reg_operands)
-	    {
-	      dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
-	      ginsn = ginsn_new_jump (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	  else if (i.mem_operands && i.index_reg)
-	    {
-	      /* jmp    *0x0(,%rax,8).  */
-	      dw2_regnum = ginsn_dw2_regnum (i.index_reg);
-	      ginsn = ginsn_new_jump (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	  else if (i.mem_operands && i.base_reg)
-	    {
-	      dw2_regnum = ginsn_dw2_regnum (i.base_reg);
-	      ginsn = ginsn_new_jump (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	}
-      else if (i.tm.extension_opcode == 2)
-	{
-	  /* 0xFF /2 (call).  */
-	  if (i.reg_operands)
-	    {
-	      dw2_regnum = ginsn_dw2_regnum (i.op[0].regs);
-	      ginsn = ginsn_new_call (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	  else if (i.mem_operands && i.base_reg)
-	    {
-	      dw2_regnum = ginsn_dw2_regnum (i.base_reg);
-	      ginsn = ginsn_new_call (insn_end_sym, true,
-				      GINSN_SRC_REG, dw2_regnum, NULL);
-	      ginsn_set_where (ginsn);
-	    }
-	}
+      else if (i.tm.extension_opcode == 4 || i.tm.extension_opcode == 2)
+	ginsn = x86_ginsn_indirect_branch (insn_end_sym);
       break;
 
     case 0xc2: /* ret imm16.  */
