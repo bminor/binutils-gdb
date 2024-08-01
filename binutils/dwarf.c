@@ -2119,7 +2119,10 @@ get_type_abbrev_from_form (unsigned long form,
 	*map_return = NULL;
     }
 
-  READ_ULEB (abbrev_number, data, section->start + section->size);
+  if (form == DW_FORM_ref_addr)
+    cu_end = section->start + map->end;
+
+  READ_ULEB (abbrev_number, data, cu_end);
 
   for (entry = map->list->first_abbrev; entry != NULL; entry = entry->next)
     if (entry->number == abbrev_number)
