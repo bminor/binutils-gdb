@@ -1104,10 +1104,16 @@ proc_with_prefix test_invalid_args {} {
     "12" \
     "TypeError.*: format_string\\(\\) takes 0 positional arguments but 1 were given.*"
 
+  # For python <= 3.12.
+  set re1 \
+    "TypeError.*: 'invalid' is an invalid keyword argument for this function"
+  # For python >= 3.13.
+  set re2 \
+    "TypeError.*: this function got an unexpected keyword argument 'invalid'"
   check_format_string \
     "a_point_t" \
     "invalid=True" \
-    "TypeError.*: 'invalid' is an invalid keyword argument for this function.*"
+    "($re1|$re2).*"
 
   check_format_string \
     "a_point_t" \
