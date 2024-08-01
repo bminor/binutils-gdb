@@ -469,7 +469,8 @@ ginsn_direct_local_jump_p (ginsnS *ginsn)
 static char *
 ginsn_src_print (struct ginsn_src *src)
 {
-  size_t len = 40;
+  int str_size = 0;
+  const size_t len = GINSN_LISTING_OPND_LEN;
   char *src_str = XNEWVEC (char, len);
 
   memset (src_str, 0, len);
@@ -477,19 +478,22 @@ ginsn_src_print (struct ginsn_src *src)
   switch (src->type)
     {
     case GINSN_SRC_REG:
-      snprintf (src_str, len, "%%r%d", ginsn_get_src_reg (src));
+      str_size = snprintf (src_str, len, "%%r%d", ginsn_get_src_reg (src));
       break;
     case GINSN_SRC_IMM:
-      snprintf (src_str, len, "%lld",
-		(long long int) ginsn_get_src_imm (src));
+      str_size = snprintf (src_str, len, "%lld",
+			   (long long int) ginsn_get_src_imm (src));
       break;
     case GINSN_SRC_INDIRECT:
-      snprintf (src_str, len, "[%%r%d+%lld]", ginsn_get_src_reg (src),
-		(long long int) ginsn_get_src_disp (src));
+      str_size = snprintf (src_str, len, "[%%r%d+%lld]",
+			   ginsn_get_src_reg (src),
+			   (long long int) ginsn_get_src_disp (src));
       break;
     default:
       break;
     }
+
+  gas_assert (str_size >= 0 && str_size < (int)len);
 
   return src_str;
 }
@@ -498,24 +502,30 @@ static char*
 ginsn_dst_print (struct ginsn_dst *dst)
 {
   int str_size = 0;
-  size_t len = GINSN_LISTING_OPND_LEN;
+  const size_t len = GINSN_LISTING_OPND_LEN;
   char *dst_str = XNEWVEC (char, len);
 
   memset (dst_str, 0, len);
 
-  if (dst->type == GINSN_DST_REG)
-    str_size = snprintf (dst_str, GINSN_LISTING_OPND_LEN,
-			 "%%r%d", ginsn_get_dst_reg (dst));
-  else if (dst->type == GINSN_DST_INDIRECT)
-    str_size = snprintf (dst_str, GINSN_LISTING_OPND_LEN,
-			 "[%%r%d+%lld]", ginsn_get_dst_reg (dst),
-			 (long long int) ginsn_get_dst_disp (dst));
-  else if (dst->type != GINSN_DST_UNKNOWN)
-    /* Other dst types are unexpected.  */
-    gas_assert (false);
+  switch (dst->type)
+    {
+    case GINSN_DST_REG:
+      str_size = snprintf (dst_str, len,
+			   "%%r%d", ginsn_get_dst_reg (dst));
+      break;
+    case GINSN_DST_INDIRECT:
+      str_size = snprintf (dst_str, len,
+			   "[%%r%d+%lld]", ginsn_get_dst_reg (dst),
+			   (long long int) ginsn_get_dst_disp (dst));
+      break;
+    default:
+      /* Other dst types are unexpected.  */
+      gas_assert (dst->type == GINSN_DST_UNKNOWN);
+      break;
+    }
 
   /* str_size will remain 0 when GINSN_DST_UNKNOWN.  */
-  gas_assert (str_size >= 0 && str_size < GINSN_LISTING_OPND_LEN);
+  gas_assert (str_size >= 0 && str_size < (int)len);
 
   return dst_str;
 }
