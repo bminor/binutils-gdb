@@ -29,9 +29,6 @@ extern unsigned long or1k_machine;
 #define TARGET_FORMAT           "elf32-or1k"
 #define TARGET_BYTES_BIG_ENDIAN 1
 
-extern const char or1k_comment_chars [];
-#define tc_comment_chars or1k_comment_chars
-
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 

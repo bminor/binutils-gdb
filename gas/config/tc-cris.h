@@ -50,11 +50,6 @@ extern size_t md_longopts_size;
 
 extern const pseudo_typeS md_pseudo_table[];
 
-#define tc_comment_chars cris_comment_chars
-extern const char cris_comment_chars[];
-extern const char line_comment_chars[];
-extern const char line_separator_chars[];
-
 /* This should be optional, since it is ignored as an escape (assumed to
    be itself) if it is not recognized.  */
 #define ONLY_STANDARD_ESCAPES

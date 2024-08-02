@@ -49,7 +49,7 @@ typedef struct
 }
 or1k_insn;
 
-const char comment_chars[]        = "#";
+const char comment_chars[]        = ";#";
 const char line_comment_chars[]   = "#";
 const char line_separator_chars[] = ";";
 const char EXP_CHARS[]            = "eE";
@@ -89,8 +89,6 @@ s_nodelay (int val ATTRIBUTE_UNUSED)
 {
   nodelay = true;
 }
-
-const char or1k_comment_chars [] = ";#";
 
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =

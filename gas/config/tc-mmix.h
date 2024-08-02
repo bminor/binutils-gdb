@@ -26,9 +26,6 @@
 #define TARGET_ARCH bfd_arch_mmix
 #define TARGET_BYTES_BIG_ENDIAN 1
 
-extern const char mmix_comment_chars[];
-#define tc_comment_chars mmix_comment_chars
-
 extern const char mmix_symbol_chars[];
 #define tc_symbol_chars mmix_symbol_chars
 

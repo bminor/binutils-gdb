@@ -211,7 +211,7 @@ static int warn_for_branch_expansion = 0;
 static int err_for_dangerous_mul_placement
  = (XCONCAT2 (arch_,DEFAULT_CRIS_ARCH) != arch_crisv32);
 
-const char cris_comment_chars[] = ";";
+const char comment_chars[] = ";";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'

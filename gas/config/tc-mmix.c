@@ -382,7 +382,7 @@ const pseudo_typeS md_pseudo_table[] =
    {NULL, 0, 0}
  };
 
-const char mmix_comment_chars[] = "%!";
+const char comment_chars[] = "%!";
 
 /* A ':' is a valid symbol character in mmixal.  It's the prefix
    delimiter, but other than that, it works like a symbol character,

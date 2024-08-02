@@ -63,9 +63,6 @@ extern long visium_pcrel_from_section (struct fix *, segT);
 
 #define md_operand(x)
 
-#define tc_comment_chars visium_comment_chars
-extern const char *visium_comment_chars;
-
 #define TARGET_USE_CFIPOP 1
 
 #define tc_cfi_frame_initial_instructions visium_cfi_frame_initial_instructions
