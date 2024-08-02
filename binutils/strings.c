@@ -1350,8 +1350,8 @@ usage (FILE *stream, int status)
   -T --target=<BFDNAME>     Specify the binary file format\n\
   -e --encoding={s,S,b,l,B,L} Select character size and endianness:\n\
                             s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n\
-  --unicode={default|show|invalid|hex|escape|highlight}\n\
-  -U {d|s|i|x|e|h}          Specify how to treat UTF-8 encoded unicode characters\n\
+  --unicode={default|locale|invalid|hex|escape|highlight}\n\
+  -U {d|l|i|x|e|h}          Specify how to treat UTF-8 encoded unicode characters\n\
   -s --output-separator=<string> String used to separate strings in output.\n\
   @<file>                   Read options from <file>\n\
   -h --help                 Display this information\n\
