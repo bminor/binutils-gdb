@@ -1324,8 +1324,11 @@ read_a_source_file (const char *name)
 	      s = input_line_pointer;
 	      if (!startswith (s, "APP\n"))
 		{
-		  /* We ignore it.  */
-		  ignore_rest_of_line ();
+		  /* We ignore it.  Note: Not ignore_rest_of_line ()!  */
+		  while (s <= buffer_limit)
+		    if (is_end_of_line (*s++))
+		      break;
+		  input_line_pointer = s;
 		  continue;
 		}
 	      bump_line_counters ();
@@ -3974,7 +3977,7 @@ demand_empty_rest_of_line (void)
   /* Return pointing just after end-of-line.  */
 }
 
-/* Silently advance to the end of line.  Use this after already having
+/* Silently advance to the end of a statement.  Use this after already having
    issued an error about something bad.  Like demand_empty_rest_of_line,
    this function may leave input_line_pointer one after buffer_limit;
    Don't call it from within expression parsing code in an attempt to
@@ -3984,9 +3987,9 @@ void
 ignore_rest_of_line (void)
 {
   while (input_line_pointer <= buffer_limit)
-    if (is_end_of_line[(unsigned char) *input_line_pointer++])
+    if (is_end_of_stmt (*input_line_pointer++))
       break;
-  /* Return pointing just after end-of-line.  */
+  /* Return pointing just after end-of-statement.  */
 }
 
 /* Sets frag for given symbol to zero_address_frag, except when the

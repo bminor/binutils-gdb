@@ -106,6 +106,7 @@ if [gas_32_check] then {
     run_list_test "equ-2" "-al"
     run_list_test "equ-bad"
     run_list_test "comments" "-almn"
+    run_dump_test "line-comment"
     run_dump_test "curly"
     run_dump_test "separator"
     run_dump_test "divide"

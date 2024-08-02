@@ -490,6 +490,10 @@ if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] } {
     run_list_test const-1 "-alm"
 }
 
+if { ![istarget "tic30-*-*"] } {
+    run_dump_test "line-comment"
+}
+
 run_list_test macro "-alm"
 
 run_list_test pr20312

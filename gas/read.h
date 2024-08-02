@@ -58,6 +58,14 @@ extern bool input_from_string;
 #define is_name_ender(c) \
   ( lex_type[(unsigned char) (c)] & LEX_END_NAME   )
 
+/* The distinction of "line" and "statement" sadly is blurred by unhelpful
+   naming of e.g. the underlying array.  Most users really mean "end of
+   statement".  Going forward only these wrappers are supposed to be used.  */
+#define is_end_of_stmt(c) \
+  (is_end_of_line[(unsigned char) (c)])
+#define is_end_of_line(c) \
+  (is_end_of_line[(unsigned char) (c)] == 1)
+
 #ifndef is_a_char
 #define CHAR_MASK	(0xff)
 #define NOT_A_CHAR	(CHAR_MASK+1)
