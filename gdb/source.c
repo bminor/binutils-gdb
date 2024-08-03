@@ -319,13 +319,13 @@ select_source_symtab ()
 				     SEARCH_FUNCTION_DOMAIN, nullptr);
   if (bsym.symbol != nullptr)
     {
-      symtab_and_line sal = find_function_start_sal (bsym.symbol, true);
+      symtab_and_line sal = find_function_start_sal (bsym.symbol, false);
       if (sal.symtab == NULL)
 	/* We couldn't find the location of `main', possibly due to missing
 	   line number info, fall back to line 1 in the corresponding file.  */
 	loc->set (bsym.symbol->symtab (), 1);
       else
-	loc->set (sal.symtab, std::max (sal.line - (lines_to_list - 1), 1));
+	loc->set (sal.symtab, sal.line);
       return;
     }
 
