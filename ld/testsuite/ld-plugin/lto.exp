@@ -547,6 +547,22 @@ set lto_link_elf_tests [list \
    "pr31956b" \
   ] \
   [list \
+   "PR ld/31956 (malloc)" \
+   "-Wl,--wrap=malloc" \
+   "-O2 -flto" \
+   {pr31956c.c} \
+   {} \
+   "pr31956c" \
+  ] \
+  [list \
+   "PR ld/31956 (unused)" \
+   "-Wl,--wrap=parse_line" \
+   "-O2 -flto" \
+   {pr31956d.c} \
+   {{"nm" {} "pr31956d.d"}} \
+   "pr31956d" \
+  ] \
+  [list \
    "Build pr30281.so" \
    "-shared -Wl,--version-script,pr30281.t \
     -O2 -fPIC -flto-partition=max -flto=2" \

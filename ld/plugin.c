@@ -778,8 +778,18 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
 	{
 	  blhe = h;
 	  /* Check if a symbol is a wrapper symbol.  */
-	  if (blhe && blhe->wrapper_symbol)
-	    wrap_status = wrapper;
+	  if (blhe)
+	    {
+	      if (blhe->wrapper_symbol)
+		wrap_status = wrapper;
+	      else if (link_info.wrap_hash != NULL)
+		{
+		  struct bfd_link_hash_entry *unwrap
+		    = unwrap_hash_lookup (&link_info, (bfd *) abfd, blhe);
+		  if (unwrap != NULL && unwrap != h)
+		    wrap_status = wrapper;
+		}
+	    }
 	}
       else
 	{
