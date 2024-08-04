@@ -1466,10 +1466,11 @@ static struct riscv_supported_ext riscv_supported_std_zxm_ext[] =
 
 static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
 {
-  {"xcvmac",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xcvalu",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
-  {"xcvelw",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xcvbi",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xcvbitmanip",	ISA_SPEC_CLASS_DRAFT,   1, 0, 0 },
+  {"xcvelw",		ISA_SPEC_CLASS_DRAFT,   1, 0, 0 },
+  {"xcvmac",		ISA_SPEC_CLASS_DRAFT,   1, 0, 0 },
   {"xcvmem",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadba",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadbb",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
@@ -2721,14 +2722,16 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "svinval");
     case INSN_CLASS_H:
       return riscv_subset_supports (rps, "h");
-    case INSN_CLASS_XCVMAC:
-      return riscv_subset_supports (rps, "xcvmac");
     case INSN_CLASS_XCVALU:
       return riscv_subset_supports (rps, "xcvalu");
-    case INSN_CLASS_XCVELW:
-      return riscv_subset_supports (rps, "xcvelw");
     case INSN_CLASS_XCVBI:
       return riscv_subset_supports (rps, "xcvbi");
+    case INSN_CLASS_XCVBITMANIP:
+      return riscv_subset_supports (rps, "xcvbitmanip");
+    case INSN_CLASS_XCVELW:
+      return riscv_subset_supports (rps, "xcvelw");
+    case INSN_CLASS_XCVMAC:
+      return riscv_subset_supports (rps, "xcvmac");
     case INSN_CLASS_XCVMEM:
       return riscv_subset_supports (rps, "xcvmem");
     case INSN_CLASS_XTHEADBA:
@@ -2999,14 +3002,16 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "svinval";
     case INSN_CLASS_H:
       return _("h");
-    case INSN_CLASS_XCVMAC:
-      return "xcvmac";
     case INSN_CLASS_XCVALU:
       return "xcvalu";
-    case INSN_CLASS_XCVELW:
-      return "xcvelw";
     case INSN_CLASS_XCVBI:
       return "xcvbi";
+    case INSN_CLASS_XCVBITMANIP:
+      return "xcvbitmanip";
+    case INSN_CLASS_XCVELW:
+      return "xcvelw";
+    case INSN_CLASS_XCVMAC:
+      return "xcvmac";
     case INSN_CLASS_XCVMEM:
       return "xcvmem";
     case INSN_CLASS_XTHEADBA:

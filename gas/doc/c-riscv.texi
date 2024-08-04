@@ -740,13 +740,18 @@ extensions supported and provides the location of their
 publicly-released documentation:
 
 @table @r
-@item XCvMac
-The XCvMac extension provides instructions for multiply-accumulate operations.
+@item XCvAlu
+The XCvAlu extension provides instructions for general ALU operations.
 
 It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
 
-@item XCvAlu
-The XCvAlu extension provides instructions for general ALU operations.
+@item XCvBi
+The XCvBi extension provides instructions for branch immediate operations.
+
+It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
+
+@item XCvBitmanip
+The XCvBitmanip extension provides instructions for bitmanip operations.
 
 It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
 
@@ -755,8 +760,8 @@ The XCvElw extension provides instructions for event load word operations.
 
 It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
 
-@item XCvBi
-The XCvBi extension provides instructions for branch immediate operations.
+@item XCvMac
+The XCvMac extension provides instructions for multiply-accumulate operations.
 
 It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
 

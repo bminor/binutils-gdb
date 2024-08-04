@@ -2339,6 +2339,25 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cv.sw", 0, INSN_CLASS_XCVMEM, "t,d(s)",  MATCH_CV_SWRR,      MASK_CV_SWRR,      match_opcode, 0},
 {"cv.sw", 0, INSN_CLASS_XCVMEM, "t,(s),d", MATCH_CV_SWRRPOST,  MASK_CV_SWRRPOST,  match_opcode, 0},
 
+/* Vendor-specific (CORE-V) Xcvbitmanip instructions.  */
+{"cv.extractr",     0, INSN_CLASS_XCVBITMANIP, "d,s,t", MATCH_CV_EXTRACTR, MASK_CV_EXTRACTR, match_opcode, 0},
+{"cv.extractur",    0, INSN_CLASS_XCVBITMANIP, "d,s,t", MATCH_CV_EXTRACTUR, MASK_CV_EXTRACTUR, match_opcode, 0},
+{"cv.insertr",      0, INSN_CLASS_XCVBITMANIP, "d,s,t", MATCH_CV_INSERTR, MASK_CV_INSERTR, match_opcode, 0},
+{"cv.bclrr",        0, INSN_CLASS_XCVBITMANIP, "d,s,t", MATCH_CV_BCLRR, MASK_CV_BCLRR, match_opcode, 0},
+{"cv.bsetr",        0, INSN_CLASS_XCVBITMANIP, "d,s,t", MATCH_CV_BSETR, MASK_CV_BSETR, match_opcode, 0},
+{"cv.ror",          0, INSN_CLASS_XCVBITMANIP, "d,s,t", MATCH_CV_ROR, MASK_CV_ROR, match_opcode, 0},
+{"cv.ff1",          0, INSN_CLASS_XCVBITMANIP, "d,s",   MATCH_CV_FF1, MASK_CV_FF1, match_opcode, 0},
+{"cv.fl1",          0, INSN_CLASS_XCVBITMANIP, "d,s",   MATCH_CV_FL1, MASK_CV_FL1, match_opcode, 0},
+{"cv.clb",          0, INSN_CLASS_XCVBITMANIP, "d,s",   MATCH_CV_CLB, MASK_CV_CLB, match_opcode, 0},
+{"cv.cnt",          0, INSN_CLASS_XCVBITMANIP, "d,s",   MATCH_CV_CNT, MASK_CV_CNT, match_opcode, 0},
+
+{"cv.extract",      0, INSN_CLASS_XCVBITMANIP, "d,s,Xc6,Xc2", MATCH_CV_EXTRACT, MASK_CV_EXTRACT, match_opcode, 0},
+{"cv.extractu",     0, INSN_CLASS_XCVBITMANIP, "d,s,Xc6,Xc2", MATCH_CV_EXTRACTU, MASK_CV_EXTRACTU, match_opcode, 0},
+{"cv.insert",       0, INSN_CLASS_XCVBITMANIP, "d,s,Xc6,Xc2", MATCH_CV_INSERT, MASK_CV_INSERT, match_opcode, 0},
+{"cv.bclr",         0, INSN_CLASS_XCVBITMANIP, "d,s,Xc6,Xc2", MATCH_CV_BCLR, MASK_CV_BCLR, match_opcode, 0},
+{"cv.bset",         0, INSN_CLASS_XCVBITMANIP, "d,s,Xc6,Xc2", MATCH_CV_BSET, MASK_CV_BSET, match_opcode, 0},
+{"cv.bitrev",       0, INSN_CLASS_XCVBITMANIP, "d,s,Xc7,Xc2", MATCH_CV_BITREV, MASK_CV_BITREV, match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 {"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xtu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
 
