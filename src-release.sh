@@ -47,7 +47,7 @@ DEVO_SUPPORT="ar-lib ChangeLog compile config config-ml.in config.guess \
 	MAINTAINERS Makefile.def Makefile.in Makefile.tpl missing mkdep \
 	mkinstalldirs move-if-change README README-maintainer-mode \
 	SECURITY.txt src-release.sh symlink-tree test-driver ylwrap \
-        multilib.am"
+        multilib.am ChangeLog.git"
 
 # Files in devo/etc used in any net release.
 ETC_SUPPORT="ChangeLog Makefile.am Makefile.in aclocal.m4 add-log.el \

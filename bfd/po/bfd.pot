@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2024-07-20 12:56+0100\n"
+"POT-Creation-Date: 2024-08-04 14:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -979,9 +979,9 @@ msgstr ""
 msgid "%pB: %s' accessed both as normal and thread local symbol"
 msgstr ""
 
-#: elf-m10300.c:2093 elf32-arm.c:13394 elf32-i386.c:3493 elf32-m32r.c:2332
+#: elf-m10300.c:2093 elf32-arm.c:13394 elf32-i386.c:3487 elf32-m32r.c:2332
 #: elf32-m68k.c:3930 elf32-s390.c:3074 elf32-sh.c:3674 elf32-tilepro.c:3274
-#: elf32-xtensa.c:3022 elf64-s390.c:3131 elf64-x86-64.c:4479
+#: elf32-xtensa.c:3022 elf64-s390.c:3131 elf64-x86-64.c:4484
 #: elfxx-sparc.c:2918 elfxx-sparc.c:3815 elfxx-tilegx.c:3666
 #: elfnn-aarch64.c:5726
 #: elfnn-aarch64.c:7344
@@ -1076,11 +1076,11 @@ msgstr ""
 msgid "Removed property %W to merge %pB (not found) and %pB (0x%v)\n"
 msgstr ""
 
-#: elf-properties.c:668 elfxx-aarch64.c:758 elfxx-x86.c:4189
+#: elf-properties.c:668 elfxx-aarch64.c:758 elfxx-x86.c:4274
 msgid "%F%P: failed to create GNU property section\n"
 msgstr ""
 
-#: elf-properties.c:672 elfxx-aarch64.c:762 elfxx-x86.c:4194
+#: elf-properties.c:672 elfxx-aarch64.c:762 elfxx-x86.c:4279
 #, c-format
 msgid "%F%pA: failed to align section\n"
 msgstr ""
@@ -2179,9 +2179,9 @@ msgstr ""
 msgid " <Unrecognised flag bits set>"
 msgstr ""
 
-#: elf32-arm.c:15342 elf32-arm.c:15476 elf32-i386.c:1535 elf32-s390.c:923
+#: elf32-arm.c:15342 elf32-arm.c:15476 elf32-i386.c:1529 elf32-s390.c:923
 #: elf32-tic6x.c:2724 elf32-tilepro.c:1435 elf32-xtensa.c:1090
-#: elf64-s390.c:845 elf64-x86-64.c:2094 elfxx-sparc.c:1386 elfxx-tilegx.c:1662
+#: elf64-s390.c:845 elf64-x86-64.c:2099 elfxx-sparc.c:1386 elfxx-tilegx.c:1662
 #: elfxx-x86.c:970
 #: elfnn-aarch64.c:7848
 #: elfnn-kvx.c:3248
@@ -2325,8 +2325,8 @@ msgstr ""
 msgid "%pB(%pA+%#<PRIx64>): unresolvable relocation against symbol `%s'"
 msgstr ""
 
-#: elf32-bfin.c:1621 elf32-i386.c:3533 elf32-m68k.c:4007 elf32-s390.c:3132
-#: elf64-s390.c:3207 elf64-x86-64.c:4534
+#: elf32-bfin.c:1621 elf32-i386.c:3527 elf32-m68k.c:4007 elf32-s390.c:3132
+#: elf64-s390.c:3207 elf64-x86-64.c:4539
 #, c-format
 msgid "%pB(%pA+%#<PRIx64>): reloc against `%s': error %d"
 msgstr ""
@@ -2782,21 +2782,14 @@ msgstr ""
 msgid ".got section not immediately after .plt section"
 msgstr ""
 
-#: elf32-i386.c:1177 elf64-x86-64.c:1550
-#, c-format
-msgid ""
-"%pB: TLS transition from %s to %s against `%s' at %#<PRIx64> in section `%"
-"pA' failed"
-msgstr ""
-
-#: elf32-i386.c:1286
+#: elf32-i386.c:1280
 #, c-format
 msgid ""
 "%pB: direct GOT relocation R_386_GOT32X against `%s' without base register "
 "can not be used when making a shared object"
 msgstr ""
 
-#: elf32-i386.c:1719 elf32-s390.c:1151 elf32-sh.c:5500 elf32-tilepro.c:1548
+#: elf32-i386.c:1713 elf32-s390.c:1151 elf32-sh.c:5500 elf32-tilepro.c:1548
 #: elf32-xtensa.c:1263 elf64-s390.c:1083 elfxx-sparc.c:1556
 #: elfxx-tilegx.c:1767
 #: elfnn-loongarch.c:726
@@ -2805,25 +2798,25 @@ msgstr ""
 msgid "%pB: `%s' accessed both as normal and thread local symbol"
 msgstr ""
 
-#: elf32-i386.c:1791
+#: elf32-i386.c:1785
 #, c-format
 msgid "%pB: unsupported non-PIC call to IFUNC `%s'"
 msgstr ""
 
-#: elf32-i386.c:1846 elf64-x86-64.c:2482
+#: elf32-i386.c:1840 elf64-x86-64.c:2487
 #, c-format
 msgid ""
 "%pB: non-canonical reference to canonical protected function `%s' in %pB"
 msgstr ""
 
-#: elf32-i386.c:2409 elf64-x86-64.c:2965
+#: elf32-i386.c:2403 elf64-x86-64.c:2970
 #: elfnn-riscv.c:2546
 #, c-format
 msgid "%pB: relocation %s against STT_GNU_IFUNC symbol `%s' isn't supported"
 msgstr ""
 
-#: elf32-i386.c:2442 elf32-i386.c:3742 elf32-i386.c:3890 elf64-x86-64.c:3022
-#: elf64-x86-64.c:4705 elf64-x86-64.c:4873
+#: elf32-i386.c:2436 elf32-i386.c:3736 elf32-i386.c:3884 elf64-x86-64.c:3027
+#: elf64-x86-64.c:4710 elf64-x86-64.c:4878
 #: elfnn-riscv.c:2408
 #: elfnn-riscv.c:3320
 #: elfnn-riscv.c:3394
@@ -2831,44 +2824,44 @@ msgstr ""
 msgid "Local IFUNC function `%s' in %pB\n"
 msgstr ""
 
-#: elf32-i386.c:2620
+#: elf32-i386.c:2614
 #, c-format
 msgid ""
 "%pB: direct GOT relocation %s against `%s' without base register can not be "
 "used when making a shared object"
 msgstr ""
 
-#: elf32-i386.c:2655 elf64-x86-64.c:3239
+#: elf32-i386.c:2649 elf64-x86-64.c:3244
 msgid "hidden symbol"
 msgstr ""
 
-#: elf32-i386.c:2658 elf64-x86-64.c:3242
+#: elf32-i386.c:2652 elf64-x86-64.c:3247
 msgid "internal symbol"
 msgstr ""
 
-#: elf32-i386.c:2661 elf64-x86-64.c:3245
+#: elf32-i386.c:2655 elf64-x86-64.c:3250
 msgid "protected symbol"
 msgstr ""
 
-#: elf32-i386.c:2664 elf64-x86-64.c:3248
+#: elf32-i386.c:2658 elf64-x86-64.c:3253
 msgid "symbol"
 msgstr ""
 
-#: elf32-i386.c:2670
+#: elf32-i386.c:2664
 #, c-format
 msgid ""
 "%pB: relocation R_386_GOTOFF against undefined %s `%s' can not be used when "
 "making a shared object"
 msgstr ""
 
-#: elf32-i386.c:2683
+#: elf32-i386.c:2677
 #, c-format
 msgid ""
 "%pB: relocation R_386_GOTOFF against protected %s `%s' can not be used when "
 "making a shared object"
 msgstr ""
 
-#: elf32-i386.c:4093 elf64-x86-64.c:5084
+#: elf32-i386.c:4087 elf64-x86-64.c:5089
 msgid "%F%P: discarded output section: `%pA'\n"
 msgstr ""
 
@@ -5010,67 +5003,67 @@ msgstr ""
 msgid "%pB: linking UltraSPARC specific with HAL specific code"
 msgstr ""
 
-#: elf64-x86-64.c:1581
+#: elf64-x86-64.c:1586
 msgid "hidden symbol "
 msgstr ""
 
-#: elf64-x86-64.c:1584
+#: elf64-x86-64.c:1589
 msgid "internal symbol "
 msgstr ""
 
-#: elf64-x86-64.c:1587 elf64-x86-64.c:1591
+#: elf64-x86-64.c:1592 elf64-x86-64.c:1596
 msgid "protected symbol "
 msgstr ""
 
-#: elf64-x86-64.c:1593
+#: elf64-x86-64.c:1598
 msgid "symbol "
 msgstr ""
 
-#: elf64-x86-64.c:1599
+#: elf64-x86-64.c:1604
 msgid "undefined "
 msgstr ""
 
-#: elf64-x86-64.c:1609
+#: elf64-x86-64.c:1614
 msgid "a shared object"
 msgstr ""
 
-#: elf64-x86-64.c:1611
+#: elf64-x86-64.c:1616
 msgid "; recompile with -fPIC"
 msgstr ""
 
-#: elf64-x86-64.c:1616
+#: elf64-x86-64.c:1621
 msgid "a PIE object"
 msgstr ""
 
-#: elf64-x86-64.c:1618
+#: elf64-x86-64.c:1623
 msgid "a PDE object"
 msgstr ""
 
-#: elf64-x86-64.c:1620
+#: elf64-x86-64.c:1625
 msgid "; recompile with -fPIE"
 msgstr ""
 
-#: elf64-x86-64.c:1624
+#: elf64-x86-64.c:1629
 #, c-format
 msgid "%pB: relocation %s against %s%s`%s' can not be used when making %s%s"
 msgstr ""
 
-#: elf64-x86-64.c:2160
+#: elf64-x86-64.c:2165
 #, c-format
 msgid "%pB: relocation %s against symbol `%s' isn't supported in x32 mode"
 msgstr ""
 
-#: elf64-x86-64.c:2312
+#: elf64-x86-64.c:2317
 #, c-format
 msgid "%pB: '%s' accessed both as normal and thread local symbol"
 msgstr ""
 
-#: elf64-x86-64.c:2567
+#: elf64-x86-64.c:2572
 #, c-format
 msgid "%pB: unsupported relocation %s against symbol `%s'"
 msgstr ""
 
-#: elf64-x86-64.c:2991
+#: elf64-x86-64.c:2996
 #: elfnn-aarch64.c:5767
 #: elfnn-riscv.c:2376
 #, c-format
@@ -5079,48 +5072,48 @@ msgid ""
 "<PRId64>"
 msgstr ""
 
-#: elf64-x86-64.c:3254
+#: elf64-x86-64.c:3259
 #, c-format
 msgid ""
 "%pB: relocation R_X86_64_GOTOFF64 against undefined %s `%s' can not be used "
 "when making a shared object"
 msgstr ""
 
-#: elf64-x86-64.c:3268
+#: elf64-x86-64.c:3273
 #, c-format
 msgid ""
 "%pB: relocation R_X86_64_GOTOFF64 against protected %s `%s' can not be used "
 "when making a shared object"
 msgstr ""
 
-#: elf64-x86-64.c:3558
+#: elf64-x86-64.c:3563
 #, c-format
 msgid ""
 "%pB: addend %s%#x in relocation %s against symbol `%s' at %#<PRIx64> in "
 "section `%pA' is out of range"
 msgstr ""
 
-#: elf64-x86-64.c:3709 elflink.c:14034
+#: elf64-x86-64.c:3714 elflink.c:14034
 msgid "%F%P: corrupt input: %pB\n"
 msgstr ""
 
-#: elf64-x86-64.c:4520
+#: elf64-x86-64.c:4525
 #, c-format
 msgid ""
 " failed to convert GOTPCREL relocation against '%s'; relink with --no-relax\n"
 msgstr ""
 
-#: elf64-x86-64.c:4679
+#: elf64-x86-64.c:4684
 #, c-format
 msgid "%F%pB: PC-relative offset overflow in PLT entry for `%s'\n"
 msgstr ""
 
-#: elf64-x86-64.c:4752
+#: elf64-x86-64.c:4757
 #, c-format
 msgid "%F%pB: branch displacement overflow in PLT entry for `%s'\n"
 msgstr ""
 
-#: elf64-x86-64.c:4805
+#: elf64-x86-64.c:4810
 #, c-format
 msgid "%F%pB: PC-relative offset overflow in GOT PLT entry for `%s'\n"
 msgstr ""
@@ -6176,7 +6169,7 @@ msgstr ""
 msgid "%pB: cannot link together %s and %s objects"
 msgstr ""
 
-#: elfxx-x86.c:536 elfxx-x86.c:3438
+#: elfxx-x86.c:536 elfxx-x86.c:3523
 #, c-format
 msgid ""
 "%F%P: %pB: copy relocation against non-copyable protected symbol `%s' in %"
@@ -6237,95 +6230,132 @@ msgid ""
 "%pB: %s (offset: 0x%v, info: 0x%v) against '%s' for section '%pA' in %pB\n"
 msgstr ""
 
-#: elfxx-x86.c:3817
+#: elfxx-x86.c:3234
+#, c-format
+msgid ""
+"%pB: TLS transition from %s to %s against `%s' at 0x%v in section `%pA' "
+"failed\n"
+msgstr ""
+
+#: elfxx-x86.c:3243
+#, c-format
+msgid "%pB(%pA+0x%v): relocation %s against `%s' must be used in ADD only\n"
+msgstr ""
+
+#: elfxx-x86.c:3251
+#, c-format
+msgid ""
+"%pB(%pA+0x%v): relocation %s against `%s' must be used in ADD or MOV only\n"
+msgstr ""
+
+#: elfxx-x86.c:3259
+#, c-format
+msgid ""
+"%pB(%pA+0x%v): relocation %s against `%s' must be used in ADD, SUB or MOV "
+"only\n"
+msgstr ""
+
+#: elfxx-x86.c:3267
+#, c-format
+msgid ""
+"%pB(%pA+0x%v): relocation %s against `%s' must be used in indirect CALL "
+"only\n"
+msgstr ""
+
+#: elfxx-x86.c:3275
+#, c-format
+msgid "%pB(%pA+0x%v): relocation %s against `%s' must be used in LEA only\n"
+msgstr ""
+
+#: elfxx-x86.c:3902
 #, c-format
 msgid "error: %pB: <corrupt x86 property (0x%x) size: 0x%x>"
 msgstr ""
 
-#: elfxx-x86.c:4030
+#: elfxx-x86.c:4115
 #, c-format
 msgid "%pB: x86 ISA needed: "
 msgstr ""
 
-#: elfxx-x86.c:4032
+#: elfxx-x86.c:4117
 #, c-format
 msgid "%pB: x86 ISA used: "
 msgstr ""
 
-#: elfxx-x86.c:4054
+#: elfxx-x86.c:4139
 #, c-format
 msgid "<unknown: %x>"
 msgstr ""
 
-#: elfxx-x86.c:4209
+#: elfxx-x86.c:4294
 msgid "%P: %pB: warning: missing %s\n"
 msgstr ""
 
-#: elfxx-x86.c:4210
+#: elfxx-x86.c:4295
 msgid "%X%P: %pB: error: missing %s\n"
 msgstr ""
 
-#: elfxx-x86.c:4316
+#: elfxx-x86.c:4401
 msgid "IBT and SHSTK properties"
 msgstr ""
 
-#: elfxx-x86.c:4318
+#: elfxx-x86.c:4403
 msgid "IBT property"
 msgstr ""
 
-#: elfxx-x86.c:4320
+#: elfxx-x86.c:4405
 msgid "SHSTK property"
 msgstr ""
 
-#: elfxx-x86.c:4325
+#: elfxx-x86.c:4410
 msgid "LAM_U48 property"
 msgstr ""
 
-#: elfxx-x86.c:4330
+#: elfxx-x86.c:4415
 msgid "LAM_U57 property"
 msgstr ""
 
-#: elfxx-x86.c:4508
+#: elfxx-x86.c:4593
 msgid "%F%P: failed to create VxWorks dynamic sections\n"
 msgstr ""
 
-#: elfxx-x86.c:4517
+#: elfxx-x86.c:4602
 msgid "%F%P: failed to create GOT sections\n"
 msgstr ""
 
-#: elfxx-x86.c:4535
+#: elfxx-x86.c:4620
 msgid "%F%P: failed to create ifunc sections\n"
 msgstr ""
 
-#: elfxx-x86.c:4572
+#: elfxx-x86.c:4657
 msgid "%F%P: failed to create GOT PLT section\n"
 msgstr ""
 
-#: elfxx-x86.c:4591
+#: elfxx-x86.c:4676
 msgid "%F%P: failed to create IBT-enabled PLT section\n"
 msgstr ""
 
-#: elfxx-x86.c:4611
+#: elfxx-x86.c:4696
 msgid "%F%P: failed to create PLT .eh_frame section\n"
 msgstr ""
 
-#: elfxx-x86.c:4624
+#: elfxx-x86.c:4709
 msgid "%F%P: failed to create GOT PLT .eh_frame section\n"
 msgstr ""
 
-#: elfxx-x86.c:4638
+#: elfxx-x86.c:4723
 msgid "%F%P: failed to create the second PLT .eh_frame section\n"
 msgstr ""
 
-#: elfxx-x86.c:4658
+#: elfxx-x86.c:4743
 msgid "%F%P: failed to create PLT .sframe section\n"
 msgstr ""
 
-#: elfxx-x86.c:4673
+#: elfxx-x86.c:4758
 msgid "%F%P: failed to create second PLT .sframe section\n"
 msgstr ""
 
-#: elfxx-x86.c:4713
+#: elfxx-x86.c:4798
 msgid "%X%P: attempted static link of dynamic object `%pB'\n"
 msgstr ""
 
