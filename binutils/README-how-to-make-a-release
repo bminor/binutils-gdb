@@ -244,7 +244,7 @@ How to create the release.
 
   21. a. Update the release number in bfd/version.m4 on the release
          branch to a whole new minor version number, without a point
-         value.  Eg "2.42.90" becomes "2.43".  NB/ Not: "2.43.00"
+         value.  Eg "2.43.90" becomes "2.44".  NB/ Not: "2.44.00"
 
       b. Change bfd/development.sh to set all values to "false".
 
@@ -275,7 +275,7 @@ How to create the release.
          "this-is-the-2.43-release" comment and commit.
 
 	   git add .
-           git commit -m "this-is-the-2.43-release"
+           git commit -m "this-is-the-2.44-release"
 	   git push
 	   
   22. Check that your file creation mask will create the
@@ -297,7 +297,7 @@ How to create the release.
       PARANOIA: Check that there are no pending commits:
 
              git status
-	   
+
       Then create the release tarballs:
   
             ./src-release.sh -b -g -l -x -z binutils
@@ -345,16 +345,16 @@ How to create the release.
 
 	    git tag -a <TAG>         -u <Your Key>
 	  eg:
-	    git tag -a binutils-2_43 -u DD9E3C4F      <=== Be careful to get the tag right
+	    git tag -a binutils-2_44 -u DD9E3C4F      <=== Be careful to get the tag right
 	  or:
-	    git tag -a binutils-2_43 -u DD9E3C4F -m "Official GNU Binutils 2.43 release"
+	    git tag -a binutils-2_44 -u DD9E3C4F -m "Official GNU Binutils 2.43 release"
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
 
         Then push the release:
 	
-	    git push origin binutils-2_43
+	    git push origin binutils-2_44
 
         If you get an error message along the lines of:
 	  "Invalid revision range ..."
@@ -362,13 +362,15 @@ How to create the release.
 
   27.  Upload the tarballs to ftp.gnu.org.
 
-          gnupload --to ftp.gnu.org:binutils binutils-2.43.tar.*
+          gnupload --to ftp.gnu.org:binutils binutils-2.44.tar.*
 
         Be prepared to provide the password for the key, if you
 	signed the binaries.
       
         The gnupload script is in the gnulib/build-aux directory.
 	It uses the ncftp package for transmitting the files.
+
+        NB/ This step can be done in PARALLEL with step 28.
 
         Check for an email response from the upload.  If necessary
         fix any problems.  (The response might take a while, so
@@ -383,10 +385,6 @@ How to create the release.
  	 chmod 644 binutils-2.4*.tar.*
 	 quit
 
-      FIXME: Are the signatures (created by the gnupload script in step 27)
-      needed ?  [The above commands upload them and nobody has complained,
-      so suggest that they are retained].
-
   29. Update web pages.  For sourceware.org:
 
       Clone the documentation (if you have not already done so):
@@ -396,8 +394,8 @@ How to create the release.
       Create a new docs sub-directory and move into it:
 
         cd binutils-htdocs
-	mkdir docs-2.43
-        cd docs-2.43
+	mkdir docs-2.44
+        cd docs-2.44
 	
       Copy the index.html from the previous release
 
@@ -424,12 +422,12 @@ How to create the release.
 	 cp <build-dir>/binutils/doc/binutils.pdf  .
 
 	 cp -r <build-dir>/gprof/doc/gprof     .
-	 cp <build-dir>/gprof/doc/gprof.html   .
-	 cp <build-dir>/gprof/doc/gprof.pdf    .
+	 cp <build-dir>/gprof/gprof.html   .		    [NB/ Path not like others]
+	 cp <build-dir>/gprof/gprof.pdf    .		    [NB/ Path not like others]
 	 
 	 cp -r <build-dir>/ld/doc/ld     .
-	 cp <build-dir>/ld/doc/ld.html   .
-	 cp <build-dir>/ld/doc/ld.pdf    .
+	 cp <build-dir>/ld/ld.html   .		    [NB/ Path not like others]
+	 cp <build-dir>/ld/ld.pdf    .		    [NB/ Path not like others]
 
 	    [NB/ The gprofng documentation does not have a node-per-page selection]
 	 cp <build-dir>/gprofng/doc/gprof.html   .
@@ -445,7 +443,7 @@ How to create the release.
 
          cd ..     [Should now be in be in binutils-htdocs/ ]
 	 rm docs
-	 ln -s docs-2.43 docs
+	 ln -s docs-2.44 docs
 	 
       Edit index.html file to change the links to point to the new
       release, mention any new features, update dates and so on.
@@ -457,7 +455,7 @@ How to create the release.
       Add the new directories and files, commit and push the changes:
 
         git add .
-        git commit -m"Update documenation for the 2.4x release"
+        git commit -m"Update documenation for the 2.4x release"a
 	git push
 
 
@@ -471,7 +469,7 @@ Hi FSF Webmasters,
 https://www.gnu.org/software/binutils/binutils.html
 
   be updated to indicate that there is now a newer version available
-  (2.4x).  I have already updated the related page on the sourceware
+  (2.4x).  I have already updated the related page on the Sourceware
   website so this might be useful as a template:
 
 https://sourceware.org/binutils/
