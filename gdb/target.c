@@ -3698,7 +3698,7 @@ dummy_make_corefile_notes (struct target_ops *self,
   return NULL;
 }
 
-#include "target-delegates.c"
+#include "target-delegates-gen.c"
 
 /* The initial current target, so that there is always a semi-valid
    current target.  */
