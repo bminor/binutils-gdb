@@ -9296,12 +9296,24 @@ print_stop_location (const target_waitstatus &ws)
 	  && (tp->control.step_start_function
 	      == find_pc_function (tp->stop_pc ())))
 	{
-	  /* Finished step, just print source line.  */
-	  source_flag = SRC_LINE;
+	  symtab_and_line sal = find_frame_sal (get_selected_frame (nullptr));
+	  if (sal.symtab != tp->current_symtab)
+	    {
+	      /* Finished step in same frame but into different file, print
+		 location and source line.  */
+	      source_flag = SRC_AND_LOC;
+	    }
+	  else
+	    {
+	      /* Finished step in same frame and same file, just print source
+		 line.  */
+	      source_flag = SRC_LINE;
+	    }
 	}
       else
 	{
-	  /* Print location and source line.  */
+	  /* Finished step into different frame, print location and source
+	     line.  */
 	  source_flag = SRC_AND_LOC;
 	}
       break;
