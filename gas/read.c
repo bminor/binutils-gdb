@@ -998,7 +998,6 @@ read_a_source_file (const char *name)
 		  input_line_pointer = s;
 		  continue;
 		}
-	      bump_line_counters ();
 	      s += 4;
 
 	      ends = find_no_app (s, next_char);
@@ -1023,9 +1022,10 @@ read_a_source_file (const char *name)
 		    }
 		  while (!ends);
 		}
+	      sb_add_char (&sbuf, '\n');
 
 	      input_line_pointer = ends ? ends + 8 : NULL;
-	      input_scrub_include_sb (&sbuf, input_line_pointer, expanding_none);
+	      input_scrub_include_sb (&sbuf, input_line_pointer, expanding_app);
 	      sb_kill (&sbuf);
 	      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 	      continue;

@@ -69,6 +69,7 @@ enum expansion {
   expanding_none,
   expanding_repeat,
   expanding_macro,
+  expanding_app,
 };
 extern void input_scrub_include_sb (sb *, char *, enum expansion);
 

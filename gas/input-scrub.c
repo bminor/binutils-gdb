@@ -194,10 +194,23 @@ input_scrub_pop (struct input_save *saved)
   saved_position = saved->saved_position;
   buffer_start = saved->buffer_start;
   buffer_length = saved->buffer_length;
-  physical_input_file = saved->physical_input_file;
+
+  /* When expanding an #APP / #NO_APP block, original lines are re-
+     processed, so whatever they did to physical file/line needs
+     retaining.  If logical file/line weren't changed, the logical
+     line number will want bumping by a corresponding value.  */
+  if (from_sb_expansion != expanding_app)
+    {
+      if (logical_input_file == 0 && logical_input_line == -1u
+	  && saved->logical_input_line != -1u)
+	saved->logical_input_line
+	  += physical_input_line - saved->physical_input_line;
+      physical_input_file = saved->physical_input_file;
+      physical_input_line = saved->physical_input_line;
+    }
   logical_input_file = saved->logical_input_file;
-  physical_input_line = saved->physical_input_line;
   logical_input_line = saved->logical_input_line;
+
   is_linefile = saved->is_linefile;
   sb_index = saved->sb_index;
   from_sb = saved->from_sb;
@@ -270,9 +283,12 @@ input_scrub_include_sb (sb *from, char *position, enum expansion expansion)
 {
   int newline;
 
-  if (macro_nest > max_macro_nest)
-    as_fatal (_("macros nested too deeply"));
-  ++macro_nest;
+  if (expansion != expanding_app)
+    {
+      if (macro_nest > max_macro_nest)
+	as_fatal (_("macros nested too deeply"));
+      ++macro_nest;
+    }
 
 #ifdef md_macro_start
   if (expansion == expanding_macro)
@@ -335,7 +351,8 @@ input_scrub_next_buffer (char **bufp)
 	      md_macro_end ();
 #endif
 	    }
-	  --macro_nest;
+	  if (from_sb_expansion != expanding_app)
+	    --macro_nest;
 	  partial_where = NULL;
 	  partial_size = 0;
 	  if (next_saved_file != NULL)
@@ -432,7 +449,7 @@ seen_at_least_1_file (void)
 void
 bump_line_counters (void)
 {
-  if (sb_index == (size_t) -1)
+  if (sb_index == (size_t) -1 || from_sb_expansion == expanding_app)
     ++physical_input_line;
 
   if (logical_input_line != -1u)
