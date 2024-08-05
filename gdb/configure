@@ -24993,19 +24993,19 @@ if test "$gdb_require_amd_dbgapi" = true \
   # version of the library.
 
 pkg_failed=no
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for amd-dbgapi >= 0.68.0" >&5
-$as_echo_n "checking for amd-dbgapi >= 0.68.0... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for amd-dbgapi >= 0.75.0" >&5
+$as_echo_n "checking for amd-dbgapi >= 0.75.0... " >&6; }
 
 if test -n "$AMD_DBGAPI_CFLAGS"; then
     pkg_cv_AMD_DBGAPI_CFLAGS="$AMD_DBGAPI_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"amd-dbgapi >= 0.68.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "amd-dbgapi >= 0.68.0") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"amd-dbgapi >= 0.75.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "amd-dbgapi >= 0.75.0") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_AMD_DBGAPI_CFLAGS=`$PKG_CONFIG --cflags "amd-dbgapi >= 0.68.0" 2>/dev/null`
+  pkg_cv_AMD_DBGAPI_CFLAGS=`$PKG_CONFIG --cflags "amd-dbgapi >= 0.75.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -25017,12 +25017,12 @@ if test -n "$AMD_DBGAPI_LIBS"; then
     pkg_cv_AMD_DBGAPI_LIBS="$AMD_DBGAPI_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"amd-dbgapi >= 0.68.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "amd-dbgapi >= 0.68.0") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"amd-dbgapi >= 0.75.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "amd-dbgapi >= 0.75.0") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_AMD_DBGAPI_LIBS=`$PKG_CONFIG --libs "amd-dbgapi >= 0.68.0" 2>/dev/null`
+  pkg_cv_AMD_DBGAPI_LIBS=`$PKG_CONFIG --libs "amd-dbgapi >= 0.75.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -25067,9 +25067,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        AMD_DBGAPI_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "amd-dbgapi >= 0.68.0" 2>&1`
+	        AMD_DBGAPI_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "amd-dbgapi >= 0.75.0" 2>&1`
         else
-	        AMD_DBGAPI_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "amd-dbgapi >= 0.68.0" 2>&1`
+	        AMD_DBGAPI_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "amd-dbgapi >= 0.75.0" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$AMD_DBGAPI_PKG_ERRORS" >&5
