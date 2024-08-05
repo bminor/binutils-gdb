@@ -864,6 +864,29 @@ do_align (unsigned int n, char *fill, unsigned int len, unsigned int max)
     record_alignment (now_seg, n - OCTETS_PER_BYTE_POWER);
 }
 
+/* Find first <eol><next_char>NO_APP<eol>, if any, in the supplied buffer.
+   Return NULL if there's none, or else the position of <next_char>.  */
+static char *
+find_no_app (const char *s, char next_char)
+{
+  const char *start = s;
+  const char srch[] = { next_char, 'N', 'O', '_', 'A', 'P', 'P', '\0' };
+
+  for (;;)
+    {
+      char *ends = strstr (s, srch);
+
+      if (ends == NULL)
+	break;
+      if (is_end_of_line (ends[sizeof (srch) - 1])
+	  && (ends == start || is_end_of_line (ends[-1])))
+	return ends;
+      s = ends + sizeof (srch) - 1;
+    }
+
+  return NULL;
+}
+
 /* We read the file, putting things into a web that represents what we
    have been reading.  */
 void
@@ -955,8 +978,10 @@ read_a_source_file (const char *name)
 #endif
 
 	  next_char = *input_line_pointer;
-	  if (was_new_line == 1 && next_char
-	      && strchr (line_comment_chars, next_char))
+	  if (was_new_line == 1
+             && (strchr (line_comment_chars, '#')
+		  ? next_char == '#'
+		  : next_char && strchr (line_comment_chars, next_char)))
 	    {
 	      /* Its a comment.  Check for APP followed by NO_APP.  */
 	      sb sbuf;
@@ -964,7 +989,7 @@ read_a_source_file (const char *name)
 	      size_t len;
 
 	      s = input_line_pointer + 1;
-	      if (!startswith (s, "APP\n"))
+	      if (!startswith (s, "APP") || !is_end_of_line (s[3]))
 		{
 		  /* We ignore it.  Note: Not ignore_rest_of_line ()!  */
 		  while (s <= buffer_limit)
@@ -976,7 +1001,7 @@ read_a_source_file (const char *name)
 	      bump_line_counters ();
 	      s += 4;
 
-	      ends = strstr (s, "#NO_APP\n");
+	      ends = find_no_app (s, next_char);
 	      len = ends ? ends - s : buffer_limit - s;
 
 	      sb_build (&sbuf, len + 100);
@@ -992,7 +1017,7 @@ read_a_source_file (const char *name)
 		      buffer_limit = input_scrub_next_buffer (&buffer);
 		      if (!buffer_limit)
 			break;
-		      ends = strstr (buffer, "#NO_APP\n");
+		      ends = find_no_app (buffer, next_char);
 		      len = ends ? ends - buffer : buffer_limit - buffer;
 		      sb_add_buffer (&sbuf, buffer, len);
 		    }

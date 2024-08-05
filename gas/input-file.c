@@ -164,34 +164,38 @@ input_file_open (const char *filename,
     }
   gas_assert (c != EOF);
 
-  if (c == '#')
+  if (strchr (line_comment_chars, '#')
+      ? c == '#'
+      : c && strchr (line_comment_chars, c))
     {
       /* Begins with comment, may not want to preprocess.  */
+      int lead = c;
+
       c = getc (f_in);
       if (c == 'N')
 	{
 	  char *p = fgets (buf, sizeof (buf), f_in);
-	  if (p && startswith (p, "O_APP") && ISSPACE (p[5]))
+	  if (p && startswith (p, "O_APP") && is_end_of_line (p[5]))
 	    preprocess = 0;
 	  if (!p || !strchr (p, '\n'))
-	    ungetc ('#', f_in);
+	    ungetc (lead, f_in);
 	  else
 	    ungetc ('\n', f_in);
 	}
       else if (c == 'A')
 	{
 	  char *p = fgets (buf, sizeof (buf), f_in);
-	  if (p && startswith (p, "PP") && ISSPACE (p[2]))
+	  if (p && startswith (p, "PP") && is_end_of_line (p[2]))
 	    preprocess = 1;
 	  if (!p || !strchr (p, '\n'))
-	    ungetc ('#', f_in);
+	    ungetc (lead, f_in);
 	  else
 	    ungetc ('\n', f_in);
 	}
       else if (c == '\n')
 	ungetc ('\n', f_in);
       else
-	ungetc ('#', f_in);
+	ungetc (lead, f_in);
     }
   else
     ungetc (c, f_in);
