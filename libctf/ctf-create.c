@@ -1207,7 +1207,7 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
     return (ctf_set_errno (ofp, ctf_errno (fp)));
   memb = (ctf_lmember_t *) dtd->dtd_vlen;
 
-  /* Remove pending refs in the old vlen region and reapply them.  */
+  /* Remove refs in the old vlen region and reapply them.  */
 
   ctf_str_move_refs (fp, old_vlen, sizeof (ctf_lmember_t) * vlen, dtd->dtd_vlen);
 
