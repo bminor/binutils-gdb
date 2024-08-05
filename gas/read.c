@@ -900,7 +900,7 @@ read_a_source_file (const char *name)
 #endif
       while (input_line_pointer < buffer_limit)
 	{
-	  bool was_new_line;
+	  char was_new_line;
 	  /* We have more of this buffer to parse.  */
 
 	  /* We now have input_line_pointer->1st char of next line.
@@ -953,6 +953,59 @@ read_a_source_file (const char *name)
 		listing_newline (NULL);
 	    }
 #endif
+
+	  next_char = *input_line_pointer;
+	  if (was_new_line == 1 && next_char
+	      && strchr (line_comment_chars, next_char))
+	    {
+	      /* Its a comment.  Check for APP followed by NO_APP.  */
+	      sb sbuf;
+	      char *ends;
+	      size_t len;
+
+	      s = input_line_pointer + 1;
+	      if (!startswith (s, "APP\n"))
+		{
+		  /* We ignore it.  Note: Not ignore_rest_of_line ()!  */
+		  while (s <= buffer_limit)
+		    if (is_end_of_line (*s++))
+		      break;
+		  input_line_pointer = s;
+		  continue;
+		}
+	      bump_line_counters ();
+	      s += 4;
+
+	      ends = strstr (s, "#NO_APP\n");
+	      len = ends ? ends - s : buffer_limit - s;
+
+	      sb_build (&sbuf, len + 100);
+	      sb_add_buffer (&sbuf, s, len);
+	      if (!ends)
+		{
+		  /* The end of the #APP wasn't in this buffer.  We
+		     keep reading in buffers until we find the #NO_APP
+		     that goes with this #APP  There is one.  The specs
+		     guarantee it...  */
+		  do
+		    {
+		      buffer_limit = input_scrub_next_buffer (&buffer);
+		      if (!buffer_limit)
+			break;
+		      ends = strstr (buffer, "#NO_APP\n");
+		      len = ends ? ends - buffer : buffer_limit - buffer;
+		      sb_add_buffer (&sbuf, buffer, len);
+		    }
+		  while (!ends);
+		}
+
+	      input_line_pointer = ends ? ends + 8 : NULL;
+	      input_scrub_include_sb (&sbuf, input_line_pointer, expanding_none);
+	      sb_kill (&sbuf);
+	      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+	      continue;
+	    }
+
 	  if (was_new_line)
 	    {
 	      line_label = NULL;
@@ -1316,51 +1369,12 @@ read_a_source_file (const char *name)
 	    }
 
 	  if (next_char && strchr (line_comment_chars, next_char))
-	    {			/* Its a comment.  Better say APP or NO_APP.  */
-	      sb sbuf;
-	      char *ends;
-	      size_t len;
-
-	      s = input_line_pointer;
-	      if (!startswith (s, "APP\n"))
-		{
-		  /* We ignore it.  Note: Not ignore_rest_of_line ()!  */
-		  while (s <= buffer_limit)
-		    if (is_end_of_line (*s++))
-		      break;
-		  input_line_pointer = s;
-		  continue;
-		}
-	      bump_line_counters ();
-	      s += 4;
-
-	      ends = strstr (s, "#NO_APP\n");
-	      len = ends ? ends - s : buffer_limit - s;
-
-	      sb_build (&sbuf, len + 100);
-	      sb_add_buffer (&sbuf, s, len);
-	      if (!ends)
-		{
-		  /* The end of the #APP wasn't in this buffer.  We
-		     keep reading in buffers until we find the #NO_APP
-		     that goes with this #APP  There is one.  The specs
-		     guarantee it...  */
-		  do
-		    {
-		      buffer_limit = input_scrub_next_buffer (&buffer);
-		      if (!buffer_limit)
-			break;
-		      ends = strstr (buffer, "#NO_APP\n");
-		      len = ends ? ends - buffer : buffer_limit - buffer;
-		      sb_add_buffer (&sbuf, buffer, len);
-		    }
-		  while (!ends);
-		}
-
-	      input_line_pointer = ends ? ends + 8 : NULL;
-	      input_scrub_include_sb (&sbuf, input_line_pointer, expanding_none);
-	      sb_kill (&sbuf);
-	      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+	    {
+	      /* Its a comment, ignore it.  Note: Not ignore_rest_of_line ()!  */
+	      while (s <= buffer_limit)
+		if (is_end_of_line (*s++))
+		  break;
+	      input_line_pointer = s;
 	      continue;
 	    }
 
