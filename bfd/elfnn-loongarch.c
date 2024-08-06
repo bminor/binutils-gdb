@@ -5247,16 +5247,15 @@ loongarch_get_max_alignment (asection *sec)
 
 static bool
 loongarch_elf_relax_section (bfd *abfd, asection *sec,
-			       struct bfd_link_info *info,
-			       bool *again)
+			     struct bfd_link_info *info,
+			     bool *again)
 {
-  struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
-  struct bfd_elf_section_data *data = elf_section_data (sec);
-  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
-  Elf_Internal_Rela *relocs;
   *again = false;
-  bfd_vma max_alignment = 0;
+  if (!is_elf_hash_table (info->hash)
+      || elf_hash_table_id (elf_hash_table (info)) != LARCH_ELF_DATA)
+    return true;
 
+  struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
   if (bfd_link_relocatable (info)
       || sec->sec_flg0
       || (sec->flags & SEC_RELOC) == 0
@@ -5268,6 +5267,8 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
       || *(htab->data_segment_phase) == 4)
     return true;
 
+  struct bfd_elf_section_data *data = elf_section_data (sec);
+  Elf_Internal_Rela *relocs;
   if (data->relocs)
     relocs = data->relocs;
   else if (!(relocs = _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL,
@@ -5278,6 +5279,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
       && !bfd_malloc_and_get_section (abfd, sec, &data->this_hdr.contents))
     return true;
 
+  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
   if (symtab_hdr->sh_info != 0
       && !symtab_hdr->contents
       && !(symtab_hdr->contents =
@@ -5290,7 +5292,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 
   /* Estimate the maximum alignment for all output sections once time
      should be enough.  */
-  max_alignment = htab->max_alignment;
+  bfd_vma max_alignment = htab->max_alignment;
   if (max_alignment == (bfd_vma) -1)
     {
       max_alignment = loongarch_get_max_alignment (sec);
