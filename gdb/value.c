@@ -1716,10 +1716,6 @@ value::record_latest ()
       fetch_lazy ();
     }
 
-  ULONGEST limit = m_limited_length;
-  if (limit != 0)
-    mark_bytes_unavailable (limit, m_enclosing_type->length () - limit);
-
   /* Mark the value as recorded in the history for the availability check.  */
   m_in_history = true;
 
@@ -3990,6 +3986,11 @@ value::fetch_lazy_memory ()
   if (len > 0)
     read_value_memory (this, 0, stack (), addr,
 		       contents_all_raw ().data (), len);
+
+  /* If only part of an array was loaded, mark the rest as unavailable.  */
+  if (m_limited_length > 0)
+    mark_bytes_unavailable (m_limited_length,
+			    m_enclosing_type->length () - m_limited_length);
 }
 
 /* See value.h.  */
