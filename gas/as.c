@@ -457,13 +457,8 @@ parse_args (int * pargc, char *** pargv)
     /* -K is not meaningful if .word is not being hacked.  */
     'K',
 #endif
-    'L', 'M', 'R', 'W', 'Z', 'a', ':', ':', 'D', 'f', 'g', ':',':', 'I', ':', 'o', ':',
-#ifndef VMS
-    /* -v takes an argument on VMS, so we don't make it a generic
-       option.  */
-    'v',
-#endif
-    'w', 'X',
+    'L', 'M', 'R', 'W', 'Z', 'a', ':', ':', 'D', 'f', 'g', ':',':', 'I', ':',
+    'o', ':', 'v', 'w', 'X',
 #ifdef HAVE_ITBL_CPU
     /* New option for extending instruction set (see also --itbl below).  */
     't', ':',
@@ -481,7 +476,6 @@ parse_args (int * pargc, char *** pargv)
       OPTION_STATISTICS,
       OPTION_VERSION,
       OPTION_DUMPCONFIG,
-      OPTION_VERBOSE,
       OPTION_EMULATION,
       OPTION_DEBUG_PREFIX_MAP,
       OPTION_DEFSYM,
@@ -600,7 +594,7 @@ parse_args (int * pargc, char *** pargv)
     ,{"statistics", no_argument, NULL, OPTION_STATISTICS}
     ,{"strip-local-absolute", no_argument, NULL, OPTION_STRIP_LOCAL_ABSOLUTE}
     ,{"version", no_argument, NULL, OPTION_VERSION}
-    ,{"verbose", no_argument, NULL, OPTION_VERBOSE}
+    ,{"verbose", no_argument, NULL, 'v'}
     ,{"target-help", no_argument, NULL, OPTION_TARGET_HELP}
     ,{"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT}
     ,{"warn", no_argument, NULL, OPTION_WARN}
@@ -650,20 +644,9 @@ parse_args (int * pargc, char *** pargv)
 	     it explicitly here before deciding we've gotten a bad argument.  */
 	  if (optc == 'v')
 	    {
-#ifdef VMS
-	      /* Telling getopt to treat -v's value as optional can result
-		 in it picking up a following filename argument here.  The
-		 VMS code in md_parse_option can return 0 in that case,
-		 but it has no way of pushing the filename argument back.  */
-	      if (optarg && *optarg)
-		new_argv[new_argc++] = optarg, new_argv[new_argc] = NULL;
-	      else
-#else
-	      case 'v':
-#endif
-	      case OPTION_VERBOSE:
-		print_version_id ();
-		verbose = 1;
+	case 'v':
+	      print_version_id ();
+	      verbose = 1;
 	      break;
 	    }
 	  else if (is_a_char (optc))
