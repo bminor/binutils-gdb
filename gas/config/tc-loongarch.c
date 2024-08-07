@@ -1221,6 +1221,9 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
 					 bfd_get_reloc_size (howto),
 					 &reloc_info[i].value, FALSE, r_type);
 	    }
+	  /* Allow LoongArch 64 to use 64-bit addends.  */
+	  if (LARCH_opts.ase_lp64)
+	    ip->fixp[i]->fx_no_overflow = 1;
 	}
     }
 
