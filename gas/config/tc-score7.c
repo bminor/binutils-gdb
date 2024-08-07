@@ -6014,18 +6014,6 @@ s7_s_score_lcomm (int bytes_p)
 
       record_alignment (bss_seg, align);
     }
-  else
-    {
-      /* Assume some objects may require alignment on some systems.  */
-#if defined (TC_ALPHA) && ! defined (VMS)
-      if (temp > 1)
-        {
-          align = ffs (temp) - 1;
-          if (temp % (1 << align))
-            abort ();
-        }
-#endif
-    }
 
   *p = 0;
   symbolP = symbol_find_or_make (name);
