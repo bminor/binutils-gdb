@@ -31,10 +31,6 @@
 #endif
 #endif
 
-#ifdef OBJ_VMS
-#define TARGET_FORMAT "vms-vax"
-#endif
-
 #ifdef OBJ_ELF
 #define TARGET_FORMAT "elf32-vax"
 #endif
