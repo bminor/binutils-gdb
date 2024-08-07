@@ -666,8 +666,12 @@ parse_args (int * pargc, char *** pargv)
 		verbose = 1;
 	      break;
 	    }
+	  else if (is_a_char (optc))
+	    as_bad (_("unrecognized option `-%c%s'"), optc, optarg ? optarg : "");
+	  else if (optarg)
+	    as_bad (_("unrecognized option `--%s=%s'"), longopts[longind].name, optarg);
 	  else
-	    as_bad (_("unrecognized option -%c%s"), optc, optarg ? optarg : "");
+	    as_bad (_("unrecognized option `--%s'"), longopts[longind].name);
 	  /* Fall through.  */
 
 	case '?':
