@@ -297,144 +297,144 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->bfd_arch_info == NULL)
     log.puts ("\n\tbfd_arch_info");
   /* Check those that need to be defined for the given multi-arch level.  */
-  /* Skip verify of short_bit, invalid_p == 0 */
-  /* Skip verify of int_bit, invalid_p == 0 */
-  /* Skip verify of long_bit, invalid_p == 0 */
-  /* Skip verify of long_long_bit, invalid_p == 0 */
-  /* Skip verify of bfloat16_bit, invalid_p == 0 */
-  /* Skip verify of bfloat16_format, invalid_p == 0 */
-  /* Skip verify of half_bit, invalid_p == 0 */
-  /* Skip verify of half_format, invalid_p == 0 */
-  /* Skip verify of float_bit, invalid_p == 0 */
-  /* Skip verify of float_format, invalid_p == 0 */
-  /* Skip verify of double_bit, invalid_p == 0 */
-  /* Skip verify of double_format, invalid_p == 0 */
-  /* Skip verify of long_double_bit, invalid_p == 0 */
-  /* Skip verify of long_double_format, invalid_p == 0 */
-  /* Skip verify of wchar_bit, invalid_p == 0 */
+  /* Skip verify of short_bit, invalid_p == 0.  */
+  /* Skip verify of int_bit, invalid_p == 0.  */
+  /* Skip verify of long_bit, invalid_p == 0.  */
+  /* Skip verify of long_long_bit, invalid_p == 0.  */
+  /* Skip verify of bfloat16_bit, invalid_p == 0.  */
+  /* Skip verify of bfloat16_format, invalid_p == 0.  */
+  /* Skip verify of half_bit, invalid_p == 0.  */
+  /* Skip verify of half_format, invalid_p == 0.  */
+  /* Skip verify of float_bit, invalid_p == 0.  */
+  /* Skip verify of float_format, invalid_p == 0.  */
+  /* Skip verify of double_bit, invalid_p == 0.  */
+  /* Skip verify of double_format, invalid_p == 0.  */
+  /* Skip verify of long_double_bit, invalid_p == 0.  */
+  /* Skip verify of long_double_format, invalid_p == 0.  */
+  /* Skip verify of wchar_bit, invalid_p == 0.  */
   if (gdbarch->wchar_signed == -1)
     gdbarch->wchar_signed = 1;
-  /* Skip verify of wchar_signed, invalid_p == 0 */
-  /* Skip verify of floatformat_for_type, invalid_p == 0 */
-  /* Skip verify of ptr_bit, invalid_p == 0 */
+  /* Skip verify of wchar_signed, invalid_p == 0.  */
+  /* Skip verify of floatformat_for_type, invalid_p == 0.  */
+  /* Skip verify of ptr_bit, invalid_p == 0.  */
   if (gdbarch->addr_bit == 0)
     gdbarch->addr_bit = gdbarch_ptr_bit (gdbarch);
-  /* Skip verify of addr_bit, invalid_p == 0 */
+  /* Skip verify of addr_bit, invalid_p == 0.  */
   if (gdbarch->dwarf2_addr_size == 0)
     gdbarch->dwarf2_addr_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
-  /* Skip verify of dwarf2_addr_size, invalid_p == 0 */
+  /* Skip verify of dwarf2_addr_size, invalid_p == 0.  */
   if (gdbarch->char_signed == -1)
     gdbarch->char_signed = 1;
-  /* Skip verify of char_signed, invalid_p == 0 */
+  /* Skip verify of char_signed, invalid_p == 0.  */
   /* Skip verify of read_pc, has predicate.  */
   /* Skip verify of write_pc, has predicate.  */
-  /* Skip verify of virtual_frame_pointer, invalid_p == 0 */
+  /* Skip verify of virtual_frame_pointer, invalid_p == 0.  */
   /* Skip verify of pseudo_register_read, has predicate.  */
   /* Skip verify of pseudo_register_read_value, has predicate.  */
   /* Skip verify of pseudo_register_write, has predicate.  */
   /* Skip verify of deprecated_pseudo_register_write, has predicate.  */
   if (gdbarch->num_regs == -1)
     log.puts ("\n\tnum_regs");
-  /* Skip verify of num_pseudo_regs, invalid_p == 0 */
+  /* Skip verify of num_pseudo_regs, invalid_p == 0.  */
   /* Skip verify of ax_pseudo_register_collect, has predicate.  */
   /* Skip verify of ax_pseudo_register_push_stack, has predicate.  */
   /* Skip verify of report_signal_info, has predicate.  */
-  /* Skip verify of sp_regnum, invalid_p == 0 */
-  /* Skip verify of pc_regnum, invalid_p == 0 */
-  /* Skip verify of ps_regnum, invalid_p == 0 */
-  /* Skip verify of fp0_regnum, invalid_p == 0 */
-  /* Skip verify of stab_reg_to_regnum, invalid_p == 0 */
-  /* Skip verify of ecoff_reg_to_regnum, invalid_p == 0 */
-  /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
-  /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
+  /* Skip verify of sp_regnum, invalid_p == 0.  */
+  /* Skip verify of pc_regnum, invalid_p == 0.  */
+  /* Skip verify of ps_regnum, invalid_p == 0.  */
+  /* Skip verify of fp0_regnum, invalid_p == 0.  */
+  /* Skip verify of stab_reg_to_regnum, invalid_p == 0.  */
+  /* Skip verify of ecoff_reg_to_regnum, invalid_p == 0.  */
+  /* Skip verify of sdb_reg_to_regnum, invalid_p == 0.  */
+  /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0.  */
   if (gdbarch->register_name == 0)
     log.puts ("\n\tregister_name");
   if (gdbarch->register_type == 0)
     log.puts ("\n\tregister_type");
-  /* Skip verify of dummy_id, invalid_p == 0 */
-  /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
+  /* Skip verify of dummy_id, invalid_p == 0.  */
+  /* Skip verify of deprecated_fp_regnum, invalid_p == 0.  */
   /* Skip verify of push_dummy_call, has predicate.  */
-  /* Skip verify of call_dummy_location, invalid_p == 0 */
+  /* Skip verify of call_dummy_location, invalid_p == 0.  */
   /* Skip verify of push_dummy_code, has predicate.  */
-  /* Skip verify of code_of_frame_writable, invalid_p == 0 */
-  /* Skip verify of print_registers_info, invalid_p == 0 */
-  /* Skip verify of print_float_info, invalid_p == 0 */
+  /* Skip verify of code_of_frame_writable, invalid_p == 0.  */
+  /* Skip verify of print_registers_info, invalid_p == 0.  */
+  /* Skip verify of print_float_info, invalid_p == 0.  */
   /* Skip verify of print_vector_info, has predicate.  */
-  /* Skip verify of register_sim_regno, invalid_p == 0 */
-  /* Skip verify of cannot_fetch_register, invalid_p == 0 */
-  /* Skip verify of cannot_store_register, invalid_p == 0 */
+  /* Skip verify of register_sim_regno, invalid_p == 0.  */
+  /* Skip verify of cannot_fetch_register, invalid_p == 0.  */
+  /* Skip verify of cannot_store_register, invalid_p == 0.  */
   /* Skip verify of get_longjmp_target, has predicate.  */
-  /* Skip verify of believe_pcc_promotion, invalid_p == 0 */
-  /* Skip verify of convert_register_p, invalid_p == 0 */
-  /* Skip verify of register_to_value, invalid_p == 0 */
-  /* Skip verify of value_to_register, invalid_p == 0 */
-  /* Skip verify of value_from_register, invalid_p == 0 */
-  /* Skip verify of pointer_to_address, invalid_p == 0 */
-  /* Skip verify of address_to_pointer, invalid_p == 0 */
+  /* Skip verify of believe_pcc_promotion, invalid_p == 0.  */
+  /* Skip verify of convert_register_p, invalid_p == 0.  */
+  /* Skip verify of register_to_value, invalid_p == 0.  */
+  /* Skip verify of value_to_register, invalid_p == 0.  */
+  /* Skip verify of value_from_register, invalid_p == 0.  */
+  /* Skip verify of pointer_to_address, invalid_p == 0.  */
+  /* Skip verify of address_to_pointer, invalid_p == 0.  */
   /* Skip verify of integer_to_address, has predicate.  */
-  /* Skip verify of return_value, invalid_p == 0 */
+  /* Skip verify of return_value, invalid_p == 0.  */
   if ((gdbarch->return_value_as_value == default_gdbarch_return_value) == (gdbarch->return_value == nullptr))
     log.puts ("\n\treturn_value_as_value");
-  /* Skip verify of get_return_buf_addr, invalid_p == 0 */
-  /* Skip verify of dwarf2_omit_typedef_p, invalid_p == 0 */
-  /* Skip verify of update_call_site_pc, invalid_p == 0 */
-  /* Skip verify of return_in_first_hidden_param_p, invalid_p == 0 */
+  /* Skip verify of get_return_buf_addr, invalid_p == 0.  */
+  /* Skip verify of dwarf2_omit_typedef_p, invalid_p == 0.  */
+  /* Skip verify of update_call_site_pc, invalid_p == 0.  */
+  /* Skip verify of return_in_first_hidden_param_p, invalid_p == 0.  */
   if (gdbarch->skip_prologue == 0)
     log.puts ("\n\tskip_prologue");
   /* Skip verify of skip_main_prologue, has predicate.  */
   /* Skip verify of skip_entrypoint, has predicate.  */
   if (gdbarch->inner_than == 0)
     log.puts ("\n\tinner_than");
-  /* Skip verify of breakpoint_from_pc, invalid_p == 0 */
+  /* Skip verify of breakpoint_from_pc, invalid_p == 0.  */
   if (gdbarch->breakpoint_kind_from_pc == 0)
     log.puts ("\n\tbreakpoint_kind_from_pc");
-  /* Skip verify of sw_breakpoint_from_kind, invalid_p == 0 */
-  /* Skip verify of breakpoint_kind_from_current_state, invalid_p == 0 */
+  /* Skip verify of sw_breakpoint_from_kind, invalid_p == 0.  */
+  /* Skip verify of breakpoint_kind_from_current_state, invalid_p == 0.  */
   /* Skip verify of adjust_breakpoint_address, has predicate.  */
-  /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
-  /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
-  /* Skip verify of decr_pc_after_break, invalid_p == 0 */
-  /* Skip verify of deprecated_function_start_offset, invalid_p == 0 */
-  /* Skip verify of remote_register_number, invalid_p == 0 */
+  /* Skip verify of memory_insert_breakpoint, invalid_p == 0.  */
+  /* Skip verify of memory_remove_breakpoint, invalid_p == 0.  */
+  /* Skip verify of decr_pc_after_break, invalid_p == 0.  */
+  /* Skip verify of deprecated_function_start_offset, invalid_p == 0.  */
+  /* Skip verify of remote_register_number, invalid_p == 0.  */
   /* Skip verify of fetch_tls_load_module_address, has predicate.  */
   /* Skip verify of get_thread_local_address, has predicate.  */
-  /* Skip verify of frame_args_skip, invalid_p == 0 */
-  /* Skip verify of unwind_pc, invalid_p == 0 */
-  /* Skip verify of unwind_sp, invalid_p == 0 */
+  /* Skip verify of frame_args_skip, invalid_p == 0.  */
+  /* Skip verify of unwind_pc, invalid_p == 0.  */
+  /* Skip verify of unwind_sp, invalid_p == 0.  */
   /* Skip verify of frame_num_args, has predicate.  */
   /* Skip verify of frame_align, has predicate.  */
-  /* Skip verify of stabs_argument_has_addr, invalid_p == 0 */
-  /* Skip verify of frame_red_zone_size, invalid_p == 0 */
-  /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
-  /* Skip verify of addr_bits_remove, invalid_p == 0 */
-  /* Skip verify of remove_non_address_bits, invalid_p == 0 */
-  /* Skip verify of memtag_to_string, invalid_p == 0 */
-  /* Skip verify of tagged_address_p, invalid_p == 0 */
-  /* Skip verify of memtag_matches_p, invalid_p == 0 */
-  /* Skip verify of set_memtags, invalid_p == 0 */
-  /* Skip verify of get_memtag, invalid_p == 0 */
-  /* Skip verify of memtag_granule_size, invalid_p == 0 */
+  /* Skip verify of stabs_argument_has_addr, invalid_p == 0.  */
+  /* Skip verify of frame_red_zone_size, invalid_p == 0.  */
+  /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0.  */
+  /* Skip verify of addr_bits_remove, invalid_p == 0.  */
+  /* Skip verify of remove_non_address_bits, invalid_p == 0.  */
+  /* Skip verify of memtag_to_string, invalid_p == 0.  */
+  /* Skip verify of tagged_address_p, invalid_p == 0.  */
+  /* Skip verify of memtag_matches_p, invalid_p == 0.  */
+  /* Skip verify of set_memtags, invalid_p == 0.  */
+  /* Skip verify of get_memtag, invalid_p == 0.  */
+  /* Skip verify of memtag_granule_size, invalid_p == 0.  */
   /* Skip verify of software_single_step, has predicate.  */
   /* Skip verify of single_step_through_delay, has predicate.  */
-  /* Skip verify of print_insn, invalid_p == 0 */
-  /* Skip verify of skip_trampoline_code, invalid_p == 0 */
-  /* Skip verify of so_ops, invalid_p == 0 */
-  /* Skip verify of skip_solib_resolver, invalid_p == 0 */
-  /* Skip verify of in_solib_return_trampoline, invalid_p == 0 */
-  /* Skip verify of in_indirect_branch_thunk, invalid_p == 0 */
-  /* Skip verify of stack_frame_destroyed_p, invalid_p == 0 */
+  /* Skip verify of print_insn, invalid_p == 0.  */
+  /* Skip verify of skip_trampoline_code, invalid_p == 0.  */
+  /* Skip verify of so_ops, invalid_p == 0.  */
+  /* Skip verify of skip_solib_resolver, invalid_p == 0.  */
+  /* Skip verify of in_solib_return_trampoline, invalid_p == 0.  */
+  /* Skip verify of in_indirect_branch_thunk, invalid_p == 0.  */
+  /* Skip verify of stack_frame_destroyed_p, invalid_p == 0.  */
   /* Skip verify of elf_make_msymbol_special, has predicate.  */
-  /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
-  /* Skip verify of make_symbol_special, invalid_p == 0 */
-  /* Skip verify of adjust_dwarf2_addr, invalid_p == 0 */
-  /* Skip verify of adjust_dwarf2_line, invalid_p == 0 */
-  /* Skip verify of cannot_step_breakpoint, invalid_p == 0 */
-  /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0 */
+  /* Skip verify of coff_make_msymbol_special, invalid_p == 0.  */
+  /* Skip verify of make_symbol_special, invalid_p == 0.  */
+  /* Skip verify of adjust_dwarf2_addr, invalid_p == 0.  */
+  /* Skip verify of adjust_dwarf2_line, invalid_p == 0.  */
+  /* Skip verify of cannot_step_breakpoint, invalid_p == 0.  */
+  /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0.  */
   /* Skip verify of address_class_type_flags, has predicate.  */
   /* Skip verify of address_class_type_flags_to_name, has predicate.  */
-  /* Skip verify of execute_dwarf_cfa_vendor_op, invalid_p == 0 */
+  /* Skip verify of execute_dwarf_cfa_vendor_op, invalid_p == 0.  */
   /* Skip verify of address_class_name_to_type_flags, has predicate.  */
-  /* Skip verify of register_reggroup_p, invalid_p == 0 */
+  /* Skip verify of register_reggroup_p, invalid_p == 0.  */
   /* Skip verify of fetch_pointer_argument, has predicate.  */
   /* Skip verify of iterate_over_regset_sections, has predicate.  */
   /* Skip verify of make_corefile_notes, has predicate.  */
@@ -449,19 +449,19 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of core_xfer_siginfo, has predicate.  */
   /* Skip verify of core_read_x86_xsave_layout, has predicate.  */
   /* Skip verify of gcore_bfd_target, has predicate.  */
-  /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
-  /* Skip verify of vbit_in_delta, invalid_p == 0 */
-  /* Skip verify of skip_permanent_breakpoint, invalid_p == 0 */
+  /* Skip verify of vtable_function_descriptors, invalid_p == 0.  */
+  /* Skip verify of vbit_in_delta, invalid_p == 0.  */
+  /* Skip verify of skip_permanent_breakpoint, invalid_p == 0.  */
   /* Skip verify of max_insn_length, has predicate.  */
   /* Skip verify of displaced_step_copy_insn, has predicate.  */
-  /* Skip verify of displaced_step_hw_singlestep, invalid_p == 0 */
+  /* Skip verify of displaced_step_hw_singlestep, invalid_p == 0.  */
   if ((gdbarch->displaced_step_copy_insn == nullptr) != (gdbarch->displaced_step_fixup == nullptr))
     log.puts ("\n\tdisplaced_step_fixup");
   /* Skip verify of displaced_step_prepare, has predicate.  */
   if ((! gdbarch->displaced_step_finish) != (! gdbarch->displaced_step_prepare))
     log.puts ("\n\tdisplaced_step_finish");
   /* Skip verify of displaced_step_copy_insn_closure_by_addr, has predicate.  */
-  /* Skip verify of displaced_step_restore_all_in_ptid, invalid_p == 0 */
+  /* Skip verify of displaced_step_restore_all_in_ptid, invalid_p == 0.  */
   if (gdbarch->displaced_step_buffer_length == 0)
     gdbarch->displaced_step_buffer_length = gdbarch->max_insn_length;
   if (gdbarch->displaced_step_buffer_length < gdbarch->max_insn_length)
@@ -469,7 +469,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of relocate_instruction, has predicate.  */
   /* Skip verify of overlay_update, has predicate.  */
   /* Skip verify of core_read_description, has predicate.  */
-  /* Skip verify of sofun_address_maybe_missing, invalid_p == 0 */
+  /* Skip verify of sofun_address_maybe_missing, invalid_p == 0.  */
   /* Skip verify of process_record, has predicate.  */
   /* Skip verify of process_record_signal, has predicate.  */
   /* Skip verify of gdb_signal_from_target, has predicate.  */
@@ -477,16 +477,16 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of get_siginfo_type, has predicate.  */
   /* Skip verify of record_special_symbol, has predicate.  */
   /* Skip verify of get_syscall_number, has predicate.  */
-  /* Skip verify of xml_syscall_file, invalid_p == 0 */
-  /* Skip verify of syscalls_info, invalid_p == 0 */
-  /* Skip verify of stap_integer_prefixes, invalid_p == 0 */
-  /* Skip verify of stap_integer_suffixes, invalid_p == 0 */
-  /* Skip verify of stap_register_prefixes, invalid_p == 0 */
-  /* Skip verify of stap_register_suffixes, invalid_p == 0 */
-  /* Skip verify of stap_register_indirection_prefixes, invalid_p == 0 */
-  /* Skip verify of stap_register_indirection_suffixes, invalid_p == 0 */
-  /* Skip verify of stap_gdb_register_prefix, invalid_p == 0 */
-  /* Skip verify of stap_gdb_register_suffix, invalid_p == 0 */
+  /* Skip verify of xml_syscall_file, invalid_p == 0.  */
+  /* Skip verify of syscalls_info, invalid_p == 0.  */
+  /* Skip verify of stap_integer_prefixes, invalid_p == 0.  */
+  /* Skip verify of stap_integer_suffixes, invalid_p == 0.  */
+  /* Skip verify of stap_register_prefixes, invalid_p == 0.  */
+  /* Skip verify of stap_register_suffixes, invalid_p == 0.  */
+  /* Skip verify of stap_register_indirection_prefixes, invalid_p == 0.  */
+  /* Skip verify of stap_register_indirection_suffixes, invalid_p == 0.  */
+  /* Skip verify of stap_gdb_register_prefix, invalid_p == 0.  */
+  /* Skip verify of stap_gdb_register_suffix, invalid_p == 0.  */
   /* Skip verify of stap_is_single_operand, has predicate.  */
   /* Skip verify of stap_parse_special_token, has predicate.  */
   /* Skip verify of stap_adjust_register, has predicate.  */
@@ -494,39 +494,39 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of dtrace_probe_is_enabled, has predicate.  */
   /* Skip verify of dtrace_enable_probe, has predicate.  */
   /* Skip verify of dtrace_disable_probe, has predicate.  */
-  /* Skip verify of has_global_solist, invalid_p == 0 */
-  /* Skip verify of has_global_breakpoints, invalid_p == 0 */
-  /* Skip verify of has_shared_address_space, invalid_p == 0 */
-  /* Skip verify of fast_tracepoint_valid_at, invalid_p == 0 */
-  /* Skip verify of guess_tracepoint_registers, invalid_p == 0 */
-  /* Skip verify of auto_charset, invalid_p == 0 */
-  /* Skip verify of auto_wide_charset, invalid_p == 0 */
-  /* Skip verify of solib_symbols_extension, invalid_p == 0 */
-  /* Skip verify of has_dos_based_file_system, invalid_p == 0 */
-  /* Skip verify of gen_return_address, invalid_p == 0 */
+  /* Skip verify of has_global_solist, invalid_p == 0.  */
+  /* Skip verify of has_global_breakpoints, invalid_p == 0.  */
+  /* Skip verify of has_shared_address_space, invalid_p == 0.  */
+  /* Skip verify of fast_tracepoint_valid_at, invalid_p == 0.  */
+  /* Skip verify of guess_tracepoint_registers, invalid_p == 0.  */
+  /* Skip verify of auto_charset, invalid_p == 0.  */
+  /* Skip verify of auto_wide_charset, invalid_p == 0.  */
+  /* Skip verify of solib_symbols_extension, invalid_p == 0.  */
+  /* Skip verify of has_dos_based_file_system, invalid_p == 0.  */
+  /* Skip verify of gen_return_address, invalid_p == 0.  */
   /* Skip verify of info_proc, has predicate.  */
   /* Skip verify of core_info_proc, has predicate.  */
-  /* Skip verify of iterate_over_objfiles_in_search_order, invalid_p == 0 */
-  /* Skip verify of ravenscar_ops, invalid_p == 0 */
-  /* Skip verify of insn_is_call, invalid_p == 0 */
-  /* Skip verify of insn_is_ret, invalid_p == 0 */
-  /* Skip verify of insn_is_jump, invalid_p == 0 */
-  /* Skip verify of program_breakpoint_here_p, invalid_p == 0 */
+  /* Skip verify of iterate_over_objfiles_in_search_order, invalid_p == 0.  */
+  /* Skip verify of ravenscar_ops, invalid_p == 0.  */
+  /* Skip verify of insn_is_call, invalid_p == 0.  */
+  /* Skip verify of insn_is_ret, invalid_p == 0.  */
+  /* Skip verify of insn_is_jump, invalid_p == 0.  */
+  /* Skip verify of program_breakpoint_here_p, invalid_p == 0.  */
   /* Skip verify of auxv_parse, has predicate.  */
-  /* Skip verify of print_auxv_entry, invalid_p == 0 */
-  /* Skip verify of vsyscall_range, invalid_p == 0 */
-  /* Skip verify of infcall_mmap, invalid_p == 0 */
-  /* Skip verify of infcall_munmap, invalid_p == 0 */
-  /* Skip verify of gcc_target_options, invalid_p == 0 */
-  /* Skip verify of gnu_triplet_regexp, invalid_p == 0 */
-  /* Skip verify of addressable_memory_unit_size, invalid_p == 0 */
-  /* Skip verify of disassembler_options_implicit, invalid_p == 0 */
-  /* Skip verify of disassembler_options, invalid_p == 0 */
-  /* Skip verify of valid_disassembler_options, invalid_p == 0 */
-  /* Skip verify of type_align, invalid_p == 0 */
-  /* Skip verify of get_pc_address_flags, invalid_p == 0 */
-  /* Skip verify of read_core_file_mappings, invalid_p == 0 */
-  /* Skip verify of use_target_description_from_corefile_notes, invalid_p == 0 */
+  /* Skip verify of print_auxv_entry, invalid_p == 0.  */
+  /* Skip verify of vsyscall_range, invalid_p == 0.  */
+  /* Skip verify of infcall_mmap, invalid_p == 0.  */
+  /* Skip verify of infcall_munmap, invalid_p == 0.  */
+  /* Skip verify of gcc_target_options, invalid_p == 0.  */
+  /* Skip verify of gnu_triplet_regexp, invalid_p == 0.  */
+  /* Skip verify of addressable_memory_unit_size, invalid_p == 0.  */
+  /* Skip verify of disassembler_options_implicit, invalid_p == 0.  */
+  /* Skip verify of disassembler_options, invalid_p == 0.  */
+  /* Skip verify of valid_disassembler_options, invalid_p == 0.  */
+  /* Skip verify of type_align, invalid_p == 0.  */
+  /* Skip verify of get_pc_address_flags, invalid_p == 0.  */
+  /* Skip verify of read_core_file_mappings, invalid_p == 0.  */
+  /* Skip verify of use_target_description_from_corefile_notes, invalid_p == 0.  */
   if (!log.empty ())
     internal_error (_("verify_gdbarch: the following are invalid ...%s"),
 		    log.c_str ());
@@ -1440,7 +1440,7 @@ int
 gdbarch_short_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of short_bit, invalid_p == 0 */
+  /* Skip verify of short_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_short_bit called\n");
   return gdbarch->short_bit;
@@ -1457,7 +1457,7 @@ int
 gdbarch_int_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of int_bit, invalid_p == 0 */
+  /* Skip verify of int_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_int_bit called\n");
   return gdbarch->int_bit;
@@ -1474,7 +1474,7 @@ int
 gdbarch_long_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of long_bit, invalid_p == 0 */
+  /* Skip verify of long_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_long_bit called\n");
   return gdbarch->long_bit;
@@ -1491,7 +1491,7 @@ int
 gdbarch_long_long_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of long_long_bit, invalid_p == 0 */
+  /* Skip verify of long_long_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_long_long_bit called\n");
   return gdbarch->long_long_bit;
@@ -1508,7 +1508,7 @@ int
 gdbarch_bfloat16_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of bfloat16_bit, invalid_p == 0 */
+  /* Skip verify of bfloat16_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_bfloat16_bit called\n");
   return gdbarch->bfloat16_bit;
@@ -1525,7 +1525,7 @@ const struct floatformat **
 gdbarch_bfloat16_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of bfloat16_format, invalid_p == 0 */
+  /* Skip verify of bfloat16_format, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_bfloat16_format called\n");
   return gdbarch->bfloat16_format;
@@ -1542,7 +1542,7 @@ int
 gdbarch_half_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of half_bit, invalid_p == 0 */
+  /* Skip verify of half_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_half_bit called\n");
   return gdbarch->half_bit;
@@ -1559,7 +1559,7 @@ const struct floatformat **
 gdbarch_half_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of half_format, invalid_p == 0 */
+  /* Skip verify of half_format, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_half_format called\n");
   return gdbarch->half_format;
@@ -1576,7 +1576,7 @@ int
 gdbarch_float_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of float_bit, invalid_p == 0 */
+  /* Skip verify of float_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_float_bit called\n");
   return gdbarch->float_bit;
@@ -1593,7 +1593,7 @@ const struct floatformat **
 gdbarch_float_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of float_format, invalid_p == 0 */
+  /* Skip verify of float_format, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_float_format called\n");
   return gdbarch->float_format;
@@ -1610,7 +1610,7 @@ int
 gdbarch_double_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of double_bit, invalid_p == 0 */
+  /* Skip verify of double_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_double_bit called\n");
   return gdbarch->double_bit;
@@ -1627,7 +1627,7 @@ const struct floatformat **
 gdbarch_double_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of double_format, invalid_p == 0 */
+  /* Skip verify of double_format, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_double_format called\n");
   return gdbarch->double_format;
@@ -1644,7 +1644,7 @@ int
 gdbarch_long_double_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of long_double_bit, invalid_p == 0 */
+  /* Skip verify of long_double_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_long_double_bit called\n");
   return gdbarch->long_double_bit;
@@ -1661,7 +1661,7 @@ const struct floatformat **
 gdbarch_long_double_format (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of long_double_format, invalid_p == 0 */
+  /* Skip verify of long_double_format, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_long_double_format called\n");
   return gdbarch->long_double_format;
@@ -1678,7 +1678,7 @@ int
 gdbarch_wchar_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of wchar_bit, invalid_p == 0 */
+  /* Skip verify of wchar_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_wchar_bit called\n");
   return gdbarch->wchar_bit;
@@ -1730,7 +1730,7 @@ int
 gdbarch_ptr_bit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of ptr_bit, invalid_p == 0 */
+  /* Skip verify of ptr_bit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_ptr_bit called\n");
   return gdbarch->ptr_bit;
@@ -1980,7 +1980,7 @@ int
 gdbarch_num_pseudo_regs (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of num_pseudo_regs, invalid_p == 0 */
+  /* Skip verify of num_pseudo_regs, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_num_pseudo_regs called\n");
   return gdbarch->num_pseudo_regs;
@@ -2069,7 +2069,7 @@ int
 gdbarch_sp_regnum (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of sp_regnum, invalid_p == 0 */
+  /* Skip verify of sp_regnum, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_sp_regnum called\n");
   return gdbarch->sp_regnum;
@@ -2086,7 +2086,7 @@ int
 gdbarch_pc_regnum (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of pc_regnum, invalid_p == 0 */
+  /* Skip verify of pc_regnum, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_pc_regnum called\n");
   return gdbarch->pc_regnum;
@@ -2103,7 +2103,7 @@ int
 gdbarch_ps_regnum (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of ps_regnum, invalid_p == 0 */
+  /* Skip verify of ps_regnum, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_ps_regnum called\n");
   return gdbarch->ps_regnum;
@@ -2120,7 +2120,7 @@ int
 gdbarch_fp0_regnum (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of fp0_regnum, invalid_p == 0 */
+  /* Skip verify of fp0_regnum, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_fp0_regnum called\n");
   return gdbarch->fp0_regnum;
@@ -2260,7 +2260,7 @@ int
 gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
+  /* Skip verify of deprecated_fp_regnum, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_deprecated_fp_regnum called\n");
   return gdbarch->deprecated_fp_regnum;
@@ -2301,7 +2301,7 @@ enum call_dummy_location_type
 gdbarch_call_dummy_location (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of call_dummy_location, invalid_p == 0 */
+  /* Skip verify of call_dummy_location, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_call_dummy_location called\n");
   return gdbarch->call_dummy_location;
@@ -2492,7 +2492,7 @@ int
 gdbarch_believe_pcc_promotion (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of believe_pcc_promotion, invalid_p == 0 */
+  /* Skip verify of believe_pcc_promotion, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_believe_pcc_promotion called\n");
   return gdbarch->believe_pcc_promotion;
@@ -2935,7 +2935,7 @@ CORE_ADDR
 gdbarch_decr_pc_after_break (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of decr_pc_after_break, invalid_p == 0 */
+  /* Skip verify of decr_pc_after_break, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_decr_pc_after_break called\n");
   return gdbarch->decr_pc_after_break;
@@ -2952,7 +2952,7 @@ CORE_ADDR
 gdbarch_deprecated_function_start_offset (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of deprecated_function_start_offset, invalid_p == 0 */
+  /* Skip verify of deprecated_function_start_offset, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_deprecated_function_start_offset called\n");
   return gdbarch->deprecated_function_start_offset;
@@ -3034,7 +3034,7 @@ CORE_ADDR
 gdbarch_frame_args_skip (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of frame_args_skip, invalid_p == 0 */
+  /* Skip verify of frame_args_skip, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_frame_args_skip called\n");
   return gdbarch->frame_args_skip;
@@ -3150,7 +3150,7 @@ int
 gdbarch_frame_red_zone_size (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of frame_red_zone_size, invalid_p == 0 */
+  /* Skip verify of frame_red_zone_size, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_frame_red_zone_size called\n");
   return gdbarch->frame_red_zone_size;
@@ -3303,7 +3303,7 @@ CORE_ADDR
 gdbarch_memtag_granule_size (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of memtag_granule_size, invalid_p == 0 */
+  /* Skip verify of memtag_granule_size, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_memtag_granule_size called\n");
   return gdbarch->memtag_granule_size;
@@ -3402,7 +3402,7 @@ const solib_ops *
 gdbarch_so_ops (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of so_ops, invalid_p == 0 */
+  /* Skip verify of so_ops, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_so_ops called\n");
   return gdbarch->so_ops;
@@ -3579,7 +3579,7 @@ int
 gdbarch_cannot_step_breakpoint (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of cannot_step_breakpoint, invalid_p == 0 */
+  /* Skip verify of cannot_step_breakpoint, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_cannot_step_breakpoint called\n");
   return gdbarch->cannot_step_breakpoint;
@@ -3596,7 +3596,7 @@ int
 gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0 */
+  /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_have_nonsteppable_watchpoint called\n");
   return gdbarch->have_nonsteppable_watchpoint;
@@ -4056,7 +4056,7 @@ int
 gdbarch_vtable_function_descriptors (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
+  /* Skip verify of vtable_function_descriptors, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_vtable_function_descriptors called\n");
   return gdbarch->vtable_function_descriptors;
@@ -4073,7 +4073,7 @@ int
 gdbarch_vbit_in_delta (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of vbit_in_delta, invalid_p == 0 */
+  /* Skip verify of vbit_in_delta, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_vbit_in_delta called\n");
   return gdbarch->vbit_in_delta;
@@ -4363,7 +4363,7 @@ int
 gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of sofun_address_maybe_missing, invalid_p == 0 */
+  /* Skip verify of sofun_address_maybe_missing, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_sofun_address_maybe_missing called\n");
   return gdbarch->sofun_address_maybe_missing;
@@ -4548,7 +4548,7 @@ const char *
 gdbarch_xml_syscall_file (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of xml_syscall_file, invalid_p == 0 */
+  /* Skip verify of xml_syscall_file, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_xml_syscall_file called\n");
   return gdbarch->xml_syscall_file;
@@ -4565,7 +4565,7 @@ struct syscalls_info *
 gdbarch_syscalls_info (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of syscalls_info, invalid_p == 0 */
+  /* Skip verify of syscalls_info, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_syscalls_info called\n");
   return gdbarch->syscalls_info;
@@ -4582,7 +4582,7 @@ const char *const *
 gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_integer_prefixes, invalid_p == 0 */
+  /* Skip verify of stap_integer_prefixes, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_stap_integer_prefixes called\n");
   return gdbarch->stap_integer_prefixes;
@@ -4599,7 +4599,7 @@ const char *const *
 gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_integer_suffixes, invalid_p == 0 */
+  /* Skip verify of stap_integer_suffixes, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_stap_integer_suffixes called\n");
   return gdbarch->stap_integer_suffixes;
@@ -4616,7 +4616,7 @@ const char *const *
 gdbarch_stap_register_prefixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_register_prefixes, invalid_p == 0 */
+  /* Skip verify of stap_register_prefixes, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_stap_register_prefixes called\n");
   return gdbarch->stap_register_prefixes;
@@ -4633,7 +4633,7 @@ const char *const *
 gdbarch_stap_register_suffixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_register_suffixes, invalid_p == 0 */
+  /* Skip verify of stap_register_suffixes, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_stap_register_suffixes called\n");
   return gdbarch->stap_register_suffixes;
@@ -4650,7 +4650,7 @@ const char *const *
 gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_register_indirection_prefixes, invalid_p == 0 */
+  /* Skip verify of stap_register_indirection_prefixes, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_stap_register_indirection_prefixes called\n");
   return gdbarch->stap_register_indirection_prefixes;
@@ -4667,7 +4667,7 @@ const char *const *
 gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_register_indirection_suffixes, invalid_p == 0 */
+  /* Skip verify of stap_register_indirection_suffixes, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_stap_register_indirection_suffixes called\n");
   return gdbarch->stap_register_indirection_suffixes;
@@ -4684,7 +4684,7 @@ const char *
 gdbarch_stap_gdb_register_prefix (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_gdb_register_prefix, invalid_p == 0 */
+  /* Skip verify of stap_gdb_register_prefix, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_stap_gdb_register_prefix called\n");
   return gdbarch->stap_gdb_register_prefix;
@@ -4701,7 +4701,7 @@ const char *
 gdbarch_stap_gdb_register_suffix (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of stap_gdb_register_suffix, invalid_p == 0 */
+  /* Skip verify of stap_gdb_register_suffix, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_stap_gdb_register_suffix called\n");
   return gdbarch->stap_gdb_register_suffix;
@@ -4886,7 +4886,7 @@ int
 gdbarch_has_global_solist (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of has_global_solist, invalid_p == 0 */
+  /* Skip verify of has_global_solist, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_has_global_solist called\n");
   return gdbarch->has_global_solist;
@@ -4903,7 +4903,7 @@ int
 gdbarch_has_global_breakpoints (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of has_global_breakpoints, invalid_p == 0 */
+  /* Skip verify of has_global_breakpoints, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_has_global_breakpoints called\n");
   return gdbarch->has_global_breakpoints;
@@ -5005,7 +5005,7 @@ const char *
 gdbarch_solib_symbols_extension (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of solib_symbols_extension, invalid_p == 0 */
+  /* Skip verify of solib_symbols_extension, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_solib_symbols_extension called\n");
   return gdbarch->solib_symbols_extension;
@@ -5022,7 +5022,7 @@ int
 gdbarch_has_dos_based_file_system (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of has_dos_based_file_system, invalid_p == 0 */
+  /* Skip verify of has_dos_based_file_system, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_has_dos_based_file_system called\n");
   return gdbarch->has_dos_based_file_system;
@@ -5121,7 +5121,7 @@ struct ravenscar_arch_ops *
 gdbarch_ravenscar_ops (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of ravenscar_ops, invalid_p == 0 */
+  /* Skip verify of ravenscar_ops, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_ravenscar_ops called\n");
   return gdbarch->ravenscar_ops;
@@ -5349,7 +5349,7 @@ const char *
 gdbarch_disassembler_options_implicit (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of disassembler_options_implicit, invalid_p == 0 */
+  /* Skip verify of disassembler_options_implicit, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_disassembler_options_implicit called\n");
   return gdbarch->disassembler_options_implicit;
@@ -5366,7 +5366,7 @@ std::string *
 gdbarch_disassembler_options (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of disassembler_options, invalid_p == 0 */
+  /* Skip verify of disassembler_options, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_disassembler_options called\n");
   return gdbarch->disassembler_options;
@@ -5383,7 +5383,7 @@ const disasm_options_and_args_t *
 gdbarch_valid_disassembler_options (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of valid_disassembler_options, invalid_p == 0 */
+  /* Skip verify of valid_disassembler_options, invalid_p == 0.  */
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_valid_disassembler_options called\n");
   return gdbarch->valid_disassembler_options;
