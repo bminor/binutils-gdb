@@ -1,7 +1,5 @@
 -*- text -*-
 
-* Add support for RISC-V Zimop, Zcmop extensions with version 1.0.
-
 * Add support for RISC-V CORE-V extension (XCvBitmanip) with version 1.0.
 
 Changes in 2.43:
@@ -49,6 +47,8 @@ Changes in 2.43:
 * Add support for RISC-V Zacas extension with version 1.0.
 
 * Add support for RISC-V Zcmp extension with version 1.0.
+
+* Add support for RISC-V Zimop and Zcmop extensions with version 1.0.
 
 * Add support for RISC-V Zfbfmin extension with version 1.0.
 
