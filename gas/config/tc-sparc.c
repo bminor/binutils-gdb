@@ -2593,13 +2593,6 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		    break;
 		  }	/* if not an 'f' register.  */
 
-		if (*args == '}' && mask != RS2 (opcode))
-		  {
-		    error_message
-		      = _(": Instruction requires frs2 and frsd must be the same register");
-		    goto error;
-		  }
-
 		switch (*args)
 		  {
 		  case 'v':
@@ -2628,9 +2621,17 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		  case 'g':
 		  case 'H':
 		  case 'J':
-		  case '}':
                   case '^':
 		    opcode |= RD (mask);
+		    continue;
+
+		  case '}':
+		    if (RD (mask) != (opcode & RD (0x1f)))
+		      {
+			error_message = _(": Instruction requires frs2 and "
+					  "frsd must be the same register");
+			goto error;
+		      }
 		    continue;
 		  }		/* Pack it in.  */
 
