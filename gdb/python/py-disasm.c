@@ -1306,7 +1306,7 @@ gdbpy_print_insn (struct gdbarch *gdbarch, CORE_ADDR memaddr,
 	}
       else
 	{
-	  gdbpy_print_stack ();
+	  gdbpy_print_stack_or_quit ();
 	  return std::optional<int> (-1);
 	}
 
