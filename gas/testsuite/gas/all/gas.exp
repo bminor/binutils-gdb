@@ -477,6 +477,7 @@ if [is_elf_format] {
 }
 
 run_dump_test quoted-sym-names
+run_dump_test quoted-label-blank
 
 # Targets where # is not a line comment character don't transform
 # "# <line> <file>" into .linefile (PR gas/29120).

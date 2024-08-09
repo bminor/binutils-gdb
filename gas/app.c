@@ -1108,6 +1108,8 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	    }
 	  else if (state == 3)
 	    old_state = 9;
+	  else if (state == 0)
+	    old_state = 11; /* Now seeing label definition.  */
 	  else
 	    old_state = state;
 	  state = 5;
