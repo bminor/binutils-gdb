@@ -93,7 +93,11 @@ static char last_char;
 static char lex[256] = {
   [' ']  = LEX_IS_WHITESPACE,
   ['\t'] = LEX_IS_WHITESPACE,
+#ifdef CR_EOL
+  ['\r'] = LEX_IS_LINE_SEPARATOR,
+#else
   ['\r'] = LEX_IS_WHITESPACE,
+#endif
   ['\n'] = LEX_IS_NEWLINE,
   [':'] = LEX_IS_COLON,
   ['$'] = LEX_IS_SYMBOL_COMPONENT,
@@ -857,7 +861,9 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	      ++mri_state;
 	    }
 	  else if (*mri_state != '\0'
-		   || (!IS_WHITESPACE (ch) && !IS_NEWLINE (ch)))
+		   || (!IS_WHITESPACE (ch)
+		       && !IS_LINE_SEPARATOR (ch)
+		       && !IS_NEWLINE (ch)))
 	    {
 	      /* We did not get the expected character, or we didn't
 		 get a valid terminating character after seeing the
