@@ -64,7 +64,7 @@ _bfd_elf_link_keep_memory (struct bfd_link_info *info)
      this is opt-in by each backend.  */
   const struct elf_backend_data *bed
     = get_elf_backend_data (info->output_bfd);
-  if (bed->use_mmap)
+  if (bed != NULL && bed->use_mmap)
     return false;
 #endif
   bfd *abfd;
@@ -5694,7 +5694,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       && !bfd_link_relocatable (info)
       && (abfd->flags & BFD_PLUGIN) == 0
       && !just_syms
-      && extsymcount)
+      && extsymcount != 0
+      && is_elf_hash_table (&htab->root))
     {
       int r_sym_shift;
 
