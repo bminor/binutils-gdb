@@ -7,7 +7,7 @@
 [^:]*:36: *Info: macro .*
 [^:]*:16: Error: unshifted register required -- `tst r0,#12'
 [^:]*:36: *Info: macro .*
-[^:]*:17: Error: unshifted register required -- `tst r0,r1,lsl#2'
+[^:]*:17: Error: unshifted register required -- `tst r0,r1,lsl ?#2'
 [^:]*:36: *Info: macro .*
 [^:]*:18: Error: unshifted register required -- `tst r0,r1,lsl r3'
 [^:]*:36: *Info: macro .*
@@ -19,7 +19,7 @@
 [^:]*:37: *Info: macro .*
 [^:]*:16: Error: unshifted register required -- `cmn r0,#12'
 [^:]*:37: *Info: macro .*
-[^:]*:17: Error: unshifted register required -- `cmn r0,r1,lsl#2'
+[^:]*:17: Error: unshifted register required -- `cmn r0,r1,lsl ?#2'
 [^:]*:37: *Info: macro .*
 [^:]*:18: Error: unshifted register required -- `cmn r0,r1,lsl r3'
 [^:]*:37: *Info: macro .*
@@ -31,7 +31,7 @@
 [^:]*:38: *Info: macro .*
 [^:]*:16: Error: unshifted register required -- `mvn r0,#12'
 [^:]*:38: *Info: macro .*
-[^:]*:17: Error: unshifted register required -- `mvn r0,r1,lsl#2'
+[^:]*:17: Error: unshifted register required -- `mvn r0,r1,lsl ?#2'
 [^:]*:38: *Info: macro .*
 [^:]*:18: Error: unshifted register required -- `mvn r0,r1,lsl r3'
 [^:]*:38: *Info: macro .*
@@ -57,7 +57,7 @@
 [^:]*:12: Error: lo register required -- `sxtb r0,r8'
 [^:]*:21: *Info: macro .*
 [^:]*:43: *Info: macro .*
-[^:]*:22: Error: Thumb encoding does not support rotation -- `sxtb r0,r1,ror#8'
+[^:]*:22: Error: Thumb encoding does not support rotation -- `sxtb r0,r1,ror ?#8'
 [^:]*:43: *Info: macro .*
 [^:]*:11: Error: lo register required -- `sxth r8,r0'
 [^:]*:21: *Info: macro .*
@@ -65,7 +65,7 @@
 [^:]*:12: Error: lo register required -- `sxth r0,r8'
 [^:]*:21: *Info: macro .*
 [^:]*:44: *Info: macro .*
-[^:]*:22: Error: Thumb encoding does not support rotation -- `sxth r0,r1,ror#8'
+[^:]*:22: Error: Thumb encoding does not support rotation -- `sxth r0,r1,ror ?#8'
 [^:]*:44: *Info: macro .*
 [^:]*:11: Error: lo register required -- `uxtb r8,r0'
 [^:]*:21: *Info: macro .*
@@ -73,7 +73,7 @@
 [^:]*:12: Error: lo register required -- `uxtb r0,r8'
 [^:]*:21: *Info: macro .*
 [^:]*:45: *Info: macro .*
-[^:]*:22: Error: Thumb encoding does not support rotation -- `uxtb r0,r1,ror#8'
+[^:]*:22: Error: Thumb encoding does not support rotation -- `uxtb r0,r1,ror ?#8'
 [^:]*:45: *Info: macro .*
 [^:]*:11: Error: lo register required -- `uxth r8,r0'
 [^:]*:21: *Info: macro .*
@@ -81,7 +81,7 @@
 [^:]*:12: Error: lo register required -- `uxth r0,r8'
 [^:]*:21: *Info: macro .*
 [^:]*:46: *Info: macro .*
-[^:]*:22: Error: Thumb encoding does not support rotation -- `uxth r0,r1,ror#8'
+[^:]*:22: Error: Thumb encoding does not support rotation -- `uxth r0,r1,ror ?#8'
 [^:]*:46: *Info: macro .*
 [^:]*:25: Error: dest must overlap one source register -- `adc r1,r2,r3'
 [^:]*:30: *Info: macro .*
@@ -94,7 +94,7 @@
 [^:]*:48: *Info: macro .*
 [^:]*:31: Error: unshifted register required -- `adc r0,#12'
 [^:]*:48: *Info: macro .*
-[^:]*:32: Error: unshifted register required -- `adc r0,r1,lsl#2'
+[^:]*:32: Error: unshifted register required -- `adc r0,r1,lsl ?#2'
 [^:]*:48: *Info: macro .*
 [^:]*:33: Error: unshifted register required -- `adc r0,r1,lsl r3'
 [^:]*:48: *Info: macro .*
@@ -109,7 +109,7 @@
 [^:]*:49: *Info: macro .*
 [^:]*:31: Error: unshifted register required -- `and r0,#12'
 [^:]*:49: *Info: macro .*
-[^:]*:32: Error: unshifted register required -- `and r0,r1,lsl#2'
+[^:]*:32: Error: unshifted register required -- `and r0,r1,lsl ?#2'
 [^:]*:49: *Info: macro .*
 [^:]*:33: Error: unshifted register required -- `and r0,r1,lsl r3'
 [^:]*:49: *Info: macro .*
@@ -124,7 +124,7 @@
 [^:]*:50: *Info: macro .*
 [^:]*:31: Error: unshifted register required -- `bic r0,#12'
 [^:]*:50: *Info: macro .*
-[^:]*:32: Error: unshifted register required -- `bic r0,r1,lsl#2'
+[^:]*:32: Error: unshifted register required -- `bic r0,r1,lsl ?#2'
 [^:]*:50: *Info: macro .*
 [^:]*:33: Error: unshifted register required -- `bic r0,r1,lsl r3'
 [^:]*:50: *Info: macro .*
@@ -139,7 +139,7 @@
 [^:]*:51: *Info: macro .*
 [^:]*:31: Error: unshifted register required -- `eor r0,#12'
 [^:]*:51: *Info: macro .*
-[^:]*:32: Error: unshifted register required -- `eor r0,r1,lsl#2'
+[^:]*:32: Error: unshifted register required -- `eor r0,r1,lsl ?#2'
 [^:]*:51: *Info: macro .*
 [^:]*:33: Error: unshifted register required -- `eor r0,r1,lsl r3'
 [^:]*:51: *Info: macro .*
@@ -154,7 +154,7 @@
 [^:]*:52: *Info: macro .*
 [^:]*:31: Error: unshifted register required -- `orr r0,#12'
 [^:]*:52: *Info: macro .*
-[^:]*:32: Error: unshifted register required -- `orr r0,r1,lsl#2'
+[^:]*:32: Error: unshifted register required -- `orr r0,r1,lsl ?#2'
 [^:]*:52: *Info: macro .*
 [^:]*:33: Error: unshifted register required -- `orr r0,r1,lsl r3'
 [^:]*:52: *Info: macro .*
@@ -169,7 +169,7 @@
 [^:]*:53: *Info: macro .*
 [^:]*:31: Error: unshifted register required -- `sbc r0,#12'
 [^:]*:53: *Info: macro .*
-[^:]*:32: Error: unshifted register required -- `sbc r0,r1,lsl#2'
+[^:]*:32: Error: unshifted register required -- `sbc r0,r1,lsl ?#2'
 [^:]*:53: *Info: macro .*
 [^:]*:33: Error: unshifted register required -- `sbc r0,r1,lsl r3'
 [^:]*:53: *Info: macro .*
@@ -220,7 +220,7 @@
 [^:]*:60: *Info: macro .*
 [^:]*:65: *Info: macro .*
 [^:]*:66: Error: ror #imm not supported -- `ror r0,r1,#12'
-[^:]*:69: Error: unshifted register required -- `add r0,r1,lsl#2'
+[^:]*:69: Error: unshifted register required -- `add r0,r1,lsl ?#2'
 [^:]*:70: Error: unshifted register required -- `add r0,r1,lsl r3'
 [^:]*:71: Error: lo register required -- `add r8,r0,#1'
 [^:]*:72: Error: lo register required -- `add r0,r8,#1'
@@ -236,7 +236,7 @@
 [^:]*:27: Error: lo register required -- `sub r0,r8'
 [^:]*:30: *Info: macro .*
 [^:]*:80: *Info: macro .*
-[^:]*:32: Error: unshifted register required -- `sub r0,r1,lsl#2'
+[^:]*:32: Error: unshifted register required -- `sub r0,r1,lsl ?#2'
 [^:]*:80: *Info: macro .*
 [^:]*:33: Error: unshifted register required -- `sub r0,r1,lsl r3'
 [^:]*:80: *Info: macro .*
@@ -246,10 +246,10 @@
 [^:]*:84: Error: lo register required -- `sub r8,r1,r2'
 [^:]*:85: Error: lo register required -- `sub r1,r8,r2'
 [^:]*:86: Error: lo register required -- `sub r1,r2,r8'
-[^:]*:88: Error: shifts in CMP/MOV instructions are only supported in unified syntax -- `cmp r0,r1,lsl#2'
+[^:]*:88: Error: shifts in CMP/MOV instructions are only supported in unified syntax -- `cmp r0,r1,lsl ?#2'
 [^:]*:89: Error: shifts in CMP/MOV instructions are only supported in unified syntax -- `cmp r0,r1,lsl r3'
 [^:]*:90: Error: only lo regs allowed with immediate -- `cmp r8,#255'
-[^:]*:92: Error: shifts in CMP/MOV instructions are only supported in unified syntax -- `mov r0,r1,lsl#2'
+[^:]*:92: Error: shifts in CMP/MOV instructions are only supported in unified syntax -- `mov r0,r1,lsl ?#2'
 [^:]*:93: Error: shifts in CMP/MOV instructions are only supported in unified syntax -- `mov r0,r1,lsl r3'
 [^:]*:94: Error: only lo regs allowed with immediate -- `mov r8,#255'
 [^:]*:98: Error: lo register required -- `ldr r8,\[r0\]'
@@ -364,8 +364,8 @@
 [^:]*:113: *Info: macro .*
 [^:]*:104: Error: Thumb does not support this addressing mode -- `strh r0,\[r1\],r2'
 [^:]*:113: *Info: macro .*
-[^:]*:115: Error: Thumb does not support this addressing mode -- `ldr r0,\[r1,r2,lsl#1\]'
-[^:]*:116: Error: Thumb does not support this addressing mode -- `str r0,\[r1,r2,lsl#1\]'
+[^:]*:115: Error: Thumb does not support this addressing mode -- `ldr r0,\[r1,r2,lsl ?#1\]'
+[^:]*:116: Error: Thumb does not support this addressing mode -- `str r0,\[r1,r2,lsl ?#1\]'
 [^:]*:119: Error: lo register required -- `ldmia r8!,{r1,r2}'
 [^:]*:120: Error: lo register required -- `ldmia r7!,{r8}'
 [^:]*:121: Warning: this instruction will write back the base register

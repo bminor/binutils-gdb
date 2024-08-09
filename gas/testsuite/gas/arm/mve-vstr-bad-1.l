@@ -45,7 +45,7 @@
 [^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
 [^:]*:36: *Info: macro .*
 [^:]*:39: Error: shift expression expected -- `vstrh.16 q0,\[r0,q1,#1\]'
-[^:]*:40: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrh.16 q0,\[r0,q1,UXTW#2\]'
+[^:]*:40: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrh.16 q0,\[r0,q1,UXTW ?#2\]'
 [^:]*:41: Error: bad element type for instruction -- `vstrw.8 q0,\[r0,q1\]'
 [^:]*:42: Error: bad element type for instruction -- `vstrw.u8 q0,\[r0,q1\]'
 [^:]*:43: Error: bad element type for instruction -- `vstrw.s8 q0,\[r0,q1\]'
@@ -71,8 +71,8 @@
 [^:]*:4: Warning: instruction is UNPREDICTABLE in an IT block
 [^:]*:53: *Info: macro .*
 [^:]*:56: Error: shift expression expected -- `vstrw.32 q0,\[r0,q1,#2\]'
-[^:]*:57: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrw.32 q0,\[r0,q1,UXTW#1\]'
-[^:]*:58: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrw.32 q0,\[r0,q1,UXTW#3\]'
+[^:]*:57: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrw.32 q0,\[r0,q1,UXTW ?#1\]'
+[^:]*:58: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrw.32 q0,\[r0,q1,UXTW ?#3\]'
 [^:]*:59: Error: bad element type for instruction -- `vstrd.8 q0,\[r0,q1\]'
 [^:]*:60: Error: bad element type for instruction -- `vstrd.u8 q0,\[r0,q1\]'
 [^:]*:61: Error: bad element type for instruction -- `vstrd.s8 q0,\[r0,q1\]'
@@ -100,9 +100,9 @@
 [^:]*:77: Warning: instruction is UNPREDICTABLE in an IT block
 [^:]*:83: *Info: macro .*
 [^:]*:84: Error: shift expression expected -- `vstrd.64 q0,\[r0,q1,#3\]'
-[^:]*:85: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrd.64 q0,\[r0,q1,UXTW#1\]'
-[^:]*:86: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrd.64 q0,\[r0,q1,UXTW#2\]'
-[^:]*:87: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrd.64 q0,\[r0,q1,UXTW#4\]'
+[^:]*:85: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrd.64 q0,\[r0,q1,UXTW ?#1\]'
+[^:]*:86: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrd.64 q0,\[r0,q1,UXTW ?#2\]'
+[^:]*:87: Error: shift immediate must be 1, 2 or 3 for half-word, word or double-word accesses respectively -- `vstrd.64 q0,\[r0,q1,UXTW ?#4\]'
 [^:]*:90: Error: syntax error -- `vstrbeq.32 q0,\[r0,q1\]'
 [^:]*:91: Error: syntax error -- `vstrbeq.32 q0,\[r0,q1\]'
 [^:]*:93: Error: syntax error -- `vstrbeq.32 q0,\[r0,q1\]'
