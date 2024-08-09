@@ -24,8 +24,6 @@
 #define DOUBLEBAR_PARALLEL
 #define DWARF2_LINE_MIN_INSN_LENGTH 2
 #define MD_APPLY_SYM_VALUE(FIX) 0
-#define TC_PREDICATE_START_CHAR '['
-#define TC_PREDICATE_END_CHAR ']'
 /* For TI C6X, we keep spaces in what the preprocessor considers
    operands as they may separate functional unit specifiers from
    operands.  */

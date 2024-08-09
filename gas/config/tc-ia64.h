@@ -78,9 +78,6 @@ extern const char *ia64_target_format (void);
 #define LEX_QM		(LEX_NAME|LEX_BEGIN_NAME) /* allow `?' inside name */
 #define LEX_HASH	LEX_END_NAME	/* allow `#' ending a name */
 
-#define TC_PREDICATE_START_CHAR '('
-#define TC_PREDICATE_END_CHAR ')'
-
 extern const char ia64_symbol_chars[];
 #define tc_symbol_chars ia64_symbol_chars
 
