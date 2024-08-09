@@ -1390,13 +1390,13 @@ optimize:
 	{nf}	\op	$128, %ecx, %edx
 	{nf}	\op	$128, %r9
 	{nf}	\op	$128, %r9, %r31
-	{nf}	\op\()b	$128, (%rax)
+	{nf}	\op\(b)	$128, (%rax)
 	{nf}	\op	$128, (%rax), %bl
-	{nf}	\op\()w	$128, (%rax)
+	{nf}	\op\(w)	$128, (%rax)
 	{nf}	\op	$128, (%rax), %dx
-	{nf}	\op\()l	$128, (%rax)
+	{nf}	\op\(l)	$128, (%rax)
 	{nf}	\op	$128, (%rax), %ecx
-	{nf}	\op\()q	$128, (%rax)
+	{nf}	\op\(q)	$128, (%rax)
 	{nf}	\op	$128, (%rax), %r9
 
 	{nf}	\op	$1, %bl
@@ -1407,13 +1407,13 @@ optimize:
 	{nf}	\op	$1, %ecx, %edx
 	{nf}	\op	$1, %r9
 	{nf}	\op	$1, %r9, %r31
-	{nf}	\op\()b	$1, (%rax)
+	{nf}	\op\(b)	$1, (%rax)
 	{nf}	\op	$1, (%rax), %bl
-	{nf}	\op\()w	$1, (%rax)
+	{nf}	\op\(w)	$1, (%rax)
 	{nf}	\op	$1, (%rax), %dx
-	{nf}	\op\()l	$1, (%rax)
+	{nf}	\op\(l)	$1, (%rax)
 	{nf}	\op	$1, (%rax), %ecx
-	{nf}	\op\()q	$1, (%rax)
+	{nf}	\op\(q)	$1, (%rax)
 	{nf}	\op	$1, (%rax), %r9
 
 	{nf}	\op	$0xff, %bl
@@ -1424,13 +1424,13 @@ optimize:
 	{nf}	\op	$-1, %ecx, %edx
 	{nf}	\op	$-1, %r9
 	{nf}	\op	$-1, %r9, %r31
-	{nf}	\op\()b	$0xff, (%rax)
+	{nf}	\op\(b)	$0xff, (%rax)
 	{nf}	\op	$-1, (%rax), %bl
-	{nf}	\op\()w	$0xffff, (%rax)
+	{nf}	\op\(w)	$0xffff, (%rax)
 	{nf}	\op	$-1, (%rax), %dx
-	{nf}	\op\()l	$0xffffffff, (%rax)
+	{nf}	\op\(l)	$0xffffffff, (%rax)
 	{nf}	\op	$-1, (%rax), %ecx
-	{nf}	\op\()q	$-1, (%rax)
+	{nf}	\op\(q)	$-1, (%rax)
 	{nf}	\op	$-1, (%rax), %r9
 	.endr
 
@@ -1444,13 +1444,13 @@ optimize:
 	{nf}	ro\dir	$63, %rdx
 	{nf}	ro\dir	$63, %rdx, %rax
 
-	{nf}	ro\dir\()b	$7, (%rdx)
+	{nf}	ro\dir\(b)	$7, (%rdx)
 	{nf}	ro\dir		$7, (%rdx), %al
-	{nf}	ro\dir\()w	$15, (%rdx)
+	{nf}	ro\dir\(w)	$15, (%rdx)
 	{nf}	ro\dir		$15, (%rdx), %ax
-	{nf}	ro\dir\()l	$31, (%rdx)
+	{nf}	ro\dir\(l)	$31, (%rdx)
 	{nf}	ro\dir		$31, (%rdx), %eax
-	{nf}	ro\dir\()q	$63, (%rdx)
+	{nf}	ro\dir\(q)	$63, (%rdx)
 	{nf}	ro\dir		$63, (%rdx), %rax
 	.endr
 
@@ -1476,10 +1476,10 @@ optimize:
 	# Note: 2-6 want leaving alone with -Os.
 	.irp n, 1, 2, 6, 7
 	# Note: 16-bit 3-operand src!=dst non-ZU form needs leaving alone.
-	{nf} imul $1<<\n, %\r\()dx, %\r\()cx
-	{nf} imul $1<<\n, (%rdx), %\r\()cx
-	{nf} imul $1<<\n, %\r\()cx, %\r\()cx
-	{nf} imul $1<<\n, %\r\()cx
+	{nf} imul $1<<\n, %\r\(dx), %\r\(cx)
+	{nf} imul $1<<\n, (%rdx), %\r\(cx)
+	{nf} imul $1<<\n, %\r\(cx), %\r\(cx)
+	{nf} imul $1<<\n, %\r\(cx)
 
 	.ifeqs "\r",""
 	{nf} imulzu $1<<\n, %dx, %cx

@@ -1148,6 +1148,8 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
     prefix_mode = (prefix_mode == GE_OPT_PREFIX_BIG) ? prefix_mode
 		  : GE_OPT_PREFIX;
 
+  skip_whitespace (*str);
+
   switch (prefix_mode)
     {
     case GE_NO_PREFIX: break;

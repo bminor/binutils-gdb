@@ -1456,6 +1456,8 @@ parse_register_list (unsigned long *insn,
 	    }
 	}
 
+      skip_white_space ();
+
       if (*input_line_pointer == '}')
 	{
 	  input_line_pointer++;
@@ -1474,6 +1476,8 @@ parse_register_list (unsigned long *insn,
 
 	  /* Skip the dash.  */
 	  ++input_line_pointer;
+
+	  skip_white_space ();
 
 	  /* Get the second register in the range.  */
 	  if (! register_name (&exp2))

@@ -643,6 +643,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXeEpPhHb";
 static inline bool
 skip_past_char (char **str, char c)
 {
+  skip_whitespace (*str);
   if (**str == c)
     {
       (*str)++;
@@ -893,6 +894,7 @@ parse_reg (char **ccp)
   start++;
 #endif
 
+  skip_whitespace (start);
   p = start;
   if (!ISALPHA (*p) || !is_name_beginner (*p))
     return NULL;
@@ -1202,12 +1204,16 @@ parse_typed_reg (char **ccp, aarch64_reg_type type,
 		 struct vector_type_el *typeinfo, unsigned int flags)
 {
   char *str = *ccp;
-  bool is_alpha = ISALPHA (*str);
-  const reg_entry *reg = parse_reg (&str);
+  bool is_alpha;
+  const reg_entry *reg;
   struct vector_type_el atype;
   struct vector_type_el parsetype;
   bool is_typed_vecreg = false;
   unsigned int err_flags = (flags & PTR_IN_REGLIST) ? SEF_IN_REGLIST : 0;
+
+  skip_whitespace (str);
+  is_alpha = ISALPHA (*str);
+  reg = parse_reg (&str);
 
   atype.defined = 0;
   atype.type = NT_invtype;
@@ -1429,10 +1435,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
   do
     {
       if (in_range)
-	{
-	  str++;		/* skip over '-' */
-	  val_range = val;
-	}
+	val_range = val;
 
       const reg_entry *reg;
       if (has_qualifier)
@@ -1494,7 +1497,8 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
       in_range = 0;
       ptr_flags |= PTR_GOOD_MATCH;
     }
-  while (skip_past_comma (&str) || (in_range = 1, *str == '-'));
+  while (skip_past_comma (&str)
+	 || (in_range = 1, skip_past_char (&str, '-')));
 
   skip_whitespace (str);
   if (*str != '}')
@@ -8289,6 +8293,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
     }
 
   /* Check if we have parsed all the operands.  */
+  skip_whitespace (str);
   if (*str != '\0' && ! error_p ())
     {
       /* Set I to the index of the last present operand; this is

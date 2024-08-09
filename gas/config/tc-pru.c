@@ -1399,7 +1399,6 @@ pru_parse_args (pru_insn_infoS *insn ATTRIBUTE_UNUSED, char *argstr,
 		  const char *parsestr, char **parsed_args)
 {
   char *p;
-  char *end = NULL;
   int i;
   p = argstr;
   i = 0;
@@ -1426,14 +1425,7 @@ pru_parse_args (pru_insn_infoS *insn ATTRIBUTE_UNUSED, char *argstr,
       else
 	{
 	  /* Check that the argument string has no trailing arguments.  */
-	  /* If we've got a %pmem relocation, we've zapped the parens with
-	     spaces.  */
-	  if (strprefix (p, "%pmem") || strprefix (p, "%label"))
-	    end = strpbrk (p, ",");
-	  else
-	    end = strpbrk (p, " ,");
-
-	  if (end != NULL)
+	  if (strpbrk (p, ",") != NULL)
 	    as_bad (_("too many arguments"));
 	}
 
