@@ -2,18 +2,18 @@
 .*: Error: operand mismatch -- `addpt w5,w8,w0'
 .*: Info:\s+did you mean this\?
 .*: Info:\s+addpt x5, x8, x0
-.*: Error: only 'LSL' shift is permitted at operand 3 -- `addpt x5,x8,x0,asr#6'
-.*: Error: shift amount out of range 0 to 7 at operand 3 -- `addpt x5,x8,x0,lsl#9'
-.*: Error: expected an integer or zero register at operand 3 -- `addpt x5,x8,sp,lsl#5'
-.*: Error: unexpected register type at operand 1 -- `addpt xzr,x8,x0,lsl#3'
+.*: Error: only 'LSL' shift is permitted at operand 3 -- `addpt x5,x8,x0,asr ?#6'
+.*: Error: shift amount out of range 0 to 7 at operand 3 -- `addpt x5,x8,x0,lsl ?#9'
+.*: Error: expected an integer or zero register at operand 3 -- `addpt x5,x8,sp,lsl ?#5'
+.*: Error: unexpected register type at operand 1 -- `addpt xzr,x8,x0,lsl ?#3'
 
 .*: Error: operand mismatch -- `subpt w5,w8,w0'
 .*: Info:\s+did you mean this\?
 .*: Info:\s+subpt x5, x8, x0
-.*: Error: only 'LSL' shift is permitted at operand 3 -- `subpt x5,x8,x0,asr#6'
-.*: Error: shift amount out of range 0 to 7 at operand 3 -- `subpt x5,x8,x0,lsl#9'
-.*: Error: expected an integer or zero register at operand 3 -- `subpt x5,x8,sp,lsl#5'
-.*: Error: unexpected register type at operand 1 -- `subpt xzr,x8,x0,lsl#3'
+.*: Error: only 'LSL' shift is permitted at operand 3 -- `subpt x5,x8,x0,asr ?#6'
+.*: Error: shift amount out of range 0 to 7 at operand 3 -- `subpt x5,x8,x0,lsl ?#9'
+.*: Error: expected an integer or zero register at operand 3 -- `subpt x5,x8,sp,lsl ?#5'
+.*: Error: unexpected register type at operand 1 -- `subpt xzr,x8,x0,lsl ?#3'
 
 .*: Error: operand mismatch -- `maddpt w1,x2,x3,x4'
 .*: Info:\s+did you mean this\?

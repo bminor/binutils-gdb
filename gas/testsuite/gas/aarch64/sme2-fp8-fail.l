@@ -175,99 +175,99 @@
 [^:]+:64:  Info: macro invoked from here
 [^:]+:60: Error: start register out of range at operand 2 -- `fcvt z4.b,{z3.s-z6.s}'
 [^:]+:64:  Info: macro invoked from here
-[^:]+:69: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.h-z1.h},{z2.h-z3.h},z2.h'
+[^:]+:69: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.h ?- ?z1.h ?},{ ?z2.h ?- ?z3.h ?},z2.h'
 [^:]+:81:  Info: macro invoked from here
-[^:]+:71: Error: start register out of range at operand 1 -- `fscale {z1.h-z2.h},{z1.h-z2.h},z3.h'
+[^:]+:71: Error: start register out of range at operand 1 -- `fscale { ?z1.h ?- ?z2.h ?},{ ?z1.h ?- ?z2.h ?},z3.h'
 [^:]+:81:  Info: macro invoked from here
-[^:]+:74: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.h-z3.h},{z1.h-z4.h},z4.h'
+[^:]+:74: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.h ?- ?z3.h ?},{ ?z1.h ?- ?z4.h ?},z4.h'
 [^:]+:81:  Info: macro invoked from here
-[^:]+:76: Error: start register out of range at operand 1 -- `fscale {z1.h-z4.h},{z1.h-z4.h},z4.h'
+[^:]+:76: Error: start register out of range at operand 1 -- `fscale { ?z1.h ?- ?z4.h ?},{ ?z1.h ?- ?z4.h ?},z4.h'
 [^:]+:81:  Info: macro invoked from here
-[^:]+:77: Error: start register out of range at operand 1 -- `fscale {z2.h-z5.h},{z2.h-z5.h},z4.h'
+[^:]+:77: Error: start register out of range at operand 1 -- `fscale { ?z2.h ?- ?z5.h ?},{ ?z2.h ?- ?z5.h ?},z4.h'
 [^:]+:81:  Info: macro invoked from here
-[^:]+:78: Error: start register out of range at operand 1 -- `fscale {z3.h-z6.h},{z3.h-z6.h},z4.h'
+[^:]+:78: Error: start register out of range at operand 1 -- `fscale { ?z3.h ?- ?z6.h ?},{ ?z3.h ?- ?z6.h ?},z4.h'
 [^:]+:81:  Info: macro invoked from here
-[^:]+:69: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.s-z1.s},{z2.s-z3.s},z2.s'
+[^:]+:69: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.s ?- ?z1.s ?},{ ?z2.s ?- ?z3.s ?},z2.s'
 [^:]+:82:  Info: macro invoked from here
-[^:]+:71: Error: start register out of range at operand 1 -- `fscale {z1.s-z2.s},{z1.s-z2.s},z3.s'
+[^:]+:71: Error: start register out of range at operand 1 -- `fscale { ?z1.s ?- ?z2.s ?},{ ?z1.s ?- ?z2.s ?},z3.s'
 [^:]+:82:  Info: macro invoked from here
-[^:]+:74: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.s-z3.s},{z1.s-z4.s},z4.s'
+[^:]+:74: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.s ?- ?z3.s ?},{ ?z1.s ?- ?z4.s ?},z4.s'
 [^:]+:82:  Info: macro invoked from here
-[^:]+:76: Error: start register out of range at operand 1 -- `fscale {z1.s-z4.s},{z1.s-z4.s},z4.s'
+[^:]+:76: Error: start register out of range at operand 1 -- `fscale { ?z1.s ?- ?z4.s ?},{ ?z1.s ?- ?z4.s ?},z4.s'
 [^:]+:82:  Info: macro invoked from here
-[^:]+:77: Error: start register out of range at operand 1 -- `fscale {z2.s-z5.s},{z2.s-z5.s},z4.s'
+[^:]+:77: Error: start register out of range at operand 1 -- `fscale { ?z2.s ?- ?z5.s ?},{ ?z2.s ?- ?z5.s ?},z4.s'
 [^:]+:82:  Info: macro invoked from here
-[^:]+:78: Error: start register out of range at operand 1 -- `fscale {z3.s-z6.s},{z3.s-z6.s},z4.s'
+[^:]+:78: Error: start register out of range at operand 1 -- `fscale { ?z3.s ?- ?z6.s ?},{ ?z3.s ?- ?z6.s ?},z4.s'
 [^:]+:82:  Info: macro invoked from here
-[^:]+:69: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.d-z1.d},{z2.d-z3.d},z2.d'
+[^:]+:69: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.d ?- ?z1.d ?},{ ?z2.d ?- ?z3.d ?},z2.d'
 [^:]+:83:  Info: macro invoked from here
-[^:]+:71: Error: start register out of range at operand 1 -- `fscale {z1.d-z2.d},{z1.d-z2.d},z3.d'
+[^:]+:71: Error: start register out of range at operand 1 -- `fscale { ?z1.d ?- ?z2.d ?},{ ?z1.d ?- ?z2.d ?},z3.d'
 [^:]+:83:  Info: macro invoked from here
-[^:]+:74: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.d-z3.d},{z1.d-z4.d},z4.d'
+[^:]+:74: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.d ?- ?z3.d ?},{ ?z1.d ?- ?z4.d ?},z4.d'
 [^:]+:83:  Info: macro invoked from here
-[^:]+:76: Error: start register out of range at operand 1 -- `fscale {z1.d-z4.d},{z1.d-z4.d},z4.d'
+[^:]+:76: Error: start register out of range at operand 1 -- `fscale { ?z1.d ?- ?z4.d ?},{ ?z1.d ?- ?z4.d ?},z4.d'
 [^:]+:83:  Info: macro invoked from here
-[^:]+:77: Error: start register out of range at operand 1 -- `fscale {z2.d-z5.d},{z2.d-z5.d},z4.d'
+[^:]+:77: Error: start register out of range at operand 1 -- `fscale { ?z2.d ?- ?z5.d ?},{ ?z2.d ?- ?z5.d ?},z4.d'
 [^:]+:83:  Info: macro invoked from here
-[^:]+:78: Error: start register out of range at operand 1 -- `fscale {z3.d-z6.d},{z3.d-z6.d},z4.d'
+[^:]+:78: Error: start register out of range at operand 1 -- `fscale { ?z3.d ?- ?z6.d ?},{ ?z3.d ?- ?z6.d ?},z4.d'
 [^:]+:83:  Info: macro invoked from here
-[^:]+:88: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.h-z1.h},{z1.h-z2.h},{z2.h-z3.h}'
+[^:]+:88: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.h ?- ?z1.h ?},{ ?z1.h ?- ?z2.h ?},{ ?z2.h ?- ?z3.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:90: Error: start register out of range at operand 1 -- `fscale {z1.h-z2.h},{z1.h-z2.h},{z2.h-z3.h}'
+[^:]+:90: Error: start register out of range at operand 1 -- `fscale { ?z1.h ?- ?z2.h ?},{ ?z1.h ?- ?z2.h ?},{ ?z2.h ?- ?z3.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:91: Error: start register out of range at operand 1 -- `fscale {z1.h-z2.h},{z1.h-z2.h},{z3.h-z4.h}'
+[^:]+:91: Error: start register out of range at operand 1 -- `fscale { ?z1.h ?- ?z2.h ?},{ ?z1.h ?- ?z2.h ?},{ ?z3.h ?- ?z4.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:94: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.h-z3.h},{z1.h-z4.h},{z4.h-z7.h}'
+[^:]+:94: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.h ?- ?z3.h ?},{ ?z1.h ?- ?z4.h ?},{ ?z4.h ?- ?z7.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:96: Error: start register out of range at operand 1 -- `fscale {z1.h-z4.h},{z1.h-z4.h},{z4.h-z7.h}'
+[^:]+:96: Error: start register out of range at operand 1 -- `fscale { ?z1.h ?- ?z4.h ?},{ ?z1.h ?- ?z4.h ?},{ ?z4.h ?- ?z7.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:97: Error: start register out of range at operand 1 -- `fscale {z2.h-z5.h},{z2.h-z5.h},{z4.h-z7.h}'
+[^:]+:97: Error: start register out of range at operand 1 -- `fscale { ?z2.h ?- ?z5.h ?},{ ?z2.h ?- ?z5.h ?},{ ?z4.h ?- ?z7.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:98: Error: start register out of range at operand 1 -- `fscale {z3.h-z6.h},{z3.h-z6.h},{z4.h-z7.h}'
+[^:]+:98: Error: start register out of range at operand 1 -- `fscale { ?z3.h ?- ?z6.h ?},{ ?z3.h ?- ?z6.h ?},{ ?z4.h ?- ?z7.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:99: Error: start register out of range at operand 3 -- `fscale {z0.h-z3.h},{z0.h-z3.h},{z5.h-z8.h}'
+[^:]+:99: Error: start register out of range at operand 3 -- `fscale { ?z0.h ?- ?z3.h ?},{ ?z0.h ?- ?z3.h ?},{ ?z5.h ?- ?z8.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:100: Error: start register out of range at operand 3 -- `fscale {z0.h-z3.h},{z0.h-z3.h},{z6.h-z9.h}'
+[^:]+:100: Error: start register out of range at operand 3 -- `fscale { ?z0.h ?- ?z3.h ?},{ ?z0.h ?- ?z3.h ?},{ ?z6.h ?- ?z9.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:101: Error: start register out of range at operand 3 -- `fscale {z0.h-z3.h},{z0.h-z3.h},{z7.h-z10.h}'
+[^:]+:101: Error: start register out of range at operand 3 -- `fscale { ?z0.h ?- ?z3.h ?},{ ?z0.h ?- ?z3.h ?},{ ?z7.h ?- ?z10.h ?}'
 [^:]+:104:  Info: macro invoked from here
-[^:]+:88: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.s-z1.s},{z1.s-z2.s},{z2.s-z3.s}'
+[^:]+:88: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.s ?- ?z1.s ?},{ ?z1.s ?- ?z2.s ?},{ ?z2.s ?- ?z3.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:90: Error: start register out of range at operand 1 -- `fscale {z1.s-z2.s},{z1.s-z2.s},{z2.s-z3.s}'
+[^:]+:90: Error: start register out of range at operand 1 -- `fscale { ?z1.s ?- ?z2.s ?},{ ?z1.s ?- ?z2.s ?},{ ?z2.s ?- ?z3.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:91: Error: start register out of range at operand 1 -- `fscale {z1.s-z2.s},{z1.s-z2.s},{z3.s-z4.s}'
+[^:]+:91: Error: start register out of range at operand 1 -- `fscale { ?z1.s ?- ?z2.s ?},{ ?z1.s ?- ?z2.s ?},{ ?z3.s ?- ?z4.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:94: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.s-z3.s},{z1.s-z4.s},{z4.s-z7.s}'
+[^:]+:94: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.s ?- ?z3.s ?},{ ?z1.s ?- ?z4.s ?},{ ?z4.s ?- ?z7.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:96: Error: start register out of range at operand 1 -- `fscale {z1.s-z4.s},{z1.s-z4.s},{z4.s-z7.s}'
+[^:]+:96: Error: start register out of range at operand 1 -- `fscale { ?z1.s ?- ?z4.s ?},{ ?z1.s ?- ?z4.s ?},{ ?z4.s ?- ?z7.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:97: Error: start register out of range at operand 1 -- `fscale {z2.s-z5.s},{z2.s-z5.s},{z4.s-z7.s}'
+[^:]+:97: Error: start register out of range at operand 1 -- `fscale { ?z2.s ?- ?z5.s ?},{ ?z2.s ?- ?z5.s ?},{ ?z4.s ?- ?z7.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:98: Error: start register out of range at operand 1 -- `fscale {z3.s-z6.s},{z3.s-z6.s},{z4.s-z7.s}'
+[^:]+:98: Error: start register out of range at operand 1 -- `fscale { ?z3.s ?- ?z6.s ?},{ ?z3.s ?- ?z6.s ?},{ ?z4.s ?- ?z7.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:99: Error: start register out of range at operand 3 -- `fscale {z0.s-z3.s},{z0.s-z3.s},{z5.s-z8.s}'
+[^:]+:99: Error: start register out of range at operand 3 -- `fscale { ?z0.s ?- ?z3.s ?},{ ?z0.s ?- ?z3.s ?},{ ?z5.s ?- ?z8.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:100: Error: start register out of range at operand 3 -- `fscale {z0.s-z3.s},{z0.s-z3.s},{z6.s-z9.s}'
+[^:]+:100: Error: start register out of range at operand 3 -- `fscale { ?z0.s ?- ?z3.s ?},{ ?z0.s ?- ?z3.s ?},{ ?z6.s ?- ?z9.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:101: Error: start register out of range at operand 3 -- `fscale {z0.s-z3.s},{z0.s-z3.s},{z7.s-z10.s}'
+[^:]+:101: Error: start register out of range at operand 3 -- `fscale { ?z0.s ?- ?z3.s ?},{ ?z0.s ?- ?z3.s ?},{ ?z7.s ?- ?z10.s ?}'
 [^:]+:105:  Info: macro invoked from here
-[^:]+:88: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.d-z1.d},{z1.d-z2.d},{z2.d-z3.d}'
+[^:]+:88: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.d ?- ?z1.d ?},{ ?z1.d ?- ?z2.d ?},{ ?z2.d ?- ?z3.d ?}'
 [^:]+:106:  Info: macro invoked from here
-[^:]+:90: Error: start register out of range at operand 1 -- `fscale {z1.d-z2.d},{z1.d-z2.d},{z2.d-z3.d}'
+[^:]+:90: Error: start register out of range at operand 1 -- `fscale { ?z1.d ?- ?z2.d ?},{ ?z1.d ?- ?z2.d ?},{ ?z2.d ?- ?z3.d ?}'
 [^:]+:106:  Info: macro invoked from here
-[^:]+:91: Error: start register out of range at operand 1 -- `fscale {z1.d-z2.d},{z1.d-z2.d},{z3.d-z4.d}'
+[^:]+:91: Error: start register out of range at operand 1 -- `fscale { ?z1.d ?- ?z2.d ?},{ ?z1.d ?- ?z2.d ?},{ ?z3.d ?- ?z4.d ?}'
 [^:]+:106:  Info: macro invoked from here
-[^:]+:94: Error: operand 2 must be the same register as operand 1 -- `fscale {z0.d-z3.d},{z1.d-z4.d},{z4.d-z7.d}'
+[^:]+:94: Error: operand 2 must be the same register as operand 1 -- `fscale { ?z0.d ?- ?z3.d ?},{ ?z1.d ?- ?z4.d ?},{ ?z4.d ?- ?z7.d ?}'
 [^:]+:106:  Info: macro invoked from here
-[^:]+:96: Error: start register out of range at operand 1 -- `fscale {z1.d-z4.d},{z1.d-z4.d},{z4.d-z7.d}'
+[^:]+:96: Error: start register out of range at operand 1 -- `fscale { ?z1.d ?- ?z4.d ?},{ ?z1.d ?- ?z4.d ?},{ ?z4.d ?- ?z7.d ?}'
 [^:]+:106:  Info: macro invoked from here
-[^:]+:97: Error: start register out of range at operand 1 -- `fscale {z2.d-z5.d},{z2.d-z5.d},{z4.d-z7.d}'
+[^:]+:97: Error: start register out of range at operand 1 -- `fscale { ?z2.d ?- ?z5.d ?},{ ?z2.d ?- ?z5.d ?},{ ?z4.d ?- ?z7.d ?}'
 [^:]+:106:  Info: macro invoked from here
-[^:]+:98: Error: start register out of range at operand 1 -- `fscale {z3.d-z6.d},{z3.d-z6.d},{z4.d-z7.d}'
+[^:]+:98: Error: start register out of range at operand 1 -- `fscale { ?z3.d ?- ?z6.d ?},{ ?z3.d ?- ?z6.d ?},{ ?z4.d ?- ?z7.d ?}'
 [^:]+:106:  Info: macro invoked from here
-[^:]+:99: Error: start register out of range at operand 3 -- `fscale {z0.d-z3.d},{z0.d-z3.d},{z5.d-z8.d}'
+[^:]+:99: Error: start register out of range at operand 3 -- `fscale { ?z0.d ?- ?z3.d ?},{ ?z0.d ?- ?z3.d ?},{ ?z5.d ?- ?z8.d ?}'
 [^:]+:106:  Info: macro invoked from here
-[^:]+:100: Error: start register out of range at operand 3 -- `fscale {z0.d-z3.d},{z0.d-z3.d},{z6.d-z9.d}'
+[^:]+:100: Error: start register out of range at operand 3 -- `fscale { ?z0.d ?- ?z3.d ?},{ ?z0.d ?- ?z3.d ?},{ ?z6.d ?- ?z9.d ?}'
 [^:]+:106:  Info: macro invoked from here
-[^:]+:101: Error: start register out of range at operand 3 -- `fscale {z0.d-z3.d},{z0.d-z3.d},{z7.d-z10.d}'
+[^:]+:101: Error: start register out of range at operand 3 -- `fscale { ?z0.d ?- ?z3.d ?},{ ?z0.d ?- ?z3.d ?},{ ?z7.d ?- ?z10.d ?}'
 [^:]+:106:  Info: macro invoked from here

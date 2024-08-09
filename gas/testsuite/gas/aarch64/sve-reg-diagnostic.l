@@ -9,7 +9,7 @@
 .*: Error: invalid base register at operand 2 -- `ldr x1,\[p0\]'
 .*: Error: invalid base register at operand 2 -- `ldr x1,\[p0\.b\]'
 .*: Error: invalid shift amount at operand 2 -- `ldr x0,\[x1,x2,lsl p0\.b\]'
-.*: Error: invalid shift amount at operand 2 -- `ldr x0,\[x1,x2,lsl#p0\.b\]'
+.*: Error: invalid shift amount at operand 2 -- `ldr x0,\[x1,x2,lsl ?#p0\.b\]'
 .*: Error: immediate out of range at operand 3 -- `and x0,x0,#x0'
 .*: Error: immediate out of range at operand 3 -- `and x0,x0,s0'
 .*: Error: immediate out of range at operand 3 -- `and x0,x0,#s0'

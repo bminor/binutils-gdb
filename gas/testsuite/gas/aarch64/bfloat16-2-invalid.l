@@ -166,7 +166,7 @@
 .*: Info:    did you mean this\?
 .*: Info:    	bfadd z31.h, z31.h, z31.h
 .*: Error: expected an SVE vector register at operand 1 -- `bfadd {z0.h},z0.h,z0.h'
-.*: Error: expected an SVE vector register at operand 1 -- `bfadd {z0.h-z0.h},z0.h'
+.*: Error: expected an SVE vector register at operand 1 -- `bfadd {z0.h ?- ?z0.h},z0.h'
 .*: Error: comma expected between operands at operand 3 -- `bfadd z0.h,z0.h'
 .*: Error: operand mismatch -- `bfclamp z0.b,z0.h,z0.h'
 .*: Info:    did you mean this\?
@@ -184,7 +184,7 @@
 .*: Info:    did you mean this\?
 .*: Info:    	bfclamp z31.h, z31.h, z31.h
 .*: Error: expected an SVE vector register at operand 1 -- `bfclamp {z0.h},z0.h,z0.h'
-.*: Error: expected an SVE vector register at operand 1 -- `bfclamp {z0.h-z0.h},z0.h'
+.*: Error: expected an SVE vector register at operand 1 -- `bfclamp {z0.h ?- ?z0.h},z0.h'
 .*: Error: comma expected between operands at operand 3 -- `bfclamp z0.h,z0.h'
 .*: Error: operand mismatch -- `bfmla z0.b,z0.h,z0.h\[0\]'
 .*: Info:    did you mean this\?
@@ -202,7 +202,7 @@
 .*: Info:    did you mean this\?
 .*: Info:    	bfmla z31.h, z31.h, z31.h\[8\]
 .*: Error: expected an SVE vector register at operand 1 -- `bfmla {z0.h},z0.h,z0.h\[1\]'
-.*: Error: expected an SVE vector register at operand 1 -- `bfmla {z0.h-z0.h},z0.h\[2\]'
+.*: Error: expected an SVE vector register at operand 1 -- `bfmla {z0.h ?- ?z0.h},z0.h\[2\]'
 .*: Error: expected an SVE predicate register at operand 2 -- `bfmla z0.h,z0.h\[3\]'
 .*: Error: operand mismatch -- `bfmls z0.b,z0.h,z0.h\[0\]'
 .*: Info:    did you mean this\?
@@ -220,7 +220,7 @@
 .*: Info:    did you mean this\?
 .*: Info:    	bfmls z31.h, z31.h, z31.h\[8\]
 .*: Error: expected an SVE vector register at operand 1 -- `bfmls {z0.h},z0.h,z0.h\[1\]'
-.*: Error: expected an SVE vector register at operand 1 -- `bfmls {z0.h-z0.h},z0.h\[2\]'
+.*: Error: expected an SVE vector register at operand 1 -- `bfmls {z0.h ?- ?z0.h},z0.h\[2\]'
 .*: Error: expected an SVE predicate register at operand 2 -- `bfmls z0.h,z0.h\[3\]'
 .*: Error: operand mismatch -- `bfmul z0.b,z0.h,z0.h\[0\]'
 .*: Info:    did you mean this\?
@@ -238,7 +238,7 @@
 .*: Info:    did you mean this\?
 .*: Info:    	bfmul z31.h, z31.h, z31.h\[8\]
 .*: Error: expected an SVE vector register at operand 1 -- `bfmul {z0.h},z0.h,z0.h\[1\]'
-.*: Error: expected an SVE vector register at operand 1 -- `bfmul {z0.h-z0.h},z0.h\[2\]'
+.*: Error: expected an SVE vector register at operand 1 -- `bfmul {z0.h ?- ?z0.h},z0.h\[2\]'
 .*: Error: expected an SVE predicate register at operand 2 -- `bfmul z0.h,z0.h\[3\]'
 .*: Error: operand mismatch -- `bfsub z0.b,z0.h,z0.h'
 .*: Info:    did you mean this\?
@@ -256,7 +256,7 @@
 .*: Info:    did you mean this\?
 .*: Info:    	bfsub z31.h, z31.h, z31.h
 .*: Error: expected an SVE vector register at operand 1 -- `bfsub {z0.h},z0.h,z0.h'
-.*: Error: expected an SVE vector register at operand 1 -- `bfsub {z0.h-z0.h},z0.h'
+.*: Error: expected an SVE vector register at operand 1 -- `bfsub {z0.h ?- ?z0.h},z0.h'
 .*: Error: comma expected between operands at operand 3 -- `bfsub z0.h,z0.h'
 .*: Warning: output register of preceding `movprfx' expected as output at operand 1 -- `bfclamp z1.h,z3.h,z16.h'
 .*: Warning: output register of preceding `movprfx' not used in current instruction at operand 1 -- `bfmla z10.h,z16.h,z3.h\[7\]'

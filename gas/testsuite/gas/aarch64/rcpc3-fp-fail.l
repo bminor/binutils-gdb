@@ -1,8 +1,8 @@
 [^:]+: Assembler messages:
-[^:]+:3: Error: register element index out of range 0 to 1 at operand 1 -- `stl1 {v1.d}\[-1\],\[x1\]'
-[^:]+:6: Error: register element index out of range 0 to 1 at operand 1 -- `stl1 {v1.d}\[2\],\[x1\]'
-[^:]+:8: Error: register element index out of range 0 to 1 at operand 1 -- `ldap1 {v2.d}\[-1\],\[sp\]'
-[^:]+:11: Error: register element index out of range 0 to 1 at operand 1 -- `ldap1 {v2.d}\[2\],\[sp\]'
+[^:]+:3: Error: register element index out of range 0 to 1 at operand 1 -- `stl1 { ?v1.d ?}\[-1\],\[x1\]'
+[^:]+:6: Error: register element index out of range 0 to 1 at operand 1 -- `stl1 { ?v1.d ?}\[2\],\[x1\]'
+[^:]+:8: Error: register element index out of range 0 to 1 at operand 1 -- `ldap1 { ?v2.d ?}\[-1\],\[sp\]'
+[^:]+:11: Error: register element index out of range 0 to 1 at operand 1 -- `ldap1 { ?v2.d ?}\[2\],\[sp\]'
 [^:]+:13: Error: immediate value out of range -256 to 255 at operand 2 -- `ldapur b1,\[x1,#-257\]'
 [^:]+:16: Error: immediate value out of range -256 to 255 at operand 2 -- `ldapur b1,\[x1,#256\]'
 [^:]+:18: Error: immediate value out of range -256 to 255 at operand 2 -- `stlur q1,\[x1,#-257\]'

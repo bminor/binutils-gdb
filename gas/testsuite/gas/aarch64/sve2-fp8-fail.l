@@ -127,35 +127,35 @@
 [^:]+:37:  Info: macro invoked from here
 [^:]+:17: Error: expected an SVE vector register at operand 2 -- `f2cvtlt z0.h,p0/z,z1.d'
 [^:]+:37:  Info: macro invoked from here
-[^:]+:23: Error: operand mismatch -- `bfcvtn z1.h,{z0.h-z1.h}'
+[^:]+:23: Error: operand mismatch -- `bfcvtn z1.h,{ ?z0.h ?- ?z1.h ?}'
 [^:]+:39:  Info: macro invoked from here
-[^:]+:24: Error: operand mismatch -- `bfcvtn z0.s,{z0.h-z1.h}'
+[^:]+:24: Error: operand mismatch -- `bfcvtn z0.s,{ ?z0.h ?- ?z1.h ?}'
 [^:]+:39:  Info: macro invoked from here
-[^:]+:25: Error: operand mismatch -- `bfcvtn z7.d,{z0.h-z1.h}'
+[^:]+:25: Error: operand mismatch -- `bfcvtn z7.d,{ ?z0.h ?- ?z1.h ?}'
 [^:]+:39:  Info: macro invoked from here
-[^:]+:27: Error: start register out of range at operand 2 -- `bfcvtn z0.b,{z1.h-z2.h}'
+[^:]+:27: Error: start register out of range at operand 2 -- `bfcvtn z0.b,{ ?z1.h ?- ?z2.h ?}'
 [^:]+:39:  Info: macro invoked from here
-[^:]+:23: Error: operand mismatch -- `fcvtn z1.h,{z0.h-z1.h}'
+[^:]+:23: Error: operand mismatch -- `fcvtn z1.h,{ ?z0.h ?- ?z1.h ?}'
 [^:]+:40:  Info: macro invoked from here
-[^:]+:24: Error: operand mismatch -- `fcvtn z0.s,{z0.h-z1.h}'
+[^:]+:24: Error: operand mismatch -- `fcvtn z0.s,{ ?z0.h ?- ?z1.h ?}'
 [^:]+:40:  Info: macro invoked from here
-[^:]+:25: Error: operand mismatch -- `fcvtn z7.d,{z0.h-z1.h}'
+[^:]+:25: Error: operand mismatch -- `fcvtn z7.d,{ ?z0.h ?- ?z1.h ?}'
 [^:]+:40:  Info: macro invoked from here
-[^:]+:27: Error: start register out of range at operand 2 -- `fcvtn z0.b,{z1.h-z2.h}'
+[^:]+:27: Error: start register out of range at operand 2 -- `fcvtn z0.b,{ ?z1.h ?- ?z2.h ?}'
 [^:]+:40:  Info: macro invoked from here
-[^:]+:23: Error: operand mismatch -- `fcvtnb z1.h,{z0.s-z1.s}'
+[^:]+:23: Error: operand mismatch -- `fcvtnb z1.h,{ ?z0.s ?- ?z1.s ?}'
 [^:]+:41:  Info: macro invoked from here
-[^:]+:24: Error: operand mismatch -- `fcvtnb z0.s,{z0.s-z1.s}'
+[^:]+:24: Error: operand mismatch -- `fcvtnb z0.s,{ ?z0.s ?- ?z1.s ?}'
 [^:]+:41:  Info: macro invoked from here
-[^:]+:25: Error: operand mismatch -- `fcvtnb z7.d,{z0.s-z1.s}'
+[^:]+:25: Error: operand mismatch -- `fcvtnb z7.d,{ ?z0.s ?- ?z1.s ?}'
 [^:]+:41:  Info: macro invoked from here
-[^:]+:27: Error: start register out of range at operand 2 -- `fcvtnb z0.b,{z1.s-z2.s}'
+[^:]+:27: Error: start register out of range at operand 2 -- `fcvtnb z0.b,{ ?z1.s ?- ?z2.s ?}'
 [^:]+:41:  Info: macro invoked from here
-[^:]+:23: Error: operand mismatch -- `fcvtnt z1.h,{z0.s-z1.s}'
+[^:]+:23: Error: operand mismatch -- `fcvtnt z1.h,{ ?z0.s ?- ?z1.s ?}'
 [^:]+:42:  Info: macro invoked from here
-[^:]+:24: Error: operand mismatch -- `fcvtnt z0.s,{z0.s-z1.s}'
+[^:]+:24: Error: operand mismatch -- `fcvtnt z0.s,{ ?z0.s ?- ?z1.s ?}'
 [^:]+:42:  Info: macro invoked from here
-[^:]+:25: Error: operand mismatch -- `fcvtnt z7.d,{z0.s-z1.s}'
+[^:]+:25: Error: operand mismatch -- `fcvtnt z7.d,{ ?z0.s ?- ?z1.s ?}'
 [^:]+:42:  Info: macro invoked from here
-[^:]+:27: Error: start register out of range at operand 2 -- `fcvtnt z0.b,{z1.s-z2.s}'
+[^:]+:27: Error: start register out of range at operand 2 -- `fcvtnt z0.b,{ ?z1.s ?- ?z2.s ?}'
 [^:]+:42:  Info: macro invoked from here
