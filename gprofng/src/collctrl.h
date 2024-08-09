@@ -101,8 +101,7 @@ public:
 
   /* set the parameters for heap tracing */
   char *set_heaptrace(const char *);
-  int get_heaptrace_mode()    { return heaptrace_enabled; };
-  int get_heaptrace_checkmode() { return heaptrace_checkenabled; };
+  char *get_heaptrace_mode()  { return heaptrace_mode; };
 
   /* set the parameters for I/O tracing */
   char *set_iotrace(const char *);
@@ -342,12 +341,7 @@ private:
   /* 	definitions in data_pckts.h */
   int synctrace_scope;
 
-  int heaptrace_enabled;    /* T if heap tracing */
-  /* if 0 no checking;
-   * if 1, check for over- and under-write
-   * if 2, also set patterns in malloc'd and free'd areas
-   */
-  int heaptrace_checkenabled;
+  char *heaptrace_mode; /* NULL, or on, or off, or range */
   int iotrace_enabled;  /* T if I/O tracing */
 
   /* count controls */

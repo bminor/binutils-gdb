@@ -107,7 +107,7 @@ collect::putenv_libcollector_ld_preloads ()
   // for those data types that get extra libs LD_PRELOAD'd, add them
   if (cc->get_synctrace_mode () != 0)
     add_ld_preload ("libgp-sync.so");
-  if (cc->get_heaptrace_mode () != 0)
+  if (cc->get_heaptrace_mode () != NULL)
     add_ld_preload ("libgp-heap.so");
   if (cc->get_iotrace_mode () != 0)
     add_ld_preload ("libgp-iotrace.so");

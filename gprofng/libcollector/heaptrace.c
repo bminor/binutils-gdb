@@ -61,6 +61,8 @@ static ModuleInterface module_interface = {
 
 static CollectorInterface *collector_interface = NULL;
 static int heap_mode = 0;
+static size_t start_range = 0;
+static size_t end_range = SIZE_MAX;
 static CollectorModule heap_hndl = COLLECTOR_MODULE_ERR;
 static const Heap_packet heap_packet0 = { .comm.tsize = sizeof ( Heap_packet) };
 static __thread int reentrance = 0;
@@ -132,6 +134,15 @@ open_experiment (const char *exp)
   if (params == NULL)   /* Heap data collection not specified */
     return COL_ERROR_HEAPINIT;
 
+  if (*params != 'o') // Not -H on. Read a range.
+    {
+      char *s;
+      start_range = (size_t) CALL_UTIL (strtoull) (params, &s, 0);
+      if (*s == '-')
+	end_range = (size_t) CALL_UTIL (strtoull) (s + 1, &s, 0);
+      fprintf(stderr, "Range: %lld - %lld\n", (long long) start_range, (long long) end_range);
+    }
+  
   collector_interface->writeLog ("<profile name=\"%s\">\n", SP_JCMD_HEAPTRACE);
   collector_interface->writeLog ("  <profdata fname=\"%s\"/>\n",
 				 module_interface.description);
@@ -264,6 +275,12 @@ malloc (size_t size)
       return ret;
     }
   PUSH_REENTRANCE;
+  if (size < start_range || size >= end_range)
+    {
+      ret = (void *) CALL_REAL (malloc)(size);
+      POP_REENTRANCE;
+      return ret;
+    }
   Heap_packet hpacket = heap_packet0;
   hpacket.comm.tstamp = gethrtime ();
   ret = (void *) CALL_REAL (malloc)(size);
@@ -333,6 +350,12 @@ realloc (void *ptr, size_t size)
       return ret;
     }
   PUSH_REENTRANCE;
+  if (size < start_range || size >= end_range)
+    {
+      ret = (void *) CALL_REAL (realloc)(ptr, size);
+      POP_REENTRANCE;
+      return ret;
+    }
   Heap_packet hpacket = heap_packet0;
   hpacket.comm.tstamp = gethrtime ();
   ret = (void *) CALL_REAL (realloc)(ptr, size);
@@ -359,6 +382,12 @@ memalign (size_t align, size_t size)
       return ret;
     }
   PUSH_REENTRANCE;
+  if (size < start_range || size >= end_range)
+    {
+      ret = (void *) CALL_REAL (memalign)(align, size);
+      POP_REENTRANCE;
+      return ret;
+    }
   Heap_packet hpacket = heap_packet0;
   hpacket.comm.tstamp = gethrtime ();
   ret = (void *) CALL_REAL (memalign)(align, size);
@@ -386,6 +415,12 @@ valloc (size_t size)
       return ret;
     }
   PUSH_REENTRANCE;
+  if (size < start_range || size >= end_range)
+    {
+      ret = (void *) CALL_REAL (valloc)(size);
+      POP_REENTRANCE;
+      return ret;
+    }
   Heap_packet hpacket = heap_packet0;
   hpacket.comm.tstamp = gethrtime ();
   ret = (void *) CALL_REAL (valloc)(size);
@@ -416,6 +451,13 @@ calloc (size_t size, size_t esize)
       return ret;
     }
   PUSH_REENTRANCE;
+  size_t sz = size * esize;
+  if (sz < start_range || sz >= end_range)
+    {
+      ret = (void *) CALL_REAL (calloc)(size, esize);
+      POP_REENTRANCE;
+      return ret;
+    }
   Heap_packet hpacket = heap_packet0;
   hpacket.comm.tstamp = gethrtime ();
   ret = (void *) CALL_REAL (calloc)(size, esize);

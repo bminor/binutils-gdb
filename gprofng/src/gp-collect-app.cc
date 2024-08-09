@@ -1403,7 +1403,7 @@ collect::usage ()
   end of this long list.
 */
   printf ( GTXT (
-    "Usage: gprofng collect app [OPTION(S)] TARGET [TARGET_ARGUMENTS]\n")),
+    "Usage: gprofng collect app [OPTION(S)] TARGET [TARGET_ARGUMENTS]\n"));
 
 /*
 -------------------------------------------------------------------------------
@@ -1481,7 +1481,8 @@ collect::usage ()
     "                       \"n\" selects native/Pthreads, \"j\" selects Java, and \"nj\" selects both;\n"
     "                       the default is \"-s off\".\n"
     "\n"
-    " -H {off|on}        disable (off), or enable (on) heap tracing; the default is \"-H off\".\n"
+    " -H {off|on|N1[-N2]}  disable (off), or enable (on) heap tracing, or\n"
+    "                      specify the heap data collection range. The default is \"-H off\".\n"
     "\n"
     " -i {off|on}        disable (off), or enable (on) I/O tracing; the default is \"-i off\".\n"
     "\n"
@@ -1494,84 +1495,6 @@ collect::usage ()
     "See also:\n"
     "\n"
     "gprofng(1), gp-archive(1), gp-display-html(1), gp-display-src(1), gp-display-text(1)\n"));
-/*
-  char *s = dbe_sprintf (GTXT ("Usage:  %s <args> target <target-args>\n"),
-			 whoami);
-  writeStr (usage_fd, s);
-  free (s);
-  writeStr (usage_fd, GTXT ("  -p {lo|on|hi|off|<value>}\tspecify clock-profiling\n"));
-  writeStr (usage_fd, GTXT ("\t`lo'    per-thread rate of ~10 samples/second\n"));
-  writeStr (usage_fd, GTXT ("\t`on'    per-thread rate of ~100 samples/second (default)\n"));
-  writeStr (usage_fd, GTXT ("\t`hi'    per-thread rate of ~1000 samples/second\n"));
-  writeStr (usage_fd, GTXT ("\t`off'   disable clock profiling\n"));
-  writeStr (usage_fd, GTXT ("\t<value> specify profile timer period in millisec.\n"));
-  s = dbe_sprintf (GTXT ("\t\t\tRange on this system is from %.3f to %.3f millisec.\n\t\t\tResolution is %.3f millisec.\n"),
-		   (double) cc->get_clk_min () / 1000.,
-		   (double) cc->get_clk_max () / 1000.,
-		   (double) cc->get_clk_res () / 1000.);
-  writeStr (usage_fd, s);
-  free (s);
-  writeStr (usage_fd, GTXT ("  -h <ctr_def>...[,<ctr_n_def>]\tspecify HW counter profiling\n"));
-  s = dbe_sprintf (GTXT ("\tto see the supported HW counters on this machine, run \"%s -h\" with no other arguments\n"),
-		   whoami);
-  writeStr (usage_fd, s);
-  free (s);
-  writeStr (usage_fd, GTXT ("  -s <threshold>[,<scope>]\tspecify synchronization wait tracing\n"));
-  writeStr (usage_fd, GTXT ("\t<scope> is \"j\" for tracing Java-APIs, \"n\" for tracing native-APIs, or \"nj\" for tracing both\n"));
-  writeStr (usage_fd, GTXT ("  -H {on|off}\tspecify heap tracing\n"));
-  writeStr (usage_fd, GTXT ("  -i {on|off}\tspecify I/O tracing\n"));
-  writeStr (usage_fd, GTXT ("  -N <lib>\tspecify library to exclude count from instrumentation (requires -c also)\n"));
-  writeStr (usage_fd, GTXT ("          \tmultiple -N arguments can be provided\n"));
-  writeStr (usage_fd, GTXT ("  -j {on|off|path}\tspecify Java profiling\n"));
-  writeStr (usage_fd, GTXT ("  -J <java-args>\tspecify arguments to Java for Java profiling\n"));
-  writeStr (usage_fd, GTXT ("  -t <duration>\tspecify time over which to record data\n"));
-  writeStr (usage_fd, GTXT ("  -n\tdry run -- don't run target or collect performance data\n"));
-  writeStr (usage_fd, GTXT ("  -y <signal>[,r]\tspecify delayed initialization and pause/resume signal\n"));
-  writeStr (usage_fd, GTXT ("\tWhen set, the target starts in paused mode;\n\t  if the optional r is provided, it starts in resumed mode\n"));
-  writeStr (usage_fd, GTXT ("  -F {on|off|=<regex>}\tspecify following descendant processes\n"));
-  writeStr (usage_fd, GTXT ("  -a {on|ldobjects|src|usedldobjects|usedsrc|off}\tspecify archiving of binaries and other files;\n"));
-  writeStr (usage_fd, GTXT ("  -S {on|off|<seconds>}\t Set the interval for periodic sampling of process-wide resource utilization\n"));
-  writeStr (usage_fd, GTXT ("  -l <signal>\tspecify signal that will trigger a sample of process-wide resource utilization\n"));
-  writeStr (usage_fd, GTXT ("  -o <expt>\tspecify experiment name\n"));
-  writeStr (usage_fd, GTXT ("  --verbose\tprint expanded log of processing\n"));
-  writeStr (usage_fd, GTXT ("  -C <label>\tspecify comment label (up to 10 may appear)\n"));
-  writeStr (usage_fd, GTXT ("  -V|--version\tprint version number and exit\n"));
-*/
-  /* don't document this feature */
-  //	writeStr (usage_fd, GTXT("  -Z\tPreload mem.so, and launch target [no experiment]\n") );
-/*
-  writeStr (usage_fd, GTXT ("\n See the gp-collect(1) man page for more information\n"));
-*/
-
-#if 0
-  /* print an extended usage message */
-  /* find a Java for Java profiling, set Java on to check Java */
-  find_java ();
-  cc->set_java_mode (NTXT ("on"));
-
-  /* check for variable-clock rate */
-  unsigned char mode = COL_CPUFREQ_NONE;
-  get_cpu_frequency (&mode);
-  if (mode != COL_CPUFREQ_NONE)
-    writeStr (usage_fd, GTXT ("NOTE: system has variable clock frequency, which may cause variable program run times.\n"));
-
-  /* show the experiment that would be run */
-  writeStr (usage_fd, GTXT ("\n Default experiment:\n"));
-  char *ccret = cc->setup_experiment ();
-  if (ccret != NULL)
-    {
-      writeStr (usage_fd, ccret);
-      free (ccret);
-      exit (1);
-    }
-  cc->delete_expt ();
-  ccret = cc->show (1);
-  if (ccret != NULL)
-    {
-      writeStr (usage_fd, ccret);
-      free (ccret);
-    }
-#endif
 }
 
 void

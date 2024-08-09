@@ -227,8 +227,7 @@ Coll_Ctrl::Coll_Ctrl (int _interactive, bool _defHWC, bool _kernelHWC)
   synctrace_enabled = 0;
   synctrace_thresh = -1;
   synctrace_scope = 0;
-  heaptrace_enabled = 0;
-  heaptrace_checkenabled = 0;
+  heaptrace_mode = NULL;
   iotrace_enabled = 0;
   count_enabled = 0;
   Iflag = 0;
@@ -300,8 +299,7 @@ Coll_Ctrl::Coll_Ctrl (Coll_Ctrl * cc)
   synctrace_enabled = cc->synctrace_enabled;
   synctrace_thresh = cc->synctrace_thresh;
   synctrace_scope = cc->synctrace_scope;
-  heaptrace_enabled = cc->heaptrace_enabled;
-  heaptrace_checkenabled = cc->heaptrace_checkenabled;
+  heaptrace_mode = dbe_strdup(cc->heaptrace_mode);
   iotrace_enabled = cc->iotrace_enabled;
   count_enabled = cc->count_enabled;
   Iflag = cc->Iflag;
@@ -365,6 +363,7 @@ Coll_Ctrl::~Coll_Ctrl ()
   free (hwc_string);
   free (project_home);
   free (java_path);
+  free (heaptrace_mode);
   hwcprof_enabled_cnt = 0;
 }
 
@@ -452,7 +451,7 @@ Coll_Ctrl::check_consistency ()
   if (count_enabled != 0
       && ((clkprof_default != 1 && clkprof_enabled != 0)
 	  || hwcprof_enabled_cnt != 0 || synctrace_enabled != 0
-	  || heaptrace_enabled != 0 || iotrace_enabled != 0))
+	  || heaptrace_mode != NULL || iotrace_enabled != 0))
     return strdup (GTXT ("Count data cannot be collected along with any other data.\n"));
 
   /* if count data, various other options are not allowed */
@@ -478,12 +477,12 @@ Coll_Ctrl::check_expt (char **warn)
   if (ret != NULL) /* something is wrong, return the error */
     return ret;
   /* check for heaptrace and java -- warn that it covers native allocations only */
-  if (heaptrace_enabled == 1 && java_mode == 1 && java_default == 0)
+  if (heaptrace_mode != NULL && java_mode == 1 && java_default == 0)
     *warn = strdup (GTXT ("Note: Heap profiling will only trace native allocations, not Java allocations.\n"));
 
   /* if no profiling data selected, warn the user */
   if (clkprof_enabled == 0 && hwcprof_enabled_cnt == 0 && synctrace_enabled == 0
-      && heaptrace_enabled == 0 && iotrace_enabled == 0 && count_enabled == 0)
+      && heaptrace_mode == NULL && iotrace_enabled == 0 && count_enabled == 0)
     *warn = strdup (GTXT ("Warning: No function level data requested; only statistics will be collected.\n\n"));
   build_data_desc ();
 
@@ -564,15 +563,8 @@ Coll_Ctrl::show (int i)
 	sb.appendf ("\t  %u. %s\n", ii + 1,
 		hwc_hwcentry_specd_string (ctrbuf, sizeof (ctrbuf), &hwctr[ii]));
     }
-  if (heaptrace_enabled != 0)
-    {
-      if (heaptrace_checkenabled == 0)
-	sb.append (GTXT ("\theap tracing enabled, no checking\n"));
-      else if (heaptrace_checkenabled == 1)
-	sb.append (GTXT ("\theap tracing enabled, over/underrun checking\n"));
-      else
-	sb.append (GTXT ("\theap tracing enabled, over/underrun checking and pattern storing\n"));
-    }
+  if (heaptrace_mode != NULL)
+    sb.append (GTXT ("\theap tracing enabled\n"));
   if (iotrace_enabled != 0)
     sb.append (GTXT ("\tI/O tracing enabled\n"));
   switch (count_enabled)
@@ -712,10 +704,10 @@ Coll_Ctrl::get_collect_args ()
 	}
       *p++ = sb.toString ();
     }
-  if (heaptrace_enabled != 0)
+  if (heaptrace_mode != NULL)
     {
       *p++ = strdup ("-H");
-      *p++ = strdup ("on");
+      *p++ = strdup (heaptrace_mode);
     }
   if (iotrace_enabled != 0)
     {
@@ -1048,39 +1040,40 @@ Coll_Ctrl::set_heaptrace (const char *string)
 {
   if (opened == 1)
     return strdup (GTXT ("Experiment is active; command ignored.\n"));
+  free(heaptrace_mode);
+  heaptrace_mode = NULL;  // Same as "off"
+  if (string != NULL && strcmp (string, "off") == 0)
+    return NULL;
+
   if (string == NULL || strlen (string) == 0 || strcmp (string, "on") == 0)
+    heaptrace_mode = strdup ("on");
+  else if (isdigit (*string))
     {
-      heaptrace_enabled = 1;
-      char *ret = check_consistency ();
-      if (ret != NULL)
+      char *s;
+      unsigned long long n = strtoull (string, &s, 0);
+      if (*s == '-' && isdigit (s[1]))
 	{
-	  heaptrace_enabled = 0;
-	  return ret;
+	  unsigned long long n1 = strtoull (s + 1, &s, 0);
+	  if (n1 < n)
+	    return dbe_sprintf (
+	       GTXT ("Incorrect range in heap trace parameter '%s'\n"), string);
 	}
-      return NULL;
+      if (*s != 0)
+	return dbe_sprintf (
+	       GTXT ("Incorrect range in heap trace parameter '%s'\n"), string);
+      heaptrace_mode = strdup (string);
     }
-  if (strcmp (string, "off") == 0)
+  else
+    return dbe_sprintf (GTXT ("Unrecognized heap tracing parameter `%s'\n"),
+			string);
+  char *ret = check_consistency ();
+  if (ret != NULL)
     {
-      heaptrace_enabled = 0;
-      return NULL;
+      free (heaptrace_mode);
+      heaptrace_mode = NULL;
+      return ret;
     }
-#if 0
-  if (strcmp (string, "check") == 0)
-    {
-      /* set to check for over/underruns */
-      heaptrace_checkenabled = 1;
-      heaptrace_enabled = 1;
-      return NULL;
-    }
-  if (strcmp (string, "clear") == 0)
-    {
-      /* set to check for over/underruns, and store patterns */
-      heaptrace_checkenabled = 2;
-      heaptrace_enabled = 1;
-      return NULL;
-    }
-#endif
-  return dbe_sprintf (GTXT ("Unrecognized heap tracing parameter `%s'\n"), string);
+  return NULL;
 }
 
 char *
@@ -1675,8 +1668,8 @@ Coll_Ctrl::build_data_desc ()
     sb.appendf ("p:%d;", clkprof_timer);
   if (synctrace_enabled == 1)
     sb.appendf ("s:%d,%d;", synctrace_thresh, synctrace_scope);
-  if (heaptrace_enabled == 1)
-    sb.appendf ("H:%d;", heaptrace_checkenabled);
+  if (heaptrace_mode != NULL && strcmp (heaptrace_mode, "off") != 0)
+    sb.appendf ("H:%s;", heaptrace_mode);
   if (iotrace_enabled == 1)
     sb.append ("i:;");
   if (hwcprof_enabled_cnt > 0)
@@ -2834,7 +2827,7 @@ Coll_Ctrl::get (char * control)
     }
   if (!strncmp (control, ipc_str_heaptrace, len))
     {
-      if ((heaptrace_enabled == 0))
+      if (heaptrace_mode == NULL)
 	return strdup (ipc_str_off);
       return strdup (ipc_str_on);
     }
@@ -3019,7 +3012,8 @@ Coll_Ctrl::unset (char * control)
     }
   if (!strncmp (control, ipc_str_heaptrace, len))
     {
-      heaptrace_enabled = 0;
+      free (heaptrace_mode);
+      heaptrace_mode = NULL;
       return NULL;
     }
   if (!strncmp (control, ipc_str_iotrace, len))
