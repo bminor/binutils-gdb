@@ -826,7 +826,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	    {
 	      /* We've read the entire pseudo-op.  If this is the end
 		 of the line, go back to the beginning.  */
-	      if (IS_NEWLINE (ch))
+	      if (IS_NEWLINE (ch) || IS_LINE_SEPARATOR (ch))
 		symver_state = NULL;
 	    }
 	}
