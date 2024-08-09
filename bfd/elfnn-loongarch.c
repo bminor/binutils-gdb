@@ -3313,7 +3313,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       /* The r_symndx will be STN_UNDEF (zero) only for relocs against symbols
 	 from removed linkonce sections, or sections discarded by a linker
 	 script.  Also for R_*_SOP_PUSH_ABSOLUTE and PCREL to specify const.  */
-      if (r_symndx == STN_UNDEF || bfd_is_abs_section (sec))
+      if (r_symndx == STN_UNDEF)
 	{
 	  defined_local = false;
 	  resolved_local = false;

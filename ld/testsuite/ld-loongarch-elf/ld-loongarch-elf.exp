@@ -184,5 +184,8 @@ if [istarget "loongarch64-*-*"] {
   run_dump_test "ie-le-relax"
   run_dump_test "tlsdesc_abs"
   run_dump_test "tlsdesc_extreme"
+  run_dump_test "provide_abs"
+  run_dump_test "provide_noabs"
+
 }
 
