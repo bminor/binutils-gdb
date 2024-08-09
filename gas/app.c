@@ -71,9 +71,6 @@ static char last_char;
 #ifdef TC_V850
 #define LEX_IS_DOUBLEDASH_1ST		12
 #endif
-#ifdef TC_M32R
-#define DOUBLEBAR_PARALLEL
-#endif
 #ifdef DOUBLEBAR_PARALLEL
 #define LEX_IS_DOUBLEBAR_1ST		13
 #endif

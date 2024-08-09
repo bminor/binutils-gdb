@@ -42,6 +42,9 @@ extern const char *m32r_target_format (void);
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 
+/* '||' denotes parallel instruction */
+#define DOUBLEBAR_PARALLEL
+
 #define DIFF_EXPR_OK		/* .-foo gets turned into PC relative relocs.  */
 
 /* We don't need to handle .word strangely.  */
