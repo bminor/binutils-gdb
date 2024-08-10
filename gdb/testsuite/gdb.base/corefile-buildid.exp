@@ -268,12 +268,13 @@ proc do_corefile_buildid_tests {args} {
 	    return
 	}
 
-	# Grab the build-id from the binary, removing ".debug" from the end.
-	set buildid [build_id_debug_filename_get $program_to_run]
+	# Get the build-id filename without ".debug" on the end.  This
+	# will have the format: '.build-id/xx/xxxxx'
+	set buildid [build_id_debug_filename_get $program_to_run ""]
 	if {$buildid == ""} {
 	    untested "binary has no build-id"
+	    return
 	}
-	regsub {\.debug$} $buildid {} buildid
 	verbose -log "build-id is $buildid"
 
 	locate_exec_from_core_build_id $corefile $buildid \
