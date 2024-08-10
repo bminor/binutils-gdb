@@ -1323,6 +1323,14 @@ if { [isnative]
 	    {{error_output "pr21997-1.err"}} \
 	    "pr21997-1" \
 	] \
+	[list \
+	    "Build pr32067" \
+	    "-Wl,--oformat,binary -nostdlib -nostartfiles" \
+	    "" \
+	    { start.s ../ld-x86-64/pr32067.s } \
+	    {} \
+	    "pr32067" \
+	] \
     ]
 
     # The musl C library does not support TEXTRELs.
