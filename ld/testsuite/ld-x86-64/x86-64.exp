@@ -1405,6 +1405,14 @@ if { [isnative] && [check_compiler_available] } {
 	    {{readelf -n indirect-extern-access.rd}}  \
 	    "libprotected-data-2b.so" \
 	] \
+	[list \
+	    "Build pr32067" \
+	    "-Wl,--oformat,binary -nostdlib -nostartfiles" \
+	    "" \
+	    { start.s pr32067.s } \
+	    {} \
+	    "pr32067" \
+	] \
     ]
 
     if  {[istarget "x86_64-*-linux*-gnux32"]} {
