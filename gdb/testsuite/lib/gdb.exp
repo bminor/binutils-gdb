@@ -9290,7 +9290,7 @@ proc using_fission { } {
 #
 # Example:
 # proc myproc {foo args} {
-#   parse_list args 1 {{bar} {baz "abc"} {qux}} "-" false
+#   parse_list 1 args {{bar} {baz "abc"} {qux}} "-" false
 #    # ...
 # }
 # myproc ABC -bar -baz DEF peanut butter
