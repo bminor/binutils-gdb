@@ -334,8 +334,10 @@ public:
       this->push_back_non_empty (elem);
   }
 
-  /* Inserts ELEM before POS.  */
-  void insert (const_iterator pos, reference elem) noexcept
+  /* Inserts ELEM before POS.
+
+     Returns an iterator to the inserted element.  */
+  iterator insert (const_iterator pos, reference elem) noexcept
   {
     if (this->empty ())
       return this->push_empty (elem);
@@ -359,6 +361,8 @@ public:
     prev_node->next = &elem;
     elem_node->next = pos_elem;
     pos_node->prev = &elem;
+
+    return this->iterator_to (elem);
   }
 
   /* Move elements from LIST at the end of the current list.  */
@@ -402,7 +406,7 @@ public:
 
 private:
   /* Push ELEM in the list, knowing the list is empty.  */
-  void push_empty (reference elem) noexcept
+  iterator push_empty (reference elem) noexcept
   {
     gdb_assert (this->empty ());
 
@@ -415,10 +419,12 @@ private:
     m_back = &elem;
     elem_node->prev = nullptr;
     elem_node->next = nullptr;
+
+    return this->iterator_to (elem);
   }
 
   /* Push ELEM at the front of the list, knowing the list is not empty.  */
-  void push_front_non_empty (reference elem) noexcept
+  iterator push_front_non_empty (reference elem) noexcept
   {
     gdb_assert (!this->empty ());
 
@@ -432,10 +438,12 @@ private:
     front_node->prev = &elem;
     elem_node->prev = nullptr;
     m_front = &elem;
+
+    return this->iterator_to (elem);
   }
 
   /* Push ELEM at the back of the list, knowing the list is not empty.  */
-  void push_back_non_empty (reference elem) noexcept
+  iterator push_back_non_empty (reference elem) noexcept
   {
     gdb_assert (!this->empty ());
 
@@ -449,6 +457,8 @@ private:
     back_node->next = &elem;
     elem_node->next = nullptr;
     m_back = &elem;
+
+    return this->iterator_to (elem);
   }
 
   void erase_element (reference elem) noexcept

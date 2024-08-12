@@ -446,15 +446,18 @@ struct intrusive_list_test
       ListType list;
 
 
-      list.insert (list.begin (), a);
+      auto a_it = list.insert (list.begin (), a);
+      SELF_CHECK (&*a_it == &a);
       expected = {&a};
       verify_items (list, expected);
 
-      list.insert (list.begin (), b);
+      auto b_it = list.insert (list.begin (), b);
+      SELF_CHECK (&*b_it == &b);
       expected = {&b, &a};
       verify_items (list, expected);
 
-      list.insert (list.begin (), c);
+      auto c_it = list.insert (list.begin (), c);
+      SELF_CHECK (&*c_it == &c);
       expected = {&c, &b, &a};
       verify_items (list, expected);
     }
@@ -465,15 +468,18 @@ struct intrusive_list_test
       ListType list;
 
 
-      list.insert (list.end (), a);
+      auto a_it = list.insert (list.end (), a);
+      SELF_CHECK (&*a_it == &a);
       expected = {&a};
       verify_items (list, expected);
 
-      list.insert (list.end (), b);
+      auto b_it = list.insert (list.end (), b);
+      SELF_CHECK (&*b_it == &b);
       expected = {&a, &b};
       verify_items (list, expected);
 
-      list.insert (list.end (), c);
+      auto c_it = list.insert (list.end (), c);
+      SELF_CHECK (&*c_it == &c);
       expected = {&a, &b, &c};
       verify_items (list, expected);
     }
@@ -486,7 +492,8 @@ struct intrusive_list_test
       list.push_back (a);
       list.push_back (b);
 
-      list.insert (list.iterator_to (b), c);
+      auto c_it = list.insert (list.iterator_to (b), c);
+      SELF_CHECK (&*c_it == &c);
       expected = {&a, &c, &b};
       verify_items (list, expected);
     }
@@ -496,7 +503,8 @@ struct intrusive_list_test
       item_type a ("a");
       ListType list;
 
-      list.insert (list.end (), a);
+      auto a_it = list.insert (list.end (), a);
+      SELF_CHECK (&*a_it == &a);
       expected = {&a};
       verify_items (list, expected);
     }
