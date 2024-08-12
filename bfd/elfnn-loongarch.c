@@ -4131,7 +4131,8 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 							    bfd_link_pic (info),
 							    h)
 			  && bfd_link_pic (info)
-			  && LARCH_REF_LOCAL (info, h))
+			  && LARCH_REF_LOCAL (info, h)
+			  && !info->enable_dt_relr)
 			{
 			  Elf_Internal_Rela rela;
 			  rela.r_offset = sec_addr (got) + got_off;

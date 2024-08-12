@@ -161,6 +161,7 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "relr-data-pie"
     run_dump_test "relr-discard-pie"
     run_dump_test "relr-got-pie"
+    run_dump_test "relr-got-start"
     run_dump_test "relr-text-pie"
     run_dump_test "abssym_pie"
   }
