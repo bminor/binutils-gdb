@@ -289,7 +289,7 @@ struct program_space
   struct objfile *objfile_for_address (CORE_ADDR address);
 
   /* Return the list of  all the solibs in this program space.  */
-  intrusive_list<solib> &solibs ()
+  owning_intrusive_list<solib> &solibs ()
   { return so_list; }
 
   /* Similar to `bfd_get_filename (exec_bfd ())` but in original form given
@@ -399,7 +399,7 @@ struct program_space
 
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */
-  intrusive_list<solib> so_list;
+  owning_intrusive_list<solib> so_list;
 
   /* Number of calls to solib_add.  */
   unsigned int solib_add_generation = 0;

@@ -212,7 +212,7 @@ open_symbol_file_object (int from_tty)
 
 /* Build a list of currently loaded shared objects.  See solib-svr4.c.  */
 
-static intrusive_list<solib>
+static owning_intrusive_list<solib>
 darwin_current_sos ()
 {
   type *ptr_type
@@ -230,7 +230,7 @@ darwin_current_sos ()
 
   image_info_size = ptr_len * 3;
 
-  intrusive_list<solib> sos;
+  owning_intrusive_list<solib> sos;
 
   /* Read infos for each solib.
      The first entry was rumored to be the executable itself, but this is not
@@ -272,16 +272,15 @@ darwin_current_sos ()
 	break;
 
       /* Create and fill the new struct solib element.  */
-      solib *newobj = new solib;
+      auto &newobj = sos.emplace_back ();
 
       auto li = std::make_unique<lm_info_darwin> ();
 
-      newobj->so_name = file_path.get ();
-      newobj->so_original_name = newobj->so_name;
+      newobj.so_name = file_path.get ();
+      newobj.so_original_name = newobj.so_name;
       li->lm_addr = load_addr;
 
-      newobj->lm_info = std::move (li);
-      sos.push_back (*newobj);
+      newobj.lm_info = std::move (li);
     }
 
   return sos;

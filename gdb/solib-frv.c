@@ -306,12 +306,12 @@ lm_base (void)
 
 /* Implement the "current_sos" solib_ops method.  */
 
-static intrusive_list<solib>
+static owning_intrusive_list<solib>
 frv_current_sos ()
 {
   bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR lm_addr, mgot;
-  intrusive_list<solib> sos;
+  owning_intrusive_list<solib> sos;
 
   /* Make sure that the main executable has been relocated.  This is
      required in order to find the address of the global offset table,
@@ -377,12 +377,12 @@ frv_current_sos ()
 	      break;
 	    }
 
-	  solib *sop = new solib;
+	  auto &sop = sos.emplace_back ();
 	  auto li = std::make_unique<lm_info_frv> ();
 	  li->map = loadmap;
 	  li->got_value = got_addr;
 	  li->lm_addr = lm_addr;
-	  sop->lm_info = std::move (li);
+	  sop.lm_info = std::move (li);
 
 	  /* Fetch the name.  */
 	  addr = extract_unsigned_integer (lm_buf.l_name,
@@ -397,11 +397,9 @@ frv_current_sos ()
 	    warning (_("Can't read pathname for link map entry."));
 	  else
 	    {
-	      sop->so_name = name_buf.get ();
-	      sop->so_original_name = sop->so_name;
+	      sop.so_name = name_buf.get ();
+	      sop.so_original_name = sop.so_name;
 	    }
-
-	  sos.push_back (*sop);
 	}
       else
 	{

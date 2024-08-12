@@ -20,9 +20,11 @@
 #define SOLIST_H
 
 #define SO_NAME_MAX_PATH_SIZE 512	/* FIXME: Should be dynamic */
+
 /* For domain_enum domain.  */
 #include "symtab.h"
 #include "gdb_bfd.h"
+#include "gdbsupport/owning_intrusive_list.h"
 #include "target-section.h"
 
 /* Base class for target-specific link map information.  */
@@ -119,7 +121,7 @@ struct solib_ops
      inferior --- we don't examine any of the shared library files
      themselves.  The declaration of `struct solib' says which fields
      we provide values for.  */
-  intrusive_list<solib> (*current_sos) ();
+  owning_intrusive_list<solib> (*current_sos) ();
 
   /* Find, open, and read the symbols for the main executable.  If
      FROM_TTY is non-zero, allow messages to be printed.  */

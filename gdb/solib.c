@@ -755,8 +755,8 @@ update_solib_list (int from_tty)
      the time we're done walking GDB's list, the inferior's list
      contains only the new shared objects, which we then add.  */
 
-  intrusive_list<solib> inferior = ops->current_sos ();
-  intrusive_list<solib>::iterator gdb_iter
+  owning_intrusive_list<solib> inferior = ops->current_sos ();
+  owning_intrusive_list<solib>::iterator gdb_iter
     = current_program_space->so_list.begin ();
   while (gdb_iter != current_program_space->so_list.end ())
     {
@@ -785,7 +785,6 @@ update_solib_list (int from_tty)
       if (inferior_iter != inferior.end ())
 	{
 	  inferior.erase (inferior_iter);
-	  delete &*inferior_iter;
 	  ++gdb_iter;
 	}
 
@@ -798,9 +797,6 @@ update_solib_list (int from_tty)
 
 	  current_program_space->deleted_solibs.push_back (gdb_iter->so_name);
 
-	  intrusive_list<solib>::iterator gdb_iter_next
-	    = current_program_space->so_list.erase (gdb_iter);
-
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
 	  if (gdb_iter->objfile != nullptr
 	      && !(gdb_iter->objfile->flags & OBJF_USERLOADED)
@@ -811,8 +807,7 @@ update_solib_list (int from_tty)
 	     sections from so.abfd; remove them.  */
 	  current_program_space->remove_target_sections (&*gdb_iter);
 
-	  delete &*gdb_iter;
-	  gdb_iter = gdb_iter_next;
+	  gdb_iter = current_program_space->so_list.erase (gdb_iter);
 	}
     }
 
@@ -1151,11 +1146,13 @@ clear_solib (program_space *pspace)
 
   disable_breakpoints_in_shlibs (pspace);
 
-  pspace->so_list.clear_and_dispose ([pspace] (solib *so) {
-    notify_solib_unloaded (pspace, *so);
-    pspace->remove_target_sections (so);
-    delete so;
-  });
+  for (solib &so : pspace->so_list)
+    {
+      notify_solib_unloaded (pspace, so);
+      pspace->remove_target_sections (&so);
+    };
+
+  pspace->so_list.clear ();
 
   if (ops->clear_solib != nullptr)
     ops->clear_solib (pspace);

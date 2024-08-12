@@ -512,13 +512,13 @@ lm_base (void)
    themselves.  The declaration of `struct solib' says which fields
    we provide values for.  */
 
-static intrusive_list<solib>
+static owning_intrusive_list<solib>
 dsbt_current_sos (void)
 {
   bfd_endian byte_order = gdbarch_byte_order (current_inferior ()->arch ());
   CORE_ADDR lm_addr;
   dsbt_info *info = get_dsbt_info (current_program_space);
-  intrusive_list<solib> sos;
+  owning_intrusive_list<solib> sos;
 
   /* Make sure that the main executable has been relocated.  This is
      required in order to find the address of the global offset table,
@@ -594,7 +594,7 @@ dsbt_current_sos (void)
 	      break;
 	    }
 
-	  solib *sop = new solib;
+	  auto &sop = sos.emplace_back ();
 	  auto li = std::make_unique<lm_info_dsbt> ();
 	  li->map = loadmap;
 	  /* Fetch the name.  */
@@ -612,12 +612,11 @@ dsbt_current_sos (void)
 		gdb_printf (gdb_stdlog, "current_sos: name = %s\n",
 			    name_buf.get ());
 
-	      sop->so_name = name_buf.get ();
-	      sop->so_original_name = sop->so_name;
+	      sop.so_name = name_buf.get ();
+	      sop.so_original_name = sop.so_name;
 	    }
 
-	  sop->lm_info = std::move (li);
-	  sos.push_back (*sop);
+	  sop.lm_info = std::move (li);
 	}
       else
 	{
