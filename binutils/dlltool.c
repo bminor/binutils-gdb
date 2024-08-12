@@ -493,12 +493,12 @@ static char * mcore_elf_linker_flags = NULL;
 /* External name alias numbering starts here.  */
 #define PREFIX_ALIAS_BASE	20000
 
-char *tmp_asm_buf;
-char *tmp_head_s_buf;
-char *tmp_head_o_buf;
-char *tmp_tail_s_buf;
-char *tmp_tail_o_buf;
-char *tmp_stub_buf;
+static char *tmp_asm_buf;
+static char *tmp_head_s_buf;
+static char *tmp_head_o_buf;
+static char *tmp_tail_s_buf;
+static char *tmp_tail_o_buf;
+static char *tmp_stub_buf;
 
 #define TMP_ASM		dlltmp (&tmp_asm_buf, "%sc.s")
 #define TMP_HEAD_S	dlltmp (&tmp_head_s_buf, "%sh.s")
@@ -809,72 +809,23 @@ struct string_list
 
 static struct string_list *excludes;
 
-static const char *rvaafter (int);
-static const char *rvabefore (int);
-static const char *asm_prefix (int, const char *);
-static void process_def_file (const char *);
-static void new_directive (char *);
-static void append_import (const char *, const char *, int, const char *);
-static void run (const char *, char *);
-static void scan_drectve_symbols (bfd *);
-static void scan_filtered_symbols (bfd *, void *, long, unsigned int);
-static void add_excludes (const char *);
-static bool match_exclude (const char *);
-static void set_default_excludes (void);
-static long filter_symbols (bfd *, void *, long, unsigned int);
-static void scan_all_symbols (bfd *);
-static void scan_open_obj_file (bfd *);
-static void scan_obj_file (const char *);
-static void dump_def_info (FILE *);
-static int sfunc (const void *, const void *);
-static void flush_page (FILE *, bfd_vma *, bfd_vma, int);
-static void gen_def_file (void);
-static void generate_idata_ofile (FILE *);
-static void assemble_file (const char *, const char *);
-static void gen_exp_file (void);
 static const char *xlate (const char *);
-static char *make_label (const char *, const char *);
-static char *make_imp_label (const char *, const char *);
-static bfd *make_one_lib_file (export_type *, int, int);
-static bfd *make_head (void);
-static bfd *make_tail (void);
 static bfd *make_delay_head (void);
-static void gen_lib_file (int);
-static void dll_name_list_append (dll_name_list_type *, bfd_byte *);
-static int  dll_name_list_count (dll_name_list_type *);
-static void dll_name_list_print (dll_name_list_type *);
 static void dll_name_list_free_contents (dll_name_list_node_type *);
-static void dll_name_list_free (dll_name_list_type *);
-static dll_name_list_type * dll_name_list_create (void);
-static void identify_dll_for_implib (void);
 static void identify_search_archive
   (bfd *, void (*) (bfd *, bfd *, void *),  void *);
 static void identify_search_member (bfd *, bfd *, void *);
-static bool identify_process_section_p (asection *, bool);
 static void identify_search_section (bfd *, asection *, void *);
-static void identify_member_contains_symname (bfd *, bfd  *, void *);
-
-static int pfunc (const void *, const void *);
-static int nfunc (const void *, const void *);
-static void remove_null_names (export_type **);
-static void process_duplicates (export_type **);
-static void fill_ordinals (export_type **);
-static void mangle_defs (void);
-static void usage (FILE *, int);
 static void inform (const char *, ...) ATTRIBUTE_PRINTF_1;
-static void set_dll_name_from_def (const char *name, char is_dll);
 
 static char *
 prefix_encode (char *start, unsigned code)
 {
-  static char alpha[26] = "abcdefghijklmnopqrstuvwxyz";
   static char buf[32];
-  char *p;
-  strcpy (buf, start);
-  p = strchr (buf, '\0');
+  char *p = stpcpy (buf, start);
   do
-    *p++ = alpha[code % sizeof (alpha)];
-  while ((code /= sizeof (alpha)) != 0);
+    *p++ = "abcdefghijklmnopqrstuvwxyz"[code % 26];
+  while ((code /= 26) != 0);
   *p = '\0';
   return buf;
 }
