@@ -2,13 +2,6 @@
 
 * Add support for RISC-V CORE-V extension (XCvBitmanip) with version 1.0.
 
-* The scrubber (pre-processor) now leaves in place more whitespace, to permit
-  various constructs not fitting the basic "insn opnd1,opnd2[,...]" scheme to
-  work.  This, however, means that macro invocations like "m 1 + 2", i.e. not
-  using double quotes or parentheses around the (apparently) sole argument,
-  will now be treated as passing three arguments.  Such lack of quotation /
-  parenthesization was never reliable to use.
-
 Changes in 2.43:
 
 * Add support for LoongArch .option for fine-grained control of assembly

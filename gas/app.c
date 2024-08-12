@@ -467,18 +467,16 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 
   /*State 0: beginning of normal line
 	  1: After first whitespace on line (flush more white)
-	  2: After first non-white (opcode or maybe label when they're followed
-	     by colons) on line (keep 1white)
-	  3: after subsequent white on line (typically into operands)
-	     (flush more white)
+	  2: After first non-white (opcode) on line (keep 1white)
+	  3: after second white on line (into operands) (flush white)
 	  4: after putting out a .linefile, put out digits
 	  5: parsing a string, then go to old-state
 	  6: putting out \ escape in a "d string.
 	  7: no longer used
 	  8: no longer used
-	  9: After seeing non-white in state 3 (keep 1white)
-	 10: no longer used
-	 11: After seeing a non-white character in state 0 (eg a label definition)
+	  9: After seeing symbol char in state 3 (keep 1white after symchar)
+	 10: After seeing whitespace in state 9 (keep white before symchar)
+	 11: After seeing a symbol character in state 0 (eg a label definition)
 	 -1: output string in out_string and go to the state in old_state
 	 12: no longer used
 #ifdef DOUBLEBAR_PARALLEL
@@ -941,11 +939,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	          && (state < 1 || strchr (tc_comment_chars, ch)))
 	      || IS_NEWLINE (ch)
 	      || IS_LINE_SEPARATOR (ch)
-	      || IS_PARALLEL_SEPARATOR (ch)
-	      /* See comma related comment near the bottom of the function.
-		 Reasoning equally applies to whitespace preceding a comma in
-		 most cases.  */
-	      || (ch == ',' && state > 2 && state != 11))
+	      || IS_PARALLEL_SEPARATOR (ch))
 	    {
 	      if (scrub_m68k_mri)
 		{
@@ -988,7 +982,6 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 		 character at the beginning of a line.  */
 	      goto recycle;
 	    case 2:
-	    case 9:
 	      state = 3;
 	      if (to + 1 < toend)
 		{
@@ -1012,6 +1005,20 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 		  break;
 		}
 	      goto recycle;	/* Sp in operands */
+	    case 9:
+	    case 10:
+#ifndef TC_KEEP_OPERAND_SPACES
+	      if (scrub_m68k_mri)
+#endif
+		{
+		  /* In MRI mode, we keep these spaces.  */
+		  state = 3;
+		  UNGET (ch);
+		  PUT (' ');
+		  break;
+		}
+	      state = 10;	/* Sp after symbol char */
+	      goto recycle;
 	    case 11:
 	      if (LABELS_WITHOUT_COLONS || flag_m68k_mri)
 		state = 1;
@@ -1082,17 +1089,27 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	    {
 	      if (ch2 != EOF)
 		UNGET (ch2);
-	      if (state == 1)
-		state = 2;
-	      else if (state == 3)
-		state = 9;
+	      if (state == 9 || state == 10)
+		state = 3;
 	      PUT (ch);
 	    }
 	  break;
 
 	case LEX_IS_STRINGQUOTE:
 	  quotechar = ch;
-	  if (state == 3)
+	  if (state == 10)
+	    {
+	      /* Preserve the whitespace in foo "bar".  */
+	      UNGET (ch);
+	      state = 3;
+	      PUT (' ');
+
+	      /* PUT didn't jump out.  We could just break, but we
+		 know what will happen, so optimize a bit.  */
+	      ch = GET ();
+	      old_state = 9;
+	    }
+	  else if (state == 3)
 	    old_state = 9;
 	  else if (state == 0)
 	    old_state = 11; /* Now seeing label definition.  */
@@ -1113,6 +1130,14 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	      UNGET (c);
 	    }
 #endif
+	  if (state == 10)
+	    {
+	      /* Preserve the whitespace in foo 'b'.  */
+	      UNGET (ch);
+	      state = 3;
+	      PUT (' ');
+	      break;
+	    }
 	  ch = GET ();
 	  if (ch == EOF)
 	    {
@@ -1147,7 +1172,10 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	      PUT (out_buf[0]);
 	      break;
 	    }
-	  old_state = state;
+	  if (state == 9)
+	    old_state = 3;
+	  else
+	    old_state = state;
 	  state = -1;
 	  out_string = out_buf;
 	  PUT (*out_string++);
@@ -1157,10 +1185,10 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 #ifdef KEEP_WHITE_AROUND_COLON
 	  state = 9;
 #else
-	  if (state == 2 || state == 11)
+	  if (state == 9 || state == 10)
+	    state = 3;
+	  else if (state != 3)
 	    state = 1;
-	  else
-	    state = 9;
 #endif
 	  PUT (ch);
 	  break;
@@ -1285,6 +1313,20 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	      break;
 	    }
 
+#ifdef TC_D10V
+	  /* All insns end in a char for which LEX_IS_SYMBOL_COMPONENT is true.
+	     Trap is the only short insn that has a first operand that is
+	     neither register nor label.
+	     We must prevent exef0f ||trap #1 to degenerate to exef0f ||trap#1 .
+	     We can't make '#' LEX_IS_SYMBOL_COMPONENT because it is
+	     already LEX_IS_LINE_COMMENT_START.  However, it is the
+	     only character in line_comment_chars for d10v, hence we
+	     can recognize it as such.  */
+	  /* An alternative approach would be to reset the state to 1 when
+	     we see '||', '<'- or '->', but that seems to be overkill.  */
+	  if (state == 10)
+	    PUT (' ');
+#endif
 	  /* We have a line comment character which is not at the
 	     start of a line.  If this is also a normal comment
 	     character, fall through.  Otherwise treat it as a default
@@ -1348,6 +1390,17 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	  /* Fall through.  */
 
 	case LEX_IS_SYMBOL_COMPONENT:
+	  if (state == 10)
+	    {
+	      /* This is a symbol character following another symbol
+		 character, with whitespace in between.  We skipped
+		 the whitespace earlier, so output it now.  */
+	      UNGET (ch);
+	      state = 3;
+	      PUT (' ');
+	      break;
+	    }
+
 #ifdef TC_Z80
 	  /* "af'" is a symbol containing '\''.  */
 	  if (state == 3 && (ch == 'a' || ch == 'A'))
@@ -1373,16 +1426,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 		}
 	    }
 #endif
-
-	  /* Fall through.  */
-	default:
-	de_fault:
-	  /* Some relatively `normal' character.  */
-	  if (state == 0)
-	    state = 11;	/* Now seeing label definition.  */
-	  else if (state == 1)
-	    state = 2;	/* Ditto.  */
-	  else if (state == 3)
+	  if (state == 3)
 	    state = 9;
 
 	  /* This is a common case.  Quickly copy CH and all the
@@ -1391,10 +1435,6 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	      && mri_state == NULL
 #if defined TC_ARM && defined OBJ_ELF
 	      && symver_state == NULL
-#endif
-#ifdef TC_Z80
-	      /* See comma related comment below.  */
-	      && ch != ','
 #endif
 	      )
 	    {
@@ -1410,12 +1450,6 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 		  if (type != 0
 		      && type != LEX_IS_SYMBOL_COMPONENT)
 		    break;
-#ifdef TC_Z80
-		  /* Need to split at commas, to be able to enter state 16
-		     when needed.  */
-		  if (ch2 == ',')
-		    break;
-#endif
 		}
 
 	      if (s > from)
@@ -1440,15 +1474,52 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 		}
 	    }
 
-	  /* As a special case, to limit the delta to previous behavior, e.g.
-	     also affecting listings, go straight to state 3 when seeing a
-	     comma. Commas are special: While they can be used to separate
-	     macro parameters or arguments, they cannot (on their own, i.e.
-	     without quoting) be arguments (or parameter default values).
-	     Hence successive whitespace is not meaningful there.  */
-	  if (ch == ',' && state == 9)
-	    state = 3;
+	  /* Fall through.  */
+	default:
+	de_fault:
+	  /* Some relatively `normal' character.  */
+	  if (state == 0)
+	    {
+	      state = 11;	/* Now seeing label definition.  */
+	    }
+	  else if (state == 1)
+	    {
+	      state = 2;	/* Ditto.  */
+	    }
+	  else if (state == 9)
+	    {
+	      if (!IS_SYMBOL_COMPONENT (ch))
+		state = 3;
+	    }
+	  else if (state == 10)
+	    {
+	      if (ch == '\\')
+		{
+		  /* Special handling for backslash: a backslash may
+		     be the beginning of a formal parameter (of a
+		     macro) following another symbol character, with
+		     whitespace in between.  If that is the case, we
+		     output a space before the parameter.  Strictly
+		     speaking, correct handling depends upon what the
+		     macro parameter expands into; if the parameter
+		     expands into something which does not start with
+		     an operand character, then we don't want to keep
+		     the space.  We don't have enough information to
+		     make the right choice, so here we are making the
+		     choice which is more likely to be correct.  */
+		  if (to + 1 >= toend)
+		    {
+		      /* If we're near the end of the buffer, save the
+		         character for the next time round.  Otherwise
+		         we'll lose our state.  */
+		      UNGET (ch);
+		      goto tofull;
+		    }
+		  *to++ = ' ';
+		}
 
+	      state = 3;
+	    }
 	  PUT (ch);
 	  break;
 	}

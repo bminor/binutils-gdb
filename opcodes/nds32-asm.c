@@ -2486,9 +2486,6 @@ parse_insn (nds32_asm_desc_t *pdesc, nds32_asm_insn_t *pinsn,
 
       while (*plex)
 	{
-	  if (ISSPACE (*p))
-	    ++p;
-
 	  if (IS_LEX_CHAR (*plex))
 	    {
 	      /* If it's a plain char, just compare it.  */
@@ -2533,8 +2530,6 @@ parse_insn (nds32_asm_desc_t *pdesc, nds32_asm_insn_t *pinsn,
 	}
 
       /* Check whether this syntax is accepted.  */
-      if (ISSPACE (*p))
-	++p;
       if (*plex == 0 && (*p == '\0' || *p == '!' || *p == '#'))
 	return 1;
 

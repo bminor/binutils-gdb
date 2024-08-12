@@ -1723,12 +1723,8 @@ preprocess_reglist (char *param, int *allocated)
 
   while (*paramP != '}')
     {
-      memset (&reg_name, '\0', sizeof (reg_name));
-
-      while (ISSPACE (*paramP))
-	paramP++;
-
       regP = paramP;
+      memset (&reg_name, '\0', sizeof (reg_name));
 
       while (ISALNUM (*paramP))
 	paramP++;

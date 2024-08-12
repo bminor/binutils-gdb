@@ -499,7 +499,6 @@ epiphany_cgen_build_insn_regex (CGEN_INSN *insn)
   char rxbuf[CGEN_MAX_RX_ELEMENTS];
   char *rx = rxbuf;
   const CGEN_SYNTAX_CHAR_TYPE *syn;
-  char prev_syntax_char = 0;
   int reg_err;
 
   syn = CGEN_SYNTAX_STRING (CGEN_OPCODE_SYNTAX (opc));
@@ -537,15 +536,6 @@ epiphany_cgen_build_insn_regex (CGEN_INSN *insn)
 	{
 	  char c = CGEN_SYNTAX_CHAR (* syn);
 
-	  /* See whitespace related comments in parse_insn_normal().  */
-	  if (c != ' ' && prev_syntax_char != ' '
-	      && (!ISALNUM (c) || !ISALNUM (prev_syntax_char)))
-	    {
-	      *rx++ = ' ';
-	      *rx++ = '*';
-	    }
-	  prev_syntax_char = c;
-
 	  switch (c)
 	    {
 	      /* Escape any regex metacharacters in the syntax.  */
@@ -579,7 +569,6 @@ epiphany_cgen_build_insn_regex (CGEN_INSN *insn)
 	  /* Replace non-syntax fields with globs.  */
 	  *rx++ = '.';
 	  *rx++ = '*';
-	  prev_syntax_char = 0;
 	}
     }
 
@@ -637,8 +626,10 @@ parse_insn_normal (CGEN_CPU_DESC cd,
   const char *errmsg;
   const char *p;
   const CGEN_SYNTAX_CHAR_TYPE * syn;
-  char prev_syntax_char = 0;
-  bool past_opcode_p;
+#ifdef CGEN_MNEMONIC_OPERANDS
+  /* FIXME: wip */
+  int past_opcode_p;
+#endif
 
   /* For now we assume the mnemonic is first (there are no leading operands).
      We can parse it without needing to set up operand parsing.
@@ -654,13 +645,13 @@ parse_insn_normal (CGEN_CPU_DESC cd,
 #ifndef CGEN_MNEMONIC_OPERANDS
   if (* str && ! ISSPACE (* str))
     return _("unrecognized instruction");
-  past_opcode_p = true;
-#else
-  past_opcode_p = false;
 #endif
 
   CGEN_INIT_PARSE (cd);
   cgen_init_parse_operand (cd);
+#ifdef CGEN_MNEMONIC_OPERANDS
+  past_opcode_p = 0;
+#endif
 
   /* We don't check for (*str != '\0') here because we want to parse
      any trailing fake arguments in the syntax string.  */
@@ -674,28 +665,18 @@ parse_insn_normal (CGEN_CPU_DESC cd,
 
   while (* syn != 0)
     {
-      char c = CGEN_SYNTAX_CHAR_P (*syn) ? CGEN_SYNTAX_CHAR (*syn) : 0;
-
-      /* FIXME: Despite this check we may still take inappropriate advantage of
-	 the fact that GAS's input scrubber will remove extraneous whitespace.
-	 We may also be a little too lax with this now, yet being more strict
-	 would require targets to indicate where whitespace is permissible.  */
-      if (past_opcode_p && c != ' ' && ISSPACE (*str)
-	  /* No whitespace between consecutive alphanumeric syntax elements.  */
-	  && (!ISALNUM (c) || !ISALNUM (prev_syntax_char)))
-	++str;
-      prev_syntax_char = c;
-
       /* Non operand chars must match exactly.  */
-      if (c != 0)
+      if (CGEN_SYNTAX_CHAR_P (* syn))
 	{
 	  /* FIXME: While we allow for non-GAS callers above, we assume the
 	     first char after the mnemonic part is a space.  */
-	  if (TOLOWER (*str) == TOLOWER (c))
+	  /* FIXME: We also take inappropriate advantage of the fact that
+	     GAS's input scrubber will remove extraneous blanks.  */
+	  if (TOLOWER (*str) == TOLOWER (CGEN_SYNTAX_CHAR (* syn)))
 	    {
 #ifdef CGEN_MNEMONIC_OPERANDS
-	      if (c == ' ')
-		past_opcode_p = true;
+	      if (CGEN_SYNTAX_CHAR(* syn) == ' ')
+		past_opcode_p = 1;
 #endif
 	      ++ syn;
 	      ++ str;
@@ -707,7 +688,7 @@ parse_insn_normal (CGEN_CPU_DESC cd,
 
 	      /* xgettext:c-format */
 	      sprintf (msg, _("syntax error (expected char `%c', found `%c')"),
-		       c, *str);
+		       CGEN_SYNTAX_CHAR(*syn), *str);
 	      return msg;
 	    }
 	  else
@@ -717,12 +698,15 @@ parse_insn_normal (CGEN_CPU_DESC cd,
 
 	      /* xgettext:c-format */
 	      sprintf (msg, _("syntax error (expected char `%c', found end of instruction)"),
-		       c);
+		       CGEN_SYNTAX_CHAR(*syn));
 	      return msg;
 	    }
 	  continue;
 	}
 
+#ifdef CGEN_MNEMONIC_OPERANDS
+      (void) past_opcode_p;
+#endif
       /* We have an operand of some sort.  */
       errmsg = cd->parse_operand (cd, CGEN_SYNTAX_FIELD (*syn), &str, fields);
       if (errmsg)

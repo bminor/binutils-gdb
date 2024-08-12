@@ -2409,17 +2409,9 @@ parse_rt (char *s,
     /* Indicate nothing there.  */
     ep->X_op = O_absent;
 
-  /* Skip whitespace.  */
-  while (ISSPACE (*s))
-    ++s;
-
   if (*s == '[')
     {
       s = parse_exp (s + 1, &e);
-
-      /* Skip whitespace.  */
-      while (ISSPACE (*s))
-	++s;
 
       if (*s == ']')
 	s++;
@@ -2943,11 +2935,6 @@ is_reg_lshift_illegal (char **oper, int is_float)
     }
 
   *oper += len;
-
-  /* Skip whitespace.  */
-  while (ISSPACE (**oper))
-    ++*oper;
-
   if ((*oper)[0] != '<' || (*oper)[1] != '<')
     {
       SET_ERROR_STRING (ERROR_UNDEFINE,
@@ -3474,9 +3461,6 @@ get_operand_value (struct csky_opcode_info *op,
 	  return false;
 	}
 
-      while (ISSPACE (**oper))
-	++*oper;
-
       if (!get_operand_value (op, oper, &soprnd->subs[0]))
 	{
 	  *s = rc;
@@ -3497,7 +3481,7 @@ get_operand_value (struct csky_opcode_info *op,
 	}
 
       *s = rc;
-      *oper = s + 1;
+      *oper += 1;
       return true;
     }
 
@@ -4293,16 +4277,11 @@ get_operand_value (struct csky_opcode_info *op,
     case OPRND_TYPE_VREG_WITH_INDEX:
       if (parse_type_freg (oper, 0))
 	{
-	  /* Skip whitespace.  */
-	  while (ISSPACE (**oper))
-	    ++*oper;
 	  if (**oper == '[')
 	    {
 	      (*oper)++;
 	      if (is_imm_within_range (oper, 0, 0xf))
 		{
-		  while (ISSPACE (**oper))
-		    ++*oper;
 		  if (**oper == ']')
 		    {
 		      unsigned int idx = --csky_insn.idx;

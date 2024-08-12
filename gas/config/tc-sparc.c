@@ -1778,9 +1778,6 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
          operands match.  */
       for (args = insn->args;; ++args)
 	{
-	  if (*s == ' ' && *args != ' ')
-	    ++s;
-
 	  switch (*args)
 	    {
 	    case 'K':
@@ -2721,6 +2718,11 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		   'symbols' in the input string.  Try not to create U
 		   symbols for registers, etc.  */
 
+		/* This stuff checks to see if the expression ends in
+		   +%reg.  If it does, it removes the register from
+		   the expression, and re-sets 's' to point to the
+		   right place.  */
+
 		if (op_arg)
 		  {
 		    int npar = 0;
@@ -2750,8 +2752,6 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 			return special_case;
 		      }
 		    s = s1 + 1;
-		    if (*s == ' ')
-		      s++;
 		    if (*s == ',' || *s == ']' || !*s)
 		      continue;
 		    if (*s != '+' && *s != '-')
@@ -2765,45 +2765,17 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		    memset (&the_insn.exp, 0, sizeof (the_insn.exp));
 		  }
 
-		/* This stuff checks to see if the expression ends in
-		   +%reg.  If it does, it removes the register from
-		   the expression, and re-sets 's' to point to the
-		   right place.  */
-
 		for (s1 = s; *s1 && *s1 != ',' && *s1 != ']'; s1++)
 		  ;
 
-		if (s1 != s && s1[-1] == ' ')
-		  --s1;
 		if (s1 != s && ISDIGIT (s1[-1]))
 		  {
 		    if (s1[-2] == '%' && s1[-3] == '+')
-		      {
-			if (s1[-3] == '+')
-			  s1 -= 3;
-			else if (s1[-3] == ' ' && s1[-4] == '+')
-			  s1 -= 4;
-			else
-			  s1 = NULL;
-		      }
-		    else if (strchr ("golir0123456789", s1[-2]) && s1[-3] == '%')
-		      {
-			if (s1[-4] == '+')
-			  s1 -= 4;
-			else if (s1[-4] == ' ' && s1[-5] == '+')
-			  s1 -= 5;
-			else
-			  s1 = NULL;
-		      }
-		    else if (s1[-3] == 'r' && s1[-4] == '%')
-		      {
-			if (s1[-5] == '+')
-			  s1 -= 5;
-			else if (s1[-5] == ' ' && s1[-6] == '+')
-			  s1 -= 6;
-			else
-			  s1 = NULL;
-		      }
+		      s1 -= 3;
+		    else if (strchr ("golir0123456789", s1[-2]) && s1[-3] == '%' && s1[-4] == '+')
+		      s1 -= 4;
+		    else if (s1[-3] == 'r' && s1[-4] == '%' && s1[-5] == '+')
+		      s1 -= 5;
 		    else
 		      s1 = NULL;
 		    if (s1)
