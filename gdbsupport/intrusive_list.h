@@ -395,13 +395,13 @@ public:
   void pop_front () noexcept
   {
     gdb_assert (!this->empty ());
-    erase_element (*m_front);
+    unlink_element (*m_front);
   }
 
   void pop_back () noexcept
   {
     gdb_assert (!this->empty ());
-    erase_element (*m_back);
+    unlink_element (*m_back);
   }
 
 private:
@@ -461,7 +461,8 @@ private:
     return this->iterator_to (elem);
   }
 
-  void erase_element (reference elem) noexcept
+protected:
+  void unlink_element (reference elem) noexcept
   {
     intrusive_list_node<T> *elem_node = as_node (&elem);
 
@@ -504,7 +505,7 @@ public:
     iterator ret = i;
     ++ret;
 
-    erase_element (*i);
+    unlink_element (*i);
 
     return ret;
   }
