@@ -485,6 +485,12 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	 13: After seeing a vertical bar, looking for a second
 	     vertical bar as a parallel expression separator.
 #endif
+#ifdef TC_PREDICATE_START_CHAR
+	 14: After seeing a predicate start character at state 0, looking
+	     for a predicate end character as predicate.
+	 15: After seeing a predicate start character at state 1, looking
+	     for a predicate end character as predicate.
+#endif
 #ifdef TC_Z80
 	 16: After seeing an 'a' or an 'A' at the start of a symbol
 	 17: After seeing an 'f' or an 'F' in state 16
@@ -770,6 +776,29 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 
       /* flushchar: */
       ch = GET ();
+
+#ifdef TC_PREDICATE_START_CHAR
+      if (ch == TC_PREDICATE_START_CHAR && (state == 0 || state == 1))
+	{
+	  state += 14;
+	  PUT (ch);
+	  continue;
+	}
+      else if (state == 14 || state == 15)
+	{
+	  if (ch == TC_PREDICATE_END_CHAR)
+	    {
+	      state -= 14;
+	      PUT (ch);
+	      ch = GET ();
+	    }
+	  else
+	    {
+	      PUT (ch);
+	      continue;
+	    }
+	}
+#endif
 
     recycle:
 
