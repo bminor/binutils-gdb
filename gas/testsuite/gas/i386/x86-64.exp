@@ -698,6 +698,8 @@ if [is_elf_format] then {
 
     run_dump_test "x86-64-no-got"
 
+    run_dump_test "x86-64-macro-1"
+
     run_dump_test "x86-64-addend"
     run_dump_test "x86-64-nop-3"
     run_dump_test "x86-64-nop-4"
