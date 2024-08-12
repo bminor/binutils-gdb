@@ -121,6 +121,12 @@ struct loongarch_elf_link_hash_table
 
   /* Layout recomputation count.  */
   bfd_size_type relr_layout_iter;
+
+  /* In BFD DT_RELR is implemented as a "relaxation."  If in a relax trip
+     size_relative_relocs is updating the layout, relax_section may see
+     a partially updated state (some sections have vma updated but the
+     others do not), and it's unsafe to do the normal relaxation.  */
+  bool layout_mutating_for_relr;
 };
 
 struct loongarch_elf_section_data
@@ -2210,6 +2216,8 @@ loongarch_elf_size_relative_relocs (struct bfd_link_info *info,
 	  *need_layout = false;
 	}
     }
+
+  htab->layout_mutating_for_relr = *need_layout;
   return true;
 }
 
@@ -5257,6 +5265,13 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
     return true;
 
   struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
+
+  /* It may happen that some sections have updated vma but the others do
+     not.  Go to the next relax trip (size_relative_relocs should have
+     been demending another relax trip anyway).  */
+  if (htab->layout_mutating_for_relr)
+    return true;
+
   if (bfd_link_relocatable (info)
       || sec->sec_flg0
       || (sec->flags & SEC_RELOC) == 0
