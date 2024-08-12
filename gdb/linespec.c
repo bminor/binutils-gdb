@@ -3733,15 +3733,11 @@ collect_symtabs_from_filename (const char *file,
 	  if (pspace->executing_startup)
 	    continue;
 
-	  set_current_program_space (pspace);
-	  iterate_over_symtabs (file, collector);
+	  iterate_over_symtabs (pspace, file, collector);
 	}
     }
   else
-    {
-      set_current_program_space (search_pspace);
-      iterate_over_symtabs (file, collector);
-    }
+    iterate_over_symtabs (search_pspace, file, collector);
 
   return collector.release_symtabs ();
 }

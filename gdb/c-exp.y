@@ -3087,10 +3087,8 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  || is_quoted_name)
 	{
 	  /* See if it's a file name. */
-	  struct symtab *symtab;
-
-	  symtab = lookup_symtab (copy.c_str ());
-	  if (symtab)
+	  if (auto symtab = lookup_symtab (current_program_space, copy.c_str ());
+	      symtab != nullptr)
 	    {
 	      yylval.bval
 		= symtab->compunit ()->blockvector ()->static_block ();

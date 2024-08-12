@@ -2089,9 +2089,9 @@ extern const char multiple_symbols_cancel[];
 
 const char *multiple_symbols_select_mode (void);
 
-/* lookup a symbol table by source file name.  */
+/* Lookup a symbol table in PSPACE by source file name.  */
 
-extern struct symtab *lookup_symtab (const char *);
+extern symtab *lookup_symtab (program_space *pspace, const char *name);
 
 /* An object of this type is passed as the 'is_a_field_of_this'
    argument to lookup_symbol and lookup_symbol_in_language.  */
@@ -2808,9 +2808,15 @@ bool iterate_over_some_symtabs (const char *name,
 				struct compunit_symtab *after_last,
 				gdb::function_view<bool (symtab *)> callback);
 
-void iterate_over_symtabs (const char *name,
-			   gdb::function_view<bool (symtab *)> callback);
+/* Check in PSPACE for a symtab of a specific name; first in symtabs, then in
+   psymtabs.  *If* there is no '/' in the name, a match after a '/' in the
+   symtab filename will also work.
 
+   Call CALLBACK with each symtab that is found.  If CALLBACK returns
+   true, the search stops.  */
+
+void iterate_over_symtabs (program_space *pspace, const char *name,
+			   gdb::function_view<bool (symtab *)> callback);
 
 std::vector<CORE_ADDR> find_pcs_for_symtab_line
     (struct symtab *symtab, int line, const linetable_entry **best_entry);

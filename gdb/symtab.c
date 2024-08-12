@@ -700,15 +700,10 @@ iterate_over_some_symtabs (const char *name,
   return false;
 }
 
-/* Check for a symtab of a specific name; first in symtabs, then in
-   psymtabs.  *If* there is no '/' in the name, a match after a '/'
-   in the symtab filename will also work.
-
-   Calls CALLBACK with each symtab that is found.  If CALLBACK returns
-   true, the search stops.  */
+/* See symtab.h.  */
 
 void
-iterate_over_symtabs (const char *name,
+iterate_over_symtabs (program_space *pspace, const char *name,
 		      gdb::function_view<bool (symtab *)> callback)
 {
   gdb::unique_xmalloc_ptr<char> real_path;
@@ -721,34 +716,28 @@ iterate_over_symtabs (const char *name,
       gdb_assert (IS_ABSOLUTE_PATH (real_path.get ()));
     }
 
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (iterate_over_some_symtabs (name, real_path.get (),
-				     objfile->compunit_symtabs, NULL,
-				     callback))
+  for (objfile *objfile : pspace->objfiles ())
+    if (iterate_over_some_symtabs (name, real_path.get (),
+				   objfile->compunit_symtabs, nullptr,
+				   callback))
 	return;
-    }
 
   /* Same search rules as above apply here, but now we look thru the
      psymtabs.  */
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (objfile->map_symtabs_matching_filename (name, real_path.get (),
-						  callback))
-	return;
-    }
+  for (objfile *objfile : pspace->objfiles ())
+    if (objfile->map_symtabs_matching_filename (name, real_path.get (),
+						callback))
+      return;
 }
 
-/* A wrapper for iterate_over_symtabs that returns the first matching
-   symtab, or NULL.  */
+/* See symtab.h.  */
 
-struct symtab *
-lookup_symtab (const char *name)
+symtab *
+lookup_symtab (program_space *pspace, const char *name)
 {
   struct symtab *result = NULL;
 
-  iterate_over_symtabs (name, [&] (symtab *symtab)
+  iterate_over_symtabs (pspace, name, [&] (symtab *symtab)
     {
       result = symtab;
       return true;
@@ -6317,7 +6306,7 @@ collect_file_symbol_completion_matches (completion_tracker &tracker,
 
   /* Go through symtabs for SRCFILE and check the externs and statics
      for symbols which match.  */
-  iterate_over_symtabs (srcfile, [&] (symtab *s)
+  iterate_over_symtabs (current_program_space, srcfile, [&] (symtab *s)
     {
       add_symtab_completions (s->compunit (),
 			      tracker, mode, lookup_name,

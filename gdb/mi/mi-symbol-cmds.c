@@ -41,7 +41,7 @@ mi_cmd_symbol_list_lines (const char *command, const char *const *argv,
     error (_("-symbol-list-lines: Usage: SOURCE_FILENAME"));
 
   filename = argv[0];
-  s = lookup_symtab (filename);
+  s = lookup_symtab (current_program_space, filename);
 
   if (s == NULL)
     error (_("-symbol-list-lines: Unknown source file name."));
