@@ -20,6 +20,9 @@
 * MTE (Memory Tagging Extension) debugging is now supported on AArch64 baremetal
   targets.
 
+* Remove support (native and remote) for QNX Neutrino (triplet
+  `i[3456]86-*-nto*`).
+
 *** Changes in GDB 15
 
 * The MPX commands "show/set mpx bound" have been deprecated, as Intel
