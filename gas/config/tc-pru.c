@@ -1401,6 +1401,7 @@ pru_parse_args (pru_insn_infoS *insn ATTRIBUTE_UNUSED, char *argstr,
   char *p;
   char *end = NULL;
   int i;
+  size_t len;
   p = argstr;
   i = 0;
   bool terminate = false;
@@ -1436,6 +1437,13 @@ pru_parse_args (pru_insn_infoS *insn ATTRIBUTE_UNUSED, char *argstr,
 	  if (end != NULL)
 	    as_bad (_("too many arguments"));
 	}
+
+      /* Strip trailing whitespace.  */
+      len = strlen (parsed_args[i]);
+      for (char *temp = parsed_args[i] + len - 1;
+	   len && ISSPACE (*temp);
+	   temp--, len--)
+	*temp = '\0';
 
       if (*parsestr == '\0' || (p != NULL && *p == '\0'))
 	terminate = true;
