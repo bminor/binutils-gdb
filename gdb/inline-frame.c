@@ -36,7 +36,7 @@
 struct inline_state
 {
   inline_state (thread_info *thread_, int skipped_frames_, CORE_ADDR saved_pc_,
-		std::vector<symbol *> &&skipped_symbols_)
+		std::vector<const symbol *> &&skipped_symbols_)
     : thread (thread_), skipped_frames (skipped_frames_), saved_pc (saved_pc_),
       skipped_symbols (std::move (skipped_symbols_))
   {}
@@ -58,7 +58,7 @@ struct inline_state
   /* Only valid if SKIPPED_FRAMES is non-zero.  This is the list of all
      function symbols that have been skipped, from inner most to outer
      most.  It is used to find the call site of the current frame.  */
-  std::vector<struct symbol *> skipped_symbols;
+  std::vector<const symbol *> skipped_symbols;
 };
 
 static std::vector<inline_state> inline_states;
@@ -342,7 +342,7 @@ void
 skip_inline_frames (thread_info *thread, bpstat *stop_chain)
 {
   const struct block *frame_block, *cur_block;
-  std::vector<struct symbol *> skipped_syms;
+  std::vector<const symbol *> skipped_syms;
   int skip_count = 0;
 
   /* This function is called right after reinitializing the frame
@@ -419,7 +419,7 @@ inline_skipped_frames (thread_info *thread)
 /* If one or more inlined functions are hidden, return the symbol for
    the function inlined into the current frame.  */
 
-struct symbol *
+const symbol *
 inline_skipped_symbol (thread_info *thread)
 {
   inline_state *state = find_inline_frame_state (thread);

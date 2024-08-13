@@ -992,7 +992,7 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 	     Use inlined_subroutine info to make the range more narrow.  */
 	  if (inline_skipped_frames (tp) > 0)
 	    {
-	      symbol *sym = inline_skipped_symbol (tp);
+	      const symbol *sym = inline_skipped_symbol (tp);
 	      if (sym->aclass () == LOC_BLOCK)
 		{
 		  const block *block = sym->value_block ();

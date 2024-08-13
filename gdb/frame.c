@@ -2859,7 +2859,7 @@ find_frame_sal (const frame_info_ptr &frame)
 
   if (frame_inlined_callees (frame) > 0)
     {
-      struct symbol *sym;
+      const symbol *sym;
 
       /* If the current frame has some inlined callees, and we have a next
 	 frame, then that frame must be an inlined frame.  In this case

@@ -62,7 +62,7 @@ int inline_skipped_frames (thread_info *thread);
 /* If one or more inlined functions are hidden, return the symbol for
    the function inlined into the current frame.  */
 
-struct symbol *inline_skipped_symbol (thread_info *thread);
+const symbol *inline_skipped_symbol (thread_info *thread);
 
 /* Return the number of functions inlined into THIS_FRAME.  Some of
    the callees may not have associated frames (see
