@@ -4068,9 +4068,9 @@ main (int ac, char **av)
   if (tmp_prefix == NULL)
     {
       /* If possible use a deterministic prefix.  */
-      if (imp_name || delayimp_name)
+      const char *input = imp_name ? imp_name : delayimp_name;
+      if (input && strlen (input) + 2 <= NAME_MAX)
 	{
-	  const char *input = imp_name ? imp_name : delayimp_name;
 	  tmp_prefix = xmalloc (strlen (input) + 2);
 	  sprintf (tmp_prefix, "%s_", input);
 	  for (i = 0; tmp_prefix[i]; i++)
@@ -4078,9 +4078,7 @@ main (int ac, char **av)
 	      tmp_prefix[i] = '_';
 	}
       else
-	{
-	  tmp_prefix = prefix_encode ("d", getpid ());
-	}
+	tmp_prefix = prefix_encode ("d", getpid ());
     }
 
   mangle_defs ();
