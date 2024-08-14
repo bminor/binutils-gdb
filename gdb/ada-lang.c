@@ -11679,7 +11679,8 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
      that should be compiled with debugging information.  As a result, we
      expect to find that symbol in the symtabs.  */
 
-  sym = standard_lookup (einfo->catch_exception_sym, NULL, SEARCH_VFT);
+  sym = standard_lookup (einfo->catch_exception_sym, NULL,
+			 SEARCH_FUNCTION_DOMAIN);
   if (sym == NULL)
     {
       /* Perhaps we did not find our symbol because the Ada runtime was
@@ -11714,7 +11715,8 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
     error (_("Symbol \"%s\" is not a function (class = %d)"),
 	   sym->linkage_name (), sym->aclass ());
 
-  sym = standard_lookup (einfo->catch_handlers_sym, NULL, SEARCH_VFT);
+  sym = standard_lookup (einfo->catch_handlers_sym, NULL,
+			 SEARCH_FUNCTION_DOMAIN);
   if (sym == NULL)
     {
       bound_minimal_symbol msym
