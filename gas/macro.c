@@ -1389,6 +1389,7 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
 		      if (idx >= in->len)
 			break;
 		    }
+		  continue;
 		}
 	      sb_reset (&f.actual);
 	      sb_add_char (&f.actual, in->ptr[idx]);
