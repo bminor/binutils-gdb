@@ -8245,7 +8245,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 			       "it's not the start of a statement");
 	}
     }
-  else if (execution_direction == EXEC_REVERSE
+
+  if (execution_direction == EXEC_REVERSE
 	  && *curr_frame_id != original_frame_id
 	  && original_frame_id.code_addr_p && curr_frame_id->code_addr_p
 	  && original_frame_id.code_addr == curr_frame_id->code_addr)
