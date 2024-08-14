@@ -109,7 +109,8 @@ read_cpuinfo ()
 	    cpu_info.cpu_clk_freq = read_int (temp + 9);
 	  else if (strncmp (temp, "cpu family", 10) == 0)
 	    cpu_info.cpu_family = read_int (temp + 10);
-	  else if ((strncmp (temp, "vendor_id", 9) || strncmp (temp, "mvendorid", 9)) == 0)
+	  else if (strncmp (temp, "vendor_id", 9) == 0
+		   || strncmp (temp, "mvendorid", 9) == 0)
 	    {
 	      if (cpu_info.cpu_vendorstr == NULL)
 		read_str (temp + 9, &cpu_info.cpu_vendorstr);
