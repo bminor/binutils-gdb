@@ -231,6 +231,13 @@ set lto_link_tests [list \
    "$plug_opt" "-flto $lto_no_fat -fcommon" \
    {pr26389.c} \
    [list [list "nm" "$plug_opt" "pr26389.d"]]] \
+  [list "Build libdefinition-1.a" \
+   "$plug_opt" \
+   "-O2 -fcommon -flto $lto_no_fat" \
+   {definition-1.c} \
+   {} \
+   "libdefinition-1.a" \
+  ] \
 ]
 
 if { [at_least_gcc_version 10 0] && [check_lto_shared_available] } {
@@ -763,6 +770,17 @@ set lto_run_tests [list \
    {pr26262a.c} "pr26262b" "pass.out" \
    "-flto -O2" "c" "" \
    ""] \
+  [list "Run common-1" \
+   "-O2 -flto" \
+   "" \
+   {common-1.c} \
+   "common-1" \
+   "pass.out" \
+   "-O2 -fcommon -flto $lto_no_fat" \
+   "c" \
+   "" \
+   "tmpdir/libdefinition-1.a" \
+  ] \
 ]
 
 if { [at_least_gcc_version 4 7] } {
