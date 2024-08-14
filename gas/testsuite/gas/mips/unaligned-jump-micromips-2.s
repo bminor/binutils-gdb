@@ -150,7 +150,7 @@ bar\@ :
 	.byte	0
 	.size	bar\@, . - bar\@
 	.if	\n - 1
-	obj	(\n - 1)
+	obj	\n - 1
 	.endif
 	.endm
 
@@ -162,7 +162,7 @@ bar\@ :
 	.hword	0
 	.size	bar\@, . - bar\@
 	.if	\n - 1
-	fun	(\n - 1)
+	fun	\n - 1
 	.endif
 	.endm
 
