@@ -700,11 +700,10 @@ struct breakpoint : public intrusive_list_node<breakpoint>
 
   /* Reevaluate a breakpoint.  This is necessary after symbols change
      (e.g., an executable or DSO was loaded, or the inferior just
-     started).  */
-  virtual void re_set ()
-  {
-    /* Nothing to re-set.  */
-  }
+     started).  This is pure virtual as, at a minimum, each sub-class must
+     recompute any cached condition expressions based off of the
+     cond_string member variable.  */
+  virtual void re_set () = 0;
 
   /* Insert the breakpoint or watchpoint or activate the catchpoint.
      Return 0 for success, 1 if the breakpoint, watchpoint or
@@ -1118,6 +1117,10 @@ struct catchpoint : public breakpoint
   catchpoint (struct gdbarch *gdbarch, bool temp, const char *cond_string);
 
   ~catchpoint () override = 0;
+
+  /* If the catchpoint has a condition set then recompute the cached
+     expression within the single dummy location.  */
+  void re_set () override;
 };
 
 

@@ -8138,6 +8138,60 @@ catchpoint::catchpoint (struct gdbarch *gdbarch, bool temp,
   pspace = current_program_space;
 }
 
+/* See breakpoint.h.  */
+
+void
+catchpoint::re_set ()
+{
+  /* All catchpoints are associated with a specific program_space.  */
+  gdb_assert (pspace != nullptr);
+
+  /* Catchpoints have a single dummy location.  */
+  gdb_assert (locations ().size () == 1);
+  bp_location &bl = m_locations.front ();
+
+  if (cond_string == nullptr)
+    {
+      /* It shouldn't be possible to have a parsed condition expression
+	 cached on this location if the catchpoint doesn't have a condition
+	 string set.  */
+      gdb_assert (bl.cond == nullptr);
+
+      /* Nothing to re-compute, and the catchpoint cannot change.  */
+      return;
+    }
+
+  bool previous_disabled_by_cond = bl.disabled_by_cond;
+
+  /* Start by marking the location disabled and discarding the previously
+     computed condition expression.  Now if we get an exception, even if
+     it's a quit exception, we'll leave the location disabled and there
+     will be no (possibly invalid) expression cached.  */
+  bl.disabled_by_cond = true;
+  bl.cond = nullptr;
+
+  const char *s = cond_string.get ();
+  try
+    {
+      switch_to_program_space_and_thread (pspace);
+
+      bl.cond = parse_exp_1 (&s, bl.address, block_for_pc (bl.address),
+			     nullptr);
+      bl.disabled_by_cond = false;
+    }
+  catch (const gdb_exception_error &e)
+    {
+      /* Any exception thrown must be from either the parse_exp_1 or
+	 earlier in the try block.  As such the following two asserts
+	 should be true.  */
+      gdb_assert (bl.disabled_by_cond);
+      gdb_assert (bl.cond == nullptr);
+    }
+
+  if (previous_disabled_by_cond != bl.disabled_by_cond)
+    notify_breakpoint_modified (this);
+}
+
 /* Notify interpreters and observers that breakpoint B was created.  */
 
 static void
