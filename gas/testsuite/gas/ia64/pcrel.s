@@ -13,27 +13,27 @@ _&n:
 _e&n:
 .endm
 
-.macro m1 op, opnd1:vararg
+.macro m1 op, opnd1
  .align 16
 	op		opnd1 _e&op - _&op
 .endm
-.macro m2 op, opnd1:vararg
+.macro m2 op, opnd1
  .align 16
 	op		opnd1 @pcrel(esym)
 .endm
-.macro m3 op, opnd1:vararg
+.macro m3 op, opnd1
  .align 16
 	op		opnd1 esym - _&op
 .endm
-.macro m4 op, opnd1:vararg
+.macro m4 op, opnd1
  .align 16
 	op		opnd1 esym - .
 .endm
-.macro m5 op, opnd1:vararg
+.macro m5 op, opnd1
  .align 16
 	op		opnd1 esym - _e&op
 .endm
-.macro m6 op, opnd1:vararg
+.macro m6 op, opnd1
  .align 16
 	op		opnd1 0
 .endm
