@@ -1929,6 +1929,28 @@ lookup_name_info::match_any ()
   return lookup_name;
 }
 
+/* See symtab.h.  */
+
+unsigned int
+lookup_name_info::search_name_hash (language lang) const
+{
+  /* This works around an obscure problem.  If currently in Ada mode,
+     and the name is wrapped in '<...>' (indicating verbatim mode),
+     force the use of the Ada language here so that the '<' and '>'
+     will be removed.  */
+  if (current_language->la_language == language_ada && ada ().verbatim_p ())
+    lang = language_ada;
+
+  /* Only compute each language's hash once.  */
+  if (!m_demangled_hashes_p[lang])
+    {
+      m_demangled_hashes[lang]
+	= ::search_name_hash (lang, language_lookup_name (lang));
+      m_demangled_hashes_p[lang] = true;
+    }
+  return m_demangled_hashes[lang];
+}
+
 /* Compute the demangled form of NAME as used by the various symbol
    lookup functions.  The result can either be the input NAME
    directly, or a pointer to a buffer owned by the STORAGE object.

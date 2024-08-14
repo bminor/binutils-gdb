@@ -12717,6 +12717,10 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 int enabled,
 				 int from_tty)
 {
+  /* This works around an obscure issue when an Ada program is
+     compiled with LTO.  */
+  scoped_restore_current_language save_language (language_ada);
+
   std::unique_ptr<ada_catchpoint> c
     (new ada_catchpoint (gdbarch, ex_kind,
 			 cond_string.empty () ? nullptr : cond_string.c_str (),

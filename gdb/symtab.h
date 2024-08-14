@@ -266,17 +266,7 @@ class lookup_name_info final
   }
 
   /* Get the search name hash for searches in language LANG.  */
-  unsigned int search_name_hash (language lang) const
-  {
-    /* Only compute each language's hash once.  */
-    if (!m_demangled_hashes_p[lang])
-      {
-	m_demangled_hashes[lang]
-	  = ::search_name_hash (lang, language_lookup_name (lang));
-	m_demangled_hashes_p[lang] = true;
-      }
-    return m_demangled_hashes[lang];
-  }
+  unsigned int search_name_hash (language lang) const;
 
   /* Get the search name for searches in language LANG.  */
   const char *language_lookup_name (language lang) const
