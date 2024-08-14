@@ -110,6 +110,13 @@ scoped_restore_current_language::scoped_restore_current_language ()
 {
 }
 
+scoped_restore_current_language::scoped_restore_current_language
+    (enum language lang)
+  : scoped_restore_current_language ()
+{
+  set_language (lang);
+}
+
 scoped_restore_current_language::~scoped_restore_current_language ()
 {
   /* If both are NULL, then that means dont_restore was called.  */

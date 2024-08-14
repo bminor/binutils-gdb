@@ -860,6 +860,10 @@ class scoped_restore_current_language
 public:
 
   scoped_restore_current_language ();
+
+  /* Set the current language as well.  */
+  explicit scoped_restore_current_language (enum language lang);
+
   ~scoped_restore_current_language ();
 
   scoped_restore_current_language (scoped_restore_current_language &&other)

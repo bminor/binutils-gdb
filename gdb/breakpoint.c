@@ -3734,8 +3734,7 @@ create_std_terminate_master_breakpoint (void)
   const char *const func_name = "std::terminate()";
 
   scoped_restore_current_program_space restore_pspace;
-  scoped_restore_current_language save_language;
-  set_language (language_cplus);
+  scoped_restore_current_language save_language (language_cplus);
 
   for (struct program_space *pspace : program_spaces)
     {

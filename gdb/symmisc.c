@@ -366,8 +366,7 @@ dump_symtab (struct symtab *symtab, struct ui_file *outfile)
      But use only real languages, not placeholders.  */
   if (symtab->language () != language_unknown)
     {
-      scoped_restore_current_language save_lang;
-      set_language (symtab->language ());
+      scoped_restore_current_language save_lang (symtab->language ());
       dump_symtab_1 (symtab, outfile);
     }
   else

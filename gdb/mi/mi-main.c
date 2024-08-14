@@ -2130,10 +2130,7 @@ mi_cmd_execute (struct mi_parse *parse)
 
   std::optional<scoped_restore_current_language> lang_saver;
   if (parse->language != language_unknown)
-    {
-      lang_saver.emplace ();
-      set_language (parse->language);
-    }
+    lang_saver.emplace (parse->language);
 
   current_context = parse;
 

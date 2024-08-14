@@ -423,8 +423,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 		   expression_context_pc, flags, *stringptr,
 		   completer != nullptr, tracker);
 
-  scoped_restore_current_language lang_saver;
-  set_language (lang->la_language);
+  scoped_restore_current_language lang_saver (lang->la_language);
 
   try
     {
@@ -490,10 +489,7 @@ parse_expression_with_language (const char *string, enum language lang)
 {
   std::optional<scoped_restore_current_language> lang_saver;
   if (current_language->la_language != lang)
-    {
-      lang_saver.emplace ();
-      set_language (lang);
-    }
+    lang_saver.emplace (lang);
 
   return parse_expression (string);
 }
