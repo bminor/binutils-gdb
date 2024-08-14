@@ -1083,6 +1083,10 @@ fragment <<EOF
 	link_info.combreloc = false;
       else if (strcmp (optarg, "nocopyreloc") == 0)
 	link_info.nocopyreloc = true;
+      else if (strcmp (optarg, "memory-seal") == 0)
+       link_info.memory_seal = true;
+      else if (strcmp (optarg, "nomemory-seal") == 0)
+       link_info.memory_seal = false;
 EOF
 if test -n "$COMMONPAGESIZE"; then
 fragment <<EOF

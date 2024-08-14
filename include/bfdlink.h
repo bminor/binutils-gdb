@@ -429,6 +429,9 @@ struct bfd_link_info
   /* TRUE if only one read-only, non-code segment should be created.  */
   unsigned int one_rosegment: 1;
 
+  /* TRUE if GNU_PROPERTY_MEMORY_SEAL should be generated.  */
+  unsigned int memory_seal: 1;
+
   /* Nonzero if .eh_frame_hdr section and PT_GNU_EH_FRAME ELF segment
      should be created.  1 for DWARF2 tables, 2 for compact tables.  */
   unsigned int eh_frame_hdr_type: 2;

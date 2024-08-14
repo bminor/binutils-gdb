@@ -33,6 +33,9 @@ Changes in 2.43:
 
 * Add -plugin-save-temps to store plugin intermediate files permanently.
 
+* Add -z memory-seal/-z nomemory-seal options to ELF linker to mark the
+  object to memory sealed.
+
 Changes in 2.42:
 
 * Add -z mark-plt/-z nomark-plt options to x86-64 ELF linker to mark PLT

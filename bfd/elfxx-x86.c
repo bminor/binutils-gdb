@@ -4892,7 +4892,8 @@ _bfd_x86_elf_link_fixup_gnu_properties
   for (p = *listp; p; p = p->next)
     {
       unsigned int type = p->property.pr_type;
-      if (type == GNU_PROPERTY_X86_COMPAT_ISA_1_USED
+      if (type == GNU_PROPERTY_MEMORY_SEAL
+	  || type == GNU_PROPERTY_X86_COMPAT_ISA_1_USED
 	  || type == GNU_PROPERTY_X86_COMPAT_ISA_1_NEEDED
 	  || (type >= GNU_PROPERTY_X86_UINT32_AND_LO
 	      && type <= GNU_PROPERTY_X86_UINT32_AND_HI)

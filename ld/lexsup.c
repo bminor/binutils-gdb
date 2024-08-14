@@ -2265,6 +2265,10 @@ elf_shlib_list_options (FILE *file)
       fprintf (file, _("\
   -z textoff                  Don't treat DT_TEXTREL in output as error\n"));
     }
+  fprintf (file, _("\
+  -z memory-seal              Mark object be memory sealed\n"));
+  fprintf (file, _("\
+  -z nomemory-seal            Don't mark oject to be memory sealed (default)\n"));
 }
 
 static void

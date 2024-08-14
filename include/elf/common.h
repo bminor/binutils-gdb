@@ -891,6 +891,7 @@
 /* Values used in GNU .note.gnu.property notes (NT_GNU_PROPERTY_TYPE_0).  */
 #define GNU_PROPERTY_STACK_SIZE			1
 #define GNU_PROPERTY_NO_COPY_ON_PROTECTED	2
+#define GNU_PROPERTY_MEMORY_SEAL		3
 
 /* A 4-byte unsigned integer property: A bit is set if it is set in all
    relocatable inputs.  */

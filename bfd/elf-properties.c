@@ -177,6 +177,20 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 	      prop->pr_kind = property_number;
 	      goto next;
 
+	    case GNU_PROPERTY_MEMORY_SEAL:
+	      if (datasz != 0)
+		{
+		  _bfd_error_handler
+		    (_("warning: %pB: corrupt memory sealing size: 0x%x"),
+		     abfd, datasz);
+		  /* Clear all properties.  */
+		  elf_properties (abfd) = NULL;
+		  return false;
+		}
+	      prop = _bfd_elf_get_property (abfd, type, datasz);
+	      prop->pr_kind = property_number;
+	      goto next;
+
 	    default:
 	      if ((type >= GNU_PROPERTY_UINT32_AND_LO
 		   && type <= GNU_PROPERTY_UINT32_AND_HI)
@@ -254,6 +268,7 @@ elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd, bfd *bbfd,
       /* FALLTHROUGH */
 
     case GNU_PROPERTY_NO_COPY_ON_PROTECTED:
+    case GNU_PROPERTY_MEMORY_SEAL:
       /* Return TRUE if APROP is NULL to indicate that BPROP should
 	 be added to ABFD.  */
       return aprop == NULL;
@@ -607,6 +622,33 @@ elf_write_gnu_properties (struct bfd_link_info *info,
     }
 }
 
+static asection *
+_bfd_elf_link_create_gnu_property_sec (struct bfd_link_info *info, bfd *elf_bfd,
+				       unsigned int elfclass)
+{
+  asection *sec;
+
+  sec = bfd_make_section_with_flags (elf_bfd,
+				     NOTE_GNU_PROPERTY_SECTION_NAME,
+				     (SEC_ALLOC
+				      | SEC_LOAD
+				      | SEC_IN_MEMORY
+				      | SEC_READONLY
+				      | SEC_HAS_CONTENTS
+				      | SEC_DATA));
+  if (sec == NULL)
+    info->callbacks->einfo (_("%F%P: failed to create GNU property section\n"));
+
+  if (!bfd_set_section_alignment (sec,
+				  elfclass == ELFCLASS64 ? 3 : 2))
+    info->callbacks->einfo (_("%F%pA: failed to align section\n"),
+			    sec);
+
+  elf_section_type (sec) = SHT_NOTE;
+  return sec;
+}
+
+
 /* Set up GNU properties.  Return the first relocatable ELF input with
    GNU properties if found.  Otherwise, return NULL.  */
 
@@ -656,23 +698,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
       /* Support -z indirect-extern-access.  */
       if (first_pbfd == NULL)
 	{
-	  sec = bfd_make_section_with_flags (elf_bfd,
-					     NOTE_GNU_PROPERTY_SECTION_NAME,
-					     (SEC_ALLOC
-					      | SEC_LOAD
-					      | SEC_IN_MEMORY
-					      | SEC_READONLY
-					      | SEC_HAS_CONTENTS
-					      | SEC_DATA));
-	  if (sec == NULL)
-	    info->callbacks->einfo (_("%F%P: failed to create GNU property section\n"));
-
-	  if (!bfd_set_section_alignment (sec,
-					  elfclass == ELFCLASS64 ? 3 : 2))
-	    info->callbacks->einfo (_("%F%pA: failed to align section\n"),
-				    sec);
-
-	  elf_section_type (sec) = SHT_NOTE;
+	  sec = _bfd_elf_link_create_gnu_property_sec (info, elf_bfd, elfclass);
 	  first_pbfd = elf_bfd;
 	  has_properties = true;
 	}
@@ -688,6 +714,31 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
       else
 	p->u.number
 	  |= GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS;
+    }
+
+  if (elf_bfd != NULL)
+    {
+      if (info->memory_seal)
+	{
+	  /* Support -z no-memory-seal.  */
+	  if (first_pbfd == NULL)
+	    {
+	      sec = _bfd_elf_link_create_gnu_property_sec (info, elf_bfd, elfclass);
+	      first_pbfd = elf_bfd;
+	      has_properties = true;
+	    }
+
+	  p = _bfd_elf_get_property (first_pbfd, GNU_PROPERTY_MEMORY_SEAL, 0);
+	  if (p->pr_kind == property_unknown)
+	    {
+	      /* Create GNU_PROPERTY_NO_MEMORY_SEAL.  */
+	      p->u.number = GNU_PROPERTY_MEMORY_SEAL;
+	      p->pr_kind = property_number;
+	    }
+	}
+      else
+	elf_find_and_remove_property (&elf_properties (elf_bfd),
+				      GNU_PROPERTY_MEMORY_SEAL, true);
     }
 
   /* Do nothing if there is no .note.gnu.property section.  */

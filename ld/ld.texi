@@ -1602,6 +1602,14 @@ Disable relocation overflow check.  This can be used to disable
 relocation overflow check if there will be no dynamic relocation
 overflow at run-time.  Supported for x86_64.
 
+@item memory-seal
+@item nomemory-seal
+Instruct the executable or shared library that the all PT_LOAD segments
+should be sealed to avoid further manipulation (such as changing the
+protection flags, the segment size, or remove the mapping).
+This is a security hardening that requires system support.  This
+generates GNU_PROPERTY_MEMORY_SEAL in .note.gnu.property section
+
 @item now
 When generating an executable or shared library, mark it to tell the
 dynamic linker to resolve all symbols when the program is started, or
