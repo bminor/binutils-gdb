@@ -44,11 +44,17 @@ _start:
 	# pop2 %rdi, %r8 set EVEX.ND=0.
 	.byte 0x62, 0xf4, 0x3c, 0x08, 0x8f, 0xc7
 
-	# pop2 %rax, %r8 set EVEX.vvvv = 1111.
-	.insn EVEX.L0.M4.W0 0x8f,  %rax, {rn-sae},%r8
+	# pop2 %rax, %rax
+	.insn EVEX.L0.NP.M4.W0 0x8f/0, %rax, {sae}, %rax
 
 	# pop2 %r11, %r11
-	.insn EVEX.L0.NP.M4.W0 0x8f/0, {sae}, %xmm11, %xmm11
+	.insn EVEX.L0.NP.M4.W0 0x8f/0, %r11, {sae}, %r11
+
+	# pop2 %rbx, %rsp
+	.insn EVEX.L0.NP.M4.W0 0x8f/0, %rbx, {sae}, %rsp
+
+	# pop2 %rsp, %rax
+	.insn EVEX.L0.NP.M4.W0 0x8f/0, %rsp, {sae}, %rax
 
 	#EVEX_MAP4 movbe %r18w,%ax set EVEX.nf = 1.
 	.insn EVEX.L0.66.M12.W0 0x60, %di, %ax {%k4}

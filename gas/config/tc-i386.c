@@ -13057,7 +13057,8 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	case 3:
 	  if (pp.encoding != encoding_default)
 	    {
-	      i.tm.opcode_modifier.vexvvvv = VexVVVV_SRC1;
+	      i.tm.opcode_modifier.vexvvvv = i.tm.extension_opcode == None
+					     ? VexVVVV_SRC1 : VexVVVV_DST;
 	      break;
 	    }
 	  /* Fall through.  */
