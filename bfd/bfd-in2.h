@@ -1947,7 +1947,8 @@ enum bfd_plugin_format
   {
     bfd_plugin_unknown = 0,
     bfd_plugin_yes = 1,
-    bfd_plugin_no = 2
+    bfd_plugin_yes_unused = 2,
+    bfd_plugin_no = 3
   };
 
 struct bfd_build_id
