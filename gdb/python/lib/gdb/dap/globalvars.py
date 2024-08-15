@@ -60,7 +60,8 @@ class _Globals(BaseReference):
 
     @in_gdb_thread
     def fetch_one_child(self, idx):
-        return self.var_list[idx].value()
+        sym = self.var_list[idx]
+        return (sym.name, sym.value())
 
 
 @in_gdb_thread
