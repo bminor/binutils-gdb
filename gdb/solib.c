@@ -991,7 +991,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
 	    }
 	}
 
-    if (loaded_any_symbols)
+    if (loaded_any_symbols || !current_program_space->deleted_solibs.empty ())
       breakpoint_re_set ();
 
     if (from_tty && pattern && !any_matches)
