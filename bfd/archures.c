@@ -947,6 +947,7 @@ bfd_arch_get_compatible (const bfd *abfd,
      to assume that they know what they are doing.  */
   if (accept_unknowns
       || ubfd->plugin_format == bfd_plugin_yes
+      || ubfd->plugin_format == bfd_plugin_yes_unused
       || strcmp (bfd_get_target (ubfd), "binary") == 0)
     return kbfd->arch_info;
   return NULL;

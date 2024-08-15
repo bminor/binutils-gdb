@@ -329,13 +329,23 @@ try_claim (bfd *abfd)
   struct ld_plugin_input_file file;
 
   file.handle = abfd;
-  if (bfd_plugin_open_input (abfd, &file)
-      && current_plugin->claim_file)
+  if (bfd_plugin_open_input (abfd, &file))
     {
-      current_plugin->claim_file (&file, &claimed);
-      bfd_plugin_close_file_descriptor ((abfd->my_archive != NULL
-					 ? abfd : NULL),
-					file.fd);
+      bool claim_file_called = false;
+      if (current_plugin->claim_file_v2)
+	{
+	  current_plugin->claim_file_v2 (&file, &claimed, false);
+	  claim_file_called = true;
+	}
+      else if (current_plugin->claim_file)
+	{
+	  current_plugin->claim_file (&file, &claimed);
+	  claim_file_called = true;
+	}
+      if (claim_file_called)
+	bfd_plugin_close_file_descriptor ((abfd->my_archive != NULL
+					   ? abfd : NULL),
+					  file.fd);
     }
 
   return claimed;

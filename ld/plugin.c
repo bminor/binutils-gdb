@@ -1174,10 +1174,11 @@ plugin_load_plugins (void)
 /* Call 'claim file' hook for all plugins.  */
 static int
 plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed,
-			bool known_used)
+			int *claim_file_handler_v2, bool known_used)
 {
   plugin_t *curplug = plugins_list;
   *claimed = false;
+  *claim_file_handler_v2 = false;
   while (curplug && !*claimed)
     {
       if (curplug->claim_file_handler)
@@ -1186,7 +1187,11 @@ plugin_call_claim_file (const struct ld_plugin_input_file *file, int *claimed,
 
 	  called_plugin = curplug;
 	  if (curplug->claim_file_handler_v2)
-	    rv = (*curplug->claim_file_handler_v2) (file, claimed, known_used);
+	    {
+	      rv = (*curplug->claim_file_handler_v2) (file, claimed,
+						      known_used);
+	      *claim_file_handler_v2 = true;
+	    }
 	  else
 	    rv = (*curplug->claim_file_handler) (file, claimed);
 	  called_plugin = NULL;
@@ -1222,7 +1227,7 @@ plugin_cleanup (bfd *abfd ATTRIBUTE_UNUSED)
 static bfd_cleanup
 plugin_object_p (bfd *ibfd, bool known_used)
 {
-  int claimed;
+  int claimed, claim_file_handler_v2;
   plugin_input_file_t *input;
   struct ld_plugin_input_file file;
   bfd *abfd;
@@ -1231,12 +1236,17 @@ plugin_object_p (bfd *ibfd, bool known_used)
   if ((ibfd->flags & BFD_PLUGIN) != 0)
     return NULL;
 
-  if (ibfd->plugin_format != bfd_plugin_unknown)
+  /* When KNOWN_USED is false, we call plugin claim_file if plugin_format
+     is bfd_plugin_unknown and set plugin_format to bfd_plugin_yes_unused
+     on LTO object.  When KNOWN_USED is true, we call plugin claim_file
+     if plugin_format is bfd_plugin_unknown or bfd_plugin_yes_unused.  */
+  if (ibfd->plugin_format != bfd_plugin_unknown
+      && (!known_used || ibfd->plugin_format != bfd_plugin_yes_unused))
     {
-      if (ibfd->plugin_format == bfd_plugin_yes)
-	return plugin_cleanup;
-      else
+      if (ibfd->plugin_format == bfd_plugin_no)
 	return NULL;
+      else
+	return plugin_cleanup;
     }
 
   /* We create a dummy BFD, initially empty, to house whatever symbols
@@ -1272,7 +1282,8 @@ plugin_object_p (bfd *ibfd, bool known_used)
 
   claimed = 0;
 
-  if (plugin_call_claim_file (&file, &claimed, known_used))
+  if (plugin_call_claim_file (&file, &claimed, &claim_file_handler_v2,
+			      known_used))
     einfo (_("%F%P: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
 
@@ -1292,7 +1303,13 @@ plugin_object_p (bfd *ibfd, bool known_used)
 
   if (claimed)
     {
-      ibfd->plugin_format = bfd_plugin_yes;
+      /* Set plugin_format to bfd_plugin_yes_unused if KNOWN_USED is
+	 false for plugin claim_file_v2 to avoid including the unused
+	 LTO archive members in linker output.  */
+      if (known_used || !claim_file_handler_v2)
+	ibfd->plugin_format = bfd_plugin_yes;
+      else
+	ibfd->plugin_format = bfd_plugin_yes_unused;
       ibfd->plugin_dummy_bfd = abfd;
       bfd_make_readable (abfd);
       abfd->no_export = ibfd->no_export;
