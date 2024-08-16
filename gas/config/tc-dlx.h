@@ -29,7 +29,7 @@
 
 #define WORKING_DOT_WORD
 
-#define LEX_DOLLAR 1
+#define LEX_DOLLAR LEX_NAME
 
 #include "bit_fix.h"
 

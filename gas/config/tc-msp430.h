@@ -99,7 +99,7 @@
 
 /* Support symbols like: C$$IO$$.  */
 #undef  LEX_DOLLAR
-#define LEX_DOLLAR 1
+#define LEX_DOLLAR LEX_NAME
 
 #define TC_IMPLICIT_LCOMM_ALIGNMENT(SIZE, P2VAR) (P2VAR) = 0
 /*   An `.lcomm' directive with no explicit alignment parameter will

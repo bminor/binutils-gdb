@@ -285,7 +285,8 @@ read_begin (void)
   /* Use more.  FIXME-SOMEDAY.  */
 
   if (flag_mri)
-    lex_type['?'] = 3;
+    lex_type['?'] = LEX_BEGIN_NAME | LEX_NAME;
+
   stabs_begin ();
 
 #ifndef WORKING_DOT_WORD

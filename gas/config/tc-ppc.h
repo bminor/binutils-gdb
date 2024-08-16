@@ -149,7 +149,7 @@ struct ppc_tc_sy
 #define OBJ_COFF_MAX_AUXENTRIES 4
 
 /* Square and curly brackets are permitted in symbol names.  */
-#define LEX_BR 3
+#define LEX_BR (LEX_BEGIN_NAME | LEX_NAME)
 
 /* Canonicalize the symbol name.  */
 #define tc_canonicalize_symbol_name(name) ppc_canonicalize_symbol_name (name)
