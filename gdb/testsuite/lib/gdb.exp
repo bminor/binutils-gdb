@@ -750,19 +750,24 @@ proc gdb_breakpoint { linespec args } {
 # single quoted C++ function specifier.
 #
 # If there are additional arguments, pass them to gdb_breakpoint.
-# We recognize no-message/message ourselves.
+# We recognize no-message/message ourselves as well as no-delete-brekpoints.
 #
 # no-message is messed up here, like gdb_breakpoint: to preserve
 # historical usage fails are always printed by default.
 # no-message: turns off printing of fails (and passes, but they're already off)
 # message: turns on printing of passes (and fails, but they're already on)
+#
+# The 'no-delete-brekpoints' option stops this proc from deleting all
+# breakpoints.
 
 proc runto { linespec args } {
     global gdb_prompt
     global bkptno_numopt_re
     global decimal
 
-    delete_breakpoints
+    if {[lsearch -exact $args no-delete-breakpoints] == -1} {
+	delete_breakpoints
+    }
 
     set print_pass 0
     set print_fail 1
@@ -838,11 +843,11 @@ proc runto { linespec args } {
 
 # Ask gdb to run until we hit a breakpoint at main.
 #
-# N.B. This function deletes all existing breakpoints.
-# If you don't want that, use gdb_start_cmd.
+# N.B. By default this function deletes all existing breakpoints.  If
+# you don't want that then pass the 'no-delete-breakpoints' argument.
 
-proc runto_main { } {
-    return [runto main qualified]
+proc runto_main { args } {
+    return [runto main qualified {*}$args]
 }
 
 ### Continue, and expect to hit a breakpoint.
