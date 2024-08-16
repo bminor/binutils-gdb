@@ -3174,7 +3174,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
     if (msymbol.minsym->type () == mst_solib_trampoline)
       {
 	bound_minimal_symbol mfunsym
-	  = lookup_minimal_symbol_text (section->objfile->pspace (),
+	  = lookup_minimal_symbol_text (current_program_space,
 					msymbol.minsym->linkage_name (),
 					nullptr);
 
