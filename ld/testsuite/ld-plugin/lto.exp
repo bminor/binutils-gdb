@@ -238,6 +238,23 @@ set lto_link_tests [list \
    {} \
    "libdefinition-1.a" \
   ] \
+  [list \
+   "Build common-2a.o" \
+   "" \
+   "-O2 -fcommon -flto $lto_no_fat" \
+   {common-2a.c} \
+   {} \
+   "" \
+   "c" \
+  ] \
+  [list \
+   "Build libcommon-2.a" \
+   "$plug_opt" \
+   "-O2 -fcommon -flto $lto_no_fat" \
+   {common-2b.c} \
+   {} \
+   "libcommon-2.a" \
+  ] \
 ]
 
 if { [at_least_gcc_version 10 0] && [check_lto_shared_available] } {
@@ -879,6 +896,26 @@ run_cc_link_tests $lto_link_tests
 # These compilation tests generate intermediate object files which will be used
 # by some elf tests besides shared libs tests.  So, always compile them.
 run_cc_link_tests $lto_compile_elf_tests
+
+# Xfail PR ld/32083 test for GCC without the fix:
+#
+# commit a98dd536b1017c2b814a3465206c6c01b2890998
+# Author: H.J. Lu <hjl.tools@gmail.com>
+# Date:   Wed Aug 21 07:25:25 2024 -0700
+#
+#    Update LDPT_REGISTER_CLAIM_FILE_HOOK_V2 linker plugin hook
+#
+set exec_output [run_host_cmd "$CC_FOR_TARGET" \
+			      "-O2 -fcommon -flto -o tmpdir/common-2 \
+			       tmpdir/common-2a.o tmpdir/libcommon-2.a \
+			       tmpdir/libcommon-2.a"]
+if [string match "" $exec_output] then {
+    pass "PR ld/32083"
+} elseif { [ regexp "lto1: fatal error: multiple prevailing defs for 'func'" $exec_output ] } {
+    xfail "PR ld/32083"
+} else {
+    fail "PR ld/32083"
+}
 
 # Restrict these to ELF targets that support shared libs and PIC.
 if { [is_elf_format] && [check_lto_shared_available] } {
