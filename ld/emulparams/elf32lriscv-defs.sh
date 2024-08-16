@@ -16,15 +16,8 @@ if test `echo "$host" | sed -e s/64//` = `echo "$target" | sed -e s/64//`; then
   esac
 fi
 
-# Enable shared library support for everything except an embedded elf target.
-case "$target" in
-  riscv*-elf)
-    ;;
-  *)
-    GENERATE_SHLIB_SCRIPT=yes
-    GENERATE_PIE_SCRIPT=yes
-    ;;
-esac
+GENERATE_SHLIB_SCRIPT=yes
+GENERATE_PIE_SCRIPT=yes
 
 IREL_IN_PLT=
 TEXT_START_ADDR=0x10000
