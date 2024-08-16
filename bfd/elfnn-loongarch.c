@@ -4136,6 +4136,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (is_dyn,
 							    bfd_link_pic (info),
 							    h)
+			  && !bfd_is_abs_section(h->root.u.def.section)
 			  && bfd_link_pic (info)
 			  && LARCH_REF_LOCAL (info, h)
 			  && !info->enable_dt_relr)
@@ -4158,7 +4159,8 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			      && local_got_offsets[r_symndx] != MINUS_ONE);
 
 		  got_off = local_got_offsets[r_symndx] & (~(bfd_vma)1);
-		  if ((local_got_offsets[r_symndx] & 1) == 0)
+		  if (sym->st_shndx != SHN_ABS
+		      && (local_got_offsets[r_symndx] & 1) == 0)
 		    {
 		      if (bfd_link_pic (info) && !info->enable_dt_relr)
 			{
@@ -5315,6 +5317,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
       bfd_vma symval;
       asection *sym_sec;
       bool local_got = false;
+      bool is_abs_symbol = false;
       Elf_Internal_Rela *rel = relocs + i;
       struct elf_link_hash_entry *h = NULL;
       unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
@@ -5496,7 +5499,21 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  break;
 
 	case R_LARCH_GOT_PC_HI20:
+	  if (h)
+	    is_abs_symbol = bfd_is_abs_section(h->root.u.def.section);
+	  else
+	    {
+	      Elf_Internal_Sym *sym = (Elf_Internal_Sym *)symtab_hdr->contents
+				    + ELFNN_R_SYM (rel->r_info);
+	      is_abs_symbol = sym->st_shndx == SHN_ABS;
+	    }
+	 /* If symval is in the range [-2^31, 2^31), we can relax the
+	    pair of instructions from pcalau12i/ld.d to lu12i.w/ori for
+	    abosulte symbol. This is not implemented yet, so we just
+	    remain the r_type which will be needed when relocate for
+	    absolute symbol. */
 	  if (local_got && 0 == info->relax_pass
+	      && !is_abs_symbol
 	      && (i + 4) <= sec->reloc_count)
 	    {
 	      if (loongarch_relax_pcala_ld (abfd, sec, rel))

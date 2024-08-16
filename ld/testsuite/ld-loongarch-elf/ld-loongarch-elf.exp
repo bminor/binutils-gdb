@@ -130,6 +130,18 @@ if [istarget "loongarch64-*-*"] {
 		"a.binary" \
 	   ] \
       ]
+
+
+  run_ld_link_exec_tests [list \
+	[list \
+	    "get global abs symbol test" \
+	    "-Wl,-z norelro -Wl,--defsym sym=0xabba" \
+	    "" \
+	    { abs-global.s get_abs_global_sym.c} \
+	    "abs-global" \
+	    "abs-global.out" \
+	] \
+    ]
 }
 
 if [istarget "loongarch64-*-*"] {
