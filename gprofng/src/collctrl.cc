@@ -77,7 +77,7 @@ read_int (char *from)
 {
   char *val = strchr (from, ':');
   if (val)
-    return atoi (val + 1);
+    return (int) strtol (val + 1, NULL, 0);
   return 0;
 }
 
@@ -130,7 +130,11 @@ read_cpuinfo ()
       fclose (procf);
     }
   if (cpu_info.cpu_vendorstr == NULL)
+#if defined(__aarch64__)
+    cpu_info.cpu_vendorstr = strdup (AARCH64_VENDORSTR_ARM);
+#else
     cpu_info.cpu_vendorstr = GTXT ("Unknown processor");
+#endif
   if (cpu_info.cpu_modelstr == NULL)
     cpu_info.cpu_modelstr = GTXT ("Unknown cpu model");
   return &cpu_info;

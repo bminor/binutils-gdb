@@ -243,6 +243,7 @@ static Hwcentry papi_generic_list[] = {
   {NULL, NULL, 0, NULL, 0, 0, 0, 0, ABST_NONE}
 };
 
+#if defined(__i386__) || defined(__x86_64)
 /* Kernel profiling pseudo-chip, OBSOLETE (To support 12.3 and earlier, TBR) */
 static Hwcentry kproflist[] = {
   {"kcycles", "kcycles", 0, STXT ("KCPU Cycles"), PRELOADS_5, 1, ABST_NONE},
@@ -1215,6 +1216,7 @@ static Hwcentry amd_15h[] = {
   {"insts1", "EX_retired_instr_w_excp_intr", 1, NULL, PRELOADS_8, 0, ABST_NONE},
   {NULL, NULL, 0, NULL, 0, 0, 0, 0, ABST_NONE}
 };
+#endif  /* __i386__ or __x86_64 */
 
 #define INIT_HWC(nm, mtr, cfg, ty) .name = (nm), .metric = (mtr), \
     .config = (cfg), .type = ty, .use_perf_event_type = 1, \
@@ -1296,15 +1298,18 @@ static Hwcentry amd_15h[] = {
   { HWCE("iTLB-loads", STXT("The Instruction TLB Loads"),\
 	 PERF_COUNT_HW_CACHE_ITLB,\
 	 PERF_COUNT_HW_CACHE_OP_READ, PERF_COUNT_HW_CACHE_RESULT_ACCESS) },
-
 static Hwcentry	generic_list[] = {
   HWC_GENERIC
   {NULL, NULL, 0, NULL, 0, 0, 0, 0, ABST_NONE}
 };
 
-#include "hwc_amd_zen3.h"
-#include "hwc_amd_zen4.h"
-#include "hwc_intel_icelake.h"
+#if defined(__i386__) || defined(__x86_64)
+ #include "hwc_amd_zen3.h"
+ #include "hwc_amd_zen4.h"
+ #include "hwc_intel_icelake.h"
+#elif defined(__aarch64__)
+ #include "hwc_arm64_amcc.h"
+#endif
 
 /* structure defining the counters for a CPU type */
 typedef struct
@@ -1325,6 +1330,7 @@ typedef struct
  *  If the string is not formatted that way, -h hi and -h lo will fail
  */
 static cpu_list_t cputabs[] = {
+#if defined(__i386__) || defined(__x86_64)
   {CPC_PENTIUM_PRO_MMX, pentiumIIlist, {"insts", 0}},
   {CPC_PENTIUM_PRO, pentiumIIIlist, {"insts", 0}},
   {CPC_PENTIUM_4, pentium4, {"insts", 0}},
@@ -1353,10 +1359,13 @@ static cpu_list_t cputabs[] = {
   {CPC_AMD_FAM_11H, amd_opteron_10h_11h, {"insts,,cycles,,l2dm,,l2dtlbm", 0}},
   {CPC_AMD_FAM_15H, amd_15h, {"insts,,cycles", 0}},
   {CPC_KPROF, kproflist, {NULL}}, // OBSOLETE (To support 12.3 and earlier, TBR)
-  {ARM_CPU_IMP_APM, generic_list, {"insts,,cycles", 0}},
   {CPC_AMD_Authentic, generic_list, {"insts,,cycles", 0}},
   {CPC_AMD_FAM_19H_ZEN3, amd_zen3_list, {"insts,,cycles", 0}},
   {CPC_AMD_FAM_19H_ZEN4, amd_zen4_list, {"insts,,cycles", 0}},
+#elif defined(__aarch64__)
+  {CPC_ARM64_AMCC, arm64_amcc_list, {"insts,,cycles", 0}},
+  {CPC_ARM_GENERIC, generic_list, {"insts,,cycles", 0}},
+#endif
   {0, generic_list, {"insts,,cycles", 0}},
 };
 
@@ -1855,6 +1864,13 @@ setup_cpc_general (int skip_hwc_test)
 	  if (cpu_p->cpu_model == 106)
 	    cpcx_cpuver = CPC_INTEL_ICELAKE;
 	}
+    }
+  else if (strcmp (cpu_p->cpu_vendorstr, AARCH64_VENDORSTR_ARM) == 0)
+    {
+      if (cpu_p->cpu_family == 0x50)
+	cpcx_cpuver = CPC_ARM64_AMCC;
+      else
+	cpcx_cpuver = CPC_ARM_GENERIC;
     }
 
 #ifdef DISALLOW_PENTIUM_PRO_MMX_7007575

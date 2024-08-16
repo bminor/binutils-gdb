@@ -128,6 +128,10 @@ extern cpu_info_t *read_cpuinfo();
 #define CPC_SPARC64_X       4006 /* Athena */
 #define CPC_SPARC64_XII     4010 /* Athena++ */
 
+// Arm
+#define CPC_ARM_GENERIC     3500
+#define CPC_ARM64_AMCC      3501 /* Applied Micro Circuits Corporation (ARM) */
+
 #define	AMD_FAM_19H_ZEN3_NAME	"AMD Family 19h (Zen3)"
 #define	AMD_FAM_19H_ZEN4_NAME	"AMD Family 19h (Zen4)"
 
