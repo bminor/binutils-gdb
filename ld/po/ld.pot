@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2024-08-04 14:11+0100\n"
+"POT-Creation-Date: 2024-08-17 17:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3440,7 +3440,7 @@ msgstr ""
 msgid "<no plugin>"
 msgstr ""
 
-#: plugin.c:255 plugin.c:1135
+#: plugin.c:255 plugin.c:1145
 msgid "%F%P: %s: error loading plugin: %s\n"
 msgstr ""
 
@@ -3480,39 +3480,39 @@ msgid "unknown LTO visibility value %x"
 msgstr ""
 
 #. We should not have a new, indirect or warning symbol here.
-#: plugin.c:828
+#: plugin.c:838
 msgid "%F%P: %s: plugin symbol table corrupt (sym type %d)\n"
 msgstr ""
 
-#: plugin.c:893
+#: plugin.c:903
 msgid "%P: %pB: symbol `%s' definition: %s, visibility: %s, resolution: %s\n"
 msgstr ""
 
-#: plugin.c:976
+#: plugin.c:986
 msgid "%P: warning: "
 msgstr ""
 
-#: plugin.c:987
+#: plugin.c:997
 msgid "%P: error: "
 msgstr ""
 
-#: plugin.c:1142
+#: plugin.c:1152
 msgid "%F%P: %s: plugin error: %d\n"
 msgstr ""
 
-#: plugin.c:1201
+#: plugin.c:1216
 msgid "%F%P: plugin_strdup failed to allocate memory: %s\n"
 msgstr ""
 
-#: plugin.c:1238
+#: plugin.c:1258
 msgid "%F%P: plugin failed to allocate memory for input: %s\n"
 msgstr ""
 
-#: plugin.c:1266
+#: plugin.c:1287
 msgid "%F%P: %s: plugin reported error claiming file\n"
 msgstr ""
 
-#: plugin.c:1379
+#: plugin.c:1406
 msgid "%P: %s: error in plugin cleanup: %d (ignored)\n"
 msgstr ""
 
