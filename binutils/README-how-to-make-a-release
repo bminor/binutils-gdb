@@ -566,7 +566,7 @@ looks like this:
      correctly.
 
   2.5 Prepare a list of the bugs which have been fixed.  This
-      will be needed for step 8.
+      will be needed for step 9.
 
   3. In the branch sources:
 
@@ -576,14 +576,29 @@ looks like this:
        d. Remove spurious autom4te.cache files:
 
           git clean -fdx
-	  
-       e. Commit the updates along with a "this-is-the-2.3x.y-release"
-          note in all of the changelogs.
-       f. Tag the branch with the new release number:
 
-            git tag -a binutils-2_3x_y
-	      [optional: add "-u XXXXX" to sign with a gpg key]
-	    git push origin binutils-2_3x_y
+        e. Update the changelog:
+	
+           gitlog-to-changelog --since=2021-07-03 > ChangeLog.git
+	  
+       f. Commit the updates along with a "this-is-the-2.4x.y-release"
+          comment.
+
+             git add .
+	     git commit -m"..."
+	     git push
+	     
+       f. Tag the branch with the new release number.  Optional: add
+          "-u XXXXX" to sign with a gpg key, and -m "..." for a
+          comment.  eg:
+	  
+               git tag -a binutils-2_43_1
+          or:	    
+	       git tag -a binutils-2_43_1 -u DD9E3C4F -m "Official GNU Binutils 2.43.1 release"
+
+          Then push it:
+	  
+	    git push origin binutils-2_43_1
 
        g. Check that your file creation mask will create the
           correct file permissions.  Ie:
@@ -592,17 +607,14 @@ looks like this:
 
        h. Create the release tarballs:
        
-            ./src-release.sh -b -g -l -x -z binutils
+              ./src-release.sh -b -g -l -x -z binutils
+	  or: 
+              ./src-release.sh -b -g -l -x -z -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` binutils
 
        i. Check that the files in the tarballs have the correct
           permissions.
 
-       j. Clean the source tree again
-       
-	    git clean -fdx
-	  
-       k. Edit bfd/development.sh and set "development=true".
-       l. Commit this change.
+           tar tvf binutils-*.tar.xz | grep -e "---"
 
   4. [If paranoid - upload the tarballs to one of the FTP servers and
       ask people to test it before going on to step 5].
@@ -621,9 +633,17 @@ looks like this:
  	 chmod 644 binutils-*.tar.*
 	 quit
 
-    It is OK to upload the signatures as well.
+   It is OK to upload the signatures as well.
 
-  7. Update web pages.  For sourceware.org:
+   7. Clean the source tree again
+       
+	 git clean -fdx
+	    
+       Edit bfd/development.sh and set "development=true".
+       
+       Commit this change.
+
+  8. Update web pages.  For sourceware.org:
 
       * Clone the binutils documentation: git clone ssh://sourceware.org/git/binutils-htdocs
       * Edit index.html and update the latest release number (if this
@@ -634,7 +654,7 @@ looks like this:
       For the www.gnu.org site you have to email webmasters@gnu.org
       and ask them to make the change(s).
 
-  8. Send an emails to the binutils list, info-gnu@gnu.org and
+  9. Send an emails to the binutils list, info-gnu@gnu.org and
      David Edelsohn <dje.gcc@gmail.com> announcing the new release.
      (The email to Davis is so that he can update the GNU Toolchain
      social media).  Something like this:
@@ -642,13 +662,13 @@ looks like this:
 ------------------------------------------------------------------------
 Hi Everyone,
 
-  We are pleased to announce that version 2.3x.y of the GNU Binutils
+  We are pleased to announce that version 2.4x.y of the GNU Binutils
   project sources have been released and are now available for download at:
 
     https://ftp.gnu.org/gnu/binutils
     https://sourceware.org/pub/binutils/releases/
 
-  This is a point release over the previous 2.3x version, containing bug
+  This is a point release over the previous 2.4x version, containing bug
   fixes but no new features.
 
   Our thanks go out to all of the binutils contributors, past and
@@ -661,7 +681,7 @@ Hi Everyone,
     xx
 --------------------------------------------------------------------------
 
-  9. Create a new Bugzilla entry for the point release.
+  10. Create a new Bugzilla entry for the point release.
      
        https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
