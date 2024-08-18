@@ -53,7 +53,7 @@ if { "$CHECK_TARGET" == "check-install" } {
         append ld_library_path ":${BUILDDIR}/../libiberty"
     }
 
-    set f [open "gprofng_wraper" w+]
+    set f [open "gprofng_wrapper" w+]
     puts $f "#!$BASH"
     puts $f "LD_LIBRARY_PATH=$ld_library_path:$orig_ld_library_path"
     puts $f "GPROFNG_SYSCONFDIR=$env(srcroot)/src"
@@ -61,8 +61,8 @@ if { "$CHECK_TARGET" == "check-install" } {
     puts $f "export LD_LIBRARY_PATH GPROFNG_SYSCONFDIR GPROFNG_PRELOAD_LIBDIRS"
     puts $f "${BUILDDIR}/src/gprofng \"\$@\""
     close $f
-    file attributes gprofng_wraper -permissions +rx
-    set ::env(GPROFNG) "$BUILDDIR/gprofng_wraper"
+    file attributes gprofng_wrapper -permissions +rx
+    set ::env(GPROFNG) "$BUILDDIR/gprofng_wrapper"
 }
 puts "### GPROFNG: $env(GPROFNG)"
 
