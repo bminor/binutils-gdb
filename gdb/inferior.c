@@ -790,6 +790,10 @@ inferior_command (const char *args, int from_tty)
 	  notify_user_selected_context_changed
 	    (USER_SELECTED_INFERIOR);
 	}
+
+      /* Switching current inferior may have made one of the inferiors
+	 prunable, so prune it.  */
+      prune_inferiors ();
     }
 }
 
