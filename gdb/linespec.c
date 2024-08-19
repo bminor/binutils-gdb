@@ -47,6 +47,7 @@
 #include "gdbsupport/def-vector.h"
 #include <algorithm>
 #include "inferior.h"
+#include "gdbsupport/unordered_set.h"
 
 /* An enumeration of the various things a user might attempt to
    complete for a linespec location.  */
@@ -3363,12 +3364,9 @@ namespace {
 class decode_compound_collector
 {
 public:
-  decode_compound_collector ()
-    : m_unique_syms (htab_create_alloc (1, htab_hash_pointer,
-					htab_eq_pointer, NULL,
-					xcalloc, xfree))
-  {
-  }
+  decode_compound_collector () = default;
+
+  DISABLE_COPY_AND_ASSIGN (decode_compound_collector);
 
   /* Return all symbols collected.  */
   std::vector<block_symbol> release_symbols ()
@@ -3382,7 +3380,7 @@ public:
 private:
   /* A hash table of all symbols we found.  We use this to avoid
      adding any symbol more than once.  */
-  htab_up m_unique_syms;
+  gdb::unordered_set<const symbol *> m_unique_syms;
 
   /* The result vector.  */
   std::vector<block_symbol>  m_symbols;
@@ -3391,7 +3389,6 @@ private:
 bool
 decode_compound_collector::operator () (block_symbol *bsym)
 {
-  void **slot;
   struct type *t;
   struct symbol *sym = bsym->symbol;
 
@@ -3405,12 +3402,10 @@ decode_compound_collector::operator () (block_symbol *bsym)
       && t->code () != TYPE_CODE_NAMESPACE)
     return true; /* Continue iterating.  */
 
-  slot = htab_find_slot (m_unique_syms.get (), sym, INSERT);
-  if (!*slot)
-    {
-      *slot = sym;
-      m_symbols.push_back (*bsym);
-    }
+  bool inserted = m_unique_syms.insert (sym).second;
+
+  if (inserted)
+    m_symbols.push_back (*bsym);
 
   return true; /* Continue iterating.  */
 }
@@ -3634,14 +3629,20 @@ namespace {
 class symtab_collector
 {
 public:
-  symtab_collector ()
-    : m_symtab_table (htab_create (1, htab_hash_pointer, htab_eq_pointer,
-				   NULL))
-  {
-  }
+  symtab_collector () = default;
+
+  DISABLE_COPY_AND_ASSIGN (symtab_collector);
 
   /* Callable as a symbol_found_callback_ftype callback.  */
-  bool operator () (symtab *sym);
+  bool operator () (struct symtab *symtab)
+  {
+    bool inserted = m_symtab_table.insert (symtab).second;
+
+    if (inserted)
+      m_symtabs.push_back (symtab);
+
+    return false;
+  }
 
   /* Return an rvalue reference to the collected symtabs.  */
   std::vector<symtab *> &&release_symtabs ()
@@ -3654,23 +3655,8 @@ private:
   std::vector<symtab *> m_symtabs;
 
   /* This is used to ensure the symtabs are unique.  */
-  htab_up m_symtab_table;
+  gdb::unordered_set<const symtab *> m_symtab_table;
 };
-
-bool
-symtab_collector::operator () (struct symtab *symtab)
-{
-  void **slot;
-
-  slot = htab_find_slot (m_symtab_table.get (), symtab, INSERT);
-  if (!*slot)
-    {
-      *slot = symtab;
-      m_symtabs.push_back (symtab);
-    }
-
-  return false;
-}
 
 } // namespace
 
