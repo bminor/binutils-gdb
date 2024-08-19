@@ -29,52 +29,6 @@
 #include "dwarf2/leb.h"
 #include "bfd.h"
 
-/* Hash function for an abbrev.  */
-
-static hashval_t
-hash_abbrev (const void *item)
-{
-  const struct abbrev_info *info = (const struct abbrev_info *) item;
-  /* Warning: if you change this next line, you must also update the
-     other code in this class using the _with_hash functions.  */
-  return info->number;
-}
-
-/* Comparison function for abbrevs.  */
-
-static int
-eq_abbrev (const void *lhs, const void *rhs)
-{
-  const struct abbrev_info *l_info = (const struct abbrev_info *) lhs;
-  const struct abbrev_info *r_info = (const struct abbrev_info *) rhs;
-  return l_info->number == r_info->number;
-}
-
-/* Abbreviation tables.
-
-   In DWARF version 2, the description of the debugging information is
-   stored in a separate .debug_abbrev section.  Before we read any
-   dies from a section we read in all abbreviations and install them
-   in a hash table.  */
-
-abbrev_table::abbrev_table (sect_offset off, struct dwarf2_section_info *sect)
-  : sect_off (off),
-    section (sect),
-    m_abbrevs (htab_create_alloc (20, hash_abbrev, eq_abbrev,
-				  nullptr, xcalloc, xfree))
-{
-}
-
-/* Add an abbreviation to the table.  */
-
-void
-abbrev_table::add_abbrev (struct abbrev_info *abbrev)
-{
-  void **slot = htab_find_slot_with_hash (m_abbrevs.get (), abbrev,
-					  abbrev->number, INSERT);
-  *slot = abbrev;
-}
-
 /* Helper function that returns true if a DIE with the given tag might
    plausibly be indexed.  */
 
