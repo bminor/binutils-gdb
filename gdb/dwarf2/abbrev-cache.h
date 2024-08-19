@@ -21,12 +21,13 @@
 #define GDB_DWARF2_ABBREV_CACHE_H
 
 #include "dwarf2/abbrev.h"
+#include "gdbsupport/unordered_map.h"
 
 /* An abbrev cache holds abbrev tables for easier reuse.  */
 class abbrev_cache
 {
 public:
-  abbrev_cache ();
+  abbrev_cache () = default;
   DISABLE_COPY_AND_ASSIGN (abbrev_cache);
 
   /* Find an abbrev table coming from the abbrev section SECTION at
@@ -34,10 +35,11 @@ public:
      been registered.  */
   abbrev_table *find (struct dwarf2_section_info *section, sect_offset offset)
   {
-    search_key key = { section, offset };
+    if (auto iter = m_tables.find ({ section, offset });
+	iter != m_tables.end ())
+      return iter->second.get ();
 
-    return (abbrev_table *) htab_find_with_hash (m_tables.get (), &key,
-						 to_underlying (offset));
+    return nullptr;
   }
 
   /* Add TABLE to this cache.  Ownership of TABLE is transferred to
@@ -48,18 +50,29 @@ public:
   void add (abbrev_table_up table);
 
 private:
-
-  static hashval_t hash_table (const void *item);
-  static int eq_table (const void *lhs, const void *rhs);
-
-  struct search_key
+  struct key
   {
-    struct dwarf2_section_info *section;
+    dwarf2_section_info *section;
     sect_offset offset;
   };
 
+  struct key_hash
+  {
+    std::size_t operator() (const key &k) const noexcept
+    {
+      return (std::hash<dwarf2_section_info *> () (k.section)
+	      + std::hash<std::uint64_t> () (to_underlying (k.offset)));
+    }
+  };
+
+  struct key_eq
+  {
+    bool operator() (const key &lhs, const key &rhs) const noexcept
+    { return lhs.section == rhs.section && lhs.offset == rhs.offset; }
+  };
+
   /* Hash table of abbrev tables.  */
-  htab_up m_tables;
+  gdb::unordered_map<key, abbrev_table_up, key_hash, key_eq> m_tables;
 };
 
 #endif /* GDB_DWARF2_ABBREV_CACHE_H */
