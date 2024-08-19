@@ -20,6 +20,8 @@
 #define TYPEPRINT_H
 
 #include "gdbsupport/gdb_obstack.h"
+#include "gdbsupport/unordered_set.h"
+#include "gdbtypes.h"
 
 enum language;
 struct ui_file;
@@ -123,10 +125,12 @@ class typedef_hash_table
 public:
 
   /* Create a new typedef-lookup hash table.  */
-  typedef_hash_table ();
+  typedef_hash_table () = default;
 
   /* Copy a typedef hash.  */
-  typedef_hash_table (const typedef_hash_table &);
+  typedef_hash_table (const typedef_hash_table &other)
+    : m_table (other.m_table)
+  {}
 
   typedef_hash_table &operator= (const typedef_hash_table &) = delete;
 
@@ -149,9 +153,24 @@ private:
   static const char *find_global_typedef (const struct type_print_options *flags,
 					  struct type *t);
 
+  struct hash
+  {
+    std::size_t operator() (type *type) const noexcept
+    {
+      /* Use check_typedef: the hash must agree with equals, and types_equal
+	 strips typedefs.  */
+      return htab_hash_string (TYPE_SAFE_NAME (check_typedef (type)));
+    }
+  };
+
+  struct eq
+  {
+    bool operator() (type *lhs, type *rhs) const noexcept
+    { return types_equal (lhs, rhs); }
+  };
 
   /* The actual hash table.  */
-  htab_up m_table;
+  gdb::unordered_map<type *, decl_field *, hash, eq> m_table;
 
   /* Storage for typedef_field objects that must be synthesized.  */
   auto_obstack m_storage;
