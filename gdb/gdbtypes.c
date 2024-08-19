@@ -5372,46 +5372,6 @@ recursive_dump_type (struct type *type, int spaces)
     obstack_free (&dont_print_type_obstack, NULL);
 }
 
-/* Trivial helpers for the libiberty hash table, for mapping one
-   type to another.  */
-
-struct type_pair
-{
-  type_pair (struct type *old_, struct type *newobj_)
-    : old (old_), newobj (newobj_)
-  {}
-
-  struct type * const old, * const newobj;
-};
-
-static hashval_t
-type_pair_hash (const void *item)
-{
-  const struct type_pair *pair = (const struct type_pair *) item;
-
-  return htab_hash_pointer (pair->old);
-}
-
-static int
-type_pair_eq (const void *item_lhs, const void *item_rhs)
-{
-  const struct type_pair *lhs = (const struct type_pair *) item_lhs;
-  const struct type_pair *rhs = (const struct type_pair *) item_rhs;
-
-  return lhs->old == rhs->old;
-}
-
-/* Allocate the hash table used by copy_type_recursive to walk
-   types without duplicates.  */
-
-htab_up
-create_copied_types_hash ()
-{
-  return htab_up (htab_create_alloc (1, type_pair_hash, type_pair_eq,
-				     htab_delete_entry<type_pair>,
-				     xcalloc, xfree));
-}
-
 /* Recursively copy (deep copy) a dynamic attribute list of a type.  */
 
 static struct dynamic_prop_list *
@@ -5443,27 +5403,20 @@ copy_dynamic_prop_list (struct obstack *storage,
    it is not associated with OBJFILE.  */
 
 struct type *
-copy_type_recursive (struct type *type, htab_t copied_types)
+copy_type_recursive (struct type *type, copied_types_hash_t &copied_types)
 {
-  void **slot;
-  struct type *new_type;
-
   if (!type->is_objfile_owned ())
     return type;
 
-  struct type_pair pair (type, nullptr);
+  if (auto iter = copied_types.find (type);
+      iter != copied_types.end ())
+    return iter->second;
 
-  slot = htab_find_slot (copied_types, &pair, INSERT);
-  if (*slot != NULL)
-    return ((struct type_pair *) *slot)->newobj;
-
-  new_type = type_allocator (type->arch ()).new_type ();
+  struct type *new_type = type_allocator (type->arch ()).new_type ();
 
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
-  struct type_pair *stored = new type_pair (type, new_type);
-
-  *slot = stored;
+  copied_types.emplace (type, new_type);
 
   /* Copy the common fields of types.  For the main type, we simply
      copy the entire thing and then update specific fields as needed.  */

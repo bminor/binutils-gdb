@@ -2468,7 +2468,7 @@ add_internal_function (gdb::unique_xmalloc_ptr<char> &&name,
 }
 
 void
-value::preserve (struct objfile *objfile, htab_t copied_types)
+value::preserve (struct objfile *objfile, copied_types_hash_t &copied_types)
 {
   if (m_type->objfile_owner () == objfile)
     m_type = copy_type_recursive (m_type, copied_types);
@@ -2481,7 +2481,7 @@ value::preserve (struct objfile *objfile, htab_t copied_types)
 
 static void
 preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
-			  htab_t copied_types)
+			  copied_types_hash_t &copied_types)
 {
   switch (var->kind)
     {
@@ -2504,7 +2504,7 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
 
 static void
 preserve_one_varobj (struct varobj *varobj, struct objfile *objfile,
-		     htab_t copied_types)
+		     copied_types_hash_t &copied_types)
 {
   if (varobj->type->is_objfile_owned ()
       && varobj->type->objfile_owner () == objfile)
@@ -2528,22 +2528,21 @@ preserve_values (struct objfile *objfile)
 {
   /* Create the hash table.  We allocate on the objfile's obstack, since
      it is soon to be deleted.  */
-  htab_up copied_types = create_copied_types_hash ();
+  copied_types_hash_t copied_types;
 
   for (const value_ref_ptr &item : value_history)
-    item->preserve (objfile, copied_types.get ());
+    item->preserve (objfile, copied_types);
 
   for (auto &pair : internalvars)
-    preserve_one_internalvar (&pair.second, objfile, copied_types.get ());
+    preserve_one_internalvar (&pair.second, objfile, copied_types);
 
   /* For the remaining varobj, check that none has type owned by OBJFILE.  */
   all_root_varobjs ([&copied_types, objfile] (struct varobj *varobj)
     {
-      preserve_one_varobj (varobj, objfile,
-			   copied_types.get ());
+      preserve_one_varobj (varobj, objfile, copied_types);
     });
 
-  preserve_ext_lang_values (objfile, copied_types.get ());
+  preserve_ext_lang_values (objfile, copied_types);
 }
 
 static void

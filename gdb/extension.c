@@ -584,7 +584,8 @@ apply_ext_lang_ptwrite_filter (btrace_thread_info *btinfo)
    preserve_one_value.  */
 
 void
-preserve_ext_lang_values (struct objfile *objfile, htab_t copied_types)
+preserve_ext_lang_values (struct objfile *objfile,
+			  copied_types_hash_t &copied_types)
 {
   for (const struct extension_language_defn *extlang : extension_languages)
     {

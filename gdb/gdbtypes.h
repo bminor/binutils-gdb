@@ -44,7 +44,6 @@
    written such that they can be used as both rvalues and lvalues.
  */
 
-#include "hashtab.h"
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/gdb-hashtab.h"
 #include <optional>
@@ -56,6 +55,7 @@
 #include "dwarf2.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gmp-utils.h"
+#include "gdbsupport/unordered_map.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -2789,10 +2789,10 @@ extern int class_or_union_p (const struct type *);
 
 extern void maintenance_print_type (const char *, int);
 
-extern htab_up create_copied_types_hash ();
+using copied_types_hash_t = gdb::unordered_map<type *, type *>;
 
 extern struct type *copy_type_recursive (struct type *type,
-					 htab_t copied_types);
+					 copied_types_hash_t &copied_types);
 
 extern struct type *copy_type (const struct type *type);
 

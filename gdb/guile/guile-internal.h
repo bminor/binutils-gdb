@@ -596,7 +596,7 @@ extern bool gdbscm_auto_load_enabled (const struct extension_language_defn *);
 
 extern void gdbscm_preserve_values
   (const struct extension_language_defn *,
-   struct objfile *, htab_t copied_types);
+   struct objfile *, copied_types_hash_t &copied_types);
 
 extern enum ext_lang_rc gdbscm_apply_val_pretty_printer
   (const struct extension_language_defn *,
