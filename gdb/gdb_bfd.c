@@ -34,6 +34,7 @@
 #include "inferior.h"
 #include "cli/cli-style.h"
 #include <unordered_map>
+#include "gdbsupport/unordered_set.h"
 
 #if CXX_STD_THREAD
 
@@ -80,12 +81,12 @@ struct gdb_bfd_section_data
   void *map_addr;
 };
 
-/* A hash table holding every BFD that gdb knows about.  This is not
+/* A hash set holding every BFD that gdb knows about.  This is not
    to be confused with 'gdb_bfd_cache', which is used for sharing
    BFDs; in contrast, this hash is used just to implement
    "maint info bfd".  */
 
-static htab_t all_bfds;
+static gdb::unordered_set<bfd *> all_bfds;
 
 /* An object of this type is stored in each BFD's user data.  */
 
@@ -482,7 +483,6 @@ static void
 gdb_bfd_init_data (struct bfd *abfd, struct stat *st)
 {
   struct gdb_bfd_data *gdata;
-  void **slot;
 
   gdb_assert (bfd_usrdata (abfd) == nullptr);
 
@@ -493,9 +493,8 @@ gdb_bfd_init_data (struct bfd *abfd, struct stat *st)
   bfd_set_usrdata (abfd, gdata);
 
   /* This is the first we've seen it, so add it to the hash table.  */
-  slot = htab_find_slot (all_bfds, abfd, INSERT);
-  gdb_assert (slot && !*slot);
-  *slot = abfd;
+  bool inserted = all_bfds.emplace (abfd).second;
+  gdb_assert (inserted);
 }
 
 /* See gdb_bfd.h.  */
@@ -734,7 +733,7 @@ gdb_bfd_unref (struct bfd *abfd)
   delete gdata;
   bfd_set_usrdata (abfd, NULL);  /* Paranoia.  */
 
-  htab_remove_elt (all_bfds, abfd);
+  all_bfds.erase (abfd);
 
   gdb_bfd_close_or_warn (abfd);
 
@@ -1145,25 +1144,6 @@ gdb_bfd_errmsg (bfd_error_type error_tag, char **matching)
   return ret;
 }
 
-/* A callback for htab_traverse that prints a single BFD.  */
-
-static int
-print_one_bfd (void **slot, void *data)
-{
-  bfd *abfd = (struct bfd *) *slot;
-  struct gdb_bfd_data *gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
-  struct ui_out *uiout = (struct ui_out *) data;
-
-  ui_out_emit_tuple tuple_emitter (uiout, NULL);
-  uiout->field_signed ("refcount", gdata->refc);
-  uiout->field_string ("addr", host_address_to_string (abfd));
-  uiout->field_string ("filename", bfd_get_filename (abfd),
-		       file_name_style.style ());
-  uiout->text ("\n");
-
-  return 1;
-}
-
 /* Implement the 'maint info bfd' command.  */
 
 static void
@@ -1177,7 +1157,17 @@ maintenance_info_bfds (const char *arg, int from_tty)
   uiout->table_header (40, ui_left, "filename", "Filename");
 
   uiout->table_body ();
-  htab_traverse_noresize (all_bfds, print_one_bfd, uiout);
+
+  for (auto abfd : all_bfds)
+    {
+      auto gdata = static_cast<gdb_bfd_data *> (bfd_usrdata (abfd));
+      ui_out_emit_tuple tuple_emitter (uiout, nullptr);
+      uiout->field_signed ("refcount", gdata->refc);
+      uiout->field_string ("addr", host_address_to_string (abfd));
+      uiout->field_string ("filename", bfd_get_filename (abfd),
+			   file_name_style.style ());
+      uiout->text ("\n");
+    }
 }
 
 /* BFD related per-inferior data.  */
@@ -1272,9 +1262,6 @@ void _initialize_gdb_bfd ();
 void
 _initialize_gdb_bfd ()
 {
-  all_bfds = htab_create_alloc (10, htab_hash_pointer, htab_eq_pointer,
-				NULL, xcalloc, xfree);
-
   add_cmd ("bfds", class_maintenance, maintenance_info_bfds, _("\
 List the BFDs that are currently open."),
 	   &maintenanceinfolist);
