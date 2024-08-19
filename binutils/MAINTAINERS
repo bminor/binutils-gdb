@@ -140,8 +140,6 @@ responsibility among the other maintainers.
   SPU		   Alan Modra <amodra@gmail.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   TIC6X            Joseph Myers <josmyers@redhat.com>
-  TILE-Gx          Walter Lee <walt@tilera.com>
-  TILEPro          Walter Lee <walt@tilera.com>
   VAX		   Matt Thomas <matt@netbsd.org>
   VAX		   Jan-Benedict Glaw <jbglaw@lug-owl.de>
   Visium	   Eric Botcazou <ebotcazou@libertysurf.fr>
@@ -167,6 +165,7 @@ goes with them.
   Jason Eckhardt
   Geoff Keating
   Mark Kettenis
+  Walter Lee
   Mei Ligang
   Arnold Metselaar
   Mark Mitchell
