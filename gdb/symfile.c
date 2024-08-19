@@ -2537,7 +2537,7 @@ reread_symbols (int from_tty)
 	  objfile->sect_index_text = -1;
 	  objfile->compunit_symtabs = NULL;
 	  objfile->template_symbols = NULL;
-	  objfile->static_links.reset (nullptr);
+	  objfile->static_links.clear ();
 
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but

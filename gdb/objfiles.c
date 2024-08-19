@@ -153,39 +153,6 @@ set_objfile_main_name (struct objfile *objfile,
   objfile->per_bfd->language_of_main = lang;
 }
 
-/* Helper structure to map blocks to static link properties in hash tables.  */
-
-struct static_link_htab_entry
-{
-  const struct block *block;
-  const struct dynamic_prop *static_link;
-};
-
-/* Return a hash code for struct static_link_htab_entry *P.  */
-
-static hashval_t
-static_link_htab_entry_hash (const void *p)
-{
-  const struct static_link_htab_entry *e
-    = (const struct static_link_htab_entry *) p;
-
-  return htab_hash_pointer (e->block);
-}
-
-/* Return whether P1 an P2 (pointers to struct static_link_htab_entry) are
-   mappings for the same block.  */
-
-static int
-static_link_htab_entry_eq (const void *p1, const void *p2)
-{
-  const struct static_link_htab_entry *e1
-    = (const struct static_link_htab_entry *) p1;
-  const struct static_link_htab_entry *e2
-    = (const struct static_link_htab_entry *) p2;
-
-  return e1->block == e2->block;
-}
-
 /* Register STATIC_LINK as the static link for BLOCK, which is part of OBJFILE.
    Must not be called more than once for each BLOCK.  */
 
@@ -194,25 +161,10 @@ objfile_register_static_link (struct objfile *objfile,
 			      const struct block *block,
 			      const struct dynamic_prop *static_link)
 {
-  void **slot;
-  struct static_link_htab_entry lookup_entry;
-  struct static_link_htab_entry *entry;
-
-  if (objfile->static_links == NULL)
-    objfile->static_links.reset (htab_create_alloc
-      (1, &static_link_htab_entry_hash, static_link_htab_entry_eq, NULL,
-       xcalloc, xfree));
-
-  /* Create a slot for the mapping, make sure it's the first mapping for this
-     block and then create the mapping itself.  */
-  lookup_entry.block = block;
-  slot = htab_find_slot (objfile->static_links.get (), &lookup_entry, INSERT);
-  gdb_assert (*slot == NULL);
-
-  entry = XOBNEW (&objfile->objfile_obstack, static_link_htab_entry);
-  entry->block = block;
-  entry->static_link = static_link;
-  *slot = (void *) entry;
+  /* Enter the mapping and make sure it's the first mapping for this
+     block.  */
+  bool inserted = objfile->static_links.emplace (block, static_link).second;
+  gdb_assert (inserted);
 }
 
 /* Look for a static link for BLOCK, which is part of OBJFILE.  Return NULL if
@@ -222,19 +174,11 @@ const struct dynamic_prop *
 objfile_lookup_static_link (struct objfile *objfile,
 			    const struct block *block)
 {
-  struct static_link_htab_entry *entry;
-  struct static_link_htab_entry lookup_entry;
+  if (auto iter = objfile->static_links.find (block);
+      iter != objfile->static_links.end ())
+    return iter->second;
 
-  if (objfile->static_links == NULL)
-    return NULL;
-  lookup_entry.block = block;
-  entry = ((struct static_link_htab_entry *)
-	   htab_find (objfile->static_links.get (), &lookup_entry));
-  if (entry == NULL)
-    return NULL;
-
-  gdb_assert (entry->block == block);
-  return entry->static_link;
+  return nullptr;
 }
 
 
