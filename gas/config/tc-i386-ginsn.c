@@ -488,6 +488,8 @@ x86_ginsn_indirect_branch (const symbolS *insn_end_sym)
   else if (i.tm.extension_opcode == 2)
     /* 0xFF /2 (call r/m).  */
     ginsn_func = ginsn_new_call;
+  else
+    return ginsn;
 
   if (i.reg_operands)
     {
