@@ -1626,6 +1626,9 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	    case 'c':
 	      switch (*++oparg)
 		{
+		/* sreg operators in cm.mvsa01 and cm.mva01s.  */
+		case '1': USE_BITS (OP_MASK_SREG1, OP_SH_SREG1); break;
+		case '2': USE_BITS (OP_MASK_SREG2, OP_SH_SREG2); break;
 		/* byte immediate operators, load/store byte insns.  */
 		case 'h': used_bits |= ENCODE_ZCB_HALFWORD_UIMM (-1U); break;
 		/* halfword immediate operators, load/store halfword insns.  */
@@ -3891,6 +3894,18 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			 we do not write anything to encoding by this operand.  */
 		      asarg = expr_parse_end;
 		      imm_expr->X_op = O_absent;
+		      continue;
+		    case '1':
+		      if (!reg_lookup (&asarg, RCLASS_GPR, &regno)
+			  || !RISCV_SREG_0_7 (regno))
+			break;
+		      INSERT_OPERAND (SREG1, *ip, regno % 8);
+		      continue;
+		    case '2':
+		      if (!reg_lookup (&asarg, RCLASS_GPR, &regno)
+			  || !RISCV_SREG_0_7 (regno))
+			break;
+		      INSERT_OPERAND (SREG2, *ip, regno % 8);
 		      continue;
 		    default:
 		      goto unknown_riscv_ip_operand;

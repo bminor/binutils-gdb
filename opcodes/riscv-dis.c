@@ -285,6 +285,17 @@ riscv_get_spimm (insn_t l)
   return spimm;
 }
 
+/* Get s-register regno by using sreg number.
+   e.g. the regno of s0 is 8, so
+   riscv_zcmp_get_sregno (0) equals 8.  */
+
+static unsigned
+riscv_zcmp_get_sregno (unsigned sreg_idx)
+{
+  return sreg_idx > 1 ?
+      sreg_idx + 16 : sreg_idx + 8;
+}
+
 /* Print insn arguments for 32/64-bit code.  */
 
 static void
@@ -698,6 +709,14 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    case 'c': /* Zcb extension 16 bits length instruction fields. */
 	      switch (*++oparg)
 		{
+		case '1':
+		    print (info->stream, dis_style_register, "%s",
+		      riscv_gpr_names[riscv_zcmp_get_sregno (EXTRACT_OPERAND (SREG1, l))]);
+		    break;
+		case '2':
+		    print (info->stream, dis_style_register, "%s",
+		      riscv_gpr_names[riscv_zcmp_get_sregno (EXTRACT_OPERAND (SREG2, l))]);
+		    break;
 		case 'b':
 		  print (info->stream, dis_style_immediate, "%d",
 			 (int)EXTRACT_ZCB_BYTE_UIMM (l));

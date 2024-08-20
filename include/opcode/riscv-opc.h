@@ -2301,6 +2301,10 @@
 #define MASK_CM_POPRET 0xff03
 #define MATCH_CM_POPRETZ 0xbc02
 #define MASK_CM_POPRETZ 0xff03
+#define MATCH_CM_MVA01S 0xac62
+#define MASK_CM_MVA01S 0xfc63
+#define MATCH_CM_MVSA01 0xac22
+#define MASK_CM_MVSA01 0xfc63
 /* Svinval instruction.  */
 #define MATCH_SINVAL_VMA 0x16000073
 #define MASK_SINVAL_VMA 0xfe007fff
@@ -4277,6 +4281,8 @@ DECLARE_INSN(cm_push, MATCH_CM_PUSH, MASK_CM_PUSH)
 DECLARE_INSN(cm_pop, MATCH_CM_POP, MASK_CM_POP)
 DECLARE_INSN(cm_popret, MATCH_CM_POPRET, MASK_CM_POPRET)
 DECLARE_INSN(cm_popretz, MATCH_CM_POPRETZ, MASK_CM_POPRETZ)
+DECLARE_INSN(cm_mvsa01, MATCH_CM_MVSA01, MASK_CM_MVSA01)
+DECLARE_INSN(cm_mva01s, MATCH_CM_MVA01S, MASK_CM_MVA01S)
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 DECLARE_INSN(th_addsl, MATCH_TH_ADDSL, MASK_TH_ADDSL)
 /* Vendor-specific (T-Head) XTheadBb instructions.  */
