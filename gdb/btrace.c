@@ -1200,7 +1200,8 @@ pt_btrace_insn_flags (const struct pt_insn &insn)
 static btrace_insn
 pt_btrace_insn (const struct pt_insn &insn)
 {
-  return {(CORE_ADDR) insn.ip, (gdb_byte) insn.size,
+  return {{static_cast<CORE_ADDR> (insn.ip)},
+	  static_cast<gdb_byte> (insn.size),
 	  pt_reclassify_insn (insn.iclass),
 	  pt_btrace_insn_flags (insn)};
 }
@@ -1209,13 +1210,13 @@ pt_btrace_insn (const struct pt_insn &insn)
 /* Helper for events that will result in an aux_insn.  */
 
 static void
-handle_pt_aux_insn (btrace_thread_info *btinfo, btrace_function *bfun,
-		    std::string &aux_str, CORE_ADDR ip)
+handle_pt_aux_insn (btrace_thread_info *btinfo, std::string &aux_str,
+		    CORE_ADDR ip)
 {
   btinfo->aux_data.emplace_back (std::move (aux_str));
-  bfun = ftrace_update_function (btinfo, ip);
+  struct btrace_function *bfun = ftrace_update_function (btinfo, ip);
 
-  btrace_insn insn {btinfo->aux_data.size () - 1, 0,
+  btrace_insn insn {{btinfo->aux_data.size () - 1}, 0,
 		    BTRACE_INSN_AUX, 0};
 
   ftrace_update_insns (bfun, insn);
@@ -1233,7 +1234,6 @@ handle_pt_insn_events (struct btrace_thread_info *btinfo,
 #if defined (HAVE_PT_INSN_EVENT)
   while (status & pts_event_pending)
     {
-      struct btrace_function *bfun;
       struct pt_event event;
       uint64_t offset;
 
@@ -1247,30 +1247,38 @@ handle_pt_insn_events (struct btrace_thread_info *btinfo,
 	  break;
 
 	case ptev_enabled:
-	  if (event.status_update != 0)
+	  {
+	    if (event.status_update != 0)
+	      break;
+
+	    if (event.variant.enabled.resumed == 0
+		&& !btinfo->functions.empty ())
+	      {
+		struct btrace_function *bfun
+		  = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
+
+		pt_insn_get_offset (decoder, &offset);
+
+		warning
+		  (_("Non-contiguous trace at instruction %u (offset = 0x%"
+		     PRIx64 ")."), bfun->insn_offset - 1, offset);
+	      }
+
 	    break;
-
-	  if (event.variant.enabled.resumed == 0 && !btinfo->functions.empty ())
-	    {
-	      bfun = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
-
-	      pt_insn_get_offset (decoder, &offset);
-
-	      warning (_("Non-contiguous trace at instruction %u (offset = 0x%"
-			 PRIx64 ")."), bfun->insn_offset - 1, offset);
-	    }
-
-	  break;
+	  }
 
 	case ptev_overflow:
-	  bfun = ftrace_new_gap (btinfo, BDE_PT_OVERFLOW, gaps);
+	  {
+	    struct btrace_function *bfun
+	      = ftrace_new_gap (btinfo, BDE_PT_OVERFLOW, gaps);
 
-	  pt_insn_get_offset (decoder, &offset);
+	    pt_insn_get_offset (decoder, &offset);
 
-	  warning (_("Overflow at instruction %u (offset = 0x%" PRIx64 ")."),
-		   bfun->insn_offset - 1, offset);
+	    warning (_("Overflow at instruction %u (offset = 0x%" PRIx64 ")."),
+		     bfun->insn_offset - 1, offset);
 
-	  break;
+	    break;
+	  }
 #if defined (HAVE_STRUCT_PT_EVENT_VARIANT_PTWRITE)
 	case ptev_ptwrite:
 	  {
@@ -1320,7 +1328,7 @@ handle_pt_insn_events (struct btrace_thread_info *btinfo,
 	    if (!ptw_string.has_value ())
 	      *ptw_string = hex_string (event.variant.ptwrite.payload);
 
-	    handle_pt_aux_insn (btinfo, bfun, *ptw_string, pc);
+	    handle_pt_aux_insn (btinfo, *ptw_string, pc);
 
 	    break;
 	  }
