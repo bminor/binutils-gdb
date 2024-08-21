@@ -709,6 +709,13 @@ class Symbol
     if (this->is_absolute())
       return false;
 
+    // Non-default weak undefined symbols in executable and shared
+    // library are always resolved to 0 at runtime.
+    if (this->visibility() != elfcpp::STV_DEFAULT
+	&& this->is_weak_undefined()
+	&& !parameters->options().relocatable())
+      return false;
+
     // An absolute reference within a position-independent output file
     // will need a dynamic relocation.
     if ((flags & ABSOLUTE_REF)

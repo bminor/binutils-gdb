@@ -865,6 +865,23 @@ weak_undef_file3.o: weak_undef_file3.cc
 weak_undef_file4.o: weak_undef_file4.cc
 	$(CXXCOMPILE) -c -o $@ $<
 
+check_PROGRAMS += weak_undef_test_3
+weak_undef_test_3_SOURCES = weak_undef_test_3.c
+weak_undef_test_3_DEPENDENCIES = gcctestdir/ld
+weak_undef_test_3_CFLAGS = -fPIE
+weak_undef_test_3_LDFLAGS = -pie
+
+check_PROGRAMS += weak_undef_test_4
+weak_undef_test_4_SOURCES = weak_undef_test_4.c
+weak_undef_test_4_DEPENDENCIES = gcctestdir/ld weak_undef_lib_4.so
+weak_undef_test_4_LDADD = weak_undef_lib_4.so
+weak_undef_test_4_LDFLAGS =  -Wl,-R,.
+MOSTLYCLEANFILES += weak_undef_lib_4.o weak_undef_lib_4.so
+weak_undef_lib_4.o:  weak_undef_lib_4.c
+	$(COMPILE) -fPIC -c -o $@ $<
+weak_undef_lib_4.so: gcctestdir/ld weak_undef_lib_4.o
+	$(LINK) -shared -o $@ weak_undef_lib_4.o
+
 if FN_PTRS_IN_SO_WITHOUT_PIC
 check_PROGRAMS += weak_undef_nonpic_test
 MOSTLYCLEANFILES += alt/weak_undef_lib_nonpic.so

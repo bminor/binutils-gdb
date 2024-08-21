@@ -211,7 +211,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	eh_test_2.sects \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	libweak_undef_2.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libweak_undef_2.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_lib_4.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_lib_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	large_symbol_alignment \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test basic_pic_test \
@@ -269,7 +271,9 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = exception_static_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_17 = weak_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_3 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_4
 @GCC_FALSE@weak_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@weak_test_DEPENDENCIES =
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_18 = weak_undef_nonpic_test
@@ -1237,7 +1241,9 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_13 = exception_static_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_14 = weak_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_2$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_2$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_3$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_4$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_15 = weak_undef_nonpic_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_16 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test$(EXEEXT) \
@@ -2247,6 +2253,16 @@ weak_undef_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 weak_undef_test_2_OBJECTS = $(am_weak_undef_test_2_OBJECTS)
 weak_undef_test_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(weak_undef_test_2_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_undef_test_3_OBJECTS = weak_undef_test_3-weak_undef_test_3.$(OBJEXT)
+weak_undef_test_3_OBJECTS = $(am_weak_undef_test_3_OBJECTS)
+weak_undef_test_3_LDADD = $(LDADD)
+weak_undef_test_3_LINK = $(CCLD) $(weak_undef_test_3_CFLAGS) $(CFLAGS) \
+	$(weak_undef_test_3_LDFLAGS) $(LDFLAGS) -o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_undef_test_4_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test_4.$(OBJEXT)
+weak_undef_test_4_OBJECTS = $(am_weak_undef_test_4_OBJECTS)
+weak_undef_test_4_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(weak_undef_test_4_LDFLAGS) $(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_unresolved_symbols_test_OBJECTS = weak_unresolved_symbols_test-weak_unresolved_symbols_test.$(OBJEXT)
 weak_unresolved_symbols_test_OBJECTS =  \
 	$(am_weak_unresolved_symbols_test_OBJECTS)
@@ -2391,7 +2407,8 @@ SOURCES = $(libgoldtest_a_SOURCES) $(aarch64_pr23870_SOURCES) \
 	$(ver_test_8_SOURCES) $(ver_test_9_SOURCES) \
 	$(weak_alias_test_SOURCES) weak_plt.c $(weak_test_SOURCES) \
 	$(weak_undef_nonpic_test_SOURCES) $(weak_undef_test_SOURCES) \
-	$(weak_undef_test_2_SOURCES) \
+	$(weak_undef_test_2_SOURCES) $(weak_undef_test_3_SOURCES) \
+	$(weak_undef_test_4_SOURCES) \
 	$(weak_unresolved_symbols_test_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -3118,6 +3135,14 @@ DEPENDENCIES = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_2_DEPENDENCIES = gcctestdir/ld libweak_undef_2.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_2_LDFLAGS = -u weak_undef_2
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_2_LDADD = -L . -lweak_undef_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_3_SOURCES = weak_undef_test_3.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_3_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_3_CFLAGS = -fPIE
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_3_LDFLAGS = -pie
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_4_SOURCES = weak_undef_test_4.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_4_DEPENDENCIES = gcctestdir/ld weak_undef_lib_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_4_LDADD = weak_undef_lib_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_4_LDFLAGS = -Wl,-R,.
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_nonpic_test_SOURCES = weak_undef_test.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_nonpic_test_DEPENDENCIES = gcctestdir/ld weak_undef_lib_nonpic.so alt/weak_undef_lib_nonpic.so
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_nonpic_test_LDFLAGS = -Wl,-R,alt
@@ -4743,6 +4768,14 @@ weak_undef_test_2$(EXEEXT): $(weak_undef_test_2_OBJECTS) $(weak_undef_test_2_DEP
 	@rm -f weak_undef_test_2$(EXEEXT)
 	$(AM_V_CXXLD)$(weak_undef_test_2_LINK) $(weak_undef_test_2_OBJECTS) $(weak_undef_test_2_LDADD) $(LIBS)
 
+weak_undef_test_3$(EXEEXT): $(weak_undef_test_3_OBJECTS) $(weak_undef_test_3_DEPENDENCIES) $(EXTRA_weak_undef_test_3_DEPENDENCIES) 
+	@rm -f weak_undef_test_3$(EXEEXT)
+	$(AM_V_CCLD)$(weak_undef_test_3_LINK) $(weak_undef_test_3_OBJECTS) $(weak_undef_test_3_LDADD) $(LIBS)
+
+weak_undef_test_4$(EXEEXT): $(weak_undef_test_4_OBJECTS) $(weak_undef_test_4_DEPENDENCIES) $(EXTRA_weak_undef_test_4_DEPENDENCIES) 
+	@rm -f weak_undef_test_4$(EXEEXT)
+	$(AM_V_CCLD)$(weak_undef_test_4_LINK) $(weak_undef_test_4_OBJECTS) $(weak_undef_test_4_LDADD) $(LIBS)
+
 weak_unresolved_symbols_test$(EXEEXT): $(weak_unresolved_symbols_test_OBJECTS) $(weak_unresolved_symbols_test_DEPENDENCIES) $(EXTRA_weak_unresolved_symbols_test_DEPENDENCIES) 
 	@rm -f weak_unresolved_symbols_test$(EXEEXT)
 	$(AM_V_CXXLD)$(weak_unresolved_symbols_test_LINK) $(weak_unresolved_symbols_test_OBJECTS) $(weak_unresolved_symbols_test_LDADD) $(LIBS)
@@ -4915,6 +4948,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test_2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test_3-weak_undef_test_3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test_4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_unresolved_symbols_test-weak_unresolved_symbols_test.Po@am__quote@
 
 .c.o:
@@ -5196,6 +5231,20 @@ pr20308e_test-pr20308_main.obj: pr20308_main.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='pr20308_main.c' object='pr20308e_test-pr20308_main.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(pr20308e_test_CFLAGS) $(CFLAGS) -c -o pr20308e_test-pr20308_main.obj `if test -f 'pr20308_main.c'; then $(CYGPATH_W) 'pr20308_main.c'; else $(CYGPATH_W) '$(srcdir)/pr20308_main.c'; fi`
+
+weak_undef_test_3-weak_undef_test_3.o: weak_undef_test_3.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(weak_undef_test_3_CFLAGS) $(CFLAGS) -MT weak_undef_test_3-weak_undef_test_3.o -MD -MP -MF $(DEPDIR)/weak_undef_test_3-weak_undef_test_3.Tpo -c -o weak_undef_test_3-weak_undef_test_3.o `test -f 'weak_undef_test_3.c' || echo '$(srcdir)/'`weak_undef_test_3.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/weak_undef_test_3-weak_undef_test_3.Tpo $(DEPDIR)/weak_undef_test_3-weak_undef_test_3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='weak_undef_test_3.c' object='weak_undef_test_3-weak_undef_test_3.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(weak_undef_test_3_CFLAGS) $(CFLAGS) -c -o weak_undef_test_3-weak_undef_test_3.o `test -f 'weak_undef_test_3.c' || echo '$(srcdir)/'`weak_undef_test_3.c
+
+weak_undef_test_3-weak_undef_test_3.obj: weak_undef_test_3.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(weak_undef_test_3_CFLAGS) $(CFLAGS) -MT weak_undef_test_3-weak_undef_test_3.obj -MD -MP -MF $(DEPDIR)/weak_undef_test_3-weak_undef_test_3.Tpo -c -o weak_undef_test_3-weak_undef_test_3.obj `if test -f 'weak_undef_test_3.c'; then $(CYGPATH_W) 'weak_undef_test_3.c'; else $(CYGPATH_W) '$(srcdir)/weak_undef_test_3.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/weak_undef_test_3-weak_undef_test_3.Tpo $(DEPDIR)/weak_undef_test_3-weak_undef_test_3.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='weak_undef_test_3.c' object='weak_undef_test_3-weak_undef_test_3.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(weak_undef_test_3_CFLAGS) $(CFLAGS) -c -o weak_undef_test_3-weak_undef_test_3.obj `if test -f 'weak_undef_test_3.c'; then $(CYGPATH_W) 'weak_undef_test_3.c'; else $(CYGPATH_W) '$(srcdir)/weak_undef_test_3.c'; fi`
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -6832,6 +6881,20 @@ weak_undef_test_2.log: weak_undef_test_2$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+weak_undef_test_3.log: weak_undef_test_3$(EXEEXT)
+	@p='weak_undef_test_3$(EXEEXT)'; \
+	b='weak_undef_test_3'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+weak_undef_test_4.log: weak_undef_test_4$(EXEEXT)
+	@p='weak_undef_test_4$(EXEEXT)'; \
+	b='weak_undef_test_4'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 weak_undef_nonpic_test.log: weak_undef_nonpic_test$(EXEEXT)
 	@p='weak_undef_nonpic_test$(EXEEXT)'; \
 	b='weak_undef_nonpic_test'; \
@@ -8264,6 +8327,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file4.o: weak_undef_file4.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_lib_4.o:  weak_undef_lib_4.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -fPIC -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_lib_4.so: gcctestdir/ld weak_undef_lib_4.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -shared -o $@ weak_undef_lib_4.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file1_nonpic.o: weak_undef_file1.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file2_nonpic.o: weak_undef_file2.cc

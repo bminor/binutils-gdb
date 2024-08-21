@@ -450,7 +450,16 @@ Symbol::final_value_is_known() const
        || parameters->options().relocatable())
       && !(this->type() == elfcpp::STT_TLS
            && parameters->options().pie()))
-    return false;
+    {
+      // Non-default weak undefined symbols in executable and shared
+      // library are always resolved to 0 at runtime.
+      if (this->visibility() != elfcpp::STV_DEFAULT
+	  && this->is_weak_undefined()
+	  && !parameters->options().relocatable())
+	return true;
+
+      return false;
+    }
 
   // If the symbol is not from an object file, and is not undefined,
   // then it is defined, and known.
