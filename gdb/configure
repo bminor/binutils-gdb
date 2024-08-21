@@ -706,6 +706,7 @@ LIBGUI
 LTLIBLZMA
 LIBLZMA
 HAVE_LIBLZMA
+FORMAT_SRCS
 SER_HARDWIRE
 WERROR_CFLAGS
 WARN_CFLAGS
@@ -932,6 +933,7 @@ with_relocated_sources
 with_auto_load_dir
 with_auto_load_safe_path
 enable_targets
+enable_binary_file_formats
 enable_gdb_mdebug_support
 enable_gdb_dwarf_support
 with_amd_dbgapi
@@ -1645,6 +1647,10 @@ Optional Features:
   --disable-nls           do not use Native Language Support
   --enable-targets=TARGETS
                           alternative target configurations
+  --enable-binary-file-formats=FORMATS
+                          enable support for selected file formats (default
+                          'all') available formats: coff, dbx, elf, macho,
+                          mips, xcoff, all
   --enable-gdb-mdebug-support
                           Enable support for the mdebug debuginfo format
                           (default 'yes')
@@ -11507,7 +11513,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11510 "configure"
+#line 11516 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11613,7 +11619,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11616 "configure"
+#line 11622 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -24882,6 +24888,18 @@ esac
 fi
 
 
+# Check whether --enable-binary_file_formats was given.
+if test "${enable_binary_file_formats+set}" = set; then :
+  enableval=$enable_binary_file_formats; case "${enableval}" in
+ yes | "") as_fn_error $? "enable-binary-file-formats option must specify file formats or 'all'" "$LINENO" 5
+            ;;
+  no)       enable_binary_file_formats= ;;
+  *)        enable_binary_file_formats=$enableval ;;
+esac
+else
+  enable_binary_file_formats=all
+fi
+
 
 # Check whether to support mdebug/ecoff debug information.
 # Check whether --enable-gdb-mdebug-support was given.
@@ -24986,10 +25004,21 @@ TARGET_OBS=
 all_targets=
 HAVE_NATIVE_GCORE_TARGET=
 
+# File formats that will be enabled based on the selected
+# target(s).  These are chosen because they are required to
+# compile one or more of the selected targets.
+target_formats=
+
+# If all targets were requested, this is all formats that should
+# accompany them.  These are just the ones required for compilation
+# to succeed, not the formats suggested based on targets.
+all_target_formats="coff xcoff"
+
 for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
 do
   if test "$targ_alias" = "all"; then
     all_targets=true
+    target_formats=$all_target_formats
   else
     # Canonicalize the secondary target names.
     result=`$ac_config_sub $targ_alias 2>/dev/null`
@@ -31628,6 +31657,12 @@ fi
 # Note that WIN32APILIBS is set by GDB_AC_COMMON.
 WIN32LIBS="$WIN32LIBS $WIN32APILIBS"
 
+# Object files to be used when building with support for all file formats.
+# This should not have elf or macho, as support for those formats depends
+# on BFD enabling them as well.
+all_binary_file_srcs="\$(dbx_SRCS) \$(mips_SRCS) \$(coff_SRCS) \$(xcoff_SRCS)"
+
+bfd_supports_elf=no
 # Add ELF support to GDB, but only if BFD includes ELF support.
 
   OLD_CFLAGS=$CFLAGS
@@ -31645,7 +31680,7 @@ WIN32LIBS="$WIN32LIBS $WIN32APILIBS"
   CC="./libtool --quiet --mode=link $CC"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ELF support in BFD" >&5
 $as_echo_n "checking for ELF support in BFD... " >&6; }
-if ${gdb_cv_var_elf+:} false; then :
+if ${gdb_cv_var_bfd_elf+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -31664,24 +31699,23 @@ return bfd_get_elf_phdr_upper_bound (NULL);
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  gdb_cv_var_elf=yes
+  gdb_cv_var_bfd_elf=yes
 else
-  gdb_cv_var_elf=no
+  gdb_cv_var_bfd_elf=no
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_var_elf" >&5
-$as_echo "$gdb_cv_var_elf" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_var_bfd_elf" >&5
+$as_echo "$gdb_cv_var_bfd_elf" >&6; }
   CC=$OLD_CC
   CFLAGS=$OLD_CFLAGS
   LDFLAGS=$OLD_LDFLAGS
   LIBS=$OLD_LIBS
-if test "$gdb_cv_var_elf" = yes; then
-  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o dtrace-probe.o \
-		gcore-elf.o elf-none-tdep.o"
+if test "$gdb_cv_var_bfd_elf" = yes; then
+  CONFIG_OBS="$CONFIG_OBS gcore-elf.o elf-none-tdep.o"
 
 $as_echo "#define HAVE_ELF 1" >>confdefs.h
 
@@ -31744,9 +31778,12 @@ if test "$ac_res" != no; then :
 fi
 
   fi
+  bfd_supports_elf=yes
+  all_binary_file_srcs="$all_binary_file_srcs \$(elf_SRCS)"
 fi
 
 # Add macho support to GDB, but only if BFD includes it.
+bfd_supports_macho=no
 
   OLD_CFLAGS=$CFLAGS
   OLD_LDFLAGS=$LDFLAGS
@@ -31763,7 +31800,7 @@ fi
   CC="./libtool --quiet --mode=link $CC"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Mach-O support in BFD" >&5
 $as_echo_n "checking for Mach-O support in BFD... " >&6; }
-if ${gdb_cv_var_macho+:} false; then :
+if ${gdb_cv_var_bfd_macho+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -31782,30 +31819,81 @@ return bfd_mach_o_lookup_command (NULL, 0, NULL);
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  gdb_cv_var_macho=yes
+  gdb_cv_var_bfd_macho=yes
 else
-  gdb_cv_var_macho=no
+  gdb_cv_var_bfd_macho=no
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_var_macho" >&5
-$as_echo "$gdb_cv_var_macho" >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_var_bfd_macho" >&5
+$as_echo "$gdb_cv_var_bfd_macho" >&6; }
   CC=$OLD_CC
   CFLAGS=$OLD_CFLAGS
   LDFLAGS=$OLD_LDFLAGS
   LIBS=$OLD_LIBS
-if test "$gdb_cv_var_macho" = yes; then
-  CONFIG_OBS="$CONFIG_OBS machoread.o"
+if test "$gdb_cv_var_bfd_macho" = yes; then
+  bfd_supports_macho=yes
+  all_binary_file_srcs="$all_binary_file_srcs \$(macho_SRCS)"
 fi
+
+FORMAT_SRCS=
+
+if test "$enable_binary_file_formats" != "all"; then
+    # Formats that are required by some requested target(s).
+    # Warn users that they are added, so no one is surprised.
+    for req in $target_formats; do
+	case ,$enable_binary_file_formats, in
+	*,$req,*)
+	    # Do nothing.
+	    ;;
+	*)
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: \"$req is required to support one or more requested targets.  Adding it\"" >&5
+$as_echo "$as_me: WARNING: \"$req is required to support one or more requested targets.  Adding it\"" >&2;}
+	    enable_binary_file_formats="${enable_binary_file_formats},$req"
+	    ;;
+	esac
+    done
+
+
+cat >>confdefs.h <<_ACEOF
+#define SUPPORTED_BINARY_FILE_FORMATS "$enable_binary_file_formats"
+_ACEOF
+
+fi
+
+enable_binary_file_formats=$(echo $enable_binary_file_formats | sed 's/,/ /g')
+
+# Go through all requested and required binary file formats to compile
+# GDB, and double check that we can compile them.
+for format in $enable_binary_file_formats
+do
+    if test "$format" = "elf" && test "$bfd_supports_elf" != "yes"; then
+	    as_fn_error but BFD does not support it." "\"elf support was requested" "$LINENO" 5;
+    elif test "$format" = "macho" && test "$bfd_supports_macho" != "yes"; then
+	    as_fn_error but BFD does not support it." "\"Mach-O support was requested" "$LINENO" 5;
+    fi
+
+    if test "$format" = "all"; then
+	FORMAT_SRCS="$all_binary_file_srcs"
+	# We don't break here in case the user requested Mach-O or ELF, but
+	# BFD is not configured to support it.  If we were to break, we would
+	# silently drop the requested support instead of erroring out.
+    else
+	fmt=$(echo "$format _SRCS" | sed 's/ //')
+	FORMAT_SRCS="$FORMAT_SRCS \$($fmt)"
+    fi
+done
+
+
 
 # Add any host-specific objects to GDB.
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 
 # If building on ELF, look for lzma support for embedded compressed debug info.
-if test "$gdb_cv_var_elf" = yes; then
+if test "$gdb_cv_var_bfd_elf" = yes; then
 
 # Check whether --with-lzma was given.
 if test "${with_lzma+set}" = set; then :

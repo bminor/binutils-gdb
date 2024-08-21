@@ -745,6 +745,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* Which binary file formats were requested at configure time. */
+#undef SUPPORTED_BINARY_FILE_FORMATS
+
 /* automatically load a system-wide gdbinit file */
 #undef SYSTEM_GDBINIT
 

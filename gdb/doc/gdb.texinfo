@@ -41277,6 +41277,14 @@ Configure @value{GDBN} for cross-debugging programs running on the
 specified list of targets.  The special value @samp{all} configures
 @value{GDBN} for debugging programs running on any target it supports.
 
+@item --enable-binary-file-formats=@r{[}@var{format}@r{]}@dots{}
+@itemx --enable-binary-file-formats=all
+Configure @value{GDBN} to support certain binary file formats.  If a
+format is the main (or only) file format for a given target, the
+configure script may add support to it anyway, and warn the user.
+If not given, all file formats that @value{GDBN} supports are compiled
+in.
+
 @item --with-gdb-datadir=@var{path}
 Set the @value{GDBN}-specific data directory.  @value{GDBN} will look
 here for certain supporting files or scripts.  This defaults to the

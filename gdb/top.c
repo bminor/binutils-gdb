@@ -1596,6 +1596,11 @@ This GDB was configured as follows:\n\
 	     --with-system-gdbinit-dir=%s%s\n\
 "), SYSTEM_GDBINIT_DIR, SYSTEM_GDBINIT_DIR_RELOCATABLE ? " (relocatable)" : "");
 
+#ifdef SUPPORTED_BINARY_FILE_FORMATS
+  gdb_printf (stream, _("\
+	     --enable-binary-file-formats=%s\n"), SUPPORTED_BINARY_FILE_FORMATS);
+#endif
+
   /* We assume "relocatable" will be printed at least once, thus we always
      print this text.  It's a reasonably safe assumption for now.  */
   gdb_printf (stream, _("\n\

@@ -191,6 +191,16 @@ AS_HELP_STRING([--enable-targets=TARGETS], [alternative target configurations]),
 	;;
 esac])
 
+AC_ARG_ENABLE(binary_file_formats,
+	      AS_HELP_STRING([--enable-binary-file-formats=FORMATS],
+			     [enable support for selected file formats (default 'all')
+			      available formats: coff, dbx, elf, macho, mips, xcoff, all]),
+[case "${enableval}" in
+ yes | "") AC_MSG_ERROR(enable-binary-file-formats option must specify file formats or 'all')
+            ;;
+  no)       enable_binary_file_formats= ;;
+  *)        enable_binary_file_formats=$enableval ;;
+esac], [enable_binary_file_formats=all])
 
 # Check whether to support mdebug/ecoff debug information.
 AC_ARG_ENABLE(gdb-mdebug-support,
@@ -240,10 +250,21 @@ TARGET_OBS=
 all_targets=
 HAVE_NATIVE_GCORE_TARGET=
 
+# File formats that will be enabled based on the selected
+# target(s).  These are chosen because they are required to
+# compile one or more of the selected targets.
+target_formats=
+
+# If all targets were requested, this is all formats that should
+# accompany them.  These are just the ones required for compilation
+# to succeed, not the formats suggested based on targets.
+all_target_formats="coff xcoff"
+
 for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
 do
   if test "$targ_alias" = "all"; then
     all_targets=true
+    target_formats=$all_target_formats
   else
     # Canonicalize the secondary target names.
     result=`$ac_config_sub $targ_alias 2>/dev/null`
@@ -1952,32 +1973,87 @@ fi
 # Note that WIN32APILIBS is set by GDB_AC_COMMON.
 WIN32LIBS="$WIN32LIBS $WIN32APILIBS"
 
+# Object files to be used when building with support for all file formats.
+# This should not have elf or macho, as support for those formats depends
+# on BFD enabling them as well.
+all_binary_file_srcs="\$(dbx_SRCS) \$(mips_SRCS) \$(coff_SRCS) \$(xcoff_SRCS)"
+
+bfd_supports_elf=no
 # Add ELF support to GDB, but only if BFD includes ELF support.
-GDB_AC_CHECK_BFD([for ELF support in BFD], gdb_cv_var_elf,
+GDB_AC_CHECK_BFD([for ELF support in BFD], gdb_cv_var_bfd_elf,
                  [bfd_get_elf_phdr_upper_bound (NULL)], elf-bfd.h)
-if test "$gdb_cv_var_elf" = yes; then
-  CONFIG_OBS="$CONFIG_OBS elfread.o stap-probe.o dtrace-probe.o \
-		gcore-elf.o elf-none-tdep.o"
+if test "$gdb_cv_var_bfd_elf" = yes; then
+  CONFIG_OBS="$CONFIG_OBS gcore-elf.o elf-none-tdep.o"
   AC_DEFINE(HAVE_ELF, 1,
 	    [Define if ELF support should be included.])
   # -ldl is provided by bfd/Makefile.am (LIBDL) <PLUGINS>.
   if test "$plugins" = "yes"; then
     AC_SEARCH_LIBS(dlopen, dl)
   fi
+  bfd_supports_elf=yes
+  all_binary_file_srcs="$all_binary_file_srcs \$(elf_SRCS)"
 fi
 
 # Add macho support to GDB, but only if BFD includes it.
-GDB_AC_CHECK_BFD([for Mach-O support in BFD], gdb_cv_var_macho,
+bfd_supports_macho=no
+GDB_AC_CHECK_BFD([for Mach-O support in BFD], gdb_cv_var_bfd_macho,
                  [bfd_mach_o_lookup_command (NULL, 0, NULL)], mach-o.h)
-if test "$gdb_cv_var_macho" = yes; then
-  CONFIG_OBS="$CONFIG_OBS machoread.o"
+if test "$gdb_cv_var_bfd_macho" = yes; then
+  bfd_supports_macho=yes
+  all_binary_file_srcs="$all_binary_file_srcs \$(macho_SRCS)"
 fi
+
+FORMAT_SRCS=
+
+if test "$enable_binary_file_formats" != "all"; then
+    # Formats that are required by some requested target(s).
+    # Warn users that they are added, so no one is surprised.
+    for req in $target_formats; do
+	case ,$enable_binary_file_formats, in
+	*,$req,*)
+	    # Do nothing.
+	    ;;
+	*)
+	    AC_MSG_WARN("$req is required to support one or more requested targets.  Adding it")
+	    enable_binary_file_formats="${enable_binary_file_formats},$req"
+	    ;;
+	esac
+    done
+
+    AC_DEFINE_UNQUOTED(SUPPORTED_BINARY_FILE_FORMATS, "$enable_binary_file_formats",
+		       Which binary file formats were requested at configure time. )
+fi
+
+enable_binary_file_formats=$(echo $enable_binary_file_formats | sed 's/,/ /g')
+
+# Go through all requested and required binary file formats to compile
+# GDB, and double check that we can compile them.
+for format in $enable_binary_file_formats
+do
+    if test "$format" = "elf" && test "$bfd_supports_elf" != "yes"; then
+	    AC_MSG_ERROR("elf support was requested, but BFD does not support it.");
+    elif test "$format" = "macho" && test "$bfd_supports_macho" != "yes"; then
+	    AC_MSG_ERROR("Mach-O support was requested, but BFD does not support it.");
+    fi
+
+    if test "$format" = "all"; then
+	FORMAT_SRCS="$all_binary_file_srcs"
+	# We don't break here in case the user requested Mach-O or ELF, but
+	# BFD is not configured to support it.  If we were to break, we would
+	# silently drop the requested support instead of erroring out.
+    else
+	fmt=$(echo "$format _SRCS" | sed 's/ //')
+	FORMAT_SRCS="$FORMAT_SRCS \$($fmt)"
+    fi
+done
+
+AC_SUBST(FORMAT_SRCS)
 
 # Add any host-specific objects to GDB.
 CONFIG_OBS="${CONFIG_OBS} ${gdb_host_obs}"
 
 # If building on ELF, look for lzma support for embedded compressed debug info.
-if test "$gdb_cv_var_elf" = yes; then
+if test "$gdb_cv_var_bfd_elf" = yes; then
   AC_ARG_WITH(lzma,
     AS_HELP_STRING([--with-lzma], [support lzma compression (auto/yes/no)]),
     [], [with_lzma=auto])

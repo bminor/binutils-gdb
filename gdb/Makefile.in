@@ -907,12 +907,21 @@ ALL_TARGET_OBS = \
 	vax-tdep.o \
 	windows-tdep.o \
 	x86-tdep.o \
-	xcoffread.o \
 	xstormy16-tdep.o \
 	xtensa-config.o \
 	xtensa-linux-tdep.o \
 	xtensa-tdep.o \
 	z80-tdep.o
+
+# Object files for reading specific types of debug information.
+coff_SRCS = coffread.c coff-pe-read.c
+dbx_SRCS = dbxread.c
+elf_SRCS = elfread.c stap-probe.c dtrace-probe.c
+macho_SRCS = machoread.c
+mips_SRCS = mipsread.c
+xcoff_SRCS = xcoffread.c
+FORMAT_SRCS = @FORMAT_SRCS@
+FORMAT_OBS = $(patsubst %.c,%.o,$(FORMAT_SRCS))
 
 # The following native-target dependent variables are defined on
 # configure.nat.
@@ -1070,8 +1079,6 @@ COMMON_SFILES = \
 	c-varobj.c \
 	charset.c \
 	cli-out.c \
-	coff-pe-read.c \
-	coffread.c \
 	complaints.c \
 	completer.c \
 	copying.c \
@@ -1085,7 +1092,6 @@ COMMON_SFILES = \
 	d-lang.c \
 	d-namespace.c \
 	d-valprint.c \
-	dbxread.c \
 	dcache.c \
 	debug.c \
 	debuginfod-support.c \
@@ -1150,7 +1156,6 @@ COMMON_SFILES = \
 	memtag.c \
 	minidebug.c \
 	minsyms.c \
-	mipsread.c \
 	namespace.c \
 	objc-lang.c \
 	objfiles.c \
@@ -1243,7 +1248,6 @@ SFILES = \
 	d-exp.y \
 	dtrace-probe.c \
 	elf-none-tdep.c \
-	elfread.c \
 	f-exp.y \
 	gcore-elf.c \
 	gdb.c \
@@ -1870,7 +1874,6 @@ ALLDEPFILES = \
 	x86-gnu-nat.c \
 	x86-nat.c \
 	x86-tdep.c \
-	xcoffread.c \
 	xstormy16-tdep.c \
 	xtensa-config.c \
 	xtensa-linux-nat.c \
@@ -1925,7 +1928,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	$(patsubst %.c,%.o,$(COMMON_SFILES)) \
 	$(SUBDIR_CLI_OBS) \
 	$(SUBDIR_MI_OBS) \
-	$(SUBDIR_TARGET_OBS)
+	$(SUBDIR_TARGET_OBS) \
+	$(FORMAT_OBS)
 
 SUBDIRS = doc @subdirs@ data-directory
 CLEANDIRS = $(SUBDIRS)

@@ -224,6 +224,17 @@ vFile:stat
 * Support for stabs debugging format and the a.out/dbx object format is
   deprecated, and will be removed in GDB 18.
 
+* Configure changes
+
+--enable-binary-file-formats=[FORMAT,...]
+--enable-binary-file-formats=all
+  A user can now decide to only compile support for certain file formats.
+  The available formats at this point are: dbx, coff, xcoff, elf, mach-o
+  and mips.  Some targets require specific file formats to be available,
+  and in such cases, the configure script will warn the user and add
+  support anyway.  By default, all formats will be compiled in, to
+  continue the behavior from before adding the switch.
+
 * A new configure option was added, allowing support for the compile
   subsystem to be disabled at configure time, in the form of
   --disable-gdb-compile.

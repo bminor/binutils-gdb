@@ -417,6 +417,30 @@ more obscure GDB `configure' options are not listed here.
      There is no convenient way to generate a list of all available
      targets.
 
+`--enable-binary-file-formats=FORMAT,FORMAT,...'
+`--enable-binary-file-formats=all'
+    Configure GDB to only be be able to read selected file formats.
+    The special value "all" causes all file formats to be compiled
+    in, and is the the default behavior of the option.  This option
+    is meant for advanced users who are sure of what they expect,
+    if you are unsure which options you will need on your debugging
+    sessions, we recommend that you not use this feature.  The
+    accepted options are:
+      * coff: Main format on Windows systems, this is required to
+        compile with windows target support;
+      * dbx (also known as a.out): Legacy file format, this is
+        recommended if you know you will be dealing with this
+        file format;
+      * elf: Main format on Linux systems, this is heavily
+        recommended when compiling with linux support;
+      * macho: Main format on MacOS systems, this is heavily
+        recommended when compiling for those targets;
+      * mips (also known as ecoff): Main file format for targets
+        running on MIPS CPUs, this is heavily recommended when
+        supporting those targets;
+      * xcoff: Main format on AIX systems, this is required to
+        compile for AIX targets and rs6000 CPUs.
+
 `--with-gdb-datadir=PATH'
      Set the GDB-specific data directory.  GDB will look here for
      certain supporting files or scripts.  This defaults to the `gdb'

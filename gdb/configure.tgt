@@ -505,7 +505,7 @@ powerpc-*-openbsd*)
 	;;
 powerpc-*-aix* | rs6000-*-* | powerpc64-*-aix*)
 	# Target: PowerPC running AIX
-	gdb_target_obs="rs6000-tdep.o rs6000-aix-tdep.o xcoffread.o \
+	gdb_target_obs="rs6000-tdep.o rs6000-aix-tdep.o \
 			ppc-sysv-tdep.o solib-aix.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
 	;;
@@ -522,8 +522,8 @@ powerpc*-*-linux*)
 powerpc-*-lynx*178)
 	# Target: PowerPC running Lynx178.
 	gdb_target_obs="rs6000-tdep.o rs6000-lynx178-tdep.o \
-			xcoffread.o ppc-sysv-tdep.o \
-			ravenscar-thread.o ppc-ravenscar-thread.o"
+			ppc-sysv-tdep.o ravenscar-thread.o \
+			ppc-ravenscar-thread.o"
 	;;
 powerpc*-*-*)
 	# Target: PowerPC running eabi
@@ -834,4 +834,18 @@ for t in x ${gdb_target_obs}; do
   if test "$t" = linux-tdep.o; then
     gdb_have_gcore=true
   fi
+done
+
+# Decide which file formats are absolutely required based on
+# the requested targets.  Warn later that they are added, in
+# case the user didn't manually request them, or all readers.
+# It's fine to add the same format multiple times since the
+# loop that reads the options to FORMAT_OBS will ensure that
+# they are only added once.
+for i in $gdb_target_obs; do
+    case "${i}" in
+    *"windows-tdep.o" ) target_formats="${target_formats} coff";;
+    "rs6000-aix-tdep.o" ) target_formats="${target_formats} xcoff";;
+    "rs6000-lynx178-tdep.o" ) target_formats="${target_formats} xcoff";;
+    esac
 done
