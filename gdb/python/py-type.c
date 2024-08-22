@@ -1465,9 +1465,13 @@ type_to_type_object (struct type *type)
       if (type->is_stub ())
 	type = check_typedef (type);
     }
-  catch (...)
+  catch (const gdb_exception_error &)
     {
       /* Just ignore failures in check_typedef.  */
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
 
   type_obj = PyObject_New (type_object, &type_object_type);
