@@ -21653,52 +21653,6 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
   remove_all_cus ();
 }
 
-/* A set of CU "per_cu" pointer, DIE offset, and GDB type pointer.
-   We store these in a hash table separate from the DIEs, and preserve them
-   when the DIEs are flushed out of cache.
-
-   The CU "per_cu" pointer is needed because offset alone is not enough to
-   uniquely identify the type.  A file may have multiple .debug_types sections,
-   or the type may come from a DWO file.  Furthermore, while it's more logical
-   to use per_cu->section+offset, with Fission the section with the data is in
-   the DWO file but we don't know that section at the point we need it.
-   We have to use something in dwarf2_per_cu_data (or the pointer to it)
-   because we can enter the lookup routine, get_die_type_at_offset, from
-   outside this file, and thus won't necessarily have PER_CU->cu.
-   Fortunately, PER_CU is stable for the life of the objfile.  */
-
-struct dwarf2_per_cu_offset_and_type
-{
-  const struct dwarf2_per_cu_data *per_cu;
-  sect_offset sect_off;
-  struct type *type;
-};
-
-/* Hash function for a dwarf2_per_cu_offset_and_type.  */
-
-static hashval_t
-per_cu_offset_and_type_hash (const void *item)
-{
-  const struct dwarf2_per_cu_offset_and_type *ofs
-    = (const struct dwarf2_per_cu_offset_and_type *) item;
-
-  return (uintptr_t) ofs->per_cu + to_underlying (ofs->sect_off);
-}
-
-/* Equality function for a dwarf2_per_cu_offset_and_type.  */
-
-static int
-per_cu_offset_and_type_eq (const void *item_lhs, const void *item_rhs)
-{
-  const struct dwarf2_per_cu_offset_and_type *ofs_lhs
-    = (const struct dwarf2_per_cu_offset_and_type *) item_lhs;
-  const struct dwarf2_per_cu_offset_and_type *ofs_rhs
-    = (const struct dwarf2_per_cu_offset_and_type *) item_rhs;
-
-  return (ofs_lhs->per_cu == ofs_rhs->per_cu
-	  && ofs_lhs->sect_off == ofs_rhs->sect_off);
-}
-
 /* Set the type associated with DIE to TYPE.  Save it in CU's hash
    table if necessary.  For convenience, return TYPE.
 
@@ -21722,8 +21676,6 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      bool skip_data_location)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
-  struct dwarf2_per_cu_offset_and_type **slot, ofs;
-  struct objfile *objfile = per_objfile->objfile;
   struct attribute *attr;
   struct dynamic_prop prop;
 
@@ -21779,24 +21731,13 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	type->add_dyn_prop (DYN_PROP_DATA_LOCATION, prop);
     }
 
-  if (per_objfile->die_type_hash == NULL)
-    per_objfile->die_type_hash
-      = htab_up (htab_create_alloc (127,
-				    per_cu_offset_and_type_hash,
-				    per_cu_offset_and_type_eq,
-				    NULL, xcalloc, xfree));
-
-  ofs.per_cu = cu->per_cu;
-  ofs.sect_off = die->sect_off;
-  ofs.type = type;
-  slot = (struct dwarf2_per_cu_offset_and_type **)
-    htab_find_slot (per_objfile->die_type_hash.get (), &ofs, INSERT);
-  if (*slot)
+  bool inserted
+    = per_objfile->die_type_hash.emplace
+       (per_cu_and_offset {cu->per_cu, die->sect_off}, type).second;
+  if (!inserted)
     complaint (_("A problem internal to GDB: DIE %s has type already set"),
 	       sect_offset_str (die->sect_off));
-  *slot = XOBNEW (&objfile->objfile_obstack,
-		  struct dwarf2_per_cu_offset_and_type);
-  **slot = ofs;
+
   return type;
 }
 
@@ -21808,19 +21749,9 @@ get_die_type_at_offset (sect_offset sect_off,
 			dwarf2_per_cu_data *per_cu,
 			dwarf2_per_objfile *per_objfile)
 {
-  struct dwarf2_per_cu_offset_and_type *slot, ofs;
+  auto it = per_objfile->die_type_hash.find ({per_cu, sect_off});
 
-  if (per_objfile->die_type_hash == NULL)
-    return NULL;
-
-  ofs.per_cu = per_cu;
-  ofs.sect_off = sect_off;
-  slot = ((struct dwarf2_per_cu_offset_and_type *)
-	  htab_find (per_objfile->die_type_hash.get (), &ofs));
-  if (slot)
-    return slot->type;
-  else
-    return NULL;
+  return it != per_objfile->die_type_hash.end () ? it->second : nullptr;
 }
 
 /* Look up the type for DIE in CU in die_type_hash,

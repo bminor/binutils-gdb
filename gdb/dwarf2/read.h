@@ -627,6 +627,26 @@ struct type_unit_group_unshareable
   struct symtab **symtabs = nullptr;
 };
 
+struct per_cu_and_offset
+{
+  dwarf2_per_cu_data *per_cu;
+  sect_offset offset;
+
+  bool operator== (const per_cu_and_offset &other) const noexcept
+  {
+    return this->per_cu == other.per_cu && this->offset == other.offset;
+  }
+};
+
+struct per_cu_and_offset_hash
+{
+  std::uint64_t operator() (const per_cu_and_offset &key) const noexcept
+  {
+    return (std::hash<dwarf2_per_cu_data *> () (key.per_cu)
+	    + std::hash<sect_offset> () (key.offset));
+  }
+};
+
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.
 
@@ -701,10 +721,22 @@ struct dwarf2_per_objfile
      other objfiles backed by the same BFD.  */
   struct dwarf2_per_bfd *per_bfd;
 
-  /* Table mapping type DIEs to their struct type *.
-     This is nullptr if not allocated yet.
-     The mapping is done via (CU/TU + DIE offset) -> type.  */
-  htab_up die_type_hash;
+  /* A mapping of (CU "per_cu" pointer, DIE offset) to GDB type pointer.
+
+     We store these in a hash table separate from the DIEs, and preserve them
+     when the DIEs are flushed out of cache.
+
+     The CU "per_cu" pointer is needed because offset alone is not enough to
+     uniquely identify the type.  A file may have multiple .debug_types sections,
+     or the type may come from a DWO file.  Furthermore, while it's more logical
+     to use per_cu->section+offset, with Fission the section with the data is in
+     the DWO file but we don't know that section at the point we need it.
+     We have to use something in dwarf2_per_cu_data (or the pointer to it)
+     because we can enter the lookup routine, get_die_type_at_offset, from
+     outside this file, and thus won't necessarily have PER_CU->cu.
+     Fortunately, PER_CU is stable for the life of the objfile.  */
+  gdb::unordered_map<per_cu_and_offset, type *, per_cu_and_offset_hash>
+    die_type_hash;
 
   /* Table containing line_header indexed by offset and offset_in_dwz.  */
   htab_up line_header_hash;
