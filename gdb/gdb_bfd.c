@@ -930,29 +930,6 @@ gdb_bfd_openw (const char *filename, const char *target)
   return gdb_bfd_ref_ptr::new_reference (result);
 }
 
-/* Wrap f (args) and handle exceptions by:
-   - returning val, and
-   - calling set_quit_flag or set_force_quit_flag, if needed.  */
-
-template <typename R, R val, typename F, typename... Args>
-static R
-catch_exceptions (F &&f, Args&&... args)
-{
-   try
-     {
-       return f (std::forward<Args> (args)...);
-     }
-   catch (const gdb_exception &ex)
-     {
-       if (ex.reason == RETURN_QUIT)
-	 set_quit_flag ();
-       else if (ex.reason == RETURN_FORCED_QUIT)
-	 set_force_quit_flag ();
-     }
-
-   return val;
-}
-
 /* See gdb_bfd.h.  */
 
 gdb_bfd_ref_ptr

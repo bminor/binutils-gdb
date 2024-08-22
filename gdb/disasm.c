@@ -197,7 +197,12 @@ gdb_disassembler_memory_reader::dis_asm_read_memory
   (bfd_vma memaddr, gdb_byte *myaddr, unsigned int len,
    struct disassemble_info *info) noexcept
 {
-  return target_read_code (memaddr, myaddr, len);
+  auto res = catch_exceptions<int, -1> ([&]
+    {
+      return target_read_code (memaddr, myaddr, len);
+    });
+
+  return res;
 }
 
 /* Wrapper of memory_error.  */
