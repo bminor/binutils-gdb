@@ -165,7 +165,7 @@ get_test_insn (struct gdbarch *gdbarch, size_t *len)
 		kind = gdbarch_breakpoint_kind_from_pc (gdbarch, &pc);
 		insn = gdbarch_sw_breakpoint_from_kind (gdbarch, kind, &bplen);
 	      }
-	    catch (...)
+	    catch (const gdb_exception_error &)
 	      {
 		continue;
 	      }
