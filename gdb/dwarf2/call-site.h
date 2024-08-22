@@ -25,6 +25,7 @@
 #include "dwarf2/types.h"
 #include "../frame.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/unordered_map.h"
 
 struct dwarf2_locexpr_baton;
 struct dwarf2_per_cu_data;
@@ -240,5 +241,7 @@ public:
 
   struct call_site_parameter parameter[];
 };
+
+using call_site_htab_t = gdb::unordered_map<unrelocated_addr, call_site *>;
 
 #endif /* CALL_SITE_H */
