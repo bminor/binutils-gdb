@@ -153,7 +153,7 @@ public:
 
   /* A hash table of DIE cu_offset for following references with
      die_info->offset.sect_off as hash.  */
-  htab_up die_hash;
+  gdb::unordered_map<sect_offset, die_info *> die_hash;
 
   /* Full DIEs if read in.  */
   struct die_info *dies = nullptr;

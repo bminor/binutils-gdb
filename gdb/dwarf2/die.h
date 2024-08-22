@@ -31,14 +31,6 @@ struct die_info
      attributes that are needed.  */
   static die_info *allocate (struct obstack *obstack, int num_attrs);
 
-  /* Trivial hash function for die_info: the hash value of a DIE is
-     its offset in .debug_info for this objfile.  */
-  static hashval_t hash (const void *item);
-
-  /* Trivial comparison function for die_info structures: two DIEs
-     are equal if they have the same offset.  */
-  static int eq (const void *item_lhs, const void *item_rhs);
-
   /* Dump this DIE and any children to MAX_LEVEL.  They are written to
      gdb_stdlog.  Note this is called from the pdie user command in
      gdb-gdb.gdb.  */
