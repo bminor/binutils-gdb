@@ -1948,7 +1948,7 @@ svr4_handle_solib_event (void)
 	  {
 	    link_map_id_val = pa->prob->evaluate_argument (0, frame);
 	  }
-	catch (const gdb_exception_error)
+	catch (const gdb_exception_error &)
 	  {
 	    link_map_id_val = NULL;
 	  }
