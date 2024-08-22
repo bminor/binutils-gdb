@@ -382,6 +382,14 @@ if { ![info exists NO_DT_RELR_CC_LDFLAGS] } then {
     }
 }
 
+if { ![info exists NO_MEMORY_SEAL_LDFLAGS] } then {
+    if { [check_memory_seal_support] } then {
+	set NO_MEMORY_SEAL_LDFLAGS "-z nomemory-seal"
+    } else {
+	set NO_MEMORY_SEAL_LDFLAGS {}
+    }
+}
+
 # Set LD_CLASS to "64bit" for a 64-bit *host* linker.
 if { ![info exists LD_CLASS] } then {
     set REAL_LD [findfile $base_dir/.libs/ld-new .libs/ld-new $LD [transform ld]]

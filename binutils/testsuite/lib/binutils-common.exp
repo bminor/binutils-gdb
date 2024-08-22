@@ -408,6 +408,25 @@ proc check_relro_support { } {
     return $relro_available_saved
 }
 
+proc check_memory_seal_support { } {
+    global memory_seal_available_saved
+    global ld
+
+    if {![info exists memory_seal_available_saved]} {
+	remote_file host delete nomemory_seal
+	set ld_output [remote_exec host $ld "-z nomemory-seal"]
+	if { [string first "not supported" $ld_output] >= 0
+	     || [string first "unrecognized option" $ld_output] >= 0
+	     || [string first "-z nomemory-seal ignored" $ld_output] >= 0
+	     || [string first "cannot find nomemory-seal" $ld_output] >= 0 } {
+	    set memory_seal_available_saved 0
+	} else {
+	    set memory_seal_available_saved 1
+	}
+    }
+    return $memory_seal_available_saved
+}
+
 # Check for support of the .noinit section, used for data that is not
 # initialized at load, or during the application's initialization sequence.
 proc supports_noinit_section {} {
@@ -1400,6 +1419,9 @@ proc run_dump_test { name {extra_options {}} } {
 	    set ld "$LD"
 	    if [check_relro_support] {
 		set ld_extra_opt "-z norelro"
+	    }
+	    if [check_memory_seal_support] {
+		append ld_extra_opt " -z nomemory-seal"
 	    }
 
 	    # Add -L$srcdir/$subdir so that the linker command can use

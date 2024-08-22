@@ -493,6 +493,9 @@ proc run_ld_link_tests { ldtests args } {
     if [check_relro_support] {
 	append ld_extra_opt " -z norelro"
     }
+    if [check_memory_seal_support] {
+	append ld_extra_opt " -z nomemory-seal"
+    }
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
@@ -979,7 +982,10 @@ proc run_cc_link_tests { ldtests } {
 		set failed 1
 	    }
 	} else {
-	    set board_flags [get_board_flags]
+	    if [check_memory_seal_support] {
+		append ldflags " -z nomemory-seal"
+	    }
+
 	    if { [string match "" $STATIC_LDFLAGS] \
 		 && [regexp -- ".* \[-\]+static .*" " $board_flags $ldflags $objfiles "] } {
 		untested $testname

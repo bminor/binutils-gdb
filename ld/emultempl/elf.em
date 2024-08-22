@@ -99,6 +99,7 @@ fragment <<EOF
   link_info.default_execstack = DEFAULT_LD_EXECSTACK;
   link_info.error_execstack = DEFAULT_LD_ERROR_EXECSTACK;
   link_info.warn_is_error_for_rwx_segments = DEFAULT_LD_ERROR_RWX_SEGMENTS;
+  link_info.memory_seal = DEFAULT_LD_Z_MEMORY_SEAL;
 }
 
 EOF

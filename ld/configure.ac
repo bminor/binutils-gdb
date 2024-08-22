@@ -232,6 +232,16 @@ AC_ARG_ENABLE(mark-plt,
   no) ac_default_ld_z_mark_plt=0 ;;
 esac])
 
+# Decide if -z memory-seal should be enabled in ELF linker by default.
+ac_default_ld_z_memory_seal=unset
+AC_ARG_ENABLE(memory-seal,
+	      AS_HELP_STRING([--enable-memory-seal],
+	      [enable -z memory-seal in ELF linker by default]),
+[case "${enableval}" in
+  yes) ac_default_ld_z_memory_seal=1 ;;
+  no) ac_default_ld_z_memory_seal=0 ;;
+esac])
+
 
 # By default warn when an executable stack is created due to object files
 # requesting such, not when the user specifies -z execstack.
@@ -616,6 +626,13 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_MARK_PLT,
   $ac_default_ld_z_mark_plt,
   [Define to 1 if you want to enable -z mark-plt in ELF x86-64 linker by default.])
+
+if test "${ac_default_ld_z_memory_seal}" = unset; then
+  ac_default_ld_z_memory_seal=0
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_MEMORY_SEAL,
+  $ac_default_ld_z_memory_seal,
+  [Define to 1 if you want to enable -z memory_seal in ELF linker by default.])
 
 
 AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_EXECSTACK,

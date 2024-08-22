@@ -34,7 +34,8 @@ Changes in 2.43:
 * Add -plugin-save-temps to store plugin intermediate files permanently.
 
 * Add -z memory-seal/-z nomemory-seal options to ELF linker to mark the
-  object to memory sealed.
+  object to memory sealed.   Also added --enable-memory-seal configure option
+  to enable the memory sealing by default.
 
 Changes in 2.42:
 
