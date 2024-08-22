@@ -1178,7 +1178,7 @@ valpy_getitem (PyObject *self, PyObject *key)
       if (res_val)
 	result = value_to_value_object (res_val);
     }
-  catch (gdb_exception &ex)
+  catch (const gdb_exception &ex)
     {
       GDB_PY_HANDLE_EXCEPTION (ex);
     }
@@ -1704,7 +1704,7 @@ valpy_nonzero (PyObject *self)
 	/* All other values are True.  */
 	nonzero = 1;
     }
-  catch (gdb_exception &ex)
+  catch (const gdb_exception &ex)
     {
       /* This is not documented in the Python documentation, but if
 	 this function fails, return -1 as slot_nb_nonzero does (the

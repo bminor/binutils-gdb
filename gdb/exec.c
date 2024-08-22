@@ -294,7 +294,7 @@ validate_exec_file (int from_tty)
 	      symbol_file_add_main (exec_file_target.c_str (), add_flags);
 	      exec_file_attach (exec_file_target.c_str (), from_tty);
 	    }
-	  catch (gdb_exception_error &err)
+	  catch (const gdb_exception_error &err)
 	    {
 	      warning (_("loading %ps %s"),
 		       styled_string (file_name_style.style (),

@@ -611,7 +611,7 @@ bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
     {
       set_breakpoint_condition (self_bp->bp, exp, 0, false);
     }
-  catch (gdb_exception &ex)
+  catch (const gdb_exception &ex)
     {
       GDB_PY_SET_HANDLE_EXCEPTION (ex);
     }
@@ -677,7 +677,7 @@ bppy_set_commands (PyObject *self, PyObject *newvalue, void *closure)
       counted_command_line lines = read_command_lines_1 (reader, 1, nullptr);
       breakpoint_set_commands (self_bp->bp, std::move (lines));
     }
-  catch (gdb_exception &ex)
+  catch (const gdb_exception &ex)
     {
       GDB_PY_SET_HANDLE_EXCEPTION (ex);
     }

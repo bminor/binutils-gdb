@@ -631,7 +631,7 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 
       write_memory_with_notification (addr, buffer, length);
     }
-  catch (gdb_exception &ex)
+  catch (const gdb_exception &ex)
     {
       GDB_PY_HANDLE_EXCEPTION (ex);
     }
@@ -705,7 +705,7 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
 				    buffer, pattern_size,
 				    &found_addr);
     }
-  catch (gdb_exception &ex)
+  catch (const gdb_exception &ex)
     {
       GDB_PY_HANDLE_EXCEPTION (ex);
     }
