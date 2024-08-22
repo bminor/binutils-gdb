@@ -313,14 +313,26 @@ frame_unwind_got_constant (const frame_info_ptr &frame, int regnum,
 }
 
 struct value *
-frame_unwind_got_bytes (const frame_info_ptr &frame, int regnum, const gdb_byte *buf)
+frame_unwind_got_bytes (const frame_info_ptr &frame, int regnum,
+			gdb::array_view<const gdb_byte> buf)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *reg_val;
 
   reg_val = value::zero (register_type (gdbarch, regnum), not_lval);
-  memcpy (reg_val->contents_raw ().data (), buf,
-	  register_size (gdbarch, regnum));
+  gdb::array_view<gdb_byte> val_contents = reg_val->contents_raw ();
+
+  /* The value's contents buffer is zeroed on allocation so if buf is
+     smaller, the remaining space will be filled with zero.
+
+     This can happen when unwinding through signal frames.  For example, if
+     an AArch64 program doesn't use SVE, then the Linux kernel will only
+     save in the signal frame the first 128 bits of the vector registers,
+     which is their minimum size, even if the vector length says they're
+     bigger.  */
+  gdb_assert (buf.size () <= val_contents.size ());
+
+  memcpy (val_contents.data (), buf.data (), buf.size ());
   return reg_val;
 }
 

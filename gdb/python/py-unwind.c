@@ -812,7 +812,7 @@ pyuw_prev_register (const frame_info_ptr &this_frame, void **cache_ptr,
   for (; reg_info < reg_info_end; ++reg_info)
     {
       if (regnum == reg_info->num)
-	return frame_unwind_got_bytes (this_frame, regnum, reg_info->data.get ());
+	return frame_unwind_got_bytes (this_frame, regnum, reg_info->data);
     }
 
   return frame_unwind_got_optimized (this_frame, regnum);
@@ -936,8 +936,9 @@ pyuw_sniffer (const struct frame_unwind *self, const frame_info_ptr &this_frame,
 
 	cached_reg_t *cached = new (&cached_frame->reg[i]) cached_reg_t ();
 	cached->num = reg->number;
-	cached->data.reset ((gdb_byte *) xmalloc (data_size));
-	memcpy (cached->data.get (), value->contents ().data (), data_size);
+	cached->data.resize (data_size);
+	gdb::array_view<const gdb_byte> contents = value->contents ();
+	cached->data.assign (contents.begin (), contents.end ());
       }
   }
 

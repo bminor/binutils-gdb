@@ -1096,7 +1096,7 @@ jit_frame_prev_register (const frame_info_ptr &this_frame, void **cache, int reg
     return frame_unwind_got_optimized (this_frame, reg);
 
   gdbarch = priv->regcache->arch ();
-  gdb_byte *buf = (gdb_byte *) alloca (register_size (gdbarch, reg));
+  gdb::byte_vector buf (register_size (gdbarch, reg));
   enum register_status status = priv->regcache->cooked_read (reg, buf);
 
   if (status == REG_VALID)

@@ -226,7 +226,7 @@ value *frame_unwind_got_constant (const frame_info_ptr &frame, int regnum,
    inside BUF.  */
 
 value *frame_unwind_got_bytes (const frame_info_ptr &frame, int regnum,
-			       const gdb_byte *buf);
+			       gdb::array_view<const gdb_byte> buf);
 
 /* Return a value which indicates that FRAME's saved version of REGNUM
    has a known constant (computed) value of ADDR.  Convert the
