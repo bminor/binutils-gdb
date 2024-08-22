@@ -4532,28 +4532,35 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
 			   dwarf2_per_objfile *per_objfile,
 			   cooked_index_storage *storage)
 {
-  cutu_reader reader (this_cu, per_objfile, nullptr, nullptr, false,
-		      storage->get_abbrev_cache ());
+  cutu_reader *reader = storage->get_reader (this_cu);
+  if (reader == nullptr)
+    {
+      cutu_reader new_reader (this_cu, per_objfile, nullptr, nullptr, false,
+			      storage->get_abbrev_cache ());
 
-  if (reader.comp_unit_die == nullptr)
+      if (new_reader.comp_unit_die == nullptr || new_reader.dummy_p)
+	return;
+
+      std::unique_ptr<cutu_reader> copy
+	(new cutu_reader (std::move (new_reader)));
+      reader = storage->preserve (std::move (copy));
+    }
+
+  if (reader->comp_unit_die == nullptr || reader->dummy_p)
     return;
 
-  if (reader.dummy_p)
-    {
-      /* Nothing.  */
-    }
-  else if (this_cu->is_debug_types)
-    build_type_psymtabs_reader (&reader, storage);
-  else if (reader.comp_unit_die->tag != DW_TAG_partial_unit)
+  if (this_cu->is_debug_types)
+    build_type_psymtabs_reader (reader, storage);
+  else if (reader->comp_unit_die->tag != DW_TAG_partial_unit)
     {
       bool nope = false;
       if (this_cu->scanned.compare_exchange_strong (nope, true))
 	{
-	  prepare_one_comp_unit (reader.cu, reader.comp_unit_die,
+	  prepare_one_comp_unit (reader->cu, reader->comp_unit_die,
 				 language_minimal);
 	  gdb_assert (storage != nullptr);
-	  cooked_indexer indexer (storage, this_cu, reader.cu->lang ());
-	  indexer.make_index (&reader);
+	  cooked_indexer indexer (storage, this_cu, reader->cu->lang ());
+	  indexer.make_index (reader);
 	}
     }
 }
@@ -16030,8 +16037,6 @@ cooked_indexer::ensure_cu_exists (cutu_reader *reader,
       if (!per_cu->scanned.compare_exchange_strong (nope, true))
 	return nullptr;
     }
-  if (per_cu == m_per_cu)
-    return reader;
 
   cutu_reader *result = m_index_storage->get_reader (per_cu);
   if (result == nullptr)
