@@ -31,6 +31,7 @@ foreach_gnat_encoding scenario flags {all minimal} {
     set bp_location [gdb_get_line_number "BREAK" ${testdir}/foo.adb]
     runto "foo.adb:$bp_location"
 
-    gdb_test "print Aos(1)" " = \\(foo.string_access\\) $hex"
-    gdb_test "print Aos(2)" " = \\(foo.string_access\\) $hex"
+    # Accept "foo." prefix for older versions of GNAT.
+    gdb_test "print Aos(1)" " = \\((foo.)?string_access\\) $hex"
+    gdb_test "print Aos(2)" " = \\((foo.)?string_access\\) $hex"
 }

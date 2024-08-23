@@ -40,8 +40,9 @@ foreach_gnat_encoding scenario flags {all minimal} {
     gdb_test "ptype &var" \
 	"type = access array \\(4 \\.\\. 8\\) of boolean <packed: 1-bit elements>"
 
+    # Accept "pa." prefix for older versions of GNAT.
     gdb_test "print &var" \
-	"= \\(access pa.packed_array\\) 0x.*"
+	"= \\(access (pa.)?packed_array\\) 0x.*"
 
     # Print the value of U_Var, an unconstrainted packed array.
 

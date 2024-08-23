@@ -34,4 +34,5 @@ gdb_test "print f(0)" " = false"
 
 gdb_test "print null" " = null"
 gdb_test "print/d null" " = 0"
-gdb_test "print U_Ptr" " = \\\(access foo\\.u_0\\\) 0x0"
+# Accept "foo." prefix for older versions of GNAT.
+gdb_test "print U_Ptr" " = \\\(access (foo\\.)?u_0\\\) 0x0"

@@ -30,4 +30,5 @@ if {![runto "dyn.adb:$bp_location"]} {
     return -1
 }
 
-gdb_test "whatis d" "type = dyn.dyn_range"
+# Accept "dyn." prefix for older versions of GNAT.
+gdb_test "whatis d" "type = (dyn.)?dyn_range"

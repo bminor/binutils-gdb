@@ -38,10 +38,11 @@ gdb_test "python print(int(gdb.parse_and_eval('si')))" \
 gdb_test "python print(int(gdb.parse_and_eval('ir')))" \
          "974"
 
+# Accept "foo." prefix for older versions of GNAT.
 gdb_test "python print(gdb.parse_and_eval('si').type)" \
-    "foo\\.small_integer" "print type"
+    "(foo\\.)?small_integer" "print type"
 gdb_test "python print(gdb.parse_and_eval('si').type.name)" \
-    "foo\\.small_integer" "print type name"
+    "(foo\\.)?small_integer" "print type name"
 
 gdb_test "python print(gdb.selected_inferior().main_name)" \
     "_ada_foo" \
