@@ -1,7 +1,4 @@
 .attribute arch, "rv32ic"
-.option norelax			# FIXME: assembler fill the paddings after parsing everything,
-				# so we probably won't fill anything for the norelax region when
-				# the riscv_opts.relax is enabled at somewhere.
 
 .section .text.cross.section.A, "ax"
 .option push
