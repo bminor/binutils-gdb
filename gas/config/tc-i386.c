@@ -8024,18 +8024,16 @@ check_VecOperands (const insn_template *t)
 	  return 1;
 	}
 
-      /* Non-EVEX.LIG forms need to have a ZMM register as at least one
-	 operand.  */
-      if (t->opcode_modifier.evex != EVEXLIG)
+      /* Non-EVEX.{LIG,512} forms need to have a ZMM register as at least one
+	 operand.  There's no need to check all operands, though: Either of the
+	 last two operands will be of the right size in all relevant templates.  */
+      if (t->opcode_modifier.evex != EVEXLIG
+	  && t->opcode_modifier.evex != EVEX512
+	  && !i.types[t->operands - 1].bitfield.zmmword
+	  && !i.types[t->operands - 2].bitfield.zmmword)
 	{
-	  for (op = 0; op < t->operands; ++op)
-	    if (i.types[op].bitfield.zmmword)
-	      break;
-	  if (op >= t->operands)
-	    {
-	      i.error = operand_size_mismatch;
-	      return 1;
-	    }
+	  i.error = operand_size_mismatch;
+	  return 1;
 	}
     }
 
