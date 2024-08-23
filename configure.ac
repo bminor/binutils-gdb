@@ -414,6 +414,8 @@ enable_gprofng=$enableval,
 enable_gprofng=yes)
 if test "$enable_gprofng" = "yes"; then
   case "${target}" in
+    *-musl*)
+      ;;
     x86_64-*-linux* | i?86-*-linux* | aarch64-*-linux* | riscv64-*-linux*)
     configdirs="$configdirs gprofng"
     ;;
