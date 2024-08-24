@@ -558,6 +558,12 @@ public:
   std::unordered_map<sect_offset, std::vector<sect_offset>,
 		     gdb::hash_enum<sect_offset>>
     abstract_to_concrete;
+
+  /* Current directory, captured at the moment that object this was
+     created.  */
+  std::string captured_cwd;
+  /* Captured copy of debug_file_directory.  */
+  std::string captured_debug_dir;
 };
 
 /* An iterator for all_units that is based on index.  This

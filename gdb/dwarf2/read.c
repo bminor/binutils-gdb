@@ -1252,7 +1252,9 @@ line_header_eq_voidp (const void *item_lhs, const void *item_rhs)
 dwarf2_per_bfd::dwarf2_per_bfd (bfd *obfd, const dwarf2_debug_sections *names,
 				bool can_copy_)
   : obfd (obfd),
-    can_copy (can_copy_)
+    can_copy (can_copy_),
+    captured_cwd (current_directory),
+    captured_debug_dir (debug_file_directory)
 {
   if (names == NULL)
     names = &dwarf2_elf_names;
@@ -9046,10 +9048,12 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
   gdb::unique_xmalloc_ptr<char> search_path_holder;
   if (search_cwd)
     {
-      if (!debug_file_directory.empty ())
+      const std::string &debug_dir = per_objfile->per_bfd->captured_debug_dir;
+
+      if (!debug_dir.empty ())
 	{
 	  search_path_holder.reset (concat (".", dirname_separator_string,
-					    debug_file_directory.c_str (),
+					    debug_dir.c_str (),
 					    (char *) NULL));
 	  search_path = search_path_holder.get ();
 	}
@@ -9057,7 +9061,7 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
 	search_path = ".";
     }
   else
-    search_path = debug_file_directory.c_str ();
+    search_path = per_objfile->per_bfd->captured_debug_dir.c_str ();
 
   /* Add the path for the executable binary to the list of search paths.  */
   std::string objfile_dir = ldirname (objfile_name (per_objfile->objfile));
@@ -9072,7 +9076,8 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
 
   gdb::unique_xmalloc_ptr<char> absolute_name;
   desc = openp (search_path, flags, file_name,
-		O_RDONLY | O_BINARY, &absolute_name);
+		O_RDONLY | O_BINARY, &absolute_name,
+		per_objfile->per_bfd->captured_cwd.c_str ());
   if (desc < 0)
     return NULL;
 
@@ -9126,7 +9131,7 @@ open_dwo_file (dwarf2_per_objfile *per_objfile,
   /* That didn't work, try debug-file-directory, which, despite its name,
      is a list of paths.  */
 
-  if (debug_file_directory.empty ())
+  if (per_objfile->per_bfd->captured_debug_dir.empty ())
     return NULL;
 
   return try_open_dwop_file (per_objfile, file_name,
@@ -9407,7 +9412,7 @@ open_dwp_file (dwarf2_per_objfile *per_objfile, const char *file_name)
      [IWBN if the dwp file name was recorded in the executable, akin to
      .gnu_debuglink, but that doesn't exist yet.]
      Strip the directory from FILE_NAME and search again.  */
-  if (!debug_file_directory.empty ())
+  if (!per_objfile->per_bfd->captured_debug_dir.empty ())
     {
       /* Don't implicitly search the current directory here.
 	 If the user wants to search "." to handle this case,
