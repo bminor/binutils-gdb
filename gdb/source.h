@@ -19,6 +19,7 @@
 #ifndef SOURCE_H
 #define SOURCE_H
 
+#include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_fd.h"
 
 struct program_space;
@@ -37,7 +38,8 @@ enum openp_flag
 DEF_ENUM_FLAGS_TYPE(openp_flag, openp_flags);
 
 extern int openp (const char *, openp_flags, const char *, int,
-		  gdb::unique_xmalloc_ptr<char> *);
+		  gdb::unique_xmalloc_ptr<char> *,
+		  const char *cwd = current_directory);
 
 extern int source_full_path_of (const char *, gdb::unique_xmalloc_ptr<char> *);
 

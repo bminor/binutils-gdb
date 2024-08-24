@@ -770,7 +770,8 @@ prepare_path_for_appending (const char *path)
     >>>>  eg executable, non-directory.  */
 int
 openp (const char *path, openp_flags opts, const char *string,
-       int mode, gdb::unique_xmalloc_ptr<char> *filename_opened)
+       int mode, gdb::unique_xmalloc_ptr<char> *filename_opened,
+       const char *cwd)
 {
   int fd;
   char *filename;
@@ -851,14 +852,14 @@ openp (const char *path, openp_flags opts, const char *string,
 	  int newlen;
 
 	  /* First, realloc the filename buffer if too short.  */
-	  len = strlen (current_directory);
+	  len = strlen (cwd);
 	  newlen = len + strlen (string) + 2;
 	  if (newlen > alloclen)
 	    {
 	      alloclen = newlen;
 	      filename = (char *) alloca (alloclen);
 	    }
-	  strcpy (filename, current_directory);
+	  strcpy (filename, cwd);
 	}
       else if (strchr(dir, '~'))
 	{
@@ -921,7 +922,7 @@ done:
 	*filename_opened = gdb_realpath (filename);
       else
 	*filename_opened
-	  = make_unique_xstrdup (gdb_abspath (filename).c_str ());
+	  = make_unique_xstrdup (gdb_abspath (filename, cwd).c_str ());
     }
 
   errno = last_errno;
