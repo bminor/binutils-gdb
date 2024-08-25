@@ -285,9 +285,7 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
       offset = i_shdrp[shindex]->sh_offset;
       shstrtabsize = i_shdrp[shindex]->sh_size;
 
-      /* Allocate and clear an extra byte at the end, to prevent crashes
-	 in case the string table is not terminated.  */
-      if (shstrtabsize + 1 <= 1
+      if (shstrtabsize == 0
 	  || bfd_seek (abfd, offset, SEEK_SET) != 0
 	  || (shstrtab
 	      = _bfd_mmap_readonly_persistent (abfd, shstrtabsize)) == NULL)
@@ -297,14 +295,13 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
 	     the string table over and over.  */
 	  i_shdrp[shindex]->sh_size = 0;
 	}
-      else if (shstrtab[shstrtabsize - 1] != '\0')
+      else if (shstrtab[shstrtabsize - 1] != 0)
 	{
 	  /* It is an error if a string table isn't terminated.  */
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-	    (_("%pB(%pA): string table is corrupt"),
-	     abfd, i_shdrp[shindex]->bfd_section);
-	  return NULL;
+	    (_("%pB: string table [%u] is corrupt"), abfd, shindex);
+	  shstrtab[shstrtabsize - 1] = 0;
 	}
       i_shdrp[shindex]->contents = shstrtab;
     }
@@ -1914,7 +1911,7 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("%pB: DT_STRTAB table is corrupt"), abfd);
-      goto error_return;
+      strbuf[dt_strsz - 1] = 0;
     }
 
   /* Get the real symbol count from DT_HASH or DT_GNU_HASH.  Prefer
