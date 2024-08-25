@@ -52,14 +52,10 @@ aarch64_linux_read_description (const aarch64_features &features)
     {
       tdesc = aarch64_create_target_description (features);
 
-      /* Configure the expedited registers.  By default we include x29, sp
-	 and pc, but we allow for up to 6 pointers as this is (currently)
-	 the most that we push.
-
-	 Calling init_target_desc takes a copy of all the strings pointed
-	 to by expedited_registers so this vector only needs to live for
-	 the scope of this function.  */
-      std::vector<const char *> expedited_registers (6);
+      /* Configure the expedited registers.  Calling init_target_desc takes
+	 a copy of all the strings pointed to by expedited_registers so this
+	 vector only needs to live for the scope of this function.  */
+      std::vector<const char *> expedited_registers;
       expedited_registers.push_back ("x29");
       expedited_registers.push_back ("sp");
       expedited_registers.push_back ("pc");
