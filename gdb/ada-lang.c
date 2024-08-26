@@ -203,6 +203,8 @@ static int symbols_are_identical_enums
 
 static bool ada_identical_enum_types_p (struct type *type1,
 					struct type *type2);
+
+static const char *ada_unqualify_enum_name (const char *name);
 
 
 /* The character set used for source files.  */
@@ -4976,8 +4978,8 @@ ada_identical_enum_types_p (struct type *type1, struct type *type2)
      suffix).  */
   for (int i = 0; i < type1->num_fields (); i++)
     {
-      const char *name_1 = type1->field (i).name ();
-      const char *name_2 = type2->field (i).name ();
+      const char *name_1 = ada_unqualify_enum_name (type1->field (i).name ());
+      const char *name_2 = ada_unqualify_enum_name (type2->field (i).name ());
       int len_1 = strlen (name_1);
       int len_2 = strlen (name_2);
 
@@ -8951,15 +8953,12 @@ ada_aligned_value_addr (struct type *type, const gdb_byte *valaddr)
 }
 
 
+/* Remove qualifications from the enumeration constant named NAME,
+   returning a pointer to the constant's base name.  */
 
-/* The printed representation of an enumeration literal with encoded
-   name NAME.  The value is good to the next call of ada_enum_name.  */
-const char *
-ada_enum_name (const char *name)
+static const char *
+ada_unqualify_enum_name (const char *name)
 {
-  static std::string storage;
-  const char *tmp;
-
   /* First, unqualify the enumeration name:
      1. Search for the last '.' character.  If we find one, then skip
      all the preceding characters, the unqualified name starts
@@ -8969,7 +8968,7 @@ ada_enum_name (const char *name)
      but stop searching when we hit an overloading suffix, which is
      of the form "__" followed by digits.  */
 
-  tmp = strrchr (name, '.');
+  const char *tmp = strrchr (name, '.');
   if (tmp != NULL)
     name = tmp + 1;
   else
@@ -8983,6 +8982,17 @@ ada_enum_name (const char *name)
 	}
     }
 
+  return name;
+}
+
+/* The printed representation of an enumeration literal with encoded
+   name NAME.  The value is good to the next call of ada_enum_name.  */
+const char *
+ada_enum_name (const char *name)
+{
+  static std::string storage;
+
+  name = ada_unqualify_enum_name (name);
   if (name[0] == 'Q')
     {
       int v;
@@ -9021,7 +9031,7 @@ ada_enum_name (const char *name)
     }
   else
     {
-      tmp = strstr (name, "__");
+      const char *tmp = strstr (name, "__");
       if (tmp == NULL)
 	tmp = strstr (name, "$");
       if (tmp != NULL)
