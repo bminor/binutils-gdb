@@ -1036,7 +1036,7 @@ proc test5 { } {
     binary scan $data i end_type
 
     # end_type is one greater than the last type in the stream
-    if { $end_type != 0x102e } {
+    if { $end_type != 0x1030 } {
 	fail "Incorrect end type value in TPI stream."
     } else {
 	pass "Correct end type value in TPI stream."

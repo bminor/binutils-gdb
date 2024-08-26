@@ -303,6 +303,11 @@ struct lf_modifier
   uint16_t padding;
 } ATTRIBUTE_PACKED;
 
+/* enum CV_ptrmode_e in cvinfo.h, shifted by 5 for the lfPointerAttr bitfield */
+#define CV_PTR_MODE_MASK	0xe0
+#define CV_PTR_MODE_PMEM	0x40
+#define CV_PTR_MODE_PMFUNC	0x60
+
 /* lfPointer in cvinfo.h */
 struct lf_pointer
 {
@@ -310,6 +315,10 @@ struct lf_pointer
   uint16_t kind;
   uint32_t base_type;
   uint32_t attributes;
+  /* following only if CV_PTR_MODE_PMEM or CV_PTR_MODE_PMFUNC in attributes */
+  uint32_t containing_class;
+  uint16_t ptr_to_mem_type;
+  uint16_t padding;
 } ATTRIBUTE_PACKED;
 
 /* lfArgList in cvinfo.h (used for both LF_ARGLIST and LF_SUBSTR_LIST) */

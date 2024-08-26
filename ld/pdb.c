@@ -2375,6 +2375,7 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
     case LF_POINTER:
       {
 	struct lf_pointer *ptr = (struct lf_pointer *) data;
+	uint32_t attributes;
 
 	if (size < offsetof (struct lf_pointer, attributes))
 	  {
@@ -2385,6 +2386,22 @@ handle_type (uint8_t *data, struct type_entry **map, uint32_t type_num,
 
 	if (!remap_type (&ptr->base_type, map, type_num, num_types))
 	  return false;
+
+	attributes = bfd_getl32 (&ptr->attributes);
+
+	if ((attributes & CV_PTR_MODE_MASK) == CV_PTR_MODE_PMEM
+	    || (attributes & CV_PTR_MODE_MASK) == CV_PTR_MODE_PMFUNC)
+	  {
+	    if (size < offsetof (struct lf_pointer, ptr_to_mem_type))
+	      {
+		einfo (_("%P: warning: truncated CodeView type record"
+			 " LF_POINTER\n"));
+		return false;
+	      }
+
+	    if (!remap_type (&ptr->containing_class, map, type_num, num_types))
+	      return false;
+	  }
 
 	break;
       }
