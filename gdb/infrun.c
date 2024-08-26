@@ -9267,8 +9267,15 @@ print_no_history_reason (struct ui_out *uiout)
 {
   if (uiout->is_mi_like_p ())
     uiout->field_string ("reason", async_reason_lookup (EXEC_ASYNC_NO_HISTORY));
+  else if (execution_direction == EXEC_FORWARD)
+    uiout->text ("\nReached end of recorded history; stopping.\nFollowing "
+		 "forward execution will be added to history.\n");
   else
-    uiout->text ("\nNo more reverse-execution history.\n");
+    {
+      gdb_assert (execution_direction == EXEC_REVERSE);
+      uiout->text ("\nReached end of recorded history; stopping.\nBackward "
+		   "execution from here not possible.\n");
+    }
 }
 
 /* Print current location without a level number, if we have changed

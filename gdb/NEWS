@@ -35,6 +35,11 @@
 * Remove support (native and remote) for QNX Neutrino (triplet
   `i[3456]86-*-nto*`).
 
+* In a record session, when a forward emulation reaches the end of the reverse
+  history, the warning message has been changed to indicate that the end of the
+  history has been reached.  It also specifies that the forward execution can
+  continue, and the recording will also continue.
+
 *** Changes in GDB 15
 
 * The MPX commands "show/set mpx bound" have been deprecated, as Intel
