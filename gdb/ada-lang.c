@@ -4976,21 +4976,19 @@ is_nondebugging_type (struct type *type)
 static bool
 ada_identical_enum_types_p (struct type *type1, struct type *type2)
 {
-  int i;
-
   /* The heuristic we use here is fairly conservative.  We consider
      that 2 enumerate types are identical if they have the same
      number of enumerals and that all enumerals have the same
      underlying value and name.  */
 
   /* All enums in the type should have an identical underlying value.  */
-  for (i = 0; i < type1->num_fields (); i++)
+  for (int i = 0; i < type1->num_fields (); i++)
     if (type1->field (i).loc_enumval () != type2->field (i).loc_enumval ())
       return false;
 
   /* All enumerals should also have the same name (modulo any numerical
      suffix).  */
-  for (i = 0; i < type1->num_fields (); i++)
+  for (int i = 0; i < type1->num_fields (); i++)
     {
       const char *name_1 = type1->field (i).name ();
       const char *name_2 = type2->field (i).name ();
