@@ -4996,12 +4996,9 @@ ada_identical_enum_types_p (struct type *type1, struct type *type2)
       int len_1 = strlen (name_1);
       int len_2 = strlen (name_2);
 
-      ada_remove_trailing_digits (type1->field (i).name (), &len_1);
-      ada_remove_trailing_digits (type2->field (i).name (), &len_2);
-      if (len_1 != len_2
-	  || strncmp (type1->field (i).name (),
-		      type2->field (i).name (),
-		      len_1) != 0)
+      ada_remove_trailing_digits (name_1, &len_1);
+      ada_remove_trailing_digits (name_2, &len_2);
+      if (len_1 != len_2 || strncmp (name_1, name_2, len_1) != 0)
 	return 0;
     }
 
