@@ -3814,8 +3814,6 @@ ada_resolve_enum (std::vector<struct block_symbol> &syms,
   for (int i = 0; i < syms.size (); ++i)
     {
       struct type *type2 = ada_check_typedef (syms[i].symbol->type ());
-      if (type1->num_fields () != type2->num_fields ())
-	continue;
       if (strcmp (type1->name (), type2->name ()) != 0)
 	continue;
       if (ada_identical_enum_types_p (type1, type2))
@@ -4970,8 +4968,7 @@ is_nondebugging_type (struct type *type)
    that are deemed "identical" for practical purposes.
 
    This function assumes that TYPE1 and TYPE2 are both TYPE_CODE_ENUM
-   types and that their number of enumerals is identical (in other
-   words, type1->num_fields () == type2->num_fields ()).  */
+   types.  */
 
 static bool
 ada_identical_enum_types_p (struct type *type1, struct type *type2)
@@ -4980,6 +4977,9 @@ ada_identical_enum_types_p (struct type *type1, struct type *type2)
      that 2 enumerate types are identical if they have the same
      number of enumerals and that all enumerals have the same
      underlying value and name.  */
+
+  if (type1->num_fields () != type2->num_fields ())
+    return false;
 
   /* All enums in the type should have an identical underlying value.  */
   for (int i = 0; i < type1->num_fields (); i++)
@@ -5044,12 +5044,6 @@ symbols_are_identical_enums (const std::vector<struct block_symbol> &syms)
   /* Quick check: They should all have the same value.  */
   for (i = 1; i < syms.size (); i++)
     if (syms[i].symbol->value_longest () != syms[0].symbol->value_longest ())
-      return 0;
-
-  /* Quick check: They should all have the same number of enumerals.  */
-  for (i = 1; i < syms.size (); i++)
-    if (syms[i].symbol->type ()->num_fields ()
-	!= syms[0].symbol->type ()->num_fields ())
       return 0;
 
   /* All the sanity checks passed, so we might have a set of
