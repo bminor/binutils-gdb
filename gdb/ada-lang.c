@@ -8758,7 +8758,14 @@ ada_atr_enum_rep (struct expression *exp, enum noside noside, struct type *type,
     type = type->target_type ();
   if (type->code () != TYPE_CODE_ENUM)
     error (_("'Enum_Rep only defined on enum types"));
-  if (!types_equal (type, arg->type ()))
+  /* In some scenarios, GNAT will emit two distinct-but-equivalent
+     enum types.  For example, this can happen with an artificial
+     range type like the index type in:
+
+     type AR is array (Enum_With_Gaps range <>) of MyWord;
+
+     This is why types_equal is not used here.  */
+  if (!ada_identical_enum_types_p (type, arg->type ()))
     error (_("'Enum_Rep requires argument to have same type as enum"));
 
   return value_cast (inttype, arg);
