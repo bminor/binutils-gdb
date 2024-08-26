@@ -13286,7 +13286,6 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (die->child != NULL)
     {
       struct die_info *child_die;
-      const char *name;
 
       child_die = die->child;
       while (child_die && child_die->tag)
@@ -13296,11 +13295,7 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 	      process_die (child_die, cu);
 	    }
 	  else
-	    {
-	      name = dwarf2_name (child_die, cu);
-	      if (name)
-		new_symbol (child_die, this_type, cu);
-	    }
+	    new_symbol (child_die, this_type, cu);
 
 	  child_die = child_die->sibling;
 	}
