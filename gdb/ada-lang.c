@@ -201,7 +201,8 @@ static symbol_name_matcher_ftype *ada_get_symbol_name_matcher
 static int symbols_are_identical_enums
   (const std::vector<struct block_symbol> &syms);
 
-static int ada_identical_enum_types_p (struct type *type1, struct type *type2);
+static bool ada_identical_enum_types_p (struct type *type1,
+					struct type *type2);
 
 
 /* The character set used for source files.  */
@@ -4965,14 +4966,14 @@ is_nondebugging_type (struct type *type)
   return (name != NULL && strcmp (name, "<variable, no debug info>") == 0);
 }
 
-/* Return nonzero if TYPE1 and TYPE2 are two enumeration types
+/* Return true if TYPE1 and TYPE2 are two enumeration types
    that are deemed "identical" for practical purposes.
 
    This function assumes that TYPE1 and TYPE2 are both TYPE_CODE_ENUM
    types and that their number of enumerals is identical (in other
    words, type1->num_fields () == type2->num_fields ()).  */
 
-static int
+static bool
 ada_identical_enum_types_p (struct type *type1, struct type *type2)
 {
   int i;
@@ -4985,7 +4986,7 @@ ada_identical_enum_types_p (struct type *type1, struct type *type2)
   /* All enums in the type should have an identical underlying value.  */
   for (i = 0; i < type1->num_fields (); i++)
     if (type1->field (i).loc_enumval () != type2->field (i).loc_enumval ())
-      return 0;
+      return false;
 
   /* All enumerals should also have the same name (modulo any numerical
      suffix).  */
@@ -4999,10 +5000,10 @@ ada_identical_enum_types_p (struct type *type1, struct type *type2)
       ada_remove_trailing_digits (name_1, &len_1);
       ada_remove_trailing_digits (name_2, &len_2);
       if (len_1 != len_2 || strncmp (name_1, name_2, len_1) != 0)
-	return 0;
+	return false;
     }
 
-  return 1;
+  return true;
 }
 
 /* Return nonzero if all the symbols in SYMS are all enumeral symbols
