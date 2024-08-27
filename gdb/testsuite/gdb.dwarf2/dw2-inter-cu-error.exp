@@ -47,5 +47,5 @@ if [prepare_for_testing "failed to prepare" $testfile \
 }
 
 # Verify that GDB notices the null DIE.
-gdb_assert { [regexp "Dwarf Error: Unexpected null DIE" $gdb_file_cmd_msg] } \
+gdb_assert { [regexp "DWARF Error: Unexpected null DIE" $gdb_file_cmd_msg] } \
 	"Null DIE error missing"
