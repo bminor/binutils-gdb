@@ -6578,13 +6578,13 @@ i386_assemble (char *line)
 	  return;
 	}
 
-      /* Don't allow e.g. KMOV in TLS code sequences.  */
+      /* Don't allow e.g. KMOV in TLS code sequences which will trigger
+	 linker error later.  */
       for (j = i.imm_operands; j < i.operands; ++j)
 	switch (i.reloc[j])
 	  {
 	  case BFD_RELOC_X86_64_GOTTPOFF:
 	  case BFD_RELOC_386_TLS_GOTIE:
-	  case BFD_RELOC_386_TLS_LE_32:
 	  case BFD_RELOC_X86_64_TLSLD:
 	    as_bad (_("TLS relocation cannot be used with `%s'"), insn_name (&i.tm));
 	    return;
