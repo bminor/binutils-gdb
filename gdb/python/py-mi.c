@@ -168,8 +168,7 @@ gdbpy_execute_mi_command (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (const gdb_exception &except)
     {
-      gdbpy_convert_exception (except);
-      return nullptr;
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
 
   return uiout.result ().release ();

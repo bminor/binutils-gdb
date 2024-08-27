@@ -2056,8 +2056,7 @@ convert_value_from_python (PyObject *obj)
     }
   catch (const gdb_exception &except)
     {
-      gdbpy_convert_exception (except);
-      return NULL;
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
 
   return value;

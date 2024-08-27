@@ -74,8 +74,7 @@ py_print_bpstat (bpstat *bs, enum gdb_signal stop_signal)
     }
   catch (const gdb_exception &except)
     {
-      gdbpy_convert_exception (except);
-      return nullptr;
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
 
   gdbpy_ref<> dict = uiout.result ();

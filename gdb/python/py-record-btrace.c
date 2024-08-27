@@ -318,8 +318,7 @@ recpy_bt_insn_decoded (PyObject *self, void *closure)
     }
   catch (const gdb_exception &except)
     {
-      gdbpy_convert_exception (except);
-      return NULL;
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
 
   return PyBytes_FromString (strfile.string ().c_str ());

@@ -389,8 +389,7 @@ frame_info_to_frame_object (const frame_info_ptr &frame)
     }
   catch (const gdb_exception &except)
     {
-      gdbpy_convert_exception (except);
-      return NULL;
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
 
   return (PyObject *) frame_obj.release ();
@@ -538,8 +537,7 @@ frapy_read_var (PyObject *self, PyObject *args, PyObject *kw)
 	}
       catch (const gdb_exception &except)
 	{
-	  gdbpy_convert_exception (except);
-	  return NULL;
+	  GDB_PY_HANDLE_EXCEPTION (except);
 	}
 
       if (!var)

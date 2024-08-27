@@ -972,8 +972,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   catch (const gdb_exception &ex)
     {
       /* We know this will always throw.  */
-      gdbpy_convert_exception (ex);
-      return NULL;
+      GDB_PY_HANDLE_EXCEPTION (ex);
     }
 
   if (!sals.empty ())

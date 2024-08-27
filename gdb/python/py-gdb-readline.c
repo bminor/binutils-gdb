@@ -59,8 +59,7 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
       /* This readline callback is called without the GIL held.  */
       gdbpy_gil gil;
 
-      gdbpy_convert_exception (except);
-      return NULL;
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
 
   /* Detect EOF (Ctrl-D).  */

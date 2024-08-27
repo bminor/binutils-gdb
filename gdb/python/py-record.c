@@ -670,7 +670,6 @@ gdbpy_start_recording (PyObject *self, PyObject *args)
 {
   const char *method = NULL;
   const char *format = NULL;
-  PyObject *ret = NULL;
 
   if (!PyArg_ParseTuple (args, "|ss", &method, &format))
     return NULL;
@@ -678,14 +677,12 @@ gdbpy_start_recording (PyObject *self, PyObject *args)
   try
     {
       record_start (method, format, 0);
-      ret = gdbpy_current_recording (self, args);
+      return gdbpy_current_recording (self, args);
     }
   catch (const gdb_exception &except)
     {
-      gdbpy_convert_exception (except);
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
-
-  return ret;
 }
 
 /* Implementation of gdb.current_recording (self) -> gdb.Record.  */

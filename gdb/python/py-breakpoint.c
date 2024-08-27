@@ -640,8 +640,7 @@ bppy_get_commands (PyObject *self, void *closure)
     }
   catch (const gdb_exception &except)
     {
-      gdbpy_convert_exception (except);
-      return NULL;
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
 
   return host_string_to_python_string (stb.c_str ()).release ();
