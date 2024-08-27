@@ -81,18 +81,20 @@ proc gdb_cont_to_bp_line { line threads nthreads } {
 
 proc gdb_cont_to_no_history_backward { threads cmd nthreads } {
     gdb_cont_to $threads $cmd \
-        [multi_line \
-             "Reached end of recorded.*Backward execution.*" \
-             "\[^\\\r\\\n\]*" \
-             "\[^\\\r\\\n\]*" \
-            ] \
-        $nthreads
+	[multi_line \
+	     "Reached end of recorded history; stopping\." \
+	     "Backward execution from here not possible\." \
+	     "\[^\\\r\\\n\]*" \
+	     "\[^\\\r\\\n\]*" \
+	     ] \
+	$nthreads
 }
 
 proc gdb_cont_to_no_history_forward { threads cmd nthreads } {
     gdb_cont_to $threads $cmd \
 	[multi_line \
-	     "Reached end of recorded.*Following forward.*" \
+	     "Reached end of recorded history; stopping\." \
+	     "Following forward execution will be added to history\." \
 	     "\[^\\\r\\\n\]*" \
 	     "\[^\\\r\\\n\]*" \
 	    ] \
