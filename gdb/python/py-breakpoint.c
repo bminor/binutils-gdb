@@ -1054,8 +1054,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   catch (const gdb_exception &except)
     {
       bppy_pending_object = NULL;
-      gdbpy_convert_exception (except);
-      return -1;
+      GDB_PY_SET_HANDLE_EXCEPTION (except);
     }
 
   BPPY_SET_REQUIRE_VALID ((gdbpy_breakpoint_object *) self);

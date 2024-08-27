@@ -541,8 +541,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (const gdb_exception &except)
     {
-      gdbpy_convert_exception (except);
-      return -1;
+      GDB_PY_SET_HANDLE_EXCEPTION (except);
     }
 
   return 0;
