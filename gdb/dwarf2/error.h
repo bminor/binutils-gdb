@@ -21,7 +21,7 @@
 #define GDB_DWARF2_ERROR_H
 
 /* Canonical capitalization of "dwarf error".  */
-#define DWARF_ERROR "Dwarf Error"
+#define DWARF_ERROR "DWARF Error"
 
 /* Prefix to be used in dwarf errors.  */
 #define DWARF_ERROR_PREFIX DWARF_ERROR ": "
