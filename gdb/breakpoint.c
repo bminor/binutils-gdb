@@ -8107,11 +8107,6 @@ disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib
     {
       bool bp_modified = false;
 
-      if (b.type != bp_jit_event
-	  && !is_breakpoint (&b)
-	  && !is_tracepoint (&b))
-	continue;
-
       for (bp_location &loc : b.locations ())
 	{
 	  if (pspace != loc.pspace || loc.shlib_disabled)
@@ -8145,7 +8140,7 @@ disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib
 
 	  bp_modified = true;
 
-	  if (!disabled_shlib_breaks)
+	  if (!disabled_shlib_breaks && user_breakpoint_p (&b))
 	    {
 	      target_terminal::ours_for_output ();
 	      warning (_("Temporarily disabling breakpoints "

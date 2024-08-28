@@ -376,7 +376,55 @@ proc_with_prefix test_solib_unmap_events { } {
 	"one dynamic linker found after dlclose calls"
 }
 
+# Check that we can 'next' over the dlclose calls without GDB giving any
+# warnings or errors.
+proc_with_prefix test_next_over_dlclose {} {
+    clean_restart $::binfile
+
+    if { ![runto_main] } {
+	return
+    }
+
+    set dlclose_lineno [gdb_get_line_number "dlclose" $::srcfile]
+    gdb_breakpoint $::srcfile:$dlclose_lineno
+    gdb_breakpoint $::srcfile:$::bp_main
+
+    # Remove the pause.  We no longer need it.
+    gdb_test "print wait_for_gdb = 0" "\\\$1 = 0"
+
+    set loc_re [multi_line \
+		    "\[^\r\n\]+/[string_to_regexp $::srcfile]:$dlclose_lineno" \
+		    "$dlclose_lineno\\s+dlclose \[^\r\n\]+"]
+
+    # This loop mirrors the loop in dlmopen.c where the inferior performs
+    # four calls to dlclose.  Here we continue to the dlclose, and then use
+    # 'next' to step over the call.  As part of the 'next' GDB will insert
+    # breakpoints to catch longjmps into the multiple copies of libc which
+    # have been loaded.  Each dlclose call will cause a copy of libc to be
+    # unloaded, which should disable the longjmp breakpoint that GDB
+    # previously inserted.
+    #
+    # At one point a bug in GDB meant that we failed to correctly disable
+    # the longjmp breakpoints and GDB would try to remove the breakpoint
+    # from a library after it had been unloaded, which would trigger a
+    # warning.
+    for { set i 0 } { $i < 4 } { incr i } {
+	gdb_continue_to_breakpoint "continue to dlclose $i" $loc_re
+	gdb_test "next" "^$::decimal\\s+for \\(dl = 0;\[^\r\n\]+\\)" \
+	    "next over dlclose $i"
+    }
+
+    # Just to confirm that we are where we think we are, continue to the
+    # final 'return' line in main.  If this isn't hit then we likely went
+    # wrong earlier.
+    gdb_continue_to_breakpoint "continue to final return" \
+	[multi_line \
+	     "\[^\r\n\]+/[string_to_regexp $::srcfile]:$::bp_main" \
+	     "$::bp_main\\s+return 0;\[^\r\n\]+"]
+}
+
 # Run the actual tests.
 test_dlmopen_no_attach
 test_dlmopen_with_attach
 test_solib_unmap_events
+test_next_over_dlclose
