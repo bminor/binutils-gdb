@@ -2035,7 +2035,7 @@ skip_attr_bytes (unsigned long form,
 
 static abbrev_entry *
 get_type_abbrev_from_form (unsigned long form,
-			   unsigned long uvalue,
+			   uint64_t uvalue,
 			   uint64_t cu_offset,
 			   unsigned char *cu_end,
 			   const struct dwarf_section *section,
@@ -2043,16 +2043,6 @@ get_type_abbrev_from_form (unsigned long form,
 			   unsigned char **data_return,
 			   abbrev_map **map_return)
 {
-  unsigned long   abbrev_number;
-  abbrev_map *    map;
-  abbrev_entry *  entry;
-  unsigned char * data;
-
-  if (abbrev_num_return != NULL)
-    * abbrev_num_return = 0;
-  if (data_return != NULL)
-    * data_return = NULL;
-
   switch (form)
     {
     case DW_FORM_GNU_ref_alt:
@@ -2063,8 +2053,8 @@ get_type_abbrev_from_form (unsigned long form,
     case DW_FORM_ref_addr:
       if (uvalue >= section->size)
 	{
-	  warn (_("Unable to resolve ref_addr form: uvalue %lx "
-		  "> section size %" PRIx64 " (%s)\n"),
+	  warn (_("Unable to resolve ref_addr form: uvalue %" PRIx64
+		  " >= section size %" PRIx64 " (%s)\n"),
 		uvalue, section->size, section->name);
 	  return NULL;
 	}
@@ -2082,8 +2072,8 @@ get_type_abbrev_from_form (unsigned long form,
       if (uvalue + cu_offset < uvalue
 	  || uvalue + cu_offset > (size_t) (cu_end - section->start))
 	{
-	  warn (_("Unable to resolve ref form: uvalue %lx + cu_offset %" PRIx64
-		  " > CU size %tx\n"),
+	  warn (_("Unable to resolve ref form: uvalue %" PRIx64
+		  " + cu_offset %" PRIx64 " > CU size %tx\n"),
 		uvalue, cu_offset, cu_end - section->start);
 	  return NULL;
 	}
@@ -2097,17 +2087,18 @@ get_type_abbrev_from_form (unsigned long form,
       return NULL;
     }
 
-  data = (unsigned char *) section->start + uvalue;
-  map = find_abbrev_map_by_offset (uvalue);
+  abbrev_map *map = find_abbrev_map_by_offset (uvalue);
 
   if (map == NULL)
     {
-      warn (_("Unable to find abbreviations for CU offset %#lx\n"), uvalue);
+      warn (_("Unable to find abbreviations for CU offset %" PRIx64 "\n"),
+	    uvalue);
       return NULL;
     }
   if (map->list == NULL)
     {
-      warn (_("Empty abbreviation list encountered for CU offset %lx\n"), uvalue);
+      warn (_("Empty abbreviation list encountered for CU offset %" PRIx64 "\n"),
+	    uvalue);
       return NULL;
     }
 
@@ -2119,20 +2110,23 @@ get_type_abbrev_from_form (unsigned long form,
 	*map_return = NULL;
     }
 
+  unsigned char *data = section->start + uvalue;
   if (form == DW_FORM_ref_addr)
     cu_end = section->start + map->end;
 
+  unsigned long abbrev_number;
   READ_ULEB (abbrev_number, data, cu_end);
 
+  if (abbrev_num_return != NULL)
+    *abbrev_num_return = abbrev_number;
+
+  if (data_return != NULL)
+    *data_return = data;
+
+  abbrev_entry *entry;
   for (entry = map->list->first_abbrev; entry != NULL; entry = entry->next)
     if (entry->number == abbrev_number)
       break;
-
-  if (abbrev_num_return != NULL)
-    * abbrev_num_return = abbrev_number;
-
-  if (data_return != NULL)
-    * data_return = data;
 
   if (entry == NULL)
     warn (_("Unable to find entry for abbreviation %lu\n"), abbrev_number);
