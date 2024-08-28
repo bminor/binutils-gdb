@@ -45,8 +45,8 @@ set xfail_re \
     [multi_line \
 	 "Multiple matches for last_node_id" \
 	 "\\\[0\\\] cancel" \
-	 "\\\[1\\\] pck\.last_node_id at .*.adb:17" \
-	 "\\\[2\\\] pck\.last_node_id at .*.adb:17" \
+	 "\\\[1\\\] pck\\.last_node_id at .*.adb:17" \
+	 "\\\[2\\\] pck\\.last_node_id at .*.adb:17" \
 	 "> $"]
 
 # Make sure that last_node_id is set to zero...
