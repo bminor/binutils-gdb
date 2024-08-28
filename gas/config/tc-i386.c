@@ -1297,7 +1297,7 @@ static htab_t reg_hash;
 static const struct
 {
   const char *str;
-  int len;
+  unsigned int len;
   const enum bfd_reloc_code_real rel[2];
   const i386_operand_type types64;
   bool need_GOT_symbol;
@@ -6678,7 +6678,7 @@ i386_assemble (char *line)
 	      {
 		if (gotrel[k].rel[object_64bit] == i.reloc[j])
 		  {
-		    as_bad (_("%s relocation cannot be used with `%s'"),
+		    as_bad (_("@%s operator cannot be used with `%s'"),
 			  gotrel[k].str, insn_name (&i.tm));
 		    return;
 		  }
