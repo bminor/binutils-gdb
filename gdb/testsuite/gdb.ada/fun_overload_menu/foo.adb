@@ -20,12 +20,12 @@ procedure Foo is
 
    function F (I : Integer; A : Integer_Access) return Boolean is
    begin
-      return True;
+      return True; --  LINE 1
    end F;
 
    function F (I : New_Integer; A : Integer_Access) return Boolean is
    begin
-      return False;
+      return False; --  LINE 2
    end F;
 
    procedure P (I : Integer; A : Integer_Access) is
