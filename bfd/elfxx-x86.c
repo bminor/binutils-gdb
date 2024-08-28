@@ -745,6 +745,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       ret->tls_get_addr = "__tls_get_addr";
       ret->relative_r_type = R_X86_64_RELATIVE;
       ret->relative_r_name = "R_X86_64_RELATIVE";
+      ret->ax_register = "RAX";
       ret->elf_append_reloc = elf_append_rela;
       ret->elf_write_addend_in_got = _bfd_elf64_write_addend;
     }
@@ -776,6 +777,7 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 	  ret->pointer_r_type = R_386_32;
 	  ret->relative_r_type = R_386_RELATIVE;
 	  ret->relative_r_name = "R_386_RELATIVE";
+	  ret->ax_register = "EAX";
 	  ret->elf_append_reloc = elf_append_rel;
 	  ret->elf_write_addend = _bfd_elf32_write_addend;
 	  ret->elf_write_addend_in_got = _bfd_elf32_write_addend;
@@ -3211,15 +3213,14 @@ _bfd_x86_elf_link_report_tls_transition_error
    enum elf_x86_tls_error_type tls_error)
 {
   const char *name;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  struct elf_x86_link_hash_table *htab
+    = elf_x86_hash_table (info, bed->target_id);
 
   if (h)
     name = h->root.root.string;
   else
     {
-      const struct elf_backend_data *bed
-	= get_elf_backend_data (abfd);
-      struct elf_x86_link_hash_table *htab
-	= elf_x86_hash_table (info, bed->target_id);
       if (htab == NULL)
 	name = "*unknown*";
       else
@@ -3265,8 +3266,9 @@ _bfd_x86_elf_link_report_tls_transition_error
       info->callbacks->einfo
 	/* xgettext:c-format */
 	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
-	   "in indirect CALL only\n"),
-	 abfd, asect, rel->r_offset, from_reloc_name, name);
+	   "in indirect CALL with %s register only\n"),
+	 abfd, asect, rel->r_offset, from_reloc_name, name,
+	 htab->ax_register);
       break;
 
     case elf_x86_tls_error_lea:

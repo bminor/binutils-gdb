@@ -2,8 +2,8 @@
 	.globl	_start
 	.type	_start,@function
 _start:
-	leaq	foo@tlsdesc(%rip), %rax
-	jmp	*foo@tlscall(%rax)
+	leaq	foo@tlsdesc(%rip), %rcx
+	call	*foo@tlscall(%rcx)
 	.globl foo
 	.section	.tdata,"awT",@progbits
 	.align 8
