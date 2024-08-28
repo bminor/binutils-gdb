@@ -687,6 +687,7 @@ struct elf_x86_link_hash_table
   const char *dynamic_interpreter;
   const char *tls_get_addr;
   const char *relative_r_name;
+  const char *ax_register;
   void (*elf_append_reloc) (bfd *, asection *, Elf_Internal_Rela *);
   void (*elf_write_addend) (bfd *, uint64_t, void *);
   void (*elf_write_addend_in_got) (bfd *, uint64_t, void *);
