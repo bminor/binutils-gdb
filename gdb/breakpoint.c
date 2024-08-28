@@ -8104,29 +8104,37 @@ disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib
 
   bool disabled_shlib_breaks = false;
 
-  for (bp_location *loc : all_bp_locations ())
+  for (breakpoint &b : all_breakpoints ())
     {
-      /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
-      struct breakpoint *b = loc->owner;
+      bool bp_modified = false;
 
-      if (pspace == loc->pspace
-	  && !loc->shlib_disabled
-	  && (((b->type == bp_breakpoint
-		|| b->type == bp_jit_event
-		|| b->type == bp_hardware_breakpoint)
-	       && (loc->loc_type == bp_loc_hardware_breakpoint
-		   || loc->loc_type == bp_loc_software_breakpoint))
-	      || is_tracepoint (b))
-	  && solib_contains_address_p (solib, loc->address))
+      if (b.type != bp_breakpoint
+	  && b.type != bp_jit_event
+	  && b.type != bp_hardware_breakpoint
+	  && !is_tracepoint (&b))
+	continue;
+
+      for (bp_location &loc : b.locations ())
 	{
-	  loc->shlib_disabled = 1;
+	  if (pspace != loc.pspace || loc.shlib_disabled)
+	    continue;
+
+	  if (loc.loc_type != bp_loc_hardware_breakpoint
+	      && loc.loc_type != bp_loc_software_breakpoint
+	      && !is_tracepoint (&b))
+	    continue;
+
+	  if (!solib_contains_address_p (solib, loc.address))
+	    continue;
+
+	  loc.shlib_disabled = 1;
+
 	  /* At this point, we cannot rely on remove_breakpoint
 	     succeeding so we must mark the breakpoint as not inserted
 	     to prevent future errors occurring in remove_breakpoints.  */
-	  loc->inserted = 0;
+	  loc.inserted = 0;
 
-	  /* This may cause duplicate notifications for the same breakpoint.  */
-	  notify_breakpoint_modified (b);
+	  bp_modified = true;
 
 	  if (!disabled_shlib_breaks)
 	    {
@@ -8134,9 +8142,12 @@ disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib
 	      warning (_("Temporarily disabling breakpoints "
 			 "for unloaded shared library \"%s\""),
 		       solib.so_name.c_str ());
+	      disabled_shlib_breaks = true;
 	    }
-	  disabled_shlib_breaks = true;
 	}
+
+      if (bp_modified)
+	notify_breakpoint_modified (&b);
     }
 }
 

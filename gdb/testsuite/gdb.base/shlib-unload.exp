@@ -1,0 +1,114 @@
+# Copyright 2024-2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Tests for GDB's handling of a shared library being unloaded via a
+# call to dlclose.  See the individual test_* procs for a description
+# of each test.
+
+standard_testfile .c -lib.c
+
+# One of the tests uses this Python file.  The test_* proc checks that
+# GDB supports Python tests.  Some of the other procs don't use this
+# Python file.
+set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
+
+# Build the library and copy it to the target.
+set libname ${testfile}-lib
+set libfile [standard_output_file $libname]
+if { [build_executable "build shlib" $libfile $srcfile2 {debug shlib}] == -1} {
+    return
+}
+set libfile_on_target [gdb_download_shlib $libfile]
+
+# Build the executable.
+set opts [list debug shlib_load additional_flags=-DSHLIB_NAME=\"${libname}\"]
+if { [build_executable "build exec" $binfile $srcfile $opts] == -1} {
+    return
+}
+
+# The line number of the dlclose call.
+set bp_line [gdb_get_line_number "Break here" $srcfile]
+
+# If the target is remote, then the library name in the bp_disabled_re
+# below will have a 'target:' prefix.
+if {[is_remote target]} {
+    set target_prefix_re "target:"
+} else {
+    set target_prefix_re ""
+}
+
+# The line emitted when GDB disables breakpoints after unloading a
+# shared library.
+set bp_disabled_re "warning: Temporarily disabling breakpoints for unloaded shared library \"$target_prefix_re[string_to_regexp $::libfile_on_target]\""
+
+# The complete regexp for when GDB stops on the line after BP_LINE,
+# assuming that GDB has disabled some breakpoints.
+set stop_after_bp_re [multi_line \
+			  "^$::bp_disabled_re" \
+			  "[expr $::bp_line + 1]\\s+assert \\(res == 0\\);"]
+
+# Checking that a breakpoint with multiple locations in a shared
+# library only triggers a single breakpoint modified event from
+# disable_breakpoints_in_unloaded_shlib when the shared library is
+# unloaded.
+proc_with_prefix test_bp_modified_events {} {
+    if { ![allow_python_tests] } {
+	unsupported "python support needed"
+	return
+    }
+
+    clean_restart $::binfile
+
+    if {![runto_main]} {
+	return
+    }
+
+    # If the debug information doesn't allow GDB to identify inline
+    # functions then this test isn't going to work.
+    get_debug_format
+    if { [skip_inline_frame_tests] } {
+	unsupported "skipping inline frame tests"
+	return
+    }
+
+    gdb_breakpoint $::srcfile:$::bp_line
+    gdb_continue_to_breakpoint "stop before dlclose"
+
+    gdb_breakpoint inline_func
+    set bp_num [get_integer_valueof "\$bpnum" "*UNKNOWN*" \
+		    "get b/p number"]
+
+    gdb_test_no_output "source $::pyfile" "import python scripts"
+
+    gdb_test "next" $::stop_after_bp_re
+
+    # The breakpoint should have been modified once when some of its
+    # locations are made pending after the shared library is unloaded.
+    gdb_test_multiple "python print(bp_modified_counts\[$bp_num\])" "" {
+	-re -wrap "^1" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "^2" {
+	    # A second event occurs when the pending breakpoint is
+	    # incorrectly deleted.
+	    kfail gdb/32404 $gdb_test_name
+	}
+	-re -wrap "^$::decimal" {
+	    fail $gdb_test_name
+	}
+    }
+}
+
+test_bp_modified_events
