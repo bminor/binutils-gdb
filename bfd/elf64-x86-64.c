@@ -1409,32 +1409,8 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 	      : elf_x86_tls_error_yes);
 
     case R_X86_64_TLSDESC_CALL:
-      /* Check transition from GDesc access model:
-		call *x@tlsdesc(%rax) <--- LP64 mode.
-		call *x@tlsdesc(%eax) <--- X32 mode.
-       */
-      if (offset + 2 <= sec->size)
-	{
-	  unsigned int prefix;
-	  call = contents + offset;
-	  prefix = 0;
-	  if (!ABI_64_P (abfd))
-	    {
-	      /* Check for call *x@tlsdesc(%eax).  */
-	      if (call[0] == 0x67)
-		{
-		  prefix = 1;
-		  if (offset + 3 > sec->size)
-		    return elf_x86_tls_error_yes;
-		}
-	    }
-	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
-	  return (call[prefix] == 0xff && call[1 + prefix] == 0x10
-		  ? elf_x86_tls_error_none
-		  : elf_x86_tls_error_indirect_call);
-	}
-
-      return elf_x86_tls_error_yes;
+      /* It has been checked in elf_x86_64_tls_transition.  */
+      return elf_x86_tls_error_none;
 
     default:
       abort ();
@@ -1459,6 +1435,8 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
   unsigned int from_type = *r_type;
   unsigned int to_type = from_type;
   bool check = true;
+  bfd_vma offset;
+  bfd_byte *call;
 
   /* Skip TLS transition for functions.  */
   if (h != NULL
@@ -1468,10 +1446,49 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 
   switch (from_type)
     {
+    case R_X86_64_TLSDESC_CALL:
+      /* Check valid GDesc call:
+		call *x@tlsdesc(%rax) <--- LP64 mode.
+		call *x@tlsdesc(%eax) <--- X32 mode.
+       */
+      offset = rel->r_offset;
+      call = NULL;
+      if (offset + 2 <= sec->size)
+	{
+	  unsigned int prefix;
+	  call = contents + offset;
+	  prefix = 0;
+	  if (!ABI_64_P (abfd))
+	    {
+	      /* Check for call *x@tlsdesc(%eax).  */
+	      if (call[0] == 0x67)
+		{
+		  prefix = 1;
+		  if (offset + 3 > sec->size)
+		    call = NULL;
+		}
+	    }
+
+	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
+	  if (call != NULL
+	      && (call[prefix] != 0xff || call[1 + prefix] != 0x10))
+	    call = NULL;
+	}
+
+      if (call == NULL)
+	{
+	  _bfd_x86_elf_link_report_tls_transition_error
+	    (info, abfd, sec, symtab_hdr, h, sym, rel,
+	     "R_X86_64_TLSDESC_CALL", NULL,
+	     elf_x86_tls_error_indirect_call);
+	  return false;
+	}
+
+      /* Fall through.  */
+
     case R_X86_64_TLSGD:
     case R_X86_64_GOTPC32_TLSDESC:
     case R_X86_64_CODE_4_GOTPC32_TLSDESC:
-    case R_X86_64_TLSDESC_CALL:
     case R_X86_64_GOTTPOFF:
     case R_X86_64_CODE_4_GOTTPOFF:
     case R_X86_64_CODE_6_GOTTPOFF:

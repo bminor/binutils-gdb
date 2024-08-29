@@ -547,6 +547,7 @@ run_dump_test "pr31868b"
 run_dump_test "pr31868c"
 run_dump_test "tlsgdesc1"
 run_dump_test "tlsgdesc2"
+run_dump_test "tlsgdesc3"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"
