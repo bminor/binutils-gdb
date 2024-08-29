@@ -20,8 +20,9 @@
 #ifndef ADDRMAP_H
 #define ADDRMAP_H
 
-#include "splay-tree.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/gdb_obstack.h"
+#include "splay-tree.h"
 
 /* An address map is essentially a table mapping CORE_ADDRs onto GDB
    data structures, like blocks, symtabs, partial symtabs, and so on.
