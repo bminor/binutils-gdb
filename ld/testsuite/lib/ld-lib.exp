@@ -488,6 +488,11 @@ proc run_ld_link_tests { ldtests args } {
 	set maybe_failed 0
 	set ld_output ""
 
+	# Don't leave previous output around
+	if { $binfile ne "tmpdir/" } {
+	    remote_file host delete $binfile
+	}
+
 	# Add -fno-lto.  LTO should be tested explicitly by $cflags.
 	if {[check_lto_available]} {
 	    set cflags "-fno-lto $cflags"
@@ -706,6 +711,11 @@ proc run_ld_link_exec_tests { ldtests args } {
 	set objfiles {}
 	set failed 0
 
+	# Don't leave previous output around
+	if { $binfile ne "tmpdir/" } {
+	    remote_file host delete $binfile
+	}
+
 	if { ![check_compiler_available] } {
 	    unsupported $testname
 	    continue
@@ -874,6 +884,11 @@ proc run_cc_link_tests { ldtests } {
 	set failed 0
 	set check_ld(terminal) 0
 	set check_ld(source) ""
+
+	# Don't leave previous output around
+	if { $binfile ne "tmpdir/" } {
+	    remote_file host delete $binfile
+	}
 
 	if { ![check_compiler_available] } {
 	    unsupported $testname
