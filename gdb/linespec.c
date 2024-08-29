@@ -23,7 +23,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "source.h"
-#include "demangle.h"
 #include "value.h"
 #include "completer.h"
 #include "cp-abi.h"
@@ -34,7 +33,6 @@
 #include "linespec.h"
 #include "language.h"
 #include "interps.h"
-#include "mi/mi-cmds.h"
 #include "target.h"
 #include "arch-utils.h"
 #include <ctype.h>
