@@ -8074,10 +8074,9 @@ disable_breakpoints_in_shlibs (program_space *pspace)
 	 becomes enabled, or the duplicate is removed, gdb will try to
 	 insert all breakpoints.  If we don't set shlib_disabled here,
 	 we'll try to insert those breakpoints and fail.  */
-      if (((b->type == bp_breakpoint)
-	   || (b->type == bp_jit_event)
-	   || (b->type == bp_hardware_breakpoint)
-	   || (is_tracepoint (b)))
+      if (((b->type == bp_jit_event)
+	   || is_breakpoint (b)
+	   || is_tracepoint (b))
 	  && loc->pspace == pspace
 	  && !loc->shlib_disabled
 	  && solib_name_from_address (loc->pspace, loc->address)
@@ -8108,9 +8107,8 @@ disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib
     {
       bool bp_modified = false;
 
-      if (b.type != bp_breakpoint
-	  && b.type != bp_jit_event
-	  && b.type != bp_hardware_breakpoint
+      if (b.type != bp_jit_event
+	  && !is_breakpoint (&b)
 	  && !is_tracepoint (&b))
 	continue;
 
