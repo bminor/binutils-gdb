@@ -20,7 +20,9 @@
 #ifndef GDB_DWARF2_PARENT_MAP_H
 #define GDB_DWARF2_PARENT_MAP_H
 
-#include <algorithm>
+#include "addrmap.h"
+#include "dwarf2/types.h"
+#include "gdbsupport/gdb_obstack.h"
 
 class cooked_index_entry;
 

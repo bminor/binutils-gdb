@@ -28,7 +28,6 @@
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_fd.h"
-#include "complaints.h"
 #include "dwarf2/index-common.h"
 #include "dwarf2/cooked-index.h"
 #include "dwarf2.h"
@@ -44,9 +43,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <forward_list>
 #include <map>
-#include <set>
 #include <unordered_map>
 #include <unordered_set>
 

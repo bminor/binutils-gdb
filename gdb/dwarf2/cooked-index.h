@@ -24,22 +24,16 @@
 #include "dwarf2/types.h"
 #include "symtab.h"
 #include "hashtab.h"
-#include "dwarf2/index-common.h"
-#include <string_view>
 #include "quick-symbol.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "addrmap.h"
 #include "gdbsupport/iterator-range.h"
-#include "gdbsupport/thread-pool.h"
 #include "dwarf2/mapped-index.h"
 #include "dwarf2/read.h"
-#include "dwarf2/tag.h"
 #include "dwarf2/abbrev-cache.h"
 #include "dwarf2/parent-map.h"
 #include "gdbsupport/range-chain.h"
-#include "gdbsupport/task-group.h"
 #include "complaints.h"
-#include "run-on-main-thread.h"
 
 #if CXX_STD_THREAD
 #include <mutex>

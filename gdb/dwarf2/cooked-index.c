@@ -24,6 +24,7 @@
 #include "cp-support.h"
 #include "c-lang.h"
 #include "ada-lang.h"
+#include "dwarf2/tag.h"
 #include "event-top.h"
 #include "exceptions.h"
 #include "split-name.h"
@@ -32,6 +33,8 @@
 #include <algorithm>
 #include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/selftest.h"
+#include "gdbsupport/task-group.h"
+#include "gdbsupport/thread-pool.h"
 #include <chrono>
 #include <unordered_set>
 #include "cli/cli-cmds.h"
