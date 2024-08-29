@@ -336,7 +336,6 @@ struct windows_per_inferior : public windows_process_info
   void handle_unload_dll (const DEBUG_EVENT &current_event) override;
   bool handle_access_violation (const EXCEPTION_RECORD *rec) override;
 
-  void invalidate_context (windows_thread_info *th);
   void fill_thread_context (windows_thread_info *th) override;
 
   void continue_one_thread (windows_thread_info *th,
@@ -889,19 +888,6 @@ windows_per_inferior::find_thread (ptid_t ptid)
   if (thr == nullptr)
     return nullptr;
   return as_windows_thread_info (thr);
-}
-
-/* Invalidate TH's context.  */
-
-void
-windows_per_inferior::invalidate_context (windows_thread_info *th)
-{
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    th->wow64_context.ContextFlags = 0;
-  else
-#endif
-    th->context.ContextFlags = 0;
 }
 
 /* Add a thread to the thread list.
