@@ -10749,7 +10749,7 @@ static const gdb::option::option_def watch_option_defs[] = {
     "location",
     [] (watch_options *opt) { return &opt->location; },
     N_("\
-This evaluates EXPRESSION and watches the memory to which is refers.\n\
+This evaluates EXPRESSION and watches the memory to which it refers.\n\
 -l can be used as a short form of -location."),
   },
 };
