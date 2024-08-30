@@ -29,6 +29,7 @@ run_dump_test test3
 if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] && ![istarget "nds32*-*-*"] } {
     run_dump_test irp
     run_dump_test rept
+    run_list_test rept "-almn"
     run_dump_test repeat
     run_dump_test vararg
 }
