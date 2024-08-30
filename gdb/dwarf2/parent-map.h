@@ -32,9 +32,31 @@ class cooked_index_entry;
    The generated DWARF can sometimes have the declaration for a method
    in a class (or perhaps namespace) scope, with the definition
    appearing outside this scope... just one of the many bad things
-   about DWARF.  In order to handle this situation, we defer certain
-   entries until the end of scanning, at which point we'll know the
-   containing context of all the DIEs that we might have scanned.  */
+   about DWARF.
+
+   For example, a program like this:
+
+   struct X { int method (); };
+   int X::method () { return 23; }
+
+   ... ends up with DWARF like:
+
+    <1><2e>: Abbrev Number: 2 (DW_TAG_structure_type)
+       <2f>   DW_AT_name        : X
+    ...
+    <2><39>: Abbrev Number: 3 (DW_TAG_subprogram)
+       <3a>   DW_AT_external    : 1
+       <3a>   DW_AT_name        : (indirect string, offset: 0xf): method
+    ...
+    <1><66>: Abbrev Number: 8 (DW_TAG_subprogram)
+       <67>   DW_AT_specification: <0x39>
+
+    Here, the name of DIE 0x66 can't be determined without knowing the
+    parent of DIE 0x39.
+
+    In order to handle this situation, we defer certain entries until
+    the end of scanning, at which point we'll know the containing
+    context of all the DIEs that we might have scanned.  */
 class parent_map
 {
 public:
@@ -99,7 +121,8 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (parent_map_map);
 
-  /* Add a parent_map to this map.  */
+  /* Add a parent_map to this map.  Note that a copy of MAP is made --
+     modifications to MAP after this call will have no effect.  */
   void add_map (const parent_map &map)
   {
     m_maps.push_back (map.to_fixed (&m_storage));
