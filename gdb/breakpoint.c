@@ -11867,7 +11867,8 @@ code_breakpoint::say_where () const
 
 /* See breakpoint.h.  */
 
-bp_location_range breakpoint::locations () const
+bp_location_range
+breakpoint::locations () const
 {
   return bp_location_range (m_locations.begin (), m_locations.end ());
 }
