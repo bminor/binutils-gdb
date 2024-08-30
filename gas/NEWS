@@ -1,7 +1,7 @@
 -*- text -*-
 
-* Add support for RISC-V Zcmp (cm.mva01s, cm.mvsa01) and CORE-V (XCvBitmanip)
-  extensions with version 1.0.
+* Add support for RISC-V Zcmp (cm.mva01s, cm.mvsa01) and CORE-V (xcvbitmanip,
+  xcvsimd) extensions with version 1.0.
 
 Changes in 2.43:
 

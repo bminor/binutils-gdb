@@ -1695,11 +1695,18 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		  case '3':
 		    used_bits |= ENCODE_CV_IS3_UIMM5 (-1U);
 		    break;
+		  case '5':
+		    used_bits |= ENCODE_CV_SIMD_IMM6(-1U);
+		    break;
 		  case '6':
 		    used_bits |= ENCODE_CV_BITMANIP_UIMM5(-1U);
 		    break;
 		  case '7':
 		    used_bits |= ENCODE_CV_BITMANIP_UIMM2(-1U);
+		    break;
+		  case '8':
+		    used_bits |= ENCODE_CV_SIMD_UIMM6(-1U);
+		    ++oparg;
 		    break;
 		  default:
 		    goto unknown_validate_operand;
@@ -4021,6 +4028,16 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			ip->insn_opcode
 			    |= ENCODE_CV_IS2_UIMM5 (imm_expr->X_add_number);
 			continue;
+		      case '5':
+			my_getExpression (imm_expr, asarg);
+			check_absolute_expr (ip, imm_expr, FALSE);
+			asarg = expr_parse_end;
+			if (imm_expr->X_add_number < -32
+			    || imm_expr->X_add_number > 31)
+			  break;
+			ip->insn_opcode
+			    |= ENCODE_CV_SIMD_IMM6 (imm_expr->X_add_number);
+			continue;
 		      case '6':
 			my_getExpression (imm_expr, asarg);
 			check_absolute_expr (ip, imm_expr, FALSE);
@@ -4040,6 +4057,29 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			  break;
 			ip->insn_opcode
 			    |= ENCODE_CV_BITMANIP_UIMM2 (imm_expr->X_add_number);
+			continue;
+		      case '8':
+			my_getExpression (imm_expr, asarg);
+			check_absolute_expr (ip, imm_expr, FALSE);
+			asarg = expr_parse_end;
+			++oparg;
+			if (imm_expr->X_add_number < 0
+			    || imm_expr->X_add_number > 63)
+			  break;
+			else if (*oparg == '1'
+			    && imm_expr->X_add_number > 1)
+			  break;
+			else if (*oparg == '2'
+			    && imm_expr->X_add_number > 3)
+			  break;
+			else if (*oparg == '3'
+			    && imm_expr->X_add_number > 7)
+			  break;
+			else if (*oparg == '4'
+			    && imm_expr->X_add_number > 15)
+			  break;
+			ip->insn_opcode
+			    |= ENCODE_CV_SIMD_UIMM6 (imm_expr->X_add_number);
 			continue;
 		      default:
 			goto unknown_riscv_ip_operand;

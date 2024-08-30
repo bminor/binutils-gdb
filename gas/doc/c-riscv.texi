@@ -775,6 +775,11 @@ The XCvMem extension provides instructions for post inc load/store operations.
 
 It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
 
+@item XcvSimd
+The XcvSimd extension provides instructions for SIMD operations.
+
+It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html}
+
 @item XTheadBa
 The XTheadBa extension provides instructions for address calculations.
 

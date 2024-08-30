@@ -822,6 +822,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		    print (info->stream, dis_style_immediate, "%d",
 			   ((int) EXTRACT_CV_BI_IMM5 (l)));
 		    break;
+		  case '5':
+		    print (info->stream, dis_style_immediate, "%d",
+			   ((int) EXTRACT_CV_SIMD_IMM6 (l)));
+		    break;
 		  case '6':
 		    print (info->stream, dis_style_immediate, "%d",
 			   ((int) EXTRACT_CV_BITMANIP_UIMM5 (l)));
@@ -829,6 +833,11 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  case '7':
 		    print (info->stream, dis_style_immediate, "%d",
 			   ((int) EXTRACT_CV_BITMANIP_UIMM2 (l)));
+		    break;
+		  case '8':
+		    print (info->stream, dis_style_immediate, "%d",
+			   ((int) EXTRACT_CV_SIMD_UIMM6 (l)));
+		    ++oparg;
 		    break;
 		  default:
 		    goto undefined_modifier;

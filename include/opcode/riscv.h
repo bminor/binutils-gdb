@@ -126,6 +126,10 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 25, 5))
 #define EXTRACT_CV_BITMANIP_UIMM2(x) \
   (RV_X(x, 25, 2))
+#define EXTRACT_CV_SIMD_IMM6(x) \
+  ((RV_X(x, 25, 1)) | (RV_X(x, 20, 5) << 1) | (RV_IMM_SIGN_N(x, 20, 5) << 5))
+#define EXTRACT_CV_SIMD_UIMM6(x) \
+  ((RV_X(x, 25, 1)) | (RV_X(x, 20, 5) << 1))
 
 #define ENCODE_ITYPE_IMM(x) \
   (RV_X(x, 0, 12) << 20)
@@ -188,6 +192,10 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 0, 5) << 25)
 #define ENCODE_CV_BITMANIP_UIMM2(x) \
   (RV_X(x, 0, 2) << 25)
+#define ENCODE_CV_SIMD_IMM6(x) \
+  ((RV_X(x, 0, 1) << 25) | (RV_X(x, 1, 5) << 20))
+#define ENCODE_CV_SIMD_UIMM6(x) \
+  ((RV_X(x, 0, 1) << 25) | (RV_X(x, 1, 5) << 20))
 
 #define VALID_ITYPE_IMM(x) (EXTRACT_ITYPE_IMM(ENCODE_ITYPE_IMM(x)) == (x))
 #define VALID_STYPE_IMM(x) (EXTRACT_STYPE_IMM(ENCODE_STYPE_IMM(x)) == (x))
@@ -523,6 +531,7 @@ enum riscv_insn_class
   INSN_CLASS_XCVELW,
   INSN_CLASS_XCVMAC,
   INSN_CLASS_XCVMEM,
+  INSN_CLASS_XCVSIMD,
   INSN_CLASS_XTHEADBA,
   INSN_CLASS_XTHEADBB,
   INSN_CLASS_XTHEADBS,
