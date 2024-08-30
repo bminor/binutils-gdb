@@ -1809,8 +1809,6 @@ struct dis386 {
 	   in MAP4.
    "ZU" => print 'zu' if EVEX.ZU=1.
    "SC" => print suffix SCC for SCC insns
-   "SW" => print '.s' to indicate operands were swapped when suffix_always is
-	   true.
    "YK" keep unused, to avoid ambiguity with the combined use of Y and K.
    "YX" keep unused, to avoid ambiguity with the combined use of Y and X.
    "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand, cond
@@ -10251,9 +10249,21 @@ static const char *const scc_suffix[16] = {
 static void
 swap_operand (instr_info *ins)
 {
-  ins->mnemonicendp[0] = '.';
-  ins->mnemonicendp[1] = 's';
-  ins->mnemonicendp[2] = '\0';
+  char *p = ins->mnemonicendp;
+
+  if (p[-1] == '}')
+    {
+      while (*--p != '{')
+	{
+	  if (p <= ins->obuf + 2)
+	    abort ();
+	}
+      if (p[-1] == ' ')
+	--p;
+    }
+  memmove (p + 2, p, ins->mnemonicendp - p + 1);
+  p[0] = '.';
+  p[1] = 's';
   ins->mnemonicendp += 2;
 }
 
@@ -10929,14 +10939,6 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 		*ins->obufp++ = ins->vex.w ? 'd': 's';
 	      else if (last[0] == 'B')
 		*ins->obufp++ = ins->vex.w ? 'w': 'b';
-	      else if (last[0] == 'S')
-		{
-		  if (ins->modrm.mod == 3 && (sizeflag & SUFFIX_ALWAYS))
-		    {
-		      *ins->obufp++ = '.';
-		      *ins->obufp++ = 's';
-		    }
-		}
 	      else
 		abort ();
 	    }
