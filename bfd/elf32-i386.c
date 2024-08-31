@@ -975,15 +975,15 @@ elf_i386_check_tls_transition (asection *sec,
 
     case R_386_TLS_IE:
       /* Check transition from IE access model:
-		movl foo@indntpoff(%rip), %eax
-		movl foo@indntpoff(%rip), %reg
-		addl foo@indntpoff(%rip), %reg
+		movl foo@indntpoff, %eax
+		movl foo@indntpoff, %reg
+		addl foo@indntpoff, %reg
        */
 
       if (offset < 1 || (offset + 4) > sec->size)
 	return elf_x86_tls_error_yes;
 
-      /* Check "movl foo@tpoff(%rip), %eax" first.  */
+      /* Check "movl foo@indntpoff, %eax" first.  */
       val = bfd_get_8 (abfd, contents + offset - 1);
       if (val == 0xa1)
 	return elf_x86_tls_error_none;
@@ -991,7 +991,7 @@ elf_i386_check_tls_transition (asection *sec,
       if (offset < 2)
 	return elf_x86_tls_error_yes;
 
-      /* Check movl|addl foo@tpoff(%rip), %reg.   */
+      /* Check movl|addl foo@indntpoff, %reg.   */
       type = bfd_get_8 (abfd, contents + offset - 2);
       if (type != 0x8b && type != 0x03)
 	return elf_x86_tls_error_add_mov;
@@ -1091,13 +1091,13 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
     {
     case R_386_TLS_DESC_CALL:
       /* Check valid GDesc call:
-		call *x@tlsdesc(%eax)
+		call *x@tlscall(%eax)
        */
       offset = rel->r_offset;
       call = NULL;
       if (offset + 2 <= sec->size)
 	{
-	  /* Make sure that it's a call *x@tlsdesc(%eax).  */
+	  /* Make sure that it's a call *x@tlscall(%eax).  */
 	  call = contents + offset;
 	  if (call[0] != 0xff || call[1] != 0x10)
 	    call = NULL;

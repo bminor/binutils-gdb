@@ -1448,8 +1448,8 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
     {
     case R_X86_64_TLSDESC_CALL:
       /* Check valid GDesc call:
-		call *x@tlsdesc(%rax) <--- LP64 mode.
-		call *x@tlsdesc(%eax) <--- X32 mode.
+		call *x@tlscall(%rax) <--- LP64 mode.
+		call *x@tlscall(%eax) <--- X32 mode.
        */
       offset = rel->r_offset;
       call = NULL;
@@ -1460,7 +1460,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	  prefix = 0;
 	  if (!ABI_64_P (abfd))
 	    {
-	      /* Check for call *x@tlsdesc(%eax).  */
+	      /* Check for call *x@tlscall(%eax).  */
 	      if (call[0] == 0x67)
 		{
 		  prefix = 1;
@@ -1469,7 +1469,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 		}
 	    }
 
-	  /* Make sure that it's a call *x@tlsdesc(%rax).  */
+	  /* Make sure that it's a call *x@tlscall(%rax).  */
 	  if (call != NULL
 	      && (call[prefix] != 0xff || call[1 + prefix] != 0x10))
 	    call = NULL;
@@ -3842,7 +3842,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  unsigned int prefix = 0;
 		  if (!ABI_64_P (input_bfd))
 		    {
-		      /* Check for call *x@tlsdesc(%eax).  */
+		      /* Check for call *x@tlscall(%eax).  */
 		      if (contents[roff] == 0x67)
 			prefix = 1;
 		    }
@@ -4302,7 +4302,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  unsigned int prefix = 0;
 		  if (!ABI_64_P (input_bfd))
 		    {
-		      /* Check for call *x@tlsdesc(%eax).  */
+		      /* Check for call *x@tlscall(%eax).  */
 		      if (contents[roff] == 0x67)
 			prefix = 1;
 		    }
