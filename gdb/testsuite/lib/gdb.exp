@@ -3568,6 +3568,55 @@ gdb_caching_proc supports_memtag {} {
     return 0
 }
 
+# Return 1 if catch syscall is supported, otherwise return 0.
+
+gdb_caching_proc supports_catch_syscall {} {
+    set me "supports_catch_syscall"
+
+    # Compile a test program.
+    set src {
+	int main() {
+	    return 0;
+	}
+    }
+    if {![gdb_simple_compile $me $src executable]} {
+	verbose -log "$me: failed to compile"
+	return 0
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $::srcdir/$::subdir
+    gdb_load $obj
+    if { ![runto_main] } {
+	verbose -log "$me: failed to run to main"
+	return 0
+    }
+
+    # To make sure we test both setting and inserting the catchpoint.
+    gdb_test_no_output "set breakpoint always-inserted on"
+
+    set res 0
+    set re_yes \
+	[string_to_regexp \
+	     "Catchpoint 2 (any syscall)"]
+    gdb_test_multiple "catch syscall" "" {
+	-re -wrap ^$re_yes {
+	    set res 1
+	}
+	-re -wrap "" {
+	}
+    }
+
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me: returning $res" 2
+    return $res
+}
+
 # Return 1 if the target supports hardware single stepping.
 
 proc can_hardware_single_step {} {
