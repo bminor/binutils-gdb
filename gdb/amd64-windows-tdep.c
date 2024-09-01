@@ -801,7 +801,7 @@ amd64_windows_frame_decode_insns (const frame_info_ptr &this_frame,
 	  std::array<gdb_byte, 8> buf;
 	  int frreg = amd64_windows_w2gdb_regnum[frame_reg];
 
-	  get_frame_register (this_frame, frreg, buf.data ());
+	  get_frame_register (this_frame, frreg, buf);
 	  save_addr = extract_unsigned_integer (buf, byte_order);
 
 	  frame_debug_printf ("   frame_reg=%s, val=%s",
@@ -1097,7 +1097,7 @@ amd64_windows_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
 
   /* Get current PC and SP.  */
   pc = get_frame_pc (this_frame);
-  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf.data ());
+  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
   cache->sp = extract_unsigned_integer (buf, byte_order);
   cache->pc = pc;
 

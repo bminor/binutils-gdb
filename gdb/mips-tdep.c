@@ -951,14 +951,17 @@ mips_register_to_value (const frame_info_ptr &frame, int regnum,
 
   if (mips_convert_register_float_case_p (gdbarch, regnum, type))
     {
-      get_frame_register (frame, regnum + 0, to + 4);
-      get_frame_register (frame, regnum + 1, to + 0);
+      gdb::array_view<gdb_byte> first_half = gdb::make_array_view (to, 4);
+      gdb::array_view<gdb_byte> second_half = gdb::make_array_view (to + 4, 4);
 
-      if (!get_frame_register_bytes (next_frame, regnum + 0, 0, { to + 4, 4 },
+      get_frame_register (frame, regnum + 0, second_half);
+      get_frame_register (frame, regnum + 1, first_half);
+
+      if (!get_frame_register_bytes (next_frame, regnum + 0, 0, second_half,
 				     optimizedp, unavailablep))
 	return 0;
 
-      if (!get_frame_register_bytes (next_frame, regnum + 1, 0, { to + 0, 4 },
+      if (!get_frame_register_bytes (next_frame, regnum + 1, 0, first_half,
 				     optimizedp, unavailablep))
 	return 0;
       *optimizedp = *unavailablep = 0;
@@ -6252,11 +6255,11 @@ mips_o64_return_value (struct gdbarch *gdbarch, struct value *function,
 
 static void
 mips_read_fp_register_single (const frame_info_ptr &frame, int regno,
-			      gdb_byte *rare_buffer)
+			      gdb::array_view<gdb_byte> rare_buffer)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int raw_size = register_size (gdbarch, regno);
-  gdb_byte *raw_buffer = (gdb_byte *) alloca (raw_size);
+  gdb::byte_vector raw_buffer (raw_size);
 
   if (!deprecated_frame_register_read (frame, regno, raw_buffer))
     error (_("can't read register %d (%s)"),
@@ -6272,11 +6275,11 @@ mips_read_fp_register_single (const frame_info_ptr &frame, int regno,
       else
 	offset = 0;
 
-      memcpy (rare_buffer, raw_buffer + offset, 4);
+      memcpy (rare_buffer.data (), raw_buffer.data () + offset, 4);
     }
   else
     {
-      memcpy (rare_buffer, raw_buffer, 4);
+      memcpy (rare_buffer.data (), raw_buffer.data (), 4);
     }
 }
 
@@ -6286,7 +6289,7 @@ mips_read_fp_register_single (const frame_info_ptr &frame, int regno,
 
 static void
 mips_read_fp_register_double (const frame_info_ptr &frame, int regno,
-			      gdb_byte *rare_buffer)
+			      gdb::array_view<gdb_byte> rare_buffer)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int raw_size = register_size (gdbarch, regno);
@@ -6311,13 +6314,14 @@ mips_read_fp_register_double (const frame_info_ptr &frame, int regno,
 	 each register.  */
       if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	{
-	  mips_read_fp_register_single (frame, regno, rare_buffer + 4);
+	  mips_read_fp_register_single (frame, regno, rare_buffer.slice (4));
 	  mips_read_fp_register_single (frame, regno + 1, rare_buffer);
 	}
       else
 	{
 	  mips_read_fp_register_single (frame, regno, rare_buffer);
-	  mips_read_fp_register_single (frame, regno + 1, rare_buffer + 4);
+	  mips_read_fp_register_single (frame, regno + 1,
+					rare_buffer.slice (4));
 	}
     }
 }
@@ -6327,15 +6331,13 @@ mips_print_fp_register (struct ui_file *file, const frame_info_ptr &frame,
 			int regnum)
 {				/* Do values for FP (float) regs.  */
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  gdb_byte *raw_buffer;
   std::string flt_str, dbl_str;
 
   const struct type *flt_type = builtin_type (gdbarch)->builtin_float;
   const struct type *dbl_type = builtin_type (gdbarch)->builtin_double;
 
-  raw_buffer
-    = ((gdb_byte *)
-       alloca (2 * register_size (gdbarch, mips_regnum (gdbarch)->fp0)));
+  gdb::byte_vector raw_buffer (2 * register_size (gdbarch,
+						  mips_regnum (gdbarch)->fp0));
 
   gdb_printf (file, "%s:", gdbarch_register_name (gdbarch, regnum));
   gdb_printf (file, "%*s",
@@ -6349,10 +6351,11 @@ mips_print_fp_register (struct ui_file *file, const frame_info_ptr &frame,
       /* 4-byte registers: Print hex and floating.  Also print even
 	 numbered registers as doubles.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt_str = target_float_to_string (raw_buffer, flt_type, "%-17.9g");
+      flt_str = target_float_to_string (raw_buffer.data (), flt_type,
+					"%-17.9g");
 
       get_formatted_print_options (&opts, 'x');
-      print_scalar_formatted (raw_buffer,
+      print_scalar_formatted (raw_buffer.data (),
 			      builtin_type (gdbarch)->builtin_uint32,
 			      &opts, 'w', file);
 
@@ -6361,7 +6364,8 @@ mips_print_fp_register (struct ui_file *file, const frame_info_ptr &frame,
       if ((regnum - gdbarch_num_regs (gdbarch)) % 2 == 0)
 	{
 	  mips_read_fp_register_double (frame, regnum, raw_buffer);
-	  dbl_str = target_float_to_string (raw_buffer, dbl_type, "%-24.17g");
+	  dbl_str = target_float_to_string (raw_buffer.data (), dbl_type,
+					    "%-24.17g");
 
 	  gdb_printf (file, " dbl: %s", dbl_str.c_str ());
 	}
@@ -6372,13 +6376,15 @@ mips_print_fp_register (struct ui_file *file, const frame_info_ptr &frame,
 
       /* Eight byte registers: print each one as hex, float and double.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
-      flt_str = target_float_to_string (raw_buffer, flt_type, "%-17.9g");
+      flt_str = target_float_to_string (raw_buffer.data (), flt_type,
+					"%-17.9g");
 
       mips_read_fp_register_double (frame, regnum, raw_buffer);
-      dbl_str = target_float_to_string (raw_buffer, dbl_type, "%-24.17g");
+      dbl_str = target_float_to_string (raw_buffer.data (), dbl_type,
+					"%-24.17g");
 
       get_formatted_print_options (&opts, 'x');
-      print_scalar_formatted (raw_buffer,
+      print_scalar_formatted (raw_buffer.data (),
 			      builtin_type (gdbarch)->builtin_uint64,
 			      &opts, 'g', file);
 

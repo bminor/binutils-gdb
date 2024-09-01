@@ -1112,7 +1112,7 @@ frame_save_as_regcache (const frame_info_ptr &this_frame)
 {
   auto cooked_read = [this_frame] (int regnum, gdb::array_view<gdb_byte> buf)
     {
-      if (!deprecated_frame_register_read (this_frame, regnum, buf.data ()))
+      if (!deprecated_frame_register_read (this_frame, regnum, buf))
 	return REG_UNAVAILABLE;
       else
 	return REG_VALID;
@@ -1177,17 +1177,17 @@ void
 frame_register_unwind (const frame_info_ptr &next_frame, int regnum,
 		       int *optimizedp, int *unavailablep,
 		       enum lval_type *lvalp, CORE_ADDR *addrp,
-		       int *realnump, gdb_byte *bufferp)
+		       int *realnump,
+		       gdb::array_view<gdb_byte> buffer)
 {
   struct value *value;
 
-  /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
+  /* Require all but BUFFER to be valid.  An empty BUFFER indicates
      that the value proper does not need to be fetched.  */
   gdb_assert (optimizedp != NULL);
   gdb_assert (lvalp != NULL);
   gdb_assert (addrp != NULL);
   gdb_assert (realnump != NULL);
-  /* gdb_assert (bufferp != NULL); */
 
   value = frame_unwind_register_value (next_frame, regnum);
 
@@ -1202,13 +1202,15 @@ frame_register_unwind (const frame_info_ptr &next_frame, int regnum,
   else
     *realnump = -1;
 
-  if (bufferp)
+  if (!buffer.empty ())
     {
+      gdb_assert (buffer.size () >= value->type ()->length ());
+
       if (!*optimizedp && !*unavailablep)
-	memcpy (bufferp, value->contents_all ().data (),
+	memcpy (buffer.data (), value->contents_all ().data (),
 		value->type ()->length ());
       else
-	memset (bufferp, 0, value->type ()->length ());
+	memset (buffer.data (), 0, value->type ()->length ());
     }
 
   /* Dispose of the new value.  This prevents watchpoints from
@@ -1217,7 +1219,8 @@ frame_register_unwind (const frame_info_ptr &next_frame, int regnum,
 }
 
 void
-frame_unwind_register (const frame_info_ptr &next_frame, int regnum, gdb_byte *buf)
+frame_unwind_register (const frame_info_ptr &next_frame, int regnum,
+		       gdb::array_view<gdb_byte> buf)
 {
   int optimized;
   int unavailable;
@@ -1238,7 +1241,7 @@ frame_unwind_register (const frame_info_ptr &next_frame, int regnum, gdb_byte *b
 
 void
 get_frame_register (const frame_info_ptr &frame,
-		    int regnum, gdb_byte *buf)
+		    int regnum, gdb::array_view<gdb_byte> buf)
 {
   frame_unwind_register (frame_info_ptr (frame->next), regnum, buf);
 }
@@ -1482,7 +1485,7 @@ put_frame_register (const frame_info_ptr &next_frame, int regnum,
 
 bool
 deprecated_frame_register_read (const frame_info_ptr &frame, int regnum,
-				gdb_byte *myaddr)
+				gdb::array_view<gdb_byte> myaddr)
 {
   int optimized;
   int unavailable;
@@ -1541,7 +1544,7 @@ get_frame_register_bytes (const frame_info_ptr &next_frame, int regnum,
 	  int realnum;
 
 	  frame_register_unwind (next_frame, regnum, optimizedp, unavailablep,
-				 &lval, &addr, &realnum, buffer.data ());
+				 &lval, &addr, &realnum, buffer);
 	  if (*optimizedp || *unavailablep)
 	    return false;
 	}
