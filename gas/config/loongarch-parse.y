@@ -368,24 +368,24 @@ multiplicative_expression
 	| multiplicative_expression '%' unary_expression {emit_bin ('%');}
 	;
 
-additive_expression
+shift_expression
 	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression {emit_bin ('+');}
-	| additive_expression '-' multiplicative_expression {emit_bin ('-');}
+	| shift_expression LEFT_OP multiplicative_expression {emit_bin (LEFT_OP);}
+	| shift_expression RIGHT_OP multiplicative_expression {emit_bin (RIGHT_OP);}
 	;
 
-shift_expression
-	: additive_expression
-	| shift_expression LEFT_OP additive_expression {emit_bin (LEFT_OP);}
-	| shift_expression RIGHT_OP additive_expression {emit_bin (RIGHT_OP);}
+additive_expression
+	: shift_expression
+	| additive_expression '+' shift_expression {emit_bin ('+');}
+	| additive_expression '-' shift_expression {emit_bin ('-');}
 	;
 
 relational_expression
-	: shift_expression
-	| relational_expression '<' shift_expression {emit_bin ('<');}
-	| relational_expression '>' shift_expression {emit_bin ('>');}
-	| relational_expression LE_OP shift_expression {emit_bin (LE_OP);}
-	| relational_expression GE_OP shift_expression {emit_bin (GE_OP);}
+	: additive_expression
+	| relational_expression '<' additive_expression {emit_bin ('<');}
+	| relational_expression '>' additive_expression {emit_bin ('>');}
+	| relational_expression LE_OP additive_expression {emit_bin (LE_OP);}
+	| relational_expression GE_OP additive_expression {emit_bin (GE_OP);}
 	;
 
 equality_expression
