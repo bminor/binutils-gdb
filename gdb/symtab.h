@@ -1647,6 +1647,9 @@ struct linetable_entry
   /* True if this PC is a good location to place a breakpoint for LINE.  */
   bool is_stmt : 1;
 
+  /* True if this PC is at a subroutine range end.  */
+  bool is_weak : 1;
+
   /* True if this location is a good location to place a breakpoint after a
      function prologue.  */
   bool prologue_end : 1;
@@ -2403,6 +2406,8 @@ struct symtab_and_line
   /* If the line number information is valid, then this indicates if this
      line table entry had the is-stmt flag set or not.  */
   bool is_stmt = false;
+  /* True if this PC is at a subroutine range end.  */
+  bool is_weak = false;
 
   /* The probe associated with this symtab_and_line.  */
   probe *prob = NULL;

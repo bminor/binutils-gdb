@@ -413,6 +413,16 @@ buildsym_compunit::record_block_range (struct block *block,
       || end_inclusive + 1 != block->end ())
     m_pending_addrmap_interesting = true;
 
+  if (block->inlined_p ())
+    {
+      m_inline_end_vector.push_back (end_inclusive + 1);
+      if (end_inclusive + 1 == start)
+	{
+	  end_inclusive = start;
+	  m_pending_addrmap_interesting = true;
+	}
+    }
+
   m_pending_addrmap.set_empty (start, end_inclusive, block);
 }
 
@@ -627,19 +637,16 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 {
   m_have_line_numbers = true;
 
-  /* Normally, we treat lines as unsorted.  But the end of sequence
-     marker is special.  We sort line markers at the same PC by line
-     number, so end of sequence markers (which have line == 0) appear
-     first.  This is right if the marker ends the previous function,
-     and there is no padding before the next function.  But it is
-     wrong if the previous line was empty and we are now marking a
-     switch to a different subfile.  We must leave the end of sequence
-     marker at the end of this group of lines, not sort the empty line
-     to after the marker.  The easiest way to accomplish this is to
-     delete any empty lines from our table, if they are followed by
-     end of sequence markers.  All we lose is the ability to set
-     breakpoints at some lines which contain no instructions
-     anyway.  */
+  /* The end of sequence marker is special.  We need to delete any
+     previous lines at the same PC, otherwise these lines may cause
+     problems since they might be at the same address as the following
+     function.  For instance suppose a function calls abort there is no
+     reason to emit a ret after that point (no joke).
+     So the label may be at the same address where the following
+     function begins.  There is also a fake end of sequence marker (-1)
+     that we emit internally when switching between different CUs
+     In this case, duplicate line table entries shall not be deleted.
+     We simply set the is_weak marker in this case.  */
   if (line == 0)
     {
       std::optional<int> last_line;
@@ -659,13 +666,82 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
       if (!last_line.has_value () || *last_line == 0)
 	return;
     }
+  else if (line == -1)
+    {
+      line = 0;
+      auto e = subfile->line_vector_entries.end ();
+      while (e > subfile->line_vector_entries.begin ())
+	{
+	  e--;
+	  if (e->unrelocated_pc () != pc)
+	    break;
+	  e->is_weak = 1;
+	}
+    }
 
   linetable_entry &e = subfile->line_vector_entries.emplace_back ();
   e.line = line;
   e.is_stmt = (flags & LEF_IS_STMT) != 0;
+  e.is_weak = false;
   e.set_unrelocated_pc (pc);
   e.prologue_end = (flags & LEF_PROLOGUE_END) != 0;
   e.epilogue_begin = (flags & LEF_EPILOGUE_BEGIN) != 0;
+}
+
+
+/* Patch the is_stmt bits at the given inline end address.
+   The line table has to be already sorted.  */
+
+static void
+patch_inline_end_pos (struct subfile *subfile, struct objfile *objfile,
+		      CORE_ADDR end)
+{
+  std::vector<linetable_entry> &items = subfile->line_vector_entries;
+  int a = 2, b = items.size () - 1;
+
+  /* We need at least two items with pc = end in the table.
+     The lowest usable items are at pos 0 and 1, the highest
+     usable items are at pos b - 2 and b - 1.  */
+  if (a > b
+      || end < items[1].pc (objfile)
+      || end > items[b - 2].pc (objfile))
+    return;
+
+  /* Look for the first item with pc > end in the range [a,b].
+     The previous element has pc = end or there is no match.
+     We set a = 2, since we need at least two consecutive elements
+     with pc = end to do anything useful.
+     We set b = items.size () - 1, since we are not interested
+     in the last element which should be an end of sequence
+     marker with line = 0 and is_stmt = true.  */
+  while (a < b)
+    {
+      int c = (a + b) / 2;
+
+      if (end < items[c].pc (objfile))
+	b = c;
+      else
+	a = c + 1;
+    }
+
+  a--;
+  if (items[a].pc (objfile) != end || items[a].is_stmt)
+    return;
+
+  /* When there is a sequence of line entries at the same address
+     where an inline range ends, and the last item has is_stmt = 0,
+     we force all previous items to have is_weak = true as well.  */
+  do
+    {
+      /* We stop at the first line entry with a different address,
+	 or when we see an end of sequence marker.  */
+      a--;
+      if (items[a].pc (objfile) != end || items[a].line == 0)
+	break;
+
+      items[a].is_weak = true;
+    }
+  while (a > 0);
 }
 
 
@@ -892,6 +968,10 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 	     relationships, this is why std::stable_sort is used.  */
 	  std::stable_sort (subfile->line_vector_entries.begin (),
 			    subfile->line_vector_entries.end ());
+
+	  for (int i = 0; i < m_inline_end_vector.size (); i++)
+	    patch_inline_end_pos (subfile, m_objfile,
+				  m_inline_end_vector[i]);
 	}
 
       /* Allocate a symbol table if necessary.  */

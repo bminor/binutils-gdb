@@ -431,6 +431,7 @@ arrange_linetable (std::vector<linetable_entry> &old_linetable)
 	  linetable_entry &e = fentries.emplace_back ();
 	  e.line = ii;
 	  e.is_stmt = true;
+	  e.is_weak = false;
 	  e.set_unrelocated_pc (old_linetable[ii].unrelocated_pc ());
 	}
     }

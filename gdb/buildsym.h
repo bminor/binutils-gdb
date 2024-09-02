@@ -446,6 +446,9 @@ private:
 
   /* Pending symbols that are local to the lexical context.  */
   struct pending *m_local_symbols = nullptr;
+
+  /* Pending inline end range addresses.  */
+  std::vector<CORE_ADDR> m_inline_end_vector;
 };
 
 

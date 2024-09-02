@@ -265,6 +265,8 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  gdb_puts (paddress (gdbarch, l->item[i].pc (objfile)), outfile);
 	  if (l->item[i].is_stmt)
 	    gdb_printf (outfile, "\t(stmt)");
+	  if (l->item[i].is_weak)
+	    gdb_printf (outfile, "\t(weak)");
 	  gdb_printf (outfile, "\n");
 	}
     }
@@ -981,12 +983,13 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
       /* Leave space for 6 digits of index and line number.  After that the
 	 tables will just not format as well.  */
       struct ui_out *uiout = current_uiout;
-      ui_out_emit_table table_emitter (uiout, 7, -1, "line-table");
+      ui_out_emit_table table_emitter (uiout, 8, -1, "line-table");
       uiout->table_header (6, ui_left, "index", _("INDEX"));
       uiout->table_header (6, ui_left, "line", _("LINE"));
       uiout->table_header (18, ui_left, "rel-address", _("REL-ADDRESS"));
       uiout->table_header (18, ui_left, "unrel-address", _("UNREL-ADDRESS"));
       uiout->table_header (7, ui_left, "is-stmt", _("IS-STMT"));
+      uiout->table_header (7, ui_left, "is-weak", _("IS-WEAK"));
       uiout->table_header (12, ui_left, "prologue-end", _("PROLOGUE-END"));
       uiout->table_header (14, ui_left, "epilogue-begin", _("EPILOGUE-BEGIN"));
       uiout->table_body ();
@@ -1008,6 +1011,7 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 	  uiout->field_core_addr ("unrel-address", objfile->arch (),
 				  CORE_ADDR (item->unrelocated_pc ()));
 	  uiout->field_string ("is-stmt", item->is_stmt ? "Y" : "");
+	  uiout->field_string ("is-weak", item->is_weak ? "Y" : "");
 	  uiout->field_string ("prologue-end", item->prologue_end ? "Y" : "");
 	  uiout->field_string ("epilogue-begin", item->epilogue_begin ? "Y" : "");
 	  uiout->text ("\n");

@@ -497,6 +497,7 @@ jit_symtab_line_mapping_add_impl (struct gdb_symbol_callbacks *cb,
 	(unrelocated_addr (map[i].pc));
       stab->linetable->item[i].line = map[i].line;
       stab->linetable->item[i].is_stmt = true;
+      stab->linetable->item[i].is_weak = false;
     }
 }
 
