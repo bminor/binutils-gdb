@@ -45,6 +45,7 @@ def launch(
     args: Sequence[str] = (),
     env: Optional[Mapping[str, str]] = None,
     stopAtBeginningOfMainSubprogram: bool = False,
+    stopOnEntry: bool = False,
     **extra,
 ):
     if cwd is not None:
@@ -62,7 +63,7 @@ def launch(
         for name, value in env.items():
             inf.set_env(name, value)
     expect_process("process")
-    exec_and_expect_stop("run")
+    exec_and_expect_stop("starti" if stopOnEntry else "run")
 
 
 @request("attach")
