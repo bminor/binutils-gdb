@@ -241,6 +241,8 @@ static const dependency isa_dependencies[] =
   { "AVX10_1",
     "AVX512VL|AVX512DQ|AVX512CD|AVX512VBMI|AVX512_VBMI2|AVX512IFMA"
     "|AVX512_VNNI|AVX512_BF16|AVX512_FP16|AVX512_VPOPCNTDQ|AVX512_BITALG" },
+  { "AVX10_2",
+    "AVX10_1" },
   { "SEV_ES",
     "SVME" },
   { "SNP",
@@ -402,6 +404,7 @@ static bitfield cpu_flags[] =
   BITFIELD (LKGS),
   BITFIELD (USER_MSR),
   BITFIELD (APX_F),
+  BITFIELD (AVX10_2),
   BITFIELD (MWAITX),
   BITFIELD (CLZERO),
   BITFIELD (OSPKE),

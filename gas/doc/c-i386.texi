@@ -219,6 +219,10 @@ accept various extension mnemonics.  For example,
 @code{avx10.1/128},
 @code{user_msr},
 @code{apx_f},
+@code{avx10.2},
+@code{avx10.2/512},
+@code{avx10.2/256},
+@code{avx10.2/128},
 @code{amx_int8},
 @code{amx_bf16},
 @code{amx_fp16},
@@ -1679,7 +1683,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.cmpccxadd} @tab @samp{.wrmsrns} @tab @samp{.msrlist}
 @item @samp{.avx_ne_convert} @tab @samp{.rao_int} @tab @samp{.fred} @tab @samp{.lkgs}
 @item @samp{.avx_vnni_int16} @tab @samp{.sha512} @tab @samp{.sm3} @tab @samp{.sm4}
-@item @samp{.pbndkb} @tab @samp{.user_msr}
+@item @samp{.pbndkb} @tab @samp{.user_msr} @tab @samp{.avx10.2}
 @item @samp{.wbnoinvd} @tab @samp{.pconfig} @tab @samp{.waitpkg} @tab @samp{.cldemote}
 @item @samp{.shstk} @tab @samp{.gfni} @tab @samp{.vaes} @tab @samp{.vpclmulqdq}
 @item @samp{.movdiri} @tab @samp{.movdir64b} @tab @samp{.enqcmd} @tab @samp{.tsxldtrk}

@@ -1186,6 +1186,7 @@ static const arch_entry cpu_arch[] =
   VECARCH (avx10.1, AVX10_1, ANY_AVX512F, set),
   SUBARCH (user_msr, USER_MSR, USER_MSR, false),
   SUBARCH (apx_f, APX_F, APX_F, false),
+  VECARCH (avx10.2, AVX10_2, ANY_AVX10_2, set),
 };
 
 #undef SUBARCH
@@ -4294,7 +4295,7 @@ static void
 build_evex_prefix (void)
 {
   unsigned int register_specifier;
-  bool w;
+  bool w, u;
   rex_byte vrex_used = 0;
 
   /* Check register specifier.  */
@@ -4367,10 +4368,62 @@ build_evex_prefix (void)
   else
     w = flag_code == CODE_64BIT ? i.rex & REX_W : evexwig == evexw1;
 
+  if (i.tm.opcode_modifier.evex == EVEXDYN)
+    {
+      unsigned int op;
+
+      /* Determine vector length from the last multi-length vector operand.  */
+      for (op = i.operands; op--;)
+	if (i.tm.operand_types[op].bitfield.xmmword
+	    + i.tm.operand_types[op].bitfield.ymmword
+	    + i.tm.operand_types[op].bitfield.zmmword > 1)
+	  {
+	    if (i.types[op].bitfield.zmmword)
+	      {
+		i.tm.opcode_modifier.evex = EVEX512;
+		break;
+	      }
+	    else if (i.types[op].bitfield.ymmword)
+	      {
+		i.tm.opcode_modifier.evex = EVEX256;
+		break;
+	      }
+	    else if (i.types[op].bitfield.xmmword)
+	      {
+		i.tm.opcode_modifier.evex = EVEX128;
+		break;
+	      }
+	    else if ((i.broadcast.type || i.broadcast.bytes)
+		      && op == i.broadcast.operand)
+	      {
+		switch (get_broadcast_bytes (&i.tm, true))
+		  {
+		    case 64:
+		      i.tm.opcode_modifier.evex = EVEX512;
+		      break;
+		    case 32:
+		      i.tm.opcode_modifier.evex = EVEX256;
+		      break;
+		    case 16:
+		      i.tm.opcode_modifier.evex = EVEX128;
+		      break;
+		    default:
+		      abort ();
+		  }
+		break;
+	      }
+	  }
+
+      if (op >= MAX_OPERANDS)
+	abort ();
+    }
+
+  u = i.rounding.type == rc_none || i.tm.opcode_modifier.evex != EVEX256;
+
   /* The third byte of the EVEX prefix.  */
   i.vex.bytes[2] = ((w << 7)
 		    | (register_specifier << 3)
-		    | 4 /* Encode the U bit.  */
+		    | (u << 2)
 		    | i.tm.opcode_modifier.opcodeprefix);
 
   /* The fourth byte of the EVEX prefix.  */
@@ -4383,57 +4436,6 @@ build_evex_prefix (void)
     {
       /* Encode the vector length.  */
       unsigned int vec_length;
-
-      if (i.tm.opcode_modifier.evex == EVEXDYN)
-	{
-	  unsigned int op;
-
-	  /* Determine vector length from the last multi-length vector
-	     operand.  */
-	  for (op = i.operands; op--;)
-	    if (i.tm.operand_types[op].bitfield.xmmword
-		+ i.tm.operand_types[op].bitfield.ymmword
-		+ i.tm.operand_types[op].bitfield.zmmword > 1)
-	      {
-		if (i.types[op].bitfield.zmmword)
-		  {
-		    i.tm.opcode_modifier.evex = EVEX512;
-		    break;
-		  }
-		else if (i.types[op].bitfield.ymmword)
-		  {
-		    i.tm.opcode_modifier.evex = EVEX256;
-		    break;
-		  }
-		else if (i.types[op].bitfield.xmmword)
-		  {
-		    i.tm.opcode_modifier.evex = EVEX128;
-		    break;
-		  }
-		else if ((i.broadcast.type || i.broadcast.bytes)
-			 && op == i.broadcast.operand)
-		  {
-		    switch (get_broadcast_bytes (&i.tm, true))
-		      {
-			case 64:
-			  i.tm.opcode_modifier.evex = EVEX512;
-			  break;
-			case 32:
-			  i.tm.opcode_modifier.evex = EVEX256;
-			  break;
-			case 16:
-			  i.tm.opcode_modifier.evex = EVEX128;
-			  break;
-			default:
-			  abort ();
-		      }
-		    break;
-		  }
-	      }
-
-	  if (op >= MAX_OPERANDS)
-	    abort ();
-	}
 
       switch (i.tm.opcode_modifier.evex)
 	{
@@ -8119,13 +8121,19 @@ check_VecOperands (const insn_template *t)
 	  return 1;
 	}
 
-      /* Non-EVEX.{LIG,512} forms need to have a ZMM register as at least one
-	 operand.  There's no need to check all operands, though: Either of the
+      /* Non-EVEX.{LIG,512,256} forms need to have a ZMM or YMM register as at
+	 least one operand.  For YMM register or EVEX256, we will need AVX10.2
+	 enabled.  There's no need to check all operands, though: Either of the
 	 last two operands will be of the right size in all relevant templates.  */
       if (t->opcode_modifier.evex != EVEXLIG
 	  && t->opcode_modifier.evex != EVEX512
+	  && (t->opcode_modifier.evex != EVEX256
+	      || !cpu_arch_flags.bitfield.cpuavx10_2)
 	  && !i.types[t->operands - 1].bitfield.zmmword
-	  && !i.types[t->operands - 2].bitfield.zmmword)
+	  && !i.types[t->operands - 2].bitfield.zmmword
+	  && ((!i.types[t->operands - 1].bitfield.ymmword
+	       && !i.types[t->operands - 2].bitfield.ymmword)
+	      || !cpu_arch_flags.bitfield.cpuavx10_2))
 	{
 	  i.error = operand_size_mismatch;
 	  return 1;
