@@ -8200,6 +8200,8 @@ process_event_stop_test (struct execution_control_state *ecs)
       infrun_debug_printf ("stepping through inlined function");
 
       if (ecs->event_thread->control.step_over_calls == STEP_OVER_ALL
+	  || ecs->event_thread->stop_pc () != stop_pc_sal.pc
+	  || !stop_pc_sal.is_stmt
 	  || inline_frame_is_marked_for_skip (false, ecs->event_thread))
 	keep_going (ecs);
       else
@@ -8248,7 +8250,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  end_stepping_range (ecs);
 	  return;
 	}
-      else if (*curr_frame_id == original_frame_id)
+      else if (get_stack_frame_id (frame)
+	       == ecs->event_thread->control.step_stack_frame_id)
 	{
 	  /* We are not at the start of a statement, and we have not changed
 	     frame.

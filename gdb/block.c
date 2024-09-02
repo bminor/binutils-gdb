@@ -196,7 +196,20 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
     return NULL;
 
   if (pblock)
-    *pblock = b;
+    {
+      struct symtab_and_line sal = find_pc_sect_line (pc, section, 0);
+      if (sal.line != 0 && sal.pc == pc && sal.is_weak)
+	{
+	  const struct block *b2 = find_block_in_blockvector (bl, pc - 1);
+	  const struct block *b0 = b;
+	  while (b0->superblock () && !b0->function ())
+	    b0 = b0->superblock ();
+	  if (b0->contains (b2))
+	    b = b2;
+	}
+      *pblock = b;
+    }
+
   return bl;
 }
 
