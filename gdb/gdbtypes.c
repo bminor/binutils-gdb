@@ -816,7 +816,7 @@ make_atomic_type (struct type *type)
 
 /* Replace the contents of ntype with the type *type.  This changes the
    contents, rather than the pointer for TYPE_MAIN_TYPE (ntype); thus
-   the changes are propogated to all types in the TYPE_CHAIN.
+   the changes are propagated to all types in the TYPE_CHAIN.
 
    In order to build recursive types, it's inevitable that we'll need
    to update types in place --- but this sort of indiscriminate

@@ -195,7 +195,7 @@ get_language_name (enum language lang)
 #endif /* HAVE_SOURCE_HIGHLIGHT */
 
 /* Try to highlight CONTENTS from file FULLNAME in language LANG using
-   the GNU source-higlight library.  Return true if highlighting
+   the GNU source-highlight library.  Return true if highlighting
    succeeded.  */
 
 static bool

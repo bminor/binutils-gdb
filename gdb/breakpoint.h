@@ -452,7 +452,7 @@ public:
      as ``address'' (above) except for cases in which
      ADJUST_BREAKPOINT_ADDRESS has computed a different address at
      which to place the breakpoint in order to comply with a
-     processor's architectual constraints.  */
+     processor's architectural constraints.  */
   CORE_ADDR requested_address = 0;
 
   /* An additional address assigned with this location.  This is currently

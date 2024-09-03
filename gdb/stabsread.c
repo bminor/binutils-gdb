@@ -3911,7 +3911,7 @@ read_huge_number (const char **pp, int end, int *bits,
 	}
 
       /* -0x7f is the same as 0x80.  So deal with it by adding one to
-	 the number of bits.  Two's complement represention octals
+	 the number of bits.  Two's complement representation octals
 	 can't have a '-' in front.  */
       if (sign == -1 && !twos_complement_representation)
 	++nbits;

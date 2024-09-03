@@ -977,7 +977,7 @@ elf_gnu_ifunc_resolver_stop (code_breakpoint *b)
   if (b_return == b)
     {
       /* No need to call find_pc_line for symbols resolving as this is only
-	 a helper breakpointer never shown to the user.  */
+	 a helper breakpoint never shown to the user.  */
 
       symtab_and_line sal;
       sal.pspace = current_inferior ()->pspace;

@@ -184,7 +184,7 @@ struct btrace_function
 
   /* The instruction number offset for the first instruction in this
      function segment.
-     If INSN is empty this is the insn_offset of the succeding function
+     If INSN is empty this is the insn_offset of the succeeding function
      segment in control-flow order.  */
   unsigned int insn_offset;
 

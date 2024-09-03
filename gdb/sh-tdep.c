@@ -2171,7 +2171,7 @@ sh_corefile_collect_regset (const struct regset *regset,
 }
 
 /* The following two regsets have the same contents, so it is tempting to
-   unify them, but they are distiguished by their address, so don't.  */
+   unify them, but they are distinguished by their address, so don't.  */
 
 const struct regset sh_corefile_gregset =
 {

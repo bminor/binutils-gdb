@@ -4505,7 +4505,7 @@ mips_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
      breakpoints inserted in a branch delay slot.  With enough
      bad luck, the 4 bytes located just before our breakpoint
      instruction could look like a branch instruction, and thus
-     trigger the adjustement, and break the function call entirely.
+     trigger the adjustment, and break the function call entirely.
      So, we reserve those 4 bytes and write a nop instruction
      to prevent that from happening.  */
   nop_addr = bp_slot - sizeof (nop_insn);

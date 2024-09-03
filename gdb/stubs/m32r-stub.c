@@ -409,7 +409,7 @@ handle_exception (int exceptionVector)
 		  hex2mem (ptr, (unsigned char *) &registers[regno], 4, 0);
 		  /*
 		   * Since we just changed a single CPU register, let's
-		   * make sure to keep the several stack pointers consistant.
+		   * make sure to keep the several stack pointers consistent.
 		   */
 		  stackmode = registers[PSW] & 0x80;
 		  if (regno == R15)	/* stack pointer changed */

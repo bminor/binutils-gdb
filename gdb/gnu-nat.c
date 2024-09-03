@@ -1221,7 +1221,7 @@ inf_update_signal_thread (struct inf *inf)
 }
 
 
-/* Detachs from INF's inferior task, letting it run once again...  */
+/* Detach from INF's inferior task, letting it run once again...  */
 void
 gnu_nat_target::inf_detach (struct inf *inf)
 {

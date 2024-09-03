@@ -3844,7 +3844,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      a dummy code sequence pushed on the stack to make the call, and
      this sequence doesn't need b0 to be set in order for our dummy
      breakpoint to be hit.  Nonetheless, this doesn't interfere, and
-     it's needed for other OSes, so we do this unconditionaly.  */
+     it's needed for other OSes, so we do this unconditionally.  */
   regcache_cooked_write_unsigned (regcache, IA64_BR0_REGNUM, bp_addr);
 
   regcache_cooked_write_unsigned (regcache, sp_regnum, sp);
