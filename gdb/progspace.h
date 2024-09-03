@@ -193,7 +193,7 @@ struct program_space
      for (objfile *objf : pspace->objfiles ()) { ... }  */
   objfiles_range objfiles ()
   {
-    return objfiles_range (objfiles_iterator (objfiles_list.begin ()));
+    return objfiles_range (objfiles_iterator (m_objfiles_list.begin ()));
   }
 
   using objfiles_safe_range = basic_safe_range<objfiles_range>;
@@ -208,7 +208,7 @@ struct program_space
   objfiles_safe_range objfiles_safe ()
   {
     return objfiles_safe_range
-      (objfiles_range (objfiles_iterator (objfiles_list.begin ())));
+      (objfiles_range (objfiles_iterator (m_objfiles_list.begin ())));
   }
 
   /* Add OBJFILE to the list of objfiles, putting it just before
@@ -337,9 +337,6 @@ struct program_space
      (e.g. the argument to the "symbol-file" or "file" command).  */
   struct objfile *symfile_object_file = NULL;
 
-  /* All known objfiles are kept in a linked list.  */
-  owning_intrusive_list<objfile> objfiles_list;
-
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */
   owning_intrusive_list<solib> so_list;
@@ -359,6 +356,9 @@ struct program_space
   registry<program_space> registry_fields;
 
 private:
+  /* All known objfiles are kept in a linked list.  */
+  owning_intrusive_list<objfile> m_objfiles_list;
+
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */
   std::vector<target_section> m_target_sections;

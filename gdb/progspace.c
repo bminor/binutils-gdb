@@ -127,8 +127,8 @@ program_space::~program_space ()
 bool
 program_space::multi_objfile_p () const
 {
-  return (!objfiles_list.empty ()
-	  && std::next (objfiles_list.begin ()) != objfiles_list.end ());
+  return (!m_objfiles_list.empty ()
+	  && std::next (m_objfiles_list.begin ()) != m_objfiles_list.end ());
 }
 
 /* See progspace.h.  */
@@ -140,8 +140,8 @@ program_space::free_all_objfiles ()
   for (const solib &so : this->solibs ())
     gdb_assert (so.objfile == NULL);
 
-  while (!objfiles_list.empty ())
-    this->remove_objfile (&objfiles_list.front ());
+  while (!m_objfiles_list.empty ())
+    this->remove_objfile (&m_objfiles_list.front ());
 }
 
 /* See progspace.h.  */
@@ -151,12 +151,12 @@ program_space::add_objfile (std::unique_ptr<objfile> &&objfile,
 			    struct objfile *before)
 {
   if (before == nullptr)
-    objfiles_list.push_back (std::move (objfile));
+    m_objfiles_list.push_back (std::move (objfile));
   else
     {
       gdb_assert (before->is_linked ());
-      objfiles_list.insert (objfiles_list.iterator_to (*before),
-			    std::move (objfile));
+      m_objfiles_list.insert (m_objfiles_list.iterator_to (*before),
+			      std::move (objfile));
     }
 }
 
@@ -175,7 +175,7 @@ program_space::remove_objfile (struct objfile *objfile)
     symfile_object_file = NULL;
 
   gdb_assert (objfile->is_linked ());
-  objfiles_list.erase (objfiles_list.iterator_to (*objfile));
+  m_objfiles_list.erase (m_objfiles_list.iterator_to (*objfile));
 }
 
 /* See progspace.h.  */
