@@ -288,7 +288,7 @@ cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
 
 /* See cooked-index.h.  */
 
-gdb::unique_xmalloc_ptr<char>
+void
 cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
 					       htab_t gnat_entries)
 {
@@ -298,7 +298,10 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
      source charset does not affect the indexer directly.  */
   std::string canonical = ada_decode (entry->name, false, false, false);
   if (canonical.empty ())
-    return {};
+    {
+      entry->canonical = entry->name;
+      return;
+    }
   std::vector<std::string_view> names = split_name (canonical.c_str (),
 						    split_style::DOT_STYLE);
   std::string_view tail = names.back ();
@@ -329,7 +332,9 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
     }
 
   entry->set_parent (parent);
-  return make_unique_xstrndup (tail.data (), tail.length ());
+  auto new_canon = make_unique_xstrndup (tail.data (), tail.length ());
+  entry->canonical = new_canon.get ();
+  m_names.push_back (std::move (new_canon));
 }
 
 /* See cooked-index.h.  */
@@ -389,17 +394,7 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
       if ((entry->flags & IS_LINKAGE) != 0)
 	entry->canonical = entry->name;
       else if (entry->lang == language_ada)
-	{
-	  gdb::unique_xmalloc_ptr<char> canon_name
-	    = handle_gnat_encoded_entry (entry, gnat_entries.get ());
-	  if (canon_name == nullptr)
-	    entry->canonical = entry->name;
-	  else
-	    {
-	      entry->canonical = canon_name.get ();
-	      m_names.push_back (std::move (canon_name));
-	    }
-	}
+	handle_gnat_encoded_entry (entry, gnat_entries.get ());
       else if (entry->lang == language_cplus || entry->lang == language_c)
 	{
 	  void **slot = htab_find_slot (seen_names.get (), entry,

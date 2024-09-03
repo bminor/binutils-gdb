@@ -338,9 +338,8 @@ private:
   /* GNAT only emits mangled ("encoded") names in the DWARF, and does
      not emit the module structure.  However, we need this structure
      to do lookups.  This function recreates that structure for an
-     existing entry.  It returns the base name (last element) of the
-     full decoded name.  */
-  gdb::unique_xmalloc_ptr<char> handle_gnat_encoded_entry
+     existing entry, modifying ENTRY as appropriate.  */
+  void handle_gnat_encoded_entry
        (cooked_index_entry *entry, htab_t gnat_entries);
 
   /* Finalize the index.  This should be called a single time, when
