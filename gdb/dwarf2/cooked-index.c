@@ -222,6 +222,7 @@ cooked_index_entry::matches (domain_search_flags kind) const
 
 const char *
 cooked_index_entry::full_name (struct obstack *storage, bool for_main,
+			       bool for_ada_linkage,
 			       const char *default_sep) const
 {
   const char *local_name = for_main ? name : canonical;
@@ -238,9 +239,15 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main,
       sep = "::";
       break;
 
+    case language_ada:
+      if (for_ada_linkage)
+	{
+	  sep = "__";
+	  break;
+	}
+      [[fallthrough]];
     case language_go:
     case language_d:
-    case language_ada:
       sep = ".";
       break;
 
@@ -250,7 +257,7 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main,
       break;
     }
 
-  get_parent ()->write_scope (storage, sep, for_main);
+  get_parent ()->write_scope (storage, sep, for_main, for_ada_linkage);
   obstack_grow0 (storage, local_name, strlen (local_name));
   return (const char *) obstack_finish (storage);
 }
@@ -260,11 +267,14 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main,
 void
 cooked_index_entry::write_scope (struct obstack *storage,
 				 const char *sep,
-				 bool for_main) const
+				 bool for_main,
+				 bool for_ada_linkage) const
 {
   if (get_parent () != nullptr)
-    get_parent ()->write_scope (storage, sep, for_main);
-  const char *local_name = for_main ? name : canonical;
+    get_parent ()->write_scope (storage, sep, for_main, for_ada_linkage);
+  /* When computing the Ada linkage name, the entry might not have
+     been canonicalized yet, so use the 'name'.  */
+  const char *local_name = (for_main || for_ada_linkage) ? name : canonical;
   obstack_grow (storage, local_name, strlen (local_name));
   obstack_grow (storage, sep, strlen (sep));
 }
