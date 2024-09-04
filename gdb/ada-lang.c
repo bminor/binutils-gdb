@@ -4690,9 +4690,9 @@ make_array_descriptor (struct type *type, struct value *arr)
    even in this case, some expensive name-based symbol searches are still
    sometimes necessary - to find an XVZ variable, mostly.  */
 
-/* Clear all entries from the symbol cache.  */
+/* See ada-lang.h.  */
 
-static void
+void
 ada_clear_symbol_cache (program_space *pspace)
 {
   ada_pspace_data_handle.clear (pspace);

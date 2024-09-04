@@ -433,4 +433,8 @@ extern block_symbol ada_resolve_variable (struct symbol *sym,
 extern struct type *ada_index_type (struct type *type, int n,
 				    const char *name);
 
+/* Clear the Ada symbol cache.  */
+
+extern void ada_clear_symbol_cache (program_space *pspace);
+
 #endif

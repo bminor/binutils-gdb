@@ -1563,6 +1563,7 @@ symbol_cache_mark_not_found (struct block_symbol_cache *bsc,
 static void
 symbol_cache_flush (struct program_space *pspace)
 {
+  ada_clear_symbol_cache (pspace);
   struct symbol_cache *cache = symbol_cache_key.get (pspace);
   int pass;
 
