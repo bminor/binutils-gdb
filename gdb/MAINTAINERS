@@ -328,7 +328,7 @@ the native maintainer when resolving ABI issues.
 			Lancelot Six		lancelot.six@amd.com
 
 	arc		--target=arc-elf
-			Shahab Vahedi		shahab@synopsys.com
+			Shahab Vahedi		list@vahedi.org
 
 	arm		--target=arm-elf
 			Alan Hayward		alan.hayward@arm.com
