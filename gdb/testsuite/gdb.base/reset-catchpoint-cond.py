@@ -15,7 +15,9 @@
 
 bp_modified_list = []
 
+
 def bp_modified(bp):
-    bp_modified_list.append (bp.number)
+    bp_modified_list.append(bp.number)
+
 
 gdb.events.breakpoint_modified.connect(bp_modified)
