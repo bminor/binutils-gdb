@@ -718,7 +718,7 @@ pdb_write_contents (bfd *abfd)
   uint32_t num_blocks;
   uint32_t num_files = 0;
   uint32_t num_directory_bytes = sizeof (uint32_t);
-  uint32_t stream0_start;
+  uint32_t stream0_start = 0;
   bfd *arelt;
 
   if (bfd_write (pdb_magic, sizeof (pdb_magic), abfd) != sizeof (pdb_magic))
