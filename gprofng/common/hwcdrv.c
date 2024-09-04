@@ -574,6 +574,7 @@ read_sample (counter_state_t *ctr_state, int msgsz, uint64_t *rvalue,
 static void
 dump_perf_event_attr (struct perf_event_attr *at)
 {
+#if defined(DEBUG)
   TprintfT (DBG_LT2, "dump_perf_event_attr:  size=%d  type=%d  sample_period=%lld\n"
 	    "  config=0x%llx  config1=0x%llx  config2=0x%llx  wakeup_events=%lld __reserved_1=%lld\n",
 	    (int) at->size, (int) at->type, (unsigned long long) at->sample_period,
@@ -589,13 +590,13 @@ dump_perf_event_attr (struct perf_event_attr *at)
   DUMP_F (exclude_kernel);
   DUMP_F (exclude_hv);
   DUMP_F (exclude_idle);
-  //    DUMP_F(xmmap);
   DUMP_F (comm);
   DUMP_F (freq);
   DUMP_F (inherit_stat);
   DUMP_F (enable_on_exec);
   DUMP_F (task);
   DUMP_F (watermark);
+#endif
 }
 
 static void

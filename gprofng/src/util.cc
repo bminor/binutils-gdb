@@ -741,17 +741,13 @@ get_relative_link (const char *path_from, const char *path_to)
   s2 = canonical_path (s2);
   long l = dbe_sstrlen (s1);
   // try to find common directories
-  int common_slashes = 0;
   int last_common_slash = -1;
   for (int i = 0; i < l; i++)
     {
-      if (s1[i] != s2[i]) break;
-      if (s1[i] == 0) break;
+      if (s1[i] != s2[i] || s1[i] == 0)
+	break;
       if (s1[i] == '/')
-	{
-	  common_slashes++;
-	  last_common_slash = i;
-	}
+	last_common_slash = i;
     }
   // find slashes in remaining path_to
   int slashes = 0;

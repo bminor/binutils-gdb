@@ -81,12 +81,6 @@ extern int __collector_mutex_trylock (collector_mutex_t *mp);
 #define __collector_mutex_init(xx) \
   do { collector_mutex_t tmp=COLLECTOR_MUTEX_INITIALIZER; *(xx)=tmp; } while(0)
 
-void __collector_sample (char *name);
-void __collector_terminate_expt ();
-void __collector_pause ();
-void __collector_pause_m ();
-void __collector_resume ();
-
 struct DT_lineno;
 
 typedef enum

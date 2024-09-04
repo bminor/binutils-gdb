@@ -1013,7 +1013,6 @@ __collector_open (const char *path, int oflag, ...)
   mode_t mode = 0;
 
   hrtime_t t_timeout = __collector_gethrtime () + 5 * ((hrtime_t) NANOSEC);
-  int nretries = 0;
   long long delay = 100; /* start at some small, arbitrary value */
 
   /* get optional mode argument if it's expected/required */
@@ -1058,7 +1057,6 @@ __collector_open (const char *path, int oflag, ...)
       delay *= 2;
       if (delay > 100000000)
 	delay = 100000000; /* cap at some large, arbitrary value */
-      nretries++;
     }
   return fd;
 }

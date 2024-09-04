@@ -1937,8 +1937,6 @@ private:
   }
 
   Experiment *exp;
-  char *hostname;
-  hrtime_t time, tstamp;
 };
 
 void

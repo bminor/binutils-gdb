@@ -78,7 +78,6 @@ private:
   Hist_data *hist_data_file_all;
   Hist_data *hist_data_vfd_all;
   Hist_data *hist_data_callstack_all;
-  Hist_data *hist_data_callstack;
 
   DbeView *dbev;
 };

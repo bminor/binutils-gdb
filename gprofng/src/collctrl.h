@@ -271,7 +271,6 @@ private:
   char *node_name;      /* name of machine on which experiment is run */
   long ncpus;           /* number of online CPUs */
   int cpu_clk_freq;     /* chip clock (MHz.), as reported from processor_info */
-  int cpc_cpuver;       /* chip version, as reported from libcpc */
   long sys_resolution;  /* system clock resolution */
   int sample_period;    /* period for sampling, seconds */
   int sample_default;    /* if period for sampling set by default */

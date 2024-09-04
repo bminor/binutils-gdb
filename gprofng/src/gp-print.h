@@ -19,7 +19,7 @@
    MA 02110-1301, USA.  */
 
 #ifndef _GP_PRINT_H
-#define _ER_PRINT_H
+#define _GP_PRINT_H
 
 #include "Command.h"
 #include "DbeApplication.h"

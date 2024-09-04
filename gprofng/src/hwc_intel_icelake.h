@@ -24,8 +24,10 @@
 #define SH(val, n) (((unsigned long long) (val)) << n)
 #define I(nm, event, umask, edge, cmask, inv, \
 	  offcore_rsp, ldlat, frontend, period, mtr) \
-	  INIT_HWC(nm, mtr, SH(event, 0) | SH(umask, 8) | SH(edge, 18) \
-		     | SH(cmask, 24) | SH(inv, 23), PERF_TYPE_RAW), \
+	  .use_perf_event_type = 1, .type = PERF_TYPE_RAW, \
+	  .name = (nm), .metric = (mtr), .reg_num = REGNO_ANY, \
+	  .config = SH(event, 0) | SH(umask, 8) | SH(edge, 18) | SH(cmask, 24) \
+		  | SH(inv, 23), \
 	  .config1 = SH(offcore_rsp, 0) | SH(ldlat, 0) | SH(frontend, 0), \
 	  .val = period
 

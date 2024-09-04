@@ -210,15 +210,10 @@ get_collector_interface ()
 static void
 collector_module_init (CollectorInterface *col_intf)
 {
-  int nmodules = 0;
-
   ModuleInitFunc next_init = (ModuleInitFunc) dlsym (RTLD_DEFAULT, "__collector_module_init");
   if (next_init != NULL)
-    {
-      nmodules++;
-      next_init (col_intf);
-    }
-  TprintfT (DBG_LT1, "collector_module_init: %d modules\n", nmodules);
+    next_init (col_intf);
+  TprintfT (DBG_LT1, "collector_module_init: %d modules\n", next_init ? 1 : 0);
 }
 
 /*   Routines concerned with general experiment start and stop */
@@ -1783,7 +1778,7 @@ __collector_pause ()
 }
 
 void
-__collector_pause_m (char *reason)
+__collector_pause_m (const char *reason)
 {
   hrtime_t now;
   char xreason[MAXPATHLEN];
@@ -2449,8 +2444,8 @@ __collector_dlog (int tflag, int level, char *format, ...)
 
 static void (*__real__exit) (int status) = NULL; /* libc only: _exit */
 static void (*__real__Exit) (int status) = NULL; /* libc only: _Exit */
-void _exit () __attribute__ ((weak, alias ("__collector_exit")));
-void _Exit () __attribute__ ((weak, alias ("__collector_Exit")));
+void _exit (int status) __attribute__ ((weak, alias ("__collector_exit")));
+void _Exit (int status) __attribute__ ((weak, alias ("__collector_Exit")));
 
 void
 __collector_exit (int status)

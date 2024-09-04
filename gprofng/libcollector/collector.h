@@ -123,7 +123,7 @@ extern void __collector_terminate_expt ();
 extern void __collector_terminate_hook ();
 extern void __collector_sample (char *name);
 extern void __collector_pause ();
-extern void __collector_pause_m ();
+extern void __collector_pause_m (const char *reason);
 extern void __collector_resume ();
 extern int collector_sigemt_sigaction (const struct sigaction*,
 				       struct sigaction*);

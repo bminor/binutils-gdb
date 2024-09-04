@@ -49,7 +49,6 @@ struct DisContext
 };
 
 static const int MAX_DISASM_STR     = 2048;
-static const int MAX_INSTR_SIZE     = 8;
 
 Disasm::Disasm (char *fname)
 {

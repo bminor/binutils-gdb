@@ -85,7 +85,6 @@ private:
 
   BaseMetricTreeNode *root;     // root of tree
   BaseMetricTreeNode *parent;   // my parent
-  bool aggregation;             // value is based on children's values
   char *name;           // bm->get_cmd() for metrics, unique string otherwise
   char *uname;                  // user-visible text
   char *unit;                   // see UNIT_* defines

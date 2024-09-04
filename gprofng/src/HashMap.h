@@ -78,9 +78,8 @@ copy_key (uint64_t a)
 }
 
 template<> inline void
-delete_key (uint64_t a)
+delete_key (uint64_t)
 {
-  a = a;
 }
 
 template<> inline int

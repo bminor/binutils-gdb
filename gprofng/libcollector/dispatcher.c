@@ -908,8 +908,9 @@ sigset (int sig, sighandler_t handler)
 
 // map interposed symbol versions
 static int
-gprofng_timer_create (int (real_func) (), clockid_t clockid,
-                      struct sigevent *sevp, timer_t *timerid)
+gprofng_timer_create (int (real_func) (clockid_t, struct sigevent *, timer_t *),
+		      clockid_t clockid,
+		      struct sigevent *sevp, timer_t *timerid)
 {
   // collector reserves SIGPROF
   if (sevp == NULL || sevp->sigev_notify != SIGEV_SIGNAL ||
@@ -1044,7 +1045,7 @@ __collector_thr_sigsetmask (int how, const sigset_t* iset, sigset_t* oset)
 // map interposed symbol versions
 
 static int
-gprofng_pthread_sigmask (int (real_func) (),
+gprofng_pthread_sigmask (int (real_func) (int, const sigset_t *, sigset_t*),
                          int how, const sigset_t *iset, sigset_t* oset)
 {
   sigset_t lsigset;
@@ -1139,9 +1140,10 @@ collector_root (void *cargs)
 // map interposed symbol versions
 
 static int
-gprofng_pthread_create (int (real_func) (), pthread_t *thread,
-                        const pthread_attr_t *attr,
-                        void *(*func)(void*), void *arg)
+gprofng_pthread_create (int (real_func) (pthread_t *, const pthread_attr_t *,
+					 void *(*)(void *), void *),
+			pthread_t *thread, const pthread_attr_t *attr,
+			void *(*func)(void*), void *arg)
 {
   TprintfT (DBG_LTT, "gprofng_pthread_create @%p\n", real_func);
   if (dispatch_mode != DISPATCH_ON)
@@ -1276,6 +1278,7 @@ __collector_ext_clone_pthread (int (*fn)(void *), void *child_stack, int flags, 
 }
 
 // weak symbols:
-int sigprocmask () __attribute__ ((weak, alias ("__collector_sigprocmask")));
-int thr_sigsetmask () __attribute__ ((weak, alias ("__collector_thr_sigsetmask")));
+int sigprocmask (int, const sigset_t*, sigset_t*) __attribute__ ((weak, alias ("__collector_sigprocmask")));
+int thr_sigsetmask (int, const sigset_t*, sigset_t*) __attribute__ ((weak, alias ("__collector_thr_sigsetmask")));
 int setitimer () __attribute__ ((weak, alias ("_setitimer")));
+

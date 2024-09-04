@@ -876,9 +876,7 @@ Coll_Ctrl::set_clkprof (const char *string, char** warn)
       double dval = strtod (string, &endchar);
       if (*endchar == 'm' || *endchar == 0) /* user specified milliseconds */
 	dval = dval * 1000.;
-      else if (*endchar == 'u') /* user specified microseconds */
-	dval = dval;
-      else
+      else if (*endchar != 'u')
 	return dbe_sprintf (GTXT ("Unrecognized clock-profiling interval `%s'\n"), string);
       nclkprof_timer = (int) (dval + 0.5);
     }
@@ -2788,7 +2786,7 @@ Coll_Ctrl::get (char * control)
     }
   if (!strncmp (control, ipc_str_javaprof, len))
     {
-      if ((java_mode == 0))
+      if (java_mode == 0)
 	return strdup (ipc_str_off);
       return strdup (ipc_str_on);
     }
@@ -2804,7 +2802,7 @@ Coll_Ctrl::get (char * control)
     }
   if (!strncmp (control, ipc_str_sample_sig, len))
     {
-      if ((sample_sig == 0))
+      if (sample_sig == 0)
 	return strdup (ipc_str_off);
       char *str_signal = find_signal_name (sample_sig);
       if (str_signal != NULL)
@@ -2838,15 +2836,15 @@ Coll_Ctrl::get (char * control)
     }
   if (!strncmp (control, ipc_str_iotrace, len))
     {
-      if ((iotrace_enabled == 0))
+      if (iotrace_enabled == 0)
 	return strdup (ipc_str_off);
       return strdup (ipc_str_on);
     }
   if (!strncmp (control, ipc_str_count, len))
     {
-      if ((count_enabled == 0))
+      if (count_enabled == 0)
 	return strdup (ipc_str_off);
-      if ((count_enabled < 0))
+      if (count_enabled < 0)
 	return strdup ("on\nstatic");
       return strdup (ipc_str_on);
     }

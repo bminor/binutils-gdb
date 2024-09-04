@@ -75,14 +75,6 @@ private:
   bool v_opt;
   int multiple;
   char *str_compcom;
-  bool hex_visible;
-  int src_visible;
-  int vis_src;
-  int vis_dis;
-  int threshold_src;
-  int threshold_dis;
-  int threshold;
-  int vis_bits;
 };
 
 static int

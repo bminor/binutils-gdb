@@ -1792,7 +1792,7 @@ check_tables ()
 }
 #endif
 
-static int try_a_counter ();
+static int try_a_counter (int forKernel);
 static void hwc_process_raw_ctrs (int forKernel, Hwcentry ***pstd_out,
 				  Hwcentry ***praw_out, Hwcentry ***phidden_out,
 				  Hwcentry**static_tables,
@@ -2838,17 +2838,6 @@ hwc_get_docref (char *buf, size_t buflen)
       buf[buflen - 1] = 0;
     }
   return buf;
-}
-
-//TBR:
-
-extern char*
-hwc_get_default_cntrs ()
-{
-  setup_cpcx ();
-  if (cpcx_default_hwcs[0] != NULL)
-    return strdup (cpcx_default_hwcs[0]); // TBR deprecate this
-  return NULL;
 }
 
 extern char*

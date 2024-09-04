@@ -9591,14 +9591,12 @@ dbeGetTLDataRepVals (VMode view_mode, hrtime_t start_ts, hrtime_t delta,
 	}
       if (sampleVals != NULL)
 	{
-	  Sample* sample = (Sample*) packets->getObjValue (PROP_SMPLOBJ, packetIdx);
-	  if (!sample || !sample->get_usage ())
-	    sample = sample;
-	  else
+	  Sample *sample = (Sample*) packets->getObjValue (PROP_SMPLOBJ, packetIdx);
+	  if (sample != NULL)
 	    {
-	      PrUsage* prusage = sample->get_usage ();
-	      Vector<long long> *mstateVals = prusage->getMstateValues ();
-	      sampleVals->store (eventIdx, mstateVals);
+	      PrUsage *prusage = sample->get_usage ();
+	      if (prusage != NULL)
+		sampleVals->store (eventIdx, prusage->getMstateValues ());
 	    }
 	}
     }
