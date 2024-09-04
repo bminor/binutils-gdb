@@ -88,6 +88,10 @@ proc test_1 { _cv _cdw64 _lv _ldw64 {_string_form ""}} {
 		# to set the current file explicitly.
 		DW_LNS_set_file $diridx
 
+		DW_LNE_set_address $bar_start
+		line [line_for bar]
+		DW_LNS_copy
+
 		DW_LNE_set_address bar_label
 		line [line_for bar_label]
 		DW_LNS_copy

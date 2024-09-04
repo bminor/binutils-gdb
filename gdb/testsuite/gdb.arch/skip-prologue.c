@@ -1,5 +1,6 @@
-/*
-   Copyright 2021-2024 Free Software Foundation, Inc.
+/* Copyright 2024 Free Software Foundation, Inc.
+
+   This file is part of GDB.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,31 +16,39 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 void
-foo (int x)
+f1 (void)
 {
+  asm ("f1_prologue_end: .globl f1_prologue_end");
+}
 
+int
+f2 (int a)
+{
+  asm ("f2_prologue_end: .globl f2_prologue_end");
+  return a;
 }
 
 void
-bar (void)
-{ /* bar: */
-  asm ("bar_label: .globl bar_label");
-  foo (1);
-  asm ("bar_label_2: .globl bar_label_2");
-  foo (2);
-  asm ("bar_label_3: .globl bar_label_3");
-  foo (3);
-  asm ("bar_label_4: .globl bar_label_4");
-  foo (4);
-  asm ("bar_label_5: .globl bar_label_5");
+f3 (void)
+{
+  asm ("f3_prologue_end: .globl f3_prologue_end");
+  f1 ();
+}
+
+int
+f4 (int a)
+{
+  asm ("f4_prologue_end: .globl f4_prologue_end");
+  return f2 (a);
 }
 
 int
 main (void)
 {
-  asm ("main_label: .globl main_label");
-
-  bar ();
+  f1 ();
+  f2 (0);
+  f3 ();
+  f4 (0);
 
   return 0;
 }
