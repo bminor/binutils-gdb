@@ -3542,7 +3542,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			  bfd_reloc_notsupported, is_undefweak, name,
 			  "TLS section not be created"));
 	      else
-		relocation -= elf_hash_table (info)->tls_sec->vma;
+		relocation = tlsoff (info, relocation);
 	    }
 	  else
 	    fatal = (loongarch_reloc_is_fatal
@@ -3891,73 +3891,71 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      {
 		Elf_Internal_Rela rela;
 		asection *srel = htab->elf.srelgot;
-		bfd_vma tls_block_off = 0;
 
-		if (LARCH_REF_LOCAL (info, h))
-		  {
-		    BFD_ASSERT (elf_hash_table (info)->tls_sec);
-		    tls_block_off = relocation
-			- elf_hash_table (info)->tls_sec->vma;
-		  }
+		int indx = 0;
+		bool need_reloc = false;
+		LARCH_TLS_GD_IE_NEED_DYN_RELOC (info, is_dyn, h, indx,
+						need_reloc);
 
 		if (tls_type & GOT_TLS_GD)
 		  {
-		    rela.r_offset = sec_addr (got) + got_off;
-		    rela.r_addend = 0;
-		    if (LARCH_REF_LOCAL (info, h))
+		    if (need_reloc)
 		      {
-			/* Local sym, used in exec, set module id 1.  */
-			if (bfd_link_executable (info))
-			  bfd_put_NN (output_bfd, 1, got->contents + got_off);
+			/* Dynamic resolved Module ID.  */
+			rela.r_offset = sec_addr (got) + got_off;
+			rela.r_addend = 0;
+			rela.r_info = ELFNN_R_INFO (indx, R_LARCH_TLS_DTPMODNN);
+			bfd_put_NN (output_bfd, 0, got->contents + got_off);
+			loongarch_elf_append_rela (output_bfd, srel, &rela);
+
+			if (indx == 0)
+			  {
+			    /* Local symbol, tp offset has been known.  */
+			    BFD_ASSERT (! unresolved_reloc);
+			    bfd_put_NN (output_bfd,
+				tlsoff (info, relocation),
+				(got->contents + got_off + GOT_ENTRY_SIZE));
+			  }
 			else
 			  {
-			    rela.r_info = ELFNN_R_INFO (0,
-							R_LARCH_TLS_DTPMODNN);
+			    /* Dynamic resolved block offset.  */
+			    bfd_put_NN (output_bfd, 0,
+				got->contents + got_off + GOT_ENTRY_SIZE);
+			    rela.r_info = ELFNN_R_INFO (indx,
+						R_LARCH_TLS_DTPRELNN);
+			    rela.r_offset += GOT_ENTRY_SIZE;
 			    loongarch_elf_append_rela (output_bfd, srel, &rela);
 			  }
-
-			bfd_put_NN (output_bfd, tls_block_off,
-				    got->contents + got_off + GOT_ENTRY_SIZE);
 		      }
-		    /* Dynamic resolved.  */
 		    else
 		      {
-			/* Dynamic relocate module id.  */
-			rela.r_info = ELFNN_R_INFO (h->dynindx,
-						    R_LARCH_TLS_DTPMODNN);
-			loongarch_elf_append_rela (output_bfd, srel, &rela);
-
-			/* Dynamic relocate offset of block.  */
-			rela.r_offset += GOT_ENTRY_SIZE;
-			rela.r_info = ELFNN_R_INFO (h->dynindx,
-						    R_LARCH_TLS_DTPRELNN);
-			loongarch_elf_append_rela (output_bfd, srel, &rela);
+			/* In a static link or an executable link with the symbol
+			   binding locally.  Mark it as belonging to module 1.  */
+			bfd_put_NN (output_bfd, 1, got->contents + got_off);
+			bfd_put_NN (output_bfd, tlsoff (info, relocation),
+			    got->contents + got_off + GOT_ENTRY_SIZE);
 		      }
 		  }
 		if (tls_type & GOT_TLS_IE)
 		  {
-		    rela.r_offset = sec_addr (got) + got_off + ie_off;
-		    if (LARCH_REF_LOCAL (info, h))
+		    if (need_reloc)
 		      {
-			/* Local sym, used in exec, set module id 1.  */
-			if (!bfd_link_executable (info))
-			  {
-			    rela.r_info = ELFNN_R_INFO (0, R_LARCH_TLS_TPRELNN);
-			    rela.r_addend = tls_block_off;
-			    loongarch_elf_append_rela (output_bfd, srel, &rela);
-			  }
+			bfd_put_NN (output_bfd, 0,
+			    got->contents + got_off + ie_off);
+			rela.r_offset = sec_addr (got) + got_off + ie_off;
+			rela.r_addend = 0;
 
-			bfd_put_NN (output_bfd, tls_block_off,
-				    got->contents + got_off + ie_off);
+			if (indx == 0)
+			  rela.r_addend = tlsoff (info, relocation);
+			rela.r_info = ELFNN_R_INFO (indx, R_LARCH_TLS_TPRELNN);
+			loongarch_elf_append_rela (output_bfd, srel, &rela);
 		      }
-		    /* Dynamic resolved.  */
 		    else
 		      {
-			/* Dynamic relocate offset of block.  */
-			rela.r_info = ELFNN_R_INFO (h->dynindx,
-						    R_LARCH_TLS_TPRELNN);
-			rela.r_addend = 0;
-			loongarch_elf_append_rela (output_bfd, srel, &rela);
+			/* In a static link or an executable link with the symbol
+			   binding locally, compute offset directly.  */
+			bfd_put_NN (output_bfd, tlsoff (info, relocation),
+			    got->contents + got_off + ie_off);
 		      }
 		  }
 	      }
