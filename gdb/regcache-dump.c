@@ -162,7 +162,7 @@ protected:
   {
     if (regnum < 0)
       {
-	gdb_printf (file, "Rmt Nr  g/G Offset");
+	gdb_printf (file, "Rmt Nr  g/G Offset  Expedited");
       }
     else if (regnum < gdbarch_num_regs (m_gdbarch))
       {
@@ -170,7 +170,12 @@ protected:
 
 	if (remote_register_number_and_offset (m_gdbarch, regnum,
 					       &pnum, &poffset))
-	  gdb_printf (file, "%7d %11d", pnum, poffset);
+	  {
+	    if (remote_register_is_expedited (regnum))
+	      gdb_printf (file, "%7d %11d  yes", pnum, poffset);
+	    else
+	      gdb_printf (file, "%7d %11d", pnum, poffset);
+	  }
       }
   }
 };
@@ -324,9 +329,11 @@ _initialize_regcache_dump ()
 	     "Takes an optional file parameter."),
 	   &maintenanceprintlist);
   add_cmd ("remote-registers", class_maintenance,
-	   maintenance_print_remote_registers, _("\
-Print the internal register configuration including remote register number "
-"and g/G packets offset.\n\
-Takes an optional file parameter."),
+	   maintenance_print_remote_registers,
+	   _("Print the internal register configuration including remote "
+	     "register number and g/G packets offset.\n"
+	     "Also prints which registers were sent in the last stop reply "
+	     "packet (i.e. expedited).\n"
+	     "Takes an optional file parameter."),
 	   &maintenanceprintlist);
 }

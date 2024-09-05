@@ -696,6 +696,10 @@ public: /* data */
      qSupported.  */
   gdb_thread_options supported_thread_options = 0;
 
+  /* Contains the regnums of the expedited registers in the last stop
+     reply packet.  */
+  std::set<int> last_seen_expedited_registers;
+
 private:
   /* Asynchronous signal handle registered as event loop source for
      when we have pending events ready to be passed to the core.  */
@@ -1491,6 +1495,20 @@ bool
 is_remote_target (process_stratum_target *target)
 {
   return as_remote_target (target) != nullptr;
+}
+
+/* See remote.h.  */
+
+bool
+remote_register_is_expedited (int regnum)
+{
+  remote_target *rt = as_remote_target (current_inferior ()->process_target ());
+
+  if (rt == nullptr)
+    return false;
+
+  remote_state *rs = rt->get_remote_state ();
+  return rs->last_seen_expedited_registers.count (regnum) > 0;
 }
 
 /* Per-program-space data key.  */
@@ -8523,6 +8541,10 @@ remote_target::process_stop_reply (stop_reply_up stop_reply,
 {
   *status = stop_reply->ws;
   ptid_t ptid = stop_reply->ptid;
+  struct remote_state *rs = get_remote_state ();
+
+  /* Forget about last reply's expedited registers.  */
+  rs->last_seen_expedited_registers.clear ();
 
   /* If no thread/process was reported by the stub then select a suitable
      thread/process.  */
@@ -8549,7 +8571,10 @@ remote_target::process_stop_reply (stop_reply_up stop_reply,
 					stop_reply->arch);
 
 	  for (cached_reg_t &reg : stop_reply->regcache)
-	    regcache->raw_supply (reg.num, reg.data.get ());
+	    {
+	      regcache->raw_supply (reg.num, reg.data.get ());
+	      rs->last_seen_expedited_registers.insert (reg.num);
+	    }
 	}
 
       remote_thread_info *remote_thr = get_remote_thread_info (this, ptid);

@@ -90,6 +90,11 @@ save gdb-index
   it contains white space or quote characters.  If the argument
   contains no such special characters then quoting is not required.
 
+maintenance print remote-registers
+  Add an "Expedited" column to the output of the command.  It indicates
+  which registers were included in the last stop reply packet received by
+  GDB.
+
 * New remote packets
 
 vFile:stat
