@@ -8330,18 +8330,26 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 	}
       /* xgettext:c-format */
       fprintf (file, _("Image identification: (major: %u, minor: %u)\n"),
-	       (unsigned)bfd_getl32 (eihi.majorid),
-	       (unsigned)bfd_getl32 (eihi.minorid));
-      fprintf (file, _(" image name       : %.*s\n"),
-	       eihi.imgnam[0], eihi.imgnam + 1);
+	       (unsigned) bfd_getl32 (eihi.majorid),
+	       (unsigned) bfd_getl32 (eihi.minorid));
+      unsigned int nlen = eihi.imgnam[0];
+      if (nlen > sizeof (eihi.imgnam) - 1)
+	nlen = sizeof (eihi.imgnam) - 1;
+      fprintf (file, _(" image name       : %.*s\n"), nlen, eihi.imgnam + 1);
       fprintf (file, _(" link time        : %s\n"),
 	       vms_time_to_str (eihi.linktime));
-      fprintf (file, _(" image ident      : %.*s\n"),
-	       eihi.imgid[0], eihi.imgid + 1);
-      fprintf (file, _(" linker ident     : %.*s\n"),
-	       eihi.linkid[0], eihi.linkid + 1);
-      fprintf (file, _(" image build ident: %.*s\n"),
-	       eihi.imgbid[0], eihi.imgbid + 1);
+      nlen = eihi.imgid[0];
+      if (nlen > sizeof (eihi.imgid) - 1)
+	nlen = sizeof (eihi.imgid) - 1;
+      fprintf (file, _(" image ident      : %.*s\n"), nlen, eihi.imgid + 1);
+      nlen = eihi.linkid[0];
+      if (nlen > sizeof (eihi.linkid) - 1)
+	nlen = sizeof (eihi.linkid) - 1;
+      fprintf (file, _(" linker ident     : %.*s\n"), nlen, eihi.linkid + 1);
+      nlen = eihi.imgbid[0];
+      if (nlen > sizeof (eihi.imgbid) -1 )
+	nlen = sizeof (eihi.imgbid) - 1;
+      fprintf (file, _(" image build ident: %.*s\n"), nlen, eihi.imgbid + 1);
     }
   if (eihs_off != 0)
     {
@@ -8474,10 +8482,15 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 	}
       fputs (_(")\n"), file);
       if (val & EISD__M_GBL)
-	/* xgettext:c-format */
-	fprintf (file, _(" ident: 0x%08x, name: %.*s\n"),
-		 (unsigned)bfd_getl32 (eisd.ident),
-		 eisd.gblnam[0], eisd.gblnam + 1);
+	{
+	  unsigned int nlen = eisd.gblnam[0];
+	  if (nlen > sizeof (eisd.gblnam) - 1)
+	    nlen = sizeof (eisd.gblnam) - 1;
+	  /* xgettext:c-format */
+	  fprintf (file, _(" ident: 0x%08x, name: %.*s\n"),
+		   (unsigned) bfd_getl32 (eisd.ident),
+		   nlen, eisd.gblnam + 1);
+	}
       eisd_off += len;
     }
 
@@ -8628,11 +8641,14 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 	       j++, shlstoff += sizeof (struct vms_shl))
 	    {
 	      struct vms_shl *shl = (struct vms_shl *) (buf + shlstoff);
+	      unsigned int nlen = shl->imgnam[0];
+	      if (nlen > sizeof (shl->imgnam) - 1)
+		nlen = sizeof (shl->imgnam) - 1;
 	      fprintf (file,
 		       /* xgettext:c-format */
 		       _("  %u: size: %u, flags: 0x%02x, name: %.*s\n"),
 		       j, shl->size, shl->flags,
-		       shl->imgnam[0], shl->imgnam + 1);
+		       nlen, shl->imgnam + 1);
 	    }
 	}
       if (qrelfixoff != 0)
