@@ -1,11 +1,11 @@
 @c ----------------------------------------------------------------------------
-@c This is the Texinfo source file for the gp-display-src man page.
+@c This is the Texinfo source file for the gprofng-display-src man page.
 @c
 @c Author: Ruud van der Pas
 @c ----------------------------------------------------------------------------
 @ifset man
 \input texinfo @c -*-texinfo-*-
-@setfilename gp-display-src
+@setfilename gprofng-display-src
 @settitle Display source code and optionally disassembly of the target object
 @include gp-macros.texi
 @end ifset
@@ -204,19 +204,19 @@ indicate generating the source, or disassembly, for all functions in the
 @c man begin SEEALSO
 
 gprofng(1),
-gp-archive(1),
-gp-collect-app(1),
-gp-display-gui(1),
-gp-display-html(1),
-gp-display-text(1)
+gprofng-archive(1),
+gprofng-collect-app(1),
+@c -- gprofng-display-gui(1),
+gprofng-display-html(1),
+gprofng-display-text(1)
 
 @iftex
 @vspace{1}
 @end iftex
 
-The user guide for gprofng is maintained as a Texinfo manual.  If the info
-and gprofng programs are correctly installed, the command
-@command{info gprofng} should give access to this document.
+The user guide for gprofng is maintained as a Texinfo manual.  If the
+@command{info} and @command{gprofng} programs are correctly installed, the
+command @command{info gprofng} should give access to this document.
 
 @c man end
 @ManPageEnd{}

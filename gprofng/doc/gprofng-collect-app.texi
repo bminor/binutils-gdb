@@ -1,11 +1,11 @@
 @c ----------------------------------------------------------------------------
-@c This is the Texinfo source file for the gp-collect-app man page.
+@c This is the Texinfo source file for the gprofng-collect-app man page.
 @c
 @c Author: Ruud van der Pas
 @c ----------------------------------------------------------------------------
 @ifset man
 \input texinfo @c -*-texinfo-*-
-@setfilename gp-collect-app
+@setfilename gprofng-collect-app
 @settitle Collect performance data for the target application
 @include gp-macros.texi
 @end ifset
@@ -356,11 +356,11 @@ gprofng can provide more details, but this is not a requirement.
 @c man begin SEEALSO
 
 gprofng(1),
-gp-archive(1),
-gp-display-gui(1),
-gp-display-html(1),
-gp-display-src(1),
-gp-display-text(1)
+gprofng-archive(1),
+@c -- gprofng-display-gui(1),
+gprofng-display-html(1),
+gprofng-display-src(1),
+gprofng-display-text(1)
 
 @iftex
 @vspace{1}

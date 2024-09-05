@@ -1,11 +1,11 @@
 @c ----------------------------------------------------------------------------
-@c This is the Texinfo source file for the gp-display-html man page.
+@c This is the Texinfo source file for the gprofng-display-html man page.
 @c
 @c Author: Ruud van der Pas
 @c ----------------------------------------------------------------------------
 @ifset man
 \input texinfo @c -*-texinfo-*-
-@setfilename gp-display-html
+@setfilename gprofng-display-html
 @settitle Generate an HTML based directory structure to browse the profiles
 @include gp-macros.texi
 @end ifset
@@ -259,11 +259,11 @@ processing begins.
 @c man begin SEEALSO
 
 gprofng(1),
-gp-archive(1),
-gp-collect-app(1),
-gp-display-gui(1),
-gp-display-src(1),
-gp-display-text(1)
+gprofng-archive(1),
+gprofng-collect-app(1),
+@c -- gprofng-display-gui(1),
+gprofng-display-src(1),
+gprofng-display-text(1)
 
 @iftex
 @vspace{1}

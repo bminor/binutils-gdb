@@ -1,11 +1,11 @@
 @c ----------------------------------------------------------------------------
-@c This is the Texinfo source file for the gp-display-text man page.
+@c This is the Texinfo source file for the gprofng-display-text man page.
 @c
 @c Author: Ruud van der Pas
 @c ----------------------------------------------------------------------------
 @ifset man
 \input texinfo @c -*-texinfo-*-
-@setfilename gp-display-text
+@setfilename gprofng-display-text
 @settitle Display the performance data in plain text format
 @include gp-macros.texi
 @end ifset
@@ -413,11 +413,11 @@ for C, C++, and Fortran.
 @c man begin SEEALSO
 
 gprofng(1),
-gp-archive(1),
-gp-collect-app(1),
-gp-display-gui(1),
-gp-display-html(1),
-gp-display-src(1)
+gprofng-archive(1),
+gprofng-collect-app(1),
+@c -- gprofng-display-gui(1),
+gprofng-display-html(1),
+gprofng-display-src(1)
 
 @iftex
 @vspace{1}
