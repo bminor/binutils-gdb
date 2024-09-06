@@ -10512,7 +10512,12 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
   if (using_thumb_only (globals)
       && (r_type == R_ARM_THM_CALL
 	  || r_type == R_ARM_THM_JUMP24)
-      && branch_type == ST_BRANCH_UNKNOWN)
+      && branch_type == ST_BRANCH_UNKNOWN
+      /* Exception to the rule above: a branch to an undefined weak
+	 symbol is turned into a jump to the next instruction unless a
+	 PLT entry will be created (see below).  */
+      && !(h && h->root.type == bfd_link_hash_undefweak
+	   && plt_offset == (bfd_vma) -1))
     {
       if (sym_sec != NULL
 	  && sym_sec->owner != NULL)
