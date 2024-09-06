@@ -13123,25 +13123,36 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Read a Fortran module as type.  This DIE can be only a declaration used for
-   imported module.  Still we need that type as local Fortran "use ... only"
-   declaration imports depend on the created type in determine_prefix.  */
+/* Read a Fortran module or Ada package as type.  For Fortran, This
+   DIE can be only a declaration used for imported module.  Still we
+   need that type as local Fortran "use ... only" declaration imports
+   depend on the created type in determine_prefix.  */
 
 static struct type *
 read_module_type (struct die_info *die, struct dwarf2_cu *cu)
 {
+  enum language lang = cu->lang ();
   struct objfile *objfile = cu->per_objfile->objfile;
-  const char *module_name;
   struct type *type;
 
-  module_name = dwarf2_name (die, cu);
-  type = type_allocator (objfile, cu->lang ()).new_type (TYPE_CODE_MODULE,
-							 0, module_name);
+  if (lang == language_ada)
+    {
+      const char *pkg_name = dwarf2_full_name (nullptr, die, cu);
+      type = type_allocator (objfile, lang).new_type (TYPE_CODE_NAMESPACE,
+						      0, pkg_name);
+    }
+  else
+    {
+      const char *module_name = dwarf2_name (die, cu);
+      type = type_allocator (objfile, lang).new_type (TYPE_CODE_MODULE,
+						      0, module_name);
+    }
 
   return set_die_type (die, type, cu);
 }
 
-/* Read a Fortran module.  */
+/* Read a module.  This tag is used by Fortran (for modules), but also
+   by Ada (for packages).  */
 
 static void
 read_module (struct die_info *die, struct dwarf2_cu *cu)
