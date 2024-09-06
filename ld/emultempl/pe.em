@@ -1747,13 +1747,28 @@ gld${EMULATION_NAME}_after_open (void)
 
 	    /* Microsoft import libraries may contain archive members for
 	       one or more DLLs, together with static object files.
-	       Inspect all members that are named *.dll - check whether
-	       they contain .idata sections. Do the renaming of all
-	       archive members that seem to be Microsoft style import
-	       objects.  */
+	       The head and sentinels are regular COFF object files,
+	       while the thunks are special ILF files that get synthesized
+	       by bfd into COFF object files.
+
+	       As Microsoft import libraries can be for a module with
+	       almost any file name (*.dll, *.exe, etc), we can't easily
+	       know which archive members to inspect.
+
+	       Inspect all members, except ones named *.o or *.obj (which
+	       is the case both for regular static libraries or for GNU
+	       style import libraries). Archive members with file names other
+	       than *.o or *.obj, that do contain .idata sections, are
+	       considered to be Microsoft style import objects, and are
+	       renamed accordingly.
+
+	       If this heuristic is wrong and we apply this on archive members
+	       that already have unique names, it shouldn't make any difference
+	       as we only append a suffix on the names.  */
 	    pnt = strrchr (bfd_get_filename (is->the_bfd), '.');
 
-	    if (pnt != NULL && (fileext_cmp (pnt + 1, "dll") == 0))
+	    if (pnt != NULL && (fileext_cmp (pnt + 1, "o") != 0 &&
+				fileext_cmp (pnt + 1, "obj") != 0))
 	      {
 		int idata2 = 0, reloc_count = 0, idata = 0;
 		asection *sec;
@@ -1768,8 +1783,8 @@ gld${EMULATION_NAME}_after_open (void)
 		    reloc_count += sec->reloc_count;
 		  }
 
-		/* An archive member named .dll, but not having any .idata
-		   sections - apparently not a Microsoft import object
+		/* An archive member not named .o or .obj, but not having any
+		   .idata sections - apparently not a Microsoft import object
 		   after all: Skip renaming it.  */
 		if (!idata)
 		  continue;
