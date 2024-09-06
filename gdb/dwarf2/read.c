@@ -43,6 +43,7 @@
 #include "dwarf2/read-gdb-index.h"
 #include "dwarf2/sect-names.h"
 #include "dwarf2/stringify.h"
+#include "dwarf2/tag.h"
 #include "dwarf2/public.h"
 #include "bfd.h"
 #include "elf-bfd.h"
@@ -5763,15 +5764,39 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *attr;
 
+  if (tag_is_type (die->tag) && die->tag != DW_TAG_template_type_param)
+    {
+      /* Historically GNAT emitted some types in funny scopes.  For
+	 example, in one test case, where the first use of Natural was
+	 as the type of a field in a record, GNAT emitted:
+
+	  <2>: DW_TAG_structure_type
+	  ... variant parts and whatnot
+	  <5>: DW_TAG_subrange_type
+	  .    DW_AT_name: natural
+
+	  To detect this, we look up the DIE tree for a node that has
+	  a name; and if that name is fully qualified, we return 0
+	  here.  */
+      if (cu->lang () == language_ada)
+	{
+	  for (die_info *iter = die->parent;
+	       iter != nullptr;
+	       iter = iter->parent)
+	    {
+	      if (tag_is_type (iter->tag))
+		{
+		  const char *name = dwarf2_name (iter, cu);
+		  if (name != nullptr)
+		    return strstr (name, "__") == nullptr;
+		}
+	    }
+	}
+      return 1;
+    }
+
   switch (die->tag)
     {
-    case DW_TAG_namespace:
-    case DW_TAG_typedef:
-    case DW_TAG_class_type:
-    case DW_TAG_interface_type:
-    case DW_TAG_structure_type:
-    case DW_TAG_union_type:
-    case DW_TAG_enumeration_type:
     case DW_TAG_enumerator:
     case DW_TAG_subprogram:
     case DW_TAG_inlined_subroutine:
@@ -5779,6 +5804,11 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_member:
     case DW_TAG_imported_declaration:
       return 1;
+
+    case DW_TAG_module:
+      /* We don't need the namespace for Fortran modules, but we do
+	 for Ada packages.  */
+      return cu->lang () == language_ada;
 
     case DW_TAG_variable:
     case DW_TAG_constant:
@@ -5886,8 +5916,7 @@ dwarf2_compute_name (const char *name,
      Fortran names because there is no mangling standard.  So new_symbol
      will set the demangled name to the result of dwarf2_full_name, and it is
      the demangled name that GDB uses if it exists.  */
-  if (lang == language_ada
-      || (lang == language_fortran && physname))
+  if ((lang == language_ada || lang == language_fortran) && physname)
     {
       /* For Ada unit, we prefer the linkage name over the name, as
 	 the former contains the exported name, which the user expects
@@ -5900,11 +5929,21 @@ dwarf2_compute_name (const char *name,
 	return linkage_name;
     }
 
+  /* Some versions of GNAT emit fully-qualified names already.  These
+     have "__" separating the components -- something ordinary names
+     will never have.  */
+  if (lang == language_ada
+      && name != nullptr
+      && strstr (name, "__") != nullptr)
+    return name;
+
   /* These are the only languages we know how to qualify names in.  */
   if (name != NULL
       && (lang == language_cplus
-	  || lang == language_fortran || lang == language_d
-	  || lang == language_rust))
+	  || lang == language_fortran
+	  || lang == language_d
+	  || lang == language_rust
+	  || lang == language_ada))
     {
       if (die_needs_namespace (die, cu))
 	{
@@ -6394,12 +6433,11 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
       canonical_name = imported_name_prefix;
     }
   else if (strlen (imported_name_prefix) > 0)
-    canonical_name = obconcat (&objfile->objfile_obstack,
-			       imported_name_prefix,
-			       (cu->lang () == language_d
-				? "."
-				: "::"),
-			       imported_name, (char *) NULL);
+    {
+      gdb::unique_xmalloc_ptr<char> temp;
+      temp = typename_concat (imported_name_prefix, imported_name, 0, cu);
+      canonical_name = obstack_strdup (&objfile->objfile_obstack, temp.get ());
+    }
   else
     canonical_name = imported_name;
 
@@ -8877,8 +8915,14 @@ dwarf2_func_is_main_p (struct die_info *die, struct dwarf2_cu *cu)
 static bool
 check_ada_pragma_import (struct die_info *die, struct dwarf2_cu *cu)
 {
-  /* A Pragma Import will have both a name and a linkage name.  */
-  const char *name = dwarf2_name (die, cu);
+  if (cu->lang () != language_ada)
+    return false;
+
+  /* A Pragma Import will have both a name and a linkage name.  With a
+     newer version of GNAT, we have to examine the full name, because
+     the compiler might decide to emit a linkage name matching the
+     full name in some scenario.  */
+  const char *name = dwarf2_full_name (nullptr, die, cu);
   if (name == nullptr)
     return false;
 
@@ -15361,8 +15405,12 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 
   if (!for_specification)
     {
+      /* Older versions of GNAT emit full-qualified encoded names.  In
+	 this case, also use this name as the linkage name.  */
       if (m_language == language_ada
-	  && *linkage_name == nullptr)
+	  && *linkage_name == nullptr
+	  && *name != nullptr
+	  && strstr (*name, "__") != nullptr)
 	*linkage_name = *name;
 
       if (!scanning_per_cu->addresses_seen && low_pc.has_value ()
@@ -17970,13 +18018,15 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       /* Fortran does not have mangling standard and the mangling does differ
 	 between gfortran, iFort etc.  */
       const char *physname
-	= (cu->lang () == language_fortran
+	= ((cu->lang () == language_fortran || cu->lang () == language_ada)
 	   ? dwarf2_full_name (name, die, cu)
 	   : dwarf2_physname (name, die, cu));
       const char *linkagename = dw2_linkage_name (die, cu);
 
-      if (linkagename == nullptr || cu->lang () == language_ada)
+      if (linkagename == nullptr)
 	sym->set_linkage_name (physname);
+      else if (cu->lang () == language_ada)
+	sym->set_linkage_name (linkagename);
       else
 	{
 	  if (physname == linkagename)
@@ -18088,11 +18138,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      list_to_add = cu->list_in_scope;
 	    }
 
-	  if (is_ada_import_or_export (cu, name, linkagename))
+	  if (is_ada_import_or_export (cu, physname, linkagename))
 	    {
 	      /* This is either a Pragma Import or Export.  They can
 		 be distinguished by the declaration flag.  */
-	      sym->set_linkage_name (name);
+	      sym->set_linkage_name (physname);
 	      if (die_is_declaration (die, cu))
 		{
 		  /* For Import, create a symbol using the source
@@ -18105,7 +18155,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		  /* For Export, create a symbol using the source
 		     name, then create a second symbol that refers
 		     back to it.  */
-		  add_ada_export_symbol (sym, linkagename, name, cu,
+		  add_ada_export_symbol (sym, linkagename, physname, cu,
 					 list_to_add);
 		}
 	    }
@@ -18205,12 +18255,12 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		list_to_add = cu->list_in_scope;
 
 	      if (list_to_add != nullptr
-		  && is_ada_import_or_export (cu, name, linkagename))
+		  && is_ada_import_or_export (cu, physname, linkagename))
 		{
 		  /* This is a Pragma Export.  A Pragma Import won't
 		     be seen here, because it will not have a location
 		     and so will be handled below.  */
-		  add_ada_export_symbol (sym, name, linkagename, cu,
+		  add_ada_export_symbol (sym, physname, linkagename, cu,
 					 list_to_add);
 		}
 	    }
@@ -18234,12 +18284,12 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		  if (!suppress_add)
 		    list_to_add = cu->list_in_scope;
 		}
-	      else if (is_ada_import_or_export (cu, name, linkagename))
+	      else if (is_ada_import_or_export (cu, physname, linkagename))
 		{
 		  /* This is a Pragma Import.  A Pragma Export won't
 		     be seen here, because it will have a location and
 		     so will be handled above.  */
-		  sym->set_linkage_name (name);
+		  sym->set_linkage_name (physname);
 		  list_to_add
 		    = ((cu->list_in_scope
 			== cu->get_builder ()->get_file_symbols ())
@@ -19031,7 +19081,8 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
   if (cu->lang () != language_cplus
       && cu->lang () != language_fortran
       && cu->lang () != language_d
-      && cu->lang () != language_rust)
+      && cu->lang () != language_rust
+      && cu->lang () != language_ada)
     return "";
 
   retval = anonymous_struct_prefix (die, cu);
@@ -19164,6 +19215,11 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	    else if (die->tag == DW_TAG_entry_point)
 	      return determine_prefix (parent, cu);
 	  }
+	else if (cu->lang () == language_ada
+		 && (die->tag == DW_TAG_subprogram
+		     || die->tag == DW_TAG_inlined_subroutine
+		     || die->tag == DW_TAG_lexical_block))
+	  return dwarf2_full_name (nullptr, parent, cu);
 	return "";
       case DW_TAG_enumeration_type:
 	parent_type = read_type_die (parent, cu);
@@ -19215,6 +19271,8 @@ typename_concat (const char *prefix, const char *suffix, int physname,
       lead = "__";
       sep = "_MOD_";
     }
+  else if (cu->lang () == language_ada)
+    sep = "__";
   else
     sep = "::";
 
@@ -19310,7 +19368,8 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       && die->tag != DW_TAG_namelist
       && die->tag != DW_TAG_union_type
       && die->tag != DW_TAG_template_type_param
-      && die->tag != DW_TAG_template_value_param)
+      && die->tag != DW_TAG_template_value_param
+      && die->tag != DW_TAG_module)
     return NULL;
 
   switch (die->tag)

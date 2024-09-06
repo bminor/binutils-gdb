@@ -446,8 +446,50 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
       if ((entry->flags & IS_LINKAGE) != 0)
 	entry->canonical = entry->name;
       else if (entry->lang == language_ada)
-	handle_gnat_encoded_entry (entry, gnat_entries.get (),
-				   new_gnat_entries);
+	{
+	  /* Newer versions of GNAT emit DW_TAG_module and use a
+	     hierarchical structure.  In this case, we don't need to
+	     do any extra work.  This can be detected by looking for a
+	     GNAT-encoded name.  */
+	  if (strstr (entry->name, "__") == nullptr)
+	    {
+	      entry->canonical = entry->name;
+
+	      /* If the entry does not have a parent, then there's
+		 nothing extra to do here -- the entry itself is
+		 sufficient.
+
+		 However, if it does have a parent, we have to
+		 synthesize an entry with the full name.  This is
+		 unfortunate, but it's necessary due to how some of
+		 the Ada name-lookup code currently works.  For
+		 example, without this, ada_get_tsd_type will
+		 fail.
+
+		 Eventually it would be good to change the Ada lookup
+		 code, and then remove these entries (and supporting
+		 code in cooked_index_entry::full_name).  */
+	      if (entry->get_parent () != nullptr)
+		{
+		  const char *fullname = entry->full_name (&m_storage, false,
+							   true);
+		  cooked_index_entry *linkage = create (entry->die_offset,
+							entry->tag,
+							(entry->flags
+							 | IS_LINKAGE
+							 | IS_SYNTHESIZED),
+							language_ada,
+							fullname,
+							nullptr,
+							entry->per_cu);
+		  linkage->canonical = fullname;
+		  new_gnat_entries.push_back (linkage);
+		}
+	    }
+	  else
+	    handle_gnat_encoded_entry (entry, gnat_entries.get (),
+				       new_gnat_entries);
+	}
       else if (entry->lang == language_cplus || entry->lang == language_c)
 	{
 	  void **slot = htab_find_slot (seen_names.get (), entry,
