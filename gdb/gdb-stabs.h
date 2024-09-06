@@ -26,6 +26,80 @@
    structures makes the stabs-oriented symbol readers able to call
    each others' functions as required.  */
 
+struct stabsread_context {
+  /* Remember what we deduced to be the source language of this psymtab.  */
+  enum language psymtab_language = language_unknown;
+
+  /* The size of each symbol in the symbol file (in external form).
+     This is set by dbx_symfile_read when building psymtabs, and by
+     dbx_psymtab_to_symtab when building symtabs.  */
+  unsigned symbol_size = 0;
+
+  /* This is the offset of the symbol table in the executable file.  */
+  unsigned symbol_table_offset = 0;
+
+  /* This is the offset of the string table in the executable file.  */
+  unsigned string_table_offset = 0;
+
+  /* For elf+stab executables, the n_strx field is not a simple index
+     into the string table.  Instead, each .o file has a base offset in
+     the string table, and the associated symbols contain offsets from
+     this base.  The following two variables contain the base offset for
+     the current and next .o files.  */
+  unsigned int file_string_table_offset = 0;
+
+  /* .o and NLM files contain unrelocated addresses which are based at
+     0.  When non-zero, this flag disables some of the special cases for
+     Solaris elf+stab text addresses at location 0.  */
+  int symfile_relocatable = 0;
+
+  /* When set, we are processing a .o file compiled by sun acc.  This is
+     misnamed; it refers to all stabs-in-elf implementations which use
+     N_UNDF the way Sun does, including Solaris gcc.  Hopefully all
+     stabs-in-elf implementations ever invented will choose to be
+     compatible.  */
+  unsigned char processing_acc_compilation = 0;
+
+  /* The lowest text address we have yet encountered.  This is needed
+     because in an a.out file, there is no header field which tells us
+     what address the program is actually going to be loaded at, so we
+     need to make guesses based on the symbols (which *are* relocated to
+     reflect the address it will be loaded at).  */
+  unrelocated_addr lowest_text_address;
+
+  /* Non-zero if there is any line number info in the objfile.  Prevents
+     dbx_end_psymtab from discarding an otherwise empty psymtab.  */
+  int has_line_numbers = 0;
+
+  /* The list of bincls.  */
+  std::vector<struct header_file_location> bincl_list;
+
+  /* Name of last function encountered.  Used in Solaris to approximate
+     object file boundaries.  */
+  const char *last_function_name = nullptr;
+
+  /* The address in memory of the string table of the object file we are
+     reading (which might not be the "main" object file, but might be a
+     shared library or some other dynamically loaded thing).  This is
+     set by read_dbx_symtab when building psymtabs, and by
+     read_ofile_symtab when building symtabs, and is used only by
+     next_symbol_text.  FIXME: If that is true, we don't need it when
+     building psymtabs, right?  */
+  char *stringtab_global = nullptr;
+
+  /* These variables are used to control fill_symbuf when the stabs
+     symbols are not contiguous (as may be the case when a COFF file is
+     linked using --split-by-reloc).  */
+  const std::vector<asection *> *symbuf_sections;
+  size_t sect_idx = 0;
+  unsigned int symbuf_left = 0;
+  unsigned int symbuf_read = 0;
+
+  /* This variable stores a global stabs buffer, if we read stabs into
+     memory in one chunk in order to process relocations.  */
+  bfd_byte *stabs_data = nullptr;
+};
+
 
 /* Information is passed among various dbxread routines for accessing
    symbol files.  A pointer to this structure is kept in the objfile,
@@ -42,6 +116,8 @@ struct dbx_symfile_info
     int stringtab_size = 0;		/* Its size */
     file_ptr symtab_offset = 0;	/* Offset in file to symbol table */
     int symbol_size = 0;		/* Bytes in a single symbol */
+
+    stabsread_context ctx; /* Context for the symfile being read.  */
 
     /* See stabsread.h for the use of the following.  */
     struct header_file *header_files = nullptr;
