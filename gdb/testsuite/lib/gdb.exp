@@ -5633,10 +5633,11 @@ proc gdb_compile {source dest type options} {
     }
 
     # If the 'build-id' option is used, then ensure that we generate a
-    # build-id.  GCC does this by default, but Clang does not, so
-    # enable it now.
-    if {[lsearch -exact $options build-id] > 0
-	&& [test_compiler_info "clang-*"]} {
+    # build-id.  It is possible that the compiler is configured to do
+    # so automatically, but at least for GCC the configure option
+    # --enable-linker-build-id is not enabled by default.
+    # So to be sure, enable it explicitly.
+    if {[lsearch -exact $options build-id] > 0} {
 	lappend new_options "ldflags=-Wl,--build-id"
     }
 
