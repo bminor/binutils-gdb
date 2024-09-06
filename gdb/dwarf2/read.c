@@ -11625,7 +11625,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (cu->lang  () == language_cplus
 	  || cu->lang () == language_d
-	  || cu->lang () == language_rust)
+	  || cu->lang () == language_rust
+	  || cu->lang () == language_ada)
 	{
 	  const char *full_name = dwarf2_full_name (name, die, cu);
 
@@ -12773,7 +12774,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 		     "than the total size of elements"));
     }
 
-  name = dwarf2_name (die, cu);
+  name = dwarf2_full_name (nullptr, die, cu);
   if (name)
     type->set_name (name);
 
@@ -14228,7 +14229,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
     bits = attr->constant_value (0) * TARGET_CHAR_BIT;
-  name = dwarf2_name (die, cu);
+  name = dwarf2_full_name (nullptr, die, cu);
   if (!name)
     complaint (_("DW_AT_name missing from DW_TAG_base_type"));
 
@@ -14788,7 +14789,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr == NULL && cu->lang () != language_ada)
     range_type->bounds ()->high.set_undefined ();
 
-  name = dwarf2_name (die, cu);
+  name = dwarf2_full_name (nullptr, die, cu);
   if (name)
     range_type->set_name (name);
 
