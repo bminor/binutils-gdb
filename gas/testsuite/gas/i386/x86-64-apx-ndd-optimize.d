@@ -134,6 +134,16 @@ Disassembly of section .text:
 \s*[a-f0-9]+:\s*0f 4c d1             	cmovl  %ecx,%edx
 \s*[a-f0-9]+:\s*0f 4f d1             	cmovg  %ecx,%edx
 \s*[a-f0-9]+:\s*0f 4e d1             	cmovle %ecx,%edx
+\s*[a-f0-9]+:\s*0f 40 ca             	cmovo  %edx,%ecx
+\s*[a-f0-9]+:\s*0f 40 ca             	cmovo  %edx,%ecx
+\s*[a-f0-9]+:\s*49 0f 42 ca          	cmovb  %r10,%rcx
+\s*[a-f0-9]+:\s*49 0f 42 ca          	cmovb  %r10,%rcx
+\s*[a-f0-9]+:\s*44 0f 44 ca          	cmove  %edx,%r9d
+\s*[a-f0-9]+:\s*44 0f 44 ca          	cmove  %edx,%r9d
+\s*[a-f0-9]+:\s*d5 90 4a ca          	cmovp  %r18d,%ecx
+\s*[a-f0-9]+:\s*d5 90 4a ca          	cmovp  %r18d,%ecx
+\s*[a-f0-9]+:\s*d5 c8 4f ca          	cmovg  %rdx,%r17
+\s*[a-f0-9]+:\s*d5 c8 4f ca          	cmovg  %rdx,%r17
 \s*[a-f0-9]+:\s*62 f4 7d 08 60 c0    	movbe  %ax,%ax
 \s*[a-f0-9]+:\s*49 0f c8             	bswap  %r8
 \s*[a-f0-9]+:\s*d5 98 c8             	bswap  %r16

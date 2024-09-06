@@ -128,6 +128,16 @@ cmovnge %edx,%ecx,%edx
 cmovnl %edx,%ecx,%edx
 cmovng %edx,%ecx,%edx
 cmovnle %edx,%ecx,%edx
+cfcmovo %edx,%ecx,%ecx
+cfcmovno %ecx,%edx,%ecx
+cfcmovc %r10,%rcx,%rcx
+cfcmovnc %rcx,%r10,%rcx
+cfcmove %edx,%r9d,%r9d
+cfcmovne %r9d,%edx,%r9d
+cfcmovp %r18d,%ecx,%ecx
+cfcmovnp %ecx,%r18d,%ecx
+cfcmovg %rdx,%r17,%r17
+cfcmovng %r17,%rdx,%r17
 movbe  %ax,%ax
 movbe  %r8,%r8
 movbe  %r16,%r16
