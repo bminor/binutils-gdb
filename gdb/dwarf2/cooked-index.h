@@ -227,8 +227,7 @@ struct cooked_index_entry : public allocate_on_obstack<cooked_index_entry>
      linkage name -- two entries are created for DIEs which have both
      attributes.  */
   const char *name;
-  /* The canonical name.  For C++ names, this may differ from NAME.
-     In all other cases, this is equal to NAME.  */
+  /* The canonical name.  This may be equal to NAME.  */
   const char *canonical = nullptr;
   /* The DWARF tag.  */
   enum dwarf_tag tag;
@@ -245,9 +244,10 @@ private:
 
   /* A helper method for full_name.  Emits the full scope of this
      object, followed by the separator, to STORAGE.  If this entry has
-     a parent, its write_scope method is called first.  */
+     a parent, its write_scope method is called first.  FOR_MAIN is
+     true when computing the name of 'main'; see full_name.  */
   void write_scope (struct obstack *storage, const char *sep,
-		    bool for_name) const;
+		    bool for_main) const;
 
   /* The parent entry.  This is NULL for top-level entries.
      Otherwise, it points to the parent entry, such as a namespace or
