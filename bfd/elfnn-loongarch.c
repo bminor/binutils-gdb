@@ -84,6 +84,14 @@ struct _bfd_loongarch_elf_obj_tdata
    && elf_tdata (bfd) != NULL						\
    && elf_object_id (bfd) == LARCH_ELF_DATA)
 
+static bool
+elfNN_loongarch_object (bfd *abfd)
+{
+  return bfd_elf_allocate_object (abfd,
+				  sizeof (struct _bfd_loongarch_elf_obj_tdata),
+				  LARCH_ELF_DATA);
+}
+
 struct relr_entry
 {
   asection *sec;
@@ -6159,6 +6167,8 @@ elf_loongarch64_hash_symbol (struct elf_link_hash_entry *h)
 #define bfd_elfNN_bfd_reloc_name_lookup loongarch_reloc_name_lookup
 #define elf_info_to_howto_rel NULL /* Fall through to elf_info_to_howto.  */
 #define elf_info_to_howto loongarch_info_to_howto_rela
+#define bfd_elfNN_mkobject						  \
+  elfNN_loongarch_object
 #define bfd_elfNN_bfd_merge_private_bfd_data				  \
   elfNN_loongarch_merge_private_bfd_data
 
