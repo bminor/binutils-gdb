@@ -295,7 +295,7 @@ bsd_uthread_solib_loaded (solib &so)
 
 static void
 bsd_uthread_solib_unloaded (program_space *pspace, const solib &so,
-			    bool still_in_use)
+			    bool still_in_use, bool /* silent */)
 {
   if (bsd_uthread_solib_name.empty () || still_in_use)
     return;

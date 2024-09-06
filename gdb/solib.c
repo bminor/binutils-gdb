@@ -694,14 +694,17 @@ notify_solib_loaded (solib &so)
 /* Notify interpreters and observers that solib SO has been unloaded.
    When STILL_IN_USE is true, the objfile backing SO is still in use,
    this indicates that SO was loaded multiple times, but only mapped
-   in once (the mapping was reused).  */
+   in once (the mapping was reused).
+
+   When SILENT is true, don't announce to the user if any breakpoints are
+   disabled as a result of unloading SO.  */
 
 static void
 notify_solib_unloaded (program_space *pspace, const solib &so,
-		       bool still_in_use)
+		       bool still_in_use, bool silent)
 {
   interps_notify_solib_unloaded (so, still_in_use);
-  gdb::observers::solib_unloaded.notify (pspace, so, still_in_use);
+  gdb::observers::solib_unloaded.notify (pspace, so, still_in_use, silent);
 }
 
 /* See solib.h.  */
@@ -803,7 +806,7 @@ update_solib_list (int from_tty)
 	  /* Notify any observer that the shared object has been
 	     unloaded before we remove it from GDB's tables.  */
 	  notify_solib_unloaded (current_program_space, *gdb_iter,
-				 still_in_use);
+				 still_in_use, false);
 
 	  /* Unless the user loaded it explicitly, free SO's objfile.  */
 	  if (gdb_iter->objfile != nullptr
@@ -1163,14 +1166,12 @@ clear_solib (program_space *pspace)
 {
   const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
-  disable_breakpoints_in_shlibs (pspace);
-
   for (solib &so : pspace->so_list)
     {
       bool still_in_use
 	= (so.objfile != nullptr && solib_used (pspace, so));
 
-      notify_solib_unloaded (pspace, so, still_in_use);
+      notify_solib_unloaded (pspace, so, still_in_use, true);
       pspace->remove_target_sections (&so);
     };
 

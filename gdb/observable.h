@@ -102,10 +102,14 @@ extern observable<inferior */* parent_inf */, inferior */* child_inf */,
 extern observable<solib &/* solib */> solib_loaded;
 
 /* The shared library SOLIB has been unloaded from program space PSPACE.
+   The SILENT argument indicates that GDB doesn't wish to notify the CLI
+   about any non-error consequences of unloading the solib, e.g. when
+   breakpoints are disabled.
+
    Note  when gdb calls this observer, the library's symbols have not
    been unloaded yet, and thus are still available.  */
 extern observable<program_space *, const solib &/* solib */,
-		  bool /* still_in_use */> solib_unloaded;
+		  bool /* still_in_use */, bool /* silent */> solib_unloaded;
 
 /* The symbol file specified by OBJFILE has been loaded.  */
 extern observable<struct objfile */* objfile */> new_objfile;

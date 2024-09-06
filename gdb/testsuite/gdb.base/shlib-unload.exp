@@ -225,6 +225,75 @@ proc_with_prefix test_dprintf_with_rerun {} {
 	"dprintf is non-pending after restart"
 }
 
+# Check that we see breakpoint modified events (where appropriate)
+# when the 'nosharedlibrary' command is used to unload all shared
+# libraries.
+#
+# Also check that the 'nosharedlibrary' doesn't trigger a warning
+# about shared library breakpoints being disabled.
+proc_with_prefix test_silent_nosharedlib {} {
+    if { ![allow_python_tests] } {
+	unsupported "python support needed"
+	return
+    }
+
+    foreach_with_prefix type { breakpoint dprintf } {
+	clean_restart $::binfile
+
+	if {![runto_main]} {
+	    return
+	}
+
+	gdb_breakpoint $::srcfile:$::bp_line
+	gdb_continue_to_breakpoint "stop before dlclose"
+
+	# Setup a dprintf or breakpoint in the shared library.
+	if { $type eq "breakpoint" } {
+	    gdb_test "break foo"
+	} else {
+	    gdb_test "dprintf foo,\"In foo\""
+	}
+
+	# Record the number of the b/p (or dprintf) we just inserted.
+	set bp_num [get_integer_valueof "\$bpnum" "*UNKNOWN*" \
+			"get b/p number"]
+
+	# Load Python library to track b/p modifications.
+	gdb_test_no_output "source $::pyfile" "import python scripts"
+
+	# Initialise the b/p modified hash.  Currently dprintf style
+	# breakpoints are not visible from Python, so the modification
+	# count will remain unchanged in that case.
+	gdb_test_no_output "python bp_modified_counts\[$bp_num\] = 0"
+
+	# Discard symbols from all loaded shared libraries.
+	gdb_test_no_output "nosharedlibrary"
+
+	# Check that our b/p is now showing as disabled.
+	if { $type eq "breakpoint" } {
+	    set re \
+		[list "$bp_num\\s+breakpoint\\s+keep\\s+y\\s+<PENDING>\\s+foo"]
+	    set count 1
+	} else {
+	    set re \
+		[list \
+		     "$bp_num\\s+dprintf\\s+keep\\s+y\\s+<PENDING>\\s+foo" \
+		     "\\s+printf \"In foo\""]
+	    set count 0
+	}
+
+	gdb_test "info breakpoints $bp_num" \
+	    [multi_line "^Num\\s+Type\\s+Disp\\s+Enb\\s+Address\\s+What" \
+		 {*}$re]
+
+	# Check we've seen the expected number of breakpoint modified
+	# events.  Currently dprintf breakpoints are not visible from
+	# Python, so we will not see an event in that case.
+	gdb_test "python print(bp_modified_counts\[$bp_num\])" "^$count"
+    }
+}
+
 test_bp_modified_events
 test_dprintf_after_unload
 test_dprintf_with_rerun
+test_silent_nosharedlib

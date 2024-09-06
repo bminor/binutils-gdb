@@ -3104,7 +3104,6 @@ insert_bp_location (struct bp_location *bl,
 		  || shared_objfile_contains_address_p (bl->pspace,
 							bl->address)))
 	    {
-	      /* See also: disable_breakpoints_in_shlibs.  */
 	      bl->shlib_disabled = 1;
 	      notify_breakpoint_modified (bl->owner);
 	      if (!*disabled_breaks)
@@ -8084,44 +8083,19 @@ create_and_insert_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR add
   return b;
 }
 
-/* See breakpoint.h.  */
-
-void
-disable_breakpoints_in_shlibs (program_space *pspace)
-{
-  for (bp_location *loc : all_bp_locations ())
-    {
-      /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
-      struct breakpoint *b = loc->owner;
-
-      /* We apply the check to all breakpoints, including disabled for
-	 those with loc->duplicate set.  This is so that when breakpoint
-	 becomes enabled, or the duplicate is removed, gdb will try to
-	 insert all breakpoints.  If we don't set shlib_disabled here,
-	 we'll try to insert those breakpoints and fail.  */
-      if (((b->type == bp_jit_event)
-	   || is_breakpoint (b)
-	   || is_tracepoint (b))
-	  && loc->pspace == pspace
-	  && !loc->shlib_disabled
-	  && solib_name_from_address (loc->pspace, loc->address)
-	  )
-	{
-	  loc->shlib_disabled = 1;
-	}
-    }
-}
-
 /* Disable any breakpoints and tracepoints that are in SOLIB upon
    notification of unloaded_shlib.  Only apply to enabled breakpoints,
    disabled ones can just stay disabled.
 
    When STILL_IN_USE is true, SOLIB hasn't really been unmapped from
-   the inferior.  In this case, don't disable anything.  */
+   the inferior.  In this case, don't disable anything.
+
+   When SILENT is false notify the user if any breakpoints are disabled,
+   otherwise, still disable the breakpoints, but don't tell the user.  */
 
 static void
 disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib,
-				       bool still_in_use)
+				       bool still_in_use, bool silent)
 {
   if (still_in_use)
     return;
@@ -8165,7 +8139,7 @@ disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib
 
 	  bp_modified = true;
 
-	  if (!disabled_shlib_breaks && user_breakpoint_p (&b))
+	  if (!disabled_shlib_breaks && !silent && user_breakpoint_p (&b))
 	    {
 	      target_terminal::ours_for_output ();
 	      warning (_("Temporarily disabling breakpoints "
