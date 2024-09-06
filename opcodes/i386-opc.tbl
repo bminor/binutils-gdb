@@ -993,8 +993,7 @@ cmov<cc>, 0x4<cc:opc>, CMOV&APX_F, C|Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstV
 cmov<cc>, 0xf4<cc:opc>, CMOV, Modrm|CheckOperandSize|No_bSuf|No_sSuf, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 cfcmov<cc>, 0x4<cc:opc>, CMOV&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|DstVVVV|EVexMap4|EVexNF|Optimize, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64, Reg16|Reg32|Reg64 }
-cfcmov<cc>, 0x4<cc:opc>, CMOV&APX_F, Load|Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-cfcmov<cc>, 0x4<cc:opc>, CMOV&APX_F, Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4|EVexNF, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Unspecified|BaseIndex }
+cfcmov<cc>, 0x4<cc:opc>, CMOV&APX_F, D|Modrm|CheckOperandSize|No_bSuf|No_sSuf|EVexMap4, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 fcmovb, 0xda/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }
 fcmovnae, 0xda/0, i687, Modrm|NoSuf, { FloatReg, FloatAcc }

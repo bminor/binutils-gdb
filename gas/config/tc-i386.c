@@ -8878,7 +8878,10 @@ match_template (char mnem_suffix)
 		  found_reverse_match = Opcode_D;
 		  goto check_operands_345;
 		}
-	      else if (t->opcode_modifier.commutative)
+	      else if (t->opcode_modifier.commutative
+		       /* CFCMOVcc also wants its major opcode unaltered.  */
+		       || (t->opcode_space == SPACE_EVEXMAP4
+			   && (t->base_opcode | 0xf) == 0x4f))
 		found_reverse_match = ~0;
 	      else if (t->opcode_space != SPACE_BASE
 		       && (t->opcode_space != SPACE_EVEXMAP4
@@ -9178,6 +9181,9 @@ match_template (char mnem_suffix)
 
       /* Fall through.  */
     case ~0:
+      if (i.tm.opcode_space == SPACE_EVEXMAP4
+	  && !t->opcode_modifier.commutative)
+	i.tm.opcode_modifier.operandconstraint = EVEX_NF;
       i.tm.operand_types[0] = operand_types[i.operands - 1];
       i.tm.operand_types[i.operands - 1] = operand_types[0];
       break;
