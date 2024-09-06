@@ -699,8 +699,8 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
 	   for the image size.  */
 	if (coff_section_data (abfd, sec) != NULL
 	    && pei_section_data (abfd, sec) != NULL)
-	  isize = (sec->vma - extra->ImageBase
-		   + SA (FA (pei_section_data (abfd, sec)->virt_size)));
+	  isize = SA (sec->vma - extra->ImageBase
+		      + FA (pei_section_data (abfd, sec)->virt_size));
       }
 
     aouthdr_in->dsize = dsize;
