@@ -1535,6 +1535,11 @@ void
 breakpoint_set_commands (struct breakpoint *b, 
 			 counted_command_line &&commands)
 {
+  /* If the commands have not changed then there's no need to update
+     anything, and no need to emit a breakpoint modified event.  */
+  if (commands_equal (b->commands.get (), commands.get ()))
+    return;
+
   validate_commands_for_breakpoint (b, commands.get ());
 
   b->commands = std::move (commands);

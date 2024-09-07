@@ -1625,6 +1625,65 @@ define_prefix_command (const char *comname, int from_tty)
   c->allow_unknown = c->user_commands.get () != nullptr;
 }
 
+/* See cli/cli-script.h.  */
+
+bool
+commands_equal (const command_line *a, const command_line *b)
+{
+  if ((a == nullptr) != (b == nullptr))
+    return false;
+
+  while (a != nullptr)
+    {
+      /* We are either at the end of both command lists, or there's
+	 another command in both lists.  */
+      if ((a->next == nullptr) != (b->next == nullptr))
+	return false;
+
+      /* There's a command line for both, or neither.  */
+      if ((a->line == nullptr) != (b->line == nullptr))
+	return false;
+
+      /* Check control_type matches.  */
+      if (a->control_type != b->control_type)
+	return false;
+
+      if (a->control_type == compile_control)
+	{
+	  if (a->control_u.compile.scope != b->control_u.compile.scope)
+	    return false;
+
+	  /* This is where we "fail safe".  The scope_data is a 'void *'
+	     pointer which changes in meaning based on the value of
+	     'scope'.  It is possible that two different 'void *' pointers
+	     could point to the equal scope data, however, we just assume
+	     that if the pointers are different, then the scope_data is
+	     different.  This could be improved in the future.  */
+	  if (a->control_u.compile.scope_data
+	      != b->control_u.compile.scope_data)
+	    return false;
+	}
+
+      /* Check lines are identical.  */
+      if (a->line != nullptr && strcmp (a->line, b->line) != 0)
+	return false;
+
+      /* Check body_list_0.  */
+      if (!commands_equal (a->body_list_0.get (), b->body_list_0.get ()))
+	return false;
+
+      /* Check body_list_1.  */
+      if (!commands_equal (a->body_list_1.get (), b->body_list_1.get ()))
+	return false;
+
+      /* Move to the next element in each chain.  */
+      a = a->next;
+      b = b->next;
+    }
+
+  return true;
+}
+
 
 /* Used to implement source_command.  */
 

@@ -184,4 +184,14 @@ extern void print_command_trace (const char *cmd, ...)
 
 extern void reset_command_nest_depth (void);
 
+/* Return true if A and B are identical.  Some commands carry around a
+   'void *' compilation context, in this case this function doesn't try to
+   validate if the context is actually the same or not, and will just
+   return false indicating the commands have changed.  That is, a return
+   value of true is a guarantee that the commands are equal, a return
+   value of false means the commands are possibly different (and in most
+   cases are different).  */
+
+extern bool commands_equal (const command_line *a, const command_line *b);
+
 #endif /* GDB_CLI_CLI_SCRIPT_H */
