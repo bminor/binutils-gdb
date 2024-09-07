@@ -1967,6 +1967,7 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
 	case DW_OP_GNU_reinterpret:
 	case DW_OP_addrx:
 	case DW_OP_GNU_addr_index:
+	case DW_OP_constx:
 	case DW_OP_GNU_const_index:
 	case DW_OP_constu:
 	case DW_OP_plus_uconst:
@@ -3265,10 +3266,13 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
   /* With -gsplit-dwarf a TLS variable can also look like this:
      DW_AT_location    : 3 byte block: fc 4 e0
 			(DW_OP_GNU_const_index: 4;
-			 DW_OP_GNU_push_tls_address)  */
+			 DW_OP_GNU_push_tls_address) |
+			 3 byte block a2 4 e0
+			(DW_OP_constx: 4;
+			 DW_OP_form_tls_address)  */
   else if (data + 3 <= end
 	   && data + 1 + (leb128_size = skip_leb128 (data + 1, end)) < end
-	   && data[0] == DW_OP_GNU_const_index
+	   && (data[0] == DW_OP_constx || data[0] == DW_OP_GNU_const_index)
 	   && leb128_size > 0
 	   && (data[1 + leb128_size] == DW_OP_GNU_push_tls_address
 	       || data[1 + leb128_size] == DW_OP_form_tls_address)
@@ -3675,6 +3679,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  gdb_printf (stream, " 0x%s", phex_nz (ul, addr_size));
 	  break;
 
+	case DW_OP_constx:
 	case DW_OP_GNU_const_index:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  ul = (uint64_t) dwarf2_read_addr_index (per_cu, per_objfile, ul);
