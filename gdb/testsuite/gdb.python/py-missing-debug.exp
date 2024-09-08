@@ -58,8 +58,21 @@ with_test_prefix "initial checks" {
 }
 
 # Load the Python script into GDB.
-gdb_test "source $remote_python_file" "^Success" \
-    "source python script"
+set python_script_loaded 0
+set re_no_curses [string_to_regexp "Module 'curses' is not installed."]
+gdb_test_multiple "source $remote_python_file" "source python script" {
+    -re -wrap $re_no_curses.* {
+	unsupported $gdb_test_name
+    }
+    -re -wrap "^Success" {
+	set python_script_loaded 1
+	pass $gdb_test_name
+    }
+}
+
+if { ! $python_script_loaded } {
+    return
+}
 
 # Setup the separate debug info directory.  This isn't actually needed until
 # some of the later tests, but might as well get this done now.
