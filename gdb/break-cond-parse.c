@@ -478,6 +478,7 @@ create_breakpoint_parse_arg_string
 
   for (const token &t : tokens)
     {
+      std::string tok_value (t.get_value ());
       switch (t.get_type ())
 	{
 	case token::type::FORCE:
@@ -490,9 +491,7 @@ create_breakpoint_parse_arg_string
 	    if (task != -1 || inferior != -1)
 	      error ("You can specify only one of thread, inferior, or task.");
 	    const char *tmptok;
-	    thread_info *thr
-	      = parse_thread_id (std::string (t.get_value ()).c_str (),
-				 &tmptok);
+	    thread_info *thr = parse_thread_id (tok_value.c_str (), &tmptok);
 	    gdb_assert (*tmptok == '\0');
 	    thread = thr->global_num;
 	  }
@@ -504,8 +503,7 @@ create_breakpoint_parse_arg_string
 	    if (task != -1 || thread != -1)
 	      error ("You can specify only one of thread, inferior, or task.");
 	    char *tmptok;
-	    long inferior_id
-	      = strtol (std::string (t.get_value ()).c_str (), &tmptok, 0);
+	    long inferior_id = strtol (tok_value.c_str (), &tmptok, 0);
 	    if (*tmptok != '\0')
 	      error (_("Junk '%s' after inferior keyword."), tmptok);
 	    if (inferior_id > INT_MAX)
@@ -523,8 +521,7 @@ create_breakpoint_parse_arg_string
 	    if (inferior != -1 || thread != -1)
 	      error ("You can specify only one of thread, inferior, or task.");
 	    char *tmptok;
-	    long task_id
-	      = strtol (std::string (t.get_value ()).c_str (), &tmptok, 0);
+	    long task_id = strtol (tok_value.c_str (), &tmptok, 0);
 	    if (*tmptok != '\0')
 	      error (_("Junk '%s' after task keyword."), tmptok);
 	    if (task_id > INT_MAX)
