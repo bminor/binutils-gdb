@@ -611,26 +611,6 @@ proc test_mod_info { mod_info } {
     if { [expr $off % 4] != 0 } {
 	set off [expr $off + 4 - ($off % 4)]
     }
-
-    incr off 64
-
-    set obj3 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
-    incr off [expr [string length $obj3] + 1]
-
-    set ar3 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
-    incr off [expr [string length $ar3] + 1]
-
-    if [string equal $obj3 "* Linker *"] {
-	pass "Correct name for dummy object file"
-    } else {
-	fail "Incorrect name for dummy object file"
-    }
-
-    if [string equal $ar3 ""] {
-	pass "Correct archive name for dummy object file"
-    } else {
-	fail "Incorrect archive name for dummy object file"
-    }
 }
 
 proc test_section_contrib { section_contrib } {
@@ -677,7 +657,7 @@ proc test2 { } {
 	return
     }
 
-    if ![ld_link $ld "tmpdir/pdb2.exe" "--pdb=tmpdir/pdb2.pdb --gc-sections -e foo tmpdir/pdb2a.o tmpdir/pdb2b.a"] {
+    if ![ld_link $ld "tmpdir/pdb2.exe" "--pdb=tmpdir/pdb2.pdb --gc-sections --disable-reloc-section -e foo tmpdir/pdb2a.o tmpdir/pdb2b.a"] {
 	unsupported "Create PE image with PDB file"
 	return
     }
