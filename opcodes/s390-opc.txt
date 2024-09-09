@@ -2061,7 +2061,7 @@ e60000000055 vcnf VRR_VV0UU2 "vector fp convert to nnp" arch14 zarch
 
 # Reset-DAT-Protection Facility
 
-b98B rdp RRF_RURR2 "reset dat protection" arch14 zarch optparm
+b98b rdp RRF_RURR2 "reset dat protection" arch14 zarch optparm
 
 # BEAR-Enhancement Facility
 
