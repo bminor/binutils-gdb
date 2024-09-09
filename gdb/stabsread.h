@@ -173,7 +173,7 @@ class psymtab_storage;
 /* Functions exported by dbxread.c.  These are not in stabsread.c because
    they are only used by some stabs readers.  */
 
-extern legacy_psymtab *dbx_end_psymtab
+extern legacy_psymtab *stabs_end_psymtab
   (struct objfile *objfile, psymtab_storage *partial_symtabs,
    legacy_psymtab *pst,
    const char **include_list, int num_includes,
@@ -251,4 +251,37 @@ process_one_symbol (int, int, CORE_ADDR, const char *,
 		    const section_offsets &,
 		    struct objfile *, enum language);
 
+#define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
+#define LDSYMLEN(p) (((struct symloc *)((p)->read_symtab_private))->ldsymlen)
+
+/* We put a pointer to this structure in the read_symtab_private field
+   of the psymtab.  */
+
+struct symloc
+  {
+    /* Offset within the file symbol table of first local symbol for this
+       file.  */
+
+    int ldsymoff;
+
+    /* Length (in bytes) of the section of the symbol table devoted to
+       this file's symbols (actually, the section bracketed may contain
+       more than just this file's symbols).  If ldsymlen is 0, the only
+       reason for this thing's existence is the dependency list.  Nothing
+       else will happen when it is read in.  */
+
+    int ldsymlen;
+
+    /* The size of each symbol in the symbol file (in external form).  */
+
+    int symbol_size;
+
+    /* Further information needed to locate the symbols if they are in
+       an ELF file.  */
+
+    int symbol_offset;
+    int string_offset;
+    int file_string_offset;
+    enum language pst_language;
+  };
 #endif /* STABSREAD_H */

@@ -33,6 +33,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "aout/stab_gnu.h"
+#include "psymtab.h"
 #include "libaout.h"
 #include "aout/aout64.h"
 #include "gdb-stabs.h"
@@ -532,6 +533,174 @@ read_type_number (const char **pp, int *typenums)
   return 0;
 }
 
+
+/* Free up old header file tables.  */
+
+void
+free_header_files (void)
+{
+  if (this_object_header_files)
+    {
+      xfree (this_object_header_files);
+      this_object_header_files = NULL;
+    }
+  n_allocated_this_object_header_files = 0;
+}
+
+/* Allocate new header file tables.  */
+
+void
+init_header_files (void)
+{
+  n_allocated_this_object_header_files = 10;
+  this_object_header_files = XNEWVEC (int, 10);
+}
+
+/* Close off the current usage of PST.
+   Returns PST or NULL if the partial symtab was empty and thrown away.
+
+   FIXME:  List variables and peculiarities of same.  */
+
+legacy_psymtab *
+stabs_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
+		   legacy_psymtab *pst,
+		   const char **include_list, int num_includes,
+		   int capping_symbol_offset, unrelocated_addr capping_text,
+		   legacy_psymtab **dependency_list,
+		   int number_dependencies,
+		   int textlow_not_set)
+{
+  int i;
+  struct gdbarch *gdbarch = objfile->arch ();
+  dbx_symfile_info *key = dbx_objfile_data_key. get (objfile);
+
+  if (capping_symbol_offset != -1)
+    LDSYMLEN (pst) = capping_symbol_offset - LDSYMOFF (pst);
+  pst->set_text_high (capping_text);
+
+  /* Under Solaris, the N_SO symbols always have a value of 0,
+     instead of the usual address of the .o file.  Therefore,
+     we have to do some tricks to fill in texthigh and textlow.
+     The first trick is: if we see a static
+     or global function, and the textlow for the current pst
+     is not set (ie: textlow_not_set), then we use that function's
+     address for the textlow of the pst.  */
+
+  /* Now, to fill in texthigh, we remember the last function seen
+     in the .o file.  Also, there's a hack in
+     bfd/elf.c and gdb/elfread.c to pass the ELF st_size field
+     to here via the misc_info field.  Therefore, we can fill in
+     a reliable texthigh by taking the address plus size of the
+     last function in the file.  */
+
+  if (!pst->text_high_valid && key->ctx.last_function_name
+      && gdbarch_sofun_address_maybe_missing (gdbarch))
+    {
+      int n;
+
+      const char *colon = strchr (key->ctx.last_function_name, ':');
+      if (colon == NULL)
+	n = 0;
+      else
+	n = colon - key->ctx.last_function_name;
+      char *p = (char *) alloca (n + 2);
+      strncpy (p, key->ctx.last_function_name, n);
+      p[n] = 0;
+
+      bound_minimal_symbol minsym
+	= lookup_minimal_symbol (current_program_space, p, objfile,
+				 pst->filename);
+      if (minsym.minsym == NULL)
+	{
+	  /* Sun Fortran appends an underscore to the minimal symbol name,
+	     try again with an appended underscore if the minimal symbol
+	     was not found.  */
+	  p[n] = '_';
+	  p[n + 1] = 0;
+	  minsym = lookup_minimal_symbol (current_program_space, p, objfile,
+					  pst->filename);
+	}
+
+      if (minsym.minsym)
+	pst->set_text_high
+	  (unrelocated_addr (CORE_ADDR (minsym.minsym->unrelocated_address ())
+			     + minsym.minsym->size ()));
+
+      key->ctx.last_function_name = NULL;
+    }
+
+  if (!gdbarch_sofun_address_maybe_missing (gdbarch))
+    ;
+  /* This test will be true if the last .o file is only data.  */
+  else if (textlow_not_set)
+    pst->set_text_low (pst->unrelocated_text_high ());
+  else
+    {
+      /* If we know our own starting text address, then walk through all other
+	 psymtabs for this objfile, and if any didn't know their ending text
+	 address, set it to our starting address.  Take care to not set our
+	 own ending address to our starting address.  */
+
+      for (partial_symtab *p1 : partial_symtabs->range ())
+	if (!p1->text_high_valid && p1->text_low_valid && p1 != pst)
+	  p1->set_text_high (pst->unrelocated_text_low ());
+    }
+
+  /* End of kludge for patching Solaris textlow and texthigh.  */
+
+  pst->end ();
+
+  pst->number_of_dependencies = number_dependencies;
+  if (number_dependencies)
+    {
+      pst->dependencies
+	= partial_symtabs->allocate_dependencies (number_dependencies);
+      memcpy (pst->dependencies, dependency_list,
+	      number_dependencies * sizeof (legacy_psymtab *));
+    }
+  else
+    pst->dependencies = 0;
+
+  for (i = 0; i < num_includes; i++)
+    {
+      legacy_psymtab *subpst =
+	new legacy_psymtab (include_list[i], partial_symtabs, objfile->per_bfd);
+
+      subpst->read_symtab_private =
+	XOBNEW (&objfile->objfile_obstack, struct symloc);
+      LDSYMOFF (subpst) =
+	LDSYMLEN (subpst) = 0;
+
+      /* We could save slight bits of space by only making one of these,
+	 shared by the entire set of include files.  FIXME-someday.  */
+      subpst->dependencies =
+	partial_symtabs->allocate_dependencies (1);
+      subpst->dependencies[0] = pst;
+      subpst->number_of_dependencies = 1;
+
+      subpst->legacy_read_symtab = pst->legacy_read_symtab;
+      subpst->legacy_expand_psymtab = pst->legacy_expand_psymtab;
+    }
+
+  if (num_includes == 0
+      && number_dependencies == 0
+      && pst->empty ()
+      && key->ctx.has_line_numbers == 0)
+    {
+      /* Throw away this psymtab, it's empty.  */
+      /* Empty psymtabs happen as a result of header files which don't have
+	 any symbols in them.  There can be a lot of them.  But this check
+	 is wrong, in that a psymtab with N_SLINE entries but nothing else
+	 is not empty, but we don't realize that.  Fixing that without slowing
+	 things down might be tricky.  */
+
+      partial_symtabs->discard_psymtab (pst);
+
+      /* Indicate that psymtab was thrown away.  */
+      pst = NULL;
+    }
+  return pst;
+}
 
 /* Record the namespace that the function defined by SYMBOL was
    defined in, if necessary.  BLOCK is the associated block; use

@@ -2892,7 +2892,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		      const char *basename;
 
 		      /* A zero value is probably an indication for the
-			 SunPRO 3.0 compiler.  dbx_end_psymtab explicitly tests
+			 SunPRO 3.0 compiler.  stabs_end_psymtab explicitly tests
 			 for zero, so don't relocate it.  */
 
 		      if (sh.value == 0
@@ -3297,7 +3297,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
 		  case N_ENDM:
 		    /* Solaris 2 end of module, finish current partial
-		       symbol table.  dbx_end_psymtab will set the
+		       symbol table.  stabs_end_psymtab will set the
 		       high text address of PST to the proper value,
 		       which is necessary if a module compiled without
 		       debugging info follows this module.  */
@@ -3686,14 +3686,14 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	    }
 	}
 
-      /* Link pst to FDR.  dbx_end_psymtab returns NULL if the psymtab was
+      /* Link pst to FDR.  stabs_end_psymtab returns NULL if the psymtab was
 	 empty and put on the free list.  */
       fdr_to_pst[f_idx].pst
-	= dbx_end_psymtab (objfile, partial_symtabs, save_pst,
-			   psymtab_include_list, includes_used,
-			   -1, save_pst->unrelocated_text_high (),
-			   dependency_list, dependencies_used,
-			   textlow_not_set);
+	= stabs_end_psymtab (objfile, partial_symtabs, save_pst,
+			     psymtab_include_list, includes_used,
+			     -1, save_pst->unrelocated_text_high (),
+			     dependency_list, dependencies_used,
+			     textlow_not_set);
       includes_used = 0;
       dependencies_used = 0;
     }
