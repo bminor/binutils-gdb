@@ -300,10 +300,11 @@ field. The notation changes as follows:
 @display
 @multitable @columnfractions 0.30 0.30
 @headitem full notation @tab short notation
-@item Dn(0,Bn) @tab Dn(Bn)
+@item Dn(Xn,0) @tab Dn(Xn,)
+@item Dn(0,Bn) @tab Dn(,Bn) or Dn(Bn)
 @item Dn(0,0) @tab Dn
 @item Dn(0) @tab Dn
-@item Dn(Ln,0) @tab Dn(Ln)
+@item Dn(Ln,0) @tab Dn(Ln,) or Dn(Ln)
 @end multitable
 @end display
 
