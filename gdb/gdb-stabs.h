@@ -20,6 +20,28 @@
 #ifndef GDB_STABS_H
 #define GDB_STABS_H
 
+/* During initial symbol readin, we need to have a structure to keep
+   track of which psymtabs have which bincls in them.  This structure
+   is used during readin to setup the list of dependencies within each
+   partial symbol table.  */
+struct legacy_psymtab;
+
+struct header_file_location
+{
+  header_file_location (const char *name_, int instance_,
+			legacy_psymtab *pst_)
+    : name (name_),
+      instance (instance_),
+      pst (pst_)
+  {
+  }
+
+  const char *name;		/* Name of header file */
+  int instance;			/* See above */
+  legacy_psymtab *pst;	/* Partial symtab that has the
+				   BINCL/EINCL defs for this file.  */
+};
+
 /* This file exists to hold the common definitions required of most of
    the symbol-readers that end up using stabs.  The common use of
    these `symbol-type-specific' customizations of the generic data

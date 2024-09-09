@@ -215,4 +215,40 @@ extern void init_header_files (void);
 
 extern void scan_file_globals (struct objfile *objfile);
 
+/* Complaints about the symbols we have encountered.  */
+
+void
+unknown_symtype_complaint (const char *);
+
+void
+lbrac_mismatch_complaint (int);
+
+void
+repeated_header_complaint (const char *, int);
+
+bound_minimal_symbol
+find_stab_function (const char *, const char *, struct objfile *);
+
+/* This handles a single symbol from the symbol-file, building symbols
+   into a GDB symtab.  It takes these arguments and an implicit argument.
+
+   TYPE is the type field of the ".stab" symbol entry.
+   DESC is the desc field of the ".stab" entry.
+   VALU is the value field of the ".stab" entry.
+   NAME is the symbol name, in our address space.
+   SECTION_OFFSETS is a set of amounts by which the sections of this
+   object file were relocated when it was loaded into memory.  Note
+   that these section_offsets are not the objfile->section_offsets but
+   the pst->section_offsets.  All symbols that refer to memory
+   locations need to be offset by these amounts.
+   OBJFILE is the object file from which we are reading symbols.  It
+   is used in end_compunit_symtab.
+   LANGUAGE is the language of the symtab.
+*/
+
+void
+process_one_symbol (int, int, CORE_ADDR, const char *,
+		    const section_offsets &,
+		    struct objfile *, enum language);
+
 #endif /* STABSREAD_H */
