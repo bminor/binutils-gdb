@@ -31,9 +31,33 @@ if sys.version_info >= (3, 7):
         return ch.isalnum()
 
 else:
-    # Fall back to curses.ascii.isascii() and curses.ascii.isalnum() for
-    # earlier versions.
-    from curses.ascii import isalnum, isascii
+    # Older version of Python doesn't have str.isascii() and
+    # str.isalnum() so provide our own.
+    #
+    # We could import isalnum() and isascii() from the curses library,
+    # but that adds an extra dependency.  Given these functions are
+    # both small and trivial lets implement them here.
+    #
+    # These definitions are based on those in the curses library, but
+    # simplified as we know C will always be a single character 'str'.
+
+    def isdigit(c):
+        return 48 <= ord(c) <= 57
+
+    def islower(c):
+        return 97 <= ord(c) <= 122
+
+    def isupper(c):
+        return 65 <= ord(c) <= 90
+
+    def isalpha(c):
+        return isupper(c) or islower(c)
+
+    def isalnum(c):
+        return isalpha(c) or isdigit(c)
+
+    def isascii(c):
+        return 0 <= ord(c) <= 127
 
 
 def _validate_name(name):
