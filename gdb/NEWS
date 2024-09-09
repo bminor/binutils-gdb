@@ -21,20 +21,6 @@
   inferior containing the thread of interest.  The breakpoint will
   be hit no less than before.
 
-* Python API
-
-  ** Added gdb.record.clear.  Clears the trace data of the current recording.
-     This forces re-decoding of the trace for successive commands.
-
-* Debugger Adapter Protocol changes
-
-  ** The "scopes" request will now return a scope holding global
-     variables from the stack frame's compilation unit.
-
-  ** The "scopes" request will return a "returnValue" scope holding
-     the return value from the latest "stepOut" command, when
-     appropriate.
-
 * For ARM targets, the offset of the pc in the jmp_buf has been fixed to match
   glibc 2.20 and later.  This should only matter when not using libc probes.
   This may cause breakage when using an incompatible libc, like uclibc or
@@ -50,6 +36,20 @@
   history, the warning message has been changed to indicate that the end of the
   history has been reached.  It also specifies that the forward execution can
   continue, and the recording will also continue.
+
+* Python API
+
+  ** Added gdb.record.clear.  Clears the trace data of the current recording.
+     This forces re-decoding of the trace for successive commands.
+
+* Debugger Adapter Protocol changes
+
+  ** The "scopes" request will now return a scope holding global
+     variables from the stack frame's compilation unit.
+
+  ** The "scopes" request will return a "returnValue" scope holding
+     the return value from the latest "stepOut" command, when
+     appropriate.
 
 * New commands
 
