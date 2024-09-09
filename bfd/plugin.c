@@ -596,8 +596,12 @@ load_plugin (bfd *abfd)
 static bfd_cleanup
 bfd_plugin_object_p (bfd *abfd)
 {
+  /* Since ld_plugin_object_p is called only for linker command-line input
+     objects, pass true to ld_plugin_object_p so that the same input IR
+     file won't be included twice if the LDPT_REGISTER_CLAIM_FILE_HOOK_V2
+     isn't used.  */
   if (ld_plugin_object_p)
-    return ld_plugin_object_p (abfd, false);
+    return ld_plugin_object_p (abfd, true);
 
   if (abfd->plugin_format == bfd_plugin_unknown && !load_plugin (abfd))
     return NULL;
