@@ -3796,7 +3796,10 @@ ada_resolve_enum (std::vector<struct block_symbol> &syms,
   for (int i = 0; i < syms.size (); ++i)
     {
       struct type *type2 = ada_check_typedef (syms[i].symbol->type ());
-      if (strcmp (type1->name (), type2->name ()) != 0)
+      /* We let an anonymous enum type match a non-anonymous one.  */
+      if (type1->name () != nullptr
+	  && type2->name () != nullptr
+	  && strcmp (type1->name (), type2->name ()) != 0)
 	continue;
       if (ada_identical_enum_types_p (type1, type2))
 	return i;
