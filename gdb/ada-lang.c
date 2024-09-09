@@ -6685,8 +6685,10 @@ ada_variant_discrim_name (struct type *type0)
   if (name == NULL || name[0] == '\000')
     return "";
 
-  for (discrim_end = name + strlen (name) - 6; discrim_end != name;
-       discrim_end -= 1)
+  size_t len = strlen (name);
+  if (len < 6)
+    return "";
+  for (discrim_end = name + len - 6; discrim_end != name; discrim_end -= 1)
     {
       if (startswith (discrim_end, "___XVN"))
 	break;
