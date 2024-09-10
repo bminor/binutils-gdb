@@ -359,7 +359,7 @@ cooked_index_shard::handle_gnat_encoded_entry (cooked_index_entry *entry,
 	  gdb::unique_xmalloc_ptr<char> new_name
 	    = make_unique_xstrndup (name.data (), name.length ());
 	  last = create (entry->die_offset, DW_TAG_module,
-			 0, language_ada, new_name.get (), parent,
+			 IS_SYNTHESIZED, language_ada, new_name.get (), parent,
 			 entry->per_cu);
 	  last->canonical = last->name;
 	  m_names.push_back (std::move (new_name));

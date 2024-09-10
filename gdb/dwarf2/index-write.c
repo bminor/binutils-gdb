@@ -676,9 +676,8 @@ public:
   /* Insert one symbol.  */
   void insert (const cooked_index_entry *entry)
   {
-    /* These entries are synthesized by the reader, and so should not
-       be written.  */
-    if (entry->lang == language_ada && entry->tag == DW_TAG_module)
+    /* Synthesized entries should not be written.  */
+    if ((entry->flags & IS_SYNTHESIZED) != 0)
       return;
 
     m_name_to_value_set[entry->name].emplace_back (entry);
@@ -729,11 +728,11 @@ public:
 	    unit_kind kind = (entry->per_cu->is_debug_types
 			      ? unit_kind::tu
 			      : unit_kind::cu);
-	    /* Currently Ada parentage is synthesized by the
-	       reader and so must be ignored here.  */
-	    const cooked_index_entry *parent = (entry->lang == language_ada
-						? nullptr
-						: entry->get_parent ());
+	    /* Some Ada parentage is synthesized by the reader and so
+	       must be ignored here.  */
+	    const cooked_index_entry *parent = entry->get_parent ();
+	    if (parent != nullptr && (parent->flags & IS_SYNTHESIZED) != 0)
+	      parent = nullptr;
 
 	    int &idx = m_indexkey_to_idx[index_key (entry->tag,
 						    kind,

@@ -60,6 +60,9 @@ enum cooked_index_flag_enum : unsigned char
   /* True is parent_entry.deferred has a value rather than parent_entry
      .resolved.  */
   IS_PARENT_DEFERRED = 16,
+  /* True if this entry was synthesized by gdb (as opposed to coming
+     directly from the DWARF).  */
+  IS_SYNTHESIZED = 32,
 };
 DEF_ENUM_FLAGS_TYPE (enum cooked_index_flag_enum, cooked_index_flag);
 
