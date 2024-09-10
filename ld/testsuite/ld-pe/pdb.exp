@@ -1744,6 +1744,99 @@ proc test9 { } {
     }
 }
 
+proc test10 { } {
+    global as
+    global ar
+    global ld
+    global objdump
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-inlineelines1a.s tmpdir/pdb-inlineelines1a.o] {
+	unsupported "Build pdb-inlineelines1a.o"
+	return
+    }
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb-inlineelines1b.s tmpdir/pdb-inlineelines1b.o] {
+      unsupported "Build pdb-inlineelines1a.o"
+      return
+    }
+
+    if ![ld_link $ld "tmpdir/pdb-inlineelines1.exe" "--pdb=tmpdir/pdb-inlineelines1.pdb tmpdir/pdb-inlineelines1a.o tmpdir/pdb-inlineelines1b.o"] {
+	unsupported "Create PE image with PDB file"
+	return
+    }
+
+    # read relevant bits from DBI stream
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb-inlineelines1.pdb 0003"]
+
+    if ![string match "" $exec_output] {
+	fail "Could not extract DBI stream"
+	return
+    } else {
+	pass "Extracted DBI stream"
+    }
+
+    set fi [open tmpdir/0003]
+    fconfigure $fi -translation binary
+
+    seek $fi 24
+
+    # read substream sizes
+
+    set data [read $fi 4]
+    binary scan $data i mod_info_size
+
+    seek $fi 36 current
+
+    set mod_info [read $fi $mod_info_size]
+
+    close $fi
+
+    # check C13 info in second module
+
+    # We're interested here that the inlinee function IDs get rewritten:
+    # 1003 -> 1002, 1004 -> 1003.  The numbers are lower because linking splits
+    # the types into two separate streams, numbered individually.
+
+    # This is what cvdump.exe -inll pdb-inlineelines1.pdb should look like:
+
+    # *** INLINEE LINES
+    #
+    # InlineeId  FileId  StaringLine
+    #      1002       0           42
+    #      1003       1           28
+
+    # For some reason it numbers file IDs in bytes for object files but as an
+    # index for PDBs, but they're stored on disk the same way.
+
+    set fn1_end [string first \000 $mod_info 64]
+    set fn2_end [string first \000 $mod_info [expr $fn1_end + 1]]
+
+    set off [expr $fn2_end + 1]
+
+    if { [expr $off % 4] != 0 } {
+	set off [expr $off + 4 - ($off % 4)]
+    }
+
+    set c13_info [extract_c13_info "tmpdir/pdb-inlineelines1.pdb" [string range $mod_info $off [expr $off + 63]]]
+
+    set fi [open tmpdir/pdb-inlineelines1-c13-info2 w]
+    fconfigure $fi -translation binary
+    puts -nonewline $fi $c13_info
+    close $fi
+
+    set exp [file_contents "$srcdir/$subdir/pdb-inlineelines1-c13-info2.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/pdb-inlineelines1-c13-info2"]
+
+    if [string match $exp $got] {
+	pass "Correct C13 info for second module"
+    } else {
+	fail "Incorrect C13 info for second module"
+    }
+}
+
 test1
 test2
 test3
@@ -1753,3 +1846,4 @@ test6
 test7
 test8
 test9
+test10

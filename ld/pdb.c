@@ -161,6 +161,9 @@ static const uint32_t crc_table[] =
   0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
+static bool remap_type (void *data, struct type_entry **map,
+			uint32_t type_num, uint32_t num_types);
+
 /* Add a new stream to the PDB archive, and return its BFD.  */
 static bfd *
 add_stream (bfd *pdb, const char *name, uint16_t *stream_num)
@@ -1836,6 +1839,76 @@ calculate_symbols_size (uint8_t *data, uint32_t size, uint32_t *sym_size)
   return true;
 }
 
+/* Parse the DEBUG_S_INLINEELINES data, which records the line numbers that
+   correspond to inlined functions.  This is similar to DEBUG_S_LINES (see
+   handle_debugs_section), but rather than just copying we also need to remap
+   the numbers of the referenced LF_FUNC_ID types.  */
+
+static bool
+parse_inlinee_lines (uint8_t *data, uint32_t size, uint8_t **bufptr,
+		     struct type_entry **map, uint32_t num_types)
+{
+  uint32_t version;
+  uint8_t *ptr;
+  unsigned int num_entries;
+
+  bfd_putl32 (DEBUG_S_INLINEELINES, *bufptr);
+  *bufptr += sizeof (uint32_t);
+
+  bfd_putl32 (size, *bufptr);
+  *bufptr += sizeof (uint32_t);
+
+  /* The inlinee lines data consists of a version uint32_t (0), followed by an
+     array of struct inlinee_source_line:
+
+     struct inlinee_source_line
+     {
+	uint32_t function_id;
+	uint32_t file_id;
+	uint32_t line_no;
+     };
+
+     (see InlineeSourceLine in cvinfo.h)
+
+     We're only interested here in the function_id, as we need to remap its
+     type number.
+  */
+
+  if (size < sizeof (uint32_t))
+    {
+      einfo (_("%P: warning: truncated DEBUG_S_INLINEELINES data\n"));
+      return false;
+    }
+
+  version = bfd_getl32 (data + sizeof (uint32_t) + sizeof (uint32_t));
+  if (version != CV_INLINEE_SOURCE_LINE_SIGNATURE)
+    {
+      einfo (_("%P: warning: unexpected DEBUG_S_INLINEELINES version %u\n"),
+	     version);
+      return false;
+    }
+
+  memcpy (*bufptr, data, size);
+  ptr = *bufptr + sizeof (uint32_t);
+  *bufptr += size;
+
+  num_entries = (size - sizeof (uint32_t)) / (3 * sizeof (uint32_t));
+
+  for (unsigned int i = 0; i < num_entries; i++)
+    {
+      uint32_t func_id;
+
+      func_id = bfd_getl32 (ptr);
+
+      if (!remap_type (ptr, map, func_id, num_types))
+	return false;
+
+      ptr += 3 * sizeof (uint32_t);
+    }
+
+  return true;
+}
+
 /* Parse the .debug$S section within an object file.  */
 static bool
 handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
@@ -1951,6 +2024,7 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
       switch (type)
 	{
 	case DEBUG_S_FILECHKSMS:
+	case DEBUG_S_INLINEELINES:
 	  c13_size += sizeof (uint32_t) + sizeof (uint32_t) + size;
 
 	  if (c13_size % sizeof (uint32_t))
@@ -2081,6 +2155,16 @@ handle_debugs_section (asection *s, bfd *mod, struct string_table *strings,
 	case DEBUG_S_SYMBOLS:
 	  if (!parse_symbols (data + off, size, &symbufptr, map, num_types,
 			      sym_rec_stream, glob, mod_num))
+	    {
+	      free (data);
+	      free (symbuf);
+	      return false;
+	    }
+
+	  break;
+
+	case DEBUG_S_INLINEELINES:
+	  if (!parse_inlinee_lines (data + off, size, &bufptr, map, num_types))
 	    {
 	      free (data);
 	      free (symbuf);

@@ -241,9 +241,12 @@ struct optional_dbg_header
 #define DEBUG_S_LINES			0xf2
 #define DEBUG_S_STRINGTABLE		0xf3
 #define DEBUG_S_FILECHKSMS		0xf4
+#define DEBUG_S_INLINEELINES		0xf6
 
 #define STRING_TABLE_SIGNATURE		0xeffeeffe
 #define STRING_TABLE_VERSION		1
+
+#define CV_INLINEE_SOURCE_LINE_SIGNATURE	0
 
 /* VHdr in nmt.h */
 struct string_table_header
