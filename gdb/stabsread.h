@@ -189,8 +189,7 @@ extern void process_one_symbol (int, int, CORE_ADDR, const char *,
    debugging information is available.  */
 
 void
-read_stabs_symtab (minimal_symbol_reader &,
-		   psymtab_storage *, struct objfile *);
+read_stabs_symtab (struct objfile *, symfile_add_flags);
 
 extern void elfstab_build_psymtabs (struct objfile *objfile,
 				    asection *stabsect,

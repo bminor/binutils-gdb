@@ -1196,10 +1196,10 @@ start_psymtab (psymtab_storage *partial_symtabs, struct objfile *objfile,
 
 /* See stabsread.h. */
 
-void
-read_stabs_symtab (minimal_symbol_reader &reader,
-		   psymtab_storage *partial_symtabs,
-		   struct objfile *objfile)
+static void
+read_stabs_symtab_1 (minimal_symbol_reader &reader,
+		     psymtab_storage *partial_symtabs,
+		     struct objfile *objfile)
 {
   struct gdbarch *gdbarch = objfile->arch ();
   struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch.  */
@@ -2210,6 +2210,50 @@ read_stabs_symtab (minimal_symbol_reader &reader,
 			  ? text_end : pst->unrelocated_text_high ()),
 			 dependency_list, dependencies_used, textlow_not_set);
     }
+}
+
+/* Scan and build partial symbols for a symbol file.
+   We have been initialized by a call to dbx_symfile_init, which 
+   put all the relevant info into a "struct dbx_symfile_info",
+   hung off the objfile structure.  */
+
+void
+read_stabs_symtab (struct objfile *objfile, symfile_add_flags symfile_flags)
+{
+  bfd *sym_bfd;
+  int val;
+  struct dbx_symfile_info *key = dbx_objfile_data_key.get (objfile);
+
+  sym_bfd = objfile->obfd.get ();
+
+  /* .o and .nlm files are relocatables with text, data and bss segs based at
+     0.  This flag disables special (Solaris stabs-in-elf only) fixups for
+     symbols with a value of 0.  */
+
+  key->ctx.symfile_relocatable = bfd_get_file_flags (sym_bfd) & HAS_RELOC;
+
+  val = bfd_seek (sym_bfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
+  if (val < 0)
+    perror_with_name (objfile_name (objfile));
+
+  key->ctx.symbol_size = DBX_SYMBOL_SIZE (objfile);
+  key->ctx.symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
+
+  scoped_free_pendings free_pending;
+
+  minimal_symbol_reader reader (objfile);
+
+  /* Read stabs data from executable file and define symbols.  */
+
+  psymbol_functions *psf = new psymbol_functions ();
+  psymtab_storage *partial_symtabs = psf->get_partial_symtabs ().get ();
+  objfile->qf.emplace_front (psf);
+  read_stabs_symtab_1 (reader, partial_symtabs, objfile);
+
+  /* Install any minimal symbols that have been collected as the current
+     minimal symbols for this objfile.  */
+
+  reader.install ();
 }
 
 /* Record the namespace that the function defined by SYMBOL was

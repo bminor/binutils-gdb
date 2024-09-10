@@ -49,6 +49,7 @@
 #include "gdbsupport/scoped_fd.h"
 #include "dwarf2/public.h"
 #include "cli/cli-cmds.h"
+#include "gdb-stabs.h"
 
 /* Whether ctf should always be read, or only if no dwarf is present.  */
 static bool always_read_ctf;
@@ -1223,6 +1224,134 @@ elf_symfile_read_dwarf2 (struct objfile *objfile,
     }
 
   return has_dwarf2;
+}
+
+/* find_text_range --- find start and end of loadable code sections
+
+   The find_text_range function finds the shortest address range that
+   encloses all sections containing executable code, and stores it in
+   objfile's text_addr and text_size members.
+
+   dbx_symfile_read will use this to finish off the partial symbol
+   table, in some cases.  */
+
+static void
+find_text_range (bfd * sym_bfd, struct objfile *objfile)
+{
+  asection *sec;
+  int found_any = 0;
+  CORE_ADDR start = 0;
+  CORE_ADDR end = 0;
+
+  for (sec = sym_bfd->sections; sec; sec = sec->next)
+    if (bfd_section_flags (sec) & SEC_CODE)
+      {
+	CORE_ADDR sec_start = bfd_section_vma (sec);
+	CORE_ADDR sec_end = sec_start + bfd_section_size (sec);
+
+	if (found_any)
+	  {
+	    if (sec_start < start)
+	      start = sec_start;
+	    if (sec_end > end)
+	      end = sec_end;
+	  }
+	else
+	  {
+	    start = sec_start;
+	    end = sec_end;
+	  }
+
+	found_any = 1;
+      }
+
+  if (!found_any)
+    error (_("Can't find any code sections in symbol file"));
+
+  DBX_TEXT_ADDR (objfile) = start;
+  DBX_TEXT_SIZE (objfile) = end - start;
+}
+
+/* Scan and build partial symbols for an ELF symbol file.
+   This ELF file has already been processed to get its minimal symbols.
+
+   This routine is the equivalent of dbx_symfile_init and dbx_symfile_read
+   rolled into one.
+
+   OBJFILE is the object file we are reading symbols from.
+   ADDR is the address relative to which the symbols are (e.g.
+   the base address of the text segment).
+   STABSECT is the BFD section information for the .stab section.
+   STABSTROFFSET and STABSTRSIZE define the location in OBJFILE where the
+   .stabstr section exists.
+
+   This routine is mostly copied from dbx_symfile_init and dbx_symfile_read,
+   adjusted for elf details.  */
+
+void
+elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
+			file_ptr stabstroffset, unsigned int stabstrsize)
+{
+  int val;
+  bfd *sym_bfd = objfile->obfd.get ();
+  const char *name = bfd_get_filename (sym_bfd);
+
+  stabsread_new_init ();
+
+  /* Allocate struct to keep track of stab reading.  */
+  dbx_objfile_data_key.emplace (objfile);
+  dbx_symfile_info *key = dbx_objfile_data_key.get (objfile);
+
+  /* Find the first and last text address.  dbx_symfile_read seems to
+     want this.  */
+  find_text_range (sym_bfd, objfile);
+
+#define	ELF_STABS_SYMBOL_SIZE	12	/* XXX FIXME XXX */
+  DBX_SYMBOL_SIZE (objfile) = ELF_STABS_SYMBOL_SIZE;
+  DBX_SYMCOUNT (objfile)
+    = bfd_section_size (stabsect) / DBX_SYMBOL_SIZE (objfile);
+  DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
+  DBX_SYMTAB_OFFSET (objfile) = stabsect->filepos;
+  DBX_STAB_SECTION (objfile) = stabsect;
+
+  if (stabstrsize > bfd_get_size (sym_bfd))
+    error (_("ridiculous string table size: %d bytes"), stabstrsize);
+  DBX_STRINGTAB (objfile) = (char *)
+    obstack_alloc (&objfile->objfile_obstack, stabstrsize + 1);
+  OBJSTAT (objfile, sz_strtab += stabstrsize + 1);
+
+  /* Now read in the string table in one big gulp.  */
+
+  val = bfd_seek (sym_bfd, stabstroffset, SEEK_SET);
+  if (val < 0)
+    perror_with_name (name);
+  val = bfd_read (DBX_STRINGTAB (objfile), stabstrsize, sym_bfd);
+  if (val != stabstrsize)
+    perror_with_name (name);
+
+  stabsread_new_init ();
+  free_header_files ();
+  init_header_files ();
+
+  key->ctx.processing_acc_compilation = 1;
+
+  key->ctx.symbuf_read = 0;
+  key->ctx.symbuf_left = bfd_section_size (stabsect);
+
+  scoped_restore restore_stabs_data = make_scoped_restore (&key->ctx.stabs_data);
+  gdb::unique_xmalloc_ptr<gdb_byte> data_holder;
+
+  key->ctx.stabs_data = symfile_relocate_debug_section (objfile, stabsect, NULL);
+  if (key->ctx.stabs_data)
+    data_holder.reset (key->ctx.stabs_data);
+
+  /* In an elf file, we've already installed the minimal symbols that came
+     from the elf (non-stab) symbol table, so always act like an
+     incremental load here.  dbx_symfile_read should not generate any new
+     minimal symbols, since we will have already read the ELF dynamic symbol
+     table and normal symbol entries won't be in the ".stab" section; but in
+     case it does, it will install them itself.  */
+  read_stabs_symtab (objfile, 0);
 }
 
 /* Scan and build partial symbols for a symbol file.
