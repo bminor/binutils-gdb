@@ -80,21 +80,38 @@ switch -glob -- [istarget] {
 	set regdir "i386/"
         set core-regs {64bit-core.xml 64bit-sse.xml}
     }
+    "riscv64*-*-*" {
+       set architecture "riscv:rv64"
+       set regdir "riscv/"
+       set core-regs 64bit-cpu.xml
+    }
 }
-
-# If no core registers were specified, assume this target does not
-# support target-defined registers.  Verify that we get a warning if
-# we try to use them.  This not only tests the warning, but also
-# reminds maintainers to add test support when they add the feature.
 
 set single_reg_xml [gdb_remote_download host  \
 			"$srcdir/$subdir/single-reg.xml"]
 
 if {[string equal ${core-regs} ""]} {
-    gdb_test "set tdesc file $single_reg_xml" \
-	"warning: Target-supplied registers are not supported.*" \
-	"set tdesc file single-reg.xml"
-    unsupported "register tests"
+    set test "set tdesc file single-reg.xml"
+    set feature_unsupported 0
+    set feature_test_unsupported 0
+    gdb_test_multiple "set tdesc file $single_reg_xml" $test {
+	-re -wrap "warning: Target-supplied registers are not supported" {
+	    set feature_unsupported 1
+	    pass $gdb_test_name
+	}
+	-re -wrap "warning: Architecture rejected target-supplied description" {
+	    set feature_test_unsupported 1
+	    pass $gdb_test_name
+	}
+    }
+
+    if { $feature_unsupported } {
+	unsupported "register tests"
+    } elseif { $feature_test_unsupported } {
+	# Remind maintainers to add test support.
+	unsupported "register tests (missing architecture-specific core-regs setting)"
+    }
+
     return 0
 }
 
