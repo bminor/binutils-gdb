@@ -1819,8 +1819,8 @@ mapped_file_info::add (const char *soname,
      parsed, we group the build-id information based on the file name.  As
      a consequence, we should see each EXPECTED_FILENAME value exactly
      once.  This means that each insertion should always succeed.  */
-  const auto [it, inserted]
-    = m_filename_to_build_id_map.emplace (expected_filename, build_id);
+  const auto inserted
+    = m_filename_to_build_id_map.emplace (expected_filename, build_id).second;
   gdb_assert (inserted);
 
   /* Setup the reverse build-id to file name map.  */
