@@ -1526,11 +1526,11 @@ gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_types (void)
 {
-  if (PyType_Ready (&type_object_type) < 0)
+  if (gdbpy_type_ready (&type_object_type) < 0)
     return -1;
-  if (PyType_Ready (&field_object_type) < 0)
+  if (gdbpy_type_ready (&field_object_type) < 0)
     return -1;
-  if (PyType_Ready (&type_iterator_object_type) < 0)
+  if (gdbpy_type_ready (&type_iterator_object_type) < 0)
     return -1;
 
   for (const auto &item : pyty_codes)
@@ -1539,16 +1539,7 @@ gdbpy_initialize_types (void)
 	return -1;
     }
 
-  if (gdb_pymodule_addobject (gdb_module, "Type",
-			      (PyObject *) &type_object_type) < 0)
-    return -1;
-
-  if (gdb_pymodule_addobject (gdb_module, "TypeIterator",
-			      (PyObject *) &type_iterator_object_type) < 0)
-    return -1;
-
-  return gdb_pymodule_addobject (gdb_module, "Field",
-				 (PyObject *) &field_object_type);
+  return 0;
 }
 
 GDBPY_INITIALIZE_FILE (gdbpy_initialize_types);

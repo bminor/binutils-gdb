@@ -287,27 +287,11 @@ ltpy_dealloc (PyObject *self)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_linetable (void)
 {
-  if (PyType_Ready (&linetable_object_type) < 0)
+  if (gdbpy_type_ready (&linetable_object_type) < 0)
     return -1;
-  if (PyType_Ready (&linetable_entry_object_type) < 0)
+  if (gdbpy_type_ready (&linetable_entry_object_type) < 0)
     return -1;
-  if (PyType_Ready (&ltpy_iterator_object_type) < 0)
-    return -1;
-
-  Py_INCREF (&linetable_object_type);
-  Py_INCREF (&linetable_entry_object_type);
-  Py_INCREF (&ltpy_iterator_object_type);
-
-  if (gdb_pymodule_addobject (gdb_module, "LineTable",
-			      (PyObject *) &linetable_object_type) < 0)
-    return -1;
-
-  if (gdb_pymodule_addobject (gdb_module, "LineTableEntry",
-			      (PyObject *) &linetable_entry_object_type) < 0)
-    return -1;
-
-  if (gdb_pymodule_addobject (gdb_module, "LineTableIterator",
-			      (PyObject *) &ltpy_iterator_object_type) < 0)
+  if (gdbpy_type_ready (&ltpy_iterator_object_type) < 0)
     return -1;
 
   return 0;

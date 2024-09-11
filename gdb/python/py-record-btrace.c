@@ -1006,7 +1006,7 @@ gdbpy_initialize_btrace (void)
 
   btpy_list_mapping_methods.mp_subscript = btpy_list_slice;
 
-  return PyType_Ready (&btpy_list_type);
+  return gdbpy_type_ready (&btpy_list_type);
 }
 
 GDBPY_INITIALIZE_FILE (gdbpy_initialize_btrace);

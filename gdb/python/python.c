@@ -2316,7 +2316,7 @@ init_done:
     return false;
 
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base)	\
-  if (gdbpy_initialize_event_generic (&name##_event_object_type, py_name) < 0) \
+  if (gdbpy_type_ready (&name##_event_object_type) < 0) \
     return false;
 #include "py-event-types.def"
 #undef GDB_PY_DEFINE_EVENT_TYPE

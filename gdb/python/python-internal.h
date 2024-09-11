@@ -1119,4 +1119,34 @@ extern std::optional<int> gdbpy_print_insn (struct gdbarch *gdbarch,
 					    CORE_ADDR address,
 					    disassemble_info *info);
 
+/* A wrapper for PyType_Ready that also automatically registers the
+   type in the appropriate module.  Returns 0 on success, -1 on error.
+   If MOD is supplied, then the type is added to that module.  If MOD
+   is not supplied, the type name (tp_name field) must be of the form
+   "gdb.Mumble", and the type will be added to the gdb module.  */
+
+static inline int
+gdbpy_type_ready (PyTypeObject *type, PyObject *mod = nullptr)
+{
+  if (PyType_Ready (type) < 0)
+    return -1;
+  if (mod == nullptr)
+    {
+      gdb_assert (startswith (type->tp_name, "gdb."));
+      mod = gdb_module;
+    }
+  const char *dot = strrchr (type->tp_name, '.');
+  gdb_assert (dot != nullptr);
+  return gdb_pymodule_addobject (mod, dot + 1, (PyObject *) type);
+}
+
+/* Poison PyType_Ready.  Only gdbpy_type_ready should be used, to
+   avoid forgetting to register the type.  See PR python/32163.  */
+#undef PyType_Ready
+#ifdef __GNUC__
+# pragma GCC poison PyType_Ready
+#else
+# define PyType_Ready POISONED_PyType_Ready
+#endif
+
 #endif /* PYTHON_PYTHON_INTERNAL_H */

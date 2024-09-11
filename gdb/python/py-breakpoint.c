@@ -1114,7 +1114,7 @@ gdbpy_breakpoint_init_breakpoint_type ()
   if (breakpoint_object_type.tp_new == nullptr)
     {
       breakpoint_object_type.tp_new = PyType_GenericNew;
-      if (PyType_Ready (&breakpoint_object_type) < 0)
+      if (gdbpy_type_ready (&breakpoint_object_type) < 0)
 	{
 	  /* Reset tp_new back to nullptr so future calls to this function
 	     will try calling PyType_Ready again.  */
@@ -1359,10 +1359,6 @@ gdbpy_initialize_breakpoints (void)
   if (!gdbpy_breakpoint_init_breakpoint_type ())
     return -1;
 
-  if (gdb_pymodule_addobject (gdb_module, "Breakpoint",
-			      (PyObject *) &breakpoint_object_type) < 0)
-    return -1;
-
   gdb::observers::breakpoint_created.attach (gdbpy_breakpoint_created,
 					     "py-breakpoint");
   gdb::observers::breakpoint_deleted.attach (gdbpy_breakpoint_deleted,
@@ -1394,14 +1390,7 @@ gdbpy_initialize_breakpoints (void)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_breakpoint_locations ()
 {
-  if (PyType_Ready (&breakpoint_location_object_type) < 0)
-    return -1;
-
-  if (gdb_pymodule_addobject (gdb_module, "BreakpointLocation",
-			      (PyObject *) &breakpoint_location_object_type)
-      < 0)
-    return -1;
-  return 0;
+  return gdbpy_type_ready (&breakpoint_location_object_type);
 }
 
 

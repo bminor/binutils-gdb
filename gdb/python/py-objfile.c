@@ -709,11 +709,7 @@ objfile_to_objfile_object (struct objfile *objfile)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_objfile (void)
 {
-  if (PyType_Ready (&objfile_object_type) < 0)
-    return -1;
-
-  return gdb_pymodule_addobject (gdb_module, "Objfile",
-				 (PyObject *) &objfile_object_type);
+  return gdbpy_type_ready (&objfile_object_type);
 }
 
 GDBPY_INITIALIZE_FILE (gdbpy_initialize_objfile);

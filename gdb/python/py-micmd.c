@@ -447,12 +447,7 @@ static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_micommands ()
 {
   micmdpy_object_type.tp_new = PyType_GenericNew;
-  if (PyType_Ready (&micmdpy_object_type) < 0)
-    return -1;
-
-  if (gdb_pymodule_addobject (gdb_module, "MICommand",
-			      (PyObject *) &micmdpy_object_type)
-      < 0)
+  if (gdbpy_type_ready (&micmdpy_object_type) < 0)
     return -1;
 
   invoke_cst = PyUnicode_FromString ("invoke");

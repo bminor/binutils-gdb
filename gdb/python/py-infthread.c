@@ -412,11 +412,7 @@ gdbpy_selected_thread (PyObject *self, PyObject *args)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_thread (void)
 {
-  if (PyType_Ready (&thread_object_type) < 0)
-    return -1;
-
-  return gdb_pymodule_addobject (gdb_module, "InferiorThread",
-				 (PyObject *) &thread_object_type);
+  return gdbpy_type_ready (&thread_object_type);
 }
 
 GDBPY_INITIALIZE_FILE (gdbpy_initialize_thread);

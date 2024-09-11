@@ -761,7 +761,7 @@ static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_frames (void)
 {
   frame_object_type.tp_new = PyType_GenericNew;
-  if (PyType_Ready (&frame_object_type) < 0)
+  if (gdbpy_type_ready (&frame_object_type) < 0)
     return -1;
 
   /* Note: These would probably be best exposed as class attributes of
@@ -785,8 +785,7 @@ gdbpy_initialize_frames (void)
 #include "unwind_stop_reasons.def"
 #undef SET
 
-  return gdb_pymodule_addobject (gdb_module, "Frame",
-				 (PyObject *) &frame_object_type);
+  return 0;
 }
 
 GDBPY_INITIALIZE_FILE (gdbpy_initialize_frames);

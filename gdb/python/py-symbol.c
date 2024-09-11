@@ -640,7 +640,7 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_symbols (void)
 {
-  if (PyType_Ready (&symbol_object_type) < 0)
+  if (gdbpy_type_ready (&symbol_object_type) < 0)
     return -1;
 
   if (PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_UNDEF", LOC_UNDEF) < 0
@@ -685,8 +685,7 @@ gdbpy_initialize_symbols (void)
 #include "sym-domains.def"
 #undef SYM_DOMAIN
 
-  return gdb_pymodule_addobject (gdb_module, "Symbol",
-				 (PyObject *) &symbol_object_type);
+  return 0;
 }
 
 GDBPY_INITIALIZE_FILE (gdbpy_initialize_symbols);

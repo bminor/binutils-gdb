@@ -1009,11 +1009,7 @@ gdbpy_selected_inferior (PyObject *self, PyObject *args)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_inferior (void)
 {
-  if (PyType_Ready (&inferior_object_type) < 0)
-    return -1;
-
-  if (gdb_pymodule_addobject (gdb_module, "Inferior",
-			      (PyObject *) &inferior_object_type) < 0)
+  if (gdbpy_type_ready (&inferior_object_type) < 0)
     return -1;
 
   gdb::observers::new_thread.attach (add_thread_object, "py-inferior");

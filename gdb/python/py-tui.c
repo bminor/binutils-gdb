@@ -625,7 +625,7 @@ gdbpy_initialize_tui ()
 {
 #ifdef TUI
   gdbpy_tui_window_object_type.tp_new = PyType_GenericNew;
-  if (PyType_Ready (&gdbpy_tui_window_object_type) < 0)
+  if (gdbpy_type_ready (&gdbpy_tui_window_object_type) < 0)
     return -1;
 #endif	/* TUI */
 

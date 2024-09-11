@@ -2215,11 +2215,7 @@ gdbpy_is_value_object (PyObject *obj)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_values (void)
 {
-  if (PyType_Ready (&value_object_type) < 0)
-    return -1;
-
-  return gdb_pymodule_addobject (gdb_module, "Value",
-				 (PyObject *) &value_object_type);
+  return gdbpy_type_ready (&value_object_type);
 }
 
 GDBPY_INITIALIZE_FILE (gdbpy_initialize_values);

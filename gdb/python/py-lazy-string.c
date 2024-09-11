@@ -236,11 +236,7 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_lazy_string (void)
 {
-  if (PyType_Ready (&lazy_string_object_type) < 0)
-    return -1;
-
-  Py_INCREF (&lazy_string_object_type);
-  return 0;
+  return gdbpy_type_ready (&lazy_string_object_type);
 }
 
 /* Determine whether the printer object pointed to by OBJ is a

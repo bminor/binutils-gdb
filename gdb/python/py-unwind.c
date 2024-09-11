@@ -1002,17 +1002,13 @@ gdbpy_initialize_unwind (void)
 {
   gdb::observers::new_architecture.attach (pyuw_on_new_gdbarch, "py-unwind");
 
-  if (PyType_Ready (&pending_frame_object_type) < 0)
+  if (gdbpy_type_ready (&pending_frame_object_type) < 0)
     return -1;
-  int rc = gdb_pymodule_addobject (gdb_module, "PendingFrame",
-				   (PyObject *) &pending_frame_object_type);
-  if (rc != 0)
-    return rc;
 
-  if (PyType_Ready (&unwind_info_object_type) < 0)
+  if (gdbpy_type_ready (&unwind_info_object_type) < 0)
     return -1;
-  return gdb_pymodule_addobject (gdb_module, "UnwindInfo",
-      (PyObject *) &unwind_info_object_type);
+
+  return 0;
 }
 
 void _initialize_py_unwind ();

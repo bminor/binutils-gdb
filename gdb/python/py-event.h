@@ -84,7 +84,5 @@ extern void evpy_dealloc (PyObject *self);
 extern int evpy_add_attribute (PyObject *event,
 			       const char *name, PyObject *attr)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_event_generic (PyTypeObject *type, const char *name)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
 #endif /* PYTHON_PY_EVENT_H */
