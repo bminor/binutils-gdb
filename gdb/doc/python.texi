@@ -7327,7 +7327,7 @@ contains the full contents of the window.  This is similar to calling
 @end defun
 
 The factory function that you supply should return an object
-conforming to the TUI window protocol.  These are the method that can
+conforming to the TUI window protocol.  These are the methods that can
 be called on this object, which is referred to below as the ``window
 object''.  The methods documented below are optional; if the object
 does not implement one of these methods, @value{GDBN} will not attempt
