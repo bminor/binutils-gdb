@@ -3169,9 +3169,16 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
       const arch_stack_entry *top = arch_stack_top;
 
       if (!top)
-	as_bad (_(".arch stack is empty"));
-      else if (top->flag_code != flag_code
-	       || top->stackop_size != stackop_size)
+	{
+	  as_bad (_(".arch stack is empty"));
+	restore_bad:
+	  (void) restore_line_pointer (e);
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      if (top->flag_code != flag_code
+	  || top->stackop_size != stackop_size)
 	{
 	  static const unsigned int bits[] = {
 	    [CODE_16BIT] = 16,
@@ -3182,22 +3189,21 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	  as_bad (_("this `.arch pop' requires `.code%u%s' to be in effect"),
 		  bits[top->flag_code],
 		  top->stackop_size == LONG_MNEM_SUFFIX ? "gcc" : "");
+	  goto restore_bad;
 	}
-      else
-	{
-	  arch_stack_top = top->prev;
 
-	  cpu_arch_name = top->name;
-	  free (cpu_sub_arch_name);
-	  cpu_sub_arch_name = top->sub_name;
-	  cpu_arch_flags = top->flags;
-	  cpu_arch_isa = top->isa;
-	  cpu_arch_isa_flags = top->isa_flags;
-	  vector_size = top->vector_size;
-	  no_cond_jump_promotion = top->no_cond_jump_promotion;
+      arch_stack_top = top->prev;
 
-	  XDELETE (top);
-	}
+      cpu_arch_name = top->name;
+      free (cpu_sub_arch_name);
+      cpu_sub_arch_name = top->sub_name;
+      cpu_arch_flags = top->flags;
+      cpu_arch_isa = top->isa;
+      cpu_arch_isa_flags = top->isa_flags;
+      vector_size = top->vector_size;
+      no_cond_jump_promotion = top->no_cond_jump_promotion;
+
+      XDELETE (top);
 
       (void) restore_line_pointer (e);
       demand_empty_rest_of_line ();
@@ -3240,18 +3246,14 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		{
 		  as_bad (_("64bit mode not supported on `%s'."),
 			  cpu_arch[j].name);
-		  (void) restore_line_pointer (e);
-		  ignore_rest_of_line ();
-		  return;
+		  goto restore_bad;
 		}
 
 	      if (flag_code == CODE_32BIT && !cpu_arch[j].enable.bitfield.cpui386)
 		{
 		  as_bad (_("32bit mode not supported on `%s'."),
 			  cpu_arch[j].name);
-		  (void) restore_line_pointer (e);
-		  ignore_rest_of_line ();
-		  return;
+		  goto restore_bad;
 		}
 
 	      cpu_arch_name = cpu_arch[j].name;
@@ -3331,12 +3333,13 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
     }
 
   if (j == ARRAY_SIZE (cpu_arch))
-    as_bad (_("no such architecture: `%s'"), string);
-
-  *input_line_pointer = e;
+    {
+      as_bad (_("no such architecture: `%s'"), string);
+      goto restore_bad;
+    }
 
   no_cond_jump_promotion = 0;
-  if (*input_line_pointer == ','
+  if (restore_line_pointer (e) == ','
       && !is_end_of_line[(unsigned char) input_line_pointer[1]])
     {
       ++input_line_pointer;
@@ -3345,10 +3348,11 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
       if (strcmp (string, "nojumps") == 0)
 	no_cond_jump_promotion = 1;
-      else if (strcmp (string, "jumps") == 0)
-	;
-      else
-	as_bad (_("no such architecture modifier: `%s'"), string);
+      else if (strcmp (string, "jumps") != 0)
+	{
+	  as_bad (_("no such architecture modifier: `%s'"), string);
+	  goto restore_bad;
+	}
 
       (void) restore_line_pointer (e);
     }
