@@ -58,6 +58,15 @@ static const char   symver_pseudo[] = ".symver";
 static const char * symver_state;
 #endif
 
+/* The pseudo-op (without leading dot) at which we want to (perhaps just
+   temporarily) stop processing.  See the comments in do_scrub_chars().  */
+static const char   end_pseudo[] = "end ";
+static const char * end_state;
+
+/* Whether, considering the state at start of assembly, NO_PSEUDO_DOT is
+   active.  */
+static bool no_pseudo_dot;
+
 static char last_char;
 
 #define LEX_IS_SYMBOL_COMPONENT		1
@@ -160,6 +169,12 @@ void
 do_scrub_begin (int m68k_mri ATTRIBUTE_UNUSED)
 {
   const char *p;
+
+  /* Latch this once at start.  xtensa uses a hook function, yet context isn't
+     meaningful for scrubbing (or else we'd need to sync scrubber behavior as
+     state changes).  */
+  if (lex['/'] == 0)
+    no_pseudo_dot = NO_PSEUDO_DOT;
 
 #ifdef TC_M68K
   scrub_m68k_mri = m68k_mri;
@@ -282,6 +297,7 @@ struct app_save
   int          add_newlines;
   char *       saved_input;
   size_t       saved_input_len;
+  const char * end_state;
 #ifdef TC_M68K
   int          scrub_m68k_mri;
   const char * mri_state;
@@ -312,6 +328,7 @@ app_push (void)
       memcpy (saved->saved_input, saved_input, saved_input_len);
       saved->saved_input_len = saved_input_len;
     }
+  saved->end_state = end_state;
 #ifdef TC_M68K
   saved->scrub_m68k_mri = scrub_m68k_mri;
   saved->mri_state = mri_state;
@@ -352,6 +369,7 @@ app_pop (char *arg)
       saved_input_len = saved->saved_input_len;
       free (saved->saved_input);
     }
+  end_state = saved->end_state;
 #ifdef TC_M68K
   scrub_m68k_mri = saved->scrub_m68k_mri;
   mri_state = saved->mri_state;
@@ -799,6 +817,43 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 #endif
 
     recycle:
+
+      /* We need to watch out for .end directives: We should in particular not
+	 issue diagnostics for anything after an active one.  */
+      if (end_state == NULL)
+	{
+	  if ((state == 0 || state == 1)
+	      && (ch == '.'
+		  || (no_pseudo_dot && ch == end_pseudo[0])))
+	    end_state = end_pseudo + (ch != '.');
+	}
+      else if (ch != '\0'
+	       && (*end_state == ch
+		   /* Avoid triggering on directives like .endif or .endr.  */
+		   || (*end_state == ' ' && !IS_SYMBOL_COMPONENT (ch))))
+	{
+ 	  if (IS_NEWLINE (ch) || IS_LINE_SEPARATOR (ch))
+ 	    goto end_end;
+	  ++end_state;
+	}
+      else if (*end_state != '\0')
+	/* We did not get the expected character, or we didn't
+	   get a valid terminating character after seeing the
+	   entire pseudo-op, so we must go back to the beginning.  */
+	end_state = NULL;
+      else if (IS_NEWLINE (ch) || IS_LINE_SEPARATOR (ch))
+	{
+	end_end:
+	  /* We've read the entire pseudo-op.  If this is the end of the line,
+	     bail out now by (ab)using the output-full path.  This allows the
+	     caller to process input up to here and terminate processing if this
+	     directive is actually active (not on the false branch of a
+	     conditional and not in a macro definition).  */
+	  end_state = NULL;
+	  state = 0;
+	  PUT (ch);
+	  goto tofull;
+	}
 
 #if defined TC_ARM && defined OBJ_ELF
       /* We need to watch out for .symver directives.  See the comment later
@@ -1440,7 +1495,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 #if defined TC_ARM && defined OBJ_ELF
 	      && symver_state == NULL
 #endif
-	      )
+	      && end_state == NULL)
 	    {
 	      char *s;
 	      ptrdiff_t len;

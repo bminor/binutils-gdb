@@ -464,6 +464,30 @@ switch -glob $target_triplet {
 	run_dump_test weakref1w
     }
 }
+
+# .end works differently on some targets. Also make sure to test the dot-less
+# form on targets setting NO_PSEUDO_DOT (and not overriding the directive).
+switch -glob $target_triplet {
+    alpha*-*-* { }
+    hppa*-*-* { }
+    iq2000-*-* { }
+    microblaze-*-* { }
+    mips*-*-* { }
+    score*-*-* { }
+    xtensa*-*-* { }
+    m68hc1*-*-* -
+    s12z-*-*    -
+    spu-*-*     -
+    xgate-*-*   -
+    z80-*-* {
+	run_list_test "end"
+	run_list_test "end-no-dot"
+    }
+    default {
+	run_list_test "end"
+    }
+}
+
 gas_test_error "weakref2.s" "" "e: would close weakref loop: e => a => b => c => d => e"
 gas_test_error "weakref3.s" "" "a: would close weakref loop: a => b => c => d => e => a"
 gas_test_error "weakref4.s" "" "is already defined"
