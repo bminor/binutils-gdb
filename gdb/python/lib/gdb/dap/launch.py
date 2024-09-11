@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import re
+
 # These are deprecated in 3.9, but required in older versions.
 from typing import Mapping, Optional, Sequence
 
@@ -20,7 +22,16 @@ import gdb
 
 from .events import exec_and_expect_stop, expect_process, expect_stop
 from .server import capability, request
-from .startup import DAPException, exec_and_log
+from .startup import DAPException, exec_and_log, in_gdb_thread
+
+
+# A wrapper for the 'file' command that correctly quotes its argument.
+@in_gdb_thread
+def file_command(program):
+    # Handle whitespace, quotes, and backslashes here.  Exactly what
+    # to quote depends on libiberty's buildargv and safe-ctype.
+    program = re.sub("[ \t\n\r\f\v\\\\'\"]", "\\\\\\g<0>", program)
+    exec_and_log("file " + program)
 
 
 # Any parameters here are necessarily extensions -- DAP requires this
@@ -39,7 +50,7 @@ def launch(
     if cwd is not None:
         exec_and_log("cd " + cwd)
     if program is not None:
-        exec_and_log("file " + program)
+        file_command(program)
     inf = gdb.selected_inferior()
     if stopAtBeginningOfMainSubprogram:
         main = inf.main_name
@@ -63,7 +74,7 @@ def attach(
     **args,
 ):
     if program is not None:
-        exec_and_log("file " + program)
+        file_command(program)
     if pid is not None:
         cmd = "attach " + str(pid)
     elif target is not None:
