@@ -412,6 +412,13 @@ proc run_quoting_and_escaping_tests { root } {
 
 	run_mid_line_completion_tests $root $cmd
     }
+
+    foreach sub_cmd { require-delimiter unknown-is-error unknown-is-operand } {
+	set cmd "maintenance test-options $sub_cmd -filename"
+	with_test_prefix "cmd=$cmd" {
+	    run_quoting_and_escaping_tests_1 $root $cmd
+	}
+    }
 }
 
 # Helper for run_unquoted_tests.  ROOT is the root directory as setup
