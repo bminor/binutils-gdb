@@ -45,6 +45,8 @@ static int scrub_m68k_mri;
 /* The pseudo-op which switches in and out of MRI mode.  See the
    comment in do_scrub_chars.  */
 static const char mri_pseudo[] = ".mri 0";
+static const char *mri_state;
+static char mri_last_ch;
 #else
 #define scrub_m68k_mri 0
 #endif
@@ -265,8 +267,6 @@ static int add_newlines;
 static char *saved_input;
 static size_t saved_input_len;
 static char input_buffer[32 * 1024];
-static const char *mri_state;
-static char mri_last_ch;
 
 /* Data structure for saving the state of app across #include's.  Note that
    app is called asynchronously to the parsing of the .include's, so our
@@ -284,9 +284,9 @@ struct app_save
   size_t       saved_input_len;
 #ifdef TC_M68K
   int          scrub_m68k_mri;
-#endif
   const char * mri_state;
   char         mri_last_ch;
+#endif
 #if defined TC_ARM && defined OBJ_ELF
   const char * symver_state;
 #endif
@@ -314,9 +314,9 @@ app_push (void)
     }
 #ifdef TC_M68K
   saved->scrub_m68k_mri = scrub_m68k_mri;
-#endif
   saved->mri_state = mri_state;
   saved->mri_last_ch = mri_last_ch;
+#endif
 #if defined TC_ARM && defined OBJ_ELF
   saved->symver_state = symver_state;
 #endif
@@ -354,9 +354,9 @@ app_pop (char *arg)
     }
 #ifdef TC_M68K
   scrub_m68k_mri = saved->scrub_m68k_mri;
-#endif
   mri_state = saved->mri_state;
   mri_last_ch = saved->mri_last_ch;
+#endif
 #if defined TC_ARM && defined OBJ_ELF
   symver_state = saved->symver_state;
 #endif
@@ -1434,7 +1434,9 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	  /* This is a common case.  Quickly copy CH and all the
 	     following symbol component or normal characters.  */
 	  if (to + 1 < toend
+#ifdef TC_M68K
 	      && mri_state == NULL
+#endif
 #if defined TC_ARM && defined OBJ_ELF
 	      && symver_state == NULL
 #endif
