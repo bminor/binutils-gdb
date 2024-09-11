@@ -805,7 +805,9 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	 in this function.  */
       if (symver_state == NULL)
 	{
-	  if ((state == 0 || state == 1) && ch == symver_pseudo[0])
+	  if ((state == 0 || state == 1)
+	      && strchr (tc_comment_chars, '@') != NULL
+	      && ch == symver_pseudo[0])
 	    symver_state = symver_pseudo + 1;
 	}
       else
