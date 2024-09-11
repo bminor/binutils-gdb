@@ -13012,14 +13012,15 @@ OP_EX (instr_info *ins, int bytemode, int sizeflag)
   USED_REX (REX_B);
   if (ins->rex & REX_B)
     reg += 8;
-  if (ins->rex2 & REX_B)
-    reg += 16;
   if (ins->vex.evex)
     {
       USED_REX (REX_X);
       if ((ins->rex & REX_X))
 	reg += 16;
+      ins->rex2_used &= ~REX_B;
     }
+  else if (ins->rex2 & REX_B)
+    reg += 16;
 
   if ((sizeflag & SUFFIX_ALWAYS)
       && (bytemode == x_swap_mode
