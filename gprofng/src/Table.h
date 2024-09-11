@@ -71,7 +71,8 @@ enum VType_type
 
 enum ProfData_type
 { // a.k.a "data_id" (not the same as Pckt_type "kind")
-  DATA_SAMPLE,      // Traditional collect "Samples"
+  DATA_NONE = -1,
+  DATA_SAMPLE = 0,  // Traditional collect "Samples"
   DATA_GCEVENT,     // Java Garbage Collection events
   DATA_HEAPSZ,      // heap size tracking based on heap tracing data
   DATA_CLOCK,       // clock profiling data

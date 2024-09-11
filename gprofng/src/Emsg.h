@@ -38,6 +38,7 @@ class StringBuilder;
 
 typedef enum
 {
+  CMSG_NONE = -1,
   CMSG_WARN = 0,
   CMSG_ERROR,
   CMSG_FATAL,

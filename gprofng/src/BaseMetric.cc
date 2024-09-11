@@ -212,7 +212,7 @@ BaseMetric::BaseMetric (const char *_cmd, const char *_username,
   clock_unit = CUNIT_NULL; // should it be CUNIT_TIME or 0 or something?
 
   /* we're not going to process packets for derived metrics */
-  packet_type = (ProfData_type) (-1);
+  packet_type = DATA_NONE;
   value_styles = VAL_VALUE;
   valtype = VT_DOUBLE;
   precision = 1000;
@@ -443,7 +443,7 @@ BaseMetric::specify ()
 
   char buf[256];
   char buf2[256];
-  packet_type = (ProfData_type) - 1; // illegal value
+  packet_type = DATA_NONE;
   clock_unit = CUNIT_TIME;
   switch (type)
     {

@@ -315,7 +315,7 @@ Experiment::ExperimentHandler::ExperimentHandler (Experiment *_exp)
   pDscr = NULL;
   propDscr = NULL;
   text = NULL;
-  mkind = (Cmsg_warn) - 1; // CMSG_NONE
+  mkind = CMSG_NONE;
   mnum = -1;
   mec = -1;
 }
@@ -368,8 +368,7 @@ Experiment::ExperimentHandler::pushElem (Element elem)
 void
 Experiment::ExperimentHandler::popElem ()
 {
-  stack->remove (stack->size () - 1);
-  curElem = stack->fetch (stack->size () - 1);
+  curElem = stack->remove (stack->size () - 1);
 }
 
 void
@@ -1240,7 +1239,7 @@ Experiment::ExperimentHandler::characters (char *ch, int start, int length)
 void
 Experiment::ExperimentHandler::endElement (char*, char*, char*)
 {
-  if (curElem == EL_EVENT && mkind >= 0 && mnum >= 0)
+  if (curElem == EL_EVENT && mkind != CMSG_NONE && mnum >= 0)
     {
       char *str;
       if (mec > 0)
@@ -1262,7 +1261,7 @@ Experiment::ExperimentHandler::endElement (char*, char*, char*)
 	exp->commentq->append (msg);
       else
 	delete msg;
-      mkind = (Cmsg_warn) - 1;
+      mkind = CMSG_NONE;
       mnum = -1;
       mec = -1;
     }
@@ -1398,7 +1397,7 @@ Experiment::Experiment ()
   archiveMap = NULL;
   nnodes = 0;
   nchunks = 0;
-  chunks = 0;
+  chunks = NULL;
   uidHTable = NULL;
   uidnodes = new Vector<UIDnode*>;
   mrecs = new Vector<MapRecord*>;
@@ -4688,26 +4687,36 @@ Experiment::readPacket (Data_window *dwin, Data_window::Span *span)
   return size;
 }
 
+static uint32_t get_v32(char *p)
+{
+  uint32_t v;
+  memcpy (&v, p, sizeof(uint32_t));
+  return v;
+}
+
+static uint64_t get_v64(char *p)
+{
+  uint64_t v;
+  memcpy (&v, p, sizeof(uint64_t));
+  return v;
+}
+
 void
 Experiment::readPacket (Data_window *dwin, char *ptr, PacketDescriptor *pDscr,
 			DataDescriptor *dDscr, int arg, uint64_t pktsz)
 {
-  union Value
-  {
-    uint32_t val32;
-    uint64_t val64;
-  } *v;
-
   long recn = dDscr->addRecord ();
   Vector<FieldDescr*> *fields = pDscr->getFields ();
+  uint32_t v32;
+  uint64_t v64;
   int sz = fields->size ();
   for (int i = 0; i < sz; i++)
     {
       FieldDescr *field = fields->fetch (i);
-      v = (Value*) (ptr + field->offset);
       if (field->propID == arg)
 	{
-	  dDscr->setValue (PROP_NTICK, recn, dwin->decode (v->val32));
+	  v32 = get_v32(ptr + field->offset);
+	  dDscr->setValue (PROP_NTICK, recn, dwin->decode (v32));
 	  dDscr->setValue (PROP_MSTATE, recn, (uint32_t) (field->propID - PROP_UCPU));
 	}
       if (field->propID == PROP_THRID || field->propID == PROP_LWPID
@@ -4718,11 +4727,13 @@ Experiment::readPacket (Data_window *dwin, char *ptr, PacketDescriptor *pDscr,
 	    {
 	    case TYPE_INT32:
 	    case TYPE_UINT32:
-	      tmp64 = dwin->decode (v->val32);
+	      v32 = get_v32 (ptr + field->offset);
+	      tmp64 = dwin->decode (v32);
 	      break;
 	    case TYPE_INT64:
 	    case TYPE_UINT64:
-	      tmp64 = dwin->decode (v->val64);
+	      v64 = get_v64 (ptr + field->offset);
+	      tmp64 = dwin->decode (v64);
 	      break;
 	    case TYPE_STRING:
 	    case TYPE_DOUBLE:
@@ -4743,11 +4754,13 @@ Experiment::readPacket (Data_window *dwin, char *ptr, PacketDescriptor *pDscr,
 	    {
 	    case TYPE_INT32:
 	    case TYPE_UINT32:
-	      dDscr->setValue (field->propID, recn, dwin->decode (v->val32));
+	      v32 = get_v32 (ptr + field->offset);
+	      dDscr->setValue (field->propID, recn, dwin->decode (v32));
 	      break;
 	    case TYPE_INT64:
 	    case TYPE_UINT64:
-	      dDscr->setValue (field->propID, recn, dwin->decode (v->val64));
+	      v64 = get_v64 (ptr + field->offset);
+	      dDscr->setValue (field->propID, recn, dwin->decode (v64));
 	      break;
 	    case TYPE_STRING:
 	      {
@@ -5039,7 +5052,8 @@ Experiment::new_uid_node (uint64_t uid, uint64_t val)
       // Reallocate Node chunk array
       UIDnode** old_chunks = chunks;
       chunks = new UIDnode*[nchunks + NCHUNKSTEP];
-      memcpy (chunks, old_chunks, nchunks * sizeof (UIDnode*));
+      if (old_chunks)
+	memcpy (chunks, old_chunks, nchunks * sizeof (UIDnode*));
       nchunks += NCHUNKSTEP;
       delete[] old_chunks;
       // Clean future pointers
@@ -5855,7 +5869,7 @@ SegMem*
 Experiment::update_ts_in_maps (Vaddr addr, hrtime_t ts)
 {
   Vector<SegMem *> *segMems = (Vector<SegMem *> *) maps->values ();
-  if (!segMems->is_sorted ())
+  if (segMems && !segMems->is_sorted ())
     {
       Dprintf (DEBUG_MAPS, NTXT ("update_ts_in_maps: segMems.size=%lld\n"), (long long) segMems->size ());
       segMems->sort (SegMemCmp);
