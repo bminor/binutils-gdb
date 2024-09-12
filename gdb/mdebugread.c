@@ -3368,7 +3368,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      char *sym_name;
 	      enum address_class theclass;
 	      unrelocated_addr minsym_value;
-	      short section = -1;
+	      int section = -1;
 
 	      (*swap_sym_in) (cur_bfd,
 			      ((char *) debug_info->external_sym
@@ -3616,7 +3616,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      enum address_class theclass;
 	      SYMR *psh;
 	      CORE_ADDR svalue;
-	      short section;
+	      int section;
 
 	      gdb_assert (ext_ptr->ifd == f_idx);
 

@@ -1594,7 +1594,6 @@ find_solib_trampoline_target (const frame_info_ptr &frame, CORE_ADDR pc)
 CORE_ADDR
 minimal_symbol_upper_bound (bound_minimal_symbol minsym)
 {
-  short section;
   struct obj_section *obj_section;
   CORE_ADDR result;
   struct minimal_symbol *iter, *msymbol;
@@ -1616,7 +1615,7 @@ minimal_symbol_upper_bound (bound_minimal_symbol minsym)
     = (minsym.objfile->per_bfd->msymbols.get ()
        + minsym.objfile->per_bfd->minimal_symbol_count);
   msymbol = minsym.minsym;
-  section = msymbol->section_index ();
+  int section = msymbol->section_index ();
   for (iter = msymbol + 1; iter != past_the_end; ++iter)
     {
       if ((iter->unrelocated_address ()

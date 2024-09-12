@@ -349,7 +349,7 @@ struct partial_symtab
   void add_psymbol (std::string_view name,
 		    bool copy_name, domain_enum domain,
 		    enum address_class theclass,
-		    short section,
+		    int section,
 		    psymbol_placement where,
 		    unrelocated_addr coreaddr,
 		    enum language language,

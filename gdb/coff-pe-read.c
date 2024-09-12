@@ -176,7 +176,6 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
 {
   enum minimal_symbol_type msymtype;
   int forward_dll_name_len = strlen (forward_dll_name);
-  short section;
 
   std::string forward_qualified_name = string_printf ("%s!%s",
 						      forward_dll_name,
@@ -215,7 +214,7 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
   unrelocated_addr vma = unrelocated_addr (msymbol.value_address ()
 					   - objfile->text_section_offset ());
   msymtype = msymbol.minsym->type ();
-  section = msymbol.minsym->section_index ();
+  int section = msymbol.minsym->section_index ();
 
   /* Generate a (hopefully unique) qualified name using the first part
      of the dll name, e.g. KERNEL32!AddAtomA.  This matches the style

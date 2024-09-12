@@ -1460,7 +1460,7 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
 {
   struct ctf_context *ccp;
   uint32_t kind;
-  short section = -1;
+  int section = -1;
 
   ccp = (struct ctf_context *) arg;
 
