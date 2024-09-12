@@ -1564,6 +1564,16 @@ This GDB was configured as follows:\n\
 "), RELOC_SRCDIR);
 #endif
 
+#if HAVE_POKE
+  gdb_printf (stream, _("\
+	     --with-poke\n\
+"));
+#else
+  gdb_printf (stream, _("\
+	     --without-poke\n\
+"));
+#endif
+
   if (DEBUGDIR[0])
     gdb_printf (stream, _("\
 	     --with-separate-debug-dir=%s%s\n\

@@ -741,6 +741,7 @@ READLINE_TEXI_INCFLAG
 READLINE_CFLAGS
 READLINE_DEPS
 READLINE
+POKE_OBS
 ZSTD_LIBS
 ZSTD_CFLAGS
 zlibinc
@@ -946,6 +947,7 @@ with_pkgversion
 with_bugurl
 with_system_zlib
 with_zstd
+with_poke
 with_iconv_bin
 with_system_readline
 with_jit_reader_dir
@@ -1714,6 +1716,7 @@ Optional Packages:
   --with-system-zlib      use installed libz
   --with-zstd             support zstd compressed debug sections
                           (default=auto)
+  --with-poke             Build GDB with poke support (default is NO)
   --with-iconv-bin=PATH   specify where to find the iconv program
   --with-system-readline  use installed readline library
   --with-jit-reader-dir=PATH
@@ -11499,7 +11502,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11502 "configure"
+#line 11505 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11605,7 +11608,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11608 "configure"
+#line 11611 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -26527,6 +26530,73 @@ $as_echo "#define HAVE_ZSTD 1" >>confdefs.h
 
 fi
 
+fi
+
+
+# Integration with GNU poke is done through the libpoke library.
+
+# Check whether --with-poke was given.
+if test "${with_poke+set}" = set; then :
+  withval=$with_poke; with_poke=$withval
+else
+  with_poke=no
+fi
+
+if test "x$with_poke" = "xyes"; then
+  # Note that we need a libpoke with support for registering foreign
+  # IO devices, hence the symbol pk_register_iod.
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pk_register_iod in -lpoke" >&5
+$as_echo_n "checking for pk_register_iod in -lpoke... " >&6; }
+if ${ac_cv_lib_poke_pk_register_iod+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpoke  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pk_register_iod ();
+int
+main ()
+{
+return pk_register_iod ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_poke_pk_register_iod=yes
+else
+  ac_cv_lib_poke_pk_register_iod=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_poke_pk_register_iod" >&5
+$as_echo "$ac_cv_lib_poke_pk_register_iod" >&6; }
+if test "x$ac_cv_lib_poke_pk_register_iod" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPOKE 1
+_ACEOF
+
+  LIBS="-lpoke $LIBS"
+
+fi
+
+  POKE_OBS="poke.o"
+
+$as_echo "#define HAVE_POKE 1" >>confdefs.h
+
+  CONFIG_INSTALL="$CONFIG_INSTALL install-poke"
+else
+  POKE_OBS=
 fi
 
 
