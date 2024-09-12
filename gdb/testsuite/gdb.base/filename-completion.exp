@@ -113,6 +113,148 @@ proc test_gdb_complete_filename_multiple {
 	$testname
 }
 
+# Helper proc.  Returns a string containing the escape sequence to move the
+# cursor COUNT characters to the left.  There's no sanity checking performed
+# on COUNT, so the user of this proc must ensure there are more than COUNT
+# characters on the current line.
+proc c_left { count } {
+    string repeat "\033\[D" $count
+}
+
+# This proc is based off of test_gdb_complete_tab_multiple in
+# completion-support.exp library.  This proc however tests completing a
+# filename in the middle of a command line.
+#
+# INPUT_LINE is the line to complete, BACK_COUNT is the number of characters
+# to move the cursor left before sending tab to complete the line.
+# ADD_COMPLETED_LINE is what we expect to be unconditionally added the first
+# time tab is sent.  On additional tabs COMPLETION_LIST will be displayed.
+# TESTNAME is used as expected.
+proc test_tab_complete_within_line_multiple { input_line back_count \
+						  add_completed_line \
+						  completion_list \
+						  testname } {
+    global gdb_prompt
+
+    # After displaying the completion list the line will be reprinted, but
+    # now with ADD_COMPLETED_LINE inserted.  Build the regexp to match
+    # against this expanded line.  The new content will be inserted
+    # BACK_COUNT character from the end of the line.
+    set expanded_line \
+	[join [list \
+		   [string range $input_line 0 end-$back_count] \
+		   ${add_completed_line} \
+		   [string range $input_line end-[expr $back_count - 1] end]] \
+	     ""]
+    set expanded_line_re [string_to_regexp $expanded_line]
+
+    # Convert input arguments into regexp.
+    set input_line_re [string_to_regexp $input_line]
+    set add_completed_line_re [string_to_regexp $add_completed_line]
+    set completion_list_re [make_tab_completion_list_re $completion_list]
+
+    # Similar to test_tab_complete_within_line_unique, build two
+    # regexp for matching the line after the first tab.  Which regexp
+    # matches will depend on the version and/or configuration of
+    # readline.  This first regexp moves the cursor backwards and then
+    # inserts new content into the line.
+    set after_tab_re1 "^$input_line_re"
+    set after_tab_re1 "$after_tab_re1\\\x08{$back_count}"
+    set after_tab_re1 "$after_tab_re1${completion::bell_re}"
+    set after_tab_re1 "$after_tab_re1\\\x1b\\\x5b[string length $add_completed_line]\\\x40"
+    set after_tab_re1 "$after_tab_re1$add_completed_line_re\$"
+
+    # This second regexp moves the cursor backwards and overwrites the
+    # end of the line, then moves the cursor backwards again to the
+    # correct position within the line.
+    set after_tab_re2 "^$input_line_re"
+    set after_tab_re2 "$after_tab_re2\\\x08{$back_count}"
+    set after_tab_re2 "$after_tab_re2${completion::bell_re}"
+    set tail [string range $input_line end-[expr $back_count - 1] end]
+    set after_tab_re2 "$after_tab_re2$add_completed_line_re"
+    set after_tab_re2 "$after_tab_re2[string_to_regexp $tail]"
+    set after_tab_re2 "$after_tab_re2\\\x08{$back_count}"
+
+    send_gdb "$input_line[c_left $back_count]\t"
+    gdb_test_multiple "" "$testname (first tab)" {
+	-re "(?:(?:$after_tab_re1)|(?:$after_tab_re2))" {
+	    send_gdb "\t"
+	    # If we auto-completed to an ambiguous prefix, we need an
+	    # extra tab to show the matches list.
+	    if {$add_completed_line != ""} {
+		send_gdb "\t"
+		set maybe_bell ${completion::bell_re}
+	    } else {
+		set maybe_bell ""
+	    }
+	    gdb_test_multiple "" "$testname (second tab)" {
+		-re "^${maybe_bell}\r\n$completion_list_re\r\n$gdb_prompt " {
+		    gdb_test_multiple "" "$testname (second tab)" {
+			-re "^$expanded_line_re\\\x08{$back_count}$" {
+			    pass $gdb_test_name
+			}
+		    }
+		}
+		-re "${maybe_bell}\r\n.+\r\n$gdb_prompt $" {
+		    fail $gdb_test_name
+		}
+	    }
+	}
+    }
+
+    clear_input_line $testname
+}
+
+# Wrapper around test_gdb_complete_tab_unique to test completing a unique
+# item in the middle of a line.  INPUT_LINE is the line to complete.
+# BACK_COUNT is the number of characters to move left within INPUT_LINE
+# before sending tab to perform completion.  INSERT_STR is what we expect to
+# see inserted by the completion engine in GDB.
+proc test_tab_complete_within_line_unique { input_line back_count insert_str } {
+    # Build regexp for the line after completion has occurred.  As
+    # completion is being performed in the middle of the line the
+    # sequence of characters we see can vary depending on which
+    # version of readline is in use, and/or how readline is
+    # configured.  Currently two different approaches are covered as
+    # RE1 and RE2.  Both of these regexp cover the complete possible
+    # output.
+    #
+    # In the first case we see the input line followed by some number
+    # of characters to move the cursor backwards.  After this we see a
+    # control sequence that tells the terminal that some characters
+    # are going to be inserted into the middle of the line, the new
+    # characters are then emitted.  The terminal itself is responsible
+    # for preserving the tail of the line, so these characters are not
+    # re-emitted.
+    set re1 [string_to_regexp $input_line]
+    set re1 $re1\\\x08{$back_count}
+    set re1 $re1\\\x1b\\\x5b[string length $insert_str]\\\x40
+    set re1 $re1[string_to_regexp $insert_str]
+
+    # In this second regexp we again start with the input line
+    # followed by the control characters to move the cursor backwards.
+    # This time though readline emits the new characters and then
+    # re-emits the tail of the original line.  This new content will
+    # overwrite the original output on the terminal.  Finally, control
+    # characters are emitted to move the cursor back to the correct
+    # place in the middle of the line.
+    set re2 [string_to_regexp $input_line]
+    set re2 $re2\\\x08{$back_count}
+    set re2 $re2[string_to_regexp $insert_str]
+    set tail [string range $input_line end-[expr $back_count - 1] end]
+    set re2 $re2[string_to_regexp $tail]
+    set re2 $re2\\\x08{$back_count}
+
+    # We can now perform the tab-completion, we check for either of
+    # the possible output regexp patterns.
+    test_gdb_complete_tab_unique \
+	"${input_line}[c_left $back_count]" \
+	"(?:(?:$re1)|(?:$re2))" \
+	"" \
+	"complete unique file within command line"
+}
+
+
 # Run filename completetion tests for those command that accept quoting and
 # escaping of the filename argument.  CMD is the inital part of the command
 # line, paths to complete will be added after CMD.
@@ -226,6 +368,25 @@ proc run_quoting_and_escaping_tests_1 { root cmd } {
     gdb_exit
 }
 
+# Tests for completing a filename in the middle of a command line.  This
+# represents a user typing out a command line then moving the cursor left
+# (e.g. with the left arrow key), editing a filename argument, and then
+# using tab completion to try and complete the filename even though there is
+# other content on the command line after the filename.
+proc run_mid_line_completion_tests { root cmd } {
+    gdb_start
+
+    test_tab_complete_within_line_unique \
+	"$cmd \"$root/bb2/dir 1/unique fi \"xxx\"" 6 "le\""
+
+    test_tab_complete_within_line_multiple \
+	"$cmd \"$root/aaa/a \"xxx\"" 6 "a " \
+	[list "aa bb" "aa cc"] \
+	"complete filename mid-line with multiple possibilities"
+
+    gdb_exit
+}
+
 # Run filename completetion tests for those command that accept quoting and
 # escaping of the filename argument.
 #
@@ -248,6 +409,8 @@ proc run_quoting_and_escaping_tests { root } {
 	foreach_with_prefix filler { "" " \"xxx\"" " 'zzz'" " yyy"} {
 	    run_quoting_and_escaping_tests_1 $root "$cmd$filler"
 	}
+
+	run_mid_line_completion_tests $root $cmd
     }
 }
 

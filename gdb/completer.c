@@ -31,6 +31,7 @@
 #include "linespec.h"
 #include "cli/cli-decode.h"
 #include "gdbsupport/gdb_tilde_expand.h"
+#include "readline/readline.h"
 
 /* FIXME: This is needed because of lookup_cmd_1 ().  We should be
    calling a hook instead so we eliminate the CLI dependency.  */
@@ -393,13 +394,34 @@ gdb_completer_file_name_quote_1 (const char *text, char quote_char)
    the quote character surrounding TEXT, or points to the null-character if
    there are no quotes around TEXT.  MATCH_TYPE will be one of the readline
    constants SINGLE_MATCH or MULTI_MATCH depending on if there is one or
-   many completions.  */
+   many completions.
+
+   We also add a trailing character, either a '/' of closing quote, if
+   MATCH_TYPE is 'SINGLE_MATCH'.  We do this because readline will only
+   add this trailing character when completing at the end of a line.  */
 
 static char *
-gdb_completer_file_name_quote (char *text, int match_type ATTRIBUTE_UNUSED,
-			       char *quote_ptr)
+gdb_completer_file_name_quote (char *text, int match_type, char *quote_ptr)
 {
-  return gdb_completer_file_name_quote_1 (text, *quote_ptr);
+  char *result = gdb_completer_file_name_quote_1 (text, *quote_ptr);
+
+  if (match_type == SINGLE_MATCH)
+    {
+      /* Add trailing '/' if TEXT is a directory, otherwise add a closing
+	 quote character matching *QUOTE_PTR.  */
+      char c = (gdb_path_isdir (gdb_tilde_expand (text).c_str ())
+		? '/' : *quote_ptr);
+
+      /* Reallocate RESULT adding C to the end.  But only if C is
+	 interesting, otherwise we can save the reallocation.  */
+      if (c != '\0')
+	{
+	  char buf[2] = { c, '\0' };
+	  result = reconcat (result, result, buf, nullptr);
+	}
+    }
+
+  return result;
 }
 
 /* The function is used to update the completion word MATCH before
