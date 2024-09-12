@@ -43,5 +43,5 @@ foreach_gnat_encoding scenario flags {all minimal} {
 	# crash.
 	set exp ".*"
     }
-    gdb_test "ptype/o prog__rec" $exp
+    gdb_test "ptype/o pck__rec" $exp
 }

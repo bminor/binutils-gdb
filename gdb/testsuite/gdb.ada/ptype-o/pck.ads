@@ -13,10 +13,13 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-with Pck; use Pck;
+package Pck is
+  type Index is range 0 .. 31;
+  type Char_Array is array ( Index range <>) of Character;
 
-procedure Prog is
-  X : Rec (7);
-begin
-  null; -- BREAK
-end Prog;
+  type Rec (Length : Index) is
+    record
+      TV_Description        : Char_Array (1 .. Length);
+      Note                  : Char_Array (1 .. Length);
+    end record;
+end Pck;
