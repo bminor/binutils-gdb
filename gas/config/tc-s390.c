@@ -795,13 +795,6 @@ s390_insert_operand (unsigned char *insn,
       uval &= 0xf;
     }
 
-  if (operand->flags & S390_OPERAND_OR1)
-    uval |= 1;
-  if (operand->flags & S390_OPERAND_OR2)
-    uval |= 2;
-  if (operand->flags & S390_OPERAND_OR8)
-    uval |= 8;
-
   /* Duplicate the GPR/VR operand at bit pos 12 to 16.  */
   if (operand->flags & S390_OPERAND_CP16)
     {

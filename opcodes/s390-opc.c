@@ -208,17 +208,9 @@ const struct s390_operand s390_operands[] =
   { 4, 20, 0 },
 #define U4_24       (U4_20 + 1)   /* 4 bit unsigned value starting at 24 */
   { 4, 24, 0 },
-#define U4_OR1_24   (U4_24 + 1)   /* 4 bit unsigned value ORed with 1 */
-  { 4, 24, S390_OPERAND_OR1 },	  /* starting at 24 */
-#define U4_OR2_24   (U4_OR1_24+1) /* 4 bit unsigned value ORed with 2 */
-  { 4, 24, S390_OPERAND_OR2 },    /* starting at 24 */
-#define U4_OR3_24   (U4_OR2_24+1) /* 4 bit unsigned value ORed with 3 */
-  { 4, 24, S390_OPERAND_OR1 | S390_OPERAND_OR2 }, /* starting at 24 */
-#define U4_28       (U4_OR3_24+1) /* 4 bit unsigned value starting at 28 */
+#define U4_28       (U4_24+1)     /* 4 bit unsigned value starting at 28 */
   { 4, 28, 0 },
-#define U4_OR8_28   (U4_28 + 1)   /* 4 bit unsigned value ORed with 8 */
-  { 4, 28, S390_OPERAND_OR8 },    /* starting at 28 */
-#define U4_32       (U4_OR8_28+1) /* 4 bit unsigned value starting at 32 */
+#define U4_32       (U4_28+1)     /* 4 bit unsigned value starting at 32 */
   { 4, 32, 0 },
 #define U4_36       (U4_32 + 1)   /* 4 bit unsigned value starting at 36 */
   { 4, 36, 0 },
@@ -512,23 +504,23 @@ unused_s390_operands_static_asserts (void)
 #define INSTR_VRR_VRR      6, { V_8,R_12,R_16,0,0,0 }            /* e.g. vlvgp */
 #define INSTR_VRR_VVV0U    6, { V_8,V_12,V_16,U4_32,0,0 }        /* e.g. vmrh  */
 #define INSTR_VRR_VVV0U0   6, { V_8,V_12,V_16,U4_24,0,0 }        /* e.g. vfaeb */
-#define INSTR_VRR_VVV0U1   6, { V_8,V_12,V_16,U4_OR1_24,0,0 }    /* e.g. vfaebs*/
-#define INSTR_VRR_VVV0U2   6, { V_8,V_12,V_16,U4_OR2_24,0,0 }    /* e.g. vfaezb*/
-#define INSTR_VRR_VVV0U3   6, { V_8,V_12,V_16,U4_OR3_24,0,0 }    /* e.g. vfaezbs*/
+#define INSTR_VRR_VVV0U1   INSTR_VRR_VVV0U0                      /* e.g. vfaebs*/
+#define INSTR_VRR_VVV0U2   INSTR_VRR_VVV0U0                      /* e.g. vfaezb*/
+#define INSTR_VRR_VVV0U3   INSTR_VRR_VVV0U0                      /* e.g. vfaezbs*/
 #define INSTR_VRR_VVV      6, { V_8,V_12,V_16,0,0,0 }            /* e.g. vmrhb */
 #define INSTR_VRR_VVV2     6, { V_8,V_CP16_12,0,0,0,0 }          /* e.g. vnot  */
 #define INSTR_VRR_VV0U     6, { V_8,V_12,U4_32,0,0,0 }           /* e.g. vseg  */
 #define INSTR_VRR_VV0U2    6, { V_8,V_12,U4_24,0,0,0 }           /* e.g. vistrb*/
 #define INSTR_VRR_VV0UU    6, { V_8,V_12,U4_28,U4_24,0,0 }       /* e.g. vcdgb */
 #define INSTR_VRR_VV0UU2   6, { V_8,V_12,U4_32,U4_28,0,0 }       /* e.g. wfc */
-#define INSTR_VRR_VV0UU8   6, { V_8,V_12,U4_OR8_28,U4_24,0,0 }   /* e.g. wcdgb */
+#define INSTR_VRR_VV0UU8   INSTR_VRR_VV0UU                       /* e.g. wcdgb */
 #define INSTR_VRR_VV       6, { V_8,V_12,0,0,0,0 }               /* e.g. vsegb */
 #define INSTR_VRR_VVVUU0V  6, { V_8,V_12,V_16,V_32,U4_20,U4_24 } /* e.g. vstrc */
 #define INSTR_VRR_VVVU0V   6, { V_8,V_12,V_16,V_32,U4_20,0 }     /* e.g. vac   */
 #define INSTR_VRR_VVVU0VB  6, { V_8,V_12,V_16,V_32,U4_24,0 }     /* e.g. vstrcb*/
-#define INSTR_VRR_VVVU0VB1 6, { V_8,V_12,V_16,V_32,U4_OR1_24,0 } /* e.g. vstrcbs*/
-#define INSTR_VRR_VVVU0VB2 6, { V_8,V_12,V_16,V_32,U4_OR2_24,0 } /* e.g. vstrczb*/
-#define INSTR_VRR_VVVU0VB3 6, { V_8,V_12,V_16,V_32,U4_OR3_24,0 } /* e.g. vstrczbs*/
+#define INSTR_VRR_VVVU0VB1 INSTR_VRR_VVVU0VB                     /* e.g. vstrcbs*/
+#define INSTR_VRR_VVVU0VB2 INSTR_VRR_VVVU0VB                     /* e.g. vstrczb*/
+#define INSTR_VRR_VVVU0VB3 INSTR_VRR_VVVU0VB                     /* e.g. vstrczbs*/
 #define INSTR_VRR_VVV0V    6, { V_8,V_12,V_16,V_32,0,0 }         /* e.g. vacq  */
 #define INSTR_VRR_VVV0U0U  6, { V_8,V_12,V_16,U4_32,U4_24,0 }    /* e.g. vfae  */
 #define INSTR_VRR_VVVV     6, { V_8,V_12,V_16,V_32,0,0 }         /* e.g. vfmadb*/
