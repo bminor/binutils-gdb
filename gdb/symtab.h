@@ -601,20 +601,20 @@ struct general_symbol_info
      section_offsets for this objfile.  Negative means that the symbol
      does not get relocated relative to a section.  */
 
-  short m_section;
+  int m_section;
 
   /* Set the index into the obj_section list (within the containing
      objfile) for the section that contains this symbol.  See M_SECTION
      for more details.  */
 
-  void set_section_index (short idx)
+  void set_section_index (int idx)
   { m_section = idx; }
 
   /* Return the index into the obj_section list (within the containing
      objfile) for the section that contains this symbol.  See M_SECTION
      for more details.  */
 
-  short section_index () const
+  auto section_index () const
   { return m_section; }
 
   /* Return the obj_section from OBJFILE for this symbol.  The symbol
