@@ -299,12 +299,14 @@ s390_print_insn_with_opcode (bfd_vma memaddr,
 	{
 	  enum disassembler_style style;
 
-	  if (flags & S390_OPERAND_OR1)
-	    val.u &= ~1;
-	  if (flags & S390_OPERAND_OR2)
-	    val.u &= ~2;
-	  if (flags & S390_OPERAND_OR8)
-	    val.u &= ~8;
+	  if (!(flags & S390_OPERAND_LENGTH))
+	    {
+	      union operand_value insn_opval;
+
+	      /* Mask any constant operand bits set in insn template.  */
+	      insn_opval = s390_extract_operand (opcode->opcode, operand);
+	      val.u &= ~insn_opval.u;
+	    }
 
 	  if ((opcode->flags & S390_INSTR_FLAG_OPTPARM)
 	      && val.u == 0
