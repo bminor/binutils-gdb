@@ -114,6 +114,119 @@ proc test_gdb_complete_filename_multiple {
 }
 
 # Run filename completetion tests for those command that accept quoting and
+# escaping of the filename argument.  CMD is the inital part of the command
+# line, paths to complete will be added after CMD.
+#
+# ROOT is the base directory as returned from setup_directory_tree, though,
+# if ROOT is a sub-directory of the user's home directory ROOT might have
+# been modified to replace the $HOME prefix with a single "~" character.
+proc run_quoting_and_escaping_tests_1 { root cmd } {
+    gdb_start
+
+    # Completing 'thread apply all ...' commands uses a custom word
+    # point.  At one point we had a bug where doing this would break
+    # completion of quoted filenames that contained white space.
+    test_gdb_complete_unique "thread apply all hel" \
+	"thread apply all help" " " false \
+	"complete a 'thread apply all' command"
+
+    foreach_with_prefix qc [list "" "'" "\""] {
+	test_gdb_complete_none "$cmd ${qc}${root}/xx" \
+	    "expand a non-existent filename"
+
+	test_gdb_complete_unique "$cmd ${qc}${root}/a" \
+	    "$cmd ${qc}${root}/aaa/" "" false \
+	    "expand a unique directory name"
+
+	test_gdb_complete_unique "$cmd ${qc}${root}/cc2" \
+	    "$cmd ${qc}${root}/cc2${qc}" " " false \
+	    "expand a unique filename"
+
+	test_gdb_complete_filename_multiple "$cmd ${qc}${root}/" \
+	    "b" "b" {
+		"bb1/"
+		"bb2/"
+	    } "" "${qc}" false \
+	    "expand multiple directory names"
+
+	test_gdb_complete_filename_multiple "$cmd ${qc}${root}/" \
+	    "c" "c" {
+		"cc1/"
+		"cc2"
+	    } "" "${qc}" false \
+	    "expand mixed directory and file names"
+
+	if { $qc ne "" } {
+	    set sp " "
+	} else {
+	    set sp "\\ "
+	}
+
+	if { $qc eq "'" } {
+	    set dq "\""
+	} else {
+	    set dq "\\\""
+	}
+
+	test_gdb_complete_unique "${cmd} ${qc}${root}/bb2/dir${sp}1/" \
+	    "${cmd} ${qc}${root}/bb2/dir${sp}1/unique${sp}file${qc}" " " \
+	    false \
+	    "expand a unique file name in a directory containing a space"
+
+	test_gdb_complete_filename_multiple "$cmd ${qc}${root}/bb2/" \
+	    "d" "ir${sp}" {
+		"dir 1/"
+		"dir 2/"
+	    } "" "${qc}" false \
+	    "expand multiple directory names containing spaces"
+
+	test_gdb_complete_filename_multiple "${cmd} ${qc}${root}/bb2/dir${sp}2/" \
+	    "f" "ile${sp}" {
+		"file 1"
+		"file 2"
+	    } "" "${qc}" false \
+	    "expand contents of a directory containing a space"
+
+	test_gdb_complete_filename_multiple "$cmd ${qc}${root}/aaa/" \
+	    "a" "a${sp}" {
+		"aa bb"
+		"aa cc"
+	    } "" "${qc}" false \
+	    "expand filenames containing spaces"
+
+	test_gdb_complete_filename_multiple "$cmd ${qc}${root}/bb1/" \
+	    "a" "a" {
+		"aa\"bb"
+		"aa'bb"
+	    } "" "${qc}" false \
+	    "expand filenames containing quotes"
+
+	test_gdb_complete_unique "$cmd ${qc}${root}/bb1/aa${dq}" \
+	    "$cmd ${qc}${root}/bb1/aa${dq}bb${qc}" " " false \
+	    "expand unique filename containing double quotes"
+
+	# It is not possible to include a single quote character
+	# within a single quoted string.  However, GDB does not do
+	# anything smart if a user tries to do this.  Avoid testing
+	# this case.  Maybe in the future we'll figure a way to avoid
+	# this situation.
+	if { $qc ne "'" } {
+	    if { $qc eq "" } {
+		set sq "\\'"
+	    } else {
+		set sq "'"
+	    }
+
+	    test_gdb_complete_unique "$cmd ${qc}${root}/bb1/aa${sq}" \
+		"$cmd ${qc}${root}/bb1/aa${sq}bb${qc}" " " false \
+		"expand unique filename containing single quote"
+	}
+    }
+
+    gdb_exit
+}
+
+# Run filename completetion tests for those command that accept quoting and
 # escaping of the filename argument.
 #
 # ROOT is the base directory as returned from setup_directory_tree, though,
@@ -127,109 +240,14 @@ proc run_quoting_and_escaping_tests { root } {
 				  "target core" "target exec" "target tfile" \
 				  "maint print c-tdesc" "compile file" \
 				  "save gdb-index" "save gdb-index -dwarf-5" } {
-	gdb_start
-
-	# Completing 'thread apply all ...' commands uses a custom word
-	# point.  At one point we had a bug where doing this would break
-	# completion of quoted filenames that contained white space.
-	test_gdb_complete_unique "thread apply all hel" \
-	    "thread apply all help" " " false \
-	    "complete a 'thread apply all' command"
-
-	foreach_with_prefix qc [list "" "'" "\""] {
-	    test_gdb_complete_none "$cmd ${qc}${root}/xx" \
-		"expand a non-existent filename"
-
-	    test_gdb_complete_unique "$cmd ${qc}${root}/a" \
-		"$cmd ${qc}${root}/aaa/" "" false \
-		"expand a unique directory name"
-
-	    test_gdb_complete_unique "$cmd ${qc}${root}/cc2" \
-		"$cmd ${qc}${root}/cc2${qc}" " " false \
-		"expand a unique filename"
-
-	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/" \
-		"b" "b" {
-		    "bb1/"
-		    "bb2/"
-		} "" "${qc}" false \
-		"expand multiple directory names"
-
-	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/" \
-		"c" "c" {
-		    "cc1/"
-		    "cc2"
-		} "" "${qc}" false \
-		"expand mixed directory and file names"
-
-	    if { $qc ne "" } {
-		set sp " "
-	    } else {
-		set sp "\\ "
-	    }
-
-	    if { $qc eq "'" } {
-		set dq "\""
-	    } else {
-		set dq "\\\""
-	    }
-
-	    test_gdb_complete_unique "${cmd} ${qc}${root}/bb2/dir${sp}1/" \
-		"${cmd} ${qc}${root}/bb2/dir${sp}1/unique${sp}file${qc}" " " \
-		false \
-		"expand a unique file name in a directory containing a space"
-
-	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/bb2/" \
-		"d" "ir${sp}" {
-		    "dir 1/"
-		    "dir 2/"
-		} "" "${qc}" false \
-		"expand multiple directory names containing spaces"
-
-	    test_gdb_complete_filename_multiple "${cmd} ${qc}${root}/bb2/dir${sp}2/" \
-		"f" "ile${sp}" {
-		    "file 1"
-		    "file 2"
-		} "" "${qc}" false \
-		"expand contents of a directory containing a space"
-
-	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/aaa/" \
-		"a" "a${sp}" {
-		    "aa bb"
-		    "aa cc"
-		} "" "${qc}" false \
-		"expand filenames containing spaces"
-
-	    test_gdb_complete_filename_multiple "$cmd ${qc}${root}/bb1/" \
-		"a" "a" {
-		    "aa\"bb"
-		    "aa'bb"
-		} "" "${qc}" false \
-		"expand filenames containing quotes"
-
-	    test_gdb_complete_unique "$cmd ${qc}${root}/bb1/aa${dq}" \
-		"$cmd ${qc}${root}/bb1/aa${dq}bb${qc}" " " false \
-		"expand unique filename containing double quotes"
-
-	    # It is not possible to include a single quote character
-	    # within a single quoted string.  However, GDB does not do
-	    # anything smart if a user tries to do this.  Avoid testing
-	    # this case.  Maybe in the future we'll figure a way to avoid
-	    # this situation.
-	    if { $qc ne "'" } {
-		if { $qc eq "" } {
-		    set sq "\\'"
-		} else {
-		    set sq "'"
-		}
-
-		test_gdb_complete_unique "$cmd ${qc}${root}/bb1/aa${sq}" \
-		    "$cmd ${qc}${root}/bb1/aa${sq}bb${qc}" " " false \
-		    "expand unique filename containing single quote"
-	    }
+	# Try each test placing the filename as the first argument
+	# then again with a quoted string immediately after the
+	# command.  This works because the filename completer will
+	# complete any number of filenames, even if the command only
+	# takes a single filename.
+	foreach_with_prefix filler { "" " \"xxx\"" " 'zzz'" " yyy"} {
+	    run_quoting_and_escaping_tests_1 $root "$cmd$filler"
 	}
-
-	gdb_exit
     }
 }
 

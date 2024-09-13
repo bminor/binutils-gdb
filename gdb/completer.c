@@ -258,7 +258,7 @@ gdb_completer_file_name_char_is_quoted (char *string, int eindex)
 	     as quoted, though this might not be completely correct; the
 	     opening and closing quotes are not themselves quoted.  But so
 	     far this doesn't seem to have caused any issues.  */
-	  if (i >= eindex)
+	  if (i > eindex)
 	    return 1;
 	}
       else
