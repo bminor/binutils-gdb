@@ -50,7 +50,6 @@
 #include "linespec.h"
 #include "cli/cli-utils.h"
 #include "objfiles.h"
-#include "annotate.h"
 
 #include "symfile.h"
 #include "extension.h"

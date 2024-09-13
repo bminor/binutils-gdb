@@ -27,7 +27,6 @@
 #include "gdbcore.h"
 #include "m2-lang.h"
 #include "target.h"
-#include "language.h"
 #include "demangle.h"
 #include "c-lang.h"
 #include "typeprint.h"

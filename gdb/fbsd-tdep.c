@@ -26,7 +26,6 @@
 #include "regcache.h"
 #include "regset.h"
 #include "gdbthread.h"
-#include "objfiles.h"
 #include "xml-syscall.h"
 #include <sys/socket.h>
 #include <arpa/inet.h>
