@@ -999,7 +999,8 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 	  ui_out_emit_tuple tuple_emitter (uiout, nullptr);
 	  uiout->field_signed ("index", i);
 	  if (item->line > 0)
-	    uiout->field_signed ("line", item->line);
+	    uiout->field_signed ("line", item->line,
+				 line_number_style.style ());
 	  else
 	    uiout->field_string ("line", _("END"));
 	  uiout->field_core_addr ("rel-address", objfile->arch (),

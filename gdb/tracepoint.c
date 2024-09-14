@@ -2351,8 +2351,9 @@ tfind_line_command (const char *args, int from_tty)
     {
       if (start_pc == end_pc)
 	{
-	  gdb_printf ("Line %d of \"%s\"",
-		      sal.line,
+	  gdb_printf ("Line %ps of \"%s\"",
+		      styled_string (line_number_style.style (),
+				     pulongest (sal.line)),
 		      symtab_to_filename_for_display (sal.symtab));
 	  gdb_stdout->wrap_here (2);
 	  gdb_printf (" is at address ");
@@ -2363,8 +2364,9 @@ tfind_line_command (const char *args, int from_tty)
 	  if (sal.line > 0
 	      && find_line_pc_range (sal, &start_pc, &end_pc)
 	      && start_pc != end_pc)
-	    gdb_printf ("Attempting to find line %d instead.\n",
-			sal.line);
+	    gdb_printf ("Attempting to find line %ps instead.\n",
+			styled_string (line_number_style.style (),
+				       pulongest (sal.line)));
 	  else
 	    error (_("Cannot find a good line."));
 	}
@@ -3644,7 +3646,7 @@ print_one_static_tracepoint_marker (int count,
       else
 	uiout->field_skip ("fullname");
 
-      uiout->field_signed ("line", sal.line);
+      uiout->field_signed ("line", sal.line, line_number_style.style ());
     }
   else
     {

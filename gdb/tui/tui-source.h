@@ -30,7 +30,8 @@
 
 struct tui_source_window : public tui_source_window_base
 {
-  tui_source_window () = default;
+  tui_source_window ();
+  ~tui_source_window ();
 
   DISABLE_COPY_AND_ASSIGN (tui_source_window);
 
@@ -81,6 +82,9 @@ private:
 
   /* It is the resolved form as returned by symtab_to_fullname.  */
   gdb::unique_xmalloc_ptr<char> m_fullname;
+
+  /* A token used to register and unregister an observer.  */
+  gdb::observers::token m_src_observable;
 };
 
 /* Return the instance of the source window.  */

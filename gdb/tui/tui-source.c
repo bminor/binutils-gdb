@@ -32,6 +32,20 @@
 #include "tui/tui-winsource.h"
 #include "tui/tui-source.h"
 #include "tui/tui-location.h"
+#include "tui/tui-io.h"
+#include "cli/cli-style.h"
+
+tui_source_window::tui_source_window ()
+{
+  line_number_style.changed.attach
+    (std::bind (&tui_source_window::style_changed, this),
+     m_src_observable, "tui-source");
+}
+
+tui_source_window::~tui_source_window ()
+{
+  line_number_style.changed.detach (m_src_observable);
+}
 
 /* Function to display source in the source window.  */
 bool
@@ -247,5 +261,7 @@ tui_source_window::show_line_number (int offset) const
 		 tui_left_margin_verbose ? "%0*d%c" : "%*d%c", m_digits - 1,
 		 lineno, space);
     }
+  tui_apply_style (handle.get (), line_number_style.style ());
   display_string (text);
+  tui_apply_style (handle.get (), ui_file_style ());
 }

@@ -65,6 +65,11 @@
 
 * New commands
 
+set style line-number foreground COLOR
+set style line-number background COLOR
+set style line-number intensity VALUE
+  Control the styling of line numbers printed by GDB.
+
 maintenance info inline-frames [ADDRESS]
   New command which displays GDB's inline-frame information for the
   current address, or for ADDRESS if specified.  The output identifies

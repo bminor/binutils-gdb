@@ -2116,9 +2116,11 @@ print_sal_location (const symtab_and_line &sal)
   const char *sym_name = NULL;
   if (sal.symbol != NULL)
     sym_name = sal.symbol->print_name ();
-  gdb_printf (_("file: \"%s\", line number: %d, symbol: \"%s\"\n"),
+  gdb_printf (_("file: \"%s\", line number: %ps, symbol: \"%s\"\n"),
 	      symtab_to_filename_for_display (sal.symtab),
-	      sal.line, sym_name != NULL ? sym_name : "???");
+	      styled_string (line_number_style.style (),
+			     pulongest (sal.line)),
+	      sym_name != NULL ? sym_name : "???");
 }
 
 /* Print a list of files and line numbers which a user may choose from

@@ -64,7 +64,7 @@ proc string_list_to_regexp { args } {
 
 # STYLE can either be the payload part of an ANSI terminal sequence,
 # or a shorthand for one of the gdb standard styles: "file",
-# "function", "variable", or "address".
+# "function", "variable", "address", etc.
 
 proc style {str style} {
     switch -exact -- $style {
@@ -76,6 +76,7 @@ proc style {str style} {
 	address { set style 34 }
 	metadata { set style 2 }
 	version { set style "35;1" }
+	line-number { set style 2 }
 	none { return $str }
     }
     return "\033\\\[${style}m${str}\033\\\[m"

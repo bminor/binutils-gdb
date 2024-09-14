@@ -1007,7 +1007,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
 	      out->text (":");
 	      annotate_frame_source_line ();
-	      out->field_signed ("line", line);
+	      out->field_signed ("line", line, line_number_style.style ());
 	    }
 	}
       if (out->is_mi_like_p ())

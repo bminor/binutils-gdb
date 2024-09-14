@@ -27852,6 +27852,10 @@ if @value{GDBN} is using its builtin disassembler library for styling
 (@pxref{style_disassembler_enabled,,@kbd{set style disassembler
 enabled}}).
 
+@item line-number
+Control the styling of line numbers.  By default, this style's
+intensity is dim.
+
 @item variable
 Control the styling of variable names.  These are managed with the
 @code{set style variable} family of commands.  By default, this style's

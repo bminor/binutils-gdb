@@ -94,13 +94,14 @@ cli_ui_out::do_end (ui_out_type type)
 
 void
 cli_ui_out::do_field_signed (int fldno, int width, ui_align alignment,
-			     const char *fldname, LONGEST value)
+			     const char *fldname, LONGEST value,
+			     const ui_file_style &style)
 {
   if (m_suppress_output)
     return;
 
   do_field_string (fldno, width, alignment, fldname, plongest (value),
-		   ui_file_style ());
+		   style);
 }
 
 /* output an unsigned field */

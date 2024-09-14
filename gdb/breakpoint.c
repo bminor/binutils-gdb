@@ -6371,7 +6371,8 @@ print_breakpoint_location (const breakpoint *b, const bp_location *loc)
       if (uiout->is_mi_like_p ())
 	uiout->field_string ("fullname", symtab_to_fullname (loc->symtab));
       
-      uiout->field_signed ("line", loc->line_number);
+      uiout->field_signed ("line", loc->line_number,
+			   line_number_style.style ());
     }
   else if (loc)
     {
@@ -11799,10 +11800,11 @@ code_breakpoint::say_where () const
 	    {
 	      const char *filename
 		= symtab_to_filename_for_display (bl.symtab);
-	      gdb_printf (": file %ps, line %d.",
+	      gdb_printf (": file %ps, line %ps.",
 			  styled_string (file_name_style.style (),
 					 filename),
-			  bl.line_number);
+			  styled_string (line_number_style.style (),
+					 pulongest (bl.line_number)));
 	    }
 	  else
 	    /* This is not ideal, but each location may have a
@@ -12832,7 +12834,7 @@ update_static_tracepoint (tracepoint *tp, struct symtab_and_line sal)
 	      uiout->field_string ("fullname", fullname);
 	    }
 
-	  uiout->field_signed ("line", sal2.line);
+	  uiout->field_signed ("line", sal2.line, line_number_style.style ());
 	  uiout->text ("\n");
 
 	  tp->first_loc ().line_number = sal2.line;

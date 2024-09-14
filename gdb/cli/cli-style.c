@@ -126,6 +126,10 @@ cli_style_option disasm_comment_style ("comment", ui_file_style::WHITE,
 
 /* See cli-style.h.  */
 
+cli_style_option line_number_style ("line-number", ui_file_style::DIM);
+
+/* See cli-style.h.  */
+
 cli_style_option::cli_style_option (const char *name,
 				    ui_file_style::basic_color fg,
 				    ui_file_style::intensity intensity)
@@ -528,6 +532,14 @@ then this style has no effect."),
 					     &style_disasm_set_list,
 					     &style_disasm_show_list,
 					     false);
+
+  line_number_style.add_setshow_commands (no_class, _("\
+Line number display styling.\n\
+Configure colors and display intensity for line numbers\n\
+The \"line-number\" style is used when GDB displays line numbers\n\
+coming from your source code."),
+				       &style_set_list, &style_show_list,
+				       false);
 
   /* Setup 'disassembler address' style and 'disassembler symbol' style,
      these are aliases for 'address' and 'function' styles respectively.  */

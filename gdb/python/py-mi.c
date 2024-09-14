@@ -86,7 +86,8 @@ py_ui_out::do_end (ui_out_type type)
 
 void
 py_ui_out::do_field_signed (int fldno, int width, ui_align align,
-			    const char *fldname, LONGEST value)
+			    const char *fldname, LONGEST value,
+			    const ui_file_style &style)
 {
   if (m_error.has_value ())
     return;

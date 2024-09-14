@@ -189,6 +189,11 @@ public:
      update_source_windows_with_addr.  */
   void update_source_window_with_addr (struct gdbarch *, CORE_ADDR);
 
+protected:
+
+  /* Called when a user style setting is changed.  */
+  void style_changed ();
+
 private:
 
   /* Used for horizontal scroll.  */
@@ -235,9 +240,6 @@ private:
 
      the initial escape that sets the color will still be applied.  */
   void puts_to_pad_with_skip (const char *string, int skip);
-
-  /* Called when the user "set style enabled" setting is changed.  */
-  void style_changed ();
 
   /* A token used to register and unregister an observer.  */
   gdb::observers::token m_observable;

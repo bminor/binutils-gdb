@@ -99,7 +99,8 @@ proc run_style_tests { } {
 
 	set main_expr [limited_style main function]
 	set base_file_expr [limited_style ".*style\\.c" file]
-	set file_expr "$base_file_expr:\[0-9\]+"
+	set line_expr [limited_style $decimal line-number]
+	set file_expr "$base_file_expr:$line_expr"
 	set arg_expr [limited_style "arg." variable]
 
 	# On some embedded targets that don't fully support argc/argv,
@@ -109,12 +110,12 @@ proc run_style_tests { } {
 	gdb_test "frame" \
 	    [multi_line \
 		 "#0\\s+$main_expr\\s+\\($arg_expr=$decimal,\\s+$arg_expr=$hex.*\\)\\s+at\\s+$file_expr" \
-		 "\[0-9\]+\\s+.*return.* break here .*"]
+		 "$line_expr\\s+.*return.* break here .*"]
 	gdb_test "info breakpoints" "$main_expr at $file_expr.*"
 
 	gdb_test_no_output "set style sources off"
 	gdb_test "frame" \
-	    "\r\n\[^\033\]*break here.*" \
+	    "\r\n$line_expr\[^\033\]*break here.*" \
 	    "frame without sources styling"
 	gdb_test_no_output "set style sources on"
 
@@ -139,18 +140,18 @@ proc run_style_tests { } {
 		[multi_line \
 		     "#0\\s+$main_expr\\s+\\($arg_expr=$decimal,\\s+$arg_expr=$hex\\)" \
 		     "\\s+at\\s+$file_expr" \
-		     "\[0-9\]+\\s+.*return.* break here .*"]
+		     "$line_expr\\s+.*return.* break here .*"]
 	    set re1_styled \
 		[multi_line \
 		     "#0\\s+$main_expr\\s+\\($arg_expr=$decimal,\\s+" \
 		     "\\s+$arg_expr=$hex.*\\)" \
 		     "\\s+at\\s+$file_expr" \
-		     "\[0-9\]+\\s+.*return.* break here .*"]
+		     "$line_expr\\s+.*return.* break here .*"]
 	    set re2_styled \
 		[multi_line \
 		     "#0\\s+$main_expr\\s+\\($arg_expr=.*" \
 		     "\\s+$arg_expr=$hex.*\\)\\s+at\\s+$file_expr" \
-		     "\[0-9\]+\\s+.*return.* break here .*"]
+		     "$line_expr\\s+.*return.* break here .*"]
 
 	    # The length of the line containing argv containing:
 	    # - 4 leading spaces

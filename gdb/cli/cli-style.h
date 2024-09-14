@@ -145,6 +145,9 @@ extern cli_style_option tui_active_border_style;
 /* The style to use for the GDB version string.  */
 extern cli_style_option version_style;
 
+/* The style for a line number.  */
+extern cli_style_option line_number_style;
+
 /* True if source styling is enabled.  */
 extern bool source_styling;
 
