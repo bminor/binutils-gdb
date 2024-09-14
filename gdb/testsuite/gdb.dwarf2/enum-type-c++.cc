@@ -24,6 +24,12 @@ public:
   };
 };
 
+enum class ec
+{
+  val2 = 2,
+};
 }
 
 int u1 = ns::A::val1;
+
+int u2 = (int)ns::ec::val2;

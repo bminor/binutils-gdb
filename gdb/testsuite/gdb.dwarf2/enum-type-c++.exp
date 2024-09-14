@@ -42,3 +42,15 @@ gdb_test_lines "maint print objfiles" \
 	 ".*"]
 
 gdb_test "print $val1" " = $val1"
+
+# Regression test for PR32158.
+setup_kfail "gdb/32158" *-*-*
+set val2 ns::ec::val2
+gdb_test_lines "maint print objfiles" \
+    "val2 has correct parent" \
+    [multi_line \
+	 "" \
+	 "$re_ws+qualified:$re_ws+$val2" \
+	 ".*"]
+
+gdb_test "print $val2" " = $val2"
