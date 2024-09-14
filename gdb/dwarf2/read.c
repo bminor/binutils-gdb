@@ -16471,12 +16471,6 @@ cooked_indexer::index_dies (cutu_reader *reader,
 	  flags &= ~IS_STATIC;
 	  flags |= parent_entry->flags & IS_STATIC;
 	}
-      /* If the parent is an enum, but not an enum class, then use the
-	 grandparent instead.  */
-      if (this_parent_entry != nullptr
-	  && this_parent_entry->tag == DW_TAG_enumeration_type
-	  && !is_enum_class)
-	this_parent_entry = this_parent_entry->get_parent ();
 
       if (abbrev->tag == DW_TAG_namespace
 	  && m_language == language_cplus
@@ -16536,7 +16530,15 @@ cooked_indexer::index_dies (cutu_reader *reader,
 	      break;
 
 	    case DW_TAG_enumeration_type:
-	      info_ptr = recurse (reader, info_ptr, this_entry, fully);
+	      /* We need to recurse even for an anonymous enumeration.
+		 Which scope we record as the parent scope depends on
+		 whether we're reading an "enum class".  If so, we use
+		 the enum itself as the parent, yielding names like
+		 "enum_class::enumerator"; otherwise we inject the
+		 names into our own parent scope.  */
+	      info_ptr = recurse (reader, info_ptr,
+				  is_enum_class ? this_entry : parent_entry,
+				  fully);
 	      continue;
 
 	    case DW_TAG_module:
