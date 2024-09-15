@@ -483,12 +483,12 @@ struct amd_dbgapi_target_breakpoint : public code_breakpoint
     disposition = disp_donttouch;
   }
 
-  void re_set () override;
+  void re_set (program_space *) override;
   void check_status (struct bpstat *bs) override;
 };
 
 void
-amd_dbgapi_target_breakpoint::re_set ()
+amd_dbgapi_target_breakpoint::re_set (program_space *)
 {
   /* Nothing.  */
 }
