@@ -37,3 +37,11 @@
 	{evex} kmovb %k1, %r8d
 	{evex} ldtilecfg (%r8)
 	{evex} cmpexadd %rax, %rcx, (%r8)
+
+	.arch default
+	vbroadcastf128	(%r16),%ymm3
+	vbroadcasti128	(%r16),%ymm3
+	vextractf128	$1,%ymm3,(%r16)
+	vextracti128	$1,%ymm3,(%r16)
+	vinsertf128	$1,(%r16),%ymm3,%ymm8
+	vinserti128	$1,(%r16),%ymm3,%ymm8

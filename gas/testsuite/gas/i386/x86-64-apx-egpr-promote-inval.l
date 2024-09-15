@@ -20,6 +20,12 @@
 .*:37: Error: .*`kmovb'.*
 .*:38: Error: .*`ldtilecfg'.*
 .*:39: Error: .*`cmpexadd'.*
+.*:42: Error: no EVEX encoding for `vbroadcastf128'
+.*:43: Error: no EVEX encoding for `vbroadcasti128'
+.*:44: Error: no EVEX encoding for `vextractf128'
+.*:45: Error: no EVEX encoding for `vextracti128'
+.*:46: Error: no EVEX encoding for `vinsertf128'
+.*:47: Error: no EVEX encoding for `vinserti128'
 GAS LISTING .*
 #...
 [ 	]*1[ 	]+\# Check illegal 64bit APX EVEX promoted instructions
