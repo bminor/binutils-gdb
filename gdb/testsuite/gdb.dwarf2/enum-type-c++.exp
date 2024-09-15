@@ -32,7 +32,6 @@ require {string equal [have_index $binfile] ""}
 set re_ws "\[ \t\]"
 
 # Regression test for PR31900.
-setup_kfail "gdb/31900" *-*-*
 set val1 ns::A::val1
 gdb_test_lines "maint print objfiles" \
     "val1 has a parent" \
@@ -44,7 +43,6 @@ gdb_test_lines "maint print objfiles" \
 gdb_test "print $val1" " = $val1"
 
 # Regression test for PR32158.
-setup_kfail "gdb/32158" *-*-*
 set val2 ns::ec::val2
 gdb_test_lines "maint print objfiles" \
     "val2 has correct parent" \
