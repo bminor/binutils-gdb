@@ -11,8 +11,7 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 00c001f4 	teq	a2,zero,0x7
 [0-9a-f]+ <[^>]*> 00a6001e 	ddiv	zero,a1,a2
 [0-9a-f]+ <[^>]*> 2401ffff 	li	at,-1
-[0-9a-f]+ <[^>]*> 14c10003 	bne	a2,at,[0-9a-f]+ <[^>]*>
-[0-9a-f]+ <[^>]*> 24010001 	li	at,1
+[0-9a-f]+ <[^>]*> 14c10002 	bne	a2,at,[0-9a-f]+ <[^>]*>
 [0-9a-f]+ <[^>]*> 00010ffc 	dsll32	at,at,0x1f
 [0-9a-f]+ <[^>]*> 00a101b4 	teq	a1,at,0x6
 [0-9a-f]+ <[^>]*> 00002012 	mflo	a0

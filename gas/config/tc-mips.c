@@ -10831,13 +10831,10 @@ macro (struct mips_cl_insn *ip, char *str)
       if (mips_opts.micromips)
 	micromips_label_expr (&label_expr);
       else
-	label_expr.X_add_number = (mips_use_trap ()
-				   ? (dbl ? 12 : 8) : (dbl ? 20 : 16));
+	label_expr.X_add_number = mips_use_trap () ? 8 : 16;
       macro_build (&label_expr, "bne", "s,t,p", op[2], AT);
       if (dbl)
 	{
-	  expr1.X_add_number = 1;
-	  load_register (AT, &expr1, dbl);
 	  macro_build (NULL, "dsll32", SHFT_FMT, AT, AT, 31);
 	}
       else

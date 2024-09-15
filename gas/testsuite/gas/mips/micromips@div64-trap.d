@@ -13,7 +13,6 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 3020 ffff 	li	at,-1
 [0-9a-f]+ <[^>]*> b426 fffe 	bne	a2,at,[0-9a-f]+ <[^>]*>
 			[0-9a-f]+: R_MICROMIPS_PC16_S1	\.L\^_0
-[0-9a-f]+ <[^>]*> 3020 0001 	li	at,1
 [0-9a-f]+ <[^>]*> 5821 f808 	dsll32	at,at,0x1f
 [0-9a-f]+ <[^>]*> 0025 603c 	teq	a1,at,0x6
 [0-9a-f]+ <\.L\^_0> 4644      	mflo	a0
