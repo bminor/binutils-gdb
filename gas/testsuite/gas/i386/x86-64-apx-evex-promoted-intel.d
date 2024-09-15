@@ -138,16 +138,6 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 da 7f 08 4b b4 87 23 01 00 00[	 ]+tileloadd tmm6,\[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 da 7d 08 4b b4 87 23 01 00 00[	 ]+tileloaddt1 tmm6,\[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 da 7e 08 4b b4 87 23 01 00 00[	 ]+tilestored[	 ]+\[r31\+rax\*4\+0x123\],tmm6
-[	 ]*[a-f0-9]+:[	 ]*62 fa 7d 28 1a 18[	 ]+vbroadcastf32x4 ymm3,XMMWORD PTR \[r16\]
-[	 ]*[a-f0-9]+:[	 ]*62 fa 7d 28 5a 18[	 ]+vbroadcasti32x4 ymm3,XMMWORD PTR \[r16\]
-[	 ]*[a-f0-9]+:[	 ]*62 fb 7d 28 19 18 01[	 ]+vextractf32x4 XMMWORD PTR \[r16\],ymm3,(0x)?1
-[	 ]*[a-f0-9]+:[	 ]*62 fb 7d 28 39 18 01[	 ]+vextracti32x4 XMMWORD PTR \[r16\],ymm3,(0x)?1
-[	 ]*[a-f0-9]+:[	 ]*62 7b 65 28 18 00 01[	 ]+vinsertf32x4 ymm8,ymm3,XMMWORD PTR \[r16\],(0x)?1
-[	 ]*[a-f0-9]+:[	 ]*62 7b 65 28 38 00 01[	 ]+vinserti32x4 ymm8,ymm3,XMMWORD PTR \[r16\],(0x)?1
-[	 ]*[a-f0-9]+:[	 ]*62 db fd 08 09 30 01[	 ]+vrndscalepd xmm6,XMMWORD PTR \[r24\],(0x)?1
-[	 ]*[a-f0-9]+:[	 ]*62 db 7d 08 08 30 02[	 ]+vrndscaleps xmm6,XMMWORD PTR \[r24\],(0x)?2
-[	 ]*[a-f0-9]+:[	 ]*62 db cd 08 0b 18 03[	 ]+vrndscalesd xmm3,xmm6,QWORD PTR \[r24\],(0x)?3
-[	 ]*[a-f0-9]+:[	 ]*62 db 4d 08 0a 18 04[	 ]+vrndscaless xmm3,xmm6,DWORD PTR \[r24\],(0x)?4
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7c 08 66 8c 87 23 01 00 00[	 ]+wrssd[	 ]+\[r31\+rax\*4\+0x123\],r25d
 [	 ]*[a-f0-9]+:[	 ]*62 4c fc 08 66 bc 87 23 01 00 00[	 ]+wrssq[	 ]+\[r31\+rax\*4\+0x123\],r31
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7d 08 65 8c 87 23 01 00 00[	 ]+wrussd[	 ]+\[r31\+rax\*4\+0x123\],r25d
