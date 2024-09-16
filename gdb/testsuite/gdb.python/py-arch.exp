@@ -28,7 +28,7 @@ if ![runto_main] {
 # internal GDB assert.
 gdb_py_test_silent_cmd "python empty = gdb.Architecture()" "get empty arch" 0
 gdb_test "python print(repr (empty))" "<gdb\\.Architecture \\(invalid\\)>" \
-    "Test empty achitecture __repr__ does not trigger an assert"
+    "Test empty architecture __repr__ does not trigger an assert"
 gdb_test "python print(empty.name())" ".*Architecture is invalid.*" \
     "Test empty architecture.name does not trigger an assert"
 gdb_test "python print(empty.disassemble())" ".*Architecture is invalid.*" \
