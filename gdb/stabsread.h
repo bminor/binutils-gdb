@@ -1,5 +1,5 @@
-/* Include file for stabs debugging format support functions.
-   Copyright (C) 1986-2024 Free Software Foundation, Inc.
+  /* Include file for stabs debugging format support functions.
+     Copyright (C) 1986-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -185,6 +185,13 @@ extern void process_one_symbol (int, int, CORE_ADDR, const char *,
 				const section_offsets &,
 				struct objfile *, enum language);
 
+/* Setup partial_symtab's describing each source file for which
+   debugging information is available.  */
+
+void
+read_stabs_symtab (minimal_symbol_reader &,
+		   psymtab_storage *, struct objfile *);
+
 extern void elfstab_build_psymtabs (struct objfile *objfile,
 				    asection *stabsect,
 				    file_ptr stabstroffset,
@@ -253,6 +260,24 @@ process_one_symbol (int, int, CORE_ADDR, const char *,
 
 #define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
 #define LDSYMLEN(p) (((struct symloc *)((p)->read_symtab_private))->ldsymlen)
+#define SYMLOC(p) ((struct symloc *)((p)->read_symtab_private))
+#define SYMBOL_SIZE(p) (SYMLOC(p)->symbol_size)
+#define SYMBOL_OFFSET(p) (SYMLOC(p)->symbol_offset)
+#define STRING_OFFSET(p) (SYMLOC(p)->string_offset)
+#define FILE_STRING_OFFSET(p) (SYMLOC(p)->file_string_offset)
+#define PST_LANGUAGE(p) (SYMLOC(p)->pst_language)
+
+#define INTERNALIZE_SYMBOL(intern, extern, abfd)			\
+  {									\
+    (intern).n_strx = bfd_h_get_32 (abfd, (extern)->e_strx);		\
+    (intern).n_type = bfd_h_get_8 (abfd, (extern)->e_type);		\
+    (intern).n_other = 0;						\
+    (intern).n_desc = bfd_h_get_16 (abfd, (extern)->e_desc);  		\
+    if (bfd_get_sign_extend_vma (abfd))					\
+      (intern).n_value = bfd_h_get_signed_32 (abfd, (extern)->e_value);	\
+    else								\
+      (intern).n_value = bfd_h_get_32 (abfd, (extern)->e_value);	\
+  }
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
