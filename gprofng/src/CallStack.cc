@@ -146,13 +146,17 @@ private:
   CallStackNode *find_preg_stack (uint64_t);
   // objs are in the root..leaf order
   void *add_stack_d (Vector<Histable*> *objs);
-  void add_stack_java (DataDescriptor *dDscr, long idx, FramePacket *frp, hrtime_t tstamp, uint32_t thrid, Vector<DbeInstr*>* natpcs, bool natpc_added, cstk_ctx_chunk *cstCtxChunk);
-  void add_stack_java_epilogue (DataDescriptor *dDscr, long idx, FramePacket *frp, hrtime_t tstamp, uint32_t thrid, Vector<DbeInstr*>* natpcs, Vector<Histable*>* jpcs, bool natpc_added);
+  void add_stack_java (DataDescriptor *dDscr, long idx, FramePacket *frp,
+	hrtime_t tstamp, uint32_t thrid, Vector<Histable*>* natpcs,
+	bool natpc_added, cstk_ctx_chunk *cstCtxChunk);
+  void add_stack_java_epilogue (DataDescriptor *dDscr, long idx,
+	FramePacket *frp, hrtime_t tstamp, uint32_t thrid,
+	Vector<Histable*>* natpcs, Vector<Histable*>* jpcs, bool natpc_added);
 
   // Adjust HW counter event to find better trigger PC, etc.
   DbeInstr *adjustEvent (DbeInstr *leafPC, DbeInstr * candPC,
 			 Vaddr &eventEA, int abst_type);
-  Vector<DbeInstr*> *natpcsP;
+  Vector<Histable*> *natpcsP;
   Vector<Histable*> *jpcsP;
 };
 
@@ -335,7 +339,7 @@ CallStackP::find_preg_stack (uint64_t prid)
 void
 CallStackP::add_stack_java (DataDescriptor *dDscr, long idx, FramePacket *frp,
 			    hrtime_t tstamp, uint32_t thrid,
-			    Vector<DbeInstr*>* natpcs, bool natpc_added,
+			    Vector<Histable*>* natpcs, bool natpc_added,
 			    cstk_ctx_chunk *cstCtxChunk)
 {
   Vector<Histable*> *jpcs = NULL;
@@ -387,7 +391,7 @@ CallStackP::add_stack_java (DataDescriptor *dDscr, long idx, FramePacket *frp,
 	      bool found = false;
 	      for (; nind >= 0; nind--)
 		{
-		  DbeInstr *nat_addr = natpcs->fetch (nind);
+		  DbeInstr *nat_addr = (DbeInstr *) natpcs->fetch (nind);
 		  if (0 == nat_addr)
 		    continue;
 		  Function *nat_func = nat_addr->func;
@@ -415,12 +419,14 @@ CallStackP::add_stack_java (DataDescriptor *dDscr, long idx, FramePacket *frp,
 // It adds the native and java stacks to the stackmap
 
 void
-CallStackP::add_stack_java_epilogue (DataDescriptor *dDscr, long idx, FramePacket *frp, hrtime_t tstamp, uint32_t thrid, Vector<DbeInstr*>* natpcs, Vector<Histable*> *jpcs, bool natpc_added)
+CallStackP::add_stack_java_epilogue (DataDescriptor *dDscr, long idx,
+	FramePacket *frp, hrtime_t tstamp, uint32_t thrid,
+	Vector<Histable*>* natpcs, Vector<Histable*> *jpcs, bool natpc_added)
 {
   CallStackNode *node = NULL;
   if (!natpc_added)
     {
-      node = (CallStackNode *) add_stack ((Vector<Histable*>*)natpcs);
+      node = (CallStackNode *) add_stack (natpcs);
       dDscr->setObjValue (PROP_MSTACK, idx, node);
       dDscr->setObjValue (PROP_XSTACK, idx, node);
       dDscr->setObjValue (PROP_USTACK, idx, node);
@@ -469,7 +475,7 @@ void
 CallStackP::add_stack (DataDescriptor *dDscr, long idx, FramePacket *frp,
 		       cstk_ctx_chunk* cstCtxChunk)
 {
-  Vector<DbeInstr*> *natpcs = NULL;
+  Vector<Histable*> *natpcs = NULL;
   cstk_ctx *cstctx = NULL;
   int stack_size = frp->stackSize ();
   if (cstCtxChunk != NULL)
@@ -485,7 +491,7 @@ CallStackP::add_stack (DataDescriptor *dDscr, long idx, FramePacket *frp,
       // [leaf_pc .. root_pc] == [0..stack_size-1]
       // Leave room for a possible "truncated" frame
       if (natpcsP == NULL)
-	natpcsP = new Vector<DbeInstr*>;
+	natpcsP = new Vector<Histable*>;
       natpcs = natpcsP;
       natpcs->reset ();
     }
@@ -632,7 +638,7 @@ CallStackP::add_stack (DataDescriptor *dDscr, long idx, FramePacket *frp,
       natpcs->append (funwf->find_dbeinstr (0, 0));
     }
 
-  CallStackNode *node = (CallStackNode*) add_stack ((Vector<Histable*>*)natpcs);
+  CallStackNode *node = (CallStackNode*) add_stack (natpcs);
   dDscr->setObjValue (PROP_MSTACK, idx, node);
   dDscr->setObjValue (PROP_XSTACK, idx, node);
   dDscr->setObjValue (PROP_USTACK, idx, node);
@@ -813,7 +819,8 @@ CallStackP::add_stack (DataDescriptor *dDscr, long idx, FramePacket *frp,
 	    bool inOMP = false;
 	    for (btm = 0; btm < natpcs->size (); btm++)
 	      {
-		LoadObject *lo = natpcs->fetch (btm)->func->module->loadobject;
+		DbeInstr *instr = (DbeInstr *) natpcs->fetch (btm);
+		LoadObject *lo = instr->func->module->loadobject;
 		if (!inOMP)
 		  {
 		    if (lo->flags & SEG_FLAG_OMP)
@@ -854,7 +861,7 @@ CallStackP::add_stack (DataDescriptor *dDscr, long idx, FramePacket *frp,
 		    // Process the entire nat_stack. Skip libthread.
 		    for (top = natpcs->size () - 1; top >= 0; top--)
 		      {
-			DbeInstr *instr = natpcs->fetch (top);
+			DbeInstr *instr = (DbeInstr *) natpcs->fetch (top);
 			if (instr->func->module->loadobject->flags & SEG_FLAG_OMP)
 			  break;
 		      }
@@ -886,7 +893,7 @@ CallStackP::add_stack (DataDescriptor *dDscr, long idx, FramePacket *frp,
 	}
       for (int i = btm; i <= top; ++i)
 	{
-	  DbeInstr *instr = natpcs->fetch (i);
+	  DbeInstr *instr = (DbeInstr *) natpcs->fetch (i);
 	  if (instr->func->module->loadobject->flags & SEG_FLAG_OMP)
 	    continue; // Skip all frames from libmtsk
 	  omppcs->append (instr);

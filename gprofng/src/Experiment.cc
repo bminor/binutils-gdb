@@ -5868,7 +5868,7 @@ SegMemCmp (const void *a, const void *b)
 SegMem*
 Experiment::update_ts_in_maps (Vaddr addr, hrtime_t ts)
 {
-  Vector<SegMem *> *segMems = (Vector<SegMem *> *) maps->values ();
+  Vector<void *> *segMems = maps->values ();
   if (segMems && !segMems->is_sorted ())
     {
       Dprintf (DEBUG_MAPS, NTXT ("update_ts_in_maps: segMems.size=%lld\n"), (long long) segMems->size ());
@@ -5876,12 +5876,12 @@ Experiment::update_ts_in_maps (Vaddr addr, hrtime_t ts)
     }
   for (int i = 0, sz = segMems ? segMems->size () : 0; i < sz; i++)
     {
-      SegMem *sm = segMems->fetch (i);
+      SegMem *sm = (SegMem *) segMems->fetch (i);
       if (ts < sm->unload_time)
 	{
 	  for (; i < sz; i++)
 	    {
-	      sm = segMems->fetch (i);
+	      sm = (SegMem *) segMems->fetch (i);
 	      if ((addr >= sm->base) && (addr < sm->base + sm->size))
 		{
 		  Dprintf (DEBUG_MAPS,

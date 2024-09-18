@@ -65,7 +65,7 @@ template <class ITEM> class Vector;
 // operate on the next stage
 typedef struct
 {
-  Vector<DbeInstr*> *natpcs;
+  Vector<Histable*> *natpcs;
   Vector<Histable*> *jpcs;
   long idx;
   FramePacket *frp;

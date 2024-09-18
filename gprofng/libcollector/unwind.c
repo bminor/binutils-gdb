@@ -1555,8 +1555,8 @@ read_int (unsigned char *pc, int w)
   if (w == 1)
     return *((char *) pc);
   if (w == 2)
-    return *(short*) pc;
-  return *(int*) pc;
+    return pc[0] | (pc[1] << 8);
+  return pc[0] | (pc[1] << 8) | (pc[2] << 16) | (pc[3] << 24);
 }
 
 /* Return codes */
