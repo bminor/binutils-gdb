@@ -323,10 +323,7 @@ varobj_create (const char *objname,
 	}
 
       /* Don't allow variables to be created for types.  */
-      enum exp_opcode opcode = var->root->exp->first_opcode ();
-      if (opcode == OP_TYPE
-	  || opcode == OP_TYPEOF
-	  || opcode == OP_DECLTYPE)
+      if (var->root->exp->type_p ())
 	{
 	  gdb_printf (gdb_stderr, "Attempt to use a type name"
 		      " as an expression.\n");

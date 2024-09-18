@@ -513,7 +513,7 @@ whatis_exp (const char *exp, int show)
       val = expr->evaluate_type ();
       type = val->type ();
 
-      if (show == -1 && expr->first_opcode () == OP_TYPE)
+      if (show == -1 && expr->type_p ())
 	{
 	  /* The user expression names a type directly.  */
 

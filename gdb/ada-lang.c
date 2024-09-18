@@ -10772,7 +10772,7 @@ ada_unop_atr_operation::evaluate (struct type *expect_type,
   struct type *type_arg = nullptr;
   value *val = nullptr;
 
-  if (std::get<0> (m_storage)->opcode () == OP_TYPE)
+  if (std::get<0> (m_storage)->type_p ())
     {
       value *tem = std::get<0> (m_storage)->evaluate (nullptr, exp,
 						      EVAL_AVOID_SIDE_EFFECTS);

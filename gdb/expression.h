@@ -147,6 +147,11 @@ public:
   virtual bool uses_objfile (struct objfile *objfile) const
   { return false; }
 
+  /* Some expression nodes represent a type, not a value.  This method
+     should be overridden to return 'true' in these situations.  */
+  virtual bool type_p () const
+  { return false; }
+
   /* Generate agent expression bytecodes for this operation.  */
   void generate_ax (struct expression *exp, struct agent_expr *ax,
 		    struct axs_value *value,
@@ -214,6 +219,11 @@ struct expression
   {
     op->dump (stream, 0);
   }
+
+  /* Call the type_p method on the outermost sub-expression of this
+     expression, and return the result.  */
+  bool type_p () const
+  { return op->type_p (); }
 
   /* Return true if this expression uses OBJFILE (and will become
      dangling when OBJFILE is unloaded), otherwise return false.
