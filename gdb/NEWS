@@ -49,6 +49,8 @@
   history has been reached.  It also specifies that the forward execution can
   continue, and the recording will also continue.
 
+* The Ada 'Object_Size attribute is now supported.
+
 * Python API
 
   ** Added gdb.record.clear.  Clears the trace data of the current recording.

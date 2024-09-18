@@ -185,12 +185,12 @@ ada_pop (bool deprocedure_p = true, struct type *context_type = nullptr)
 }
 
 /* Like parser_state::wrap, but use ada_pop to pop the value.  */
-template<typename T>
+template<typename T, typename... Args>
 void
-ada_wrap ()
+ada_wrap (Args... args)
 {
   operation_up arg = ada_pop ();
-  pstate->push_new<T> (std::move (arg));
+  pstate->push_new<T> (std::move (arg), std::forward<Args> (args)...);
 }
 
 /* Create and push an address-of operation, as appropriate for Ada.
@@ -519,7 +519,7 @@ make_tick_completer (struct stoken tok)
 
 %right TICK_ACCESS TICK_ADDRESS TICK_FIRST TICK_LAST TICK_LENGTH
 %right TICK_MAX TICK_MIN TICK_MODULUS
-%right TICK_POS TICK_RANGE TICK_SIZE TICK_TAG TICK_VAL
+%right TICK_POS TICK_RANGE TICK_SIZE TICK_OBJECT_SIZE TICK_TAG TICK_VAL
 %right TICK_COMPLETE TICK_ENUM_REP TICK_ENUM_VAL
  /* The following are right-associative only so that reductions at this
     precedence have lower precedence than '.' and '('.  The syntax still
@@ -914,7 +914,9 @@ primary :	primary TICK_ACCESS
 			    (std::move (arg), OP_ATR_LENGTH, $3);
 			}
 	|       primary TICK_SIZE
-			{ ada_wrap<ada_atr_size_operation> (); }
+			{ ada_wrap<ada_atr_size_operation> (true); }
+	|       primary TICK_OBJECT_SIZE
+			{ ada_wrap<ada_atr_size_operation> (false); }
 	|	primary TICK_TAG
 			{ ada_wrap<ada_atr_tag_operation> (); }
 	|       opt_type_prefix TICK_MIN '(' exp ',' exp ')'

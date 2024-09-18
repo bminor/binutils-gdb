@@ -10101,15 +10101,28 @@ ada_atr_tag (struct type *expect_type,
   return ada_value_tag (arg1);
 }
 
-/* A helper function for OP_ATR_SIZE.  */
+namespace expr
+{
 
 value *
-ada_atr_size (struct type *expect_type,
-	      struct expression *exp,
-	      enum noside noside, enum exp_opcode op,
-	      struct value *arg1)
+ada_atr_size_operation::evaluate (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside)
 {
-  struct type *type = arg1->type ();
+  bool is_type = std::get<0> (m_storage)->opcode () == OP_TYPE;
+  bool is_size = std::get<1> (m_storage);
+
+  enum noside sub_noside = is_type ? EVAL_AVOID_SIDE_EFFECTS : noside;
+  value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, sub_noside);
+  struct type *type = ada_check_typedef (val->type ());
+
+  if (is_type)
+    {
+      if (is_size)
+	error (_("gdb cannot apply 'Size to a type"));
+      if (is_dynamic_type (type) || find_base_type (type) != nullptr)
+	error (_("cannot apply 'Object_Size to dynamic type"));
+    }
 
   /* If the argument is a reference, then dereference its type, since
      the user is really asking for the size of the actual object,
@@ -10123,6 +10136,8 @@ ada_atr_size (struct type *expect_type,
     return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
 			       TARGET_CHAR_BIT * type->length ());
 }
+
+} /* namespace expr */
 
 /* A helper function for UNOP_ABS.  */
 

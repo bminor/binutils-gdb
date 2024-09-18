@@ -672,6 +672,7 @@ attributes[] = {
   { "max", TICK_MAX },
   { "min", TICK_MIN },
   { "modulus", TICK_MODULUS },
+  { "object_size", TICK_OBJECT_SIZE },
   { "pos", TICK_POS },
   { "range", TICK_RANGE },
   { "size", TICK_SIZE },
