@@ -2238,8 +2238,10 @@ proc gdb_reinitialize_dir { subdir } {
     }
     send_gdb "dir\n"
     gdb_expect 60 {
-	-re "Reinitialize source path to empty.*y or n. " {
-	    send_gdb "y\n" answer
+	-re "Reinitialize source path to empty.*y or n.(\\\s.answered Y; input not from terminal.)?" {
+	    if {![info exists expect_out(1,string)]} {
+		send_gdb "y\n" answer
+	    }
 	    gdb_expect 60 {
 		-re "Source directories searched.*$gdb_prompt $" {
 		    send_gdb "dir $subdir\n"
