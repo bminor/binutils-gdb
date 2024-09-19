@@ -1922,7 +1922,7 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Run pr32189" \
-	    "-nostdlib -nostartfiles" \
+	    "$NOPIE_LDFLAGS -nostdlib -nostartfiles" \
 	    "" \
 	    { pr32189.s } \
 	    "pr32189" \
