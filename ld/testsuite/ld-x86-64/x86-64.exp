@@ -1920,6 +1920,14 @@ if { [isnative] && [check_compiler_available] } {
 	    "pass.out" \
 	    "-fPIE" \
 	] \
+	[list \
+	    "Run pr32189" \
+	    "-nostdlib -nostartfiles" \
+	    "" \
+	    { pr32189.s } \
+	    "pr32189" \
+	    "pass.out" \
+	] \
     ]
 
     # Run-time tests which require working ifunc attribute support.
