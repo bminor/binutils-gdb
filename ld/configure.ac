@@ -424,6 +424,28 @@ if test $ld_cv_decl_getopt_unistd_h = yes; then
 	    [Is the prototype for getopt in <unistd.h> in the expected format?])
 fi
 
+dnl xxhash support from gdbsupport/common.m4
+AC_MSG_CHECKING([whether to use xxhash])
+AC_ARG_WITH(xxhash,
+  AS_HELP_STRING([--with-xxhash], [use inlined libxxhash for hashing (faster) (auto/yes/no)]),
+  [], [with_xxhash=auto])
+if test "x$with_xxhash" != "xno"; then
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#define XXH_INLINE_ALL
+#include <xxhash.h>
+XXH128_hash_t r;
+void foo (void) { r = XXH128("foo", 3, 0); }
+])],[
+  with_xxhash=yes
+  AC_DEFINE([WITH_XXHASH], 1, [whether to use inline xxhash])
+],[
+  if test "$with_xxhash" = yes; then
+    AC_MSG_ERROR([xxhash is missing or unusable])
+  fi
+  with_xxhash=no])
+fi
+AC_MSG_RESULT([$with_xxhash])
+
 # Link in zlib/zstd if we can.  This allows us to read and write
 # compressed debug sections.
 AM_ZLIB
