@@ -274,6 +274,30 @@ enum i386_error
     internal_error,
   };
 
+enum x86_tls_error_type
+{
+  x86_tls_error_continue,
+  x86_tls_error_none,
+  x86_tls_error_insn,
+  x86_tls_error_opcode,
+  x86_tls_error_sib,
+  x86_tls_error_no_base_reg,
+  x86_tls_error_require_no_base_index_reg,
+  x86_tls_error_base_reg,
+  x86_tls_error_index_ebx,
+  x86_tls_error_eax,
+  x86_tls_error_RegA,
+  x86_tls_error_ebx,
+  x86_tls_error_rip,
+  x86_tls_error_dest_eax,
+  x86_tls_error_dest_rdi,
+  x86_tls_error_scale_factor,
+  x86_tls_error_base_reg_size,
+  x86_tls_error_dest_32bit_reg_size,
+  x86_tls_error_dest_64bit_reg_size,
+  x86_tls_error_dest_32bit_or_64bit_reg_size
+};
+
 struct _i386_insn
   {
     /* TM holds the template for the insn were currently assembling.  */
@@ -364,6 +388,9 @@ struct _i386_insn
 
     /* Has GOTPC or TLS relocation.  */
     bool has_gotpc_tls_reloc;
+
+    /* Has relocation entry from the gotrel array.  */
+    bool has_gotrel;
 
     /* RM and SIB are the modrm byte and the sib byte where the
        addressing modes of this insn are encoded.  */
@@ -716,6 +743,9 @@ lfence_before_ret;
 
 static int generate_relax_relocations
   = DEFAULT_GENERATE_X86_RELAX_RELOCATIONS;
+
+/* 1 if the assembler should check tls relocation.  */
+static bool tls_check = DEFAULT_X86_TLS_CHECK;
 
 static enum check_kind
   {
@@ -6358,6 +6388,356 @@ static INLINE bool may_need_pass2 (const insn_template *t)
 	       && (t->base_opcode | 8) == 0x2c);
 }
 
+static enum x86_tls_error_type
+x86_check_tls_relocation (enum bfd_reloc_code_real r_type)
+{
+  switch (r_type)
+    {
+    case BFD_RELOC_386_TLS_GOTDESC:
+      /* Check GDesc access model:
+
+	 leal x@tlsdesc(%ebx), %reg32 --> Memory reg must be %ebx and
+					  SIB is not supported.
+       */
+      if (i.tm.mnem_off != MN_lea)
+	return x86_tls_error_insn;
+      if (i.index_reg)
+	return x86_tls_error_sib;
+      if (!i.base_reg)
+	return x86_tls_error_no_base_reg;
+      if (i.base_reg->reg_type.bitfield.instance != RegB)
+	return x86_tls_error_ebx;
+      if (!i.op[1].regs->reg_type.bitfield.dword)
+	return x86_tls_error_dest_32bit_reg_size;
+      break;
+
+    case BFD_RELOC_386_TLS_GD:
+      /* Check GD access model:
+
+	 leal foo@tlsgd(,%ebx,1), %eax   --> Only this fixed format is supported.
+	 leal foo@tlsgd(%reg32), %eax    --> Dest reg must be '%eax'
+					     Memory reg can't be %eax.
+       */
+      if (i.tm.mnem_off != MN_lea)
+	return x86_tls_error_insn;
+      if (i.op[1].regs->reg_type.bitfield.instance != Accum)
+	return x86_tls_error_dest_eax;
+      if (!i.op[1].regs->reg_type.bitfield.dword)
+	return x86_tls_error_dest_32bit_reg_size;
+      if (i.index_reg)
+	{
+	  if (i.base_reg)
+	    return x86_tls_error_base_reg;
+	  if (i.index_reg->reg_type.bitfield.instance != RegB)
+	    return x86_tls_error_index_ebx;
+	  if (i.log2_scale_factor)
+	    return x86_tls_error_scale_factor;
+	}
+      else
+	{
+	  if (!i.base_reg)
+	    return x86_tls_error_no_base_reg;
+	  if (i.base_reg->reg_type.bitfield.instance == Accum)
+	    return x86_tls_error_eax;
+	}
+      break;
+
+    case BFD_RELOC_386_TLS_LDM:
+      /*  Check LDM access model:
+
+	  leal foo@tlsldm(%reg32), %eax --> Dest reg must be '%eax'
+				            Memory reg can't be %eax and SIB
+					    is not supported.
+       */
+      if (i.tm.mnem_off != MN_lea)
+	return x86_tls_error_insn;
+      if (i.index_reg)
+	return x86_tls_error_sib;
+      if (!i.base_reg)
+	return x86_tls_error_no_base_reg;
+      if (i.base_reg->reg_type.bitfield.instance == Accum)
+	return x86_tls_error_eax;
+      if (i.op[1].regs->reg_type.bitfield.instance != Accum)
+	return x86_tls_error_dest_eax;
+      if (!i.op[1].regs->reg_type.bitfield.dword)
+	return x86_tls_error_dest_32bit_reg_size;
+      break;
+
+    case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
+      /* Check GOTPC32 TLSDESC access model:
+
+	 --- LP64 mode ---
+	 leaq x@tlsdesc(%rip), %reg64 --> Memory reg must be %rip.
+
+	 --- X32 mode ---
+	 rex/rex2 leal x@tlsdesc(%rip), %reg32 --> Memory reg must be %rip.
+
+	 In X32 mode, gas will add rex/rex2 for it later, no need to check
+	 here.
+       */
+      if (i.tm.mnem_off != MN_lea)
+	return x86_tls_error_insn;
+      if (!i.base_reg)
+	return x86_tls_error_no_base_reg;
+      if (i.base_reg->reg_num != RegIP
+	  || !i.base_reg->reg_type.bitfield.qword)
+	return x86_tls_error_rip;
+      if (x86_elf_abi == X86_64_ABI)
+	{
+	  if (!i.op[1].regs->reg_type.bitfield.qword)
+	    return x86_tls_error_dest_64bit_reg_size;
+	}
+      else if (!i.op[1].regs->reg_type.bitfield.dword
+	       && !i.op[1].regs->reg_type.bitfield.qword)
+	return x86_tls_error_dest_32bit_or_64bit_reg_size;
+	  break;
+
+    case BFD_RELOC_X86_64_TLSGD:
+      /* Check GD access model:
+
+	 leaq foo@tlsgd(%rip), %rdi --> Only this fixed format is supported.
+       */
+    case BFD_RELOC_X86_64_TLSLD:
+      /* Check LD access model:
+
+	 leaq foo@tlsld(%rip), %rdi --> Only this fixed format is supported.
+       */
+      if (i.tm.mnem_off != MN_lea)
+	return x86_tls_error_insn;
+      if (!i.base_reg)
+	return x86_tls_error_no_base_reg;
+      if (i.base_reg->reg_num != RegIP
+	  || !i.base_reg->reg_type.bitfield.qword)
+	return x86_tls_error_rip;
+      if (!i.op[1].regs->reg_type.bitfield.qword
+	  || i.op[1].regs->reg_num != EDI_REG_NUM
+	  || i.op[1].regs->reg_flags)
+	return x86_tls_error_dest_rdi;
+      break;
+
+    case BFD_RELOC_386_TLS_GOTIE:
+      /* Check GOTIE access model:
+
+	 subl foo@gotntpoff(%reg1), %reg2
+	 movl foo@gotntpoff(%reg1), %reg2
+	 addl foo@gotntpoff(%reg1), %reg2
+
+	 Memory operand: SIB is not supported.
+       */
+    case BFD_RELOC_386_TLS_IE_32:
+      /* Check IE_32 access model:
+
+	 subl foo@gottpoff(%reg1), %reg2
+	 movl foo@gottpoff(%reg1), %reg2
+	 addl foo@gottpoff(%reg1), %reg2
+
+	 Memory operand: SIB is not supported.
+       */
+      if (i.tm.mnem_off != MN_sub
+	  && i.tm.mnem_off != MN_add
+	  && i.tm.mnem_off != MN_mov)
+	return x86_tls_error_insn;
+      if (i.op[1].regs->reg_type.bitfield.class != Reg
+	  || i.op[0].regs->reg_type.bitfield.class
+	  || i.imm_operands)
+	return x86_tls_error_opcode;
+      if (!i.base_reg)
+	return x86_tls_error_no_base_reg;
+      if (i.index_reg)
+	return x86_tls_error_sib;
+      if (!i.base_reg->reg_type.bitfield.dword)
+	return x86_tls_error_base_reg_size;
+      if (!i.op[1].regs->reg_type.bitfield.dword)
+	return x86_tls_error_dest_32bit_reg_size;
+      break;
+
+    case BFD_RELOC_386_TLS_IE:
+      /* Check IE access model:
+
+	 movl foo@indntpoff, %reg32 --> Mod == 00 && r/m == 5
+	 addl foo@indntpoff, %reg32 --> Mod == 00 && r/m == 5
+       */
+      if (i.tm.mnem_off != MN_add && i.tm.mnem_off != MN_mov)
+	return x86_tls_error_insn;
+      if (i.op[1].regs->reg_type.bitfield.class != Reg
+	  || i.op[0].regs->reg_type.bitfield.class
+	  || i.imm_operands)
+	return x86_tls_error_opcode;
+      if (i.base_reg || i.index_reg)
+	return x86_tls_error_require_no_base_index_reg;
+      if (!i.op[1].regs->reg_type.bitfield.dword)
+	return x86_tls_error_dest_32bit_reg_size;
+      break;
+
+    case BFD_RELOC_X86_64_GOTTPOFF:
+      /* Check GOTTPOFF access model:
+
+	 mov foo@gottpoff(%rip), %reg --> Memory Reg must be %rip.
+	 add foo@gottpoff(%rip), %reg --> Memory Reg must be %rip.
+	 add %reg1, foo@gottpoff(%rip), %reg2 --> Memory Reg must be %rip.
+	 add foo@gottpoff(%rip), %reg1, %reg2 --> Memory Reg must be %rip.
+       */
+      if (i.tm.mnem_off != MN_add && i.tm.mnem_off != MN_mov)
+	return x86_tls_error_insn;
+      if (i.op[i.operands - 1].regs->reg_type.bitfield.class != Reg
+	  || (i.op[0].regs->reg_type.bitfield.class
+	      && i.tm.opcode_modifier.vexvvvv != VexVVVV_DST)
+	  || i.imm_operands)
+	return x86_tls_error_opcode;
+      if (!i.base_reg)
+	return x86_tls_error_no_base_reg;
+      if (i.base_reg->reg_num != RegIP
+	  || !i.base_reg->reg_type.bitfield.qword)
+	return x86_tls_error_rip;
+      if (x86_elf_abi == X86_64_ABI)
+	{
+	  if (!i.op[i.operands - 1].regs->reg_type.bitfield.qword)
+	    return x86_tls_error_dest_64bit_reg_size;
+	}
+      else if (!i.op[i.operands - 1].regs->reg_type.bitfield.dword
+	       && !i.op[i.operands - 1].regs->reg_type.bitfield.qword)
+	return x86_tls_error_dest_32bit_or_64bit_reg_size;
+      break;
+
+    case BFD_RELOC_386_TLS_DESC_CALL:
+      /* Check GDesc access model:
+
+	 call *x@tlscall(%eax) --> Memory reg must be %eax and
+				   SIB is not supported.
+       */
+    case BFD_RELOC_X86_64_TLSDESC_CALL:
+      /* Check GDesc access model:
+
+	 call *x@tlscall(%rax) <--- LP64 mode.
+	 call *x@tlscall(%eax) <--- X32 mode.
+
+	 Only these fixed formats are supported.
+       */
+      if (i.tm.mnem_off != MN_call)
+	return x86_tls_error_insn;
+      if (i.index_reg)
+	return x86_tls_error_sib;
+      if (!i.base_reg)
+	return x86_tls_error_no_base_reg;
+      if (i.base_reg->reg_type.bitfield.instance != Accum)
+	return x86_tls_error_RegA;
+      break;
+
+    case BFD_RELOC_NONE:
+      /* This isn't a relocation.  */
+      return x86_tls_error_continue;
+
+    default:
+      break;
+    }
+
+  /* This relocation is OK.  */
+  return x86_tls_error_none;
+}
+
+static void
+x86_report_tls_error (enum x86_tls_error_type tls_error,
+		      enum bfd_reloc_code_real r_type)
+{
+  unsigned int k;
+  for (k = 0; k < ARRAY_SIZE (gotrel); k++)
+    if (gotrel[k].rel[object_64bit] == r_type)
+      break;
+
+  switch (tls_error)
+    {
+    case x86_tls_error_insn:
+      as_bad (_("@%s operator cannot be used with `%s'"),
+	      gotrel[k].str, insn_name (&i.tm));
+      return;
+
+    case x86_tls_error_opcode:
+      as_bad (_("@%s operator can be used with `%s', but format is wrong"),
+	      gotrel[k].str, insn_name (&i.tm));
+      return;
+
+    case x86_tls_error_sib:
+      as_bad (_("@%s operator requires no SIB"), gotrel[k].str);
+      return;
+
+    case x86_tls_error_no_base_reg:
+      as_bad (_("@%s operator requires base register"), gotrel[k].str);
+      return;
+
+    case x86_tls_error_require_no_base_index_reg:
+      as_bad (_("@%s operator requires no base/index register"),
+	      gotrel[k].str);
+      return;
+
+    case x86_tls_error_base_reg:
+      as_bad (_("@%s operator requires no base register"), gotrel[k].str);
+      return;
+
+    case x86_tls_error_index_ebx:
+      as_bad (_("@%s operator requires `%sebx' as index register"),
+	      gotrel[k].str, register_prefix);
+      return;
+
+    case x86_tls_error_eax:
+      as_bad (_("@%s operator requires `%seax' as base register"),
+	      gotrel[k].str, register_prefix);
+      return;
+
+    case x86_tls_error_RegA:
+      as_bad (_("@%s operator requires `%seax/%srax' as base register"),
+	      gotrel[k].str, register_prefix, register_prefix);
+      return;
+
+    case x86_tls_error_ebx:
+      as_bad (_("@%s operator requires `%sebx' as base register"),
+	      gotrel[k].str, register_prefix);
+      return;
+
+    case x86_tls_error_rip:
+      as_bad (_("@%s operator requires `%srip' as base register"),
+	      gotrel[k].str, register_prefix);
+      return;
+
+    case x86_tls_error_dest_eax:
+      as_bad (_("@%s operator requires `%seax' as dest register"),
+	      gotrel[k].str, register_prefix);
+      return;
+
+    case x86_tls_error_dest_rdi:
+      as_bad (_("@%s operator requires `%srdi' as dest register"),
+	      gotrel[k].str, register_prefix);
+      return;
+
+    case x86_tls_error_scale_factor:
+      as_bad (_("@%s operator requires scale factor of 1"),
+	      gotrel[k].str);
+      return;
+
+    case x86_tls_error_base_reg_size:
+      as_bad (_("@%s operator requires 32-bit base register"),
+	      gotrel[k].str);
+      return;
+
+    case x86_tls_error_dest_32bit_reg_size:
+      as_bad (_("@%s operator requires 32-bit dest register"),
+	      gotrel[k].str);
+      return;
+
+    case x86_tls_error_dest_64bit_reg_size:
+      as_bad (_("@%s operator requires 64-bit dest register"),
+	      gotrel[k].str);
+      return;
+
+    case x86_tls_error_dest_32bit_or_64bit_reg_size:
+      as_bad (_("@%s operator requires 32-bit or 64-bit dest register"),
+	      gotrel[k].str);
+      return;
+
+    default:
+      abort ();
+    }
+}
+
 /* This is the guts of the machine-dependent assembler.  LINE points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
@@ -6696,6 +7076,21 @@ i386_assemble (char *line)
 	i.prefix[LOCK_PREFIX] = 0;
     }
 
+  if (i.has_gotrel && tls_check)
+    {
+      enum x86_tls_error_type tls_error;
+      for (j = 0; j < i.operands; ++j)
+	{
+	  tls_error = x86_check_tls_relocation (i.reloc[j]);
+	  if (tls_error == x86_tls_error_continue)
+	    continue;
+
+	  if (tls_error != x86_tls_error_none)
+	    x86_report_tls_error (tls_error, i.reloc[j]);
+	  break;
+	}
+    }
+
   if ((is_any_vex_encoding (&i.tm) && i.tm.opcode_space != SPACE_EVEXMAP4)
       || i.tm.operand_types[i.imm_operands].bitfield.class >= RegMMX
       || i.tm.operand_types[i.imm_operands + 1].bitfield.class >= RegMMX)
@@ -6706,28 +7101,6 @@ i386_assemble (char *line)
 	  as_bad (_("data size prefix invalid with `%s'"), insn_name (&i.tm));
 	  return;
 	}
-
-      /* Don't allow e.g. KMOV in TLS code sequences which will trigger
-	 linker error later.  */
-      for (j = i.imm_operands; j < i.operands; ++j)
-	switch (i.reloc[j])
-	  {
-	  case BFD_RELOC_X86_64_GOTTPOFF:
-	  case BFD_RELOC_386_TLS_GOTIE:
-	  case BFD_RELOC_X86_64_TLSLD:
-	    for (unsigned int k = 0; k < ARRAY_SIZE (gotrel); k++)
-	      {
-		if (gotrel[k].rel[object_64bit] == i.reloc[j])
-		  {
-		    as_bad (_("@%s operator cannot be used with `%s'"),
-			  gotrel[k].str, insn_name (&i.tm));
-		    return;
-		  }
-	      }
-	    abort ();
-	  default:
-	    break;
-	  }
     }
 
   /* Check if HLE prefix is OK.  */
@@ -12497,6 +12870,7 @@ lex_got (enum bfd_reloc_code_real *rel,
 	      int first, second;
 	      char *tmpbuf, *past_reloc;
 
+	      i.has_gotrel = true;
 	      *rel = gotrel[j].rel[object_64bit];
 
 	      if (types)
@@ -16230,6 +16604,7 @@ const char *md_shortopts = "qnO::";
 #define OPTION_MLFENCE_BEFORE_INDIRECT_BRANCH (OPTION_MD_BASE + 32)
 #define OPTION_MLFENCE_BEFORE_RET (OPTION_MD_BASE + 33)
 #define OPTION_MUSE_UNALIGNED_VECTOR_MOVE (OPTION_MD_BASE + 34)
+#define OPTION_MTLS_CHECK (OPTION_MD_BASE + 35)
 
 struct option md_longopts[] =
 {
@@ -16276,6 +16651,7 @@ struct option md_longopts[] =
   {"mlfence-before-ret", required_argument, NULL, OPTION_MLFENCE_BEFORE_RET},
   {"mamd64", no_argument, NULL, OPTION_MAMD64},
   {"mintel64", no_argument, NULL, OPTION_MINTEL64},
+  {"mtls-check", required_argument, NULL, OPTION_MTLS_CHECK},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -16832,6 +17208,14 @@ md_parse_option (int c, const char *arg)
 	  optimize_for_space = 0;
 	}
       break;
+    case OPTION_MTLS_CHECK:
+      if (strcasecmp (arg, "yes") == 0)
+	tls_check = true;
+      else if (strcasecmp (arg, "no") == 0)
+	tls_check = false;
+      else
+	as_fatal (_("invalid -mtls-check= option: `%s'"), arg);
+      break;
 
     default:
       return 0;
@@ -17074,6 +17458,16 @@ md_show_usage (FILE *stream)
     fprintf (stream, _("(default: no)\n"));
   fprintf (stream, _("\
                           generate relax relocations\n"));
+
+  fprintf (stream, _("\
+  -mtls-check=[no|yes] "));
+  if (DEFAULT_X86_TLS_CHECK)
+    fprintf (stream, _("(default: yes)\n"));
+  else
+    fprintf (stream, _("(default: no)\n"));
+  fprintf (stream, _("\
+                          check TLS relocation\n"));
+
   fprintf (stream, _("\
   -malign-branch-boundary=NUM (default: 0)\n\
                           align branches within NUM byte boundary\n"));

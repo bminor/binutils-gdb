@@ -16,13 +16,12 @@
 .*:23: Error: @TLSDESC operator cannot be used with `add'
 .*:24: Error: @TLSDESC operator requires `%rip' as base register
 .*:25: Error: @TLSDESC operator requires `%rip' as base register
-.*:26: Error: @TLSDESC operator requires 64-bit dest register
-.*:27: Error: @TLSDESC operator requires 64-bit dest register
+.*:27: Error: @TLSDESC operator requires 32-bit or 64-bit dest register
 .*:30: Error: @GOTTPOFF operator cannot be used with `sub'
 .*:31: Error: @GOTTPOFF operator cannot be used with `xor'
 .*:32: Error: @GOTTPOFF operator requires `%rip' as base register
 .*:33: Error: @GOTTPOFF operator requires `%rip' as base register
-.*:34: Error: @GOTTPOFF operator requires 64-bit dest register
+.*:34: Error: @GOTTPOFF operator requires 32-bit or 64-bit dest register
 .*:35: Error: @GOTTPOFF operator can be used with `add', but format is wrong
 .*:36: Error: @GOTTPOFF operator can be used with `add', but format is wrong
 .*:37: Error: @GOTTPOFF operator can be used with `add', but format is wrong

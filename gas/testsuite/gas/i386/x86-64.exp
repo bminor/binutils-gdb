@@ -653,7 +653,8 @@ if [is_elf_format] then {
     run_dump_test "x86-64-unwind"
 
     run_dump_test "reloc64"
-    run_list_test "reloc64" "--defsym _bad_=1"
+    run_list_test "reloc64" "--defsym _bad_=1 -mtls-check=no"
+    run_dump_test "x86-64-tls"
     run_list_test "x86-64-inval-tls"
     run_dump_test "mixed-mode-reloc64"
     run_dump_test "rela"

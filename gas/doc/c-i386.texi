@@ -467,6 +467,16 @@ R_X86_64_REX_GOTPCRELX, in 64-bit mode.
 relocations.  The default can be controlled by a configure option
 @option{--enable-x86-relax-relocations}.
 
+@cindex @samp{-mtls-check=} option, i386
+@cindex @samp{-mtls-check=} option, x86-64
+@item -mtls-check=@var{no}
+@itemx -mtls-check=@var{yes}
+These options control whether the assembler check tls relocation.
+@option{-mtls-check=@var{yes}} will check tls relocation.
+@option{-mtls-check=@var{no}} will not check tls relocation
+The default can be controlled by a configure option
+@option{--enable-x86-tls-check}.
+
 @cindex @samp{-malign-branch-boundary=} option, i386
 @cindex @samp{-malign-branch-boundary=} option, x86-64
 @item -malign-branch-boundary=@var{NUM}

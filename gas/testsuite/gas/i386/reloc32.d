@@ -1,4 +1,4 @@
-#as: -mrelax-relocations=yes
+#as: -mrelax-relocations=yes -mtls-check=no
 #objdump: -Drw
 #name: i386 relocs
 
