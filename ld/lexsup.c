@@ -2278,6 +2278,15 @@ elf_static_list_options (FILE *file)
 {
   fprintf (file, _("\
   --build-id[=STYLE]          Generate build ID note\n"));
+  /* DEFAULT_BUILD_ID_STYLE n/a here */
+#ifdef WITH_XXHASH
+  fprintf (file, _("\
+                                Styles: none,md5,sha1,xx,uuid,0xHEX\n"));
+  /* NB: testsuite/ld-elf/build-id.exp depends on this syntax */
+#else
+  fprintf (file, _("\
+                                Styles: none,md5,sha1,uuid,0xHEX\n"));
+#endif
   fprintf (file, _("\
   --package-metadata[=JSON]   Generate package metadata note\n"));
   fprintf (file, _("\
