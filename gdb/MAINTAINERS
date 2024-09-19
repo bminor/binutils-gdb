@@ -473,7 +473,7 @@ SystemTap		Sergio Durigan Junior	sergiodj@sergiodj.net
 Reverse debugging / Record and Replay / Tracing:
 
 record
-  full			Guinevere Larsen	blarsen@redhat.com
+  full			Guinevere Larsen	guinevere@redhat.com
   btrace		Markus T. Metzger	markus.t.metzger@intel.com
 
 
@@ -656,7 +656,7 @@ Jan Kratochvil					jan.kratochvil@redhat.com
 Maxim Kuvyrkov					maxim@kugelworks.com
 Pierre Langlois 				pierre.langlois@arm.com
 Jonathan Larmour				jifl@ecoscentric.com
-Guinevere Larsen				blarsen@redhat.com
+Guinevere Larsen				guinevere@redhat.com
 Jeff Law					law@redhat.com
 Justin Lebar					justin.lebar@gmail.com
 David Lecomber					david@streamline-computing.com
