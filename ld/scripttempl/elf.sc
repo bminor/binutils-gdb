@@ -397,6 +397,19 @@ fi
 # ===========================================================================
 # Functions for generating parts of the linker script
 
+# Helper function for putting comments into scripts.
+# Useful when trying to track down script composition problems.
+# Use by adding:
+#   emit_comment "a message"
+# wherever necessary.
+
+emit_comment()
+{
+cat <<EOF
+  /* $1 */
+EOF
+}
+
 emit_header()
 {
 cat <<EOF
@@ -425,7 +438,6 @@ emit_early_ro()
 {
   cat <<EOF
   ${INITIAL_READONLY_SECTIONS}
-  .note.gnu.build-id ${RELOCATING-0}: { *(.note.gnu.build-id) }
 EOF
 }
 
@@ -436,6 +448,11 @@ cat <<EOF
   ${CREATE_SHLIB-${CREATE_PIE-${RELOCATING+PROVIDE (__executable_start = ${TEXT_START_ADDR}); . = ${TEXT_BASE_ADDRESS};}}}
   ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR}${SIZEOF_HEADERS_CODE};}}
   ${CREATE_PIE+${RELOCATING+PROVIDE (__executable_start = ${SHLIB_TEXT_START_ADDR}); . = ${SHLIB_TEXT_START_ADDR}${SIZEOF_HEADERS_CODE};}}
+
+  /* Place build-id as close to the ELF headers as possible.  This
+     maximises the chance the build-id will be present in core files,
+     which GDB can then use to locate the associated debuginfo file.  */
+  .note.gnu.build-id ${RELOCATING-0}: { *(.note.gnu.build-id) }
 EOF
 }
 
@@ -557,6 +574,7 @@ EOF
 align_text()
 {
 cat <<EOF
+  ${RELOCATING+/* Align the text segment.  */}
   ${RELOCATING+${TEXT_SEGMENT_ALIGN}}
 EOF
 }
@@ -798,11 +816,28 @@ EOF
   emit_executable_start
 
   if test -z "${ALL_TEXT_BEFORE_RO}"; then
+    # We are allowed to put R/O sections before code sections.
+
     test -n "${SEPARATE_CODE}" || emit_early_ro
     test -n "${NON_ALLOC_DYN}${SEPARATE_CODE}" || emit_dyn
+
+    # We only need the alignment if we have emitted some sections.
+    if test -z "${SEPARATE_CODE}"; then
+      align_text
+    elif test -z "${NON_ALLOC_DYN}${SEPARATE_CODE}"; then
+      align_text
+    fi
   fi
   
-  align_text  
+  # We do not align the code segment here as doing so will increase the file size.
+  # Normally having the text segment at the start of the file will automatically
+  # mean that it is aligned(*), and if we have emitted any r/o sections due to the
+  # tests of SEPARATE_CODE above, then extra alignment will have already been
+  # generated.
+  #
+  # *: Including the ELF headers and .note.gnu.build-id section in the code segment
+  # is a very small theoretical risk.
+
   emit_text
 
   align_rodata
