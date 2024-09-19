@@ -1,0 +1,51 @@
+# Copyright 2024 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+standard_testfile .c
+
+if { ![test_compiler_info gcc*] || ![supports_statement_frontiers] } {
+    untested "this test needs gcc with statement frontiers"
+    return -1
+}
+
+global srcfile testfile
+
+set options {debug nowarnings optimize=-O2}
+lappend options additional_flags=-gstatement-frontiers
+
+if { [prepare_for_testing "failed to prepare" $binfile \
+      $srcfile $options] } {
+    return -1
+}
+
+if ![runto_main] {
+    return
+}
+
+gdb_test "frame 0" "\\s*\\#0\\s+main.*${srcfile}:36.*" "in main"
+gdb_test_multiple "step" "step into test0" {
+    -re ".*test0.*${srcfile}:20.*$::gdb_prompt $" {
+	gdb_test "step" ".*line 21.*" $gdb_test_name
+    }
+    -re ".*test0.*${srcfile}:21.*$::gdb_prompt $" {
+	pass $gdb_test_name
+    }
+}
+gdb_test "frame 1" "\\s*\\#1\\s+main.*${srcfile}:36.*" "frame1"
+gdb_test "step" ".*test1.*${srcfile}:31.*" "step into test1"
+gdb_test "frame 1" "\\s*\\#1.*in main.*${srcfile}:36.*" "frame2"
+gdb_test "step" ".*main.*${srcfile}:37.*" "step back to main"
+gdb_test "next" ".*return 0;.*" "step over test0+1"
+gdb_test "frame 0" "\\s*\\#0\\s+main.*${srcfile}:38.*" "in main again"

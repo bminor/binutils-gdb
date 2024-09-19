@@ -1,0 +1,51 @@
+# Copyright 2024 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# PR 25987
+standard_testfile .cc
+
+if { ![test_compiler_info gcc*] || ![supports_statement_frontiers] } {
+    untested "this test needs gcc with statement frontiers"
+    return -1
+}
+
+set options {c++ debug nowarnings optimize=-Og}
+lappend options additional_flags=-gstatement-frontiers
+if { [prepare_for_testing "failed to prepare" $testfile \
+      $srcfile $options] } {
+    return -1
+}
+
+if ![runto_main] {
+    return
+}
+
+gdb_test "bt" "\\s*\\#0\\s+main.*" "in main"
+#break at the empty inline function ptr::get
+gdb_test "b get" ".*" "break at get"
+gdb_test "c" ".*" "continue to get"
+#call frame 1 is at line 29
+gdb_test "bt" [multi_line "\\s*\\#0\\s+ptr::get\[^\r\]*${srcfile}:21" \
+			  "\\s*\\#1\\s+intermediate\[^\r\]*${srcfile}:29" \
+			  ".*"] \
+	      "at get"
+#print a local value here
+gdb_test "p t" ".*(\\\$1 = \\(MyClass \\*\\) 0x|value has been optimized out).*" "print t"
+gdb_test "c" ".*SIGSEGV.*" "continue to SIGSEGV"
+#call frame 1 is at line 29
+gdb_test "bt" [multi_line "\\s*\\#0\\s+\[^\r\]*MyClass::call\[^\r\]*${srcfile}:26" \
+			  "\\s*\\#1\\s+0x\[^\r\]*intermediate\[^\r\]*${srcfile}:29" \
+			  ".*"] \
+	      "at call"

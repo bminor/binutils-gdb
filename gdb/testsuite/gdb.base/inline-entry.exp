@@ -1,0 +1,43 @@
+# Copyright 2024 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+standard_testfile .c
+
+if { [test_compiler_info gcc*] && ![supports_statement_frontiers] } {
+    untested "this test needs gcc with statement frontiers"
+    return -1
+}
+
+global srcfile testfile
+
+set options {debug nowarnings optimize=-O2}
+if { [supports_statement_frontiers] } {
+    lappend options additional_flags=-gstatement-frontiers
+}
+
+if { [prepare_for_testing "failed to prepare" $binfile \
+      $srcfile $options] } {
+    return -1
+}
+
+if ![runto_main] {
+    return
+}
+
+gdb_test "break bar" ".*Breakpoint 2 at .*" "break at bar"
+gdb_test "break foo" ".*Breakpoint 3 at .*" "break at foo"
+gdb_test "continue" ".*Breakpoint .* bar .*" "continue to bar"
+gdb_test "continue" ".*Breakpoint .* foo .*" "continue to foo"
+gdb_test "continue" ".* exited .*" "continue to exit"
