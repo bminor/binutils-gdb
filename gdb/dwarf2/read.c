@@ -10688,6 +10688,17 @@ read_variable (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
+/* Return true if an empty range associated with an entry of type TAG in
+   CU should be "fixed", that is, converted to a single byte, non-empty
+   range.  */
+
+static bool
+dwarf_fixup_empty_range (struct dwarf2_cu *cu, dwarf_tag tag)
+{
+  return (tag == DW_TAG_inlined_subroutine
+	  && producer_is_gcc (cu->producer, nullptr, nullptr));
+}
+
 /* Call CALLBACK from DW_AT_ranges attribute value OFFSET
    reading .debug_rnglists.
    Callback's type should be:
@@ -10850,7 +10861,12 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 
       /* Empty range entries have no effect.  */
       if (range_beginning == range_end)
-	continue;
+	{
+	  if (dwarf_fixup_empty_range (cu, tag))
+	    range_end = (unrelocated_addr) ((CORE_ADDR) range_end + 1);
+	  else
+	    continue;
+	}
 
       /* Only DW_RLE_offset_pair needs the base address added.  */
       if (rlet == DW_RLE_offset_pair)
@@ -10972,7 +10988,12 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
 
       /* Empty range entries have no effect.  */
       if (range_beginning == range_end)
-	continue;
+	{
+	  if (dwarf_fixup_empty_range (cu, tag))
+	    range_end = (unrelocated_addr) ((CORE_ADDR) range_end + 1);
+	  else
+	    continue;
+	}
 
       range_beginning = (unrelocated_addr) ((CORE_ADDR) range_beginning
 					    + (CORE_ADDR) *base);
@@ -11195,9 +11216,24 @@ dwarf2_get_pc_bounds (struct die_info *die, unrelocated_addr *lowpc,
   if (ret == PC_BOUNDS_NOT_PRESENT || ret == PC_BOUNDS_INVALID)
     return ret;
 
-  /* partial_die_info::read has also the strict LOW < HIGH requirement.  */
+  /* These LOW and HIGH values will be used to create a block.  A block's
+     high address is the first address after the block's address range, so
+     if 'high <= low' then the block has no code associated with it.  */
   if (high <= low)
-    return PC_BOUNDS_INVALID;
+    {
+      /* In some cases though, when the blocks LOW / HIGH were defined with
+	 the DW_AT_low_pc and DW_AT_high_pc, we see some compilers create
+	 an empty block when we can provide a better debug experience by
+	 having a non-empty block.  We do this by "fixing" the block to be
+	 a single byte in length.  See dwarf_fixup_empty_range for when
+	 this fixup is performed.  */
+      if (high == low
+	  && ret == PC_BOUNDS_HIGH_LOW
+	  && dwarf_fixup_empty_range (cu, die->tag))
+	high = (unrelocated_addr) (((ULONGEST) low) + 1);
+      else
+	return PC_BOUNDS_INVALID;
+    }
 
   /* When using the GNU linker, .gnu.linkonce. sections are used to
      eliminate duplicate copies of functions and vtables and such.
@@ -11465,7 +11501,31 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 
 	  CORE_ADDR low = per_objfile->relocate (unrel_low);
 	  CORE_ADDR high = per_objfile->relocate (unrel_high);
-	  cu->get_builder ()->record_block_range (block, low, high - 1);
+
+	  /* Blocks where 'high < low' should be rejected earlier in the
+	     process, e.g. see dwarf2_get_pc_bounds.  */
+	  gdb_assert (high >= low);
+
+	  /* The value of HIGH is the first address past the end, but
+	     GDB stores ranges with the high value as last inclusive
+	     address, so in most cases we need to decrement HIGH here.
+
+	     Blocks where 'high == low' represent an empty block (i.e. a
+	     block with no associated code).
+
+	     When 'high == low' and dwarf_fixup_empty_range returns true we
+	     "fix" the empty range into a single byte range, which we can
+	     do by leaving HIGH untouched.  Otherwise we decrement HIGH,
+	     which might result in 'high < low'.  */
+	  if (high > low || !dwarf_fixup_empty_range (cu, die->tag))
+	    high -= 1;
+
+	  /* If the above decrement resulted in 'high < low' then this
+	     represents an empty range.  There's little point storing this
+	     in GDB's internal structures, it's just more to search
+	     through, and it will never match any address.  */
+	  if (high >= low)
+	    cu->get_builder ()->record_block_range (block, low, high);
 	}
     }
 

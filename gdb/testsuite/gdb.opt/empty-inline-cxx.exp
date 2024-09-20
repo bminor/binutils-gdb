@@ -1,0 +1,96 @@
+# Copyright 2024 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+standard_testfile .cc
+
+require {expr ![test_compiler_info gcc* c++] \
+	     || [supports_statement_frontiers] }
+
+set options {c++ debug optimize=-Og}
+lappend_include_file options $srcdir/lib/attributes.h
+if {[supports_statement_frontiers]} {
+    lappend options additional_flags=-gstatement-frontiers
+}
+
+# Some line numbers we need for the test.
+set get_myclass_line [gdb_get_line_number "MyClass* get_myclass ()"]
+set call_get_line [gdb_get_line_number "p.get_myclass ()"]
+set final_bp_line [gdb_get_line_number "Final breakpoint"]
+
+# Build the test executable adding "-OPT_LEVEL" to the compilation
+# flags.  The break on the small function which is likely to have been
+# inlined, check we stop where we expect, and that the backtrace looks
+# correct.
+#
+# Then return from the inline function and call to another function,
+# check the backtrace from this second function also looks good,
+# specifically, we're checking that the backtrace doesn't incorrectly
+# place frame #1 on the line for the inline function.
+proc run_test { opt_level } {
+
+    set opts $::options
+    lappend opts "additional_flags=-${opt_level}"
+
+    if { [prepare_for_testing "failed to prepare" "$::testfile-$opt_level" \
+	      $::srcfile $opts] } {
+	return
+    }
+
+    if { ![runto_main] } {
+	return
+    }
+
+    gdb_test "bt" "#0\\s+main \\(\\) \[^\r\n\]+/$::srcfile:$::decimal" \
+	"backtrace in main"
+
+    # Break at the empty inline function ptr::get_myclass.
+    gdb_breakpoint get_myclass
+    gdb_continue_to_breakpoint "continue to get_myclass" \
+	[multi_line \
+	     ".*/$::srcfile:$::get_myclass_line" \
+	     "$::get_myclass_line\\s+MyClass\\* get_myclass \\(\\) \[^\r\n\]+"]
+
+    # Backtrace.
+    gdb_test "bt" \
+	[multi_line \
+	     "#0\\s+ptr::get_myclass\[^\r\n\]+/$::srcfile:$::get_myclass_line" \
+	     "#1\\s+intermediate\[^\r\n\]+/$::srcfile:$::call_get_line" \
+	     "#2\\s+\[^\r\n\]+main \\(\\) \[^\r\n\]+/$::srcfile:$::decimal"] \
+	"at get_myclass"
+
+    # Print a class member variable, this should be in scope, but is often
+    # reported as optimised out.
+    gdb_test "p t" \
+	"(?:\\\$1 = \\(MyClass \\*\\) $::hex|value has been optimized out)" \
+	"print ptr::t"
+
+    gdb_breakpoint $::srcfile:$::final_bp_line
+    gdb_continue_to_breakpoint "continue to final breakpoint"
+
+    # Backtrace.  Check frame #1 looks right.  Bug gdb/25987 would report
+    # frame #1 as being the correct function, but would report the line for
+    # ptr::get_myclass(), which is not correct.
+    setup_xfail *-*-* gdb/25987
+    gdb_test "bt" \
+	[multi_line \
+	     "#0\\s+MyClass::call\[^\r\n\]+/$::srcfile:$::final_bp_line" \
+	     "#1\\s+\[^\r\n\]+ intermediate\[^\r\n\]+/$::srcfile:$::call_get_line" \
+	     "#2\\s+\[^\r\n\]+ main \\(\\) \[^\r\n\]+/$::srcfile:$::decimal"] \
+	"at call"
+}
+
+foreach_with_prefix opt_level { Og O0 O1 O2 } {
+    run_test ${opt_level}
+}

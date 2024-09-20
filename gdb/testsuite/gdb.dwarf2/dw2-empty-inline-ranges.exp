@@ -1,0 +1,260 @@
+# Copyright 2024 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Define an inline function `foo` within the function `main`.  The
+# function `foo` uses DW_AT_ranges to define its ranges.  One of the
+# sub-ranges for foo will be empty.
+#
+# An empty sub-rnage should indicate that there is no code associated
+# with `foo` at that address, however, with gcc versions at least
+# between 8.x and 14.x (latest at the time of writing this comment),
+# it is observed that when these empty sub-ranges are created for an
+# inline function, if GDB treats the sub-range as non-empty, and stops
+# at that location, then this generally gives a better debug
+# experience.  It is often still possible to read local variables at
+# that address.
+#
+# This function defines an inline function, places a breakpoint on its
+# entry-pc, and then runs and expects GDB to stop, and report the stop
+# as being inside the inline function.
+#
+# We then check that the next outer frame is `main` as expected, and
+# that the block for `foo` has the expected sub-ranges.
+#
+# We compile a variety of different configurations, broadly there are
+# two variables, the location of the empty sub-range, and whether the
+# entry-pc points at the empty sub-range or not.
+#
+# The the empty sub-range location, the empty sub-range can be the
+# sub-range at the lowest address, highest address, or can be
+# somewhere between a blocks low and high addresses.
+
+load_lib dwarf.exp
+
+require dwarf2_support
+
+standard_testfile .c .S
+
+# Lines we reference in the generated DWARF.
+set main_decl_line [gdb_get_line_number "main decl line"]
+set foo_call_line [gdb_get_line_number "foo call line"]
+
+get_func_info main
+
+# Compile the source file and load the executable into GDB so we can
+# extract some addresses needed for creating the DWARF.
+if { [prepare_for_testing "failed to prepare" ${testfile} \
+	  [list ${srcfile}]] } {
+    return -1
+}
+
+if {![runto_main]} {
+    return -1
+}
+
+# Some addresses that we need when generating the DWARF.
+for { set i 0 } { $i < 9 } { incr i } {
+    set main_$i [get_hexadecimal_valueof "&main_$i" "UNKNOWN" \
+		     "get address for main_$i"]
+}
+
+# Create the DWARF assembler file into ASM_FILE.  Using DWARF_VERSION
+# to define which style of ranges to create.  FUNC_RANGES is a list of
+# 6 entries, each of which is an address, used to create the ranges
+# for the inline function DIE.  The ENTRY_PC is also an address and is
+# used for the DW_AT_entry_pc of the inlined function.
+proc write_asm_file { asm_file dwarf_version func_ranges entry_pc } {
+    Dwarf::assemble $asm_file {
+	upvar entry_label entry_label
+	upvar dwarf_version dwarf_version
+	upvar func_ranges func_ranges
+	upvar entry_pc entry_pc
+
+	declare_labels lines_table inline_func ranges_label
+
+	cu { version $dwarf_version } {
+	    compile_unit {
+		{producer "GNU C 14.1.0"}
+		{language @DW_LANG_C}
+		{name $::srcfile}
+		{comp_dir /tmp}
+		{low_pc 0 addr}
+		{DW_AT_stmt_list $lines_table DW_FORM_sec_offset}
+	    } {
+		inline_func: subprogram {
+		    {name foo}
+		    {inline @DW_INL_declared_inlined}
+		}
+		subprogram {
+		    {name main}
+		    {decl_file 1 data1}
+		    {decl_line $::main_decl_line data1}
+		    {decl_column 1 data1}
+		    {low_pc $::main_start addr}
+		    {high_pc $::main_len data4}
+		    {external 1 flag}
+		} {
+		    inlined_subroutine {
+			{abstract_origin %$inline_func}
+			{call_file 1 data1}
+			{call_line $::foo_call_line data1}
+			{entry_pc $entry_pc addr}
+			{ranges $ranges_label DW_FORM_sec_offset}
+		    }
+		}
+	    }
+	}
+
+	lines {version 2} lines_table {
+	    include_dir "$::srcdir/$::subdir"
+	    file_name "$::srcfile" 1
+	}
+
+	if { $dwarf_version == 5 } {
+	    rnglists {} {
+		table {} {
+		    ranges_label: list_ {
+			start_end [lindex $func_ranges 0] [lindex $func_ranges 1]
+			start_end [lindex $func_ranges 2] [lindex $func_ranges 3]
+			start_end [lindex $func_ranges 4] [lindex $func_ranges 5]
+		    }
+		}
+	    }
+	} else {
+	    ranges { } {
+		ranges_label: sequence {
+		    range [lindex $func_ranges 0] [lindex $func_ranges 1]
+		    range [lindex $func_ranges 2] [lindex $func_ranges 3]
+		    range [lindex $func_ranges 4] [lindex $func_ranges 5]
+		}
+	    }
+	}
+    }
+}
+
+# Gobal used to give each generated binary a unique name.
+set test_id 0
+
+proc run_test { dwarf_version empty_loc entry_pc_type } {
+    incr ::test_id
+
+    set this_testfile $::testfile-$::test_id
+
+    set asm_file [standard_output_file $this_testfile.S]
+
+    if { $empty_loc eq "start" } {
+	set ranges [list \
+			$::main_1 $::main_1 \
+			$::main_3 $::main_4 \
+			$::main_6 $::main_7]
+	set entry_pc_choices [list $::main_1 $::main_3]
+    } elseif { $empty_loc eq "middle" } {
+	set ranges [list \
+			$::main_1 $::main_2 \
+			$::main_4 $::main_4 \
+			$::main_6 $::main_7]
+	set entry_pc_choices [list $::main_4 $::main_1]
+    } elseif { $empty_loc eq "end" } {
+	set ranges [list \
+			$::main_1 $::main_2 \
+			$::main_4 $::main_5 \
+			$::main_7 $::main_7]
+	set entry_pc_choices [list $::main_7 $::main_1]
+    } else {
+	error "unknown location for empty range '$empty_loc'"
+    }
+
+    if { $entry_pc_type eq "empty" } {
+	set entry_pc [lindex $entry_pc_choices 0]
+    } elseif { $entry_pc_type eq "non_empty" } {
+	set entry_pc [lindex $entry_pc_choices 1]
+    } else {
+	error "unknown entry-pc type '$entry_pc_type'"
+    }
+
+    write_asm_file $asm_file $dwarf_version $ranges $entry_pc
+
+    if {[prepare_for_testing "failed to prepare" $this_testfile \
+	     [list $::srcfile $asm_file] {nodebug}]} {
+	return
+    }
+
+    if {![runto_main]} {
+	return
+    }
+
+    # Continue until we stop in 'foo'.
+    gdb_breakpoint foo
+    gdb_test "continue" \
+	"Breakpoint $::decimal, $::hex in foo \\(\\)" \
+	"continue to b/p in foo"
+
+    # Check we stopped at the entry-pc.
+    set pc [get_hexadecimal_valueof "\$pc" "*UNKNOWN*" \
+		"get \$pc at breakpoint"]
+    gdb_assert { $pc == $entry_pc } "stopped at entry-pc"
+
+    # The block's expected overall low/high addresses.
+    set block_start [lindex $ranges 0]
+    set block_end [lindex $ranges 5]
+
+    # Setup variables r{0,1,2}s, r{0,1,2}e, to represent ranges start
+    # and end addresses.  These are extracted from the RANGES
+    # variable.  However, RANGES includes the empty ranges, so spot
+    # the empty ranges and update the end address as GDB does.
+    #
+    # Also, if the empty range is at the end of the block, then the
+    # block's overall end address also needs adjusting.
+    for { set i 0 } { $i < 3 } { incr i } {
+	set start [lindex $ranges [expr $i * 2]]
+	set end [lindex $ranges [expr $i * 2 + 1]]
+	if { $start == $end } {
+	    set end [format "0x%x" [expr $end + 1]]
+	}
+	if { $block_end == $start } {
+	    set block_end $end
+	}
+	set r${i}s $start
+	set r${i}e $end
+    }
+
+    # Check the block 'foo' has the expected ranges.
+    gdb_test "maintenance info blocks" \
+	[multi_line \
+	     "\\\[\\(block \\*\\) $::hex\\\] $block_start\\.\\.$block_end" \
+	     "  entry pc: $entry_pc" \
+	     "  inline function: foo" \
+	     "  symbol count: $::decimal" \
+	     "  address ranges:" \
+	     "    $r0s\\.\\.$r0e" \
+	     "    $r1s\\.\\.$r1e" \
+	     "    $r2s\\.\\.$r2e"] \
+	"block for foo has some content"
+
+    # Check the outer frame is 'main' as expected.
+    gdb_test "frame 1" \
+	[multi_line \
+	     "#1  main \\(\\) at \[^\r\n\]+/$::srcfile:$::foo_call_line" \
+	     "$::foo_call_line\\s+\[^\r\n\]+/\\* foo call line \\*/"] \
+	"frame 1 is for main"
+}
+
+foreach_with_prefix dwarf_version { 4 5 } {
+    foreach_with_prefix empty_loc { start middle end } {
+	foreach_with_prefix entry_pc_type { empty non_empty } {
+	    run_test $dwarf_version $empty_loc $entry_pc_type
+	}
+    }
+}

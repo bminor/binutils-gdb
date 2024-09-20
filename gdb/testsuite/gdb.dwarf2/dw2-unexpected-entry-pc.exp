@@ -56,6 +56,9 @@ foreach foo {foo_1 foo_2 foo_3 foo_4 foo_5 foo_6} {
 		  "get address for $foo label"]
 }
 
+set foo_3_end [get_hexadecimal_valueof "&foo_3 + 1" "UNKNOWN" \
+		   "get address for 'foo_3 + 1'"]
+
 # Some line numbers needed in the generated DWARF.
 set foo_decl_line [gdb_get_line_number "foo decl line"]
 set bar_call_line [gdb_get_line_number "bar call line"]
@@ -85,24 +88,40 @@ if [is_ilp32_target] {
 # generated which covers some parts of the inlined function.  This
 # makes most sense when being tested with the 'foo_6' label, as that
 # label is all about handling the end of the inline function case.
+#
+# The PRODUCER is the string used to control the DW_AT_producer string
+# in the CU.  When PRODUCER is 'gcc' then a string is used that
+# represents the gcc compiler.  When PRODUCER is 'other' then a string
+# that will not be interpreted as gcc is used.  The gcc compiler will
+# sometimes generate empty ranges for inline functions (from at least
+# gcc 8.x through to the currently latest release 14.x), and so GDB
+# has code in place to convert empty ranges to non-empty.  This fix is
+# not applied to other compilers at this time.
 
-proc run_test { entry_label dwarf_version with_line_table } {
-    set dw_testname "${::testfile}-${dwarf_version}-${entry_label}"
+proc run_test { producer entry_label dwarf_version with_line_table } {
+    set dw_testname "${::testfile}-${producer}-${dwarf_version}-${entry_label}"
 
     if { $with_line_table } {
 	set dw_testname ${dw_testname}-lt
+    }
+
+    if { $producer eq "other" } {
+	set producer_str "ACME C 1.0.0"
+    } else {
+	set producer_str "GNU C 10.0.0"
     }
 
     set asm_file [standard_output_file "${dw_testname}.S"]
     Dwarf::assemble $asm_file {
 	upvar dwarf_version dwarf_version
 	upvar entry_label entry_label
+	upvar producer_str producer_str
 
 	declare_labels lines_table inline_func ranges_label
 
 	cu { version $dwarf_version } {
 	    compile_unit {
-		{producer "gcc"}
+		{producer $producer_str}
 		{language @DW_LANG_C}
 		{name $::srcfile}
 		{comp_dir /tmp}
@@ -157,6 +176,10 @@ proc run_test { entry_label dwarf_version with_line_table } {
 		    line 2
 		    DW_LNS_copy
 
+		    DW_LNE_set_address foo_3
+		    line 3
+		    DW_LNS_copy
+
 		    DW_LNE_set_address foo_6
 		    line 10
 		    DW_LNS_copy
@@ -206,6 +229,16 @@ proc run_test { entry_label dwarf_version with_line_table } {
 	return false
     }
 
+    if { $producer eq "gcc" } {
+	set entry_pc $::foo_3
+	set empty_range_re "\r\n    $::foo_3\\.\\.$::foo_3_end"
+	set line_num 3
+    } else {
+	set entry_pc $::foo_1
+	set empty_range_re ""
+	set line_num 1
+    }
+
     # Place a breakpoint on `bar` and run to the breakpoint.  Use
     # gdb_test as we want full pattern matching against the stop
     # location.
@@ -215,8 +248,8 @@ proc run_test { entry_label dwarf_version with_line_table } {
     if { $with_line_table } {
 	set re \
 	    [multi_line \
-		 "Breakpoint $::decimal, bar \\(\\) at \[^\r\n\]+/$::srcfile:1" \
-		 "1\\s+\[^\r\n\]+"]
+		 "Breakpoint $::decimal, bar \\(\\) at \[^\r\n\]+/$::srcfile:$line_num" \
+		 "$line_num\\s+\[^\r\n\]+"]
     } else {
 	set re "Breakpoint $::decimal, $::hex in bar \\(\\)"
     }
@@ -230,21 +263,23 @@ proc run_test { entry_label dwarf_version with_line_table } {
     gdb_test "maint info blocks" \
 	[multi_line \
 	     "\\\[\\(block \\*\\) $::hex\\\] $::foo_1\\.\\.$::foo_6" \
-	     "  entry pc: $::foo_1" \
+	     "  entry pc: $entry_pc" \
 	     "  inline function: bar" \
 	     "  symbol count: $::decimal" \
-	     "  address ranges:" \
+	     "  address ranges:$empty_range_re" \
 	     "    $::foo_1\\.\\.$::foo_2" \
 	     "    $::foo_5\\.\\.$::foo_6"]
 }
 
-foreach_with_prefix dwarf_version { 4 5 } {
-    # Test various labels without any line table present.
-    foreach_with_prefix entry_label { foo_3 foo_4 foo_2 foo_6 } {
-	run_test $entry_label $dwarf_version false
-    }
+foreach_with_prefix producer { other gcc } {
+    foreach_with_prefix dwarf_version { 4 5 } {
+	# Test various labels without any line table present.
+	foreach_with_prefix entry_label { foo_3 foo_4 foo_2 foo_6 } {
+	    run_test $producer $entry_label $dwarf_version false
+	}
 
-    # Now test what happens if we use the end address of the block,
-    # but also supply a line table.  Does GDB do anything different?
-    run_test foo_6 $dwarf_version true
+	# Now test what happens if we use the end address of the block,
+	# but also supply a line table.  Does GDB do anything different?
+	run_test $producer foo_6 $dwarf_version true
+    }
 }

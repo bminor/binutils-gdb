@@ -1,0 +1,128 @@
+# Copyright 2024 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Define an inline function `foo` within the function `main`.  The
+# function `foo` uses DW_AT_low_pc and DW_AT_high_pc to define its
+# range, except that DW_AT_high_pc is the constant 0.
+#
+# This should indicate that there is no code associated with `foo`,
+# however, with gcc versions at least between 8.x and 14.x (latest at
+# the time of writing this comment), it is observed that when these
+# empty inline functions are created, if GDB stops at the address
+# given in DW_AT_low_pc, then locals associated with the inline
+# function can usually be read.
+#
+# At the very least, stopping at the location of the inline function
+# means that the user can place a breakpoint on the inline function
+# and have GDB stop in a suitable location, that alone is helpful.
+#
+# This test defines an inline function, places a breakpoint, and then
+# runs and expects GDB to stop, and report the stop as being inside
+# the inline function.
+#
+# We then check that the next outer frame is `main` as expected, and
+# that the block for `foo` has been extended to a single byte, which
+# is how GDB gives the previously empty block some range.
+
+load_lib dwarf.exp
+
+require dwarf2_support
+
+standard_testfile .c .S
+
+# Lines we reference in the generated DWARF.
+set main_decl_line [gdb_get_line_number "main decl line"]
+set foo_call_line [gdb_get_line_number "foo call line"]
+
+get_func_info main
+
+set asm_file [standard_output_file $srcfile2]
+Dwarf::assemble $asm_file {
+    upvar entry_label entry_label
+
+    declare_labels lines_table inline_func
+
+    cu { } {
+	compile_unit {
+	    {producer "GNU C 14.1.0"}
+	    {language @DW_LANG_C}
+	    {name $::srcfile}
+	    {comp_dir /tmp}
+	    {low_pc 0 addr}
+	    {DW_AT_stmt_list $lines_table DW_FORM_sec_offset}
+	} {
+	    inline_func: subprogram {
+		{name foo}
+		{inline @DW_INL_declared_inlined}
+	    }
+	    subprogram {
+		{name main}
+		{decl_file 1 data1}
+		{decl_line $::main_decl_line data1}
+		{decl_column 1 data1}
+		{low_pc $::main_start addr}
+		{high_pc $::main_len data4}
+		{external 1 flag}
+	    } {
+		inlined_subroutine {
+		    {abstract_origin %$inline_func}
+		    {call_file 1 data1}
+		    {call_line $::foo_call_line data1}
+		    {low_pc main_1 addr}
+		    {high_pc 0 data4}
+		}
+	    }
+	}
+    }
+
+    lines {version 2} lines_table {
+	include_dir "$::srcdir/$::subdir"
+	file_name "$::srcfile" 1
+    }
+}
+
+if {[prepare_for_testing "failed to prepare" $testfile \
+	 [list $srcfile $asm_file] {nodebug}]} {
+    return
+}
+
+if {![runto_main]} {
+    return
+}
+
+gdb_breakpoint foo
+gdb_test "continue" \
+    "Breakpoint $decimal, $hex in foo \\(\\)" \
+    "continue to b/p in foo"
+
+set foo_start [get_hexadecimal_valueof "&main_1" "*UNKNOWN*" \
+		   "get address of foo start"]
+set foo_end [get_hexadecimal_valueof "&main_1 + 1" "*UNKNOWN*" \
+		   "get address of foo end"]
+
+gdb_test "maintenance info blocks" \
+    [multi_line \
+	 "\\\[\\(block \\*\\) $hex\\\] $foo_start\\.\\.$foo_end" \
+	 "  entry pc: $foo_start" \
+	 "  inline function: foo" \
+	 "  symbol count: $decimal" \
+	 "  is contiguous"] \
+    "block for foo has some content"
+
+gdb_test "frame 1" \
+    [multi_line \
+	 "#1  main \\(\\) at \[^\r\n\]+/$srcfile:$foo_call_line" \
+	 "$foo_call_line\\s+\[^\r\n\]+/\\* foo call line \\*/"] \
+    "frame 1 is for main"
