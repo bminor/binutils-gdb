@@ -541,6 +541,8 @@ run_dump_test "tlsie5"
 run_dump_test "tlsdesc3"
 run_dump_test "tlsdesc4"
 run_dump_test "tlsdesc5"
+run_dump_test "pr32191"
+run_dump_test "pr32191-x32"
 
 if { ![skip_sframe_tests] } {
     run_dump_test "sframe-simple-1"

@@ -514,6 +514,7 @@ run_dump_test "pr28870"
 run_dump_test "pr28894"
 run_dump_test "pr30787"
 run_dump_test "pr31047"
+run_dump_test "pr32191"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]

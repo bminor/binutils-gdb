@@ -2047,13 +2047,25 @@ lang_insert_orphan (asection *s,
 		 place orphan note section after non-note sections.  */
 
 	      first_orphan_note = NULL;
+
+	      /* NB: When --rosegment is used, the .note.gnu.build-id
+		 section is placed before text sections.  Ignore the
+		 .note.gnu.build-id section if -z separate-code and
+		 --rosegment are used together to avoid putting any
+		 note sections between the .note.gnu.build-id section
+		 and text sections in the same PT_LOAD segment.  */
+	      bool ignore_build_id = (link_info.separate_code
+				      && link_info.one_rosegment);
+
 	      for (sec = link_info.output_bfd->sections;
 		   (sec != NULL
 		    && !bfd_is_abs_section (sec));
 		   sec = sec->next)
 		if (sec != snew
 		    && elf_section_type (sec) == SHT_NOTE
-		    && (sec->flags & SEC_LOAD) != 0)
+		    && (sec->flags & SEC_LOAD) != 0
+		    && (!ignore_build_id
+			|| strcmp (sec->name, ".note.gnu.build-id") != 0))
 		  {
 		    if (!first_orphan_note)
 		      first_orphan_note = sec;

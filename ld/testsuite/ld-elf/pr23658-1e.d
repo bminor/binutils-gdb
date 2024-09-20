@@ -3,10 +3,12 @@
 #source: pr23658-1c.s
 #source: pr23658-1d.s
 #source: start.s
-#ld: --build-id --no-rosegment
+#ld: --build-id -z separate-code --rosegment
 #readelf: -l --wide
 # Since generic linker targets don't place SHT_NOTE sections as orphan,
-# SHT_NOTE sections aren't grouped nor sorted.
+# SHT_NOTE sections aren't grouped nor sorted.  .note.gnu.build-id is
+# placed before text sections and there should no other note sections
+# between .note.gnu.build-id and text sections.
 #xfail: [uses_genelf]
 #xfail: m68hc12-*
 # The following targets don't support --build-id.
@@ -15,6 +17,7 @@
 #xfail: pru-*
 
 #...
+ +[0-9]+ +\.note.gnu.build-id +
  +[0-9]+ +\.note\.4 \.note\.1 +
- +[0-9]+ +\.note.gnu.build-id \.note\.2 .note\.3 +
+ +[0-9]+ +\.note\.2 \.note\.3 +
 #pass
