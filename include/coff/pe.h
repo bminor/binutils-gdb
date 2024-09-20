@@ -338,6 +338,7 @@ typedef struct
 #define IMPORT_NAME		1
 #define IMPORT_NAME_NOPREFIX	2
 #define IMPORT_NAME_UNDECORATE	3
+#define IMPORT_NAME_EXPORTAS	4
 
 /* Weak external characteristics.  */
 #define IMAGE_WEAK_EXTERN_SEARCH_NOLIBRARY	1

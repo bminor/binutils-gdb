@@ -409,7 +409,7 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
       There will be two symbols for the imported value, one the symbol name
       and one with _imp__ prefixed.  Allowing for the terminating nul's this
-      is strlen (symbol_name) * 2 + 8 + 21 + strlen (source_dll).
+      is strlen (import_name) * 2 + 8 + 21 + strlen (source_dll).
 
       The strings in the string table must start STRING__SIZE_SIZE bytes into
       the table in order to for the string lookup code in coffgen/coffcode to
@@ -425,7 +425,7 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define SIZEOF_ILF_EXT_SYMS	 (NUM_ILF_SYMS * sizeof (* vars.esym_table))
 #define SIZEOF_ILF_RELOCS	 (NUM_ILF_RELOCS * sizeof (* vars.reltab))
 #define SIZEOF_ILF_INT_RELOCS	 (NUM_ILF_RELOCS * sizeof (* vars.int_reltab))
-#define SIZEOF_ILF_STRINGS	 (strlen (symbol_name) * 2 + 8 \
+#define SIZEOF_ILF_STRINGS	 (strlen (import_name) * 2 + 8 \
 					+ 21 + strlen (source_dll) \
 					+ NUM_ILF_SECTIONS * 9 \
 					+ STRING_SIZE_SIZE)
@@ -440,7 +440,7 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define SIZEOF_IDATA5		(1 * 4)
 #endif
 
-#define SIZEOF_IDATA6		(2 + strlen (symbol_name) + 1 + 1)
+#define SIZEOF_IDATA6		(2 + strlen (import_name) + 1 + 1)
 #define SIZEOF_IDATA7		(strlen (source_dll) + 1 + 1)
 #define SIZEOF_ILF_SECTIONS	(NUM_ILF_SECTIONS * sizeof (struct coff_section_tdata))
 
@@ -792,7 +792,8 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 		    char *	    symbol_name,
 		    char *	    source_dll,
 		    unsigned int    ordinal,
-		    unsigned int    types)
+		    unsigned int    types,
+		    char *          import_name)
 {
   bfd_byte *		   ptr;
   pe_ILF_vars		   vars;
@@ -834,6 +835,17 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
     case IMPORT_NAME:
     case IMPORT_NAME_NOPREFIX:
     case IMPORT_NAME_UNDECORATE:
+      import_name = symbol_name;
+      break;
+
+    case IMPORT_NAME_EXPORTAS:
+      if (!import_name || !import_name[0])
+	{
+	  _bfd_error_handler (_("%pB: missing import name for "
+				"IMPORT_NAME_EXPORTAS for %s"),
+			      abfd, symbol_name);
+	  return false;
+	}
       break;
 
     default:
@@ -955,7 +967,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 	goto error_return;
 
       /* If necessary, trim the import symbol name.  */
-      symbol = symbol_name;
+      symbol = import_name;
 
       /* As used by MS compiler, '_', '@', and '?' are alternative
 	 forms of USER_LABEL_PREFIX, with '?' for c++ mangled names,
@@ -964,7 +976,8 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 	 IMPORT_NAME_NOPREFIX and IMPORT_NAME_UNDECORATE as per the
 	 PE COFF 6.0 spec (section 8.3, Import Name Type).  */
 
-      if (import_name_type != IMPORT_NAME)
+      if (import_name_type != IMPORT_NAME &&
+	  import_name_type != IMPORT_NAME_EXPORTAS)
 	{
 	  char c = symbol[0];
 
@@ -1179,6 +1192,7 @@ pe_ILF_object_p (bfd * abfd)
   bfd_byte *	  ptr;
   char *	  symbol_name;
   char *	  source_dll;
+  char *	  import_name;
   unsigned int	  machine;
   bfd_size_type	  size;
   unsigned int	  ordinal;
@@ -1340,9 +1354,24 @@ pe_ILF_object_p (bfd * abfd)
       return NULL;
     }
 
+  /* An ILF file may contain a third string, after source_dll; this is used
+   * for IMPORT_NAME_EXPORTAS. We know from above that the whole block of
+   * data is null terminated, ptr[size-1]==0, but we don't know how many
+   * individual null terminated strings we have in there.
+   *
+   * First find the end of source_dll. */
+  import_name = source_dll + strlen (source_dll) + 1;
+  if ((bfd_byte *) import_name >= ptr + size)
+    {
+      /* If this points at the end of the ptr+size block, we only had two
+       * strings. */
+      import_name = NULL;
+    }
+
   /* Now construct the bfd.  */
   if (! pe_ILF_build_a_bfd (abfd, magic, symbol_name,
-			    source_dll, ordinal, types))
+			    source_dll, ordinal, types,
+			    import_name))
     {
       bfd_release (abfd, ptr);
       return NULL;
