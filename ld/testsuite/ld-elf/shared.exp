@@ -1410,7 +1410,7 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Build pr22393-2a.so" \
-	    "-shared -Wl,-z,separate-code" \
+	    "-shared -Wl,-z,separate-code,--no-rosegment" \
 	    "-fPIC" \
 	    {pr22393-2a.c} \
 	    {{readelf -lW pr22393-2a.rd} \
@@ -1419,7 +1419,7 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Build pr22393-2a-now.so" \
-	    "-shared -Wl,-z,separate-code,-z,now" \
+	    "-shared -Wl,-z,separate-code,-z,now,--no-rosegment" \
 	    "-fPIC" \
 	    {pr22393-2a.c} \
 	    {{readelf -lW pr22393-2a.rd} \
@@ -1428,7 +1428,7 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Build pr22393-2" \
-	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a.so" \
+	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,--no-rosegment,--no-as-needed tmpdir/pr22393-2a.so" \
 	    "$NOPIE_CFLAGS" \
 	    {pr22393-2b.c} \
 	    {{readelf -lW pr22393-2a.rd} \
@@ -1437,7 +1437,7 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Build pr22393-2 (PIE)" \
-	    "-pie -Wl,-z,separate-code,--no-as-needed tmpdir/pr22393-2a-now.so" \
+	    "-pie -Wl,-z,separate-code,--no-rosegment,--no-as-needed tmpdir/pr22393-2a-now.so" \
 	    "-fPIE" \
 	    {pr22393-2b.c} \
 	    {{readelf -lW pr22393-2a.rd} \
@@ -1446,7 +1446,7 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Build pr22393-2 (static)" \
-	    "-static -Wl,-z,separate-code" \
+	    "-static -Wl,-z,separate-code,--no-rosegment" \
 	    "" \
 	    {pr22393-2a.c pr22393-2b.c} \
 	    {{readelf -lW pr22393-2a.rd} \

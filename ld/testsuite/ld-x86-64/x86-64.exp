@@ -1219,7 +1219,7 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Build pr22393-3a.so" \
-	    "-shared -Wl,-z,separate-code,-z,max-page-size=0x1000" \
+	    "-shared -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-rosegment" \
 	    "-fPIC -Wa,-mx86-used-note=yes" \
 	    {pr22393-3a.c} \
 	    {{readelf -lW pr22393-3a.rd} \
@@ -1228,7 +1228,7 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Build pr22393-3a-now.so" \
-	    "-shared -Wl,-z,separate-code,-z,now,-z,max-page-size=0x1000" \
+	    "-shared -Wl,-z,separate-code,-z,now,-z,max-page-size=0x1000,--no-rosegment" \
 	    "-fPIC -Wa,-mx86-used-note=yes" \
 	    {pr22393-3a.c} \
 	    {{readelf -lW pr22393-3a.rd} \
@@ -1237,7 +1237,7 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Build pr22393-3" \
-	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-as-needed tmpdir/pr22393-3a.so" \
+	    "$NOPIE_LDFLAGS -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-rosegment,--no-as-needed tmpdir/pr22393-3a.so" \
 	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
 	    {pr22393-3b.c} \
 	    {{readelf -lW pr22393-3a.rd} \
@@ -1246,7 +1246,7 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Build pr22393-3 (PIE)" \
-	    "-pie -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-as-needed tmpdir/pr22393-3a-now.so" \
+	    "-pie -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-rosegment,--no-as-needed tmpdir/pr22393-3a-now.so" \
 	    "-fPIE -Wa,-mx86-used-note=yes" \
 	    {pr22393-3b.c} \
 	    {{readelf -lW pr22393-3a.rd} \
@@ -1255,7 +1255,7 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Build pr22393-3 (static)" \
-	    "-static -Wl,-z,separate-code,-z,max-page-size=0x1000" \
+	    "-static -Wl,-z,separate-code,-z,max-page-size=0x1000,--no-rosegment" \
 	    "-Wa,-mx86-used-note=yes" \
 	    {pr22393-3a.c pr22393-3b.c} \
 	    {{readelf -lW pr22393-3a.rd} \
