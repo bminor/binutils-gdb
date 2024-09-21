@@ -24,7 +24,8 @@
 
 struct loongarch_ASEs_option LARCH_opts =
 {
-  .relax = 1
+  .relax = 1,
+  .thin_add_sub = 0
 };
 
 size_t

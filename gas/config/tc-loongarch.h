@@ -79,7 +79,8 @@ extern bool loongarch_frag_align_code (int, int);
    SEC_CODE, we generate 32/64_PCREL.  */
 #define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) \
   (!(LARCH_opts.thin_add_sub \
-     && (BFD_RELOC_32 || BFD_RELOC_64) \
+     && ((FIX)->fx_r_type == BFD_RELOC_32 \
+	 ||(FIX)->fx_r_type == BFD_RELOC_64) \
      && (!LARCH_opts.relax \
 	|| S_GET_VALUE (FIX->fx_subsy) \
 	   == FIX->fx_frag->fr_address + FIX->fx_where \
