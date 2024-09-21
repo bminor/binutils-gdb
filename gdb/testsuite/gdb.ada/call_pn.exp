@@ -35,7 +35,7 @@ if {![runto "foo.adb:$bp_location"]} {
 # related to PR25764 - "LOC_UNRESOLVED symbol missing from partial symtab".
 # Stabilize test results by ensuring that the xfail triggers for the "before"
 # print.
-gdb_test_no_output "maint expand-symtabs"
+gdb_test_no_output {maint expand-symtabs "\(pck\|foo\)\.adb"}
 
 # The xfail is for PR gcc/94469, which occurs with target board
 # unix/-flto/-O0/-flto-partition=none/-ffat-lto-objects and gcc-8 and later.
