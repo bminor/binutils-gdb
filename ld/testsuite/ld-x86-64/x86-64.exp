@@ -1929,6 +1929,14 @@ if { [isnative] && [check_compiler_available] } {
 	    "pr32189" \
 	    "pass.out" \
 	] \
+	[list \
+	    "Run plt3" \
+	    "$NOPIE_LDFLAGS -nostdlib -nostartfiles" \
+	    "" \
+	    { plt3.s } \
+	    "plt3" \
+	    "pass.out" \
+	] \
     ]
 
     # Run-time tests which require working ifunc attribute support.
