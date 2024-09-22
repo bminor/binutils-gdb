@@ -59,6 +59,7 @@ Disassembly of section \.text:
 .*[ 	]+R_X86_64_32[ 	]+xtrn
 .*[ 	]+R_X86_64_GOT64[ 	]+ptr
 .*[ 	]+R_X86_64_GOTOFF64[ 	]+Ldst
+.*[ 	]+R_X86_64_PLT32[ 	]+ptr
 Disassembly of section \.data:
 #...
 .*[ 	]+R_X86_64_64[ 	]+xtrn

@@ -229,6 +229,8 @@ bad	.long	xtrn@plt - .
 	.text
 	movabs	$ptr@GOT, %rax
 	movabs	$Ldst@GOTOFF, %rdx
+	movq	$ptr@PLT, %rax
+
 	.data
 ptr:
 	.quad 0

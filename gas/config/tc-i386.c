@@ -3806,6 +3806,11 @@ tc_i386_fix_adjustable (fixS *fixP)
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
+  /* Resolve PLT32 relocation against local symbol to section only for
+     PC-relative relocations.  */
+  if (fixP->fx_r_type == BFD_RELOC_386_PLT32
+      || fixP->fx_r_type == BFD_RELOC_X86_64_PLT32)
+    return fixP->fx_pcrel;
   return 1;
 }
 #endif
@@ -18322,8 +18327,12 @@ i386_validate_fix (fixS *fixp)
     {
       /* NB: Commit 292676c1 resolved PLT32 reloc aganst local symbol
 	 to section.  Since PLT32 relocation must be against symbols,
-	 turn such PLT32 relocation into PC32 relocation.  */
+	 turn such PLT32 relocation into PC32 relocation.  NB: We can
+	 turn PLT32 relocation into PC32 relocation only for PC-relative
+	 relocations since non-PC-relative relocations need PLT entries.
+       */
       if (fixp->fx_addsy
+	  && fixp->fx_pcrel
 	  && (fixp->fx_r_type == BFD_RELOC_386_PLT32
 	      || fixp->fx_r_type == BFD_RELOC_X86_64_PLT32)
 	  && symbol_section_p (fixp->fx_addsy))
