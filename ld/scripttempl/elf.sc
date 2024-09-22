@@ -425,7 +425,6 @@ emit_early_ro()
 {
   cat <<EOF
   ${INITIAL_READONLY_SECTIONS}
-  .note.gnu.build-id ${RELOCATING-0}: { *(.note.gnu.build-id) }
 EOF
 }
 
