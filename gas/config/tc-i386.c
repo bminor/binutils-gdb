@@ -6487,12 +6487,15 @@ x86_check_tls_relocation (enum bfd_reloc_code_real r_type)
       if (i.base_reg->reg_num != RegIP
 	  || !i.base_reg->reg_type.bitfield.qword)
 	return x86_tls_error_rip;
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (x86_elf_abi == X86_64_ABI)
 	{
 	  if (!i.op[1].regs->reg_type.bitfield.qword)
 	    return x86_tls_error_dest_64bit_reg_size;
 	}
-      else if (!i.op[1].regs->reg_type.bitfield.dword
+      else
+#endif
+	if (!i.op[1].regs->reg_type.bitfield.dword
 	       && !i.op[1].regs->reg_type.bitfield.qword)
 	return x86_tls_error_dest_32bit_or_64bit_reg_size;
 	  break;
@@ -6594,12 +6597,15 @@ x86_check_tls_relocation (enum bfd_reloc_code_real r_type)
       if (i.base_reg->reg_num != RegIP
 	  || !i.base_reg->reg_type.bitfield.qword)
 	return x86_tls_error_rip;
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (x86_elf_abi == X86_64_ABI)
 	{
 	  if (!i.op[i.operands - 1].regs->reg_type.bitfield.qword)
 	    return x86_tls_error_dest_64bit_reg_size;
 	}
-      else if (!i.op[i.operands - 1].regs->reg_type.bitfield.dword
+      else
+#endif
+	if (!i.op[i.operands - 1].regs->reg_type.bitfield.dword
 	       && !i.op[i.operands - 1].regs->reg_type.bitfield.qword)
 	return x86_tls_error_dest_32bit_or_64bit_reg_size;
       break;
