@@ -274,6 +274,7 @@ enum i386_error
     internal_error,
   };
 
+#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
 enum x86_tls_error_type
 {
   x86_tls_error_continue,
@@ -297,6 +298,7 @@ enum x86_tls_error_type
   x86_tls_error_dest_64bit_reg_size,
   x86_tls_error_dest_32bit_or_64bit_reg_size
 };
+#endif
 
 struct _i386_insn
   {
@@ -6393,6 +6395,7 @@ static INLINE bool may_need_pass2 (const insn_template *t)
 	       && (t->base_opcode | 8) == 0x2c);
 }
 
+#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
 static enum x86_tls_error_type
 x86_check_tls_relocation (enum bfd_reloc_code_real r_type)
 {
@@ -6487,15 +6490,12 @@ x86_check_tls_relocation (enum bfd_reloc_code_real r_type)
       if (i.base_reg->reg_num != RegIP
 	  || !i.base_reg->reg_type.bitfield.qword)
 	return x86_tls_error_rip;
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (x86_elf_abi == X86_64_ABI)
 	{
 	  if (!i.op[1].regs->reg_type.bitfield.qword)
 	    return x86_tls_error_dest_64bit_reg_size;
 	}
-      else
-#endif
-	if (!i.op[1].regs->reg_type.bitfield.dword
+      else if (!i.op[1].regs->reg_type.bitfield.dword
 	       && !i.op[1].regs->reg_type.bitfield.qword)
 	return x86_tls_error_dest_32bit_or_64bit_reg_size;
 	  break;
@@ -6597,15 +6597,12 @@ x86_check_tls_relocation (enum bfd_reloc_code_real r_type)
       if (i.base_reg->reg_num != RegIP
 	  || !i.base_reg->reg_type.bitfield.qword)
 	return x86_tls_error_rip;
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
       if (x86_elf_abi == X86_64_ABI)
 	{
 	  if (!i.op[i.operands - 1].regs->reg_type.bitfield.qword)
 	    return x86_tls_error_dest_64bit_reg_size;
 	}
-      else
-#endif
-	if (!i.op[i.operands - 1].regs->reg_type.bitfield.dword
+      else if (!i.op[i.operands - 1].regs->reg_type.bitfield.dword
 	       && !i.op[i.operands - 1].regs->reg_type.bitfield.qword)
 	return x86_tls_error_dest_32bit_or_64bit_reg_size;
       break;
@@ -6748,6 +6745,7 @@ x86_report_tls_error (enum x86_tls_error_type tls_error,
       abort ();
     }
 }
+#endif
 
 /* This is the guts of the machine-dependent assembler.  LINE points to a
    machine dependent instruction.  This function is supposed to emit
@@ -7087,7 +7085,8 @@ i386_assemble (char *line)
 	i.prefix[LOCK_PREFIX] = 0;
     }
 
-  if (i.has_gotrel && tls_check)
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  if (IS_ELF && i.has_gotrel && tls_check)
     {
       enum x86_tls_error_type tls_error;
       for (j = 0; j < i.operands; ++j)
@@ -7101,6 +7100,7 @@ i386_assemble (char *line)
 	  break;
 	}
     }
+#endif
 
   if ((is_any_vex_encoding (&i.tm) && i.tm.opcode_space != SPACE_EVEXMAP4)
       || i.tm.operand_types[i.imm_operands].bitfield.class >= RegMMX
@@ -17469,7 +17469,7 @@ md_show_usage (FILE *stream)
     fprintf (stream, _("(default: no)\n"));
   fprintf (stream, _("\
                           generate relax relocations\n"));
-
+#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
   fprintf (stream, _("\
   -mtls-check=[no|yes] "));
   if (DEFAULT_X86_TLS_CHECK)
@@ -17478,7 +17478,7 @@ md_show_usage (FILE *stream)
     fprintf (stream, _("(default: no)\n"));
   fprintf (stream, _("\
                           check TLS relocation\n"));
-
+#endif
   fprintf (stream, _("\
   -malign-branch-boundary=NUM (default: 0)\n\
                           align branches within NUM byte boundary\n"));
