@@ -4048,6 +4048,13 @@ a similar fashion by the @code{gcc} linker wrapper program.  The default
 may be overridden by the @samp{--demangle} and @samp{--no-demangle}
 options.
 
+@kindex SOURCE_DATE_EPOCH
+@cindex timestamps
+If the PE/COFF specific @option{--insert-timestamp} is active and the
+@env{SOURCE_DATE_EPOCH} environment variable is defined, then the
+timestamp value in this variable will be inserted into the COFF header
+instead of the current time.
+
 @c man end
 @end ifset
 
