@@ -29,6 +29,7 @@ if {[istarget i*86-*-cygwin*]
     || [istarget i*86-*-pe]
     || [istarget i*86-*-mingw*]
     || [istarget x86_64-*-mingw*]
+    || [istarget x86_64-*-cygwin*]
     || [istarget arm-wince-pe] } {
 
     if {[istarget x86_64-*-mingw*] } {
@@ -40,6 +41,21 @@ if {[istarget i*86-*-cygwin*]
 	{".secrel32 w/ relocs" "--enable-reloc-section" "" "" {secrel1.s secrel2.s}
 	 {{objdump -p secrel-reloc.d}} "secrel.x"}
 	{".secidx w/ relocs" "--enable-reloc-section" "" "" {secidx1.s secidx2.s}
+	 {{objdump -p secidx-reloc.d}} "secidx.x"}
+	{"Empty export table" "" "" "" "exports.s"
+	 {{objdump -p exports64.d}} "exports.dll"}
+	{"TLS directory entry" "" "" "" "tlssec.s"
+	 {{objdump -p tlssec64.d}} "tlssec.dll"}
+      }
+    } elseif {[istarget x86_64-*-cygwin*]} {
+      set pe_tests {
+	{".secrel32" "--disable-auto-import --disable-reloc-section" "" "" {secrel1.s secrel2.s}
+	 {{objdump -s secrel_64.d}} "secrel.x"}
+	{".secidx" "--disable-auto-import --disable-reloc-section" "" "" {secidx1.s secidx2.s}
+	 {{objdump -s secidx_64.d}} "secidx.x"}
+	{".secrel32 w/ relocs" "--disable-auto-import --enable-reloc-section" "" "" {secrel1.s secrel2.s}
+	 {{objdump -p secrel-reloc.d}} "secrel.x"}
+	{".secidx w/ relocs" "--disable-auto-import --enable-reloc-section" "" "" {secidx1.s secidx2.s}
 	 {{objdump -p secidx-reloc.d}} "secidx.x"}
 	{"Empty export table" "" "" "" "exports.s"
 	 {{objdump -p exports64.d}} "exports.dll"}
