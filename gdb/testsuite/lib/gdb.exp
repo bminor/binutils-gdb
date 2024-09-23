@@ -1559,7 +1559,7 @@ proc gdb_test { args } {
     global gdb_prompt
     upvar timeout timeout
 
-    parse_args {
+    parse_some_args {
 	{prompt ""}
 	{no-prompt-anchor}
 	{lbl}
@@ -1567,7 +1567,8 @@ proc gdb_test { args } {
 	{nonl}
     }
 
-    lassign $args command pattern message question response
+    set args [lassign $args command pattern message question response]
+    check_no_args_left
 
     # Can't have a question without a response.
     if { $question != "" && $response == "" || [llength $args] > 5 } {
@@ -1741,13 +1742,14 @@ if { [tcl_version_at_least 8 6 2] == 0 } {
 proc gdb_test_no_output { args } {
     global gdb_prompt
 
-    parse_args {
+    parse_some_args {
 	{prompt ""}
 	{no-prompt-anchor}
 	{nopass}
     }
 
-    lassign $args command message
+    set args [lassign $args command message]
+    check_no_args_left
 
     set prompt [fill_in_default_prompt $prompt [expr !${no-prompt-anchor}]]
 
@@ -1789,7 +1791,7 @@ proc gdb_test_no_output { args } {
 proc gdb_test_sequence { args } {
     global gdb_prompt
 
-    parse_args {{prompt ""}}
+    parse_some_args {{prompt ""}}
 
     if { $prompt == "" } {
 	set prompt "$gdb_prompt $"
@@ -9351,11 +9353,30 @@ proc parse_list { level listname argset prefix eval } {
 # Search the caller's args variable and set variables according to the list of
 # valid options described by ARGSET.
 
-proc parse_args { argset } {
+proc parse_some_args { argset } {
     parse_list 2 args $argset "-" false
 
     # The remaining args should be checked to see that they match the
     # number of items expected to be passed into the procedure...
+}
+
+# Check that the caller's args variable is empty.
+
+proc check_no_args_left {} {
+    # Require no remaining args.
+    upvar 1 args args
+    if { [llength $args] != 0 } {
+	error "Args left unparsed: $args"
+    }
+}
+
+# As parse_some_args, but check that no args remain after parsing.
+
+proc parse_args { argset } {
+    uplevel parse_some_args [list $argset]
+
+    # Require no remaining args.
+    uplevel check_no_args_left
 }
 
 # Process the caller's options variable and set variables according

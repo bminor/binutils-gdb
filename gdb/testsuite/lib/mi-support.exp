@@ -2680,7 +2680,7 @@ proc mi_make_info_frame_regexp {args} {
 # build the regexp for matching against the -stack-info-frame output.
 
 proc mi_info_frame { test args } {
-    parse_args {{frame ""} {thread ""}}
+    parse_some_args {{frame ""} {thread ""}}
 
     set re [eval mi_make_info_frame_regexp $args]
 
