@@ -185,6 +185,9 @@ typedef struct
   const char *target_name;
   const char *object_target;
   unsigned int imagebase_reloc;
+  unsigned int secrel_reloc_lo;
+  unsigned int secrel_reloc_hi;
+  unsigned int section_reloc;
   int pe_arch;
   int bfd_arch;
   bool underscored;
@@ -257,11 +260,16 @@ static pe_details_type pe_detail_list[] =
 #ifdef pe_use_plus
     "pei-x86-64",
     "pe-x86-64",
-    3 /* R_IMAGEBASE */,
+    3 /* R_AMD64_IMAGEBASE */,
+    11 /* R_AMD64_SECREL32 */,
+    12 /* R_AMD64_SECREL7 */,
+    10 /* R_AMD64_SECTION */,
 #else
     "pei-i386",
     "pe-i386",
     7 /* R_IMAGEBASE */,
+    11, 11 /* R_SECREL32 */,
+    10 /* R_SECTION */,
 #endif
     PE_ARCH_i386,
     bfd_arch_i386,
@@ -276,7 +284,10 @@ static pe_details_type pe_detail_list[] =
   {
     "pei-x86-64",
     "pe-bigobj-x86-64",
-    3 /* R_IMAGEBASE */,
+    3 /* R_AMD64_IMAGEBASE */,
+    11 /* R_AMD64_SECREL32 */,
+    12 /* R_AMD64_SECREL7 */,
+    10 /* R_AMD64_SECTION */,
     PE_ARCH_i386,
     bfd_arch_i386,
     false,
@@ -287,6 +298,8 @@ static pe_details_type pe_detail_list[] =
     "pei-i386",
     "pe-bigobj-i386",
     7 /* R_IMAGEBASE */,
+    11, 11 /* R_SECREL32 */,
+    10 /* R_SECTION */,
     PE_ARCH_i386,
     bfd_arch_i386,
     true,
@@ -297,6 +310,7 @@ static pe_details_type pe_detail_list[] =
     "pei-shl",
     "pe-shl",
     16 /* R_SH_IMAGEBASE */,
+    ~0, 0, ~0, /* none */
     PE_ARCH_sh,
     bfd_arch_sh,
     true,
@@ -306,6 +320,7 @@ static pe_details_type pe_detail_list[] =
     "pei-mips",
     "pe-mips",
     34 /* MIPS_R_RVA */,
+    ~0, 0, ~0, /* none */
     PE_ARCH_mips,
     bfd_arch_mips,
     false,
@@ -315,6 +330,7 @@ static pe_details_type pe_detail_list[] =
     "pei-arm-little",
     "pe-arm-little",
     11 /* ARM_RVA32 */,
+    ~0, 0, ~0, /* none */
     PE_ARCH_arm,
     bfd_arch_arm,
     true,
@@ -324,6 +340,8 @@ static pe_details_type pe_detail_list[] =
     "pei-arm-wince-little",
     "pe-arm-wince-little",
     2,  /* ARM_RVA32 on Windows CE, see bfd/coff-arm.c.  */
+    15, 15, /* ARM_SECREL (dito) */
+    14, /* ARM_SECTION (dito) */
     PE_ARCH_arm_wince,
     bfd_arch_arm,
     false,
@@ -332,13 +350,16 @@ static pe_details_type pe_detail_list[] =
   {
     "pei-aarch64-little",
     "pe-aarch64-little",
-    2,  /* ARM64_RVA32 */
+    2,  /* IMAGE_REL_ARM64_ADDR32NB */
+    8,  /* IMAGE_REL_ARM64_SECREL */
+    11, /* IMAGE_REL_ARM64_SECREL_LOW12L */
+    13, /* IMAGE_REL_ARM64_SECTION */
     PE_ARCH_aarch64,
     bfd_arch_aarch64,
     false,
     autofilter_symbollist_generic
   },
-  { NULL, NULL, 0, 0, 0, false, NULL }
+  { NULL, NULL, 0, 0, 0, 0, 0, 0, false, NULL }
 };
 
 static const pe_details_type *pe_details;
@@ -1596,7 +1617,10 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		  printf ("rel: %s\n", sym->name);
 		}
 	      if (!relocs[i]->howto->pc_relative
-		  && relocs[i]->howto->type != pe_details->imagebase_reloc)
+		  && relocs[i]->howto->type != pe_details->imagebase_reloc
+		  && (relocs[i]->howto->type < pe_details->secrel_reloc_lo
+		      || relocs[i]->howto->type > pe_details->secrel_reloc_hi)
+		  && relocs[i]->howto->type != pe_details->section_reloc)
 		{
 		  struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 		  const struct bfd_link_hash_entry *blhe
