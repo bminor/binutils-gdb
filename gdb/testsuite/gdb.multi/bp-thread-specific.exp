@@ -32,8 +32,32 @@ if {![runto_main]} {
     return -1
 }
 
+delete_breakpoints
+
+# Create a thread-specific b/p on main.
+gdb_breakpoint "main thread 1"
+set bpnum [get_integer_valueof "\$bpnum" "INVALID" \
+	      "get number for thread specific b/p on main"]
+
+# Check the b/p has a location and is displayed correctly.
+gdb_test "info breakpoints" \
+    [multi_line \
+	 "" \
+	 "$bpnum\\s+breakpoint\\s+keep\\s+y\\s+$hex\\s+in main at \[^\r\n\]+/$srcfile:$decimal"\
+	 "\\s+stop only in thread 1"] \
+    "check thread b/p on main has a location"
+
 gdb_test "add-inferior -exec ${binfile}" "Added inferior 2.*" "add inferior 2"
 gdb_test "inferior 2"
+
+# The breakpoint should still have a location, but should now display
+# information indicating this breakpoint is only in inferior 1.
+gdb_test "info breakpoints" \
+    [multi_line \
+	 "" \
+	 "$bpnum\\s+breakpoint\\s+keep\\s+y\\s+$hex\\s+in main at \[^\r\n\]+/$srcfile:$decimal inf 1"\
+	 "\\s+stop only in thread 1\\.1"] \
+    "check thread b/p on main still has updated correctly"
 
 if {![runto_main]} {
     return -1

@@ -1578,10 +1578,20 @@ breakpoint_set_thread (struct breakpoint *b, int thread)
       /* If the program space has changed for this breakpoint, then
 	 re-evaluate it's locations.  */
       if (old_pspace != new_pspace)
-	breakpoint_re_set_one (b, new_pspace);
+	{
+	  /* The breakpoint is now associated with a completely different
+	     program space.  Discard all of the current locations and then
+	     re-set the breakpoint in the new program space, this will
+	     create the new locations.  */
+	  b->clear_locations ();
+	  breakpoint_re_set_one (b, new_pspace);
+	}
 
-      /* Let others know the breakpoint has changed.  */
-      notify_breakpoint_modified (b);
+      /* If the program space didn't change, or the breakpoint didn't
+	 acquire any new locations after the clear_locations call, then we
+	 need to notify of the breakpoint modification now.  */
+      if (old_pspace == new_pspace || !b->has_locations ())
+	notify_breakpoint_modified (b);
     }
 }
 
@@ -1625,9 +1635,20 @@ breakpoint_set_inferior (struct breakpoint *b, int inferior)
 	}
 
       if (old_pspace != new_pspace)
-	breakpoint_re_set_one (b, new_pspace);
+	{
+	  /* The breakpoint is now associated with a completely different
+	     program space.  Discard all of the current locations and then
+	     re-set the breakpoint in the new program space, this will
+	     create the new locations.  */
+	  b->clear_locations ();
+	  breakpoint_re_set_one (b, new_pspace);
+	}
 
-      notify_breakpoint_modified (b);
+      /* If the program space didn't change, or the breakpoint didn't
+	 acquire any new locations after the clear_locations call, then we
+	 need to notify of the breakpoint modification now.  */
+      if (old_pspace == new_pspace || !b->has_locations ())
+	notify_breakpoint_modified (b);
     }
 }
 
@@ -12943,31 +12964,11 @@ update_breakpoint_locations (code_breakpoint *b,
      all locations are in the same shared library, that was unloaded.
      We'd like to retain the location, so that when the library is
      loaded again, we don't loose the enabled/disabled status of the
-     individual locations.
-
-     Thread specific breakpoints will also trigger this case if the thread
-     is changed to a different program space, and all of the old locations
-     go out of scope.  In this case we do (currently) discard the old
-     locations -- we assume the change in thread is permanent and the old
-     locations will never come back into scope.  */
+     individual locations.  */
   if (all_locations_are_pending (b, filter_pspace) && sals.empty ())
-    {
-      if (b->thread != -1)
-	b->clear_locations ();
-      return;
-    }
+    return;
 
   bp_location_list existing_locations = b->steal_locations (filter_pspace);
-
-  /* If this is a thread-specific breakpoint then any locations left on the
-     breakpoint are for a program space in which the thread of interest
-     does not operate.  This can happen when the user changes the thread of
-     a thread-specific breakpoint.
-
-     We assume that the change in thread is permanent, and that the old
-     locations will never be used again, so discard them now.  */
-  if (b->thread != -1)
-    b->clear_locations ();
 
   for (const auto &sal : sals)
     {

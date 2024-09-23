@@ -36,7 +36,7 @@ main (void)
 static int
 bar (void)
 {
-  return baz ();
+  return baz ();		/* Second location of bar.  */
 }
 
 static int
