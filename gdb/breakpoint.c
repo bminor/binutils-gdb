@@ -13136,9 +13136,10 @@ code_breakpoint::re_set_default (struct program_space *filter_pspace)
 {
   std::vector<symtab_and_line> expanded, expanded_end;
 
-  /* If this breakpoint is thread-specific then find the program space in
-     which the specific thread exists.  Otherwise, for breakpoints that are
-     not thread-specific THREAD_PSPACE will be nullptr.  */
+  /* If this breakpoint is thread- or inferior-specific, then find the
+     program space in which this breakpoint exists.  Otherwise, for
+     breakpoints that are not thread- or inferior-specific, BP_PSPACE will
+     be nullptr.  */
   program_space *bp_pspace
     = find_program_space_for_breakpoint (this->thread, this->inferior);
 
