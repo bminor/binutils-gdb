@@ -57,7 +57,9 @@ print_objfile_statistics (void)
     for (objfile &objfile : pspace->objfiles ())
       {
 	QUIT;
-	gdb_printf (_("Statistics for '%s':\n"), objfile_name (&objfile));
+	gdb_printf (_("Statistics for '%ps':\n"),
+		    styled_string (file_name_style.style (),
+				   objfile_name (&objfile)));
 	if (objfile.per_bfd->n_minsyms > 0)
 	  gdb_printf (_("  Number of \"minimal\" symbols read: %d\n"),
 		      objfile.per_bfd->n_minsyms);
@@ -100,8 +102,9 @@ print_objfile_statistics (void)
 
 	gdb_printf (_("  Total memory used for string cache: %d\n"),
 		    objfile.per_bfd->string_cache.memory_used ());
-	gdb_printf (_("Byte cache statistics for '%s':\n"),
-		    objfile_name (&objfile));
+	gdb_printf (_("Byte cache statistics for '%ps':\n"),
+		    styled_string (file_name_style.style (),
+				   objfile_name (&objfile)));
 	objfile.per_bfd->string_cache.print_statistics ("string cache");
 	objfile.print_stats (true);
       }
@@ -110,7 +113,9 @@ print_objfile_statistics (void)
 static void
 dump_objfile (struct objfile *objfile)
 {
-  gdb_printf ("\nObject file %s:  ", objfile_name (objfile));
+  gdb_printf ("\nObject file %ps:  ",
+	      styled_string (file_name_style.style (),
+			     objfile_name (objfile)));
   gdb_printf ("Objfile at %s, bfd at %s, %d minsyms\n\n",
 	      host_address_to_string (objfile),
 	      host_address_to_string (objfile->obfd.get ()),
@@ -129,8 +134,9 @@ dump_objfile (struct objfile *objfile)
 
       for (symtab *symtab : cu.filetabs ())
 	{
-	  gdb_printf ("%s at %s",
-		      symtab_to_filename_for_display (symtab),
+	  gdb_printf ("%ps at %s",
+		      styled_string (file_name_style.style (),
+				     symtab_to_filename_for_display (symtab)),
 		      host_address_to_string (symtab));
 	  if (symtab->compunit ()->objfile () != objfile)
 	    gdb_printf (", NOT ON CHAIN!");
@@ -152,7 +158,9 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
   int index;
   char ms_type;
 
-  gdb_printf (outfile, "\nObject file %s:\n\n", objfile_name (objfile));
+  gdb_printf (outfile, "\nObject file %ps:\n\n",
+	      styled_string (file_name_style.style (),
+			     objfile_name (objfile)));
   if (objfile->per_bfd->minimal_symbol_count == 0)
     {
       gdb_printf (outfile, "No minimal symbols found.\n");
@@ -222,7 +230,9 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	  gdb_printf (outfile, "  %s", msymbol->demangled_name ());
 	}
       if (msymbol->filename)
-	gdb_printf (outfile, "  %s", msymbol->filename);
+	gdb_printf (outfile, "  %ps",
+		    styled_string (file_name_style.style (),
+				   msymbol->filename));
       gdb_puts ("\n", outfile);
       index++;
     }
@@ -242,15 +252,18 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
   const struct linetable *l;
   int depth;
 
-  gdb_printf (outfile, "\nSymtab for file %s at %s\n",
-	      symtab_to_filename_for_display (symtab),
+  gdb_printf (outfile, "\nSymtab for file %ps at %s\n",
+	      styled_string (file_name_style.style (),
+			     symtab_to_filename_for_display (symtab)),
 	      host_address_to_string (symtab));
 
   if (symtab->compunit ()->dirname () != NULL)
-    gdb_printf (outfile, "Compilation directory is %s\n",
-		symtab->compunit ()->dirname ());
-  gdb_printf (outfile, "Read from object file %s (%s)\n",
-	      objfile_name (objfile),
+    gdb_printf (outfile, "Compilation directory is %ps\n",
+		styled_string (file_name_style.style (),
+			       symtab->compunit ()->dirname ()));
+  gdb_printf (outfile, "Read from object file %ps (%s)\n",
+	      styled_string (file_name_style.style (),
+			     objfile_name (objfile)),
 	      host_address_to_string (objfile));
   gdb_printf (outfile, "Language: %s\n",
 	      language_str (symtab->language ()));
@@ -296,8 +309,9 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  gdb_puts (paddress (gdbarch, b->end ()), outfile);
 	  if (b->function ())
 	    {
-	      gdb_printf (outfile, ", function %s",
-			  b->function ()->linkage_name ());
+	      gdb_printf (outfile, ", function %ps",
+			  styled_string (function_name_style.style (),
+					 b->function ()->linkage_name ()));
 	      if (b->function ()->demangled_name () != NULL)
 		{
 		  gdb_printf (outfile, ", %s",
@@ -330,8 +344,9 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	= symtab_to_filename_for_display (compunit->primary_filetab ());
 
       gdb_printf (outfile,
-		  "\nBlockvector same as owning compunit: %s\n\n",
-		  compunit_filename);
+		  "\nBlockvector same as owning compunit: %ps\n\n",
+		  styled_string (file_name_style.style (),
+				 compunit_filename));
     }
 
   /* Print info about the user of this compunit_symtab, and the
@@ -760,7 +775,9 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 		  {
 		    if (! printed_objfile_start)
 		      {
-			gdb_printf ("{ objfile %s ", objfile_name (&objfile));
+			gdb_printf ("{ objfile %ps ",
+				    styled_string (file_name_style.style (),
+						   objfile_name (&objfile)));
 			gdb_stdout->wrap_here (2);
 			gdb_printf ("((struct objfile *) %s)\n",
 				    host_address_to_string (&objfile));
@@ -776,9 +793,12 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 				    (cust.producer () != nullptr
 				     ? cust.producer () : "(null)"));
 			gdb_printf ("    name %s\n", cust.name);
-			gdb_printf ("    dirname %s\n",
-				    (cust.dirname () != NULL
-				     ? cust.dirname () : "(null)"));
+			if (cust.dirname () == nullptr)
+			  gdb_printf ("    dirname (null)\n");
+			else
+			  gdb_printf ("    dirname %ps\n",
+				      styled_string (file_name_style.style (),
+						     cust.dirname ()));
 			gdb_printf ("    blockvector"
 				    " ((struct blockvector *) %s)\n",
 				    host_address_to_string
@@ -808,15 +828,19 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 			printed_compunit_symtab_start = 1;
 		      }
 
-		    gdb_printf ("\t{ symtab %s ",
-				symtab_to_filename_for_display (symtab));
+		    gdb_printf
+		      ("\t{ symtab %ps ",
+		       styled_string (file_name_style.style (),
+				      symtab_to_filename_for_display (symtab)));
 		    gdb_stdout->wrap_here (4);
 		    gdb_printf ("((struct symtab *) %s)\n",
 				host_address_to_string (symtab));
-		    gdb_printf ("\t  fullname %s\n",
-				symtab->fullname () != nullptr
-				? symtab->fullname ()
-				: "(null)");
+		    if (symtab->fullname () == nullptr)
+		      gdb_printf ("\t  fullname (void)\n");
+		    else
+		      gdb_printf ("\t  fullname %ps\n",
+				  styled_string (file_name_style.style (),
+						 symtab->fullname ()));
 		    gdb_printf ("\t  "
 				"linetable ((struct linetable *) %s)\n",
 				host_address_to_string
@@ -867,14 +891,18 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 	      {
 		if (! printed_objfile_start)
 		  {
-		    gdb_printf ("{ objfile %s ", objfile_name (&objfile));
+		    gdb_printf ("{ objfile %ps ",
+				styled_string (file_name_style.style (),
+					       objfile_name (&objfile)));
 		    gdb_stdout->wrap_here (2);
 		    gdb_printf ("((struct objfile *) %s)\n",
 				host_address_to_string (&objfile));
 		    printed_objfile_start = 1;
 		  }
-		gdb_printf ("  { symtab %s\n",
-			    symtab_to_filename_for_display (symtab));
+		gdb_printf
+		  ("  { symtab %ps\n",
+		   styled_string (file_name_style.style (),
+				  symtab_to_filename_for_display (symtab)));
 		if (cust.blockvector () == NULL)
 		  gdb_printf ("    NULL blockvector\n");
 		gdb_printf ("  }\n");
