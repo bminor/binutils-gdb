@@ -934,19 +934,17 @@ private:
 
 /* Use this in a 'catch' block to convert the exception to a Python
    exception and return nullptr.  */
-#define GDB_PY_HANDLE_EXCEPTION(Exception)	\
-  do {						\
-    gdbpy_convert_exception (Exception);	\
-    return nullptr;				\
+#define GDB_PY_HANDLE_EXCEPTION(Exception)				\
+  do {									\
+    return gdbpy_handle_gdb_exception (nullptr, Exception);		\
   } while (0)
 
 /* Use this in a 'catch' block to convert the exception to a Python
    exception and return -1.  */
-#define GDB_PY_SET_HANDLE_EXCEPTION(Exception)				\
-    do {								\
-      gdbpy_convert_exception (Exception);				\
-      return -1;							\
-    } while (0)
+#define GDB_PY_SET_HANDLE_EXCEPTION(Exception)			\
+  do {								\
+    return gdbpy_handle_gdb_exception (-1, Exception);	\
+  } while (0)
 
 int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
@@ -1012,6 +1010,18 @@ extern PyObject *gdbpy_gdberror_exc;
 
 extern void gdbpy_convert_exception (const struct gdb_exception &)
     CPYCHECKER_SETS_EXCEPTION;
+
+ /* Use this in a 'catch' block to convert the exception E to a Python
+    exception and return value VAL to signal that an exception occurred.
+    Typically at the use site, that value will be returned immediately.  */
+
+template<typename T>
+[[nodiscard]] T
+gdbpy_handle_gdb_exception (T val, const gdb_exception &e)
+{
+  gdbpy_convert_exception (e);
+  return val;
+}
 
 int get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
     CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
