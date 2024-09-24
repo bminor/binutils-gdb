@@ -903,18 +903,25 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 	}
     }
 
-  if (regexp)
-    re_comp (regexp);
+  if (regexp == nullptr)
+    {
+      for (struct program_space *pspace : program_spaces)
+	for (objfile *objfile : pspace->objfiles ())
+	  objfile->expand_all_symtabs ();
+
+      return;
+    }
+
+  re_comp (regexp);
 
   for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       objfile->expand_symtabs_matching
 	([&] (const char *filename, bool basenames)
-	 {
-	   /* KISS: Only apply the regexp to the complete file name.  */
-	   return (!basenames
-		   && (regexp == NULL || re_exec (filename)));
-	 },
+	   {
+	     /* KISS: Only apply the regexp to the complete file name.  */
+	     return !basenames && re_exec (filename);
+	   },
 	 NULL,
 	 NULL,
 	 NULL,
