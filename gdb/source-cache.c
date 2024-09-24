@@ -282,6 +282,12 @@ static void gnu_source_highlight_test ()
     {
       res = try_source_highlight (styled_prog, language_c, fullname);
     }
+  catch (const gdb_exception &e)
+    {
+      if (e.reason != RETURN_ERROR)
+	throw;
+      saw_exception = true;
+    }
   catch (...)
     {
       saw_exception = true;
