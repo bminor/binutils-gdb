@@ -26,6 +26,7 @@
 #include "run-on-main-thread.h"
 #include "gdbsupport/task-group.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-style.h"
 
 /* We don't want gdb to exit while it is in the process of writing to
    the index cache.  So, all live cooked index vectors are stored
@@ -238,11 +239,20 @@ cooked_index::dump (gdbarch *arch)
     {
       QUIT;
 
+      ui_file_style style;
+      if (entry->matches (SEARCH_FUNCTION_DOMAIN))
+	style = function_name_style.style ();
+      else if (entry->matches (SEARCH_VAR_DOMAIN))
+	style = variable_name_style.style ();
+
       gdb_printf ("    [%zu] ((cooked_index_entry *) %p)\n", i++, entry);
-      gdb_printf ("    name:       %s\n", entry->name);
-      gdb_printf ("    canonical:  %s\n", entry->canonical);
-      gdb_printf ("    qualified:  %s\n",
-		  entry->full_name (&temp_storage, 0, "::"));
+      gdb_printf ("    name:       %ps\n", styled_string (style,
+							  entry->name));
+      gdb_printf ("    canonical:  %ps\n", styled_string (style,
+							  entry->canonical));
+      gdb_printf ("    qualified:  %ps\n",
+		  styled_string (style,
+				 entry->full_name (&temp_storage, 0, "::")));
       gdb_printf ("    DWARF tag:  %s\n", dwarf_tag_name (entry->tag));
       gdb_printf ("    flags:      %s\n", to_string (entry->flags).c_str ());
       gdb_printf ("    DIE offset: %s\n", sect_offset_str (entry->die_offset));
