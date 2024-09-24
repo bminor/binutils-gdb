@@ -292,7 +292,7 @@ typy_fields_items (PyObject *self, enum gdbpy_iter_kind kind)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   gdbpy_ref<> type_holder;
@@ -456,7 +456,7 @@ typy_is_array_like (PyObject *self, void *closure)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   if (result)
@@ -480,7 +480,7 @@ typy_is_string_like (PyObject *self, void *closure)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   if (result)
@@ -501,7 +501,7 @@ typy_strip_typedefs (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return type_to_type_object (type);
@@ -522,7 +522,7 @@ typy_get_composite (struct type *type)
 	}
       catch (const gdb_exception &except)
 	{
-	  GDB_PY_HANDLE_EXCEPTION (except);
+	  return gdbpy_handle_gdb_exception (nullptr, except);
 	}
 
       if (!type->is_pointer_or_reference ())
@@ -592,7 +592,7 @@ typy_array_1 (PyObject *self, PyObject *args, int is_vector)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return type_to_type_object (array);
@@ -626,7 +626,7 @@ typy_pointer (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return type_to_type_object (type);
@@ -698,7 +698,7 @@ typy_reference (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return type_to_type_object (type);
@@ -732,7 +732,7 @@ typy_const (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return type_to_type_object (type);
@@ -750,7 +750,7 @@ typy_volatile (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return type_to_type_object (type);
@@ -768,7 +768,7 @@ typy_unqualified (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return type_to_type_object (type);
@@ -859,7 +859,7 @@ typy_lookup_typename (const char *type_name, const struct block *block)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return type;
@@ -913,7 +913,7 @@ typy_lookup_type (struct demangle_component *demangled,
 	}
       catch (const gdb_exception &except)
 	{
-	  GDB_PY_HANDLE_EXCEPTION (except);
+	  return gdbpy_handle_gdb_exception (nullptr, except);
 	}
     }
 
@@ -955,7 +955,7 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   if (! info)
@@ -1034,7 +1034,7 @@ typy_template_argument (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   /* We might not have DW_TAG_template_*, so try to parse the type's
@@ -1069,7 +1069,7 @@ typy_template_argument (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return result;
@@ -1093,7 +1093,7 @@ typy_repr (PyObject *self)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
   auto py_typename = PyUnicode_Decode (type_name.c_str (), type_name.size (),
 				       host_charset (), NULL);
@@ -1115,7 +1115,7 @@ typy_str (PyObject *self)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return PyUnicode_Decode (thetype.c_str (), thetype.size (),
@@ -1151,7 +1151,7 @@ typy_richcompare (PyObject *self, PyObject *other, int op)
 	{
 	  /* If there is a GDB exception, a comparison is not capable
 	     (or trusted), so exit.  */
-	  GDB_PY_HANDLE_EXCEPTION (except);
+	  return gdbpy_handle_gdb_exception (nullptr, except);
 	}
     }
 
@@ -1471,7 +1471,7 @@ type_to_type_object (struct type *type)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   type_obj = PyObject_New (type_object, &type_object_type);

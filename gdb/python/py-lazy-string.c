@@ -148,7 +148,7 @@ stpy_convert_to_value (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return result;
@@ -311,7 +311,7 @@ stpy_str (PyObject *self)
     }
   catch (const gdb_exception &exc)
     {
-      GDB_PY_HANDLE_EXCEPTION (exc);
+      return gdbpy_handle_gdb_exception (nullptr, exc);
     }
 
   return host_string_to_python_string (stream.c_str ()).release ();

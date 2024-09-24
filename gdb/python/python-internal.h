@@ -933,13 +933,6 @@ private:
 };
 
 /* Use this in a 'catch' block to convert the exception to a Python
-   exception and return nullptr.  */
-#define GDB_PY_HANDLE_EXCEPTION(Exception)				\
-  do {									\
-    return gdbpy_handle_gdb_exception (nullptr, Exception);		\
-  } while (0)
-
-/* Use this in a 'catch' block to convert the exception to a Python
    exception and return -1.  */
 #define GDB_PY_SET_HANDLE_EXCEPTION(Exception)			\
   do {								\

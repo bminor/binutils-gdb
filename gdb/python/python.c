@@ -593,7 +593,7 @@ gdbpy_parameter (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &ex)
     {
-      GDB_PY_HANDLE_EXCEPTION (ex);
+      return gdbpy_handle_gdb_exception (nullptr, ex);
     }
 
   if (cmd == CMD_LIST_AMBIGUOUS)
@@ -756,7 +756,7 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
 	 convert the exception and continue back in Python, we should
 	 re-enable stdin here.  */
       async_enable_stdin ();
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   if (to_string)
@@ -972,7 +972,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   catch (const gdb_exception &ex)
     {
       /* We know this will always throw.  */
-      GDB_PY_HANDLE_EXCEPTION (ex);
+      return gdbpy_handle_gdb_exception (nullptr, ex);
     }
 
   if (!sals.empty ())
@@ -1053,7 +1053,7 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return result;
@@ -1538,7 +1538,7 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   Py_RETURN_NONE;

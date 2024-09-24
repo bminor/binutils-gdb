@@ -595,7 +595,7 @@ disasmpy_builtin_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 	    }
 	  catch (const gdb_exception &except)
 	    {
-	      GDB_PY_HANDLE_EXCEPTION (except);
+	      return gdbpy_handle_gdb_exception (nullptr, except);
 	    }
 	  if (!str.empty ())
 	    PyErr_SetString (gdbpy_gdberror_exc, str.c_str ());
@@ -933,7 +933,7 @@ disasmpy_result_str (PyObject *self)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return PyUnicode_Decode (str.c_str (), str.size (),
@@ -1512,7 +1512,7 @@ disasmpy_addr_part_str (PyObject *self)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return PyUnicode_Decode (str.c_str (), str.size (),

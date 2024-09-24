@@ -169,7 +169,7 @@ ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return build_line_table_tuple_from_pcs (py_line, pcs);

@@ -522,7 +522,7 @@ pspy_block_for_pc (PyObject *o, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   if (cust == NULL || cust->objfile () == NULL)
@@ -564,7 +564,7 @@ pspy_find_pc_line (PyObject *o, PyObject *args)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
   return result;
