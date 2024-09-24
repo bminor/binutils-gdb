@@ -13242,6 +13242,18 @@ public:
 	    fileio_error remote_errno;
 	    m_remote->remote_hostio_close (m_fd, &remote_errno);
 	  }
+	catch (const gdb_exception_quit &ex)
+	  {
+	    /* We can't throw from a destructor, so re-set the quit flag
+	      for later QUIT checking.  */
+	    set_quit_flag ();
+	  }
+	catch (const gdb_exception_forced_quit &ex)
+	  {
+	    /* Like above, but (eventually) cause GDB to terminate by
+	       setting sync_quit_force_run.  */
+	    set_force_quit_flag ();
+	  }
 	catch (...)
 	  {
 	    /* Swallow exception before it escapes the dtor.  If
