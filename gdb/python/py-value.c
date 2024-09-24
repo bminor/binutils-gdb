@@ -921,8 +921,7 @@ valpy_assign_core (value_object *self, struct value *new_value)
     }
   catch (const gdb_exception &except)
     {
-      gdbpy_convert_exception (except);
-      return false;
+      return gdbpy_handle_gdb_exception (false, except);
     }
 
   return true;
