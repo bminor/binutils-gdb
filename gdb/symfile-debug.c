@@ -376,7 +376,8 @@ objfile::expand_symtabs_matching
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
-   domain_search_flags domain)
+   domain_search_flags domain,
+   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
 {
   /* This invariant is documented in quick-functions.h.  */
   gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
@@ -393,7 +394,8 @@ objfile::expand_symtabs_matching
   for (const auto &iter : qf)
     if (!iter->expand_symtabs_matching (this, file_matcher, lookup_name,
 					symbol_matcher, expansion_notify,
-					search_flags, domain))
+					search_flags, domain,
+					lang_matcher))
       return false;
   return true;
 }

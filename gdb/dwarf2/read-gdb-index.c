@@ -158,7 +158,9 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
-     domain_search_flags domain) override;
+     domain_search_flags domain,
+     gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
+       override;
 };
 
 /* This dumps minimal information about the index.
@@ -187,7 +189,8 @@ dw2_expand_marked_cus
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
-   domain_search_flags kind)
+   domain_search_flags kind,
+   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
 {
   offset_type vec_len, vec_idx;
   bool global_seen = false;
@@ -268,7 +271,7 @@ dw2_expand_marked_cus
 
       dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cu (cu_index);
       if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile, file_matcher,
-					    expansion_notify))
+					    expansion_notify, lang_matcher))
 	return false;
     }
 
@@ -283,7 +286,8 @@ dwarf2_gdb_index::expand_symtabs_matching
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
-     domain_search_flags domain)
+     domain_search_flags domain,
+     gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -300,7 +304,8 @@ dwarf2_gdb_index::expand_symtabs_matching
 
 	  if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile,
 						file_matcher,
-						expansion_notify))
+						expansion_notify,
+						lang_matcher))
 	    return false;
 	}
       return true;
@@ -316,10 +321,11 @@ dwarf2_gdb_index::expand_symtabs_matching
 					  [&] (offset_type idx)
     {
       if (!dw2_expand_marked_cus (per_objfile, idx, file_matcher,
-				  expansion_notify, search_flags, domain))
+				  expansion_notify, search_flags, domain,
+				  lang_matcher))
 	return false;
       return true;
-    }, per_objfile);
+    }, per_objfile, lang_matcher);
 
   return result;
 }

@@ -3759,7 +3759,8 @@ expand_symtabs_matching
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
-   domain_search_flags domain)
+   domain_search_flags domain,
+   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
 {
   for (objfile *objfile : current_program_space->objfiles ())
     if (!objfile->expand_symtabs_matching (file_matcher,
@@ -3767,7 +3768,8 @@ expand_symtabs_matching
 					   symbol_matcher,
 					   expansion_notify,
 					   search_flags,
-					   domain))
+					   domain,
+					   lang_matcher))
       return false;
   return true;
 }

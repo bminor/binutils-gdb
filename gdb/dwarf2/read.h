@@ -102,6 +102,7 @@ struct dwarf2_per_cu_data
       is_dwz (false),
       reading_dwo_directly (false),
       tu_read (false),
+      lto_artificial (false),
       queued (false),
       m_header_read_in (false),
       mark (false),
@@ -147,6 +148,11 @@ public:
      "midflight").
      This flag is only valid if is_debug_types is true.  */
   unsigned int tu_read : 1;
+
+  /* Non-zero if the CU is produced by GCC and has name "<artificial>".  GCC
+     uses this to indicate that the CU does not correspond to a single source
+     file.  GCC produces this type of CU during LTO.  */
+  unsigned int lto_artificial : 1;
 
   /* Wrap the following in struct packed instead of bitfields to avoid
      data races when the bitfields end up on the same memory location
@@ -324,6 +330,9 @@ public:
     return l;
   }
 
+  /* Make sure that m_lang != language_unknown.  */
+  void ensure_lang (dwarf2_per_objfile *per_objfile);
+
   /* Return the language of this CU, as a DWARF DW_LANG_* value.  This
      may be 0 in some situations.  */
   dwarf_source_language dw_lang () const
@@ -334,6 +343,22 @@ public:
      differ, as DW_LANG can be 0 for included units, whereas in this
      situation LANG would be set by the importing CU.  */
   void set_lang (enum language lang, dwarf_source_language dw_lang);
+
+  /* Return true if the CU may be a multi-language CU.  */
+
+  bool maybe_multi_language () const
+  {
+    enum language lang = this->lang ();
+
+    if (!lto_artificial)
+      /* Assume multi-language CUs are generated only by GCC LTO.  */
+      return false;
+
+    /* If GCC mixes different languages in an artificial LTO CU, it labels it C.
+       The exception to this is when it mixes C and C++, which it labels it C++.
+       For now, we don't consider the latter a multi-language CU.  */
+    return lang == language_c;
+  }
 
   /* Free any cached file names.  */
   void free_cached_file_names ();
@@ -867,7 +892,8 @@ extern bool dw2_expand_symtabs_matching_one
   (dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify);
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher);
 
 /* Helper for dw2_expand_symtabs_matching that works with a
    mapped_index_base instead of the containing objfile.  This is split
@@ -881,7 +907,8 @@ extern bool dw2_expand_symtabs_matching_symbol
    const lookup_name_info &lookup_name_in,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<bool (offset_type)> match_callback,
-   dwarf2_per_objfile *per_objfile);
+   dwarf2_per_objfile *per_objfile,
+   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher);
 
 /* If FILE_MATCHER is non-NULL, set all the
    dwarf2_per_cu_quick_data::MARK of the current DWARF2_PER_OBJFILE

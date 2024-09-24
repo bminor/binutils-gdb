@@ -1644,7 +1644,9 @@ struct readnow_functions : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
-     domain_search_flags domain) override
+     domain_search_flags domain,
+     gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
+       override
   {
     return true;
   }
@@ -2296,7 +2298,8 @@ dw2_expand_symtabs_matching_symbol
    const lookup_name_info &lookup_name_in,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<bool (offset_type)> match_callback,
-   dwarf2_per_objfile *per_objfile)
+   dwarf2_per_objfile *per_objfile,
+   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
 {
   lookup_name_info lookup_name_without_params
     = lookup_name_in.make_ignore_params ();
@@ -2332,6 +2335,8 @@ dw2_expand_symtabs_matching_symbol
   for (int i = 0; i < nr_languages; i++)
     {
       enum language lang_e = (enum language) i;
+      if (lang_matcher != nullptr && !lang_matcher (lang_e))
+	continue;
 
       const language_defn *lang = language_def (lang_e);
       symbol_name_matcher_ftype *name_matcher
@@ -2489,7 +2494,7 @@ check_match (const char *file, int line,
     if (expected_str == NULL || strcmp (expected_str, matched_name) != 0)
       mismatch (expected_str, matched_name);
     return true;
-  }, per_objfile);
+  }, per_objfile, nullptr);
 
   const char *expected_str
   = expected_it == expected_end ? NULL : *expected_it++;
@@ -2850,19 +2855,29 @@ dw2_expand_symtabs_matching_one
   (dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify)
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
 {
-  if (file_matcher == NULL || per_cu->mark)
+  if (file_matcher != nullptr && !per_cu->mark)
+    return true;
+
+  if (lang_matcher != nullptr)
     {
-      bool symtab_was_null = !per_objfile->symtab_set_p (per_cu);
-
-      compunit_symtab *symtab
-	= dw2_instantiate_symtab (per_cu, per_objfile, false);
-      gdb_assert (symtab != nullptr);
-
-      if (expansion_notify != NULL && symtab_was_null)
-	return expansion_notify (symtab);
+      /* Try to skip CUs with non-matching language.  */
+      per_cu->ensure_lang (per_objfile);
+      if (!per_cu->maybe_multi_language ()
+	  && !lang_matcher (per_cu->lang ()))
+	return true;
     }
+
+  bool symtab_was_null = !per_objfile->symtab_set_p (per_cu);
+  compunit_symtab *symtab
+    = dw2_instantiate_symtab (per_cu, per_objfile, false);
+  gdb_assert (symtab != nullptr);
+
+  if (expansion_notify != NULL && symtab_was_null)
+    return expansion_notify (symtab);
+
   return true;
 }
 
@@ -16619,7 +16634,8 @@ cooked_index_functions::expand_symtabs_matching
       gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
       gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
       block_search_flags search_flags,
-      domain_search_flags domain)
+      domain_search_flags domain,
+      gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -16638,7 +16654,8 @@ cooked_index_functions::expand_symtabs_matching
 
 	  if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile,
 						file_matcher,
-						expansion_notify))
+						expansion_notify,
+						lang_matcher))
 	    return false;
 	}
       return true;
@@ -16663,8 +16680,42 @@ cooked_index_functions::expand_symtabs_matching
   symbol_name_match_type match_type
     = lookup_name_without_params.match_type ();
 
+  std::bitset<nr_languages> unique_styles_used;
+  if (lang_matcher != nullptr)
+    for (unsigned iter = 0; iter < nr_languages; ++iter)
+      {
+	enum language lang = (enum language) iter;
+	if (!lang_matcher (lang))
+	  continue;
+
+	switch (lang)
+	  {
+	  case language_cplus:
+	  case language_rust:
+	    unique_styles_used[language_cplus] = true;
+	    break;
+	  case language_d:
+	  case language_go:
+	    unique_styles_used[language_d] = true;
+	    break;
+	  case language_ada:
+	    unique_styles_used[language_ada] = true;
+	    break;
+	  default:
+	    unique_styles_used[language_c] = true;
+	  }
+
+	if (unique_styles_used.count ()
+	    == sizeof (unique_styles) / sizeof (unique_styles[0]))
+	  break;
+      }
+
   for (enum language lang : unique_styles)
     {
+      if (lang_matcher != nullptr
+	  && !unique_styles_used.test (lang))
+	continue;
+
       std::vector<std::string_view> name_vec
 	= lookup_name_without_params.split_name (lang);
       std::vector<std::string> name_str_vec (name_vec.begin (), name_vec.end ());
@@ -16694,6 +16745,15 @@ cooked_index_functions::expand_symtabs_matching
 	  if (!entry->matches (search_flags)
 	      || !entry->matches (domain))
 	    continue;
+
+	  if (lang_matcher != nullptr)
+	    {
+	      /* Try to skip CUs with non-matching language.  */
+	      entry->per_cu->ensure_lang (per_objfile);
+	      if (!entry->per_cu->maybe_multi_language ()
+		  && !lang_matcher (entry->per_cu->lang ()))
+		continue;
+	    }
 
 	  /* We've found the base name of the symbol; now walk its
 	     parentage chain, ensuring that each component
@@ -16763,7 +16823,7 @@ cooked_index_functions::expand_symtabs_matching
 
 	  if (!dw2_expand_symtabs_matching_one (entry->per_cu, per_objfile,
 						file_matcher,
-						expansion_notify))
+						expansion_notify, nullptr))
 	    return false;
 	}
     }
@@ -21463,6 +21523,24 @@ dwarf2_per_cu_data::set_lang (enum language lang,
   gdb_assert (old_dw == 0 || old_dw == dw_lang);
 }
 
+/* See read.h.  */
+
+void
+dwarf2_per_cu_data::ensure_lang (dwarf2_per_objfile *per_objfile)
+{
+  if (lang (false) != language_unknown)
+    return;
+
+  cutu_reader reader (this, per_objfile);
+  if (reader.dummy_p)
+    {
+      set_lang (language_minimal, (dwarf_source_language)0);
+      return;
+    }
+
+  prepare_one_comp_unit (reader.cu, reader.comp_unit_die, language_minimal);
+}
+
 /* A helper function for dwarf2_find_containing_comp_unit that returns
    the index of the result, and that searches a vector.  It will
    return a result even if the offset in question does not actually
@@ -21625,6 +21703,14 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
     lang = pretend_language;
 
   cu->language_defn = language_def (lang);
+
+  /* Initialize the lto_artificial field.  */
+  attr = dwarf2_attr (comp_unit_die, DW_AT_name, cu);
+  if (attr != nullptr
+      && cu->producer != nullptr
+      && strcmp (attr->as_string (), "<artificial>") == 0
+      && producer_is_gcc (cu->producer, nullptr, nullptr))
+    cu->per_cu->lto_artificial = true;
 
   switch (comp_unit_die->tag)
     {

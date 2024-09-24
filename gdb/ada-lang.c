@@ -13048,7 +13048,12 @@ ada_add_global_exceptions (compiled_regex *preg,
 			   },
 			   NULL,
 			   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-			   SEARCH_VAR_DOMAIN);
+			   SEARCH_VAR_DOMAIN,
+			   [&] (enum language lang)
+			     {
+			       /* Try to skip non-Ada CUs.  */
+			       return lang == language_ada;
+			     });
 
   /* Iterate over all objfiles irrespective of scope or linker namespaces
      so we get all exceptions anywhere in the progspace.  */
