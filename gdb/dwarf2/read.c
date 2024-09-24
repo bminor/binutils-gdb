@@ -16078,6 +16078,10 @@ cooked_indexer::ensure_cu_exists (cutu_reader *reader,
       cutu_reader new_reader (per_cu, per_objfile, nullptr, nullptr, false,
 			      m_index_storage->get_abbrev_cache ());
 
+      if (new_reader.dummy_p || new_reader.comp_unit_die == nullptr
+	  || !new_reader.comp_unit_die->has_children)
+	return nullptr;
+
       prepare_one_comp_unit (new_reader.cu, new_reader.comp_unit_die,
 			     language_minimal);
       std::unique_ptr<cutu_reader> copy
@@ -16085,7 +16089,8 @@ cooked_indexer::ensure_cu_exists (cutu_reader *reader,
       result = m_index_storage->preserve (std::move (copy));
     }
 
-  if (result->dummy_p || !result->comp_unit_die->has_children)
+  if (result->dummy_p  || result->comp_unit_die == nullptr
+      || !result->comp_unit_die->has_children)
     return nullptr;
 
   if (for_scanning)
@@ -16271,49 +16276,53 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
       cutu_reader *new_reader
 	= ensure_cu_exists (reader, reader->cu->per_objfile, origin_offset,
 			    origin_is_dwz, false);
-      if (new_reader != nullptr)
+      if (new_reader == nullptr)
+	error (_(DWARF_ERROR_PREFIX
+		 "cannot follow reference to DIE at %s"
+		 " [in module %s]"),
+	       sect_offset_str (origin_offset),
+	       bfd_get_filename (reader->abfd));
+
+      const gdb_byte *new_info_ptr = (new_reader->buffer
+				      + to_underlying (origin_offset));
+
+      if (*parent_entry == nullptr)
 	{
-	  const gdb_byte *new_info_ptr = (new_reader->buffer
-					  + to_underlying (origin_offset));
-
-	  if (*parent_entry == nullptr)
-	    {
-	      /* We only perform immediate lookups of parents for DIEs
-		 from earlier in this CU.  This avoids any problem
-		 with a NULL result when when we see a reference to a
-		 DIE in another CU that we may or may not have
-		 imported locally.  */
-	      parent_map::addr_type addr
-		= parent_map::form_addr (origin_offset, origin_is_dwz);
-	      if (new_reader->cu != reader->cu || new_info_ptr > watermark_ptr)
-		*maybe_defer = addr;
-	      else
-		*parent_entry = m_die_range_map->find (addr);
-	    }
-
-	  unsigned int bytes_read;
-	  const abbrev_info *new_abbrev = peek_die_abbrev (*new_reader,
-							   new_info_ptr,
-							   &bytes_read);
-
-	  if (new_abbrev == nullptr)
-	    error (_(DWARF_ERROR_PREFIX
-		     "Unexpected null DIE at offset %s [in module %s]"),
-		   sect_offset_str (origin_offset),
-		   bfd_get_filename (new_reader->abfd));
-
-	  new_info_ptr += bytes_read;
-
-	  if (new_reader->cu == reader->cu && new_info_ptr == watermark_ptr)
-	    {
-	      /* Self-reference, we're done.  */
-	    }
+	  /* We only perform immediate lookups of parents for DIEs
+	     from earlier in this CU.  This avoids any problem
+	     with a NULL result when when we see a reference to a
+	     DIE in another CU that we may or may not have
+	     imported locally.  */
+	  parent_map::addr_type addr
+	    = parent_map::form_addr (origin_offset, origin_is_dwz);
+	  if (new_reader->cu != reader->cu || new_info_ptr > watermark_ptr)
+	    *maybe_defer = addr;
 	  else
-	    scan_attributes (scanning_per_cu, new_reader, new_info_ptr,
-			     new_info_ptr, new_abbrev, name, linkage_name,
-			     flags, nullptr, parent_entry, maybe_defer,
-			     is_enum_class, true);
+	    *parent_entry = m_die_range_map->find (addr);
 	}
+
+      unsigned int bytes_read;
+      const abbrev_info *new_abbrev = peek_die_abbrev (*new_reader,
+						       new_info_ptr,
+						       &bytes_read);
+
+      if (new_abbrev == nullptr)
+	error (_(DWARF_ERROR_PREFIX
+		 "Unexpected null DIE at offset %s [in module %s]"),
+	       sect_offset_str (origin_offset),
+	       bfd_get_filename (new_reader->abfd));
+
+      new_info_ptr += bytes_read;
+
+      if (new_reader->cu == reader->cu && new_info_ptr == watermark_ptr)
+	{
+	  /* Self-reference, we're done.  */
+	}
+      else
+	scan_attributes (scanning_per_cu, new_reader, new_info_ptr,
+			 new_info_ptr, new_abbrev, name, linkage_name,
+			 flags, nullptr, parent_entry, maybe_defer,
+			 is_enum_class, true);
     }
 
   if (!for_specification)
@@ -20415,7 +20424,12 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 			     false, cu->lang ());
 
       target_cu = per_objfile->get_cu (per_cu);
-      gdb_assert (target_cu != nullptr);
+      if (target_cu == nullptr)
+	error (_(DWARF_ERROR_PREFIX
+		 "cannot follow reference to DIE at %s"
+		 " [in module %s]"),
+	       sect_offset_str (sect_off),
+	       objfile_name (per_objfile->objfile));
     }
   else if (cu->dies == NULL)
     {
