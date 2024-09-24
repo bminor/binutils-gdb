@@ -462,13 +462,24 @@ gdb_type_name_to_poke (std::string str, struct type *type = nullptr)
   return str;
 }
 
+/* Given a GDB symbol name, mangle it to a valid Poke variable name.  */
+
+static std::string
+gdb_sym_name_to_poke (std::string str)
+{
+  for (auto &ch : str)
+    if (!isalnum (ch))
+      ch = '_';
+  return str;
+}
+
 static void poke_command (const char *args, int from_tty);
 
 /* Command to feed the poke compiler with the definition of some given
    GDB type.  */
 
 static std::string
-poke_add_type (struct type *type)
+poke_add_type (struct type *type, std::string *poke_type_name = nullptr)
 {
   std::string type_name;
   std::string str;
@@ -640,16 +651,18 @@ poke_add_type (struct type *type)
 
       if (!type_name.empty ())
 	{
-	  std::string poke_type_name = gdb_type_name_to_poke (type_name, type);
+	  std::string ptype_name = gdb_type_name_to_poke (type_name, type);
 
 	  std::string deftype = "type ";
-	  deftype += poke_type_name;
+	  deftype += ptype_name;
 	  deftype += " = ";
 	  deftype += str;
 
 	  type_poke_strings.push_back (deftype);
 	  poke_command (deftype.c_str (), 0 /* from_tty */);
-	  gdb_printf ("added type %s = %s\n", poke_type_name.c_str (),
+	  if (poke_type_name != nullptr)
+	    *poke_type_name = ptype_name;
+	  gdb_printf ("added type %s = %s\n", ptype_name.c_str (),
 		      str.c_str ());
 	}
       else
@@ -779,7 +792,13 @@ poke_dump_types (const char *args, int from_tty)
 static void
 poke_add_type_command (const char *args, int from_tty)
 {
-  std::string type_name = skip_spaces (args);
+  const char *sans_space_args{ skip_spaces (args) };
+
+  if (sans_space_args == nullptr)
+    return;
+
+  std::string type_name{ sans_space_args };
+
   type_name = gdb_type_name_to_poke (type_name);
 
   expression_up expr = parse_expression (args);
@@ -793,6 +812,10 @@ static void
 poke_add_types (const char *args, int from_tty)
 {
   const char *symbol_name_regexp = skip_spaces (args);
+
+  if (symbol_name_regexp == nullptr)
+    return;
+
   global_symbol_searcher spec (SEARCH_TYPE_DOMAIN, symbol_name_regexp);
   std::vector<symbol_search> symbols{ spec.search () };
 
@@ -811,16 +834,56 @@ poke_add_types (const char *args, int from_tty)
 static void
 poke_add_var_command (const char *args, int from_tty)
 {
-#if 0
-  std::string sym_name = skip_spaces (args);
-  type_name = gdb_type_name_to_poke (type_name);
+  const auto sans_space_args{ skip_spaces (args) };
 
-  expression_up expr = parse_expression (args);
-  struct value *val = expr->evaluate_type ();
-  struct type *type = val->type ();
+  if (sans_space_args == nullptr)
+    return;
 
-  poke_add_type (type);
-#endif
+  std::string sym_name{ sans_space_args };
+}
+
+static std::string
+addr_to_offset (CORE_ADDR addr)
+{
+  int unit_size{ gdbarch_addressable_memory_unit_size (get_current_arch ()) };
+
+  return std::to_string (addr) + "#" + std::to_string (unit_size * 8);
+}
+
+static void
+poke_add_vars (const char *args, int from_tty)
+{
+  const char *symbol_name_regexp = skip_spaces (args);
+
+  if (symbol_name_regexp == nullptr)
+    return;
+
+  global_symbol_searcher spec (SEARCH_VAR_DOMAIN, symbol_name_regexp);
+  std::vector<symbol_search> symbols{ spec.search () };
+
+  for (const symbol_search &p : symbols)
+    {
+      QUIT;
+
+      struct symbol *sym = p.symbol;
+      struct type *type = sym->type ();
+      CORE_ADDR value_addr = sym->value_address ();
+      const char *natural_name = sym->natural_name ();
+
+      if (type != nullptr)
+	{
+	  std::string defvar{ "var " };
+	  std::string poke_type_name;
+
+	  poke_add_type (type, &poke_type_name);
+
+	  defvar += gdb_sym_name_to_poke (natural_name) + " = "
+		    + poke_type_name + " @ " + addr_to_offset (value_addr);
+
+	  poke_command (defvar.c_str (), 0 /* from_tty */);
+	  gdb_printf ("added variable %s\n", defvar.c_str ());
+	}
+    }
 }
 
 /* Command to execute a poke statement or declaration.	*/
@@ -912,6 +975,14 @@ Usage: poke-add-types REGEXP\n"));
   add_com ("poke-dump-types", class_vars, poke_dump_types, _("\
 Dump the definition of all the GDB types known to poke.\n\
 Usage: poke-dump-types\n"));
+
+  add_com ("poke-add-var", class_vars, poke_add_var_command, _("\
+Add Poke variable for the given symbol.\n\
+Usage: poke-add-var EXPRESSION\n"));
+
+  add_com ("poke-add-vars", class_vars, poke_add_vars, _("\
+Add Poke variables for the given regexp.\n\
+Usage: poke-add-vars REGEXP\n"));
 
   add_com ("poke", class_vars, poke_command, _("\
 Execute a Poke statement or declaration.\n\
