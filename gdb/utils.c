@@ -1282,6 +1282,14 @@ set_screen_width_and_height (int width, int height)
   set_width ();
 }
 
+/* Import termcap variable UP (instead of readline private variable
+   _rl_term_up, which we're trying to avoid, see PR build/10723).  The UP
+   variable doesn't seem be part of the regular termcap interface, but rather
+   curses-specific.  But if it's missing in the termcap library, then readline
+   provides a fallback version.  Let's assume the fallback is not part of the
+   private readline interface.  */
+extern "C" char *UP;
+
 /* Implement "maint info screen".  */
 
 static void
@@ -1340,6 +1348,46 @@ maintenance_info_screen (const char *args, int from_tty)
 	      _("Number of lines environment thinks "
 		"are in a page is %s (LINES).\n"),
 	      getenv ("LINES"));
+
+  bool have_up = UP != nullptr && *UP != '\0';
+
+  /* Fetch value of readline variable horizontal-scroll-mode.  */
+  const char *horizontal_scroll_mode_value
+    = rl_variable_value ("horizontal-scroll-mode");
+  bool force_horizontal_scroll_mode
+    = (horizontal_scroll_mode_value != nullptr
+       && strcmp (horizontal_scroll_mode_value, "on") == 0);
+
+  const char *mode = nullptr;
+  const char *reason = nullptr;
+  if (batch_flag)
+    {
+      mode = "unsupported";
+      reason = "gdb batch mode";
+    }
+  else if (!have_up)
+    {
+      mode = "unsupported";
+      reason = "terminal is not Cursor Up capable";
+    }
+  else if (force_horizontal_scroll_mode)
+    {
+      mode = "disabled";
+      reason = "horizontal-scroll-mode";
+    }
+  else if (readline_hidden_cols)
+    {
+      mode = "readline";
+      reason = "terminal is not auto wrap capable, last column reserved";
+    }
+  else
+    {
+      mode = "terminal";
+      reason = "terminal is auto wrap capable";
+    }
+
+  gdb_printf (gdb_stdout, _("Readline wrapping mode: %s (%s).\n"), mode,
+	      reason);
 }
 
 void
