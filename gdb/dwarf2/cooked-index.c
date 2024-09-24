@@ -256,6 +256,7 @@ cooked_index::dump (gdbarch *arch)
       gdb_printf ("    DWARF tag:  %s\n", dwarf_tag_name (entry->tag));
       gdb_printf ("    flags:      %s\n", to_string (entry->flags).c_str ());
       gdb_printf ("    DIE offset: %s\n", sect_offset_str (entry->die_offset));
+      gdb_printf ("    CU index:   %u\n", entry->per_cu->index);
 
       if ((entry->flags & IS_PARENT_DEFERRED) != 0)
 	gdb_printf ("    parent:     deferred (%" PRIx64 ")\n",
