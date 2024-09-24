@@ -109,6 +109,9 @@ public:
       /* "If the initialization of exit_function throws an exception,
 	 calls f()."  */
       f ();
+      /* "throws: Nothing, unless the initialization of exit_function
+	 throws."  */
+      throw;
     }
 
   template<typename EFP,
