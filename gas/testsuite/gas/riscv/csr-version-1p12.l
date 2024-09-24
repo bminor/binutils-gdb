@@ -661,6 +661,22 @@
 .*Info: macro .*
 .*Warning: invalid CSR `minstretcfgh', needs `smcntrpmf' extension
 .*Info: macro .*
+.*Warning: invalid CSR `mnepc', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnepc', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mncause', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mncause', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnscratch', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnscratch', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnstatus', needs `smrnmi' extension
+.*Info: macro .*
+.*Warning: invalid CSR `mnstatus', needs `smrnmi' extension
+.*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
 .*Info: macro .*
 .*Warning: invalid CSR `mstateen0', needs `smstateen' extension
