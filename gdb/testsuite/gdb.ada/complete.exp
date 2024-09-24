@@ -124,7 +124,7 @@ test_gdb_complete "pck.my" \
                   "p pck.my_global_variable"
 
 # A fully qualified package name
-test_gdb_complete "pck.inne" \
+test_gdb_complete "pck.inner" \
     "p pck.inner.inside_variable" \
     "complete fully qualified package name"
 
