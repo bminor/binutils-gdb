@@ -2575,18 +2575,12 @@ target_wait (ptid_t ptid, struct target_waitstatus *status,
   if (!target_can_async_p (target))
     gdb_assert ((options & TARGET_WNOHANG) == 0);
 
-  try
-    {
-      gdb::observers::target_pre_wait.notify (ptid);
-      ptid_t event_ptid = target->wait (ptid, status, options);
-      gdb::observers::target_post_wait.notify (event_ptid);
-      return event_ptid;
-    }
-  catch (...)
-    {
-      gdb::observers::target_post_wait.notify (null_ptid);
-      throw;
-    }
+  ptid_t event_ptid = null_ptid;
+  SCOPE_EXIT { gdb::observers::target_post_wait.notify (event_ptid); };
+  gdb::observers::target_pre_wait.notify (ptid);
+  event_ptid = target->wait (ptid, status, options);
+
+  return event_ptid;
 }
 
 /* See target.h.  */
