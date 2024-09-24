@@ -885,7 +885,7 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   catch (const gdb_exception &except)
     {
       Py_DECREF (self);
-      GDB_PY_SET_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (-1, except);
     }
 
   return 0;

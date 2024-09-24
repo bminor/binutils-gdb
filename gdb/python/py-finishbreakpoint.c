@@ -217,7 +217,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_SET_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (-1, except);
     }
 
   if (PyErr_Occurred ())
@@ -317,7 +317,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_SET_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (-1, except);
     }
 
   self_bpfinish->py_bp.bp->frame_id = frame_id;

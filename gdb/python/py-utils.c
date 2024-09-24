@@ -247,7 +247,7 @@ get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
 	}
       catch (const gdb_exception &except)
 	{
-	  GDB_PY_SET_HANDLE_EXCEPTION (except);
+	  return gdbpy_handle_gdb_exception (-1, except);
 	}
     }
   else

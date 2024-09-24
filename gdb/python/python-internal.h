@@ -932,13 +932,6 @@ private:
   PyGILState_STATE m_state;
 };
 
-/* Use this in a 'catch' block to convert the exception to a Python
-   exception and return -1.  */
-#define GDB_PY_SET_HANDLE_EXCEPTION(Exception)			\
-  do {								\
-    return gdbpy_handle_gdb_exception (-1, Exception);	\
-  } while (0)
-
 int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
 void gdbpy_print_stack_or_quit ();

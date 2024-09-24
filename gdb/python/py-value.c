@@ -997,7 +997,7 @@ value_has_field (struct value *v, PyObject *field)
     }
   catch (const gdb_exception &except)
     {
-      GDB_PY_SET_HANDLE_EXCEPTION (except);
+      return gdbpy_handle_gdb_exception (-1, except);
     }
 
   return has_field;
@@ -1709,7 +1709,7 @@ valpy_nonzero (PyObject *self)
       /* This is not documented in the Python documentation, but if
 	 this function fails, return -1 as slot_nb_nonzero does (the
 	 default Python nonzero function).  */
-      GDB_PY_SET_HANDLE_EXCEPTION (ex);
+      return gdbpy_handle_gdb_exception (-1, ex);
     }
 
   return nonzero;
