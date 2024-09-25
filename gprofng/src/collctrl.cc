@@ -2422,7 +2422,7 @@ Coll_Ctrl::preprocess_names ()
     }
   else
     {
-      expt_dir = dbe_strndup (expt_name, s - expt_name - 1);
+      expt_dir = dbe_strndup (expt_name, s - expt_name);
       base_name = strdup (s + 1);
     }
 
