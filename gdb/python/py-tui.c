@@ -36,6 +36,9 @@
 #include "tui/tui-layout.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-winsource.h"
+#include "observable.h"
+#include "py-events.h"
+#include "py-event.h"
 
 class tui_py_window;
 
@@ -616,6 +619,29 @@ PyTypeObject gdbpy_tui_window_object_type =
   0,				  /* tp_alloc */
 };
 
+/* Called when TUI is enabled or disabled.  */
+
+static void
+gdbpy_tui_enabled (bool state)
+{
+  gdbpy_enter enter_py;
+
+  if (evregpy_no_listeners_p (gdb_py_events.tui_enabled))
+    return;
+
+  gdbpy_ref<> event_obj = create_event_object (&tui_enabled_event_object_type);
+  if (event_obj == nullptr)
+    {
+      gdbpy_print_stack ();
+      return;
+    }
+
+  gdbpy_ref<> code (PyBool_FromLong (state));
+  if (evpy_add_attribute (event_obj.get (), "enabled", code.get ()) < 0
+      || evpy_emit_event (event_obj.get (), gdb_py_events.tui_enabled) < 0)
+    gdbpy_print_stack ();
+}
+
 #endif /* TUI */
 
 /* Initialize this module.  */
@@ -627,6 +653,8 @@ gdbpy_initialize_tui ()
   gdbpy_tui_window_object_type.tp_new = PyType_GenericNew;
   if (gdbpy_type_ready (&gdbpy_tui_window_object_type) < 0)
     return -1;
+
+  gdb::observers::tui_enabled.attach (gdbpy_tui_enabled, "py-tui");
 #endif	/* TUI */
 
   return 0;

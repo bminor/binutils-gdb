@@ -253,6 +253,8 @@ extern observable <program_space */* pspace */> new_program_space;
 /* The program space PSPACE is about to be deleted.  */
 extern observable <program_space */* pspace */> free_program_space;
 
+extern observable<bool /* enabled */> tui_enabled;
+
 } /* namespace observers */
 
 } /* namespace gdb */

@@ -40,6 +40,7 @@
 #include "terminal.h"
 #include "top.h"
 #include "ui.h"
+#include "observable.h"
 
 #include <fcntl.h>
 
@@ -509,6 +510,8 @@ tui_enable (void)
   /* Update gdb's knowledge of its terminal.  */
   gdb_save_tty_state ();
   tui_update_gdb_sizes ();
+
+  gdb::observers::tui_enabled.notify (true);
 }
 
 /* Leave the tui mode.
@@ -547,6 +550,8 @@ tui_disable (void)
 
   tui_active = false;
   tui_update_gdb_sizes ();
+
+  gdb::observers::tui_enabled.notify (false);
 }
 
 /* Command wrapper for enabling tui mode.  */

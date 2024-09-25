@@ -4081,6 +4081,16 @@ The @code{gdb.Progspace} that is about to be removed from
 @value{GDBN}.
 @end defvar
 
+@item events.tui_enabled
+This is emitted when the TUI is enabled or disabled.  The event is of
+type @code{gdb.TuiEnabledEvent}, which has a single read-only
+attribute:
+
+@defvar TuiStatusEvent.enabled
+If the TUI has just been enabled, this is @code{True}; otherwise it is
+@code{False}.
+@end defvar
+
 @end table
 
 @node Threads In Python
