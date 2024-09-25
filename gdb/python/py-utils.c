@@ -390,6 +390,35 @@ gdbpy_handle_exception ()
 
   if (fetched_error.type_matches (PyExc_KeyboardInterrupt))
     throw_quit ("Quit");
+  else if (fetched_error.type_matches (PyExc_SystemExit))
+    {
+      gdbpy_ref<> value = fetched_error.value ();
+      gdbpy_ref<> code (PyObject_GetAttrString (value.get (), "code"));
+      int exit_arg;
+
+      if (code.get () == Py_None)
+	{
+	  /* CODE == None: exit status is 0.  */
+	  exit_arg = 0;
+	}
+      else if (code.get () != nullptr && PyLong_Check (code.get ()))
+	{
+	  /* CODE == integer: exit status is aforementioned integer.  */
+	  exit_arg = PyLong_AsLong (code.get ());
+	}
+      else
+	{
+	  if (code.get () == nullptr)
+	    gdbpy_print_stack ();
+
+	  /* Otherwise: exit status is 1, print code to stderr.  */
+	  if (msg != nullptr)
+	    gdb_printf (gdb_stderr, "%s\n", msg.get ());
+	  exit_arg = 1;
+	}
+
+      quit_force (&exit_arg, 0);
+    }
   else if (! fetched_error.type_matches (gdbpy_gdberror_exc)
 	   || msg == NULL || *msg == '\0')
     {
