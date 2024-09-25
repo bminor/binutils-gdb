@@ -1327,6 +1327,8 @@ static htab_t op_hash;
 /* Hash table for register lookup.  */
 static htab_t reg_hash;
 
+#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O) \
+     || defined (TE_PE))
 static const struct
 {
   const char *str;
@@ -1414,6 +1416,7 @@ gotrel[] =
 #undef OPERAND_TYPE_IMM32_32S_64_DISP32_64
 #undef OPERAND_TYPE_IMM64_DISP64
 };
+#endif
 
   /* Various efficient no-op patterns for aligning code labels.
      Note: Don't try to assemble the instructions in the comments.
@@ -12836,10 +12839,8 @@ x86_address_bytes (void)
   return stdoutput->arch_info->bits_per_address / 8;
 }
 
-#if (!(defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O)) \
-     || defined (LEX_AT)) && !defined (TE_PE)
-# define lex_got(reloc, adjust, types) NULL
-#else
+#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O) \
+     || defined (TE_PE))
 /* Parse operands of the form
    <symbol>@GOTOFF+<nnn>
    and similar .plt or .got references.
@@ -12937,6 +12938,8 @@ lex_got (enum bfd_reloc_code_real *rel,
   /* Might be a symbol version string.  Don't as_bad here.  */
   return NULL;
 }
+#else
+# define lex_got(reloc, adjust, types) NULL
 #endif
 
 bfd_reloc_code_real_type
@@ -12948,9 +12951,7 @@ x86_cons (expressionS *exp, int size)
   exp->X_md = 0;
   expr_mode = expr_operator_none;
 
-#if ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) \
-      && !defined (LEX_AT)) \
-    || defined (TE_PE)
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (TE_PE)
   if (size == 4 || (object_64bit && size == 8))
     {
       /* Handle @GOTOFF and the like in an expression.  */
