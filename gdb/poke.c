@@ -929,8 +929,8 @@ poke_command (const char *args, int from_tty)
 			     &exit_exception)
 	      != PK_OK
 	  || exit_exception != PK_NULL)
-	/* Poke compiler will right error message to the output.  */
-	goto error;
+	/* Poke compiler will write error message to the output.  */
+	goto done;
     }
   else
     {
@@ -941,7 +941,7 @@ poke_command (const char *args, int from_tty)
 				&exit_exception)
 	      != PK_OK
 	  || exit_exception != PK_NULL)
-	goto error;
+	goto done;
 
       if (val != PK_NULL)
 	{
@@ -950,9 +950,9 @@ poke_command (const char *args, int from_tty)
 	}
     }
 
+done:
   pk_set_lexical_cuckolding_p (poke_compiler (), 0);
 
-error:
   if (exit_exception != PK_NULL)
     poke_handle_exception (exit_exception);
 }
