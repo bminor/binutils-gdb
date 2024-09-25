@@ -346,7 +346,6 @@ the native maintainer when resolving ABI issues.
 	h8300		--target=h8300-elf
 
 	i386		--target=i386-elf
-			Felix Willgerodt	felix.willgerodt@intel.com
 
 	ia64		--target=ia64-linux-gnu
 			(--target=ia64-elf broken)
@@ -422,7 +421,6 @@ the native maintainer when resolving ABI issues.
 	vax		--target=vax-netbsd
 
 	x86-64		--target=x86_64-linux-gnu
-			Felix Willgerodt	felix.willgerodt@intel.com
 
 	xstormy16	--target=xstormy16-elf
 	xtensa		--target=xtensa-elf
@@ -790,7 +788,7 @@ Ulrich Weigand					uweigand@de.ibm.com
 Ken Werner					ken.werner@de.ibm.com
 Tim Wiederhake					tim.wiederhake@intel.com
 Mark Wielaard					mark@klomp.org
-Felix Willgerodt				felix.willgerodt@intel.com
+Felix Willgerodt				felix.willgerodt@gmail.com
 Nathan Williams					nathanw@wasabisystems.com
 Bob Wilson					bob.wilson@acm.org
 Jim Wilson					wilson@tuliptree.org
@@ -866,6 +864,7 @@ Stan Shebs (Global)				stanshebs@google.com
 Joel Brobecker (Global, Ada)			brobecker@adacore.com
 Doug Evans (Global)				dje@google.com
 Yao Qi (Global)					qiyao@sourceware.org
+Felix Willgerodt (amd64, i386)			felix.willgerodt@gmail.com
 
 
 Folks that have been caught up in a paper trail:
