@@ -18,6 +18,7 @@
 
 import gdb.printing
 
+
 class SPrinter:
     def __init__(self, val):
         self.val = val

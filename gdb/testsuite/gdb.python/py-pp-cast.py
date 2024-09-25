@@ -15,6 +15,7 @@
 
 import gdb.printing
 
+
 class PpIntPrinter(object):
     def __init__(self, val):
         self.val = val
