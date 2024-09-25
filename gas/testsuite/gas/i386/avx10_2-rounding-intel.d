@@ -6,9 +6,9 @@
 
 Disassembly of section \.text:
 
-0+ <_start>:
 #...
-\s*a83:\s*62 f1 d1 18 c2 ec 7b\s+vcmppd k5,ymm5,ymm4\{sae\},0x7b
+[a-f0-9]+ <_intel>:
+\s*[a-f0-9]+:\s*62 f1 d1 18 c2 ec 7b\s+vcmppd k5,ymm5,ymm4\{sae\},0x7b
 \s*[a-f0-9]+:\s*62 f1 d1 1f c2 ec 7b\s+vcmppd k5\{k7\},ymm5,ymm4\{sae\},0x7b
 \s*[a-f0-9]+:\s*62 f2 f9 18 42 f5\s+vgetexppd ymm6,ymm5\{sae\}
 \s*[a-f0-9]+:\s*62 f2 f9 1f 42 f5\s+vgetexppd ymm6\{k7\},ymm5\{sae\}

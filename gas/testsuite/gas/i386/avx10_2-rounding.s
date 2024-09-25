@@ -175,6 +175,7 @@ _start:
 	vcvt\n\()2ph	{rz-sae}, %ymm5, %ymm6{%k7}{z}
 	.endr
 
+_intel:
 	.intel_syntax noprefix
 	.irp m, pd, ph, ps
 	vcmp\m	k5, ymm5, ymm4{sae}, 123
