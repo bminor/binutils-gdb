@@ -377,7 +377,9 @@ static void
 maintenance_print_symbols (const char *args, int from_tty)
 {
   struct ui_file *outfile = gdb_stdout;
-  char *address_arg = NULL, *source_arg = NULL, *objfile_arg = NULL;
+  const char *address_arg = nullptr;
+  const char *source_arg = nullptr;
+  const char *objfile_arg = nullptr;
   int i, outfile_idx;
 
   dont_repeat ();
@@ -655,7 +657,7 @@ static void
 maintenance_print_msymbols (const char *args, int from_tty)
 {
   struct ui_file *outfile = gdb_stdout;
-  char *objfile_arg = NULL;
+  const char *objfile_arg = nullptr;
   int i, outfile_idx;
 
   dont_repeat ();
@@ -887,7 +889,7 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 static void
 maintenance_expand_symtabs (const char *args, int from_tty)
 {
-  char *regexp = NULL;
+  const char *regexp = nullptr;
 
   /* We use buildargv here so that we handle spaces in the regexp
      in a way that allows adding more arguments later.  */
