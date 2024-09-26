@@ -55,7 +55,7 @@ foreach_gnat_encoding scenario flags {all minimal} {
 
     # GNAT >= 12.0 has the needed fix here.
     set xfail_expected 0
-    if {$scenario == "minimal" && ![test_compiler_info {gcc-1[2-9]-*}]} {
+    if {$scenario == "minimal" && [gnat_version_compare < 12]} {
 	set xfail_expected 1
     }
 

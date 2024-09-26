@@ -111,14 +111,31 @@ proc gdb_get_bp_addr { num } {
 }
 
 # Compare the version numbers in L1 to those in L2 using OP, and
-# return 1 if the comparison is true.  OP can be "<", "<=", or "==".
-# It is ok if the lengths of the lists differ.
+# return 1 if the comparison is true.  OP can be "<", "<=", ">", ">=",
+# or "==".  It is ok if the lengths of the lists differ.
 
 proc version_compare { l1 op l2 } {
     switch -exact $op {
 	"=="    -
 	"<="    -
 	"<"     {}
+
+	">=" {
+	    # a >= b => b <= a
+	    set x $l2
+	    set l2 $l1
+	    set l1 $x
+	    set op "<="
+	}
+
+	">" {
+	    # a > b => b < a
+	    set x $l2
+	    set l2 $l1
+	    set l1 $x
+	    set op "<"
+	}
+
 	default { error "unsupported op: $op" }
     }
 

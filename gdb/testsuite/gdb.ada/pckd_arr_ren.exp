@@ -32,8 +32,9 @@ foreach_gnat_encoding scenario flags {all minimal} {
     runto "foo.adb:$bp_location"
 
     # GNAT 9 and 10 are known to fail.
-    if {$scenario == "minimal" && ([test_compiler_info {gcc-9-*}] \
-				       || [test_compiler_info {gcc-10-*}])} {
+    if {$scenario == "minimal"
+	&& [gnat_version_compare >= 9]
+	&& [gnat_version_compare <= 10]} {
 	setup_kfail "minimal encodings" *-*-*
     }
     gdb_test "print A2" \

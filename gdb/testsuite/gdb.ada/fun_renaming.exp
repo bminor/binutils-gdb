@@ -41,7 +41,7 @@ gdb_test_multiple $test $test {
         pass $test
     }
     -wrap -re "No definition of \"fun_rename_test_n\" in current context\\." {
-        if {[test_compiler_info {gcc-6*}]} {
+	if {[gnat_version_compare >= 6]} {
             fail $test
         } else {
             xfail $test
@@ -55,7 +55,7 @@ gdb_test_multiple $test $test {
         pass $test
     }
     -wrap -re "No definition of \"renamed_fun_rename_test_next\" in current context\\." {
-        if {[test_compiler_info {gcc-6*}]} {
+	if {[gnat_version_compare >= 6]} {
             fail $test
         } else {
             xfail $test
@@ -69,14 +69,14 @@ gdb_test_multiple $test $test {
         pass $test
     }
     -wrap -re "No definition of \"pack\\.renamed_fun_rename_test_next\" in current context\\." {
-        if {[test_compiler_info {gcc-6*}]} {
+	if {[gnat_version_compare >= 6]} {
             fail $test
         } else {
             xfail $test
         }
     }
     -wrap -re "Type <data variable, no debug info> is not a structure or union type\\." {
-        if {[test_compiler_info {gcc-6*}]} {
+	if {[gnat_version_compare >= 6]} {
             fail $test
         } else {
             xfail $test

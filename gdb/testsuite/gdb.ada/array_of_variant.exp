@@ -20,7 +20,7 @@ require allow_ada_tests
 
 standard_ada_testfile p
 
-set old_gcc [expr [test_compiler_info {gcc-[0-7]-*}]]
+set old_gcc [gnat_version_compare <= 7]
 
 proc gdb_test_with_xfail { cmd re re_xfail msg } {
     global scenario old_gcc

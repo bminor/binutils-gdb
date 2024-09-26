@@ -41,7 +41,7 @@ foreach_gnat_encoding scenario flags {all minimal} {
 	}
 	-re " = \\(size => 8, length => 8, buffer => warning: could not find bounds information on packed array.*$gdb_prompt $" {
 	    # GNAT >= 11.0 has the needed fix here.
-	    if {$scenario == "minimal" && ![test_compiler_info {gcc-1[1-9]-*}]} {
+	    if {$scenario == "minimal" && [gnat_version_compare >= 11]} {
 		setup_kfail "minimal encodings" *-*-*
 	    }
 	    fail $test
@@ -62,7 +62,7 @@ foreach_gnat_encoding scenario flags {all minimal} {
 	}
 	-re " = \\(size => 8, length => 8, buffer => warning: could not find bounds information on packed array.*$gdb_prompt $" {
 	    # GNAT >= 11.0 has the needed fix here.
-	    if {$scenario == "minimal" && ![test_compiler_info {gcc-1[1-9]-*}]} {
+	    if {$scenario == "minimal" && [gnat_version_compare >= 11]} {
 		setup_kfail "minimal encodings" *-*-*
 	    }
 	    fail $test
