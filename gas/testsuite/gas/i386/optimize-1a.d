@@ -171,6 +171,26 @@ Disassembly of section .text:
  +[a-f0-9]+:	f3 .*	movss  %xmm1,\(%edx\)
  +[a-f0-9]+:	c5 .*	vmovd  %xmm1,%edx
  +[a-f0-9]+:	c5 .*	vmovss %xmm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovaps %xmm1,%xmm2
+ +[a-f0-9]+:	c5 .*	vmovups %xmm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovdqa %xmm1,%xmm2
+ +[a-f0-9]+:	c5 .*	vmovdqu %xmm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovaps %xmm1,%xmm2
+ +[a-f0-9]+:	c5 .*	vmovups %xmm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovdqa %xmm1,%xmm2
+ +[a-f0-9]+:	c5 .*	vmovdqu %xmm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovapd %xmm1,%xmm2
+ +[a-f0-9]+:	c5 .*	vmovupd %xmm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovdqa %xmm1,%xmm2
+ +[a-f0-9]+:	c5 .*	vmovdqu %xmm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovaps %ymm1,%ymm2
+ +[a-f0-9]+:	c5 .*	vmovups %ymm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovdqa %ymm1,%ymm2
+ +[a-f0-9]+:	c5 .*	vmovdqu %ymm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovapd %ymm1,%ymm2
+ +[a-f0-9]+:	c5 .*	vmovupd %ymm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovdqa %ymm1,%ymm2
+ +[a-f0-9]+:	c5 .*	vmovdqu %ymm1,\(%edx\)
  +[a-f0-9]+:	0f ba e0 0f          	bt     \$0xf,%eax
  +[a-f0-9]+:	66 0f ba e0 10       	bt     \$0x10,%ax
  +[a-f0-9]+:	0f ba f8 0f          	btc    \$0xf,%eax

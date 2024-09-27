@@ -199,6 +199,31 @@ _start:
 	vextractps	$0, %xmm1, %edx
 	vextractps	$0, %xmm1, (%edx)
 
+	vextractf128 $0, %ymm1, %xmm2
+	vextractf128 $0, %ymm1, (%edx)
+	vextracti128 $0, %ymm1, %xmm2
+	vextracti128 $0, %ymm1, (%edx)
+
+	vextractf32x4 $0, %ymm1, %xmm2
+	vextractf32x4 $0, %ymm1, (%edx)
+	vextracti32x4 $0, %ymm1, %xmm2
+	vextracti32x4 $0, %ymm1, (%edx)
+
+	vextractf64x2 $0, %ymm1, %xmm2
+	vextractf64x2 $0, %ymm1, (%edx)
+	vextracti64x2 $0, %ymm1, %xmm2
+	vextracti64x2 $0, %ymm1, (%edx)
+
+	vextractf32x8 $0, %zmm1, %ymm2
+	vextractf32x8 $0, %zmm1, (%edx)
+	vextracti32x8 $0, %zmm1, %ymm2
+	vextracti32x8 $0, %zmm1, (%edx)
+
+	vextractf64x4 $0, %zmm1, %ymm2
+	vextractf64x4 $0, %zmm1, (%edx)
+	vextracti64x4 $0, %zmm1, %ymm2
+	vextracti64x4 $0, %zmm1, (%edx)
+
 	bt	$15, %ax
 	bt	$16, %ax
 	btc	$15, %ax

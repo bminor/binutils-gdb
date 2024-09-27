@@ -5587,6 +5587,80 @@ optimize_encoding (void)
       i.operands = 2;
       i.imm_operands = 0;
     }
+  else if ((i.tm.base_opcode | 0x22) == 0x3b
+	   && i.tm.opcode_space == SPACE_0F3A
+	   && i.op[0].imms->X_op == O_constant
+	   && i.op[0].imms->X_add_number == 0)
+    {
+      /* Optimize: -O:
+         vextractf128 $0, %ymmN, %xmmM      -> vmovaps %xmmN, %xmmM
+         vextractf128 $0, %ymmN, mem        -> vmovups %xmmN, mem
+         vextractf32x4 $0, %[yz]mmN, %xmmM  -> vmovaps %xmmN, %xmmM
+         vextractf32x4 $0, %[yz]mmN, mem    -> vmovups %xmmN, mem
+         vextractf64x2 $0, %[yz]mmN, %xmmM  -> vmovapd %xmmN, %xmmM
+         vextractf64x2 $0, %[yz]mmN, mem    -> vmovupd %xmmN, mem
+         vextractf32x8 $0, %zmmN, %ymmM     -> vmovaps %ymmN, %ymmM
+         vextractf32x8 $0, %zmmN, mem       -> vmovups %ymmN, mem
+         vextractf64x4 $0, %zmmN, %ymmM     -> vmovapd %ymmN, %ymmM
+         vextractf64x4 $0, %zmmN, mem       -> vmovupd %ymmN, mem
+         vextracti128 $0, %ymmN, %xmmM      -> vmovdqa %xmmN, %xmmM
+         vextracti128 $0, %ymmN, mem        -> vmovdqu %xmmN, mem
+         vextracti32x4 $0, %[yz]mmN, %xmmM  -> vmovdqa{,32} %xmmN, %xmmM
+         vextracti32x4 $0, %[yz]mmN, mem    -> vmovdqu{,32} %xmmN, mem
+         vextracti64x2 $0, %[yz]mmN, %xmmM  -> vmovdqa{,64} %xmmN, %xmmM
+         vextracti64x2 $0, %[yz]mmN, mem    -> vmovdqu{,64} %xmmN, mem
+         vextracti32x8 $0, %zmmN, %ymmM     -> vmovdqa{,32} %ymmN, %ymmM
+         vextracti32x8 $0, %zmmN, mem       -> vmovdqu{,32} %ymmN, mem
+         vextracti64x4 $0, %zmmN, %ymmM     -> vmovdqa{,64} %ymmN, %ymmM
+         vextracti64x4 $0, %zmmN, mem       -> vmovdqu{,64} %ymmN, mem
+       */
+      i.tm.opcode_space = SPACE_0F;
+
+      if (!i.mask.reg
+	  && (pp.encoding <= encoding_vex3
+	      || (pp.encoding == encoding_evex512
+		  && (!i.base_reg || !(i.base_reg->reg_flags & RegRex2))
+		  && (!i.index_reg || !(i.index_reg->reg_flags & RegRex2)))))
+	{
+	  i.tm.opcode_modifier.vex = i.tm.base_opcode & 2 ? VEX256 : VEX128;
+	  i.tm.opcode_modifier.evex = 0;
+	}
+      else
+	i.tm.opcode_modifier.evex = i.tm.base_opcode & 2 ? EVEX256 : EVEX128;
+
+      if (i.tm.base_opcode & 0x20)
+	{
+	  i.tm.base_opcode = 0x7f;
+	  if (i.reg_operands != 2)
+	    i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
+	}
+      else
+	{
+	  if (i.reg_operands == 2)
+	    i.tm.base_opcode = 0x29;
+	  else
+	    i.tm.base_opcode = 0x11;
+	  if (i.tm.opcode_modifier.vexw != VEXW1)
+	    i.tm.opcode_modifier.opcodeprefix = PREFIX_NONE;
+	}
+
+      if (i.tm.opcode_modifier.vex)
+	i.tm.opcode_modifier.vexw = VEXWIG;
+
+      i.op[0].regs = i.op[1].regs;
+      i.types[0] = i.types[1];
+      i.flags[0] = i.flags[1];
+      i.tm.operand_types[0] = i.tm.operand_types[1];
+
+      i.op[1].regs = i.op[2].regs;
+      i.types[1] = i.types[2];
+      i.flags[1] = i.flags[2];
+      i.reloc[1] = i.reloc[2];
+      i.tm.operand_types[1] = i.tm.operand_types[2];
+
+      i.operands = 2;
+      i.imm_operands = 0;
+    }
 }
 
 /* Check whether the promoted (to address size) register is usable as index
