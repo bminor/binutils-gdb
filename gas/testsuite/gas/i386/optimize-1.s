@@ -194,6 +194,11 @@ _start:
 	vpextrd		$0, %xmm1, %edx
 	vpextrd		$0, %xmm1, (%edx)
 
+	extractps	$0, %xmm1, %edx
+	extractps	$0, %xmm1, (%edx)
+	vextractps	$0, %xmm1, %edx
+	vextractps	$0, %xmm1, (%edx)
+
 	bt	$15, %ax
 	bt	$16, %ax
 	btc	$15, %ax

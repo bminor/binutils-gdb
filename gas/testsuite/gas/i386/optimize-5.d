@@ -166,6 +166,10 @@ Disassembly of section .text:
  +[a-f0-9]+:	66 .*	movd   %xmm1,\(%edx\)
  +[a-f0-9]+:	c5 .*	vmovd  %xmm1,%edx
  +[a-f0-9]+:	c5 .*	vmovd  %xmm1,\(%edx\)
+ +[a-f0-9]+:	66 .*	movd   %xmm1,%edx
+ +[a-f0-9]+:	f3 .*	movss  %xmm1,\(%edx\)
+ +[a-f0-9]+:	c5 .*	vmovd  %xmm1,%edx
+ +[a-f0-9]+:	c5 .*	vmovss %xmm1,\(%edx\)
  +[a-f0-9]+:	0f ba e0 0f          	bt     \$0xf,%eax
  +[a-f0-9]+:	66 0f ba e0 10       	bt     \$0x10,%ax
  +[a-f0-9]+:	0f ba f8 0f          	btc    \$0xf,%eax

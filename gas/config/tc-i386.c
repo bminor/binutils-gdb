@@ -5551,6 +5551,42 @@ optimize_encoding (void)
       i.operands = 2;
       i.imm_operands = 0;
     }
+  else if (i.tm.base_opcode == 0x17
+	   && i.tm.opcode_space == SPACE_0F3A
+	   && i.op[0].imms->X_op == O_constant
+	   && i.op[0].imms->X_add_number == 0)
+    {
+      /* Optimize: -O:
+         extractps $0, %xmmN, %rM   -> movd %xmmN, %rM
+         extractps $0, %xmmN, mem   -> movss %xmmN, mem
+         vextractps $0, %xmmN, %rM  -> vmovd %xmmN, %rM
+         vextractps $0, %xmmN, mem  -> vmovss %xmmN, mem
+       */
+      i.tm.opcode_space = SPACE_0F;
+      i.tm.opcode_modifier.vexw = VEXW0;
+
+      if (!i.mem_operands)
+	i.tm.base_opcode = 0x7e;
+      else
+	{
+	  i.tm.base_opcode = 0x11;
+	  i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
+	}
+
+      i.op[0].regs = i.op[1].regs;
+      i.types[0] = i.types[1];
+      i.flags[0] = i.flags[1];
+      i.tm.operand_types[0] = i.tm.operand_types[1];
+
+      i.op[1].regs = i.op[2].regs;
+      i.types[1] = i.types[2];
+      i.flags[1] = i.flags[2];
+      i.reloc[1] = i.reloc[2];
+      i.tm.operand_types[1] = i.tm.operand_types[2];
+
+      i.operands = 2;
+      i.imm_operands = 0;
+    }
 }
 
 /* Check whether the promoted (to address size) register is usable as index
