@@ -224,6 +224,14 @@ _start:
 	vextracti64x4 $0, %zmm1, %ymm2
 	vextracti64x4 $0, %zmm1, (%edx)
 
+	insertps $0, %xmm1, %xmm2
+	insertps $0xce, (%ecx), %xmm2
+	insertps $0xff, %xmm1, %xmm2
+
+	vinsertps $0, %xmm1, %xmm2, %xmm3
+	vinsertps $0xce, (%ecx), %xmm2, %xmm2
+	vinsertps $0xff, %xmm1, %xmm2, %xmm3
+
 	bt	$15, %ax
 	bt	$16, %ax
 	btc	$15, %ax

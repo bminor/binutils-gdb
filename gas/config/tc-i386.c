@@ -5661,6 +5661,102 @@ optimize_encoding (void)
       i.operands = 2;
       i.imm_operands = 0;
     }
+  else if (i.tm.base_opcode == 0x21
+	   && i.tm.opcode_space == SPACE_0F3A
+	   && i.op[0].imms->X_op == O_constant
+	   && (i.operands == i.reg_operands + 1
+	       ? i.op[0].imms->X_add_number == 0
+		 || (i.op[0].imms->X_add_number & 0xf) == 0xf
+	       : (i.op[0].imms->X_add_number & 0x3f) == 0x0e
+		  && (i.reg_operands == 1 || i.op[2].regs == i.op[3].regs)))
+    {
+      /* Optimize: -O:
+         insertps $0b....1111, %xmmN, %xmmM          -> xorps %xmmM, %xmmM
+         insertps $0b00000000, %xmmN, %xmmM          -> movss %xmmN, %xmmM
+         insertps $0b..001110, mem, %xmmN            -> movss mem, %xmmN
+         vinsertps $0b....1111, %xmmN, %xmmM, %xmmK  -> vxorps %xmm?, %xmm?, %xmmK
+         vinsertps $0b00000000, %xmmN, %xmmM, %xmmK  -> vmovss %xmmN, %xmmM, %xmmK
+         vinsertps $0b..001110, mem, %xmmN, %xmmN    -> vmovss mem, %xmmN
+       */
+      i.tm.opcode_space = SPACE_0F;
+      if ((i.op[0].imms->X_add_number & 0xf) == 0xf)
+	{
+	  i.tm.base_opcode = 0x57;
+	  i.tm.opcode_modifier.opcodeprefix = PREFIX_NONE;
+
+	  --i.operands;
+
+	  i.op[i.operands - 1].regs = i.op[i.operands].regs;
+	  i.types[i.operands - 1] = i.types[i.operands];
+	  i.flags[i.operands - 1] = i.flags[i.operands];
+	  i.tm.operand_types[i.operands - 1] = i.tm.operand_types[i.operands];
+
+	  i.op[1].regs = i.op[i.operands - 1].regs;
+	  i.types[1] = i.types[i.operands - 1];
+	  i.flags[1] = i.flags[i.operands - 1];
+	  i.tm.operand_types[1] = i.tm.operand_types[i.operands - 1];
+
+	  i.op[0].regs = i.op[1].regs;
+	  i.types[0] = i.types[1];
+	  i.flags[0] = i.flags[1];
+	  i.tm.operand_types[0] = i.tm.operand_types[1];
+
+	  /* Switch from EVEX to VEX encoding if possible.  Sadly we can't
+	     (always) tell use of the {evex} pseudo-prefix (which otherwise
+	     we'd like to respect) from use of %xmm16-%xmm31.  */
+	  if (pp.encoding == encoding_evex)
+	    pp.encoding = encoding_default;
+	  if (i.tm.opcode_modifier.evex
+	      && pp.encoding <= encoding_vex3
+	      && !(i.op[0].regs->reg_flags & RegVRex))
+	    {
+	      i.tm.opcode_modifier.evex = 0;
+	      i.tm.opcode_modifier.vex = VEX128;
+	    }
+
+	  /* Switch from VEX3 to VEX2 encoding if possible.  */
+	  if (i.tm.opcode_modifier.vex
+	      && pp.encoding <= encoding_vex
+	      && (i.op[0].regs->reg_flags & RegRex))
+	    {
+	      i.op[0].regs -= 8;
+	      i.op[1].regs = i.op[0].regs;
+	    }
+	}
+      else
+	{
+	  i.tm.base_opcode = 0x10;
+	  i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
+
+	  if (i.op[0].imms->X_add_number == 0)
+	    {
+	      i.op[0].regs = i.op[1].regs;
+	      --i.operands;
+	    }
+	  else
+	    {
+	      i.op[0].disps = i.op[1].disps;
+	      i.reloc[0] = i.reloc[1];
+	      i.operands = 2;
+	      i.tm.opcode_modifier.vexvvvv = 0;
+	    }
+	  i.types[0] = i.types[1];
+	  i.flags[0] = i.flags[1];
+	  i.tm.operand_types[0] = i.tm.operand_types[1];
+
+	  i.op[1].regs = i.op[2].regs;
+	  i.types[1] = i.types[2];
+	  i.flags[1] = i.flags[2];
+	  i.tm.operand_types[1] = i.tm.operand_types[2];
+
+	  i.op[2].regs = i.op[3].regs;
+	  i.types[2] = i.types[3];
+	  i.flags[2] = i.flags[3];
+	  i.tm.operand_types[2] = i.tm.operand_types[3];
+	}
+
+      i.imm_operands = 0;
+    }
 }
 
 /* Check whether the promoted (to address size) register is usable as index
