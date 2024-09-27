@@ -15,6 +15,7 @@
 
 import os
 import tracemalloc
+
 import gdb
 
 # A global variable in which we store a reference to the memory buffer
