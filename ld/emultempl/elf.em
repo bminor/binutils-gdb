@@ -1084,6 +1084,7 @@ fragment <<EOF
 	link_info.relro = false;
 EOF
 fi
+fi
 fragment <<EOF
       else if (strcmp (optarg, "separate-code") == 0)
 	link_info.separate_code = true;
@@ -1100,7 +1101,6 @@ fragment <<EOF
       else if (strcmp (optarg, "textoff") == 0)
 	link_info.textrel_check = textrel_check_none;
 EOF
-fi
 
 if test -n "$PARSE_AND_LIST_ARGS_CASE_Z" ; then
 fragment <<EOF
