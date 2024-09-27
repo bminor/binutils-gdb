@@ -1141,6 +1141,7 @@ proc uses_genelf { } {
 	 || [istarget "ft32-*-*"]
 	 || [istarget "iq2000-*-*"]
 	 || [istarget "mn10200-*-*"]
+	 || [istarget "moxie-*-moxiebox*"]
 	 || [istarget "msp430-*-*"]
 	 || [istarget "mt-*-*"]
 	 || [istarget "pj*-*-*"]
@@ -1149,6 +1150,14 @@ proc uses_genelf { } {
 	return 1
     }
     return 0
+}
+
+# Return true if target uses elf.em.
+proc uses_elf_em { } {
+    if { [is_elf_format] && ![uses_genelf] } {
+	return 1;
+    }
+    return 0;
 }
 
 proc is_underscore_target { } {
