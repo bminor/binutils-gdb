@@ -1026,10 +1026,23 @@ list_symbol_table (void)
 
 typedef struct cached_line
 {
-  file_info_type * file;
-  unsigned int     line;
-  char             buffer [LISTING_RHS_WIDTH];
+  file_info_type *file;
+  unsigned int line;
+  unsigned int bufsize;
+  char *buffer;
 } cached_line;
+
+static void
+alloc_cache (cached_line *cache, unsigned int width)
+{
+  if (cache->bufsize < width)
+    {
+      cache->bufsize = width;
+      free (cache->buffer);
+      cache->buffer = xmalloc (width);
+    }
+  cache->buffer[0] = 0;
+}
 
 static void
 print_source (file_info_type *  current_file,
@@ -1080,7 +1093,7 @@ print_source (file_info_type *  current_file,
 
 	  cache->file = current_file;
 	  cache->line = list->hll_line;
-	  cache->buffer[0] = 0;
+	  alloc_cache (cache, width);
 	  rebuffer_line (current_file, cache->line, cache->buffer, width);
 	}
 
@@ -1101,7 +1114,7 @@ print_source (file_info_type *  current_file,
 	  cache = cached_lines + next_free_line;
 	  cache->file = current_file;
 	  cache->line = current_file->linenum + 1;
-	  cache->buffer[0] = 0;
+	  alloc_cache (cache, width);
 	  p = buffer_line (current_file, cache->buffer, width);
 
 	  /* Cache optimization:  If printing a group of lines
