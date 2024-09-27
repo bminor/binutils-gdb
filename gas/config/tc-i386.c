@@ -5545,6 +5545,7 @@ optimize_encoding (void)
       i.op[1].regs = i.op[2].regs;
       i.types[1] = i.types[2];
       i.flags[1] = i.flags[2];
+      i.reloc[1] = i.reloc[2];
       i.tm.operand_types[1] = i.tm.operand_types[2];
 
       i.operands = 2;
