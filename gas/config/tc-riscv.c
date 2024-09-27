@@ -185,6 +185,9 @@ static enum float_abi float_abi = FLOAT_ABI_DEFAULT;
 
 static unsigned elf_flags = 0;
 
+/* Indicate whether we are already assembling any instructions.  */
+static bool start_assemble = false;
+
 static bool probing_insn_operands;
 
 /* Set the default_isa_spec.  Return 0 if the spec isn't supported.
@@ -282,6 +285,16 @@ riscv_set_rvc (bool rvc_value)
   if (rvc_value)
     elf_flags |= EF_RISCV_RVC;
 
+  if (start_assemble && subseg_text_p (now_seg)
+      && riscv_opts.rvc && !rvc_value)
+    {
+      struct riscv_segment_info_type *info
+	= &seg_info(now_seg)->tc_segment_info_data;
+
+      info->last_insn16 = true;
+      info->rvc = rvc_value;
+    }
+
   riscv_opts.rvc = rvc_value;
 }
 
@@ -354,10 +367,8 @@ riscv_set_arch (const char *s)
   riscv_set_arch_str (&file_arch_str);
   riscv_set_arch_str (&riscv_rps_as.subset_list->arch_str);
 
-  riscv_set_rvc (false);
-  if (riscv_subset_supports (&riscv_rps_as, "c")
-      || riscv_subset_supports (&riscv_rps_as, "zca"))
-    riscv_set_rvc (true);
+  riscv_set_rvc (riscv_subset_supports (&riscv_rps_as, "c")
+		 || riscv_subset_supports (&riscv_rps_as, "zca"));
 
   if (riscv_subset_supports (&riscv_rps_as, "ztso"))
     riscv_set_tso ();
@@ -456,9 +467,6 @@ const char EXP_CHARS[] = "eE";
 /* Chars that mean this number is a floating point constant.
    As in 0f12.456 or 0d1.2345e12.  */
 const char FLT_CHARS[] = "rRsSfFdDxXpPhH";
-
-/* Indicate we are already assemble any instructions or not.  */
-static bool start_assemble = false;
 
 /* Indicate ELF attributes are explicitly set.  */
 static bool explicit_attr = false;
@@ -627,6 +635,7 @@ riscv_mapping_state (enum riscv_seg_mstate to_state,
 
   valueT value = (valueT) (frag_now_fix () - max_chars);
   seg_info (now_seg)->tc_segment_info_data.map_state = to_state;
+  seg_info (now_seg)->tc_segment_info_data.last_insn16 = false;
   const char *arch_str = reset_seg_arch_str
 			 ? riscv_rps_as.subset_list->arch_str : NULL;
   make_mapping_symbol (to_state, value, frag_now, arch_str,
@@ -4237,11 +4246,12 @@ riscv_ip_hardcode (char *str,
 	    generic_bignum[num],
 	    llen);
       memset(ip->insn_long_opcode + repr_bytes, 0, bytes - repr_bytes);
-      return NULL;
     }
-
-  if (bytes < sizeof(values[0]) && values[num - 1] >> (8 * bytes) != 0)
+  else if (bytes < sizeof(values[0]) && values[num - 1] >> (8 * bytes) != 0)
     return _("value conflicts with instruction length");
+
+  if (!riscv_opts.rvc && (bytes & 2))
+    seg_info (now_seg)->tc_segment_info_data.last_insn16 = true;
 
   return NULL;
 }
@@ -4929,10 +4939,8 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
       riscv_update_subset (&riscv_rps_as, name);
       riscv_set_arch_str (&riscv_rps_as.subset_list->arch_str);
 
-      riscv_set_rvc (false);
-      if (riscv_subset_supports (&riscv_rps_as, "c")
-	  || riscv_subset_supports (&riscv_rps_as, "zca"))
-	riscv_set_rvc (true);
+      riscv_set_rvc (riscv_subset_supports (&riscv_rps_as, "c")
+		     || riscv_subset_supports (&riscv_rps_as, "zca"));
 
       if (riscv_subset_supports (&riscv_rps_as, "ztso"))
 	riscv_set_tso ();
@@ -5040,14 +5048,26 @@ riscv_frag_align_code (int n)
   char *nops;
   expressionS ex;
 
-  /* If we are moving to a smaller alignment than the instruction size, then no
-     alignment is required. */
+  /* If we are moving to alignment no larger than the instruction size, then
+     no special alignment handling is required. */
   if (bytes <= insn_alignment)
-    return true;
+    {
+      if (bytes == insn_alignment)
+	seg_info (now_seg)->tc_segment_info_data.last_insn16 = false;
+      return false;
+    }
 
   /* When not relaxing, riscv_handle_align handles code alignment.  */
   if (!riscv_opts.relax)
     return false;
+
+  /* If the last item emitted was not an ordinary insn, first align back to
+     insn granularity.  Don't do this unconditionally, to avoid altering frags
+     when that's not actually needed.  */
+  if (seg_info (now_seg)->tc_segment_info_data.map_state != MAP_INSN
+      || seg_info (now_seg)->tc_segment_info_data.last_insn16)
+    frag_align_code (riscv_opts.rvc ? 1 : 2, 0);
+  seg_info (now_seg)->tc_segment_info_data.last_insn16 = false;
 
   /* Maybe we should use frag_var to create a new rs_align_code fragment,
      rather than just use frag_more to handle an alignment here?  So that we
@@ -5363,6 +5383,18 @@ tc_riscv_regname_to_dw2regnum (char *regname)
 
   as_bad (_("unknown register `%s'"), regname);
   return -1;
+}
+
+void
+riscv_elf_section_change_hook (void)
+{
+  struct riscv_segment_info_type *info
+    = &seg_info(now_seg)->tc_segment_info_data;
+
+  if (info->rvc && !riscv_opts.rvc)
+    info->last_insn16 = true;
+
+  info->rvc = riscv_opts.rvc;
 }
 
 void

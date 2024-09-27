@@ -1030,7 +1030,7 @@ riscv_disassemble_insn (bfd_vma memaddr,
     {
       i -= 2;
       word = bfd_get_bits (packet + i, 16, false);
-      if (!word && !printed)
+      if (!word && !printed && i)
 	continue;
 
       (*info->fprintf_styled_func) (info->stream, dis_style_immediate,

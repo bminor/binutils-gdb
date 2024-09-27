@@ -128,6 +128,9 @@ extern int tc_riscv_regname_to_dw2regnum (char *);
 /* Even on RV64, use 4-byte alignment, as F registers may be only 32 bits.  */
 #define DWARF2_CIE_DATA_ALIGNMENT -4
 
+#define md_elf_section_change_hook riscv_elf_section_change_hook
+extern void riscv_elf_section_change_hook (void);
+
 #define elf_tc_final_processing riscv_elf_final_processing
 extern void riscv_elf_final_processing (void);
 
@@ -153,6 +156,8 @@ void riscv_mapping_state (enum riscv_seg_mstate, int, bool);
 struct riscv_segment_info_type
 {
   enum riscv_seg_mstate map_state;
+  bool rvc;
+  bool last_insn16;
   /* The current mapping symbol with architecture string.  */
   symbolS *arch_map_symbol;
 };
