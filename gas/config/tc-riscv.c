@@ -579,19 +579,19 @@ make_mapping_symbol (enum riscv_seg_mstate state,
     }
   frag->tc_frag_data.last_map_symbol = symbol;
 
-  if (removed == NULL)
-    return;
-
   if (odd_data_padding)
     {
       /* If the removed mapping symbol is $x+arch, then add it back to
 	 the next $x.  */
-      const char *str = strncmp (S_GET_NAME (removed), "$xrv", 4) == 0
+      const char *str = removed != NULL
+			&& strncmp (S_GET_NAME (removed), "$xrv", 4) == 0
 			? S_GET_NAME (removed) + 2 : NULL;
       make_mapping_symbol (MAP_INSN, frag->fr_fix + 1, frag, str,
 			   false/* odd_data_padding */);
     }
-  symbol_remove (removed, &symbol_rootP, &symbol_lastP);
+
+  if (removed != NULL)
+    symbol_remove (removed, &symbol_rootP, &symbol_lastP);
 }
 
 /* Set the mapping state for frag_now.  */
