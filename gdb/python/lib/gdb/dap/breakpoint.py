@@ -208,9 +208,9 @@ def _set_breakpoints_callback(kind, specs, creator):
                     }
                 )
 
-    # Delete any breakpoints that were not reused.
-    for entry in saved_map.values():
-        entry.delete()
+        # Delete any breakpoints that were not reused.
+        for entry in saved_map.values():
+            entry.delete()
     return result
 
 
