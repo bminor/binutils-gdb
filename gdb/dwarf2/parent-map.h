@@ -104,6 +104,9 @@ public:
     return new (obstack) addrmap_fixed (obstack, &m_map);
   }
 
+  /* Dump a human-readable form of this map.  */
+  void dump () const;
+
 private:
 
   /* An addrmap that maps from section offsets to cooked_index_entry *.  */
@@ -140,6 +143,9 @@ public:
       }
     return nullptr;
   }
+
+  /* Dump a human-readable form of this collection of parent_maps.  */
+  void dump () const;
 
 private:
 

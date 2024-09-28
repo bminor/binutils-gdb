@@ -4449,6 +4449,50 @@ cooked_index_storage::eq_cutu_reader (const void *a, const void *b)
   return ra->cu->per_cu->index == *rb;
 }
 
+/* Dump MAP as parent_map.  */
+
+static void
+dump_parent_map (const struct addrmap *map)
+{
+  auto_obstack temp_storage;
+
+  auto annotate_cooked_index_entry
+    = [&] (struct ui_file *outfile, const void *value)
+	{
+	  const cooked_index_entry *parent_entry
+	    = (const cooked_index_entry *)value;
+	  if (parent_entry == nullptr)
+	    return;
+
+	  gdb_printf (outfile, " (0x%" PRIx64 ": %s)",
+		      to_underlying (parent_entry->die_offset),
+		      parent_entry->full_name (&temp_storage, false));
+	};
+
+  addrmap_dump (const_cast<addrmap *> (map), gdb_stdlog, nullptr,
+		annotate_cooked_index_entry);
+}
+
+/* See parent-map.h.  */
+
+void
+parent_map::dump () const
+{
+  dump_parent_map (&m_map);
+}
+
+/* See parent-map.h.  */
+
+void
+parent_map_map::dump () const
+{
+  for (const auto &iter : m_maps)
+    {
+      gdb_printf (gdb_stdlog, "map start:\n");
+      dump_parent_map (iter);
+    }
+}
+
 /* An instance of this is created to index a CU.  */
 
 class cooked_indexer
@@ -4841,6 +4885,11 @@ private:
   {
     if (dwarf_read_debug > 0)
       print_tu_stats (m_per_objfile);
+    if (dwarf_read_debug > 1)
+      {
+	dwarf_read_debug_printf_v ("Final m_all_parents_map:");
+	m_all_parents_map.dump ();
+      }
   }
 
   /* After the last DWARF-reading task has finished, this function

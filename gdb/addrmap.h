@@ -219,8 +219,13 @@ private:
 
 /* Dump the addrmap to OUTFILE.  If PAYLOAD is non-NULL, only dump any
    components that map to PAYLOAD.  (If PAYLOAD is NULL, the entire
-   map is dumped.)  */
+   map is dumped.)  If ANNOTATE_VALUE is non-nullptr, call it for each
+   value.  */
+
 void addrmap_dump (struct addrmap *map, struct ui_file *outfile,
-		   void *payload);
+		   void *payload,
+		   gdb::function_view<void (struct ui_file *outfile,
+					    const void *value)>
+		     annotate_value = nullptr);
 
 #endif /* ADDRMAP_H */
