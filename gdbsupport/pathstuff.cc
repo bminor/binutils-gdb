@@ -124,17 +124,17 @@ gdb_realpath_keepfile (const char *filename)
 /* See gdbsupport/pathstuff.h.  */
 
 std::string
-gdb_abspath (const char *path)
+gdb_abspath (const char *path, const char *cwd)
 {
   gdb_assert (path != NULL && path[0] != '\0');
 
   if (path[0] == '~')
     return gdb_tilde_expand (path);
 
-  if (IS_ABSOLUTE_PATH (path) || current_directory == NULL)
+  if (IS_ABSOLUTE_PATH (path) || cwd == NULL)
     return path;
 
-  return path_join (current_directory, path);
+  return path_join (cwd, path);
 }
 
 /* See gdbsupport/pathstuff.h.  */
