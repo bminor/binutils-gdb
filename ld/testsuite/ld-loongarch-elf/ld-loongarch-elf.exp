@@ -166,6 +166,10 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "relr-got-shared"
     run_dump_test "relr-text-shared"
     run_dump_test "abssym_shared"
+    run_dump_test "bad_pcala_hi20_global"
+    run_dump_test "bad_pcala_hi20_weak"
+    run_dump_test "bad_pcrel20_s2_global"
+    run_dump_test "bad_pcrel20_s2_weak"
   }
 
   if [check_pie_support] {

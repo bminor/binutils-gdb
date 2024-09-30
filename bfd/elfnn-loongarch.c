@@ -1079,6 +1079,18 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    h->non_got_ref = 1;
 	  break;
 
+	/* Since shared library global symbols interpose, any
+	   PC-relative relocations against external symbols
+	   should not be used to build shared libraries.  */
+	case R_LARCH_PCREL20_S2:
+	  if (bfd_link_pic (info)
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (sec->flags & SEC_READONLY) != 0
+	      && ! LARCH_REF_LOCAL (info, h))
+	    return bad_static_reloc (abfd, rel, sec, r_type, h, NULL);
+
+	  break;
+
 	/* For normal cmodel, pcalau12i + addi.d/w used to data.
 	   For first version medium cmodel, pcalau12i + jirl are used to
 	   function call, it need to creat PLT entry for STT_FUNC and
@@ -1095,6 +1107,15 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      h->non_got_ref = 1;
 	      h->pointer_equality_needed = 1;
 	    }
+
+	  /* PC-relative relocations are allowed For first version
+	     medium cmodel function call.  */
+	  if (h != NULL && !h->needs_plt
+	      && bfd_link_pic (info)
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (sec->flags & SEC_READONLY) != 0
+	      && ! LARCH_REF_LOCAL (info, h))
+	    return bad_static_reloc (abfd, rel, sec, r_type, h, NULL);
 
 	  break;
 

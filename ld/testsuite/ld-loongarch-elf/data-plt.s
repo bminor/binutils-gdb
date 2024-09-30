@@ -2,6 +2,7 @@
 # R_LARCH_PCALA_HI20 only need to generate PLT entry for function symbols.
 	.text
 	.globl	a
+	.hidden	a
 
 	.data
 	.align	2
