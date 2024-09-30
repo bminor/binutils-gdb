@@ -1126,7 +1126,7 @@ _bfd_munmap_readonly_temporary (void *ptr, size_t rsize)
 {
   /* NB: Since _bfd_munmap_readonly_temporary is called like free, PTR
      may be NULL.  Otherwise, PTR and RSIZE must be valid.  If RSIZE is
-     0, _bfd_malloc_and_read is called.  */
+     0, free is called.  */
   if (ptr == NULL)
     return;
   if (rsize != 0)

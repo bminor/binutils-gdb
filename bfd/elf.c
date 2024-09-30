@@ -301,7 +301,8 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%pB: string table [%u] is corrupt"), abfd, shindex);
-	  shstrtab[shstrtabsize - 1] = 0;
+	  shstrtab = NULL;
+	  i_shdrp[shindex]->sh_size = 0;
 	}
       i_shdrp[shindex]->contents = shstrtab;
     }
