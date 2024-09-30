@@ -9012,7 +9012,7 @@ lang_record_phdrs (void)
 		continue;
 
 	      /* Don't add orphans to PT_INTERP header.  */
-	      if (l->type == 3)
+	      if (l->type == PT_INTERP)
 		continue;
 
 	      if (last == NULL)

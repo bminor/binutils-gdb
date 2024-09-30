@@ -2118,7 +2118,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
       { ".bss",
 	SEC_ALLOC,
 	0, 0, 0, 0 },
-      { 0,
+      { NULL,
 	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA,
 	0, 0, 0, 0 },
       { ".interp",
@@ -2328,7 +2328,18 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
 	   && (elfinput
 	       ? sh_type == SHT_NOTE
 	       : startswith (secname, ".note")))
-    place = &hold[orphan_interp];
+    {
+      /* PR 32219: Check that the .interp section
+	 exists before attaching orphans to it.  */
+      if (lang_output_section_find (hold[orphan_interp].name))
+	place = &hold[orphan_interp];
+      /* Next best place: after .rodata.  */
+      else if (lang_output_section_find (hold[orphan_rodata].name))
+	place = &hold[orphan_rodata];
+      /* Last attempt: the .text section.  */
+      else
+	place = &hold[orphan_text];
+    }
   else if ((flags & (SEC_LOAD | SEC_HAS_CONTENTS | SEC_THREAD_LOCAL)) == 0)
     place = &hold[orphan_bss];
   else if ((flags & SEC_SMALL_DATA) != 0)

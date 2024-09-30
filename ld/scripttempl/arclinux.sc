@@ -661,6 +661,7 @@ source_sh $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   ${ATTRS_SECTIONS}
+  .ARC.attributes 0 : { KEEP (*(.ARC.attributes)) }
   ${OTHER_SECTIONS}
   ${RELOCATING+${OTHER_SYMBOLS}}
   ${RELOCATING+${DISCARDED}}

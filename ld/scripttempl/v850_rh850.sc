@@ -19,6 +19,10 @@ SEARCH_DIR(.);
 ${RELOCATING+EXTERN(__ctbp __ep __gp)};
 SECTIONS
 {
+  /* PR 32100: GDB makes use of the fact that the .note.gnu.build-id
+     section is typically placed next to the ELF headers.  */
+  .note.gnu.build-id ${RELOCATING-0}: { *(.note.gnu.build-id) }
+
   /* This saves a little space in the ELF file, since the zda starts
      at a higher location that the ELF headers take up.  */
 

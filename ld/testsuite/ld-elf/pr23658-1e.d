@@ -14,10 +14,11 @@
 # The following targets don't support --build-id.
 #xfail: cr16-* crx-* visium-*
 # The following targets place .note.gnu.build-id in unusual places.
-#xfail: pru-*
+#xfail: *-*-hpux* arc*-* avr-* microblaze-*-* nds32*-* spu-*-*
 
 #...
  +[0-9]+ +\.note.gnu.build-id +
+#...
  +[0-9]+ +\.note\.4 \.note\.1 +
  +[0-9]+ +\.note\.2 \.note\.3 +
 #pass

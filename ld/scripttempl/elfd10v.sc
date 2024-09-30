@@ -102,6 +102,10 @@ EOF
 cat <<EOF
 SECTIONS
 {
+  /* PR 32100: GDB makes use of the fact that the .note.gnu.build-id
+     section is typically placed next to the ELF headers.  */
+  .note.gnu.build-id ${RELOCATING-0}: { *(.note.gnu.build-id) } ${RELOCATING+ >INSN}
+
   .text ${RELOCATING+${TEXT_START_ADDR}} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}
@@ -175,7 +179,7 @@ SECTIONS
 
 EOF
 
-source_sh $srcdir/scripttempl/misc-sections.sc
+source_sh $srcdir/scripttempl/misc-sections.sc DATA
 source_sh $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
