@@ -1016,16 +1016,23 @@ edit_command (const char *arg, int from_tty)
 	  gdbarch = sal.symtab->compunit ()->objfile ()->arch ();
 	  sym = find_pc_function (sal.pc);
 	  if (sym)
-	    gdb_printf ("%s is in %s (%s:%d).\n",
-			paddress (gdbarch, sal.pc),
-			sym->print_name (),
-			symtab_to_filename_for_display (sal.symtab),
-			sal.line);
+	    gdb_printf ("%ps is in %ps (%ps:%ps).\n",
+			styled_string (address_style.style (),
+				       paddress (gdbarch, sal.pc)),
+			styled_string (function_name_style.style (),
+				       sym->print_name ()),
+			styled_string (file_name_style.style (),
+				       symtab_to_filename_for_display (sal.symtab)),
+			styled_string (line_number_style.style (),
+				       pulongest (sal.line)));
 	  else
-	    gdb_printf ("%s is at %s:%d.\n",
-			paddress (gdbarch, sal.pc),
-			symtab_to_filename_for_display (sal.symtab),
-			sal.line);
+	    gdb_printf ("%ps is at %ps:%ps.\n",
+			styled_string (address_style.style (),
+				       paddress (gdbarch, sal.pc)),
+			styled_string (file_name_style.style (),
+				       symtab_to_filename_for_display (sal.symtab)),
+			styled_string (line_number_style.style (),
+				       pulongest (sal.line)));
 	}
 
       /* If what was given does not imply a symtab, it must be an

@@ -3698,9 +3698,11 @@ See set/show multiple-symbol."));
 	      gdb_printf ("[%d] ", i + first_choice);
 	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
 					  &type_print_raw_options);
-	      gdb_printf (_(" at %s:%d\n"),
-			  symtab_to_filename_for_display (symtab),
-			  syms[i].symbol->line ());
+	      gdb_printf (_(" at %ps:%ps\n"),
+			  styled_string (file_name_style.style (),
+					 symtab_to_filename_for_display (symtab)),
+			  styled_string (line_number_style.style (),
+					 pulongest (syms[i].symbol->line ())));
 	    }
 	  else if (is_enumeral
 		   && syms[i].symbol->type ()->name () != NULL)
@@ -3719,9 +3721,10 @@ See set/show multiple-symbol."));
 
 	      if (symtab != NULL)
 		gdb_printf (is_enumeral
-			    ? _(" in %s (enumeral)\n")
-			    : _(" at %s:?\n"),
-			    symtab_to_filename_for_display (symtab));
+			    ? _(" in %ps (enumeral)\n")
+			    : _(" at %ps:?\n"),
+			    styled_string (file_name_style.style (),
+					   symtab_to_filename_for_display (symtab)));
 	      else
 		gdb_printf (is_enumeral
 			    ? _(" (enumeral)\n")

@@ -899,7 +899,10 @@ do_mixed_source_and_assembly (struct gdbarch *gdbarch,
 		 output includes the source specs for each line.  */
 	      if (sal.symtab != NULL)
 		{
-		  uiout->text (symtab_to_filename_for_display (sal.symtab));
+		  auto filename = symtab_to_filename_for_display (sal.symtab);
+		  uiout->message ("%ps",
+				  styled_string (file_name_style.style (),
+						 filename));
 		}
 	      else
 		uiout->text ("unknown");

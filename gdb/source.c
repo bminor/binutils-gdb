@@ -1386,7 +1386,9 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
       last_line_listed = loc->line ();
       if (flags & PRINT_SOURCE_LINES_FILENAME)
 	{
-	  uiout->text (symtab_to_filename_for_display (s));
+	  uiout->message ("%ps",
+			  styled_string (file_name_style.style (),
+					 symtab_to_filename_for_display (s)));
 	  uiout->text (":");
 	}
 
@@ -1553,10 +1555,11 @@ info_line_command (const char *arg, int from_tty)
 
 	  if (start_pc == end_pc)
 	    {
-	      gdb_printf ("Line %ps of \"%s\"",
+	      gdb_printf ("Line %ps of \"%ps\"",
 			  styled_string (line_number_style.style (),
 					 pulongest (sal.line)),
-			  symtab_to_filename_for_display (sal.symtab));
+			  styled_string (file_name_style.style (),
+					 symtab_to_filename_for_display (sal.symtab)));
 	      gdb_stdout->wrap_here (2);
 	      gdb_printf (" is at address ");
 	      print_address (gdbarch, start_pc, gdb_stdout);
@@ -1565,10 +1568,11 @@ info_line_command (const char *arg, int from_tty)
 	    }
 	  else
 	    {
-	      gdb_printf ("Line %ps of \"%s\"",
+	      gdb_printf ("Line %ps of \"%ps\"",
 			  styled_string (line_number_style.style (),
 					 pulongest (sal.line)),
-			  symtab_to_filename_for_display (sal.symtab));
+			  styled_string (file_name_style.style (),
+					 symtab_to_filename_for_display (sal.symtab)));
 	      gdb_stdout->wrap_here (2);
 	      gdb_printf (" starts at address ");
 	      print_address (gdbarch, start_pc, gdb_stdout);
@@ -1593,10 +1597,11 @@ info_line_command (const char *arg, int from_tty)
 	/* Is there any case in which we get here, and have an address
 	   which the user would want to see?  If we have debugging symbols
 	   and no line numbers?  */
-	gdb_printf (_("Line number %ps is out of range for \"%s\".\n"),
+	gdb_printf (_("Line number %ps is out of range for \"%ps\".\n"),
 		    styled_string (line_number_style.style (),
 				   pulongest (sal.line)),
-		    symtab_to_filename_for_display (sal.symtab));
+		    styled_string (file_name_style.style (),
+				   symtab_to_filename_for_display (sal.symtab)));
     }
 }
 
