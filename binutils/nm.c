@@ -1227,7 +1227,8 @@ print_symbol (bfd *        abfd,
 
   format->print_symbol_info (&info, abfd);
 
-  if (line_numbers)
+  const char *symname = bfd_asymbol_name (sym);
+  if (line_numbers && symname != NULL && symname[0] != 0)
     {
       struct lineno_cache *lc = bfd_usrdata (abfd);
       const char *filename, *functionname;
@@ -1258,7 +1259,6 @@ print_symbol (bfd *        abfd,
       else if (bfd_is_und_section (bfd_asymbol_section (sym)))
 	{
 	  unsigned int i;
-	  const char *symname;
 
 	  /* For an undefined symbol, we try to find a reloc for the
              symbol, and print the line number of the reloc.  */
@@ -1274,7 +1274,6 @@ print_symbol (bfd *        abfd,
 	      bfd_map_over_sections (abfd, get_relocs, &rinfo);
 	    }
 
-	  symname = bfd_asymbol_name (sym);
 	  for (i = 0; i < lc->seccount; i++)
 	    {
 	      long j;
@@ -1287,6 +1286,7 @@ print_symbol (bfd *        abfd,
 		  if (r->sym_ptr_ptr != NULL
 		      && (*r->sym_ptr_ptr)->section == sym->section
 		      && (*r->sym_ptr_ptr)->value == sym->value
+		      && bfd_asymbol_name (*r->sym_ptr_ptr) != NULL
 		      && strcmp (symname,
 				 bfd_asymbol_name (*r->sym_ptr_ptr)) == 0
 		      && bfd_find_nearest_line (abfd, lc->secs[i], lc->syms,
