@@ -582,6 +582,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
   const char *whaterr;
   int err = 0;
 
+  /* "citer" is for types that reference only one other type: "citers" can store
+     many of them, but is more expensive to both populate and traverse.  */
   const char *citer = NULL;
   ctf_dynset_t *citers = NULL;
 
