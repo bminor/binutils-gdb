@@ -2161,11 +2161,12 @@ coff_print_symbol (bfd *abfd,
 		   bfd_print_symbol_type how)
 {
   FILE * file = (FILE *) filep;
+  const char *symname = symbol->name ? symbol->name : "<null>";
 
   switch (how)
     {
     case bfd_print_symbol_name:
-      fprintf (file, "%s", symbol->name);
+      fprintf (file, "%s", symname);
       break;
 
     case bfd_print_symbol_more:
@@ -2189,7 +2190,7 @@ coff_print_symbol (bfd *abfd,
 	  if (combined < obj_raw_syments (abfd)
 	      || combined >= obj_raw_syments (abfd) + obj_raw_syment_count (abfd))
 	    {
-	      fprintf (file, _("<corrupt info> %s"), symbol->name);
+	      fprintf (file, _("<corrupt info> %s"), symname);
 	      break;
 	    }
 
@@ -2207,7 +2208,7 @@ coff_print_symbol (bfd *abfd,
 		   combined->u.syment.n_sclass,
 		   combined->u.syment.n_numaux);
 	  bfd_fprintf_vma (abfd, file, val);
-	  fprintf (file, " %s", symbol->name);
+	  fprintf (file, " %s", symname);
 
 	  for (aux = 0; aux < combined->u.syment.n_numaux; aux++)
 	    {
@@ -2297,7 +2298,8 @@ coff_print_symbol (bfd *abfd,
 
 	  if (l)
 	    {
-	      fprintf (file, "\n%s :", l->u.sym->name);
+	      fprintf (file, "\n%s :",
+		       l->u.sym->name ? l->u.sym->name : "<null>");
 	      l++;
 	      while (l->line_number)
 		{
@@ -2317,7 +2319,7 @@ coff_print_symbol (bfd *abfd,
 		   symbol->section->name,
 		   coffsymbol (symbol)->native ? "n" : "g",
 		   coffsymbol (symbol)->lineno ? "l" : " ",
-		   symbol->name);
+		   symname);
 	}
     }
 }

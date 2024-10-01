@@ -777,7 +777,7 @@ bfd_symbol_info (asymbol *symbol, symbol_info *ret)
   else
     ret->value = symbol->value + symbol->section->vma;
 
-  ret->name = symbol->name;
+  ret->name = symbol->name ? symbol->name : "<null>";
 }
 
 /*

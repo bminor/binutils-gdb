@@ -210,16 +210,17 @@ bfd_pef_print_symbol (bfd *abfd,
 		      bfd_print_symbol_type how)
 {
   FILE *file = (FILE *) afile;
+  const char *symname = symbol->name ? symbol->name : "<null>";
 
   switch (how)
     {
     case bfd_print_symbol_name:
-      fprintf (file, "%s", symbol->name);
+      fprintf (file, "%s", symname);
       break;
     default:
       bfd_print_symbol_vandf (abfd, (void *) file, symbol);
-      fprintf (file, " %-5s %s", symbol->section->name, symbol->name);
-      if (startswith (symbol->name, "__traceback_"))
+      fprintf (file, " %-5s %s", symbol->section->name, symname);
+      if (startswith (symname, "__traceback_"))
 	{
 	  unsigned char *buf;
 	  size_t offset = symbol->value + 4;

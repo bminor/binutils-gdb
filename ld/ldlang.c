@@ -4895,9 +4895,6 @@ ld_is_local_symbol (asymbol * sym)
   if (name == NULL || *name == 0)
     return false;
 
-  if (strcmp (name, "(null)") == 0)
-    return false;
-
   /* Skip .Lxxx and such like.  */
   if (bfd_is_local_label (link_info.output_bfd, sym))
     return false;

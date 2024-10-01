@@ -549,9 +549,7 @@ bfd_elf_sym_name (bfd *abfd,
     }
 
   name = bfd_elf_string_from_elf_section (abfd, shindex, iname);
-  if (name == NULL)
-    name = "(null)";
-  else if (sym_sec && *name == '\0')
+  if (sym_sec && name && *name == '\0')
     name = bfd_section_name (sym_sec);
 
   return name;
@@ -2314,10 +2312,12 @@ bfd_elf_print_symbol (bfd *abfd,
 		      bfd_print_symbol_type how)
 {
   FILE *file = (FILE *) filep;
+  const char *symname = symbol->name ? symbol->name : "<null>";
+
   switch (how)
     {
     case bfd_print_symbol_name:
-      fprintf (file, "%s", symbol->name);
+      fprintf (file, "%s", symname);
       break;
     case bfd_print_symbol_more:
       fprintf (file, "elf ");
@@ -2340,11 +2340,10 @@ bfd_elf_print_symbol (bfd *abfd,
 	if (bed->elf_backend_print_symbol_all)
 	  name = (*bed->elf_backend_print_symbol_all) (abfd, filep, symbol);
 
-	if (name == NULL)
-	  {
-	    name = symbol->name;
-	    bfd_print_symbol_vandf (abfd, file, symbol);
-	  }
+	if (name != NULL)
+	  symname = name;
+	else
+	  bfd_print_symbol_vandf (abfd, file, symbol);
 
 	fprintf (file, " %s\t", section_name);
 	/* Print the "other" value for a symbol.  For common symbols,
@@ -2391,7 +2390,7 @@ bfd_elf_print_symbol (bfd *abfd,
 	    fprintf (file, " 0x%02x", (unsigned int) st_other);
 	  }
 
-	fprintf (file, " %s", name);
+	fprintf (file, " %s", symname);
       }
       break;
     }
