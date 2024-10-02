@@ -402,11 +402,7 @@ static int dll_name_set_by_exp_name;
 static int add_indirect = 0;
 static int add_underscore = 0;
 static int add_stdcall_underscore = 0;
-/* This variable can hold three different values. The value
-   -1 (default) means that default underscoring should be used,
-   zero means that no underscoring should be done, and one
-   indicates that underscoring should be done.  */
-static int leading_underscore = -1;
+static char *leading_underscore = NULL;
 static int dontdeltemps = 0;
 
 /* TRUE if we should export all symbols.  Otherwise, we only export
@@ -909,31 +905,13 @@ rvabefore (int mach)
 static const char *
 asm_prefix (int mach, const char *name)
 {
-  switch (mach)
-    {
-    case MARM:
-    case MTHUMB:
-    case MARM_INTERWORK:
-    case MMCORE_BE:
-    case MMCORE_LE:
-    case MMCORE_ELF:
-    case MMCORE_ELF_LE:
-    case MARM_WINCE:
-    case MAARCH64:
-      break;
-    case M386:
-    case MX86:
-      /* Symbol names starting with ? do not have a leading underscore. */
-      if ((name && *name == '?') || leading_underscore == 0)
-	break;
-      else
-	return "_";
-    default:
-      /* xgettext:c-format */
-      fatal (_("Internal error: Unknown machine type: %d"), mach);
-      break;
-    }
-  return "";
+  /* ??? --leading_underscore is only supported on x86.  */
+  if (!(mach == M386 || mach == MX86))
+    return "";
+  /* Symbol names starting with ? do not have a leading underscore.  */
+  if (name && *name == '?')
+    return "";
+  return leading_underscore;
 }
 
 #define ASM_BYTE		mtable[machine].how_byte
@@ -1500,7 +1478,7 @@ add_excludes (const char *new_excludes)
       if (*exclude_string == '@')
 	sprintf (new_exclude->string, "%s", exclude_string);
       else
-	sprintf (new_exclude->string, "%s%s", !leading_underscore ? "" : "_",
+	sprintf (new_exclude->string, "%s%s", leading_underscore,
 		 exclude_string);
       new_exclude->next = excludes;
       excludes = new_exclude;
@@ -2150,11 +2128,10 @@ gen_exp_file (void)
 	    if (create_compat_implib)
 	      fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
 	    fprintf (f, "\t%s\t_imp_%s%s\n", ASM_GLOBAL,
-		     !leading_underscore ? "" : "_", exp->name);
+		     leading_underscore, exp->name);
 	    if (create_compat_implib)
 	      fprintf (f, "__imp_%s:\n", exp->name);
-	    fprintf (f, "_imp_%s%s:\n",
-		     !leading_underscore ? "" : "_", exp->name);
+	    fprintf (f, "_imp_%s%s:\n", leading_underscore, exp->name);
 	    fprintf (f, "\t%s\t%s\n", ASM_LONG, exp->name);
 	  }
     }
@@ -3874,10 +3851,10 @@ main (int ac, char **av)
 	  add_stdcall_underscore = 1;
 	  break;
 	case OPTION_NO_LEADING_UNDERSCORE:
-	  leading_underscore = 0;
+	  leading_underscore = "";
 	  break;
 	case OPTION_LEADING_UNDERSCORE:
-	  leading_underscore = 1;
+	  leading_underscore = "_";
 	  break;
 	case OPTION_IDENTIFY_STRICT:
 	  identify_strict = 1;
@@ -4008,12 +3985,18 @@ main (int ac, char **av)
 		    || strcmp (mname, "arm64") == 0);
 
   /* Check the default underscore */
-  int u = leading_underscore; /* Underscoring mode. -1 for use default.  */
-  if (u == -1)
-    bfd_get_target_info (mtable[machine].how_bfd_target, NULL,
-			 NULL, &u, NULL);
-  if (u != -1)
-    leading_underscore = u != 0;
+  if (leading_underscore == NULL)
+    {
+      int u;
+      static char underscore[2];
+      bfd_get_target_info (mtable[machine].how_bfd_target, NULL,
+			   NULL, &u, NULL);
+      if (u == -1)
+	u = 0;
+      underscore[0] = u;
+      underscore[1] = 0;
+      leading_underscore = underscore;
+    }
 
   if (!dll_name && exp_name)
     {
