@@ -124,10 +124,6 @@ extern void (*deprecated_file_changed_hook) (const char *filename);
 
 extern bool write_files;
 
-/* Open and set up the core file bfd.  */
-
-extern void core_target_open (const char *arg, int from_tty);
-
 extern void core_file_command (const char *filename, int from_tty);
 
 extern void exec_file_attach (const char *filename, int from_tty);

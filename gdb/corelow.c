@@ -59,6 +59,10 @@
 #define O_LARGEFILE 0
 #endif
 
+/* Forward declarations.  */
+
+static void core_target_open (const char *arg, int from_tty);
+
 /* A mem_range and the build-id associated with the file mapped into the
    given range.  */
 
@@ -904,9 +908,9 @@ locate_exec_from_corefile_build_id (bfd *abfd, core_target *target,
     }
 }
 
-/* See gdbcore.h.  */
+/* Open and set up the core file bfd.  */
 
-void
+static void
 core_target_open (const char *arg, int from_tty)
 {
   const char *p;
