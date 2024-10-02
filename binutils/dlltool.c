@@ -903,11 +903,8 @@ rvabefore (int mach)
 }
 
 static const char *
-asm_prefix (int mach, const char *name)
+asm_prefix (const char *name)
 {
-  /* ??? --leading_underscore is only supported on x86.  */
-  if (!(mach == M386 || mach == MX86))
-    return "";
   /* Symbol names starting with ? do not have a leading underscore.  */
   if (name && *name == '?')
     return "";
@@ -925,7 +922,7 @@ asm_prefix (int mach, const char *name)
 #define ASM_ALIGN_SHORT		mtable[machine].how_align_short
 #define ASM_RVA_BEFORE		rvabefore (machine)
 #define ASM_RVA_AFTER		rvaafter (machine)
-#define ASM_PREFIX(NAME)	asm_prefix (machine, (NAME))
+#define ASM_PREFIX(NAME)	asm_prefix (NAME)
 #define ASM_ALIGN_LONG  	mtable[machine].how_align_long
 #define HOW_BFD_READ_TARGET	0  /* Always default.  */
 #define HOW_BFD_WRITE_TARGET	mtable[machine].how_bfd_target
