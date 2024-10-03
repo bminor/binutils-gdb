@@ -124,6 +124,13 @@ set style command background COLOR
 set style command intensity VALUE
   Control the styling of GDB commands when displayed by GDB.
 
+set style title foreground COLOR
+set style title background COLOR
+set style title intensity VALUE
+  This style now applies to the header line of lists, for example the
+  first line of the output of "info breakpoints".  Previous uses of
+  this style have been replaced with the new "command" style.
+
 set warn-language-frame-mismatch [on|off]
 show warn-language-frame-mismatch
   Control the warning that is emitted when specifying a language that

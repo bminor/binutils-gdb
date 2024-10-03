@@ -27915,10 +27915,9 @@ Files}).
 @item title
 Control the styling of titles.  These are managed with the
 @code{set style title} family of commands.  By default, this style's
-intensity is bold.  Commands are using the title style to improve
-the readability of large output.  For example, the commands
-@command{apropos} and @command{help} are using the title style
-for the command names.
+intensity is bold.  The title style is used when displaying the header
+line of a list, for example the first line of the output of
+@code{info breakpoints} (@pxref{Set Breaks}).
 
 @item highlight
 Control the styling of highlightings.  These are managed with the

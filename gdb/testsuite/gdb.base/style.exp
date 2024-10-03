@@ -111,7 +111,8 @@ proc run_style_tests { } {
 	    [multi_line \
 		 "#0\\s+$main_expr\\s+\\($arg_expr=$decimal,\\s+$arg_expr=$hex.*\\)\\s+at\\s+$file_expr" \
 		 "$line_expr\\s+.*return.* break here .*"]
-	gdb_test "info breakpoints" "$main_expr at $file_expr.*"
+	gdb_test "info breakpoints" \
+	    ".*[limited_style What title].*$main_expr at $file_expr.*"
 
 	gdb_test_no_output "set style sources off"
 	gdb_test "frame" \
