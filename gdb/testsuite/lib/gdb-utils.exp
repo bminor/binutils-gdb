@@ -69,6 +69,7 @@ proc string_list_to_regexp { args } {
 proc style {str style} {
     switch -exact -- $style {
 	title { set style 1 }
+	command { set style 1 }
 	file { set style 32 }
 	function { set style 33 }
 	highlight { set style 31 }

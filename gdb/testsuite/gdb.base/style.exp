@@ -238,8 +238,8 @@ proc run_style_tests { } {
 	    "The ${address_style_expr} foreground color is: ${color}" \
 	    "style name and style word styled using its own style in show style"
 
-	set aliases_expr [limited_style ".*aliases.*" title]
-	set breakpoints_expr [limited_style ".*breakpoints.*" title]
+	set aliases_expr [limited_style ".*aliases.*" command]
+	set breakpoints_expr [limited_style ".*breakpoints.*" command]
 	gdb_test "help" \
 	    [multi_line \
 		 "List of classes of commands:" \
@@ -248,10 +248,10 @@ proc run_style_tests { } {
 		 "${breakpoints_expr} -- Making program stop at certain points\." \
 		 ".*" \
 		] \
-	    "help classes of commands styled with title"
+	    "help classes of commands styled with command"
 
-	set taas_expr  [limited_style ".*taas.*" title]
-	set tfaas_expr  [limited_style ".*tfaas.*" title]
+	set taas_expr  [limited_style ".*taas.*" command]
+	set tfaas_expr  [limited_style ".*tfaas.*" command]
 	set cut_for_thre_expr [limited_style "cut for 'thre" highlight]
 	gdb_test "apropos -v cut for 'thre" \
 	    [multi_line \
@@ -301,7 +301,7 @@ proc run_style_tests { } {
 	gdb_test_no_output "maintenance deprecate p \"new_p\"" \
 	    "maintenance deprecate p \"new_p\" /1/"
 	gdb_test "p 5" \
-	    "Warning: '[limited_style p title]', an alias for the command '[limited_style print title]', is deprecated.*Use '[limited_style new_p title]'.*" \
+	    "Warning: '[limited_style p command]', an alias for the command '[limited_style print command]', is deprecated.*Use '[limited_style new_p command]'.*" \
 	    "p deprecated warning, with replacement"
 
 	# Check that the version string is styled in the output of 'show
@@ -503,7 +503,7 @@ with_test_prefix "all styles enabled" {
 
 # Now, for each style in turn.  Disable that style only and run the
 # test again.  Things in that style should NOT now be styled.
-foreach style { title file function highlight variable \
+foreach style { command title file function highlight variable \
 		    address metadata } {
     set currently_disabled_style $style
     with_test_prefix "disable style $style" {

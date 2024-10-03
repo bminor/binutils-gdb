@@ -1530,7 +1530,7 @@ add_com_suppress_notification (const char *name, enum command_class theclass,
 					&cmdlist, suppress_notification);
 }
 
-/* Print the prefix of C followed by name of C in title style.  */
+/* Print the prefix of C followed by name of C in command style.  */
 
 static void
 fput_command_name_styled (const cmd_list_element &c, struct ui_file *stream)
@@ -1538,7 +1538,7 @@ fput_command_name_styled (const cmd_list_element &c, struct ui_file *stream)
   std::string prefixname
     = c.prefix == nullptr ? "" : c.prefix->prefixname ();
 
-  fprintf_styled (stream, title_style.style (), "%s%s",
+  fprintf_styled (stream, command_style.style (), "%s%s",
 		  prefixname.c_str (), c.name);
 }
 
@@ -2509,21 +2509,21 @@ deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
 
       if (cmd->cmd_deprecated)
 	gdb_printf (_("Warning: command '%ps' (%ps) is deprecated.\n"),
-		    styled_string (title_style.style (),
+		    styled_string (command_style.style (),
 				   tmp_cmd_str.c_str ()),
-		    styled_string (title_style.style (),
+		    styled_string (command_style.style (),
 				   tmp_alias_str.c_str ()));
       else
 	gdb_printf (_("Warning: '%ps', an alias for the command '%ps', "
 		      "is deprecated.\n"),
-		    styled_string (title_style.style (),
+		    styled_string (command_style.style (),
 				   tmp_alias_str.c_str ()),
-		    styled_string (title_style.style (),
+		    styled_string (command_style.style (),
 				   tmp_cmd_str.c_str ()));
     }
   else
     gdb_printf (_("Warning: command '%ps' is deprecated.\n"),
-		styled_string (title_style.style (),
+		styled_string (command_style.style (),
 			       tmp_cmd_str.c_str ()));
 
   /* Now display a second line indicating what the user should use instead.
@@ -2536,7 +2536,7 @@ deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
     replacement = cmd->replacement;
   if (replacement != nullptr)
     gdb_printf (_("Use '%ps'.\n\n"),
-		styled_string (title_style.style (),
+		styled_string (command_style.style (),
 			       replacement));
   else
     gdb_printf (_("No alternative known.\n\n"));
