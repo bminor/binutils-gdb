@@ -43,6 +43,7 @@
 #include "gcore-elf.h"
 #include "solib-svr4.h"
 #include "memtag.h"
+#include "cli/cli-style.h"
 
 #include <ctype.h>
 #include <unordered_map>
@@ -457,7 +458,7 @@ struct mapping
 {
   ULONGEST addr;
   ULONGEST endaddr;
-  std::string_view permissions;
+  std::string permissions;
   ULONGEST offset;
   std::string_view device;
   ULONGEST inode;
@@ -484,7 +485,8 @@ read_mapping (const char *line)
   const char *permissions_start = p;
   while (*p && !isspace (*p))
     p++;
-  mapping.permissions = {permissions_start, (size_t) (p - permissions_start)};
+  mapping.permissions = std::string (permissions_start,
+				     (size_t) (p - permissions_start));
 
   mapping.offset = strtoulst (p, &p, 16);
 
@@ -897,51 +899,39 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	= target_fileio_read_stralloc (NULL, filename);
       if (map != NULL)
 	{
-	  char *line;
-
 	  gdb_printf (_("Mapped address spaces:\n\n"));
-	  if (gdbarch_addr_bit (gdbarch) == 32)
-	    {
-	      gdb_printf ("\t%10s %10s %10s %10s  %s %s\n",
-			  "Start Addr", "  End Addr", "      Size",
-			  "    Offset", "Perms  ", "objfile");
-	    }
-	  else
-	    {
-	      gdb_printf ("  %18s %18s %10s %10s  %s %s\n",
-			  "Start Addr", "  End Addr", "      Size",
-			  "    Offset", "Perms ", "objfile");
-	    }
+	  ui_out_emit_table emitter (current_uiout, 6, -1, "ProcMappings");
+
+	  int width = gdbarch_addr_bit (gdbarch) == 32 ? 10 : 18;
+	  current_uiout->table_header (width, ui_left, "start", "Start Addr");
+	  current_uiout->table_header (width, ui_left, "end", "End Addr");
+	  current_uiout->table_header (width, ui_left, "size", "Size");
+	  current_uiout->table_header (width, ui_left, "offset", "Offset");
+	  current_uiout->table_header (5, ui_left, "perms", "Perms");
+	  current_uiout->table_header (0, ui_left, "objfile", "File");
+	  current_uiout->table_body ();
 
 	  char *saveptr;
-	  for (line = strtok_r (map.get (), "\n", &saveptr);
-	       line;
-	       line = strtok_r (NULL, "\n", &saveptr))
+	  for (const char *line = strtok_r (map.get (), "\n", &saveptr);
+	       line != nullptr;
+	       line = strtok_r (nullptr, "\n", &saveptr))
 	    {
 	      struct mapping m = read_mapping (line);
 
-	      if (gdbarch_addr_bit (gdbarch) == 32)
-		{
-		  gdb_printf ("\t%10s %10s %10s %10s  %-5.*s  %s\n",
-			      paddress (gdbarch, m.addr),
-			      paddress (gdbarch, m.endaddr),
-			      hex_string (m.endaddr - m.addr),
-			      hex_string (m.offset),
-			      (int) m.permissions.size (),
-			      m.permissions.data (),
-			      m.filename);
-		}
-	      else
-		{
-		  gdb_printf ("  %18s %18s %10s %10s  %-5.*s  %s\n",
-			      paddress (gdbarch, m.addr),
-			      paddress (gdbarch, m.endaddr),
-			      hex_string (m.endaddr - m.addr),
-			      hex_string (m.offset),
-			      (int) m.permissions.size (),
-			      m.permissions.data (),
-			      m.filename);
-		}
+	      ui_out_emit_tuple tuple_emitter (current_uiout, nullptr);
+	      current_uiout->field_core_addr ("start", gdbarch, m.addr);
+	      current_uiout->field_core_addr ("end", gdbarch, m.endaddr);
+	      /* These next two aren't really addresses and so
+		 shouldn't be styled as such.  */
+	      current_uiout->field_string ("size",
+					   paddress (gdbarch,
+						     m.endaddr - m.addr));
+	      current_uiout->field_string ("offset",
+					   paddress (gdbarch, m.offset));
+	      current_uiout->field_string ("perms", m.permissions);
+	      current_uiout->field_string ("objfile", m.filename,
+					   file_name_style.style ());
+	      current_uiout->text ("\n");
 	    }
 	}
       else
@@ -1242,42 +1232,34 @@ linux_read_core_file_mappings
 static void
 linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 {
+  std::optional<ui_out_emit_table> emitter;
+
   linux_read_core_file_mappings (gdbarch, current_program_space->core_bfd (),
-    [=] (ULONGEST count)
+    [&] (ULONGEST count)
       {
 	gdb_printf (_("Mapped address spaces:\n\n"));
-	if (gdbarch_addr_bit (gdbarch) == 32)
-	  {
-	    gdb_printf ("\t%10s %10s %10s %10s %s\n",
-			"Start Addr",
-			"  End Addr",
-			"      Size", "    Offset", "objfile");
-	  }
-	else
-	  {
-	    gdb_printf ("  %18s %18s %10s %10s %s\n",
-			"Start Addr",
-			"  End Addr",
-			"      Size", "    Offset", "objfile");
-	  }
+	emitter.emplace (current_uiout, 5, -1, "ProcMappings");
+	int width = gdbarch_addr_bit (gdbarch) == 32 ? 10 : 18;
+	current_uiout->table_header (width, ui_left, "start", "Start Addr");
+	current_uiout->table_header (width, ui_left, "end", "End Addr");
+	current_uiout->table_header (width, ui_left, "size", "Size");
+	current_uiout->table_header (width, ui_left, "offset", "Offset");
+	current_uiout->table_header (0, ui_left, "objfile", "File");
+	current_uiout->table_body ();
       },
     [=] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
 	 const char *filename, const bfd_build_id *build_id)
       {
-	if (gdbarch_addr_bit (gdbarch) == 32)
-	  gdb_printf ("\t%10s %10s %10s %10s %s\n",
-		      paddress (gdbarch, start),
-		      paddress (gdbarch, end),
-		      hex_string (end - start),
-		      hex_string (file_ofs),
-		      filename);
-	else
-	  gdb_printf ("  %18s %18s %10s %10s %s\n",
-		      paddress (gdbarch, start),
-		      paddress (gdbarch, end),
-		      hex_string (end - start),
-		      hex_string (file_ofs),
-		      filename);
+	ui_out_emit_tuple tuple_emitter (current_uiout, nullptr);
+	current_uiout->field_core_addr ("start", gdbarch, start);
+	current_uiout->field_core_addr ("end", gdbarch, end);
+	/* These next two aren't really addresses and so shouldn't be
+	   styled as such.  */
+	current_uiout->field_string ("size", paddress (gdbarch, end - start));
+	current_uiout->field_string ("offset", paddress (gdbarch, file_ofs));
+	current_uiout->field_string ("objfile", filename,
+				     file_name_style.style ());
+	current_uiout->text ("\n");
       });
 }
 

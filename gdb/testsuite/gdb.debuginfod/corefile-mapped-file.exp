@@ -93,7 +93,7 @@ set ptr_address [get_hexadecimal_valueof "&library_ptr" "unknown"]
 
 set ptr_offset "unknown"
 gdb_test_multiple "info proc mappings" "" {
-    -re "^\\s+($hex)\\s+($hex)\\s+$hex\\s+($hex)\[^\r\n\]+$library_filename\r\n" {
+    -re "^($hex)\\s+($hex)\\s+$hex\\s+($hex)\[^\r\n\]+$library_filename\\s*\r\n" {
 	set low_addr $expect_out(1,string)
 	set high_addr $expect_out(2,string)
 	set file_offset $expect_out(3,string)

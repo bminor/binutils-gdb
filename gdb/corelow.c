@@ -1698,24 +1698,19 @@ get_current_core_target ()
 void
 core_target::info_proc_mappings (struct gdbarch *gdbarch)
 {
-  if (!m_core_file_mappings.empty ())
-    {
-      gdb_printf (_("Mapped address spaces:\n\n"));
-      if (gdbarch_addr_bit (gdbarch) == 32)
-	{
-	  gdb_printf ("\t%10s %10s %10s %10s %s\n",
-		      "Start Addr",
-		      "  End Addr",
-		      "      Size", "    Offset", "objfile");
-	}
-      else
-	{
-	  gdb_printf ("  %18s %18s %10s %10s %s\n",
-		      "Start Addr",
-		      "  End Addr",
-		      "      Size", "    Offset", "objfile");
-	}
-    }
+  if (m_core_file_mappings.empty ())
+    return;
+
+  gdb_printf (_("Mapped address spaces:\n\n"));
+  ui_out_emit_table emitter (current_uiout, 5, -1, "ProcMappings");
+
+  int width = gdbarch_addr_bit (gdbarch) == 32 ? 10 : 18;
+  current_uiout->table_header (width, ui_left, "start", "Start Addr");
+  current_uiout->table_header (width, ui_left, "end", "End Addr");
+  current_uiout->table_header (width, ui_left, "size", "Size");
+  current_uiout->table_header (width, ui_left, "offset", "Offset");
+  current_uiout->table_header (0, ui_left, "objfile", "File");
+  current_uiout->table_body ();
 
   for (const target_section &tsp : m_core_file_mappings)
     {
@@ -1724,20 +1719,16 @@ core_target::info_proc_mappings (struct gdbarch *gdbarch)
       ULONGEST file_ofs = tsp.the_bfd_section->filepos;
       const char *filename = bfd_get_filename (tsp.the_bfd_section->owner);
 
-      if (gdbarch_addr_bit (gdbarch) == 32)
-	gdb_printf ("\t%10s %10s %10s %10s %s\n",
-		    paddress (gdbarch, start),
-		    paddress (gdbarch, end),
-		    hex_string (end - start),
-		    hex_string (file_ofs),
-		    filename);
-      else
-	gdb_printf ("  %18s %18s %10s %10s %s\n",
-		    paddress (gdbarch, start),
-		    paddress (gdbarch, end),
-		    hex_string (end - start),
-		    hex_string (file_ofs),
-		    filename);
+      ui_out_emit_tuple tuple_emitter (current_uiout, nullptr);
+      current_uiout->field_core_addr ("start", gdbarch, start);
+      current_uiout->field_core_addr ("end", gdbarch, end);
+      /* These next two aren't really addresses and so shouldn't be
+	 styled as such.  */
+      current_uiout->field_string ("size", paddress (gdbarch, end - start));
+      current_uiout->field_string ("offset", paddress (gdbarch, file_ofs));
+      current_uiout->field_string ("objfile", filename,
+				   file_name_style.style ());
+      current_uiout->text ("\n");
     }
 }
 
