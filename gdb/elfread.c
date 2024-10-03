@@ -612,6 +612,8 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
       const size_t got_suffix_len = strlen (SYMBOL_GOT_PLT_SUFFIX);
 
       name = bfd_asymbol_name (*relplt->relocation[reloc].sym_ptr_ptr);
+      if (!name)
+	continue;
       address = relplt->relocation[reloc].address;
 
       asection *msym_section;
