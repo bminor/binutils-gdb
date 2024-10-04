@@ -54,17 +54,15 @@ struct target_desc final : tdesc_element
   mutable const char *xmltarget = NULL;
 
   /* The value of <architecture> element in the XML, replying GDB.  */
-  const char *arch = NULL;
+  gdb::unique_xmalloc_ptr<char> arch;
 
   /* The value of <osabi> element in the XML, replying GDB.  */
-  const char *osabi = NULL;
+  gdb::unique_xmalloc_ptr<char> osabi;
 
 public:
   target_desc ()
     : registers_size (0)
   {}
-
-  ~target_desc ();
 
   bool operator== (const target_desc &other) const;
 

@@ -20,12 +20,6 @@
 
 #ifndef IN_PROCESS_AGENT
 
-target_desc::~target_desc ()
-{
-  xfree ((char *) arch);
-  xfree ((char *) osabi);
-}
-
 bool target_desc::operator== (const target_desc &other) const
 {
   if (reg_defs != other.reg_defs)
@@ -162,7 +156,7 @@ tdesc_compatible_info_arch_name (const tdesc_compatible_info_up &c_info)
 const char *
 tdesc_architecture_name (const struct target_desc *target_desc)
 {
-  return target_desc->arch;
+  return target_desc->arch.get ();
 }
 
 /* See gdbsupport/tdesc.h.  */
@@ -171,7 +165,7 @@ void
 set_tdesc_architecture (struct target_desc *target_desc,
 			const char *name)
 {
-  target_desc->arch = xstrdup (name);
+  target_desc->arch = make_unique_xstrdup (name);
 }
 
 /* See gdbsupport/tdesc.h.  */
@@ -179,7 +173,7 @@ set_tdesc_architecture (struct target_desc *target_desc,
 const char *
 tdesc_osabi_name (const struct target_desc *target_desc)
 {
-  return target_desc->osabi;
+  return target_desc->osabi.get ();
 }
 
 /* See gdbsupport/tdesc.h.  */
@@ -187,7 +181,7 @@ tdesc_osabi_name (const struct target_desc *target_desc)
 void
 set_tdesc_osabi (struct target_desc *target_desc, const char *name)
 {
-  target_desc->osabi = xstrdup (name);
+  target_desc->osabi = make_unique_xstrdup (name);
 }
 
 /* See gdbsupport/tdesc.h.  */
@@ -198,7 +192,7 @@ tdesc_get_features_xml (const target_desc *tdesc)
   /* Either .xmltarget or .features is not NULL.  */
   gdb_assert (tdesc->xmltarget != NULL
 	      || (!tdesc->features.empty ()
-		  && tdesc->arch != NULL));
+		  && tdesc_architecture_name (tdesc) != nullptr));
 
   if (tdesc->xmltarget == NULL)
     {
