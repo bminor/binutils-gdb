@@ -1539,7 +1539,7 @@ filter_symbols (bfd *abfd, void *minisyms, long symcount, unsigned int size)
 	       || bfd_is_com_section (sym->section))
 	      && ! bfd_is_und_section (sym->section));
 
-      keep = keep && ! match_exclude (sym->name);
+      keep = keep && sym->name != NULL && !match_exclude (sym->name);
 
       if (keep)
 	{
@@ -3197,9 +3197,10 @@ identify_member_contains_symname (bfd  * abfd,
 
   for (i = 0; i < number_of_symbols; i++)
     {
-      if (strncmp (symbol_table[i]->name,
-		   search_data->symname,
-		   strlen (search_data->symname)) == 0)
+      if (symbol_table[i]->name != NULL
+	  && strncmp (symbol_table[i]->name,
+		      search_data->symname,
+		      strlen (search_data->symname)) == 0)
 	{
 	  search_data->found = true;
 	  break;
