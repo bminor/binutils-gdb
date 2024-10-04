@@ -193,7 +193,7 @@ netbsd_amd64_target::low_arch_setup ()
   target_desc *tdesc
     = amd64_create_target_description (X86_XSTATE_SSE_MASK, false, false, false);
 
-  init_target_desc (tdesc, amd64_expedite_regs);
+  init_target_desc (tdesc, amd64_expedite_regs, GDB_OSABI_NETBSD);
 
   current_process ()->tdesc = tdesc;
 }

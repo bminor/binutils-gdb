@@ -67,7 +67,8 @@ aarch64_linux_read_description (const aarch64_features &features)
 
       expedited_registers.push_back (nullptr);
 
-      init_target_desc (tdesc, (const char **) expedited_registers.data ());
+      init_target_desc (tdesc, (const char **) expedited_registers.data (),
+			GDB_OSABI_LINUX);
 
       tdesc_aarch64_map[features] = tdesc;
     }
