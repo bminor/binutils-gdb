@@ -119,7 +119,6 @@ responsibility among the other maintainers.
   Moxie		   Anthony Green <green@moxielogic.com>
   NDS32		   Kuan-Lin Chen <kuanlinchentw@gmail.com>
   NDS32		   Wei-Cheng Wang <cole945@gmail.com>
-  NetBSD support   Matt Thomas <matt@netbsd.org>
   Nios II	   Sandra Loosemore <sloosemore@baylibre.com>
   Nios II	   Andrew Jenner <andrew@codesourcery.com>
   OR1K		   Christian Svensson <blue@cmd.nu>
@@ -140,7 +139,6 @@ responsibility among the other maintainers.
   SPU		   Alan Modra <amodra@gmail.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   TIC6X            Joseph Myers <josmyers@redhat.com>
-  VAX		   Matt Thomas <matt@netbsd.org>
   VAX		   Jan-Benedict Glaw <jbglaw@lug-owl.de>
   Visium	   Eric Botcazou <ebotcazou@libertysurf.fr>
   VMS		   Tristan Gingold <tgingold@free.fr>
@@ -172,6 +170,7 @@ goes with them.
   Bernd Schmidt
   Svein Seldal
   Martin Schwidefsky
+  Matt Thomas
 
       --------- CGEN Maintainers -------------
 
