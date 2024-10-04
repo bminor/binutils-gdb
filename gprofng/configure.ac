@@ -46,6 +46,8 @@ AC_SUBST(GPROFNG_LIBADD)
 
 ACX_PROG_CC_WARNINGS_ARE_ERRORS([manual])
 ACX_PROG_CC_WARNING_OPTS([-Wall], [gprofng_cflags])
+# LTO is disabled until PR32092 is fixed
+ACX_PROG_CC_WARNING_OPTS([-fno-lto], [nolto_cflags])
 ACX_PROG_CC_WARNING_OPTS([-Wno-switch], [GPROFNG_NO_SWITCH_CFLAGS])
 gprofng_cppflags="-U_ASM"
 build_collector=
@@ -241,6 +243,7 @@ AC_SUBST(GPROFNG_CFLAGS, [${gprofng_cflags}])
 AC_SUBST(GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS)
 AC_SUBST(GPROFNG_NO_SWITCH_CFLAGS)
 AC_SUBST(GPROFNG_CPPFLAGS, [${gprofng_cppflags}])
+AC_SUBST(NOLTO_CFLAGS, [${nolto_cflags}])
 
 AC_CHECK_DECLS([basename])
 AC_CHECK_FUNCS(clock_gettime strsignal)

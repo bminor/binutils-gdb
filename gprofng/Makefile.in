@@ -299,6 +299,7 @@ MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
+NOLTO_CFLAGS = @NOLTO_CFLAGS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OTOOL = @OTOOL@
@@ -364,6 +365,7 @@ localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
+nolto_cflags = @nolto_cflags@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
 prefix = @prefix@
@@ -399,7 +401,8 @@ AM_MAKEFLAGS = \
 	jdk_inc="$(jdk_inc)" \
 	LD_NO_AS_NEEDED="$(LD_NO_AS_NEEDED)" \
 	GPROFNG_CFLAGS="$(GPROFNG_CFLAGS)" \
-	GPROFNG_CPPFLAGS="$(GPROFNG_CPPFLAGS)"
+	GPROFNG_CPPFLAGS="$(GPROFNG_CPPFLAGS)" \
+	NOLTO_CFLAGS="$(NOLTO_CFLAGS)"
 
 
 # development.sh is used to determine -Werror default.
