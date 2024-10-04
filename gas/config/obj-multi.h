@@ -46,6 +46,11 @@
 	 ? (*this_format->app_file) (NAME)		\
 	 : (void) 0)
 
+#define obj_assign_symbol(S)				\
+	(this_format->assign_symbol			\
+	 ? (*this_format->assign_symbol) (S)		\
+	 : (void) 0)
+
 #define obj_frob_symbol(S,P)				\
 	(*this_format->frob_symbol) (S, &(P))
 

@@ -251,6 +251,7 @@ extern symbolS *coff_last_function;
 
 #define obj_emit_lineno(WHERE, LINE, FILE_START)	abort ()
 #define obj_app_file(name)           c_dot_file_symbol (name)
+#define obj_assign_symbol(S)         coff_assign_symbol (S)
 #define obj_frob_symbol(S,P) 	     coff_frob_symbol (S, & P)
 #define obj_frob_section(S)	     coff_frob_section (S)
 #define obj_frob_file_after_relocs() coff_frob_file_after_relocs ()
@@ -322,6 +323,7 @@ extern int  S_GET_STORAGE_CLASS          (symbolS *);
 extern void SA_SET_SYM_ENDNDX            (symbolS *, symbolS *);
 extern void coff_add_linesym             (symbolS *);
 extern void c_dot_file_symbol            (const char *);
+extern void coff_assign_symbol           (symbolS *);
 extern void coff_frob_symbol             (symbolS *, int *);
 extern void coff_adjust_symtab           (void);
 extern void coff_frob_section            (segT);

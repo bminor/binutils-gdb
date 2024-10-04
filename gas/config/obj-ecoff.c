@@ -293,6 +293,7 @@ const struct format_ops ecoff_format_ops =
   0,	/* begin.  */
   0,	/* end.  */
   ecoff_new_file,
+  NULL, /* assign_symbol */
   obj_ecoff_frob_symbol,
   ecoff_frob_file,
   0,	/* frob_file_before_adjust.  */

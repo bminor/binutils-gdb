@@ -3282,6 +3282,7 @@ const struct format_ops elf_format_ops =
   elf_begin,
   elf_end,
   elf_file_symbol,
+  NULL, /* assign_symbol */
   elf_frob_symbol,
   elf_frob_file,
   elf_frob_file_before_adjust,

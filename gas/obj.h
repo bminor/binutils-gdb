@@ -46,6 +46,7 @@ struct format_ops {
   void (*begin) (void);
   void (*end) (void);
   void (*app_file) (const char *);
+  void (*assign_symbol) (symbolS *);
   void (*frob_symbol) (symbolS *, int *);
   void (*frob_file) (void);
   void (*frob_file_before_adjust) (void);

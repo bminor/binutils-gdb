@@ -298,6 +298,7 @@ const struct format_ops aout_format_ops =
   0,	/* begin.  */
   0,	/* end.  */
   0,	/* app_file.  */
+  NULL, /* assign_symbol */
   obj_aout_frob_symbol,
   0,	/* frob_file.  */
   0,	/* frob_file_before_adjust.  */

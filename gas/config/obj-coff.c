@@ -1177,6 +1177,15 @@ coff_obj_read_begin_hook (void)
   tag_init ();
 }
 
+void
+coff_assign_symbol (symbolS *symp ATTRIBUTE_UNUSED)
+{
+#ifndef TE_PE
+  /* "set" symbols are local unless otherwise specified.  */
+  SF_SET_LOCAL (symp);
+#endif
+}
+
 symbolS *coff_last_function;
 #ifndef OBJ_XCOFF
 static symbolS *coff_last_bf;
@@ -1910,6 +1919,7 @@ const struct format_ops coff_format_ops =
   0,    /* begin */
   0,	/* end.  */
   c_dot_file_symbol,
+  coff_assign_symbol,
   coff_frob_symbol,
   0,	/* frob_file */
   0,	/* frob_file_before_adjust */
