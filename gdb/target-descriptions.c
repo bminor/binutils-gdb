@@ -1318,7 +1318,7 @@ public:
 	&& tdesc_osabi (e) < GDB_OSABI_INVALID)
       {
 	gdb_printf
-	  ("  set_tdesc_osabi (result.get (), osabi_from_tdesc_string (\"%s\"));\n",
+	  ("  set_tdesc_osabi (result.get (), \"%s\");\n",
 	   gdbarch_osabi_name (tdesc_osabi (e)));
 	gdb_printf ("\n");
       }
