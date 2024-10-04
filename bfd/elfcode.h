@@ -1355,7 +1355,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bool dynamic)
 	    sym->symbol.name = (elf_tdata (abfd)->dt_strtab
 				+ isym->st_name);
 	  else
-	    sym->symbol.name = bfd_elf_sym_name (abfd, hdr, isym, NULL);
+	    sym->symbol.name = bfd_elf_sym_name_raw (abfd, hdr, isym);
 	  sym->symbol.value = isym->st_value;
 
 	  if (isym->st_shndx == SHN_UNDEF)
