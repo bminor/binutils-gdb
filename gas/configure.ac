@@ -722,15 +722,6 @@ changequote([,])dnl
 			big)	emulation="mipsbelf mipslelf mipself" ;;
 			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;
-      # i386-pc-pe-coff != i386-pc-coff.
-      i386-*-pe-coff)	;;
-      # Uncommenting the next line will turn on support for i386 AOUT
-      # for the default linux configuration
-      # i386-*-linux*-elf) emulation="i386elf i386aout" ;;
-      #
-      i386-*-aout)	emulation="i386aout" ;;
-      i386-*-coff)	emulation="i386coff" ;;
-      i386-*-elf)	emulation="i386elf" ;;
 
       # Always all formats.  The first stated emulation becomes the default.
       cris-*-*aout*)	emulation="crisaout criself" ;;
@@ -797,38 +788,6 @@ fi
 
 AC_DEFINE_UNQUOTED(DEFAULT_COMPRESSED_DEBUG_ALGORITHM, $ac_default_compressed_debug_sections_algorithm,
 		   [Default compression algorithm for --enable-compressed-debug-sections.])
-
-# Turn on all targets if possible
-if test ${all_targets} = "yes"; then
-  case ${target_cpu_type} in
-  i386)
-    case ${obj_format} in
-    aout)
-      emulations="$emulations i386coff i386elf"
-      ;;
-    coff)
-      emulations="$emulations i386aout i386elf"
-    ;;
-    elf)
-      emulations="$emulations i386aout i386coff"
-      ;;
-    esac
-  ;;
-  x86_64)
-    case ${obj_format} in
-    aout)
-      emulations="$emulations i386coff i386elf"
-      ;;
-    coff)
-      emulations="$emulations i386aout i386elf"
-    ;;
-    elf)
-      emulations="$emulations i386aout i386coff"
-      ;;
-    esac
-  ;;
-  esac
-fi
 
 # PE code has way too many macros tweaking behaviour
 case ${te_file} in

@@ -36,7 +36,6 @@ struct emulation
 COMMON struct emulation * this_emulation;
 
 extern struct emulation mipsbelf, mipslelf, mipself;
-extern struct emulation i386coff, i386elf, i386aout;
 extern struct emulation crisaout, criself;
 
 extern void common_emul_init (void);

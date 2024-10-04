@@ -17,9 +17,6 @@ config/atof-vax.c
 config/bfin-lex-wrapper.c
 config/e-crisaout.c
 config/e-criself.c
-config/e-i386aout.c
-config/e-i386coff.c
-config/e-i386elf.c
 config/e-mipself.c
 config/kvx-parse.c
 config/kvx-parse.h

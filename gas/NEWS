@@ -1,5 +1,7 @@
 -*- text -*-
 
+* On x86 emulation support (for secondary targets) was dropped.
+
 * Add support for RISC-V Zcmp (cm.mva01s, cm.mvsa01), Smrnmi and CORE-V
   (xcvbitmanip, xcvsimd) extensions with version 1.0.
 

@@ -362,9 +362,6 @@ TARG_ENV_CFILES = \
 MULTI_CFILES = \
 	config/e-crisaout.c \
 	config/e-criself.c \
-	config/e-i386aout.c \
-	config/e-i386coff.c \
-	config/e-i386elf.c \
 	config/e-mipself.c
 
 CONFIG_ATOF_CFILES = \
