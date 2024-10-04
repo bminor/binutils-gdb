@@ -49,12 +49,7 @@
 #endif
 
 #ifdef TC_I386
-#ifdef TE_PEP
-#include "coff/x86_64.h"
-#else
-#include "coff/i386.h"
-#endif
-
+#include "coff/x86.h"
 #ifndef TARGET_FORMAT
 #ifdef TE_PEP
 #define TARGET_FORMAT "coff-x86-64"
