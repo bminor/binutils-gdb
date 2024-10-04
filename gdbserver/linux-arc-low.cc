@@ -114,7 +114,7 @@ arc_linux_read_description (void)
   target_desc_up tdesc = arc_create_target_description (features);
 
   static const char *expedite_regs[] = { "sp", "status32", nullptr };
-  init_target_desc (tdesc.get (), expedite_regs);
+  init_target_desc (tdesc.get (), expedite_regs, GDB_OSABI_LINUX);
 
   return tdesc.release ();
 }

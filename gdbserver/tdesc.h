@@ -20,6 +20,7 @@
 #define GDBSERVER_TDESC_H
 
 #include "gdbsupport/tdesc.h"
+#include "gdbsupport/osabi.h"
 
 #include "regdef.h"
 #include <vector>
@@ -81,10 +82,11 @@ void copy_target_description (struct target_desc *dest,
 			      const struct target_desc *src);
 
 /* Initialize TDESC, and then set its expedite_regs field to
-   EXPEDITE_REGS.  */
+   EXPEDITE_REGS and its osabi to OSABI.  */
 
 void init_target_desc (struct target_desc *tdesc,
-		       const char **expedite_regs);
+		       const char **expedite_regs,
+		       enum gdb_osabi osabi);
 
 /* Return the current inferior's target description.  Never returns
    NULL.  */
