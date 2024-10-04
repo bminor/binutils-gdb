@@ -26,10 +26,21 @@
 void
 x86_linux_post_init_tdesc (target_desc *tdesc, bool is_64bit)
 {
+  enum gdb_osabi osabi = GDB_OSABI_LINUX;
+
+#ifndef IN_PROCESS_AGENT
+  /* x86 target descriptions are created with the osabi already set.
+     However, init_target_desc requires us to override the already set
+     value.  That's fine, out new string should match the old one.  */
+  gdb_assert (tdesc_osabi_name (tdesc) != nullptr);
+  gdb_assert (strcmp (tdesc_osabi_name (tdesc),
+		      gdbarch_osabi_name (osabi)) == 0);
+#endif /* ! IN_PROCESS_AGENT */
+
 #ifdef __x86_64__
   if (is_64bit)
-    init_target_desc (tdesc, amd64_expedite_regs);
+    init_target_desc (tdesc, amd64_expedite_regs, osabi);
   else
 #endif
-    init_target_desc (tdesc, i386_expedite_regs);
+    init_target_desc (tdesc, i386_expedite_regs, osabi);
 }

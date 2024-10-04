@@ -596,12 +596,12 @@ i386_arch_setup (void)
 #ifdef __x86_64__
   tdesc = amd64_create_target_description (X86_XSTATE_SSE_MASK, false,
 					   false, false);
-  init_target_desc (tdesc, amd64_expedite_regs);
+  init_target_desc (tdesc, amd64_expedite_regs, WINDOWS_OSABI);
   win32_tdesc = tdesc;
 #endif
 
   tdesc = i386_create_target_description (X86_XSTATE_SSE_MASK, false, false);
-  init_target_desc (tdesc, i386_expedite_regs);
+  init_target_desc (tdesc, i386_expedite_regs, WINDOWS_OSABI);
 #ifdef __x86_64__
   wow64_win32_tdesc = tdesc;
 #else
