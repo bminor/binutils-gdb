@@ -16624,7 +16624,8 @@ _bfd_mips_elf_get_synthetic_symtab (bfd *abfd,
   size += count * (sizeof (mipssuffix) +
 		   (micromips_p ? sizeof (microsuffix) : sizeof (m16suffix)));
   for (pi = 0; pi < counti; pi += bed->s->int_rels_per_ext_rel)
-    size += 2 * strlen ((*p[pi].sym_ptr_ptr)->name);
+    if ((*p[pi].sym_ptr_ptr)->name != NULL)
+      size += 2 * strlen ((*p[pi].sym_ptr_ptr)->name);
 
   /* Add the size of "_PROCEDURE_LINKAGE_TABLE_" too.  */
   size += sizeof (asymbol) + sizeof (pltname);
@@ -16754,31 +16755,34 @@ _bfd_mips_elf_get_synthetic_symtab (bfd *abfd,
 
       if (i < count)
 	{
-	  size_t namelen;
-	  size_t len;
+	  if ((*p[pi].sym_ptr_ptr)->name != NULL)
+	    {
+	      size_t namelen;
+	      size_t len;
 
-	  *s = **p[pi].sym_ptr_ptr;
-	  /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
-	     we are defining a symbol, ensure one of them is set.  */
-	  if ((s->flags & BSF_LOCAL) == 0)
-	    s->flags |= BSF_GLOBAL;
-	  s->flags |= BSF_SYNTHETIC;
-	  s->section = plt;
-	  s->value = plt_offset;
-	  s->name = names;
-	  s->udata.i = other;
+	      *s = **p[pi].sym_ptr_ptr;
+	      /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
+		 we are defining a symbol, ensure one of them is set.  */
+	      if ((s->flags & BSF_LOCAL) == 0)
+		s->flags |= BSF_GLOBAL;
+	      s->flags |= BSF_SYNTHETIC;
+	      s->section = plt;
+	      s->value = plt_offset;
+	      s->name = names;
+	      s->udata.i = other;
 
-	  len = strlen ((*p[pi].sym_ptr_ptr)->name);
-	  namelen = len + suffixlen;
-	  if (names + namelen > nend)
-	    break;
+	      len = strlen ((*p[pi].sym_ptr_ptr)->name);
+	      namelen = len + suffixlen;
+	      if (names + namelen > nend)
+		break;
 
-	  memcpy (names, (*p[pi].sym_ptr_ptr)->name, len);
-	  names += len;
-	  memcpy (names, suffix, suffixlen);
-	  names += suffixlen;
+	      memcpy (names, (*p[pi].sym_ptr_ptr)->name, len);
+	      names += len;
+	      memcpy (names, suffix, suffixlen);
+	      names += suffixlen;
 
-	  ++s, ++n;
+	      ++s, ++n;
+	    }
 	  pi = (pi + bed->s->int_rels_per_ext_rel) % counti;
 	}
     }

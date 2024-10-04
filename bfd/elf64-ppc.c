@@ -2402,7 +2402,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
 	  sym = *r->sym_ptr_ptr;
 	  if (!sym_exists_at (syms, opdsymend, symcount,
-			      sym->section->id, sym->value + r->addend))
+			      sym->section->id, sym->value + r->addend)
+	      && syms[i]->name != NULL)
 	    {
 	      ++count;
 	      size += sizeof (asymbol);
@@ -2440,7 +2441,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
 	  sym = *r->sym_ptr_ptr;
 	  if (!sym_exists_at (syms, opdsymend, symcount,
-			      sym->section->id, sym->value + r->addend))
+			      sym->section->id, sym->value + r->addend)
+	      && syms[i]->name != NULL)
 	    {
 	      size_t len;
 
@@ -2491,7 +2493,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    continue;
 
 	  ent = bfd_get_64 (abfd, contents + syms[i]->value);
-	  if (!sym_exists_at (syms, opdsymend, symcount, -1, ent))
+	  if (!sym_exists_at (syms, opdsymend, symcount, -1, ent)
+	      && syms[i]->name != NULL)
 	    {
 	      ++count;
 	      size += sizeof (asymbol);
@@ -2579,11 +2582,12 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
 	      p = relplt->relocation;
 	      for (i = 0; i < plt_count; i++, p++)
-		{
-		  size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
-		  if (p->addend != 0)
-		    size += sizeof ("+0x") - 1 + 16;
-		}
+		if ((*p->sym_ptr_ptr)->name != NULL)
+		  {
+		    size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+		    if (p->addend != 0)
+		      size += sizeof ("+0x") - 1 + 16;
+		  }
 	    }
 	}
 
@@ -2603,7 +2607,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    continue;
 
 	  ent = bfd_get_64 (abfd, contents + syms[i]->value);
-	  if (!sym_exists_at (syms, opdsymend, symcount, -1, ent))
+	  if (!sym_exists_at (syms, opdsymend, symcount, -1, ent)
+	      && syms[i]->name != NULL)
 	    {
 	      size_t lo, hi;
 	      size_t len;
@@ -2691,42 +2696,43 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	     for pending shared library loads.  */
 	  p = relplt->relocation;
 	  for (i = 0; i < plt_count; i++, p++)
-	    {
-	      size_t len;
+	    if ((*p->sym_ptr_ptr)->name != NULL)
+	      {
+		size_t len;
 
-	      *s = **p->sym_ptr_ptr;
-	      /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
-		 we are defining a symbol, ensure one of them is set.  */
-	      if ((s->flags & BSF_LOCAL) == 0)
-		s->flags |= BSF_GLOBAL;
-	      s->flags |= BSF_SYNTHETIC;
-	      s->section = glink;
-	      s->value = glink_vma - glink->vma;
-	      s->name = names;
-	      s->udata.p = NULL;
-	      len = strlen ((*p->sym_ptr_ptr)->name);
-	      memcpy (names, (*p->sym_ptr_ptr)->name, len);
-	      names += len;
-	      if (p->addend != 0)
-		{
-		  memcpy (names, "+0x", sizeof ("+0x") - 1);
-		  names += sizeof ("+0x") - 1;
-		  bfd_sprintf_vma (abfd, names, p->addend);
-		  names += strlen (names);
-		}
-	      memcpy (names, "@plt", sizeof ("@plt"));
-	      names += sizeof ("@plt");
-	      s++;
-	      if (abi < 2)
-		{
-		  glink_vma += 8;
-		  if (i >= 0x8000)
-		    glink_vma += 4;
-		}
-	      else
-		glink_vma += 4;
-	    }
-	  count += plt_count;
+		*s = **p->sym_ptr_ptr;
+		/* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
+		   we are defining a symbol, ensure one of them is set.  */
+		if ((s->flags & BSF_LOCAL) == 0)
+		  s->flags |= BSF_GLOBAL;
+		s->flags |= BSF_SYNTHETIC;
+		s->section = glink;
+		s->value = glink_vma - glink->vma;
+		s->name = names;
+		s->udata.p = NULL;
+		len = strlen ((*p->sym_ptr_ptr)->name);
+		memcpy (names, (*p->sym_ptr_ptr)->name, len);
+		names += len;
+		if (p->addend != 0)
+		  {
+		    memcpy (names, "+0x", sizeof ("+0x") - 1);
+		    names += sizeof ("+0x") - 1;
+		    bfd_sprintf_vma (abfd, names, p->addend);
+		    names += strlen (names);
+		  }
+		memcpy (names, "@plt", sizeof ("@plt"));
+		names += sizeof ("@plt");
+		s++;
+		if (abi < 2)
+		  {
+		    glink_vma += 8;
+		    if (i >= 0x8000)
+		      glink_vma += 4;
+		  }
+		else
+		  glink_vma += 4;
+		count++;
+	      }
 	}
     }
 
