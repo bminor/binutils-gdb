@@ -1309,6 +1309,8 @@ static Hwcentry	generic_list[] = {
  #include "hwc_intel_icelake.h"
 #elif defined(__aarch64__)
  #include "hwc_arm64_amcc.h"
+ #include "hwc_arm_neoverse_n1.h"
+ #include "hwc_arm_ampere_1.h"
 #endif
 
 /* structure defining the counters for a CPU type */
@@ -1364,6 +1366,8 @@ static cpu_list_t cputabs[] = {
   {CPC_AMD_FAM_19H_ZEN4, amd_zen4_list, {"insts,,cycles", 0}},
 #elif defined(__aarch64__)
   {CPC_ARM64_AMCC, arm64_amcc_list, {"insts,,cycles", 0}},
+  {CPC_ARM_NEOVERSE_N1, arm_neoverse_n1_list, {"insts,,cycles", 0}},
+  {CPC_ARM_AMPERE_1, arm_ampere_1_list, {"insts,,cycles", 0}},
   {CPC_ARM_GENERIC, generic_list, {"insts,,cycles", 0}},
 #endif
   {0, generic_list, {"insts,,cycles", 0}},
@@ -1869,6 +1873,10 @@ setup_cpc_general (int skip_hwc_test)
     {
       if (cpu_p->cpu_family == 0x50)
 	cpcx_cpuver = CPC_ARM64_AMCC;
+      else if (cpu_p->cpu_family == 0x41)
+	cpcx_cpuver = CPC_ARM_NEOVERSE_N1;
+      else if (cpu_p->cpu_family == 0xc0)
+	cpcx_cpuver = CPC_ARM_AMPERE_1;
       else
 	cpcx_cpuver = CPC_ARM_GENERIC;
     }

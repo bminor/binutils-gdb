@@ -131,6 +131,8 @@ extern cpu_info_t *read_cpuinfo();
 // Arm
 #define CPC_ARM_GENERIC     3500
 #define CPC_ARM64_AMCC      3501 /* Applied Micro Circuits Corporation (ARM) */
+#define CPC_ARM_NEOVERSE_N1 3502
+#define CPC_ARM_AMPERE_1    3503
 
 #define	AMD_FAM_19H_ZEN3_NAME	"AMD Family 19h (Zen3)"
 #define	AMD_FAM_19H_ZEN4_NAME	"AMD Family 19h (Zen4)"
