@@ -130,10 +130,6 @@ static long start_time;
 #ifdef USE_EMULATIONS
 #define EMULATION_ENVIRON "AS_EMULATION"
 
-extern struct emulation mipsbelf, mipslelf, mipself;
-extern struct emulation i386coff, i386elf, i386aout;
-extern struct emulation crisaout, criself;
-
 static struct emulation *const emulations[] = { EMULATIONS };
 static const int n_emulations = sizeof (emulations) / sizeof (emulations[0]);
 

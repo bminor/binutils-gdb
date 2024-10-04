@@ -82,7 +82,7 @@ extern const struct format_ops ecoff_format_ops;
 extern const struct format_ops coff_format_ops;
 extern const struct format_ops aout_format_ops;
 
-#ifndef this_format
+#ifdef USE_EMULATIONS
 COMMON const struct format_ops *this_format;
 #endif
 
