@@ -9725,6 +9725,9 @@ bool
 _bfd_elf_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED,
 			      const char *name)
 {
+  if (!name)
+    return false;
+
   /* Normal local symbols start with ``.L''.  */
   if (name[0] == '.' && name[1] == 'L')
     return true;
