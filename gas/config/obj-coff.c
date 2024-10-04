@@ -1936,7 +1936,6 @@ const struct format_ops coff_format_ops =
   0,	/* s_get_type */
   0,	/* s_set_type */
   0,	/* copy_symbol_attributes */
-  0,	/* generate_asm_lineno */
   0,	/* process_stab */
   coff_separate_stab_sections,
   obj_coff_init_stab_section,

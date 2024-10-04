@@ -310,7 +310,6 @@ const struct format_ops ecoff_format_ops =
   0,	/* s_get_type.  */
   0,	/* s_set_type.  */
   0,	/* copy_symbol_attributes.  */
-  ecoff_generate_asm_lineno,
   ecoff_stab,
   ecoff_separate_stab_sections,
   0,	/* init_stab_section.  */

@@ -3191,15 +3191,6 @@ elf_frob_file_after_relocs (void)
 }
 
 static void
-elf_generate_asm_lineno (void)
-{
-#ifdef NEED_ECOFF_DEBUG
-  if (ECOFF_DEBUGGING)
-    ecoff_generate_asm_lineno ();
-#endif
-}
-
-static void
 elf_process_stab (int what ATTRIBUTE_UNUSED,
 		  const char *string ATTRIBUTE_UNUSED,
 		  int type ATTRIBUTE_UNUSED,
@@ -3297,7 +3288,6 @@ const struct format_ops elf_format_ops =
   0,	/* s_get_type */
   0,	/* s_set_type */
   elf_copy_symbol_attributes,
-  elf_generate_asm_lineno,
   elf_process_stab,
   elf_separate_stab_sections,
   elf_init_stab_section,

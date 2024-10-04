@@ -315,7 +315,6 @@ const struct format_ops aout_format_ops =
   obj_aout_s_get_type,
   obj_aout_s_set_type,
   0,	/* copy_symbol_attributes.  */
-  0,	/* generate_asm_lineno.  */
   obj_aout_process_stab,
   obj_aout_separate_stab_sections,
   0,	/* init_stab_section.  */
