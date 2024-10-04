@@ -182,13 +182,6 @@ select_emulation_mode (int argc, char **argv)
   this_emulation->init ();
 }
 
-const char *
-default_emul_bfd_name (void)
-{
-  abort ();
-  return NULL;
-}
-
 void
 common_emul_init (void)
 {

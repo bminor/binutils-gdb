@@ -22,10 +22,6 @@
 #define emul_init			common_emul_init
 #endif
 
-#ifndef emul_bfd_name
-#define emul_bfd_name			default_emul_bfd_name
-#endif
-
 #ifndef emul_local_labels_fb
 #define emul_local_labels_fb		0
 #endif
@@ -48,10 +44,8 @@
 
 struct emulation emul_struct_name =
   {
-    0,
     emul_name,
     emul_init,
-    emul_bfd_name,
     emul_local_labels_fb, emul_local_labels_dollar,
     emul_leading_underscore,
     emul_default_endian,

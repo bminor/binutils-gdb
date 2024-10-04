@@ -20,16 +20,6 @@
 #include "as.h"
 #include "emul.h"
 
-static const char *i386coff_bfd_name (void);
-
-static const char *
-i386coff_bfd_name (void)
-{
-  abort ();
-  return NULL;
-}
-
-#define emul_bfd_name	i386coff_bfd_name
 #define emul_format	&coff_format_ops
 
 #define emul_name	"i386coff"
