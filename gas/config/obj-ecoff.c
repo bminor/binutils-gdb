@@ -195,30 +195,6 @@ obj_ecoff_set_ext (symbolS *sym, EXTR *ext)
   (*debug_swap->swap_ext_out) (stdoutput, ext, esym->native);
 }
 
-static int
-ecoff_sec_sym_ok_for_reloc (asection *sec ATTRIBUTE_UNUSED)
-{
-  return 1;
-}
-
-static void
-obj_ecoff_frob_symbol (symbolS *sym, int *puntp ATTRIBUTE_UNUSED)
-{
-  ecoff_frob_symbol (sym);
-}
-
-static void
-ecoff_pop_insert (void)
-{
-  pop_insert (obj_pseudo_table);
-}
-
-static int
-ecoff_separate_stab_sections (void)
-{
-  return 0;
-}
-
 /* These are the pseudo-ops we support in this file.  Only those
    relating to debugging information are supported here.
 
@@ -282,6 +258,32 @@ const pseudo_typeS obj_pseudo_table[] =
   { NULL,	s_ignore,		0 }
 };
 
+#ifdef USE_EMULATIONS
+
+static int
+ecoff_sec_sym_ok_for_reloc (asection *sec ATTRIBUTE_UNUSED)
+{
+  return 1;
+}
+
+static void
+obj_ecoff_frob_symbol (symbolS *sym, int *puntp ATTRIBUTE_UNUSED)
+{
+  ecoff_frob_symbol (sym);
+}
+
+static void
+ecoff_pop_insert (void)
+{
+  pop_insert (obj_pseudo_table);
+}
+
+static int
+ecoff_separate_stab_sections (void)
+{
+  return 0;
+}
+
 const struct format_ops ecoff_format_ops =
 {
   bfd_target_ecoff_flavour,
@@ -321,3 +323,5 @@ const struct format_ops ecoff_format_ops =
   ecoff_symbol_clone_hook,
   0	/* adjust_symtab.  */
 };
+
+#endif /* USE_EMULATIONS */

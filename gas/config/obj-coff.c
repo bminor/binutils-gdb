@@ -1856,7 +1856,7 @@ symbol_dump (void)
 
 #endif /* DEBUG */
 
-const pseudo_typeS coff_pseudo_table[] =
+static const pseudo_typeS coff_pseudo_table[] =
 {
   {"ABORT", s_abort, 0},
   /* We accept the .bss directive for backward compatibility with
@@ -1897,13 +1897,13 @@ const pseudo_typeS coff_pseudo_table[] =
 };
 
 
-/* Support for a COFF emulation.  */
-
-static void
+void
 coff_pop_insert (void)
 {
   pop_insert (coff_pseudo_table);
 }
+
+#ifdef USE_EMULATIONS /* Support for a COFF emulation.  */
 
 static int
 coff_separate_stab_sections (void)
@@ -1947,3 +1947,5 @@ const struct format_ops coff_format_ops =
   coff_obj_symbol_clone_hook,
   coff_adjust_symtab
 };
+
+#endif /* USE_EMULATIONS */

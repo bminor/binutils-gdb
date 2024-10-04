@@ -199,48 +199,6 @@ elf_pop_insert (void)
     pop_insert (ecoff_debug_pseudo_table);
 }
 
-static bfd_vma
-elf_s_get_size (symbolS *sym)
-{
-  return S_GET_SIZE (sym);
-}
-
-static void
-elf_s_set_size (symbolS *sym, bfd_vma sz)
-{
-  S_SET_SIZE (sym, sz);
-}
-
-static bfd_vma
-elf_s_get_align (symbolS *sym)
-{
-  return S_GET_ALIGN (sym);
-}
-
-static void
-elf_s_set_align (symbolS *sym, bfd_vma align)
-{
-  S_SET_ALIGN (sym, align);
-}
-
-int
-elf_s_get_other (symbolS *sym)
-{
-  return elf_symbol (symbol_get_bfdsym (sym))->internal_elf_sym.st_other;
-}
-
-static void
-elf_s_set_other (symbolS *sym, int other)
-{
-  S_SET_OTHER (sym, other);
-}
-
-static int
-elf_sec_sym_ok_for_reloc (asection *sec)
-{
-  return obj_sec_sym_ok_for_reloc (sec);
-}
-
 void
 elf_file_symbol (const char *s)
 {
@@ -3190,38 +3148,6 @@ elf_frob_file_after_relocs (void)
 #endif /* NEED_ECOFF_DEBUG */
 }
 
-static void
-elf_process_stab (int what ATTRIBUTE_UNUSED,
-		  const char *string ATTRIBUTE_UNUSED,
-		  int type ATTRIBUTE_UNUSED,
-		  int other ATTRIBUTE_UNUSED,
-		  int desc ATTRIBUTE_UNUSED)
-{
-#ifdef NEED_ECOFF_DEBUG
-  if (ECOFF_DEBUGGING)
-    ecoff_stab (what, string, type, other, desc);
-#endif
-}
-
-static int
-elf_separate_stab_sections (void)
-{
-#ifdef NEED_ECOFF_DEBUG
-  return (!ECOFF_DEBUGGING);
-#else
-  return 1;
-#endif
-}
-
-static void
-elf_init_stab_section (segT stab, segT stabstr)
-{
-#ifdef NEED_ECOFF_DEBUG
-  if (!ECOFF_DEBUGGING)
-#endif
-    obj_elf_init_stab_section (stab, stabstr);
-}
-
 /* This is called when the assembler starts.  */
 
 void
@@ -3265,6 +3191,84 @@ elf_end (void)
     }
 }
 
+#ifdef USE_EMULATIONS
+
+static bfd_vma
+elf_s_get_size (symbolS *sym)
+{
+  return S_GET_SIZE (sym);
+}
+
+static void
+elf_s_set_size (symbolS *sym, bfd_vma sz)
+{
+  S_SET_SIZE (sym, sz);
+}
+
+static bfd_vma
+elf_s_get_align (symbolS *sym)
+{
+  return S_GET_ALIGN (sym);
+}
+
+static void
+elf_s_set_align (symbolS *sym, bfd_vma align)
+{
+  S_SET_ALIGN (sym, align);
+}
+
+int
+elf_s_get_other (symbolS *sym)
+{
+  return elf_symbol (symbol_get_bfdsym (sym))->internal_elf_sym.st_other;
+}
+
+static void
+elf_s_set_other (symbolS *sym, int other)
+{
+  S_SET_OTHER (sym, other);
+}
+
+static int
+elf_sec_sym_ok_for_reloc (asection *sec)
+{
+  return obj_sec_sym_ok_for_reloc (sec);
+}
+
+#ifdef NEED_ECOFF_DEBUG
+static void
+elf_process_stab (int what ATTRIBUTE_UNUSED,
+		  const char *string ATTRIBUTE_UNUSED,
+		  int type ATTRIBUTE_UNUSED,
+		  int other ATTRIBUTE_UNUSED,
+		  int desc ATTRIBUTE_UNUSED)
+{
+  if (ECOFF_DEBUGGING)
+    ecoff_stab (what, string, type, other, desc);
+}
+#else
+# define elf_process_stab NULL
+#endif
+
+static int
+elf_separate_stab_sections (void)
+{
+#ifdef NEED_ECOFF_DEBUG
+  return (!ECOFF_DEBUGGING);
+#else
+  return 1;
+#endif
+}
+
+#ifdef NEED_ECOFF_DEBUG
+static void
+elf_init_stab_section (segT stab, segT stabstr)
+{
+  if (!ECOFF_DEBUGGING)
+    obj_elf_init_stab_section (stab, stabstr);
+}
+#endif
+
 const struct format_ops elf_format_ops =
 {
   bfd_target_elf_flavour,
@@ -3290,7 +3294,11 @@ const struct format_ops elf_format_ops =
   elf_copy_symbol_attributes,
   elf_process_stab,
   elf_separate_stab_sections,
+#ifdef NEED_ECOFF_DEBUG
   elf_init_stab_section,
+#else
+  obj_elf_init_stab_section,
+#endif
   elf_sec_sym_ok_for_reloc,
   elf_pop_insert,
 #ifdef NEED_ECOFF_DEBUG
@@ -3303,3 +3311,5 @@ const struct format_ops elf_format_ops =
   elf_obj_symbol_clone_hook,
   elf_adjust_symtab
 };
+
+#endif /* USE_EMULATIONS */

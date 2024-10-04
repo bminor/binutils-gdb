@@ -150,7 +150,8 @@ extern void elf_end (void);
 
 int elf_s_get_other (symbolS *);
 #ifndef S_GET_OTHER
-#define S_GET_OTHER(S)	(elf_s_get_other (S))
+#define S_GET_OTHER(S) \
+  (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_other)
 #endif
 #ifndef S_SET_OTHER
 #define S_SET_OTHER(S,V) \

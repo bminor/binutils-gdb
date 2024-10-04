@@ -270,12 +270,9 @@ extern symbolS *coff_last_function;
 #endif
 #endif
 
-/* Sanity check.  */
-
-extern const pseudo_typeS coff_pseudo_table[];
-
+extern void coff_pop_insert (void);
 #ifndef obj_pop_insert
-#define obj_pop_insert() pop_insert (coff_pseudo_table)
+#define obj_pop_insert() coff_pop_insert ()
 #endif
 
 /* In COFF, if a symbol is defined using .def/.val SYM/.endef, it's OK

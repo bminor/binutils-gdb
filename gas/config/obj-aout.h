@@ -27,10 +27,9 @@
 
 #define OUTPUT_FLAVOR bfd_target_aout_flavour
 
-extern const pseudo_typeS aout_pseudo_table[];
-
+extern void aout_pop_insert (void);
 #ifndef obj_pop_insert
-#define obj_pop_insert() pop_insert (aout_pseudo_table)
+#define obj_pop_insert() aout_pop_insert ()
 #endif
 
 /* Symbol table entry data type.  */

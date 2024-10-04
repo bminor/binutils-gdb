@@ -221,13 +221,15 @@ obj_aout_type (int ignore ATTRIBUTE_UNUSED)
   s_ignore (0);
 }
 
-/* Support for an AOUT emulation.  */
+static const pseudo_typeS aout_pseudo_table[];
 
-static void
+void
 aout_pop_insert (void)
 {
   pop_insert (aout_pseudo_table);
 }
+
+#ifdef USE_EMULATIONS /* Support for an AOUT emulation.  */
 
 static int
 obj_aout_s_get_other (symbolS *sym)
@@ -327,7 +329,9 @@ const struct format_ops aout_format_ops =
   0	/* adjust_symtab.  */
 };
 
-const pseudo_typeS aout_pseudo_table[] =
+#endif /* USE_EMULATIONS */
+
+static const pseudo_typeS aout_pseudo_table[] =
 {
   {"line", obj_aout_line, 0},	/* Source code line number.  */
   {"ln", obj_aout_line, 0},	/* COFF line number that we use anyway.  */
