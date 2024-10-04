@@ -2498,16 +2498,15 @@ cfi_finish (void)
 	- .sframe in the .cfi_sections directive.  */
   if (flag_gen_sframe || (all_cfi_sections & CFI_EMIT_sframe) != 0)
     {
-      if (support_sframe_p ())
+      if (support_sframe_p () && !SUPPORT_FRAME_LINKONCE)
 	{
 	  segT sframe_seg;
 	  int alignment = ffs (DWARF2_ADDR_SIZE (stdoutput)) - 1;
 
-	  if (!SUPPORT_FRAME_LINKONCE)
-	    sframe_seg = get_cfi_seg (NULL, ".sframe",
-					 (SEC_ALLOC | SEC_LOAD | SEC_DATA
-					  | DWARF2_EH_FRAME_READ_ONLY),
-					 alignment);
+	  sframe_seg = get_cfi_seg (NULL, ".sframe",
+				    (SEC_ALLOC | SEC_LOAD | SEC_DATA
+				     | DWARF2_EH_FRAME_READ_ONLY),
+				    alignment);
 	  output_sframe (sframe_seg);
 	}
       else
