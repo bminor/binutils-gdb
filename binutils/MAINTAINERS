@@ -73,9 +73,7 @@ responsibility among the other maintainers.
   BFIN		   Jie Zhang <jzhang918@gmail.com>
   BFIN		   Mike Frysinger <vapier@gentoo.org>
   BPF		   Jose E. Marchesi <jose.marchesi@oracle.com>
-  CR16		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
-  CRX		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
   CTF		   Nick Alcock <nick.alcock@oracle.com>
   C-SKY		   Lifang Xia <lifang_xia@linux.alibaba.com>
   C-SKY		   Yunhai Shang <yunhai@linux.alibaba.com>
@@ -169,6 +167,7 @@ goes with them.
   Mark Mitchell
   Bernd Schmidt
   Svein Seldal
+  M R Swami Reddy
   Martin Schwidefsky
   Matt Thomas
 
