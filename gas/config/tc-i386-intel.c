@@ -1126,7 +1126,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  else
 	    i.types[this_operand].bitfield.disp16 = 1;
 
-#if defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT)
+#ifdef OBJ_AOUT
 	  /*
 	   * exp_seg is used only for verification in
 	   * i386_finalize_displacement, and we can end up seeing reg_section

@@ -84,9 +84,7 @@ extern unsigned long i386_mach (void);
 #define ELF_TARGET_IAMCU_FORMAT	"elf32-iamcu"
 #endif
 
-#if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
-     || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
+#if (defined (OBJ_ELF) || defined (TE_PE) || defined (OBJ_MACH_O))
 extern const char *i386_target_format (void);
 #define TARGET_FORMAT i386_target_format ()
 #else
@@ -141,7 +139,7 @@ int i386_validate_fix (struct fix *);
     if (!i386_validate_fix(FIX)) goto SKIP;      \
   } while (0)
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 #define tc_fix_adjustable(X)  tc_i386_fix_adjustable(X)
 extern int tc_i386_fix_adjustable (struct fix *);
 #else
@@ -233,7 +231,7 @@ if ((n)									\
 extern void i386_cons_align (int);
 #define md_cons_align(nbytes) i386_cons_align (nbytes)
 
-#if !defined (OBJ_AOUT) && !defined (OBJ_MAYBE_AOUT)
+#ifndef OBJ_AOUT
 #define md_section_align(seg, value) ((void)(seg), (value))
 #endif
 
@@ -426,7 +424,7 @@ extern void i386_solaris_fix_up_eh_frame (segT);
 extern bfd_vma x86_64_section_letter (int, const char **);
 #define md_elf_section_letter(LETTER, PTR_MSG)	x86_64_section_letter (LETTER, PTR_MSG)
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 extern void x86_cleanup (void);
 #define md_cleanup() x86_cleanup ()
 

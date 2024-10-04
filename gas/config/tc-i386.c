@@ -193,7 +193,7 @@ static void output_disp (fragS *, offsetT);
 #ifdef OBJ_AOUT
 static void s_bss (int);
 #endif
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 static void handle_large_common (int small ATTRIBUTE_UNUSED);
 
 /* GNU_PROPERTY_X86_ISA_1_USED.  */
@@ -274,7 +274,7 @@ enum i386_error
     internal_error,
   };
 
-#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+#ifdef OBJ_ELF
 enum x86_tls_error_type
 {
   x86_tls_error_continue,
@@ -564,7 +564,7 @@ const char extra_symbol_chars[] = "*%-(["
 #endif
 	;
 
-#if ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))	\
+#if (defined (OBJ_ELF)					\
      && !defined (TE_GNU)				\
      && !defined (TE_LINUX)				\
      && !defined (TE_Haiku)				\
@@ -653,7 +653,7 @@ static int use_rela_relocations = 0;
 /* __tls_get_addr/___tls_get_addr symbol for TLS.  */
 static const char *tls_get_addr;
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 
 /* The ELF ABI to use.  */
 enum x86_elf_abi
@@ -671,7 +671,7 @@ static enum x86_elf_abi x86_elf_abi = I386_ABI;
 static int use_big_obj = 0;
 #endif
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 /* 1 if generating code for a shared library.  */
 static int shared = 0;
 
@@ -1304,7 +1304,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"disallow_index_reg", set_allow_index_reg, 0},
   {"sse_check", set_check, 0},
   {"operand_check", set_check, 1},
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
   {"largecomm", handle_large_common, 0},
 #else
   {"file", dwarf2_directive_file, 0},
@@ -1327,8 +1327,7 @@ static htab_t op_hash;
 /* Hash table for register lookup.  */
 static htab_t reg_hash;
 
-#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O) \
-     || defined (TE_PE))
+#if (defined (OBJ_ELF) || defined (OBJ_MACH_O) || defined (TE_PE))
 static const struct
 {
   const char *str;
@@ -1349,7 +1348,7 @@ gotrel[] =
       { .imm64 = 1, .disp64 = 1 } }
 
 #ifndef TE_PE
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
     { STRING_COMMA_LEN ("SIZE"),      { BFD_RELOC_SIZE32,
 					BFD_RELOC_SIZE32 },
     { .bitfield = { .imm32 = 1, .imm64 = 1 } }, false },
@@ -3077,12 +3076,9 @@ static void
 check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
 			   i386_cpu_flags new_flag ATTRIBUTE_UNUSED)
 {
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  static const char *arch;
-
   /* Intel MCU is only supported on ELF.  */
-  if (!IS_ELF)
-    return;
+#ifdef OBJ_ELF
+  static const char *arch;
 
   if (!arch)
     {
@@ -3555,13 +3551,12 @@ md_begin (void)
   if (object_64bit)
     {
 #if defined (OBJ_COFF) && defined (TE_PE)
-      x86_dwarf2_return_column = (OUTPUT_FLAVOR == bfd_target_coff_flavour
-				  ? 32 : 16);
+      x86_dwarf2_return_column = 32;
 #else
       x86_dwarf2_return_column = 16;
 #endif
       x86_cie_data_alignment = -8;
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
       x86_sframe_cfa_sp_reg = REG_SP;
       x86_sframe_cfa_fp_reg = REG_FP;
 #endif
@@ -3800,7 +3795,7 @@ reloc (unsigned int size,
 	    break;
 	  }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
       if (other == BFD_RELOC_SIZE32)
 	{
 	  if (size == 8)
@@ -3871,7 +3866,7 @@ reloc (unsigned int size,
   return NO_RELOC;
 }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 /* Here we decide which fixups can be adjusted to make them relative to
    the beginning of the section instead of the symbol.  Basically we need
    to make sure that the dynamic relocations are done correctly, so in
@@ -3880,9 +3875,6 @@ reloc (unsigned int size,
 int
 tc_i386_fix_adjustable (fixS *fixP)
 {
-  if (!IS_ELF)
-    return 1;
-
   /* Don't adjust pc-relative references to merge sections in 64-bit
      mode.  */
   if (use_rela_relocations
@@ -6605,7 +6597,7 @@ static INLINE bool may_need_pass2 (const insn_template *t)
 	       && (t->base_opcode | 8) == 0x2c);
 }
 
-#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+#ifdef OBJ_ELF
 static enum x86_tls_error_type
 x86_check_tls_relocation (enum bfd_reloc_code_real r_type)
 {
@@ -7295,8 +7287,8 @@ i386_assemble (char *line)
 	i.prefix[LOCK_PREFIX] = 0;
     }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (IS_ELF && i.has_gotrel && tls_check)
+#ifdef OBJ_ELF
+  if (i.has_gotrel && tls_check)
     {
       enum x86_tls_error_type tls_error;
       for (j = 0; j < i.operands; ++j)
@@ -7530,10 +7522,10 @@ i386_assemble (char *line)
   /* We are ready to output the insn.  */
   output_insn (last_insn);
 
-#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+#ifdef OBJ_ELF
   /* PS: SCFI is enabled only for System V AMD64 ABI.  The ABI check has been
      performed in i386_target_format.  */
-  if (IS_ELF && flag_synth_cfi)
+  if (flag_synth_cfi)
     {
       ginsnS *ginsn;
       ginsn = x86_ginsn_new (symbol_temp_new_now (), frch_ginsn_gen_mode ());
@@ -10302,7 +10294,7 @@ process_suffix (const insn_template *t)
 		  ? i.op[1].regs->reg_type.bitfield.word
 		  : i.op[1].regs->reg_type.bitfield.dword)
 	      && ((i.base_reg == NULL && i.index_reg == NULL)
-#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+#ifdef OBJ_ELF
 		  || (x86_elf_abi == X86_64_X32_ABI
 		      && i.base_reg
 		      && i.base_reg->reg_num == RegIP
@@ -11448,17 +11440,14 @@ output_branch (void)
   frag_var (rs_machine_dependent, 5, i.reloc[0], subtype, sym, off, p);
 }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+/* PLT32 relocation is ELF only.  */
+#ifdef OBJ_ELF
 /* Return TRUE iff PLT32 relocation should be used for branching to
    symbol S.  */
 
 static bool
 need_plt32_p (symbolS *s)
 {
-  /* PLT32 relocation is ELF only.  */
-  if (!IS_ELF)
-    return false;
-
 #ifdef TE_SOLARIS
   /* Don't emit PLT32 relocation on Solaris: neither native linker nor
      krtld support it.  */
@@ -11570,7 +11559,7 @@ output_jump (void)
       abort ();
     }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
   if (flag_code == CODE_64BIT && size == 4
       && jump_reloc == NO_RELOC && i.op[0].disps->X_add_number == 0
       && need_plt32_p (i.op[0].disps->X_add_symbol))
@@ -11733,7 +11722,7 @@ i386_unrecognized_line (int ch)
   return 1;
 }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 void
 x86_cleanup (void)
 {
@@ -11746,7 +11735,7 @@ x86_cleanup (void)
   unsigned int isa_1_descsz_raw, feature_2_descsz_raw;
   unsigned int padding;
 
-  if (!IS_ELF || !x86_used_note)
+  if (!x86_used_note)
     return;
 
   x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X86;
@@ -12155,8 +12144,8 @@ output_insn (const struct last_insn *last_insn)
      or never be used.  */
   enum mf_jcc_kind mf_jcc = mf_jcc_jo;
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (IS_ELF && x86_used_note && now_seg != absolute_section)
+#ifdef OBJ_ELF
+  if (x86_used_note && now_seg != absolute_section)
     {
       if ((i.xstate & xstate_tmm) == xstate_tmm
 	  || is_cpu (&i.tm, CpuAMX_TILE))
@@ -12431,7 +12420,7 @@ output_insn (const struct last_insn *last_insn)
 	      abort ();
 	    }
 
-#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+#ifdef OBJ_ELF
 	  /* For x32, add a dummy REX_OPCODE prefix for mov/add with
 	     R_X86_64_GOTTPOFF relocation so that linker can safely
 	     perform IE->LE optimization.  A dummy REX_OPCODE prefix
@@ -13046,8 +13035,7 @@ x86_address_bytes (void)
   return stdoutput->arch_info->bits_per_address / 8;
 }
 
-#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O) \
-     || defined (TE_PE))
+#if (defined (OBJ_ELF) || defined (OBJ_MACH_O) || defined (TE_PE))
 /* Parse operands of the form
    <symbol>@GOTOFF+<nnn>
    and similar .plt or .got references.
@@ -13069,11 +13057,6 @@ lex_got (enum bfd_reloc_code_real *rel,
      and adjust the reloc according to the real size in reloc().  */
   char *cp;
   unsigned int j;
-
-#if defined (OBJ_MAYBE_ELF) && !defined (TE_PE)
-  if (!IS_ELF)
-    return NULL;
-#endif
 
   for (cp = input_line_pointer; *cp != '@'; cp++)
     if (is_end_of_line[(unsigned char) *cp] || *cp == ',')
@@ -13158,7 +13141,7 @@ x86_cons (expressionS *exp, int size)
   exp->X_md = 0;
   expr_mode = expr_operator_none;
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (TE_PE)
+#if defined (OBJ_ELF) || defined (TE_PE)
   if (size == 4 || (object_64bit && size == 8))
     {
       /* Handle @GOTOFF and the like in an expression.  */
@@ -14029,10 +14012,10 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
   last_insn->name = ".insn directive";
   last_insn->file = as_where (&last_insn->line);
 
-#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+#ifdef OBJ_ELF
   /* PS: SCFI is enabled only for System V AMD64 ABI.  The ABI check has been
      performed in i386_target_format.  */
-  if (IS_ELF && flag_synth_cfi)
+  if (flag_synth_cfi)
     as_bad (_("SCFI: hand-crafting instructions not supported"));
 #endif
 
@@ -14438,9 +14421,8 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 	  && flag_code != CODE_64BIT && !object_64bit)
 	exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
     }
-#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
-  else if (OUTPUT_FLAVOR == bfd_target_aout_flavour
-	   && exp_seg != absolute_section
+#ifdef OBJ_AOUT
+  else if (exp_seg != absolute_section
 	   && exp_seg != text_section
 	   && exp_seg != data_section
 	   && exp_seg != bss_section
@@ -14727,9 +14709,8 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 	exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
     }
 
-#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
-  else if (OUTPUT_FLAVOR == bfd_target_aout_flavour
-	   && exp_seg != absolute_section
+#ifdef OBJ_AOUT
+  else if (exp_seg != absolute_section
 	   && exp_seg != text_section
 	   && exp_seg != data_section
 	   && exp_seg != bss_section
@@ -15410,7 +15391,7 @@ i386_frag_max_var (fragS *frag)
   return TYPE_FROM_RELAX_STATE (frag->fr_subtype) == UNCOND_JUMP ? 4 : 5;
 }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 static int
 elf_symbol_resolved_in_segment_p (symbolS *fr_symbol, offsetT fr_var)
 {
@@ -15868,14 +15849,12 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
      an externally visible symbol, because it may be overridden by a
      shared library.  */
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      || (IS_ELF
-	  && !elf_symbol_resolved_in_segment_p (fragP->fr_symbol,
-						fragP->fr_var))
+#ifdef OBJ_ELF
+      || !elf_symbol_resolved_in_segment_p (fragP->fr_symbol,
+					    fragP->fr_var)
 #endif
 #if defined (OBJ_COFF) && defined (TE_PE)
-      || (OUTPUT_FLAVOR == bfd_target_coff_flavour
-	  && S_IS_WEAK (fragP->fr_symbol))
+      || S_IS_WEAK (fragP->fr_symbol)
 #endif
       )
     {
@@ -15891,7 +15870,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	reloc_type = (enum bfd_reloc_code_real) fragP->fr_var;
       else if (size == 2)
 	reloc_type = BFD_RELOC_16_PCREL;
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
       else if (fragP->tc_frag_data.code == CODE_64BIT
 	       && fragP->fr_offset == 0
 	       && need_plt32_p (fragP->fr_symbol))
@@ -16242,30 +16221,22 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	 This covers for the fact that bfd_install_relocation will
 	 subtract the current location (for partial_inplace, PC relative
 	 relocations); see more below.  */
-#ifndef OBJ_AOUT
-      if (IS_ELF
-#ifdef TE_PE
-	  || OUTPUT_FLAVOR == bfd_target_coff_flavour
+#if defined (OBJ_ELF) || defined (TE_PE)
+      value += fixP->fx_where + fixP->fx_frag->fr_address;
 #endif
-	  )
-	value += fixP->fx_where + fixP->fx_frag->fr_address;
-#endif
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      if (IS_ELF)
-	{
-	  segT sym_seg = S_GET_SEGMENT (fixP->fx_addsy);
+#ifdef OBJ_ELF
+      segT sym_seg = S_GET_SEGMENT (fixP->fx_addsy);
 
-	  if ((sym_seg == seg
-	       || (symbol_section_p (fixP->fx_addsy)
-		   && sym_seg != absolute_section))
-	      && !generic_force_reloc (fixP))
-	    {
-	      /* Yes, we add the values in twice.  This is because
-		 bfd_install_relocation subtracts them out again.  I think
-		 bfd_install_relocation is broken, but I don't dare change
-		 it.  FIXME.  */
-	      value += fixP->fx_where + fixP->fx_frag->fr_address;
-	    }
+      if ((sym_seg == seg
+	   || (symbol_section_p (fixP->fx_addsy)
+	       && sym_seg != absolute_section))
+	  && !generic_force_reloc (fixP))
+	{
+	  /* Yes, we add the values in twice.  This is because
+	     bfd_install_relocation subtracts them out again.  I think
+	     bfd_install_relocation is broken, but I don't dare change
+	     it.  FIXME.  */
+	  value += fixP->fx_where + fixP->fx_frag->fr_address;
 	}
 #endif
 #if defined (OBJ_COFF) && defined (TE_PE)
@@ -16298,8 +16269,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
   /* Fix a few things - the dynamic linker expects certain values here,
      and we must not disappoint it.  */
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (IS_ELF && fixP->fx_addsy)
+#ifdef OBJ_ELF
+  if (fixP->fx_addsy)
     switch (fixP->fx_r_type)
       {
       case BFD_RELOC_386_PLT32:
@@ -16351,7 +16322,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       default:
 	break;
       }
-#endif /* defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)  */
+#endif /* OBJ_ELF  */
 
   /* If not 64bit, massage value, to account for wraparound when !BFD64.  */
   if (!object_64bit)
@@ -16782,7 +16753,7 @@ bool i386_record_operator (operatorT op,
 }
 #endif
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 const char *md_shortopts = "kVQ:sqnO::";
 #else
 const char *md_shortopts = "qnO::";
@@ -16828,11 +16799,10 @@ const char *md_shortopts = "qnO::";
 struct option md_longopts[] =
 {
   {"32", no_argument, NULL, OPTION_32},
-#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
+#if (defined (OBJ_ELF) || defined (TE_PE) || defined (OBJ_MACH_O))
   {"64", no_argument, NULL, OPTION_64},
 #endif
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
   {"x32", no_argument, NULL, OPTION_X32},
   {"mshared", no_argument, NULL, OPTION_MSHARED},
   {"mx86-used-note", required_argument, NULL, OPTION_X86_USED_NOTE},
@@ -16891,7 +16861,7 @@ md_parse_option (int c, const char *arg)
       quiet_warnings = 1;
       break;
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
       /* -Qy, -Qn: SVR4 arguments controlling whether a .comment section
 	 should be emitted or not.  FIXME: Not implemented.  */
     case 'Q':
@@ -16928,8 +16898,7 @@ md_parse_option (int c, const char *arg)
 
 
 #endif
-#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
+#if (defined (OBJ_ELF) || defined (TE_PE) || defined (OBJ_MACH_O))
     case OPTION_64:
       {
 	const char **list, **l;
@@ -16952,25 +16921,22 @@ md_parse_option (int c, const char *arg)
       break;
 #endif
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
     case OPTION_X32:
-      if (IS_ELF)
-	{
-	  const char **list, **l;
+      {
+	const char **list, **l;
 
-	  list = bfd_target_list ();
-	  for (l = list; *l != NULL; l++)
-	    if (startswith (*l, "elf32-x86-64"))
-	      {
-		default_arch = "x86_64:32";
-		break;
-	      }
-	  if (*l == NULL)
-	    as_fatal (_("no compiled in support for 32bit x86_64"));
-	  free (list);
-	}
-      else
-	as_fatal (_("32bit x86_64 is only supported for ELF"));
+	list = bfd_target_list ();
+	for (l = list; *l != NULL; l++)
+	  if (startswith (*l, "elf32-x86-64"))
+	    {
+	      default_arch = "x86_64:32";
+	      break;
+	    }
+	if (*l == NULL)
+	  as_fatal (_("no compiled in support for 32bit x86_64"));
+	free (list);
+      }
       break;
 #endif
 
@@ -17558,7 +17524,7 @@ show_arch (FILE *stream, int ext, int check)
 void
 md_show_usage (FILE *stream)
 {
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
   fprintf (stream, _("\
   -Qy, -Qn                ignored\n\
   -V                      print assembler version number\n\
@@ -17568,12 +17534,12 @@ md_show_usage (FILE *stream)
   -n                      do not optimize code alignment\n\
   -O{012s}                attempt some code optimizations\n\
   -q                      quieten some warnings\n"));
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
   fprintf (stream, _("\
   -s                      ignored\n"));
 #endif
 #ifdef BFD64
-# if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+# ifdef OBJ_ELF
   fprintf (stream, _("\
   --32/--64/--x32         generate 32bit/64bit/x32 object\n"));
 # elif defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O)
@@ -17646,7 +17612,7 @@ md_show_usage (FILE *stream)
   -mnaked-reg             don't require `%%' prefix for registers\n"));
   fprintf (stream, _("\
   -madd-bnd-prefix        add BND prefix for all valid branches\n"));
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
   fprintf (stream, _("\
   -mshared                disable branch optimization for shared code\n"));
   fprintf (stream, _("\
@@ -17677,7 +17643,7 @@ md_show_usage (FILE *stream)
     fprintf (stream, _("(default: no)\n"));
   fprintf (stream, _("\
                           generate relax relocations\n"));
-#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+#ifdef OBJ_ELF
   fprintf (stream, _("\
   -mtls-check=[no|yes] "));
   if (DEFAULT_X86_TLS_CHECK)
@@ -17716,9 +17682,7 @@ md_show_usage (FILE *stream)
   -mintel64               accept only Intel64 ISA\n"));
 }
 
-#if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
-     || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-     || defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O))
+#if (defined (OBJ_ELF) || defined (TE_PE) || defined (OBJ_MACH_O))
 
 /* Pick the target format to use.  */
 
@@ -17728,7 +17692,7 @@ i386_target_format (void)
   if (startswith (default_arch, "x86_64"))
     {
       update_code_flag (CODE_64BIT, 1);
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
       if (default_arch[6] == '\0')
 	x86_elf_abi = X86_64_ABI;
       else
@@ -17759,8 +17723,8 @@ i386_target_format (void)
   else
     as_fatal (_("unknown architecture"));
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (IS_ELF && flag_synth_cfi && x86_elf_abi != X86_64_ABI)
+#ifdef OBJ_ELF
+  if (flag_synth_cfi && x86_elf_abi != X86_64_ABI)
     as_fatal (_("SCFI is not supported for this ABI"));
 #endif
 
@@ -17769,12 +17733,7 @@ i386_target_format (void)
 
   switch (OUTPUT_FLAVOR)
     {
-#if defined (OBJ_MAYBE_AOUT) || defined (OBJ_AOUT)
-    case bfd_target_aout_flavour:
-      return AOUT_TARGET_FORMAT;
-#endif
-#if defined (OBJ_MAYBE_COFF) || defined (OBJ_COFF)
-# if defined (TE_PE) || defined (TE_PEP)
+#ifdef TE_PE
     case bfd_target_coff_flavour:
       if (flag_code == CODE_64BIT)
 	{
@@ -17782,15 +17741,8 @@ i386_target_format (void)
 	  return use_big_obj ? "pe-bigobj-x86-64" : "pe-x86-64";
 	}
       return use_big_obj ? "pe-bigobj-i386" : "pe-i386";
-# elif defined (TE_GO32)
-    case bfd_target_coff_flavour:
-      return "coff-go32";
-# else
-    case bfd_target_coff_flavour:
-      return "coff-i386";
-# endif
 #endif
-#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+#ifdef OBJ_ELF
     case bfd_target_elf_flavour:
       {
 	const char *format;
@@ -17848,7 +17800,7 @@ i386_target_format (void)
     }
 }
 
-#endif /* OBJ_MAYBE_ more than one  */
+#endif /* ELF / PE / MACH_O  */
 
 symbolS *
 md_undefined_symbol (char *name)
@@ -17870,26 +17822,20 @@ md_undefined_symbol (char *name)
   return 0;
 }
 
-#if defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT)
+#ifdef OBJ_AOUT
 /* Round up a section size to the appropriate boundary.  */
 
 valueT
 md_section_align (segT segment, valueT size)
 {
-  if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
-    {
-      /* For a.out, force the section size to be aligned.  If we don't do
-	 this, BFD will align it for us, but it will not write out the
-	 final bytes of the section.  This may be a bug in BFD, but it is
-	 easier to fix it here since that is how the other a.out targets
-	 work.  */
-      int align;
+  /* For a.out, force the section size to be aligned.  If we don't do
+     this, BFD will align it for us, but it will not write out the
+     final bytes of the section.  This may be a bug in BFD, but it is
+     easier to fix it here since that is how the other a.out targets
+     work.  */
+  int align = bfd_section_alignment (segment);
 
-      align = bfd_section_alignment (segment);
-      size = ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
-    }
-
-  return size;
+  return ((size + (1 << align) - 1) & (-((valueT) 1 << align)));
 }
 #endif
 
@@ -17947,10 +17893,10 @@ i386_validate_fix (fixS *fixp)
       return 0;
     }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
   if (fixp->fx_r_type == BFD_RELOC_SIZE32
       || fixp->fx_r_type == BFD_RELOC_SIZE64)
-    return IS_ELF && fixp->fx_addsy
+    return fixp->fx_addsy
 	   && (!S_IS_DEFINED (fixp->fx_addsy)
 	       || S_IS_EXTERNAL (fixp->fx_addsy));
 
@@ -17985,7 +17931,7 @@ i386_validate_fix (fixS *fixp)
 	    {
 	      if (!object_64bit)
 		abort ();
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 	      if (fixp->fx_tcbit)
 		fixp->fx_r_type = BFD_RELOC_X86_64_GOTPCRELX;
 	      else if (fixp->fx_tcbit2)
@@ -18006,7 +17952,7 @@ i386_validate_fix (fixS *fixp)
 	  fixp->fx_subsy = 0;
 	}
     }
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
   else
     {
       /* NB: Commit 292676c1 resolved PLT32 reloc aganst local symbol
@@ -18041,7 +17987,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
   switch (fixp->fx_r_type)
     {
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
       symbolS *sym;
 
     case BFD_RELOC_SIZE32:
@@ -18058,7 +18004,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	sym = fixp->fx_subsy;
       else
 	sym = NULL;
-      if (IS_ELF && sym && S_IS_DEFINED (sym) && !S_IS_EXTERNAL (sym))
+      if (sym && S_IS_DEFINED (sym) && !S_IS_EXTERNAL (sym))
 	{
 	  /* Resolve size relocation against local symbol to size of
 	     the symbol plus addend.  */
@@ -18336,7 +18282,7 @@ tc_x86_frame_initial_instructions (void)
 int
 x86_dwarf2_addr_size (void)
 {
-#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+#ifdef OBJ_ELF
   if (x86_elf_abi == X86_64_X32_ABI)
     return 4;
 #endif
@@ -18356,7 +18302,7 @@ tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 }
 #endif
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+#ifdef OBJ_ELF
 int
 i386_elf_section_type (const char *str, size_t len)
 {
@@ -18465,4 +18411,4 @@ handle_large_common (int small ATTRIBUTE_UNUSED)
       bss_section = saved_bss_section;
     }
 }
-#endif /* OBJ_ELF || OBJ_MAYBE_ELF */
+#endif /* OBJ_ELF */
