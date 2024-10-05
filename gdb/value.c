@@ -4093,12 +4093,24 @@ value::fetch_lazy_register ()
 
 	  if (new_val->entirely_available ())
 	    {
-	      int i;
+	      int i, reg_size;
 	      gdb::array_view<const gdb_byte> buf = new_val->contents ();
 
 	      gdb_printf (&debug_file, " bytes=");
 	      gdb_printf (&debug_file, "[");
-	      for (i = 0; i < register_size (gdbarch, regnum); i++)
+
+	      if (register_is_variable_size (gdbarch, regnum))
+		/* To get the size of a variable-size register, we need to
+		   call frame_save_as_regcache () so that we can call
+		   regcache::register_size ().  Unfortunatlly the former
+		   ends up calling this function so we enter into an
+		   infinite recursion.  So just assume that the value has
+		   the correct size.  */
+		reg_size = buf.size ();
+	      else
+		reg_size = register_size (gdbarch, regnum);
+
+	      for (i = 0; i < reg_size; i++)
 		gdb_printf (&debug_file, "%02x", buf[i]);
 	      gdb_printf (&debug_file, "]");
 	    }

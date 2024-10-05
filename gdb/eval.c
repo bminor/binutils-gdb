@@ -1137,13 +1137,14 @@ eval_op_register (struct type *expect_type, struct expression *exp,
   if (regno == -1)
     error (_("Register $%s not available."), name);
 
-  /* In EVAL_AVOID_SIDE_EFFECTS mode, we only need to return
-     a value with the appropriate register type.  Unfortunately,
-     we don't have easy access to the type of user registers.
-     So for these registers, we fetch the register value regardless
-     of the evaluation mode.  */
+  /* In EVAL_AVOID_SIDE_EFFECTS mode, we only need to return a value with
+     the appropriate register type.  Unfortunately, we don't have easy
+     access to the type of user registers and variable-size registers.  So
+     for these registers, we fetch the register value regardless of the
+     evaluation mode.  */
   if (noside == EVAL_AVOID_SIDE_EFFECTS
-      && regno < gdbarch_num_cooked_regs (exp->gdbarch))
+      && regno < gdbarch_num_cooked_regs (exp->gdbarch)
+      && !register_is_variable_size (exp->gdbarch, regno))
     val = value::zero (register_type (exp->gdbarch, regno), not_lval);
   else
     val = value_of_register

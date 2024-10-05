@@ -1746,7 +1746,7 @@ pass_in_v (struct gdbarch *gdbarch,
     {
       int regnum = AARCH64_V0_REGNUM + info->nsrn;
       /* Enough space for a full vector register.  */
-      gdb::byte_vector reg (register_size (gdbarch, regnum), 0);
+      gdb::byte_vector reg (regcache->register_size (regnum), 0);
       gdb_assert (len <= reg.size ());
 
       info->argnum++;
@@ -2610,7 +2610,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	{
 	  int regno = AARCH64_V0_REGNUM + i;
 	  /* Enough space for a full vector register.  */
-	  gdb::byte_vector buf (register_size (gdbarch, regno));
+	  gdb::byte_vector buf (regs->register_size (regno));
 	  gdb_assert (len <= buf.size ());
 
 	  aarch64_debug_printf
@@ -2724,7 +2724,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	{
 	  int regno = AARCH64_V0_REGNUM + i;
 	  /* Enough space for a full vector register.  */
-	  gdb::byte_vector tmpbuf (register_size (gdbarch, regno));
+	  gdb::byte_vector tmpbuf (regs->register_size (regno));
 	  gdb_assert (len <= tmpbuf.size ());
 
 	  aarch64_debug_printf
@@ -3378,7 +3378,8 @@ aarch64_pseudo_write_1 (gdbarch *gdbarch, const frame_info_ptr &next_frame,
      various 'scalar' pseudo registers to behavior like architectural
      writes, register width bytes are written the remainder are set to
      zero.  */
-  gdb::byte_vector raw_buf (register_size (gdbarch, raw_regnum), 0);
+  int raw_reg_size = register_size (gdbarch, raw_regnum, &next_frame);
+  gdb::byte_vector raw_buf (raw_reg_size, 0);
   static_assert (AARCH64_V0_REGNUM == AARCH64_SVE_Z0_REGNUM);
 
   gdb::array_view<gdb_byte> raw_view (raw_buf);

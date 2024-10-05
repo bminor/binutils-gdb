@@ -581,11 +581,12 @@ read_frame_register_value (value *value)
   LONGEST reg_offset = value->offset ();
   int regnum = value->regnum ();
   int len = type_length_units (check_typedef (value->type ()));
+  int reg_size = register_size (gdbarch, regnum, &next_frame);
 
   /* Skip registers wholly inside of REG_OFFSET.  */
-  while (reg_offset >= register_size (gdbarch, regnum))
+  while (reg_offset >= reg_size)
     {
-      reg_offset -= register_size (gdbarch, regnum);
+      reg_offset -= reg_size;
       regnum++;
     }
 

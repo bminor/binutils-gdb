@@ -164,11 +164,15 @@ extern bool regcache_map_supplies (const struct regcache_map_entry *map,
 
 extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 
+/* Return the size of register REGNUM.  FRAME is needed in case regnum is a
+   variable-size register.  */
 
-/* Return the size of register REGNUM.  All registers should have only
-   one size.  */
+extern int register_size (struct gdbarch *gdbarch, int regnum,
+			  const frame_info_ptr *next_frame = nullptr);
 
-extern int register_size (struct gdbarch *gdbarch, int regnum);
+/* Return whether REGNUM  is a variable-size register.  */
+
+extern bool register_is_variable_size (struct gdbarch *gdbarch, int regnum);
 
 using register_read_ftype
   = gdb::function_view<register_status (int, gdb::array_view<gdb_byte>)>;
@@ -257,6 +261,12 @@ public:
   /* See gdbsupport/common-regcache.h.  */
   bool raw_compare (int regnum, const void *buf, int offset) const override;
 
+  /* Whether any register in this regcache has a dynamic type.  */
+  bool has_variable_size_registers ();
+
+  /* Return type of register REGNUM.  */
+  struct type *register_type (int regnum) const;
+
   /* See gdbsupport/common-regcache.h.  */
   int register_size (int regnum) const override;
 
@@ -265,6 +275,10 @@ protected:
   void assert_regnum (int regnum) const;
 
   int num_raw_registers () const;
+
+  /* Initialize (or reset) information about variable-size registers in this
+     reg_buffer.  */
+  void initialize_variable_size_registers ();
 
   /* Return a view on register REGNUM's buffer cache.  */
   template <typename ElemType>
@@ -280,10 +294,24 @@ protected:
   struct regcache_descr *m_descr;
 
   bool m_has_pseudo;
-  /* The register buffers.  */
-  std::unique_ptr<gdb_byte[]> m_registers;
+
+  /* The fixed-size register buffers.  */
+  std::unique_ptr<gdb_byte[]> m_fixed_size_registers;
+
+  /* The variable-size register buffers (if any).  */
+  std::unique_ptr<gdb_byte[]> m_variable_size_registers;
+
   /* Register cache status.  */
   std::unique_ptr<register_status[]> m_register_status;
+
+  /* The resolved types for variable-size registers (if any).  */
+  std::vector<struct type *> m_variable_size_register_type;
+
+  /* The size of resolved types for variable-size registers (if any).  */
+  std::vector<long> m_variable_size_register_sizeof;
+
+  /* The offset of resolved types for variable-size registers (if any).  */
+  std::vector<long> m_variable_size_register_offset;
 
   friend class regcache;
   friend class detached_regcache;

@@ -1318,12 +1318,24 @@ frame_unwind_register_value (const frame_info_ptr &next_frame, int regnum)
 	    gdb_printf (&debug_file, " lazy");
 	  else if (value->entirely_available ())
 	    {
-	      int i;
+	      int i, reg_size;
 	      gdb::array_view<const gdb_byte> buf = value->contents ();
 
 	      gdb_printf (&debug_file, " bytes=");
 	      gdb_printf (&debug_file, "[");
-	      for (i = 0; i < register_size (gdbarch, regnum); i++)
+
+	      if (register_is_variable_size (gdbarch, regnum))
+		/* To get the size of a variable-size register, we need to
+		   call frame_save_as_regcache () so that we can call
+		   regcache::register_size ().  Unfortunatlly the former
+		   ends up calling this function so we enter into an
+		   infinite recursion.  So just assume that the value has
+		   the correct size.  */
+		reg_size = buf.size ();
+	      else
+		reg_size = register_size (gdbarch, regnum);
+
+	      for (i = 0; i < reg_size; i++)
 		gdb_printf (&debug_file, "%02x", buf[i]);
 	      gdb_printf (&debug_file, "]");
 	    }
@@ -1442,7 +1454,7 @@ put_frame_register (const frame_info_ptr &next_frame, int regnum,
   int unavail;
   enum lval_type lval;
   CORE_ADDR addr;
-  int size = register_size (gdbarch, regnum);
+  int size = register_size (gdbarch, regnum, &next_frame);
 
   gdb_assert (buf.size () == size);
 
@@ -1458,8 +1470,9 @@ put_frame_register (const frame_info_ptr &next_frame, int regnum,
 	break;
       }
     case lval_register:
-      /* Not sure if that's always true... but we have a problem if not.  */
-      gdb_assert (size == register_size (gdbarch, realnum));
+      if (regnum != realnum)
+	/* Not sure if that's always true... but we have a problem if not.  */
+	gdb_assert (size == register_size (gdbarch, realnum));
 
       if (realnum < gdbarch_num_regs (gdbarch)
 	  || !gdbarch_pseudo_register_write_p (gdbarch))
@@ -1505,9 +1518,9 @@ get_frame_register_bytes (const frame_info_ptr &next_frame, int regnum,
   gdbarch *gdbarch = frame_unwind_arch (next_frame);
 
   /* Skip registers wholly inside of OFFSET.  */
-  while (offset >= register_size (gdbarch, regnum))
+  while (offset >= register_size (gdbarch, regnum, &next_frame))
     {
-      offset -= register_size (gdbarch, regnum);
+      offset -= register_size (gdbarch, regnum, &next_frame);
       regnum++;
     }
 
@@ -1517,7 +1530,7 @@ get_frame_register_bytes (const frame_info_ptr &next_frame, int regnum,
   int numregs = gdbarch_num_cooked_regs (gdbarch);
   for (int i = regnum; i < numregs; i++)
     {
-      int thissize = register_size (gdbarch, i);
+      int thissize = register_size (gdbarch, i, &next_frame);
 
       if (thissize == 0)
 	break;	/* This register is not available on this architecture.  */
@@ -1531,10 +1544,10 @@ get_frame_register_bytes (const frame_info_ptr &next_frame, int regnum,
   /* Copy the data.  */
   while (!buffer.empty ())
     {
-      int curr_len = std::min<int> (register_size (gdbarch, regnum) - offset,
-				    buffer.size ());
+      int reg_size = register_size (gdbarch, regnum, &next_frame);
+      int curr_len = std::min<int> (reg_size - offset, buffer.size ());
 
-      if (curr_len == register_size (gdbarch, regnum))
+      if (curr_len == reg_size)
 	{
 	  enum lval_type lval;
 	  CORE_ADDR addr;
@@ -1582,19 +1595,19 @@ put_frame_register_bytes (const frame_info_ptr &next_frame, int regnum,
   gdbarch *gdbarch = frame_unwind_arch (next_frame);
 
   /* Skip registers wholly inside of OFFSET.  */
-  while (offset >= register_size (gdbarch, regnum))
+  while (offset >= register_size (gdbarch, regnum, &next_frame))
     {
-      offset -= register_size (gdbarch, regnum);
+      offset -= register_size (gdbarch, regnum, &next_frame);
       regnum++;
     }
 
   /* Copy the data.  */
   while (!buffer.empty ())
     {
-      int curr_len = std::min<int> (register_size (gdbarch, regnum) - offset,
-				    buffer.size ());
+      int reg_size = register_size (gdbarch, regnum, &next_frame);
+      int curr_len = std::min<int> (reg_size - offset, buffer.size ());
 
-      if (curr_len == register_size (gdbarch, regnum))
+      if (curr_len == reg_size)
 	put_frame_register (next_frame, regnum, buffer.slice (0, curr_len));
       else
 	{

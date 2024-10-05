@@ -51,7 +51,7 @@ struct regcache_descr
      redundant information - if the PC is constructed from two
      registers then those registers and not the PC lives in the raw
      cache.  */
-  long sizeof_raw_registers = 0;
+  long sizeof_fixed_size_raw_registers = 0;
 
   /* The cooked register space.  Each cooked register in the range
      [0..NR_RAW_REGISTERS) is direct-mapped onto the corresponding raw
@@ -60,7 +60,7 @@ struct regcache_descr
      both raw registers and memory by the architecture methods
      gdbarch_pseudo_register_read and gdbarch_pseudo_register_write.  */
   int nr_cooked_registers = 0;
-  long sizeof_cooked_registers = 0;
+  long sizeof_fixed_size_cooked_registers = 0;
 
   /* Offset and size (in 8 bit bytes), of each register in the
      register cache.  All registers (including those in the range
@@ -68,6 +68,12 @@ struct regcache_descr
      offset.  */
   long *register_offset = nullptr;
   long *sizeof_register = nullptr;
+
+  /* Vector indicating whether a given register is variable-size.  */
+  bool *register_is_variable_size = nullptr;
+
+  /* Does the regcache contains any variable-size register?  */
+  bool has_variable_size_registers = false;
 
   /* Cached table containing the type of each register.  */
   struct type **register_type = nullptr;
@@ -116,23 +122,49 @@ init_regcache_descr (struct gdbarch *gdbarch)
       = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
     descr->register_offset
       = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
+    descr->register_is_variable_size
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, bool);
+
     for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
       {
-	descr->sizeof_register[i] = descr->register_type[i]->length ();
-	descr->register_offset[i] = offset;
-	offset += descr->sizeof_register[i];
+	descr->register_is_variable_size[i]
+	  = is_dynamic_type (descr->register_type[i]);
+	if (descr->register_is_variable_size[i])
+	  {
+	    descr->sizeof_register[i] = -1;
+	    descr->register_offset[i] = -1;
+	    descr->has_variable_size_registers = true;
+	  }
+	else
+	  {
+	    descr->sizeof_register[i] = descr->register_type[i]->length ();
+	    descr->register_offset[i] = offset;
+	    offset += descr->sizeof_register[i];
+	  }
       }
+
     /* Set the real size of the raw register cache buffer.  */
-    descr->sizeof_raw_registers = offset;
+    descr->sizeof_fixed_size_raw_registers = offset;
 
     for (; i < descr->nr_cooked_registers; i++)
       {
-	descr->sizeof_register[i] = descr->register_type[i]->length ();
-	descr->register_offset[i] = offset;
-	offset += descr->sizeof_register[i];
+	descr->register_is_variable_size[i]
+	  = is_dynamic_type (descr->register_type[i]);
+	if (descr->register_is_variable_size[i])
+	  {
+	    descr->sizeof_register[i] = -1;
+	    descr->register_offset[i] = -1;
+	    descr->has_variable_size_registers = true;
+	  }
+	else
+	  {
+	    descr->sizeof_register[i] = descr->register_type[i]->length ();
+	    descr->register_offset[i] = offset;
+	    offset += descr->sizeof_register[i];
+	  }
       }
     /* Set the real size of the readonly register cache buffer.  */
-    descr->sizeof_cooked_registers = offset;
+    descr->sizeof_fixed_size_cooked_registers = offset;
   }
 
   return descr;
@@ -154,27 +186,60 @@ regcache_descr (struct gdbarch *gdbarch)
 /* Utility functions returning useful register attributes stored in
    the regcache descr.  */
 
+/* See gdb/regcache.h.  */
+
 struct type *
 register_type (struct gdbarch *gdbarch, int regnum)
 {
   struct regcache_descr *descr = regcache_descr (gdbarch);
 
   gdb_assert (regnum >= 0 && regnum < descr->nr_cooked_registers);
-  return descr->register_type[regnum];
+
+  struct type *type = descr->register_type[regnum];
+
+  if (descr->register_is_variable_size[regnum])
+    {
+      frame_info_ptr current_frame = get_current_frame ();
+      type = resolve_dynamic_type (type, {}, 0, &current_frame);
+    }
+
+  return type;
 }
 
-/* Utility functions returning useful register attributes stored in
-   the regcache descr.  */
+/* See gdb/regcache.h.  */
 
 int
-register_size (struct gdbarch *gdbarch, int regnum)
+register_size (struct gdbarch *gdbarch, int regnum,
+	       const frame_info_ptr *next_frame)
 {
   struct regcache_descr *descr = regcache_descr (gdbarch);
-  int size;
 
-  gdb_assert (regnum >= 0 && regnum < gdbarch_num_cooked_regs (gdbarch));
-  size = descr->sizeof_register[regnum];
-  return size;
+  gdb_assert (regnum >= 0);
+  gdb_assert (regnum < descr->nr_cooked_registers);
+
+  if (descr->register_is_variable_size[regnum])
+    {
+      gdb_assert (next_frame != nullptr);
+
+      std::unique_ptr<readonly_detached_regcache> regcache =
+	frame_save_as_regcache (get_prev_frame (*next_frame));
+      return regcache->register_size (regnum);
+    }
+
+  return descr->sizeof_register[regnum];
+}
+
+/* See gdb/regcache.h.  */
+
+bool
+register_is_variable_size (struct gdbarch *gdbarch, int regnum)
+{
+  struct regcache_descr *descr = regcache_descr (gdbarch);
+
+  gdb_assert (regnum >= 0);
+  gdb_assert (regnum < descr->nr_cooked_registers);
+
+  return descr->register_is_variable_size[regnum];
 }
 
 /* See gdbsupport/common-regcache.h.  */
@@ -182,7 +247,47 @@ register_size (struct gdbarch *gdbarch, int regnum)
 int
 reg_buffer::register_size (int regnum) const
 {
-  return ::register_size (this->arch (), regnum);
+  gdb_assert (regnum >= 0);
+  gdb_assert (regnum < m_descr->nr_cooked_registers);
+
+  int size;
+
+  if (m_descr->register_is_variable_size[regnum])
+    {
+      if (!m_variable_size_registers)
+	const_cast<reg_buffer *> (this)
+	  ->initialize_variable_size_registers (); // FIXME: Remove cast.
+
+      size = m_variable_size_register_sizeof[regnum];
+    }
+  else
+    size = m_descr->sizeof_register[regnum];
+
+  return size;
+}
+
+/* See gdb/regcache.h.  */
+
+struct type *
+reg_buffer::register_type (int regnum) const
+{
+  gdb_assert (regnum >= 0);
+  gdb_assert (regnum < m_descr->nr_cooked_registers);
+
+  struct type *type;
+
+  if (m_descr->register_is_variable_size[regnum])
+    {
+      if (!m_variable_size_registers)
+	const_cast<reg_buffer *> (this)
+	  ->initialize_variable_size_registers (); // FIXME: Remove cast.
+
+      type = m_variable_size_register_type[regnum];
+    }
+  else
+    type = m_descr->register_type[regnum];
+
+  return type;
 }
 
 reg_buffer::reg_buffer (gdbarch *gdbarch, bool has_pseudo)
@@ -196,13 +301,13 @@ reg_buffer::reg_buffer (gdbarch *gdbarch, bool has_pseudo)
      REG_VALID.  */
   if (has_pseudo)
     {
-      m_registers.reset (new gdb_byte[m_descr->sizeof_cooked_registers]);
+      m_fixed_size_registers.reset (new gdb_byte[m_descr->sizeof_fixed_size_cooked_registers]);
       m_register_status.reset
 	(new register_status[m_descr->nr_cooked_registers] ());
     }
   else
     {
-      m_registers.reset (new gdb_byte[m_descr->sizeof_raw_registers]);
+      m_fixed_size_registers.reset (new gdb_byte[m_descr->sizeof_fixed_size_raw_registers]);
       m_register_status.reset
 	(new register_status[gdbarch_num_regs (gdbarch)] ());
     }
@@ -231,6 +336,50 @@ reg_buffer::arch () const
   return m_descr->gdbarch;
 }
 
+/* See regcache.h.  */
+
+void
+reg_buffer::initialize_variable_size_registers ()
+{
+  unsigned long total_size = 0;
+
+  m_variable_size_register_type.resize (m_descr->nr_cooked_registers);
+  m_variable_size_register_sizeof.resize (m_descr->nr_cooked_registers);
+  m_variable_size_register_offset.resize (m_descr->nr_cooked_registers);
+
+  for (unsigned int i = 0; i < m_descr->nr_cooked_registers; i++)
+    {
+      if (!m_descr->register_is_variable_size[i])
+	{
+	  m_variable_size_register_type[i] = nullptr;
+	  m_variable_size_register_sizeof[i] = -1;
+	  m_variable_size_register_offset[i] = -1;
+	  continue;
+	}
+
+      m_variable_size_register_type[i]
+	= resolve_dynamic_type (m_descr->register_type[i], {},
+				/* Unused address.  */ 0, nullptr);
+
+      ULONGEST size = m_variable_size_register_type[i]->length ();
+      gdb_assert (size != 0);
+      m_variable_size_register_sizeof[i] = size;
+      m_variable_size_register_offset[i] = total_size;
+      m_register_status[i] = REG_UNKNOWN;
+      total_size += size;
+    }
+
+  m_variable_size_registers.reset (new gdb_byte[total_size]);
+}
+
+/* See regcache.h.  */
+
+bool
+reg_buffer::has_variable_size_registers ()
+{
+  return m_descr->has_variable_size_registers;
+}
+
 /* Helper for reg_buffer::register_buffer.  */
 
 template<typename ElemType>
@@ -238,8 +387,19 @@ gdb::array_view<ElemType>
 reg_buffer::register_buffer (int regnum) const
 {
   assert_regnum (regnum);
-  ElemType *start = &m_registers[m_descr->register_offset[regnum]];
-  int size = m_descr->sizeof_register[regnum];
+  ElemType *start;
+
+  if (m_descr->register_is_variable_size[regnum])
+    {
+      if (!m_variable_size_registers)
+	const_cast<reg_buffer *>(this)->initialize_variable_size_registers (); // FIXME: Remove cast.
+
+      start = &m_variable_size_registers[m_variable_size_register_offset[regnum]];
+    }
+  else
+    start = &m_fixed_size_registers[m_descr->register_offset[regnum]];
+
+  int size = register_size (regnum);
   return gdb::array_view<ElemType> (start, size);
 }
 
@@ -267,8 +427,14 @@ reg_buffer::save (register_read_ftype cooked_read)
   /* It should have pseudo registers.  */
   gdb_assert (m_has_pseudo);
   /* Clear the dest.  */
-  memset (m_registers.get (), 0, m_descr->sizeof_cooked_registers);
+  memset (m_fixed_size_registers.get (), 0, m_descr->sizeof_fixed_size_cooked_registers);
   memset (m_register_status.get (), REG_UNKNOWN, m_descr->nr_cooked_registers);
+
+  /* For data related to variable-size registers, we only need to reset
+     their buffer at this point.  Other data will be resized/re-set by
+     initialize_variable_size_registers ().  */
+  m_variable_size_registers.reset ();
+
   /* Copy over any registers (identified by their membership in the
      save_reggroup) and mark them as valid.  The full [0 .. gdbarch_num_regs +
      gdbarch_num_pseudo_regs) range is checked since some architectures need
@@ -615,7 +781,7 @@ register_status
 readable_regcache::raw_read (int regnum, gdb::array_view<gdb_byte> dst)
 {
   assert_regnum (regnum);
-  gdb_assert (dst.size () == m_descr->sizeof_register[regnum]);
+  gdb_assert (dst.size () == register_size (regnum));
 
   raw_update (regnum);
 
@@ -631,7 +797,7 @@ register_status
 readable_regcache::raw_read (int regnum, gdb_byte *dst)
 {
   assert_regnum (regnum);
-  int size = m_descr->sizeof_register[regnum];
+  int size = register_size (regnum);
   return raw_read (regnum, gdb::make_array_view (dst, size));
 }
 
@@ -647,7 +813,7 @@ enum register_status
 readable_regcache::raw_read (int regnum, T *val)
 {
   assert_regnum (regnum);
-  size_t size = m_descr->sizeof_register[regnum];
+  size_t size = register_size (regnum);
   gdb_byte *buf = (gdb_byte *) alloca (size);
   auto view = gdb::make_array_view (buf, size);
   register_status status = raw_read (regnum, view);
@@ -682,7 +848,7 @@ regcache::raw_write (int regnum, T val)
 {
   assert_regnum (regnum);
 
-  int size = m_descr->sizeof_register[regnum];
+  int size = register_size (regnum);
   gdb_byte *buf = (gdb_byte *) alloca (size);
   auto view = gdb::make_array_view (buf, size);
   store_integer (view, gdbarch_byte_order (m_descr->gdbarch), val);
@@ -721,7 +887,7 @@ readable_regcache::cooked_read (int regnum, gdb::array_view<gdb_byte> dst)
   if (regnum < num_raw_registers ())
     return raw_read (regnum, dst);
 
-  gdb_assert (dst.size () == m_descr->sizeof_register[regnum]);
+  gdb_assert (dst.size () == register_size (regnum));
 
   if (m_has_pseudo && m_register_status[regnum] != REG_UNKNOWN)
     {
@@ -763,7 +929,7 @@ readable_regcache::cooked_read (int regnum, gdb_byte *dst)
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < m_descr->nr_cooked_registers);
 
-  int size = m_descr->sizeof_register[regnum];
+  int size = register_size (regnum);
   return cooked_read (regnum, gdb::make_array_view (dst, size));
 }
 
@@ -777,8 +943,12 @@ readable_regcache::cooked_read_value (int regnum)
       || (m_has_pseudo && m_register_status[regnum] != REG_UNKNOWN)
       || !gdbarch_pseudo_register_read_value_p (m_descr->gdbarch))
     {
+      /* Provide the register type if its size is fixed to avoid infinite
+	 recursion in the case of variable-size registers.  */
+      struct type *type = (m_descr->register_is_variable_size[regnum] ?
+			   nullptr : m_descr->register_type[regnum]);
       value *result = value::allocate_register
-	(get_next_frame_sentinel_okay (get_current_frame ()), regnum);
+	(get_next_frame_sentinel_okay (get_current_frame ()), regnum, type);
 
       /* It is more efficient in general to do this delegation in this
 	 direction than in the other one, even though the value-based
@@ -808,7 +978,7 @@ enum register_status
 readable_regcache::cooked_read (int regnum, T *val)
 {
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_cooked_registers);
-  size_t size = m_descr->sizeof_register[regnum];
+  size_t size = register_size (regnum);
   gdb_byte *buf = (gdb_byte *) alloca (size);
   auto view = gdb::make_array_view (buf, size);
   register_status status = cooked_read (regnum, view);
@@ -842,7 +1012,7 @@ regcache::cooked_write (int regnum, T val)
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < m_descr->nr_cooked_registers);
 
-  int size = m_descr->sizeof_register[regnum];
+  int size = register_size (regnum);
   gdb_byte *buf = (gdb_byte *) alloca (size);
   auto view = gdb::make_array_view (buf, size);
   store_integer (view, gdbarch_byte_order (m_descr->gdbarch), val);
@@ -861,7 +1031,7 @@ void
 regcache::raw_write (int regnum, gdb::array_view<const gdb_byte> src)
 {
   assert_regnum (regnum);
-  gdb_assert (src.size () == m_descr->sizeof_register[regnum]);
+  gdb_assert (src.size () == register_size (regnum));
 
   /* On the sparc, writing %g0 is a no-op, so we don't even want to
      change the registers array if something writes to this register.  */
@@ -898,7 +1068,7 @@ regcache::raw_write (int regnum, const gdb_byte *src)
 {
   assert_regnum (regnum);
 
-  int size = m_descr->sizeof_register[regnum];
+  int size = register_size (regnum);
   raw_write (regnum, gdb::make_array_view (src, size));
 }
 
@@ -929,7 +1099,7 @@ regcache::cooked_write (int regnum, const gdb_byte *src)
   gdb_assert (regnum >= 0);
   gdb_assert (regnum < m_descr->nr_cooked_registers);
 
-  int size = m_descr->sizeof_register[regnum];
+  int size = register_size (regnum);
   return cooked_write (regnum, gdb::make_array_view (src, size));
 }
 
@@ -1159,7 +1329,7 @@ reg_buffer::raw_supply (int regnum, const void *src)
 {
   assert_regnum (regnum);
 
-  int size = m_descr->sizeof_register[regnum];
+  int size = register_size (regnum);
   raw_supply (regnum, gdb::make_array_view ((const gdb_byte *) src, size));
 }
 
@@ -1213,7 +1383,7 @@ reg_buffer::raw_collect (int regnum, void *dst) const
 {
   assert_regnum (regnum);
 
-  int size = m_descr->sizeof_register[regnum];
+  int size = register_size (regnum);
   return raw_collect (regnum, gdb::make_array_view ((gdb_byte *) dst, size));
 }
 
@@ -1288,7 +1458,7 @@ regcache::transfer_regset (const struct regset *regset, int regbase,
 	regno += regbase;
 
       if (slot_size == 0 && regno != REGCACHE_MAP_SKIP)
-	slot_size = m_descr->sizeof_register[regno];
+	slot_size = register_size (regnum);
 
       if (regno == REGCACHE_MAP_SKIP
 	  || (regnum != -1

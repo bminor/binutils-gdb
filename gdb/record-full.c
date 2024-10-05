@@ -401,12 +401,11 @@ static inline struct record_full_entry *
 record_full_reg_alloc (struct regcache *regcache, int regnum)
 {
   struct record_full_entry *rec;
-  struct gdbarch *gdbarch = regcache->arch ();
 
   rec = XCNEW (struct record_full_entry);
   rec->type = record_full_reg;
   rec->u.reg.num = regnum;
-  rec->u.reg.len = register_size (gdbarch, regnum);
+  rec->u.reg.len = regcache->register_size (regnum);
   if (rec->u.reg.len > sizeof (rec->u.reg.u.buf))
     rec->u.reg.u.ptr = (gdb_byte *) xmalloc (rec->u.reg.len);
 

@@ -482,6 +482,8 @@ struct packet_reg
      at present.  */
 };
 
+struct remote_state;
+
 struct remote_arch_state
 {
   explicit remote_arch_state (struct gdbarch *gdbarch);
@@ -504,6 +506,10 @@ struct remote_arch_state
   /* This is the maximum size (in chars) of a non read/write packet.
      It is also used as a cap on the size of read/write packets.  */
   long remote_packet_size;
+
+  /* Make sure the maximum packet size reflects current size of variable-size
+     registers.  */
+  void update_packet_size (const struct regcache *regcache, remote_state *rs);
 };
 
 /* Description of the remote protocol state for the currently
@@ -2062,7 +2068,8 @@ show_remote_exec_file (struct ui_file *file, int from_tty,
 }
 
 static int
-map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
+map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs,
+			   const struct regcache *regcache = nullptr)
 {
   int regnum, num_remote_regs, offset;
   struct packet_reg **remote_regs;
@@ -2070,8 +2077,15 @@ map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
   for (regnum = 0; regnum < gdbarch_num_regs (gdbarch); regnum++)
     {
       struct packet_reg *r = &regs[regnum];
+      bool skip_register;
 
-      if (register_size (gdbarch, regnum) == 0)
+      if (regcache == nullptr)
+	skip_register = (register_is_variable_size (gdbarch, regnum)
+			 || register_size (gdbarch, regnum) == 0);
+      else
+	skip_register = regcache->register_size (regnum) == 0;
+
+      if (skip_register)
 	/* Do not try to fetch zero-sized (placeholder) registers.  */
 	r->pnum = -1;
       else
@@ -2099,7 +2113,10 @@ map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
     {
       remote_regs[regnum]->in_g_packet = true;
       remote_regs[regnum]->offset = offset;
-      offset += register_size (gdbarch, remote_regs[regnum]->regnum);
+      if (regcache == nullptr)
+	offset += register_size (gdbarch, remote_regs[regnum]->regnum);
+      else
+	offset += regcache->register_size (remote_regs[regnum]->regnum);
     }
 
   return offset;
@@ -2158,6 +2175,29 @@ remote_arch_state::remote_arch_state (struct gdbarch *gdbarch)
      little.  */
   if (this->sizeof_g_packet > ((this->remote_packet_size - 32) / 2))
     this->remote_packet_size = (this->sizeof_g_packet * 2 + 32);
+}
+
+/* See remote_arch_state class declaration.  */
+
+void
+remote_arch_state::update_packet_size (const struct regcache *regcache,
+				       remote_state *rs)
+{
+  /* Record the maximum possible size of the g packet - it may turn out
+     to be smaller.  */
+  this->sizeof_g_packet
+    = map_regcache_remote_table (regcache->arch (), this->regs.get (),
+				 regcache);
+
+  this->remote_packet_size = 400 - 1;
+
+  if (this->sizeof_g_packet > (this->remote_packet_size - 32) / 2)
+    this->remote_packet_size = this->sizeof_g_packet * 2 + 32;
+
+  /* Make sure that the packet buffer is plenty big enough for
+     this architecture.  */
+  if (rs->buf.size () < this->remote_packet_size)
+    rs->buf.resize (2 * this->remote_packet_size);
 }
 
 /* Get a pointer to the current remote target.  If not connected to a
@@ -8935,6 +8975,10 @@ remote_target::process_stop_reply (stop_reply_up stop_reply,
 	      regcache->raw_supply (reg.num, reg.data);
 	      rs->last_seen_expedited_registers.insert (reg.num);
 	    }
+
+	  if (regcache->has_variable_size_registers ())
+	    rs->get_remote_arch_state (regcache->arch ())
+	      ->update_packet_size (regcache, rs);
 	}
 
       remote_thread_info *remote_thr = get_remote_thread_info (this, ptid);
@@ -9352,7 +9396,7 @@ remote_target::process_g_packet (struct regcache *regcache)
       for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
 	{
 	  long offset = rsa->regs[i].offset;
-	  long reg_size = register_size (gdbarch, i);
+	  long reg_size = regcache->register_size (i);
 
 	  if (rsa->regs[i].pnum == -1)
 	    continue;
@@ -9400,7 +9444,7 @@ remote_target::process_g_packet (struct regcache *regcache)
   for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     {
       struct packet_reg *r = &rsa->regs[i];
-      long reg_size = register_size (gdbarch, i);
+      long reg_size = regcache->register_size (i);
 
       if (r->in_g_packet)
 	{
@@ -9535,7 +9579,8 @@ remote_target::store_register_using_P (const struct regcache *regcache,
   struct remote_state *rs = get_remote_state ();
   /* Try storing a single register.  */
   char *buf = rs->buf.data ();
-  gdb_byte *regp = (gdb_byte *) alloca (register_size (gdbarch, reg->regnum));
+  int reg_size = regcache->register_size (reg->regnum);
+  gdb_byte *regp = (gdb_byte *) alloca (reg_size);
   char *p;
 
   if (m_features.packet_support (PACKET_P) == PACKET_DISABLE)
@@ -9547,7 +9592,7 @@ remote_target::store_register_using_P (const struct regcache *regcache,
   xsnprintf (buf, get_remote_packet_size (), "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
   regcache->raw_collect (reg->regnum, regp);
-  bin2hex (regp, p, register_size (gdbarch, reg->regnum));
+  bin2hex (regp, p, reg_size);
   putpkt (rs->buf);
   getpkt (&rs->buf);
 
