@@ -10539,8 +10539,8 @@ remote_target::getpkt (gdb::char_vector *buf, bool forever, bool *is_notif)
 
 	      if (val > max_chars)
 		remote_debug_printf_nofunc
-		  ("Packet received: %s [%d bytes omitted]", str.c_str (),
-		   val - max_chars);
+		  ("Packet received: %s [%d of %d bytes omitted]", str.c_str (),
+		   val - max_chars, val);
 	      else
 		remote_debug_printf_nofunc ("Packet received: %s",
 					    str.c_str ());
