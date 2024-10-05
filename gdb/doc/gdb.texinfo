@@ -22865,6 +22865,19 @@ Print the number of cache hits and misses since the launch of @value{GDBN}.
 
 @end table
 
+@subsection Building the index with GNU @command{gold}
+
+The GNU @command{gold} linker can write the index at link time into
+the resulting ELF file, by passing the @command{--gdb-index} flag to
+@command{gold}.
+
+This is especially helpful if you intend to build a program and immediately
+run it under @value{GDBN}.  You may find that it is faster overall for
+the linker to write the index while it has the relevant information in
+memory anyways, rather than re-reloading the data from disk with
+@command{gdb-add-index}, or debugging the program without an index at
+all, especially for large programs.
+
 @node Debug Names
 @section Extensions to @samp{.debug_names}
 @cindex index files
