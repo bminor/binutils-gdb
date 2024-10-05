@@ -1,0 +1,100 @@
+# Copyright (C) 2010-2024 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file is part of the GDB testsuite.
+# It tests gdb.parameter and gdb.Parameter.
+
+load_lib gdb-python.exp
+
+require allow_python_tests
+
+# Start with a fresh gdb.
+clean_restart
+
+gdb_test_no_output "python print_color_attrs = lambda c: print (c, c.colorspace, c.is_none, c.is_indexed, c.is_direct)" \
+    "print_color_attrs helper"
+
+gdb_test_no_output "python c = gdb.Color ()" \
+    "create color without params"
+gdb_test "python print_color_attrs (c)" "none 0 True False False" \
+    "print attrs of a color without params"
+
+gdb_test_no_output "python c = gdb.Color ('green')" \
+    "create color from basic name string"
+gdb_test "python print_color_attrs (c)" "green 1 False True False" \
+    "print attrs of a basic color name"
+gdb_test "python print (c.index)" "2" \
+    "print index of a basic color name"
+
+gdb_test_no_output "python c = gdb.Color (2)" \
+    "create color from basic index"
+gdb_test "python print_color_attrs (c)" "green 1 False True False" \
+    "print attrs of a basic color"
+gdb_test "python print (c.index)" "2" \
+    "print index of a basic color"
+
+gdb_test_no_output "python c = gdb.Color (14)" \
+    "create color from integer 14"
+gdb_test "python print_color_attrs (c)" "14 2 False True False" \
+    "print attrs of an color 14"
+gdb_test "python print (c.index)" "14" \
+    "print index of color 14"
+
+gdb_test_no_output "python c = gdb.Color (2, gdb.COLORSPACE_ANSI_8COLOR)" \
+    "create color from basic index and ansi colorspace"
+gdb_test "python print_color_attrs (c)" "green 1 False True False" \
+    "print attrs of a basic color with ansi colorspace"
+gdb_test "python print (c.index)" "2" \
+    "print index of a basic color with ansi colorspace"
+
+gdb_test_no_output "python c = gdb.Color (2, gdb.COLORSPACE_XTERM_256COLOR)" \
+    "create color from basic index and xterm256 colorspace"
+gdb_test "python print_color_attrs (c)" "2 3 False True False" \
+    "print attrs of a basic color with xterm256 colorspace"
+gdb_test "python print (c.index)" "2" \
+    "print index of a basic color with xterm256 colorspace"
+
+gdb_test_no_output "python c = gdb.Color ((171, 205, 239), gdb.COLORSPACE_RGB_24BIT)" \
+    "create color from rgb components"
+gdb_test "python print_color_attrs (c)" "#ABCDEF 4 False False True" \
+    "print attrs of an RGB color"
+gdb_test "python print (c.components)" "\\(171, 205, 239\\)" \
+    "print components of an RGB color"
+
+gdb_test_no_output "python c = gdb.Color ('none')" \
+    "create color from string none"
+gdb_test "python print_color_attrs (c)" "none 0 True False False" \
+    "print attrs of a color none"
+
+gdb_test_no_output "python c = gdb.Color ('254')" \
+    "create color from string 254"
+gdb_test "python print_color_attrs (c)" "254 3 False True False" \
+    "print attrs of an color 254"
+gdb_test "python print (c.index)" "254" \
+    "print index of color 254"
+
+gdb_test_no_output "python c_none = gdb.Color ('none')" \
+    "save default color"
+gdb_test_no_output "python c_red = gdb.Color ('red')" \
+    "save blue color"
+gdb_test_no_output "python c_green = gdb.Color ('green')" \
+    "save yellow color"
+gdb_test [concat "python print (c_red.escape_sequence (True) + " \
+    "c_green.escape_sequence (False) + 'red on green' + " \
+    "c_none.escape_sequence (False) + ' red on default' + " \
+    "c_none.escape_sequence (True))"] \
+    "\033\\\[31m\033\\\[42mred on green\033\\\[49m red on default\033\\\[39m" \
+    "escape sequences"
+

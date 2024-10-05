@@ -359,6 +359,7 @@ SUBDIR_GUILE_SRCS = \
 	guile/scm-block.c \
 	guile/scm-breakpoint.c \
 	guile/scm-cmd.c \
+	guile/scm-color.c \
 	guile/scm-disasm.c \
 	guile/scm-exception.c \
 	guile/scm-frame.c \
@@ -395,6 +396,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-bpevent.c \
 	python/py-breakpoint.c \
 	python/py-cmd.c \
+	python/py-color.c \
 	python/py-connection.c \
 	python/py-continueevent.c \
 	python/py-dap.c \

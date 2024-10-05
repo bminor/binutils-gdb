@@ -13009,6 +13009,20 @@ and @code{$_shell_exitsignal} according to the exit status of the last
 launched command.  These variables are set and used similarly to
 the variables @code{$_exitcode} and @code{$_exitsignal}.
 
+@item $_colorsupport
+@vindex $_colorsupport@r{, convenience variable}
+@cindex color space
+Comma-separated list of @dfn{color space} names supported by terminal.  Names
+could be any of @samp{monochrome}, @samp{ansi_8color}, @samp{aixterm_16color},
+@samp{xterm_256color}, @samp{rgb_24bit}.  E.g., for plain linux terminal the
+value could be @samp{monochrome,ansi_8color} and for terminal with truecolor
+support it could be
+@samp{monochrome,ansi_8color,aixterm_16color,xterm_256color,rgb_24bit}.
+@samp{rgb_24bit} availability is determined by the @env{COLORTERM} environment
+variable which may be @samp{truecolor} or @samp{24bit}. Other color spaces are
+determined by the "Co" termcap which in turn depends on the @env{TERM}
+environment variable.
+
 @end table
 
 @node Convenience Funs
@@ -27871,16 +27885,32 @@ For example, the style of file names can be controlled using the
 
 @table @code
 @item set style filename background @var{color}
-Set the background to @var{color}.  Valid colors are @samp{none}
-(meaning the terminal's default color), @samp{black}, @samp{red},
-@samp{green}, @samp{yellow}, @samp{blue}, @samp{magenta}, @samp{cyan},
-and@samp{white}.
+Set the background to @var{color}.  @var{color} can be @samp{none}
+(meaning the terminal's default color), a name of one of the eight standard
+colors of ISO/IEC 6429, index from 0 to 255 into terminal's color
+palette or a hexadecimal RGB triplet in @samp{#RRGGBB} format for
+24-bit TrueColor.
+
+Valid color names are @samp{black}, @samp{red}, @samp{green},
+@samp{yellow}, @samp{blue}, @samp{magenta}, @samp{cyan}, and
+@samp{white}.
+
+Integers 0 to 7 are the synonyms for the standard colors.  Integers 8-15 are
+used for the so-called bright colors from the aixterm extended 16-color
+palette.  Integers 16-255 are the indexes into xterm extended 256-color palette
+(usually 6x6x6 cube plus gray ramp).  In general, 256-color palette is terminal
+dependent and sometimes can be changed with OSC 4 sequences, e.g.
+"\033]4;1;rgb:00/FF/00\033\\". A hexadecimal 24-bit TrueColor is specified in
+the format @samp{#RRGGBB} where RR, GG and BB are the 2-digit hexadecimal
+integers specifiing the intensity of the red, green and blue color components,
+respectively.
+
+It is the responsibility of the user to verify that the terminal supports
+the specified colors.
 
 @item set style filename foreground @var{color}
-Set the foreground to @var{color}.  Valid colors are @samp{none}
-(meaning the terminal's default color), @samp{black}, @samp{red},
-@samp{green}, @samp{yellow}, @samp{blue}, @samp{magenta}, @samp{cyan},
-and@samp{white}.
+Set the foreground to @var{color}.  @var{color} can be given in the same ways
+as for the background.
 
 @item set style filename intensity @var{value}
 Set the intensity to @var{value}.  Valid intensities are @samp{normal}

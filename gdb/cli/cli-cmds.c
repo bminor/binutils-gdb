@@ -2398,6 +2398,11 @@ value_from_setting (const setting &var, struct gdbarch *gdbarch)
 
 	return current_language->value_string (gdbarch, value, len);
       }
+    case var_color:
+      {
+	std::string s = var.get<ui_file_style::color> ().to_string ();
+	return current_language->value_string (gdbarch, s.c_str (), s.size ());
+      }
     default:
       gdb_assert_not_reached ("bad var_type");
     }
@@ -2445,6 +2450,7 @@ str_value_from_setting (const setting &var, struct gdbarch *gdbarch)
     case var_pinteger:
     case var_boolean:
     case var_auto_boolean:
+    case var_color:
       {
 	std::string cmd_val = get_setshow_command_value_string (var);
 

@@ -47,6 +47,9 @@ union pascm_variable
 
   /* Hold a string, for enums.  */
   const char *cstringval;
+
+  /* Hold a color.  */
+  ui_file_style::color color;
 };
 
 /* A GDB parameter.
@@ -130,6 +133,7 @@ enum scm_param_types
   param_optional_filename,
   param_filename,
   param_enum,
+  param_color,
 };
 
 /* Translation from Guile parameters to GDB variable types.  Keep in the
@@ -155,7 +159,8 @@ param_to_var[] =
   { var_string_noescape },
   { var_optional_filename },
   { var_filename },
-  { var_enum }
+  { var_enum },
+  { var_color }
 };
 
 /* Wraps a setting around an existing param_smob.  This abstraction
@@ -179,6 +184,8 @@ make_setting (param_smob *s)
     return setting (type, s->value.stringval);
   else if (var_type_uses<const char *> (type))
     return setting (type, &s->value.cstringval);
+  else if (var_type_uses<ui_file_style::color> (s->type))
+    return setting (s->type, &s->value.color);
   else
     gdb_assert_not_reached ("unhandled var type");
 }
@@ -239,10 +246,9 @@ static SCM
 pascm_make_param_smob (void)
 {
   param_smob *p_smob = (param_smob *)
-    scm_gc_malloc (sizeof (param_smob), param_smob_name);
+    scm_gc_calloc (sizeof (param_smob), param_smob_name);
   SCM p_scm;
 
-  memset (p_smob, 0, sizeof (*p_smob));
   p_smob->cmd_class = no_class;
   p_smob->type = var_boolean; /* ARI: var_boolean */
   p_smob->set_func = SCM_BOOL_F;
@@ -511,6 +517,13 @@ add_setshow_generic (enum var_types param_type,
 				       set_list, show_list);
       break;
 
+    case var_color:
+      commands = add_setshow_color_cmd (cmd_name, cmd_class, &self->value.color,
+					set_doc, show_doc, help_doc,
+					set_func, show_func,
+					set_list, show_list);
+      break;
+
     default:
       gdb_assert_not_reached ("bad param_type value");
     }
@@ -588,6 +601,7 @@ static const scheme_integer_constant parameter_types[] =
   { "PARAM_OPTIONAL_FILENAME", param_optional_filename },
   { "PARAM_FILENAME", param_filename },
   { "PARAM_ENUM", param_enum },
+  { "PARAM_COLOR", param_color },
 
   END_INTEGER_CONSTANTS
 };
@@ -648,6 +662,11 @@ pascm_param_value (const setting &var, int arg_pos, const char *func_name)
 	if (str == nullptr)
 	  str = "";
 	return gdbscm_scm_from_host_string (str, strlen (str));
+      }
+
+    case var_color:
+      {
+	return coscm_scm_from_color (var.get<ui_file_style::color> ());
       }
 
     case var_boolean:
@@ -763,6 +782,12 @@ pascm_set_param_value_x (param_smob *p_smob,
 	var.set<const char *> (enumeration[i]);
 	break;
       }
+
+    case var_color:
+      SCM_ASSERT_TYPE (coscm_is_color (value), value, arg_pos, func_name,
+		       _("<gdb:color>"));
+      var.set<ui_file_style::color> (coscm_get_color (value));
+      break;
 
     case var_boolean:
       SCM_ASSERT_TYPE (gdbscm_is_bool (value), value, arg_pos, func_name,
@@ -1050,6 +1075,8 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
   scm_set_smob_free (parameter_smob_tag, pascm_free_parameter_smob);
   if (var_type_uses<std::string> (p_smob->type))
     p_smob->value.stringval = new std::string;
+  else if (var_type_uses<ui_file_style::color> (p_smob->type))
+    p_smob->value.color = ui_file_style::NONE;
 
   if (initial_value_arg_pos > 0)
     {

@@ -36,6 +36,7 @@
 #include "run-on-main-thread.h"
 #include "observable.h"
 #include "build-id.h"
+#include "py-color.h"
 
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
@@ -509,6 +510,12 @@ gdbpy_parameter_value (const setting &var)
 	  str = var.get<std::string> ().c_str ();
 
 	return host_string_to_python_string (str).release ();
+      }
+
+    case var_color:
+      {
+	const ui_file_style::color &color = var.get<ui_file_style::color> ();
+	return create_color_object (color).release ();
       }
 
     case var_boolean:

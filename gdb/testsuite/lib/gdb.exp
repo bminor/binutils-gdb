@@ -10265,10 +10265,11 @@ proc with_override { name override body } {
 # Run BODY after setting the TERM environment variable to 'ansi', and
 # unsetting the NO_COLOR environment variable.
 proc with_ansi_styling_terminal { body } {
-    save_vars { ::env(TERM) ::env(NO_COLOR) } {
+    save_vars { ::env(TERM) ::env(NO_COLOR) ::env(COLORTERM) } {
 	# Set environment variables to allow styling.
 	setenv TERM ansi
 	unset -nocomplain ::env(NO_COLOR)
+	unset -nocomplain ::env(COLORTERM)
 
 	set code [catch {uplevel 1 $body} result]
     }

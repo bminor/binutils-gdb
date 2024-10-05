@@ -2130,6 +2130,17 @@ show_startup_quiet (struct ui_file *file, int from_tty,
 }
 
 static void
+init_colorsupport_var ()
+{
+  const std::vector<color_space> &cs = colorsupport ();
+  std::string s;
+  for (color_space c : cs)
+    s.append (s.empty () ? "" : ",").append (color_space_name (c));
+  struct internalvar *colorsupport_var = create_internalvar ("_colorsupport");
+  set_internalvar_string (colorsupport_var, s.c_str ());
+}
+
+static void
 init_main (void)
 {
   /* Initialize the prompt to a simple "(gdb) " prompt or to whatever
@@ -2333,6 +2344,9 @@ gdb_init ()
      during startup.  */
   set_language (language_c);
   expected_language = current_language;	/* Don't warn about the change.  */
+
+  /* Create $_colorsupport convenience variable.  */
+  init_colorsupport_var ();
 }
 
 void _initialize_top ();

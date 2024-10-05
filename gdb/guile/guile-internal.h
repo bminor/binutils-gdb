@@ -452,6 +452,14 @@ extern int gdbscm_valid_command_class_p (int command_class);
 extern char *gdbscm_canonicalize_command_name (const char *name,
 					       int want_trailing_space);
 
+/* scm-color.c */
+
+extern SCM coscm_scm_from_color (const ui_file_style::color &color);
+
+extern int coscm_is_color (SCM scm);
+
+extern const ui_file_style::color & coscm_get_color (SCM color_scm);
+
 /* scm-frame.c */
 
 struct frame_smob;
@@ -630,6 +638,7 @@ extern void gdbscm_initialize_arches (void);
 extern void gdbscm_initialize_auto_load (void);
 extern void gdbscm_initialize_blocks (void);
 extern void gdbscm_initialize_breakpoints (void);
+extern void gdbscm_initialize_colors (void);
 extern void gdbscm_initialize_commands (void);
 extern void gdbscm_initialize_disasm (void);
 extern void gdbscm_initialize_exceptions (void);

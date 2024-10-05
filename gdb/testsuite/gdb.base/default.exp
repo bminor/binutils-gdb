@@ -15,8 +15,11 @@
 
 # Start with a fresh gdb
 
-gdb_exit
-gdb_start
+with_ansi_styling_terminal {
+    setenv TERM dumb
+    gdb_exit
+    gdb_start
+}
 
 set prev_timeout $timeout
 set timeout 60
@@ -684,6 +687,7 @@ set show_conv_list \
 	{$_probe_arg10 = <error: No frame selected>} \
 	{$_probe_arg11 = <error: No frame selected>} \
 	{$_cimag = <internal function _cimag>} \
+	{$_colorsupport = "monochrome"} \
 	{$_creal = <internal function _creal>} \
 	{$_isvoid = <internal function _isvoid>} \
 	{$_shell = <internal function _shell>} \

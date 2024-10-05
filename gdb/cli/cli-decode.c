@@ -23,6 +23,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-style.h"
+#include "cli/cli-utils.h"
 #include <optional>
 
 /* Prototypes for local functions.  */
@@ -735,6 +736,87 @@ add_setshow_enum_cmd (const char *name, command_class theclass,
 						  show_list);
 
   cmds.set->enums = enumlist;
+
+  return cmds;
+}
+
+/* See cli-decode.h.  */
+
+void
+complete_on_color (completion_tracker &tracker,
+		   const char *text, const char *word)
+{
+  complete_on_enum (tracker, ui_file_style::basic_color_enums.data (),
+		    text, word);
+  if (*text == '\0')
+    {
+      /* Convenience to let the user know what the option
+	 can accept.  Note there's no common prefix between
+	 the strings on purpose, so that complete_on_enum doesn't do
+	 a partial match.  */
+      tracker.add_completion (make_unique_xstrdup ("NUMBER"));
+      tracker.add_completion (make_unique_xstrdup ("#RRGGBB"));
+    }
+}
+
+/* Completer used in color commands.  */
+
+static void
+color_completer (struct cmd_list_element *ignore,
+		 completion_tracker &tracker,
+		 const char *text, const char *word)
+{
+  complete_on_color (tracker, text, word);
+}
+
+
+/* Add element named NAME to command list LIST (the list for set or
+   some sublist thereof).  CLASS is as in add_cmd.  VAR is address
+   of the variable which will contain the color.  */
+
+set_show_commands
+add_setshow_color_cmd (const char *name,
+		       enum command_class theclass,
+		       ui_file_style::color *var,
+		       const char *set_doc,
+		       const char *show_doc,
+		       const char *help_doc,
+		       cmd_func_ftype *set_func,
+		       show_value_ftype *show_func,
+		       struct cmd_list_element **set_list,
+		       struct cmd_list_element **show_list)
+{
+  set_show_commands commands = add_setshow_cmd_full<ui_file_style::color>
+    (name, theclass, var_color, var,
+     set_doc, show_doc, help_doc,
+     nullptr, nullptr, set_func, show_func,
+     set_list, show_list);
+
+  set_cmd_completer (commands.set, color_completer);
+
+  return commands;
+}
+
+/* Same as above but using a getter and a setter function instead of a pointer
+   to a global storage buffer.  */
+
+set_show_commands
+add_setshow_color_cmd (const char *name, command_class theclass,
+		       const char *set_doc, const char *show_doc,
+		       const char *help_doc,
+		       setting_func_types<ui_file_style::color>::set set_func,
+		       setting_func_types<ui_file_style::color>::get get_func,
+		       show_value_ftype *show_func,
+		       cmd_list_element **set_list,
+		       cmd_list_element **show_list)
+{
+  auto cmds = add_setshow_cmd_full<ui_file_style::color>
+    (name, theclass, var_color, nullptr,
+     set_doc, show_doc, help_doc,
+     set_func, get_func, nullptr, show_func,
+     set_list, show_list);
+
+  set_cmd_completer (cmds.set, color_completer);
 
   return cmds;
 }
@@ -2755,4 +2837,96 @@ int
 cli_user_command_p (struct cmd_list_element *cmd)
 {
   return cmd->theclass == class_user && cmd->func == do_simple_func;
+}
+
+/* See cli-decode.h.  */
+
+ui_file_style::color
+parse_cli_var_color (const char **args)
+{
+  /* Do a "set" command.  ARG is nullptr if no argument, or the
+     text of the argument.  */
+
+  if (args == nullptr || *args == nullptr || **args == '\0')
+    {
+      std::string msg;
+
+      for (size_t i = 0; ui_file_style::basic_color_enums[i]; ++i)
+	{
+	  msg.append ("\"");
+	  msg.append (ui_file_style::basic_color_enums[i]);
+	  msg.append ("\", ");
+	}
+
+      error (_("Requires an argument. Valid arguments are %sinteger from -1 "
+	     "to 255 or an RGB hex triplet in a format #RRGGBB"),
+	     msg.c_str ());
+    }
+
+  const char *p = skip_to_space (*args);
+  size_t len = p - *args;
+
+  int nmatches = 0;
+  ui_file_style::basic_color match = ui_file_style::NONE;
+  for (int i = 0; ui_file_style::basic_color_enums[i]; ++i)
+    if (strncmp (*args, ui_file_style::basic_color_enums[i], len) == 0)
+      {
+	match = static_cast<ui_file_style::basic_color> (i - 1);
+	if (ui_file_style::basic_color_enums[i][len] == '\0')
+	  {
+	    nmatches = 1;
+	    break; /* Exact match.  */
+	  }
+	else
+	  nmatches++;
+      }
+
+  if (nmatches == 1)
+    {
+      *args += len;
+      return ui_file_style::color (match);
+    }
+
+  if (nmatches > 1)
+    error (_("Ambiguous item \"%.*s\"."), (int) len, *args);
+
+  if (**args != '#')
+    {
+      ULONGEST num = get_ulongest (args);
+      if (num > 255)
+	error (_("integer %s out of range"), pulongest (num));
+      return ui_file_style::color (color_space::XTERM_256COLOR,
+				   static_cast<int> (num));
+    }
+
+  /* Try to parse #RRGGBB string.  */
+  if (len != 7)
+    error_no_arg (_("invalid RGB hex triplet format"));
+
+  uint8_t r, g, b;
+  int scanned_chars = 0;
+  int parsed_args = sscanf (*args, "#%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%n",
+			    &r, &g, &b, &scanned_chars);
+
+  if (parsed_args != 3 || scanned_chars != 7)
+    error_no_arg (_("invalid RGB hex triplet format"));
+
+  *args += len;
+  return ui_file_style::color (r, g, b);
+}
+
+/* See cli-decode.h.  */
+
+ui_file_style::color
+parse_var_color (const char *arg)
+{
+  const char *end_arg = arg;
+  ui_file_style::color color = parse_cli_var_color (&end_arg);
+
+  int len = end_arg - arg;
+  const char *after = skip_spaces (end_arg);
+  if (*after != '\0')
+    error (_("Junk after item \"%.*s\": %s"), len, arg, after);
+
+  return color;
 }

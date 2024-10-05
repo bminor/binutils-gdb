@@ -70,6 +70,9 @@ proc run_style_tests { } {
     global currently_disabled_style decimal hex
 
     with_ansi_styling_terminal {
+	setenv TERM xterm-256color
+	setenv COLORTERM truecolor
+
 	# Restart GDB with the correct TERM variable setting, this
 	# means that GDB will enable styling.
 	clean_restart_and_disable "restart 1" ${binfile}
@@ -311,6 +314,21 @@ proc run_style_tests { } {
 	set url [limited_style "http:.*html" file]
 	gdb_test "show version" "${vers}.*<$url>.*" \
 	    "'show version' is styled"
+
+	if { $currently_disabled_style != "version" } {
+	    # Check that colors in styling can be set as integer and as RGB hex
+	    # triplet.  Check that the version string is styled in the output of
+	    # 'show version' according to the set colors.
+	    gdb_test_no_output "set style version intensity normal"
+	    gdb_test_no_output "set style version background 255"
+	    gdb_test_no_output "set style version foreground #FED210"
+	    gdb_test "show style version background" \
+		"The \033\\\[38;2;254;210;16;48;5;255;22;27m.*\".*version.*\".*style.*\033\\\[m background color is: 255" \
+		"Version's 256-color background style"
+	    gdb_test "show style version foreground" \
+		"The \033\\\[38;2;254;210;16;48;5;255;22;27m.*\".*version.*\".*style.*\033\\\[m foreground color is: #FED210" \
+		"Version's TrueColor foreground style"
+	}
     }
 }
 
@@ -487,6 +505,179 @@ proc test_startup_version_string { } {
     gdb_test "" "${vers}.*" "version is styled at startup"
 }
 
+# Color support is disabled when TERM=dumb and COLORTERM="".
+# All colors are approximated to none when set.
+proc test_colorsupport_monochrome { } {
+    with_test_prefix "colorsupport_monochrome" {
+	with_ansi_styling_terminal {
+	    setenv TERM dumb
+	    gdb_exit
+	    gdb_start
+	    gdb_test "print \$_colorsupport" \
+		"\\\$1 = \"monochrome\"" \
+		"color support is monochrome"
+	    gdb_test_no_output "set style enabled off"
+	    gdb_test_no_output "set style filename foreground none"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: none" \
+	      "none without approximation"
+	    gdb_test_no_output "set style filename foreground blue"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: none" \
+	      "blue approximated to none"
+	}
+    }
+}
+
+# Color support is limited by 8 colors when TERM=ansi and COLORTERM="".
+# All colors are approximated to basic colors when set.
+proc test_colorsupport_8color { } {
+    with_test_prefix "colorsupport_8color" {
+	with_ansi_styling_terminal {
+	    gdb_exit
+	    gdb_start
+	    gdb_test "print \$_colorsupport" \
+		"\033\\\[.*m\\\$1\033\\\[m = \"monochrome,ansi_8color\"" \
+		"color support is 8 color"
+	    gdb_test_no_output "set style enabled off"
+	    gdb_test_no_output "set style filename foreground none"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: none" \
+	      "none without approximation"
+	    gdb_test_no_output "set style filename foreground yellow"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: yellow" \
+	      "yellow without approximation"
+	    gdb_test_no_output "set style filename foreground 9"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: red" \
+	      "9 approximated to red"
+	    gdb_test_no_output "set style filename foreground 118"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: green" \
+	      "118 approximated to green"
+	    gdb_test_no_output "set style filename foreground #000ABC"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: blue" \
+	      "#000ABC approximated to blue"
+	}
+    }
+}
+
+# Color support is limited by 256 colors when TERM=xterm-256color and
+# COLORTERM="".  All colors are approximated by 256 color palette when set.
+proc test_colorsupport_256color { } {
+    with_test_prefix "colorsupport_256color" {
+	with_ansi_styling_terminal {
+	    setenv TERM xterm-256color
+	    gdb_exit
+	    gdb_start
+	    gdb_test "print \$_colorsupport" \
+		"\033\\\[.*m\\\$1\033\\\[m = \"monochrome,ansi_8color,aixterm_16color,xterm_256color\"" \
+		"color support is 256 color"
+	    gdb_test_no_output "set style enabled off"
+	    gdb_test_no_output "set style filename foreground none"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: none" \
+	      "none without approximation"
+	    gdb_test_no_output "set style filename foreground red"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: red" \
+	      "red without approximation"
+	    gdb_test_no_output "set style filename foreground 9"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: 9" \
+	      "9 without approximation"
+	    gdb_test_no_output "set style filename foreground 118"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: 118" \
+	      "118 without approximation"
+	    gdb_test_no_output "set style filename foreground #CD00CD"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: 5" \
+	      "#CD00CD approximated to 5"
+	    gdb_test_no_output "set style filename foreground #FFAF12"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: 214" \
+	      "#FFAF12 approximated to 214"
+	}
+    }
+}
+
+# Color support is limited by 16777216 colors when TERM=xterm-256color and
+# COLORTERM="truecolor".  No approximation needed.
+proc test_colorsupport_truecolor { } {
+    with_test_prefix "colorsupport_truecolor" {
+	with_ansi_styling_terminal {
+	    setenv TERM xterm-256color
+	    setenv COLORTERM truecolor
+	    gdb_exit
+	    gdb_start
+	    gdb_test "print \$_colorsupport" \
+		"\033\\\[.*m\\\$1\033\\\[m = \"monochrome,ansi_8color,aixterm_16color,xterm_256color,rgb_24bit\"" \
+		"color support is truecolor"
+	    gdb_test_no_output "set style enabled off"
+	    gdb_test_no_output "set style filename foreground none"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: none" \
+	      "none without approximation"
+	    gdb_test_no_output "set style filename foreground red"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: red" \
+	      "red without approximation"
+	    gdb_test_no_output "set style filename foreground 9"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: 9" \
+	      "9 without approximation"
+	    gdb_test_no_output "set style filename foreground 118"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: 118" \
+	      "118 without approximation"
+	    gdb_test_no_output "set style filename foreground #CD00CD"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: #CD00CD" \
+	      "#CD00CD without approximation"
+	}
+    }
+}
+
+# Color support is limited by 16777216 colors when TERM=dumb and
+# COLORTERM=24bit.  No approximation needed.  Basic colors replaced with RGB.
+proc test_colorsupport_truecolor_only { } {
+    with_test_prefix "colorsupport_truecolor_only" {
+	with_ansi_styling_terminal {
+	    setenv TERM dumb
+	    setenv COLORTERM truecolor
+	    gdb_exit
+	    gdb_start
+	    gdb_test "print \$_colorsupport" \
+		"\\\$1 = \"monochrome,rgb_24bit\"" \
+		"color support is truecolor only"
+	    gdb_test_no_output "set style enabled off"
+	    gdb_test_no_output "set style filename foreground none"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: none" \
+	      "none without approximation"
+	    gdb_test_no_output "set style filename foreground red"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: #DE382B" \
+	      "red replaced by #DE382B"
+	    gdb_test_no_output "set style filename foreground 9"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: #FF0000" \
+	      "9 replaced by #FF0000"
+	    gdb_test_no_output "set style filename foreground 118"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: #87FF00" \
+	      "118 replaced by #87FF00"
+	    gdb_test_no_output "set style filename foreground #CD00CD"
+	    gdb_test "show style filename foreground" \
+	      "The \"filename\" style foreground color is: #CD00CD" \
+	      "#CD00CD without approximation"
+	}
+    }
+}
+
 # Check to see if the Python styling of disassembler output is
 # expected or not, this styling requires Python support in GDB, and
 # the Python pygments module to be available.
@@ -521,3 +712,9 @@ test_disassembler_error_handling
 
 # Finally, check the styling of the version string during startup.
 test_startup_version_string
+
+test_colorsupport_monochrome
+test_colorsupport_8color
+test_colorsupport_256color
+test_colorsupport_truecolor
+test_colorsupport_truecolor_only

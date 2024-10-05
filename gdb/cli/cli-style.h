@@ -67,9 +67,9 @@ private:
   const char *m_name;
 
   /* The foreground.  */
-  const char *m_foreground;
+  ui_file_style::color m_foreground;
   /* The background.  */
-  const char *m_background;
+  ui_file_style::color m_background;
   /* The intensity.  */
   const char *m_intensity;
 

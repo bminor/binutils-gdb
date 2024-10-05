@@ -58,7 +58,7 @@ run_tests ()
   SELF_CHECK (style.get_background ().is_none ());
   SELF_CHECK (style.get_intensity () == ui_file_style::NORMAL);
   SELF_CHECK (style.is_reverse ());
-  SELF_CHECK (style.to_ansi () == "\033[7m");
+  SELF_CHECK (style.to_ansi () == "\033[39;49;22;7m");
 
   style = ui_file_style ();
   SELF_CHECK (style.parse ("\033[32;1m", &n_read));
@@ -68,7 +68,7 @@ run_tests ()
   SELF_CHECK (style.get_background ().is_none ());
   SELF_CHECK (style.get_intensity () == ui_file_style::BOLD);
   SELF_CHECK (!style.is_reverse ());
-  SELF_CHECK (style.to_ansi () == "\033[32;1m");
+  SELF_CHECK (style.to_ansi () == "\033[32;49;1;27m");
 
   style = ui_file_style ();
   SELF_CHECK (style.parse ("\033[38;5;112;48;5;249m", &n_read));
@@ -81,7 +81,7 @@ run_tests ()
   CHECK_RGB (0xb2, 0xb2, 0xb2);
   SELF_CHECK (style.get_intensity () == ui_file_style::NORMAL);
   SELF_CHECK (!style.is_reverse ());
-  SELF_CHECK (style.to_ansi () == "\033[38;5;112;48;5;249m");
+  SELF_CHECK (style.to_ansi () == "\033[38;5;112;48;5;249;22;27m");
 
   style = ui_file_style ();
   SELF_CHECK (style.parse ("\033[38;2;83;84;85;48;2;0;1;254;2;7m", &n_read));

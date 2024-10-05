@@ -225,6 +225,7 @@ optional arguments while skipping others.  Example:
 * Finish Breakpoints in Python:: Setting Breakpoints on function return
                                 using Python.
 * Lazy Strings In Python::      Python representation of lazy strings.
+* Colors In Python::            Python representation of colors.
 * Architectures In Python::     Python representation of architectures.
 * Registers In Python::         Python representation of registers.
 * Connections In Python::       Python representation of connections.
@@ -5242,6 +5243,11 @@ except the special value -1 is returned for the setting of ``unlimited''.
 @item gdb.PARAM_ENUM
 The value is a string, which must be one of a collection string
 constants provided when the parameter is created.
+
+@findex PARAM_COLOR
+@findex gdb.PARAM_COLOR
+@item gdb.PARAM_COLOR
+The value is @code{gdb.Color} instance.
 @end table
 
 @node Functions In Python
@@ -7019,6 +7025,98 @@ resolve this to the lazy string's character type, use the type's
 @code{target} method.  @xref{Types In Python}.  This attribute is not
 writable.
 @end defvar
+
+@node Colors In Python
+@subsubsection Python representation of colors
+
+@cindex colors in python
+@tindex gdb.Color
+You can assign instance of @code{Color} to the @code{value} of
+a @code{Parameter} instance created with @code{PARAM_COLOR}.
+
+@code{Color} may refer to an index from color palette or contain components
+of a color from some colorspace.
+
+@defun Color.__init__ (@r{[}@var{value} @r{[}, @var{color-space}@r{]}@r{]})
+
+@var{value} is @code{None} (meaning the terminal's default color),
+an integer index of a color in palette, tuple with color components
+or a string.  String can be a hex RGB triplet in @samp{#RRGGBB} format
+or one of the following color names:
+@samp{none} (meaning the terminal's default color), @samp{black}, @samp{red},
+@samp{green}, @samp{yellow}, @samp{blue}, @samp{magenta}, @samp{cyan},
+or @samp{white}.
+
+@var{color-space} should be one of the @samp{COLORSPACE_} constants.  This
+argument tells @value{GDBN} which color space @var{value} belongs.
+@end defun
+
+@defvar Color.is_none
+This atribute is boolean.  If its value is @code{True} then color is terminal's
+default.
+@end defvar
+
+@defvar Color.is_indexed
+This atribute is boolean.  If its value is @code{True} then color is indexed,
+i.e. belongs to some palette.
+@end defvar
+
+@defvar Color.is_direct
+This atribute is boolean.  If its value is @code{True} then this object
+describes direct colour in the sense of ISO/IEC 8613-6.
+@end defvar
+
+@defvar Color.index
+This attribute exist if @code{is_indexed} is @code{True}.  Its integer value is
+index of a color in a palette.
+@end defvar
+
+@defvar Color.components
+This attribute exist if @code{is_direct} is @code{True}.  Its value is tuple
+with integer components of a color.
+@end defvar
+
+@defun Color.escape_sequence (@var{self}, @var{is_foreground})
+Returns string to change terminal's color to this.
+
+If @var{is_foreground} is @code{True}, then the returned sequence will change
+foreground color.  Otherwise, the returned sequence will change background
+color.
+@end defun
+
+When color is initialized, its color space must be specified.  The
+available color spaces are represented by constants defined in the @code{gdb}
+module:
+
+@table @code
+@findex COLORSPACE_MONOCHROME
+@findex gdb.COLORSPACE_MONOCHROME
+@item gdb.COLORSPACE_MONOCHROME
+Palette with only terminal's default color.
+
+@findex COLORSPACE_ANSI_8COLOR
+@findex gdb.COLORSPACE_ANSI_8COLOR
+@item gdb.COLORSPACE_ANSI_8COLOR
+Palette with eight standard colors of ISO/IEC 6429 "black", "red", "green", etc.
+
+@findex COLORSPACE_AIXTERM_16COLOR
+@findex gdb.COLORSPACE_AIXTERM_16COLOR
+@item gdb.COLORSPACE_AIXTERM_16COLOR
+Palette with 16 colors.  First eight are standard colors of ISO/IEC 6429
+"black", "red", "green", etc.  Next eight are their bright version.
+
+@findex COLORSPACE_XTERM_256COLOR
+@findex gdb.COLORSPACE_XTERM_256COLOR
+@item gdb.COLORSPACE_XTERM_256COLOR
+Palette with 256 colors.  First 16 are from COLORSPACE_AIXTERM_16COLOR.  Next
+216 colors are 6x6x6 RGB cube.  And last 24 colors form grayscale ramp.
+
+@findex COLORSPACE_RGB_24BIT
+@findex gdb.COLORSPACE_RGB_24BIT
+@item gdb.COLORSPACE_RGB_24BIT
+Direct 24-bit RGB colors.
+
+@end table
 
 @node Architectures In Python
 @subsubsection Python representation of architectures

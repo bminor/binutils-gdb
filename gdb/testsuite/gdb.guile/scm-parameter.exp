@@ -389,3 +389,50 @@ with_test_prefix "previously-ambiguous" {
 }
 
 rename scm_param_test_maybe_no_output ""
+
+# Test a color parameter.
+
+with_ansi_styling_terminal {
+    # This enables 256 colors support and disables colors approximation.
+    setenv TERM xterm-256color
+    setenv COLORTERM truecolor
+
+    # Start with a fresh gdb.
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+
+    gdb_install_guile_utils
+    gdb_install_guile_module
+
+    # We use "." here instead of ":" so that this works on win32 too.
+    set escaped_directory [string_to_regexp "$srcdir/$subdir"]
+
+    gdb_test_multiline "color gdb parameter" \
+	"guile" "" \
+	"(define test-color-param" "" \
+	"  (make-parameter \"print test-color-param\"" "" \
+	"   #:command-class COMMAND_DATA" "" \
+	"   #:parameter-type PARAM_COLOR" "" \
+	"   #:doc \"When set, test param does something useful. When disabled, does nothing.\"" "" \
+	"   #:show-doc \"Show the state of the test-color-param.\"" "" \
+	"   #:set-doc \"Set the state of the test-color-param.\"" "" \
+	"   #:show-func (lambda (self value)" "" \
+	"      (format #f \"The state of the test-color-param is ~a.\" value))" "" \
+	"   #:initial-value (make-color \"green\")))" "" \
+	"(register-parameter! test-color-param)" "" \
+	"end"
+
+    with_test_prefix "test-color-param" {
+	with_test_prefix "initial-value" {
+	    gdb_test "guile (print (parameter-value test-color-param))" "= #<gdb:color green COLORSPACE_ANSI_8COLOR>" "color parameter value (green)"
+	    gdb_test "show print test-color-param" "The state of the test-color-param is green." "show initial value"
+	    gdb_test_no_output "set print test-color-param 255"
+	}
+	with_test_prefix "new-value" {
+	    gdb_test "show print test-color-param" "The state of the test-color-param is 255." "show new value"
+	    gdb_test "guile (print (parameter-value test-color-param))" "= #<gdb:color 255 COLORSPACE_XTERM_256COLOR>" "color parameter value (255)"
+	    gdb_test "set print test-color-param 256" "integer 256 out of range.*" "set invalid color parameter"
+	}
+    }
+}

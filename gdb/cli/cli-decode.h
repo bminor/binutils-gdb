@@ -309,6 +309,27 @@ extern const char * const boolean_enums[];
 /* The enums of auto-boolean commands.  */
 extern const char * const auto_boolean_enums[];
 
+/* Add the different possible completions of TEXT with color.
+
+   WORD points in the same buffer as TEXT, and completions should be
+   returned relative to this position.  For example, suppose TEXT is "foo"
+   and we want to complete to "foobar".  If WORD is "oo", return
+   "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
+
+extern void complete_on_color (completion_tracker &tracker,
+			       const char *text, const char *word);
+
+/* Parse ARGS, an option to a var_color variable.
+ *
+   Either returns the parsed value on success or throws an error.  ARGS may be
+   one of strings {none, black, red, green, yellow, blue, magenta,
+   cyan, white}, or color number from 0 to 255, or RGB hex triplet #RRGGBB.
+   */
+extern ui_file_style::color parse_cli_var_color (const char **args);
+
+/* Same as above but additionally check that there is no junk in the end.  */
+extern ui_file_style::color parse_var_color (const char *arg);
+
 /* Verify whether a given cmd_list_element is a user-defined command.
    Return 1 if it is user-defined.  Return 0 otherwise.  */
 

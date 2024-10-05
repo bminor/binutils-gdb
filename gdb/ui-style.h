@@ -19,6 +19,38 @@
 #ifndef GDB_UI_STYLE_H
 #define GDB_UI_STYLE_H
 
+/* One of the color spaces that usually supported by terminals.  */
+enum class color_space
+{
+  /* one default terminal color  */
+  MONOCHROME,
+
+  /* foreground colors \e[30m ... \e[37m,
+     background colors \e[40m ... \e[47m  */
+  ANSI_8COLOR,
+
+  /* foreground colors \e[30m ... \e[37m, \e[90m ... \e[97m
+     background colors \e[40m ... \e[47m, \e[100m ... \e107m  */
+  AIXTERM_16COLOR,
+
+  /* foreground colors \e[38;5;0m ... \e[38;5;255m
+     background colors \e[48;5;0m ... \e[48;5;255m  */
+  XTERM_256COLOR,
+
+  /* foreground colors \e[38;2;0;0;0m ... \e[38;2;255;255;255m
+     background colors \e[48;2;0;0;0m ... \e[48;2;255;255;255m  */
+  RGB_24BIT
+};
+
+/* Color spaces supported by terminal.  */
+extern const std::vector<color_space> & colorsupport ();
+
+/* Textual representation of C.  */
+extern const char * color_space_name (color_space c);
+
+/* Cast C to RESULT and return true if it's value is valid; false otherwise.  */
+extern bool color_space_safe_cast (color_space *result, long c);
+
 /* Styles that can be applied to a ui_file.  */
 struct ui_file_style
 {
@@ -43,20 +75,61 @@ struct ui_file_style
   public:
 
     color (basic_color c)
-      : m_simple (true),
+      : m_color_space (c == NONE ? color_space::MONOCHROME
+				 : color_space::ANSI_8COLOR),
 	m_value (c)
     {
     }
 
     color (int c)
-      : m_simple (true),
+      : m_value (c)
+    {
+      if (c < -1 || c > 255)
+	error (_("Palette color index %d is out of range."), c);
+      if (c == -1)
+	m_color_space = color_space::MONOCHROME;
+      else if (c <= 7)
+	m_color_space = color_space::ANSI_8COLOR;
+      else if (c <= 15)
+	m_color_space = color_space::AIXTERM_16COLOR;
+      else
+	m_color_space = color_space::XTERM_256COLOR;
+    }
+
+    color (color_space cs, int c)
+      : m_color_space (cs),
 	m_value (c)
     {
-      gdb_assert (c >= -1 && c <= 255);
+      if (c < -1 || c > 255)
+	error (_("Palette color index %d is out of range."), c);
+
+      std::pair<int, int> range;
+      switch (cs)
+	{
+	case color_space::MONOCHROME:
+	  range = {-1, -1};
+	  break;
+	case color_space::ANSI_8COLOR:
+	  range = {0, 7};
+	  break;
+	case color_space::AIXTERM_16COLOR:
+	  range = {0, 15};
+	  break;
+	case color_space::XTERM_256COLOR:
+	  range = {0, 255};
+	  break;
+	default:
+	  error (_("Color space %d is incompatible with indexed colors."),
+		 static_cast<int> (cs));
+	}
+
+      if (c < range.first || c > range.second)
+	error (_("Color %d is out of range [%d, %d] of color space %d."),
+	       c, range.first, range.second, static_cast<int> (cs));
     }
 
     color (uint8_t r, uint8_t g, uint8_t b)
-      : m_simple (false),
+      : m_color_space (color_space::RGB_24BIT),
 	m_red (r),
 	m_green (g),
 	m_blue (b)
@@ -65,19 +138,24 @@ struct ui_file_style
 
     bool operator== (const color &other) const
     {
-      if (m_simple != other.m_simple)
+      if (m_color_space != other.m_color_space)
 	return false;
-      if (m_simple)
+      if (is_simple ())
 	return m_value == other.m_value;
       return (m_red == other.m_red && m_green == other.m_green
 	      && m_blue == other.m_blue);
     }
 
+    bool operator!= (const color &other) const
+    {
+      return ! (*this == other);
+    }
+
     bool operator< (const color &other) const
     {
-      if (m_simple != other.m_simple)
-	return m_simple < other.m_simple;
-      if (m_simple)
+      if (m_color_space != other.m_color_space)
+	return m_color_space < other.m_color_space;
+      if (is_simple ())
 	return m_value < other.m_value;
       if (m_red < other.m_red)
 	return true;
@@ -91,23 +169,54 @@ struct ui_file_style
       return false;
     }
 
+    color_space colorspace () const
+    {
+      return m_color_space;
+    }
+
     /* Return true if this is the "NONE" color, false otherwise.  */
     bool is_none () const
     {
-      return m_simple && m_value == NONE;
+      return m_color_space == color_space::MONOCHROME && m_value == NONE;
     }
 
     /* Return true if this is one of the basic colors, false
        otherwise.  */
     bool is_basic () const
     {
-      return m_simple && m_value >= BLACK && m_value <= WHITE;
+      if (m_color_space == color_space::ANSI_8COLOR
+	  || m_color_space == color_space::AIXTERM_16COLOR)
+	return BLACK <= m_value && m_value <= WHITE;
+      else
+	return false;
     }
 
-    /* Return the value of a basic color.  */
+    /* Return true if this is one of the colors, stored as int, false
+       otherwise.  */
+    bool is_simple () const
+    {
+      return m_color_space != color_space::RGB_24BIT;
+    }
+
+    /* Return true if this is one of the indexed colors, false
+       otherwise.  */
+    bool is_indexed () const
+    {
+      return m_color_space != color_space::RGB_24BIT
+	     && m_color_space != color_space::MONOCHROME;
+    }
+
+    /* Return true if this is one of the direct colors (RGB, CMY, CMYK), false
+       otherwise.  */
+    bool is_direct () const
+    {
+      return m_color_space == color_space::RGB_24BIT;
+    }
+
+    /* Return the value of a simple color.  */
     int get_value () const
     {
-      gdb_assert (is_basic ());
+      gdb_assert (is_simple ());
       return m_value;
     }
 
@@ -118,14 +227,23 @@ struct ui_file_style
 
     /* Append the ANSI terminal escape sequence for this color to STR.
        IS_FG indicates whether this is a foreground or background
-       color.  Returns true if any characters were written; returns
-       false otherwise (which can only happen for the "NONE"
-       color).  */
-    bool append_ansi (bool is_fg, std::string *str) const;
+       color.  */
+    void append_ansi (bool is_fg, std::string *str) const;
+
+    /* Return the ANSI escape sequence for this color.
+       IS_FG indicates whether this is a foreground or background color.  */
+    std::string to_ansi (bool is_fg) const;
+
+    /* Returns text representation of this object.
+       It is "none", name of a basic color, number or a #RRGGBB hex triplet.  */
+    std::string to_string () const;
+
+    /* Approximates THIS color by closest one from SPACES.  */
+    color approximate (const std::vector<color_space> &spaces) const;
 
   private:
 
-    bool m_simple;
+    color_space m_color_space;
     union
     {
       int m_value;
@@ -234,6 +352,9 @@ struct ui_file_style
   {
     return this;
   }
+
+  /* nullptr-terminated list of names corresponding to enum basic_color.  */
+  static const std::vector<const char *> basic_color_enums;
 
 private:
 

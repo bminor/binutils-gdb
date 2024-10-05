@@ -3,6 +3,25 @@
 
 *** Changes since GDB 16
 
+* "set style" commands now supports numeric format for basic colors
+  from 0 to 255 and #RRGGBB format for TrueColor.
+
+* New built-in convenience variable $_colorsupport provides comma-separated
+  list of color space names supported by terminal.  Each color space name is one
+  of monochrome, ansi_8color, aixterm_16color, xterm_256color or rgb_24bit.
+  It is handy for conditionally using styling colors based on terminal features.
+  For example:
+
+  (gdb) if $_regex ($_colorsupport, ".*(^|,)rgb_24bit($|,).*")
+   >set style filename background #FACADE
+   >else
+   >if $_regex ($_colorsupport, ".*(^|,)xterm_256color($|,).*")
+    >set style filename background 224
+    >else
+    >set style filename background red
+    >end
+   >end
+
 * New commands
 
 maintenance check psymtabs
@@ -10,6 +29,20 @@ maintenance check psymtabs
 
 maintenance check symtabs
   Renamed from maintenance check-symtabs
+
+* Python API
+
+  ** New class gdb.Color for dealing with colors.
+
+  ** New constant gdb.PARAM_COLOR represents color type of a
+     gdb.Parameter.value.  Parameter's value is gdb.Color instance.
+
+* Guile API
+
+  ** New type <gdb:color> for dealing with colors.
+
+  ** New constant PARAM_COLOR represents color type of a value
+     of a <gdb:parameter> object.  Parameter's value is <gdb::color> instance.
 
 *** Changes in GDB 16
 

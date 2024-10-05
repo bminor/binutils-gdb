@@ -185,6 +185,58 @@ proc_with_prefix test_enum_parameter { } {
 	"Undefined item: \"three\".*" "set invalid enum parameter"
 }
 
+# Test an color parameter.
+proc_with_prefix test_color_parameter { } {
+    global env
+    with_ansi_styling_terminal {
+	# This enables 256 colors support and disables colors approximation.
+	setenv TERM xterm-256color
+	setenv COLORTERM truecolor
+
+	clean_restart
+
+	gdb_test_multiline "color gdb parameter" \
+	    "python" "" \
+	    "class TestColorParam (gdb.Parameter):" "" \
+	    "   \"\"\"When set, test param does something useful. When disabled, does nothing.\"\"\"" "" \
+	    "   show_doc = \"Show the state of the color\"" ""\
+	    "   set_doc = \"Set the state of the color\"" "" \
+	    "   def get_show_string (self, pvalue):" ""\
+	    "      return \"The state of the color is \" + str(pvalue)" ""\
+	    "   def get_set_string (self):" ""\
+	    "      return \"The state of the color has been set to \" + str(self.value)" ""\
+	    "   def __init__ (self, name):" "" \
+	    "      super (TestColorParam, self).__init__ (name, gdb.COMMAND_DATA, gdb.PARAM_COLOR)" "" \
+	    "      self.value = gdb.Color(\"green\")" "" \
+	    "test_color_param = TestColorParam ('print test-color-param')" ""\
+	    "end"
+
+	gdb_test "python print (test_color_param.value)" "green" \
+	    "test color parameter value is green"
+	gdb_test "show print test-color-param" \
+	    "The state of the color is green.*" \
+	    "show parameter is initial value"
+	gdb_test "set print test-color-param 255" \
+	    "The state of the color has been set to 255" "set color to 255"
+	gdb_test "show print test-color-param" \
+	    "The state of the color is 255.*" "show parameter is new value"
+	gdb_test "python print (test_color_param.value)" "255" \
+	    "test color parameter value is 255"
+	gdb_test_no_output "python test_color_param.value = gdb.Color(254)" \
+	    "assign test_color_param.value to 254"
+	gdb_test "python print (test_color_param.value)" "254" \
+	    "test color parameter value is integer"
+	gdb_test_no_output "python test_color_param.value =  gdb.Color('#FED210')" \
+	    "assign test_color_param.value to #FED210"
+	gdb_test "python print (test_color_param.value.components)" "\\(254, 210, 16\\)" \
+	    "test color parameter components from RGB hex tripple value"
+	gdb_test "set print test-color-param 256" \
+	    "integer 256 out of range.*" "set invalid color parameter"
+	gdb_test "python test_color_param.value = gdb.Color(256)" \
+	    ".*Error occurred in Python: Palette color index 256 is out of range.*" "set invalid color value"
+    }
+}
+
 # Test a file parameter.
 proc_with_prefix test_file_parameter { } {
     clean_restart
@@ -623,6 +675,7 @@ test_directories
 test_data_directory
 test_boolean_parameter
 test_enum_parameter
+test_color_parameter
 test_file_parameter
 test_undocumented_parameter
 test_really_undocumented_parameter
