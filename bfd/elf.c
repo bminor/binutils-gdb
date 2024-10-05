@@ -8734,21 +8734,21 @@ swap_out_syms (bfd *abfd,
       Elf_Internal_Sym sym;
 
       flagword flags = syms[idx]->flags;
-      if (!name_local_sections
-	  && (flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
+      if (syms[idx]->name == NULL
+	  || (!name_local_sections
+	      && (flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM))
 	{
 	  /* Local section symbols have no name.  */
-	  sym.st_name = (unsigned long) -1;
+	  sym.st_name = 0;
 	}
       else
 	{
 	  /* Call _bfd_elf_strtab_offset after _bfd_elf_strtab_finalize
 	     to get the final offset for st_name.  */
-	  sym.st_name
-	    = (unsigned long) _bfd_elf_strtab_add (stt, syms[idx]->name,
-						   false);
-	  if (sym.st_name == (unsigned long) -1)
+	  size_t stridx = _bfd_elf_strtab_add (stt, syms[idx]->name, false);
+	  if (stridx == (size_t) -1)
 	    goto error_return;
+	  sym.st_name = stridx;
 	}
 
       bfd_vma value = syms[idx]->value;
@@ -8959,9 +8959,7 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
   for (idx = 0; idx < outbound_syms_index; idx++)
     {
       struct elf_sym_strtab *elfsym = &symstrtab[idx];
-      if (elfsym->sym.st_name == (unsigned long) -1)
-	elfsym->sym.st_name = 0;
-      else
+      if (elfsym->sym.st_name != 0)
 	elfsym->sym.st_name = _bfd_elf_strtab_offset (stt,
 						      elfsym->sym.st_name);
       if (info && info->callbacks->ctf_new_symbol)
