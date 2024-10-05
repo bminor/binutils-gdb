@@ -117,6 +117,13 @@ void regcache_invalidate (void);
 
 void regcache_release (void);
 
+/* Set contents of register REGNUM from BUF, interpreted as an hexadecimal
+   string.
+   Return true on success, false if there is an error.  */
+
+bool register_from_string (struct regcache *regcache, int regnum,
+			   gdb::array_view<const char> buf);
+
 /* Convert all registers to a string in the currently specified remote
    format.  */
 

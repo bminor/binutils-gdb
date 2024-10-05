@@ -4794,6 +4794,19 @@ process_point_options (struct gdb_breakpoint *bp, const char **packet)
   *packet = dataptr;
 }
 
+static bool
+can_access_registers (client_state &cs)
+{
+  if (!target_running () || cs.current_traceframe >= 0
+      || !set_desired_thread ())
+    {
+      write_enn (cs.own_buf);
+      return false;
+    }
+
+  return true;
+}
+
 /* Event loop callback that handles a serial event.  The first byte in
    the serial buffer gets us here.  We expect characters to arrive at
    a brisk pace, so we read the rest of the packet with a blocking
@@ -4928,22 +4941,81 @@ process_serial_event (void)
 	}
       break;
     case 'G':
-      require_running_or_break (cs.own_buf);
-      if (cs.current_traceframe >= 0)
-	write_enn (cs.own_buf);
-      else
-	{
-	  struct regcache *regcache;
+      {
+	if (!can_access_registers (cs))
+	  break;
 
-	  if (!set_desired_thread ())
+	regcache *regcache = get_thread_regcache (current_thread, 1);
+	registers_from_string (regcache, &cs.own_buf[1]);
+	write_ok (cs.own_buf);
+      }
+      break;
+    case 'p':
+      {
+	if (!can_access_registers (cs))
+	  break;
+
+	int i = 1, regnum = 0;
+	char c;
+	while ((c = cs.own_buf[i++]) != '\0')
+	  {
+	    regnum = regnum << 4;
+	    regnum |= fromhex (c) & 0x0f;
+	  }
+
+	struct regcache *regcache = get_thread_regcache (current_thread, true);
+
+	if (regnum < 0 || regnum >= regcache->tdesc->reg_defs.size ())
+	  {
 	    write_enn (cs.own_buf);
-	  else
-	    {
-	      regcache = get_thread_regcache (current_thread);
-	      registers_from_string (regcache, &cs.own_buf[1]);
-	      write_ok (cs.own_buf);
-	    }
-	}
+	    break;
+	  }
+
+	fetch_inferior_registers (regcache, regnum);
+	collect_register_as_string (regcache, regnum, cs.own_buf);
+      }
+      break;
+    case 'P':
+      {
+	if (!can_access_registers (cs))
+	  break;
+
+	if (strchr (cs.own_buf, '=') == nullptr)
+	  {
+	    write_enn (cs.own_buf);
+	    break;
+	  }
+
+	int i = 1, regnum = 0;
+	char c;
+	while ((c = cs.own_buf[i++]) != '=')
+	  {
+	    regnum = regnum << 4;
+	    regnum |= fromhex (c) & 0x0f;
+	  }
+
+	struct regcache *regcache = get_thread_regcache (current_thread, true);
+
+	if (regnum < 0 || regnum >= regcache->tdesc->reg_defs.size ())
+	  {
+	    write_enn (cs.own_buf);
+	    break;
+	  }
+
+	len = strlen (&cs.own_buf[i]);
+	bool ret = register_from_string (regcache, regnum,
+					 gdb::make_array_view (&cs.own_buf[i],
+							       len));
+	if (!ret)
+	  {
+	    write_enn (cs.own_buf);
+	    break;
+	  }
+
+	/* FIXME: Why doesn't the G packet need this as well?  */
+	store_inferior_registers (regcache, regnum);
+	write_ok (cs.own_buf);
+      }
       break;
     case 'm':
       {

@@ -185,6 +185,30 @@ find_register_by_number (const struct target_desc *tdesc, int n)
 
 #ifndef IN_PROCESS_AGENT
 
+static gdb::array_view<gdb_byte> register_data (const struct regcache *regcache,
+						int n);
+
+/* See regcache.h.  */
+
+bool
+register_from_string (struct regcache *regcache, int regnum,
+		      gdb::array_view<const char> buf)
+{
+  gdb::array_view<gdb_byte> value = register_data (regcache, regnum);
+  int expected_len = value.size () * 2;
+
+  if (buf.size () != expected_len)
+    {
+      warning (_("Wrong sized packet for register %d (expected %d bytes, got %zu)"),
+	       regnum, expected_len, buf.size ());
+      return false;
+    }
+
+  hex2bin (buf.data (), value.data (), buf.size () / 2);
+
+  return true;
+}
+
 void
 registers_to_string (struct regcache *regcache, char *buf)
 {
