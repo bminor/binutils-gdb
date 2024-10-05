@@ -46,6 +46,9 @@
    language is requested. */
 #undef ENABLE_NLS
 
+/* Additional targets configured into GDB. */
+#undef ENABLE_TARGETS
+
 /* The .gdbearlyinit filename. */
 #undef GDBEARLYINIT
 

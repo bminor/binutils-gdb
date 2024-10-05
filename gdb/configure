@@ -24828,9 +24828,17 @@ if test "${enable_targets+set}" = set; then :
   yes | "") as_fn_error $? "enable-targets option must specify target names or 'all'" "$LINENO" 5
             ;;
   no)       enable_targets= ;;
-  *)        enable_targets=$enableval ;;
+  *)
+	enable_targets=$enableval
+
+cat >>confdefs.h <<_ACEOF
+#define ENABLE_TARGETS "$enable_targets"
+_ACEOF
+
+	;;
 esac
 fi
+
 
 
 # Check whether --enable-64-bit-bfd was given.

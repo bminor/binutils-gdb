@@ -184,8 +184,13 @@ AS_HELP_STRING([--enable-targets=TARGETS], [alternative target configurations]),
   yes | "") AC_MSG_ERROR(enable-targets option must specify target names or 'all')
             ;;
   no)       enable_targets= ;;
-  *)        enable_targets=$enableval ;;
+  *)
+	enable_targets=$enableval
+	AC_DEFINE_UNQUOTED(ENABLE_TARGETS, "$enable_targets",
+			   Additional targets configured into GDB. )
+	;;
 esac])
+
 
 BFD_64_BIT
 

@@ -1379,6 +1379,11 @@ This GDB was configured as follows:\n\
    configure --host=%s --target=%s\n\
 "), host_name, target_name);
 
+#ifdef ENABLE_TARGETS
+  gdb_printf (stream, _("\
+	     --enable-targets=%s\n"), ENABLE_TARGETS);
+#endif
+
   gdb_printf (stream, _("\
 	     --with-auto-load-dir=%s\n\
 	     --with-auto-load-safe-path=%s\n\
