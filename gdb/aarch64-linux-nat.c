@@ -311,6 +311,21 @@ store_fpregs_to_thread (const struct regcache *regcache)
     }
 }
 
+/* Fill GDB's REGCACHE with the SVE VG register value from the thread
+   associated with REGCACHE.
+
+   This function handles reading data from SVE or SSVE states, depending
+   on which state is active at the moment.  */
+
+static void
+fetch_sve_vg_from_thread (struct regcache *regcache)
+{
+  uint64_t vq = aarch64_sve_get_vq (regcache->ptid ().lwp ());
+  uint64_t vg = sve_vg_from_vq (vq);
+
+  regcache->raw_supply (AARCH64_SVE_VG_REGNUM, &vg);
+}
+
 /* Fill GDB's REGCACHE with the valid SVE register values from the thread
    associated with REGCACHE.
 
@@ -322,6 +337,19 @@ fetch_sveregs_from_thread (struct regcache *regcache)
 {
   /* Fetch SVE state from the thread and copy it into the register cache.  */
   aarch64_sve_regs_copy_to_reg_buf (regcache->ptid ().lwp (), regcache);
+}
+
+/* Store the SVE VG register value from GDB's REGCACHE to the thread
+   associated with REGCACHE.
+
+   This function handles writing data to SVE or SSVE state, depending
+   on which state is active at the moment.  */
+
+static void
+store_sve_vg_to_thread (struct regcache *regcache)
+{
+  if (!aarch64_sve_set_vq (regcache->ptid ().lwp (), regcache))
+    perror_with_name (_ ("Unable to set VG register"));
 }
 
 /* Store the valid SVE register values from GDB's REGCACHE to the thread
@@ -648,8 +676,10 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
     fetch_gregs_from_thread (regcache);
   /* SVE register?  */
   else if ((tdep->has_sve () || tdep->has_sme ())
-	   && regno <= AARCH64_SVE_VG_REGNUM)
+	   && regno < AARCH64_SVE_VG_REGNUM)
     fetch_sveregs_from_thread (regcache);
+  else if (tdep->has_sve () && regno == AARCH64_SVE_VG_REGNUM)
+    fetch_sve_vg_from_thread (regcache);
   /* FPSIMD register?  */
   else if (regno <= AARCH64_FPCR_REGNUM)
     fetch_fpregs_from_thread (regcache);
@@ -759,8 +789,10 @@ aarch64_store_registers (struct regcache *regcache, int regno)
     store_gregs_to_thread (regcache);
   /* SVE register?  */
   else if ((tdep->has_sve () || tdep->has_sme ())
-	   && regno <= AARCH64_SVE_VG_REGNUM)
+	   && regno < AARCH64_SVE_VG_REGNUM)
     store_sveregs_to_thread (regcache);
+  else if (tdep->has_sve () && regno == AARCH64_SVE_VG_REGNUM)
+    store_sve_vg_to_thread (regcache);
   /* FPSIMD register?  */
   else if (regno <= AARCH64_FPCR_REGNUM)
     store_fpregs_to_thread (regcache);
