@@ -1251,6 +1251,9 @@ is_specified_symbol_predicate (void **slot, void *data)
 static bool
 is_specified_symbol (const char *name, htab_t htab)
 {
+  if (name == NULL)
+    return false;
+
   if (wildcard)
     {
       struct is_specified_symbol_predicate_data data;
@@ -1576,6 +1579,9 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
       bool rem_leading_char;
       bool add_leading_char;
 
+      if (name == NULL)
+	continue;
+
       undefined = bfd_is_und_section (bfd_asymbol_section (sym));
 
       if (add_sym_list)
@@ -1590,14 +1596,14 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	{
 	  char *new_name;
 
-	  if (name != NULL
-	      && name[0] == '_'
+	  if (name[0] == '_'
 	      && name[1] == '_'
 	      && strcmp (name + (name[2] == '_'), "__gnu_lto_slim") == 0)
 	    {
-	      fatal (_("redefining symbols does not work on LTO-compiled object files"));
+	      fatal (_("redefining symbols does not work"
+		       " on LTO-compiled object files"));
 	    }
-	  
+
 	  new_name = (char *) lookup_sym_redefinition (name);
 	  if (new_name == name
 	      && (flags & BSF_SECTION_SYM) != 0)
@@ -2956,7 +2962,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  pset = find_section_list (padd->name, false,
 				    SECTION_CONTEXT_SET_FLAGS);
 	  if (pset != NULL)
-	    {	      
+	    {
 	      flags = pset->flags | SEC_HAS_CONTENTS;
 	      flags = check_new_section_flags (flags, obfd, padd->name);
 	    }
