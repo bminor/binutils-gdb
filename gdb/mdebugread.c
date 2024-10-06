@@ -413,7 +413,7 @@ static struct parse_stack
 
     struct type *cur_type;	/* Type we parse fields for.  */
     int cur_field;		/* Field number in cur_type.  */
-    CORE_ADDR procadr;		/* Start addres of this procedure.  */
+    CORE_ADDR procadr;		/* Start address of this procedure.  */
     int numargs;		/* Its argument count.  */
   }
 

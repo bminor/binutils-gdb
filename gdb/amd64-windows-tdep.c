@@ -324,7 +324,7 @@ amd64_windows_push_dummy_call
   /* Pass "hidden" argument".  */
   if (return_method == return_method_struct)
     {
-      /* The "hidden" argument is passed throught the first argument
+      /* The "hidden" argument is passed through the first argument
 	 register.  */
       const int arg_regnum = amd64_windows_dummy_call_integer_regs[0];
 

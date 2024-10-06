@@ -311,7 +311,7 @@ term_raw_write (const char *str, unsigned int len)
     LIB$SIGNAL (status);
 }
 
-/* Flush ther term buffer.  */
+/* Flush the term buffer.  */
 
 static void
 term_flush (void)
