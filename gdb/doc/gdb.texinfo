@@ -18298,6 +18298,9 @@ All Modula-2 built-in procedures also return a result, described below.
 @item ABS(@var{n})
 Returns the absolute value of @var{n}.
 
+@item ADR(@var{n})
+Returns the memory address of @var{n}.
+
 @item CAP(@var{c})
 If @var{c} is a lower case letter, it returns its upper case
 equivalent, otherwise it returns its argument.
