@@ -255,8 +255,8 @@ proc test_tab_complete_within_line_unique { input_line back_count insert_str } {
 }
 
 
-# Run filename completetion tests for those command that accept quoting and
-# escaping of the filename argument.  CMD is the inital part of the command
+# Run filename completion tests for those command that accept quoting and
+# escaping of the filename argument.  CMD is the initial part of the command
 # line, paths to complete will be added after CMD.
 #
 # ROOT is the base directory as returned from setup_directory_tree, though,
