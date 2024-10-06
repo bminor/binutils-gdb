@@ -1754,7 +1754,7 @@ target_xfer_partial (struct target_ops *ops,
    If an error occurs, no guarantee is made about the contents of the data at
    MYADDR.  In particular, the caller should not depend upon partial reads
    filling the buffer with good data.  There is no way for the caller to know
-   how much good data might have been transfered anyway.  Callers that can
+   how much good data might have been transferred anyway.  Callers that can
    deal with partial reads should call target_read (which will retry until
    it makes no progress, and then return how much was transferred).  */
 

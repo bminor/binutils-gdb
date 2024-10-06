@@ -1897,7 +1897,7 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
    for S/390 ELF Application Binary Interface Supplement".
 
    SP is the current stack pointer.  We must put arguments, links,
-   padding, etc. whereever they belong, and return the new stack
+   padding, etc. wherever they belong, and return the new stack
    pointer value.
 
    If STRUCT_RETURN is non-zero, then the function we're calling is

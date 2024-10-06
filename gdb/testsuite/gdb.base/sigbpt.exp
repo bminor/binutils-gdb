@@ -22,7 +22,7 @@
 # This test is known to tickle the following problems: kernel letting
 # the inferior execute both the system call, and the instruction
 # following, when single-stepping a system call; kernel failing to
-# propogate the single-step state when single-stepping the sigreturn
+# propagate the single-step state when single-stepping the sigreturn
 # system call, instead resuming the inferior at full speed; GDB
 # doesn't know how to software single-step across a sigreturn
 # instruction.  Since the kernel problems can be "fixed" using

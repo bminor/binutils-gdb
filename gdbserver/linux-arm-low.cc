@@ -361,7 +361,7 @@ get_next_pcs_is_thumb (struct arm_get_next_pcs *self)
 }
 
 /* Read memory from the inferior.
-   BYTE_ORDER is ignored and there to keep compatiblity with GDB's
+   BYTE_ORDER is ignored and there to keep compatibility with GDB's
    read_memory_unsigned_integer. */
 static ULONGEST
 get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,

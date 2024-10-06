@@ -631,7 +631,7 @@ address_space_name_to_type_instance_flags (struct gdbarch *gdbarch,
 }
 
 /* Identify address space identifier by type_instance_flags and return
-   the string version of the adress space name.  */
+   the string version of the address space name.  */
 
 const char *
 address_space_type_instance_flags_to_name (struct gdbarch *gdbarch,
@@ -733,7 +733,7 @@ make_type_with_address_space (struct type *type,
    If TYPEPTR and *TYPEPTR are non-zero, then *TYPEPTR points to
    storage to hold the new qualified type; *TYPEPTR and TYPE must be
    in the same objfile.  Otherwise, allocate fresh memory for the new
-   type whereever TYPE lives.  If TYPEPTR is non-zero, set it to the
+   type wherever TYPE lives.  If TYPEPTR is non-zero, set it to the
    new type we construct.  */
 
 struct type *
@@ -1371,7 +1371,7 @@ create_array_type_with_stride (type_allocator &alloc,
 	 undefined by setting it to zero.  Although we are not expected
 	 to trust TYPE_LENGTH in this case, setting the size to zero
 	 allows us to avoid allocating objects of random sizes in case
-	 we accidently do.  */
+	 we accidentally do.  */
       result_type->set_length (0);
     }
 
@@ -1553,7 +1553,7 @@ set_type_self_type (struct type *type, struct type *self_type)
 }
 
 /* Smash TYPE to be a type of pointers to members of SELF_TYPE with type
-   TO_TYPE.  A member pointer is a wierd thing -- it amounts to a
+   TO_TYPE.  A member pointer is a weird thing -- it amounts to a
    typed offset into a struct, e.g. "an int at offset 8".  A MEMBER
    TYPE doesn't include the offset (that's the value of the MEMBER
    itself), but does include the structure type into which it points

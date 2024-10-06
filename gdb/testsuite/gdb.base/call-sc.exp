@@ -184,7 +184,7 @@ proc test_scalar_returns { } {
     # known, both failed to print a final "source and line" and misplaced
     # the frame ("No frame").
 
-    # The test is writen so that it only reports one FAIL/PASS for the
+    # The test is written so that it only reports one FAIL/PASS for the
     # entire operation.  The value returned is checked further down.
     # "return_value_unknown", if non-empty, records why GDB realised
     # that it didn't know where the return value was.

@@ -4857,7 +4857,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       si = pop_stack_item (si);
     }
 
-  /* Finally, update teh SP register.  */
+  /* Finally, update the SP register.  */
   regcache_cooked_write_unsigned (regcache, ARM_SP_REGNUM, sp);
 
   return sp;
@@ -12139,7 +12139,7 @@ arm_record_ld_st_imm_offset (arm_insn_decode_record *arm_insn_r)
       record_buf[arm_insn_r->reg_rec_count++] = reg_dest;
 
       /* The LDR instruction is capable of doing branching.  If MOV LR, PC
-	 preceeds a LDR instruction having R15 as reg_base, it
+	 precedes a LDR instruction having R15 as reg_base, it
 	 emulates a branch and link instruction, and hence we need to save
 	 CPSR and PC as well.  */
       if (ARM_PC_REGNUM == reg_dest)
@@ -12263,7 +12263,7 @@ arm_record_ld_st_reg_offset (arm_insn_decode_record *arm_insn_r)
 	  if (15 == reg_src2)
 	    {
 	      /* If R15 was used as Rn, hence current PC+8.  */
-	      /* Pre-indexed mode doesnt reach here ; illegal insn.  */
+	      /* Pre-indexed mode doesn't reach here ; illegal insn.  */
 		u_regval[0] = u_regval[0] + 8;
 	    }
 	  /* Calculate target store address, Rn +/- Rm, register offset.  */
@@ -12576,7 +12576,7 @@ arm_record_b_bl (arm_insn_decode_record *arm_insn_r)
 
   /* Handle B, BL, BLX(1) insns.  */
   /* B simply branches so we do nothing here.  */
-  /* Note: BLX(1) doesnt fall here but instead it falls into
+  /* Note: BLX(1) doesn't fall here but instead it falls into
      extension space.  */
   if (bit (arm_insn_r->arm_insn, 24))
     {

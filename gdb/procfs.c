@@ -205,7 +205,7 @@ procfs_target::auxv_parse (const gdb_byte **readptr,
    concerning a /proc process.  There should be exactly one procinfo
    for each process, and since GDB currently can debug only one
    process at a time, that means there should be only one procinfo.
-   All of the LWP's of a process can be accessed indirectly thru the
+   All of the LWP's of a process can be accessed indirectly through the
    single process procinfo.
 
    However, against the day when GDB may debug more than one process,

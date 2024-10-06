@@ -282,7 +282,7 @@ arc_store_gregset (struct regcache *regcache, const void *buf)
   unsigned long pcl = regbuf->stop_pc & ~3L;
   supply_register_by_name (regcache, "pcl", &pcl);
 
-  /* Other auxilliary registers.  */
+  /* Other auxiliary registers.  */
   supply_register_by_name (regcache, "status32", &(regbuf->scratch.status32));
 
   /* BTA.  */

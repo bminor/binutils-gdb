@@ -213,7 +213,7 @@ get_linux_gdbarch_data (struct gdbarch *gdbarch)
 
 /* Linux-specific cached data.  This is used by GDB for caching
    purposes for each inferior.  This helps reduce the overhead of
-   transfering data from a remote target to the local host.  */
+   transferring data from a remote target to the local host.  */
 struct linux_info
 {
   /* Cache of the inferior's vsyscall/vDSO mapping range.  Only valid

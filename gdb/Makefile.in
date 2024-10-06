@@ -2528,7 +2528,7 @@ clean-po:
 # rule has no dependencies and always regenerates gdb.pot.  This is
 # relatively harmless since the .po files do not directly depend on
 # it.  The .pot file is left in the build directory.  Since GDB's
-# Makefile lacks a cannonical list of sources (missing xm, tm and nm
+# Makefile lacks a canonical list of sources (missing xm, tm and nm
 # files) force this rule.
 $(PACKAGE).pot: po/$(PACKAGE).pot
 po/$(PACKAGE).pot: force

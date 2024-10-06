@@ -113,7 +113,7 @@ struct dict_iterator
 
 struct mdict_iterator
 {
-  /* The multidictionary with whcih this iterator is associated.  */
+  /* The multidictionary with which this iterator is associated.  */
   const struct multidictionary *mdict;
 
   /* The iterator used to iterate through individual dictionaries.  */

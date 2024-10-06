@@ -409,7 +409,7 @@ qIsAddressTagged
 
 * The printf command now accepts a '%V' output format which will
   format an expression just as the 'print' command would.  Print
-  options can be placed withing '[...]' after the '%V' to modify how
+  options can be placed within '[...]' after the '%V' to modify how
   the value is printed.  E.g:
     printf "%V", some_array
     printf "%V[-array-indexes on]", some_array
@@ -6686,7 +6686,7 @@ qSupported:
   target.
 
 qXfer:auxv:read:
-  Fetch an OS auxilliary vector from the remote stub.  This packet is a
+  Fetch an OS auxiliary vector from the remote stub.  This packet is a
   more efficient replacement for qPart:auxv:read.
 
 qXfer:memory-map:read:
@@ -7894,7 +7894,7 @@ with that.  The sub-program to run is specified using the syntax
 * MIPS 64 remote protocol
 
 A long standing bug in the mips64 remote protocol where by GDB
-expected certain 32 bit registers (ex SR) to be transfered as 32
+expected certain 32 bit registers (ex SR) to be transferred as 32
 instead of 64 bits has been fixed.
 
 The command ``set remote-mips64-transfers-32bit-regs on'' has been
@@ -8650,7 +8650,7 @@ MIPS remote debugging protocol.
 
 This version includes preliminary support for Chill, a Pascal like language
 used by telecommunications companies.  Chill support is also being integrated
-into the GNU compiler, but we don't know when it will be publically available.
+into the GNU compiler, but we don't know when it will be publicly available.
 
 
 *** Changes in GDB-4.8:

@@ -296,7 +296,7 @@ proc test_struct_returns { n } {
     # known, both failed to print a final "source and line" and misplaced
     # the frame ("No frame").
 
-    # The test is writen so that it only reports one FAIL/PASS for the
+    # The test is written so that it only reports one FAIL/PASS for the
     # entire operation.  The value returned is checked further down.
     # "return_value_known", if non-zero, indicates that GDB knew where
     # the return value was located.

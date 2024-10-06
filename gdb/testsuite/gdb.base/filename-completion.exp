@@ -387,7 +387,7 @@ proc run_mid_line_completion_tests { root cmd } {
     gdb_exit
 }
 
-# Run filename completetion tests for those command that accept quoting and
+# Run filename completion tests for those command that accept quoting and
 # escaping of the filename argument.
 #
 # ROOT is the base directory as returned from setup_directory_tree, though,
@@ -471,7 +471,7 @@ proc run_unquoted_tests_core { root cmd { prefix "" } } {
 }
 
 
-# Run filename completetion tests for a sample of commands that take an
+# Run filename completion tests for a sample of commands that take an
 # unquoted, unescaped filename as an argument.  Only a sample of commands
 # are (currently) tested as there's a lot of commands that accept this style
 # of filename argument.

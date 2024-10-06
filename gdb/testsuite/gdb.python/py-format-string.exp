@@ -82,7 +82,7 @@ set default_pointer_regexp "0x\[a-fA-F0-9\]+"
 
 # A regular expression for a non-expanded C++ reference.
 #
-# Stringifying a C++ reference produces an address preceeded by a "@" in
+# Stringifying a C++ reference produces an address preceded by a "@" in
 # Python, but, by default, the C++ reference/class is expanded by the
 # GDB print command.
 set default_ref_regexp "@${default_pointer_regexp}"

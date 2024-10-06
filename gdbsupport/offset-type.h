@@ -33,7 +33,7 @@
    - You can compare offsets of the same type for equality and order.
      You can't compare an offset with an unrelated type.
 
-   - You can add/substract an integer to/from an offset, which gives
+   - You can add/subtract an integer to/from an offset, which gives
      you back a shifted offset.
 
    - You can subtract two offsets of the same type, which gives you

@@ -552,7 +552,7 @@ compare_selectors (const void *a, const void *b)
  *
  * Implements the "Info selectors" command.  Takes an optional regexp
  * arg.  Lists all objective c selectors that match the regexp.  Works
- * by grepping thru all symbols for objective c methods.  Output list
+ * by grepping through all symbols for objective c methods.  Output list
  * is sorted and uniqued. 
  */
 
@@ -601,7 +601,7 @@ info_selectors_command (const char *regexp, int from_tty)
 	error (_("Invalid regexp (%s): %s"), val, regexp);
     }
 
-  /* First time thru is JUST to get max length and count.  */
+  /* First time through is JUST to get max length and count.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
       for (minimal_symbol *msymbol : objfile->msymbols ())
@@ -716,7 +716,7 @@ compare_classes (const void *a, const void *b)
  *
  * Implements the "info classes" command for objective c classes.
  * Lists all objective c classes that match the optional regexp.
- * Works by grepping thru the list of objective c methods.  List will
+ * Works by grepping through the list of objective c methods.  List will
  * be sorted and uniqued (since one class may have many methods).
  * BUGS: will not list a class that has no methods. 
  */
@@ -755,7 +755,7 @@ info_classes_command (const char *regexp, int from_tty)
 	error (_("Invalid regexp (%s): %s"), val, regexp);
     }
 
-  /* First time thru is JUST to get max length and count.  */
+  /* First time through is JUST to get max length and count.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
       for (minimal_symbol *msymbol : objfile->msymbols ())

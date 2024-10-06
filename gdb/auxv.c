@@ -328,7 +328,7 @@ parse_auxv (target_ops *ops, gdbarch *gdbarch, const gdb_byte **readptr,
 
 /*  Auxiliary Vector information structure.  This is used by GDB
     for caching purposes for each inferior.  This helps reduce the
-    overhead of transfering data from a remote target to the local host.  */
+    overhead of transferring data from a remote target to the local host.  */
 struct auxv_info
 {
   std::optional<gdb::byte_vector> data;

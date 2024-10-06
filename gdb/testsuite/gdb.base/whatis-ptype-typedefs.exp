@@ -55,7 +55,7 @@ proc prepare {lang} {
     return 1
 }
 
-# The following list is layed out as a table.  It is composed by
+# The following list is laid out as a table.  It is composed by
 # sub-lists (lines), with each line representing one whatis/ptype
 # test.  The sub-list (line) elements (columns) are (in order):
 #

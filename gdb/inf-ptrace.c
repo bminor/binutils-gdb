@@ -475,7 +475,7 @@ inf_ptrace_target::xfer_partial (enum target_object object,
     case TARGET_OBJECT_AUXV:
 #if defined (PT_IO) && defined (PIOD_READ_AUXV)
       /* OpenBSD 4.5 has a new PIOD_READ_AUXV operation for the PT_IO
-	 request that allows us to read the auxilliary vector.  Other
+	 request that allows us to read the auxiliary vector.  Other
 	 BSD's may follow if they feel the need to support PIE.  */
       {
 	struct ptrace_io_desc piod;

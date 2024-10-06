@@ -2105,7 +2105,7 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
 
   /* Found a function symbol.  Now we will substitute its
      value in place of the message dispatcher (obj_msgSend),
-     so that we call the method directly instead of thru
+     so that we call the method directly instead of through
      the dispatcher.  The main reason for doing this is that
      we can now evaluate the return value and parameter values
      according to their known data types, in case we need to

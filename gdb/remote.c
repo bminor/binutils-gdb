@@ -685,7 +685,7 @@ public: /* data */
 
   /* FIXME: cagney/1999-09-23: Even though getpkt was called with
      ``forever'' still use the normal timeout mechanism.  This is
-     currently used by the ASYNC code to guarentee that target reads
+     currently used by the ASYNC code to guarantee that target reads
      during the initial connect always time-out.  Once getpkt has been
      modified to return a timeout indication and, in turn
      remote_wait()/wait_for_inferior() have gained a timeout parameter
@@ -3932,7 +3932,7 @@ remote_target::remote_get_threadlist (int startflag, threadref *nextthread,
       /* FIXME: This is a good reason to drop the packet.  */
       /* Possibly, there is a duplicate response.  */
       /* Possibilities :
-	 retransmit immediatly - race conditions
+	 retransmit immediately - race conditions
 	 retransmit after timeout - yes
 	 exit
 	 wait for packet, then exit
@@ -6292,7 +6292,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
 
   /* Start the remote connection.  If error() or QUIT, discard this
      target (we'd otherwise be in an inconsistent state) and then
-     propogate the error on up the exception chain.  This ensures that
+     propagate the error on up the exception chain.  This ensures that
      the caller doesn't stumble along blindly assuming that the
      function succeeded.  The CLI doesn't have this problem but other
      UI's, such as MI do.
@@ -15327,7 +15327,7 @@ static serial_event_ftype remote_async_serial_handler;
 static void
 remote_async_serial_handler (struct serial *scb, void *context)
 {
-  /* Don't propogate error information up to the client.  Instead let
+  /* Don't propagate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */
   inferior_event_handler (INF_REG_EVENT);
 }

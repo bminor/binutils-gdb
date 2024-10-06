@@ -4774,7 +4774,7 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 
       if ((*pp)[0] == 'o' && (*pp)[1] == 'p' && is_cplus_marker ((*pp)[2]))
 	{
-	  /* This is a completely wierd case.  In order to stuff in the
+	  /* This is a completely weird case.  In order to stuff in the
 	     names that might contain colons (the usual name delimiter),
 	     Mike Tiemann defined a different name format which is
 	     signalled if the identifier is "op$".  In that case, the

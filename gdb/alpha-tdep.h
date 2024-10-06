@@ -99,7 +99,7 @@ struct alpha_gdbarch_tdep : gdbarch_tdep_base
   int sc_fpregs_offset = 0;
 
   int jb_pc = 0;			/* Offset to PC value in jump buffer.
-				   If htis is negative, longjmp support
+				   If this is negative, longjmp support
 				   will be disabled.  */
   size_t jb_elt_size = 0;		/* And the size of each entry in the buf.  */
 };

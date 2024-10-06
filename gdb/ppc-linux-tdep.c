@@ -133,7 +133,7 @@ static solib_ops powerpc_so_ops;
 	    (gdb) b main
 	    Breakpoint 2 at 0x100006a0: file gdb.base/shmain.c, line 44.
 
-	Examine the instruction (and the immediatly following instruction)
+	Examine the instruction (and the immediately following instruction)
 	upon which the breakpoint was placed.  Note that the PLT entry
 	for shr1 contains zeros.
 

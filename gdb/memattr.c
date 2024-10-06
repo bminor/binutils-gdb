@@ -134,7 +134,7 @@ create_user_mem_region (CORE_ADDR lo, CORE_ADDR hi,
   int ix = std::distance (user_mem_region_list.begin (), it);
 
   /* Check for an overlapping memory region.  We only need to check
-     in the vincinity - at most one before and one after the
+     in the vicinity - at most one before and one after the
      insertion point.  */
   for (int i = ix - 1; i < ix + 1; i++)
     {

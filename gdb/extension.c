@@ -680,7 +680,7 @@ static bool quit_flag;
 
 /* The current extension language we've called out to, or
    extension_language_gdb if there isn't one.
-   This must be set everytime we call out to an extension language, and reset
+   This must be set every time we call out to an extension language, and reset
    to the previous value when it returns.  Note that the previous value may
    be a different (or the same) extension language.  */
 static const struct extension_language_defn *active_ext_lang

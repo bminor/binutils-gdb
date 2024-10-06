@@ -2110,7 +2110,7 @@ tfind_1 (enum trace_find_type type, int num,
 	 if you're in a user-defined command or especially in a
 	 loop, then you need a way to detect that the command
 	 failed WITHOUT aborting.  This allows you to write
-	 scripts that search thru the trace buffer until the end,
+	 scripts that search through the trace buffer until the end,
 	 and then continue on to do something else.  */
   
       if (from_tty)

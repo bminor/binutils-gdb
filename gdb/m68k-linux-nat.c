@@ -350,7 +350,7 @@ fill_fpregset (const struct regcache *regcache,
 #ifdef HAVE_PTRACE_GETREGS
 
 /* Fetch all floating-point registers from process/thread TID and store
-   thier values in GDB's register array.  */
+   their values in GDB's register array.  */
 
 static void
 fetch_fpregs (struct regcache *regcache, int tid)

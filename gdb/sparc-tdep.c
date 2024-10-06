@@ -769,7 +769,7 @@ sparc_alloc_frame_cache (void)
   return cache;
 }
 
-/* GCC generates several well-known sequences of instructions at the begining
+/* GCC generates several well-known sequences of instructions at the beginning
    of each function prologue when compiling with -fstack-check.  If one of
    such sequences starts at START_PC, then return the address of the
    instruction immediately past this sequence.  Otherwise, return START_PC.  */

@@ -263,7 +263,7 @@ proc test_python_helper {} {
     # Test the htab_t pretty-printer.
     gdb_test -prompt $outer_prompt_re "print all_bfds" "htab_t with ${::decimal} elements = \\{${::hex}.*\\}"
 
-    # Test the intrusive_list pretty-printer.  A bug occured in the
+    # Test the intrusive_list pretty-printer.  A bug occurred in the
     # pretty-printer for lists with more than one element.  Verify that
     # we see both elements of the inferior_list list being printed.
     gdb_test -prompt $outer_prompt_re "print inferior_list" "intrusive list of inferior = {.*, num = 1,.*, num = 2,.*}"

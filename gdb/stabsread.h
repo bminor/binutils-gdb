@@ -54,7 +54,7 @@ extern unsigned char processing_gcc_compilation;
 extern int within_function;
 
 /* Hash table of global symbols whose values are not known yet.
-   They are chained thru the SYMBOL_VALUE_CHAIN, since we don't
+   They are chained through the SYMBOL_VALUE_CHAIN, since we don't
    have the correct data for that slot yet.
 
    The use of the LOC_BLOCK code in this chain is nonstandard--

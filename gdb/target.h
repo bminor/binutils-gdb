@@ -134,7 +134,7 @@ enum inferior_event_type
     INF_EXEC_COMPLETE,
   };
 
-/* Target objects which can be transfered using target_read,
+/* Target objects which can be transferred using target_read,
    target_write, et cetera.  */
 
 enum target_object
@@ -156,7 +156,7 @@ enum target_object
   TARGET_OBJECT_CODE_MEMORY,
   /* Kernel Unwind Table.  See "ia64-tdep.c".  */
   TARGET_OBJECT_UNWIND_TABLE,
-  /* Transfer auxilliary vector.  */
+  /* Transfer auxiliary vector.  */
   TARGET_OBJECT_AUXV,
   /* StackGhost cookie.  See "sparc-tdep.c".  */
   TARGET_OBJECT_WCOOKIE,
@@ -177,7 +177,7 @@ enum target_object
   /* Currently loaded libraries specific to AIX systems, in XML format.  */
   TARGET_OBJECT_LIBRARIES_AIX,
   /* Get OS specific data.  The ANNEX specifies the type (running
-     processes, etc.).  The data being transfered is expected to follow
+     processes, etc.).  The data being transferred is expected to follow
      the DTD specified in features/osdata.dtd.  */
   TARGET_OBJECT_OSDATA,
   /* Extra signal info.  Usually the contents of `siginfo_t' on unix
@@ -821,7 +821,7 @@ struct target_ops
        transferring if desired.  This is handled in target.c.
 
        The interface does not support a "retry" mechanism.  Instead it
-       assumes that at least one addressable unit will be transfered on each
+       assumes that at least one addressable unit will be transferred on each
        successful call.
 
        NOTE: cagney/2003-10-17: The current interface can lead to

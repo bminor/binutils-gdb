@@ -619,7 +619,7 @@ find_program_interpreter (void)
 
 
 /* Scan for DESIRED_DYNTAG in .dynamic section of the target's main executable,
-   found by consulting the OS auxillary vector.  If DESIRED_DYNTAG is found, 1
+   found by consulting the OS auxiliary vector.  If DESIRED_DYNTAG is found, 1
    is returned and the corresponding PTR is set.  */
 
 static int
@@ -2355,7 +2355,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	}
 
       /* If we were not able to find the base address of the loader
-	 from our so_list, then try using the AT_BASE auxilliary entry.  */
+	 from our so_list, then try using the AT_BASE auxiliary entry.  */
       if (!load_addr_found)
 	if (target_auxv_search (AT_BASE, &load_addr) > 0)
 	  {
@@ -2616,8 +2616,8 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	return 0;
     }
 
-  /* Verify that the auxilliary vector describes the same file as exec_bfd, by
-     comparing their program headers.  If the program headers in the auxilliary
+  /* Verify that the auxiliary vector describes the same file as exec_bfd, by
+     comparing their program headers.  If the program headers in the auxiliary
      vector do not match the program headers in the executable, then we are
      looking at a different file than the one used by the kernel - for
      instance, "gdb program" connected to "gdbserver :PORT ld.so program".  */

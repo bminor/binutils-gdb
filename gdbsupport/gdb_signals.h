@@ -35,9 +35,9 @@ extern int gdb_signal_to_host_p (enum gdb_signal signo);
    gdb_signal_to_host() returns 0 and prints a warning() on GDB's
    console if SIGNO has no equivalent host representation.  */
 /* FIXME: cagney/1999-11-22: Here ``host'' is used incorrectly, it is
-   refering to the target operating system's signal numbering.
+   referring to the target operating system's signal numbering.
    Similarly, ``enum gdb_signal'' is named incorrectly, ``enum
-   gdb_signal'' would probably be better as it is refering to GDB's
+   gdb_signal'' would probably be better as it is referring to GDB's
    internal representation of a target operating system's signal.  */
 extern enum gdb_signal gdb_signal_from_host (int);
 extern int gdb_signal_to_host (enum gdb_signal);

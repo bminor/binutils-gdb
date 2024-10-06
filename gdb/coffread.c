@@ -122,7 +122,7 @@ static unsigned local_auxesz;
 static int pe_file;
 
 /* Chain of typedefs of pointers to empty struct/union types.
-   They are chained thru the SYMBOL_VALUE_CHAIN.  */
+   They are chained through the SYMBOL_VALUE_CHAIN.  */
 
 static struct symbol *opaque_type_chain[HASHSIZE];
 
@@ -1737,7 +1737,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		     This is not just a consequence of GDB's type
 		     management; CC and GCC (at least through version
 		     2.4) both output variables of either type char *
-		     or caddr_t with the type refering to the C_TPDEF
+		     or caddr_t with the type referring to the C_TPDEF
 		     symbol for caddr_t.  If a future compiler cleans
 		     this up it GDB is not ready for it yet, but if it
 		     becomes ready we somehow need to disable this

@@ -3339,7 +3339,7 @@ get_data_from_address (unsigned short *inst, CORE_ADDR address,
   return value;
 }
 
-/* Handles the assign addresing mode for the ADD, SUB, CMP, AND, OR and MOVE 
+/* Handles the assign addressing mode for the ADD, SUB, CMP, AND, OR and MOVE
    instructions.  The MOVE instruction is the move from source to register.  */
 
 static void 
@@ -3398,7 +3398,7 @@ three_operand_add_sub_cmp_and_or_op (unsigned short inst,
   inst_env->disable_interrupt = 0;
 }
 
-/* Handles the index addresing mode for the ADD, SUB, CMP, AND, OR and MOVE
+/* Handles the index addressing mode for the ADD, SUB, CMP, AND, OR and MOVE
    instructions.  The MOVE instruction is the move from source to register.  */
 
 static void 
@@ -3425,7 +3425,7 @@ handle_prefix_index_mode_for_aritm_op (unsigned short inst,
   inst_env->disable_interrupt = 0;
 }
 
-/* Handles the autoincrement and indirect addresing mode for the ADD, SUB,
+/* Handles the autoincrement and indirect addressing mode for the ADD, SUB,
    CMP, AND OR and MOVE instruction.  The MOVE instruction is the move from
    source to register.  */
 

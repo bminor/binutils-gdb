@@ -428,7 +428,7 @@ arc_linux_software_single_step (struct regcache *regcache)
   CORE_ADDR next_pc = arc_insn_get_linear_next_pc (curr_insn);
   std::vector<CORE_ADDR> next_pcs;
 
-  /* For instructions with delay slots, the fall thru is not the
+  /* For instructions with delay slots, the fall through is not the
      instruction immediately after the current instruction, but the one
      after that.  */
   if (curr_insn.has_delay_slot)

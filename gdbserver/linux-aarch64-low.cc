@@ -1538,7 +1538,7 @@ emit_add (uint32_t *buf, struct aarch64_register rd,
 
    RD is the destination register.
    RN is the input register.
-   IMM is the immediate to substract to RN.  */
+   IMM is the immediate to subtract to RN.  */
 
 static int
 emit_sub (uint32_t *buf, struct aarch64_register rd,

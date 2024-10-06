@@ -1486,7 +1486,7 @@ value_coerce_to_target (struct value *val)
    nonzero lower bound.
 
    FIXME: A previous comment here indicated that this routine should
-   be substracting the array's lower bound.  It's not clear to me that
+   be subtracting the array's lower bound.  It's not clear to me that
    this is correct.  Given an array subscripting operation, it would
    certainly work to do the adjustment here, essentially computing:
 

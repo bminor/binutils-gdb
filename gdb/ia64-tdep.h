@@ -156,7 +156,7 @@
 /* Predicate registers: There are 64 of these 1-bit registers.  We
    define a single register which is used to communicate these values
    to/from the target.  We will somehow contrive to make it appear
-   that IA64_PR0_REGNUM thru IA64_PR63_REGNUM hold the actual values.  */
+   that IA64_PR0_REGNUM through IA64_PR63_REGNUM hold the actual values.  */
 #define IA64_PR_REGNUM		330
 
 /* Instruction pointer: 64 bits wide.  */

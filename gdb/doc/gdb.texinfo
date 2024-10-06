@@ -4289,7 +4289,7 @@ includes changes in memory, registers, and even (within some limits)
 system state.  Effectively, it is like going back in time to the
 moment when the checkpoint was saved.
 
-Thus, if you're stepping thru a program and you think you're 
+Thus, if you're stepping through a program and you think you're
 getting close to the point where things go wrong, you can save
 a checkpoint.  Then, if you accidentally go too far and miss
 the critical statement, instead of having to restart your program
@@ -7659,7 +7659,7 @@ the called function, stopping at the beginning of the @emph{last}
 statement in the called function (typically a return statement).
 
 Also, as with the @code{step} command, if non-debuggable functions are
-called, @code{reverse-step} will run thru them backward without stopping.
+called, @code{reverse-step} will run through them backward without stopping.
 
 @kindex reverse-stepi
 @kindex rsi @r{(@code{reverse-stepi})}

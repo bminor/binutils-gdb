@@ -17882,7 +17882,7 @@ die_is_declaration (struct die_info *die, struct dwarf2_cu *cu)
      which value is non-zero.  However, we have to be careful with
      DIEs having a DW_AT_specification attribute, because dwarf2_attr()
      (via dwarf2_flag_true_p) follows this attribute.  So we may
-     end up accidently finding a declaration attribute that belongs
+     end up accidentally finding a declaration attribute that belongs
      to a different DIE referenced by the specification attribute,
      even though the given DIE does not have a declaration attribute.  */
   return (dwarf2_flag_true_p (die, DW_AT_declaration, cu)

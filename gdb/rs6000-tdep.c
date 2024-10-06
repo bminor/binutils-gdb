@@ -1389,7 +1389,7 @@ rs6000_fetch_instruction (struct gdbarch *gdbarch, const CORE_ADDR pc)
   return op;
 }
 
-/* GCC generates several well-known sequences of instructions at the begining
+/* GCC generates several well-known sequences of instructions at the beginning
    of each function prologue when compiling with -fstack-check.  If one of
    such sequences starts at START_PC, then return the address of the
    instruction immediately past this sequence.  Otherwise, return START_PC.  */
@@ -4298,7 +4298,7 @@ ppc_record_ACC_fpscr (struct regcache *regcache, ppc_gdbarch_tdep *tdep,
 	 ACC[7][3] -> VSR[31]
 
      NOTE:
-     In ISA 3.1 the ACC is mapped on top of VSR[0] thru VSR[31].
+     In ISA 3.1 the ACC is mapped on top of VSR[0] through VSR[31].
 
      In the future, the ACC may be implemented as an independent register file
      rather than mapping on top of the VSRs.  This will then require the ACC to

@@ -8285,7 +8285,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep->st0_regnum = I386_ST0_REGNUM;
 
-  /* I386_NUM_XREGS includes %mxcsr, so substract one.  */
+  /* I386_NUM_XREGS includes %mxcsr, so subtract one.  */
   tdep->num_xmm_regs = I386_NUM_XREGS - 1;
 
   tdep->jb_pc_offset = -1;

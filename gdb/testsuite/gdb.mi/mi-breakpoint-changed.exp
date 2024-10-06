@@ -172,7 +172,7 @@ with_test_prefix "test_insert_delete_modify" {
     test_insert_delete_modify
 }
 
-# Test 'breakpoint-modified' notification is emited when pending breakpoints are
+# Test 'breakpoint-modified' notification is emitted when pending breakpoints are
 # resolved.
 
 proc test_pending_resolved { } {

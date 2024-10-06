@@ -2771,7 +2771,7 @@ namespace eval Dwarf {
     # section_version n
     #                - section version number to emit
     #                default = 2
-    # seg_size n   - the size of the adress selector in bytes: 0, 4, or 8
+    # seg_size n   - the size of the address selector in bytes: 0, 4, or 8
     #                default = 0
     #
     # LABEL is the label of the corresponding CU.

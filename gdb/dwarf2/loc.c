@@ -779,7 +779,7 @@ func_addr_to_tail_call_list (struct gdbarch *gdbarch, CORE_ADDR addr)
    via its tail calls (incl. transitively).  Throw NO_ENTRY_VALUE_ERROR if it
    can call itself via tail calls.
 
-   If a funtion can tail call itself its entry value based parameters are
+   If a function can tail call itself its entry value based parameters are
    unreliable.  There is no verification whether the value of some/all
    parameters is unchanged through the self tail call, we expect if there is
    a self tail call all the parameters can be modified.  */
