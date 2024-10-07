@@ -530,13 +530,11 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 }
 
 /* Look up a symbol name.  */
-const char *
-bfd_elf_sym_name (bfd *abfd,
-		  Elf_Internal_Shdr *symtab_hdr,
-		  Elf_Internal_Sym *isym,
-		  asection *sym_sec)
+static const char *
+bfd_elf_sym_name_raw (bfd *abfd,
+		      Elf_Internal_Shdr *symtab_hdr,
+		      Elf_Internal_Sym *isym)
 {
-  const char *name;
   unsigned int iname = isym->st_name;
   unsigned int shindex = symtab_hdr->sh_link;
 
@@ -548,9 +546,18 @@ bfd_elf_sym_name (bfd *abfd,
       shindex = elf_elfheader (abfd)->e_shstrndx;
     }
 
-  name = bfd_elf_string_from_elf_section (abfd, shindex, iname);
+  return bfd_elf_string_from_elf_section (abfd, shindex, iname);
+}
+
+const char *
+bfd_elf_sym_name (bfd *abfd,
+		  Elf_Internal_Shdr *symtab_hdr,
+		  Elf_Internal_Sym *isym,
+		  asection *sym_sec)
+{
+  const char *name = bfd_elf_sym_name_raw (abfd, symtab_hdr, isym);
   if (name == NULL)
-    name = "(null)";
+    name = bfd_symbol_error_name;
   else if (sym_sec && *name == '\0')
     name = bfd_section_name (sym_sec);
 
@@ -583,7 +590,7 @@ group_signature (bfd *abfd, Elf_Internal_Shdr *ghdr)
 			    &isym, esym, &eshndx) == NULL)
     return NULL;
 
-  return bfd_elf_sym_name (abfd, hdr, &isym, NULL);
+  return bfd_elf_sym_name_raw (abfd, hdr, &isym);
 }
 
 static bool
@@ -2314,10 +2321,13 @@ bfd_elf_print_symbol (bfd *abfd,
 		      bfd_print_symbol_type how)
 {
   FILE *file = (FILE *) filep;
+  const char *symname = (symbol->name != bfd_symbol_error_name
+			 ? symbol->name : _("<corrupt>"));
+
   switch (how)
     {
     case bfd_print_symbol_name:
-      fprintf (file, "%s", symbol->name);
+      fprintf (file, "%s", symname);
       break;
     case bfd_print_symbol_more:
       fprintf (file, "elf ");
@@ -2340,11 +2350,10 @@ bfd_elf_print_symbol (bfd *abfd,
 	if (bed->elf_backend_print_symbol_all)
 	  name = (*bed->elf_backend_print_symbol_all) (abfd, filep, symbol);
 
-	if (name == NULL)
-	  {
-	    name = symbol->name;
-	    bfd_print_symbol_vandf (abfd, file, symbol);
-	  }
+	if (name != NULL)
+	  symname = name;
+	else
+	  bfd_print_symbol_vandf (abfd, file, symbol);
 
 	fprintf (file, " %s\t", section_name);
 	/* Print the "other" value for a symbol.  For common symbols,
@@ -2391,7 +2400,7 @@ bfd_elf_print_symbol (bfd *abfd,
 	    fprintf (file, " 0x%02x", (unsigned int) st_other);
 	  }
 
-	fprintf (file, " %s", name);
+	fprintf (file, " %s", symname);
       }
       break;
     }
@@ -8730,17 +8739,16 @@ swap_out_syms (bfd *abfd,
 	  && (flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
 	{
 	  /* Local section symbols have no name.  */
-	  sym.st_name = (unsigned long) -1;
+	  sym.st_name = 0;
 	}
       else
 	{
 	  /* Call _bfd_elf_strtab_offset after _bfd_elf_strtab_finalize
 	     to get the final offset for st_name.  */
-	  sym.st_name
-	    = (unsigned long) _bfd_elf_strtab_add (stt, syms[idx]->name,
-						   false);
-	  if (sym.st_name == (unsigned long) -1)
+	  size_t stridx = _bfd_elf_strtab_add (stt, syms[idx]->name, false);
+	  if (stridx == (size_t) -1)
 	    goto error_return;
+	  sym.st_name = stridx;
 	}
 
       bfd_vma value = syms[idx]->value;
@@ -8951,9 +8959,7 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
   for (idx = 0; idx < outbound_syms_index; idx++)
     {
       struct elf_sym_strtab *elfsym = &symstrtab[idx];
-      if (elfsym->sym.st_name == (unsigned long) -1)
-	elfsym->sym.st_name = 0;
-      else
+      if (elfsym->sym.st_name != 0)
 	elfsym->sym.st_name = _bfd_elf_strtab_offset (stt,
 						      elfsym->sym.st_name);
       if (info && info->callbacks->ctf_new_symbol)

@@ -1928,7 +1928,7 @@ coff_get_normalized_symtab (bfd *abfd)
 	      if ((bfd_size_type) aux->u.auxent.x_file.x_n.x_n.x_offset
 		  >= obj_coff_strings_len (abfd))
 		sym->u.syment._n._n_n._n_offset =
-		  (uintptr_t) _("<corrupt>");
+		  (uintptr_t) bfd_symbol_error_name;
 	      else
 		sym->u.syment._n._n_n._n_offset =
 		  (uintptr_t) (string_table
@@ -1978,7 +1978,7 @@ coff_get_normalized_symtab (bfd *abfd)
 		    if ((bfd_size_type) aux->u.auxent.x_file.x_n.x_n.x_offset
 			>= obj_coff_strings_len (abfd))
 		      aux->u.auxent.x_file.x_n.x_n.x_offset =
-			(uintptr_t) _("<corrupt>");
+			(uintptr_t) bfd_symbol_error_name;
 		    else
 		      aux->u.auxent.x_file.x_n.x_n.x_offset =
 			(uintptr_t) (string_table
@@ -2028,7 +2028,7 @@ coff_get_normalized_symtab (bfd *abfd)
 		}
 	      if (sym->u.syment._n._n_n._n_offset >= obj_coff_strings_len (abfd))
 		sym->u.syment._n._n_n._n_offset =
-		  (uintptr_t) _("<corrupt>");
+		  (uintptr_t) bfd_symbol_error_name;
 	      else
 		sym->u.syment._n._n_n._n_offset =
 		  (uintptr_t) (string_table
@@ -2047,7 +2047,7 @@ coff_get_normalized_symtab (bfd *abfd)
 		 the debug data.  */
 	      if (sym->u.syment._n._n_n._n_offset >= debug_sec->size)
 		sym->u.syment._n._n_n._n_offset =
-		  (uintptr_t) _("<corrupt>");
+		  (uintptr_t) bfd_symbol_error_name;
 	      else
 		sym->u.syment._n._n_n._n_offset =
 		  (uintptr_t) (debug_sec_data
@@ -2161,11 +2161,13 @@ coff_print_symbol (bfd *abfd,
 		   bfd_print_symbol_type how)
 {
   FILE * file = (FILE *) filep;
+  const char *symname = (symbol->name != bfd_symbol_error_name
+			 ? symbol->name : _("<corrupt>"));
 
   switch (how)
     {
     case bfd_print_symbol_name:
-      fprintf (file, "%s", symbol->name);
+      fprintf (file, "%s", symname);
       break;
 
     case bfd_print_symbol_more:
@@ -2189,7 +2191,7 @@ coff_print_symbol (bfd *abfd,
 	  if (combined < obj_raw_syments (abfd)
 	      || combined >= obj_raw_syments (abfd) + obj_raw_syment_count (abfd))
 	    {
-	      fprintf (file, _("<corrupt info> %s"), symbol->name);
+	      fprintf (file, _("<corrupt info> %s"), symname);
 	      break;
 	    }
 
@@ -2207,7 +2209,7 @@ coff_print_symbol (bfd *abfd,
 		   combined->u.syment.n_sclass,
 		   combined->u.syment.n_numaux);
 	  bfd_fprintf_vma (abfd, file, val);
-	  fprintf (file, " %s", symbol->name);
+	  fprintf (file, " %s", symname);
 
 	  for (aux = 0; aux < combined->u.syment.n_numaux; aux++)
 	    {
@@ -2297,7 +2299,9 @@ coff_print_symbol (bfd *abfd,
 
 	  if (l)
 	    {
-	      fprintf (file, "\n%s :", l->u.sym->name);
+	      fprintf (file, "\n%s :",
+		       l->u.sym->name != bfd_symbol_error_name
+		       ? l->u.sym->name : _("<corrupt>"));
 	      l++;
 	      while (l->line_number)
 		{
@@ -2317,7 +2321,7 @@ coff_print_symbol (bfd *abfd,
 		   symbol->section->name,
 		   coffsymbol (symbol)->native ? "n" : "g",
 		   coffsymbol (symbol)->lineno ? "l" : " ",
-		   symbol->name);
+		   symname);
 	}
     }
 }

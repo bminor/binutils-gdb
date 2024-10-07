@@ -1452,11 +1452,13 @@ _bfd_ecoff_print_symbol (bfd *abfd,
   const struct ecoff_debug_swap * const debug_swap
     = &ecoff_backend (abfd)->debug_swap;
   FILE *file = (FILE *)filep;
+  const char *symname = (symbol->name != bfd_symbol_error_name
+			 ? symbol->name : _("<corrupt>"));
 
   switch (how)
     {
     case bfd_print_symbol_name:
-      fprintf (file, "%s", symbol->name);
+      fprintf (file, "%s", symname);
       break;
     case bfd_print_symbol_more:
       if (ecoffsymbol (symbol)->local)
@@ -1526,7 +1528,7 @@ _bfd_ecoff_print_symbol (bfd *abfd,
 		 (unsigned) ecoff_ext.asym.sc,
 		 (unsigned) ecoff_ext.asym.index,
 		 jmptbl, cobol_main, weakext,
-		 symbol->name);
+		 symname);
 
 	if (ecoffsymbol (symbol)->fdr != NULL
 	    && ecoff_ext.asym.index != indexNil)

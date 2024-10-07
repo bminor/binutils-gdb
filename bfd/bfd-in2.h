@@ -1260,6 +1260,11 @@ typedef struct _symbol_info
   const char *stab_name;       /* String for stab type.  */
 } symbol_info;
 
+/* An empty string that will not match the address of any other
+   symbol name, even unnamed local symbols which will also have empty
+   string names.  This can be used to flag a symbol as corrupt if its
+   name uses an out of range string table index.  */
+extern const char bfd_symbol_error_name[];
 #define bfd_get_symtab_upper_bound(abfd) \
        BFD_SEND (abfd, _bfd_get_symtab_upper_bound, (abfd))
 
