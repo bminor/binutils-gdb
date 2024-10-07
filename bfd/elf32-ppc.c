@@ -1806,7 +1806,7 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   bfd_vma stub_off;
   asymbol *s;
   arelent *p;
-  size_t count, n, i, stub_delta;
+  size_t count, i, stub_delta;
   size_t size;
   char *names;
   bfd_byte buf[4];
@@ -1935,12 +1935,11 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   size = count * sizeof (asymbol);
   p = relplt->relocation;
   for (i = 0; i < count; i++, p++)
-    if ((*p->sym_ptr_ptr)->name != NULL)
-      {
-	size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
-	if (p->addend != 0)
-	  size += sizeof ("+0x") - 1 + 8;
-      }
+    {
+      size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+      if (p->addend != 0)
+	size += sizeof ("+0x") - 1 + 8;
+    }
 
   size += sizeof (asymbol) + sizeof ("__glink");
 
@@ -1954,40 +1953,38 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   stub_off = glink_vma - glink->vma;
   names = (char *) (s + count + 1 + (resolv_vma != 0));
   p = relplt->relocation + count - 1;
-  for (n = 0, i = 0; i < count; i++)
-    if ((*p->sym_ptr_ptr)->name != NULL)
-      {
-	size_t len;
+  for (i = 0; i < count; i++)
+    {
+      size_t len;
 
-	stub_off -= stub_delta;
-	if (strcmp ((*p->sym_ptr_ptr)->name, "__tls_get_addr_opt") == 0)
-	  stub_off -= 32;
-	*s = **p->sym_ptr_ptr;
-	/* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
-	   we are defining a symbol, ensure one of them is set.  */
-	if ((s->flags & BSF_LOCAL) == 0)
-	  s->flags |= BSF_GLOBAL;
-	s->flags |= BSF_SYNTHETIC;
-	s->section = glink;
-	s->value = stub_off;
-	s->name = names;
-	s->udata.p = NULL;
-	len = strlen ((*p->sym_ptr_ptr)->name);
-	memcpy (names, (*p->sym_ptr_ptr)->name, len);
-	names += len;
-	if (p->addend != 0)
-	  {
-	    memcpy (names, "+0x", sizeof ("+0x") - 1);
-	    names += sizeof ("+0x") - 1;
-	    bfd_sprintf_vma (abfd, names, p->addend);
-	    names += strlen (names);
-	  }
-	memcpy (names, "@plt", sizeof ("@plt"));
-	names += sizeof ("@plt");
-	++s;
-	--p;
-	++n;
-      }
+      stub_off -= stub_delta;
+      if (strcmp ((*p->sym_ptr_ptr)->name, "__tls_get_addr_opt") == 0)
+	stub_off -= 32;
+      *s = **p->sym_ptr_ptr;
+      /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
+	 we are defining a symbol, ensure one of them is set.  */
+      if ((s->flags & BSF_LOCAL) == 0)
+	s->flags |= BSF_GLOBAL;
+      s->flags |= BSF_SYNTHETIC;
+      s->section = glink;
+      s->value = stub_off;
+      s->name = names;
+      s->udata.p = NULL;
+      len = strlen ((*p->sym_ptr_ptr)->name);
+      memcpy (names, (*p->sym_ptr_ptr)->name, len);
+      names += len;
+      if (p->addend != 0)
+	{
+	  memcpy (names, "+0x", sizeof ("+0x") - 1);
+	  names += sizeof ("+0x") - 1;
+	  bfd_sprintf_vma (abfd, names, p->addend);
+	  names += strlen (names);
+	}
+      memcpy (names, "@plt", sizeof ("@plt"));
+      names += sizeof ("@plt");
+      ++s;
+      --p;
+    }
 
   /* Add a symbol at the start of the glink branch table.  */
   memset (s, 0, sizeof *s);
@@ -1999,7 +1996,7 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   memcpy (names, "__glink", sizeof ("__glink"));
   names += sizeof ("__glink");
   s++;
-  n++;
+  count++;
 
   if (resolv_vma)
     {
@@ -2013,10 +2010,10 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
       memcpy (names, "__glink_PLTresolve", sizeof ("__glink_PLTresolve"));
       names += sizeof ("__glink_PLTresolve");
       s++;
-      n++;
+      count++;
     }
 
-  return n;
+  return count;
 }
 
 /* The following functions are specific to the ELF linker, while

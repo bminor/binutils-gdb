@@ -3710,12 +3710,9 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
   for (i = 0; i < dynrelcount; i++)
     {
       p = dynrelbuf[i];
-      if ((*p->sym_ptr_ptr)->name != NULL)
-	{
-	  size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
-	  if (p->addend != 0)
-	    size += sizeof ("+0x") - 1 + 8 + 8 * ABI_64_P (abfd);
-	}
+      size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+      if (p->addend != 0)
+	size += sizeof ("+0x") - 1 + 8 + 8 * ABI_64_P (abfd);
     }
 
   s = *ret = (asymbol *) bfd_zmalloc (size);
@@ -3820,8 +3817,7 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
 	    /* Skip unknown relocation.  PR 17512: file: bc9d6cf5.  */
 	    if (got_vma == p->address
 		&& p->howto != NULL
-		&& valid_plt_reloc_p (p->howto->type)
-		&& (*p->sym_ptr_ptr)->name != NULL)
+		&& valid_plt_reloc_p (p->howto->type))
 	      {
 		*s = **p->sym_ptr_ptr;
 		/* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL

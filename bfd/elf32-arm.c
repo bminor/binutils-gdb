@@ -20100,7 +20100,6 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
   char *names;
   asection *plt;
   bfd_vma offset;
-  bfd_vma plt_size;
   bfd_byte *data;
 
   *ret = NULL;
@@ -20135,12 +20134,11 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
   size = count * sizeof (asymbol);
   p = relplt->relocation;
   for (i = 0; i < count; i++, p += elf32_arm_size_info.int_rels_per_ext_rel)
-    if ((*p->sym_ptr_ptr)->name != NULL)
-      {
-	size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
-	if (p->addend != 0)
-	  size += sizeof ("+0x") - 1 + 8;
-      }
+    {
+      size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+      if (p->addend != 0)
+	size += sizeof ("+0x") - 1 + 8;
+    }
 
   offset = elf32_arm_plt0_size (abfd, data, plt->size);
   if (offset == (bfd_vma) -1
@@ -20151,18 +20149,15 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
     }
 
   names = (char *) (s + count);
-  for (i = 0, p = relplt->relocation, n = 0;
-       i < count;
-       i++, p += elf32_arm_size_info.int_rels_per_ext_rel, offset += plt_size)
+  p = relplt->relocation;
+  n = 0;
+  for (i = 0; i < count; i++, p += elf32_arm_size_info.int_rels_per_ext_rel)
     {
       size_t len;
 
-      plt_size = elf32_arm_plt_size (abfd, data, offset, plt->size);
+      bfd_vma plt_size = elf32_arm_plt_size (abfd, data, offset, plt->size);
       if (plt_size == (bfd_vma) -1)
 	break;
-
-      if ((*p->sym_ptr_ptr)->name == NULL)
-	continue;
 
       *s = **p->sym_ptr_ptr;
       /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
@@ -20193,6 +20188,7 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
       memcpy (names, "@plt", sizeof ("@plt"));
       names += sizeof ("@plt");
       ++s, ++n;
+      offset += plt_size;
     }
 
   free (data);
