@@ -25,11 +25,12 @@ if {[build_executable ${testfile}.exp $testfile] == -1} {
     return
 }
 
-save_vars { env(ASAN_OPTIONS) } {
+save_vars { env(ASAN_OPTIONS) env(TSAN_OPTIONS) } {
     # The request readMemory with count 18446744073709551615 triggers address
     # sanitizer.  Suppress the error, leaving us with just this warning:
     #   WARNING: AddressSanitizer failed to allocate 0xffffffffffffffff bytes
     set_sanitizer ASAN_OPTIONS allocator_may_return_null 1
+    set_sanitizer TSAN_OPTIONS allocator_may_return_null 1
 
     if {[dap_initialize] == ""} {
 	return
