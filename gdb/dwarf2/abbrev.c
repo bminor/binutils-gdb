@@ -276,7 +276,8 @@ abbrev_table::read (struct dwarf2_section_info *section,
 	}
       else if ((cur_abbrev->tag == DW_TAG_structure_type
 		|| cur_abbrev->tag == DW_TAG_class_type
-		|| cur_abbrev->tag == DW_TAG_union_type)
+		|| cur_abbrev->tag == DW_TAG_union_type
+		|| cur_abbrev->tag == DW_TAG_namespace)
 	       && cur_abbrev->has_children)
 	{
 	  /* We have to record this as interesting, regardless of how

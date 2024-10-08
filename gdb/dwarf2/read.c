@@ -16310,7 +16310,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	 want to treat them as definitions.  */
       if ((abbrev->tag == DW_TAG_class_type
 	   || abbrev->tag == DW_TAG_structure_type
-	   || abbrev->tag == DW_TAG_union_type)
+	   || abbrev->tag == DW_TAG_union_type
+	   || abbrev->tag == DW_TAG_namespace)
 	  && abbrev->has_children)
 	*flags |= IS_TYPE_DECLARATION;
       else
@@ -16635,7 +16636,7 @@ cooked_indexer::index_dies (cutu_reader *reader,
 		else if (defer != 0)
 		  recurse_parent = defer;
 		else
-		  recurse_parent = parent_entry;
+		  recurse_parent = this_parent_entry;
 
 		info_ptr = recurse (reader, info_ptr, recurse_parent, fully);
 	      }
