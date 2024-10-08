@@ -4071,20 +4071,9 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    else if (in_priv_spec != PRIV_SPEC_CLASS_NONE
 		     && in_priv_spec != out_priv_spec)
 	      {
-		_bfd_error_handler
-		  (_("warning: %pB use privileged spec version %u.%u.%u but "
-		     "the output use version %u.%u.%u"),
-		   ibfd,
-		   in_attr[Tag_a].i,
-		   in_attr[Tag_b].i,
-		   in_attr[Tag_c].i,
-		   out_attr[Tag_a].i,
-		   out_attr[Tag_b].i,
-		   out_attr[Tag_c].i);
-
-		/* The privileged spec v1.9.1 can not be linked with others
-		   since the conflicts, so we plan to drop it in a year or
-		   two.  */
+		/* The abandoned privileged spec v1.9.1 can not be linked with
+		   others since the conflicts.  Keep the check since compatible
+		   issue.  */
 		if (in_priv_spec == PRIV_SPEC_CLASS_1P9P1
 		    || out_priv_spec == PRIV_SPEC_CLASS_1P9P1)
 		  {
