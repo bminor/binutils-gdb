@@ -2072,3 +2072,113 @@ b201 stbear S_RD "store bear" arch14 zarch
 # Processor-Activity-Instrumentation Facility
 
 b28f qpaci S_RD "query processor activity counter information" arch14 zarch
+
+
+# arch15 instructions
+
+e70000000089 vblend VRR_VVVU0V " " arch15 zarch
+e70000000089 vblendb VRR_VVV0V " " arch15 zarch
+e70001000089 vblendh VRR_VVV0V " " arch15 zarch
+e70002000089 vblendf VRR_VVV0V " " arch15 zarch
+e70003000089 vblendg VRR_VVV0V " " arch15 zarch
+e70004000089 vblendq VRR_VVV0V " " arch15 zarch
+
+e70000000088 veval VRI_VVV0UV " " arch15 zarch
+
+e70000000054 vgem VRR_VV0U " " arch15 zarch
+e70000000054 vgemb VRR_VV " " arch15 zarch
+e70000001054 vgemh VRR_VV " " arch15 zarch
+e70000002054 vgemf VRR_VV " " arch15 zarch
+e70000003054 vgemg VRR_VV " " arch15 zarch
+e70000004054 vgemq VRR_VV " " arch15 zarch
+
+e700000030d7 vuphg VRR_VV " " arch15 zarch
+e700000030d5 vuplhg VRR_VV " " arch15 zarch
+e700000030d6 vuplg VRR_VV " " arch15 zarch
+e700000030d4 vupllg VRR_VV " " arch15 zarch
+
+e700000040f2 vavgq VRR_VVV " " arch15 zarch
+e700000040f0 vavglq VRR_VVV " " arch15 zarch
+e700000040db vecq VRR_VV " " arch15 zarch
+e700000040d9 veclq VRR_VV " " arch15 zarch
+e700000040f8 vceqq VRR_VVV " " arch15 zarch
+e700001040f8 vceqqs VRR_VVV " " arch15 zarch
+e700000040fb vchq VRR_VVV " " arch15 zarch
+e700001040fb vchqs VRR_VVV " " arch15 zarch
+e700000040f9 vchlq VRR_VVV " " arch15 zarch
+e700001040f9 vchlqs VRR_VVV " " arch15 zarch
+e70000004053 vclzq VRR_VV " " arch15 zarch
+e70000004052 vctzq VRR_VV " " arch15 zarch
+e700000040de vlcq VRR_VV " " arch15 zarch
+e700000040df vlpq VRR_VV " " arch15 zarch
+e700000040ff vmxq VRR_VVV " " arch15 zarch
+e700000040fd vmxlq VRR_VVV " " arch15 zarch
+e700000040fe vmnq VRR_VVV " " arch15 zarch
+e700000040fc vmnlq VRR_VVV " " arch15 zarch
+e700030000aa vmalg VRR_VVV0V " " arch15 zarch
+e700040000aa vmalq VRR_VVV0V " " arch15 zarch
+e700030000ab vmahg VRR_VVV0V " " arch15 zarch
+e700040000ab vmahq VRR_VVV0V " " arch15 zarch
+e700030000a9 vmalhg VRR_VVV0V " " arch15 zarch
+e700040000a9 vmalhq VRR_VVV0V " " arch15 zarch
+e700030000ae vmaeg VRR_VVV0V " " arch15 zarch
+e700030000ac vmaleg VRR_VVV0V " " arch15 zarch
+e700030000af vmaog VRR_VVV0V " " arch15 zarch
+e700030000ad vmalog VRR_VVV0V " " arch15 zarch
+e700000030a3 vmhg VRR_VVV " " arch15 zarch
+e700000040a3 vmhq VRR_VVV " " arch15 zarch
+e700000030a1 vmlhg VRR_VVV " " arch15 zarch
+e700000040a1 vmlhq VRR_VVV " " arch15 zarch
+e700000030a2 vmlg VRR_VVV " " arch15 zarch
+e700000040a2 vmlq VRR_VVV " " arch15 zarch
+e700000030a6 vmeg VRR_VVV " " arch15 zarch
+e700000030a4 vmleg VRR_VVV " " arch15 zarch
+e700000030a7 vmog VRR_VVV " " arch15 zarch
+e700000030a5 vmlog VRR_VVV " " arch15 zarch
+
+e700000000b2 vd VRR_VVV0UU " " arch15 zarch
+e700000020b2 vdf VRR_VVV0U02 " " arch15 zarch
+e700000030b2 vdg VRR_VVV0U02 " " arch15 zarch
+e700000040b2 vdq VRR_VVV0U02 " " arch15 zarch
+
+e700000000b0 vdl VRR_VVV0UU " " arch15 zarch
+e700000020b0 vdlf VRR_VVV0U02 " " arch15 zarch
+e700000030b0 vdlg VRR_VVV0U02 " " arch15 zarch
+e700000040b0 vdlq VRR_VVV0U02 " " arch15 zarch
+
+e700000000b3 vr VRR_VVV0UU " " arch15 zarch
+e700000020b3 vrf VRR_VVV0U02 " " arch15 zarch
+e700000030b3 vrg VRR_VVV0U02 " " arch15 zarch
+e700000040b3 vrq VRR_VVV0U02 " " arch15 zarch
+
+e700000000b1 vrl VRR_VVV0UU " " arch15 zarch
+e700000020b1 vrlf VRR_VVV0U02 " " arch15 zarch
+e700000030b1 vrlg VRR_VVV0U02 " " arch15 zarch
+e700000040b1 vrlq VRR_VVV0U02 " " arch15 zarch
+
+b968 clzg RRE_RR " " arch15 zarch
+b969 ctzg RRE_RR " " arch15 zarch
+
+e30000000060 lxab RXY_RRRD " " arch15 zarch
+e30000000062 lxah RXY_RRRD " " arch15 zarch
+e30000000064 lxaf RXY_RRRD " " arch15 zarch
+e30000000066 lxag RXY_RRRD " " arch15 zarch
+e30000000068 lxaq RXY_RRRD " " arch15 zarch
+
+e30000000061 llxab RXY_RRRD " " arch15 zarch
+e30000000063 llxah RXY_RRRD " " arch15 zarch
+e30000000065 llxaf RXY_RRRD " " arch15 zarch
+e30000000067 llxag RXY_RRRD " " arch15 zarch
+e30000000069 llxaq RXY_RRRD " " arch15 zarch
+
+b96c bextg RRF_R0RR2 " " arch15 zarch
+b96d bdepg RRF_R0RR2 " " arch15 zarch
+
+b93e kimd RRF_U0RR " " arch15 zarch optparm
+b93f klmd RRF_U0RR " " arch15 zarch optparm
+
+e6000000004e vcvbq VRR_VV0U2 " " arch15 zarch
+e6000000004a vcvdq VRI_VV0UU " " arch15 zarch
+
+e6000000005f vtp VRR_0V0U " " arch15 zarch optparm
+e6000000007f vtz VRR_0VVU " " arch15 zarch

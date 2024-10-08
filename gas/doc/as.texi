@@ -1961,7 +1961,7 @@ Specify which s390 processor variant is the target, @samp{g5} (or
 @samp{arch6}), @samp{z9-109}, @samp{z9-ec} (or @samp{arch7}), @samp{z10} (or
 @samp{arch8}), @samp{z196} (or @samp{arch9}), @samp{zEC12} (or @samp{arch10}),
 @samp{z13} (or @samp{arch11}), @samp{z14} (or @samp{arch12}), @samp{z15}
-(or @samp{arch13}), or @samp{z16} (or @samp{arch14}).
+(or @samp{arch13}), @samp{z16} (or @samp{arch14}), or @samp{arch15}.
 @item -mregnames
 @itemx -mno-regnames
 Allow or disallow symbolic names for registers.
