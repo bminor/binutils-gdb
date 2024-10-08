@@ -2992,7 +2992,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 					   section.  */
 	    }
 
-	  /* Cust is best found sofar, save it.  */
+	  /* Cust is best found so far, save it.  */
 	  best_cust = cust;
 	  best_cust_range = range;
 	}

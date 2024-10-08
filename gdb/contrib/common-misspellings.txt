@@ -15,3 +15,4 @@
 # Common spelling mistakes.
 
 inbetween->between, in between, in-between
+sofar->so far
