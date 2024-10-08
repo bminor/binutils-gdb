@@ -1182,8 +1182,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
 
   {"m", "+zmmul", check_implicit_always},
 
-  {"zabha", "+a", check_implicit_always},
-  {"zacas", "+a", check_implicit_always},
+  {"zabha", "+zaamo", check_implicit_always},
+  {"zacas", "+zaamo", check_implicit_always},
   {"a", "+zaamo,+zalrsc", check_implicit_always},
 
   {"xsfvcp", "+zve32x", check_implicit_always},
