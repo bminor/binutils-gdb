@@ -228,7 +228,7 @@ cli_interp::exec (const char *command_str)
      interpreter which has a new ui_file for gdb_stdout, use that one
      instead of the default.
 
-     It is important that it gets reset everytime, since the user
+     It is important that it gets reset every time, since the user
      could set gdb to use a different interpreter.  */
   ui_file *old_stream = m_cli_uiout->set_stream (gdb_stdout);
   SCOPE_EXIT { m_cli_uiout->set_stream (old_stream); };

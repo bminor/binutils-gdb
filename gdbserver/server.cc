@@ -1786,7 +1786,7 @@ struct qxfer
      the starting point.  The ANNEX can be used to provide additional
      data-specific information to the target.
 
-     Return the number of bytes actually transfered, zero when no
+     Return the number of bytes actually transferred, zero when no
      further transfer is possible, -1 on error, -2 when the transfer
      is not supported, and -3 on a verbose error message that should
      be preserved.  Return of a positive value smaller than LEN does

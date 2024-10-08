@@ -671,7 +671,7 @@ validate_actionline (const char *line, tracepoint *t)
 		  p = strchr (p, ',');
 		  continue;
 		}
-	      /* else fall thru, treat p as an expression and parse it!  */
+	      /* else fall through, treat p as an expression and parse it!  */
 	    }
 	  tmp_p = p;
 	  for (bp_location &loc : t->locations ())

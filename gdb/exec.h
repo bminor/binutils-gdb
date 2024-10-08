@@ -62,7 +62,7 @@ extern enum target_xfer_status
    noted above.  See memory_xfer_partial_1() in target.c for an
    example.
 
-   Return the number of bytes actually transfered, or zero when no
+   Return the number of bytes actually transferred, or zero when no
    data is available for the requested range.
 
    This function is intended to be used from target_xfer_partial

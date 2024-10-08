@@ -25,19 +25,24 @@ url=https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/For_mac
 cache_dir=$scriptdir/../../.git
 cache_file=wikipedia-common-misspellings.txt
 dictionary=$cache_dir/$cache_file
+local_dictionary=$scriptdir/common-misspellings.txt
 
-# Separators: space, slash, tab.
+# Separators: space, slash, tab, colon, comma.
 declare -a grep_separators
 grep_separators=(
     " "
     "/"
     "	"
+    ":"
+    ","
 )
 declare -a sed_separators
 sed_separators=(
     " "
     "/"
     "\t"
+    ":"
+    ","
 )
 
 join ()
@@ -149,13 +154,27 @@ get_dictionary ()
     trap "" EXIT
 }
 
+output_local_dictionary ()
+{
+    # Filter out comments and empty lines.
+    grep -E -v \
+	 "^#|^$" \
+	 "$local_dictionary"
+}
+
+output_dictionaries ()
+{
+    output_local_dictionary
+    cat "$dictionary"
+}
+
 parse_dictionary ()
 {
     # Parse dictionary.
     mapfile -t words \
-	    < <(awk -F '->' '{print $1}' "$dictionary")
+	    < <(awk -F '->' '{print $1}' <(output_dictionaries))
     mapfile -t replacements \
-	    < <(awk -F '->' '{print $2}' "$dictionary")
+	    < <(awk -F '->' '{print $2}' <(output_dictionaries))
 }
 
 find_files_matching_words ()
@@ -310,11 +329,19 @@ main ()
 	return
     fi
 
+    declare -A words_done
     local i word replacement
     i=0
     for word in "${words[@]}"; do
 	replacement=${replacements[$i]}
 	i=$((i + 1))
+
+	# Skip words that are already handled.  This ensures that the local
+	# dictionary overrides the wiki dictionary.
+	if [ "${words_done[$word]}" == 1 ]; then
+	    continue
+	fi
+	words_done[$word]=1
 
 	replace_word_in_files \
 	    "$word" \
