@@ -76,6 +76,7 @@ libgdbsupport_a_SOURCES = \
     job-control.cc \
     netstuff.cc \
     new-op.cc \
+    osabi.cc \
     pathstuff.cc \
     print-utils.cc \
     ptid.cc \

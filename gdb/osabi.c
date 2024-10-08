@@ -42,93 +42,6 @@ static const char *gdb_osabi_available_names[GDB_OSABI_INVALID + 3] = {
 };
 static const char *set_osabi_string;
 
-/* Names associated with each osabi.  */
-
-struct osabi_names
-{
-  /* The "pretty" name.  */
-
-  const char *pretty;
-
-  /* The triplet regexp, or NULL if not known.  */
-
-  const char *regexp;
-};
-
-/* This table matches the indices assigned to enum gdb_osabi.  Keep
-   them in sync.  */
-static const struct osabi_names gdb_osabi_names[] =
-{
-  { "unknown", NULL },
-  { "none", NULL },
-
-  { "SVR4", NULL },
-  { "GNU/Hurd", NULL },
-  { "Solaris", NULL },
-  { "GNU/Linux", "linux(-gnu[^-]*)?" },
-  { "FreeBSD", NULL },
-  { "NetBSD", NULL },
-  { "OpenBSD", NULL },
-  { "WindowsCE", NULL },
-  { "DJGPP", NULL },
-  { "Cygwin", NULL },
-  { "Windows", NULL },
-  { "AIX", NULL },
-  { "DICOS", NULL },
-  { "Darwin", NULL },
-  { "OpenVMS", NULL },
-  { "LynxOS178", NULL },
-  { "Newlib", NULL },
-  { "SDE", NULL },
-  { "PikeOS", NULL },
-
-  { "<invalid>", NULL }
-};
-
-const char *
-gdbarch_osabi_name (enum gdb_osabi osabi)
-{
-  if (osabi >= GDB_OSABI_UNKNOWN && osabi < GDB_OSABI_INVALID)
-    return gdb_osabi_names[osabi].pretty;
-
-  return gdb_osabi_names[GDB_OSABI_INVALID].pretty;
-}
-
-/* See osabi.h.  */
-
-const char *
-osabi_triplet_regexp (enum gdb_osabi osabi)
-{
-  if (osabi >= GDB_OSABI_UNKNOWN && osabi < GDB_OSABI_INVALID)
-    return gdb_osabi_names[osabi].regexp;
-
-  return gdb_osabi_names[GDB_OSABI_INVALID].regexp;
-}
-
-/* Lookup the OS ABI corresponding to the specified target description
-   string.  */
-
-enum gdb_osabi
-osabi_from_tdesc_string (const char *name)
-{
-  int i;
-
-  for (i = 0; i < ARRAY_SIZE (gdb_osabi_names); i++)
-    if (strcmp (name, gdb_osabi_names[i].pretty) == 0)
-      {
-	/* See note above: the name table matches the indices assigned
-	   to enum gdb_osabi.  */
-	enum gdb_osabi osabi = (enum gdb_osabi) i;
-
-	if (osabi == GDB_OSABI_INVALID)
-	  return GDB_OSABI_UNKNOWN;
-	else
-	  return osabi;
-      }
-
-  return GDB_OSABI_UNKNOWN;
-}
-
 /* Handler for a given architecture/OS ABI pair.  There should be only
    one handler for a given OS ABI each architecture family.  */
 struct gdb_osabi_handler
@@ -671,10 +584,6 @@ void _initialize_gdb_osabi ();
 void
 _initialize_gdb_osabi ()
 {
-  if (strcmp (gdb_osabi_names[GDB_OSABI_INVALID].pretty, "<invalid>") != 0)
-    internal_error
-      (_("_initialize_gdb_osabi: gdb_osabi_names[] is inconsistent"));
-
   /* Register a generic sniffer for ELF flavoured files.  */
   gdbarch_register_osabi_sniffer (bfd_arch_unknown,
 				  bfd_target_elf_flavour,
