@@ -27,8 +27,47 @@ cache_file=wikipedia-common-misspellings.txt
 dictionary=$cache_dir/$cache_file
 
 # Separators: space, slash, tab.
-grep_separator=" |/|	"
-sed_separator=" \|/\|\t"
+declare -a grep_separators
+grep_separators=(
+    " "
+    "/"
+    "	"
+)
+declare -a sed_separators
+sed_separators=(
+    " "
+    "/"
+    "\t"
+)
+
+join ()
+{
+    local or
+    or="$1"
+    shift
+
+    local res
+    res=""
+
+    local first
+    first=true
+
+    for item in "$@"; do
+	if $first; then
+	    first=false
+	    res="$item"
+	else
+	    res="$res$or$item"
+	fi
+    done
+
+    echo "$res"
+}
+
+grep_or="|"
+sed_or="\|"
+grep_separator=$(join $grep_or "${grep_separators[@]}")
+sed_separator=$(join $sed_or "${sed_separators[@]}")
 
 usage ()
 {
