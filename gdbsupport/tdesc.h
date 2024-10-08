@@ -18,6 +18,8 @@
 #ifndef COMMON_TDESC_H
 #define COMMON_TDESC_H
 
+#include "gdbsupport/osabi.h"
+
 struct tdesc_feature;
 struct tdesc_type;
 struct tdesc_type_builtin;
@@ -338,8 +340,8 @@ void set_tdesc_architecture (target_desc *target_desc,
    or NULL if no architecture was specified.  */
 const char *tdesc_architecture_name (const struct target_desc *target_desc);
 
-/* Set TARGET_DESC's osabi by NAME.  */
-void set_tdesc_osabi (target_desc *target_desc, const char *name);
+/* Set TARGET_DESC's osabi to OSABI.  */
+void set_tdesc_osabi (target_desc *target_desc, enum gdb_osabi osabi);
 
 /* Return the osabi associated with this target description as a string,
    or NULL if no osabi was specified.  */

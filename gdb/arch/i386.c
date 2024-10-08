@@ -18,6 +18,7 @@
 #include "i386.h"
 #include "gdbsupport/tdesc.h"
 #include "gdbsupport/x86-xstate.h"
+#include "gdbsupport/osabi.h"
 #include <stdlib.h>
 
 #include "../features/i386/32bit-core.c"
@@ -38,7 +39,7 @@ i386_create_target_description (uint64_t xcr0, bool is_linux, bool segments)
 #ifndef IN_PROCESS_AGENT
   set_tdesc_architecture (tdesc.get (), "i386");
   if (is_linux)
-    set_tdesc_osabi (tdesc.get (), "GNU/Linux");
+    set_tdesc_osabi (tdesc.get (), GDB_OSABI_LINUX);
 #endif
 
   long regnum = 0;

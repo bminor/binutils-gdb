@@ -219,7 +219,6 @@ int tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
 
 void set_tdesc_architecture (struct target_desc *,
 			     const struct bfd_arch_info *);
-void set_tdesc_osabi (struct target_desc *, enum gdb_osabi osabi);
 void set_tdesc_property (struct target_desc *,
 			 const char *key, const char *value);
 void tdesc_add_compatible (struct target_desc *,

@@ -17,6 +17,7 @@
 
 #include "amd64.h"
 #include "gdbsupport/x86-xstate.h"
+#include "gdbsupport/osabi.h"
 #include <stdlib.h>
 
 #include "../features/i386/64bit-avx.c"
@@ -45,7 +46,7 @@ amd64_create_target_description (uint64_t xcr0, bool is_x32, bool is_linux,
 			  is_x32 ? "i386:x64-32" : "i386:x86-64");
 
   if (is_linux)
-    set_tdesc_osabi (tdesc.get (), "GNU/Linux");
+    set_tdesc_osabi (tdesc.get (), GDB_OSABI_LINUX);
 #endif
 
   long regnum = 0;

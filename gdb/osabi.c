@@ -524,6 +524,35 @@ generic_elf_osabi_sniffer (bfd *abfd)
 
   return osabi;
 }
+
+/* See osabi.h.  */
+
+const char *
+gdbarch_osabi_enum_name (enum gdb_osabi osabi)
+{
+  switch (osabi)
+    {
+#define GDB_OSABI_DEF_FIRST(Enum, Name, Regex)	\
+      case GDB_OSABI_ ## Enum:			\
+	return "GDB_OSABI_" #Enum;
+
+#define GDB_OSABI_DEF(Enum, Name, Regex)	\
+      case GDB_OSABI_ ## Enum:			\
+	return "GDB_OSABI_" #Enum;
+
+#define GDB_OSABI_DEF_LAST(Enum, Name, Regex)	\
+      case GDB_OSABI_ ## Enum:			\
+	return "GDB_OSABI_" #Enum;
+
+#include "gdbsupport/osabi.def"
+
+#undef GDB_OSABI_DEF_LAST
+#undef GDB_OSABI_DEF
+#undef GDB_OSABI_DEF_FIRST
+    }
+
+  gdb_assert_not_reached ();
+}
 
 static void
 set_osabi (const char *args, int from_tty, struct cmd_list_element *c)

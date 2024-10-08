@@ -52,4 +52,8 @@ void gdbarch_init_osabi (struct gdbarch_info, struct gdbarch *);
 void generic_elf_osabi_sniff_abi_tag_sections (bfd *, asection *,
 					       enum gdb_osabi *);
 
+/* Return a string version of OSABI.  This is used when generating code
+   which calls set_tdesc_osabi and an 'enum gdb_osabi' value is needed.  */
+const char *gdbarch_osabi_enum_name (enum gdb_osabi osabi);
+
 #endif /* OSABI_H */

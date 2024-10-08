@@ -179,8 +179,9 @@ tdesc_osabi_name (const struct target_desc *target_desc)
 /* See gdbsupport/tdesc.h.  */
 
 void
-set_tdesc_osabi (struct target_desc *target_desc, const char *name)
+set_tdesc_osabi (struct target_desc *target_desc, enum gdb_osabi osabi)
 {
+  const char *name = gdbarch_osabi_name (osabi);
   target_desc->osabi = make_unique_xstrdup (name);
 }
 

@@ -1200,12 +1200,6 @@ set_tdesc_architecture (struct target_desc *target_desc,
 /* See gdbsupport/tdesc.h.  */
 
 void
-set_tdesc_osabi (struct target_desc *target_desc, const char *name)
-{
-  set_tdesc_osabi (target_desc, osabi_from_tdesc_string (name));
-}
-
-void
 set_tdesc_osabi (struct target_desc *target_desc, enum gdb_osabi osabi)
 {
   target_desc->osabi = osabi;
@@ -1317,9 +1311,8 @@ public:
     if (tdesc_osabi (e) > GDB_OSABI_UNKNOWN
 	&& tdesc_osabi (e) < GDB_OSABI_INVALID)
       {
-	gdb_printf
-	  ("  set_tdesc_osabi (result.get (), \"%s\");\n",
-	   gdbarch_osabi_name (tdesc_osabi (e)));
+	const char *enum_name = gdbarch_osabi_enum_name (tdesc_osabi (e));
+	gdb_printf ("  set_tdesc_osabi (result.get (), %s);\n", enum_name);
 	gdb_printf ("\n");
       }
 
