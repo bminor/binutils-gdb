@@ -114,3 +114,18 @@ gdb_test "ptype enum EU" "type = enum EU {TWO = 2}" \
 gdb_test_no_output "set lang c++"
 gdb_test "ptype enum EU" "type = enum EU : unsigned int {TWO = 2}" \
     "ptype EU in C++"
+
+gdb_test "p ns::val1" \
+    " = ns::val1"
+
+require !readnow
+require {string equal [have_index $binfile] ""}
+
+set re_ws "\[ \t\]"
+
+gdb_test_lines "maint print objfiles" \
+    "val1 has a parent" \
+    [multi_line \
+	 "" \
+	 "$re_ws+qualified:$re_ws+ns::val1" \
+	 ".*"]
