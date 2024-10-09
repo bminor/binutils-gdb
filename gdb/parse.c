@@ -100,7 +100,7 @@ void
 parser_state::mark_struct_expression (expr::structop_base_operation *op)
 {
   gdb_assert (parse_completion && m_completion_state == nullptr);
-  m_completion_state.reset (new expr_complete_structop (op));
+  m_completion_state = std::make_unique<expr_complete_structop> (op);
 }
 
 /* Indicate that the current parser invocation is completing a tag.

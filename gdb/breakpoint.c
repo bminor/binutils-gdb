@@ -10494,9 +10494,9 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 
   std::unique_ptr<watchpoint> w;
   if (use_mask)
-    w.reset (new masked_watchpoint (nullptr, bp_type));
+    w = std::make_unique<masked_watchpoint> (nullptr, bp_type);
   else
-    w.reset (new watchpoint (nullptr, bp_type));
+    w = std::make_unique<watchpoint> (nullptr, bp_type);
 
   /* At most one of thread or task can be set on a watchpoint.  */
   gdb_assert (thread == -1 || task == -1);

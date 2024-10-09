@@ -3970,7 +3970,7 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
       /* If an existing_cu is provided, a dwarf2_cu must not exist for this_cu
 	 in per_objfile yet.  */
       gdb_assert (per_objfile->get_cu (this_cu) == nullptr);
-      m_new_cu.reset (new dwarf2_cu (this_cu, per_objfile));
+      m_new_cu = std::make_unique<dwarf2_cu> (this_cu, per_objfile);
       cu = m_new_cu.get ();
     }
 
@@ -4067,7 +4067,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 	 thread-safe.  */
       gdb_assert (cache != nullptr
 		  || per_objfile->get_cu (this_cu) == nullptr);
-      m_new_cu.reset (new dwarf2_cu (this_cu, per_objfile));
+      m_new_cu = std::make_unique<dwarf2_cu> (this_cu, per_objfile);
       cu = m_new_cu.get ();
     }
 
@@ -4257,7 +4257,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
   /* This is cheap if the section is already read in.  */
   section->read (objfile);
 
-  m_new_cu.reset (new dwarf2_cu (this_cu, per_objfile));
+  m_new_cu = std::make_unique<dwarf2_cu> (this_cu, per_objfile);
 
   begin_info_ptr = info_ptr = section->buffer + to_underlying (this_cu->sect_off);
   info_ptr = read_and_check_comp_unit_head (per_objfile, &m_new_cu->header,
@@ -7366,7 +7366,7 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
       res.set_name (make_unique_xstrdup (lbasename (res.get_name ())));
     }
 
-  cu->per_cu->fnd.reset (new file_and_directory (std::move (res)));
+  cu->per_cu->fnd = std::make_unique<file_and_directory> (std::move (res));
   return *cu->per_cu->fnd;
 }
 
@@ -7612,11 +7612,11 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 	  gdb_assert (tug_unshare->symtabs == NULL);
 	  gdb_assert (m_builder == nullptr);
 	  struct compunit_symtab *cust = tug_unshare->compunit_symtab;
-	  m_builder.reset (new struct buildsym_compunit
+	  m_builder = std::make_unique<buildsym_compunit>
 			   (cust->objfile (), "",
 			    cust->dirname (),
 			    cust->language (),
-			    0, cust));
+			    0, cust);
 	  list_in_scope = get_builder ()->get_file_symbols ();
 	}
       return;
@@ -7666,11 +7666,11 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
     {
       gdb_assert (m_builder == nullptr);
       struct compunit_symtab *cust = tug_unshare->compunit_symtab;
-      m_builder.reset (new struct buildsym_compunit
+      m_builder = std::make_unique<buildsym_compunit>
 		       (cust->objfile (), "",
 			cust->dirname (),
 			cust->language (),
-			0, cust));
+			0, cust);
       list_in_scope = get_builder ()->get_file_symbols ();
 
       auto &file_names = line_header->file_names ();

@@ -353,7 +353,7 @@ ui_out::table_begin (int nr_cols, int nr_rows, const std::string &tblid)
     internal_error (_("tables cannot be nested; table_begin found before \
 previous table_end."));
 
-  m_table_up.reset (new ui_out_table (level () + 1, nr_cols, tblid));
+  m_table_up = std::make_unique<ui_out_table> (level () + 1, nr_cols, tblid);
 
   do_table_begin (nr_cols, nr_rows, tblid.c_str ());
 }

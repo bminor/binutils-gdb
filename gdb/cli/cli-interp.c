@@ -269,7 +269,7 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
   if (logfile != nullptr)
     {
       gdb_assert (m_saved_output == nullptr);
-      m_saved_output.reset (new saved_output_files);
+      m_saved_output = std::make_unique<saved_output_files> ();
       m_saved_output->out = gdb_stdout;
       m_saved_output->err = gdb_stderr;
       m_saved_output->log = gdb_stdlog;

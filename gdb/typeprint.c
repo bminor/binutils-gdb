@@ -562,10 +562,10 @@ whatis_exp (const char *exp, int show)
   std::unique_ptr<ext_lang_type_printers> printer_holder;
   if (!flags.raw)
     {
-      table_holder.reset (new typedef_hash_table);
+      table_holder = std::make_unique<typedef_hash_table> ();
       flags.global_typedefs = table_holder.get ();
 
-      printer_holder.reset (new ext_lang_type_printers);
+      printer_holder = std::make_unique<ext_lang_type_printers> ();
       flags.global_printers = printer_holder.get ();
     }
 

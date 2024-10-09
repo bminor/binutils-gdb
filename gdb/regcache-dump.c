@@ -244,13 +244,13 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
   switch (what_to_dump)
     {
     case regcache_dump_none:
-      dump.reset (new register_dump_none (gdbarch));
+      dump = std::make_unique<register_dump_none> (gdbarch);
       break;
     case regcache_dump_remote:
-      dump.reset (new register_dump_remote (gdbarch));
+      dump = std::make_unique<register_dump_remote> (gdbarch);
       break;
     case regcache_dump_groups:
-      dump.reset (new register_dump_groups (gdbarch));
+      dump = std::make_unique<register_dump_groups> (gdbarch);
       break;
     case regcache_dump_raw:
     case regcache_dump_cooked:
@@ -258,15 +258,15 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
 	auto dump_pseudo = (what_to_dump == regcache_dump_cooked);
 
 	if (target_has_registers ())
-	  dump.reset (new register_dump_regcache (get_thread_regcache
-						    (inferior_thread ()),
-						  dump_pseudo));
+	  dump = (std::make_unique<register_dump_regcache>
+		  (get_thread_regcache (inferior_thread ()), dump_pseudo));
 	else
 	  {
 	    /* For the benefit of "maint print registers" & co when
 	       debugging an executable, allow dumping a regcache even when
 	       there is no thread selected / no registers.  */
-	    dump.reset (new register_dump_reg_buffer (gdbarch, dump_pseudo));
+	    dump = std::make_unique<register_dump_reg_buffer> (gdbarch,
+							       dump_pseudo);
 	  }
       }
       break;

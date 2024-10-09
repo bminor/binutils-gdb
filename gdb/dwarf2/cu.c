@@ -77,9 +77,12 @@ dwarf2_cu::start_compunit_symtab (const char *name, const char *comp_dir,
       name_for_id = name_for_id_holder.c_str ();
     }
 
-  m_builder.reset (new struct buildsym_compunit
-		   (this->per_objfile->objfile,
-		    name, comp_dir, name_for_id, lang (), low_pc));
+  m_builder = std::make_unique<buildsym_compunit> (this->per_objfile->objfile,
+						   name,
+						   comp_dir,
+						   name_for_id,
+						   lang (),
+						   low_pc);
 
   list_in_scope = get_builder ()->get_file_symbols ();
 
