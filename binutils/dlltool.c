@@ -271,16 +271,8 @@
 #define PAGE_MASK ((bfd_vma) (- COFF_PAGE_SIZE))
 #endif
 
-/* Get current BFD error message.  */
-#define bfd_get_errmsg() (bfd_errmsg (bfd_get_error ()))
-
-/* Forward references.  */
-static char *look_for_prog (const char *, const char *, int);
-static char *deduce_name (const char *);
-
-#ifdef DLLTOOL_MCORE_ELF
-static void mcore_elf_cache_filename (const char *);
-static void mcore_elf_gen_out_file (void);
+#ifndef NAME_MAX
+#define NAME_MAX	255
 #endif
 
 #ifdef HAVE_SYS_WAIT_H
@@ -482,9 +474,6 @@ static char * mcore_elf_linker_flags = NULL;
 #ifndef DRECTVE_SECTION_NAME
 #define DRECTVE_SECTION_NAME ".drectve"
 #endif
-
-/* What's the right name for this ?  */
-#define PATHMAX 250
 
 /* External name alias numbering starts here.  */
 #define PREFIX_ALIAS_BASE	20000
@@ -805,14 +794,27 @@ struct string_list
 
 static struct string_list *excludes;
 
+/* Forward references.  */
+static char *deduce_name (const char *);
 static const char *xlate (const char *);
-static bfd *make_delay_head (void);
 static void dll_name_list_free_contents (dll_name_list_node_type *);
 static void identify_search_archive
   (bfd *, void (*) (bfd *, bfd *, void *),  void *);
 static void identify_search_member (bfd *, bfd *, void *);
 static void identify_search_section (bfd *, asection *, void *);
 static void inform (const char *, ...) ATTRIBUTE_PRINTF_1;
+
+#ifdef DLLTOOL_MCORE_ELF
+static void mcore_elf_cache_filename (const char *);
+static void mcore_elf_gen_out_file (void);
+#endif
+
+/* Get current BFD error message.  */
+static inline const char *
+bfd_get_errmsg (void)
+{
+  return bfd_errmsg (bfd_get_error ());
+}
 
 static char *
 prefix_encode (char *start, unsigned code)
@@ -2778,7 +2780,7 @@ make_head (void)
   return abfd;
 }
 
-bfd *
+static bfd *
 make_delay_head (void)
 {
   FILE *f = fopen (TMP_HEAD_S, FOPEN_WT);
