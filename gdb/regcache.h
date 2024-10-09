@@ -31,6 +31,7 @@ struct gdbarch;
 class thread_info;
 struct process_stratum_target;
 struct inferior;
+class ui_out;
 
 extern struct regcache *get_thread_regcache (process_stratum_target *target,
 					     ptid_t ptid);
@@ -536,7 +537,7 @@ extern void registers_changed_thread (thread_info *thread);
 class register_dump
 {
 public:
-  void dump (ui_file *file);
+  void dump (ui_out *out, const char *name);
   virtual ~register_dump () = default;
 
 protected:
@@ -544,9 +545,14 @@ protected:
     : m_gdbarch (arch)
   {}
 
-  /* Dump the register REGNUM contents.  If REGNUM is -1, print the
-     header.  */
-  virtual void dump_reg (ui_file *file, int regnum) = 0;
+  /* Number of additional table headers.  */
+  virtual int num_additional_headers () = 0;
+
+  /* Add the additional headers to OUT.  */
+  virtual void additional_headers (ui_out *out) = 0;
+
+  /* Dump the register REGNUM contents.  */
+  virtual void dump_reg (ui_out *out, int regnum) = 0;
 
   gdbarch *m_gdbarch;
 };

@@ -38,43 +38,45 @@ public:
   }
 
 protected:
-  void dump_reg (ui_file *file, int regnum) override
+
+  int num_additional_headers () override
+  { return 1; }
+
+  void additional_headers (ui_out *out) override
   {
-    if (regnum < 0)
+    out->table_header (0, ui_left, "value",
+		       m_dump_pseudo ? "Cooked value" : "Raw value");
+  }
+
+  void dump_reg (ui_out *out, int regnum) override
+  {
+    if (regnum < gdbarch_num_regs (m_gdbarch) || m_dump_pseudo)
       {
-	if (m_dump_pseudo)
-	  gdb_printf (file, "Cooked value");
+	auto size = register_size (m_gdbarch, regnum);
+
+	if (size == 0)
+	  return;
+
+	gdb::byte_vector buf (size);
+	auto status = m_regcache->cooked_read (regnum, buf.data ());
+
+	if (status == REG_UNKNOWN)
+	  out->field_string ("value", "<invalid>");
+	else if (status == REG_UNAVAILABLE)
+	  out->field_string ("value", "<unavailable>");
 	else
-	  gdb_printf (file, "Raw value");
+	  {
+	    string_file str;
+	    print_hex_chars (&str, buf.data (), size,
+			     gdbarch_byte_order (m_gdbarch), true);
+	    out->field_stream ("value", str);
+	  }
       }
     else
       {
-	if (regnum < gdbarch_num_regs (m_gdbarch) || m_dump_pseudo)
-	  {
-	    auto size = register_size (m_gdbarch, regnum);
-
-	    if (size == 0)
-	      return;
-
-	    gdb::byte_vector buf (size);
-	    auto status = m_regcache->cooked_read (regnum, buf.data ());
-
-	    if (status == REG_UNKNOWN)
-	      gdb_printf (file, "<invalid>");
-	    else if (status == REG_UNAVAILABLE)
-	      gdb_printf (file, "<unavailable>");
-	    else
-	      {
-		print_hex_chars (file, buf.data (), size,
-				 gdbarch_byte_order (m_gdbarch), true);
-	      }
-	  }
-	else
-	  {
-	    /* Just print "<cooked>" for pseudo register when
-	       regcache_dump_raw.  */
-	    gdb_printf (file, "<cooked>");
-	  }
+	/* Just print "<cooked>" for pseudo register when
+	   regcache_dump_raw.  */
+	out->field_string ("value", "<cooked>");
       }
   }
 
@@ -97,39 +99,39 @@ public:
   }
 
 protected:
-  void dump_reg (ui_file *file, int regnum) override
+
+  int num_additional_headers () override
+  { return 1; }
+
+  void additional_headers (ui_out *out) override
   {
-    if (regnum < 0)
+    out->table_header (0, ui_left, "value",
+		       m_has_pseudo ? "Cooked value" : "Raw value");
+  }
+
+  void dump_reg (ui_out *out, int regnum) override
+  {
+    if (regnum < gdbarch_num_regs (m_gdbarch) || m_has_pseudo)
       {
-	if (m_has_pseudo)
-	  gdb_printf (file, "Cooked value");
+	auto size = register_size (m_gdbarch, regnum);
+
+	if (size == 0)
+	  return;
+
+	auto status = get_register_status (regnum);
+
+	gdb_assert (status != REG_VALID);
+
+	if (status == REG_UNKNOWN)
+	  out->field_string ("value", "<invalid>");
 	else
-	  gdb_printf (file, "Raw value");
+	  out->field_string ("value", "<unavailable>");
       }
     else
       {
-	if (regnum < gdbarch_num_regs (m_gdbarch) || m_has_pseudo)
-	  {
-	    auto size = register_size (m_gdbarch, regnum);
-
-	    if (size == 0)
-	      return;
-
-	    auto status = get_register_status (regnum);
-
-	    gdb_assert (status != REG_VALID);
-
-	    if (status == REG_UNKNOWN)
-	      gdb_printf (file, "<invalid>");
-	    else
-	      gdb_printf (file, "<unavailable>");
-	  }
-	else
-	  {
-	    /* Just print "<cooked>" for pseudo register when
-	       regcache_dump_raw.  */
-	    gdb_printf (file, "<cooked>");
-	  }
+	/* Just print "<cooked>" for pseudo register when
+	   regcache_dump_raw.  */
+	out->field_string ("value", "<cooked>");
       }
   }
 };
@@ -144,7 +146,14 @@ public:
   {}
 
 protected:
-  void dump_reg (ui_file *file, int regnum) override
+
+  int num_additional_headers () override
+  { return 0; }
+
+  void additional_headers (ui_out *out) override
+  { }
+
+  void dump_reg (ui_out *out, int regnum) override
   {}
 };
 
@@ -158,24 +167,38 @@ public:
   {}
 
 protected:
-  void dump_reg (ui_file *file, int regnum) override
-  {
-    if (regnum < 0)
-      {
-	gdb_printf (file, "Rmt Nr  g/G Offset  Expedited");
-      }
-    else if (regnum < gdbarch_num_regs (m_gdbarch))
-      {
-	int pnum, poffset;
 
-	if (remote_register_number_and_offset (m_gdbarch, regnum,
-					       &pnum, &poffset))
-	  {
-	    if (remote_register_is_expedited (regnum))
-	      gdb_printf (file, "%7d %11d  yes", pnum, poffset);
-	    else
-	      gdb_printf (file, "%7d %11d", pnum, poffset);
-	  }
+  int num_additional_headers () override
+  { return 3; }
+
+  void additional_headers (ui_out *out) override
+  {
+    out->table_header (7, ui_left, "remnum", "Rmt Nr");
+    out->table_header (11, ui_left, "goffset", "g/G Offset");
+    out->table_header (3, ui_left, "expedited", "Expedited");
+  }
+
+  void dump_reg (ui_out *out, int regnum) override
+  {
+    int pnum, poffset;
+
+    if (regnum < gdbarch_num_regs (m_gdbarch)
+	&& remote_register_number_and_offset (m_gdbarch, regnum,
+					      &pnum, &poffset))
+      {
+	out->field_signed ("remnum", pnum);
+	out->field_signed ("goffset", poffset);
+
+	if (remote_register_is_expedited (regnum))
+	  out->field_string ("expedited", "yes");
+	else
+	  out->field_skip ("expedited");
+      }
+    else
+      {
+	out->field_skip ("remnum");
+	out->field_skip ("goffset");
+	out->field_skip ("expedited");
       }
   }
 };
@@ -190,22 +213,28 @@ public:
   {}
 
 protected:
-  void dump_reg (ui_file *file, int regnum) override
+
+  int num_additional_headers () override
+  { return 1; }
+
+  void additional_headers (ui_out *out) override
   {
-    if (regnum < 0)
-      gdb_printf (file, "Groups");
-    else
+    out->table_header (0, ui_left, "groups", "Groups");
+  }
+
+  void dump_reg (ui_out *out, int regnum) override
+  {
+    string_file file;
+    const char *sep = "";
+    for (const struct reggroup *group : gdbarch_reggroups (m_gdbarch))
       {
-	const char *sep = "";
-	for (const struct reggroup *group : gdbarch_reggroups (m_gdbarch))
+	if (gdbarch_register_reggroup_p (m_gdbarch, regnum, group))
 	  {
-	    if (gdbarch_register_reggroup_p (m_gdbarch, regnum, group))
-	      {
-		gdb_printf (file, "%s%s", sep, group->name ());
-		sep = ",";
-	      }
+	    gdb_printf (&file, "%s%s", sep, group->name ());
+	    sep = ",";
 	  }
       }
+    out->field_stream ("groups", file);
   }
 };
 
@@ -221,15 +250,13 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
 {
   /* Where to send output.  */
   stdio_file file;
-  ui_file *out;
+  std::optional<ui_out_redirect_pop> redirect;
 
-  if (args == NULL)
-    out = gdb_stdout;
-  else
+  if (args != nullptr)
     {
       if (!file.open (args, "w"))
 	perror_with_name (_("maintenance print architecture"));
-      out = &file;
+      redirect.emplace (current_uiout, &file);
     }
 
   std::unique_ptr<register_dump> dump;
@@ -241,20 +268,25 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
   else
     gdbarch = current_inferior ()->arch ();
 
+  const char *name;
   switch (what_to_dump)
     {
     case regcache_dump_none:
       dump = std::make_unique<register_dump_none> (gdbarch);
+      name = "Registers";
       break;
     case regcache_dump_remote:
       dump = std::make_unique<register_dump_remote> (gdbarch);
+      name = "RegisterRemote";
       break;
     case regcache_dump_groups:
       dump = std::make_unique<register_dump_groups> (gdbarch);
+      name = "RegisterGroups";
       break;
     case regcache_dump_raw:
     case regcache_dump_cooked:
       {
+	name = "RegisterDump";
 	auto dump_pseudo = (what_to_dump == regcache_dump_cooked);
 
 	if (target_has_registers ())
@@ -272,7 +304,7 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
       break;
     }
 
-  dump->dump (out);
+  dump->dump (current_uiout, name);
 }
 
 static void
