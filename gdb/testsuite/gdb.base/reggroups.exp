@@ -39,10 +39,10 @@ proc fetch_reggroups {test} {
 	-re "maint print reggroups\r\n" {
 	    exp_continue
 	}
-	-re "^ Group\[ \t\]+Type\[ \t\]+\r\n" {
+	-re "^Group\[ \t\]+Type\[ \t\]+\r\n" {
 	    exp_continue
 	}
-	-re "^ (\[_0-9a-zA-Z-\]+)\[ \t\]+(user|internal)\[ \t\]+\r\n" {
+	-re "^(\[_0-9a-zA-Z-\]+)\[ \t\]+(user|internal)\[ \t\]+\r\n" {
 	    lappend reggroups $expect_out(1,string)
 	    exp_continue
 	}
