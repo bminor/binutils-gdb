@@ -245,8 +245,14 @@ enum regcache_dump_what
   regcache_dump_remote
 };
 
+/* Helper for the various maint commands that print registers.  ARGS
+   is the arguments passed to the command.  WHAT_TO_DUMP indicates
+   exactly which registers to display.  COMMAND is the command name,
+   used in error messages.  */
+
 static void
-regcache_print (const char *args, enum regcache_dump_what what_to_dump)
+regcache_print (const char *args, enum regcache_dump_what what_to_dump,
+		const char *command)
 {
   /* Where to send output.  */
   stdio_file file;
@@ -255,7 +261,7 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
   if (args != nullptr)
     {
       if (!file.open (args, "w"))
-	perror_with_name (_("maintenance print architecture"));
+	perror_with_name (command);
       redirect.emplace (current_uiout, &file);
     }
 
@@ -310,31 +316,34 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
 static void
 maintenance_print_registers (const char *args, int from_tty)
 {
-  regcache_print (args, regcache_dump_none);
+  regcache_print (args, regcache_dump_none, "maintenance print registers");
 }
 
 static void
 maintenance_print_raw_registers (const char *args, int from_tty)
 {
-  regcache_print (args, regcache_dump_raw);
+  regcache_print (args, regcache_dump_raw, "maintenance print raw-registers");
 }
 
 static void
 maintenance_print_cooked_registers (const char *args, int from_tty)
 {
-  regcache_print (args, regcache_dump_cooked);
+  regcache_print (args, regcache_dump_cooked,
+		  "maintenance print cooked-registers");
 }
 
 static void
 maintenance_print_register_groups (const char *args, int from_tty)
 {
-  regcache_print (args, regcache_dump_groups);
+  regcache_print (args, regcache_dump_groups,
+		  "maintenance print register-groups");
 }
 
 static void
 maintenance_print_remote_registers (const char *args, int from_tty)
 {
-  regcache_print (args, regcache_dump_remote);
+  regcache_print (args, regcache_dump_remote,
+		  "maintenance print remote-registers");
 }
 
 void _initialize_regcache_dump ();
