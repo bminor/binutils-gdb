@@ -64,8 +64,7 @@ examples.tar.gz:
 	$(AM_V_at)( tar czf $@ $(srcdir)/../examples )
 
 install-examples:  examples.tar.gz
-	$(mkinstalldirs) $(docdir)/gprofng
-	$(INSTALL_DATA) examples.tar.gz $(docdir)/gprofng
+	$(mkinstalldirs) $(DESTDIR)$(docdir)/gprofng
+	$(INSTALL_DATA) examples.tar.gz $(DESTDIR)$(docdir)/gprofng
 
 install-am: install-examples
-
