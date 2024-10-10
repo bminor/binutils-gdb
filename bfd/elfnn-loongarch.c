@@ -5435,7 +5435,8 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  Elf_Internal_Sym *sym = (Elf_Internal_Sym *)symtab_hdr->contents
 				    + r_symndx;
 
-	  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+	  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
+	      && r_type != R_LARCH_CALL36)
 	    continue;
 
 	  /* Only TLS instruction sequences that are accompanied by
@@ -5468,8 +5469,8 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	}
       else
 	{
-	  /* Disable the relaxation for ifunc.  */
-	  if (h != NULL && h->type == STT_GNU_IFUNC)
+	  if (h != NULL && h->type == STT_GNU_IFUNC
+	      && r_type != R_LARCH_CALL36)
 	    continue;
 
 	  /* The GOT entry of tls symbols must in current execute file or
@@ -5485,6 +5486,20 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      if (r_type == R_LARCH_TLS_DESC_PC_HI20
 		    && GOT_TLS_GD_BOTH_P (tls_type))
 		symval += 2 * GOT_ENTRY_SIZE;
+	    }
+	  else if (h->plt.offset != MINUS_ONE)
+	    {
+	      sym_sec = htab->elf.splt ? htab->elf.splt : htab->elf.iplt;
+	      symval = h->plt.offset;
+	    }
+	  /* Like loongarch_elf_relocate_section, set relocation(offset) to 0.
+	     Undefweak for other relocations handing in the future.  */
+	  else if (h->root.type == bfd_link_hash_undefweak
+		    && !h->root.linker_def
+		    && r_type == R_LARCH_CALL36)
+	    {
+	      sym_sec = sec;
+	      symval = rel->r_offset;
 	    }
 	  else if ((h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)
