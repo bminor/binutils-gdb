@@ -178,27 +178,31 @@ struct block : public allocate_on_obstack<block>
   bool is_contiguous () const
   { return this->ranges ().size () <= 1; }
 
-  /* Return the "entry PC" of this block.
+  /* Return the entry-pc of this block.
 
-     The entry PC is the lowest (start) address for the block when all addresses
-     within the block are contiguous.  If non-contiguous, then use the start
-     address for the first range in the block.
-
-     At the moment, this almost matches what DWARF specifies as the entry
-     pc.  (The missing bit is support for DW_AT_entry_pc which should be
-     preferred over range data and the low_pc.)
-
-     Once support for DW_AT_entry_pc is added, I expect that an entry_pc
-     field will be added to one of these data structures.  Once that's done,
-     the entry_pc field can be set from the dwarf reader (and other readers
-     too).  ENTRY_PC can then be redefined to be less DWARF-centric.  */
+     If the entry PC has been set to a specific value then this is
+     returned.  Otherwise, the default_entry_pc() address is returned.  */
 
   CORE_ADDR entry_pc () const
   {
-    if (this->is_contiguous ())
-      return this->start ();
-    else
-      return this->ranges ()[0].start ();
+    return default_entry_pc () + m_entry_pc_offset;
+  }
+
+  /* Set this block's entry-pc to ADDR, which must lie between start() and
+     end().  The entry-pc is stored as the signed offset from the
+     default_entry_pc() address.
+
+     Note that block sub-ranges can be out of order, as such the offset of
+     the entry-pc might be negative.  */
+
+  void set_entry_pc (CORE_ADDR addr)
+  {
+    CORE_ADDR start = default_entry_pc ();
+
+    gdb_assert (addr >= this->start () && addr < this->end ());
+    gdb_assert (start >= this->start () && start < this->end ());
+
+    m_entry_pc_offset = addr - start;
   }
 
   /* Return the objfile of this block.  */
@@ -309,6 +313,26 @@ struct block : public allocate_on_obstack<block>
 
 private:
 
+  /* Return the default entry-pc of this block.  The default is the address
+     we use if the debug information hasn't specifically set a different
+     entry-pc value.  This is the lowest address for the block when all
+     addresses within the block are contiguous.  If non-contiguous, then
+     use the start address for the first range in the block.
+
+     This almost matches what DWARF specifies as the entry pc, except that
+     the final case, using the first address of the first range, is a GDB
+     extension.  However, the DWARF reader sets the specific entry-pc
+     wherever possible, so this non-standard fallback case is only used as
+     a last resort.  */
+
+  CORE_ADDR default_entry_pc () const
+  {
+    if (this->is_contiguous ())
+      return this->start ();
+    else
+      return this->ranges ()[0].start ();
+  }
+
   /* If the namespace_info is NULL, allocate it via OBSTACK and
      initialize its members to zero.  */
   void initialize_namespace (struct obstack *obstack);
@@ -345,6 +369,21 @@ private:
      startaddr and endaddr above.  */
 
   struct blockranges *m_ranges = nullptr;
+
+  /* The offset of the actual entry-pc value from the default entry-pc
+     value.  If space was no object then we'd store an actual address along
+     with a flag to indicate if the address has been set or not.  But we'd
+     like to keep the size of block low, so we'd like to use a single
+     member variable.
+
+     We would also like to avoid using 0 as a special address; some targets
+     do allow for accesses to address 0.
+
+     So instead we store the offset of the defined entry-pc from the
+     default entry-pc.  See default_entry_pc() for the definition of the
+     default entry-pc.  See entry_pc() for how this offset is used.  */
+
+  LONGEST m_entry_pc_offset = 0;
 };
 
 /* The global block is singled out so that we can provide a back-link

@@ -11313,8 +11313,106 @@ get_scope_pc_bounds (struct die_info *die,
   *highpc = best_high;
 }
 
+/* Return the base address for DIE (which is represented by BLOCK) within
+   CU.  The base address is the DW_AT_low_pc, or if that is not present,
+   the first address in the first range defined by DW_AT_ranges.
+
+   The DWARF standard actually says that if DIE has neither DW_AT_low_pc or
+   DW_AT_ranges then we should search in the parent of DIE for those
+   properties, and so on up the hierarchy, until we find a die with one of
+   those attributes, and use that as the base address.  We don't implement
+   that yet simply because we've never encountered a need for it.  */
+
+static std::optional<CORE_ADDR>
+dwarf2_die_base_address (struct die_info *die, struct block *block,
+			 struct dwarf2_cu *cu)
+{
+  dwarf2_per_objfile *per_objfile = cu->per_objfile;
+
+  struct attribute *attr = dwarf2_attr (die, DW_AT_low_pc, cu);
+  if (attr != nullptr)
+    return per_objfile->relocate (attr->as_address ());
+  else if (block->ranges ().size () > 0)
+    return block->ranges ()[0].start ();
+
+  return {};
+}
+
+/* Set the entry PC for BLOCK which represents DIE from CU.  Relies on the
+   range information (if present) already having been read from DIE and
+   stored into BLOCK.  */
+
+static void
+dwarf2_record_block_entry_pc (struct die_info *die, struct block *block,
+			      struct dwarf2_cu *cu)
+{
+  dwarf2_per_objfile *per_objfile = cu->per_objfile;
+
+  /* Filled with the entry-pc if we can find it.  */
+  std::optional<CORE_ADDR> entry;
+
+  /* Set the block's entry PC where possible.  */
+  struct attribute *attr = dwarf2_attr (die, DW_AT_entry_pc, cu);
+  if (attr != nullptr)
+    {
+      /* DWARF-5 allows for the DW_AT_entry_pc to be an unsigned constant
+	 offset from the containing DIE's base address.  We don't limit the
+	 constant handling to DWARF-5 though.  If a broken compiler emits
+	 this for DWARF-4 then we handle it just as we would for DWARF-5.  */
+      if (attr->form_is_constant ())
+	{
+	  if (attr->form_is_unsigned ())
+	    {
+	      CORE_ADDR offset = attr->as_unsigned ();
+
+	      std::optional<CORE_ADDR> base
+		= dwarf2_die_base_address (die, block, cu);
+
+	      if (base.has_value ())
+		entry.emplace (base.value () + offset);
+	    }
+	  else
+	    {
+	      /* We could possibly handle signed constants, but this is out
+		 of spec, so for now, just complain and ignore it.  */
+	      complaint (_("Unhandled constant for DW_AT_entry_pc, value (%s)"),
+			 plongest (attr->as_nonnegative ()));
+	    }
+	}
+      else
+	entry.emplace (per_objfile->relocate (attr->as_address ()));
+    }
+  else
+    entry = dwarf2_die_base_address (die, block, cu);
+
+  if (entry.has_value ())
+    {
+      CORE_ADDR entry_pc = entry.value ();
+
+      /* Some compilers (e.g. GCC) will have the DW_AT_entry_pc point at an
+	 empty sub-range, which by a strict reading of the DWARF means that
+	 the entry-pc is outside the blocks code range.  If we continue
+	 using this address then GDB will confuse itself, breakpoints will
+	 be placed at the entry-pc, but once stopped there, GDB will not
+	 recognise that it is inside this block.
+
+	 To avoid this, ignore entry-pc values that are outside the block's
+	 range, GDB will then select a suitable default entry-pc.  */
+      if (entry_pc >= block->start () && entry_pc < block->end ())
+	block->set_entry_pc (entry_pc);
+      else
+	complaint (_("in %s, DIE %s, DW_AT_entry_pc (%s) outside "
+		     "block range (%s -> %s)"),
+		   objfile_name (per_objfile->objfile),
+		   sect_offset_str (die->sect_off),
+		   paddress (per_objfile->objfile->arch (), entry_pc),
+		   paddress (per_objfile->objfile->arch (), block->start ()),
+		   paddress (per_objfile->objfile->arch (), block->end ()));
+    }
+}
+
 /* Record the address ranges for BLOCK, offset by BASEADDR, as given
-   in DIE.  */
+   in DIE.  Also set the entry PC for BLOCK.  */
 
 static void
 dwarf2_record_block_ranges (struct die_info *die, struct block *block,
@@ -11369,6 +11467,8 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 
       block->set_ranges (make_blockranges (objfile, blockvec));
     }
+
+  dwarf2_record_block_entry_pc (die, block, cu);
 }
 
 /* Check whether the producer field indicates either of GCC < 4.6, or the
