@@ -10,11 +10,12 @@
 # placed before text sections and there should no other note sections
 # between .note.gnu.build-id and text sections.
 #xfail: [uses_genelf]
-#xfail: m68hc12-*
 # The following targets don't support --build-id.
 #xfail: cr16-* crx-* visium-*
 # The following targets place .note.gnu.build-id in unusual places.
-#xfail: *-*-hpux* arc*-* avr-* microblaze-*-* nds32*-* spu-*-*
+#xfail: *-*-hpux*
+#xfail: arc*-* avr-* m68hc1*-* microblaze*-* nds32*-* spu-*-* xstormy16-*-*
+#noxfail: microblaze*-linux*
 
 #...
  +[0-9]+ +\.note.gnu.build-id +

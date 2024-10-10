@@ -897,6 +897,9 @@ proc prune_dump_output { output } {
 #	Run this test and it is is expected to fail on a specified list
 #	of targets.
 #
+#   noxfail: GLOB|PROC ...
+#	Of targets that match the xfail list, this list won't fail.
+#
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
 #	to pass.  The DUMPPROG, addr2line, nm, objdump, readelf and size
@@ -1001,6 +1004,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(warning) {}
     set opts(warning_output) {}
     set opts(xfail) {}
+    set opts(noxfail) {}
 
     set in_extra 0
     foreach i [concat $opt_array {{} {}} $extra_options] {
@@ -1031,6 +1035,7 @@ proc run_dump_test { name {extra_options {}} } {
 
 	switch -- $opt_name {
 	    xfail {}
+	    noxfail {}
 	    target {}
 	    alltargets {}
 	    notarget {}
@@ -1293,6 +1298,12 @@ proc run_dump_test { name {extra_options {}} } {
     foreach targ $opts(xfail) {
 	if [match_target $targ] {
 	    setup_xfail "*-*-*"
+	    break
+	}
+    }
+    foreach targ $opts(noxfail) {
+	if [match_target $targ] {
+	    clear_xfail "*-*-*"
 	    break
 	}
     }
