@@ -29,26 +29,39 @@ if { [prepare_for_testing "failed to prepare" $testfile \
 
 require {string equal [have_index $binfile] ""}
 
+set lines [gdb_get_lines "maint print objfiles"]
 set re_ws "\[ \t\]"
 
 # Regression test for PR31900.
 set val1 ns::A::val1
-gdb_test_lines "maint print objfiles" \
-    "val1 has a parent" \
-    [multi_line \
-	 "" \
-	 "$re_ws+qualified:$re_ws+$val1" \
-	 ".*"]
+set test "val1 has a parent"
+if { [regexp val1 $lines] } {
+    set re \
+	[multi_line \
+	     "" \
+	     "$re_ws+qualified:$re_ws+$val1" \
+	     ".*"]
+    gdb_assert {[regexp $re $lines]} $test
 
-gdb_test "print $val1" " = $val1"
+    gdb_test "print $val1" " = $val1"
+} else {
+    # Clang doesn't emit a DIE for val1.
+    unsupported $test
+}
 
 # Regression test for PR32158.
 set val2 ns::ec::val2
-gdb_test_lines "maint print objfiles" \
-    "val2 has correct parent" \
-    [multi_line \
-	 "" \
-	 "$re_ws+qualified:$re_ws+$val2" \
-	 ".*"]
+set test "val2 has correct parent"
+if { [regexp val2 $lines] } {
+    set re \
+	[multi_line \
+	     "" \
+	     "$re_ws+qualified:$re_ws+$val2" \
+	     ".*"]
+    gdb_assert {[regexp $re $lines]} $test
 
-gdb_test "print $val2" " = $val2"
+    gdb_test "print $val2" " = $val2"
+} else {
+    # Clang doesn't emit a DIE for val2.
+    unsupported $test
+}

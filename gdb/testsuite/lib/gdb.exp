@@ -1817,6 +1817,55 @@ proc gdb_test_sequence { args } {
 }
 
 
+# Issue COMMAND, and return corresponding output lines.  Helper function for
+# gdb_get_lines_no_pass and gdb_get_lines.
+
+proc gdb_get_lines_1 { command message } {
+    set no_pass [string equal $message ""]
+    set lines ""
+    set ok 0
+    gdb_test_multiple $command $message {
+	-re "\r\n(\[^\r\n\]*)(?=\r\n)" {
+	    set line $expect_out(1,string)
+	    if { $lines eq "" } {
+		append lines "$line"
+	    } else {
+		append lines "\r\n$line"
+	    }
+	    exp_continue
+	}
+	-re -wrap "" {
+	    append lines "\r\n"
+	    set ok 1
+	    if { ! $no_pass } {
+		pass $gdb_test_name
+	    }
+	}
+    }
+
+    if { ! $ok } {
+	return ""
+    }
+
+    return $lines
+}
+
+# Issue COMMAND, and return corresponding output lines.  Don't generate a pass.
+
+proc gdb_get_lines_no_pass { command } {
+    gdb_get_lines_1 $command ""
+}
+
+# Issue COMMAND, and return corresponding output lines.  Generate a pass.
+
+proc gdb_get_lines { command {message ""} } {
+    if { $message == "" } {
+	set message [command_to_message $command]
+    }
+
+    gdb_get_lines_1 $command $message
+}
+
 # Match output of COMMAND using RE.  Read output line-by-line.
 # Report pass/fail with MESSAGE.
 # For a command foo with output:
@@ -1856,22 +1905,7 @@ proc gdb_test_lines { command message re args } {
 	set message [command_to_message $command]
     }
 
-    set lines ""
-    gdb_test_multiple $command $message {
-	-re "\r\n(\[^\r\n\]*)(?=\r\n)" {
-	    set line $expect_out(1,string)
-	    if { $lines eq "" } {
-		append lines "$line"
-	    } else {
-		append lines "\r\n$line"
-	    }
-	    exp_continue
-	}
-	-re -wrap "" {
-	    append lines "\r\n"
-	}
-    }
-
+    set lines [gdb_get_lines_no_pass $command]
     gdb_assert { [regexp $re $lines] } $message
 
     foreach re $re_not {
