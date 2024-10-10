@@ -621,6 +621,7 @@ objfile_relocate1 (struct objfile *objfile,
 	{
 	  b->set_start (b->start () + delta[block_line_section]);
 	  b->set_end (b->end () + delta[block_line_section]);
+	  b->set_entry_pc (b->entry_pc () + delta[block_line_section]);
 
 	  for (blockrange &r : b->ranges ())
 	    {

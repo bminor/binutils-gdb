@@ -179,25 +179,33 @@ struct block : public allocate_on_obstack<block>
 
   /* Return the "entry PC" of this block.
 
-     The entry PC is the lowest (start) address for the block when all addresses
-     within the block are contiguous.  If non-contiguous, then use the start
-     address for the first range in the block.
+     If the entry PC has been set to a specific value then this is
+     returned.  Otherwise, the entry PC is the lowest (start) address for
+     the block when all addresses within the block are contiguous.  If
+     non-contiguous, then use the start address for the first range in the
+     block.
 
-     At the moment, this almost matches what DWARF specifies as the entry
-     pc.  (The missing bit is support for DW_AT_entry_pc which should be
-     preferred over range data and the low_pc.)
-
-     Once support for DW_AT_entry_pc is added, I expect that an entry_pc
-     field will be added to one of these data structures.  Once that's done,
-     the entry_pc field can be set from the dwarf reader (and other readers
-     too).  ENTRY_PC can then be redefined to be less DWARF-centric.  */
+     This almost matches what DWARF specifies as the entry pc, except that
+     the final case, using the first address of the first range, is a GDB
+     extension.  However, the DWARF reader sets the specific entry PC
+     wherever possible, so this non-standard fallback case is only used as
+     a last resort.  */
 
   CORE_ADDR entry_pc () const
   {
-    if (this->is_contiguous ())
+    if (m_entry_pc != 0)
+      return m_entry_pc;
+    else if (this->is_contiguous ())
       return this->start ();
     else
       return this->ranges ()[0].start ();
+  }
+
+  /* Set this block's entry PC.  */
+
+  void set_entry_pc (CORE_ADDR addr)
+  {
+    m_entry_pc = addr;
   }
 
   /* Return the objfile of this block.  */
@@ -344,6 +352,18 @@ private:
      startaddr and endaddr above.  */
 
   struct blockranges *m_ranges = nullptr;
+
+  /* The entry address for this block.  The value 0 is special and
+     indicates that the entry address has not been set.
+
+     Using 0 as a special value is not ideal, targets for which 0 is a
+     valid code address might run into problems if they want to use 0 as a
+     block's entry address, but the alternative is to carry a flag
+     indicating if m_entry_pc is valid or not, but that would make 'struct
+     block' even bigger, and we want to keep 'struct block' as small as
+     possible (we might have a lot of blocks).  */
+
+  CORE_ADDR m_entry_pc = 0;
 };
 
 /* The global block is singled out so that we can provide a back-link
