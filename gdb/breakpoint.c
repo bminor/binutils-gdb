@@ -10480,45 +10480,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
      'wp_frame'.  */
   frame_id watchpoint_frame = get_frame_id (wp_frame);
 
-  /* If the expression is "local", then set up a "watchpoint scope"
-     breakpoint at the point where we've left the scope of the watchpoint
-     expression.  Create the scope breakpoint before the watchpoint, so
-     that we will encounter it first in bpstat_stop_status.  */
-  if (exp_valid_block != NULL && wp_frame != NULL)
-    {
-      frame_id caller_frame_id = frame_unwind_caller_id (wp_frame);
-
-      if (frame_id_p (caller_frame_id))
-	{
-	  gdbarch *caller_arch = frame_unwind_caller_arch (wp_frame);
-	  CORE_ADDR caller_pc = frame_unwind_caller_pc (wp_frame);
-
-	  scope_breakpoint
-	    = create_internal_breakpoint (caller_arch, caller_pc,
-					  bp_watchpoint_scope);
-
-	  /* create_internal_breakpoint could invalidate WP_FRAME.  */
-	  wp_frame = NULL;
-
-	  scope_breakpoint->enable_state = bp_enabled;
-
-	  /* Automatically delete the breakpoint when it hits.  */
-	  scope_breakpoint->disposition = disp_del;
-
-	  /* Only break in the proper frame (help with recursion).  */
-	  scope_breakpoint->frame_id = caller_frame_id;
-
-	  /* Set the address at which we will stop.  */
-	  bp_location &loc = scope_breakpoint->first_loc ();
-	  loc.gdbarch = caller_arch;
-	  loc.requested_address = caller_pc;
-	  loc.address
-	    = adjust_breakpoint_address (loc.gdbarch, loc.requested_address,
-					 scope_breakpoint->type,
-					 current_program_space);
-	}
-    }
-
   /* Now set up the breakpoint.  We create all watchpoints as hardware
      watchpoints here even if hardware watchpoints are turned off, a call
      to update_watchpoint later in this function will cause the type to
@@ -10589,14 +10550,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
       w->watchpoint_thread = null_ptid;
     }
 
-  if (scope_breakpoint != NULL)
-    {
-      /* The scope breakpoint is related to the watchpoint.  We will
-	 need to act on them together.  */
-      w->related_breakpoint = scope_breakpoint;
-      scope_breakpoint->related_breakpoint = w.get ();
-    }
-
   if (!just_location)
     value_free_to_mark (mark);
 
@@ -10604,7 +10557,60 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
      that should be inserted.  */
   update_watchpoint (w.get (), true /* reparse */);
 
+  /* If the expression is "local", then set up a "watchpoint scope"
+     breakpoint at the point where we've left the scope of the watchpoint
+     expression.  Create the scope breakpoint before the watchpoint, so
+     that we will encounter it first in bpstat_stop_status.  */
+  if (exp_valid_block != nullptr && wp_frame != nullptr)
+    {
+      frame_id caller_frame_id = frame_unwind_caller_id (wp_frame);
+
+      if (frame_id_p (caller_frame_id))
+	{
+	  gdbarch *caller_arch = frame_unwind_caller_arch (wp_frame);
+	  CORE_ADDR caller_pc = frame_unwind_caller_pc (wp_frame);
+
+	  scope_breakpoint
+	    = create_internal_breakpoint (caller_arch, caller_pc,
+					  bp_watchpoint_scope);
+
+	  /* create_internal_breakpoint could invalidate WP_FRAME.  */
+	  wp_frame = nullptr;
+
+	  scope_breakpoint->enable_state = bp_enabled;
+
+	  /* Automatically delete the breakpoint when it hits.  */
+	  scope_breakpoint->disposition = disp_del;
+
+	  /* Only break in the proper frame (help with recursion).  */
+	  scope_breakpoint->frame_id = caller_frame_id;
+
+	  /* Set the address at which we will stop.  */
+	  bp_location &loc = scope_breakpoint->first_loc ();
+	  loc.gdbarch = caller_arch;
+	  loc.requested_address = caller_pc;
+	  loc.address
+	    = adjust_breakpoint_address (loc.gdbarch, loc.requested_address,
+					 scope_breakpoint->type,
+					 current_program_space);
+	}
+  }
+
+  if (scope_breakpoint != nullptr)
+    {
+      /* The scope breakpoint is related to the watchpoint.  We will
+	 need to act on them together.  */
+      w->related_breakpoint = scope_breakpoint;
+      scope_breakpoint->related_breakpoint = w.get ();
+    }
+
+  /* Verify that the scope breakpoint comes before the watchpoint in the
+     breakpoint chain.  */
+  gdb_assert (scope_breakpoint == nullptr
+	      || &breakpoint_chain.back () == scope_breakpoint);
+  watchpoint *watchpoint_ptr = w.get ();
   install_breakpoint (internal, std::move (w), 1);
+  gdb_assert (&breakpoint_chain.back () == watchpoint_ptr);
 }
 
 /* Return count of debug registers needed to watch the given expression.
