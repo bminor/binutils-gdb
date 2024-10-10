@@ -3455,19 +3455,10 @@ find_pc_line_symtab (CORE_ADDR pc)
   return sal.symtab;
 }
 
-/* Find line number LINE in any symtab whose name is the same as
-   SYMTAB.
+/* See symtab.h.  */
 
-   If found, return the symtab that contains the linetable in which it was
-   found, set *INDEX to the index in the linetable of the best entry
-   found, and set *EXACT_MATCH to true if the value returned is an
-   exact match.
-
-   If not found, return NULL.  */
-
-struct symtab *
-find_line_symtab (struct symtab *sym_tab, int line,
-		  int *index, bool *exact_match)
+symtab *
+find_line_symtab (symtab *sym_tab, int line, int *index)
 {
   int exact = 0;  /* Initialized here to avoid a compiler warning.  */
 
@@ -3547,8 +3538,6 @@ done:
 
   if (index)
     *index = best_index;
-  if (exact_match)
-    *exact_match = (exact != 0);
 
   return best_symtab;
 }
@@ -3609,7 +3598,7 @@ find_line_pc (struct symtab *symtab, int line, CORE_ADDR *pc)
   if (symtab == 0)
     return false;
 
-  symtab = find_line_symtab (symtab, line, &ind, NULL);
+  symtab = find_line_symtab (symtab, line, &ind);
   if (symtab != NULL)
     {
       l = symtab->linetable ();

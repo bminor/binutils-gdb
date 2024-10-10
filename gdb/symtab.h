@@ -2510,7 +2510,16 @@ completion_skip_symbol (complete_symbol_mode mode, Symbol *sym)
 
 bool matching_obj_sections (struct obj_section *, struct obj_section *);
 
-extern struct symtab *find_line_symtab (struct symtab *, int, int *, bool *);
+/* Find line number LINE in any symtab whose name is the same as
+   SYMTAB.
+
+   If found, return the symtab that contains the linetable in which it was
+   found, set *INDEX to the index in the linetable of the best entry
+   found.  The returned index includes inexact matches.
+
+   If not found, return NULL.  */
+
+extern symtab *find_line_symtab (symtab *sym_tab, int line, int *index);
 
 /* Given a function symbol SYM, find the symtab and line for the start
    of the function.  If FUNFIRSTLINE is true, we want the first line

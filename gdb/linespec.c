@@ -4031,7 +4031,7 @@ decode_digits_list_mode (struct linespec_state *self,
       set_current_program_space (pspace);
 
       /* Simplistic search just for the list command.  */
-      val.symtab = find_line_symtab (elt, val.line, NULL, NULL);
+      val.symtab = find_line_symtab (elt, val.line, nullptr);
       if (val.symtab == NULL)
 	val.symtab = elt;
       val.pspace = pspace;
