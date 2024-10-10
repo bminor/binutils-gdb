@@ -4073,7 +4073,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  /* For 2G jump, generate pcalau12i, jirl.  */
 	  /* If use jirl, turns to R_LARCH_B16.  */
 	  uint32_t insn = bfd_get (32, input_bfd, contents + rel->r_offset);
-	  if (LARCH_INSN_JIRL(insn))
+	  if (LARCH_INSN_JIRL (insn))
 	    {
 	      relocation &= 0xfff;
 	      /* Signed extend.  */
@@ -4853,9 +4853,11 @@ loongarch_tls_perform_trans (bfd *abfd, asection *sec,
 */
 static bool
 loongarch_relax_tls_le (bfd *abfd, asection *sec,
-			Elf_Internal_Rela *rel,
+			asection *sym_sec ATTRIBUTE_UNUSED,
+			Elf_Internal_Rela *rel, bfd_vma symval,
 			struct bfd_link_info *link_info,
-			bfd_vma symval)
+			bool *agin ATTRIBUTE_UNUSED,
+			bfd_vma max_alignment ATTRIBUTE_UNUSED)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   uint32_t insn = bfd_get (32, abfd, contents + rel->r_offset);
@@ -4863,7 +4865,7 @@ loongarch_relax_tls_le (bfd *abfd, asection *sec,
   symval = symval - elf_hash_table (link_info)->tls_sec->vma;
   /* The old LE instruction sequence can be relaxed when the symbol offset
      is smaller than the 12-bit range.  */
-  if (ELFNN_R_TYPE ((rel + 1)->r_info) == R_LARCH_RELAX && (symval <= 0xfff))
+  if (symval <= 0xfff)
     {
       switch (ELFNN_R_TYPE (rel->r_info))
 	{
@@ -4976,9 +4978,6 @@ loongarch_relax_pcala_addi (bfd *abfd, asection *sec, asection *sym_sec,
 
   /* Is pcalau12i + addi.d insns?  */
   if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_PCALA_LO12)
-      || (ELFNN_R_TYPE ((rel_lo + 1)->r_info) != R_LARCH_RELAX)
-      || (ELFNN_R_TYPE ((rel_hi + 1)->r_info) != R_LARCH_RELAX)
-      || (rel_hi->r_offset + 4 != rel_lo->r_offset)
       || !LARCH_INSN_ADDI_D(add)
       /* Is pcalau12i $rd + addi.d $rd,$rd?  */
       || (LARCH_GET_RD(add) != rd)
@@ -5036,10 +5035,8 @@ loongarch_relax_call36 (bfd *abfd, asection *sec, asection *sym_sec,
   else if (symval < pc)
     pc += (max_alignment > 4 ? max_alignment : 0);
 
-
   /* Is pcalau12i + addi.d insns?  */
-  if ((ELFNN_R_TYPE ((rel + 1)->r_info) != R_LARCH_RELAX)
-      || !LARCH_INSN_JIRL(jirl)
+  if (!LARCH_INSN_JIRL (jirl)
       || ((bfd_signed_vma)(symval - pc) < (bfd_signed_vma)(int32_t)0xf8000000)
       || ((bfd_signed_vma)(symval - pc) > (bfd_signed_vma)(int32_t)0x7fffffc))
     return false;
@@ -5065,7 +5062,12 @@ loongarch_relax_call36 (bfd *abfd, asection *sec, asection *sym_sec,
 /* Relax pcalau12i,ld.d => pcalau12i,addi.d.  */
 static bool
 loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
-		Elf_Internal_Rela *rel_hi)
+			  asection *sym_sec ATTRIBUTE_UNUSED,
+			  Elf_Internal_Rela *rel_hi,
+			  bfd_vma symval ATTRIBUTE_UNUSED,
+			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			  bool *again ATTRIBUTE_UNUSED,
+			  bfd_vma max_alignment ATTRIBUTE_UNUSED)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   Elf_Internal_Rela *rel_lo = rel_hi + 2;
@@ -5075,9 +5077,6 @@ loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
   uint32_t addi_d = LARCH_OP_ADDI_D;
 
   if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_GOT_PC_LO12)
-      || (ELFNN_R_TYPE ((rel_lo + 1)->r_info) != R_LARCH_RELAX)
-      || (ELFNN_R_TYPE ((rel_hi + 1)->r_info) != R_LARCH_RELAX)
-      || (rel_hi->r_offset + 4 != rel_lo->r_offset)
       || (LARCH_GET_RD(ld) != rd)
       || (LARCH_GET_RJ(ld) != rd)
       || !LARCH_INSN_LD_D(ld))
@@ -5107,11 +5106,12 @@ bfd_elfNN_loongarch_set_data_segment_info (struct bfd_link_info *info,
 /* Implement R_LARCH_ALIGN by deleting excess alignment NOPs.
    Once we've handled an R_LARCH_ALIGN, we can't relax anything else.  */
 static bool
-loongarch_relax_align (bfd *abfd, asection *sec,
-			asection *sym_sec,
-			struct bfd_link_info *link_info,
+loongarch_relax_align (bfd *abfd, asection *sec, asection *sym_sec,
 			Elf_Internal_Rela *rel,
-			bfd_vma symval)
+			bfd_vma symval ATTRIBUTE_UNUSED,
+			struct bfd_link_info *link_info,
+			bool *again ATTRIBUTE_UNUSED,
+			bfd_vma max_alignment ATTRIBUTE_UNUSED)
 {
   bfd_vma  addend, max = 0, alignment = 1;
 
@@ -5199,9 +5199,6 @@ loongarch_relax_tls_ld_gd_desc (bfd *abfd, asection *sec, asection *sym_sec,
   /* Is pcalau12i + addi.d insns?  */
   if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_GOT_PC_LO12
 	&& ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_TLS_DESC_PC_LO12)
-      || (ELFNN_R_TYPE ((rel_lo + 1)->r_info) != R_LARCH_RELAX)
-      || (ELFNN_R_TYPE ((rel_hi + 1)->r_info) != R_LARCH_RELAX)
-      || (rel_hi->r_offset + 4 != rel_lo->r_offset)
       || !LARCH_INSN_ADDI_D(add)
       /* Is pcalau12i $rd + addi.d $rd,$rd?  */
       || (LARCH_GET_RD(add) != rd)
@@ -5258,12 +5255,18 @@ loongarch_get_max_alignment (asection *sec)
   return (bfd_vma) 1 << max_alignment_power;
 }
 
+typedef bool (*relax_func_t) (bfd *, asection *, asection *,
+			      Elf_Internal_Rela *, bfd_vma,
+			      struct bfd_link_info *, bool *,
+			       bfd_vma);
+
 static bool
 loongarch_elf_relax_section (bfd *abfd, asection *sec,
 			     struct bfd_link_info *info,
 			     bool *again)
 {
   *again = false;
+
   if (!is_elf_hash_table (info->hash)
       || elf_hash_table_id (elf_hash_table (info)) != LARCH_ELF_DATA)
     return true;
@@ -5278,13 +5281,13 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 
   if (bfd_link_relocatable (info)
       || sec->sec_flg0
-      || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
+      || (sec->flags & SEC_RELOC) == 0
+      || (sec->flags & SEC_HAS_CONTENTS) == 0
+      /* The exp_seg_relro_adjust is enum phase_enum (0x4).  */
+      || *(htab->data_segment_phase) == 4
       || (info->disable_target_specific_optimizations
-	  && info->relax_pass == 0)
-      /* The exp_seg_relro_adjust is enum phase_enum (0x4),
-	 and defined in ld/ldexp.h.  */
-      || *(htab->data_segment_phase) == 4)
+	  && info->relax_pass == 0))
     return true;
 
   struct bfd_elf_section_data *data = elf_section_data (sec);
@@ -5294,11 +5297,14 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
   else if (!(relocs = _bfd_elf_link_read_relocs (abfd, sec, NULL, NULL,
 						 info->keep_memory)))
     return true;
+  data->relocs = relocs;
 
+  /* Read this BFD's contents if we haven't done so already.  */
   if (!data->this_hdr.contents
       && !bfd_malloc_and_get_section (abfd, sec, &data->this_hdr.contents))
     return true;
 
+  /* Read this BFD's symbols if we haven't done so already.  */
   Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (abfd);
   if (symtab_hdr->sh_info != 0
       && !symtab_hdr->contents
@@ -5307,8 +5313,6 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 						   symtab_hdr->sh_info,
 						   0, NULL, NULL, NULL)))
     return true;
-
-  data->relocs = relocs;
 
   /* Estimate the maximum alignment for all output sections once time
      should be enough.  */
@@ -5331,6 +5335,93 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
       unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
       unsigned long r_symndx = ELFNN_R_SYM (rel->r_info);
 
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  h = elf_sym_hashes (abfd)[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+	       || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
+
+      /* If the conditions for tls type transition are met, type
+	 transition is performed instead of relax.
+	 During the transition from DESC->IE/LE, there are 2 situations
+	 depending on the different configurations of the relax/norelax
+	 option.
+	 If the -relax option is used, the extra nops will be removed,
+	 and this transition is performed in pass 0.
+	 If the --no-relax option is used, nop will be retained, and
+	 this transition is performed in pass 1.  */
+      if (IS_LOONGARCH_TLS_TRANS_RELOC (r_type)
+	  && (i + 1 != sec->reloc_count)
+	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX
+	  && rel->r_offset == rel[1].r_offset
+	  && loongarch_can_trans_tls (abfd, info, h, r_symndx, r_type))
+	{
+	  loongarch_tls_perform_trans (abfd, sec, rel, h, info);
+	  r_type = ELFNN_R_TYPE (rel->r_info);
+	}
+
+      relax_func_t relax_func = NULL;
+      if (info->relax_pass == 0)
+	{
+	  switch (r_type)
+	    {
+	    case R_LARCH_PCALA_HI20:
+	      relax_func = loongarch_relax_pcala_addi;
+	      break;
+	    case R_LARCH_GOT_PC_HI20:
+	      relax_func = loongarch_relax_pcala_ld;
+	      break;
+	    case R_LARCH_CALL36:
+	      relax_func = loongarch_relax_call36;
+	      break;
+	    case R_LARCH_TLS_LE_HI20_R:
+	    case R_LARCH_TLS_LE_LO12_R:
+	    case R_LARCH_TLS_LE_ADD_R:
+	    case R_LARCH_TLS_LE_HI20:
+	    case R_LARCH_TLS_LE_LO12:
+	    case R_LARCH_TLS_LE64_LO20:
+	    case R_LARCH_TLS_LE64_HI12:
+	      relax_func = loongarch_relax_tls_le;
+	      break;
+	    case R_LARCH_TLS_LD_PC_HI20:
+	    case R_LARCH_TLS_GD_PC_HI20:
+	    case R_LARCH_TLS_DESC_PC_HI20:
+	      relax_func = loongarch_relax_tls_ld_gd_desc;
+	      break;
+	    default:
+		continue;
+	    }
+
+	  /* Only relax this reloc if it is paired with R_RISCV_RELAX.  */
+	  if (r_type == R_LARCH_TLS_LD_PC_HI20
+	      || r_type == R_LARCH_TLS_GD_PC_HI20
+	      || r_type == R_LARCH_TLS_DESC_PC_HI20
+	      || r_type == R_LARCH_PCALA_HI20
+	      || r_type == R_LARCH_GOT_PC_HI20)
+	    {
+	      if ((i + 2) == sec->reloc_count - 1
+		  || ELFNN_R_TYPE ((rel + 1)->r_info) != R_LARCH_RELAX
+		  || ELFNN_R_TYPE ((rel + 3)->r_info) != R_LARCH_RELAX
+		  || rel->r_offset != (rel + 1)->r_offset
+		  || (rel + 2)->r_offset != (rel + 3)->r_offset
+		  || rel->r_offset + 4 != (rel + 2)->r_offset)
+		continue;
+	    }
+	  else
+	    {
+	      if (i == sec->reloc_count - 1
+		  || ELFNN_R_TYPE ((rel + 1)->r_info) != R_LARCH_RELAX
+		  || rel->r_offset != (rel + 1)->r_offset)
+		continue;
+	    }
+	}
+      else if (info->relax_pass == 1 && r_type == R_LARCH_ALIGN)
+	relax_func = loongarch_relax_align;
+      else
+	continue;
+
       /* Four kind of relocations:
 	 Normal: symval is the symbol address.
 	 R_LARCH_ALIGN: symval is the address of the last NOP instruction
@@ -5343,29 +5434,26 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  Elf_Internal_Sym *sym = (Elf_Internal_Sym *)symtab_hdr->contents
 				    + r_symndx;
+
 	  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 	    continue;
 
 	  /* Only TLS instruction sequences that are accompanied by
 	     R_LARCH_RELAX and cannot perform type transition can be
 	     relaxed.  */
-	  if (R_LARCH_TLS_LD_PC_HI20 == r_type
-	      || R_LARCH_TLS_GD_PC_HI20 == r_type
-	      || (R_LARCH_TLS_DESC_PC_HI20 == r_type
-		  && (i + 1 != sec->reloc_count)
-		  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX
-		  && ! loongarch_can_trans_tls (abfd, info, h,
-						  r_symndx, r_type)))
+	  if (r_type == R_LARCH_TLS_LD_PC_HI20
+	      || r_type == R_LARCH_TLS_GD_PC_HI20
+	      || r_type == R_LARCH_TLS_DESC_PC_HI20)
 	    {
 	      sym_sec = htab->elf.sgot;
 	      symval = elf_local_got_offsets (abfd)[r_symndx];
 	      char tls_type = _bfd_loongarch_elf_tls_type (abfd, h,
 							    r_symndx);
-	      if (R_LARCH_TLS_DESC_PC_HI20 == r_type
+	      if (r_type == R_LARCH_TLS_DESC_PC_HI20
 		    && GOT_TLS_GD_BOTH_P (tls_type))
 		symval += 2 * GOT_ENTRY_SIZE;
 	    }
-	  else if (sym->st_shndx == SHN_UNDEF || R_LARCH_ALIGN == r_type)
+	  else if (sym->st_shndx == SHN_UNDEF || r_type == R_LARCH_ALIGN)
 	    {
 	      sym_sec = sec;
 	      symval = rel->r_offset;
@@ -5376,35 +5464,25 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      symval = sym->st_value;
 	    }
 	  symtype = ELF_ST_TYPE (sym->st_info);
+	  is_abs_symbol = sym->st_shndx == SHN_ABS;
 	}
       else
 	{
-	  r_symndx = ELFNN_R_SYM (rel->r_info) - symtab_hdr->sh_info;
-	  h = elf_sym_hashes (abfd)[r_symndx];
-
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
 	  /* Disable the relaxation for ifunc.  */
 	  if (h != NULL && h->type == STT_GNU_IFUNC)
 	    continue;
 
 	  /* The GOT entry of tls symbols must in current execute file or
 	     shared object.  */
-	  if (R_LARCH_TLS_LD_PC_HI20 == r_type
-	      || R_LARCH_TLS_GD_PC_HI20 == r_type
-	      || (R_LARCH_TLS_DESC_PC_HI20 == r_type
-		  && (i + 1 != sec->reloc_count)
-		  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX
-		  && !loongarch_can_trans_tls (abfd, info, h,
-						r_symndx, r_type)))
+	  if (r_type == R_LARCH_TLS_LD_PC_HI20
+	      || r_type == R_LARCH_TLS_GD_PC_HI20
+	      || r_type == R_LARCH_TLS_DESC_PC_HI20)
 	    {
 	      sym_sec = htab->elf.sgot;
 	      symval = h->got.offset;
 	      char tls_type = _bfd_loongarch_elf_tls_type (abfd, h,
 							    r_symndx);
-	      if (R_LARCH_TLS_DESC_PC_HI20 == r_type
+	      if (r_type == R_LARCH_TLS_DESC_PC_HI20
 		    && GOT_TLS_GD_BOTH_P (tls_type))
 		symval += 2 * GOT_ENTRY_SIZE;
 	    }
@@ -5413,12 +5491,13 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 		&& h->root.u.def.section != NULL
 		&& h->root.u.def.section->output_section != NULL)
 	    {
-	      symval = h->root.u.def.value;
 	      sym_sec = h->root.u.def.section;
+	      symval = h->root.u.def.value;
 	    }
 	  else
 	    continue;
 
+	  is_abs_symbol = bfd_is_abs_section (h->root.u.def.section);
 	  if (h && LARCH_REF_LOCAL (info, h))
 	    local_got = true;
 	  symtype = h->type;
@@ -5441,7 +5520,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	 + (alingmeng - 4).
 	 If r_symndx is 0, alignmeng-4 is r_addend.
 	 If r_symndx > 0, alignment-4 is 2^(r_addend & 0xff)-4.  */
-      else if (R_LARCH_ALIGN == r_type)
+      else if (r_type == R_LARCH_ALIGN)
 	if (r_symndx > 0)
 	  symval += ((1 << (rel->r_addend & 0xff)) - 4);
 	else
@@ -5451,96 +5530,14 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 
       symval += sec_addr (sym_sec);
 
-      /* If the conditions for tls type transition are met, type
-	 transition is performed instead of relax.
-	 During the transition from DESC->IE/LE, there are 2 situations
-	 depending on the different configurations of the relax/norelax
-	 option.
-	 If the -relax option is used, the extra nops will be removed,
-	 and this transition is performed in pass 0.
-	 If the --no-relax option is used, nop will be retained, and
-	 this transition is performed in pass 1.  */
-      if (IS_LOONGARCH_TLS_TRANS_RELOC (r_type)
-	  && (i + 1 != sec->reloc_count)
-	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX
-	  && loongarch_can_trans_tls (abfd, info, h, r_symndx, r_type))
-	{
-	  loongarch_tls_perform_trans (abfd, sec, rel, h, info);
-	  r_type = ELFNN_R_TYPE (rel->r_info);
-	}
+      if (r_type == R_LARCH_GOT_PC_HI20 && (!local_got || is_abs_symbol))
+	continue;
 
-      switch (r_type)
-	{
-	case R_LARCH_ALIGN:
-	  if (1 == info->relax_pass)
-	    loongarch_relax_align (abfd, sec, sym_sec, info, rel, symval);
-	  break;
-
-	case R_LARCH_DELETE:
-	  if (1 == info->relax_pass)
-	    {
-	      loongarch_relax_delete_bytes (abfd, sec, rel->r_offset, 4, info);
-	      rel->r_info = ELFNN_R_INFO (0, R_LARCH_NONE);
-	    }
-	  break;
-	case R_LARCH_CALL36:
-	  if (0 == info->relax_pass && (i + 2) <= sec->reloc_count)
-	    loongarch_relax_call36 (abfd, sec, sym_sec, rel, symval,
+      if (relax_func (abfd, sec, sym_sec, rel, symval,
+		      info, again, max_alignment)
+	  && relax_func == loongarch_relax_pcala_ld)
+	loongarch_relax_pcala_addi (abfd, sec, sym_sec, rel, symval,
 				    info, again, max_alignment);
-	  break;
-
-	case R_LARCH_TLS_LE_HI20_R:
-	case R_LARCH_TLS_LE_LO12_R:
-	case R_LARCH_TLS_LE_ADD_R:
-	case R_LARCH_TLS_LE_HI20:
-	case R_LARCH_TLS_LE_LO12:
-	case R_LARCH_TLS_LE64_LO20:
-	case R_LARCH_TLS_LE64_HI12:
-	  if (0 == info->relax_pass && (i + 2) <= sec->reloc_count)
-	    loongarch_relax_tls_le (abfd, sec, rel, info, symval);
-	  break;
-
-	case R_LARCH_PCALA_HI20:
-	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
-	    loongarch_relax_pcala_addi (abfd, sec, sym_sec, rel, symval,
-					info, again, max_alignment);
-	  break;
-
-	case R_LARCH_GOT_PC_HI20:
-	  if (h)
-	    is_abs_symbol = bfd_is_abs_section(h->root.u.def.section);
-	  else
-	    {
-	      Elf_Internal_Sym *sym = (Elf_Internal_Sym *)symtab_hdr->contents
-				    + ELFNN_R_SYM (rel->r_info);
-	      is_abs_symbol = sym->st_shndx == SHN_ABS;
-	    }
-	 /* If symval is in the range [-2^31, 2^31), we can relax the
-	    pair of instructions from pcalau12i/ld.d to lu12i.w/ori for
-	    abosulte symbol. This is not implemented yet, so we just
-	    remain the r_type which will be needed when relocate for
-	    absolute symbol. */
-	  if (local_got && 0 == info->relax_pass
-	      && !is_abs_symbol
-	      && (i + 4) <= sec->reloc_count)
-	    {
-	      if (loongarch_relax_pcala_ld (abfd, sec, rel))
-		loongarch_relax_pcala_addi (abfd, sec, sym_sec, rel, symval,
-					    info, again, max_alignment);
-	    }
-	  break;
-
-	case R_LARCH_TLS_LD_PC_HI20:
-	case R_LARCH_TLS_GD_PC_HI20:
-	case R_LARCH_TLS_DESC_PC_HI20:
-	  if (0 == info->relax_pass && (i + 4) <= sec->reloc_count)
-	    loongarch_relax_tls_ld_gd_desc (abfd, sec, sym_sec, rel, symval,
-					    info, again, max_alignment);
-	  break;
-
-	default:
-	  break;
-	}
     }
 
   return true;
