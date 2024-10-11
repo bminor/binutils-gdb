@@ -2540,7 +2540,7 @@ extern long _bfd_elf_link_lookup_local_dynindx
 extern bool _bfd_elf_compute_section_file_positions
   (bfd *, struct bfd_link_info *);
 extern file_ptr _bfd_elf_assign_file_position_for_section
-  (Elf_Internal_Shdr *, file_ptr, bool);
+  (Elf_Internal_Shdr *, file_ptr, bool, unsigned char);
 extern bool _bfd_elf_modify_headers
   (bfd *, struct bfd_link_info *);
 

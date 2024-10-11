@@ -4,7 +4,7 @@
 #readelf: -u
 #target: [is_elf_format]
 
-Unwind section '.ARM.exidx' at offset 0x5c contains 1 entry:
+Unwind section '.ARM.exidx' at offset 0x[0-9a-f]+ contains 1 entry:
 
 0x0: @0x0
   Compact model index: 1

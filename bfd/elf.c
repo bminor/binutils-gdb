@@ -4572,10 +4572,23 @@ align_file_position (file_ptr off, int align)
 file_ptr
 _bfd_elf_assign_file_position_for_section (Elf_Internal_Shdr *i_shdrp,
 					   file_ptr offset,
-					   bool align)
+					   bool align,
+					   unsigned char log_file_align)
 {
-  if (align && i_shdrp->sh_addralign > 1)
-    offset = BFD_ALIGN (offset, i_shdrp->sh_addralign & -i_shdrp->sh_addralign);
+  if (i_shdrp->sh_addralign > 1)
+    {
+      file_ptr salign = i_shdrp->sh_addralign & -i_shdrp->sh_addralign;
+
+      if (align)
+	offset = BFD_ALIGN (offset, salign);
+      else if (log_file_align)
+	{
+	  /* Heuristic: Cap alignment at log_file_align.  */
+	  file_ptr falign = 1u << log_file_align;
+
+	  offset = BFD_ALIGN (offset, salign < falign ? salign : falign);
+	}
+    }
   i_shdrp->sh_offset = offset;
   if (i_shdrp->bfd_section != NULL)
     i_shdrp->bfd_section->filepos = offset;
@@ -4663,18 +4676,18 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
       off = elf_next_file_pos (abfd);
 
       hdr = & elf_symtab_hdr (abfd);
-      off = _bfd_elf_assign_file_position_for_section (hdr, off, true);
+      off = _bfd_elf_assign_file_position_for_section (hdr, off, true, 0);
 
       if (elf_symtab_shndx_list (abfd) != NULL)
 	{
 	  hdr = & elf_symtab_shndx_list (abfd)->hdr;
 	  if (hdr->sh_size != 0)
-	    off = _bfd_elf_assign_file_position_for_section (hdr, off, true);
+	    off = _bfd_elf_assign_file_position_for_section (hdr, off, true, 0);
 	  /* FIXME: What about other symtab_shndx sections in the list ?  */
 	}
 
       hdr = &elf_tdata (abfd)->strtab_hdr;
-      off = _bfd_elf_assign_file_position_for_section (hdr, off, true);
+      off = _bfd_elf_assign_file_position_for_section (hdr, off, true, 0);
 
       elf_next_file_pos (abfd) = off;
 
@@ -6548,8 +6561,8 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	  else
 	    align = hdr->sh_addralign & -hdr->sh_addralign;
 	  off += vma_page_aligned_bias (hdr->sh_addr, off, align);
-	  off = _bfd_elf_assign_file_position_for_section (hdr, off,
-							   false);
+	  off = _bfd_elf_assign_file_position_for_section (hdr, off, false,
+							   bed->s->log_file_align);
 	}
       else if (((hdr->sh_type == SHT_REL || hdr->sh_type == SHT_RELA)
 		&& hdr->bfd_section == NULL)
@@ -6566,7 +6579,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	       || hdr == i_shdrpp[elf_shstrtab_sec (abfd)])
 	hdr->sh_offset = -1;
       else
-	off = _bfd_elf_assign_file_position_for_section (hdr, off, true);
+	off = _bfd_elf_assign_file_position_for_section (hdr, off, true, 0);
     }
   elf_next_file_pos (abfd) = off;
 
@@ -6803,7 +6816,8 @@ assign_file_positions_except_relocs (bfd *abfd,
 	      hdr->sh_offset = -1;
 	    }
 	  else
-	    off = _bfd_elf_assign_file_position_for_section (hdr, off, true);
+	    off = _bfd_elf_assign_file_position_for_section (hdr, off, false,
+							     0);
 	}
 
       elf_next_file_pos (abfd) = off;
@@ -7018,7 +7032,7 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
   Elf_Internal_Shdr **shdrpp, **end_shdrpp;
   Elf_Internal_Shdr *shdrp;
   Elf_Internal_Ehdr *i_ehdrp;
-  const struct elf_backend_data *bed;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   /* Skip non-load sections without section header.  */
   if ((abfd->flags & BFD_NO_SECTION_HEADER) != 0)
@@ -7086,7 +7100,10 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 	      sec->contents = NULL;
 	    }
 
-	  off = _bfd_elf_assign_file_position_for_section (shdrp, off, true);
+	  off = _bfd_elf_assign_file_position_for_section (shdrp, off,
+		  (abfd->flags & (EXEC_P | DYNAMIC))
+		  || bfd_get_format (abfd) == bfd_core,
+		  bed->s->log_file_align);
 	}
     }
 
@@ -7095,11 +7112,10 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
   _bfd_elf_strtab_finalize (elf_shstrtab (abfd));
   shdrp = &elf_tdata (abfd)->shstrtab_hdr;
   shdrp->sh_size = _bfd_elf_strtab_size (elf_shstrtab (abfd));
-  off = _bfd_elf_assign_file_position_for_section (shdrp, off, true);
+  off = _bfd_elf_assign_file_position_for_section (shdrp, off, true, 0);
 
   /* Place the section headers.  */
   i_ehdrp = elf_elfheader (abfd);
-  bed = get_elf_backend_data (abfd);
   off = align_file_position (off, 1 << bed->s->log_file_align);
   i_ehdrp->e_shoff = off;
   off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
