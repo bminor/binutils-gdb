@@ -16799,11 +16799,14 @@ const char *md_shortopts = "qnO::";
 struct option md_longopts[] =
 {
   {"32", no_argument, NULL, OPTION_32},
-#if (defined (OBJ_ELF) || defined (TE_PE) || defined (OBJ_MACH_O))
+#if (defined (OBJ_ELF) || defined (TE_PE) || defined (OBJ_MACH_O)) \
+    && defined (BFD64)
   {"64", no_argument, NULL, OPTION_64},
 #endif
 #ifdef OBJ_ELF
+# ifdef BFD64
   {"x32", no_argument, NULL, OPTION_X32},
+# endif
   {"mshared", no_argument, NULL, OPTION_MSHARED},
   {"mx86-used-note", required_argument, NULL, OPTION_X86_USED_NOTE},
 #endif
@@ -16895,9 +16898,10 @@ md_parse_option (int c, const char *arg)
       else
         as_fatal (_("invalid -mx86-used-note= option: `%s'"), arg);
       break;
-
-
 #endif
+
+#ifdef BFD64
+
 #if (defined (OBJ_ELF) || defined (TE_PE) || defined (OBJ_MACH_O))
     case OPTION_64:
       {
@@ -16939,6 +16943,8 @@ md_parse_option (int c, const char *arg)
       }
       break;
 #endif
+
+#endif /* BFD64 */
 
     case OPTION_32:
       {
