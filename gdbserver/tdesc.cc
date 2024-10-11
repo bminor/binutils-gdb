@@ -53,8 +53,7 @@ void target_desc::accept (tdesc_element_visitor &v) const
 
 void
 init_target_desc (struct target_desc *tdesc,
-		  const char **expedite_regs,
-		  enum gdb_osabi osabi)
+		  const char **expedite_regs)
 {
   int offset = 0;
 
@@ -89,8 +88,6 @@ init_target_desc (struct target_desc *tdesc,
   int expedite_count = 0;
   while (expedite_regs[expedite_count] != nullptr)
     tdesc->expedite_regs.push_back (expedite_regs[expedite_count++]);
-
-  set_tdesc_osabi (tdesc, osabi);
 #endif
 }
 

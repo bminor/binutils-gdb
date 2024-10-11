@@ -228,7 +228,7 @@ tic6x_read_description (enum c6x_feature feature)
     {
       *tdesc = tic6x_create_target_description (feature);
       static const char *expedite_regs[] = { "A15", "PC", NULL };
-      init_target_desc (*tdesc, expedite_regs, GDB_OSABI_LINUX);
+      init_target_desc (*tdesc, expedite_regs);
     }
 
   return *tdesc;

@@ -133,7 +133,7 @@ csky_target::low_arch_setup ()
 
   if (tdesc->expedite_regs.empty ())
     {
-      init_target_desc (tdesc.get (), expedite_regs, GDB_OSABI_LINUX);
+      init_target_desc (tdesc.get (), expedite_regs);
       gdb_assert (!tdesc->expedite_regs.empty ());
     }
 
