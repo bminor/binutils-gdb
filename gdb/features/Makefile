@@ -191,6 +191,8 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	echo "xmltarget:$(<F)" >> $(outdir)/$*.tmp
 	echo "expedite:$(if $($*-expedite),$($*-expedite),$($(firstword $(subst -, ,$(notdir $*)))-expedite))" \
 	  >> $(outdir)/$*.tmp
+	$(XSLTPROC) --path "$(PWD)" --xinclude print-osabi.xsl $< \
+	  >> $(outdir)/$*.tmp
 	$(XSLTPROC) --path "$(PWD)" --xinclude number-regs.xsl $< | \
 	  $(XSLTPROC) sort-regs.xsl - | \
 	  $(XSLTPROC) gdbserver-regs.xsl - >> $(outdir)/$*.tmp

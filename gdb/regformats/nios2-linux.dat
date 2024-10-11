@@ -3,6 +3,7 @@
 name:nios2_linux
 xmltarget:nios2-linux.xml
 expedite:sp,pc
+osabi:GNU/Linux
 32:zero
 32:at
 32:r2
