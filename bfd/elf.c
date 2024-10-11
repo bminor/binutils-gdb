@@ -4557,15 +4557,6 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
   return true;
 }
 
-/* Align to the maximum file alignment that could be required for any
-   ELF data structure.  */
-
-static inline file_ptr
-align_file_position (file_ptr off, int align)
-{
-  return (off + align - 1) & ~(align - 1);
-}
-
 /* Assign a file position to a section, optionally aligning to the
    required section alignment.  */
 
@@ -7116,7 +7107,7 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 
   /* Place the section headers.  */
   i_ehdrp = elf_elfheader (abfd);
-  off = align_file_position (off, 1 << bed->s->log_file_align);
+  off = BFD_ALIGN (off, 1u << bed->s->log_file_align);
   i_ehdrp->e_shoff = off;
   off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
   elf_next_file_pos (abfd) = off;
