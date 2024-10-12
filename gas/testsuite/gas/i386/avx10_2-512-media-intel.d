@@ -1,6 +1,6 @@
 #objdump: -dw -Mintel
 #name: i386 AVX10.2/512 media insns (Intel disassembly)
-#source: avx10_2-512-1.s
+#source: avx10_2-512-media.s
 
 .*: +file format .*
 

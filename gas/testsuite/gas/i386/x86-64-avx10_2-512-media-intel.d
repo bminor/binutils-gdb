@@ -1,6 +1,6 @@
 #objdump: -dw -Mintel
 #name: x86_64 AVX10.2/512 media insns (Intel disassembly)
-#source: x86-64-avx10_2-512-1.s
+#source: x86-64-avx10_2-512-media.s
 
 .*: +file format .*
 
