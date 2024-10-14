@@ -667,6 +667,9 @@ install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
 
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+
 installcheck: installcheck-am
 install-strip:
 	if test -z '$(STRIP)'; then \
@@ -708,7 +711,7 @@ html-am: $(HTMLS)
 
 info-am: $(INFO_DEPS)
 
-install-data-am: install-info-am install-man
+install-data-am: install-data-local install-info-am install-man
 
 install-dvi: install-dvi-am
 
@@ -856,17 +859,18 @@ uninstall-man: uninstall-man1
 	clean-libtool cscopelist-am ctags-am dist-info distclean \
 	distclean-generic distclean-libtool distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-man1 install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-aminfo maintainer-clean-generic \
-	maintainer-clean-vti mostlyclean mostlyclean-aminfo \
-	mostlyclean-generic mostlyclean-libtool mostlyclean-vti pdf \
-	pdf-am ps ps-am tags-am uninstall uninstall-am \
-	uninstall-dvi-am uninstall-html-am uninstall-info-am \
-	uninstall-man uninstall-man1 uninstall-pdf-am uninstall-ps-am
+	install-data-am install-data-local install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-man1 \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-aminfo \
+	maintainer-clean-generic maintainer-clean-vti mostlyclean \
+	mostlyclean-aminfo mostlyclean-generic mostlyclean-libtool \
+	mostlyclean-vti pdf pdf-am ps ps-am tags-am uninstall \
+	uninstall-am uninstall-dvi-am uninstall-html-am \
+	uninstall-info-am uninstall-man uninstall-man1 \
+	uninstall-pdf-am uninstall-ps-am
 
 .PRECIOUS: Makefile
 
@@ -893,11 +897,11 @@ info: $(man_MANS)
 examples.tar.gz:
 	$(AM_V_at)( tar czf $@ $(srcdir)/../examples )
 
-install-examples:  examples.tar.gz
+.PHONY: install-data-local
+
+install-data-local:  examples.tar.gz
 	$(mkinstalldirs) $(DESTDIR)$(docdir)/gprofng
 	$(INSTALL_DATA) examples.tar.gz $(DESTDIR)$(docdir)/gprofng
-
-install-am: install-examples
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
