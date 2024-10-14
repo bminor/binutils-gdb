@@ -5912,7 +5912,7 @@ s7_s_score_lcomm (int bytes_p)
 
   c = get_symbol_name (&name);
   p = input_line_pointer;
-  *p = c;
+  restore_line_pointer (c);
 
   if (name == p)
     {
@@ -5921,7 +5921,7 @@ s7_s_score_lcomm (int bytes_p)
       return;
     }
 
-  SKIP_WHITESPACE_AFTER_NAME ();
+  SKIP_WHITESPACE ();
 
   /* Accept an optional comma after the name.  The comma used to be
      required, but Irix 5 cc does not generate it.  */

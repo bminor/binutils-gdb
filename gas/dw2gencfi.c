@@ -1245,8 +1245,8 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
 	    break;
 	  }
 
-	*input_line_pointer = c;
-	SKIP_WHITESPACE_AFTER_NAME ();
+	restore_line_pointer (c);
+	SKIP_WHITESPACE ();
 	if (*input_line_pointer == ',')
 	  {
 	    name = input_line_pointer++;

@@ -1152,8 +1152,8 @@ parse_reloc_symbol (expressionS *resultP)
       return;
     }
 
-  *input_line_pointer = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
+  restore_line_pointer (c);
+  SKIP_WHITESPACE ();
   /* Extra check for TLS: base.  */
   if (*input_line_pointer == '@')
     {

@@ -1150,8 +1150,8 @@ obj_coff_weak (int ignore ATTRIBUTE_UNUSED)
 	}
       c = 0;
       symbolP = symbol_find_or_make (name);
-      *input_line_pointer = c;
-      SKIP_WHITESPACE_AFTER_NAME ();
+      restore_line_pointer (c);
+      SKIP_WHITESPACE ();
       S_SET_WEAK (symbolP);
 
       if (c == ',')
@@ -1557,8 +1557,8 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
 
   c = get_symbol_name (&section_name);
   name = xmemdup0 (section_name, input_line_pointer - section_name);
-  *input_line_pointer = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
+  restore_line_pointer (c);
+  SKIP_WHITESPACE ();
 
   exp = 0;
   flags = SEC_NO_FLAGS;

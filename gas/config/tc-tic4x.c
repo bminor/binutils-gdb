@@ -800,8 +800,8 @@ tic4x_globl (int ignore ATTRIBUTE_UNUSED)
     {
       c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
-      *input_line_pointer = c;
-      SKIP_WHITESPACE_AFTER_NAME ();
+      restore_line_pointer (c);
+      SKIP_WHITESPACE ();
       S_SET_STORAGE_CLASS (symbolP, C_EXT);
       S_SET_EXTERNAL (symbolP);
       if (c == ',')

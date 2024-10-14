@@ -1326,21 +1326,21 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
       if (strcmp (p, "basic_block") == 0)
 	{
 	  current.flags |= DWARF2_FLAG_BASIC_BLOCK;
-	  *input_line_pointer = c;
+	  restore_line_pointer (c);
 	}
       else if (strcmp (p, "prologue_end") == 0)
 	{
 	  if (dwarf_level < 3)
 	    dwarf_level = 3;
 	  current.flags |= DWARF2_FLAG_PROLOGUE_END;
-	  *input_line_pointer = c;
+	  restore_line_pointer (c);
 	}
       else if (strcmp (p, "epilogue_begin") == 0)
 	{
 	  if (dwarf_level < 3)
 	    dwarf_level = 3;
 	  current.flags |= DWARF2_FLAG_EPILOGUE_BEGIN;
-	  *input_line_pointer = c;
+	  restore_line_pointer (c);
 	}
       else if (strcmp (p, "is_stmt") == 0)
 	{
@@ -1442,7 +1442,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	  return;
 	}
 
-      SKIP_WHITESPACE_AFTER_NAME ();
+      SKIP_WHITESPACE ();
     }
 
   demand_empty_rest_of_line ();

@@ -453,8 +453,8 @@ s_desc (int ignore ATTRIBUTE_UNUSED)
 
   c = get_symbol_name (&name);
   p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
+  restore_line_pointer (c);
+  SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
       *p = 0;

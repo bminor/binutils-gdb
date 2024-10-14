@@ -1573,8 +1573,8 @@ xtensa_literal_pseudo (int ignored ATTRIBUTE_UNUSED)
   c = get_symbol_name (&base_name);
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
+  restore_line_pointer (c);
+  SKIP_WHITESPACE ();
 
   if (*input_line_pointer != ',' && *input_line_pointer != ':')
     {

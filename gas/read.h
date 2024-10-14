@@ -37,16 +37,6 @@ extern bool input_from_string;
 #define SKIP_ALL_WHITESPACE() SKIP_WHITESPACE()
 #endif
 
-#define SKIP_WHITESPACE_AFTER_NAME()		\
-  do						\
-    {						\
-      if (* input_line_pointer == '"')		\
-	++ input_line_pointer;			\
-      if (* input_line_pointer == ' ')		\
-	++ input_line_pointer;			\
-    }						\
-  while (0)
-
 #define	LEX_NAME	(1)	/* may continue a name */
 #define LEX_BEGIN_NAME	(2)	/* may begin a name */
 #define LEX_END_NAME	(4)	/* ends a name */

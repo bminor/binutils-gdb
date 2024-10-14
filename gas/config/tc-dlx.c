@@ -234,8 +234,8 @@ s_proc (int end_p)
 
       delim1 = get_symbol_name (&name);
       name = xstrdup (name);
-      *input_line_pointer = delim1;
-      SKIP_WHITESPACE_AFTER_NAME ();
+      restore_line_pointer (delim1);
+      SKIP_WHITESPACE ();
 
       if (*input_line_pointer != ',')
 	{

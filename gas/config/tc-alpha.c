@@ -936,8 +936,8 @@ tokenize_arguments (char *str,
 	      goto err_report;
 	    }
 
-	  *input_line_pointer = c;
-	  SKIP_WHITESPACE_AFTER_NAME ();
+	  restore_line_pointer (c);
+	  SKIP_WHITESPACE ();
 	  if (*input_line_pointer != '!')
 	    {
 	      if (r->require_seq)
@@ -3499,9 +3499,9 @@ s_alpha_comm (int ignore ATTRIBUTE_UNUSED)
 
   /* Just after name is now '\0'.  */
   p = input_line_pointer;
-  *p = c;
+  restore_line_pointer (c);
 
-  SKIP_WHITESPACE_AFTER_NAME ();
+  SKIP_WHITESPACE ();
 
   /* Alpha OSF/1 compiler doesn't provide the comma, gcc does.  */
   if (*input_line_pointer == ',')
@@ -3746,8 +3746,8 @@ s_alpha_ent (int dummy ATTRIBUTE_UNUSED)
 
 	  /* The .ent directive is sometimes followed by a number.  Not sure
 	     what it really means, but ignore it.  */
-	  *input_line_pointer = name_end;
-	  SKIP_WHITESPACE_AFTER_NAME ();
+	  restore_line_pointer (name_end);
+	  SKIP_WHITESPACE ();
 	  if (*input_line_pointer == ',')
 	    {
 	      input_line_pointer++;
@@ -4316,11 +4316,11 @@ s_alpha_section (int secid)
 
      	      SKIP_WHITESPACE ();
      	      c = get_symbol_name (&beg);
-     	      *input_line_pointer = c;
+     	      restore_line_pointer (c);
 
      	      vms_flags |= s_alpha_section_word (beg, input_line_pointer - beg);
 
-     	      SKIP_WHITESPACE_AFTER_NAME ();
+     	      SKIP_WHITESPACE ();
      	    }
      	  while (*input_line_pointer++ == ',');
 
@@ -4938,8 +4938,8 @@ s_alpha_proc (int is_static ATTRIBUTE_UNUSED)
   c = get_symbol_name (&name);
   p = input_line_pointer;
   symbolP = symbol_find_or_make (name);
-  *p = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
+  restore_line_pointer (c);
+  SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
       *p = 0;

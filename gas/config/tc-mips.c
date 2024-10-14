@@ -16509,8 +16509,8 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
       symbolP = symbol_find_or_make (name);
       S_SET_EXTERNAL (symbolP);
 
-      *input_line_pointer = c;
-      SKIP_WHITESPACE_AFTER_NAME ();
+      restore_line_pointer (c);
+      SKIP_WHITESPACE ();
 
       if (!is_end_of_line[(unsigned char) *input_line_pointer]
 	  && (*input_line_pointer != ','))
@@ -17569,9 +17569,9 @@ s_mips_weakext (int ignore ATTRIBUTE_UNUSED)
   c = get_symbol_name (&name);
   symbolP = symbol_find_or_make (name);
   S_SET_WEAK (symbolP);
-  *input_line_pointer = c;
+  restore_line_pointer (c);
 
-  SKIP_WHITESPACE_AFTER_NAME ();
+  SKIP_WHITESPACE ();
 
   if (! is_end_of_line[(unsigned char) *input_line_pointer])
     {

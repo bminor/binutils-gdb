@@ -4199,24 +4199,23 @@ dot_unwabi (int dummy ATTRIBUTE_UNUSED)
 static void
 dot_personality (int dummy ATTRIBUTE_UNUSED)
 {
-  char *name, *p, c;
+  char *name, c;
 
   if (!in_procedure ("personality"))
     return;
   SKIP_WHITESPACE ();
   c = get_symbol_name (&name);
-  p = input_line_pointer;
   unwind.personality_routine = symbol_find_or_make (name);
   unwind.force_unwind_entry = 1;
-  *p = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
+  restore_line_pointer (c);
+  SKIP_WHITESPACE ();
   demand_empty_rest_of_line ();
 }
 
 static void
 dot_proc (int dummy ATTRIBUTE_UNUSED)
 {
-  char *name, *p, c;
+  char *name, c;
   symbolS *sym;
   proc_pending *pending, *last_pending;
 
@@ -4240,7 +4239,6 @@ dot_proc (int dummy ATTRIBUTE_UNUSED)
     {
       SKIP_WHITESPACE ();
       c = get_symbol_name (&name);
-      p = input_line_pointer;
       if (!*name)
 	as_bad (_("Empty argument of .proc"));
       else
@@ -4261,8 +4259,8 @@ dot_proc (int dummy ATTRIBUTE_UNUSED)
 	    }
 	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 	}
-      *p = c;
-      SKIP_WHITESPACE_AFTER_NAME ();
+      restore_line_pointer (c);
+      SKIP_WHITESPACE ();
       if (*input_line_pointer != ',')
 	break;
       ++input_line_pointer;
@@ -4494,11 +4492,10 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
   /* Parse names of main and alternate entry points.  */
   while (1)
     {
-      char *name, *p, c;
+      char *name, c;
 
       SKIP_WHITESPACE ();
       c = get_symbol_name (&name);
-      p = input_line_pointer;
       if (!*name)
 	(md.unwind_check == unwind_check_warning
 	 ? as_warn
@@ -4518,8 +4515,8 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
 	  if (!sym || !pending)
 	    as_warn (_("`%s' was not specified with previous .proc"), name);
 	}
-      *p = c;
-      SKIP_WHITESPACE_AFTER_NAME ();
+      restore_line_pointer (c);
+      SKIP_WHITESPACE ();
       if (*input_line_pointer != ',')
 	break;
       ++input_line_pointer;
@@ -4607,9 +4604,9 @@ dot_rot (int type)
     {
       ch = get_symbol_name (&start);
       len = strlen (ia64_canonicalize_symbol_name (start));
-      *input_line_pointer = ch;
+      restore_line_pointer (ch);
 
-      SKIP_WHITESPACE_AFTER_NAME ();
+      SKIP_WHITESPACE ();
       if (*input_line_pointer != '[')
 	{
 	  as_bad (_("Expected '['"));
@@ -4740,9 +4737,9 @@ dot_psr (int dummy ATTRIBUTE_UNUSED)
 	md.flags |= EF_IA_64_ABI64;
       else
 	as_bad (_("Unknown psr option `%s'"), option);
-      *input_line_pointer = ch;
+      restore_line_pointer (ch);
 
-      SKIP_WHITESPACE_AFTER_NAME ();
+      SKIP_WHITESPACE ();
       if (*input_line_pointer != ',')
 	break;
 
@@ -5159,8 +5156,8 @@ dot_entry (int dummy ATTRIBUTE_UNUSED)
       if (str_hash_insert (md.entry_hash, S_GET_NAME (symbolP), symbolP, 0))
 	as_bad (_("duplicate entry hint %s"), name);
 
-      *input_line_pointer = c;
-      SKIP_WHITESPACE_AFTER_NAME ();
+      restore_line_pointer (c);
+      SKIP_WHITESPACE ();
       c = *input_line_pointer;
       if (c == ',')
 	{
@@ -11731,7 +11728,7 @@ dot_alias (int section)
 
   delim = get_symbol_name (&name);
   end_name = input_line_pointer;
-  *end_name = delim;
+  restore_line_pointer (delim);
 
   if (name == end_name)
     {
@@ -11740,7 +11737,7 @@ dot_alias (int section)
       return;
     }
 
-  SKIP_WHITESPACE_AFTER_NAME ();
+  SKIP_WHITESPACE ();
 
   if (*input_line_pointer != ',')
     {

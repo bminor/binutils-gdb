@@ -344,8 +344,8 @@ get_sym_from_input_line_and_check (void)
 
   c = get_symbol_name (& name);
   sym = symbol_find_or_make (name);
-  *input_line_pointer = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
+  restore_line_pointer (c);
+  SKIP_WHITESPACE ();
 
   /* There is no symbol name if input_line_pointer has not moved.  */
   if (name == input_line_pointer)
@@ -1937,9 +1937,9 @@ obj_elf_get_vtable_inherit (void)
       bad = 1;
     }
 
-  *input_line_pointer = c;
+  restore_line_pointer (c);
 
-  SKIP_WHITESPACE_AFTER_NAME ();
+  SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
       as_bad (_("expected comma after name in .vtable_inherit"));
@@ -2353,8 +2353,8 @@ obj_elf_size (int ignore ATTRIBUTE_UNUSED)
   symbolS *sym;
 
   p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
+  restore_line_pointer (c);
+  SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
       *p = 0;

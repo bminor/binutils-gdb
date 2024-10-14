@@ -1253,8 +1253,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      expressionP->X_add_symbol = symbol_lookup_or_make (name, start);
 	      expressionP->X_add_number = 0;
 
-	      *input_line_pointer = c;
-	      SKIP_WHITESPACE_AFTER_NAME ();
+	      restore_line_pointer (c);
+	      SKIP_WHITESPACE ();
 	      if (*input_line_pointer != ')')
 		as_bad (_("syntax error in .startof. or .sizeof."));
 	      else
