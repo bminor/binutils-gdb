@@ -64,7 +64,7 @@ read_str (char *from, char **to)
 	  {
 	    if (s[i] != '\n' && s[i] != ' ' && s[i] != '\t')
 	      {
-		*to = strndup (s, i + 1);
+		*to = xstrndup (s, i + 1);
 		return;
 	      }
 	  }
@@ -131,7 +131,7 @@ read_cpuinfo ()
     }
   if (cpu_info.cpu_vendorstr == NULL)
 #if defined(__aarch64__)
-    cpu_info.cpu_vendorstr = strdup (AARCH64_VENDORSTR_ARM);
+    cpu_info.cpu_vendorstr = xstrdup (AARCH64_VENDORSTR_ARM);
 #else
     cpu_info.cpu_vendorstr = GTXT ("Unknown processor");
 #endif
@@ -149,11 +149,11 @@ Coll_Ctrl::Coll_Ctrl (int _interactive, bool _defHWC, bool _kernelHWC)
 
   /* set this host's parameters */
   gethostname (hostname, 1023);
-  node_name = strdup (hostname);
+  node_name = xstrdup (hostname);
   char *p = strchr (node_name, (int) '.');
   if (p != NULL)
     *p = 0;
-  default_stem = strdup ("test");
+  default_stem = xstrdup ("test");
 
   cpu_info_t *cpu_p = read_cpuinfo ();
   ncpus = cpu_p->cpu_cnt;
@@ -186,7 +186,7 @@ Coll_Ctrl::Coll_Ctrl (int _interactive, bool _defHWC, bool _kernelHWC)
   follow_spec_usr = NULL;
   follow_spec_cmp = NULL;
   prof_idle = 1;
-  archive_mode = strdup ("on");
+  archive_mode = xstrdup ("on");
   pauseresume_sig = 0;
   sample_sig = 0;
   uinterrupt = 0;
@@ -201,7 +201,7 @@ Coll_Ctrl::Coll_Ctrl (int _interactive, bool _defHWC, bool _kernelHWC)
   base_name = NULL;
   udir_name = NULL;
   store_dir = NULL;
-  prev_store_dir = strdup ("");
+  prev_store_dir = xstrdup ("");
   store_ptr = NULL;
   expt_group = NULL;
   target_name = NULL;
@@ -256,8 +256,8 @@ Coll_Ctrl::Coll_Ctrl (Coll_Ctrl * cc)
   interactive = cc->interactive;
   defHWC = cc->defHWC;
   kernelHWC = cc->kernelHWC;
-  node_name = strdup (cc->node_name);
-  default_stem = strdup (cc->default_stem);
+  node_name = xstrdup (cc->node_name);
+  default_stem = xstrdup (cc->default_stem);
   ncpus = cc->ncpus;
   cpu_clk_freq = cc->cpu_clk_freq;
   npages = cc->npages;
@@ -272,15 +272,15 @@ Coll_Ctrl::Coll_Ctrl (Coll_Ctrl * cc)
   follow_default = cc->follow_default;
   if (cc->follow_spec_usr)
     {
-      follow_spec_usr = strdup (cc->follow_spec_usr);
-      follow_spec_cmp = strdup (cc->follow_spec_cmp);
+      follow_spec_usr = xstrdup (cc->follow_spec_usr);
+      follow_spec_cmp = xstrdup (cc->follow_spec_cmp);
     }
   else
     {
       follow_spec_usr = NULL;
       follow_spec_cmp = NULL;
     }
-  archive_mode = strdup (cc->archive_mode);
+  archive_mode = xstrdup (cc->archive_mode);
   pauseresume_sig = cc->pauseresume_sig;
   sample_sig = cc->sample_sig;
   time_run = cc->time_run;
@@ -295,12 +295,12 @@ Coll_Ctrl::Coll_Ctrl (Coll_Ctrl * cc)
   hwcprof_default = cc->hwcprof_default;
   hwcprof_enabled_cnt = cc->hwcprof_enabled_cnt;
   if (cc->hwc_string != NULL)
-    hwc_string = strdup (cc->hwc_string);
+    hwc_string = xstrdup (cc->hwc_string);
   else
     hwc_string = NULL;
   for (int i = 0; i < hwcprof_enabled_cnt; i++)
     hwcentry_dup (&hwctr[i], &(cc->hwctr[i]));
-  project_home = cc->project_home ? strdup (cc->project_home) : NULL;
+  project_home = cc->project_home ? xstrdup (cc->project_home) : NULL;
   synctrace_enabled = cc->synctrace_enabled;
   synctrace_thresh = cc->synctrace_thresh;
   synctrace_scope = cc->synctrace_scope;
@@ -324,16 +324,16 @@ Coll_Ctrl::Coll_Ctrl (Coll_Ctrl * cc)
   // these represent user settings
   expt_group = NULL;
   if (cc->expt_group != NULL)
-    expt_group = strdup (cc->expt_group);
+    expt_group = xstrdup (cc->expt_group);
   uexpt_name = NULL;
   if (cc->uexpt_name != NULL)
-    uexpt_name = strdup (cc->uexpt_name);
+    uexpt_name = xstrdup (cc->uexpt_name);
   udir_name = NULL;
   if (cc->udir_name != NULL)
-    udir_name = strdup (cc->udir_name);
+    udir_name = xstrdup (cc->udir_name);
 
   /* clear the string pointers */
-  prev_store_dir = strdup ("");
+  prev_store_dir = xstrdup ("");
   store_ptr = NULL;
   target_name = NULL;
   data_desc = NULL;
@@ -408,11 +408,11 @@ char *
 Coll_Ctrl::enable_expt ()
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (cpu_clk_freq == 0)
-    return strdup (GTXT ("Can not determine CPU clock frequency.\n"));
+    return xstrdup (GTXT ("Can not determine CPU clock frequency.\n"));
   if (sys_resolution == 0)
-    return strdup (GTXT ("System clock profile resolution can not be determined.\n"));
+    return xstrdup (GTXT ("System clock profile resolution can not be determined.\n"));
   enabled = 1;
   return NULL;
 }
@@ -450,14 +450,14 @@ Coll_Ctrl::check_consistency ()
 {
   /* check for Java arguments, but not Java profiling */
   if (java_args != NULL && java_mode == 0)
-    return strdup (GTXT ("Java arguments can not be set if Java profiling is not enabled.\n"));
+    return xstrdup (GTXT ("Java arguments can not be set if Java profiling is not enabled.\n"));
 
   /* if count data, no other data is allowed */
   if (count_enabled != 0
       && ((clkprof_default != 1 && clkprof_enabled != 0)
 	  || hwcprof_enabled_cnt != 0 || synctrace_enabled != 0
 	  || heaptrace_mode != NULL || iotrace_enabled != 0))
-    return strdup (GTXT ("Count data cannot be collected along with any other data.\n"));
+    return xstrdup (GTXT ("Count data cannot be collected along with any other data.\n"));
 
   /* if count data, various other options are not allowed */
   if (count_enabled != 0
@@ -466,10 +466,10 @@ Coll_Ctrl::check_consistency ()
 	  || (follow_mode != 0 && follow_default != 1)
 	  || pauseresume_sig != 0 || sample_sig != 0
 	  || (sample_default != 1 && sample_period != 0) || time_run != 0))
-    return strdup (GTXT ("Count data cannot be collected with any of -F -S -y -l -j -J -x -t .\n"));
+    return xstrdup (GTXT ("Count data cannot be collected with any of -F -S -y -l -j -J -x -t .\n"));
   /* if not count data, I and N options are not allowed */
   if (count_enabled == 0 && (Iflag != 0 || Nflag != 0))
-    return strdup (GTXT ("-I or -N can only be specified with count data.\n"));
+    return xstrdup (GTXT ("-I or -N can only be specified with count data.\n"));
   return NULL;
 }
 
@@ -483,12 +483,12 @@ Coll_Ctrl::check_expt (char **warn)
     return ret;
   /* check for heaptrace and java -- warn that it covers native allocations only */
   if (heaptrace_mode != NULL && java_mode == 1 && java_default == 0)
-    *warn = strdup (GTXT ("Note: Heap profiling will only trace native allocations, not Java allocations.\n"));
+    *warn = xstrdup (GTXT ("Note: Heap profiling will only trace native allocations, not Java allocations.\n"));
 
   /* if no profiling data selected, warn the user */
   if (clkprof_enabled == 0 && hwcprof_enabled_cnt == 0 && synctrace_enabled == 0
       && heaptrace_mode == NULL && iotrace_enabled == 0 && count_enabled == 0)
-    *warn = strdup (GTXT ("Warning: No function level data requested; only statistics will be collected.\n\n"));
+    *warn = xstrdup (GTXT ("Warning: No function level data requested; only statistics will be collected.\n\n"));
   build_data_desc ();
 
   /* verify that the directory exists */
@@ -677,22 +677,20 @@ char **
 Coll_Ctrl::get_collect_args ()
 {
   char **p;
-  char **argv = (char **) calloc (MAX_COLLECT_ARGS, sizeof (char *));
-  if (argv == NULL) // poor way of dealing with calloc failure
-    abort ();
+  char **argv = (char **) xcalloc (MAX_COLLECT_ARGS, sizeof (char *));
   p = argv;
-  *p++ = strdup ("collect");
+  *p++ = xstrdup ("collect");
   if (debug_mode == 1)
-    *p++ = strdup ("-x");
+    *p++ = xstrdup ("-x");
   if (clkprof_enabled != 0)
     {
-      *p++ = strdup ("-p");
+      *p++ = xstrdup ("-p");
       *p++ = dbe_sprintf ("%du", clkprof_timer);
     }
   if (hwcprof_enabled_cnt > 0)
     {
       StringBuilder sb;
-      *p++ = strdup ("-h");
+      *p++ = xstrdup ("-h");
       for (int ii = 0; ii < hwcprof_enabled_cnt; ii++)
 	{
 	  char*rateString = hwc_rate_string (&hwctr[ii], 1); //"1" is for temporary goldfile compatibility. TBR YXXX!!
@@ -711,90 +709,90 @@ Coll_Ctrl::get_collect_args ()
     }
   if (heaptrace_mode != NULL)
     {
-      *p++ = strdup ("-H");
-      *p++ = strdup (heaptrace_mode);
+      *p++ = xstrdup ("-H");
+      *p++ = xstrdup (heaptrace_mode);
     }
   if (iotrace_enabled != 0)
     {
-      *p++ = strdup ("-i");
-      *p++ = strdup ("on");
+      *p++ = xstrdup ("-i");
+      *p++ = xstrdup ("on");
     }
   if (synctrace_enabled != 0)
     {
-      *p++ = strdup ("-s");
+      *p++ = xstrdup ("-s");
       if (synctrace_thresh < 0)
-	*p++ = strdup ("calibrate");
+	*p++ = xstrdup ("calibrate");
       else if (synctrace_thresh == 0)
-	*p++ = strdup ("all");
+	*p++ = xstrdup ("all");
       else
 	*p++ = dbe_sprintf ("%d", synctrace_thresh);
       *p++ = dbe_sprintf (",%d", synctrace_scope);
     }
   if (follow_mode != 0)
     {
-      *p++ = strdup ("-F");
+      *p++ = xstrdup ("-F");
       char * fs = get_follow_usr_spec ();
       if (fs)
-	*p++ = strdup (fs);
+	*p++ = xstrdup (fs);
       else
 	{
 	  switch (get_follow_mode ())
 	    {
 	    case FOLLOW_ON:
-	      *p++ = strdup ("on");
+	      *p++ = xstrdup ("on");
 	      break;
 	    case FOLLOW_ALL:
-	      *p++ = strdup ("all");
+	      *p++ = xstrdup ("all");
 	      break;
 	    case FOLLOW_NONE:
 	    default:
-	      *p++ = strdup ("off");
+	      *p++ = xstrdup ("off");
 	      break;
 	    }
 	}
     }
-  *p++ = strdup ("-a");
-  *p++ = strdup (get_archive_mode ());
+  *p++ = xstrdup ("-a");
+  *p++ = xstrdup (get_archive_mode ());
   if (java_mode != 0)
     {
-      *p++ = strdup ("-j");
-      *p++ = strdup ("on");
+      *p++ = xstrdup ("-j");
+      *p++ = xstrdup ("on");
     }
   if (pauseresume_sig != 0)
     {
-      *p++ = strdup ("-y");
+      *p++ = xstrdup ("-y");
       *p++ = dbe_sprintf ("%d%s", pauseresume_sig,
 			  (pauseresume_pause == 0 ? ",r" : ""));
     }
   if (sample_sig != 0)
     {
-      *p++ = strdup ("-l");
+      *p++ = xstrdup ("-l");
       *p++ = dbe_sprintf ("%d", sample_sig);
     }
   if (sample_period != 0)
     {
-      *p++ = strdup ("-S");
+      *p++ = xstrdup ("-S");
       *p++ = dbe_sprintf ("%d", sample_period);
     }
   if (size_limit != 0)
     {
-      *p++ = strdup ("-L");
+      *p++ = xstrdup ("-L");
       *p++ = dbe_sprintf ("%d", size_limit);
     }
   if (expt_group != NULL)
     {
-      *p++ = strdup ("-g");
-      *p++ = strdup (expt_group);
+      *p++ = xstrdup ("-g");
+      *p++ = xstrdup (expt_group);
     }
   if (udir_name != 0)
     {
-      *p++ = strdup ("-d");
-      *p++ = strdup (udir_name);
+      *p++ = xstrdup ("-d");
+      *p++ = xstrdup (udir_name);
     }
   if (expt_name != 0)
     {
-      *p++ = strdup ("-o");
-      *p++ = strdup (expt_name);
+      *p++ = xstrdup ("-o");
+      *p++ = xstrdup (expt_name);
     }
   if (p - argv >= MAX_COLLECT_ARGS) // argument list too small -- fatal error
     abort ();
@@ -852,10 +850,10 @@ Coll_Ctrl::set_clkprof (const char *string, char** warn)
   int prevclkprof_default;
   *warn = NULL;
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   /* if the first character is a +, warn user that it is no longer supported */
   if (string[0] == '+')
-    return strdup (GTXT ("Warning: clock-based memoryspace and dataspace profiling is no longer supported\n"));
+    return xstrdup (GTXT ("Warning: clock-based memoryspace and dataspace profiling is no longer supported\n"));
   if (strcmp (string, "off") == 0)
     {
       clkprof_enabled = 0;
@@ -946,7 +944,7 @@ char *
 Coll_Ctrl::set_synctrace (const char *string)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   char *comma_p = NULL;
   if (string == NULL)
     {
@@ -962,7 +960,7 @@ Coll_Ctrl::set_synctrace (const char *string)
 	}
       return NULL;
     }
-  char *val = strdup (string);
+  char *val = xstrdup (string);
   /* see if there's a comma in the string */
   char *next = strchr (val, (int) ',');
   if (next != NULL)
@@ -1042,14 +1040,14 @@ char *
 Coll_Ctrl::set_heaptrace (const char *string)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   free(heaptrace_mode);
   heaptrace_mode = NULL;  // Same as "off"
   if (string != NULL && strcmp (string, "off") == 0)
     return NULL;
 
   if (string == NULL || strlen (string) == 0 || strcmp (string, "on") == 0)
-    heaptrace_mode = strdup ("on");
+    heaptrace_mode = xstrdup ("on");
   else if (isdigit (*string))
     {
       char *s;
@@ -1064,7 +1062,7 @@ Coll_Ctrl::set_heaptrace (const char *string)
       if (*s != 0)
 	return dbe_sprintf (
 	       GTXT ("Incorrect range in heap trace parameter '%s'\n"), string);
-      heaptrace_mode = strdup (string);
+      heaptrace_mode = xstrdup (string);
     }
   else
     return dbe_sprintf (GTXT ("Unrecognized heap tracing parameter `%s'\n"),
@@ -1083,7 +1081,7 @@ char *
 Coll_Ctrl::set_iotrace (const char *string)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (string == NULL || strlen (string) == 0 || strcmp (string, "on") == 0)
     {
       iotrace_enabled = 1;
@@ -1108,7 +1106,7 @@ Coll_Ctrl::set_count (const char *string)
 {
   int ret = -1;
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (string == NULL || strlen (string) == 0 || strcmp (string, "off") == 0)
     {
       count_enabled = 0;
@@ -1161,9 +1159,9 @@ char *
 Coll_Ctrl::set_time_run (const char *valarg)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (valarg == NULL) /* invalid setting */
-    return strdup (GTXT ("time parameter can not be NULL\n"));
+    return xstrdup (GTXT ("time parameter can not be NULL\n"));
   /* the string should be a number >= 0 */
   int prev_start_delay = start_delay;
   int prev_time_run = time_run;
@@ -1233,9 +1231,9 @@ char *
 Coll_Ctrl::set_attach_pid (char *valarg)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (valarg == NULL)
-    return strdup (GTXT ("Specified PID can not be NULL\n"));
+    return xstrdup (GTXT ("Specified PID can not be NULL\n"));
 
   /* the string should be a number corresponding to an active process' pid */
   char *endchar = NULL;
@@ -1269,19 +1267,19 @@ Coll_Ctrl::hwcentry_dup (Hwcentry *hnew, Hwcentry *_hwc)
 {
   *hnew = *_hwc;
   if (_hwc->name != NULL)
-    hnew->name = strdup (_hwc->name);
+    hnew->name = xstrdup (_hwc->name);
   else
     hnew->name = NULL;
   if (_hwc->int_name != NULL)
-    hnew->int_name = strdup (_hwc->int_name);
+    hnew->int_name = xstrdup (_hwc->int_name);
   else
     hnew->int_name = NULL;
   if (_hwc->metric != NULL)
-    hnew->metric = strdup (_hwc->metric);
+    hnew->metric = xstrdup (_hwc->metric);
   else
     hnew->metric = NULL;
   if (_hwc->short_desc != NULL)
-    hnew->short_desc = strdup (_hwc->short_desc);
+    hnew->short_desc = xstrdup (_hwc->short_desc);
   else
     hnew->short_desc = NULL;
 }
@@ -1378,7 +1376,7 @@ Coll_Ctrl::add_hwcstring (const char *string, char **warnmsg)
   char *emsg;
   char *wmsg;
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (hwcprof_default == 0)
     {
       /* Copy the counters already defined */
@@ -1472,14 +1470,12 @@ Coll_Ctrl::add_default_hwcstring (const char *resolution, char **warnmsg, bool a
     }
   /* allocate return string */
   int retsize = 2 * len + 10;
-  char *ret = (char *) malloc (retsize);
-  if (ret == NULL)
-    return strdup (GTXT ("internal error formating HW counter set; malloc failed\n"));
+  char *ret = (char *) xmalloc (retsize);
   *ret = 0;
   char *retp = ret;
   char *stringp = def_string;
   int first = 1;
-  char *hwc_defaultx = strdup (def_string);
+  char *hwc_defaultx = xstrdup (def_string);
 
   /* now massage the string in order to insert resolution for each counter */
   for (;;)
@@ -1608,7 +1604,7 @@ Coll_Ctrl::set_sample_period (const char *string)
 {
   int val;
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (string == NULL || strcmp (string, "on") == 0)
     val = 1;
   else if (strcmp (string, "off") == 0)
@@ -1638,7 +1634,7 @@ char *
 Coll_Ctrl::set_size_limit (const char *string)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (string == NULL || strlen (string) == 0
       || strcmp (string, "unlimited") == 0 || strcmp (string, "none") == 0)
     {
@@ -1776,7 +1772,7 @@ Coll_Ctrl::join_group ()
 	  if (uinterrupt == 1)
 	    {
 	      close (groupfd);
-	      return strdup (GTXT ("user interrupt\n"));
+	      return xstrdup (GTXT ("user interrupt\n"));
 	    }
 	  // it's opened, now lock it
 	  if (fcntl (groupfd, F_SETLK, &flockbuf) != -1)
@@ -1820,7 +1816,7 @@ Coll_Ctrl::join_group ()
 	      // can't get the lock, close the file and try again
 	      close (groupfd);
 	      if (uinterrupt == 1)
-		return strdup (GTXT ("user interrupt\n"));
+		return xstrdup (GTXT ("user interrupt\n"));
 	      if (tries == 11900)
 		return dbe_sprintf (GTXT ("Timed out: waiting for group file %s\n"), group_file);
 #if 0
@@ -1883,7 +1879,7 @@ Coll_Ctrl::set_directory (char *dir, char **warn)
   struct stat statbuf;
   *warn = NULL;
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (stat (dir, &statbuf) != 0)
     return dbe_sprintf (GTXT ("Can't set directory `%s': %s\n"),
 			dir, strerror (errno));
@@ -1891,7 +1887,7 @@ Coll_Ctrl::set_directory (char *dir, char **warn)
     return dbe_sprintf (GTXT ("Can't set directory `%s': %s\n"),
 			dir, strerror (ENOTDIR));
   free (udir_name);
-  udir_name = strdup (dir);
+  udir_name = xstrdup (dir);
 
   // Process new setting
   *warn = preprocess_names ();
@@ -1922,14 +1918,14 @@ Coll_Ctrl::set_target (char* targetname)
   free (target_name);
   target_name = NULL;
   if (targetname != NULL)
-    target_name = strdup (targetname);
+    target_name = xstrdup (targetname);
   return 0;
 }
 
 void
 Coll_Ctrl::set_default_stem (const char* stem)
 {
-  default_stem = strdup (stem);
+  default_stem = xstrdup (stem);
   preprocess_names ();
   (void) update_expt_name (false, false); // no warnings
 }
@@ -1944,7 +1940,7 @@ Coll_Ctrl::set_expt (const char *ename, char **warn, bool overwriteExp)
       uexpt_name = NULL;
       return NULL;
     }
-  char *exptname = canonical_path (strdup (ename));
+  char *exptname = canonical_path (xstrdup (ename));
   size_t i = strlen (exptname);
   if (i < 4 || strcmp (&exptname[i - 3], ".er") != 0)
     {
@@ -1980,7 +1976,7 @@ char *
 Coll_Ctrl::set_group (char *groupname)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (expt_group != NULL)
     {
       free (expt_group);
@@ -1996,7 +1992,7 @@ Coll_Ctrl::set_group (char *groupname)
   int i = (int) strlen (groupname);
   if (i < 5 || strcmp (&groupname[i - 4], ".erg") != 0)
     return dbe_sprintf (GTXT ("Experiment group name `%s'must end in `.erg'\n"), groupname);
-  expt_group = strdup (groupname);
+  expt_group = xstrdup (groupname);
   preprocess_names ();
   (void) update_expt_name (true, false);
   return NULL;
@@ -2007,7 +2003,7 @@ Coll_Ctrl::set_java_mode (const char *string)
 {
   struct stat statbuf;
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (string == NULL || strlen (string) == 0 || strcmp (string, "on") == 0)
     {
 #if defined(GPROFNG_JAVA_PROFILING)
@@ -2024,7 +2020,7 @@ Coll_Ctrl::set_java_mode (const char *string)
 	}
       return NULL;
 #else
-      return strdup (GTXT ("gprofng was built without support for profiling Java applications\n"));
+      return xstrdup (GTXT ("gprofng was built without support for profiling Java applications\n"));
 #endif
     }
   if (strcmp (string, "off") == 0)
@@ -2071,9 +2067,9 @@ char *
 Coll_Ctrl::set_java_path (const char *string)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   free (java_path);
-  java_path = strdup (string);
+  java_path = xstrdup (string);
   return NULL;
 }
 
@@ -2082,12 +2078,12 @@ Coll_Ctrl::set_java_args (char *string)
 {
   char *next;
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   char *prev_java_args = java_args;
   if (string == NULL || strlen (string) == 0)
-    java_args = strdup ("");
+    java_args = xstrdup ("");
   else
-    java_args = strdup (string);
+    java_args = xstrdup (string);
   // now count the number of Java arguments
   for (next = java_args; *next; next++)
     {
@@ -2116,7 +2112,7 @@ char *
 Coll_Ctrl::set_follow_mode (const char *string)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   free (follow_spec_usr);
   free (follow_spec_cmp);
   follow_spec_usr = NULL;
@@ -2143,18 +2139,13 @@ Coll_Ctrl::set_follow_mode (const char *string)
       int ercode;
       const char *userspec = &string[1];
       size_t newstrlen = strlen (userspec) + 3;
-      char * str = (char *) malloc (newstrlen);
-      if (str)
-	{
-	  snprintf (str, newstrlen, "^%s$", userspec);
-	  assert (strlen (str) == newstrlen - 1);
-	  ercode = regcomp (&regex_desc, str, REG_EXTENDED | REG_NOSUB | REG_NEWLINE);
-	}
-      else
-	ercode = 1;
+      char * str = (char *) xmalloc (newstrlen);
+      snprintf (str, newstrlen, "^%s$", userspec);
+      assert (strlen (str) == newstrlen - 1);
+      ercode = regcomp (&regex_desc, str, REG_EXTENDED | REG_NOSUB | REG_NEWLINE);
       if (!ercode)
 	{
-	  follow_spec_usr = strdup (string);
+	  follow_spec_usr = xstrdup (string);
 	  /* Ideally, follow_spec_cmp = [serialized regex_desc], */
 	  /* so that libcollector wouldn't have to recompile it. */
 	  /* For now, just copy the regular expression into follow_spec_cmp */
@@ -2173,7 +2164,7 @@ char *
 Coll_Ctrl::set_prof_idle (const char *string)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (string == NULL || strlen (string) == 0 || strcmp (string, "on") == 0)
     {
       prof_idle = 1;
@@ -2191,7 +2182,7 @@ char *
 Coll_Ctrl::set_archive_mode (const char *string)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (string == NULL || strlen (string) == 0)
     string = "on";
   if (strcasecmp (string, "on") == 0 || strcasecmp (string, "off") == 0
@@ -2201,7 +2192,7 @@ Coll_Ctrl::set_archive_mode (const char *string)
       || strcasecmp (string, "all") == 0)
     {
       free (archive_mode);
-      archive_mode = strdup (string);
+      archive_mode = xstrdup (string);
       return NULL;
     }
   return dbe_sprintf (GTXT ("Unrecognized archive-mode parameter `%s'\n"), string);
@@ -2212,7 +2203,7 @@ Coll_Ctrl::set_sample_signal (int value)
 {
   const char *buf;
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (value == 0)
     {
       sample_sig = 0;
@@ -2241,9 +2232,7 @@ Coll_Ctrl::find_sig (const char *string)
   if (strncmp (string, "SIG", 3) != 0)
     {
       // no: add it
-      signame_alloc = (char *) malloc (strlen (string) + 3 + 1);
-      if (signame_alloc == NULL)
-	return -1;
+      signame_alloc = (char *) xmalloc (strlen (string) + 3 + 1);
       strcpy (signame_alloc, "SIG");
       strcpy (&signame_alloc[3], string);
       signame = signame_alloc;
@@ -2266,7 +2255,7 @@ char *
 Coll_Ctrl::set_pauseresume_signal (int value, int resume)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   if (value == 0)
     {
       pauseresume_sig = 0;
@@ -2299,7 +2288,7 @@ char *
 Coll_Ctrl::set_debug_mode (int value)
 {
   if (opened == 1)
-    return strdup (GTXT ("Experiment is active; command ignored.\n"));
+    return xstrdup (GTXT ("Experiment is active; command ignored.\n"));
   debug_mode = value;
   return NULL;
 }
@@ -2373,7 +2362,7 @@ Coll_Ctrl::preprocess_names ()
     }
   expno = 1;
   if (uexpt_name != NULL)
-    expt_name = strdup (uexpt_name);
+    expt_name = xstrdup (uexpt_name);
   else
     {
       // no user name -- pick a default
@@ -2382,12 +2371,12 @@ Coll_Ctrl::preprocess_names ()
       char *stembase;
       if (expt_group == NULL)
 	{
-	  stem = strdup (default_stem);
+	  stem = xstrdup (default_stem);
 	  stembase = stem;
 	}
       else
 	{
-	  stem = strdup (expt_group);
+	  stem = xstrdup (expt_group);
 	  stem[strlen (stem) - 4] = 0;
 	  stembase = stem;
 	  // now remove any leading directory
@@ -2401,7 +2390,7 @@ Coll_Ctrl::preprocess_names ()
 	  if (strlen (stembase) == 0)
 	    {
 	      free (stem);
-	      stem = strdup (default_stem);
+	      stem = xstrdup (default_stem);
 	      stembase = stem;
 	    }
 	}
@@ -2417,35 +2406,35 @@ Coll_Ctrl::preprocess_names ()
   char *s = strrchr (expt_name, '/');
   if (s == NULL)
     {
-      expt_dir = strdup (".");
-      base_name = strdup (expt_name);
+      expt_dir = xstrdup (".");
+      base_name = xstrdup (expt_name);
     }
   else
     {
       expt_dir = dbe_strndup (expt_name, s - expt_name);
-      base_name = strdup (s + 1);
+      base_name = xstrdup (s + 1);
     }
 
   if (expt_dir[0] == '/')
-    store_dir = strdup (expt_dir);
+    store_dir = xstrdup (expt_dir);
   else if ((udir_name == NULL) || (udir_name[0] == 0))
     {
       if (expt_dir[0] == 0)
-	store_dir = strdup (".");
+	store_dir = xstrdup (".");
       else
-	store_dir = strdup (expt_dir);
+	store_dir = xstrdup (expt_dir);
     }
   else
     {
       /* udir_name is a non-empty string */
       if (expt_dir[0] == 0)
-	store_dir = strdup (udir_name);
+	store_dir = xstrdup (udir_name);
       else
 	store_dir = dbe_sprintf ("%s/%s", udir_name, expt_dir);
     }
   free (store_ptr);
   if (strcmp (store_dir, ".") == 0)
-    store_ptr = strdup (base_name);
+    store_ptr = xstrdup (base_name);
   else
     store_ptr = dbe_sprintf ("%s/%s", store_dir, base_name);
 
@@ -2453,7 +2442,7 @@ Coll_Ctrl::preprocess_names ()
   if (strcmp (store_dir, prev_store_dir) != 0)
     {
       free (prev_store_dir);
-      prev_store_dir = strdup (store_dir);
+      prev_store_dir = xstrdup (store_dir);
       const char *fstype = get_fstype (store_dir);
       if (interactive && enabled && (fstype != NULL) && (nofswarn == 0))
 	sb.appendf (GTXT ("Experiment directory is set to a file system of type \"%s\",\n"
@@ -2513,7 +2502,7 @@ Coll_Ctrl::update_expt_name (bool chgmsg, bool chkonly, bool newname)
     return NULL;
 
   // save the name for a changed message
-  char *oldbase = strdup (base_name);
+  char *oldbase = xstrdup (base_name);
 
   // the name is of the from prefix.nnn.er; extract the value of nnn
   int version = atoi (&base_name[pcount + 1]);
@@ -2568,17 +2557,17 @@ Coll_Ctrl::update_expt_name (bool chgmsg, bool chkonly, bool newname)
   else
     free (oldbase);
   free (base_name);
-  base_name = strdup (newbase);
+  base_name = xstrdup (newbase);
 
   // now, reset expt_name to reflect new setting
   free (expt_name);
   if (expt_dir[0] == 0)
-    expt_name = strdup (base_name);
+    expt_name = xstrdup (base_name);
   else
     expt_name = dbe_sprintf ("%s/%s", expt_dir, base_name);
   free (store_ptr);
   if (strcmp (store_dir, ".") == 0)
-    store_ptr = strdup (base_name);
+    store_ptr = xstrdup (base_name);
   else
     store_ptr = dbe_sprintf ("%s/%s", store_dir, base_name);
   closedir (dir);
@@ -2712,7 +2701,7 @@ Coll_Ctrl::find_signal_name (int signal)
   char *str_signal = NULL;
   const char *buf = strsignal (signal);
   if (buf != NULL)
-    str_signal = strdup (buf);
+    str_signal = xstrdup (buf);
   return str_signal;
 }
 
@@ -2729,7 +2718,7 @@ Coll_Ctrl::get (char * control)
     {
       if ((size_limit > 0))
 	return dbe_sprintf ("%d", size_limit);
-      return strdup (ipc_str_unlimited);
+      return xstrdup (ipc_str_unlimited);
     }
   if (!strncmp (control, ipc_str_time_limit, len))
     {
@@ -2743,67 +2732,67 @@ Coll_Ctrl::get (char * control)
 	    }
 	  return dbe_sprintf ("0s-%ds", time_run);
 	}
-      return strdup (ipc_str_unlimited);
+      return xstrdup (ipc_str_unlimited);
     }
   if (strncmp (control, ipc_str_arch_exp, len) == 0)
-    return strdup (get_archive_mode ());
+    return xstrdup (get_archive_mode ());
   if (!strncmp (control, ipc_str_descendant, len))
     {
       switch (get_follow_mode ())
 	{
 	case FOLLOW_ON:
-	  return strdup (ipc_str_on);
+	  return xstrdup (ipc_str_on);
 	case FOLLOW_ALL:
-	  return strdup (ipc_str_on);
+	  return xstrdup (ipc_str_on);
 	case FOLLOW_NONE:
 	default:
-	  return strdup (ipc_str_off);
+	  return xstrdup (ipc_str_off);
 	}
     }
   if (!strncmp (control, ipc_str_prof_idle, len))
     {
       if (prof_idle == 0)
-	return strdup (ipc_str_off);
-      return strdup (ipc_str_on);
+	return xstrdup (ipc_str_off);
+      return xstrdup (ipc_str_on);
     }
   if (!strncmp (control, ipc_str_clkprof, len))
     {
       if (clkprof_default == 1 && clkprof_enabled == 1) // Default value
-	return strdup (ipc_str_empty);
+	return xstrdup (ipc_str_empty);
       if (clkprof_enabled == 0)
-	return strdup (ipc_str_off);
+	return xstrdup (ipc_str_off);
       if ((clkprof_timer > 0))
 	return dbe_sprintf ("%d", clkprof_timer / 1000);
-      return strdup (ipc_str_internal_error);
+      return xstrdup (ipc_str_internal_error);
     }
   if (!strncmp (control, ipc_str_hwcprof, len))
     {
       if (hwcprof_enabled_cnt == 0)
-	return strdup (ipc_str_off);
+	return xstrdup (ipc_str_off);
       if (hwc_string != NULL)
 	return dbe_sprintf ("on\n%s", hwc_string);
-      return strdup (ipc_str_on); // XXX need more details?
+      return xstrdup (ipc_str_on); // XXX need more details?
     }
   if (!strncmp (control, ipc_str_javaprof, len))
     {
       if (java_mode == 0)
-	return strdup (ipc_str_off);
-      return strdup (ipc_str_on);
+	return xstrdup (ipc_str_off);
+      return xstrdup (ipc_str_on);
     }
   if (!strncmp (control, ipc_str_sample, len))
     {
       if (sample_default == 1 && sample_period == 1) // Default value
-	return strdup (ipc_str_empty);
+	return xstrdup (ipc_str_empty);
       if (sample_period == 0)
-	return strdup (ipc_str_off);
+	return xstrdup (ipc_str_off);
       if (sample_period > 0)
 	return dbe_sprintf ("%d", sample_period);
-      return strdup (ipc_str_internal_error);
+      return xstrdup (ipc_str_internal_error);
     }
   if (!strncmp (control, ipc_str_sample_sig, len))
     {
       if (sample_sig == 0)
-	return strdup (ipc_str_off);
+	return xstrdup (ipc_str_off);
       char *str_signal = find_signal_name (sample_sig);
       if (str_signal != NULL)
 	return str_signal;
@@ -2812,7 +2801,7 @@ Coll_Ctrl::get (char * control)
   if (!strncmp (control, ipc_str_pause_resume_sig, len))
     {
       if (pauseresume_sig == 0)
-	return strdup (ipc_str_off);
+	return xstrdup (ipc_str_off);
       char *str_signal = find_signal_name (pauseresume_sig);
       if (str_signal != NULL)
 	return str_signal;
@@ -2821,34 +2810,34 @@ Coll_Ctrl::get (char * control)
   if (!strncmp (control, ipc_str_synctrace, len))
     {
       if (synctrace_enabled == 0)
-	return strdup (ipc_str_off);
+	return xstrdup (ipc_str_off);
       if (synctrace_thresh < 0)
-	return strdup ("on\nthreshold: calibrate");
+	return xstrdup ("on\nthreshold: calibrate");
       if (synctrace_thresh == 0)
-	return strdup ("on\nthreshold: all");
+	return xstrdup ("on\nthreshold: all");
       return dbe_sprintf ("on\nthreshold: %d", synctrace_thresh);
     }
   if (!strncmp (control, ipc_str_heaptrace, len))
     {
       if (heaptrace_mode == NULL)
-	return strdup (ipc_str_off);
-      return strdup (ipc_str_on);
+	return xstrdup (ipc_str_off);
+      return xstrdup (ipc_str_on);
     }
   if (!strncmp (control, ipc_str_iotrace, len))
     {
       if (iotrace_enabled == 0)
-	return strdup (ipc_str_off);
-      return strdup (ipc_str_on);
+	return xstrdup (ipc_str_off);
+      return xstrdup (ipc_str_on);
     }
   if (!strncmp (control, ipc_str_count, len))
     {
       if (count_enabled == 0)
-	return strdup (ipc_str_off);
+	return xstrdup (ipc_str_off);
       if (count_enabled < 0)
-	return strdup ("on\nstatic");
-      return strdup (ipc_str_on);
+	return xstrdup ("on\nstatic");
+      return xstrdup (ipc_str_on);
     }
-  return strdup (ipc_str_unknown_control);
+  return xstrdup (ipc_str_unknown_control);
 }
 
 /**
@@ -2914,7 +2903,7 @@ Coll_Ctrl::set (char * control, const char * value)
     return set_sample_signal (find_sig (value));
   if (!strncmp (control, ipc_str_pause_resume_sig, len))
     {
-      char *str_signal = strdup (value);
+      char *str_signal = xstrdup (value);
       char *str_state = strchr (str_signal, (int) '\n');
       if (str_state != NULL)
 	{
@@ -2936,7 +2925,7 @@ Coll_Ctrl::set (char * control, const char * value)
     return set_iotrace (value);
   if (!strncmp (control, ipc_str_count, len))
     return set_count (value);
-  return strdup (ipc_str_unknown_control);
+  return xstrdup (ipc_str_unknown_control);
 }
 
 /**
@@ -2957,7 +2946,7 @@ Coll_Ctrl::unset (char * control)
     }
   if (!strncmp (control, ipc_str_arch_exp, len))
     {
-      archive_mode = strdup ("on");
+      archive_mode = xstrdup ("on");
       return NULL;
     }
   if (!strncmp (control, ipc_str_descendant, len))
@@ -3031,12 +3020,12 @@ Coll_Ctrl::unset (char * control)
       Nflag = 0;
       return NULL;
     }
-  return strdup (ipc_str_unknown_control);
+  return xstrdup (ipc_str_unknown_control);
 }
 
 void
 Coll_Ctrl::set_project_home (char *s)
 {
   if (s)
-    project_home = strdup (s);
+    project_home = xstrdup (s);
 }

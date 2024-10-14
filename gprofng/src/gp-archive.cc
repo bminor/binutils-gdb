@@ -528,7 +528,7 @@ er_archive::check_args (int argc, char *argv[])
 	  if (dseen)
 	    fprintf (stderr, GTXT ("Warning: option -d was specified several times. Last value is used.\n"));
 	  free (common_archive_dir);
-	  common_archive_dir = strdup (optarg);
+	  common_archive_dir = xstrdup (optarg);
 	  dseen = 1;
 	  break;
 	case 'q':
@@ -546,7 +546,7 @@ er_archive::check_args (int argc, char *argv[])
 	  if (rseen)
 	    fprintf (stderr, GTXT ("Warning: option -r was specified several times. Last value is used.\n"));
 	  free (common_archive_dir);
-	  common_archive_dir = strdup (optarg);
+	  common_archive_dir = xstrdup (optarg);
 	  use_relative_path = 1;
 	  rseen = 1;
 	  break;
@@ -667,7 +667,7 @@ er_archive::check_env_var ()
     }
   if (opts->size () > 0)
     {
-      char **arr = (char **) malloc (sizeof (char *) *opts->size ());
+      char **arr = (char **) xmalloc (sizeof (char *) *opts->size ());
       for (long i = 0; i < opts->size (); i++)
 	arr[i] = opts->get (i);
       if (-1 == check_args (opts->size (), arr))
@@ -697,5 +697,6 @@ real_main (int argc, char *argv[])
 int
 main (int argc, char *argv[])
 {
+  xmalloc_set_program_name (argv[0]);
   return catch_out_of_memory (real_main, argc, argv);
 }

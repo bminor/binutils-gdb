@@ -178,7 +178,7 @@ am__objects_1 = Application.lo BaseMetric.lo BaseMetricTreeNode.lo \
 	QLParser.tab.lo dbe_collctrl.lo i18n.lo parse.lo UserLabel.lo \
 	util.lo Dbe.lo
 am__objects_2 = dbe_hwcdrv.lo dbe_hwcfuncs.lo dbe_hwctable.lo \
-	dbe_memmgr.lo gethrtime.lo
+	gethrtime.lo
 am_libgprofng_la_OBJECTS = $(am__objects_1) $(am__objects_2)
 libgprofng_la_OBJECTS = $(am_libgprofng_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -519,7 +519,6 @@ CSOURCES = \
 	dbe_hwcdrv.c \
 	dbe_hwcfuncs.c \
 	dbe_hwctable.c \
-	dbe_memmgr.c \
 	gethrtime.c \
 	$(NULL)
 
@@ -786,7 +785,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbe_hwcdrv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbe_hwcfuncs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbe_hwctable.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbe_memmgr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/envsets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gethrtime.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gp-archive.Po@am__quote@

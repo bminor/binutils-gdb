@@ -252,9 +252,7 @@ Experiment::ExperimentFile::fgets ()
   if (bufsz == 0)
     {
       bufsz = 1024;
-      buffer = (char *) malloc (bufsz);
-      if (buffer == NULL)
-	return NULL;
+      buffer = (char *) xmalloc (bufsz);
       buffer[bufsz - 1] = (char) 1; // sentinel
     }
   char *res = ::fgets (buffer, bufsz, fh);
@@ -263,9 +261,7 @@ Experiment::ExperimentFile::fgets ()
   while (buffer[bufsz - 1] == (char) 0)
     {
       int newsz = bufsz + 1024;
-      char *newbuf = (char *) malloc (newsz);
-      if (newbuf == NULL)
-	return NULL;
+      char *newbuf = (char *) xmalloc (newsz);
       memcpy (newbuf, buffer, bufsz);
       free (buffer);
       buffer = newbuf;
@@ -451,19 +447,19 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
       if (str != NULL)
 	{
 	  found = 1;
-	  exp->coll_params.start_delay = strdup (str);
+	  exp->coll_params.start_delay = xstrdup (str);
 	}
       str = attrs->getValue (SP_JCMD_TERMINATE);
       if (str != NULL)
 	{
 	  found = 1;
-	  exp->coll_params.terminate = strdup (str);
+	  exp->coll_params.terminate = xstrdup (str);
 	}
       str = attrs->getValue (SP_JCMD_PAUSE_SIG);
       if (str != NULL)
 	{
 	  found = 1;
-	  exp->coll_params.pause_sig = strdup (str);
+	  exp->coll_params.pause_sig = xstrdup (str);
 	}
       str = attrs->getValue (SP_JCMD_SAMPLE_PERIOD);
       if (str != NULL)
@@ -491,7 +487,7 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
       if (str != NULL)
 	{
 	  found = 1;
-	  exp->coll_params.linetrace = strdup (str);
+	  exp->coll_params.linetrace = xstrdup (str);
 	}
 
       str = attrs->getValue (SP_JCMD_COLLENV);
@@ -524,11 +520,11 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
       pushElem (EL_SYSTEM);
       const char *str = attrs->getValue (NTXT ("hostname"));
       if (str != NULL)
-	exp->hostname = strdup (str);
+	exp->hostname = xstrdup (str);
       str = attrs->getValue (NTXT ("os"));
       if (str != NULL)
 	{
-	  exp->os_version = strdup (str);
+	  exp->os_version = xstrdup (str);
 	  /* For Linux experiments expect sparse thread ID's */
 	  if (strncmp (str, NTXT ("SunOS"), 5) != 0)
 	    exp->sparse_threads = true;
@@ -547,7 +543,7 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
 	    exp->platform = Sparc;
 	  exp->need_swap_endian = (DbeSession::platform == Sparc) ?
 		  (exp->platform != Sparc) : (exp->platform == Sparc);
-	  exp->architecture = strdup (str);
+	  exp->architecture = xstrdup (str);
 	}
       str = attrs->getValue (NTXT ("pagesz"));
       if (str != NULL)
@@ -624,7 +620,7 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
 	exp->sid = atoi (str);
       str = attrs->getValue (NTXT ("cwd"));
       if (str != NULL)
-	exp->ucwd = strdup (str);
+	exp->ucwd = xstrdup (str);
       str = attrs->getValue (NTXT ("pagesz"));
       if (str != NULL)
 	exp->page_size = atoi (str);
@@ -1061,7 +1057,7 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
 	  exp->has_java = true;
 	  str = attrs->getValue (NTXT ("jversion"));
 	  if (str != NULL)
-	    exp->jversion = strdup (str);
+	    exp->jversion = xstrdup (str);
 	}
       else if (strcmp (str, NTXT ("datarace")) == 0)
 	{
@@ -1148,7 +1144,7 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
 		{
 		  fldDscr->vtype = TYPE_DATE;
 		  const char *fmt = attrs->getValue (NTXT ("format"));
-		  fldDscr->format = strdup (fmt ? fmt : "");
+		  fldDscr->format = xstrdup (fmt ? fmt : "");
 		}
 	    }
 	  propDscr->vtype = fldDscr->vtype;
@@ -1173,7 +1169,7 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
 
 	  str = attrs->getValue (NTXT ("uname"));
 	  if (str)
-	    propDscr->uname = strdup (PTXT ((char*) str));
+	    propDscr->uname = xstrdup (PTXT ((char*) str));
 	  str = attrs->getValue (NTXT ("noshow"));
 	  if (str && atoi (str) != 0)
 	    propDscr->flags |= PRFLAG_NOSHOW;
@@ -4589,7 +4585,7 @@ Experiment::readPacket (Data_window *dwin, Data_window::Span *span)
 		else
 		  {
 		    // bug 6909545: garbage in 64-bit JAVA_INFO
-		    char *nstack = (char*) malloc (stack_size);
+		    char *nstack = (char*) xmalloc (stack_size);
 		    char *dst = nstack;
 		    char *srcmax = stack + stack_size - sizeof (uint64_t);
 		    for (char *src = stack; src <= srcmax;)
@@ -5845,7 +5841,7 @@ Experiment::checkFileInArchive (const char *fname, bool archiveFile)
       DbeFile *df = archiveMap->get (aname);
       free (aname);
       if (df)
-	return strdup (df->get_location ());
+	return xstrdup (df->get_location ());
       return NULL;
     }
   if (founder_exp)
@@ -6591,12 +6587,7 @@ Experiment::copy_file_to_common_archive (const char *name, const char *aname,
 	  fprintf (stderr, GTXT ("gp-archive: Fatal error: pathconf(\".\", _PC_PATH_MAX) failed\n"));
 	  return 1;
 	}
-      char *buf = (char *) malloc ((size_t) size);
-      if (buf == NULL)
-	{
-	  fprintf (stderr, GTXT ("gp-archive: Fatal error: unable to allocate memory\n"));
-	  return 1;
-	}
+      char *buf = (char *) xmalloc ((size_t) size);
       char *ptr = getcwd (buf, (size_t) size);
       if (ptr == NULL)
 	{

@@ -101,7 +101,7 @@ SourceFile::readSource ()
       status = OS_NOSRC;
       return false;
     }
-  char *srcMap = (char *) malloc (srcLen + 1);
+  char *srcMap = (char *) xmalloc (srcLen + 1);
   int64_t sz = read_from_file (fd, srcMap, srcLen);
   if (sz != (int64_t) srcLen)
     append_msg (CMSG_ERROR, GTXT ("%s: Can read only %lld bytes instead %lld"),

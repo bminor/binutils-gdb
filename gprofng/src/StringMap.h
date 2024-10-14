@@ -154,7 +154,7 @@ StringMap<Value_t>::put (const char *key, Value_t val)
       chunks[nchunks - 1] = new Entry[CHUNK_SIZE];
     }
   entry = &chunks[entries / CHUNK_SIZE][entries % CHUNK_SIZE];
-  entry->key = strdup (key);
+  entry->key = xstrdup (key);
   entry->val = val;
   index->insert (lo, entry);
   hashTable[idx] = entry;

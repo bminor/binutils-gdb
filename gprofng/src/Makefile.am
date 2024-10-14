@@ -92,7 +92,6 @@ CSOURCES = \
 	dbe_hwcdrv.c \
 	dbe_hwcfuncs.c \
 	dbe_hwctable.c \
-	dbe_memmgr.c \
 	gethrtime.c \
 	$(NULL)
 

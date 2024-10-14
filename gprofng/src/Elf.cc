@@ -405,7 +405,7 @@ Elf::elf_getdata (unsigned int sec)
 {
   if (data == NULL)
     {
-      data = (Elf_Data **) malloc (ehdrp->e_shnum * sizeof (Elf_Data *));
+      data = (Elf_Data **) xmalloc (ehdrp->e_shnum * sizeof (Elf_Data *));
       for (int i = 0; i < (int) ehdrp->e_shnum; i++)
 	data[i] = NULL;
     }
@@ -744,7 +744,7 @@ Elf::get_bfd_symbols()
 	bfd_symcnt = bfd_get_symtab_upper_bound (abfd);
       if (bfd_symcnt > 0)
 	{
-	  bfd_sym = (asymbol **) malloc (bfd_symcnt);
+	  bfd_sym = (asymbol **) xmalloc (bfd_symcnt);
 	  bfd_symcnt = bfd_canonicalize_symtab (abfd, bfd_sym);
 	  if (bfd_symcnt < 0)
 	    {
@@ -761,7 +761,7 @@ Elf::get_bfd_symbols()
       bfd_dynsymcnt = bfd_get_dynamic_symtab_upper_bound (abfd);
       if (bfd_dynsymcnt > 0)
 	{
-	  bfd_dynsym = (asymbol **) malloc (bfd_dynsymcnt);
+	  bfd_dynsym = (asymbol **) xmalloc (bfd_dynsymcnt);
 	  bfd_dynsymcnt = bfd_canonicalize_dynamic_symtab (abfd, bfd_dynsym);
 	  if (bfd_dynsymcnt < 0)
 	    {

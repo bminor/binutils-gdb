@@ -129,14 +129,14 @@ Function::get_name (NameFormat nfmt)
   bool soname_fmt = Histable::soname_fmt (nfmt);
   int fname_fmt = Histable::fname_fmt (nfmt);
   if (fname_fmt == Histable::MANGLED)
-    name_buf = strdup (mangled_name);
+    name_buf = xstrdup (mangled_name);
   else
     {
       if (module && module->is_fortran ()
 	  && (streq (name, "MAIN") || streq (name, "MAIN_")))
-	name_buf = strdup (match_name);
+	name_buf = xstrdup (match_name);
       else
-	name_buf = strdup (name);
+	name_buf = xstrdup (name);
 
       if (fname_fmt == Histable::SHORT)
 	{

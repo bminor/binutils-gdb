@@ -63,6 +63,7 @@ static Process **processes;
 int
 main (int argc, char *argv[])
 {
+  xmalloc_set_program_name (argv[0]);
   // disable any alarm that might be pending
   int r = alarm (0);
   if (r != 0)

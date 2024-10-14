@@ -89,7 +89,7 @@ Descendants::insert (int ind, CallStackNode* item)
   if (old_cnt + 1 >= limit)
     {
       int new_limit = (limit == 0) ? DELTA : limit * 2;
-      CallStackNode **new_data = (CallStackNode **) malloc (new_limit * sizeof (CallStackNode *));
+      CallStackNode **new_data = (CallStackNode **) xmalloc (new_limit * sizeof (CallStackNode *));
       for (int i = 0; i < ind; i++)
 	new_data[i] = old_data[i];
       new_data[ind] = item;
@@ -204,12 +204,12 @@ CallStackP::new_Node (CallStackNode *anc, Histable *pcval)
       nchunks++;
 
       // Reallocate Node chunk array
-      chunks = (CallStackNode **) malloc (nchunks * sizeof (CallStackNode *));
+      chunks = (CallStackNode **) xmalloc (nchunks * sizeof (CallStackNode *));
       for (int i = 0; i < nchunks - 1; i++)
 	chunks[i] = old_chunks[i];
       free (old_chunks);
       // Allocate new chunk for nodes.
-      chunks[nchunks - 1] = (CallStackNode *) malloc (CHUNKSZ * sizeof (CallStackNode));
+      chunks[nchunks - 1] = (CallStackNode *) xmalloc (CHUNKSZ * sizeof (CallStackNode));
     }
   nodes++;
   CallStackNode *node = get_node (nodes - 1);

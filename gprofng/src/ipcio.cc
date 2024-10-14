@@ -63,7 +63,7 @@ IPCrequest::IPCrequest (int sz, int reqID, int chID)
   channelID = chID;
   status = INITIALIZED;
   idx = 0;
-  buf = (char *) malloc (size);
+  buf = (char *) xmalloc (size);
   cancelImmediate = false;
 }
 
@@ -149,7 +149,7 @@ readSVal (IPCrequest *req)
       ipc_trace ("  readSVal: <NULL>\n");
       return NULL;
     }
-  char *str = (char *) malloc (len + 1);
+  char *str = (char *) xmalloc (len + 1);
   char *s = str;
   *s = (char) 0;
   while (len--)

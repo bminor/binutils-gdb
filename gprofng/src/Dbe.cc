@@ -353,7 +353,7 @@ dbeReadFile (const char *pathname)
 {
   Vector<char*> *result = new Vector<char*>(2);
   int limit = 1024 * 1024; // Temporary limit: 1 MB
-  char * contents = (char *) malloc (limit);
+  char * contents = (char *) xmalloc (limit);
   StringBuilder sb;
   if (NULL == contents)
     {
@@ -4960,7 +4960,7 @@ dbeGetFuncList (int dbevindex, int type, int subtype)
 	      //	it needs to be
 	      // first, scan all the lines, to get the maximum line number
 	      bufsz = 1024;
-	      buf = (char *) malloc (bufsz);
+	      buf = (char *) xmalloc (bufsz);
 	      int max_lineno = 0;
 	      int hidx;
 	      Hist_data::HistItem *hitem;
@@ -5047,7 +5047,7 @@ dbeGetFuncList (int dbevindex, int type, int subtype)
 			      // Reallocate the buffer
 			      size_t curlen = d - buf;
 			      bufsz += 1024;
-			      char *buf_new = (char *) malloc (bufsz);
+			      char *buf_new = (char *) xmalloc (bufsz);
 			      strncpy (buf_new, buf, curlen);
 			      buf_new[curlen] = '\0';
 			      free (buf);
@@ -5243,7 +5243,7 @@ dbeGetFuncListV2 (int dbevindex, int mtype, Obj sel_obj, int type, int subtype)
 	    //	it needs to be
 	    // first, scan all the lines, to get the maximum line number
 	    bufsz = 1024;
-	    buf = (char *) malloc (bufsz);
+	    buf = (char *) xmalloc (bufsz);
 	    int max_lineno = 0;
 	    int hidx;
 	    Hist_data::HistItem *hitem;
@@ -5334,7 +5334,7 @@ dbeGetFuncListV2 (int dbevindex, int mtype, Obj sel_obj, int type, int subtype)
 			    // Reallocate the buffer
 			    size_t curlen = d - buf;
 			    bufsz += 1024;
-			    char *buf_new = (char *) malloc (bufsz);
+			    char *buf_new = (char *) xmalloc (bufsz);
 			    strncpy (buf_new, buf, curlen);
 			    buf_new[curlen] = '\0';
 			    free (buf);
@@ -6089,7 +6089,7 @@ dbeGetStatisList (int dbevindex)
     return NULL;
 
   // Get statistics data
-  data = (Stats_data **) malloc ((size + 1) * sizeof (Stats_data *));
+  data = (Stats_data **) xmalloc ((size + 1) * sizeof (Stats_data *));
   data[0] = new Stats_data ();
   for (index = 1; index <= size; index++)
     {
@@ -7006,8 +7006,8 @@ dbeGetSummary (int dbevindex, Vector<Obj> *sel_objs, int type, int subtype)
       if (map != NULL)
 	{
 	  int nmetrics = mvec->size ();
-	  double *evalues = (double *) malloc (nmetrics * sizeof (double));
-	  double *ivalues = (double *) malloc (nmetrics * sizeof (double));
+	  double *evalues = (double *) xmalloc (nmetrics * sizeof (double));
+	  double *ivalues = (double *) xmalloc (nmetrics * sizeof (double));
 	  for (index2 = 0; index2 < nmetrics; index2++)
 	    {
 	      evalues[index2] = excl_list->fetch (index2);
@@ -7090,8 +7090,8 @@ dbeGetHwcSets (int /*dbevindex*/, bool forKernel)
   Vector<char*> *name = new Vector<char*>(1); // Internal name
   if (NULL != defctrs)
     {
-      i18n->store (0, strdup (defctrs));
-      name->store (0, strdup (NTXT ("default")));
+      i18n->store (0, xstrdup (defctrs));
+      name->store (0, xstrdup (NTXT ("default")));
     }
   list->store (0, i18n);
   list->store (1, name);
@@ -8692,8 +8692,8 @@ dbeGetDataDescriptorsV2 (int exp_id)
       int data_id = dataDscr->getId ();
       int aux_prop_id = (data_id == DATA_HWC) ? PROP_HWCTAG : PROP_NONE;
       dataId->append (data_id);
-      dataName->append (strdup (dataDscr->getName ()));
-      dataUName->append (strdup (dataDscr->getUName ()));
+      dataName->append (xstrdup (dataDscr->getName ()));
+      dataUName->append (xstrdup (dataDscr->getUName ()));
       auxProp->append (aux_prop_id);
     }
   delete ddscr;
@@ -9921,8 +9921,8 @@ dbeGetLineInfo (Obj pc)
   if (dbeline != NULL)
     snprintf (lineno, sizeof (lineno), NTXT ("%d"), dbeline->lineno);
   Vector<char*> *res = new Vector<char*>(2);
-  res->store (0, strdup (fname));
-  res->store (1, strdup (lineno));
+  res->store (0, xstrdup (fname));
+  res->store (1, xstrdup (lineno));
   return res;
 }
 

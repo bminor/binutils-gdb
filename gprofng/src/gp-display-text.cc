@@ -112,6 +112,7 @@ reexec_enhance (int argc, char *argv[])
 int
 main (int argc, char *argv[])
 {
+  xmalloc_set_program_name (argv[0]);
   er_print *erprint;
   int ind = 1;
   if (argc > ind && *argv[ind] == '-')
@@ -533,7 +534,7 @@ er_print::process_object_select (char *names)
   if (!got_err)
     { // good coverage string
       free (cov_string);
-      cov_string = strdup (names);
+      cov_string = xstrdup (names);
     }
   else
     { // bad, restore original coverage
@@ -1662,9 +1663,9 @@ er_print::exp_list ()
   for (index = 0; index < size; index++)
     {
       lists[0][index] = dbe_sprintf (NTXT ("%d"), index + 1);
-      lists[1][index] = strdup (dbev->get_exp_enable (index) ? GTXT ("yes") : GTXT ("no"));
+      lists[1][index] = xstrdup (dbev->get_exp_enable (index) ? GTXT ("yes") : GTXT ("no"));
       lists[2][index] = dbe_sprintf (NTXT ("%d"), dbeSession->get_exp (index)->getPID ());
-      lists[3][index] = strdup (dbeSession->get_exp (index)->get_expt_name ());
+      lists[3][index] = xstrdup (dbeSession->get_exp (index)->get_expt_name ());
     }
   disp_list (4, size, align, header, lists);
   for (int i = 0; i < 4; i++)
@@ -1834,9 +1835,9 @@ er_print::seg_list ()
 	  continue;
       }
     bool expand = dbev->get_lo_expand (lo->seg_idx);
-    lists[0][new_index] = strdup (expand ? GTXT ("yes") : GTXT ("no"));
+    lists[0][new_index] = xstrdup (expand ? GTXT ("yes") : GTXT ("no"));
     lists[1][new_index] = dbe_sprintf (NTXT ("%lld"), (ll_t) lo->get_size ());
-    lists[2][new_index] = strdup (lo->get_pathname ());
+    lists[2][new_index] = xstrdup (lo->get_pathname ());
     new_index++;
   }
 
@@ -1903,7 +1904,7 @@ er_print::filter_list (CmdType cmd_type)
 	continue;
       lists[0][new_index] = dbe_sprintf (NTXT ("%d"), index + 1);
       pattern = dbev->get_exp_enable (index) ? select->get_pattern () : NULL;
-      lists[1][new_index] = strdup (pattern && *pattern ? pattern : GTXT ("none"));
+      lists[1][new_index] = xstrdup (pattern && *pattern ? pattern : GTXT ("none"));
       lists[2][new_index] = dbe_sprintf (NTXT ("%lld"), (ll_t) select->nelem ());
       lists[3][new_index] = select->get_status ();
       new_index++;
@@ -2822,7 +2823,7 @@ er_print::set_outfile (char *cmd, FILE *&set_file, bool append)
       else if ((fname = strstr (cmd, NTXT ("~"))) != NULL && home != NULL)
 	path = dbe_sprintf (NTXT ("/home/%s"), fname + 1);
       else
-	path = strdup (cmd);
+	path = xstrdup (cmd);
       new_file = fopen (path, append ? NTXT ("a") : NTXT ("w"));
       if (new_file == NULL)
 	{

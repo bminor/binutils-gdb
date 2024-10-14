@@ -1245,7 +1245,7 @@ DbeSession::open_experiment (Experiment *exp, char *path)
     {
       if (t_exp_list[j] == NULL) continue;
       Experiment *dexp = t_exp_list[j];
-      exp_ctx *new_ctx = (exp_ctx*) malloc (sizeof (exp_ctx));
+      exp_ctx *new_ctx = (exp_ctx*) xmalloc (sizeof (exp_ctx));
       new_ctx->path = NULL;
       new_ctx->exp = dexp;
       new_ctx->ds = this;

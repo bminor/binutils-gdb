@@ -28,6 +28,7 @@
 #include <sys/wait.h>   // wait
 #include <locale.h>
 
+#include "libiberty.h"
 #include "DbeApplication.h"
 #include "Histable.h"
 #include "ipcio.h"
@@ -2686,7 +2687,7 @@ ipc_mainLoop (int argc, char *argv[])
   if (er_print_catch_crash)
     {
       /* reserve memory for fatal error processing */
-      fatalErrorDynamicMemory = (char *) malloc (4 * 1024 * 1024); // reserve 4 MB
+      fatalErrorDynamicMemory = (char *) xmalloc (4 * 1024 * 1024); // reserve 4 MB
       /* install a handler for SIGABRT */
       ipc_request_trace (TRACE_LVL_1, "Installing SIGABRT handler to send message to analyzer\n");
       sigemptyset (&act.sa_mask);

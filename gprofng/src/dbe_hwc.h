@@ -24,7 +24,13 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "libiberty.h"
 #include "i18n.h"
+
+#define malloc(s) xmalloc (s)
+#define realloc(p, s) xrealloc (p, s)
+#define calloc(n, s) xcalloc (n, s)
+#define strdup(s) xstrdup (s)
 
 #define HWC_TRACELEVEL -1
 #if HWC_TRACELEVEL < 0

@@ -1346,13 +1346,13 @@ Settings::proc_tabs (bool _rdtMode)
   if (_rdtMode == true)
     {
       if (str_rtabs == NULL)
-	str_rtabs = strdup ("header");
+	str_rtabs = xstrdup ("header");
       cmd = str_rtabs;
     }
   else
     {
       if (str_tabs == NULL)
-	str_tabs = strdup ("header");
+	str_tabs = xstrdup ("header");
       cmd = str_tabs;
     }
   if (strcmp (cmd, NTXT ("none")) == 0)

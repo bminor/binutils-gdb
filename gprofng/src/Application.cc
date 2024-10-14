@@ -112,7 +112,7 @@ Application::get_realpath (const char *_name)
 	      path = s + 1;
 	    }
     }
-  return strdup (_name);
+  return xstrdup (_name);
 }
 
 // Set the directory where all binaries are found

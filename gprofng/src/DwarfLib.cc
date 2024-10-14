@@ -1523,7 +1523,7 @@ DwrLineRegs::read_file_names_dwarf5 ()
 	   (long long) debug_lineSec->offset, efmt_cnt);
   if (efmt_cnt == 0)
     return NULL;
-  t_entry_fmt *efmt = (t_entry_fmt *) malloc (sizeof (t_entry_fmt) * efmt_cnt);
+  t_entry_fmt *efmt = (t_entry_fmt *) xmalloc (sizeof (t_entry_fmt) * efmt_cnt);
   for (int i = 0; i < efmt_cnt; i++)
     {
       efmt[i].type_code = debug_lineSec->GetULEB128 ();
@@ -2350,8 +2350,8 @@ DwrCU::map_dwarf_lines (Module *mod)
   if (isGNU && (inlinedSubrCnt > 0))
     {
       Function *func = NULL;
-      mod->inlinedSubr = (InlinedSubr *) malloc (inlinedSubrCnt
-						 * sizeof (InlinedSubr));
+      mod->inlinedSubr = (InlinedSubr *) xmalloc (inlinedSubrCnt
+						  * sizeof (InlinedSubr));
       for (long i = 0; i < inlinedSubrCnt; i++)
 	{
 	  DwrInlinedSubr *inlinedSubr = dwrInlinedSubrs->get (i);

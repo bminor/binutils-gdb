@@ -238,7 +238,7 @@ BaseMetric::BaseMetric (const BaseMetric& m)
     default_visbits[ii] = m.default_visbits[ii];
   if (m.cond_spec)
     {
-      cond_spec = strdup (m.cond_spec);
+      cond_spec = xstrdup (m.cond_spec);
       cond = m.cond->copy ();
     }
   else
@@ -248,7 +248,7 @@ BaseMetric::BaseMetric (const BaseMetric& m)
     }
   if (m.val_spec)
     {
-      val_spec = strdup (m.val_spec);
+      val_spec = xstrdup (m.val_spec);
       val = m.val->copy ();
     }
   else
@@ -258,7 +258,7 @@ BaseMetric::BaseMetric (const BaseMetric& m)
     }
   if (m.expr_spec)
     {
-      expr_spec = strdup (m.expr_spec);
+      expr_spec = xstrdup (m.expr_spec);
       expr = m.expr->copy ();
     }
   else

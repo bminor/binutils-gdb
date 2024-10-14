@@ -49,6 +49,7 @@ private:
 int
 main (int argc, char *argv[])
 {
+  xmalloc_set_program_name (argv[0]);
   Gprofng *gprofng = new Gprofng (argc, argv);
   gprofng->start();
   delete gprofng;
@@ -228,7 +229,7 @@ Gprofng::exec_cmd (char *tool_name, int argc, char **argv)
 
   const char *aname = app_names[first].app_name;
 
-  char **arr = (char **) malloc ((argc + 5) * sizeof (char *));
+  char **arr = (char **) xmalloc ((argc + 5) * sizeof (char *));
   char *pname = get_name ();
   char *exe_name = dbe_sprintf ("%.*s%s",
 			(int) (get_basename (pname) - pname), pname, aname);
