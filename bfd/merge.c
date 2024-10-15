@@ -165,7 +165,7 @@ struct sec_merge_sec_info
 
 /* Given a merge hash table TABLE and a number of entries to be
    ADDED, possibly resize the table for this to fit without further
-   resizing.  */
+   resizing.  Returns false if that can't be done for whatever reason.  */
 
 static bool
 sec_merge_maybe_resize (struct sec_merge_hash *table, unsigned added)
@@ -174,17 +174,18 @@ sec_merge_maybe_resize (struct sec_merge_hash *table, unsigned added)
   if (NEEDS_RESIZE (bfdtab->count + added, table->nbuckets))
     {
       unsigned i;
-      unsigned long newnb = table->nbuckets * 2;
+      unsigned long newnb = table->nbuckets;
       struct sec_merge_hash_entry **newv;
       uint64_t *newl;
       unsigned long alloc;
 
-      while (NEEDS_RESIZE (bfdtab->count + added, newnb))
+      do
 	{
 	  newnb *= 2;
-	  if (!newnb)
+	  if (!(unsigned int)newnb)
 	    return false;
 	}
+      while (NEEDS_RESIZE (bfdtab->count + added, newnb));
 
       alloc = newnb * sizeof (newl[0]);
       if (alloc / sizeof (newl[0]) != newnb)
@@ -698,9 +699,12 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
 }
 
 /* Record one whole input section (described by SECINFO) into the hash table
-   SINFO.  */
+   SINFO.  Returns 0 on hard errors (no sense in continuing link),
+   1 when section is completely recorded, and 2 when the section wasn't
+   recorded but we can continue (e.g. by simply not deduplicating this
+   section).  */
 
-static bool
+static int
 record_section (struct sec_merge_info *sinfo,
 		struct sec_merge_sec_info *secinfo)
 {
@@ -737,8 +741,8 @@ record_section (struct sec_merge_info *sinfo,
      merged into this area will make use of that as well.  */
   if (!sec_merge_maybe_resize (sinfo->htab, 1 + sec->size / 2))
     {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
+      free (contents);
+      return 2;
     }
 
   /* Walk through the contents, calculate hashes and length of all
@@ -788,14 +792,14 @@ record_section (struct sec_merge_info *sinfo,
   /*printf ("ZZZ %s:%s %u entries\n", sec->owner->filename, sec->name,
 	  (unsigned)secinfo->noffsetmap);*/
 
-  return true;
+  return 1;
 
  error_return:
   free (contents);
   contents = NULL;
   for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
     *secinfo->psecinfo = NULL;
-  return false;
+  return 0;
 }
 
 /* qsort comparison function.  Won't ever return zero as all entries
@@ -991,9 +995,16 @@ _bfd_merge_sections (bfd *abfd,
 	  }
 	else
 	  {
-	    if (!record_section (sinfo, secinfo))
+	    int e = record_section (sinfo, secinfo);
+	    if (e == 0)
 	      return false;
-	    if (align)
+	    if (e == 2)
+	      {
+		*secinfo->psecinfo = NULL;
+		if (remove_hook)
+		  (*remove_hook) (abfd, secinfo->sec);
+	      }
+	    else if (align)
 	      {
 		unsigned int opb = bfd_octets_per_byte (abfd, secinfo->sec);
 
@@ -1043,7 +1054,8 @@ _bfd_merge_sections (bfd *abfd,
       /* Finally remove all input sections which have not made it into
 	 the hash table at all.  */
       for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
-	if (secinfo->first_str == NULL)
+	if (secinfo->first_str == NULL
+	    && secinfo->sec->sec_info_type == SEC_INFO_TYPE_MERGE)
 	  secinfo->sec->flags |= SEC_EXCLUDE | SEC_KEEP;
     }
 
