@@ -410,7 +410,7 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 
       There will be two symbols for the imported value, one the symbol name
       and one with _imp__ prefixed.  Allowing for the terminating nul's this
-      is strlen (import_name) * 2 + 8 + 21 + strlen (source_dll).
+      is strlen (symbol_name) * 2 + 8 + 21 + strlen (source_dll).
 
       The strings in the string table must start STRING__SIZE_SIZE bytes into
       the table in order to for the string lookup code in coffgen/coffcode to
@@ -426,7 +426,7 @@ pe_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define SIZEOF_ILF_EXT_SYMS	 (NUM_ILF_SYMS * sizeof (*vars.esym_table))
 #define SIZEOF_ILF_RELOCS	 (NUM_ILF_RELOCS * sizeof (*vars.reltab))
 #define SIZEOF_ILF_INT_RELOCS	 (NUM_ILF_RELOCS * sizeof (*vars.int_reltab))
-#define SIZEOF_ILF_STRINGS	 (strlen (import_name) * 2 + 8 \
+#define SIZEOF_ILF_STRINGS	 (strlen (symbol_name) * 2 + 8 \
 				  + 21 + strlen (source_dll)   \
 				  + NUM_ILF_SECTIONS * 9       \
 				  + STRING_SIZE_SIZE)
