@@ -143,6 +143,13 @@ gdbpy_execute_mi_command (PyObject *self, PyObject *args, PyObject *kw)
   if (n_args < 0)
     return nullptr;
 
+  if (n_args == 0)
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("gdb.execute_mi requires command argument"));
+      return nullptr;
+    }
+
   for (Py_ssize_t i = 0; i < n_args; ++i)
     {
       /* Note this returns a borrowed reference.  */
