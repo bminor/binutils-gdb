@@ -20,6 +20,7 @@
 #define GDBSERVER_GDBTHREAD_H
 
 #include "gdbsupport/common-gdbthread.h"
+#include "gdbsupport/function-view.h"
 #include "inferiors.h"
 
 #include <list>
@@ -103,111 +104,35 @@ struct thread_info *find_any_thread_of_pid (int pid);
 /* Find the first thread for which FUNC returns true.  Return NULL if no thread
    satisfying FUNC is found.  */
 
-template <typename Func>
-static thread_info *
-find_thread (Func func)
-{
-  std::list<thread_info *>::iterator next, cur = all_threads.begin ();
-
-  while (cur != all_threads.end ())
-    {
-      next = cur;
-      next++;
-
-      if (func (*cur))
-	return *cur;
-
-      cur = next;
-    }
-
-  return NULL;
-}
+thread_info *
+find_thread (gdb::function_view<bool (thread_info *)> func);
 
 /* Like the above, but only consider threads with pid PID.  */
 
-template <typename Func>
-static thread_info *
-find_thread (int pid, Func func)
-{
-  return find_thread ([&] (thread_info *thread)
-    {
-      return thread->id.pid () == pid && func (thread);
-    });
-}
+thread_info *
+find_thread (int pid, gdb::function_view<bool (thread_info *)> func);
 
 /* Find the first thread that matches FILTER for which FUNC returns true.
    Return NULL if no thread satisfying these conditions is found.  */
 
-template <typename Func>
-static thread_info *
-find_thread (ptid_t filter, Func func)
-{
-  return find_thread ([&] (thread_info *thread) {
-    return thread->id.matches (filter) && func (thread);
-  });
-}
+thread_info *
+find_thread (ptid_t filter, gdb::function_view<bool (thread_info *)> func);
 
 /* Invoke FUNC for each thread.  */
 
-template <typename Func>
-static void
-for_each_thread (Func func)
-{
-  std::list<thread_info *>::iterator next, cur = all_threads.begin ();
-
-  while (cur != all_threads.end ())
-    {
-      next = cur;
-      next++;
-      func (*cur);
-      cur = next;
-    }
-}
+void
+for_each_thread (gdb::function_view<void (thread_info *)> func);
 
 /* Like the above, but only consider threads with pid PID.  */
 
-template <typename Func>
-static void
-for_each_thread (int pid, Func func)
-{
-  for_each_thread ([&] (thread_info *thread)
-    {
-      if (pid == thread->id.pid ())
-	func (thread);
-    });
-}
+void
+for_each_thread (int pid, gdb::function_view<void (thread_info *)> func);
 
 /* Find the a random thread for which FUNC (THREAD) returns true.  If
    no entry is found then return NULL.  */
 
-template <typename Func>
-static thread_info *
-find_thread_in_random (Func func)
-{
-  int count = 0;
-  int random_selector;
-
-  /* First count how many interesting entries we have.  */
-  for_each_thread ([&] (thread_info *thread) {
-    if (func (thread))
-      count++;
-  });
-
-  if (count == 0)
-    return NULL;
-
-  /* Now randomly pick an entry out of those.  */
-  random_selector = (int)
-    ((count * (double) rand ()) / (RAND_MAX + 1.0));
-
-  thread_info *thread = find_thread ([&] (thread_info *thr_arg) {
-    return func (thr_arg) && (random_selector-- == 0);
-  });
-
-  gdb_assert (thread != NULL);
-
-  return thread;
-}
+thread_info *
+find_thread_in_random (gdb::function_view<bool (thread_info *)> func);
 
 /* Get current thread ID (Linux task ID).  */
 #define current_ptid (current_thread->id)

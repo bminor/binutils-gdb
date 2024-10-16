@@ -215,6 +215,144 @@ current_process (void)
   return current_process_;
 }
 
+/* See inferiors.h.  */
+
+void
+for_each_process (gdb::function_view<void (process_info *)> func)
+{
+  std::list<process_info *>::iterator next, cur = all_processes.begin ();
+
+  while (cur != all_processes.end ())
+    {
+      next = cur;
+      next++;
+      func (*cur);
+      cur = next;
+    }
+}
+
+/* See inferiors.h.  */
+
+process_info *
+find_process (gdb::function_view<bool (process_info *)> func)
+{
+  std::list<process_info *>::iterator next, cur = all_processes.begin ();
+
+  while (cur != all_processes.end ())
+    {
+      next = cur;
+      next++;
+
+      if (func (*cur))
+	return *cur;
+
+      cur = next;
+    }
+
+  return NULL;
+}
+
+/* See gdbthread.h.  */
+
+thread_info *
+find_thread (gdb::function_view<bool (thread_info *)> func)
+{
+  std::list<thread_info *>::iterator next, cur = all_threads.begin ();
+
+  while (cur != all_threads.end ())
+    {
+      next = cur;
+      next++;
+
+      if (func (*cur))
+	return *cur;
+
+      cur = next;
+    }
+
+  return NULL;
+}
+
+/* See gdbthread.h.  */
+
+thread_info *
+find_thread (int pid, gdb::function_view<bool (thread_info *)> func)
+{
+  return find_thread ([&] (thread_info *thread)
+    {
+      return thread->id.pid () == pid && func (thread);
+    });
+}
+
+/* See gdbthread.h.  */
+
+thread_info *
+find_thread (ptid_t filter, gdb::function_view<bool (thread_info *)> func)
+{
+  return find_thread ([&] (thread_info *thread) {
+    return thread->id.matches (filter) && func (thread);
+  });
+}
+
+/* See gdbthread.h.  */
+
+void
+for_each_thread (gdb::function_view<void (thread_info *)> func)
+{
+  std::list<thread_info *>::iterator next, cur = all_threads.begin ();
+
+  while (cur != all_threads.end ())
+    {
+      next = cur;
+      next++;
+      func (*cur);
+      cur = next;
+    }
+}
+
+/* See gdbthread.h.  */
+
+void
+for_each_thread (int pid, gdb::function_view<void (thread_info *)> func)
+{
+  for_each_thread ([&] (thread_info *thread)
+    {
+      if (pid == thread->id.pid ())
+	func (thread);
+    });
+}
+
+/* See gdbthread.h.  */
+
+thread_info *
+find_thread_in_random (gdb::function_view<bool (thread_info *)> func)
+{
+  int count = 0;
+  int random_selector;
+
+  /* First count how many interesting entries we have.  */
+  for_each_thread ([&] (thread_info *thread) {
+    if (func (thread))
+      count++;
+  });
+
+  if (count == 0)
+    return NULL;
+
+  /* Now randomly pick an entry out of those.  */
+  random_selector = (int)
+    ((count * (double) rand ()) / (RAND_MAX + 1.0));
+
+  thread_info *thread = find_thread ([&] (thread_info *thr_arg) {
+    return func (thr_arg) && (random_selector-- == 0);
+  });
+
+  gdb_assert (thread != NULL);
+
+  return thread;
+}
+
+
 /* See gdbsupport/common-gdbthread.h.  */
 
 void

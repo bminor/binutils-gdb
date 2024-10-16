@@ -103,43 +103,12 @@ extern std::list<process_info *> all_processes;
 
 /* Invoke FUNC for each process.  */
 
-template <typename Func>
-static void
-for_each_process (Func func)
-{
-  std::list<process_info *>::iterator next, cur = all_processes.begin ();
-
-  while (cur != all_processes.end ())
-    {
-      next = cur;
-      next++;
-      func (*cur);
-      cur = next;
-    }
-}
+void for_each_process (gdb::function_view<void (process_info *)> func);
 
 /* Find the first process for which FUNC returns true.  Return NULL if no
    process satisfying FUNC is found.  */
 
-template <typename Func>
-static process_info *
-find_process (Func func)
-{
-  std::list<process_info *>::iterator next, cur = all_processes.begin ();
-
-  while (cur != all_processes.end ())
-    {
-      next = cur;
-      next++;
-
-      if (func (*cur))
-	return *cur;
-
-      cur = next;
-    }
-
-  return NULL;
-}
+process_info *find_process (gdb::function_view<bool (process_info *)> func);
 
 extern struct thread_info *current_thread;
 
