@@ -57,6 +57,8 @@
 #include "gdbsupport/netstuff.h"
 #include "gdbsupport/rsp-low.h"
 
+#include "getopt.h"
+
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
@@ -425,30 +427,39 @@ gdbreplay_usage (FILE *stream)
 captured_main (int argc, char *argv[])
 {
   FILE *fp;
-  int ch;
-
-  if (argc >= 2 && strcmp (argv[1], "--version") == 0)
+  int ch, optc;
+  enum opts { OPT_VERSION = 1, OPT_HELP };
+  static struct option longopts[] =
     {
-      gdbreplay_version ();
-      exit (0);
-    }
-  if (argc >= 2 && strcmp (argv[1], "--help") == 0)
+	{"version", no_argument, nullptr, OPT_VERSION},
+	{"help", no_argument, nullptr, OPT_HELP},
+	{nullptr, no_argument, nullptr, 0}
+    };
+
+  while ((optc = getopt_long (argc, argv, "", longopts, nullptr)) != -1)
     {
-      gdbreplay_usage (stdout);
-      exit (0);
+      switch (optc)
+	{
+	case OPT_VERSION:
+	  gdbreplay_version ();
+	  exit (0);
+	case OPT_HELP:
+	  gdbreplay_usage (stdout);
+	  exit (0);
+	}
     }
 
-  if (argc < 3)
+  if (optind + 2 != argc)
     {
       gdbreplay_usage (stderr);
       exit (1);
     }
-  fp = fopen (argv[1], "r");
+  fp = fopen (argv[optind], "r");
   if (fp == NULL)
     {
-      perror_with_name (argv[1]);
+      perror_with_name (argv[optind]);
     }
-  remote_open (argv[2]);
+  remote_open (argv[optind + 1]);
   while ((ch = logchar (fp)) != EOF)
     {
       switch (ch)
