@@ -20,8 +20,6 @@
 
 #include "mydefs.h"
 
-bool verbose;
-
 /*
 * -----------------------------------------------------------------------------
 * This function allocates the data and sets up the data structures to be used
@@ -65,6 +63,10 @@ void allocate_data (int active_threads,
       printf ("Error: allocation of vector ref failed\n");
       perror ("vector ref");
       exit (-1);
+    }
+  else
+    {
+      if (verbose) printf ("Vector ref allocated\n");
     }
 
   if ((*A = (double **) malloc (number_of_rows * sizeof (double))) == NULL)
