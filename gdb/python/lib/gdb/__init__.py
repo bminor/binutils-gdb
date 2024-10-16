@@ -19,12 +19,7 @@ import sys
 import threading
 import traceback
 from contextlib import contextmanager
-
-# Python 3 moved "reload"
-if sys.version_info >= (3, 4):
-    from importlib import reload
-else:
-    from imp import reload
+from importlib import reload
 
 import _gdb
 

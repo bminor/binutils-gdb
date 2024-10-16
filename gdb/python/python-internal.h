@@ -88,6 +88,8 @@
 #include <frameobject.h>
 #include "py-ref.h"
 
+static_assert (PY_VERSION_HEX >= 0x03040000);
+
 #define Py_TPFLAGS_CHECKTYPES 0
 
 /* If Python.h does not define WITH_THREAD, then the various
@@ -134,17 +136,6 @@ typedef unsigned long gdb_py_ulongest;
 #define gdb_py_long_as_long_and_overflow PyLong_AsLongAndOverflow
 
 #endif /* HAVE_LONG_LONG */
-
-#if PY_VERSION_HEX < 0x03020000
-typedef long Py_hash_t;
-#endif
-
-/* PyMem_RawMalloc appeared in Python 3.4.  For earlier versions, we can just
-   fall back to PyMem_Malloc.  */
-
-#if PY_VERSION_HEX < 0x03040000
-#define PyMem_RawMalloc PyMem_Malloc
-#endif
 
 /* A template variable holding the format character (as for
    Py_BuildValue) for a given type.  */

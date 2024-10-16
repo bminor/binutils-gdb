@@ -740,8 +740,8 @@ AC_DEFUN([AC_TRY_LIBPYTHON],
   found_usable_python=no
   AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "Python.h"]],
                                  [[
-				    #if PY_MAJOR_VERSION != 3
-				    # error "We only support Python 3"
+				    #if PY_VERSION_HEX < 0x03040000
+				    # error "Minimum supported Python version is 3.4"
 				    #endif
 				    Py_Initialize ();
 				 ]])],

@@ -124,6 +124,8 @@ info threads [-gid] [-stopped] [-running] [ID]...
 
 * Python API
 
+  ** GDB no longer supports Python versions less than 3.4.
+
   ** New class gdb.Color for dealing with colors.
 
   ** New constant gdb.PARAM_COLOR represents color type of a
