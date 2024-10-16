@@ -1355,15 +1355,15 @@ handle_detach (char *own_buf)
      another process might delete the next thread in the iteration, which is
      the one saved by the safe iterator.  We will never delete the currently
      iterated on thread, so standard iteration should be safe.  */
-  for (thread_info *thread : all_threads)
+  for (thread_info &thread : all_threads)
     {
       /* Only threads that are of the process we are detaching.  */
-      if (thread->id.pid () != pid)
+      if (thread.id.pid () != pid)
 	continue;
 
       /* Only threads that have a pending fork event.  */
       target_waitkind kind;
-      thread_info *child = target_thread_pending_child (thread, &kind);
+      thread_info *child = target_thread_pending_child (&thread, &kind);
       if (child == nullptr || kind == TARGET_WAITKIND_THREAD_CLONED)
 	continue;
 
@@ -1375,7 +1375,7 @@ handle_detach (char *own_buf)
       if (detach_inferior (fork_child_process) != 0)
 	warning (_("Failed to detach fork child %s, child of %s"),
 		 target_pid_to_str (ptid_t (fork_child_pid)).c_str (),
-		 target_pid_to_str (thread->id).c_str ());
+		 target_pid_to_str (thread.id).c_str ());
     }
 
   if (detach_inferior (process) != 0)
@@ -2523,7 +2523,7 @@ static void
 handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 {
   client_state &cs = get_client_state ();
-  static std::list<thread_info *>::const_iterator thread_iter;
+  static owning_intrusive_list<thread_info>::iterator thread_iter;
 
   /* Reply the current thread id.  */
   if (strcmp ("qC", own_buf) == 0 && !disable_packet_qC)
@@ -2536,7 +2536,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       else
 	{
 	  thread_iter = all_threads.begin ();
-	  ptid = (*thread_iter)->id;
+	  ptid = thread_iter->id;
 	}
 
       sprintf (own_buf, "QC");
@@ -2599,7 +2599,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  thread_iter = all_threads.begin ();
 
 	  *own_buf++ = 'm';
-	  ptid_t ptid = (*thread_iter)->id;
+	  ptid_t ptid = thread_iter->id;
 	  write_ptid (own_buf, ptid);
 	  thread_iter++;
 	  return;
@@ -2611,7 +2611,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  if (thread_iter != all_threads.end ())
 	    {
 	      *own_buf++ = 'm';
-	      ptid_t ptid = (*thread_iter)->id;
+	      ptid_t ptid = thread_iter->id;
 	      write_ptid (own_buf, ptid);
 	      thread_iter++;
 	      return;

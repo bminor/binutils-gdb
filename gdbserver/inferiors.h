@@ -20,8 +20,9 @@
 #define GDBSERVER_INFERIORS_H
 
 #include "gdbsupport/gdb_vecs.h"
+#include "gdbsupport/owning_intrusive_list.h"
+
 #include "dll.h"
-#include <list>
 
 struct thread_info;
 struct regcache;
@@ -32,7 +33,7 @@ struct raw_breakpoint;
 struct fast_tracepoint_jump;
 struct process_info_private;
 
-struct process_info
+struct process_info : public intrusive_list_node<process_info>
 {
   process_info (int pid_, int attached_)
   : pid (pid_), attached (attached_)
@@ -99,7 +100,7 @@ pid_of (const process_info *proc)
 struct process_info *current_process (void);
 struct process_info *get_thread_process (const struct thread_info *);
 
-extern std::list<process_info *> all_processes;
+extern owning_intrusive_list<process_info> all_processes;
 
 /* Invoke FUNC for each process.  */
 
