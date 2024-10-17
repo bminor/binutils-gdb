@@ -587,6 +587,14 @@ gdb_bfd_open (const char *name, const char *target, int fd,
 			  host_address_to_string (abfd),
 			  bfd_get_filename (abfd));
 
+  /* It's important to pass the already-computed stat info here,
+     rather than, say, calling gdb_bfd_ref_ptr::new_reference.  BFD by
+     default will "stat" the file each time bfd_get_mtime is called --
+     and since we will enter it into the hash table using this
+     mtime, if the file changed at the wrong moment, the race would
+     lead to a hash table corruption.  */
+  gdb_bfd_init_data (abfd, &st);
+
   if (bfd_sharing)
     {
       slot = htab_find_slot_with_hash (gdb_bfd_cache, &search, hash, INSERT);
@@ -594,13 +602,6 @@ gdb_bfd_open (const char *name, const char *target, int fd,
       *slot = abfd;
     }
 
-  /* It's important to pass the already-computed stat info here,
-     rather than, say, calling gdb_bfd_ref_ptr::new_reference.  BFD by
-     default will "stat" the file each time bfd_get_mtime is called --
-     and since we already entered it into the hash table using this
-     mtime, if the file changed at the wrong moment, the race would
-     lead to a hash table corruption.  */
-  gdb_bfd_init_data (abfd, &st);
   return gdb_bfd_ref_ptr (abfd);
 }
 
