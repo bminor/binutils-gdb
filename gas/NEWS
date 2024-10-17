@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the x86 Zhaoxin GMI instructions.
+
 * On x86 emulation support (for secondary targets) was dropped.
 
 * Add support for RISC-V Zcmp (cm.mva01s, cm.mvsa01), Smrnmi and CORE-V

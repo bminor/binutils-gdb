@@ -334,6 +334,7 @@ static bitfield cpu_flags[] =
   BITFIELD (3dnow),
   BITFIELD (3dnowA),
   BITFIELD (PadLock),
+  BITFIELD (GMI),
   BITFIELD (SVME),
   BITFIELD (VMX),
   BITFIELD (SMX),

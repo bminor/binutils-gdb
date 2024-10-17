@@ -274,7 +274,8 @@ accept various extension mnemonics.  For example,
 @code{snp},
 @code{invlpgb},
 @code{tlbsync},
-@code{svme} and
+@code{svme},
+@code{gmi} and
 @code{padlock}.
 Note that these extension mnemonics can be prefixed with @code{no} to revoke
 the respective (and any dependent) functionality.  Note further that the
@@ -1705,7 +1706,8 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.rdpru}
 @item @samp{.mcommit} @tab @samp{.sev_es} @tab @samp{.snp} @tab @samp{.invlpgb}
-@item @samp{.tlbsync} @tab @samp{.apx_f}
+@item @samp{.tlbsync} @tab @samp{.apx_f} @tab @samp{.gmi}
+
 @end multitable
 
 Apart from the warning, there are only two other effects on

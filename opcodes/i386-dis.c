@@ -90,6 +90,7 @@ static bool PCLMUL_Fixup (instr_info *, int, int);
 static bool VPCMP_Fixup (instr_info *, int, int);
 static bool VPCOM_Fixup (instr_info *, int, int);
 static bool NOP_Fixup (instr_info *, int, int);
+static bool MONTMUL_Fixup (instr_info *, int, int);
 static bool OP_3DNowSuffix (instr_info *, int, int);
 static bool CMP_Fixup (instr_info *, int, int);
 static bool REP_Fixup (instr_info *, int, int);
@@ -1050,6 +1051,9 @@ enum
   PREFIX_0F7D,
   PREFIX_0F7E,
   PREFIX_0F7F,
+  PREFIX_0FA6_REG_0,
+  PREFIX_0FA6_REG_5,
+  PREFIX_0FA7_REG_6,
   PREFIX_0FAE_REG_0_MOD_3,
   PREFIX_0FAE_REG_1_MOD_3,
   PREFIX_0FAE_REG_2_MOD_3,
@@ -2855,9 +2859,12 @@ static const struct dis386 reg_table[][8] = {
   },
   /* REG_0FA6 */
   {
-    { "montmul",	{ { OP_0f07, 0 } }, 0 },
+    { PREFIX_TABLE (PREFIX_0FA6_REG_0) },
     { "xsha1",		{ { OP_0f07, 0 } }, 0 },
     { "xsha256",	{ { OP_0f07, 0 } }, 0 },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0FA6_REG_5) },
   },
   /* REG_0FA7 */
   {
@@ -2867,6 +2874,7 @@ static const struct dis386 reg_table[][8] = {
     { "xcrypt-ctr",	{ { OP_0f07, 0 } }, 0 },
     { "xcrypt-cfb",	{ { OP_0f07, 0 } }, 0 },
     { "xcrypt-ofb",	{ { OP_0f07, 0 } }, 0 },
+    { PREFIX_TABLE (PREFIX_0FA7_REG_6) },
   },
   /* REG_0FAE */
   {
@@ -3441,6 +3449,26 @@ static const struct dis386 prefix_table[][4] = {
     { "movq",	{ EMS, MX }, PREFIX_OPCODE },
     { "movdqu",	{ EXxS, XM }, PREFIX_OPCODE },
     { "movdqa",	{ EXxS, XM }, PREFIX_OPCODE },
+  },
+
+  /* PREFIX_0FA6_REG_0 */
+  {
+    { Bad_Opcode },
+    { "montmul",	{ { MONTMUL_Fixup, 0 } }, 0},
+    { Bad_Opcode },
+    { "sm2",	{ Skip_MODRM }, 0 },
+  },
+
+  /* PREFIX_0FA6_REG_5 */
+  {
+    { Bad_Opcode },
+    { "sm3",	{ Skip_MODRM }, 0 },
+  },
+
+  /* PREFIX_0FA7_REG_6 */
+  {
+    { Bad_Opcode },
+    { "sm4",	{ Skip_MODRM }, 0 },
   },
 
   /* PREFIX_0FAE_REG_0_MOD_3 */
@@ -13089,6 +13117,24 @@ OP_0f07 (instr_info *ins, int bytemode, int sizeflag)
   if (ins->modrm.mod != 3 || ins->modrm.rm != 0)
     return BadOp (ins);
   return OP_E (ins, bytemode, sizeflag);
+}
+
+/* montmul instruction need display repz and skip modrm */
+
+static bool
+MONTMUL_Fixup (instr_info *ins, int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+{
+  if (ins->modrm.mod != 3 || ins->modrm.rm != 0)
+    return BadOp (ins);
+
+  /* The 0xf3 prefix should be displayed as "repz" for montmul. */
+  if (ins->prefixes & PREFIX_REPZ)
+    ins->all_prefixes[ins->last_repz_prefix] = 0xf3;
+
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  ins->codep++;
+  return true;
 }
 
 /* NOP is an alias of "xchg %ax,%ax" in 16bit mode, "xchg %eax,%eax" in
