@@ -20,6 +20,13 @@
 #ifndef COMMON_COMMON_DEFS_H
 #define COMMON_COMMON_DEFS_H
 
+#if defined (__SANITIZE_THREAD__) && defined (__GNUC__) \
+  && !defined (__clang__) && __GNUC__ <= 13
+
+/* Work around PR gcc/110799.  */
+#pragma GCC optimize("-fno-hoist-adjacent-loads")
+#endif
+
 #include <gdbsupport/config.h>
 
 #undef PACKAGE_NAME
