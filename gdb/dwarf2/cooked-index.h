@@ -140,8 +140,11 @@ struct cooked_index_entry : public allocate_on_obstack<cooked_index_entry>
      STORAGE.  FOR_MAIN is true if we are computing the name of the
      "main" entry -- one marked DW_AT_main_subprogram.  This matters
      for avoiding name canonicalization and also a related race (if
-     "main" computation is done during finalization).  */
-  const char *full_name (struct obstack *storage, bool for_main = false) const;
+     "main" computation is done during finalization).  If the language
+     doesn't prescribe a separator, one can be specified using
+     DEFAULT_SEP.  */
+  const char *full_name (struct obstack *storage, bool for_main = false,
+			 const char *default_sep = nullptr) const;
 
   /* Comparison modes for the 'compare' function.  See the function
      for a description.  */
