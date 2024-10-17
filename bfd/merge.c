@@ -181,9 +181,9 @@ sec_merge_maybe_resize (struct sec_merge_hash *table, unsigned added)
 
       do
 	{
-	  newnb *= 2;
-	  if (!(unsigned int)newnb)
+	  if (newnb >> (8 * sizeof(mapofs_type) - 1))
 	    return false;
+	  newnb *= 2;
 	}
       while (NEEDS_RESIZE (bfdtab->count + added, newnb));
 
