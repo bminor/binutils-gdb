@@ -173,6 +173,20 @@ gdb_test "maint info blocks" [make_blocks_result normal_func \
 				  inline_func_a inline_func_b] \
     "maint info blocks within inline function, all blocks still visible"
 
+# Use 'stepi' and check 'maint info inline-frames' still works.
+gdb_test "stepi" ".*" "perform stepi"
+gdb_test "maint info inline-frames" \
+    [multi_line \
+	 "^Inline state information for thread $decimal\\." \
+	 "program counter = $hex" \
+	 "skipped frames = 0" \
+	 "> inline_func_b"] \
+    "check inline-frames state when within inline_func_b after stepi"
+
+gdb_test "maint info blocks" [make_blocks_result normal_func \
+				  inline_func_a inline_func_b] \
+    "maint info blocks within inline function after stepi, all blocks still visible"
+
 # Use the recorded $pc value to check inline frames.
 gdb_test "maint info inline-frames $pc" \
     [multi_line \

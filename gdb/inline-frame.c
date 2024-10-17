@@ -550,15 +550,38 @@ maintenance_info_inline_frames (const char *arg, int from_tty)
 				return thread == istate.thread;
 			      });
 
-      /* Stopped threads always have cached inline_state information.  */
-      gdb_assert (it != inline_states.end ());
+      /* Stopped threads don't always have cached inline_state
+	 information.  We always skip computing the inline_state after a
+	 stepi or nexti, but also in some other cases when we can be sure
+	 that the inferior isn't at the start of an inlined function.
+	 Check out the call to skip_inline_frames in handle_signal_stop
+	 for more details.  */
+      if (it != inline_states.end ())
+	{
+	  /* We do have cached inline frame information, use it.  This
+	     gives us access to the current skipped_frames count so we can
+	     correctly indicate when the inferior is not in the inner most
+	     inlined function.  */
+	  gdb_printf (_("Cached inline state information for thread %s.\n"),
+		      print_thread_id (thread));
 
-      gdb_printf (_("Cached inline state information for thread %s.\n"),
-		  print_thread_id (thread));
+	  function_symbols = &it->function_symbols;
+	  skipped_frames = it->skipped_frames;
+	  addr = it->saved_pc;
+	}
+      else
+	{
+	  /* No cached inline frame information, lookup the information for
+	     the current address.  */
+	  gdb_printf (_("Inline state information for thread %s.\n"),
+		      print_thread_id (thread));
 
-      function_symbols = &it->function_symbols;
-      skipped_frames = it->skipped_frames;
-      addr = it->saved_pc;
+	  addr = get_frame_pc (get_current_frame ());
+	  local_function_symbols.emplace (gather_inline_frames (addr));
+
+	  function_symbols = &(local_function_symbols.value ());
+	  skipped_frames = 0;
+	}
     }
   else
     {
