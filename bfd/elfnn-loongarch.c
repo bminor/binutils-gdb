@@ -5350,7 +5350,6 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
       bfd_vma symval;
       asection *sym_sec;
       bool local_got = false;
-      bool is_abs_symbol = false;
       Elf_Internal_Rela *rel = relocs + i;
       struct elf_link_hash_entry *h = NULL;
       unsigned long r_type = ELFNN_R_TYPE (rel->r_info);
@@ -5456,8 +5455,9 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  Elf_Internal_Sym *sym = (Elf_Internal_Sym *)symtab_hdr->contents
 				    + r_symndx;
 
-	  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
-	      && r_type != R_LARCH_CALL36)
+	  if ((ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC
+	       && r_type != R_LARCH_CALL36)
+	      || sym->st_shndx == SHN_ABS)
 	    continue;
 
 	  /* Only TLS instruction sequences that are accompanied by
@@ -5486,12 +5486,13 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	      symval = sym->st_value;
 	    }
 	  symtype = ELF_ST_TYPE (sym->st_info);
-	  is_abs_symbol = sym->st_shndx == SHN_ABS;
 	}
       else
 	{
-	  if (h != NULL && h->type == STT_GNU_IFUNC
-	      && r_type != R_LARCH_CALL36)
+	  if (h != NULL
+	      && ((h->type == STT_GNU_IFUNC
+		   && r_type != R_LARCH_CALL36)
+		  || bfd_is_abs_section (h->root.u.def.section)))
 	    continue;
 
 	  /* The GOT entry of tls symbols must in current execute file or
@@ -5533,7 +5534,6 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	  else
 	    continue;
 
-	  is_abs_symbol = bfd_is_abs_section (h->root.u.def.section);
 	  if (h && LARCH_REF_LOCAL (info, h))
 	    local_got = true;
 	  symtype = h->type;
@@ -5566,7 +5566,7 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 
       symval += sec_addr (sym_sec);
 
-      if (r_type == R_LARCH_GOT_PC_HI20 && (!local_got || is_abs_symbol))
+      if (r_type == R_LARCH_GOT_PC_HI20 && !local_got)
 	continue;
 
       if (relax_func (abfd, sec, sym_sec, rel, symval,

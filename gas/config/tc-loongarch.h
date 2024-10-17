@@ -74,6 +74,9 @@ extern bool loongarch_frag_align_code (int, int);
    relaxation, so do not resolve such expressions in the assembler.  */
 #define md_allow_local_subtract(l,r,s) 0
 
+#define TC_FORCE_RELOCATION(FIX) loongarch_force_relocation (FIX)
+extern int loongarch_force_relocation (struct fix *);
+
 /* If subsy of BFD_RELOC32/64 and PC in same segment, and without relax
    or PC at start of subsy or with relax but sub_symbol_segment not in
    SEC_CODE, we generate 32/64_PCREL.  */
