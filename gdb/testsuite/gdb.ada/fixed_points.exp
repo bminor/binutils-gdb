@@ -93,7 +93,7 @@ foreach_gnat_encoding scenario flags {all minimal} {
     }
 
     # This failed before GCC 10.
-    if {$scenario == "all" && [gnat_version_compare < 10]} {
+    if {$scenario == "all" && [gnat_version_compare >= 10]} {
 	gdb_test "p Float(Another_Fixed) = Float(Another_Delta * 5)" "true" \
 	    "value of another_fixed"
     }
