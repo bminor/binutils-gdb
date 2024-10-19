@@ -157,11 +157,11 @@ public:
   constexpr T *data () noexcept { return m_array; }
   constexpr const T *data () const noexcept { return m_array; }
 
-  constexpr T *begin () noexcept { return m_array; }
-  constexpr const T *begin () const noexcept { return m_array; }
+  constexpr T *begin () const noexcept { return m_array; }
+  constexpr const T *cbegin () const noexcept { return m_array; }
 
-  constexpr T *end () noexcept { return m_array + m_size; }
-  constexpr const T *end () const noexcept { return m_array + m_size; }
+  constexpr T *end () const noexcept { return m_array + m_size; }
+  constexpr const T *cend () const noexcept { return m_array + m_size; }
 
   constexpr reference operator[] (size_t index) noexcept
   {
