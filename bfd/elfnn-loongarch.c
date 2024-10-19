@@ -6270,7 +6270,9 @@ elf_loongarch64_hash_symbol (struct elf_link_hash_entry *h)
 #define ELF_ARCH bfd_arch_loongarch
 #define ELF_TARGET_ID LARCH_ELF_DATA
 #define ELF_MACHINE_CODE EM_LOONGARCH
-#define ELF_MAXPAGESIZE 0x4000
+#define ELF_MINPAGESIZE 0x1000
+#define ELF_MAXPAGESIZE 0x10000
+#define ELF_COMMONPAGESIZE 0x4000
 #define bfd_elfNN_bfd_reloc_type_lookup loongarch_reloc_type_lookup
 #define bfd_elfNN_bfd_link_hash_table_create				  \
   loongarch_elf_link_hash_table_create

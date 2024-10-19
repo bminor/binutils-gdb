@@ -1,3 +1,14 @@
+2024-10-18  WANG Xuerui <git@xen0n.name>
+
+	* testsuite/ld-loongarch-elf/64_pcrel.d: Update assertions after
+	changing the target max page size to 64KiB.
+	* testsuite/ld-loongarch-elf/data-got.d: Likewise.
+	* testsuite/ld-loongarch-elf/desc-relex.d: Likewise.
+	* testsuite/ld-loongarch-elf/relax-align-ignore-start.d: Likewise.
+	* testsuite/ld-loongarch-elf/tlsdesc_abs.d: Make the fuzzy match work
+	as intended by not checking exact instruction words.
+	* testsuite/ld-loongarch-elf/tlsdesc_extreme.d: Likewise.
+
 2024-07-20  Nick Clifton  <nickc@redhat.com>
 
 	* 2.43 branch point.
