@@ -88,6 +88,8 @@ public:
   using reference = T &;
   using const_reference = const T &;
   using size_type = size_t;
+  using const_iterator = const T *;
+  using iterator = T *;
 
   /* Default construction creates an empty view.  */
   constexpr array_view () noexcept
@@ -157,11 +159,11 @@ public:
   constexpr T *data () noexcept { return m_array; }
   constexpr const T *data () const noexcept { return m_array; }
 
-  constexpr T *begin () const noexcept { return m_array; }
-  constexpr const T *cbegin () const noexcept { return m_array; }
+  constexpr iterator begin () const noexcept { return m_array; }
+  constexpr const_iterator cbegin () const noexcept { return m_array; }
 
-  constexpr T *end () const noexcept { return m_array + m_size; }
-  constexpr const T *cend () const noexcept { return m_array + m_size; }
+  constexpr iterator end () const noexcept { return m_array + m_size; }
+  constexpr const_iterator cend () const noexcept { return m_array + m_size; }
 
   constexpr reference operator[] (size_t index) noexcept
   {
