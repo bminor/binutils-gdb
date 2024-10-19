@@ -27,9 +27,16 @@
 #include "hashtab.h"
 #include "extension-priv.h"
 #include "symtab.h"
-#include "libguile.h"
 #include "objfiles.h"
 #include "top.h"
+
+#if __cplusplus >= 202002L
+/* Work around Werror=volatile in SCM_UNPACK for
+   SCM_DEBUG_TYPING_STRICTNESS == 1.  Reported upstream:
+   https://debbugs.gnu.org/cgi/bugreport.cgi?bug=65333 .  */
+#define SCM_DEBUG_TYPING_STRICTNESS 0
+#endif
+#include "libguile.h"
 
 struct block;
 struct frame_info;
