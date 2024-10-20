@@ -187,11 +187,6 @@
 #define bfd_elfNN_bfd_gc_sections bfd_elf_gc_sections
 #endif
 
-#ifndef bfd_elfNN_bfd_merge_sections
-#define bfd_elfNN_bfd_merge_sections \
-  _bfd_elf_merge_sections
-#endif
-
 #ifndef bfd_elfNN_bfd_is_group_section
 #define bfd_elfNN_bfd_is_group_section bfd_elf_is_group_section
 #endif
@@ -287,6 +282,9 @@
 #ifndef bfd_elfNN_bfd_final_link
 #define bfd_elfNN_bfd_final_link	bfd_elf_final_link
 #endif
+#ifndef bfd_elfNN_bfd_merge_sections
+#define bfd_elfNN_bfd_merge_sections	_bfd_elf_merge_sections
+#endif
 #else /* ! defined (elf_backend_relocate_section) */
 /* If no backend relocate_section routine, use the generic linker.
    Note - this will prevent the port from being able to use some of
@@ -309,6 +307,9 @@
 #endif
 #ifndef bfd_elfNN_bfd_final_link
 #define bfd_elfNN_bfd_final_link	_bfd_generic_final_link
+#endif
+#ifndef bfd_elfNN_bfd_merge_sections
+#define bfd_elfNN_bfd_merge_sections	bfd_generic_merge_sections
 #endif
 #endif /* ! defined (elf_backend_relocate_section) */
 

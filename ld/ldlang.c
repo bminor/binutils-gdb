@@ -8426,7 +8426,8 @@ lang_process (void)
 	 sections, so that GCed sections are not merged, but before
 	 assigning dynamic symbols, since removing whole input sections
 	 is hard then.  */
-      bfd_merge_sections (link_info.output_bfd, &link_info);
+      if (!bfd_merge_sections (link_info.output_bfd, &link_info))
+	einfo (_("%F%P: bfd_merge_sections failed: %E\n"));
 
       /* Look for a text section and set the readonly attribute in it.  */
       found = bfd_get_section_by_name (link_info.output_bfd, ".text");
