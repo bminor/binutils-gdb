@@ -76,7 +76,7 @@ sed_separator=$(join $sed_or "${sed_separators[@]}")
 
 usage ()
 {
-    echo "usage: $(basename "$0") <file|dir>+"
+    echo "usage: $(basename "$0") [--check] <file|dir>+"
 }
 
 make_absolute ()
@@ -100,6 +100,18 @@ parse_args ()
     local files
     files=$(mktemp)
     trap 'rm -f "$files"' EXIT
+
+    while true; do
+	case " $1 " in
+	    " --check ")
+		check=true
+		shift
+		;;
+	    *)
+		break
+		;;
+	esac
+    done
 
     if [ $# -eq -0 ]; then
 	usage
@@ -311,6 +323,7 @@ replace_word_in_files ()
 main ()
 {
     declare -a unique_files
+    check=false
     parse_args "$@"
 
     get_dictionary
@@ -327,6 +340,10 @@ main ()
 
     if [ ${#files_matching_words[@]} -eq 0 ]; then
 	return
+    fi
+
+    if $check; then
+	exit 1
     fi
 
     declare -A words_done
