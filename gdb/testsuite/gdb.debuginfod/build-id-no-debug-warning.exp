@@ -16,7 +16,7 @@
 # This test triggers the "separate debug info file has no debug info" warning by replacing
 # the build-id based .debug file with the stripped binary and then loading it to gdb.
 # It then also sets up local debuginfod server with the correct debug file to download
-# to make sure no warnings are emmitted.
+# to make sure no warnings are emitted.
 
 
 standard_testfile

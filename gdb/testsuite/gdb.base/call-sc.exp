@@ -286,7 +286,7 @@ proc test_scalar_returns { } {
 	}
 	-re ".*${gdb_prompt} $" {
 	    if $return_value_unimplemented {
-		# What a suprize.  The architecture hasn't implemented
+		# What a surprise.  The architecture hasn't implemented
 		# return_value, and hence has to fail.
 		kfail "$test" gdb/1444
 	    } else {

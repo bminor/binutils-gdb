@@ -3735,7 +3735,7 @@ handle_status (char *own_buf)
     {
       for_each_thread (queue_stop_reply_callback);
 
-      /* The first is sent immediatly.  OK is sent if there is no
+      /* The first is sent immediately.  OK is sent if there is no
 	 stopped thread, which is the same handling of the vStopped
 	 packet (by design).  */
       notif_write_event (&notif_stop, cs.own_buf);

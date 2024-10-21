@@ -9501,7 +9501,7 @@ remote_target::remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   strcat (rs->buf.data (), header);
   p = rs->buf.data () + strlen (header);
 
-  /* Compute a best guess of the number of bytes actually transfered.  */
+  /* Compute a best guess of the number of bytes actually transferred.  */
   if (packet_format == 'X')
     {
       /* Best guess at number of bytes that will fit.  */

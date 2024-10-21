@@ -73,8 +73,20 @@ join ()
 
 grep_or="|"
 sed_or="\|"
-grep_separator=$(join $grep_or "${grep_separators[@]}")
-sed_separator=$(join $sed_or "${sed_separators[@]}")
+
+grep_join ()
+{
+    local res
+    res=$(join $grep_or "$@")
+    echo "($res)"
+}
+
+sed_join ()
+{
+    local res
+    res=$(join $sed_or "$@")
+    echo "\($res\)"
+}
 
 usage ()
 {
@@ -201,26 +213,24 @@ find_files_matching_words ()
     local patfile
     patfile="$cache_dir/$cache_file2".$cache_id
 
+    local pat
     if [ -f "$patfile" ]; then
 	pat=$(cat "$patfile")
     else
 	rm -f "$cache_dir/$cache_file2".*
 
-	local pat
-	pat=""
-	for word in "${words[@]}"; do
-	    if [ "$pat" = "" ]; then
-		pat="$word"
-	    else
-		pat="$pat|$word"
-	    fi
-	done
-	pat="($pat)"
+	pat=$(grep_join "${words[@]}")
 
-	local sep
-	sep=$grep_separator
+	local before after
+	before=$(grep_join \
+		     "^" \
+		     "${grep_separators[@]}")
+	after=$(grep_join \
+		    "${grep_separators[@]}" \
+		    "\." \
+		    "$")
 
-	pat="(^|$sep)$pat($sep|$)"
+	pat="$before$pat$after"
 
 	echo "$pat" \
 	     > "$patfile"
@@ -238,10 +248,16 @@ find_files_matching_word ()
     pat="$1"
     shift
 
-    local sep
-    sep=$grep_separator
+    local before after
+    before=$(grep_join \
+		 "^" \
+		 "${grep_separators[@]}")
+    after=$(grep_join \
+		"${grep_separators[@]}" \
+		"\." \
+		"$")
 
-    pat="(^|$sep)$pat($sep|$)"
+    pat="$before$pat$after"
 
     grep -E \
 	-l \
@@ -260,22 +276,20 @@ replace_word_in_file ()
     local file
     file="$3"
 
-    local sep
-    sep=$sed_separator
+    local before after
+    before=$(sed_join \
+		 "^" \
+		 "${sed_separators[@]}")
+    after=$(sed_join \
+		"${sed_separators[@]}" \
+		"\." \
+		"$")
 
-    # Save separator.
-    sep="\($sep\)"
-
-    local repl1 repl2 repl3
-
-    repl1="s%$sep$word$sep%\1$replacement\2%g"
-
-    repl2="s%^$word$sep%$replacement\1%"
-
-    repl3="s%$sep$word$%\1$replacement%"
+    local repl
+    repl="s%$before$word$after%\1$replacement\2%g"
 
     sed -i \
-	"$repl1;$repl2;$repl3" \
+	"$repl" \
 	"$file"
 }
 
