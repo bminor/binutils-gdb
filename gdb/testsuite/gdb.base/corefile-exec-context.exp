@@ -18,7 +18,7 @@
 #
 # Currently, only Linux supports reading full executable and arguments
 # from a core file.
-require {istarget *-linux*}
+require {is_any_target "*-*-linux*" "*-*-freebsd*"}
 
 standard_testfile
 

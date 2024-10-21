@@ -18,7 +18,7 @@
 #
 # Currently, only Linux supports reading full executable and arguments
 # from a core file.
-require {istarget *-linux*}
+require {is_any_target "*-*-linux*" "*-*-freebsd*"}
 
 standard_testfile
 
@@ -114,6 +114,16 @@ with_test_prefix "absolute path" {
 	remote_exec build "mv $corefile $corefile_3"
 
 	remote_exec build "rm -f $symlink"
+
+	# FreeBSD is unable to figure out the actual underlying mapped
+	# file, so when the symlink is deleted, FeeeBSD is stuck.
+	#
+	# There is some argument that this shouldn't even be a
+	# failure, the user ran the symlink, and if the symlink is
+	# gone, should we really expect GDB to find the underlying
+	# file?  That we can on Linux is really just a quirk of how
+	# the mapped file list works.
+	setup_xfail "*-*-freebsd*"
 
 	test_load $corefile_3 $binfile $symlink
     }

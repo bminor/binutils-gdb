@@ -33,6 +33,7 @@
 #include "elf-bfd.h"
 #include "fbsd-tdep.h"
 #include "gcore-elf.h"
+#include "arch-utils.h"
 
 /* This enum is derived from FreeBSD's <sys/signal.h>.  */
 
@@ -2361,6 +2362,137 @@ fbsd_vdso_range (struct gdbarch *gdbarch, struct mem_range *range)
   return range->length != 0;
 }
 
+/* Try to extract the inferior arguments, environment, and executable name
+   from CBFD.  */
+
+static core_file_exec_context
+fbsd_corefile_parse_exec_context_1 (struct gdbarch *gdbarch, bfd *cbfd)
+{
+  gdb_assert (gdbarch != nullptr);
+
+  /* If there's no core file loaded then we're done.  */
+  if (cbfd == nullptr)
+    return {};
+
+  int ptr_bytes = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
+
+  /* Find the .auxv section in the core file. The BFD library creates this
+     for us from the AUXV note when the BFD is opened.  If the section
+     can't be found then there's nothing more we can do.  */
+  struct bfd_section * section = bfd_get_section_by_name (cbfd, ".auxv");
+  if (section == nullptr)
+    return {};
+
+  /* Grab the contents of the .auxv section.  If we can't get the contents
+     then there's nothing more we can do.  */
+  bfd_size_type size = bfd_section_size (section);
+  if (bfd_section_size_insane (cbfd, section))
+    return {};
+  gdb::byte_vector contents (size);
+  if (!bfd_get_section_contents (cbfd, section, contents.data (), 0, size))
+    return {};
+
+  /* Read AT_FREEBSD_ARGV, the address of the argument string vector.  */
+  CORE_ADDR argv_addr;
+  if (target_auxv_search (contents, current_inferior ()->top_target (),
+			  gdbarch, AT_FREEBSD_ARGV, &argv_addr) != 1)
+    return {};
+
+  /* Read AT_FREEBSD_ARGV, the address of the environment string vector.  */
+  CORE_ADDR envv_addr;
+  if (target_auxv_search (contents, current_inferior ()->top_target (),
+			  gdbarch, AT_FREEBSD_ENVV, &envv_addr) != 1)
+    return {};
+
+  /* Read the AT_EXECPATH string.  It's OK if we can't get this
+     information.  */
+  gdb::unique_xmalloc_ptr<char> execpath;
+  CORE_ADDR execpath_string_addr;
+  if (target_auxv_search (contents, current_inferior ()->top_target (),
+			  gdbarch, AT_FREEBSD_EXECPATH,
+			  &execpath_string_addr) == 1)
+    execpath = target_read_string (execpath_string_addr, INT_MAX);
+
+  /* The byte order.  */
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  /* On FreeBSD the command the user ran is found in argv[0].  When we
+     read the first argument we place it into EXECFN.  */
+  gdb::unique_xmalloc_ptr<char> execfn;
+
+  /* Read strings from AT_FREEBSD_ARGV until we find a NULL marker.  The
+     first argument is placed into EXECFN as the command name.  */
+  std::vector<gdb::unique_xmalloc_ptr<char>> arguments;
+  CORE_ADDR str_addr;
+  while ((str_addr
+	  = (CORE_ADDR) read_memory_unsigned_integer (argv_addr, ptr_bytes,
+						      byte_order)) != 0)
+    {
+      gdb::unique_xmalloc_ptr<char> str
+	= target_read_string (str_addr, INT_MAX);
+      if (str == nullptr)
+	return {};
+
+      if (execfn == nullptr)
+	execfn = std::move (str);
+      else
+	arguments.emplace_back (std::move (str));
+
+      argv_addr += ptr_bytes;
+    }
+
+  /* Read strings from AT_FREEBSD_ENVV until we find a NULL marker.  */
+  std::vector<gdb::unique_xmalloc_ptr<char>> environment;
+  while ((str_addr
+	  = (uint64_t) read_memory_unsigned_integer (envv_addr, ptr_bytes,
+						     byte_order)) != 0)
+    {
+      gdb::unique_xmalloc_ptr<char> str
+	= target_read_string (str_addr, INT_MAX);
+      if (str == nullptr)
+	return {};
+
+      environment.emplace_back (std::move (str));
+      envv_addr += ptr_bytes;
+    }
+
+  return core_file_exec_context (std::move (execfn),
+				 std::move (execpath),
+				 std::move (arguments),
+				 std::move (environment));
+}
+
+/* See elf-corelow.h.  */
+
+static core_file_exec_context
+fbsd_corefile_parse_exec_context (struct gdbarch *gdbarch, bfd *cbfd)
+{
+  /* Catch and discard memory errors.
+
+     If the core file format is not as we expect then we can easily trigger
+     a memory error while parsing the core file.  We don't want this to
+     prevent the user from opening the core file; the information provided
+     by this function is helpful, but not critical, debugging can continue
+     without it.  Instead just give a warning and return an empty context
+     object.  */
+  try
+    {
+      return fbsd_corefile_parse_exec_context_1 (gdbarch, cbfd);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      if (ex.error == MEMORY_ERROR)
+	{
+	  warning
+	    (_("failed to parse execution context from corefile: %s"),
+	     ex.message->c_str ());
+	  return {};
+	}
+      else
+	throw;
+    }
+}
+
 /* Return the address range of the vDSO for the current inferior.  */
 
 static int
@@ -2404,4 +2536,6 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/freebsd.xml");
   set_gdbarch_get_syscall_number (gdbarch, fbsd_get_syscall_number);
+  set_gdbarch_core_parse_exec_context (gdbarch,
+				       fbsd_corefile_parse_exec_context);
 }
