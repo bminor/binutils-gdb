@@ -5033,7 +5033,7 @@ cooked_index_debug_info::do_reading ()
 	}
 
       gdb_assert (iter != last);
-      workers.add_task ([=] ()
+      workers.add_task ([this, task_count, iter, last] ()
 	{
 	  process_cus (task_count, iter, last);
 	});

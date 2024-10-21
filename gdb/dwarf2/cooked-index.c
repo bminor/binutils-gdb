@@ -468,7 +468,7 @@ cooked_index_shard::find (const std::string &name, bool completing) const
 void
 cooked_index_worker::start ()
 {
-  gdb::thread_pool::g_thread_pool->post_task ([=] ()
+  gdb::thread_pool::g_thread_pool->post_task ([this] ()
   {
     try
       {
@@ -653,7 +653,7 @@ cooked_index::set_contents (vec_type &&vec, deferred_warnings *warn,
      finalization.  However, that would take a slot in the global
      thread pool, and if enough such tasks were submitted at once, it
      would cause a livelock.  */
-  gdb::task_group finalizers ([=] ()
+  gdb::task_group finalizers ([this, warn] ()
   {
     m_state->set (cooked_state::FINALIZED);
     m_state->write_to_cache (index_for_writing (), warn);
