@@ -1002,7 +1002,7 @@ fi
 GAS_CHECK_DECL_NEEDED(environ, f, char **f, $gas_test_headers)
 GAS_CHECK_DECL_NEEDED(ffs, f, int (*f)(int), $gas_test_headers)
 
-AC_CHECK_DECLS([asprintf, mempcpy, stpcpy])
+AC_CHECK_DECLS([mempcpy, stpcpy])
 
 BFD_BINARY_FOPEN
 

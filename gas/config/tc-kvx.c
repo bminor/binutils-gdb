@@ -2107,21 +2107,13 @@ kvx_check_label (symbolS *sym)
 void
 kvx_emit_single_noop (void)
 {
-  char *nop;
-  char *end_of_bundle;
-
-  if (asprintf (&nop, "nop") < 0)
-    as_fatal ("%s", xstrerror (errno));
-
-  if (asprintf (&end_of_bundle, "be") < 0)
-    as_fatal ("%s", xstrerror (errno));
+  char nop[] = "nop";
+  char end_of_bundle[] = "be";
 
   char *saved_ilp = input_line_pointer;
   md_assemble (nop);
   md_assemble (end_of_bundle);
   input_line_pointer = saved_ilp;
-  free (nop);
-  free (end_of_bundle);
 }
 
 /*  edit out some syntactic sugar that confuses GAS       */

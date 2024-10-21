@@ -2107,17 +2107,12 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 static void
 md_assemblef (const char *format, ...)
 {
-  char *buf = NULL;
+  char *buf;
   va_list ap;
-  int r;
 
   va_start (ap, format);
 
-  r = vasprintf (&buf, format, ap);
-
-  if (r < 0)
-    as_fatal (_("internal: vasprintf failed"));
-
+  buf = xvasprintf (format, ap);
   md_assemble (buf);
   free(buf);
 

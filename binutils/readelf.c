@@ -14421,17 +14421,14 @@ display_lto_symtab (Filedata *           filedata,
     return false;
 
   /* Look for extended data for the symbol table.  */
-  Elf_Internal_Shdr * ext = NULL;
   void * ext_data_orig = NULL;
   char * ext_data = NULL;
   char * ext_data_end = NULL;
-  char * ext_name = NULL;
-
-  if (asprintf (& ext_name, ".gnu.lto_.ext_symtab.%s",
-		(section_name (filedata, section)
-		 + sizeof (".gnu.lto_.symtab.") - 1)) > 0
-      && ext_name != NULL /* Paranoia.  */
-      && (ext = find_section (filedata, ext_name)) != NULL)
+  char *ext_name = xasprintf (".gnu.lto_.ext_symtab.%s",
+			      (section_name (filedata, section)
+			       + sizeof (".gnu.lto_.symtab.")));
+  Elf_Internal_Shdr *ext = find_section (filedata, ext_name);
+  if (ext != NULL)
     {
       if (ext->sh_size < 3)
 	error (_("LTO Symbol extension table '%s' is empty!\n"),
@@ -16871,11 +16868,7 @@ dump_ctf_indent_lines (ctf_sect_names_t sect ATTRIBUTE_UNUSED,
 		       char *s, void *arg)
 {
   const char *blanks = arg;
-  char *new_s;
-
-  if (asprintf (&new_s, "%s%s", blanks, s) < 0)
-    return s;
-  return new_s;
+  return xasprintf ("%s%s", blanks, s);
 }
 
 /* Dump CTF errors/warnings.  */

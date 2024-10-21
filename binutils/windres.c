@@ -885,10 +885,7 @@ main (int argc, char **argv)
 
 	case OPTION_PREPROCESSOR:
 	  if (strchr (optarg, ' '))
-	    {
-	      if (asprintf (& preprocessor, "\"%s\"", optarg) == -1)
-		preprocessor = optarg;
-	    }
+	    preprocessor = xasprintf ("\"%s\"", optarg);
 	  else
 	    preprocessor = optarg;	    
 	  break;

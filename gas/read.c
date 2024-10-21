@@ -3604,8 +3604,7 @@ s_nop (int ignore ATTRIBUTE_UNUSED)
 #endif
       /* md_assemble might modify its argument, so
 	 we must pass it a string that is writable.  */
-      if (asprintf (&nop, "%s", md_single_noop_insn) < 0)
-	as_fatal ("%s", xstrerror (errno));
+      nop = xasprintf ("%s", md_single_noop_insn);
 
       /* Some targets assume that they can update input_line_pointer
 	 inside md_assemble, and, worse, that they can leave it
@@ -6533,20 +6532,14 @@ do_s_func (int end_p, const char *default_prefix)
       if (*input_line_pointer != ',')
 	{
 	  if (default_prefix)
-	    {
-	      if (asprintf (&label, "%s%s", default_prefix, name) == -1)
-		as_fatal ("%s", xstrerror (errno));
-	    }
+	    label = xasprintf ("%s%s", default_prefix, name);
 	  else
 	    {
 	      char leading_char = bfd_get_symbol_leading_char (stdoutput);
 	      /* Missing entry point, use function's name with the leading
 		 char prepended.  */
 	      if (leading_char)
-		{
-		  if (asprintf (&label, "%c%s", leading_char, name) == -1)
-		    as_fatal ("%s", xstrerror (errno));
-		}
+		label = xasprintf ("%c%s", leading_char, name);
 	      else
 		label = xstrdup (name);
 	    }
