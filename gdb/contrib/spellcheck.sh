@@ -20,12 +20,14 @@
 # $ ./gdb/contrib/spellcheck.sh gdb*
 
 scriptdir=$(cd "$(dirname "$0")" || exit; pwd -P)
+this_script=$scriptdir/$(basename "$0")
 
 url=https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/For_machines
 cache_dir=$scriptdir/../../.git
 cache_file=wikipedia-common-misspellings.txt
 dictionary=$cache_dir/$cache_file
 local_dictionary=$scriptdir/common-misspellings.txt
+cache_file2=spell-check.pat1
 
 # Separators: space, slash, tab, colon, comma.
 declare -a grep_separators
@@ -191,21 +193,38 @@ parse_dictionary ()
 
 find_files_matching_words ()
 {
-    local pat
-    pat=""
-    for word in "${words[@]}"; do
-	if [ "$pat" = "" ]; then
-	    pat="$word"
-	else
-	    pat="$pat|$word"
-	fi
-    done
-    pat="($pat)"
+    local cache_id
+    cache_id=$(cat "$local_dictionary" "$dictionary" "$this_script" \
+		 | md5sum  \
+		 | awk '{print $1}')
 
-    local sep
-    sep=$grep_separator
+    local patfile
+    patfile="$cache_dir/$cache_file2".$cache_id
 
-    pat="(^|$sep)$pat($sep|$)"
+    if [ -f "$patfile" ]; then
+	pat=$(cat "$patfile")
+    else
+	rm -f "$cache_dir/$cache_file2".*
+
+	local pat
+	pat=""
+	for word in "${words[@]}"; do
+	    if [ "$pat" = "" ]; then
+		pat="$word"
+	    else
+		pat="$pat|$word"
+	    fi
+	done
+	pat="($pat)"
+
+	local sep
+	sep=$grep_separator
+
+	pat="(^|$sep)$pat($sep|$)"
+
+	echo "$pat" \
+	     > "$patfile"
+    fi
 
     grep -E \
 	-l \
