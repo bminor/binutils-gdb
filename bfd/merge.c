@@ -244,8 +244,23 @@ sec_merge_hash_insert (struct sec_merge_hash *table,
   hashp->alignment = 0;
   hashp->u.suffix = NULL;
   hashp->next = NULL;
-  // We must not need resizing, otherwise the estimation was wrong
-  BFD_ASSERT (!NEEDS_RESIZE (bfdtab->count + 1, table->nbuckets));
+
+  if (NEEDS_RESIZE (bfdtab->count + 1, table->nbuckets))
+    {
+      if (!sec_merge_maybe_resize (table, 1))
+	return NULL;
+      uint64_t *key_lens = table->key_lens;
+      unsigned int nbuckets = table->nbuckets;
+      _index = hash & (nbuckets - 1);
+      while (1)
+	{
+	  uint64_t candlen = key_lens[_index];
+	  if (!(candlen & (uint32_t)-1))
+	    break;
+	  _index = (_index + 1) & (nbuckets - 1);
+	}
+    }
+
   bfdtab->count++;
   table->key_lens[_index] = (hash << 32) | (uint32_t)len;
   table->values[_index] = hashp;
@@ -699,12 +714,11 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
 }
 
 /* Record one whole input section (described by SECINFO) into the hash table
-   SINFO.  Returns 0 on hard errors (no sense in continuing link),
-   1 when section is completely recorded, and 2 when the section wasn't
-   recorded but we can continue (e.g. by simply not deduplicating this
-   section).  */
+   SINFO.  Returns true when section is completely recorded, and false when
+   it wasn't recorded but we can continue (e.g. by simply not deduplicating
+   this section).  */
 
-static int
+static bool
 record_section (struct sec_merge_info *sinfo,
 		struct sec_merge_sec_info *secinfo)
 {
@@ -735,15 +749,6 @@ record_section (struct sec_merge_info *sinfo,
     goto error_return;
 
   /* Now populate the hash table and offset mapping.  */
-
-  /* Presize the hash table for what we're going to add.  We overestimate
-     quite a bit, but if it turns out to be too much then other sections
-     merged into this area will make use of that as well.  */
-  if (!sec_merge_maybe_resize (sinfo->htab, 1 + sec->size / 2))
-    {
-      free (contents);
-      return 2;
-    }
 
   /* Walk through the contents, calculate hashes and length of all
      blobs (strings or fixed-size entries) we find and fill the
@@ -792,14 +797,12 @@ record_section (struct sec_merge_info *sinfo,
   /*printf ("ZZZ %s:%s %u entries\n", sec->owner->filename, sec->name,
 	  (unsigned)secinfo->noffsetmap);*/
 
-  return 1;
+  return true;
 
  error_return:
   free (contents);
   contents = NULL;
-  for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
-    *secinfo->psecinfo = NULL;
-  return 0;
+  return false;
 }
 
 /* qsort comparison function.  Won't ever return zero as all entries
@@ -987,31 +990,20 @@ _bfd_merge_sections (bfd *abfd,
       /* Record the sections into the hash table.  */
       align = 1;
       for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
-	if (secinfo->sec->flags & SEC_EXCLUDE)
+	if (secinfo->sec->flags & SEC_EXCLUDE
+	    || !record_section (sinfo, secinfo))
 	  {
 	    *secinfo->psecinfo = NULL;
 	    if (remove_hook)
 	      (*remove_hook) (abfd, secinfo->sec);
 	  }
-	else
+	else if (align)
 	  {
-	    int e = record_section (sinfo, secinfo);
-	    if (e == 0)
-	      return false;
-	    if (e == 2)
-	      {
-		*secinfo->psecinfo = NULL;
-		if (remove_hook)
-		  (*remove_hook) (abfd, secinfo->sec);
-	      }
-	    else if (align)
-	      {
-		unsigned int opb = bfd_octets_per_byte (abfd, secinfo->sec);
+	    unsigned int opb = bfd_octets_per_byte (abfd, secinfo->sec);
 
-		align = (bfd_size_type) 1 << secinfo->sec->alignment_power;
-		if (((secinfo->sec->size / opb) & (align - 1)) != 0)
-		  align = 0;
-	      }
+	    align = (bfd_size_type) 1 << secinfo->sec->alignment_power;
+	    if (((secinfo->sec->size / opb) & (align - 1)) != 0)
+	      align = 0;
 	  }
 
       if (sinfo->htab->first == NULL)
