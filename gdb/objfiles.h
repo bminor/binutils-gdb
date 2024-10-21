@@ -631,6 +631,9 @@ public:
     gdb_assert (section->owner == nullptr || section->owner == this->obfd);
 
     int idx = gdb_bfd_section_index (this->obfd.get (), section);
+
+    /* Guarantee that the section offsets were initialized.  */
+    gdb_assert (this->section_offsets.size () > idx);
     return this->section_offsets[idx];
   }
 
@@ -642,6 +645,9 @@ public:
     gdb_assert (section->owner == nullptr || section->owner == this->obfd);
 
     int idx = gdb_bfd_section_index (this->obfd.get (), section);
+
+    /* Guarantee that the section offsets were initialized.  */
+    gdb_assert (this->section_offsets.capacity () > idx);
     this->section_offsets[idx] = offset;
   }
 
@@ -889,7 +895,7 @@ public:
 
 /* A deleter for objfile.  */
 
-struct objfile_deleter
+struct objfile_unlinker
 {
   void operator() (objfile *ptr) const
   {
@@ -899,7 +905,7 @@ struct objfile_deleter
 
 /* A unique pointer that holds an objfile.  */
 
-typedef std::unique_ptr<objfile, objfile_deleter> objfile_up;
+typedef std::unique_ptr<objfile, objfile_unlinker> scoped_objfile_unlinker;
 
 /* Relocation offset applied to the section.  */
 inline CORE_ADDR

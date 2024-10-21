@@ -886,6 +886,11 @@ syms_from_objfile_1 (struct objfile *objfile,
   section_addr_info local_addr;
   const int mainline = add_flags & SYMFILE_MAINLINE;
 
+  /* If we can't find a sym_fns struct to read the objfile, we'll error
+     out, and should unlink the objfile from the program space.  So this
+     should be declared before a find_sym_fns call.  */
+  scoped_objfile_unlinker objfile_holder (objfile);
+
   objfile_set_sym_fns (objfile, find_sym_fns (objfile->obfd.get ()));
   objfile->qf.clear ();
 
@@ -902,8 +907,6 @@ syms_from_objfile_1 (struct objfile *objfile,
   /* Make sure that partially constructed symbol tables will be cleaned up
      if an error occurs during symbol reading.  */
   std::optional<clear_symtab_users_cleanup> defer_clear_users;
-
-  objfile_up objfile_holder (objfile);
 
   /* If ADDRS is NULL, put together a dummy address list.
      We now establish the convention that an addr of zero means
@@ -2522,7 +2525,7 @@ reread_symbols (int from_tty)
 	  /* If we get an error, blow away this objfile (not sure if
 	     that is the correct response for things like shared
 	     libraries).  */
-	  objfile_up objfile_holder (objfile);
+	  scoped_objfile_unlinker objfile_holder (objfile);
 
 	  /* We need to do this whenever any symbols go away.  */
 	  clear_symtab_users_cleanup defer_clear_users (0);
