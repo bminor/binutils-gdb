@@ -887,6 +887,10 @@ namespace eval Dwarf {
 	    DW_AT_GNU_addr_base {
 		return DW_FORM_sec_offset
 	    }
+	    DW_AT_decl_file -
+	    DW_AT_decl_line {
+		return DW_FORM_udata
+	    }
 	}
 	return ""
     }

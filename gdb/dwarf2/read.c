@@ -17839,10 +17839,11 @@ dwarf_lang_to_enum_language (unsigned int lang)
   return language;
 }
 
-/* Return the named attribute or NULL if not there.  */
+/* Return the NAME attribute of DIE in *CU, or return NULL if not there.  Also
+   return in *CU the cu in which the attribute was actually found.  */
 
 static struct attribute *
-dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
+dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu **cu)
 {
   for (;;)
     {
@@ -17862,13 +17863,21 @@ dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
 	break;
 
       struct die_info *prev_die = die;
-      die = follow_die_ref (die, spec, &cu);
+      die = follow_die_ref (die, spec, cu);
       if (die == prev_die)
 	/* Self-reference, we're done.  */
 	break;
     }
 
   return NULL;
+}
+
+/* Return the NAME attribute of DIE in CU, or return NULL if not there.  */
+
+static struct attribute *
+dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
+{
+  return dwarf2_attr (die, name, &cu);
 }
 
 /* Return the string associated with a string-typed attribute, or NULL if it
@@ -19037,17 +19046,24 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       if (attr != nullptr)
 	sym->set_line (attr->constant_value (0));
 
+      struct dwarf2_cu *file_cu = cu;
       attr = dwarf2_attr (die,
 			  inlined_func ? DW_AT_call_file : DW_AT_decl_file,
-			  cu);
+			  &file_cu);
       if (attr != nullptr && attr->is_nonnegative ())
 	{
 	  file_name_index file_index
 	    = (file_name_index) attr->as_nonnegative ();
 	  struct file_entry *fe;
 
-	  if (cu->line_header != NULL)
-	    fe = cu->line_header->file_name_at (file_index);
+	  if (file_cu->line_header == nullptr)
+	    {
+	      file_and_directory fnd (nullptr, nullptr);
+	      handle_DW_AT_stmt_list (file_cu->dies, file_cu, fnd, {}, false);
+	    }
+
+	  if (file_cu->line_header != nullptr)
+	    fe = file_cu->line_header->file_name_at (file_index);
 	  else
 	    fe = NULL;
 
