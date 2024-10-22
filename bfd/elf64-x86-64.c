@@ -906,6 +906,14 @@ static const sframe_frame_row_entry elf_x86_64_sframe_pltn_fre2 =
   SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
 };
 
+/* .sframe FRE covering the .plt section entry for IBT.  */
+static const sframe_frame_row_entry elf_x86_64_sframe_ibt_pltn_fre2 =
+{
+  9, /* SFrame FRE start address.  */
+  {16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, /* 12 bytes.  */
+  SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
+};
+
 /* .sframe FRE covering the second .plt section entry.  */
 static const sframe_frame_row_entry elf_x86_64_sframe_sec_pltn_fre1 =
 {
@@ -930,7 +938,7 @@ static const struct elf_x86_sframe_plt elf_x86_64_sframe_non_lazy_plt =
   { &elf_x86_64_sframe_null_fre }
 };
 
-/* SFrame helper object for lazy PLT.  Also used for IBT enabled PLT.  */
+/* SFrame helper object for lazy PLT. */
 static const struct elf_x86_sframe_plt elf_x86_64_sframe_plt =
 {
   LAZY_PLT_ENTRY_SIZE,
@@ -942,9 +950,25 @@ static const struct elf_x86_sframe_plt elf_x86_64_sframe_plt =
   /* Array of SFrame FREs for plt.  */
   { &elf_x86_64_sframe_pltn_fre1, &elf_x86_64_sframe_pltn_fre2 },
   NON_LAZY_PLT_ENTRY_SIZE,
-  1, /* Number of FREs for PLTn for second PLT.  */
-  /* FREs for second plt (stack trace info for .plt.got is
-     identical).  Used when IBT or non-lazy PLT is in effect.  */
+  1, /* Number of FREs for second PLT.  */
+  /* Array of SFrame FREs for second PLT.  */
+  { &elf_x86_64_sframe_sec_pltn_fre1 }
+};
+
+/* SFrame helper object for lazy PLT with IBT. */
+static const struct elf_x86_sframe_plt elf_x86_64_sframe_ibt_plt =
+{
+  LAZY_PLT_ENTRY_SIZE,
+  2, /* Number of FREs for PLT0.  */
+  /* Array of SFrame FREs for plt0.  */
+  { &elf_x86_64_sframe_plt0_fre1, &elf_x86_64_sframe_plt0_fre2 },
+  LAZY_PLT_ENTRY_SIZE,
+  2, /* Number of FREs for PLTn.  */
+  /* Array of SFrame FREs for plt.  */
+  { &elf_x86_64_sframe_pltn_fre1, &elf_x86_64_sframe_ibt_pltn_fre2 },
+  LAZY_PLT_ENTRY_SIZE,
+  1, /* Number of FREs for second PLT.  */
+  /* Array of SFrame FREs for second plt.  */
   { &elf_x86_64_sframe_sec_pltn_fre1 }
 };
 
@@ -5678,7 +5702,7 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
     {
       init_table.sframe_lazy_plt = &elf_x86_64_sframe_plt;
       init_table.sframe_non_lazy_plt = &elf_x86_64_sframe_non_lazy_plt;
-      init_table.sframe_lazy_ibt_plt = &elf_x86_64_sframe_plt;
+      init_table.sframe_lazy_ibt_plt = &elf_x86_64_sframe_ibt_plt;
       init_table.sframe_non_lazy_ibt_plt = &elf_x86_64_sframe_non_lazy_plt;
     }
   else

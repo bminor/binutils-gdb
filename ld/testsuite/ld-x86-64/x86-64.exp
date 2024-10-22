@@ -547,6 +547,7 @@ run_dump_test "pr32191-x32"
 if { ![skip_sframe_tests] } {
     run_dump_test "sframe-simple-1"
     run_dump_test "sframe-plt-1"
+    run_dump_test "sframe-ibt-plt-1"
 }
 
 if ![istarget "x86_64-*-linux*"] {
