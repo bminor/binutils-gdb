@@ -24,6 +24,8 @@
 
 #include "dll.h"
 
+#include <unordered_map>
+
 struct thread_info;
 struct regcache;
 struct target_desc;
@@ -32,6 +34,9 @@ struct breakpoint;
 struct raw_breakpoint;
 struct fast_tracepoint_jump;
 struct process_info_private;
+struct process_info;
+
+extern owning_intrusive_list<process_info> all_processes;
 
 struct process_info : public intrusive_list_node<process_info>
 {
@@ -83,6 +88,29 @@ struct process_info : public intrusive_list_node<process_info>
      not access inferior memory or registers, as we haven't determined
      the target architecture/description.  */
   bool starting_up = false;
+
+  /* Return a reference to the private thread list.  */
+  owning_intrusive_list<thread_info> &thread_list ()
+  { return m_thread_list; }
+
+  /* Return a reference to the private thread map.  */
+  std::unordered_map<ptid_t, thread_info *> &thread_map ()
+  { return m_ptid_thread_map; }
+
+  /* Find the first thread for which FUNC returns true.  Return nullptr if no
+     such thread is found.  */
+  thread_info *find_thread (gdb::function_view<bool (thread_info *)> func);
+
+  /* Invoke FUNC for each thread.  */
+  void for_each_thread (gdb::function_view<void (thread_info *)> func);
+
+private:
+  /* This processes' thread list, sorted by creation order.  */
+  owning_intrusive_list<thread_info> m_thread_list;
+
+  /* A map of ptid_t to thread_info*, for average O(1) ptid_t lookup.
+     Exited threads do not appear in the map.  */
+  std::unordered_map<ptid_t, thread_info *> m_ptid_thread_map;
 };
 
 /* Get the pid of PROC.  */
@@ -93,9 +121,9 @@ pid_of (const process_info *proc)
   return proc->pid;
 }
 
-/* Return a pointer to the process that corresponds to the current
-   thread (current_thread).  It is an error to call this if there is
-   no current thread selected.  */
+/* Return a pointer to the current process.  Note that the current
+   process may be non-null while the current thread (current_thread)
+   is null.  */
 
 struct process_info *current_process (void);
 struct process_info *get_thread_process (const struct thread_info *);
