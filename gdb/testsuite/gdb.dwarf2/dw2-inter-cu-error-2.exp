@@ -41,10 +41,16 @@ Dwarf::assemble $asm_file {
     }
 }
 
-if [prepare_for_testing "failed to prepare" $testfile \
+if [build_executable "failed to prepare" $testfile \
 	[list $asm_file $srcfile] {nodebug}] {
     return -1
 }
+
+clean_restart
+
+gdb_test_no_output "maint set dwarf synchronous on"
+
+gdb_load $binfile
 
 gdb_assert \
     { [regexp "DWARF Error: cannot follow reference" $gdb_file_cmd_msg] } \
