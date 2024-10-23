@@ -22,6 +22,7 @@
 
 #include "dictionary.h"
 #include "gdbsupport/array-view.h"
+#include "gdbsupport/next-iterator.h"
 
 /* Opaque declarations.  */
 
@@ -227,7 +228,7 @@ struct block : public allocate_on_obstack<block>
   /* This returns the using directives list associated with this
      block, if any.  */
 
-  struct using_direct *get_using () const;
+  next_range<using_direct> get_using () const;
 
   /* Set this block's using member to USING; if needed, allocate
      memory via OBSTACK.  (It won't make a copy of USING, however, so

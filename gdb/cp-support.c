@@ -1390,7 +1390,6 @@ add_symbol_overload_list_using (const char *func_name,
 				const char *the_namespace,
 				std::vector<symbol *> *overload_list)
 {
-  struct using_direct *current;
   const struct block *block;
 
   /* First, go through the using directives.  If any of them apply,
@@ -1400,9 +1399,7 @@ add_symbol_overload_list_using (const char *func_name,
   for (block = get_selected_block (0);
        block != NULL;
        block = block->superblock ())
-    for (current = block->get_using ();
-	current != NULL;
-	current = current->next)
+    for (using_direct *current : block->get_using ())
       {
 	/* Prevent recursive calls.  */
 	if (current->searched)

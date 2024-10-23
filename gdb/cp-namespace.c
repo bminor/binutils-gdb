@@ -394,7 +394,6 @@ cp_lookup_symbol_via_imports (const char *scope,
 			      std::map<std::string,
 				       struct block_symbol>& found_symbols)
 {
-  struct using_direct *current;
   struct block_symbol sym = {};
   int len;
   int directive_match;
@@ -420,9 +419,7 @@ cp_lookup_symbol_via_imports (const char *scope,
   /* Go through the using directives.  If any of them add new names to
      the namespace we're searching in, see if we can find a match by
      applying them.  */
-  for (current = block->get_using ();
-       current != NULL;
-       current = current->next)
+  for (using_direct *current : block->get_using ())
     {
       const char **excludep;
 

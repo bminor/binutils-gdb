@@ -5431,15 +5431,12 @@ ada_add_block_renamings (std::vector<struct block_symbol> &result,
 			 const lookup_name_info &lookup_name,
 			 domain_search_flags domain)
 {
-  struct using_direct *renaming;
   int defns_mark = result.size ();
 
   symbol_name_matcher_ftype *name_match
     = ada_get_symbol_name_matcher (lookup_name);
 
-  for (renaming = block->get_using ();
-       renaming != NULL;
-       renaming = renaming->next)
+  for (using_direct *renaming : block->get_using ())
     {
       const char *r_name;
 

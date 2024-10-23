@@ -322,13 +322,13 @@ block::set_scope (const char *scope, struct obstack *obstack)
 
 /* See block.h.  */
 
-struct using_direct *
+next_range<using_direct>
 block::get_using () const
 {
   if (m_namespace_info == nullptr)
-    return nullptr;
+    return {};
   else
-    return m_namespace_info->using_decl;
+    return next_range<using_direct> (m_namespace_info->using_decl);
 }
 
 /* See block.h.  */
