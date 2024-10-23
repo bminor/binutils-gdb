@@ -5426,17 +5426,9 @@ ada_add_block_renamings (std::vector<struct block_symbol> &result,
       const char *r_name;
 
       /* Avoid infinite recursions: skip this renaming if we are actually
-	 already traversing it.
-
-	 Currently, symbol lookup in Ada don't use the namespace machinery from
-	 C++/Fortran support: skip namespace imports that use them.  */
-      if (renaming->searched
-	  || (renaming->import_src != NULL
-	      && renaming->import_src[0] != '\0')
-	  || (renaming->import_dest != NULL
-	      && renaming->import_dest[0] != '\0'))
+	 already traversing it.  */
+      if (renaming->searched)
 	continue;
-      renaming->searched = 1;
 
       /* TODO: here, we perform another name-based symbol lookup, which can
 	 pull its own multiple overloads.  In theory, we should be able to do
@@ -5448,14 +5440,33 @@ ada_add_block_renamings (std::vector<struct block_symbol> &result,
       r_name = (renaming->alias != NULL
 		? renaming->alias
 		: renaming->declaration);
+      if (r_name == nullptr)
+	continue;
+
+      scoped_restore reset_searched
+	= make_scoped_restore (&renaming->searched, 1);
+      std::string storage;
+      if (renaming->import_src != nullptr && renaming->import_src[0] != '\0')
+	{
+	  storage = std::string (renaming->import_src) + "__" + r_name;
+	  r_name = storage.c_str ();
+	}
+
       if (name_match (r_name, lookup_name, NULL))
 	{
-	  lookup_name_info decl_lookup_name (renaming->declaration,
+	  r_name = renaming->declaration;
+	  if (renaming->import_dest != nullptr
+	      && renaming->import_dest[0] != '\0')
+	    {
+	      storage = std::string (renaming->import_dest) + "__" + r_name;
+	      r_name = storage.c_str ();
+	    }
+
+	  lookup_name_info decl_lookup_name (r_name,
 					     lookup_name.match_type ());
 	  ada_add_all_symbols (result, block, decl_lookup_name, domain,
 			       1, NULL);
 	}
-      renaming->searched = 0;
     }
   return result.size () != defns_mark;
 }
