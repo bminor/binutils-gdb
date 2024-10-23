@@ -922,7 +922,7 @@ static const sframe_frame_row_entry elf_x86_64_sframe_sec_pltn_fre1 =
   SFRAME_V1_FRE_INFO (SFRAME_BASE_REG_SP, 1, SFRAME_FRE_OFFSET_1B) /* FRE info.  */
 };
 
-/* SFrame helper object for non-lazy PLT.  Also used for IBT enabled PLT.  */
+/* SFrame helper object for non-lazy PLT.  */
 static const struct elf_x86_sframe_plt elf_x86_64_sframe_non_lazy_plt =
 {
   LAZY_PLT_ENTRY_SIZE,
@@ -935,7 +935,31 @@ static const struct elf_x86_sframe_plt elf_x86_64_sframe_non_lazy_plt =
   { &elf_x86_64_sframe_sec_pltn_fre1, &elf_x86_64_sframe_null_fre },
   0,
   0, /* There is no second PLT necessary.  */
-  { &elf_x86_64_sframe_null_fre }
+  { &elf_x86_64_sframe_null_fre },
+  NON_LAZY_PLT_ENTRY_SIZE,
+  1, /* Number of FREs for PLT GOT.  */
+  /* Array of SFrame FREs for PLT GOT.  */
+  { &elf_x86_64_sframe_null_fre },
+};
+
+/* SFrame helper object for non-lazy IBT enabled PLT.  */
+static const struct elf_x86_sframe_plt elf_x86_64_sframe_non_lazy_ibt_plt =
+{
+  LAZY_PLT_ENTRY_SIZE,
+  2, /* Number of FREs for PLT0.  */
+  /* Array of SFrame FREs for plt0.  */
+  { &elf_x86_64_sframe_plt0_fre1, &elf_x86_64_sframe_plt0_fre2 },
+  LAZY_PLT_ENTRY_SIZE,
+  1, /* Number of FREs for PLTn.  */
+  /* Array of SFrame FREs for plt.  */
+  { &elf_x86_64_sframe_sec_pltn_fre1, &elf_x86_64_sframe_null_fre },
+  0,
+  0, /* There is no second PLT necessary.  */
+  { &elf_x86_64_sframe_null_fre },
+  LAZY_PLT_ENTRY_SIZE,
+  1, /* Number of FREs for PLT GOT.  */
+  /* Array of SFrame FREs for PLT GOT.  */
+  { &elf_x86_64_sframe_null_fre },
 };
 
 /* SFrame helper object for lazy PLT. */
@@ -952,7 +976,11 @@ static const struct elf_x86_sframe_plt elf_x86_64_sframe_plt =
   NON_LAZY_PLT_ENTRY_SIZE,
   1, /* Number of FREs for second PLT.  */
   /* Array of SFrame FREs for second PLT.  */
-  { &elf_x86_64_sframe_sec_pltn_fre1 }
+  { &elf_x86_64_sframe_sec_pltn_fre1 },
+  NON_LAZY_PLT_ENTRY_SIZE,
+  1, /* Number of FREs for PLT GOT.  */
+  /* Array of SFrame FREs for PLT GOT.  */
+  { &elf_x86_64_sframe_null_fre },
 };
 
 /* SFrame helper object for lazy PLT with IBT. */
@@ -969,7 +997,11 @@ static const struct elf_x86_sframe_plt elf_x86_64_sframe_ibt_plt =
   LAZY_PLT_ENTRY_SIZE,
   1, /* Number of FREs for second PLT.  */
   /* Array of SFrame FREs for second plt.  */
-  { &elf_x86_64_sframe_sec_pltn_fre1 }
+  { &elf_x86_64_sframe_sec_pltn_fre1 },
+  LAZY_PLT_ENTRY_SIZE,
+  1, /* Number of FREs for PLT GOT.  */
+  /* Array of SFrame FREs for PLT GOT.  */
+  { &elf_x86_64_sframe_null_fre },
 };
 
 /* These are the standard parameters.  */
@@ -5703,7 +5735,7 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
       init_table.sframe_lazy_plt = &elf_x86_64_sframe_plt;
       init_table.sframe_non_lazy_plt = &elf_x86_64_sframe_non_lazy_plt;
       init_table.sframe_lazy_ibt_plt = &elf_x86_64_sframe_ibt_plt;
-      init_table.sframe_non_lazy_ibt_plt = &elf_x86_64_sframe_non_lazy_plt;
+      init_table.sframe_non_lazy_ibt_plt = &elf_x86_64_sframe_non_lazy_ibt_plt;
     }
   else
     {

@@ -401,6 +401,10 @@ struct elf_x86_sframe_plt
   unsigned int sec_pltn_entry_size;
   unsigned int sec_pltn_num_fres;
   const sframe_frame_row_entry *sec_pltn_fres[SFRAME_PLTN_MAX_NUM_FRES];
+
+  unsigned int plt_got_entry_size;
+  unsigned int plt_got_num_fres;
+  const sframe_frame_row_entry *plt_got_fres[SFRAME_PLTN_MAX_NUM_FRES];
 };
 
 struct elf_x86_lazy_plt_layout
@@ -606,6 +610,8 @@ struct elf_x86_link_hash_table
   asection *plt_sframe;
   sframe_encoder_ctx *plt_second_cfe_ctx;
   asection *plt_second_sframe;
+  sframe_encoder_ctx *plt_got_cfe_ctx;
+  asection *plt_got_sframe;
 
   /* Parameters describing PLT generation, lazy or non-lazy.  */
   struct elf_x86_plt_layout plt;
