@@ -205,6 +205,8 @@ remote_open (const char *name)
   if (bind (tmp_desc, p->ai_addr, p->ai_addrlen) != 0)
     perror_with_name ("Can't bind address");
 
+  fprintf (stderr, "Replay logfile using %s\n", name);
+  fflush (stderr);
   if (p->ai_socktype == SOCK_DGRAM)
     remote_desc_in = tmp_desc;
   else
@@ -258,9 +260,6 @@ remote_open (const char *name)
   fcntl (remote_desc_in, F_SETFL, FASYNC);
 #endif
   remote_desc_out = remote_desc_in;
-
-  fprintf (stderr, "Replay logfile using %s\n", name);
-  fflush (stderr);
 }
 
 static int
