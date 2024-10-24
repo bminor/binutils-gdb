@@ -736,22 +736,14 @@ writesym (char **dst, const char *sym)
   int len = (sym ? strlen (sym) : 0);
 
   if (len >= 16)
+    len = 16;
+  else if (len == 0)
     {
-      *p++ = '0';
-      len = 16;
-    }
-  else
-    {
-      if (len == 0)
-	{
-	  *p++ = '1';
-	  sym = "$";
-	  len = 1;
-	}
-      else
-	*p++ = digs[len];
+      len = 1;
+      sym = "$";
     }
 
+  *p++ = digs[len & 0xf];
   while (len--)
     *p++ = *sym++;
 
