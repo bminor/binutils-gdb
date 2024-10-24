@@ -395,7 +395,7 @@ first_phase (bfd *abfd, int type, char *src, char * src_end)
 	  if (!n)
 	    return false;
 	  memcpy (n, sym, len + 1);
-	  section = bfd_make_section (abfd, n);
+	  section = bfd_make_section_old_way (abfd, n);
 	  if (section == NULL)
 	    return false;
 	}
@@ -719,24 +719,13 @@ writevalue (char **dst, bfd_vma value)
   int len;
   int shift;
 
-  for (len = 8, shift = 28; shift; shift -= 4, len--)
-    {
-      if ((value >> shift) & 0xf)
-	{
-	  *p++ = len + '0';
-	  while (len)
-	    {
-	      *p++ = digs[(value >> shift) & 0xf];
-	      shift -= 4;
-	      len--;
-	    }
-	  *dst = p;
-	  return;
+  for (len = BFD_ARCH_SIZE / 4, shift = len * 4 - 4; len > 1; shift -= 4, len--)
+    if ((value >> shift) & 0xf)
+      break;
 
-	}
-    }
-  *p++ = '1';
-  *p++ = '0';
+  *p++ = digs[len & 0xf];
+  for (; len; shift -= 4, len--)
+    *p++ = digs[(value >> shift) & 0xf];
   *dst = p;
 }
 
