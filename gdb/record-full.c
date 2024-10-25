@@ -2072,7 +2072,8 @@ record_full_base_target::goto_record (ULONGEST target_insn)
 void
 record_full_base_target::record_stop_replaying ()
 {
-  goto_record_end ();
+  if (RECORD_FULL_IS_REPLAY)
+    goto_record_end ();
 }
 
 /* "resume" method for prec over corefile.  */
