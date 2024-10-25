@@ -3200,8 +3200,7 @@ schedlock_applies (struct thread_info *tp)
 	  || (scheduler_mode == schedlock_step
 	      && tp->control.stepping_command)
 	  || (scheduler_mode == schedlock_replay
-	      && target_record_will_replay (minus_one_ptid,
-					    execution_direction)));
+	      && target_record_will_replay (tp->ptid, execution_direction)));
 }
 
 /* When FORCE_P is false, set process_stratum_target::COMMIT_RESUMED_STATE
