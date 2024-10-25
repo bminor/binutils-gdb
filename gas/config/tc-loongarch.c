@@ -1080,7 +1080,7 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
     }
   /* check all atomic memory insns */
   else if (ip->insn->mask == LARCH_MK_ATOMIC_MEM
-	   && LARCH_INSN_ATOMIC_MEM(ip->insn_bin))
+	   && LARCH_INSN_ATOMIC_MEM (ip->insn_bin))
     {
       /* For AMO insn amswap.[wd], amadd.[wd], etc.  */
       if (ip->args[0] != 0
@@ -1090,22 +1090,22 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
     }
   else if ((ip->insn->mask == LARCH_MK_BSTRINS_W
 	    /* bstr(ins|pick).w  rd, rj, msbw, lsbw  */
-	    && (LARCH_INSN_BSTRINS_W(ip->insn_bin)
-		|| LARCH_INSN_BSTRPICK_W(ip->insn_bin)))
+	    && (LARCH_INSN_BSTRINS_W (ip->insn_bin)
+		|| LARCH_INSN_BSTRPICK_W (ip->insn_bin)))
 	   || (ip->insn->mask == LARCH_MK_BSTRINS_D
 	       /* bstr(ins|pick).d  rd, rj, msbd, lsbd  */
-	       && (LARCH_INSN_BSTRINS_D(ip->insn_bin)
-		   || LARCH_INSN_BSTRPICK_D(ip->insn_bin))))
+	       && (LARCH_INSN_BSTRINS_D (ip->insn_bin)
+		   || LARCH_INSN_BSTRPICK_D (ip->insn_bin))))
     {
       /* For bstr(ins|pick).[wd].  */
       if (ip->args[2] < ip->args[3])
 	as_bad (_("bstr(ins|pick).[wd] require msbd >= lsbd"));
     }
   else if (ip->insn->mask != 0
-	   && (LARCH_INSN_CSRXCHG(ip->insn_bin)
-	       || LARCH_INSN_GCSRXCHG(ip->insn_bin))
-	   && (LARCH_GET_RJ(ip->insn_bin) == 0
-	       || LARCH_GET_RJ(ip->insn_bin) == 1)
+	   && (LARCH_INSN_CSRXCHG (ip->insn_bin)
+	       || LARCH_INSN_GCSRXCHG (ip->insn_bin))
+	   && (LARCH_GET_RJ (ip->insn_bin) == 0
+	       || LARCH_GET_RJ (ip->insn_bin) == 1)
 	   /* csrxchg  rd, rj, csr_num  */
 	   && (strcmp ("csrxchg", ip->name) == 0
 	       || strcmp ("gcsrxchg", ip->name) == 0))
@@ -2231,7 +2231,7 @@ loongarch_convert_frag_branch (fragS *fragp)
     case RELAX_BRANCH_26:
       insn = bfd_getl32 (buf);
       /* Invert the branch condition.  */
-      if (LARCH_INSN_FLOAT_BRANCH(insn))
+      if (LARCH_INSN_FLOAT_BRANCH (insn))
 	insn ^= LARCH_FLOAT_BRANCH_INVERT_BIT;
       else
 	insn ^= LARCH_BRANCH_INVERT_BIT;
