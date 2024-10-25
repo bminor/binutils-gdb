@@ -184,7 +184,7 @@ extern "C" void _rl_signal_handler (int);
    (sjlj-based) C++ exceptions.  */
 
 static struct gdb_exception
-gdb_rl_callback_read_char_wrapper_noexcept () noexcept
+gdb_rl_callback_read_char_wrapper_sjlj ()
 {
   struct gdb_exception gdb_expt;
 
@@ -227,6 +227,22 @@ gdb_rl_callback_read_char_wrapper_noexcept () noexcept
   END_CATCH_SJLJ
 
   return gdb_expt;
+}
+
+/* Wrapper around gdb_rl_callback_read_char_wrapper_sjlj to ensure
+   noexcept.  */
+
+static struct gdb_exception
+gdb_rl_callback_read_char_wrapper_noexcept () noexcept
+{
+  try
+    {
+      return gdb_rl_callback_read_char_wrapper_sjlj ();
+    }
+  catch (gdb_exception &ex)
+    {
+      return std::move (ex);
+    }
 }
 
 static void
