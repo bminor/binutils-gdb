@@ -1170,7 +1170,7 @@ ldelf_handle_dt_needed (struct elf_link_hash_table *htab,
 	    {
 	      char *filename;
 
-	      if (search->source != search_dir_linker_script)
+	      if (search->cmdline)
 		continue;
 	      filename = (char *) xmalloc (strlen (search->name) + len + 2);
 	      sprintf (filename, "%s/%s", search->name, l->name);

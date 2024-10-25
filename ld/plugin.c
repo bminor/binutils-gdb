@@ -933,7 +933,7 @@ add_input_file (const char *pathname)
 			    NULL);
   if (!is)
     return LDPS_ERR;
-  is->plugin = called_plugin;
+  is->flags.lto_output = 1;
   return LDPS_OK;
 }
 
@@ -948,23 +948,17 @@ add_input_library (const char *pathname)
 			    NULL);
   if (!is)
     return LDPS_ERR;
-  is->plugin = called_plugin;
+  is->flags.lto_output = 1;
   return LDPS_OK;
 }
 
 /* Set the extra library path to be used by libraries added via
    add_input_library.  */
-
 static enum ld_plugin_status
 set_extra_library_path (const char *path)
 {
-  search_dirs_type * sdt;
-
   ASSERT (called_plugin);
-  sdt = ldfile_add_library_path (xstrdup (path), search_dir_plugin);
-  if (sdt == NULL)
-    return LDPS_ERR;
-  sdt->plugin = called_plugin;
+  ldfile_add_library_path (xstrdup (path), false);
   return LDPS_OK;
 }
 
