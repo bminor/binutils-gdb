@@ -123,8 +123,6 @@ public:
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void stop (ptid_t) override;
-  void update_thread_list () override;
-  bool thread_alive (ptid_t ptid) override;
   void goto_record_begin () override;
   void goto_record_end () override;
   void goto_record (ULONGEST insn) override;
@@ -2819,32 +2817,6 @@ record_btrace_target::stopped_by_hw_breakpoint ()
     }
 
   return this->beneath ()->stopped_by_hw_breakpoint ();
-}
-
-/* The update_thread_list method of target record-btrace.  */
-
-void
-record_btrace_target::update_thread_list ()
-{
-  /* We don't add or remove threads during replay.  */
-  if (record_is_replaying (minus_one_ptid))
-    return;
-
-  /* Forward the request.  */
-  this->beneath ()->update_thread_list ();
-}
-
-/* The thread_alive method of target record-btrace.  */
-
-bool
-record_btrace_target::thread_alive (ptid_t ptid)
-{
-  /* We don't add or remove threads during replay.  */
-  if (record_is_replaying (minus_one_ptid))
-    return true;
-
-  /* Forward the request.  */
-  return this->beneath ()->thread_alive (ptid);
 }
 
 /* Set the replay branch trace instruction iterator.  If IT is NULL, replay
