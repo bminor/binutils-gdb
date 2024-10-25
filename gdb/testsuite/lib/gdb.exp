@@ -5066,7 +5066,8 @@ proc skip_unwinder_tests {} {
 
 proc skip_libstdcxx_probe_tests_prompt { prompt_regexp } {
     set supported 0
-    gdb_test_multiple "info probe" "check for stap probe in libstdc++" \
+    gdb_test_multiple "info probes stap libstdcxx" \
+	"check for stap probe in libstdc++" \
 	-prompt "$prompt_regexp" {
 	    -re ".*libstdcxx.*catch.*\r\n$prompt_regexp" {
 		set supported 1
