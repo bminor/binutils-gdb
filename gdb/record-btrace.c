@@ -2794,7 +2794,7 @@ record_btrace_target::can_execute_reverse ()
 bool
 record_btrace_target::stopped_by_sw_breakpoint ()
 {
-  if (record_is_replaying (minus_one_ptid))
+  if (record_is_replaying (inferior_ptid))
     {
       struct thread_info *tp = inferior_thread ();
 
@@ -2809,7 +2809,7 @@ record_btrace_target::stopped_by_sw_breakpoint ()
 bool
 record_btrace_target::stopped_by_hw_breakpoint ()
 {
-  if (record_is_replaying (minus_one_ptid))
+  if (record_is_replaying (inferior_ptid))
     {
       struct thread_info *tp = inferior_thread ();
 
