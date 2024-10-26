@@ -1631,10 +1631,12 @@ probes_table_htab_remove_objfile_probes (void **slot, void *info)
 static void
 probes_table_remove_objfile_probes (struct objfile *objfile)
 {
-  svr4_info *info = get_svr4_info (objfile->pspace ());
-  if (info->probes_table != nullptr)
-    htab_traverse_noresize (info->probes_table.get (),
-			    probes_table_htab_remove_objfile_probes, objfile);
+  svr4_info *info = solib_svr4_pspace_data.get (objfile->pspace ());
+  if (info == nullptr || info->probes_table == nullptr)
+    return;
+
+  htab_traverse_noresize (info->probes_table.get (),
+			  probes_table_htab_remove_objfile_probes, objfile);
 }
 
 /* Register a solib event probe and its associated action in the

@@ -300,8 +300,26 @@ set_current_source_symtab_and_line (const symtab_and_line &sal)
 void
 clear_current_source_symtab_and_line (program_space *pspace)
 {
-  current_source_location *loc = get_source_location (pspace);
+  current_source_location *loc = current_source_key.get (pspace);
+  if (loc == nullptr)
+    return;
+
   loc->set (nullptr, 0);
+}
+
+/* Reset any information stored about a default file and line to print, if it's
+   owned by OBJFILE.  */
+
+void
+clear_current_source_symtab_and_line (objfile *objfile)
+{
+  current_source_location *loc = current_source_key.get (objfile->pspace ());
+  if (loc == nullptr)
+    return;
+
+  if (loc->symtab () != nullptr
+      && loc->symtab ()->compunit ()->objfile () == objfile)
+    clear_current_source_symtab_and_line (objfile->pspace ());
 }
 
 /* See source.h.  */
