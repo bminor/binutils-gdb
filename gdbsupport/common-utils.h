@@ -84,6 +84,11 @@ char *savestring (const char *ptr, size_t len);
 
 std::string extract_string_maybe_quoted (const char **arg);
 
+/* Return a copy of STR, but with any white space, single quote, or
+   double quote characters escaped with a backslash.  */
+
+std::string make_quoted_string (const char *str);
+
 /* The strerror() function can return NULL for errno values that are
    out of range.  Provide a "safe" version that always returns a
    printable string.  This version is also thread-safe.  */
