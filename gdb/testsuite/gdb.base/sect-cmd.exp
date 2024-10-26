@@ -37,7 +37,7 @@ set section_name ""
 
 set ok 0
 gdb_test_multiple "info files" "" -lbl {
-    -re "\\s+($hex) - ($hex) is (\\\$CODE\\\$|\\.text\\S*) in .*" {
+    -re "\\s+($hex) - ($hex) is (\\\$CODE\\\$|\\.text\\S*) in \[^\r\n\]*(?=\r\n)" {
 	if { ! $ok } {
 	    set address1 $expect_out(1,string)
 	    set address2 $expect_out(2,string)
@@ -64,11 +64,11 @@ if { $address1 == "" || $address2 == "" || $section_name == "" } {
 set saw_section_address_line false
 gdb_test_multiple "section $section_name $address1" \
     "set section $section_name to original address" -lbl {
-	-re ".*$address1 \- $address2 is $section_name in \[^\r\n\]*" {
+	-re "\[^\r\n\]*$address1 \- $address2 is $section_name in \[^\r\n\]*(?=\r\n)" {
 	    set saw_section_address_line true
 	    exp_continue
 	}
-	-re "Section \[^\r\n\]+ not found\r\n" {
+	-re "Section \[^\r\n\]+ not found(?=\r\n)" {
 	    fail "$gdb_test_name (saw not found marker)"
 	    exp_continue
 	}
