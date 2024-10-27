@@ -139,7 +139,7 @@ proc_with_prefix local_debuginfod { } {
     gdb_test "file ${build_id_debug_file}" \
 	[multi_line \
 	     "Reading symbols from ${build_id_debug_file}\\.\\.\\." \
-	     "Downloading separate debug info for ${build_id_debug_file}\\.\\.\\." \
+	     "Downloading\[^\r\n\]*separate debug info for ${build_id_debug_file}\\.\\.\\." \
 	     "Reading symbols from ${cache}/\[^\r\n\]+\\.\\.\\.(?:\r\nExpanding full symbols from \[^\r\n\]+)*"] \
 	"debuginfod running, info downloaded, no warnings"
 }
