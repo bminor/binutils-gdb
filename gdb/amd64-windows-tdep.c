@@ -238,6 +238,7 @@ amd64_windows_push_arguments (struct regcache *regcache, int nargs,
      These arguments are replaced by pointers to a copy we are making
      in inferior memory.  So use a copy of the ARGS table, to avoid
      modifying the original one.  */
+  if (nargs > 0)
   {
     struct value **args1 = XALLOCAVEC (struct value *, nargs);
 
