@@ -207,7 +207,8 @@ amd64_windows_store_arg_in_reg (struct regcache *regcache,
 {
   struct type *type = arg->type ();
   const gdb_byte *valbuf = arg->contents ().data ();
-  gdb_byte buf[8];
+  /* We only set 8 bytes, buf if it's a XMM register, 16 bytes are read.  */
+  gdb_byte buf[16];
 
   gdb_assert (type->length () <= 8);
   memset (buf, 0, sizeof buf);
