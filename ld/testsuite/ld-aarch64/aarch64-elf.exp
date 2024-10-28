@@ -23,6 +23,8 @@ if { ![is_elf_format] || ![istarget "aarch64*-*-*"] } {
     return
 }
 
+load_lib $srcdir/$subdir/lib/aarch64-elf-lib.exp
+
 # List contains test-items with 3 items followed by 2 lists:
 # 0:name 1:ld early options 2:ld late options 3:assembler options
 # 4:filenames of assembler files 5: action and options. 6: name of output file
@@ -45,41 +47,6 @@ set tmp {
      "erratum835769"}
 }
 if [check_shared_lib_support] { append aarch64elftests $tmp }
-
-proc aarch64_choose_ilp32_emul {} {
-    if [istarget *linux*] then {
-	if [istarget aarch64_be-*] {
-	    return "aarch64linux32b"
-	}
-	return "aarch64linux32"
-    }
-    if [istarget aarch64_be-*] {
-        return "aarch64elf32b"
-    }
-    return "aarch64elf32"
-}
-
-proc aarch64_choose_lp64_emul {} {
-    if [istarget *linux*] then {
-	if [istarget aarch64_be-*] {
-	    return "aarch64linuxb"
-	}
-	return "aarch64linux"
-    }
-    if [istarget *nto*] then {
-	return "aarch64nto"
-    }
-    if [istarget aarch64_be-*] {
-        return "aarch64elfb"
-    }
-    return "aarch64elf"
-}
-
-proc run_dump_test_lp64 { testname } {
-  run_dump_test $testname \
-		[list [list as "-mabi=lp64"] \
-		      [list ld [concat "-m " [aarch64_choose_lp64_emul]]]]
-}
 
 set eh-frame-merge-lp64 [list [list "EH Frame merge" \
 			      [concat "-m " [aarch64_choose_lp64_emul] \
@@ -405,14 +372,6 @@ run_dump_test_lp64 "rela-idempotent"
 
 run_dump_test_lp64 "pie-bind-locally"
 
-run_dump_test "property-bti-pac1"
-run_dump_test "property-bti-pac2"
-run_dump_test "property-bti-pac3"
-run_dump_test "property-bti-pac4-a"
-run_dump_test "property-bti-pac4-b"
-run_dump_test "bti-plt-1"
-run_dump_test "bti-plt-2"
-
 run_dump_test_lp64 "variant_pcs-r"
 run_dump_test_lp64 "variant_pcs-shared"
 run_dump_test_lp64 "variant_pcs-now"
@@ -433,8 +392,6 @@ set aarch64elflinktests {
   {"ld-aarch64/func sym hash opt for exe"
    "-e0 --hash-style=gnu tmpdir/func-in-so.so" "" ""
     {func-sym-hash-opt.s} {{readelf --dyn-sym func-sym-hash-opt.d}} "hash-opt"}
-  {"Build bti-plt-so for PLT tests" "-shared" "" "" {bti-plt-so.s}
-    {} "libbti-plt-so.so"}
 }
 
 set aarch64elfcclinktests [list \
@@ -448,25 +405,8 @@ if [check_shared_lib_support] {
     run_cc_link_tests $aarch64elfcclinktests
 }
 
-run_dump_test "bti-plt-3"
-run_dump_test "bti-plt-4"
-run_dump_test "bti-plt-5"
-run_dump_test "bti-plt-6"
-run_dump_test "bti-plt-7"
-
-run_dump_test "pac-plt-1"
-run_dump_test "pac-plt-2"
-run_dump_test "bti-pac-plt-1"
-run_dump_test "bti-pac-plt-2"
-
-run_dump_test "bti-warn"
 run_dump_test "weak-tls"
 run_dump_test "undef-tls"
-
-run_dump_test_lp64 "bti-far-1"
-run_dump_test_lp64 "bti-far-2"
-run_dump_test_lp64 "bti-far-opt"
-run_dump_test_lp64 "bti-far-3"
 
 if { [supports_dt_relr] } {
   run_dump_test_lp64 "relr-align"
