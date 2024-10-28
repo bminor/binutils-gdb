@@ -24,6 +24,7 @@
 #include "tdesc.h"
 #include "debug.h"
 #include "dll.h"
+#include "gdbsupport/common-gdbthread.h"
 #include "gdbsupport/rsp-low.h"
 #include "gdbsupport/netstuff.h"
 #include "gdbsupport/filestuff.h"

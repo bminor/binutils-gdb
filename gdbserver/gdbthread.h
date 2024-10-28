@@ -19,7 +19,6 @@
 #ifndef GDBSERVER_GDBTHREAD_H
 #define GDBSERVER_GDBTHREAD_H
 
-#include "gdbsupport/common-gdbthread.h"
 #include "gdbsupport/function-view.h"
 #include "inferiors.h"
 
