@@ -312,8 +312,8 @@ aarch64_elf_create_output_section_statements (void)
 {
   if (strstr (bfd_get_target (link_info.output_bfd), "aarch64") == NULL)
     {
-      /* The arm backend needs special fields in the output hash structure.
-	 These will only be created if the output format is an arm format,
+      /* The AArch64 backend needs special fields in the output hash structure.
+	 These will only be created if the output format is an AArch64 format,
 	 hence we do not support linking and changing output formats at the
 	 same time.  Use a link followed by objcopy to change output formats.  */
       einfo (_("%F%P: error: cannot change output format "
