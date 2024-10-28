@@ -8219,6 +8219,36 @@ with the total number of issues will be displayed at the end.
 @cindex Protect PLTs with Returned Pointer Authentication
 The @samp{-z pac-plt} option enables the usage of pointer authentication in PLTs.
 
+@kindex -z gcs=[always|never|implicit]
+@cindex Controls whether the output object supports the Guarded Control Stack (GCS) mechanism.
+The @samp{-z gcs} option controls the verification of Guarded Control Stack (GCS)
+markings on input objects and marks the output with GCS if all conditions are
+validated.
+@itemize
+@item@samp{implicit} (default if @samp{-z gcs} is omitted) enables GCS marking
+on the output if, and only if, all input objects composing the link unit are
+marked with GCS.
+@item@samp{always} forces the marking of the output with GCS.
+@item@samp{never} ignores any GCS marking on the input objects, and does not
+mark the output with GCS.
+@end itemize
+
+@kindex -z gcs-report[=none|warning|error]
+@cindex Control warnings for missing GCS markings.
+The @samp{-z gcs-report[=none|warning|error]} specifies how to report the missing
+GCS markings on inputs, i.e. the GNU_PROPERTY_AARCH64_FEATURE_1_GCS property.
+By default, if the option is omitted and @samp{-z gcs} is provided, warnings are
+emitted.
+@itemize
+@item@samp{none} disables any warning messages.
+@item@samp{warning} (the default value) emits warning messages when input objects
+composing the link unit are missing GCS markings, or dynamic objects containing
+external symbols used in the link unit.
+@item@samp{error} turns the warning messages into errors.
+@end itemize
+If issues are found, a maximum of 20 messages will be emitted, and then a summary
+with the total number of issues will be displayed at the end.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear

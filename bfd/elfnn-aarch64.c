@@ -5020,8 +5020,24 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
     elf_aarch64_tdata (output_bfd)->gnu_property_aarch64_feature_1_and
       |= GNU_PROPERTY_AARCH64_FEATURE_1_BTI;
 
+  switch (sw_protections->gcs_type)
+    {
+    case GCS_ALWAYS:
+      elf_aarch64_tdata (output_bfd)->gnu_property_aarch64_feature_1_and
+	|= GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
+      break;
+    case GCS_NEVER:
+      elf_aarch64_tdata (output_bfd)->gnu_property_aarch64_feature_1_and
+	&= ~GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
+      break;
+    case GCS_IMPLICIT:
+      /* GCS feature on the output bfd will be deduced from input objects.  */
+      break;
+    }
+
   elf_aarch64_tdata (output_bfd)->sw_protections = *sw_protections;
   elf_aarch64_tdata (output_bfd)->n_bti_issues = 0;
+  elf_aarch64_tdata (output_bfd)->n_gcs_issues = 0;
 
   setup_plt_values (link_info, sw_protections->plt_type);
 }
@@ -10630,6 +10646,7 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
       const aarch64_protection_opts *sw_protections
 	= &elf_aarch64_tdata (info->output_bfd)->sw_protections;
       aarch64_feature_marking_report bti_report = sw_protections->bti_report;
+      aarch64_feature_marking_report gcs_report = sw_protections->gcs_report;
 
       /* If output has been marked with BTI using command line argument, give
 	 out warning if necessary.  */
@@ -10640,6 +10657,18 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
 	    _bfd_aarch64_elf_check_bti_report (info, abfd);
 	  if (!bprop || !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
 	    _bfd_aarch64_elf_check_bti_report (info, bbfd);
+	}
+
+      /* If the output has been marked with GCS using '-z gcs' and the input is
+	 missing GCS feature tag, throw a warning/error in accordance with
+	 -z gcs-report=warning/error.  */
+      if ((outprop & GNU_PROPERTY_AARCH64_FEATURE_1_GCS)
+	  && gcs_report != MARKING_NONE)
+	{
+	  if (!aprop || !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_GCS))
+	    _bfd_aarch64_elf_check_gcs_report (info, abfd);
+	  if (!bprop || !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_GCS))
+	    _bfd_aarch64_elf_check_gcs_report (info, bbfd);
 	}
     }
 

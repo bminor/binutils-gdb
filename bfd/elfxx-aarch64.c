@@ -765,6 +765,7 @@ _bfd_aarch64_report_summary_merge_issues (struct bfd_link_info *info)
   const struct elf_aarch64_obj_tdata * tdata
     = elf_aarch64_tdata (info->output_bfd);
   aarch64_feature_marking_report bti_report = tdata->sw_protections.bti_report;
+  aarch64_feature_marking_report gcs_report = tdata->sw_protections.gcs_report;
 
   if (tdata->n_bti_issues > GNU_PROPERTY_ISSUES_MAX
       && bti_report != MARKING_NONE)
@@ -776,6 +777,18 @@ _bfd_aarch64_report_summary_merge_issues (struct bfd_link_info *info)
 	: _("warning: found a total of %d inputs incompatible with "
 	    "BTI requirements.\n");
       info->callbacks->einfo (msg, tdata->n_bti_issues);
+    }
+
+  if (tdata->n_gcs_issues > GNU_PROPERTY_ISSUES_MAX
+      && gcs_report != MARKING_NONE)
+    {
+      const char *msg
+	= (tdata->sw_protections.gcs_report == MARKING_ERROR)
+	? _("%Xerror: found a total of %d inputs incompatible with "
+	    "GCS requirements.\n")
+	: _("warning: found a total of %d inputs incompatible with "
+	    "GCS requirements.\n");
+      info->callbacks->einfo (msg, tdata->n_gcs_issues);
     }
 }
 
@@ -796,7 +809,7 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
   /* If ebfd != NULL it is either an input with property note or the last input.
      Either way if we have an output GNU property that was provided, we should
      add it (by creating a section if needed).  */
-  if (ebfd != NULL && outprop)
+  if (ebfd != NULL)
     {
       /* If no GNU property node was found, create the GNU property note
 	 section.  */
@@ -817,8 +830,17 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	   && !(prop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
 	_bfd_aarch64_elf_check_bti_report (info, ebfd);
 
+      if (tdata->sw_protections.gcs_type == GCS_NEVER)
+	prop->u.number &= ~GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
+      else if ((outprop & GNU_PROPERTY_AARCH64_FEATURE_1_GCS)
+	       && !(prop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_GCS))
+	_bfd_aarch64_elf_check_gcs_report (info, ebfd);
+
       prop->u.number |= outprop;
-      prop->pr_kind = property_number;
+      if (prop->u.number == 0)
+	prop->pr_kind = property_remove;
+      else
+	prop->pr_kind = property_number;
     }
 
   /* Set up generic GNU properties, and merge them with the backend-specific
@@ -843,7 +865,8 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	    {
 	      outprop = (p->property.u.number
 			 & (GNU_PROPERTY_AARCH64_FEATURE_1_BTI
-			  | GNU_PROPERTY_AARCH64_FEATURE_1_PAC));
+			  | GNU_PROPERTY_AARCH64_FEATURE_1_PAC
+			  | GNU_PROPERTY_AARCH64_FEATURE_1_GCS));
 	      break;
 	    }
 	}
@@ -906,6 +929,19 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *info
     {
     case GNU_PROPERTY_AARCH64_FEATURE_1_AND:
       {
+	aarch64_gcs_type gcs_type
+	  = elf_aarch64_tdata (info->output_bfd)->sw_protections.gcs_type;
+	/* OUTPROP does not contain GCS for GCS_NEVER. We only need to make sure
+	 that APROP does not contain GCS as well.
+	 Notes:
+	  - if BPROP contains GCS and APROP is not null, it is zeroed by the
+	    AND with APROP.
+	  - if BPROP contains GCS and APROP is null, it is overwritten with
+	    OUTPROP as the AND with APROP would have been equivalent to zeroing
+	    BPROP.  */
+	if (gcs_type == GCS_NEVER && aprop != NULL)
+	  aprop->u.number &= ~GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
+
 	if (aprop != NULL && bprop != NULL)
 	  {
 	    orig_number = aprop->u.number;
@@ -1003,6 +1039,29 @@ _bfd_aarch64_elf_check_bti_report (struct bfd_link_info *info, bfd *ebfd)
 	"file lacks the necessary property note.\n")
     : _("%X%pB: error: BTI is required by -z force-bti, but this input object "
 	"file lacks the necessary property note.\n");
+
+  info->callbacks->einfo (msg, ebfd);
+}
+
+void
+_bfd_aarch64_elf_check_gcs_report (struct bfd_link_info *info, bfd *ebfd)
+{
+  struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
+
+  if (tdata->sw_protections.gcs_report == MARKING_NONE)
+    return;
+
+  ++tdata->n_gcs_issues;
+
+  if (tdata->n_gcs_issues > GNU_PROPERTY_ISSUES_MAX)
+    return;
+
+  const char *msg
+    = (tdata->sw_protections.gcs_report == MARKING_WARN)
+    ? _("%pB: warning: GCS is required by -z gcs, but this input object file "
+	"lacks the necessary property note.\n")
+    : _("%X%pB: error: GCS is required by -z gcs, but this input object file "
+	"lacks the necessary property note.\n");
 
   info->callbacks->einfo (msg, ebfd);
 }

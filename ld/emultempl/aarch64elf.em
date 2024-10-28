@@ -37,6 +37,8 @@ static int no_apply_dynamic_relocs = 0;
 static aarch64_protection_opts sw_protections = {
   .plt_type = PLT_NORMAL,
   .bti_report = MARKING_WARN,
+  .gcs_type = GCS_IMPLICIT,
+  .gcs_report = MARKING_WARN,
 };
 
 #define COMPILE_TIME_STRLEN(s) \
@@ -352,28 +354,75 @@ aarch64_elf_create_output_section_statements (void)
 }
 
 static bool
+aarch64_parse_feature_report_option (const char *optarg,
+				     const char *report_opt,
+				     const size_t report_opt_len,
+				     aarch64_feature_marking_report *level)
+{
+  if (strncmp (optarg, report_opt, report_opt_len) != 0)
+    return false;
+
+  if (strlen (optarg) == report_opt_len
+      || strcmp (optarg + report_opt_len, "=warning") == 0)
+    *level = MARKING_WARN;
+  else if (strcmp (optarg + report_opt_len, "=none") == 0)
+    *level = MARKING_NONE;
+  else if (strcmp (optarg + report_opt_len, "=error") == 0)
+    *level = MARKING_ERROR;
+  else
+    einfo (_("%X%P: error: unrecognized value '-z %s'\n"), optarg);
+
+  return true;
+}
+
+static bool
 aarch64_parse_bti_report_option (const char *optarg)
 {
   #define BTI_REPORT      "bti-report"
   #define BTI_REPORT_LEN  COMPILE_TIME_STRLEN (BTI_REPORT)
 
-  if (strncmp (optarg, BTI_REPORT, BTI_REPORT_LEN) != 0)
+  return aarch64_parse_feature_report_option (optarg, BTI_REPORT,
+    BTI_REPORT_LEN, &sw_protections.bti_report);
+
+  #undef BTI_REPORT
+  #undef BTI_REPORT_LEN
+}
+
+static bool
+aarch64_parse_gcs_report_option (const char *optarg)
+{
+  #define GCS_REPORT      "gcs-report"
+  #define GCS_REPORT_LEN  COMPILE_TIME_STRLEN (GCS_REPORT)
+
+  return aarch64_parse_feature_report_option (optarg, GCS_REPORT,
+    GCS_REPORT_LEN, &sw_protections.gcs_report);
+
+  #undef GCS_REPORT
+  #undef GCS_REPORT_LEN
+}
+
+static bool
+aarch64_parse_gcs_option (const char *optarg)
+{
+  #define GCS      "gcs"
+  #define GCS_LEN  COMPILE_TIME_STRLEN (GCS)
+
+  if (strncmp (optarg, GCS, GCS_LEN) != 0)
     return false;
 
-  if (strlen (optarg) == BTI_REPORT_LEN
-      || strcmp (optarg + BTI_REPORT_LEN, "=warning") == 0)
-    sw_protections.bti_report = MARKING_WARN;
-  else if (strcmp (optarg + BTI_REPORT_LEN, "=none") == 0)
-    sw_protections.bti_report = MARKING_NONE;
-  else if (strcmp (optarg + BTI_REPORT_LEN, "=error") == 0)
-    sw_protections.bti_report = MARKING_ERROR;
+  if (strcmp (optarg + GCS_LEN, "=always") == 0)
+    sw_protections.gcs_type = GCS_ALWAYS;
+  else if (strcmp (optarg + GCS_LEN, "=never") == 0)
+    sw_protections.gcs_type = GCS_NEVER;
+  else if (strcmp (optarg + GCS_LEN, "=implicit") == 0)
+    sw_protections.gcs_type = GCS_IMPLICIT;
   else
     einfo (_("%X%P: error: unrecognized value '-z %s'\n"), optarg);
 
   return true;
 
-  #undef BTI_REPORT
-  #undef BTI_REPORT_LEN
+  #undef GCS
+  #undef GCS_LEN
 }
 EOF
 
@@ -433,6 +482,18 @@ PARSE_AND_LIST_OPTIONS='
                                            and output has BTI marking.\n"));
   fprintf (file, _("\
   -z pac-plt                           Protect PLTs with Pointer Authentication.\n"));
+  fprintf (file, _("\
+  -z gcs=[always|never|implicit]       Controls whether the output supports the Guarded Control Stack (GCS) mechanism.\n\
+                                         implicit (default if '\''-z gcs'\'' is omitted): deduce GCS from input objects.\n\
+                                         always: always marks the output with GCS.\n\
+                                         never: never marks the output with GCS.\n"));
+  fprintf (file, _("\
+  -z gcs-report[=none|warning|error]   Emit warning/error on mismatch of GCS marking between input objects and ouput.\n\
+                                         none: Does not emit any warning/error messages.\n\
+                                         warning (default): Emit warning when the input objects are missing GCS markings\n\
+                                           and output have GCS marking.\n\
+                                         error: Emit error when the input objects are missing GCS markings\n\
+                                           and output have GCS marking.\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASE_Z_AARCH64='
@@ -442,6 +503,10 @@ PARSE_AND_LIST_ARGS_CASE_Z_AARCH64='
 	{}
      else if (strcmp (optarg, "pac-plt") == 0)
 	sw_protections.plt_type |= PLT_PAC;
+     else if (aarch64_parse_gcs_report_option (optarg))
+	{}
+     else if (aarch64_parse_gcs_option (optarg))
+	{}
 '
 PARSE_AND_LIST_ARGS_CASE_Z="$PARSE_AND_LIST_ARGS_CASE_Z $PARSE_AND_LIST_ARGS_CASE_Z_AARCH64"
 

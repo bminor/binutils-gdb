@@ -53,6 +53,16 @@ typedef enum
 			 markings.  */
 } aarch64_feature_marking_report;
 
+/* To indicate whether GNU_PROPERTY_AARCH64_FEATURE_1_GCS bit is
+   enabled/disabled on the output when -z gcs linker
+   command line option is passed.  */
+typedef enum
+{
+  GCS_NEVER	= 0,  /* gcs is disabled on output.  */
+  GCS_IMPLICIT  = 1,  /* gcs is deduced from input object.  */
+  GCS_ALWAYS	= 2,  /* gsc is enabled on output.  */
+} aarch64_gcs_type;
+
 /* A structure to encompass all information about software protections coming
    from BTI or PAC related command line options.  */
 struct aarch64_protection_opts
@@ -62,6 +72,12 @@ struct aarch64_protection_opts
 
   /* Report level for BTI issues.  */
   aarch64_feature_marking_report bti_report;
+
+  /* Look-up mode for GCS property.  */
+  aarch64_gcs_type gcs_type;
+
+  /* Report level for GCS issues.  */
+  aarch64_feature_marking_report gcs_report;
 };
 typedef struct aarch64_protection_opts aarch64_protection_opts;
 
@@ -87,6 +103,9 @@ struct elf_aarch64_obj_tdata
 
   /* Number of reported BTI issues.  */
   int n_bti_issues;
+
+  /* Number of reported GCS issues.  */
+  int n_gcs_issues;
 };
 
 #define elf_aarch64_tdata(bfd)				\
@@ -195,6 +214,9 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
 
 extern void
 _bfd_aarch64_elf_check_bti_report (struct bfd_link_info *, bfd *);
+
+extern void
+_bfd_aarch64_elf_check_gcs_report (struct bfd_link_info *, bfd *);
 
 extern void
 _bfd_aarch64_elf_link_fixup_gnu_properties (struct bfd_link_info *,
