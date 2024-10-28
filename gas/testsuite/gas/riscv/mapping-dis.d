@@ -11,7 +11,7 @@ Disassembly of section .text.cross.section.A:
 [ 	]+[0-9a-f]+:[ 	]+4505[ 	]+li[ 	]+a0,1
 [ 	]+[0-9a-f]+:[ 	]+bffd[ 	]+j[ 	]+0 <funcA>
 
-Disassembly of section .text.corss.section.B:
+Disassembly of section .text.cross.section.B:
 
 0+000 <funcB>:
 [ 	]+[0-9a-f]+:[ 	]+4509[ 	]+li[ 	]+a0,2

@@ -7,7 +7,7 @@ funcA:
 addi	a0, zero, 1		# rv32i
 .option arch, +c
 j	funcA			# rv32ic
-.section .text.corss.section.B, "ax"
+.section .text.cross.section.B, "ax"
 .globl funcB
 funcB:
 addi	a0, zero, 2		# rv32ic, need to be added since start of section
