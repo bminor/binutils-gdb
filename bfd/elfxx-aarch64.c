@@ -814,7 +814,8 @@ _bfd_aarch64_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
 	  return property_corrupt;
 	}
       prop = _bfd_elf_get_property (abfd, type, datasz);
-      /* Combine properties of the same type.  */
+      /* Merge AArch64 feature properties together if they are declared in
+	 different AARCH64_FEATURE_1_AND properties.  */
       prop->u.number |= bfd_h_get_32 (abfd, ptr);
       prop->pr_kind = property_number;
       break;
@@ -921,4 +922,19 @@ _bfd_aarch64_elf_link_fixup_gnu_properties
 	  break;
 	}
     }
+}
+
+/* Check AArch64 BTI report.  */
+void
+_bfd_aarch64_elf_check_bti_report (aarch64_bti_report bti_report, bfd *ebfd)
+{
+  if (bti_report == BTI_NONE)
+    return;
+
+  const char *log_level = (bti_report == BTI_WARN ? "warning" : "error");
+
+  const char *msg = _("%pB: %s: BTI turned on by -z force-bti on the output "
+		    "when all inputs do not have BTI in NOTE section.");
+
+  _bfd_error_handler (msg, ebfd, log_level);
 }

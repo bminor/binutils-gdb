@@ -34,27 +34,33 @@ extern void bfd_elf32_aarch64_init_maps
 typedef enum
 {
   PLT_NORMAL	= 0x0,  /* Normal plts.  */
-  PLT_BTI	= 0x1,  /* plts with bti.  */
+  PLT_BTI	= 0x1,  /* plts with BTI.  */
   PLT_PAC	= 0x2,  /* plts with pointer authentication.  */
   PLT_BTI_PAC	= PLT_BTI | PLT_PAC
 } aarch64_plt_type;
 
-/* To indicate if BTI is enabled with/without warning.  */
+/* Indicates whether the linker should generate warnings/errors when input
+   objects are missing BTI markings and the output has BTI markings.  */
 typedef enum
 {
-  BTI_NONE	= 0,  /* BTI is not enabled.  */
-  BTI_WARN	= 1,  /* BTI is enabled with -z force-bti.  */
-} aarch64_enable_bti_type;
+  BTI_NONE	= 0,  /* Does not emit any warning/error messages.  */
+  BTI_WARN	= 1,  /* Emit warning when the input objects are missing BTI
+			 markings and output have BTI marking.  */
+  BTI_ERROR	= 2,  /* Emit error when the input objects are missing BTI
+			 markings and output have BTI marking.  */
+} aarch64_bti_report;
 
-/* A structure to encompass all information coming from BTI or PAC
-   related command line options.  This involves the "PLT_TYPE" to determine
-   which version of PLTs to pick and "BTI_TYPE" to determine if
-   BTI should be turned on with any warnings.   */
-typedef struct
+/* A structure to encompass all information about software protections coming
+   from BTI or PAC related command line options.  */
+struct aarch64_protection_opts
 {
+  /* PLT type to use depending on the selected software proctections.  */
   aarch64_plt_type plt_type;
-  aarch64_enable_bti_type bti_type;
-} aarch64_bti_pac_info;
+
+  /* Report level for BTI issues.  */
+  aarch64_bti_report bti_report;
+};
+typedef struct aarch64_protection_opts aarch64_protection_opts;
 
 /* An enum to define what kind of erratum fixes we should apply.  This gives the
    user a bit more control over the sequences we generate.  */
@@ -67,11 +73,11 @@ typedef enum
 
 extern void bfd_elf64_aarch64_set_options
   (bfd *, struct bfd_link_info *, int, int, int, int, erratum_84319_opts, int,
-   aarch64_bti_pac_info);
+   const aarch64_protection_opts *);
 
 extern void bfd_elf32_aarch64_set_options
   (bfd *, struct bfd_link_info *, int, int, int, int, erratum_84319_opts, int,
-   aarch64_bti_pac_info);
+   const aarch64_protection_opts *);
 
 /* AArch64 stub generation support for ELF64.  Called from the linker.  */
 extern int elf64_aarch64_setup_section_lists
@@ -157,6 +163,9 @@ extern bool
 _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
 				       elf_property *, elf_property *,
 				       uint32_t);
+
+extern void
+_bfd_aarch64_elf_check_bti_report (aarch64_bti_report, bfd *);
 
 extern void
 _bfd_aarch64_elf_link_fixup_gnu_properties (struct bfd_link_info *,
