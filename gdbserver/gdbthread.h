@@ -104,35 +104,32 @@ struct thread_info *find_any_thread_of_pid (int pid);
 /* Find the first thread for which FUNC returns true.  Return NULL if no thread
    satisfying FUNC is found.  */
 
-thread_info *
-find_thread (gdb::function_view<bool (thread_info *)> func);
+thread_info *find_thread (gdb::function_view<bool (thread_info *)> func);
 
 /* Like the above, but only consider threads with pid PID.  */
 
-thread_info *
-find_thread (int pid, gdb::function_view<bool (thread_info *)> func);
+thread_info *find_thread (int pid,
+			  gdb::function_view<bool (thread_info *)> func);
 
 /* Find the first thread that matches FILTER for which FUNC returns true.
    Return NULL if no thread satisfying these conditions is found.  */
 
-thread_info *
-find_thread (ptid_t filter, gdb::function_view<bool (thread_info *)> func);
+thread_info *find_thread (ptid_t filter,
+			  gdb::function_view<bool (thread_info *)> func);
 
 /* Invoke FUNC for each thread.  */
 
-void
-for_each_thread (gdb::function_view<void (thread_info *)> func);
+void for_each_thread (gdb::function_view<void (thread_info *)> func);
 
 /* Like the above, but only consider threads with pid PID.  */
 
-void
-for_each_thread (int pid, gdb::function_view<void (thread_info *)> func);
+void for_each_thread (int pid, gdb::function_view<void (thread_info *)> func);
 
 /* Find the a random thread for which FUNC (THREAD) returns true.  If
    no entry is found then return NULL.  */
 
-thread_info *
-find_thread_in_random (gdb::function_view<bool (thread_info *)> func);
+thread_info *find_thread_in_random
+  (gdb::function_view<bool (thread_info *)> func);
 
 /* Get current thread ID (Linux task ID).  */
 #define current_ptid (current_thread->id)
