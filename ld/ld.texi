@@ -2732,6 +2732,19 @@ for compatibility with other linkers, you may omit the leading
 should be no white space between @var{sectionname}, the equals
 sign (``@key{=}''), and @var{org}.
 
+@kindex --image-base=@var{org}
+@item --image-base=@var{org}
+@cindex image base address, cmd line
+When using ELF, same as @option{-Ttext-segment}, with both options effectively
+setting the base address of the ELF executable.
+
+When using PE, use @var{value} as the base address of your program or dll.
+This is the lowest memory location that will be used when your program or
+dll is loaded.  To reduce the need to relocate and improve performance of
+your dlls, each should have a unique base address and not overlap any
+other dlls.  The default is 0x400000 for executables, and 0x10000000
+for dlls.
+
 @kindex -Tbss=@var{org}
 @kindex -Tdata=@var{org}
 @kindex -Ttext=@var{org}
@@ -2746,7 +2759,7 @@ Same as @option{--section-start}, with @code{.bss}, @code{.data} or
 @item -Ttext-segment=@var{org}
 @cindex text segment origin, cmd line
 When creating an ELF executable, it will set the address of the first
-byte of the text segment.  Note that when @option{-pie} is used with
+byte of the first segment.  Note that when @option{-pie} is used with
 @option{-Ttext-segment=@var{org}}, the output executable is marked
 ET_EXEC so that the address of the first byte of the text segment will
 be guaranteed to be @var{org} at run time.
@@ -3390,17 +3403,6 @@ file offsets which are multiples of this number.  This defaults to
 Specify the number of bytes of memory to reserve (and optionally commit)
 to be used as heap for this program.  The default is 1MB reserved, 4K
 committed.
-[This option is specific to the i386 PE targeted port of the linker]
-
-@cindex image base
-@kindex --image-base
-@item --image-base @var{value}
-Use @var{value} as the base address of your program or dll.  This is
-the lowest memory location that will be used when your program or dll
-is loaded.  To reduce the need to relocate and improve performance of
-your dlls, each should have a unique base address and not overlap any
-other dlls.  The default is 0x400000 for executables, and 0x10000000
-for dlls.
 [This option is specific to the i386 PE targeted port of the linker]
 
 @kindex --kill-at

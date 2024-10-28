@@ -2,6 +2,9 @@
 
 Changes in 2.44:
 
+* Add --image-base=<ADDR> option to the ELF linker to behave the same
+  as -Ttext-segment for compatibility with LLD.
+
 * Add a "--build-id=xx" option, if built with the xxhash library.  This
   produces a 128-bit hash, 2-4x faster than md5 or sha1.
 

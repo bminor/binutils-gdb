@@ -510,6 +510,8 @@ static const struct ld_option ld_options[] =
   { {"section-start", required_argument, NULL, OPTION_SECTION_START},
     '\0', N_("SECTION=ADDRESS"), N_("Set address of named section"),
     TWO_DASHES },
+  { {"image-base", required_argument, NULL, OPTION_IMAGE_BASE},
+    '\0', N_("ADDRESS"), N_("Set image base address"), TWO_DASHES },
   { {"Tbss", required_argument, NULL, OPTION_TBSS},
     '\0', N_("ADDRESS"), N_("Set address of .bss section"), ONE_DASH },
   { {"Tdata", required_argument, NULL, OPTION_TDATA},
@@ -1477,6 +1479,9 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_TTEXT:
 	  set_segment_start (".text", optarg);
 	  break;
+	case OPTION_IMAGE_BASE:
+	  /* Unless PE, --image-base and -Ttext-segment behavior is the same
+	     PE-specific functionality is implemented in emultempl/{pe, pep, beos}.em  */
 	case OPTION_TTEXT_SEGMENT:
 	  set_segment_start (".text-segment", optarg);
 	  break;
