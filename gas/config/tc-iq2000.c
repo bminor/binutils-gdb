@@ -108,12 +108,12 @@ static struct iq2000_hi_fixup * iq2000_hi_fixup_list;
 /* Macro hash table, which we will add to.  */
 extern struct htab *macro_hash;
 
-const char *md_shortopts = "";
-struct option md_longopts[] =
+const char md_shortopts[] = "";
+const struct option md_longopts[] =
 {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c ATTRIBUTE_UNUSED,

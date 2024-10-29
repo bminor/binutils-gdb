@@ -103,16 +103,16 @@ enum options
   OPTION_CPU_EPIPHANY16
 };
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "mepiphany ",  no_argument, NULL, OPTION_CPU_EPIPHANY },
   { "mepiphany16", no_argument, NULL, OPTION_CPU_EPIPHANY16 },
   { NULL,          no_argument, NULL, 0 },
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
-const char * md_shortopts = "";
+const char md_shortopts[] = "";
 
 int
 md_parse_option (int c ATTRIBUTE_UNUSED, const char * arg ATTRIBUTE_UNUSED)

@@ -84,9 +84,9 @@ s12z_strtol (const char *str, char ** endptr)
 
 /* Options and initialization.  */
 
-const char *md_shortopts = "";
+const char md_shortopts[] = "";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
   {
 #define OPTION_REG_PREFIX (OPTION_MD_BASE)
    {"mreg-prefix", required_argument, NULL, OPTION_REG_PREFIX},
@@ -95,7 +95,7 @@ struct option md_longopts[] =
    {NULL, no_argument, NULL, 0}
   };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 
 relax_typeS md_relax_table[] =

@@ -216,8 +216,8 @@ const pseudo_typeS md_pseudo_table[] =
   {0, 0, 0}
 };
 
-const char *md_shortopts = "nO::g::G:";
-struct option md_longopts[] =
+const char md_shortopts[] = "nO::g::G:";
+const struct option md_longopts[] =
 {
 #ifdef OPTION_EB
   {"EB"     , no_argument, NULL, OPTION_EB},
@@ -239,7 +239,7 @@ struct option md_longopts[] =
   {NULL     , no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 #define s3_GP                     28
 #define s3_PIC_CALL_REG           29

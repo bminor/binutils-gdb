@@ -254,11 +254,11 @@ int md_short_jump_size = 4;
 int md_long_jump_size = 4;
 #endif
 
-const char *md_shortopts = "A:m:kVQ:";
-struct option md_longopts[] = {
+const char md_shortopts[] = "A:m:kVQ:";
+const struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* Initialize the default opcode arch and word size from the default
    architecture name if not specified by an option.  */

@@ -1098,9 +1098,9 @@ unsigned int ppc_apuinfo_num_alloc;
 #endif /* OBJ_ELF */
 
 #ifdef OBJ_ELF
-const char *const md_shortopts = "b:l:usm:K:VQ:";
+const char md_shortopts[] = "b:l:usm:K:VQ:";
 #else
-const char *const md_shortopts = "um:";
+const char md_shortopts[] = "um:";
 #endif
 #define OPTION_NOPS (OPTION_MD_BASE + 0)
 const struct option md_longopts[] = {

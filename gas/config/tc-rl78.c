@@ -288,10 +288,10 @@ enum options
 };
 
 #define RL78_SHORTOPTS ""
-const char * md_shortopts = RL78_SHORTOPTS;
+const char md_shortopts[] = RL78_SHORTOPTS;
 
 /* Assembler options.  */
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"norelax", no_argument, NULL, OPTION_NORELAX},
@@ -303,7 +303,7 @@ struct option md_longopts[] =
   {"m64bit-doubles", no_argument, NULL, OPTION_64BIT_DOUBLES},
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char * arg ATTRIBUTE_UNUSED)

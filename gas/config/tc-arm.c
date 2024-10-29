@@ -30341,7 +30341,7 @@ md_begin (void)
 
       */
 
-const char * md_shortopts = "m:k";
+const char md_shortopts[] = "m:k";
 
 #ifdef ARM_BI_ENDIAN
 #define OPTION_EB (OPTION_MD_BASE + 0)
@@ -30356,7 +30356,7 @@ const char * md_shortopts = "m:k";
 #define OPTION_FIX_V4BX (OPTION_MD_BASE + 2)
 #define OPTION_FDPIC (OPTION_MD_BASE + 3)
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
 #ifdef OPTION_EB
   {"EB", no_argument, NULL, OPTION_EB},
@@ -30371,7 +30371,7 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 struct arm_option_table
 {

@@ -81,13 +81,13 @@ static unsigned int mcpu_opt = CoreMeta12;
 static unsigned int mfpu_opt = 0;
 static unsigned int mdsp_opt = 0;
 
-const char * md_shortopts = "m:";
+const char md_shortopts[] = "m:";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* Parser hash tables.  */
 static htab_t mnemonic_htab;

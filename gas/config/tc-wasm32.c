@@ -78,7 +78,7 @@ const char comment_chars[] = ";#";
 const char line_comment_chars[] = ";#";
 const char line_separator_chars[] = "";
 
-const char *md_shortopts = "m:";
+const char md_shortopts[] = "m:";
 
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
@@ -94,12 +94,12 @@ const pseudo_typeS md_pseudo_table[] =
 
 static htab_t wasm32_hash;
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* No relaxation/no machine-dependent frags.  */
 

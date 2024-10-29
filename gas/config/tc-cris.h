@@ -44,10 +44,6 @@ extern unsigned int cris_mach (void);
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 
-extern const char *md_shortopts;
-extern struct option md_longopts[];
-extern size_t md_longopts_size;
-
 extern const pseudo_typeS md_pseudo_table[];
 
 /* This should be optional, since it is ignored as an escape (assumed to

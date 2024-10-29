@@ -85,14 +85,14 @@ struct mn10200_fixup
 struct mn10200_fixup fixups[MAX_INSN_FIXUPS];
 static int fc;
 
-const char *md_shortopts = "";
+const char md_shortopts[] = "";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =

@@ -34,7 +34,7 @@ const char EXP_CHARS[] = "eE\0";
 const char FLT_CHARS[] = "RrDdFfSsHh\0";
 
 /* For machine specific options.  */
-const char * md_shortopts = ""; /* None yet.  */
+const char md_shortopts[] = ""; /* None yet.  */
 
 enum options
 {
@@ -80,7 +80,7 @@ enum options
 #define INS_UNDOC (INS_IDX_HALF | INS_IN_F_C)
 #define INS_UNPORT (INS_OUT_C_0 | INS_SLI | INS_ROT_II_LD)
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "march",     required_argument, NULL, OPTION_MARCH},
   { "z80",       no_argument, NULL, OPTION_MACH_Z80},
@@ -115,7 +115,7 @@ struct option md_longopts[] =
   { NULL, no_argument, NULL, 0 }
 } ;
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 extern int coff_flags;
 /* Instruction classes that silently assembled.  */

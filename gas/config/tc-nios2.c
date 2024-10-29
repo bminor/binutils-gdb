@@ -68,9 +68,9 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* Machine-dependent command-line options.  */
 
-const char *md_shortopts = "r";
+const char md_shortopts[] = "r";
 
-struct option md_longopts[] = {
+const struct option md_longopts[] = {
 #define OPTION_RELAX_ALL (OPTION_MD_BASE + 0)
   {"relax-all", no_argument, NULL, OPTION_RELAX_ALL},
 #define OPTION_NORELAX (OPTION_MD_BASE + 1)
@@ -85,7 +85,7 @@ struct option md_longopts[] = {
   {"march", required_argument, NULL, OPTION_MARCH}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* The assembler supports three different relaxation modes, controlled by
    command-line options.  */

@@ -75,7 +75,7 @@ struct pru_opt_s
 
 static struct pru_opt_s pru_opt = { true, true };
 
-const char *md_shortopts = "r";
+const char md_shortopts[] = "r";
 
 enum options
 {
@@ -84,7 +84,7 @@ enum options
   OPTION_NO_WARN_REGNAME_LABEL,
 };
 
-struct option md_longopts[] = {
+const struct option md_longopts[] = {
   { "mlink-relax",  no_argument, NULL, OPTION_LINK_RELAX  },
   { "mno-link-relax",  no_argument, NULL, OPTION_NO_LINK_RELAX  },
   { "mno-warn-regname-label",  no_argument, NULL,
@@ -92,7 +92,7 @@ struct option md_longopts[] = {
   { NULL, no_argument, NULL, 0 }
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 typedef struct pru_insn_reloc
 {

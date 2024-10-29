@@ -210,9 +210,9 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* ia64-specific option processing:  */
 
-const char *md_shortopts = "m:N:x::";
+const char md_shortopts[] = "m:N:x::";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
   {
 #define OPTION_MCONSTANT_GP (OPTION_MD_BASE + 1)
     {"mconstant-gp", no_argument, NULL, OPTION_MCONSTANT_GP},
@@ -220,7 +220,7 @@ struct option md_longopts[] =
     {"mauto-pic", no_argument, NULL, OPTION_MAUTO_PIC}
   };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 static struct
   {

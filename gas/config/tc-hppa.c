@@ -1631,26 +1631,26 @@ md_estimate_size_before_relax (fragS *fragP, asection *segment ATTRIBUTE_UNUSED)
 
 #ifdef OBJ_ELF
 # ifdef WARN_COMMENTS
-const char *md_shortopts = "Vc";
+const char md_shortopts[] = "Vc";
 # else
-const char *md_shortopts = "V";
+const char md_shortopts[] = "V";
 # endif
 #else
 # ifdef WARN_COMMENTS
-const char *md_shortopts = "c";
+const char md_shortopts[] = "c";
 # else
-const char *md_shortopts = "";
+const char md_shortopts[] = "";
 # endif
 #endif
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
 #ifdef WARN_COMMENTS
   {"warn-comment", no_argument, NULL, 'c'},
 #endif
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)

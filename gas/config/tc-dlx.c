@@ -1047,14 +1047,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     fixP->fx_no_overflow = 1;
 }
 
-const char *md_shortopts = "";
+const char md_shortopts[] = "";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
   {
     {NULL, no_argument, NULL, 0}
   };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c     ATTRIBUTE_UNUSED,

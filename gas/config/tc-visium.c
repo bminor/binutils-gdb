@@ -218,14 +218,14 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 }
 
 /* The parse options.  */
-const char *md_shortopts = "m:";
+const char md_shortopts[] = "m:";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 struct visium_option_table
 {

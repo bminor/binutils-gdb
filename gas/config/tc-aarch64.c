@@ -10467,7 +10467,7 @@ md_begin (void)
 
 /* Command line processing.  */
 
-const char *md_shortopts = "m:";
+const char md_shortopts[] = "m:";
 
 #ifdef AARCH64_BI_ENDIAN
 #define OPTION_EB (OPTION_MD_BASE + 0)
@@ -10480,7 +10480,7 @@ const char *md_shortopts = "m:";
 #endif
 #endif
 
-struct option md_longopts[] = {
+const struct option md_longopts[] = {
 #ifdef OPTION_EB
   {"EB", no_argument, NULL, OPTION_EB},
 #endif
@@ -10490,7 +10490,7 @@ struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 struct aarch64_option_table
 {

@@ -28,7 +28,7 @@
 const char comment_chars[]        = ";";
 const char line_comment_chars[]   = "#";
 const char line_separator_chars[] = "";
-const char *md_shortopts          = "O";
+const char md_shortopts[]         = "O";
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
 
@@ -88,7 +88,7 @@ enum options
   OPTION_NOGSTABSPACKING
 };
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {"nowarnswap", no_argument, NULL, OPTION_NOWARNSWAP},
   {"gstabspacking",  no_argument, NULL, OPTION_GSTABSPACKING},
@@ -98,7 +98,7 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* Opcode hash table.  */
 static htab_t d10v_hash;

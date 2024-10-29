@@ -161,7 +161,7 @@ const char line_comment_chars[] = "#";
 const char *avr_line_separator_chars = "$";
 static const char *avr_line_separator_chars_no_dollar = "";
 
-const char *md_shortopts = "m:";
+const char md_shortopts[] = "m:";
 struct mcu_type_s
 {
   const char *name;
@@ -571,7 +571,7 @@ enum options
   OPTION_NO_DOLLAR_LINE_SEPARATOR,
 };
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "mmcu",   required_argument, NULL, OPTION_MMCU        },
   { "mall-opcodes", no_argument, NULL, OPTION_ALL_OPCODES },
@@ -585,7 +585,7 @@ struct option md_longopts[] =
   { NULL, no_argument, NULL, 0 }
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* Display nicely formatted list of known MCU names.  */
 

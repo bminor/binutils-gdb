@@ -1450,7 +1450,7 @@ static const struct mips_cpu_info *mips_cpu_info_from_isa (int);
 static const struct mips_cpu_info *mips_cpu_info_from_arch (int);
 
 /* Command-line options.  */
-const char *md_shortopts = "O::g::G:";
+const char md_shortopts[] = "O::g::G:";
 
 enum options
   {
@@ -1585,7 +1585,7 @@ enum options
     OPTION_END_OF_ENUM
   };
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   /* Options which specify architecture.  */
   {"march", required_argument, NULL, OPTION_MARCH},
@@ -1738,7 +1738,7 @@ struct option md_longopts[] =
 
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* Information about either an Application Specific Extension or an
    optional architecture feature that, for simplicity, we treat in the

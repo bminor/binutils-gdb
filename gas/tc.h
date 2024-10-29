@@ -22,6 +22,10 @@
 /* In theory (mine, at least!) the machine dependent part of the assembler
    should only have to include one file.  This one.  -- JF */
 
+extern const char md_shortopts[];
+extern const struct option md_longopts[];
+extern const size_t md_longopts_size;
+
 extern const pseudo_typeS md_pseudo_table[];
 
 const char * md_atof (int, char *, int *);

@@ -438,7 +438,6 @@ parse_args (int * pargc, char *** pargv)
      the ordering of the two.  We describe each non-option ARGV-element
      as if it were the argument of an option with character code 1.  */
   char *shortopts;
-  extern const char *md_shortopts;
   static const char std_shortopts[] =
   {
     '-', 'J',
@@ -455,8 +454,6 @@ parse_args (int * pargc, char *** pargv)
     '\0'
   };
   struct option *longopts;
-  extern struct option md_longopts[];
-  extern size_t md_longopts_size;
   /* Codes used for the long options with no short synonyms.  */
   enum option_values
     {

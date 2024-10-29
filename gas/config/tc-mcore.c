@@ -1629,7 +1629,7 @@ md_atof (int type, char * litP, int * sizeP)
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
 }
 
-const char * md_shortopts = "";
+const char md_shortopts[] = "";
 
 enum options
 {
@@ -1642,7 +1642,7 @@ enum options
   OPTION_EL,
 };
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "no-jsri2bsr", no_argument, NULL, OPTION_JSRI2BSR_OFF},
   { "jsri2bsr",    no_argument, NULL, OPTION_JSRI2BSR_ON},
@@ -1654,7 +1654,7 @@ struct option md_longopts[] =
   { NULL,          no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char * arg)

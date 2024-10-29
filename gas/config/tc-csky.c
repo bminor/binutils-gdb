@@ -967,9 +967,9 @@ const char EXP_CHARS[] = "eE";
 
 const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
 
-const char *md_shortopts = "";
+const char md_shortopts[] = "";
 
-struct option md_longopts[] = {
+const struct option md_longopts[] = {
 #define OPTION_MARCH (OPTION_MD_BASE + 0)
   {"march", required_argument, NULL, OPTION_MARCH},
 #define OPTION_MCPU (OPTION_MD_BASE + 1)
@@ -1023,7 +1023,7 @@ struct option md_longopts[] = {
   {"mvdsp", no_argument, &do_opt_mvdsp, CSKY_ISA_VDSP},
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 static struct csky_insn_info csky_insn;
 

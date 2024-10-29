@@ -84,9 +84,9 @@ tilegx_target_format (void)
 #define OPTION_EB (OPTION_MD_BASE + 2)
 #define OPTION_EL (OPTION_MD_BASE + 3)
 
-const char *md_shortopts = "VQ:";
+const char md_shortopts[] = "VQ:";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {"32", no_argument, NULL, OPTION_32},
   {"64", no_argument, NULL, OPTION_64},
@@ -95,7 +95,7 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)

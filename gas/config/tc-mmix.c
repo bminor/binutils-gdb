@@ -80,7 +80,7 @@ static void mmix_cons (int);
    }						\
  while (0)
 
-const char *md_shortopts = "x";
+const char md_shortopts[] = "x";
 static int current_fb_label = -1;
 static char *pending_label = NULL;
 
@@ -189,7 +189,7 @@ static int doing_bspec = 0;
 static const char *bspec_file;
 static unsigned int bspec_line;
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
  {
 #define OPTION_RELAX  (OPTION_MD_BASE)
 #define OPTION_NOEXPAND  (OPTION_RELAX + 1)
@@ -215,7 +215,7 @@ struct option md_longopts[] =
    {NULL, no_argument, NULL, 0}
  };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 static htab_t mmix_opcode_hash;
 

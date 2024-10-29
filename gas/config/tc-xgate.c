@@ -163,9 +163,9 @@ const pseudo_typeS md_pseudo_table[] =
   {0, 0, 0}
 };
 
-const char *md_shortopts = "m:";
+const char md_shortopts[] = "m:";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
 #define OPTION_PRINT_INSN_SYNTAX  (OPTION_MD_BASE + 0)
   { "print-insn-syntax", no_argument, NULL, OPTION_PRINT_INSN_SYNTAX },
@@ -191,7 +191,7 @@ struct option md_longopts[] =
   { NULL, no_argument, NULL, 0 }
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 const char *
 md_atof (int type, char *litP, int *sizeP)

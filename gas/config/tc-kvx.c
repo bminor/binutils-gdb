@@ -233,7 +233,7 @@ struct label_fix
 /*   OPTIONS PROCESSING                              */
 /*****************************************************/
 
-const char *md_shortopts = "hV";	/* catted to std short options */
+const char md_shortopts[] = "hV";	/* catted to std short options */
 
 /* added to std long options */
 
@@ -254,7 +254,7 @@ const char *md_shortopts = "hV";	/* catted to std short options */
 #define OPTION_MORE                  (OPTION_MD_BASE + 19)
 #define OPTION_NO_MORE               (OPTION_MD_BASE + 20)
 
-struct option md_longopts[] = {
+const struct option md_longopts[] = {
   { "march",                 required_argument, NULL, OPTION_MARCH                 },
   { "check-resources",       no_argument,       NULL, OPTION_CHECK_RESOURCES       },
   { "no-check-resources",    no_argument,       NULL, OPTION_NO_CHECK_RESOURCES    },
@@ -273,7 +273,7 @@ struct option md_longopts[] = {
   { NULL,                    no_argument,       NULL, 0                            }
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)

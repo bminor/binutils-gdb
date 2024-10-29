@@ -1515,9 +1515,9 @@ parse_register_list (unsigned long *insn,
   return NULL;
 }
 
-const char *md_shortopts = "m:";
+const char md_shortopts[] = "m:";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
 #define OPTION_DISP_SIZE_DEFAULT_22 (OPTION_MD_BASE)
   {"disp-size-default-22", no_argument, NULL, OPTION_DISP_SIZE_DEFAULT_22},
@@ -1526,7 +1526,7 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 static bool v850_data_8 = false;
 

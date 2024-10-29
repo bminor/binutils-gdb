@@ -4305,7 +4305,7 @@ md_number_to_chars (char *buf, valueT val, int n)
     number_to_chars_littleendian (buf, val, n);
 }
 
-const char *md_shortopts = "O::g::G:";
+const char md_shortopts[] = "O::g::G:";
 
 enum options
 {
@@ -4326,7 +4326,7 @@ enum options
   OPTION_END_OF_ENUM
 };
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {"march", required_argument, NULL, OPTION_MARCH},
   {"fPIC", no_argument, NULL, OPTION_PIC},
@@ -4346,7 +4346,7 @@ struct option md_longopts[] =
 
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg)

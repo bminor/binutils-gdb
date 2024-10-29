@@ -314,13 +314,13 @@ struct bfin_cpu bfin_cpus[] =
 };
 
 /* Define bfin-specific command-line options (there are none). */
-const char *md_shortopts = "";
+const char md_shortopts[] = "";
 
 #define OPTION_FDPIC		(OPTION_MD_BASE)
 #define OPTION_NOPIC		(OPTION_MD_BASE + 1)
 #define OPTION_MCPU		(OPTION_MD_BASE + 2)
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "mcpu",		required_argument,	NULL, OPTION_MCPU	},
   { "mfdpic",		no_argument,		NULL, OPTION_FDPIC      },
@@ -329,7 +329,7 @@ struct option md_longopts[] =
   { NULL,		no_argument,		NULL, 0                 },
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 
 int

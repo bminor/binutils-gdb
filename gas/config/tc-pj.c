@@ -319,9 +319,9 @@ md_atof (int type, char *litP, int *sizeP)
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
 }
 
-const char *md_shortopts = "";
+const char md_shortopts[] = "";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
 #define OPTION_LITTLE (OPTION_MD_BASE)
 #define OPTION_BIG    (OPTION_LITTLE + 1)
@@ -330,7 +330,7 @@ struct option md_longopts[] =
   {"big", no_argument, NULL, OPTION_BIG},
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)

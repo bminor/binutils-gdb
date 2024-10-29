@@ -139,7 +139,7 @@ static struct mep_hi_fixup * mep_hi_fixup_list;
 #define OPTION_NODSP		(OPTION_MD_BASE + 32)
 #define OPTION_LIBRARY		(OPTION_MD_BASE + 33)
 
-struct option md_longopts[] = {
+const struct option md_longopts[] = {
   { "EB",          no_argument, NULL, OPTION_EB},
   { "EL",          no_argument, NULL, OPTION_EL},
   { "mconfig",     required_argument, NULL, OPTION_CONFIG},
@@ -170,7 +170,7 @@ struct option md_longopts[] = {
   { "mno-dsp",     no_argument, NULL, OPTION_NODSP},
   { "mlibrary",    no_argument, NULL, OPTION_LIBRARY},
   { NULL, 0, NULL, 0 } };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* Options which default to on/off together.  See the comment where
    this is used for details.  Note that CP and CP64 are not in this
@@ -189,7 +189,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 	| (1 << CGEN_INSN_OPTIONAL_UCI_INSN) \
 	| (1 << CGEN_INSN_OPTIONAL_DSP_INSN) )
 
-const char * md_shortopts = "";
+const char md_shortopts[] = "";
 static int optbits = 0;
 static int optbitset = 0;
 

@@ -200,7 +200,7 @@ const pseudo_typeS md_pseudo_table[] =
 
 
 #define FRV_SHORTOPTS "G:"
-const char * md_shortopts = FRV_SHORTOPTS;
+const char md_shortopts[] = FRV_SHORTOPTS;
 
 #define OPTION_GPR_32		(OPTION_MD_BASE)
 #define OPTION_GPR_64		(OPTION_MD_BASE + 1)
@@ -226,7 +226,7 @@ const char * md_shortopts = FRV_SHORTOPTS;
 #define OPTION_FDPIC		(OPTION_MD_BASE + 21)
 #define OPTION_NOPIC		(OPTION_MD_BASE + 22)
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "mgpr-32",		no_argument,		NULL, OPTION_GPR_32        },
   { "mgpr-64",		no_argument,		NULL, OPTION_GPR_64        },
@@ -255,7 +255,7 @@ struct option md_longopts[] =
   { NULL,		no_argument,		NULL, 0                 },
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* What value to give to bfd_set_gp_size.  */
 static int g_switch_value = 8;

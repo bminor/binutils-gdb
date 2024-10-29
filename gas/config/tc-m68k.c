@@ -7341,9 +7341,9 @@ m68k_set_extension (char const *name, int allow_m, int silent)
    Invocation line includes a switch not recognized by the base assembler.
  */
 
-const char *md_shortopts = "lSA:m:kQ:V";
+const char md_shortopts[] = "lSA:m:kQ:V";
 
-struct option md_longopts[] = {
+const struct option md_longopts[] = {
 #define OPTION_PIC (OPTION_MD_BASE)
   {"pic", no_argument, NULL, OPTION_PIC},
 #define OPTION_REGISTER_PREFIX_OPTIONAL (OPTION_MD_BASE + 1)
@@ -7363,7 +7363,7 @@ struct option md_longopts[] = {
   {"pcrel", no_argument, NULL, OPTION_PCREL},
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg)

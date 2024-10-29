@@ -189,7 +189,7 @@ allow_m32rx (int on)
 
 #define M32R_SHORTOPTS "O::K:"
 
-const char *md_shortopts = M32R_SHORTOPTS;
+const char md_shortopts[] = M32R_SHORTOPTS;
 
 enum md_option_enums
 {
@@ -212,7 +212,7 @@ enum md_option_enums
   OPTION_NO_WARN_UNMATCHED
 };
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {"m32r",  no_argument, NULL, OPTION_M32R},
   {"m32rx", no_argument, NULL, OPTION_M32RX},
@@ -243,7 +243,7 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 static void
 little (int on)

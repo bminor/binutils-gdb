@@ -78,10 +78,10 @@ enum options
 };
 
 #define RX_SHORTOPTS ""
-const char * md_shortopts = RX_SHORTOPTS;
+const char md_shortopts[] = RX_SHORTOPTS;
 
 /* Assembler options.  */
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {"mbig-endian-data", no_argument, NULL, OPTION_BIG},
   {"mlittle-endian-data", no_argument, NULL, OPTION_LITTLE},
@@ -105,7 +105,7 @@ struct option md_longopts[] =
   {"mno-allow-string-insns", no_argument, NULL, OPTION_DISALLOW_STRING_INSNS},
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 struct cpu_type
 {

@@ -112,7 +112,7 @@ const char EXP_CHARS[] = "eE";
 /* or    0d1.2345e12.  */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
-const char *md_shortopts = "O::g::G:";
+const char md_shortopts[] = "O::g::G:";
 
 static const char default_arch[] = DEFAULT_ARCH;
 
@@ -154,7 +154,7 @@ enum options
   OPTION_END_OF_ENUM,
 };
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "mabi", required_argument, NULL, OPTION_ABI },
 
@@ -172,7 +172,7 @@ struct option md_longopts[] =
   { NULL, no_argument, NULL, 0 }
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg)

@@ -243,12 +243,12 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 #ifdef OBJ_EVAX
-const char *md_shortopts = "Fm:g+1h:HG:";
+const char md_shortopts[] = "Fm:g+1h:HG:";
 #else
-const char *md_shortopts = "Fm:gG:";
+const char md_shortopts[] = "Fm:gG:";
 #endif
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
   {
 #define OPTION_32ADDR (OPTION_MD_BASE)
     { "32addr", no_argument, NULL, OPTION_32ADDR },
@@ -269,7 +269,7 @@ struct option md_longopts[] =
     { NULL, no_argument, NULL, 0 }
   };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 #ifdef OBJ_EVAX
 #define AXP_REG_R0     0

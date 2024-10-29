@@ -61,7 +61,7 @@ const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
 
 #define M32C_SHORTOPTS ""
-const char * md_shortopts = M32C_SHORTOPTS;
+const char md_shortopts[] = M32C_SHORTOPTS;
 
 /* assembler options */
 #define OPTION_CPU_M16C	       (OPTION_MD_BASE)
@@ -69,7 +69,7 @@ const char * md_shortopts = M32C_SHORTOPTS;
 #define OPTION_LINKRELAX       (OPTION_MD_BASE + 2)
 #define OPTION_H_TICK_HEX      (OPTION_MD_BASE + 3)
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "m16c",       no_argument,	      NULL, OPTION_CPU_M16C   },
   { "m32c",       no_argument,	      NULL, OPTION_CPU_M32C   },
@@ -77,7 +77,7 @@ struct option md_longopts[] =
   { "h-tick-hex", no_argument,	      NULL, OPTION_H_TICK_HEX  },
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* Default machine */
 

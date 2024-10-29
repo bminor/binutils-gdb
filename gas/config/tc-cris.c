@@ -414,7 +414,7 @@ const relax_typeS md_cris_relax_table[] =
 #undef BDAP_WB
 
 /* Target-specific multicharacter options, not const-declared.  */
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
 #define OPTION_NO_US (OPTION_MD_BASE + 0)
   {"no-underscore", no_argument, NULL, OPTION_NO_US},
@@ -432,8 +432,8 @@ struct option md_longopts[] =
 };
 
 /* Not const-declared.  */
-size_t md_longopts_size = sizeof (md_longopts);
-const char *md_shortopts = "hHN";
+const size_t md_longopts_size = sizeof (md_longopts);
+const char md_shortopts[] = "hHN";
 
 /* At first glance, this may seems wrong and should be 4 (ba + nop); but
    since a short_jump must skip a *number* of long jumps, it must also be

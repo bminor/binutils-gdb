@@ -16756,9 +16756,9 @@ bool i386_record_operator (operatorT op,
 #endif
 
 #ifdef OBJ_ELF
-const char *md_shortopts = "kVQ:sqnO::";
+const char md_shortopts[] = "kVQ:sqnO::";
 #else
-const char *md_shortopts = "qnO::";
+const char md_shortopts[] = "qnO::";
 #endif
 
 #define OPTION_32 (OPTION_MD_BASE + 0)
@@ -16798,7 +16798,7 @@ const char *md_shortopts = "qnO::";
 #define OPTION_MUSE_UNALIGNED_VECTOR_MOVE (OPTION_MD_BASE + 34)
 #define OPTION_MTLS_CHECK (OPTION_MD_BASE + 35)
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {"32", no_argument, NULL, OPTION_32},
 #if (defined (OBJ_ELF) || defined (TE_PE) || defined (OBJ_MACH_O)) \
@@ -16848,7 +16848,7 @@ struct option md_longopts[] =
   {"mtls-check", required_argument, NULL, OPTION_MTLS_CHECK},
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg)

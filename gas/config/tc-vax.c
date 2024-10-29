@@ -2190,18 +2190,18 @@ md_create_long_jump (char *ptr,
 }
 
 #ifdef OBJ_ELF
-const char *md_shortopts = "d:STt:VkQ:";
+const char md_shortopts[] = "d:STt:VkQ:";
 #else
-const char *md_shortopts = "d:STt:V";
+const char md_shortopts[] = "d:STt:V";
 #endif
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
 #ifdef OBJ_ELF
   { "pic", no_argument, NULL, 'k' },
 #endif
   { NULL, no_argument, NULL, 0 }
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg)

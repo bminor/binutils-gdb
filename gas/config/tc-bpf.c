@@ -126,7 +126,7 @@ enum options
   OPTION_NO_RELAX,
 };
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "EL", no_argument, NULL, OPTION_LITTLE_ENDIAN },
   { "EB", no_argument, NULL, OPTION_BIG_ENDIAN },
@@ -137,9 +137,9 @@ struct option md_longopts[] =
   { NULL,          no_argument, NULL, 0 },
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
-const char * md_shortopts = "";
+const char md_shortopts[] = "";
 
 /* BPF supports little-endian and big-endian variants.  The following
    global records what endianness to use.  It can be configured using

@@ -120,8 +120,8 @@ md_begin (void)
     str_hash_insert (op_hash, spu_opcodes[i].mnemonic, &spu_opcodes[i], 0);
 }
 
-const char *md_shortopts = "";
-struct option md_longopts[] = {
+const char md_shortopts[] = "";
+const struct option md_longopts[] = {
 #define OPTION_APUASM (OPTION_MD_BASE)
   {"apuasm", no_argument, NULL, OPTION_APUASM},
 #define OPTION_DD2 (OPTION_MD_BASE+1)
@@ -132,7 +132,7 @@ struct option md_longopts[] = {
   {"mdd3.0", no_argument, NULL, OPTION_DD3},
   { NULL, no_argument, NULL, 0 }
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* When set (by -apuasm) our assembler emulates the behaviour of apuasm.
  * e.g. don't add bias to float conversion and don't right shift

@@ -138,14 +138,14 @@ const char FLT_CHARS[] = "fF";
    nums.  */
 const char EXP_CHARS[] = "eE";
 
-const char *md_shortopts = "";
+const char md_shortopts[] = "";
 
 #define OPTION_ADDRESS_MODE     (OPTION_MD_BASE)
 #define OPTION_CPU_VERSION      (OPTION_ADDRESS_MODE + 1)
 #define OPTION_COFF_VERSION     (OPTION_CPU_VERSION + 1)
 #define OPTION_STDERR_TO_FILE   (OPTION_COFF_VERSION + 1)
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   { "mfar-mode",       no_argument,	    NULL, OPTION_ADDRESS_MODE },
   { "mf",	       no_argument,	    NULL, OPTION_ADDRESS_MODE },
@@ -155,7 +155,7 @@ struct option md_longopts[] =
   { NULL,              no_argument,         NULL, 0},
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 static int assembly_begun = 0;
 /* Addressing mode is not entirely implemented; the latest rev of the Other

@@ -85,9 +85,9 @@ const pseudo_typeS md_pseudo_table[] =
 
 /* Target specific command line options.  */
 
-const char * md_shortopts = "";
+const char md_shortopts[] = "";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
 #define OPTION_MULTIPLY_ENABLED         (OPTION_MD_BASE + 1)
   { "mmultiply-enabled",            no_argument, NULL, OPTION_MULTIPLY_ENABLED },
@@ -109,7 +109,7 @@ struct option md_longopts[] =
   { "mall-enabled",                 no_argument, NULL, OPTION_ALL_ENABLED },
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* Display architecture specific options.  */
 

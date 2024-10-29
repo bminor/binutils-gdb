@@ -1742,9 +1742,9 @@ const pseudo_typeS md_pseudo_table[] =
   {NULL, NULL, 0}
 };
 
-const char *md_shortopts = "mm:,mP,mQ,ml,mN,mn,my,mY,mu,mU";
+const char md_shortopts[] = "mm:,mP,mQ,ml,mN,mn,my,mY,mu,mU";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {"msilicon-errata", required_argument, NULL, OPTION_SILICON_ERRATA},
   {"msilicon-errata-warn", required_argument, NULL, OPTION_SILICON_ERRATA_WARN},
@@ -1764,7 +1764,7 @@ struct option md_longopts[] =
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 void
 md_show_usage (FILE * stream)

@@ -2708,8 +2708,8 @@ enum options
   OPTION_DUMMY  /* Not used.  This is just here to make it easy to add and subtract options from this enum.  */
 };
 
-const char *md_shortopts = "";
-struct option md_longopts[] =
+const char md_shortopts[] = "";
+const struct option md_longopts[] =
 {
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"big", no_argument, NULL, OPTION_BIG},
@@ -2732,7 +2732,7 @@ struct option md_longopts[] =
 
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg ATTRIBUTE_UNUSED)

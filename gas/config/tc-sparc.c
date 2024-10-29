@@ -401,8 +401,8 @@ sparc_target_format (void)
  *		error.  For example, from sparclite to v9.
  */
 
-const char *md_shortopts = "A:K:VQ:sq";
-struct option md_longopts[] = {
+const char md_shortopts[] = "A:K:VQ:sq";
+const struct option md_longopts[] = {
 #define OPTION_BUMP (OPTION_MD_BASE)
   {"bump", no_argument, NULL, OPTION_BUMP},
 #define OPTION_SPARC (OPTION_MD_BASE + 1)
@@ -442,7 +442,7 @@ struct option md_longopts[] = {
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg)

@@ -56,13 +56,13 @@ const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
 
 #define OR1K_SHORTOPTS "m:"
-const char * md_shortopts = OR1K_SHORTOPTS;
+const char md_shortopts[] = OR1K_SHORTOPTS;
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {NULL, no_argument, NULL, 0}
 };
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 unsigned long or1k_machine = 0; /* default */
 

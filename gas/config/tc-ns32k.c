@@ -2109,16 +2109,16 @@ md_create_long_jump (char *ptr,
   md_number_to_disp (ptr + 1, (valueT) offset, 4);
 }
 
-const char *md_shortopts = "m:";
+const char md_shortopts[] = "m:";
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
 #define OPTION_DISP_SIZE (OPTION_MD_BASE)
   {"disp-size-default", required_argument , NULL, OPTION_DISP_SIZE},
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 int
 md_parse_option (int c, const char *arg)

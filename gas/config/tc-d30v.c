@@ -27,7 +27,7 @@
 const char comment_chars[]        = ";";
 const char line_comment_chars[]   = "#";
 const char line_separator_chars[] = "";
-const char *md_shortopts          = "OnNcC";
+const char md_shortopts[]         = "OnNcC";
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
 
@@ -107,12 +107,12 @@ static symbolS *d30v_last_label;
 #define NOP_RIGHT  ((long long) NOP)
 #define NOP2 (FM00 | NOP_LEFT | NOP_RIGHT)
 
-struct option md_longopts[] =
+const struct option md_longopts[] =
 {
   {NULL, no_argument, NULL, 0}
 };
 
-size_t md_longopts_size = sizeof (md_longopts);
+const size_t md_longopts_size = sizeof (md_longopts);
 
 /* Opcode hash table.  */
 static htab_t d30v_hash;
