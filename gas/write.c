@@ -238,7 +238,7 @@ fixS *
 fix_new_exp (fragS *frag,		/* Which frag?  */
 	     unsigned long where,	/* Where in that frag?  */
 	     unsigned long size,	/* 1, 2, or 4 usually.  */
-	     expressionS *exp,		/* Expression.  */
+	     const expressionS *exp,	/* Expression.  */
 	     int pcrel,			/* TRUE if PC-relative relocation.  */
 	     RELOC_ENUM r_type		/* Relocation type.  */)
 {
@@ -254,20 +254,6 @@ fix_new_exp (fragS *frag,		/* Which frag?  */
     case O_register:
       as_bad (_("register value used as expression"));
       break;
-
-    case O_add:
-      /* This comes up when _GLOBAL_OFFSET_TABLE_+(.-L0) is read, if
-	 the difference expression cannot immediately be reduced.  */
-      {
-	symbolS *stmp = make_expr_symbol (exp);
-
-	exp->X_op = O_symbol;
-	exp->X_op_symbol = 0;
-	exp->X_add_symbol = stmp;
-	exp->X_add_number = 0;
-
-	return fix_new_exp (frag, where, size, exp, pcrel, r_type);
-      }
 
     case O_symbol_rva:
       add = exp->X_add_symbol;
@@ -290,6 +276,8 @@ fix_new_exp (fragS *frag,		/* Which frag?  */
       off = exp->X_add_number;
       break;
 
+    case O_add: /* This comes up when _GLOBAL_OFFSET_TABLE_+(.-L0) is read, if
+		   the difference expression cannot immediately be reduced.  */
     default:
       add = make_expr_symbol (exp);
       break;
