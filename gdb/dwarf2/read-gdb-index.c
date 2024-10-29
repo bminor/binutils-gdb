@@ -497,7 +497,7 @@ create_cus_from_gdb_index (dwarf2_per_bfd *per_bfd,
   per_bfd->all_units.reserve ((cu_list_elements + dwz_elements) / 2);
 
   create_cus_from_gdb_index_list (per_bfd, cu_list, cu_list_elements,
-				  &per_bfd->info, 0);
+				  &per_bfd->infos[0], 0);
 
   if (dwz_elements == 0)
     return;
@@ -692,9 +692,10 @@ dwarf2_read_gdb_index
 
   if (types_list_elements)
     {
-      /* We can only handle a single .debug_types when we have an
-	 index.  */
-      if (per_bfd->types.size () > 1)
+      /* We can only handle a single .debug_info and .debug_types when we have
+	 an index.  */
+      if (per_bfd->infos.size () > 1
+	  || per_bfd->types.size () > 1)
 	{
 	  per_bfd->all_units.clear ();
 	  return 0;
@@ -703,7 +704,7 @@ dwarf2_read_gdb_index
       dwarf2_section_info *section
 	= (per_bfd->types.size () == 1
 	   ? &per_bfd->types[0]
-	   : &per_bfd->info);
+	   : &per_bfd->infos[0]);
 
       create_signatured_type_table_from_gdb_index (per_bfd, section, types_list,
 						   types_list_elements);

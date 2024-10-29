@@ -1392,8 +1392,11 @@ dwarf2_has_info (struct objfile *objfile,
       per_objfile = dwarf2_objfile_data_key.emplace (objfile, objfile, per_bfd);
     }
 
-  const bool has_info = (!per_objfile->per_bfd->info.is_virtual
-			 && per_objfile->per_bfd->info.s.section != nullptr
+  /* Virtual sections are created from DWP files.  It's not clear those
+     can occur here, so perhaps the is_virtual checks here are dead code.  */
+  const bool has_info = (!per_objfile->per_bfd->infos.empty ()
+			 && !per_objfile->per_bfd->infos[0].is_virtual
+			 && per_objfile->per_bfd->infos[0].s.section != nullptr
 			 && !per_objfile->per_bfd->abbrev.is_virtual
 			 && per_objfile->per_bfd->abbrev.s.section != nullptr);
 
@@ -1436,8 +1439,11 @@ dwarf2_per_bfd::locate_sections (bfd *abfd, asection *sectp,
     }
   else if (names.info.matches (sectp->name))
     {
-      this->info.s.section = sectp;
-      this->info.size = bfd_section_size (sectp);
+      struct dwarf2_section_info info_section;
+      memset (&info_section, 0, sizeof (info_section));
+      info_section.s.section = sectp;
+      info_section.size = bfd_section_size (sectp);
+      this->infos.push_back (info_section);
     }
   else if (names.abbrev.matches (sectp->name))
     {
@@ -1585,7 +1591,9 @@ dwarf2_get_section_info (struct objfile *objfile,
 void
 dwarf2_per_bfd::map_info_sections (struct objfile *objfile)
 {
-  info.read (objfile);
+  for (auto &section : infos)
+    section.read (objfile);
+
   abbrev.read (objfile);
   line.read (objfile);
   str.read (objfile);
@@ -5134,9 +5142,10 @@ create_all_units (dwarf2_per_objfile *per_objfile)
   htab_up types_htab;
   gdb_assert (per_objfile->per_bfd->all_units.empty ());
 
-  read_comp_units_from_section (per_objfile, &per_objfile->per_bfd->info,
-				&per_objfile->per_bfd->abbrev, 0,
-				types_htab, rcuh_kind::COMPILE);
+  for (dwarf2_section_info &section : per_objfile->per_bfd->infos)
+    read_comp_units_from_section (per_objfile, &section,
+				  &per_objfile->per_bfd->abbrev, 0,
+				  types_htab, rcuh_kind::COMPILE);
   for (dwarf2_section_info &section : per_objfile->per_bfd->types)
     read_comp_units_from_section (per_objfile, &section,
 				  &per_objfile->per_bfd->abbrev, 0,

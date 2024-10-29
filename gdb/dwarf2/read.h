@@ -468,7 +468,7 @@ public:
      the objfile obstack.  */
   auto_obstack obstack;
 
-  dwarf2_section_info info {};
+  std::vector<dwarf2_section_info> infos;
   dwarf2_section_info abbrev {};
   dwarf2_section_info line {};
   dwarf2_section_info loc {};
