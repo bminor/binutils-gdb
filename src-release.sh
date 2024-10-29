@@ -363,23 +363,32 @@ gdb_tar_compress()
     do_compress $package $ver "$compressors"
 }
 
-# The FSF "binutils" release includes gprof and ld.
-BINUTILS_SUPPORT_DIRS="libsframe bfd gas include libiberty libctf opcodes ld elfcpp gold gprof gprofng setup.com makefile.vms cpu zlib"
-binutils_release()
-{
-    compressors=$1
-    package=binutils
-    tool=binutils
-    tar_compress $package $tool "$BINUTILS_SUPPORT_DIRS" "$compressors"
-}
-
-GAS_SUPPORT_DIRS="bfd include libiberty opcodes setup.com makefile.vms zlib"
+GAS_DIRS="bfd gas include libiberty opcodes setup.com makefile.vms zlib"
 gas_release()
 {
     compressors=$1
     package=gas
     tool=gas
-    tar_compress $package $tool "$GAS_SUPPORT_DIRS" "$compressors"
+    tar_compress $package $tool "$GAS_DIRS" "$compressors"
+}
+
+# The FSF "binutils" release includes gprof and ld.
+NO_GOLD_BIN_DIRS="$GAS_DIRS binutils cpu gprof gprofng ld libsframe libctf "
+no_gold_binutils_release()
+{
+    compressors=$1
+    package=binutils
+    tool=binutils
+    tar_compress $package $tool "$NO_GOLD_BIN_DIRS" "$compressors"
+}
+
+BINUTILS_DIRS="$NO_GOLD_BIN_DIRS elfcpp gold"
+binutils_release()
+{
+    compressors=$1
+    package=binutils
+    tool=binutils
+    tar_compress $package $tool "$BINUTILS_DIRS" "$compressors"
 }
 
 GDB_SUPPORT_DIRS="libsframe bfd include libiberty libctf opcodes readline sim libdecnumber cpu zlib contrib gnulib gdbsupport gdbserver libbacktrace"
@@ -411,6 +420,12 @@ usage()
     echo "  -x: Compress with xz"
     echo "  -z: Compress with zstd"
     echo "  -r <date>: Create a reproducible tarball using <date> as the mtime"
+    echo "release:"
+    echo "  binutils:     All the binutils including gold"
+    echo "  no_gold_bin:  All the binutils except gold"
+    echo "  gas:          Just the assembler"
+    echo "  gdb:          All of GDB"
+    echo "  sim:          Just the simulator"
     exit 1
 }
 
@@ -425,6 +440,8 @@ build_release()
 	    gas_release "$compressors";;
 	gdb)
 	    gdb_release "$compressors";;
+	no_gold_bin)
+	    no_gold_binutils_release "$compressors";;
 	sim)
 	    sim_release "$compressors";;
 	*)
