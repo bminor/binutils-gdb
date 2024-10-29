@@ -115,6 +115,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 5, 1) << 1)
 #define EXTRACT_ZCMP_SPIMM(x) \
   (RV_X(x, 2, 2) << 4)
+#define EXTRACT_ZCMT_INDEX(x) \
+  (RV_X(x, 2, 8))
 /* Vendor-specific (CORE-V) extract macros.  */
 #define EXTRACT_CV_IS2_UIMM5(x) \
   (RV_X(x, 20, 5))
@@ -183,6 +185,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   (RV_X(x, 1, 1) << 5)
 #define ENCODE_ZCMP_SPIMM(x) \
   (RV_X(x, 4, 2) << 2)
+#define ENCODE_ZCMT_INDEX(x) \
+  (RV_X(x, 0, 8) << 2)
 /* Vendor-specific (CORE-V) encode macros.  */
 #define ENCODE_CV_IS2_UIMM5(x) \
   (RV_X(x, 0, 5) << 20)
@@ -517,6 +521,7 @@ enum riscv_insn_class
   INSN_CLASS_ZCB_AND_ZMMUL,
   INSN_CLASS_ZCMOP,
   INSN_CLASS_ZCMP,
+  INSN_CLASS_ZCMT,
   INSN_CLASS_SVINVAL,
   INSN_CLASS_ZICBOM,
   INSN_CLASS_ZICBOP,

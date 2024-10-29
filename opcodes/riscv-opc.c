@@ -362,6 +362,25 @@ match_sreg1_not_eq_sreg2 (const struct riscv_opcode *op, insn_t insn)
       && (EXTRACT_OPERAND (SREG1, insn) != EXTRACT_OPERAND (SREG2, insn));
 }
 
+/* This is used for cm.jt. This requires index operand to be less than 32.  */
+
+static int
+match_cm_jt (const struct riscv_opcode *op, insn_t insn)
+{
+  return match_opcode (op, insn)
+    && EXTRACT_ZCMT_INDEX (insn) < 32;
+}
+
+/* This is used for cm.jalt. This requires index operand to be in 32 to 255.  */
+
+static int
+match_cm_jalt (const struct riscv_opcode *op, insn_t insn)
+{
+  return match_opcode (op, insn)
+    && EXTRACT_ZCMT_INDEX (insn) >= 32
+    && EXTRACT_ZCMT_INDEX (insn) < 256;
+}
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -2195,6 +2214,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cm.popretz", 0,  INSN_CLASS_ZCMP, "{Wcr},Wcp",  MATCH_CM_POPRETZ, MASK_CM_POPRETZ, match_opcode, 0 },
 {"cm.mva01s",  0,  INSN_CLASS_ZCMP, "Wc1,Wc2",    MATCH_CM_MVA01S, MASK_CM_MVA01S, match_opcode, 0 },
 {"cm.mvsa01",  0,  INSN_CLASS_ZCMP, "Wc1,Wc2",    MATCH_CM_MVSA01, MASK_CM_MVSA01, match_sreg1_not_eq_sreg2, 0 },
+
+/* Zcmt instructions */
+{"cm.jt",      0,  INSN_CLASS_ZCMT, "WcI", MATCH_CM_JT, MASK_CM_JT, match_cm_jt, 0 },
+{"cm.jalt",    0,  INSN_CLASS_ZCMT, "Wci", MATCH_CM_JALT, MASK_CM_JALT, match_cm_jalt, 0 },
 
 /* Supervisor instructions.  */
 {"csrr",       0, INSN_CLASS_ZICSR, "d,E",   MATCH_CSRRS, MASK_CSRRS|MASK_RS1, match_opcode, INSN_ALIAS },

@@ -737,6 +737,11 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  print (info->stream, dis_style_immediate, "%d",
 			 riscv_get_spimm (l));
 		  break;
+		case 'i':
+		case 'I':
+		  print (info->stream, dis_style_address_offset,
+			 "%lu", EXTRACT_ZCMT_INDEX (l));
+		  break;
 		default:
 		  goto undefined_modifier;
 		}

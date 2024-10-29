@@ -71,6 +71,7 @@ enum riscv_csr_class
   CSR_CLASS_I_32,	/* rv32 only */
   CSR_CLASS_F,		/* f-ext only */
   CSR_CLASS_ZKR,	/* zkr only */
+  CSR_CLASS_ZCMT,	/* zcmt only */
   CSR_CLASS_V,		/* rvv only */
   CSR_CLASS_DEBUG,	/* debug CSR */
   CSR_CLASS_H,		/* hypervisor */
@@ -1070,6 +1071,9 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_ZKR:
       extension = "zkr";
       break;
+    case CSR_CLASS_ZCMT:
+      extension = "zcmt";
+      break;
     case CSR_CLASS_V:
       extension = "zve32x";
       break;
@@ -1650,6 +1654,9 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		case 'p': used_bits |= ENCODE_ZCMP_SPIMM (-1U); break;
 		/* Register list operand for cm.push and cm.pop.  */
 		case 'r': USE_BITS (OP_MASK_REG_LIST, OP_SH_REG_LIST); break;
+		/* Table jump used by cm.jt or cm.jalt.  */
+		case 'i':
+		case 'I': used_bits |= ENCODE_ZCMT_INDEX (-1U); break;
 		case 'f': break;
 		default:
 		  goto unknown_validate_operand;
@@ -3922,6 +3929,28 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			break;
 		      INSERT_OPERAND (SREG2, *ip, regno % 8);
 		      continue;
+		    case 'I': /* index operand of cm.jt. The range is from 0 to 31.  */
+		      my_getSmallExpression (imm_expr, imm_reloc, asarg, p);
+		      if (imm_expr->X_op != O_constant
+			  || imm_expr->X_add_number < 0
+			  || imm_expr->X_add_number > 31)
+			{
+			  as_bad ("bad index value for cm.jt, range: [0, 31]");
+			  break;
+			}
+		      ip->insn_opcode |= ENCODE_ZCMT_INDEX (imm_expr->X_add_number);
+		      goto rvc_imm_done;
+		    case 'i': /* index operand of cm.jalt. The range is from 32 to 255.  */
+		      my_getSmallExpression (imm_expr, imm_reloc, asarg, p);
+		      if (imm_expr->X_op != O_constant
+			  || imm_expr->X_add_number < 32
+			  || imm_expr->X_add_number > 255)
+			{
+			  as_bad ("bad index value for cm.jalt, range: [32, 255]");
+			  break;
+			}
+		      ip->insn_opcode |= ENCODE_ZCMT_INDEX (imm_expr->X_add_number);
+		      goto rvc_imm_done;
 		    default:
 		      goto unknown_riscv_ip_operand;
 		    }
