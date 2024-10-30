@@ -907,7 +907,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
   /* Operands for jump/call need special consideration.  */
   if (current_templates.start->opcode_modifier.jump == JUMP
       || current_templates.start->opcode_modifier.jump == JUMP_DWORD
-      || current_templates.start->opcode_modifier.jump == JUMP_INTERSEGMENT)
+      || current_templates.start->opcode_modifier.jump == JUMP_INTERSEGMENT
+      || current_templates.start->mnem_off == MN_jmpabs)
     {
       bool jumpabsolute = false;
 

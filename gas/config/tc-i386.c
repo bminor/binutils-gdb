@@ -4674,6 +4674,24 @@ static void establish_rex (void)
 
   if (is_apx_rex2_encoding ())
     {
+      /* Most prefixes are not permitted with JMPABS.  */
+      if (i.tm.mnem_off == MN_jmpabs)
+	{
+	  if (i.prefix[DATA_PREFIX] || (i.prefix[REX_PREFIX] & REX_W))
+	    {
+	      as_bad (_("size override not allowed with `%s'"),
+		      insn_name (&i.tm));
+	      i.prefix[DATA_PREFIX] = 0;
+	      i.prefix[REX_PREFIX] &= ~REX_W;
+	    }
+	  if (i.prefix[ADDR_PREFIX])
+	    {
+	      as_bad (_("address override not allowed with `%s'"),
+		      insn_name (&i.tm));
+	      i.prefix[ADDR_PREFIX] = 0;
+	    }
+	}
+
       build_rex2_prefix ();
       /* The individual REX.RXBW bits got consumed.  */
       i.rex &= REX_OPCODE;
@@ -8216,7 +8234,8 @@ optimize_imm (void)
 	       /* A more generic (but also more involved) way of dealing
 		  with the special case(s) would be to go look for
 		  DefaultSize attributes on any of the templates.  */
-	       && current_templates.start->mnem_off != MN_push))
+	       && current_templates.start->mnem_off != MN_push
+	       && current_templates.start->mnem_off != MN_jmpabs))
     guess_suffix = LONG_MNEM_SUFFIX;
 
   for (op = i.operands; --op >= 0;)
@@ -8362,10 +8381,10 @@ optimize_disp (const insn_template *t)
 	}
     }
 
-  /* Don't optimize displacement for movabs since it only takes 64bit
-     displacement.  */
+  /* Don't optimize displacement for movabs / jmpabs since they only take
+     64-bit displacement.  */
   if (pp.disp_encoding > disp_encoding_8bit
-      || (flag_code == CODE_64BIT && t->mnem_off == MN_movabs))
+      || t->mnem_off == MN_movabs || t->mnem_off == MN_jmpabs)
     return true;
 
   for (op = i.operands; op-- > 0;)

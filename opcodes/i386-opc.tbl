@@ -510,6 +510,9 @@ ljmp, 0xea, No64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf, { Imm16, Imm16|Imm32
 ljmp, 0xff/5, 0, Amd64|Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf, { Unspecified|BaseIndex }
 ljmp, 0xff/5, x64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_sSuf, { Unspecified|BaseIndex }
 
+jmpabs, 0xa1, APX_F, NoSuf|Rex2, { Imm64 }
+jmpabs, 0xa1, APX_F, NoSuf|Rex2|IntelSyntax, { Disp64|Unspecified }
+
 ret, 0xc3, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk|IntelSuffix, {}
 ret, 0xc2, No64, ImplicitStackOp|DefaultSize|No_bSuf|No_sSuf|No_qSuf|RepPrefixOk|BNDPrefixOk|IntelSuffix, { Imm16 }
 ret, 0xc3, x64, Amd64|ImplicitStackOp|DefaultSize|No_bSuf|No_lSuf|No_sSuf|NoRex64|RepPrefixOk|BNDPrefixOk|IntelSuffix, {}
