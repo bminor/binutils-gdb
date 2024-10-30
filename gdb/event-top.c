@@ -387,6 +387,23 @@ gdb_rl_callback_handler_install (const char *prompt)
      therefore loses input.  */
   gdb_assert (!callback_handler_installed);
 
+#ifdef RL_STATE_EOF
+  /* Some versions of readline contain a bug where the rl_eof_found flag
+     would not be reset back to 0 in rl_initialize, despite the
+     RL_STATE_EOF flag being cleared in this function.
+
+     The consequence of this mistake is that readline will appear to get
+     stuck in the EOF state, and will emit an extra '\n' character each
+     time an input line is completed.
+
+     Work around this by clearing the EOF state now ourselves.  */
+  if (RL_ISSTATE (RL_STATE_EOF))
+    {
+      RL_UNSETSTATE (RL_STATE_EOF);
+      rl_eof_found = 0;
+    }
+#endif /* RL_STATE_EOF */
+
   rl_callback_handler_install (prompt, gdb_rl_callback_handler);
   callback_handler_installed = true;
 }

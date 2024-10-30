@@ -3740,6 +3740,34 @@ proc readline_is_used { } {
     }
 }
 
+# Return true if readline has support for the EOF flag.
+
+proc readline_supports_eof_flag { } {
+    gdb_test_multiple "show configuration" "" {
+	-re -wrap "\r\nGNU Readline library version: ($::decimal)\\.($::decimal)\\s+\\((internal|system)\\)" {
+	    set major $expect_out(1,string)
+	    set minor $expect_out(2,string)
+	    set type $expect_out(3,string)
+
+	    # The internal readline was patched with EOF support ahead
+	    # of this landing in upstream readline.
+	    if { $type eq "internal" } {
+		return true
+	    }
+
+	    # The EOF flag support was added in readline 8.2.
+	    if { $major > 8 || $major == 8 && $minor >= 2 } {
+		return true
+	    }
+
+	    return false
+	}
+	-re ".*$::gdb_prompt $" {
+	    return false
+	}
+    }
+}
+
 # Return 1 if target is ELF.
 gdb_caching_proc is_elf_target {} {
     set me "is_elf_target"
