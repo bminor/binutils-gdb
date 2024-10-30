@@ -1,5 +1,5 @@
 #source: pr25207.s
-#ld: -z separate-code -Ttext-segment=0x120000 -z max-page-size=0x10000
+#ld: -z separate-code --no-rosegment -Ttext-segment=0x120000 -z max-page-size=0x10000
 #readelf: -l --wide
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
 # changing -Ttext-segment behaviour will break --image-base (pr25207)
