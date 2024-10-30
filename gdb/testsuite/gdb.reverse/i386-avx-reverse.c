@@ -82,23 +82,23 @@ vmov_test ()
   asm volatile ("vmovq %0, %%xmm15": "=m" (buf1));
 
   /* Test vmovdq style instructions.  */
-  /* For local and dynamic buffers, we can't guarantee they will be aligned.
+  /* For local and global buffers, we can't guarantee they will be aligned.
      However, the aligned and unaligned versions seem to be encoded the same,
-     so testing one is enough to validate both.  */
+     so testing one is enough to validate both.  For safety, though, the
+     dynamic buffers are forced to be 32-bit aligned so vmovdqa can be
+     explicitly tested at least once.  */
 
   /* Operations based on local buffers.  */
   asm volatile ("vmovdqu %0, %%ymm0": : "m"(buf0));
   asm volatile ("vmovdqu %%ymm0, %0": "=m"(buf1));
 
   /* Operations based on global buffers.  */
-  /* Global buffers seem to always be aligned, lets sanity check vmovdqa.  */
-  asm volatile ("vmovdqa %0, %%ymm15": : "m"(global_buf0));
-  asm volatile ("vmovdqa %%ymm15, %0": "=m"(global_buf1));
   asm volatile ("vmovdqu %0, %%ymm0": : "m"(global_buf0));
   asm volatile ("vmovdqu %%ymm0, %0": "=m"(global_buf1));
 
   /* Operations based on dynamic buffers.  */
-  /* The dynamic buffers are not aligned, so we skip vmovdqa.  */
+  asm volatile ("vmovdqa %0, %%ymm15": : "m"(*dyn_buf0));
+  asm volatile ("vmovdqa %%ymm15, %0": "=m"(*dyn_buf1));
   asm volatile ("vmovdqu %0, %%ymm0": : "m"(*dyn_buf0));
   asm volatile ("vmovdqu %%ymm0, %0": "=m"(*dyn_buf1));
 
@@ -210,11 +210,16 @@ vzeroupper_test ()
   return 0; /* end vzeroupper_test  */
 }
 
+/* This include is used to allocate the dynamic buffer and have
+   the pointers aligned to a 32-bit boundary, so we can test instructions
+   that require aligned memory.  */
+#include "precise-aligned-alloc.c"
+
 int
 main ()
 {
-  dyn_buf0 = (char *) malloc(sizeof(char) * 32);
-  dyn_buf1 = (char *) malloc(sizeof(char) * 32);
+  dyn_buf0 = (char *) precise_aligned_alloc(32, sizeof(char) * 32, NULL);
+  dyn_buf1 = (char *) precise_aligned_alloc(32, sizeof(char) * 32, NULL);
   for (int i =0; i < 32; i++)
     {
       dyn_buf0[i] = 0x20 + (i % 16);
