@@ -172,6 +172,7 @@ static int i386_intel_parse_name (const char *, expressionS *);
 static const reg_entry *parse_register (const char *, char **);
 static const char *parse_insn (const char *, char *, enum parse_mode);
 static char *parse_operands (char *, const char *);
+static void copy_operand (unsigned int, unsigned int);
 static void swap_operands (void);
 static void swap_2_operands (unsigned int, unsigned int);
 static enum i386_flag_code i386_addressing_mode (void);
@@ -5149,17 +5150,11 @@ optimize_encoding (void)
       i.tm.base_opcode = 0x00;
       i.tm.extension_opcode = None;
       if (i.operands >= 2)
-	{
-	  i.tm.operand_types[0] = i.tm.operand_types[1];
-	  i.op[0].regs = i.op[1].regs;
-	  i.types[0] = i.types[1];
-	}
+	copy_operand (0, 1);
       else
 	{
 	  /* Legacy form with omitted shift count operand.  */
-	  i.tm.operand_types[1] = i.tm.operand_types[0];
-	  i.op[1].regs = i.op[0].regs;
-	  i.types[1] = i.types[0];
+	  copy_operand (1, 0);
 	  i.operands = 2;
 	}
       i.reg_operands++;
@@ -5445,10 +5440,7 @@ optimize_encoding (void)
 	      i.reg_operands = 3;
 	      i.tm.operands = 3;
 
-	      i.op[2].regs = i.op[0].regs;
-	      i.types[2] = i.types[0];
-	      i.flags[2] = i.flags[0];
-	      i.tm.operand_types[2] = i.tm.operand_types[0];
+	      copy_operand (2, 0);
 
 	      i.tm.opcode_modifier.sse2avx = 0;
 	    }
@@ -5492,9 +5484,7 @@ optimize_encoding (void)
       i.tm.extension_opcode = None;
       if (i.tm.opcode_modifier.vexvvvv)
 	i.tm.opcode_modifier.vexvvvv = VexVVVV_SRC1;
-      i.tm.operand_types[0] = i.tm.operand_types[1];
-      i.op[0].regs = i.op[1].regs;
-      i.types[0] = i.types[1];
+      copy_operand (0, 1);
       i.reg_operands++;
       i.imm_operands = 0;
     }
@@ -5518,11 +5508,7 @@ optimize_encoding (void)
       ++i.reg_operands;
       ++i.tm.operands;
 
-      i.op[2].regs = i.op[0].regs;
-      i.types[2] = i.types[0];
-      i.flags[2] = i.flags[0];
-      i.tm.operand_types[2] = i.tm.operand_types[0];
-
+      copy_operand (2, 0);
       swap_2_operands (1, 2);
     }
   else if (i.tm.base_opcode == 0x16
@@ -5550,16 +5536,8 @@ optimize_encoding (void)
 	    = i.tm.opcode_modifier.sse2avx ? VEXW0 : VEXWIG;
 	}
 
-      i.op[0].regs = i.op[1].regs;
-      i.types[0] = i.types[1];
-      i.flags[0] = i.flags[1];
-      i.tm.operand_types[0] = i.tm.operand_types[1];
-
-      i.op[1].regs = i.op[2].regs;
-      i.types[1] = i.types[2];
-      i.flags[1] = i.flags[2];
-      i.reloc[1] = i.reloc[2];
-      i.tm.operand_types[1] = i.tm.operand_types[2];
+      copy_operand (0, 1);
+      copy_operand (1, 2);
 
       i.operands = 2;
       i.imm_operands = 0;
@@ -5586,16 +5564,8 @@ optimize_encoding (void)
 	  i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
 	}
 
-      i.op[0].regs = i.op[1].regs;
-      i.types[0] = i.types[1];
-      i.flags[0] = i.flags[1];
-      i.tm.operand_types[0] = i.tm.operand_types[1];
-
-      i.op[1].regs = i.op[2].regs;
-      i.types[1] = i.types[2];
-      i.flags[1] = i.flags[2];
-      i.reloc[1] = i.reloc[2];
-      i.tm.operand_types[1] = i.tm.operand_types[2];
+      copy_operand (0, 1);
+      copy_operand (1, 2);
 
       i.operands = 2;
       i.imm_operands = 0;
@@ -5660,16 +5630,8 @@ optimize_encoding (void)
       if (i.tm.opcode_modifier.vex)
 	i.tm.opcode_modifier.vexw = VEXWIG;
 
-      i.op[0].regs = i.op[1].regs;
-      i.types[0] = i.types[1];
-      i.flags[0] = i.flags[1];
-      i.tm.operand_types[0] = i.tm.operand_types[1];
-
-      i.op[1].regs = i.op[2].regs;
-      i.types[1] = i.types[2];
-      i.flags[1] = i.flags[2];
-      i.reloc[1] = i.reloc[2];
-      i.tm.operand_types[1] = i.tm.operand_types[2];
+      copy_operand (0, 1);
+      copy_operand (1, 2);
 
       i.operands = 2;
       i.imm_operands = 0;
@@ -5699,20 +5661,9 @@ optimize_encoding (void)
 
 	  --i.operands;
 
-	  i.op[i.operands - 1].regs = i.op[i.operands].regs;
-	  i.types[i.operands - 1] = i.types[i.operands];
-	  i.flags[i.operands - 1] = i.flags[i.operands];
-	  i.tm.operand_types[i.operands - 1] = i.tm.operand_types[i.operands];
-
-	  i.op[1].regs = i.op[i.operands - 1].regs;
-	  i.types[1] = i.types[i.operands - 1];
-	  i.flags[1] = i.flags[i.operands - 1];
-	  i.tm.operand_types[1] = i.tm.operand_types[i.operands - 1];
-
-	  i.op[0].regs = i.op[1].regs;
-	  i.types[0] = i.types[1];
-	  i.flags[0] = i.flags[1];
-	  i.tm.operand_types[0] = i.tm.operand_types[1];
+	  copy_operand (i.operands - 1, i.operands);
+	  copy_operand (1, i.operands - 1);
+	  copy_operand (0, 1);
 
 	  /* Switch from EVEX to VEX encoding if possible.  Sadly we can't
 	     (always) tell use of the {evex} pseudo-prefix (which otherwise
@@ -5742,30 +5693,15 @@ optimize_encoding (void)
 	  i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
 
 	  if (i.op[0].imms->X_add_number == 0)
-	    {
-	      i.op[0].regs = i.op[1].regs;
-	      --i.operands;
-	    }
+	    --i.operands;
 	  else
 	    {
-	      i.op[0].disps = i.op[1].disps;
-	      i.reloc[0] = i.reloc[1];
 	      i.operands = 2;
 	      i.tm.opcode_modifier.vexvvvv = 0;
 	    }
-	  i.types[0] = i.types[1];
-	  i.flags[0] = i.flags[1];
-	  i.tm.operand_types[0] = i.tm.operand_types[1];
-
-	  i.op[1].regs = i.op[2].regs;
-	  i.types[1] = i.types[2];
-	  i.flags[1] = i.flags[2];
-	  i.tm.operand_types[1] = i.tm.operand_types[2];
-
-	  i.op[2].regs = i.op[3].regs;
-	  i.types[2] = i.types[3];
-	  i.flags[2] = i.flags[3];
-	  i.tm.operand_types[2] = i.tm.operand_types[3];
+	  copy_operand (0, 1);
+	  copy_operand (1, 2);
+	  copy_operand (2, 3);
 	}
 
       i.imm_operands = 0;
@@ -5858,16 +5794,8 @@ optimize_nf_encoding (void)
 	= (i.op[0].imms->X_add_number == 1) != (i.tm.extension_opcode == 0);
       i.tm.opcode_modifier.w = 1;
 
-      i.types[0] = i.types[1];
-      i.types[1] = i.types[2];
-      i.tm.operand_types[0] = i.tm.operand_types[1];
-      i.tm.operand_types[1] = i.tm.operand_types[2];
-      i.op[0] = i.op[1];
-      i.op[1] = i.op[2];
-      i.flags[0] = i.flags[1];
-      i.flags[1] = i.flags[2];
-      i.reloc[0] = i.reloc[1];
-      i.reloc[1] = NO_RELOC;
+      copy_operand (0, 1);
+      copy_operand (1, 2);
 
       i.imm_operands = 0;
       --i.operands;
@@ -5956,9 +5884,7 @@ optimize_nf_encoding (void)
 	  i.tm.opcode_modifier.vexvvvv = VexVVVV_DST;
 	  i.operands = 3;
 	  i.reg_operands = 2;
-	  i.op[2].regs = i.op[1].regs;
- 	  i.tm.operand_types[2] = i.tm.operand_types[1];
- 	  i.types[2] = i.types[1];
+	  copy_operand (2, 1);
 	}
     }
 
@@ -6150,9 +6076,7 @@ optimize_nf_encoding (void)
       i.op[0].disps = NULL;
       i.flags[0] = Operand_Mem;
 
-      i.tm.operand_types[1] = i.tm.operand_types[i.operands - 1];
-      i.op[1].regs = i.op[i.operands - 1].regs;
-      i.types[1] = i.types[i.operands - 1];
+      copy_operand (1, i.operands - 1);
 
       i.operands = 2;
       i.mem_operands = i.reg_operands = 1;
@@ -6213,10 +6137,8 @@ optimize_nf_encoding (void)
 	   */
 	  if (i.operands == 2)
 	    {
-	      i.tm.operand_types[2] = i.tm.operand_types[1];
+	      copy_operand (2, 1);
 	      i.tm.operand_types[2].bitfield.baseindex = 0;
-	      i.op[2].regs = i.op[1].regs;
-	      i.types[2] = i.types[1];
 	      i.reg_operands = 2;
 	      i.operands = 3;
 	    }
@@ -8114,6 +8036,19 @@ parse_operands (char *l, const char *mnemonic)
 	}
     }
   return l;
+}
+
+static void
+copy_operand (unsigned int to, unsigned int from)
+{
+  i.types[to] = i.types[from];
+  i.tm.operand_types[to] = i.tm.operand_types[from];
+  i.flags[to] = i.flags[from];
+  i.op[to] = i.op[from];
+  i.reloc[to] = i.reloc[from];
+  i.imm_bits[to] = i.imm_bits[from];
+  /* Note: i.mask and i.broadcast aren't handled here, as what (if
+     anything) to do there depends on context.  */
 }
 
 static void
@@ -10690,11 +10625,8 @@ process_operands (void)
      number 0.  */
   if (i.tm.mnem_off == MN_tilezero)
     {
-      i.op[1].regs = i.op[0].regs;
+      copy_operand (1, 0);
       i.op[0].regs -= i.op[0].regs->reg_num;
-      i.types[1] = i.types[0];
-      i.tm.operand_types[1] = i.tm.operand_types[0];
-      i.flags[1] = i.flags[0];
       i.operands++;
       i.reg_operands++;
       i.tm.operands++;
@@ -10732,12 +10664,7 @@ process_operands (void)
 	  /* Add the implicit xmm0 for instructions with VEX prefix
 	     and 3 sources.  */
 	  for (j = i.operands; j > 0; j--)
-	    {
-	      i.op[j] = i.op[j - 1];
-	      i.types[j] = i.types[j - 1];
-	      i.tm.operand_types[j] = i.tm.operand_types[j - 1];
-	      i.flags[j] = i.flags[j - 1];
-	    }
+	    copy_operand (j, j - 1);
 	  i.op[0].regs
 	    = (const reg_entry *) str_hash_find (reg_hash, "xmm0");
 	  i.types[0] = regxmm;
@@ -10749,10 +10676,6 @@ process_operands (void)
 
 	  dupl++;
 	  dest++;
-	  i.op[dupl] = i.op[dest];
-	  i.types[dupl] = i.types[dest];
-	  i.tm.operand_types[dupl] = i.tm.operand_types[dest];
-	  i.flags[dupl] = i.flags[dest];
 	}
       else
 	{
@@ -10760,15 +10683,12 @@ process_operands (void)
 	  i.operands++;
 	  i.reg_operands++;
 	  i.tm.operands++;
-
-	  i.op[dupl] = i.op[dest];
-	  i.types[dupl] = i.types[dest];
-	  i.tm.operand_types[dupl] = i.tm.operand_types[dest];
-	  i.flags[dupl] = i.flags[dest];
 	}
 
-       if (i.tm.opcode_modifier.immext)
-	 process_immext ();
+      copy_operand (dupl, dest);
+
+      if (i.tm.opcode_modifier.immext)
+	process_immext ();
     }
   else if (i.tm.operand_types[0].bitfield.instance == Accum
 	   && i.tm.opcode_modifier.modrm)
@@ -10776,16 +10696,7 @@ process_operands (void)
       unsigned int j;
 
       for (j = 1; j < i.operands; j++)
-	{
-	  i.op[j - 1] = i.op[j];
-	  i.types[j - 1] = i.types[j];
-
-	  /* We need to adjust fields in i.tm since they are used by
-	     build_modrm_byte.  */
-	  i.tm.operand_types [j - 1] = i.tm.operand_types [j];
-
-	  i.flags[j - 1] = i.flags[j];
-	}
+	copy_operand (j - 1, j);
 
       /* No adjustment to i.reg_operands: This was already done at the top
 	 of the function.  */
