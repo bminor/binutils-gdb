@@ -2491,6 +2491,7 @@ Display information about permission for copying @value{GDBN}.
 Display the @sc{gnu} ``NO WARRANTY'' statement, or a warranty,
 if your version of @value{GDBN} comes with one.
 
+@anchor{show configuration}
 @kindex show configuration
 @item show configuration
 Display detailed information about the way @value{GDBN} was configured
@@ -2500,6 +2501,11 @@ automatically by @command{configure}.  When reporting a @value{GDBN}
 bug (@pxref{GDB Bugs}), it is important to include this information in
 your report.
 
+This commands also displays the version number of the Readline library
+that @value{GDBN} is using.  After the version number will appear
+either @samp{(system)} indicating @value{GDBN} is using the shared
+system Readline library, or @samp{(internal)} indicating @value{GDBN}
+is using a statically linked in version of the Readline library.
 @end table
 
 @node Running
@@ -27533,6 +27539,10 @@ is useful for conditions in @file{.inputrc}.
 This command accepts the current line for execution and fetches the
 next line relative to the current line from the history for editing.
 Any argument is ignored.
+
+It is possible to discover which version of Readline @value{GDBN} is
+using with the @kbd{show configuration} command (@pxref{show
+configuration}).
 
 @node Command History
 @section Command History

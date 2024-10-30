@@ -140,6 +140,9 @@ maintenance print remote-registers
   which registers were included in the last stop reply packet received by
   GDB.
 
+show configuration
+  Now includes the version of GNU Readline library that GDB is using.
+
 * New remote packets
 
 vFile:stat

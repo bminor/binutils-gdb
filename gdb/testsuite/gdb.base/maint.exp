@@ -381,6 +381,9 @@ gdb_test "maint" \
     "List.*unambiguous\\..*" \
     "maint w/o args"
 
+gdb_test "show configuration" \
+    "^This GDB was configured as follows:\r\n.*\r\nGNU Readline library version: \[^\r\n\]+"
+
 # Test that "main info line-table" w/o a file name shows the symtab for
 # $srcfile.
 set saw_srcfile 0
