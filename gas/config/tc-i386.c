@@ -4527,7 +4527,8 @@ build_rex2_prefix (void)
   i.vex.bytes[0] = 0xd5;
   /* For the W R X B bits, the variables of rex prefix will be reused.  */
   i.vex.bytes[1] = ((i.tm.opcode_space << 7)
-		    | (i.rex2 << 4) | i.rex);
+		    | (i.rex2 << 4)
+		    | ((i.rex | i.prefix[REX_PREFIX]) & 0xf));
 }
 
 /* Build the EVEX prefix (4-byte) for evex insn
@@ -4676,6 +4677,7 @@ static void establish_rex (void)
       build_rex2_prefix ();
       /* The individual REX.RXBW bits got consumed.  */
       i.rex &= REX_OPCODE;
+      i.prefix[REX_PREFIX] = 0;
     }
   else if (i.rex != 0)
     add_prefix (REX_OPCODE | i.rex);

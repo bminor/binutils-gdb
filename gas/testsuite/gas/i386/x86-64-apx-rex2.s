@@ -83,3 +83,9 @@ _start:
          leal	1(%r16, %r28), %r31d
          leal	129(%r20, %r8), %eax
          leal	129(%r28, %r8), %r31d
+
+## explicit REX prefix
+         rex.r notl (%r20)
+         rex.x notl (%r20)
+         rex.b notl (%r20)
+         rex.w not (%r20)
