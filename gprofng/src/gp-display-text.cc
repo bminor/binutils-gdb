@@ -253,7 +253,8 @@ er_print::usage ()
     "\n"
     "See also:\n"
     "\n"
-    "gprofng(1), gp-archive(1), gp-collect-app(1), gp-display-html(1), gp-display-src(1)\n"));
+    "gprofng(1), gprofng-archive(1), gprofng-collect-app(1), "
+    "gprofng-display-html(1), gprofng-display-src(1)\n"));
 }
 
 int // returns count of experiments read

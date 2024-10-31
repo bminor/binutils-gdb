@@ -54,7 +54,7 @@
 @ManPageStart{NAME}
 @c man begin NAME
 
-gp-collect-app - Collect performance data for the target program
+gprofng-collect-app - Collect performance data for the target program
 
 @c man end
 @ManPageEnd{}

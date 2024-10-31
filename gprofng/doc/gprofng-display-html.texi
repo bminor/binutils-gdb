@@ -54,7 +54,7 @@
 @ManPageStart{NAME}
 @c man begin NAME
 
-gp-display-html - Generate an HTML based directory structure to browse the
+gprofng-display-html - Generate an HTML based directory structure to browse the
 profiles
 
 @c man end

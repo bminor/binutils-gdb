@@ -1152,7 +1152,7 @@ __collector_SIGCHLD_signal_handler (int sig, siginfo_t *si, void *context)
    * before the handler knows the value of mychild_pid.
    */
   if (calling_pid == mychild_pid)
-    // er_archive has exited; so restore the user handler
+    // gprofng_archive has exited; so restore the user handler
     __collector_sigaction (SIGCHLD, &original_sigchld_sigaction, NULL);
   else
     {
@@ -1269,7 +1269,7 @@ __collector_close_experiment ()
   if (project_home && archive_mode && __collector_strcmp (archive_mode, "off"))
     {
       /* construct a command to launch it */
-      char *er_archive_name = "/bin/gp-archive";
+      char *er_archive_name = "/bin/gprofng-archive";
       size_t cmdlen = CALL_UTIL (strlen)(project_home) + CALL_UTIL (strlen)(er_archive_name) + 1;
       char *command = (char*) alloca (cmdlen);
       CALL_UTIL (snprintf)(command, cmdlen, "%s%s", project_home, er_archive_name);

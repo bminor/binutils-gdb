@@ -54,7 +54,7 @@
 @ManPageStart{NAME}
 @c man begin NAME
 
-gp-display-text - Display the performance data in plain text format
+gprofng-display-text - Display the performance data in plain text format
 
 @c man end
 @ManPageEnd{}

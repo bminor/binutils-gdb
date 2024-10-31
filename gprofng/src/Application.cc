@@ -202,11 +202,7 @@ Application::check_args (int argc, char *argv[])
     switch (opt)
       {
       case 'V':
-// Ruud
 	Application::print_version_info ();
-/*
-	printf (NTXT ("GNU %s version %s\n"), get_basename (prog_name), VERSION);
-*/
 	exit (0);
       default:
 	usage ();
@@ -246,7 +242,6 @@ Application::set_progress (int percentage, const char *proc_str)
   return 0;
 }
 
-// Ruud
 void
 Application::print_version_info ()
 {

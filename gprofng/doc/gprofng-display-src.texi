@@ -54,7 +54,7 @@
 @ManPageStart{NAME}
 @c man begin NAME
 
-gp-display-src - Display the source code, optionally interleaved with the
+gprofng-display-src - Display the source code, optionally interleaved with the
 disassembly of the target object
 
 @c man end

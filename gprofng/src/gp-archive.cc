@@ -139,11 +139,8 @@ er_archive::usage ()
     "\n"
     "See also:\n"
     "\n"
-    "gprofng(1), gp-collect-app(1), gp-display-html(1), gp-display-src(1), gp-display-text(1)\n"));
-// Ruud
-/*
-  fprintf (stderr, GTXT ("GNU %s version %s\n"), get_basename (prog_name), VERSION);
-*/
+    "gprofng(1), gprofng-collect-app(1), gprofng-display-html(1), "
+    "gprofng-display-src(1), gprofng-display-text(1)\n"));
   exit (1);
 }
 
@@ -617,11 +614,7 @@ er_archive::check_args (int argc, char *argv[])
 	    break;
 	  }
 	case 'V':
-// Ruud
 	  Application::print_version_info ();
-/*
-	  printf (GTXT ("GNU %s version %s\n"), get_basename (prog_name), VERSION);
-*/
 	  exit (0);
 	case 'w':
 	  whoami = optarg;

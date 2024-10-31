@@ -323,7 +323,7 @@ recommend to search for @code{gprofng-gui} how to obtain, install and use it.
 @ManPageStart{SEE ALSO}
 @c man begin SEEALSO
 
-gp-archive(1),
+gprofng-archive(1),
 gprofng-collect-app(1),
 @c -- gprofng-display-gui(1),
 gprofng-display-html(1),

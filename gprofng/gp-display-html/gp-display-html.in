@@ -87,7 +87,7 @@ my $g_test_code = $FALSE;
 #------------------------------------------------------------------------------
 # GPROFNG commands and files used.
 #------------------------------------------------------------------------------
-my $GP_DISPLAY_TEXT = "gp-display-text";
+my $GP_DISPLAY_TEXT = "gprofng-display-text";
 
 my $g_gp_output_file   = $GP_DISPLAY_TEXT.".stdout.log";
 my $g_gp_error_logfile = $GP_DISPLAY_TEXT.".stderr.log";
@@ -195,7 +195,7 @@ my $thresh = 0;
 # Define the driver command, tool name and version number.
 #------------------------------------------------------------------------------
 $driver_cmd       = "gprofng display html";
-$tool_name        = "gp-display-html";
+$tool_name        = "gprofng-display-html";
 #$binutils_version = "2.38.50";
 $binutils_version = "2.43.0";
 $version_info     = $tool_name . " GNU binutils version " . $binutils_version;
@@ -1937,7 +1937,7 @@ sub check_availability_tool
   my $target_cmd;
 
 #------------------------------------------------------------------------------
-# Get the path to gp-display-text.
+# Get the path to gprofng-display-text.
 #------------------------------------------------------------------------------
   my ($error_occurred_ref, $gp_path_ref, $return_value_ref) =
 		       find_path_to_gp_display_text ($location_gp_command_ref);
@@ -1951,7 +1951,7 @@ sub check_availability_tool
 
   if (not $error_occurred)
 #------------------------------------------------------------------------------
-# All is well and gp-display-text has been located.
+# All is well and gprofng-display-text has been located.
 #------------------------------------------------------------------------------
     {
       $g_path_to_tools = $return_value;
@@ -4655,7 +4655,7 @@ sub find_keyword_in_string
 
 #------------------------------------------------------------------------------
 # Retrieve the absolute path that was used to execute the command.  This path
-# is used to execute gp-display-text later on.
+# is used to execute gprofng-display-text later on.
 #------------------------------------------------------------------------------
 sub find_path_to_gp_display_text
 {
@@ -7843,7 +7843,7 @@ sub generate_html_function_blocks
 #------------------------------------------------------------------------------
 # Get all the metrics available
 #
-# (gp-display-text) metric_list
+# (gprofng-display-text) metric_list
 # Current metrics: e.totalcpu:i.totalcpu:e.cycles:e+insts:e+llm:name
 # Current Sort Metric: Exclusive Total CPU Time ( e.totalcpu )
 # Available metrics:

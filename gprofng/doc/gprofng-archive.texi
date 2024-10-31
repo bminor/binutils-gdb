@@ -54,7 +54,7 @@
 @ManPageStart{NAME}
 @c man begin NAME
 
-gp-archive - Archive the associated application binaries and sources for a
+gprofng-archive - Archive the associated application binaries and sources for a
 gprofng experiment
 
 @c man end

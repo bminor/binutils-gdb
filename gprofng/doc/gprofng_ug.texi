@@ -518,7 +518,7 @@ is illustrated below:
 @verbatim
 $ gprofng display text test.1.er
 Warning: History and command editing is not supported on this system.
-(gp-display-text) quit
+(gprofng-display-text) quit
 $
 @end verbatim
 @end smallexample
@@ -1367,7 +1367,7 @@ marked with the @samp{<} and @samp{>} symbols.
 Experiment: mxv.1.thr.er
 No errors
 No warnings
-Archive command ` /usr/bin/gp-archive -n -a on --outfile
+Archive command ` /usr/bin/gprofng-archive -n -a on --outfile
                      <apath>/archive.log <apath>/mxv.1.thr.er'
 
 Target command (64-bit): './mxv-pthreads -m 8000 -n 4000 -t 1'
