@@ -649,7 +649,8 @@ static int
 gdb_bfd_close_or_warn (struct bfd *abfd)
 {
   int ret;
-  const char *name = bfd_get_filename (abfd);
+  gdb::unique_xmalloc_ptr<char> name
+    = make_unique_xstrdup (bfd_get_filename (abfd));
 
   for (asection *sect : gdb_bfd_sections (abfd))
     free_one_bfd_section (sect);
@@ -657,7 +658,7 @@ gdb_bfd_close_or_warn (struct bfd *abfd)
   ret = bfd_close (abfd);
 
   if (!ret)
-    gdb_bfd_close_warning (name,
+    gdb_bfd_close_warning (name.get (),
 			   bfd_errmsg (bfd_get_error ()));
 
   return ret;
