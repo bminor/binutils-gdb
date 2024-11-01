@@ -12684,6 +12684,10 @@ ppc64_elf_setup_section_lists (struct bfd_link_info *info)
   if (htab == NULL)
     return -1;
 
+  /* The access to _bfd_section_id here is unlocked, so for the time
+     being this function cannot be called in multi-threaded mode.  */
+  BFD_ASSERT (!_bfd_threading_enabled ());
+
   htab->sec_info_arr_size = _bfd_section_id;
   amt = sizeof (*htab->sec_info) * (htab->sec_info_arr_size);
   htab->sec_info = bfd_zmalloc (amt);

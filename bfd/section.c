@@ -839,6 +839,10 @@ unsigned int _bfd_section_id = 0x10;  /* id 0 to 3 used by STD_SECTION.  */
 static asection *
 bfd_section_init (bfd *abfd, asection *newsect)
 {
+  /* Locking needed for the _bfd_section_id access.  */
+  if (!bfd_lock ())
+    return NULL;
+
   newsect->id = _bfd_section_id;
   newsect->index = abfd->section_count;
   newsect->owner = abfd;
@@ -849,6 +853,10 @@ bfd_section_init (bfd *abfd, asection *newsect)
   _bfd_section_id++;
   abfd->section_count++;
   bfd_section_list_append (abfd, newsect);
+
+  if (!bfd_unlock ())
+    return NULL;
+
   return newsect;
 }
 

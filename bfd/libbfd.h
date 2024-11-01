@@ -993,6 +993,8 @@ void _bfd_restore_error_handler_caching (struct per_xvec_messages *) ATTRIBUTE_H
 
 const char *_bfd_get_error_program_name (void) ATTRIBUTE_HIDDEN;
 
+bool _bfd_threading_enabled (void) ATTRIBUTE_HIDDEN;
+
 bool bfd_lock (void) ATTRIBUTE_HIDDEN;
 
 bool bfd_unlock (void) ATTRIBUTE_HIDDEN;

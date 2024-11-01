@@ -451,6 +451,10 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
      of an archive.  */
   orig_messages = _bfd_set_error_handler_caching (&messages);
 
+  /* Locking is required here in order to manage _bfd_section_id.  */
+  if (!bfd_lock ())
+    return false;
+
   preserve_match.marker = NULL;
   if (!bfd_preserve_save (abfd, &preserve, NULL))
     goto err_ret;
@@ -698,7 +702,10 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       bfd_set_lto_type (abfd);
 
       /* File position has moved, BTW.  */
-      return bfd_cache_set_uncloseable (abfd, old_in_format_matches, NULL);
+      bool ret = bfd_cache_set_uncloseable (abfd, old_in_format_matches, NULL);
+      if (!bfd_unlock ())
+	return false;
+      return ret;
     }
 
   if (match_count == 0)
@@ -742,6 +749,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   _bfd_restore_error_handler_caching (orig_messages);
   print_and_clear_messages (&messages, PER_XVEC_NO_TARGET);
   bfd_cache_set_uncloseable (abfd, old_in_format_matches, NULL);
+  bfd_unlock ();
   return false;
 }
 
