@@ -25,7 +25,6 @@
    See:
    https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-335.pdf  */
 
-#include <memory.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

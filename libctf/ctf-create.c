@@ -18,7 +18,6 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <ctf-impl.h>
-#include <sys/param.h>
 #include <string.h>
 #include <unistd.h>
 

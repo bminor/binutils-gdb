@@ -22,7 +22,6 @@
 
 #include "config.h"
 #include <errno.h>
-#include <sys/param.h>
 #include "ctf-decls.h"
 #include <ctf-api.h>
 #include "ctf-sha1.h"
