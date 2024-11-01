@@ -1,0 +1,9 @@
+# source: multidim-array-ctf.c
+int
+(long )?unsigned int
+int \[9\]
+int \[5\]\[9\]
+int \[3\]\[5\]\[9\]
+int \[2\]
+int \[1\]\[2\]
+
