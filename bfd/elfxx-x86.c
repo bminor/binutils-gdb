@@ -1817,7 +1817,8 @@ elf_x86_relative_reloc_compare (const void *pa, const void *pb)
 enum dynobj_sframe_plt_type
 {
   SFRAME_PLT = 1,
-  SFRAME_PLT_SEC = 2
+  SFRAME_PLT_SEC = 2,
+  SFRAME_PLT_GOT = 3,
 };
 
 /* Create SFrame stack trace info for the plt entries in the .plt section
@@ -1880,6 +1881,21 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
 
 	  break;
 	}
+      case SFRAME_PLT_GOT:
+	{
+	  ectx = &htab->plt_got_cfe_ctx;
+	  dpltsec = htab->plt_got;
+
+	  plt0_entry_size = 0;
+
+	  plt_entry_size = htab->sframe_plt->plt_got_entry_size;
+	  pltn_fres = htab->sframe_plt->plt_got_fres;
+	  num_pltn_fres = htab->sframe_plt->plt_got_num_fres;
+	  num_pltn_entries = dpltsec->size / plt_entry_size;
+
+	  break;
+	}
+
     default:
       /* No other value is possible.  */
       return false;
@@ -1983,6 +1999,10 @@ _bfd_x86_elf_write_sframe_plt (bfd *output_bfd,
     case SFRAME_PLT_SEC:
       ectx = htab->plt_second_cfe_ctx;
       sec = htab->plt_second_sframe;
+      break;
+    case SFRAME_PLT_GOT:
+      ectx = htab->plt_got_cfe_ctx;
+      sec = htab->plt_got_sframe;
       break;
     default:
       /* No other value is possible.  */
@@ -2511,7 +2531,18 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 	  htab->plt_sframe->size = sizeof (sframe_header) + 1;
 	}
 
-      /* FIXME - generate for .plt.got ?  */
+      if (htab->plt_got_sframe != NULL
+	  && htab->plt_got != NULL
+	  && htab->plt_got->size != 0
+	  && !bfd_is_abs_section (htab->plt_got->output_section))
+	{
+	  _bfd_x86_elf_create_sframe_plt (output_bfd, info, SFRAME_PLT_GOT);
+	  /* FIXME - Dirty Hack.  Set the size to something non-zero for now,
+	     so that the section does not get stripped out below.  The precise
+	     size of this section is known only when the contents are
+	     serialized in _bfd_x86_elf_write_sframe_plt.  */
+	  htab->plt_got_sframe->size = sizeof (sframe_header) + 1;
+	}
 
       if (htab->plt_second_sframe != NULL
 	  && htab->plt_second != NULL
@@ -2578,6 +2609,7 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 	       || s == htab->plt_second_eh_frame
 	       || s == htab->plt_sframe
 	       || s == htab->plt_second_sframe
+	       || s == htab->plt_got_sframe
 	       || s == htab->elf.sdynbss
 	       || s == htab->elf.sdynrelro)
 	{
@@ -2622,7 +2654,8 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 
       /* Skip allocating contents for .sframe section as it is written
 	 out differently.  See below.  */
-      if ((s == htab->plt_sframe) || (s == htab->plt_second_sframe))
+      if ((s == htab->plt_sframe) || (s == htab->plt_second_sframe)
+	  || (s == htab->plt_got_sframe))
 	continue;
 
       /* NB: Initially, the iplt section has minimal alignment to
@@ -2687,6 +2720,12 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 	  && htab->plt_second->size != 0
 	  && htab->plt_second_sframe->contents == NULL)
 	_bfd_x86_elf_write_sframe_plt (output_bfd, info, SFRAME_PLT_SEC);
+
+      if (htab->plt_got_sframe != NULL
+	  && htab->plt_got != NULL
+	  && htab->plt_got->size != 0
+	  && htab->plt_got_sframe->contents == NULL)
+	_bfd_x86_elf_write_sframe_plt (output_bfd, info, SFRAME_PLT_GOT);
     }
 
   if (resolved_plt != NULL
@@ -2997,6 +3036,34 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 	    return NULL;
 	}
     }
+
+  if (htab->plt_got_sframe != NULL
+      && htab->plt_got_sframe->contents != NULL)
+    {
+      if (htab->plt_got != NULL
+	  && htab->plt_got->size != 0
+	  && (htab->plt_got->flags & SEC_EXCLUDE) == 0
+	  && htab->plt_got->output_section != NULL
+	  && htab->plt_got_sframe->output_section != NULL)
+	{
+	  bfd_vma plt_start = htab->plt_got->output_section->vma;
+	  bfd_vma sframe_start
+	    = (htab->plt_got_sframe->output_section->vma
+	       + htab->plt_got_sframe->output_offset
+	       + PLT_SFRAME_FDE_START_OFFSET);
+	  bfd_put_signed_32 (dynobj, plt_start - sframe_start,
+			     htab->plt_got_sframe->contents
+			     + PLT_SFRAME_FDE_START_OFFSET);
+	}
+      if (htab->plt_got_sframe->sec_info_type == SEC_INFO_TYPE_SFRAME)
+	{
+	  if (! _bfd_elf_merge_section_sframe (output_bfd, info,
+					       htab->plt_got_sframe,
+					       htab->plt_got_sframe->contents))
+	    return NULL;
+	}
+    }
+
   if (htab->elf.sgot && htab->elf.sgot->size > 0)
     elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize
       = htab->got_entry_size;
@@ -4764,7 +4831,18 @@ _bfd_x86_elf_link_setup_gnu_properties
 
 	      htab->plt_second_sframe = sec;
 	    }
-	  /* FIXME - add later for plt_got. */
+
+	  /* .plt.got.  */
+	  if (htab->plt_got != NULL)
+	    {
+	      sec = bfd_make_section_anyway_with_flags (dynobj,
+							".sframe",
+							flags);
+	      if (sec == NULL)
+		info->callbacks->einfo (_("%F%P: failed to create PLT GOT .sframe section\n"));
+
+	      htab->plt_got_sframe = sec;
+	    }
 	}
     }
 
