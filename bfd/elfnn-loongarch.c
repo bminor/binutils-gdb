@@ -856,13 +856,15 @@ loongarch_tls_transition (bfd *input_bfd,
 }
 
 static bool
-bad_static_reloc (bfd *abfd, const Elf_Internal_Rela *rel, asection *sec,
-		  unsigned r_type, struct elf_link_hash_entry *h,
+bad_static_reloc (struct bfd_link_info *info,
+		  bfd *abfd, const Elf_Internal_Rela *rel,
+		  asection *sec, unsigned r_type,
+		  struct elf_link_hash_entry *h,
 		  Elf_Internal_Sym *isym)
 {
-  /* We propably can improve the information to tell users that they should
-     be recompile the code with -fPIC or -fPIE, just like what x86 does.  */
   reloc_howto_type * r = loongarch_elf_rtype_to_howto (abfd, r_type);
+  const char *object;
+  const char *pic;
   const char *name = NULL;
 
   if (h)
@@ -874,10 +876,24 @@ bad_static_reloc (bfd *abfd, const Elf_Internal_Rela *rel, asection *sec,
   if (name == NULL || *name == '\0')
     name ="<nameless>";
 
+  if (bfd_link_dll (info))
+    {
+      object = _("a shared object");
+      pic = _("; recompile with -fPIC");
+    }
+  else
+    {
+      if (bfd_link_pie (info))
+	object = _("a PIE object");
+      else
+	object = _("a PDE object");
+      pic = _("; recompile with -fPIE");
+    }
+
   (*_bfd_error_handler)
    (_("%pB:(%pA+%#lx): relocation %s against `%s` can not be used when making "
-      "a shared object; recompile with -fPIC"),
-    abfd, sec, (long) rel->r_offset, r ? r->name : _("<unknown>"), name);
+      "%s%s"),
+    abfd, sec, (long) rel->r_offset, r ? r->name : _("<unknown>"), name, object, pic);
   bfd_set_error (bfd_error_bad_value);
   return false;
 }
@@ -1047,7 +1063,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_LARCH_TLS_LE_HI20_R:
 	case R_LARCH_SOP_PUSH_TLS_TPREL:
 	  if (!bfd_link_executable (info))
-	    return bad_static_reloc (abfd, rel, sec, r_type, h, isym);
+	    return bad_static_reloc (info, abfd, rel, sec, r_type, h, isym);
 
 	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
 							   r_symndx,
@@ -1065,7 +1081,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_LARCH_ABS_HI20:
 	  if (bfd_link_pic (info))
-	    return bad_static_reloc (abfd, rel, sec, r_type, h, isym);
+	    return bad_static_reloc (info, abfd, rel, sec, r_type, h, isym);
 
 	  /* Fall through.  */
 	case R_LARCH_SOP_PUSH_ABSOLUTE:
@@ -1087,7 +1103,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0
 	      && ! LARCH_REF_LOCAL (info, h))
-	    return bad_static_reloc (abfd, rel, sec, r_type, h, NULL);
+	    return bad_static_reloc (info, abfd, rel, sec, r_type, h, NULL);
 
 	  break;
 
@@ -1115,7 +1131,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0
 	      && ! LARCH_REF_LOCAL (info, h))
-	    return bad_static_reloc (abfd, rel, sec, r_type, h, NULL);
+	    return bad_static_reloc (info, abfd, rel, sec, r_type, h, NULL);
 
 	  break;
 
