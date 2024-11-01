@@ -388,7 +388,7 @@ check_frame_language_change (void)
   /* FIXME: This should be cacheing the frame and only running when
      the frame changes.  */
 
-  if (has_stack_frames ())
+  if (warn_frame_lang_mismatch && has_stack_frames ())
     {
       enum language flang;
 

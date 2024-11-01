@@ -16795,6 +16795,19 @@ written in one source language can be used by a main program written in
 a different source language.  Using @samp{set language auto} in this
 case frees you from having to set the working language manually.
 
+The warning is enabled by default, but it can be controlled via a
+setting:
+
+@table @code
+@item set warn-language-frame-mismatch [on|off]
+@kindex warn-language-frame-mismatch
+Enable or disable the warning that is issued when the current language
+is set to a value that does not match the current frame.
+
+@item show warn-language-frame-mismatch
+Show whether the frame-mismatch warning will be issued.
+@end table
+
 @node Show
 @section Displaying the Language
 
