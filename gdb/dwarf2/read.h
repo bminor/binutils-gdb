@@ -29,7 +29,6 @@
 #include "dwarf2/section.h"
 #include "dwarf2/cu.h"
 #include "gdbsupport/gdb_obstack.h"
-#include "gdbsupport/hash_enum.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/packed.h"
 
@@ -555,8 +554,7 @@ public:
 
   /* Mapping from abstract origin DIE to concrete DIEs that reference it as
      DW_AT_abstract_origin.  */
-  std::unordered_map<sect_offset, std::vector<sect_offset>,
-		     gdb::hash_enum<sect_offset>>
+  std::unordered_map<sect_offset, std::vector<sect_offset>>
     abstract_to_concrete;
 
   /* Current directory, captured at the moment that object this was
