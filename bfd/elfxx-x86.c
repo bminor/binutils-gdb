@@ -1831,7 +1831,6 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
   struct elf_x86_link_hash_table *htab;
   const struct elf_backend_data *bed;
 
-  bool plt0_generated_p;
   unsigned int plt0_entry_size;
   unsigned char func_info;
   uint32_t fre_type;
@@ -1845,14 +1844,11 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
   unsigned plt_entry_size = 0;
   unsigned int num_pltn_fres = 0;
   unsigned int num_pltn_entries = 0;
+  const sframe_frame_row_entry * const *pltn_fres;
 
   bed = get_elf_backend_data (output_bfd);
   htab = elf_x86_hash_table (info, bed->target_id);
   /* Whether SFrame stack trace info for plt0 is to be generated.  */
-  plt0_generated_p = htab->plt.has_plt0;
-  plt0_entry_size
-    = (plt0_generated_p) ? htab->sframe_plt->plt0_entry_size : 0;
-
   switch (plt_sec_type)
     {
     case SFRAME_PLT:
@@ -1860,7 +1856,10 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
 	  ectx = &htab->plt_cfe_ctx;
 	  dpltsec = htab->elf.splt;
 
-	  plt_entry_size = htab->plt.plt_entry_size;
+	  plt0_entry_size
+	    = htab->plt.has_plt0 ? htab->sframe_plt->plt0_entry_size : 0;
+	  plt_entry_size = htab->sframe_plt->pltn_entry_size;
+	  pltn_fres = htab->sframe_plt->pltn_fres;
 	  num_pltn_fres = htab->sframe_plt->pltn_num_fres;
 	  num_pltn_entries
 	    = (dpltsec->size - plt0_entry_size) / plt_entry_size;
@@ -1870,12 +1869,15 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
     case SFRAME_PLT_SEC:
 	{
 	  ectx = &htab->plt_second_cfe_ctx;
-	  /* FIXME - this or htab->plt_second_sframe ?  */
-	  dpltsec = htab->plt_second_eh_frame;
+	  dpltsec = htab->plt_second;
+
+	  plt0_entry_size = 0;
 
 	  plt_entry_size = htab->sframe_plt->sec_pltn_entry_size;
+	  pltn_fres = htab->sframe_plt->sec_pltn_fres;
 	  num_pltn_fres = htab->sframe_plt->sec_pltn_num_fres;
 	  num_pltn_entries = dpltsec->size / plt_entry_size;
+
 	  break;
 	}
     default:
@@ -1897,7 +1899,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
 
   /* Add SFrame FDE and the associated FREs for plt0 if plt0 has been
      generated.  */
-  if (plt0_generated_p)
+  if (plt0_entry_size)
     {
       /* Add SFrame FDE for plt0, the function start address is updated later
 	 at _bfd_elf_merge_section_sframe time.  */
@@ -1934,16 +1936,17 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
 				      plt0_entry_size, /* func start addr.  */
 				      dpltsec->size - plt0_entry_size,
 				      func_info,
-				      16,
+				      plt_entry_size,
 				      0 /* Num FREs.  */);
 
       sframe_frame_row_entry pltn_fre;
-      /* Now add the FREs for pltn.  Simply adding the two FREs suffices due
+      /* Now add the FREs for pltn.  Simply adding the FREs suffices due
 	 to the usage of SFRAME_FDE_TYPE_PCMASK above.  */
       for (unsigned int j = 0; j < num_pltn_fres; j++)
 	{
-	  pltn_fre = *(htab->sframe_plt->pltn_fres[j]);
-	  sframe_encoder_add_fre (*ectx, 1, &pltn_fre);
+	  unsigned int func_idx = plt0_entry_size ? 1 : 0;
+	  pltn_fre = *(pltn_fres[j]);
+	  sframe_encoder_add_fre (*ectx, func_idx, &pltn_fre);
 	}
     }
 
