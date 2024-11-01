@@ -2680,8 +2680,8 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 	_bfd_x86_elf_write_sframe_plt (output_bfd, info, SFRAME_PLT);
 
       if (htab->plt_second_sframe != NULL
-	  && htab->elf.splt != NULL
-	  && htab->elf.splt->size != 0
+	  && htab->plt_second != NULL
+	  && htab->plt_second->size != 0
 	  && htab->plt_second_sframe->contents == NULL)
 	_bfd_x86_elf_write_sframe_plt (output_bfd, info, SFRAME_PLT_SEC);
     }
