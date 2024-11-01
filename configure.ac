@@ -408,8 +408,7 @@ case "${ENABLE_LD}" in
 esac
 
 AC_ARG_ENABLE(gprofng,
-[AS_HELP_STRING([[--enable-gprofng[=ARG]]],
-		[build gprofng @<:@ARG={yes,no}@:>@])],
+[AS_HELP_STRING([[--disable-gprofng]], [do not build gprofng])],
 enable_gprofng=$enableval,
 enable_gprofng=yes)
 if test "$enable_gprofng" = "yes"; then
