@@ -327,9 +327,34 @@ if {[record_full_function "vzeroupper"] == true} {
 	    "Register ymm15h changed: 3405707982" \
 	    "Register rip changed: \[^\r\n\]+" ] \
 	"verify vzeroupper recording"
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for vzeroupper_test"
 } else {
     untested "couldn't run vzeroupper tests"
 }
 
 gdb_test "finish" "Run till exit from.*vzeroupper_test.*" \
     "leaving vzeroupper"
+
+# Preparation and testing vpxor instructions.
+gdb_test_no_output "set \$ymm0.v2_int128 = {0x0, 0x12345}" "set ymm0 for vpxor"
+gdb_test_no_output "set \$ymm1.v2_int128 = {0x1f1e1d1c1b1a1918, 0x0}" \
+    "set ymm1 for vpxor"
+gdb_test_no_output "set \$ymm2.v2_int128 = {0x0, 0xbeef}" "set ymm2 for vpxor"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0x0, 0xcafeface}" "set ymm15 for vpxor"
+
+if {[record_full_function "vpxor"] == true} {
+    test_one_register "vpxor" "ymm15" "0x0, 0xcafeface"
+    test_one_register "vpxor" "ymm2" "0x0, 0xbeef"
+    test_one_register "vpxor" "ymm1" "0x1f1e1d1c1b1a1918, 0x0"
+    test_one_register "vpxor" "ymm0" "0x0, 0x0" "first"
+    test_one_register "vpxor" "ymm0" "0x0, 0x12345" "second"
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for vpxor_test"
+} else {
+    untested "couldn't run vpxor tests"
+}
+gdb_test "finish" "Run till exit from.*vpxor_test.*" \
+    "leaving vpxor"

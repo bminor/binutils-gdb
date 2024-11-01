@@ -210,6 +210,25 @@ vzeroupper_test ()
   return 0; /* end vzeroupper_test  */
 }
 
+int
+vpxor_test ()
+{
+  /* start vpxor_test.  */
+  /* Using GDB, load this value onto the register, for ease of testing.
+     ymm0.v2_int128  = {0x0, 0x12345}
+     ymm1.v2_int128  = {0x1f1e1d1c1b1a1918, 0x0}
+     ymm2.v2_int128  = {0x0, 0xbeef}
+     ymm15.v2_int128 = {0x0, 0xcafeface}
+     this way it's easy to confirm we're undoing things correctly.  */
+
+  asm volatile ("vpxor %ymm0, %ymm0, %ymm0");
+  asm volatile ("vpxor %xmm0, %xmm1, %xmm0");
+  asm volatile ("vpxor %ymm2, %ymm15, %ymm1");
+  asm volatile ("vpxor %xmm2, %xmm15, %xmm2");
+  asm volatile ("vpxor %ymm2, %ymm1, %ymm15");
+  return 0; /* end vpxor_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -235,5 +254,6 @@ main ()
   vpunpck_test ();
   vpbroadcast_test ();
   vzeroupper_test ();
+  vpxor_test ();
   return 0;	/* end of main */
 }

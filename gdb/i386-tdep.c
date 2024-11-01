@@ -4981,6 +4981,15 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	break;
       }
 
+    case 0xef:
+      {
+	i386_record_modrm (ir);
+	int reg_offset = ir->reg + vex_r * 8;
+	record_full_arch_list_add_reg (ir->regcache,
+				       tdep->ymm0_regnum + reg_offset);
+	break;
+      }
+
     default:
       gdb_printf (gdb_stderr,
 		  _("Process record does not support VEX instruction 0x%02x "
