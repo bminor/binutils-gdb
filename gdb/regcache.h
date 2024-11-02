@@ -260,6 +260,9 @@ public:
   /* See gdbsupport/common-regcache.h.  */
   bool raw_compare (int regnum, const void *buf, int offset) const override;
 
+  /* See gdbsupport/common-regcache.h.  */
+  int register_size (int regnum) const override;
+
 protected:
   /* Assert on the range of REGNUM.  */
   void assert_regnum (int regnum) const;

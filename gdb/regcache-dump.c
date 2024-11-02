@@ -113,7 +113,7 @@ protected:
   {
     if (regnum < gdbarch_num_regs (m_gdbarch) || m_has_pseudo)
       {
-	auto size = register_size (m_gdbarch, regnum);
+	auto size = register_size (regnum);
 
 	if (size == 0)
 	  return;

@@ -211,7 +211,7 @@ amd64_windows_store_arg_in_reg (struct regcache *regcache,
 
   gdb_assert (valbuf.size () <= 8);
   std::copy (valbuf.begin (), valbuf.end (), buf.begin ());
-  size_t reg_size = regcache_register_size (regcache, regno);
+  size_t reg_size = regcache->register_size (regno);
   gdb_assert (reg_size <= buf.size ());
   gdb::array_view<gdb_byte> view (buf);
   regcache->cooked_write (regno, view.slice (0, reg_size));

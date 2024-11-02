@@ -51,6 +51,9 @@ struct regcache : public reg_buffer_common
   enum register_status get_register_status (int regnum) const override;
 
   /* See gdbsupport/common-regcache.h.  */
+  int register_size (int regnum) const override;
+
+  /* See gdbsupport/common-regcache.h.  */
   void raw_supply (int regnum, gdb::array_view<const gdb_byte> src) override;
 
   /* See gdbsupport/common-regcache.h.  */

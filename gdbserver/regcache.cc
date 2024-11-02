@@ -306,10 +306,9 @@ register_size (const struct target_desc *tdesc, int n)
 /* See gdbsupport/common-regcache.h.  */
 
 int
-regcache_register_size (const reg_buffer_common *regcache, int n)
+regcache::register_size (int regnum) const
 {
-  return register_size
-    (gdb::checked_static_cast<const struct regcache *> (regcache)->tdesc, n);
+  return ::register_size (tdesc, regnum);
 }
 
 static gdb::array_view<gdb_byte>

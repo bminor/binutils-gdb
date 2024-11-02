@@ -1564,7 +1564,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 					byte_order, I387_FCTRL_INIT_VAL);
 	      else
 		memset (FXSAVE_ADDR (tdep, regs, i), 0,
-			regcache_register_size (regcache, i));
+			regcache->register_size (i));
 	    }
 	}
     }
@@ -1887,7 +1887,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 	    int regsize;
 
 	    regcache->raw_collect (i, raw);
-	    regsize = regcache_register_size (regcache, i);
+	    regsize = regcache->register_size (i);
 	    p = FXSAVE_ADDR (tdep, regs, i);
 	    if (memcmp (raw, p, regsize))
 	      {

@@ -166,7 +166,7 @@ aarch64_point_is_aligned (ptid_t ptid, int is_watchpoint, CORE_ADDR addr,
       /* Set alignment to 2 only if the current process is 32-bit,
 	 since thumb instruction can be 2-byte aligned.  Otherwise, set
 	 alignment to AARCH64_HBP_ALIGNMENT.  */
-      if (regcache_register_size (regcache, 0) == 8)
+      if (regcache->register_size (0) == 8)
 	alignment = AARCH64_HBP_ALIGNMENT;
       else
 	alignment = 2;
