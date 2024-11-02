@@ -522,8 +522,11 @@ public:
     m_args = std::move (args);
   };
 
-  /* Set the argument string from some strings.  */
-  void set_args (gdb::array_view<char * const> args);
+  /* Set the argument string from some strings in ARGS.  When
+     ESCAPE_SHELL_CHAR is true all special shell characters in ARGS are
+     escaped, When false only the characters that GDB sees as special will
+     be escaped.  See construct_inferior_arguments for more details.  */
+  void set_args (gdb::array_view<char * const> args, bool escape_shell_char);
 
   /* Get the argument string to use when running this inferior.
 

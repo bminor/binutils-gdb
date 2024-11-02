@@ -929,7 +929,7 @@ infpy_set_args (PyObject *self, PyObject *value, void *closure)
       for (const auto &arg : args)
 	argvec.push_back (arg.get ());
       gdb::array_view<char * const> view (argvec.data (), argvec.size ());
-      inf->inferior->set_args (view);
+      inf->inferior->set_args (view, true);
     }
   else
     {

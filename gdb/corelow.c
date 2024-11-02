@@ -1174,7 +1174,7 @@ core_target_open (const char *arg, int from_tty)
       for (const gdb::unique_xmalloc_ptr<char> &a : ctx.args ())
 	argv.push_back (a.get ());
       gdb::array_view<char * const> view (argv.data (), argv.size ());
-      current_inferior ()->set_args (view);
+      current_inferior ()->set_args (view, true);
 
       /* And now copy the environment.  */
       current_inferior ()->environment = ctx.environment ();

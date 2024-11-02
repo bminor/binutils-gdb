@@ -3465,7 +3465,7 @@ handle_v_run (char *own_buf)
   else
     program_path.set (new_program_name.get ());
 
-  program_args = construct_inferior_arguments (new_argv.get ());
+  program_args = construct_inferior_arguments (new_argv.get (), true);
 
   try
     {
@@ -4355,7 +4355,7 @@ captured_main (int argc, char *argv[])
 
       int n = argc - (next_arg - argv);
       program_args
-	= construct_inferior_arguments ({&next_arg[1], &next_arg[n]});
+	= construct_inferior_arguments ({&next_arg[1], &next_arg[n]}, true);
 
       /* Wait till we are at first instruction in program.  */
       target_create_inferior (program_path.get (), program_args);
