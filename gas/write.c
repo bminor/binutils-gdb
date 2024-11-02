@@ -26,6 +26,7 @@
 #include "output-file.h"
 #include "dwarf2dbg.h"
 #include "compress-debug.h"
+#include "codeview.h"
 
 #ifndef TC_FORCE_RELOCATION
 #define TC_FORCE_RELOCATION(FIX)		\
@@ -509,6 +510,32 @@ cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
 		fragP->fr_fix += md_long_jump_size;
 	  }
 	frag_wane (fragP);
+      }
+      break;
+#endif
+
+#if defined (TE_PE) && defined (O_secrel)
+    case rs_cv_comp:
+      {
+	offsetT value = S_GET_VALUE (fragP->fr_symbol);
+	int size;
+
+	if (!S_IS_DEFINED (fragP->fr_symbol))
+	  {
+	    as_bad_where (fragP->fr_file, fragP->fr_line,
+			  _(".cv_%ccomp operand is an undefined symbol: %s"),
+			  fragP->fr_subtype ? 's' : 'u',
+			  S_GET_NAME (fragP->fr_symbol));
+	  }
+
+	size = output_cv_comp (fragP->fr_literal + fragP->fr_fix, value,
+			       fragP->fr_subtype);
+
+	fragP->fr_fix += size;
+	fragP->fr_type = rs_fill;
+	fragP->fr_var = 0;
+	fragP->fr_offset = 0;
+	fragP->fr_symbol = NULL;
       }
       break;
 #endif
@@ -2767,6 +2794,9 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 #endif
 
 	case rs_leb128:
+#if defined (TE_PE) && defined (O_secrel)
+	case rs_cv_comp:
+#endif
 	  /* Initial guess is always 1; doing otherwise can result in
 	     stable solutions that are larger than the minimum.  */
 	  address += fragP->fr_offset = 1;
@@ -3119,6 +3149,20 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 		  fragP->fr_offset = size;
 		}
 		break;
+
+#if defined (TE_PE) && defined (O_secrel)
+	      case rs_cv_comp:
+		{
+		  valueT value;
+		  offsetT size;
+
+		  value = resolve_symbol_value (fragP->fr_symbol);
+		  size = sizeof_cv_comp (value, fragP->fr_subtype);
+		  growth = size - fragP->fr_offset;
+		  fragP->fr_offset = size;
+		}
+	      break;
+#endif
 
 	      case rs_cfa:
 		growth = eh_frame_relax_frag (fragP);

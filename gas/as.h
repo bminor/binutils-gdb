@@ -263,7 +263,10 @@ enum _relax_state
   rs_dwarf2dbg,
 
   /* SFrame FRE type selection optimization.  */
-  rs_sframe
+  rs_sframe,
+
+  /* CodeView compressed integer.  */
+  rs_cv_comp,
 };
 
 typedef enum _relax_state relax_stateT;

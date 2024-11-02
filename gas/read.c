@@ -265,6 +265,9 @@ static void poend (void);
 static size_t get_macro_line_sb (sb *);
 static void generate_file_debug (void);
 static char *_find_end_of_line (char *, int, int, int);
+#if defined (TE_PE) && defined (O_secrel)
+static void s_cv_comp (int sign);
+#endif
 
 void
 read_begin (void)
@@ -369,6 +372,10 @@ static const pseudo_typeS potable[] = {
   {"comm", s_comm, 0},
   {"common", s_mri_common, 0},
   {"common.s", s_mri_common, 1},
+#if defined (TE_PE) && defined (O_secrel)
+  {"cv_scomp", s_cv_comp, 1},
+  {"cv_ucomp", s_cv_comp, 0},
+#endif
   {"data", s_data, 0},
   {"dc", cons, 2},
   {"dc.a", cons, 0},
@@ -5457,6 +5464,97 @@ s_leb128 (int sign)
   demand_empty_rest_of_line ();
 }
 
+#if defined (TE_PE) && defined (O_secrel)
+
+/* Generate the appropriate fragments for a given expression to emit a
+   cv_comp value.  SIGN is 1 for cv_scomp, 0 for cv_ucomp.  */
+
+static void
+emit_cv_comp_expr (expressionS *exp, int sign)
+{
+  operatorT op = exp->X_op;
+
+  if (op == O_absent || op == O_illegal)
+    {
+      as_warn (_("zero assumed for missing expression"));
+      exp->X_add_number = 0;
+      op = O_constant;
+    }
+  else if (op == O_big)
+    {
+      as_bad (_("number invalid"));
+      exp->X_add_number = 0;
+      op = O_constant;
+    }
+  else if (op == O_register)
+    {
+      as_warn (_("register value used as expression"));
+      op = O_constant;
+    }
+
+  if (now_seg == absolute_section)
+    {
+      if (op != O_constant || exp->X_add_number != 0)
+	as_bad (_("attempt to store value in absolute section"));
+      abs_section_offset++;
+      return;
+    }
+
+  if ((op != O_constant || exp->X_add_number != 0) && in_bss ())
+    as_bad (_("attempt to store non-zero value in section `%s'"),
+	    segment_name (now_seg));
+
+  /* Let the backend know that subsequent data may be byte aligned.  */
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
+
+  if (op == O_constant)
+    {
+      offsetT value = exp->X_add_number;
+      unsigned int size;
+      char *p;
+
+      /* If we've got a constant, emit the thing directly right now.  */
+
+      size = sizeof_cv_comp (value, sign);
+      p = frag_more (size);
+      if (output_cv_comp (p, value, sign) > size)
+	abort ();
+    }
+  else
+    {
+      /* Otherwise, we have to create a variable sized fragment and
+	 resolve things later.  */
+
+      frag_var (rs_cv_comp, 4, 0, sign, make_expr_symbol (exp), 0, NULL);
+    }
+}
+
+/* Parse the .cv_ucomp and .cv_scomp pseudos.  */
+
+static void
+s_cv_comp (int sign)
+{
+  expressionS exp;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  do
+    {
+      expression (&exp);
+      emit_cv_comp_expr (&exp, sign);
+    }
+  while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;
+  demand_empty_rest_of_line ();
+}
+
+#endif /* TE_PE && O_secrel */
+
 /* Code for handling base64 encoded strings.
    Based upon code in sharutils' lib/base64.c source file, written by
    Simon Josefsson.  Which was partially adapted from GNU MailUtils

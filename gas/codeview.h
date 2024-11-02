@@ -101,5 +101,7 @@ struct cv_line
 
 extern void codeview_finish (void);
 extern void codeview_generate_asm_lineno (void);
+extern unsigned int output_cv_comp (char *, offsetT, int);
+extern unsigned int sizeof_cv_comp (offsetT, int);
 
 #endif

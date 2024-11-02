@@ -38,6 +38,11 @@ run_dump_test "section-exclude"
 
 run_dump_test "set"
 
+if { [istarget "aarch64-*-*"] || [istarget "arm*-*-*"] || [istarget "i*86-*-*"]
+    || [istarget "x86_64-*-*"] } then {
+  run_dump_test "cv_comp"
+}
+
 # SEH related tests
 
 # These tests are only for x86_64 targets
