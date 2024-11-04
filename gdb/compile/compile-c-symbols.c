@@ -30,7 +30,7 @@
 #include "gdbtypes.h"
 #include "dwarf2/loc.h"
 #include "inferior.h"
-
+#include "gdbsupport/unordered_set.h"
 
 /* Compute the name of the pointer representing a local symbol's
    address.  */
@@ -441,46 +441,6 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
   return result;
 }
 
-
-
-/* A hash function for symbol names.  */
-
-static hashval_t
-hash_symname (const void *a)
-{
-  const struct symbol *sym = (const struct symbol *) a;
-
-  return htab_hash_string (sym->natural_name ());
-}
-
-/* A comparison function for hash tables that just looks at symbol
-   names.  */
-
-static int
-eq_symname (const void *a, const void *b)
-{
-  const struct symbol *syma = (const struct symbol *) a;
-  const struct symbol *symb = (const struct symbol *) b;
-
-  return strcmp (syma->natural_name (), symb->natural_name ()) == 0;
-}
-
-/* If a symbol with the same name as SYM is already in HASHTAB, return
-   1.  Otherwise, add SYM to HASHTAB and return 0.  */
-
-static int
-symbol_seen (htab_t hashtab, struct symbol *sym)
-{
-  void **slot;
-
-  slot = htab_find_slot (hashtab, sym, INSERT);
-  if (*slot != NULL)
-    return 1;
-
-  *slot = sym;
-  return 0;
-}
-
 /* Generate C code to compute the length of a VLA.  */
 
 static void
@@ -626,19 +586,16 @@ generate_c_for_variable_locations (compile_instance *compiler,
 
   /* Ensure that a given name is only entered once.  This reflects the
      reality of shadowing.  */
-  htab_up symhash (htab_create_alloc (1, hash_symname, eq_symname, NULL,
-				      xcalloc, xfree));
+  gdb::unordered_set<std::string_view> symset;
 
   while (1)
     {
       /* Iterate over symbols in this block, generating code to
 	 compute the location of each local variable.  */
       for (struct symbol *sym : block_iterator_range (block))
-	{
-	  if (!symbol_seen (symhash.get (), sym))
-	    generate_c_for_for_one_variable (compiler, stream, gdbarch,
-					     registers_used, pc, sym);
-	}
+	if (symset.insert (sym->natural_name ()).second)
+	  generate_c_for_for_one_variable (compiler, stream, gdbarch,
+					   registers_used, pc, sym);
 
       /* If we just finished the outermost block of a function, we're
 	 done.  */
