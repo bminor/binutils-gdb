@@ -122,53 +122,29 @@ dwarf2_cu::addr_type () const
   return addr_type;
 }
 
-/* A hashtab traversal function that marks the dependent CUs.  */
-
-static int
-dwarf2_mark_helper (void **slot, void *data)
-{
-  dwarf2_per_cu_data *per_cu = (dwarf2_per_cu_data *) *slot;
-  dwarf2_per_objfile *per_objfile = (dwarf2_per_objfile *) data;
-  dwarf2_cu *cu = per_objfile->get_cu (per_cu);
-
-  /* cu->m_dependencies references may not yet have been ever read if
-     QUIT aborts reading of the chain.  As such dependencies remain
-     valid it is not much useful to track and undo them during QUIT
-     cleanups.  */
-  if (cu != nullptr)
-    cu->mark ();
-  return 1;
-}
-
 /* See dwarf2/cu.h.  */
 
 void
 dwarf2_cu::mark ()
 {
-  if (!m_mark)
+  if (m_mark)
+    return;
+
+  m_mark = true;
+
+  for (dwarf2_per_cu_data *per_cu : m_dependencies)
     {
-      m_mark = true;
-      if (m_dependencies != nullptr)
-	htab_traverse_noresize (m_dependencies.get (), dwarf2_mark_helper,
-				per_objfile);
+      /* cu->m_dependencies references may not yet have been ever
+	 read if QUIT aborts reading of the chain.  As such
+	 dependencies remain valid it is not much useful to track
+	 and undo them during QUIT cleanups.  */
+      dwarf2_cu *cu = per_objfile->get_cu (per_cu);
+
+      if (cu == nullptr)
+	continue;
+
+      cu->mark ();
     }
-}
-
-/* See dwarf2/cu.h.  */
-
-void
-dwarf2_cu::add_dependence (struct dwarf2_per_cu_data *ref_per_cu)
-{
-  void **slot;
-
-  if (m_dependencies == nullptr)
-    m_dependencies.reset (htab_create_alloc
-			  (5, htab_hash_pointer, htab_eq_pointer,
-			   nullptr, xcalloc, xfree));
-
-  slot = htab_find_slot (m_dependencies.get (), ref_per_cu, INSERT);
-  if (*slot == nullptr)
-    *slot = ref_per_cu;
 }
 
 /* See dwarf2/cu.h.  */
