@@ -19,6 +19,7 @@
 #ifndef TYPEPRINT_H
 #define TYPEPRINT_H
 
+#include "gdbsupport/gdb-hashtab.h"
 #include "gdbsupport/gdb_obstack.h"
 
 enum language;
