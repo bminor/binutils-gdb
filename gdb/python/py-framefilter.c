@@ -17,6 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "gdbsupport/unordered_set.h"
 #include "objfiles.h"
 #include "symtab.h"
 #include "language.h"
@@ -27,7 +28,6 @@
 #include "stack.h"
 #include "source.h"
 #include "annotate.h"
-#include "hashtab.h"
 #include "demangle.h"
 #include "mi/mi-cmds.h"
 #include "python-internal.h"
@@ -731,25 +731,37 @@ py_print_args (PyObject *filter,
   return EXT_LANG_BT_OK;
 }
 
+using levels_printed_hash = gdb::unordered_set<frame_info *>;
+
 /*  Print a single frame to the designated output stream, detecting
     whether the output is MI or console, and formatting the output
-    according to the conventions of that protocol.  FILTER is the
-    frame-filter associated with this frame.  FLAGS is an integer
-    describing the various print options.  The FLAGS variables is
-    described in "apply_frame_filter" function.  ARGS_TYPE is an
-    enumerator describing the argument format.  OUT is the output
-    stream to print, INDENT is the level of indention for this frame
-    (in the case of elided frames), and LEVELS_PRINTED is a hash-table
-    containing all the frames level that have already been printed.
-    If a frame level has been printed, do not print it again (in the
-    case of elided frames).  Returns EXT_LANG_BT_ERROR on error, with any
-    GDB exceptions converted to a Python exception, or EXT_LANG_BT_OK
-    on success.  It can also throw an exception RETURN_QUIT.  */
+    according to the conventions of that protocol.
+
+    FILTER is the frame-filter associated with this frame.
+
+    FLAGS is an integer describing the various print options.  The FLAGS
+    variables is described in "apply_frame_filter" function.
+
+    ARGS_TYPE is an enumerator describing the argument format.
+
+    OUT is the output stream to print to.
+
+    INDENT is the level of indention for this frame  (in the case of elided
+    frames).
+
+    LEVELS_PRINTED is a hash-table containing all the frames for which the
+    level has already been printed.  If a level has been printed, do not print
+    it again (in the case of elided frames).
+
+    Returns EXT_LANG_BT_ERROR on error, with any GDB exceptions converted to a
+    Python exception, or EXT_LANG_BT_OK on success.  It can also throw an
+    exception RETURN_QUIT.  */
 
 static enum ext_lang_bt_status
 py_print_frame (PyObject *filter, frame_filter_flags flags,
 		enum ext_lang_frame_args args_type,
-		struct ui_out *out, int indent, htab_t levels_printed)
+		struct ui_out *out, int indent,
+		levels_printed_hash &levels_printed)
 {
   int has_addr = 0;
   CORE_ADDR address = 0;
@@ -859,23 +871,16 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
       && (location_print
 	  || (out->is_mi_like_p () && (print_frame_info || print_args))))
     {
-      struct frame_info **slot;
-      int level;
-
-      slot = (frame_info **) htab_find_slot (levels_printed,
-						   frame.get(), INSERT);
-
-      level = frame_relative_level (frame);
-
       /* Check if this frame has already been printed (there are cases
 	 where elided synthetic dummy-frames have to 'borrow' the frame
 	 architecture from the eliding frame.  If that is the case, do
-	 not print 'level', but print spaces.  */
-      if (*slot == frame)
+	 not print the level, but print spaces.  */
+      if (!levels_printed.insert (frame.get ()).second)
 	out->field_skip ("level");
       else
 	{
-	  *slot = frame.get ();
+	  int level = frame_relative_level (frame);
+
 	  annotate_frame_begin (print_level ? level : 0,
 				gdbarch, address);
 	  out->text ("#");
@@ -1197,10 +1202,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
   if (iterable == Py_None)
     return EXT_LANG_BT_NO_FILTERS;
 
-  htab_up levels_printed (htab_create (20,
-				       htab_hash_pointer,
-				       htab_eq_pointer,
-				       NULL));
+  levels_printed_hash levels_printed;
 
   while (true)
     {
@@ -1232,7 +1234,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
       try
 	{
 	  success = py_print_frame (item.get (), flags, args_type, out, 0,
-				    levels_printed.get ());
+				    levels_printed);
 	}
       catch (const gdb_exception_error &except)
 	{
