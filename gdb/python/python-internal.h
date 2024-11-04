@@ -474,7 +474,7 @@ extern enum ext_lang_bt_status gdbpy_apply_frame_filter
    struct ui_out *out, int frame_low, int frame_high);
 extern void gdbpy_preserve_values (const struct extension_language_defn *,
 				   struct objfile *objfile,
-				   htab_t copied_types);
+				   copied_types_hash_t &copied_types);
 extern enum ext_lang_bp_stop gdbpy_breakpoint_cond_says_stop
   (const struct extension_language_defn *, struct breakpoint *);
 extern int gdbpy_breakpoint_has_cond (const struct extension_language_defn *,

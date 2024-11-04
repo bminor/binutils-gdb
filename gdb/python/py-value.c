@@ -233,7 +233,8 @@ valpy_init (PyObject *self, PyObject *args, PyObject *kwds)
    each.  */
 void
 gdbpy_preserve_values (const struct extension_language_defn *extlang,
-		       struct objfile *objfile, htab_t copied_types)
+		       struct objfile *objfile,
+		       copied_types_hash_t &copied_types)
 {
   value_object *iter;
 

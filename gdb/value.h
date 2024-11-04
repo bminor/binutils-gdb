@@ -24,12 +24,12 @@
 #include "extension.h"
 #include "gdbsupport/gdb_ref_ptr.h"
 #include "gmp-utils.h"
+#include "gdbtypes.h"
 
 struct block;
 struct expression;
 struct regcache;
 struct symbol;
-struct type;
 struct ui_file;
 struct language_defn;
 struct value_print_options;
@@ -593,7 +593,7 @@ public:
 
   /* Update this value before discarding OBJFILE.  COPIED_TYPES is
      used to prevent cycles / duplicates.  */
-  void preserve (struct objfile *objfile, htab_t copied_types);
+  void preserve (struct objfile *objfile, copied_types_hash_t &copied_types);
 
   /* Unpack a bitfield of BITSIZE bits found at BITPOS in the object
      at VALADDR + EMBEDDEDOFFSET that has the type of DEST_VAL and

@@ -201,7 +201,8 @@ struct extension_language_ops
      COPIED_TYPES is used to prevent cycles / duplicates and is passed to
      preserve_one_value.  */
   void (*preserve_values) (const struct extension_language_defn *,
-			   struct objfile *objfile, htab_t copied_types);
+			   struct objfile *objfile,
+			   copied_types_hash_t &copied_types);
 
   /* Return non-zero if there is a stop condition for the breakpoint.
      This is used to implement the restriction that a breakpoint may have

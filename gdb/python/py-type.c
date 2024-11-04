@@ -1174,15 +1174,14 @@ struct typy_deleter
        operating on.  */
     gdbpy_enter enter_py;
 
-    htab_up copied_types = create_copied_types_hash ();
+    copied_types_hash_t copied_types;
 
     while (obj)
       {
 	type_object *next = obj->next;
 
-	htab_empty (copied_types.get ());
-
-	obj->type = copy_type_recursive (obj->type, copied_types.get ());
+	copied_types.clear ();
+	obj->type = copy_type_recursive (obj->type, copied_types);
 
 	obj->next = NULL;
 	obj->prev = NULL;
