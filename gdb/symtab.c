@@ -396,42 +396,35 @@ linetable_entry::pc (const struct objfile *objfile) const
 call_site *
 compunit_symtab::find_call_site (CORE_ADDR pc) const
 {
-  if (m_call_site_htab == nullptr)
-    return nullptr;
-
   CORE_ADDR delta = this->objfile ()->text_section_offset ();
-  unrelocated_addr unrelocated_pc = (unrelocated_addr) (pc - delta);
 
-  struct call_site call_site_local (unrelocated_pc, nullptr, nullptr);
-  void **slot
-    = htab_find_slot (m_call_site_htab, &call_site_local, NO_INSERT);
-  if (slot != nullptr)
-    return (call_site *) *slot;
+  if (auto it = m_call_site_htab->find (static_cast<unrelocated_addr> (pc - delta));
+      it != m_call_site_htab->end ())
+    return *it;
 
   /* See if the arch knows another PC we should try.  On some
      platforms, GCC emits a DWARF call site that is offset from the
      actual return location.  */
   struct gdbarch *arch = objfile ()->arch ();
   CORE_ADDR new_pc = gdbarch_update_call_site_pc (arch, pc);
+
   if (pc == new_pc)
     return nullptr;
 
-  unrelocated_pc = (unrelocated_addr) (new_pc - delta);
-  call_site new_call_site_local (unrelocated_pc, nullptr, nullptr);
-  slot = htab_find_slot (m_call_site_htab, &new_call_site_local, NO_INSERT);
-  if (slot == nullptr)
-    return nullptr;
+  if (auto it = m_call_site_htab->find (static_cast<unrelocated_addr> (new_pc - delta));
+      it != m_call_site_htab->end ())
+    return *it;
 
-  return (call_site *) *slot;
+  return nullptr;
 }
 
 /* See symtab.h.  */
 
 void
-compunit_symtab::set_call_site_htab (htab_up call_site_htab)
+compunit_symtab::set_call_site_htab (call_site_htab_t &&call_site_htab)
 {
   gdb_assert (m_call_site_htab == nullptr);
-  m_call_site_htab = call_site_htab.release ();
+  m_call_site_htab = new call_site_htab_t (std::move (call_site_htab));
 }
 
 /* See symtab.h.  */
@@ -500,8 +493,7 @@ void
 compunit_symtab::finalize ()
 {
   this->forget_cached_source_info ();
-  if (m_call_site_htab != nullptr)
-    htab_delete (m_call_site_htab);
+  delete m_call_site_htab;
 }
 
 /* The relocated address of the minimal symbol, using the section

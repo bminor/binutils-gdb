@@ -25,6 +25,7 @@
 #include "dwarf2/types.h"
 #include "../frame.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/unordered_set.h"
 
 struct dwarf2_locexpr_baton;
 struct dwarf2_per_cu_data;
@@ -168,33 +169,16 @@ struct call_site
     : per_cu (per_cu), per_objfile (per_objfile), m_unrelocated_pc (pc)
   {}
 
-  static int
-  eq (const call_site *a, const call_site *b)
-  {
-    return a->m_unrelocated_pc == b->m_unrelocated_pc;
-  }
-
-  static hashval_t
-  hash (const call_site *a)
-  {
-    return (hashval_t) a->m_unrelocated_pc;
-  }
-
-  static int
-  eq (const void *a, const void *b)
-  {
-    return eq ((const call_site *)a, (const call_site *)b);
-  }
-
-  static hashval_t
-  hash (const void *a)
-  {
-    return hash ((const call_site *)a);
-  }
-
-  /* Return the address of the first instruction after this call.  */
+  /* Return the relocated (using the objfile from PER_OBJFILE) address of the
+     first instruction after this call.  */
 
   CORE_ADDR pc () const;
+
+  /* Return the unrelocated address of the first instruction after this
+     call.  */
+
+  unrelocated_addr unrelocated_pc () const noexcept
+  { return m_unrelocated_pc; }
 
   /* Call CALLBACK for each target address.  CALLER_FRAME (for
      registers) can be NULL if it is not known.  This function may
@@ -240,5 +224,38 @@ public:
 
   struct call_site_parameter parameter[];
 };
+
+/* Key hash type to store call_site objects in gdb::unordered_set, identified by
+   their unrelocated PC.  */
+
+struct call_site_hash_pc
+{
+  using is_transparent = void;
+
+  std::size_t operator() (const call_site *site) const noexcept
+  { return (*this) (site->unrelocated_pc ()); }
+
+  std::size_t operator() (unrelocated_addr pc) const noexcept
+  { return std::hash<unrelocated_addr> () (pc); }
+};
+
+/* Key equal type to store call_site objects in gdb::unordered_set, identified
+   by their unrelocated PC.  */
+
+struct call_site_eq_pc
+{
+  using is_transparent = void;
+
+  bool operator() (const call_site *a, const call_site *b) const noexcept
+  { return (*this) (a->unrelocated_pc (), b); }
+
+  bool operator() (unrelocated_addr pc, const call_site *site) const noexcept
+  { return pc == site->unrelocated_pc (); }
+};
+
+/* Set of call_site objects identified by their unrelocated PC.  */
+
+using call_site_htab_t
+  = gdb::unordered_set<call_site *, call_site_hash_pc, call_site_eq_pc>;
 
 #endif /* CALL_SITE_H */

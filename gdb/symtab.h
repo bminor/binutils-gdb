@@ -24,6 +24,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include "dwarf2/call-site.h"
 #include "gdbsupport/gdb_vecs.h"
 #include "gdbtypes.h"
 #include "gdbsupport/gdb_obstack.h"
@@ -1947,7 +1948,7 @@ struct compunit_symtab
   symtab *primary_filetab () const;
 
   /* Set m_call_site_htab.  */
-  void set_call_site_htab (htab_up call_site_htab);
+  void set_call_site_htab (call_site_htab_t &&call_site_htab);
 
   /* Find call_site info for PC.  */
   call_site *find_call_site (CORE_ADDR pc) const;
@@ -2014,7 +2015,7 @@ struct compunit_symtab
   unsigned int m_epilogue_unwind_valid : 1;
 
   /* struct call_site entries for this compilation unit or NULL.  */
-  htab_t m_call_site_htab;
+  call_site_htab_t *m_call_site_htab;
 
   /* The macro table for this symtab.  Like the blockvector, this
      is shared between different symtabs in a given compilation unit.
