@@ -19,8 +19,10 @@
 #ifndef TYPEPRINT_H
 #define TYPEPRINT_H
 
-#include "gdbsupport/gdb-hashtab.h"
 #include "gdbsupport/gdb_obstack.h"
+#include "gdbsupport/unordered_set.h"
+#include "gdbtypes.h"
+#include "hashtab.h"
 
 enum language;
 struct ui_file;
@@ -115,19 +117,21 @@ private:
 
 extern const struct type_print_options type_print_raw_options;
 
-/* A hash table holding typedef_field objects.  This is more
-   complicated than an ordinary hash because it must also track the
-   lifetime of some -- but not all -- of the contained objects.  */
+/* A hash table holding decl_field objects.  This is more complicated than an
+   ordinary hash because it must also track the lifetime of some -- but not all
+   -- of the contained objects.  */
 
 class typedef_hash_table
 {
 public:
 
   /* Create a new typedef-lookup hash table.  */
-  typedef_hash_table ();
+  typedef_hash_table () = default;
 
   /* Copy a typedef hash.  */
-  typedef_hash_table (const typedef_hash_table &);
+  typedef_hash_table (const typedef_hash_table &other)
+    : m_table (other.m_table)
+  {}
 
   typedef_hash_table &operator= (const typedef_hash_table &) = delete;
 
@@ -150,9 +154,36 @@ private:
   static const char *find_global_typedef (const struct type_print_options *flags,
 					  struct type *t);
 
+  struct decl_field_type_hash
+  {
+    using is_transparent = void;
 
-  /* The actual hash table.  */
-  htab_up m_table;
+    std::size_t operator() (type *t) const noexcept
+    {
+      /* Use check_typedef: the hash must agree with equals, and types_equal
+	 strips typedefs.  */
+      return htab_hash_string (TYPE_SAFE_NAME (check_typedef (t)));
+    }
+
+    std::size_t operator() (const decl_field *f) const noexcept
+    { return (*this) (f->type); }
+  };
+
+  struct decl_field_type_eq
+  {
+    using is_transparent = void;
+
+    bool operator () (type *t, const decl_field *f) const noexcept
+    { return types_equal (t, f->type); }
+
+    bool operator() (const decl_field *lhs,
+		     const decl_field *rhs) const noexcept
+    { return (*this) (lhs->type, rhs); }
+  };
+
+  /* The actual hash table of `decl_field *` identified by their type field.  */
+  gdb::unordered_set<decl_field *, decl_field_type_hash, decl_field_type_eq>
+    m_table;
 
   /* Storage for typedef_field objects that must be synthesized.  */
   auto_obstack m_storage;
