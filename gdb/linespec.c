@@ -1386,6 +1386,14 @@ struct decode_line_2_item
   {
   }
 
+  /* Used for sorting.  */
+  bool operator< (const decode_line_2_item &other) const
+  {
+    if (displayform != other.displayform)
+      return displayform < other.displayform;
+    return fullform < other.fullform;
+  }
+
   /* The form using symtab_to_fullname.  */
   std::string fullform;
 
@@ -1396,18 +1404,6 @@ struct decode_line_2_item
      requested breakpoint for this entry.  */
   unsigned int selected : 1;
 };
-
-/* Helper for std::sort to sort decode_line_2_item entries by
-   DISPLAYFORM and secondarily by FULLFORM.  */
-
-static bool
-decode_line_2_compare_items (const decode_line_2_item &a,
-			     const decode_line_2_item &b)
-{
-  if (a.displayform != b.displayform)
-    return a.displayform < b.displayform;
-  return a.fullform < b.fullform;
-}
 
 /* Handle multiple results in RESULT depending on SELECT_MODE.  This
    will either return normally, throw an exception on multiple
@@ -1456,7 +1452,7 @@ decode_line_2 (struct linespec_state *self,
     }
 
   /* Sort the list of method names.  */
-  std::sort (items.begin (), items.end (), decode_line_2_compare_items);
+  std::sort (items.begin (), items.end ());
 
   /* Remove entries with the same FULLFORM.  */
   items.erase (std::unique (items.begin (), items.end (),
