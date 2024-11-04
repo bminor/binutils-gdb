@@ -25,6 +25,7 @@
 #include <optional>
 #include "language.h"
 #include "gdbsupport/unordered_set.h"
+#include "dwarf2/die.h"
 
 /* Type used for delaying computation of method physnames.
    See comments for compute_delayed_physnames.  */
@@ -153,7 +154,9 @@ public:
 
   /* A hash table of DIE cu_offset for following references with
      die_info->offset.sect_off as hash.  */
-  htab_up die_hash;
+  using die_hash_t = gdb::unordered_set<die_info *, die_info_hash_sect_off,
+					die_info_eq_sect_off>;
+  die_hash_t die_hash;
 
   /* Full DIEs if read in.  */
   struct die_info *dies = nullptr;
