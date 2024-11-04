@@ -3424,67 +3424,45 @@ ada_decoded_op_name (enum exp_opcode op)
   error (_("Could not find operator name for opcode"));
 }
 
-/* Returns true (non-zero) iff decoded name N0 should appear before N1
-   in a listing of choices during disambiguation (see sort_choices, below).
-   The idea is that overloadings of a subprogram name from the
-   same package should sort in their source order.  We settle for ordering
-   such symbols by their trailing number (__N  or $N).  */
-
-static int
-encoded_ordered_before (const char *N0, const char *N1)
-{
-  if (N1 == NULL)
-    return 0;
-  else if (N0 == NULL)
-    return 1;
-  else
-    {
-      int k0, k1;
-
-      for (k0 = strlen (N0) - 1; k0 > 0 && isdigit (N0[k0]); k0 -= 1)
-	;
-      for (k1 = strlen (N1) - 1; k1 > 0 && isdigit (N1[k1]); k1 -= 1)
-	;
-      if ((N0[k0] == '_' || N0[k0] == '$') && N0[k0 + 1] != '\000'
-	  && (N1[k1] == '_' || N1[k1] == '$') && N1[k1 + 1] != '\000')
-	{
-	  int n0, n1;
-
-	  n0 = k0;
-	  while (N0[n0] == '_' && n0 > 0 && N0[n0 - 1] == '_')
-	    n0 -= 1;
-	  n1 = k1;
-	  while (N1[n1] == '_' && n1 > 0 && N1[n1 - 1] == '_')
-	    n1 -= 1;
-	  if (n0 == n1 && strncmp (N0, N1, n0) == 0)
-	    return (atoi (N0 + k0 + 1) < atoi (N1 + k1 + 1));
-	}
-      return (strcmp (N0, N1) < 0);
-    }
-}
-
-/* Sort SYMS[0..NSYMS-1] to put the choices in a canonical order by the
-   encoded names.  */
+/* Sort SYMS to put the choices in a canonical order by the encoded
+   names.  */
 
 static void
-sort_choices (struct block_symbol syms[], int nsyms)
+sort_choices (std::vector<struct block_symbol> &syms)
 {
-  int i;
+  std::sort (syms.begin (), syms.end (),
+	     [] (const block_symbol &a, const block_symbol &b)
+	     {
+	       if (!a.symbol->is_objfile_owned ())
+		 return true;
+	       if (!b.symbol->is_objfile_owned ())
+		 return true;
 
-  for (i = 1; i < nsyms; i += 1)
-    {
-      struct block_symbol sym = syms[i];
-      int j;
+	       const char *fna = a.symbol->symtab ()->filename;
+	       const char *fnb = b.symbol->symtab ()->filename;
 
-      for (j = i - 1; j >= 0; j -= 1)
-	{
-	  if (encoded_ordered_before (syms[j].symbol->linkage_name (),
-				      sym.symbol->linkage_name ()))
-	    break;
-	  syms[j + 1] = syms[j];
-	}
-      syms[j + 1] = sym;
-    }
+	       /* First sort by basename.  This is done because,
+		  depending on how GNAT was invoked, different sources
+		  might have relative or absolute paths, but we'd like
+		  similar ones to appear together.  */
+	       int cmp = strcmp (lbasename (fna), lbasename (fnb));
+	       if (cmp != 0)
+		 return cmp < 0;
+
+	       /* The basenames are the same, so group identical paths
+		  together.  */
+	       cmp = strcmp (fna, fnb);
+	       if (cmp != 0)
+		 return cmp < 0;
+
+	       if (a.symbol->line () < b.symbol->line ())
+		 return true;
+	       if (a.symbol->line () > b.symbol->line ())
+		 return false;
+
+	       return strcmp (a.symbol->natural_name (),
+			      b.symbol->natural_name ()) < 0;
+	     });
 }
 
 /* Whether GDB should display formals and return types for functions in the
@@ -3619,7 +3597,7 @@ get_selections (int *choices, int n_choices, int max_results,
   return n_chosen;
 }
 
-/* Given a list of NSYMS symbols in SYMS, select up to MAX_RESULTS>0
+/* Given a list symbols in SYMS, select up to MAX_RESULTS>0
    by asking the user (if necessary), returning the number selected,
    and setting the first elements of SYMS items.  Error if no symbols
    selected.  */
@@ -3628,18 +3606,16 @@ get_selections (int *choices, int n_choices, int max_results,
    to be re-integrated one of these days.  */
 
 static int
-user_select_syms (struct block_symbol *syms, int nsyms, int max_results)
+user_select_syms (std::vector<struct block_symbol> &syms, int max_results)
 {
   int i;
-  int *chosen = XALLOCAVEC (int , nsyms);
-  int n_chosen;
   int first_choice = (max_results == 1) ? 1 : 2;
   const char *select_mode = multiple_symbols_select_mode ();
 
   if (max_results < 1)
     error (_("Request to select 0 symbols!"));
-  if (nsyms <= 1)
-    return nsyms;
+  if (syms.size () <= 1)
+    return syms.size ();
 
   if (select_mode == multiple_symbols_cancel)
     error (_("\
@@ -3650,15 +3626,15 @@ See set/show multiple-symbol."));
      Only do that if more than one symbol can be selected, of course.
      Otherwise, display the menu as usual.  */
   if (select_mode == multiple_symbols_all && max_results > 1)
-    return nsyms;
+    return syms.size ();
 
   gdb_printf (_("[0] cancel\n"));
   if (max_results > 1)
     gdb_printf (_("[1] all\n"));
 
-  sort_choices (syms, nsyms);
+  sort_choices (syms);
 
-  for (i = 0; i < nsyms; i += 1)
+  for (i = 0; i < syms.size (); i += 1)
     {
       if (syms[i].symbol == NULL)
 	continue;
@@ -3733,8 +3709,10 @@ See set/show multiple-symbol."));
 	}
     }
 
-  n_chosen = get_selections (chosen, nsyms, max_results, max_results > 1,
-			     "overload-choice");
+  int *chosen = XALLOCAVEC (int , syms.size ());
+  int n_chosen = get_selections (chosen, syms.size (),
+				 max_results, max_results > 1,
+				 "overload-choice");
 
   for (i = 0; i < n_chosen; i += 1)
     syms[i] = syms[chosen[i]];
@@ -3921,7 +3899,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
   else
     {
       gdb_printf (_("Multiple matches for %s\n"), sym->print_name ());
-      user_select_syms (candidates.data (), candidates.size (), 1);
+      user_select_syms (candidates, 1);
       i = 0;
     }
 
@@ -4127,7 +4105,8 @@ ada_resolve_function (std::vector<struct block_symbol> &syms,
   else if (m > 1 && !parse_completion)
     {
       gdb_printf (_("Multiple matches for %s\n"), name);
-      user_select_syms (syms.data (), m, 1);
+      syms.resize (m);
+      user_select_syms (syms, 1);
       return 0;
     }
   return 0;
