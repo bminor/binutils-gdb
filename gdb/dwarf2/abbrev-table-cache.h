@@ -32,7 +32,8 @@ public:
   /* Find an abbrev table coming from the abbrev section SECTION at
      offset OFFSET.  Return the table, or nullptr if it has not yet
      been registered.  */
-  abbrev_table *find (struct dwarf2_section_info *section, sect_offset offset)
+  const abbrev_table *find (dwarf2_section_info *section,
+			    sect_offset offset) const
   {
     search_key key = { section, offset };
 

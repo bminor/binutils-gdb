@@ -573,7 +573,7 @@ struct die_reader_specs
   const gdb_byte *buffer_end;
 
   /* The abbreviation table to use when reading the DIEs.  */
-  struct abbrev_table *abbrev_table;
+  const struct abbrev_table *abbrev_table;
 };
 
 /* A subclass of die_reader_specs that holds storage and has complex
@@ -585,10 +585,10 @@ public:
 
   cutu_reader (dwarf2_per_cu_data *this_cu,
 	       dwarf2_per_objfile *per_objfile,
-	       struct abbrev_table *abbrev_table,
+	       const struct abbrev_table *abbrev_table,
 	       dwarf2_cu *existing_cu,
 	       bool skip_partial,
-	       abbrev_table_cache *cache = nullptr);
+	       const abbrev_table_cache *cache = nullptr);
 
   explicit cutu_reader (struct dwarf2_per_cu_data *this_cu,
 			dwarf2_per_objfile *per_objfile,
@@ -3710,7 +3710,7 @@ init_cu_die_reader (struct die_reader_specs *reader,
 		    struct dwarf2_cu *cu,
 		    struct dwarf2_section_info *section,
 		    struct dwo_file *dwo_file,
-		    struct abbrev_table *abbrev_table)
+		    const abbrev_table *abbrev_table)
 {
   gdb_assert (section->readin && section->buffer != NULL);
   reader->abfd = section->get_bfd_owner ();
@@ -4009,10 +4009,10 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
 
 cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 			  dwarf2_per_objfile *per_objfile,
-			  struct abbrev_table *abbrev_table,
+			  const struct abbrev_table *abbrev_table,
 			  dwarf2_cu *existing_cu,
 			  bool skip_partial,
-			  abbrev_table_cache *cache)
+			  const abbrev_table_cache *cache)
   : die_reader_specs {},
     m_this_cu (this_cu)
 {

@@ -377,7 +377,7 @@ public:
   DISABLE_COPY_AND_ASSIGN (cooked_index_storage);
 
   /* Return the current abbrev table_cache.  */
-  abbrev_table_cache *get_abbrev_table_cache ()
+  const abbrev_table_cache *get_abbrev_table_cache () const
   { return &m_abbrev_table_cache; }
 
   /* Return the DIE reader corresponding to PER_CU.  If no such reader
