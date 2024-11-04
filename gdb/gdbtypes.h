@@ -48,11 +48,7 @@
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/gdb-hashtab.h"
 #include <optional>
-#include "gdbsupport/offset-type.h"
 #include "gdbsupport/enum-flags.h"
-#include "gdbsupport/underlying.h"
-#include "gdbsupport/print-utils.h"
-#include "gdbsupport/function-view.h"
 #include "dwarf2.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gmp-utils.h"
