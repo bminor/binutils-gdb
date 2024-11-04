@@ -21,12 +21,13 @@
 #define GDB_DWARF2_ABBREV_TABLE_CACHE_H
 
 #include "dwarf2/abbrev.h"
+#include "gdbsupport/unordered_set.h"
 
 /* An abbrev table cache holds abbrev tables for easier reuse.  */
 class abbrev_table_cache
 {
 public:
-  abbrev_table_cache ();
+  abbrev_table_cache () = default;
   DISABLE_COPY_AND_ASSIGN (abbrev_table_cache);
 
   /* Find an abbrev table coming from the abbrev section SECTION at
@@ -35,10 +36,13 @@ public:
   const abbrev_table *find (dwarf2_section_info *section,
 			    sect_offset offset) const
   {
-    search_key key = { section, offset };
+    abbrev_table_search_key key {section, offset};
 
-    return (abbrev_table *) htab_find_with_hash (m_tables.get (), &key,
-						 to_underlying (offset));
+    if (auto iter = m_tables.find (key);
+	iter != m_tables.end ())
+      return iter->get ();
+
+    return nullptr;
   }
 
   /* Add TABLE to this cache.  Ownership of TABLE is transferred to
@@ -49,18 +53,43 @@ public:
   void add (abbrev_table_up table);
 
 private:
-
-  static hashval_t hash_table (const void *item);
-  static int eq_table (const void *lhs, const void *rhs);
-
-  struct search_key
+  /* Key used to search for an existing abbrev table in M_TABLES.  */
+  struct abbrev_table_search_key
   {
-    struct dwarf2_section_info *section;
-    sect_offset offset;
+    const dwarf2_section_info *section;
+    sect_offset sect_off;
+  };
+
+  struct abbrev_table_hash
+  {
+    using is_transparent = void;
+
+    std::size_t operator() (const abbrev_table_search_key &key) const noexcept
+    {
+      return (std::hash<const dwarf2_section_info *> () (key.section)
+	      + (std::hash<std::underlying_type_t<decltype (key.sect_off)>> ()
+		 (to_underlying (key.sect_off))));
+    }
+
+    std::size_t operator() (const abbrev_table_up &table) const noexcept
+    { return (*this) ({ table->section, table->sect_off }); }
+  };
+
+  struct abbrev_table_eq
+  {
+    using is_transparent = void;
+
+    bool operator() (const abbrev_table_search_key &key,
+		     const abbrev_table_up &table) const noexcept
+    { return key.section == table->section && key.sect_off == table->sect_off; }
+
+    bool operator() (const abbrev_table_up &lhs,
+		     const abbrev_table_up &rhs) const noexcept
+    { return (*this) ({ lhs->section, lhs->sect_off }, rhs); }
   };
 
   /* Hash table of abbrev tables.  */
-  htab_up m_tables;
+  gdb::unordered_set<abbrev_table_up, abbrev_table_hash, abbrev_table_eq> m_tables;
 };
 
 #endif /* GDB_DWARF2_ABBREV_TABLE_CACHE_H */

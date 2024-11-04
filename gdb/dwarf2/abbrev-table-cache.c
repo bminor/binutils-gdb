@@ -19,33 +19,6 @@
 
 #include "dwarf2/abbrev-table-cache.h"
 
-/* Hash function for an abbrev table.  */
-
-hashval_t
-abbrev_table_cache::hash_table (const void *item)
-{
-  const struct abbrev_table *table = (const struct abbrev_table *) item;
-  return to_underlying (table->sect_off);
-}
-
-/* Comparison function for abbrev table.  */
-
-int
-abbrev_table_cache::eq_table (const void *lhs, const void *rhs)
-{
-  const struct abbrev_table *l_table = (const struct abbrev_table *) lhs;
-  const search_key *key = (const search_key *) rhs;
-  return (l_table->section == key->section
-	  && l_table->sect_off == key->offset);
-}
-
-abbrev_table_cache::abbrev_table_cache ()
-  : m_tables (htab_create_alloc (20, hash_table, eq_table,
-				 htab_delete_entry<abbrev_table>,
-				 xcalloc, xfree))
-{
-}
-
 void
 abbrev_table_cache::add (abbrev_table_up table)
 {
@@ -53,11 +26,8 @@ abbrev_table_cache::add (abbrev_table_up table)
   if (table == nullptr)
     return;
 
-  search_key key = { table->section, table->sect_off };
-  void **slot = htab_find_slot_with_hash (m_tables.get (), &key,
-					  to_underlying (table->sect_off),
-					  INSERT);
+  bool inserted = m_tables.emplace (std::move (table)).second;
+
   /* If this one already existed, then it should have been reused.  */
-  gdb_assert (*slot == nullptr);
-  *slot = (void *) table.release ();
+  gdb_assert (inserted);
 }
