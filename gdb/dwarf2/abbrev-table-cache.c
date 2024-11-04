@@ -17,12 +17,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "dwarf2/abbrev-cache.h"
+#include "dwarf2/abbrev-table-cache.h"
 
 /* Hash function for an abbrev table.  */
 
 hashval_t
-abbrev_cache::hash_table (const void *item)
+abbrev_table_cache::hash_table (const void *item)
 {
   const struct abbrev_table *table = (const struct abbrev_table *) item;
   return to_underlying (table->sect_off);
@@ -31,7 +31,7 @@ abbrev_cache::hash_table (const void *item)
 /* Comparison function for abbrev table.  */
 
 int
-abbrev_cache::eq_table (const void *lhs, const void *rhs)
+abbrev_table_cache::eq_table (const void *lhs, const void *rhs)
 {
   const struct abbrev_table *l_table = (const struct abbrev_table *) lhs;
   const search_key *key = (const search_key *) rhs;
@@ -39,7 +39,7 @@ abbrev_cache::eq_table (const void *lhs, const void *rhs)
 	  && l_table->sect_off == key->offset);
 }
 
-abbrev_cache::abbrev_cache ()
+abbrev_table_cache::abbrev_table_cache ()
   : m_tables (htab_create_alloc (20, hash_table, eq_table,
 				 htab_delete_entry<abbrev_table>,
 				 xcalloc, xfree))
@@ -47,7 +47,7 @@ abbrev_cache::abbrev_cache ()
 }
 
 void
-abbrev_cache::add (abbrev_table_up table)
+abbrev_table_cache::add (abbrev_table_up table)
 {
   /* We allow this as a convenience to the caller.  */
   if (table == nullptr)

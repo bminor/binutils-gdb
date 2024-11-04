@@ -17,17 +17,17 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_DWARF2_ABBREV_CACHE_H
-#define GDB_DWARF2_ABBREV_CACHE_H
+#ifndef GDB_DWARF2_ABBREV_TABLE_CACHE_H
+#define GDB_DWARF2_ABBREV_TABLE_CACHE_H
 
 #include "dwarf2/abbrev.h"
 
-/* An abbrev cache holds abbrev tables for easier reuse.  */
-class abbrev_cache
+/* An abbrev table cache holds abbrev tables for easier reuse.  */
+class abbrev_table_cache
 {
 public:
-  abbrev_cache ();
-  DISABLE_COPY_AND_ASSIGN (abbrev_cache);
+  abbrev_table_cache ();
+  DISABLE_COPY_AND_ASSIGN (abbrev_table_cache);
 
   /* Find an abbrev table coming from the abbrev section SECTION at
      offset OFFSET.  Return the table, or nullptr if it has not yet
@@ -62,4 +62,4 @@ private:
   htab_up m_tables;
 };
 
-#endif /* GDB_DWARF2_ABBREV_CACHE_H */
+#endif /* GDB_DWARF2_ABBREV_TABLE_CACHE_H */

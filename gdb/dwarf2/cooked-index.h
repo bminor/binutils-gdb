@@ -30,7 +30,7 @@
 #include "gdbsupport/iterator-range.h"
 #include "dwarf2/mapped-index.h"
 #include "dwarf2/read.h"
-#include "dwarf2/abbrev-cache.h"
+#include "dwarf2/abbrev-table-cache.h"
 #include "dwarf2/parent-map.h"
 #include "gdbsupport/range-chain.h"
 #include "complaints.h"
@@ -376,11 +376,9 @@ public:
   cooked_index_storage ();
   DISABLE_COPY_AND_ASSIGN (cooked_index_storage);
 
-  /* Return the current abbrev cache.  */
-  abbrev_cache *get_abbrev_cache ()
-  {
-    return &m_abbrev_cache;
-  }
+  /* Return the current abbrev table_cache.  */
+  abbrev_table_cache *get_abbrev_table_cache ()
+  { return &m_abbrev_table_cache; }
 
   /* Return the DIE reader corresponding to PER_CU.  If no such reader
      has been registered, return NULL.  */
@@ -436,8 +434,9 @@ private:
   /* Equality function for cutu_reader.  */
   static int eq_cutu_reader (const void *a, const void *b);
 
-  /* The abbrev cache used by this indexer.  */
-  abbrev_cache m_abbrev_cache;
+  /* The abbrev table cache used by this indexer.  */
+  abbrev_table_cache m_abbrev_table_cache;
+
   /* A hash table of cutu_reader objects.  */
   htab_up m_reader_hash;
   /* The index shard that is being constructed.  */

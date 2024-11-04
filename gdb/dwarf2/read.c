@@ -89,7 +89,7 @@
 #include "gdbsupport/pathstuff.h"
 #include "count-one-bits.h"
 #include <unordered_set>
-#include "dwarf2/abbrev-cache.h"
+#include "dwarf2/abbrev-table-cache.h"
 #include "cooked-index.h"
 #include "gdbsupport/thread-pool.h"
 #include "run-on-main-thread.h"
@@ -588,7 +588,7 @@ public:
 	       struct abbrev_table *abbrev_table,
 	       dwarf2_cu *existing_cu,
 	       bool skip_partial,
-	       abbrev_cache *cache = nullptr);
+	       abbrev_table_cache *cache = nullptr);
 
   explicit cutu_reader (struct dwarf2_per_cu_data *this_cu,
 			dwarf2_per_objfile *per_objfile,
@@ -4012,7 +4012,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 			  struct abbrev_table *abbrev_table,
 			  dwarf2_cu *existing_cu,
 			  bool skip_partial,
-			  abbrev_cache *cache)
+			  abbrev_table_cache *cache)
   : die_reader_specs {},
     m_this_cu (this_cu)
 {
@@ -4431,7 +4431,7 @@ cooked_index_storage::get_reader (dwarf2_per_cu_data *per_cu)
 cutu_reader *
 cooked_index_storage::preserve (std::unique_ptr<cutu_reader> reader)
 {
-  m_abbrev_cache.add (reader->release_abbrev_table ());
+  m_abbrev_table_cache.add (reader->release_abbrev_table ());
 
   int index = reader->cu->per_cu->index;
   void **slot = htab_find_slot_with_hash (m_reader_hash.get (), &index,
@@ -4609,7 +4609,7 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
   if (reader == nullptr)
     {
       cutu_reader new_reader (this_cu, per_objfile, nullptr, nullptr, false,
-			      storage->get_abbrev_cache ());
+			      storage->get_abbrev_table_cache ());
 
       if (new_reader.comp_unit_die == nullptr || new_reader.dummy_p)
 	return;
@@ -16243,7 +16243,7 @@ cooked_indexer::ensure_cu_exists (cutu_reader *reader,
   if (result == nullptr)
     {
       cutu_reader new_reader (per_cu, per_objfile, nullptr, nullptr, false,
-			      m_index_storage->get_abbrev_cache ());
+			      m_index_storage->get_abbrev_table_cache ());
 
       if (new_reader.dummy_p || new_reader.comp_unit_die == nullptr
 	  || !new_reader.comp_unit_die->has_children)
