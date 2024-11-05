@@ -47,6 +47,7 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "tls-le-relax"
     run_dump_test "relax-medium-call"
     run_dump_test "relax-medium-call-1"
+    run_dump_test "check_got_relax"
 }
 
 if [istarget "loongarch32-*-*"] {

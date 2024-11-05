@@ -5099,12 +5099,12 @@ loongarch_relax_call36 (bfd *abfd, asection *sec, asection *sym_sec,
 /* Relax pcalau12i,ld.d => pcalau12i,addi.d.  */
 static bool
 loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
-			  asection *sym_sec ATTRIBUTE_UNUSED,
+			  asection *sym_sec,
 			  Elf_Internal_Rela *rel_hi,
-			  bfd_vma symval ATTRIBUTE_UNUSED,
-			  struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			  bfd_vma symval,
+			  struct bfd_link_info *info,
 			  bool *again ATTRIBUTE_UNUSED,
-			  bfd_vma max_alignment ATTRIBUTE_UNUSED)
+			  bfd_vma max_alignment)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   Elf_Internal_Rela *rel_lo = rel_hi + 2;
@@ -5113,10 +5113,32 @@ loongarch_relax_pcala_ld (bfd *abfd, asection *sec,
   uint32_t rd = LARCH_GET_RD (pca);
   uint32_t addi_d = LARCH_OP_ADDI_D;
 
+  /* This section's output_offset need to subtract the bytes of instructions
+     relaxed by the previous sections, so it needs to be updated beforehand.
+     size_input_section already took care of updating it after relaxation,
+     so we additionally update once here.  */
+  sec->output_offset = sec->output_section->size;
+  bfd_vma pc = sec_addr (sec) + rel_hi->r_offset;
+
+  /* If pc and symbol not in the same segment, add/sub segment alignment.  */
+  if (!loongarch_two_sections_in_same_segment (info->output_bfd,
+					       sec->output_section,
+					       sym_sec->output_section))
+    max_alignment = info->maxpagesize > max_alignment ? info->maxpagesize
+							: max_alignment;
+
+  if (symval > pc)
+    pc -= (max_alignment > 4 ? max_alignment : 0);
+  else if (symval < pc)
+    pc += (max_alignment > 4 ? max_alignment : 0);
+
   if ((ELFNN_R_TYPE (rel_lo->r_info) != R_LARCH_GOT_PC_LO12)
       || (LARCH_GET_RD (ld) != rd)
       || (LARCH_GET_RJ (ld) != rd)
-      || !LARCH_INSN_LD_D (ld))
+      || !LARCH_INSN_LD_D (ld)
+      /* Within +-2G addressing range.  */
+      || (bfd_signed_vma)(symval - pc) < (bfd_signed_vma)(int32_t)0x80000000
+      || (bfd_signed_vma)(symval - pc) > (bfd_signed_vma)(int32_t)0x7fffffff)
     return false;
 
   addi_d = addi_d | (rd << 5) | rd;
