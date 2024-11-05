@@ -8260,7 +8260,7 @@ elfNN_aarch64_maybe_function_sym (const asymbol *sym, asection *sec,
     return 0;
 
   size = (sym->flags & BSF_SYNTHETIC) ? 0 : elf_sym->internal_elf_sym.st_size;
-  
+
   if (!(sym->flags & BSF_SYNTHETIC))
     switch (ELF_ST_TYPE (elf_sym->internal_elf_sym.st_info))
       {
@@ -8278,7 +8278,7 @@ elfNN_aarch64_maybe_function_sym (const asymbol *sym, asection *sec,
 	default:
 	  return 0;
       }
-  
+
   if ((sym->flags & BSF_LOCAL)
       && bfd_is_aarch64_special_symbol_name (sym->name,
 					     BFD_AARCH64_SPECIAL_SYM_TYPE_ANY))
