@@ -84,6 +84,9 @@ struct elf_aarch64_obj_tdata
 
   /* Software protections options.  */
   struct aarch64_protection_opts sw_protections;
+
+  /* Number of reported BTI issues.  */
+  int n_bti_issues;
 };
 
 #define elf_aarch64_tdata(bfd)				\

@@ -5021,6 +5021,7 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
       |= GNU_PROPERTY_AARCH64_FEATURE_1_BTI;
 
   elf_aarch64_tdata (output_bfd)->sw_protections = *sw_protections;
+  elf_aarch64_tdata (output_bfd)->n_bti_issues = 0;
 
   setup_plt_values (link_info, sw_protections->plt_type);
 }

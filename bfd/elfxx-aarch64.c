@@ -755,6 +755,30 @@ _bfd_aarch64_elf_create_gnu_property_section (struct bfd_link_info *info,
   elf_section_type (sec) = SHT_NOTE;
 }
 
+static const int GNU_PROPERTY_ISSUES_MAX = 20;
+
+/* Report a summary of the issues met during the merge of the GNU properties, if
+   the number of issues goes above GNU_PROPERTY_ISSUES_MAX.  */
+static void
+_bfd_aarch64_report_summary_merge_issues (struct bfd_link_info *info)
+{
+  const struct elf_aarch64_obj_tdata * tdata
+    = elf_aarch64_tdata (info->output_bfd);
+  aarch64_feature_marking_report bti_report = tdata->sw_protections.bti_report;
+
+  if (tdata->n_bti_issues > GNU_PROPERTY_ISSUES_MAX
+      && bti_report != MARKING_NONE)
+    {
+      const char *msg
+	= (tdata->sw_protections.bti_report == MARKING_ERROR)
+	? _("%Xerror: found a total of %d inputs incompatible with "
+	    "BTI requirements.\n")
+	: _("warning: found a total of %d inputs incompatible with "
+	    "BTI requirements.\n");
+      info->callbacks->einfo (msg, tdata->n_bti_issues);
+    }
+}
+
 /* Find the first input bfd with GNU property and merge it with GPROP.  If no
    such input is found, add it to a new section at the last input.  Update
    GPROP accordingly.  */
@@ -824,6 +848,8 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	    }
 	}
     }
+
+  _bfd_aarch64_report_summary_merge_issues (info);
 
   tdata->gnu_property_aarch64_feature_1_and = outprop;
   return pbfd;
@@ -964,6 +990,11 @@ _bfd_aarch64_elf_check_bti_report (struct bfd_link_info *info, bfd *ebfd)
   struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
 
   if (tdata->sw_protections.bti_report == MARKING_NONE)
+    return;
+
+  ++tdata->n_bti_issues;
+
+  if (tdata->n_bti_issues > GNU_PROPERTY_ISSUES_MAX)
     return;
 
   const char *msg
