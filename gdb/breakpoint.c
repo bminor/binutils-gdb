@@ -13012,53 +13012,53 @@ update_breakpoint_locations (code_breakpoint *b,
     }
 
   /* If possible, carry over 'disable' status from existing
-     breakpoints.  */
-  {
-    /* If there are multiple breakpoints with the same function name,
-       e.g. for inline functions, comparing function names won't work.
-       Instead compare pc addresses; this is just a heuristic as things
-       may have moved, but in practice it gives the correct answer
-       often enough until a better solution is found.  */
-    int have_ambiguous_names = ambiguous_names_p (b->locations ());
+     breakpoints.
 
-    for (const bp_location &e : existing_locations)
-      {
-	if ((!e.enabled || e.disabled_by_cond) && e.function_name)
-	  {
-	    if (have_ambiguous_names)
+     If there are multiple breakpoints with the same function name,
+     e.g. for inline functions, comparing function names won't work.
+     Instead compare pc addresses; this is just a heuristic as things
+     may have moved, but in practice it gives the correct answer
+     often enough until a better solution is found.  */
+  bool have_ambiguous_names = ambiguous_names_p (b->locations ());
+
+  for (const bp_location &e : existing_locations)
+    {
+      if (e.function_name == nullptr
+	  || (e.enabled && !e.disabled_by_cond))
+	continue;
+
+      if (have_ambiguous_names)
+	{
+	  for (bp_location &l : b->locations ())
+	    {
+	      /* Ignore software vs hardware location type at
+		 this point, because with "set breakpoint
+		 auto-hw", after a re-set, locations that were
+		 hardware can end up as software, or vice versa.
+		 As mentioned above, this is an heuristic and in
+		 practice should give the correct answer often
+		 enough.  */
+	      if (breakpoint_locations_match (&e, &l, true))
+		{
+		  l.enabled = e.enabled;
+		  l.disabled_by_cond = e.disabled_by_cond;
+		  break;
+		}
+	    }
+	}
+      else
+	{
+	  for (bp_location &l : b->locations ())
+	    if (l.function_name
+		&& strcmp (e.function_name.get (),
+			   l.function_name.get ()) == 0)
 	      {
-		for (bp_location &l : b->locations ())
-		  {
-		    /* Ignore software vs hardware location type at
-		       this point, because with "set breakpoint
-		       auto-hw", after a re-set, locations that were
-		       hardware can end up as software, or vice versa.
-		       As mentioned above, this is an heuristic and in
-		       practice should give the correct answer often
-		       enough.  */
-		    if (breakpoint_locations_match (&e, &l, true))
-		      {
-			l.enabled = e.enabled;
-			l.disabled_by_cond = e.disabled_by_cond;
-			break;
-		      }
-		  }
+		l.enabled = e.enabled;
+		l.disabled_by_cond = e.disabled_by_cond;
+		break;
 	      }
-	    else
-	      {
-		for (bp_location &l : b->locations ())
-		  if (l.function_name
-		      && strcmp (e.function_name.get (),
-				 l.function_name.get ()) == 0)
-		    {
-		      l.enabled = e.enabled;
-		      l.disabled_by_cond = e.disabled_by_cond;
-		      break;
-		    }
-	      }
-	  }
-      }
-  }
+	}
+    }
 
   if (!locations_are_equal (existing_locations, b->locations ()))
     notify_breakpoint_modified (b);
