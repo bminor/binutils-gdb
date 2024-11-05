@@ -21837,6 +21837,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
   attr = dwarf2_attr (comp_unit_die, DW_AT_name, cu);
   if (attr != nullptr
       && cu->producer != nullptr
+      && attr->as_string () != nullptr
       && strcmp (attr->as_string (), "<artificial>") == 0
       && producer_is_gcc (cu->producer, nullptr, nullptr))
     cu->per_cu->lto_artificial = true;
