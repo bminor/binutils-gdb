@@ -8594,7 +8594,6 @@ code_breakpoint::add_location (const symtab_and_line &sal)
   new_loc->symtab = sal.symtab;
   new_loc->symbol = sal.symbol;
   new_loc->msymbol = sal.msymbol;
-  new_loc->objfile = sal.objfile;
 
   breakpoint::add_location (*new_loc);
 

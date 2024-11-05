@@ -513,9 +513,6 @@ public:
      originally set on a GNU ifunc symbol.  */
   const minimal_symbol *msymbol = NULL;
 
-  /* The objfile the symbol or minimal symbol were found in.  */
-  const struct objfile *objfile = NULL;
-
   /* Return a string representation of the bp_location.
      This is only meant to be used in debug messages.  */
   std::string to_string () const;
