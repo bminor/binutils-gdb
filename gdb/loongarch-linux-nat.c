@@ -608,17 +608,11 @@ loongarch_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
   if (siginfo.si_signo != SIGTRAP || (siginfo.si_code & 0xffff) != TRAP_HWBKPT)
     return false;
 
-  /* Make sure to ignore the top byte, otherwise we may not recognize a
-     hardware watchpoint hit.  The stopped data addresses coming from the
-     kernel can potentially be tagged addresses.  */
-  struct gdbarch *gdbarch = thread_architecture (inferior_ptid);
-  const CORE_ADDR addr_trap
-    = gdbarch_remove_non_address_bits (gdbarch, (CORE_ADDR) siginfo.si_addr);
-
   /* Check if the address matches any watched address.  */
   state = loongarch_get_debug_reg_state (inferior_ptid.pid ());
 
-  return loongarch_stopped_data_address (state, addr_trap, addr_p);
+  return
+    loongarch_stopped_data_address (state, (CORE_ADDR) siginfo.si_addr, addr_p);
 }
 
 /* Implement the "stopped_by_watchpoint" target_ops method.  */
