@@ -554,10 +554,8 @@ CORE_ADDR
 aarch64_target::low_stopped_data_address ()
 {
   siginfo_t siginfo;
-  int pid;
   struct aarch64_debug_reg_state *state;
-
-  pid = lwpid_of (current_thread);
+  int pid = current_thread->id.lwp ();
 
   /* Get the siginfo.  */
   if (ptrace (PTRACE_GETSIGINFO, pid, NULL, &siginfo) != 0)
@@ -694,7 +692,7 @@ aarch64_sve_regs_copy_to_regcache (struct regcache *regcache,
      request in aarch64_sve_regs_copy_to_reg_buf, therefore bypassing
      gdbserver's own call to ptrace.  */
 
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   /* Update the register cache.  aarch64_sve_regs_copy_to_reg_buf handles
      fetching the NT_ARM_SVE state from thread TID.  */
@@ -706,7 +704,7 @@ aarch64_sve_regs_copy_to_regcache (struct regcache *regcache,
 static void
 aarch64_sve_regs_copy_from_regcache (struct regcache *regcache, void *buf)
 {
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   /* Update the thread SVE state.  aarch64_sve_regs_copy_from_reg_buf
      handles writing the SVE/FPSIMD state back to thread TID.  */
@@ -727,7 +725,7 @@ aarch64_za_regs_copy_to_regcache (struct regcache *regcache,
 {
   /* BUF is unused here since we collect the data straight from a ptrace
      request, therefore bypassing gdbserver's own call to ptrace.  */
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   int za_regnum = find_regno (regcache->tdesc, "za");
   int svg_regnum = find_regno (regcache->tdesc, "svg");
@@ -745,7 +743,7 @@ aarch64_za_regs_copy_to_regcache (struct regcache *regcache,
 static void
 aarch64_za_regs_copy_from_regcache (struct regcache *regcache, void *buf)
 {
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   int za_regnum = find_regno (regcache->tdesc, "za");
   int svg_regnum = find_regno (regcache->tdesc, "svg");
@@ -773,7 +771,7 @@ aarch64_zt_regs_copy_to_regcache (struct regcache *regcache,
 {
   /* BUF is unused here since we collect the data straight from a ptrace
      request, therefore bypassing gdbserver's own call to ptrace.  */
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   int zt_regnum = find_regno (regcache->tdesc, "zt0");
 
@@ -788,7 +786,7 @@ aarch64_zt_regs_copy_to_regcache (struct regcache *regcache,
 static void
 aarch64_zt_regs_copy_from_regcache (struct regcache *regcache, void *buf)
 {
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   int zt_regnum = find_regno (regcache->tdesc, "zt0");
 
@@ -927,9 +925,7 @@ aarch64_target::low_arch_setup ()
 {
   unsigned int machine;
   int is_elf64;
-  int tid;
-
-  tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
@@ -966,7 +962,7 @@ aarch64_target::low_arch_setup ()
   else
     current_process ()->tdesc = aarch32_linux_read_description ();
 
-  aarch64_linux_get_debug_reg_capacity (lwpid_of (current_thread));
+  aarch64_linux_get_debug_reg_capacity (current_thread->id.lwp ());
 }
 
 /* Implementation of linux target ops method "get_regs_info".  */
@@ -3433,7 +3429,7 @@ aarch64_target::fetch_memtags (CORE_ADDR address, size_t len,
 			       gdb::byte_vector &tags, int type)
 {
   /* Allocation tags are per-process, so any tid is fine.  */
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   /* Allocation tag?  */
   if (type == static_cast <int> (aarch64_memtag_type::mte_allocation))
@@ -3447,7 +3443,7 @@ aarch64_target::store_memtags (CORE_ADDR address, size_t len,
 			       const gdb::byte_vector &tags, int type)
 {
   /* Allocation tags are per-process, so any tid is fine.  */
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   /* Allocation tag?  */
   if (type == static_cast <int> (aarch64_memtag_type::mte_allocation))

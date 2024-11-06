@@ -879,8 +879,7 @@ ppc_target::low_arch_setup ()
   const struct target_desc *tdesc;
   struct regset_info *regset;
   struct ppc_linux_features features = ppc_linux_no_features;
-
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   features.wordsize = ppc_linux_target_wordsize (tid);
 

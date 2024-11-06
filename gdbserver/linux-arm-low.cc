@@ -706,7 +706,7 @@ arm_target::low_stopped_by_watchpoint ()
 
   /* Retrieve siginfo.  */
   errno = 0;
-  ptrace (PTRACE_GETSIGINFO, lwpid_of (current_thread), 0, &siginfo);
+  ptrace (PTRACE_GETSIGINFO, current_thread->id.lwp (), 0, &siginfo);
   if (errno != 0)
     return false;
 
@@ -853,7 +853,7 @@ void
 arm_target::low_prepare_to_resume (lwp_info *lwp)
 {
   struct thread_info *thread = get_lwp_thread (lwp);
-  int pid = lwpid_of (thread);
+  int pid = thread->id.lwp ();
   struct process_info *proc = find_process_pid (pid_of (thread));
   struct arch_process_info *proc_info = proc->priv->arch_private;
   struct arch_lwp_info *lwp_info = lwp->arch_private;
@@ -1009,7 +1009,7 @@ arm_read_description (void)
     {
       /* Make sure that the kernel supports reading VFP registers.  Support was
 	 added in 2.6.30.  */
-      int pid = lwpid_of (current_thread);
+      int pid = current_thread->id.lwp ();
       errno = 0;
       char *buf = (char *) alloca (ARM_VFP3_REGS_SIZE);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0 && errno == EIO)
@@ -1033,7 +1033,7 @@ arm_read_description (void)
 void
 arm_target::low_arch_setup ()
 {
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
   int gpregs[18];
   struct iovec iov;
 

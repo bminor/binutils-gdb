@@ -374,7 +374,7 @@ x86_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
     idx = gs >> reg_thread_area;
 
     if (ptrace (PTRACE_GET_THREAD_AREA,
-		lwpid_of (thr),
+		thr->id.lwp (),
 		(void *) (long) idx, (unsigned long) &desc) < 0)
       return -1;
 
@@ -821,7 +821,7 @@ x86_target::low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 {
 #ifdef __x86_64__
   unsigned int machine;
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
   int is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
 
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
@@ -844,7 +844,7 @@ static int use_xml;
 static const struct target_desc *
 x86_linux_read_description ()
 {
-  int tid = lwpid_of (current_thread);
+  int tid = current_thread->id.lwp ();
 
   /* If we are not allowed to send an XML target description then we need
      to use the hard-wired target descriptions.  This corresponds to GDB's

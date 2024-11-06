@@ -144,14 +144,6 @@ pid_of (const thread_info *thread)
   return thread->id.pid ();
 }
 
-/* Get the lwp of THREAD.  */
-
-static inline long
-lwpid_of (const thread_info *thread)
-{
-  return thread->id.lwp ();
-}
-
 /* Switch the current thread.  */
 
 void switch_to_thread (thread_info *thread);
