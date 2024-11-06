@@ -854,7 +854,7 @@ arm_target::low_prepare_to_resume (lwp_info *lwp)
 {
   struct thread_info *thread = get_lwp_thread (lwp);
   int pid = thread->id.lwp ();
-  struct process_info *proc = find_process_pid (pid_of (thread));
+  process_info *proc = find_process_pid (thread->id.pid ());
   struct arch_process_info *proc_info = proc->priv->arch_private;
   struct arch_lwp_info *lwp_info = lwp->arch_private;
   int i;

@@ -436,7 +436,7 @@ aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
   int ret;
   enum target_hw_bp_type targ_type;
   struct aarch64_debug_reg_state *state
-    = aarch64_get_debug_reg_state (pid_of (current_thread));
+    = aarch64_get_debug_reg_state (current_thread->id.pid ());
 
   if (show_debug_regs)
     fprintf (stderr, "insert_point on entry (addr=0x%08lx, len=%d)\n",
@@ -487,7 +487,7 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   int ret;
   enum target_hw_bp_type targ_type;
   struct aarch64_debug_reg_state *state
-    = aarch64_get_debug_reg_state (pid_of (current_thread));
+    = aarch64_get_debug_reg_state (current_thread->id.pid ());
 
   if (show_debug_regs)
     fprintf (stderr, "remove_point on entry (addr=0x%08lx, len=%d)\n",
@@ -573,7 +573,7 @@ aarch64_target::low_stopped_data_address ()
     = aarch64_remove_non_address_bits ((CORE_ADDR) siginfo.si_addr);
 
   /* Check if the address matches any watched address.  */
-  state = aarch64_get_debug_reg_state (pid_of (current_thread));
+  state = aarch64_get_debug_reg_state (current_thread->id.pid ());
   CORE_ADDR result;
   if (aarch64_stopped_data_address (state, addr_trap, &result))
     return result;

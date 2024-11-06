@@ -2346,10 +2346,9 @@ linux_process_target::filter_event (int lwpid, int wstat)
 
   if (WIFSTOPPED (wstat))
     {
-      struct process_info *proc;
-
       /* Architecture-specific setup after inferior is running.  */
-      proc = find_process_pid (pid_of (thread));
+      process_info *proc = find_process_pid (thread->id.pid ());
+
       if (proc->tdesc == NULL)
 	{
 	  if (proc->attached)
@@ -2373,7 +2372,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 
   if (WIFSTOPPED (wstat) && child->must_set_ptrace_flags)
     {
-      struct process_info *proc = find_process_pid (pid_of (thread));
+      process_info *proc = find_process_pid (thread->id.pid ());
       int options = linux_low_ptrace_options (proc->attached);
 
       linux_enable_event_reporting (lwpid, options);
@@ -4279,7 +4278,7 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
 	  || ptid == thread->id
 	  /* Handle both 'pPID' and 'pPID.-1' as meaning 'all threads
 	     of PID'.  */
-	  || (ptid.pid () == pid_of (thread)
+	  || (ptid.pid () == thread->id.pid ()
 	      && (ptid.is_pid ()
 		  || ptid.lwp () == -1)))
 	{
@@ -5975,7 +5974,7 @@ linux_process_target::handle_new_gdb_connection ()
       else
 	{
 	  /* Already stopped; go ahead and set the ptrace options.  */
-	  struct process_info *proc = find_process_pid (pid_of (thread));
+	  process_info *proc = find_process_pid (thread->id.pid ());
 	  int options = linux_low_ptrace_options (proc->attached);
 
 	  linux_enable_event_reporting (thread->id.lwp (), options);

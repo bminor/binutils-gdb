@@ -1823,7 +1823,7 @@ handle_qxfer_exec_file (const char *annex,
       if (current_thread == NULL)
 	return -1;
 
-      pid = pid_of (current_thread);
+      pid = current_thread->id.pid ();
     }
   else
     {

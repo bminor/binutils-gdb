@@ -589,7 +589,7 @@ s390_target::low_arch_setup ()
   struct regset_info *regset;
 
   /* Determine word size and HWCAP.  */
-  int pid = pid_of (current_thread);
+  int pid = current_thread->id.pid ();
   int wordsize = s390_get_wordsize (pid);
   unsigned long hwcap = linux_get_hwcap (pid, wordsize);
 
