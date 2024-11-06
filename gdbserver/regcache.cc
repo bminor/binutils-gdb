@@ -97,8 +97,10 @@ regcache_invalidate_thread (struct thread_info *thread)
 void
 regcache_invalidate_pid (int pid)
 {
-  /* Only invalidate the regcaches of threads of this process.  */
-  for_each_thread (pid, regcache_invalidate_thread);
+  process_info *process = find_process_pid (pid);
+
+  if (process != nullptr)
+    process->for_each_thread (regcache_invalidate_thread);
 }
 
 /* See regcache.h.  */

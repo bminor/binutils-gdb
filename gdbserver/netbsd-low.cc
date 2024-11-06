@@ -455,7 +455,7 @@ netbsd_process_target::detach (process_info *process)
 void
 netbsd_process_target::mourn (struct process_info *proc)
 {
-  for_each_thread (proc->pid, remove_thread);
+  proc->for_each_thread (remove_thread);
 
   remove_process (proc);
 }

@@ -116,10 +116,6 @@ thread_info *find_thread (ptid_t filter,
 
 void for_each_thread (gdb::function_view<void (thread_info *)> func);
 
-/* Like the above, but only consider threads with pid PID.  */
-
-void for_each_thread (int pid, gdb::function_view<void (thread_info *)> func);
-
 /* Like the above, but only consider threads matching PTID.  */
 
 void for_each_thread

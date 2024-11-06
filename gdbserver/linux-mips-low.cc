@@ -575,7 +575,7 @@ mips_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
   priv->watch_mirror = regs;
 
   /* Only update the threads of this process.  */
-  for_each_thread (proc->pid, update_watch_registers_callback);
+  proc->for_each_thread (update_watch_registers_callback);
 
   return 0;
 }
@@ -624,7 +624,7 @@ mips_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 				  &priv->watch_mirror);
 
   /* Only update the threads of this process.  */
-  for_each_thread (proc->pid, update_watch_registers_callback);
+  proc->for_each_thread (pid, update_watch_registers_callback);
 
   return 0;
 }

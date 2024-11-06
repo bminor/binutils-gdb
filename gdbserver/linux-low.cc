@@ -1385,7 +1385,7 @@ linux_process_target::kill (process_info *process)
      first, as PTRACE_KILL will not work otherwise.  */
   stop_all_lwps (0, NULL);
 
-  for_each_thread (pid, [&] (thread_info *thread)
+  process->for_each_thread ([&] (thread_info *thread)
     {
       kill_one_lwp_callback (thread, pid);
     });
@@ -1588,7 +1588,7 @@ linux_process_target::detach (process_info *process)
   /* Detach from the clone lwps first.  If the thread group exits just
      while we're detaching, we must reap the clone lwps before we're
      able to reap the leader.  */
-  for_each_thread (process->pid, [this] (thread_info *thread)
+  process->for_each_thread ([this] (thread_info *thread)
     {
       /* We don't actually detach from the thread group leader just yet.
 	 If the thread group exits, we must reap the zombie clone lwps
@@ -1621,7 +1621,7 @@ linux_process_target::mourn (process_info *process)
   thread_db_mourn (process);
 #endif
 
-  for_each_thread (process->pid, [this] (thread_info *thread)
+  process->for_each_thread ([this] (thread_info *thread)
     {
       delete_lwp (get_thread_lwp (thread));
     });
@@ -1756,14 +1756,14 @@ find_lwp_pid (ptid_t ptid)
   return get_thread_lwp (thread);
 }
 
-/* Return the number of known LWPs in the tgid given by PID.  */
+/* Return the number of known LWPs in PROCESS.  */
 
 static int
-num_lwps (int pid)
+num_lwps (process_info *process)
 {
   int count = 0;
 
-  for_each_thread (pid, [&] (thread_info *thread)
+  process->for_each_thread ([&] (thread_info *thread)
     {
       count++;
     });
@@ -1802,7 +1802,7 @@ linux_process_target::check_zombie_leaders ()
 
       threads_debug_printf ("leader_pid=%d, leader_lp!=NULL=%d, "
 			    "num_lwps=%d, zombie=%d",
-			    leader_pid, leader_lp!= NULL, num_lwps (leader_pid),
+			    leader_pid, leader_lp!= NULL, num_lwps (proc),
 			    linux_proc_pid_is_zombie (leader_pid));
 
       if (leader_lp != NULL && !leader_lp->stopped

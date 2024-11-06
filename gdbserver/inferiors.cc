@@ -353,24 +353,17 @@ process_info::for_each_thread (gdb::function_view<void (thread_info *)> func)
 /* See gdbthread.h.  */
 
 void
-for_each_thread (int pid, gdb::function_view<void (thread_info *)> func)
-{
-  process_info *process = find_process_pid (pid);
-  if (process == nullptr)
-    return;
-
-  process->for_each_thread (func);
-}
-
-/* See gdbthread.h.  */
-
-void
 for_each_thread (ptid_t ptid, gdb::function_view<void (thread_info *)> func)
 {
   if (ptid == minus_one_ptid)
     for_each_thread (func);
   else if (ptid.is_pid ())
-    for_each_thread (ptid.pid (), func);
+    {
+      process_info *process = find_process_pid (ptid.pid ());
+
+      if (process != nullptr)
+	process->for_each_thread (func);
+    }
   else
     find_thread (ptid, [func] (thread_info *thread)
       {

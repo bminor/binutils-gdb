@@ -65,7 +65,7 @@ x86_dr_low_set_addr (int regnum, CORE_ADDR addr)
   gdb_assert (DR_FIRSTADDR <= regnum && regnum <= DR_LASTADDR);
 
   /* Only update the threads of this process.  */
-  for_each_thread (current_thread->id.pid (), update_debug_registers);
+  current_process ()->for_each_thread (update_debug_registers);
 }
 
 /* Update the inferior's DR7 debug control register from STATE.  */
@@ -74,7 +74,7 @@ static void
 x86_dr_low_set_control (unsigned long control)
 {
   /* Only update the threads of this process.  */
-  for_each_thread (current_thread->id.pid (), update_debug_registers);
+  current_process ()->for_each_thread (update_debug_registers);
 }
 
 /* Return the current value of a DR register of the current thread's

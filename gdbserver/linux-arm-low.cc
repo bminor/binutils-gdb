@@ -636,7 +636,7 @@ arm_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
 	pts[i] = p;
 
 	/* Only update the threads of the current process.  */
-	for_each_thread (current_thread->id.pid (), [&] (thread_info *thread)
+	current_process ()->for_each_thread ([&] (thread_info *thread)
 	  {
 	    update_registers_callback (thread, watch, i);
 	  });
@@ -681,7 +681,7 @@ arm_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 	pts[i].control = arm_hwbp_control_disable (pts[i].control);
 
 	/* Only update the threads of the current process.  */
-	for_each_thread (current_thread->id.pid (), [&] (thread_info *thread)
+	current_process ()->for_each_thread ([&] (thread_info *thread)
 	  {
 	    update_registers_callback (thread, watch, i);
 	  });
