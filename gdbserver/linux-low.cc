@@ -141,8 +141,7 @@ enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 static bool
 is_leader (thread_info *thread)
 {
-  ptid_t ptid = ptid_of (thread);
-  return ptid.pid () == ptid.lwp ();
+  return thread->id.pid () == thread->id.lwp ();
 }
 
 /* Return true if we should report thread exit events to GDB, for
@@ -164,7 +163,7 @@ report_exit_events_for (thread_info *thr)
 ptid_t
 ptid_of_lwp (struct lwp_info *lwp)
 {
-  return ptid_of (get_lwp_thread (lwp));
+  return get_lwp_thread (lwp)->id;
 }
 
 /* See nat/linux-nat.h.  */
@@ -546,13 +545,13 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 			 : event == PTRACE_EVENT_VFORK ? "vfork"
 			 : event == PTRACE_EVENT_CLONE ? "clone"
 			 : "???"),
-			ptid_of (event_thr).lwp (),
+			event_thr->id.lwp (),
 			new_pid);
 	}
 
       ptid_t child_ptid = (event != PTRACE_EVENT_CLONE
 			   ? ptid_t (new_pid, new_pid)
-			   : ptid_t (ptid_of (event_thr).pid (), new_pid));
+			   : ptid_t (event_thr->id.pid (), new_pid));
 
       process_info *child_proc = nullptr;
 
@@ -686,7 +685,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	{
 	  threads_debug_printf
 	    ("not reporting clone event from LWP %ld, new child is %ld\n",
-	     ptid_of (event_thr).lwp (),
+	     event_thr->id.lwp (),
 	     new_pid);
 	  return 1;
 	}
@@ -703,7 +702,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	  : event == PTRACE_EVENT_VFORK ? "vfork"
 	  : event == PTRACE_EVENT_CLONE ? "clone"
 	  : "???"),
-	 ptid_of (event_thr).lwp (),
+	 event_thr->id.lwp (),
 	 new_pid);
       return 0;
     }
@@ -731,7 +730,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 			    lwpid_of (event_thr));
 
       /* Get the event ptid.  */
-      event_ptid = ptid_of (event_thr);
+      event_ptid = event_thr->id;
       event_pid = event_ptid.pid ();
 
       /* Save the syscall list from the execing process.  */
@@ -889,7 +888,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
     {
       threads_debug_printf
 	("%s stopped by software breakpoint",
-	 target_pid_to_str (ptid_of (get_lwp_thread (lwp))).c_str ());
+	 target_pid_to_str (get_lwp_thread (lwp)->id).c_str ());
 
       /* Back up the PC if necessary.  */
       if (pc != sw_breakpoint_pc)
@@ -905,15 +904,15 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
   else if (lwp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT)
     threads_debug_printf
       ("%s stopped by hardware breakpoint",
-       target_pid_to_str (ptid_of (get_lwp_thread (lwp))).c_str ());
+       target_pid_to_str (get_lwp_thread (lwp)->id).c_str ());
   else if (lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
     threads_debug_printf
       ("%s stopped by hardware watchpoint",
-       target_pid_to_str (ptid_of (get_lwp_thread (lwp))).c_str ());
+       target_pid_to_str (get_lwp_thread (lwp)->id).c_str ());
   else if (lwp->stop_reason == TARGET_STOPPED_BY_SINGLE_STEP)
     threads_debug_printf
       ("%s stopped by trace",
-       target_pid_to_str (ptid_of (get_lwp_thread (lwp))).c_str ());
+       target_pid_to_str (get_lwp_thread (lwp)->id).c_str ());
 
   lwp->stop_pc = pc;
   return true;
@@ -1294,7 +1293,7 @@ linux_kill_one_lwp (struct lwp_info *lwp)
       int save_errno = errno;
 
       threads_debug_printf ("kill_lwp (SIGKILL) %s, 0, 0 (%s)",
-			    target_pid_to_str (ptid_of (thr)).c_str (),
+			    target_pid_to_str (thr->id).c_str (),
 			    save_errno ? safe_strerror (save_errno) : "OK");
     }
 
@@ -1305,7 +1304,7 @@ linux_kill_one_lwp (struct lwp_info *lwp)
       int save_errno = errno;
 
       threads_debug_printf ("PTRACE_KILL %s, 0, 0 (%s)",
-			    target_pid_to_str (ptid_of (thr)).c_str (),
+			    target_pid_to_str (thr->id).c_str (),
 			    save_errno ? safe_strerror (save_errno) : "OK");
     }
 }
@@ -1316,8 +1315,8 @@ static void
 kill_wait_lwp (struct lwp_info *lwp)
 {
   struct thread_info *thr = get_lwp_thread (lwp);
-  int pid = ptid_of (thr).pid ();
-  int lwpid = ptid_of (thr).lwp ();
+  int pid = thr->id.pid ();
+  int lwpid = thr->id.lwp ();
   int wstat;
   int res;
 
@@ -1437,7 +1436,7 @@ get_detach_signal (struct thread_info *thread)
   if (!WIFSTOPPED (status))
     {
       threads_debug_printf ("lwp %s hasn't stopped: no pending signal",
-			    target_pid_to_str (ptid_of (thread)).c_str ());
+			    target_pid_to_str (thread->id).c_str ());
       return 0;
     }
 
@@ -1446,7 +1445,7 @@ get_detach_signal (struct thread_info *thread)
     {
       threads_debug_printf ("lwp %s had stopped with extended "
 			    "status: no pending signal",
-			    target_pid_to_str (ptid_of (thread)).c_str ());
+			    target_pid_to_str (thread->id).c_str ());
       return 0;
     }
 
@@ -1455,7 +1454,7 @@ get_detach_signal (struct thread_info *thread)
   if (cs.program_signals_p && !cs.program_signals[signo])
     {
       threads_debug_printf ("lwp %s had signal %s, but it is in nopass state",
-			    target_pid_to_str (ptid_of (thread)).c_str (),
+			    target_pid_to_str (thread->id).c_str (),
 			    gdb_signal_to_string (signo));
       return 0;
     }
@@ -1468,14 +1467,14 @@ get_detach_signal (struct thread_info *thread)
       threads_debug_printf ("lwp %s had signal %s, "
 			    "but we don't know if we should pass it. "
 			    "Default to not.",
-			    target_pid_to_str (ptid_of (thread)).c_str (),
+			    target_pid_to_str (thread->id).c_str (),
 			    gdb_signal_to_string (signo));
       return 0;
     }
   else
     {
       threads_debug_printf ("lwp %s has pending signal %s: delivering it",
-			    target_pid_to_str (ptid_of (thread)).c_str (),
+			    target_pid_to_str (thread->id).c_str (),
 			    gdb_signal_to_string (signo));
 
       return WSTOPSIG (status);
@@ -1493,7 +1492,7 @@ linux_process_target::detach_one_lwp (lwp_info *lwp)
   if (lwp->stop_expected)
     {
       threads_debug_printf ("Sending SIGCONT to %s",
-			    target_pid_to_str (ptid_of (thread)).c_str ());
+			    target_pid_to_str (thread->id).c_str ());
 
       kill_lwp (lwpid_of (thread), SIGCONT);
       lwp->stop_expected = 0;
@@ -1549,13 +1548,13 @@ linux_process_target::detach_one_lwp (lwp_info *lwp)
       else
 	{
 	  error (_("Can't detach %s: %s"),
-		 target_pid_to_str (ptid_of (thread)).c_str (),
+		 target_pid_to_str (thread->id).c_str (),
 		 safe_strerror (save_errno));
 	}
     }
   else
     threads_debug_printf ("PTRACE_DETACH (%s, %s, 0) (OK)",
-			  target_pid_to_str (ptid_of (thread)).c_str (),
+			  target_pid_to_str (thread->id).c_str (),
 			  strsignal (sig));
 
   delete_lwp (lwp);
@@ -2432,14 +2431,14 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	  /* We want to report the stop to the core.  Treat the
 	     SIGSTOP as a normal event.  */
 	  threads_debug_printf ("resume_stop SIGSTOP caught for %s.",
-				target_pid_to_str (ptid_of (thread)).c_str ());
+				target_pid_to_str (thread->id).c_str ());
 	}
       else if (stopping_threads != NOT_STOPPING_THREADS)
 	{
 	  /* Stopping threads.  We don't want this SIGSTOP to end up
 	     pending.  */
 	  threads_debug_printf ("SIGSTOP caught for %s while stopping threads.",
-				target_pid_to_str (ptid_of (thread)).c_str ());
+				target_pid_to_str (thread->id).c_str ());
 	  return;
 	}
       else
@@ -2447,7 +2446,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	  /* This is a delayed SIGSTOP.  Filter out the event.  */
 	  threads_debug_printf ("%s %s, 0, 0 (discard delayed SIGSTOP)",
 			  child->stepping ? "step" : "continue",
-			  target_pid_to_str (ptid_of (thread)).c_str ());
+			  target_pid_to_str (thread->id).c_str ());
 
 	  resume_one_lwp (child, child->stepping, 0, NULL);
 	  return;
@@ -2494,7 +2493,7 @@ linux_process_target::resume_stopped_resumed_lwps (thread_info *thread)
 	}
 
       threads_debug_printf ("resuming stopped-resumed LWP %s at %s: step=%d",
-			    target_pid_to_str (ptid_of (thread)).c_str (),
+			    target_pid_to_str (thread->id).c_str (),
 			    paddress (lp->stop_pc), step);
 
       resume_one_lwp (lp, step, GDB_SIGNAL_0, NULL);
@@ -2735,7 +2734,7 @@ select_event_lwp (struct lwp_info **orig_lp)
       if (event_thread != NULL)
 	threads_debug_printf
 	  ("Select single-step %s",
-	   target_pid_to_str (ptid_of (event_thread)).c_str ());
+	   target_pid_to_str (event_thread->id).c_str ());
     }
   if (event_thread == NULL)
     {
@@ -2899,7 +2898,7 @@ linux_process_target::filter_exit_event (lwp_info *event_child,
 					 target_waitstatus *ourstatus)
 {
   struct thread_info *thread = get_lwp_thread (event_child);
-  ptid_t ptid = ptid_of (thread);
+  ptid_t ptid = thread->id;
 
   if (ourstatus->kind () == TARGET_WAITKIND_THREAD_EXITED)
     {
@@ -3045,7 +3044,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
 	  threads_debug_printf
 	    ("ret = %s, exited with retcode %d",
-	     target_pid_to_str (ptid_of (current_thread)).c_str (),
+	     target_pid_to_str (current_thread->id).c_str (),
 	     WEXITSTATUS (w));
 	}
       else
@@ -3054,7 +3053,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
 	  threads_debug_printf
 	    ("ret = %s, terminated with signal %d",
-	     target_pid_to_str (ptid_of (current_thread)).c_str (),
+	     target_pid_to_str (current_thread->id).c_str (),
 	     WTERMSIG (w));
 	}
 
@@ -3086,7 +3085,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
       threads_debug_printf
 	("step-over for %s executed software breakpoint",
-	 target_pid_to_str (ptid_of (current_thread)).c_str ());
+	 target_pid_to_str (current_thread->id).c_str ());
 
       if (increment_pc != 0)
 	{
@@ -3240,9 +3239,9 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
 		  threads_debug_printf
 		    ("ret = %s, stopped while stabilizing threads",
-		     target_pid_to_str (ptid_of (current_thread)).c_str ());
+		     target_pid_to_str (current_thread->id).c_str ());
 
-		  return ptid_of (current_thread);
+		  return current_thread->id;
 		}
 	    }
 	}
@@ -3622,7 +3621,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   gdb_assert (step_over_bkpt == null_ptid);
 
   threads_debug_printf ("ret = %s, %s",
-			target_pid_to_str (ptid_of (current_thread)).c_str (),
+			target_pid_to_str (current_thread->id).c_str (),
 			ourstatus->to_string ().c_str ());
 
   return filter_exit_event (event_child, ourstatus);
@@ -3921,7 +3920,7 @@ linux_process_target::stop_all_lwps (int suspend, lwp_info *except)
   threads_debug_printf
     ("%s, except=%s", suspend ? "stop-and-suspend" : "stop",
      (except != NULL
-      ? target_pid_to_str (ptid_of (get_lwp_thread (except))).c_str ()
+      ? target_pid_to_str (get_lwp_thread (except)->id).c_str ()
       : "none"));
 
   stopping_threads = (suspend
@@ -6981,7 +6980,7 @@ linux_process_target::read_btrace_conf (const btrace_target_info *tinfo,
 ptid_t
 current_lwp_ptid (void)
 {
-  return ptid_of (current_thread);
+  return current_thread->id;
 }
 
 /* A helper function that copies NAME to DEST, replacing non-printable

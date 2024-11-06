@@ -1421,7 +1421,7 @@ delete_single_step_breakpoints (struct thread_info *thread)
   while (bp)
     {
       if (bp->type == single_step_breakpoint
-	  && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
+	  && ((struct single_step_breakpoint *) bp)->ptid == thread->id)
 	{
 	  scoped_restore_current_thread restore_thread;
 
@@ -1513,7 +1513,7 @@ uninsert_single_step_breakpoints (struct thread_info *thread)
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
     {
     if (bp->type == single_step_breakpoint
-	&& ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
+	&& ((struct single_step_breakpoint *) bp)->ptid == thread->id)
       {
 	gdb_assert (bp->raw->inserted > 0);
 
@@ -1585,7 +1585,7 @@ has_single_step_breakpoints (struct thread_info *thread)
   while (bp)
     {
       if (bp->type == single_step_breakpoint
-	  && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
+	  && ((struct single_step_breakpoint *) bp)->ptid == thread->id)
 	return 1;
       else
 	{
@@ -1619,7 +1619,7 @@ reinsert_single_step_breakpoints (struct thread_info *thread)
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
     {
       if (bp->type == single_step_breakpoint
-	  && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
+	  && ((struct single_step_breakpoint *) bp)->ptid == thread->id)
 	{
 	  gdb_assert (bp->raw->inserted > 0);
 
@@ -2145,7 +2145,7 @@ clone_all_breakpoints (struct thread_info *child_thread,
 
   for (bp = parent_proc->breakpoints; bp != NULL; bp = bp->next)
     {
-      new_bkpt = clone_one_breakpoint (bp, ptid_of (child_thread));
+      new_bkpt = clone_one_breakpoint (bp, child_thread->id);
       APPEND_TO_LIST (new_list, new_bkpt, bkpt_tail);
       APPEND_TO_LIST (new_raw_list, new_bkpt->raw, raw_bkpt_tail);
     }

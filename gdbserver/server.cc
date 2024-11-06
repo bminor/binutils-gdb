@@ -1007,7 +1007,7 @@ handle_general_set (char *own_buf)
 
 	  for_each_thread ([&] (thread_info *thread)
 	    {
-	      if (ptid_of (thread).matches (ptid))
+	      if (thread->id.matches (ptid))
 		set_options[thread] = options;
 	    });
 	}
@@ -1020,7 +1020,7 @@ handle_general_set (char *own_buf)
 	  if (thread->thread_options != options)
 	    {
 	      threads_debug_printf ("[options for %s are now %s]\n",
-				    target_pid_to_str (ptid_of (thread)).c_str (),
+				    target_pid_to_str (thread->id).c_str (),
 				    to_string (options).c_str ());
 
 	      thread->thread_options = options;
@@ -1994,7 +1994,7 @@ handle_qxfer_statictrace (const char *annex,
 static void
 handle_qxfer_threads_worker (thread_info *thread, std::string *buffer)
 {
-  ptid_t ptid = ptid_of (thread);
+  ptid_t ptid = thread->id;
   char ptid_s[100];
   int core = target_core_of_thread (ptid);
   char core_s[21];

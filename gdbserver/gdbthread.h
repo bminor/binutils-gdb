@@ -136,14 +136,6 @@ thread_info *find_thread_in_random
 thread_info *find_thread_in_random
   (ptid_t ptid, gdb::function_view<bool (thread_info *)> func);
 
-/* Get the ptid of THREAD.  */
-
-static inline ptid_t
-ptid_of (const thread_info *thread)
-{
-  return thread->id;
-}
-
 /* Get the pid of THREAD.  */
 
 static inline int

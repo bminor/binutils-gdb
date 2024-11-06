@@ -132,7 +132,7 @@ netbsd_process_target::resume (struct thread_resume *resume_info, size_t n)
   const bool step = resume_info[0].kind == resume_step;
 
   if (resume_ptid == minus_one_ptid)
-    resume_ptid = ptid_of (current_thread);
+    resume_ptid = current_thread->id;
 
   const pid_t pid = resume_ptid.pid ();
   const lwpid_t lwp = resume_ptid.lwp ();
@@ -483,7 +483,7 @@ void
 netbsd_process_target::fetch_registers (struct regcache *regcache, int regno)
 {
   const netbsd_regset_info *regset = get_regs_info ();
-  ptid_t inferior_ptid = ptid_of (current_thread);
+  ptid_t inferior_ptid = current_thread->id;
 
   while (regset->size >= 0)
     {
@@ -504,7 +504,7 @@ void
 netbsd_process_target::store_registers (struct regcache *regcache, int regno)
 {
   const netbsd_regset_info *regset = get_regs_info ();
-  ptid_t inferior_ptid = ptid_of (current_thread);
+  ptid_t inferior_ptid = current_thread->id;
 
   while (regset->size >= 0)
     {
@@ -551,7 +551,7 @@ netbsd_process_target::write_memory (CORE_ADDR memaddr,
 void
 netbsd_process_target::request_interrupt ()
 {
-  ptid_t inferior_ptid = ptid_of (get_first_thread ());
+  ptid_t inferior_ptid = get_first_thread ()->id;
 
   ::kill (inferior_ptid.pid (), SIGINT);
 }

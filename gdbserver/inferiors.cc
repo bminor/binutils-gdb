@@ -105,7 +105,7 @@ process_info::remove_thread (thread_info *thread)
   if (thread->btrace != NULL)
     target_disable_btrace (thread->btrace);
 
-  discard_queued_stop_replies (ptid_of (thread));
+  discard_queued_stop_replies (thread->id);
 
   if (current_thread == thread)
     switch_to_thread (nullptr);
