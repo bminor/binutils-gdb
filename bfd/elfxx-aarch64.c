@@ -707,11 +707,16 @@ _bfd_aarch64_elf_find_1st_bfd_input_with_gnu_property (
   bool *has_gnu_property)
 {
   BFD_ASSERT (has_gnu_property);
+  const struct elf_backend_data *obfd = get_elf_backend_data (info->output_bfd);
   bfd *pbfd = info->input_bfds;
   bfd *prev = NULL;
   for (; pbfd != NULL; pbfd = pbfd->link.next)
     if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
-	&& bfd_count_sections (pbfd) != 0)
+	&& bfd_count_sections (pbfd) != 0
+	&& (pbfd->flags & (DYNAMIC | BFD_PLUGIN | BFD_LINKER_CREATED)) == 0
+	&& (obfd->elf_machine_code
+	    == get_elf_backend_data (pbfd)->elf_machine_code)
+	&& (obfd->s->elfclass == get_elf_backend_data (pbfd)->s->elfclass))
       {
 	/* Does the input have a list of GNU properties ? */
 	if (elf_properties (pbfd) != NULL)
