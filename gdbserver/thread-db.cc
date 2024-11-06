@@ -216,7 +216,7 @@ static int
 attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 {
   struct process_info *proc = current_process ();
-  int pid = pid_of (proc);
+  int pid = proc->pid;
   ptid_t ptid = ptid_t (pid, ti_p->ti_lid);
   struct lwp_info *lwp;
   int err;
@@ -748,7 +748,7 @@ thread_db_init (void)
 	 find_one_thread then.  That uses thread_db entry points that
 	 do not walk libpthread's thread list, so should be safe, as
 	 well as more efficient.  */
-      if (!linux_proc_task_list_dir_exists (pid_of (proc)))
+      if (!linux_proc_task_list_dir_exists (proc->pid))
 	thread_db_find_new_threads ();
       thread_db_look_up_symbols ();
       return 1;

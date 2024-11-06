@@ -564,10 +564,11 @@ read_ptid (const char *buf, const char **obuf)
 {
   const char *p = buf;
   const char *pp;
-  ULONGEST pid = 0, tid = 0;
 
   if (*p == 'p')
     {
+      ULONGEST pid;
+
       /* Multi-process ptid.  */
       pp = unpack_varlen_hex (p + 1, &pid);
       if (*pp != '.')
@@ -575,23 +576,25 @@ read_ptid (const char *buf, const char **obuf)
 
       p = pp + 1;
 
-      tid = hex_or_minus_one (p, &pp);
+      ULONGEST tid = hex_or_minus_one (p, &pp);
 
       if (obuf)
 	*obuf = pp;
+
       return ptid_t (pid, tid);
     }
 
   /* No multi-process.  Just a tid.  */
-  tid = hex_or_minus_one (p, &pp);
+  ULONGEST tid = hex_or_minus_one (p, &pp);
 
   /* Since GDB is not sending a process id (multi-process extensions
      are off), then there's only one process.  Default to the first in
      the list.  */
-  pid = pid_of (get_first_process ());
+  int pid = get_first_process ()->pid;
 
   if (obuf)
     *obuf = pp;
+
   return ptid_t (pid, tid);
 }
 

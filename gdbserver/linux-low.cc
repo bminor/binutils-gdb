@@ -1794,7 +1794,7 @@ linux_process_target::check_zombie_leaders ()
 
   for_each_process ([&] (process_info *proc)
     {
-      pid_t leader_pid = pid_of (proc);
+      pid_t leader_pid = proc->pid;
       lwp_info *leader_lp = find_lwp_pid (ptid_t (leader_pid));
 
       threads_debug_printf ("leader_pid=%d, leader_lp!=NULL=%d, "

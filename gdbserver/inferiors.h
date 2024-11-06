@@ -121,14 +121,6 @@ private:
   std::unordered_map<ptid_t, thread_info *> m_ptid_thread_map;
 };
 
-/* Get the pid of PROC.  */
-
-static inline int
-pid_of (const process_info *proc)
-{
-  return proc->pid;
-}
-
 /* Return a pointer to the current process.  Note that the current
    process may be non-null while the current thread (current_thread)
    is null.  */
