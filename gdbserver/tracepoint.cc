@@ -6804,7 +6804,7 @@ static int
 run_inferior_command (char *cmd, int len)
 {
   int err = -1;
-  int pid = current_ptid.pid ();
+  int pid = current_thread->id.pid ();
 
   trace_debug ("run_inferior_command: running: %s", cmd);
 

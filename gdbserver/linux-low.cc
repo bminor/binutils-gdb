@@ -3970,7 +3970,7 @@ linux_process_target::install_software_single_step_breakpoints (lwp_info *lwp)
   std::vector<CORE_ADDR> next_pcs = low_get_next_pcs (regcache);
 
   for (CORE_ADDR pc : next_pcs)
-    set_single_step_breakpoint (pc, current_ptid);
+    set_single_step_breakpoint (pc, current_thread->id);
 }
 
 int

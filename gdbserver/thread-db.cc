@@ -309,7 +309,7 @@ static void
 thread_db_find_new_threads (void)
 {
   td_err_e err;
-  ptid_t ptid = current_ptid;
+  ptid_t ptid = current_thread->id;
   struct thread_db *thread_db = current_process ()->priv->thread_db;
   int loop, iteration;
 

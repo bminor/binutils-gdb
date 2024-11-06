@@ -74,7 +74,7 @@ const struct target_desc *wow64_win32_tdesc;
 static ptid_t
 current_thread_ptid (void)
 {
-  return current_ptid;
+  return current_thread->id;
 }
 
 /* The current debug event from WaitForDebugEvent.  */

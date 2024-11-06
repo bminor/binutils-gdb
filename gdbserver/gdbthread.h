@@ -136,9 +136,6 @@ thread_info *find_thread_in_random
 thread_info *find_thread_in_random
   (ptid_t ptid, gdb::function_view<bool (thread_info *)> func);
 
-/* Get current thread ID (Linux task ID).  */
-#define current_ptid (current_thread->id)
-
 /* Get the ptid of THREAD.  */
 
 static inline ptid_t
