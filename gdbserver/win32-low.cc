@@ -69,14 +69,6 @@ const struct target_desc *wow64_win32_tdesc;
 
 #define NUM_REGS (the_low_target.num_regs ())
 
-/* Get the thread ID from the current selected inferior (the current
-   thread).  */
-static ptid_t
-current_thread_ptid (void)
-{
-  return current_thread->id;
-}
-
 /* The current debug event from WaitForDebugEvent.  */
 static ptid_t
 debug_event_ptid (DEBUG_EVENT *event)
@@ -452,7 +444,7 @@ child_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
   windows_thread_info *th
-    = windows_process.thread_rec (current_thread_ptid (),
+    = windows_process.thread_rec (current_thread->id,
 				  INVALIDATE_CONTEXT);
   if (r == -1 || r > NUM_REGS)
     child_fetch_inferior_registers (regcache, NUM_REGS);
@@ -468,7 +460,7 @@ child_store_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
   windows_thread_info *th
-    = windows_process.thread_rec (current_thread_ptid (),
+    = windows_process.thread_rec (current_thread->id,
 				  INVALIDATE_CONTEXT);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_store_inferior_registers (regcache, NUM_REGS);
@@ -973,7 +965,7 @@ maybe_adjust_pc ()
   child_fetch_inferior_registers (regcache, -1);
 
   windows_thread_info *th
-    = windows_process.thread_rec (current_thread_ptid (),
+    = windows_process.thread_rec (current_thread->id,
 				  DONT_INVALIDATE_CONTEXT);
   th->stopped_at_software_breakpoint = false;
 
@@ -1396,7 +1388,7 @@ bool
 win32_process_target::stopped_by_sw_breakpoint ()
 {
   windows_thread_info *th
-    = windows_process.thread_rec (current_thread_ptid (),
+    = windows_process.thread_rec (current_thread->id,
 				  DONT_INVALIDATE_CONTEXT);
   return th == nullptr ? false : th->stopped_at_software_breakpoint;
 }
@@ -1423,7 +1415,7 @@ const char *
 win32_process_target::thread_name (ptid_t thread)
 {
   windows_thread_info *th
-    = windows_process.thread_rec (current_thread_ptid (),
+    = windows_process.thread_rec (current_thread->id,
 				  DONT_INVALIDATE_CONTEXT);
   return th->thread_name ();
 }
