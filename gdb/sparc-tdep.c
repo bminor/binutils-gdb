@@ -2092,7 +2092,6 @@ sparc32_supply_gregset (const struct sparc_gregmap *gregmap,
 			int regnum, const void *gregs)
 {
   const gdb_byte *regs = (const gdb_byte *) gregs;
-  gdb_byte zero[4] = { 0 };
   int i;
 
   if (regnum == SPARC32_PSR_REGNUM || regnum == -1)
@@ -2108,7 +2107,7 @@ sparc32_supply_gregset (const struct sparc_gregmap *gregmap,
     regcache->raw_supply (SPARC32_Y_REGNUM, regs + gregmap->r_y_offset);
 
   if (regnum == SPARC_G0_REGNUM || regnum == -1)
-    regcache->raw_supply (SPARC_G0_REGNUM, &zero);
+    regcache->raw_supply_zeroed (SPARC_G0_REGNUM);
 
   if ((regnum >= SPARC_G1_REGNUM && regnum <= SPARC_O7_REGNUM) || regnum == -1)
     {
