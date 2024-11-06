@@ -24,4 +24,5 @@ Disassembly of section \.text:
 .*:	(5b 85 2a 7d|7d 2a 85 5b) 	stxvrll vs41,r10,r16
 .*:	(9a 8d 2a 7d|7d 2a 8d 9a) 	stxvprl vs40,r10,r17
 .*:	(da 95 6a 7d|7d 6a 95 da) 	stxvprll vs42,r10,r18
+.*:	(c6 9d e9 f3|f3 e9 9d c6) 	xvrlw   vs31,vs41,vs51
 #pass

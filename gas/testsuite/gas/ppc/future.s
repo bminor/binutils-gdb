@@ -16,3 +16,4 @@ _start:
 	stxvrll	 41,10,16
 	stxvprl	 40,10,17
 	stxvprll 42,10,18
+	xvrlw	 31,41,51
