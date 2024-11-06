@@ -973,7 +973,8 @@ edit_command (const char *arg, int from_tty)
     {
       if (sal.symtab == 0)
 	error (_("No default source file yet."));
-      sal.line += get_lines_to_list () / 2;
+      if (get_first_line_listed () != 0)
+	sal.line = get_first_line_listed () + get_lines_to_list () / 2;
     }
   else
     {
