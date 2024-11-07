@@ -1775,8 +1775,8 @@ find_sym_fns (bfd *abfd)
     if (our_flavour == rsf.sym_flavour)
       return rsf.sym_fns;
 
-  error (_("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown."),
-	 bfd_get_target (abfd));
+  error (_("Object file %s could not be read.  Symbol format `%s' unknown."),
+	 abfd->filename, bfd_get_target (abfd));
 }
 
 
