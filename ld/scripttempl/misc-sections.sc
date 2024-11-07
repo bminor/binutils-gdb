@@ -30,15 +30,4 @@ cat <<EOF
 
   .gnu.build.attributes : { *(.gnu.build.attributes${RELOCATING+ .gnu.build.attributes.*}) }
 
-  /* Various note sections.  Placed here so that they do not get
-     treated as orphan sections.  */
-  .note.build-id :      { *(.note.build-id) } ${RELOCATING+${REGION}}
-  .note.GNU-stack :     { *(.note.GNU-stack) } ${RELOCATING+${REGION}}
-  .note.gnu-property :  { *(.note.gnu-property) } ${RELOCATING+${REGION}}
-  .note.ABI-tag :       { *(.note.ABI-tag) } ${RELOCATING+${REGION}}
-  .note.package :       { *(.note.package) } ${RELOCATING+${REGION}}
-  .note.dlopen :        { *(.note.dlopen) } ${RELOCATING+${REGION}}
-  .note.netbsd.ident :  { *(.note.netbsd.ident) } ${RELOCATING+${REGION}}
-  .note.openbsd.ident : { *(.note.openbsd.ident) } ${RELOCATING+${REGION}}
-
 EOF
