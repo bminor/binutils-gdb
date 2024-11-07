@@ -44,8 +44,8 @@ add_thread (ptid_t thread_id, void *target_data)
   process_info *process = find_process_pid (thread_id.pid ());
   gdb_assert (process != nullptr);
 
-  auto &new_thread = process->thread_list ().emplace_back (thread_id,
-							   target_data);
+  auto &new_thread
+    = process->thread_list ().emplace_back (thread_id, process, target_data);
   bool inserted
     = process->thread_map ().insert ({thread_id, &new_thread}).second;
 

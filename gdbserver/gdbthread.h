@@ -27,14 +27,18 @@ struct regcache;
 
 struct thread_info : public intrusive_list_node<thread_info>
 {
-  thread_info (ptid_t id, void *target_data)
-    : id (id), target_data (target_data)
+  thread_info (ptid_t id, process_info *process, void *target_data)
+    : id (id), target_data (target_data), m_process (process)
   {}
 
   ~thread_info ()
   {
     free_register_cache (this->regcache_data);
   }
+
+  /* Return the process owning this thread.  */
+  process_info *process () const
+  { return m_process; }
 
   /* The id of this thread.  */
   ptid_t id;
@@ -81,6 +85,9 @@ struct thread_info : public intrusive_list_node<thread_info>
 
   /* Thread options GDB requested with QThreadOptions.  */
   gdb_thread_options thread_options = 0;
+  
+private:
+  process_info *m_process;
 };
 
 void remove_thread (struct thread_info *thread);
