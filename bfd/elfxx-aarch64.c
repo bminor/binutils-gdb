@@ -999,10 +999,10 @@ _bfd_aarch64_elf_check_bti_report (struct bfd_link_info *info, bfd *ebfd)
 
   const char *msg
     = (tdata->sw_protections.bti_report == MARKING_WARN)
-    ? _("%pB: warning: BTI turned on by -z force-bti on the output when all "
-	"inputs do not have BTI in NOTE section.\n")
-    : _("%X%pB: error: BTI turned on by -z force-bti on the output when all "
-	"inputs do not have BTI in NOTE section.\n");
+    ? _("%pB: warning: BTI is required by -z force-bti, but this input object "
+	"file lacks the necessary property note.\n")
+    : _("%X%pB: error: BTI is required by -z force-bti, but this input object "
+	"file lacks the necessary property note.\n");
 
   info->callbacks->einfo (msg, ebfd);
 }

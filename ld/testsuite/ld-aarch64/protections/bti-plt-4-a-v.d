@@ -3,7 +3,7 @@
 #target: [check_shared_lib_support]
 #as: -mabi=lp64
 #ld: -z force-bti -z bti-report -e _start -T bti-plt.ld -L./tmpdir -lbti-plt-so
-#warning: .*bti-plt-1\.o: warning: BTI turned on by -z force-bti.*
+#warning: .*bti-plt-1\.o: warning: BTI is required by -z force-bti.*
 #readelf: -n
 
 # Should warn about the missing input BTI NOTE but should still mark

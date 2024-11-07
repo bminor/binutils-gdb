@@ -3,7 +3,7 @@
 #target: [check_shared_lib_support]
 #as: -mabi=lp64
 #ld: -shared -z force-bti -T bti-plt.ld -L./tmpdir -lbti-plt-so
-#warning: .*bti-plt-1\.o: warning: BTI turned on by -z force-bti.*
+#warning: .*bti-plt-1\.o: warning: BTI is required by -z force-bti.*
 #objdump: -dr -j .plt
 
 [^:]*: *file format elf64-.*aarch64
