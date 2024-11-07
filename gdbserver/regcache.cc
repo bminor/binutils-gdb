@@ -40,7 +40,7 @@ get_thread_regcache (struct thread_info *thread, int fetch)
      have.  */
   if (regcache == NULL)
     {
-      struct process_info *proc = get_thread_process (thread);
+      process_info *proc = thread->process ();
 
       gdb_assert (proc->tdesc != NULL);
 

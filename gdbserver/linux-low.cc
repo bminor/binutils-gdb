@@ -604,7 +604,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	     the client side will access registers.  */
 	  gdb_assert (child_proc != NULL);
 
-	  process_info *parent_proc = get_thread_process (event_thr);
+	  process_info *parent_proc = event_thr->process ();
 	  child_proc->attached = parent_proc->attached;
 
 	  clone_all_breakpoints (child_thr, event_thr);
@@ -723,7 +723,6 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
     }
   else if (event == PTRACE_EVENT_EXEC && cs.report_exec_events)
     {
-      struct process_info *proc;
       std::vector<int> syscalls_to_catch;
       ptid_t event_ptid;
       pid_t event_pid;
@@ -736,7 +735,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
       event_pid = event_ptid.pid ();
 
       /* Save the syscall list from the execing process.  */
-      proc = get_thread_process (event_thr);
+      process_info *proc = event_thr->process ();
       syscalls_to_catch = std::move (proc->syscalls_to_catch);
 
       /* Delete the execing process and all its threads.  */
@@ -781,7 +780,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 CORE_ADDR
 linux_process_target::get_pc (lwp_info *lwp)
 {
-  process_info *proc = get_thread_process (get_lwp_thread (lwp));
+  process_info *proc = get_lwp_thread (lwp)->process ();
   gdb_assert (!proc->starting_up);
 
   if (!low_supports_breakpoints ())
@@ -829,7 +828,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
   if (!low_supports_breakpoints ())
     return false;
 
-  process_info *proc = get_thread_process (get_lwp_thread (lwp));
+  process_info *proc = get_lwp_thread (lwp)->process ();
   if (proc->starting_up)
     {
       /* Claim we have the stop PC so that the caller doesn't try to
@@ -2938,10 +2937,7 @@ linux_process_target::filter_exit_event (lwp_info *event_child,
 static int
 gdb_catching_syscalls_p (struct lwp_info *event_child)
 {
-  struct thread_info *thread = get_lwp_thread (event_child);
-  struct process_info *proc = get_thread_process (thread);
-
-  return !proc->syscalls_to_catch.empty ();
+  return !get_lwp_thread (event_child)->process ()->syscalls_to_catch.empty ();
 }
 
 bool
@@ -2949,7 +2945,7 @@ linux_process_target::gdb_catch_this_syscall (lwp_info *event_child)
 {
   int sysno;
   struct thread_info *thread = get_lwp_thread (event_child);
-  struct process_info *proc = get_thread_process (thread);
+  process_info *proc = thread->process ();
 
   if (proc->syscalls_to_catch.empty ())
     return false;
@@ -4016,7 +4012,6 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
 {
   struct thread_info *thread = get_lwp_thread (lwp);
   int ptrace_request;
-  struct process_info *proc = get_thread_process (thread);
 
   /* Note that target description may not be initialised
      (proc->tdesc == NULL) at this point because the program hasn't
@@ -4139,7 +4134,7 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
       step = single_step (lwp);
     }
 
-  if (proc->tdesc != NULL && low_supports_breakpoints ())
+  if (thread->process ()->tdesc != nullptr && low_supports_breakpoints ())
     {
       struct regcache *regcache = get_thread_regcache (current_thread, 1);
 
@@ -4393,11 +4388,10 @@ linux_process_target::thread_needs_step_over (thread_info *thread)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
   CORE_ADDR pc;
-  struct process_info *proc = get_thread_process (thread);
 
   /* GDBserver is skipping the extra traps from the wrapper program,
      don't have to do step over.  */
-  if (proc->tdesc == NULL)
+  if (thread->process ()->tdesc == nullptr)
     return false;
 
   /* LWPs which will not be resumed are not interesting, because we

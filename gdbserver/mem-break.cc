@@ -1412,7 +1412,7 @@ set_single_step_breakpoint (CORE_ADDR stop_at, ptid_t ptid)
 void
 delete_single_step_breakpoints (struct thread_info *thread)
 {
-  struct process_info *proc = get_thread_process (thread);
+  process_info *proc = thread->process ();
   struct breakpoint *bp, **bp_link;
 
   bp = proc->breakpoints;
@@ -1507,7 +1507,7 @@ uninsert_all_breakpoints (void)
 void
 uninsert_single_step_breakpoints (struct thread_info *thread)
 {
-  struct process_info *proc = get_thread_process (thread);
+  process_info *proc = thread->process ();
   struct breakpoint *bp;
 
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
@@ -1576,7 +1576,7 @@ reinsert_breakpoints_at (CORE_ADDR pc)
 int
 has_single_step_breakpoints (struct thread_info *thread)
 {
-  struct process_info *proc = get_thread_process (thread);
+  process_info *proc = thread->process ();
   struct breakpoint *bp, **bp_link;
 
   bp = proc->breakpoints;
@@ -1613,7 +1613,7 @@ reinsert_all_breakpoints (void)
 void
 reinsert_single_step_breakpoints (struct thread_info *thread)
 {
-  struct process_info *proc = get_thread_process (thread);
+  process_info *proc = thread->process ();
   struct breakpoint *bp;
 
   for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
@@ -2138,8 +2138,8 @@ clone_all_breakpoints (struct thread_info *child_thread,
   struct breakpoint *new_bkpt;
   struct breakpoint *bkpt_tail = NULL;
   struct raw_breakpoint *raw_bkpt_tail = NULL;
-  struct process_info *child_proc = get_thread_process (child_thread);
-  struct process_info *parent_proc = get_thread_process (parent_thread);
+  process_info *child_proc = child_thread->process ();
+  process_info *parent_proc = parent_thread->process ();
   struct breakpoint **new_list = &child_proc->breakpoints;
   struct raw_breakpoint **new_raw_list = &child_proc->raw_breakpoints;
 

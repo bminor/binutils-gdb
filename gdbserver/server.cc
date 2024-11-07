@@ -1296,11 +1296,7 @@ handle_detach (char *own_buf)
       process = find_process_pid (pid);
     }
   else
-    {
-      process = (current_thread != nullptr
-		 ? get_thread_process (current_thread)
-		 : nullptr);
-    }
+    process = current_process ();
 
   if (process == NULL)
     {
@@ -1363,9 +1359,7 @@ handle_detach (char *own_buf)
       if (child == nullptr || kind == TARGET_WAITKIND_THREAD_CLONED)
 	continue;
 
-      process_info *fork_child_process = get_thread_process (child);
-      gdb_assert (fork_child_process != nullptr);
-
+      process_info *fork_child_process = child->process ();
       int fork_child_pid = fork_child_process->pid;
 
       if (detach_inferior (fork_child_process) != 0)

@@ -214,12 +214,6 @@ have_attached_inferiors_p (void)
 }
 
 struct process_info *
-get_thread_process (const struct thread_info *thread)
-{
-  return find_process_pid (thread->id.pid ());
-}
-
-struct process_info *
 current_process (void)
 {
   return current_process_;
@@ -422,7 +416,7 @@ void
 switch_to_thread (thread_info *thread)
 {
   if (thread != nullptr)
-    current_process_ = get_thread_process (thread);
+    current_process_ = thread->process ();
   else
     current_process_ = nullptr;
   current_thread = thread;

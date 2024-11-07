@@ -134,7 +134,6 @@ pid_of (const process_info *proc)
    is null.  */
 
 struct process_info *current_process (void);
-struct process_info *get_thread_process (const struct thread_info *);
 
 extern owning_intrusive_list<process_info> all_processes;
 

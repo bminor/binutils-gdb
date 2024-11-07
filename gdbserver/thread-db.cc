@@ -388,10 +388,9 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   psaddr_t addr;
   td_err_e err;
   struct lwp_info *lwp;
-  struct process_info *proc;
   struct thread_db *thread_db;
+  process_info *proc = thread->process ();
 
-  proc = get_thread_process (thread);
   thread_db = proc->priv->thread_db;
 
   /* If the thread layer is not (yet) initialized, fail.  */
@@ -448,14 +447,13 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 bool
 thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len)
 {
-  struct thread_db *thread_db;
   struct lwp_info *lwp;
   thread_info *thread = find_thread_ptid (ptid);
 
   if (thread == NULL)
     return false;
 
-  thread_db = get_thread_process (thread)->priv->thread_db;
+  thread_db *thread_db = thread->process ()->priv->thread_db;
 
   if (thread_db == NULL)
     return false;
@@ -873,8 +871,7 @@ thread_db_handle_monitor_command (char *mon)
 void
 thread_db_notice_clone (struct thread_info *parent_thr, ptid_t child_ptid)
 {
-  process_info *parent_proc = get_thread_process (parent_thr);
-  struct thread_db *thread_db = parent_proc->priv->thread_db;
+  thread_db *thread_db = parent_thr->process ()->priv->thread_db;
 
   /* If the thread layer isn't initialized, return.  It may just
      be that the program uses clone, but does not use libthread_db.  */
