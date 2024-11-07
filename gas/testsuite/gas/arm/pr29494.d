@@ -4,6 +4,7 @@
 #  "unaligned opcodes detected in executable segment"
 # message because the jump table at the end of the .text
 # section was not 2-byte aligned.
+# skip: *-*-pe *-wince-*
 
 #...
 .*\.short[ 	]+0x(aea8|a8ae)
