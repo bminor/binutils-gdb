@@ -202,22 +202,6 @@ init_string (string_type *buffer)
   init_string_with_size (buffer, DEF_SIZE);
 }
 
-static int
-find (string_type *str, char *what)
-{
-  unsigned int i;
-  char *p;
-  p = what;
-  for (i = 0; i < str->write_idx && *p; i++)
-    {
-      if (*p == str->ptr[i])
-	p++;
-      else
-	p = what;
-    }
-  return (*p == 0);
-}
-
 static void
 write_buffer (string_type *buffer, FILE *f)
 {
