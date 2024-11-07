@@ -91,7 +91,6 @@ private:
 };
 
 void remove_thread (struct thread_info *thread);
-struct thread_info *add_thread (ptid_t ptid, void *target_data);
 
 /* Return a pointer to the first thread, or NULL if there isn't one.  */
 

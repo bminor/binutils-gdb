@@ -104,6 +104,9 @@ struct process_info : public intrusive_list_node<process_info>
   /* Invoke FUNC for each thread.  */
   void for_each_thread (gdb::function_view<void (thread_info *)> func);
 
+  /* Add a thread with id ID to this process.  */
+  thread_info *add_thread (ptid_t id, void *target_data);
+
 private:
   /* This processes' thread list, sorted by creation order.  */
   owning_intrusive_list<thread_info> m_thread_list;

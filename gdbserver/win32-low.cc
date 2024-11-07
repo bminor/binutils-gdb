@@ -174,7 +174,7 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 #endif
   th = new windows_thread_info (tid, h, base);
 
-  add_thread (ptid, th);
+  find_process_pid (pid)->add_thread (ptid, th);
 
   if (the_low_target.thread_added != NULL)
     (*the_low_target.thread_added) (th);

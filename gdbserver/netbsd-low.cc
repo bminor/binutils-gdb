@@ -321,7 +321,7 @@ netbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	ourstatus->set_spurious ();
       else
 	{
-	  add_thread (wptid, NULL);
+	  find_process_pid (wptid.pid ())->add_thread (wptid, nullptr);
 	  ourstatus->set_thread_created ();
 	}
       return wptid;
@@ -391,7 +391,7 @@ netbsd_process_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	 that was not fully initialized during the attach stage.  */
       if (wptid.lwp () != 0 && !find_thread_ptid (wptid)
 	  && ourstatus->kind () != TARGET_WAITKIND_THREAD_EXITED)
-	add_thread (wptid, nullptr);
+	find_process_pid (wptid.pid ())->add_thread (wptid, nullptr);
 
       switch (ourstatus->kind ())
 	{

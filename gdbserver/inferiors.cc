@@ -38,16 +38,11 @@ struct thread_info *current_thread;
    Empty if not specified.  */
 static std::string current_inferior_cwd;
 
-struct thread_info *
-add_thread (ptid_t thread_id, void *target_data)
+thread_info *
+process_info::add_thread (ptid_t id, void *target_data)
 {
-  process_info *process = find_process_pid (thread_id.pid ());
-  gdb_assert (process != nullptr);
-
-  auto &new_thread
-    = process->thread_list ().emplace_back (thread_id, process, target_data);
-  bool inserted
-    = process->thread_map ().insert ({thread_id, &new_thread}).second;
+  auto &new_thread = m_thread_list.emplace_back (id, this, target_data);
+  bool inserted = m_ptid_thread_map.insert ({ id, &new_thread }).second;
 
   /* A thread with this ptid should not exist in the map yet.  */
   gdb_assert (inserted);

@@ -925,7 +925,7 @@ linux_process_target::add_lwp (ptid_t ptid)
 {
   lwp_info *lwp = new lwp_info;
 
-  lwp->thread = add_thread (ptid, lwp);
+  lwp->thread = find_process_pid (ptid.pid ())->add_thread (ptid, lwp);
 
   low_new_thread (lwp);
 
