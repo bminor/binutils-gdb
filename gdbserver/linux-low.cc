@@ -398,11 +398,11 @@ linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine)
 void
 linux_process_target::delete_lwp (lwp_info *lwp)
 {
-  struct thread_info *thr = get_lwp_thread (lwp);
+  thread_info *thr = get_lwp_thread (lwp);
 
   threads_debug_printf ("deleting %ld", lwpid_of (thr));
 
-  remove_thread (thr);
+  thr->process ()->remove_thread (thr);
 
   low_delete_thread (lwp->arch_private);
 

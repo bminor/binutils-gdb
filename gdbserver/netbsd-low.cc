@@ -303,7 +303,7 @@ netbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  /* NetBSD does not store an LWP exit status.  */
 	  ourstatus->set_thread_exited (0);
 
-	  remove_thread (thr);
+	  thr->process ()->remove_thread (thr);
 	}
       return wptid;
     }

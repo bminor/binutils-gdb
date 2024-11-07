@@ -90,8 +90,6 @@ private:
   process_info *m_process;
 };
 
-void remove_thread (struct thread_info *thread);
-
 /* Return a pointer to the first thread, or NULL if there isn't one.  */
 
 struct thread_info *get_first_thread (void);

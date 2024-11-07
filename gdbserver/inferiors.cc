@@ -100,23 +100,22 @@ find_any_thread_of_pid (int pid)
 }
 
 void
-remove_thread (struct thread_info *thread)
+process_info::remove_thread (thread_info *thread)
 {
   if (thread->btrace != NULL)
     target_disable_btrace (thread->btrace);
 
   discard_queued_stop_replies (ptid_of (thread));
-  process_info *process = get_thread_process (thread);
-  gdb_assert (process != nullptr);
 
   if (current_thread == thread)
     switch_to_thread (nullptr);
 
   /* We should not try to remove a thread that was not added.  */
-  int num_erased = process->thread_map ().erase (thread->id);
+  gdb_assert (thread->process () == this);
+  int num_erased = m_ptid_thread_map.erase (thread->id);
   gdb_assert (num_erased > 0);
 
-  process->thread_list ().erase (process->thread_list ().iterator_to (*thread));
+  m_thread_list.erase (m_thread_list.iterator_to (*thread));
 }
 
 void *

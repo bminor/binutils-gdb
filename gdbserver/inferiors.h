@@ -107,6 +107,11 @@ struct process_info : public intrusive_list_node<process_info>
   /* Add a thread with id ID to this process.  */
   thread_info *add_thread (ptid_t id, void *target_data);
 
+  /* Remove thread THREAD.
+
+     THREAD must be part of this process' thread list.  */
+  void remove_thread (thread_info *thread);
+
 private:
   /* This processes' thread list, sorted by creation order.  */
   owning_intrusive_list<thread_info> m_thread_list;
