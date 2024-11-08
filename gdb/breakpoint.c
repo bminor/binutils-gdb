@@ -7768,12 +7768,12 @@ set_breakpoint_location_function (struct bp_location *loc)
 struct gdbarch *
 get_sal_arch (struct symtab_and_line sal)
 {
-  if (sal.section)
+  if (sal.section != nullptr)
     return sal.section->objfile->arch ();
-  if (sal.symtab)
+  if (sal.symtab != nullptr)
     return sal.symtab->compunit ()->objfile ()->arch ();
 
-  return NULL;
+  return nullptr;
 }
 
 /* Call this routine when stepping and nexting to enable a breakpoint
