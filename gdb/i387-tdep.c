@@ -1031,7 +1031,6 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
   unsigned int zmm_endlo_regnum = I387_ZMM0H_REGNUM (tdep)
 				  + std::min (tdep->num_zmm_regs, 16);
   ULONGEST clear_bv;
-  static const gdb_byte zero[I386_MAX_REGISTER_SIZE] = { 0 };
   enum
     {
       none = 0x0,
@@ -1102,14 +1101,14 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
     case pkeys:
       if ((clear_bv & X86_XSTATE_PKRU))
-	regcache->raw_supply (regnum, zero);
+	regcache->raw_supply_zeroed (regnum);
       else
 	regcache->raw_supply (regnum, XSAVE_PKEYS_ADDR (tdep, regs, regnum));
       return;
 
     case avx512_zmm0_h:
       if ((clear_bv & X86_XSTATE_ZMM_H))
-	regcache->raw_supply (regnum, zero);
+	regcache->raw_supply_zeroed (regnum);
       else
 	regcache->raw_supply (regnum,
 			      XSAVE_AVX512_ZMM0_H_ADDR (tdep, regs, regnum));
@@ -1117,7 +1116,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
     case avx512_zmm16_h:
       if ((clear_bv & X86_XSTATE_ZMM))
-	regcache->raw_supply (regnum, zero);
+	regcache->raw_supply_zeroed (regnum);
       else
 	regcache->raw_supply (regnum,
 			      XSAVE_AVX512_ZMM16_H_ADDR (tdep, regs, regnum));
@@ -1125,14 +1124,14 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
     case avx512_k:
       if ((clear_bv & X86_XSTATE_K))
-	regcache->raw_supply (regnum, zero);
+	regcache->raw_supply_zeroed (regnum);
       else
 	regcache->raw_supply (regnum, XSAVE_AVX512_K_ADDR (tdep, regs, regnum));
       return;
 
     case avx512_ymmh_avx512:
       if ((clear_bv & X86_XSTATE_ZMM))
-	regcache->raw_supply (regnum, zero);
+	regcache->raw_supply_zeroed (regnum);
       else
 	regcache->raw_supply (regnum,
 			      XSAVE_YMM_H_AVX512_ADDR (tdep, regs, regnum));
@@ -1140,7 +1139,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
     case avx512_xmm_avx512:
       if ((clear_bv & X86_XSTATE_ZMM))
-	regcache->raw_supply (regnum, zero);
+	regcache->raw_supply_zeroed (regnum);
       else
 	regcache->raw_supply (regnum,
 			      XSAVE_XMM_AVX512_ADDR (tdep, regs, regnum));
@@ -1148,21 +1147,21 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 
     case avxh:
       if ((clear_bv & X86_XSTATE_AVX))
-	regcache->raw_supply (regnum, zero);
+	regcache->raw_supply_zeroed (regnum);
       else
 	regcache->raw_supply (regnum, XSAVE_AVXH_ADDR (tdep, regs, regnum));
       return;
 
     case sse:
       if ((clear_bv & X86_XSTATE_SSE))
-	regcache->raw_supply (regnum, zero);
+	regcache->raw_supply_zeroed (regnum);
       else
 	regcache->raw_supply (regnum, FXSAVE_ADDR (tdep, regs, regnum));
       return;
 
     case x87:
       if ((clear_bv & X86_XSTATE_X87))
-	regcache->raw_supply (regnum, zero);
+	regcache->raw_supply_zeroed (regnum);
       else
 	regcache->raw_supply (regnum, FXSAVE_ADDR (tdep, regs, regnum));
       return;
@@ -1176,7 +1175,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = I387_PKRU_REGNUM (tdep);
 		   i < I387_PKEYSEND_REGNUM (tdep);
 		   i++)
-		regcache->raw_supply (i, zero);
+		regcache->raw_supply_zeroed (i);
 	    }
 	  else
 	    {
@@ -1193,7 +1192,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	  if ((clear_bv & X86_XSTATE_ZMM_H))
 	    {
 	      for (i = I387_ZMM0H_REGNUM (tdep); i < zmm_endlo_regnum; i++)
-		regcache->raw_supply (i, zero);
+		regcache->raw_supply_zeroed (i);
 	    }
 	  else
 	    {
@@ -1211,7 +1210,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = I387_K0_REGNUM (tdep);
 		   i < I387_KEND_REGNUM (tdep);
 		   i++)
-		regcache->raw_supply (i, zero);
+		regcache->raw_supply_zeroed (i);
 	    }
 	  else
 	    {
@@ -1229,15 +1228,15 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	    {
 	      for (i = I387_ZMM16H_REGNUM (tdep);
 		   i < I387_ZMMENDH_REGNUM (tdep); i++)
-		regcache->raw_supply (i, zero);
+		regcache->raw_supply_zeroed (i);
 	      for (i = I387_YMM16H_REGNUM (tdep);
 		   i < I387_YMMH_AVX512_END_REGNUM (tdep);
 		   i++)
-		regcache->raw_supply (i, zero);
+		regcache->raw_supply_zeroed (i);
 	      for (i = I387_XMM16_REGNUM (tdep);
 		   i < I387_XMM_AVX512_END_REGNUM (tdep);
 		   i++)
-		regcache->raw_supply (i, zero);
+		regcache->raw_supply_zeroed (i);
 	    }
 	  else
 	    {
@@ -1264,7 +1263,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = I387_YMM0H_REGNUM (tdep);
 		   i < I387_YMMENDH_REGNUM (tdep);
 		   i++)
-		regcache->raw_supply (i, zero);
+		regcache->raw_supply_zeroed (i);
 	    }
 	  else
 	    {
@@ -1283,7 +1282,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = I387_XMM0_REGNUM (tdep);
 		   i < I387_MXCSR_REGNUM (tdep);
 		   i++)
-		regcache->raw_supply (i, zero);
+		regcache->raw_supply_zeroed (i);
 	    }
 	  else
 	    {
@@ -1301,7 +1300,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 	      for (i = I387_ST0_REGNUM (tdep);
 		   i < I387_FCTRL_REGNUM (tdep);
 		   i++)
-		regcache->raw_supply (i, zero);
+		regcache->raw_supply_zeroed (i);
 	    }
 	  else
 	    {
@@ -1336,7 +1335,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 		regcache->raw_supply (i, buf);
 	      }
 	    else
-	      regcache->raw_supply (i, zero);
+	      regcache->raw_supply_zeroed (i);
 	  }
 	/* Most of the FPU control registers occupy only 16 bits in
 	   the xsave extended state.  Give those a special treatment.  */
