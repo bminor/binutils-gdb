@@ -8191,6 +8191,34 @@ library have disappeared from the executable.  This option is only effective
 for Secure Gateway import libraries, ie. when @samp{--cmse-implib} is
 specified.
 
+@kindex -z force-bti
+@cindex Protect PLTs with Branch Target Identification
+The @samp{-z force-bti} option turns on the verification of Branch Target
+Identification (BTI) in input objects, generates PLTs with BTI, and marks the
+output with BTI.  If this option is omitted, but all input objects belonging to
+the link unit have the BTI marking, the linker implicitly generates PLTs with
+BTI, and marks the output with BTI.
+
+@kindex -z bti-report[=none|warning|error]
+@cindex Control warnings for missing BTI markings.
+The @samp{-z bti-report[=none|warning|error]} option specifies how to report
+missing BTI markings on inputs, i.e. the GNU_PROPERTY_AARCH64_FEATURE_1_BTI
+property.
+By default, if the option is omitted and @samp{-z force-bti} is provided,
+warnings are emitted.
+@itemize
+@item@samp{none} disables any warning messages.
+@item@samp{warning} (the default value) emits warning messages when input objects
+composing the link unit are missing BTI markings.
+@item@samp{error} turns the warning messages into errors.
+@end itemize
+If issues are found, a maximum of 20 messages will be emitted, and then a summary
+with the total number of issues will be displayed at the end.
+
+@kindex -z pac-plt
+@cindex Protect PLTs with Returned Pointer Authentication
+The @samp{-z pac-plt} option enables the usage of pointer authentication in PLTs.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear
