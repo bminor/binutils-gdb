@@ -1,4 +1,5 @@
 # name: NOP<c> instructions
+# as: -march=armv7-a
 # objdump: -dr --prefix-addresses --show-raw-insn
 # skip: *-*-pe *-*-wince
 
