@@ -1,4 +1,5 @@
 # name: Upredictable Instructions
+# as: -march=armv6
 # objdump: -D --prefix-addresses --show-raw-insn
 
 .*: +file format .*arm.*

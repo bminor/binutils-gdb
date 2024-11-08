@@ -3364,6 +3364,7 @@ static const struct mopcode32 mve_opcodes[] =
    %C			print the PSR sub type.
    %U			print barrier type.
    %P			print address for pli instruction.
+   %T			print 'from Armv4T onwards'
 
    %<bitfield>r		print as an ARM register
    %<bitfield>T		print as an ARM register + 1
@@ -3392,8 +3393,8 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0xe7f000f0, 0xfff000f0, "udf\t%{I:#%e%}"},
 
-  {ARM_FEATURE_CORE_LOW (ARM_EXT_V4T | ARM_EXT_V5),
-    0x012FFF10, 0x0ffffff0, "bx%c\t%0-3r"},
+  {ARM_FEATURE_CORE_LOW (ARM_EXT_V4),
+    0x012FFF10, 0x0ffffff0, "bx%c\t%0-3r%T"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
     0x00000090, 0x0fe000f0, "mul%20's%c\t%16-19R, %0-3R, %8-11R"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V2),
@@ -10118,6 +10119,18 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 		      value_in_comment = print_arm_address (pc, info, given | (1 << P_BIT));
 		      break;
 
+		    case 'T':
+		      /* Armv4 does not have a BX instruction, however, when
+			 assembled with the --fix-v4bx option GAS will accept
+			 and assemble a BX instruction when assembling for
+			 Armv4.  When disassembling we also disassemble it as a
+			 BX instruction, but do make the user aware that this
+			 instruction is only supported on HW from Armv4T
+			 onwards.  */
+		      if (info->mach == bfd_mach_arm_4)
+			func (stream, dis_style_text, "\t@ from Armv4T onwards");
+		      break;
+
 		    case 'S':
 		      allow_unpredictable = true;
 		      /* Fall through.  */
@@ -12307,7 +12320,7 @@ select_arm_features (unsigned long mach,
 	  ARM_MERGE_FEATURE_SETS (arch_fset, arch_fset, armv8_6_ext_fset);
 	  break;
 	}
-    case bfd_mach_arm_8R:	 ARM_SET_FEATURES (ARM_ARCH_V8R); break;
+    case bfd_mach_arm_8R:	 ARM_SET_FEATURES (ARM_ARCH_V8R_CRC); break;
     case bfd_mach_arm_8M_BASE:	 ARM_SET_FEATURES (ARM_ARCH_V8M_BASE); break;
     case bfd_mach_arm_8M_MAIN:	 ARM_SET_FEATURES (ARM_ARCH_V8M_MAIN); break;
     case bfd_mach_arm_8_1M_MAIN:
@@ -12373,9 +12386,15 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bool little)
     {
       static struct arm_private_data private;
 
-      if ((info->flags & USER_SPECIFIED_MACHINE_TYPE) == 0)
+      if (info->flavour != bfd_target_elf_flavour
+	  && (info->flags & USER_SPECIFIED_MACHINE_TYPE) == 0)
 	/* If the user did not use the -m command line switch then default to
 	   disassembling all types of ARM instruction.
+
+	   If this is an arm elf target, build attributes will be used to
+	   determine info->mach, which enable us to be more accurate when
+	   disassembling since we know what the target architecture version is.
+	   For any other target see the comment below:
 
 	   The info->mach value has to be ignored as this will be based on
 	   the default archictecture for the target and/or hints in the notes
