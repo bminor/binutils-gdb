@@ -8255,15 +8255,33 @@ mark the output with GCS.
 
 @kindex -z gcs-report[=none|warning|error]
 @cindex Control warnings for missing GCS markings.
-The @samp{-z gcs-report[=none|warning|error]} specifies how to report the missing
-GCS markings on inputs, i.e. the GNU_PROPERTY_AARCH64_FEATURE_1_GCS property.
-By default, if the option is omitted and @samp{-z gcs} is provided, warnings are
-emitted.
+The @samp{-z gcs-report[=none|warning|error]} option specifies how to report the
+missing GCS markings on inputs, i.e. the GNU_PROPERTY_AARCH64_FEATURE_1_GCS
+property. By default, if the option is omitted and @samp{-z gcs} is provided,
+warnings are emitted.
 @itemize
 @item @samp{none} disables any warning messages.
 @item @samp{warning} (the default value) emits warning messages when input objects
-composing the link unit are missing GCS markings, or dynamic objects containing
-external symbols used in the link unit.
+composing the link unit are missing GCS markings.
+@item @samp{error} turns the warning messages into errors.
+@end itemize
+If issues are found, a maximum of 20 messages will be emitted, and then a summary
+with the total number of issues will be displayed at the end.
+
+@kindex -z gcs-report-dynamic=none|warning|error
+@cindex Control warnings for missing GCS markings on dynamic input objects.
+The @samp{-z gcs-report-dynamic=none|warning|error} option specifies how to
+report the missing GCS markings on dynamic input objects, i.e. the
+GNU_PROPERTY_AARCH64_FEATURE_1_GCS property. By default, if the option is
+omitted, it inherits the value of @samp{-z gcs-report}. However, the inherited
+value is capped to @samp{warning} as some user might want to only report errors
+in the currently built module, and not the shared dependencies. It is therefore
+necessary to use an explicit @samp{-z gcs-report-dynamic=error} option if you
+want the linker to error on GCS issues in the shared libraries.
+@itemize
+@item @samp{none} disables any warning messages.
+@item @samp{warning} emits warning messages when dynamic objects are missing
+GCS markings.
 @item @samp{error} turns the warning messages into errors.
 @end itemize
 If issues are found, a maximum of 20 messages will be emitted, and then a summary

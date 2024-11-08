@@ -764,11 +764,9 @@ _bfd_aarch64_report_summary_merge_issues (struct bfd_link_info *info)
 {
   const struct elf_aarch64_obj_tdata * tdata
     = elf_aarch64_tdata (info->output_bfd);
-  aarch64_feature_marking_report bti_report = tdata->sw_protections.bti_report;
-  aarch64_feature_marking_report gcs_report = tdata->sw_protections.gcs_report;
 
   if (tdata->n_bti_issues > GNU_PROPERTY_ISSUES_MAX
-      && bti_report != MARKING_NONE)
+      && tdata->sw_protections.bti_report != MARKING_NONE)
     {
       const char *msg
 	= (tdata->sw_protections.bti_report == MARKING_ERROR)
@@ -780,7 +778,7 @@ _bfd_aarch64_report_summary_merge_issues (struct bfd_link_info *info)
     }
 
   if (tdata->n_gcs_issues > GNU_PROPERTY_ISSUES_MAX
-      && gcs_report != MARKING_NONE)
+      && tdata->sw_protections.gcs_report != MARKING_NONE)
     {
       const char *msg
 	= (tdata->sw_protections.gcs_report == MARKING_ERROR)
@@ -790,6 +788,71 @@ _bfd_aarch64_report_summary_merge_issues (struct bfd_link_info *info)
 	    "GCS requirements.\n");
       info->callbacks->einfo (msg, tdata->n_gcs_issues);
     }
+
+  if (tdata->n_gcs_dynamic_issues > GNU_PROPERTY_ISSUES_MAX
+      && tdata->sw_protections.gcs_report_dynamic != MARKING_NONE)
+    {
+      const char *msg
+	= (tdata->sw_protections.gcs_report_dynamic == MARKING_ERROR)
+	? _("%Xerror: found a total of %d dynamically-linked objects "
+	    "incompatible with GCS requirements.\n")
+	: _("warning: found a total of %d dynamically-linked objects "
+	    "incompatible with GCS requirements.\n");
+      info->callbacks->einfo (msg, tdata->n_gcs_dynamic_issues);
+    }
+}
+
+/* Perform a look-up of a property in an unsorted list of properties.  This is
+   useful when the list of properties of an object has not been sorted yet.  */
+static uint32_t
+_bfd_aarch64_prop_linear_lookup (elf_property_list *properties,
+				 unsigned int pr_type)
+{
+  for (elf_property_list *p = properties; p != NULL; p = p->next)
+    if (p->property.pr_type == pr_type)
+      return p->property.u.number;
+  return 0;
+}
+
+/* Compare the GNU properties of the current dynamic object, with the ones of
+   the output BFD.  Today, we only care about GCS feature stored in
+   GNU_PROPERTY_AARCH64_FEATURE_1.  */
+static void
+_bfd_aarch64_compare_dynamic_obj_prop_against_outprop(
+  struct bfd_link_info *info,
+  const uint32_t outprop,
+  bfd *pbfd)
+{
+  if (!(outprop & GNU_PROPERTY_AARCH64_FEATURE_1_GCS))
+    return;
+
+  const uint32_t dyn_obj_aarch64_feature_prop =
+    _bfd_aarch64_prop_linear_lookup (elf_properties (pbfd),
+				     GNU_PROPERTY_AARCH64_FEATURE_1_AND);
+  if (!(dyn_obj_aarch64_feature_prop & GNU_PROPERTY_AARCH64_FEATURE_1_GCS))
+    _bfd_aarch64_elf_check_gcs_report (info, pbfd);
+}
+
+/* Check compatibility between the GNU properties of the ouput BFD and the
+   linked dynamic objects.  */
+static void
+_bfd_aarch64_elf_check_gnu_properties_linked_dynamic_objects (
+  struct bfd_link_info * info,
+  const uint32_t outprop)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (info->output_bfd);
+  const int elf_machine_code = bed->elf_machine_code;
+  const unsigned int elfclass = bed->s->elfclass;
+
+  for (bfd *pbfd = info->input_bfds; pbfd != NULL; pbfd = pbfd->link.next)
+    /* Ignore GNU properties from non-ELF objects or ELF objects with different
+       machine code.  */
+    if ((pbfd->flags & DYNAMIC) != 0
+	&& (bfd_get_flavour (pbfd) == bfd_target_elf_flavour)
+	&& (get_elf_backend_data (pbfd)->elf_machine_code == elf_machine_code)
+	&& (get_elf_backend_data (pbfd)->s->elfclass == elfclass))
+      _bfd_aarch64_compare_dynamic_obj_prop_against_outprop(info, outprop,
+	pbfd);
 }
 
 /* Find the first input bfd with GNU property and merge it with GPROP.  If no
@@ -855,7 +918,7 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
       /* The property list is sorted in order of type.  */
       for (elf_property_list *p = elf_properties (pbfd);
 	   (p != NULL)
-	     && (GNU_PROPERTY_AARCH64_FEATURE_1_AND <= p->property.pr_type);
+	   && (GNU_PROPERTY_AARCH64_FEATURE_1_AND <= p->property.pr_type);
 	   p = p->next)
 	{
 	  /* This merge of features should happen only once as all the identical
@@ -872,9 +935,12 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	}
     }
 
+  tdata->gnu_property_aarch64_feature_1_and = outprop;
+
+  _bfd_aarch64_elf_check_gnu_properties_linked_dynamic_objects (info, outprop);
+
   _bfd_aarch64_report_summary_merge_issues (info);
 
-  tdata->gnu_property_aarch64_feature_1_and = outprop;
   return pbfd;
 }
 
@@ -1047,21 +1113,42 @@ void
 _bfd_aarch64_elf_check_gcs_report (struct bfd_link_info *info, bfd *ebfd)
 {
   struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
+  bool dynamic_obj = (ebfd->flags & DYNAMIC) != 0;
 
-  if (tdata->sw_protections.gcs_report == MARKING_NONE)
-    return;
+  if (dynamic_obj)
+    {
+      if (tdata->sw_protections.gcs_report_dynamic == MARKING_NONE)
+	return;
+      ++tdata->n_gcs_dynamic_issues;
+      if (tdata->n_gcs_dynamic_issues > GNU_PROPERTY_ISSUES_MAX)
+	return;
+    }
+  else
+    {
+      if (tdata->sw_protections.gcs_report == MARKING_NONE)
+	return;
+      ++tdata->n_gcs_issues;
+      if (tdata->n_gcs_issues > GNU_PROPERTY_ISSUES_MAX)
+	return;
+    }
 
-  ++tdata->n_gcs_issues;
-
-  if (tdata->n_gcs_issues > GNU_PROPERTY_ISSUES_MAX)
-    return;
-
-  const char *msg
-    = (tdata->sw_protections.gcs_report == MARKING_WARN)
-    ? _("%pB: warning: GCS is required by -z gcs, but this input object file "
-	"lacks the necessary property note.\n")
-    : _("%X%pB: error: GCS is required by -z gcs, but this input object file "
-	"lacks the necessary property note.\n");
+  const char *msg;
+  if (dynamic_obj)
+    msg = (tdata->sw_protections.gcs_report_dynamic == MARKING_WARN)
+      ? _("%pB: warning: GCS is required by -z gcs, but this shared library "
+	  "lacks the necessary property note. The dynamic loader might not "
+	  "enable GCS or refuse to load the program unless all the shared "
+	  "library dependencies have the GCS marking.\n")
+      : _("%X%pB: error: GCS is required by -z gcs, but this shared library "
+	  "lacks the necessary property note. The dynamic loader might not "
+	  "enable GCS or refuse to load the program unless all the shared "
+	  "library dependencies have the GCS marking.\n");
+  else
+    msg = (tdata->sw_protections.gcs_report == MARKING_WARN)
+      ? _("%pB: warning: GCS is required by -z gcs, but this input object file "
+	  "lacks the necessary property note.\n")
+      : _("%X%pB: error: GCS is required by -z gcs, but this input object file "
+	  "lacks the necessary property note.\n");
 
   info->callbacks->einfo (msg, ebfd);
 }

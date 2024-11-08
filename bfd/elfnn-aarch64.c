@@ -5035,8 +5035,22 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
     }
 
   elf_aarch64_tdata (output_bfd)->sw_protections = *sw_protections;
+  /* Inherit the value from '-z gcs-report' if the option '-z gcs-report-dynamic'
+     was not set on the command line.  However, the inheritance mechanism is
+     capped to avoid inheriting the error level from -g gcs-report as the user
+     might want to continue to build a module without rebuilding all the shared
+     libraries.  If a user also wants to error GCS issues in the shared
+     libraries, '-z gcs-report-dynamic=error' will have to be specified
+     explicitly.  */
+  if (sw_protections->gcs_report_dynamic == MARKING_UNSET)
+    elf_aarch64_tdata (output_bfd)->sw_protections.gcs_report_dynamic
+      = (sw_protections->gcs_report == MARKING_ERROR)
+      ? MARKING_WARN
+      : sw_protections->gcs_report;
+
   elf_aarch64_tdata (output_bfd)->n_bti_issues = 0;
   elf_aarch64_tdata (output_bfd)->n_gcs_issues = 0;
+  elf_aarch64_tdata (output_bfd)->n_gcs_dynamic_issues = 0;
 
   setup_plt_values (link_info, sw_protections->plt_type);
 }

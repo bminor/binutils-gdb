@@ -51,6 +51,9 @@ typedef enum
   MARKING_ERROR	= 2,  /* Emit error when the input objects are missing GNU
 			 feature property markings, and the output has the
 			 markings.  */
+  MARKING_UNSET = 3,  /* The only purpose of this value is to simulate an
+			 optional to detect when the value was not initialized
+			 from the command line.  */
 } aarch64_feature_marking_report;
 
 /* To indicate whether GNU_PROPERTY_AARCH64_FEATURE_1_GCS bit is
@@ -64,7 +67,7 @@ typedef enum
 } aarch64_gcs_type;
 
 /* A structure to encompass all information about software protections coming
-   from BTI or PAC related command line options.  */
+   from BTI, PAC and GCS related command line options.  */
 struct aarch64_protection_opts
 {
   /* PLT type to use depending on the selected software proctections.  */
@@ -78,6 +81,9 @@ struct aarch64_protection_opts
 
   /* Report level for GCS issues.  */
   aarch64_feature_marking_report gcs_report;
+
+  /* Report level for GCS issues with dynamic inputs.  */
+  aarch64_feature_marking_report gcs_report_dynamic;
 };
 typedef struct aarch64_protection_opts aarch64_protection_opts;
 
@@ -104,8 +110,11 @@ struct elf_aarch64_obj_tdata
   /* Number of reported BTI issues.  */
   int n_bti_issues;
 
-  /* Number of reported GCS issues.  */
+  /* Number of reported GCS issues for non-dynamic objects.  */
   int n_gcs_issues;
+
+  /* Number of reported GCS issues for dynamic objects.  */
+  int n_gcs_dynamic_issues;
 };
 
 #define elf_aarch64_tdata(bfd)				\
