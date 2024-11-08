@@ -61,7 +61,6 @@ nios2_supply_gregset (const struct regset *regset,
 {
   const gdb_byte *gregs = (const gdb_byte *) gregs_buf;
   int regno;
-  static const gdb_byte zero_buf[4] = {0, 0, 0, 0};
 
   for (regno = NIOS2_Z_REGNUM; regno <= NIOS2_MPUACC_REGNUM; regno++)
     if (regnum == -1 || regnum == regno)
@@ -69,7 +68,7 @@ nios2_supply_gregset (const struct regset *regset,
 	if (reg_offsets[regno] != -1)
 	  regcache->raw_supply (regno, gregs + 4 * reg_offsets[regno]);
 	else
-	  regcache->raw_supply (regno, zero_buf);
+	  regcache->raw_supply_zeroed (regno);
       }
 }
 
