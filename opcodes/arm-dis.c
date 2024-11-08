@@ -3359,6 +3359,7 @@ static const struct mopcode32 mve_opcodes[] =
    %m			print register mask for ldm/stm instruction
    %o			print operand2 (immediate or register + shift)
    %p			print 'p' iff bits 12-15 are 15
+   %O			print 'OBSOLETE' iff bits 12-15 are 15
    %t			print 't' iff bit 21 set and bit 24 clear
    %B			print arm BLX(1) destination
    %C			print the PSR sub type.
@@ -3969,32 +3970,32 @@ static const struct opcode32 arm_opcodes[] =
     0x01000000, 0x0fb00cff, "mrs%c\t%12-15R, %R"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x03000000, 0x0fe00000, "tst%p%c\t%16-19r, %o"},
+    0x03000000, 0x0fe00000, "tst%p%c\t%16-19r, %o%O"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01000000, 0x0fe00010, "tst%p%c\t%16-19r, %o"},
+    0x01000000, 0x0fe00010, "tst%p%c\t%16-19r, %o%O"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01000010, 0x0fe00090, "tst%p%c\t%16-19R, %o"},
+    0x01000010, 0x0fe00090, "tst%p%c\t%16-19R, %o%O"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x03300000, 0x0ff00000, "teq%p%c\t%16-19r, %o"},
+    0x03300000, 0x0ff00000, "teq%p%c\t%16-19r, %o%O"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01300000, 0x0ff00010, "teq%p%c\t%16-19r, %o"},
+    0x01300000, 0x0ff00010, "teq%p%c\t%16-19r, %o%O"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01300010, 0x0ff00010, "teq%p%c\t%16-19R, %o"},
+    0x01300010, 0x0ff00010, "teq%p%c\t%16-19R, %o%O"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x03400000, 0x0fe00000, "cmp%p%c\t%16-19r, %o"},
+    0x03400000, 0x0fe00000, "cmp%p%c\t%16-19r, %o%O"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01400000, 0x0fe00010, "cmp%p%c\t%16-19r, %o"},
+    0x01400000, 0x0fe00010, "cmp%p%c\t%16-19r, %o%O"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01400010, 0x0fe00090, "cmp%p%c\t%16-19R, %o"},
+    0x01400010, 0x0fe00090, "cmp%p%c\t%16-19R, %o%O"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x03600000, 0x0fe00000, "cmn%p%c\t%16-19r, %o"},
+    0x03600000, 0x0fe00000, "cmn%p%c\t%16-19r, %o%O"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01600000, 0x0fe00010, "cmn%p%c\t%16-19r, %o"},
+    0x01600000, 0x0fe00010, "cmn%p%c\t%16-19r, %o%O"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x01600010, 0x0fe00090, "cmn%p%c\t%16-19R, %o"},
+    0x01600010, 0x0fe00090, "cmn%p%c\t%16-19R, %o%O"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x03800000, 0x0fe00000, "orr%20's%c\t%12-15r, %16-19r, %o"},
@@ -10342,19 +10343,12 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 
 		    case 'p':
 		      if ((given & 0x0000f000) == 0x0000f000)
-			{
-			  arm_feature_set arm_ext_v6 =
-			    ARM_FEATURE_CORE_LOW (ARM_EXT_V6);
-
-			  /* The p-variants of tst/cmp/cmn/teq are the pre-V6
-			     mechanism for setting PSR flag bits.  They are
-			     obsolete in V6 onwards.  */
-			  if (! ARM_CPU_HAS_FEATURE (private_data->features, \
-						     arm_ext_v6))
-			    func (stream, dis_style_mnemonic, "p");
-			  else
-			    is_unpredictable = true;
-			}
+			func (stream, dis_style_mnemonic, "p");
+		      break;
+		    case 'O':
+		      if ((given & 0x0000f000) == 0x0000f000)
+			func (stream, dis_style_text,
+			      "\t@ p-variant is OBSOLETE");
 		      break;
 
 		    case 't':
