@@ -76,8 +76,11 @@ save_vars { env(EDITOR) } {
 	# even for non-dwarf debug formats, but this currently fails
 	# with the stabs board.
 	if { $non_dwarf } { setup_xfail *-*-* }
+	# Additionally, some targets will report the default location
+	# as the opening brace of main, while others report the first
+	# line of code inside main.  For this test either will do.
 	gdb_test "edit" \
-	    "\r\n\\+$line_0 $srcfile_re" \
+	    "\r\n\\+(?:$line_0|$line_1) $srcfile_re" \
 	    "check edit of default location"
 
 	gdb_test "list $line_4" \
