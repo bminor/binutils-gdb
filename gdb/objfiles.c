@@ -281,7 +281,7 @@ objfile::objfile (gdb_bfd_ref_ptr bfd_, program_space *pspace,
 
   if (obfd != nullptr)
     {
-      mtime = bfd_get_mtime (obfd.get ());
+      mtime = gdb_bfd_get_mtime (obfd.get ());
 
       /* Build section table.  */
       build_objfile_section_table (this);

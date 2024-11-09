@@ -434,7 +434,8 @@ macho_add_oso_symfile (oso_el *oso, const gdb_bfd_ref_ptr &abfd,
       return;
     }
 
-  if (abfd->my_archive == NULL && oso->mtime != bfd_get_mtime (abfd.get ()))
+  if (abfd->my_archive == nullptr
+      && oso->mtime != gdb_bfd_get_mtime (abfd.get ()))
     {
       warning (_("`%s': file time stamp mismatch."), oso->name);
       return;

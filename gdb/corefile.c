@@ -51,7 +51,7 @@ reopen_exec_file (void)
 
   /* If the timestamp of the exec file has changed, reopen it.  */
   struct stat st;
-  int res = bfd_stat (exec_bfd, &st);
+  int res = gdb_bfd_stat (exec_bfd, &st);
 
   if (res == 0
       && current_program_space->ebfd_mtime != 0
@@ -70,8 +70,8 @@ validate_files (void)
       if (!core_file_matches_executable_p (current_program_space->core_bfd (),
 					   current_program_space->exec_bfd ()))
 	warning (_("core file may not match specified executable file."));
-      else if (bfd_get_mtime (current_program_space->exec_bfd ())
-	       > bfd_get_mtime (current_program_space->core_bfd ()))
+      else if (gdb_bfd_get_mtime (current_program_space->exec_bfd ())
+	       > gdb_bfd_get_mtime (current_program_space->core_bfd ()))
 	warning (_("exec file is newer than core file."));
     }
 }

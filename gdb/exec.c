@@ -483,7 +483,7 @@ exec_file_attach (const char *filename, int from_tty)
 	= build_section_table (current_program_space->exec_bfd ());
 
       current_program_space->ebfd_mtime
-	= bfd_get_mtime (current_program_space->exec_bfd ());
+	= gdb_bfd_get_mtime (current_program_space->exec_bfd ());
 
       validate_files ();
 

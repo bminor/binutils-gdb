@@ -251,6 +251,17 @@ gdb_bfd_sections (const gdb_bfd_ref_ptr &abfd)
   return gdb_bfd_section_range (abfd->sections);
 };
 
+/* A wrapper for bfd_stat that acquires the per-BFD lock on ABFD.  */
+
+extern int gdb_bfd_stat (bfd *abfd, struct stat *sbuf)
+  ATTRIBUTE_WARN_UNUSED_RESULT;
+
+/* A wrapper for bfd_get_mtime that acquires the per-BFD lock on
+   ABFD.  */
+
+extern long gdb_bfd_get_mtime (bfd *abfd)
+  ATTRIBUTE_WARN_UNUSED_RESULT;
+
 /* A wrapper for bfd_errmsg to produce a more helpful error message
    in the case of bfd_error_file_ambiguously recognized.
    MATCHING, if non-NULL, is the corresponding argument to

@@ -1121,6 +1121,32 @@ gdb_bfd_get_full_section_contents (bfd *abfd, asection *section,
 				   section_size);
 }
 
+/* See gdb_bfd.h.  */
+
+int
+gdb_bfd_stat (bfd *abfd, struct stat *sbuf)
+{
+#if CXX_STD_THREAD
+  gdb_bfd_data *gdata = (gdb_bfd_data *) bfd_usrdata (abfd);
+  std::lock_guard<std::mutex> guard (gdata->per_bfd_mutex);
+#endif
+
+  return bfd_stat (abfd, sbuf);
+}
+
+/* See gdb_bfd.h.  */
+
+long
+gdb_bfd_get_mtime (bfd *abfd)
+{
+#if CXX_STD_THREAD
+  gdb_bfd_data *gdata = (gdb_bfd_data *) bfd_usrdata (abfd);
+  std::lock_guard<std::mutex> guard (gdata->per_bfd_mutex);
+#endif
+
+  return bfd_get_mtime (abfd);
+}
+
 #define AMBIGUOUS_MESS1	".\nMatching formats:"
 #define AMBIGUOUS_MESS2	\
   ".\nUse \"set gnutarget format-name\" to specify the format."
