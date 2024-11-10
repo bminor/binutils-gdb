@@ -69,6 +69,9 @@
   ** New class gdb.missing_objfile.MissingObjfileHandler which can be
      sub-classed to create handlers for missing objfiles.
 
+  ** The 'signed' argument to gdb.Architecture.integer_type() will no
+     longer accept non-bool types.
+
 * Debugger Adapter Protocol changes
 
   ** The "scopes" request will now return a scope holding global
