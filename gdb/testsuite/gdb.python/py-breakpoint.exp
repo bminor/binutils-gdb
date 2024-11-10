@@ -792,6 +792,15 @@ proc_with_prefix test_bkpt_qualified {} {
 	$one_location_re \
 	"qualified true"
 
+    # Test qualified with a non-bool type.
+    delete_breakpoints
+    gdb_test \
+	"python gdb.Breakpoint(\"multiply\", qualified=None)" \
+	[multi_line \
+	     "Python Exception <class 'TypeError'>: argument 10 must be bool, not None" \
+	     "Error occurred in Python: argument 10 must be bool, not None"] \
+	"qualified non_bool_type"
+
     # Test qualified=True with an explicit function.
     delete_breakpoints
     gdb_test \
