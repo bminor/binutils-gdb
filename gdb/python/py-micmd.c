@@ -509,7 +509,16 @@ micmdpy_set_installed (PyObject *self, PyObject *newvalue, void *closure)
 {
   struct micmdpy_object *micmd_obj = (struct micmdpy_object *) self;
 
-  bool installed_p = PyObject_IsTrue (newvalue);
+  if (!PyBool_Check (newvalue))
+    {
+      PyErr_Format (PyExc_TypeError,
+		    _("gdb.MICommand.installed must be set to a bool, not %s"),
+		    newvalue == Py_None ? "None" : Py_TYPE(newvalue)->tp_name);
+      return -1;
+    }
+
+  bool installed_p = newvalue == Py_True;
+
   if (installed_p == (micmd_obj->mi_command != nullptr))
     return 0;
 

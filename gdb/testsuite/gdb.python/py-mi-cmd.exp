@@ -233,6 +233,21 @@ mi_gdb_test "-abc str" \
     "\\^error,msg=\"Undefined MI command: abc\",code=\"undefined-command\"" \
     "-abc str, but now the command is gone"
 
+mi_gdb_test "python cmd.installed = None" \
+    ".*\r\n\\^error,msg=\"Error occurred in Python: gdb\\.MICommand\\.installed must be set to a bool, not None\"" \
+    "re-install the mi command using value None"
+
+mi_gdb_test "python cmd.installed = 1" \
+    ".*\r\n\\^error,msg=\"Error occurred in Python: gdb\\.MICommand\\.installed must be set to a bool, not int\"" \
+    "re-install the mi command using an int value"
+
+mi_gdb_test "python print(cmd.installed)" \
+    [multi_line \
+	 ".*" \
+	 "~\"False\\\\n\"" \
+	 "\\^done"] \
+    "cmd is still not installed"
+
 mi_gdb_test "python cmd.installed = True" \
     ".*\\^done" \
     "re-install the mi command"
