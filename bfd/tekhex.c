@@ -361,6 +361,7 @@ first_phase (bfd *abfd, int type, char *src, char * src_end)
 {
   asection *section, *alt_section;
   unsigned int len;
+  bfd_vma addr;
   bfd_vma val;
   char sym[17];			/* A symbol can only be 16chars long.  */
 
@@ -368,20 +369,16 @@ first_phase (bfd *abfd, int type, char *src, char * src_end)
     {
     case '6':
       /* Data record - read it and store it.  */
-      {
-	bfd_vma addr;
+      if (!getvalue (&src, &addr, src_end))
+	return false;
 
-	if (!getvalue (&src, &addr, src_end))
-	  return false;
-
-	while (*src && src < src_end - 1)
-	  {
-	    insert_byte (abfd, HEX (src), addr);
-	    src += 2;
-	    addr++;
-	  }
-	return true;
-      }
+      while (*src && src < src_end - 1)
+	{
+	  insert_byte (abfd, HEX (src), addr);
+	  src += 2;
+	  addr++;
+	}
+      return true;
 
     case '3':
       /* Symbol record, read the segment.  */
@@ -406,13 +403,16 @@ first_phase (bfd *abfd, int type, char *src, char * src_end)
 	    {
 	    case '1':		/* Section range.  */
 	      src++;
-	      if (!getvalue (&src, &section->vma, src_end))
+	      if (!getvalue (&src, &addr, src_end))
 		return false;
 	      if (!getvalue (&src, &val, src_end))
 		return false;
-	      if (val < section->vma)
-		val = section->vma;
-	      section->size = val - section->vma;
+	      if (bfd_is_const_section (section))
+		break;
+	      section->vma = addr;
+	      if (val < addr)
+		val = addr;
+	      section->size = val - addr;
 	      /* PR 17512: file: objdump-s-endless-loop.tekhex.
 		 Check for overlarge section sizes.  */
 	      if (section->size & 0x80000000)
@@ -455,6 +455,8 @@ first_phase (bfd *abfd, int type, char *src, char * src_end)
 		  new_symbol->symbol.flags = BSF_LOCAL;
 		if (stype == '2' || stype == '6')
 		  new_symbol->symbol.section = bfd_abs_section_ptr;
+		else if (bfd_is_const_section (section))
+		  ;
 		else if (stype == '3' || stype == '7')
 		  {
 		    if ((section->flags & SEC_DATA) == 0)
