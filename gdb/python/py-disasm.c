@@ -650,7 +650,7 @@ disasmpy_set_enabled (PyObject *self, PyObject *args, PyObject *kw)
       return nullptr;
     }
 
-  python_print_insn_enabled = PyObject_IsTrue (newstate);
+  python_print_insn_enabled = newstate == Py_True;
   Py_RETURN_NONE;
 }
 

@@ -1131,6 +1131,11 @@ proc_with_prefix test_invalid_args {} {
 proc test_styling {} {
     gdb_test "python print(gdb.parse_and_eval(\"a_point_t\").format_string(styling=True, raw=True))" \
 	"{[style x variable] = 42, [style y variable] = 12}"
+
+    gdb_test "python print(gdb.parse_and_eval(\"a_point_t\").format_string(styling=None, raw=True))" \
+	[multi_line \
+	     "Python Exception <class 'TypeError'>: argument 8 must be bool, not None" \
+	     "Error occurred in Python: argument 8 must be bool, not None" ] \
 }
 
 # Test the gdb.print_options API.

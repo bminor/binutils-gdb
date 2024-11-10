@@ -815,7 +815,9 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 	}
     }
 
-  string_file stb (PyObject_IsTrue (styling_obj));
+  /* We force styling_obj to be a 'bool' when we parse the args above.  */
+  gdb_assert (PyBool_Check (styling_obj));
+  string_file stb (styling_obj == Py_True);
 
   try
     {
@@ -1988,9 +1990,8 @@ convert_value_from_python (PyObject *obj)
     {
       if (PyBool_Check (obj))
 	{
-	  cmp = PyObject_IsTrue (obj);
-	  if (cmp >= 0)
-	    value = value_from_longest (builtin_type_pybool, cmp);
+	  cmp = obj == Py_True ? 1 : 0;
+	  value = value_from_longest (builtin_type_pybool, cmp);
 	}
       else if (PyLong_Check (obj))
 	{
