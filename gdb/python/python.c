@@ -1810,7 +1810,9 @@ gdbpy_handle_missing_debuginfo (const struct extension_language_defn *extlang,
 
   if (PyBool_Check (pyo_execute_ret.get ()))
     {
-      bool try_again = PyObject_IsTrue (pyo_execute_ret.get ());
+      /* We know the value is a bool, so it must be either Py_True or
+	 Py_False.  Anything else would not get past the above check.  */
+      bool try_again = pyo_execute_ret.get () == Py_True;
       return ext_lang_missing_file_result (try_again);
     }
 
