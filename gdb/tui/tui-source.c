@@ -164,12 +164,12 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
 	s = cursal.symtab;
 
       int line_no = m_start_line_or_addr.u.line_no + num_to_scroll;
+      if (line_no <= 0)
+	line_no = 1;
       const std::vector<off_t> *offsets;
       if (g_source_cache.get_line_charpos (s, &offsets)
 	  && line_no > offsets->size ())
 	line_no = m_start_line_or_addr.u.line_no;
-      if (line_no <= 0)
-	line_no = 1;
 
       cursal.line = line_no;
       find_line_pc (cursal.symtab, cursal.line, &cursal.pc);
