@@ -161,7 +161,7 @@ proc load_exec_and_core_file { expect_warning expect_download testname \
 		set saw_warning true
 		exp_continue
 	    }
-	    -re "^Downloading file \[^\r\n\]+/libfoo_1\\.so\\.\\.\\.\r\n" {
+	    -re "^Downloading\[^\r\n\]*file \[^\r\n\]+/libfoo_1\\.so\\.\\.\\.\r\n" {
 		set saw_download true
 		exp_continue
 	    }
