@@ -136,7 +136,7 @@ set reading_re \
     "Reading \[^\r\n\]+\r\n"
 set libthread_db_re \
     [multi_line \
-	 "\\\[Thread debugging using libthread_db enabled\\\]" \
+	 [string_to_regexp {[Thread debugging using libthread_db enabled]}] \
 	 "Using host libthread_db library \[^\r\n\]+\r\n"]
 
 set optional_re \
@@ -157,7 +157,7 @@ set run_re \
 	 "\r\n\032\032post-prompt\r\n" \
 	 "Starting program: $binexp \r\n" \
 	 $optional_re \
-	 "\(\r\n\032\032breakpoints-invalid\r\n\)?" \
+	 "(\r\n\032\032breakpoints-invalid\r\n)?" \
 	 $optional_re \
 	 "(\r\n\032\032frames-invalid\r\n)?" \
 	 $optional_re \
@@ -174,7 +174,7 @@ set run_re \
 	 "\r\n\032\032frame-function-name\r\n" \
 	 "main" \
 	 "\r\n\032\032frame-args\r\n" \
-	 " \\(\\)" \
+	 [string_to_regexp " ()"] \
 	 "\r\n\032\032frame-source-begin\r\n" \
 	 " at " \
 	 "\r\n\032\032frame-source-file\r\n" \
@@ -280,6 +280,8 @@ gdb_test_multiple "continue" "continue to printf" {
     -re ".*$gdb_prompt$"     { fail $gdb_test_name }
 }
 
+set pac [string_to_regexp {[PAC]}]
+
 #
 # test:
 # annotate-frame-where
@@ -293,7 +295,7 @@ set pat_begin \
 	 ".0  \r\n" \
 	 "(" \
 	 "\032\032frame-address\r\n" \
-	 "${hex}( \\\[PAC\\\])?" \
+	 "${hex}( $pac)?" \
 	 "\r\n\032\032frame-address-end\r\n" \
 	 " in \r\n" \
 	 ")*" \
@@ -304,13 +306,13 @@ set pat_begin \
 	 "\r\n\032\032frame-begin 1 $hex\r\n" \
 	 ".1  " \
 	 "\r\n\032\032frame-address\r\n" \
-	 "${hex}( \\\[PAC\\\])?" \
+	 "${hex}( $pac)?" \
 	 "\r\n\032\032frame-address-end\r\n" \
 	 " in " \
 	 "\r\n\032\032frame-function-name\r\n" \
 	 "main" \
 	 "\r\n\032\032frame-args\r\n" \
-	 " \\(\\)" \
+	 [string_to_regexp " ()"] \
 	 "\r\n\032\032frame-source-begin\r\n" \
 	 " at " \
 	 "\r\n\032\032frame-source-file\r\n"]
@@ -435,12 +437,14 @@ if {![is_remote host]} {
 	"set inferior cwd to test directory"
 }
 
+set y_or_n [string_to_regexp "(y or n)"]
+
 # should ask query. Test annotate-query.
 # we don't care about anything else here, only the query.
 
 send_gdb "run\n"
 gdb_expect {
-  -re "pre-query.*already.*\\(y or n\\).*query\r\n" {
+  -re "pre-query.*already.*$y_or_n.*query\r\n" {
          send_gdb "y\n"
          gdb_expect {
 	     -re ".*post-query.*$gdb_prompt$" \
