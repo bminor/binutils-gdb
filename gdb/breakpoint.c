@@ -14688,8 +14688,30 @@ void
 breakpoint_free_objfile (struct objfile *objfile)
 {
   for (bp_location *loc : all_bp_locations ())
-    if (loc->symtab != NULL && loc->symtab->compunit ()->objfile () == objfile)
-      loc->symtab = NULL;
+    {
+      if (loc->symtab != nullptr
+	  && loc->symtab->compunit ()->objfile () == objfile)
+	{
+	  loc->symtab = nullptr;
+	  loc->symbol = nullptr;
+	  loc->msymbol = nullptr;
+	}
+
+      if (loc->section != nullptr
+	  && loc->section->objfile == objfile)
+	{
+	  /* If symtab was set then it should have already been cleared.
+	     But if bp_location::msymbol was set then the symbol and symtab
+	     might already have been nullptr.  */
+	  gdb_assert (loc->symtab == nullptr);
+	  loc->section = nullptr;
+	  loc->symbol = nullptr;
+	  loc->msymbol = nullptr;
+	}
+
+      if (loc->probe.objfile == objfile)
+	loc->probe = bound_probe ();
+    }
 }
 
 /* Chain containing all defined "enable breakpoint" subcommands.  */
