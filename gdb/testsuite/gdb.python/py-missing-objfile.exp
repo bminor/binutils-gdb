@@ -50,7 +50,7 @@ set remote_python_file \
 # Generate a core file.
 set corefile [core_find $binfile {}]
 if {$corefile == ""} {
-    unsupport "core file not generated"
+    unsupported "core file not generated"
     return 0
 }
 
