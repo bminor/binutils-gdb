@@ -358,3 +358,48 @@ if {[record_full_function "vpxor"] == true} {
 }
 gdb_test "finish" "Run till exit from.*vpxor_test.*" \
     "leaving vpxor"
+
+# Preparation and testing vpcmpeq instructions.
+gdb_test_no_output "set \$ymm0.v2_int128 = {0x12345, 0x12345}" \
+    "set ymm0 for vpcmpeq"
+gdb_test_no_output \
+    "set \$ymm1.v8_int32 = {0xcafe, 0xbeef, 0xff, 0x1234, 0x0, 0xff00, 0xff0000ff, 0xface0f0f}" \
+    "set ymm1 for vpcmpeq"
+gdb_test_no_output \
+    "set \$ymm2.v8_int32 = {0xcafe0, 0xbeef, 0xff00, 0x12345678, 0x90abcdef, 0xffff00, 0xff, 0xf}" \
+    "set ymm2 for vpcmpeq"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0xcafeface, 0xcafeface}" \
+    "set ymm15 for vpcmpeq"
+
+if {[record_full_function "vpcmpeq"] == true} {
+    test_one_register "vpcmpeqd" "ymm15" \
+	"0xffff0000ffffffff00000000, 0xffff0000ffff00000000" "ymm: "
+    test_one_register "vpcmpeqw" "ymm15" \
+	"0xffff0000ffffffffff000000, 0xff00ffffffff00ffff00000000" "ymm: "
+    test_one_register "vpcmpeqb" "ymm15" \
+	"0xffffffff00000000, 0x0" "ymm: "
+    test_one_register "vpcmpeqd" "ymm15" \
+	"0xffff0000ffffffff00000000, 0x0" "xmm: "
+    test_one_register "vpcmpeqw" "ymm15" \
+	"0xffff0000ffffffffff000000, 0x0" "xmm: "
+    test_one_register "vpcmpeqb" "ymm15" "0xcafeface, 0xcafeface" "xmm: "
+
+    test_one_register "vpcmpeqd" "ymm0" \
+	"0xffff0000ffffffff00000000, 0xffff0000ffff00000000" "ymm: "
+    test_one_register "vpcmpeqw" "ymm0" \
+	"0xffff0000ffffffffff000000, 0xff00ffffffff00ffff00000000" "ymm: "
+    test_one_register "vpcmpeqb" "ymm0" \
+	"0xffffffff00000000, 0x0" "ymm: "
+    test_one_register "vpcmpeqd" "ymm0" \
+	"0xffff0000ffffffff00000000, 0x0" "xmm: "
+    test_one_register "vpcmpeqw" "ymm0" \
+	"0xffff0000ffffffffff000000, 0x0" "xmm: "
+    test_one_register "vpcmpeqb" "ymm0" "0x12345, 0x12345" "xmm: "
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for vpcmpeq_test"
+} else {
+    untested "couldn't run vpcmpeq tests"
+}
+gdb_test "finish" "Run till exit from.*vpcmpeq_test.*" \
+    "leaving vpcmpeq"

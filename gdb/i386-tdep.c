@@ -4951,6 +4951,17 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
       }
       break;
 
+    case 0x74:	/* VPCMPEQB  */
+    case 0x75:	/* VPCMPEQB  */
+    case 0x76:	/* VPCMPEQB  */
+      {
+	i386_record_modrm (ir);
+	int reg_offset = ir->reg + vex_r * 8;
+	record_full_arch_list_add_reg (ir->regcache,
+				       tdep->ymm0_regnum + reg_offset);
+      }
+      break;
+
     case 0x78:	/* VPBROADCASTB  */
     case 0x79:	/* VPBROADCASTW  */
     case 0x58:	/* VPBROADCASTD  */

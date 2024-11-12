@@ -229,6 +229,37 @@ vpxor_test ()
   return 0; /* end vpxor_test  */
 }
 
+int
+vpcmpeq_test ()
+{
+  /* start vpcmpeq_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     ymm0.v2_int128  = {0x0, 0x12345}
+     ymm1.v8_int32 = {0xcafe, 0xbeef, 0xff, 0x1234, 0x0, 0xff00, 0xff0000ff, 0xface0f0f}
+     ymm2.v8_int32 = {0xcafe0, 0xbeef, 0xff00, 0x12345678, 0x90abcdef, 0xffff00, 0xff, 0xf}
+     ymm15.v2_int128 = {0xcafeface, 0xcafeface}
+     this way it's easy to confirm we're undoing things correctly.  */
+
+  /* Test all the vpcmpeq variants on a low register (number 0).  */
+  asm volatile ("vpcmpeqb %xmm1, %xmm2, %xmm0");
+  asm volatile ("vpcmpeqw %xmm1, %xmm2, %xmm0");
+  asm volatile ("vpcmpeqd %xmm1, %xmm2, %xmm0");
+
+  asm volatile ("vpcmpeqb %ymm1, %ymm2, %ymm0");
+  asm volatile ("vpcmpeqw %ymm1, %ymm2, %ymm0");
+  asm volatile ("vpcmpeqd %ymm1, %ymm2, %ymm0");
+
+  /* Test all the vpcmpeq variants on a high register (number 15).  */
+  asm volatile ("vpcmpeqb %xmm1, %xmm2, %xmm15");
+  asm volatile ("vpcmpeqw %xmm1, %xmm2, %xmm15");
+  asm volatile ("vpcmpeqd %xmm1, %xmm2, %xmm15");
+
+  asm volatile ("vpcmpeqb %ymm1, %ymm2, %ymm15");
+  asm volatile ("vpcmpeqw %ymm1, %ymm2, %ymm15");
+  asm volatile ("vpcmpeqd %ymm1, %ymm2, %ymm15");
+  return 0; /* end vpcmpeq_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -255,5 +286,6 @@ main ()
   vpbroadcast_test ();
   vzeroupper_test ();
   vpxor_test ();
+  vpcmpeq_test ();
   return 0;	/* end of main */
 }
