@@ -86,7 +86,7 @@ def get_global_scope(frame):
     syms = []
     block_iter = block
     while block_iter is not None:
-        syms += [sym for sym in block_iter if sym.is_variable]
+        syms += [sym for sym in block_iter if sym.is_variable and not sym.is_artificial]
         block_iter = block_iter.superblock
 
     if len(syms) == 0:

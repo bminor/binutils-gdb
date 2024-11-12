@@ -205,6 +205,18 @@ sympy_is_variable (PyObject *self, void *closure)
 			      || theclass == LOC_OPTIMIZED_OUT));
 }
 
+/* Implementation of Symbol.is_artificial.  */
+
+static PyObject *
+sympy_is_artificial (PyObject *self, void *closure)
+{
+  struct symbol *symbol = nullptr;
+
+  SYMPY_REQUIRE_VALID (self, symbol);
+
+  return PyBool_FromLong (symbol->is_artificial ());
+}
+
 /* Implementation of gdb.Symbol.needs_frame -> Boolean.
    Returns true iff the symbol needs a frame for evaluation.  */
 
@@ -709,6 +721,8 @@ to display demangled or mangled names.", NULL },
   { "addr_class", sympy_get_addr_class, NULL, "Address class of the symbol." },
   { "is_argument", sympy_is_argument, NULL,
     "True if the symbol is an argument of a function." },
+  { "is_artificial", sympy_is_artificial, nullptr,
+    "True if the symbol is marked artificial." },
   { "is_constant", sympy_is_constant, NULL,
     "True if the symbol is a constant." },
   { "is_function", sympy_is_function, NULL,

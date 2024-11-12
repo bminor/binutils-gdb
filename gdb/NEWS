@@ -89,6 +89,8 @@
   ** The 'qualified' argument to gdb.Breakpoint constructor will no
      longer accept non-bool types.
 
+  ** Added the gdb.Symbol.is_artificial attribute.
+
 * Debugger Adapter Protocol changes
 
   ** The "scopes" request will now return a scope holding global
@@ -103,6 +105,8 @@
      any time after the "initialized" event, but will not take effect
      (or send a response) until after the "configurationDone" request
      has been sent.
+
+  ** The "variables" request will not return artificial symbols.
 
 * New commands
 
