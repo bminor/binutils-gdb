@@ -15,11 +15,11 @@ main:
 	.global _main
 _main:
 	.dc.a 0
-	.section .rodata,"a"
+	.section .rodata,"a",%progbits
 	.zero 8
-	.bss
+	.section .bss,"aw",%nobits
 	.zero 8
-	.section	.note.ABI-tag,"a"
+	.section	.note.ABI-tag,"a",%progbits
 	.align 4
 	.zero 32
 	.ident	"GCC: (GNU) 14.2.1"
