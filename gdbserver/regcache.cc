@@ -370,6 +370,17 @@ supply_register_zeroed (struct regcache *regcache, int n)
 #endif
 }
 
+void
+regcache::raw_supply_part_zeroed (int regnum, int offset, size_t size)
+{
+  auto dst = register_data (this, regnum).slice (offset, size);
+  memset (dst.data (), 0, dst.size ());
+#ifndef IN_PROCESS_AGENT
+  if (register_status != NULL)
+    register_status[regnum] = REG_VALID;
+#endif
+}
+
 #ifndef IN_PROCESS_AGENT
 
 /* Supply register called NAME with value zero to REGCACHE.  */

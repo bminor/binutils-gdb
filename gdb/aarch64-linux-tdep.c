@@ -1297,10 +1297,7 @@ aarch64_linux_supply_za_regset (const struct regset *regset,
       regcache->raw_supply (tdep->sme_za_regnum, buf);
     }
   else
-    {
-      gdb::byte_vector za_zeroed (za_bytes, 0);
-      regcache->raw_supply (tdep->sme_za_regnum, za_zeroed);
-    }
+    regcache->raw_supply_part_zeroed (tdep->sme_za_regnum, 0, za_bytes);
 }
 
 /* Collect register REGNUM from REGCACHE to BUF, using the register

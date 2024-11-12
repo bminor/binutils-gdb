@@ -96,6 +96,12 @@ struct reg_buffer_common
 				      regcache_register_size (this, regnum)));
   }
 
+  /* Supply part of register REGNUM with zeroed value.  Start at OFFSET in
+     the register, with size SIZE.  The rest of the register is left
+     untouched.  */
+  virtual void raw_supply_part_zeroed (int regnum, int offset, size_t size)
+    = 0;
+
   /* Collect register REGNUM from this register buffer and store its contents in
      DST.  */
   virtual void raw_collect (int regnum, gdb::array_view<gdb_byte> dst) const

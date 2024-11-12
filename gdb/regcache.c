@@ -1190,6 +1190,16 @@ reg_buffer::raw_supply_zeroed (int regnum)
 /* See gdbsupport/common-regcache.h.  */
 
 void
+reg_buffer::raw_supply_part_zeroed (int regnum, int offset, size_t size)
+{
+  gdb::array_view<gdb_byte> dst = register_buffer (regnum).slice (offset, size);
+  memset (dst.data (), 0, dst.size ());
+  m_register_status[regnum] = REG_VALID;
+}
+
+/* See gdbsupport/common-regcache.h.  */
+
+void
 reg_buffer::raw_collect (int regnum, gdb::array_view<gdb_byte> dst) const
 {
   gdb::array_view<const gdb_byte> src = register_buffer (regnum);

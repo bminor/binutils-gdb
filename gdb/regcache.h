@@ -243,6 +243,9 @@ public:
      unavailable).  */
   void raw_supply_zeroed (int regnum);
 
+  /* See gdbsupport/common-regcache.h.  */
+  void raw_supply_part_zeroed (int regnum, int offset, size_t size) override;
+
   /* Supply part of register REGNUM to this register buffer.  Start at OFFSET in
      the register.  The size is given by the size of SRC.  The rest of the
      register left untouched.  */

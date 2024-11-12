@@ -53,6 +53,9 @@ struct regcache : public reg_buffer_common
   void raw_supply (int regnum, gdb::array_view<const gdb_byte> src) override;
 
   /* See gdbsupport/common-regcache.h.  */
+  void raw_supply_part_zeroed (int regnum, int offset, size_t size) override;
+
+  /* See gdbsupport/common-regcache.h.  */
   void raw_collect (int regnum, gdb::array_view<gdb_byte> dst) const override;
 
   /* See gdbsupport/common-regcache.h.  */
