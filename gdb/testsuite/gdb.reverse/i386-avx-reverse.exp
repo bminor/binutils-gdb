@@ -64,6 +64,19 @@ proc test_one_register {insn register value {prefix ""}} {
 }
 
 # Shorthand to test reversing through one instruction and
+# testing if a general purpose register has the expected value.
+# Prefix, if included, should end with a colon and space.
+
+proc test_one_general_register {insn register value {prefix ""}} {
+    gdb_test "reverse-step" "$insn.*" \
+	"${prefix}reverse-step from $insn to test register $register"
+
+    gdb_test "info register $register" \
+	"$register\\s+$value.*" \
+	"${prefix}verify $register before $insn"
+}
+
+# Shorthand to test reversing through one instruction and
 # testing if a variable has the expected value.
 # Prefix, if used, should end with a colon and space.
 
@@ -403,3 +416,24 @@ if {[record_full_function "vpcmpeq"] == true} {
 }
 gdb_test "finish" "Run till exit from.*vpcmpeq_test.*" \
     "leaving vpcmpeq"
+
+# Preparation and testing vpcmpeq instructions.
+gdb_test_no_output "set \$rbx = 2" "set rbx for vpmovmskb"
+gdb_test_no_output "set \$r8 = 3" "set r8 for vpmovmskb"
+gdb_test_no_output "set \$r9 = 4" "set ymm15 for vpmovmskb"
+
+if {[record_full_function "vpmovmskb"] == true} {
+    test_one_general_register "vpmovmskb" "r9" "0x4"
+    test_one_general_register "vpmovmskb" "r8" "0x3"
+    test_one_general_register "vpmovmskb" "rbx" "0x2"
+    # Because of the infrastructure of the test, we can't set rax.
+    # However, it seems to always be set to 0, so this should be fine.
+    test_one_general_register "vpmovmskb" "rax" "0x0"
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for vpmovmskb_test"
+} else {
+    untested "couldn't run vpmovmskb tests"
+}
+gdb_test "finish" "Run till exit from.*vpmovmskb_test.*" \
+    "leaving vpmovmskb"

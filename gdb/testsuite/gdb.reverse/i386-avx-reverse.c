@@ -260,6 +260,23 @@ vpcmpeq_test ()
   return 0; /* end vpcmpeq_test  */
 }
 
+int
+vpmovmskb_test ()
+{
+  /* start vpmovmskb_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     rbx = 2
+     r8  = 3
+     r9  = 4
+     this way it's easy to confirm we're undoing things correctly.  */
+  asm volatile ("vpmovmskb %ymm0, %eax");
+  asm volatile ("vpmovmskb %ymm0, %ebx");
+
+  asm volatile ("vpmovmskb %ymm0, %r8");
+  asm volatile ("vpmovmskb %ymm0, %r9");
+  return 0; /* end vpmovmskb_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -287,5 +304,6 @@ main ()
   vzeroupper_test ();
   vpxor_test ();
   vpcmpeq_test ();
+  vpmovmskb_test ();
   return 0;	/* end of main */
 }

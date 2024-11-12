@@ -4992,6 +4992,15 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	break;
       }
 
+    case 0xd7:	/* VPMOVMSKB  */
+      {
+	i386_record_modrm (ir);
+	record_full_arch_list_add_reg (ir->regcache,
+				       ir->regmap[X86_RECORD_REAX_REGNUM
+						  + ir->reg + 8 * vex_r]);
+      }
+      break;
+
     case 0xef:
       {
 	i386_record_modrm (ir);
