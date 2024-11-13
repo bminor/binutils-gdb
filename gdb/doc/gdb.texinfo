@@ -40047,6 +40047,10 @@ reporting an error.  A new JIT reader can be loaded by first unloading
 the current one using @code{jit-reader-unload} and then invoking
 @code{jit-reader-load}.
 
+@item show jit-reader-directory
+This command will show the directory that is used by
+@code{jit-reader-load} when a relative file name is specified.
+
 @item jit-reader-unload
 Unload the currently loaded JIT reader.
 

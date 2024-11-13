@@ -28,6 +28,7 @@
 #include "filenames.h"
 #include "frame-unwind.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-style.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "observable.h"
@@ -1298,6 +1299,16 @@ jit_event_handler (gdbarch *gdbarch, objfile *jiter)
     }
 }
 
+/* Implementation of "show jit-reader-directory".  */
+
+static void
+show_jit_reader_directory (const char *args, int from_tty)
+{
+  gdb_printf (_("JIT reader directory is %ps.\n"),
+	      styled_string (file_name_style.style (),
+			     jit_reader_dir.c_str ()));
+}
+
 void _initialize_jit ();
 void
 _initialize_jit ()
@@ -1329,8 +1340,8 @@ _initialize_jit ()
 Load FILE as debug info reader and unwinder for JIT compiled code.\n\
 Usage: jit-reader-load FILE\n\
 Try to load file FILE as a debug info reader (and unwinder) for\n\
-JIT compiled code.  The file is loaded from " JIT_READER_DIR ",\n\
-relocated relative to the GDB executable if required."));
+JIT compiled code.  If FILE is not an absolute file name, it is found\n\
+relative to a built-in directory.  See \"show jit-reader-directory\"."));
       set_cmd_completer (c, deprecated_filename_completer);
 
       c = add_com ("jit-reader-unload", no_class,
@@ -1339,5 +1350,11 @@ Unload the currently loaded JIT debug info reader.\n\
 Usage: jit-reader-unload\n\n\
 Do \"help jit-reader-load\" for info on loading debug info readers."));
       set_cmd_completer (c, noop_completer);
+
+      add_cmd ("jit-reader-directory", class_obscure,
+	       show_jit_reader_directory,
+	       _("Show the JIT reader directory.\n\
+This is the directory used by \"jit-reader-load\" when given\n\
+a relative file name."), &showlist);
     }
 }

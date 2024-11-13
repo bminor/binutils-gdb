@@ -94,6 +94,10 @@
 
 * New commands
 
+show jit-reader-directory
+  Show the name of the directory that "jit-reader-load" uses for
+  relative file names.
+
 set style line-number foreground COLOR
 set style line-number background COLOR
 set style line-number intensity VALUE
