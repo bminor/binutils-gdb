@@ -37,6 +37,7 @@ grep_separators=(
     "	"
     ":"
     ","
+    "\""
 )
 declare -a sed_separators
 sed_separators=(
@@ -45,6 +46,7 @@ sed_separators=(
     "\t"
     ":"
     ","
+    "\""
 )
 
 # Pre: start of line, left parenthesis.

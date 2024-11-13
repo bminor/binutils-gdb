@@ -380,7 +380,7 @@ static const char * const sparc32_register_names[] =
 #define SPARC32_NUM_REGS ARRAY_SIZE (sparc32_register_names)
 
 /* We provide the aliases %d0..%d30 for the floating registers as
-   "psuedo" registers.  */
+   "pseudo" registers.  */
 
 static const char * const sparc32_pseudo_register_names[] =
 {

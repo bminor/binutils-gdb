@@ -786,7 +786,7 @@ static const char * const sparc64_register_names[] =
 #define SPARC64_NUM_REGS ARRAY_SIZE (sparc64_register_names)
 
 /* We provide the aliases %d0..%d62 and %q0..%q60 for the floating
-   registers as "psuedo" registers.  */
+   registers as "pseudo" registers.  */
 
 static const char * const sparc64_pseudo_register_names[] =
 {
