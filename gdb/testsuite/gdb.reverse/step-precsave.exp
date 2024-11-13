@@ -268,12 +268,12 @@ gdb_test_multiple "stepi" "$test_message" {
     }
 }
 
-# step backward into function (thru return)
+# step backward into function (through return)
 
 gdb_test "step" "(RETURN FROM CALLEE|ARRIVED IN CALLEE).*" \
     "reverse step into fn call"
 
-# step backward out of called function (thru call)
+# step backward out of called function (through call)
 
 set test_message "reverse step out of called fn"
 gdb_test_multiple "step" "$test_message" {

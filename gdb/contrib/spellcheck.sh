@@ -47,6 +47,32 @@ sed_separators=(
     ","
 )
 
+# Pre: start of line, left parenthesis.
+declare -a grep_pre
+grep_pre=(
+    "^"
+    "\("
+)
+declare -a sed_pre
+sed_pre=(
+    "^"
+    "("
+)
+
+# Post: dot, right parenthesis, end of line.
+declare -a grep_post
+grep_post=(
+    "\."
+    "\)"
+    "$"
+)
+declare -a sed_post
+sed_post=(
+    "\."
+    ")"
+    "$"
+)
+
 join ()
 {
     local or
@@ -223,12 +249,11 @@ find_files_matching_words ()
 
 	local before after
 	before=$(grep_join \
-		     "^" \
+		     "${grep_pre[@]}" \
 		     "${grep_separators[@]}")
 	after=$(grep_join \
 		    "${grep_separators[@]}" \
-		    "\." \
-		    "$")
+		    "${grep_post[@]}")
 
 	pat="$before$pat$after"
 
@@ -250,12 +275,11 @@ find_files_matching_word ()
 
     local before after
     before=$(grep_join \
-		 "^" \
+		 "${grep_pre[@]}" \
 		 "${grep_separators[@]}")
     after=$(grep_join \
 		"${grep_separators[@]}" \
-		"\." \
-		"$")
+		"${grep_post[@]}")
 
     pat="$before$pat$after"
 
@@ -278,12 +302,11 @@ replace_word_in_file ()
 
     local before after
     before=$(sed_join \
-		 "^" \
+		 "${sed_pre[@]}" \
 		 "${sed_separators[@]}")
     after=$(sed_join \
 		"${sed_separators[@]}" \
-		"\." \
-		"$")
+		"${sed_post[@]}")
 
     local repl
     repl="s%$before$word$after%\1$replacement\2%g"

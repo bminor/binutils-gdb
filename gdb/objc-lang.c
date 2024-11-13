@@ -1203,7 +1203,7 @@ print_object_command (const char *args, int from_tty)
   gdb_printf ("\n");
 }
 
-/* The data structure 'methcalls' is used to detect method calls (thru
+/* The data structure 'methcalls' is used to detect method calls (through
  * ObjC runtime lib functions objc_msgSend, objc_msgSendSuper, etc.),
  * and ultimately find the method being called.
  */
