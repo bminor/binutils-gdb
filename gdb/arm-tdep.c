@@ -13557,9 +13557,12 @@ thumb_record_misc (arm_insn_decode_record *thumb_insn_r)
 	  record_buf[0] = bits (thumb_insn_r->arm_insn, 0, 2);
 	  thumb_insn_r->reg_rec_count = 1;
 	  break;
-	case 4: /* fall through  */
 	case 5:
-	  /* PUSH.  */
+	  /* PUSH with lr.  */
+	  register_count++;
+	  [[fallthrough]];
+	case 4:
+	  /* PUSH without lr.  */
 	  register_bits = bits (thumb_insn_r->arm_insn, 0, 7);
 	  regcache_raw_read_unsigned (reg_cache, ARM_SP_REGNUM, &u_regval);
 	  while (register_bits)
@@ -13568,8 +13571,7 @@ thumb_record_misc (arm_insn_decode_record *thumb_insn_r)
 		register_count++;
 	      register_bits = register_bits >> 1;
 	    }
-	  start_address = u_regval -  \
-	    (4 * (bit (thumb_insn_r->arm_insn, 8) + register_count));
+	  start_address = u_regval - (4 * register_count);
 	  thumb_insn_r->mem_rec_count = register_count;
 	  while (register_count)
 	    {
