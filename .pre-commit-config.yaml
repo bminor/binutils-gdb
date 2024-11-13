@@ -1,5 +1,42 @@
+# Git has the notion of hooks, which are custom scripts that are run on
+# specific events.  One of these hooks is the pre-commit hook (located at
+# .git/hooks/pre-commit), which is run when committing, before specifying a
+# message.
+#
+# To ease management of the pre-commit hook, the pre-commit framework
+# ( https://pre-commit.com ) was developed.  This is the configuration file
+# for that framework.  It contains a list of hooks, with information on where
+# to find them and on which files to run them.
+#
+# See here ( https://pre-commit.com/#install ) on how to install the
+# pre-commit framework.
+#
+# To run all the hooks specified in this file manually, you can do:
+# $ pre-commit run
+#
+# To run some hooks and skip others, you can use environment variable SKIP:
+# $ SKIP=flake8,isort pre-commit run
+#
+# To install the pre-commit framework in the repository in order to run the
+# hooks on every commit, do:
+# $ pre-commit install
+#
+# After installing the pre-commit framework, you can skip running all
+# pre-commit hooks using --no-verify, or some using SKIP.
+# $ git commit --no-verify ...
+# $ SKIP=flake8,isort git commit ...
+#
+# In case some of these hooks don't work for you, you can make the SKIP
+# setting permanent by:
+# - setting SKIP in your environment
+#   (this will affect all repositories where it is set)
+# - setting SKIP in .git/hooks/pre-commit by adding "export SKIP=..."
+#   (this will affect only this repository, but it may have to be re-added
+#    if .git/hooks/pre-commit is regenerated)
+#
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+
 repos:
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 24.8.0
