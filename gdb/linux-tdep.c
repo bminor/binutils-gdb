@@ -2104,7 +2104,7 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   if (!note_data)
     return NULL;
 
-  /* Auxillary vector.  */
+  /* Auxiliary vector.  */
   std::optional<gdb::byte_vector> auxv =
     target_read_alloc (current_inferior ()->top_target (),
 		       TARGET_OBJECT_AUXV, NULL);

@@ -1227,7 +1227,7 @@ amd64_get_unused_input_int_reg (const struct amd64_insn *details)
 
   /* Avoid RAX.  */
   used_regs_mask |= 1 << EAX_REG_NUM;
-  /* Similarily avoid RDX, implicit operand in divides.  */
+  /* Similarly avoid RDX, implicit operand in divides.  */
   used_regs_mask |= 1 << EDX_REG_NUM;
   /* Avoid RSP.  */
   used_regs_mask |= 1 << ESP_REG_NUM;

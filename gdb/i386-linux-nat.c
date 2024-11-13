@@ -137,7 +137,7 @@ store_register (const struct regcache *regcache, int regno)
 }
 
 
-/* Transfering the general-purpose registers between GDB, inferiors
+/* Transferring the general-purpose registers between GDB, inferiors
    and core files.  */
 
 /* Fill GDB's register array with the general-purpose register values
@@ -234,7 +234,7 @@ static void store_regs (const struct regcache *regcache, int tid, int regno) {}
 #endif
 
 
-/* Transfering floating-point registers between GDB, inferiors and cores.  */
+/* Transferring floating-point registers between GDB, inferiors and cores.  */
 
 /* Fill GDB's register array with the floating-point register values in
    *FPREGSETP.  */
@@ -304,7 +304,7 @@ store_fpregs (const struct regcache *regcache, int tid, int regno)
 #endif
 
 
-/* Transfering floating-point and SSE registers to and from GDB.  */
+/* Transferring floating-point and SSE registers to and from GDB.  */
 
 /* Fetch all registers covered by the PTRACE_GETREGSET request from
    process/thread TID and store their values in GDB's register array.

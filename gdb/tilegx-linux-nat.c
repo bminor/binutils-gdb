@@ -72,7 +72,7 @@ static const int regmap[] =
   56, 58
 };
 
-/* Transfering the general-purpose registers between GDB, inferiors
+/* Transferring the general-purpose registers between GDB, inferiors
    and core files.  */
 
 /* Fill GDB's register array with the general-purpose register values
@@ -105,7 +105,7 @@ fill_gregset (const struct regcache* regcache,
       regcache->raw_collect (i, regp + regmap[i]);
 }
 
-/* Transfering floating-point registers between GDB, inferiors and cores.  */
+/* Transferring floating-point registers between GDB, inferiors and cores.  */
 
 /* Fill GDB's register array with the floating-point register values in
    *FPREGSETP.  */

@@ -961,7 +961,7 @@ yylex (void)
 
        case LOC_LABEL:
        case LOC_UNRESOLVED:
-	  error (_("internal:  Unforseen case in m2lex()"));
+	  error (_("internal:  Unforeseen case in m2lex()"));
 
        default:
 	  error (_("unhandled token in m2lex()"));

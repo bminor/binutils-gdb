@@ -90,7 +90,7 @@ static int amd64_linux_gregset32_reg_offset[] =
 };
 
 
-/* Transfering the general-purpose registers between GDB, inferiors
+/* Transferring the general-purpose registers between GDB, inferiors
    and core files.  */
 
 /* See amd64_collect_native_gregset.  This linux specific version handles
@@ -178,7 +178,7 @@ fill_gregset (const struct regcache *regcache,
   amd64_linux_collect_native_gregset (regcache, gregsetp, regnum);
 }
 
-/* Transfering floating-point registers between GDB, inferiors and cores.  */
+/* Transferring floating-point registers between GDB, inferiors and cores.  */
 
 /* Fill GDB's register cache with the floating-point and SSE register
    values in *FPREGSETP.  */
