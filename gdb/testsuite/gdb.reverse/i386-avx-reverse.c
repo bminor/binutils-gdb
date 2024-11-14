@@ -211,9 +211,9 @@ vzeroupper_test ()
 }
 
 int
-vpxor_test ()
+vpor_xor_test ()
 {
-  /* start vpxor_test.  */
+  /* start vpor_xor_test.  */
   /* Using GDB, load this value onto the register, for ease of testing.
      ymm0.v2_int128  = {0x0, 0x12345}
      ymm1.v2_int128  = {0x1f1e1d1c1b1a1918, 0x0}
@@ -226,7 +226,13 @@ vpxor_test ()
   asm volatile ("vpxor %ymm2, %ymm15, %ymm1");
   asm volatile ("vpxor %xmm2, %xmm15, %xmm2");
   asm volatile ("vpxor %ymm2, %ymm1, %ymm15");
-  return 0; /* end vpxor_test  */
+
+  asm volatile ("vpor %ymm0, %ymm0, %ymm0");
+  asm volatile ("vpor %xmm0, %xmm1, %xmm0");
+  asm volatile ("vpor %ymm2, %ymm15, %ymm1");
+  asm volatile ("vpor %xmm2, %xmm15, %xmm2");
+  asm volatile ("vpor %ymm2, %ymm1, %ymm15");
+  return 0; /* end vpor_xor_test  */
 }
 
 int
@@ -302,7 +308,7 @@ main ()
   vpunpck_test ();
   vpbroadcast_test ();
   vzeroupper_test ();
-  vpxor_test ();
+  vpor_xor_test ();
   vpcmpeq_test ();
   vpmovmskb_test ();
   return 0;	/* end of main */

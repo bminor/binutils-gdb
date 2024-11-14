@@ -5001,7 +5001,8 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
       }
       break;
 
-    case 0xef:
+    case 0xef:	/* VPXOR  */
+    case 0xeb:	/* VPOR   */
       {
 	i386_record_modrm (ir);
 	int reg_offset = ir->reg + vex_r * 8;

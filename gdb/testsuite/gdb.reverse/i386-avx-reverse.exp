@@ -351,26 +351,32 @@ gdb_test "finish" "Run till exit from.*vzeroupper_test.*" \
     "leaving vzeroupper"
 
 # Preparation and testing vpxor instructions.
-gdb_test_no_output "set \$ymm0.v2_int128 = {0x0, 0x12345}" "set ymm0 for vpxor"
+gdb_test_no_output "set \$ymm0.v2_int128 = {0x0, 0x12345}" "set ymm0 for vpor_xor"
 gdb_test_no_output "set \$ymm1.v2_int128 = {0x1f1e1d1c1b1a1918, 0x0}" \
-    "set ymm1 for vpxor"
-gdb_test_no_output "set \$ymm2.v2_int128 = {0x0, 0xbeef}" "set ymm2 for vpxor"
-gdb_test_no_output "set \$ymm15.v2_int128 = {0x0, 0xcafeface}" "set ymm15 for vpxor"
+    "set ymm1 for vpor_xor"
+gdb_test_no_output "set \$ymm2.v2_int128 = {0x0, 0xbeef}" "set ymm2 for vpor_xor"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0x0, 0xcafeface}" "set ymm15 for vpor_xor"
 
-if {[record_full_function "vpxor"] == true} {
+if {[record_full_function "vpor_xor"] == true} {
+    test_one_register "vpor" "ymm15" "0x0, 0xcafe4421"
+    test_one_register "vpor" "ymm2" "0x0, 0x0"
+    test_one_register "vpor" "ymm1" "0x0, 0xcafe4421"
+    test_one_register "vpor" "ymm0" "0x1f1e1d1c1b1a1918, 0x0" "first: "
+    test_one_register "vpor" "ymm0" "0x1f1e1d1c1b1a1918, 0x0" "second: "
+
     test_one_register "vpxor" "ymm15" "0x0, 0xcafeface"
     test_one_register "vpxor" "ymm2" "0x0, 0xbeef"
     test_one_register "vpxor" "ymm1" "0x1f1e1d1c1b1a1918, 0x0"
-    test_one_register "vpxor" "ymm0" "0x0, 0x0" "first"
-    test_one_register "vpxor" "ymm0" "0x0, 0x12345" "second"
+    test_one_register "vpxor" "ymm0" "0x0, 0x0" "first: "
+    test_one_register "vpxor" "ymm0" "0x0, 0x12345" "second: "
 
     gdb_test "record stop" "Process record is stopped.*" \
-	"delete history for vpxor_test"
+	"delete history for vpor_xor_test"
 } else {
-    untested "couldn't run vpxor tests"
+    untested "couldn't run vpor_xor tests"
 }
-gdb_test "finish" "Run till exit from.*vpxor_test.*" \
-    "leaving vpxor"
+gdb_test "finish" "Run till exit from.*vpor_xor_test.*" \
+    "leaving vpor_xor"
 
 # Preparation and testing vpcmpeq instructions.
 gdb_test_no_output "set \$ymm0.v2_int128 = {0x12345, 0x12345}" \
