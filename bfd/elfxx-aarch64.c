@@ -724,16 +724,40 @@ _bfd_aarch64_elf_find_1st_bfd_input_with_gnu_property (
   return prev;
 }
 
+/* Create a GNU property section for the given bfd input.  */
+static void
+_bfd_aarch64_elf_create_gnu_property_section (struct bfd_link_info *info,
+					      bfd *ebfd)
+{
+  asection *sec;
+  sec = bfd_make_section_with_flags (ebfd,
+				     NOTE_GNU_PROPERTY_SECTION_NAME,
+				     (SEC_ALLOC
+				      | SEC_LOAD
+				      | SEC_IN_MEMORY
+				      | SEC_READONLY
+				      | SEC_HAS_CONTENTS
+				      | SEC_DATA));
+  if (sec == NULL)
+    info->callbacks->einfo (
+      _("%F%P: failed to create GNU property section\n"));
+
+  unsigned align = (bfd_get_mach (ebfd) & bfd_mach_aarch64_ilp32) ? 2 : 3;
+  if (!bfd_set_section_alignment (sec, align))
+    info->callbacks->einfo (_("%F%pA: failed to align section\n"),
+			    sec);
+
+  elf_section_type (sec) = SHT_NOTE;
+}
+
 /* Find the first input bfd with GNU property and merge it with GPROP.  If no
    such input is found, add it to a new section at the last input.  Update
    GPROP accordingly.  */
 bfd *
 _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 {
-  asection *sec;
   bfd *pbfd;
   elf_property *prop;
-  unsigned align;
 
   struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
   uint32_t outprop = tdata->gnu_property_aarch64_feature_1_and;
@@ -762,26 +786,7 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
       /* If no GNU property node was found, create the GNU property note
 	 section.  */
       if (!has_gnu_property)
-	{
-	  sec = bfd_make_section_with_flags (ebfd,
-					     NOTE_GNU_PROPERTY_SECTION_NAME,
-					     (SEC_ALLOC
-					      | SEC_LOAD
-					      | SEC_IN_MEMORY
-					      | SEC_READONLY
-					      | SEC_HAS_CONTENTS
-					      | SEC_DATA));
-	  if (sec == NULL)
-	    info->callbacks->einfo (
-	      _("%F%P: failed to create GNU property section\n"));
-
-          align = (bfd_get_mach (ebfd) & bfd_mach_aarch64_ilp32) ? 2 : 3;
-	  if (!bfd_set_section_alignment (sec, align))
-	    info->callbacks->einfo (_("%F%pA: failed to align section\n"),
-				    sec);
-
-	  elf_section_type (sec) = SHT_NOTE;
-	}
+	_bfd_aarch64_elf_create_gnu_property_section (info, ebfd);
     }
 
   pbfd = _bfd_elf_link_setup_gnu_properties (info);
