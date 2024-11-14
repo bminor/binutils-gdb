@@ -710,7 +710,7 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
   elf_property *prop;
   unsigned align;
 
-  uint32_t gnu_prop = *gprop;
+  uint32_t outprop = *gprop;
 
   /* Find a normal input file with GNU property note.  */
   for (pbfd = info->input_bfds;
@@ -728,17 +728,17 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
   /* If ebfd != NULL it is either an input with property note or the last
      input.  Either way if we have gnu_prop, we should add it (by creating
      a section if needed).  */
-  if (ebfd != NULL && gnu_prop)
+  if (ebfd != NULL && outprop)
     {
       prop = _bfd_elf_get_property (ebfd,
 				    GNU_PROPERTY_AARCH64_FEATURE_1_AND,
 				    4);
-      if (gnu_prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI
+      if (outprop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI
 	  && !(prop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
 	    _bfd_error_handler (_("%pB: warning: BTI turned on by -z force-bti "
 				  "when all inputs do not have BTI in NOTE "
 				  "section."), ebfd);
-      prop->u.number |= gnu_prop;
+      prop->u.number |= outprop;
       prop->pr_kind = property_number;
 
       /* pbfd being NULL implies ebfd is the last input.  Create the GNU
@@ -772,7 +772,7 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
     return pbfd;
 
   /* If pbfd has any GNU_PROPERTY_AARCH64_FEATURE_1_AND properties, update
-     gnu_prop accordingly.  */
+     outprop accordingly.  */
   if (pbfd != NULL)
     {
       elf_property_list *p;
@@ -783,7 +783,7 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 	  /* Check for all GNU_PROPERTY_AARCH64_FEATURE_1_AND.  */
 	  if (GNU_PROPERTY_AARCH64_FEATURE_1_AND == p->property.pr_type)
 	    {
-	      gnu_prop = (p->property.u.number
+	      outprop = (p->property.u.number
 			  & (GNU_PROPERTY_AARCH64_FEATURE_1_PAC
 			      | GNU_PROPERTY_AARCH64_FEATURE_1_BTI));
 	      break;
@@ -792,7 +792,7 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 	    break;
 	}
     }
-  *gprop = gnu_prop;
+  *gprop = outprop;
   return pbfd;
 }
 

@@ -2540,7 +2540,7 @@ struct elf_aarch64_obj_tdata
   int no_wchar_size_warning;
 
   /* All GNU_PROPERTY_AARCH64_FEATURE_1_AND properties.  */
-  uint32_t gnu_and_prop;
+  uint32_t gnu_property_aarch64_feature_1_and;
 
   /* Software protections options.  */
   struct aarch64_protection_opts sw_protections;
@@ -3464,8 +3464,8 @@ aarch64_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 static bool
 elf_aarch64_bti_p (bfd *output_bfd)
 {
-  uint32_t prop = elf_aarch64_tdata (output_bfd)->gnu_and_prop;
-  return prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI;
+  return elf_aarch64_tdata (output_bfd)->gnu_property_aarch64_feature_1_and
+       & GNU_PROPERTY_AARCH64_FEATURE_1_BTI;
 }
 
 /* External entry points for sizing and building linker stubs.  */
@@ -5040,7 +5040,7 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
   /* Note: gnu_property_aarch64_feature_1_and was initialized to 0 by
      bfd_zalloc().  */
   if (sw_protections->plt_type & PLT_BTI)
-    elf_aarch64_tdata (output_bfd)->gnu_and_prop
+    elf_aarch64_tdata (output_bfd)->gnu_property_aarch64_feature_1_and
       |= GNU_PROPERTY_AARCH64_FEATURE_1_BTI;
 
   elf_aarch64_tdata (output_bfd)->sw_protections = *sw_protections;
@@ -10616,11 +10616,11 @@ static bfd *
 elfNN_aarch64_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   struct elf_aarch64_obj_tdata * tdata = elf_aarch64_tdata (info->output_bfd);
-  uint32_t prop = tdata->gnu_and_prop;
-  bfd *pbfd = _bfd_aarch64_elf_link_setup_gnu_properties (info, &prop);
-  tdata->gnu_and_prop = prop;
+  uint32_t outprop = tdata->gnu_property_aarch64_feature_1_and;
+  bfd *pbfd = _bfd_aarch64_elf_link_setup_gnu_properties (info, &outprop);
+  tdata->gnu_property_aarch64_feature_1_and = outprop;
   tdata->sw_protections.plt_type
-    |= (prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI) ? PLT_BTI : 0;
+    |= (outprop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI) ? PLT_BTI : 0;
   setup_plt_values (info, tdata->sw_protections.plt_type);
   return pbfd;
 }
@@ -10634,8 +10634,8 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
 				       elf_property *aprop,
 				       elf_property *bprop)
 {
-  uint32_t prop
-    = elf_aarch64_tdata (info->output_bfd)->gnu_and_prop;
+  uint32_t outprop
+    = elf_aarch64_tdata (info->output_bfd)->gnu_property_aarch64_feature_1_and;
 
   /* Properties are merged per type, hence only check for warnings when merging
      GNU_PROPERTY_AARCH64_FEATURE_1_AND.  */
@@ -10648,7 +10648,7 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
 
       /* If output has been marked with BTI using command line argument, give
 	 out warning if necessary.  */
-      if ((prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
+      if ((outprop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
 	  && (bti_report != MARKING_NONE))
 	{
 	  if (!aprop || !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
@@ -10659,7 +10659,7 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
     }
 
   return  _bfd_aarch64_elf_merge_gnu_properties (info, abfd, aprop,
-						 bprop, prop);
+						 bprop, outprop);
 }
 
 /* We use this so we can override certain functions
