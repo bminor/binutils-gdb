@@ -775,21 +775,22 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
      outprop accordingly.  */
   if (pbfd != NULL)
     {
-      elf_property_list *p;
-
       /* The property list is sorted in order of type.  */
-      for (p = elf_properties (pbfd); p; p = p->next)
+      for (elf_property_list *p = elf_properties (pbfd);
+	   (p != NULL)
+	     && (GNU_PROPERTY_AARCH64_FEATURE_1_AND <= p->property.pr_type);
+	   p = p->next)
 	{
-	  /* Check for all GNU_PROPERTY_AARCH64_FEATURE_1_AND.  */
-	  if (GNU_PROPERTY_AARCH64_FEATURE_1_AND == p->property.pr_type)
+	  /* This merge of features should happen only once as all the identical
+	     properties are supposed to have been merged at this stage by
+	     _bfd_elf_link_setup_gnu_properties().  */
+	  if (p->property.pr_type == GNU_PROPERTY_AARCH64_FEATURE_1_AND)
 	    {
 	      outprop = (p->property.u.number
-			  & (GNU_PROPERTY_AARCH64_FEATURE_1_PAC
-			      | GNU_PROPERTY_AARCH64_FEATURE_1_BTI));
+			 & (GNU_PROPERTY_AARCH64_FEATURE_1_BTI
+			  | GNU_PROPERTY_AARCH64_FEATURE_1_PAC));
 	      break;
 	    }
-	  else if (GNU_PROPERTY_AARCH64_FEATURE_1_AND < p->property.pr_type)
-	    break;
 	}
     }
 
