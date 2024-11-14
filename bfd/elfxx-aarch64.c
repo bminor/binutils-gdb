@@ -22,6 +22,7 @@
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "elfxx-aarch64.h"
+#include "libbfd.h"
 #include <stdarg.h>
 #include <string.h>
 
@@ -697,6 +698,32 @@ _bfd_aarch64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_ty
     }
 }
 
+/* Find the first input bfd with GNU properties.
+   If such an input is found, set found to true and return the relevant input.
+   Otherwise, return the last input of bfd inputs.  */
+static bfd *
+_bfd_aarch64_elf_find_1st_bfd_input_with_gnu_property (
+  struct bfd_link_info *info,
+  bool *has_gnu_property)
+{
+  BFD_ASSERT (has_gnu_property);
+  bfd *pbfd = info->input_bfds;
+  bfd *prev = NULL;
+  for (; pbfd != NULL; pbfd = pbfd->link.next)
+    if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
+	&& bfd_count_sections (pbfd) != 0)
+      {
+	/* Does the input have a list of GNU properties ? */
+	if (elf_properties (pbfd) != NULL)
+	  {
+	    *has_gnu_property = true;
+	    return pbfd;
+	  }
+	prev = pbfd;
+      }
+  return prev;
+}
+
 /* Find the first input bfd with GNU property and merge it with GPROP.  If no
    such input is found, add it to a new section at the last input.  Update
    GPROP accordingly.  */
@@ -705,25 +732,16 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   asection *sec;
   bfd *pbfd;
-  bfd *ebfd = NULL;
   elf_property *prop;
   unsigned align;
 
   struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
   uint32_t outprop = tdata->gnu_property_aarch64_feature_1_and;
 
-  /* Find a normal input file with GNU property note.  */
-  for (pbfd = info->input_bfds;
-       pbfd != NULL;
-       pbfd = pbfd->link.next)
-    if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
-	&& bfd_count_sections (pbfd) != 0)
-      {
-	ebfd = pbfd;
-
-	if (elf_properties (pbfd) != NULL)
-	  break;
-      }
+  bool has_gnu_property = false;
+  bfd *ebfd =
+    _bfd_aarch64_elf_find_1st_bfd_input_with_gnu_property (info,
+							   &has_gnu_property);
 
   /* If ebfd != NULL it is either an input with property note or the last
      input.  Either way if we have gnu_prop, we should add it (by creating
@@ -741,9 +759,9 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
       prop->u.number |= outprop;
       prop->pr_kind = property_number;
 
-      /* pbfd being NULL implies ebfd is the last input.  Create the GNU
-	 property note section.  */
-      if (pbfd == NULL)
+      /* If no GNU property node was found, create the GNU property note
+	 section.  */
+      if (!has_gnu_property)
 	{
 	  sec = bfd_make_section_with_flags (ebfd,
 					     NOTE_GNU_PROPERTY_SECTION_NAME,
