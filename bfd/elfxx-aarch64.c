@@ -701,8 +701,7 @@ _bfd_aarch64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_ty
    such input is found, add it to a new section at the last input.  Update
    GPROP accordingly.  */
 bfd *
-_bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
-					    uint32_t *gprop)
+_bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   asection *sec;
   bfd *pbfd;
@@ -710,7 +709,8 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
   elf_property *prop;
   unsigned align;
 
-  uint32_t outprop = *gprop;
+  struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
+  uint32_t outprop = tdata->gnu_property_aarch64_feature_1_and;
 
   /* Find a normal input file with GNU property note.  */
   for (pbfd = info->input_bfds;
@@ -792,7 +792,8 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info,
 	    break;
 	}
     }
-  *gprop = outprop;
+
+  tdata->gnu_property_aarch64_feature_1_and = outprop;
   return pbfd;
 }
 

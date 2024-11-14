@@ -2526,29 +2526,6 @@ struct elf_aarch64_local_symbol
   bfd_vma tlsdesc_got_jump_table_offset;
 };
 
-struct elf_aarch64_obj_tdata
-{
-  struct elf_obj_tdata root;
-
-  /* local symbol descriptors */
-  struct elf_aarch64_local_symbol *locals;
-
-  /* Zero to warn when linking objects with incompatible enum sizes.  */
-  int no_enum_size_warning;
-
-  /* Zero to warn when linking objects with incompatible wchar_t sizes.  */
-  int no_wchar_size_warning;
-
-  /* All GNU_PROPERTY_AARCH64_FEATURE_1_AND properties.  */
-  uint32_t gnu_property_aarch64_feature_1_and;
-
-  /* Software protections options.  */
-  struct aarch64_protection_opts sw_protections;
-};
-
-#define elf_aarch64_tdata(bfd)				\
-  ((struct elf_aarch64_obj_tdata *) (bfd)->tdata.any)
-
 #define elf_aarch64_locals(bfd) (elf_aarch64_tdata (bfd)->locals)
 
 #define is_aarch64_elf(bfd)				\
@@ -10615,12 +10592,19 @@ elfNN_aarch64_backend_symbol_processing (bfd *abfd, asymbol *sym)
 static bfd *
 elfNN_aarch64_link_setup_gnu_properties (struct bfd_link_info *info)
 {
+  bfd *pbfd = _bfd_aarch64_elf_link_setup_gnu_properties (info);
+
+  /* When BTI is forced on the command line, information flows from plt_type to
+     outprop, so plt_type has already been set and outprop don't have any effect
+     on plt_type.
+     Whereas if BTI is inferred from the input bfds, information flows from
+     outprop to plt_type.  If the property GNU_PROPERTY_AARCH64_FEATURE_1_BTI
+     has been set on all the input bfds, then BTI is set on the output bfd and
+     plt_type is updated accordingly.  */
   struct elf_aarch64_obj_tdata * tdata = elf_aarch64_tdata (info->output_bfd);
   uint32_t outprop = tdata->gnu_property_aarch64_feature_1_and;
-  bfd *pbfd = _bfd_aarch64_elf_link_setup_gnu_properties (info, &outprop);
-  tdata->gnu_property_aarch64_feature_1_and = outprop;
-  tdata->sw_protections.plt_type
-    |= (outprop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI) ? PLT_BTI : 0;
+  if (outprop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
+    tdata->sw_protections.plt_type |= PLT_BTI;
   setup_plt_values (info, tdata->sw_protections.plt_type);
   return pbfd;
 }

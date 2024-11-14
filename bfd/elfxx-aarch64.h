@@ -65,6 +65,30 @@ struct aarch64_protection_opts
 };
 typedef struct aarch64_protection_opts aarch64_protection_opts;
 
+struct elf_aarch64_local_symbol;
+struct elf_aarch64_obj_tdata
+{
+  struct elf_obj_tdata root;
+
+  /* local symbol descriptors */
+  struct elf_aarch64_local_symbol *locals;
+
+  /* Zero to warn when linking objects with incompatible enum sizes.  */
+  int no_enum_size_warning;
+
+  /* Zero to warn when linking objects with incompatible wchar_t sizes.  */
+  int no_wchar_size_warning;
+
+  /* All GNU_PROPERTY_AARCH64_FEATURE_1_AND properties.  */
+  uint32_t gnu_property_aarch64_feature_1_and;
+
+  /* Software protections options.  */
+  struct aarch64_protection_opts sw_protections;
+};
+
+#define elf_aarch64_tdata(bfd)				\
+  ((struct elf_aarch64_obj_tdata *) (bfd)->tdata.any)
+
 /* An enum to define what kind of erratum fixes we should apply.  This gives the
    user a bit more control over the sequences we generate.  */
 typedef enum
@@ -155,8 +179,7 @@ _bfd_aarch64_elf_write_core_note (bfd *, char *, int *, int, ...);
 #define elf_backend_write_core_note	_bfd_aarch64_elf_write_core_note
 
 extern bfd *
-_bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *,
-					    uint32_t *);
+_bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *);
 
 extern enum elf_property_kind
 _bfd_aarch64_elf_parse_gnu_properties (bfd *, unsigned int,
