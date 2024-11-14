@@ -827,8 +827,8 @@ _bfd_aarch64_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
   return property_number;
 }
 
-/* Merge AArch64 GNU property BPROP with APROP also accounting for PROP.
-   If APROP isn't NULL, merge it with BPROP and/or PROP.  Vice-versa if BROP
+/* Merge AArch64 GNU property BPROP with APROP also accounting for OUTPROP.
+   If APROP isn't NULL, merge it with BPROP and/or OUTPROP.  Vice-versa if BROP
    isn't NULL.  Return TRUE if there is any update to APROP or if BPROP should
    be merge with ABFD.  */
 bool
@@ -837,7 +837,7 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *info
 				       bfd *abfd ATTRIBUTE_UNUSED,
 				       elf_property *aprop,
 				       elf_property *bprop,
-				       uint32_t prop)
+				       uint32_t outprop)
 {
   unsigned int orig_number;
   bool updated = false;
@@ -850,7 +850,7 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *info
 	if (aprop != NULL && bprop != NULL)
 	  {
 	    orig_number = aprop->u.number;
-	    aprop->u.number = (orig_number & bprop->u.number) | prop;
+	    aprop->u.number = (orig_number & bprop->u.number) | outprop;
 	    updated = orig_number != aprop->u.number;
 	    /* Remove the property if all feature bits are cleared.  */
 	    if (aprop->u.number == 0)
@@ -858,22 +858,22 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *info
 	    break;
 	  }
 	/* If either is NULL, the AND would be 0 so, if there is
-	   any PROP, asign it to the input that is not NULL.  */
-	if (prop)
+	   any OUTPROP, assign it to the input that is not NULL.  */
+	if (outprop)
 	  {
 	    if (aprop != NULL)
 	      {
 		orig_number = aprop->u.number;
-		aprop->u.number = prop;
+		aprop->u.number = outprop;
 		updated = orig_number != aprop->u.number;
 	      }
 	    else
 	      {
-		bprop->u.number = prop;
+		bprop->u.number = outprop;
 		updated = true;
 	      }
 	  }
-	/* No PROP and BPROP is NULL, so remove APROP.  */
+	/* No OUTPROP and BPROP is NULL, so remove APROP.  */
 	else if (aprop != NULL)
 	  {
 	    aprop->pr_kind = property_remove;
