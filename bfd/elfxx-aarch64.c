@@ -797,9 +797,6 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
      GNU properties (if found).  */
   bfd *pbfd = _bfd_elf_link_setup_gnu_properties (info);
 
-  if (bfd_link_relocatable (info))
-    return pbfd;
-
   /* If pbfd has any GNU_PROPERTY_AARCH64_FEATURE_1_AND properties, update
      outprop accordingly.  */
   if (pbfd != NULL)
