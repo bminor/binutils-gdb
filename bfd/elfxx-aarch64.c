@@ -756,9 +756,6 @@ _bfd_aarch64_elf_create_gnu_property_section (struct bfd_link_info *info,
 bfd *
 _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 {
-  bfd *pbfd;
-  elf_property *prop;
-
   struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
   uint32_t outprop = tdata->gnu_property_aarch64_feature_1_and;
 
@@ -767,29 +764,38 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
     _bfd_aarch64_elf_find_1st_bfd_input_with_gnu_property (info,
 							   &has_gnu_property);
 
-  /* If ebfd != NULL it is either an input with property note or the last
-     input.  Either way if we have gnu_prop, we should add it (by creating
-     a section if needed).  */
+  /* If ebfd != NULL it is either an input with property note or the last input.
+     Either way if we have an output GNU property that was provided, we should
+     add it (by creating a section if needed).  */
   if (ebfd != NULL && outprop)
     {
-      prop = _bfd_elf_get_property (ebfd,
-				    GNU_PROPERTY_AARCH64_FEATURE_1_AND,
-				    4);
-      if (outprop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI
-	  && !(prop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
-	    _bfd_error_handler (_("%pB: warning: BTI turned on by -z force-bti "
-				  "when all inputs do not have BTI in NOTE "
-				  "section."), ebfd);
-      prop->u.number |= outprop;
-      prop->pr_kind = property_number;
-
       /* If no GNU property node was found, create the GNU property note
 	 section.  */
       if (!has_gnu_property)
 	_bfd_aarch64_elf_create_gnu_property_section (info, ebfd);
+
+      /* Merge the found input property with output properties. Note: if no
+	 property was found, _bfd_elf_get_property will create one.  */
+      elf_property *prop =
+	_bfd_elf_get_property (ebfd,
+			       GNU_PROPERTY_AARCH64_FEATURE_1_AND,
+			       4);
+
+      /* Check for a feature mismatch and report issue (if any) before this
+	 information get lost as the value of ebfd will be overriden with
+	 outprop.  */
+      if ((outprop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
+	   && !(prop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
+	_bfd_aarch64_elf_check_bti_report (info, ebfd);
+
+      prop->u.number |= outprop;
+      prop->pr_kind = property_number;
     }
 
-  pbfd = _bfd_elf_link_setup_gnu_properties (info);
+  /* Set up generic GNU properties, and merge them with the backend-specific
+     ones (if any). pbfd points to the first relocatable ELF input with
+     GNU properties (if found).  */
+  bfd *pbfd = _bfd_elf_link_setup_gnu_properties (info);
 
   if (bfd_link_relocatable (info))
     return pbfd;
