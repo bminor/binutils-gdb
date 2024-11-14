@@ -11450,6 +11450,21 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
   struct attribute *attr;
   struct attribute *attr_high;
 
+  /* Like dwarf_get_pc_bounds_ranges_or_highlow_pc, we read either the
+     low/high pc attributes, OR the ranges attribute, but not both.  If we
+     parse both here then we open up the possibility that, due to invalid
+     DWARF, a block's start() and end() might not contain all of the ranges.
+
+     We have seen this in the wild with older (pre v9) versions of GCC.  In
+     this case a GCC bug meant that a DIE was linked via DW_AT_abstract_origin
+     to the wrong DIE.  Instead of pointing at the abstract DIE, GCC was
+     linking one instance DIE to an earlier instance DIE.  The first instance
+     DIE had low/high pc attributes, while the second instance DIE had a
+     ranges attribute.  When processing the incorrectly linked instance GDB
+     would see a DIE with both a low/high pc and some ranges data.  However,
+     the ranges data was all outside the low/high range, which would trigger
+     asserts when setting the entry-pc.  */
+
   attr_high = dwarf2_attr (die, DW_AT_high_pc, cu);
   if (attr_high)
     {
@@ -11467,32 +11482,41 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 	  CORE_ADDR high = per_objfile->relocate (unrel_high);
 	  cu->get_builder ()->record_block_range (block, low, high - 1);
 	}
+
+      attr = dwarf2_attr (die, DW_AT_ranges, cu);
+      if (attr != nullptr && attr->form_is_unsigned ())
+	complaint (_("in %s, DIE %s, DW_AT_ranges ignored due to DW_AT_low_pc"),
+		   objfile_name (per_objfile->objfile),
+		   sect_offset_str (die->sect_off));
     }
-
-  attr = dwarf2_attr (die, DW_AT_ranges, cu);
-  if (attr != nullptr && attr->form_is_unsigned ())
+  else
     {
-      /* Offset in the .debug_ranges or .debug_rnglist section (depending
-	 on DWARF version).  */
-      ULONGEST ranges_offset = attr->as_unsigned ();
-
-      /* See dwarf2_cu::gnu_ranges_base's doc for why we might want to add
-	 this value.  */
-      if (die->tag != DW_TAG_compile_unit)
-	ranges_offset += cu->gnu_ranges_base;
-
-      std::vector<blockrange> blockvec;
-      dwarf2_ranges_process (ranges_offset, cu, die->tag,
-	[&] (unrelocated_addr start, unrelocated_addr end)
+      attr = dwarf2_attr (die, DW_AT_ranges, cu);
+      if (attr != nullptr && attr->form_is_unsigned ())
 	{
-	  CORE_ADDR abs_start = per_objfile->relocate (start);
-	  CORE_ADDR abs_end = per_objfile->relocate (end);
-	  cu->get_builder ()->record_block_range (block, abs_start,
-						  abs_end - 1);
-	  blockvec.emplace_back (abs_start, abs_end);
-	});
+	  /* Offset in the .debug_ranges or .debug_rnglist section (depending
+	     on DWARF version).  */
+	  ULONGEST ranges_offset = attr->as_unsigned ();
 
-      block->set_ranges (make_blockranges (objfile, blockvec));
+	  /* See dwarf2_cu::gnu_ranges_base's doc for why we might want to add
+	     this value.  */
+	  if (die->tag != DW_TAG_compile_unit)
+	    ranges_offset += cu->gnu_ranges_base;
+
+	  std::vector<blockrange> blockvec;
+	  dwarf2_ranges_process (ranges_offset, cu, die->tag,
+				 [&] (unrelocated_addr start,
+				      unrelocated_addr end)
+	  {
+	    CORE_ADDR abs_start = per_objfile->relocate (start);
+	    CORE_ADDR abs_end = per_objfile->relocate (end);
+	    cu->get_builder ()->record_block_range (block, abs_start,
+						    abs_end - 1);
+	    blockvec.emplace_back (abs_start, abs_end);
+	  });
+
+	  block->set_ranges (make_blockranges (objfile, blockvec));
+	}
     }
 
   dwarf2_record_block_entry_pc (die, block, cu);
