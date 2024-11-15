@@ -21,10 +21,27 @@
 # Testing with Clang 9.0.1 and 15.0.2 seemed to indicate that the
 # Clang generated code didn't depend on the entry_pc being parsed.
 
+# Older versions of GCC, those prior to the -gstatement-frontiers work
+# added in 8.x, would generate DW_AT_entry_pc values pointing to the
+# first instruction of an inlined function.  This first instruction
+# could then be reordered such that the first instruction might be
+# executed even when the actual call to the inline function ended up
+# being skipped.  GDB can then hit a breakpoint for a function that
+# ends up never being called.
+#
+# This test is specifically testing that GDB correctly handles the
+# case where DW_AT_entry_pc is not the first instruction of an inlined
+# function, as can be the case in gcc 8.x with the
+# -gstatement-frontiers work in place.
+require {expr ![is_c_compiler_gcc] || [supports_statement_frontiers]}
+
 standard_testfile
 
 set options {debug optimize=-O2}
 lappend_include_file options $srcdir/lib/attributes.h
+if { [supports_statement_frontiers] } {
+    lappend options additional_flags=-gstatement-frontiers
+}
 
 if { [prepare_for_testing "failed to prepare" $binfile $srcfile $options] } {
     return
