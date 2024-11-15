@@ -194,6 +194,7 @@ write_dependency_file (void)
   out = fopen (config.dependency_file, FOPEN_WT);
   if (out == NULL)
     {
+      bfd_set_error (bfd_error_system_call);
       einfo (_("%F%P: cannot open dependency file %s: %E\n"),
 	     config.dependency_file);
     }
