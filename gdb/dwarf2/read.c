@@ -8615,6 +8615,9 @@ create_dwp_v2_or_v5_section (dwarf2_per_objfile *per_objfile,
 
   result.virtual_offset = offset;
   result.size = size;
+  gdb_assert (section->readin);
+  result.readin = true;
+  result.buffer = section->buffer + offset;
   return result;
 }
 
