@@ -1279,9 +1279,10 @@ fetched and converted to the given length.
 @end defun
 
 @defun Value.lazy_string (@r{[}encoding @r{[}, length@r{]]})
-If this @code{gdb.Value} represents a string, then this method
-converts the contents to a @code{gdb.LazyString} (@pxref{Lazy Strings
-In Python}).  Otherwise, this method will throw an exception.
+This method attempts to convert this @code{gdb.Value} to a
+@code{gdb.LazyString} (@pxref{Lazy Strings In Python}).  Values of
+array or pointer type can be converted; for other types, this method
+will throw an exception.
 
 If the optional @var{encoding} argument is given, it must be a string
 naming the encoding of the @code{gdb.LazyString}.  Some examples are:
@@ -6971,10 +6972,12 @@ A @code{gdb.LazyString} is represented in @value{GDBN} as an
 that will be used to encode that region of memory, and a @code{length}
 to delimit the region of memory that represents the string.  The
 difference between a @code{gdb.LazyString} and a string wrapped within
-a @code{gdb.Value} is that a @code{gdb.LazyString} will be treated
-differently by @value{GDBN} when printing.  A @code{gdb.LazyString} is
+a @code{gdb.Value} is that a @code{gdb.LazyString} will only be
 retrieved and encoded during printing, while a @code{gdb.Value}
 wrapping a string is immediately retrieved and encoded on creation.
+
+A @code{gdb.LazyString} can be created using the
+@code{gdb.Value.lazy_string} method (@pxref{Values From Inferior}).
 
 A @code{gdb.LazyString} object has the following functions:
 
