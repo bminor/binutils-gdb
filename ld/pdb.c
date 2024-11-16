@@ -175,7 +175,7 @@ add_stream (bfd *pdb, const char *name, uint16_t *stream_num)
   if (!bfd_make_writable (stream))
     {
       bfd_close (stream);
-      return false;
+      return NULL;
     }
 
   if (!pdb->archive_head)
