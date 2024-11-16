@@ -6037,7 +6037,7 @@ bfd_mach_o_lookup_uuid_command (bfd *abfd)
   bfd_mach_o_load_command *uuid_cmd = NULL;
   int ncmd = bfd_mach_o_lookup_command (abfd, BFD_MACH_O_LC_UUID, &uuid_cmd);
   if (ncmd != 1 || uuid_cmd == NULL)
-    return false;
+    return NULL;
   return &uuid_cmd->command.uuid;
 }
 

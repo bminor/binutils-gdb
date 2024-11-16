@@ -4352,7 +4352,7 @@ ppc_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
 		      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
 					      opt->dynstr_index);
 		      if (!bfd_elf_link_record_dynamic_symbol (info, opt))
-			return false;
+			return NULL;
 		    }
 		  htab->tls_get_addr = opt;
 		}

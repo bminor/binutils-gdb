@@ -130,7 +130,7 @@ bfd_sym_read_name_table (bfd *abfd, bfd_sym_header_block *dshb)
   size_t table_offset = dshb->dshb_nte.dti_first_page * dshb->dshb_page_size;
 
   if (bfd_seek (abfd, table_offset, SEEK_SET) != 0)
-    return false;
+    return NULL;
   return _bfd_alloc_and_read (abfd, table_size, table_size);
 }
 
