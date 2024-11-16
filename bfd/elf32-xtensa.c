@@ -10070,7 +10070,7 @@ translate_reloc_bfd_fix (reloc_bfd_fix *fix)
      location.  Otherwise, the relocation should move within the
      section.  */
 
-  removed = false;
+  removed = NULL;
   if (is_operand_relocation (fix->src_type))
     {
       /* Check if the original relocation is against a literal being
@@ -10141,7 +10141,7 @@ translate_reloc (const r_reloc *orig_rel, r_reloc *new_rel, asection *sec)
 
   target_offset = orig_rel->target_offset;
 
-  removed = false;
+  removed = NULL;
   if (is_operand_relocation (ELF32_R_TYPE (orig_rel->rela.r_info)))
     {
       /* Check if the original relocation is against a literal being
