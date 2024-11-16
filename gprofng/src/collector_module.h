@@ -110,7 +110,7 @@ typedef struct CollectorUtilFuncs
   long (*sysinfo)(int command, char *buf, long count);
   time_t (*time)(time_t *tloc);
   int (*unsetenv)(const char *name);
-  int (*vsnprintf)(char *str, size_t size, const char *format, va_list ap);
+  int (*vsnprintf)(char *str, size_t size, const char *format, ...);
   pid_t (*waitpid)(pid_t pid, int *stat_loc, int options);
   ssize_t (*write)(int, void *, size_t);
   double (*atof)();

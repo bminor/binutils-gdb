@@ -1209,7 +1209,7 @@ process_vsyscall_page ()
 /*
  * collector API for dynamic functions
  */
-void collector_func_load () __attribute__ ((weak, alias ("__collector_func_load")));
+void collector_func_load (char*, char*, char*, void*, int, int, DT_lineno *) __attribute__ ((weak, alias ("__collector_func_load")));
 void
 __collector_func_load (char *name, char *alias, char *sourcename,
 		       void *vaddr, int size, int lntsize, DT_lineno *lntable)
@@ -1218,7 +1218,7 @@ __collector_func_load (char *name, char *alias, char *sourcename,
 			     vaddr, size, lntsize, lntable);
 }
 
-void collector_func_unload () __attribute__ ((weak, alias ("__collector_func_unload")));
+void collector_func_unload (void *vaddr) __attribute__ ((weak, alias ("__collector_func_unload")));
 void
 __collector_func_unload (void *vaddr)
 {

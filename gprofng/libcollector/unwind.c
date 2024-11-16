@@ -421,7 +421,7 @@ __collector_ext_unwind_init (int record)
   omp_no_walk = 1;
 
   if (__collector_VM_ReadByteInstruction == NULL)
-    __collector_VM_ReadByteInstruction = (int(*)()) dlsym (RTLD_DEFAULT, "Async_VM_ReadByteInstruction");
+    __collector_VM_ReadByteInstruction = (int(*)(unsigned char*)) dlsym (RTLD_DEFAULT, "Async_VM_ReadByteInstruction");
 
 #if ARCH(SPARC)
 #if WSIZE(64)

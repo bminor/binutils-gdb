@@ -685,8 +685,8 @@ __collector_env_update (char *envp[])
 
 
 /*------------------------------------------------------------- putenv */
-int putenv () __attribute__ ((weak, alias ("__collector_putenv")));
-int _putenv () __attribute__ ((weak, alias ("__collector_putenv")));
+int putenv (char*) __attribute__ ((weak, alias ("__collector_putenv")));
+int _putenv (char*) __attribute__ ((weak, alias ("__collector_putenv")));
 
 int
 __collector_putenv (char * string)
@@ -694,9 +694,9 @@ __collector_putenv (char * string)
   if (CALL_UTIL (putenv) == __collector_putenv ||
       CALL_UTIL (putenv) == NULL)
     { // __collector_libc_funcs_init failed
-      CALL_UTIL (putenv) = (int(*)())dlsym (RTLD_NEXT, "putenv");
+      CALL_UTIL (putenv) = (int(*)(char*))dlsym (RTLD_NEXT, "putenv");
       if (CALL_UTIL (putenv) == NULL || CALL_UTIL (putenv) == __collector_putenv)
-	  CALL_UTIL (putenv) = (int(*)())dlsym (RTLD_DEFAULT, "putenv");
+	  CALL_UTIL (putenv) = (int(*)(char*))dlsym (RTLD_DEFAULT, "putenv");
       if (CALL_UTIL (putenv) == NULL || CALL_UTIL (putenv) == __collector_putenv)
 	{
 	  TprintfT (DBG_LT2, "__collector_putenv(): ERROR: no pointer found.\n");
@@ -712,8 +712,8 @@ __collector_putenv (char * string)
 }
 
 /*------------------------------------------------------------- setenv */
-int setenv () __attribute__ ((weak, alias ("__collector_setenv")));
-int _setenv () __attribute__ ((weak, alias ("__collector_setenv")));
+int setenv (const char*, const char*, int) __attribute__ ((weak, alias ("__collector_setenv")));
+int _setenv (const char*, const char*, int) __attribute__ ((weak, alias ("__collector_setenv")));
 
 int
 __collector_setenv (const char *name, const char *value, int overwrite)
@@ -721,9 +721,9 @@ __collector_setenv (const char *name, const char *value, int overwrite)
   if (CALL_UTIL (setenv) == __collector_setenv ||
       CALL_UTIL (setenv) == NULL)
     { // __collector_libc_funcs_init failed
-      CALL_UTIL (setenv) = (int(*)())dlsym (RTLD_NEXT, "setenv");
+      CALL_UTIL (setenv) = (int(*)(const char*, const char*, int))dlsym (RTLD_NEXT, "setenv");
       if (CALL_UTIL (setenv) == NULL || CALL_UTIL (setenv) == __collector_setenv)
-	CALL_UTIL (setenv) = (int(*)())dlsym (RTLD_DEFAULT, "setenv");
+	CALL_UTIL (setenv) = (int(*)(const char*, const char*, int))dlsym (RTLD_DEFAULT, "setenv");
       if (CALL_UTIL (setenv) == NULL || CALL_UTIL (setenv) == __collector_setenv)
 	{
 	  TprintfT (DBG_LT2, "__collector_setenv(): ERROR: no pointer found.\n");
@@ -758,8 +758,8 @@ __collector_setenv (const char *name, const char *value, int overwrite)
 }
 
 /*------------------------------------------------------------- unsetenv */
-int unsetenv () __attribute__ ((weak, alias ("__collector_unsetenv")));
-int _unsetenv () __attribute__ ((weak, alias ("__collector_unsetenv")));
+int unsetenv (const char*) __attribute__ ((weak, alias ("__collector_unsetenv")));
+int _unsetenv (const char*) __attribute__ ((weak, alias ("__collector_unsetenv")));
 
 int
 __collector_unsetenv (const char *name)
@@ -767,9 +767,9 @@ __collector_unsetenv (const char *name)
   if (CALL_UTIL (unsetenv) == __collector_unsetenv ||
       CALL_UTIL (unsetenv) == NULL)
     { // __collector_libc_funcs_init failed
-      CALL_UTIL (unsetenv) = (int(*)())dlsym (RTLD_NEXT, "unsetenv");
+      CALL_UTIL (unsetenv) = (int(*)(const char*))dlsym (RTLD_NEXT, "unsetenv");
       if (CALL_UTIL (unsetenv) == NULL || CALL_UTIL (unsetenv) == __collector_unsetenv)
-	CALL_UTIL (unsetenv) = (int(*)())dlsym (RTLD_DEFAULT, "unsetenv");
+	CALL_UTIL (unsetenv) = (int(*)(const char*))dlsym (RTLD_DEFAULT, "unsetenv");
       if (CALL_UTIL (unsetenv) == NULL || CALL_UTIL (unsetenv) == __collector_unsetenv)
 	{
 	  TprintfT (DBG_LT2, "__collector_unsetenv(): ERROR: no pointer found.\n");

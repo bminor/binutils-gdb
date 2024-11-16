@@ -99,8 +99,8 @@ static void rwrite (int fd, const void *buf, size_t nbyte);
 static void addToDynamicArchive (const char* name, const unsigned char* class_data, int class_data_len);
 static void (*AsyncGetCallTrace)(JVMPI_CallTrace*, jint, ucontext_t*) = NULL;
 static void (*collector_heap_record)(int, int, void*) = NULL;
-static void (*collector_jsync_begin)() = NULL;
-static void (*collector_jsync_end)(hrtime_t, void *) = NULL;
+static void (*collector_jsync_begin)(void) = NULL;
+static void (*collector_jsync_end)(hrtime_t, void*) = NULL;
 
 #define gethrtime collector_interface->getHiResTime
 
@@ -224,7 +224,7 @@ open_experiment (const char *exp)
       else if (__collector_strStartWith (args, "s:") == 0)
 	{
 	  java_sync_mode = 1;
-	  collector_jsync_begin = (void(*)(hrtime_t, void *))dlsym (RTLD_DEFAULT, "__collector_jsync_begin");
+	  collector_jsync_begin = (void(*)(void))dlsym (RTLD_DEFAULT, "__collector_jsync_begin");
 	  collector_jsync_end = (void(*)(hrtime_t, void *))dlsym (RTLD_DEFAULT, "__collector_jsync_end");
 	}
 #endif
@@ -249,7 +249,7 @@ __collector_jprofile_enable_synctrace ()
       return;
     }
   java_sync_mode = 1;
-  collector_jsync_begin = (void(*)(hrtime_t, void *))dlsym (RTLD_DEFAULT, "__collector_jsync_begin");
+  collector_jsync_begin = (void(*)(void))dlsym (RTLD_DEFAULT, "__collector_jsync_begin");
   collector_jsync_end = (void(*)(hrtime_t, void *))dlsym (RTLD_DEFAULT, "__collector_jsync_end");
   TprintfT (DBG_LT1, "jprofile: turning on Java synctrace, and requesting events\n");
 }
@@ -1123,7 +1123,7 @@ jprof_find_asyncgetcalltrace ()
 {
   void *jvmhandle;
   if (__collector_VM_ReadByteInstruction == NULL)
-    __collector_VM_ReadByteInstruction = (int(*)()) dlsym (RTLD_DEFAULT, "Async_VM_ReadByteInstruction");
+    __collector_VM_ReadByteInstruction = (int(*)(unsigned char*)) dlsym (RTLD_DEFAULT, "Async_VM_ReadByteInstruction");
 
   /* look for stack unwind function using default path */
   AsyncGetCallTrace = (void (*)(JVMPI_CallTrace*, jint, ucontext_t*))

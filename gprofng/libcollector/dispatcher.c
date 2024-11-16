@@ -1281,4 +1281,3 @@ __collector_ext_clone_pthread (int (*fn)(void *), void *child_stack, int flags, 
 int sigprocmask (int, const sigset_t*, sigset_t*) __attribute__ ((weak, alias ("__collector_sigprocmask")));
 int thr_sigsetmask (int, const sigset_t*, sigset_t*) __attribute__ ((weak, alias ("__collector_thr_sigsetmask")));
 int setitimer () __attribute__ ((weak, alias ("_setitimer")));
-

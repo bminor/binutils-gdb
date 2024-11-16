@@ -1578,7 +1578,7 @@ __collector_resume_experiment ()
 }
 
 /* Code to support Samples and Pause/Resume */
-void collector_sample () __attribute__ ((weak, alias ("__collector_sample")));
+void collector_sample (char *name) __attribute__ ((weak, alias ("__collector_sample")));
 void
 __collector_sample (char *name)
 {
