@@ -77,7 +77,9 @@ struct solib : intrusive_list_node<solib>
      current_sos must initialize these fields to 0.  */
 
   gdb_bfd_ref_ptr abfd;
-  char symbols_loaded = 0;	/* flag: symbols read in yet?  */
+
+  /* True if symbols have been read in.  */
+  bool symbols_loaded = false;
 
   /* objfile with symbols for a loaded library.  Target memory is read from
      ABFD.  OBJFILE may be NULL either before symbols have been loaded, if
