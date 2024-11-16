@@ -30,7 +30,9 @@
 
 /* Build-time checks are preferrable over runtime ones.  Use this construct
    in preference where possible.  */
+#ifndef static_assert
 #define static_assert(e) ((void)sizeof (struct { int _:1 - 2 * !(e); }))
+#endif
 
 static const char *program_name = NULL;
 static int debug = 0;

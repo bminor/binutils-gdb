@@ -36,7 +36,9 @@
 
 /* Build-time checks are preferrable over runtime ones.  Use this construct
    in preference where possible.  */
+#ifndef static_assert
 #define static_assert(e) ((void)sizeof (struct { int _:1 - 2 * !(e); }))
+#endif
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
