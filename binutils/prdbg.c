@@ -2818,7 +2818,7 @@ visibility_name (enum debug_visibility visibility)
       break;
     default:
       abort ();
-      return false;
+      return NULL;
     }
   return s;
 }
