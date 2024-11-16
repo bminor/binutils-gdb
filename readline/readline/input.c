@@ -21,6 +21,13 @@
 
 #define READLINE_LIBRARY
 
+#if defined (__MINGW32__)
+/* These are needed to get the declaration of 'alarm' when including
+   <unistd.h>.  */
+#define __USE_MINGW_ALARM
+#define _POSIX
+#endif
+
 #if defined (__TANDEM)
 #  define _XOPEN_SOURCE_EXTENDED 1
 #  define _TANDEM_SOURCE 1
@@ -834,7 +841,7 @@ rl_getc (FILE *stream)
       /* We know at this point that _rl_caught_signal == 0 */
 
 #if defined (__MINGW32__)
-      if (isatty (fd)
+      if (isatty (fd))
 	return (_getch ());	/* "There is no error return." */
 #endif
       result = 0;
