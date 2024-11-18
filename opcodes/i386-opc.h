@@ -572,10 +572,12 @@ enum
 #define UGH 3
   /* An implicit xmm0 as the first operand */
 #define IMPLICIT_1ST_XMM0 4
-  /* The second operand must be a vector register, {x,y,z}mmN, where N is a multiple of 4.
-     It implicitly denotes the register group of {x,y,z}mmN - {x,y,z}mm(N + 3).
+  /* One of the operands denotes a sequence of registers, with insn-dependent
+     constraint on the first register number.  It implicitly denotes e.g. the
+     register group of {x,y,z}mmN - {x,y,z}mm(N + 3), in which case N ought to
+     be a multiple of 4.
    */
-#define IMPLICIT_QUAD_GROUP 5
+#define IMPLICIT_GROUP 5
   /* Default mask isn't allowed.  */
 #define NO_DEFAULT_MASK 6
   /* Address prefix changes register operand */

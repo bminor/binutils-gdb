@@ -80,7 +80,7 @@
 #define Anysize           OperandConstraint=ANY_SIZE
 #define DistinctDest      OperandConstraint=DISTINCT_DEST
 #define Implicit1stXmm0   OperandConstraint=IMPLICIT_1ST_XMM0
-#define ImplicitQuadGroup OperandConstraint=IMPLICIT_QUAD_GROUP
+#define ImplicitGroup     OperandConstraint=IMPLICIT_GROUP
 #define NoDefMask         OperandConstraint=NO_DEFAULT_MASK
 #define RegKludge         OperandConstraint=REG_KLUDGE
 #define Ugh               OperandConstraint=UGH
@@ -2879,17 +2879,17 @@ vpmultishiftqb, 0x6683, AVX512VBMI, Modrm|Masking|Space0F38|Src1VVVV|VexW1|Broad
 
 // AVX512_4FMAPS instructions
 
-v4fmaddps, 0xf29a, AVX512_4FMAPS, Modrm|EVex=1|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex, RegZMM, RegZMM }
-v4fnmaddps, 0xf2aa, AVX512_4FMAPS, Modrm|EVex=1|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex, RegZMM, RegZMM }
-v4fmaddss, 0xf29b, AVX512_4FMAPS, Modrm|EVex=4|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex, RegXMM, RegXMM }
-v4fnmaddss, 0xf2ab, AVX512_4FMAPS, Modrm|EVex=4|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex, RegXMM, RegXMM }
+v4fmaddps, 0xf29a, AVX512_4FMAPS, Modrm|EVex=1|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitGroup, { XMMword|Unspecified|BaseIndex, RegZMM, RegZMM }
+v4fnmaddps, 0xf2aa, AVX512_4FMAPS, Modrm|EVex=1|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitGroup, { XMMword|Unspecified|BaseIndex, RegZMM, RegZMM }
+v4fmaddss, 0xf29b, AVX512_4FMAPS, Modrm|EVex=4|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitGroup, { XMMword|Unspecified|BaseIndex, RegXMM, RegXMM }
+v4fnmaddss, 0xf2ab, AVX512_4FMAPS, Modrm|EVex=4|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitGroup, { XMMword|Unspecified|BaseIndex, RegXMM, RegXMM }
 
 // AVX512_4FMAPS instructions end
 
 // AVX512_4VNNIW instructions
 
-vp4dpwssd, 0xf252, AVX512_4VNNIW, Modrm|EVex=1|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex, RegZMM, RegZMM }
-vp4dpwssds, 0xf253, AVX512_4VNNIW, Modrm|EVex=1|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitQuadGroup, { XMMword|Unspecified|BaseIndex, RegZMM, RegZMM }
+vp4dpwssd, 0xf252, AVX512_4VNNIW, Modrm|EVex=1|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitGroup, { XMMword|Unspecified|BaseIndex, RegZMM, RegZMM }
+vp4dpwssds, 0xf253, AVX512_4VNNIW, Modrm|EVex=1|Masking|Space0F38|Src1VVVV|VexW0|Disp8MemShift=4|NoSuf|ImplicitGroup, { XMMword|Unspecified|BaseIndex, RegZMM, RegZMM }
 
 // AVX512_4VNNIW instructions end
 

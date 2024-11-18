@@ -457,6 +457,7 @@ if [gas_32_check] then {
     run_list_test "avx512_4fmaps-warn"
     run_dump_test "avx512_4vnniw"
     run_dump_test "avx512_4vnniw-intel"
+    run_list_test "avx512_4vnniw-warn"
     run_dump_test "avx512_vpopcntdq"
     run_dump_test "avx512_vpopcntdq-intel"
     run_dump_test "avx512_vpopcntdq_vl"

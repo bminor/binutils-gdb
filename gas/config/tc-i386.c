@@ -10703,21 +10703,34 @@ process_operands (void)
       i.operands--;
       i.tm.operands--;
     }
-  else if (i.tm.opcode_modifier.operandconstraint == IMPLICIT_QUAD_GROUP)
+  else if (i.tm.opcode_modifier.operandconstraint == IMPLICIT_GROUP)
     {
-      unsigned int regnum, first_reg_in_group, last_reg_in_group;
+      unsigned int op, extra;
+      const reg_entry *first;
 
-      /* The second operand must be {x,y,z}mmN, where N is a multiple of 4. */
-      gas_assert (i.operands >= 2 && i.types[1].bitfield.class == RegSIMD);
-      regnum = register_number (i.op[1].regs);
-      first_reg_in_group = regnum & ~3;
-      last_reg_in_group = first_reg_in_group + 3;
-      if (regnum != first_reg_in_group)
-	as_warn (_("source register `%s%s' implicitly denotes"
-		   " `%s%.3s%u' to `%s%.3s%u' source group in `%s'"),
-		 register_prefix, i.op[1].regs->reg_name,
-		 register_prefix, i.op[1].regs->reg_name, first_reg_in_group,
-		 register_prefix, i.op[1].regs->reg_name, last_reg_in_group,
+      /* The second operand must be {x,y,z}mmN. */
+      gas_assert (i.operands == 3 && i.types[1].bitfield.class == RegSIMD);
+
+      switch (i.types[2].bitfield.class)
+	{
+	case RegSIMD:
+	  /* AVX512-{4FMAPS,4VNNIW} operand 2: N must be a multiple of 4. */
+	  op = 1;
+	  extra = 3;
+	  break;
+
+	default:
+	  abort ();
+	}
+
+      first = i.op[op].regs - (register_number (i.op[op].regs) & extra);
+      if (i.op[op].regs != first)
+	as_warn (_("operand %u `%s%s' implicitly denotes"
+		   " `%s%s' to `%s%s' group in `%s'"),
+		 intel_syntax ? i.operands - op : op + 1,
+		 register_prefix, i.op[op].regs->reg_name,
+		 register_prefix, first[0].reg_name,
+		 register_prefix, first[extra].reg_name,
 		 insn_name (&i.tm));
     }
   else if (i.tm.opcode_modifier.operandconstraint == REG_KLUDGE)
