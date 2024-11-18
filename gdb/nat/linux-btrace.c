@@ -1004,7 +1004,7 @@ linux_read_btrace (struct btrace_data *btrace,
       return linux_read_pt (&btrace->variant.pt, tinfo, type);
     }
 
-  internal_error (_("Unkown branch trace format."));
+  internal_error (_("Unknown branch trace format."));
 }
 
 /* See linux-btrace.h.  */
