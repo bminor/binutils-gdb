@@ -1876,6 +1876,12 @@ subsegs_finish_section (asection *s)
   if (!seginfo)
     return;
 
+  /* This now gets called even if we had errors.  In that case, any alignment
+     is meaningless, and, moreover, will look weird if we are generating a
+     listing.  */
+  if (had_errors ())
+    do_not_pad_sections_to_alignment = 1;
+
   for (frchainP = seginfo->frchainP;
        frchainP != NULL;
        frchainP = frchainP->frch_next)
@@ -1883,12 +1889,6 @@ subsegs_finish_section (asection *s)
       int alignment;
 
       subseg_set (s, frchainP->frch_subseg);
-
-      /* This now gets called even if we had errors.  In that case,
-	 any alignment is meaningless, and, moreover, will look weird
-	 if we are generating a listing.  */
-      if (had_errors ())
-	do_not_pad_sections_to_alignment = 1;
 
       alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
       if ((bfd_section_flags (now_seg) & (SEC_MERGE | SEC_STRINGS))
