@@ -231,6 +231,32 @@ parse_dictionary ()
 	    < <(awk -F '->' '{print $1}' <(output_dictionaries))
     mapfile -t replacements \
 	    < <(awk -F '->' '{print $2}' <(output_dictionaries))
+
+    local words_done
+    declare -A words_done
+    local i word replacement
+    i=0
+    for word in "${words[@]}"; do
+	replacement=${replacements[$i]}
+
+	# Skip words that are already handled.  This ensures that the local
+	# dictionary overrides the wiki dictionary.
+	if [ "${words_done[$word]}" == 1 ]; then
+	    words[$i]=""
+	    replacements[$i]=""
+	    i=$((i + 1))
+	    continue
+	fi
+	words_done[$word]=1
+
+	# Skip identity rules.
+	if [ "$word" = "$replacement" ]; then
+	    words[$i]=""
+	    replacements[$i]=""
+	fi
+
+	i=$((i + 1))
+    done
 }
 
 find_files_matching_words ()
@@ -252,6 +278,9 @@ find_files_matching_words ()
 	declare -a re_words
 	mapfile -t re_words \
 		< <(for f in "${words[@]}"; do
+			if [ "$f" = "" ]; then
+			    continue
+			fi
 			echo "$f"
 		    done \
 			| sed "s/^\(.\)/[\u\1\1]/")
@@ -417,19 +446,15 @@ main ()
 	exit 1
     fi
 
-    declare -A words_done
     local i word replacement
     i=0
     for word in "${words[@]}"; do
 	replacement=${replacements[$i]}
 	i=$((i + 1))
 
-	# Skip words that are already handled.  This ensures that the local
-	# dictionary overrides the wiki dictionary.
-	if [ "${words_done[$word]}" == 1 ]; then
+	if [ "$word" = "" ]; then
 	    continue
 	fi
-	words_done[$word]=1
 
 	replace_word_in_files \
 	    "$word" \

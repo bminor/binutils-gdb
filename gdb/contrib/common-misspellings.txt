@@ -12,8 +12,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# This file contains additions to and overrides for
+# wikipedia-common-misspellings.txt.
+
 # Common spelling mistakes.
 
 inbetween->between, in between, in-between
 sofar->so far
 doens't->doesn't
+
+# Identity rules.
+
+thru->thru
