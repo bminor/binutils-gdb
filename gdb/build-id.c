@@ -223,13 +223,29 @@ build_id_to_debug_bfd_1 (const std::string &original_link,
 
 /* Common code for finding BFDs of a given build-id.  This function
    works with both debuginfo files (SUFFIX == ".debug") and executable
-   files (SUFFIX == "").  */
+   files (SUFFIX == "").
+
+   The build-id will be split into a single byte sub-directory, followed by
+   the remaining build-id bytes as the filename, i.e. we use the lookup
+   format: `.build-id/xx/yy....zz`.  As a consequence, if BUILD_ID_LEN is
+   less than 2 (bytes), no results will be found as there are not enough
+   bytes to form the `yy....zz` part of the lookup filename.  */
 
 static gdb_bfd_ref_ptr
 build_id_to_bfd_suffix (size_t build_id_len, const bfd_byte *build_id,
 			const char *suffix)
 {
   SEPARATE_DEBUG_FILE_SCOPED_DEBUG_ENTER_EXIT;
+
+  if (build_id_len < 2)
+    {
+      /* Zero length build-ids are ignored by bfd.  */
+      gdb_assert (build_id_len > 0);
+      separate_debug_file_debug_printf
+	("Ignoring short build-id `%s' for build-id based lookup",
+	 bin2hex (build_id, build_id_len).c_str ());
+      return {};
+    }
 
   /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
      cause "/.build-id/..." lookups.  */
@@ -249,11 +265,9 @@ build_id_to_bfd_suffix (size_t build_id_len, const bfd_byte *build_id,
       std::string link = debugdir.get ();
       link += "/.build-id/";
 
-      if (size > 0)
-	{
-	  size--;
-	  string_appendf (link, "%02x/", (unsigned) *data++);
-	}
+      gdb_assert (size > 1);
+      size--;
+      string_appendf (link, "%02x/", (unsigned) *data++);
 
       while (size-- > 0)
 	string_appendf (link, "%02x", (unsigned) *data++);

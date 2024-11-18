@@ -3008,24 +3008,31 @@ namespace eval Dwarf {
 
     proc _note {type name hexdata} {
 	set namelen [expr [string length $name] + 1]
+	set datalen [expr [string length $hexdata] / 2]
 
 	# Name size.
 	_op .4byte $namelen
 	# Data size.
-	_op .4byte [expr [string length $hexdata] / 2]
+	_op .4byte $datalen
 	# Type.
 	_op .4byte $type
 	# The name.
 	_op .ascii [_quote $name]
-	# Alignment.
+	# Alignment (to 4-byte boundary).
 	set align 2
 	set total [expr {($namelen + (1 << $align) - 1) & -(1 << $align)}]
 	for {set i $namelen} {$i < $total} {incr i} {
-	    _op .byte 0
+	    _op .byte 0 padding
 	}
 	# The data.
 	foreach {a b} [split $hexdata {}] {
 	    _op .byte 0x$a$b
+	}
+	# Alignment (to 4-byte boundary).
+	set align 2
+	set total [expr {($datalen + (1 << $align) - 1) & -(1 << $align)}]
+	for {set i $datalen} {$i < $total} {incr i} {
+	    _op .byte 0 padding
 	}
     }
 
