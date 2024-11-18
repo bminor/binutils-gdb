@@ -3130,7 +3130,7 @@ enqcmds, 0xf3f8, APX_F(ENQCMD), Modrm|AddrPrefixOpReg|NoSuf|EVexMap4, { Unspecif
 
 // VP2INTERSECT instructions.
 
-vp2intersect<dq>, 0xf268, AVX512_VP2INTERSECT, Modrm|Space0F38|Src1VVVV|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegMask }
+vp2intersect<dq>, 0xf268, AVX512_VP2INTERSECT, Modrm|Space0F38|Src1VVVV|<dq:vexw>|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|ImplicitGroup, { RegXMM|RegYMM|RegZMM|<dq:elem>|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegMask }
 
 // VP2INTERSECT instructions end.
 

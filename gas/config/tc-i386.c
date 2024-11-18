@@ -10719,6 +10719,12 @@ process_operands (void)
 	  extra = 3;
 	  break;
 
+	case RegMask:
+	  /* AVX512-VP2INTERSECT operand 3: N must be a multiple of 2. */
+	  op = 2;
+	  extra = 1;
+	  break;
+
 	default:
 	  abort ();
 	}

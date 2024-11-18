@@ -577,6 +577,7 @@ if [gas_32_check] then {
     run_dump_test "vp2intersect"
     run_dump_test "vp2intersect-intel"
     run_list_test "vp2intersect-inval-bcast"
+    run_list_test "vp2intersect-warn" "-aln"
     run_dump_test "keylocker"
     run_dump_test "keylocker-intel"
     run_dump_test "avx512_fp16"
