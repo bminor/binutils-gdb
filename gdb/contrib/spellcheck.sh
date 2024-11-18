@@ -29,6 +29,32 @@ dictionary=$cache_dir/$cache_file
 local_dictionary=$scriptdir/common-misspellings.txt
 cache_file2=spell-check.pat1
 
+bash_version_at_least ()
+{
+    local major
+    major="$1"
+    local minor
+    minor="$2"
+
+    if [ "$bash_major" = "" ]; then
+	bash_major=$(echo "$BASH_VERSION" | awk -F '.' '{print $1}')
+	bash_minor=$(echo "$BASH_VERSION" | awk -F '.' '{print $2}')
+    fi
+
+    if [ "$bash_major" -lt "$major" ]; then
+	# Major version less then required, return false.
+	return 1
+    fi
+
+    if [ "$bash_major" -gt "$major" ]; then
+	# Major version more then required, return true.
+	return 0
+    fi
+
+    # Check minor version.
+    [ "$bash_minor" -ge "$minor" ]
+}
+
 # Separators: space, slash, tab, colon, comma.
 declare -a grep_separators
 grep_separators=(
@@ -343,7 +369,13 @@ find_files_matching_word ()
 		"${grep_separators[@]}" \
 		"${grep_post[@]}")
 
-    pat="(${pat@u}|$pat)"
+    if bash_version_at_least 5 1; then
+	patc=${pat@u}
+    else
+	# shellcheck disable=SC2001
+	patc=$(echo "$pat" | sed 's/^\(.\)/\u\1/')
+    fi
+    pat="($patc|$pat)"
 
     pat="$before$pat$after"
 
@@ -372,10 +404,20 @@ replace_word_in_file ()
 		"${sed_separators[@]}" \
 		"${sed_post[@]}")
 
+    if bash_version_at_least 5 1; then
+	wordc=${word@u}
+	replacementc=${replacement@u}
+    else
+	# shellcheck disable=SC2001
+	wordc=$(echo "$word" | sed 's/^\(.\)/\u\1/')
+	# shellcheck disable=SC2001
+	replacementc=$(echo "$replacement" | sed 's/^\(.\)/\u\1/')
+    fi
+
     local repl1
     local repl2
     repl1="s%$before$word$after%\1$replacement\2%g"
-    repl2="s%$before${word@u}$after%\1${replacement@u}\2%g"
+    repl2="s%$before$wordc$after%\1$replacementc\2%g"
 
     sed -i \
 	"$repl1;$repl2" \
