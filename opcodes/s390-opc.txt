@@ -2190,3 +2190,11 @@ e6000000004a vcvdq VRI_VV0UU "vector convert to decimal 128 bit" arch15 zarch
 
 e6000000005f vtp VRR_0V0U "vector test decimal" arch15 zarch optparm
 e6000000007f vtz VRR_0VVU "vector test zoned" arch15 zarch
+
+# Concurrent-Functions Facility
+
+c806 cal SSF_RRDRD2 "compare and load 32" arch15 zarch
+c807 calg SSF_RRDRD2 "compare and load 64" arch15 zarch
+c80f calgf SSF_RRDRD2 "compare and load 64<32" arch15 zarch
+
+eb0000000016 pfcr RSY_RRRD "perform functions with concurrent results" arch15 zarch
