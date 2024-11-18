@@ -8,6 +8,10 @@ Changes in 2.44:
 * Add a "--build-id=xx" option, if built with the xxhash library.  This
   produces a 128-bit hash, 2-4x faster than md5 or sha1.
 
+* The ELF linker option --package-metadata supports percent-encoded and
+  %[string] encoded JSON payload now to ease passing around this option
+  without getting the JSON payload corrupted.
+
 Changes in 2.43:
 
 * Add support for LoongArch DT_RELR (compressed R_LARCH_RELATIVE).

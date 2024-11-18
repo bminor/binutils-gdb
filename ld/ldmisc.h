@@ -39,5 +39,6 @@ do { info_assert(__FILE__,__LINE__); } while (0)
 extern void print_spaces (int);
 #define print_space() print_spaces (1)
 extern void print_nl (void);
+extern void percent_decode (const char *, char *);
 
 #endif

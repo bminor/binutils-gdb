@@ -867,8 +867,16 @@ gld${EMULATION_NAME}_handle_option (int optc)
     case OPTION_PACKAGE_METADATA:
       free ((char *) ldelf_emit_note_fdo_package_metadata);
       ldelf_emit_note_fdo_package_metadata = NULL;
-      if (optarg != NULL && strlen(optarg) > 0)
-	ldelf_emit_note_fdo_package_metadata = xstrdup (optarg);
+      if (optarg != NULL)
+	{
+	  size_t len = strlen (optarg);
+	  if (len > 0)
+	    {
+	      char *package_metadata = xmalloc (len + 1);
+	      percent_decode (optarg, package_metadata);
+	      ldelf_emit_note_fdo_package_metadata = package_metadata;
+	    }
+	}
       break;
 
     case OPTION_COMPRESS_DEBUG:

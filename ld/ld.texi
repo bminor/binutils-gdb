@@ -3253,6 +3253,11 @@ Request the creation of a @code{.note.package} ELF note section.  The
 contents of the note are in JSON format, as per the package metadata
 specification.  For more information see:
 https://systemd.io/ELF_PACKAGE_METADATA/
+The JSON argument support percent-encoding and following %[string]
+(where string refers to the name in HTML's Named Character References)
+encoding: @samp{%[comma]} for @samp{,}, @samp{%[lbrace]} for @samp{@{},
+@samp{%[quot]} for @samp{"}, @samp{%[rbrace]} for @samp{@}}, and
+@samp{%[space]} for space character.
 If the JSON argument is missing/empty then this will disable the
 creation of the metadata note, if one had been enabled by an earlier
 occurrence of the --package-metadata option.
