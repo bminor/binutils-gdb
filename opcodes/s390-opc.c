@@ -468,6 +468,7 @@ unused_s390_operands_static_asserts (void)
 #define INSTR_SS_RRRDRD2   6, { R_8,D_20,B_16,R_12,D_36,B_32 }   /* e.g. plo   */
 #define INSTR_SS_RRRDRD3   6, { R_8,R_12,D_20,B_16,D_36,B_32 }   /* e.g. lmd   */
 #define INSTR_SSF_RRDRD    6, { D_20,B_16,D_36,B_32,R_8,0 }      /* e.g. mvcos */
+#define INSTR_SSF_RRDRD2   6, { R_8,D_20,B_16,D_36,B_32,0 }      /* e.g. cal   */
 #define INSTR_SSF_RERDRD2  6, { RE_8,D_20,B_16,D_36,B_32,0 }     /* e.g. lpd   */
 #define INSTR_S_00         4, { 0,0,0,0,0,0 }                    /* e.g. hsch  */
 #define INSTR_S_RD         4, { D_20,B_16,0,0,0,0 }              /* e.g. stck  */
@@ -700,6 +701,7 @@ unused_s390_operands_static_asserts (void)
 #define MASK_SS_RRRDRD2   { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SS_RRRDRD3   { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SSF_RRDRD    { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
+#define MASK_SSF_RRDRD2   { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SSF_RERDRD2  { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_S_00         { 0xff, 0xff, 0xff, 0xff, 0x00, 0x00 }
 #define MASK_S_RD         { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
