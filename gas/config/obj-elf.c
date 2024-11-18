@@ -1327,7 +1327,7 @@ obj_elf_section (int push)
 		goto fetch_entsize;
 	      entsize = get_absolute_expression ();
 	      SKIP_WHITESPACE ();
-	      if (entsize < 0)
+	      if (entsize <= 0)
 		{
 		  as_warn (_("invalid merge entity size"));
 		  attr &= ~SHF_MERGE;
