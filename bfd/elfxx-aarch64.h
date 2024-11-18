@@ -129,13 +129,33 @@ typedef enum
   ERRAT_ADRP  = (1 << 2),  /* Erratum workarounds using ADRP are allowed.  */
 } erratum_84319_opts;
 
+/* An enum to define the various modes of MTE operation.
+   The enumerator constants must be the same as specified in the Memtag ABI
+   Extension to ELF for the Arm® 64-bit Architecture (AArch64) document.  */
+typedef enum
+{
+  AARCH64_MEMTAG_MODE_SYNC    = 0,
+  AARCH64_MEMTAG_MODE_ASYNC   = 1,
+  AARCH64_MEMTAG_MODE_NONE    = 2,
+} aarch64_memtag_mode_type;
+
+/* A structure to encompass all information about memtag feature related
+   command line options.  */
+struct aarch64_memtag_opts
+{
+  /* Mode of MTE operation.  */
+  aarch64_memtag_mode_type memtag_mode;
+};
+
+typedef struct aarch64_memtag_opts aarch64_memtag_opts;
+
 extern void bfd_elf64_aarch64_set_options
   (bfd *, struct bfd_link_info *, int, int, int, int, erratum_84319_opts, int,
-   const aarch64_protection_opts *);
+   const aarch64_protection_opts *, const aarch64_memtag_opts *);
 
 extern void bfd_elf32_aarch64_set_options
   (bfd *, struct bfd_link_info *, int, int, int, int, erratum_84319_opts, int,
-   const aarch64_protection_opts *);
+   const aarch64_protection_opts *, const aarch64_memtag_opts *);
 
 /* AArch64 stub generation support for ELF64.  Called from the linker.  */
 extern int elf64_aarch64_setup_section_lists
