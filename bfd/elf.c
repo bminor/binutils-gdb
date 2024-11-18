@@ -846,7 +846,10 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       newsect->entsize = hdr->sh_entsize;
     }
   if ((hdr->sh_flags & SHF_STRINGS) != 0)
-    flags |= SEC_STRINGS;
+    {
+      flags |= SEC_STRINGS;
+      newsect->entsize = hdr->sh_entsize;
+    }
   if ((hdr->sh_flags & SHF_TLS) != 0)
     flags |= SEC_THREAD_LOCAL;
   if ((hdr->sh_flags & SHF_EXCLUDE) != 0)
@@ -3709,7 +3712,10 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
       this_hdr->sh_entsize = asect->entsize;
     }
   if ((asect->flags & SEC_STRINGS) != 0)
-    this_hdr->sh_flags |= SHF_STRINGS;
+    {
+      this_hdr->sh_flags |= SHF_STRINGS;
+      this_hdr->sh_entsize = asect->entsize;
+    }
   if ((asect->flags & SEC_GROUP) == 0 && elf_group_name (asect) != NULL)
     this_hdr->sh_flags |= SHF_GROUP;
   if ((asect->flags & SEC_THREAD_LOCAL) != 0)

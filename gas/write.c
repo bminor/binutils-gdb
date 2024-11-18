@@ -1891,7 +1891,7 @@ subsegs_finish_section (asection *s)
 	do_not_pad_sections_to_alignment = 1;
 
       alignment = SUB_SEGMENT_ALIGN (now_seg, frchainP);
-      if ((bfd_section_flags (now_seg) & SEC_MERGE)
+      if ((bfd_section_flags (now_seg) & (SEC_MERGE | SEC_STRINGS))
 	  && now_seg->entsize)
 	{
 	  unsigned int entsize = now_seg->entsize;

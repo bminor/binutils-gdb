@@ -7001,17 +7001,18 @@ Note - some sections, eg @code{.text} and @code{.data} are considered to be
 special and have fixed types.  Any attempt to declare them with a different
 type will generate an error from the assembler.
 
-If @var{flags} contains the @code{M} symbol then the @var{type} argument must
-be specified as well as an extra argument---@var{entsize}---like this:
+If @var{flags} contains the @code{M} and/or @code{S} symbol then the @var{type}
+argument must be specified as well as an extra argument---@var{entsize}---like
+this:
 
 @smallexample
 .section @var{name} , "@var{flags}"M, @@@var{type}, @var{entsize}
 @end smallexample
 
 Sections with the @code{M} flag but not @code{S} flag must contain fixed size
-constants, each @var{entsize} octets long. Sections with both @code{M} and
-@code{S} must contain zero terminated strings where each character is
-@var{entsize} bytes long. The linker may remove duplicates within sections with
+constants, each @var{entsize} octets long. Sections with @code{S} must contain
+zero terminated strings where each character is @var{entsize} bytes long. For
+@code{M} sections the linker may remove duplicates within sections with
 the same name, same entity size and same flags.  @var{entsize} must be an
 absolute expression.  For sections with both @code{M} and @code{S}, a string
 which is a suffix of a larger string is considered a duplicate.  Thus
@@ -7031,8 +7032,8 @@ is not generally a good idea as section indices are rarely known at assembly
 time, but the facility is provided for testing purposes.  An index of zero is
 allowed.  It indicates that the linked-to section has already been discarded.
 
-Note: If both the @var{M} and @var{o} flags are present, then the fields
-for the Merge flag should come first, like this:
+Note: If both one of @var{M} or @var{S} and @var{o} flags are present, then the
+fields for the Merge/String flag should come first, like this:
 
 @smallexample
 .section @var{name},"@var{flags}"Mo,@@@var{type},@var{entsize},@var{SymbolName}
@@ -7055,8 +7056,8 @@ indicates that only one copy of this section should be retained
 an alias for comdat
 @end table
 
-Note: if both the @var{M} and @var{G} flags are present then the fields for
-the Merge flag should come first, like this:
+Note: Uf both one of @var{M} or @var{S} and @var{G} flags are present then the
+fields for the Merge/String flag should come first, like this:
 
 @smallexample
 .section @var{name} , "@var{flags}"MG, @@@var{type}, @var{entsize}, @var{GroupName}[, @var{linkage}]

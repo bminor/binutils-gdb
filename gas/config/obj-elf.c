@@ -809,7 +809,7 @@ change_section (const char *name,
 	= match_p->linked_to_symbol_name;
 
       bfd_set_section_flags (sec, flags);
-      if (flags & SEC_MERGE)
+      if (flags & (SEC_MERGE | SEC_STRINGS))
 	sec->entsize = entsize;
       elf_group_name (sec) = match_p->group_name;
 
@@ -864,7 +864,8 @@ change_section (const char *name,
 	       processor or application specific attribute as suspicious?  */
 	    elf_section_flags (sec) = attr;
 
-	  if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
+	  if ((flags & (SEC_MERGE | SEC_STRINGS))
+	      && old_sec->entsize != (unsigned) entsize)
 	    as_bad (_("changed section entity size for %s"), name);
 	}
     }
@@ -1318,36 +1319,39 @@ obj_elf_section (int push)
 	    }
 
 	  SKIP_WHITESPACE ();
-	  if ((attr & SHF_MERGE) != 0 && *input_line_pointer == ',')
+	  if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0
+	      && *input_line_pointer == ',')
 	    {
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
 	      if (inherit && *input_line_pointer == ','
-		  && (bfd_section_flags (now_seg) & SEC_MERGE) != 0)
+		  && (bfd_section_flags (now_seg)
+		      & (SEC_MERGE | SEC_STRINGS)) != 0)
 		goto fetch_entsize;
 	      entsize = get_absolute_expression ();
 	      SKIP_WHITESPACE ();
 	      if (entsize <= 0)
 		{
-		  as_warn (_("invalid merge entity size"));
-		  attr &= ~SHF_MERGE;
+		  as_warn (_("invalid merge / string entity size"));
+		  attr &= ~(SHF_MERGE | SHF_STRINGS);
 		  entsize = 0;
 		}
 	    }
-	  else if ((attr & SHF_MERGE) != 0 && inherit
-		    && (bfd_section_flags (now_seg) & SEC_MERGE) != 0)
+	  else if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0 && inherit
+		    && (bfd_section_flags (now_seg)
+			& (SEC_MERGE | SEC_STRINGS)) != 0)
 	    {
 	    fetch_entsize:
 	      entsize = now_seg->entsize;
 	    }
-	  else if ((attr & SHF_MERGE) != 0)
+	  else if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0)
 	    {
-	      as_warn (_("entity size for SHF_MERGE not specified"));
-	      attr &= ~SHF_MERGE;
+	      as_warn (_("entity size for SHF_MERGE / SHF_STRINGS not specified"));
+	      attr &= ~(SHF_MERGE | SHF_STRINGS);
 	    }
 
-	  if ((attr & SHF_MERGE) != 0 && type == SHT_NOBITS)
-	    as_warn (_("bogus SHF_MERGE for SHT_NOBITS section"));
+	  if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0 && type == SHT_NOBITS)
+	    as_warn (_("bogus SHF_MERGE / SHF_STRINGS for SHT_NOBITS section"));
 
 	  if ((attr & SHF_LINK_ORDER) != 0 && *input_line_pointer == ',')
 	    {
