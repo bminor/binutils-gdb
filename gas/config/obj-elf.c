@@ -1346,6 +1346,9 @@ obj_elf_section (int push)
 	      attr &= ~SHF_MERGE;
 	    }
 
+	  if ((attr & SHF_MERGE) != 0 && type == SHT_NOBITS)
+	    as_warn (_("bogus SHF_MERGE for SHT_NOBITS section"));
+
 	  if ((attr & SHF_LINK_ORDER) != 0 && *input_line_pointer == ',')
 	    {
 	      ++input_line_pointer;

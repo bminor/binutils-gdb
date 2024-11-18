@@ -627,6 +627,7 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
 
   if (sec->size == 0
       || (sec->flags & SEC_EXCLUDE) != 0
+      || (sec->flags & SEC_HAS_CONTENTS) == 0
       || sec->entsize == 0)
     return true;
 
