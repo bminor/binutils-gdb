@@ -402,6 +402,20 @@ expect (FILE *fp)
     }
 }
 
+/* Calculate checksum for the packet stored in buffer buf.  Store
+   the checksum in a hexadecimal format in a checksum_hex variable.  */
+static void
+recalculate_csum (const std::string &buf, int cnt, unsigned char *checksum_hex)
+{
+  unsigned char csum = 0;
+
+  for (int i = 0; i < cnt; i++)
+    csum += buf[i];
+
+  checksum_hex[0] = tohex ((csum >> 4) & 0xf);
+  checksum_hex[1] = tohex (csum & 0xf);
+}
+
 /* Play data back to gdb from fp (after skipping leading blank) up until a
    \n is read from fp (which is discarded and not sent to gdb). */
 
@@ -409,7 +423,10 @@ static void
 play (FILE *fp)
 {
   int fromlog;
-  char ch;
+  int where_csum = 0, offset = 1;
+  unsigned char checksum[2] = {0, 0};
+  std::string line;
+
 
   if ((fromlog = logchar (fp, false)) != ' ')
     {
@@ -418,10 +435,37 @@ play (FILE *fp)
     }
   while ((fromlog = logchar (fp, false)) != EOL)
     {
-      ch = fromlog;
-      if (write (remote_desc_out, &ch, 1) != 1)
-	remote_error ("Error during write to gdb");
+      line.push_back (fromlog);
+      if (line[line.length ()] == '#')
+	where_csum = line.length ();
     }
+
+  /* Packet starts with '+$' or '$', we don't want to calculate those
+     to the checksum, substract the offset to adjust the line length.
+     If the line starts with '$', the offset remains set to 1.  */
+  if (line[0] == '+')
+    offset = 2;
+
+  /* If '#' is missing at the end of the line, add it and adjust the line
+     length.  */
+  if (where_csum == 0)
+    {
+      where_csum = line.length ();
+      line.push_back ('#');
+    }
+  recalculate_csum (line.substr (offset), where_csum - offset, checksum);
+
+  /* Check if the checksum is missing and adjust the line length to be able
+     to fit the checksum.  */
+  if (where_csum + 1 >= line.length ())
+    line.resize (where_csum + 3);
+
+  /* Replace what is at the end of the packet with the checksum.  */
+  line[where_csum + 1] = checksum[0];
+  line[where_csum + 2] = checksum[1];
+
+  if (write (remote_desc_out, line.data (), line.size ()) != line.size ())
+    remote_error ("Error during write to gdb");
 }
 
 static void
