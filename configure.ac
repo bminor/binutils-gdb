@@ -365,7 +365,7 @@ case "${ENABLE_GOLD}" in
       # Check for target supported by gold.
       case "${target}" in
         i?86-*-* | x86_64-*-* | sparc*-*-* | powerpc*-*-* | arm*-*-* \
-        | aarch64*-*-* | tilegx*-*-* | mips*-*-* | s390*-*-* | loongarch*-*-*)
+        | aarch64*-*-* | tilegx*-*-* | mips*-*-* | s390*-*-*)
 	  configdirs="$configdirs gold"
 	  if test x${ENABLE_GOLD} = xdefault; then
 	    default_ld=gold
@@ -1432,6 +1432,7 @@ fi
 
 ACX_PROG_GNAT
 ACX_PROG_GDC
+ACX_PROG_CARGO
 ACX_PROG_CMP_IGNORE_INITIAL
 
 AC_ARG_ENABLE([bootstrap],
@@ -1477,16 +1478,16 @@ case "$have_compiler:$host:$target:$enable_bootstrap" in
     ;;
 esac
 
-# When bootstrapping with GCC, build stage 1 in C++11 mode to ensure that a
-# C++11 compiler can still start the bootstrap.  Otherwise, if building GCC,
-# require C++11 (or higher).
+# When bootstrapping with GCC, build stage 1 in C++14 mode to ensure that a
+# C++14 compiler can still start the bootstrap.  Otherwise, if building GCC,
+# require C++14 (or higher).
 if test "$enable_bootstrap:$GXX" = "yes:yes"; then
-  CXX="$CXX -std=c++11"
+  CXX="$CXX -std=c++14"
 elif test "$have_compiler" = yes; then
-  AX_CXX_COMPILE_STDCXX(11)
+  AX_CXX_COMPILE_STDCXX(14)
 
   if test "${build}" != "${host}"; then
-    AX_CXX_COMPILE_STDCXX(11, [], [], [_FOR_BUILD])
+    AX_CXX_COMPILE_STDCXX(14, [], [], [_FOR_BUILD])
   fi
 fi
 
@@ -2057,6 +2058,64 @@ fi
 
 AC_SUBST(PICFLAG)
 
+
+# Check for libdiagnostics support.
+AC_MSG_CHECKING([whether to enable libdiagnostics])
+AC_ARG_ENABLE(libdiagnostics,
+[AS_HELP_STRING([--enable-libdiagnostics],
+		[build libdiagnostics shared library])],
+enable_libdiagnostics=$enableval,
+enable_libdiagnostics=no)
+
+if test x$enable_libdiagnostics = xyes; then
+  # Disable libdiagnostics if -enable-host-shared not specified
+  # but not if building for Mingw. All code in Windows
+  # is position independent code (PIC).
+  case $target in
+     *mingw*) ;;
+     *)
+       if test x$host_shared != xyes; then
+	 AC_MSG_ERROR([
+Enabling libdiagnostics requires --enable-host-shared.
+
+--enable-host-shared typically slows the rest of the compiler down by
+a few %, so you must explicitly enable it.
+
+If you want to build both libdiagnostics and the regular compiler, it is often
+best to do this via two separate configure/builds, in separate
+directories, to avoid imposing the performance cost of
+--enable-host-shared on the regular compiler.])
+       fi
+       ;;
+   esac
+fi
+AC_MSG_RESULT($enable_libdiagnostics)
+AC_SUBST(enable_libdiagnostics)
+
+
+# Rust requires -ldl and -lpthread if you are using an old glibc that does not include them by
+# default, so we check for them here
+# We are doing the test here and not in the gcc/configure to be able to nicely disable the
+# build of the Rust frontend in case a dep is missing.
+missing_rust_dynlibs=none
+
+save_LIBS="$LIBS"
+LIBS=
+AC_SEARCH_LIBS([dlopen], [dl])
+AC_SEARCH_LIBS([pthread_create], [pthread])
+CRAB1_LIBS="$LIBS"
+LIBS="$save_LIBS"
+
+if test "$ac_cv_search_dlopen" = no; then
+    missing_rust_dynlibs="libdl"
+fi
+
+if test "$ac_cv_search_pthread_create" = no; then
+    missing_rust_dynlibs="$missing_rust_dynlibs, libpthread"
+fi
+
+AC_SUBST(CRAB1_LIBS, "$CRAB1_LIBS")
+
 # If we are building PIC/PIE host executables, and we are building dependent
 # libs (e.g. GMP) in-tree those libs need to be configured to generate PIC
 # code.
@@ -2133,7 +2192,7 @@ if test -d ${srcdir}/gcc; then
         lang_requires_boot_languages=
         # set srcdir during sourcing lang_frag to the gcc dir.
         # Sadly overriding srcdir on the . line doesn't work in plain sh as it
-        # polutes this shell
+        # pollutes this shell
         saved_srcdir=${srcdir}
         srcdir=${srcdir}/gcc . ${lang_frag}
         srcdir=${saved_srcdir}
@@ -2294,6 +2353,25 @@ if test -d ${srcdir}/gcc; then
             ;;
         esac
 
+        # Disable Rust if we are missing some required C libraries for the Rust runtime.
+        case ${add_this_lang}:${language}:${missing_rust_dynlibs} in
+          *:rust:none)
+            # Nothing to do - we're not missing any C libraries
+            ;;
+          yes:rust:*)
+            AC_MSG_ERROR([some C libraries are required to build $language: $missing_rust_dynlibs])
+            add_this_lang=unsupported
+            ;;
+          all:rust:*)
+            AC_MSG_WARN([some C libraries are required to build $language: $missing_rust_dynlibs])
+            add_this_lang=unsupported
+            ;;
+          *:rust:*)
+            # Silently disable.
+            add_this_lang=unsupported
+            ;;
+        esac
+
         # Disable jit if -enable-host-shared not specified
         # but not if building for Mingw. All code in Windows
         # is position independent code (PIC).
@@ -2325,6 +2403,35 @@ directories, to avoid imposing the performance cost of
 	        esac
           ;;
         esac
+
+        # Pre-conditions to consider whether cargo being supported.
+        if test x"$have_cargo" = xyes \
+          && test x"$build" != x"$host"; then
+          # Until <https://github.com/Rust-GCC/gccrs/issues/2898>
+          # "'cargo' should build for the host system" is resolved:
+          AC_MSG_WARN([use of cargo not yet supported here in Canadian cross configurations])
+          have_cargo=no
+        else
+          # Assume that cargo-produced object files are compatible with what
+          # we're going to build here.
+          :
+        fi
+        # Disable Rust if cargo is unavailable.
+        case ${add_this_lang}:${language}:${have_cargo} in
+          yes:rust:no)
+            # Specifically requested language; tell them.
+            AC_MSG_ERROR([cargo is required to build $language])
+            ;;
+          all:rust:no)
+            AC_MSG_WARN([cargo is required to build $language])
+            add_this_lang=unsupported
+            ;;
+          *:rust:no)
+            # Silently disable.
+            add_this_lang=unsupported
+            ;;
+        esac
+
 
         # Disable a language that is unsupported by the target.
 	case "${add_this_lang}: $unsupported_languages " in
@@ -3140,6 +3247,15 @@ case "$enable_bootstrap:$ENABLE_GOLD: $configdirs :,$stage1_languages," in
     AC_MSG_ERROR([in a combined tree, bootstrapping with --enable-gold requires c++ in stage1_languages])
     ;;
 esac
+
+# Bootstrapping GCC requires libstdc++-v3 so error out if libstdc++ is disabled with bootstrapping
+# Note C++ is always enabled for stage1 now.
+case "$enable_bootstrap:${noconfigdirs}" in
+  yes:*target-libstdc++-v3*)
+    AC_MSG_ERROR([bootstrapping with --disable-libstdcxx is not supported])
+    ;;
+esac
+
 
 extrasub_build=
 for module in ${build_configdirs} ; do
