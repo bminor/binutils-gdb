@@ -264,9 +264,7 @@ stpy_lazy_string_elt_type (lazy_string_object *lazy)
     case TYPE_CODE_ARRAY:
       return check_typedef (realtype->target_type ());
     default:
-      /* This is done to preserve existing behavior.  PR 20769.
-	 E.g., gdb.parse_and_eval("my_int_variable").lazy_string().type.  */
-      return realtype;
+      gdb_assert_not_reached ("invalid lazy string");
     }
 }
 

@@ -521,14 +521,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
    If LENGTH is provided then the length parameter is set to LENGTH.
    Otherwise if the value is an array of known length then the array's length
    is used.  Otherwise the length will be set to -1 (meaning first null of
-   appropriate with).
-
-   Note: In order to not break any existing uses this allows creating
-   lazy strings from anything.  PR 20769.  E.g.,
-   gdb.parse_and_eval("my_int_variable").lazy_string().
-   "It's easier to relax restrictions than it is to impose them after the
-   fact."  So we should be flagging any unintended uses as errors, but it's
-   perhaps too late for that.  */
+   appropriate with).  */
 
 static PyObject *
 valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
@@ -596,9 +589,7 @@ valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
 	  addr = value_as_address (value);
 	  break;
 	default:
-	  /* Should flag an error here.  PR 20769.  */
-	  addr = value->address ();
-	  break;
+	  error (_("Cannot make lazy string from this object"));
 	}
 
       str_obj = gdbpy_create_lazy_string_object (addr, length, user_encoding,
