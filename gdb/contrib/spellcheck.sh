@@ -269,13 +269,13 @@ parse_dictionary ()
     local i word replacement
     i=0
     for word in "${words[@]}"; do
-	replacement=${replacements[$i]}
+	replacement=${replacements[i]}
 
 	# Skip words that are already handled.  This ensures that the local
 	# dictionary overrides the wiki dictionary.
 	if [ "${words_done[$word]}" == 1 ]; then
-	    words[$i]=""
-	    replacements[$i]=""
+	    words[i]=""
+	    replacements[i]=""
 	    i=$((i + 1))
 	    continue
 	fi
@@ -283,8 +283,8 @@ parse_dictionary ()
 
 	# Skip identity rules.
 	if [ "$word" = "$replacement" ]; then
-	    words[$i]=""
-	    replacements[$i]=""
+	    words[i]=""
+	    replacements[i]=""
 	fi
 
 	i=$((i + 1))
@@ -296,7 +296,7 @@ print_dictionary ()
     local i word replacement
     i=0
     for word in "${words[@]}"; do
-	replacement=${replacements[$i]}
+	replacement=${replacements[i]}
 	i=$((i + 1))
 
 	if [ "$word" == "" ]; then
@@ -519,7 +519,7 @@ main ()
     local i word replacement
     i=0
     for word in "${words[@]}"; do
-	replacement=${replacements[$i]}
+	replacement=${replacements[i]}
 	i=$((i + 1))
 
 	if [ "$word" = "" ]; then
