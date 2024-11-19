@@ -182,14 +182,6 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
       return NULL;
     }
 
-  if (address == 0 && length != 0)
-    {
-      PyErr_SetString (gdbpy_gdb_memory_error,
-		       _("Cannot create a lazy string with address 0x0, " \
-			 "and a non-zero length."));
-      return NULL;
-    }
-
   if (!type)
     {
       PyErr_SetString (PyExc_RuntimeError,
@@ -216,6 +208,23 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 	  }
 	break;
       }
+
+    case TYPE_CODE_PTR:
+      if (address == 0)
+	{
+	  if (length > 0)
+	    {
+	      PyErr_SetString (gdbpy_gdb_memory_error,
+			       _("Cannot create a lazy string with address 0x0, " \
+				 "and a non-zero length."));
+	      return nullptr;
+	    }
+	  length = 0;
+	}
+      break;
+
+    default:
+      gdb_assert_not_reached ("invalid type in gdbpy_create_lazy_string_object");
     }
 
   str_obj = PyObject_New (lazy_string_object, &lazy_string_object_type);
