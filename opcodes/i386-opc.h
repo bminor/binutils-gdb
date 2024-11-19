@@ -227,6 +227,8 @@ enum i386_cpu
   CpuLKGS,
   /* Intel USER_MSR Instruction support required.  */
   CpuUSER_MSR,
+  /* Intel MSR_IMM Instructions support required.  */
+  CpuMSR_IMM,
   /* Intel AVX10.2 Instructions support required.  */
   CpuAVX10_2,
   /* mwaitx instruction required */
@@ -482,6 +484,7 @@ typedef union i386_cpu_flags
       unsigned int cpufred:1;
       unsigned int cpulkgs:1;
       unsigned int cpuuser_msr:1;
+      unsigned int cpumsr_imm:1;
       unsigned int cpuavx10_2:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;

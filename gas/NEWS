@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the x86 Intel MSR_IMM instructions.
+
 * Add support for the x86 Zhaoxin GMI instructions.
 
 * On x86 emulation support (for secondary targets) was dropped.

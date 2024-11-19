@@ -281,6 +281,8 @@ static const dependency isa_dependencies[] =
     "64" },
   { "USER_MSR",
     "64" },
+  { "MSR_IMM",
+    "64" },
   { "APX_F",
     "XSAVE|64" },
 };
@@ -406,6 +408,7 @@ static bitfield cpu_flags[] =
   BITFIELD (FRED),
   BITFIELD (LKGS),
   BITFIELD (USER_MSR),
+  BITFIELD (MSR_IMM),
   BITFIELD (APX_F),
   BITFIELD (AVX10_2),
   BITFIELD (MWAITX),

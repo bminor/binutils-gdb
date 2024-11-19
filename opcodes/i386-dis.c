@@ -902,6 +902,7 @@ enum
   REG_VEX_0FAE,
   REG_VEX_0F3849_X86_64_L_0_W_0_M_1_P_0,
   REG_VEX_0F38F3_L_0_P_0,
+  REG_VEX_MAP7_F6_L_0_W_0,
   REG_VEX_MAP7_F8_L_0_W_0,
 
   REG_XOP_09_01_L_0,
@@ -1151,6 +1152,7 @@ enum
   PREFIX_VEX_0F38F6_L_0,
   PREFIX_VEX_0F38F7_L_0,
   PREFIX_VEX_0F3AF0_L_0,
+  PREFIX_VEX_MAP7_F6_L_0_W_0_R_0_X86_64,
   PREFIX_VEX_MAP7_F8_L_0_W_0_R_0_X86_64,
 
   PREFIX_EVEX_0F5B,
@@ -1318,6 +1320,7 @@ enum
   X86_64_VEX_0F386C,
   X86_64_VEX_0F38Ex,
 
+  X86_64_VEX_MAP7_F6_L_0_W_0_R_0,
   X86_64_VEX_MAP7_F8_L_0_W_0_R_0,
 };
 
@@ -1432,6 +1435,7 @@ enum
   VEX_LEN_0F3ADE_W_0,
   VEX_LEN_0F3ADF,
   VEX_LEN_0F3AF0,
+  VEX_LEN_MAP7_F6,
   VEX_LEN_MAP7_F8,
   VEX_LEN_XOP_08_85,
   VEX_LEN_XOP_08_86,
@@ -1593,6 +1597,7 @@ enum
   VEX_W_0F3ACE,
   VEX_W_0F3ACF,
   VEX_W_0F3ADE,
+  VEX_W_MAP7_F6_L_0,
   VEX_W_MAP7_F8_L_0,
 
   VEX_W_XOP_08_85_L_0,
@@ -2958,6 +2963,10 @@ static const struct dis386 reg_table[][8] = {
     { "%NFblsmskS",		{ VexGdq, Edq }, 0 },
     { "%NFblsiS",		{ VexGdq, Edq }, 0 },
   },
+  /* REG_VEX_MAP7_F6_L_0_W_0 */
+  {
+    { X86_64_TABLE (X86_64_VEX_MAP7_F6_L_0_W_0_R_0) },
+  },
   /* REG_VEX_MAP7_F8_L_0_W_0 */
   {
     { X86_64_TABLE (X86_64_VEX_MAP7_F8_L_0_W_0_R_0) },
@@ -4166,12 +4175,20 @@ static const struct dis386 prefix_table[][4] = {
     { "%XErorxS",		{ Gdq, Edq, Ib }, 0 },
   },
 
+  /* PREFIX_VEX_MAP7_F6_L_0_W_0_R_0_X86_64 */
+  {
+    { Bad_Opcode },
+    { "wrmsrns",	{ Skip_MODRM, Id, Rq }, 0 },
+    { Bad_Opcode },
+    { "rdmsr",		{ Rq, Id }, 0 },
+  },
+
   /* PREFIX_VEX_MAP7_F8_L_0_W_0_R_0_X86_64 */
   {
     { Bad_Opcode },
-    { "uwrmsr", { Skip_MODRM, Id, Rq }, 0 },
+    { "uwrmsr",	{ Skip_MODRM, Id, Rq }, 0 },
     { Bad_Opcode },
-    { "urdmsr", { Rq, Id }, 0 },
+    { "urdmsr",	{ Rq, Id }, 0 },
   },
 
 #include "i386-dis-evex-prefix.h"
@@ -4528,6 +4545,12 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { Bad_Opcode },
     { "%XEcmp%CCxadd", { Mdq, Gdq, VexGdq }, PREFIX_DATA },
+  },
+
+  /* X86_64_VEX_MAP7_F6_L_0_W_0_R_0 */
+  {
+    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_VEX_MAP7_F6_L_0_W_0_R_0_X86_64) },
   },
 
   /* X86_64_VEX_MAP7_F8_L_0_W_0_R_0 */
@@ -7287,6 +7310,11 @@ static const struct dis386 vex_len_table[][2] = {
     { PREFIX_TABLE (PREFIX_VEX_0F3AF0_L_0) },
   },
 
+  /* VEX_LEN_MAP7_F6 */
+  {
+    { VEX_W_TABLE (VEX_W_MAP7_F6_L_0) },
+  },
+
   /* VEX_LEN_MAP7_F8 */
   {
     { VEX_W_TABLE (VEX_W_MAP7_F8_L_0) },
@@ -7897,6 +7925,10 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F3ADE */
     { VEX_LEN_TABLE (VEX_LEN_0F3ADE_W_0) },
+  },
+  {
+    /* VEX_W_MAP7_F6_L_0 */
+    { REG_TABLE (REG_VEX_MAP7_F6_L_0_W_0) },
   },
   {
     /* VEX_W_MAP7_F8_L_0 */
@@ -8643,6 +8675,7 @@ static const struct dis386 bad_opcode = { "(bad)", { XX }, 0 };
 /* Fetch error indicator.  */
 static const struct dis386 err_opcode = { NULL, { XX }, 0 };
 
+static const struct dis386 map7_f6_opcode = { VEX_LEN_TABLE (VEX_LEN_MAP7_F6) };
 static const struct dis386 map7_f8_opcode = { VEX_LEN_TABLE (VEX_LEN_MAP7_F8) };
 
 /* Get a pointer to struct dis386 with a valid name.  */
@@ -8956,6 +8989,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       ins->condition_code = vindex & 0xf;
       if (vex_table_index != VEX_MAP7)
 	dp = &vex_table[vex_table_index][vindex];
+      else if (vindex == 0xf6)
+	dp = &map7_f6_opcode;
       else if (vindex == 0xf8)
 	dp = &map7_f8_opcode;
       else
@@ -9117,6 +9152,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	dp = &evex_table[vex_table_index][vindex];
       else if (vindex == 0xf8)
 	dp = &map7_f8_opcode;
+      else if (vindex == 0xf6)
+	dp = &map7_f6_opcode;
       else
 	dp = &bad_opcode;
       ins->end_codep = ins->codep;

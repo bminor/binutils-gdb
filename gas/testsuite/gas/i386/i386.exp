@@ -520,6 +520,7 @@ if [gas_32_check] then {
     run_dump_test "sm4-intel"
     run_list_test "pbndkb-inval"
     run_list_test "user_msr-inval"
+    run_list_test "msr_imm-inval"
     run_list_test "apx-push2pop2-inval"
     run_dump_test "avx10_2-rounding"
     run_dump_test "avx10_2-rounding-intel"

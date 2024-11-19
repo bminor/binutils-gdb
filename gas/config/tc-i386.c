@@ -1221,6 +1221,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (apx_f, APX_F, APX_F, false),
   VECARCH (avx10.2, AVX10_2, ANY_AVX10_2, set),
   SUBARCH (gmi, GMI, GMI, false),
+  SUBARCH (msr_imm, MSR_IMM, MSR_IMM, false),
 };
 
 #undef SUBARCH
@@ -2233,7 +2234,8 @@ cpu_flags_match (const insn_template *t)
 	  && (any.bitfield.cpubmi || any.bitfield.cpubmi2
 	      || any.bitfield.cpuavx512f || any.bitfield.cpuavx512bw
 	      || any.bitfield.cpuavx512dq || any.bitfield.cpuamx_tile
-	      || any.bitfield.cpucmpccxadd || any.bitfield.cpuuser_msr))
+	      || any.bitfield.cpucmpccxadd || any.bitfield.cpuuser_msr
+	      || any.bitfield.cpumsr_imm))
 	{
 	  /* These checks (verifying that APX_F() was properly used in the
 	     opcode table entry) make sure there's no need for an "else" to
@@ -4037,7 +4039,8 @@ install_template (const insn_template *t)
       if ((maybe_cpu (t, CpuCMPCCXADD) || maybe_cpu (t, CpuAMX_TILE)
 	   || maybe_cpu (t, CpuAVX512F) || maybe_cpu (t, CpuAVX512DQ)
 	   || maybe_cpu (t, CpuAVX512BW) || maybe_cpu (t, CpuBMI)
-	   || maybe_cpu (t, CpuBMI2) || maybe_cpu (t, CpuUSER_MSR))
+	   || maybe_cpu (t, CpuBMI2) || maybe_cpu (t, CpuUSER_MSR)
+	   || maybe_cpu (t, CpuMSR_IMM))
 	  && maybe_cpu (t, CpuAPX_F))
 	{
 	  if (need_evex_encoding (t))
@@ -6990,18 +6993,20 @@ i386_assemble (char *line)
      because of the swapping above) in the incoming set of operands.  */
   if ((i.imm_operands == 2
        && (t->mnem_off == MN_extrq || t->mnem_off == MN_insertq))
-      || (t->mnem_off == MN_uwrmsr && i.imm_operands
-	  && i.operands > i.imm_operands))
+      || ((t->mnem_off == MN_uwrmsr || t->mnem_off == MN_wrmsrns)
+	  && i.imm_operands && i.operands > i.imm_operands))
       swap_2_operands (0, 1);
 
   if (i.imm_operands)
     {
-      /* For USER_MSR instructions, imm32 stands for the name of an model specific
-	 register (MSR). That's an unsigned quantity, whereas all other insns with
-	 32-bit immediate and 64-bit operand size use sign-extended
-	 immediates (imm32s). Therefore these insns are special-cased, bypassing
-	 the normal handling of immediates here.  */
-      if (is_cpu(current_templates.start, CpuUSER_MSR))
+      /* For USER_MSR and MSR_IMM instructions, imm32 stands for the name of a
+	 model specific register (MSR). That's an unsigned quantity, whereas all
+	 other insns with 32-bit immediate and 64-bit operand size use
+	 sign-extended immediates (imm32s). Therefore these insns are
+	 special-cased, bypassing the normal handling of immediates here.  */
+      if (is_cpu(current_templates.start, CpuUSER_MSR)
+	  || t->mnem_off == MN_rdmsr
+	  || t->mnem_off == MN_wrmsrns)
 	{
 	  for (j = 0; j < i.operands; j++)
 	    {
