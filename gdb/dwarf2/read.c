@@ -11343,6 +11343,28 @@ dwarf2_die_base_address (struct die_info *die, struct block *block,
   return {};
 }
 
+/* Return true if ADDR is within any of the ranges covered by BLOCK.  If
+   there are no sub-ranges then just check against the block's start and
+   end addresses, otherwise, check each sub-range covered by the block.  */
+
+static bool
+dwarf2_addr_in_block_ranges (CORE_ADDR addr, struct block *block)
+{
+  if (block->ranges ().size () == 0)
+    return addr >= block->start () && addr < block->end ();
+
+  /* Check if ADDR is within any of the block's sub-ranges.  */
+  for (const blockrange &br : block->ranges ())
+    {
+      if (addr >= br.start () && addr < br.end ())
+	return true;
+    }
+
+  /* ADDR is not within any of the block's sub-ranges.  */
+  return false;
+}
+
+
 /* Set the entry PC for BLOCK which represents DIE from CU.  Relies on the
    range information (if present) already having been read from DIE and
    stored into BLOCK.  */
@@ -11403,7 +11425,7 @@ dwarf2_record_block_entry_pc (struct die_info *die, struct block *block,
 
 	 To avoid this, ignore entry-pc values that are outside the block's
 	 range, GDB will then select a suitable default entry-pc.  */
-      if (entry_pc >= block->start () && entry_pc < block->end ())
+      if (dwarf2_addr_in_block_ranges (entry_pc, block))
 	block->set_entry_pc (entry_pc);
       else
 	complaint (_("in %s, DIE %s, DW_AT_entry_pc (%s) outside "
