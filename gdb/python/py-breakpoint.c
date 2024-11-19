@@ -1690,7 +1690,7 @@ bplocpy_get_thread_groups (PyObject *py_self, void *closure)
 	  gdbpy_ref<> num = gdb_py_object_from_ulongest (inf->num);
 	  if (num == nullptr)
 	    return nullptr;
-	  if (PyList_Append (list.get (), num.release ()) != 0)
+	  if (PyList_Append (list.get (), num.get ()) != 0)
 	    return nullptr;
 	}
     }
