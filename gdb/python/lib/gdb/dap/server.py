@@ -59,7 +59,9 @@ class NotStoppedException(Exception):
 class CancellationHandler:
     def __init__(self):
         # Methods on this class acquire this lock before proceeding.
-        self.lock = threading.Lock()
+        # A recursive lock is used to simplify the 'check_cancel'
+        # callers.
+        self.lock = threading.RLock()
         # The request currently being handled, or None.
         self.in_flight_dap_thread = None
         self.in_flight_gdb_thread = None
@@ -72,10 +74,22 @@ class CancellationHandler:
         try:
             with self.lock:
                 self.in_flight_dap_thread = req
+            # Note we do not call check_cancel here.  This is a bit of
+            # a hack, but it's because the direct callers of this
+            # aren't prepared for a KeyboardInterrupt.
             yield
         finally:
             with self.lock:
                 self.in_flight_dap_thread = None
+
+    def check_cancel(self, req):
+        """Check whether request REQ is cancelled.
+        If so, raise KeyboardInterrupt."""
+        with self.lock:
+            # If the request is cancelled, don't execute the region.
+            while len(self.reqs) > 0 and self.reqs[0] <= req:
+                if heapq.heappop(self.reqs) == req:
+                    raise KeyboardInterrupt()
 
     def cancel(self, req):
         """Call to cancel a request.
@@ -88,7 +102,7 @@ class CancellationHandler:
                 gdb.interrupt()
             else:
                 # We don't actually ignore the request here, but in
-                # the 'starting' method.  This way we don't have to
+                # the 'check_cancel' method.  This way we don't have to
                 # track as much state.  Also, this implementation has
                 # the weird property that a request can be cancelled
                 # before it is even sent.  It didn't seem worthwhile
@@ -105,10 +119,7 @@ class CancellationHandler:
             return
         try:
             with self.lock:
-                # If the request is cancelled, don't execute the region.
-                while len(self.reqs) > 0 and self.reqs[0] <= req:
-                    if heapq.heappop(self.reqs) == req:
-                        raise KeyboardInterrupt()
+                self.check_cancel(req)
                 # Request is being handled by the gdb thread.
                 self.in_flight_gdb_thread = req
             # Execute region.  This may be interrupted by gdb.interrupt.
@@ -152,6 +163,7 @@ class Server:
             "command": params["command"],
         }
         try:
+            self.canceller.check_cancel(req)
             if "arguments" in params:
                 args = params["arguments"]
             else:
