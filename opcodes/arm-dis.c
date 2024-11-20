@@ -5280,7 +5280,7 @@ is_mve_okay_in_it (enum mve_instructions matched_insn)
 }
 
 static bool
-is_mve_architecture (struct disassemble_info *info)
+is_v81m_architecture (struct disassemble_info *info)
 {
   struct arm_private_data *private_data = info->private_data;
   arm_feature_set allowed_arches = private_data->features;
@@ -10999,6 +10999,14 @@ psr_name (int regno)
     case 0x12: return "BASEPRI_MAX";
     case 0x13: return "FAULTMASK";
     case 0x14: return "CONTROL";
+    case 0x20: return "PAC_KEY_P_0";
+    case 0x21: return "PAC_KEY_P_1";
+    case 0x22: return "PAC_KEY_P_2";
+    case 0x23: return "PAC_KEY_P_3";
+    case 0x24: return "PAC_KEY_U_0";
+    case 0x25: return "PAC_KEY_U_1";
+    case 0x26: return "PAC_KEY_U_2";
+    case 0x27: return "PAC_KEY_U_3";
     case 0x88: return "MSP_NS";
     case 0x89: return "PSP_NS";
     case 0x8a: return "MSPLIM_NS";
@@ -11008,6 +11016,14 @@ psr_name (int regno)
     case 0x93: return "FAULTMASK_NS";
     case 0x94: return "CONTROL_NS";
     case 0x98: return "SP_NS";
+    case 0xa0: return "PAC_KEY_P_0_NS";
+    case 0xa1: return "PAC_KEY_P_1_NS";
+    case 0xa2: return "PAC_KEY_P_2_NS";
+    case 0xa3: return "PAC_KEY_P_3_NS";
+    case 0xa4: return "PAC_KEY_U_0_NS";
+    case 0xa5: return "PAC_KEY_U_1_NS";
+    case 0xa6: return "PAC_KEY_U_2_NS";
+    case 0xa7: return "PAC_KEY_U_3_NS";
     default: return "<unknown>";
     }
 }
@@ -11020,7 +11036,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
   const struct opcode32 *insn;
   void *stream = info->stream;
   fprintf_styled_ftype func = info->fprintf_styled_func;
-  bool is_mve = is_mve_architecture (info);
+  bool is_mve = is_v81m_architecture (info);
   enum disassembler_style base_style = dis_style_mnemonic;
   enum disassembler_style old_base_style = base_style;
 
@@ -11671,6 +11687,10 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		    if (given & 0x100)
 		      func (stream, dis_style_register, "c");
 		  }
+		else if (is_v81m_architecture (info))
+		  func (stream, dis_style_register, "%s",
+			psr_name (given & 0xff));
+
 		else if ((given & 0x20) == 0x20)
 		  {
 		    char const* name;
@@ -11694,8 +11714,11 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		break;
 
 	      case 'D':
-		if (((given & 0xff) == 0)
-		    || ((given & 0x20) == 0x20))
+		if (is_v81m_architecture (info))
+		  func (stream, dis_style_register, "%s",
+			psr_name (given & 0xff));
+		else if (((given & 0xff) == 0)
+			 || ((given & 0x20) == 0x20))
 		  {
 		    char const* name;
 		    unsigned sm = (given & 0xf0000) >> 16;
