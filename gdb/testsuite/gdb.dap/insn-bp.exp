@@ -39,6 +39,8 @@ if {[dap_initialize] == ""} {
     return
 }
 
+set launch_id [dap_launch $testfile]
+
 set obj [dap_check_request_and_response "set breakpoint on main" \
 	     setFunctionBreakpoints \
 	     {o breakpoints [a [o name [s main]]]}]
@@ -56,14 +58,12 @@ gdb_assert {[dict get $bp verified] == "false"} \
 
 dap_check_request_and_response "configurationDone" configurationDone
 
-if {[dap_launch $testfile] == ""} {
-    return
-}
-
 # The event we're looking for should occur during startup, but we want
 # to leave open the possibility that it occurs when waiting for the
-# stopped event.  So, keep both event lists around and search them
+# stopped event.  So, keep all event lists around and search them
 # once below.
+lassign [dap_check_response "launch response" launch $launch_id] \
+    unused objs0
 lassign [dap_wait_for_event_and_check "inferior started" \
 	     thread "body reason" started] \
     unused objs1
@@ -72,7 +72,7 @@ lassign [dap_wait_for_event_and_check "stopped at breakpoint" stopped \
 	    "body hitBreakpointIds" $fn_bpno] unused objs2
 
 set found_bp_event 0
-foreach obj [concat $objs1 $objs2] {
+foreach obj [concat $objs0 $objs1 $objs2] {
     if { [dict get $obj "type"] != "event" } {
 	continue
     }

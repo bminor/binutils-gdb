@@ -98,6 +98,12 @@
      the return value from the latest "stepOut" command, when
      appropriate.
 
+  ** The "launch" and "attach" requests were rewritten in accordance
+     with some clarifications to the spec.  Now they can be sent at
+     any time after the "initialized" event, but will not take effect
+     (or send a response) until after the "configurationDone" request
+     has been sent.
+
 * New commands
 
 show jit-reader-directory
