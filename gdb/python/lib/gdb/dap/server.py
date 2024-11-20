@@ -65,15 +65,17 @@ class CancellationHandler:
         self.in_flight_gdb_thread = None
         self.reqs = []
 
-    def starting(self, req):
-        """Call at the start of the given request."""
-        with self.lock:
-            self.in_flight_dap_thread = req
-
-    def done(self, req):
-        """Indicate that the request is done."""
-        with self.lock:
-            self.in_flight_dap_thread = None
+    @contextmanager
+    def current_request(self, req):
+        """Return a new context manager that registers that request
+        REQ has started."""
+        try:
+            with self.lock:
+                self.in_flight_dap_thread = req
+            yield
+        finally:
+            with self.lock:
+                self.in_flight_dap_thread = None
 
     def cancel(self, req):
         """Call to cancel a request.
@@ -150,7 +152,6 @@ class Server:
             "command": params["command"],
         }
         try:
-            self.canceller.starting(req)
             if "arguments" in params:
                 args = params["arguments"]
             else:
@@ -180,11 +181,6 @@ class Server:
             result["success"] = False
             result["message"] = str(e)
         return result
-
-    @in_dap_thread
-    def _handle_command_finish(self, params):
-        req = params["seq"]
-        self.canceller.done(req)
 
     # Read inferior output and sends OutputEvents to the client.  It
     # is run in its own thread.
@@ -243,9 +239,10 @@ class Server:
             # A None value here means the reader hit EOF.
             if cmd is None:
                 break
-            result = self._handle_command(cmd)
-            self._send_json(result)
-            self._handle_command_finish(cmd)
+            req = cmd["seq"]
+            with self.canceller.current_request(req):
+                result = self._handle_command(cmd)
+                self._send_json(result)
             fns = None
             with self.delayed_fns_lock:
                 fns = self.delayed_fns
