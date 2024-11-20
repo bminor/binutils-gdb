@@ -23855,6 +23855,14 @@ static const struct asm_psr v7m_psrs[] =
   {"basepri_max",  0x12}, {"BASEPRI_MAX",  0x12},
   {"faultmask",	   0x13}, {"FAULTMASK",	   0x13},
   {"control",	   0x14}, {"CONTROL",	   0x14},
+  {"pac_key_p_0",  0x20}, {"PAC_KEY_P_0",  0x20},
+  {"pac_key_p_1",  0x21}, {"PAC_KEY_P_1",  0x21},
+  {"pac_key_p_2",  0x22}, {"PAC_KEY_P_2",  0x22},
+  {"pac_key_p_3",  0x23}, {"PAC_KEY_P_3",  0x23},
+  {"pac_key_u_0",  0x24}, {"PAC_KEY_U_0",  0x24},
+  {"pac_key_u_1",  0x25}, {"PAC_KEY_U_1",  0x25},
+  {"pac_key_u_2",  0x26}, {"PAC_KEY_U_2",  0x26},
+  {"pac_key_u_3",  0x27}, {"PAC_KEY_U_3",  0x27},
   {"msp_ns",	   0x88}, {"MSP_NS",	   0x88},
   {"psp_ns",	   0x89}, {"PSP_NS",	   0x89},
   {"msplim_ns",	   0x8a}, {"MSPLIM_NS",	   0x8a},
@@ -23863,7 +23871,15 @@ static const struct asm_psr v7m_psrs[] =
   {"basepri_ns",   0x91}, {"BASEPRI_NS",   0x91},
   {"faultmask_ns", 0x93}, {"FAULTMASK_NS", 0x93},
   {"control_ns",   0x94}, {"CONTROL_NS",   0x94},
-  {"sp_ns",	   0x98}, {"SP_NS",	   0x98 }
+  {"sp_ns",	   0x98}, {"SP_NS",	   0x98},
+  {"pac_key_p_0_ns",  0xa0}, {"PAC_KEY_P_0_NS",  0xa0},
+  {"pac_key_p_1_ns",  0xa1}, {"PAC_KEY_P_1_NS",  0xa1},
+  {"pac_key_p_2_ns",  0xa2}, {"PAC_KEY_P_2_NS",  0xa2},
+  {"pac_key_p_3_ns",  0xa3}, {"PAC_KEY_P_3_NS",  0xa3},
+  {"pac_key_u_0_ns",  0xa4}, {"PAC_KEY_U_0_NS",  0xa4},
+  {"pac_key_u_1_ns",  0xa5}, {"PAC_KEY_U_1_NS",  0xa5},
+  {"pac_key_u_2_ns",  0xa6}, {"PAC_KEY_U_2_NS",  0xa6},
+  {"pac_key_u_3_ns",  0xa7}, {"PAC_KEY_U_3_NS",  0xa7},
 };
 
 /* Table of all shift-in-operand names.	 */
