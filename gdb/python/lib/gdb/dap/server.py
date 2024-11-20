@@ -124,9 +124,9 @@ class Server:
         self.in_stream = in_stream
         self.out_stream = out_stream
         self.child_stream = child_stream
-        self.delayed_events_lock = threading.Lock()
+        self.delayed_fns_lock = threading.Lock()
         self.defer_stop_events = False
-        self.delayed_events = []
+        self.delayed_fns = []
         # This queue accepts JSON objects that are then sent to the
         # DAP client.  Writing is done in a separate thread to avoid
         # blocking the read loop.
@@ -246,13 +246,13 @@ class Server:
             result = self._handle_command(cmd)
             self._send_json(result)
             self._handle_command_finish(cmd)
-            events = None
-            with self.delayed_events_lock:
-                events = self.delayed_events
-                self.delayed_events = []
+            fns = None
+            with self.delayed_fns_lock:
+                fns = self.delayed_fns
+                self.delayed_fns = []
                 self.defer_stop_events = False
-            for event, body in events:
-                self.send_event(event, body)
+            for fn in fns:
+                fn()
         # Got the terminate request.  This is handled by the
         # JSON-writing thread, so that we can ensure that all
         # responses are flushed to the client before exiting.
@@ -264,8 +264,8 @@ class Server:
     def send_event_later(self, event, body=None):
         """Send a DAP event back to the client, but only after the
         current request has completed."""
-        with self.delayed_events_lock:
-            self.delayed_events.append((event, body))
+        with self.delayed_fns_lock:
+            self.delayed_fns.append(lambda: self.send_event(event, body))
 
     @in_gdb_thread
     def send_event_maybe_later(self, event, body=None):
@@ -275,9 +275,9 @@ class Server:
         the client."""
         with self.canceller.lock:
             if self.canceller.in_flight_dap_thread:
-                with self.delayed_events_lock:
+                with self.delayed_fns_lock:
                     if self.defer_stop_events:
-                        self.delayed_events.append((event, body))
+                        self.delayed_fns.append(lambda: self.send_event(event, body))
                         return
         self.send_event(event, body)
 
