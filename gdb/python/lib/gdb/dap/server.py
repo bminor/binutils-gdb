@@ -47,6 +47,52 @@ _commands = {}
 _server = None
 
 
+class DeferredRequest:
+    """If a DAP request function returns a deferred request, no
+    response is sent immediately.
+
+    Instead, request processing continues, with this particular
+    request remaining un-replied-to.
+
+    Later, when the result is available, the deferred request can be
+    scheduled.  This causes 'invoke' to be called and then the
+    response to be sent to the client.
+
+    """
+
+    # This is for internal use by the server.  It should not be
+    # overridden by any subclass.  This adds the request ID and the
+    # result template object to this object.  These are then used
+    # during rescheduling.
+    def set_request(self, req, result):
+        self._req = req
+        self._result = result
+
+    @in_dap_thread
+    def invoke(self):
+        """Implement the deferred request.
+
+        This will be called from 'reschedule' (and should not be
+        called elsewhere).  It should return the 'body' that will be
+        sent in the response.  None means no 'body' field will be set.
+
+        Subclasses must override this.
+
+        """
+        pass
+
+    @in_dap_thread
+    def reschedule(self):
+        """Call this to reschedule this deferred request.
+
+        This will call 'invoke' after the appropriate bookkeeping and
+        will arrange for its result to be reported to the client.
+
+        """
+        with _server.canceller.current_request(self._req):
+            _server.invoke_request(self._req, self._result, self.invoke)
+
+
 # A subclass of Exception that is used solely for reporting that a
 # request needs the inferior to be stopped, but it is not stopped.
 class NotStoppedException(Exception):
@@ -66,6 +112,9 @@ class CancellationHandler:
         self.in_flight_dap_thread = None
         self.in_flight_gdb_thread = None
         self.reqs = []
+        # A set holding the request IDs of all deferred requests that
+        # are still unresolved.
+        self.deferred_ids = set()
 
     @contextmanager
     def current_request(self, req):
@@ -82,14 +131,52 @@ class CancellationHandler:
             with self.lock:
                 self.in_flight_dap_thread = None
 
+    def defer_request(self, req):
+        """Indicate that the request REQ has been deferred."""
+        with self.lock:
+            self.deferred_ids.add(req)
+
+    def request_finished(self, req):
+        """Indicate that the request REQ is finished.
+
+        It doesn't matter whether REQ succeeded or failed, only that
+        processing for it is done.
+
+        """
+        with self.lock:
+            # Use discard here, not remove, because this is called
+            # regardless of whether REQ was deferred.
+            self.deferred_ids.discard(req)
+
     def check_cancel(self, req):
         """Check whether request REQ is cancelled.
         If so, raise KeyboardInterrupt."""
         with self.lock:
-            # If the request is cancelled, don't execute the region.
-            while len(self.reqs) > 0 and self.reqs[0] <= req:
-                if heapq.heappop(self.reqs) == req:
-                    raise KeyboardInterrupt()
+            # We want to drop any cancellations that come before REQ,
+            # but keep ones for any deferred requests that are still
+            # unresolved.  This holds any such requests that were
+            # popped during the loop.
+            deferred = []
+            try:
+                # If the request is cancelled, don't execute the region.
+                while len(self.reqs) > 0 and self.reqs[0] <= req:
+                    # In most cases, if we see a cancellation request
+                    # on the heap that is before REQ, we can just
+                    # ignore it -- we missed our chance to cancel that
+                    # request.
+                    next_id = heapq.heappop(self.reqs)
+                    if next_id == req:
+                        raise KeyboardInterrupt()
+                    elif next_id in self.deferred_ids:
+                        # We could be in a situation where we're
+                        # processing request 23, but request 18 is
+                        # still deferred.  In this case, popping
+                        # request 18 here will lose the cancellation.
+                        # So, we preserve it.
+                        deferred.append(next_id)
+            finally:
+                for x in deferred:
+                    heapq.heappush(self.reqs, x)
 
     def cancel(self, req):
         """Call to cancel a request.
@@ -152,27 +239,27 @@ class Server:
         global _server
         _server = self
 
-    # Treat PARAMS as a JSON-RPC request and perform its action.
-    # PARAMS is just a dictionary from the JSON.
+    # A helper for request processing.  REQ is the request ID.  RESULT
+    # is a result "template" -- a dictionary with a few items already
+    # filled in.  This helper calls FN and then fills in the remaining
+    # parts of RESULT, as needed.  If FN returns an ordinary result,
+    # or if it fails, then the final RESULT is sent as a response to
+    # the client.  However, if FN returns a DeferredRequest, then that
+    # request is updated (see DeferredRequest.set_request) and no
+    # response is sent.
     @in_dap_thread
-    def _handle_command(self, params):
-        req = params["seq"]
-        result = {
-            "request_seq": req,
-            "type": "response",
-            "command": params["command"],
-        }
+    def invoke_request(self, req, result, fn):
         try:
             self.canceller.check_cancel(req)
-            if "arguments" in params:
-                args = params["arguments"]
-            else:
-                args = {}
-            global _commands
-            body = _commands[params["command"]](**args)
-            if body is not None:
-                result["body"] = body
+            fn_result = fn()
             result["success"] = True
+            if isinstance(fn_result, DeferredRequest):
+                fn_result.set_request(req, result)
+                self.canceller.defer_request(req)
+                # Do not send a response.
+                return
+            elif fn_result is not None:
+                result["body"] = fn_result
         except NotStoppedException:
             # This is an expected exception, and the result is clearly
             # visible in the log, so do not log it.
@@ -192,7 +279,33 @@ class Server:
             log_stack()
             result["success"] = False
             result["message"] = str(e)
-        return result
+
+        self.canceller.request_finished(req)
+        # We have a response for the request, so send it back to the
+        # client.
+        self._send_json(result)
+
+    # Treat PARAMS as a JSON-RPC request and perform its action.
+    # PARAMS is just a dictionary from the JSON.
+    @in_dap_thread
+    def _handle_command(self, params):
+        req = params["seq"]
+        result = {
+            "request_seq": req,
+            "type": "response",
+            "command": params["command"],
+        }
+
+        if "arguments" in params:
+            args = params["arguments"]
+        else:
+            args = {}
+
+        def fn():
+            global _commands
+            return _commands[params["command"]](**args)
+
+        self.invoke_request(req, result, fn)
 
     # Read inferior output and sends OutputEvents to the client.  It
     # is run in its own thread.
@@ -253,8 +366,7 @@ class Server:
                 break
             req = cmd["seq"]
             with self.canceller.current_request(req):
-                result = self._handle_command(cmd)
-                self._send_json(result)
+                self._handle_command(cmd)
             fns = None
             with self.delayed_fns_lock:
                 fns = self.delayed_fns
