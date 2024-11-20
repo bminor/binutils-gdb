@@ -281,6 +281,12 @@ class Server:
                         return
         self.send_event(event, body)
 
+    @in_dap_thread
+    def call_function_later(self, fn):
+        """Call FN later -- after the current request's response has been sent."""
+        with self.delayed_fns_lock:
+            self.delayed_fns.append(fn)
+
     # Note that this does not need to be run in any particular thread,
     # because it just creates an object and writes it to a thread-safe
     # queue.
@@ -319,6 +325,12 @@ def send_event_maybe_later(event, body=None):
     the client."""
     global _server
     _server.send_event_maybe_later(event, body)
+
+
+def call_function_later(fn):
+    """Call FN later -- after the current request's response has been sent."""
+    global _server
+    _server.call_function_later(fn)
 
 
 # A helper decorator that checks whether the inferior is running.
