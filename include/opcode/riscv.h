@@ -554,6 +554,9 @@ enum riscv_insn_class
   INSN_CLASS_XVENTANACONDOPS,
   INSN_CLASS_XSFVCP,
   INSN_CLASS_XSFCEASE,
+  INSN_CLASS_XSFVQMACCQOQ,
+  INSN_CLASS_XSFVQMACCDOD,
+  INSN_CLASS_XSFVFNRCLIPXFQF,
 };
 
 /* This structure holds information for a particular instruction.  */

@@ -37,3 +37,28 @@
 	.option arch, +xsfcease1p0
 	sf.cease
 	.option pop
+
+	# xsfvqmaccqoq
+	.option push
+	.option arch, +xsfvqmaccqoq
+	sf.vqmaccu.4x8x4 v4, v8, v12
+	sf.vqmacc.4x8x4 v4, v8, v12
+	sf.vqmaccus.4x8x4 v4, v8, v12
+	sf.vqmaccsu.4x8x4 v4, v8, v12
+	.option pop
+
+	# xsfvqmaccdod
+	.option push
+	.option arch, +xsfvqmaccdod
+	sf.vqmaccu.2x8x2 v4, v8, v12
+	sf.vqmacc.2x8x2 v4, v8, v12
+	sf.vqmaccus.2x8x2 v4, v8, v12
+	sf.vqmaccsu.2x8x2 v4, v8, v12
+	.option pop
+
+	# xsfvfnrclipxfqf
+	.option push
+	.option arch, +xsfvfnrclipxfqf
+	sf.vfnrclip.xu.f.qf v4, v8, f12
+	sf.vfnrclip.x.f.qf  v4, v8, f12
+	.option pop

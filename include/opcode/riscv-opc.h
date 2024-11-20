@@ -3745,6 +3745,28 @@
 /* Vendor-specific (SiFive) cease instruction.  */
 #define MATCH_SF_CEASE 0x30500073
 #define MASK_SF_CEASE 0xffffffff
+/* SiFive custom int8 matrix-multiply instruction.  */
+#define MATCH_SFVQMACCU4X8X4 0xf200205b
+#define MASK_SFVQMACCU4X8X4 0xfe00707f
+#define MATCH_SFVQMACC4X8X4 0xf600205b
+#define MASK_SFVQMACC4X8X4 0xfe00707f
+#define MATCH_SFVQMACCUS4X8X4 0xfa00205b
+#define MASK_SFVQMACCUS4X8X4 0xfe00707f
+#define MATCH_SFVQMACCSU4X8X4 0xfe00205b
+#define MASK_SFVQMACCSU4X8X4 0xfe00707f
+#define MATCH_SFVQMACCU2X8X2 0xb200205b
+#define MASK_SFVQMACCU2X8X2 0xfe00707f
+#define MATCH_SFVQMACC2X8X2 0xb600205b
+#define MASK_SFVQMACC2X8X2 0xfe00707f
+#define MATCH_SFVQMACCUS2X8X2 0xba00205b
+#define MASK_SFVQMACCUS2X8X2 0xfe00707f
+#define MATCH_SFVQMACCSU2X8X2 0xbe00205b
+#define MASK_SFVQMACCSU2X8X2 0xfe00707f
+/* FP32-to-int8 Ranged Clip Instructions (Xsfvfnrclipxfqf).  */
+#define MATCH_SFVFNRCLIPXUFQF 0x8a00505b
+#define MASK_SFVFNRCLIPXUFQF 0xfe00707f
+#define MATCH_SFVFNRCLIPXFQF 0x8e00505b
+#define MASK_SFVFNRCLIPXFQF 0xfe00707f
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
