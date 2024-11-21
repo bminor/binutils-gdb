@@ -193,6 +193,18 @@ stpy_get_producer (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+/* Getter function for Symtab.compunit.  */
+
+static PyObject *
+stpy_get_compunit (PyObject *self, void *closure)
+{
+  struct symtab *symtab = nullptr;
+
+  STPY_REQUIRE_VALID (self, symtab);
+
+  return compunit_to_compunit_object (symtab->compunit ()).release ();
+}
+
 static PyObject *
 stpy_fullname (PyObject *self, PyObject *args)
 {
@@ -533,6 +545,8 @@ static gdb_PyGetSetDef symtab_object_getset[] = {
     NULL },
   { "producer", stpy_get_producer, NULL,
     "The name/version of the program that compiled this symtab.", NULL },
+  { "compunit", stpy_get_compunit, nullptr,
+    "The compunit this symtab belongs to.", nullptr },
   {NULL}  /* Sentinel */
 };
 

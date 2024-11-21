@@ -220,6 +220,7 @@ optional arguments while skipping others.  Example:
 * Blocks In Python::            Accessing blocks from Python.
 * Symbols In Python::           Python representation of symbols.
 * Symbol Tables In Python::     Python representation of symbol tables.
+* Compunits In Python::         Python representation of compunits.
 * Line Tables In Python::       Python representation of line tables.
 * Breakpoints In Python::       Manipulating breakpoints using Python.
 * Finish Breakpoints in Python:: Setting Breakpoints on function return
@@ -5691,6 +5692,11 @@ Like @code{Objfile.lookup_global_symbol}, but searches for a global
 symbol with static linkage named @var{name} in this objfile.
 @end defun
 
+@defun Objfile.compunits ()
+Return a sequence of all the compunits associated with this objfile.
+@xref{Compunits In Python}.
+@end defun
+
 @node Frames In Python
 @subsubsection Accessing inferior stack frames from Python
 
@@ -6041,6 +6047,11 @@ For ordinary function blocks, the superblock is the static block.
 However, you should note that it is possible for a function block to
 have a superblock that is not the static block -- for instance this
 happens for an inlined function.
+@end defvar
+
+@defvar Block.compunit
+The compunit containing this block.  @xref{Compunits In Python}.
+This attribute is not writable.
 @end defvar
 
 @defvar Block.superblock
@@ -6471,6 +6482,11 @@ If no producer information is available then @code{None} is returned.
 This attribute is not writable.
 @end defvar
 
+@defvar Symtab.compunit
+The compunit this symbol table belongs to.  @xref{Compunits In Python}.
+This attribute is not writable.
+@end defvar
+
 A @code{gdb.Symtab} object has the following methods:
 
 @defun Symtab.is_valid ()
@@ -6498,6 +6514,59 @@ Return the static block of the underlying symbol table.
 @defun Symtab.linetable ()
 Return the line table associated with the symbol table.
 @xref{Line Tables In Python}.
+@end defun
+
+@node Compunits In Python
+@subsubsection Compunits representation in Python
+
+@cindex compunits in python
+@tindex gdb.Compunit
+
+Access to compunits maintained by @value{GDBN} on objfiles
+is exposed to Python via @code{gdb.Compunit}.  Compunit for a symbol table can
+be accessed via @code{compunit} property of @code{gdb.Symtab} object.
+@xref{Symbol Tables In Python}.  Method @code{compunits} of
+@code{gdb.Objfile} can be used to get a list of all compunits belonging to
+that objfile.  @xref{Objfiles In Python}.
+
+A @code{gdb.Compunit} object has the following attributes:
+
+@defvar Compunit.objfile
+The compunits' backing object file.  @xref{Objfiles In Python}.
+This attribute is not writable.
+@end defvar
+
+@defvar Compunit.producer
+The name and possibly version number of the program that
+compiled the code in the compunit.
+The contents of this string is up to the compiler.
+If no producer information is available then @code{None} is returned.
+This attribute is not writable.
+@end defvar
+
+@defvar Compunit.symtabs
+The list of symbol tables associated with this compunit.
+@xref{Symbol Tables In Python}.  This attribute is not writable.
+@end defvar
+
+A @code{gdb.Compunit} object has the following methods:
+
+@defun Compunit.is_valid ()
+Returns @code{True} if the @code{gdb.Compunit} object is valid,
+@code{False} if not.  A @code{gdb.Compunit} object can become invalid if
+the compunit it refers to does not exist in @value{GDBN} any
+longer.  All other @code{gdb.Compunit} methods will throw an exception
+if it is invalid at the time the method is called.
+@end defun
+
+@defun Compunit.global_block ()
+Return the global block of the underlying compunit.
+@xref{Blocks In Python}.
+@end defun
+
+@defun Compunit.static_block ()
+Return the static block of the underlying compunit.
+@xref{Blocks In Python}.
 @end defun
 
 @node Line Tables In Python

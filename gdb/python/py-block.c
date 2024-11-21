@@ -215,6 +215,19 @@ blpy_get_static_block (PyObject *self, void *closure)
   return block_to_block_object (static_block, self_obj->objfile);
 }
 
+/* Getter function for Block.compunit.  */
+
+static PyObject *
+blpy_get_compunit (PyObject *self, void *closure)
+{
+  const struct block *block;
+
+  BLPY_REQUIRE_VALID (self, block);
+
+  return compunit_to_compunit_object (
+	   block->global_block ()->compunit ()).release ();
+}
+
 /* Implementation of gdb.Block.is_global (self) -> Boolean.
    Returns True if this block object is a global block.  */
 
@@ -553,6 +566,8 @@ static gdb_PyGetSetDef block_object_getset[] = {
     "Block containing the global block.", NULL },
   { "static_block", blpy_get_static_block, NULL,
     "Block containing the static block.", NULL },
+  { "compunit", blpy_get_compunit, nullptr,
+    "Compunit containing this block.", nullptr },
   { "is_static", blpy_is_static, NULL,
     "Whether this block is a static block.", NULL },
   { "is_global", blpy_is_global, NULL,

@@ -104,6 +104,8 @@ gdb_test "python print (repr (block))" \
     "Check block in many_locals_func"
 gdb_test "python print (block.function)" "many_locals_func" \
     "many_locals_func block"
+gdb_test "python print(block.compunit)" "<gdb\.Compunit object at .*>" \
+    "test compunit property"
 
 # Switch frames, then test for main block.
 gdb_test "up" ".*"

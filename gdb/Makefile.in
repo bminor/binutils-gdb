@@ -438,6 +438,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-value.c \
 	python/py-varobj.c \
 	python/py-xmethods.c \
+	python/py-compunit.c \
 	python/python.c
 
 SUBDIR_PYTHON_OBS = $(patsubst %.c,%.o,$(SUBDIR_PYTHON_SRCS))

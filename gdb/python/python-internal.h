@@ -555,6 +555,8 @@ gdbpy_ref<thread_object> create_thread_object (struct thread_info *tp);
 gdbpy_ref<> thread_to_thread_object (thread_info *thr);;
 gdbpy_ref<inferior_object> inferior_to_inferior_object (inferior *inf);
 
+gdbpy_ref<> compunit_to_compunit_object (struct compunit_symtab *compunit);
+
 PyObject *gdbpy_buffer_to_membuf (gdb::unique_xmalloc_ptr<gdb_byte> buffer,
 				  CORE_ADDR address, ULONGEST length);
 
@@ -571,6 +573,7 @@ struct symtab *symtab_object_to_symtab (PyObject *obj);
 struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
 frame_info_ptr frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
+struct compunit_symtab *compunit_object_to_compunit (PyObject *obj);
 
 extern PyObject *gdbpy_execute_mi_command (PyObject *self, PyObject *args,
 					   PyObject *kw);

@@ -68,6 +68,8 @@ gdb_test "python print (sal.is_valid())" "True" "test sal.is_valid"
 gdb_test "python print (symtab.filename)" ".*${py_symbol_c}" "test symtab.filename"
 gdb_test "python print (symtab.objfile)" \
     "<gdb.Objfile filename=.*${testfile}.*>" "test symtab.objfile"
+gdb_test "python print (symtab.compunit)" \
+    "<gdb.Compunit .*>" "test symtab.compunit"
 gdb_test "python print (symtab.fullname())" ".*${full_py_symbol_c}" "test symtab.fullname"
 gdb_test "python print (symtab.is_valid())" "True" "test symtab.is_valid()"
 gdb_test "python print (\"qq\" in global_symbols)" "True" "test qq in global symbols"
@@ -110,6 +112,12 @@ gdb_test "python print (symtab != 123 )"\
     "True" \
     "test symtab non-equality with non-symtab"
 
+gdb_test "python print (symtab.compunit in symtab.objfile.compunits())" \
+    "True" "Test symtab.compunit in symtab.objfile.compunits()"
+gdb_test "python print (symtab.compunit.global_block() is symtab.global_block())" \
+    "True" "Test symtab.compunit.global_block() is symtab.global_block()"
+gdb_test "python print (symtab.compunit.static_block() is symtab.static_block())" \
+    "True" "Test symtab.compunit.static_block() is symtab.static_block()"
 
 # Test is_valid when the objfile is unloaded.  This must be the last
 # test as it unloads the object file in GDB.

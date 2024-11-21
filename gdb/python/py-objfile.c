@@ -544,6 +544,31 @@ objfpy_repr (PyObject *self_)
 			       objfile_name (obj));
 }
 
+/* Implementation of gdb.Objfile.compunits() -> List  */
+
+static PyObject *
+objfpy_compunits (PyObject *self_, PyObject *args)
+{
+  objfile_object *self = (objfile_object *) self_;
+
+  OBJFPY_REQUIRE_VALID (self);
+
+  gdbpy_ref<> list (PyList_New (0));
+  if (list == nullptr)
+    return nullptr;
+
+  for (struct compunit_symtab *compunit : self->objfile->compunits ())
+    {
+      gdbpy_ref<> item = compunit_to_compunit_object (compunit);
+
+      if (item.get () == nullptr
+	    || PyList_Append (list.get (), item.get ()) == -1)
+	return nullptr;
+    }
+
+  return list.release ();
+}
+
 /* Subroutine of gdbpy_lookup_objfile_by_build_id to simplify it.
    Return non-zero if STRING is a potentially valid build id.  */
 
@@ -736,6 +761,10 @@ Look up a global symbol in this objfile and return it." },
     METH_VARARGS | METH_KEYWORDS,
     "lookup_static_symbol (name [, domain]).\n\
 Look up a static-linkage global symbol in this objfile and return it." },
+
+  { "compunits", objfpy_compunits, METH_NOARGS,
+    "compunits () -> List.\n\
+Return a sequence of compunits associated to this objfile." },
 
   { NULL }
 };
