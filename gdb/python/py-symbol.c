@@ -767,7 +767,8 @@ PyTypeObject symbol_object_type = {
   "GDB symbol object",		  /*tp_doc */
   0,				  /*tp_traverse */
   0,				  /*tp_clear */
-  0,				  /*tp_richcompare */
+  gdbpy_richcompare<symbol_object, symbol, &symbol_object::symbol>,
+				    /*tp_richcompare */
   0,				  /*tp_weaklistoffset */
   0,				  /*tp_iter */
   0,				  /*tp_iternext */

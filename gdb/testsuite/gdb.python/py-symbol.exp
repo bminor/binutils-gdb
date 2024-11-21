@@ -201,6 +201,27 @@ if { [is_remote host] } {
 }
 gdb_test "python print (t\[0\].symtab)" "${py_symbol_c}" "get symtab"
 
+# Test comparison for equality and non-equality
+gdb_test "python print (t\[0\] == t\[0\] )"\
+	 "True" \
+	 "test symbol equality with itself"
+gdb_test "python print (t\[0\] == a\[0\] )"\
+	 "False" \
+	 "test symbol equality with other symbol"
+gdb_test "python print (t\[0\] == 123 )"\
+	 "False" \
+	 "test symbol equality with non-symbol"
+
+gdb_test "python print (t\[0\] != t\[0\] )"\
+	 "False" \
+	 "test symbol non-equality with itself"
+gdb_test "python print (t\[0\] != a\[0\] )"\
+	 "True" \
+	 "test symbol non-equality with other symbol"
+gdb_test "python print (t\[0\] != 123 )"\
+	 "True" \
+	 "test symbol non-equality with non-symbol"
+
 # C++ tests
 # Recompile binary.
 lappend opts c++
