@@ -1194,6 +1194,22 @@ is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile)
       if (osect->contains (addr))
 	return true;
     }
+  /* Objfiles created dynamically by JIT reader API (and possibly by
+     other means too) do not have sections and therefore the above
+     check never succeeds.
+
+     For such "dynamic" objfiles walk over all compunits and check
+     if given ADDR falls into compunit's global block.  */
+  if (! objfile->sections_start)
+    {
+      for (compunit_symtab *cu
+	     : const_cast<struct objfile *>(objfile)->compunits ())
+	{
+	  global_block *gb = cu->blockvector ()->global_block ();
+	  if (gb->start () <= addr && addr <= gb->end ())
+	    return true;
+	}
+    }
   return false;
 }
 
