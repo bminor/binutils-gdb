@@ -25,6 +25,12 @@ struct linetable_entry_object {
   int line;
   /* The pc associated with the source line.  */
   CORE_ADDR pc;
+  /* See is_stmt in stuct linetable_entry.  */
+  bool is_stmt : 1;
+  /* See prologue_end in stuct linetable_entry.  */
+  bool prologue_end : 1;
+  /* See epilogue_begin in struct linetable_entry.  */
+  bool epilogue_begin : 1;
 };
 
 extern PyTypeObject linetable_entry_object_type
@@ -98,7 +104,8 @@ symtab_to_linetable_object (PyObject *symtab)
    and an address.  */
 
 static PyObject *
-build_linetable_entry (int line, CORE_ADDR address)
+build_linetable_entry (int line, CORE_ADDR address, bool is_stmt,
+		       bool prologue_end, bool epilogue_begin)
 {
   linetable_entry_object *obj;
 
@@ -108,6 +115,9 @@ build_linetable_entry (int line, CORE_ADDR address)
     {
       obj->line = line;
       obj->pc = address;
+      obj->is_stmt = is_stmt;
+      obj->prologue_end = prologue_end;
+      obj->epilogue_begin = epilogue_begin;
     }
 
   return (PyObject *) obj;
@@ -120,22 +130,26 @@ build_linetable_entry (int line, CORE_ADDR address)
    address.  */
 
 static PyObject *
-build_line_table_tuple_from_pcs (int line, const std::vector<CORE_ADDR> &pcs)
+build_line_table_tuple_from_entries (
+	const struct objfile *objfile,
+	const std::vector<const linetable_entry *> &entries)
 {
   int i;
 
-  if (pcs.size () < 1)
+  if (entries.size () < 1)
     Py_RETURN_NONE;
 
-  gdbpy_ref<> tuple (PyTuple_New (pcs.size ()));
+  gdbpy_ref<> tuple (PyTuple_New (entries.size ()));
 
   if (tuple == NULL)
     return NULL;
 
-  for (i = 0; i < pcs.size (); ++i)
+  for (i = 0; i < entries.size (); ++i)
     {
-      CORE_ADDR pc = pcs[i];
-      gdbpy_ref<> obj (build_linetable_entry (line, pc));
+      auto entry = entries[i];
+      gdbpy_ref<> obj (build_linetable_entry (
+			entry->line, entry->pc (objfile), entry->is_stmt,
+			entry->prologue_end, entry->epilogue_begin));
 
       if (obj == NULL)
 	return NULL;
@@ -155,24 +169,35 @@ ltpy_get_pcs_for_line (PyObject *self, PyObject *args)
 {
   struct symtab *symtab;
   gdb_py_longest py_line;
-  const linetable_entry *best_entry = nullptr;
-  std::vector<CORE_ADDR> pcs;
+  std::vector<const linetable_entry*> entries;
 
   LTPY_REQUIRE_VALID (self, symtab);
 
   if (! PyArg_ParseTuple (args, GDB_PY_LL_ARG, &py_line))
     return NULL;
 
+  if (! symtab->linetable ())
+    Py_RETURN_NONE;
+
   try
     {
-      pcs = find_pcs_for_symtab_line (symtab, py_line, &best_entry);
+      const linetable_entry *entry;
+      int i;
+      for (entry = symtab->linetable ()->item, i = 0;
+	   i < symtab->linetable ()->nitems;
+	   entry++, i++)
+	{
+	  if (entry->line == py_line)
+	    entries.push_back (entry);
+	}
     }
   catch (const gdb_exception &except)
     {
       return gdbpy_handle_gdb_exception (nullptr, except);
     }
 
-  return build_line_table_tuple_from_pcs (py_line, pcs);
+  struct objfile *objfile = symtab->compunit ()->objfile ();
+  return build_line_table_tuple_from_entries (objfile, entries);
 }
 
 /* Implementation of gdb.LineTable.has_line (self, line) -> Boolean.
@@ -321,6 +346,50 @@ ltpy_entry_get_pc (PyObject *self, void *closure)
   return gdb_py_object_from_ulongest (obj->pc).release ();
 }
 
+/* Implementation of gdb.LineTableEntry.is_stmt (self) -> bool.  Returns
+   True if associated PC is a good location to place a breakpoint for
+   associatated LINE.  */
+
+static PyObject *
+ltpy_entry_get_is_stmt (PyObject *self, void *closure)
+{
+  linetable_entry_object *obj = (linetable_entry_object *) self;
+
+  if (obj->is_stmt != 0)
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
+
+/* Implementation of gdb.LineTableEntry.prologue_end (self) -> bool.  Returns
+   True if associated PC is a good location to place a breakpoint after a
+   function prologue.  */
+
+static PyObject *
+ltpy_entry_get_prologue_end (PyObject *self, void *closure)
+{
+  linetable_entry_object *obj = (linetable_entry_object *) self;
+
+  if (obj->prologue_end)
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
+
+/* Implementation of gdb.LineTableEntry.prologue_end (self) -> bool.  Returns
+   True if this location marks the start of the epilogue.  */
+
+static PyObject *
+ltpy_entry_get_epilogue_begin (PyObject *self, void *closure)
+{
+  linetable_entry_object *obj = (linetable_entry_object *) self;
+
+  if (obj->epilogue_begin)
+    Py_RETURN_TRUE;
+  else
+    Py_RETURN_FALSE;
+}
+
 /* LineTable iterator functions.  */
 
 /* Return a new line table iterator.  */
@@ -406,7 +475,8 @@ ltpy_iternext (PyObject *self)
     }
 
   struct objfile *objfile = symtab->compunit ()->objfile ();
-  obj = build_linetable_entry (item->line, item->pc (objfile));
+  obj = build_linetable_entry (item->line, item->pc (objfile), item->is_stmt,
+			       item->prologue_end, item->epilogue_begin );
   iter_obj->current_index++;
 
   return obj;
@@ -534,8 +604,15 @@ static gdb_PyGetSetDef linetable_entry_object_getset[] = {
     "The line number in the source file.", NULL },
   { "pc", ltpy_entry_get_pc, NULL,
     "The memory address for this line number.", NULL },
+  { "is_stmt", ltpy_entry_get_is_stmt, NULL,
+    "Whether this is a good location to place a breakpoint for associated LINE.", NULL },
+  { "prologue_end", ltpy_entry_get_prologue_end, NULL,
+    "Whether this is a good location to place a breakpoint after method prologue.", NULL },
+  { "epilogue_begin", ltpy_entry_get_epilogue_begin, NULL,
+    "True if this location marks the start of the epilogue.", NULL },
   { NULL }  /* Sentinel */
 };
+
 
 PyTypeObject linetable_entry_object_type = {
   PyVarObject_HEAD_INIT (NULL, 0)

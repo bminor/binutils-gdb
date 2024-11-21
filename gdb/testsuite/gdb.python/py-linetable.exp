@@ -53,6 +53,16 @@ gdb_test "python print(len(lt.line(20)))" "1" \
     "Test length of a single pc line"
 gdb_test "python print(lt.line(1))" "None" \
     "Test None returned for line with no pc"
+gdb_test "python print(next(iter(lt)).is_stmt)" \
+	 "(True|False)" \
+	 "Test is_stmt"
+gdb_test "python print(next(iter(lt)).prologue_end)" \
+	 "(True|False)" \
+	 "Test prologue_end"
+gdb_test "python print(next(iter(lt)).epilogue_begin)" \
+	 "(True|False)" \
+	 "Test epilogue_begin"
+
 
 # Test gdb.Linetable.sourcelines ()
 gdb_py_test_silent_cmd "python fset = lt.source_lines()" \

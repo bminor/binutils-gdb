@@ -6674,6 +6674,23 @@ executable code for that source line resides in memory.  This
 attribute is not writable.
 @end defvar
 
+@defvar LineTableEntry.is_stmt
+True if pc (associated with this entry) is a good location to place
+a breakpoint for line (associated with this entry).  This attribute is not
+writable.
+@end defvar
+
+@defvar LineTableEntry.prologue_end
+True if pc (associated with this entry) is a good location to place
+a breakpoint after a function prologue.  This attribute is not
+writable.
+@end defvar
+
+@defvar LineTableEntry.epilogue_begin
+True if pc (associated with this entry) marks the start of the epilogue.
+This attribute is not writable.
+@end defvar
+
 As there can be multiple addresses for a single source line, you may
 receive multiple @code{LineTableEntry} objects with matching
 @code{line} attributes, but with different @code{pc} attributes.  The
