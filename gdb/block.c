@@ -17,6 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <cstring>
 #include "block.h"
 #include "symtab.h"
 #include "symfile.h"
@@ -819,6 +820,64 @@ make_blockranges (struct objfile *objfile,
   for (int i = 0; i < n; i++)
     blr->range[i] = rangevec[i];
   return blr;
+}
+
+static bool
+block_ordering_predicate(struct block *b1, struct block *b2)
+{
+  CORE_ADDR start1 = b1->start ();
+  CORE_ADDR start2 = b2->start ();
+
+  if (start1 != start2)
+    return start1 < start2;
+  return (b2->end () < b1->end ());
+}
+
+/* See block.h.  */
+
+void
+blockvector::add_block (struct block *block)
+{
+  if (num_blocks() <= FIRST_LOCAL_BLOCK)
+    {
+      /* No blocks (except global and static block).  */
+      m_blocks.push_back (block);
+    }
+  else
+    {
+      /* blockvector already contains some blocks.  Insert new block
+	 to a correct place.  */
+      auto first = m_blocks.begin () + FIRST_LOCAL_BLOCK;
+      auto last = m_blocks.end ();
+
+      auto insert_before = std::upper_bound (first,
+					     last,
+					     block,
+					     block_ordering_predicate);
+
+      m_blocks.insert (insert_before, block);
+    }
+}
+
+/* See block.h.  */
+
+void
+blockvector::sort ()
+{
+  if (num_blocks() > FIRST_LOCAL_BLOCK)
+    {
+      std::sort (blocks ().begin () + FIRST_LOCAL_BLOCK,
+		 blocks ().end (),
+		 block_ordering_predicate);
+    }
+}
+
+/* See block.h.  */
+
+struct blockvector *
+allocate_blockvector(struct obstack *obstack, int nblocks, int capacity)
+{
+  return new (obstack) blockvector(obstack, nblocks, capacity);
 }
 
 /* Implement 'maint info blocks' command.  If passed an argument then

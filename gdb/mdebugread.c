@@ -242,8 +242,6 @@ static struct compunit_symtab *new_symtab (const char *, int, struct objfile *);
 
 static struct linetable *new_linetable (int);
 
-static struct blockvector *new_bvect (int);
-
 static struct type *parse_type (int, union aux_ext *, unsigned int, int *,
 				int, const char *);
 
@@ -4499,17 +4497,8 @@ add_block (struct block *b, struct symtab *s)
   /* Cast away "const", but that's ok because we're building the
      symtab and blockvector here.  */
   struct blockvector *bv
-    = (struct blockvector *) s->compunit ()->blockvector ();
-
-  bv = (struct blockvector *) xrealloc ((void *) bv,
-					(sizeof (struct blockvector)
-					 + bv->num_blocks ()
-					 * sizeof (struct block)));
-  if (bv != s->compunit ()->blockvector ())
-    s->compunit ()->set_blockvector (bv);
-
-  bv->set_block (bv->num_blocks (), b);
-  bv->set_num_blocks (bv->num_blocks () + 1);
+    = const_cast<struct blockvector*> (s->compunit ()->blockvector ());
+  bv->add_block (b);
 }
 
 /* Add a new linenumber entry (LINENO,ADR) to a linevector LT.
@@ -4632,7 +4621,7 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   lang = cust->language ();
 
   /* All symtabs must have at least two blocks.  */
-  bv = new_bvect (2);
+  bv = allocate_blockvector(&objfile->objfile_obstack, 2);
   bv->set_block (GLOBAL_BLOCK, new_block (objfile, NON_FUNCTION_BLOCK, lang));
   bv->set_block (STATIC_BLOCK, new_block (objfile, NON_FUNCTION_BLOCK, lang));
   bv->static_block ()->set_superblock (bv->global_block ());
@@ -4698,21 +4687,6 @@ shrink_linetable (struct linetable *lt)
 					(sizeof (struct linetable)
 					 + ((lt->nitems - 1)
 					    * sizeof (lt->item))));
-}
-
-/* Allocate and zero a new blockvector of NBLOCKS blocks.  */
-
-static struct blockvector *
-new_bvect (int nblocks)
-{
-  struct blockvector *bv;
-  int size;
-
-  size = sizeof (struct blockvector) + nblocks * sizeof (struct block *);
-  bv = (struct blockvector *) xzalloc (size);
-  bv->set_num_blocks (nblocks);
-
-  return bv;
 }
 
 /* Allocate and zero a new block of language LANGUAGE, and set its

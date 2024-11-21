@@ -429,10 +429,7 @@ buildsym_compunit::make_blockvector ()
     {
     }
 
-  blockvector = (struct blockvector *)
-    obstack_alloc (&m_objfile->objfile_obstack,
-		   (sizeof (struct blockvector)
-		    + (i - 1) * sizeof (struct block *)));
+  blockvector = allocate_blockvector(&m_objfile->objfile_obstack, i);
 
   /* Copy the blocks into the blockvector.  This is done in reverse
      order, which happens to put the blocks into the proper order
@@ -440,7 +437,6 @@ buildsym_compunit::make_blockvector ()
      each block into the list after its subblocks in order to make
      sure this is true.  */
 
-  blockvector->set_num_blocks (i);
   for (next = m_pending_blocks; next; next = next->next)
     blockvector->set_block (--i, next->block);
 

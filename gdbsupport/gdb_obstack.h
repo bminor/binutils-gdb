@@ -20,6 +20,8 @@
 #if !defined (GDB_OBSTACK_H)
 #define GDB_OBSTACK_H 1
 
+#include <limits>
+#include <type_traits>
 #include "obstack.h"
 
 /* Utility macros - wrap obstack alloc into something more robust.  */
@@ -156,5 +158,55 @@ struct allocate_on_obstack
   void operator delete (void *memory) {}
   void operator delete[] (void *memory) {}
 };
+
+/* Implementation of Allocator concept using obstack to
+   allocate memory. This allows standard containers to be
+   used with obstack.  */
+
+template <typename T>
+class obstack_allocator
+{
+public:
+  typedef T value_type;
+
+  obstack_allocator (struct obstack *obstack)
+    : m_obstack(obstack)
+    {}
+
+  template <typename U> constexpr obstack_allocator (const obstack_allocator<U>& allocator) noexcept
+    : m_obstack(allocator.m_obstack)
+  {}
+
+  T* allocate (std::size_t n)
+  {
+    if (n > std::numeric_limits<std::size_t>::max () / sizeof (T))
+      throw std::bad_array_new_length ();
+
+    if (auto p = static_cast<T*> (obstack_alloc (m_obstack, n * sizeof (T))))
+      {
+	return p;
+      }
+
+    throw std::bad_alloc ();
+  }
+
+  void deallocate(T* p, std::size_t n) noexcept
+  {}
+
+private:
+
+  struct obstack *m_obstack;
+};
+
+template <class T, class U>
+bool operator==(const obstack_allocator<T> &t, const obstack_allocator<U> &u)
+{
+  return (std::is_same<T, U>::value_type) && (t.m_obstack == u.m_obstack);
+}
+template <class T, class U>
+bool operator!=(const obstack_allocator<T> &t, const obstack_allocator<U> &u)
+{
+  return ! (t == u);
+}
 
 #endif

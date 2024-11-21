@@ -20,6 +20,7 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#include <algorithm>
 #include "dictionary.h"
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/next-iterator.h"
@@ -416,41 +417,60 @@ private:
 
 struct blockvector
 {
+  void* operator new (size_t size, struct obstack *obstack)
+  {
+    return obstack_alloc (obstack, size);
+  }
+
+  void* operator new[] (size_t size, struct obstack *obstack)
+  {
+    return obstack_alloc (obstack, size);
+  }
+
+  void operator delete (void *memory) {}
+  void operator delete[] (void *memory) {}
+
+  blockvector (struct obstack *obstack, int nblocks, int capacity = 0)
+    : m_map (nullptr),
+      m_blocks (0, nullptr, obstack_allocator<struct block *> (obstack))
+  {
+    m_blocks.reserve (std::max (nblocks, capacity));
+    m_blocks.resize (nblocks, nullptr);
+  }
+
   /* Return a view on the blocks of this blockvector.  */
   gdb::array_view<struct block *> blocks ()
   {
-    return gdb::array_view<struct block *> (m_blocks, m_num_blocks);
+    return gdb::array_view<struct block *> (m_blocks.data (), m_blocks.size ());
   }
 
   /* Const version of the above.  */
   gdb::array_view<const struct block *const> blocks () const
   {
-    const struct block **blocks = (const struct block **) m_blocks;
-    return gdb::array_view<const struct block *const> (blocks, m_num_blocks);
+    const struct block **blocks = (const struct block **) m_blocks.data ();
+    return gdb::array_view<const struct block *const> (blocks, m_blocks.size ());
   }
 
   /* Return the block at index I.  */
   struct block *block (size_t i)
-  { return this->blocks ()[i]; }
+  { return m_blocks[i]; }
 
   /* Const version of the above.  */
   const struct block *block (size_t i) const
-  { return this->blocks ()[i]; }
+  { return m_blocks[i]; }
 
   /* Set the block at index I.  */
   void set_block (int i, struct block *block)
   { m_blocks[i] = block; }
 
-  /* Set the number of blocks of this blockvector.
-
-     The storage of blocks is done using a flexible array member, so the number
-     of blocks set here must agree with what was effectively allocated.  */
-  void set_num_blocks (int num_blocks)
-  { m_num_blocks = num_blocks; }
+  /* Add BLOCK, making sure blocks are ordered by code-addresses
+     as required. Update global and static block start and end
+     adresses accordingly.  */
+  void add_block(struct block *block);
 
   /* Return the number of blocks in this blockvector.  */
   int num_blocks () const
-  { return m_num_blocks; }
+  { return m_blocks.size (); }
 
   /* Return the global block of this blockvector.  */
   struct global_block *global_block ()
@@ -483,18 +503,22 @@ struct blockvector
   void set_map (addrmap_fixed *map)
   { m_map = map; }
 
+  void sort ();
+
 private:
   /* An address map mapping addresses to blocks in this blockvector.
      This pointer is zero if the blocks' start and end addresses are
      enough.  */
   addrmap_fixed *m_map;
 
-  /* Number of blocks in the list.  */
-  int m_num_blocks;
-
   /* The blocks themselves.  */
-  struct block *m_blocks[1];
+  std::vector<struct block *, obstack_allocator<struct block *>> m_blocks;
 };
+
+/* Allocate new blockvector for NBLOCKS blocks with enough storage to
+   hold up to CAPACITY blocks.  CAPACITY defaults to NBLOCKS.  */
+struct blockvector *allocate_blockvector(struct obstack *obstack,
+					 int nblocks, int capacity = 0);
 
 extern const struct blockvector *blockvector_for_pc (CORE_ADDR,
 					       const struct block **);
