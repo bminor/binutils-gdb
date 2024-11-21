@@ -1273,7 +1273,13 @@ sframe_xlate_do_aarch64_negate_ra_state (struct sframe_xlate_ctx *xlate_ctx,
 }
 
 /* Translate DW_CFA_GNU_window_save into SFrame context.
-   DW_CFA_AARCH64_negate_ra_state is multiplexed with DW_CFA_GNU_window_save.
+   DW_CFA_GNU_window_save is a DWARF Sparc extension, but is multiplexed with a
+   directive of DWARF AArch64 extension: DW_CFA_AARCH64_negate_ra_state.
+   The AArch64 backend of GCC 14 and older versions was emitting mistakenly the
+   Sparc CFI directive (.cfi_window_save).  From GCC 15, the AArch64 backend
+   only emits .cfi_negate_ra_state.  For backward compatibility, the handler for
+   .cfi_window_save needs to check whether the directive was used in a AArch64
+   ABI context or not.
    Return SFRAME_XLATE_OK if success.  */
 
 static int
