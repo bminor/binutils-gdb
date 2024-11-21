@@ -53,17 +53,19 @@ def launch(
     if program is not None:
         file_command(program)
     inf = gdb.selected_inferior()
-    if stopAtBeginningOfMainSubprogram:
-        main = inf.main_name
-        if main is not None:
-            exec_and_log("tbreak " + main)
     inf.arguments = args
     if env is not None:
         inf.clear_env()
         for name, value in env.items():
             inf.set_env(name, value)
     expect_process("process")
-    exec_and_expect_stop("starti" if stopOnEntry else "run")
+    if stopAtBeginningOfMainSubprogram:
+        cmd = "start"
+    elif stopOnEntry:
+        cmd = "starti"
+    else:
+        cmd = "run"
+    exec_and_expect_stop(cmd)
 
 
 @request("attach")
