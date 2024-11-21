@@ -6040,6 +6040,11 @@ The block containing this block.  If this parent block does not exist,
 this attribute holds @code{None}.  This attribute is not writable.
 @end defvar
 
+@defvar Block.subblocks
+A list of blocks nested in this block.  If there are no blocks nested,
+this attribute holds an empty list.  This attribute is not writable.
+@end defvar
+
 @defvar Block.global_block
 The global block associated with this block.  This attribute is not
 writable.

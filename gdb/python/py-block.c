@@ -149,6 +149,34 @@ blpy_get_superblock (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+static PyObject *
+blpy_get_subblocks (PyObject *self, void *closure)
+{
+  const struct block *block;
+
+  BLPY_REQUIRE_VALID (self, block);
+
+  gdbpy_ref<> list (PyList_New (0));
+  if (list == nullptr)
+    return nullptr;
+
+  compunit_symtab *cu = block->global_block ()->compunit ();
+
+  for (const struct block *each : cu->blockvector ()->blocks ())
+    {
+      if (each->superblock () == block)
+	{
+	  gdbpy_ref<> item (block_to_block_object (each, cu->objfile ()));
+
+	  if (item.get () == nullptr
+	      || PyList_Append (list.get (), item.get ()) == -1)
+	    return nullptr;
+	}
+    }
+
+  return list.release ();
+}
+
 /* Return the global block associated to this block.  */
 
 static PyObject *
@@ -529,6 +557,8 @@ static gdb_PyGetSetDef block_object_getset[] = {
     "Whether this block is a static block.", NULL },
   { "is_global", blpy_is_global, NULL,
     "Whether this block is a global block.", NULL },
+  { "subblocks", blpy_get_subblocks, nullptr,
+    "List of blocks contained in this block.", nullptr },
   { NULL }  /* Sentinel */
 };
 

@@ -83,6 +83,9 @@
   ** The 'qualified' argument to gdb.Breakpoint constructor will no
      longer accept non-bool types.
 
+  ** Added gdb.Block.subblocks.  Returns a list of blocks contained in that
+     block.
+
 * Debugger Adapter Protocol changes
 
   ** The "scopes" request will now return a scope holding global
