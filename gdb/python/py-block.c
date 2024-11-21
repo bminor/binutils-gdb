@@ -342,6 +342,106 @@ blpy_dealloc (PyObject *obj)
   Py_TYPE (obj)->tp_free (obj);
 }
 
+/* Object initializer; creates new block.
+
+   Use: __init__(SUPERBLOCK, START, END).  */
+
+static int
+blpy_init (PyObject *zelf, PyObject *args, PyObject *kw)
+{
+  struct block_object *self = (struct block_object*) zelf;
+
+  if (self->block)
+    {
+      PyErr_Format (PyExc_RuntimeError,
+		    _("Block object already initialized."));
+      return -1;
+    }
+
+  static const char *keywords[] = { "superblock", "start", "end", NULL };
+  PyObject *superblock_obj;
+  uint64_t start;
+  uint64_t end;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OKK", keywords,
+					 &superblock_obj, &start, &end))
+    return -1;
+
+
+  auto superblock = block_object_to_block (superblock_obj);
+  if (superblock == nullptr)
+    {
+      PyErr_Format (PyExc_TypeError,
+		    _("The superblock argument is not valid gdb.Block "
+		      "object"));
+      return -1;
+    }
+
+  /* Check that start-end range is valid.  */
+  if (! (start <= end))
+    {
+      PyErr_Format (PyExc_ValueError,
+		    _("The start argument must be less or equal to the end "
+		      "argument"));
+      return -1;
+
+    }
+
+  /* Check that start-end range is within superblocks' range.  */
+  if (! (superblock-> start() <= start && end <= superblock->end ()))
+    {
+      PyErr_Format (PyExc_ValueError,
+		    _("The start-end range must be within superblocks' "
+		      "range"));
+      return -1;
+    }
+
+  /* Check that start-end range does not overlap with any
+     "sibling" blocks' range.  */
+  auto cu = superblock->global_block ()->compunit ();
+
+  for (auto each : cu->blockvector ()->blocks ())
+    {
+      if (each->superblock () == superblock)
+	{
+	  /* each is a "sibling" block. */
+	  if (std::max (start, each->start ()) < std::min(end, each->end ()))
+	    {
+	      PyErr_Format (PyExc_ValueError,
+		    _("The start-end range overlaps with one of the "
+		      "sibling blocks"));
+	      return -1;
+	    }
+	}
+    }
+
+  auto obstack = &(cu->objfile ()->objfile_obstack);
+  auto blk = new (obstack) block ();
+
+  blk->set_superblock (superblock);
+  blk->set_multidict (mdict_create_linear (obstack, NULL));
+  blk->set_start ((CORE_ADDR) start);
+  blk->set_end ((CORE_ADDR) end);
+
+  cu->blockvector ()->add_block (blk);
+
+  self->block = blk;
+  self->objfile = cu->objfile ();
+
+  htab_t table = blpy_objfile_data_key.get (self->objfile);
+  if (table == nullptr)
+    {
+      table = htab_create_alloc (10, block_object_hash, block_object_eq,
+				 block_object_del, xcalloc, xfree);
+      blpy_objfile_data_key.set (self->objfile, table);
+    }
+  hashval_t hash = htab_hash_pointer (blk);
+  void **slot = htab_find_slot_with_hash (table, blk, hash, INSERT);
+  *slot = self;
+
+  return 0;
+}
+
 /* Create a new block object (gdb.Block) that encapsulates the struct
    block object from GDB.  */
 PyObject *
@@ -533,7 +633,6 @@ blpy_richcompare (PyObject *self, PyObject *other, int op)
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_blocks (void)
 {
-  block_object_type.tp_new = PyType_GenericNew;
   if (gdbpy_type_ready (&block_object_type) < 0)
     return -1;
 
@@ -613,7 +712,15 @@ PyTypeObject block_object_type = {
   0,				  /* tp_iternext */
   block_object_methods,		  /* tp_methods */
   0,				  /* tp_members */
-  block_object_getset		  /* tp_getset */
+  block_object_getset,		  /* tp_getset */
+  0,				  /* tp_base */
+  0,				  /* tp_dict */
+  0,				  /* tp_descr_get */
+  0,				  /* tp_descr_set */
+  0,                              /* tp_dictoffset */
+  blpy_init,                      /* tp_init */
+  0,				  /* tp_alloc */
+  PyType_GenericNew		  /* tp_new */
 };
 
 static PyMethodDef block_iterator_object_methods[] = {

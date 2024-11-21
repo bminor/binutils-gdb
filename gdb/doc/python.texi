@@ -6037,6 +6037,12 @@ historical compatibility.
 
 A @code{gdb.Block} object has the following methods:
 
+@defun Block.__init__ (superblock, start, end)
+Create new block in @var{superblock} spanning from @var{start} to @var{end}.
+The new block's @var{start}--@var{end} range must be within superblock's
+range and must not overlap with any block already contained in superblock.
+@end defun
+
 @defun Block.is_valid ()
 Returns @code{True} if the @code{gdb.Block} object is valid,
 @code{False} if not.  A block object can become invalid if the block it

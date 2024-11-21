@@ -115,6 +115,29 @@ gdb_test "python print (repr (block))" "<gdb.Block main \{.*\}>" \
          "Check Frame 2's block not None"
 gdb_test "python print (block.function)" "main" "main block"
 
+# Test creation of blocks. For that we create a new compunit to make sure
+# there's space for new blocks to fit in.
+gdb_py_test_silent_cmd "python cu = gdb.Compunit(\"dynamic\", gdb.current_progspace().objfiles()\[0\], 100, 200)" \
+		       "Create new compunit" 1
+gdb_test "python print ( gdb.Block(cu.static_block(), 100, 150))" \
+	 "<gdb.Block <anonymous> \{.*\}>" \
+	 "Create new block"
+gdb_test "python print ( gdb.Block(\"xxx\", 160, 170))" \
+	 "TypeError.*:.*" \
+	 "Try create new block with non-block superblock"
+gdb_test "python print ( gdb.Block(cu.static_block(), 170, 160))" \
+	 "ValueError.*:.*" \
+	 "Try create new block with start > end"
+gdb_test "python print ( gdb.Block(cu.static_block(), 70, 160))" \
+	 "ValueError.*:.*" \
+	 "Try create new block with outside superblock"
+gdb_test "python print ( gdb.Block(cu.static_block(), 140, 160))" \
+	 "ValueError.*:.*" \
+	 "Try create new block overlaping with sibling"
+gdb_test "python print ( gdb.Block(cu.static_block(), 160, 170))" \
+	 "<gdb.Block <anonymous> \{.*\}>" \
+	 "Create sibling block"
+
 # Test Block is_valid.  This must always be the last test in this
 # testcase as it unloads the object file.
 delete_breakpoints
