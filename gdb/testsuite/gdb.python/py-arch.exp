@@ -104,6 +104,10 @@ foreach_with_prefix test_data { {None None} \
 	"check 'signed' argument can handle non-bool type $bad_type"
 }
 
+gdb_test "python print(arch.void_type())" \
+    "void" \
+    "get void type"
+
 # Test for gdb.architecture_names().  First we're going to grab the
 # complete list of architecture names using the 'complete' command.
 set arch_names []
