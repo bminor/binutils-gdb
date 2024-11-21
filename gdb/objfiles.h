@@ -644,6 +644,10 @@ public:
     this->section_offsets[idx] = offset;
   }
 
+  /* Return the section index for section mapped at memory range
+     [START, END].  If there's no such section, return -1.  */
+  int find_section_index (CORE_ADDR start, CORE_ADDR end);
+
   class section_iterator
   {
   public:

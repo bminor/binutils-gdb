@@ -6278,6 +6278,32 @@ arguments.
 
 A @code{gdb.Symbol} object has the following methods:
 
+@defun Symbol.__init__ (name, symtab, type, domain, addr_class, value)
+Creates new symbol named @var{name} and adds it to symbol table
+@var{symtab}.
+
+The @var{type} argument specifies type of the symbol as @var{gdb.Type}
+object (@pxref{Types In Python}).
+
+The @var{domain} argument specifies domain of the symbol.  Each domain is
+a constant defined in the @code{gdb} module and described later in this
+chapter.
+
+The @var{addr_class} argument, together with @var{value} argument, specifies
+how to find the value of this symbol.  Each address class is a constant
+defined in the @code{gdb} module and described later in this chapter.  As of
+now, only @code{gdb.SYMBOL_LOC_BLOCK} address class is supported, but future
+versions of @value{GDBN} may support more address classes.
+
+The meaning of @var{value} argument depends on the value of @var{addr_class}:
+@vtable @code
+@item gdb.SYMBOL_LOC_BLOCK
+The @var{value} argument must be a block (a @code{gdb.Block} object).  Block
+must belong to the same compunit as the
+@var{symtab} parameter (@pxref{Compunits In Python}).
+@end vtable
+@end defun
+
 @defun Symbol.is_valid ()
 Returns @code{True} if the @code{gdb.Symbol} object is valid,
 @code{False} if not.  A @code{gdb.Symbol} object can become invalid if

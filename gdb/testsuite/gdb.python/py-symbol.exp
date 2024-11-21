@@ -222,6 +222,19 @@ gdb_test "python print (t\[0\] != 123 )"\
 	 "True" \
 	 "test symbol non-equality with non-symbol"
 
+# Test creation of new symbols
+gdb_py_test_silent_cmd "python s = gdb.Symbol(\"ns1\", t\[0\].symtab, t\[0\].type.function(), gdb.SYMBOL_FUNCTION_DOMAIN, gdb.SYMBOL_LOC_BLOCK, t\[0\].symtab.static_block() )" \
+	"create symbol" 0
+gdb_test "python print (s)" \
+	 "ns1" \
+	 "test new symbol's __str__"
+gdb_test "python print (s.symtab == t\[0\].symtab)" \
+	 "True" \
+	 "test new symbol's symtab"
+gdb_test "python print (s.type == t\[0\].type.function())" \
+	 "True" \
+	 "test new symbol's type"
+
 # C++ tests
 # Recompile binary.
 lappend opts c++

@@ -400,6 +400,135 @@ sympy_repr (PyObject *self)
 			       symbol->print_name ());
 }
 
+/* Object initializer; creates new symbol.
+
+   Use: __init__(NAME, SYMTAB, TYPE, DOMAIN, ADDR_CLASS, VALUE).  */
+
+static int
+sympy_init (PyObject *zelf, PyObject *args, PyObject *kw)
+{
+  struct symbol_object *self = (struct symbol_object*) zelf;
+
+  if (self->symbol)
+    {
+      PyErr_Format (PyExc_RuntimeError,
+		    _("Symbol object already initialized."));
+      return -1;
+    }
+
+   static const char *keywords[] = { "name", "symtab", "type",
+				     "domain", "addr_class", "value",
+				     nullptr };
+   const char *name;
+   PyObject *symtab_obj = nullptr;
+   PyObject *type_obj = nullptr;
+   domain_enum domain;
+   unsigned int addr_class;
+   PyObject *value_obj = nullptr;
+
+   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "sOOIIO", keywords,
+					 &name, &symtab_obj, &type_obj,
+					 &domain, &addr_class, &value_obj))
+    return -1;
+
+
+  struct symtab *symtab = symtab_object_to_symtab (symtab_obj);
+  if (symtab == nullptr)
+    {
+      PyErr_Format (PyExc_TypeError,
+		    _("The symtab argument is not valid gdb.Symtab object"));
+      return -1;
+    }
+
+  struct type *type = type_object_to_type (type_obj);
+  if (type == nullptr)
+    {
+      PyErr_Format (PyExc_TypeError,
+		    _("The type argument is not valid gdb.Type object"));
+      return -1;
+    }
+  if (type->objfile_owner () != nullptr &&
+      type->objfile_owner () != symtab->compunit ()->objfile ())
+    {
+      PyErr_Format (PyExc_ValueError,
+		    _("The type argument's owning objfile differs from "
+		      "symtab's objfile."));
+      return -1;
+    }
+
+  union _value {
+    const struct block *block;
+  } value;
+
+  switch (addr_class)
+    {
+      default:
+	PyErr_Format (PyExc_ValueError,
+		      _("The value of addr_class argument is not supported"));
+	return -1;
+
+      case LOC_BLOCK:
+	if ((value.block = block_object_to_block (value_obj)) == nullptr)
+	  {
+	    PyErr_Format (PyExc_TypeError,
+			 _("The addr_class argument is SYMBOL_LOC_BLOCK but "
+			   "the value argument is not a valid gdb.Block."));
+	    return -1;
+	  }
+	if (type->code () != TYPE_CODE_FUNC)
+	  {
+	    PyErr_Format (PyExc_ValueError,
+			 _("The addr_class argument is SYMBOL_LOC_BLOCK but "
+			   "the type argument is not a function type."));
+	    return -1;
+	  }
+	break;
+    }
+
+  struct objfile *objfile = symtab->compunit ()->objfile ();
+  auto_obstack *obstack = &(objfile->objfile_obstack);
+  struct symbol *sym = new (obstack) symbol();
+
+  sym->m_name = obstack_strdup (obstack, name);
+  sym->set_symtab (symtab);
+  sym->set_type (type);
+  sym->set_domain (domain);
+  sym->set_aclass_index (addr_class);
+
+  switch (addr_class)
+    {
+      case LOC_BLOCK:
+	{
+	  sym->set_value_block (value.block);
+
+	  if (domain == FUNCTION_DOMAIN)
+	    const_cast<struct block*> (value.block)->set_function (sym);
+
+	  /* Set symbol's section index.  This needed in somewhat unusual
+	     usecase where dynamic code is generated into a special section
+	     (defined in custom linker script or otherwise).  Otherwise,
+	     find_pc_sect_compunit_symtab () would not find the compunit
+	     symtab and commands like "disassemble function_name" would
+	     resort to disassemble complete section.
+
+	     Note that in usual case where new objfile is created for
+	     dynamic code, the objfile has no sections at all and
+	     objfile::find_section_index () returns -1.
+	     */
+	  CORE_ADDR start = value.block->start ();
+	  CORE_ADDR end = value.block->end ();
+	  sym->set_section_index (objfile->find_section_index (start, end));
+	}
+	break;
+      default:
+	gdb_assert_not_reached("unreachable");
+	break;
+  }
+
+  set_symbol (self, sym);
+  return 0;
+}
+
 /* Implementation of
    gdb.lookup_symbol (name [, block] [, domain]) -> (symbol, is_field_of_this)
    A tuple with 2 elements is always returned.  The first is the symbol
@@ -774,5 +903,13 @@ PyTypeObject symbol_object_type = {
   0,				  /*tp_iternext */
   symbol_object_methods,	  /*tp_methods */
   0,				  /*tp_members */
-  symbol_object_getset		  /*tp_getset */
+  symbol_object_getset,		  /*tp_getset */
+  0,				  /*tp_base */
+  0,				  /*tp_dict */
+  0,				  /*tp_descr_get */
+  0,				  /*tp_descr_set */
+  0,                              /*tp_dictoffset */
+  sympy_init,	                  /*tp_init */
+  0,				  /*tp_alloc */
+  PyType_GenericNew,		  /*tp_new */
 };

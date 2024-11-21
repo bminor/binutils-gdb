@@ -1312,3 +1312,23 @@ objfile_int_type (struct objfile *of, int size_in_bytes, bool unsigned_p)
 
   gdb_assert_not_reached ("unable to find suitable integer type");
 }
+
+/* See objfiles.h.  */
+
+int
+objfile::find_section_index (CORE_ADDR start, CORE_ADDR end)
+{
+  obj_section *sect;
+  int sect_index;
+  for (sect = this->sections_start, sect_index = 0;
+       sect < this->sections_end;
+       sect++, sect_index++)
+    {
+      if (sect->the_bfd_section == nullptr)
+	continue;
+
+      if (sect->addr () <= start && end <= sect->endaddr ())
+	return sect_index;
+    }
+  return -1;
+}
