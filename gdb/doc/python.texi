@@ -6728,6 +6728,14 @@ Line: 45 Address: 0x400615L
 In addition to being able to iterate over a @code{LineTable}, it also
 has the following direct access methods:
 
+@defun LineTable.__init__ (symtab, entries)
+Creates a new @code{LineTable} object and associate it with given
+@var{symtab}.  Old linetable that might already be associated with @var{symtab}
+is discarded.  The @var{entries} argument is a list of @code{LineTableEntry}
+objects that constitute the newly created line table.  Line table entries
+do not need to be sorted.
+@end defun
+
 @defun LineTable.line (line)
 Return a Python @code{Tuple} of @code{LineTableEntry} objects for any
 entries in the line table for the given @var{line}, which specifies

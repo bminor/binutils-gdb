@@ -39,12 +39,12 @@ gdb_py_test_silent_cmd "python lt = gdb.selected_frame().find_sal().symtab.linet
 
 gdb_test_multiline "input simple command" \
   "python" "" \
-  "def list_lines():" "" \
+  "def list_lines(lt):" "" \
   "   for l in lt:" "" \
   "     print ('L' + str(l.line) + ' A ' + hex(l.pc))" "" \
   "end" ""
 
-gdb_test "python list_lines()" \
+gdb_test "python list_lines(lt)" \
     "L20 A $hex.*L21 A $hex.*L22 A $hex.*L24 A $hex.*L25 A $hex.*L40 A $hex.*L42 A $hex.*L44 A $hex.*L42 A $hex.*L46 A $hex.*" \
     "test linetable iterator addr"
 gdb_test "python print(len(lt.line(42)))" "2" \
@@ -106,3 +106,31 @@ gdb_test "python print( gdb.LineTableEntry('xx', 123456).pc)" \
 gdb_test "python print( gdb.LineTableEntry(10, 123456, prologue_end = True).prologue_end)" \
     "True" \
     "test prologue_end keyword argument"
+
+# Test gdb.LineTable.__init__(). To do so, we create new compunit and new
+# symtab.
+gdb_py_test_silent_cmd "python cu = gdb.Compunit(\"dynamic_cu\", gdb.Objfile(\"dynamic_objf\"), 0x100, 0x200)" \
+    "create new compunit" 1
+gdb_py_test_silent_cmd "python st = gdb.Symtab(\"dynamic_st\", cu)" \
+    "create new symtab" 1
+gdb_test "python lt2 = gdb.LineTable(st, \[gdb.LineTableEntry(10, 0x123)\]); print(lt)" \
+    "<gdb.LineTable object at $hex.*" \
+    "create new linetable"
+gdb_test "python print(lt2.is_valid())" \
+    "True" \
+    "test new linetable is valid"
+gdb_test "python list_lines(lt2)" \
+    "L10 A 0x123.*" \
+    "test new linetable iterator"
+gdb_test "python print(len(list(gdb.LineTable(st, \[\]))))" \
+    "0" \
+    "test creating empty linetable"
+gdb_test "python gdb.LineTable(123, \[gdb.LineTableEntry(10, 0x123)\])" \
+    "TypeError.*:.*" \
+    "test creating linetable with invalid symtab"
+gdb_test "python gdb.LineTable(st, gdb.LineTableEntry(10, 0x123))" \
+    "TypeError.*:.*" \
+    "test creating linetable with invalid entries"
+gdb_test "python gdb.LineTable(st, \[gdb.LineTableEntry(10, 0x123), \"xxx\"\])" \
+    "TypeError.*:.*" \
+    "test creating linetable with invalid element in entries"

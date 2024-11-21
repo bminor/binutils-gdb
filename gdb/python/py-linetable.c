@@ -17,7 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <algorithm>
 #include "python-internal.h"
+#include "objfiles.h"
 
 struct linetable_entry_object {
   PyObject_HEAD
@@ -294,6 +296,102 @@ ltpy_is_valid (PyObject *self, PyObject *args)
   Py_RETURN_TRUE;
 }
 
+/* Object initializer; creates new linetable.
+
+   Use: __init__(SYMTAB, ENTRIES).  */
+
+static int
+ltpy_init (PyObject *zelf, PyObject *args, PyObject *kw)
+{
+  struct linetable_object *self = (struct linetable_object*) zelf;
+
+  static const char *keywords[] = { "symtab", "entries", nullptr };
+  PyObject *symtab_obj;
+  PyObject *entries;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OO", keywords,
+					&symtab_obj, &entries))
+    return -1;
+
+  struct symtab *symtab = symtab_object_to_symtab (symtab_obj);
+  if (symtab == nullptr)
+    {
+      PyErr_Format (PyExc_TypeError,
+		    _("The symtab argument is not valid gdb.Symtab."));
+      return -1;
+    }
+
+  if (!PyList_Check (entries))
+    {
+      PyErr_Format (PyExc_TypeError,
+		    _("The entries parameter is not a list."));
+      return -1;
+    }
+
+  struct objfile *objfile = symtab->compunit ()->objfile ();
+
+  /* Commit 1acc9dca "Change linetables to be objfile-independent"
+     changed linetables so that entries contain relative of objfile's
+     text section offset.  Since the objfile has been created dynamically
+     and may not have "text" section offset initialized, we do it here.
+
+     Note that here no section is added to objfile (since that requires
+     having bfd_section first), only text offset.  */
+  if (objfile->sect_index_text == -1)
+    {
+      objfile->section_offsets.push_back (0);
+      objfile->sect_index_text = objfile->section_offsets.size () - 1;
+    }
+  CORE_ADDR text_section_offset = objfile->text_section_offset ();
+
+  long nentries = PyList_Size (entries);
+  long linetable_size
+    = sizeof (struct linetable)
+      + std::max(nentries - 1, 0L) * sizeof (struct linetable_entry);
+  struct linetable *linetable
+    = (struct linetable *)obstack_alloc (&(objfile->objfile_obstack),
+					 linetable_size);
+  linetable->nitems = nentries;
+  for (int i = 0; i < nentries; i++)
+    {
+      linetable_entry_object *entry_obj
+	= (linetable_entry_object *)PyList_GetItem (entries, i);
+			;
+      if (! PyObject_TypeCheck (entry_obj , &linetable_entry_object_type))
+	{
+	  PyErr_Format (PyExc_TypeError,
+		       _("Element at %d of entries argument is not a "
+			 "gdb.LineTableEntry object"), i);
+	  return -1;
+	}
+
+      /* Since PC of entries passed to this function are "unrelocated",
+	 we compensate here.  */
+      CORE_ADDR pc ((CORE_ADDR)entry_obj->pc - text_section_offset);
+
+      linetable->item[i].line = entry_obj->line;
+      linetable->item[i].set_unrelocated_pc (unrelocated_addr (pc));
+      linetable->item[i].is_stmt = entry_obj->is_stmt;
+      linetable->item[i].prologue_end = entry_obj->prologue_end;
+      linetable->item[i].epilogue_begin = entry_obj->epilogue_begin;
+    }
+  /* Now sort the entries in increasing PC order.  */
+  if (nentries > 0)
+    {
+      auto linetable_entry_ordering = [] (const struct linetable_entry &e1,
+					  const struct linetable_entry &e2)
+	{
+	  return e1.unrelocated_pc () < e2.unrelocated_pc ();
+	};
+      std::sort (&(linetable->item[0]), &(linetable->item[nentries]),
+		 linetable_entry_ordering);
+    }
+  symtab->set_linetable (linetable);
+  self->symtab = symtab_obj;
+  Py_INCREF (symtab_obj);
+
+  return 0;
+}
 /* Deconstructor for the line table object.  Decrement the reference
    to the symbol table object before calling the default free.  */
 
@@ -302,7 +400,8 @@ ltpy_dealloc (PyObject *self)
 {
   linetable_object *obj = (linetable_object *) self;
 
-  Py_DECREF (obj->symtab);
+  if (obj->symtab)
+    Py_DECREF (obj->symtab);
   Py_TYPE (self)->tp_free (self);
 }
 
@@ -591,8 +690,9 @@ PyTypeObject linetable_object_type = {
   0,				  /* tp_descr_get */
   0,				  /* tp_descr_set */
   0,				  /* tp_dictoffset */
-  0,    			  /* tp_init */
+  ltpy_init,   			  /* tp_init */
   0,				  /* tp_alloc */
+  PyType_GenericNew		  /* tp_new */
 };
 
 static PyMethodDef ltpy_iterator_methods[] = {
