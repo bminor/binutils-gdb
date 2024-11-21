@@ -579,7 +579,8 @@ PyTypeObject symtab_object_type = {
   "GDB symtab object",		  /*tp_doc */
   0,				  /*tp_traverse */
   0,				  /*tp_clear */
-  0,				  /*tp_richcompare */
+  gdbpy_richcompare<symtab_object, symtab, &symtab_object::symtab>,
+				    /*tp_richcompare */
   0,				  /*tp_weaklistoffset */
   0,				  /*tp_iter */
   0,				  /*tp_iternext */

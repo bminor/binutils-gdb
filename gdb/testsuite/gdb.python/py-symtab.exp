@@ -89,6 +89,27 @@ gdb_test_multiple "python print (\"simple_struct\" in static_symbols)" \
 	    }
 	}
     }
+# Test comparison for equality and non-equality
+gdb_test "python print (symtab == symtab)"\
+    "True" \
+    "test symtab equality with itself"
+gdb_test "python print (symtab == sal.symtab)"\
+    "True" \
+    "test symtab equality with other symtab object referring to the same symtab"
+gdb_test "python print (symtab == 123 )"\
+    "False" \
+    "test symtab equality with non-symtab"
+
+gdb_test "python print (symtab != symtab)"\
+    "False" \
+    "test symtab non-equality with itself"
+gdb_test "python print (symtab != sal.symtab)"\
+    "False" \
+    "test symtab non-equality with other symtab object referring to the same symtab"
+gdb_test "python print (symtab != 123 )"\
+    "True" \
+    "test symtab non-equality with non-symtab"
+
 
 # Test is_valid when the objfile is unloaded.  This must be the last
 # test as it unloads the object file in GDB.
