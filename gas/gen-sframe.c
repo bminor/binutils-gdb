@@ -1272,6 +1272,19 @@ sframe_xlate_do_aarch64_negate_ra_state (struct sframe_xlate_ctx *xlate_ctx,
   return SFRAME_XLATE_OK;
 }
 
+/* Translate DW_CFA_AARCH64_negate_ra_state_with_pc into SFrame context.
+   Return SFRAME_XLATE_OK if success.  */
+
+static int
+sframe_xlate_do_aarch64_negate_ra_state_with_pc (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
+						 struct cfi_insn_data *cfi_insn ATTRIBUTE_UNUSED)
+{
+  as_warn (_("skipping SFrame FDE; .cfi_negate_ra_state_with_pc"));
+  /* The used signing method should be encoded inside the FDE in SFrame v3.
+     For now, PAuth_LR extension is not supported with SFrame.  */
+  return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
+}
+
 /* Translate DW_CFA_GNU_window_save into SFrame context.
    DW_CFA_GNU_window_save is a DWARF Sparc extension, but is multiplexed with a
    directive of DWARF AArch64 extension: DW_CFA_AARCH64_negate_ra_state.
@@ -1386,6 +1399,9 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
        DW_CFA_GNU_window_save.  */
     case DW_CFA_GNU_window_save:
       err = sframe_xlate_do_gnu_window_save (xlate_ctx, cfi_insn);
+      break;
+    case DW_CFA_AARCH64_negate_ra_state_with_pc:
+      err = sframe_xlate_do_aarch64_negate_ra_state_with_pc (xlate_ctx, cfi_insn);
       break;
     case DW_CFA_register:
       err = sframe_xlate_do_register (xlate_ctx, cfi_insn);
