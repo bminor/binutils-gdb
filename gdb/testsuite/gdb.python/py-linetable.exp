@@ -81,3 +81,28 @@ gdb_test "python print(lt.has_line(44))" \
 gdb_test "python print(lt.has_line(10))" \
     "False.*" \
     "test has_pcs at line 10"
+
+# Test gdb.LineTableEntry.__init__ ()
+gdb_test "python print( gdb.LineTableEntry(10, 0xcafe0000).line)" \
+    "10" \
+    "test new LineTableEntry line"
+
+gdb_test "python print( gdb.LineTableEntry(10, 123456).pc)" \
+    "123456" \
+    "test new LineTableEntry pc"
+
+gdb_test "python print( gdb.LineTableEntry(10, 123456).is_stmt)" \
+    "False" \
+    "test new LineTableEntry is_stmt"
+gdb_test "python print( gdb.LineTableEntry(10, 123456).prologue_end)" \
+    "False" \
+    "test new LineTableEntry prologue_end"
+gdb_test "python print( gdb.LineTableEntry(10, 123456).epilogue_begin)" \
+    "False" \
+    "test new LineTableEntry epilogue_begin"
+gdb_test "python print( gdb.LineTableEntry('xx', 123456).pc)" \
+    "TypeError.*:.*" \
+    "test creating invalid gdb.LineTableEntry"
+gdb_test "python print( gdb.LineTableEntry(10, 123456, prologue_end = True).prologue_end)" \
+    "True" \
+    "test prologue_end keyword argument"

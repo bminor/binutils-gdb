@@ -146,7 +146,7 @@ build_line_table_tuple_from_entries (
 
   for (i = 0; i < entries.size (); ++i)
     {
-      auto entry = entries[i];
+      const linetable_entry *entry = entries[i];
       gdbpy_ref<> obj (build_linetable_entry (
 			entry->line, entry->pc (objfile), entry->is_stmt,
 			entry->prologue_end, entry->epilogue_begin));
@@ -390,6 +390,41 @@ ltpy_entry_get_epilogue_begin (PyObject *self, void *closure)
     Py_RETURN_FALSE;
 }
 
+/* Object initializer; creates new linetable entry.
+
+   Use: __init__(LINE, PC, IS_STMT, PROLOGUE_END, EPILOGUE_BEGIN).  */
+
+static int
+ltpy_entry_init (PyObject *zelf, PyObject *args, PyObject *kw)
+{
+  linetable_entry_object *self = (linetable_entry_object *) zelf;
+
+   static const char *keywords[] = { "line", "pc", "is_stmt", "prologue_end",
+				     "epilogue_begin", nullptr };
+   int line = 0;
+   CORE_ADDR pc = 0;
+   int is_stmt = 0;
+   int prologue_end = 0;
+   int epilogue_begin = 0;
+
+   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "iK|ppp",
+	  keywords,
+	  &line,
+	  &pc,
+	  &is_stmt,
+	  &prologue_end,
+	  &epilogue_begin))
+    return -1;
+
+   self->line = line;
+   self->pc = pc;
+   self->is_stmt = is_stmt == 1 ? true : false;
+   self->prologue_end = prologue_end == 1 ? true : false;
+   self->epilogue_begin = epilogue_begin == 1 ? true : false;
+
+   return 0;
+}
+
 /* LineTable iterator functions.  */
 
 /* Return a new line table iterator.  */
@@ -604,12 +639,12 @@ static gdb_PyGetSetDef linetable_entry_object_getset[] = {
     "The line number in the source file.", NULL },
   { "pc", ltpy_entry_get_pc, NULL,
     "The memory address for this line number.", NULL },
-  { "is_stmt", ltpy_entry_get_is_stmt, NULL,
-    "Whether this is a good location to place a breakpoint for associated LINE.", NULL },
-  { "prologue_end", ltpy_entry_get_prologue_end, NULL,
-    "Whether this is a good location to place a breakpoint after method prologue.", NULL },
-  { "epilogue_begin", ltpy_entry_get_epilogue_begin, NULL,
-    "True if this location marks the start of the epilogue.", NULL },
+  { "is_stmt", ltpy_entry_get_is_stmt, nullptr,
+    "Whether this is a good location to place a breakpoint for associated LINE.", nullptr },
+  { "prologue_end", ltpy_entry_get_prologue_end, nullptr,
+    "Whether this is a good location to place a breakpoint after method prologue.", nullptr },
+  { "epilogue_begin", ltpy_entry_get_epilogue_begin, nullptr,
+    "True if this location marks the start of the epilogue.", nullptr },
   { NULL }  /* Sentinel */
 };
 
@@ -650,6 +685,7 @@ PyTypeObject linetable_entry_object_type = {
   0,				  /* tp_descr_get */
   0,				  /* tp_descr_set */
   0,				  /* tp_dictoffset */
-  0,	                          /* tp_init */
+  ltpy_entry_init,		  /* tp_init */
   0,				  /* tp_alloc */
+  PyType_GenericNew,		  /* tp_new */
 };

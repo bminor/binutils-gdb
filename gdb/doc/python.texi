@@ -6691,6 +6691,14 @@ True if pc (associated with this entry) marks the start of the epilogue.
 This attribute is not writable.
 @end defvar
 
+@code{LineTableEntry} objects have the following methods:
+
+@defun LineTableEntry.__init__ (line, pc@r{[}, is_stmt@r{][}, prologue_end@r{][}, epilogue_begin@r{]})
+Create new line table entry. Arguments correspond to @code{LineTableEntry}
+attributes described above.  Optional arguments @var{is_stmt},
+@var{prologue_end} and @var{epilogue_begin} default to @code{False}.
+@end defun
+
 As there can be multiple addresses for a single source line, you may
 receive multiple @code{LineTableEntry} objects with matching
 @code{line} attributes, but with different @code{pc} attributes.  The
