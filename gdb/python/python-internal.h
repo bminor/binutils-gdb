@@ -575,6 +575,7 @@ frame_info_ptr frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 struct compunit_symtab *compunit_object_to_compunit (PyObject *obj);
 inferior *inferior_object_to_inferior(PyObject *obj);
+struct objfile *objfile_object_to_objfile(PyObject *obj);
 
 extern PyObject *gdbpy_execute_mi_command (PyObject *self, PyObject *args,
 					   PyObject *kw);

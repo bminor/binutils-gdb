@@ -6551,7 +6551,7 @@ that objfile.  @xref{Objfiles In Python}.
 A @code{gdb.Compunit} object has the following attributes:
 
 @defvar Compunit.objfile
-The compunits' backing object file.  @xref{Objfiles In Python}.
+The compunit's backing object file.  @xref{Objfiles In Python}.
 This attribute is not writable.
 @end defvar
 
@@ -6569,6 +6569,22 @@ The list of symbol tables associated with this compunit.
 @end defvar
 
 A @code{gdb.Compunit} object has the following methods:
+
+@defun Compunit.__init__ (filename, objfile, start, end @r{[}, capacity @r{]})
+Create a new compunit with given @var{filename} in given @var{objfile}
+(@pxref{Objfiles In Python}).  The newly created compunit has an empty global
+block and empty static block (@pxref{Blocks In Python}).
+
+The @var{start} and @var{end} arguments specifies the start and end address
+of compunit's global and static blocks.  It must not overlap with any existing
+compunit belonging to the same program space
+(@pxref{Progspaces In Python}).
+
+The optional @var{capacity} argument sets the initial capacity of the
+internal block vector.  More blocks than @var{capacity} can still be added
+to the compunit however.  If not specified, defaults to 8 blocks (including
+global and static blocks).
+@end defun
 
 @defun Compunit.is_valid ()
 Returns @code{True} if the @code{gdb.Compunit} object is valid,

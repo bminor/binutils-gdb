@@ -54,9 +54,49 @@ gdb_test "python print (objfile.compunits()\[0\].symtabs)" \
     "Compunit symtabs return a sequence of gdb.Symtab"
 
 
+# Test creation of compunits
+gdb_py_test_silent_cmd "python cu = gdb.Compunit(\"compunit1\", objfile, 200, 300)" \
+    "Create compunit1" 1
+gdb_test "python print(cu)" \
+    "<gdb\.Compunit object at .*>" \
+    "Print created compunit1"
+gdb_test "python print(cu in objfile.compunits())" \
+    "True" \
+    "Test compunit1 is in objfile.compunits()"
+gdb_test "python print(cu.global_block().start)" \
+    "0" \
+    "Test compunit1.global_block().start is 0"
+gdb_test "python print(cu.global_block().end)" \
+    "0" \
+    "Test compunit1.global_block().end is 0"
+gdb_test "python print(cu.static_block().start)" \
+    "0" \
+    "Test compunit1.static_block().start is 0"
+gdb_test "python print(cu.static_block().end)" \
+    "0" \
+    "Test compunit1.static_block().end is 0"
+
+gdb_py_test_silent_cmd "python cu2 = gdb.Compunit(\"dynamic2\", objfile, 400, 500, 24)" \
+    "Create compunit2 with capacity fo 24 blocks" 1
+
+gdb_test "python cu3 = gdb.Compunit(\"dynamic3\", gdb, 600, 700)" \
+    "TypeError.*:.*" \
+    "Create compunit3 passing non-objfile"
+
+gdb_test "python cu4 = gdb.Compunit(\"dynamic4\", objfile, 900, 800)" \
+    "ValueError.*:.*" \
+    "Create compunit4 passing invalid global block range"
+
+gdb_test "python cu5 = gdb.Compunit(\"dynamic5\", objfile, 225, 325)" \
+    "ValueError.*:.*" \
+    "Create compunit4 passing overlapping global block range"
+
+
 gdb_unload "unload 1"
 
 gdb_test "python print (objfile.is_valid())" "False" \
 "Get objfile validity after unload"
 gdb_test "python print (objfile.compunits())" "RuntimeError.*: Objfile no longer exists.*" \
 "Get objfile compunits after unload"
+gdb_py_test_silent_cmd "python cu6 = gdb.Compunit(\"dynamic6\", objfile)" \
+    "Create compunit4 passing invalid objfile" 1

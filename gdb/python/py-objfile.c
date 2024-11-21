@@ -824,6 +824,18 @@ objfile_to_objfile_object (struct objfile *objfile)
   return gdbpy_ref<>::new_reference (result);
 }
 
+/* Returns the struct objfile value corresponding to the given Python
+   objfile object OBJ.  Returns NULL if OBJ is not an objfile object.  */
+
+struct objfile *
+objfile_object_to_objfile (PyObject *obj)
+{
+  if (! PyObject_TypeCheck (obj, &objfile_object_type))
+    return nullptr;
+
+  return ((objfile_object *)obj)->objfile;
+}
+
 /* This function remove any dynamic objfiles left over when the
    inferior exits.  */
 
