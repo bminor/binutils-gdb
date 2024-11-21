@@ -225,6 +225,16 @@ python_free_objfile (struct objfile *objfile)
     gdbpy_print_stack ();
 }
 
+/* Return inferior reference that is wrapped by this object.  */
+
+inferior *
+inferior_object_to_inferior (PyObject *obj)
+{
+  if (! PyObject_TypeCheck (obj, &inferior_object_type))
+    return nullptr;
+  return ((inferior_object *) obj)->inferior;
+}
+
 /* Return a reference to the Python object of type Inferior
    representing INFERIOR.  If the object has already been created,
    return it and increment the reference count,  otherwise, create it.

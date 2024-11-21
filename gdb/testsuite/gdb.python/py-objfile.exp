@@ -172,4 +172,40 @@ if ![ishost *-*-mingw*] {
 gdb_py_test_silent_cmd "python objfile = gdb.objfiles()\[0\]" \
     "get first objfile" 1
 gdb_file_cmd ${binfile}
-gdb_test "python print(objfile)" "<gdb.Objfile \\\(invalid\\\)>"
+gdb_test "python print(objfile)" "<gdb.Objfile \\\(invalid\\\)>" "print invalid objfile"
+
+# Test creating objfile dynamically from Python
+gdb_py_test_silent_cmd "python objfile = gdb.Objfile(\"Test objfile\")" \
+	"create objfile" 1
+
+gdb_test "python print(objfile)" \
+	"<gdb.Objfile filename=Test objfile>" \
+	"print dynamic objfile"
+
+gdb_test "python print(objfile.is_file)" \
+	"False" \
+	"(dynamic) objfile.is_file"
+
+gdb_test "python print(objfile.is_valid())" \
+	"True" \
+	"(dynamic) objfile.is_valid()"
+
+gdb_test "python print(objfile in gdb.objfiles())" \
+	"True" \
+	"(dynamic) objfile in gdb.objfiles()"
+
+gdb_test "python print( gdb.Objfile(\"Test objfile 2\", gdb.selected_inferior()))" \
+	"<gdb.Objfile filename=Test objfile 2>" \
+	"create objfile with inferior"
+
+gdb_test "python print( gdb.Objfile(\"Test objfile 3\", gdb.selected_inferior(), gdb.selected_inferior().architecture()))" \
+	"<gdb.Objfile filename=Test objfile 3>" \
+	"create objfile with inferior and arch"
+
+gdb_test "python print( gdb.Objfile(\"Test objfile 4\", gdb))" \
+	"TypeError.*:.*" \
+	"create objfile with invalid inferior"
+
+gdb_test "python print( gdb.Objfile(\"Test objfile 5\", gdb.selected_inferior(), gdb.selected_inferior()))" \
+	"TypeError.*:.*" \
+	"create objfile with valid inferior but invalid arch"
