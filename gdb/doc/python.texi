@@ -6203,6 +6203,11 @@ of a symbol.  Each address class is a constant defined in the
 @code{gdb} module and described later in this chapter.
 @end defvar
 
+@defvar Symbol.domain
+The domain of the symbol.  Each domain is a constant defined in the
+@code{gdb} module and described later in this chapter.
+@end defvar
+
 @defvar Symbol.needs_frame
 This is @code{True} if evaluating this symbol's value requires a frame
 (@pxref{Frames In Python}) and @code{False} otherwise.  Typically,
