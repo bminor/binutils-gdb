@@ -6508,6 +6508,10 @@ This attribute is not writable.
 
 A @code{gdb.Symtab} object has the following methods:
 
+@defun Symtab.__init__ (filename, compunit)
+Create a new symtab for given @var{filename} in given @var{compunit}.
+@end defun
+
 @defun Symtab.is_valid ()
 Returns @code{True} if the @code{gdb.Symtab} object is valid,
 @code{False} if not.  A @code{gdb.Symtab} object can become invalid if

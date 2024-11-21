@@ -119,6 +119,17 @@ gdb_test "python print (symtab.compunit.global_block() is symtab.global_block())
 gdb_test "python print (symtab.compunit.static_block() is symtab.static_block())" \
     "True" "Test symtab.compunit.static_block() is symtab.static_block()"
 
+# Test creating new symtab in existing compunit
+gdb_py_test_silent_cmd "python cu = symtab.compunit" "remember compunit" 1
+gdb_test "python print(repr( gdb.Symtab(\"some_file.txt\", cu) ))" \
+    "<gdb.Symtab object at .*>" \
+    "test creation of symtab"
+
+gdb_test "python print(repr( gdb.Symtab(\"some_file.txt\", (1,2,3)) ))" \
+    "TypeError.*:.*" \
+    "test creation of symtab passing non-compunit object"
+
+
 # Test is_valid when the objfile is unloaded.  This must be the last
 # test as it unloads the object file in GDB.
 gdb_unload
@@ -129,3 +140,7 @@ gdb_test "python print (symtab.is_valid())" "False" \
 
 gdb_test_no_output "python sal = None" "test sal destructor"
 gdb_test_no_output "python symtab = None" "test symtab destructor"
+
+gdb_test "python print(repr( gdb.Symtab(\"some_file2.txt\", cu) ))" \
+    "TypeError.*:.*" \
+    "test creation of symtab passing invalid compunit"
