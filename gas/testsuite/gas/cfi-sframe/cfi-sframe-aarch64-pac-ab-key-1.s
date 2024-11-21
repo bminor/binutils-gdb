@@ -8,12 +8,12 @@ _Z5foo_av:
 .LFB0:
 	.cfi_startproc
 	hint	25 // paciasp
-	.cfi_window_save
+	.cfi_negate_ra_state
 	stp	x29, x30, [sp, -16]!
 	.cfi_def_cfa_offset 16
 	.cfi_offset 29, -16
 	.cfi_offset 30, -8
-        ret
+	ret
 	.cfi_endproc
 .LFE0:
 	.size	_Z5foo_av, .-_Z5foo_av
@@ -25,12 +25,12 @@ _Z5foo_bv:
 	.cfi_startproc
 	.cfi_b_key_frame
 	hint	27 // pacibsp
-	.cfi_window_save
+	.cfi_negate_ra_state
 	stp	x29, x30, [sp, -16]!
 	.cfi_def_cfa_offset 16
 	.cfi_offset 29, -16
 	.cfi_offset 30, -8
 	nop
 	nop
-        ret
+	ret
 	.cfi_endproc
