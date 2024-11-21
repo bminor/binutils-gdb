@@ -138,6 +138,26 @@ gdb_test "python print ( gdb.Block(cu.static_block(), 160, 170))" \
 	 "<gdb.Block <anonymous> \{.*\}>" \
 	 "Create sibling block"
 
+# Test adding symbols to a block.
+gdb_py_test_silent_cmd "python symtab = gdb.Symtab(\"some_file.txt\", cu)" \
+		       "Create new symtab" 1
+gdb_py_test_silent_cmd "python typ = gdb.selected_inferior().architecture().integer_type(0).function()" \
+		       "Create type of new symbol" 1
+gdb_py_test_silent_cmd "python sym = gdb.Symbol(\"static_block\", symtab, typ, gdb.SYMBOL_FUNCTION_DOMAIN, gdb.SYMBOL_LOC_BLOCK, cu.static_block() )" \
+		       "Create new symbol" 1
+gdb_test "python print ( sym in list(cu.global_block()) )" \
+	 "False" \
+	 "Symbol is not in global block"
+gdb_py_test_silent_cmd "python cu.global_block().add_symbol(sym)" \
+		       "Add new symbol to block" 1
+gdb_test "python print ( sym in list(cu.global_block()) )" \
+		       "True" \
+		       "Symbol is in global block"
+gdb_test "python print ( cu.global_block().add_symbol(cu))" \
+	 "TypeError.*:.*" \
+	 "Add non-symbol to block"
+
+
 # Test Block is_valid.  This must always be the last test in this
 # testcase as it unloads the object file.
 delete_breakpoints

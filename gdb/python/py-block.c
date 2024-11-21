@@ -261,6 +261,43 @@ blpy_is_static (PyObject *self, void *closure)
   Py_RETURN_FALSE;
 }
 
+/* Implementation of gdb.Block.add_symbol (self, symbol).
+   Adds SYMBOL to this block.  */
+
+static PyObject *
+blpy_add_symbol (PyObject *self, PyObject *symbol_obj)
+{
+  const struct block *block;
+
+  BLPY_REQUIRE_VALID (self, block);
+
+  struct symbol *symbol = symbol_object_to_symbol (symbol_obj);
+  if (symbol == nullptr)
+    {
+      return PyErr_Format (PyExc_TypeError,
+			   _("The symbol argument is not valid gdb.Symbol"));
+    }
+
+  if (symbol->symtab ()->compunit() != block->global_block ()->compunit ())
+    {
+      return PyErr_Format (PyExc_TypeError,
+			   _("The symbol argument belongs to different "
+			     "compunit than block"));
+    }
+
+  multidictionary *dict = block->multidict ();
+  if (dict == nullptr)
+    {
+      auto_obstack *obstack =
+	&(block->global_block ()->compunit ()->objfile ()->objfile_obstack);
+      dict = mdict_create_linear (obstack, nullptr);
+      const_cast<struct block *>(block)->set_multidict (dict);
+    }
+
+  mdict_add_symbol (dict, symbol);
+  Py_RETURN_NONE;
+}
+
 /* Given a string, returns the gdb.Symbol representing that symbol in this
    block.  If such a symbol does not exist, returns NULL with a Python
    exception.  */
@@ -358,7 +395,7 @@ blpy_init (PyObject *zelf, PyObject *args, PyObject *kw)
       return -1;
     }
 
-  static const char *keywords[] = { "superblock", "start", "end", NULL };
+  static const char *keywords[] = { "superblock", "start", "end", nullptr };
   PyObject *superblock_obj;
   uint64_t start;
   uint64_t end;
@@ -398,9 +435,9 @@ blpy_init (PyObject *zelf, PyObject *args, PyObject *kw)
 
   /* Check that start-end range does not overlap with any
      "sibling" blocks' range.  */
-  auto cu = superblock->global_block ()->compunit ();
+  compunit_symtab *cu = superblock->global_block ()->compunit ();
 
-  for (auto each : cu->blockvector ()->blocks ())
+  for (const struct block *each : cu->blockvector ()->blocks ())
     {
       if (each->superblock () == superblock)
 	{
@@ -415,11 +452,11 @@ blpy_init (PyObject *zelf, PyObject *args, PyObject *kw)
 	}
     }
 
-  auto obstack = &(cu->objfile ()->objfile_obstack);
-  auto blk = new (obstack) block ();
+  auto_obstack *obstack = &(cu->objfile ()->objfile_obstack);
+  struct block *blk = new (obstack) block ();
 
   blk->set_superblock (superblock);
-  blk->set_multidict (mdict_create_linear (obstack, NULL));
+  blk->set_multidict (mdict_create_linear (obstack, nullptr));
   blk->set_start ((CORE_ADDR) start);
   blk->set_end ((CORE_ADDR) end);
 
@@ -651,6 +688,9 @@ static PyMethodDef block_object_methods[] = {
   { "is_valid", blpy_is_valid, METH_NOARGS,
     "is_valid () -> Boolean.\n\
 Return true if this block is valid, false if not." },
+  { "add_symbol", blpy_add_symbol, METH_O,
+    "add_symbol (symbol) -> None.\n\
+Add given symbol to the block." },
   {NULL}  /* Sentinel */
 };
 

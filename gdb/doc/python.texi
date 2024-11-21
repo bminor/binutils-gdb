@@ -6043,6 +6043,11 @@ The new block's @var{start}--@var{end} range must be within superblock's
 range and must not overlap with any block already contained in superblock.
 @end defun
 
+@defun Block.add_symbol (symbol)
+Add @var{symbol} to this block.  Both the block and the @var{symbol} must
+belong to the same compunit (@pxref{Compunits In Python}).
+@end defun
+
 @defun Block.is_valid ()
 Returns @code{True} if the @code{gdb.Block} object is valid,
 @code{False} if not.  A block object can become invalid if the block it
