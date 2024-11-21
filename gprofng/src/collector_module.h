@@ -107,7 +107,6 @@ typedef struct CollectorUtilFuncs
   int (*symlink)(const char *s1, const char *s2);
   int (*syscall)(int number, ...);
   long (*sysconf)(int name);
-  long (*sysinfo)(int command, char *buf, long count);
   time_t (*time)(time_t *tloc);
   int (*unsetenv)(const char *name);
   int (*vsnprintf)(char *str, size_t size, const char *format, ...);

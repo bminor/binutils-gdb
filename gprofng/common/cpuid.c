@@ -21,7 +21,9 @@
 #if defined(__i386__) || defined(__x86_64)
 #include <cpuid.h>  /* GCC-provided */
 #elif defined(__aarch64__)
+#if !defined(ATTRIBUTE_UNUSED)
 #define ATTRIBUTE_UNUSED __attribute__((unused))
+#endif
 
 static inline uint_t __attribute_const__
 __get_cpuid (unsigned int op ATTRIBUTE_UNUSED, unsigned int *eax,

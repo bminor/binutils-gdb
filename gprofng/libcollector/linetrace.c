@@ -1527,7 +1527,7 @@ DCL_FUNC_VER (DCL_POSIX_SPAWNP, posix_spawnp_2_2, posix_spawnp@GLIBC_2.2)
 DCL_POSIX_SPAWNP (posix_spawnp)
 
 /*------------------------------------------------------------- system */
-int system () __attribute__ ((weak, alias ("__collector_system")));
+int system (const char *cmd) __attribute__ ((weak, alias ("__collector_system")));
 
 int
 __collector_system (const char *cmd)
@@ -1582,10 +1582,10 @@ DCL_FUNC_VER (DCL_POPEN, popen_2_0, popen@GLIBC_2.0)
 DCL_POPEN (popen)
 
 /*------------------------------------------------------------- grantpt */
-int grantpt () __attribute__ ((weak, alias ("__collector_grantpt")));
+int grantpt (int fildes) __attribute__ ((weak, alias ("__collector_grantpt")));
 
 int
-__collector_grantpt (const int fildes)
+__collector_grantpt (int fildes)
 {
   if (NULL_PTR (grantpt))
     init_lineage_intf ();
@@ -1607,10 +1607,10 @@ __collector_grantpt (const int fildes)
 }
 
 /*------------------------------------------------------------- ptsname */
-char *ptsname () __attribute__ ((weak, alias ("__collector_ptsname")));
+char *ptsname (int fildes) __attribute__ ((weak, alias ("__collector_ptsname")));
 
 char *
-__collector_ptsname (const int fildes)
+__collector_ptsname (int fildes)
 {
   if (NULL_PTR (ptsname))
     init_lineage_intf ();

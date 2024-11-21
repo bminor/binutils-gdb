@@ -1427,15 +1427,6 @@ __collector_util_init ()
       err = COL_ERROR_UTIL_INIT;
     }
 
-  ptr = dlsym (libc, "sysinfo");
-  if (ptr)
-    __collector_util_funcs.sysinfo = (long (*)())ptr;
-  else
-    {
-      CALL_UTIL (fprintf)(stderr, "collector_util_init COL_ERROR_UTIL_INIT sysinfo: %s\n", dlerror ());
-      err = COL_ERROR_UTIL_INIT;
-    }
-
   ptr = dlsym (libc, "clearenv");
   if (ptr)
     __collector_util_funcs.clearenv = (int(*)())ptr;

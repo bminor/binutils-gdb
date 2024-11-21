@@ -40,8 +40,8 @@ static void s_inline_code (int);
 void ext_inline_code (int);
 
 #ifndef NO_INLINE
-void xinline_code () __attribute__ ((always_inline));
-void s_inline_code () __attribute__ ((always_inline));
+void xinline_code (int) __attribute__ ((always_inline));
+void s_inline_code (int) __attribute__ ((always_inline));
 #endif
 
 #include "inc_inline.h"

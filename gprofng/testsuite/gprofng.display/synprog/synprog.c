@@ -528,14 +528,14 @@ reapchildren ()
 int
 doabort (int k)
 {
-  char *nullptr = NULL;
+  char *p = NULL;
   char c;
 
   /* Log the event */
   wlog ("start of doabort", NULL);
 
   /* and dereference a NULL */
-  c = *nullptr;
+  c = *p;
 
   /* this should never be reached */
   return (int) c;

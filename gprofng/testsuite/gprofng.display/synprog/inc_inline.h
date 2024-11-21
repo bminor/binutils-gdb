@@ -19,7 +19,7 @@
    MA 02110-1301, USA.  */
 
 #ifndef NO_INLINE
-void ext_inline_code() __attribute__ ((always_inline));
+void ext_inline_code(int) __attribute__ ((always_inline));
 #endif
 
 void
