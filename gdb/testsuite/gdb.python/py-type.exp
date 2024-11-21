@@ -365,6 +365,26 @@ if { [build_inferior "${binfile}" "c"] == 0 } {
   gdb_test "python print(gdb.lookup_type('int').optimized_out())" \
       "<optimized out>"
 
+  gdb_test_no_output "python int_t = gdb.lookup_type('int')"
+
+  gdb_test "python print(repr(int_t.function()))" \
+      "<gdb.Type code=TYPE_CODE_FUNC name=int \\(\\)>"
+
+  gdb_test "python print(repr(int_t.function(int_t, int_t, int_t)))" \
+      "<gdb.Type code=TYPE_CODE_FUNC name=int \\(int, int, int\\)>"
+
+  gdb_test "python print(repr(int_t.function(int_t, None)))" \
+      "<gdb.Type code=TYPE_CODE_FUNC name=int \\(int, ...\\)>"
+
+  gdb_test "python print(repr(int_t.function(None)))" \
+      "<gdb.Type code=TYPE_CODE_FUNC name=int \\(\\)>"
+
+  gdb_test "python print(repr(int_t.function(123)))" \
+      "TypeError.*:.*"
+
+   gdb_test "python print(repr(int_t.function(int_t, None, int_t)))" \
+      "ValueError.*:.*"
+
   set sint [get_sizeof int 0]
   gdb_test "python print(gdb.parse_and_eval('aligncheck').type.alignof)" \
       $sint

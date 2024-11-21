@@ -1574,6 +1574,14 @@ Return a new @code{gdb.Type} object which represents a pointer to this
 type.
 @end defun
 
+@defun Type.function (@r{[}param_type@dots{}@r{]})
+Return a new @code{gdb.Type} object which represents a type of function
+returning this type.  @code{param_type@dots{}} arguments specify parameter
+types.  Use @code{None} as last parameter type to create a vararg function
+type.  When invoked with single @code{None} argument or with no arguments at
+all it creates a vararg function taking zero or more parameters.
+@end defun
+
 @defun Type.strip_typedefs ()
 Return a new @code{gdb.Type} that represents the real type,
 after removing all layers of typedefs.

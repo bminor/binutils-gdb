@@ -774,6 +774,57 @@ typy_unqualified (PyObject *self, PyObject *args)
   return type_to_type_object (type);
 }
 
+/* Return a function type. */
+static PyObject *
+typy_function (PyObject *self, PyObject *args)
+{
+  struct type *type = ((type_object *) self)->type;
+
+  gdb_assert (PySequence_Check (args));
+
+  std::vector<struct type *> param_types (PySequence_Length (args));
+
+  for (int i = 0; i < PySequence_Length (args); i++)
+    {
+      PyObject *param_type_obj = PySequence_GetItem (args, i);
+
+      if (param_type_obj == Py_None)
+	{
+	  param_types[i] = nullptr;
+	  if (i != (PySequence_Length (args) - 1))
+	    {
+	      PyErr_Format (PyExc_ValueError,
+			    _("Argument at index %d is None but None can "
+			      "only be the last type."), i);
+	      return nullptr;
+	    }
+	}
+      else
+	{
+	  param_types[i] = type_object_to_type (param_type_obj);
+	  if (!param_types[i])
+	    {
+	      PyErr_Format (PyExc_TypeError,
+			    _("Argument at index %d is not a gdb.Type "
+			      "object."), i);
+	      return nullptr;
+	    }
+	}
+    }
+
+  try
+    {
+      type = lookup_function_type_with_arguments (
+	       type, param_types.size (), param_types.data ());
+    }
+  catch (const gdb_exception &except)
+    {
+      return gdbpy_handle_gdb_exception (nullptr, except);
+    }
+
+  return type_to_type_object (type);
+}
+
 /* Return the size of the type represented by SELF, in bytes.  */
 static PyObject *
 typy_get_sizeof (PyObject *self, void *closure)
@@ -1641,6 +1692,9 @@ Return the type of a template argument." },
   { "unqualified", typy_unqualified, METH_NOARGS,
     "unqualified () -> Type\n\
 Return a variant of this type without const or volatile attributes." },
+  { "function", typy_function, METH_VARARGS,
+    "function () -> Type\n\
+Return a function type returning value of this type." },
   { "values", typy_values, METH_NOARGS,
     "values () -> list\n\
 Return a list holding all the fields of this type.\n\
