@@ -1,0 +1,57 @@
+# Copyright (C) 2024-2024 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file is part of the GDB testsuite.  It test the Python API to
+# create symbol tables for dynamic (JIT) code and follows the example
+# code given in documentation (see section JIT Interface in Python)
+
+load_lib gdb-python.exp
+
+require allow_python_tests
+require is_x86_64_m64_target
+
+standard_testfile
+
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+    return -1
+}
+
+if ![runto_main] {
+    return 0
+}
+
+set remote_python_file [gdb_remote_download host \
+                                ${srcdir}/${subdir}/${testfile}.py]
+gdb_test_no_output "source ${remote_python_file}" "load python file"
+
+gdb_breakpoint [gdb_get_line_number "breakpoint 1 line" ${testfile}.c]
+gdb_continue_to_breakpoint "continue to breakpoint 1 line"
+gdb_test "disassemble /s jit_function_add" \
+	"Dump of assembler code for function jit_function_add:.*End of assembler dump." \
+	"disassemble jit_function_add"
+
+gdb_breakpoint "jit_function_add"
+gdb_continue_to_breakpoint "continue to jit_function_add"
+
+gdb_test "bt 1" \
+	"#0  jit_function_add \\(\\) at py-jit.c:.*" \
+	"bt 1"
+
+gdb_breakpoint [gdb_get_line_number "breakpoint 2 line" ${testfile}.c]
+gdb_continue_to_breakpoint "continue to breakpoint 2 line"
+
+gdb_test "disassemble jit_function_add" \
+	"No symbol \"jit_function_add\" in current context." \
+	"disassemble jit_function_add after code has been unregistered"

@@ -96,6 +96,10 @@
 
   ** Added class gdb.Compunit.
 
+  ** Extended the Python API to allow interfacing with JIT compilers using
+     Python (as an alternative to JIT reader API).  For details, see Section
+     "JIT Interface in Python" in GDB documentation.
+
 * Debugger Adapter Protocol changes
 
   ** The "scopes" request will now return a scope holding global

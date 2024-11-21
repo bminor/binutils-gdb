@@ -39886,7 +39886,8 @@ If you are using @value{GDBN} to debug a program that uses this interface, then
 it should work transparently so long as you have not stripped the binary.  If
 you are developing a JIT compiler, then the interface is documented in the rest
 of this chapter.  At this time, the only known client of this interface is the
-LLVM JIT.
+LLVM JIT.  An alternative to interface descrived below is to implement JIT
+interface in Python (@pxref{JIT Interface in Python}).
 
 Broadly speaking, the JIT interface mirrors the dynamic loader interface.  The
 JIT compiler communicates with @value{GDBN} by writing data into a global

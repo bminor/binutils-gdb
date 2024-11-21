@@ -233,6 +233,7 @@ optional arguments while skipping others.  Example:
 * Disassembly In Python::       Instruction Disassembly In Python
 * Missing Debug Info In Python:: Handle missing debug info from Python.
 * Missing Objfiles In Python::  Handle objfiles from Python.
+* JIT Interface in Python::     Writing JIT compilation interface in Python
 @end menu
 
 @node Basic Python
@@ -8553,6 +8554,127 @@ missing-objfile-handlers} above, but instead of listing the matching
 handlers, all of the matching handlers are enabled.  The
 @code{enabled} field of each matching handler is set to @code{True}.
 @end table
+
+@node JIT Interface in Python
+@subsubsection Writing JIT compilation interface in Python
+@cindex python, just-in-time compilation, JIT compilation interface
+
+This section provides a high-level overview how to implement a JIT compiler
+interface entirely in Python.  For alternative way of interfacing a JIT
+@pxref{JIT Interface}.
+
+A JIT compiler interface usually needs to implement three elements:
+
+@enumerate
+@item
+A way how to get notified when the JIT compiler compiles (and installs) new
+code and when existing code is discarded.  Typical solution is to put a Python
+breakpoint (@pxref{Breakpoints In Python}) on some function known to be
+called by the JIT compiler once code is installed or discarded.
+
+@item
+When a new code is installed the JIT interface needs to extract (debug)
+information for newly installed code from the JIT compiler
+(@pxref{Values From Inferior}) and build @value{GDBN}'s internal structures.
+@xref{Objfiles In Python}, @ref{Compunits In Python},
+ @ref{Blocks In Python},   @ref{Symbol Tables In Python},
+ @ref{Symbols In Python},  @ref{Line Tables In Python}).
+
+@item
+Finally, when (previously installed) code is discarded the JIT interface
+needs to discard @value{GDBN}'s internal structures built in previous step.
+This is done by calling @code{unlink} on an objfile for that code
+(which was created in previous step).
+@end enumerate
+
+Here's an example showing how to write a simple JIT interface in Python:
+
+@c The copy of the code below is also in testsuite/gdb.python/py-jit.py
+@c and used by py-jit.exp to make sure it is up to date.  If changed the
+@c test and py-jit.py should be checked and update accordingly if needed.
+@smallexample
+import gdb
+
+class JITRegisterCode(gdb.Breakpoint):
+    def stop(self):
+	# Extract new code's address, size, name, linetable (and possibly
+	# other useful information).  How exactly to do so depends on JIT
+	# compiler in question.
+	#
+	# In this example address, size and name get passed as parameters
+	# to registration function.
+
+	frame = gdb.newest_frame()
+	addr = int(frame.read_var('code'))
+	size = int(frame.read_var('size'))
+	name = frame.read_var('name').string()
+	linetable_entries = get_linetable_entries(addr)
+
+	# Create objfile and compunit for allocated "jitted" code
+	objfile = gdb.Objfile(name)
+	compunit = gdb.Compunit(name, objfile, addr, addr + size)
+
+	# Mark the objfile as "jitted" code.  This will be used later when
+	# unregistering discarded code to check the objfile was indeed
+	# created for "jitted" code.
+	setattr(objfile, "is_jit_code", True)
+
+	# Create block for jitted function
+	block = gdb.Block(compunit.static_block(), addr, addr + size)
+
+	# Create symbol table holding info about jitted function, ...
+	symtab = gdb.Symtab("py-jit.c", compunit)
+	linetable = gdb.LineTable(symtab, linetable_entries)
+
+	# ...type of the jitted function...
+	void_t = gdb.selected_inferior().architecture().void_type()
+	func_t = void_t.function(None)
+
+	# ...and symbol representing jitted function.
+	symbol = gdb.Symbol(name, symtab, func_t,
+			    gdb.SYMBOL_FUNCTION_DOMAIN, gdb.SYMBOL_LOC_BLOCK,
+			    block)
+
+	# Finally, register the symbol in static block...
+	compunit.static_block().add_symbol(symbol)
+
+	# ..and continue execution
+	return False
+
+# Create breakpoint to register new code
+JITRegisterCode("jit_register_code", internal=True)
+
+
+class JITUnregisterCode(gdb.Breakpoint):
+    def stop(self):
+	# Find out which code has been discarded.  Again, how exactly to
+	# do so depends on JIT compiler in question.
+	#
+	# In this example address of discarded code is passed as a
+	# parameter.
+
+	frame = gdb.newest_frame()
+	addr = int(frame.read_var('code'))
+
+	# Find objfile which was created in JITRegisterCode.stop() for
+	# given jitted code.
+	objfile = gdb.current_progspace().objfile_for_address(addr)
+	if objfile is None:
+	    # No objfile for given addr (this should not normally happen)
+	    return False # Continue execution
+	if not getattr(objfile, "is_jit_code", False):
+	    # Not a jitted code (this should not happen either)
+	    return False # Continue execution
+
+	# Remove the objfile and all debug info associated with it...
+	objfile.unlink()
+
+	# ..and continue execution
+	return False # Continue execution
+
+# Create breakpoint to discard old code
+JITUnregisterCode("jit_unregister_code", internal=True)
+@end smallexample
 
 @node Python Auto-loading
 @subsection Python Auto-loading
