@@ -209,3 +209,15 @@ gdb_test "python print( gdb.Objfile(\"Test objfile 4\", gdb))" \
 gdb_test "python print( gdb.Objfile(\"Test objfile 5\", gdb.selected_inferior(), gdb.selected_inferior()))" \
 	"TypeError.*:.*" \
 	"create objfile with valid inferior but invalid arch"
+
+gdb_test "python print(objfile.unlink())" \
+	"None" \
+	"remove (dynamic) objfile"
+
+gdb_test "python print(objfile in gdb.objfiles())" \
+	"False" \
+	"removed (dynamic) objfile no longer in gdb.objfiles()"
+
+gdb_test "python print(objfile.is_valid())" \
+	"False" \
+	"removes (dynamic) objfile is no longer valid"

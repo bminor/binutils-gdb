@@ -5710,6 +5710,12 @@ Return a sequence of all the compunits associated with this objfile.
 @xref{Compunits In Python}.
 @end defun
 
+@defun Objfile.unlink ()
+Remove this objfile.  This should be used only on objfiles created by
+Python (see @code{Objfile.__init__} above) but @code{Objfile.unlink} does
+not make any checks.
+@end defun
+
 @node Frames In Python
 @subsubsection Accessing inferior stack frames from Python
 

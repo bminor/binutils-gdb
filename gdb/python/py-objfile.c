@@ -608,6 +608,20 @@ objfpy_lookup_static_symbol (PyObject *self, PyObject *args, PyObject *kw)
   Py_RETURN_NONE;
 }
 
+/* Implementation of gdb.Objfile.unlink ().  */
+
+static PyObject *
+objfpy_unlink (PyObject *self, PyObject *args)
+{
+  objfile_object *obj = (objfile_object *) self;
+
+  OBJFPY_REQUIRE_VALID (obj);
+
+  obj->objfile->unlink();
+
+  Py_RETURN_NONE;
+}
+
 /* Implement repr() for gdb.Objfile.  */
 
 static PyObject *
@@ -870,6 +884,10 @@ Look up a static-linkage global symbol in this objfile and return it." },
   { "compunits", objfpy_compunits, METH_NOARGS,
     "compunits () -> List.\n\
 Return a sequence of compunits associated to this objfile." },
+
+  { "unlink", objfpy_unlink, METH_NOARGS,
+    "unlink ().\n\
+Remove this objfile." },
 
   { NULL }
 };
