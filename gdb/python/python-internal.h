@@ -1145,4 +1145,37 @@ gdbpy_type_ready (PyTypeObject *type, PyObject *mod = nullptr)
 # define PyType_Ready POISONED_PyType_Ready
 #endif
 
+/* Implements default equality and non-equality comparisons for GDB
+   Python objects.
+
+   All other comparison operators will throw a TypeError Python exception.
+
+   Two Python objects of type P are considered equal  if both point to the
+   same underlying GBB structure of type D.  The last template parameter
+   specifies the member of Python object holding reference to underlying
+   GBB structure.  */
+
+template <typename P, typename D, D* P::*data>
+PyObject *
+gdbpy_richcompare (PyObject *self, PyObject *other, int op)
+{
+  int result;
+
+  if (!PyObject_TypeCheck (other, self->ob_type)
+      || (op != Py_EQ && op != Py_NE))
+    {
+      Py_INCREF (Py_NotImplemented);
+      return Py_NotImplemented;
+    }
+
+  if ( (P *)self->*data == (P *)other->*data)
+    result = Py_EQ;
+  else
+    result = Py_NE;
+
+  if (op == result)
+    Py_RETURN_TRUE;
+  Py_RETURN_FALSE;
+}
+
 #endif /* PYTHON_PYTHON_INTERNAL_H */
