@@ -120,7 +120,7 @@ responsibility among the other maintainers.
   OR1K		   Christian Svensson <blue@cmd.nu>
   OR1K		   Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>
   OR1K		   Stafford Horne <shorne@gmail.com>
-  PPC		   Peter Bergner <bergner@vnet.ibm.com>
+  PPC		   Peter Bergner <bergner@linux.ibm.com>
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
   RISC-V	   Palmer Dabbelt <palmer@dabbelt.com>
   RISC-V	   Andrew Waterman <andrew@sifive.com>
