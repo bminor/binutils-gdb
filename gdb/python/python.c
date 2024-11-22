@@ -2297,6 +2297,42 @@ gdbpy_gdb_exiting (int exit_code)
     gdbpy_print_stack ();
 }
 
+/* Signal handler to convert a SIGABRT into an exception.  */
+
+static void
+catch_python_fatal (int signum)
+{
+  signal (SIGABRT, catch_python_fatal);
+
+  throw_exception_sjlj (gdb_exception {RETURN_ERROR, GENERIC_ERROR});
+}
+
+/* Stand-in for Py_IsInitialized ().  To be used because after a python fatal
+   error, no calls into Python are allowed.  */
+
+static bool py_isinitialized = false;
+
+/* Call Py_Initialize (), and return true if successful.   */
+
+static bool ATTRIBUTE_UNUSED
+py_initialize ()
+{
+  auto prev_handler = signal (SIGABRT, catch_python_fatal);
+  SCOPE_EXIT { signal (SIGABRT, prev_handler); };
+
+  TRY_SJLJ
+    {
+      Py_Initialize ();
+      py_isinitialized = true;
+    }
+  CATCH_SJLJ (e, RETURN_MASK_ERROR)
+    {
+    }
+  END_CATCH_SJLJ;
+
+  return py_isinitialized;
+}
+
 static bool
 do_start_initialization ()
 {
@@ -2353,7 +2389,8 @@ do_start_initialization ()
      remain alive for the duration of the program's execution, so
      it is not freed after this call.  */
   Py_SetProgramName (progname_copy);
-  Py_Initialize ();
+  if (!py_initialize ())
+    return false;
 #else
   PyConfig config;
 
@@ -2383,9 +2420,11 @@ init_done:
 		    status.exitcode);
       return false;
     }
+  py_isinitialized = true;
 #endif
 #else
-  Py_Initialize ();
+  if (!py_initialize ())
+    return false;
 #endif
 
 #if PY_VERSION_HEX < 0x03090000
@@ -2727,7 +2766,7 @@ do_initialize (const struct extension_language_defn *extlang)
 static void
 gdbpy_initialize (const struct extension_language_defn *extlang)
 {
-  if (!do_start_initialization () && Py_IsInitialized () && PyErr_Occurred ())
+  if (!do_start_initialization () && py_isinitialized && PyErr_Occurred ())
     gdbpy_print_stack ();
 
   gdbpy_enter enter_py;
