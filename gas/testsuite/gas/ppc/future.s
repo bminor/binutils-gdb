@@ -17,3 +17,13 @@ _start:
 	stxvprl	 40,10,17
 	stxvprll 42,10,18
 	xvrlw	 31,41,51
+	xvadduwm 30,42,52
+	xvadduhm 30,42,53
+	xvsubuwm 29,43,54
+	xvsubuhm 63,0,30
+	xvmuluwm 30,40,60
+	xvmuluhm 60,61,62
+	xvmulhsw 34,35,36
+	xvmulhsh 1,2,3
+	xvmulhuw 20,21,22
+	xvmulhuh 20,42,52

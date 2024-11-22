@@ -25,4 +25,14 @@ Disassembly of section \.text:
 .*:	(9a 8d 2a 7d|7d 2a 8d 9a) 	stxvprl vs40,r10,r17
 .*:	(da 95 6a 7d|7d 6a 95 da) 	stxvprll vs42,r10,r18
 .*:	(c6 9d e9 f3|f3 e9 9d c6) 	xvrlw   vs31,vs41,vs51
+.*:	(1e a4 ca f3|f3 ca a4 1e) 	xvadduwm vs30,vs42,vs52
+.*:	(5e ac ca f3|f3 ca ac 5e) 	xvadduhm vs30,vs42,vs53
+.*:	(9e b4 ab f3|f3 ab b4 9e) 	xvsubuwm vs29,vs43,vs54
+.*:	(d9 f4 e0 f3|f3 e0 f4 d9) 	xvsubuhm vs63,vs0,vs30
+.*:	(1e e5 c8 f3|f3 c8 e5 1e) 	xvmuluwm vs30,vs40,vs60
+.*:	(5f f5 9d f3|f3 9d f5 5f) 	xvmuluhm vs60,vs61,vs62
+.*:	(9f 25 43 f0|f0 43 25 9f) 	xvmulhsw vs34,vs35,vs36
+.*:	(d8 1d 22 f0|f0 22 1d d8) 	xvmulhsh vs1,vs2,vs3
+.*:	(90 b3 95 f2|f2 95 b3 90) 	xvmulhuw vs20,vs21,vs22
+.*:	(d6 a3 8a f2|f2 8a a3 d6) 	xvmulhuh vs20,vs42,vs52
 #pass
