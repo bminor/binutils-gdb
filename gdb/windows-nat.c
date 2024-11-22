@@ -730,7 +730,7 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 #ifdef __x86_64__
       if (windows_process.wow64_process)
 	{
-	  th->wow64_context.ContextFlags = CONTEXT_DEBUGGER_DR;
+	  th->wow64_context.ContextFlags = WOW64_CONTEXT_ALL;
 	  CHECK (Wow64GetThreadContext (th->h, &th->wow64_context));
 	  /* Copy dr values from that thread.
 	     But only if there were not modified since last stop.
@@ -1290,7 +1290,7 @@ windows_nat_target::windows_continue (DWORD continue_status, int id,
 	  {
 	    if (th->debug_registers_changed)
 	      {
-		th->wow64_context.ContextFlags |= CONTEXT_DEBUG_REGISTERS;
+		th->wow64_context.ContextFlags |= WOW64_CONTEXT_DEBUG_REGISTERS;
 		th->wow64_context.Dr0 = windows_process.dr[0];
 		th->wow64_context.Dr1 = windows_process.dr[1];
 		th->wow64_context.Dr2 = windows_process.dr[2];
