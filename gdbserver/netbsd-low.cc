@@ -222,7 +222,7 @@ netbsd_waitpid (ptid_t ptid, struct target_waitstatus *ourstatus,
   int options = (target_options & TARGET_WNOHANG) ? WNOHANG : 0;
 
   pid_t pid
-    = gdb::handle_eintr (-1, ::waitpid, ptid.pid (), &status, options);
+    = gdb::waitpid (ptid.pid (), &status, options);
 
   if (pid == -1)
     perror_with_name (_("Child process unexpectedly missing"));
@@ -432,7 +432,7 @@ netbsd_process_target::kill (process_info *process)
     return -1;
 
   int status;
-  if (gdb::handle_eintr (-1, ::waitpid, pid, &status, 0) == -1)
+  if (gdb::waitpid (pid, &status, 0) == -1)
     return -1;
   mourn (process);
   return 0;
@@ -1123,15 +1123,15 @@ netbsd_qxfer_libraries_svr4 (const pid_t pid, const char *annex,
 static bool
 elf_64_file_p (const char *file)
 {
-  int fd = gdb::handle_eintr (-1, ::open, file, O_RDONLY);
+  int fd = gdb::open (file, O_RDONLY);
   if (fd < 0)
     perror_with_name (("open"));
 
   Elf64_Ehdr header;
-  ssize_t ret = gdb::handle_eintr (-1, ::read, fd, &header, sizeof (header));
+  ssize_t ret = gdb::read (fd, &header, sizeof (header));
   if (ret == -1)
     perror_with_name (("read"));
-  gdb::handle_eintr (-1, ::close, fd);
+  gdb::close (fd);
   if (ret != sizeof (header))
     error ("Cannot read ELF file header: %s", file);
 
