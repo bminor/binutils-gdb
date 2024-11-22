@@ -90,13 +90,16 @@ enum pointer_auth_key {
 
 /* The extra fields required by AArch64 in fde_entry and cie_entry.  Currently
    only used to store the key used to sign the frame's return address.  */
-#define tc_fde_entry_extras enum pointer_auth_key pauth_key;
-#define tc_cie_entry_extras enum pointer_auth_key pauth_key;
+#define tc_fde_entry_extras enum pointer_auth_key pauth_key; \
+                            bool memtag_frame_p;
+#define tc_cie_entry_extras enum pointer_auth_key pauth_key; \
+                            bool memtag_frame_p;
 
 /* The extra initialisation steps needed by AArch64 in alloc_fde_entry.
    Currently only used to initialise the key used to sign the return
    address.  */
-#define tc_fde_entry_init_extra(fde) fde->pauth_key = AARCH64_PAUTH_KEY_A;
+#define tc_fde_entry_init_extra(fde) fde->pauth_key = AARCH64_PAUTH_KEY_A; \
+				     fde->memtag_frame_p = false;
 
 /* Extra checks required by AArch64 when outputting the current cie_entry.
    Currently only used to output a 'B' if the return address is signed with the
@@ -106,18 +109,22 @@ enum pointer_auth_key {
       { \
 	if (cie->pauth_key == AARCH64_PAUTH_KEY_B) \
 	  out_one ('B'); \
+	if (cie->memtag_frame_p) \
+	  out_one ('G'); \
       } \
     while (0)
 
 /* Extra equivalence checks required by AArch64 when selecting the correct cie
    for some fde.  Currently only used to check for quivalence between keys used
    to sign ther return address.  */
-#define tc_cie_fde_equivalent_extra(cie, fde) (cie->pauth_key == fde->pauth_key)
+#define tc_cie_fde_equivalent_extra(cie, fde) ((cie->pauth_key == fde->pauth_key) \
+					      && (cie->memtag_frame_p = fde->memtag_frame_p))
 
 /* The extra initialisation steps needed by AArch64 in select_cie_for_fde.
    Currently only used to initialise the key used to sign the return
    address.  */
-#define tc_cie_entry_init_extra(cie, fde) cie->pauth_key = fde->pauth_key;
+#define tc_cie_entry_init_extra(cie, fde) cie->pauth_key = fde->pauth_key; \
+					  cie->memtag_frame_p = fde->memtag_frame_p;
 
 #define TC_FIX_TYPE struct aarch64_fix
 #define TC_INIT_FIX_DATA(FIX) { (FIX)->tc_fix_data.inst = NULL;	\
