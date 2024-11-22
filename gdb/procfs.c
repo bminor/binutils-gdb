@@ -2062,8 +2062,9 @@ wait_again:
 	    {
 	      int wait_retval;
 
-	      /* /proc file not found; presumably child has terminated.  */
-	      wait_retval = ::wait (&wstat); /* "wait" for the child's exit.  */
+	      /* /proc file not found; presumably child has terminated.  Wait
+		 for the child's exit.  */
+	      wait_retval = gdb::wait (&wstat);
 
 	      /* Wrong child?  */
 	      if (wait_retval != inf->pid)
@@ -2150,7 +2151,7 @@ wait_again:
 		      }
 		    else
 		      {
-			int temp = ::wait (&wstat);
+			int temp = gdb::wait (&wstat);
 
 			/* FIXME: shouldn't I make sure I get the right
 			   event from the right process?  If (for
@@ -2562,7 +2563,7 @@ unconditionally_kill_inferior (procinfo *pi)
 
       ret = gdb::waitpid (pi->pid, &status, 0);
 #else
-      wait (NULL);
+      gdb::wait (NULL);
 #endif
     }
 }
