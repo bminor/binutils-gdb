@@ -2375,7 +2375,14 @@ do_start_initialization ()
 init_done:
   PyConfig_Clear (&config);
   if (PyStatus_Exception (status))
-    return false;
+    {
+      if (PyStatus_IsError (status))
+	gdb_printf (_("Python initialization failed: %s\n"), status.err_msg);
+      else
+	gdb_printf (_("Python initialization failed with exit status: %d\n"),
+		    status.exitcode);
+      return false;
+    }
 #endif
 #else
   Py_Initialize ();
@@ -2720,7 +2727,7 @@ do_initialize (const struct extension_language_defn *extlang)
 static void
 gdbpy_initialize (const struct extension_language_defn *extlang)
 {
-  if (!do_start_initialization () && PyErr_Occurred ())
+  if (!do_start_initialization () && Py_IsInitialized () && PyErr_Occurred ())
     gdbpy_print_stack ();
 
   gdbpy_enter enter_py;
