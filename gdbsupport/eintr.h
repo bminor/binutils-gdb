@@ -101,6 +101,17 @@ read (int fd, void *buf, size_t count)
   return gdb::handle_eintr (-1, ::read, fd, buf, count);
 }
 
+template<typename... Args> int fcntl (int fd, int op, Args... args)
+{
+  return gdb::handle_eintr (-1, ::fcntl, fd, op, args...);
+}
+
+inline ssize_t
+write (int fd, const void *buf, size_t count)
+{
+  return gdb::handle_eintr (-1, ::write, fd, buf, count);
+}
+
 } /* namespace gdb */
 
 #endif /* GDBSUPPORT_EINTR_H */
