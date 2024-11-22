@@ -1344,6 +1344,31 @@ interruptible_select (int n,
   if (n <= fd)
     n = fd + 1;
 
+  bool tsan_forced_timeout = false;
+#if defined (__SANITIZE_THREAD__)
+  struct timeval tv;
+  if (timeout == nullptr)
+    {
+      /* A nullptr timeout means select is blocking, and ThreadSanitizer has
+	 a bug that it considers select non-blocking, and consequently when
+	 intercepting select it will not call signal handlers for pending
+	 signals, and gdb will hang in select waiting for those signal
+	 handlers to be called.
+
+	 Filed here ( https://github.com/google/sanitizers/issues/1813 ).
+
+	 Work around this by:
+	 - forcing a small timeout, and
+	 - upon timeout calling a function that ThreadSanitizer does consider
+	   blocking: usleep, forcing signal handlers to be called for pending
+	   signals.  */
+      tv.tv_sec = 0;
+      tv.tv_usec = 1000;
+      timeout = &tv;
+      tsan_forced_timeout = true;
+    }
+#endif
+
   {
     fd_set ret_readfds, ret_writefds, ret_exceptfds;
     struct timeval ret_timeout;
@@ -1358,6 +1383,12 @@ interruptible_select (int n,
 
 	if (res == -1 && errno == EINTR)
 	  continue;
+
+	if (tsan_forced_timeout && res == 0)
+	  {
+	    usleep (0);
+	    continue;
+	  }
 
 	break;
       }
