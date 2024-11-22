@@ -2331,17 +2331,20 @@ do_start_initialization ()
      for Python versions that do not duplicate program_name.  */
   static wchar_t *progname_copy;
 
-  std::string oldloc = setlocale (LC_ALL, NULL);
-  setlocale (LC_ALL, "");
-  size_t progsize = strlen (progname.get ());
-  progname_copy = XNEWVEC (wchar_t, progsize + 1);
-  size_t count = mbstowcs (progname_copy, progname.get (), progsize + 1);
-  if (count == (size_t) -1)
-    {
-      fprintf (stderr, "Could not convert python path to string\n");
-      return false;
-    }
-  setlocale (LC_ALL, oldloc.c_str ());
+  {
+    std::string oldloc = setlocale (LC_ALL, NULL);
+    SCOPE_EXIT { setlocale (LC_ALL, oldloc.c_str ()); };
+
+    setlocale (LC_ALL, "");
+    size_t progsize = strlen (progname.get ());
+    progname_copy = XNEWVEC (wchar_t, progsize + 1);
+    size_t count = mbstowcs (progname_copy, progname.get (), progsize + 1);
+    if (count == (size_t) -1)
+      {
+	fprintf (stderr, "Could not convert python path to string\n");
+	return false;
+      }
+  }
 
   /* Py_SetProgramName was deprecated in Python 3.11.  Use PyConfig
      mechanisms for Python 3.10 and newer.  */
