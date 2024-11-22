@@ -28,6 +28,7 @@
 #include <signal.h>
 #include <sched.h>
 #include "gdbsupport/scope-exit.h"
+#include "gdbsupport/eintr.h"
 
 /* See nat/linux-namespaces.h.  */
 bool debug_linux_namespaces;
@@ -722,7 +723,7 @@ mnsh_maybe_mourn_peer (void)
 	  return;
 	}
 
-      pid = waitpid (helper->pid, &status, WNOHANG);
+      pid = gdb::waitpid (helper->pid, &status, WNOHANG);
       if (pid == 0)
 	{
 	  /* The helper is still alive.  */

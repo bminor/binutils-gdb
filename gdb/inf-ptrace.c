@@ -32,6 +32,7 @@
 #include "nat/fork-inferior.h"
 #include "utils.h"
 #include "gdbarch.h"
+#include "gdbsupport/eintr.h"
 
 
 
@@ -122,7 +123,7 @@ inf_ptrace_target::mourn_inferior ()
      Do not check whether this succeeds though, since we may be
      dealing with a process that we attached to.  Such a process will
      only report its exit status to its original parent.  */
-  waitpid (inferior_ptid.pid (), &status, 0);
+  gdb::waitpid (inferior_ptid.pid (), &status, 0);
 
   inf_child_target::mourn_inferior ();
 }
@@ -227,7 +228,7 @@ inf_ptrace_target::kill ()
     return;
 
   ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3)0, 0);
-  waitpid (pid, &status, 0);
+  gdb::waitpid (pid, &status, 0);
 
   target_mourn_inferior (inferior_ptid);
 }
@@ -307,12 +308,8 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     {
       set_sigint_trap ();
 
-      do
-	{
-	  pid = waitpid (ptid.pid (), &status, options);
-	  save_errno = errno;
-	}
-      while (pid == -1 && errno == EINTR);
+      pid = gdb::waitpid (ptid.pid (), &status, options);
+      save_errno = errno;
 
       clear_sigint_trap ();
 
