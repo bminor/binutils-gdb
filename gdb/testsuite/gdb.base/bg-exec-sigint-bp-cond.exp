@@ -16,6 +16,10 @@
 # Check that sending GDB a SIGINT while handling execution control
 # does not interrupt the execution control.
 
+# The way we get the pid of gdb doesn't work with remote host.  We get the
+# pid of the ssh session on build instead.
+require {!is_remote host}
+
 standard_testfile
 
 if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
