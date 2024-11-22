@@ -2215,6 +2215,9 @@ static struct cmd_list_element *user_show_python_list;
 static void
 finalize_python (const struct extension_language_defn *ignore)
 {
+  if (!gdb_python_initialized)
+    return;
+
   struct active_ext_lang_state *previous_active;
 
   /* We don't use ensure_python_env here because if we ever ran the
@@ -2766,8 +2769,21 @@ do_initialize (const struct extension_language_defn *extlang)
 static void
 gdbpy_initialize (const struct extension_language_defn *extlang)
 {
-  if (!do_start_initialization () && py_isinitialized && PyErr_Occurred ())
-    gdbpy_print_stack ();
+  if (!do_start_initialization ())
+    {
+      if (py_isinitialized)
+	{
+	  if (PyErr_Occurred ())
+	    gdbpy_print_stack ();
+
+	  /* We got no use for the Python interpreter anymore.  Finalize it
+	     ASAP.  */
+	  Py_Finalize ();
+	}
+
+      /* Continue with python disabled.  */
+      return;
+    }
 
   gdbpy_enter enter_py;
 
