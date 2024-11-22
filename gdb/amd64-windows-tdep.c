@@ -205,14 +205,12 @@ static void
 amd64_windows_store_arg_in_reg (struct regcache *regcache,
 				struct value *arg, int regno)
 {
-  struct type *type = arg->type ();
-  const gdb_byte *valbuf = arg->contents ().data ();
+  gdb::array_view<const gdb_byte> valbuf = arg->contents ();
   /* We only set 8 bytes, buf if it's a XMM register, 16 bytes are read.  */
-  std::array<gdb_byte, 16> buf;
+  std::array<gdb_byte, 16> buf {};
 
-  gdb_assert (type->length () <= 8);
-  memset (buf.data (), 0, buf.size ());
-  memcpy (buf.data (), valbuf, std::min (type->length (), (ULONGEST) 8));
+  gdb_assert (valbuf.size () <= 8);
+  std::copy (valbuf.begin (), valbuf.end (), buf.begin ());
   size_t reg_size = regcache_register_size (regcache, regno);
   gdb_assert (reg_size <= buf.size ());
   gdb::array_view<gdb_byte> view (buf);
