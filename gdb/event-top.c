@@ -1268,6 +1268,60 @@ handle_sigint (int sig)
   mark_async_signal_handler (sigint_token);
 }
 
+/* Copy file descriptors smaller than N from SRC to DST and return DST.
+   Portable version of FD_COPY.  */
+
+static fd_set *
+fd_copy (fd_set *dst, const fd_set *src, int n)
+{
+  FD_ZERO (dst);
+  for (int i = 0; i < n; ++i)
+    if (FD_ISSET (i, src))
+      FD_SET (i, dst);
+
+  return dst;
+}
+
+/* Copy SRC to DST and return DST.  */
+
+static struct timeval *
+timeval_copy (struct timeval *dst, const struct timeval *src)
+{
+  *dst = *src;
+  return dst;
+}
+
+/* Version of select that can be used in a loop, since unlike select it keeps
+   requested and returned values separate.  */
+
+static int
+gdb_select (int n,
+	    const fd_set *req_readfds, fd_set *ret_readfds,
+	    const fd_set *req_writefds, fd_set *ret_writefds,
+	    const fd_set *req_exceptfds, fd_set *ret_exceptfds,
+	    const struct timeval *req_timeout, struct timeval *ret_timeout)
+{
+  ret_readfds
+    = (req_readfds == nullptr
+       ? nullptr
+       : fd_copy (ret_readfds, req_readfds, n));
+  ret_writefds
+    = (req_writefds == nullptr
+       ? nullptr
+       : fd_copy (ret_writefds, req_writefds, n));
+  ret_exceptfds
+    = (req_exceptfds == nullptr
+       ? nullptr
+       : fd_copy (ret_exceptfds, req_exceptfds, n));
+
+  ret_timeout
+    = (req_timeout == nullptr
+       ? nullptr
+       : timeval_copy (ret_timeout, req_timeout));
+
+  return gdb_select (n, ret_readfds, ret_writefds, ret_exceptfds, ret_timeout);
+}
+
 /* See gdb_select.h.  */
 
 int
@@ -1290,11 +1344,33 @@ interruptible_select (int n,
   if (n <= fd)
     n = fd + 1;
 
-  do
-    {
-      res = gdb_select (n, readfds, writefds, exceptfds, timeout);
-    }
-  while (res == -1 && errno == EINTR);
+  {
+    fd_set ret_readfds, ret_writefds, ret_exceptfds;
+    struct timeval ret_timeout;
+
+    while (true)
+      {
+	res = gdb_select (n,
+			  readfds, &ret_readfds,
+			  writefds, &ret_writefds,
+			  exceptfds, &ret_exceptfds,
+			  timeout, &ret_timeout);
+
+	if (res == -1 && errno == EINTR)
+	  continue;
+
+	break;
+      }
+
+    if (readfds != nullptr)
+      fd_copy (readfds, &ret_readfds, n);
+    if (writefds != nullptr)
+      fd_copy (writefds, &ret_writefds, n);
+    if (exceptfds != nullptr)
+      fd_copy (exceptfds, &ret_exceptfds, n);
+    if (timeout)
+      timeval_copy (timeout, &ret_timeout);
+  }
 
   if (res == 1 && FD_ISSET (fd, readfds))
     {
