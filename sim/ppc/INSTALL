@@ -32,7 +32,7 @@ following:
 
 	gcc			GCC version two includes suport
 				for long long (64bit integer)
-				arrithemetic which PSIM uses.  Hence
+				arithmetic which PSIM uses.  Hence
 				it is recommended that you build PSIM
 				using GCC.
 				

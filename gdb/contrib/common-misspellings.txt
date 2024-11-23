@@ -22,6 +22,8 @@ sofar->so far
 doens't->doesn't
 behavour->behavior
 behaviour->behavior
+arrithemetic->arithmetic
+electricaly->electrically
 
 # Identity rules.
 
