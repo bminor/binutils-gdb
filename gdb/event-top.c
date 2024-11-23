@@ -1031,7 +1031,7 @@ handle_fatal_signal (int sig)
     }
 #endif
 
-  /* If possible arrange for SIG to have its default behaviour (which
+  /* If possible arrange for SIG to have its default behavior (which
      should be to terminate the current process), unblock SIG, and reraise
      the signal.  This ensures GDB terminates with the expected signal.  */
   if (signal (sig, SIG_DFL) != SIG_ERR

@@ -1834,7 +1834,7 @@ The program being debugged entered a std::terminate call, most likely\n\
 caused by an unhandled C++ exception.  GDB blocked this call in order\n\
 to prevent the program from being terminated, and has restored the\n\
 context to its original state before the call.\n\
-To change this behaviour use \"set unwind-on-terminating-exception off\".\n\
+To change this behavior use \"set unwind-on-terminating-exception off\".\n\
 Evaluation of the expression containing the function (%s)\n\
 will be abandoned."),
 		 name.c_str ());

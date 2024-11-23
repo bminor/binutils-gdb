@@ -145,7 +145,7 @@ with_test_prefix "Custom" {
 	]
 }
 
-### 2.2 None as filter. This resets the default behaviour.
+### 2.2 None as filter. This resets the default behavior.
 with_test_prefix "None" {
     gdb_test_multiline "register filter in python" \
 	"python" "" \

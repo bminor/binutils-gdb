@@ -122,7 +122,7 @@ $GDB --batch -nx -iex 'set auto-load no' \
 
 # In some situations gdb can exit without creating an index.  This is
 # not an error.
-# E.g., if $file is stripped.  This behaviour is akin to stripping an
+# E.g., if $file is stripped.  This behavior is akin to stripping an
 # already stripped binary, it's a no-op.
 status=0
 

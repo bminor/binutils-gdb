@@ -762,7 +762,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
      default value for the backtrace command (see the call to print_frame_info
      in backtrace_command_1).
      Having the same default ensures that 'bt' and 'bt no-filters'
-     have the same behaviour when some filters exist but do not apply
+     have the same behavior when some filters exist but do not apply
      to a frame.  */
   enum print_what print_what
     = out->is_mi_like_p () ? LOC_AND_ADDRESS : LOCATION;

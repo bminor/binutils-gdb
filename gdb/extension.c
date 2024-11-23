@@ -85,7 +85,7 @@ const struct extension_language_defn extension_language_gdb =
 
 static const std::array<const extension_language_defn *, 2> extension_languages
 {
-  /* To preserve existing behaviour, python should always appear first.  */
+  /* To preserve existing behavior, python should always appear first.  */
   &extension_language_python,
   &extension_language_guile,
 };

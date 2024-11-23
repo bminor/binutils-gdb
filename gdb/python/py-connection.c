@@ -342,7 +342,7 @@ struct py_send_packet_callbacks : public send_remote_packet_callbacks
      It is important that the result is inspected immediately after sending
      a packet to the remote, and any error fetched,  calling any other
      Python functions that might clear the error state, or rely on an error
-     not being set will cause undefined behaviour.  */
+     not being set will cause undefined behavior.  */
 
   gdbpy_ref<> result () const
   {

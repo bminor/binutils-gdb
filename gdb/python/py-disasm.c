@@ -308,7 +308,7 @@ disasm_info_dealloc (PyObject *self)
      NEXT is nullptr.  */
   Py_XDECREF ((PyObject *) obj->next);
 
-  /* Now core deallocation behaviour.  */
+  /* Now core deallocation behavior.  */
   Py_TYPE (self)->tp_free (self);
 }
 
@@ -740,7 +740,7 @@ disasmpy_info_progspace (PyObject *self, void *closure)
    part in the gdbpy_disassembler is a text part in the same STYLE, then
    the new string is appended to the previous part.
 
-   The merging behaviour make the Python API a little more user friendly,
+   The merging behavior make the Python API a little more user friendly,
    some disassemblers produce their output character at a time, there's no
    particular reason for this, it's just how they are implemented.  By
    merging parts with the same style we make it easier for the user to

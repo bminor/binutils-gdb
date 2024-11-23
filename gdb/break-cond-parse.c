@@ -368,7 +368,7 @@ parse_all_tokens (const char *str)
      which exists for backwards compatibility reasons.  Traditionally this
      flag, if it occurred immediately after the 'if' condition, would be
      treated as part of the 'if' condition.  When the breakpoint condition
-     parsing code was rewritten, this behaviour was retained.  */
+     parsing code was rewritten, this behavior was retained.  */
   gdb_assert (backward_results.empty ()
 	      || (forward_results.back ().get_type ()
 		  == token::type::CONDITION));

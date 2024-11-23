@@ -177,7 +177,7 @@ enum ext_lang_rc
 
   /* There was an error (e.g., Python error while printing a value).
      When an error occurs no further extension languages are tried.
-     This is to preserve existing behaviour, and because it's convenient
+     This is to preserve existing behavior, and because it's convenient
      for Python developers.
      Note: This is different than encountering a memory error trying to read
      a value for pretty-printing.  Here we're referring to, e.g., programming

@@ -112,7 +112,7 @@ struct annotate_arg_emitter
    are on, we only sometimes print the annotation, and only sometimes
    update the current symtab and line.  However, this particular annotation
    has behaved this way for some time, and front ends that still use
-   annotations now depend on this behaviour.  */
+   annotations now depend on this behavior.  */
 extern bool annotate_source_line (struct symtab *s, int line,
 				  int mid_statement, CORE_ADDR pc);
 

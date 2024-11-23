@@ -1544,7 +1544,7 @@ parse_debug_options (const char *options)
   gdb_assert (options != nullptr);
 
   /* Empty options means the "default" set.  This exists mostly for
-     backwards compatibility with gdbserver's legacy behaviour.  */
+     backwards compatibility with gdbserver's legacy behavior.  */
   if (*options == '\0')
     options = "+threads";
 

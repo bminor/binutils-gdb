@@ -2043,7 +2043,7 @@ decode_frame_entry (struct gdbarch *gdbarch,
 	 produces a hole in the frame info that gets filled by the 
 	 linker with zeros.
 
-	 The GCC behaviour is arguably a bug, but it's effectively now
+	 The GCC behavior is arguably a bug, but it's effectively now
 	 part of the ABI, so we're now stuck with it, at least at the
 	 object file level.  A smart linker may decide, in the process
 	 of compressing duplicate CIE information, that it can rewrite

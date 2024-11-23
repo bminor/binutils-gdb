@@ -4209,7 +4209,7 @@ call executes, the new target restarts.  To restart the parent
 process, use the @code{file} command with the parent executable name
 as its argument.  By default, after an @code{exec} call executes,
 @value{GDBN} discards the symbols of the previous executable image.
-You can change this behaviour with the @w{@code{set follow-exec-mode}}
+You can change this behavior with the @w{@code{set follow-exec-mode}}
 command.
 
 @table @code
@@ -4977,7 +4977,7 @@ breakpoints set by commands like @code{next} and @code{finish}.  For
 breakpoints set with @code{hbreak}, @value{GDBN} will always use hardware
 breakpoints.
 
-You can control this automatic behaviour with the following commands:
+You can control this automatic behavior with the following commands:
 
 @kindex set breakpoint auto-hw
 @kindex show breakpoint auto-hw
@@ -4998,7 +4998,7 @@ at the breakpoint address with a special instruction, which, when
 executed, given control to the debugger.  By default, the program
 code is so modified only when the program is resumed.  As soon as
 the program stops, @value{GDBN} restores the original instructions.  This
-behaviour guards against leaving breakpoints inserted in the
+behavior guards against leaving breakpoints inserted in the
 target should gdb abrubptly disconnect.  However, with slow remote
 targets, inserting and removing breakpoint can reduce the performance.
 This behavior can be controlled with the following commands::
@@ -8177,7 +8177,7 @@ are printed in execution order.
 It can also print mixed source+disassembly if you specify the the
 @code{/m} or @code{/s} modifier, and print the raw instructions in hex
 as well as in symbolic form by specifying the @code{/r} or @code{/b}
-modifier.  The behaviour of the @code{/m}, @code{/s}, @code{/r}, and
+modifier.  The behavior of the @code{/m}, @code{/s}, @code{/r}, and
 @code{/b} modifiers are the same as for the @kbd{disassemble} command
 (@pxref{disassemble,,@kbd{disassemble}}).
 
@@ -13805,7 +13805,7 @@ Disable @value{GDBN} from caching target memory.  This is the default.
 @value{GDBN} can be instructed to refuse accesses to memory that is
 not explicitly described.  This can be useful if accessing such
 regions has undesired effects for a specific target, or to provide
-better error checking.  The following commands control this behaviour.
+better error checking.  The following commands control this behavior.
 
 @table @code
 @kindex set mem inaccessible-by-default
@@ -17593,7 +17593,7 @@ Because of a limitation in @file{libdecnumber}, the library used by @value{GDBN}
 to manipulate decimal floating point numbers, it is not possible to convert
 (using a cast, for example) integers wider than 32-bit to decimal float.
 
-In addition, in order to imitate @value{GDBN}'s behaviour with binary floating
+In addition, in order to imitate @value{GDBN}'s behavior with binary floating
 point computations, error checking in decimal float operations ignores
 underflow, overflow and divide by zero exceptions.
 
@@ -21120,7 +21120,7 @@ still ongoing, then @value{GDBN} will interrupt the program.
 
 If a function called from @value{GDBN} is interrupted by a timeout,
 then by default the inferior is left in the frame where the timeout
-occurred, this behaviour can be adjusted with @samp{set
+occurred, this behavior can be adjusted with @samp{set
 unwind-on-timeout} (@pxref{set unwind-on-timeout}).
 
 For targets that don't support asynchronous execution
@@ -30296,7 +30296,7 @@ There are some things to be aware of, however.
 @subsection Python comes first
 
 Python was @value{GDBN}'s first extension language, and to avoid breaking
-existing behaviour Python comes first.  This is generally solved by the
+existing behavior Python comes first.  This is generally solved by the
 ``first one wins'' principle.  @value{GDBN} maintains a list of enabled
 extension languages, and when it makes a call to an extension language,
 (say to pretty-print a value), it tries each in turn until an extension
@@ -31415,7 +31415,7 @@ if the selected thread in @value{GDBN} is supposed to be identical to the
 thread the frontend wants to operate on.  However, getting this
 optimization right can be tricky.  In particular, if the frontend
 sends several commands to @value{GDBN}, and one of the commands changes the
-selected thread, then the behaviour of subsequent commands will
+selected thread, then the behavior of subsequent commands will
 change.  So, a frontend should either wait for response from such
 problematic commands, or explicitly add @code{-thread-select} for
 all subsequent commands.  No frontend is known to do this exactly
@@ -31782,7 +31782,7 @@ details about the various output records.
 @cindex @sc{gdb/mi}, compatibility with CLI
 
 For the developers convenience CLI commands can be entered directly,
-but there may be some unexpected behaviour.  For example, commands
+but there may be some unexpected behavior.  For example, commands
 that query the user will behave as if the user replied yes, breakpoint
 command lists are not executed and some CLI commands, such as
 @code{if}, @code{when} and @code{define}, prompt for further input with
@@ -31961,7 +31961,7 @@ values.
 @item "^running"
 This result record is equivalent to @samp{^done}.  Historically, it
 was output instead of @samp{^done} if the command has resumed the
-target.  This behaviour is maintained for backward compatibility, but
+target.  This behavior is maintained for backward compatibility, but
 all frontends should treat @samp{^done} and @samp{^running}
 identically and rely on the @samp{*running} output record to determine
 which threads are resumed.
@@ -41702,7 +41702,7 @@ in @value{GDBN} downloading larger amounts of data.
 When @value{GDBN} reports an internal problem (error or warning) it
 gives the user the opportunity to both quit @value{GDBN} and create a
 core file of the current @value{GDBN} session.  These commands let you
-override the default behaviour for each particular @var{action},
+override the default behavior for each particular @var{action},
 described in the table below.
 
 @table @samp
@@ -47123,7 +47123,7 @@ conditions is met:
 
 @itemize @bullet
 @item
-The user types @kbd{Ctrl-c}.  The behaviour is as explained above, and the
+The user types @kbd{Ctrl-c}.  The behavior is as explained above, and the
 @code{read}
 system call is treated as finished.
 

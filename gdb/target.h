@@ -1661,7 +1661,7 @@ struct memory_write_request
   void *baton;
 };
 
-/* Enumeration specifying different flash preservation behaviour.  */
+/* Enumeration specifying different flash preservation behavior.  */
 enum flash_preserve_mode
   {
     flash_preserve,

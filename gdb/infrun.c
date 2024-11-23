@@ -4958,7 +4958,7 @@ adjust_pc_after_break (struct thread_info *thread,
      we would wrongly adjust the PC to 0x08000000, since there's a
      breakpoint at PC - 1.  We'd then report a hit on B1, although
      INSN1 hadn't been de-executed yet.  Doing nothing is the correct
-     behaviour.  */
+     behavior.  */
   if (execution_direction == EXEC_REVERSE)
     return;
 

@@ -733,7 +733,7 @@ btrace_find_line_range (CORE_ADDR pc)
     {
       /* The test of is_stmt here was added when the is_stmt field was
 	 introduced to the 'struct linetable_entry' structure.  This
-	 ensured that this loop maintained the same behaviour as before we
+	 ensured that this loop maintained the same behavior as before we
 	 introduced is_stmt.  That said, it might be that we would be
 	 better off not checking is_stmt here, this would lead to us
 	 possibly adding more line numbers to the range.  At the time this

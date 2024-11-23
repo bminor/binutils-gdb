@@ -1183,7 +1183,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
   changeable = varobj_value_is_changeable_p (var);
 
   /* If the type has custom visualizer, we consider it to be always
-     changeable.  FIXME: need to make sure this behaviour will not
+     changeable.  FIXME: need to make sure this behavior will not
      mess up read-sensitive values.  */
   if (var->dynamic->pretty_printer != NULL)
     changeable = true;

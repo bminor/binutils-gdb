@@ -2077,7 +2077,7 @@ mi_cmd_execute (struct mi_parse *parse)
 	error (_("Invalid thread group for the --thread-group option"));
 
       set_current_inferior (inf);
-      /* This behaviour means that if --thread-group option identifies
+      /* This behavior means that if --thread-group option identifies
 	 an inferior with multiple threads, then a random one will be
 	 picked.  This is not a problem -- frontend should always
 	 provide --thread if it wishes to operate on a specific

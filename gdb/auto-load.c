@@ -787,7 +787,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
       maybe_add_script_file (pspace_info, is_safe, debugfile, debugfile,
 			     language);
 
-      /* To preserve existing behaviour we don't check for whether the
+      /* To preserve existing behavior we don't check for whether the
 	 script was already in the table, and always load it.
 	 It's highly unlikely that we'd ever load it twice,
 	 and these scripts are required to be idempotent under multiple

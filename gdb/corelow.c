@@ -1523,7 +1523,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
    exactly lively, are they?  On the other hand, if we don't claim
    that each & every one is alive, then we don't get any of them
    to appear in an "info thread" command, which is quite a useful
-   behaviour.
+   behavior.
  */
 bool
 core_target::thread_alive (ptid_t ptid)

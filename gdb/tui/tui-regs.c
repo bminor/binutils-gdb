@@ -437,7 +437,7 @@ tui_register_info::rerender (WINDOW *handle, int field_width)
 
 /* Helper for "tui reg next", returns the next register group after
    CURRENT_GROUP in the register group list for GDBARCH, with wrap around
-   behaviour.
+   behavior.
 
    If CURRENT_GROUP is nullptr (e.g. if the tui register window has only
    just been displayed and has no current group selected) or the currently
@@ -459,7 +459,7 @@ tui_reg_next (const reggroup *current_group, struct gdbarch *gdbarch)
 
 /* Helper for "tui reg prev", returns the register group previous to
    CURRENT_GROUP in the register group list for GDBARCH, with wrap around
-   behaviour.
+   behavior.
 
    If CURRENT_GROUP is nullptr (e.g. if the tui register window has only
    just been displayed and has no current group selected) or the currently

@@ -252,7 +252,7 @@ gdb_test "with breakpoint pending off -- break main ta 999 if (1==1)" \
 # as " - force - condition", that is, subtraction of the symbol
 # "force" followed by subtraction of symbol "context".  This is really
 # just a quirk of how this used to be implemented, and should maybe be
-# changed in the future.  However, for now GDB retains this behaviour.
+# changed in the future.  However, for now GDB retains this behavior.
 gdb_test "break *main if (1==1) -force-condition" \
     "No symbol \"force\" in current context\\."
 

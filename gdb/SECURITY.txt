@@ -135,7 +135,7 @@ What Is Not A Security Bug
   It is possible for a program to detect when it is run under GDB and
   to change its behavior so that unwanted behavior may only appear
   when a program is run under GDB.  Any issues that arise due to an
-  untrusted program detecting GDB and changing its behaviour are not
+  untrusted program detecting GDB and changing its behavior are not
   security issues in GDB unless the issue also meet some other
   definition of a security bug.
 
@@ -191,7 +191,7 @@ Security Realities Of The GDB Project
 
   There are known bugs in GDB related to loading malformed executables
   and parsing the debug information, a consequence of these bugs is
-  that a malicious program could trigger undefined behaviour in GDB,
+  that a malicious program could trigger undefined behavior in GDB,
   which could be used to trigger arbitrary code execution.
 
   Given these risks, the advice of the GDB project is that, when using
@@ -199,7 +199,7 @@ Security Realities Of The GDB Project
   environment.
 
   As there are already known bugs in GDB relating to undefined
-  behaviour triggered from malformed programs, further bugs in this
+  behavior triggered from malformed programs, further bugs in this
   area should still be reported, but are unlikely to be given high
   priority.  Bugs in GDB that are triggered by well-formed programs
   should also be reported, and are likely to be treated as higher

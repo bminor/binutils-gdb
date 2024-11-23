@@ -20,7 +20,7 @@
 require {!is_remote host}
 
 # Test both ansi (no auto-wrap) and xterm (auto-wrap).  Also test dumb, which
-# shows the effective behaviour on stub-termcap systems, regardless of the
+# shows the effective behavior on stub-termcap systems, regardless of the
 # TERM setting.
 set terms {ansi xterm dumb}
 

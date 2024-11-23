@@ -49,7 +49,7 @@ extern void execute_command (const char *, int);
 
 /* Run FN.  Capture its output into the returned string, do not display it
    to the screen.  The global BATCH_FLAG will temporarily be set to true.
-   When TERM_OUT is true the output is collected with terminal behaviour
+   When TERM_OUT is true the output is collected with terminal behavior
    (e.g. with styling).  When TERM_OUT is false raw output will be collected
    (e.g. no styling).  */
 

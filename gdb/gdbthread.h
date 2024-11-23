@@ -216,7 +216,7 @@ struct thread_suspend_state
      - If the thread is running, then this field has its value removed by
        calling stop_pc.reset() (see thread_info::set_executing()).
        Attempting to read a std::optional with no value is undefined
-       behaviour and will trigger an assertion error when _GLIBCXX_DEBUG is
+       behavior and will trigger an assertion error when _GLIBCXX_DEBUG is
        defined, which should make error easier to track down.  */
   std::optional<CORE_ADDR> stop_pc;
 };

@@ -95,7 +95,7 @@ private:
 
 /* A base class used by fortran_array_walker.  There's no virtual methods
    here, sub-classes should just override the functions they want in order
-   to specialise the behaviour to their needs.  The functionality
+   to specialise the behavior to their needs.  The functionality
    provided in these default implementations will visit every array
    element, but do nothing for each element.  */
 

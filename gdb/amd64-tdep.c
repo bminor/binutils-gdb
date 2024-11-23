@@ -1714,7 +1714,7 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 	  CORE_ADDR rip = pc - insn_offset;
 
 	  /* If we just stepped over a breakpoint insn, we don't backup
-	     the pc on purpose; this is to match behaviour without
+	     the pc on purpose; this is to match behavior without
 	     stepping.  */
 
 	  regcache_write_pc (regs, rip);

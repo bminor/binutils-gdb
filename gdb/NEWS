@@ -605,7 +605,7 @@ show tui mouse-events
      changed.
 
   ** New methods added to the gdb.PendingFrame class.  These methods
-     have the same behaviour as the corresponding methods on
+     have the same behavior as the corresponding methods on
      gdb.Frame.  The new methods are:
 
      - gdb.PendingFrame.name: Return the name for the frame's
@@ -1231,7 +1231,7 @@ winheight
 * MI changes
 
  ** The '-add-inferior' with no option flags now inherits the
-    connection of the current inferior, this restores the behaviour of
+    connection of the current inferior, this restores the behavior of
     GDB as it was prior to GDB 10.
 
  ** The '-add-inferior' command now accepts a '--no-connection'
@@ -2012,7 +2012,7 @@ set print frame-info [short-location|location|location-and-address
                         |source-and-location|source-line|auto]
 show print frame-info
   This controls what frame information is printed by the commands printing
-  a frame.  This setting will e.g. influence the behaviour of 'backtrace',
+  a frame.  This setting will e.g. influence the behavior of 'backtrace',
   'frame', 'stepi'.  The python frame filtering also respect this setting.
   The 'backtrace' '-frame-info' option can override this global setting.
 
@@ -8098,7 +8098,7 @@ full 64-bit address.  The command
 
 	set remoteaddresssize 32
 
-can be used to revert to the old behaviour.  For existing remote stubs
+can be used to revert to the old behavior.  For existing remote stubs
 the change should not be noticed, as the additional address information
 will be discarded.
 

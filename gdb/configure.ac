@@ -802,7 +802,7 @@ else
         python_prefix=
       fi
       if test ! -x "${python_prog}"; then
-        # Fall back to gdb 7.0/7.1 behaviour.
+        # Fall back to gdb 7.0/7.1 behavior.
         python_prog=missing
         python_prefix=${with_python}
       fi

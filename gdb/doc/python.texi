@@ -1180,7 +1180,7 @@ refer to, @code{False} (the default) if they shouldn't.  Note that, unlike
 for the @code{print} command, references are not automatically expanded
 when using the @code{format_string} method or the @code{str}
 function.  There is no global @code{print} setting to change the default
-behaviour.
+behavior.
 
 @item actual_objects
 @code{True} if the representation of a pointer to an object should

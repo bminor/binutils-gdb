@@ -4401,7 +4401,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 	    case btTypedef:
 	      /* Follow a forward typedef.  This might recursively
 		 call cross_ref till we get a non typedef'ed type.
-		 FIXME: This is not correct behaviour, but gdb currently
+		 FIXME: This is not correct behavior, but gdb currently
 		 cannot handle typedefs without type copying.  Type
 		 copying is impossible as we might have mutual forward
 		 references between two files and the copied type would not
@@ -4427,7 +4427,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
 	{
 	  /* Parse the type for a normal typedef.  This might recursively call
 	     cross_ref till we get a non typedef'ed type.
-	     FIXME: This is not correct behaviour, but gdb currently
+	     FIXME: This is not correct behavior, but gdb currently
 	     cannot handle typedefs without type copying.  But type copying is
 	     impossible as we might have mutual forward references between
 	     two files and the copied type would not get filled in when

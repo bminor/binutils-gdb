@@ -169,7 +169,7 @@ if {![runto_main]} {
     return
 }
 
-gdb_breakpoint [gdb_get_line_number "Undefined behaviour here" $srcfile3]
+gdb_breakpoint [gdb_get_line_number "Undefined behavior here" $srcfile3]
 gdb_continue_to_breakpoint "run to breakpoint"
 
 set library_base_address \

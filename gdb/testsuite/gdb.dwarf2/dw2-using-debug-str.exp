@@ -134,7 +134,7 @@ set line1 "Reading symbols from \[^\r\n\]+"
 set dwarf_error "DWARF Error: DW_FORM_strp used without required section"
 
 # This pattern is hit when GDB does not use -readnow (i.e. the default
-# behaviour).
+# behavior).
 set pattern1 \
     [multi_line \
          $line1 \

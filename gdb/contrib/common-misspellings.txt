@@ -20,6 +20,8 @@
 inbetween->between, in between, in-between
 sofar->so far
 doens't->doesn't
+behavour->behavior
+behaviour->behavior
 
 # Identity rules.
 

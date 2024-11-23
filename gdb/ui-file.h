@@ -82,10 +82,10 @@ public:
   virtual bool isatty ()
   { return false; }
 
-  /* true indicates terminal output behaviour such as cli_styling.
+  /* true indicates terminal output behavior such as cli_styling.
      This default implementation indicates to do terminal output
-     behaviour if the UI_FILE is a tty.  A derived class can override
-     TERM_OUT to have cli_styling behaviour without being a tty.  */
+     behavior if the UI_FILE is a tty.  A derived class can override
+     TERM_OUT to have cli_styling behavior without being a tty.  */
   virtual bool term_out ()
   { return isatty (); }
 
@@ -171,9 +171,9 @@ class string_file : public ui_file
 {
 public:
   /* Construct a string_file to collect 'raw' output, i.e. without
-     'terminal' behaviour such as cli_styling.  */
+     'terminal' behavior such as cli_styling.  */
   string_file () : m_term_out (false) {};
-  /* If TERM_OUT, construct a string_file with terminal output behaviour
+  /* If TERM_OUT, construct a string_file with terminal output behavior
      such as cli_styling)
      else collect 'raw' output like the previous constructor.  */
   explicit string_file (bool term_out) : m_term_out (term_out) {};

@@ -788,7 +788,7 @@ struct symbol *
 					    const char *name);
 
 
-/* These macros define the behaviour of the expression 
+/* These macros define the behavior of the expression 
    evaluator.  */
 
 /* Should we range check values against the domain of their type?  */

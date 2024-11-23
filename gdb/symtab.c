@@ -4258,7 +4258,7 @@ find_epilogue_using_linetable (CORE_ADDR func_addr)
       /* Move to the last linetable entry of the current function.  */
       if (it == &linetable->item[0])
 	{
-	  /* Doing it-- would introduce undefined behaviour, avoid it by
+	  /* Doing it-- would introduce undefined behavior, avoid it by
 	     explicitly handling this case.  */
 	  return {};
 	}
@@ -4292,7 +4292,7 @@ find_epilogue_using_linetable (CORE_ADDR func_addr)
 	  if (it == &linetable->item[0])
 	    {
 	      /* No more entries in the current function.
-		 Doing it-- would introduce undefined behaviour, avoid it by
+		 Doing it-- would introduce undefined behavior, avoid it by
 		 explicitly handling this case.  */
 	      break;
 	    }
