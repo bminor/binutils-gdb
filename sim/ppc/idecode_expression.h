@@ -48,7 +48,7 @@
 
 /* 64bit target expressions:
 
-   Unfortunatly 128bit arrithemetic isn't that common.  Consequently
+   Unfortunately 128bit arrithemetic isn't that common.  Consequently
    the 32/64 bit trick can not be used.  Instead all calculations are
    required to retain carry/overflow information in separate
    variables.  Even with this restriction it is still possible for the

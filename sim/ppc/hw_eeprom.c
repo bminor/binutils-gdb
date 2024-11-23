@@ -29,7 +29,7 @@
 /* DEVICE
 
 
-   eeprom - JEDEC? compatible electricaly erasable programable device
+   eeprom - JEDEC? compatible electricaly erasable programmable device
 
 
    DESCRIPTION
