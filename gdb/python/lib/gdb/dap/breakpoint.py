@@ -288,7 +288,7 @@ def _rewrite_src_breakpoint(
     }
 
 
-@request("setBreakpoints")
+@request("setBreakpoints", expect_stopped=False)
 @capability("supportsHitConditionalBreakpoints")
 @capability("supportsConditionalBreakpoints")
 @capability("supportsLogPoints")

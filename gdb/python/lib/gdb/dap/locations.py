@@ -28,7 +28,7 @@ from .startup import exec_mi_and_log
 # This points out that fixing this would be an incompatibility but
 # goes on to propose "if arguments property is missing, debug adapters
 # should return an error".
-@request("breakpointLocations")
+@request("breakpointLocations", expect_stopped=False)
 @capability("supportsBreakpointLocationsRequest")
 def breakpoint_locations(*, source, line: int, endLine: Optional[int] = None, **extra):
     if endLine is None:
