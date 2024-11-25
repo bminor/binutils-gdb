@@ -56,6 +56,9 @@
 
 * The Ada 'Object_Size attribute is now supported.
 
+* Support for process record/replay and reverse debugging on loongarch*-linux*
+  targets has been added.
+
 * Python API
 
   ** Added gdb.record.clear.  Clears the trace data of the current recording.
