@@ -602,6 +602,9 @@ loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Get the syscall number from the arch's register.  */
   set_gdbarch_get_syscall_number (gdbarch, loongarch_linux_get_syscall_number);
+
+  /* Reversible debugging, process record.  */
+  set_gdbarch_process_record (gdbarch, loongarch_process_record);
 }
 
 /* Initialize LoongArch Linux target support.  */
