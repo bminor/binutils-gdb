@@ -202,9 +202,6 @@ extern void coffstab_build_psymtabs
    const std::vector<asection *> &stabs,
    file_ptr stabstroffset, unsigned int stabstrsize);
 
-extern void stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
-				     char *stabstr_name, char *text_name);
-
 extern int symbol_reference_defined (const char **);
 
 extern void ref_add (int, struct symbol *, const char *, CORE_ADDR);

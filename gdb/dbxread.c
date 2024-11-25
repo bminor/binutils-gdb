@@ -252,90 +252,6 @@ dbx_symfile_finish (struct objfile *objfile)
 
 
 
-/* Scan and build partial symbols for a file with special sections for stabs
-   and stabstrings.  The file has already been processed to get its minimal
-   symbols, and any other symbols that might be necessary to resolve GSYMs.
-
-   This routine is the equivalent of dbx_symfile_init and dbx_symfile_read
-   rolled into one.
-
-   OBJFILE is the object file we are reading symbols from.
-   ADDR is the address relative to which the symbols are (e.g. the base address
-   of the text segment).
-   STAB_NAME is the name of the section that contains the stabs.
-   STABSTR_NAME is the name of the section that contains the stab strings.
-
-   This routine is mostly copied from dbx_symfile_init and
-   dbx_symfile_read.  */
-
-void
-stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
-			 char *stabstr_name, char *text_name)
-{
-  int val;
-  bfd *sym_bfd = objfile->obfd.get ();
-  const char *name = bfd_get_filename (sym_bfd);
-  asection *stabsect;
-  asection *stabstrsect;
-  asection *text_sect;
-
-  stabsect = bfd_get_section_by_name (sym_bfd, stab_name);
-  stabstrsect = bfd_get_section_by_name (sym_bfd, stabstr_name);
-
-  if (!stabsect)
-    return;
-
-  if (!stabstrsect)
-    error (_("stabsect_build_psymtabs:  Found stabs (%s), "
-	     "but not string section (%s)"),
-	   stab_name, stabstr_name);
-
-  dbx_objfile_data_key.emplace (objfile);
-
-  text_sect = bfd_get_section_by_name (sym_bfd, text_name);
-  if (!text_sect)
-    error (_("Can't find %s section in symbol file"), text_name);
-  DBX_TEXT_ADDR (objfile) = bfd_section_vma (text_sect);
-  DBX_TEXT_SIZE (objfile) = bfd_section_size (text_sect);
-
-  DBX_SYMBOL_SIZE (objfile) = sizeof (struct external_nlist);
-  DBX_SYMCOUNT (objfile) = bfd_section_size (stabsect)
-    / DBX_SYMBOL_SIZE (objfile);
-  DBX_STRINGTAB_SIZE (objfile) = bfd_section_size (stabstrsect);
-  DBX_SYMTAB_OFFSET (objfile) = stabsect->filepos;	/* XXX - FIXME: POKING
-							   INSIDE BFD DATA
-							   STRUCTURES */
-
-  if (DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
-    error (_("ridiculous string table size: %d bytes"),
-	   DBX_STRINGTAB_SIZE (objfile));
-  DBX_STRINGTAB (objfile) = (char *)
-    obstack_alloc (&objfile->objfile_obstack,
-		   DBX_STRINGTAB_SIZE (objfile) + 1);
-  OBJSTAT (objfile, sz_strtab += DBX_STRINGTAB_SIZE (objfile) + 1);
-
-  /* Now read in the string table in one big gulp.  */
-
-  val = bfd_get_section_contents (sym_bfd,	/* bfd */
-				  stabstrsect,	/* bfd section */
-				  DBX_STRINGTAB (objfile), /* input buffer */
-				  0,		/* offset into section */
-				  DBX_STRINGTAB_SIZE (objfile)); /* amount to
-								    read */
-
-  if (!val)
-    perror_with_name (name);
-
-  stabsread_new_init ();
-  free_header_files ();
-  init_header_files ();
-
-  /* Now, do an incremental load.  */
-
-  dbx_objfile_data_key.get (objfile)->ctx.processing_acc_compilation = 1;
-  dbx_symfile_read (objfile, 0);
-}
-
 static const struct sym_fns aout_sym_fns =
 {
   dbx_new_init,			/* init anything gbl to entire symtab */
