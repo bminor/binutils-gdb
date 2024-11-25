@@ -113,6 +113,7 @@ const pseudo_typeS scfi_pseudo_table[] =
     { "cfi_restore_state", dot_scfi_ignore, 0 },
     { "cfi_window_save", dot_scfi_ignore, 0 },
     { "cfi_negate_ra_state", dot_scfi_ignore, 0 },
+    { "cfi_negate_ra_state_with_pc", dot_scfi_ignore, 0 },
     { "cfi_escape", dot_scfi_ignore, 0 },
     { "cfi_personality", dot_scfi_ignore, 0 },
     { "cfi_personality_id", dot_scfi_ignore, 0 },

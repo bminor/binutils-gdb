@@ -714,6 +714,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_restore_state", dot_cfi, DW_CFA_restore_state },
     { "cfi_window_save", dot_cfi, DW_CFA_GNU_window_save },
     { "cfi_negate_ra_state", dot_cfi, DW_CFA_AARCH64_negate_ra_state },
+    { "cfi_negate_ra_state_with_pc", dot_cfi, DW_CFA_AARCH64_negate_ra_state_with_pc },
     { "cfi_escape", dot_cfi_escape, 0 },
     { "cfi_signal_frame", dot_cfi, CFI_signal_frame },
     { "cfi_personality", dot_cfi_personality, 0 },
@@ -912,6 +913,10 @@ dot_cfi (int arg)
 
     case DW_CFA_GNU_window_save:
       cfi_add_CFA_insn (DW_CFA_GNU_window_save);
+      break;
+
+    case DW_CFA_AARCH64_negate_ra_state_with_pc:
+      cfi_add_CFA_insn (DW_CFA_AARCH64_negate_ra_state_with_pc);
       break;
 
     case CFI_signal_frame:
@@ -1754,6 +1759,10 @@ output_cfi_insn (struct cfi_insn_data *insn)
       out_one (DW_CFA_GNU_window_save);
       break;
 
+    case DW_CFA_AARCH64_negate_ra_state_with_pc:
+      out_one (DW_CFA_AARCH64_negate_ra_state_with_pc);
+      break;
+
     case CFI_escape:
       {
 	struct cfi_escape_data *e;
@@ -2212,6 +2221,7 @@ cfi_change_reg_numbers (struct cfi_insn_data *insn, segT ccseg)
 	case DW_CFA_remember_state:
 	case DW_CFA_restore_state:
 	case DW_CFA_GNU_window_save:
+	case DW_CFA_AARCH64_negate_ra_state_with_pc:
 	case CFI_escape:
 	case CFI_label:
 	  break;
@@ -2619,14 +2629,16 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_remember_state", dot_cfi_dummy, 0 },
     { "cfi_restore_state", dot_cfi_dummy, 0 },
     { "cfi_window_save", dot_cfi_dummy, 0 },
+    { "cfi_negate_ra_state", dot_cfi_dummy, 0 },
+    { "cfi_negate_ra_state_with_pc", dot_cfi_dummy, 0 },
     { "cfi_escape", dot_cfi_dummy, 0 },
     { "cfi_signal_frame", dot_cfi_dummy, 0 },
     { "cfi_personality", dot_cfi_dummy, 0 },
     { "cfi_personality_id", dot_cfi_dummy, 0 },
     { "cfi_lsda", dot_cfi_dummy, 0 },
     { "cfi_val_encoded_addr", dot_cfi_dummy, 0 },
-    { "cfi_label", dot_cfi_dummy, 0 },
     { "cfi_inline_lsda", dot_cfi_dummy, 0 },
+    { "cfi_label", dot_cfi_dummy, 0 },
     { "cfi_val_offset", dot_cfi_dummy, 0 },
     { NULL, NULL, 0 }
   };

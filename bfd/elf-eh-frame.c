@@ -359,6 +359,7 @@ skip_cfa_op (bfd_byte **iter, bfd_byte *end, unsigned int encoded_ptr_width)
     case DW_CFA_remember_state:
     case DW_CFA_restore_state:
     case DW_CFA_GNU_window_save:
+    case DW_CFA_AARCH64_negate_ra_state_with_pc:
       /* No arguments.  */
       return true;
 

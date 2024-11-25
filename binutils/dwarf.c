@@ -10408,6 +10408,11 @@ display_debug_frames (struct dwarf_section *section,
 	      fc->pc_begin += ofs;
 	      break;
 
+	    case DW_CFA_AARCH64_negate_ra_state_with_pc:
+	      if (! do_debug_frames_interp)
+		printf ("  DW_CFA_AARCH64_negate_ra_state_with_pc\n");
+	      break;
+
 	    case DW_CFA_GNU_window_save:
 	      if (! do_debug_frames_interp)
 		printf ("  %s\n", DW_CFA_GNU_window_save_name[is_aarch64]);
