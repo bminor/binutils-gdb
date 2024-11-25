@@ -16,15 +16,12 @@
 # This file is part of the gdb testsuite.
 
 #
-# This test tests some i386 general instructions for reverse execution.
+# This test tests i386 AVX instructions for reverse execution.  This
+# is supposed to test all supported instructions eventually.
 #
 
 require supports_reverse
-
-if {![istarget "*86*-*linux*"]} {
-    verbose "Skipping i386 reverse tests."
-    return
-}
+require have_avx
 
 # TODO: this is the case because I used xmm15 all over the test.
 # Some parts of the test require xmm15 to validate some code paths, but
