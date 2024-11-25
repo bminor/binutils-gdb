@@ -2312,6 +2312,22 @@ loongarch_record_special_insn (loongarch_record_s *loongarch_record)
   return LOONGARCH_RECORD_SUCCESS;
 }
 
+/* Record handler for syscall instructions.  */
+
+static int
+loongarch_record_syscall_insn (loongarch_record_s *loongarch_record)
+{
+  uint64_t syscall_number;
+  struct loongarch_gdbarch_tdep *tdep
+	    = gdbarch_tdep<loongarch_gdbarch_tdep> (loongarch_record->gdbarch);
+
+  regcache_raw_read_unsigned (loongarch_record->regcache, LOONGARCH_A7_REGNUM,
+			      &syscall_number);
+
+  return tdep->loongarch_syscall_record (loongarch_record->regcache,
+					 syscall_number);
+}
+
 /* Decode insns type and invoke its record handler.  */
 
 static int
@@ -2335,6 +2351,8 @@ loongarch_record_decode_insn_handler (loongarch_record_s *loongarch_record)
     return loongarch_record_bound_check_load_insn (loongarch_record);
   else if (is_bound_check_store_insn (loongarch_record->insn))
     return loongarch_record_bound_check_store_insn (loongarch_record);
+  else if (is_syscall_insn (loongarch_record->insn))
+    return loongarch_record_syscall_insn (loongarch_record);
 
   return LOONGARCH_RECORD_UNSUPPORTED;
 }

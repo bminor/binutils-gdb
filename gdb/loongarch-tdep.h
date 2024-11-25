@@ -40,6 +40,10 @@ struct loongarch_gdbarch_tdep : gdbarch_tdep_base
   /* Features about the abi that impact how the gdbarch is configured.  */
   struct loongarch_gdbarch_features abi_features;
 
+  /* Syscall record.  */
+  int (*loongarch_syscall_record) (struct regcache *regcache,
+				   unsigned long syscall_number) = nullptr;
+
   /* Return the expected next PC if FRAME is stopped at a syscall instruction.  */
   CORE_ADDR (*syscall_next_pc) (const frame_info_ptr &frame) = nullptr;
 };
