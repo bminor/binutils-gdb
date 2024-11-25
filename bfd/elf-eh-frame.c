@@ -843,6 +843,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 		      REQUIRE (skip_bytes (&buf, end, per_width));
 		    }
 		    break;
+		  case 'G':
+		    break;
 		  default:
 		    /* Unrecognized augmentation. Better bail out.  */
 		    goto free_no_table;
