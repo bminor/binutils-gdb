@@ -4915,6 +4915,15 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       tls_type = 0;
       switch (r_type)
 	{
+	case R_PPC64_PLTSEQ:
+	case R_PPC64_PLTSEQ_NOTOC:
+	  /* Inline plt call code emitted by gcc doesn't support
+	     modifying the tls_index words to short-circuit
+	     __tls_get_addr calls.  See PR32387.  */
+	  if (h != NULL && (h == tga || h == dottga))
+	    htab->params->tls_get_addr_opt = 0;
+	  break;
+
 	case R_PPC64_TLSGD:
 	case R_PPC64_TLSLD:
 	  /* These special tls relocs tie a call to __tls_get_addr with
