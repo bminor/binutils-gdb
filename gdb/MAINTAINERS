@@ -383,9 +383,7 @@ the native maintainer when resolving ABI issues.
 
 	ms1		Deleted
 
-	nios2		--target=nios2-elf
-			--target=nios2-linux-gnu
-			Yao Qi			qiyao@sourceware.org
+	nios2		Deleted
 
 	ns32k		Deleted
 

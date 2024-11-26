@@ -92,10 +92,9 @@ get_test_insn (struct gdbarch *gdbarch, size_t *len)
       insn = xstormy16_insn;
       *len = sizeof (xstormy16_insn);
       break;
-    case bfd_arch_nios2:
     case bfd_arch_score:
     case bfd_arch_riscv:
-      /* nios2, riscv, and score need to know the current instruction
+      /* riscv and score need to know the current instruction
 	 to select breakpoint instruction.  Give the breakpoint
 	 instruction kind explicitly.  */
       {

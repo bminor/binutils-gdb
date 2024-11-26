@@ -188,14 +188,6 @@ case "${gdbserver_host}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
-  nios2*-*-linux*)	srv_regobj="nios2-linux.o"
-			srv_tgtobj="$srv_linux_obj linux-nios2-low.o"
-			srv_xmlfiles="nios2-linux.xml"
-			srv_xmlfiles="${srv_xmlfiles} nios2-cpu.xml"
-			srv_linux_regsets=yes
-			srv_linux_usrregs=yes
-			srv_linux_thread_db=yes
-			;;
   or1k*-*-linux*)	srv_regobj="or1k-linux.o"
 			srv_tgtobj="$srv_linux_obj linux-or1k-low.o"
 			srv_xmlfiles="or1k-linux.xml"

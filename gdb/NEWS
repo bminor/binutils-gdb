@@ -3,6 +3,9 @@
 
 *** Changes since GDB 15
 
+* Support for Nios II targets has been removed as this architecture
+  has been EOL'ed by Intel.
+
 * GDB now supports watchpoints for tagged data pointers (see
   https://en.wikipedia.org/wiki/Tagged_pointer) on amd64, such as the
   one used by the Linear Address Masking (LAM) feature provided by

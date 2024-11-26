@@ -466,17 +466,6 @@ nds32*-*-elf)
 	gdb_target_obs="nds32-tdep.o"
 	;;
 
-nios2*-*-linux*)
-	# Target: Altera Nios II running Linux
-	gdb_target_obs="nios2-tdep.o nios2-linux-tdep.o solib-svr4.o \
-			symfile-mem.o glibc-tdep.o linux-tdep.o"
-	;;
-
-nios2*-*-*)
-	# Target: Altera Nios II bare-metal
-	gdb_target_obs="nios2-tdep.o"
-	;;
-
 or1k*-*-linux*)
 	# Target: OpenCores OpenRISC 1000 32-bit running Linux
 	gdb_target_obs="or1k-tdep.o or1k-linux-tdep.o solib-svr4.o \

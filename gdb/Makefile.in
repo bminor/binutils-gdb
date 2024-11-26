@@ -857,8 +857,6 @@ ALL_TARGET_OBS = \
 	msp430-tdep.o \
 	netbsd-tdep.o \
 	nds32-tdep.o \
-	nios2-linux-tdep.o \
-	nios2-tdep.o \
 	obsd-tdep.o \
 	or1k-linux-tdep.o \
 	or1k-tdep.o \
@@ -1441,7 +1439,6 @@ HFILES_NO_SRCDIR = \
 	netbsd-nat.h \
 	netbsd-tdep.h \
 	nds32-tdep.h \
-	nios2-tdep.h \
 	elf-none-tdep.h \
 	objc-lang.h \
 	objfiles.h \
@@ -1806,8 +1803,6 @@ ALLDEPFILES = \
 	netbsd-nat.c \
 	netbsd-tdep.c \
 	nds32-tdep.c \
-	nios2-linux-tdep.c \
-	nios2-tdep.c \
 	obsd-nat.c \
 	obsd-tdep.c \
 	or1k-linux-nat.c \

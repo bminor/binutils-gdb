@@ -46,7 +46,6 @@
 # List of .dat files to create in ../regformats/
 WHICH = mips-linux mips-dsp-linux \
 	mips64-linux mips64-dsp-linux \
-	nios2-linux \
 	or1k-linux \
 	rs6000/powerpc-32 \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
@@ -73,7 +72,6 @@ mips-expedite = r29,pc
 mips-dsp-expedite = r29,pc
 mips64-expedite = r29,pc
 mips64-dsp-expedite = r29,pc
-nios2-linux-expedite = sp,pc
 or1k-expedite = r1,npc
 powerpc-expedite = r1,pc
 s390-linux32-expedite = r14,r15,pswa
@@ -107,7 +105,6 @@ XMLTOC = \
 	mips64-dsp-linux.xml \
 	mips64-linux.xml \
 	nds32.xml \
-	nios2.xml \
 	or1k.xml \
 	or1k-linux.xml \
 	rs6000/powerpc-32.xml \
