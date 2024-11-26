@@ -465,7 +465,7 @@
   <syscall name="lsm_get_self_attr" number="459"/>
   <syscall name="lsm_set_self_attr" number="460"/>
   <syscall name="lsm_list_modules" number="461"/>
-  <syscall name="mseal" number="462"/>
+  <syscall name="mseal" number="462" groups="memory"/>
   <syscall name="ARM_breakpoint" number="983041"/>
   <syscall name="ARM_cacheflush" number="983042"/>
   <syscall name="ARM_usr26" number="983043"/>
