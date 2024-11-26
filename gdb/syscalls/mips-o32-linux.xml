@@ -438,4 +438,5 @@
   <syscall name="lsm_get_self_attr" number="4459"/>
   <syscall name="lsm_set_self_attr" number="4460"/>
   <syscall name="lsm_list_modules" number="4461"/>
+  <syscall name="mseal" number="4462"/>
 </syscalls_info>
