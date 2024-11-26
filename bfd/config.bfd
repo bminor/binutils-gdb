@@ -151,6 +151,7 @@ case $targ in
  mips*-sgi-* | \
  mips*el-*-rtems* | \
  m32c-*-rtems* | \
+ nios2*-*-* | \
  ns32k-*-netbsd* | \
  openrisc-*-* | \
  or32-*-* | \

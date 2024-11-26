@@ -122,8 +122,6 @@ config/tc-mt.c
 config/tc-mt.h
 config/tc-nds32.c
 config/tc-nds32.h
-config/tc-nios2.c
-config/tc-nios2.h
 config/tc-ns32k.c
 config/tc-ns32k.h
 config/tc-or1k.c
