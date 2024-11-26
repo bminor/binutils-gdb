@@ -20,10 +20,9 @@
 #define GDBSERVER_INFERIORS_H
 
 #include "gdbsupport/owning_intrusive_list.h"
+#include "gdbsupport/unordered_map.h"
 
 #include "dll.h"
-
-#include <unordered_map>
 
 struct thread_info;
 struct regcache;
@@ -121,7 +120,7 @@ private:
 
   /* A map of ptid_t to thread_info*, for average O(1) ptid_t lookup.
      Exited threads do not appear in the map.  */
-  std::unordered_map<ptid_t, thread_info *> m_ptid_thread_map;
+  gdb::unordered_map<ptid_t, thread_info *> m_ptid_thread_map;
 };
 
 /* Return a pointer to the current process.  Note that the current
