@@ -496,12 +496,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{--no-expand}] [@b{--no-merge-gregs}] [@b{-x}]
    [@b{--linker-allocated-gregs}]
 @end ifset
-@ifset NIOSII
-
-@emph{Target Nios II options:}
-   [@b{-relax-all}] [@b{-relax-section}] [@b{-no-relax}]
-   [@b{-EB}] [@b{-EL}]
-@end ifset
 @ifset NDS32
 
 @emph{Target NDS32 options:}
@@ -1326,24 +1320,6 @@ The target machine does (or does not) have a memory-management
 unit coprocessor.  The default is to assume an MMU for 68020 and up.
 
 @end table
-@end ifset
-
-@ifset NIOSII
-
-@ifclear man
-@xref{Nios II Options}, for the options available when @value{AS} is configured
-for an Altera Nios II processor.
-@end ifclear
-
-@ifset man
-@c man begin OPTIONS
-The following options are available when @value{AS} is configured for an
-Altera Nios II processor.
-@c man end
-@c man begin INCLUDE
-@include c-nios2.texi
-@c ended inside the included file
-@end ifset
 @end ifset
 
 @ifset PDP11
@@ -8173,9 +8149,6 @@ subject, see the hardware manufacturer's manual.
 @ifset NDS32
 * NDS32-Dependent::             Andes NDS32 Dependent Features
 @end ifset
-@ifset NIOSII
-* NiosII-Dependent::            Altera Nios II Dependent Features
-@end ifset
 @ifset NS32K
 * NS32K-Dependent::		NS32K Dependent Features
 @end ifset
@@ -8411,10 +8384,6 @@ family.
 
 @ifset NDS32
 @include c-nds32.texi
-@end ifset
-
-@ifset NIOSII
-@include c-nios2.texi
 @end ifset
 
 @ifset NS32K

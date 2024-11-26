@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Support for Nios II target has been removed, as this architecture has been
+  EOL'ed by Intel.
+
 Changes in 2.44:
 
 * Add --image-base=<ADDR> option to the ELF linker to behave the same

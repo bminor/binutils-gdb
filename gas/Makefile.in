@@ -685,7 +685,6 @@ TARGET_CPU_CFILES = \
 	config/tc-msp430.c \
 	config/tc-mt.c \
 	config/tc-nds32.c \
-	config/tc-nios2.c \
 	config/tc-ns32k.c \
 	config/tc-or1k.c \
 	config/tc-pdp11.c \
@@ -759,7 +758,6 @@ TARGET_CPU_HFILES = \
 	config/tc-msp430.h \
 	config/tc-mt.h \
 	config/tc-nds32.h \
-	config/tc-nios2.h \
 	config/tc-ns32k.h \
 	config/tc-or1k.h \
 	config/tc-pdp11.h \
@@ -993,7 +991,6 @@ CPU_DOCS = \
 	doc/c-mmix.texi \
 	doc/c-mt.texi \
 	doc/c-msp430.texi \
-	doc/c-nios2.texi \
 	doc/c-nds32.texi \
 	doc/c-ns32k.texi \
 	doc/c-or1k.texi \
@@ -1186,8 +1183,6 @@ config/tc-msp430.$(OBJEXT): config/$(am__dirstamp) \
 config/tc-mt.$(OBJEXT): config/$(am__dirstamp) \
 	config/$(DEPDIR)/$(am__dirstamp)
 config/tc-nds32.$(OBJEXT): config/$(am__dirstamp) \
-	config/$(DEPDIR)/$(am__dirstamp)
-config/tc-nios2.$(OBJEXT): config/$(am__dirstamp) \
 	config/$(DEPDIR)/$(am__dirstamp)
 config/tc-ns32k.$(OBJEXT): config/$(am__dirstamp) \
 	config/$(DEPDIR)/$(am__dirstamp)
@@ -1419,7 +1414,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-msp430.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-mt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-nds32.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-nios2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-ns32k.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-or1k.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-pdp11.Po@am__quote@

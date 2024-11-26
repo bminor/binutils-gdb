@@ -670,10 +670,6 @@ nds32*le-*-linux-gnu*)	targ_emul=nds32elf_linux
 			;;
 nds32*be-*-linux-gnu*)	targ_emul=nds32belf_linux
 			;;
-nios2*-*-linux*)	targ_emul=nios2linux
-			;;
-nios2*-*-*)		targ_emul=nios2elf
-			;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)  targ_emul=pc532macha
 			targ_extra_ofiles=
 			;;

@@ -844,8 +844,6 @@ ALL_EMULATION_SOURCES = \
 	ends32elf.c \
 	ends32elf16m.c \
 	ends32elf_linux.c \
-	enios2elf.c \
-	enios2linux.c \
 	ens32knbsd.c \
 	epc532macha.c \
 	epdp11.c \
@@ -1543,8 +1541,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ends32elf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ends32elf16m.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ends32elf_linux.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/enios2elf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/enios2linux.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ens32knbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epc532macha.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/epdp11.Po@am__quote@

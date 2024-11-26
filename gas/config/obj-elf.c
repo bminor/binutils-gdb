@@ -57,10 +57,6 @@
 #include "elf/mep.h"
 #endif
 
-#ifdef TC_NIOS2
-#include "elf/nios2.h"
-#endif
-
 #ifdef TC_PRU
 #include "elf/pru.h"
 #endif

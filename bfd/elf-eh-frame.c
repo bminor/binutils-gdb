@@ -2145,7 +2145,6 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 			/* Fall thru */
 		      case bfd_arch_frv:
 		      case bfd_arch_i386:
-		      case bfd_arch_nios2:
 			BFD_ASSERT (htab->hgot != NULL
 				    && ((htab->hgot->root.type
 					 == bfd_link_hash_defined)

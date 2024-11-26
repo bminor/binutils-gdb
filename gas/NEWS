@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Support for Nios II targets has been dropped, as the architecture has
+  been EOL'ed by Intel.
+
 * Add support for the x86 Intel MSR_IMM instructions.
 
 * Add support for the x86 Zhaoxin GMI instructions.

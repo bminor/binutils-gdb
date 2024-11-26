@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Support for Nios II targets has been removed except in the readelf utility,
+  as this architecture has been EOL'ed by Intel.
+
 * RISC-V disassembly now supports -M,max option like QEMU to dump instruction
   without checking architecture support as usual.
 
