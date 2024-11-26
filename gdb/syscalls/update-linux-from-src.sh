@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copyright (C) 2022-2024 Free Software Foundation, Inc.
 #
@@ -20,23 +20,30 @@
 # Used to generate .xml.in files, like so:
 # $ ./update-linux-from-src.sh ~/linux-stable.git
 
-if [ $# -lt 1 ]; then
-    echo "dir argument needed"
-    exit 1
-fi
+parse_args ()
+{
+    if [ $# -lt 1 ]; then
+	echo "dir argument needed"
+	exit 1
+    fi
 
-d="$1"
-shift
+    d="$1"
+    shift
 
-if [ ! -d "$d" ]; then
-    echo "cannot find $d"
-    exit 1
-fi
+    if [ ! -d "$d" ]; then
+	echo "cannot find $d"
+	exit 1
+    fi
+}
 
 pre ()
 {
+    local f
     f="$1"
+    local start_date
+    start_date="$2"
 
+    local year
     year=$(date +%Y)
 
     cat <<EOF
@@ -69,9 +76,13 @@ post ()
 
 one ()
 {
+    local f
     f="$1"
+    local abi
     abi="$2"
+    local start_date
     start_date="$3"
+    local offset
     offset="$4"
 
     pre "$f" "$start_date"
@@ -85,10 +96,18 @@ one ()
     post
 }
 
-for f in *.in; do
+regen ()
+{
+    local f
+    f="$1"
+
+    local start_date
     start_date=2009
+    local offset
     offset=0
 
+    local t
+    local abi
     case $f in
 	amd64-linux.xml.in)
 	    t="arch/x86/entry/syscalls/syscall_64.tbl"
@@ -144,30 +163,42 @@ for f in *.in; do
 	    ;;
 	bfin-linux.xml.in)
 	    echo "Skipping $f, no longer supported"
-	    continue
+	    return
 	    ;;
 	aarch64-linux.xml.in)
 	    echo "Skipping $f, no syscall.tbl"
-	    continue
+	    return
 	    ;;
 	arm-linux.xml.in)
 	    echo "Skipping $f, use arm-linux.py instead"
-	    continue
+	    return
 	    ;;
 	loongarch-linux.xml.in)
 	    echo "Skipping $f, no syscall.tbl"
-	    continue
+	    return
 	    ;;
 	linux-defaults.xml.in)
-	    continue
+	    return
 	    ;;
 	*)
 	    echo "Don't know how to generate $f"
-	    continue
+	    return
 	    ;;
     esac
 
     echo "Generating $f"
     one "$t" "$abi" "$start_date" "$offset" > "$f"
+}
 
-done
+main ()
+{
+    # Set global d.
+    parse_args "$@"
+
+    local f
+    for f in *.xml.in; do
+	regen "$f"
+    done
+}
+
+main "$@"
