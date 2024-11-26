@@ -9162,6 +9162,8 @@ read_cie (unsigned char *start, unsigned char *end,
 	    ;
 	  else if (*p == 'B')
 	    ;
+	  else if (*p == 'G')
+	    ;
 	  else
 	    break;
 	  p++;
