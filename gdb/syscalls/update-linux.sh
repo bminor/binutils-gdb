@@ -36,12 +36,19 @@ if [ ! -f "$f" ]; then
     exit 1
 fi
 
+startyear=2009
+case "$f" in
+    *aarch64-linux.xml.in)
+	startyear=2015
+	;;
+esac
+
 year=$(date +%Y)
 
 (
     cat <<EOF
 <?xml version="1.0"?>
-<!-- Copyright (C) 2009-$year Free Software Foundation, Inc.
+<!-- Copyright (C) $startyear-$year Free Software Foundation, Inc.
 
      Copying and distribution of this file, with or without modification,
      are permitted in any medium without royalty provided the copyright
