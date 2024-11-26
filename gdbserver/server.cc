@@ -35,7 +35,7 @@
 #include "dll.h"
 #include "hostio.h"
 #include <vector>
-#include <unordered_map>
+#include "gdbsupport/unordered_map.h"
 #include "gdbsupport/common-inferior.h"
 #include "gdbsupport/job-control.h"
 #include "gdbsupport/environ.h"
@@ -947,7 +947,7 @@ handle_general_set (char *own_buf)
 	 It's nicer if we only print the final options for each TID,
 	 and if we only print about it if the options changed compared
 	 to the options that were previously set on the thread.  */
-      std::unordered_map<thread_info *, gdb_thread_options> set_options;
+      gdb::unordered_map<thread_info *, gdb_thread_options> set_options;
 
       while (*p != '\0')
 	{

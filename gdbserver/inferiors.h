@@ -19,12 +19,10 @@
 #ifndef GDBSERVER_INFERIORS_H
 #define GDBSERVER_INFERIORS_H
 
-#include "gdbsupport/gdb_vecs.h"
 #include "gdbsupport/owning_intrusive_list.h"
+#include "gdbsupport/unordered_map.h"
 
 #include "dll.h"
-
-#include <unordered_map>
 
 struct thread_info;
 struct regcache;
@@ -94,7 +92,7 @@ struct process_info : public intrusive_list_node<process_info>
   { return m_thread_list; }
 
   /* Return a reference to the private thread map.  */
-  std::unordered_map<ptid_t, thread_info *> &thread_map ()
+  gdb::unordered_map<ptid_t, thread_info *> &thread_map ()
   { return m_ptid_thread_map; }
 
   /* Find the first thread for which FUNC returns true.  Return nullptr if no
@@ -118,7 +116,7 @@ private:
 
   /* A map of ptid_t to thread_info*, for average O(1) ptid_t lookup.
      Exited threads do not appear in the map.  */
-  std::unordered_map<ptid_t, thread_info *> m_ptid_thread_map;
+  gdb::unordered_map<ptid_t, thread_info *> m_ptid_thread_map;
 };
 
 /* Return a pointer to the current process.  Note that the current
