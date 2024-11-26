@@ -42,6 +42,21 @@ pre ()
     f="$1"
     local start_date
     start_date="$2"
+    local h
+    h="$3"
+
+    local prefix
+    prefix="     "
+
+    if [ "$h" != "" ]; then
+	file_files="files"
+	belong_belongs="belong"
+	files=$(echo -e "$prefix$f\n$prefix$h")
+    else
+	file_files="file"
+	belong_belongs="belongs"
+	files="$prefix$f"
+    fi
 
     local year
     year=$(date +%Y)
@@ -56,11 +71,11 @@ pre ()
 
 <!DOCTYPE feature SYSTEM "gdb-syscalls.dtd">
 
-<!-- This file was generated using the following file:
+<!-- This file was generated using the following $file_files:
 
-     $f
+$files
 
-     The file mentioned above belongs to the Linux Kernel.  -->
+     The $file_files mentioned above $belong_belongs to the Linux Kernel.  -->
 
 
 EOF
@@ -84,16 +99,34 @@ one ()
     start_date="$3"
     local offset
     offset="$4"
+    local h
+    h="$5"
 
     tmp=$(mktemp)
     trap 'rm -f $tmp' EXIT
 
-    pre "$f" "$start_date"
+    pre "$f" "$start_date" "$h"
 
     # Print out num, abi, name.
     grep -v "^#" "$d/$f" \
 	| awk '{print $1, $2, $3}' \
 	      > "$tmp"
+
+    local decimal
+    decimal="[0-9][0-9]*"
+    # Print out num, "removed", name.
+    grep -E "^# $decimal was sys_*" "$d/$f" \
+	| awk '{print $2, "removed", gensub("^sys_", "", 1, $4)}' \
+	      >> "$tmp"
+
+    case $h in
+	arch/arm/include/uapi/asm/unistd.h)
+	    grep '#define __ARM_NR_[a-z].*__ARM_NR_BASE\+' "$d/$h" \
+		| sed 's/#define //;s/__ARM_NR_BASE+//;s/[()]//g;s/__ARM_NR_/ARM_/' \
+		| awk '{print $2 + 0x0f0000, "private", $1}' \
+		      >> "$tmp"
+	    ;;
+    esac
 
     local nums
     declare -a nums
@@ -101,6 +134,8 @@ one ()
     declare -a abis
     local names
     declare -a names
+    local name_exists
+    declare -A name_exists
 
     local i
     i=0
@@ -136,6 +171,10 @@ one ()
 	abis[i]="$_abi"
 	names[i]="$_name"
 
+	if [ "$_abi" != "removed" ]; then
+	    name_exists[$_name]=1
+	fi
+
 	i=$((i + 1))
     done < <(sort -V "$tmp")
 
@@ -147,7 +186,17 @@ one ()
 	_abi=${abis[$i]}
 	_num=$((${nums[$i]} + offset))
 
-	echo "  <syscall name=\"$_name\" number=\"$_num\"/>"
+	if [ "$_abi" = "removed" ] && [ "${name_exists[$_name]}" = 1 ]; then
+	    _name=old$_name
+	fi
+
+	echo -n "  <syscall name=\"$_name\" number=\"$_num\"/>"
+
+	if [ "$_abi" = "removed" ]; then
+	    echo " <!-- removed -->"
+	else
+	    echo
+	fi
     done
 
     post
@@ -162,6 +211,8 @@ regen ()
     start_date=2009
     local offset
     offset=0
+    local h
+    h=
 
     local t
     local abi
@@ -227,8 +278,9 @@ regen ()
 	    return
 	    ;;
 	arm-linux.xml.in)
-	    echo "Skipping $f, use arm-linux.py instead"
-	    return
+	    t="arch/arm/tools/syscall.tbl"
+	    h="arch/arm/include/uapi/asm/unistd.h"
+	    abi="common eabi oabi removed private"
 	    ;;
 	loongarch-linux.xml.in)
 	    echo "Skipping $f, no syscall.tbl"
@@ -244,7 +296,7 @@ regen ()
     esac
 
     echo "Generating $f"
-    one "$t" "$abi" "$start_date" "$offset" > "$f"
+    one "$t" "$abi" "$start_date" "$offset" "$h" > "$f"
 }
 
 main ()
