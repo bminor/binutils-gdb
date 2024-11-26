@@ -78,20 +78,77 @@ one ()
 {
     local f
     f="$1"
-    local abi
-    abi="$2"
+    local select_abis
+    select_abis="$2"
     local start_date
     start_date="$3"
     local offset
     offset="$4"
 
+    tmp=$(mktemp)
+    trap 'rm -f $tmp' EXIT
+
     pre "$f" "$start_date"
 
+    # Print out num, abi, name.
     grep -v "^#" "$d/$f" \
-	| awk '{print $2, $3, $1}' \
-	| grep -E "^$abi" \
-	| grep -E -v " (reserved|unused)[0-9]+ " \
-	| awk "{printf \"  <syscall name=\\\"%s\\\" number=\\\"%s\\\"/>\n\", \$2, \$3 + $offset}"
+	| awk '{print $1, $2, $3}' \
+	      > "$tmp"
+
+    local nums
+    declare -a nums
+    local abis
+    declare -a abis
+    local names
+    declare -a names
+
+    local i
+    i=0
+    local _num
+    local _abi
+    local _name
+    while read -r -a line; do
+	_num="${line[0]}"
+	_abi="${line[1]}"
+	_name="${line[2]}"
+
+	local found
+	found=false
+	for a in $select_abis; do
+	    if [ "$a" = "$_abi" ]; then
+		found=true
+		break
+	    fi
+	done
+	if ! $found; then
+	    continue
+	fi
+
+	if [ "${_name/reserved+([0-9])/}" = "" ]; then
+	    continue
+	fi
+
+	if [ "${_name/unused+([0-9])/}" = "" ]; then
+	    continue
+	fi
+
+	nums[i]="$_num"
+	abis[i]="$_abi"
+	names[i]="$_name"
+
+	i=$((i + 1))
+    done < <(sort -V "$tmp")
+
+    local n
+    n=$i
+
+    for ((i = 0 ; i < n ; i++)); do
+	_name=${names[$i]}
+	_abi=${abis[$i]}
+	_num=$((${nums[$i]} + offset))
+
+	echo "  <syscall name=\"$_name\" number=\"$_num\"/>"
+    done
 
     post
 }
@@ -111,7 +168,7 @@ regen ()
     case $f in
 	amd64-linux.xml.in)
 	    t="arch/x86/entry/syscalls/syscall_64.tbl"
-	    abi="(common|64)"
+	    abi="common 64"
 	    ;;
 	i386-linux.xml.in)
 	    t="arch/x86/entry/syscalls/syscall_32.tbl"
@@ -119,28 +176,28 @@ regen ()
 	    ;;
 	ppc64-linux.xml.in)
 	    t="arch/powerpc/kernel/syscalls/syscall.tbl"
-	    abi="(common|64|nospu)"
+	    abi="common 64 nospu"
 	    ;;
 	ppc-linux.xml.in)
 	    t="arch/powerpc/kernel/syscalls/syscall.tbl"
-	    abi="(common|32|nospu)"
+	    abi="common 32 nospu"
 	    ;;
 	s390-linux.xml.in)
 	    t="arch/s390/kernel/syscalls/syscall.tbl"
-	    abi="(common|32)"
+	    abi="common 32"
 	    ;;
 	s390x-linux.xml.in)
 	    t="arch/s390/kernel/syscalls/syscall.tbl"
-	    abi="(common|64)"
+	    abi="common 64"
 	    ;;
 	sparc64-linux.xml.in)
 	    t="arch/sparc/kernel/syscalls/syscall.tbl"
-	    abi="(common|64)"
+	    abi="common 64"
 	    start_date="2010"
 	    ;;
 	sparc-linux.xml.in)
 	    t="arch/sparc/kernel/syscalls/syscall.tbl"
-	    abi="(common|32)"
+	    abi="common 32"
 	    start_date="2010"
 	    ;;
 	mips-n32-linux.xml.in)
@@ -192,6 +249,8 @@ regen ()
 
 main ()
 {
+    shopt -s extglob
+
     # Set global d.
     parse_args "$@"
 
