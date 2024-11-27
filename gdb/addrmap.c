@@ -356,6 +356,7 @@ addrmap_mutable::~addrmap_mutable ()
 void
 addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload,
 	      gdb::function_view<void (struct ui_file *outfile,
+				       CORE_ADDR start_addr,
 				       const void *value)> annotate_value)
 {
   /* True if the previously printed addrmap entry was for PAYLOAD.
@@ -381,7 +382,7 @@ addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload,
 		    core_addr_to_string (start_addr),
 		    addr_str);
 	if (annotate_value != nullptr)
-	  annotate_value (outfile, obj);
+	  annotate_value (outfile, start_addr, obj);
 
 	gdb_printf (outfile, "\n");
       }

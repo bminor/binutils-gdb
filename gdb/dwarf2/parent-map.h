@@ -102,7 +102,7 @@ public:
   }
 
   /* Dump a human-readable form of this map.  */
-  void dump () const;
+  void dump (dwarf2_per_bfd *per_bfd) const;
 
 private:
 
@@ -142,7 +142,7 @@ public:
   }
 
   /* Dump a human-readable form of this collection of parent_maps.  */
-  void dump () const;
+  void dump (dwarf2_per_bfd *per_bfd) const;
 
 private:
 
