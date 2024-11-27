@@ -2534,8 +2534,10 @@ ipc_doWork (void *arg)
     }
   else
     {
-      ipc_log ("Unrecognized input cmd \"%s\"; Aborting.\n", inp);
-      return 1;
+      char *s = dbe_sprintf ("Unrecognized request: \"%s\"", inp);
+      ipc_log ("%s\n", s);
+      writeError (s, req);
+      free (s);
     }
   ipc_log ("  processing IPC command %s complete\n", inp);
   free (inp);

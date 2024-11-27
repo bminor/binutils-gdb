@@ -777,6 +777,16 @@ writeString (const char *s, IPCrequest* req)
 }
 
 void
+writeError (const char *s, IPCrequest* req)
+{
+  IPCresponse *OUTS = responseBufferPool->getNewResponse (BUFFER_SIZE_LARGE);
+  OUTS->sendByte (L_STRING);
+  OUTS->sendSVal (s);
+  writeResponseWithHeader (req->getRequestID (), req->getChannelID (),
+			   RESPONSE_TYPE_COMPLETE, RESPONSE_STATUS_ERROR, OUTS);
+}
+
+void
 writeObject (DbeObj obj, IPCrequest* req)
 {
   writeLong ((long long) obj, req);
