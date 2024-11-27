@@ -4,7 +4,7 @@ tmpdir/aarch64.x:     file format pei-aarch64-little
 
 Disassembly of section .text:
 
-0000000000002000 <__rt_psrelocs_end>:
+0000000000002000 <.text>:
 	...
 
 0000000000002010 <foo>:
@@ -58,41 +58,41 @@ Disassembly of section .text:
     20cc:	0000121f 	udf	#4639
     20d0:	17ffffd0 	b	2010 <foo>
     20d4:	17ffffd0 	b	2014 <foo\+0x4>
-    20d8:	17ffffcd 	b	200c <__rt_psrelocs_end\+0xc>
+    20d8:	17ffffcd 	b	200c <.text\+0xc>
     20dc:	14000051 	b	2220 <bar>
     20e0:	14000051 	b	2224 <bar\+0x4>
     20e4:	1400004e 	b	221c <.text>
     20e8:	97ffffca 	bl	2010 <foo>
     20ec:	97ffffca 	bl	2014 <foo\+0x4>
-    20f0:	97ffffc7 	bl	200c <__rt_psrelocs_end\+0xc>
+    20f0:	97ffffc7 	bl	200c <.text\+0xc>
     20f4:	9400004b 	bl	2220 <bar>
     20f8:	9400004b 	bl	2224 <bar\+0x4>
     20fc:	94000048 	bl	221c <.text>
     2100:	97ffffbf 	bl	1ffc <__ImageBase\+0xffc>
     2104:	b4fff860 	cbz	x0, 2010 <foo>
     2108:	b4fff860 	cbz	x0, 2014 <foo\+0x4>
-    210c:	b4fff800 	cbz	x0, 200c <__rt_psrelocs_end\+0xc>
+    210c:	b4fff800 	cbz	x0, 200c <.text\+0xc>
     2110:	b4000880 	cbz	x0, 2220 <bar>
     2114:	b4000880 	cbz	x0, 2224 <bar\+0x4>
     2118:	b4000820 	cbz	x0, 221c <.text>
     211c:	b4fff700 	cbz	x0, 1ffc <__ImageBase\+0xffc>
     2120:	3607f780 	tbz	w0, #0, 2010 <foo>
     2124:	3607f780 	tbz	w0, #0, 2014 <foo\+0x4>
-    2128:	3607f720 	tbz	w0, #0, 200c <__rt_psrelocs_end\+0xc>
+    2128:	3607f720 	tbz	w0, #0, 200c <.text\+0xc>
     212c:	360007a0 	tbz	w0, #0, 2220 <bar>
     2130:	360007a0 	tbz	w0, #0, 2224 <bar\+0x4>
     2134:	36000740 	tbz	w0, #0, 221c <.text>
     2138:	3607f620 	tbz	w0, #0, 1ffc <__ImageBase\+0xffc>
-    213c:	90000000 	adrp	x0, 2000 <__rt_psrelocs_end>
-    2140:	90000000 	adrp	x0, 2000 <__rt_psrelocs_end>
-    2144:	90000000 	adrp	x0, 2000 <__rt_psrelocs_end>
-    2148:	90000000 	adrp	x0, 2000 <__rt_psrelocs_end>
-    214c:	90000000 	adrp	x0, 2000 <__rt_psrelocs_end>
-    2150:	90000000 	adrp	x0, 2000 <__rt_psrelocs_end>
+    213c:	90000000 	adrp	x0, 2000 <.text>
+    2140:	90000000 	adrp	x0, 2000 <.text>
+    2144:	90000000 	adrp	x0, 2000 <.text>
+    2148:	90000000 	adrp	x0, 2000 <.text>
+    214c:	90000000 	adrp	x0, 2000 <.text>
+    2150:	90000000 	adrp	x0, 2000 <.text>
     2154:	f0ffffe0 	adrp	x0, 1000 <__ImageBase>
     2158:	10fff5c0 	adr	x0, 2010 <foo>
     215c:	30fff5a0 	adr	x0, 2011 <foo\+0x1>
-    2160:	70fff560 	adr	x0, 200f <__rt_psrelocs_end\+0xf>
+    2160:	70fff560 	adr	x0, 200f <.text\+0xf>
     2164:	100005e0 	adr	x0, 2220 <bar>
     2168:	300005c0 	adr	x0, 2221 <bar\+0x1>
     216c:	70000580 	adr	x0, 221f <.text\+0x3>
@@ -146,13 +146,4 @@ Disassembly of section .text:
 0000000000002220 <bar>:
     2220:	9abcdef0 	.inst	0x9abcdef0 ; undefined
     2224:	12345678 	and	w24, w19, #0xfffff003
-
-0000000000002228 <__CTOR_LIST__>:
-    2228:	ffffffff 	.inst	0xffffffff ; undefined
-    222c:	ffffffff 	.inst	0xffffffff ; undefined
-	...
-
-0000000000002238 <__DTOR_LIST__>:
-    2238:	ffffffff 	.inst	0xffffffff ; undefined
-    223c:	ffffffff 	.inst	0xffffffff ; undefined
-	...
+#pass

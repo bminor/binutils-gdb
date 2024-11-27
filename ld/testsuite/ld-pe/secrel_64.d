@@ -6,8 +6,6 @@ Contents of section \.text:
  .*1010 3e3e3e3e 3e3e3c3c 3e3e3e3e 3e3e3e3c  .*
  .*1020 3e3e3e3e 3c3c3c3c 3e3e3e3e 3e3c3c3c  .*
  .*1030 3e3e3e3e 3e3e3c3c 3e3e3e3e 3e3e3e3c  .*
- .*1040 ffffffff ffffffff 00000000 00000000  .*
- .*1050 ffffffff ffffffff 00000000 00000000  .*
 Contents of section \.data:
  .*2000 3e3e3e3e 3c3c3c3c 3e3e3e3e 3e3c3c3c  .*
  .*2010 3e3e3e3e 3e3e3c3c 3e3e3e3e 3e3e3e3c  .*
@@ -23,6 +21,8 @@ Contents of section \.rdata:
  .*3000 3e3e3e3e 3c3c3c3c 3e3e3e3e 3e3c3c3c  .*
  .*3010 3e3e3e3e 3e3e3c3c 3e3e3e3e 3e3e3e3c  .*
  .*3020 3e3e3e3e 00000000 00000000 00000000  .*
+ .*3030 ffffffff ffffffff 00000000 00000000  .*
+ .*3040 ffffffff ffffffff 00000000 00000000  .*
 Contents of section \.idata:
  .*4000 00000000 00000000 00000000 00000000  .*
  .*4010 00000000 00000000                    .*
