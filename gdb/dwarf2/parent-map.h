@@ -69,18 +69,15 @@ public:
   parent_map (parent_map &&) = default;
   parent_map &operator= (parent_map &&) = default;
 
-  /* A reasonably opaque type that is used here to combine a section
-     offset and the 'dwz' flag into a single value.  */
+  /* A reasonably opaque type that is used as part of a DIE range.  */
   enum addr_type : CORE_ADDR { };
 
   /* Turn a section offset into a value that can be used in a parent
      map.  */
-  static addr_type form_addr (sect_offset offset, bool is_dwz)
+  static addr_type form_addr (const gdb_byte *info_ptr)
   {
-    CORE_ADDR value = to_underlying (offset);
-    if (is_dwz)
-      value |= ((CORE_ADDR) 1) << (8 * sizeof (CORE_ADDR) - 1);
-    return addr_type (value);
+    static_assert (sizeof (addr_type) >= sizeof (uintptr_t));
+    return (addr_type) (uintptr_t) info_ptr;
   }
 
   /* Add a new entry to this map.  DIEs from START to END, inclusive,

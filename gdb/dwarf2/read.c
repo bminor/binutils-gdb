@@ -16439,8 +16439,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	     with a NULL result when when we see a reference to a
 	     DIE in another CU that we may or may not have
 	     imported locally.  */
-	  parent_map::addr_type addr
-	    = parent_map::form_addr (origin_offset, origin_is_dwz);
+	  parent_map::addr_type addr = parent_map::form_addr (new_info_ptr);
 	  if (new_reader->cu != reader->cu || new_info_ptr > watermark_ptr)
 	    *maybe_defer = addr;
 	  else
@@ -16579,11 +16578,10 @@ cooked_indexer::recurse (cutu_reader *reader,
       /* Both start and end are inclusive, so use both "+ 1" and "- 1" to
 	 limit the range to the children of parent_entry.  */
       parent_map::addr_type start
-	= parent_map::form_addr (parent_entry->die_offset + 1,
-				 reader->cu->per_cu->is_dwz);
-      parent_map::addr_type end
-	= parent_map::form_addr (sect_offset (info_ptr - 1 - reader->buffer),
-				 reader->cu->per_cu->is_dwz);
+	= parent_map::form_addr (reader->buffer
+				 + to_underlying (parent_entry->die_offset)
+				 + 1);
+      parent_map::addr_type end = parent_map::form_addr (info_ptr - 1);
       m_die_range_map->add_entry (start, end, parent_entry);
     }
 
