@@ -1139,22 +1139,11 @@ __collector_util_init ()
       err = COL_ERROR_UTIL_INIT;
     }
 
-#if ARCH(Intel) && WSIZE(32)
-  ptr = dlvsym (libc, "open64", "GLIBC_2.2"); // it is in /lib/libpthread.so.0
+  ptr = dlsym (libc, "open64");
   if (ptr)
     __collector_util_funcs.open_bare = (int(*)(const char *path, int oflag, ...))ptr;
   else
-    {
-      Tprintf (DBG_LT0, "libcol_util: WARNING: dlvsym for %s@%s failed. Using dlsym() instead.", "open64", "GLIBC_2.2");
-#endif /* ARCH(Intel) && WSIZE(32) */
-      ptr = dlsym (libc, "open64");
-      if (ptr)
-	__collector_util_funcs.open_bare = (int(*)(const char *path, int oflag, ...))ptr;
-      else
-	__collector_util_funcs.open_bare = __collector_util_funcs.open;
-#if ARCH(Intel) && WSIZE(32)
-    }
-#endif /* ARCH(Intel) && WSIZE(32) */
+    __collector_util_funcs.open_bare = __collector_util_funcs.open;
 
   ptr = dlsym (libc, "close");
   if (ptr)
@@ -1183,42 +1172,20 @@ __collector_util_init ()
       err = COL_ERROR_UTIL_INIT;
     }
 
-#if ARCH(Intel) && WSIZE(32)
-  ptr = dlvsym (libc, "pwrite", "GLIBC_2.2"); // it is in /lib/libpthread.so.0
+  ptr = dlsym (libc, "pwrite");
   if (ptr)
-    __collector_util_funcs.pwrite = (ssize_t (*)(int, void*, size_t, off_t))ptr;
+    __collector_util_funcs.pwrite = (ssize_t (*)(int, const void*, size_t, off_t))ptr;
   else
     {
-      Tprintf (DBG_LT0, "libcol_util: WARNING: dlvsym for %s@%s failed. Using dlsym() instead.", "pwrite", "GLIBC_2.2");
-#endif /* ARCH(Intel) && WSIZE(32) */
-      ptr = dlsym (libc, "pwrite");
-      if (ptr)
-	__collector_util_funcs.pwrite = (ssize_t (*)(int, const void*, size_t, off_t))ptr;
-      else
-	{
-	  CALL_UTIL (fprintf)(stderr, "collector_util_init COL_ERROR_UTIL_INIT pwrite: %s\n", dlerror ());
-	  err = COL_ERROR_UTIL_INIT;
-	}
-#if ARCH(Intel) && WSIZE(32)
+      CALL_UTIL (fprintf)(stderr, "collector_util_init COL_ERROR_UTIL_INIT pwrite: %s\n", dlerror ());
+      err = COL_ERROR_UTIL_INIT;
     }
-#endif
 
-#if ARCH(Intel) && WSIZE(32)
-  ptr = dlvsym (libc, "pwrite64", "GLIBC_2.2"); // it is in /lib/libpthread.so.0
+  ptr = dlsym (libc, "pwrite64");
   if (ptr)
-    __collector_util_funcs.pwrite64_ = (ssize_t (*)())ptr;
+    __collector_util_funcs.pwrite64_ = (ssize_t (*)(int, const void*, size_t, off_t))ptr;
   else
-    {
-      Tprintf (DBG_LT0, "libcol_util: WARNING: dlvsym for %s@%s failed. Using dlsym() instead.", "pwrite64", "GLIBC_2.2");
-#endif /* ARCH(Intel) && WSIZE(32) */
-      ptr = dlsym (libc, "pwrite64");
-      if (ptr)
-	__collector_util_funcs.pwrite64_ = (ssize_t (*)(int, const void*, size_t, off_t))ptr;
-      else
-	__collector_util_funcs.pwrite64_ = __collector_util_funcs.pwrite;
-#if ARCH(Intel) && WSIZE(32)
-    }
-#endif /* ARCH(Intel) && WSIZE(32) */
+    __collector_util_funcs.pwrite64_ = __collector_util_funcs.pwrite;
 
   ptr = dlsym (libc, "lseek");
   if (ptr)
