@@ -10636,9 +10636,9 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
 	  && (bti_report != MARKING_NONE))
 	{
 	  if (!aprop || !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
-	    _bfd_aarch64_elf_check_bti_report (bti_report, abfd);
+	    _bfd_aarch64_elf_check_bti_report (info, abfd);
 	  if (!bprop || !(bprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
-	    _bfd_aarch64_elf_check_bti_report (bti_report, bbfd);
+	    _bfd_aarch64_elf_check_bti_report (info, bbfd);
 	}
     }
 

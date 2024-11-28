@@ -191,7 +191,7 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
 				       uint32_t);
 
 extern void
-_bfd_aarch64_elf_check_bti_report (aarch64_feature_marking_report, bfd *);
+_bfd_aarch64_elf_check_bti_report (struct bfd_link_info *, bfd *);
 
 extern void
 _bfd_aarch64_elf_link_fixup_gnu_properties (struct bfd_link_info *,
