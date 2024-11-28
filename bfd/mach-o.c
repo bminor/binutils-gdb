@@ -6019,9 +6019,9 @@ bfd_mach_o_core_file_failing_command (bfd *abfd)
   int ret;
 
   ret = bfd_mach_o_core_fetch_environment (abfd, &buf, &len);
-  if (ret < 0)
+  if (ret < 0 || len == 0)
     return NULL;
-
+  buf[len - 1] = 0;
   return (char *) buf;
 }
 

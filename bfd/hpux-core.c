@@ -177,7 +177,8 @@ hpux_core_core_file_p (bfd *abfd)
 	    struct proc_exec proc_exec;
 	    if (bfd_read (&proc_exec, core_header.len, abfd) != core_header.len)
 	      break;
-	    strncpy (core_command (abfd), proc_exec.cmd, MAXCOMLEN + 1);
+	    strncpy (core_command (abfd), proc_exec.cmd, MAXCOMLEN);
+	    core_command (abfd)[MAXCOMLEN] = 0;
 	    good_sections++;
 	  }
 	  break;
