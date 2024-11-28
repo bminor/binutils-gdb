@@ -90,6 +90,8 @@ imply smcsrind
 imply smcntrpmf
 imply smstateen
 imply smepmp
+imply smdbltrp
+
 imply ssaia
 imply sscsrind
 imply sscofpmf
@@ -99,6 +101,7 @@ imply sstc
 imply sstvala
 imply sstvecd
 imply ssu64xl
+imply ssdbltrp
 
 imply svade
 imply svadu

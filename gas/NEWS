@@ -9,8 +9,8 @@
 
 * On x86 emulation support (for secondary targets) was dropped.
 
-* Add support for RISC-V Zcmp (cm.mva01s, cm.mvsa01), Smrnmi, CORE-V
-  (xcvbitmanip, xcvsimd) extensions with version 1.0 and more SiFive
+* Add support for RISC-V Zcmp (cm.mva01s, cm.mvsa01), Smrnmi, S[sm]dbltrp,
+  CORE-V (xcvbitmanip, xcvsimd) extensions with version 1.0 and more SiFive
   extensions (xsfvqmaccdod, xsfvqmaccqoq and xsfvfnrclipxfqf).
 
 Changes in 2.43:

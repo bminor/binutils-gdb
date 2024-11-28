@@ -117,6 +117,7 @@ All available -march extensions for RISC-V:
 	smepmp                                  1.0
 	smrnmi                                  1.0
 	smstateen                               1.0
+	smdbltrp                                1.0
 	ssaia                                   1.0
 	ssccptr                                 1.0
 	sscsrind                                1.0
@@ -127,6 +128,7 @@ All available -march extensions for RISC-V:
 	sstvala                                 1.0
 	sstvecd                                 1.0
 	ssu64xl                                 1.0
+	ssdbltrp                                1.0
 	svade                                   1.0
 	svadu                                   1.0
 	svbare                                  1.0
