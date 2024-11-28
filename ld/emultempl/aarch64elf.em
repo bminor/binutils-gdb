@@ -36,7 +36,7 @@ static erratum_84319_opts fix_erratum_843419 = ERRAT_NONE;
 static int no_apply_dynamic_relocs = 0;
 static aarch64_protection_opts sw_protections = {
   .plt_type = PLT_NORMAL,
-  .bti_report = BTI_WARN,
+  .bti_report = MARKING_WARN,
 };
 
 #define COMPILE_TIME_STRLEN(s) \
@@ -362,11 +362,11 @@ aarch64_parse_bti_report_option (const char *optarg)
 
   if (strlen (optarg) == BTI_REPORT_LEN
       || strcmp (optarg + BTI_REPORT_LEN, "=warning") == 0)
-    sw_protections.bti_report = BTI_WARN;
+    sw_protections.bti_report = MARKING_WARN;
   else if (strcmp (optarg + BTI_REPORT_LEN, "=none") == 0)
-    sw_protections.bti_report = BTI_NONE;
+    sw_protections.bti_report = MARKING_NONE;
   else if (strcmp (optarg + BTI_REPORT_LEN, "=error") == 0)
-    sw_protections.bti_report = BTI_ERROR;
+    sw_protections.bti_report = MARKING_ERROR;
   else
     einfo (_("%X%P: error: unrecognized value '-z %s'\n"), optarg);
 

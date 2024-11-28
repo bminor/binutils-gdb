@@ -10644,12 +10644,12 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
     {
       const aarch64_protection_opts *sw_protections
 	= &elf_aarch64_tdata (info->output_bfd)->sw_protections;
-      aarch64_bti_report bti_report = sw_protections->bti_report;
+      aarch64_feature_marking_report bti_report = sw_protections->bti_report;
 
       /* If output has been marked with BTI using command line argument, give
 	 out warning if necessary.  */
       if ((prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
-	  && (bti_report != BTI_NONE))
+	  && (bti_report != MARKING_NONE))
 	{
 	  if ((aprop && !(aprop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
 	      || !aprop)

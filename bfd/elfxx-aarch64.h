@@ -39,16 +39,19 @@ typedef enum
   PLT_BTI_PAC	= PLT_BTI | PLT_PAC
 } aarch64_plt_type;
 
-/* Indicates whether the linker should generate warnings/errors when input
-   objects are missing BTI markings and the output has BTI markings.  */
+/* Indicates whether the linker should generate warnings, errors, or nothing
+   when input objects are missing GNU feature property markings and the output
+   has the markings.  */
 typedef enum
 {
-  BTI_NONE	= 0,  /* Does not emit any warning/error messages.  */
-  BTI_WARN	= 1,  /* Emit warning when the input objects are missing BTI
-			 markings and output have BTI marking.  */
-  BTI_ERROR	= 2,  /* Emit error when the input objects are missing BTI
-			 markings and output have BTI marking.  */
-} aarch64_bti_report;
+  MARKING_NONE	= 0,  /* Does not emit any warning/error messages.  */
+  MARKING_WARN	= 1,  /* Emit warning when the input objects are missing GNU
+			 feature property markings, and the output has the
+			 markings.  */
+  MARKING_ERROR	= 2,  /* Emit error when the input objects are missing GNU
+			 feature property markings, and the output has the
+			 markings.  */
+} aarch64_feature_marking_report;
 
 /* A structure to encompass all information about software protections coming
    from BTI or PAC related command line options.  */
@@ -58,7 +61,7 @@ struct aarch64_protection_opts
   aarch64_plt_type plt_type;
 
   /* Report level for BTI issues.  */
-  aarch64_bti_report bti_report;
+  aarch64_feature_marking_report bti_report;
 };
 typedef struct aarch64_protection_opts aarch64_protection_opts;
 
@@ -165,7 +168,7 @@ _bfd_aarch64_elf_merge_gnu_properties (struct bfd_link_info *, bfd *,
 				       uint32_t);
 
 extern void
-_bfd_aarch64_elf_check_bti_report (aarch64_bti_report, bfd *);
+_bfd_aarch64_elf_check_bti_report (aarch64_feature_marking_report, bfd *);
 
 extern void
 _bfd_aarch64_elf_link_fixup_gnu_properties (struct bfd_link_info *,

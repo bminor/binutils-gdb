@@ -926,15 +926,18 @@ _bfd_aarch64_elf_link_fixup_gnu_properties
 
 /* Check AArch64 BTI report.  */
 void
-_bfd_aarch64_elf_check_bti_report (aarch64_bti_report bti_report, bfd *ebfd)
+_bfd_aarch64_elf_check_bti_report (aarch64_feature_marking_report bti_report,
+				   bfd *ebfd)
 {
-  if (bti_report == BTI_NONE)
+  if (bti_report == MARKING_NONE)
     return;
 
-  const char *log_level = (bti_report == BTI_WARN ? "warning" : "error");
+  const char *msg
+    = (bti_report == MARKING_WARN)
+    ? _("%pB: warning: BTI turned on by -z force-bti on the output when all "
+	"inputs do not have BTI in NOTE section.")
+    : _("%pB: error: BTI turned on by -z force-bti on the output when all "
+	"inputs do not have BTI in NOTE section.");
 
-  const char *msg = _("%pB: %s: BTI turned on by -z force-bti on the output "
-		    "when all inputs do not have BTI in NOTE section.");
-
-  _bfd_error_handler (msg, ebfd, log_level);
+  _bfd_error_handler (msg, ebfd);
 }
