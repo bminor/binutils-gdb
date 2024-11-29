@@ -1424,7 +1424,7 @@ md_gather_operands (char *str,
   expressionS ex;
   elf_suffix_type suffix;
   bfd_reloc_code_real_type reloc;
-  int omitted_base_or_index;
+  int omitted_index;
   int operand_number;
   char *f;
   int fc, i;
@@ -1433,7 +1433,7 @@ md_gather_operands (char *str,
     str++;
 
   /* Gather the operands.  */
-  omitted_base_or_index = 0;	/* Whether B in D(L,B) or X in D(X,B) were omitted.  */
+  omitted_index = 0;		/* Whether X in D(X,B) was omitted.  */
   operand_number = 1;		/* Current operand number in e.g. R1,I2,M3,D4(B4).  */
   fc = 0;
   for (opindex_ptr = opcode->operands; *opindex_ptr != 0; opindex_ptr++)
@@ -1450,13 +1450,13 @@ md_gather_operands (char *str,
 	  break;
 	}
 
-      if (omitted_base_or_index && (operand->flags & S390_OPERAND_INDEX))
+      if (omitted_index && (operand->flags & S390_OPERAND_INDEX))
 	{
 	  /* Skip omitted optional index register operand in D(X,B) due to
 	     D(,B) or D(B). Skip comma, if D(,B).  */
 	  if (*str == ',')
 	    str++;
-	  omitted_base_or_index = 0;
+	  omitted_index = 0;
 	  continue;
 	}
 
@@ -1720,17 +1720,9 @@ md_gather_operands (char *str,
 		  break;
 	      /* If there is no comma until the closing parenthesis ')' or
 		 there is a comma right after the opening parenthesis '(',
-		 we have to skip the omitted optional index or base register
-		 operand:
-		 - Index X in D(X,B), when D(,B) or D(B)
-		 - Base B in D(L,B), when D(L)  */
-	      if (*f == ',' && f == str)
-		{
-		  /* Comma directly after opening parenthesis '(' ? */
-		  omitted_base_or_index = 1;
-		}
-	      else
-		omitted_base_or_index = (*f != ',');
+		 we have to skip an omitted optional index register
+		 operand X in D(X,B), when D(,B) or D(B).  */
+	      omitted_index = ((*f == ',' && f == str) || (*f == ')'));
 	    }
 	}
       else if (operand->flags & S390_OPERAND_BASE)
@@ -1741,7 +1733,7 @@ md_gather_operands (char *str,
 		    operand_number);
 	  else
 	    str++;
-	  omitted_base_or_index = 0;
+	  omitted_index = 0;
 
 	  /* If there is no further input and the remaining operands are
 	     optional then have these optional operands processed.  */
