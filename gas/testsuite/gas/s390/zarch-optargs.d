@@ -10,7 +10,7 @@ Disassembly of section .text:
 .*:	07 00 [	 ]*nopr
 .*:	07 01 [	 ]*nopr	%r1
 # nop [D1(X1,B1)]
-.*:	47 00 00 00 [	 ]*nop	0
+.*:	47 00 00 00 [	 ]*nop
 .*:	47 00 0f ff [	 ]*nop	4095
 .*:	47 00 2f ff [	 ]*nop	4095\(%r2\)
 .*:	47 01 0f ff [	 ]*nop	4095\(%r1,0\)
