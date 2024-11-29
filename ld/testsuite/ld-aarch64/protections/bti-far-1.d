@@ -1,6 +1,7 @@
 #name: Check linker stubs with indirect calls handle BTI (shared lib).
 #source: bti-far.s
 #target: [check_shared_lib_support]
+#as: -defsym __property_bti__=1
 #ld: -shared -T bti-far.ld
 #objdump: -dr
 
@@ -49,34 +50,34 @@ Disassembly of section \.text:
 
 0000000000020020 <___veneer>:
    20020:	90091910 	adrp	x16, 12340000 <foo>
-   20024:	91012210 	add	x16, x16, #0x48
+   20024:	9100c210 	add	x16, x16, #0x30
    20028:	d61f0200 	br	x16
 	\.\.\.
 
 Disassembly of section \.far:
 
 0000000012340000 <foo>:
-    12340000:	9400000c 	bl	12340030 <___veneer>
+    12340000:	9400000e 	bl	12340038 <___veneer>
 
 0000000012340004 <bar>:
-    12340004:	9400000b 	bl	12340030 <___veneer>
+    12340004:	9400000d 	bl	12340038 <___veneer>
     12340008:	94000004 	bl	12340018 <__foo_veneer>
     1234000c:	00000000 	udf	#0
-    12340010:	14000010 	b	12340050 <___bti_veneer\+0x8>
+    12340010:	14000010 	b	12340050 <___veneer\+0x18>
     12340014:	d503201f 	nop
 
 0000000012340018 <__foo_veneer>:
-    12340018:	90f6e6d0 	adrp	x16, 18000 <\.plt>
+    12340018:	90f6e6d0 	adrp	x16, 18000 <.plt>
     1234001c:	9100e210 	add	x16, x16, #0x38
     12340020:	d61f0200 	br	x16
 	\.\.\.
 
-0000000012340030 <___veneer>:
-    12340030:	90f6e710 	adrp	x16, 20000 <_start>
-    12340034:	91006210 	add	x16, x16, #0x18
-    12340038:	d61f0200 	br	x16
-	\.\.\.
+0000000012340030 <___bti_veneer>:
+    12340030:	d503245f 	bti	c
+    12340034:	17fffff4 	b	12340004 <bar>
 
-0000000012340048 <___bti_veneer>:
-    12340048:	d503245f 	bti	c
-    1234004c:	17ffffee 	b	12340004 <bar>
+0000000012340038 <___veneer>:
+    12340038:	90f6e710 	adrp	x16, 20000 <_start>
+    1234003c:	91006210 	add	x16, x16, #0x18
+    12340040:	d61f0200 	br	x16
+	\.\.\.

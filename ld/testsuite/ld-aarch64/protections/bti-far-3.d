@@ -2,6 +2,7 @@
 #source: bti-far-3a.s
 #source: bti-far-3b.s
 #source: bti-far-3c.s
+#as: -defsym __property_bti__=1
 #ld: -shared --hash-style=sysv -T bti-far-3.ld
 #objdump: -dr
 

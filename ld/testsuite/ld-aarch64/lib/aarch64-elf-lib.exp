@@ -54,6 +54,6 @@ proc aarch64_choose_lp64_emul {} {
 
 proc run_dump_test_lp64 { testname } {
   run_dump_test $testname \
-    [list [list as "-mabi=lp64"] \
+    [list [list as "-mabi=lp64 -I\$srcdir/\$subdir"] \
 	  [list ld [concat "-m " [aarch64_choose_lp64_emul]]]]
 }

@@ -12,13 +12,4 @@ c_func:
 	b	b_func
 	b	extern_func
 
-	.section	.note.gnu.property,"a"
-	.align	3
-	.word	4
-	.word	16
-	.word	5
-	.string	"GNU"
-	.word	3221225472
-	.word	4
-	.word	1
-	.align	3
+.include "gnu-note-properties-selectable-merged.inc"

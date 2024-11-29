@@ -41,13 +41,4 @@ bar:
 	b baz_paciasp
 	b baz_pacibsp
 
-	.section	.note.gnu.property,"a"
-	.align	3
-	.word	4
-	.word	16
-	.word	5
-	.string	"GNU"
-	.word	0xc0000000
-	.word	4
-	.word	1
-	.align	3
+.include "gnu-note-properties-selectable-merged.inc"
