@@ -40,7 +40,7 @@ foreach test_lp64 $test_lp64_list {
 set aarch64elflinktests {
   {"Build bti-plt-so for PLT tests"
    "-shared" ""
-   ""
+   "-I$srcdir/$subdir -defsym __property_bti__=1"
    {bti-plt-so.s} {} "libbti-plt-so.so"}
 }
 
