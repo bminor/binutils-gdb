@@ -214,20 +214,29 @@ s390_print_insn_with_opcode (bfd_vma memaddr,
 	  continue;
 	}
 
-      /* For instructions with a last optional operand don't print it
-	 if zero.  */
-      if ((opcode->flags & (S390_INSTR_FLAG_OPTPARM | S390_INSTR_FLAG_OPTPARM2))
-	  && val.u == 0
-	  && opindex[1] == 0)
-	break;
-
-      if ((opcode->flags & S390_INSTR_FLAG_OPTPARM2)
-	  && val.u == 0 && opindex[1] != 0 && opindex[2] == 0)
+      /* Omit optional last operands with a value of zero, except if
+	 within an addressing operand sequence D(X,B), D(B), and D(L,B).
+	 Index and base register operands with a value of zero are
+	 handled separately, as they may not be omitted unconditionally.  */
+      if (!(operand->flags & (S390_OPERAND_BASE
+			      | S390_OPERAND_INDEX
+			      | S390_OPERAND_LENGTH)))
 	{
-	  union operand_value next_op_val =
-	    s390_extract_operand (buffer, s390_operands + opindex[1]);
-	  if (next_op_val.u == 0)
+	  if ((opcode->flags & (S390_INSTR_FLAG_OPTPARM | S390_INSTR_FLAG_OPTPARM2))
+	      && val.u == 0
+	      && opindex[1] == 0)
 	    break;
+
+	  if ((opcode->flags & S390_INSTR_FLAG_OPTPARM2)
+	      && val.u == 0
+	      && opindex[1] != 0 && opindex[2] == 0)
+	    {
+	      union operand_value next_op_val =
+		s390_extract_operand (buffer, s390_operands + opindex[1]);
+
+	      if (next_op_val.u == 0)
+		break;
+	    }
 	}
 
       if (flags & S390_OPERAND_GPR)
@@ -312,6 +321,7 @@ s390_print_insn_with_opcode (bfd_vma memaddr,
 	      && val.u == 0
 	      && opindex[1] == 0)
 	    break;
+
 	  info->fprintf_styled_func (info->stream, dis_style_text,
 				     "%c", separator);
 	  style = ((flags & S390_OPERAND_DISP)
