@@ -677,7 +677,6 @@ fetch_indexed_string (uint64_t idx,
 
   str_offset = byte_get (index_section->start + index_offset, offset_size);
 
-  str_offset -= str_section->address;
   if (str_offset >= str_section->size)
     {
       warn (_("indirect offset too big: %#" PRIx64 "\n"), str_offset);
