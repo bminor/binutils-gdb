@@ -16738,11 +16738,14 @@ bool i386_record_operator (operatorT op,
 }
 #endif
 
+const char md_shortopts[] =
 #ifdef OBJ_ELF
-const char md_shortopts[] = "kVQ:sqnO::";
-#else
-const char md_shortopts[] = "qnO::";
+  "kVQ:"
+# ifdef TE_SOLARIS
+  "s"
+# endif
 #endif
+  "qnO::";
 
 #define OPTION_32 (OPTION_MD_BASE + 0)
 #define OPTION_64 (OPTION_MD_BASE + 1)
@@ -16866,10 +16869,12 @@ md_parse_option (int c, const char *arg)
     case 'k':
       break;
 
+# ifdef TE_SOLARIS
     case 's':
       /* -s: On i386 Solaris, this tells the native assembler to use
 	 .stab instead of .stab.excl.  We always use .stab anyhow.  */
       break;
+# endif
 
     case OPTION_MSHARED:
       shared = 1;
