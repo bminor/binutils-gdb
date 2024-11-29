@@ -562,7 +562,7 @@ set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EV
 setzu<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|VexWIG|EVexMap4|ZU, { Reg8 }
 // As an extension, allow SETcc without the ZU infix, instead taking the full
 // register as operand.
-set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_bSuf|No_sSuf|EVexMap4|ZU, { Reg32|Reg64 }
+set<cc>, 0xf24<cc:opc>/0, APX_F, Modrm|No_bSuf|No_wSuf|No_sSuf|EVexMap4|ZU, { Reg32|Reg64 }
 
 // String manipulation.
 cmps, 0xa6, 0, W|No_sSuf|RepPrefixOk|IntelSuffix, {}
