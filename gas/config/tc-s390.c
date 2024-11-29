@@ -1359,21 +1359,42 @@ operand_type_str(const struct s390_operand * operand)
     }
 }
 
-/* Return true if all remaining operands in the opcode with
-   OPCODE_FLAGS can be skipped.  */
+/* Return remaining operand count.  */
+
+static unsigned int
+operand_count (const unsigned char *opindex_ptr)
+{
+  unsigned int count = 0;
+
+  for (; *opindex_ptr != 0; opindex_ptr++)
+    {
+      /* Count D(X,B), D(B), and D(L,B) as one operand.  Assuming correct
+	 instruction operand definitions simply do not count D, X, and L.  */
+      if (!(s390_operands[*opindex_ptr].flags & (S390_OPERAND_DISP
+						| S390_OPERAND_INDEX
+						| S390_OPERAND_LENGTH)))
+	count++;
+    }
+
+  return count;
+}
+
+/* Return true if all remaining instruction operands are optional.  */
+
 static bool
 skip_optargs_p (unsigned int opcode_flags, const unsigned char *opindex_ptr)
 {
-  if ((opcode_flags & (S390_INSTR_FLAG_OPTPARM | S390_INSTR_FLAG_OPTPARM2))
-      && opindex_ptr[0] != '\0'
-      && opindex_ptr[1] == '\0')
-    return true;
+  if ((opcode_flags & (S390_INSTR_FLAG_OPTPARM | S390_INSTR_FLAG_OPTPARM2)))
+    {
+      unsigned int opcount = operand_count (opindex_ptr);
 
-  if ((opcode_flags & S390_INSTR_FLAG_OPTPARM2)
-      && opindex_ptr[0] != '\0'
-      && opindex_ptr[1] != '\0'
-      && opindex_ptr[2] == '\0')
-    return true;
+      if (opcount == 1)
+	return true;
+
+      if ((opcode_flags & S390_INSTR_FLAG_OPTPARM2) && opcount == 2)
+	return true;
+    }
+
   return false;
 }
 
@@ -1421,8 +1442,7 @@ md_gather_operands (char *str,
 
       operand = s390_operands + *opindex_ptr;
 
-      if ((opcode->flags & (S390_INSTR_FLAG_OPTPARM | S390_INSTR_FLAG_OPTPARM2))
-	  && *str == '\0')
+      if (*str == '\0' && skip_optargs_p (opcode->flags, opindex_ptr))
 	{
 	  /* Optional parameters might need to be ORed with a
 	     value so calling s390_insert_operand is needed.  */
