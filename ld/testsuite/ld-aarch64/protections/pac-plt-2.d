@@ -2,8 +2,10 @@
 #target: [check_shared_lib_support]
 #ld: -shared -z pac-plt -T bti-plt.ld
 #objdump: -dr -j .plt
-#...
-Disassembly of section .plt:
+
+[^:]*: *file format elf64-.*aarch64
+
+Disassembly of section \.plt:
 
 .* \<.plt\>:
 .*:	a9bf7bf0 	stp	x16, x30, \[sp, #-16\]!
