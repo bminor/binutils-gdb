@@ -1,6 +1,6 @@
 #name: BTI PLT with only GNU PROP
 #source: property-bti-pac1.s
-#as: -mabi=lp64 -defsym __property_bti__=1
+#as: -mabi=lp64
 #ld: -e _start -L./tmpdir -lbti-plt-so
 #objdump: -dr -j .plt
 #target: *linux*
