@@ -128,7 +128,7 @@ make_bfd_asection (bfd *abfd, const char *name, flagword flags,
 /* Return true if the given core file section corresponds to a thread,
    based on its name.  */
 
-static int
+static bool
 thread_section_p (bfd *abfd ATTRIBUTE_UNUSED,
 		  asection *sect,
 		  void *obj ATTRIBUTE_UNUSED)
