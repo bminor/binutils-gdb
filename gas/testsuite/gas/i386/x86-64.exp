@@ -60,6 +60,7 @@ if { ![istarget "*-*-*cygwin*"]
 } else {
     run_dump_test "x86-64-w64-pcrel"
     run_dump_test "x86-64-imgrel"
+    run_dump_test "x86-64-secidx"
 }
 run_list_test "pcrel64" "-al"
 run_dump_test "x86-64-rip"
