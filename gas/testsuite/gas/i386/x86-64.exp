@@ -52,11 +52,14 @@ run_dump_test "x86-64-addr32-intel"
 run_list_test "x86-64-addr32-bad" "-al"
 run_dump_test "x86-64-opcode"
 run_dump_test "x86-64-intel64"
-if { ! [istarget "*-*-*cygwin*"] && ![istarget "*-*-mingw*"] } then {
+if { ![istarget "*-*-*cygwin*"]
+     && ![istarget "*-*-mingw*"]
+     && ![istarget "*-*-pe*"] } then {
     run_dump_test "x86-64-pcrel"
     run_dump_test "x86-64-disassem"
 } else {
     run_dump_test "x86-64-w64-pcrel"
+    run_dump_test "x86-64-imgrel"
 }
 run_list_test "pcrel64" "-al"
 run_dump_test "x86-64-rip"

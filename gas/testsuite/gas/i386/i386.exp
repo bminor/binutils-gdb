@@ -795,6 +795,7 @@ if [gas_32_check] then {
     } then {
 	run_dump_test "secrel"
 	run_dump_test "secidx"
+	run_dump_test "imgrel"
     }
 
     # Miscellaneous tests.
