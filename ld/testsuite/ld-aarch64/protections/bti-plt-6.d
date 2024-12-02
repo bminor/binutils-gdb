@@ -1,4 +1,4 @@
-#name: Warn with one missing GNU NOTE BTI input
+#name: Specifying '-z force-bti' and warn only on inputs with missing BTI feature
 #source: property-bti-pac2.s
 #source: property-bti-pac1.s
 #target: [check_shared_lib_support]
@@ -7,8 +7,8 @@
 #warning: .*property-bti-pac2.*: warning: BTI turned on by -z force-bti.*$
 #readelf: -n
 
-# Should warn about the missing input BTI NOTE but should
-# still mark output as BTI
+# Should warn about the missing input BTI NOTE but should still mark
+# output as BTI.
 
 Displaying notes found in: .note.gnu.property
 [ 	]+Owner[ 	]+Data size[ 	]+Description
