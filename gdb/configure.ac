@@ -1294,9 +1294,7 @@ AC_SUBST(SRCHIGH_CFLAGS)
 # ------------------------- #
 
 AC_HEADER_STDC
-# elf_hp.h is for HP/UX 64-bit shared library support.
 AC_CHECK_HEADERS([ \
-  elf_hp.h \
   machine/reg.h \
   nlist.h \
   ptrace.h \

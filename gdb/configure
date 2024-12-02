@@ -29187,9 +29187,7 @@ $as_echo "#define STDC_HEADERS 1" >>confdefs.h
 
 fi
 
-# elf_hp.h is for HP/UX 64-bit shared library support.
 for ac_header in  \
-  elf_hp.h \
   machine/reg.h \
   nlist.h \
   ptrace.h \
