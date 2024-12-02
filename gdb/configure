@@ -19567,7 +19567,25 @@ $as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
   fi
 
 
-  for ac_header in linux/perf_event.h locale.h memory.h signal.h 		   sys/resource.h sys/socket.h 		   sys/un.h sys/wait.h 		   thread_db.h wait.h 		   termios.h 		   dlfcn.h 		   linux/elf.h proc_service.h 		   poll.h sys/poll.h sys/select.h
+for ac_header in  \
+  dlfcn.h \
+  linux/elf.h \
+  linux/perf_event.h  \
+  locale.h \
+  memory.h \
+  poll.h \
+  proc_service.h \
+  signal.h \
+  sys/poll.h \
+  sys/resource.h \
+  sys/select.h \
+  sys/socket.h \
+  sys/un.h \
+  sys/wait.h \
+  termios.h \
+  thread_db.h \
+  wait.h \
+
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -20029,9 +20047,25 @@ if test "$ac_res" != no; then :
 
 fi
 
-  for ac_func in fdwalk getrlimit pipe pipe2 poll socketpair sigaction \
-		  ptrace64 sbrk setns sigaltstack sigprocmask \
-		  setpgid setpgrp getrusage getauxval sigtimedwait
+  for ac_func in  \
+    fdwalk \
+    getauxval \
+    getrlimit \
+    getrusage \
+    pipe \
+    pipe2 \
+    poll \
+    ptrace64 \
+    sbrk \
+    setns \
+    setpgid \
+    setpgrp \
+    sigaction \
+    sigaltstack \
+    sigprocmask \
+    sigtimedwait \
+    socketpair \
+
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -29154,12 +29188,23 @@ $as_echo "#define STDC_HEADERS 1" >>confdefs.h
 fi
 
 # elf_hp.h is for HP/UX 64-bit shared library support.
-for ac_header in nlist.h machine/reg.h \
-                  thread_db.h \
-		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
-		  sys/procctl.h sys/resource.h sys/ptrace.h ptrace.h \
-		  sys/reg.h sys/debugreg.h \
-		  termios.h elf_hp.h
+for ac_header in  \
+  elf_hp.h \
+  machine/reg.h \
+  nlist.h \
+  ptrace.h \
+  sys/debugreg.h \
+  sys/file.h \
+  sys/filio.h \
+  sys/ioctl.h \
+  sys/param.h \
+  sys/procctl.h \
+  sys/ptrace.h \
+  sys/reg.h \
+  sys/resource.h \
+  termios.h \
+  thread_db.h \
+
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -29171,6 +29216,7 @@ _ACEOF
 fi
 
 done
+
 
 for ac_header in sys/user.h
 do :
@@ -29189,7 +29235,14 @@ fi
 done
 
 
-for ac_header in curses.h cursesX.h ncurses.h ncursesw/ncurses.h ncurses/ncurses.h ncurses/term.h
+for ac_header in  \
+  curses.h \
+  cursesX.h \
+  ncurses.h \
+  ncurses/ncurses.h \
+  ncurses/term.h \
+  ncursesw/ncurses.h \
+
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -29201,6 +29254,7 @@ _ACEOF
 fi
 
 done
+
 
 for ac_header in term.h
 do :
@@ -29853,13 +29907,28 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 # Checks for library functions.  #
 # ------------------------------ #
 
-for ac_func in getuid getgid \
-		pread pread64 pwrite resize_term \
-		getpgid setsid \
-		sigsetmask \
-		ttrace wresize setlocale iconvlist libiconvlist btowc \
-		setrlimit getrlimit posix_madvise waitpid \
-		use_default_colors
+for ac_func in  \
+  btowc \
+  getgid \
+  getpgid \
+  getrlimit \
+  getuid \
+  iconvlist \
+  libiconvlist \
+  posix_madvise \
+  pread \
+  pread64 \
+  pwrite \
+  resize_term \
+  setlocale \
+  setrlimit \
+  setsid \
+  sigsetmask \
+  ttrace \
+  use_default_colors \
+  waitpid \
+  wresize \
+
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -29870,6 +29939,7 @@ _ACEOF
 
 fi
 done
+
 
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for nl_langinfo and CODESET" >&5
