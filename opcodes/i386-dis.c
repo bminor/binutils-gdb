@@ -1673,6 +1673,7 @@ enum
   EVEX_W_0F6F_P_3,
   EVEX_W_0F70_P_2,
   EVEX_W_0F72_R_2,
+  EVEX_W_0F72_R_4,
   EVEX_W_0F72_R_6,
   EVEX_W_0F73_R_2,
   EVEX_W_0F73_R_6,
@@ -1693,6 +1694,7 @@ enum
   EVEX_W_0FD3,
   EVEX_W_0FD4,
   EVEX_W_0FD6,
+  EVEX_W_0FE2,
   EVEX_W_0FE6_P_1,
   EVEX_W_0FE7,
   EVEX_W_0FF2,
@@ -1837,6 +1839,8 @@ struct dis386 {
    "XV" => print "{vex} " pseudo prefix
    "XE" => print "{evex} " pseudo prefix if no EVEX-specific functionality is
 	   is used by an EVEX-encoded (AVX512VL) instruction.
+   "ME" => Similar to "XE", but only print "{evex} " when there is no
+	   memory operand.
    "NF" => print "{nf} " pseudo prefix when EVEX.NF = 1 and print "{evex} "
 	   pseudo prefix when instructions without NF, EGPR and VVVV,
    "NE" => don't print "{evex} " pseudo prefix for some special instructions
@@ -10619,6 +10623,10 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	    {
 	      switch (last[0])
 		{
+		case 'M':
+		  if (ins->modrm.mod != 3)
+		    break;
+		/* Fall through.  */
 		case 'X':
 		  if (!ins->vex.evex || ins->vex.b || ins->vex.ll >= 2
 		      || (ins->rex2 & 7)

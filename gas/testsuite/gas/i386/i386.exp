@@ -294,6 +294,7 @@ if [gas_32_check] then {
     run_dump_test "evex-lig-2"
     run_dump_test "evex-wig1"
     run_dump_test "evex-wig1-intel"
+    run_dump_test "evex-only"
     run_dump_test "evex-no-scale-32"
     run_dump_test "sse2avx"
     run_dump_test "unaligned-vector-move"

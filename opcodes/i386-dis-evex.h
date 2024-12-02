@@ -256,7 +256,7 @@ static const struct dis386 evex_table[][256] = {
     /* E0 */
     { "%XEvpavgb",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "%XEvpsraw",	{ XM, Vex, EXxmm }, PREFIX_DATA },
-    { "%XEvpsra%DQ",	{ XM, Vex, EXxmm }, PREFIX_DATA },
+    { VEX_W_TABLE (EVEX_W_0FE2) },
     { "%XEvpavgw",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "%XEvpmulhuw",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "%XEvpmulhw",	{ XM, Vex, EXx }, PREFIX_DATA },
