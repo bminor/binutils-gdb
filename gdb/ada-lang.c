@@ -13800,8 +13800,15 @@ public:
 		 const char *encoding, int force_ellipses,
 		 const struct value_print_options *options) const override
   {
-    ada_printstr (stream, elttype, string, length, encoding,
-		  force_ellipses, options);
+    /* ada_printstr doesn't handle UTF-8 too well, but we want this
+       for lazy-string printing.  Defer this case to the generic
+       code.  */
+    if (encoding != nullptr && strcasecmp (encoding, "UTF-8") == 0)
+      generic_printstr (stream, elttype, string, length, encoding,
+			force_ellipses, '"', 0, options);
+    else
+      ada_printstr (stream, elttype, string, length, encoding,
+		    force_ellipses, options);
   }
 
   /* See language.h.  */
