@@ -1,4 +1,4 @@
-#as: -O0
+#as: -O0 -march=+mpx
 #objdump: -drw
 #name: pseudo prefixes
 

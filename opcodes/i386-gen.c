@@ -47,7 +47,7 @@ typedef struct dependency
 static const dependency isa_dependencies[] =
 {
   { "UNKNOWN",
-    "~IAMCU" },
+    "~(IAMCU|MPX)" },
   { "GENERIC32",
     "386" },
   { "GENERIC64",
