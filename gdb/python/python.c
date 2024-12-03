@@ -2300,6 +2300,12 @@ gdbpy_gdb_exiting (int exit_code)
     gdbpy_print_stack ();
 }
 
+/* Stand-in for Py_IsInitialized ().  To be used because after a python fatal
+   error, no calls into Python are allowed.  */
+
+static bool py_isinitialized = false;
+
+#if PY_VERSION_HEX < 0x030a0000
 /* Signal handler to convert a SIGABRT into an exception.  */
 
 static void
@@ -2310,14 +2316,9 @@ catch_python_fatal (int signum)
   throw_exception_sjlj (gdb_exception {RETURN_ERROR, GENERIC_ERROR});
 }
 
-/* Stand-in for Py_IsInitialized ().  To be used because after a python fatal
-   error, no calls into Python are allowed.  */
-
-static bool py_isinitialized = false;
-
 /* Call Py_Initialize (), and return true if successful.   */
 
-static bool ATTRIBUTE_UNUSED
+static bool
 py_initialize_catch_abort ()
 {
   auto prev_handler = signal (SIGABRT, catch_python_fatal);
@@ -2335,6 +2336,7 @@ py_initialize_catch_abort ()
 
   return py_isinitialized;
 }
+#endif
 
 /* Initialize python, either by calling Py_Initialize or
    Py_InitializeFromConfig, and return true if successful.  */
