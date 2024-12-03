@@ -396,6 +396,9 @@ linetable_entry::pc (const struct objfile *objfile) const
 call_site *
 compunit_symtab::find_call_site (CORE_ADDR pc) const
 {
+  if (m_call_site_htab == nullptr)
+    return nullptr;
+
   CORE_ADDR delta = this->objfile ()->text_section_offset ();
 
   if (auto it = m_call_site_htab->find (static_cast<unrelocated_addr> (pc - delta));
