@@ -22,8 +22,9 @@
 
 struct target_desc;
 
-/* Return the i386 target description corresponding to XCR0.  */
+/* Return the i386 target description corresponding to XSTATE_BV.  */
 
-extern const struct target_desc *i386_linux_read_description (uint64_t xcr0);
+extern const struct target_desc *i386_linux_read_description
+  (uint64_t xstate_bv);
 
 #endif /* GDB_ARCH_I386_LINUX_TDESC_H */

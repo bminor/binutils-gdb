@@ -873,7 +873,7 @@ x86_linux_read_description ()
   bool have_ptrace_getregset_was_unknown
     = have_ptrace_getregset == TRIBOOL_UNKNOWN;
 
-  /* Get pointers to where we should store the xcr0 and xsave_layout
+  /* Get pointers to where we should store the xstate_bv and xsave_layout
      values.  These will be filled in by x86_linux_tdesc_for_tid the first
      time that the function is called.  Subsequent calls will not modify
      the stored values.  */
@@ -2892,17 +2892,16 @@ x86_target::get_ipa_tdesc_idx ()
 		  || tdesc == tdesc_amd64_linux_no_xml.get ()
 #endif /* __x86_64__ */
 		  );
-      return x86_linux_xcr0_to_tdesc_idx (X86_XSTATE_SSE_MASK);
+      return x86_linux_xstate_bv_to_tdesc_idx (X86_XSTATE_SSE_MASK);
     }
 
-  /* The xcr0 value and xsave layout value are cached when the target
+  /* The xstate_bv value and xsave layout value are cached when the target
      description is read.  Grab their cache location, and use the cached
      value to calculate a tdesc index.  */
   std::pair<uint64_t *, x86_xsave_layout *> storage
     = i387_get_xsave_storage ();
-  uint64_t xcr0 = *storage.first;
 
-  return x86_linux_xcr0_to_tdesc_idx (xcr0);
+  return x86_linux_xstate_bv_to_tdesc_idx (*storage.first);
 }
 
 /* The linux target ops object.  */

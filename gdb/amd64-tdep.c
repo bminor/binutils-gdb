@@ -3568,23 +3568,23 @@ amd64_x32_none_init_abi (gdbarch_info info, gdbarch *arch)
 		      amd64_target_description (X86_XSTATE_SSE_MASK, true));
 }
 
-/* Return the target description for a specified XSAVE feature mask.  */
+/* See amd64-tdep.h.  */
 
 const struct target_desc *
-amd64_target_description (uint64_t xcr0, bool segments)
+amd64_target_description (uint64_t xstate_bv, bool segments)
 {
   static target_desc *amd64_tdescs \
     [2/*AVX*/][2/*AVX512*/][2/*PKRU*/][2/*segments*/] = {};
   target_desc **tdesc;
 
-  tdesc = &amd64_tdescs[(xcr0 & X86_XSTATE_AVX) ? 1 : 0]
-    [(xcr0 & X86_XSTATE_AVX512) ? 1 : 0]
-    [(xcr0 & X86_XSTATE_PKRU) ? 1 : 0]
+  tdesc = &amd64_tdescs[(xstate_bv & X86_XSTATE_AVX) ? 1 : 0]
+    [(xstate_bv & X86_XSTATE_AVX512) ? 1 : 0]
+    [(xstate_bv & X86_XSTATE_PKRU) ? 1 : 0]
     [segments ? 1 : 0];
 
   if (*tdesc == NULL)
-    *tdesc = amd64_create_target_description (xcr0, false, false,
-					      segments);
+    *tdesc = amd64_create_target_description (xstate_bv, false,
+					      false, segments);
 
   return *tdesc;
 }
