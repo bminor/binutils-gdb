@@ -17958,6 +17958,8 @@ dwarf_lang_to_enum_language (unsigned int lang)
     case DW_LANG_C89:
     case DW_LANG_C99:
     case DW_LANG_C11:
+    case DW_LANG_C17:
+    case DW_LANG_C23:
     case DW_LANG_C:
     case DW_LANG_UPC:
       language = language_c;
@@ -17966,6 +17968,9 @@ dwarf_lang_to_enum_language (unsigned int lang)
     case DW_LANG_C_plus_plus:
     case DW_LANG_C_plus_plus_11:
     case DW_LANG_C_plus_plus_14:
+    case DW_LANG_C_plus_plus_17:
+    case DW_LANG_C_plus_plus_20:
+    case DW_LANG_C_plus_plus_23:
       language = language_cplus;
       break;
     case DW_LANG_D:
@@ -17976,16 +17981,21 @@ dwarf_lang_to_enum_language (unsigned int lang)
     case DW_LANG_Fortran95:
     case DW_LANG_Fortran03:
     case DW_LANG_Fortran08:
+    case DW_LANG_Fortran18:
+    case DW_LANG_Fortran23:
       language = language_fortran;
       break;
     case DW_LANG_Go:
       language = language_go;
       break;
+    case DW_LANG_Assembly:
     case DW_LANG_Mips_Assembler:
       language = language_asm;
       break;
     case DW_LANG_Ada83:
     case DW_LANG_Ada95:
+    case DW_LANG_Ada2005:
+    case DW_LANG_Ada2012:
       language = language_ada;
       break;
     case DW_LANG_Modula2:
