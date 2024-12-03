@@ -2091,6 +2091,17 @@ python_command (const char *arg, int from_tty)
 
 #endif /* HAVE_PYTHON */
 
+/* Stand-in for Py_IsInitialized ().  To be used because after a python fatal
+   error, no calls into Python are allowed.  */
+
+static bool py_isinitialized = false;
+
+/* Variables to hold the effective values of "python ignore-environment" and
+   "python dont-write-bytecode" at Python initialization.  */
+
+static bool python_ignore_environment_at_python_initialization;
+static bool python_dont_write_bytecode_at_python_initialization;
+
 /* When this is turned on before Python is initialised then Python will
    ignore any environment variables related to Python.  This is equivalent
    to passing `-E' to the python program.  */
@@ -2115,15 +2126,15 @@ static void
 set_python_ignore_environment (const char *args, int from_tty,
 			       struct cmd_list_element *c)
 {
-#ifdef HAVE_PYTHON
-  /* Py_IgnoreEnvironmentFlag is deprecated in Python 3.12.  Disable
-     its usage in Python 3.10 and above since the PyConfig mechanism
-     is now (also) used in 3.10 and higher.  See do_start_initialization()
-     in this file.  */
-#if PY_VERSION_HEX < 0x030a0000
-  Py_IgnoreEnvironmentFlag = python_ignore_environment ? 1 : 0;
-#endif
-#endif
+  if (py_isinitialized)
+    {
+      python_ignore_environment
+	= python_ignore_environment_at_python_initialization;
+
+      warning (_("Setting python ignore-environment after Python"
+		 " initialization has no effect, try setting this during"
+		 " early initialization"));
+    }
 }
 
 /* When this is turned on before Python is initialised then Python will
@@ -2187,15 +2198,18 @@ static void
 set_python_dont_write_bytecode (const char *args, int from_tty,
 				struct cmd_list_element *c)
 {
-#ifdef HAVE_PYTHON
-  /* Py_DontWriteBytecodeFlag is deprecated in Python 3.12.  Disable
-     its usage in Python 3.10 and above since the PyConfig mechanism
-     is now (also) used in 3.10 and higher.  See do_start_initialization()
-     in this file.  */
-#if PY_VERSION_HEX < 0x030a0000
-  Py_DontWriteBytecodeFlag = !python_write_bytecode ();
-#endif
-#endif /* HAVE_PYTHON */
+  if (py_isinitialized)
+    {
+      python_dont_write_bytecode
+	= (python_dont_write_bytecode_at_python_initialization
+	   ? AUTO_BOOLEAN_TRUE
+	   : AUTO_BOOLEAN_FALSE);
+
+      warning (_("Setting python dont-write-bytecode after Python"
+		 " initialization has no effect, try setting this during"
+		 " early initialization, or try setting"
+		 " sys.dont_write_bytecode"));
+    }
 }
 
 
@@ -2300,11 +2314,6 @@ gdbpy_gdb_exiting (int exit_code)
     gdbpy_print_stack ();
 }
 
-/* Stand-in for Py_IsInitialized ().  To be used because after a python fatal
-   error, no calls into Python are allowed.  */
-
-static bool py_isinitialized = false;
-
 #if PY_VERSION_HEX < 0x030a0000
 /* Signal handler to convert a SIGABRT into an exception.  */
 
@@ -2344,6 +2353,19 @@ py_initialize_catch_abort ()
 static bool
 py_initialize ()
 {
+  /* Sample values at Python initialization.  */
+  python_dont_write_bytecode_at_python_initialization
+    = !python_write_bytecode ();
+  python_ignore_environment_at_python_initialization
+    =  python_ignore_environment;
+
+  /* Don't show "python dont-write-bytecode auto" after Python
+     initialization.  */
+  python_dont_write_bytecode
+    = (python_dont_write_bytecode_at_python_initialization
+       ? AUTO_BOOLEAN_TRUE
+       : AUTO_BOOLEAN_FALSE);
+
 #if PY_VERSION_HEX < 0x030a0000
   /* Python documentation indicates that the memory given
      to Py_SetProgramName cannot be freed.  However, it seems that
@@ -2393,6 +2415,10 @@ py_initialize ()
      it is not freed after this call.  */
   if (progname_copy != nullptr)
     Py_SetProgramName (progname_copy);
+  Py_DontWriteBytecodeFlag
+    = python_dont_write_bytecode_at_python_initialization;
+  Py_IgnoreEnvironmentFlag
+    = python_ignore_environment_at_python_initialization ? 1 : 0;
   return py_initialize_catch_abort ();
 #else
   PyConfig config;
@@ -2407,8 +2433,8 @@ py_initialize ()
 	goto init_done;
     }
 
-  config.write_bytecode = python_write_bytecode ();
-  config.use_environment = !python_ignore_environment;
+  config.write_bytecode = !python_dont_write_bytecode_at_python_initialization;
+  config.use_environment = !python_ignore_environment_at_python_initialization;
 
   status = PyConfig_Read (&config);
   if (PyStatus_Exception (status))
