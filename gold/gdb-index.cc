@@ -371,9 +371,26 @@ Gdb_index_info_reader::visit_top_die(Dwarf_die* die)
 		|| this->cu_language_ == elfcpp::DW_LANG_Fortran90
 		|| this->cu_language_ == elfcpp::DW_LANG_Java
 		|| this->cu_language_ == elfcpp::DW_LANG_Ada95
+		|| this->cu_language_ == elfcpp::DW_LANG_Ada2005
+		|| this->cu_language_ == elfcpp::DW_LANG_Ada2012
+		|| this->cu_language_ == elfcpp::DW_LANG_HIP
+		|| this->cu_language_ == elfcpp::DW_LANG_Assembly
+		|| this->cu_language_ == elfcpp::DW_LANG_C_sharp
+		|| this->cu_language_ == elfcpp::DW_LANG_Mojo
+		|| this->cu_language_ == elfcpp::DW_LANG_GLSL
+		|| this->cu_language_ == elfcpp::DW_LANG_GLSL_ES
+		|| this->cu_language_ == elfcpp::DW_LANG_HLSL
+		|| this->cu_language_ == elfcpp::DW_LANG_Odin
+		|| this->cu_language_ == elfcpp::DW_LANG_P4
+		|| this->cu_language_ == elfcpp::DW_LANG_Metal
 		|| this->cu_language_ == elfcpp::DW_LANG_Fortran95
 		|| this->cu_language_ == elfcpp::DW_LANG_Fortran03
-		|| this->cu_language_ == elfcpp::DW_LANG_Fortran08)
+		|| this->cu_language_ == elfcpp::DW_LANG_Fortran08
+		|| this->cu_language_ == elfcpp::DW_LANG_Fortran18
+		|| this->cu_language_ == elfcpp::DW_LANG_Fortran23
+		|| this->cu_language_ == elfcpp::DW_LANG_Ruby
+		|| this->cu_language_ == elfcpp::DW_LANG_Move
+		|| this->cu_language_ == elfcpp::DW_LANG_Hylo)
 	      {
 		gold_warning(_("%s: --gdb-index currently supports "
 			       "only C and C++ languages"),
