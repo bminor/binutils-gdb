@@ -441,16 +441,6 @@ mmix_fill_nops (char *opcodep, int n)
     md_number_to_chars (opcodep + i * 4, SWYM_INSN_BYTE << 24, 4);
 }
 
-/* See macro md_parse_name in tc-mmix.h.  */
-
-int
-mmix_current_location (void (*fn) (expressionS *), expressionS *exp)
-{
-  (*fn) (exp);
-
-  return 1;
-}
-
 /* Get up to three operands, filling them into the exp array.
    General idea and code stolen from the tic80 port.  */
 

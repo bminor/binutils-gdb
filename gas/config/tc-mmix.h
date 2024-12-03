@@ -48,15 +48,12 @@ extern void mmix_md_begin (void);
 extern void mmix_md_finish (void);
 #define md_finish mmix_md_finish
 
-extern int mmix_current_location \
-  (void (*fn) (expressionS *), expressionS *);
 extern int mmix_parse_predefined_name (char *, expressionS *);
 
 extern char *mmix_current_prefix;
 
-/* A bit ugly, since we "know" that there's a static function
-   current_location that does what we want.  We also strip off a leading
-   ':' in another ugly way.
+/* Besides the special casing of "@" we also strip off a leading ':' in an
+   ugly way.
 
    The [DVWIOUZX]_Handler symbols are provided when-used.  */
 
@@ -65,7 +62,7 @@ extern int mmix_gnu_syntax;
  (! mmix_gnu_syntax						\
   && (name[0] == '@'						\
       ? (! is_part_of_name (name[1])				\
-	 && mmix_current_location (current_location, exp))	\
+	 && (current_location (exp), 1))			\
       : ((name[0] == ':' || ISUPPER (name[0]))			\
 	 && mmix_parse_predefined_name (name, exp))))
 
