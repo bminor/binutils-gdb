@@ -369,7 +369,7 @@ gdbarch_num_cooked_regs (gdbarch *arch)
   return gdbarch_num_regs (arch) + gdbarch_num_pseudo_regs (arch);
 }
 
-/* Return true if stacks for ARCH grow down, otherwise return true.  */
+/* Return true if stacks for ARCH grow down, otherwise return false.  */
 
 static inline bool
 gdbarch_stack_grows_down (gdbarch *arch)
