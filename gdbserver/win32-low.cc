@@ -188,12 +188,17 @@ delete_thread_info (thread_info *thread)
 static void
 child_delete_thread (DWORD pid, DWORD tid)
 {
-  /* If the last thread is exiting, just return.  */
-  if (all_threads.size () == 1)
+  process_info *process = find_process_pid (pid);
+
+  if (process == nullptr)
     return;
 
-  thread_info *thread = find_thread_ptid (ptid_t (pid, tid));
-  if (thread == NULL)
+  /* If the last thread is exiting, just return.  */
+  if (process->thread_count () == 1)
+    return;
+
+  thread_info *thread = process->find_thread (ptid_t (pid, tid));
+  if (thread == nullptr)
     return;
 
   delete_thread_info (thread);

@@ -97,6 +97,10 @@ struct process_info : public intrusive_list_node<process_info>
   std::unordered_map<ptid_t, thread_info *> &thread_map ()
   { return m_ptid_thread_map; }
 
+  /* Return the number of threads in this process.  */
+  unsigned int thread_count () const
+  { return m_ptid_thread_map.size (); }
+
   /* Return the thread with ptid PTID, or nullptr if no such thread is
      found.  */
   thread_info *find_thread (ptid_t ptid);
