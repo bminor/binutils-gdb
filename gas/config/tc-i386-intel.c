@@ -236,13 +236,15 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
   return O_absent;
 }
 
-static int i386_intel_parse_name (const char *name, expressionS *e)
+static int i386_intel_parse_name (const char *name,
+				  expressionS *e,
+				  enum expr_mode mode)
 {
   unsigned int j;
 
   if (! strcmp (name, "$"))
     {
-      current_location (e);
+      current_location (e, mode);
       return 1;
     }
 

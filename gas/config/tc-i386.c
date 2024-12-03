@@ -168,7 +168,7 @@ static int i386_finalize_displacement (segT, expressionS *, i386_operand_type,
 static int i386_att_operand (char *);
 static int i386_intel_operand (char *, int);
 static int i386_intel_simplify (expressionS *);
-static int i386_intel_parse_name (const char *, expressionS *);
+static int i386_intel_parse_name (const char *, expressionS *, enum expr_mode);
 static const reg_entry *parse_register (const char *, char **);
 static const char *parse_insn (const char *, char *, enum parse_mode);
 static char *parse_operands (char *, const char *);
@@ -16649,7 +16649,10 @@ parse_register (const char *reg_string, char **end_op)
 }
 
 int
-i386_parse_name (char *name, expressionS *e, char *nextcharP)
+i386_parse_name (char *name,
+		 expressionS *e,
+		 enum expr_mode mode,
+		 char *nextcharP)
 {
   const reg_entry *r = NULL;
   char *end = input_line_pointer;
@@ -16674,7 +16677,7 @@ i386_parse_name (char *name, expressionS *e, char *nextcharP)
     }
   input_line_pointer = end;
   *end = 0;
-  return intel_syntax ? i386_intel_parse_name (name, e) : 0;
+  return intel_syntax ? i386_intel_parse_name (name, e, mode) : 0;
 }
 
 void

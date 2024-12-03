@@ -62,7 +62,7 @@ extern int mmix_gnu_syntax;
  (! mmix_gnu_syntax						\
   && (name[0] == '@'						\
       ? (! is_part_of_name (name[1])				\
-	 && (current_location (exp), 1))			\
+	 && (current_location (exp, mode), 1))			\
       : ((name[0] == ':' || ISUPPER (name[0]))			\
 	 && mmix_parse_predefined_name (name, exp))))
 
