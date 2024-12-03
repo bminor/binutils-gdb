@@ -2389,6 +2389,31 @@ display_lang (uint64_t uvalue)
     case DW_LANG_Fortran03:		printf ("Fortran 03"); break;
     case DW_LANG_Fortran08:		printf ("Fortran 08"); break;
     case DW_LANG_RenderScript:		printf ("RenderScript"); break;
+    case DW_LANG_C17:                   printf ("C17"); break;
+    case DW_LANG_Fortran18:             printf ("Fortran 18"); break;
+    case DW_LANG_Ada2005:               printf ("Ada 2005"); break;
+    case DW_LANG_Ada2012:               printf ("Ada 2012"); break;
+    case DW_LANG_HIP:                   printf ("Hip"); break;
+    case DW_LANG_Assembly:              printf ("Assembler"); break;
+    case DW_LANG_C_sharp:               printf ("C Sharp"); break;
+    case DW_LANG_Mojo:                  printf ("Mojo"); break;
+    case DW_LANG_GLSL:                  printf ("GLSL"); break;
+    case DW_LANG_GLSL_ES:               printf ("GLSL_ES"); break;
+    case DW_LANG_HLSL:                  printf ("HLSL"); break;
+    case DW_LANG_OpenCL_CPP:            printf ("OpenCL C++"); break;
+    case DW_LANG_CPP_for_OpenCL:        printf ("C++ for OpenCL"); break;
+    case DW_LANG_SYCL:                  printf ("SYCL"); break;
+    case DW_LANG_C_plus_plus_17:        printf ("C++17"); break;
+    case DW_LANG_C_plus_plus_20:        printf ("C++20"); break;
+    case DW_LANG_C_plus_plus_23:	printf ("C++23"); break;
+    case DW_LANG_Odin:                  printf ("Odin"); break;
+    case DW_LANG_P4:                    printf ("P4"); break;
+    case DW_LANG_Metal:                 printf ("C23"); break;
+    case DW_LANG_C23:                   printf ("C23"); break;
+    case DW_LANG_Fortran23:             printf ("Fortran 23"); break;
+    case DW_LANG_Ruby:                  printf ("Ruby"); break;
+    case DW_LANG_Move:                  printf ("Move"); break;
+    case DW_LANG_Hylo:                  printf ("Hylo"); break;
 
       /* MIPS extension.  */
     case DW_LANG_Mips_Assembler:	printf ("MIPS assembler"); break;
