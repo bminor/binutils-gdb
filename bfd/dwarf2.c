@@ -1722,12 +1722,17 @@ mangle_style (int lang)
     {
     case DW_LANG_Ada83:
     case DW_LANG_Ada95:
+    case DW_LANG_Ada2005:
+    case DW_LANG_Ada2012:
       return DMGL_GNAT;
 
     case DW_LANG_C_plus_plus:
     case DW_LANG_C_plus_plus_03:
     case DW_LANG_C_plus_plus_11:
     case DW_LANG_C_plus_plus_14:
+    case DW_LANG_C_plus_plus_17:
+    case DW_LANG_C_plus_plus_20:
+    case DW_LANG_C_plus_plus_23:
       return DMGL_GNU_V3;
 
     case DW_LANG_Java:
@@ -1748,12 +1753,17 @@ mangle_style (int lang)
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
     case DW_LANG_Fortran77:
+    case DW_LANG_Fortran18:
+    case DW_LANG_Fortran23:
     case DW_LANG_Pascal83:
     case DW_LANG_PLI:
     case DW_LANG_C99:
     case DW_LANG_UPC:
     case DW_LANG_C11:
+    case DW_LANG_C17:
+    case DW_LANG_C23:
     case DW_LANG_Mips_Assembler:
+    case DW_LANG_Assembly:
     case DW_LANG_Upc:
     case DW_LANG_HP_Basic91:
     case DW_LANG_HP_IMacro:
