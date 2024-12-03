@@ -193,17 +193,6 @@ expr_build_uconstant (offsetT value)
   e.X_extrabit = 0;
   return make_expr_symbol (&e);
 }
-
-/* Build an expression for the current location ('.').  */
-
-symbolS *
-expr_build_dot (void)
-{
-  expressionS e;
-
-  current_location (&e);
-  return symbol_clone_if_forward_ref (make_expr_symbol (&e));
-}
 
 /* Build any floating-point literal here.
    Also build any bignum literal here.  */
@@ -752,6 +741,24 @@ current_location (expressionS *expressionp)
       expressionp->X_add_symbol = &dot_symbol;
       expressionp->X_add_number = 0;
     }
+}
+
+/* Make a symbol for the current location ('.').  */
+
+symbolS *
+expr_build_dot (void)
+{
+  if (now_seg != absolute_section)
+    {
+      symbolS *symbolP = symbol_temp_new_now ();
+
+#ifdef tc_new_dot_label
+      tc_new_dot_label (symbolP);
+#endif
+      return symbolP;
+    }
+
+  return expr_build_uconstant (abs_section_offset);
 }
 
 #ifndef md_register_arithmetic
