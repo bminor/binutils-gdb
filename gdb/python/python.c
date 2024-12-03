@@ -2819,6 +2819,39 @@ do_initialize (const struct extension_language_defn *extlang)
   return gdb_pymodule_addobject (m, "gdb", gdb_python_module) >= 0;
 }
 
+/* Emit warnings in case python initialization has failed.  */
+
+static void
+python_initialization_failed_warnings ()
+{
+  const char *pythonhome = nullptr;
+  const char *pythonpath = nullptr;
+
+  if (!python_ignore_environment)
+    {
+      pythonhome = getenv ("PYTHONHOME");
+      pythonpath = getenv ("PYTHONPATH");
+    }
+
+  bool have_pythonhome
+    = pythonhome != nullptr && pythonhome[0] != '\0';
+  bool have_pythonpath
+    = pythonpath != nullptr && pythonpath[0] != '\0';
+
+  if (have_pythonhome)
+    warning (_("Python failed to initialize with PYTHONHOME set.  Maybe"
+	       " because it is set incorrectly? Maybe because it points to"
+	       " incompatible standard libraries? Consider changing or"
+	       " unsetting it, or ignoring it using \"set python"
+	       " ignore-environment on\" at early initialization."));
+
+  if (have_pythonpath)
+    warning (_("Python failed to initialize with PYTHONPATH set.  Maybe because"
+	       " it points to incompatible modules? Consider changing or"
+	       " unsetting it, or ignoring it using \"set python"
+	       " ignore-environment on\" at early initialization."));
+}
+
 /* Perform Python initialization.  This will be called after GDB has
    performed all of its own initialization.  This is the
    extension_language_ops.initialize "method".  */
@@ -2837,6 +2870,8 @@ gdbpy_initialize (const struct extension_language_defn *extlang)
 	     ASAP.  */
 	  Py_Finalize ();
 	}
+      else
+	python_initialization_failed_warnings ();
 
       /* Continue with python disabled.  */
       return;
