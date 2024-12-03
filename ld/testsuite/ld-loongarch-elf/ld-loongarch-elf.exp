@@ -143,6 +143,17 @@ if [istarget "loongarch64-*-*"] {
 	    "abs-global.out" \
 	] \
     ]
+
+  run_cc_link_tests [list \
+      [list \
+	  "call undefweak symbol" \
+	  "" "" \
+	  {call_undefweak.s} \
+	  {{objdump {-d} call_undefweak.d}} \
+	  "call_undefweak" \
+      ] \
+  ]
+
 }
 
 if [istarget "loongarch64-*-*"] {

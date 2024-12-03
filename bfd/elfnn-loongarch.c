@@ -222,6 +222,10 @@ loongarch_elf_new_section_hook (bfd *abfd, asection *sec)
    || (R_TYPE) == R_LARCH_TLS_LE64_LO20	  \
    || (R_TYPE) == R_LARCH_TLS_LE64_HI12)
 
+#define IS_CALL_RELOC(R_TYPE)	  \
+  ((R_TYPE) == R_LARCH_B26	  \
+   ||(R_TYPE) == R_LARCH_CALL36)
+
 /* If TLS GD/IE need dynamic relocations, INDX will be the dynamic indx,
    and set NEED_RELOC to true used in allocate_dynrelocs and
    loongarch_elf_relocate_section for TLS GD/IE.  */
@@ -4015,9 +4019,44 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_LARCH_B26:
 	case R_LARCH_CALL36:
 	  unresolved_reloc = false;
+	  bool via_plt =
+	    plt != NULL && h != NULL && h->plt.offset != (bfd_vma) - 1;
+
 	  if (is_undefweak)
 	    {
 	      relocation = 0;
+
+	      /* A call to an undefined weak symbol is converted to 0.  */
+	      if (!via_plt && IS_CALL_RELOC (r_type))
+		{
+		  /* call36 fn1 => pcaddu18i $ra,0+jirl $ra,$zero,0
+		     tail36 $t0,fn1 => pcaddi18i $t0,0+jirl $zero,$zero,0  */
+		  if (R_LARCH_CALL36 == r_type)
+		    {
+		      uint32_t jirl = bfd_get (32, input_bfd,
+					  contents + rel->r_offset + 4);
+		      uint32_t rd = LARCH_GET_RD (jirl);
+		      jirl = LARCH_OP_JIRL | rd;
+
+		      bfd_put (32, input_bfd, jirl,
+			       contents + rel->r_offset + 4);
+		    }
+		  else
+		    {
+		      uint32_t b_bl = bfd_get (32, input_bfd,
+					       contents + rel->r_offset);
+		      /* b %plt(fn1) => jirl $zero,zero,0.  */
+		      if (LARCH_INSN_B (b_bl))
+			bfd_put (32, input_bfd, LARCH_OP_JIRL,
+				 contents + rel->r_offset);
+		      else
+		      /* bl %plt(fn1) => jirl $ra,zero,0.  */
+		      bfd_put (32, input_bfd, LARCH_OP_JIRL | 0x1,
+			       contents + rel->r_offset);
+		    }
+		  r = bfd_reloc_continue;
+		  break;
+		}
 	    }
 
 	  if (resolved_local)
