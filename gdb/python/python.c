@@ -2318,7 +2318,7 @@ static bool py_isinitialized = false;
 /* Call Py_Initialize (), and return true if successful.   */
 
 static bool ATTRIBUTE_UNUSED
-py_initialize ()
+py_initialize_catch_abort ()
 {
   auto prev_handler = signal (SIGABRT, catch_python_fatal);
   SCOPE_EXIT { signal (SIGABRT, prev_handler); };
@@ -2336,20 +2336,25 @@ py_initialize ()
   return py_isinitialized;
 }
 
-static bool
-do_start_initialization ()
-{
-  /* Define all internal modules.  These are all imported (and thus
-     created) during initialization.  */
-  struct _inittab mods[] =
-  {
-    { "_gdb", init__gdb_module },
-    { "_gdbevents", gdbpy_events_mod_func },
-    { nullptr, nullptr }
-  };
+/* Initialize python, either by calling Py_Initialize or
+   Py_InitializeFromConfig, and return true if successful.  */
 
-  if (PyImport_ExtendInittab (mods) < 0)
-    return false;
+static bool
+py_initialize ()
+{
+#if PY_VERSION_HEX < 0x030a0000
+  /* Python documentation indicates that the memory given
+     to Py_SetProgramName cannot be freed.  However, it seems that
+     at least Python 3.7.4 Py_SetProgramName takes a copy of the
+     given program_name.  Making progname_copy static and not release
+     the memory avoids a leak report for Python versions that duplicate
+     program_name, and respect the requirement of Py_SetProgramName
+     for Python versions that do not duplicate program_name.  */
+  static wchar_t *progname_copy = nullptr;
+#else
+  wchar_t *progname_copy = nullptr;
+  SCOPE_EXIT { XDELETEVEC (progname_copy); };
+#endif
 
 #ifdef WITH_PYTHON_PATH
   /* Work around problem where python gets confused about where it is,
@@ -2361,14 +2366,6 @@ do_start_initialization ()
   gdb::unique_xmalloc_ptr<char> progname
     (concat (ldirname (python_libdir.c_str ()).c_str (), SLASH_STRING, "bin",
 	      SLASH_STRING, "python", (char *) NULL));
-  /* Python documentation indicates that the memory given
-     to Py_SetProgramName cannot be freed.  However, it seems that
-     at least Python 3.7.4 Py_SetProgramName takes a copy of the
-     given program_name.  Making progname_copy static and not release
-     the memory avoids a leak report for Python versions that duplicate
-     program_name, and respect the requirement of Py_SetProgramName
-     for Python versions that do not duplicate program_name.  */
-  static wchar_t *progname_copy;
 
   {
     std::string oldloc = setlocale (LC_ALL, NULL);
@@ -2384,6 +2381,7 @@ do_start_initialization ()
 	return false;
       }
   }
+#endif
 
   /* Py_SetProgramName was deprecated in Python 3.11.  Use PyConfig
      mechanisms for Python 3.10 and newer.  */
@@ -2391,17 +2389,21 @@ do_start_initialization ()
   /* Note that Py_SetProgramName expects the string it is passed to
      remain alive for the duration of the program's execution, so
      it is not freed after this call.  */
-  Py_SetProgramName (progname_copy);
-  if (!py_initialize ())
-    return false;
+  if (progname_copy != nullptr)
+    Py_SetProgramName (progname_copy);
+  return py_initialize_catch_abort ();
 #else
   PyConfig config;
 
   PyConfig_InitPythonConfig (&config);
-  PyStatus status = PyConfig_SetString (&config, &config.program_name,
-					progname_copy);
-  if (PyStatus_Exception (status))
-    goto init_done;
+  PyStatus status;
+  if (progname_copy != nullptr)
+    {
+      status = PyConfig_SetString (&config, &config.program_name,
+				   progname_copy);
+      if (PyStatus_Exception (status))
+	goto init_done;
+    }
 
   config.write_bytecode = python_write_bytecode ();
   config.use_environment = !python_ignore_environment;
@@ -2423,12 +2425,29 @@ init_done:
 		    status.exitcode);
       return false;
     }
+
   py_isinitialized = true;
+  return true;
 #endif
-#else
+}
+
+static bool
+do_start_initialization ()
+{
+  /* Define all internal modules.  These are all imported (and thus
+     created) during initialization.  */
+  struct _inittab mods[] =
+  {
+    { "_gdb", init__gdb_module },
+    { "_gdbevents", gdbpy_events_mod_func },
+    { nullptr, nullptr }
+  };
+
+  if (PyImport_ExtendInittab (mods) < 0)
+    return false;
+
   if (!py_initialize ())
     return false;
-#endif
 
 #if PY_VERSION_HEX < 0x03090000
   /* PyEval_InitThreads became deprecated in Python 3.9 and will
