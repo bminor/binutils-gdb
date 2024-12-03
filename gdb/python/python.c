@@ -2141,6 +2141,17 @@ set_python_ignore_environment (const char *args, int from_tty,
    not write `.pyc' files on import of a module.  */
 static enum auto_boolean python_dont_write_bytecode = AUTO_BOOLEAN_AUTO;
 
+
+/* Return true if environment variable PYTHONDONTWRITEBYTECODE is set to a
+   non-empty string.  */
+
+static bool
+env_python_dont_write_bytecode ()
+{
+  const char *envvar = getenv ("PYTHONDONTWRITEBYTECODE");
+  return envvar != nullptr && envvar[0] != '\0';
+}
+
 /* Implement 'show python dont-write-bytecode'.  */
 
 static void
@@ -2150,8 +2161,10 @@ show_python_dont_write_bytecode (struct ui_file *file, int from_tty,
   if (python_dont_write_bytecode == AUTO_BOOLEAN_AUTO)
     {
       const char *auto_string
-	= (python_ignore_environment
-	   || getenv ("PYTHONDONTWRITEBYTECODE") == nullptr) ? "off" : "on";
+	= ((python_ignore_environment
+	    || !env_python_dont_write_bytecode ())
+	   ? "off"
+	   : "on");
 
       gdb_printf (file,
 		  _("Python's dont-write-bytecode setting is %s (currently %s).\n"),
@@ -2177,10 +2190,7 @@ python_write_bytecode ()
       if (python_ignore_environment)
 	wbc = 1;
       else
-	{
-	  const char *pdwbc = getenv ("PYTHONDONTWRITEBYTECODE");
-	  wbc = (pdwbc == nullptr || pdwbc[0] == '\0') ? 1 : 0;
-	}
+	wbc = env_python_dont_write_bytecode () ? 0 : 1;
     }
   else
     wbc = python_dont_write_bytecode == AUTO_BOOLEAN_TRUE ? 0 : 1;
