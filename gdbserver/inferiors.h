@@ -97,6 +97,10 @@ struct process_info : public intrusive_list_node<process_info>
   std::unordered_map<ptid_t, thread_info *> &thread_map ()
   { return m_ptid_thread_map; }
 
+  /* Return the thread with ptid PTID, or nullptr if no such thread is
+     found.  */
+  thread_info *find_thread (ptid_t ptid);
+
   /* Find the first thread for which FUNC returns true.  Return nullptr if no
      such thread is found.  */
   thread_info *find_thread (gdb::function_view<bool (thread_info *)> func);
