@@ -1248,8 +1248,24 @@ enum
   PREFIX_EVEX_MAP5_7D,
 
   PREFIX_EVEX_MAP6_13,
+  PREFIX_EVEX_MAP6_2C,
+  PREFIX_EVEX_MAP6_42,
+  PREFIX_EVEX_MAP6_4C,
+  PREFIX_EVEX_MAP6_4E,
   PREFIX_EVEX_MAP6_56,
   PREFIX_EVEX_MAP6_57,
+  PREFIX_EVEX_MAP6_98,
+  PREFIX_EVEX_MAP6_9A,
+  PREFIX_EVEX_MAP6_9C,
+  PREFIX_EVEX_MAP6_9E,
+  PREFIX_EVEX_MAP6_A8,
+  PREFIX_EVEX_MAP6_AA,
+  PREFIX_EVEX_MAP6_AC,
+  PREFIX_EVEX_MAP6_AE,
+  PREFIX_EVEX_MAP6_B8,
+  PREFIX_EVEX_MAP6_BA,
+  PREFIX_EVEX_MAP6_BC,
+  PREFIX_EVEX_MAP6_BE,
   PREFIX_EVEX_MAP6_D6,
   PREFIX_EVEX_MAP6_D7,
 };
@@ -1815,6 +1831,8 @@ struct dis386 {
    "XW" => print 's', 'd' depending on the VEX.W bit (for FMA)
    "XD" => print 'd' if !EVEX or EVEX.W=1, EVEX.W=0 is not a valid encoding
    "XH" => print 'h' if EVEX.W=0, EVEX.W=1 is not a valid encoding (for FP16)
+   "XB" => print 'bf16' if EVEX.W=0, EVEX.W=1 is not a valid encoding
+	   (for BF16)
    "XS" => print 's' if !EVEX or EVEX.W=0, EVEX.W=1 is not a valid encoding
    "XV" => print "{vex} " pseudo prefix
    "XE" => print "{evex} " pseudo prefix if no EVEX-specific functionality is
@@ -10509,6 +10527,13 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 		}
 
 	      goto case_B;
+	    }
+	  else if (l && last[0] == 'X')
+	    {
+	      if (!ins->vex.w)
+		oappend (ins, "bf16");
+	      else
+		oappend (ins, "{bad}");
 	    }
 	  else
 	    abort ();
