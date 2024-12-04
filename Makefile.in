@@ -31593,7 +31593,7 @@ configure-readline:
 	  $$s/$$module_srcdir/configure \
 	  --srcdir=$${topdir}/$$module_srcdir \
 	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
-	  --target=${target_alias}  \
+	  --target=${target_alias} --enable-static  \
 	  || exit 1
 @endif readline
 
@@ -40793,7 +40793,7 @@ configure-libcc1:
 	  $$s/$$module_srcdir/configure \
 	  --srcdir=$${topdir}/$$module_srcdir \
 	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
-	  --target=${target_alias} --enable-shared \
+	  --target=${target_alias} --enable-static --disable-shared \
 	  || exit 1
 @endif libcc1
 
