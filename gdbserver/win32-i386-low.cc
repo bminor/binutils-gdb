@@ -50,7 +50,7 @@ static struct x86_debug_reg_state debug_reg_state;
 static void
 update_debug_registers (thread_info *thread)
 {
-  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
+  auto th = static_cast<windows_thread_info *> (thread->target_data ());
 
   /* The actual update is done later just before resuming the lwp,
      we just mark that the registers need updating.  */
@@ -83,8 +83,8 @@ x86_dr_low_set_control (unsigned long control)
 static DWORD64
 win32_get_current_dr (int dr)
 {
-  windows_thread_info *th
-    = (windows_thread_info *) thread_target_data (current_thread);
+  auto th
+    = static_cast<windows_thread_info *> (current_thread->target_data ());
 
   win32_require_context (th);
 

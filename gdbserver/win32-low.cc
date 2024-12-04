@@ -141,7 +141,7 @@ gdbserver_windows_process::thread_rec
   if (thread == NULL)
     return NULL;
 
-  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
+  auto th = static_cast<windows_thread_info *> (thread->target_data ());
   if (disposition != DONT_INVALIDATE_CONTEXT)
     win32_require_context (th);
   return th;
@@ -178,7 +178,7 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 static void
 delete_thread_info (thread_info *thread)
 {
-  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
+  auto th = static_cast<windows_thread_info *> (thread->target_data ());
 
   thread->process ()->remove_thread (thread);
   delete th;
@@ -394,7 +394,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 static void
 continue_one_thread (thread_info *thread, int thread_id)
 {
-  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
+  auto th = static_cast<windows_thread_info *> (thread->target_data ());
 
   if (thread_id == -1 || thread_id == th->tid)
     {
@@ -923,7 +923,7 @@ gdbserver_windows_process::handle_unload_dll ()
 static void
 suspend_one_thread (thread_info *thread)
 {
-  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
+  auto th = static_cast<windows_thread_info *> (thread->target_data ());
 
   th->suspend ();
 }

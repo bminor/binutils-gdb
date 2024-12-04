@@ -118,12 +118,6 @@ process_info::remove_thread (thread_info *thread)
   m_thread_list.erase (m_thread_list.iterator_to (*thread));
 }
 
-void *
-thread_target_data (struct thread_info *thread)
-{
-  return thread->target_data;
-}
-
 void
 clear_inferiors (void)
 {

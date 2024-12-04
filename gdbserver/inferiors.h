@@ -154,8 +154,6 @@ void switch_to_process (process_info *proc);
 
 void clear_inferiors (void);
 
-void *thread_target_data (struct thread_info *);
-
 /* Set the inferior current working directory.  If CWD is empty, unset
    the directory.  */
 void set_inferior_cwd (std::string cwd);
