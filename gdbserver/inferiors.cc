@@ -112,21 +112,6 @@ process_info::remove_thread (thread_info *thread)
   m_thread_list.erase (m_thread_list.iterator_to (*thread));
 }
 
-void
-clear_inferiors (void)
-{
-  for_each_process ([] (process_info *process)
-    {
-      process->thread_list ().clear ();
-      process->thread_map ().clear ();
-    });
-
-  clear_dlls ();
-
-  switch_to_thread (nullptr);
-  current_process_ = nullptr;
-}
-
 struct process_info *
 add_process (int pid, int attached)
 {

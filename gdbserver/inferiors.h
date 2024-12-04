@@ -92,10 +92,6 @@ struct process_info : public intrusive_list_node<process_info>
   owning_intrusive_list<thread_info> &thread_list ()
   { return m_thread_list; }
 
-  /* Return a reference to the private thread map.  */
-  std::unordered_map<ptid_t, thread_info *> &thread_map ()
-  { return m_ptid_thread_map; }
-
   /* Return the number of threads in this process.  */
   unsigned int thread_count () const
   { return m_ptid_thread_map.size (); }
@@ -158,8 +154,6 @@ int have_attached_inferiors_p (void);
 
 /* Switch to a thread of PROC.  */
 void switch_to_process (process_info *proc);
-
-void clear_inferiors (void);
 
 /* Set the inferior current working directory.  If CWD is empty, unset
    the directory.  */

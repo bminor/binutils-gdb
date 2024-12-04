@@ -660,7 +660,7 @@ gdbserver_windows_process::handle_output_debug_string
 }
 
 static void
-win32_clear_inferiors (void)
+win32_clear_process ()
 {
   if (windows_process.open_process_used)
     {
@@ -670,7 +670,6 @@ win32_clear_inferiors (void)
 
   for_each_thread (delete_thread_info);
   windows_process.siginfo_er.ExceptionCode = 0;
-  clear_inferiors ();
 }
 
 /* Implementation of target_ops::kill.  */
@@ -693,9 +692,9 @@ win32_process_target::kill (process_info *process)
 	windows_process.handle_output_debug_string (nullptr);
     }
 
-  win32_clear_inferiors ();
-
+  win32_clear_process ();
   remove_process (process);
+
   return 0;
 }
 
@@ -714,7 +713,7 @@ win32_process_target::detach (process_info *process)
     return -1;
 
   DebugSetProcessKillOnExit (FALSE);
-  win32_clear_inferiors ();
+  win32_clear_process ();
   remove_process (process);
 
   return 0;
@@ -1197,7 +1196,7 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	case TARGET_WAITKIND_EXITED:
 	  OUTMSG2 (("Child exited with retcode = %x\n",
 		    ourstatus->exit_status ()));
-	  win32_clear_inferiors ();
+	  win32_clear_process ();
 	  return ptid_t (windows_process.current_event.dwProcessId);
 	case TARGET_WAITKIND_STOPPED:
 	case TARGET_WAITKIND_SIGNALLED:
