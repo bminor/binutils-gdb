@@ -378,6 +378,7 @@ run_dump_test_lp64 "variant_pcs-now"
 
 run_dump_test_lp64 "mte-tagged-frame"
 run_dump_test_lp64 "dt-memtag-mode"
+run_dump_test_lp64 "dt-memtag-stack"
 
 set aarch64elflinktests {
   {"ld-aarch64/so with global symbol" "-shared" "" "" {copy-reloc-so.s}

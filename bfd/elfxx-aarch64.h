@@ -145,6 +145,9 @@ struct aarch64_memtag_opts
 {
   /* Mode of MTE operation.  */
   aarch64_memtag_mode_type memtag_mode;
+
+  /* Whether stack accesses use MTE insns.  */
+  unsigned int memtag_stack;
 };
 
 typedef struct aarch64_memtag_opts aarch64_memtag_opts;

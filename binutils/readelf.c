@@ -2588,6 +2588,7 @@ get_aarch64_dynamic_type (unsigned long type)
     case DT_AARCH64_PAC_PLT:  return "AARCH64_PAC_PLT";
     case DT_AARCH64_VARIANT_PCS:  return "AARCH64_VARIANT_PCS";
     case DT_AARCH64_MEMTAG_MODE: return "AARCH64_MEMTAG_MODE";
+    case DT_AARCH64_MEMTAG_STACK: return "AARCH64_MEMTAG_STACK";
 
     default:
       return NULL;
