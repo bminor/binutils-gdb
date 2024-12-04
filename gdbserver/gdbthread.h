@@ -33,18 +33,23 @@ struct thread_info : public intrusive_list_node<thread_info>
 
   ~thread_info ()
   {
-    free_register_cache (this->regcache_data);
+    free_register_cache (m_regcache);
   }
 
   /* Return the process owning this thread.  */
   process_info *process () const
   { return m_process; }
 
+  struct regcache *regcache ()
+  { return m_regcache; }
+
+  void set_regcache (struct regcache *regcache)
+  { m_regcache = regcache; }
+
   /* The id of this thread.  */
   ptid_t id;
 
   void *target_data;
-  struct regcache *regcache_data = nullptr;
 
   /* The last resume GDB requested on this thread.  */
   enum resume_kind last_resume_kind = resume_continue;
@@ -88,6 +93,7 @@ struct thread_info : public intrusive_list_node<thread_info>
   
 private:
   process_info *m_process;
+  struct regcache *m_regcache = nullptr;
 };
 
 /* Return a pointer to the first thread, or NULL if there isn't one.  */

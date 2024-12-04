@@ -27,9 +27,7 @@
 struct regcache *
 get_thread_regcache (struct thread_info *thread, int fetch)
 {
-  struct regcache *regcache;
-
-  regcache = thread_regcache_data (thread);
+  regcache *regcache = thread->regcache ();
 
   /* Threads' regcaches are created lazily, because biarch targets add
      the main thread/lwp before seeing it stop for the first time, and
@@ -45,7 +43,7 @@ get_thread_regcache (struct thread_info *thread, int fetch)
       gdb_assert (proc->tdesc != NULL);
 
       regcache = new_register_cache (proc->tdesc);
-      set_thread_regcache_data (thread, regcache);
+      thread->set_regcache (regcache);
     }
 
   if (fetch && regcache->registers_valid == 0)
@@ -74,9 +72,7 @@ get_thread_regcache_for_ptid (ptid_t ptid)
 void
 regcache_invalidate_thread (struct thread_info *thread)
 {
-  struct regcache *regcache;
-
-  regcache = thread_regcache_data (thread);
+  regcache *regcache = thread->regcache ();
 
   if (regcache == NULL)
     return;
@@ -277,13 +273,13 @@ find_regno (const struct target_desc *tdesc, const char *name)
 static void
 free_register_cache_thread (struct thread_info *thread)
 {
-  struct regcache *regcache = thread_regcache_data (thread);
+  regcache *regcache = thread->regcache ();
 
   if (regcache != NULL)
     {
       regcache_invalidate_thread (thread);
       free_register_cache (regcache);
-      set_thread_regcache_data (thread, NULL);
+      thread->set_regcache (nullptr);
     }
 }
 

@@ -155,8 +155,6 @@ void switch_to_process (process_info *proc);
 void clear_inferiors (void);
 
 void *thread_target_data (struct thread_info *);
-struct regcache *thread_regcache_data (struct thread_info *);
-void set_thread_regcache_data (struct thread_info *, struct regcache *);
 
 /* Set the inferior current working directory.  If CWD is empty, unset
    the directory.  */

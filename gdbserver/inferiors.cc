@@ -124,18 +124,6 @@ thread_target_data (struct thread_info *thread)
   return thread->target_data;
 }
 
-struct regcache *
-thread_regcache_data (struct thread_info *thread)
-{
-  return thread->regcache_data;
-}
-
-void
-set_thread_regcache_data (struct thread_info *thread, struct regcache *data)
-{
-  thread->regcache_data = data;
-}
-
 void
 clear_inferiors (void)
 {
