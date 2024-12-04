@@ -71,11 +71,13 @@ handle_eintr (ErrorValType errval, const Fun &f, const Args &... args)
   return ret;
 }
 
+#ifdef HAVE_WAITPID
 inline pid_t
 waitpid (pid_t pid, int *wstatus, int options)
 {
   return gdb::handle_eintr (-1, ::waitpid, pid, wstatus, options);
 }
+#endif /* HAVE_WAITPID */
 
 inline int
 open (const char *pathname, int flags)
@@ -83,11 +85,13 @@ open (const char *pathname, int flags)
   return gdb::handle_eintr (-1, ::open, pathname, flags);
 }
 
+#ifdef HAVE_WAIT
 inline pid_t
 wait (int *wstatus)
 {
   return gdb::handle_eintr (-1, ::wait, wstatus);
 }
+#endif /* HAVE_WAIT */
 
 inline int
 close (int fd)

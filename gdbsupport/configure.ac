@@ -56,6 +56,11 @@ AM_CONDITIONAL(SELFTEST, $enable_unittests)
 AM_CONDITIONAL(HAVE_PIPE_OR_PIPE2,
    [test x$ac_cv_func_pipe = xyes -o x$ac_cv_func_pipe2 = xyes ])
 
+AC_CHECK_FUNCS([ \
+    waitpid \
+    wait
+  ])
+
 # Check the return and argument types of ptrace.
 GDB_AC_PTRACE
 

@@ -1389,7 +1389,6 @@ AC_CHECK_FUNCS([ \
   sigsetmask \
   ttrace \
   use_default_colors \
-  waitpid \
   wresize \
 ])
 
