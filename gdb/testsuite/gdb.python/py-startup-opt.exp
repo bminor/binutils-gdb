@@ -94,13 +94,15 @@ proc test_python_settings { exp_state } {
 	    "  print (\"${attr} is off\")" "" \
 	    "end" "${attr} is ${answer}"
 
-	if { $attr == "dont_write_bytecode" && $exp_state == "off" } {
+	if { $attr == "dont_write_bytecode" } {
 	    set setting dont-write-bytecode
-	    set show_setting \
-		"Python's $setting setting is auto (currently $answer)."
-	    gdb_test "show python $setting" \
-		[string_to_regexp $show_setting]
+	} else {
+	    set setting ignore-environment
 	}
+	set show_setting \
+	    "Python's $setting setting is $answer."
+	gdb_test "show python $setting" \
+	    [string_to_regexp $show_setting]
     }
 
     gdb_exit
