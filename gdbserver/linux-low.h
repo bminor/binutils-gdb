@@ -713,7 +713,6 @@ protected:
 extern linux_process_target *the_linux_target;
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))
-#define get_lwp_thread(lwp) ((lwp)->thread)
 
 /* Information about a signal that is to be delivered to a thread.  */
 

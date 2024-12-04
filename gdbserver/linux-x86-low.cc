@@ -301,7 +301,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
 #ifdef __x86_64__
   lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
   gdb_assert (lwp != nullptr);
-  int use_64bit = is_64bit_tdesc (get_lwp_thread (lwp));
+  int use_64bit = is_64bit_tdesc (lwp->thread);
 
   if (use_64bit)
     {
@@ -346,7 +346,7 @@ x86_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
   lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
   gdb_assert (lwp != nullptr);
 #ifdef __x86_64__
-  int use_64bit = is_64bit_tdesc (get_lwp_thread (lwp));
+  int use_64bit = is_64bit_tdesc (lwp->thread);
 
   if (use_64bit)
     {
@@ -362,7 +362,7 @@ x86_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 #endif
 
   {
-    struct thread_info *thr = get_lwp_thread (lwp);
+    struct thread_info *thr = lwp->thread;
     struct regcache *regcache = get_thread_regcache (thr, 1);
     unsigned int desc[4];
     ULONGEST gs = 0;
