@@ -2253,6 +2253,10 @@ do_start_initialization ()
   PyConfig config;
 
   PyConfig_InitPythonConfig (&config);
+
+  // Ignore config errors, since all of the packages we use in this static python version are frozen.
+  config.pathconfig_warnings = 0;
+
   PyStatus status = PyConfig_SetString (&config, &config.program_name,
 					progname_copy);
   if (PyStatus_Exception (status))
