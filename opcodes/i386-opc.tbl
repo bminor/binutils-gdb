@@ -3484,4 +3484,30 @@ vsqrtnepbf16, 0x6651, AVX10_2, Modrm|Map5|VexW0|Masking|Broadcast|Disp8ShiftVL|C
 
 vcomsbf16, 0x662f, AVX10_2, Modrm|Map5|EVexLIG|VexW0|Disp8MemShift=1|NoSuf, { RegXMM|Word|Unspecified|BaseIndex, RegXMM }
 
+<sign:opc, $s:0x0, u:0x2>
+
+vcvtnebf162i<sign>bs, 0xf269 | <sign:opc>, AVX10_2, Modrm|Map5|VexW0|Masking|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Word|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vcvtph2i<sign>bs, 0x69 | <sign:opc>, AVX10_2, Modrm|Map5|VexW0|Masking|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|Word|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vcvtps2i<sign>bs, 0x6669 | <sign:opc>, AVX10_2, Modrm|Map5|VexW0|Masking|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|StaticRounding|SAE, { RegXMM|RegYMM|RegZMM|DWord|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+
+vcvttbf162i<sign>bs, 0xf268 | <sign:opc>, AVX10_2, Modrm|Map5|VexW0|Masking|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Word|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vcvttph2i<sign>bs, 0x68 | <sign:opc>, AVX10_2, Modrm|Map5|VexW0|Masking|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|SAE, { RegXMM|RegYMM|RegZMM|Word|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vcvttps2i<sign>bs, 0x6668 | <sign:opc>, AVX10_2, Modrm|Map5|VexW0|Masking|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|SAE, { RegXMM|RegYMM|RegZMM|DWord|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+
+<sign>
+
+<sign:opc, $s:6d, u:6c>
+
+vcvttpd2<sign>dqs<Exy>, 0x<sign:opc>, AVX10_2, Modrm|Map5|<Exy:attr>|VexW1|Masking|Broadcast|CheckOperandSize|NoSuf|<Exy:sae>, { <Exy:src>|Qword, <Exy:dst> }
+vcvttpd2<sign>qqs, 0x66<sign:opc>, AVX10_2, Modrm|Map5|VexW1|Masking|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf|SAE, { RegXMM|RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vcvttps2<sign>dqs, 0x<sign:opc>, AVX10_2, Modrm|Map5|VexW0|Masking|Broadcast|Disp8ShiftVL|Broadcast|CheckOperandSize|NoSuf|SAE, { RegXMM|RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vcvttps2<sign>qqs, 0x66<sign:opc>, AVX10_2, Modrm|Map5|EVex128|VexW0|Masking|Broadcast|Disp8MemShift=3|NoSuf, { RegXMM|Dword|Qword|Unspecified|BaseIndex, RegXMM }
+vcvttps2<sign>qqs, 0x66<sign:opc>, AVX10_2, Modrm|Map5|EVex256|VexW0|Masking|Broadcast|Disp8MemShift=4|NoSuf|SAE, { RegXMM|Dword|Unspecified|BaseIndex, RegYMM }
+vcvttps2<sign>qqs, 0x66<sign:opc>, AVX10_2, Modrm|Map5|EVex512|VexW0|Masking|Broadcast|Disp8MemShift=5|NoSuf|SAE, { RegYMM|Dword|Unspecified|BaseIndex, RegZMM }
+
+vcvttsd2<sign>sis, 0xf2<sign:opc>, AVX10_2, Modrm|Map5|EVexLIG|Disp8MemShift=3|NoSuf|SAE, { RegXMM|Qword|Unspecified|BaseIndex, Reg32|Reg64 }
+vcvttss2<sign>sis, 0xf3<sign:opc>, AVX10_2, Modrm|Map5|EVexLIG|Disp8MemShift=2|NoSuf|SAE, { RegXMM|Dword|Unspecified|BaseIndex, Reg32|Reg64 }
+
+<sign>
+
 // AVX10.2 instructions end.

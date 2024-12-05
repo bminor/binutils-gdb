@@ -1283,12 +1283,12 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 68 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_EVEX_MAP5_68) },
+    { PREFIX_TABLE (PREFIX_EVEX_MAP5_69) },
+    { PREFIX_TABLE (PREFIX_EVEX_MAP5_6A) },
+    { PREFIX_TABLE (PREFIX_EVEX_MAP5_6B) },
+    { PREFIX_TABLE (PREFIX_EVEX_MAP5_6C) },
+    { PREFIX_TABLE (PREFIX_EVEX_MAP5_6D) },
     { "vmovwY", { XMScalar, Edw }, PREFIX_DATA },
     { Bad_Opcode },
     /* 70 */
