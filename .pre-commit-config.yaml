@@ -49,9 +49,14 @@ repos:
     hooks:
     - id: flake8
       types_or: [file]
-      # Note this one is only run on gdb/python, not (for now) the
-      # test suite.
-      files: 'gdb/python/.*\.py(\.in)?$'
+      # Run this for (in glob notation):
+      #
+      #  - gdb/gdb-gdb.py.in
+      #  - gdb/*.py
+      #  - gdb/python/**/*.py
+      #  - gdb/testsuite/*.py
+      #
+      files: '^gdb/(gdb-gdb\.py\.in|[^/]+\.py|python/.+\.py|testsuite/[^/]+\.py)$'
       args: [--config, gdb/setup.cfg]
   - repo: https://github.com/pycqa/isort
     rev: 6.0.0

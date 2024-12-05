@@ -17,21 +17,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""copyright.py
-
-This script updates the list of years in the copyright notices in
-most files maintained by the GDB project.
-
-Usage: cd src/gdb && ./copyright.py
-
-Always review the output of this script before committing it!
-A useful command to review the output is:
-    % filterdiff -x \*.c -x \*.cc -x \*.h -x \*.exp updates.diff
-This removes the bulk of the changes which are most likely to be correct.
-"""
+# This script updates the list of years in the copyright notices in
+# most files maintained by the GDB project.
+#
+# Usage: cd src/gdb && ./copyright.py
+#
+# Always review the output of this script before committing it!
+#
+# A useful command to review the output is:
+#
+#     $ filterdiff -x \*.c -x \*.cc -x \*.h -x \*.exp updates.diff
+#
+# This removes the bulk of the changes which are most likely to be correct.
 
 import argparse
-import datetime
 import locale
 import os
 import os.path

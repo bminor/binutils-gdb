@@ -147,7 +147,7 @@ def identify_racy_tests():
     for s1, s2 in ignore_relations.items():
         try:
             ignored_tests |= all_tests[s1] & all_tests[s2]
-        except:
+        except Exception:
             continue
 
     racy_tests: set[str] = set()
