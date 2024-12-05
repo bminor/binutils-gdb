@@ -901,6 +901,10 @@ syms_from_objfile_1 (struct objfile *objfile,
       int num_sections = gdb_bfd_count_sections (objfile->obfd.get ());
 
       objfile->section_offsets.assign (num_sections, 0);
+
+      /* Release the objfile unique pointer, since nothing went wrong
+	 in reading it.  */
+      objfile_holder.release ();
       return;
     }
 
