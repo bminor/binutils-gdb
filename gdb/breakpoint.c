@@ -8127,10 +8127,21 @@ disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib
 
 	  loc.shlib_disabled = 1;
 
-	  /* At this point, we cannot rely on remove_breakpoint
-	     succeeding so we must mark the breakpoint as not inserted
-	     to prevent future errors occurring in remove_breakpoints.  */
-	  loc.inserted = 0;
+	  /* At this point, we don't know whether the shared library
+	     was unmapped from the inferior or not, so leave the
+	     inserted flag alone.  We'll handle failure to uninsert
+	     quietly, in case the library was indeed unmapped.
+
+	     The test gdb.base/nostdlib.exp when run on AArch64
+	     GNU/Linux using glibc will cause the dynamic linker to be
+	     unloaded from the inferior, but the linker will never be
+	     unmapped.  Additionally, at the time the dynamic linker
+	     is unloaded the inferior will be stopped within the
+	     dynamic linker.
+
+	     If we clear the inserted flag here then GDB will fail to
+	     remove the internal breakpoints from the dynamic linker
+	     leading to unexpected SIGTRAPs.  */
 
 	  bp_modified = true;
 
