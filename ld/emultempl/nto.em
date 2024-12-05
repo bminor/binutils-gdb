@@ -22,7 +22,7 @@
 # specific routines.
 
 # NTO templates aims to refine the default ${ARCH}elf.em template.
-. "${srcdir}/emultempl/${ARCH}elf.em"
+source_em "${srcdir}/emultempl/${ARCH}elf.em"
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
