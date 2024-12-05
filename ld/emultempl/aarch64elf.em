@@ -354,34 +354,34 @@ aarch64_elf_create_output_section_statements (void)
 }
 
 static bool
-aarch64_parse_feature_report_option (const char *optarg,
+aarch64_parse_feature_report_option (const char *_optarg,
 				     const char *report_opt,
 				     const size_t report_opt_len,
 				     aarch64_feature_marking_report *level)
 {
-  if (strncmp (optarg, report_opt, report_opt_len) != 0)
+  if (strncmp (_optarg, report_opt, report_opt_len) != 0)
     return false;
 
-  if (strlen (optarg) == report_opt_len
-      || strcmp (optarg + report_opt_len, "=warning") == 0)
+  if (strlen (_optarg) == report_opt_len
+      || strcmp (_optarg + report_opt_len, "=warning") == 0)
     *level = MARKING_WARN;
-  else if (strcmp (optarg + report_opt_len, "=none") == 0)
+  else if (strcmp (_optarg + report_opt_len, "=none") == 0)
     *level = MARKING_NONE;
-  else if (strcmp (optarg + report_opt_len, "=error") == 0)
+  else if (strcmp (_optarg + report_opt_len, "=error") == 0)
     *level = MARKING_ERROR;
   else
-    einfo (_("%X%P: error: unrecognized value '-z %s'\n"), optarg);
+    einfo (_("%X%P: error: unrecognized value '-z %s'\n"), _optarg);
 
   return true;
 }
 
 static bool
-aarch64_parse_bti_report_option (const char *optarg)
+aarch64_parse_bti_report_option (const char *_optarg)
 {
   #define BTI_REPORT      "bti-report"
   #define BTI_REPORT_LEN  COMPILE_TIME_STRLEN (BTI_REPORT)
 
-  return aarch64_parse_feature_report_option (optarg, BTI_REPORT,
+  return aarch64_parse_feature_report_option (_optarg, BTI_REPORT,
     BTI_REPORT_LEN, &sw_protections.bti_report);
 
   #undef BTI_REPORT
@@ -389,12 +389,12 @@ aarch64_parse_bti_report_option (const char *optarg)
 }
 
 static bool
-aarch64_parse_gcs_report_option (const char *optarg)
+aarch64_parse_gcs_report_option (const char *_optarg)
 {
   #define GCS_REPORT      "gcs-report"
   #define GCS_REPORT_LEN  COMPILE_TIME_STRLEN (GCS_REPORT)
 
-  return aarch64_parse_feature_report_option (optarg, GCS_REPORT,
+  return aarch64_parse_feature_report_option (_optarg, GCS_REPORT,
     GCS_REPORT_LEN, &sw_protections.gcs_report);
 
   #undef GCS_REPORT
@@ -402,22 +402,22 @@ aarch64_parse_gcs_report_option (const char *optarg)
 }
 
 static bool
-aarch64_parse_gcs_option (const char *optarg)
+aarch64_parse_gcs_option (const char *_optarg)
 {
   #define GCS      "gcs"
   #define GCS_LEN  COMPILE_TIME_STRLEN (GCS)
 
-  if (strncmp (optarg, GCS, GCS_LEN) != 0)
+  if (strncmp (_optarg, GCS, GCS_LEN) != 0)
     return false;
 
-  if (strcmp (optarg + GCS_LEN, "=always") == 0)
+  if (strcmp (_optarg + GCS_LEN, "=always") == 0)
     sw_protections.gcs_type = GCS_ALWAYS;
-  else if (strcmp (optarg + GCS_LEN, "=never") == 0)
+  else if (strcmp (_optarg + GCS_LEN, "=never") == 0)
     sw_protections.gcs_type = GCS_NEVER;
-  else if (strcmp (optarg + GCS_LEN, "=implicit") == 0)
+  else if (strcmp (_optarg + GCS_LEN, "=implicit") == 0)
     sw_protections.gcs_type = GCS_IMPLICIT;
   else
-    einfo (_("%X%P: error: unrecognized value '-z %s'\n"), optarg);
+    einfo (_("%X%P: error: unrecognized value '-z %s'\n"), _optarg);
 
   return true;
 
