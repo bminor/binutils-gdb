@@ -32429,6 +32429,11 @@ by a symbol name.
 If this breakpoint is pending, this field is present and holds the
 text used to set the breakpoint, as entered by the user.
 
+@value{GDBN}'s internal breakpoints (@pxref{maint info breakpoints})
+can sometimes become pending too, for these breakpoints the
+@var{pending} field will be empty as @value{GDBN} automatically
+creates these breakpoints as shared libraries are loaded.
+
 @item evaluated-by
 Where this breakpoint's condition is evaluated, either @samp{host} or
 @samp{target}.

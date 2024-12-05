@@ -6424,7 +6424,28 @@ print_breakpoint_location (const breakpoint *b, const bp_location *loc)
       uiout->field_stream ("at", stb);
     }
   else
-    uiout->field_string ("pending", b->locspec->to_string ());
+    {
+      /* Internal breakpoints don't have a locspec string, but can become
+	 pending if the shared library the breakpoint is in is unloaded.
+	 For most internal breakpoint types though, after unloading the
+	 shared library, the breakpoint will be deleted and never recreated
+	 (see internal_breakpoint::re_set).  But for two internal
+	 breakpoint types bp_shlib_event and bp_thread_event this is not
+	 true.  Usually we don't expect the libraries that contain these
+	 breakpoints to ever be unloaded, but a buggy inferior might do
+	 such a thing, in which case GDB should be prepared to handle this
+	 case.
+
+	 If these two breakpoint types become pending then there will be no
+	 locspec string.  */
+      gdb_assert (b->locspec != nullptr
+		  || (!user_breakpoint_p (b)
+		      && (b->type == bp_shlib_event
+			  || b->type == bp_thread_event)));
+      const char *locspec_str
+	= (b->locspec != nullptr ? b->locspec->to_string () : "");
+      uiout->field_string ("pending", locspec_str);
+    }
 
   if (loc && is_breakpoint (b)
       && breakpoint_condition_evaluation_mode () == condition_evaluation_target
