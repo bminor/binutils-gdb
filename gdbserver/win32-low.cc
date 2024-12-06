@@ -81,12 +81,10 @@ debug_event_ptid (DEBUG_EVENT *event)
 static void
 win32_get_thread_context (windows_thread_info *th)
 {
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    memset (&th->wow64_context, 0, sizeof (WOW64_CONTEXT));
-  else
-#endif
-    memset (&th->context, 0, sizeof (CONTEXT));
+  windows_process.with_context (th, [] (auto *context)
+    {
+      memset (context, 0, sizeof (*context));
+    });
   (*the_low_target.get_thread_context) (th);
 }
 
@@ -95,12 +93,10 @@ win32_get_thread_context (windows_thread_info *th)
 static void
 win32_set_thread_context (windows_thread_info *th)
 {
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    Wow64SetThreadContext (th->h, &th->wow64_context);
-  else
-#endif
-    SetThreadContext (th->h, &th->context);
+  windows_process.with_context (th, [&] (auto *context)
+    {
+      set_thread_context (th->h, context);
+    });
 }
 
 /* Set the thread context of the thread associated with TH.  */
@@ -117,13 +113,7 @@ win32_prepare_to_resume (windows_thread_info *th)
 void
 win32_require_context (windows_thread_info *th)
 {
-  DWORD context_flags;
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    context_flags = th->wow64_context.ContextFlags;
-  else
-#endif
-    context_flags = th->context.ContextFlags;
+  DWORD context_flags = *windows_process.context_flags_ptr (th);
   if (context_flags == 0)
     {
       th->suspend ();
@@ -407,13 +397,7 @@ continue_one_thread (thread_info *thread, int thread_id)
 
       if (th->suspended)
 	{
-	  DWORD *context_flags;
-#ifdef __x86_64__
-	  if (windows_process.wow64_process)
-	    context_flags = &th->wow64_context.ContextFlags;
-	  else
-#endif
-	    context_flags = &th->context.ContextFlags;
+	  DWORD *context_flags = windows_process.context_flags_ptr (th);
 	  if (*context_flags)
 	    {
 	      win32_set_thread_context (th);
@@ -823,13 +807,7 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
     {
       win32_prepare_to_resume (th);
 
-      DWORD *context_flags;
-#ifdef __x86_64__
-      if (windows_process.wow64_process)
-	context_flags = &th->wow64_context.ContextFlags;
-      else
-#endif
-	context_flags = &th->context.ContextFlags;
+      DWORD *context_flags = windows_process.context_flags_ptr (th);
       if (*context_flags)
 	{
 	  /* Move register values from the inferior into the thread

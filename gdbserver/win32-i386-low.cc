@@ -88,13 +88,12 @@ win32_get_current_dr (int dr)
 
   win32_require_context (th);
 
-#ifdef __x86_64__
-#define RET_DR(DR)				\
-  case DR:					\
-    return th->wow64_context.Dr ## DR
-
-  if (windows_process.wow64_process)
+  return windows_process.with_context (th, [&] (auto *context) -> DWORD64
     {
+#define RET_DR(DR)				\
+      case DR:					\
+	return context->Dr ## DR
+
       switch (dr)
 	{
 	  RET_DR (0);
@@ -104,29 +103,10 @@ win32_get_current_dr (int dr)
 	  RET_DR (6);
 	  RET_DR (7);
 	}
-    }
-  else
-#undef RET_DR
-#endif
-#define RET_DR(DR)				\
-  case DR:					\
-    return th->context.Dr ## DR
-
-    {
-      switch (dr)
-	{
-	  RET_DR (0);
-	  RET_DR (1);
-	  RET_DR (2);
-	  RET_DR (3);
-	  RET_DR (6);
-	  RET_DR (7);
-	}
-    }
-
 #undef RET_DR
 
-  gdb_assert_not_reached ("unhandled dr");
+      gdb_assert_not_reached ("unhandled dr");
+    });
 }
 
 static CORE_ADDR
@@ -247,59 +227,33 @@ i386_initial_stuff (void)
 static void
 i386_get_thread_context (windows_thread_info *th)
 {
-  /* Requesting the CONTEXT_EXTENDED_REGISTERS register set fails if
-     the system doesn't support extended registers.  */
-  static DWORD extended_registers = CONTEXT_EXTENDED_REGISTERS;
-#ifdef __x86_64__
-  static DWORD wow64_extended_registers = WOW64_CONTEXT_EXTENDED_REGISTERS;
-#endif
+  windows_process.with_context (th, [&] (auto *context)
+    {
+      /* Requesting the CONTEXT_EXTENDED_REGISTERS register set fails if
+	 the system doesn't support extended registers.  */
+      static DWORD extended_registers
+	= WindowsContext<decltype(context)>::extended;
 
  again:
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    th->wow64_context.ContextFlags = (WOW64_CONTEXT_FULL
-				      | WOW64_CONTEXT_FLOATING_POINT
-				      | WOW64_CONTEXT_DEBUG_REGISTERS
-				      | wow64_extended_registers);
-  else
-#endif
-    th->context.ContextFlags = (CONTEXT_FULL
-				| CONTEXT_FLOATING_POINT
-				| CONTEXT_DEBUG_REGISTERS
-				| extended_registers);
+      context->ContextFlags = (WindowsContext<decltype(context)>::full
+			       | WindowsContext<decltype(context)>::floating
+			       | WindowsContext<decltype(context)>::debug
+			       | extended_registers);
 
-  BOOL ret;
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    ret = Wow64GetThreadContext (th->h, &th->wow64_context);
-  else
-#endif
-    ret = GetThreadContext (th->h, &th->context);
-  if (!ret)
-    {
-      DWORD e = GetLastError ();
+      BOOL ret = get_thread_context (th->h, context);
+      if (!ret)
+	{
+	  DWORD e = GetLastError ();
 
-#ifdef __x86_64__
-      if (windows_process.wow64_process)
-	{
-	  if (wow64_extended_registers && e == ERROR_INVALID_PARAMETER)
-	    {
-	      wow64_extended_registers = 0;
-	      goto again;
-	    }
-	}
-      else
-#endif
-	{
 	  if (extended_registers && e == ERROR_INVALID_PARAMETER)
 	    {
 	      extended_registers = 0;
 	      goto again;
 	    }
-	}
 
-      error ("GetThreadContext failure %ld\n", (long) e);
-    }
+	  error ("GetThreadContext failure %ld\n", (long) e);
+	}
+    });
 }
 
 static void
@@ -311,28 +265,16 @@ i386_prepare_to_resume (windows_thread_info *th)
 
       win32_require_context (th);
 
-#ifdef __x86_64__
-      if (windows_process.wow64_process)
+      windows_process.with_context (th, [&] (auto *context)
 	{
-	  th->wow64_context.Dr0 = dr->dr_mirror[0];
-	  th->wow64_context.Dr1 = dr->dr_mirror[1];
-	  th->wow64_context.Dr2 = dr->dr_mirror[2];
-	  th->wow64_context.Dr3 = dr->dr_mirror[3];
-	  /* th->wow64_context.Dr6 = dr->dr_status_mirror;
+	  context->Dr0 = dr->dr_mirror[0];
+	  context->Dr1 = dr->dr_mirror[1];
+	  context->Dr2 = dr->dr_mirror[2];
+	  context->Dr3 = dr->dr_mirror[3];
+	  /* context->Dr6 = dr->dr_status_mirror;
 	     FIXME: should we set dr6 also ?? */
-	  th->wow64_context.Dr7 = dr->dr_control_mirror;
-	}
-      else
-#endif
-	{
-	  th->context.Dr0 = dr->dr_mirror[0];
-	  th->context.Dr1 = dr->dr_mirror[1];
-	  th->context.Dr2 = dr->dr_mirror[2];
-	  th->context.Dr3 = dr->dr_mirror[3];
-	  /* th->context.Dr6 = dr->dr_status_mirror;
-	     FIXME: should we set dr6 also ?? */
-	  th->context.Dr7 = dr->dr_control_mirror;
-	}
+	  context->Dr7 = dr->dr_control_mirror;
+	});
 
       th->debug_registers_changed = false;
     }
@@ -347,12 +289,10 @@ i386_thread_added (windows_thread_info *th)
 static void
 i386_single_step (windows_thread_info *th)
 {
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    th->wow64_context.EFlags |= FLAG_TRACE_BIT;
-  else
-#endif
-    th->context.EFlags |= FLAG_TRACE_BIT;
+  windows_process.with_context (th, [] (auto *context)
+    {
+      context->EFlags |= FLAG_TRACE_BIT;
+    });
 }
 
 /* An array of offset mappings into a Win32 Context structure.
@@ -532,13 +472,10 @@ i386_fetch_inferior_register (struct regcache *regcache,
 #endif
     mappings = i386_mappings;
 
-  char *context_offset;
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    context_offset = (char *) &th->wow64_context + mappings[r];
-  else
-#endif
-    context_offset = (char *) &th->context + mappings[r];
+  char *context_offset = windows_process.with_context (th, [&] (auto *context)
+    {
+      return (char *) context + mappings[r];
+    });
 
   /* GDB treats some registers as 32-bit, where they are in fact only
      16 bits long.  These cases must be handled specially to avoid
@@ -571,13 +508,10 @@ i386_store_inferior_register (struct regcache *regcache,
 #endif
     mappings = i386_mappings;
 
-  char *context_offset;
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    context_offset = (char *) &th->wow64_context + mappings[r];
-  else
-#endif
-    context_offset = (char *) &th->context + mappings[r];
+  char *context_offset = windows_process.with_context (th, [&] (auto *context)
+    {
+      return (char *) context + mappings[r];
+    });
 
   /* GDB treats some registers as 32-bit, where they are in fact only
      16 bits long.  These cases must be handled specially to avoid
