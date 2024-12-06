@@ -35,21 +35,21 @@ check()
 }
 
 status=0
-check pr26936a.stdout "^pr26936a.s +6 +0x10108 +x" 1
-check pr26936a.stdout "^pr26936b.s +5 +0x10109 +x" 1
-check pr26936a.stdout "^pr26936b.s +11 +0x10108 +x" 1
-check pr26936a.stdout "^pr26936c.s +6 +0x10108 +x" 1
-check pr26936a.stdout "^ +0+10108 0+1" 3
-check pr26936a.stdout "^ +0+10109 0+1" 1
-check pr26936a.stdout "^ +0+ 0+10109 0+1010a" 1
-check pr26936a.stdout "^ +0+ 0+10108 0+10109" 1
-check pr26936b.stdout "^pr26936d.s +6 +0x10108 +x" 1
-check pr26936b.stdout "^pr26936b.s +5 +0x10109 +x" 1
-check pr26936b.stdout "^pr26936b.s +11 +0x10108 +x" 1
-check pr26936b.stdout "^pr26936c.s +6 +0x10108 +x" 1
-check pr26936b.stdout "^ +0+10108 0+1" 3
-check pr26936b.stdout "^ +0+10109 0+1" 1
-check pr26936b.stdout "^ +0+ 0+10109 0+1010a" 1
-check pr26936b.stdout "^ +0+ 0+10108 0+10109" 1
+check pr26936a.stdout "^pr26936a.s +6 +0x10118 +x" 1
+check pr26936a.stdout "^pr26936b.s +5 +0x10119 +x" 1
+check pr26936a.stdout "^pr26936b.s +11 +0x10118 +x" 1
+check pr26936a.stdout "^pr26936c.s +6 +0x10118 +x" 1
+check pr26936a.stdout "^ +0+10118 0+1" 3
+check pr26936a.stdout "^ +0+10119 0+1" 1
+check pr26936a.stdout "^ +0+ 0+10119 0+1011a" 1
+check pr26936a.stdout "^ +0+ 0+10118 0+10119" 1
+check pr26936b.stdout "^pr26936d.s +6 +0x10118 +x" 1
+check pr26936b.stdout "^pr26936b.s +5 +0x10119 +x" 1
+check pr26936b.stdout "^pr26936b.s +11 +0x10118 +x" 1
+check pr26936b.stdout "^pr26936c.s +6 +0x10118 +x" 1
+check pr26936b.stdout "^ +0+10118 0+1" 3
+check pr26936b.stdout "^ +0+10119 0+1" 1
+check pr26936b.stdout "^ +0+ 0+10119 0+1011a" 1
+check pr26936b.stdout "^ +0+ 0+10118 0+10119" 1
 
 exit $status
