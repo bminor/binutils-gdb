@@ -22,6 +22,7 @@
 #include "arch-utils.h"
 #include "cli/cli-cmds.h"
 #include "extract-store-integer.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "symtab.h"
 #include "gdbcore.h"
 #include "frame.h"

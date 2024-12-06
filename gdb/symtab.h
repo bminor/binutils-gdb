@@ -25,7 +25,6 @@
 #include <string>
 #include <set>
 #include "dwarf2/call-site.h"
-#include "gdbsupport/gdb_vecs.h"
 #include "gdbtypes.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/gdb_regex.h"

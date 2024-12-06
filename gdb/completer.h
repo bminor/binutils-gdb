@@ -18,7 +18,6 @@
 #define COMPLETER_H 1
 
 #include "gdbsupport/gdb-hashtab.h"
-#include "gdbsupport/gdb_vecs.h"
 #include "command.h"
 
 /* Types of functions in struct match_list_displayer.  */

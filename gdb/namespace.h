@@ -19,7 +19,6 @@
 #ifndef NAMESPACE_H
 #define NAMESPACE_H
 
-#include "gdbsupport/gdb_vecs.h"
 #include "gdbsupport/gdb_obstack.h"
 
 /* This struct is designed to store data from using directives.  It

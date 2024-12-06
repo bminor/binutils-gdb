@@ -22,6 +22,7 @@
 #include "addrmap.h"
 #include "block.h"
 #include "frame-unwind.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "inferior.h"
 #include "gdbthread.h"
 #include "regcache.h"

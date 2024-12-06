@@ -23,7 +23,6 @@
 #define CP_SUPPORT_H
 
 #include "symtab.h"
-#include "gdbsupport/gdb_vecs.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/array-view.h"
 #include <vector>

@@ -17,6 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "arch-utils.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "symtab.h"
 #include "expression.h"
 #include "language.h"

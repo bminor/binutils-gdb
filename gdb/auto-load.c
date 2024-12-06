@@ -19,6 +19,7 @@
 
 #include <ctype.h>
 #include "auto-load.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "progspace.h"
 #include "gdbsupport/gdb_regex.h"
 #include "ui-out.h"

@@ -21,6 +21,7 @@
 #include <ctype.h>
 #include "event-top.h"
 #include "exceptions.h"
+#include "gdbsupport/gdb_vecs.h"
 #include "gdbsupport/unordered_set.h"
 #include "symtab.h"
 #include "frame.h"
