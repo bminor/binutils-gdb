@@ -389,16 +389,14 @@ objfile *
 objfile::make (gdb_bfd_ref_ptr bfd_, program_space *pspace, const char *name_,
 	       objfile_flags flags_, objfile *parent)
 {
-  objfile *result
-    = new objfile (std::move (bfd_), current_program_space, name_, flags_);
+  objfile *result = new objfile (std::move (bfd_), pspace, name_, flags_);
   if (parent != nullptr)
     add_separate_debug_objfile (result, parent);
 
-  current_program_space->add_objfile (std::unique_ptr<objfile> (result),
-				      parent);
+  pspace->add_objfile (std::unique_ptr<objfile> (result), parent);
 
   /* Rebuild section map next time we need it.  */
-  get_objfile_pspace_data (current_program_space)->new_objfiles_available = 1;
+  get_objfile_pspace_data (pspace)->new_objfiles_available = 1;
 
   return result;
 }
