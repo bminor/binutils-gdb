@@ -1436,38 +1436,35 @@ static void
 add_symbol_overload_list_qualified (const char *func_name,
 				    std::vector<symbol *> *overload_list)
 {
-  const struct block *surrounding_static_block = 0;
-
-  /* Look through the partial symtabs for all symbols which begin by
-     matching FUNC_NAME.  Make sure we read that symbol table in.  */
-
-  for (objfile *objf : current_program_space->objfiles ())
-    objf->expand_symtabs_for_function (func_name);
+  const block *selected_block = get_selected_block (0);
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
 
-  for (const block *b = get_selected_block (0);
-       b != nullptr;
-       b = b->superblock ())
+  for (const block *b = selected_block; b != nullptr; b = b->superblock ())
     add_symbol_overload_list_block (func_name, b, overload_list);
 
-  surrounding_static_block = get_selected_block (0);
-  surrounding_static_block = (surrounding_static_block == nullptr
-			      ? nullptr
-			      : surrounding_static_block->static_block ());
+  const block *surrounding_static_block = (selected_block == nullptr
+					   ? nullptr
+					   : selected_block->static_block ());
 
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
 
-  const block *block = get_selected_block (0);
-  struct objfile *current_objfile = block ? block->objfile () : nullptr;
+  struct objfile *current_objfile = (selected_block
+				     ? selected_block->objfile ()
+				     : nullptr);
 
   gdbarch_iterate_over_objfiles_in_search_order
     (current_objfile ? current_objfile->arch () : current_inferior ()->arch (),
      [func_name, surrounding_static_block, &overload_list]
      (struct objfile *obj)
        {
+	 /* Look through the partial symtabs for all symbols which
+	    begin by matching FUNC_NAME.  Make sure we read that
+	    symbol table in.  */
+	 obj->expand_symtabs_for_function (func_name);
+
 	 for (compunit_symtab *cust : obj->compunits ())
 	   {
 	     QUIT;
