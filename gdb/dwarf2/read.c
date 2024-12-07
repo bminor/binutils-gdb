@@ -1535,6 +1535,31 @@ struct readnow_functions : public dwarf2_base_index_functions
      domain_search_flags domain,
      expand_symtabs_lang_matcher lang_matcher) override
   {
+    dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+    auto_bool_vector cus_to_skip;
+    dw_expand_symtabs_matching_file_matcher (per_objfile, cus_to_skip,
+					     file_matcher);
+
+    for (const auto &per_cu : per_objfile->per_bfd->all_units)
+      {
+	QUIT;
+
+	/* Skip various types of unit that should not be searched
+	   directly: partial units and dummy units.  */
+	if (/* Note that we request the non-strict unit type here.  If
+	       there was an error while reading, like in
+	       dw-form-strx-out-of-bounds.exp, then the unit type may
+	       not be set.  */
+	    per_cu->unit_type (false) == DW_UT_partial
+	    || per_cu->unit_type (false) == 0
+	    || per_objfile->get_symtab (per_cu.get ()) == nullptr)
+	  continue;
+	if (!dw2_expand_symtabs_matching_one (per_cu.get (), per_objfile,
+					      cus_to_skip, file_matcher,
+					      expansion_notify,
+					      lang_matcher))
+	  return false;
+      }
     return true;
   }
 };
@@ -1992,13 +2017,15 @@ dw2_expand_symtabs_matching_one
 	return true;
     }
 
-  bool symtab_was_null = !per_objfile->symtab_set_p (per_cu);
   compunit_symtab *symtab
     = dw2_instantiate_symtab (per_cu, per_objfile, false);
   gdb_assert (symtab != nullptr);
 
-  if (expansion_notify != NULL && symtab_was_null)
-    return expansion_notify (symtab);
+  if (expansion_notify != nullptr)
+    {
+      cus_to_skip.set (per_cu->index, true);
+      return expansion_notify (symtab);
+    }
 
   return true;
 }
@@ -2025,13 +2052,6 @@ dw_expand_symtabs_matching_file_matcher
       QUIT;
 
       if (per_cu->is_debug_types)
-	{
-	  cus_to_skip.set (per_cu->index, true);
-	  continue;
-	}
-
-      /* We only need to look at symtabs not already expanded.  */
-      if (per_objfile->symtab_set_p (per_cu.get ()))
 	{
 	  cus_to_skip.set (per_cu->index, true);
 	  continue;
@@ -14674,10 +14694,6 @@ cooked_index_functions::expand_symtabs_matching
 							  completing))
 	{
 	  QUIT;
-
-	  /* No need to consider symbols from expanded CUs.  */
-	  if (per_objfile->symtab_set_p (entry->per_cu))
-	    continue;
 
 	  /* We don't need to consider symbols from some CUs.  */
 	  if (cus_to_skip.is_set (entry->per_cu->index))

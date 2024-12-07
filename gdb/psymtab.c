@@ -914,9 +914,6 @@ psymbol_functions::expand_symtabs_matching
     {
       QUIT;
 
-      if (ps->readin_p (objfile))
-	continue;
-
       if (file_matcher)
 	{
 	  bool match;
