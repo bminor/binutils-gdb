@@ -1029,11 +1029,12 @@ dwarf2_gdb_index::dump (struct objfile *objfile)
 }
 
 /* Helper for dw2_expand_matching symtabs.  Called on each symbol
-   matched, to expand corresponding CUs that were marked.  IDX is the
-   index of the symbol name that matched.  */
+   matched, to expand corresponding CUs (unless the CU is to be
+   skipped).  IDX is the index of the symbol name that matched.  */
 
 static bool
 dw2_expand_marked_cus (dwarf2_per_objfile *per_objfile, offset_type idx,
+		       auto_bool_vector &cus_to_skip,
 		       expand_symtabs_file_matcher file_matcher,
 		       expand_symtabs_expansion_listener expansion_notify,
 		       block_search_flags search_flags,
@@ -1117,8 +1118,9 @@ dw2_expand_marked_cus (dwarf2_per_objfile *per_objfile, offset_type idx,
 
       dwarf2_per_cu *per_cu = index.units[cu_index];
 
-      if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile, file_matcher,
-					    expansion_notify, lang_matcher))
+      if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile, cus_to_skip,
+					    file_matcher, expansion_notify,
+					    lang_matcher))
 	return false;
     }
 
@@ -1138,7 +1140,9 @@ dwarf2_gdb_index::expand_symtabs_matching
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
+  auto_bool_vector cus_to_skip;
+  dw_expand_symtabs_matching_file_matcher (per_objfile, cus_to_skip,
+					   file_matcher);
 
   /* This invariant is documented in quick-functions.h.  */
   gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
@@ -1149,7 +1153,7 @@ dwarf2_gdb_index::expand_symtabs_matching
 	  QUIT;
 
 	  if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile,
-						file_matcher,
+						cus_to_skip, file_matcher,
 						expansion_notify,
 						lang_matcher))
 	    return false;
@@ -1166,7 +1170,7 @@ dwarf2_gdb_index::expand_symtabs_matching
 					  symbol_matcher,
 					  [&] (offset_type idx)
     {
-      if (!dw2_expand_marked_cus (per_objfile, idx, file_matcher,
+      if (!dw2_expand_marked_cus (per_objfile, idx, cus_to_skip, file_matcher,
 				  expansion_notify, search_flags, domain,
 				  lang_matcher))
 	return false;

@@ -1974,11 +1974,13 @@ bool
 dw2_expand_symtabs_matching_one
   (dwarf2_per_cu *per_cu,
    dwarf2_per_objfile *per_objfile,
+   auto_bool_vector &cus_to_skip,
    expand_symtabs_file_matcher file_matcher,
    expand_symtabs_expansion_listener expansion_notify,
    expand_symtabs_lang_matcher lang_matcher)
 {
-  if (file_matcher != nullptr && !per_cu->mark)
+  /* Already visited, or intentionally skipped.  */
+  if (cus_to_skip.is_set (per_cu->index))
     return true;
 
   if (lang_matcher != nullptr)
@@ -2005,7 +2007,9 @@ dw2_expand_symtabs_matching_one
 
 void
 dw_expand_symtabs_matching_file_matcher
-  (dwarf2_per_objfile *per_objfile, expand_symtabs_file_matcher file_matcher)
+  (dwarf2_per_objfile *per_objfile,
+   auto_bool_vector &cus_to_skip,
+   expand_symtabs_file_matcher file_matcher)
 {
   if (file_matcher == NULL)
     return;
@@ -2021,54 +2025,57 @@ dw_expand_symtabs_matching_file_matcher
       QUIT;
 
       if (per_cu->is_debug_types)
-	continue;
-      per_cu->mark = 0;
+	{
+	  cus_to_skip.set (per_cu->index, true);
+	  continue;
+	}
 
       /* We only need to look at symtabs not already expanded.  */
       if (per_objfile->symtab_set_p (per_cu.get ()))
-	continue;
+	{
+	  cus_to_skip.set (per_cu->index, true);
+	  continue;
+	}
 
       if (per_cu->fnd != nullptr)
 	{
 	  file_and_directory *fnd = per_cu->fnd.get ();
 
 	  if (file_matcher (fnd->get_name (), false))
-	    {
-	      per_cu->mark = 1;
-	      continue;
-	    }
+	    continue;
 
 	  /* Before we invoke realpath, which can get expensive when many
 	     files are involved, do a quick comparison of the basenames.  */
 	  if ((basenames_may_differ
 	       || file_matcher (lbasename (fnd->get_name ()), true))
 	      && file_matcher (fnd->get_fullname (), false))
-	    {
-	      per_cu->mark = 1;
-	      continue;
-	    }
+	    continue;
 	}
 
       quick_file_names *file_data = dw2_get_file_names (per_cu.get (),
 							per_objfile);
       if (file_data == NULL)
-	continue;
-
-      if (visited_not_found.contains (file_data))
-	continue;
-      else if (visited_found.contains (file_data))
 	{
-	  per_cu->mark = 1;
+	  cus_to_skip.set (per_cu->index, true);
 	  continue;
 	}
 
+      if (visited_not_found.contains (file_data))
+	{
+	  cus_to_skip.set (per_cu->index, true);
+	  continue;
+	}
+      else if (visited_found.contains (file_data))
+	continue;
+
+      bool matched = false;
       for (int j = 0; j < file_data->num_file_names; ++j)
 	{
 	  const char *this_real_name;
 
 	  if (file_matcher (file_data->file_names[j], false))
 	    {
-	      per_cu->mark = 1;
+	      matched = true;
 	      break;
 	    }
 
@@ -2082,15 +2089,18 @@ dw_expand_symtabs_matching_file_matcher
 	  this_real_name = dw2_get_real_path (per_objfile, file_data, j);
 	  if (file_matcher (this_real_name, false))
 	    {
-	      per_cu->mark = 1;
+	      matched = true;
 	      break;
 	    }
 	}
 
-      if (per_cu->mark)
+      if (matched)
 	visited_found.insert (file_data);
       else
-	visited_not_found.insert (file_data);
+	{
+	  cus_to_skip.set (per_cu->index, true);
+	  visited_not_found.insert (file_data);
+	}
     }
 }
 
@@ -14575,7 +14585,9 @@ cooked_index_functions::expand_symtabs_matching
 
   cooked_index *table = wait (objfile, true);
 
-  dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
+  auto_bool_vector cus_to_skip;
+  dw_expand_symtabs_matching_file_matcher (per_objfile, cus_to_skip,
+					   file_matcher);
 
   /* This invariant is documented in quick-functions.h.  */
   gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
@@ -14586,7 +14598,7 @@ cooked_index_functions::expand_symtabs_matching
 	  QUIT;
 
 	  if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile,
-						file_matcher,
+						cus_to_skip, file_matcher,
 						expansion_notify,
 						lang_matcher))
 	    return false;
@@ -14667,9 +14679,8 @@ cooked_index_functions::expand_symtabs_matching
 	  if (per_objfile->symtab_set_p (entry->per_cu))
 	    continue;
 
-	  /* If file-matching was done, we don't need to consider
-	     symbols from unmarked CUs.  */
-	  if (file_matcher != nullptr && !entry->per_cu->mark)
+	  /* We don't need to consider symbols from some CUs.  */
+	  if (cus_to_skip.is_set (entry->per_cu->index))
 	    continue;
 
 	  /* See if the symbol matches the type filter.  */
@@ -14754,7 +14765,7 @@ cooked_index_functions::expand_symtabs_matching
 	    }
 
 	  if (!dw2_expand_symtabs_matching_one (entry->per_cu, per_objfile,
-						file_matcher,
+						cus_to_skip, file_matcher,
 						expansion_notify, nullptr))
 	    return false;
 	}
