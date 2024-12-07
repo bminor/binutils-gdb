@@ -5509,22 +5509,22 @@ map_matching_symbols (struct objfile *objfile,
 		      match_data &data)
 {
   data.objfile = objfile;
+
+  const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
+  auto callback = [&] (compunit_symtab *symtab)
+    {
+      const struct block *block
+	= symtab->blockvector ()->block (block_kind);
+      return iterate_over_symbols_terminated (block, lookup_name,
+					      domain, data);
+    };
+
   objfile->expand_symtabs_matching (nullptr, &lookup_name,
-				    nullptr, nullptr,
+				    nullptr, callback,
 				    global
 				    ? SEARCH_GLOBAL_BLOCK
 				    : SEARCH_STATIC_BLOCK,
 				    domain);
-
-  const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
-  for (compunit_symtab *symtab : objfile->compunits ())
-    {
-      const struct block *block
-	= symtab->blockvector ()->block (block_kind);
-      if (!iterate_over_symbols_terminated (block, lookup_name,
-					    domain, data))
-	break;
-    }
 }
 
 /* Add to RESULT all non-local symbols whose name and domain match
