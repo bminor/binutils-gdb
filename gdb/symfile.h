@@ -345,15 +345,6 @@ symfile_segment_data_up get_symfile_segment_data (bfd *abfd);
 
 extern scoped_restore_tmpl<int> increment_reading_symtab (void);
 
-bool expand_symtabs_matching
-  (expand_symtabs_file_matcher file_matcher,
-   const lookup_name_info &lookup_name,
-   expand_symtabs_symbol_matcher symbol_matcher,
-   expand_symtabs_expansion_listener expansion_notify,
-   block_search_flags search_flags,
-   domain_search_flags kind,
-   expand_symtabs_lang_matcher lang_matcher = nullptr);
-
 void map_symbol_filenames (symbol_filename_listener fun, bool need_fullname);
 
 /* Target-agnostic function to load the sections of an executable into memory.

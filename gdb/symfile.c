@@ -3755,31 +3755,6 @@ symfile_free_objfile (struct objfile *objfile)
   objfile->pspace ()->remove_target_sections (objfile);
 }
 
-/* Wrapper around the quick_symbol_functions expand_symtabs_matching "method".
-   Expand all symtabs that match the specified criteria.
-   See quick_symbol_functions.expand_symtabs_matching for details.  */
-
-bool
-expand_symtabs_matching (expand_symtabs_file_matcher file_matcher,
-			 const lookup_name_info &lookup_name,
-			 expand_symtabs_symbol_matcher symbol_matcher,
-			 expand_symtabs_expansion_listener expansion_notify,
-			 block_search_flags search_flags,
-			 domain_search_flags domain,
-			 expand_symtabs_lang_matcher lang_matcher)
-{
-  for (objfile *objfile : current_program_space->objfiles ())
-    if (!objfile->expand_symtabs_matching (file_matcher,
-					   &lookup_name,
-					   symbol_matcher,
-					   expansion_notify,
-					   search_flags,
-					   domain,
-					   lang_matcher))
-      return false;
-  return true;
-}
-
 /* Wrapper around the quick_symbol_functions map_symbol_filenames "method".
    Map function FUN over every file.
    See quick_symbol_functions.map_symbol_filenames for details.  */
