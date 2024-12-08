@@ -1498,8 +1498,8 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
   else
     print_size_symbols (abfd, dynamic, symsizes, symcount, archive_bfd);
 
-  if (synthsyms)
-    free (synthsyms);
+  free_lineno_cache (abfd);
+  free (synthsyms);
   free (minisyms);
   free (symsizes);
 }
@@ -1602,7 +1602,6 @@ display_archive (bfd *file)
 
       if (last_arfile != NULL)
 	{
-	  free_lineno_cache (last_arfile);
 	  bfd_close (last_arfile);
 	  if (arfile == last_arfile)
 	    return;
@@ -1611,10 +1610,7 @@ display_archive (bfd *file)
     }
 
   if (last_arfile != NULL)
-    {
-      free_lineno_cache (last_arfile);
-      bfd_close (last_arfile);
-    }
+    bfd_close (last_arfile);
 }
 
 static bool
@@ -1656,7 +1652,6 @@ display_file (char *filename)
       retval = false;
     }
 
-  free_lineno_cache (file);
   if (!bfd_close (file))
     retval = false;
 
