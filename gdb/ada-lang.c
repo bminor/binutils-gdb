@@ -13655,19 +13655,11 @@ public:
 					  const char *text, const char *word,
 					  enum type_code code) const override
   {
-    const struct block *b, *surrounding_static_block = 0;
+    const struct block *surrounding_static_block = 0;
 
     gdb_assert (code == TYPE_CODE_UNDEF);
 
     lookup_name_info lookup_name (text, name_match_type, true);
-
-    /* First, look at the partial symtab symbols.  */
-    expand_symtabs_matching (NULL,
-			     lookup_name,
-			     NULL,
-			     NULL,
-			     SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-			     SEARCH_ALL_DOMAINS);
 
     /* At this point scan through the misc symbol vectors and add each
        symbol you find to the list.  Eventually we want to ignore
@@ -13710,7 +13702,9 @@ public:
     /* Search upwards from currently selected frame (so that we can
        complete on local vars.  */
 
-    for (b = get_selected_block (0); b != NULL; b = b->superblock ())
+    for (const block *b = get_selected_block (0);
+	 b != nullptr;
+	 b = b->superblock ())
       {
 	if (b->is_static_block ())
 	  surrounding_static_block = b;   /* For elmin of dups */
@@ -13732,43 +13726,36 @@ public:
 
     for (objfile *objfile : current_program_space->objfiles ())
       {
-	for (compunit_symtab *s : objfile->compunits ())
+	auto callback = [&] (compunit_symtab *s)
 	  {
 	    QUIT;
-	    b = s->blockvector ()->global_block ();
-	    for (struct symbol *sym : block_iterator_range (b))
+	    for (const block *b = s->blockvector ()->static_block ();
+		 b != nullptr;
+		 b = b->superblock ())
 	      {
-		if (completion_skip_symbol (mode, sym))
-		  continue;
+		/* Don't do this block twice.  */
+		if (b == surrounding_static_block)
+		  break;
 
-		completion_list_add_name (tracker,
-					  sym->language (),
-					  sym->linkage_name (),
-					  lookup_name, text, word);
+		for (struct symbol *sym : block_iterator_range (b))
+		  {
+		    if (completion_skip_symbol (mode, sym))
+		      continue;
+
+		    completion_list_add_name (tracker,
+					      sym->language (),
+					      sym->linkage_name (),
+					      lookup_name, text, word);
+		  }
 	      }
-	  }
-      }
 
-    for (objfile *objfile : current_program_space->objfiles ())
-      {
-	for (compunit_symtab *s : objfile->compunits ())
-	  {
-	    QUIT;
-	    b = s->blockvector ()->static_block ();
-	    /* Don't do this block twice.  */
-	    if (b == surrounding_static_block)
-	      continue;
-	    for (struct symbol *sym : block_iterator_range (b))
-	      {
-		if (completion_skip_symbol (mode, sym))
-		  continue;
+	    return true;
+	  };
 
-		completion_list_add_name (tracker,
-					  sym->language (),
-					  sym->linkage_name (),
-					  lookup_name, text, word);
-	      }
-	  }
+	objfile->expand_symtabs_matching
+	  (nullptr, &lookup_name, nullptr, callback,
+	   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
+	   SEARCH_ALL_DOMAINS);
       }
   }
 
