@@ -13101,31 +13101,11 @@ ada_add_global_exceptions (compiled_regex *preg,
       return preg == nullptr || preg->exec (name, 0, NULL, 0) == 0;
     };
 
-
-  /* In Ada, the symbol "search name" is a linkage name, whereas the
-     regular expression used to do the matching refers to the natural
-     name.  So match against the decoded name.  */
-  expand_symtabs_matching (NULL,
-			   lookup_name_info::match_any (),
-			   [&] (const char *search_name)
-			   {
-			     std::string decoded = ada_decode (search_name);
-			     return name_matches_regex (decoded.c_str ());
-			   },
-			   NULL,
-			   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-			   SEARCH_VAR_DOMAIN,
-			   [&] (enum language lang)
-			     {
-			       /* Try to skip non-Ada CUs.  */
-			       return lang == language_ada;
-			     });
-
   /* Iterate over all objfiles irrespective of scope or linker namespaces
      so we get all exceptions anywhere in the progspace.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *s : objfile->compunits ())
+      auto callback = [&] (compunit_symtab *s)
 	{
 	  const struct blockvector *bv = s->blockvector ();
 	  int i;
@@ -13144,7 +13124,30 @@ ada_add_global_exceptions (compiled_regex *preg,
 		    exceptions->push_back (info);
 		  }
 	    }
-	}
+
+	  return true;
+	};
+
+      /* In Ada, the symbol "search name" is a linkage name, whereas
+	 the regular expression used to do the matching refers to the
+	 natural name.  So match against the decoded name.  */
+      auto any = lookup_name_info::match_any ();
+      objfile->expand_symtabs_matching
+	(nullptr,
+	 &any,
+	 [&] (const char *search_name)
+	   {
+	     std::string decoded = ada_decode (search_name);
+	     return name_matches_regex (decoded.c_str ());
+	   },
+	 callback,
+	 SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
+	 SEARCH_VAR_DOMAIN,
+	 [&] (enum language lang)
+	   {
+	     /* Try to skip non-Ada CUs.  */
+	     return lang == language_ada;
+	   });
     }
 }
 
