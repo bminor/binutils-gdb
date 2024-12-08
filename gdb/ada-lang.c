@@ -13637,7 +13637,7 @@ public:
 
     for (b = get_selected_block (0); b != NULL; b = b->superblock ())
       {
-	if (!b->superblock ())
+	if (b->is_static_block ())
 	  surrounding_static_block = b;   /* For elmin of dups */
 
 	for (struct symbol *sym : block_iterator_range (b))
