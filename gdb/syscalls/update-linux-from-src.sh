@@ -20,6 +20,8 @@
 # Used to generate .xml.in files, like so:
 # $ ./update-linux-from-src.sh ~/linux-stable.git
 
+pwd=$(pwd -P)
+
 parse_args ()
 {
     if [ $# -lt 1 ]; then
@@ -34,6 +36,51 @@ parse_args ()
 	echo "cannot find $d"
 	exit 1
     fi
+}
+
+gen_from_kernel_headers ()
+{
+    local f
+    f="$1"
+    local arch
+    arch="$2"
+
+    echo "Generating $f"
+
+    local tmpdir
+    tmpdir=$(mktemp -d)
+    trap 'rm -Rf $tmpdir/*' EXIT
+
+    local build
+    build="$tmpdir"/build
+    local install
+    install="$tmpdir"/install
+    local usr
+    usr="$install"/usr
+    local include
+    include="$usr"/include
+
+    mkdir -p "$build" "$usr"
+
+    (
+	cd "$build" || exit 1
+
+	make \
+	    -f "$d"/Makefile \
+	    ARCH="$arch" \
+	    INSTALL_HDR_PATH="$usr" \
+	    headers_install \
+	    > "$build"/header_install.log \
+	    2>&1
+
+	"$pwd"/update-linux.sh \
+	    "$pwd"/"$f" \
+	    -nostdinc \
+	    -isystem "$include"
+    )
+
+    trap '' EXIT
+    rm -Rf "$tmpdir"
 }
 
 pre ()
@@ -274,7 +321,8 @@ regen ()
 	    return
 	    ;;
 	aarch64-linux.xml.in)
-	    echo "Skipping $f, no syscall.tbl"
+	    # No syscall.tbl.
+	    gen_from_kernel_headers "$f" arm64
 	    return
 	    ;;
 	arm-linux.xml.in)

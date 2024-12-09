@@ -67,7 +67,7 @@ EOF
 
     echo '<syscalls_info>'
 
-    echo '#include <sys/syscall.h>' \
+    echo '#include <asm/unistd.h>' \
 	| gcc -E - -dD "$@" \
 	| grep -E '#define __NR_' \
 	| while read -r line; do
