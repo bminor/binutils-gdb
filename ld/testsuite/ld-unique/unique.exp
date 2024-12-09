@@ -113,13 +113,8 @@ if ![ld_compile "$CC_FOR_TARGET -c" "$srcdir/$subdir/unique_empty.s" "tmpdir/uni
     set fails [expr $fails + 1]
 }
 
-# When using GCC as the linker driver, we need to specify board cflags when
-# linking because cflags may contain linker options.  For example when linker
-# options are included in GCC spec files then we need the -specs option.
-set board_flags [get_board_flags]
-
 # Create executable containing unique symbol.
-if ![ld_link "$CC_FOR_TARGET $NOPIE_LDFLAGS $board_flags" "tmpdir/unique_prog" "tmpdir/unique.o"] {
+if ![ld_link "$CC_FOR_TARGET $NOPIE_LDFLAGS" "tmpdir/unique_prog" "tmpdir/unique.o"] {
     fail "Could not link a unique executable"
     set fails [expr $fails + 1]
 }

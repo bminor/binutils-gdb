@@ -210,6 +210,17 @@ proc default_ld_link { ld target objects } {
 	set flags [big_or_little_endian]
     }
 
+    # When using GCC as the linker driver, we need to specify board cflags when
+    # linking because cflags may contain linker options.  For example when
+    # linker options are included in GCC spec files then we need the -specs
+    # option.
+    set gccexe [string replace $ld 0 [string last "/" $ld] ""]
+    if {[string match "*cc*" $gccexe] ||
+	[string match "*++*" $gccexe] ||
+	[string match "clang*" $gccexe]} then {
+	set flags "$flags [get_board_flags]"
+    }
+
     remote_file host delete $target
     set exec_output [run_host_cmd "$ld" "$flags -o $target $objects"]
     set exec_output [prune_warnings $exec_output]
@@ -701,12 +712,6 @@ proc run_ld_link_exec_tests { ldtests args } {
     global exec_output
     global STATIC_LDFLAGS
 
-    # When using GCC as the linker driver, we need to specify board cflags when
-    # linking because cflags may contain linker options.  For example when
-    # linker options are included in GCC spec files then we need the -specs
-    # option.
-    set board_flags [get_board_flags]
-
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
 	set ld_options [lindex $testitem 1]
@@ -786,12 +791,13 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    pass $testname
 	    continue;
 	} else {
+	    set board_flags [get_board_flags]
 	    if { [string match "" $STATIC_LDFLAGS] \
 		 && [regexp -- ".* \[-\]+static .*" " $board_flags $ld_options $objfiles $ld_after "] } {
 		untested $testname
 		continue
 	    }
-	    if ![$link_proc $link_cmd $binfile "$board_flags -L$srcdir/$subdir $ld_options $objfiles $ld_after"] {
+	    if ![$link_proc $link_cmd $binfile " -L$srcdir/$subdir $ld_options $objfiles $ld_after"] {
 		set failed 1
 	    }
 	}
@@ -866,8 +872,6 @@ proc run_cc_link_tests { ldtests } {
     global ar
     global exec_output
     global STATIC_LDFLAGS
-
-    set board_flags [get_board_flags]
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
@@ -975,12 +979,13 @@ proc run_cc_link_tests { ldtests } {
 		set failed 1
 	    }
 	} else {
+	    set board_flags [get_board_flags]
 	    if { [string match "" $STATIC_LDFLAGS] \
 		 && [regexp -- ".* \[-\]+static .*" " $board_flags $ldflags $objfiles "] } {
 		untested $testname
 		continue
 	    }
-	    ld_link $cc_cmd $binfile "$board_flags -L$srcdir/$subdir $ldflags $objfiles"
+	    ld_link $cc_cmd $binfile "-L$srcdir/$subdir $ldflags $objfiles"
 	    set ld_output "$exec_output"
 
 	    if { $check_ld(source) == "regexp" } then {
