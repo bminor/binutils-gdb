@@ -405,11 +405,12 @@ expect (FILE *fp)
 /* Calculate checksum for the packet stored in buffer buf.  Store
    the checksum in a hexadecimal format in a checksum_hex variable.  */
 static void
-recalculate_csum (const std::string &buf, int cnt, unsigned char *checksum_hex)
+recalculate_csum (const std::string &buf, int off, unsigned char *checksum_hex)
 {
   unsigned char csum = 0;
 
-  for (int i = 0; i < cnt; i++)
+  int len = buf.length ();
+  for (int i = off; i < len; ++i)
     csum += buf[i];
 
   checksum_hex[0] = tohex ((csum >> 4) & 0xf);
@@ -435,9 +436,9 @@ play (FILE *fp)
     }
   while ((fromlog = logchar (fp, false)) != EOL)
     {
-      line.push_back (fromlog);
-      if (line[line.length ()] == '#')
+      if (fromlog == '#')
 	where_csum = line.length ();
+      line.push_back (fromlog);
     }
 
   /* Packet starts with '+$' or '$', we don't want to calculate those
@@ -446,23 +447,13 @@ play (FILE *fp)
   if (line[0] == '+')
     offset = 2;
 
-  /* If '#' is missing at the end of the line, add it and adjust the line
-     length.  */
-  if (where_csum == 0)
-    {
-      where_csum = line.length ();
-      line.push_back ('#');
-    }
-  recalculate_csum (line.substr (offset), where_csum - offset, checksum);
+  if (where_csum > 0)
+    line.resize (where_csum);
+  recalculate_csum (line, offset, checksum);
 
-  /* Check if the checksum is missing and adjust the line length to be able
-     to fit the checksum.  */
-  if (where_csum + 1 >= line.length ())
-    line.resize (where_csum + 3);
-
-  /* Replace what is at the end of the packet with the checksum.  */
-  line[where_csum + 1] = checksum[0];
-  line[where_csum + 2] = checksum[1];
+  line.push_back ('#');
+  line.push_back (checksum[0]);
+  line.push_back (checksum[1]);
 
   if (write (remote_desc_out, line.data (), line.size ()) != line.size ())
     remote_error ("Error during write to gdb");
