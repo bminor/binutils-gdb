@@ -2029,10 +2029,10 @@ extern int pc_at_non_inline_function (const address_space *aspace,
 				      CORE_ADDR pc,
 				      const target_waitstatus &ws);
 
-extern int user_breakpoint_p (struct breakpoint *);
+extern int user_breakpoint_p (const breakpoint *);
 
 /* Return true if this breakpoint is pending, false if not.  */
-extern int pending_breakpoint_p (struct breakpoint *);
+extern int pending_breakpoint_p (const breakpoint *);
 
 /* Attempt to determine architecture of location identified by SAL.  */
 extern struct gdbarch *get_sal_arch (struct symtab_and_line sal);
