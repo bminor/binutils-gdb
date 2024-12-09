@@ -1596,7 +1596,7 @@ insert_ras (uint64_t insn,
 	    const char **errmsg)
 {
   if (value == 0)
-    *errmsg = _("invalid register operand when updating");
+    *errmsg = _("invalid base address register operand");
   return insn | ((value & 0x1f) << 16);
 }
 
@@ -3359,8 +3359,8 @@ const struct powerpc_operand powerpc_operands[] =
   { 0x1f, 16, insert_ram, extract_ram, PPC_OPERAND_GPR_0 },
 
   /* The RA field in a D or X form instruction which is an updating
-     store or an updating floating point load, which means that the RA
-     field may not be zero.  */
+     store or an updating floating point load or a hash store or check,
+     which means that the RA field may not be zero.  */
 #define RAS RAM + 1
   { 0x1f, 16, insert_ras, extract_ras, PPC_OPERAND_GPR_0 },
 
@@ -8555,7 +8555,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"addeo.",	XO(31,138,1,1),	XO_MASK,     PPCCOM,	0,		{RT, RA, RB}},
 {"aeo.",	XO(31,138,1,1),	XO_MASK,     PWRCOM,	0,		{RT, RA, RB}},
 
-{"hashstp",	X(31,658),	XRC_MASK,    POWER8,	0,		{RB, DW, RA0}},
+{"hashstp",	X(31,658),	XRC_MASK,    POWER8,	0,		{RB, DW, RAS}},
 
 {"mfsrin",	X(31,659),	XRA_MASK,    PPC,	NON32,		{RT, RB}},
 
@@ -8588,7 +8588,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"tendall.",	XRC(31,686,1)|(1<<25), XRTRARB_MASK, PPCHTM, 0,		{0}},
 {"tend.",	XRC(31,686,1), XRTARARB_MASK, PPCHTM,	0,		{HTM_A}},
 
-{"hashchkp",	X(31,690),	XRC_MASK,    POWER8,	0,		{RB, DW, RA0}},
+{"hashchkp",	X(31,690),	XRC_MASK,    POWER8,	0,		{RB, DW, RAS}},
 
 {"stbcx.",	XRC(31,694,1),	X_MASK,	  POWER8|E6500, 0,		{RS, RA0, RB}},
 
@@ -8621,7 +8621,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"addzeo.",	XO(31,202,1,1),	XORB_MASK,   PPCCOM,	0,		{RT, RA}},
 {"azeo.",	XO(31,202,1,1),	XORB_MASK,   PWRCOM,	0,		{RT, RA}},
 
-{"hashst",	X(31,722),	XRC_MASK,    POWER8,	0,		{RB, DW, RA0}},
+{"hashst",	X(31,722),	XRC_MASK,    POWER8,	0,		{RB, DW, RAS}},
 
 {"stswi",	X(31,725),	X_MASK,	     PPCCOM,	E500|E500MC,	{RS, RA0, NB}},
 {"stsi",	X(31,725),	X_MASK,	     PWRCOM,	0,		{RS, RA0, NB}},
@@ -8671,7 +8671,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"tresume.",	XRCL(31,750,1,1), XRTRARB_MASK,PPCHTM,	EXT,		{0}},
 {"tsr.",	XRC(31,750,1),	  XRTLRARB_MASK,PPCHTM,	0,		{L}},
 
-{"hashchk",	X(31,754),	XRC_MASK,    POWER8,	0,		{RB, DW, RA0}},
+{"hashchk",	X(31,754),	XRC_MASK,    POWER8,	0,		{RB, DW, RAS}},
 
 {"darn",	X(31,755),	XLRAND_MASK, POWER9,	0,		{RT, LRAND}},
 
