@@ -9989,6 +9989,30 @@ check_ada_pragma_import (struct die_info *die, struct dwarf2_cu *cu)
   return true;
 }
 
+/* Apply fixups to LOW_PC and HIGH_PC due to an incorrect DIE in CU.  */
+
+static void
+fixup_low_high_pc (struct dwarf2_cu *cu, struct die_info *die, CORE_ADDR *low_pc,
+		   CORE_ADDR *high_pc)
+{
+  if (die->tag != DW_TAG_subprogram)
+    return;
+
+  dwarf2_per_objfile *per_objfile = cu->per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
+  struct gdbarch *gdbarch = objfile->arch ();
+
+  if (gdbarch_bfd_arch_info (gdbarch)->arch == bfd_arch_arm
+      && producer_is_gas_ge_2_39 (cu))
+    {
+      /* Gas version 2.39 produces DWARF for a Thumb subprogram with a low_pc
+	 attribute with the thumb bit set (PR gas/31115).  Work around this.  */
+      *low_pc = gdbarch_addr_bits_remove (gdbarch, *low_pc);
+      if (high_pc != nullptr)
+	*high_pc = gdbarch_addr_bits_remove (gdbarch, *high_pc);
+    }
+}
+
 static void
 read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -10068,15 +10092,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   lowpc = per_objfile->relocate (unrel_low);
   highpc = per_objfile->relocate (unrel_high);
-
-  if (gdbarch_bfd_arch_info (gdbarch)->arch == bfd_arch_arm
-      && producer_is_gas_ge_2_39 (cu))
-    {
-      /* Gas version 2.39 produces DWARF for a Thumb subprogram with a low_pc
-	 attribute with the thumb bit set (PR gas/31115).  Work around this.  */
-      lowpc = gdbarch_addr_bits_remove (gdbarch, lowpc);
-      highpc = gdbarch_addr_bits_remove (gdbarch, highpc);
-    }
+  fixup_low_high_pc (cu, die, &lowpc, &highpc);
 
   /* If we have any template arguments, then we must allocate a
      different sort of symbol.  */
@@ -11336,7 +11352,11 @@ dwarf2_die_base_address (struct die_info *die, struct block *block,
 
   struct attribute *attr = dwarf2_attr (die, DW_AT_low_pc, cu);
   if (attr != nullptr)
-    return per_objfile->relocate (attr->as_address ());
+    {
+      CORE_ADDR res = per_objfile->relocate (attr->as_address ());
+      fixup_low_high_pc (cu, die, &res, nullptr);
+      return res;
+    }
   else if (block->ranges ().size () > 0)
     return block->ranges ()[0].start ();
 
@@ -11480,6 +11500,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 
 	  CORE_ADDR low = per_objfile->relocate (unrel_low);
 	  CORE_ADDR high = per_objfile->relocate (unrel_high);
+	  fixup_low_high_pc (cu, die, &low, &high);
 	  cu->get_builder ()->record_block_range (block, low, high - 1);
 	}
 
