@@ -5888,9 +5888,6 @@ display_any_bfd (bfd *file, int level)
   /* If the file is an archive, process all of its elements.  */
   if (bfd_check_format (file, bfd_archive))
     {
-      bfd *arfile = NULL;
-      bfd *last_arfile = NULL;
-
       if (level == 0)
 	printf (_("In archive %s:\n"), sanitize_string (bfd_get_filename (file)));
       else if (level > 100)
@@ -5905,30 +5902,25 @@ display_any_bfd (bfd *file, int level)
 	printf (_("In nested archive %s:\n"),
 		sanitize_string (bfd_get_filename (file)));
 
+      bfd *last_arfile = NULL;
       for (;;)
 	{
-	  bfd_set_error (bfd_error_no_error);
-
-	  arfile = bfd_openr_next_archived_file (file, arfile);
-	  if (arfile == NULL)
+	  bfd *arfile = bfd_openr_next_archived_file (file, last_arfile);
+	  if (arfile == NULL
+	      || arfile == last_arfile)
 	    {
+	      if (arfile != NULL)
+		bfd_set_error (bfd_error_malformed_archive);
 	      if (bfd_get_error () != bfd_error_no_more_archived_files)
 		my_bfd_nonfatal (bfd_get_filename (file));
 	      break;
 	    }
 
+	  if (last_arfile != NULL)
+	    bfd_close (last_arfile);
+
 	  display_any_bfd (arfile, level + 1);
 
-	  if (last_arfile != NULL)
-	    {
-	      bfd_close (last_arfile);
-	      /* PR 17512: file: ac585d01.  */
-	      if (arfile == last_arfile)
-		{
-		  last_arfile = NULL;
-		  break;
-		}
-	    }
 	  last_arfile = arfile;
 	}
 

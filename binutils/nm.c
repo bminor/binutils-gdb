@@ -1566,26 +1566,29 @@ set_print_format (bfd *file)
 static void
 display_archive (bfd *file)
 {
-  bfd *arfile = NULL;
-  bfd *last_arfile = NULL;
-  char **matching;
-
   format->print_archive_filename (bfd_get_filename (file));
 
   if (print_armap)
     print_symdef_entry (file);
 
+  bfd *last_arfile = NULL;
   for (;;)
     {
-      arfile = bfd_openr_next_archived_file (file, arfile);
-
-      if (arfile == NULL)
+      bfd *arfile = bfd_openr_next_archived_file (file, last_arfile);
+      if (arfile == NULL
+	  || arfile == last_arfile)
 	{
+	  if (arfile != NULL)
+	    bfd_set_error (bfd_error_malformed_archive);
 	  if (bfd_get_error () != bfd_error_no_more_archived_files)
 	    bfd_nonfatal (bfd_get_filename (file));
 	  break;
 	}
 
+      if (last_arfile != NULL)
+	bfd_close (last_arfile);
+
+      char **matching;
       if (bfd_check_format_matches (arfile, bfd_object, &matching))
 	{
 	  set_print_format (arfile);
@@ -1600,12 +1603,6 @@ display_archive (bfd *file)
 	    list_matching_formats (matching);
 	}
 
-      if (last_arfile != NULL)
-	{
-	  bfd_close (last_arfile);
-	  if (arfile == last_arfile)
-	    return;
-	}
       last_arfile = arfile;
     }
 
