@@ -503,7 +503,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
   client_state &cs = get_client_state ();
   struct lwp_info *event_lwp = *orig_event_lwp;
   int event = linux_ptrace_get_extended_event (wstat);
-  struct thread_info *event_thr = event_lwp->thread;
+  thread_info *event_thr = event_lwp->thread;
 
   gdb_assert (event_lwp->waitstatus.kind () == TARGET_WAITKIND_IGNORE);
 
@@ -1159,7 +1159,7 @@ int
 linux_process_target::attach (unsigned long pid)
 {
   struct process_info *proc;
-  struct thread_info *initial_thread;
+  thread_info *initial_thread;
   ptid_t ptid = ptid_t (pid, pid);
   int err;
 
@@ -1270,7 +1270,7 @@ last_thread_of_process_p (int pid)
 static void
 linux_kill_one_lwp (struct lwp_info *lwp)
 {
-  struct thread_info *thr = lwp->thread;
+  thread_info *thr = lwp->thread;
   int pid = thr->id.lwp ();
 
   /* PTRACE_KILL is unreliable.  After stepping into a signal handler,
@@ -1314,7 +1314,7 @@ linux_kill_one_lwp (struct lwp_info *lwp)
 static void
 kill_wait_lwp (struct lwp_info *lwp)
 {
-  struct thread_info *thr = lwp->thread;
+  thread_info *thr = lwp->thread;
   int pid = thr->id.pid ();
   int lwpid = thr->id.lwp ();
   int wstat;
@@ -1410,7 +1410,7 @@ linux_process_target::kill (process_info *process)
    thread when detaching, otherwise, it'd be suppressed/lost.  */
 
 static int
-get_detach_signal (struct thread_info *thread)
+get_detach_signal (thread_info *thread)
 {
   client_state &cs = get_client_state ();
   enum gdb_signal signo = GDB_SIGNAL_0;
@@ -1484,7 +1484,7 @@ get_detach_signal (struct thread_info *thread)
 void
 linux_process_target::detach_one_lwp (lwp_info *lwp)
 {
-  struct thread_info *thread = lwp->thread;
+  thread_info *thread = lwp->thread;
   int sig;
 
   /* If there is a pending SIGSTOP, get rid of it.  */
@@ -1699,7 +1699,7 @@ linux_process_target::thread_still_has_status_pending (thread_info *thread)
 static int
 lwp_resumed (struct lwp_info *lwp)
 {
-  struct thread_info *thread = lwp->thread;
+  thread_info *thread = lwp->thread;
 
   if (thread->last_resume_kind != resume_stop)
     return 1;
@@ -1912,7 +1912,7 @@ lwp_suspended_decr (struct lwp_info *lwp)
 
   if (lwp->suspended < 0)
     {
-      struct thread_info *thread = lwp->thread;
+      thread_info *thread = lwp->thread;
 
       internal_error ("unsuspend LWP %ld, suspended=%d\n", thread->id.lwp (),
 		      lwp->suspended);
@@ -1927,7 +1927,7 @@ lwp_suspended_decr (struct lwp_info *lwp)
 static int
 handle_tracepoints (struct lwp_info *lwp)
 {
-  struct thread_info *tinfo = lwp->thread;
+  thread_info *tinfo = lwp->thread;
   int tpoint_related_event = 0;
 
   gdb_assert (lwp->suspended == 0);
@@ -1973,7 +1973,7 @@ linux_process_target::linux_fast_tracepoint_collecting
   (lwp_info *lwp, fast_tpoint_collect_status *status)
 {
   CORE_ADDR thread_area;
-  struct thread_info *thread = lwp->thread;
+  thread_info *thread = lwp->thread;
 
   /* Get the thread area address.  This is used to recognize which
      thread is which when tracing with the in-process agent library.
@@ -2114,7 +2114,7 @@ linux_process_target::maybe_move_out_of_jump_pad (lwp_info *lwp, int *wstat)
 static void
 enqueue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
 {
-  struct thread_info *thread = lwp->thread;
+  thread_info *thread = lwp->thread;
 
   threads_debug_printf ("Deferring signal %d for LWP %ld.",
 			WSTOPSIG (*wstat), thread->id.lwp ());
@@ -2156,7 +2156,7 @@ enqueue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
 static int
 dequeue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
 {
-  struct thread_info *thread = lwp->thread;
+  thread_info *thread = lwp->thread;
 
   if (!lwp->pending_signals_to_report.empty ())
     {
@@ -2242,7 +2242,7 @@ void
 linux_process_target::filter_event (int lwpid, int wstat)
 {
   struct lwp_info *child;
-  struct thread_info *thread;
+  thread_info *thread;
   int have_stop_pc = 0;
 
   child = find_lwp_pid (ptid_t (lwpid));
@@ -2503,7 +2503,7 @@ linux_process_target::wait_for_event_filtered (ptid_t wait_ptid,
 					       ptid_t filter_ptid,
 					       int *wstatp, int options)
 {
-  struct thread_info *event_thread;
+  thread_info *event_thread;
   struct lwp_info *event_child, *requested_child;
   sigset_t block_mask, prev_mask;
 
@@ -2708,7 +2708,7 @@ linux_process_target::wait_for_event (ptid_t ptid, int *wstatp, int options)
 static void
 select_event_lwp (struct lwp_info **orig_lp)
 {
-  struct thread_info *event_thread = NULL;
+  thread_info *event_thread = NULL;
 
   /* In all-stop, give preference to the LWP that is being
      single-stepped.  There will be at most one, and it's the LWP that
@@ -2895,7 +2895,7 @@ ptid_t
 linux_process_target::filter_exit_event (lwp_info *event_child,
 					 target_waitstatus *ourstatus)
 {
-  struct thread_info *thread = event_child->thread;
+  thread_info *thread = event_child->thread;
   ptid_t ptid = thread->id;
 
   if (ourstatus->kind () == TARGET_WAITKIND_THREAD_EXITED)
@@ -2941,7 +2941,7 @@ bool
 linux_process_target::gdb_catch_this_syscall (lwp_info *event_child)
 {
   int sysno;
-  struct thread_info *thread = event_child->thread;
+  thread_info *thread = event_child->thread;
   process_info *proc = thread->process ();
 
   if (proc->syscalls_to_catch.empty ())
@@ -3794,7 +3794,7 @@ lwp_is_marked_dead (struct lwp_info *lwp)
 void
 linux_process_target::wait_for_sigstop ()
 {
-  struct thread_info *saved_thread;
+  thread_info *saved_thread;
   ptid_t saved_tid;
   int wstat;
   int ret;
@@ -3956,7 +3956,7 @@ enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t *info)
 void
 linux_process_target::install_software_single_step_breakpoints (lwp_info *lwp)
 {
-  struct thread_info *thread = lwp->thread;
+  thread_info *thread = lwp->thread;
   struct regcache *regcache = get_thread_regcache (thread, 1);
 
   scoped_restore_current_thread restore_thread;
@@ -4005,7 +4005,7 @@ void
 linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
 					    int signal, siginfo_t *info)
 {
-  struct thread_info *thread = lwp->thread;
+  thread_info *thread = lwp->thread;
   int ptrace_request;
 
   /* Note that target description may not be initialised
@@ -4211,7 +4211,7 @@ linux_process_target::low_prepare_to_resume (lwp_info *lwp)
 static int
 check_ptrace_stopped_lwp_gone (struct lwp_info *lp)
 {
-  struct thread_info *thread = lp->thread;
+  thread_info *thread = lp->thread;
 
   /* If we get an error after resuming the LWP successfully, we'd
      confuse !T state for the LWP being gone.  */
@@ -4496,7 +4496,7 @@ linux_process_target::thread_needs_step_over (thread_info *thread)
 void
 linux_process_target::start_step_over (lwp_info *lwp)
 {
-  struct thread_info *thread = lwp->thread;
+  thread_info *thread = lwp->thread;
   CORE_ADDR pc;
 
   threads_debug_printf ("Starting step-over on LWP %ld.  Stopping all threads",
@@ -4722,7 +4722,7 @@ linux_process_target::resume_one_thread (thread_info *thread,
 void
 linux_process_target::resume (thread_resume *resume_info, size_t n)
 {
-  struct thread_info *need_step_over = NULL;
+  thread_info *need_step_over = NULL;
 
  THREADS_SCOPED_DEBUG_ENTER_EXIT;
 
@@ -4888,7 +4888,7 @@ linux_process_target::unsuspend_and_proceed_one_lwp (thread_info *thread,
 void
 linux_process_target::proceed_all_lwps ()
 {
-  struct thread_info *need_step_over;
+  thread_info *need_step_over;
 
   /* If there is a thread which would otherwise be resumed, which is
      stopped at a breakpoint that needs stepping over, then don't

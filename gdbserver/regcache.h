@@ -72,7 +72,7 @@ void regcache_cpy (struct regcache *dst, struct regcache *src);
 
 struct regcache *new_register_cache (const struct target_desc *tdesc);
 
-struct regcache *get_thread_regcache (struct thread_info *thread, int fetch);
+struct regcache *get_thread_regcache (thread_info *thread, int fetch);
 
 /* Release all memory associated with the register cache for INFERIOR.  */
 
@@ -80,7 +80,7 @@ void free_register_cache (struct regcache *regcache);
 
 /* Invalidate cached registers for one thread.  */
 
-void regcache_invalidate_thread (struct thread_info *);
+void regcache_invalidate_thread (thread_info *);
 
 /* Invalidate cached registers for all threads of the given process.  */
 

@@ -852,7 +852,7 @@ sethbpregs_hwbp_control (int pid, int i, arm_hwbp_control_t control)
 void
 arm_target::low_prepare_to_resume (lwp_info *lwp)
 {
-  struct thread_info *thread = lwp->thread;
+  thread_info *thread = lwp->thread;
   int pid = thread->id.lwp ();
   process_info *proc = find_process_pid (thread->id.pid ());
   struct arch_process_info *proc_info = proc->priv->arch_private;

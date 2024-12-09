@@ -382,7 +382,7 @@ thread_db_look_up_one_symbol (const char *name, CORE_ADDR *addrp)
 }
 
 int
-thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
+thread_db_get_tls_address (thread_info *thread, CORE_ADDR offset,
 			   CORE_ADDR load_module, CORE_ADDR *address)
 {
   psaddr_t addr;
@@ -869,7 +869,7 @@ thread_db_handle_monitor_command (char *mon)
 /* See linux-low.h.  */
 
 void
-thread_db_notice_clone (struct thread_info *parent_thr, ptid_t child_ptid)
+thread_db_notice_clone (thread_info *parent_thr, ptid_t child_ptid)
 {
   thread_db *thread_db = parent_thr->process ()->priv->thread_db;
 

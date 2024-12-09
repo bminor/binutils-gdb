@@ -141,7 +141,7 @@ void for_each_process (gdb::function_view<void (process_info *)> func);
 
 process_info *find_process (gdb::function_view<bool (process_info *)> func);
 
-extern struct thread_info *current_thread;
+extern thread_info *current_thread;
 
 /* Return the first process in the processes list.  */
 struct process_info *get_first_process (void);

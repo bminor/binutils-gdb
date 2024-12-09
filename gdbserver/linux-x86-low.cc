@@ -362,7 +362,7 @@ x86_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 #endif
 
   {
-    struct thread_info *thr = lwp->thread;
+    thread_info *thr = lwp->thread;
     struct regcache *regcache = get_thread_regcache (thr, 1);
     unsigned int desc[4];
     ULONGEST gs = 0;

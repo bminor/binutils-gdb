@@ -31,7 +31,7 @@ static process_info *current_process_;
 
 /* The current thread.  This is either a thread of CURRENT_PROCESS, or
    NULL.  */
-struct thread_info *current_thread;
+thread_info *current_thread;
 
 /* The current working directory used to start the inferior.
 
@@ -55,7 +55,7 @@ process_info::add_thread (ptid_t id, void *target_data)
 
 /* See gdbthread.h.  */
 
-struct thread_info *
+thread_info *
 get_first_thread (void)
 {
   return find_thread ([] (thread_info *thread)
@@ -64,7 +64,7 @@ get_first_thread (void)
     });
 }
 
-struct thread_info *
+thread_info *
 find_thread_ptid (ptid_t ptid)
 {
   process_info *process = find_process_pid (ptid.pid ());
@@ -77,7 +77,7 @@ find_thread_ptid (ptid_t ptid)
 /* Find a thread associated with the given PROCESS, or NULL if no
    such thread exists.  */
 
-static struct thread_info *
+static thread_info *
 find_thread_process (const struct process_info *const process)
 {
   return find_any_thread_of_pid (process->pid);
@@ -85,7 +85,7 @@ find_thread_process (const struct process_info *const process)
 
 /* See gdbthread.h.  */
 
-struct thread_info *
+thread_info *
 find_any_thread_of_pid (int pid)
 {
   return find_thread (pid, [] (thread_info *thread) {

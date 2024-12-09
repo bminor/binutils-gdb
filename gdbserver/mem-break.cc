@@ -1410,7 +1410,7 @@ set_single_step_breakpoint (CORE_ADDR stop_at, ptid_t ptid)
 }
 
 void
-delete_single_step_breakpoints (struct thread_info *thread)
+delete_single_step_breakpoints (thread_info *thread)
 {
   process_info *proc = thread->process ();
   struct breakpoint *bp, **bp_link;
@@ -1505,7 +1505,7 @@ uninsert_all_breakpoints (void)
 }
 
 void
-uninsert_single_step_breakpoints (struct thread_info *thread)
+uninsert_single_step_breakpoints (thread_info *thread)
 {
   process_info *proc = thread->process ();
   struct breakpoint *bp;
@@ -1574,7 +1574,7 @@ reinsert_breakpoints_at (CORE_ADDR pc)
 }
 
 int
-has_single_step_breakpoints (struct thread_info *thread)
+has_single_step_breakpoints (thread_info *thread)
 {
   process_info *proc = thread->process ();
   struct breakpoint *bp, **bp_link;
@@ -1611,7 +1611,7 @@ reinsert_all_breakpoints (void)
 }
 
 void
-reinsert_single_step_breakpoints (struct thread_info *thread)
+reinsert_single_step_breakpoints (thread_info *thread)
 {
   process_info *proc = thread->process ();
   struct breakpoint *bp;
@@ -2131,8 +2131,8 @@ clone_one_breakpoint (const struct breakpoint *src, ptid_t ptid)
 /* See mem-break.h.  */
 
 void
-clone_all_breakpoints (struct thread_info *child_thread,
-		       const struct thread_info *parent_thread)
+clone_all_breakpoints (thread_info *child_thread,
+		       const thread_info *parent_thread)
 {
   const struct breakpoint *bp;
   struct breakpoint *new_bkpt;

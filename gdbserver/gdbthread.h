@@ -100,13 +100,13 @@ private:
 
 /* Return a pointer to the first thread, or NULL if there isn't one.  */
 
-struct thread_info *get_first_thread (void);
+thread_info *get_first_thread (void);
 
-struct thread_info *find_thread_ptid (ptid_t ptid);
+thread_info *find_thread_ptid (ptid_t ptid);
 
 /* Find any thread of the PID process.  Returns NULL if none is
    found.  */
-struct thread_info *find_any_thread_of_pid (int pid);
+thread_info *find_any_thread_of_pid (int pid);
 
 /* Find the first thread for which FUNC returns true.  Return NULL if no thread
    satisfying FUNC is found.  */

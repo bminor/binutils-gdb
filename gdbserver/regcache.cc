@@ -25,7 +25,7 @@
 #ifndef IN_PROCESS_AGENT
 
 struct regcache *
-get_thread_regcache (struct thread_info *thread, int fetch)
+get_thread_regcache (thread_info *thread, int fetch)
 {
   regcache *regcache = thread->regcache ();
 
@@ -70,7 +70,7 @@ get_thread_regcache_for_ptid (ptid_t ptid)
 }
 
 void
-regcache_invalidate_thread (struct thread_info *thread)
+regcache_invalidate_thread (thread_info *thread)
 {
   regcache *regcache = thread->regcache ();
 
@@ -271,7 +271,7 @@ find_regno (const struct target_desc *tdesc, const char *name)
 }
 
 static void
-free_register_cache_thread (struct thread_info *thread)
+free_register_cache_thread (thread_info *thread)
 {
   regcache *regcache = thread->regcache ();
 

@@ -4296,7 +4296,7 @@ handle_tracepoint_query (char *packet)
    action covering the whole range.  */
 
 static void
-add_while_stepping_state (struct thread_info *tinfo,
+add_while_stepping_state (thread_info *tinfo,
 			  int tp_number, CORE_ADDR tp_address)
 {
   struct wstep_state *wstep = XNEW (struct wstep_state);
@@ -4322,7 +4322,7 @@ release_while_stepping_state (struct wstep_state *wstep)
    with thread TINFO.  */
 
 void
-release_while_stepping_state_list (struct thread_info *tinfo)
+release_while_stepping_state_list (thread_info *tinfo)
 {
   struct wstep_state *head;
 
@@ -4340,7 +4340,7 @@ release_while_stepping_state_list (struct thread_info *tinfo)
    collecting tracepoint data, false otherwise.  */
 
 int
-tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
+tracepoint_finished_step (thread_info *tinfo, CORE_ADDR stop_pc)
 {
   struct tracepoint *tpoint;
   struct wstep_state *wstep;
@@ -4445,7 +4445,7 @@ tracepoint_finished_step (struct thread_info *tinfo, CORE_ADDR stop_pc)
    tracing agents when the IPA's tracing stops for some reason.  */
 
 int
-handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc)
+handle_tracepoint_bkpts (thread_info *tinfo, CORE_ADDR stop_pc)
 {
   /* Pull in fast tracepoint trace frames from the inferior in-process
      agent's buffer into our buffer.  */
@@ -4526,7 +4526,7 @@ handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc)
    so.  */
 
 int
-tracepoint_was_hit (struct thread_info *tinfo, CORE_ADDR stop_pc)
+tracepoint_was_hit (thread_info *tinfo, CORE_ADDR stop_pc)
 {
   struct tracepoint *tpoint;
   int ret = 0;
