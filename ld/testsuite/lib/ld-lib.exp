@@ -177,6 +177,28 @@ proc is_endian_output_format { object_flags } {
     }
 }
 
+# Return flags as defined within board_info
+#
+proc get_board_flags {} {
+    global board_cflags
+    global board_ldflags
+
+    if [board_info [target_info name] exists cflags] {
+	set board_cflags " [board_info [target_info name] cflags]"
+    } else {
+	set board_cflags ""
+    }
+
+    if [board_info [target_info name] exists ldflags] {
+	set board_ldflags " [board_info [target_info name] ldflags]"
+    } else {
+	set board_ldflags ""
+    }
+
+    return "$board_cflags $board_ldflags"
+}
+
+
 # Link a program using ld
 #
 proc default_ld_link { ld target objects } {
@@ -677,25 +699,13 @@ proc run_ld_link_exec_tests { ldtests args } {
     global CXX_FOR_TARGET
     global errcnt
     global exec_output
-    global board_cflags
-    global board_ldflags
     global STATIC_LDFLAGS
 
     # When using GCC as the linker driver, we need to specify board cflags when
     # linking because cflags may contain linker options.  For example when
     # linker options are included in GCC spec files then we need the -specs
     # option.
-    if [board_info [target_info name] exists cflags] {
-	set board_cflags " [board_info [target_info name] cflags]"
-    } else {
-	set board_cflags ""
-    }
-
-    if [board_info [target_info name] exists ldflags] {
-	set board_ldflags " [board_info [target_info name] ldflags]"
-    } else {
-	set board_ldflags ""
-    }
+    set board_flags [get_board_flags]
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
@@ -777,11 +787,11 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    continue;
 	} else {
 	    if { [string match "" $STATIC_LDFLAGS] \
-		 && [regexp -- ".* \[-\]+static .*" " $board_cflags $board_ldflags $ld_options $objfiles $ld_after "] } {
+		 && [regexp -- ".* \[-\]+static .*" " $board_flags $ld_options $objfiles $ld_after "] } {
 		untested $testname
 		continue
 	    }
-	    if ![$link_proc $link_cmd $binfile "$board_cflags $board_ldflags -L$srcdir/$subdir $ld_options $objfiles $ld_after"] {
+	    if ![$link_proc $link_cmd $binfile "$board_flags -L$srcdir/$subdir $ld_options $objfiles $ld_after"] {
 		set failed 1
 	    }
 	}
@@ -855,21 +865,9 @@ proc run_cc_link_tests { ldtests } {
     global CXX_FOR_TARGET
     global ar
     global exec_output
-    global board_cflags
-    global board_ldflags
     global STATIC_LDFLAGS
 
-    if [board_info [target_info name] exists cflags] {
-	set board_cflags " [board_info [target_info name] cflags]"
-    } else {
-	set board_cflags ""
-    }
-
-    if [board_info [target_info name] exists ldflags] {
-	set board_ldflags " [board_info [target_info name] ldflags]"
-    } else {
-	set board_ldflags ""
-    }
+    set board_flags [get_board_flags]
 
     foreach testitem $ldtests {
 	set testname [lindex $testitem 0]
@@ -978,11 +976,11 @@ proc run_cc_link_tests { ldtests } {
 	    }
 	} else {
 	    if { [string match "" $STATIC_LDFLAGS] \
-		 && [regexp -- ".* \[-\]+static .*" " $board_cflags $board_ldflags $ldflags $objfiles "] } {
+		 && [regexp -- ".* \[-\]+static .*" " $board_flags $ldflags $objfiles "] } {
 		untested $testname
 		continue
 	    }
-	    ld_link $cc_cmd $binfile "$board_cflags $board_ldflags -L$srcdir/$subdir $ldflags $objfiles"
+	    ld_link $cc_cmd $binfile "$board_flags -L$srcdir/$subdir $ldflags $objfiles"
 	    set ld_output "$exec_output"
 
 	    if { $check_ld(source) == "regexp" } then {
@@ -1113,8 +1111,8 @@ proc check_gc_sections_available { } {
 
 	# elf2flt uses -q (--emit-relocs), which is incompatible with
 	# --gc-sections.
-	if { [board_info target exists ldflags]
-	     && [regexp " -elf2flt\[ =\]" " [board_info target ldflags] "] } {
+	set board_flags [get_board_flags]
+	if { [regexp " (-Wl,)*-elf2flt\[ =\]" " $board_flags "] } {
 	    set gc_sections_available_saved 0
 	    return 0
 	}
@@ -1227,14 +1225,7 @@ proc check_compiler_available { } {
 	    return 0
 	}
 
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
+	set flags [get_board_flags]
 	set basename "tmpdir/compiler[pid]"
 	set src ${basename}.c
 	set output ${basename}.out
@@ -1300,14 +1291,7 @@ proc check_lto_available { } {
 	    return 1
 	}
 	# Check if gcc supports -flto -fuse-linker-plugin
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
+	set flags [get_board_flags]
 	set basename "tmpdir/lto[pid]"
 	set src ${basename}.c
 	set output ${basename}.out
@@ -1343,14 +1327,7 @@ proc check_lto_fat_available { } {
 	    return 1
 	}
 	# Check if gcc supports -flto -fuse-linker-plugin
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
+	set flags [get_board_flags]
 	set basename "tmpdir/lto[pid]"
 	set src ${basename}.c
 	set output ${basename}.out
@@ -1386,14 +1363,7 @@ proc check_lto_shared_available { } {
 	    return 1
 	}
 	# Check if gcc supports -flto -fuse-linker-plugin -shared
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
+	set flags [get_board_flags]
 	set basename "tmpdir/lto_shared[pid]"
 	set src ${basename}.c
 	set output ${basename}.so
@@ -1445,14 +1415,7 @@ proc check_ifunc_available { } {
 	    return 0
 	}
 	# Check if gcc supports -flto -fuse-linker-plugin
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
+	set flags [get_board_flags]
 	set basename "tmpdir/ifunc[pid]"
 	set src ${basename}.c
 	set output ${basename}.out
@@ -1494,14 +1457,7 @@ proc check_ifunc_attribute_available { } {
 	    return 0
 	}
 	# Check if gcc supports -flto -fuse-linker-plugin
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
+	set flags [get_board_flags]
 	set basename "tmpdir/ifunc[pid]"
 	set src ${basename}.c
 	set output ${basename}.out
@@ -1577,14 +1533,7 @@ proc check_gnu2_tls_available { } {
 	    return 0
 	}
 	# Check if GNU2 TLS works.
-	set flags "$GNU2_CFLAGS"
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
+	set flags "$GNU2_CFLAGS [get_board_flags]"
 	set basename "tmpdir/gnu2_tls[pid]"
 	set src1 ${basename}1.c
 	set output1 ${basename}.so
@@ -1633,13 +1582,7 @@ proc compile_one_cc { src output additional_flags } {
     global CC_FOR_TARGET
     global CFLAGS_FOR_TARGET
 
-    set flags ""
-    if [board_info [target_info name] exists cflags] {
-	append flags " [board_info [target_info name] cflags]"
-    }
-    if [board_info [target_info name] exists ldflags] {
-	append flags " [board_info [target_info name] ldflags]"
-    }
+    set flags [get_board_flags]
 
     if [is_remote host] {
 	set src [remote_download host $src]
