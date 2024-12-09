@@ -124,12 +124,14 @@ extern int loongarch_force_relocation (struct fix *);
   loongarch_cfi_frame_initial_instructions
 extern void loongarch_cfi_frame_initial_instructions (void);
 
+#define tc_parse_to_dw2regnum tc_loongarch_parse_to_dw2regnum
+extern void tc_loongarch_parse_to_dw2regnum (expressionS *);
+
+extern int tc_loongarch_regname_to_dw2regnum (char *);
+
 #define tc_symbol_new_hook(sym) \
   if (0 == strcmp (sym->bsym->name, FAKE_LABEL_NAME)) \
     S_SET_OTHER (sym, STV_HIDDEN);
-
-#define tc_parse_to_dw2regnum tc_loongarch_parse_to_dw2regnum
-extern void tc_loongarch_parse_to_dw2regnum (expressionS *);
 
 extern void loongarch_pre_output_hook (void);
 #define md_pre_output_hook loongarch_pre_output_hook ()

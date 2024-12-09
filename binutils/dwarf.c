@@ -8796,6 +8796,27 @@ init_dwarf_regnames_riscv (void)
   dwarf_regnames_lookup_func = regname_internal_riscv;
 }
 
+static const char *const dwarf_regnames_loongarch[] =
+{
+  "$zero", "$ra", "$tp", "$sp", "$a0", "$a1", "$a2", "$a3",  /* 0-7   */
+  "$a4",   "$a5", "$a6", "$a7", "$t0", "$t1", "$t2", "$t3",  /* 8-15  */
+  "$t4",   "$t5", "$t6", "$t7", "$t8", "$r21","$fp", "$s0",  /* 16-23 */
+  "$s1",   "$s2", "$s3", "$s4", "$s5", "$s6", "$s7", "$s8",  /* 24-31 */
+  "$fa0", "$fa1", "$fa2", "$fa3", "$fa4",  "$fa5",  "$fa6",  /* 32-38 */
+  "$fa7", "$ft0", "$ft1", "$ft2", "$ft3",  "$ft4",  "$ft5",  /* 39-45 */
+  "$ft6", "$ft7", "$ft8", "$ft9", "$ft10", "$ft11", "$ft12", /* 46-52 */
+  "$ft13", "$ft14", "$ft15", "$fs0", "$fs1", "$fs2", "$fs3", /* 53-59 */
+  "$fs4",  "$fs5",  "$fs6",  "$fs7",			     /* 60-63 */
+};
+
+static void
+init_dwarf_regnames_loongarch (void)
+{
+  dwarf_regnames = dwarf_regnames_loongarch;
+  dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_loongarch);
+  dwarf_regnames_lookup_func = regname_internal_by_table_only;
+}
+
 void
 init_dwarf_regnames_by_elf_machine_code (unsigned int e_machine)
 {
@@ -8828,6 +8849,10 @@ init_dwarf_regnames_by_elf_machine_code (unsigned int e_machine)
 
     case EM_RISCV:
       init_dwarf_regnames_riscv ();
+      break;
+
+    case EM_LOONGARCH:
+      init_dwarf_regnames_loongarch ();
       break;
 
     default:
@@ -8877,6 +8902,10 @@ init_dwarf_regnames_by_bfd_arch_and_mach (enum bfd_architecture arch,
 
     case bfd_arch_riscv:
       init_dwarf_regnames_riscv ();
+      break;
+
+    case bfd_arch_loongarch:
+      init_dwarf_regnames_loongarch ();
       break;
 
     default:

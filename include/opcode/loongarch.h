@@ -267,6 +267,10 @@ dec2 : [1-9][0-9]?
   extern const char *const loongarch_cr_normal_name[4];
   extern const char *const loongarch_v_normal_name[32];
   extern const char *const loongarch_x_normal_name[32];
+  extern const char *const loongarch_r_cfi_name[32];
+  extern const char *const loongarch_r_cfi_name_alias[32];
+  extern const char *const loongarch_f_cfi_name[32];
+  extern const char *const loongarch_f_cfi_name_alias[32];
 
   extern struct loongarch_ase loongarch_ASEs[];
 
