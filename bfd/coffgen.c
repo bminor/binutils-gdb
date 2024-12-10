@@ -307,7 +307,6 @@ coff_real_object_p (bfd *abfd,
   flagword oflags = abfd->flags;
   bfd_vma ostart = bfd_get_start_address (abfd);
   void * tdata;
-  void * tdata_save;
   bfd_size_type readsize;	/* Length of file_info.  */
   unsigned int scnhsz;
   char *external_sections;
@@ -336,7 +335,6 @@ coff_real_object_p (bfd *abfd,
 
   /* Set up the tdata area.  ECOFF uses its own routine, and overrides
      abfd->flags.  */
-  tdata_save = abfd->tdata.any;
   tdata = bfd_coff_mkobject_hook (abfd, (void *) internal_f, (void *) internal_a);
   if (tdata == NULL)
     goto fail2;
@@ -375,7 +373,6 @@ coff_real_object_p (bfd *abfd,
   _bfd_coff_free_symbols (abfd);
   bfd_release (abfd, tdata);
  fail2:
-  abfd->tdata.any = tdata_save;
   abfd->flags = oflags;
   abfd->start_address = ostart;
   return NULL;

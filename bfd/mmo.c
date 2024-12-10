@@ -565,21 +565,16 @@ mmo_mkobject (bfd *abfd)
 {
   mmo_init ();
 
-  if (abfd->tdata.mmo_data == NULL)
-    {
-      time_t created;
+  /* All fields are zero-initialized, so we don't have to explicitly
+     initialize most.  */
+  tdata_type *tdata = bfd_zalloc (abfd, sizeof (tdata_type));
+  if (tdata == NULL)
+    return false;
 
-      /* All fields are zero-initialized, so we don't have to explicitly
-	 initialize most.  */
-      tdata_type *tdata = (tdata_type *) bfd_zalloc (abfd, sizeof (tdata_type));
-      if (tdata == NULL)
-	return false;
+  time_t created = time (NULL);
+  bfd_put_32 (abfd, created, tdata->created);
 
-      created = time (NULL);
-      bfd_put_32 (abfd, created, tdata->created);
-
-      abfd->tdata.mmo_data = tdata;
-    }
+  abfd->tdata.mmo_data = tdata;
 
   return true;
 }

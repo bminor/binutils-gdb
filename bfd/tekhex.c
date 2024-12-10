@@ -616,10 +616,14 @@ tekhex_object_p (bfd *abfd)
   if (b[0] != '%' || !ISHEX (b[1]) || !ISHEX (b[2]) || !ISHEX (b[3]))
     return NULL;
 
-  tekhex_mkobject (abfd);
+  if (!tekhex_mkobject (abfd))
+    return NULL;
 
   if (!pass_over (abfd, first_phase))
-    return NULL;
+    {
+      bfd_release (abfd, abfd->tdata.tekhex_data);
+      return NULL;
+    }
 
   return _bfd_no_cleanup;
 }

@@ -2790,7 +2790,6 @@ alpha_vms_free_private (bfd *abfd)
 static bfd_cleanup
 alpha_vms_object_p (bfd *abfd)
 {
-  void *tdata_save = abfd->tdata.any;
   unsigned int test_len;
   unsigned char *buf;
 
@@ -2798,10 +2797,7 @@ alpha_vms_object_p (bfd *abfd)
 
   /* Allocate alpha-vms specific data.  */
   if (!vms_initialize (abfd))
-    {
-      abfd->tdata.any = tdata_save;
-      return NULL;
-    }
+    return NULL;
 
   if (bfd_seek (abfd, 0, SEEK_SET))
     goto error_ret;
@@ -2913,9 +2909,7 @@ alpha_vms_object_p (bfd *abfd)
 
  error_ret:
   alpha_vms_free_private (abfd);
-  if (abfd->tdata.any != tdata_save && abfd->tdata.any != NULL)
-    bfd_release (abfd, abfd->tdata.any);
-  abfd->tdata.any = tdata_save;
+  bfd_release (abfd, abfd->tdata.any);
   return NULL;
 }
 

@@ -496,20 +496,13 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
 				 struct internal_exec *execp,
 				 bfd_cleanup (*callback_to_real_object_p) (bfd *))
 {
-  struct aout_data_struct *rawptr, *oldrawptr;
+  struct aout_data_struct *rawptr;
   bfd_cleanup result;
-  size_t amt = sizeof (*rawptr);
 
-  rawptr = bfd_zalloc (abfd, amt);
+  rawptr = bfd_zalloc (abfd, sizeof (*rawptr));
   if (rawptr == NULL)
     return NULL;
-
-  oldrawptr = abfd->tdata.aout_data;
   abfd->tdata.aout_data = rawptr;
-
-  /* Copy the contents of the old tdata struct.  */
-  if (oldrawptr != NULL)
-    *abfd->tdata.aout_data = *oldrawptr;
 
   abfd->tdata.aout_data->a.hdr = &rawptr->e;
   /* Copy in the internal_exec struct.  */
@@ -675,7 +668,6 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
 
  error_ret:
   bfd_release (abfd, rawptr);
-  abfd->tdata.aout_data = oldrawptr;
   return NULL;
 }
 

@@ -5263,8 +5263,6 @@ bfd_mach_o_scan (bfd *abfd,
       break;
     }
 
-  abfd->tdata.mach_o_data = mdata;
-
   bfd_mach_o_convert_architecture (header->cputype, header->cpusubtype,
 				   &cpu_type, &cpu_subtype);
   if (cpu_type == bfd_arch_unknown)
@@ -5320,7 +5318,10 @@ bfd_mach_o_scan (bfd *abfd,
 	    }
 
 	  if (!bfd_mach_o_read_command (abfd, cur, filesize))
-	    return false;
+	    {
+	      bfd_set_error (bfd_error_wrong_format);
+	      return false;
+	    }
 	}
     }
 
@@ -5443,18 +5444,21 @@ bfd_mach_o_header_p (bfd *abfd,
 
   mdata = (bfd_mach_o_data_struct *) bfd_zalloc (abfd, sizeof (*mdata));
   if (mdata == NULL)
-    goto fail;
+    return NULL;
+  abfd->tdata.mach_o_data = mdata;
+
   mdata->hdr_offset = hdr_off;
 
   if (!bfd_mach_o_scan (abfd, &header, mdata))
-    goto wrong;
+    {
+      bfd_release (abfd, mdata);
+      return NULL;
+    }
 
   return _bfd_no_cleanup;
 
  wrong:
   bfd_set_error (bfd_error_wrong_format);
-
- fail:
   return NULL;
 }
 
@@ -5541,7 +5545,11 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
 
   if (bfd_seek (abfd, 0, SEEK_SET) != 0
       || bfd_read (&hdr, sizeof (hdr), abfd) != sizeof (hdr))
-    goto error;
+    {
+      if (bfd_get_error () != bfd_error_system_call)
+	goto wrong;
+      goto error;
+    }
 
   adata = bfd_alloc (abfd, sizeof (mach_o_fat_data_struct));
   if (adata == NULL)
@@ -5550,12 +5558,12 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
   adata->magic = bfd_getb32 (hdr.magic);
   adata->nfat_arch = bfd_getb32 (hdr.nfat_arch);
   if (adata->magic != 0xcafebabe)
-    goto error;
+    goto wrong;
   /* Avoid matching Java bytecode files, which have the same magic number.
      In the Java bytecode file format this field contains the JVM version,
      which starts at 43.0.  */
   if (adata->nfat_arch > 30)
-    goto error;
+    goto wrong;
 
   if (_bfd_mul_overflow (adata->nfat_arch,
 			 sizeof (mach_o_fat_archentry), &amt))
@@ -5596,10 +5604,11 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
 
   return _bfd_no_cleanup;
 
+ wrong:
+  bfd_set_error (bfd_error_wrong_format);
  error:
   if (adata != NULL)
     bfd_release (abfd, adata);
-  bfd_set_error (bfd_error_wrong_format);
   return NULL;
 }
 
