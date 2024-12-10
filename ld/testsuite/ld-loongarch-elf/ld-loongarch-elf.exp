@@ -147,7 +147,7 @@ if [istarget "loongarch64-*-*"] {
   run_cc_link_tests [list \
       [list \
 	  "call undefweak symbol" \
-	  "" "" \
+	  "-no-pie" "" \
 	  {call_undefweak.s} \
 	  {{objdump {-d} call_undefweak.d}} \
 	  "call_undefweak" \
