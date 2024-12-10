@@ -318,7 +318,6 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
   bfd *abfd;
   bool bfd_plugin_target;
 
-  bfd_use_reserved_id = 1;
   bfd_plugin_target = bfd_plugin_target_p (srctemplate->xvec);
   abfd = bfd_create (concat (name, IRONLY_SUFFIX, (const char *) NULL),
 		     bfd_plugin_target ? link_info.output_bfd : srctemplate);

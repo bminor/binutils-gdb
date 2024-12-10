@@ -3007,9 +3007,6 @@ bool bfd_merge_private_bfd_data
 		 (ibfd, info))
 
 /* Extracted from opncls.c.  */
-/* Set to N to open the next N BFDs using an alternate id space.  */
-extern unsigned int bfd_use_reserved_id;
-
 bfd *bfd_fopen (const char *filename, const char *target,
     const char *mode, int fd);
 
