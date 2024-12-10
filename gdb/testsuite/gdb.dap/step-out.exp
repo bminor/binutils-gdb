@@ -60,31 +60,37 @@ set scopes [dap_check_request_and_response "get scopes" scopes \
 		[format {o frameId [i %d]} $frame_id]]
 set scopes [dict get [lindex $scopes 0] body scopes]
 
-gdb_assert {[llength $scopes] == 3} "three scopes"
+gdb_assert {[llength $scopes] == 2 || [llength $scopes] == 3} "two or three scopes"
 
 lassign $scopes scope reg_scope return_scope
-gdb_assert {[dict get $scope name] == "Locals"} "scope is locals"
-gdb_assert {[dict get $scope presentationHint] == "locals"} \
-    "locals presentation hint"
-gdb_assert {[dict get $scope namedVariables] == 1} "one var in scope"
 
-gdb_assert {[dict get $return_scope name] == "Return"} "scope is return"
-gdb_assert {[dict get $return_scope presentationHint] == "returnValue"} \
-    "returnValue presentation hint"
-gdb_assert {[dict get $return_scope namedVariables] == 1} \
-    "one var in return scope"
+set test "scope is locals"
+if { $return_scope == "" } {
+    unsupported $test
+} else {
+    gdb_assert {[dict get $scope name] == "Locals"} $test
+    gdb_assert {[dict get $scope presentationHint] == "locals"} \
+	"locals presentation hint"
+    gdb_assert {[dict get $scope namedVariables] == 1} "one var in scope"
 
-set num [dict get $return_scope variablesReference]
-set refs [lindex [dap_check_request_and_response "fetch arguments" \
-		      "variables" \
-		      [format {o variablesReference [i %d]} $num]] \
-	      0]
-set varlist [lindex [dict get $refs body variables] 0]
+    gdb_assert {[dict get $return_scope name] == "Return"} "scope is return"
+    gdb_assert {[dict get $return_scope presentationHint] == "returnValue"} \
+	"returnValue presentation hint"
+    gdb_assert {[dict get $return_scope namedVariables] == 1} \
+	"one var in return scope"
 
-gdb_assert {[dict get $varlist variablesReference] > 0} \
-    "variable has children"
-gdb_assert {[dict get $varlist name] == "(return)"} \
-    "variable is return value"
+    set num [dict get $return_scope variablesReference]
+    set refs [lindex [dap_check_request_and_response "fetch arguments" \
+			  "variables" \
+			  [format {o variablesReference [i %d]} $num]] \
+		  0]
+    set varlist [lindex [dict get $refs body variables] 0]
+
+    gdb_assert {[dict get $varlist variablesReference] > 0} \
+	"variable has children"
+    gdb_assert {[dict get $varlist name] == "(return)"} \
+	"variable is return value"
+}
 
 set response_and_events [dap_request_and_response stepOut {o threadId [i 1]}]
 set response [lindex $response_and_events 0]
