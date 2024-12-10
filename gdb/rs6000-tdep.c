@@ -3528,7 +3528,7 @@ struct ppc_variant
     const struct target_desc **tdesc;
   };
 
-static struct ppc_variant variants[] =
+static const ppc_variant variants[] =
 {
   {"powerpc", "PowerPC user-level", bfd_arch_powerpc,
    bfd_mach_ppc, &tdesc_powerpc_altivec32},
