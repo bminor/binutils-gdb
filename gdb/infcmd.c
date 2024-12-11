@@ -1999,15 +1999,17 @@ info_program_command (const char *args, int from_tty)
 }
 
 
-/* A helper function that prints some info from ENV.  VAR is either
-   NULL, or the name of the variable to display.  */
+/* A helper function that prints some info from ENV.  If ENV is
+   nullptr, then the host environment is used; otherwise the provided
+   environment is used.  VAR is either NULL, or the name of the
+   variable to display.  */
 
 static void
 display_environment (const gdb_environ *env, const char *var)
 {
   if (var)
     {
-      const char *val = env->get (var);
+      const char *val = env == nullptr ? getenv (var) : env->get (var);
 
       if (val)
 	{
@@ -2025,7 +2027,9 @@ display_environment (const gdb_environ *env, const char *var)
     }
   else
     {
-      char **envp = env->envp ();
+      char **envp = env == nullptr ? environ : env->envp ();
+      if (envp == nullptr)
+	return;
 
       for (int idx = 0; envp[idx] != nullptr; ++idx)
 	{
@@ -2101,10 +2105,18 @@ set_var_in_environment (gdb_environ *env, const char *arg)
       gdb_printf (_("Setting environment variable "
 		    "\"%s\" to null value.\n"),
 		  var.c_str ());
-      env->set (var.c_str (), "");
+      if (env == nullptr)
+	setenv (var.c_str (), "", 1);
+      else
+	env->set (var.c_str (), "");
     }
   else
-    env->set (var.c_str (), val);
+    {
+      if (env == nullptr)
+	setenv (var.c_str (), val, 1);
+      else
+	env->set (var.c_str (), val);
+    }
 }
 
 static void
@@ -2125,10 +2137,20 @@ unset_var_in_environment (gdb_environ *env, const char *var, int from_tty)
       /* If there is no argument, delete all environment variables.
 	 Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
-	env->clear ();
+	{
+	  if (env == nullptr)
+	    clearenv ();
+	  else
+	    env->clear ();
+	}
     }
   else
-    env->unset (var);
+    {
+      if (env == nullptr)
+	unsetenv (var);
+      else
+	env->unset (var);
+    }
 }
 
 static void
