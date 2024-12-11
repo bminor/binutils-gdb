@@ -29585,6 +29585,32 @@ Continuing.
 
 Suppressing CLI notifications may be useful in scripts to obtain a
 reduced output from a list of commands.
+
+@kindex show local-environment
+@item show local-environment @r{[}@var{varname}@r{]}
+Print the value of the local environment variable @var{varname}.  If
+you do not supply @var{varname}, print the names and values of all
+local environment variables.  A local environment variable is used
+when @value{GDBN} executes a local command, such as by the
+@code{shell} command.
+
+@kindex set local-environment
+@anchor{set local-environment}
+@item set local-environment @var{varname} @r{[}=@var{value}@r{]}
+Set environment variable @var{varname} to @var{value}.  The value
+changes for @value{GDBN} itself.  The @var{value} may be any string;
+the values of environment variables are just strings, and any
+interpretation is supplied by your program itself.  The @var{value}
+parameter is optional; if it is eliminated, the variable is set to a
+null value.
+
+@kindex unset local-environment
+@anchor{unset local-environment}
+@item unset local-environment @var{varname}
+Remove variable @var{varname} from the local environment.  This is
+different from @samp{set local-environment @var{varname} =};
+@code{unset local-environment} removes the variable from the
+environment, rather than assigning it an empty value.
 @end table
 
 @kindex show suppress-cli-notifications

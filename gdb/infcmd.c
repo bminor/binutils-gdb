@@ -2045,6 +2045,12 @@ environment_info (const char *var, int from_tty)
   display_environment (&current_inferior ()->environment, var);
 }
 
+static void
+local_environment_info (const char *var, int from_tty)
+{
+  display_environment (nullptr, var);
+}
+
 /* A helper to set an environment variable.  ARG is the string passed
    to 'set environment', i.e., the variable and value to use.  ENV is
    the environment in which the variable will be set.  */
@@ -2125,6 +2131,12 @@ set_environment_command (const char *arg, int from_tty)
   set_var_in_environment (&current_inferior ()->environment, arg);
 }
 
+static void
+set_local_environment_command (const char *arg, int from_tty)
+{
+  set_var_in_environment (nullptr, arg);
+}
+
 /* A helper to unset an environment variable.  ENV is the environment
    in which the variable will be unset.  VAR is the name of the
    variable, or NULL meaning unset all variables.  */
@@ -2157,6 +2169,12 @@ static void
 unset_environment_command (const char *var, int from_tty)
 {
   unset_var_in_environment (&current_inferior ()->environment, var, from_tty);
+}
+
+static void
+unset_local_environment_command (const char *var, int from_tty)
+{
+  unset_var_in_environment (nullptr, var, from_tty);
 }
 
 /* Handle the execution path (PATH variable).  */
@@ -3184,6 +3202,14 @@ give the program being debugged.  With no arguments, prints the entire\n\
 environment to be given to the program."), &showlist);
   set_cmd_completer (c, noop_completer);
 
+  c = add_cmd ("local-environment", no_class, local_environment_info, _("\
+The local environment, or one variable's value.\n\
+With an argument VAR, prints the value of environment variable VAR to\n\
+use locally.  With no arguments, prints the entire local environment.\n\
+The local environment by commands that run a process locally, for\n\
+example \"shell\"."), &showlist);
+  set_cmd_completer (c, noop_completer);
+
   add_basic_prefix_cmd ("unset", no_class,
 			_("Complement to certain \"set\" commands."),
 			&unsetlist, 0, &cmdlist);
@@ -3194,11 +3220,27 @@ This does not affect the program until the next \"run\" command."),
 	       &unsetlist);
   set_cmd_completer (c, noop_completer);
 
+  c = add_cmd ("local-environment", class_run,
+	       unset_local_environment_command, _("\
+Cancel local environment variable VAR."),
+	       &unsetlist);
+  set_cmd_completer (c, noop_completer);
+
   c = add_cmd ("environment", class_run, set_environment_command, _("\
 Set environment variable value to give the program.\n\
 Arguments are VAR VALUE where VAR is variable name and VALUE is value.\n\
 VALUES of environment variables are uninterpreted strings.\n\
 This does not affect the program until the next \"run\" command."),
+	       &setlist);
+  set_cmd_completer (c, noop_completer);
+
+  c = add_cmd ("local-environment", class_run,
+	       set_local_environment_command, _("\
+Set local environment variable value.\n\
+Arguments are VAR VALUE where VAR is variable name and VALUE is value.\n\
+VALUES of environment variables are uninterpreted strings.\n\
+The local environment by commands that run a process locally, for\n\
+example \"shell\"."),
 	       &setlist);
   set_cmd_completer (c, noop_completer);
 

@@ -58,6 +58,13 @@ GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*
 
 * New commands
 
+set local-environment
+show local-environment
+unset local-environment
+  Analogs of the existing "environment" commands that affect GDB's own
+  environment.  The local environment is used by "shell", "pipe", and
+  other commands that launch a subprocess other than an inferior.
+
 maintenance test-remote-args ARGS
   Test splitting and joining of inferior arguments ARGS as they would
   be split and joined when being passed to a remote target.
