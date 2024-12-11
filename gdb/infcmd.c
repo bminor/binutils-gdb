@@ -1998,12 +1998,16 @@ info_program_command (const char *args, int from_tty)
 		styled_string (command_style.style (), "info registers"));
 }
 
+
+/* A helper function that prints some info from ENV.  VAR is either
+   NULL, or the name of the variable to display.  */
+
 static void
-environment_info (const char *var, int from_tty)
+display_environment (const gdb_environ &env, const char *var)
 {
   if (var)
     {
-      const char *val = current_inferior ()->environment.get (var);
+      const char *val = env.get (var);
 
       if (val)
 	{
@@ -2021,7 +2025,7 @@ environment_info (const char *var, int from_tty)
     }
   else
     {
-      char **envp = current_inferior ()->environment.envp ();
+      char **envp = env.envp ();
 
       for (int idx = 0; envp[idx] != nullptr; ++idx)
 	{
@@ -2032,7 +2036,17 @@ environment_info (const char *var, int from_tty)
 }
 
 static void
-set_environment_command (const char *arg, int from_tty)
+environment_info (const char *var, int from_tty)
+{
+  display_environment (current_inferior ()->environment, var);
+}
+
+/* A helper to set an environment variable.  ARG is the string passed
+   to 'set environment', i.e., the variable and value to use.  ENV is
+   the environment in which the variable will be set.  */
+
+static void
+set_var_in_environment (gdb_environ &env, const char *arg)
 {
   const char *p, *val;
   int nullset = 0;
@@ -2087,24 +2101,40 @@ set_environment_command (const char *arg, int from_tty)
       gdb_printf (_("Setting environment variable "
 		    "\"%s\" to null value.\n"),
 		  var.c_str ());
-      current_inferior ()->environment.set (var.c_str (), "");
+      env.set (var.c_str (), "");
     }
   else
-    current_inferior ()->environment.set (var.c_str (), val);
+    env.set (var.c_str (), val);
 }
 
 static void
-unset_environment_command (const char *var, int from_tty)
+set_environment_command (const char *arg, int from_tty)
+{
+  set_var_in_environment (current_inferior ()->environment, arg);
+}
+
+/* A helper to unset an environment variable.  ENV is the environment
+   in which the variable will be unset.  VAR is the name of the
+   variable, or NULL meaning unset all variables.  */
+
+static void
+unset_var_in_environment (gdb_environ &env, const char *var, int from_tty)
 {
   if (var == 0)
     {
       /* If there is no argument, delete all environment variables.
 	 Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
-	current_inferior ()->environment.clear ();
+	env.clear ();
     }
   else
-    current_inferior ()->environment.unset (var);
+    env.unset (var);
+}
+
+static void
+unset_environment_command (const char *var, int from_tty)
+{
+  unset_var_in_environment (current_inferior ()->environment, var, from_tty);
 }
 
 /* Handle the execution path (PATH variable).  */
