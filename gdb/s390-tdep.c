@@ -4014,6 +4014,13 @@ ex:
 	/* 0xb330-0xb335 undefined */
 
 	case 0xb33a: /* MAYR - multiply and add unnormalized */
+	  /* float pair destination [RRD]; R1 may designate lower- or
+	     higher-numbered register of pair */
+	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[4] & 13)))
+	    return -1;
+	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[4] | 2)))
+	    return -1;
+	  break;
 	case 0xb33b: /* MYR - multiply unnormalized */
 	  /* float pair destination [RRD] */
 	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[4]))
@@ -6333,6 +6340,13 @@ ex:
 	/* 0xed36 undefined */
 
 	case 0xed3a: /* MAY - multiply and add unnormalized */
+	  /* float pair destination [RXF]; R1 may designate lower- or
+	     higher-numbered register of pair */
+	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[8] & 13)))
+	    return -1;
+	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + (inib[8] | 2)))
+	    return -1;
+	  break;
 	case 0xed3b: /* MY - multiply unnormalized */
 	  /* float pair destination [RXF] */
 	  if (record_full_arch_list_add_reg (regcache, S390_F0_REGNUM + inib[8]))
