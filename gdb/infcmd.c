@@ -2003,11 +2003,11 @@ info_program_command (const char *args, int from_tty)
    NULL, or the name of the variable to display.  */
 
 static void
-display_environment (const gdb_environ &env, const char *var)
+display_environment (const gdb_environ *env, const char *var)
 {
   if (var)
     {
-      const char *val = env.get (var);
+      const char *val = env->get (var);
 
       if (val)
 	{
@@ -2025,7 +2025,7 @@ display_environment (const gdb_environ &env, const char *var)
     }
   else
     {
-      char **envp = env.envp ();
+      char **envp = env->envp ();
 
       for (int idx = 0; envp[idx] != nullptr; ++idx)
 	{
@@ -2038,7 +2038,7 @@ display_environment (const gdb_environ &env, const char *var)
 static void
 environment_info (const char *var, int from_tty)
 {
-  display_environment (current_inferior ()->environment, var);
+  display_environment (&current_inferior ()->environment, var);
 }
 
 /* A helper to set an environment variable.  ARG is the string passed
@@ -2046,7 +2046,7 @@ environment_info (const char *var, int from_tty)
    the environment in which the variable will be set.  */
 
 static void
-set_var_in_environment (gdb_environ &env, const char *arg)
+set_var_in_environment (gdb_environ *env, const char *arg)
 {
   const char *p, *val;
   int nullset = 0;
@@ -2101,16 +2101,16 @@ set_var_in_environment (gdb_environ &env, const char *arg)
       gdb_printf (_("Setting environment variable "
 		    "\"%s\" to null value.\n"),
 		  var.c_str ());
-      env.set (var.c_str (), "");
+      env->set (var.c_str (), "");
     }
   else
-    env.set (var.c_str (), val);
+    env->set (var.c_str (), val);
 }
 
 static void
 set_environment_command (const char *arg, int from_tty)
 {
-  set_var_in_environment (current_inferior ()->environment, arg);
+  set_var_in_environment (&current_inferior ()->environment, arg);
 }
 
 /* A helper to unset an environment variable.  ENV is the environment
@@ -2118,23 +2118,23 @@ set_environment_command (const char *arg, int from_tty)
    variable, or NULL meaning unset all variables.  */
 
 static void
-unset_var_in_environment (gdb_environ &env, const char *var, int from_tty)
+unset_var_in_environment (gdb_environ *env, const char *var, int from_tty)
 {
   if (var == 0)
     {
       /* If there is no argument, delete all environment variables.
 	 Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
-	env.clear ();
+	env->clear ();
     }
   else
-    env.unset (var);
+    env->unset (var);
 }
 
 static void
 unset_environment_command (const char *var, int from_tty)
 {
-  unset_var_in_environment (current_inferior ()->environment, var, from_tty);
+  unset_var_in_environment (&current_inferior ()->environment, var, from_tty);
 }
 
 /* Handle the execution path (PATH variable).  */
