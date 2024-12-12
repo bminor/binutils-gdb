@@ -73,3 +73,6 @@ stamp-*
 /gmp*
 /isl*
 /gettext*
+
+# Static compilation build files.
+/build-*/
