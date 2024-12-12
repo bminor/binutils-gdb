@@ -46,4 +46,12 @@ extern void elfmdebug_build_psymtabs (struct objfile *,
 				      const struct ecoff_debug_swap *,
 				      asection *);
 
+/* Read ECOFF debugging information from a BFD section.  This is
+   called from mipsread.c.  It parses the section into a
+   ecoff_debug_info struct, and then lets the rest of the file handle
+   it as normal.  */
+extern void mipsmdebug_build_psymtabs (struct objfile *,
+				       const struct ecoff_debug_swap *,
+				       struct ecoff_debug_info *);
+
 #endif /* GDB_MDEBUGREAD_H */

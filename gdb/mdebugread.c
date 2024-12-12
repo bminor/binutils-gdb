@@ -4792,6 +4792,27 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
   reader.install ();
 }
 
+/* see mdebugread.h.  */
+
+void
+mipsmdebug_build_psymtabs (struct objfile *objfile,
+			   const struct ecoff_debug_swap *swap,
+			   struct ecoff_debug_info *info)
+{
+  bfd *abfd = objfile->obfd.get ();
+
+  minimal_symbol_reader reader (objfile);
+
+  if (!(*swap->read_debug_info) (abfd, nullptr,
+				 info))
+    error (_("Error reading ECOFF debugging information: %s"),
+	   bfd_errmsg (bfd_get_error ()));
+
+  mdebug_build_psymtabs (reader, objfile, swap, info);
+
+  reader.install ();
+}
+
 void _initialize_mdebugread ();
 void
 _initialize_mdebugread ()
