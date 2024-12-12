@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test GDB's 'set print characters' setting works for Ada strings.
+# Test UTF-8 lazy strings in Ada.
 
 load_lib "ada.exp"
 load_lib gdb-python.exp
@@ -32,8 +32,8 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
 clean_restart ${testfile}
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/main.adb]
-if ![runto "main.adb:$bp_location" ] then {
-  return -1
+if {![runto "main.adb:$bp_location"]} {
+    return
 }
 
 gdb_test_no_output "python arg = gdb.parse_and_eval('arg.all')"
