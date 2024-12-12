@@ -34,8 +34,8 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
 
 clean_restart ${binfile}
 
-if ![runto_main] then {
-    fail "could not run to main"
+if {![runto_main]} {
+    return
 }
 
 gdb_breakpoint break_here_asm temporary

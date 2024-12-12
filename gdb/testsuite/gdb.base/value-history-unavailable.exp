@@ -21,9 +21,8 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 
-if ![runto_main] then {
-    perror "couldn't run to breakpoint"
-    continue
+if {![runto_main]} {
+    return
 }
 
 set target_char_mask [get_valueof "/u" "a.x\[0]" "255" "get target char mask"]
