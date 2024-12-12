@@ -2392,6 +2392,28 @@ extract_dm (uint64_t insn,
   return (value) ? 1 : 0;
 }
 
+static uint64_t
+insert_m2 (uint64_t insn,
+	  int64_t value,
+	  ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	  const char **errmsg)
+{
+  if (value != 0 && value != 1 && value != 2)
+    *errmsg = _("invalid M value");
+  return insn | ((value & 0x2) << (15)) | ((value & 0x1) << 11);
+}
+
+static int64_t
+extract_m2 (uint64_t insn,
+	   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	   int *invalid)
+{
+  int64_t value = ((insn >> 15) & 0x2) | ((insn >> 11) & 0x1);
+  if (value == 3)
+    *invalid = 1;
+  return value;
+}
+
 /* The VLESIMM field in an I16A form instruction.  This is split.  */
 
 static uint64_t
@@ -3887,8 +3909,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define DMEX DM + 1
   { 0x3, 8, insert_dm, extract_dm, 0 },
 
+  /* The 2-bit M field in an AES XX2/XX3 form instruction. This is split.  */
+#define AESM DMEX + 1
+  { 0x3, PPC_OPSHIFT_INV, insert_m2, extract_m2, 0 },
+
   /* The UIM field in an XX2 form instruction.  */
-#define UIM DMEX + 1
+#define UIM AESM + 1
   /* The 2-bit UIMM field in a VX form instruction.  */
 #define UIMM2 UIM
   /* The 2-bit L field in a darn instruction.  */
@@ -3943,6 +3969,8 @@ const struct powerpc_operand powerpc_operands[] =
 
 #define ms vs + 1
 #define yx ms
+  /* The P field in Galois Field XX3 form instruction.  */
+#define PGF1 yx
   { 0x1, 8, NULL, NULL, 0 },
 
 #define SVLcr ms + 1
@@ -4467,6 +4495,12 @@ const unsigned int num_powerpc_operands = ARRAY_SIZE (powerpc_operands);
 /* A XX2 form instruction with the VA bits specified.  */
 #define XX2VA(op, xop, vaop) (XX2(op,xop) | (((vaop) & 0x1f) << 16))
 
+/* An XX2 form instruction with the M bits specified.  */
+#define XX2M(op, xop, m)			\
+  (XX2 (op, xop)				\
+   | (((uint64_t)(m) & 0x2) << 15)		\
+   | (((uint64_t)(m) & 0x1) << 11))
+
 /* An XX3 form instruction.  */
 #define XX3(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0xff) << 3))
 
@@ -4475,6 +4509,18 @@ const unsigned int num_powerpc_operands = ARRAY_SIZE (powerpc_operands);
   (OP (op)					\
    | (((uint64_t)(rc) & 1) << 10)		\
    | ((((uint64_t)(xop)) & 0x7f) << 3))
+
+/* An XX3 form instruction with the M bits specified.  */
+#define XX3M(op, xop, m)			\
+  (XX3 (op, xop)				\
+   | (((uint64_t)(m) & 0x2) << 15)		\
+   | (((uint64_t)(m) & 0x1) << 11))
+
+/* A GF XX3 form instruction with the P bit specified.  */
+#define XX3GF(op, xop, xop1, p)			\
+  (XX3 (op, xop)				\
+   | (((uint64_t)(xop1) & 3) << 9)		\
+   | (((uint64_t)(p) & 1) << 8))
 
 /* An XX4 form instruction.  */
 #define XX4(op, xop) (OP (op) | ((((uint64_t)(xop)) & 0x3) << 4))
@@ -4564,6 +4610,17 @@ const unsigned int num_powerpc_operands = ARRAY_SIZE (powerpc_operands);
 #define XX3DMR_MASK (XX3ACC_MASK | (1 << 11))
 #define XX2DMR_MASK (XX2ACC_MASK | (0xf << 17))
 #define XX3GERX_MASK (XX3ACC_MASK | (1 << 16))
+
+/* The masks for XX2 AES instructions with m0, m1 bits.  */
+#define XX2AES_MASK (XX2 (0x3f, 0x1ff) | (0xf << 17) | 1)
+#define XX2AESM_MASK (XX2AES_MASK | (1 << 16) | (1 << 11))
+
+/* The masks for XX3 AES instructions with m0, m1 bits.  */
+#define XX3AES_MASK (XX3 (0x3f, 0xff) | 1)
+#define XX3AESM_MASK (XX3AES_MASK | (1 << 16) | (1 << 11))
+
+/* The masks for XX3 GF instructions with P bit.  */
+#define XX3GF_MASK (XX3 (0x3f, 0xff) & ~(1 << 8))
 
 /* The mask for an XX4 form instruction.  */
 #define XX4_MASK XX4 (0x3f, 0x3)
@@ -9389,6 +9446,16 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"xsnegdp",	XX2(60,377),	XX2_MASK,    PPCVSX,	PPCVLE,		{XT6, XB6}},
 {"xvmaxsp",	XX3(60,192),	XX3_MASK,    PPCVSX,	PPCVLE,		{XT6, XA6, XB6}},
 {"xvnmaddasp",	XX3(60,193),	XX3_MASK,    PPCVSX,	PPCVLE,		{XT6, XA6, XB6}},
+
+{"xxaes128encp",XX3M(60,194,0),XX3AESM_MASK,  PPCVSXF, PPCVLE|EXT,	{XTP, XA5p, XB5p}},
+{"xxaes192encp",XX3M(60,194,1),XX3AESM_MASK,  PPCVSXF, PPCVLE|EXT,	{XTP, XA5p, XB5p}},
+{"xxaes256encp",XX3M(60,194,2),XX3AESM_MASK,  PPCVSXF, PPCVLE|EXT,	{XTP, XA5p, XB5p}},
+{"xxaesencp",	XX3M(60,194,0),XX3AES_MASK,   PPCVSXF, PPCVLE,		{XTP, XA5p, XB5p, AESM}},
+{"xxaes128decp",XX3M(60,202,0),XX3AESM_MASK,  PPCVSXF, PPCVLE|EXT,	{XTP, XA5p, XB5p}},
+{"xxaes192decp",XX3M(60,202,1),XX3AESM_MASK,  PPCVSXF, PPCVLE|EXT,	{XTP, XA5p, XB5p}},
+{"xxaes256decp",XX3M(60,202,2),XX3AESM_MASK,  PPCVSXF, PPCVLE|EXT,	{XTP, XA5p, XB5p}},
+{"xxaesdecp",	XX3M(60,202,0),XX3AES_MASK,   PPCVSXF, PPCVLE,		{XTP, XA5p, XB5p, AESM}},
+
 {"xvcvspuxds",	XX2(60,392),	XX2_MASK,    PPCVSX,	PPCVLE,		{XT6, XB6}},
 {"xvcvdpsp",	XX2(60,393),	XX2_MASK,    PPCVSX,	PPCVLE,		{XT6, XB6}},
 {"xvminsp",	XX3(60,200),	XX3_MASK,    PPCVSX,	PPCVLE,		{XT6, XA6, XB6}},
@@ -9398,11 +9465,22 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"xvmovsp",	XX3(60,208),	XX3_MASK,    PPCVSX,	PPCVLE|EXT,	{XT6, XAB6}},
 {"xvcpsgnsp",	XX3(60,208),	XX3_MASK,    PPCVSX,	PPCVLE,		{XT6, XA6, XB6}},
 {"xvnmsubasp",	XX3(60,209),	XX3_MASK,    PPCVSX,	PPCVLE,		{XT6, XA6, XB6}},
+
+{"xxaes128genlkp",XX2M(60,420,0),XX2AESM_MASK, PPCVSXF, PPCVLE|EXT,	{XTP, XB5p}},
+{"xxaes192genlkp",XX2M(60,420,1),XX2AESM_MASK, PPCVSXF, PPCVLE|EXT,	{XTP, XB5p}},
+{"xxaes256genlkp",XX2M(60,420,2),XX2AESM_MASK, PPCVSXF, PPCVLE|EXT,	{XTP, XB5p}},
+{"xxaesgenlkp",   XX2M(60,420,0),XX2AES_MASK,  PPCVSXF, PPCVLE,		{XTP, XB5p, AESM}},
+
 {"xvcvuxdsp",	XX2(60,424),	XX2_MASK,    PPCVSX,	PPCVLE,		{XT6, XB6}},
 {"xvnabssp",	XX2(60,425),	XX2_MASK,    PPCVSX,	PPCVLE,		{XT6, XB6}},
 {"xvtstdcsp",	XX2(60,426),  XX2DCMXS_MASK, PPCVSX3,	PPCVLE,		{XT6, XB6, DCMXS}},
 {"xviexpsp",	XX3(60,216),	XX3_MASK,    PPCVSX3,	PPCVLE,		{XT6, XA6, XB6}},
 {"xvnmsubmsp",	XX3(60,217),	XX3_MASK,    PPCVSX,	PPCVLE,		{XT6, XA6, XB6}},
+
+{"xxgfmul128gcm",XX3GF(60,26,3,0),  XX3_MASK,	PPCVSXF, PPCVLE|EXT,	{XT6, XA6, XB6}},
+{"xxgfmul128xts",XX3GF(60,26,3,1),  XX3_MASK,	PPCVSXF, PPCVLE|EXT,	{XT6, XA6, XB6}},
+{"xxgfmul128",	 XX3GF(60,26,3,0),  XX3GF_MASK, PPCVSXF, PPCVLE,	{XT6, XA6, XB6, PGF1}},
+
 {"xvcvsxdsp",	XX2(60,440),	XX2_MASK,    PPCVSX,	PPCVLE,		{XT6, XB6}},
 {"xvnegsp",	XX2(60,441),	XX2_MASK,    PPCVSX,	PPCVLE,		{XT6, XB6}},
 {"xvmaxdp",	XX3(60,224),	XX3_MASK,    PPCVSX,	PPCVLE,		{XT6, XA6, XB6}},
