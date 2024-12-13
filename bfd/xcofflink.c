@@ -439,12 +439,11 @@ _bfd_xcoff_canonicalize_dynamic_reloc (bfd *abfd,
 
       bfd_xcoff_swap_ldrel_in (abfd, elrel, &ldrel);
 
-      if (ldrel.l_symndx == -1u)
-	relbuf->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-      else if (ldrel.l_symndx < 3)
+      if (ldrel.l_symndx + 2 < 5)
 	{
-	  static const char stdsec[3][8] = { ".text", ".data", ".bss" };
-	  const char *name = stdsec[ldrel.l_symndx];
+	  static const char stdsec[5][8]
+	    = { ".tbss", ".tdata", ".text", ".data", ".bss" };
+	  const char *name = stdsec[ldrel.l_symndx + 2];
 	  asection *sec = bfd_get_section_by_name (abfd, name);
 	  if (sec == NULL)
 	    {
@@ -5090,7 +5089,7 @@ xcoff_create_ldrel (bfd *output_bfd, struct xcoff_final_link_info *flinfo,
       ldrel.l_symndx = h->ldindx;
     }
   else
-    ldrel.l_symndx = -1;
+    abort ();
 
   ldrel.l_rtype = (irel->r_size << 8) | irel->r_type;
   ldrel.l_rsecnm = output_section->target_index;
