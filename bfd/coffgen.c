@@ -3295,8 +3295,7 @@ _bfd_coff_free_cached_info (bfd *abfd)
 	 Do not clear the keep_syms and keep_strings flags.
 	 These may have been set by pe_ILF_build_a_bfd() indicating
 	 that the syms and strings pointers are not to be freed.  */
-      if (!_bfd_coff_free_symbols (abfd))
-	return false;
+      _bfd_coff_free_symbols (abfd);
     }
 
   return _bfd_generic_bfd_free_cached_info (abfd);
