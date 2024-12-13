@@ -1721,7 +1721,8 @@ resolve_symbol_value (symbolS *symp)
 
 	  switch (symp->x->value.X_op)
 	    {
-	    case O_multiply:		left *= right; break;
+	    /* See expr() for reasons of the use of valueT casts here.  */
+	    case O_multiply:		left *= (valueT) right; break;
 	    case O_divide:		left /= right; break;
 	    case O_modulus:		left %= right; break;
 	    case O_left_shift:
