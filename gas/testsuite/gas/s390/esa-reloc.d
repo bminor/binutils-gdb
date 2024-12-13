@@ -1,4 +1,4 @@
-#name: s390 reloc
+#name: s390 reloc (esa reloc)
 #objdump: -dr
 
 .*: +file format .*
