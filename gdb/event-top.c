@@ -1480,6 +1480,7 @@ async_do_nothing (gdb_client_data arg)
 static void
 handle_sighup (int sig)
 {
+  scoped_restore restore_errno = make_scoped_restore (&errno);
   mark_async_signal_handler (sighup_token);
   signal (sig, handle_sighup);
 }
