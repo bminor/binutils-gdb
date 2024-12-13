@@ -131,7 +131,10 @@ def _execute_unwinders(pending_frame):
 
 
 # Convenience variable to GDB's python directory
-PYTHONDIR = os.path.dirname(os.path.dirname(__file__))
+try:
+    PYTHONDIR = os.path.dirname(os.path.dirname(__file__))
+except NameError:
+    PYTHONDIR = "FROZEN"
 
 # Auto-load all functions/commands.
 
@@ -146,7 +149,13 @@ packages = ["function", "command", "printer"]
 
 def _auto_load_packages():
     for package in packages:
-        location = os.path.join(os.path.dirname(__file__), package)
+        # __file__ isn't set when compiling the module remotely with static python. If Python is static, we
+        # can just skip this method because no Python packages that can be loaded exist. Everything is
+        # supposed to be frozen into the python lib/binary.
+        try:
+            location = os.path.join(os.path.dirname(__file__), package)
+        except NameError:
+            return
         if os.path.exists(location):
             py_files = filter(
                 lambda x: x.endswith(".py") and x != "__init__.py", os.listdir(location)
