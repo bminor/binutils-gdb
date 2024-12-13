@@ -4,7 +4,7 @@
 
 .+:     file .+
 
-Contents of the .eh_frame section:
+Contents of the \.eh_frame section:
 
 0+ 0+10 0+ CIE
   Version:               1
