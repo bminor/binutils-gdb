@@ -13853,8 +13853,7 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
 		{
 		  /* FIXME: This and the error case below mean that we
 		     have a symbol on relocs that is not elf_symbol_type.  */
-		  internal_reloc->sym_ptr_ptr =
-		    bfd_abs_section_ptr->symbol_ptr_ptr;
+		  internal_reloc->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 		}
 	      else if (r_sym (rela.r_info) > symcount)
 		{
@@ -13863,8 +13862,7 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
 		    (_("%pB(%pA): relocation %zu has invalid symbol index %lu"),
 		     abfd, sec, i, (long) r_sym (rela.r_info));
 		  bfd_set_error (bfd_error_bad_value);
-		  internal_reloc->sym_ptr_ptr =
-		    bfd_abs_section_ptr->symbol_ptr_ptr;
+		  internal_reloc->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 		  result = false;
 		}
 	      else

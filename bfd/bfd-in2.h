@@ -811,7 +811,6 @@ typedef struct bfd_section
 
   /* A symbol which points at this section only.  */
   struct bfd_symbol *symbol;
-  struct bfd_symbol **symbol_ptr_ptr;
 
   /* Early in the link process, map_head and map_tail are used to build
      a list of input sections attached to an output section.  Later,
@@ -1002,8 +1001,8 @@ discarded_section (const asection *sec)
   /* target_index, used_by_bfd, constructor_chain, owner,           */ \
      0,            NULL,        NULL,              NULL,               \
 								       \
-  /* symbol,                    symbol_ptr_ptr,                     */ \
-     (struct bfd_symbol *) SYM, &SEC.symbol,                           \
+  /* symbol,                                                        */ \
+     (struct bfd_symbol *) SYM,                                        \
 								       \
   /* map_head, map_tail, already_assigned, type                     */ \
      { NULL }, { NULL }, NULL,             0                           \

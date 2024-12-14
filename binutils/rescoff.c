@@ -481,7 +481,7 @@ write_coff_file (const char *filename, const char *target,
   if (sec == NULL)
     bfd_fatal ("bfd_make_section");
 
-  if (! bfd_set_symtab (abfd, sec->symbol_ptr_ptr, 1))
+  if (! bfd_set_symtab (abfd, &sec->symbol, 1))
     bfd_fatal ("bfd_set_symtab");
 
   /* Requiring this is probably a bug in BFD.  */
@@ -498,7 +498,7 @@ write_coff_file (const char *filename, const char *target,
   set_windres_bfd (&wrbfd, abfd, sec, WR_KIND_BFD);
 
   cwi.wrbfd = &wrbfd;
-  cwi.sympp = sec->symbol_ptr_ptr;
+  cwi.sympp = &sec->symbol;
   cwi.dirsize = 0;
   cwi.dirstrsize = 0;
   cwi.dataentsize = 0;

@@ -1489,9 +1489,9 @@ bfd_mach_o_canonicalize_non_scattered_reloc (bfd *abfd,
     {
       /* PR 17512: file: 8396-1185-0.004.  */
       if (num >= (unsigned) bfd_mach_o_count_symbols (abfd))
-	sym = bfd_und_section_ptr->symbol_ptr_ptr;
+	sym = &bfd_und_section_ptr->symbol;
       else if (syms == NULL)
-	sym = bfd_und_section_ptr->symbol_ptr_ptr;
+	sym = &bfd_und_section_ptr->symbol;
       else
 	/* An external symbol number.  */
 	sym = syms + num;
@@ -1503,7 +1503,7 @@ bfd_mach_o_canonicalize_non_scattered_reloc (bfd *abfd,
 	 This value is almost certainly not a valid section number, hence
 	 this specific case to avoid an assertion failure.
 	 Target specific swap_reloc_in routine should adjust that.  */
-      sym = bfd_abs_section_ptr->symbol_ptr_ptr;
+      sym = &bfd_abs_section_ptr->symbol;
     }
   else
     {
@@ -1516,7 +1516,7 @@ malformed mach-o reloc: section index is greater than the number of sections"));
 	}
 
       /* A section number.  */
-      sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
+      sym = &mdata->sections[num - 1]->bfdsection->symbol;
       /* For a symbol defined in section S, the addend (stored in the
 	 binary) contains the address of the section.  To comply with
 	 bfd convention, subtract the section address.
@@ -1554,7 +1554,7 @@ bfd_mach_o_pre_canonicalize_one_reloc (bfd *abfd,
   bfd_vma addr;
 
   addr = bfd_get_32 (abfd, raw->r_address);
-  res->sym_ptr_ptr = bfd_und_section_ptr->symbol_ptr_ptr;
+  res->sym_ptr_ptr = &bfd_und_section_ptr->symbol;
   res->addend = 0;
 
   if (addr & BFD_MACH_O_SR_SCATTERED)
@@ -1578,7 +1578,7 @@ bfd_mach_o_pre_canonicalize_one_reloc (bfd *abfd,
 	  bfd_mach_o_section *sect = mdata->sections[j];
 	  if (symnum >= sect->addr && symnum < sect->addr + sect->size)
 	    {
-	      res->sym_ptr_ptr = sect->bfdsection->symbol_ptr_ptr;
+	      res->sym_ptr_ptr = &sect->bfdsection->symbol;
 	      res->addend = symnum - sect->addr;
 	      break;
 	    }

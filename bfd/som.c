@@ -4914,7 +4914,7 @@ som_set_reloc_info (unsigned char *fixup,
 	  rptr->address = offset;
 	  rptr->howto = &som_hppa_howto_table[op];
 	  rptr->addend = 0;
-	  rptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+	  rptr->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 	}
 
       /* Set default input length to 0.  Get the opcode class index

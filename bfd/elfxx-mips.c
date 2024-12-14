@@ -593,8 +593,6 @@ struct mips_elf_obj_tdata
 
   /* The Irix 5 support uses two virtual sections, which represent
      text/data symbols defined in dynamic objects.  */
-  asymbol *elf_data_symbol;
-  asymbol *elf_text_symbol;
   asection *elf_data_section;
   asection *elf_text_section;
 
@@ -7913,11 +7911,8 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	  /* Initialize the section.  */
 
 	  mips_elf_tdata (abfd)->elf_text_section = elf_text_section;
-	  mips_elf_tdata (abfd)->elf_text_symbol = elf_text_symbol;
 
 	  elf_text_section->symbol = elf_text_symbol;
-	  elf_text_section->symbol_ptr_ptr = &mips_elf_tdata (abfd)->elf_text_symbol;
-
 	  elf_text_section->name = ".text";
 	  elf_text_section->flags = SEC_NO_FLAGS;
 	  elf_text_section->output_section = NULL;
@@ -7954,11 +7949,8 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	  /* Initialize the section.  */
 
 	  mips_elf_tdata (abfd)->elf_data_section = elf_data_section;
-	  mips_elf_tdata (abfd)->elf_data_symbol = elf_data_symbol;
 
 	  elf_data_section->symbol = elf_data_symbol;
-	  elf_data_section->symbol_ptr_ptr = &mips_elf_tdata (abfd)->elf_data_symbol;
-
 	  elf_data_section->name = ".data";
 	  elf_data_section->flags = SEC_NO_FLAGS;
 	  elf_data_section->output_section = NULL;
@@ -13455,7 +13447,7 @@ _bfd_elf_mips_get_relocated_section_contents
 		     * bfd_octets_per_byte (input_bfd, input_section));
 	      _bfd_clear_contents ((*parent)->howto, input_bfd,
 				   input_section, data, off);
-	      (*parent)->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+	      (*parent)->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 	      (*parent)->addend = 0;
 	      (*parent)->howto = &none_howto;
 	      r = bfd_reloc_ok;

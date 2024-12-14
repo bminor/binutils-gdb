@@ -1666,7 +1666,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 	keep = false;
       else if ((flags & BSF_KEEP) != 0		/* Used in relocation.  */
 	       || ((flags & BSF_SECTION_SYM) != 0
-		   && ((*bfd_asymbol_section (sym)->symbol_ptr_ptr)->flags
+		   && (bfd_asymbol_section (sym)->symbol->flags
 		       & BSF_KEEP) != 0))
 	{
 	  keep = true;

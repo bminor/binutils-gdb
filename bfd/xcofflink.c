@@ -451,7 +451,7 @@ _bfd_xcoff_canonicalize_dynamic_reloc (bfd *abfd,
 	      return -1;
 	    }
 
-	  relbuf->sym_ptr_ptr = sec->symbol_ptr_ptr;
+	  relbuf->sym_ptr_ptr = &sec->symbol;
 	}
       else if (ldrel.l_symndx - 3 < ldhdr.l_nsyms)
 	relbuf->sym_ptr_ptr = syms + (ldrel.l_symndx - 3);
@@ -461,7 +461,7 @@ _bfd_xcoff_canonicalize_dynamic_reloc (bfd *abfd,
 	    /* xgettext:c-format */
 	    (_("%pB: warning: illegal symbol index %lu in relocs"),
 	     abfd, (unsigned long) ldrel.l_symndx);
-	  relbuf->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+	  relbuf->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 	}
 
       relbuf->address = ldrel.l_vaddr;

@@ -2220,7 +2220,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	  if (asec == absolute_section)
 	    {
 	      reloc->addend += S_GET_VALUE (fixp->fx_addsy);
-	      reloc->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+	      reloc->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 	    }
 	  else
 	    {
@@ -2258,8 +2258,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	      break;
 
 	    default:
-	      reloc->sym_ptr_ptr
-		= (asymbol **) bfd_abs_section_ptr->symbol_ptr_ptr;
+	      reloc->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 	      return relocs;
 	    }
 

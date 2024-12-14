@@ -5586,8 +5586,7 @@ alpha_vms_slurp_relocs (bfd *abfd)
 	      {
 		if (PRIV (sections) == NULL || cur_psidx >= (int) PRIV (section_count))
 		  goto fail;
-		reloc->sym_ptr_ptr =
-		  PRIV (sections)[cur_psidx]->symbol_ptr_ptr;
+		reloc->sym_ptr_ptr = &PRIV (sections)[cur_psidx]->symbol;
 	      }
 	    else
 	      reloc->sym_ptr_ptr = NULL;

@@ -1685,7 +1685,7 @@ ecoff_slurp_reloc_table (bfd *abfd,
       (*backend->swap_reloc_in) (abfd,
 				 external_relocs + i * external_reloc_size,
 				 &intern);
-      rptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+      rptr->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
       rptr->addend = 0;
 
       if (intern.r_extern)
@@ -1729,7 +1729,7 @@ ecoff_slurp_reloc_table (bfd *abfd,
 	      sec = bfd_get_section_by_name (abfd, sec_name);
 	      if (sec != NULL)
 		{
-		  rptr->sym_ptr_ptr = sec->symbol_ptr_ptr;
+		  rptr->sym_ptr_ptr = &sec->symbol;
 		  rptr->addend = - bfd_section_vma (sec);
 		}
 	    }
@@ -3963,7 +3963,7 @@ ecoff_reloc_link_order (bfd *output_bfd,
   if (type == bfd_section_reloc_link_order)
     {
       section = link_order->u.reloc.p->u.section;
-      rel.sym_ptr_ptr = section->symbol_ptr_ptr;
+      rel.sym_ptr_ptr = &section->symbol;
     }
   else
     {

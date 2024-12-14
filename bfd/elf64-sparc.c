@@ -123,7 +123,7 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	relent->address = rela.r_offset - asect->vma;
 
       if (ELF64_R_SYM (rela.r_info) == STN_UNDEF)
-	relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+	relent->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
       else if (/* PR 17512: file: 996185f8.  */
 	       ELF64_R_SYM (rela.r_info) > (dynamic
 					    ? bfd_get_dynamic_symcount (abfd)
@@ -134,7 +134,7 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	    (_("%pB(%pA): relocation %d has invalid symbol index %ld"),
 	     abfd, asect, i, (long) ELF64_R_SYM (rela.r_info));
 	  bfd_set_error (bfd_error_bad_value);
-	  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+	  relent->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 	}
       else
 	{
@@ -147,7 +147,7 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	  if ((s->flags & BSF_SECTION_SYM) == 0)
 	    relent->sym_ptr_ptr = ps;
 	  else
-	    relent->sym_ptr_ptr = s->section->symbol_ptr_ptr;
+	    relent->sym_ptr_ptr = &s->section->symbol;
 	}
 
       relent->addend = rela.r_addend;
@@ -158,7 +158,7 @@ elf64_sparc_slurp_one_reloc_table (bfd *abfd, asection *asect,
 	  relent->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, R_SPARC_LO10);
 	  relent[1].address = relent->address;
 	  relent++;
-	  relent->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+	  relent->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 	  relent->addend = ELF64_R_TYPE_DATA (rela.r_info);
 	  relent->howto = _bfd_sparc_elf_info_to_howto_ptr (abfd, R_SPARC_13);
 	}
