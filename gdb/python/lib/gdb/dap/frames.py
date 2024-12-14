@@ -20,6 +20,7 @@ from gdb.frames import frame_iterator
 
 from .startup import in_gdb_thread
 from .state import set_thread
+from typing import Dict
 
 # A list of all the frames we've reported.  A frame's index in the
 # list is its ID.  We don't use a hash here because frames are not
@@ -31,7 +32,7 @@ _all_frames = []
 _iter_map = {}
 
 # Map from a global frame ID to a thread ID.
-thread_ids: dict[int, int] = {}
+thread_ids: Dict[int, int] = {}
 
 
 # Clear all the frame IDs.
