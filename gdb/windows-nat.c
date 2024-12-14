@@ -53,6 +53,7 @@
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbthread.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-style.h"
 #include <unistd.h>
 #include "exec.h"
 #include "solist.h"
@@ -3190,7 +3191,7 @@ Show whether to display kernel exceptions in child process."), NULL,
 	 that we're missing some functionality.  */
       warning(_("\
 cannot automatically find executable file or library to read symbols.\n\
-Use \"%ps\" or \"%ps\" command to load executable/libraries directly.")
+Use \"%ps\" or \"%ps\" command to load executable/libraries directly."),
 	      styled_string (command_style.style (), "file"),
 	      styled_string (command_style.style (), "dll"));
     }
