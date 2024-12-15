@@ -1176,34 +1176,8 @@ static void
 perform_an_assembly_pass (int argc, char ** argv)
 {
   int saw_a_file = 0;
-#ifndef OBJ_MACH_O
-  flagword applicable;
-#endif
 
   need_pass_2 = 0;
-
-#ifndef OBJ_MACH_O
-  /* Create the standard sections, and those the assembler uses
-     internally.  */
-  text_section = subseg_new (TEXT_SECTION_NAME, 0);
-  data_section = subseg_new (DATA_SECTION_NAME, 0);
-  bss_section = subseg_new (BSS_SECTION_NAME, 0);
-  /* @@ FIXME -- we're setting the RELOC flag so that sections are assumed
-     to have relocs, otherwise we don't find out in time.  */
-  applicable = bfd_applicable_section_flags (stdoutput);
-  bfd_set_section_flags (text_section,
-			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-				       | SEC_CODE | SEC_READONLY));
-  bfd_set_section_flags (data_section,
-			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
-				       | SEC_DATA));
-  bfd_set_section_flags (bss_section, applicable & SEC_ALLOC);
-  seg_info (bss_section)->bss = 1;
-#endif
-  subseg_new (BFD_ABS_SECTION_NAME, 0);
-  subseg_new (BFD_UND_SECTION_NAME, 0);
-  reg_section = subseg_new ("*GAS `reg' section*", 0);
-  expr_section = subseg_new ("*GAS `expr' section*", 0);
 
 #ifndef OBJ_MACH_O
   subseg_set (text_section, 0);
@@ -1292,6 +1266,17 @@ gas_early_init (int *argcp, char ***argvp)
 #endif
 }
 
+/* Tack on format specific section data and create a proper section
+   symbol for one of the standard bfd sections.  */
+
+static void
+bfd_std_section_init (const char *name)
+{
+  asection *sec = bfd_make_section_old_way (stdoutput, name);
+  gas_assert (BFD_SEND (stdoutput, _new_section_hook, (stdoutput, sec)));
+  subseg_new (name, 0);
+}
+
 /* The bulk of gas initialisation.  This is after args are parsed.  */
 
 static void
@@ -1353,6 +1338,29 @@ gas_init (void)
       free (defsyms);
       defsyms = next;
     }
+
+#ifndef OBJ_MACH_O
+  /* Create the standard sections, and those the assembler uses
+     internally.  */
+  text_section = subseg_new (TEXT_SECTION_NAME, 0);
+  data_section = subseg_new (DATA_SECTION_NAME, 0);
+  bss_section = subseg_new (BSS_SECTION_NAME, 0);
+  /* @@ FIXME -- we're setting the RELOC flag so that sections are assumed
+     to have relocs, otherwise we don't find out in time.  */
+  flagword applicable = bfd_applicable_section_flags (stdoutput);
+  bfd_set_section_flags (text_section,
+			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+				       | SEC_CODE | SEC_READONLY));
+  bfd_set_section_flags (data_section,
+			 applicable & (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+				       | SEC_DATA));
+  bfd_set_section_flags (bss_section, applicable & SEC_ALLOC);
+  seg_info (bss_section)->bss = 1;
+#endif
+  bfd_std_section_init (BFD_ABS_SECTION_NAME);
+  bfd_std_section_init (BFD_UND_SECTION_NAME);
+  reg_section = subseg_new ("*GAS `reg' section*", 0);
+  expr_section = subseg_new ("*GAS `expr' section*", 0);
 }
 
 int

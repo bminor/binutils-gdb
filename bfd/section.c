@@ -1145,11 +1145,6 @@ bfd_make_section_old_way (bfd *abfd, const char *name)
       return bfd_section_init (abfd, newsect);
     }
 
-  /* Call new_section_hook when "creating" the standard abs, com, und
-     and ind sections to tack on format specific section data.
-     Also, create a proper section symbol.  */
-  if (! BFD_SEND (abfd, _new_section_hook, (abfd, newsect)))
-    return NULL;
   return newsect;
 }
 
