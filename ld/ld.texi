@@ -8207,10 +8207,10 @@ property.
 By default, if the option is omitted and @samp{-z force-bti} is provided,
 warnings are emitted.
 @itemize
-@item@samp{none} disables any warning messages.
-@item@samp{warning} (the default value) emits warning messages when input objects
+@item @samp{none} disables any warning messages.
+@item @samp{warning} (the default value) emits warning messages when input objects
 composing the link unit are missing BTI markings.
-@item@samp{error} turns the warning messages into errors.
+@item @samp{error} turns the warning messages into errors.
 @end itemize
 If issues are found, a maximum of 20 messages will be emitted, and then a summary
 with the total number of issues will be displayed at the end.
@@ -8225,11 +8225,11 @@ The @samp{-z gcs} option controls the verification of Guarded Control Stack (GCS
 markings on input objects and marks the output with GCS if all conditions are
 validated.
 @itemize
-@item@samp{implicit} (default if @samp{-z gcs} is omitted) enables GCS marking
+@item @samp{implicit} (default if @samp{-z gcs} is omitted) enables GCS marking
 on the output if, and only if, all input objects composing the link unit are
 marked with GCS.
-@item@samp{always} forces the marking of the output with GCS.
-@item@samp{never} ignores any GCS marking on the input objects, and does not
+@item @samp{always} forces the marking of the output with GCS.
+@item @samp{never} ignores any GCS marking on the input objects, and does not
 mark the output with GCS.
 @end itemize
 
@@ -8240,11 +8240,11 @@ GCS markings on inputs, i.e. the GNU_PROPERTY_AARCH64_FEATURE_1_GCS property.
 By default, if the option is omitted and @samp{-z gcs} is provided, warnings are
 emitted.
 @itemize
-@item@samp{none} disables any warning messages.
-@item@samp{warning} (the default value) emits warning messages when input objects
+@item @samp{none} disables any warning messages.
+@item @samp{warning} (the default value) emits warning messages when input objects
 composing the link unit are missing GCS markings, or dynamic objects containing
 external symbols used in the link unit.
-@item@samp{error} turns the warning messages into errors.
+@item @samp{error} turns the warning messages into errors.
 @end itemize
 If issues are found, a maximum of 20 messages will be emitted, and then a summary
 with the total number of issues will be displayed at the end.
