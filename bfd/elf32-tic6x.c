@@ -2083,18 +2083,12 @@ static bool
 elf32_tic6x_new_section_hook (bfd *abfd, asection *sec)
 {
   bool ret;
+  _tic6x_elf_section_data *sdata;
 
-  /* Allocate target specific section data.  */
-  if (!sec->used_by_bfd)
-    {
-      _tic6x_elf_section_data *sdata;
-      size_t amt = sizeof (*sdata);
-
-      sdata = (_tic6x_elf_section_data *) bfd_zalloc (abfd, amt);
-      if (sdata == NULL)
-	return false;
-      sec->used_by_bfd = sdata;
-    }
+  sdata = bfd_zalloc (abfd, sizeof (*sdata));
+  if (sdata == NULL)
+    return false;
+  sec->used_by_bfd = sdata;
 
   ret = _bfd_elf_new_section_hook (abfd, sec);
   sec->use_rela_p = elf32_tic6x_tdata (abfd)->use_rela_p;

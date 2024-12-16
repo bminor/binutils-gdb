@@ -247,15 +247,12 @@ spu_elf_rel9 (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 static bool
 spu_elf_new_section_hook (bfd *abfd, asection *sec)
 {
-  if (!sec->used_by_bfd)
-    {
-      struct _spu_elf_section_data *sdata;
+  struct _spu_elf_section_data *sdata;
 
-      sdata = bfd_zalloc (abfd, sizeof (*sdata));
-      if (sdata == NULL)
-	return false;
-      sec->used_by_bfd = sdata;
-    }
+  sdata = bfd_zalloc (abfd, sizeof (*sdata));
+  if (sdata == NULL)
+    return false;
+  sec->used_by_bfd = sdata;
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }

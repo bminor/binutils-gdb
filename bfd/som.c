@@ -5328,14 +5328,12 @@ extern const bfd_target hppa_som_vec;
 static bool
 som_new_section_hook (bfd *abfd, asection *newsect)
 {
-  if (!newsect->used_by_bfd)
-    {
-      size_t amt = sizeof (struct som_section_data_struct);
+  size_t amt = sizeof (struct som_section_data_struct);
 
-      newsect->used_by_bfd = bfd_zalloc (abfd, amt);
-      if (!newsect->used_by_bfd)
-	return false;
-    }
+  newsect->used_by_bfd = bfd_zalloc (abfd, amt);
+  if (!newsect->used_by_bfd)
+    return false;
+
   newsect->alignment_power = 3;
 
   /* We allow more than three sections internally.  */

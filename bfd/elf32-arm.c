@@ -18535,16 +18535,10 @@ elf32_arm_filter_implib_symbols (bfd *abfd ATTRIBUTE_UNUSED,
 static bool
 elf32_arm_new_section_hook (bfd *abfd, asection *sec)
 {
-  if (!sec->used_by_bfd)
-    {
-      _arm_elf_section_data *sdata;
-      size_t amt = sizeof (*sdata);
-
-      sdata = (_arm_elf_section_data *) bfd_zalloc (abfd, amt);
-      if (sdata == NULL)
-	return false;
-      sec->used_by_bfd = sdata;
-    }
+  _arm_elf_section_data *sdata = bfd_zalloc (abfd, sizeof (*sdata));
+  if (sdata == NULL)
+    return false;
+  sec->used_by_bfd = sdata;
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }

@@ -742,16 +742,12 @@ struct _microblaze_elf_section_data
 static bool
 microblaze_elf_new_section_hook (bfd *abfd, asection *sec)
 {
-  if (!sec->used_by_bfd)
-    {
-      struct _microblaze_elf_section_data *sdata;
-      size_t amt = sizeof (*sdata);
+  struct _microblaze_elf_section_data *sdata;
 
-      sdata = bfd_zalloc (abfd, amt);
-      if (sdata == NULL)
-	return false;
-      sec->used_by_bfd = sdata;
-    }
+  sdata = bfd_zalloc (abfd, sizeof (*sdata));
+  if (sdata == NULL)
+    return false;
+  sec->used_by_bfd = sdata;
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }

@@ -4056,9 +4056,8 @@ static bool
 s3_elf32_score_new_section_hook (bfd *abfd, asection *sec)
 {
   struct _score_elf_section_data *sdata;
-  size_t amt = sizeof (*sdata);
 
-  sdata = bfd_zalloc (abfd, amt);
+  sdata = bfd_zalloc (abfd, sizeof (*sdata));
   if (sdata == NULL)
     return false;
   sec->used_by_bfd = sdata;

@@ -3520,40 +3520,31 @@ bfd_mach_o_read_header (bfd *abfd, file_ptr hdr_off, bfd_mach_o_header *header)
 bool
 bfd_mach_o_new_section_hook (bfd *abfd, asection *sec)
 {
-  bfd_mach_o_section *s;
-  unsigned bfdalign = bfd_section_alignment (sec);
-
-  s = bfd_mach_o_get_mach_o_section (sec);
+  bfd_mach_o_section *s = bfd_zalloc (abfd, sizeof (*s));
   if (s == NULL)
+    return false;
+  sec->used_by_bfd = s;
+  s->bfdsection = sec;
+
+  /* Create the Darwin seg/sect name pair from the bfd name.
+     If this is a canonical name for which a specific paiting exists
+     there will also be defined flags, type, attribute and alignment
+     values.  */
+  const mach_o_section_name_xlat *xlat
+    = bfd_mach_o_convert_section_name_to_mach_o (abfd, sec, s);
+  if (xlat != NULL)
     {
-      flagword bfd_flags;
-      static const mach_o_section_name_xlat * xlat;
-
-      s = (bfd_mach_o_section *) bfd_zalloc (abfd, sizeof (*s));
-      if (s == NULL)
-	return false;
-      sec->used_by_bfd = s;
-      s->bfdsection = sec;
-
-      /* Create the Darwin seg/sect name pair from the bfd name.
-	 If this is a canonical name for which a specific paiting exists
-	 there will also be defined flags, type, attribute and alignment
-	 values.  */
-      xlat = bfd_mach_o_convert_section_name_to_mach_o (abfd, sec, s);
-      if (xlat != NULL)
-	{
-	  s->flags = xlat->macho_sectype | xlat->macho_secattr;
-	  s->align = xlat->sectalign > bfdalign ? xlat->sectalign
-						: bfdalign;
-	  bfd_set_section_alignment (sec, s->align);
-	  bfd_flags = bfd_section_flags (sec);
-	  if (bfd_flags == SEC_NO_FLAGS)
-	    bfd_set_section_flags (sec, xlat->bfd_flags);
-	}
-      else
-	/* Create default flags.  */
-	bfd_mach_o_set_section_flags_from_bfd (abfd, sec);
+      s->flags = xlat->macho_sectype | xlat->macho_secattr;
+      unsigned bfdalign = bfd_section_alignment (sec);
+      s->align = xlat->sectalign > bfdalign ? xlat->sectalign : bfdalign;
+      bfd_set_section_alignment (sec, s->align);
+      flagword bfd_flags = bfd_section_flags (sec);
+      if (bfd_flags == SEC_NO_FLAGS)
+	bfd_set_section_flags (sec, xlat->bfd_flags);
     }
+  else
+    /* Create default flags.  */
+    bfd_mach_o_set_section_flags_from_bfd (abfd, sec);
 
   return _bfd_generic_new_section_hook (abfd, sec);
 }

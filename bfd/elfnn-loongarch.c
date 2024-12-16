@@ -152,16 +152,12 @@ struct loongarch_elf_section_data
 static bool
 loongarch_elf_new_section_hook (bfd *abfd, asection *sec)
 {
-  if (!sec->used_by_bfd)
-    {
-      struct loongarch_elf_section_data *sdata;
-      size_t amt = sizeof (*sdata);
+  struct loongarch_elf_section_data *sdata;
 
-      sdata = bfd_zalloc (abfd, amt);
-      if (!sdata)
-	return false;
-      sec->used_by_bfd = sdata;
-    }
+  sdata = bfd_zalloc (abfd, sizeof (*sdata));
+  if (!sdata)
+    return false;
+  sec->used_by_bfd = sdata;
 
   return _bfd_elf_new_section_hook (abfd, sec);
 }
