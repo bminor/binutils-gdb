@@ -272,16 +272,19 @@ proc dap_check_request_and_response {name command {obj {}}} {
 # Start gdb, send a DAP initialization request and return the
 # response.  This approach lets the caller check the feature list, if
 # desired.  Returns the empty string on failure.  NAME is used as the
-# test name.
-proc dap_initialize {{name "initialize"}} {
+# test name.  EXTRA are other settings to pass via the "initialize"
+# request.
+proc dap_initialize {{name "initialize"} {extra ""}} {
     if {[dap_gdb_start]} {
 	return ""
     }
     return [dap_check_request_and_response $name initialize \
-		{o clientID [s "gdb testsuite"] \
-		     supportsVariableType [l true] \
-		     supportsVariablePaging [l true] \
-		     supportsMemoryReferences [l true]}]
+		[format {o clientID [s "gdb testsuite"] \
+			     supportsVariableType [l true] \
+			     supportsVariablePaging [l true] \
+			     supportsMemoryReferences [l true] \
+			     %s} \
+		     $extra]]
 }
 
 # Send a launch request specifying FILE as the program to use for the

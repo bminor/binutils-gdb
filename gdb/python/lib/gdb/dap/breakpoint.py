@@ -21,7 +21,7 @@ from typing import Optional, Sequence
 
 import gdb
 
-from .server import capability, request, send_event
+from .server import capability, export_line, import_line, request, send_event
 from .sources import make_source
 from .startup import (
     DAPException,
@@ -128,7 +128,7 @@ def _breakpoint_descriptor(bp):
             result.update(
                 {
                     "source": make_source(filename),
-                    "line": line,
+                    "line": export_line(line),
                 }
             )
 
@@ -281,7 +281,7 @@ def _rewrite_src_breakpoint(
 ):
     return {
         "source": source["path"],
-        "line": line,
+        "line": import_line(line),
         "condition": condition,
         "hitCondition": hitCondition,
         "logMessage": logMessage,
