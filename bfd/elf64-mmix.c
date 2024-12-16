@@ -2861,6 +2861,7 @@ mmix_elf_relax_section (bfd *abfd,
 
 #define ELF_ARCH		bfd_arch_mmix
 #define ELF_MACHINE_CODE	EM_MMIX
+#define ELF_TARGET_ID		MMIX_ELF_DATA
 
 /* According to mmix-doc page 36 (paragraph 45), this should be (1LL << 48LL).
    However, that's too much for something somewhere in the linker part of

@@ -4447,6 +4447,7 @@ _bfd_score_elf_common_definition (Elf_Internal_Sym *sym)
 #define ELF_ARCH			bfd_arch_score
 #define ELF_MACHINE_CODE		EM_SCORE
 #define ELF_MACHINE_ALT1		EM_SCORE_OLD
+#define ELF_TARGET_ID			SCORE_ELF_DATA
 #define ELF_MAXPAGESIZE			0x8000
 
 #define elf_info_to_howto		NULL
