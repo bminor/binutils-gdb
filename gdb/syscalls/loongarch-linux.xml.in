@@ -93,6 +93,8 @@
   <syscall name="splice" number="76"/>
   <syscall name="tee" number="77"/>
   <syscall name="readlinkat" number="78"/>
+  <syscall name="fstatat" number="79"/>
+  <syscall name="fstat" number="80"/>
   <syscall name="sync" number="81"/>
   <syscall name="fsync" number="82"/>
   <syscall name="fdatasync" number="83"/>
@@ -327,5 +329,10 @@
   <syscall name="lsm_get_self_attr" number="459"/>
   <syscall name="lsm_set_self_attr" number="460"/>
   <syscall name="lsm_list_modules" number="461"/>
-  <syscall name="syscalls" number="462"/>
+  <syscall name="mseal" number="462"/>
+  <syscall name="setxattrat" number="463"/>
+  <syscall name="getxattrat" number="464"/>
+  <syscall name="listxattrat" number="465"/>
+  <syscall name="removexattrat" number="466"/>
+  <syscall name="syscalls" number="467"/>
 </syscalls_info>
