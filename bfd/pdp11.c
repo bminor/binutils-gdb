@@ -3655,19 +3655,12 @@ aout_link_input_section (struct aout_final_link_info *flaginfo,
 				  (file_ptr) 0, input_size))
     return false;
 
-  /* Read in the relocs if we haven't already done it.  */
-  if (aout_section_data (input_section) != NULL
-      && aout_section_data (input_section)->relocs != NULL)
-    relocs = aout_section_data (input_section)->relocs;
-  else
+  relocs = flaginfo->relocs;
+  if (rel_size > 0)
     {
-      relocs = flaginfo->relocs;
-      if (rel_size > 0)
-	{
-	  if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0
-	      || bfd_read (relocs, rel_size, input_bfd) != rel_size)
-	    return false;
-	}
+      if (bfd_seek (input_bfd, input_section->rel_filepos, SEEK_SET) != 0
+	  || bfd_read (relocs, rel_size, input_bfd) != rel_size)
+	return false;
     }
 
   /* Relocate the section contents.  */
