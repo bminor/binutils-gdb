@@ -17,7 +17,7 @@ import gdb
 
 from .frames import frame_for_id
 from .globalvars import get_global_scope
-from .server import request
+from .server import export_line, request
 from .sources import make_source
 from .startup import in_gdb_thread
 from .varref import BaseReference
@@ -92,7 +92,7 @@ class _ScopeReference(BaseReference):
         result["namedVariables"] = self.child_count()
         frame = frame_for_id(self.frameId)
         if frame.line() is not None:
-            result["line"] = frame.line()
+            result["line"] = export_line(frame.line())
         filename = frame.filename()
         if filename is not None:
             result["source"] = make_source(filename)

@@ -15,7 +15,7 @@
 
 import gdb
 
-from .server import capability, request
+from .server import capability, export_line, request
 from .sources import make_source
 
 
@@ -53,7 +53,7 @@ class _BlockTracker:
         sal = gdb.find_pc_line(pc)
         if sal.symtab is not None:
             if sal.line != 0:
-                result["line"] = sal.line
+                result["line"] = export_line(sal.line)
             if sal.symtab.filename is not None:
                 # The spec says this can be omitted in some
                 # situations, but it's a little simpler to just always

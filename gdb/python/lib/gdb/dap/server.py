@@ -46,6 +46,10 @@ _commands = {}
 # The global server.
 _server = None
 
+# This is set by the initialize request and is used when rewriting
+# line numbers.
+_lines_start_at_1 = False
+
 
 class DeferredRequest:
     """If a DAP request function returns a deferred request, no
@@ -571,15 +575,15 @@ def capability(name, value=True):
     return wrap
 
 
-def client_bool_capability(name):
+def client_bool_capability(name, default=False):
     """Return the value of a boolean client capability.
 
     If the capability was not specified, or did not have boolean type,
-    False is returned."""
+    DEFAULT is returned.  DEFAULT defaults to False."""
     global _server
     if name in _server.config and isinstance(_server.config[name], bool):
         return _server.config[name]
-    return False
+    return default
 
 
 @request("initialize", on_dap_thread=True)
@@ -587,6 +591,8 @@ def initialize(**args):
     global _server, _capabilities
     _server.config = args
     _server.send_event_later("initialized")
+    global _lines_start_at_1
+    _lines_start_at_1 = client_bool_capability("linesStartAt1", True)
     return _capabilities.copy()
 
 
@@ -690,3 +696,27 @@ def send_gdb_with_response(fn):
     if isinstance(val, (Exception, KeyboardInterrupt)):
         raise val
     return val
+
+
+def export_line(line):
+    """Rewrite LINE according to client capability.
+    This applies the linesStartAt1 capability as needed,
+    when sending a line number from gdb to the client."""
+    global _lines_start_at_1
+    if not _lines_start_at_1:
+        # In gdb, lines start at 1, so we only need to change this if
+        # the client starts at 0.
+        line = line - 1
+    return line
+
+
+def import_line(line):
+    """Rewrite LINE according to client capability.
+    This applies the linesStartAt1 capability as needed,
+    when the client sends a line number to gdb."""
+    global _lines_start_at_1
+    if not _lines_start_at_1:
+        # In gdb, lines start at 1, so we only need to change this if
+        # the client starts at 0.
+        line = line + 1
+    return line
