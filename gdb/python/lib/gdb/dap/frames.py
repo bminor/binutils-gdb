@@ -14,13 +14,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import itertools
+from typing import Dict
 
 import gdb
 from gdb.frames import frame_iterator
 
 from .startup import in_gdb_thread
 from .state import set_thread
-from typing import Dict
 
 # A list of all the frames we've reported.  A frame's index in the
 # list is its ID.  We don't use a hash here because frames are not
