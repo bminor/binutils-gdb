@@ -108,7 +108,8 @@ extern bool loongarch_force_relocation_sub_same(struct fix *, asection *);
    FDE Code Alignment Factor (DWARF2_LINE_MIN_INSN_LENGTH) should be 1
    because DW_CFA_advance_loc need to be relocated in bytes
    when linker relaxation.  */
-#define DWARF2_CIE_DATA_ALIGNMENT     (-8)
+extern int loongarch_cie_data_alignment;
+#define DWARF2_CIE_DATA_ALIGNMENT loongarch_cie_data_alignment
 #define DWARF2_DEFAULT_RETURN_COLUMN  1	    /* FDE Return Address Register.  */
 
 #define tc_cfi_frame_initial_instructions	\

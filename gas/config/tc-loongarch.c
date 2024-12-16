@@ -118,6 +118,9 @@ static const char default_arch[] = DEFAULT_ARCH;
 
 static bool call36 = 0;
 
+/* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
+int loongarch_cie_data_alignment;
+
 /* The lowest 4-bit is the bytes of instructions.  */
 #define RELAX_BRANCH_16 0xc0000014
 #define RELAX_BRANCH_21 0xc0000024
@@ -515,6 +518,8 @@ md_begin ()
   /* FIXME: expressionS use 'offsetT' as constant,
    * we want this is 64-bit type.  */
   assert (8 <= sizeof (offsetT));
+
+  loongarch_cie_data_alignment = LARCH_opts.ase_lp64 ? (-8) : (-4);
 }
 
 /* Called just before the assembler exits.  */
