@@ -5076,7 +5076,7 @@ bfd_mach_o_flatten_sections (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   bfd_mach_o_load_command *cmd;
-  long csect = 0;
+  unsigned long csect;
   size_t amt;
 
   /* Count total number of sections.  */
@@ -5120,6 +5120,7 @@ bfd_mach_o_flatten_sections (bfd *abfd)
 	    mdata->sections[csect++] = sec;
 	}
     }
+  BFD_ASSERT (mdata->nsects == csect);
   return true;
 }
 
