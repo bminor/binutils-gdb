@@ -474,7 +474,7 @@ regcache_raw_read_unsigned (reg_buffer_common *reg_buf, int regnum,
   *val = 0;
   collect_register (regcache, regnum, val);
 
-  return REG_VALID;
+  return regcache->get_register_status (regnum);
 }
 
 #ifndef IN_PROCESS_AGENT
