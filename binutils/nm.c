@@ -676,7 +676,7 @@ print_symname (const char *form, struct extended_symbol_info *info,
 	       const char *name, bfd *abfd)
 {
   char *alloc = NULL;
-  char *atver = NULL;
+  char *atname = NULL;
 
   if (name == NULL)
     name = info->sinfo->name;
@@ -684,9 +684,19 @@ print_symname (const char *form, struct extended_symbol_info *info,
   if (!with_symbol_versions
       && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
-      atver = strchr (name, '@');
+      char *atver = strchr (name, '@');
+
       if (atver)
-	*atver = 0;
+	{
+	  /* PR 32467 - Corrupt binaries might include an @ character in a
+	     symbol name.  Since non-versioned symbol names can be in
+	     read-only memory (via memory mapping of a file's contents) we
+	     cannot just replace the @ character with a NUL.  Instead we
+	     create a truncated copy of the name.  */
+	  atname = xstrdup (name);
+	  atname [atver - name] = 0;
+	  name = atname;
+	}
     }
 
   if (do_demangle && *name)
@@ -697,9 +707,7 @@ print_symname (const char *form, struct extended_symbol_info *info,
     }
 
   if (unicode_display != unicode_default)
-    {
-      name = convert_utf8 (name);
-    }
+    name = convert_utf8 (name);
 
   if (info != NULL && info->elfinfo && with_symbol_versions)
     {
@@ -720,8 +728,8 @@ print_symname (const char *form, struct extended_symbol_info *info,
 	}
     }
   printf (form, name);
-  if (atver)
-    *atver = '@';
+
+  free (atname);
   free (alloc);
 }
 
