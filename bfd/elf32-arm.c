@@ -2630,6 +2630,8 @@ static const insn_sequence elf32_arm_stub_long_branch_thumb2_only_pure[] =
   THUMB32_MOVW (0xf2400c00),	     /* mov.w ip, R_ARM_MOVW_ABS_NC */
   THUMB32_MOVT (0xf2c00c00),	     /* movt  ip, R_ARM_MOVT_ABS << 16 */
   THUMB16_INSN (0x4760),	     /* bx   ip */
+  THUMB16_INSN (0xbf00),	     /* nop */
+  /* The nop is added to ensure alignment of following stubs in the section.  */
 };
 
 /* V4T Thumb -> Thumb long branch stub. Using the stack is not
