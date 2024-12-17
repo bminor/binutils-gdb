@@ -60,13 +60,14 @@ struct regcache : public reg_buffer_common
 
   /* See gdbsupport/common-regcache.h.  */
   bool raw_compare (int regnum, const void *buf, int offset) const override;
+
+  /* Copy the contents of SRC into this regcache.  */
+  void copy_from (regcache *src);
 };
 
 struct regcache *init_register_cache (struct regcache *regcache,
 				      const struct target_desc *tdesc,
 				      unsigned char *regbuf);
-
-void regcache_cpy (struct regcache *dst, struct regcache *src);
 
 /* Create a new register cache for INFERIOR.  */
 

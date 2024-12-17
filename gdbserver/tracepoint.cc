@@ -4797,7 +4797,7 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 			     regspace + 1);
 
 	/* Copy the register data to the regblock.  */
-	regcache_cpy (&tregcache, context_regcache);
+	tregcache.copy_from (context_regcache);
 
 #ifndef IN_PROCESS_AGENT
 	/* On some platforms, trap-based tracepoints will have the PC

@@ -178,19 +178,19 @@ free_register_cache (struct regcache *regcache)
 #endif
 
 void
-regcache_cpy (struct regcache *dst, struct regcache *src)
+regcache::copy_from (regcache *src)
 {
-  gdb_assert (src != NULL && dst != NULL);
-  gdb_assert (src->tdesc == dst->tdesc);
-  gdb_assert (src != dst);
+  gdb_assert (src != nullptr);
+  gdb_assert (src->tdesc == this->tdesc);
+  gdb_assert (src != this);
 
-  memcpy (dst->registers, src->registers, src->tdesc->registers_size);
+  memcpy (this->registers, src->registers, src->tdesc->registers_size);
 #ifndef IN_PROCESS_AGENT
-  if (dst->register_status != NULL && src->register_status != NULL)
-    memcpy (dst->register_status, src->register_status,
+  if (this->register_status != nullptr && src->register_status != nullptr)
+    memcpy (this->register_status, src->register_status,
 	    src->tdesc->reg_defs.size ());
 #endif
-  dst->registers_valid = src->registers_valid;
+  this->registers_valid = src->registers_valid;
 }
 
 /* Return a reference to the description of register N.  */
