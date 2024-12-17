@@ -46,7 +46,7 @@ get_thread_regcache (thread_info *thread, bool fetch)
       thread->set_regcache (regcache);
     }
 
-  if (fetch && !regcache->registers_valid)
+  if (fetch && !regcache->registers_fetched)
     {
       scoped_restore_current_thread restore_thread;
 
@@ -55,7 +55,7 @@ get_thread_regcache (thread_info *thread, bool fetch)
       memset (regcache->register_status, REG_UNAVAILABLE,
 	      regcache->tdesc->reg_defs.size ());
       fetch_inferior_registers (regcache, -1);
-      regcache->registers_valid = true;
+      regcache->registers_fetched = true;
     }
 
   return regcache;
@@ -77,7 +77,7 @@ regcache_invalidate_thread (thread_info *thread)
   if (regcache == NULL)
     return;
 
-  if (regcache->registers_valid)
+  if (regcache->registers_fetched)
     {
       scoped_restore_current_thread restore_thread;
 
@@ -85,7 +85,7 @@ regcache_invalidate_thread (thread_info *thread)
       store_inferior_registers (regcache, -1);
     }
 
-  regcache->registers_valid = false;
+  regcache->registers_fetched = false;
 }
 
 /* See regcache.h.  */
@@ -146,7 +146,7 @@ init_register_cache (struct regcache *regcache,
 #endif
     }
 
-  regcache->registers_valid = false;
+  regcache->registers_fetched = false;
 
   return regcache;
 }
@@ -190,7 +190,7 @@ regcache::copy_from (regcache *src)
     memcpy (this->register_status, src->register_status,
 	    src->tdesc->reg_defs.size ());
 #endif
-  this->registers_valid = src->registers_valid;
+  this->registers_fetched = src->registers_fetched;
 }
 
 /* Return a reference to the description of register N.  */

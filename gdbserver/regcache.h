@@ -33,12 +33,13 @@ struct regcache : public reg_buffer_common
   /* The regcache's target description.  */
   const struct target_desc *tdesc = nullptr;
 
-  /* Whether the REGISTERS buffer's contents are valid.  If false, we
-     haven't fetched the registers from the target yet.  Not that this
-     register cache is _not_ pass-through, unlike GDB's.  Note that
-     "valid" here is unrelated to whether the registers are available
-     in a traceframe.  For that, check REGISTER_STATUS below.  */
-  bool registers_valid = false;
+  /* Whether the REGISTERS buffer's contents are fetched.  If false,
+     we haven't fetched the registers from the target yet.  Note that
+     this register cache is _not_ pass-through, unlike GDB's.  Also,
+     note that "fetched" here is unrelated to whether the registers
+     are available in a traceframe.  For that, check REGISTER_STATUS
+     below.  */
+  bool registers_fetched = false;
   bool registers_owned = false;
   unsigned char *registers = nullptr;
 #ifndef IN_PROCESS_AGENT
