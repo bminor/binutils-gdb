@@ -8354,7 +8354,7 @@ _bfd_elf_link_hash_table_create (bfd *abfd)
 
   if (! _bfd_elf_link_hash_table_init (ret, abfd, _bfd_elf_link_hash_newfunc,
 				       sizeof (struct elf_link_hash_entry),
-				       GENERIC_ELF_DATA))
+				       get_elf_backend_data (abfd)->target_id))
     {
       free (ret);
       return NULL;
