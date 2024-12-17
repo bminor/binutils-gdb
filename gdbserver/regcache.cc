@@ -46,7 +46,7 @@ get_thread_regcache (thread_info *thread, bool fetch)
       thread->set_regcache (regcache);
     }
 
-  if (fetch && regcache->registers_valid == 0)
+  if (fetch && !regcache->registers_valid)
     {
       scoped_restore_current_thread restore_thread;
 
@@ -55,7 +55,7 @@ get_thread_regcache (thread_info *thread, bool fetch)
       memset (regcache->register_status, REG_UNAVAILABLE,
 	      regcache->tdesc->reg_defs.size ());
       fetch_inferior_registers (regcache, -1);
-      regcache->registers_valid = 1;
+      regcache->registers_valid = true;
     }
 
   return regcache;
@@ -85,7 +85,7 @@ regcache_invalidate_thread (thread_info *thread)
       store_inferior_registers (regcache, -1);
     }
 
-  regcache->registers_valid = 0;
+  regcache->registers_valid = false;
 }
 
 /* See regcache.h.  */
@@ -127,7 +127,7 @@ init_register_cache (struct regcache *regcache,
       regcache->tdesc = tdesc;
       regcache->registers
 	= (unsigned char *) xcalloc (1, tdesc->registers_size);
-      regcache->registers_owned = 1;
+      regcache->registers_owned = true;
       regcache->register_status
 	= (unsigned char *) xmalloc (tdesc->reg_defs.size ());
       memset ((void *) regcache->register_status, REG_UNAVAILABLE,
@@ -140,13 +140,13 @@ init_register_cache (struct regcache *regcache,
     {
       regcache->tdesc = tdesc;
       regcache->registers = regbuf;
-      regcache->registers_owned = 0;
+      regcache->registers_owned = false;
 #ifndef IN_PROCESS_AGENT
       regcache->register_status = NULL;
 #endif
     }
 
-  regcache->registers_valid = 0;
+  regcache->registers_valid = false;
 
   return regcache;
 }

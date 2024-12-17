@@ -38,8 +38,8 @@ struct regcache : public reg_buffer_common
      register cache is _not_ pass-through, unlike GDB's.  Note that
      "valid" here is unrelated to whether the registers are available
      in a traceframe.  For that, check REGISTER_STATUS below.  */
-  int registers_valid = 0;
-  int registers_owned = 0;
+  bool registers_valid = false;
+  bool registers_owned = false;
   unsigned char *registers = nullptr;
 #ifndef IN_PROCESS_AGENT
   /* One of REG_UNAVAILABLE or REG_VALID.  */
