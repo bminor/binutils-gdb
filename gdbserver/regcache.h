@@ -72,7 +72,7 @@ void regcache_cpy (struct regcache *dst, struct regcache *src);
 
 struct regcache *new_register_cache (const struct target_desc *tdesc);
 
-struct regcache *get_thread_regcache (thread_info *thread, int fetch);
+regcache *get_thread_regcache (thread_info *thread, bool fetch = true);
 
 /* Release all memory associated with the register cache for INFERIOR.  */
 

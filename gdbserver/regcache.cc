@@ -25,7 +25,7 @@
 #ifndef IN_PROCESS_AGENT
 
 struct regcache *
-get_thread_regcache (thread_info *thread, int fetch)
+get_thread_regcache (thread_info *thread, bool fetch)
 {
   regcache *regcache = thread->regcache ();
 
@@ -66,7 +66,7 @@ get_thread_regcache (thread_info *thread, int fetch)
 reg_buffer_common *
 get_thread_regcache_for_ptid (ptid_t ptid)
 {
-  return get_thread_regcache (find_thread_ptid (ptid), 1);
+  return get_thread_regcache (find_thread_ptid (ptid));
 }
 
 void

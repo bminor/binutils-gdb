@@ -1175,7 +1175,7 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 
 	switch_to_thread (the_target, ptid);
 
-	regcache = get_thread_regcache (current_thread, 1);
+	regcache = get_thread_regcache (current_thread);
 
 	if (the_target->stopped_by_watchpoint ())
 	  {

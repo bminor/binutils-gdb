@@ -4376,7 +4376,7 @@ tracepoint_finished_step (thread_info *tinfo, CORE_ADDR stop_pc)
 	       wstep->tp_number, paddress (wstep->tp_address));
 
   ctx.base.type = trap_tracepoint;
-  ctx.regcache = get_thread_regcache (tinfo, 1);
+  ctx.regcache = get_thread_regcache (tinfo);
 
   while (wstep != NULL)
     {
@@ -4537,7 +4537,7 @@ tracepoint_was_hit (thread_info *tinfo, CORE_ADDR stop_pc)
     return 0;
 
   ctx.base.type = trap_tracepoint;
-  ctx.regcache = get_thread_regcache (tinfo, 1);
+  ctx.regcache = get_thread_regcache (tinfo);
 
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     {

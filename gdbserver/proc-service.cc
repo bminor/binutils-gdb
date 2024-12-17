@@ -112,7 +112,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
 
   scoped_restore_current_thread restore_thread;
   switch_to_thread (lwp->thread);
-  regcache = get_thread_regcache (current_thread, 1);
+  regcache = get_thread_regcache (current_thread);
   gregset_info ()->fill_function (regcache, gregset);
 
   return PS_OK;

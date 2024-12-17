@@ -1053,7 +1053,7 @@ ppc_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 {
   struct lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
   thread_info *thr = lwp->thread;
-  struct regcache *regcache = get_thread_regcache (thr, 1);
+  regcache *regcache = get_thread_regcache (thr);
   ULONGEST tp = 0;
 
 #ifdef __powerpc64__

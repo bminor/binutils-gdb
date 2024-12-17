@@ -943,7 +943,7 @@ gdbserver_windows_process::handle_access_violation
 static void
 maybe_adjust_pc ()
 {
-  struct regcache *regcache = get_thread_regcache (current_thread, 1);
+  regcache *regcache = get_thread_regcache (current_thread);
   child_fetch_inferior_registers (regcache, -1);
 
   windows_thread_info *th
