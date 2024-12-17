@@ -181,6 +181,8 @@ fn main () {
 
     let nonzero_offset = EnumWithNonzeroOffset { a: Some(1), b: None };
 
+    let tuple_tuple = ((23i32, 24i32), 25i32);
+
     println!("{}, {}", x.0, x.1);        // set breakpoint here
     println!("{}", diff2(92, 45));
     empty();
