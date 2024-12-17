@@ -35,10 +35,10 @@ enum register_status : signed char
 
     /* The register value is unavailable.  E.g., we're inspecting a
        traceframe, and this register wasn't collected.  Note that this
-       is different a different "unavailable" from saying the register
-       does not exist in the target's architecture --- in that case,
-       the target should have given us a target description that does
-       not include the register in the first place.  */
+       "unavailable" is different from saying the register does not
+       exist in the target's architecture --- in that case, the target
+       should have given us a target description that does not include
+       the register in the first place.  */
     REG_UNAVAILABLE = -1
   };
 
