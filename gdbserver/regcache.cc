@@ -526,7 +526,10 @@ regcache::get_register_status (int regnum) const
 {
 #ifndef IN_PROCESS_AGENT
   gdb_assert (regnum >= 0 && regnum < tdesc->reg_defs.size ());
-  return (enum register_status) (register_status[regnum]);
+  if (register_status != nullptr)
+    return (enum register_status) (register_status[regnum]);
+  else
+    return REG_VALID;
 #else
   return REG_VALID;
 #endif
