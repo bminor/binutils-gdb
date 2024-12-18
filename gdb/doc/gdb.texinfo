@@ -51359,7 +51359,7 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 @c man title gdb-add-index Add index files to speed up GDB
 
 @c man begin SYNOPSIS gdb-add-index
-gdb-add-index @var{filename}
+gdb-add-index [-dwarf-5] @var{filename}
 @c man end
 
 @c man begin DESCRIPTION gdb-add-index
@@ -51371,14 +51371,24 @@ provides a way to build an index, which speeds up startup.
 
 To determine whether a file contains such an index, use the command
 @kbd{readelf -S filename}: the index is stored in a section named
-@code{.gdb_index}.  The index file can only be produced on systems
+@code{.gdb_index} (pre-DWARF 5) or @code{.debug_names} and
+@code{.debug_str} (DWARF 5).  Indexes can only be produced on systems
 which use ELF binaries and DWARF debug information (i.e., sections
 named @code{.debug_*}).
 
-@command{gdb-add-index} uses @value{GDBN} and @command{objdump} found
-in the @env{PATH} environment variable.  If you want to use different
-versions of these programs, you can specify them through the
-@env{GDB} and @env{OBJDUMP} environment variables.
+By default @command{gdb-add-index} will add a pre-DWARF 5
+@code{.gdb_index} section to @var{filename}.  With @option{-dwarf-5}
+DWARF 5 sections are added instead.
+
+@var{filename} must be writable.
+
+@command{gdb-add-index} uses @value{GDBN}, @command{objcopy}, and
+@command{readelf} found in the @env{PATH} environment variable.  If
+you want to use different versions of these programs, you can specify
+them through the appropriate environment variables (see below).
+
+@command{gdb-add-index} exits with status 0 if it succeeds in creating
+the index for @var{filename} or greater than 0 if an error occurs.
 
 See more in
 @ifset man
@@ -51388,6 +51398,32 @@ the @value{GDBN} manual in node @code{Index Files}
 @ifclear man
 @ref{Index Files}.
 @end ifclear
+@c man end
+
+@c man begin OPTIONS gdb-add-index
+@table @env
+@item -dwarf-5
+Add DWARF 5 sections instead of previous @code{.debug_index} section.
+
+@end table
+@c man end
+
+@c man begin ENVIRONMENT gdb-add-index
+@table @env
+@item GDB
+Full file name of the @code{gdb} program to use for index generation.
+If not set, the @env{PATH} will be searched for a @code{gdb} program.
+
+@item OBJCOPY
+Full file name of the @code{objcopy} program to use to copy section
+information into the given file.  If not set, the @env{PATH} will be searched
+for a @code{objcopy} program.
+
+@item READELF
+Full file name of the @code{readelf} program to use to inspect
+properties of the given file.  If not set, the @env{PATH} will be searched
+for a @code{readelf} program.
+@end table
 @c man end
 
 @c man begin SEEALSO gdb-add-index
