@@ -4088,7 +4088,7 @@ This is emitted when the TUI is enabled or disabled.  The event is of
 type @code{gdb.TuiEnabledEvent}, which has a single read-only
 attribute:
 
-@defvar TuiStatusEvent.enabled
+@defvar TuiEnabledEvent.enabled
 If the TUI has just been enabled, this is @code{True}; otherwise it is
 @code{False}.
 @end defvar
