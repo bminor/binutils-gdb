@@ -1867,6 +1867,7 @@ _is_cpu (const i386_cpu_attr *a, enum i386_cpu cpu)
     case CpuAVX512F:  return a->bitfield.cpuavx512f;
     case CpuAVX512VL: return a->bitfield.cpuavx512vl;
     case CpuAPX_F:    return a->bitfield.cpuapx_f;
+    case CpuAVX10_2:  return a->bitfield.cpuavx10_2;
     case Cpu64:       return a->bitfield.cpu64;
     case CpuNo64:     return a->bitfield.cpuno64;
     default:
