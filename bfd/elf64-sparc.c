@@ -888,6 +888,7 @@ const struct elf_size_info elf64_sparc_size_info =
 #define TARGET_BIG_SYM	sparc_elf64_vec
 #define TARGET_BIG_NAME	"elf64-sparc"
 #define ELF_ARCH	bfd_arch_sparc
+#define ELF_TARGET_ID	SPARC_ELF_DATA
 #define ELF_MAXPAGESIZE 0x100000
 #define ELF_COMMONPAGESIZE 0x2000
 

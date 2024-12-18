@@ -5449,6 +5449,7 @@ static const struct elf_size_info elf64_ia64_vms_size_info = {
 };
 
 #define ELF_ARCH			bfd_arch_ia64
+#define ELF_TARGET_ID			IA64_ELF_DATA
 #define ELF_MACHINE_CODE		EM_IA_64
 #define ELF_MAXPAGESIZE			0x10000	/* 64KB */
 #define ELF_COMMONPAGESIZE		0x200	/* 16KB */

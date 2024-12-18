@@ -4676,6 +4676,7 @@ elfNN_kvx_plt_sym_val (bfd_vma i, const asection *plt,
 }
 
 #define ELF_ARCH			bfd_arch_kvx
+#define ELF_TARGET_ID			KVX_ELF_DATA
 #define ELF_MACHINE_CODE		EM_KVX
 #define ELF_MAXPAGESIZE			0x10000
 #define ELF_MINPAGESIZE			0x1000

@@ -5299,6 +5299,7 @@ elf32_csky_obj_attrs_handle_unknown (bfd *abfd ATTRIBUTE_UNUSED,
 #define TARGET_LITTLE_SYM                     csky_elf32_le_vec
 #define TARGET_LITTLE_NAME                    "elf32-csky-little"
 #define ELF_ARCH                              bfd_arch_csky
+#define ELF_TARGET_ID			      CSKY_ELF_DATA
 #define ELF_MACHINE_CODE                      EM_CSKY
 #define ELF_MACHINE_ALT1		      EM_CSKY_OLD
 #define ELF_MAXPAGESIZE                       0x1000
