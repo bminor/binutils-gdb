@@ -222,18 +222,17 @@ bfd_elf_gnu_hash (const char *namearg)
 }
 
 /* Create a tdata field OBJECT_SIZE bytes in length, zeroed out and with
-   the object_id field of an elf_obj_tdata field set to OBJECT_ID.  */
+   the object_id field of an elf_obj_tdata field set.  */
 bool
 bfd_elf_allocate_object (bfd *abfd,
-			 size_t object_size,
-			 enum elf_target_id object_id)
+			 size_t object_size)
 {
   BFD_ASSERT (object_size >= sizeof (struct elf_obj_tdata));
   abfd->tdata.any = bfd_zalloc (abfd, object_size);
   if (abfd->tdata.any == NULL)
     return false;
 
-  elf_object_id (abfd) = object_id;
+  elf_object_id (abfd) = get_elf_backend_data (abfd)->target_id;
   if (abfd->direction != read_direction)
     {
       struct output_elf_obj_tdata *o = bfd_zalloc (abfd, sizeof *o);
@@ -249,9 +248,7 @@ bfd_elf_allocate_object (bfd *abfd,
 bool
 bfd_elf_make_object (bfd *abfd)
 {
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_obj_tdata),
-				  bed->target_id);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_obj_tdata));
 }
 
 bool

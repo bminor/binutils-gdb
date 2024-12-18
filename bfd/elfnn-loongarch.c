@@ -88,8 +88,7 @@ static bool
 elfNN_loongarch_object (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd,
-				  sizeof (struct _bfd_loongarch_elf_obj_tdata),
-				  LARCH_ELF_DATA);
+				  sizeof (struct _bfd_loongarch_elf_obj_tdata));
 }
 
 struct relr_entry

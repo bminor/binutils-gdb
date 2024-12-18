@@ -2149,8 +2149,7 @@ struct sh_elf_obj_tdata
 static bool
 sh_elf_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct sh_elf_obj_tdata),
-				  SH_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct sh_elf_obj_tdata));
 }
 
 /* sh ELF linker hash table.  */

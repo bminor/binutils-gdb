@@ -1655,8 +1655,7 @@ elf32_tic6x_mkobject (bfd *abfd)
 {
   bool ret;
 
-  ret = bfd_elf_allocate_object (abfd, sizeof (struct elf32_tic6x_obj_tdata),
-				 TIC6X_ELF_DATA);
+  ret = bfd_elf_allocate_object (abfd, sizeof (struct elf32_tic6x_obj_tdata));
   if (ret)
     elf32_tic6x_set_use_rela_p (abfd, true);
   return ret;

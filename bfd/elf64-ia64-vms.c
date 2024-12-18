@@ -5412,8 +5412,8 @@ elf64_vms_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 static bool
 elf64_ia64_vms_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object
-    (abfd, sizeof (struct elf64_ia64_vms_obj_tdata), IA64_ELF_DATA);
+  return bfd_elf_allocate_object (abfd,
+				  sizeof (struct elf64_ia64_vms_obj_tdata));
 }
 
 

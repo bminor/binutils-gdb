@@ -197,8 +197,7 @@ static bool
 elfNN_riscv_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd,
-				  sizeof (struct _bfd_riscv_elf_obj_tdata),
-				  RISCV_ELF_DATA);
+				  sizeof (struct _bfd_riscv_elf_obj_tdata));
 }
 
 #include "elf/common.h"

@@ -665,8 +665,7 @@ struct elf_xtensa_obj_tdata
 static bool
 elf_xtensa_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_xtensa_obj_tdata),
-				  XTENSA_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_xtensa_obj_tdata));
 }
 
 /* Xtensa ELF linker hash table.  */

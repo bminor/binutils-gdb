@@ -3207,8 +3207,7 @@ struct elf_arm_obj_tdata
 static bool
 elf32_arm_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_arm_obj_tdata),
-				  ARM_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_arm_obj_tdata));
 }
 
 #define elf32_arm_hash_entry(ent) ((struct elf32_arm_link_hash_entry *)(ent))

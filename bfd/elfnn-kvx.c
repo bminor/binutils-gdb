@@ -421,8 +421,7 @@ struct elf_kvx_obj_tdata
 static bool
 elfNN_kvx_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_kvx_obj_tdata),
-				  KVX_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_kvx_obj_tdata));
 }
 
 #define elf_kvx_hash_entry(ent) \

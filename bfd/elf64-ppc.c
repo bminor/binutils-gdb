@@ -1843,8 +1843,7 @@ struct ppc64_elf_obj_tdata
 static bool
 ppc64_elf_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct ppc64_elf_obj_tdata),
-				  PPC64_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct ppc64_elf_obj_tdata));
 }
 
 /* Fix bad default arch selected for a 64 bit input bfd when the

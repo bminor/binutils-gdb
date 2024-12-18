@@ -977,8 +977,7 @@ elf_or1k_plt_entry_size (bfd_vma plt_index)
 static bool
 elf_or1k_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_or1k_obj_tdata),
-				  OR1K_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_or1k_obj_tdata));
 }
 
 /* Create an entry in an or1k ELF linker hash table.  */

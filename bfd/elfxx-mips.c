@@ -1374,8 +1374,7 @@ mips_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
 bool
 _bfd_mips_elf_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct mips_elf_obj_tdata),
-				  MIPS_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct mips_elf_obj_tdata));
 }
 
 /* MIPS ELF uses a special find_nearest_line routine in order the

@@ -256,8 +256,7 @@ struct elf_nds32_obj_tdata
 static bool
 nds32_elf_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_nds32_obj_tdata),
-				  NDS32_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_nds32_obj_tdata));
 }
 
 /* Relocations used for relocation.  */

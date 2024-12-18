@@ -2536,8 +2536,7 @@ struct elf_aarch64_local_symbol
 static bool
 elfNN_aarch64_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_aarch64_obj_tdata),
-				  AARCH64_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_aarch64_obj_tdata));
 }
 
 #define elf_aarch64_hash_entry(ent) \

@@ -734,8 +734,8 @@ struct _bfd_sparc_elf_obj_tdata
 bool
 _bfd_sparc_elf_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct _bfd_sparc_elf_obj_tdata),
-				  SPARC_ELF_DATA);
+  return bfd_elf_allocate_object (abfd,
+				  sizeof (struct _bfd_sparc_elf_obj_tdata));
 }
 
 static void

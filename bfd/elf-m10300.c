@@ -5464,8 +5464,7 @@ _bfd_mn10300_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UN
 static bool
 mn10300_elf_mkobject (bfd *abfd)
 {
-  return bfd_elf_allocate_object (abfd, sizeof (struct elf_mn10300_obj_tdata),
-				  MN10300_ELF_DATA);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_mn10300_obj_tdata));
 }
 
 #define bfd_elf32_mkobject	mn10300_elf_mkobject
