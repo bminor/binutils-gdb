@@ -13,8 +13,8 @@ Contents of the .*:
   Return address column: .*
   Augmentation data:     .*
 #...
-[a-zA-Z0-9]+ [a-zA-Z0-9]+ [a-zA-Z0-9]+ FDE cie=00000000 pc=[a-zA-Z0-9]+\.\.[a-zA-Z0-9]+
-  DW_CFA_advance_loc: 4 to 0000000000000020
+[a-zA-Z0-9]+ [a-zA-Z0-9]+ [a-zA-Z0-9]+ FDE cie=0+ pc=[a-zA-Z0-9]+\.\.[a-zA-Z0-9]+
+  DW_CFA_advance_loc: 4 to 0+20
   DW_CFA_offset_extended_sf: r0 \(\$zero\) at cfa\+8
   DW_CFA_offset_extended_sf: r1 \(\$ra\) at cfa\+16
   DW_CFA_offset_extended_sf: r2 \(\$tp\) at cfa\+24
