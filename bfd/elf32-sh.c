@@ -2244,8 +2244,7 @@ sh_elf_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      sh_elf_link_hash_newfunc,
-				      sizeof (struct elf_sh_link_hash_entry),
-				      SH_ELF_DATA))
+				      sizeof (struct elf_sh_link_hash_entry)))
     {
       free (ret);
       return NULL;

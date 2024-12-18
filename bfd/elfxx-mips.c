@@ -14444,8 +14444,7 @@ _bfd_mips_elf_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      mips_elf_link_hash_newfunc,
-				      sizeof (struct mips_elf_link_hash_entry),
-				      MIPS_ELF_DATA))
+				      sizeof (struct mips_elf_link_hash_entry)))
     {
       free (ret);
       return NULL;

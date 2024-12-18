@@ -1062,8 +1062,7 @@ elf64_ia64_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      elf64_ia64_new_elf_hash_entry,
-				      sizeof (struct elf64_ia64_link_hash_entry),
-				      IA64_ELF_DATA))
+				      sizeof (struct elf64_ia64_link_hash_entry)))
     {
       free (ret);
       return NULL;

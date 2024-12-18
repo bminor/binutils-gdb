@@ -1184,8 +1184,7 @@ tilepro_elf_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (ret, abfd, link_hash_newfunc,
-				      sizeof (struct tilepro_elf_link_hash_entry),
-				      TILEPRO_ELF_DATA))
+				      sizeof (struct tilepro_elf_link_hash_entry)))
     {
       free (ret);
       return NULL;

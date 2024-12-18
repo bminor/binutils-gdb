@@ -4364,8 +4364,7 @@ elf32_score_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (ret, abfd, score_elf_link_hash_newfunc,
-				      sizeof (struct score_elf_link_hash_entry),
-				      SCORE_ELF_DATA))
+				      sizeof (struct score_elf_link_hash_entry)))
     {
       free (ret);
       return NULL;

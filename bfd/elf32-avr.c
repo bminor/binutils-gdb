@@ -877,8 +877,7 @@ elf32_avr_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&htab->etab, abfd,
 				      elf32_avr_link_hash_newfunc,
-				      sizeof (struct elf_link_hash_entry),
-				      AVR_ELF_DATA))
+				      sizeof (struct elf_link_hash_entry)))
     {
       free (htab);
       return NULL;

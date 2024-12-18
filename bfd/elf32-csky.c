@@ -1502,8 +1502,7 @@ csky_elf_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
 				      csky_elf_link_hash_newfunc,
-				      sizeof (struct csky_elf_link_hash_entry),
-				      CSKY_ELF_DATA))
+				      sizeof (struct csky_elf_link_hash_entry)))
     {
       free (ret);
       return NULL;

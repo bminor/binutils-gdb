@@ -2344,7 +2344,7 @@ extern bool _bfd_elf_link_hash_table_init
   (struct elf_link_hash_table *, bfd *,
    struct bfd_hash_entry *(*)
      (struct bfd_hash_entry *, struct bfd_hash_table *, const char *),
-   unsigned int, enum elf_target_id);
+   unsigned int);
 extern bool _bfd_elf_slurp_version_tables
   (bfd *, bool);
 extern bool _bfd_elf_merge_sections

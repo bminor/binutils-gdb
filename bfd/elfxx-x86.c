@@ -720,23 +720,21 @@ struct bfd_link_hash_table *
 _bfd_x86_elf_link_hash_table_create (bfd *abfd)
 {
   struct elf_x86_link_hash_table *ret;
-  const struct elf_backend_data *bed;
   size_t amt = sizeof (struct elf_x86_link_hash_table);
 
   ret = (struct elf_x86_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
-  bed = get_elf_backend_data (abfd);
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
 				      _bfd_x86_elf_link_hash_newfunc,
-				      sizeof (struct elf_x86_link_hash_entry),
-				      bed->target_id))
+				      sizeof (struct elf_x86_link_hash_entry)))
     {
       free (ret);
       return NULL;
     }
 
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   if (bed->target_id == X86_64_ELF_DATA)
     {
       ret->is_reloc_section = elf_x86_64_is_reloc_section;

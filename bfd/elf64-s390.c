@@ -723,8 +723,7 @@ elf_s390_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc,
-				      sizeof (struct elf_s390_link_hash_entry),
-				      S390_ELF_DATA))
+				      sizeof (struct elf_s390_link_hash_entry)))
     {
       free (ret);
       return NULL;

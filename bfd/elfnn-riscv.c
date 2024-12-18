@@ -503,8 +503,7 @@ riscv_elf_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc,
-				      sizeof (struct riscv_elf_link_hash_entry),
-				      RISCV_ELF_DATA))
+				      sizeof (struct riscv_elf_link_hash_entry)))
     {
       free (ret);
       return NULL;

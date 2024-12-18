@@ -3738,8 +3738,7 @@ nds32_elf_link_hash_table_create (bfd *abfd)
   /* Patch tag.  */
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      nds32_elf_link_hash_newfunc,
-				      sizeof (struct elf_nds32_link_hash_entry),
-				      NDS32_ELF_DATA))
+				      sizeof (struct elf_nds32_link_hash_entry)))
     {
       free (ret);
       return NULL;

@@ -641,7 +641,7 @@ elfNN_kvx_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init
       (&ret->root, abfd, elfNN_kvx_link_hash_newfunc,
-       sizeof (struct elf_kvx_link_hash_entry), KVX_ELF_DATA))
+       sizeof (struct elf_kvx_link_hash_entry)))
     {
       free (ret);
       return NULL;

@@ -1617,8 +1617,7 @@ elf32_cr16_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (ret, abfd,
 				      elf32_cr16_link_hash_newfunc,
-				      sizeof (struct elf32_cr16_link_hash_entry),
-				      GENERIC_ELF_DATA))
+				      sizeof (struct elf32_cr16_link_hash_entry)))
     {
       free (ret);
       return NULL;

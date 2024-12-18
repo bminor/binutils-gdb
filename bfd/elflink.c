@@ -8318,11 +8318,11 @@ _bfd_elf_link_hash_table_init
    struct bfd_hash_entry *(*newfunc) (struct bfd_hash_entry *,
 				      struct bfd_hash_table *,
 				      const char *),
-   unsigned int entsize,
-   enum elf_target_id target_id)
+   unsigned int entsize)
 {
   bool ret;
-  int can_refcount = get_elf_backend_data (abfd)->can_refcount;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  int can_refcount = bed->can_refcount;
 
   table->init_got_refcount.refcount = can_refcount - 1;
   table->init_plt_refcount.refcount = can_refcount - 1;
@@ -8334,8 +8334,8 @@ _bfd_elf_link_hash_table_init
   ret = _bfd_link_hash_table_init (&table->root, abfd, newfunc, entsize);
 
   table->root.type = bfd_link_elf_hash_table;
-  table->hash_table_id = target_id;
-  table->target_os = get_elf_backend_data (abfd)->target_os;
+  table->hash_table_id = bed->target_id;
+  table->target_os = bed->target_os;
 
   return ret;
 }
@@ -8353,8 +8353,7 @@ _bfd_elf_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (! _bfd_elf_link_hash_table_init (ret, abfd, _bfd_elf_link_hash_newfunc,
-				       sizeof (struct elf_link_hash_entry),
-				       get_elf_backend_data (abfd)->target_id))
+				       sizeof (struct elf_link_hash_entry)))
     {
       free (ret);
       return NULL;

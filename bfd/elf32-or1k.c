@@ -1028,8 +1028,7 @@ or1k_elf_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      or1k_elf_link_hash_newfunc,
-				      sizeof (struct elf_or1k_link_hash_entry),
-				      OR1K_ELF_DATA))
+				      sizeof (struct elf_or1k_link_hash_entry)))
     {
       free (ret);
       return NULL;

@@ -3547,8 +3547,7 @@ ppc64_elf_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&htab->elf, abfd, link_hash_newfunc,
-				      sizeof (struct ppc_link_hash_entry),
-				      PPC64_ELF_DATA))
+				      sizeof (struct ppc_link_hash_entry)))
     {
       free (htab);
       return NULL;
