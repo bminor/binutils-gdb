@@ -77,16 +77,16 @@ if { [build_executable "build shlib" $binfile_lib2 $srcfile_lib \
     return
 }
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
+if { [build_executable "failed to build" $testfile $srcfile \
 	  [list additional_flags=-DDSO1_NAME=\"$binfile_lib1\" \
 	       additional_flags=-DDSO2_NAME=\"$binfile_lib2\" \
 	       shlib_load debug]] } {
-    return -1
+    return
 }
 
-if { ![runto_main] } {
-    return -1
-}
+# Some locations needed by the tests.
+set bp_inc [gdb_get_line_number "bp.inc" $srcfile_lib]
+set bp_main [gdb_get_line_number "bp.main" $srcfile]
 
 # Check that 'info shared' show NUM occurrences of DSO.
 proc check_dso_count { dso num } {
@@ -158,41 +158,58 @@ proc test_dlmopen {} {
     }
 }
 
-# Remove the pause.  We only need it for the attach test.
-gdb_test "print wait_for_gdb = 0" "\\\$1 = 0"
+# Setup for calling 'test_dlmopen', this is the version of the test
+# that doesn't use 'attach'.
+proc test_dlmopen_no_attach {} {
+    clean_restart $::binfile
 
-# Break in the to-be-loaded library and at the end of main.
-set bp_inc [gdb_get_line_number "bp.inc" $srcfile_lib]
-set bp_main [gdb_get_line_number "bp.main" $srcfile]
+    if { ![runto_main] } {
+	return
+    }
 
-delete_breakpoints
-gdb_breakpoint $srcfile_lib:$bp_inc allow-pending
-gdb_breakpoint $srcfile:$bp_main
-
-test_dlmopen
-
-# Try the same again when attaching after dlmopen().
-require can_spawn_for_attach
-
-clean_restart $binfile
-
-# Start the test program.
-set test_spawn_id [spawn_wait_for_attach $binfile]
-set testpid [spawn_id_get_pid $test_spawn_id]
-
-# Attach.
-if { ![gdb_attach $testpid] } {
-    return
-}
-
-with_test_prefix "attach" {
-    # Remove the pause.  We no longer need it.
+    # Remove the pause.  We only need it for the attach test.
     gdb_test "print wait_for_gdb = 0" "\\\$1 = 0"
 
-    # Set the same breakpoints again.  This time, however, we do not allow the
-    # breakpoint to be pending since the library has already been loaded.
-    gdb_breakpoint $srcfile_lib:$bp_inc
-    gdb_breakpoint $srcfile:$bp_main
+    # Break in the to-be-loaded library and at the end of main.
+    delete_breakpoints
+    gdb_breakpoint $::srcfile_lib:$::bp_inc allow-pending
+    gdb_breakpoint $::srcfile:$::bp_main
 
     test_dlmopen
 }
+
+# Setup for calling 'test_dlmopen', this is the version of the test
+# that does use 'attach'.
+proc test_dlmopen_with_attach {} {
+    if { ![can_spawn_for_attach] } {
+	unsupported "cannot run attach tests"
+	return
+    }
+
+    clean_restart $::binfile
+
+    # Start the test program.
+    set test_spawn_id [spawn_wait_for_attach $::binfile]
+    set testpid [spawn_id_get_pid $test_spawn_id]
+
+    # Attach.
+    if { ![gdb_attach $testpid] } {
+	return
+    }
+
+    with_test_prefix "attach" {
+	# Remove the pause.  We no longer need it.
+	gdb_test "print wait_for_gdb = 0" "\\\$1 = 0"
+
+	# Set the same breakpoints again.  This time, however, we do not allow the
+	# breakpoint to be pending since the library has already been loaded.
+	gdb_breakpoint $::srcfile_lib:$::bp_inc
+	gdb_breakpoint $::srcfile:$::bp_main
+
+	test_dlmopen
+    }
+}
+
+# Run the actual tests.
+test_dlmopen_no_attach
+test_dlmopen_with_attach
