@@ -4763,6 +4763,35 @@ process_serial_event (void)
       else
 	write_enn (cs.own_buf);
       break;
+    case 'x':
+      {
+	require_running_or_break (cs.own_buf);
+	decode_x_packet (&cs.own_buf[1], &mem_addr, &len);
+	int res = gdb_read_memory (mem_addr, mem_buf, len);
+	if (res < 0)
+	  write_enn (cs.own_buf);
+	else
+	  {
+	    gdb_byte *buffer = (gdb_byte *) cs.own_buf;
+	    *buffer++ = 'b';
+
+	    int out_len_units;
+	    new_packet_len = remote_escape_output (mem_buf, res, 1,
+						   buffer,
+						   &out_len_units,
+						   PBUFSIZ);
+	    new_packet_len++; /* For the 'b' marker.  */
+
+	    if (out_len_units != res)
+	      {
+		write_enn (cs.own_buf);
+		new_packet_len = -1;
+	      }
+	    else
+	      suppress_next_putpkt_log ();
+	  }
+      }
+      break;
     case 'X':
       require_running_or_break (cs.own_buf);
       if (decode_X_packet (&cs.own_buf[1], packet_len - 1,

@@ -196,6 +196,12 @@ vFile:stat
   vFile:fstat but takes a filename rather than an open file
   descriptor.
 
+x addr,length
+  Given ADDR and LENGTH, fetch LENGTH units from the memory at address
+  ADDR and send the fetched data in binary format.  This packet is
+  equivalent to 'm', except that the data in the response are in
+  binary format.
+
 *** Changes in GDB 15
 
 * The MPX commands "show/set mpx bound" have been deprecated, as Intel
