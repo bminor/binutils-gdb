@@ -19465,7 +19465,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		     be seen here, because it will have a location and
 		     so will be handled above.  */
 		  sym->set_linkage_name (name);
-		  list_to_add = cu->list_in_scope;
+		  list_to_add
+		    = ((cu->list_in_scope
+			== cu->get_builder ()->get_file_symbols ())
+		       ? cu->get_builder ()->get_global_symbols ()
+		       : cu->list_in_scope);
 		  SYMBOL_LOCATION_BATON (sym) = (void *) linkagename;
 		  sym->set_aclass_index (ada_imported_index);
 		}
