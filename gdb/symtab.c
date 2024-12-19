@@ -6120,25 +6120,20 @@ default_collect_symbol_completion_matches_break_on
   /* Add completions for all currently loaded symbol tables.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      for (compunit_symtab *cust : objfile->compunits ())
-	add_symtab_completions (cust, tracker, mode, lookup_name,
-				sym_text, word, code);
+      /* Look through the partial symtabs for all symbols which begin by
+	 matching SYM_TEXT.  Expand all CUs that you find to the list.  */
+      objfile->expand_symtabs_matching
+	(nullptr, &lookup_name, nullptr,
+	 [&] (compunit_symtab *symtab)
+	   {
+	     add_symtab_completions (symtab,
+				     tracker, mode, lookup_name,
+				     sym_text, word, code);
+	     return true;
+	   },
+	 SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
+	 SEARCH_ALL_DOMAINS);
     }
-
-  /* Look through the partial symtabs for all symbols which begin by
-     matching SYM_TEXT.  Expand all CUs that you find to the list.  */
-  expand_symtabs_matching (NULL,
-			   lookup_name,
-			   NULL,
-			   [&] (compunit_symtab *symtab) /* expansion notify */
-			     {
-			       add_symtab_completions (symtab,
-						       tracker, mode, lookup_name,
-						       sym_text, word, code);
-			       return true;
-			     },
-			   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
-			   SEARCH_ALL_DOMAINS);
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars).  Also catch fields of types defined in
