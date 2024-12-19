@@ -105,8 +105,6 @@ struct iq2000_hi_fixup
 /* The list of unmatched HI relocs.  */
 static struct iq2000_hi_fixup * iq2000_hi_fixup_list;
 
-/* Macro hash table, which we will add to.  */
-extern struct htab *macro_hash;
 
 const char md_shortopts[] = "";
 const struct option md_longopts[] =
@@ -279,9 +277,7 @@ iq2000_add_macro (const char *  name,
 	}
     }
 
-  str_hash_insert (macro_hash, macro->name, macro, 1);
-
-  macro_defined = 1;
+  (void) add_macro (macro, true);
 }
 
 static void

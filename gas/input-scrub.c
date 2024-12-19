@@ -23,6 +23,7 @@
 #include "input-file.h"
 #include "sb.h"
 #include "listing.h"
+#include "macro.h"
 
 /*
  * O/S independent module to supply buffers of sanitised source code
@@ -290,12 +291,13 @@ input_scrub_include_sb (sb *from, char *position, enum expansion expansion)
       ++macro_nest;
     }
 
-#ifdef md_macro_start
   if (expansion == expanding_macro)
     {
+#ifdef md_macro_start
       md_macro_start ();
-    }
 #endif
+      increment_macro_nesting_depth ();
+    }
 
   next_saved_file = input_scrub_push (position);
 
@@ -350,6 +352,7 @@ input_scrub_next_buffer (char **bufp)
 	         data.  */
 	      md_macro_end ();
 #endif
+	      decrement_macro_nesting_depth ();
 	    }
 	  if (from_sb_expansion != expanding_app)
 	    --macro_nest;

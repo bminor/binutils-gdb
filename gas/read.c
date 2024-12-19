@@ -655,7 +655,8 @@ poend (void)
     }
 
 /* Helper function of read_a_source_file, which tries to expand a macro.  */
-static int
+
+static bool
 try_macro (char term, const char *line)
 {
   sb out;
@@ -672,12 +673,14 @@ try_macro (char term, const char *line)
       sb_kill (&out);
       buffer_limit =
 	input_scrub_next_buffer (&input_line_pointer);
+
+      macro_record_invocation (macro);
 #ifdef md_macro_info
       md_macro_info (macro);
 #endif
-      return 1;
+      return true;
     }
-  return 0;
+  return false;
 }
 
 #ifdef HANDLE_BUNDLE
@@ -1269,7 +1272,7 @@ read_a_source_file (const char *name)
 			  s_ignore (0);
 			  nul_char = next_char = *--input_line_pointer;
 			  *input_line_pointer = '\0';
-			  if (! macro_defined || ! try_macro (next_char, s))
+			  if (! try_macro (next_char, s))
 			    {
 			      *end = '\0';
 			      as_bad (_("unknown pseudo-op: `%s'"), s);
@@ -1306,7 +1309,7 @@ read_a_source_file (const char *name)
 
 		      generate_lineno_debug ();
 
-		      if (macro_defined && try_macro (next_char, s))
+		      if (try_macro (next_char, s))
 			continue;
 
 		      if (mri_pending_align)
@@ -2816,7 +2819,7 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
 	  as_warn_where (macro->file, macro->line,
 			 _("attempt to redefine pseudo-op `%s' ignored"),
 			 macro->name);
-	  str_hash_delete (macro_hash, macro->name);
+	  delete_macro (macro->name);
 	}
     }
 

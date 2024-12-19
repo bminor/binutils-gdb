@@ -6215,7 +6215,12 @@ With that definition, @samp{SUM 0,5} is equivalent to this assembly input:
 @item .macro @var{macname}
 @itemx .macro @var{macname} @var{macargs} @dots{}
 @cindex @code{macro} directive
-Begin the definition of a macro called @var{macname}.  If your macro
+Begin the definition of a macro called @var{macname}.  Macro names are case
+insensitive.  Macro definitions can be nested, although their behaviour is
+sometimes counter intuitive.  Nested macros only have scope within their
+defining macro.
+
+If your macro
 definition requires arguments, specify their names after the macro name,
 separated by commas or spaces.  You can qualify the macro argument to
 indicate whether all invocations must specify a non-blank value (through
@@ -6380,6 +6385,29 @@ adjacent string literals - even if separated only by a blank - will not be
 concatenated when determining macro arguments, even if they're only separated
 by white space.  This is unlike certain other pseudo ops, e.g. @code{.ascii}.
 
+Nested macros can access the arguments of their parents.  But also if their
+argument names clash with those of their parents, their versions are used.  So
+for example:
+
+@smallexample
+.macro OUTER arg1, arg2, arg3:vararg
+     .macro INNER arg4 arg2
+        .dc.a \arg2
+	.dc.a \arg3
+     .endm
+     INNER \arg1 bert
+	.dc.a \arg2
+.endm
+
+OUTER fred, jim, harry\arg4
+@end smallexample
+
+This will generate references to symbols called @samp{jim} - from the
+definition of the OUTER macro, @samp{bert} - from the definition in INNER
+where arg2 has been overridden and @samp{harryfred} - from the definition in
+INNER where the value of arg3 from OUTER is used, but with the value of arg4
+substituted into the symbol.
+
 @item .endm
 @cindex @code{endm} directive
 Mark the end of a macro definition.
@@ -6394,6 +6422,33 @@ Exit early from the current macro definition.
 @command{@value{AS}} maintains a counter of how many macros it has
 executed in this pseudo-variable; you can copy that number to your
 output with @samp{\@@}, but @emph{only within a macro definition}.
+
+Note - the @samp{\@@} counter is incremented at the end of the expansion of a
+macro, but before the contents of any nested macros are evaluated.  This can
+lead to counter-intuitive behaviour when nested macros are used.  For example:
+
+@smallexample
+  .macro o
+    .macro i
+    _i\@@_:
+    .endm
+    i
+    _o\@@_:
+  .endm
+  o
+@end smallexample
+
+Produces two symbols @samp{_o0_} and @samp{_i1_}.  This happens because the
+@samp{o} macro executes entirely first, putting the definition and invocation
+of the @samp{i} macro into the input buffer.  It also puts the definition of
+the @samp{_o\@@_} symbol into the input buffer, evaluating the @samp{\@@}
+counter in the process and so generating a symbol called @samp{_o0_}.
+
+That finishes the invocation of @samp{o} so the @samp{\@@} counter is
+incremented.  Then the input buffer is re-evaluated and the definition and
+invocation of macro @samp{i} is found.  This results in @samp{_i\@@_} being put
+into the input buffer and this time @samp{\@@} evaluates to 1, so the symbol
+created is @samp{_i1_}.
 
 @cindex number of times a macro has been executed
 @cindex macro, execution count
@@ -6680,6 +6735,9 @@ those explicitly specified with @code{.eject}.
 @cindex @code{purgem} directive
 Undefine the macro @var{name}, so that later uses of the string will not be
 expanded.  @xref{Macro}.
+
+Note - nested macros are automatically purged at the end of the macro that
+defines them.
 
 @ifset ELF
 @node PushSection
