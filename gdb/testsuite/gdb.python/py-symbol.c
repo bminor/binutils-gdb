@@ -44,6 +44,7 @@ extern void function_in_other_file (void);
 
 int qq = 72;			/* line of qq */
 static int __attribute__ ((used)) rr = 42;	/* line of rr */
+static int __attribute__ ((used)) qqrr = 42;
 
 int func (int arg)
 {

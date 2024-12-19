@@ -20,11 +20,11 @@ load_lib gdb-python.exp
 
 require allow_python_tests
 
-standard_testfile py-symbol.c py-symbol-2.c
+standard_testfile py-symbol.c py-symbol-2.c py-symbol-3.c
 
 set opts { debug additional_flags=-DUSE_TWO_FILES }
 if {[prepare_for_testing "failed to prepare" $testfile \
-	 [list $srcfile $srcfile2] $opts]} {
+	 [list $srcfile $srcfile2 $srcfile3] $opts]} {
     return -1
 }
 
@@ -35,6 +35,13 @@ set readnow_p [readnow]
 # expanded.
 gdb_test "python print (len (gdb.lookup_static_symbols ('rr')))" \
     "2" "print (len (gdb.lookup_static_symbols ('rr')))"
+
+# This test does not make sense when readnow is in effect.
+if {!$readnow_p} {
+    # Make sure that the global symbol's symtab was not expanded.
+    gdb_test_no_output "pipe maint info symtab | grep \"name.*py-symbol-3.c\"" \
+	"global rr symtab was not expanded"
+}
 
 # Restart so we don't have expanded symtabs after the previous test.
 clean_restart ${binfile}
@@ -65,7 +72,7 @@ gdb_test "python print (gdb.lookup_global_symbol('qq').needs_frame)" \
 # Similarly, test looking up a static symbol before we runto_main.
 set rr_line [gdb_get_line_number "line of rr"]
 set rr_line_alt [gdb_get_line_number "line of other rr" py-symbol-2.c]
-gdb_test "python print (gdb.lookup_global_symbol ('rr') is None)" "True" \
+gdb_test "python print (gdb.lookup_global_symbol ('qqrr') is None)" "True" \
     "lookup_global_symbol for static var"
 
 set cmd "python print (gdb.lookup_static_symbol ('rr').line)"
