@@ -26,6 +26,7 @@
 #include "dll.h"
 #include "gdbsupport/common-gdbthread.h"
 #include "gdbsupport/rsp-low.h"
+#include "gdbsupport/scope-exit.h"
 #include "gdbsupport/netstuff.h"
 #include "gdbsupport/filestuff.h"
 #include "gdbsupport/gdb-sigmask.h"
@@ -638,6 +639,8 @@ putpkt_binary_1 (char *buf, int cnt, int is_notif)
   char *p;
   int cc;
 
+  SCOPE_EXIT { suppressed_remote_debug = false; };
+
   buf2 = (char *) xmalloc (strlen ("$") + cnt + strlen ("#nn") + 1);
 
   /* Copy the packet into buffer BUF2, encapsulating it
@@ -672,15 +675,15 @@ putpkt_binary_1 (char *buf, int cnt, int is_notif)
       if (cs.noack_mode || is_notif)
 	{
 	  /* Don't expect an ack then.  */
-	  if (is_notif)
-	    remote_debug_printf ("putpkt (\"%s\"); [notif]", buf2);
-	  else
-	    remote_debug_printf ("putpkt (\"%s\"); [noack mode]", buf2);
+	  remote_debug_printf ("putpkt (\"%s\"); [%s]",
+			       (suppressed_remote_debug ? "..." : buf2),
+			       (is_notif ? "notif" : "noack mode"));
 
 	  break;
 	}
 
-      remote_debug_printf ("putpkt (\"%s\"); [looking for ack]", buf2);
+      remote_debug_printf ("putpkt (\"%s\"); [looking for ack]",
+			   (suppressed_remote_debug ? "..." : buf2));
 
       cc = readchar ();
 
