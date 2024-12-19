@@ -602,17 +602,15 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
 
       /* Expand any symtabs that contain potentially matching symbols.  */
       lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
-      expand_symtabs_matching (NULL, lookup_name, NULL, NULL,
-			       SEARCH_STATIC_BLOCK, flags);
 
       for (objfile *objfile : current_program_space->objfiles ())
 	{
-	  for (compunit_symtab *cust : objfile->compunits ())
+	  auto callback = [&] (compunit_symtab *cust)
 	    {
 	      /* Skip included compunits to prevent including compunits from
 		 being searched twice.  */
 	      if (cust->user != nullptr)
-		continue;
+		return true;
 
 	      const struct blockvector *bv = cust->blockvector ();
 	      const struct block *block = bv->static_block ();
@@ -625,13 +623,19 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
 		  if (symbol != nullptr)
 		    {
 		      PyObject *sym_obj = symbol_to_symbol_object (symbol);
-		      if (sym_obj == nullptr)
-			return nullptr;
-		      if (PyList_Append (return_list.get (), sym_obj) == -1)
-			return nullptr;
+		      if (sym_obj == nullptr
+			  || PyList_Append (return_list.get (), sym_obj) == -1)
+			return false;
 		    }
 		}
-	    }
+
+	      return true;
+	    };
+
+	  if (!objfile->expand_symtabs_matching
+	      (nullptr, &lookup_name, nullptr, callback,
+	       SEARCH_STATIC_BLOCK, flags))
+	    return nullptr;
 	}
     }
   catch (const gdb_exception &except)
