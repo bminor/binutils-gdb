@@ -104,7 +104,8 @@ extern observable<solib &/* solib */> solib_loaded;
 /* The shared library SOLIB has been unloaded from program space PSPACE.
    Note  when gdb calls this observer, the library's symbols have not
    been unloaded yet, and thus are still available.  */
-extern observable<program_space *, const solib &/* solib */> solib_unloaded;
+extern observable<program_space *, const solib &/* solib */,
+		  bool /* still_in_use */> solib_unloaded;
 
 /* The symbol file specified by OBJFILE has been loaded.  */
 extern observable<struct objfile */* objfile */> new_objfile;

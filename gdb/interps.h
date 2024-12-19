@@ -153,8 +153,11 @@ public:
   /* Notify the interpreter that solib SO has been loaded.  */
   virtual void on_solib_loaded (const solib &so) {}
 
-  /* Notify the interpreter that solib SO has been unloaded.  */
-  virtual void on_solib_unloaded (const solib &so) {}
+  /* Notify the interpreter that solib SO has been unloaded.  When
+     STILL_IN_USE is true, the objfile backing SO is still in use,
+     this indicates that SO was loaded multiple times, but only mapped
+     in once (the mapping was reused).  */
+  virtual void on_solib_unloaded (const solib &so, bool still_in_use) {}
 
   /* Notify the interpreter that a command it is executing is about to cause
      the inferior to proceed.  */
@@ -332,8 +335,11 @@ extern void interps_notify_target_resumed (ptid_t ptid);
 /* Notify all interpreters that solib SO has been loaded.  */
 extern void interps_notify_solib_loaded (const solib &so);
 
-/* Notify all interpreters that solib SO has been unloaded.  */
-extern void interps_notify_solib_unloaded (const solib &so);
+/* Notify all interpreters that solib SO has been unloaded.  When
+   STILL_IN_USE is true, the objfile backing SO is still in use, this
+   indicates that SO was loaded multiple times, but only mapped in
+   once (the mapping was reused).  */
+extern void interps_notify_solib_unloaded (const solib &so, bool still_in_use);
 
 /* Notify all interpreters that the selected traceframe changed.
 

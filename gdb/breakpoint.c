@@ -8090,11 +8090,18 @@ disable_breakpoints_in_shlibs (program_space *pspace)
 
 /* Disable any breakpoints and tracepoints that are in SOLIB upon
    notification of unloaded_shlib.  Only apply to enabled breakpoints,
-   disabled ones can just stay disabled.  */
+   disabled ones can just stay disabled.
+
+   When STILL_IN_USE is true, SOLIB hasn't really been unmapped from
+   the inferior.  In this case, don't disable anything.  */
 
 static void
-disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib)
+disable_breakpoints_in_unloaded_shlib (program_space *pspace, const solib &solib,
+				       bool still_in_use)
 {
+  if (still_in_use)
+    return;
+
   bool disabled_shlib_breaks = false;
 
   for (bp_location *loc : all_bp_locations ())

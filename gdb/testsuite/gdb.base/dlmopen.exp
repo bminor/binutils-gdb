@@ -88,6 +88,18 @@ if { [build_executable "failed to build" $testfile $srcfile \
 set bp_inc [gdb_get_line_number "bp.inc" $srcfile_lib]
 set bp_main [gdb_get_line_number "bp.main" $srcfile]
 
+# Figure out the file name for the dynamic linker.
+set dyln_name [section_get $binfile .interp]
+if { $dyln_name eq "" } {
+    unsupported "couldn't find dynamic linker name"
+    return
+}
+
+# Return true if FILENAME is the dynamic linker.  Otherwise return false.
+proc is_dyln { filename } {
+    return [expr {$filename eq $::dyln_name}]
+}
+
 # Check that 'info shared' show NUM occurrences of DSO.
 proc check_dso_count { dso num } {
     global gdb_prompt hex
@@ -210,6 +222,161 @@ proc test_dlmopen_with_attach {} {
     }
 }
 
+# Run 'info sharedlibrary' and count the number of mappings that look
+# like they might be the dynamic linker.  This will only work for
+# Linux right now.
+proc get_dyld_info {} {
+    if { ![istarget *-linux*] } {
+	return [list 0 ""]
+    }
+
+    set dyld_count 0
+    set dyld_start_addr ""
+    gdb_test_multiple "info sharedlibrary" "" {
+	-re "From\\s+To\\s+Syms\\s+Read\\s+Shared Object Library\r\n" {
+	    exp_continue
+	}
+	-re "^($::hex)\\s+$::hex\\s+\[^/\]+(/\[^\r\n\]+)\r\n" {
+	    set addr $expect_out(1,string)
+	    set lib $expect_out(2,string)
+
+	    if { [is_dyln $lib] } {
+		# This looks like it might be the dynamic linker.
+		incr dyld_count
+		if { $dyld_start_addr eq "" } {
+		    set dyld_start_addr $addr
+		} elseif { $dyld_start_addr ne $addr } {
+		    set dyld_start_addr "MULTIPLE"
+		}
+	    }
+
+	    exp_continue
+	}
+	-re "\\(\\*\\): Shared library is missing debugging information\\.\r\n" {
+	    exp_continue
+	}
+	-re "^$::gdb_prompt $" {
+	}
+    }
+
+    if { $dyld_start_addr eq "MULTIPLE" } {
+	set dyld_start_addr ""
+    }
+
+    return [list $dyld_count $dyld_start_addr]
+}
+
+# The inferior for this test causes the dynamic linker to be appear
+# multiple times in the inferior's shared library list, but (at least
+# with glibc), the dynamic linker is really only mapped in once.  That
+# is, each of the dynamic linker instances that appear in the 'info
+# sharedlibrary' output, will have the same address range.
+#
+# This test creates a user breakpoint in the dynamic linker, and then
+# runs over the dlcose calls, which unmap all but one of the dynamic
+# linker instances.
+#
+# The expectation is that the user breakpoint in the dynamic linker
+# should still be active.  Older versions of GDB had a bug where the
+# breakpoint would become pending.
+proc_with_prefix test_solib_unmap_events { } {
+
+    # This test relies on finding the dynamic linker library, and is
+    # currently written assuming Linux.
+    if { ![istarget *-linux*] } {
+	unsupport "cannot find dynamic linker library on this target"
+	return
+    }
+
+    clean_restart $::binfile
+
+    if { ![runto_main] } {
+	return
+    }
+
+    # Check that before any of our dlopen/dlmopen calls, we can find a
+    # single copy of the dynamic linker in the shared library list.
+    set dyld_info [get_dyld_info]
+    set dyld_count [lindex $dyld_info 0]
+    if { $dyld_count != 1 } {
+	unsupported "initial dyld state appears strange"
+	return
+    }
+
+    # Continue the inferior until all solib are loaded.
+    set alarm_lineno [gdb_get_line_number "alarm" $::srcfile]
+    gdb_breakpoint ${::srcfile}:${alarm_lineno}
+    gdb_continue_to_breakpoint "all solib are now loaded"
+
+    # Check that we have multiple copies of dynamic linker loaded, and
+    # that the dynamic linker is only loaded at a single address.
+    set dyld_info [get_dyld_info]
+    set dyld_count [lindex $dyld_info 0]
+    set dyld_start_addr [lindex $dyld_info 1]
+
+    # If we didn't find a suitable dynamic linker address, or we
+    # didn't find multiple copies of the dynamic linker, then
+    # something has gone wrong with the test setup.
+    if { $dyld_count < 2 } {
+	unsupported "multiple copies of the dynamic linker not found"
+	return
+    }
+    if { $dyld_start_addr eq "" } {
+	unsupported "unable to find suitable dynamic linker start address"
+	return
+    }
+
+    # Check the address we found is (likely) writable.
+    gdb_test_multiple "x/1i $dyld_start_addr" "check b/p address" {
+	-re -wrap "Cannot access memory at address \[^\r\n\]+" {
+	    unsupported "dynamic linker address is not accessible"
+	    return
+	}
+	-re -wrap "" {
+	}
+    }
+
+    # Create a breakpoint within the dynamic linker.  It is pretty unlikely
+    # that this breakpoint will ever be hit, but just in case it is, make it
+    # conditional, with a condition that will never be true.  All we really
+    # care about for this test is whether the breakpoint will be made
+    # pending or not (it should not).
+    gdb_test "break *$dyld_start_addr if (0)" \
+	"Breakpoint $::decimal at $::hex\[^\r\n\]+" \
+	"create breakpoint within dynamic linker"
+    set bpnum [get_integer_valueof "\$bpnum" INVALID "get bpnum"]
+
+    # Now continue until the 'bp.main' location, this will unload some
+    # copies, but not all copies, of the dynamic linker.
+    gdb_test "print wait_for_gdb = 0" " = 0"
+    set bp_main [gdb_get_line_number "bp.main" $::srcfile]
+
+    gdb_breakpoint $::srcfile:$bp_main
+    gdb_continue_to_breakpoint "stop at bp.main"
+
+    # At one point, GDB would incorrectly mark the breakpoints in the
+    # dynamic linker as pending when some instances of the library were
+    # unloaded, despite there really only being one copy of the dynamic
+    # linker actually loaded into the inferior's address space.
+    gdb_test_multiple "info breakpoints $bpnum" "check b/p status" {
+	-re -wrap "$bpnum\\s+breakpoint\\s+keep\\s+y\\s+<PENDING>\\s+\\*$::hex\\s*\r\n\\s+stop only if \\(0\\)" {
+	    fail $gdb_test_name
+	}
+
+	-re -wrap "$bpnum\\s+breakpoint\\s+keep\\s+y\\s+$::hex\\s*\[^\r\n\]+\r\n\\s+stop only if \\(0\\)" {
+	    pass $gdb_test_name
+	}
+    }
+
+    # With all the dlclose calls now complete, we should be back to a
+    # single copy of the dynamic linker.
+    set dyld_info [get_dyld_info]
+    set dyld_count [lindex $dyld_info 0]
+    gdb_assert { $dyld_count == 1 } \
+	"one dynamic linker found after dlclose calls"
+}
+
 # Run the actual tests.
 test_dlmopen_no_attach
 test_dlmopen_with_attach
+test_solib_unmap_events

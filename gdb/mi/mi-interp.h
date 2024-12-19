@@ -61,7 +61,7 @@ public:
 			  const char *format) override;
   void on_target_resumed (ptid_t ptid) override;
   void on_solib_loaded (const solib &so) override;
-  void on_solib_unloaded (const solib &so) override;
+  void on_solib_unloaded (const solib &so, bool still_in_use) override;
   void on_about_to_proceed () override;
   void on_traceframe_changed (int tfnum, int tpnum) override;
   void on_tsv_created (const trace_state_variable *tsv) override;

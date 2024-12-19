@@ -760,7 +760,7 @@ mi_interp::on_solib_loaded (const solib &solib)
 }
 
 void
-mi_interp::on_solib_unloaded (const solib &solib)
+mi_interp::on_solib_unloaded (const solib &solib, bool still_in_use)
 {
   ui_out *uiout = this->interp_ui_out ();
 
