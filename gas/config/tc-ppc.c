@@ -3516,13 +3516,6 @@ md_assemble (char *str)
 	  char *orig_str = str;
 	  bfd_reloc_code_real_type reloc = ppc_elf_suffix (&str, &ex);
 
-	  if (ex.X_op == O_constant)
-	    {
-	      val = ex.X_add_number;
-	      if (sizeof (ex.X_add_number) < sizeof (val)
-		  && (ex.X_add_number < 0) != ex.X_extrabit)
-		val = val ^ ((addressT) -1 ^ (uint64_t) -1);
-	    }
 	  if (reloc != BFD_RELOC_NONE)
 	    switch (reloc)
 	      {
