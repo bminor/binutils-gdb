@@ -878,6 +878,8 @@ struct asm_opcode
 
 #define T_OPCODE_BRANCH 0xe000
 
+#define T_OPCODE_STMFD  0xe9000000
+
 #define THUMB_SIZE	2	/* Size of thumb instruction.  */
 #define THUMB_PP_PC_LR 0x0100
 #define THUMB_LOAD_BIT 0x0800
@@ -12352,6 +12354,8 @@ encode_thumb2_multi (bool do_io, int base, unsigned mask,
     inst.instruction |= base << 16;
 }
 
+static void do_t_push_pop (void);
+
 static void
 do_t_ldmstm (void)
 {
@@ -12367,20 +12371,73 @@ do_t_ldmstm (void)
       unsigned mask;
 
       narrow = false;
-      /* See if we can use a 16-bit instruction.  */
-      if (inst.instruction < 0xffff /* not ldmdb/stmdb */
-	  && inst.size_req != 4
-	  && !(inst.operands[1].imm & ~0xff))
+      /* Try to convert ldm/stm to a 16-bit instruction.  */
+      /* First, handle SP as the base.  */
+      if (inst.operands[0].reg == REG_SP)
 	{
-	  mask = 1 << inst.operands[0].reg;
-
-	  if (inst.operands[0].reg <= 7)
+	  /* Try converting to push/pop.  */
+	  if (inst.operands[0].writeback
+	      && (inst.instruction == T_OPCODE_STMFD  /* Push.  */
+		  || inst.instruction == T_MNEM_ldmia)) /* Pop.  */
 	    {
+	      inst.instruction = (inst.instruction == T_MNEM_ldmia
+				  ? T_MNEM_pop
+				  : T_MNEM_push);
+	      inst.operands[0] = inst.operands[1];
+	      do_t_push_pop ();
+	      return;
+	    }
+	  /* For single registers try a simple ldr/str.  */
+	  if (!inst.operands[0].writeback
+	      && (inst.instruction == T_MNEM_stmia
+		  || inst.instruction == T_MNEM_ldmia)
+	      && (inst.operands[1].imm & (inst.operands[1].imm - 1)) == 0)
+	    {
+	      unsigned long opcode = T_MNEM_str_sp;
+	      if (inst.instruction == T_MNEM_ldmia)
+		opcode = T_MNEM_ldr_sp;
+	      inst.instruction = THUMB_OP16 (opcode);
+	      inst.instruction |= ((ffs (inst.operands[1].imm) - 1) << 8);
+	      narrow = true;
+	    }
+	}
+      /* For ldmia/stmia with all low registers we can try 16-bit
+	 encodings.  */
+      else if (inst.size_req != 4
+	       && (inst.instruction == T_MNEM_ldmia
+		   || inst.instruction == T_MNEM_stmia)
+	       && inst.operands[0].reg <= 7
+	       && !(inst.operands[1].imm & ~0xff))
+	{
+	  /* For single registers try a simple ldr/str.  */
+	  if (!inst.operands[0].writeback
+	      && (inst.operands[1].imm & (inst.operands[1].imm - 1)) == 0)
+	    {
+	      unsigned long opcode = T_MNEM_ldr;
+	      if (inst.instruction == T_MNEM_stmia)
+		opcode = T_MNEM_str;
+
+	      inst.instruction = THUMB_OP16 (opcode);
+	      inst.instruction |= inst.operands[0].reg << 3;
+	      inst.instruction |= (ffs (inst.operands[1].imm) - 1);
+	      narrow = true;
+	    }
+	  /* Finally, try a 16-bit ldm/stm.  */
+	  else
+	    {
+	      mask = 1 << inst.operands[0].reg;
+
+	      /* STMIA must have writeback; LDMIA must have writeback
+		 if and only if the base register is not in the
+		 transfer list.  */
 	      if (inst.instruction == T_MNEM_stmia
 		  ? inst.operands[0].writeback
 		  : (inst.operands[0].writeback
 		     == !(inst.operands[1].imm & mask)))
 		{
+		  /* For STMIA, if the base register is in the
+		     transfer list, the value stored is UNKOWN if it
+		     is not the first register in the list.  */
 		  if (inst.instruction == T_MNEM_stmia
 		      && (inst.operands[1].imm & mask)
 		      && (inst.operands[1].imm & (mask - 1)))
@@ -12390,50 +12447,6 @@ do_t_ldmstm (void)
 		  inst.instruction = THUMB_OP16 (inst.instruction);
 		  inst.instruction |= inst.operands[0].reg << 8;
 		  inst.instruction |= inst.operands[1].imm;
-		  narrow = true;
-		}
-	      else if ((inst.operands[1].imm & (inst.operands[1].imm-1)) == 0)
-		{
-		  /* This means 1 register in reg list one of 3 situations:
-		     1. Instruction is stmia, but without writeback.
-		     2. lmdia without writeback, but with Rn not in
-			reglist.
-		     3. ldmia with writeback, but with Rn in reglist.
-		     Case 3 is UNPREDICTABLE behaviour, so we handle
-		     case 1 and 2 which can be converted into a 16-bit
-		     str or ldr. The SP cases are handled below.  */
-		  unsigned long opcode;
-		  /* First, record an error for Case 3.  */
-		  if (inst.operands[1].imm & mask
-		      && inst.operands[0].writeback)
-		    inst.error =
-			_("having the base register in the register list when "
-			  "using write back is UNPREDICTABLE");
-
-		  opcode = (inst.instruction == T_MNEM_stmia ? T_MNEM_str
-							     : T_MNEM_ldr);
-		  inst.instruction = THUMB_OP16 (opcode);
-		  inst.instruction |= inst.operands[0].reg << 3;
-		  inst.instruction |= (ffs (inst.operands[1].imm)-1);
-		  narrow = true;
-		}
-	    }
-	  else if (inst.operands[0] .reg == REG_SP)
-	    {
-	      if (inst.operands[0].writeback)
-		{
-		  inst.instruction =
-			THUMB_OP16 (inst.instruction == T_MNEM_stmia
-				    ? T_MNEM_push : T_MNEM_pop);
-		  inst.instruction |= inst.operands[1].imm;
-		  narrow = true;
-		}
-	      else if ((inst.operands[1].imm & (inst.operands[1].imm-1)) == 0)
-		{
-		  inst.instruction =
-			THUMB_OP16 (inst.instruction == T_MNEM_stmia
-				    ? T_MNEM_str_sp : T_MNEM_ldr_sp);
-		  inst.instruction |= ((ffs (inst.operands[1].imm)-1) << 8);
 		  narrow = true;
 		}
 	    }
