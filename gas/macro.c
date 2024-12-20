@@ -1411,7 +1411,6 @@ check_macro (const char *line, sb *expand,
 {
   const char *s;
   char *copy, *cls;
-  macro_entry *macro;
   sb line_sb;
 
   if (! macros_defined)
@@ -1431,8 +1430,8 @@ check_macro (const char *line, sb *expand,
   for (cls = copy; *cls != '\0'; cls ++)
     *cls = TOLOWER (*cls);
 
-  int i;
-  for (i = macro_nesting_depth; i >= 0; i--)
+  macro_entry *macro = NULL;
+  for (int i = macro_nesting_depth; i >= 0; i--)
     {
       macro = str_hash_find (macro_hash[i], copy);
       if (macro != NULL)
