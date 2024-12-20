@@ -1054,11 +1054,14 @@ static int operate_saved_history = -1;
 static void
 gdb_rl_operate_and_get_next_completion (void)
 {
-  int delta = where_history () - operate_saved_history;
+  if (operate_saved_history != -1)
+    {
+      int delta = where_history () - operate_saved_history;
 
-  /* The `key' argument to rl_get_previous_history is ignored.  */
-  rl_get_previous_history (delta, 0);
-  operate_saved_history = -1;
+      /* The `key' argument to rl_get_previous_history is ignored.  */
+      rl_get_previous_history (delta, 0);
+      operate_saved_history = -1;
+    }
 
   /* readline doesn't automatically update the display for us.  */
   rl_redisplay ();
@@ -1083,9 +1086,10 @@ gdb_rl_operate_and_get_next (int count, int key)
   /* Find the current line, and find the next line to use.  */
   where = where_history();
 
-  if ((history_is_stifled () && (history_length >= history_max_entries))
-      || (where >= history_length - 1))
+  if (history_is_stifled () && history_length >= history_max_entries)
     operate_saved_history = where;
+  else if (where >= history_length - 1)
+    operate_saved_history = -1;
   else
     operate_saved_history = where + 1;
 
