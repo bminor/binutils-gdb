@@ -20,8 +20,13 @@ load_lib completion-support.exp
 standard_testfile explicit.c explicit2.c 3explicit.c
 set exefile $testfile
 
+set opts {}
+lappend opts debug
+lappend opts nowarnings
+lappend opts additional_flags=-nostdlib
+
 if {[prepare_for_testing "failed to prepare" $exefile \
-	 [list $srcfile $srcfile2 $srcfile3] {debug nowarnings}]} {
+	 [list $srcfile $srcfile2 $srcfile3] $opts]} {
     return -1
 }
 
