@@ -6884,6 +6884,34 @@ fatal so it can carry out the purpose of the interrupt: to kill the program.
 program.  You can tell @value{GDBN} in advance what to do for each kind of
 signal.
 
+When specifying a signal by number, @value{GDBN} translates the number
+to the target platform according to the corresponding signal name.
+For example, @value{GDBN} always treats signal 1 as @code{SIGHUP}.
+So, when specifying @samp{1} as a signal, @value{GDBN} will translate
+this to the target's @code{SIGHUP}, whatever that might be.
+
+Numbers may only be used for signals 1 through 15.  @value{GDBN} uses
+this mapping:
+
+@multitable {Number} {SIGTERM}
+@headitem Number @tab Name
+@item 1 @tab SIGHUP
+@item 2 @tab SIGINT
+@item 3 @tab SIGQUIT
+@item 4 @tab SIGILL
+@item 5 @tab SIGTRAP
+@item 6 @tab SIGABRT
+@item 7 @tab SIGEMT
+@item 8 @tab SIGFPE
+@item 9 @tab SIGKILL
+@item 10 @tab SIGBUS
+@item 11 @tab SIGSEGV
+@item 12 @tab SIGSYS
+@item 13 @tab SIGPIPE
+@item 14 @tab SIGALRM
+@item 15 @tab SIGTERM
+@end multitable
+
 @cindex handling signals
 Normally, @value{GDBN} is set up to let the non-erroneous signals like
 @code{SIGALRM} be silently passed to your program
