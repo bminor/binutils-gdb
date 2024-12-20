@@ -25,6 +25,7 @@
 #include "serial.h"
 #include "ui.h"
 #include <optional>
+#include "cli/cli-style.h"
 
 static void
 print_flush (void)
@@ -105,6 +106,7 @@ exception_print (struct ui_file *file, const struct gdb_exception &e)
   if (e.reason < 0 && e.message != NULL)
     {
       print_flush ();
+      print_error_prefix (file);
       print_exception (file, e);
     }
 }
@@ -118,6 +120,7 @@ exception_fprintf (struct ui_file *file, const struct gdb_exception &e,
       va_list args;
 
       print_flush ();
+      print_error_prefix (file);
 
       /* Print the prefix.  */
       va_start (args, prefix);

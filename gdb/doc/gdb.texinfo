@@ -27974,6 +27974,19 @@ value, then @value{GDBN} will change this to @samp{off} at startup.
 @item show style enabled
 Show the current state of styling.
 
+@item set style emoji @samp{auto|on|off}
+Enable or disable the use of emoji.  On most hosts, the default is
+@samp{auto}, meaning that emoji will only be used if the host
+character set is @samp{UTF-8}; however, on Windows the default is
+@samp{off} when using the console.  Note that disabling styling as a
+whole will also prevent emoji display.
+
+Currently, emoji are printed whenever @value{GDBN} reports an error or
+a warning.
+
+@item show style emoji
+Show the current state of emoji output.
+
 @item set style sources @samp{on|off}
 Enable or disable source code styling.  This affects whether source
 code, such as the output of the @code{list} command, is styled.  The
@@ -27986,6 +27999,17 @@ There are two ways that highlighting can be done.  First, if
 is used.  Otherwise, if @value{GDBN} was configured with Python
 scripting support, and if the Python Pygments package is available,
 then it will be used.
+
+@item set style warning-prefix
+@itemx show style warning-prefix
+@itemx set style error-prefix
+@itemx show style error-prefix
+
+These commands control the prefix that is printed before warnings and
+errors, respectively.  This functionality is intended for use with
+emoji display, and so the prefixes are only displayed if emoji styling
+is enabled.  The defaults are the warning sign emoji for warnings, and
+and the cross mark emoji for errors.
 
 @item show style sources
 Show the current state of source code styling.

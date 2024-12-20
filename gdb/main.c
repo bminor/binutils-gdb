@@ -672,6 +672,8 @@ captured_main_1 (struct captured_main_args *context)
   /* Ensure stderr is unbuffered.  A Cygwin pty or pipe is implemented
      as a Windows pipe, and Windows buffers on pipes.  */
   setvbuf (stderr, NULL, _IONBF, BUFSIZ);
+
+  windows_initialize_console ();
 #endif
 
   /* Note: `error' cannot be called before this point, because the

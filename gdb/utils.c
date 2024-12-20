@@ -177,6 +177,7 @@ vwarning (const char *string, va_list args)
 	  target_terminal::ours_for_output ();
 	}
       gdb_puts (warning_pre_print, gdb_stderr);
+      print_warning_prefix (gdb_stderr);
       gdb_puts (_("warning: "), gdb_stderr);
       gdb_vprintf (gdb_stderr, string, args);
       gdb_printf (gdb_stderr, "\n");

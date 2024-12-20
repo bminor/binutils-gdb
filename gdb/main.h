@@ -44,6 +44,9 @@ extern std::string interpreter_p;
    return value is in malloc'ed storage.  */
 extern char *windows_get_absolute_argv0 (const char *argv0);
 
+/* Initialize Windows console settings.  */
+extern void windows_initialize_console ();
+
 extern void set_gdb_data_directory (const char *new_data_dir);
 
 #endif /* GDB_MAIN_H */

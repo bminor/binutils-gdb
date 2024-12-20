@@ -329,6 +329,18 @@ proc run_style_tests { } {
 		"The \033\\\[38;2;254;210;16;48;5;255;22;27m.*\".*version.*\".*style.*\033\\\[m foreground color is: #FED210" \
 		"Version's TrueColor foreground style"
 	}
+
+	gdb_test_no_output "set host-charset UTF-8"
+	# Chosen since it will print an error.
+	gdb_test "maint translate-address" \
+	    "❌️ requires argument.*" \
+	    "emoji output"
+
+	gdb_test_no_output "set style error-prefix abcd:" \
+	    "set the error prefix"
+	gdb_test "maint translate-address" \
+	    "abcd:requires argument.*" \
+	    "error prefix"
     }
 }
 

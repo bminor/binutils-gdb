@@ -190,4 +190,18 @@ private:
   bool m_old_value;
 };
 
+/* Return true if emoji styling is allowed.  */
+extern bool emojis_ok ();
+
+/* Disable emoji styling.  This is here so that Windows can disable
+   emoji when the console is in use.  It shouldn't be called
+   elsewhere.  */
+extern void no_emojis ();
+
+/* Print the warning prefix, if desired.  */
+extern void print_warning_prefix (ui_file *file);
+
+/* Print the error prefix, if desired.  */
+extern void print_error_prefix (ui_file *file);
+
 #endif /* GDB_CLI_CLI_STYLE_H */

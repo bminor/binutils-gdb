@@ -65,6 +65,19 @@ show riscv numeric-register-names
   (e.g 'x1') or their abi names (e.g. 'ra').
   Defaults to 'off', matching the old behaviour (abi names).
 
+set style emoji on|off|auto
+show style emoji
+  Controls whether GDB can display emoji.  The default is "auto",
+  which means emoji will be displayed in some situations when
+  the host charset is UTF-8.
+
+set style warning-prefix STRING
+set style error-prefix STRING
+  These commands control the prefix that is printed before warnings
+  and errors, respectively.  This functionality is intended for use
+  with emoji display, and so the prefixes are only displayed if emoji
+  styling is enabled.
+
 info linker-namespaces
 info linker-namespaces [[N]]
   Print information about the given linker namespace (identified as N),
