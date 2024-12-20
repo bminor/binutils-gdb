@@ -760,6 +760,7 @@ HAVE_NATIVE_GCORE_TARGET
 TARGET_OBS
 AMD_DBGAPI_LIBS
 AMD_DBGAPI_CFLAGS
+HAVE_GSTACK
 ENABLE_BFD_64_BIT_FALSE
 ENABLE_BFD_64_BIT_TRUE
 subdirs
@@ -11499,7 +11500,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11502 "configure"
+#line 11503 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11605,7 +11606,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11608 "configure"
+#line 11609 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -25008,6 +25009,12 @@ if test x${all_targets} = xtrue; then
   fi
 fi
 
+HAVE_GSTACK=0
+if test $gdb_native = yes; then
+   HAVE_GSTACK=1
+fi
+
+
 # AMD debugger API support.
 
 
@@ -33761,6 +33768,8 @@ fi
 
 ac_config_files="$ac_config_files gcore"
 
+ac_config_files="$ac_config_files gstack.in:gstack-1.in"
+
 ac_config_files="$ac_config_files Makefile gdb-gdb.gdb gdb-gdb.py doc/Makefile data-directory/Makefile"
 
 
@@ -34861,6 +34870,7 @@ do
     "jit-reader.h") CONFIG_FILES="$CONFIG_FILES jit-reader.h:jit-reader.in" ;;
     "nm.h") CONFIG_LINKS="$CONFIG_LINKS nm.h:$GDB_NM_FILE" ;;
     "gcore") CONFIG_FILES="$CONFIG_FILES gcore" ;;
+    "gstack.in") CONFIG_FILES="$CONFIG_FILES gstack.in:gstack-1.in" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "gdb-gdb.gdb") CONFIG_FILES="$CONFIG_FILES gdb-gdb.gdb" ;;
     "gdb-gdb.py") CONFIG_FILES="$CONFIG_FILES gdb-gdb.py" ;;

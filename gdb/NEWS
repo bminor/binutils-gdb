@@ -62,6 +62,8 @@
 * Support for process record/replay and reverse debugging on loongarch*-linux*
   targets has been added.
 
+* New bash script gstack uses GDB to print stack traces of running processes.
+
 * Python API
 
   ** Added gdb.record.clear.  Clears the trace data of the current recording.

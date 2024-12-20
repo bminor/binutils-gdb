@@ -590,6 +590,7 @@ CONFIG_CLEAN = @CONFIG_CLEAN@
 CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
+HAVE_GSTACK = @HAVE_GSTACK@
 
 CONFIG_SRC_SUBDIR = arch cli dwarf2 mi compile tui unittests guile python \
 	target nat
@@ -1946,7 +1947,7 @@ generated_files = \
 # Flags needed to compile Python code
 PYTHON_CFLAGS = @PYTHON_CFLAGS@
 
-all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb gcore
+all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb gcore gstack
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=$(SUBDIRS)" subdir_do
 
 # Rule for compiling .c files in the top-level gdb directory.
@@ -2105,6 +2106,19 @@ install-only: $(CONFIG_INSTALL)
 		  $(INSTALL_SCRIPT) gcore \
 			  $(DESTDIR)$(bindir)/$$transformed_name; \
 	fi
+	if test "x${HAVE_GSTACK}" != x; \
+	then \
+	  transformed_name=`t='$(program_transform_name)'; \
+			    echo gstack | sed -e "$$t"` ; \
+		  if test "x$$transformed_name" = x; then \
+		    transformed_name=gstack ; \
+		  else \
+		    true ; \
+		  fi ; \
+		  $(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir) ; \
+		  $(INSTALL_SCRIPT) gstack \
+			  $(DESTDIR)$(bindir)/$$transformed_name; \
+	fi
 	transformed_name=`t='$(program_transform_name)'; \
 			  echo gdb-add-index | sed -e "$$t"` ; \
 	if test "x$$transformed_name" = x; then \
@@ -2144,6 +2158,17 @@ uninstall: force $(CONFIG_UNINSTALL)
 			    echo gcore | sed -e "$$t"` ; \
 		  if test "x$$transformed_name" = x; then \
 		    transformed_name=gcore ; \
+		  else \
+		    true ; \
+		  fi ; \
+		  rm -f $(DESTDIR)$(bindir)/$$transformed_name; \
+	fi
+	if test "x$(HAVE_GSTACK)" != x; \
+	then \
+	  transformed_name=`t='$(program_transform_name)'; \
+			    echo gstack | sed -e "$$t"` ; \
+		  if test "x$$transformed_name" = x; then \
+		    transformed_name=gstack ; \
 		  else \
 		    true ; \
 		  fi ; \
@@ -2260,7 +2285,7 @@ clean mostlyclean: $(CONFIG_CLEAN)
 # functionality described is if the distributed files are unmodified.
 distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(CLEANDIRS)" subdir_do
-	rm -f nm.h config.status config.h stamp-h b jit-reader.h gcore stamp-nmh
+	rm -f nm.h config.status config.h stamp-h b jit-reader.h gcore gstack gstack.in stamp-nmh
 	rm -f gdb-gdb.py gdb-gdb.gdb
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
@@ -2319,6 +2344,15 @@ jit-reader.h: $(srcdir)/jit-reader.in config.status
 	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
 gcore: $(srcdir)/gcore.in config.status
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
+
+gstack: gstack.in version.c
+	$(ECHO_GEN) \
+	vv=`grep 'version\[\] = ' version.c | grep -o '".*"' | tr -d \"`; \
+	sed -e "s,@VERSION@,$$vv," $< > $@
+	@chmod +x $@
+
+gstack.in: $(srcdir)/gstack-1.in config.status
 	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
 gdb-gdb.py: $(srcdir)/gdb-gdb.py.in config.status

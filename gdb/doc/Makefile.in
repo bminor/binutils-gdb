@@ -188,7 +188,7 @@ TEXI2POD = perl $(srcdir)/../../etc/texi2pod.pl \
 POD2MAN = pod2man --center="GNU Development Tools"
 
 # List of man pages generated from gdb.texi
-MAN1S = gdb.1 gdbserver.1 gcore.1 gdb-add-index.1
+MAN1S = gdb.1 gdbserver.1 gcore.1 gstack.1 gdb-add-index.1
 MAN5S = gdbinit.5
 MANS = $(MAN1S) $(MAN5S)
 
@@ -199,6 +199,7 @@ POD_FILE_TMPS = $(patsubst %.1,%.pod,$(MAN1S)) \
 
 HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 HAVE_NATIVE_GCORE_HOST = @HAVE_NATIVE_GCORE_HOST@
+HAVE_GSTACK = @HAVE_GSTACK@
 
 ###
 
@@ -339,6 +340,10 @@ install-man1: $(MAN1S)
 		  -a "$$p" = gcore.1; then \
 	    continue; \
 	  fi; \
+	  if test "x$(HAVE_GSTACK)" = x \
+		  -a "$$p" = gstack.1; then \
+	    continue; \
+	  fi; \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=`echo $$p | sed -e 's|^.*/||' -e '$(transform)'`; \
 	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(man1dir)/$$f'"; \
@@ -361,6 +366,10 @@ uninstall-man1:
 	files=`{ l2='$(MAN1S)'; for i in $$l2; do \
 	  if test "x$(HAVE_NATIVE_GCORE_TARGET)$(HAVE_NATIVE_GCORE_HOST)" = x \
 		  -a "$$i" = gcore.1; then \
+	    continue; \
+	  fi; \
+	  if test "x$(HAVE_GSTACK)" = x \
+		  -a "$$i" = gstack.1; then \
 	    continue; \
 	  fi; \
 	  echo "$$i"; \

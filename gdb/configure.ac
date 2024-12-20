@@ -261,6 +261,12 @@ if test x${all_targets} = xtrue; then
   fi
 fi
 
+HAVE_GSTACK=0
+if test $gdb_native = yes; then
+   HAVE_GSTACK=1
+fi
+AC_SUBST(HAVE_GSTACK)
+
 # AMD debugger API support.
 
 AC_ARG_WITH([amd-dbgapi],
@@ -2264,6 +2270,7 @@ GDB_AC_SELFTEST([
 GDB_AC_TRANSFORM([gdb], [GDB_TRANSFORM_NAME])
 GDB_AC_TRANSFORM([gcore], [GCORE_TRANSFORM_NAME])
 AC_CONFIG_FILES([gcore], [chmod +x gcore])
+AC_CONFIG_FILES([gstack.in:gstack-1.in])
 AC_CONFIG_FILES([Makefile gdb-gdb.gdb gdb-gdb.py doc/Makefile data-directory/Makefile])
 
 AC_OUTPUT

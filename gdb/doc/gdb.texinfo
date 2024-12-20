@@ -50584,6 +50584,7 @@ Show the current verbosity setting.
 * gdb man::                     The GNU Debugger man page
 * gdbserver man::               Remote Server for the GNU Debugger man page
 * gcore man::                   Generate a core file of a running program
+* gstack man::                  Print a stack trace of a running program
 * gdbinit man::                 gdbinit scripts
 * gdb-add-index man::           Add index files to speed up GDB
 @end menu
@@ -51249,6 +51250,75 @@ the gcore command. This argument is optional.
 @c man end
 
 @c man begin SEEALSO gcore
+@ifset man
+The full documentation for @value{GDBN} is maintained as a Texinfo manual.
+If the @code{info} and @code{gdb} programs and @value{GDBN}'s Texinfo
+documentation are properly installed at your site, the command
+
+@smallexample
+info gdb
+@end smallexample
+
+@noindent
+should give you access to the complete manual.
+
+@cite{Using GDB: A Guide to the GNU Source-Level Debugger},
+Richard M. Stallman and Roland H. Pesch, July 1991.
+@end ifset
+@c man end
+
+@node gstack man
+@heading gstack
+
+@c man title gstack Print a stack trace of a running program
+
+@format
+@c man begin SYNOPSIS gstack
+gstack [-h | --help] [-v | --version] @var{pid}
+@c man end
+@end format
+
+@c man begin DESCRIPTION gstack
+Print a stack trace of a running program with process ID @var{pid}.  If the process
+is multi-threaded, @command{gstack} outputs backtraces for every thread which exists
+in the process.
+
+The script invokes @value{GDBN}, attaches to the given process ID, prints the stack trace,
+and detaches from the process.
+
+@command{gstack} exits with non-zero status if @code{gdb} was unable to attach to
+the given process ID for any reason, such as a non-existent process ID or
+insufficient privileges to attach to the process.
+@c man end
+
+@c man begin OPTIONS gstack
+@table @env
+@item --help
+@itemx -h
+List all options, with brief explanations.
+
+@item --version
+@itemx -v
+Print version information and then exit.
+@end table
+@c man end
+
+@c man begin ENVIRONMENT gstack
+@table @env
+@item AWK
+Full file name for an Awk interpreter to use.  If not set, @env{PATH} will be
+searched for an @code{awk} program.
+
+@item GDB
+Full file name for a @value{GDBN} executable to use to generate stack backtraces.
+If not set, @env{PATH} will be searched for a @code{gdb} program.
+
+@item GDBARGS
+Optional arguments to be passed to the @code{gdb} program.
+@end table
+@c man end
+
+@c man begin SEEALSO gstack
 @ifset man
 The full documentation for @value{GDBN} is maintained as a Texinfo manual.
 If the @code{info} and @code{gdb} programs and @value{GDBN}'s Texinfo
