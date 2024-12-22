@@ -1016,14 +1016,15 @@ gnu_nat_target::inf_validate_procs (struct inf *inf)
   {
     /* Make things normally linear.  */
     mach_msg_type_number_t search_start = 0;
-    /* Which thread in PROCS corresponds to each task thread, & the task.  */
-    struct proc *matched[num_threads + 1];
+
+    /* Which thread in PROCS corresponds to each task thread.  */
+    std::vector<struct proc *> matched (num_threads);
+
     /* The last thread in INF->threads, so we can add to the end.  */
     struct proc *last = 0;
+
     /* The current thread we're considering.  */
     struct proc *thread = inf->threads;
-
-    memset (matched, 0, sizeof (matched));
 
     while (thread)
       {
