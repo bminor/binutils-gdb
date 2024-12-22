@@ -5978,11 +5978,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	p->p_align = 1 << bed->s->log_file_align;
 
       if (m == phdr_load_seg)
-	{
-	  if (!m->includes_filehdr)
-	    p->p_offset = off;
-	  off += actual * bed->s->sizeof_phdr;
-	}
+	off += actual * bed->s->sizeof_phdr;
 
       no_contents = false;
       off_adjust = 0;
@@ -6131,6 +6127,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    {
 	      if (p->p_type == PT_LOAD)
 		{
+		  p->p_offset = off - actual * bed->s->sizeof_phdr;
 		  elf_elfheader (abfd)->e_phoff = p->p_offset;
 		  if (m->count > 0)
 		    {
@@ -6141,6 +6138,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 	      else if (phdr_load_seg != NULL)
 		{
+		  /* Also set PT_PHDR to match phdr_load_seg.  We've
+		     sorted segments so that phdr_load_seg will
+		     already be set by the code immediately above.  */
 		  Elf_Internal_Phdr *phdr = phdrs + phdr_load_seg->idx;
 		  bfd_vma phdr_off = 0;  /* Octets.  */
 		  if (phdr_load_seg->includes_filehdr)
