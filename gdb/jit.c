@@ -665,6 +665,8 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 
   objfile *objfile = objfile::make (nullptr, current_program_space,
 				    objfile_name.c_str (), OBJF_NOT_FILENAME);
+  objfile->section_offsets.push_back (0);
+  objfile->sect_index_text = 0;
   objfile->per_bfd->gdbarch = priv_data->gdbarch;
 
   for (gdb_symtab &symtab : obj->symtabs)
