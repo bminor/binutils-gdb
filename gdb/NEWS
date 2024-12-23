@@ -62,6 +62,18 @@ binary-upload in qSupported reply
   stub doesn't report this feature supported, then GDB will not use
   the 'x' packet.
 
+* MI changes
+
+** The =library-unloaded event now includes the 'ranges' field, which
+   has the same meaning as for the =library-loaded event.
+
+** The =library-unloaded event now includes the 'still-in-use' field.
+   This field is 'true' when a library is unloaded (removed from the
+   inferior's list of loaded libraries), but the mapping within the
+   inferior's address space is retained, as the library was mapped
+   multiple times, and the same mapping was being reused.  In all
+   other cases, this field will have the value 'false'.
+
 *** Changes in GDB 16
 
 * Support for Nios II targets has been removed as this architecture

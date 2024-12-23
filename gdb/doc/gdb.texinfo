@@ -32253,12 +32253,22 @@ to this library.
 
 @item =library-unloaded,...
 Reports that a library was unloaded by the program.  This notification
-has 3 fields---@var{id}, @var{target-name} and @var{host-name} with
-the same meaning as for the @code{=library-loaded} notification.
+has the following fields---@var{id}, @var{target-name},
+@var{host-name} and @var{ranges} with the same meaning as for the
+@code{=library-loaded} notification.
+
+It is possible that a library can appear multiple times in an
+inferior's library list, but the library is only mapped once into the
+inferior's address space.  When this happens, and one copy of the
+library is unloaded, but there are remaining copies, the
+@var{still-in-use} field will be @samp{true}.  In all other
+situations, the @var{still-in-use} field will have the value
+@samp{false}.
+
 The @var{thread-group} field, if present, specifies the id of the
-thread group in whose context the library was unloaded.  If the field is
-absent, it means the library was unloaded in the context of all present
-thread groups.
+thread group in whose context the library was unloaded.  If the field
+is absent, it means the library was unloaded in the context of all
+present thread groups.
 
 @item =traceframe-changed,num=@var{tfnum},tracepoint=@var{tpnum}
 @itemx =traceframe-changed,end

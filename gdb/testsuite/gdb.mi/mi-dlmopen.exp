@@ -167,13 +167,23 @@ proc check_solib_unload_events {} {
     # unload events.  Process them now.
     set dyld_unload_count 0
     array set unload_counts {}
+    set still_in_use_fields_correct true
     gdb_test_multiple "" "" -prompt $::mi_gdb_prompt {
-	-re "=library-unloaded,id=\"(\[^\"\]+)\",\[^\r\n\]+\r\n" {
+	-re "=library-unloaded,id=\"(\[^\"\]+)\",\[^\r\n\]+,ranges=\\\[\\{from=\"$::hex\",to=\"$::hex\"\\}\\\],still-in-use=\"(true|false)\"\r\n" {
 	    set lib $expect_out(1,string)
+	    set in_use $expect_out(2,string)
 	    if {[is_dyln $lib]} {
 		# This is the dynamic linker being unloaded.
 		incr dyld_unload_count
+		set expected_in_use "true"
+	    } else {
+		set expected_in_use "false"
 	    }
+
+	    if { $in_use ne $expected_in_use } {
+		set still_in_use_fields_correct false
+	    }
+
 	    set filename [file tail $lib]
 	    incr unload_counts($filename)
 	    exp_continue
@@ -186,6 +196,9 @@ proc check_solib_unload_events {} {
     # times.
     gdb_assert { $dyld_unload_count == $dyld_count - 1 } \
 	"expected number of dynamic linker unloads"
+
+    gdb_assert { $still_in_use_fields_correct } \
+	"still-in-use fields were all correct"
 
     # Check that we saw the expected number of library-unloaded events for
     # each library.  Each DESC is a list of two elements, a filename for a
