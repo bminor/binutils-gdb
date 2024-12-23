@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the x86 Intel AVX10.2 instructions.
+
 * Add support for the x86 Intel SM4 AVX10.2 instructions.
 
 * Support for Nios II targets has been dropped, as the architecture has

@@ -1155,6 +1155,8 @@ enum
   PREFIX_VEX_MAP7_F6_L_0_W_0_R_0_X86_64,
   PREFIX_VEX_MAP7_F8_L_0_W_0_R_0_X86_64,
 
+  PREFIX_EVEX_0F2E,
+  PREFIX_EVEX_0F2F,
   PREFIX_EVEX_0F5B,
   PREFIX_EVEX_0F6F,
   PREFIX_EVEX_0F70,
@@ -1207,6 +1209,8 @@ enum
   PREFIX_EVEX_0F3A26,
   PREFIX_EVEX_0F3A27,
   PREFIX_EVEX_0F3A42_W_0,
+  PREFIX_EVEX_0F3A52,
+  PREFIX_EVEX_0F3A53,
   PREFIX_EVEX_0F3A56,
   PREFIX_EVEX_0F3A57,
   PREFIX_EVEX_0F3A66,
@@ -1245,6 +1249,7 @@ enum
   PREFIX_EVEX_MAP5_6B,
   PREFIX_EVEX_MAP5_6C,
   PREFIX_EVEX_MAP5_6D,
+  PREFIX_EVEX_MAP5_6E_L_0,
   PREFIX_EVEX_MAP5_74,
   PREFIX_EVEX_MAP5_78,
   PREFIX_EVEX_MAP5_79,
@@ -1252,6 +1257,7 @@ enum
   PREFIX_EVEX_MAP5_7B,
   PREFIX_EVEX_MAP5_7C,
   PREFIX_EVEX_MAP5_7D,
+  PREFIX_EVEX_MAP5_7E_L_0,
 
   PREFIX_EVEX_MAP6_13,
   PREFIX_EVEX_MAP6_2C,
@@ -1521,7 +1527,9 @@ enum
 
 enum
 {
-  EVEX_LEN_0F3816 = 0,
+  EVEX_LEN_0F7E_P_1_W_0 = 0,
+  EVEX_LEN_0FD6_P_2_W_0,
+  EVEX_LEN_0F3816,
   EVEX_LEN_0F3819,
   EVEX_LEN_0F381A,
   EVEX_LEN_0F381B,
@@ -1541,7 +1549,10 @@ enum
   EVEX_LEN_0F3A39,
   EVEX_LEN_0F3A3A,
   EVEX_LEN_0F3A3B,
-  EVEX_LEN_0F3A43
+  EVEX_LEN_0F3A43,
+
+  EVEX_LEN_MAP5_6E,
+  EVEX_LEN_MAP5_7E,
 };
 
 enum
@@ -1779,7 +1790,9 @@ enum
   EVEX_W_MAP5_6C_P_2,
   EVEX_W_MAP5_6D_P_0,
   EVEX_W_MAP5_6D_P_2,
+  EVEX_W_MAP5_6E_P_1,
   EVEX_W_MAP5_7A_P_3,
+  EVEX_W_MAP5_7E_P_1,
 };
 
 typedef bool (*op_rtn) (instr_info *ins, int bytemode, int sizeflag);
@@ -3315,16 +3328,16 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0F2E */
   {
-    { "%XEVucomisYX",	{ XMScalar, EXd, EXxEVexS }, 0 },
+    { "VucomisYX",	{ XMScalar, EXd, EXxEVexS }, 0 },
     { Bad_Opcode },
-    { "%XEVucomisYX",	{ XMScalar, EXq, EXxEVexS }, 0 },
+    { "VucomisYX",	{ XMScalar, EXq, EXxEVexS }, 0 },
   },
 
   /* PREFIX_0F2F */
   {
-    { "%XEVcomisYX",	{ XMScalar, EXd, EXxEVexS }, 0 },
+    { "VcomisYX",	{ XMScalar, EXd, EXxEVexS }, 0 },
     { Bad_Opcode },
-    { "%XEVcomisYX",	{ XMScalar, EXq, EXxEVexS }, 0 },
+    { "VcomisYX",	{ XMScalar, EXq, EXxEVexS }, 0 },
   },
 
   /* PREFIX_0F51 */
