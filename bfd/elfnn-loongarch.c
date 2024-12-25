@@ -863,8 +863,16 @@ bad_static_reloc (struct bfd_link_info *info,
 {
   reloc_howto_type * r = loongarch_elf_rtype_to_howto (abfd, r_type);
   const char *object;
-  const char *pic;
+  const char *pic_opt;
   const char *name = NULL;
+
+  /* If this, the problem is we are referring an external symbol in
+     a way only working for local symbols, not PC-relative vs.
+	 absolute.  */
+  bool bad_extern_access =
+    (bfd_link_pde (info)
+     || r_type == R_LARCH_PCREL20_S2
+     || r_type == R_LARCH_PCALA_HI20);
 
   if (h)
     name = h->root.root.string;
@@ -873,12 +881,12 @@ bad_static_reloc (struct bfd_link_info *info,
 					    elf_symtab_hdr (abfd).sh_link,
 					    isym->st_name);
   if (name == NULL || *name == '\0')
-    name ="<nameless>";
+    name = "<nameless>";
 
   if (bfd_link_dll (info))
     {
       object = _("a shared object");
-      pic = _("; recompile with -fPIC");
+      pic_opt = "-fPIC";
     }
   else
     {
@@ -886,13 +894,16 @@ bad_static_reloc (struct bfd_link_info *info,
 	object = _("a PIE object");
       else
 	object = _("a PDE object");
-      pic = _("; recompile with -fPIE");
+
+      pic_opt = bad_extern_access ? "-mno-direct-extern-access" : "-fPIE";
     }
 
   (*_bfd_error_handler)
    (_("%pB:(%pA+%#lx): relocation %s against `%s` can not be used when making "
-      "%s%s"),
-    abfd, sec, (long) rel->r_offset, r ? r->name : _("<unknown>"), name, object, pic);
+      "%s; recompile with %s%s"),
+    abfd, sec, (long) rel->r_offset, r ? r->name : _("<unknown>"), name,
+    object, pic_opt,
+    bad_extern_access ? _(" and check the symbol visibility") : "");
   bfd_set_error (bfd_error_bad_value);
   return false;
 }
