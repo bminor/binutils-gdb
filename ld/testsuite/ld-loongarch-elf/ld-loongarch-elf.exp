@@ -196,6 +196,7 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "relr-text-pie"
     run_dump_test "abssym_pie"
     run_dump_test "weak-undef-hidden-pie"
+    run_dump_test "weak-undef-static-pie"
   }
 
   run_dump_test "max_imm_b16"

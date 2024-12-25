@@ -1096,12 +1096,16 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	/* Since shared library global symbols interpose, any
 	   PC-relative relocations against external symbols
-	   should not be used to build shared libraries.  */
+	   should not be used to build shared libraries.
+	   In static PIE undefined weak symbols may be allowed
+	   by rewriting pcaddi to addi.w if addend is in [-2048, 2048).  */
 	case R_LARCH_PCREL20_S2:
 	  if (bfd_link_pic (info)
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0
-	      && ! LARCH_REF_LOCAL (info, h))
+	      && ! LARCH_REF_LOCAL (info, h)
+	      && (!info->nointerp
+		  || h->root.type != bfd_link_hash_undefweak))
 	    return bad_static_reloc (info, abfd, rel, sec, r_type, h, NULL);
 
 	  break;
@@ -1124,12 +1128,16 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    }
 
 	  /* PC-relative relocations are allowed For first version
-	     medium cmodel function call.  */
+	     medium cmodel function call.  Those against undefined
+	     weak symbol are allowed for static PIE by rewritting
+	     pcalau12i to lu12i.w.  */
 	  if (h != NULL && !h->needs_plt
 	      && bfd_link_pic (info)
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (sec->flags & SEC_READONLY) != 0
-	      && ! LARCH_REF_LOCAL (info, h))
+	      && ! LARCH_REF_LOCAL (info, h)
+	      && (!info->nointerp
+		  || h->root.type != bfd_link_hash_undefweak))
 	    return bad_static_reloc (info, abfd, rel, sec, r_type, h, NULL);
 
 	  break;
@@ -4113,12 +4121,13 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_LARCH_PCALA_HI20:
 	  unresolved_reloc = false;
 
-	  /* If sym is hidden undefined weak, (sym + addend) should be
-	     resolved to runtime address (0 + addend).  */
+	  /* If sym is undef weak and it's hidden or we are doing a static
+	     link, (sym + addend) should be resolved to runtime address
+	     (0 + addend).  */
 	  resolve_pcrel_undef_weak =
-	    (is_undefweak
-	     && h
-	     && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);
+	    ((info->nointerp
+	      || (h && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT))
+	     && is_undefweak);
 
 	  if (resolve_pcrel_undef_weak)
 	    pc = 0;
