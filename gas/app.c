@@ -820,7 +820,9 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 
       /* We need to watch out for .end directives: We should in particular not
 	 issue diagnostics for anything after an active one.  */
-      if (end_state == NULL)
+      if (ch == EOF)
+	end_state = NULL;
+      else if (end_state == NULL)
 	{
 	  if ((state == 0 || state == 1)
 	      && (ch == '.'
@@ -858,7 +860,9 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 #if defined TC_ARM && defined OBJ_ELF
       /* We need to watch out for .symver directives.  See the comment later
 	 in this function.  */
-      if (symver_state == NULL)
+      if (ch == EOF)
+	symver_state = NULL;
+      else if (symver_state == NULL)
 	{
 	  if ((state == 0 || state == 1)
 	      && strchr (tc_comment_chars, '@') != NULL
@@ -891,7 +895,9 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	 MRI mode or not.  Unfortunately, since m68k MRI mode affects
 	 the scrubber, that means that we need a special purpose
 	 recognizer here.  */
-      if (mri_state == NULL)
+      if (ch == EOF)
+	mri_state = NULL;
+      else if (mri_state == NULL)
 	{
 	  if ((state == 0 || state == 1)
 	      && ch == mri_pseudo[0])
@@ -927,7 +933,7 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen,
 	    }
 	  else
 	    {
-	      /* We've read the entire pseudo-op.  mips_last_ch is
+	      /* We've read the entire pseudo-op.  mri_last_ch is
 		 either '0' or '1' indicating whether to enter or
 		 leave MRI mode.  */
 	      do_scrub_begin (mri_last_ch == '1');
