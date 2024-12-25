@@ -3251,6 +3251,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       char tls_type;
       bfd_vma relocation, off, ie_off, desc_off;
       int i, j;
+      bool resolve_pcrel_undef_weak = false;
 
       /* When an unrecognized relocation is encountered, which usually
 	 occurs when using a newer assembler but an older linker, an error
@@ -4102,23 +4103,74 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	  break;
 
+	case R_LARCH_PCALA64_HI12:
+	  pc -= 4;
+	  /* Fall through.  */
+	case R_LARCH_PCALA64_LO20:
+	  pc -= 8;
+	  /* Fall through.  */
 	case R_LARCH_PCREL20_S2:
-	  unresolved_reloc = false;
-	  if (h && h->plt.offset != MINUS_ONE)
-	    relocation = sec_addr (plt) + h->plt.offset;
-	  else
-	    relocation += rel->r_addend;
-	  relocation -= pc;
-	  break;
-
 	case R_LARCH_PCALA_HI20:
 	  unresolved_reloc = false;
+
+	  /* If sym is hidden undefined weak, (sym + addend) should be
+	     resolved to runtime address (0 + addend).  */
+	  resolve_pcrel_undef_weak =
+	    (is_undefweak
+	     && h
+	     && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);
+
+	  if (resolve_pcrel_undef_weak)
+	    pc = 0;
+
 	  if (h && h->plt.offset != MINUS_ONE)
 	    relocation = sec_addr (plt) + h->plt.offset;
 	  else
 	    relocation += rel->r_addend;
 
-	  RELOCATE_CALC_PC32_HI20 (relocation, pc);
+	  switch (r_type)
+	    {
+	    case R_LARCH_PCREL20_S2:
+	      relocation -= pc;
+	      if (resolve_pcrel_undef_weak)
+		{
+		  bfd_signed_vma addr = (bfd_signed_vma) relocation;
+		  if (addr >= 2048 || addr < -2048)
+		    {
+		      const char *msg =
+			_("cannot resolve R_LARCH_PCREL20_S2 against "
+			  "undefined weak symbol with addend out of "
+			  "[-2048, 2048)");
+		      fatal =
+			loongarch_reloc_is_fatal (info, input_bfd,
+						  input_section, rel,
+						  howto,
+						  bfd_reloc_notsupported,
+						  is_undefweak, name, msg);
+		      break;
+		    }
+
+		  uint32_t insn = bfd_get (32, input_bfd,
+					   contents + rel->r_offset);
+		  insn = LARCH_GET_RD (insn) | LARCH_OP_ADDI_W;
+		  insn |= (relocation & 0xfff) << 10;
+		  bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+		  r = bfd_reloc_continue;
+		}
+	      break;
+	    case R_LARCH_PCALA_HI20:
+	      RELOCATE_CALC_PC32_HI20 (relocation, pc);
+	      if (resolve_pcrel_undef_weak)
+		{
+		  uint32_t insn = bfd_get (32, input_bfd,
+					   contents + rel->r_offset);
+		  insn = LARCH_GET_RD (insn) | LARCH_OP_LU12I_W;
+		  bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+		}
+	      break;
+	    default:
+	      RELOCATE_CALC_PC64_HI32 (relocation, pc);
+	    }
 	  break;
 
 	case R_LARCH_TLS_LE_HI20_R:
@@ -4153,19 +4205,6 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_B16);
 	      howto = loongarch_elf_rtype_to_howto (input_bfd, R_LARCH_B16);
 	    }
-	  break;
-
-	case R_LARCH_PCALA64_HI12:
-	  pc -= 4;
-	  /* Fall through.  */
-	case R_LARCH_PCALA64_LO20:
-	  if (h && h->plt.offset != MINUS_ONE)
-	    relocation = sec_addr (plt) + h->plt.offset;
-	  else
-	    relocation += rel->r_addend;
-
-	  RELOCATE_CALC_PC64_HI32 (relocation, pc - 8);
-
 	  break;
 
 	case R_LARCH_GOT_PC_HI20:

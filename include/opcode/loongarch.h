@@ -36,6 +36,7 @@ extern "C"
 
   #define LARCH_MK_ADDI_D 0xffc00000
   #define LARCH_OP_ADDI_D 0x02c00000
+  #define LARCH_OP_ADDI_W 0x02800000
   #define LARCH_MK_PCADDI 0xfe000000
   #define LARCH_OP_PCADDI 0x18000000
   #define LARCH_MK_B 0xfc000000
@@ -44,6 +45,7 @@ extern "C"
   #define LARCH_OP_BL 0x54000000
   #define LARCH_MK_ORI 0xffc00000
   #define LARCH_OP_ORI 0x03800000
+  #define LARCH_OP_OR 0x00150000
   #define LARCH_MK_LU12I_W 0xfe000000
   #define LARCH_OP_LU12I_W 0x14000000
   #define LARCH_MK_LD_D 0xffc00000
