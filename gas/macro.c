@@ -868,7 +868,7 @@ sub_actual (size_t start, sb *in, sb *t, struct htab *formal_hash,
 	  /* The parent's FORMALs might contain parameters that need further
 	     substitution.  See gas/testsuite/gas/arm/macro-vld1.s for an
 	     example of this.  */
-	  if (strchr (add->ptr, '\\'))
+	  if (memchr (add->ptr, '\\', add->len))
 	    {
 	      sb newadd;
 
@@ -1485,7 +1485,7 @@ delete_macro (const char *name)
 	}
     }
 
-  if (macro == NULL)
+  if (j < 0)
     as_warn (_("Attempt to purge non-existing macro `%s'"), copy);
 
   free (copy);
