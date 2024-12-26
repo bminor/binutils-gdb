@@ -5410,6 +5410,11 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 		    && GOT_TLS_GD_BOTH_P (tls_type))
 		symval += 2 * GOT_ENTRY_SIZE;
 	    }
+	  else if (h->plt.offset != MINUS_ONE)
+	    {
+	      sym_sec = htab->elf.splt ? htab->elf.splt : htab->elf.iplt;
+	      symval = h->plt.offset;
+	    }
 	  else if ((h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)
 		&& h->root.u.def.section != NULL
