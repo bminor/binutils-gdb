@@ -23,7 +23,7 @@ if { ![is_elf_format] || ![istarget "aarch64*-*-*"] } {
     return
 }
 
-load_lib $srcdir/$subdir/lib/aarch64-elf-lib.exp
+load_file $srcdir/$subdir/lib/aarch64-elf-lib.exp
 
 # List contains test-items with 3 items followed by 2 lists:
 # 0:name 1:ld early options 2:ld late options 3:assembler options

@@ -23,7 +23,7 @@ if { ![is_elf_format] || ![istarget "aarch64*-*-*"] } {
   return
 }
 
-load_lib $srcdir/$subdir/../lib/aarch64-elf-lib.exp
+load_file $srcdir/$subdir/../lib/aarch64-elf-lib.exp
 
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 set test_lp64_list [lsort [glob -nocomplain $srcdir/$subdir/bti-far-*.d]]
