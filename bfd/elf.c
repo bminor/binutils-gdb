@@ -6398,8 +6398,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB: section `%pA' can't be allocated in segment %d"),
-		     abfd, sec, j);
+		    (_("%pB: section `%pA' can't be allocated in segment %u"),
+		     abfd, sec, m->idx);
 		  print_segment_map (m);
 		}
 	    }
