@@ -486,7 +486,7 @@ file_constrained_test_cpls_function (int i)
 
 
 int
-main ()
+not_really_main ()
 {
   template2_struct_inst.template2_fn<int, int> ();
   template_struct_int.template_overload_fn(0);

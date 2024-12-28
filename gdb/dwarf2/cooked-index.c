@@ -93,39 +93,37 @@ int
 cooked_index_entry::compare (const char *stra, const char *strb,
 			     comparison_mode mode)
 {
-  auto munge = [] (char c) -> unsigned char
+  auto munge = [] (char c) constexpr -> unsigned char
     {
-      /* We want to sort '<' before any other printable character.
-	 So, rewrite '<' to something just before ' '.  */
+      /* Treat '<' as if it ended the string.  This lets something
+	 like "func<t>" match "func<t<int>>".  See the "Breakpoints in
+	 template functions" section in the manual.  */
       if (c == '<')
-	return '\x1f';
+	return '\0';
       return TOLOWER ((unsigned char) c);
     };
 
-  while (*stra != '\0'
-	 && *strb != '\0'
-	 && (munge (*stra) == munge (*strb)))
+  unsigned char a = munge (*stra);
+  unsigned char b = munge (*strb);
+
+  while (a != '\0' && b != '\0' && a == b)
     {
-      ++stra;
-      ++strb;
+      a = munge (*++stra);
+      b = munge (*++strb);
     }
 
-  unsigned char c1 = munge (*stra);
-  unsigned char c2 = munge (*strb);
-
-  if (c1 == c2)
+  if (a == b)
     return 0;
 
   /* When completing, if STRB ends earlier than STRA, consider them as
-     equal.  When comparing, if STRB ends earlier and STRA ends with
-     '<', consider them as equal.  */
-  if (mode == COMPLETE || (mode == MATCH && c1 == munge ('<')))
+     equal.  */
+  if (mode == COMPLETE || (mode == MATCH && a == munge ('<')))
     {
-      if (c2 == '\0')
+      if (b == '\0')
 	return 0;
     }
 
-  return c1 < c2 ? -1 : 1;
+  return a < b ? -1 : 1;
 }
 
 #if GDB_SELF_TEST
@@ -155,33 +153,36 @@ test_compare ()
 					   mode_complete) == 0);
 
   SELF_CHECK (cooked_index_entry::compare ("name", "name<>",
-					   mode_compare) < 0);
+					   mode_compare) == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<>", "name",
 					   mode_compare) == 0);
   SELF_CHECK (cooked_index_entry::compare ("name", "name<>",
-					   mode_complete) < 0);
+					   mode_complete) == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<>", "name",
 					   mode_complete) == 0);
 
   SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<arg>",
 					   mode_compare) == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<ag>",
-					   mode_compare) > 0);
+					   mode_compare) == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<arg>",
 					   mode_complete) == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg>", "name<ag>",
-					   mode_complete) > 0);
+					   mode_complete) == 0);
 
   SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>",
 					   "name<arg<more>>",
 					   mode_compare) == 0);
+  SELF_CHECK (cooked_index_entry::compare ("name<arg>",
+					   "name<arg<more>>",
+					   mode_compare) == 0);
 
   SELF_CHECK (cooked_index_entry::compare ("name", "name<arg<more>>",
-					   mode_compare) < 0);
+					   mode_compare) == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>", "name",
 					   mode_compare) == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
-					   mode_compare) > 0);
+					   mode_compare) == 0);
   SELF_CHECK (cooked_index_entry::compare ("name<arg<more>>", "name<arg<",
 					   mode_complete) == 0);
 
@@ -191,7 +192,7 @@ test_compare ()
   SELF_CHECK (cooked_index_entry::compare ("abcd", "", mode_complete) == 0);
 
   SELF_CHECK (cooked_index_entry::compare ("func", "func<type>",
-					   mode_sort) < 0);
+					   mode_sort) == 0);
   SELF_CHECK (cooked_index_entry::compare ("func<type>", "func1",
 					   mode_sort) < 0);
 }
