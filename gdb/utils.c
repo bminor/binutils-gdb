@@ -3491,8 +3491,8 @@ wait_to_die_with_timeout (pid_t pid, int *status, int timeout)
 
 #endif /* HAVE_WAITPID */
 
-/* Provide fnmatch compatible function for FNM_FILE_NAME matching of host files.
-   Both FNM_FILE_NAME and FNM_NOESCAPE must be set in FLAGS.
+/* Provide fnmatch compatible function for matching of host files.
+   FNM_NOESCAPE must be set in FLAGS.
 
    It handles correctly HAVE_DOS_BASED_FILE_SYSTEM and
    HAVE_CASE_INSENSITIVE_FILE_SYSTEM.  */
@@ -3500,8 +3500,6 @@ wait_to_die_with_timeout (pid_t pid, int *status, int timeout)
 int
 gdb_filename_fnmatch (const char *pattern, const char *string, int flags)
 {
-  gdb_assert ((flags & FNM_FILE_NAME) != 0);
-
   /* It is unclear how '\' escaping vs. directory separator should coexist.  */
   gdb_assert ((flags & FNM_NOESCAPE) != 0);
 

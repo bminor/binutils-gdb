@@ -531,7 +531,7 @@ skiplist_entry::do_skip_gfile_p (const symtab_and_line &function_sal) const
   /* Check first sole SYMTAB->FILENAME.  It may not be a substring of
      symtab_to_fullname as it may contain "./" etc.  */
   if (gdb_filename_fnmatch (m_file.c_str (), function_sal.symtab->filename,
-			    FNM_FILE_NAME | FNM_NOESCAPE) == 0)
+			    FNM_NOESCAPE) == 0)
     result = true;
 
   /* Before we invoke symtab_to_fullname, which is expensive, do a quick
@@ -542,14 +542,14 @@ skiplist_entry::do_skip_gfile_p (const symtab_and_line &function_sal) const
   else if (!basenames_may_differ
       && gdb_filename_fnmatch (lbasename (m_file.c_str ()),
 			       lbasename (function_sal.symtab->filename),
-			       FNM_FILE_NAME | FNM_NOESCAPE) != 0)
+			       FNM_NOESCAPE) != 0)
     result = false;
   else
     {
       /* Note: symtab_to_fullname caches its result, thus we don't have to.  */
       const char *fullname = symtab_to_fullname (function_sal.symtab);
 
-      result = compare_glob_filenames_for_search (fullname, m_file.c_str ());
+      result = gdb_filename_fnmatch (m_file.c_str (), fullname, FNM_NOESCAPE);
     }
 
   if (debug_skip)

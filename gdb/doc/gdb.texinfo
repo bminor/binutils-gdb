@@ -6737,7 +6737,9 @@ Functions in @var{file} will be skipped over when stepping.
 @itemx -gfi @var{file-glob-pattern}
 @cindex skipping over files via glob-style patterns
 Functions in files matching @var{file-glob-pattern} will be skipped
-over when stepping.
+over when stepping.  The directory separator character @file{/} is treated as a
+regular character, so it can be matched by wildcard characters @file{*} and
+@file{?}.
 
 @smallexample
 (@value{GDBP}) skip -gfi utils/*.c
