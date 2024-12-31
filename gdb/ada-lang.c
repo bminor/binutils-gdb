@@ -6467,7 +6467,7 @@ ada_get_tsd_type (struct inferior *inf)
 
   if (data->tsd_type == 0)
     data->tsd_type
-      = lookup_transparent_type ("<ada__tags__type_specific_data>",
+      = lookup_transparent_type ("ada.tags.type_specific_data",
 				 SEARCH_TYPE_DOMAIN);
   return data->tsd_type;
 }

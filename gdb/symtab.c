@@ -2766,35 +2766,6 @@ basic_lookup_transparent_type_quick (struct objfile *objfile,
   return sym->type ();
 }
 
-/* Subroutine of basic_lookup_transparent_type to simplify it.
-   Look up the non-opaque definition of NAME in BLOCK_INDEX of OBJFILE.
-   BLOCK_INDEX is either GLOBAL_BLOCK or STATIC_BLOCK.  */
-
-static struct type *
-basic_lookup_transparent_type_1 (struct objfile *objfile,
-				 enum block_enum block_index,
-				 domain_search_flags flags,
-				 const lookup_name_info &name)
-{
-  const struct blockvector *bv;
-  const struct block *block;
-  const struct symbol *sym;
-
-  for (compunit_symtab *cust : objfile->compunits ())
-    {
-      bv = cust->blockvector ();
-      block = bv->block (block_index);
-      sym = block_find_symbol (block, name, flags, nullptr);
-      if (sym != nullptr)
-	{
-	  gdb_assert (!TYPE_IS_OPAQUE (sym->type ()));
-	  return sym->type ();
-	}
-    }
-
-  return NULL;
-}
-
 /* The standard implementation of lookup_transparent_type.  This code
    was modeled on lookup_symbol -- the parts not relevant to looking
    up types were just left out.  In particular it's assumed here that
@@ -2808,19 +2779,7 @@ basic_lookup_transparent_type (const char *name, domain_search_flags flags)
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
-  /* Now search all the global symbols.  Do the symtab's first, then
-     check the psymtab's.  If a psymtab indicates the existence
-     of the desired name as a global, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol.  */
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      t = basic_lookup_transparent_type_1 (objfile, GLOBAL_BLOCK,
-					   flags, lookup_name);
-      if (t)
-	return t;
-    }
-
+  /* Search all the global symbols.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
       t = basic_lookup_transparent_type_quick (objfile, GLOBAL_BLOCK,
@@ -2829,21 +2788,8 @@ basic_lookup_transparent_type (const char *name, domain_search_flags flags)
 	return t;
     }
 
-  /* Now search the static file-level symbols.
-     Not strictly correct, but more useful than an error.
-     Do the symtab's first, then
-     check the psymtab's.  If a psymtab indicates the existence
-     of the desired name as a file-level static, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol.  */
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      t = basic_lookup_transparent_type_1 (objfile, STATIC_BLOCK,
-					   flags, lookup_name);
-      if (t)
-	return t;
-    }
-
+  /* Now search the static file-level symbols.  Not strictly correct,
+     but more useful than an error.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
       t = basic_lookup_transparent_type_quick (objfile, STATIC_BLOCK,
