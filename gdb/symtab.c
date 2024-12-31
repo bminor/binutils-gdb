@@ -2449,11 +2449,6 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
 			     enum block_enum block_index, const char *name,
 			     const domain_search_flags domain)
 {
-  struct compunit_symtab *cust;
-  const struct blockvector *bv;
-  const struct block *block;
-  struct block_symbol result;
-
   symbol_lookup_debug_printf_v
     ("lookup_symbol_via_quick_fns (%s, %s, %s, %s)",
      objfile_debug_name (objfile),
@@ -2461,27 +2456,37 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
      name, domain_name (domain).c_str ());
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
-  cust = objfile->lookup_symbol (block_index, lookup_name, domain);
-  if (cust == NULL)
+  best_symbol_tracker accum;
+  auto searcher = [&] (compunit_symtab *symtab)
+    {
+      const struct blockvector *bv = symtab->blockvector ();
+      const struct block *block = bv->block (block_index);
+      /* If the accumulator finds a best symbol, end the search by
+	 returning false; otherwise keep going by returning true.  */
+      return !accum.search (symtab, block, lookup_name, domain);
+    };
+
+  objfile->expand_symtabs_matching (nullptr, &lookup_name, nullptr,
+				    searcher,
+				    block_index == GLOBAL_BLOCK
+				    ? SEARCH_GLOBAL_BLOCK
+				    : SEARCH_STATIC_BLOCK,
+				    domain);
+  if (accum.best_symtab == nullptr)
     {
       symbol_lookup_debug_printf_v
 	("lookup_symbol_via_quick_fns (...) = NULL");
       return {};
     }
-
-  bv = cust->blockvector ();
-  block = bv->block (block_index);
-  result.symbol = block_lookup_symbol (block, lookup_name, domain);
-  if (result.symbol == NULL)
-    error_in_psymtab_expansion (block_index, name, cust);
+  if (accum.currently_best.symbol == nullptr)
+    error_in_psymtab_expansion (block_index, name, accum.best_symtab);
 
   symbol_lookup_debug_printf_v
     ("lookup_symbol_via_quick_fns (...) = %s (block %s)",
-     host_address_to_string (result.symbol),
-     host_address_to_string (block));
+     host_address_to_string (accum.currently_best.symbol),
+     host_address_to_string (accum.currently_best.block));
 
-  result.block = block;
-  return result;
+  return accum.currently_best;
 }
 
 /* See language.h.  */
