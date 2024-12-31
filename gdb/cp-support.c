@@ -1473,16 +1473,14 @@ add_symbol_overload_list_qualified (const char *func_name,
 				     ? selected_block->objfile ()
 				     : nullptr);
 
+  lookup_name_info base_lookup (func_name, symbol_name_match_type::FULL);
+  lookup_name_info lookup_name = base_lookup.make_ignore_params ();
+
   current_program_space->iterate_over_objfiles_in_search_order
-    ([func_name, surrounding_static_block, &overload_list]
+    ([func_name, surrounding_static_block, &overload_list, lookup_name]
      (struct objfile *obj)
        {
-	 /* Look through the partial symtabs for all symbols which
-	    begin by matching FUNC_NAME.  Make sure we read that
-	    symbol table in.  */
-	 obj->expand_symtabs_for_function (func_name);
-
-	 for (compunit_symtab *cust : obj->compunits ())
+	 auto callback = [&] (compunit_symtab *cust)
 	   {
 	     QUIT;
 	     const struct block *b = cust->blockvector ()->global_block ();
@@ -1490,11 +1488,19 @@ add_symbol_overload_list_qualified (const char *func_name,
 
 	     b = cust->blockvector ()->static_block ();
 	     /* Don't do this block twice.  */
-	     if (b == surrounding_static_block)
-	       continue;
+	     if (b != surrounding_static_block)
+	       add_symbol_overload_list_block (func_name, b, overload_list);
+	     return true;
+	   };
 
-	     add_symbol_overload_list_block (func_name, b, overload_list);
-	   }
+	 /* Look through the partial symtabs for all symbols which
+	    begin by matching FUNC_NAME.  Make sure we read that
+	    symbol table in.  */
+	 obj->expand_symtabs_matching (nullptr, &lookup_name,
+				       nullptr, callback,
+				       (SEARCH_GLOBAL_BLOCK
+					| SEARCH_STATIC_BLOCK),
+				       SEARCH_FUNCTION_DOMAIN);
 
 	 return 0;
        }, current_objfile);
