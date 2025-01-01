@@ -3845,10 +3845,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  if (l->obfd == NULL)
 	    rmdir (l->name);
 	  else
-	    {
-	      bfd_close (l->obfd);
-	      unlink (l->name);
-	    }
+	    unlink (l->name);
 	  free (l->name);
 	}
       next = l->next;

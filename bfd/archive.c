@@ -2882,6 +2882,15 @@ _bfd_unlink_from_archive_parent (bfd *abfd)
 bool
 _bfd_archive_close_and_cleanup (bfd *abfd)
 {
+  if (bfd_write_p (abfd) && abfd->format == bfd_archive)
+    {
+      bfd *current;
+      while ((current = abfd->archive_head) != NULL)
+	{
+	  abfd->archive_head = current->archive_next;
+	  bfd_close_all_done (current);
+	}
+    }
   if (bfd_read_p (abfd) && abfd->format == bfd_archive)
     {
       bfd *nbfd;

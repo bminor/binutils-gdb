@@ -3009,13 +3009,6 @@ gen_lib_file (int delay)
   if (! bfd_close (outarch))
     bfd_fatal (imp_name);
 
-  while (head != NULL)
-    {
-      bfd *n = head->archive_next;
-      bfd_close (head);
-      head = n;
-    }
-
   /* Delete all the temp files.  */
   unlink_temp_files ();
 

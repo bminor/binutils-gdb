@@ -3058,13 +3058,6 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
 
   if (! bfd_close (outarch))
     einfo ("%X%P: bfd_close %s: %E\n", impfilename);
-
-  while (head != NULL)
-    {
-      bfd *n = head->archive_next;
-      bfd_close (head);
-      head = n;
-    }
 }
 
 static int undef_count = 0;
