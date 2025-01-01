@@ -5730,6 +5730,7 @@ dump_bfd (bfd *abfd, bool is_mainfile)
 		{
 		  if (old_symcount == 0)
 		    {
+		      free (syms);
 		      syms = extra_syms;
 		    }
 		  else
@@ -5739,6 +5740,7 @@ dump_bfd (bfd *abfd, bool is_mainfile)
 		      memcpy (syms + old_symcount,
 			      extra_syms,
 			      (symcount + 1) * sizeof (asymbol *));
+		      free (extra_syms);
 		    }
 		}
 
