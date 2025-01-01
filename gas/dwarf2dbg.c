@@ -883,6 +883,8 @@ allocate_filename_to_slot (const char *dirname,
 		}
 	      
 	      dirs[files[num].dir] = xmemdup0 (dirname, strlen (dirname));
+	      if (dirs_in_use <= files[num].dir)
+		dirs_in_use = files[num].dir + 1;
 	    }
 	    
 	  return true;
@@ -911,6 +913,8 @@ allocate_filename_to_slot (const char *dirname,
 		    }
 
 		  dirs[files[num].dir] = xmemdup0 (filename, file - filename);
+		  if (dirs_in_use <= files[num].dir)
+		    dirs_in_use = files[num].dir + 1;
 		}
 	      return true;
 	    }
