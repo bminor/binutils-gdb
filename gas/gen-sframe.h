@@ -135,10 +135,6 @@ unsigned char
 sframe_get_abi_arch_callback (const char *target_arch,
 			      int big_endian_p);
 
-/* The list of all FDEs with data in SFrame internal representation.  */
-
-extern struct sframe_func_entry *all_sframe_fdes;
-
 /* SFrame version specific operations structure.  */
 
 struct sframe_version_ops
