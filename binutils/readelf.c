@@ -8171,8 +8171,9 @@ process_section_headers (Filedata * filedata)
     return false;
 
   /* Read in the string table, so that we have names to display.  */
-  if (filedata->file_header.e_shstrndx != SHN_UNDEF
-       && filedata->file_header.e_shstrndx < filedata->file_header.e_shnum)
+  if (filedata->string_table == NULL
+      && filedata->file_header.e_shstrndx != SHN_UNDEF
+      && filedata->file_header.e_shstrndx < filedata->file_header.e_shnum)
     {
       section = filedata->section_headers + filedata->file_header.e_shstrndx;
 
@@ -16517,6 +16518,7 @@ static uint64_t
 maybe_expand_or_relocate_section (Elf_Internal_Shdr *  section,
 				  Filedata *           filedata,
 				  unsigned char **     start_ptr,
+				  unsigned char **     decomp_buf,
 				  bool                 relocate)
 {
   uint64_t         section_size = section->sh_size;
@@ -16577,7 +16579,10 @@ maybe_expand_or_relocate_section (Elf_Internal_Shdr *  section,
 	{
 	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
 					   &new_size, filedata->file_size))
-	    section_size = new_size;
+	    {
+	      *decomp_buf = start;
+	      section_size = new_size;
+	    }
 	  else
 	    {
 	      error (_("Unable to decompress section %s\n"),
@@ -16636,6 +16641,7 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
   unsigned char *end;
   unsigned char *real_start;
   unsigned char *start;
+  unsigned char *decomp_buf;
   bool some_strings_shown;
 
   real_start = start = (unsigned char *) get_section_contents (section, filedata);
@@ -16653,7 +16659,9 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
     printf (_("\nString dump of section '%s':\n"),
 	    printable_section_name (filedata, section));
 
-  num_bytes = maybe_expand_or_relocate_section (section, filedata, & start, false);
+  decomp_buf = NULL;
+  num_bytes = maybe_expand_or_relocate_section (section, filedata, &start,
+						&decomp_buf, false);
   if (num_bytes == (uint64_t) -1)
     goto error_out;
 
@@ -16756,12 +16764,14 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
   if (! some_strings_shown)
     printf (_("  No strings found in this section."));
 
+  free (decomp_buf);
   free (real_start);
 
   putchar ('\n');
   return true;
 
 error_out:
+  free (decomp_buf);
   free (real_start);
   return false;
 }
@@ -16777,6 +16787,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
   unsigned char *data;
   unsigned char *real_start;
   unsigned char *start;
+  unsigned char *decomp_buf;
 
   real_start = start = (unsigned char *) get_section_contents (section, filedata);
   if (start == NULL)
@@ -16793,7 +16804,9 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
     printf (_("\nHex dump of section '%s':\n"),
 	    printable_section_name (filedata, section));
 
-  section_size = maybe_expand_or_relocate_section (section, filedata, & start, relocate);
+  decomp_buf = NULL;
+  section_size = maybe_expand_or_relocate_section (section, filedata, &start,
+						   &decomp_buf, relocate);
   if (section_size == (uint64_t) -1)
     goto error_out;
 
@@ -16838,12 +16851,14 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
       bytes -= lbytes;
     }
 
+  free (decomp_buf);
   free (real_start);
 
   putchar ('\n');
   return true;
 
  error_out:
+  free (decomp_buf);
   free (real_start);
   return false;
 }
@@ -24193,12 +24208,7 @@ process_file (char * file_name)
 	ret = false;
     }
 
-  fclose (filedata->handle);
-  free (filedata->section_headers);
-  free (filedata->program_headers);
-  free (filedata->string_table);
-  free (filedata->dump.dump_sects);
-  free (filedata);
+  close_debug_file (filedata);
 
   free (ba_cache.strtab);
   ba_cache.strtab = NULL;

@@ -11818,10 +11818,10 @@ check_gnu_debuglink (const char * pathname, void * crc_pointer)
     crc = calc_gnu_debuglink_crc32 (crc, buffer, count);
 
   fclose (f);
+  close_debug_file (sep_data);
 
   if (crc != * (unsigned long *) crc_pointer)
     {
-      close_debug_file (sep_data);
       warn (_("Separate debug info file %s found, but CRC does not match - ignoring\n"),
 	    pathname);
       return false;
@@ -11863,6 +11863,7 @@ check_gnu_debugaltlink (const char * filename, void * data ATTRIBUTE_UNUSED)
   /* FIXME: We should now extract the build-id in the separate file
      and check it...  */
 
+  close_debug_file (sep_data);
   return true;
 }
 
