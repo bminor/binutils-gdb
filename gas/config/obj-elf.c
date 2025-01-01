@@ -1370,7 +1370,8 @@ obj_elf_section (int push)
 		  (void) restore_line_pointer (c);
 		  length = input_line_pointer - beg;
 		  if (length)
-		    match.linked_to_symbol_name = xmemdup0 (beg, length);
+		    match.linked_to_symbol_name
+		      = notes_memdup (beg, length, length + 1);
 		}
 	    }
 	  else if ((attr & SHF_LINK_ORDER) != 0 && inherit
@@ -1811,9 +1812,8 @@ obj_elf_find_and_add_versioned_name (const char *version_name,
       return versioned_name;
 
   /* Add this versioned name to the head of the list,  */
-  versioned_name = (struct elf_versioned_name_list *)
-    xmalloc (sizeof (*versioned_name));
-  versioned_name->name = xstrdup (version_name);
+  versioned_name = notes_alloc (sizeof (*versioned_name));
+  versioned_name->name = notes_strdup (version_name);
   versioned_name->next = sy_obj->versioned_name;
   sy_obj->versioned_name = versioned_name;
 
