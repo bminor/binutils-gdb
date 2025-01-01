@@ -330,6 +330,7 @@ read_end (void)
   _obstack_free (&cond_obstack, NULL);
   free (current_name);
   free (current_label);
+  free (include_dirs);
 }
 
 #ifndef TC_ADDRESS_BYTES

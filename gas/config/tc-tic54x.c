@@ -2990,7 +2990,7 @@ md_begin (void)
   /* Look for A_DIR and add it to the include list.  */
   if (A_DIR != NULL)
     {
-      char *tmp = xstrdup (A_DIR);
+      char *tmp = notes_strdup (A_DIR);
 
       do
 	{
