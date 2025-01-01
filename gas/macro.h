@@ -64,28 +64,31 @@ typedef struct macro_struct
   int             formal_count;		/* Number of formal args.  */
   formal_entry *  formals;		/* List of formal_structs.  */
   htab_t          formal_hash;		/* Hash table of formals.  */
-  struct macro_struct * parent;         /* Parent of nested macros.  */
   const char *    name;			/* Macro name.  */
   const char *    file;			/* File the macro was defined in.  */
   unsigned int    line;			/* Line number of definition.  */
   unsigned int    count;                /* Invocation count.  */
 } macro_entry;
 
-/* The macro/text block nesting level.  */
+/* Whether any macros have been defined.  */
+
+extern int macro_defined;
+
+/* The macro nesting level.  */
 
 extern int macro_nest;
+
+/* The macro hash table.  */
+
+extern htab_t macro_hash;
 
 extern int buffer_and_nest (const char *, const char *, sb *,
 			    size_t (*) (sb *));
 extern void macro_init (void);
 extern void macro_end (void);
 extern macro_entry *define_macro (sb *, sb *, size_t (*) (sb *));
-extern bool check_macro (const char *, sb *, const char **, macro_entry **);
+extern int check_macro (const char *, sb *, const char **, macro_entry **);
 extern void delete_macro (const char *);
 extern const char *expand_irp (int, size_t, sb *, sb *, size_t (*) (sb *));
-extern void increment_macro_nesting_depth (void);
-extern void decrement_macro_nesting_depth (void);
-extern void macro_record_invocation (macro_entry *);
-extern bool add_macro (macro_entry *, bool);
 
 #endif

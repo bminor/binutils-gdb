@@ -112,4 +112,6 @@ run_list_test count
 run_list_test irp-count
 run_list_test irpc-quote
 run_list_test rept-count
-run_dump_test nesting
+run_dump_test nesting1
+run_dump_test nesting2
+run_dump_test nesting3
