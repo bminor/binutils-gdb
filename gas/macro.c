@@ -878,6 +878,7 @@ sub_actual (size_t start, sb *in, sb *t, struct htab *formal_hash,
 	      (void) macro_expand_body (add, &newadd, NULL, NULL,
 					orig_macro, orig_macro->count);
 	      sb_add_sb (out, &newadd);
+	      sb_kill (&newadd);
 	    }
 	  else
 	    {
