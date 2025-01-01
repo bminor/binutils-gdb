@@ -1975,7 +1975,7 @@ create_note_reloc (segT           sec,
 {
   struct reloc_list * reloc;
 
-  reloc = XNEW (struct reloc_list);
+  reloc = notes_alloc (sizeof (*reloc));
 
   /* We create a .b type reloc as resolve_reloc_expr_symbols() has already been called.  */
   reloc->u.b.sec           = sec;
@@ -2535,6 +2535,7 @@ write_object_file (void)
 #endif
 
   bfd_map_over_sections (stdoutput, write_relocs, (char *) 0);
+  reloc_list = NULL;
 
 #ifdef tc_frob_file_after_relocs
   tc_frob_file_after_relocs ();

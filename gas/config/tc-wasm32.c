@@ -368,7 +368,7 @@ wasm32_leb128 (char **line, int bits, int sign)
       return str != str0;
     }
 
-  reloc = XNEW (struct reloc_list);
+  reloc = notes_alloc (sizeof (*reloc));
   reloc->u.a.offset_sym = expr_build_dot ();
   if (ex.X_op == O_symbol)
     {
@@ -411,7 +411,7 @@ wasm32_leb128 (char **line, int bits, int sign)
 
 	  signature = strndup (input_line_pointer + 1, siglength);
 
-	  reloc2 = XNEW (struct reloc_list);
+	  reloc2 = notes_alloc (sizeof (*reloc2));
 	  reloc2->u.a.offset_sym = expr_build_dot ();
 	  reloc2->u.a.sym = symbol_find_or_make (signature);
 	  reloc2->u.a.addend = 0;
