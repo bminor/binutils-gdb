@@ -708,20 +708,15 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos,
 	  /* This proxy entry refers to an element of a nested archive.
 	     Locate the member of that archive and return a bfd for it.  */
 	  bfd *ext_arch = find_nested_archive (filename, archive);
+	  file_ptr origin = new_areldata->origin;
 
+	  free (new_areldata);
 	  if (ext_arch == NULL
 	      || ! bfd_check_format (ext_arch, bfd_archive))
-	    {
-	      free (new_areldata);
-	      return NULL;
-	    }
-	  n_bfd = _bfd_get_elt_at_filepos (ext_arch,
-					   new_areldata->origin, info);
+	    return NULL;
+	  n_bfd = _bfd_get_elt_at_filepos (ext_arch, origin, info);
 	  if (n_bfd == NULL)
-	    {
-	      free (new_areldata);
-	      return NULL;
-	    }
+	    return NULL;
 	  n_bfd->proxy_origin = bfd_tell (archive);
 
 	  /* Copy BFD_COMPRESS, BFD_DECOMPRESS and BFD_COMPRESS_GABI
