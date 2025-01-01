@@ -15757,10 +15757,8 @@ cooked_index_functions::expand_symtabs_matching
       std::vector<lookup_name_info> segment_lookup_names;
       segment_lookup_names.reserve (name_vec.size ());
       for (auto &segment_name : name_str_vec)
-	{
-	  segment_lookup_names.emplace_back (segment_name,
-	    symbol_name_match_type::FULL, completing, true);
-	}
+	segment_lookup_names.emplace_back (segment_name, match_type,
+					   completing, true);
 
       for (const cooked_index_entry *entry : table->find (name_str_vec.back (),
 							  completing))

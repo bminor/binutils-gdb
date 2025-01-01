@@ -30,17 +30,12 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile $opts]} {
     return -1
 }
 
-gdb_breakpoint "outer<int>::fn" message
-delete_breakpoints
-
-gdb_breakpoint "outer<char>::fn<short>" message
-delete_breakpoints
+foreach ordinary {"outer<int>::fn" "outer<char>::fn<short>" "toplev<char>"} {
+    gdb_breakpoint $ordinary message
+    clean_restart $testfile
+}
 
 gdb_test "break outer::fn" "Breakpoint $decimal at .*2 locations."
-delete_breakpoints
 
+clean_restart $testfile
 gdb_test "break toplev" "Breakpoint $decimal at .*2 locations."
-delete_breakpoints
-
-gdb_breakpoint "toplev<char>" message
-delete_breakpoints
