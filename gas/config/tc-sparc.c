@@ -3834,10 +3834,10 @@ tc_gen_reloc (asection *section, fixS *fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  relocs[0] = reloc = XNEW (arelent);
+  reloc = notes_alloc (sizeof (arelent));
+  reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
+  relocs[0] = reloc;
   relocs[1] = NULL;
-
-  reloc->sym_ptr_ptr = XNEW (asymbol *);
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -4014,7 +4014,6 @@ tc_gen_reloc (asection *section, fixS *fixp)
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("internal error: can't export reloc type %d (`%s')"),
 		    fixp->fx_r_type, bfd_get_reloc_code_name (code));
-      xfree (reloc);
       relocs[0] = NULL;
       return relocs;
     }
@@ -4040,10 +4039,10 @@ tc_gen_reloc (asection *section, fixS *fixp)
      on the same location.  */
   if (code == BFD_RELOC_SPARC_OLO10)
     {
-      relocs[1] = reloc = XNEW (arelent);
+      reloc = notes_alloc (sizeof (arelent));
+      reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
+      relocs[1] = reloc;
       relocs[2] = NULL;
-
-      reloc->sym_ptr_ptr = XNEW (asymbol *);
       *reloc->sym_ptr_ptr
 	= symbol_get_bfdsym (section_symbol (absolute_section));
       reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;

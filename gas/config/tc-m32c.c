@@ -1032,11 +1032,10 @@ tc_gen_reloc (asection *sec, fixS *fx)
       || fx->fx_r_type == BFD_RELOC_M32C_RL_1ADDR
       || fx->fx_r_type == BFD_RELOC_M32C_RL_2ADDR)
     {
-      arelent * reloc;
+      arelent *reloc;
 
-      reloc = XNEW (arelent);
-
-      reloc->sym_ptr_ptr = XNEW (asymbol *);
+      reloc = notes_alloc (sizeof (arelent));
+      reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fx->fx_addsy);
       reloc->address = fx->fx_frag->fr_address + fx->fx_where;
       reloc->howto = bfd_reloc_type_lookup (stdoutput, fx->fx_r_type);

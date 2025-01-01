@@ -18381,9 +18381,10 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   arelent *reloc;
   bfd_reloc_code_real_type code;
 
-  memset (retval, 0, sizeof(retval));
-  reloc = retval[0] = XCNEW (arelent);
-  reloc->sym_ptr_ptr = XNEW (asymbol *);
+  memset (retval, 0, sizeof (retval));
+  reloc = notes_alloc (sizeof (arelent));
+  reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
+  retval[0] = reloc;
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 

@@ -6224,8 +6224,8 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
 {
   arelent *reloc;
 
-  reloc = XNEW (arelent);
-  reloc->sym_ptr_ptr = XNEW (asymbol *);
+  reloc = notes_alloc (sizeof (arelent));
+  reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -6300,7 +6300,7 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
 	  pname = symbol_get_bfdsym (sym)->name;
 	}
 
-      udata = XNEW (struct evax_private_udata_struct);
+      udata = notes_alloc (sizeof (*udata));
       udata->enbsym = symbol_get_bfdsym (fixp->fx_addsy);
       udata->bsym = symbol_get_bfdsym (fixp->tc_fix_data.info->psym);
       udata->origname = (char *)pname;

@@ -1294,7 +1294,7 @@ write_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 	rp = &r->next;
     }
 
-  relocs = XCNEWVEC (arelent *, n);
+  relocs = notes_alloc (n * sizeof (arelent *));
 
   n = 0;
   r = my_reloc_list;

@@ -1257,11 +1257,11 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
       fixp->fx_subsy = NULL;
     }
 
-  reloc[0]		  = XNEW (arelent);
-  reloc[0]->sym_ptr_ptr   = XNEW (asymbol *);
-  * reloc[0]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
-  reloc[0]->address       = fixp->fx_frag->fr_address + fixp->fx_where;
-  reloc[0]->addend        = fixp->fx_offset;
+  reloc[0] = notes_alloc (sizeof (arelent));
+  reloc[0]->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
+  *reloc[0]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+  reloc[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  reloc[0]->addend = fixp->fx_offset;
 
   if (fixp->fx_r_type == BFD_RELOC_RL78_32_OP
       && fixp->fx_subsy)
@@ -1269,13 +1269,13 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
       fixp->fx_r_type = BFD_RELOC_RL78_DIFF;
     }
 
-#define OPX(REL,SYM,ADD)							\
-  reloc[rp]		   = XNEW (arelent);		\
-  reloc[rp]->sym_ptr_ptr   = XNEW (asymbol *);		\
-  reloc[rp]->howto         = bfd_reloc_type_lookup (stdoutput, REL);		\
-  reloc[rp]->addend        = ADD;						\
-  * reloc[rp]->sym_ptr_ptr = SYM;						\
-  reloc[rp]->address       = fixp->fx_frag->fr_address + fixp->fx_where;	\
+#define OPX(REL,SYM,ADD)						\
+  reloc[rp] = notes_alloc (sizeof (arelent));				\
+  reloc[rp]->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));		\
+  reloc[rp]->howto = bfd_reloc_type_lookup (stdoutput, REL);		\
+  reloc[rp]->addend = ADD;						\
+  *reloc[rp]->sym_ptr_ptr = SYM;					\
+  reloc[rp]->address = fixp->fx_frag->fr_address + fixp->fx_where;	\
   reloc[++rp] = NULL
 #define OPSYM(SYM) OPX(BFD_RELOC_RL78_SYM, SYM, 0)
 

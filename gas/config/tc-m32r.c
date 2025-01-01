@@ -2193,9 +2193,8 @@ tc_gen_reloc (asection * section, fixS * fixP)
   arelent * reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = XNEW (arelent);
-
-  reloc->sym_ptr_ptr = XNEW (asymbol *);
+  reloc = notes_alloc (sizeof (arelent));
+  reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
 
@@ -2268,7 +2267,7 @@ printf(" => %s",bfd_get_reloc_code_name(code));
 printf(" => %s\n",reloc->howto->name);
 #endif
 
- if (reloc->howto == (reloc_howto_type *) NULL)
+ if (reloc->howto == NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
             _("internal error: can't export reloc type %d (`%s')"),

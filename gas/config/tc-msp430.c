@@ -4629,23 +4629,22 @@ S_IS_GAS_LOCAL (symbolS * s)
    then it is done here.  */
 
 arelent **
-tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
+tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
-  static arelent * no_relocs = NULL;
-  static arelent * relocs[MAX_RELOC_EXPANSION + 1];
+  static arelent *no_relocs = NULL;
+  static arelent *relocs[MAX_RELOC_EXPANSION + 1];
   arelent *reloc;
 
-  reloc = XNEW (arelent);
+  reloc = notes_alloc (sizeof (arelent));
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
 
-  if (reloc->howto == (reloc_howto_type *) NULL)
+  if (reloc->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("reloc %d not supported by object file format"),
 		    (int) fixp->fx_r_type);
-      free (reloc);
-      return & no_relocs;
+      return &no_relocs;
     }
 
   relocs[0] = reloc;
@@ -4686,7 +4685,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	  && ! S_IS_GAS_LOCAL (fixp->fx_addsy)
 	  && ! S_IS_GAS_LOCAL (fixp->fx_subsy))
 	{
-	  arelent * reloc2 = XNEW (arelent);
+	  arelent *reloc2 = notes_alloc (sizeof (arelent));
 
 	  relocs[0] = reloc2;
 	  relocs[1] = reloc;
@@ -4700,7 +4699,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	    reloc2->sym_ptr_ptr = &bfd_abs_section_ptr->symbol;
 	  else
 	    {
-	      reloc2->sym_ptr_ptr = XNEW (asymbol *);
+	      reloc2->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
 	      *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 	    }
 
@@ -4712,7 +4711,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	    }
 	  else
 	    {
-	      reloc->sym_ptr_ptr = XNEW (asymbol *);
+	      reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
 	      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	    }
 
@@ -4750,8 +4749,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	      return relocs;
 	    }
 
-	  free (reloc);
-	  return & no_relocs;
+	  return &no_relocs;
 	}
     }
   else
@@ -4764,11 +4762,10 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	  char *fixpos = fixp->fx_where + fixp->fx_frag->fr_literal;
 
 	  md_number_to_chars (fixpos, amount, 2);
-	  free (reloc);
-	  return & no_relocs;
+	  return &no_relocs;
 	}
 #endif
-      reloc->sym_ptr_ptr = XNEW (asymbol *);
+      reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->addend = fixp->fx_offset;
 

@@ -2169,7 +2169,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
   static arelent * relocs[MAX_RELOC_EXPANSION + 1];
   arelent *reloc;
 
-  reloc = XNEW (arelent);
+  reloc = notes_alloc (sizeof (arelent));
 
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == NULL)
@@ -2177,8 +2177,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("reloc %d not supported by object file format"),
 		    (int) fixp->fx_r_type);
-      free (reloc);
-      return & no_relocs;
+      return &no_relocs;
     }
 
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
@@ -2205,7 +2204,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	 even local symbols defined in the same section.  */
       if (ssec != absolute_section || asec != absolute_section)
 	{
-	  arelent * reloc2 = XNEW (arelent);
+	  arelent *reloc2 = notes_alloc (sizeof (arelent));
 
 	  relocs[0] = reloc2;
 	  relocs[1] = reloc;
@@ -2213,7 +2212,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	  reloc2->address = reloc->address;
 	  reloc2->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_MN10300_SYM_DIFF);
 	  reloc2->addend = - S_GET_VALUE (fixp->fx_subsy);
-	  reloc2->sym_ptr_ptr = XNEW (asymbol *);
+	  reloc2->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
 	  *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 
 	  reloc->addend = fixp->fx_offset;
@@ -2224,7 +2223,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	    }
 	  else
 	    {
-	      reloc->sym_ptr_ptr = XNEW (asymbol *);
+	      reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
 	      *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
 	    }
 
@@ -2262,13 +2261,12 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 	      return relocs;
 	    }
 
-	  free (reloc);
-	  return & no_relocs;
+	  return &no_relocs;
 	}
     }
   else
     {
-      reloc->sym_ptr_ptr = XNEW (asymbol *);
+      reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
       *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       reloc->addend = fixp->fx_offset;
     }

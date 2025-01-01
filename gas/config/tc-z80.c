@@ -3859,12 +3859,12 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED , fixS *fixp)
       return NULL;
     }
 
-  reloc               = XNEW (arelent);
-  reloc->sym_ptr_ptr  = XNEW (asymbol *);
+  reloc = notes_alloc (sizeof (arelent));
+  reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
-  reloc->address      = fixp->fx_frag->fr_address + fixp->fx_where;
-  reloc->addend       = fixp->fx_offset;
-  reloc->howto        = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
+  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  reloc->addend = fixp->fx_offset;
+  reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,

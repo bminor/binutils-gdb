@@ -1023,7 +1023,9 @@ gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
   bfd_reloc_code_real_type r_type = fixP->fx_r_type;
   arelent *reloc;
 
-  reloc = XNEW (arelent);
+  reloc = notes_alloc (sizeof (arelent));
+  reloc->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
+  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
 
 #ifdef GAS_CGEN_PCREL_R_TYPE
   if (fixP->fx_pcrel)
@@ -1031,7 +1033,7 @@ gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
 #endif
   reloc->howto = bfd_reloc_type_lookup (stdoutput, r_type);
 
-  if (reloc->howto == (reloc_howto_type *) NULL)
+  if (reloc->howto == NULL)
     {
       as_bad_where (fixP->fx_file, fixP->fx_line,
 		    _("relocation is not supported"));
@@ -1039,9 +1041,6 @@ gas_cgen_tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixP)
     }
 
   gas_assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
-
-  reloc->sym_ptr_ptr = XNEW (asymbol *);
-  *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
 
   /* Use fx_offset for these cases.  */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY
