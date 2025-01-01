@@ -424,7 +424,7 @@ normalize (const char *file, bfd *abfd)
 
 /* Remove any output file.  This is only called via xatexit.  */
 
-static const char *output_filename = NULL;
+static char *output_filename = NULL;
 static FILE *output_file = NULL;
 
 static void
@@ -435,6 +435,8 @@ remove_output (void)
       if (output_file != NULL)
 	fclose (output_file);
       unlink_if_ordinary (output_filename);
+      free (output_filename);
+      output_filename = NULL;
     }
 }
 
@@ -914,7 +916,10 @@ main (int argc, char **argv)
 	  if (files != NULL)
 	    delete_members (arch, files);
 	  else
-	    output_filename = NULL;
+	    {
+	      free (output_filename);
+	      output_filename = NULL;
+	    }
 	  break;
 
 	case move:
@@ -925,7 +930,10 @@ main (int argc, char **argv)
 	      if (files != NULL)
 		move_members (arch, files);
 	      else
-		output_filename = NULL;
+		{
+		  free (output_filename);
+		  output_filename = NULL;
+		}
 	      break;
 	    }
 	  /* Fall through.  */
@@ -935,7 +943,10 @@ main (int argc, char **argv)
 	  if (files != NULL || write_armap > 0)
 	    replace_members (arch, files, operation == quick_append);
 	  else
-	    output_filename = NULL;
+	    {
+	      free (output_filename);
+	      output_filename = NULL;
+	    }
 	  break;
 
 	  /* Shouldn't happen! */
@@ -1011,7 +1022,7 @@ open_inarch (const char *archive_filename, const char *file)
         non_fatal (_("creating %s"), archive_filename);
 
       /* If we die creating a new archive, don't leave it around.  */
-      output_filename = archive_filename;
+      output_filename = xstrdup (archive_filename);
     }
 
   arch = bfd_openr (archive_filename, target);
@@ -1112,7 +1123,9 @@ static FILE * open_output_file (bfd *) ATTRIBUTE_RETURNS_NONNULL;
 static FILE *
 open_output_file (bfd * abfd)
 {
-  output_filename = bfd_get_filename (abfd);
+  char *alloc = xstrdup (bfd_get_filename (abfd));
+
+  output_filename = alloc;
 
   /* PR binutils/17533: Do not allow directory traversal
      outside of the current directory tree - unless the
@@ -1123,7 +1136,9 @@ open_output_file (bfd * abfd)
 
       non_fatal (_("illegal output pathname for archive member: %s, using '%s' instead"),
 		 output_filename, base);
-      output_filename = base;
+      output_filename = xstrdup (base);
+      free (alloc);
+      alloc = output_filename;
     }
 
   if (output_dir)
@@ -1132,12 +1147,12 @@ open_output_file (bfd * abfd)
 
       if (len > 0)
 	{
-	  /* FIXME: There is a memory leak here, but it is not serious.  */
 	  if (IS_DIR_SEPARATOR (output_dir [len - 1]))
 	    output_filename = concat (output_dir, output_filename, NULL);
 	  else
 	    output_filename = concat (output_dir, "/", output_filename, NULL);
 	}
+      free (alloc);
     }
 
   if (verbose)
@@ -1234,6 +1249,7 @@ extract_file (bfd *abfd)
       set_times (output_filename, &buf);
     }
 
+  free (output_filename);
   output_filename = NULL;
 }
 
@@ -1241,16 +1257,18 @@ static void
 write_archive (bfd *iarch)
 {
   bfd *obfd;
-  char *old_name, *new_name;
+  const char *old_name;
+  char *new_name;
   bfd *contents_head = iarch->archive_next;
   int tmpfd = -1;
 
-  old_name = xstrdup (bfd_get_filename (iarch));
+  old_name = bfd_get_filename (iarch);
   new_name = make_tempname (old_name, &tmpfd);
 
   if (new_name == NULL)
     bfd_fatal (_("could not create temporary file whilst writing archive"));
 
+  free (output_filename);
   output_filename = new_name;
 
   obfd = bfd_fdopenw (new_name, bfd_get_target (iarch), tmpfd);
@@ -1291,14 +1309,15 @@ write_archive (bfd *iarch)
     bfd_fatal (old_name);
 
   output_filename = NULL;
-
+  old_name = xstrdup (old_name);
   /* We don't care if this fails; we might be creating the archive.  */
   bfd_close (iarch);
 
-  if (smart_rename (new_name, old_name, tmpfd, NULL, false) != 0)
-    xexit (1);
-  free (old_name);
+  int ret = smart_rename (new_name, old_name, tmpfd, NULL, false);
+  free ((char *) old_name);
   free (new_name);
+  if (ret != 0)
+    xexit (1);
 }
 
 /* Return a pointer to the pointer to the entry which should be rplacd'd
@@ -1406,7 +1425,10 @@ delete_members (bfd *arch, char **files_to_delete)
   if (something_changed)
     write_archive (arch);
   else
-    output_filename = NULL;
+    {
+      free (output_filename);
+      output_filename = NULL;
+    }
 }
 
 
@@ -1573,7 +1595,10 @@ replace_members (bfd *arch, char **files_to_move, bool quick)
   if (changed)
     write_archive (arch);
   else
-    output_filename = NULL;
+    {
+      free (output_filename);
+      output_filename = NULL;
+    }
 }
 
 static int
