@@ -327,6 +327,8 @@ enum i386_cpu
   CpuAPX_F,
   /* Intel AVX10.2 Instructions support required.  */
   CpuAVX10_2,
+  /* Intel AMX-TRANSPOSE Instructions support required.  */
+  CpuAMX_TRANSPOSE,
   /* Not supported in the 64bit mode  */
   CpuNo64,
 
@@ -364,6 +366,7 @@ enum i386_cpu
 		   cpuavx512vl:1, \
 		   cpuapx_f:1, \
 		   cpuavx10_2:1, \
+		   cpuamx_transpose:1, \
       /* NOTE: This field needs to remain last. */ \
 		   cpuno64:1
 

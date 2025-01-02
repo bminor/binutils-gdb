@@ -3210,6 +3210,26 @@ tilerelease, 0x49c0, AMX_TILE, Vex128|Space0F38|VexW0|NoSuf, {}
 
 tilezero, 0xf249, AMX_TILE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM }
 
+<z:pfx, z0:, z1:66>
+
+<loc:opc, $t:0x0, t1:0x1>
+
+t2rpntlvw<z><loc>, 0x<z:pfx>6e | <loc:opc>, APX_F(AMX_TRANSPOSE), Sibmem|Vex128|EVex128|Space0F38|VexW0|NoSuf|ImplicitGroup, { Unspecified|BaseIndex, RegTMM }
+
+<z>
+<loc>
+
+tconjtcmmimfp16ps, 0x6b, AMX_COMPLEX&AMX_TRANSPOSE, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+tconjtfp16, 0x666b, AMX_COMPLEX&AMX_TRANSPOSE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM, RegTMM }
+
+ttcmmimfp16ps, 0xf26b, AMX_COMPLEX&AMX_TRANSPOSE, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+ttcmmrlfp16ps, 0xf36b, AMX_COMPLEX&AMX_TRANSPOSE, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+
+ttdpbf16ps, 0xf36c, AMX_BF16&AMX_TRANSPOSE, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+ttdpfp16ps, 0xf26c, AMX_FP16&AMX_TRANSPOSE, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+
+ttransposed, 0xf35f, AMX_TRANSPOSE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM, RegTMM }
+
 // AMX instructions end.
 
 // KEYLOCKER instructions.

@@ -129,6 +129,10 @@ _start:
 	shrx	%r31,%r15,%r11
 	shrx	%r31,0x123(%r31,%rax,4),%r15
 	sttilecfg	0x123(%r31,%rax,4)
+	t2rpntlvwz0	0x123(%r31,%rax,8),%tmm6
+	t2rpntlvwz0t1	0x123(%r31,%rax,8),%tmm6
+	t2rpntlvwz1	0x123(%r31,%rax,8),%tmm6
+	t2rpntlvwz1t1	0x123(%r31,%rax,8),%tmm6
 	tileloadd	0x123(%r31,%rax,4),%tmm6
 	tileloaddt1	0x123(%r31,%rax,4),%tmm6
 	tilestored	%tmm6,0x123(%r31,%rax,4)
@@ -262,6 +266,10 @@ _start:
 	shrx	r11,r15,r31
 	shrx	r15,QWORD PTR [r31+rax*4+0x123],r31
 	sttilecfg	[r31+rax*4+0x123]
+	t2rpntlvwz0	tmm6,[r31+rax*8+0x123]
+	t2rpntlvwz0t1	tmm6,[r31+rax*8+0x123]
+	t2rpntlvwz1	tmm6,[r31+rax*8+0x123]
+	t2rpntlvwz1t1	tmm6,[r31+rax*8+0x123]
 	tileloadd	tmm6,[r31+rax*4+0x123]
 	tileloaddt1	tmm6,[r31+rax*4+0x123]
 	tilestored	[r31+rax*4+0x123],tmm6
