@@ -721,20 +721,14 @@ struct symbol *
 block_lookup_symbol_primary (const struct block *block, const char *name,
 			     const domain_search_flags domain)
 {
-  struct symbol *sym, *other;
-  struct mdict_iterator mdict_iter;
-
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
   /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
   gdb_assert (block->superblock () == NULL
 	      || block->superblock ()->superblock () == NULL);
 
-  other = NULL;
-  for (sym = mdict_iter_match_first (block->multidict (), lookup_name,
-				     &mdict_iter);
-       sym != NULL;
-       sym = mdict_iter_match_next (lookup_name, &mdict_iter))
+  symbol *other = nullptr;
+  for (symbol *sym : block_iterator_range (block, &lookup_name))
     {
       /* With the fix for PR gcc/debug/91507, we get for:
 	 ...
