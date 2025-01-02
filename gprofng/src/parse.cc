@@ -752,15 +752,6 @@ Experiment::process_seg_map_cmd (char */*cmd*/, hrtime_t ts, Vaddr vaddr,
 	      lo->dbeFile->sbuf.st_mtime = 0; // Don't check timestamps
 	      free (archName);
 	    }
-	  else
-	    {
-	      archName = checkFileInArchive (nm, true);
-	      if (archName)
-		{
-		  lo->set_archname (archName);
-		  lo->need_swap_endian = need_swap_endian;
-		}
-	    }
 	  if (!dbeSession->archive_mode)
 	    lo->sync_read_stabs ();
 	}
