@@ -2357,44 +2357,25 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
      name, domain_name (domain).c_str ());
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
-  struct block_symbol other;
-  other.symbol = NULL;
+  best_symbol_tracker accum;
   for (compunit_symtab *cust : objfile->compunits ())
     {
       const struct blockvector *bv;
       const struct block *block;
-      struct block_symbol result;
 
       bv = cust->blockvector ();
       block = bv->block (block_index);
-      result.symbol = block_lookup_symbol_primary (block, lookup_name, domain);
-      result.block = block;
-      if (result.symbol == NULL)
-	continue;
-      if (best_symbol (result.symbol, domain))
-	{
-	  other = result;
-	  break;
-	}
-      if (result.symbol->matches (domain))
-	{
-	  struct symbol *better
-	    = better_symbol (other.symbol, result.symbol, domain);
-	  if (better != other.symbol)
-	    {
-	      other.symbol = better;
-	      other.block = block;
-	    }
-	}
+      if (accum.search (cust, block, lookup_name, domain))
+	break;
     }
 
-  if (other.symbol != NULL)
+  if (accum.currently_best.symbol != nullptr)
     {
       symbol_lookup_debug_printf_v
 	("lookup_symbol_in_objfile_symtabs (...) = %s (block %s)",
-	 host_address_to_string (other.symbol),
-	 host_address_to_string (other.block));
-      return other;
+	 host_address_to_string (accum.currently_best.symbol),
+	 host_address_to_string (accum.currently_best.block));
+      return accum.currently_best;
     }
 
   symbol_lookup_debug_printf_v

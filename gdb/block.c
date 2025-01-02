@@ -669,7 +669,11 @@ block_lookup_symbol (const struct block *block, const lookup_name_info &name,
 		     const domain_search_flags domain)
 {
   if (!block->function ())
-    return block_lookup_symbol_primary (block, name, domain);
+    {
+      best_symbol_tracker tracker;
+      tracker.search (nullptr, block, name, domain);
+      return tracker.currently_best.symbol;
+    }
   else
     {
       /* Note that parameter symbols do not always show up last in the
@@ -700,12 +704,12 @@ block_lookup_symbol (const struct block *block, const lookup_name_info &name,
 
 /* See block.h.  */
 
-struct symbol *
-block_lookup_symbol_primary (const struct block *block,
+bool
+best_symbol_tracker::search (compunit_symtab *symtab,
+			     const struct block *block,
 			     const lookup_name_info &name,
 			     const domain_search_flags domain)
 {
-  symbol *other = nullptr;
   for (symbol *sym : block_iterator_range (block, &name))
     {
       /* With the fix for PR gcc/debug/91507, we get for:
@@ -736,17 +740,28 @@ block_lookup_symbol_primary (const struct block *block,
 	 the only option to make this work is improve the fallback to use the
 	 size of the minimal symbol.  Filed as PR exp/24989.  */
       if (best_symbol (sym, domain))
-	return sym;
+	{
+	  best_symtab = symtab;
+	  currently_best = { sym, block };
+	  return true;
+	}
 
       /* This is a bit of a hack, but 'matches' might ignore
 	 STRUCT vs VAR domain symbols.  So if a matching symbol is found,
 	 make sure there is no "better" matching symbol, i.e., one with
 	 exactly the same domain.  PR 16253.  */
       if (sym->matches (domain))
-	other = better_symbol (other, sym, domain);
+	{
+	  symbol *better = better_symbol (sym, currently_best.symbol, domain);
+	  if (better != currently_best.symbol)
+	    {
+	      best_symtab = symtab;
+	      currently_best = { better, block };
+	    }
+	}
     }
 
-  return other;
+  return false;
 }
 
 /* See block.h.  */

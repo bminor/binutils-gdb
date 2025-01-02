@@ -630,14 +630,27 @@ extern struct symbol *block_lookup_symbol (const struct block *block,
 					   const lookup_name_info &name,
 					   const domain_search_flags domain);
 
-/* Search BLOCK for symbol NAME in DOMAIN but only in primary symbol table of
-   BLOCK.  BLOCK must be STATIC_BLOCK or GLOBAL_BLOCK.  Function is useful if
-   one iterates all global/static blocks of an objfile.  */
+/* When searching for a symbol, the "best" symbol is preferred over
+   one that is merely acceptable.  See 'best_symbol'.  This class
+   keeps track of this distinction while searching.  */
 
-extern struct symbol *block_lookup_symbol_primary
-     (const struct block *block,
-      const lookup_name_info &name,
-      const domain_search_flags domain);
+struct best_symbol_tracker
+{
+  /* The symtab in which the currently best symbol appears.  */
+  compunit_symtab *best_symtab = nullptr;
+
+  /* The currently best (really "better") symbol.  */
+  block_symbol currently_best {};
+
+  /* Search BLOCK (which must have come from SYMTAB) for a symbol
+     matching NAME and DOMAIN.  When a symbol is found, update
+     'currently_best'.  If a best symbol is found, return true.
+     Otherwise, return false.  SYMTAB can be nullptr if the caller
+     does not care about this tracking.  */
+  bool search (compunit_symtab *symtab,
+	       const block *block, const lookup_name_info &name,
+	       domain_search_flags domain);
+};
 
 /* Find symbol NAME in BLOCK and in DOMAIN.  This will return a
    matching symbol whose type is not a "opaque", see TYPE_IS_OPAQUE.
