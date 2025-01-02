@@ -1,6 +1,6 @@
 #nm: -j
 #name: Nested macros (PR 32487)
-# Sone targets do not support macros used like this.
+# Some targets do not support macros used like this.
 #skip: mmix-*
 
 #...
