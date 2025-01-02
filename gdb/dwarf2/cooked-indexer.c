@@ -20,6 +20,7 @@
 #include "dwarf2/cooked-indexer.h"
 #include "dwarf2/cooked-index-worker.h"
 #include "dwarf2/error.h"
+#include "dwarf2/read.h"
 
 /* See cooked-indexer.h.  */
 
@@ -297,7 +298,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 	   || abbrev->tag == DW_TAG_namespace)
 	  && abbrev->has_children)
 	*flags |= IS_TYPE_DECLARATION;
-      else
+      else if (!is_ada_import_or_export (reader->cu (), *name, *linkage_name))
 	{
 	  *linkage_name = nullptr;
 	  *name = nullptr;
@@ -506,7 +507,8 @@ cooked_indexer::index_dies (cutu_reader *reader,
       /* If a DIE parent is a DW_TAG_subprogram, then the DIE is only
 	 interesting if it's a DW_TAG_subprogram or a DW_TAG_entry_point.  */
       bool die_interesting
-	= (abbrev->interesting
+	= ((abbrev->interesting
+	    || (m_language == language_ada && abbrev->maybe_ada_import))
 	   && (parent_entry == nullptr
 	       || parent_entry->tag != DW_TAG_subprogram
 	       || abbrev->tag == DW_TAG_subprogram

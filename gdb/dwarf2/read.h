@@ -1382,4 +1382,10 @@ extern struct dwarf2_section_info *get_debug_line_section
 extern void dwarf2_start_subfile (dwarf2_cu *cu, const file_entry &fe,
 				  const line_header &lh);
 
+/* A helper function that decides if a given symbol is an Ada Pragma
+   Import or Pragma Export.  */
+
+extern bool is_ada_import_or_export (dwarf2_cu *cu, const char *name,
+				     const char *linkagename);
+
 #endif /* GDB_DWARF2_READ_H */

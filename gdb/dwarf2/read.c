@@ -981,9 +981,6 @@ static void queue_comp_unit (dwarf2_per_cu *per_cu,
 
 static void process_queue (dwarf2_per_objfile *per_objfile);
 
-static bool is_ada_import_or_export (dwarf2_cu *cu, const char *name,
-				     const char *linkagename);
-
 /* Class, the destructor of which frees all allocated queue entries.  This
    will only have work to do if an error was thrown while processing the
    dwarf.  If no error was thrown then the queue entries should have all
@@ -15977,14 +15974,14 @@ add_ada_export_symbol (struct symbol *orig, const char *new_name,
   add_symbol_to_list (copy, list_to_add);
 }
 
-/* A helper function that decides if a given symbol is an Ada Pragma
-   Import or Pragma Export.  */
+/* See read.h.  */
 
-static bool
+bool
 is_ada_import_or_export (dwarf2_cu *cu, const char *name,
 			 const char *linkagename)
 {
   return (cu->lang () == language_ada
+	  && name != nullptr
 	  && linkagename != nullptr
 	  && !streq (name, linkagename)
 	  /* The following exclusions are necessary because symbols

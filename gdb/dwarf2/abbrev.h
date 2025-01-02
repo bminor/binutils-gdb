@@ -51,6 +51,14 @@ struct abbrev_info
   /* True if the DIE has children.  */
   bool has_children;
   bool interesting;
+  /* In Ada, an imported subprogram DIE will be marked as a
+     declaration, but will have both a name and a linkage name.  This
+     declaration may be the only spot where that name is associated
+     with an object, so it has to show up in the index.  But, because
+     abbrevs are CU-independent, we can't check the language when
+     computing them and instead we keep a separate flag to indicate
+     that the scanner should check this DIE.  */
+  bool maybe_ada_import;
   unsigned short size_if_constant;
   unsigned short sibling_offset;
   /* Number of attributes.  */

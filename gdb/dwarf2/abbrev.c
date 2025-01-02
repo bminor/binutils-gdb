@@ -108,6 +108,8 @@ abbrev_table::read (struct dwarf2_section_info *section,
       cur_abbrev->has_children = read_1_byte (abfd, abbrev_ptr);
       abbrev_ptr += 1;
 
+      cur_abbrev->maybe_ada_import = false;
+
       unsigned int size = 0;
       unsigned int sibling_offset = -1;
       bool is_csize = true;
@@ -242,7 +244,12 @@ abbrev_table::read (struct dwarf2_section_info *section,
 	}
       else if (has_hardcoded_declaration
 	       && (cur_abbrev->tag != DW_TAG_variable || !has_external))
-	cur_abbrev->interesting = false;
+	{
+	  cur_abbrev->interesting = false;
+	  if (cur_abbrev->tag == DW_TAG_subprogram && has_name
+	      && has_linkage_name)
+	    cur_abbrev->maybe_ada_import = true;
+	}
       else if (!tag_interesting_for_index (cur_abbrev->tag))
 	cur_abbrev->interesting = false;
       else
