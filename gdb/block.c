@@ -669,24 +669,7 @@ block_lookup_symbol (const struct block *block, const lookup_name_info &name,
 		     const domain_search_flags domain)
 {
   if (!block->function ())
-    {
-      struct symbol *other = NULL;
-
-      for (struct symbol *sym : block_iterator_range (block, &name))
-	{
-	  /* See comment related to PR gcc/debug/91507 in
-	     block_lookup_symbol_primary.  */
-	  if (best_symbol (sym, domain))
-	    return sym;
-	  /* This is a bit of a hack, but symbol_matches_domain might ignore
-	     STRUCT vs VAR domain symbols.  So if a matching symbol is found,
-	     make sure there is no "better" matching symbol, i.e., one with
-	     exactly the same domain.  PR 16253.  */
-	  if (sym->matches (domain))
-	    other = better_symbol (other, sym, domain);
-	}
-      return other;
-    }
+    return block_lookup_symbol_primary (block, name, domain);
   else
     {
       /* Note that parameter symbols do not always show up last in the
@@ -722,10 +705,6 @@ block_lookup_symbol_primary (const struct block *block,
 			     const lookup_name_info &name,
 			     const domain_search_flags domain)
 {
-  /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
-  gdb_assert (block->superblock () == NULL
-	      || block->superblock ()->superblock () == NULL);
-
   symbol *other = nullptr;
   for (symbol *sym : block_iterator_range (block, &name))
     {
