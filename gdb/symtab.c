@@ -2586,24 +2586,12 @@ lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
 			      ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
 			      name, domain_name (domain).c_str ());
 
-  result = lookup_symbol_in_objfile_symtabs (objfile, block_index,
-					     name, domain);
-  if (result.symbol != NULL)
-    {
-      symbol_lookup_debug_printf
-	("lookup_symbol_in_objfile (...) = %s (in symtabs)",
-	 host_address_to_string (result.symbol));
-      return result;
-    }
-
   result = lookup_symbol_via_quick_fns (objfile, block_index,
 					name, domain);
-  symbol_lookup_debug_printf ("lookup_symbol_in_objfile (...) = %s%s",
+  symbol_lookup_debug_printf ("lookup_symbol_in_objfile (...) = %s",
 			      result.symbol != NULL
 			      ? host_address_to_string (result.symbol)
-			      : "NULL",
-			      result.symbol != NULL ? " (via quick fns)"
-			      : "");
+			      : "NULL");
   return result;
 }
 
