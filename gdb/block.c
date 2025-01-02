@@ -718,17 +718,16 @@ block_lookup_symbol (const struct block *block, const lookup_name_info &name,
 /* See block.h.  */
 
 struct symbol *
-block_lookup_symbol_primary (const struct block *block, const char *name,
+block_lookup_symbol_primary (const struct block *block,
+			     const lookup_name_info &name,
 			     const domain_search_flags domain)
 {
-  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
-
   /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
   gdb_assert (block->superblock () == NULL
 	      || block->superblock ()->superblock () == NULL);
 
   symbol *other = nullptr;
-  for (symbol *sym : block_iterator_range (block, &lookup_name))
+  for (symbol *sym : block_iterator_range (block, &name))
     {
       /* With the fix for PR gcc/debug/91507, we get for:
 	 ...

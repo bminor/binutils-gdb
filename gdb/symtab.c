@@ -2356,6 +2356,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
      block_index == GLOBAL_BLOCK ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
      name, domain_name (domain).c_str ());
 
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
   struct block_symbol other;
   other.symbol = NULL;
   for (compunit_symtab *cust : objfile->compunits ())
@@ -2366,7 +2367,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 
       bv = cust->blockvector ();
       block = bv->block (block_index);
-      result.symbol = block_lookup_symbol_primary (block, name, domain);
+      result.symbol = block_lookup_symbol_primary (block, lookup_name, domain);
       result.block = block;
       if (result.symbol == NULL)
 	continue;

@@ -636,7 +636,7 @@ extern struct symbol *block_lookup_symbol (const struct block *block,
 
 extern struct symbol *block_lookup_symbol_primary
      (const struct block *block,
-      const char *name,
+      const lookup_name_info &name,
       const domain_search_flags domain);
 
 /* Find symbol NAME in BLOCK and in DOMAIN.  This will return a
