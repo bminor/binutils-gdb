@@ -1131,6 +1131,7 @@ enum
   PREFIX_VEX_0F98_L_0_W_1,
   PREFIX_VEX_0F99_L_0_W_0,
   PREFIX_VEX_0F99_L_0_W_1,
+  PREFIX_VEX_0F3848_X86_64_L_0_W_0,
   PREFIX_VEX_0F3849_X86_64_L_0_W_0_M_0,
   PREFIX_VEX_0F3849_X86_64_L_0_W_0_M_1,
   PREFIX_VEX_0F384B_X86_64_L_0_W_0,
@@ -1347,6 +1348,7 @@ enum
   X86_64_0F38F8_M_1,
   X86_64_0FC7_REG_6_MOD_3_PREFIX_1,
 
+  X86_64_VEX_0F3848,
   X86_64_VEX_0F3849,
   X86_64_VEX_0F384B,
   X86_64_VEX_0F385C,
@@ -1429,6 +1431,7 @@ enum
   VEX_LEN_0F381A,
   VEX_LEN_0F3836,
   VEX_LEN_0F3841,
+  VEX_LEN_0F3848_X86_64,
   VEX_LEN_0F3849_X86_64,
   VEX_LEN_0F384B_X86_64,
   VEX_LEN_0F385A,
@@ -1600,6 +1603,7 @@ enum
   VEX_W_0F382F,
   VEX_W_0F3836,
   VEX_W_0F3846,
+  VEX_W_0F3848_X86_64_L_0,
   VEX_W_0F3849_X86_64_L_0,
   VEX_W_0F384B_X86_64_L_0,
   VEX_W_0F3850,
@@ -4068,6 +4072,13 @@ static const struct dis386 prefix_table[][4] = {
     { "ktestd", { MaskG, MaskR }, 0 },
   },
 
+  /* PREFIX_VEX_0F3848_X86_64_L_0_W_0 */
+  {
+    { "ttmmultf32ps",	{ TMM, Rtmm, VexTmm }, 0 },
+    { Bad_Opcode },
+    { "tmmultf32ps",	{ TMM, Rtmm, VexTmm }, 0 },
+  },
+
   /* PREFIX_VEX_0F3849_X86_64_L_0_W_0_M_0 */
   {
     { "ldtilecfg", { M }, 0 },
@@ -4601,6 +4612,12 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { Bad_Opcode },
     { "senduipi",	{ Eq }, 0 },
+  },
+
+  /* X86_64_VEX_0F3848 */
+  {
+    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0F3848_X86_64) },
   },
 
   /* X86_64_VEX_0F3849 */
@@ -6514,7 +6531,7 @@ static const struct dis386 vex_table[][256] = {
     { VEX_W_TABLE (VEX_W_0F3846) },
     { "vpsllv%DQ", { XM, Vex, EXx }, PREFIX_DATA },
     /* 48 */
-    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_VEX_0F3848) },
     { X86_64_TABLE (X86_64_VEX_0F3849) },
     { Bad_Opcode },
     { X86_64_TABLE (X86_64_VEX_0F384B) },
@@ -7192,6 +7209,11 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F3841 */
   {
     { "vphminposuw",	{ XM, EXx }, PREFIX_DATA },
+  },
+
+  /* VEX_LEN_0F3848_X86_64 */
+  {
+    { VEX_W_TABLE (VEX_W_0F3848_X86_64_L_0) },
   },
 
   /* VEX_LEN_0F3849_X86_64 */
@@ -7879,6 +7901,10 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F3846 */
     { "vpsravd",	{ XM, Vex, EXx }, PREFIX_DATA },
+  },
+  {
+    /* VEX_W_0F3848_X86_64_L_0 */
+    { PREFIX_TABLE (PREFIX_VEX_0F3848_X86_64_L_0_W_0) },
   },
   {
     /* VEX_W_0F3849_X86_64_L_0 */

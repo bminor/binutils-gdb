@@ -3230,6 +3230,9 @@ ttdpfp16ps, 0xf26c, AMX_FP16&AMX_TRANSPOSE, Modrm|Vex128|Space0F38|Src2VVVV|VexW
 
 ttransposed, 0xf35f, AMX_TRANSPOSE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM, RegTMM }
 
+tmmultf32ps, 0x6648, AMX_TF32, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+ttmmultf32ps, 0x48, AMX_TF32&AMX_TRANSPOSE, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+
 // AMX instructions end.
 
 // KEYLOCKER instructions.
