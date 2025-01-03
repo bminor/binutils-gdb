@@ -1,13 +1,14 @@
 	.text
-.macro func
+ .macro func1
 	foo
-.endm
+ .endm
 
-.macro do_foo
-.macro foo
+ .macro do_foo
+ .macro foo
+	.global foo
 foo:
 	.dc.a 0
-.endm
-.endm
-do_foo
-func
+ .endm
+ .endm
+	do_foo
+	func1

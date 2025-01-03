@@ -1,10 +1,11 @@
-.macro function name
- .macro endfunc
+ .macro function name
+ .macro endfunction
  .endm
 	.text
+	.global \name
 \name:
-.endm
+ .endm
 
-function foo
+	function foo
 	.dc.a 0
-endfunc
+	endfunction
