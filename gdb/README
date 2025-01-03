@@ -445,6 +445,9 @@ more obscure GDB `configure' options are not listed here.
 `--disable-gdb-compile'
     Build GDB without support for the 'compile' command.
 
+`--disable-gdb-mdebug-support'
+    Build GDB without support for reading mdebug debug information.
+
 `--with-curses'
      Use the curses library instead of the termcap library, for
      text-mode terminal operations.

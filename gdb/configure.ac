@@ -192,6 +192,20 @@ AS_HELP_STRING([--enable-targets=TARGETS], [alternative target configurations]),
 esac])
 
 
+# Check whether to support mdebug/ecoff debug information.
+AC_ARG_ENABLE(gdb-mdebug-support,
+AS_HELP_STRING([--enable-gdb-mdebug-support],
+	       [Enable support for the mdebug debuginfo format (default 'yes')]),
+[GDB_CHECK_YES_NO_VAL([$enableval], [--enable-gdb-mdebug-support])],
+[enable_gdb_mdebug_support=yes])
+
+if test "x${enable_gdb_mdebug_support}" != "xno"; then
+    CONFIG_SRCS="$CONFIG_SRCS mdebugread.c"
+    CONFIG_OBS="$CONFIG_OBS mdebugread.o"
+    AC_DEFINE(MDEBUG_FORMAT_AVAILABLE, 1,
+	      [defined if mdebug format was requested.])
+fi
+
 BFD_64_BIT
 
 # Provide defaults for some variables set by the per-host and per-target

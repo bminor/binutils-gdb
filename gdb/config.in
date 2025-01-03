@@ -639,6 +639,9 @@
    */
 #undef LT_OBJDIR
 
+/* defined if mdebug format was requested. */
+#undef MDEBUG_FORMAT_AVAILABLE
+
 /* Name of this package. */
 #undef PACKAGE
 

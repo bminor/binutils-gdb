@@ -1172,7 +1172,6 @@ COMMON_SFILES = \
 	maint.c \
 	maint-test-options.c \
 	maint-test-settings.c \
-	mdebugread.c \
 	mem-break.c \
 	memattr.c \
 	memory-map.c \

@@ -37,10 +37,7 @@ struct mdebug_extra_func_info
 
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
 
-extern void mdebug_build_psymtabs (minimal_symbol_reader &,
-				   struct objfile *,
-				   const struct ecoff_debug_swap *,
-				   struct ecoff_debug_info *);
+#if defined(MDEBUG_FORMAT_AVAILABLE)
 
 extern void elfmdebug_build_psymtabs (struct objfile *,
 				      const struct ecoff_debug_swap *,
@@ -53,5 +50,25 @@ extern void elfmdebug_build_psymtabs (struct objfile *,
 extern void mipsmdebug_build_psymtabs (struct objfile *,
 				       const struct ecoff_debug_swap *,
 				       struct ecoff_debug_info *);
+
+#else /* MDEBUG_FORMAT_AVAILABLE */
+
+static inline void
+elfmdebug_build_psymtabs (struct objfile *,
+			  const struct ecoff_debug_swap *,
+			  asection *)
+{
+  warning (_("No mdebug support available"));
+}
+
+static inline void
+mipsmdebug_build_psymtabs (struct objfile *,
+			   const struct ecoff_debug_swap *,
+			   struct ecoff_debug_info *)
+{
+  warning (_("No mdebug support available"));
+}
+
+#endif /* MDEBUG_FORMAT_AVAILABLE */
 
 #endif /* GDB_MDEBUGREAD_H */

@@ -329,7 +329,7 @@ fdr_name (FDR *f)
 /* Read in and parse the symtab of the file OBJFILE.  Symbols from
    different sections are relocated via the SECTION_OFFSETS.  */
 
-void
+static void
 mdebug_build_psymtabs (minimal_symbol_reader &reader,
 		       struct objfile *objfile,
 		       const struct ecoff_debug_swap *swap,
