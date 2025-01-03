@@ -768,11 +768,6 @@ CODE_FRAGMENT
 .
 */
 
-static TLS bfd_error_type bfd_error;
-static TLS bfd_error_type input_error;
-static TLS bfd *input_bfd;
-static TLS char *_bfd_error_buf;
-
 const char *const bfd_errmsgs[] =
 {
   N_("no error"),
@@ -799,6 +794,19 @@ const char *const bfd_errmsgs[] =
   N_("error reading %s: %s"),
   N_("#<invalid error code>")
 };
+
+static TLS bfd_error_type bfd_error;
+static TLS char *_bfd_error_buf;
+
+/* Free any data associated with the BFD error.  */
+
+static void
+_bfd_clear_error_data (void)
+{
+  bfd_error = bfd_error_no_error;
+  free (_bfd_error_buf);
+  _bfd_error_buf = NULL;
+}
 
 /*
 FUNCTION
@@ -858,12 +866,12 @@ bfd_set_input_error (bfd *input, bfd_error_type error_tag)
 {
   /* This is an error that occurred during bfd_close when writing an
      archive, but on one of the input files.  */
-  bfd_error = bfd_error_on_input;
   _bfd_clear_error_data ();
-  input_bfd = input;
-  input_error = error_tag;
-  if (input_error >= bfd_error_on_input)
+  if (error_tag >= bfd_error_on_input)
     abort ();
+  if (bfd_asprintf (_(bfd_errmsgs[bfd_error_on_input]),
+		    bfd_get_filename (input), bfd_errmsg (error_tag)))
+    bfd_error = bfd_error_on_input;
 }
 
 /*
@@ -885,16 +893,7 @@ bfd_errmsg (bfd_error_type error_tag)
   extern int errno;
 #endif
   if (error_tag == bfd_error_on_input)
-    {
-      const char *msg = bfd_errmsg (input_error);
-      char *ret = bfd_asprintf (_(bfd_errmsgs[error_tag]),
-				bfd_get_filename (input_bfd), msg);
-      if (ret)
-	return ret;
-
-      /* Ick, what to do on out of memory?  */
-      return msg;
-    }
+    return _bfd_error_buf;
 
   if (error_tag == bfd_error_system_call)
     return xstrerror (errno);
@@ -929,24 +928,6 @@ bfd_perror (const char *message)
   else
     fprintf (stderr, "%s: %s\n", message, bfd_errmsg (bfd_get_error ()));
   fflush (stderr);
-}
-
-/*
-INTERNAL_FUNCTION
-	_bfd_clear_error_data
-
-SYNOPSIS
-	void _bfd_clear_error_data (void);
-
-DESCRIPTION
-	Free any data associated with the BFD error.
-*/
-
-void
-_bfd_clear_error_data (void)
-{
-  free (_bfd_error_buf);
-  _bfd_error_buf = NULL;
 }
 
 /*
@@ -1961,10 +1942,7 @@ DESCRIPTION
 unsigned int
 bfd_init (void)
 {
-  bfd_error = bfd_error_no_error;
-  input_bfd = NULL;
   _bfd_clear_error_data ();
-  input_error = bfd_error_no_error;
   _bfd_error_internal = error_handler_fprintf;
   _bfd_assert_handler = _bfd_default_assert_handler;
 

@@ -943,7 +943,6 @@ bfd_close_all_done (bfd *abfd)
     _maybe_make_executable (abfd);
 
   _bfd_delete_bfd (abfd);
-  _bfd_clear_error_data ();
 
   return ret;
 }
