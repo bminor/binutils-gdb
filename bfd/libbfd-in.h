@@ -248,7 +248,7 @@ extern int bfd_generic_stat_arch_elt
 #define _bfd_read_ar_hdr(abfd) \
 	BFD_SEND (abfd, _bfd_read_ar_hdr_fn, (abfd))
 #define _bfd_write_ar_hdr(archive, abfd)	 \
-	BFD_SEND (abfd, _bfd_write_ar_hdr_fn, (archive, abfd))
+	BFD_SEND (archive, _bfd_write_ar_hdr_fn, (archive, abfd))
 
 /* Generic routines to use for BFD_JUMP_TABLE_GENERIC.  Use
    BFD_JUMP_TABLE_GENERIC (_bfd_generic).  */
