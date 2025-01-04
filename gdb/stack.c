@@ -2776,7 +2776,14 @@ return_command (const char *retval_exp, int from_tty)
     {
       int confirmed;
 
-      if (thisfun == NULL)
+      if (get_frame_type (thisframe) == SIGTRAMP_FRAME)
+	{
+	  warning (_("Returning from signal trampoline does not fully restore"
+		     " pre-signal state, such as process signal mask."));
+	  confirmed = query (_("%sMake signal trampoline return now? "),
+			     query_prefix.c_str ());
+	}
+      else if (thisfun == NULL)
 	confirmed = query (_("%sMake selected stack frame return now? "),
 			   query_prefix.c_str ());
       else

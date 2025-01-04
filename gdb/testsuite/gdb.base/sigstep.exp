@@ -259,7 +259,7 @@ proc advancei { cmd } {
 	    -re "return .*${gdb_prompt} $" {
 		fail "$test (stepped)"
 	    }
-	    -re "Make .*frame return now.*y or n. $" {
+	    -re "Make signal trampoline return now.*y or n. $" {
 		send_gdb "y\n"
 		exp_continue -continue_timer
 	    }
