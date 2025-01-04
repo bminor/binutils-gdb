@@ -151,6 +151,14 @@ win32_isatty (int fd)
 #  define RL_TIMEOUT_USE_SELECT
 #else
 #  define RL_TIMEOUT_USE_SIGALRM
+#  ifdef __MINGW32_MAJOR_VERSION
+/* mingw.org's MinGW doesn't have 'alarm'.  */
+unsigned int
+alarm (unsigned int seconds)
+{
+  return 0;
+}
+#  endif
 #endif
 
 int rl_set_timeout (unsigned int, unsigned int);
