@@ -80,7 +80,7 @@ target_boards=(
     gold
     gold-gdb-index
     readnow
-    stabs
+    # Skip the stabs board, Stabs support in gdb is unmaintained.
 )
 
 # Like target_boards, but not actual files in gdb/testsuite/boards.
