@@ -655,9 +655,9 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
       REQUIRE (skip_bytes (&buf, end, hdr_length - 4));
     }
 
-  sec_info = (struct eh_frame_sec_info *)
-      bfd_zmalloc (sizeof (struct eh_frame_sec_info)
-		   + (num_entries - 1) * sizeof (struct eh_cie_fde));
+  sec_info = bfd_zalloc (abfd,
+			 (sizeof (struct eh_frame_sec_info)
+			  + (num_entries - 1) * sizeof (struct eh_cie_fde)));
   REQUIRE (sec_info);
 
   /* We need to have a "struct cie" for each CIE in this section.  */
@@ -1050,7 +1050,6 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
     (_("error in %pB(%pA); no .eh_frame_hdr table will be created"),
      abfd, sec);
   hdr_info->u.dwarf.table = false;
-  free (sec_info);
  success:
   _bfd_elf_munmap_section_contents (sec, ehbuf);
   free (local_cies);

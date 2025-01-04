@@ -214,7 +214,7 @@ _bfd_elf_parse_sframe (bfd *abfd,
   /* Decode the buffer and keep decoded contents for later use.
      Relocations are performed later, but are such that the section's
      size is unaffected.  */
-  sfd_info = bfd_malloc (sizeof (struct sframe_dec_info));
+  sfd_info = bfd_alloc (abfd, sizeof (*sfd_info));
   sf_size = sec->size;
 
   sfd_info->sfd_ctx = sframe_decode ((const char*)sfbuf, sf_size, &decerr);
