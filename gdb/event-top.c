@@ -1276,7 +1276,7 @@ fd_copy (fd_set *dst, const fd_set *src, int n)
 {
   FD_ZERO (dst);
   for (int i = 0; i < n; ++i)
-    if (FD_ISSET (i, src))
+    if (FD_ISSET (i, (fd_set *)src))
       FD_SET (i, dst);
 
   return dst;
