@@ -3114,9 +3114,9 @@ _initialize_windows_nat ()
 
   add_com ("signal-event", class_run, signal_event_command, _("\
 Signal a crashed process with event ID, to allow its debugging.\n\
-This command is needed in support of setting up GDB as JIT debugger on \
-MS-Windows.  The command should be invoked from the GDB command line using \
-the '-ex' command-line option.  The ID of the event that blocks the \
+This command is needed in support of setting up GDB as JIT debugger on\n\
+MS-Windows.  The command should be invoked from the GDB command line using\n\
+the '-ex' command-line option.  The ID of the event that blocks the\n\
 crashed process will be supplied by the Windows JIT debugging mechanism."));
 
 #ifdef __CYGWIN__
