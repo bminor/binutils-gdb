@@ -20,8 +20,8 @@
 # source file used is break.c
 
 
-#maintenance check-psymtabs -- Check consistency of psymtabs vs symtabs
-#maintenance check-symtabs -- Check consistency of symtabs
+#maintenance check psymtabs -- Check consistency of psymtabs vs symtabs
+#maintenance check symtabs -- Check consistency of symtabs
 #maintenance expand-symtabs -- Expand symtabs matching a file regexp
 #maintenance set -- Set GDB internal variables used by the GDB maintainer
 #maintenance show -- Show GDB internal variables used by the GDB maintainer
@@ -156,8 +156,8 @@ set have_psyms [expr ! ( $have_gdb_index || $readnow_p )]
 # issues.
 
 set seen_command false
-gdb_test_multiple "maint check-psymtabs" "" {
-    -re "^maint check-psymtabs\r\n" {
+gdb_test_multiple "maint check psymtabs" "" {
+    -re "^maint check psymtabs\r\n" {
 	set seen_command true
 	exp_continue
     }
@@ -174,7 +174,7 @@ gdb_test_multiple "maint check-psymtabs" "" {
 # This command does not produce any output unless there is some problem
 # with the symtabs, so that branch will really never be covered in the
 # tests here!!
-gdb_test_no_output "maint check-symtabs"
+gdb_test_no_output "maint check symtabs"
 
 # Test per-command stats.
 gdb_test_no_output "maint set per-command on"

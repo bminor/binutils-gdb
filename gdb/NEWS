@@ -3,6 +3,14 @@
 
 *** Changes since GDB 16
 
+* New commands
+
+maintenance check psymtabs
+  Renamed from maintenance check-psymtabs
+
+maintenance check symtabs
+  Renamed from maintenance check-symtabs
+
 *** Changes in GDB 16
 
 * Support for Nios II targets has been removed as this architecture

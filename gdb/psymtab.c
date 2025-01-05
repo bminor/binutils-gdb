@@ -1572,8 +1572,8 @@ This does not include information about individual partial symbols,\n\
 just the symbol table structures themselves."),
 	   &maintenanceinfolist);
 
-  add_cmd ("check-psymtabs", class_maintenance, maintenance_check_psymtabs,
+  add_cmd ("psymtabs", class_maintenance, maintenance_check_psymtabs,
 	   _("\
 Check consistency of currently expanded psymtabs versus symtabs."),
-	   &maintenancelist);
+	   &maintenancechecklist);
 }

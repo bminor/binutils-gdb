@@ -23,4 +23,4 @@ gdb_test_no_output "maint expand-symtabs"
 
 # Check that we don't get:
 #   Static symbol `foo' only found in check-psymtab.c psymtab
-gdb_test_no_output "maint check-psymtab"
+gdb_test_no_output "maint check psymtab"

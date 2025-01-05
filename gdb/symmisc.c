@@ -838,7 +838,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
    GDB assumes they are always non-NULL.
 
    Note: This does not check for psymtab vs symtab consistency.
-   Use "maint check-psymtabs" for that.  */
+   Use "maint check psymtabs" for that.  */
 
 static void
 maintenance_check_symtabs (const char *ignore, int from_tty)
@@ -1093,10 +1093,10 @@ With an argument REGEXP, list just the line tables for the symbol\n\
 tables with matching names."),
 	   &maintenanceinfolist);
 
-  add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
+  add_cmd ("symtabs", class_maintenance, maintenance_check_symtabs,
 	   _("\
 Check consistency of currently expanded symtabs."),
-	   &maintenancelist);
+	   &maintenancechecklist);
 
   add_cmd ("expand-symtabs", class_maintenance, maintenance_expand_symtabs,
 	   _("Expand symbol tables.\n\
