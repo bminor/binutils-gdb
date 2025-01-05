@@ -8020,6 +8020,13 @@ bfd_keep_unused_section_symbols (const bfd *abfd)
   return abfd->xvec->keep_unused_section_symbols;
 }
 
+static inline bool
+bfd_target_supports_archives (const bfd *abfd)
+{
+  return (abfd->xvec->_bfd_check_format[bfd_archive]
+	  != abfd->xvec->_bfd_check_format[bfd_unknown]);
+}
+
 bool bfd_set_default_target (const char *name);
 
 const bfd_target *bfd_find_target (const char *target_name, bfd *abfd);

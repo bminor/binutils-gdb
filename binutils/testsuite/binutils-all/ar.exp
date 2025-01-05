@@ -309,13 +309,11 @@ proc thin_archive_with_nested { bfdtests } {
     if [is_remote host] {
 	set archive artest.a
 	set archive2 artest2.a
-	set archive3 artest3.a
 	set objfile [remote_download host tmpdir/bintest.${obj}]
 	remote_file host delete $archive
     } else {
 	set archive tmpdir/artest.a
 	set archive2 tmpdir/artest2.a
-	set archive3 tmpdir/artest3.a
 	set objfile tmpdir/bintest.${obj}
     }
 
@@ -329,15 +327,7 @@ proc thin_archive_with_nested { bfdtests } {
 
     remote_file build delete tmpdir/artest2.a
 
-    set got [binutils_run $AR "rcT $archive2 ${archive}"]
-    if ![string match "" $got] {
-	fail $testname
-	return
-    }
-
-    remote_file build delete tmpdir/artest3.a
-
-    set got [binutils_run $AR "rc --thin $archive3 ${archive}"]
+    set got [binutils_run $AR "rc --thin $archive2 ${archive}"]
     if ![string match "" $got] {
 	fail $testname
 	return
@@ -352,13 +342,6 @@ proc thin_archive_with_nested { bfdtests } {
 	}
 
 	set exec_output [binutils_run "$base_dir/$bfdtest" "$archive2"]
-	if ![string match "" $exec_output] {
-	    verbose -log $exec_output
-	    fail "$testname ($bfdtest)"
-	    return
-	}
-
-	set exec_output [binutils_run "$base_dir/$bfdtest" "$archive3"]
 	if ![string match "" $exec_output] {
 	    verbose -log $exec_output
 	    fail "$testname ($bfdtest)"
@@ -994,6 +977,54 @@ __.LIBDEP*" $got] {
     pass $testname
 }
 
+# Test creation of an archive containing object files not of the same
+# format as the target object files.
+
+proc foreign_object { } {
+    global AR
+    global NM
+    global srcdir
+    global subdir
+
+    set testname "ar foreign object"
+
+    set object1 $srcdir/$subdir/tek1.obj
+    set object2 $srcdir/$subdir/tek2.obj
+    if [is_remote host] {
+	set archive artest.a
+	set object1 [remote_download host $object1]
+	set object2 [remote_download host $object2]
+	remote_file host delete $archive
+    } else {
+	set archive tmpdir/artest.a
+    }
+
+    remote_file build delete tmpdir/artest.a
+
+    set got [binutils_run $AR "rc $archive $object1 $object2"]
+    if ![string match {} $got] {
+	fail $testname
+	return
+    }
+
+    set got [binutils_run $NM $archive]
+    if ![string match {
+tek1.obj:
+*: no symbols
+
+tek2.obj:
+00000001 D _binary_x_end
+00000001 A _binary_x_size
+00000000 D _binary_x_start
+} $got] {
+	fail $testname
+	return
+    }
+
+    pass $testname
+}
+
+
 # Run the tests.
 
 # Only run the bfdtest checks if the programs exist.  Since these
@@ -1030,3 +1061,5 @@ test_add_dependencies
 if { [is_elf_format] && [supports_gnu_unique] } {
     unique_symbol
 }
+
+foreign_object

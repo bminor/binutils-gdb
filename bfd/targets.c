@@ -667,6 +667,13 @@ to find an alternative output format that is suitable.
 .  return abfd->xvec->keep_unused_section_symbols;
 .}
 .
+.static inline bool
+.bfd_target_supports_archives (const bfd *abfd)
+.{
+.  return (abfd->xvec->_bfd_check_format[bfd_archive]
+.	   != abfd->xvec->_bfd_check_format[bfd_unknown]);
+.}
+.
 */
 
 /* All known xvecs (even those that don't compile on all systems).

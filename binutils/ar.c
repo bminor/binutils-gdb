@@ -1006,11 +1006,15 @@ open_inarch (const char *archive_filename, const char *file)
 	  obj = bfd_openr (file, target);
 	  if (obj != NULL)
 	    {
-	      if (bfd_check_format (obj, bfd_object))
+	      if (bfd_check_format (obj, bfd_object)
+		  && bfd_target_supports_archives (obj))
 		target = bfd_get_target (obj);
 	      (void) bfd_close (obj);
 	    }
 	}
+
+      /* If we die creating a new archive, don't leave it around.  */
+      output_filename = xstrdup (archive_filename);
 
       /* Create an empty archive.  */
       arch = bfd_openw (archive_filename, target);
@@ -1020,9 +1024,6 @@ open_inarch (const char *archive_filename, const char *file)
 	bfd_fatal (archive_filename);
       else if (!silent_create)
         non_fatal (_("creating %s"), archive_filename);
-
-      /* If we die creating a new archive, don't leave it around.  */
-      output_filename = xstrdup (archive_filename);
     }
 
   arch = bfd_openr (archive_filename, target);

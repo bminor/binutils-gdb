@@ -1307,13 +1307,13 @@ const bfd_target srec_vec =
   {
     _bfd_bool_bfd_false_error,
     srec_mkobject,
-    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error,
     _bfd_bool_bfd_false_error,
   },
   {				/* bfd_write_contents.  */
     _bfd_bool_bfd_false_error,
     srec_write_object_contents,
-    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error,
     _bfd_bool_bfd_false_error,
   },
 
@@ -1364,13 +1364,13 @@ const bfd_target symbolsrec_vec =
   {
     _bfd_bool_bfd_false_error,
     srec_mkobject,
-    _bfd_generic_mkarchive,
+    _bfd_bool_bfd_false_error,
     _bfd_bool_bfd_false_error,
   },
   {				/* bfd_write_contents.  */
     _bfd_bool_bfd_false_error,
     symbolsrec_write_object_contents,
-    _bfd_write_archive_contents,
+    _bfd_bool_bfd_false_error,
     _bfd_bool_bfd_false_error,
   },
 

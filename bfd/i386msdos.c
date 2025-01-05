@@ -295,13 +295,13 @@ const bfd_target i386_msdos_vec =
     {
       _bfd_bool_bfd_false_error,
       msdos_mkobject,
-      _bfd_generic_mkarchive,
+      _bfd_bool_bfd_false_error,
       _bfd_bool_bfd_false_error,
     },
     {				/* bfd_write_contents */
       _bfd_bool_bfd_false_error,
       msdos_write_object_contents,
-      _bfd_write_archive_contents,
+      _bfd_bool_bfd_false_error,
       _bfd_bool_bfd_false_error,
     },
 
