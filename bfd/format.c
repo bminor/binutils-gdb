@@ -535,14 +535,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (cleanup)
 	{
 	  int match_priority = abfd->xvec->match_priority;
-#if BFD_SUPPORTS_PLUGINS
-	  /* If this object can be handled by a plugin, give that the
-	     lowest priority; objects both handled by a plugin and
-	     with an underlying object format will be claimed
-	     separately by the plugin.  */
-	  if (*target == &plugin_vec)
-	    match_priority = (*target)->match_priority;
-#endif
 
 	  if (abfd->format != bfd_archive
 	      || (bfd_has_map (abfd)
