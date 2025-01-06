@@ -3126,9 +3126,9 @@ vcvtneps2bf16<Vxy>, 0xf372, AVX_NE_CONVERT, Modrm|<Vxy:vex>|Space0F38|VexW0|NoSu
 // ENQCMD instructions.
 
 enqcmd, 0xf20f38f8, ENQCMD, Modrm|AddrPrefixOpReg|NoSuf, { Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-enqcmd, 0xf2f8, APX_F(ENQCMD), Modrm|AddrPrefixOpReg|NoSuf|EVexMap4, { Unspecified|BaseIndex, Reg32|Reg64 }
+enqcmd, 0xf2f8, ENQCMD&APX_F, Modrm|AddrPrefixOpReg|NoSuf|EVexMap4, { Unspecified|BaseIndex, Reg32|Reg64 }
 enqcmds, 0xf30f38f8, ENQCMD, Modrm|AddrPrefixOpReg|NoSuf, { Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-enqcmds, 0xf3f8, APX_F(ENQCMD), Modrm|AddrPrefixOpReg|NoSuf|EVexMap4, { Unspecified|BaseIndex, Reg32|Reg64 }
+enqcmds, 0xf3f8, ENQCMD&APX_F, Modrm|AddrPrefixOpReg|NoSuf|EVexMap4, { Unspecified|BaseIndex, Reg32|Reg64 }
 
 // ENQCMD instructions end.
 
