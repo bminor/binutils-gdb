@@ -93,3 +93,7 @@
 	luti4	{ z19.b, z24.b, z27.b, z31.b }, zt0, { z12 - z13 }
 	luti4	{ z19.b, z22.b, z27.b, z31.b }, zt0, { z12 - z13 }
 	luti4	{ z19.b, z23.b, z27.b, z31.b }, zt0, { z12 - z14 }
+
+	// Missing "mul vl"
+	movt	zt0[0], z2
+	movt	zt0[1], z2

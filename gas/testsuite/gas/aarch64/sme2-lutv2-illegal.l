@@ -68,3 +68,5 @@
 [^ :]+:[0-9]+: Error: invalid register list at operand 1 -- `luti4 { ?z19.b,z24.b,z27.b,z31.b ?},zt0,{ ?z12 ?- ?z13 ?}'
 [^ :]+:[0-9]+: Error: invalid register list at operand 1 -- `luti4 { ?z19.b,z22.b,z27.b,z31.b ?},zt0,{ ?z12 ?- ?z13 ?}'
 [^ :]+:[0-9]+: Error: the register list must have a stride of 1 at operand 1 -- `luti4 { ?z19.b,z23.b,z27.b,z31.b ?},zt0,{ ?z12 ?- ?z14 ?}'
+[^ :]+:[0-9]+: Error: comma expected between operands at operand 2 -- `movt zt0\[0\], ?z2'
+[^ :]+:[0-9]+: Error: comma expected between operands at operand 2 -- `movt zt0\[1\], ?z2'
