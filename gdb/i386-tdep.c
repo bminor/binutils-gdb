@@ -4816,6 +4816,39 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 
   switch (opcode)
     {
+    case 0x10:	/* VMOVS[S|D] XMM, mem.  */
+		/* VMOVUP[S|D] XMM, mem.  */
+    case 0x28:	/* VMOVAP[S|D] XMM, mem.  */
+      /* Moving from memory region or XMM registers into an XMM register.  */
+      i386_record_modrm (ir);
+      record_full_arch_list_add_reg (ir->regcache,
+				     ir->regmap[X86_RECORD_XMM0_REGNUM]
+				     + ir->reg + vex_r * 8);
+      break;
+    case 0x11:	/* VMOVS[S|D] mem, XMM.  */
+		/* VMOVUP[S|D] mem, XMM.  */
+    case 0x29:	/* VMOVAP[S|D] mem, XMM.  */
+      /* Moving from memory region into an XMM register.  */
+      /* This can also be used for XMM -> XMM in some scenarios.  */
+      i386_record_modrm (ir);
+      if (ir->mod == 3)
+	{
+	  /* In this case the destination register is encoded differently
+	     to any other AVX instruction I've seen so far.  In this one,
+	     VEX.B is the most important bit of the destination.  */
+	  record_full_arch_list_add_reg (ir->regcache,
+					 ir->regmap[X86_RECORD_XMM0_REGNUM]
+					 + ir->rm + ir->rex_b * 8);
+	}
+      else
+	{
+	  /* VEX.pp stores whether we're moving a single or double precision
+	     float.  It just happens that pp is exactly one less than
+	     log2(size) so we can use that directly.  */
+	  ir->ot = ir->pp;
+	  i386_record_lea_modrm (ir);
+	}
+      break;
     case 0x6e:	/* VMOVD XMM, reg/mem  */
       /* This is moving from a regular register or memory region into an
 	 XMM register. */

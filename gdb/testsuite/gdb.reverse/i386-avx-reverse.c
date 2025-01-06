@@ -107,6 +107,67 @@ vmov_test ()
   asm volatile ("vmovdqu %ymm2, %ymm15");
   asm volatile ("vmovdqa %ymm15, %ymm0");
 
+  /* Testing vmov [ss|sd] instructions.  */
+  /* Note, vmovss only works with XMM registers, not YMM registers,
+     according to the intel manual.  Also, initializing the variables
+     uses xmm0 in my machine, so we can't test with it, so use xmm1
+     instead.  */
+
+  /* Move single precision floats to and from memory.  */
+  float f1 = 1.5, f2 = 4.2;
+  asm volatile ("vmovss %0, %%xmm1" : : "m"(f1));
+  asm volatile ("vmovss %0, %%xmm15": : "m"(f2));
+  asm volatile ("vmovss %%xmm1, %0" :  "=m"(f2));
+  asm volatile ("vmovss %%xmm15, %0":  "=m"(f1));
+
+  asm volatile ("vmovss %xmm15, %xmm1, %xmm2");
+  asm volatile ("vmovss %xmm15, %xmm1, %xmm8");
+  asm volatile ("vmovss %xmm1, %xmm2, %xmm15");
+  asm volatile ("vmovss %xmm2, %xmm15, %xmm1");
+
+  /* Testing double precision floats.  */
+  double d1 = -1.5, d2 = -2.5;
+  asm volatile ("vmovsd %0, %%xmm1" : : "m"(d1));
+  asm volatile ("vmovsd %0, %%xmm15": : "m"(d2));
+  asm volatile ("vmovsd %%xmm1, %0" :  "=m"(d2));
+  asm volatile ("vmovsd %%xmm15, %0":  "=m"(d1));
+
+  asm volatile ("vmovsd %xmm15, %xmm1, %xmm2");
+  asm volatile ("vmovsd %xmm15, %xmm1, %xmm8");
+  asm volatile ("vmovsd %xmm1, %xmm2, %xmm15");
+  asm volatile ("vmovsd %xmm2, %xmm15, %xmm1");
+
+  /* "reset" all the buffers.  This doesn't zero them all, but
+     it zeroes the start which lets us ensure the tests see
+     some changes.  */
+  asm volatile ("vmovq %%xmm3, %0": "=m" (buf1));
+  asm volatile ("vmovq %%xmm3, %0": "=m" (global_buf1));
+  asm volatile ("vmovq %%xmm3, %0": "=m" (*dyn_buf1));
+
+  /* Testing vmovu[ps|pd] instructions.  Even though there are aligned
+     versions of these instructions like vmovdq[u|a], they have different
+     opcodes, meaning they'll need to be tested separately.  */
+
+  asm volatile ("vmovups %0, %%xmm0"  : : "m"(buf0));
+  asm volatile ("vmovupd %0, %%xmm15" : : "m"(buf1));
+  asm volatile ("vmovupd %%xmm0, %0"  : : "m"(buf1));
+  asm volatile ("vmovups %%xmm15, %0" : : "m"(buf1));
+
+  asm volatile ("vmovups %0, %%xmm0"  : : "m"(global_buf0));
+  asm volatile ("vmovupd %0, %%xmm15" : : "m"(global_buf1));
+  asm volatile ("vmovupd %%xmm0, %0"  : : "m"(global_buf1));
+  asm volatile ("vmovups %%xmm15, %0" : : "m"(global_buf1));
+
+  asm volatile ("vmovups %0, %%xmm0"  : : "m"(*dyn_buf0));
+  asm volatile ("vmovupd %0, %%xmm15" : : "m"(*dyn_buf1));
+  asm volatile ("vmovupd %%xmm0, %0"  : : "m"(*dyn_buf1));
+  asm volatile ("vmovups %%xmm15, %0" : : "m"(*dyn_buf1));
+
+  asm volatile ("vmovaps %0, %%xmm0"  : : "m"(*dyn_buf0));
+  asm volatile ("vmovapd %0, %%xmm15" : : "m"(*dyn_buf1));
+  asm volatile ("vmovapd %%xmm0, %0"  : : "m"(*dyn_buf1));
+  asm volatile ("vmovaps %%xmm15, %0" : : "m"(*dyn_buf1));
+
   /* We have a return statement to deal with
      epilogue in different compilers.  */
   return 0; /* end vmov_test */

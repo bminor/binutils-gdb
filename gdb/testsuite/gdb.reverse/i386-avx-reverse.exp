@@ -145,6 +145,63 @@ global decimal
 
 if {[record_full_function "vmov"] == true} {
     # Now execute backwards, checking all instructions.
+
+    test_one_memory "vmovaps" "dyn_buf1" \
+	"0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28" true
+    test_one_memory "vmovapd" "dyn_buf1" \
+	"0x54, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x28" true
+    test_one_register "vmovapd" "xmm15" ".*" "dynamic buffer: "
+    test_one_register "vmovaps" "xmm0" ".*" "dynamic buffer: "
+
+    test_one_memory "vmovups" "dyn_buf1" \
+	"0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28" true
+    test_one_memory "vmovupd" "dyn_buf1" \
+	"0x54, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x28" true
+    test_one_register "vmovupd" "xmm15" ".*" "dynamic buffer: "
+    test_one_register "vmovups" "xmm0" ".*" "dynamic buffer: "
+
+    test_one_memory "vmovups" "global_buf1" \
+	"0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18"
+    test_one_memory "vmovupd" "global_buf1" \
+	"0x54, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x18"
+    test_one_register "vmovupd" "xmm15" ".*" "global buffer: "
+    test_one_register "vmovups" "xmm0" ".*" "global buffer: "
+
+    test_one_memory "vmovups" "buf1" \
+	"0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38"
+    test_one_memory "vmovupd" "buf1" \
+	"0x54, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x38"
+    test_one_register "vmovupd" "xmm15" "0xbff8000000000000" "local buffer: "
+    test_one_register "vmovups" "xmm0" "0xc004000000000000" "local buffer: "
+
+    gdb_test "rs 3" "vmovq %%xmm3.*"
+
+    test_one_register "vmovsd" "xmm1" "0xbff8000000000000" "from register: "
+    test_one_register "vmovsd" "xmm15" "0xc004000000000000" "from register: "
+    test_one_register "vmovsd" "xmm8" "0x40866666" "from register: "
+    test_one_register "vmovsd" "xmm2" "0x40866666" "from register: "
+
+    test_one_memory "vmovsd" "d1" "0xbff8000000000000"
+    test_one_memory "vmovsd" "d2" "0xc004000000000000"
+    test_one_register "vmovsd" "xmm15" "0x3fc00000"
+    test_one_register "vmovsd" "xmm1" "0x40866666"
+
+    # Reverse step over the line initializing the floats.
+    gdb_test "rs" "double .*" "step over double initialization"
+
+    test_one_register "vmovss" "xmm1" "0x3fc00000" "from register: "
+    test_one_register "vmovss" "xmm15" "0x40866666" "from register: "
+    test_one_register "vmovss" "xmm8" "0" "from register: "
+    test_one_register "vmovss" "xmm2" "0" "from register: "
+
+    test_one_memory "vmovss" "f1" "0x3fc00000"
+    test_one_memory "vmovss" "f2" "0x40866666"
+    test_one_register "vmovss" "xmm15" "0x0"
+    test_one_register "vmovss" "xmm1" "0x0"
+
+    # Reverse step over the line initializing the floats.
+    gdb_test "rs" "float .*" "step over float initialization"
+
     test_one_register "vmovdqa" "ymm0" \
 	"0x2f2e2d2c2b2a29282726252423222120, 0x2f2e2d2c2b2a29282726252423222120" \
 	"from register: "
