@@ -643,7 +643,6 @@ enum
   M_FLx,
   M_Sx_FSx,
   M_CALL,
-  M_J,
   M_LI,
   M_EXTH,
   M_ZEXTW,
