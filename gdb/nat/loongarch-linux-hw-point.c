@@ -221,19 +221,6 @@ loongarch_linux_get_debug_reg_capacity (int tid)
 }
 
 /* Return the debug register state for process PID.  If no existing
-   state is found for this process, return nullptr.  */
-
-struct loongarch_debug_reg_state *
-loongarch_lookup_debug_reg_state (pid_t pid)
-{
-  auto it = loongarch_debug_process_state.find (pid);
-  if (it != loongarch_debug_process_state.end ())
-    return &it->second;
-
-  return nullptr;
-}
-
-/* Return the debug register state for process PID.  If no existing
    state is found for this process, create new state.  */
 
 struct loongarch_debug_reg_state *
