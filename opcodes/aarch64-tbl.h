@@ -2841,8 +2841,10 @@ static const aarch64_feature_set aarch64_feature_lut_sve2 =
   AARCH64_FEATURES (2, LUT, SVE2);
 static const aarch64_feature_set aarch64_feature_brbe =
   AARCH64_FEATURE (BRBE);
-static const aarch64_feature_set aarch64_feature_sme_lutv2 =
-  AARCH64_FEATURES (3, SME_LUTv2, SME2, SME2p1);
+static const aarch64_feature_set aarch64_feature_lutv2_sme2 =
+  AARCH64_FEATURES (2, SME_LUTv2, SME2);
+static const aarch64_feature_set aarch64_feature_lutv2_sme2p1 =
+  AARCH64_FEATURES (2, SME_LUTv2, SME2p1);
 static const aarch64_feature_set aarch64_feature_fp8fma =
   AARCH64_FEATURE (FP8FMA);
 static const aarch64_feature_set aarch64_feature_fp8dot4 =
@@ -2938,7 +2940,8 @@ static const aarch64_feature_set aarch64_feature_sme_f16f16_f8f16 =
 #define LUT &aarch64_feature_lut
 #define LUT_SVE2 &aarch64_feature_lut_sve2
 #define BRBE		&aarch64_feature_brbe
-#define LUTv2_SME2 &aarch64_feature_sme_lutv2
+#define LUTv2_SME2	&aarch64_feature_lutv2_sme2
+#define LUTv2_SME2p1	&aarch64_feature_lutv2_sme2p1
 #define FP8FMA		&aarch64_feature_fp8fma
 #define FP8DOT4		&aarch64_feature_fp8dot4
 #define FP8DOT2		&aarch64_feature_fp8dot2
@@ -3150,6 +3153,9 @@ static const aarch64_feature_set aarch64_feature_sme_f16f16_f8f16 =
   { NAME, OPCODE, MASK, ic_system, 0, BRBE, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define LUTv2_SME2_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS)	\
   { NAME, OPCODE, MASK, CLASS, 0, LUTv2_SME2, OPS, QUALS, \
+    FLAGS, 0, 0, NULL }
+#define LUTv2_SME2p1_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS)	\
+  { NAME, OPCODE, MASK, CLASS, 0, LUTv2_SME2p1, OPS, QUALS, \
     FLAGS, 0, 0, NULL }
 #define FP8FMA_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, FP8FMA, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -6807,7 +6813,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
 
   /* SME2 lutv2.  */
   LUTv2_SME2_INSN ("luti4", 0xc08b0000, 0xffffcc23, sme_size_12_b, OP3 (SME_Zdnx4, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_VUU_B, F_STRICT | 0),
-  LUTv2_SME2_INSN ("luti4", 0xc09b0000, 0xffffcc2c, sme_size_12_b, OP3 (SME_Zdnx4_STRIDED, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_VUU_B, F_STRICT | 0),
+  LUTv2_SME2p1_INSN ("luti4", 0xc09b0000, 0xffffcc2c, sme_size_12_b, OP3 (SME_Zdnx4_STRIDED, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_VUU_B, F_STRICT | 0),
   LUTv2_SME2_INSN ("movt", 0xc04f03e0, 0xffffcfe0, sme_misc, OP2 (SME_ZT0_INDEX2_12, SVE_Zt), {}, 0),
   /* SME FP16 ZA-targeting addition instructions.  */
   SME_F16F16_F8F16_INSNC("fadd", 0xc1a41c00, 0xffff9c38, sme_misc, OP2 (SME_ZA_array_off3_0, SME_Znx2), OP_SVE_HH, F_OD (2), 0),
