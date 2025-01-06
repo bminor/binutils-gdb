@@ -16809,6 +16809,12 @@ cooked_indexer::index_dies (cutu_reader *reader,
 	      break;
 
 	    case DW_TAG_enumeration_type:
+	      /* Some versions of gdc could emit an "enum class"
+		 without a name, which is nonsensical.  These are
+		 skipped.  */
+	      if (is_enum_class && this_entry == nullptr)
+		continue;
+
 	      /* We need to recurse even for an anonymous enumeration.
 		 Which scope we record as the parent scope depends on
 		 whether we're reading an "enum class".  If so, we use
