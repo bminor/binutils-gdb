@@ -2015,8 +2015,32 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 		 bits of the result.  */
 	      resultP->X_add_number *= (valueT) v;
 	      break;
-	    case O_divide:		resultP->X_add_number /= v; break;
-	    case O_modulus:		resultP->X_add_number %= v; break;
+
+	    case O_divide:
+	      if (v == 1)
+		break;
+	      if (v == -1)
+		{
+		  /* Dividing the largest negative value representable in offsetT
+		     by -1 has a non-representable result in common binary
+		     notation.  Treat it as negation instead, carried out as an
+		     unsigned operation to avoid UB.  */
+		  resultP->X_add_number = - (valueT) resultP->X_add_number;
+		}
+	      else
+		resultP->X_add_number /= v;
+	      break;
+
+	    case O_modulus:
+	      /* See above for why in particular -1 needs special casing.
+	         While the operation is UB in C, mathematically it has a well-
+	         defined result.  */
+	      if (v == 1 || v == -1)
+		resultP->X_add_number = 0;
+	      else
+		resultP->X_add_number %= v;
+	      break;
+
 	    case O_left_shift:
 	    case O_right_shift:
 	      /* We always use unsigned shifts.  According to the ISO
@@ -2372,12 +2396,22 @@ resolve_expression (expressionS *expressionP)
 	case O_divide:
 	  if (right == 0)
 	    return 0;
-	  left = (offsetT) left / (offsetT) right;
+	  /* See expr() for reasons of the special casing.  */
+	  if (right == 1)
+	    break;
+	  if ((offsetT) right == -1)
+	    left = -left;
+	  else
+	    left = (offsetT) left / (offsetT) right;
 	  break;
 	case O_modulus:
 	  if (right == 0)
 	    return 0;
-	  left = (offsetT) left % (offsetT) right;
+	  /* Again, see expr() for reasons of the special casing.  */
+	  if (right == 1 || (offsetT) right == -1)
+	    left = 0;
+	  else
+	    left = (offsetT) left % (offsetT) right;
 	  break;
 	case O_left_shift:
 	  if (right >= sizeof (left) * CHAR_BIT)

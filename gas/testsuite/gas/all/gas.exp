@@ -449,6 +449,22 @@ if { ![istarget "pdp11-*-*"] } {
     run_dump_test octa
 }
 
+# Some x86 flavors use '/' as a comment char, yet that can be suppressed.
+# Some other target use '/' or '%' as a comment char, without a way to
+# suppress it.
+if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } {
+    run_dump_test quad-div {{as --divide}}
+    run_dump_test quad-div2 {{as --divide}}
+    run_dump_test octa-div {{as --divide}}
+} elseif { ![istarget "mcore-*-*"]
+	   && ![istarget "mmix-*-*"]
+	   && ![istarget "pdp11-*-*"]
+	   && ![istarget "pj*-*-*"] } {
+    run_dump_test quad-div
+    run_dump_test quad-div2
+    run_dump_test octa-div
+}
+
 # .set works differently on some targets.
 switch -glob $target_triplet {
     alpha*-*-* { }
