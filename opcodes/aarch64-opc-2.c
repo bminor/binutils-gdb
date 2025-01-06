@@ -273,7 +273,6 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_SVE_REGLIST, "SVE_ZtxN", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zt}, "a list of SVE vector registers"},
   {AARCH64_OPND_CLASS_SVE_REGLIST, "SME_Zdnx2", 2 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Zdn2}, "a list of SVE vector registers"},
   {AARCH64_OPND_CLASS_SVE_REGLIST, "SME_Zdnx4", 4 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Zdn4}, "a list of SVE vector registers"},
-  {AARCH64_OPND_CLASS_SVE_REGLIST, "SME_Zdnx4_STRIDED", 4 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_ZdnT, FLD_SME_Zdn2_0}, "a list of SVE vector registers"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zm", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Zm}, "an SVE vector register"},
   {AARCH64_OPND_CLASS_SVE_REGLIST, "SME_Zmx2", 2 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Zm2}, "a list of SVE vector registers"},
   {AARCH64_OPND_CLASS_SVE_REGLIST, "SME_Zmx4", 4 << OPD_F_OD_LSB | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Zm4}, "a list of SVE vector registers"},

@@ -1834,13 +1834,6 @@
 {                                                       \
   QLF2(S_S,NIL),                                        \
 }
-/* e.g. movt ZT0{[<offs>, MUL VL]}, <Zt>  */
-/* The second operand doesn't have a qualifier and
-   is checked separetely during encoding.  */
-#define OP_SVE_SU_Q					\
-{                                                       \
-  QLF2(S_Q,NIL),                                        \
-}
 #define OP_SVE_SUS                                      \
 {                                                       \
   QLF3(S_S,NIL,S_S),                                    \
@@ -2088,13 +2081,6 @@
   QLF3(S_H,NIL,W),                                      \
   QLF3(S_S,NIL,W),                                      \
   QLF3(S_D,NIL,X),                                      \
-}
-/* e.g. luti4 { <Zd1>.B-<Zd4>.B }, ZT0, { <Zn1>-<Zn2> }  */
-/* The second and third operands don't have qualifiers and
-   are checked separetely during encoding.  */
-#define OP_SVE_VUU_B					\
-{                                                       \
-  QLF3(S_B,NIL,NIL),                                    \
 }
 #define OP_SVE_VUU_BH					\
 {                                                       \
@@ -6844,8 +6830,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   LUT_SVE2_INSN ("luti4", 0x4520bc00, 0xff20fc00, OP3 (SVE_Zd, SVE_ZnxN, SVE_Zm2_22_INDEX), OP_SVE_HHU, F_OD(1), 0),
 
   /* SME2 lutv2.  */
-  LUTv2_SME2_INSN ("luti4", 0xc08b0000, 0xffffcc23, sme_size_12_b, OP3 (SME_Zdnx4, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_VUU_B, F_STRICT | 0),
-  LUTv2_SME2p1_INSN ("luti4", 0xc09b0000, 0xffffcc2c, sme_size_12_b, OP3 (SME_Zdnx4_STRIDED, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_VUU_B, F_STRICT | 0),
+  LUTv2_SME2_INSN ("luti4", 0xc08b0000, 0xffffcc23, sme_size_12_b, OP3 (SME_Zdnx4, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_BUU, F_STRICT | 0),
+  LUTv2_SME2p1_INSN ("luti4", 0xc09b0000, 0xffffcc2c, sme_size_12_b, OP3 (SME_Ztx4_STRIDED, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_BUU, F_STRICT | 0),
   LUTv2_SME2_INSN ("movt", 0xc04f03e0, 0xffffcfe0, sme_misc, OP2 (SME_ZT0_INDEX2_12, SVE_Zt), {}, 0),
   /* SME FP16 ZA-targeting addition instructions.  */
   SME_F16F16_F8F16_INSNC("fadd", 0xc1a41c00, 0xffff9c38, sme_misc, OP2 (SME_ZA_array_off3_0, SME_Znx2), OP_SVE_HH, F_OD (2), 0),
@@ -7458,9 +7444,6 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_SME_Zdn2), "a list of SVE vector registers")		\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zdnx4", 4 << OPD_F_OD_LSB,	\
       F(FLD_SME_Zdn4), "a list of SVE vector registers")		\
-    Y(SVE_REGLIST, sve_strided_reglist, "SME_Zdnx4_STRIDED",		\
-      4 << OPD_F_OD_LSB, F(FLD_SME_ZdnT, FLD_SME_Zdn2_0),		\
-      "a list of SVE vector registers")					\
     Y(SVE_REG, regno, "SME_Zm", 0, F(FLD_SME_Zm),			\
       "an SVE vector register")						\
     Y(SVE_REGLIST, sve_aligned_reglist, "SME_Zmx2", 2 << OPD_F_OD_LSB,	\
