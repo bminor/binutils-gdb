@@ -46,6 +46,7 @@
 #include "gdbsupport/scoped_fd.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/buildargv.h"
+#include "gdbsupport/eintr.h"
 #include "cli/cli-style.h"
 
 /* This module provides the interface between GDB and the
