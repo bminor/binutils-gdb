@@ -142,6 +142,9 @@ case "${gdbserver_host}" in
 			;;
   loongarch*-*-linux*)	srv_tgtobj="arch/loongarch.o linux-loongarch-low.o"
 			srv_tgtobj="${srv_tgtobj} ${srv_linux_obj}"
+			srv_tgtobj="$srv_tgtobj nat/loongarch-hw-point.o"
+			srv_tgtobj="$srv_tgtobj nat/loongarch-linux.o"
+			srv_tgtobj="$srv_tgtobj nat/loongarch-linux-hw-point.o"
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
