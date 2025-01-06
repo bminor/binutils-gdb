@@ -3242,7 +3242,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
-	case AARCH64_OPND_SME_ZT0_INDEX2_12:
+	case AARCH64_OPND_SME_ZT0_INDEX_MUL_VL:
 	  if (!value_in_range_p (opnd->imm.value, 0, 3))
 	    {
 	      set_elem_idx_out_of_range_error (mismatch_detail, idx, 0, 3);
@@ -5051,7 +5051,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "%s[%s]", style_reg (styler, "zt0"),
 		style_imm (styler, "%d", (int) opnd->imm.value));
       break;
-    case AARCH64_OPND_SME_ZT0_INDEX2_12:
+    case AARCH64_OPND_SME_ZT0_INDEX_MUL_VL:
       snprintf (buf, size, "%s[%s, %s]", style_reg (styler, "zt0"),
 		style_imm (styler, "%d", (int) opnd->imm.value),
 		style_sub_mnem (styler, "mul vl"));

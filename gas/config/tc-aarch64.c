@@ -8100,7 +8100,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->imm.value = vectype.index;
 	  break;
 
-	case AARCH64_OPND_SME_ZT0_INDEX2_12:
+	case AARCH64_OPND_SME_ZT0_INDEX_MUL_VL:
 	  po_misc_or_fail (parse_shifter_zt0_with_bit_index
 			   (&str, info, SHIFTED_MUL_VL));
 	  break;

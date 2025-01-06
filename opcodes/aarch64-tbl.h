@@ -6832,7 +6832,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   /* SME2 lutv2.  */
   LUTv2_SME2_INSN ("luti4", 0xc08b0000, 0xffffcc23, sme_size_12_b, OP3 (SME_Zdnx4, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_BUU, F_STRICT | 0),
   LUTv2_SME2p1_INSN ("luti4", 0xc09b0000, 0xffffcc2c, sme_size_12_b, OP3 (SME_Ztx4_STRIDED, SME_ZT0, SME_Znx2_BIT_INDEX), OP_SVE_BUU, F_STRICT | 0),
-  LUTv2_SME2_INSN ("movt", 0xc04f03e0, 0xffffcfe0, sme_misc, OP2 (SME_ZT0_INDEX2_12, SVE_Zt), {}, 0),
+  LUTv2_SME2_INSN ("movt", 0xc04f03e0, 0xffffcfe0, sme_misc, OP2 (SME_ZT0_INDEX_MUL_VL, SVE_Zt), {}, 0),
   /* SME FP16 ZA-targeting addition instructions.  */
   SME_F16F16_F8F16_INSNC("fadd", 0xc1a41c00, 0xffff9c38, sme_misc, OP2 (SME_ZA_array_off3_0, SME_Znx2), OP_SVE_HH, F_OD (2), 0),
   SME_F16F16_F8F16_INSNC("fadd", 0xc1a51c00, 0xffff9c78, sme_misc, OP2 (SME_ZA_array_off3_0, SME_Znx4), OP_SVE_HH, F_OD (4), 0),
@@ -7601,7 +7601,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SYSTEM, none, "SME_ZT0", 0, F (), "ZT0")				\
     Y(IMMEDIATE, imm, "SME_ZT0_INDEX", OPD_F_SHIFT_BY_3,		\
       F (FLD_imm3_12), "a ZT0 index")					\
-    Y(IMMEDIATE, imm, "SME_ZT0_INDEX2_12", 0,				\
+    Y(IMMEDIATE, imm, "SME_ZT0_INDEX_MUL_VL", 0,				\
       F (FLD_imm3_12), "a ZT0 index")					\
     Y(SYSTEM, none, "SME_ZT0_LIST", 0, F (), "{ ZT0 }")			\
     Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16_5),			\
