@@ -36,14 +36,6 @@
 
 #include "elf/common.h"
 
-/* Hash table storing per-process data.  We don't bind this to a
-   per-inferior registry because of targets like x86 GNU/Linux that
-   need to keep track of processes that aren't bound to any inferior
-   (e.g., fork children, checkpoints).  */
-
-static std::unordered_map<pid_t, loongarch_debug_reg_state>
-loongarch_debug_process_state;
-
 /* See loongarch-linux-hw-point.h  */
 
 /* Helper for loongarch_notify_debug_reg_change.  Records the
@@ -218,21 +210,4 @@ loongarch_linux_get_debug_reg_capacity (int tid)
 		 " available."));
       loongarch_num_bp_regs = 0;
     }
-}
-
-/* Return the debug register state for process PID.  If no existing
-   state is found for this process, create new state.  */
-
-struct loongarch_debug_reg_state *
-loongarch_get_debug_reg_state (pid_t pid)
-{
-  return &loongarch_debug_process_state[pid];
-}
-
-/* Remove any existing per-process debug state for process PID.  */
-
-void
-loongarch_remove_debug_reg_state (pid_t pid)
-{
-  loongarch_debug_process_state.erase (pid);
 }

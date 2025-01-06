@@ -32,6 +32,30 @@
 
 #include <asm/ptrace.h>
 
+/* Hash table storing per-process data.  We don't bind this to a
+   per-inferior registry because of targets like x86 GNU/Linux that
+   need to keep track of processes that aren't bound to any inferior
+   (e.g., fork children, checkpoints).  */
+
+static std::unordered_map<pid_t, loongarch_debug_reg_state>
+loongarch_debug_process_state;
+
+/* See nat/loongarch-linux-hw-point.h.  */
+
+struct loongarch_debug_reg_state *
+loongarch_get_debug_reg_state (pid_t pid)
+{
+  return &loongarch_debug_process_state[pid];
+}
+
+/* Remove any existing per-process debug state for process PID.  */
+
+static void
+loongarch_remove_debug_reg_state (pid_t pid)
+{
+  loongarch_debug_process_state.erase (pid);
+}
+
 /* LoongArch Linux native additions to the default Linux support.  */
 
 class loongarch_linux_nat_target final : public linux_nat_trad_target

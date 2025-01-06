@@ -113,9 +113,4 @@ void loongarch_linux_get_debug_reg_capacity (int tid);
 
 struct loongarch_debug_reg_state *loongarch_get_debug_reg_state (pid_t pid);
 
-/* Remove any existing per-process debug state for process PID.  */
-
-void loongarch_remove_debug_reg_state (pid_t pid);
-
-
 #endif /* GDB_NAT_LOONGARCH_LINUX_HW_POINT_H */
