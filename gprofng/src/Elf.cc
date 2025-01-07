@@ -265,9 +265,14 @@ Elf::~Elf ()
       for (int i = 0; i < (int) ehdrp->e_shnum; i++)
 	{
 	  Elf_Data *p = data[i];
-	  if (p && !mmap_on_file && (p->d_flags & SHF_SUNW_ABSENT) == 0)
-	    free (p->d_buf);
-	  delete p;
+	  if (p)
+	    {
+	      if (p->d_flags & SEC_DECOMPRESSED)
+		free (p->d_buf);
+	      else if (!mmap_on_file && (p->d_flags & SHF_SUNW_ABSENT) == 0)
+		free (p->d_buf);
+	      delete p;
+	    }
 	}
       free (data);
     }
@@ -443,11 +448,28 @@ Elf::elf_getdata (unsigned int sec)
 		}
 	    }
 	}
-      edta->d_buf = get_data (shdr->sh_offset, (size_t) shdr->sh_size, NULL);
-      edta->d_flags = shdr->sh_flags;
-      edta->d_size = ((edta->d_buf == NULL) || (shdr->sh_type == SHT_NOBITS)) ? 0 : shdr->sh_size;
-      edta->d_off = shdr->sh_offset;
-      edta->d_align = shdr->sh_addralign;
+
+      sec_ptr sp = shdr->bfd_section;
+      if (sp && bfd_is_section_compressed (abfd, sp))
+	{
+	  bfd_byte *p = NULL;
+	  if (bfd_get_full_section_contents (abfd, sp, &p))
+	    {
+	      edta->d_buf = p;
+	      edta->d_size = p ? sp->size : 0;
+	      edta->d_off = 0;
+	      edta->d_flags = shdr->sh_flags | SEC_DECOMPRESSED;
+	      edta->d_align = shdr->sh_addralign;
+	    }
+	}
+      else
+	{
+	  edta->d_buf = get_data (shdr->sh_offset, (size_t) shdr->sh_size, NULL);
+	  edta->d_flags = shdr->sh_flags;
+	  edta->d_size = ((edta->d_buf == NULL) || (shdr->sh_type == SHT_NOBITS)) ? 0 : shdr->sh_size;
+	  edta->d_off = shdr->sh_offset;
+	  edta->d_align = shdr->sh_addralign;
+	}
     }
   return edta;
 }
