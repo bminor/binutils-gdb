@@ -13,6 +13,7 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+with Pck; use Pck;
 procedure pr is
 
    type Report is (Hello, Goodbye);
@@ -30,6 +31,6 @@ procedure pr is
 
 begin
 
-   null; -- STOP
+   Do_Nothing(Var'Address); -- STOP
 
 end pr;

@@ -13,11 +13,13 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+with Pck; use Pck;
+
 procedure Main is
    type Letters is new Character range 'A' .. 'Z';
    type Array_Type is array (Letters) of Boolean;
 
    Array_Value : Array_Type := ('A' => true, 'Z' => true, others => false);
 begin
-   null; -- STOP
+   Do_Nothing (Array_Value'Address);  --  STOP
 end Main;

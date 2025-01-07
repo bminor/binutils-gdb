@@ -13,6 +13,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+with System;
 package Pack is
 
    type Index_Type_1 is new Natural;
@@ -30,5 +31,7 @@ package Pack is
    type Nested_Type is
      array (Index_Type_1 range <>, Index_Type_2 range <>)
      of CA_Simple_Type;
+
+   procedure Do_Nothing (A : System.Address);
 
 end Pack;

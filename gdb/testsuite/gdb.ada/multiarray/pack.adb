@@ -1,4 +1,4 @@
--- Copyright 2022-2024 Free Software Foundation, Inc.
+-- Copyright 2024 Free Software Foundation, Inc.
 --
 -- This program is free software; you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -13,36 +13,9 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-with Pack; use Pack;
-
-procedure P is
-
-   procedure Nop is
+package body Pack is
+   procedure Do_Nothing (A : System.Address) is
    begin
       null;
-   end Nop;
-
-   procedure Discard
-     (Arg_Simple  : Simple_Type;
-      Arg_Nested  : Nested_Type) is
-   begin
-      null;
-   end Discard;
-
-   Simple : Simple_Type :=
-      (1 => (5 => 1, 6 => 2),
-       2 => (5 => 3, 6 => 4),
-       3 => (5 => 5, 6 => 6));
-   Nested : Nested_Type :=
-      (1 => (5 => (1, 2),  6 => (3, 4)),
-       2 => (5 => (5, 6),  6 => (7, 8)),
-       3 => (5 => (9, 10), 6 => (11, 12)));
-
-begin
-   Nop; --  START
-
-   Discard (Simple, Nested);
-   Do_Nothing (Simple'Address);
-   Do_Nothing (Nested'Address);
-
-end P;
+   end Do_Nothing;
+end Pack;
