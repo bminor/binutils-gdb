@@ -156,7 +156,7 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
 
   /* Mark FDEs with [m] where the FRE start address is interpreted as a
      mask.  */
-  int fde_type_addrmask_p = (SFRAME_V1_FUNC_FDE_TYPE (func_info)
+  int fde_type_addrmask_p = (SFRAME_V2_FUNC_FDE_TYPE (func_info)
 			     == SFRAME_FDE_TYPE_PCMASK);
   const char *fde_type_marker
     = (fde_type_addrmask_p ? "[m]" : "   ");
@@ -167,7 +167,7 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
 	  func_size);
 
   if (is_sframe_abi_arch_aarch64 (sfd_ctx)
-      && (SFRAME_V1_FUNC_PAUTH_KEY (func_info) == SFRAME_AARCH64_PAUTH_KEY_B))
+      && (SFRAME_V2_FUNC_PAUTH_KEY (func_info) == SFRAME_AARCH64_PAUTH_KEY_B))
     printf (", pauth = B key");
 
   char temp[100];

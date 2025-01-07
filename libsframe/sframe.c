@@ -209,7 +209,7 @@ sframe_get_fre_type (sframe_func_desc_entry_int *fdep)
 {
   uint32_t fre_type = 0;
   if (fdep)
-    fre_type = SFRAME_V1_FUNC_FRE_TYPE (fdep->func_info);
+    fre_type = SFRAME_V2_FUNC_FRE_TYPE (fdep->func_info);
   return fre_type;
 }
 
@@ -218,7 +218,7 @@ sframe_get_fde_type (sframe_func_desc_entry_int *fdep)
 {
   uint32_t fde_type = 0;
   if (fdep)
-    fde_type = SFRAME_V1_FUNC_FDE_TYPE (fdep->func_info);
+    fde_type = SFRAME_V2_FUNC_FDE_TYPE (fdep->func_info);
   return fde_type;
 }
 
@@ -806,7 +806,7 @@ sframe_fde_create_func_info (uint32_t fre_type,
 		   || fre_type == SFRAME_FRE_TYPE_ADDR4);
   sframe_assert (fde_type == SFRAME_FDE_TYPE_PCINC
 		    || fde_type == SFRAME_FDE_TYPE_PCMASK);
-  func_info = SFRAME_V1_FUNC_INFO (fde_type, fre_type);
+  func_info = SFRAME_V2_FUNC_INFO (fde_type, fre_type);
   return func_info;
 }
 
