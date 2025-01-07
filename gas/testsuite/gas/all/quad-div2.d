@@ -6,7 +6,7 @@
 #notarget: bfin-*-* *c30-*-* *c4x-*-* *c54x-*-* v850*-*-*
 # linkrelax targets don't handle equivalence expressions well (nor any
 # other forward expression).  mep uses complex relocs.
-#xfail: crx-*-* h8300-*-* mn10200-*-* mn10300-*-* mep-*-*
+#xfail: am33*-*-* crx-*-* h8300-*-* mn10200-*-* mn10300-*-* mep-*-*
 
 .*: .*
 
