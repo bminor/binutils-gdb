@@ -1308,6 +1308,14 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_immediate, "0x%04x", (unsigned) data);
       break;
+    case 3:
+      info->bytes_per_line = 7;
+      (*info->fprintf_styled_func)
+	(info->stream, dis_style_assembler_directive, ".word");
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
+      (*info->fprintf_styled_func)
+	(info->stream, dis_style_immediate, "0x%06x", (unsigned) data);
+      break;
     case 4:
       info->bytes_per_line = 8;
       (*info->fprintf_styled_func)
@@ -1360,12 +1368,31 @@ riscv_init_disasm_info (struct disassemble_info *info)
   return true;
 }
 
+/* Fetch an instruction. If only a partial instruction is able to be fetched,
+   return the number of accessible bytes.  */
+
+static bfd_vma
+fetch_insn (bfd_vma memaddr,
+	    bfd_byte *packet,
+	    bfd_vma dump_size,
+	    struct disassemble_info *info,
+	    volatile int *status)
+{
+  do
+    {
+      *status = (*info->read_memory_func) (memaddr, packet, dump_size, info);
+    }
+  while (*status != 0 && dump_size-- > 1);
+
+  return dump_size;
+}
+
 int
 print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 {
   bfd_byte packet[RISCV_MAX_INSN_LEN];
   insn_t insn = 0;
-  bfd_vma dump_size;
+  bfd_vma dump_size, bytes_fetched;
   int status;
   enum riscv_seg_mstate mstate;
   int (*riscv_disassembler) (bfd_vma, insn_t, const bfd_byte *,
@@ -1398,24 +1425,42 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   else
     {
       /* Get the first 2-bytes to check the lenghth of instruction.  */
-      status = (*info->read_memory_func) (memaddr, packet, 2, info);
+      bytes_fetched = fetch_insn (memaddr, packet, 2, info, &status);
       if (status != 0)
 	{
 	  (*info->memory_error_func) (status, memaddr, info);
 	  return -1;
 	}
+      else if (bytes_fetched != 2)
+       {
+	  /* Only the first byte was able to be read.  Dump the partial
+	     instruction.  */
+	  dump_size = bytes_fetched;
+	  info->bytes_per_chunk = dump_size;
+	  riscv_disassembler = riscv_disassemble_data;
+	  goto print;
+       }
       insn = (insn_t) bfd_getl16 (packet);
       dump_size = riscv_insn_length (insn);
       riscv_disassembler = riscv_disassemble_insn;
     }
 
-  /* Fetch the instruction to dump.  */
-  status = (*info->read_memory_func) (memaddr, packet, dump_size, info);
+  bytes_fetched = fetch_insn (memaddr, packet, dump_size, info, &status);
+
   if (status != 0)
     {
       (*info->memory_error_func) (status, memaddr, info);
       return -1;
     }
+  else if (bytes_fetched != dump_size)
+    {
+      dump_size = bytes_fetched;
+      info->bytes_per_chunk = dump_size;
+      riscv_disassembler = riscv_disassemble_data;
+    }
+
+ print:
+
   insn = (insn_t) bfd_get_bits (packet, dump_size * 8, false);
 
   return (*riscv_disassembler) (memaddr, insn, packet, info);
