@@ -4250,6 +4250,11 @@ add_matching_symbols_to_info (const char *name,
 {
   lookup_name_info lookup_name (name, name_match_type);
 
+  auto add_symbol = [&] (block_symbol *bsym)
+    {
+      return info->add_symbol (bsym);
+    };
+
   for (const auto &elt : *info->file_symtabs)
     {
       if (elt == nullptr)
@@ -4257,8 +4262,7 @@ add_matching_symbols_to_info (const char *name,
 	  iterate_over_all_matching_symtabs (info->state, lookup_name,
 					     domain_search_flags,
 					     pspace, true,
-					     [&] (block_symbol *bsym)
-	    { return info->add_symbol (bsym); });
+					     add_symbol);
 	  search_minsyms_for_name (info, lookup_name, pspace, NULL);
 	}
       else if (pspace == NULL || pspace == elt->compunit ()->objfile ()->pspace ())
@@ -4270,9 +4274,7 @@ add_matching_symbols_to_info (const char *name,
 	  program_space *elt_pspace = elt->compunit ()->objfile ()->pspace ();
 	  gdb_assert (!elt_pspace->executing_startup);
 	  set_current_program_space (elt_pspace);
-	  iterate_over_file_blocks (elt, lookup_name, SEARCH_VFT,
-				    [&] (block_symbol *bsym)
-	    { return info->add_symbol (bsym); });
+	  iterate_over_file_blocks (elt, lookup_name, SEARCH_VFT, add_symbol);
 
 	  /* If no new symbols were found in this iteration and this symtab
 	     is in assembler, we might actually be looking for a label for
