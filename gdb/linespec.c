@@ -76,16 +76,6 @@ enum class linespec_complete_what
   KEYWORD,
 };
 
-/* An address entry is used to ensure that any given location is only
-   added to the result a single time.  It holds an address and the
-   program space from which the address came.  */
-
-struct address_entry
-{
-  struct program_space *pspace;
-  CORE_ADDR addr;
-};
-
 /* A linespec.  Elements of this structure are filled in by a parser
    (either parse_linespec or some other function).  The structure is
    then converted into SALs by convert_linespec_to_sals.  */
@@ -132,29 +122,6 @@ struct linespec_canonical_name
   struct symtab *symtab;
 };
 
-/* A hash function for address_entry.  */
-
-static hashval_t
-hash_address_entry (const void *p)
-{
-  const address_entry *aep = (const address_entry *) p;
-  hashval_t hash;
-
-  hash = iterative_hash_object (aep->pspace, 0);
-  return iterative_hash_object (aep->addr, hash);
-}
-
-/* An equality function for address_entry.  */
-
-static int
-eq_address_entry (const void *a, const void *b)
-{
-  const address_entry *aea = (const address_entry *) a;
-  const address_entry *aeb = (const address_entry *) b;
-
-  return aea->pspace == aeb->pspace && aea->addr == aeb->addr;
-}
-
 /* An instance of this is used to keep all state while linespec
    operates.  This instance is passed around as a 'this' pointer to
    the various implementation methods.  */
@@ -174,9 +141,7 @@ struct linespec_state
       default_line (default_line),
       funfirstline ((flags & DECODE_LINE_FUNFIRSTLINE) ? 1 : 0),
       list_mode ((flags & DECODE_LINE_LIST_MODE) ? 1 : 0),
-      canonical (canonical),
-      addr_set (htab_create_alloc (10, hash_address_entry, eq_address_entry,
-				   xfree, xcalloc, xfree))
+      canonical (canonical)
   {
   }
 
@@ -187,11 +152,17 @@ struct linespec_state
 
   ~linespec_state ()
   {
-    htab_delete (addr_set);
     xfree (canonical_names);
   }
 
   DISABLE_COPY_AND_ASSIGN (linespec_state);
+
+  /* Add ADDR to the address set.  Return true if this is a new
+     entry.  */
+  bool maybe_add_address (program_space *pspace, CORE_ADDR addr)
+  {
+    return addr_set.emplace (pspace, addr).second;
+  }
 
   /* The language in use during linespec processing.  */
   const struct language_defn *language;
@@ -222,12 +193,19 @@ struct linespec_state
   /* Canonical strings that mirror the std::vector<symtab_and_line> result.  */
   linespec_canonical_name *canonical_names = nullptr;
 
-  /* This is a set of address_entry objects which is used to prevent
-     duplicate symbols from being entered into the result.  */
-  htab_t addr_set;
-
   /* Are we building a linespec?  */
   int is_linespec = 0;
+
+private:
+
+  /* An address entry is used to ensure that any given location is
+     only added to the result a single time.  It holds an address and
+     the program space from which the address came.  */
+  using address_entry = std::pair<::program_space *, CORE_ADDR>;
+
+  /* This is a set of address_entry objects which is used to prevent
+     duplicate symbols from being entered into the result.  */
+  gdb::unordered_set<address_entry> addr_set;
 };
 
 /* This is a helper object that is used when collecting symbols into a
@@ -1137,29 +1115,6 @@ add_sal_to_sals (struct linespec_state *self,
 	  canonical->symtab = NULL;
 	}
     }
-}
-
-/* Check whether the address, represented by PSPACE and ADDR, is
-   already in the set.  If so, return 0.  Otherwise, add it and return
-   1.  */
-
-static int
-maybe_add_address (htab_t set, struct program_space *pspace, CORE_ADDR addr)
-{
-  struct address_entry e, *p;
-  void **slot;
-
-  e.pspace = pspace;
-  e.addr = addr;
-  slot = htab_find_slot (set, &e, INSERT);
-  if (*slot)
-    return 0;
-
-  p = XNEW (struct address_entry);
-  memcpy (p, &e, sizeof (struct address_entry));
-  *slot = p;
-
-  return 1;
 }
 
 /* A helper that walks over all matching symtabs in all objfiles and
@@ -2243,7 +2198,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 	    = sym.symbol->symtab ()->compunit ()->objfile ()->pspace ();
 
 	  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
-	      && maybe_add_address (state->addr_set, pspace, sal.pc))
+	      && state->maybe_add_address (pspace, sal.pc))
 	    add_sal_to_sals (state, &sals, &sal,
 			     sym.symbol->natural_name (), 0);
 	}
@@ -2308,7 +2263,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 		{
 		  symtab_and_line sal;
 		  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
-		      && maybe_add_address (state->addr_set, pspace, sal.pc))
+		      && state->maybe_add_address (pspace, sal.pc))
 		    add_sal_to_sals (state, &sals, &sal,
 				     sym.symbol->natural_name (), 0);
 		}
@@ -4157,7 +4112,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 
   sal.section = msymbol->obj_section (objfile);
 
-  if (maybe_add_address (self->addr_set, objfile->pspace (), sal.pc))
+  if (self->maybe_add_address (objfile->pspace (), sal.pc))
     add_sal_to_sals (self, result, &sal, msymbol->natural_name (), 0);
 }
 
