@@ -132,12 +132,67 @@ struct linespec_canonical_name
   struct symtab *symtab;
 };
 
+/* A hash function for address_entry.  */
+
+static hashval_t
+hash_address_entry (const void *p)
+{
+  const address_entry *aep = (const address_entry *) p;
+  hashval_t hash;
+
+  hash = iterative_hash_object (aep->pspace, 0);
+  return iterative_hash_object (aep->addr, hash);
+}
+
+/* An equality function for address_entry.  */
+
+static int
+eq_address_entry (const void *a, const void *b)
+{
+  const address_entry *aea = (const address_entry *) a;
+  const address_entry *aeb = (const address_entry *) b;
+
+  return aea->pspace == aeb->pspace && aea->addr == aeb->addr;
+}
+
 /* An instance of this is used to keep all state while linespec
    operates.  This instance is passed around as a 'this' pointer to
    the various implementation methods.  */
 
 struct linespec_state
 {
+  linespec_state (int flags, const language_defn *language,
+		  program_space *pspace,
+		  program_space *search_pspace,
+		  symtab *default_symtab,
+		  int default_line,
+		  linespec_result *canonical)
+    : language (language),
+      program_space (pspace),
+      search_pspace (search_pspace),
+      default_symtab (default_symtab),
+      default_line (default_line),
+      funfirstline ((flags & DECODE_LINE_FUNFIRSTLINE) ? 1 : 0),
+      list_mode ((flags & DECODE_LINE_LIST_MODE) ? 1 : 0),
+      canonical (canonical),
+      addr_set (htab_create_alloc (10, hash_address_entry, eq_address_entry,
+				   xfree, xcalloc, xfree))
+  {
+  }
+
+  linespec_state (const language_defn *language, program_space *program_space)
+    : linespec_state (0, language, program_space, nullptr, nullptr, 0, nullptr)
+  {
+  }
+
+  ~linespec_state ()
+  {
+    htab_delete (addr_set);
+    xfree (canonical_names);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (linespec_state);
+
   /* The language in use during linespec processing.  */
   const struct language_defn *language;
 
@@ -165,14 +220,14 @@ struct linespec_state
   struct linespec_result *canonical;
 
   /* Canonical strings that mirror the std::vector<symtab_and_line> result.  */
-  struct linespec_canonical_name *canonical_names;
+  linespec_canonical_name *canonical_names = nullptr;
 
   /* This is a set of address_entry objects which is used to prevent
      duplicate symbols from being entered into the result.  */
   htab_t addr_set;
 
   /* Are we building a linespec?  */
-  int is_linespec;
+  int is_linespec = 0;
 };
 
 /* This is a helper object that is used when collecting symbols into a
@@ -284,8 +339,6 @@ struct linespec_parser
 		   int default_line,
 		   struct linespec_result *canonical);
 
-  ~linespec_parser ();
-
   DISABLE_COPY_AND_ASSIGN (linespec_parser);
 
   /* Lexer internal data  */
@@ -305,7 +358,7 @@ struct linespec_parser
   int is_quote_enclosed = 0;
 
   /* The state of the parse.  */
-  struct linespec_state state {};
+  linespec_state state;
 
   /* The result of the parse.  */
   linespec result;
@@ -1084,29 +1137,6 @@ add_sal_to_sals (struct linespec_state *self,
 	  canonical->symtab = NULL;
 	}
     }
-}
-
-/* A hash function for address_entry.  */
-
-static hashval_t
-hash_address_entry (const void *p)
-{
-  const struct address_entry *aep = (const struct address_entry *) p;
-  hashval_t hash;
-
-  hash = iterative_hash_object (aep->pspace, 0);
-  return iterative_hash_object (aep->addr, hash);
-}
-
-/* An equality function for address_entry.  */
-
-static int
-eq_address_entry (const void *a, const void *b)
-{
-  const struct address_entry *aea = (const struct address_entry *) a;
-  const struct address_entry *aeb = (const struct address_entry *) b;
-
-  return aea->pspace == aeb->pspace && aea->addr == aeb->addr;
 }
 
 /* Check whether the address, represented by PSPACE and ADDR, is
@@ -2667,30 +2697,6 @@ parse_linespec (linespec_parser *parser, const char *arg,
 }
 
 
-/* A constructor for linespec_state.  */
-
-static void
-linespec_state_constructor (struct linespec_state *self,
-			    int flags, const struct language_defn *language,
-			    struct program_space *search_pspace,
-			    struct symtab *default_symtab,
-			    int default_line,
-			    struct linespec_result *canonical)
-{
-  memset (self, 0, sizeof (*self));
-  self->language = language;
-  self->funfirstline = (flags & DECODE_LINE_FUNFIRSTLINE) ? 1 : 0;
-  self->list_mode = (flags & DECODE_LINE_LIST_MODE) ? 1 : 0;
-  self->search_pspace = search_pspace;
-  self->default_symtab = default_symtab;
-  self->default_line = default_line;
-  self->canonical = canonical;
-  self->program_space = current_program_space;
-  self->addr_set = htab_create_alloc (10, hash_address_entry, eq_address_entry,
-				      xfree, xcalloc, xfree);
-  self->is_linespec = 0;
-}
-
 /* Initialize a new linespec parser.  */
 
 linespec_parser::linespec_parser (int flags,
@@ -2699,30 +2705,13 @@ linespec_parser::linespec_parser (int flags,
 				  struct symtab *default_symtab,
 				  int default_line,
 				  struct linespec_result *canonical)
+  : state (flags, language, current_program_space, search_pspace,
+	     default_symtab, default_line, canonical)
 {
   lexer.current.type = LSTOKEN_CONSUMED;
   result.explicit_loc.func_name_match_type
     = symbol_name_match_type::WILD;
   result.explicit_loc.line_offset.sign = LINE_OFFSET_UNKNOWN;
-  linespec_state_constructor (&state, flags, language,
-			      search_pspace,
-			      default_symtab, default_line, canonical);
-}
-
-/* A destructor for linespec_state.  */
-
-static void
-linespec_state_destructor (struct linespec_state *self)
-{
-  htab_delete (self->addr_set);
-  xfree (self->canonical_names);
-}
-
-/* Delete a linespec parser.  */
-
-linespec_parser::~linespec_parser ()
-{
-  linespec_state_destructor (&state);
 }
 
 /* See description in linespec.h.  */
@@ -3753,10 +3742,8 @@ symbol_searcher::find_all_symbols (const std::string &name,
 				   struct program_space *search_pspace)
 {
   symbol_searcher_collect_info info;
-  struct linespec_state state;
+  linespec_state state (language, current_program_space);
 
-  memset (&state, 0, sizeof (state));
-  state.language = language;
   info.state = &state;
 
   info.result.symbols = &m_symbols;
