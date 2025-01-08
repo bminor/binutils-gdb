@@ -165,7 +165,8 @@ proc run_test { mode } {
 
 # Run the tests.
 foreach_with_prefix mode { syscall signal fork } {
-    if { $mode == "syscall" && ![allow_xml_test] } {
+    if { $mode == "syscall"
+	 && ( ![allow_xml_test] || ![supports_catch_syscall] ) } {
 	continue
     }
     run_test $mode
