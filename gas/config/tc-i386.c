@@ -1184,6 +1184,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (amx_complex, AMX_COMPLEX, ANY_AMX_COMPLEX, false),
   SUBARCH (amx_transpose, AMX_TRANSPOSE, ANY_AMX_TRANSPOSE, false),
   SUBARCH (amx_tf32, AMX_TF32, ANY_AMX_TF32, false),
+  SUBARCH (amx_fp8, AMX_FP8, ANY_AMX_FP8, false),
   SUBARCH (amx_tile, AMX_TILE, ANY_AMX_TILE, false),
   SUBARCH (movdiri, MOVDIRI, MOVDIRI, false),
   SUBARCH (movdir64b, MOVDIR64B, MOVDIR64B, false),
@@ -4227,6 +4228,7 @@ build_vex_prefix (const insn_template *t)
 	case SPACE_0F:
 	case SPACE_0F38:
 	case SPACE_0F3A:
+	case SPACE_MAP5:
 	case SPACE_MAP7:
 	  i.vex.bytes[0] = 0xc4;
 	  break;

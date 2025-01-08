@@ -3233,6 +3233,11 @@ ttransposed, 0xf35f, AMX_TRANSPOSE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM
 tmmultf32ps, 0x6648, AMX_TF32, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
 ttmmultf32ps, 0x48, AMX_TF32&AMX_TRANSPOSE, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
 
+tdpbf8ps, 0xfd, AMX_FP8, Modrm|Vex128|Map5|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+tdpbhf8ps, 0xf2fd, AMX_FP8, Modrm|Vex128|Map5|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+tdphbf8ps, 0xf3fd, AMX_FP8, Modrm|Vex128|Map5|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+tdphf8ps, 0x66fd, AMX_FP8, Modrm|Vex128|Map5|Src2VVVV|VexW0|NoSuf, { RegTMM, RegTMM, RegTMM }
+
 // AMX instructions end.
 
 // KEYLOCKER instructions.
