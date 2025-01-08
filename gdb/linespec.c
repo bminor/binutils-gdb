@@ -139,8 +139,8 @@ struct linespec_state
       search_pspace (search_pspace),
       default_symtab (default_symtab),
       default_line (default_line),
-      funfirstline ((flags & DECODE_LINE_FUNFIRSTLINE) ? 1 : 0),
-      list_mode ((flags & DECODE_LINE_LIST_MODE) ? 1 : 0),
+      funfirstline ((flags & DECODE_LINE_FUNFIRSTLINE) != 0),
+      list_mode ((flags & DECODE_LINE_LIST_MODE) != 0),
       canonical (canonical)
   {
   }
@@ -177,10 +177,10 @@ struct linespec_state
 
   /* The 'funfirstline' value that was passed in to decode_line_1 or
      decode_line_full.  */
-  int funfirstline;
+  bool funfirstline;
 
   /* Nonzero if we are running in 'list' mode; see decode_line_list.  */
-  int list_mode;
+  bool list_mode;
 
   /* The 'canonical' value passed to decode_line_full, or NULL.  */
   struct linespec_result *canonical;
@@ -189,7 +189,7 @@ struct linespec_state
   std::vector<linespec_canonical_name> canonical_names;
 
   /* Are we building a linespec?  */
-  int is_linespec = 0;
+  bool is_linespec = false;
 
 private:
 
@@ -328,7 +328,7 @@ struct linespec_parser
   } lexer {};
 
   /* Is the entire linespec quote-enclosed?  */
-  int is_quote_enclosed = 0;
+  bool is_quote_enclosed = false;
 
   /* The state of the parse.  */
   linespec_state state;
@@ -396,8 +396,8 @@ static struct line_offset
      linespec_parse_variable (struct linespec_state *self,
 			      const char *variable);
 
-static int symbol_to_sal (struct symtab_and_line *result,
-			  int funfirstline, struct symbol *sym);
+static bool symbol_to_sal (struct symtab_and_line *result,
+			   bool funfirstline, struct symbol *sym);
 
 static void add_matching_symbols_to_info (const char *name,
 					  symbol_name_match_type name_match_type,
@@ -1986,7 +1986,7 @@ static std::vector<symtab_and_line>
 create_sals_line_offset (struct linespec_state *self,
 			 linespec *ls)
 {
-  int use_default = 0;
+  bool use_default = false;
 
   /* This is where we need to make sure we have good defaults.
      We must guarantee that this section of code is never executed
@@ -2005,7 +2005,7 @@ create_sals_line_offset (struct linespec_state *self,
       ls->file_symtabs
 	= collect_symtabs_from_filename (self->default_symtab->filename,
 					 self->search_pspace);
-      use_default = 1;
+      use_default = true;
     }
 
   symtab_and_line val;
@@ -2461,7 +2461,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
   /* A special case to start.  It has become quite popular for
      IDEs to work around bugs in the previous parser by quoting
      the entire linespec, so we attempt to deal with this nicely.  */
-  parser->is_quote_enclosed = 0;
+  parser->is_quote_enclosed = false;
   if (parser->completion_tracker == NULL
       && !is_ada_operator (arg)
       && *arg != '\0'
@@ -2473,7 +2473,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
 	  /* Here's the special case.  Skip ARG past the initial
 	     quote.  */
 	  ++arg;
-	  parser->is_quote_enclosed = 1;
+	  parser->is_quote_enclosed = true;
 	}
     }
 
@@ -2843,7 +2843,7 @@ linespec_complete (completion_tracker &tracker, const char *text,
   parser.lexer.stream = text;
 
   parser.completion_tracker = &tracker;
-  parser.state.is_linespec = 1;
+  parser.state.is_linespec = true;
 
   /* Parse as much as possible.  parser.completion_word will hold
      furthest completion point we managed to parse to.  */
@@ -3034,7 +3034,7 @@ location_spec_to_sals (linespec_parser *parser,
     case LINESPEC_LOCATION_SPEC:
       {
 	const linespec_location_spec *ls = as_linespec_location_spec (locspec);
-	parser->state.is_linespec = 1;
+	parser->state.is_linespec = true;
 	result = parse_linespec (parser, ls->spec_string.get (),
 				 ls->match_type);
       }
@@ -4104,7 +4104,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
 
 static void
 add_minsym (struct minimal_symbol *minsym, struct objfile *objfile,
-	    struct symtab *symtab, int list_mode,
+	    struct symtab *symtab, bool list_mode,
 	    std::vector<bound_minimal_symbol> *msyms)
 {
   if (symtab != NULL)
@@ -4292,14 +4292,14 @@ add_matching_symbols_to_info (const char *name,
 /* Now come some functions that are called from multiple places within
    decode_line_1.  */
 
-static int
+static bool
 symbol_to_sal (struct symtab_and_line *result,
-	       int funfirstline, struct symbol *sym)
+	       bool funfirstline, struct symbol *sym)
 {
   if (sym->aclass () == LOC_BLOCK)
     {
       *result = find_function_start_sal (sym, funfirstline);
-      return 1;
+      return true;
     }
   else
     {
@@ -4312,7 +4312,7 @@ symbol_to_sal (struct symtab_and_line *result,
 	  result->pc = sym->value_address ();
 	  result->pspace = result->symtab->compunit ()->objfile ()->pspace ();
 	  result->explicit_pc = 1;
-	  return 1;
+	  return true;
 	}
       else if (funfirstline)
 	{
@@ -4327,11 +4327,11 @@ symbol_to_sal (struct symtab_and_line *result,
 	  result->line = sym->line ();
 	  result->pc = sym->value_address ();
 	  result->pspace = result->symtab->compunit ()->objfile ()->pspace ();
-	  return 1;
+	  return true;
 	}
     }
 
-  return 0;
+  return false;
 }
 
 linespec_result::~linespec_result ()
