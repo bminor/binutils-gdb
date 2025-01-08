@@ -298,6 +298,25 @@ gdb_test_no_output \
 gdb_test_no_output "set \$ymm2.v2_int128 = {0x0, 0x0}"
 gdb_test_no_output "set \$ymm15.v2_int128 = {0xdead, 0xbeef}"
 if {[record_full_function "vpunpck"] == true} {
+    # Floating point unpack instructions.
+    test_one_register "vunpckhpd" "ymm15" \
+	"0x1f1e1d1c3f3e3d3c1b1a19183b3a3938, 0x0"
+    test_one_register "vunpckhpd" "ymm2" \
+	"0x1f1e1d1c3f3e3d3c1b1a19183b3a3938, 0x2f2e2d2c4f4e4d4c2b2a29284b4a4948"
+    test_one_register "vunpckhps" "ymm2" \
+	"0x17161514131211103736353433323130, 0x0"
+    test_one_register "vunpckhps" "ymm15" \
+	"0x17161514131211103736353433323130, 0x27262524232221204746454443424140"
+    test_one_register "vunpcklpd" "ymm15" \
+	"0x17161514373635341312111033323130, 0x0"
+    test_one_register "vunpcklpd" "ymm2" \
+	"0x17161514373635341312111033323130, 0x27262524474645442322212043424140"
+    test_one_register "vunpcklps" "ymm2" \
+	"0x1f1e1d1c1b1a19183f3e3d3c3b3a3938, 0x0"
+    test_one_register "vunpcklps" "ymm15" \
+	"0x1f1e1d1c1b1a19183f3e3d3c3b3a3938, 0x2f2e2d2c2b2a29284f4e4d4c4b4a4948"
+
+
     test_one_register "vpunpckhqdq" "ymm15" \
 	"0x1f1e1d1c3f3e3d3c1b1a19183b3a3938, 0x2f2e2d2c4f4e4d4c2b2a29284b4a4948" \
 	"ymm: "
@@ -325,14 +344,15 @@ if {[record_full_function "vpunpck"] == true} {
     test_one_register "vpunpcklwd" "ymm15" \
 	"0x17371636153514341333123211311030, 0x0"
     test_one_register "vpunpcklbw" "ymm15" "0xdead, 0xbeef"
+
+    # Move to the end of vmov_test to set up next.
+    # Stop recording in case of recording errors.
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for vpunpck_test"
 } else {
     untested "couldn't test vpunpck tests"
 }
 
-# Move to the end of vmov_test to set up next.
-# Stop recording in case of recording errors.
-gdb_test "record stop" "Process record is stopped.*" \
-    "delete history for vpunpck_test"
 gdb_test "finish" "Run till exit from.*vpunpck_test.*" "leaving vpunpck_test"
 
 # Start vpbroadcast tests

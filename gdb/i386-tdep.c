@@ -4849,6 +4849,12 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	  i386_record_lea_modrm (ir);
 	}
       break;
+    case 0x14: /* VUNPCKL[PS|PD].  */
+    case 0x15: /* VUNPCKH [PS|PD].  */
+      i386_record_modrm (ir);
+      record_full_arch_list_add_reg (ir->regcache,
+				     tdep->ymm0_regnum + ir->reg + vex_r * 8);
+      break;
     case 0x6e:	/* VMOVD XMM, reg/mem  */
       /* This is moving from a regular register or memory region into an
 	 XMM register. */

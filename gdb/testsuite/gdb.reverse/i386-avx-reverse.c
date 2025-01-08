@@ -182,6 +182,7 @@ vpunpck_test  ()
   /* Using GDB, load these values onto registers, for ease of testing.
      ymm0.v2_int128  = {0x1f1e1d1c1b1a19181716151413121110, 0x2f2e2d2c2b2a29282726252423222120}
      ymm1.v2_int128  = {0x4f4e4d4c4b4a49484746454443424140, 0x3f3e3d3c3b3a39383736353433323130}
+     ymm2.v2_int128 = {0x0, 0x0}
      ymm15.v2_int128 = {0xdead, 0xbeef}
      so that's easy to confirm that the unpacking went as expected.  */
 
@@ -220,6 +221,25 @@ vpunpck_test  ()
   asm volatile ("vpunpckhdq  %ymm0, %ymm1,  %ymm15");
   /* 17 16 15 14 13 12 11 10 ...*/
   asm volatile ("vpunpckhqdq %ymm0, %ymm1, %ymm15");
+
+  /* Test some of the floating point unpack instructions.  */
+  /* 17 27 16 26 15 25 14 24 ...*/
+  asm volatile ("vunpcklps  %xmm0, %xmm1, %xmm15");
+  /* 17 16 27 26 15 14 25 24 ...*/
+  asm volatile ("vunpcklps  %ymm0, %ymm1, %ymm2");
+  /* 17 16 15 14 27 26 25 24 ...*/
+  asm volatile ("vunpcklpd  %xmm0, %xmm1,  %xmm2");
+  /* 17 16 15 14 13 12 11 10 ...*/
+  asm volatile ("vunpcklpd %ymm0, %ymm1, %ymm15");
+  /* 17 27 16 26 15 25 14 24 ...*/
+  asm volatile ("vunpckhps  %xmm0, %xmm1, %xmm15");
+  /* 17 16 27 26 15 14 25 24 ...*/
+  asm volatile ("vunpckhps  %ymm0, %ymm1, %ymm2");
+  /* 17 16 15 14 27 26 25 24 ...*/
+  asm volatile ("vunpckhpd  %xmm0, %xmm1,  %xmm2");
+  /* 17 16 15 14 13 12 11 10 ...*/
+  asm volatile ("vunpckhpd %ymm0, %ymm1, %ymm15");
+
   /* We have a return statement to deal with
      epilogue in different compilers.  */
   return 0; /* end vpunpck_test */
