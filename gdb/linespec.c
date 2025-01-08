@@ -116,7 +116,7 @@ struct linespec
 struct linespec_canonical_name
 {
   /* Remaining text part of the linespec string.  */
-  char *suffix;
+  std::string suffix;
 
   /* If NULL then SUFFIX is the whole linespec string.  */
   struct symtab *symtab;
@@ -148,11 +148,6 @@ struct linespec_state
   linespec_state (const language_defn *language, program_space *program_space)
     : linespec_state (0, language, program_space, nullptr, nullptr, 0, nullptr)
   {
-  }
-
-  ~linespec_state ()
-  {
-    xfree (canonical_names);
   }
 
   DISABLE_COPY_AND_ASSIGN (linespec_state);
@@ -191,7 +186,7 @@ struct linespec_state
   struct linespec_result *canonical;
 
   /* Canonical strings that mirror the std::vector<symtab_and_line> result.  */
-  linespec_canonical_name *canonical_names = nullptr;
+  std::vector<linespec_canonical_name> canonical_names;
 
   /* Are we building a linespec?  */
   int is_linespec = 0;
@@ -1083,12 +1078,9 @@ add_sal_to_sals (struct linespec_state *self,
 
   if (self->canonical)
     {
-      struct linespec_canonical_name *canonical;
+      linespec_canonical_name &canonical
+	= self->canonical_names.emplace_back ();
 
-      self->canonical_names = XRESIZEVEC (struct linespec_canonical_name,
-					  self->canonical_names,
-					  sals->size ());
-      canonical = &self->canonical_names[sals->size () - 1];
       if (!literal_canonical && sal->symtab)
 	{
 	  symtab_to_fullname (sal->symtab);
@@ -1098,21 +1090,21 @@ add_sal_to_sals (struct linespec_state *self,
 	     the time being.  */
 	  if (symname != NULL && sal->line != 0
 	      && self->language->la_language == language_ada)
-	    canonical->suffix = xstrprintf ("%s:%d", symname,
-					    sal->line).release ();
+	    canonical.suffix = string_printf ("%s:%d", symname,
+					      sal->line);
 	  else if (symname != NULL)
-	    canonical->suffix = xstrdup (symname);
+	    canonical.suffix = symname;
 	  else
-	    canonical->suffix = xstrprintf ("%d", sal->line).release ();
-	  canonical->symtab = sal->symtab;
+	    canonical.suffix = string_printf ("%d", sal->line);
+	  canonical.symtab = sal->symtab;
 	}
       else
 	{
 	  if (symname != NULL)
-	    canonical->suffix = xstrdup (symname);
+	    canonical.suffix = symname;
 	  else
-	    canonical->suffix = xstrdup ("<unknown>");
-	  canonical->symtab = NULL;
+	    canonical.suffix = "<unknown>";
+	  canonical.symtab = NULL;
 	}
     }
 }
@@ -1307,7 +1299,7 @@ canonical_to_fullform (const struct linespec_canonical_name *canonical)
     return canonical->suffix;
   else
     return string_printf ("%s:%s", symtab_to_fullname (canonical->symtab),
-			  canonical->suffix);
+			  canonical->suffix.c_str ());
 }
 
 /* Given FILTERS, a list of canonical names, filter the sals in RESULT
@@ -1418,7 +1410,6 @@ decode_line_2 (struct linespec_state *self,
       std::string displayform;
 
       canonical = &self->canonical_names[i];
-      gdb_assert (canonical->suffix != NULL);
 
       std::string fullform = canonical_to_fullform (canonical);
 
@@ -1430,7 +1421,7 @@ decode_line_2 (struct linespec_state *self,
 
 	  fn_for_display = symtab_to_filename_for_display (canonical->symtab);
 	  displayform = string_printf ("%s:%s", fn_for_display,
-				       canonical->suffix);
+				       canonical->suffix.c_str ());
 	}
 
       items.emplace_back (std::move (fullform), std::move (displayform),
@@ -3129,14 +3120,6 @@ decode_line_full (struct location_spec *locspec, int flags,
 
   gdb_assert (result.size () == 1 || canonical->pre_expanded);
   canonical->pre_expanded = 1;
-
-  /* Arrange for allocated canonical names to be freed.  */
-  std::vector<gdb::unique_xmalloc_ptr<char>> hold_names;
-  for (int i = 0; i < result.size (); ++i)
-    {
-      gdb_assert (state->canonical_names[i].suffix != NULL);
-      hold_names.emplace_back (state->canonical_names[i].suffix);
-    }
 
   if (select_mode == NULL)
     {
