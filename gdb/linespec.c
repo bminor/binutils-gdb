@@ -4122,11 +4122,8 @@ add_minsym (struct minimal_symbol *minsym, struct objfile *objfile,
     }
 
   /* Exclude data symbols when looking for breakpoint locations.  */
-  if (!list_mode && !msymbol_is_function (objfile, minsym))
-    return;
-
-  msyms->emplace_back (minsym, objfile);
-  return;
+  if (list_mode || msymbol_is_function (objfile, minsym))
+    msyms->emplace_back (minsym, objfile);
 }
 
 /* Search for minimal symbols called NAME.  If SEARCH_PSPACE
