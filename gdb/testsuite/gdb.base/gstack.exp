@@ -14,6 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require !gdb_protocol_is_remote
+require can_spawn_for_attach
+
 standard_testfile
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}] == -1} {
