@@ -3144,9 +3144,9 @@ do_repeat (size_t count, const char *start, const char *end,
   sb one;
   sb many;
 
-  if (((ssize_t) count) < 0)
+  if (count > 0x7fffffff)
     {
-      as_bad (_("negative count for %s - ignored"), start);
+      as_bad (_("excessive count %zu for %s - ignored"), count, start);
       count = 0;
     }
 
