@@ -2880,7 +2880,7 @@ stop_current_target_threads_ns (ptid_t ptid)
      all-stop mode, we will only get one stop event --- it's undefined
      which thread will report the event.  */
   set_stop_requested (current_inferior ()->process_target (),
-		      ptid, 1);
+		      ptid, true);
 }
 
 /* See inferior.h.  */

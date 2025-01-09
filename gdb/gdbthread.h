@@ -533,7 +533,7 @@ public:
   struct target_waitstatus pending_follow;
 
   /* True if this thread has been explicitly requested to stop.  */
-  int stop_requested = 0;
+  bool stop_requested = false;
 
   /* The initiating frame of a nexting operation, used for deciding
      which exceptions to intercept.  If it is null_frame_id no
