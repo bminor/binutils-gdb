@@ -364,6 +364,61 @@ vpmovmskb_test ()
   return 0; /* end vpmovmskb_test  */
 }
 
+/* Test record arithmetic instructions.  */
+int
+arith_test ()
+{
+  /* start arith_test.  */
+  /* Using GDB, load these values onto registers for testing.
+     ymm0.v8_float = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}
+     ymm1.v8_float = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}
+     ymm15.v2_int128 = {0x0, 0x0}
+     this way it's easy to confirm we're undoing things correctly.  */
+  asm volatile ("vaddps %xmm0, %xmm1, %xmm15");
+  asm volatile ("vaddps %ymm0, %ymm1, %ymm15");
+  asm volatile ("vaddpd %xmm0, %xmm1, %xmm15");
+  asm volatile ("vaddpd %ymm0, %ymm1, %ymm15");
+  asm volatile ("vaddss %xmm0, %xmm1, %xmm15");
+  asm volatile ("vaddsd %xmm0, %xmm1, %xmm15");
+
+  asm volatile ("vmulps %xmm0, %xmm1, %xmm15");
+  asm volatile ("vmulps %ymm0, %ymm1, %ymm15");
+  asm volatile ("vmulpd %xmm0, %xmm1, %xmm15");
+  asm volatile ("vmulpd %ymm0, %ymm1, %ymm15");
+  asm volatile ("vmulss %xmm0, %xmm1, %xmm15");
+  asm volatile ("vmulsd %xmm0, %xmm1, %xmm15");
+
+  asm volatile ("vsubps %xmm0, %xmm1, %xmm15");
+  asm volatile ("vsubps %ymm0, %ymm1, %ymm15");
+  asm volatile ("vsubpd %xmm0, %xmm1, %xmm15");
+  asm volatile ("vsubpd %ymm0, %ymm1, %ymm15");
+  asm volatile ("vsubss %xmm0, %xmm1, %xmm15");
+  asm volatile ("vsubsd %xmm0, %xmm1, %xmm15");
+
+  asm volatile ("vdivps %xmm0, %xmm1, %xmm15");
+  asm volatile ("vdivps %ymm0, %ymm1, %ymm15");
+  asm volatile ("vdivpd %xmm0, %xmm1, %xmm15");
+  asm volatile ("vdivpd %ymm0, %ymm1, %ymm15");
+  asm volatile ("vdivss %xmm0, %xmm1, %xmm15");
+  asm volatile ("vdivsd %xmm0, %xmm1, %xmm15");
+
+  asm volatile ("vminps %xmm0, %xmm1, %xmm15");
+  asm volatile ("vminps %ymm0, %ymm1, %ymm15");
+  asm volatile ("vminpd %xmm0, %xmm1, %xmm15");
+  asm volatile ("vminpd %ymm0, %ymm1, %ymm15");
+  asm volatile ("vminss %xmm0, %xmm1, %xmm15");
+  asm volatile ("vminsd %xmm0, %xmm1, %xmm15");
+
+  asm volatile ("vmaxps %xmm0, %xmm1, %xmm15");
+  asm volatile ("vmaxps %ymm0, %ymm1, %ymm15");
+  asm volatile ("vmaxpd %xmm0, %xmm1, %xmm15");
+  asm volatile ("vmaxpd %ymm0, %ymm1, %ymm15");
+  asm volatile ("vmaxss %xmm0, %xmm1, %xmm15");
+  asm volatile ("vmaxsd %xmm0, %xmm1, %xmm15");
+
+  return 0; /* end arith_test  */
+}
+
 /* This include is used to allocate the dynamic buffer and have
    the pointers aligned to a 32-bit boundary, so we can test instructions
    that require aligned memory.  */
@@ -392,5 +447,6 @@ main ()
   vpor_xor_test ();
   vpcmpeq_test ();
   vpmovmskb_test ();
+  arith_test ();
   return 0;	/* end of main */
 }

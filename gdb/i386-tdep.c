@@ -5003,9 +5003,15 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 
     case 0x78:	/* VPBROADCASTB  */
     case 0x79:	/* VPBROADCASTW  */
-    case 0x58:	/* VPBROADCASTD  */
-    case 0x59:	/* VPBROADCASTQ  */
+    case 0x58:	/* VPBROADCASTD and VADD[P|S][S|D]  */
+    case 0x59:	/* VPBROADCASTQ and VMUL[P|S][S|D]  */
+    case 0x5c:	/* VSUB[P|S][S|D]  */
+    case 0x5d:	/* VMIN[P|S][S|D]  */
+    case 0x5e:	/* VDIV[P|S][S|D]  */
+    case 0x5f:	/* VMAX[P|S][S|D]  */
       {
+	/* vpbroadcast and arithmethic operations are differentiated
+	   by map_select, but it doesn't change the recording mechanics.  */
 	i386_record_modrm (ir);
 	int reg_offset = ir->reg + vex_r * 8;
 	gdb_assert (tdep->num_ymm_regs > reg_offset);

@@ -517,3 +517,108 @@ if {[record_full_function "vpmovmskb"] == true} {
 }
 gdb_test "finish" "Run till exit from.*vpmovmskb_test.*" \
     "leaving vpmovmskb"
+
+# Preparation and testing arithmetic instructions.
+gdb_test_no_output \
+    "set \$ymm0.v8_float = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}"
+gdb_test_no_output \
+    "set \$ymm1.v8_float = {0, 1, 2, 3, 4, 5, 6, 7}"
+gdb_test_no_output "set \$ymm15.v2_int128 = {0,0}"
+
+if {[record_full_function "arith"] == true} {
+    test_one_register "vmaxsd" "ymm15" \
+	"0x40400000400000003f8000003f000000, 0x0" "ymm operation: "
+    test_one_register "vmaxss" "ymm15" \
+	"0x40600000402000003fc000003f000000, 0x40f0000040d0000040b0000040900000" \
+	"xmm operation: "
+    test_one_register "vmaxpd" "ymm15" \
+	"0x40600000402000003fc000003f000000, 0x0" "ymm operation: "
+    test_one_register "vmaxpd" "ymm15" \
+	"0x40600000402000003fc000003f000000, 0x40f0000040d0000040b0000040900000" \
+	"xmm operation: "
+    test_one_register "vmaxps" "ymm15" \
+	"0x40600000402000003fc000003f000000, 0x0" "ymm operation: "
+    test_one_register "vmaxps" "ymm15" \
+	"0x40400000400000003f80000000000000, 0x0" "xmm operation: "
+
+    test_one_register "vminsd" "ymm15" \
+	"0x40400000400000003f80000000000000, 0x0" "ymm operation: "
+    test_one_register "vminss" "ymm15" \
+	"0x40400000400000003f80000000000000, 0x40e0000040c0000040a0000040800000" \
+	"xmm operation: "
+    test_one_register "vminpd" "ymm15" \
+	"0x40400000400000003f80000000000000, 0x0" "ymm operation: "
+    test_one_register "vminpd" "ymm15" \
+	"0x40400000400000003f80000000000000, 0x40e0000040c0000040a0000040800000" \
+	"xmm operation: "
+    test_one_register "vminps" "ymm15" \
+	"0x40400000400000003f80000000000000, 0x0" "ymm operation: "
+    test_one_register "vminps" "ymm15" \
+	"0x40400000400000003fafffff820001f0, 0x0" "xmm operation: "
+
+    test_one_register "vdivsd" "ymm15" \
+	"0x40400000400000003f80000000000000, 0x0" "ymm operation: "
+    test_one_register "vdivss" "ymm15" \
+	"0x3fcfffffffc000013fafffff820001f0, 0x3fdfffffffe000013fdfffffffe00001" \
+	"xmm operation: "
+    test_one_register "vdivpd" "ymm15" \
+	"0x3fcfffffffc000013fafffff820001f0, 0x0" "ymm operation: "
+    test_one_register "vdivpd" "ymm15" \
+	"0x3f5b6db73f4ccccd3f2aaaab00000000, 0x3f6eeeef3f6c4ec53f68ba2f3f638e39" \
+	"xmm operation: "
+    test_one_register "vdivps" "ymm15" \
+	"0x3f5b6db73f4ccccd3f2aaaab00000000, 0x0" "ymm operation: "
+    test_one_register "vdivps" "ymm15" \
+	"0x4040000040000000bfbe00007e000000, 0x0" "xmm operation: "
+
+    test_one_register "vsubsd" "ymm15" \
+	"0x40400000400000003f800000bf000000, 0x0" "ymm operation: "
+    test_one_register "vsubss" "ymm15" \
+	"0xc058000060400000bfbe00007e000000, 0xc0e0000040e00000c0a0000040a00000" \
+	"xmm operation: "
+    test_one_register "vsubpd" "ymm15" \
+	"0xc058000060400000bfbe00007e000000, 0x0" "ymm operation: "
+    test_one_register "vsubpd" "ymm15" \
+	"0xbf000000bf000000bf000000bf000000, 0xbf000000bf000000bf000000bf000000" \
+	"xmm operation: "
+    test_one_register "vsubps" "ymm15" \
+	"0xbf000000bf000000bf000000bf000000, 0x0" "ymm operation: "
+    test_one_register "vsubps" "ymm15" \
+	"0x40400000400000003f5000003f000000, 0x0" "xmm operation: "
+
+    test_one_register "vmulsd" "ymm15" \
+	"0x40400000400000003f80000000000000, 0x0" "ymm operation: "
+    test_one_register "vmulss" "ymm15" \
+	"0x40b00000802001003f5000003f000000, 0x41e00000819001064160000081100104" \
+	"xmm operation: "
+    test_one_register "vmulpd" "ymm15" \
+	"0x40b00000802001003f5000003f000000, 0x0" "ymm operation: "
+    test_one_register "vmulpd" "ymm15" \
+	"0x4128000040a000003fc0000000000000, 0x42520000421c000041dc000041900000" \
+	"xmm operation: "
+    test_one_register "vmulps" "ymm15" \
+	"0x4128000040a000003fc0000000000000, 0x0" "ymm operation: "
+    test_one_register "vmulps" "ymm15" \
+	"0x40400000400000003fc100003f000000, 0x0" "xmm operation: "
+
+    test_one_register "vaddsd" "ymm15" \
+	"0x40400000400000003f8000003f000000, 0x0" "ymm operation: "
+    test_one_register "vaddss" "ymm15" \
+	"0x40640000502000003fc100003f000000, 0x40f800006130000040b8000060d00000" \
+	"xmm operation: "
+    test_one_register "vaddpd" "ymm15" \
+	"0x40640000502000003fc100003f000000, 0x0" "ymm operation: "
+    test_one_register "vaddpd" "ymm15" \
+	"0x40d0000040900000402000003f000000, 0x41680000414800004128000041080000" \
+	"xmm operation: "
+    test_one_register "vaddps" "ymm15" \
+	"0x40d0000040900000402000003f000000, 0x0" "ymm operation: "
+    test_one_register "vaddps" "ymm15" "0x0, 0x0" "xmm operation: "
+
+    gdb_test "record stop" "Process record is stopped.*" \
+	"delete history for arith_test"
+} else {
+    untested "couldn't run arith tests"
+}
+gdb_test "finish" "Run till exit from.*arith_test.*" \
+    "leaving arith"
