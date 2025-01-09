@@ -209,24 +209,13 @@ find_register_by_number (const struct target_desc *tdesc, int n)
 void
 registers_to_string (struct regcache *regcache, char *buf)
 {
-  unsigned char *registers = regcache->registers;
   const struct target_desc *tdesc = regcache->tdesc;
 
   for (int i = 0; i < tdesc->reg_defs.size (); ++i)
     {
-      if (regcache->register_status[i] == REG_VALID)
-	{
-	  bin2hex (registers, buf, register_size (tdesc, i));
-	  buf += register_size (tdesc, i) * 2;
-	}
-      else
-	{
-	  memset (buf, 'x', register_size (tdesc, i) * 2);
-	  buf += register_size (tdesc, i) * 2;
-	}
-      registers += register_size (tdesc, i);
+      collect_register_as_string (regcache, i, buf);
+      buf += register_size (tdesc, i) * 2;
     }
-  *buf = '\0';
 }
 
 void
@@ -491,7 +480,15 @@ regcache_raw_get_unsigned_by_name (struct regcache *regcache,
 void
 collect_register_as_string (struct regcache *regcache, int n, char *buf)
 {
-  bin2hex (register_data (regcache, n), buf);
+  int reg_size = register_size (regcache->tdesc, n);
+
+  if (regcache->get_register_status (n) == REG_VALID)
+    bin2hex (register_data (regcache, n), buf);
+  else
+    memset (buf, 'x', reg_size * 2);
+
+  buf += reg_size * 2;
+  *buf = '\0';
 }
 
 void
