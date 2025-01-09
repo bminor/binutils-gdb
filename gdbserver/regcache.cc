@@ -327,16 +327,14 @@ regcache::raw_supply (int n, gdb::array_view<const gdb_byte> src)
     {
       copy (src, dst);
 #ifndef IN_PROCESS_AGENT
-      if (register_status != NULL)
-	register_status[n] = REG_VALID;
+      set_register_status (n, REG_VALID);
 #endif
     }
   else
     {
       memset (dst.data (), 0, dst.size ());
 #ifndef IN_PROCESS_AGENT
-      if (register_status != NULL)
-	register_status[n] = REG_UNAVAILABLE;
+      set_register_status (n, REG_UNAVAILABLE);
 #endif
     }
 }
@@ -349,8 +347,7 @@ supply_register_zeroed (struct regcache *regcache, int n)
   auto dst = register_data (regcache, n);
   memset (dst.data (), 0, dst.size ());
 #ifndef IN_PROCESS_AGENT
-  if (regcache->register_status != NULL)
-    regcache->register_status[n] = REG_VALID;
+  regcache->set_register_status (n, REG_VALID);
 #endif
 }
 
@@ -360,8 +357,7 @@ regcache::raw_supply_part_zeroed (int regnum, int offset, size_t size)
   auto dst = register_data (this, regnum).slice (offset, size);
   memset (dst.data (), 0, dst.size ());
 #ifndef IN_PROCESS_AGENT
-  if (register_status != NULL)
-    register_status[regnum] = REG_VALID;
+  set_register_status (regnum, REG_VALID);
 #endif
 }
 
@@ -391,12 +387,8 @@ supply_regblock (struct regcache *regcache, const void *buf)
 
       memcpy (regcache->registers, buf, tdesc->registers_size);
 #ifndef IN_PROCESS_AGENT
-      {
-	int i;
-
-	for (i = 0; i < tdesc->reg_defs.size (); i++)
-	  regcache->register_status[i] = REG_VALID;
-      }
+      for (int i = 0; i < tdesc->reg_defs.size (); i++)
+	regcache->set_register_status (i, REG_VALID);
 #endif
     }
   else
@@ -405,12 +397,8 @@ supply_regblock (struct regcache *regcache, const void *buf)
 
       memset (regcache->registers, 0, tdesc->registers_size);
 #ifndef IN_PROCESS_AGENT
-      {
-	int i;
-
-	for (i = 0; i < tdesc->reg_defs.size (); i++)
-	  regcache->register_status[i] = REG_UNAVAILABLE;
-      }
+      for (int i = 0; i < tdesc->reg_defs.size (); i++)
+	regcache->set_register_status (i, REG_UNAVAILABLE);
 #endif
     }
 }
@@ -528,6 +516,16 @@ regcache::get_register_status (int regnum) const
     return REG_VALID;
 #else
   return REG_VALID;
+#endif
+}
+
+void
+regcache::set_register_status (int regnum, enum register_status status)
+{
+#ifndef IN_PROCESS_AGENT
+  gdb_assert (regnum >= 0 && regnum < tdesc->reg_defs.size ());
+  if (register_status != nullptr)
+    register_status[regnum] = status;
 #endif
 }
 

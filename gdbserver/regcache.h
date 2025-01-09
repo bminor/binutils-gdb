@@ -50,6 +50,9 @@ struct regcache : public reg_buffer_common
   /* See gdbsupport/common-regcache.h.  */
   enum register_status get_register_status (int regnum) const override;
 
+  /* Set the status of register REGNUM to STATUS.  */
+  void set_register_status (int regnum, enum register_status status);
+
   /* See gdbsupport/common-regcache.h.  */
   int register_size (int regnum) const override;
 
