@@ -2532,12 +2532,12 @@ s390_prologue_frame_unwind_cache (const frame_info_ptr &this_frame,
      ABI; for call-clobbered registers the parser may have recognized
      spurious stores.  */
 
-  for (i = 0; i < 16; i++)
+  for (i = 0; i < S390_NUM_GPRS; i++)
     if (s390_register_call_saved (gdbarch, S390_R0_REGNUM + i)
 	&& data.gpr_slot[i] != 0)
       info->saved_regs[S390_R0_REGNUM + i].set_addr (cfa - data.gpr_slot[i]);
 
-  for (i = 0; i < 16; i++)
+  for (i = 0; i < S390_NUM_FPRS; i++)
     if (s390_register_call_saved (gdbarch, S390_F0_REGNUM + i)
 	&& data.fpr_slot[i] != 0)
       info->saved_regs[S390_F0_REGNUM + i].set_addr (cfa - data.fpr_slot[i]);
