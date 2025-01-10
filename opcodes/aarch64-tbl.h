@@ -1814,6 +1814,10 @@
 {                                                       \
   QLF3(S_S,P_M,S_H),                                    \
 }
+#define OP_SVE_SH					\
+{							\
+  QLF2(S_S,S_H),					\
+}
 #define OP_SVE_SHH                                      \
 {                                                       \
   QLF3(S_S,S_H,S_H),                                    \
@@ -6711,6 +6715,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_F16F16_INSN("fmls", 0xc1301c08, 0xfff09c18, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_HHH, F_OD (4), 0),
   SME_F16F16_INSN("fmls", 0xc1a01018, 0xffe19c38, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zmx2), OP_SVE_HHH, F_OD (2), 0),
   SME_F16F16_INSN("fmls", 0xc1a11018, 0xffe39c78, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zmx4), OP_SVE_HHH, F_OD (4), 0),
+  SME_F16F16_INSN("fcvt", 0xc1a0e000, 0xfffffc01, sme_misc, 0, OP2 (SME_Zdnx2, SVE_Zn), OP_SVE_SH, F_OD (2), 0),
+  SME_F16F16_INSN("fcvtl", 0xc1a0e001, 0xfffffc01, sme_misc, 0, OP2 (SME_Zdnx2, SVE_Zn), OP_SVE_SH, F_OD (2), 0),
 
 /* SVE2p1 Instructions.  */
   SVE2p1_INSN("addqv",0x04052000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, 0),
