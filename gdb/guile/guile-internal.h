@@ -30,7 +30,13 @@
 #include "objfiles.h"
 #include "top.h"
 
-#if __cplusplus >= 202002L
+/* GCC introduced C++20 support in GCC 8, using -std=c++2a (the name of the
+   C++20 standard before publishing) and __cplusplus 201709L.  In GCC 10,
+   -std=c++20 was added, but __cplusplus stayed at 201709L, and was only
+   changed to the standard 202002L in GCC 11.  Consequently, some C++20
+   features and restrictions need to be tested against the non-standard
+   201709L, otherwise the build with GCC 10 and -std=c++20 will break.  */
+#if __cplusplus >= 201709L
 /* Work around Werror=volatile in SCM_UNPACK for
    SCM_DEBUG_TYPING_STRICTNESS == 1.  Reported upstream:
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=65333 .  */
