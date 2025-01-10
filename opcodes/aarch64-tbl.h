@@ -6699,6 +6699,18 @@ const struct aarch64_opcode aarch64_opcode_table[] =
 /* SME2.1 half-precision floating-point instructions.  */
   SME_F16F16_INSN("fmopa", 0x81800008, 0xffe0001e, sme_misc, 0, OP5 (SME_ZAda_1b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SVE_HMMHH, 0, 0),
   SME_F16F16_INSN("fmops", 0x81800018, 0xffe0001e, sme_misc, 0, OP5 (SME_ZAda_1b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SVE_HMMHH, 0, 0),
+  SME_F16F16_INSN("fmla", 0xc1101000, 0xfff09030, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zm_INDEX3_3), OP_SVE_HHH, F_OD(2), 0),
+  SME_F16F16_INSN("fmla", 0xc1109000, 0xfff09070, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zm_INDEX3_3), OP_SVE_HHH, F_OD(4), 0),
+  SME_F16F16_INSN("fmla", 0xc1201c00, 0xfff09c18, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_HHH, F_OD (2), 0),
+  SME_F16F16_INSN("fmla", 0xc1301c00, 0xfff09c18, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_HHH, F_OD (4), 0),
+  SME_F16F16_INSN("fmla", 0xc1a01008, 0xffe19c38, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zmx2), OP_SVE_HHH, F_OD (2), 0),
+  SME_F16F16_INSN("fmla", 0xc1a11008, 0xffe39c78, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zmx4), OP_SVE_HHH, F_OD (4), 0),
+  SME_F16F16_INSN("fmls", 0xc1101010, 0xfff09030, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zm_INDEX3_3), OP_SVE_HHH, F_OD(2), 0),
+  SME_F16F16_INSN("fmls", 0xc1109010, 0xfff09070, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zm_INDEX3_3), OP_SVE_HHH, F_OD(4), 0),
+  SME_F16F16_INSN("fmls", 0xc1201c08, 0xfff09c18, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_HHH, F_OD (2), 0),
+  SME_F16F16_INSN("fmls", 0xc1301c08, 0xfff09c18, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SVE_ZnxN, SME_Zm), OP_SVE_HHH, F_OD (4), 0),
+  SME_F16F16_INSN("fmls", 0xc1a01018, 0xffe19c38, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx2, SME_Zmx2), OP_SVE_HHH, F_OD (2), 0),
+  SME_F16F16_INSN("fmls", 0xc1a11018, 0xffe39c78, sme_misc, 0, OP3 (SME_ZA_array_off3_0, SME_Znx4, SME_Zmx4), OP_SVE_HHH, F_OD (4), 0),
 
 /* SVE2p1 Instructions.  */
   SVE2p1_INSN("addqv",0x04052000, 0xff3fe000, sve2_urqvs, 0, OP3 (Vd, SVE_Pg3, SVE_Zn), OP_SVE_vUS_BHSD_BHSD, F_OPD_SIZE, 0),
