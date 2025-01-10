@@ -189,6 +189,7 @@ extern offsetT *symbol_X_add_number (const symbolS *);
 extern void symbol_set_value_now (symbolS *);
 extern void symbol_set_frag (symbolS *, fragS *);
 extern fragS *symbol_get_frag (const symbolS *);
+extern fragS *symbol_get_frag_and_value (const symbolS *, addressT *);
 extern void symbol_mark_used (symbolS *);
 extern void symbol_clear_used (symbolS *);
 extern int symbol_used_p (const symbolS *);

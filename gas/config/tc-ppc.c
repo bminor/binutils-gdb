@@ -4082,12 +4082,14 @@ md_assemble (char *str)
 	 a label attached to the instruction.  By "attached" we mean
 	 on the same source line as the instruction and without any
 	 intervening semicolons.  */
-      dot_value = frag_now_fix ();
-      dot_frag = frag_now;
+      symbol_set_value_now (&dot_symbol);
       for (l = insn_labels; l != NULL; l = l->next)
 	{
-	  symbol_set_frag (l->label, dot_frag);
-	  S_SET_VALUE (l->label, dot_value);
+	  addressT value;
+
+	  symbol_set_frag (l->label,
+			   symbol_get_frag_and_value (&dot_symbol, &value));
+	  S_SET_VALUE (l->label, value);
 	}
     }
 

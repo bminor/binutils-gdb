@@ -170,8 +170,6 @@ struct reloc_list
 
 extern int finalize_syms;
 extern symbolS *abs_section_sym;
-extern addressT dot_value;
-extern fragS *dot_frag;
 extern struct reloc_list* reloc_list;
 
 extern void append (char **, char *, unsigned long);

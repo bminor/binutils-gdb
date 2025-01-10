@@ -4483,8 +4483,7 @@ emit_expr_with_reloc (expressionS *exp,
     return;
 
   frag_grow (nbytes);
-  dot_value = frag_now_fix ();
-  dot_frag = frag_now;
+  symbol_set_value_now (&dot_symbol);
 
 #ifndef NO_LISTING
 #ifdef OBJ_ELF

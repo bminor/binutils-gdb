@@ -2814,6 +2814,23 @@ symbol_get_frag (const symbolS *s)
   return s->frag;
 }
 
+/* Return the frag of a symbol and the symbol's offset into that frag.  */
+
+fragS *symbol_get_frag_and_value (const symbolS *s, addressT *value)
+{
+  if (s->flags.local_symbol)
+    {
+      const struct local_symbol *locsym = (const struct local_symbol *) s;
+
+      *value = locsym->value;
+      return locsym->frag;
+    }
+
+  gas_assert (s->x->value.X_op == O_constant);
+  *value = s->x->value.X_add_number;
+  return s->frag;
+}
+
 /* Mark a symbol as having been used.  */
 
 void
