@@ -1770,8 +1770,44 @@ linux_nat_target::resume (ptid_t scope_ptid, int step, enum gdb_signal signo)
      last_resume_kind to resume_continue.  */
   iterate_over_lwps (scope_ptid, resume_set_callback);
 
+  /* Let's see if we're supposed to resume INFERIOR_PTID at all.  */
+  if (!inferior_ptid.matches (scope_ptid))
+    {
+      linux_nat_debug_printf ("inferior_ptid %s not in scope %s",
+			      inferior_ptid.to_string ().c_str (),
+			      scope_ptid.to_string ().c_str ());
+      iterate_over_lwps (scope_ptid, [=] (struct lwp_info *info)
+	{
+	  return linux_nat_resume_callback (info, nullptr);
+	});
+
+      if (target_can_async_p ())
+	{
+	  target_async (true);
+	  /* Tell the event loop we have something to process.  */
+	  async_file_mark ();
+	}
+
+      return;
+    }
+
   lp = find_lwp_pid (inferior_ptid);
   gdb_assert (lp != NULL);
+
+  if (!lp->stopped)
+    {
+      linux_nat_debug_printf ("inferior_ptid %s not stopped",
+			      inferior_ptid.to_string ().c_str ());
+
+      if (target_can_async_p ())
+	{
+	  target_async (true);
+	  /* Tell the event loop we have something to process.  */
+	  async_file_mark ();
+	}
+
+      return;
+    }
 
   /* Remember if we're stepping.  */
   lp->last_resume_kind = step ? resume_step : resume_continue;
