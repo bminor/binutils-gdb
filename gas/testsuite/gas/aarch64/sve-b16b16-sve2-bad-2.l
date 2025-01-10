@@ -183,8 +183,8 @@
 .*: Error: operand mismatch -- `bfclamp z31.b,z31.s,z31.d'
 .*: Info:    did you mean this\?
 .*: Info:    	bfclamp z31.h, z31.h, z31.h
-.*: Error: expected an SVE vector register at operand 1 -- `bfclamp { ?z0.h ?},z0.h,z0.h'
-.*: Error: expected an SVE vector register at operand 1 -- `bfclamp { ?z0.h-z0.h ?},z0.h'
+.*: Error: expected a list of 2 or 4 registers at operand 1 -- `bfclamp { ?z0.h ?},z0.h,z0.h'
+.*: Error: invalid range in vector register list at operand 1 -- `bfclamp { ?z0.h-z0.h ?},z0.h'
 .*: Error: comma expected between operands at operand 3 -- `bfclamp z0.h,z0.h'
 .*: Error: operand mismatch -- `bfmla z0.b,z0.h,z0.h\[0\]'
 .*: Info:    did you mean this\?
