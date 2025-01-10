@@ -2857,8 +2857,12 @@ static void
 riscv_call_arg_scalar_int (struct riscv_arg_info *ainfo,
 			   struct riscv_call_info *cinfo)
 {
+  auto lang_req = language_pass_by_reference (ainfo->type);
+
   if (TYPE_HAS_DYNAMIC_LENGTH (ainfo->type)
-      || ainfo->length > (2 * cinfo->xlen))
+      || ainfo->length > (2 * cinfo->xlen)
+      || !lang_req.trivially_copy_constructible
+      || !lang_req.trivially_destructible)
     {
       /* Argument is going to be passed by reference.  */
       ainfo->argloc[0].loc_type
