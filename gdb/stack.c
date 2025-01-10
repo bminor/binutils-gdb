@@ -1750,7 +1750,7 @@ info_frame_command_core (const frame_info_ptr &fi, bool selected_frame_p)
 	  /* Find out the location of the saved register without
 	     fetching the corresponding value.  */
 	  frame_register_unwind (fi, i, &optimized, &unavailable,
-				 &lval, &addr, &realnum, NULL);
+				 &lval, &addr, &realnum);
 	  /* For moment, only display registers that were saved on the
 	     stack.  */
 	  if (!optimized && !unavailable && lval == lval_memory)

@@ -685,14 +685,14 @@ const char *unwind_stop_reason_to_string (enum unwind_stop_reason);
 const char *frame_stop_reason_string (const frame_info_ptr &);
 
 /* Unwind the stack frame so that the value of REGNUM, in the previous
-   (up, older) frame is returned.  If VALUEP is NULL, don't
+   (up, older) frame is returned.  If VALUEP is nullptr, don't
    fetch/compute the value.  Instead just return the location of the
    value.  */
 extern void frame_register_unwind (const frame_info_ptr &frame, int regnum,
 				   int *optimizedp, int *unavailablep,
 				   enum lval_type *lvalp,
 				   CORE_ADDR *addrp, int *realnump,
-				   gdb_byte *valuep);
+				   gdb_byte *valuep = nullptr);
 
 /* Fetch a register from this, or unwind a register from the next
    frame.  Note that the get_frame methods are wrappers to

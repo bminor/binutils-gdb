@@ -1447,7 +1447,7 @@ put_frame_register (const frame_info_ptr &next_frame, int regnum,
   gdb_assert (buf.size () == size);
 
   frame_register_unwind (next_frame, regnum, &optim, &unavail, &lval, &addr,
-			 &realnum, nullptr);
+			 &realnum);
   if (optim)
     error (_("Attempt to assign to a register that was not saved."));
   switch (lval)
@@ -2159,7 +2159,7 @@ frame_register_unwind_location (const frame_info_ptr &initial_this_frame,
       int unavailable;
 
       frame_register_unwind (this_frame, regnum, optimizedp, &unavailable,
-			     lvalp, addrp, realnump, NULL);
+			     lvalp, addrp, realnump);
 
       if (*optimizedp)
 	break;
