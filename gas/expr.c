@@ -738,7 +738,7 @@ current_location (expressionS *expressionp, enum expr_mode mode)
   else
     {
       expressionp->X_op = O_symbol;
-      if (mode != expr_defer)
+      if (mode != expr_defer_incl_dot)
 	{
 	  expressionp->X_add_symbol = symbol_temp_new_now ();
 #ifdef tc_new_dot_label
@@ -1387,14 +1387,14 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	  /* If we have an absolute symbol or a reg, then we know its
 	     value now.  */
 	  segment = S_GET_SEGMENT (symbolP);
-	  if (mode != expr_defer
+	  if (!expr_defer_p (mode)
 	      && segment == absolute_section
 	      && !S_FORCE_RELOC (symbolP, 0))
 	    {
 	      expressionP->X_op = O_constant;
 	      expressionP->X_add_number = S_GET_VALUE (symbolP);
 	    }
-	  else if (mode != expr_defer && segment == reg_section)
+	  else if (!expr_defer_p (mode) && segment == reg_section)
 	    {
 	      expressionP->X_op = O_register;
 	      expressionP->X_add_number = S_GET_VALUE (symbolP);
@@ -1438,7 +1438,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
   if (expressionP->X_add_symbol)
     symbol_mark_used (expressionP->X_add_symbol);
 
-  if (mode != expr_defer)
+  if (!expr_defer_p (mode))
     {
       expressionP->X_add_symbol
 	= symbol_clone_if_forward_ref (expressionP->X_add_symbol);
@@ -1933,7 +1933,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 
       is_unsigned = resultP->X_unsigned && right.X_unsigned;
 
-      if (mode == expr_defer
+      if (expr_defer_p (mode)
 	  && ((resultP->X_add_symbol != NULL
 	       && S_IS_FORWARD_REF (resultP->X_add_symbol))
 	      || (right.X_add_symbol != NULL

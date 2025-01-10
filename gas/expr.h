@@ -153,8 +153,11 @@ enum expr_mode
 {
   expr_evaluate,
   expr_normal,
-  expr_defer
+  expr_defer,
+  expr_defer_incl_dot,
 };
+
+#define expr_defer_p(m) ((m) >= expr_defer)
 
 /* "result" should be type (expressionS *).  */
 #define expression(result) expr (0, result, expr_normal)
