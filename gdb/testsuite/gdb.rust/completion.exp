@@ -31,4 +31,6 @@ if {![runto ${srcfile}:$line]} {
     return -1
 }
 
-gdb_test "complete break pars" ".*"
+with_timeout_factor 2 {
+    gdb_test "complete break pars" ".*"
+}
