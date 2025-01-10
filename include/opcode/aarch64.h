@@ -264,6 +264,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SME_F8F32,
   /* SME F8F16 instructions.  */
   AARCH64_FEATURE_SME_F8F16,
+  /* Non-widening half-precision FP16 to FP16 arithmetic for SME2.  */
+  AARCH64_FEATURE_SME_F16F16,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */

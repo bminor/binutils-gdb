@@ -315,6 +315,8 @@ automatically cause those extensions to be disabled.
  @tab Enable @code{wfet} and @code{wfit} instructions.
 @item @code{xs} @tab
  @tab Enable the XS memory attribute extension.
+@item @code{sme-f16f16} @tab
+ @tab Enable the SME2 F16F16 Extension.
 @end multitable
 
 @multitable @columnfractions .20 .80
