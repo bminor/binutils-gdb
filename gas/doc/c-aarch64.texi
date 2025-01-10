@@ -269,6 +269,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the SM3 and SM4 cryptographic extensions.
 @item @code{sme} @tab @code{sve2}, @code{bf16}
  @tab Enable the Scalable Matrix Extension.
+@item @code{sme-b16b16} @tab @code{sme2}, @code{sve-b16b16}
+ @tab Enable SME ZA-targeting non-widening BFloat16 instructions.
 @item @code{sme-f8f16} @tab @code{sme-f8f32}
  @tab Enable the SME F8F16 Extension.
 @item @code{sme-f8f32} @tab @code{sme2}, @code{fp8}

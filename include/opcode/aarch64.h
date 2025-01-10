@@ -266,6 +266,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SME_F16F16,
   /* SVE Z-targeting non-widening BFloat16 instructions.  */
   AARCH64_FEATURE_SVE_B16B16,
+  /* SME non-widening BFloat16 instructions.  */
+  AARCH64_FEATURE_SME_B16B16,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */

@@ -10764,6 +10764,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sme-f8f16",		AARCH64_FEATURE (SME_F8F16),
 			AARCH64_FEATURE (SME_F8F32)},
   {"sme-f16f16",	AARCH64_FEATURE (SME_F16F16), AARCH64_FEATURE (SME2)},
+  {"sme-b16b16",	AARCH64_FEATURE (SME_B16B16),
+			AARCH64_FEATURES (2, SVE_B16B16, SME2)},
   {NULL,		AARCH64_NO_FEATURES, AARCH64_NO_FEATURES},
 };
 
