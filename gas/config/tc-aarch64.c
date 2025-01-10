@@ -10740,9 +10740,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"rasv2",		AARCH64_FEATURE (RASv2), AARCH64_FEATURE (RAS)},
   {"ite",		AARCH64_FEATURE (ITE), AARCH64_NO_FEATURES},
   {"d128",		AARCH64_FEATURE (D128), D128_FEATURE_DEPS},
-  // Feature b16b16 is currently incomplete.
-  // TODO: finish implementation and enable relevant flags.
-  //{"b16b16",		AARCH64_FEATURE (B16B16), AARCH64_FEATURE (SVE2)},
+  {"sve-b16b16",	AARCH64_FEATURE (SVE_B16B16), AARCH64_NO_FEATURES},
   {"sme2p1",		AARCH64_FEATURE (SME2p1), AARCH64_FEATURE (SME2)},
   {"sve2p1",		AARCH64_FEATURE (SVE2p1), AARCH64_FEATURE (SVE2)},
   {"rcpc3",		AARCH64_FEATURE (RCPC3), AARCH64_FEATURE (RCPC2)},

@@ -161,8 +161,6 @@ automatically cause those extensions to be disabled.
 @headitem Extension @tab Depends upon @tab Description
 @item @code{aes} @tab @code{simd}
  @tab Enable the AES and PMULL cryptographic extensions.
-@c @item @code{b16b16} @tab @code{sve2}
-@c  @tab Enable BFloat16 to BFloat16 arithmetic for SVE2 and SME2.
 @item @code{bf16} @tab @code{fp}
  @tab Enable BFloat16 extension.
 @item @code{brbe} @tab
@@ -295,6 +293,8 @@ automatically cause those extensions to be disabled.
  @tab Enable the Streaming SVE FP8 FMA instructions.  These can also be enabled using @code{+fp8fma+sme2}.
 @item @code{sve} @tab @code{fcma}
  @tab Enable the Scalable Vector Extension.
+@item @code{sve-b16b16} @tab
+@tab Enable the SVE B16B16 extension.  These instructions also require either @code{+sve2} or @code{+sme2}.
 @item @code{sve2} @tab @code{sve}
  @tab Enable SVE2.
 @item @code{sve2-aes} @tab @code{sve2}, @code{aes}

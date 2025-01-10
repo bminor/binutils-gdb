@@ -226,8 +226,6 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SPMU2,
   /* Performance Monitors Synchronous-Exception-Based Event Extension.  */
   AARCH64_FEATURE_SEBEP,
-  /* SVE2.1 and SME2.1 non-widening BFloat16 instructions.  */
-  AARCH64_FEATURE_B16B16,
   /* SME2.1 instructions.  */
   AARCH64_FEATURE_SME2p1,
   /* SVE2.1 instructions.  */
@@ -266,6 +264,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SME_F8F16,
   /* Non-widening half-precision FP16 to FP16 arithmetic for SME2.  */
   AARCH64_FEATURE_SME_F16F16,
+  /* SVE Z-targeting non-widening BFloat16 instructions.  */
+  AARCH64_FEATURE_SVE_B16B16,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */

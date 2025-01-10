@@ -1838,7 +1838,7 @@
 {                                                       \
   QLF3(S_S,NIL,S_S),                                    \
 }
-#define OP_SVE_SMSS				     \
+#define OP_SVE_HMHH				     \
 {						       \
   QLF4(S_H,P_M,S_H,S_H),				\
 }
@@ -2805,8 +2805,8 @@ static const aarch64_feature_set aarch64_feature_the =
   AARCH64_FEATURE (THE);
 static const aarch64_feature_set aarch64_feature_d128_the =
   AARCH64_FEATURES (2, D128, THE);
-static const aarch64_feature_set aarch64_feature_b16b16_sve2 =
-  AARCH64_FEATURES (2, B16B16, SVE2);
+static const aarch64_feature_set aarch64_feature_sve_b16b16_sve2 =
+  AARCH64_FEATURES (2, SVE_B16B16, SVE2);
 static const aarch64_feature_set aarch64_feature_sme2p1 =
   AARCH64_FEATURE (SME2p1);
 static const aarch64_feature_set aarch64_feature_sve2p1 =
@@ -2921,7 +2921,7 @@ static const aarch64_feature_set aarch64_feature_sme_f16f16 =
 #define D128	  &aarch64_feature_d128
 #define THE	  &aarch64_feature_the
 #define D128_THE  &aarch64_feature_d128_the
-#define B16B16_SVE2  &aarch64_feature_b16b16_sve2
+#define B16B16_SVE2  &aarch64_feature_sve_b16b16_sve2
 #define SME2p1  &aarch64_feature_sme2p1
 #define SVE2p1  &aarch64_feature_sve2p1
 #define RCPC3	  &aarch64_feature_rcpc3
@@ -6631,16 +6631,16 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   D128_THE_INSN("rcwsswppal", 0x59e0a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
   D128_THE_INSN("rcwsswppl", 0x5960a000, 0xffe0fc00, OP3 (Rt, Rs, ADDR_SIMPLE), QL_X2NIL, 0),
 
-/* BFloat16 SVE Instructions.  */
-  B16B16_SVE2_INSNC("bfadd", 0x65008000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 2),
-  B16B16_SVE2_INSNC("bfmax", 0x65068000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 2),
-  B16B16_SVE2_INSNC("bfmaxnm", 0x65048000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 2),
-  B16B16_SVE2_INSNC("bfmin", 0x65078000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 2),
-  B16B16_SVE2_INSNC("bfminnm", 0x65058000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 2),
-  B16B16_SVE2_INSNC("bfmla", 0x65200000, 0xffe0e000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zn, SVE_Zm_16), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 0),
-  B16B16_SVE2_INSNC("bfmls", 0x65202000, 0xffe0e000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zn, SVE_Zm_16), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 0),
-  B16B16_SVE2_INSNC("bfmul", 0x65028000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 2),
-  B16B16_SVE2_INSNC("bfsub", 0x65018000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_SMSS, 0, C_SCAN_MOVPRFX, 2),
+/* SVE Z-targeting non-widening BFloat16 instructions.  */
+  B16B16_SVE2_INSNC("bfadd", 0x65008000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_HMHH, 0, C_SCAN_MOVPRFX, 2),
+  B16B16_SVE2_INSNC("bfmax", 0x65068000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_HMHH, 0, C_SCAN_MOVPRFX, 2),
+  B16B16_SVE2_INSNC("bfmaxnm", 0x65048000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_HMHH, 0, C_SCAN_MOVPRFX, 2),
+  B16B16_SVE2_INSNC("bfmin", 0x65078000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_HMHH, 0, C_SCAN_MOVPRFX, 2),
+  B16B16_SVE2_INSNC("bfminnm", 0x65058000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_HMHH, 0, C_SCAN_MOVPRFX, 2),
+  B16B16_SVE2_INSNC("bfmla", 0x65200000, 0xffe0e000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zn, SVE_Zm_16), OP_SVE_HMHH, 0, C_SCAN_MOVPRFX, 0),
+  B16B16_SVE2_INSNC("bfmls", 0x65202000, 0xffe0e000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zn, SVE_Zm_16), OP_SVE_HMHH, 0, C_SCAN_MOVPRFX, 0),
+  B16B16_SVE2_INSNC("bfmul", 0x65028000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_HMHH, 0, C_SCAN_MOVPRFX, 2),
+  B16B16_SVE2_INSNC("bfsub", 0x65018000, 0xffffe000, sve_misc, 0, OP4 (SVE_Zd, SVE_Pg3, SVE_Zd, SVE_Zm_5), OP_SVE_HMHH, 0, C_SCAN_MOVPRFX, 2),
   B16B16_SVE2_INSNC("bfclamp", 0x64202400, 0xffe0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_HHH, 0, C_SCAN_MOVPRFX, 0),
   B16B16_SVE2_INSNC("bfmla", 0x64200800, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_22_INDEX), OP_SVE_VVV_H, 0, C_SCAN_MOVPRFX, 0),
   B16B16_SVE2_INSNC("bfmls", 0x64200c00, 0xffa0fc00, sve_misc, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm3_22_INDEX), OP_SVE_VVV_H, 0, C_SCAN_MOVPRFX, 0),
