@@ -169,7 +169,7 @@ XCONCAT2 (SETMEM,mode) (SIM_CPU *cpu, IADDR pc, ADDR a, mode val) \
   XCONCAT2 (sim_core_write_unaligned_,size) (cpu, pc, write_map, a, val); \
 }
 #else
-#define DECLARE_SETMEM(mode, size) DECLARE_SETMEM_EXTERN (mode, size
+#define DECLARE_SETMEM(mode, size) DECLARE_SETMEM_EXTERN (mode, size)
 #endif
 
 DECLARE_SETMEM (SF, 4) /* TAGS: SETMEMSF */
