@@ -2134,10 +2134,13 @@ xcryptofb, 0xf30fa7e8, PadLock, NoSuf|RepPrefixOk, {}
 // Alias for xstore-rng.
 xstore, 0xfa7c0, PadLock, NoSuf|RepPrefixOk, {}
 
-// ZHAOXIN GMI instructions
+// Zhaoxin GMI instructions
 sm2, 0xf20fa6c0, GMI, NoSuf, {}
 sm3, 0xf30fa6e8, GMI, NoSuf, {}
 sm4, 0xf30fa7f0, GMI, NoSuf, {}
+
+// Zhaoxin PadLock RNG2 instruction
+xrng2, 0xf30fa7f8, PadLockRNG2, NoSuf|RepPrefixOk, {}
 
 // Multy-precision Add Carry, rdseed instructions.
 <adx:pfx, c:66, o:f3>

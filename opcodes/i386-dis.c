@@ -2952,6 +2952,7 @@ static const struct dis386 reg_table[][8] = {
     { "xcrypt-cfb",	{ { OP_0f07, 0 } }, 0 },
     { "xcrypt-ofb",	{ { OP_0f07, 0 } }, 0 },
     { PREFIX_TABLE (PREFIX_0FA7_REG_6) },
+    { "xrng2",		{ { OP_0f07, 0 } }, 0 },
   },
   /* REG_0FAE */
   {
