@@ -615,7 +615,10 @@ ldelf_search_needed (const char *path, struct dt_needed *n, int force,
       needed.name = filename;
 
       if (ldelf_try_needed (&needed, force, is_linux))
-	return true;
+	{
+	  free (filename);
+	  return true;
+	}
 
       free (filename);
 
