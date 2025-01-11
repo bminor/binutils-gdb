@@ -1458,14 +1458,12 @@ write_build_id (bfd *abfd)
     }
   i_shdr = &elf_section_data (asec->output_section)->this_hdr;
 
-  if (i_shdr->contents == NULL)
-    {
-      if (asec->contents == NULL)
-	asec->contents = (unsigned char *) xmalloc (asec->size);
-      contents = asec->contents;
-    }
-  else
+  if (i_shdr->contents != NULL)
     contents = i_shdr->contents + asec->output_offset;
+  else if (asec->contents != NULL)
+    contents = asec->contents;
+  else
+    contents = xmalloc (asec->size);
 
   e_note = (Elf_External_Note *) contents;
   size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
@@ -1485,8 +1483,11 @@ write_build_id (bfd *abfd)
 
   position = i_shdr->sh_offset + asec->output_offset;
   size = asec->size;
-  return (bfd_seek (abfd, position, SEEK_SET) == 0
-	  && bfd_write (contents, size, abfd) == size);
+  bool ret = (bfd_seek (abfd, position, SEEK_SET) == 0
+	      && bfd_write (contents, size, abfd) == size);
+  if (i_shdr->contents == NULL && asec->contents == NULL)
+    free (contents);
+  return ret;
 }
 
 /* Make .note.gnu.build-id section, and set up elf_tdata->build_id.  */
@@ -1547,14 +1548,12 @@ write_package_metadata (bfd *abfd)
     }
   i_shdr = &elf_section_data (asec->output_section)->this_hdr;
 
-  if (i_shdr->contents == NULL)
-    {
-      if (asec->contents == NULL)
-	asec->contents = (unsigned char *) xmalloc (asec->size);
-      contents = asec->contents;
-    }
-  else
+  if (i_shdr->contents != NULL)
     contents = i_shdr->contents + asec->output_offset;
+  else if (asec->contents != NULL)
+    contents = asec->contents;
+  else
+    contents = xmalloc (asec->size);
 
   e_note = (Elf_External_Note *) contents;
   size = offsetof (Elf_External_Note, name[sizeof "FDO"]);
@@ -1573,8 +1572,11 @@ write_package_metadata (bfd *abfd)
 
   position = i_shdr->sh_offset + asec->output_offset;
   size = asec->size;
-  return (bfd_seek (abfd, position, SEEK_SET) == 0
-	  && bfd_write (contents, size, abfd) == size);
+  bool ret = (bfd_seek (abfd, position, SEEK_SET) == 0
+	      && bfd_write (contents, size, abfd) == size);
+  if (i_shdr->contents == NULL && asec->contents == NULL)
+    free (contents);
+  return ret;
 }
 
 /* Make .note.package section.
