@@ -97,7 +97,8 @@ sframe_decoder_set_func_reloc_index (struct sframe_dec_info *sfd_info,
    needed for linking SEC.  Returns TRUE if setup is done successfully.  */
 
 static bool
-sframe_decoder_init_func_bfdinfo (asection *sec,
+sframe_decoder_init_func_bfdinfo (bfd *abfd,
+				  asection *sec,
 				  struct sframe_dec_info *sfd_info,
 				  struct elf_reloc_cookie *cookie)
 {
@@ -109,11 +110,9 @@ sframe_decoder_init_func_bfdinfo (asection *sec,
 
   /* Allocate and clear the memory.  */
   func_bfdinfo_size = (sizeof (struct sframe_func_bfdinfo)) * fde_count;
-  sfd_info->sfd_func_bfdinfo
-    = (struct sframe_func_bfdinfo*) bfd_malloc (func_bfdinfo_size);
+  sfd_info->sfd_func_bfdinfo = bfd_zalloc (abfd, func_bfdinfo_size);
   if (sfd_info->sfd_func_bfdinfo == NULL)
     return false;
-  memset (sfd_info->sfd_func_bfdinfo, 0, func_bfdinfo_size);
 
   /* For linker generated .sframe sections, we have no relocs.  Skip.  */
   if ((sec->flags & SEC_LINKER_CREATED) && cookie->rels == NULL)
@@ -224,7 +223,7 @@ _bfd_elf_parse_sframe (bfd *abfd,
        sframe_decode in case of error.  */
     goto fail_no_free;
 
-  if (!sframe_decoder_init_func_bfdinfo (sec, sfd_info, cookie))
+  if (!sframe_decoder_init_func_bfdinfo (abfd, sec, sfd_info, cookie))
     {
       sframe_decoder_free (&sfd_ctx);
       goto fail_no_free;
