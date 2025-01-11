@@ -3990,6 +3990,7 @@ xcoff_build_loader_section (struct xcoff_loader_info *ldinfo)
   lsec->contents = bfd_zalloc (output_bfd, lsec->size);
   if (lsec->contents == NULL)
     return false;
+  lsec->alloced = 1;
 
   /* Set up the header.  */
   bfd_xcoff_swap_ldhdr_out (output_bfd, ldhdr, lsec->contents);
@@ -4062,6 +4063,7 @@ bfd_xcoff_build_dynamic_sections (bfd *output_bfd,
       sec->contents = bfd_zalloc (output_bfd, sec->size);
       if (sec->contents == NULL)
 	return false;
+      sec->alloced = 1;
     }
   sec = xcoff_hash_table (info)->toc_section;
   if (sec->size > 0)
@@ -4069,6 +4071,7 @@ bfd_xcoff_build_dynamic_sections (bfd *output_bfd,
       sec->contents = bfd_zalloc (output_bfd, sec->size);
       if (sec->contents == NULL)
 	return false;
+      sec->alloced = 1;
     }
   sec = xcoff_hash_table (info)->descriptor_section;
   if (sec->size > 0)
@@ -4076,6 +4079,7 @@ bfd_xcoff_build_dynamic_sections (bfd *output_bfd,
       sec->contents = bfd_zalloc (output_bfd, sec->size);
       if (sec->contents == NULL)
 	return false;
+      sec->alloced = 1;
     }
 
   /* Now that we've done garbage collection, decide which symbols to keep,
@@ -4931,7 +4935,7 @@ bfd_xcoff_build_stubs (struct bfd_link_info *info)
       stub_sec->contents = bfd_zalloc (htab->params->stub_bfd, size);
       if (stub_sec->contents == NULL && size != 0)
 	return false;
-
+      stub_sec->alloced = 1;
     }
 
   /* Build the stubs as directed by the stub hash table.  */

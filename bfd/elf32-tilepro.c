@@ -2203,6 +2203,7 @@ tilepro_elf_late_size_sections (bfd *output_bfd,
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF32_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF32_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
@@ -2368,6 +2369,7 @@ tilepro_elf_late_size_sections (bfd *output_bfd,
       s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return false;
+      s->alloced = 1;
     }
 
   return _bfd_elf_add_dynamic_tags (output_bfd, info, true);

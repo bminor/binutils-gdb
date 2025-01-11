@@ -2311,6 +2311,7 @@ loongarch_elf_finish_relative_relocs (struct bfd_link_info *info)
   srelrdyn->contents = bfd_alloc (dynobj, srelrdyn->size);
   if (!srelrdyn->contents)
     return false;
+  srelrdyn->alloced = 1;
 
   bfd_vma *addr = htab->relr_sorted;
   bfd_byte *loc = srelrdyn->contents;
@@ -2385,6 +2386,7 @@ loongarch_elf_late_size_sections (bfd *output_bfd,
 	    interpreter = "/lib/ld.so.1";
 
 	  s->contents = (unsigned char *) interpreter;
+	  s->alloced = 1;
 	  s->size = strlen (interpreter) + 1;
 	}
     }
@@ -2613,6 +2615,7 @@ loongarch_elf_late_size_sections (bfd *output_bfd,
       s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return false;
+      s->alloced = 1;
     }
 
   if (elf_hash_table (info)->dynamic_sections_created)

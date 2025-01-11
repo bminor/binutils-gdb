@@ -2740,6 +2740,7 @@ elf_metag_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    abort ();
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
@@ -2884,7 +2885,8 @@ elf_metag_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       s->contents = bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return false;
-      else if (reloc_section)
+      s->alloced = 1;
+      if (reloc_section)
 	{
 	  unsigned char *contents = s->contents;
 	  Elf32_External_Rela reloc;
@@ -3964,6 +3966,7 @@ elf_metag_build_stubs (struct bfd_link_info *info)
       stub_sec->contents = bfd_zalloc (htab->stub_bfd, size);
       if (stub_sec->contents == NULL && size != 0)
 	return false;
+      stub_sec->alloced = 1;
       stub_sec->size = 0;
     }
 

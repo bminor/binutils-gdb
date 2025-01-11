@@ -2392,6 +2392,7 @@ v850_elf_make_note_section (bfd * abfd)
     return NULL;
 
   s->contents = data;
+  s->alloced = 1;
 
   /* Provide default (= uninitilaised) values for all of the notes.  */
   for (id = V850_NOTE_ALIGNMENT; id <= NUM_V850_NOTES; id++)

@@ -4850,6 +4850,7 @@ elfNN_aarch64_build_stubs (struct bfd_link_info *info)
       stub_sec->contents = bfd_zalloc (htab->stub_bfd, size);
       if (stub_sec->contents == NULL && size != 0)
 	return false;
+      stub_sec->alloced = 1;
       stub_sec->size = 0;
 
       /* Add a branch around the stub section, and a nop, to keep it 8 byte
@@ -9406,6 +9407,7 @@ elfNN_aarch64_finish_relative_relocs (struct bfd_link_info *info)
   srelrdyn->contents = bfd_alloc (dynobj, srelrdyn->size);
   if (srelrdyn->contents == NULL)
     return false;
+  srelrdyn->alloced = 1;
   bfd_vma *addr = htab->relr_sorted;
   bfd_byte *loc = srelrdyn->contents;
   for (bfd_size_type i = 0; i < htab->relr_count; )
@@ -9472,6 +9474,7 @@ elfNN_aarch64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    abort ();
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
@@ -9723,6 +9726,7 @@ elfNN_aarch64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return false;
+      s->alloced = 1;
     }
 
   if (htab->root.dynamic_sections_created)

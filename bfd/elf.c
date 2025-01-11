@@ -3885,6 +3885,7 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	  *failedptr = true;
 	  return;
 	}
+      sec->alloced = 1;
     }
 
   loc = sec->contents + sec->size;
@@ -10125,6 +10126,15 @@ _bfd_elf_free_cached_info (bfd *abfd)
       _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
       _bfd_dwarf1_cleanup_debug_info (abfd, &tdata->dwarf1_find_line_info);
       _bfd_stab_cleanup (abfd, &tdata->line_info);
+      for (asection *sec = abfd->sections; sec != NULL; sec = sec->next)
+	{
+	  _bfd_elf_munmap_section_contents (sec, sec->contents);
+	  if (!sec->alloced)
+	    {
+	      free (elf_section_data (sec)->this_hdr.contents);
+	      elf_section_data (sec)->this_hdr.contents = NULL;
+	    }
+	}
       free (tdata->symtab_hdr.contents);
       tdata->symtab_hdr.contents = NULL;
     }
@@ -14090,6 +14100,7 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	  hdr->contents = bfd_alloc (abfd, hdr->sh_size);
 	  if (hdr->contents == NULL)
 	    continue;
+	  relsec->alloced = 1;
 
 #if DEBUG_SECONDARY_RELOCS
 	  fprintf (stderr, "write %u secondary relocs for %s from %s\n",
@@ -14235,6 +14246,7 @@ elf_mmap_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **buf)
 	}
     }
 #endif
+  /* FIXME: We should not get here if sec->alloced is set.  */
   bool ret = bfd_get_full_section_contents (abfd, sec, buf);
   if (ret && sec->mmapped_p)
     *buf = sec->contents;
@@ -14262,12 +14274,21 @@ _bfd_elf_link_mmap_section_contents (bfd *abfd, sec_ptr sec,
 /* Munmap section contents.  */
 
 void
-_bfd_elf_munmap_section_contents (asection *sec ATTRIBUTE_UNUSED,
-				  void *contents)
+_bfd_elf_munmap_section_contents (asection *sec, void *contents)
 {
   /* NB: Since _bfd_elf_munmap_section_contents is called like free,
      CONTENTS may be NULL.  */
   if (contents == NULL)
+    return;
+
+  if (sec->alloced
+      /* What a tangled web we weave with section contents.
+	 FIXME: We shouldn't need to test anything but sec->alloced
+	 here, but there are cases where a buffer is allocated for a
+	 section but then another buffer is malloc'd anyway.  eg.
+	 trace through ld-elf/eh4 testcase on x86_64.  */
+      && (sec->contents == contents
+	  || elf_section_data (sec)->this_hdr.contents == contents))
     return;
 
   /* Don't leave pointers to data we are about to munmap or free.  */
@@ -14314,6 +14335,7 @@ _bfd_elf_link_munmap_section_contents (asection *sec ATTRIBUTE_UNUSED)
 	abort ();
       sec->mmapped_p = 0;
       sec->contents = NULL;
+      elf_section_data (sec)->this_hdr.contents = NULL;
       elf_section_data (sec)->contents_addr = NULL;
       elf_section_data (sec)->contents_size = 0;
     }

@@ -3010,6 +3010,7 @@ elfNN_ia64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       sec = bfd_get_linker_section (dynobj, ".interp");
       BFD_ASSERT (sec != NULL);
       sec->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
+      sec->alloced = 1;
       sec->size = strlen (ELF_DYNAMIC_INTERPRETER) + 1;
     }
 
@@ -3184,6 +3185,7 @@ elfNN_ia64_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  sec->contents = (bfd_byte *) bfd_zalloc (dynobj, sec->size);
 	  if (sec->contents == NULL && sec->size != 0)
 	    return false;
+	  sec->alloced = 1;
 	}
     }
 

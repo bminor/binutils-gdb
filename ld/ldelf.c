@@ -1857,6 +1857,7 @@ ldelf_before_allocation (char *audit, char *depaudit,
       if (default_interpreter_name != NULL)
 	{
 	  sinterp->contents = (bfd_byte *) default_interpreter_name;
+	  sinterp->alloced = 1;
 	  sinterp->size = strlen ((char *) sinterp->contents) + 1;
 	}
     }

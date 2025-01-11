@@ -872,6 +872,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 				align_size);
 
       /* Cache the section contents for elf_link_input_bfd.  */
+      sec->alloced = 1;
       elf_section_data (sec)->this_hdr.contents = contents;
 
       /* If GNU_PROPERTY_NO_COPY_ON_PROTECTED is set, protected data

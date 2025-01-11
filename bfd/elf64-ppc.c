@@ -6178,6 +6178,7 @@ sfpr_define (struct bfd_link_info *info,
 		    = bfd_alloc (htab->elf.dynobj, SFPR_MAX);
 		  if (htab->sfpr->contents == NULL)
 		    return false;
+		  htab->sfpr->alloced = 1;
 		}
 	    }
 	}
@@ -10262,6 +10263,7 @@ ppc64_elf_late_size_sections (bfd *output_bfd,
 	    abort ();
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
@@ -10547,6 +10549,7 @@ ppc64_elf_late_size_sections (bfd *output_bfd,
       s->contents = bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return false;
+      s->alloced = 1;
     }
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
@@ -10564,6 +10567,7 @@ ppc64_elf_late_size_sections (bfd *output_bfd,
 	      s->contents = bfd_zalloc (ibfd, s->size);
 	      if (s->contents == NULL)
 		return false;
+	      s->alloced = 1;
 	    }
 	}
       s = ppc64_elf_tdata (ibfd)->relgot;
@@ -10576,6 +10580,7 @@ ppc64_elf_late_size_sections (bfd *output_bfd,
 	      s->contents = bfd_zalloc (ibfd, s->size);
 	      if (s->contents == NULL)
 		return false;
+	      s->alloced = 1;
 	      relocs = true;
 	      s->reloc_count = 0;
 	    }
@@ -14416,6 +14421,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
       if (p == NULL)
 	return false;
       htab->glink_eh_frame->contents = p;
+      htab->glink_eh_frame->alloced = 1;
       last_fde = p;
       align = 4;
 
@@ -14998,6 +15004,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 					   stub_sec->size);
 	  if (stub_sec->contents == NULL)
 	    return false;
+	  stub_sec->alloced = 1;
 	  stub_sec->size = 0;
 	}
     }
@@ -15195,6 +15202,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 					 htab->brlt->size);
       if (htab->brlt->contents == NULL)
 	return false;
+      htab->brlt->alloced = 1;
     }
   if (htab->relbrlt != NULL && htab->relbrlt->size != 0)
     {
@@ -15202,6 +15210,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 					    htab->relbrlt->size);
       if (htab->relbrlt->contents == NULL)
 	return false;
+      htab->relbrlt->alloced = 1;
     }
 
   /* Build the stubs as directed by the stub hash table.  */
@@ -15294,6 +15303,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	= bfd_alloc (htab->elf.dynobj, htab->elf.srelrdyn->size);
       if (htab->elf.srelrdyn->contents == NULL)
 	return false;
+      htab->elf.srelrdyn->alloced = 1;
 
       bfd_vma *relr_addr = sort_relr (htab);
       if (htab->relr_count != 0 && relr_addr == NULL)

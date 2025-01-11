@@ -1929,6 +1929,7 @@ lm32_elf_late_size_sections (bfd *output_bfd,
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
@@ -2054,6 +2055,7 @@ lm32_elf_late_size_sections (bfd *output_bfd,
       s->contents = bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return false;
+      s->alloced = 1;
     }
 
   if (!_bfd_elf_add_dynamic_tags (output_bfd, info, relocs))
@@ -2182,6 +2184,7 @@ lm32_elf_late_size_sections (bfd *output_bfd,
 	     bfd_zalloc (dynobj, lm32fdpic_fixup32_section (info)->size);
 	  if (lm32fdpic_fixup32_section (info)->contents == NULL)
 	    return false;
+	  lm32fdpic_fixup32_section (info)->alloced = 1;
 	}
     }
 

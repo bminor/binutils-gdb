@@ -3928,6 +3928,7 @@ _bfinfdpic_size_got_plt (bfd *output_bfd,
 				 bfinfdpic_got_section (info)->size);
       if (bfinfdpic_got_section (info)->contents == NULL)
 	return false;
+      bfinfdpic_got_section (info)->alloced = 1;
     }
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -3947,6 +3948,7 @@ _bfinfdpic_size_got_plt (bfd *output_bfd,
 				 bfinfdpic_gotrel_section (info)->size);
       if (bfinfdpic_gotrel_section (info)->contents == NULL)
 	return false;
+      bfinfdpic_gotrel_section (info)->alloced = 1;
     }
 
   bfinfdpic_gotfixup_section (info)->size = (gpinfop->g.fixups + 1) * 4;
@@ -3959,6 +3961,7 @@ _bfinfdpic_size_got_plt (bfd *output_bfd,
 				 bfinfdpic_gotfixup_section (info)->size);
       if (bfinfdpic_gotfixup_section (info)->contents == NULL)
 	return false;
+      bfinfdpic_gotfixup_section (info)->alloced = 1;
     }
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -3973,6 +3976,7 @@ _bfinfdpic_size_got_plt (bfd *output_bfd,
 				 bfinfdpic_pltrel_section (info)->size);
       if (bfinfdpic_pltrel_section (info)->contents == NULL)
 	return false;
+      bfinfdpic_pltrel_section (info)->alloced = 1;
     }
 
   /* Add 4 bytes for every block of at most 65535 lazy PLT entries,
@@ -4018,6 +4022,7 @@ _bfinfdpic_size_got_plt (bfd *output_bfd,
 				 bfinfdpic_plt_section (info)->size);
       if (bfinfdpic_plt_section (info)->contents == NULL)
 	return false;
+      bfinfdpic_plt_section (info)->alloced = 1;
     }
 
   return true;
@@ -4048,6 +4053,7 @@ elf32_bfinfdpic_late_size_sections (bfd *output_bfd,
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
@@ -5142,6 +5148,7 @@ bfin_late_size_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
   else
@@ -5229,6 +5236,7 @@ bfin_late_size_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
       s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL && s->size != 0)
 	return false;
+      s->alloced = 1;
     }
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -5309,6 +5317,7 @@ bfd_bfin_elf32_create_embedded_relocs (bfd *abfd,
   relsec->contents = (bfd_byte *) bfd_alloc (abfd, amt);
   if (relsec->contents == NULL)
     goto error_return;
+  relsec->alloced = 1;
 
   p = relsec->contents;
 

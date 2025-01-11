@@ -3175,6 +3175,7 @@ elf32_tic6x_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 	    abort ();
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
@@ -3319,6 +3320,7 @@ elf32_tic6x_late_size_sections (bfd *output_bfd, struct bfd_link_info *info)
       s->contents = bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return false;
+      s->alloced = 1;
     }
 
   if (htab->elf.dynamic_sections_created)

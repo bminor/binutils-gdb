@@ -10001,6 +10001,7 @@ _bfd_mips_elf_late_size_sections (bfd *output_bfd,
 	    = strlen (ELF_DYNAMIC_INTERPRETER (output_bfd)) + 1;
 	  s->contents
 	    = (bfd_byte *) ELF_DYNAMIC_INTERPRETER (output_bfd);
+	  s->alloced = 1;
 	}
 
       /* Figure out the size of the PLT header if we know that we
@@ -10177,6 +10178,7 @@ _bfd_mips_elf_late_size_sections (bfd *output_bfd,
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
+      s->alloced = 1;
     }
 
   if (htab->root.dynamic_sections_created)
@@ -15405,6 +15407,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	  o->size = c * sizeof (Elf32_External_gptab);
 	  o->contents = (bfd_byte *) ext_tab;
+	  o->alloced = 1;
 
 	  /* Skip this section later on (I don't think this currently
 	     matters, but someday it might).  */

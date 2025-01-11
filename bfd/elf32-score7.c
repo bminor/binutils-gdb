@@ -3056,6 +3056,7 @@ s7_bfd_score_elf_late_size_sections (bfd *output_bfd, struct bfd_link_info *info
 	  BFD_ASSERT (s != NULL);
 	  s->size = strlen (ELF_DYNAMIC_INTERPRETER) + 1;
 	  s->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
@@ -3138,6 +3139,7 @@ s7_bfd_score_elf_late_size_sections (bfd *output_bfd, struct bfd_link_info *info
 	  bfd_set_error (bfd_error_no_memory);
 	  return false;
 	}
+      s->alloced = 1;
     }
 
   if (elf_hash_table (info)->dynamic_sections_created)

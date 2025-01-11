@@ -1809,6 +1809,7 @@ bfd_arm_allocate_interworking_sections (struct bfd_link_info * info)
 
       s->size = globals->arm_glue_size;
       s->contents = foo;
+      s->alloced = 1;
     }
 
   if (globals->thumb_glue_size != 0)
@@ -1824,6 +1825,7 @@ bfd_arm_allocate_interworking_sections (struct bfd_link_info * info)
 
       s->size = globals->thumb_glue_size;
       s->contents = foo;
+      s->alloced = 1;
     }
 
   return true;

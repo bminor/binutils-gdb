@@ -610,6 +610,7 @@ spu_elf_create_sections (struct bfd_link_info *info)
       memcpy (data + 12 + ((sizeof (SPU_PLUGIN_NAME) + 3) & -4),
 	      bfd_get_filename (info->output_bfd), name_len);
       s->contents = data;
+      s->alloced = 1;
     }
 
   if (htab->params->emit_fixups)
@@ -1965,6 +1966,7 @@ spu_elf_build_stubs (struct bfd_link_info *info)
 						      htab->stub_sec[i]->size);
 	    if (htab->stub_sec[i]->contents == NULL)
 	      return false;
+	    htab->stub_sec[i]->alloced = 1;
 	    htab->stub_sec[i]->rawsize = htab->stub_sec[i]->size;
 	    htab->stub_sec[i]->size = 0;
 	  }
@@ -1999,6 +2001,7 @@ spu_elf_build_stubs (struct bfd_link_info *info)
   htab->ovtab->contents = bfd_zalloc (htab->ovtab->owner, htab->ovtab->size);
   if (htab->ovtab->contents == NULL)
     return false;
+  htab->ovtab->alloced = 1;
 
   p = htab->ovtab->contents;
   if (htab->params->ovly_flavour == ovly_soft_icache)
@@ -2100,6 +2103,7 @@ spu_elf_build_stubs (struct bfd_link_info *info)
 					     htab->init->size);
 	  if (htab->init->contents == NULL)
 	    return false;
+	  htab->init->alloced = 1;
 
 	  h = define_ovtab_symbol (htab, "__icache_fileoff");
 	  if (h == NULL)
@@ -5502,6 +5506,7 @@ spu_elf_size_sections (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
       sfixup->contents = (bfd_byte *) bfd_zalloc (info->input_bfds, size);
       if (sfixup->contents == NULL)
 	return false;
+      sfixup->alloced = 1;
     }
   return true;
 }

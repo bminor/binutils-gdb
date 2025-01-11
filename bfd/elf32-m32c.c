@@ -792,6 +792,7 @@ m32c_elf_early_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   splt->contents = (bfd_byte *) bfd_zalloc (dynobj, splt->size);
   if (splt->contents == NULL)
     return false;
+  splt->alloced = 1;
 
   return true;
 }

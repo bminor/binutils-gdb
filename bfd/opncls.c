@@ -148,18 +148,6 @@ _bfd_new_bfd_contained_in (bfd *obfd)
 static void
 _bfd_delete_bfd (bfd *abfd)
 {
-#ifdef USE_MMAP
-  if (abfd->xvec
-      && abfd->xvec->flavour == bfd_target_elf_flavour)
-    {
-      asection *sec;
-      for (sec = abfd->sections; sec != NULL; sec = sec->next)
-	if (sec->mmapped_p)
-	  munmap (elf_section_data (sec)->contents_addr,
-		  elf_section_data (sec)->contents_size);
-    }
-#endif
-
   /* Give the target _bfd_free_cached_info a chance to free memory.  */
   if (abfd->memory && abfd->xvec)
     bfd_free_cached_info (abfd);

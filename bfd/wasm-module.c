@@ -468,6 +468,7 @@ wasm_scan (bfd *abfd)
 						  bfdsec->size);
 	  if (!bfdsec->contents)
 	    goto error_return;
+	  bfdsec->alloced = 1;
 	}
 
       vma += bfdsec->size;

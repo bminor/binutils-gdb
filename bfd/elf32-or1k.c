@@ -3069,6 +3069,7 @@ or1k_elf_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
@@ -3204,9 +3205,9 @@ or1k_elf_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 but this way if it does, we get a R_OR1K_NONE reloc instead
 	 of garbage.  */
       s->contents = bfd_zalloc (dynobj, s->size);
-
       if (s->contents == NULL)
 	return false;
+      s->alloced = 1;
     }
 
   return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs);

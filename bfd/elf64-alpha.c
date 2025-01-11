@@ -2586,6 +2586,7 @@ elf64_alpha_early_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  s->contents = (bfd_byte *) bfd_zalloc (i, s->size);
 	  if (s->contents == NULL)
 	    return false;
+	  s->alloced = 1;
 	}
     }
 
@@ -2812,6 +2813,7 @@ elf64_alpha_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
 
       /* Now that we've seen all of the input files, we can decide which
@@ -2882,6 +2884,7 @@ elf64_alpha_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
 	  if (s->contents == NULL)
 	    return false;
+	  s->alloced = 1;
 	}
     }
 

@@ -422,8 +422,11 @@ CODE_FRAGMENT
 .  {* Nonzero if this section uses RELA relocations, rather than REL.  *}
 .  unsigned int use_rela_p:1;
 .
-.  {* Nonzero if this section contents are mmapped, rather than malloced.  *}
+.  {* Nonzero if section contents are mmapped.  *}
 .  unsigned int mmapped_p:1;
+.
+.  {* Nonzero if section contents should not be freed.  *}
+.  unsigned int alloced:1;
 .
 .  {* Bits used by various backends.  The generic code doesn't touch
 .     these fields.  *}
@@ -716,8 +719,8 @@ EXTERNAL
 .  {* linker_mark, linker_has_input, gc_mark, decompress_status,     *}	\
 .     0,           0,                1,       0,			\
 .									\
-.  {* segment_mark, sec_info_type, use_rela_p, mmapped_p,           *}	\
-.     0,            0,             0,	       0,			\
+.  {* segment_mark, sec_info_type, use_rela_p, mmapped_p, alloced,   *}	\
+.     0,            0,             0,          0,         0,		\
 .									\
 .  {* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,    *}	\
 .     0,        0,        0,        0,        0,        0,		\
@@ -1656,6 +1659,10 @@ DESCRIPTION
 bool
 bfd_malloc_and_get_section (bfd *abfd, sec_ptr sec, bfd_byte **buf)
 {
+  /* FIXME: We sometimes get here when sec->alloced is set.
+     arm, aarch64, and xtensa targets all abort on some ld tests
+     if we also test sec->alloced here.  We really should not ever be
+     mallocing a buffer if we already have an alloced one.  */
   if (sec->mmapped_p)
     abort ();
   *buf = NULL;

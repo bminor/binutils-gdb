@@ -2385,6 +2385,7 @@ _bfd_mmix_after_linker_allocation (bfd *abfd ATTRIBUTE_UNUSED,
     = contents = bfd_alloc (bpo_greg_owner, bpo_gregs_section->size);
   if (contents == NULL)
     return false;
+  bpo_gregs_section->alloced = 1;
 
   /* Sanity check: If these numbers mismatch, some relocation has not been
      accounted for and the rest of gregdata is probably inconsistent.

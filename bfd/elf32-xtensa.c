@@ -1593,6 +1593,7 @@ elf_xtensa_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    abort ();
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
 
       /* Allocate room for one word in ".got".  */
@@ -1731,6 +1732,7 @@ elf_xtensa_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
 	  if (s->contents == NULL)
 	    return false;
+	  s->alloced = 1;
 	}
     }
 

@@ -5313,6 +5313,7 @@ _frvfdpic_size_got_plt (bfd *output_bfd,
 				 frvfdpic_got_section (info)->size);
       if (frvfdpic_got_section (info)->contents == NULL)
 	return false;
+      frvfdpic_got_section (info)->alloced = 1;
     }
 
   if (frvfdpic_gotrel_section (info))
@@ -5332,6 +5333,7 @@ _frvfdpic_size_got_plt (bfd *output_bfd,
 				 frvfdpic_gotrel_section (info)->size);
       if (frvfdpic_gotrel_section (info)->contents == NULL)
 	return false;
+      frvfdpic_gotrel_section (info)->alloced = 1;
     }
 
   frvfdpic_gotfixup_section (info)->size = (gpinfop->g.fixups + 1) * 4;
@@ -5344,6 +5346,7 @@ _frvfdpic_size_got_plt (bfd *output_bfd,
 				 frvfdpic_gotfixup_section (info)->size);
       if (frvfdpic_gotfixup_section (info)->contents == NULL)
 	return false;
+      frvfdpic_gotfixup_section (info)->alloced = 1;
     }
 
   if (frvfdpic_pltrel_section (info))
@@ -5360,6 +5363,7 @@ _frvfdpic_size_got_plt (bfd *output_bfd,
 				     frvfdpic_pltrel_section (info)->size);
 	  if (frvfdpic_pltrel_section (info)->contents == NULL)
 	    return false;
+	  frvfdpic_pltrel_section (info)->alloced = 1;
 	}
     }
 
@@ -5413,6 +5417,7 @@ _frvfdpic_size_got_plt (bfd *output_bfd,
 				     frvfdpic_plt_section (info)->size);
 	  if (frvfdpic_plt_section (info)->contents == NULL)
 	    return false;
+	  frvfdpic_plt_section (info)->alloced = 1;
 	}
     }
 
@@ -5442,6 +5447,7 @@ elf32_frvfdpic_late_size_sections (bfd *output_bfd,
 	  BFD_ASSERT (s != NULL);
 	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (bfd_byte *) ELF_DYNAMIC_INTERPRETER;
+	  s->alloced = 1;
 	}
     }
 
