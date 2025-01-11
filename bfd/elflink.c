@@ -13829,7 +13829,7 @@ init_reloc_cookie (struct elf_reloc_cookie *cookie,
 	{
 	  symtab_hdr->contents = (bfd_byte *) cookie->locsyms;
 	  info->cache_size += (cookie->locsymcount
-			       * sizeof (Elf_External_Sym_Shndx));
+			       * sizeof (Elf_Internal_Sym));
 	}
     }
   return true;

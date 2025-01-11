@@ -8684,7 +8684,7 @@ swap_out_syms (bfd *abfd,
     }
 
   if (_bfd_mul_overflow (symcount + 1, bed->s->sizeof_sym, &amt)
-      || (outbound_syms = (bfd_byte *) bfd_alloc (abfd, amt)) == NULL)
+      || (outbound_syms = bfd_malloc (amt)) == NULL)
     {
     error_no_mem:
       bfd_set_error (bfd_error_no_memory);
@@ -10125,6 +10125,8 @@ _bfd_elf_free_cached_info (bfd *abfd)
       _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
       _bfd_dwarf1_cleanup_debug_info (abfd, &tdata->dwarf1_find_line_info);
       _bfd_stab_cleanup (abfd, &tdata->line_info);
+      free (tdata->symtab_hdr.contents);
+      tdata->symtab_hdr.contents = NULL;
     }
 
   return _bfd_generic_bfd_free_cached_info (abfd);
