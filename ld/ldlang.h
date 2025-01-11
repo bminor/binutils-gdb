@@ -664,6 +664,10 @@ extern void lang_for_each_statement_worker
   (void (*) (lang_statement_union_type *), lang_statement_union_type *);
 extern void *stat_alloc
   (size_t);
+extern void * stat_memdup
+  (const void *, size_t, size_t);
+extern char *stat_strdup
+  (const char *);
 extern void strip_excluded_output_sections
   (void);
 extern void lang_clear_os_map

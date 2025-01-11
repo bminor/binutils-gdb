@@ -1989,16 +1989,6 @@ parse_args (unsigned argc, char **argv)
 	  if (opt_dynamic_list != dynamic_list_data)
 	    opt_dynamic_list = dynamic_list;
 	}
-      else
-	{
-	  /* Free the export list.  */
-	  for (; head->next != NULL; head = next)
-	    {
-	      next = head->next;
-	      free (head);
-	    }
-	  free (export_list);
-	}
     }
 
   switch (opt_dynamic_list)
@@ -2022,17 +2012,7 @@ parse_args (unsigned argc, char **argv)
 	break;
       case symbolic:
 	link_info.symbolic = true;
-	if (link_info.dynamic_list)
-	  {
-	    struct bfd_elf_version_expr *ent, *next;
-	    for (ent = link_info.dynamic_list->head.list; ent; ent = next)
-	      {
-		next = ent->next;
-		free (ent);
-	      }
-	    free (link_info.dynamic_list);
-	    link_info.dynamic_list = NULL;
-	  }
+	link_info.dynamic_list = NULL;
 	break;
       case symbolic_functions:
 	link_info.dynamic = true;

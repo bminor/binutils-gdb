@@ -1630,7 +1630,7 @@ exp_get_fill (etree_type *tree, fill_type *def, char *name)
     {
       unsigned char *dst;
       unsigned char *s;
-      fill = (fill_type *) xmalloc ((len + 1) / 2 + sizeof (*fill) - 1);
+      fill = stat_alloc ((len + 1) / 2 + sizeof (*fill) - 1);
       fill->size = (len + 1) / 2;
       dst = fill->data;
       s = (unsigned char *) expld.result.str;
@@ -1655,7 +1655,7 @@ exp_get_fill (etree_type *tree, fill_type *def, char *name)
     }
   else
     {
-      fill = (fill_type *) xmalloc (4 + sizeof (*fill) - 1);
+      fill = stat_alloc (4 + sizeof (*fill) - 1);
       val = expld.result.value;
       fill->data[0] = (val >> 24) & 0xff;
       fill->data[1] = (val >> 16) & 0xff;

@@ -543,7 +543,7 @@ section_name_spec:
 sect_flag_list:	NAME
 			{
 			  struct flag_info_list *n;
-			  n = ((struct flag_info_list *) xmalloc (sizeof *n));
+			  n = stat_alloc (sizeof *n);
 			  if ($1[0] == '!')
 			    {
 			      n->with = without_flags;
@@ -561,7 +561,7 @@ sect_flag_list:	NAME
 	|	sect_flag_list '&' NAME
 			{
 			  struct flag_info_list *n;
-			  n = ((struct flag_info_list *) xmalloc (sizeof *n));
+			  n = stat_alloc (sizeof *n);
 			  if ($3[0] == '!')
 			    {
 			      n->with = without_flags;
@@ -582,7 +582,7 @@ sect_flags:
 		INPUT_SECTION_FLAGS '(' sect_flag_list ')'
 			{
 			  struct flag_info *n;
-			  n = ((struct flag_info *) xmalloc (sizeof *n));
+			  n = stat_alloc (sizeof *n);
 			  n->flag_list = $3;
 			  n->flags_initialized = false;
 			  n->not_with_flags = 0;
@@ -595,7 +595,7 @@ exclude_name_list:
 		exclude_name_list wildcard_name
 			{
 			  struct name_list *tmp;
-			  tmp = (struct name_list *) xmalloc (sizeof *tmp);
+			  tmp = stat_alloc (sizeof *tmp);
 			  tmp->name = $2;
 			  tmp->next = $1;
 			  $$ = tmp;
@@ -604,7 +604,7 @@ exclude_name_list:
 		wildcard_name
 			{
 			  struct name_list *tmp;
-			  tmp = (struct name_list *) xmalloc (sizeof *tmp);
+			  tmp = stat_alloc (sizeof *tmp);
 			  tmp->name = $1;
 			  tmp->next = NULL;
 			  $$ = tmp;
@@ -615,7 +615,7 @@ section_name_list:
 		section_name_list opt_comma section_name_spec
 			{
 			  struct wildcard_list *tmp;
-			  tmp = (struct wildcard_list *) xmalloc (sizeof *tmp);
+			  tmp = stat_alloc (sizeof *tmp);
 			  tmp->next = $1;
 			  tmp->spec = $3;
 			  $$ = tmp;
@@ -624,7 +624,7 @@ section_name_list:
 		section_name_spec
 			{
 			  struct wildcard_list *tmp;
-			  tmp = (struct wildcard_list *) xmalloc (sizeof *tmp);
+			  tmp = stat_alloc (sizeof *tmp);
 			  tmp->next = NULL;
 			  tmp->spec = $1;
 			  $$ = tmp;
@@ -926,7 +926,7 @@ nocrossref_list:
 		{
 		  struct lang_nocrossref *n;
 
-		  n = (struct lang_nocrossref *) xmalloc (sizeof *n);
+		  n = stat_alloc (sizeof *n);
 		  n->name = $1;
 		  n->next = $2;
 		  $$ = n;
@@ -935,7 +935,7 @@ nocrossref_list:
 		{
 		  struct lang_nocrossref *n;
 
-		  n = (struct lang_nocrossref *) xmalloc (sizeof *n);
+		  n = stat_alloc (sizeof *n);
 		  n->name = $1;
 		  n->next = $3;
 		  $$ = n;
@@ -1225,8 +1225,7 @@ phdr_opt:
 		{
 		  struct lang_output_section_phdr_list *n;
 
-		  n = ((struct lang_output_section_phdr_list *)
-		       xmalloc (sizeof *n));
+		  n = stat_alloc (sizeof *n);
 		  n->name = $3;
 		  n->used = false;
 		  n->next = $1;

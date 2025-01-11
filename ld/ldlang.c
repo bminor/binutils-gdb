@@ -188,6 +188,23 @@ stat_alloc (size_t size)
   return obstack_alloc (&stat_obstack, size);
 }
 
+void *
+stat_memdup (const void *src, size_t copy_size, size_t alloc_size)
+{
+  void *ret = obstack_alloc (&stat_obstack, alloc_size);
+  memcpy (ret, src, copy_size);
+  if (alloc_size > copy_size)
+    memset ((char *) ret + copy_size, 0, alloc_size - copy_size);
+  return ret;
+}
+
+char *
+stat_strdup (const char *str)
+{
+  size_t len = strlen (str) + 1;
+  return stat_memdup (str, len, len);
+}
+
 /* Code for handling simple wildcards without going through fnmatch,
    which can be expensive because of charset translations etc.  */
 
@@ -277,15 +294,13 @@ static char *
 ldirname (const char *name)
 {
   const char *base = lbasename (name);
-  char *dirname;
 
   while (base > name && IS_DIR_SEPARATOR (base[-1]))
     --base;
-  if (base == name)
-    return strdup (".");
-  dirname = strdup (name);
-  dirname[base - name] = '\0';
-  return dirname;
+  size_t len = base - name;
+  if (len == 0)
+    return ".";
+  return stat_memdup (name, len, len + 1);
 }
 
 /* If PATTERN is of the form archive:file, return a pointer to the
@@ -733,7 +748,7 @@ output_section_callback_sort (lang_wild_statement_type *ptr,
   if (wont_add_section_p (section, os))
     return;
 
-  node = (lang_section_bst_type *) xmalloc (sizeof (lang_section_bst_type));
+  node = stat_alloc (sizeof (*node));
   node->left = 0;
   node->right = 0;
   node->section = section;
@@ -764,8 +779,6 @@ output_section_callback_tree_to_list (lang_wild_statement_type *ptr,
 
   if (tree->right)
     output_section_callback_tree_to_list (ptr, tree->right, output);
-
-  free (tree);
 }
 
 
@@ -1454,7 +1467,7 @@ lang_memory_region_lookup (const char *const name, bool create)
 
   new_region = stat_alloc (sizeof (lang_memory_region_type));
 
-  new_region->name_list.name = xstrdup (name);
+  new_region->name_list.name = stat_strdup (name);
   new_region->name_list.next = NULL;
   new_region->next = NULL;
   new_region->origin_exp = NULL;
@@ -1509,7 +1522,7 @@ lang_memory_region_alias (const char *alias, const char *region_name)
 
   /* Add alias to region name list.  */
   n = stat_alloc (sizeof (lang_memory_region_name));
-  n->name = xstrdup (alias);
+  n->name = stat_strdup (alias);
   n->next = region->name_list.next;
   region->name_list.next = n;
 }
@@ -2989,11 +3002,9 @@ add_excluded_libs (const char *list)
       end = strpbrk (p, ",:");
       if (end == NULL)
 	end = p + strlen (p);
-      entry = (struct excluded_lib *) xmalloc (sizeof (*entry));
+      entry = stat_alloc (sizeof (*entry));
       entry->next = excluded_libs;
-      entry->name = (char *) xmalloc (end - p + 1);
-      memcpy (entry->name, p, end - p);
-      entry->name[end - p] = '\0';
+      entry->name = stat_memdup (p, end - p, end - p + 1);
       excluded_libs = entry;
       if (*end == '\0')
 	break;
@@ -4017,7 +4028,7 @@ ldlang_add_undef (const char *const name, bool cmdline ATTRIBUTE_UNUSED)
   new_undef->next = ldlang_undef_chain_list_head;
   ldlang_undef_chain_list_head = new_undef;
 
-  new_undef->name = xstrdup (name);
+  new_undef->name = stat_strdup (name);
 
   if (link_info.output_bfd != NULL)
     insert_undefined (new_undef->name);
@@ -4096,7 +4107,7 @@ ldlang_add_require_defined (const char *const name)
   ldlang_add_undef (name, true);
   ptr = stat_alloc (sizeof (*ptr));
   ptr->next = require_defined_symbol_list;
-  ptr->name = strdup (name);
+  ptr->name = stat_strdup (name);
   require_defined_symbol_list = ptr;
 }
 
@@ -9183,7 +9194,7 @@ lang_add_nocrossref (lang_nocrossref_type *l)
 {
   struct lang_nocrossrefs *n;
 
-  n = (struct lang_nocrossrefs *) xmalloc (sizeof *n);
+  n = stat_alloc (sizeof *n);
   n->next = nocrossref_list;
   n->list = l;
   n->onlyfirst = false;
@@ -9366,7 +9377,7 @@ lang_leave_overlay (etree_type *lma_expr,
 	{
 	  lang_nocrossref_type *nc;
 
-	  nc = (lang_nocrossref_type *) xmalloc (sizeof *nc);
+	  nc = stat_alloc (sizeof *nc);
 	  nc->name = l->os->name;
 	  nc->next = nocrossref;
 	  nocrossref = nc;
@@ -9546,13 +9557,10 @@ realsymbol (const char *pattern)
   if (changed)
     {
       *s = '\0';
-      return symbol;
+      pattern = stat_strdup (symbol);
     }
-  else
-    {
-      free (symbol);
-      return pattern;
-    }
+  free (symbol);
+  return pattern;
 }
 
 /* This is called for each variable name or match expression.  NEW_NAME is
@@ -9567,7 +9575,7 @@ lang_new_vers_pattern (struct bfd_elf_version_expr *orig,
 {
   struct bfd_elf_version_expr *ret;
 
-  ret = (struct bfd_elf_version_expr *) xmalloc (sizeof *ret);
+  ret = stat_alloc (sizeof *ret);
   ret->next = orig;
   ret->symver = 0;
   ret->script = 0;
@@ -9604,7 +9612,8 @@ lang_new_vers_node (struct bfd_elf_version_expr *globals,
 {
   struct bfd_elf_version_tree *ret;
 
-  ret = (struct bfd_elf_version_tree *) xcalloc (1, sizeof *ret);
+  ret = stat_alloc (sizeof (*ret));
+  memset (ret, 0, sizeof (*ret));
   ret->globals.list = globals;
   ret->locals.list = locals;
   ret->match = lang_vers_match;
@@ -9686,15 +9695,7 @@ lang_finalize_version_expr_head (struct bfd_elf_version_expr_head *head)
 		    }
 		  while (e1 && strcmp (e1->pattern, e->pattern) == 0);
 
-		  if (last == NULL)
-		    {
-		      /* This is a duplicate.  */
-		      /* FIXME: Memory leak.  Sometimes pattern is not
-			 xmalloced alone, but in larger chunk of memory.  */
-		      /* free (e->pattern); */
-		      free (e);
-		    }
-		  else
+		  if (last != NULL)
 		    {
 		      e->next = last->next;
 		      last->next = e;
@@ -9734,7 +9735,6 @@ lang_register_vers_node (const char *name,
     {
       einfo (_("%X%P: anonymous version tag cannot be combined"
 	       " with other version tags\n"));
-      free (version);
       return;
     }
 
@@ -9827,7 +9827,7 @@ lang_add_vers_depend (struct bfd_elf_version_deps *list, const char *name)
   struct bfd_elf_version_deps *ret;
   struct bfd_elf_version_tree *t;
 
-  ret = (struct bfd_elf_version_deps *) xmalloc (sizeof *ret);
+  ret = stat_alloc (sizeof *ret);
   ret->next = list;
 
   for (t = link_info.version_info; t != NULL; t = t->next)
@@ -9860,7 +9860,7 @@ lang_do_version_exports_section (void)
 	continue;
 
       len = sec->size;
-      contents = (char *) xmalloc (len);
+      contents = stat_alloc (len);
       if (!bfd_get_section_contents (is->the_bfd, sec, contents, 0, len))
 	einfo (_("%X%P: unable to read .exports section contents\n"), sec);
 
@@ -9870,8 +9870,6 @@ lang_do_version_exports_section (void)
 	  greg = lang_new_vers_pattern (greg, p, NULL, false);
 	  p = strchr (p, '\0') + 1;
 	}
-
-      /* Do not free the contents, as we used them creating the regex.  */
 
       /* Do not include this section in the link.  */
       sec->flags |= SEC_EXCLUDE | SEC_KEEP;
@@ -9936,8 +9934,8 @@ lang_add_unique (const char *name)
     if (strcmp (ent->name, name) == 0)
       return;
 
-  ent = (struct unique_sections *) xmalloc (sizeof *ent);
-  ent->name = xstrdup (name);
+  ent = stat_alloc (sizeof *ent);
+  ent->name = stat_strdup (name);
   ent->next = unique_section_list;
   unique_section_list = ent;
 }
@@ -9960,7 +9958,8 @@ lang_append_dynamic_list (struct bfd_elf_dynamic_list **list_p,
     {
       struct bfd_elf_dynamic_list *d;
 
-      d = (struct bfd_elf_dynamic_list *) xcalloc (1, sizeof *d);
+      d = stat_alloc (sizeof (*d));
+      memset (d, 0, sizeof (*d));
       d->head.list = dynamic;
       d->match = lang_vers_match;
       *list_p = d;

@@ -438,18 +438,11 @@ ldfile_try_open_bfd (const char *attempt,
 			  if (token == ',')
 			    {
 			      if ((token = yylex ()) != NAME)
-				{
-				  free (arg1);
-				  continue;
-				}
+				continue;
 			      arg2 = yylval.name;
 			      if ((token = yylex ()) != ','
 				  || (token = yylex ()) != NAME)
-				{
-				  free (arg1);
-				  free (arg2);
-				  continue;
-				}
+				continue;
 			      arg3 = yylval.name;
 			      token = yylex ();
 			    }
@@ -468,18 +461,12 @@ ldfile_try_open_bfd (const char *attempt,
 			      if (strcmp (arg, lang_get_output_target ()) != 0)
 				skip = 1;
 			    }
-			  free (arg1);
-			  free (arg2);
-			  free (arg3);
 			  break;
 			case NAME:
 			case LNAME:
 			case VERS_IDENTIFIER:
 			case VERS_TAG:
-			  free (yylval.name);
-			  break;
 			case INT:
-			  free (yylval.bigint.str);
 			  break;
 			}
 		      token = yylex ();

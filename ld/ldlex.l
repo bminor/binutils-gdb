@@ -188,7 +188,8 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 					   && (yytext[1] == 'x'
 					       || yytext[1] == 'X'))
 				    {
-				      yylval.bigint.str = xstrdup (yytext + 2);
+				      yylval.bigint.str
+					= stat_strdup (yytext + 2);
 				    }
 				  return INT;
 				}
@@ -391,32 +392,32 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 
 <MRI>{FILENAMECHAR1}{NOCFILENAMECHAR}*	{
 /* Filename without commas, needed to parse mri stuff */
-				  yylval.name = xstrdup (yytext);
+				  yylval.name = stat_strdup (yytext);
 				  return NAME;
 				}
 
 
 <SCRIPT,INPUTLIST>{FILENAMECHAR1}{FILENAMECHAR}*	{
-				  yylval.name = xstrdup (yytext);
+				  yylval.name = stat_strdup (yytext);
 				  return NAME;
 				}
 <INPUTLIST>"="{FILENAMECHAR1}{FILENAMECHAR}*	{
 /* Filename to be prefixed by --sysroot or when non-sysrooted, nothing.  */
-				  yylval.name = xstrdup (yytext);
+				  yylval.name = stat_strdup (yytext);
 				  return NAME;
 				}
 <INPUTLIST>"-l"{FILENAMECHAR}+ {
-				  yylval.name = xstrdup (yytext + 2);
+				  yylval.name = stat_strdup (yytext + 2);
 				  return LNAME;
 				}
 <EXPRESSION>{SYMBOLNAMECHAR1}{SYMBOLNAMECHAR}* {
-				  yylval.name = xstrdup (yytext);
+				  yylval.name = stat_strdup (yytext);
 				  return NAME;
 				}
   /* The following rule is to prevent a fill expression on the output
      section before /DISCARD/ interpreting the '/' as a divide.  */
 <EXPRESSION>"/DISCARD/"		{
-				  yylval.name = xstrdup (yytext);
+				  yylval.name = stat_strdup (yytext);
 				  return NAME;
 				}
 <WILD>{WILDCHAR}* {
@@ -431,14 +432,14 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 		  }
 		else
 		  {
-		    yylval.name = xstrdup (yytext);
+		    yylval.name = stat_strdup (yytext);
 		    return NAME;
 		  }
 	}
 
 <SCRIPT,EXPRESSION,WILD,VERS_NODE,INPUTLIST>"\""[^\"]*"\"" {
 		/* No matter the state, quotes give what's inside.  */
-		yylval.name = xmemdup (yytext + 1, yyleng - 2, yyleng - 1);
+		yylval.name = stat_memdup (yytext + 1, yyleng - 2, yyleng - 1);
 		return NAME;
 	}
 
@@ -457,10 +458,10 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 
 <VERS_NODE>extern		{ RTOKEN(EXTERN); }
 
-<VERS_NODE>{V_IDENTIFIER}	{ yylval.name = xstrdup (yytext);
+<VERS_NODE>{V_IDENTIFIER}	{ yylval.name = stat_strdup (yytext);
 				  return VERS_IDENTIFIER; }
 
-<VERS_SCRIPT>{V_TAG}		{ yylval.name = xstrdup (yytext);
+<VERS_SCRIPT>{V_TAG}		{ yylval.name = stat_strdup (yytext);
 				  return VERS_TAG; }
 
 <VERS_START>"{"			{ BEGIN(VERS_SCRIPT); return *yytext; }
