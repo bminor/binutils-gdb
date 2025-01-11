@@ -1378,9 +1378,8 @@ struct decode_line_2_item
   /* The form using symtab_to_filename_for_display.  */
   std::string displayform;
 
-  /* Field is initialized to zero and it is set to one if the user
-     requested breakpoint for this entry.  */
-  unsigned int selected : 1;
+  /* True if the user requested breakpoint for this entry.  */
+  bool selected;
 };
 
 /* Handle multiple results in RESULT depending on SELECT_MODE.  This
@@ -1495,7 +1494,7 @@ decode_line_2 (struct linespec_state *self,
 	  if (!item->selected)
 	    {
 	      filters.push_back (item->fullform.c_str ());
-	      item->selected = 1;
+	      item->selected = true;
 	    }
 	  else
 	    {
