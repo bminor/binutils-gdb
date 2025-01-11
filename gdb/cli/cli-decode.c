@@ -128,8 +128,10 @@ set_cmd_completer_handle_brkchars (struct cmd_list_element *cmd,
   cmd->completer_handle_brkchars = func;
 }
 
+/* See cli-decode.h.  */
+
 std::string
-cmd_list_element::prefixname () const
+cmd_list_element::prefixname_no_space () const
 {
   if (!this->is_prefix ())
     /* Not a prefix command.  */
@@ -137,12 +139,25 @@ cmd_list_element::prefixname () const
 
   std::string prefixname;
   if (this->prefix != nullptr)
-    prefixname = this->prefix->prefixname ();
+    {
+      prefixname = this->prefix->prefixname_no_space ();
+      prefixname += " ";
+    }
 
   prefixname += this->name;
-  prefixname += " ";
 
   return prefixname;
+}
+
+/* See cli-decode.h.  */
+
+std::string
+cmd_list_element::prefixname () const
+{
+  std::string result = prefixname_no_space ();
+  if (!result.empty ())
+    result += " ";
+  return result;
 }
 
 /* See cli/cli-decode.h.  */
@@ -381,7 +396,7 @@ do_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
   while (c->is_alias ())
     c = c->alias_target;
 
-  help_list (*c->subcommands, c->prefixname ().c_str (),
+  help_list (*c->subcommands, c->prefixname_no_space ().c_str (),
 	     all_commands, gdb_stdout);
 }
 
@@ -1885,7 +1900,7 @@ help_cmd (const char *command, struct ui_file *stream)
 
   /* If this is a prefix command, print it's subcommands.  */
   if (c->is_prefix ())
-    help_list (*c->subcommands, c->prefixname ().c_str (),
+    help_list (*c->subcommands, c->prefixname_no_space ().c_str (),
 	       all_commands, stream);
 
   /* If this is a class name, print all of the commands in the class.  */
@@ -1906,54 +1921,48 @@ help_cmd (const char *command, struct ui_file *stream)
 		c->hook_post->name);
 }
 
-/*
- * Get a specific kind of help on a command list.
- *
- * LIST is the list.
- * CMDTYPE is the prefix to use in the title string.
- * THECLASS is the class with which to list the nodes of this list (see
- * documentation for help_cmd_list below),  As usual, ALL_COMMANDS for
- * everything, ALL_CLASSES for just classes, and non-negative for only things
- * in a specific class.
- * and STREAM is the output stream on which to print things.
- * If you call this routine with a class >= 0, it recurses.
- */
+/* Get a specific kind of help on a command list.
+
+   LIST is the list.
+   CMDTYPE is the prefix to use in the title string.  It should not
+   end in a space.
+   THECLASS is the class with which to list the nodes of this list (see
+   documentation for help_cmd_list below),  As usual, ALL_COMMANDS for
+   everything, ALL_CLASSES for just classes, and non-negative for only things
+   in a specific class.
+   and STREAM is the output stream on which to print things.
+   If you call this routine with a class >= 0, it recurses.  */
 void
 help_list (struct cmd_list_element *list, const char *cmdtype,
 	   enum command_class theclass, struct ui_file *stream)
 {
-  int len;
-  char *cmdtype1, *cmdtype2;
-
-  /* If CMDTYPE is "foo ", CMDTYPE1 gets " foo" and CMDTYPE2 gets "foo sub".
-   */
-  len = strlen (cmdtype);
-  cmdtype1 = (char *) alloca (len + 1);
-  cmdtype1[0] = 0;
-  cmdtype2 = (char *) alloca (len + 4);
-  cmdtype2[0] = 0;
-  if (len)
+  int len = strlen (cmdtype);
+  const char *space = "";
+  const char *prefix = "";
+  if (len > 0)
     {
-      cmdtype1[0] = ' ';
-      memcpy (cmdtype1 + 1, cmdtype, len - 1);
-      cmdtype1[len] = 0;
-      memcpy (cmdtype2, cmdtype, len - 1);
-      strcpy (cmdtype2 + len - 1, " sub");
+      prefix = "sub";
+      space = " ";
     }
 
   if (theclass == all_classes)
-    gdb_printf (stream, "List of classes of %scommands:\n\n", cmdtype2);
+    gdb_printf (stream, "List of classes of %scommands:\n\n",
+		prefix);
+  else if (len == 0)
+    gdb_printf (stream, "List of commands:\n\n");
   else
-    gdb_printf (stream, "List of %scommands:\n\n", cmdtype2);
+    gdb_printf (stream, "List of \"%ps\" %scommands:\n\n",
+		styled_string (command_style.style (), cmdtype),
+		prefix);
 
   help_cmd_list (list, theclass, theclass >= 0, stream);
 
   if (theclass == all_classes)
     {
       gdb_printf (stream, "\n\
-Type \"%p[help%s%p]\" followed by a class name for a list of commands in ",
+Type \"%p[help%s%s%p]\" followed by a class name for a list of commands in ",
 		  command_style.style ().ptr (),
-		  cmdtype1,
+		  space, cmdtype,
 		  nullptr);
       stream->wrap_here (0);
       gdb_printf (stream, "that class.");
@@ -1963,9 +1972,9 @@ Type \"%ps\" for the list of all commands.",
 		  styled_string (command_style.style (), "help all"));
     }
 
-  gdb_printf (stream, "\nType \"%p[help%s%p]\" followed by %scommand name ",
-	      command_style.style ().ptr (), cmdtype1, nullptr,
-	      cmdtype2);
+  gdb_printf (stream, "\nType \"%p[help%s%s%p]\" followed by %scommand name ",
+	      command_style.style ().ptr (), space, cmdtype, nullptr,
+	      prefix);
   stream->wrap_here (0);
   gdb_puts ("for ", stream);
   stream->wrap_here (0);

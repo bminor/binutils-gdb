@@ -83,6 +83,9 @@ struct cmd_list_element
      For non-prefix commands, return an empty string.  */
   std::string prefixname () const;
 
+  /* Like prefixname, but do not append a trailing space.  */
+  std::string prefixname_no_space () const;
+
   /* Return a vector of strings describing the components of the full name
      of this command.  For example, if this command is 'set AA BB CC',
      then the vector will contain 4 elements 'set', 'AA', 'BB', and 'CC'

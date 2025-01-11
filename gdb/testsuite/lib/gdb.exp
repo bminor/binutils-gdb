@@ -8708,8 +8708,8 @@ proc test_prefix_command_help { command_list expected_initial_lines args } {
     # Use 'list' and not just {} because we want variables to
     # be expanded in this list.
     set l_stock_body [list\
-         "List of $full_command subcommands\:.*\[\r\n\]+"\
-         "Type \"help $full_command\" followed by $full_command subcommand name for full documentation\.\[\r\n\]+"]
+         "List of \"$full_command\" subcommands\:.*\[\r\n\]+"\
+         "Type \"help $full_command\" followed by subcommand name for full documentation\.\[\r\n\]+"]
     set l_entire_body [concat $expected_initial_lines $l_stock_body $help_list_trailer]
     if {[llength $args]>0} {
         help_test_raw "help ${command}" $l_entire_body [lindex $args 0]

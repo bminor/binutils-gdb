@@ -215,7 +215,7 @@ error_no_arg (const char *why)
 static void
 info_command (const char *arg, int from_tty)
 {
-  help_list (infolist, "info ", all_commands, gdb_stdout);
+  help_list (infolist, "info", all_commands, gdb_stdout);
 }
 
 /* See cli/cli-cmds.h.  */

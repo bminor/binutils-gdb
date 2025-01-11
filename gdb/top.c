@@ -545,12 +545,10 @@ execute_command (const char *p, int from_tty)
 	   that can be followed by its args), report the list of
 	   subcommands.  */
 	{
-	  std::string prefixname = c->prefixname ();
-	  std::string prefixname_no_space
-	    = prefixname.substr (0, prefixname.length () - 1);
+	  std::string prefixname = c->prefixname_no_space ();
 	  gdb_printf
 	    ("\"%s\" must be followed by the name of a subcommand.\n",
-	     prefixname_no_space.c_str ());
+	     prefixname.c_str ());
 	  help_list (*c->subcommands, prefixname.c_str (), all_commands,
 		     gdb_stdout);
 	}
