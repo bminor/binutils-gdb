@@ -1398,7 +1398,7 @@ void
 lang_finish (void)
 {
   output_section_statement_table_free ();
-  ldfile_remap_input_free ();
+  ldfile_free ();
 }
 
 /*----------------------------------------------------------------------

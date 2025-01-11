@@ -63,6 +63,7 @@ typedef struct search_arch
 } search_arch_type;
 
 static search_dirs_type **search_tail_ptr = &search_head;
+static search_dirs_type *script_search;
 static search_arch_type *search_arch_head;
 static search_arch_type **search_arch_tail_ptr = &search_arch_head;
 
@@ -109,7 +110,7 @@ ldfile_add_remap (const char * pattern, const char * renamed)
     }
 }
 
-void
+static void
 ldfile_remap_input_free (void)
 {
   while (input_remaps != NULL)
@@ -327,6 +328,18 @@ ldfile_add_library_path (const char *name, bool cmdline)
     new_dirs->name = concat (ld_sysroot, name + strlen ("$SYSROOT"), (const char *) NULL);
   else
     new_dirs->name = xstrdup (name);
+}
+
+static void
+ldfile_library_path_free (search_dirs_type **root)
+{
+  search_dirs_type *ent;
+  while ((ent = *root) != NULL)
+    {
+      *root = ent->next;
+      free ((void *) ent->name);
+      free (ent);
+    }
 }
 
 /* Try to open a BFD for a lang_input_statement.  */
@@ -835,7 +848,6 @@ ldfile_find_command_file (const char *name,
   search_dirs_type *search;
   FILE *result = NULL;
   char *path;
-  static search_dirs_type *script_search;
 
   if (!default_only)
     {
@@ -854,6 +866,7 @@ ldfile_find_command_file (const char *name,
 	  search_tail_ptr = &script_search;
 	  ldfile_add_library_path (script_dir, true);
 	  search_tail_ptr = save_tail_ptr;
+	  free (script_dir);
 	}
     }
 
@@ -903,9 +916,6 @@ ldfile_open_command_file_1 (const char *name, enum script_open_style open_how)
 	}
     }
 
-  /* FIXME: This memory is never freed, but that should not really matter.
-     It will be released when the linker exits, and it is unlikely to ever
-     be more than a few tens of bytes.  */
   len = strlen (name);
   script = xmalloc (sizeof (*script) + len);
   script->next = processed_scripts;
@@ -928,6 +938,17 @@ ldfile_open_command_file_1 (const char *name, enum script_open_style open_how)
   lineno = 1;
 
   saved_script_handle = ldlex_input_stack;
+}
+
+static void
+ldfile_script_free (struct script_name_list **root)
+{
+  struct script_name_list *ent;
+  while ((ent = *root) != NULL)
+    {
+      *root = ent->next;
+      free (ent);
+    }
 }
 
 /* Open command file NAME in the current directory, -L directories,
@@ -974,6 +995,18 @@ ldfile_add_arch (const char *in_name)
 
 }
 
+static void
+ldfile_arch_free (search_arch_type **root)
+{
+  search_arch_type *ent;
+  while ((ent = *root) != NULL)
+    {
+      *root = ent->next;
+      free (ent->name);
+      free (ent);
+    }
+}
+
 /* Set the output architecture.  */
 
 void
@@ -991,4 +1024,18 @@ ldfile_set_output_arch (const char *string, enum bfd_architecture defarch)
     ldfile_output_architecture = defarch;
   else
     einfo (_("%F%P: cannot represent machine `%s'\n"), string);
+}
+
+/* Tidy up memory.  */
+
+void
+ldfile_free (void)
+{
+  ldfile_remap_input_free ();
+  ldfile_library_path_free (&script_search);
+  search_tail_ptr = &search_head;
+  ldfile_library_path_free (&search_head);
+  search_arch_tail_ptr = &search_arch_head;
+  ldfile_arch_free (&search_arch_head);
+  ldfile_script_free (&processed_scripts);
 }
