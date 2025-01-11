@@ -1472,7 +1472,7 @@ info_auto_load_cmd (const char *args, int from_tty)
   struct ui_out *uiout = current_uiout;
 
   ui_out_emit_tuple tuple_emitter (uiout, "infolist");
-
+  const ui_file_style cmd_style = command_style.style ();
   for (list = *auto_load_info_cmdlist_get (); list != NULL; list = list->next)
     {
       ui_out_emit_tuple option_emitter (uiout, "option");
@@ -1480,7 +1480,7 @@ info_auto_load_cmd (const char *args, int from_tty)
       gdb_assert (!list->is_prefix ());
       gdb_assert (list->type == not_set_cmd);
 
-      uiout->field_string ("name", list->name);
+      uiout->field_string ("name", list->name, cmd_style);
       uiout->text (":  ");
       cmd_func (list, auto_load_info_scripts_pattern_nl, from_tty);
     }

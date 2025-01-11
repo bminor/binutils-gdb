@@ -15583,6 +15583,7 @@ show_remote_cmd (const char *args, int from_tty)
   struct ui_out *uiout = current_uiout;
 
   ui_out_emit_tuple tuple_emitter (uiout, "showlist");
+  const ui_file_style cmd_style = command_style.style ();
   for (; list != NULL; list = list->next)
     if (strcmp (list->name, "Z-packet") == 0)
       continue;
@@ -15594,7 +15595,7 @@ show_remote_cmd (const char *args, int from_tty)
       {
 	ui_out_emit_tuple option_emitter (uiout, "option");
 
-	uiout->field_string ("name", list->name);
+	uiout->field_string ("name", list->name, cmd_style);
 	uiout->text (":  ");
 	if (list->type == show_cmd)
 	  do_show_command (NULL, from_tty, list);
