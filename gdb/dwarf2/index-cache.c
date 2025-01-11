@@ -280,11 +280,6 @@ show_index_cache_command (const char *arg, int from_tty)
 
   /* Call all "show index-cache" subcommands.  */
   cmd_show_list (show_index_cache_prefix_list, from_tty);
-
-  gdb_printf ("\n");
-  gdb_printf
-    (_("The index cache is currently %s.\n"),
-     global_index_cache.enabled () ? _("enabled") : _("disabled"));
 }
 
 /* "set/show index-cache enabled" set callback.  */
