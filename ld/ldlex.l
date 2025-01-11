@@ -477,6 +477,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				}
 
 <<EOF>> {
+  yy_delete_buffer (YY_CURRENT_BUFFER);
   include_stack_ptr--;
   if (include_stack_ptr == 0)
     {
@@ -528,13 +529,13 @@ yy_create_string_buffer (const char *string, size_t size)
 {
   YY_BUFFER_STATE b;
 
-  b = xmalloc (sizeof (struct yy_buffer_state));
+  b = yyalloc (sizeof (struct yy_buffer_state));
   b->yy_input_file = 0;
   b->yy_buf_size = size;
 
   /* yy_ch_buf has to be 2 characters longer than the size given because
      we need to put in 2 end-of-buffer characters.  */
-  b->yy_ch_buf = xmalloc ((size_t) b->yy_buf_size + 3);
+  b->yy_ch_buf = yyalloc (b->yy_buf_size + 3);
 
   b->yy_ch_buf[0] = '\n';
   strcpy (b->yy_ch_buf+1, string);
