@@ -315,12 +315,11 @@ plugin_opt_plugin_arg (const char *arg)
 static bfd *
 plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 {
-  bfd *abfd;
-  bool bfd_plugin_target;
-
-  bfd_plugin_target = bfd_plugin_target_p (srctemplate->xvec);
-  abfd = bfd_create (concat (name, IRONLY_SUFFIX, (const char *) NULL),
-		     bfd_plugin_target ? link_info.output_bfd : srctemplate);
+  bool bfd_plugin_target = bfd_plugin_target_p (srctemplate->xvec);
+  char *filename = concat (name, IRONLY_SUFFIX, (const char *) NULL);
+  bfd *abfd = bfd_create (filename, (bfd_plugin_target
+				     ? link_info.output_bfd : srctemplate));
+  free (filename);
   if (abfd != NULL)
     {
       abfd->flags |= BFD_LINKER_CREATED | BFD_PLUGIN;
