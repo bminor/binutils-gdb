@@ -5679,7 +5679,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  /* Create dynamic sections for backends that require
 		     that be done before setup_gnu_properties.  */
 		  if (!_bfd_elf_link_create_dynamic_sections (abfd, info))
-		    return false;
+		    goto error_free_vers;
 		  add_needed = true;
 		}
 	      else if (dynamic
@@ -5875,9 +5875,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    }
 	  free (shortname);
 	}
-      free (nondeflt_vers);
-      nondeflt_vers = NULL;
     }
+  free (nondeflt_vers);
+  nondeflt_vers = NULL;
 
   /* Now set the alias field correctly for all the weak defined
      symbols we found.  The only way to do this is to search all the
@@ -6041,7 +6041,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
   if (bed->check_directives
       && !(*bed->check_directives) (abfd, info))
-    return false;
+    goto error_free_vers;
 
   /* If this is a non-traditional link, try to optimize the handling
      of the .stab/.stabstr sections.  */
@@ -8336,6 +8336,7 @@ _bfd_elf_link_hash_table_init
   table->root.type = bfd_link_elf_hash_table;
   table->hash_table_id = bed->target_id;
   table->target_os = bed->target_os;
+  table->root.hash_table_free = _bfd_elf_link_hash_table_free;
 
   return ret;
 }
@@ -8358,7 +8359,6 @@ _bfd_elf_link_hash_table_create (bfd *abfd)
       free (ret);
       return NULL;
     }
-  ret->root.hash_table_free = _bfd_elf_link_hash_table_free;
 
   return &ret->root;
 }
@@ -10452,10 +10452,6 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
     ret = false;
 
   free (symbuf);
-
-  free (hash_table->strtab);
-  hash_table->strtab = NULL;
-
   return ret;
 }
 
@@ -12574,7 +12570,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   const char *std_attrs_section;
   struct elf_link_hash_table *htab = elf_hash_table (info);
   bool sections_removed;
-  bool ret;
 
   if (!is_elf_hash_table (&htab->root))
     return false;
@@ -13178,8 +13173,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  }
     }
 
-  ret = true;
-
   /* Output any global symbols that got converted to local in a
      version script or due to symbol visibility.  We do this in a
      separate step since ELF requires all local symbols to appear
@@ -13192,10 +13185,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   eoinfo.file_sym_done = false;
   bfd_hash_traverse (&info->hash->table, elf_link_output_extsym, &eoinfo);
   if (eoinfo.failed)
-    {
-      ret = false;
-      goto return_local_hash_table;
-    }
+    goto error_return;
 
   /* If backend needs to output some local symbols not present in the hash
      table, do it now.  */
@@ -13203,10 +13193,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       if (! ((*bed->elf_backend_output_arch_local_syms)
 	     (abfd, info, &flinfo, elf_link_output_symstrtab)))
-	{
-	  ret = false;
-	  goto return_local_hash_table;
-	}
+	goto error_return;
     }
 
   /* That wrote out all the local symbols.  Finish up the symbol table
@@ -13253,10 +13240,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      BFD_ASSERT (indx > 0);
 	      sym.st_shndx = indx;
 	      if (! check_dynsym (abfd, &sym))
-		{
-		  ret = false;
-		  goto return_local_hash_table;
-		}
+		goto error_return;
 	      sym.st_value = s->vma;
 	      dest = dynsym + dynindx * bed->s->sizeof_sym;
 
@@ -13294,10 +13278,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		  sym.st_shndx =
 		    elf_section_data (s->output_section)->this_idx;
 		  if (! check_dynsym (abfd, &sym))
-		    {
-		      ret = false;
-		      goto return_local_hash_table;
-		    }
+		    goto error_return;
 		  sym.st_value = (s->output_section->vma
 				  + s->output_offset
 				  + e->isym.st_value);
@@ -13320,10 +13301,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   eoinfo.flinfo = &flinfo;
   bfd_hash_traverse (&info->hash->table, elf_link_output_extsym, &eoinfo);
   if (eoinfo.failed)
-    {
-      ret = false;
-      goto return_local_hash_table;
-    }
+    goto error_return;
 
   /* If backend needs to output some symbols not present in the hash
      table, do it now.  */
@@ -13332,10 +13310,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       if (! ((*bed->elf_backend_output_arch_syms)
 	     (abfd, info, &flinfo, elf_link_output_symstrtab)))
-	{
-	  ret = false;
-	  goto return_local_hash_table;
-	}
+	goto error_return;
     }
 
   /* Finalize the .strtab section.  */
@@ -13343,10 +13318,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* Swap out the .strtab section. */
   if (!elf_link_swap_symbols_out (&flinfo))
-    {
-      ret = false;
-      goto return_local_hash_table;
-    }
+    goto error_return;
+  free (htab->strtab);
+  htab->strtab = NULL;
 
   /* Now we know the size of the symtab section.  */
   if (bfd_get_symcount (abfd) > 0)
@@ -13373,10 +13347,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      if (bfd_seek (abfd, symtab_shndx_hdr->sh_offset, SEEK_SET) != 0
 		  || (bfd_write (flinfo.symshndxbuf, amt, abfd) != amt))
-		{
-		  ret = false;
-		  goto return_local_hash_table;
-		}
+		goto error_return;
 	    }
 	}
 
@@ -13398,18 +13369,14 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
       if (bfd_seek (abfd, symstrtab_hdr->sh_offset, SEEK_SET) != 0
 	  || ! _bfd_elf_strtab_emit (abfd, flinfo.symstrtab))
-	{
-	  ret = false;
-	  goto return_local_hash_table;
-	}
+	goto error_return;
     }
 
   if (info->out_implib_bfd && !elf_output_implib (abfd, info))
     {
       _bfd_error_handler (_("%pB: failed to generate import library"),
 			  info->out_implib_bfd);
-      ret = false;
-      goto return_local_hash_table;
+      goto error_return;
     }
 
   /* Adjust the relocs to have the correct symbol indices.  */
@@ -13424,16 +13391,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       sort = bed->sort_relocs_p == NULL || (*bed->sort_relocs_p) (o);
       if (esdo->rel.hdr != NULL
 	  && !elf_link_adjust_relocs (abfd, o, &esdo->rel, sort, info))
-	{
-	  ret = false;
-	  goto return_local_hash_table;
-	}
+	goto error_return;
       if (esdo->rela.hdr != NULL
 	  && !elf_link_adjust_relocs (abfd, o, &esdo->rela, sort, info))
-	{
-	  ret = false;
-	  goto return_local_hash_table;
-	}
+	goto error_return;
 
       /* Set the reloc_count field to 0 to prevent write_relocs from
 	 trying to swap the relocs out itself.  */
@@ -13801,25 +13762,24 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     {
       bfd_byte *contents = (bfd_byte *) bfd_malloc (attr_size);
       if (contents == NULL)
-	{
-	  /* Bail out and fail.  */
-	  ret = false;
-	  goto return_local_hash_table;
-	}
+	goto error_ret2;
       bfd_elf_set_obj_attr_contents (abfd, contents, attr_size);
       bfd_set_section_contents (abfd, attr_section, contents, 0, attr_size);
       free (contents);
     }
 
- return_local_hash_table:
   if (info->unique_symbol)
     bfd_hash_table_free (&flinfo.local_hash_table);
-  return ret;
+  return true;
 
  error_return:
+  free (htab->strtab);
+  htab->strtab = NULL;
   elf_final_link_free (abfd, &flinfo);
-  ret = false;
-  goto return_local_hash_table;
+ error_ret2:
+  if (info->unique_symbol)
+    bfd_hash_table_free (&flinfo.local_hash_table);
+  return false;
 }
 
 /* Initialize COOKIE for input bfd ABFD.  */
