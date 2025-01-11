@@ -1120,14 +1120,6 @@ destroy_layout (struct cmd_list_element *self, void *context)
 
 static struct cmd_list_element *layout_list;
 
-/* Called to implement 'tui layout'.  */
-
-static void
-tui_layout_command (const char *args, int from_tty)
-{
-  help_list (layout_list, "tui layout ", all_commands, gdb_stdout);
-}
-
 /* Add a "layout" command with name NAME that switches to LAYOUT.  */
 
 static struct cmd_list_element *
@@ -1307,7 +1299,7 @@ void
 _initialize_tui_layout ()
 {
   struct cmd_list_element *layout_cmd
-    = add_prefix_cmd ("layout", class_tui, tui_layout_command, _("\
+    = add_basic_prefix_cmd ("layout", class_tui, _("\
 Change the layout of windows.\n\
 Usage: tui layout prev | next | LAYOUT-NAME"),
 		      &layout_list, 0, tui_get_cmd_list ());

@@ -1909,22 +1909,6 @@ source_lines_range::source_lines_range (int startline,
     }
 }
 
-/* Handle the "set source" base command.  */
-
-static void
-set_source (const char *arg, int from_tty)
-{
-  help_list (setsourcelist, "set source ", all_commands, gdb_stdout);
-}
-
-/* Handle the "show source" base command.  */
-
-static void
-show_source (const char *args, int from_tty)
-{
-  help_list (showsourcelist, "show source ", all_commands, gdb_stdout);
-}
-
 
 void _initialize_source ();
 void
@@ -2045,13 +2029,12 @@ By default, relative filenames are displayed."),
 			show_filename_display_string,
 			&setlist, &showlist);
 
-  add_prefix_cmd ("source", no_class, set_source,
-		  _("Generic command for setting how sources are handled."),
-		  &setsourcelist, 0, &setlist);
-
-  add_prefix_cmd ("source", no_class, show_source,
-		  _("Generic command for showing source settings."),
-		  &showsourcelist, 0, &showlist);
+  add_setshow_prefix_cmd
+    ("source", no_class,
+     _("Generic command for setting how sources are handled."),
+     _("Generic command for showing source settings."),
+     &setsourcelist, &showsourcelist,
+     &setlist, &showlist);
 
   add_setshow_boolean_cmd ("open", class_files, &source_open, _("\
 Set whether GDB should open source files."), _("\
