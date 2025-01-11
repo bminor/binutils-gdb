@@ -1063,7 +1063,7 @@ bfd_get_unique_section_name (bfd *abfd, const char *templat, int *count)
   char *sname;
 
   len = strlen (templat);
-  sname = (char *) bfd_malloc (len + 8);
+  sname = bfd_alloc (abfd, len + 8);
   if (sname == NULL)
     return NULL;
   memcpy (sname, templat, len);
