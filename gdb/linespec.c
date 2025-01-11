@@ -1065,14 +1065,14 @@ linespec_lexer_peek_token (linespec_parser *parser)
    the new sal, if needed.  If not NULL, SYMNAME is the name of the
    symbol to use when constructing the new canonical name.
 
-   If LITERAL_CANONICAL is non-zero, SYMNAME will be used as the
+   If LITERAL_CANONICAL is true, SYMNAME will be used as the
    canonical name for the SAL.  */
 
 static void
 add_sal_to_sals (struct linespec_state *self,
 		 std::vector<symtab_and_line> *sals,
 		 struct symtab_and_line *sal,
-		 const char *symname, int literal_canonical)
+		 const char *symname, bool literal_canonical)
 {
   sals->push_back (*sal);
 
@@ -2134,7 +2134,7 @@ create_sals_line_offset (struct linespec_state *self,
 
 	    sal.symbol = sym;
 	    add_sal_to_sals (self, &values, &sal,
-			     sym ? sym->natural_name () : NULL, 0);
+			     sym ? sym->natural_name () : nullptr, false);
 	  }
     }
 
@@ -2166,7 +2166,7 @@ convert_address_location_to_sals (struct linespec_state *self,
   sal.symbol = find_pc_sect_containing_function (sal.pc, sal.section);
 
   std::vector<symtab_and_line> sals;
-  add_sal_to_sals (self, &sals, &sal, core_addr_to_string (address), 1);
+  add_sal_to_sals (self, &sals, &sal, core_addr_to_string (address), true);
 
   return sals;
 }
@@ -2191,7 +2191,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 	  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
 	      && state->maybe_add_address (pspace, sal.pc))
 	    add_sal_to_sals (state, &sals, &sal,
-			     sym.symbol->natural_name (), 0);
+			     sym.symbol->natural_name (), false);
 	}
     }
   else if (!ls->function_symbols.empty () || !ls->minimal_symbols.empty ())
@@ -2256,7 +2256,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 		  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
 		      && state->maybe_add_address (pspace, sal.pc))
 		    add_sal_to_sals (state, &sals, &sal,
-				     sym.symbol->natural_name (), 0);
+				     sym.symbol->natural_name (), false);
 		}
 	    }
 	}
@@ -3945,7 +3945,7 @@ decode_digits_list_mode (struct linespec_state *self,
       val.pc = 0;
       val.explicit_line = true;
 
-      add_sal_to_sals (self, &values, &val, NULL, 0);
+      add_sal_to_sals (self, &values, &val, NULL, false);
     }
 
   return values;
@@ -4096,7 +4096,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   sal.section = msymbol->obj_section (objfile);
 
   if (self->maybe_add_address (objfile->pspace (), sal.pc))
-    add_sal_to_sals (self, result, &sal, msymbol->natural_name (), 0);
+    add_sal_to_sals (self, result, &sal, msymbol->natural_name (), false);
 }
 
 /* Helper for search_minsyms_for_name that adds the symbol to the
