@@ -179,7 +179,7 @@ struct linespec_state
      decode_line_full.  */
   bool funfirstline;
 
-  /* Nonzero if we are running in 'list' mode; see decode_line_list.  */
+  /* True if we are running in 'list' mode; see decode_line_list.  */
   bool list_mode;
 
   /* The 'canonical' value passed to decode_line_full, or NULL.  */
