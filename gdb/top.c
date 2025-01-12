@@ -85,10 +85,6 @@
 
 extern void initialize_all_files (void);
 
-#define PROMPT(X) the_prompts.prompt_stack[the_prompts.top + X].prompt
-#define PREFIX(X) the_prompts.prompt_stack[the_prompts.top + X].prefix
-#define SUFFIX(X) the_prompts.prompt_stack[the_prompts.top + X].suffix
-
 /* Default command line prompt.  This is overridden in some configs.  */
 
 #ifndef DEFAULT_PROMPT
