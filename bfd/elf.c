@@ -14270,15 +14270,15 @@ _bfd_elf_munmap_section_contents (asection *sec ATTRIBUTE_UNUSED,
   if (contents == NULL)
     return;
 
+  /* Don't leave pointers to data we are about to munmap or free.  */
+  if (sec->contents == contents)
+    sec->contents = NULL;
+  if (elf_section_data (sec)->this_hdr.contents == contents)
+    elf_section_data (sec)->this_hdr.contents = NULL;
+
 #ifdef USE_MMAP
   if (sec->mmapped_p)
     {
-      /* _bfd_elf_mmap_section_contents may return the previously
-	 mapped section contents.  Munmap the section contents only
-	 if they haven't been cached.  */
-      if (elf_section_data (sec)->this_hdr.contents == contents)
-	return;
-
       /* When _bfd_elf_mmap_section_contents returns CONTENTS as
 	 malloced, CONTENTS_ADDR is set to NULL.  */
       if (elf_section_data (sec)->contents_addr != NULL)
@@ -14288,7 +14288,6 @@ _bfd_elf_munmap_section_contents (asection *sec ATTRIBUTE_UNUSED,
 		      elf_section_data (sec)->contents_size) != 0)
 	    abort ();
 	  sec->mmapped_p = 0;
-	  sec->contents = NULL;
 	  elf_section_data (sec)->contents_addr = NULL;
 	  elf_section_data (sec)->contents_size = 0;
 	  return;
