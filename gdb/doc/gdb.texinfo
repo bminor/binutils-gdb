@@ -22963,7 +22963,7 @@ This has the value @samp{0x2002}.  It is a flag that, when set,
 indicates that the associated entry is the program's @code{main}.
 
 @item DW_IDX_GNU_language
-This has the value @samp{0x2003}.  It is @samp{DW_LANG_} constant,
+This has the value @samp{0x2003}.  It is a @samp{DW_LANG_} constant,
 indicating the language of the associated entry.
 
 @item DW_IDX_GNU_linkage_name
