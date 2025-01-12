@@ -2272,7 +2272,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 
       if (!_bfd_elf_x86_valid_reloc_p (sec, info, htab, rel, h, isym,
 				       symtab_hdr, &no_dynreloc))
-	return false;
+	goto error_return;
 
       if (! elf_x86_64_tls_transition (info, abfd, sec, contents,
 				       symtab_hdr, sym_hashes,
@@ -2292,8 +2292,11 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_X86_64_TPOFF32:
 	  if (!bfd_link_executable (info) && ABI_64_P (abfd))
-	    return elf_x86_64_need_pic (info, abfd, sec, h, symtab_hdr, isym,
-					&x86_64_elf_howto_table[r_type]);
+	    {
+	      elf_x86_64_need_pic (info, abfd, sec, h, symtab_hdr, isym,
+				   &x86_64_elf_howto_table[r_type]);
+	      goto error_return;
+	    }
 	  if (eh != NULL)
 	    eh->zero_undefweak &= 0x2;
 	  break;
@@ -2359,7 +2362,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 
 		if (!elf_x86_allocate_local_got_info (abfd,
 						      symtab_hdr->sh_info))
-		      goto error_return;
+		  goto error_return;
 
 		/* This is a global offset table entry for a local symbol.  */
 		local_got_refcounts = elf_local_got_refcounts (abfd);
@@ -2466,8 +2469,11 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 		      && !h->def_regular
 		      && h->def_dynamic
 		      && (sec->flags & SEC_READONLY) == 0)))
-	    return elf_x86_64_need_pic (info, abfd, sec, h, symtab_hdr, isym,
-					&x86_64_elf_howto_table[r_type]);
+	    {
+	      elf_x86_64_need_pic (info, abfd, sec, h, symtab_hdr, isym,
+				   &x86_64_elf_howto_table[r_type]);
+	      goto error_return;
+	    }
 	  /* Fall through.  */
 
 	case R_X86_64_PC8:
