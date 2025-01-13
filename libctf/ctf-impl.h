@@ -222,7 +222,6 @@ typedef struct ctf_str_atom
 {
   char *csa_str;		/* Pointer to string (also used as hash key).  */
   ctf_list_t csa_refs;		/* This string's refs.  */
-  ctf_list_t csa_movable_refs;	/* This string's movable refs.  */
   uint32_t csa_offset;		/* Offset in this strtab, if any.  */
   uint32_t csa_external_offset;	/* External strtab offset, if any.  */
   unsigned long csa_snapshot_id; /* Snapshot ID at time of creation.  */
@@ -236,15 +235,6 @@ typedef struct ctf_str_atom_ref
   ctf_list_t caf_list;		/* List forward/back pointers.  */
   uint32_t *caf_ref;		/* A single ref to this string.  */
 } ctf_str_atom_ref_t;
-
-/* Like a ctf_str_atom_ref_t, but specific to movable refs.  */
-
-typedef struct ctf_str_atom_ref_movable
-{
-  ctf_list_t caf_list;		/* List forward/back pointers.  */
-  uint32_t *caf_ref;		/* A single ref to this string.  */
-  ctf_dynhash_t *caf_movable_refs; /* Backpointer to ctf_str_movable_refs for this dict. */  
-} ctf_str_atom_ref_movable_t;
 
 /* A single linker-provided symbol, during symbol addition, possibly before we
    have been given external strtab refs.  */

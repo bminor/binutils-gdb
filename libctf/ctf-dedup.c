@@ -3156,8 +3156,8 @@ ctf_dedup_emit (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
   return outputs;
 }
 
-/* Deduplicate strings.  The child dict ctf_parent_strlen is not updated
-   yet: this must be done after parent serialization.  */
+/* Deduplicate strings.  This must be done after parent serialization.
+   The child dict ctf_parent_strlen is not updated yet.  */
 
 int
 ctf_dedup_strings (ctf_dict_t *fp)
@@ -3185,8 +3185,7 @@ ctf_dedup_strings (ctf_dict_t *fp)
 	  ctf_str_atom_t *atom = (ctf_str_atom_t *) v;
 	  uintptr_t count = 0;
 
-	  if (ctf_list_empty_p (&atom->csa_refs)
-	      && ctf_list_empty_p (&atom->csa_movable_refs))
+	  if (ctf_list_empty_p (&atom->csa_refs))
 	    continue;
 
 	  if (atom->csa_external_offset
@@ -3222,10 +3221,7 @@ ctf_dedup_strings (ctf_dict_t *fp)
     goto iterr;
 
   /* Deduplicate the strings, adding them to the parent and transplanting
-     their ref lists there.  After transplantation, some of the movable refs
-     in the parent will contain references to a ctf_str_movable_refs hashtab
-     in the child dicts, but that's fine: it only means we can still do things
-     that involve ref movement in children without trouble.  */
+     their ref lists there.  */
 
   while ((err = ctf_dynhash_next (fp->ctf_link_outputs, &i, NULL, &dict)) == 0)
     {
@@ -3238,8 +3234,7 @@ ctf_dedup_strings (ctf_dict_t *fp)
 	  ctf_str_atom_t *atom = (ctf_str_atom_t *) v;
 	  ctf_str_atom_t *dedupped_atom;
 
-	  if (ctf_list_empty_p (&atom->csa_refs)
-	      && ctf_list_empty_p (&atom->csa_movable_refs))
+	  if (ctf_list_empty_p (&atom->csa_refs))
 	      continue;
 
 	  if (atom->csa_external_offset
@@ -3268,8 +3263,6 @@ ctf_dedup_strings (ctf_dict_t *fp)
 	  /* Splice all refs into the new atom.  */
 
 	  ctf_list_splice (&dedupped_atom->csa_refs, &atom->csa_refs);
-	  ctf_list_splice (&dedupped_atom->csa_movable_refs,
-			   &atom->csa_movable_refs);
 
 	  /* This atom is now "external" from the perspective of the child:
 	     mostly, this means the child will not try to write it to its
