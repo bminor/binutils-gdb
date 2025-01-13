@@ -2841,14 +2841,9 @@ _bfd_elf_link_info_read_relocs (bfd *abfd,
       bfd_size_type size;
 
       size = (bfd_size_type) o->reloc_count * sizeof (Elf_Internal_Rela);
-      if (keep_memory)
-	{
-	  internal_relocs = alloc2 = (Elf_Internal_Rela *) bfd_alloc (abfd, size);
-	  if (info)
-	    info->cache_size += size;
-	}
-      else
-	internal_relocs = alloc2 = (Elf_Internal_Rela *) bfd_malloc (size);
+      if (keep_memory && info)
+	info->cache_size += size;
+      internal_relocs = alloc2 = (Elf_Internal_Rela *) bfd_malloc (size);
       if (internal_relocs == NULL)
 	return NULL;
     }
@@ -2886,13 +2881,7 @@ _bfd_elf_link_info_read_relocs (bfd *abfd,
 
  error_return:
   _bfd_munmap_temporary (alloc1, alloc1_size);
-  if (alloc2 != NULL)
-    {
-      if (keep_memory)
-	bfd_release (abfd, alloc2);
-      else
-	free (alloc2);
-    }
+  free (alloc2);
   return NULL;
 }
 

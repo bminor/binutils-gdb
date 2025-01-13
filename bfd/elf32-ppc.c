@@ -6629,26 +6629,15 @@ ppc_elf_relax_section (bfd *abfd,
     {
       /* Append sufficient NOP relocs so we can write out relocation
 	 information for the trampolines.  */
-      Elf_Internal_Shdr *rel_hdr;
-      Elf_Internal_Rela *new_relocs = bfd_malloc ((changes + isec->reloc_count)
-						  * sizeof (*new_relocs));
-      unsigned ix;
-
-      if (!new_relocs)
+      size_t old_size = isec->reloc_count * sizeof (*internal_relocs);
+      size_t extra_size = changes * sizeof (*internal_relocs);
+      internal_relocs = bfd_realloc (internal_relocs, old_size + extra_size);
+      elf_section_data (isec)->relocs = internal_relocs;
+      if (!internal_relocs)
 	goto error_return;
-      memcpy (new_relocs, internal_relocs,
-	      isec->reloc_count * sizeof (*new_relocs));
-      for (ix = changes; ix--;)
-	{
-	  irel = new_relocs + ix + isec->reloc_count;
-
-	  irel->r_info = ELF32_R_INFO (0, R_PPC_NONE);
-	}
-      if (internal_relocs != elf_section_data (isec)->relocs)
-	free (internal_relocs);
-      elf_section_data (isec)->relocs = new_relocs;
+      memset ((char *) internal_relocs + old_size, 0, extra_size);
       isec->reloc_count += changes;
-      rel_hdr = _bfd_elf_single_rel_hdr (isec);
+      Elf_Internal_Shdr *rel_hdr = _bfd_elf_single_rel_hdr (isec);
       rel_hdr->sh_size += changes * rel_hdr->sh_entsize;
     }
   else if (elf_section_data (isec)->relocs != internal_relocs)

@@ -10134,6 +10134,8 @@ _bfd_elf_free_cached_info (bfd *abfd)
 	      free (elf_section_data (sec)->this_hdr.contents);
 	      elf_section_data (sec)->this_hdr.contents = NULL;
 	    }
+	  free (elf_section_data (sec)->relocs);
+	  elf_section_data (sec)->relocs = NULL;
 	}
       free (tdata->symtab_hdr.contents);
       tdata->symtab_hdr.contents = NULL;

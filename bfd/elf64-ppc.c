@@ -11575,7 +11575,7 @@ get_relocs (asection *sec, int count)
     {
       bfd_size_type relsize;
       relsize = sec->reloc_count * sizeof (*relocs);
-      relocs = bfd_alloc (sec->owner, relsize);
+      relocs = bfd_malloc (relsize);
       if (relocs == NULL)
 	return NULL;
       elfsec_data->relocs = relocs;
