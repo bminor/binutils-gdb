@@ -611,6 +611,7 @@ ctf_str_remove_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
       if (aref->caf_ref == ref)
 	{
 	  ctf_list_delete (&atom->csa_refs, aref);
+	  ctf_dynhash_remove (fp->ctf_str_movable_refs, ref);
 	  free (aref);
 	}
     }
