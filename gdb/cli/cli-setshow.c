@@ -27,6 +27,7 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-setshow.h"
+#include "cli/cli-style.h"
 #include "cli/cli-utils.h"
 
 /* Return true if the change of command parameter should be notified.  */
@@ -137,10 +138,14 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
     {
     case var_string:
     case var_string_noescape:
-    case var_optional_filename:
-    case var_filename:
     case var_enum:
       gdb_printf ((" is \"%s\".\n"), value);
+      break;
+
+    case var_optional_filename:
+    case var_filename:
+      gdb_printf ((" is \"%ps\".\n"),
+		  styled_string (file_name_style.style (), value));
       break;
 
     default:
