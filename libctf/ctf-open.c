@@ -1798,7 +1798,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   fp->ctf_str[CTF_STRTAB_0].cts_strs = (const char *) fp->ctf_buf
     + hp->cth_stroff;
   fp->ctf_str[CTF_STRTAB_0].cts_len = hp->cth_strlen;
-  if (ctf_str_create_atoms (fp) < 0)
+  if (ctf_init_refs (fp) < 0 || ctf_str_create_atoms (fp) < 0)
     {
       err = ENOMEM;
       goto bad;
@@ -2032,6 +2032,7 @@ ctf_dict_close (ctf_dict_t *fp)
   ctf_dynhash_destroy (fp->ctf_link_out_cu_mapping);
 
   ctf_str_free_atoms (fp);
+  ctf_free_refs (fp);
   free (fp->ctf_tmp_typeslice);
 
   if (fp->ctf_data.cts_name != _CTF_NULLSTR)

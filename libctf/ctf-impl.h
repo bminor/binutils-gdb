@@ -228,13 +228,13 @@ typedef struct ctf_str_atom
   int csa_flags;		 /* CTF_STR_ATOM_* flags. */
 } ctf_str_atom_t;
 
-/* The refs of a single string in the atoms table.  */
+/* A single ref.  */
 
-typedef struct ctf_str_atom_ref
+typedef struct ctf_ref
 {
-  ctf_list_t caf_list;		/* List forward/back pointers.  */
-  uint32_t *caf_ref;		/* A single ref to this string.  */
-} ctf_str_atom_ref_t;
+  ctf_list_t cre_list;		/* List forward/back pointers.  */
+  uint32_t *cre_ref;		/* A single ref to this string.  */
+} ctf_ref_t;
 
 /* A single linker-provided symbol, during symbol addition, possibly before we
    have been given external strtab refs.  */
@@ -392,7 +392,7 @@ struct ctf_dict
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
   ctf_strs_writable_t *ctf_dynstrtab; /* Dynamically allocated string table, if any. */
   ctf_dynhash_t *ctf_str_atoms;	  /* Hash table of ctf_str_atoms_t.  */
-  ctf_dynhash_t *ctf_str_movable_refs; /* Hash table of void * -> ctf_str_atom_ref_movable_t.  */
+  ctf_dynhash_t *ctf_movable_refs; /* Hash table of void * -> ctf_ref_t.  */
   uint32_t ctf_str_prov_offset;	  /* Latest provisional offset assigned so far.  */
   unsigned char *ctf_base;	  /* CTF file pointer.  */
   unsigned char *ctf_dynbase;	  /* Freeable CTF file pointer. */
@@ -765,12 +765,20 @@ extern uint32_t ctf_str_add_no_dedup_ref (ctf_dict_t *, const char *,
 					  uint32_t *ref);
 extern uint32_t ctf_str_add_movable_ref (ctf_dict_t *, const char *,
 					 uint32_t *ref);
-extern int ctf_str_move_refs (ctf_dict_t *fp, void *src, size_t len, void *dest);
 extern int ctf_str_add_external (ctf_dict_t *, const char *, uint32_t offset);
 extern void ctf_str_remove_ref (ctf_dict_t *, const char *, uint32_t *ref);
 extern void ctf_str_purge_refs (ctf_dict_t *fp);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
 extern const ctf_strs_writable_t *ctf_str_write_strtab (ctf_dict_t *);
+
+extern int ctf_init_refs (ctf_dict_t *);
+extern void ctf_free_refs (ctf_dict_t *);
+extern ctf_ref_t *ctf_create_ref (ctf_dict_t *, ctf_list_t *, uint32_t *ref,
+				  int movable);
+extern void ctf_remove_ref (ctf_dict_t *fp, ctf_list_t *, uint32_t *ref);
+extern int ctf_move_refs (ctf_dict_t *fp, void *src, size_t len, void *dest);
+extern void ctf_purge_ref_list (ctf_dict_t *, ctf_list_t *);
+extern void ctf_update_refs (ctf_list_t *, uint32_t value);
 
 extern int ctf_preserialize (ctf_dict_t *fp);
 extern void ctf_depreserialize (ctf_dict_t *fp);

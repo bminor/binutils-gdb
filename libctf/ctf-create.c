@@ -1118,7 +1118,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 
   /* Remove refs in the old vlen region and reapply them.  */
 
-  ctf_str_move_refs (fp, old_vlen, sizeof (ctf_enum_t) * vlen, dtd->dtd_vlen);
+  ctf_move_refs (fp, old_vlen, sizeof (ctf_enum_t) * vlen, dtd->dtd_vlen);
 
   /* Check for constant duplication within any given enum: only needed for
      non-root-visible types, since the duplicate detection above does the job
@@ -1209,7 +1209,7 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 
   /* Remove refs in the old vlen region and reapply them.  */
 
-  ctf_str_move_refs (fp, old_vlen, sizeof (ctf_lmember_t) * vlen, dtd->dtd_vlen);
+  ctf_move_refs (fp, old_vlen, sizeof (ctf_lmember_t) * vlen, dtd->dtd_vlen);
 
   if (name != NULL)
     {
