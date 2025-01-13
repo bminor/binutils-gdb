@@ -36,7 +36,6 @@
 #include "run-on-main-thread.h"
 #include "observable.h"
 #include "build-id.h"
-#include "py-color.h"
 
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
@@ -78,6 +77,7 @@ static const char *gdbpy_should_print_stack = python_excp_message;
 #include "interps.h"
 #include "event-top.h"
 #include "py-event.h"
+#include "py-color.h"
 
 /* True if Python has been successfully initialized, false
    otherwise.  */
