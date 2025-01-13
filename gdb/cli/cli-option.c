@@ -832,10 +832,10 @@ append_val_type_str (std::string &help, const option_def &opt,
       help += "NUMBER|#RRGGBB";
       break;
     case var_string:
-      help += "STRING";
+      help += " STRING";
       break;
     case var_filename:
-      help += "FILENAME";
+      help += " FILENAME";
       break;
     default:
       break;

@@ -1162,3 +1162,9 @@ test-thread-apply
 
 # Basic "info threads" integration tests.
 test-info-threads
+
+# There was a bug where the "metasyntactic variable" was glued to the
+# option.
+gdb_test "help maintenance test-options unknown-is-operand" \
+    "-string STRING.*-filename FILENAME.*" \
+    "option help has spaces"
