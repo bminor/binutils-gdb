@@ -74,6 +74,9 @@ binary-upload in qSupported reply
    multiple times, and the same mapping was being reused.  In all
    other cases, this field will have the value 'false'.
 
+* Support for stabs debugging format and the a.out/dbx object format is
+  deprecated, and will be removed in GDB 18.
+
 *** Changes in GDB 16
 
 * Support for Nios II targets has been removed as this architecture
