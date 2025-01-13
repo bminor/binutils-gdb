@@ -6805,8 +6805,12 @@ assign_file_positions_except_relocs (bfd *abfd,
 	      hdr->sh_offset = -1;
 	    }
 	  else
+	    /* There shouldn't be a need to effect "capped" file alignment here,
+	       yet at least the Linux kernel's modpost utility was found to be
+	       unhappy without.  While the issue was addressed there, let's be
+	       kind for at least the foreseeable future ...  */
 	    off = _bfd_elf_assign_file_position_for_section (hdr, off, false,
-							     0);
+							     bed->s->log_file_align);
 	}
 
       elf_next_file_pos (abfd) = off;
