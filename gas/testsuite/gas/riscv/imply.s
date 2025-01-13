@@ -21,6 +21,10 @@ imply zacas
 imply a
 
 imply xsfvcp
+imply xsfvqmaccqoq
+imply xsfvqmaccdod
+imply xsfvfnrclipxfqf
+
 imply v
 imply zvfh
 imply zvfhmin
