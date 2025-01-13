@@ -156,37 +156,27 @@ ctf_strptr_validate (ctf_dict_t *fp, uint32_t name)
 
 /* Remove all refs to a given atom.  */
 static void
-ctf_str_purge_atom_refs (ctf_str_atom_t *atom)
+ctf_str_purge_atom_refs (ctf_dict_t *fp, ctf_str_atom_t *atom)
 {
   ctf_str_atom_ref_t *ref, *next;
-  ctf_str_atom_ref_movable_t *movref, *movnext;
 
   for (ref = ctf_list_next (&atom->csa_refs); ref != NULL; ref = next)
     {
       next = ctf_list_next (ref);
       ctf_list_delete (&atom->csa_refs, ref);
+      ctf_dynhash_remove (fp->ctf_str_movable_refs, ref);
       free (ref);
-    }
-
-  for (movref = ctf_list_next (&atom->csa_movable_refs);
-       movref != NULL; movref = movnext)
-    {
-      movnext = ctf_list_next (movref);
-      ctf_list_delete (&atom->csa_movable_refs, movref);
-
-      ctf_dynhash_remove (movref->caf_movable_refs, movref);
-
-      free (movref);
     }
 }
 
 /* Free an atom.  */
 static void
-ctf_str_free_atom (void *a)
+ctf_str_free_atom (void *a, void *fp_)
 {
   ctf_str_atom_t *atom = a;
+  ctf_dict_t *fp = fp_;
 
-  ctf_str_purge_atom_refs (atom);
+  ctf_str_purge_atom_refs (fp, atom);
 
   if (atom->csa_flags & CTF_STR_ATOM_FREEABLE)
     free (atom->csa_str);
@@ -210,8 +200,8 @@ ctf_str_create_atoms (ctf_dict_t *fp)
 {
   size_t i;
 
-  fp->ctf_str_atoms = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
-					  NULL, ctf_str_free_atom);
+  fp->ctf_str_atoms = ctf_dynhash_create_arg (ctf_hash_string, ctf_hash_eq_string,
+					      NULL, ctf_str_free_atom, fp);
   if (!fp->ctf_str_atoms)
     return -ENOMEM;
 
@@ -299,38 +289,27 @@ static ctf_str_atom_ref_t *
 aref_create (ctf_dict_t *fp, ctf_str_atom_t *atom, uint32_t *ref, int flags)
 {
   ctf_str_atom_ref_t *aref;
-  size_t s = sizeof (struct ctf_str_atom_ref);
 
-  if (flags & CTF_STR_MOVABLE)
-    s = sizeof (struct ctf_str_atom_ref_movable);
-
-  aref = malloc (s);
+  aref = malloc (sizeof (struct ctf_str_atom_ref));
 
   if (!aref)
     return NULL;
 
   aref->caf_ref = ref;
 
-  /* Movable refs get a backpointer to them in ctf_str_movable_refs, and a
-     pointer to ctf_str_movable_refs itself in the ref, for use when freeing
-     refs: they can be moved later in batches via a call to
-     ctf_str_move_refs.  */
+  /* Movable refs get a backpointer to them in ctf_str_movable_refs: they can be
+     moved later in batches via a call to ctf_str_move_refs.  */
 
   if (flags & CTF_STR_MOVABLE)
     {
-      ctf_str_atom_ref_movable_t *movref = (ctf_str_atom_ref_movable_t *) aref;
-
-      movref->caf_movable_refs = fp->ctf_str_movable_refs;
-
       if (ctf_dynhash_insert (fp->ctf_str_movable_refs, ref, aref) < 0)
 	{
 	  free (aref);
 	  return NULL;
 	}
-      ctf_list_append (&atom->csa_movable_refs, movref);
     }
-  else
-    ctf_list_append (&atom->csa_refs, aref);
+
+  ctf_list_append (&atom->csa_refs, aref);
 
   return aref;
 }
@@ -584,7 +563,7 @@ ctf_str_add_external (ctf_dict_t *fp, const char *str, uint32_t offset)
    refs backpointer for this, because it is done an amortized-constant
    number of times during structure member and enumerand addition, and if we
    did a linear search this would turn such addition into an O(n^2)
-   operation.  Even this is not linear, but it's better than that.  */
+   operation.  */
 int
 ctf_str_move_refs (ctf_dict_t *fp, void *src, size_t len, void *dest)
 {
@@ -595,7 +574,7 @@ ctf_str_move_refs (ctf_dict_t *fp, void *src, size_t len, void *dest)
 
   for (p = (uintptr_t) src; p - (uintptr_t) src < len; p++)
     {
-      ctf_str_atom_ref_movable_t *ref;
+      ctf_str_atom_ref_t *ref;
 
       if ((ref = ctf_dynhash_lookup (fp->ctf_str_movable_refs,
 				     (ctf_str_atom_ref_t *) p)) != NULL)
@@ -620,7 +599,6 @@ void
 ctf_str_remove_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
 {
   ctf_str_atom_ref_t *aref, *anext;
-  ctf_str_atom_ref_movable_t *amovref, *amovnext;
   ctf_str_atom_t *atom = NULL;
 
   atom = ctf_dynhash_lookup (fp->ctf_str_atoms, str);
@@ -634,18 +612,6 @@ ctf_str_remove_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
 	{
 	  ctf_list_delete (&atom->csa_refs, aref);
 	  free (aref);
-	}
-    }
-
-  for (amovref = ctf_list_next (&atom->csa_movable_refs);
-       amovref != NULL; amovref = amovnext)
-    {
-      amovnext = ctf_list_next (amovref);
-      if (amovref->caf_ref == ref)
-	{
-	  ctf_list_delete (&atom->csa_movable_refs, amovref);
-	  ctf_dynhash_remove (fp->ctf_str_movable_refs, ref);
-	  free (amovref);
 	}
     }
 }
@@ -674,18 +640,19 @@ ctf_str_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 /* An adaptor around ctf_purge_atom_refs.  */
 static void
 ctf_str_purge_one_atom_refs (void *key _libctf_unused_, void *value,
-			     void *arg _libctf_unused_)
+			     void *arg)
 {
   ctf_str_atom_t *atom = (ctf_str_atom_t *) value;
+  ctf_dict_t *fp = (ctf_dict_t *) arg;
 
-  ctf_str_purge_atom_refs (atom);
+  ctf_str_purge_atom_refs (fp, atom);
 }
 
 /* Remove all the recorded refs from the atoms table.  */
 void
 ctf_str_purge_refs (ctf_dict_t *fp)
 {
-  ctf_dynhash_iter (fp->ctf_str_atoms, ctf_str_purge_one_atom_refs, NULL);
+  ctf_dynhash_iter (fp->ctf_str_atoms, ctf_str_purge_one_atom_refs, fp);
 }
 
 /* Update a list of refs to the specified value. */
@@ -693,15 +660,10 @@ static void
 ctf_str_update_refs (ctf_str_atom_t *refs, uint32_t value)
 {
   ctf_str_atom_ref_t *ref;
-  ctf_str_atom_ref_movable_t *movref;
 
   for (ref = ctf_list_next (&refs->csa_refs); ref != NULL;
        ref = ctf_list_next (ref))
     *(ref->caf_ref) = value;
-
-  for (movref = ctf_list_next (&refs->csa_movable_refs);
-       movref != NULL; movref = ctf_list_next (movref))
-    *(movref->caf_ref) = value;
 }
 
 /* Sort the strtab.  */
@@ -817,8 +779,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 	goto err_strtab;
 
       if (atom->csa_str[0] == 0 || atom->csa_external_offset
-	  || (ctf_list_empty_p (&atom->csa_refs)
-	      && ctf_list_empty_p (&atom->csa_movable_refs)))
+	  || ctf_list_empty_p (&atom->csa_refs))
 	continue;
 
       strtab->cts_len += strlen (atom->csa_str) + 1;
@@ -854,8 +815,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 	goto err_sorttab;
 
       if (atom->csa_str[0] == 0 || atom->csa_external_offset
-	  || (ctf_list_empty_p (&atom->csa_refs)
-	      && ctf_list_empty_p (&atom->csa_movable_refs)))
+	  || ctf_list_empty_p (&atom->csa_refs))
 	continue;
 
       sorttab[i++] = atom;
@@ -904,8 +864,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
       ctf_str_atom_t *atom = (ctf_str_atom_t *) v;
       uint32_t offset;
 
-      if (ctf_list_empty_p (&atom->csa_refs) &&
-	  ctf_list_empty_p (&atom->csa_movable_refs))
+      if (ctf_list_empty_p (&atom->csa_refs))
 	continue;
 
       if (atom->csa_external_offset)
