@@ -46425,9 +46425,9 @@ query), until the target responds with @samp{l} (lower-case ell, for
 @item qTSTMat:@var{address}
 @anchor{qTSTMat}
 @cindex @samp{qTSTMat} packet
-This packets requests data about static tracepoint markers in the
+This packet requests data about static tracepoint markers in the
 target program at @var{address}.  Replies to this packet follow the
-syntax of the @samp{qTfSTM} and @code{qTsSTM} packets that list static
+syntax of the @code{qTfSTM} and @code{qTsSTM} packets that list static
 tracepoint markers.
 
 @item QTSave:@var{filename}
