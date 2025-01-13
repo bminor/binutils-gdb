@@ -791,17 +791,20 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 
   if ((fp->ctf_structs
        = ctf_dynhash_create_sized (pop[CTF_K_STRUCT], ctf_hash_string,
-				   ctf_hash_eq_string, NULL, NULL)) == NULL)
+				   ctf_hash_eq_string,
+				   NULL, NULL, NULL)) == NULL)
     return ENOMEM;
 
   if ((fp->ctf_unions
        = ctf_dynhash_create_sized (pop[CTF_K_UNION], ctf_hash_string,
-				   ctf_hash_eq_string, NULL, NULL)) == NULL)
+				   ctf_hash_eq_string,
+				   NULL, NULL, NULL)) == NULL)
     return ENOMEM;
 
   if ((fp->ctf_enums
        = ctf_dynhash_create_sized (pop[CTF_K_ENUM], ctf_hash_string,
-				   ctf_hash_eq_string, NULL, NULL)) == NULL)
+				   ctf_hash_eq_string,
+				   NULL, NULL, NULL)) == NULL)
     return ENOMEM;
 
   if ((fp->ctf_names
@@ -816,7 +819,8 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 				   pop[CTF_K_RESTRICT] +
 				   pop_enumerators,
 				   ctf_hash_string,
-				   ctf_hash_eq_string, NULL, NULL)) == NULL)
+				   ctf_hash_eq_string,
+				   NULL, NULL, NULL)) == NULL)
     return ENOMEM;
 
   if ((fp->ctf_conflicting_enums
