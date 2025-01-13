@@ -651,7 +651,12 @@ extern int ctf_hash_eq_string (const void *, const void *);
 extern int ctf_hash_eq_type_key (const void *, const void *);
 extern int ctf_hash_eq_type_id_key (const void *, const void *);
 
+/* Freeing functions.  ctf_hash_free_fun is used unless the arg
+   parameter to ctf_dynhash_create_{arg,sized} is non-NULL.
+   There is no way to pass a NULL arg to ctf_hash_free_arg_fun.  */
+
 typedef void (*ctf_hash_free_fun) (void *);
+typedef void (*ctf_hash_free_arg_fun) (void *, void *);
 
 typedef void (*ctf_hash_iter_f) (void *key, void *value, void *arg);
 typedef int (*ctf_hash_iter_remove_f) (void *key, void *value, void *arg);
@@ -661,10 +666,14 @@ typedef int (*ctf_hash_sort_f) (const ctf_next_hkv_t *, const ctf_next_hkv_t *,
 
 extern ctf_dynhash_t *ctf_dynhash_create (ctf_hash_fun, ctf_hash_eq_fun,
 					  ctf_hash_free_fun, ctf_hash_free_fun);
+extern ctf_dynhash_t *ctf_dynhash_create_arg (ctf_hash_fun, ctf_hash_eq_fun,
+					      ctf_hash_free_arg_fun,
+					      ctf_hash_free_arg_fun, void *);
 extern ctf_dynhash_t *ctf_dynhash_create_sized (unsigned long, ctf_hash_fun,
 						ctf_hash_eq_fun,
-						ctf_hash_free_fun,
-						ctf_hash_free_fun);
+						ctf_hash_free_arg_fun,
+						ctf_hash_free_arg_fun,
+						void *);
 
 extern int ctf_dynhash_insert (ctf_dynhash_t *, void *, void *);
 extern void ctf_dynhash_remove (ctf_dynhash_t *, const void *);

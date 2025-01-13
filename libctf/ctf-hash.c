@@ -46,13 +46,54 @@ typedef struct ctf_helem
   ctf_dynhash_t *owner;          /* The hash that owns us.  */
 } ctf_helem_t;
 
-/* Equally, the key_free and value_free may not exist.  */
+/* Equally, the key_free_ and value_free_ may not exist: if neither do, the
+   arg will not exist either.  */
 
 struct ctf_dynhash
 {
   struct htab *htab;
-  ctf_hash_free_fun key_free;
-  ctf_hash_free_fun value_free;
+
+  /* The freeing functions may be of type ctf_hash_free_fun, if arg is NULL,
+     or ctf_hash_free_arg_fun, if it is not.
+
+     Everything from this point on is allocated only if we have at least one
+     freeing function defined.  */
+
+#ifdef __GNUC__
+  __extension__
+  union
+  {
+    ctf_hash_free_fun key_free_;
+    ctf_hash_free_arg_fun key_arg_free_;
+  };
+
+  __extension__
+  union
+  {
+    ctf_hash_free_fun value_free_;
+    ctf_hash_free_arg_fun value_arg_free_;
+  };
+#else
+  union
+  {
+    ctf_hash_free_fun key_free_;
+    ctf_hash_free_arg_fun key_arg_free_;
+  } _k;
+
+  union
+  {
+    ctf_hash_free_fun value_free_;
+    ctf_hash_free_arg_fun value_arg_free_;
+  } _v;
+
+#define key_free_ _k.key_free_
+#define key_arg_free_ _k.key_arg_free_
+#define value_free_ _v.value_free_
+#define value_arg_free_ _v.value_arg_free_
+
+#endif
+
+  void *arg;			/* arg to freeing functions.  */
 };
 
 /* Hash and eq functions for the dynhash and hash. */
@@ -146,17 +187,30 @@ ctf_dynhash_item_free (void *item)
 {
   ctf_helem_t *helem = item;
 
-  if (helem->owner->key_free && helem->key)
-    helem->owner->key_free (helem->key);
-  if (helem->owner->value_free && helem->value)
-    helem->owner->value_free (helem->value);
+  if (helem->owner->key_free_ && helem->key)
+    {
+      if (!helem->owner->arg)
+	helem->owner->key_free_ (helem->key);
+      else
+	helem->owner->key_arg_free_ (helem->key, helem->owner->arg);
+    }
+  if (helem->owner->value_free_ && helem->value)
+    {
+      if (!helem->owner->arg)
+	helem->owner->value_free_ (helem->value);
+      else
+	{
+	  helem->owner->value_arg_free_ (helem->value, helem->owner->arg);
+	}
+    }
   free (helem);
 }
 
 ctf_dynhash_t *
 ctf_dynhash_create_sized (unsigned long nelems, ctf_hash_fun hash_fun,
-			  ctf_hash_eq_fun eq_fun, ctf_hash_free_fun key_free,
-			  ctf_hash_free_fun value_free)
+			  ctf_hash_eq_fun eq_fun,
+			  ctf_hash_free_arg_fun key_free,
+			  ctf_hash_free_arg_fun value_free, void *arg)
 {
   ctf_dynhash_t *dynhash;
   htab_del del = ctf_dynhash_item_free;
@@ -165,7 +219,7 @@ ctf_dynhash_create_sized (unsigned long nelems, ctf_hash_fun hash_fun,
     dynhash = malloc (sizeof (ctf_dynhash_t));
   else
     {
-      void *p = malloc (offsetof (ctf_dynhash_t, key_free));
+      void *p = malloc (offsetof (ctf_dynhash_t, key_free_));
       dynhash = p;
     }
   if (!dynhash)
@@ -183,20 +237,44 @@ ctf_dynhash_create_sized (unsigned long nelems, ctf_hash_fun hash_fun,
 
   if (key_free || value_free)
     {
-      dynhash->key_free = key_free;
-      dynhash->value_free = value_free;
+      dynhash->key_arg_free_ = key_free;
+      dynhash->value_arg_free_ = value_free;
+      dynhash->arg = arg;
     }
 
   return dynhash;
 }
 
 ctf_dynhash_t *
-ctf_dynhash_create (ctf_hash_fun hash_fun, ctf_hash_eq_fun eq_fun,
-		    ctf_hash_free_fun key_free, ctf_hash_free_fun value_free)
+ctf_dynhash_create_arg (ctf_hash_fun hash_fun, ctf_hash_eq_fun eq_fun,
+			ctf_hash_free_arg_fun key_free,
+			ctf_hash_free_arg_fun value_free,
+			void *arg)
 {
   /* 7 is arbitrary and not benchmarked yet.  */
 
-  return ctf_dynhash_create_sized (7, hash_fun, eq_fun, key_free, value_free);
+  return ctf_dynhash_create_sized (7, hash_fun, eq_fun, key_free, value_free, arg);
+}
+
+ctf_dynhash_t *
+ctf_dynhash_create (ctf_hash_fun hash_fun, ctf_hash_eq_fun eq_fun,
+		    ctf_hash_free_fun key_free, ctf_hash_free_fun value_free)
+{
+  union cast
+  {
+    ctf_hash_free_fun in;
+    ctf_hash_free_arg_fun out;
+  };
+  union cast key_arg_free;
+  union cast value_arg_free;
+
+  key_arg_free.in = key_free;
+  value_arg_free.in = value_free;
+
+  /* 7 is arbitrary and not benchmarked yet.  */
+
+  return ctf_dynhash_create_sized (7, hash_fun, eq_fun, key_arg_free.out,
+				   value_arg_free.out, NULL);
 }
 
 static ctf_helem_t **
@@ -209,7 +287,8 @@ ctf_hashtab_lookup (struct htab *htab, const void *key, enum insert_option inser
 static ctf_helem_t *
 ctf_hashtab_insert (struct htab *htab, void *key, void *value,
 		    ctf_hash_free_fun key_free,
-		    ctf_hash_free_fun value_free)
+		    ctf_hash_free_fun value_free,
+		    void *arg)
 {
   ctf_helem_t **slot;
 
@@ -238,10 +317,37 @@ ctf_hashtab_insert (struct htab *htab, void *key, void *value,
     }
   else
     {
+      union cast
+      {
+	ctf_hash_free_fun in;
+	ctf_hash_free_arg_fun out;
+      };
+
       if (key_free)
-	  key_free (key);
+	{
+	  {if (!arg)
+	      key_free (key);
+	    else
+	      {
+		union cast key_arg_free;
+
+		key_arg_free.in = key_free;
+		key_arg_free.out (key, arg);
+	      }
+	  }
+	}
       if (value_free)
-	  value_free ((*slot)->value);
+	{
+	  if (!arg)
+	    value_free ((*slot)->value);
+	  else
+	    {
+	      union cast value_arg_free;
+
+	      value_arg_free.in = value_free;
+	      value_arg_free.out ((*slot)->value, arg);
+	    }
+	}
     }
   (*slot)->value = value;
   return *slot;
@@ -252,14 +358,16 @@ ctf_dynhash_insert (ctf_dynhash_t *hp, void *key, void *value)
 {
   ctf_helem_t *slot;
   ctf_hash_free_fun key_free = NULL, value_free = NULL;
+  void *arg = NULL;
 
   if (hp->htab->del_f == ctf_dynhash_item_free)
     {
-      key_free = hp->key_free;
-      value_free = hp->value_free;
+      key_free = hp->key_free_;
+      value_free = hp->value_free_;
+      arg = hp->arg;
     }
   slot = ctf_hashtab_insert (hp->htab, key, value,
-			     key_free, value_free);
+			     key_free, value_free, arg);
 
   if (!slot)
     return -errno;
@@ -579,7 +687,8 @@ ctf_dynhash_destroy (ctf_dynhash_t *hp)
 /* The dynset, used for sets of keys with no value.  The implementation of this
    can be much simpler, because without a value the slot can simply be the
    stored key, which means we don't need to store the freeing functions and the
-   dynset itself is just a htab.  */
+   dynset itself is just a htab.  There is no support for freeing
+   functions with args.  */
 
 ctf_dynset_t *
 ctf_dynset_create (htab_hash hash_fun, htab_eq eq_fun,
