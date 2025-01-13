@@ -231,17 +231,6 @@ ctf_str_append_noerr (char *s, const char *append)
   return new_s;
 }
 
-/* Store the specified error code into errp if it is non-NULL, and then
-   return NULL for the benefit of the caller.  */
-
-void *
-ctf_set_open_errno (int *errp, int error)
-{
-  if (errp != NULL)
-    *errp = error;
-  return NULL;
-}
-
 /* Create a ctf_next_t.  */
 
 ctf_next_t *

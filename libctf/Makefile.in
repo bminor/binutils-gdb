@@ -197,22 +197,22 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(infodir)" \
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libctf_nobfd_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-am__libctf_nobfd_la_SOURCES_DIST = ctf-archive.c ctf-dump.c \
+am__libctf_nobfd_la_SOURCES_DIST = ctf-api.c ctf-archive.c ctf-dump.c \
 	ctf-create.c ctf-decl.c ctf-error.c ctf-hash.c ctf-labels.c \
-	ctf-dedup.c ctf-link.c ctf-lookup.c ctf-open.c ctf-serialize.c \
-	ctf-sha1.c ctf-string.c ctf-subr.c ctf-types.c ctf-util.c \
+	ctf-dedup.c ctf-link.c ctf-lookup.c ctf-open.c ctf-port.c \
+	ctf-serialize.c ctf-sha1.c ctf-string.c ctf-types.c ctf-util.c \
 	ctf-qsort_r.c
 @NEED_CTF_QSORT_R_TRUE@am__objects_1 = libctf_nobfd_la-ctf-qsort_r.lo
-am_libctf_nobfd_la_OBJECTS = libctf_nobfd_la-ctf-archive.lo \
-	libctf_nobfd_la-ctf-dump.lo libctf_nobfd_la-ctf-create.lo \
-	libctf_nobfd_la-ctf-decl.lo libctf_nobfd_la-ctf-error.lo \
-	libctf_nobfd_la-ctf-hash.lo libctf_nobfd_la-ctf-labels.lo \
-	libctf_nobfd_la-ctf-dedup.lo libctf_nobfd_la-ctf-link.lo \
-	libctf_nobfd_la-ctf-lookup.lo libctf_nobfd_la-ctf-open.lo \
+am_libctf_nobfd_la_OBJECTS = libctf_nobfd_la-ctf-api.lo \
+	libctf_nobfd_la-ctf-archive.lo libctf_nobfd_la-ctf-dump.lo \
+	libctf_nobfd_la-ctf-create.lo libctf_nobfd_la-ctf-decl.lo \
+	libctf_nobfd_la-ctf-error.lo libctf_nobfd_la-ctf-hash.lo \
+	libctf_nobfd_la-ctf-labels.lo libctf_nobfd_la-ctf-dedup.lo \
+	libctf_nobfd_la-ctf-link.lo libctf_nobfd_la-ctf-lookup.lo \
+	libctf_nobfd_la-ctf-open.lo libctf_nobfd_la-ctf-port.lo \
 	libctf_nobfd_la-ctf-serialize.lo libctf_nobfd_la-ctf-sha1.lo \
-	libctf_nobfd_la-ctf-string.lo libctf_nobfd_la-ctf-subr.lo \
-	libctf_nobfd_la-ctf-types.lo libctf_nobfd_la-ctf-util.lo \
-	$(am__objects_1)
+	libctf_nobfd_la-ctf-string.lo libctf_nobfd_la-ctf-types.lo \
+	libctf_nobfd_la-ctf-util.lo $(am__objects_1)
 libctf_nobfd_la_OBJECTS = $(am_libctf_nobfd_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -226,21 +226,21 @@ libctf_nobfd_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 @INSTALL_LIBBFD_TRUE@am_libctf_nobfd_la_rpath = -rpath $(libdir)
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1)
 libctf_la_DEPENDENCIES = ../bfd/libbfd.la $(am__DEPENDENCIES_2)
-am__libctf_la_SOURCES_DIST = ctf-archive.c ctf-dump.c ctf-create.c \
-	ctf-decl.c ctf-error.c ctf-hash.c ctf-labels.c ctf-dedup.c \
-	ctf-link.c ctf-lookup.c ctf-open.c ctf-serialize.c ctf-sha1.c \
-	ctf-string.c ctf-subr.c ctf-types.c ctf-util.c ctf-qsort_r.c \
-	ctf-open-bfd.c
+am__libctf_la_SOURCES_DIST = ctf-api.c ctf-archive.c ctf-dump.c \
+	ctf-create.c ctf-decl.c ctf-error.c ctf-hash.c ctf-labels.c \
+	ctf-dedup.c ctf-link.c ctf-lookup.c ctf-open.c ctf-port.c \
+	ctf-serialize.c ctf-sha1.c ctf-string.c ctf-types.c ctf-util.c \
+	ctf-qsort_r.c ctf-open-bfd.c
 @NEED_CTF_QSORT_R_TRUE@am__objects_2 = libctf_la-ctf-qsort_r.lo
-am__objects_3 = libctf_la-ctf-archive.lo libctf_la-ctf-dump.lo \
-	libctf_la-ctf-create.lo libctf_la-ctf-decl.lo \
-	libctf_la-ctf-error.lo libctf_la-ctf-hash.lo \
-	libctf_la-ctf-labels.lo libctf_la-ctf-dedup.lo \
-	libctf_la-ctf-link.lo libctf_la-ctf-lookup.lo \
-	libctf_la-ctf-open.lo libctf_la-ctf-serialize.lo \
+am__objects_3 = libctf_la-ctf-api.lo libctf_la-ctf-archive.lo \
+	libctf_la-ctf-dump.lo libctf_la-ctf-create.lo \
+	libctf_la-ctf-decl.lo libctf_la-ctf-error.lo \
+	libctf_la-ctf-hash.lo libctf_la-ctf-labels.lo \
+	libctf_la-ctf-dedup.lo libctf_la-ctf-link.lo \
+	libctf_la-ctf-lookup.lo libctf_la-ctf-open.lo \
+	libctf_la-ctf-port.lo libctf_la-ctf-serialize.lo \
 	libctf_la-ctf-sha1.lo libctf_la-ctf-string.lo \
-	libctf_la-ctf-subr.lo libctf_la-ctf-types.lo \
-	libctf_la-ctf-util.lo $(am__objects_2)
+	libctf_la-ctf-types.lo libctf_la-ctf-util.lo $(am__objects_2)
 am_libctf_la_OBJECTS = $(am__objects_3) libctf_la-ctf-open-bfd.lo
 libctf_la_OBJECTS = $(am_libctf_la_OBJECTS)
 libctf_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -607,10 +607,11 @@ libctf_nobfd_la_LIBADD = @CTF_LIBADD@ $(ZLIB)
 libctf_ldflags_nover = -version-info 0:0:0 @SHARED_LDFLAGS@
 libctf_nobfd_la_LDFLAGS = $(libctf_ldflags_nover) @VERSION_FLAGS_NOBFD@
 libctf_nobfd_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=1
-libctf_nobfd_la_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c \
-	ctf-decl.c ctf-error.c ctf-hash.c ctf-labels.c ctf-dedup.c \
-	ctf-link.c ctf-lookup.c ctf-open.c ctf-serialize.c ctf-sha1.c \
-	ctf-string.c ctf-subr.c ctf-types.c ctf-util.c $(am__append_1)
+libctf_nobfd_la_SOURCES = ctf-api.c ctf-archive.c ctf-dump.c \
+	ctf-create.c ctf-decl.c ctf-error.c ctf-hash.c ctf-labels.c \
+	ctf-dedup.c ctf-link.c ctf-lookup.c ctf-open.c ctf-port.c \
+	ctf-serialize.c ctf-sha1.c ctf-string.c ctf-types.c ctf-util.c \
+	$(am__append_1)
 
 # @CTF_LIBADD@ appears here twice: once, to force libiberty to get searched before
 # install-time libbfd adds a -L to the install dir (possibly pointing at an
@@ -755,6 +756,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-api.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-archive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-create.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-decl.Plo@am__quote@
@@ -767,13 +769,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-lookup.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-open-bfd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-open.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-port.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-qsort_r.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-serialize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-sha1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-string.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-subr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_la-ctf-util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-api.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-archive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-create.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-decl.Plo@am__quote@
@@ -785,11 +788,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-link.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-lookup.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-open.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-port.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-qsort_r.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-serialize.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-sha1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-string.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-subr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libctf_nobfd_la-ctf-util.Plo@am__quote@
 
@@ -813,6 +816,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+libctf_nobfd_la-ctf-api.lo: ctf-api.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_nobfd_la-ctf-api.lo -MD -MP -MF $(DEPDIR)/libctf_nobfd_la-ctf-api.Tpo -c -o libctf_nobfd_la-ctf-api.lo `test -f 'ctf-api.c' || echo '$(srcdir)/'`ctf-api.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctf_nobfd_la-ctf-api.Tpo $(DEPDIR)/libctf_nobfd_la-ctf-api.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ctf-api.c' object='libctf_nobfd_la-ctf-api.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_nobfd_la-ctf-api.lo `test -f 'ctf-api.c' || echo '$(srcdir)/'`ctf-api.c
 
 libctf_nobfd_la-ctf-archive.lo: ctf-archive.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_nobfd_la-ctf-archive.lo -MD -MP -MF $(DEPDIR)/libctf_nobfd_la-ctf-archive.Tpo -c -o libctf_nobfd_la-ctf-archive.lo `test -f 'ctf-archive.c' || echo '$(srcdir)/'`ctf-archive.c
@@ -891,6 +901,13 @@ libctf_nobfd_la-ctf-open.lo: ctf-open.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_nobfd_la-ctf-open.lo `test -f 'ctf-open.c' || echo '$(srcdir)/'`ctf-open.c
 
+libctf_nobfd_la-ctf-port.lo: ctf-port.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_nobfd_la-ctf-port.lo -MD -MP -MF $(DEPDIR)/libctf_nobfd_la-ctf-port.Tpo -c -o libctf_nobfd_la-ctf-port.lo `test -f 'ctf-port.c' || echo '$(srcdir)/'`ctf-port.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctf_nobfd_la-ctf-port.Tpo $(DEPDIR)/libctf_nobfd_la-ctf-port.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ctf-port.c' object='libctf_nobfd_la-ctf-port.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_nobfd_la-ctf-port.lo `test -f 'ctf-port.c' || echo '$(srcdir)/'`ctf-port.c
+
 libctf_nobfd_la-ctf-serialize.lo: ctf-serialize.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_nobfd_la-ctf-serialize.lo -MD -MP -MF $(DEPDIR)/libctf_nobfd_la-ctf-serialize.Tpo -c -o libctf_nobfd_la-ctf-serialize.lo `test -f 'ctf-serialize.c' || echo '$(srcdir)/'`ctf-serialize.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctf_nobfd_la-ctf-serialize.Tpo $(DEPDIR)/libctf_nobfd_la-ctf-serialize.Plo
@@ -912,13 +929,6 @@ libctf_nobfd_la-ctf-string.lo: ctf-string.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_nobfd_la-ctf-string.lo `test -f 'ctf-string.c' || echo '$(srcdir)/'`ctf-string.c
 
-libctf_nobfd_la-ctf-subr.lo: ctf-subr.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_nobfd_la-ctf-subr.lo -MD -MP -MF $(DEPDIR)/libctf_nobfd_la-ctf-subr.Tpo -c -o libctf_nobfd_la-ctf-subr.lo `test -f 'ctf-subr.c' || echo '$(srcdir)/'`ctf-subr.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctf_nobfd_la-ctf-subr.Tpo $(DEPDIR)/libctf_nobfd_la-ctf-subr.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ctf-subr.c' object='libctf_nobfd_la-ctf-subr.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_nobfd_la-ctf-subr.lo `test -f 'ctf-subr.c' || echo '$(srcdir)/'`ctf-subr.c
-
 libctf_nobfd_la-ctf-types.lo: ctf-types.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_nobfd_la-ctf-types.lo -MD -MP -MF $(DEPDIR)/libctf_nobfd_la-ctf-types.Tpo -c -o libctf_nobfd_la-ctf-types.lo `test -f 'ctf-types.c' || echo '$(srcdir)/'`ctf-types.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctf_nobfd_la-ctf-types.Tpo $(DEPDIR)/libctf_nobfd_la-ctf-types.Plo
@@ -939,6 +949,13 @@ libctf_nobfd_la-ctf-qsort_r.lo: ctf-qsort_r.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ctf-qsort_r.c' object='libctf_nobfd_la-ctf-qsort_r.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_nobfd_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_nobfd_la-ctf-qsort_r.lo `test -f 'ctf-qsort_r.c' || echo '$(srcdir)/'`ctf-qsort_r.c
+
+libctf_la-ctf-api.lo: ctf-api.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_la-ctf-api.lo -MD -MP -MF $(DEPDIR)/libctf_la-ctf-api.Tpo -c -o libctf_la-ctf-api.lo `test -f 'ctf-api.c' || echo '$(srcdir)/'`ctf-api.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctf_la-ctf-api.Tpo $(DEPDIR)/libctf_la-ctf-api.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ctf-api.c' object='libctf_la-ctf-api.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_la-ctf-api.lo `test -f 'ctf-api.c' || echo '$(srcdir)/'`ctf-api.c
 
 libctf_la-ctf-archive.lo: ctf-archive.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_la-ctf-archive.lo -MD -MP -MF $(DEPDIR)/libctf_la-ctf-archive.Tpo -c -o libctf_la-ctf-archive.lo `test -f 'ctf-archive.c' || echo '$(srcdir)/'`ctf-archive.c
@@ -1017,6 +1034,13 @@ libctf_la-ctf-open.lo: ctf-open.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_la-ctf-open.lo `test -f 'ctf-open.c' || echo '$(srcdir)/'`ctf-open.c
 
+libctf_la-ctf-port.lo: ctf-port.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_la-ctf-port.lo -MD -MP -MF $(DEPDIR)/libctf_la-ctf-port.Tpo -c -o libctf_la-ctf-port.lo `test -f 'ctf-port.c' || echo '$(srcdir)/'`ctf-port.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctf_la-ctf-port.Tpo $(DEPDIR)/libctf_la-ctf-port.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ctf-port.c' object='libctf_la-ctf-port.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_la-ctf-port.lo `test -f 'ctf-port.c' || echo '$(srcdir)/'`ctf-port.c
+
 libctf_la-ctf-serialize.lo: ctf-serialize.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_la-ctf-serialize.lo -MD -MP -MF $(DEPDIR)/libctf_la-ctf-serialize.Tpo -c -o libctf_la-ctf-serialize.lo `test -f 'ctf-serialize.c' || echo '$(srcdir)/'`ctf-serialize.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctf_la-ctf-serialize.Tpo $(DEPDIR)/libctf_la-ctf-serialize.Plo
@@ -1037,13 +1061,6 @@ libctf_la-ctf-string.lo: ctf-string.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ctf-string.c' object='libctf_la-ctf-string.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_la-ctf-string.lo `test -f 'ctf-string.c' || echo '$(srcdir)/'`ctf-string.c
-
-libctf_la-ctf-subr.lo: ctf-subr.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_la-ctf-subr.lo -MD -MP -MF $(DEPDIR)/libctf_la-ctf-subr.Tpo -c -o libctf_la-ctf-subr.lo `test -f 'ctf-subr.c' || echo '$(srcdir)/'`ctf-subr.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libctf_la-ctf-subr.Tpo $(DEPDIR)/libctf_la-ctf-subr.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='ctf-subr.c' object='libctf_la-ctf-subr.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libctf_la-ctf-subr.lo `test -f 'ctf-subr.c' || echo '$(srcdir)/'`ctf-subr.c
 
 libctf_la-ctf-types.lo: ctf-types.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libctf_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libctf_la-ctf-types.lo -MD -MP -MF $(DEPDIR)/libctf_la-ctf-types.Tpo -c -o libctf_la-ctf-types.lo `test -f 'ctf-types.c' || echo '$(srcdir)/'`ctf-types.c
