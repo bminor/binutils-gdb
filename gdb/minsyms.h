@@ -240,8 +240,8 @@ extern bound_minimal_symbol lookup_minimal_symbol_linkage
    OBJF_MAINLINE will be considered.  */
 
 extern bound_minimal_symbol lookup_minimal_symbol_linkage
-  (program_space *pspace, const char *name, bool only_main)
-  ATTRIBUTE_NONNULL (1);
+  (program_space *pspace, const char *name, bool match_static_type,
+   bool only_main) ATTRIBUTE_NONNULL (1);
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and PC.  If OBJF is non-NULL,

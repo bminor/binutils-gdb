@@ -589,7 +589,7 @@ lookup_minimal_symbol_linkage (const char *name, struct objfile *objf,
 
 bound_minimal_symbol
 lookup_minimal_symbol_linkage (program_space *pspace, const char *name,
-			       bool only_main)
+			       bool match_static_type, bool only_main)
 {
   for (objfile *objfile : pspace->objfiles ())
     {
@@ -599,9 +599,8 @@ lookup_minimal_symbol_linkage (program_space *pspace, const char *name,
       if (only_main && (objfile->flags & OBJF_MAINLINE) == 0)
 	continue;
 
-      bound_minimal_symbol minsym = lookup_minimal_symbol_linkage (name,
-								   objfile,
-								   false);
+      bound_minimal_symbol minsym
+	= lookup_minimal_symbol_linkage (name, objfile, match_static_type);
       if (minsym.minsym != nullptr)
 	return minsym;
     }

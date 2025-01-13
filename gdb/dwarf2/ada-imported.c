@@ -36,7 +36,8 @@ ada_imported_read_variable (struct symbol *symbol, const frame_info_ptr &frame)
 {
   const char *name = get_imported_name (symbol);
   bound_minimal_symbol minsym
-    = lookup_minimal_symbol_linkage (symbol->objfile ()->pspace (), name, false);
+    = lookup_minimal_symbol_linkage (symbol->objfile ()->pspace (), name,
+				     true, false);
   if (minsym.minsym == nullptr)
     error (_("could not find imported name %s"), name);
   return value_at (symbol->type (), minsym.value_address ());
