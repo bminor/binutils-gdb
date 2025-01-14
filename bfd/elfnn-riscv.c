@@ -3658,13 +3658,47 @@ riscv_elf_plt_sym_val (bfd_vma i, const asection *plt,
   return plt->vma + PLT_HEADER_SIZE + i * PLT_ENTRY_SIZE;
 }
 
+/* Used to decide how to sort relocs in an optimal manner for the
+   dynamic linker, before writing them out.  */
+
 static enum elf_reloc_type_class
-riscv_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+riscv_reloc_type_class (const struct bfd_link_info *info,
 			const asection *rel_sec ATTRIBUTE_UNUSED,
 			const Elf_Internal_Rela *rela)
 {
+  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
+
+  if (htab->elf.dynsym != NULL
+      && htab->elf.dynsym->contents != NULL)
+    {
+      /* Check relocation against STT_GNU_IFUNC symbol if there are
+	 dynamic symbols.  */
+      bfd *abfd = info->output_bfd;
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+      unsigned long r_symndx = ELFNN_R_SYM (rela->r_info);
+      if (r_symndx != STN_UNDEF)
+	{
+	  Elf_Internal_Sym sym;
+	  if (!bed->s->swap_symbol_in (abfd,
+				       (htab->elf.dynsym->contents
+					+ r_symndx * bed->s->sizeof_sym),
+				       0, &sym))
+	    {
+	      /* xgettext:c-format */
+	      _bfd_error_handler (_("%pB symbol number %lu references"
+				    " nonexistent SHT_SYMTAB_SHNDX section"),
+				  abfd, r_symndx);
+	      /* Ideally an error class should be returned here.  */
+	    }
+	  else if (ELF_ST_TYPE (sym.st_info) == STT_GNU_IFUNC)
+	    return reloc_class_ifunc;
+	}
+    }
+
   switch (ELFNN_R_TYPE (rela->r_info))
     {
+    case R_RISCV_IRELATIVE:
+      return reloc_class_ifunc;
     case R_RISCV_RELATIVE:
       return reloc_class_relative;
     case R_RISCV_JUMP_SLOT:
