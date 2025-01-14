@@ -24,6 +24,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-style.h"
+#include "gdbcore.h"
 #include "gdbsupport/unordered_map.h"
 #include "inf-loop.h"
 #include "inferior.h"
@@ -215,6 +216,12 @@ struct amd_dbgapi_inferior_info
   /* List of pending events the amd-dbgapi target retrieved from the dbgapi.  */
   std::list<std::pair<ptid_t, target_waitstatus>> wave_events;
 
+  /* Map of threads with ongoing displaced steps to corresponding amd-dbgapi
+     displaced stepping handles.  */
+  gdb::unordered_map<thread_info *,
+		     decltype (amd_dbgapi_displaced_stepping_id_t::handle)>
+    stepping_id_map;
+
   /* Map of wave ID to wave_info.  We cache wave_info objects because
      we need to access the info after the wave is gone, in the thread
      exit nofication.  E.g.:
@@ -290,6 +297,21 @@ struct amd_dbgapi_target final : public target_ops
 
   bool stopped_by_sw_breakpoint () override;
   bool stopped_by_hw_breakpoint () override;
+
+  bool supports_displaced_step (thread_info *thread) override
+  {
+    /* Handle displaced stepping for GPU threads only.  */
+    if (!ptid_is_gpu (thread->ptid))
+      return beneath ()->supports_displaced_step (thread);
+
+    return true;
+  }
+
+  displaced_step_prepare_status displaced_step_prepare
+    (thread_info *thread, CORE_ADDR &displaced_pc) override;
+
+  displaced_step_finish_status displaced_step_finish
+    (thread_info *thread, const target_waitstatus &status) override;
 
 private:
   /* True if we must report thread events.  */
@@ -1895,6 +1917,122 @@ amd_dbgapi_target::update_thread_list ()
 
   /* Give the beneath target a chance to do extra processing.  */
   this->beneath ()->update_thread_list ();
+}
+
+displaced_step_prepare_status
+amd_dbgapi_target::displaced_step_prepare (thread_info *thread,
+					   CORE_ADDR &displaced_pc)
+{
+  if (!ptid_is_gpu (thread->ptid))
+    return beneath ()->displaced_step_prepare (thread, displaced_pc);
+
+  gdb_assert (!thread->displaced_step_state.in_progress ());
+
+  /* Read the bytes that were overwritten by the breakpoint instruction being
+     stepped over.  */
+  CORE_ADDR original_pc = regcache_read_pc (get_thread_regcache (thread));
+  gdbarch *arch = get_thread_regcache (thread)->arch ();
+  size_t size = get_amdgpu_gdbarch_tdep (arch)->breakpoint_instruction_size;
+  gdb::byte_vector overwritten_bytes (size);
+
+  read_memory (original_pc, overwritten_bytes.data (), size);
+
+  /* Ask dbgapi to start the displaced step.  */
+  amd_dbgapi_wave_id_t wave_id = get_amd_dbgapi_wave_id (thread->ptid);
+  amd_dbgapi_displaced_stepping_id_t stepping_id;
+  amd_dbgapi_status_t status
+    = amd_dbgapi_displaced_stepping_start (wave_id, overwritten_bytes.data (),
+					   &stepping_id);
+
+  switch (status)
+   {
+    case AMD_DBGAPI_STATUS_SUCCESS:
+      break;
+
+    case AMD_DBGAPI_STATUS_ERROR_DISPLACED_STEPPING_BUFFER_NOT_AVAILABLE:
+      return DISPLACED_STEP_PREPARE_STATUS_UNAVAILABLE;
+
+    case AMD_DBGAPI_STATUS_ERROR_ILLEGAL_INSTRUCTION:
+      return DISPLACED_STEP_PREPARE_STATUS_CANT;
+
+    default:
+      error (_("amd_dbgapi_displaced_stepping_start failed (%s)"),
+	   get_status_string (status));
+    }
+
+  /* Save the displaced stepping id in the per-inferior info.  */
+  amd_dbgapi_inferior_info *info = get_amd_dbgapi_inferior_info (thread->inf);
+
+  bool inserted
+    = info->stepping_id_map.emplace (thread, stepping_id.handle).second;
+  gdb_assert (inserted);
+
+  /* Get the new (displaced) PC.  */
+  status = amd_dbgapi_wave_get_info (wave_id, AMD_DBGAPI_WAVE_INFO_PC,
+				     sizeof (displaced_pc), &displaced_pc);
+  if (status != AMD_DBGAPI_STATUS_SUCCESS)
+    {
+      amd_dbgapi_displaced_stepping_complete (wave_id, stepping_id);
+      error (_("amd_dbgapi_wave_get_info failed (%s), could not get the "
+	       "thread's displaced PC."),
+	     get_status_string (status));
+    }
+
+  displaced_debug_printf ("selected buffer at %#lx", displaced_pc);
+
+  /* We may have written some registers, so flush the register cache.  */
+  registers_changed_thread (thread);
+
+  return DISPLACED_STEP_PREPARE_STATUS_OK;
+}
+
+displaced_step_finish_status
+amd_dbgapi_target::displaced_step_finish (thread_info *thread,
+					  const target_waitstatus &ws)
+{
+  if (!ptid_is_gpu (thread->ptid))
+    return beneath ()->displaced_step_finish (thread, ws);
+
+  gdb_assert (thread->displaced_step_state.in_progress ());
+
+  /* Find the displaced stepping id for this thread.  */
+  amd_dbgapi_inferior_info *info = get_amd_dbgapi_inferior_info (thread->inf);
+  auto entry = info->stepping_id_map.extract (thread);
+
+  gdb_assert (entry.has_value ());
+  amd_dbgapi_displaced_stepping_id_t stepping_id {entry->second};
+
+  /* If the thread exited while stepping, we are done.  The code above
+     cleared our associated resources.  We don't want to call dbgapi
+     below: since the thread is gone, we wouldn't be able to find the
+     necessary wave ID.  dbgapi already took care of releasing its
+     displaced-stepping-related resources when it deleted the
+     wave.  */
+  if (ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
+    return DISPLACED_STEP_FINISH_STATUS_OK;
+
+  amd_dbgapi_wave_id_t wave_id = get_amd_dbgapi_wave_id (thread->ptid);
+  amd_dbgapi_wave_stop_reasons_t stop_reason;
+  amd_dbgapi_status_t status
+    = amd_dbgapi_wave_get_info (wave_id, AMD_DBGAPI_WAVE_INFO_STOP_REASON,
+				sizeof (stop_reason), &stop_reason);
+
+  if (status != AMD_DBGAPI_STATUS_SUCCESS)
+    error (_("wave_get_info for wave_%ld failed (%s)"), wave_id.handle,
+	   get_status_string (status));
+
+  status = amd_dbgapi_displaced_stepping_complete (wave_id, stepping_id);
+
+  if (status != AMD_DBGAPI_STATUS_SUCCESS)
+    error (_("amd_dbgapi_displaced_stepping_complete failed (%s)"),
+	   get_status_string (status));
+
+  /* We may have written some registers, so flush the register cache.  */
+  registers_changed_thread (thread);
+
+  return (stop_reason & AMD_DBGAPI_WAVE_STOP_REASON_SINGLE_STEP) != 0
+	   ? DISPLACED_STEP_FINISH_STATUS_OK
+	   : DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED;
 }
 
 /* inferior_created observer.  */
