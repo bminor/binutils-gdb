@@ -47214,7 +47214,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 1, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 1, 1, 0, 0, 0 } } } },
-  { MN_vcomsbf16, 0x2f, 2, SPACE_MAP5, None,
+  { MN_vcomisbf16, 0x2f, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 1, 0, 0, 4, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
       0, 0 },
@@ -48263,7 +48263,7 @@ const char i386_mnemonics[] =
   "\0""vrcpbf16"
   "\0""vcmpbf16"
   "\0""vgetexpbf16"
-  "\0""vcomsbf16"
+  "\0""vcomisbf16"
   "\0""vfpclassbf16"
   "\0""vgetmantbf16"
   "\0""vrsqrtbf16"

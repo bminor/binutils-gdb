@@ -278,11 +278,11 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 d3 17 30 c2 29 7b\s+vcmpbf16 k5,ymm29,WORD BCST \[r9\],0x7b
 \s*[a-f0-9]+:\s*62 f3 17 20 c2 69 7f 7b\s+vcmpbf16 k5,ymm29,YMMWORD PTR \[rcx\+0xfe0\],0x7b
 \s*[a-f0-9]+:\s*62 f3 17 37 c2 6a 80 7b\s+vcmpbf16 k5\{k7\},ymm29,WORD BCST \[rdx-0x100\],0x7b
-\s*[a-f0-9]+:\s*62 05 7d 08 2f f5\s+vcomsbf16 xmm30,xmm29
-\s*[a-f0-9]+:\s*62 25 7d 08 2f b4 f5 00 00 00 10\s+vcomsbf16 xmm30,WORD PTR \[rbp\+r14\*8\+0x10000000\]
-\s*[a-f0-9]+:\s*62 45 7d 08 2f 31\s+vcomsbf16 xmm30,WORD PTR \[r9\]
-\s*[a-f0-9]+:\s*62 65 7d 08 2f 71 7f\s+vcomsbf16 xmm30,WORD PTR \[rcx\+0xfe\]
-\s*[a-f0-9]+:\s*62 65 7d 08 2f 72 80\s+vcomsbf16 xmm30,WORD PTR \[rdx-0x100\]
+\s*[a-f0-9]+:\s*62 05 7d 08 2f f5\s+vcomisbf16 xmm30,xmm29
+\s*[a-f0-9]+:\s*62 25 7d 08 2f b4 f5 00 00 00 10\s+vcomisbf16 xmm30,WORD PTR \[rbp\+r14\*8\+0x10000000\]
+\s*[a-f0-9]+:\s*62 45 7d 08 2f 31\s+vcomisbf16 xmm30,WORD PTR \[r9\]
+\s*[a-f0-9]+:\s*62 65 7d 08 2f 71 7f\s+vcomisbf16 xmm30,WORD PTR \[rcx\+0xfe\]
+\s*[a-f0-9]+:\s*62 65 7d 08 2f 72 80\s+vcomisbf16 xmm30,WORD PTR \[rdx-0x100\]
 \s*[a-f0-9]+:\s*62 93 7f 28 66 ed 7b\s+vfpclassbf16 k5,ymm29,0x7b
 \s*[a-f0-9]+:\s*62 93 7f 08 66 ed 7b\s+vfpclassbf16 k5,xmm29,0x7b
 \s*[a-f0-9]+:\s*62 b3 7f 0f 66 ac f5 00 00 00 10 7b\s+vfpclassbf16 k5\{k7\},XMMWORD PTR \[rbp\+r14\*8\+0x10000000\],0x7b

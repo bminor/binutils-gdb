@@ -69,11 +69,11 @@ _start:
 	vcmpbf16	$123, 4064(%ecx), %ymm5, %k5
 	vcmpbf16	$123, -256(%edx){1to16}, %ymm5, %k5{%k7}
 
-	vcomsbf16	%xmm5, %xmm6
-	vcomsbf16	0x10000000(%esp, %esi, 8), %xmm6
-	vcomsbf16	(%ecx), %xmm6
-	vcomsbf16	254(%ecx), %xmm6
-	vcomsbf16	-256(%edx), %xmm6
+	vcomisbf16	%xmm5, %xmm6
+	vcomisbf16	0x10000000(%esp, %esi, 8), %xmm6
+	vcomisbf16	(%ecx), %xmm6
+	vcomisbf16	254(%ecx), %xmm6
+	vcomisbf16	-256(%edx), %xmm6
 
 	vfpclassbf16	$123, %ymm5, %k5
 	vfpclassbf16	$123, %xmm5, %k5
@@ -152,11 +152,11 @@ _intel:
 	vcmpbf16	k5, ymm5, [ecx+4064], 123
 	vcmpbf16	k5{k7}, ymm5, [edx-256]{1to16}, 123
 
-	vcomsbf16	xmm6, xmm5
-	vcomsbf16	xmm6, WORD PTR [esp+esi*8+0x10000000]
-	vcomsbf16	xmm6, WORD PTR [ecx]
-	vcomsbf16	xmm6, WORD PTR [ecx+254]
-	vcomsbf16	xmm6, WORD PTR [edx-256]
+	vcomisbf16	xmm6, xmm5
+	vcomisbf16	xmm6, WORD PTR [esp+esi*8+0x10000000]
+	vcomisbf16	xmm6, WORD PTR [ecx]
+	vcomisbf16	xmm6, WORD PTR [ecx+254]
+	vcomisbf16	xmm6, WORD PTR [edx-256]
 
 	vfpclassbf16	k5, ymm5, 123
 	vfpclassbf16	k5, xmm5, 123

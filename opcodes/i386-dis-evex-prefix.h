@@ -502,7 +502,7 @@
   {
     { "vcomisY%XH",	{ XMScalar, EXw, EXxEVexS }, 0 },
     { "vcomxs%XH",	{ XMScalar, EXw, EXxEVexS }, 0 },
-    { "vcoms%XB",	{ XMScalar, EXw, EXxEVexS }, 0 },
+    { "vcomis%XB",	{ XMScalar, EXw, EXxEVexS }, 0 },
   },
   /* PREFIX_EVEX_MAP5_51 */
   {

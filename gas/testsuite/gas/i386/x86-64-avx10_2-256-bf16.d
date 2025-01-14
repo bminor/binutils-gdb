@@ -276,11 +276,11 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 d3 17 30 c2 29 7b\s+vcmpbf16 \$0x7b,\(%r9\)\{1to16\},%ymm29,%k5
 \s*[a-f0-9]+:\s*62 f3 17 20 c2 69 7f 7b\s+vcmpbf16 \$0x7b,0xfe0\(%rcx\),%ymm29,%k5
 \s*[a-f0-9]+:\s*62 f3 17 37 c2 6a 80 7b\s+vcmpbf16 \$0x7b,-0x100\(%rdx\)\{1to16\},%ymm29,%k5\{%k7\}
-\s*[a-f0-9]+:\s*62 05 7d 08 2f f5\s+vcomsbf16 %xmm29,%xmm30
-\s*[a-f0-9]+:\s*62 25 7d 08 2f b4 f5 00 00 00 10\s+vcomsbf16 0x10000000\(%rbp,%r14,8\),%xmm30
-\s*[a-f0-9]+:\s*62 45 7d 08 2f 31\s+vcomsbf16 \(%r9\),%xmm30
-\s*[a-f0-9]+:\s*62 65 7d 08 2f 71 7f\s+vcomsbf16 0xfe\(%rcx\),%xmm30
-\s*[a-f0-9]+:\s*62 65 7d 08 2f 72 80\s+vcomsbf16 -0x100\(%rdx\),%xmm30
+\s*[a-f0-9]+:\s*62 05 7d 08 2f f5\s+vcomisbf16 %xmm29,%xmm30
+\s*[a-f0-9]+:\s*62 25 7d 08 2f b4 f5 00 00 00 10\s+vcomisbf16 0x10000000\(%rbp,%r14,8\),%xmm30
+\s*[a-f0-9]+:\s*62 45 7d 08 2f 31\s+vcomisbf16 \(%r9\),%xmm30
+\s*[a-f0-9]+:\s*62 65 7d 08 2f 71 7f\s+vcomisbf16 0xfe\(%rcx\),%xmm30
+\s*[a-f0-9]+:\s*62 65 7d 08 2f 72 80\s+vcomisbf16 -0x100\(%rdx\),%xmm30
 \s*[a-f0-9]+:\s*62 93 7f 28 66 ed 7b\s+vfpclassbf16 \$0x7b,%ymm29,%k5
 \s*[a-f0-9]+:\s*62 93 7f 08 66 ed 7b\s+vfpclassbf16 \$0x7b,%xmm29,%k5
 \s*[a-f0-9]+:\s*62 b3 7f 0f 66 ac f5 00 00 00 10 7b\s+vfpclassbf16x \$0x7b,0x10000000\(%rbp,%r14,8\),%k5\{%k7\}
