@@ -8,12 +8,12 @@ Disassembly of section \.text:
 
 #...
 [a-f0-9]+ <_intel>:
-\s*[a-f0-9]+:\s*62 03 17 00 52 f4 7b\s+vminmaxpbf16 xmm30,xmm29,xmm28,0x7b
-\s*[a-f0-9]+:\s*62 03 17 20 52 f4 7b\s+vminmaxpbf16 ymm30,ymm29,ymm28,0x7b
-\s*[a-f0-9]+:\s*62 23 17 27 52 b4 f5 00 00 00 10 7b\s+vminmaxpbf16 ymm30\{k7\},ymm29,YMMWORD PTR \[rbp\+r14\*8\+0x10000000\],0x7b
-\s*[a-f0-9]+:\s*62 63 17 20 52 71 7f 7b\s+vminmaxpbf16 ymm30,ymm29,YMMWORD PTR \[rcx\+0xfe0\],0x7b
-\s*[a-f0-9]+:\s*62 23 17 07 52 b4 f5 00 00 00 10 7b\s+vminmaxpbf16 xmm30\{k7\},xmm29,XMMWORD PTR \[rbp\+r14\*8\+0x10000000\],0x7b
-\s*[a-f0-9]+:\s*62 63 17 00 52 71 7f 7b\s+vminmaxpbf16 xmm30,xmm29,XMMWORD PTR \[rcx\+0x7f0\],0x7b
+\s*[a-f0-9]+:\s*62 03 17 00 52 f4 7b\s+vminmaxbf16 xmm30,xmm29,xmm28,0x7b
+\s*[a-f0-9]+:\s*62 03 17 20 52 f4 7b\s+vminmaxbf16 ymm30,ymm29,ymm28,0x7b
+\s*[a-f0-9]+:\s*62 23 17 27 52 b4 f5 00 00 00 10 7b\s+vminmaxbf16 ymm30\{k7\},ymm29,YMMWORD PTR \[rbp\+r14\*8\+0x10000000\],0x7b
+\s*[a-f0-9]+:\s*62 63 17 20 52 71 7f 7b\s+vminmaxbf16 ymm30,ymm29,YMMWORD PTR \[rcx\+0xfe0\],0x7b
+\s*[a-f0-9]+:\s*62 23 17 07 52 b4 f5 00 00 00 10 7b\s+vminmaxbf16 xmm30\{k7\},xmm29,XMMWORD PTR \[rbp\+r14\*8\+0x10000000\],0x7b
+\s*[a-f0-9]+:\s*62 63 17 00 52 71 7f 7b\s+vminmaxbf16 xmm30,xmm29,XMMWORD PTR \[rcx\+0x7f0\],0x7b
 \s*[a-f0-9]+:\s*62 03 95 00 52 f4 7b\s+vminmaxpd xmm30,xmm29,xmm28,0x7b
 \s*[a-f0-9]+:\s*62 03 95 20 52 f4 7b\s+vminmaxpd ymm30,ymm29,ymm28,0x7b
 \s*[a-f0-9]+:\s*62 23 95 27 52 b4 f5 00 00 00 10 7b\s+vminmaxpd ymm30\{k7\},ymm29,YMMWORD PTR \[rbp\+r14\*8\+0x10000000\],0x7b
@@ -32,10 +32,10 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 63 15 20 52 71 7f 7b\s+vminmaxps ymm30,ymm29,YMMWORD PTR \[rcx\+0xfe0\],0x7b
 \s*[a-f0-9]+:\s*62 23 15 07 52 b4 f5 00 00 00 10 7b\s+vminmaxps xmm30\{k7\},xmm29,XMMWORD PTR \[rbp\+r14\*8\+0x10000000\],0x7b
 \s*[a-f0-9]+:\s*62 63 15 00 52 71 7f 7b\s+vminmaxps xmm30,xmm29,XMMWORD PTR \[rcx\+0x7f0\],0x7b
-\s*[a-f0-9]+:\s*62 43 17 30 52 31 7b\s+vminmaxpbf16 ymm30,ymm29,WORD BCST \[r9\],0x7b
-\s*[a-f0-9]+:\s*62 63 17 b7 52 72 80 7b\s+vminmaxpbf16 ymm30\{k7\}\{z\},ymm29,WORD BCST \[rdx-0x100\],0x7b
-\s*[a-f0-9]+:\s*62 43 17 10 52 31 7b\s+vminmaxpbf16 xmm30,xmm29,WORD BCST \[r9\],0x7b
-\s*[a-f0-9]+:\s*62 63 17 97 52 72 80 7b\s+vminmaxpbf16 xmm30\{k7\}\{z\},xmm29,WORD BCST \[rdx-0x100\],0x7b
+\s*[a-f0-9]+:\s*62 43 17 30 52 31 7b\s+vminmaxbf16 ymm30,ymm29,WORD BCST \[r9\],0x7b
+\s*[a-f0-9]+:\s*62 63 17 b7 52 72 80 7b\s+vminmaxbf16 ymm30\{k7\}\{z\},ymm29,WORD BCST \[rdx-0x100\],0x7b
+\s*[a-f0-9]+:\s*62 43 17 10 52 31 7b\s+vminmaxbf16 xmm30,xmm29,WORD BCST \[r9\],0x7b
+\s*[a-f0-9]+:\s*62 63 17 97 52 72 80 7b\s+vminmaxbf16 xmm30\{k7\}\{z\},xmm29,WORD BCST \[rdx-0x100\],0x7b
 \s*[a-f0-9]+:\s*62 03 91 10 52 f4 7b\s+vminmaxpd ymm30,ymm29,ymm28\{sae\},0x7b
 \s*[a-f0-9]+:\s*62 43 95 30 52 31 7b\s+vminmaxpd ymm30,ymm29,QWORD BCST \[r9\],0x7b
 \s*[a-f0-9]+:\s*62 63 95 b7 52 72 80 7b\s+vminmaxpd ymm30\{k7\}\{z\},ymm29,QWORD BCST \[rdx-0x400\],0x7b

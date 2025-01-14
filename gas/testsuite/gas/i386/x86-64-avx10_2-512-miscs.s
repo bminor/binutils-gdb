@@ -4,14 +4,14 @@
 	.arch .avx10.2/512
 	.text
 _start:
-	.irp m, pbf16, pd, ph, ps
+	.irp m, bf16, pd, ph, ps
 	vminmax\m	$123, %zmm28, %zmm29, %zmm30
 	vminmax\m	$123, 0x10000000(%rbp, %r14, 8), %zmm29, %zmm30{%k7}
 	vminmax\m	$123, 8128(%rcx), %zmm29, %zmm30
 	.endr
 
-	vminmaxpbf16	$123, (%r9){1to32}, %zmm29, %zmm30
-	vminmaxpbf16	$123, -256(%rdx){1to32}, %zmm29, %zmm30{%k7}{z}
+	vminmaxbf16	$123, (%r9){1to32}, %zmm29, %zmm30
+	vminmaxbf16	$123, -256(%rdx){1to32}, %zmm29, %zmm30{%k7}{z}
 	vminmaxpd	$123, {sae}, %zmm28, %zmm29, %zmm30
 	vminmaxpd	$123, (%r9){1to8}, %zmm29, %zmm30
 	vminmaxpd	$123, -1024(%rdx){1to8}, %zmm29, %zmm30{%k7}{z}
@@ -24,14 +24,14 @@ _start:
 
 _intel:
 	.intel_syntax noprefix
-	.irp m, pbf16, pd, ph, ps
+	.irp m, bf16, pd, ph, ps
 	vminmax\m	zmm30, zmm29, zmm28, 123
 	vminmax\m	zmm30{k7}, zmm29, [rbp+r14*8+0x10000000], 123
 	vminmax\m	zmm30, zmm29, ZMMWORD PTR [rcx+8128], 123
 	.endr
 
-	vminmaxpbf16	zmm30, zmm29, [r9]{1to32}, 123
-	vminmaxpbf16	zmm30{k7}{z}, zmm29, WORD PTR [rdx-256]{1to32}, 123
+	vminmaxbf16	zmm30, zmm29, [r9]{1to32}, 123
+	vminmaxbf16	zmm30{k7}{z}, zmm29, WORD PTR [rdx-256]{1to32}, 123
 	vminmaxpd	zmm30, zmm29, zmm28, {sae}, 123
 	vminmaxpd	zmm30, zmm29, QWORD PTR [r9]{1to8}, 123
 	vminmaxpd	zmm30{k7}{z}, zmm29, [rdx-1024]{1to8}, 123
