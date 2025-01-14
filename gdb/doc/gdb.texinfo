@@ -46071,6 +46071,9 @@ two-digit hex number in the packet; @var{len} is the number of bytes
 in the expression (and thus one-half the number of hex digits in the
 packet).
 
+@item L
+Collect static trace data.
+
 @end table
 
 Any number of actions may be packed together in a single @samp{QTDP}
