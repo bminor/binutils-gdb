@@ -39,7 +39,7 @@ extern const char * tilegx_target_format (void);
 
 #define DIFF_EXPR_OK   /* foo-. gets turned into PC relative relocs */
 
-#define HANDLE_ALIGN(fragp) tilegx_handle_align (fragp)
+#define HANDLE_ALIGN(sec, fragp) tilegx_handle_align (fragp)
 extern void tilegx_handle_align (struct frag *);
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE (7 + 8)

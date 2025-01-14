@@ -69,7 +69,7 @@ extern const struct relax_type md_relax_table[];
 
 /* When relaxing, we need to generate
    relocations for alignment directives.  */
-#define HANDLE_ALIGN(frag) v850_handle_align (frag)
+#define HANDLE_ALIGN(sec, frag) v850_handle_align (frag)
 extern void v850_handle_align (fragS *);
 
 /* We need space in a frag's fixed size to allow for alignment when relaxing.  */

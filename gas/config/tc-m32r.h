@@ -63,7 +63,7 @@ extern long m32r_relax_frag (segT, fragS *, long);
 
 /* Fill in rs_align_code fragments.  */
 extern void m32r_handle_align (fragS *);
-#define HANDLE_ALIGN(f)  m32r_handle_align (f)
+#define HANDLE_ALIGN(s, f)  m32r_handle_align (f)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (1 + 2 + 4)
 

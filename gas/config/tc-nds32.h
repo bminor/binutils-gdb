@@ -112,7 +112,7 @@ extern void tc_nds32_frame_initial_instructions (void);
 #define GAS_SORT_RELOCS				1
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX)			0
-#define HANDLE_ALIGN(f)				nds32_handle_align (f)
+#define HANDLE_ALIGN(s, f)			nds32_handle_align (f)
 #undef DIFF_EXPR_OK				/* They should be fixed in linker.  */
 #define md_relax_frag(segment, fragP, stretch)	nds32_relax_frag (segment, fragP, stretch)
 #define WORKING_DOT_WORD			/* We don't need to handle .word strangely.  */

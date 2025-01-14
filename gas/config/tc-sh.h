@@ -53,7 +53,7 @@ extern int sh_optimize_expr (expressionS *, operatorT, expressionS *);
 
 /* When relaxing, we need to generate relocations for alignment
    directives.  */
-#define HANDLE_ALIGN(frag) sh_handle_align (frag)
+#define HANDLE_ALIGN(sec, frag) sh_handle_align (frag)
 extern void sh_handle_align (fragS *);
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE (1 + 2)

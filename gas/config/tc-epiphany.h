@@ -72,7 +72,7 @@ extern void epiphany_cgen_md_operand (expressionS *);
   epiphany_cgen_parse_fix_exp (opinfo, exp)
 extern int epiphany_cgen_parse_fix_exp (int, expressionS *);
 
-#define HANDLE_ALIGN(f)  epiphany_handle_align (f)
+#define HANDLE_ALIGN(s, f) epiphany_handle_align (f)
 extern void epiphany_handle_align (fragS *);
 
 #define TARGET_FORMAT "elf32-epiphany"

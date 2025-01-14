@@ -73,7 +73,7 @@ frag_alloc_check (const struct obstack *ob)
    hackery can be done in just one place.  */
 
 fragS *
-frag_alloc (struct obstack *ob)
+frag_alloc (struct obstack *ob, size_t extra)
 {
   fragS *ptr;
   int oalign;
@@ -81,7 +81,7 @@ frag_alloc (struct obstack *ob)
   (void) obstack_alloc (ob, 0);
   oalign = obstack_alignment_mask (ob);
   obstack_alignment_mask (ob) = 0;
-  ptr = (fragS *) obstack_alloc (ob, SIZEOF_STRUCT_FRAG);
+  ptr = (fragS *) obstack_alloc (ob, extra + SIZEOF_STRUCT_FRAG);
   obstack_alignment_mask (ob) = oalign;
   memset (ptr, 0, SIZEOF_STRUCT_FRAG);
   totalfrags++;
@@ -180,7 +180,7 @@ frag_new (size_t old_frags_var_max_size
   former_last_fragP = frchP->frch_last;
   gas_assert (former_last_fragP != 0);
   gas_assert (former_last_fragP == frag_now);
-  frag_now = frag_alloc (&frchP->frch_obstack);
+  frag_now = frag_alloc (&frchP->frch_obstack, 0);
 
   frag_now->fr_file = as_where (&frag_now->fr_line);
 

@@ -108,7 +108,7 @@ extern void alpha_define_label (symbolS *);
 #define md_cons_align(nbytes) alpha_cons_align (nbytes)
 extern void alpha_cons_align (int);
 
-#define HANDLE_ALIGN(fragp) alpha_handle_align (fragp)
+#define HANDLE_ALIGN(sec, fragp) alpha_handle_align (fragp)
 extern void alpha_handle_align (struct frag *);
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (3 + 4 + 8)

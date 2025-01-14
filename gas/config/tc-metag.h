@@ -52,7 +52,7 @@ extern int metag_force_relocation (struct fix *);
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 
-#define HANDLE_ALIGN(fragp) metag_handle_align (fragp)
+#define HANDLE_ALIGN(sec, fragp) metag_handle_align (fragp)
 extern void metag_handle_align (struct frag *);
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 1

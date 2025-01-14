@@ -417,7 +417,7 @@ cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
     case rs_org:
     case rs_space:
 #ifdef HANDLE_ALIGN
-      HANDLE_ALIGN (fragP);
+      HANDLE_ALIGN (sec, fragP);
 #endif
     skip_align:
       know (fragP->fr_next != NULL);
@@ -737,11 +737,11 @@ resolve_reloc_expr_symbols (void)
 	  else if (sym != NULL && sec != NULL)
 	    {
 	      /* Convert relocs against local symbols to refer to the
-	         corresponding section symbol plus offset instead.  Keep
-	         PC-relative relocs of the REL variety intact though to
+		 corresponding section symbol plus offset instead.  Keep
+		 PC-relative relocs of the REL variety intact though to
 		 prevent the offset from overflowing the relocated field,
-	         unless it has enough bits to cover the whole address
-	         space.  */
+		 unless it has enough bits to cover the whole address
+		 space.  */
 	      if (S_IS_LOCAL (sym)
 		  && S_IS_DEFINED (sym)
 		  && !symbol_section_p (sym)
@@ -1448,17 +1448,17 @@ compress_frag (bool use_zstd, void *ctx, const char *contents, int in_size,
   while (in_size > 0)
     {
       /* Reserve all the space available in the current chunk.
-         If none is available, start a new frag.  */
+	 If none is available, start a new frag.  */
       avail_out = obstack_room (ob);
       if (avail_out <= 0)
-        {
-          obstack_finish (ob);
-          f = frag_alloc (ob);
+	{
+	  obstack_finish (ob);
+	  f = frag_alloc (ob, 0);
 	  f->fr_type = rs_fill;
-          (*last_newf)->fr_next = f;
-          *last_newf = f;
-          avail_out = obstack_room (ob);
-        }
+	  (*last_newf)->fr_next = f;
+	  *last_newf = f;
+	  avail_out = obstack_room (ob);
+	}
       if (avail_out <= 0)
 	as_fatal (_("can't extend frag"));
       next_out = obstack_next_free (ob);
@@ -1510,16 +1510,8 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   /* Create a new frag to contain the compression header.  */
   struct obstack *ob = &seginfo->frchainP->frch_obstack;
-  fragS *first_newf = frag_alloc (ob);
-  if (obstack_room (ob) < header_size)
-    first_newf = frag_alloc (ob);
-  if (obstack_room (ob) < header_size)
-    as_fatal (ngettext ("can't extend frag %lu char",
-			"can't extend frag %lu chars",
-			(unsigned long) header_size),
-	      (unsigned long) header_size);
+  fragS *first_newf = frag_alloc (ob, header_size);
   fragS *last_newf = first_newf;
-  obstack_blank_fast (ob, header_size);
   last_newf->fr_type = rs_fill;
   last_newf->fr_fix = header_size;
   char *header = last_newf->fr_literal;
@@ -1577,7 +1569,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	  fragS *newf;
 
 	  obstack_finish (ob);
-	  newf = frag_alloc (ob);
+	  newf = frag_alloc (ob, 0);
 	  newf->fr_type = rs_fill;
 	  last_newf->fr_next = newf;
 	  last_newf = newf;
@@ -2994,9 +2986,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 		      struct obstack *ob = &seginfo->frchainP->frch_obstack;
 		      struct frag *newf;
 
-		      newf = frag_alloc (ob);
-		      obstack_blank_fast (ob, fragP->fr_var);
-		      obstack_finish (ob);
+		      newf = frag_alloc (ob, fragP->fr_var);
 		      memcpy (newf, fragP, SIZEOF_STRUCT_FRAG);
 		      memcpy (newf->fr_literal,
 			      fragP->fr_literal + fragP->fr_fix,

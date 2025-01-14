@@ -125,7 +125,7 @@ extern bool mn10300_allow_local_subtract (expressionS *, expressionS *, segT);
 
 #define TC_FRAG_TYPE bool
 
-#define HANDLE_ALIGN(frag) mn10300_handle_align (frag)
+#define HANDLE_ALIGN(sec, frag) mn10300_handle_align (frag)
 extern void mn10300_handle_align (fragS *);
 
 /* Only allow call frame debug info optimization when linker relaxation is

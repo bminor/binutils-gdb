@@ -59,7 +59,7 @@ extern char mips_nop_opcode (void);
 #define NOP_OPCODE (mips_nop_opcode ())
 
 extern void mips_handle_align (struct frag *);
-#define HANDLE_ALIGN(fragp)  mips_handle_align (fragp)
+#define HANDLE_ALIGN(sec, fragp)  mips_handle_align (fragp)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (3 + 4)
 

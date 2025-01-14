@@ -124,7 +124,7 @@ extern void frag_append_1_char (int);
 #define FRAG_APPEND_1_CHAR(X) frag_append_1_char (X)
 
 void frag_init (void);
-fragS *frag_alloc (struct obstack *);
+fragS *frag_alloc (struct obstack *, size_t);
 void frag_grow (size_t nchars);
 char *frag_more (size_t nchars);
 void frag_align (int alignment, int fill_character, int max);

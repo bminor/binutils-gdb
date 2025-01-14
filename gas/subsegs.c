@@ -127,7 +127,7 @@ subseg_set_rest (segT seg, subsegT subseg)
 #if __GNUC__ >= 2
       obstack_alignment_mask (&newP->frch_obstack) = __alignof__ (fragS) - 1;
 #endif
-      newP->frch_frag_now = frag_alloc (&newP->frch_obstack);
+      newP->frch_frag_now = frag_alloc (&newP->frch_obstack, 0);
       newP->frch_frag_now->fr_type = rs_fill;
       newP->frch_cfi_data = NULL;
       newP->frch_ginsn_data = NULL;

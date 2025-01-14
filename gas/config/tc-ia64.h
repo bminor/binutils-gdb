@@ -154,7 +154,7 @@ extern void ia64_convert_frag (fragS *);
 #define MD_PCREL_FROM_SECTION(fix,sec)	ia64_pcrel_from_section (fix, sec)
 #define md_section_align(seg,size)	(size)
 #define md_do_align(n,f,l,m,j)		ia64_md_do_align (n,f,l,m)
-#define HANDLE_ALIGN(f)			ia64_handle_align (f)
+#define HANDLE_ALIGN(s, f)		ia64_handle_align (f)
 #define md_elf_section_type(str,len)	ia64_elf_section_type (str, len)
 #define md_after_parse_args()		ia64_after_parse_args ()
 #define TC_DWARF2_EMIT_OFFSET		ia64_dwarf2_emit_offset

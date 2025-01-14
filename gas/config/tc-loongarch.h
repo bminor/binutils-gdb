@@ -139,7 +139,7 @@ extern void loongarch_pre_output_hook (void);
 
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN) 0
 
-#define HANDLE_ALIGN(fragp) loongarch_handle_align (fragp)
+#define HANDLE_ALIGN(sec, fragp) loongarch_handle_align (fragp)
 extern void loongarch_handle_align (struct frag *);
 #define MAX_MEM_FOR_RS_ALIGN_CODE (3 + 4)
 

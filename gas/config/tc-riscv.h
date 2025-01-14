@@ -62,7 +62,7 @@ extern bool riscv_frag_align_code (int);
     }
 
 extern void riscv_handle_align (fragS *);
-#define HANDLE_ALIGN riscv_handle_align
+#define HANDLE_ALIGN(s, f) riscv_handle_align (f)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE (3 + 4)
 

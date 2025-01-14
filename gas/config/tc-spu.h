@@ -102,7 +102,7 @@ extern symbolS *section_symbol (asection *);
 
 /* Fill in rs_align_code fragments.  */
 extern void spu_handle_align (fragS *);
-#define HANDLE_ALIGN(frag)  spu_handle_align (frag)
+#define HANDLE_ALIGN(sec, frag)  spu_handle_align (frag)
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (7 + 8)
 
