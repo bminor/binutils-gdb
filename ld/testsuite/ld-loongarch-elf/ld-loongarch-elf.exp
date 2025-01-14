@@ -154,6 +154,21 @@ if [istarget "loongarch64-*-*"] {
       ] \
   ]
 
+  # Using DESC and IE to access the same tls symbol but with
+  # -mno-relax requires allocating GOT entries for both DESC and IE,
+  # not just IE
+  run_ld_link_tests [list \
+      [list \
+	  "desc and ie do not type transition" \
+	  "-pie -e0 --hash-style=both" "" \
+	  "-mno-relax" \
+	  {desc-ie-norelax.s} \
+	  {{objdump {-d} desc-ie-norelax.dd} \
+	   {readelf {-rW} desc-ie-norelax.rd} \
+	   {objdump {-sj.got} desc-ie-norelax.sd}} \
+	  "desc-ie-norelax" \
+      ] \
+  ] \
 }
 
 if [istarget "loongarch64-*-*"] {

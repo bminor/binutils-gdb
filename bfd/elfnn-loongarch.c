@@ -683,7 +683,8 @@ loongarch_elf_record_tls_and_got_reference (bfd *abfd,
 					    struct bfd_link_info *info,
 					    struct elf_link_hash_entry *h,
 					    unsigned long symndx,
-					    char tls_type)
+					    char tls_type,
+					    bool with_relax_reloc)
 {
   struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
   Elf_Internal_Shdr *symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -729,9 +730,12 @@ loongarch_elf_record_tls_and_got_reference (bfd *abfd,
   char *new_tls_type = &_bfd_loongarch_elf_tls_type (abfd, h, symndx);
   *new_tls_type |= tls_type;
 
-  /* If a symbol is accessed by both IE and DESC, relax DESC to IE.  */
-  if ((*new_tls_type & GOT_TLS_IE) && (*new_tls_type & GOT_TLS_GDESC))
+  /* If DESC relocs can do transitions and accessed by both IE and DESC,
+     transition DESC to IE.  */
+  if (with_relax_reloc
+      && (*new_tls_type & GOT_TLS_IE) && (*new_tls_type & GOT_TLS_GDESC))
     *new_tls_type &= ~ (GOT_TLS_GDESC);
+
   if ((*new_tls_type & GOT_NORMAL) && (*new_tls_type & ~GOT_NORMAL))
     {
       _bfd_error_handler (_("%pB: `%s' accessed both as normal and "
@@ -1014,9 +1018,13 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       /* Type transitions are only possible with relocations accompanied
 	 by R_LARCH_RELAX.  */
+      bool with_relax_reloc = false;
       if (rel + 1 != relocs + sec->reloc_count
 	  && ELFNN_R_TYPE (rel[1].r_info) == R_LARCH_RELAX)
-	r_type = loongarch_tls_transition (abfd, info, h, r_symndx, r_type);
+	{
+	  r_type = loongarch_tls_transition (abfd, info, h, r_symndx, r_type);
+	  with_relax_reloc = true;
+	}
 
       /* I don't want to spend time supporting DT_RELR with old object
 	 files doing stack-based relocs.  */
@@ -1041,7 +1049,8 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    h->pointer_equality_needed = 1;
 	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
 							   r_symndx,
-							   GOT_NORMAL))
+							   GOT_NORMAL,
+							   with_relax_reloc))
 	    return false;
 	  break;
 
@@ -1052,7 +1061,8 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_LARCH_SOP_PUSH_TLS_GD:
 	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
 							   r_symndx,
-							   GOT_TLS_GD))
+							   GOT_TLS_GD,
+							   with_relax_reloc))
 	    return false;
 	  break;
 
@@ -1065,7 +1075,8 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
 							   r_symndx,
-							   GOT_TLS_IE))
+							   GOT_TLS_IE,
+							   with_relax_reloc))
 	    return false;
 	  break;
 
@@ -1077,7 +1088,8 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
 							   r_symndx,
-							   GOT_TLS_LE))
+							   GOT_TLS_LE,
+							   with_relax_reloc))
 	    return false;
 	  break;
 
@@ -1085,7 +1097,8 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_LARCH_TLS_DESC_HI20:
 	  if (!loongarch_elf_record_tls_and_got_reference (abfd, info, h,
 							   r_symndx,
-							   GOT_TLS_GDESC))
+							   GOT_TLS_GDESC,
+							   with_relax_reloc))
 	    return false;
 	  break;
 
