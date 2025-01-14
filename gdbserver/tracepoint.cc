@@ -125,7 +125,6 @@ trace_vdebug (const char *fmt, ...)
   IPA_SYM_EXPORTED_NAME (get_trace_state_variable_value_ptr)
 # define set_trace_state_variable_value_ptr \
   IPA_SYM_EXPORTED_NAME (set_trace_state_variable_value_ptr)
-# define ust_loaded IPA_SYM_EXPORTED_NAME (ust_loaded)
 # define helper_thread_id IPA_SYM_EXPORTED_NAME (helper_thread_id)
 # define cmd_buf IPA_SYM_EXPORTED_NAME (cmd_buf)
 # define ipa_tdesc_idx IPA_SYM_EXPORTED_NAME (ipa_tdesc_idx)
@@ -165,7 +164,6 @@ struct ipa_sym_addresses
   CORE_ADDR addr_get_raw_reg_ptr;
   CORE_ADDR addr_get_trace_state_variable_value_ptr;
   CORE_ADDR addr_set_trace_state_variable_value_ptr;
-  CORE_ADDR addr_ust_loaded;
   CORE_ADDR addr_ipa_tdesc_idx;
 };
 
@@ -202,7 +200,6 @@ static struct
   IPA_SYM(get_raw_reg_ptr),
   IPA_SYM(get_trace_state_variable_value_ptr),
   IPA_SYM(set_trace_state_variable_value_ptr),
-  IPA_SYM(ust_loaded),
   IPA_SYM(ipa_tdesc_idx),
 };
 
@@ -210,52 +207,21 @@ static struct ipa_sym_addresses ipa_sym_addrs;
 
 static int read_inferior_integer (CORE_ADDR symaddr, int *val);
 
-/* Returns true if both the in-process agent library and the static
-   tracepoints libraries are loaded in the inferior, and agent has
-   capability on static tracepoints.  */
-
-static int
-in_process_agent_supports_ust (void)
-{
-  int loaded = 0;
-
-  if (!agent_loaded_p ())
-    {
-      warning ("In-process agent not loaded");
-      return 0;
-    }
-
-  if (agent_capability_check (AGENT_CAPA_STATIC_TRACE))
-    {
-      /* Agent understands static tracepoint, then check whether UST is in
-	 fact loaded in the inferior.  */
-      if (read_inferior_integer (ipa_sym_addrs.addr_ust_loaded, &loaded))
-	{
-	  warning ("Error reading ust_loaded in lib");
-	  return 0;
-	}
-
-      return loaded;
-    }
-  else
-    return 0;
-}
-
 static void
 write_e_ipa_not_loaded (char *buffer)
 {
   sprintf (buffer,
 	   "E.In-process agent library not loaded in process.  "
-	   "Fast and static tracepoints unavailable.");
+	   "Fast tracepoints unavailable.");
 }
 
-/* Write an error to BUFFER indicating that UST isn't loaded in the
-   inferior.  */
+/* Write an error to BUFFER indicating that static tracepoint support
+   does not exist.  */
 
 static void
-write_e_ust_not_loaded (char *buffer)
+write_e_static_tracepoints_not_supported (char *buffer)
 {
-  sprintf (buffer, "E.GDBserver was built without static tracepoints support");
+  sprintf (buffer, "E.GDBserver does not have static tracepoints support");
 }
 
 /* If the in-process agent library isn't loaded in the inferior, write
@@ -267,26 +233,6 @@ maybe_write_ipa_not_loaded (char *buffer)
   if (!agent_loaded_p ())
     {
       write_e_ipa_not_loaded (buffer);
-      return 1;
-    }
-  return 0;
-}
-
-/* If the in-process agent library and the ust (static tracepoints)
-   library aren't loaded in the inferior, write an error to BUFFER,
-   and return 1.  Otherwise, return 0.  */
-
-static int
-maybe_write_ipa_ust_not_loaded (char *buffer)
-{
-  if (!agent_loaded_p ())
-    {
-      write_e_ipa_not_loaded (buffer);
-      return 1;
-    }
-  else if (!in_process_agent_supports_ust ())
-    {
-      write_e_ust_not_loaded (buffer);
       return 1;
     }
   return 0;
@@ -786,7 +732,7 @@ struct tracepoint
   char **step_actions_str;
 
   /* Handle returned by the breakpoint or tracepoint module when we
-     inserted the trap or jump, or hooked into a static tracepoint.
+     inserted the trap or jump.
      NULL if we haven't inserted it yet.  */
   void *handle;
 #endif
@@ -2567,7 +2513,7 @@ cmd_qtdp (char *own_buf)
 
       if (tpoint->type != trap_tracepoint)
 	{
-	  /* Find another fast or static tracepoint at the same address.  */
+	  /* Find another fast tracepoint at the same address.  */
 	  for (tp = tracepoints; tp; tp = tp->next)
 	    {
 	      if (tp->address == tpoint->address && tp->type == tpoint->type
@@ -3110,12 +3056,11 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
 	  write_e_ipa_not_loaded (own_buf);
 	  return;
 	}
-      if (tpoint->type == static_tracepoint
-	  && !in_process_agent_supports_ust ())
+      if (tpoint->type == static_tracepoint)
 	{
 	  trace_debug ("Requested a static tracepoint, but static "
 		       "tracepoints are not supported.");
-	  write_e_ust_not_loaded (own_buf);
+	  write_e_static_tracepoints_not_supported (own_buf);
 	  return;
 	}
 
@@ -3145,7 +3090,7 @@ static void download_tracepoint_1 (struct tracepoint *tpoint);
 static void
 cmd_qtstart (char *packet)
 {
-  struct tracepoint *tpoint, *prev_ftpoint, *prev_stpoint;
+  struct tracepoint *tpoint, *prev_ftpoint;
   CORE_ADDR tpptr = 0, prev_tpptr = 0;
 
   trace_debug ("Starting the trace");
@@ -3168,9 +3113,6 @@ cmd_qtstart (char *packet)
 
   /* No previous fast tpoint yet.  */
   prev_ftpoint = NULL;
-
-  /* No previous static tpoint yet.  */
-  prev_stpoint = NULL;
 
   *packet = '\0';
 
@@ -3249,29 +3191,9 @@ cmd_qtstart (char *packet)
 	    }
 	  else
 	    {
-	      if (!in_process_agent_supports_ust ())
-		{
-		  trace_debug ("Requested a static tracepoint, but static "
-			       "tracepoints are not supported.");
-		  break;
-		}
-
-	      download_tracepoint_1 (tpoint);
-	      /* Can only probe a given marker once.  */
-	      if (prev_stpoint != NULL
-		  && prev_stpoint->address == tpoint->address)
-		tpoint->handle = (void *) -1;
-	      else
-		{
-		  if (probe_marker_at (tpoint->address, packet) == 0)
-		    {
-		      tpoint->handle = (void *) -1;
-
-		      /* So that we can handle multiple static tracepoints
-			 at the same address easily.  */
-		      prev_stpoint = tpoint;
-		    }
-		}
+	      trace_debug ("Requested a static tracepoint, but static "
+			   "tracepoints are not supported.");
+	      break;
 	    }
 
 	  prev_tpptr = tpptr;
@@ -3876,8 +3798,7 @@ cmd_qtsv (char *packet)
 static void
 cmd_qtfstm (char *packet)
 {
-  if (!maybe_write_ipa_ust_not_loaded (packet))
-    run_inferior_command (packet, strlen (packet) + 1);
+  write_e_static_tracepoints_not_supported (packet);
 }
 
 /* Return additional static tracepoints markers.  */
@@ -3885,8 +3806,7 @@ cmd_qtfstm (char *packet)
 static void
 cmd_qtsstm (char *packet)
 {
-  if (!maybe_write_ipa_ust_not_loaded (packet))
-    run_inferior_command (packet, strlen (packet) + 1);
+  write_e_static_tracepoints_not_supported (packet);
 }
 
 /* Return the definition of the static tracepoint at a given address.
@@ -3895,8 +3815,7 @@ cmd_qtsstm (char *packet)
 static void
 cmd_qtstmat (char *packet)
 {
-  if (!maybe_write_ipa_ust_not_loaded (packet))
-    run_inferior_command (packet, strlen (packet) + 1);
+  write_e_static_tracepoints_not_supported (packet);
 }
 
 /* Sent the agent a command to close it.  */
@@ -4508,10 +4427,7 @@ tracepoint_was_hit (thread_info *tinfo, CORE_ADDR stop_pc)
     {
       /* Note that we collect fast tracepoints here as well.  We'll
 	 step over the fast tracepoint jump later, which avoids the
-	 double collect.  However, we don't collect for static
-	 tracepoints here, because UST markers are compiled in program,
-	 and probes will be executed in program.  So static tracepoints
-	 are collected there.   */
+	 double collect.  */
       if (tpoint->enabled && stop_pc == tpoint->address
 	  && tpoint->type != static_tracepoint)
 	{
@@ -6472,7 +6388,6 @@ upload_fast_traceframes (void)
 
 #ifdef IN_PROCESS_AGENT
 
-IP_AGENT_EXPORT_VAR int ust_loaded;
 IP_AGENT_EXPORT_VAR char cmd_buf[IPA_CMD_BUF_SIZE];
 
 #endif /* IN_PROCESS_AGENT */
