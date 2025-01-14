@@ -10823,8 +10823,6 @@ cmdline_emit_object_only_section (void)
   lang_init (true);
   ldexp_init (true);
 
-  ld_parse_linker_script ();
-
   /* Set up the object-only output. */
   lang_final ();
 

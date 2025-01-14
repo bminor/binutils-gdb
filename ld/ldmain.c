@@ -410,7 +410,34 @@ main (int argc, char **argv)
 
   ldemul_set_symbols ();
 
-  ld_parse_linker_script ();
+  /* If we have not already opened and parsed a linker script,
+     try the default script from command line first.  */
+  if (saved_script_handle == NULL
+      && command_line.default_script != NULL)
+    {
+      ldfile_open_script_file (command_line.default_script);
+      parser_input = input_script;
+      yyparse ();
+    }
+
+  /* If we have not already opened and parsed a linker script
+     read the emulation's appropriate default script.  */
+  if (saved_script_handle == NULL)
+    {
+      int isfile;
+      char *s = ldemul_get_script (&isfile);
+
+      if (isfile)
+	ldfile_open_default_command_file (s);
+      else
+	{
+	  lex_string = s;
+	  lex_redirect (s, _("built in linker script"), 1);
+	}
+      parser_input = input_script;
+      yyparse ();
+      lex_string = NULL;
+    }
 
   if (verbose)
     {
@@ -1676,39 +1703,4 @@ notice (struct bfd_link_info *info,
     add_cref (name, abfd, section, value);
 
   return true;
-}
-
-/* Parse the linker script.   */
-
-void
-ld_parse_linker_script (void)
-{
-  /* If we have not already opened and parsed a linker script,
-     try the default script from command line first.  */
-  if (saved_script_handle == NULL
-      && command_line.default_script != NULL)
-    {
-      ldfile_open_script_file (command_line.default_script);
-      parser_input = input_script;
-      yyparse ();
-    }
-
-  /* If we have not already opened and parsed a linker script
-     read the emulation's appropriate default script.  */
-  if (saved_script_handle == NULL)
-    {
-      int isfile;
-      char *s = ldemul_get_script (&isfile);
-
-      if (isfile)
-	ldfile_open_default_command_file (s);
-      else
-	{
-	  lex_string = s;
-	  lex_redirect (s, _("built in linker script"), 1);
-	}
-      parser_input = input_script;
-      yyparse ();
-      lex_string = NULL;
-    }
 }
