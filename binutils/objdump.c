@@ -6001,12 +6001,14 @@ main (int argc, char **argv)
 	  {
 	    char *options;
 	    if (disassembler_options)
-	      /* Ignore potential memory leak for now.  */
 	      options = concat (disassembler_options, ",",
 				optarg, (const char *) NULL);
 	    else
-	      options = optarg;
+	      options = xstrdup (optarg);
+	    free (disassembler_options);
 	    disassembler_options = remove_whitespace_and_extra_commas (options);
+	    if (!disassembler_options)
+	      free (options);
 	  }
 	  break;
 	case 'j':
