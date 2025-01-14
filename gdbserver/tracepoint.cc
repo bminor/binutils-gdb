@@ -3791,33 +3791,6 @@ cmd_qtsv (char *packet)
     strcpy (packet, "l");
 }
 
-/* Return the first static tracepoint marker, and initialize the state
-   machine that will iterate through all the static tracepoints
-   markers.  */
-
-static void
-cmd_qtfstm (char *packet)
-{
-  write_e_static_tracepoints_not_supported (packet);
-}
-
-/* Return additional static tracepoints markers.  */
-
-static void
-cmd_qtsstm (char *packet)
-{
-  write_e_static_tracepoints_not_supported (packet);
-}
-
-/* Return the definition of the static tracepoint at a given address.
-   Result packet is the same as qTsST's.  */
-
-static void
-cmd_qtstmat (char *packet)
-{
-  write_e_static_tracepoints_not_supported (packet);
-}
-
 /* Sent the agent a command to close it.  */
 
 void
@@ -4131,21 +4104,6 @@ handle_tracepoint_query (char *packet)
   else if (startswith (packet, "qTBuffer:"))
     {
       cmd_qtbuffer (packet);
-      return 1;
-    }
-  else if (strcmp ("qTfSTM", packet) == 0)
-    {
-      cmd_qtfstm (packet);
-      return 1;
-    }
-  else if (strcmp ("qTsSTM", packet) == 0)
-    {
-      cmd_qtsstm (packet);
-      return 1;
-    }
-  else if (startswith (packet, "qTSTMat:"))
-    {
-      cmd_qtstmat (packet);
       return 1;
     }
   else if (strcmp ("qTMinFTPILen", packet) == 0)
@@ -5174,59 +5132,6 @@ traceframe_read_tsv (int tsvnum, LONGEST *val)
     trace_debug ("traceframe %d has no data for variable %d",
 		 tfnum, tsvnum);
   return !found;
-}
-
-/* Read a requested block of static tracepoint data from a trace
-   frame.  */
-
-int
-traceframe_read_sdata (int tfnum, ULONGEST offset,
-		       unsigned char *buf, ULONGEST length,
-		       ULONGEST *nbytes)
-{
-  struct traceframe *tframe;
-  unsigned char *database, *dataptr;
-  unsigned int datasize;
-  unsigned short mlen;
-
-  trace_debug ("traceframe_read_sdata");
-
-  tframe = find_traceframe (tfnum);
-
-  if (!tframe)
-    {
-      trace_debug ("traceframe %d not found", tfnum);
-      return 1;
-    }
-
-  datasize = tframe->data_size;
-  database = &tframe->data[0];
-
-  /* Iterate through a traceframe's blocks, looking for static
-     tracepoint data.  */
-  dataptr = traceframe_find_block_type (database, datasize,
-					tfnum, 'S');
-  if (dataptr != NULL)
-    {
-      memcpy (&mlen, dataptr, sizeof (mlen));
-      dataptr += sizeof (mlen);
-      if (offset < mlen)
-	{
-	  if (offset + length > mlen)
-	    length = mlen - offset;
-
-	  memcpy (buf, dataptr, length);
-	  *nbytes = length;
-	}
-      else
-	*nbytes = 0;
-      return 0;
-    }
-
-  trace_debug ("traceframe %d has no static trace data", tfnum);
-
-  *nbytes = 0;
-  return 0;
 }
 
 /* Callback for traceframe_walk_blocks.  Builds a traceframe-info

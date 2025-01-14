@@ -1965,29 +1965,6 @@ handle_qxfer_siginfo (const char *annex,
   return the_target->qxfer_siginfo (annex, readbuf, writebuf, offset, len);
 }
 
-/* Handle qXfer:statictrace:read.  */
-
-static int
-handle_qxfer_statictrace (const char *annex,
-			  gdb_byte *readbuf, const gdb_byte *writebuf,
-			  ULONGEST offset, LONGEST len)
-{
-  client_state &cs = get_client_state ();
-  ULONGEST nbytes;
-
-  if (writebuf != NULL)
-    return -2;
-
-  if (annex[0] != '\0' || current_thread == NULL 
-      || cs.current_traceframe == -1)
-    return -1;
-
-  if (traceframe_read_sdata (cs.current_traceframe, offset,
-			     readbuf, len, &nbytes))
-    return -1;
-  return nbytes;
-}
-
 /* Helper for handle_qxfer_threads_proper.
    Emit the XML to describe the thread of INF.  */
 
@@ -2324,7 +2301,6 @@ static const struct qxfer qxfer_packets[] =
     { "libraries-svr4", handle_qxfer_libraries_svr4 },
     { "osdata", handle_qxfer_osdata },
     { "siginfo", handle_qxfer_siginfo },
-    { "statictrace", handle_qxfer_statictrace },
     { "threads", handle_qxfer_threads },
     { "traceframe-info", handle_qxfer_traceframe_info },
   };
@@ -2842,9 +2818,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";DisconnectedTracing+");
 	  if (gdb_supports_qRelocInsn && target_supports_fast_tracepoints ())
 	    strcat (own_buf, ";FastTracepoints+");
-	  strcat (own_buf, ";StaticTracepoints+");
 	  strcat (own_buf, ";InstallInTrace+");
-	  strcat (own_buf, ";qXfer:statictrace:read+");
 	  strcat (own_buf, ";qXfer:traceframe-info:read+");
 	  strcat (own_buf, ";EnableDisableTracepoints+");
 	  strcat (own_buf, ";QTBuffer:size+");
