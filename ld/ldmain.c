@@ -933,8 +933,8 @@ add_archive_element (struct bfd_link_info *info,
 	}
     }
   else
-#endif /* BFD_SUPPORTS_PLUGINS */
     cmdline_check_object_only_section (input->the_bfd, false);
+#endif /* BFD_SUPPORTS_PLUGINS */
 
   if (link_info.input_bfds_tail == &input->the_bfd->link.next
       || input->the_bfd->link.next != NULL)
