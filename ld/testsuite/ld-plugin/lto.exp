@@ -726,29 +726,9 @@ set lto_run_tests [list \
   [list "LTO 3c" \
    "-O2 -flto -fuse-linker-plugin tmpdir/lto-3a.o tmpdir/lto-3c.o -Wl,--whole-archive tmpdir/liblto-3.a -Wl,--no-whole-archive tmpdir/liblto-3.a" "" \
    {dummy.c} "lto-3d.exe" "lto-3.out" "" "c"] \
-  [list "LTO 4a" \
-   "-O2 -flto -fuse-linker-plugin \
-    -Wl,--no-warn-execstack,--no-error-execstack \
-    tmpdir/lto-4r-a.o" "" \
-   {dummy.c} "lto-4a.exe" "lto-4.out" "" "c"] \
-  [list "LTO 4c" \
-   "-O2 -flto -fuse-linker-plugin \
-    -Wl,--no-warn-execstack,--no-error-execstack \
-    tmpdir/lto-4r-c.o" "" \
-   {dummy.c} "lto-4c.exe" "lto-4.out" "" "c"] \
-  [list "LTO 4d" \
-   "-O2 -flto -fuse-linker-plugin \
-    -Wl,--no-warn-execstack,--no-error-execstack \
-    tmpdir/lto-4r-d.o" "" \
-   {dummy.c} "lto-4d.exe" "lto-4.out" "" "c"] \
   [list "LTO 5" \
    "-O2 -flto -fuse-linker-plugin tmpdir/lto-5.o" "" \
    {dummy.c} "lto-5.exe" "lto-5.out" "" "c"] \
-  [list "LTO 10" \
-   "-O2 -flto -fuse-linker-plugin \
-    -Wl,--no-warn-execstack,--no-error-execstack \
-    tmpdir/lto-10.o" "" \
-   {dummy.c} "lto-10.exe" "lto-10.out" "" "c"] \
   [list "LTO 11" \
    "-O -flto -fuse-linker-plugin tmpdir/liblto-11.a" "" \
    {dummy.c} "lto-11.exe" "lto-11.out" "" "c"] \
@@ -918,9 +898,29 @@ set lto_run_elf_shared_tests [list \
 
 # LTO run-time tests for ELF
 set lto_run_elf_tests [list \
+  [list "LTO 4a" \
+   "-O2 -flto -fuse-linker-plugin \
+    -Wl,--no-warn-execstack,--no-error-execstack \
+    tmpdir/lto-4r-a.o" "" \
+   {dummy.c} "lto-4a.exe" "lto-4.out" "" "c"] \
+  [list "LTO 4c" \
+   "-O2 -flto -fuse-linker-plugin \
+    -Wl,--no-warn-execstack,--no-error-execstack \
+    tmpdir/lto-4r-c.o" "" \
+   {dummy.c} "lto-4c.exe" "lto-4.out" "" "c"] \
+  [list "LTO 4d" \
+   "-O2 -flto -fuse-linker-plugin \
+    -Wl,--no-warn-execstack,--no-error-execstack \
+    tmpdir/lto-4r-d.o" "" \
+   {dummy.c} "lto-4d.exe" "lto-4.out" "" "c"] \
   [list "LTO 8" \
    "-O2 -flto -fuse-linker-plugin tmpdir/lto-8b.o tmpdir/lto-8a.o" "" \
    {dummy.c} "lto-8.exe" "lto-8.out" "" "c"] \
+  [list "LTO 10" \
+   "-O2 -flto -fuse-linker-plugin \
+    -Wl,--no-warn-execstack,--no-error-execstack \
+    tmpdir/lto-10.o" "" \
+   {dummy.c} "lto-10.exe" "lto-10.out" "" "c"] \
   [list "LTO TLS IE" \
    "-O2 -flto -fuse-linker-plugin" "" \
    {run-ie.c} "run-ie.exe" "run-ie.out" "" "c"] \
@@ -1135,30 +1135,32 @@ if { [at_least_gcc_version 4 7] } {
 # Run "ld -r" to generate inputs for complex LTO tests.
 run_dump_test "lto-3r"
 remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
-run_dump_test "lto-4r-a"
-remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-a.o"
-run_dump_test "lto-4r-b"
-remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-b.o"
-run_dump_test "lto-4r-c"
-remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-c.o"
-run_dump_test "lto-4r-d"
-remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-d.o"
 run_dump_test "lto-5r"
 remote_exec host "mv" "tmpdir/dump tmpdir/lto-5.o"
-run_dump_test "lto-10r"
-remote_exec host "mv" "tmpdir/dump tmpdir/lto-10.o"
-set testname "nm mixed object"
-set lto_plugin [string trim [run_host_cmd "$CC_FOR_TARGET" "-print-prog-name=liblto_plugin.so"]]
-if { [ regexp "liblto_plugin.so" $lto_plugin ] } {
-    set exec_output [run_host_cmd "$NM" "--plugin $lto_plugin tmpdir/lto-10.o"]
-    if { [ regexp "T main" $exec_output ] } {
-	pass $testname
-    } {
+if { [is_elf_format] } {
+    run_dump_test "lto-4r-a"
+    remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-a.o"
+    run_dump_test "lto-4r-b"
+    remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-b.o"
+    run_dump_test "lto-4r-c"
+    remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-c.o"
+    run_dump_test "lto-4r-d"
+    remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-d.o"
+    run_dump_test "lto-10r"
+    remote_exec host "mv" "tmpdir/dump tmpdir/lto-10.o"
+    set testname "nm mixed object"
+    set lto_plugin [string trim [run_host_cmd "$CC_FOR_TARGET" "-print-prog-name=liblto_plugin.so"]]
+    if { [ regexp "liblto_plugin.so" $lto_plugin ] } {
+	set exec_output [run_host_cmd "$NM" "--plugin $lto_plugin tmpdir/lto-10.o"]
+	if { [ regexp "(D|T) main" $exec_output ] } {
+	    pass $testname
+	} else {
+	    fail $testname
+	}
+    } else {
 	fail $testname
     }
-} {
-    fail $testname
- }
+}
 
 run_cc_link_tests $lto_link_symbol_tests
 
