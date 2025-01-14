@@ -537,6 +537,16 @@ disassemble_init_powerpc (struct disassemble_info *info)
     }
 }
 
+void
+disassemble_free_powerpc (struct disassemble_info *info)
+{
+  if (info->private_data != NULL)
+    {
+      free (private_data (info)->special[0].buf);
+      free (private_data (info)->special[1].buf);
+    }
+}
+
 /* Print a big endian PowerPC instruction.  */
 
 int

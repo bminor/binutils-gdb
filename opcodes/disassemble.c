@@ -767,6 +767,7 @@ disassemble_free_target (struct disassemble_info *info)
 #endif
 #ifdef ARCH_powerpc
     case bfd_arch_powerpc:
+      disassemble_free_powerpc (info);
       break;
 #endif
 #ifdef ARCH_riscv
