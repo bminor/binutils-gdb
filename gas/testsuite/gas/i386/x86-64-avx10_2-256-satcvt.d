@@ -6,16 +6,16 @@
 Disassembly of section \.text:
 
 0+ <_start>:
-\s*[a-f0-9]+:\s*62 05 7f 08 69 f5\s+vcvtnebf162ibs\s+%xmm29,%xmm30
-\s*[a-f0-9]+:\s*62 05 7f 28 69 f5\s+vcvtnebf162ibs\s+%ymm29,%ymm30
-\s*[a-f0-9]+:\s*62 25 7f 0f 69 b4 f5 00 00 00 10\s+vcvtnebf162ibs\s+0x10000000\(%rbp,%r14,8\),%xmm30\{%k7\}
-\s*[a-f0-9]+:\s*62 45 7f 18 69 31\s+vcvtnebf162ibs\s+\(%r9\)\{1to8\},%xmm30
-\s*[a-f0-9]+:\s*62 65 7f 08 69 71 7f\s+vcvtnebf162ibs\s+0x7f0\(%rcx\),%xmm30
-\s*[a-f0-9]+:\s*62 65 7f 9f 69 72 80\s+vcvtnebf162ibs\s+-0x100\(%rdx\)\{1to8\},%xmm30\{%k7\}\{z\}
-\s*[a-f0-9]+:\s*62 25 7f 2f 69 b4 f5 00 00 00 10\s+vcvtnebf162ibs\s+0x10000000\(%rbp,%r14,8\),%ymm30\{%k7\}
-\s*[a-f0-9]+:\s*62 45 7f 38 69 31\s+vcvtnebf162ibs\s+\(%r9\)\{1to16\},%ymm30
-\s*[a-f0-9]+:\s*62 65 7f 28 69 71 7f\s+vcvtnebf162ibs\s+0xfe0\(%rcx\),%ymm30
-\s*[a-f0-9]+:\s*62 65 7f bf 69 72 80\s+vcvtnebf162ibs\s+-0x100\(%rdx\)\{1to16\},%ymm30\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 05 7f 08 69 f5\s+vcvtbf162ibs\s+%xmm29,%xmm30
+\s*[a-f0-9]+:\s*62 05 7f 28 69 f5\s+vcvtbf162ibs\s+%ymm29,%ymm30
+\s*[a-f0-9]+:\s*62 25 7f 0f 69 b4 f5 00 00 00 10\s+vcvtbf162ibs\s+0x10000000\(%rbp,%r14,8\),%xmm30\{%k7\}
+\s*[a-f0-9]+:\s*62 45 7f 18 69 31\s+vcvtbf162ibs\s+\(%r9\)\{1to8\},%xmm30
+\s*[a-f0-9]+:\s*62 65 7f 08 69 71 7f\s+vcvtbf162ibs\s+0x7f0\(%rcx\),%xmm30
+\s*[a-f0-9]+:\s*62 65 7f 9f 69 72 80\s+vcvtbf162ibs\s+-0x100\(%rdx\)\{1to8\},%xmm30\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 25 7f 2f 69 b4 f5 00 00 00 10\s+vcvtbf162ibs\s+0x10000000\(%rbp,%r14,8\),%ymm30\{%k7\}
+\s*[a-f0-9]+:\s*62 45 7f 38 69 31\s+vcvtbf162ibs\s+\(%r9\)\{1to16\},%ymm30
+\s*[a-f0-9]+:\s*62 65 7f 28 69 71 7f\s+vcvtbf162ibs\s+0xfe0\(%rcx\),%ymm30
+\s*[a-f0-9]+:\s*62 65 7f bf 69 72 80\s+vcvtbf162ibs\s+-0x100\(%rdx\)\{1to16\},%ymm30\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 05 7c 08 69 f5\s+vcvtph2ibs\s+%xmm29,%xmm30
 \s*[a-f0-9]+:\s*62 05 7c 28 69 f5\s+vcvtph2ibs\s+%ymm29,%ymm30
 \s*[a-f0-9]+:\s*62 05 78 18 69 f5\s+vcvtph2ibs\s+\{rn-sae\},%ymm29,%ymm30
@@ -137,16 +137,16 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 55 fe 08 6d 21\s+vcvttss2sis\s+\(%r9\),%r12
 \s*[a-f0-9]+:\s*62 75 fe 08 6d 61 7f\s+vcvttss2sis\s+0x1fc\(%rcx\),%r12
 \s*[a-f0-9]+:\s*62 75 fe 08 6d 62 80\s+vcvttss2sis\s+-0x200\(%rdx\),%r12
-\s*[a-f0-9]+:\s*62 05 7f 08 6b f5\s+vcvtnebf162iubs\s+%xmm29,%xmm30
-\s*[a-f0-9]+:\s*62 05 7f 28 6b f5\s+vcvtnebf162iubs\s+%ymm29,%ymm30
-\s*[a-f0-9]+:\s*62 25 7f 0f 6b b4 f5 00 00 00 10\s+vcvtnebf162iubs\s+0x10000000\(%rbp,%r14,8\),%xmm30\{%k7\}
-\s*[a-f0-9]+:\s*62 45 7f 18 6b 31\s+vcvtnebf162iubs\s+\(%r9\)\{1to8\},%xmm30
-\s*[a-f0-9]+:\s*62 65 7f 08 6b 71 7f\s+vcvtnebf162iubs\s+0x7f0\(%rcx\),%xmm30
-\s*[a-f0-9]+:\s*62 65 7f 9f 6b 72 80\s+vcvtnebf162iubs\s+-0x100\(%rdx\)\{1to8\},%xmm30\{%k7\}\{z\}
-\s*[a-f0-9]+:\s*62 25 7f 2f 6b b4 f5 00 00 00 10\s+vcvtnebf162iubs\s+0x10000000\(%rbp,%r14,8\),%ymm30\{%k7\}
-\s*[a-f0-9]+:\s*62 45 7f 38 6b 31\s+vcvtnebf162iubs\s+\(%r9\)\{1to16\},%ymm30
-\s*[a-f0-9]+:\s*62 65 7f 28 6b 71 7f\s+vcvtnebf162iubs\s+0xfe0\(%rcx\),%ymm30
-\s*[a-f0-9]+:\s*62 65 7f bf 6b 72 80\s+vcvtnebf162iubs\s+-0x100\(%rdx\)\{1to16\},%ymm30\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 05 7f 08 6b f5\s+vcvtbf162iubs\s+%xmm29,%xmm30
+\s*[a-f0-9]+:\s*62 05 7f 28 6b f5\s+vcvtbf162iubs\s+%ymm29,%ymm30
+\s*[a-f0-9]+:\s*62 25 7f 0f 6b b4 f5 00 00 00 10\s+vcvtbf162iubs\s+0x10000000\(%rbp,%r14,8\),%xmm30\{%k7\}
+\s*[a-f0-9]+:\s*62 45 7f 18 6b 31\s+vcvtbf162iubs\s+\(%r9\)\{1to8\},%xmm30
+\s*[a-f0-9]+:\s*62 65 7f 08 6b 71 7f\s+vcvtbf162iubs\s+0x7f0\(%rcx\),%xmm30
+\s*[a-f0-9]+:\s*62 65 7f 9f 6b 72 80\s+vcvtbf162iubs\s+-0x100\(%rdx\)\{1to8\},%xmm30\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 25 7f 2f 6b b4 f5 00 00 00 10\s+vcvtbf162iubs\s+0x10000000\(%rbp,%r14,8\),%ymm30\{%k7\}
+\s*[a-f0-9]+:\s*62 45 7f 38 6b 31\s+vcvtbf162iubs\s+\(%r9\)\{1to16\},%ymm30
+\s*[a-f0-9]+:\s*62 65 7f 28 6b 71 7f\s+vcvtbf162iubs\s+0xfe0\(%rcx\),%ymm30
+\s*[a-f0-9]+:\s*62 65 7f bf 6b 72 80\s+vcvtbf162iubs\s+-0x100\(%rdx\)\{1to16\},%ymm30\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 05 7c 08 6b f5\s+vcvtph2iubs\s+%xmm29,%xmm30
 \s*[a-f0-9]+:\s*62 05 7c 28 6b f5\s+vcvtph2iubs\s+%ymm29,%ymm30
 \s*[a-f0-9]+:\s*62 05 78 18 6b f5\s+vcvtph2iubs\s+\{rn-sae\},%ymm29,%ymm30

@@ -8,16 +8,16 @@ Disassembly of section \.text:
 
 #...
 [a-f0-9]+ <_intel>:
-\s*[a-f0-9]+:\s*62 f5 7f 08 69 f5\s+vcvtnebf162ibs xmm6,xmm5
-\s*[a-f0-9]+:\s*62 f5 7f 28 69 f5\s+vcvtnebf162ibs ymm6,ymm5
-\s*[a-f0-9]+:\s*62 f5 7f 0f 69 b4 f4 00 00 00 10\s+vcvtnebf162ibs xmm6\{k7\},XMMWORD PTR \[esp\+esi\*8\+0x10000000\]
-\s*[a-f0-9]+:\s*62 f5 7f 18 69 31\s+vcvtnebf162ibs xmm6,WORD BCST \[ecx\]
-\s*[a-f0-9]+:\s*62 f5 7f 08 69 71 7f\s+vcvtnebf162ibs xmm6,XMMWORD PTR \[ecx\+0x7f0\]
-\s*[a-f0-9]+:\s*62 f5 7f 9f 69 72 80\s+vcvtnebf162ibs xmm6\{k7\}\{z\},WORD BCST \[edx-0x100\]
-\s*[a-f0-9]+:\s*62 f5 7f 2f 69 b4 f4 00 00 00 10\s+vcvtnebf162ibs ymm6\{k7\},YMMWORD PTR \[esp\+esi\*8\+0x10000000\]
-\s*[a-f0-9]+:\s*62 f5 7f 38 69 31\s+vcvtnebf162ibs ymm6,WORD BCST \[ecx\]
-\s*[a-f0-9]+:\s*62 f5 7f 28 69 71 7f\s+vcvtnebf162ibs ymm6,YMMWORD PTR \[ecx\+0xfe0\]
-\s*[a-f0-9]+:\s*62 f5 7f bf 69 72 80\s+vcvtnebf162ibs ymm6\{k7\}\{z\},WORD BCST \[edx-0x100\]
+\s*[a-f0-9]+:\s*62 f5 7f 08 69 f5\s+vcvtbf162ibs xmm6,xmm5
+\s*[a-f0-9]+:\s*62 f5 7f 28 69 f5\s+vcvtbf162ibs ymm6,ymm5
+\s*[a-f0-9]+:\s*62 f5 7f 0f 69 b4 f4 00 00 00 10\s+vcvtbf162ibs xmm6\{k7\},XMMWORD PTR \[esp\+esi\*8\+0x10000000\]
+\s*[a-f0-9]+:\s*62 f5 7f 18 69 31\s+vcvtbf162ibs xmm6,WORD BCST \[ecx\]
+\s*[a-f0-9]+:\s*62 f5 7f 08 69 71 7f\s+vcvtbf162ibs xmm6,XMMWORD PTR \[ecx\+0x7f0\]
+\s*[a-f0-9]+:\s*62 f5 7f 9f 69 72 80\s+vcvtbf162ibs xmm6\{k7\}\{z\},WORD BCST \[edx-0x100\]
+\s*[a-f0-9]+:\s*62 f5 7f 2f 69 b4 f4 00 00 00 10\s+vcvtbf162ibs ymm6\{k7\},YMMWORD PTR \[esp\+esi\*8\+0x10000000\]
+\s*[a-f0-9]+:\s*62 f5 7f 38 69 31\s+vcvtbf162ibs ymm6,WORD BCST \[ecx\]
+\s*[a-f0-9]+:\s*62 f5 7f 28 69 71 7f\s+vcvtbf162ibs ymm6,YMMWORD PTR \[ecx\+0xfe0\]
+\s*[a-f0-9]+:\s*62 f5 7f bf 69 72 80\s+vcvtbf162ibs ymm6\{k7\}\{z\},WORD BCST \[edx-0x100\]
 \s*[a-f0-9]+:\s*62 f5 7c 08 69 f5\s+vcvtph2ibs xmm6,xmm5
 \s*[a-f0-9]+:\s*62 f5 7c 28 69 f5\s+vcvtph2ibs ymm6,ymm5
 \s*[a-f0-9]+:\s*62 f5 78 18 69 f5\s+vcvtph2ibs ymm6,ymm5\{rn-sae\}
@@ -127,16 +127,16 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 f5 7e 08 6d 11\s+vcvttss2sis edx,DWORD PTR \[ecx\]
 \s*[a-f0-9]+:\s*62 f5 7e 08 6d 51 7f\s+vcvttss2sis edx,DWORD PTR \[ecx\+0x1fc\]
 \s*[a-f0-9]+:\s*62 f5 7e 08 6d 52 80\s+vcvttss2sis edx,DWORD PTR \[edx-0x200\]
-\s*[a-f0-9]+:\s*62 f5 7f 08 6b f5\s+vcvtnebf162iubs xmm6,xmm5
-\s*[a-f0-9]+:\s*62 f5 7f 28 6b f5\s+vcvtnebf162iubs ymm6,ymm5
-\s*[a-f0-9]+:\s*62 f5 7f 0f 6b b4 f4 00 00 00 10\s+vcvtnebf162iubs xmm6\{k7\},XMMWORD PTR \[esp\+esi\*8\+0x10000000\]
-\s*[a-f0-9]+:\s*62 f5 7f 18 6b 31\s+vcvtnebf162iubs xmm6,WORD BCST \[ecx\]
-\s*[a-f0-9]+:\s*62 f5 7f 08 6b 71 7f\s+vcvtnebf162iubs xmm6,XMMWORD PTR \[ecx\+0x7f0\]
-\s*[a-f0-9]+:\s*62 f5 7f 9f 6b 72 80\s+vcvtnebf162iubs xmm6\{k7\}\{z\},WORD BCST \[edx-0x100\]
-\s*[a-f0-9]+:\s*62 f5 7f 2f 6b b4 f4 00 00 00 10\s+vcvtnebf162iubs ymm6\{k7\},YMMWORD PTR \[esp\+esi\*8\+0x10000000\]
-\s*[a-f0-9]+:\s*62 f5 7f 38 6b 31\s+vcvtnebf162iubs ymm6,WORD BCST \[ecx\]
-\s*[a-f0-9]+:\s*62 f5 7f 28 6b 71 7f\s+vcvtnebf162iubs ymm6,YMMWORD PTR \[ecx\+0xfe0\]
-\s*[a-f0-9]+:\s*62 f5 7f bf 6b 72 80\s+vcvtnebf162iubs ymm6\{k7\}\{z\},WORD BCST \[edx-0x100\]
+\s*[a-f0-9]+:\s*62 f5 7f 08 6b f5\s+vcvtbf162iubs xmm6,xmm5
+\s*[a-f0-9]+:\s*62 f5 7f 28 6b f5\s+vcvtbf162iubs ymm6,ymm5
+\s*[a-f0-9]+:\s*62 f5 7f 0f 6b b4 f4 00 00 00 10\s+vcvtbf162iubs xmm6\{k7\},XMMWORD PTR \[esp\+esi\*8\+0x10000000\]
+\s*[a-f0-9]+:\s*62 f5 7f 18 6b 31\s+vcvtbf162iubs xmm6,WORD BCST \[ecx\]
+\s*[a-f0-9]+:\s*62 f5 7f 08 6b 71 7f\s+vcvtbf162iubs xmm6,XMMWORD PTR \[ecx\+0x7f0\]
+\s*[a-f0-9]+:\s*62 f5 7f 9f 6b 72 80\s+vcvtbf162iubs xmm6\{k7\}\{z\},WORD BCST \[edx-0x100\]
+\s*[a-f0-9]+:\s*62 f5 7f 2f 6b b4 f4 00 00 00 10\s+vcvtbf162iubs ymm6\{k7\},YMMWORD PTR \[esp\+esi\*8\+0x10000000\]
+\s*[a-f0-9]+:\s*62 f5 7f 38 6b 31\s+vcvtbf162iubs ymm6,WORD BCST \[ecx\]
+\s*[a-f0-9]+:\s*62 f5 7f 28 6b 71 7f\s+vcvtbf162iubs ymm6,YMMWORD PTR \[ecx\+0xfe0\]
+\s*[a-f0-9]+:\s*62 f5 7f bf 6b 72 80\s+vcvtbf162iubs ymm6\{k7\}\{z\},WORD BCST \[edx-0x100\]
 \s*[a-f0-9]+:\s*62 f5 7c 08 6b f5\s+vcvtph2iubs xmm6,xmm5
 \s*[a-f0-9]+:\s*62 f5 7c 28 6b f5\s+vcvtph2iubs ymm6,ymm5
 \s*[a-f0-9]+:\s*62 f5 78 18 6b f5\s+vcvtph2iubs ymm6,ymm5\{rn-sae\}

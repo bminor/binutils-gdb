@@ -27,25 +27,25 @@ _start:
 	vcvtbiasph2\m	(%r9){1to16}, %ymm29, %xmm30
 	vcvtbiasph2\m	4064(%rcx), %ymm29, %xmm30
 	vcvtbiasph2\m	-256(%rdx){1to16}, %ymm29, %xmm30{%k7}{z}
-	vcvtne2ph2\m	%xmm28, %xmm29, %xmm30
-	vcvtne2ph2\m	%ymm28, %ymm29, %ymm30
-	vcvtne2ph2\m	0x10000000(%rbp, %r14, 8), %xmm29, %xmm30{%k7}
-	vcvtne2ph2\m	(%r9){1to8}, %xmm29, %xmm30
-	vcvtne2ph2\m	2032(%rcx), %xmm29, %xmm30
-	vcvtne2ph2\m	-256(%rdx){1to8}, %xmm29, %xmm30{%k7}
-	vcvtne2ph2\m	0x10000000(%rbp, %r14, 8), %ymm29, %ymm30{%k7}
-	vcvtne2ph2\m	(%r9){1to16}, %ymm29, %ymm30
-	vcvtne2ph2\m	4064(%rcx), %ymm29, %ymm30
-	vcvtne2ph2\m	-256(%rdx){1to16}, %ymm29, %ymm30{%k7}
-	vcvtneph2\m	%xmm29, %xmm30
-	vcvtneph2\m	%ymm29, %xmm30
-	vcvtneph2\m\()x	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
-	vcvtneph2\m	(%r9){1to8}, %xmm30
-	vcvtneph2\m\()x	2032(%rcx), %xmm30
-	vcvtneph2\m	-256(%rdx){1to8}, %xmm30{%k7}{z}
-	vcvtneph2\m	(%r9){1to16}, %xmm30
-	vcvtneph2\m\()y	4064(%rcx), %xmm30
-	vcvtneph2\m	-256(%rdx){1to16}, %xmm30{%k7}{z}
+	vcvt2ph2\m	%xmm28, %xmm29, %xmm30
+	vcvt2ph2\m	%ymm28, %ymm29, %ymm30
+	vcvt2ph2\m	0x10000000(%rbp, %r14, 8), %xmm29, %xmm30{%k7}
+	vcvt2ph2\m	(%r9){1to8}, %xmm29, %xmm30
+	vcvt2ph2\m	2032(%rcx), %xmm29, %xmm30
+	vcvt2ph2\m	-256(%rdx){1to8}, %xmm29, %xmm30{%k7}
+	vcvt2ph2\m	0x10000000(%rbp, %r14, 8), %ymm29, %ymm30{%k7}
+	vcvt2ph2\m	(%r9){1to16}, %ymm29, %ymm30
+	vcvt2ph2\m	4064(%rcx), %ymm29, %ymm30
+	vcvt2ph2\m	-256(%rdx){1to16}, %ymm29, %ymm30{%k7}
+	vcvtph2\m	%xmm29, %xmm30
+	vcvtph2\m	%ymm29, %xmm30
+	vcvtph2\m\()x	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
+	vcvtph2\m	(%r9){1to8}, %xmm30
+	vcvtph2\m\()x	2032(%rcx), %xmm30
+	vcvtph2\m	-256(%rdx){1to8}, %xmm30{%k7}{z}
+	vcvtph2\m	(%r9){1to16}, %xmm30
+	vcvtph2\m\()y	4064(%rcx), %xmm30
+	vcvtph2\m	-256(%rdx){1to16}, %xmm30{%k7}{z}
 	.endr
 
 	vcvthf82ph	%xmm29, %xmm30
@@ -84,25 +84,25 @@ _intel:
 	vcvtbiasph2\m	xmm30, ymm29, WORD PTR [r9]{1to16}
 	vcvtbiasph2\m	xmm30, ymm29, YMMWORD PTR [rcx+4064]
 	vcvtbiasph2\m	xmm30{k7}{z}, ymm29, WORD PTR [rdx-256]{1to16}
-	vcvtne2ph2\m	xmm30, xmm29, xmm28
-	vcvtne2ph2\m	ymm30, ymm29, ymm28
-	vcvtne2ph2\m	xmm30{k7}, xmm29, XMMWORD PTR [rbp+r14*8+0x10000000]
-	vcvtne2ph2\m	xmm30, xmm29, WORD PTR [r9]{1to8}
-	vcvtne2ph2\m	xmm30, xmm29, XMMWORD PTR [rcx+2032]
-	vcvtne2ph2\m	xmm30{k7}, xmm29, WORD PTR [rdx-256]{1to8}
-	vcvtne2ph2\m	ymm30{k7}, ymm29, YMMWORD PTR [rbp+r14*8+0x10000000]
-	vcvtne2ph2\m	ymm30, ymm29, WORD PTR [r9]{1to16}
-	vcvtne2ph2\m	ymm30, ymm29, YMMWORD PTR [rcx+4064]
-	vcvtne2ph2\m	ymm30{k7}, ymm29, WORD PTR [rdx-256]{1to16}
-	vcvtneph2\m	xmm30, xmm29
-	vcvtneph2\m	xmm30, ymm29
-	vcvtneph2\m	xmm30{k7}, XMMWORD PTR [rbp+r14*8+0x10000000]
-	vcvtneph2\m	xmm30, WORD PTR [r9]{1to8}
-	vcvtneph2\m	xmm30, XMMWORD PTR [rcx+2032]
-	vcvtneph2\m	xmm30{k7}{z}, WORD PTR [rdx-256]{1to8}
-	vcvtneph2\m	xmm30, WORD PTR [r9]{1to16}
-	vcvtneph2\m	xmm30, YMMWORD PTR [rcx+4064]
-	vcvtneph2\m	xmm30{k7}{z}, WORD PTR [rdx-256]{1to16}
+	vcvt2ph2\m	xmm30, xmm29, xmm28
+	vcvt2ph2\m	ymm30, ymm29, ymm28
+	vcvt2ph2\m	xmm30{k7}, xmm29, XMMWORD PTR [rbp+r14*8+0x10000000]
+	vcvt2ph2\m	xmm30, xmm29, WORD PTR [r9]{1to8}
+	vcvt2ph2\m	xmm30, xmm29, XMMWORD PTR [rcx+2032]
+	vcvt2ph2\m	xmm30{k7}, xmm29, WORD PTR [rdx-256]{1to8}
+	vcvt2ph2\m	ymm30{k7}, ymm29, YMMWORD PTR [rbp+r14*8+0x10000000]
+	vcvt2ph2\m	ymm30, ymm29, WORD PTR [r9]{1to16}
+	vcvt2ph2\m	ymm30, ymm29, YMMWORD PTR [rcx+4064]
+	vcvt2ph2\m	ymm30{k7}, ymm29, WORD PTR [rdx-256]{1to16}
+	vcvtph2\m	xmm30, xmm29
+	vcvtph2\m	xmm30, ymm29
+	vcvtph2\m	xmm30{k7}, XMMWORD PTR [rbp+r14*8+0x10000000]
+	vcvtph2\m	xmm30, WORD PTR [r9]{1to8}
+	vcvtph2\m	xmm30, XMMWORD PTR [rcx+2032]
+	vcvtph2\m	xmm30{k7}{z}, WORD PTR [rdx-256]{1to8}
+	vcvtph2\m	xmm30, WORD PTR [r9]{1to16}
+	vcvtph2\m	xmm30, YMMWORD PTR [rcx+4064]
+	vcvtph2\m	xmm30{k7}{z}, WORD PTR [rdx-256]{1to16}
 	.endr
 
 	vcvthf82ph	xmm30, xmm29

@@ -5,11 +5,11 @@
 	.text
 _start:
 	.irp u, "", u
-	vcvtnebf162i\u\()bs	%zmm29, %zmm30
-	vcvtnebf162i\u\()bs	0x10000000(%rbp, %r14, 8), %zmm30{%k7}
-	vcvtnebf162i\u\()bs	(%r9){1to32}, %zmm30
-	vcvtnebf162i\u\()bs	8128(%rcx), %zmm30
-	vcvtnebf162i\u\()bs	-256(%rdx){1to32}, %zmm30{%k7}{z}
+	vcvtbf162i\u\()bs	%zmm29, %zmm30
+	vcvtbf162i\u\()bs	0x10000000(%rbp, %r14, 8), %zmm30{%k7}
+	vcvtbf162i\u\()bs	(%r9){1to32}, %zmm30
+	vcvtbf162i\u\()bs	8128(%rcx), %zmm30
+	vcvtbf162i\u\()bs	-256(%rdx){1to32}, %zmm30{%k7}{z}
 
 	vcvtph2i\u\()bs	%zmm29, %zmm30
 	vcvtph2i\u\()bs	{rn-sae}, %zmm29, %zmm30
@@ -77,11 +77,11 @@ _start:
 _intel:
 	.intel_syntax noprefix
 	.irp u, "", u
-	vcvtnebf162i\u\()bs	zmm30, zmm29
-	vcvtnebf162i\u\()bs	zmm30{k7}, [rbp+r14*8+0x10000000]
-	vcvtnebf162i\u\()bs	zmm30, [r9]{1to32}
-	vcvtnebf162i\u\()bs	zmm30, ZMMWORD PTR [rcx+8128]
-	vcvtnebf162i\u\()bs	zmm30{k7}{z}, WORD PTR [rdx-256]{1to32}
+	vcvtbf162i\u\()bs	zmm30, zmm29
+	vcvtbf162i\u\()bs	zmm30{k7}, [rbp+r14*8+0x10000000]
+	vcvtbf162i\u\()bs	zmm30, [r9]{1to32}
+	vcvtbf162i\u\()bs	zmm30, ZMMWORD PTR [rcx+8128]
+	vcvtbf162i\u\()bs	zmm30{k7}{z}, WORD PTR [rdx-256]{1to32}
 
 	vcvtph2i\u\()bs	zmm30, zmm29
 	vcvtph2i\u\()bs	zmm30, zmm29, {rn-sae}

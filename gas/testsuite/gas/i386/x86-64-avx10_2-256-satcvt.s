@@ -5,16 +5,16 @@
 	.text
 _start:
 	.irp u, "", u
-	vcvtnebf162i\u\()bs	%xmm29, %xmm30
-	vcvtnebf162i\u\()bs	%ymm29, %ymm30
-	vcvtnebf162i\u\()bs	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
-	vcvtnebf162i\u\()bs	(%r9){1to8}, %xmm30
-	vcvtnebf162i\u\()bs	2032(%rcx), %xmm30
-	vcvtnebf162i\u\()bs	-256(%rdx){1to8}, %xmm30{%k7}{z}
-	vcvtnebf162i\u\()bs	0x10000000(%rbp, %r14, 8), %ymm30{%k7}
-	vcvtnebf162i\u\()bs	(%r9){1to16}, %ymm30
-	vcvtnebf162i\u\()bs	4064(%rcx), %ymm30
-	vcvtnebf162i\u\()bs	-256(%rdx){1to16}, %ymm30{%k7}{z}
+	vcvtbf162i\u\()bs	%xmm29, %xmm30
+	vcvtbf162i\u\()bs	%ymm29, %ymm30
+	vcvtbf162i\u\()bs	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
+	vcvtbf162i\u\()bs	(%r9){1to8}, %xmm30
+	vcvtbf162i\u\()bs	2032(%rcx), %xmm30
+	vcvtbf162i\u\()bs	-256(%rdx){1to8}, %xmm30{%k7}{z}
+	vcvtbf162i\u\()bs	0x10000000(%rbp, %r14, 8), %ymm30{%k7}
+	vcvtbf162i\u\()bs	(%r9){1to16}, %ymm30
+	vcvtbf162i\u\()bs	4064(%rcx), %ymm30
+	vcvtbf162i\u\()bs	-256(%rdx){1to16}, %ymm30{%k7}{z}
 
 	vcvtph2i\u\()bs	%xmm29, %xmm30
 	vcvtph2i\u\()bs	%ymm29, %ymm30
@@ -152,16 +152,16 @@ _start:
 _intel:
 	.intel_syntax noprefix
 	.irp u, "", u
-	vcvtnebf162i\u\()bs	xmm30, xmm29
-	vcvtnebf162i\u\()bs	ymm30, ymm29
-	vcvtnebf162i\u\()bs	xmm30{k7}, [rbp+r14*8+0x10000000]
-	vcvtnebf162i\u\()bs	xmm30, [r9]{1to8}
-	vcvtnebf162i\u\()bs	xmm30, XMMWORD PTR [rcx+2032]
-	vcvtnebf162i\u\()bs	xmm30{k7}{z}, WORD PTR [rdx-256]{1to8}
-	vcvtnebf162i\u\()bs	ymm30{k7}, [rbp+r14*8+0x10000000]
-	vcvtnebf162i\u\()bs	ymm30, [r9]{1to16}
-	vcvtnebf162i\u\()bs	ymm30, YMMWORD PTR [rcx+4064]
-	vcvtnebf162i\u\()bs	ymm30{k7}{z}, WORD PTR [rdx-256]{1to16}
+	vcvtbf162i\u\()bs	xmm30, xmm29
+	vcvtbf162i\u\()bs	ymm30, ymm29
+	vcvtbf162i\u\()bs	xmm30{k7}, [rbp+r14*8+0x10000000]
+	vcvtbf162i\u\()bs	xmm30, [r9]{1to8}
+	vcvtbf162i\u\()bs	xmm30, XMMWORD PTR [rcx+2032]
+	vcvtbf162i\u\()bs	xmm30{k7}{z}, WORD PTR [rdx-256]{1to8}
+	vcvtbf162i\u\()bs	ymm30{k7}, [rbp+r14*8+0x10000000]
+	vcvtbf162i\u\()bs	ymm30, [r9]{1to16}
+	vcvtbf162i\u\()bs	ymm30, YMMWORD PTR [rcx+4064]
+	vcvtbf162i\u\()bs	ymm30{k7}{z}, WORD PTR [rdx-256]{1to16}
 
 	vcvtph2i\u\()bs	xmm30, xmm29
 	vcvtph2i\u\()bs	ymm30, ymm29

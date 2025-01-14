@@ -8,11 +8,11 @@ Disassembly of section \.text:
 
 #...
 [a-f0-9]+ <_intel>:
-\s*[a-f0-9]+:\s*62 05 7f 48 69 f5\s+vcvtnebf162ibs zmm30,zmm29
-\s*[a-f0-9]+:\s*62 25 7f 4f 69 b4 f5 00 00 00 10\s+vcvtnebf162ibs zmm30\{k7\},ZMMWORD PTR \[rbp\+r14\*8\+0x10000000\]
-\s*[a-f0-9]+:\s*62 45 7f 58 69 31\s+vcvtnebf162ibs zmm30,WORD BCST \[r9\]
-\s*[a-f0-9]+:\s*62 65 7f 48 69 71 7f\s+vcvtnebf162ibs zmm30,ZMMWORD PTR \[rcx\+0x1fc0\]
-\s*[a-f0-9]+:\s*62 65 7f df 69 72 80\s+vcvtnebf162ibs zmm30\{k7\}\{z\},WORD BCST \[rdx-0x100\]
+\s*[a-f0-9]+:\s*62 05 7f 48 69 f5\s+vcvtbf162ibs zmm30,zmm29
+\s*[a-f0-9]+:\s*62 25 7f 4f 69 b4 f5 00 00 00 10\s+vcvtbf162ibs zmm30\{k7\},ZMMWORD PTR \[rbp\+r14\*8\+0x10000000\]
+\s*[a-f0-9]+:\s*62 45 7f 58 69 31\s+vcvtbf162ibs zmm30,WORD BCST \[r9\]
+\s*[a-f0-9]+:\s*62 65 7f 48 69 71 7f\s+vcvtbf162ibs zmm30,ZMMWORD PTR \[rcx\+0x1fc0\]
+\s*[a-f0-9]+:\s*62 65 7f df 69 72 80\s+vcvtbf162ibs zmm30\{k7\}\{z\},WORD BCST \[rdx-0x100\]
 \s*[a-f0-9]+:\s*62 05 7c 48 69 f5\s+vcvtph2ibs zmm30,zmm29
 \s*[a-f0-9]+:\s*62 05 7c 18 69 f5\s+vcvtph2ibs zmm30,zmm29\{rn-sae\}
 \s*[a-f0-9]+:\s*62 25 7c 4f 69 b4 f5 00 00 00 10\s+vcvtph2ibs zmm30\{k7\},ZMMWORD PTR \[rbp\+r14\*8\+0x10000000\]
@@ -66,11 +66,11 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 45 7d 58 6d 31\s+vcvttps2qqs zmm30,DWORD BCST \[r9\]
 \s*[a-f0-9]+:\s*62 65 7d 48 6d 71 7f\s+vcvttps2qqs zmm30,YMMWORD PTR \[rcx\+0xfe0\]
 \s*[a-f0-9]+:\s*62 65 7d df 6d 72 80\s+vcvttps2qqs zmm30\{k7\}\{z\},DWORD BCST \[rdx-0x200\]
-\s*[a-f0-9]+:\s*62 05 7f 48 6b f5\s+vcvtnebf162iubs zmm30,zmm29
-\s*[a-f0-9]+:\s*62 25 7f 4f 6b b4 f5 00 00 00 10\s+vcvtnebf162iubs zmm30\{k7\},ZMMWORD PTR \[rbp\+r14\*8\+0x10000000\]
-\s*[a-f0-9]+:\s*62 45 7f 58 6b 31\s+vcvtnebf162iubs zmm30,WORD BCST \[r9\]
-\s*[a-f0-9]+:\s*62 65 7f 48 6b 71 7f\s+vcvtnebf162iubs zmm30,ZMMWORD PTR \[rcx\+0x1fc0\]
-\s*[a-f0-9]+:\s*62 65 7f df 6b 72 80\s+vcvtnebf162iubs zmm30\{k7\}\{z\},WORD BCST \[rdx-0x100\]
+\s*[a-f0-9]+:\s*62 05 7f 48 6b f5\s+vcvtbf162iubs zmm30,zmm29
+\s*[a-f0-9]+:\s*62 25 7f 4f 6b b4 f5 00 00 00 10\s+vcvtbf162iubs zmm30\{k7\},ZMMWORD PTR \[rbp\+r14\*8\+0x10000000\]
+\s*[a-f0-9]+:\s*62 45 7f 58 6b 31\s+vcvtbf162iubs zmm30,WORD BCST \[r9\]
+\s*[a-f0-9]+:\s*62 65 7f 48 6b 71 7f\s+vcvtbf162iubs zmm30,ZMMWORD PTR \[rcx\+0x1fc0\]
+\s*[a-f0-9]+:\s*62 65 7f df 6b 72 80\s+vcvtbf162iubs zmm30\{k7\}\{z\},WORD BCST \[rdx-0x100\]
 \s*[a-f0-9]+:\s*62 05 7c 48 6b f5\s+vcvtph2iubs zmm30,zmm29
 \s*[a-f0-9]+:\s*62 05 7c 18 6b f5\s+vcvtph2iubs zmm30,zmm29\{rn-sae\}
 \s*[a-f0-9]+:\s*62 25 7c 4f 6b b4 f5 00 00 00 10\s+vcvtph2iubs zmm30\{k7\},ZMMWORD PTR \[rbp\+r14\*8\+0x10000000\]

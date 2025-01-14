@@ -46570,7 +46570,7 @@ static const insn_template i386_optab[] =
 	  0, 0, 1, 0, 0, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  0, 1, 0, 0, 0, 0 } } } },
-  { MN_vcvtne2ph2bf8, 0x74, 3, SPACE_0F38, None,
+  { MN_vcvt2ph2bf8, 0x74, 3, SPACE_0F38, None,
     { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 1, 1, 3, 0, 0, 5, 1, 2, 0, 0, 7, 0, 0, 0, 0, 0,
       0, 0 },
@@ -46582,7 +46582,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 1, 0, 0, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 1, 1, 0, 0, 0 } } } },
-  { MN_vcvtne2ph2bf8s, 0x74, 3, SPACE_MAP5, None,
+  { MN_vcvt2ph2bf8s, 0x74, 3, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 1, 1, 3, 0, 0, 5, 1, 2, 0, 0, 7, 0, 0, 0, 0, 0,
       0, 0 },
@@ -46594,7 +46594,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 1, 0, 0, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 1, 1, 0, 0, 0 } } } },
-  { MN_vcvtne2ph2hf8, 0x18, 3, SPACE_MAP5, None,
+  { MN_vcvt2ph2hf8, 0x18, 3, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 1, 1, 3, 0, 0, 5, 1, 2, 0, 0, 7, 0, 0, 0, 0, 0,
       0, 0 },
@@ -46606,7 +46606,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 1, 0, 0, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 1, 1, 0, 0, 0 } } } },
-  { MN_vcvtne2ph2hf8s, 0x1b, 3, SPACE_MAP5, None,
+  { MN_vcvt2ph2hf8s, 0x1b, 3, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 1, 1, 3, 0, 0, 5, 1, 2, 0, 0, 7, 0, 0, 0, 0, 0,
       0, 0 },
@@ -46618,7 +46618,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 1, 0, 0, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 1, 1, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8, 0x74, 2, SPACE_0F38, None,
+  { MN_vcvtph2bf8, 0x74, 2, SPACE_0F38, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 1, 1, 2, 0, 0, 6, 0, 0, 0, 0, 0,
       0, 0 },
@@ -46628,7 +46628,7 @@ static const insn_template i386_optab[] =
 	  0, 0, 1, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  0, 1, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8, 0x74, 2, SPACE_0F38, None,
+  { MN_vcvtph2bf8, 0x74, 2, SPACE_0F38, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 5, 1, 2, 0, 0, 7, 0, 1, 0, 0, 0,
       0, 0 },
@@ -46638,7 +46638,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8, 0x74, 2, SPACE_0F38, None,
+  { MN_vcvtph2bf8, 0x74, 2, SPACE_0F38, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 5, 1, 2, 0, 0, 7, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46648,7 +46648,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 0, 0, 0, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8x, 0x74, 2, SPACE_0F38, None,
+  { MN_vcvtph2bf8x, 0x74, 2, SPACE_0F38, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 2, 1, 2, 0, 0, 4, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46658,7 +46658,7 @@ static const insn_template i386_optab[] =
 	  1, 0, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8y, 0x74, 2, SPACE_0F38, None,
+  { MN_vcvtph2bf8y, 0x74, 2, SPACE_0F38, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 3, 1, 2, 0, 0, 5, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46668,7 +46668,7 @@ static const insn_template i386_optab[] =
 	  0, 1, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8s, 0x74, 2, SPACE_MAP5, None,
+  { MN_vcvtph2bf8s, 0x74, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 1, 1, 2, 0, 0, 6, 0, 0, 0, 0, 0,
       0, 0 },
@@ -46678,7 +46678,7 @@ static const insn_template i386_optab[] =
 	  0, 0, 1, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  0, 1, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8s, 0x74, 2, SPACE_MAP5, None,
+  { MN_vcvtph2bf8s, 0x74, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 5, 1, 2, 0, 0, 7, 0, 1, 0, 0, 0,
       0, 0 },
@@ -46688,7 +46688,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8s, 0x74, 2, SPACE_MAP5, None,
+  { MN_vcvtph2bf8s, 0x74, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 5, 1, 2, 0, 0, 7, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46698,7 +46698,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 0, 0, 0, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8sx, 0x74, 2, SPACE_MAP5, None,
+  { MN_vcvtph2bf8sx, 0x74, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 2, 1, 2, 0, 0, 4, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46708,7 +46708,7 @@ static const insn_template i386_optab[] =
 	  1, 0, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2bf8sy, 0x74, 2, SPACE_MAP5, None,
+  { MN_vcvtph2bf8sy, 0x74, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 3, 1, 2, 0, 0, 5, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46718,7 +46718,7 @@ static const insn_template i386_optab[] =
 	  0, 1, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8, 0x18, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8, 0x18, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 1, 1, 2, 0, 0, 6, 0, 0, 0, 0, 0,
       0, 0 },
@@ -46728,7 +46728,7 @@ static const insn_template i386_optab[] =
 	  0, 0, 1, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  0, 1, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8, 0x18, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8, 0x18, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 5, 1, 2, 0, 0, 7, 0, 1, 0, 0, 0,
       0, 0 },
@@ -46738,7 +46738,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8, 0x18, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8, 0x18, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 5, 1, 2, 0, 0, 7, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46748,7 +46748,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 0, 0, 0, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8x, 0x18, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8x, 0x18, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 2, 1, 2, 0, 0, 4, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46758,7 +46758,7 @@ static const insn_template i386_optab[] =
 	  1, 0, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8y, 0x18, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8y, 0x18, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 3, 1, 2, 0, 0, 5, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46768,7 +46768,7 @@ static const insn_template i386_optab[] =
 	  0, 1, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8s, 0x1b, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8s, 0x1b, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 1, 1, 2, 0, 0, 6, 0, 0, 0, 0, 0,
       0, 0 },
@@ -46778,7 +46778,7 @@ static const insn_template i386_optab[] =
 	  0, 0, 1, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  0, 1, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8s, 0x1b, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8s, 0x1b, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 5, 1, 2, 0, 0, 7, 0, 1, 0, 0, 0,
       0, 0 },
@@ -46788,7 +46788,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8s, 0x1b, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8s, 0x1b, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 5, 1, 2, 0, 0, 7, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46798,7 +46798,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 0, 0, 0, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8sx, 0x1b, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8sx, 0x1b, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 2, 1, 2, 0, 0, 4, 0, 2, 0, 0, 0,
       0, 0 },
@@ -46808,7 +46808,7 @@ static const insn_template i386_optab[] =
 	  1, 0, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtneph2hf8sy, 0x1b, 2, SPACE_MAP5, None,
+  { MN_vcvtph2hf8sy, 0x1b, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 2, 0, 0, 3, 1, 2, 0, 0, 5, 0, 2, 0, 0, 0,
       0, 0 },
@@ -47224,7 +47224,7 @@ static const insn_template i386_optab[] =
 	  1, 0, 0, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 0, 0, 0, 0, 0 } } } },
-  { MN_vcvtnebf162ibs, 0x69 | 0x0, 2, SPACE_MAP5, None,
+  { MN_vcvtbf162ibs, 0x69 | 0x0, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 3, 0, 0, 5, 1, 2, 0, 0, 7, 0, 0, 0, 0, 0,
       0, 0 },
@@ -47234,7 +47234,7 @@ static const insn_template i386_optab[] =
 	  1, 1, 1, 0, 1, 0 } },
       { { 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	  1, 1, 1, 0, 0, 0 } } } },
-  { MN_vcvtnebf162iubs, 0x69 | 0x2, 2, SPACE_MAP5, None,
+  { MN_vcvtbf162iubs, 0x69 | 0x2, 2, SPACE_MAP5, None,
     { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 1, 3, 0, 0, 5, 1, 2, 0, 0, 7, 0, 0, 0, 0, 0,
       0, 0 },
@@ -48285,12 +48285,12 @@ const char i386_mnemonics[] =
   "\0""vinserti128"
   "\0""vbroadcasti128"
   "\0""encodekey128"
-  "\0""vcvtne2ph2bf8"
-  "\0""vcvtneph2bf8"
+  "\0""vcvt2ph2bf8"
   "\0""vcvtbiasph2bf8"
-  "\0""vcvtne2ph2hf8"
-  "\0""vcvtneph2hf8"
+  "\0""vcvtph2bf8"
+  "\0""vcvt2ph2hf8"
   "\0""vcvtbiasph2hf8"
+  "\0""vcvtph2hf8"
   "\0""vmovdqu8"
   "\0""vextractf32x8"
   "\0""vinsertf32x8"
@@ -49653,26 +49653,26 @@ const char i386_mnemonics[] =
   "\0""fdivr"
   "\0""fidivr"
   "\0""rex.wr"
-  "\0""vcvtne2ph2bf8s"
-  "\0""vcvtneph2bf8s"
+  "\0""vcvt2ph2bf8s"
   "\0""vcvtbiasph2bf8s"
-  "\0""vcvtne2ph2hf8s"
-  "\0""vcvtneph2hf8s"
+  "\0""vcvtph2bf8s"
+  "\0""vcvt2ph2hf8s"
   "\0""vcvtbiasph2hf8s"
+  "\0""vcvtph2hf8s"
   "\0""aas"
   "\0""scas"
   "\0""das"
   "\0""fabs"
   "\0""jmpabs"
   "\0""movabs"
-  "\0""vcvtnebf162ibs"
   "\0""vcvttbf162ibs"
+  "\0""vcvtbf162ibs"
   "\0""vcvttph2ibs"
   "\0""vcvtph2ibs"
   "\0""vcvttps2ibs"
   "\0""vcvtps2ibs"
-  "\0""vcvtnebf162iubs"
   "\0""vcvttbf162iubs"
+  "\0""vcvtbf162iubs"
   "\0""vcvttph2iubs"
   "\0""vcvtph2iubs"
   "\0""vcvttps2iubs"
@@ -50234,8 +50234,8 @@ const char i386_mnemonics[] =
   "\0""rex64x"
   "\0""vcvtneps2bf16x"
   "\0""vfpclassbf16x"
-  "\0""vcvtneph2bf8x"
-  "\0""vcvtneph2hf8x"
+  "\0""vcvtph2bf8x"
+  "\0""vcvtph2hf8x"
   "\0""pfmax"
   "\0""adcx"
   "\0""bndldx"
@@ -50264,8 +50264,8 @@ const char i386_mnemonics[] =
   "\0""rorx"
   "\0""monitorx"
   "\0""rex.wrx"
-  "\0""vcvtneph2bf8sx"
-  "\0""vcvtneph2hf8sx"
+  "\0""vcvtph2bf8sx"
+  "\0""vcvtph2hf8sx"
   "\0""vcvtpd2psx"
   "\0""vcvtph2psx"
   "\0""vcvtqq2psx"
@@ -50283,8 +50283,8 @@ const char i386_mnemonics[] =
   "\0""rex64y"
   "\0""vcvtneps2bf16y"
   "\0""vfpclassbf16y"
-  "\0""vcvtneph2bf8y"
-  "\0""vcvtneph2hf8y"
+  "\0""vcvtph2bf8y"
+  "\0""vcvtph2hf8y"
   "\0""vfpclasspdy"
   "\0""loadiwkey"
   "\0""vcvtpd2phy"
@@ -50298,8 +50298,8 @@ const char i386_mnemonics[] =
   "\0""vcvttpd2udqy"
   "\0""vcvtpd2udqy"
   "\0""rmpquery"
-  "\0""vcvtneph2bf8sy"
-  "\0""vcvtneph2hf8sy"
+  "\0""vcvtph2bf8sy"
+  "\0""vcvtph2hf8sy"
   "\0""clrssbsy"
   "\0""setssbsy"
   "\0""vcvtpd2psy"

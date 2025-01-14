@@ -6,11 +6,11 @@
 Disassembly of section \.text:
 
 0+ <_start>:
-\s*[a-f0-9]+:\s*62 f5 7f 48 69 f5\s+vcvtnebf162ibs\s+%zmm5,%zmm6
-\s*[a-f0-9]+:\s*62 f5 7f 4f 69 b4 f4 00 00 00 10\s+vcvtnebf162ibs\s+0x10000000\(%esp,%esi,8\),%zmm6\{%k7\}
-\s*[a-f0-9]+:\s*62 f5 7f 58 69 31\s+vcvtnebf162ibs\s+\(%ecx\)\{1to32\},%zmm6
-\s*[a-f0-9]+:\s*62 f5 7f 48 69 71 7f\s+vcvtnebf162ibs\s+0x1fc0\(%ecx\),%zmm6
-\s*[a-f0-9]+:\s*62 f5 7f df 69 72 80\s+vcvtnebf162ibs\s+-0x100\(%edx\)\{1to32\},%zmm6\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 f5 7f 48 69 f5\s+vcvtbf162ibs\s+%zmm5,%zmm6
+\s*[a-f0-9]+:\s*62 f5 7f 4f 69 b4 f4 00 00 00 10\s+vcvtbf162ibs\s+0x10000000\(%esp,%esi,8\),%zmm6\{%k7\}
+\s*[a-f0-9]+:\s*62 f5 7f 58 69 31\s+vcvtbf162ibs\s+\(%ecx\)\{1to32\},%zmm6
+\s*[a-f0-9]+:\s*62 f5 7f 48 69 71 7f\s+vcvtbf162ibs\s+0x1fc0\(%ecx\),%zmm6
+\s*[a-f0-9]+:\s*62 f5 7f df 69 72 80\s+vcvtbf162ibs\s+-0x100\(%edx\)\{1to32\},%zmm6\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 f5 7c 48 69 f5\s+vcvtph2ibs\s+%zmm5,%zmm6
 \s*[a-f0-9]+:\s*62 f5 7c 18 69 f5\s+vcvtph2ibs\s+\{rn-sae\},%zmm5,%zmm6
 \s*[a-f0-9]+:\s*62 f5 7c 4f 69 b4 f4 00 00 00 10\s+vcvtph2ibs\s+0x10000000\(%esp,%esi,8\),%zmm6\{%k7\}
@@ -64,11 +64,11 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 f5 7d 58 6d 31\s+vcvttps2qqs\s+\(%ecx\)\{1to8\},%zmm6
 \s*[a-f0-9]+:\s*62 f5 7d 48 6d 71 7f\s+vcvttps2qqs\s+0xfe0\(%ecx\),%zmm6
 \s*[a-f0-9]+:\s*62 f5 7d df 6d 72 80\s+vcvttps2qqs\s+-0x200\(%edx\)\{1to8\},%zmm6\{%k7\}\{z\}
-\s*[a-f0-9]+:\s*62 f5 7f 48 6b f5\s+vcvtnebf162iubs\s+%zmm5,%zmm6
-\s*[a-f0-9]+:\s*62 f5 7f 4f 6b b4 f4 00 00 00 10\s+vcvtnebf162iubs\s+0x10000000\(%esp,%esi,8\),%zmm6\{%k7\}
-\s*[a-f0-9]+:\s*62 f5 7f 58 6b 31\s+vcvtnebf162iubs\s+\(%ecx\)\{1to32\},%zmm6
-\s*[a-f0-9]+:\s*62 f5 7f 48 6b 71 7f\s+vcvtnebf162iubs\s+0x1fc0\(%ecx\),%zmm6
-\s*[a-f0-9]+:\s*62 f5 7f df 6b 72 80\s+vcvtnebf162iubs\s+-0x100\(%edx\)\{1to32\},%zmm6\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 f5 7f 48 6b f5\s+vcvtbf162iubs\s+%zmm5,%zmm6
+\s*[a-f0-9]+:\s*62 f5 7f 4f 6b b4 f4 00 00 00 10\s+vcvtbf162iubs\s+0x10000000\(%esp,%esi,8\),%zmm6\{%k7\}
+\s*[a-f0-9]+:\s*62 f5 7f 58 6b 31\s+vcvtbf162iubs\s+\(%ecx\)\{1to32\},%zmm6
+\s*[a-f0-9]+:\s*62 f5 7f 48 6b 71 7f\s+vcvtbf162iubs\s+0x1fc0\(%ecx\),%zmm6
+\s*[a-f0-9]+:\s*62 f5 7f df 6b 72 80\s+vcvtbf162iubs\s+-0x100\(%edx\)\{1to32\},%zmm6\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 f5 7c 48 6b f5\s+vcvtph2iubs\s+%zmm5,%zmm6
 \s*[a-f0-9]+:\s*62 f5 7c 18 6b f5\s+vcvtph2iubs\s+\{rn-sae\},%zmm5,%zmm6
 \s*[a-f0-9]+:\s*62 f5 7c 4f 6b b4 f4 00 00 00 10\s+vcvtph2iubs\s+0x10000000\(%esp,%esi,8\),%zmm6\{%k7\}

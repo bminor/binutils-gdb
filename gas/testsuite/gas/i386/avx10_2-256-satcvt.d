@@ -6,16 +6,16 @@
 Disassembly of section \.text:
 
 0+ <_start>:
-\s*[a-f0-9]+:\s*62 f5 7f 08 69 f5\s+vcvtnebf162ibs\s+%xmm5,%xmm6
-\s*[a-f0-9]+:\s*62 f5 7f 28 69 f5\s+vcvtnebf162ibs\s+%ymm5,%ymm6
-\s*[a-f0-9]+:\s*62 f5 7f 0f 69 b4 f4 00 00 00 10\s+vcvtnebf162ibs\s+0x10000000\(%esp,%esi,8\),%xmm6\{%k7\}
-\s*[a-f0-9]+:\s*62 f5 7f 18 69 31\s+vcvtnebf162ibs\s+\(%ecx\)\{1to8\},%xmm6
-\s*[a-f0-9]+:\s*62 f5 7f 08 69 71 7f\s+vcvtnebf162ibs\s+0x7f0\(%ecx\),%xmm6
-\s*[a-f0-9]+:\s*62 f5 7f 9f 69 72 80\s+vcvtnebf162ibs\s+-0x100\(%edx\)\{1to8\},%xmm6\{%k7\}\{z\}
-\s*[a-f0-9]+:\s*62 f5 7f 2f 69 b4 f4 00 00 00 10\s+vcvtnebf162ibs\s+0x10000000\(%esp,%esi,8\),%ymm6\{%k7\}
-\s*[a-f0-9]+:\s*62 f5 7f 38 69 31\s+vcvtnebf162ibs\s+\(%ecx\)\{1to16\},%ymm6
-\s*[a-f0-9]+:\s*62 f5 7f 28 69 71 7f\s+vcvtnebf162ibs\s+0xfe0\(%ecx\),%ymm6
-\s*[a-f0-9]+:\s*62 f5 7f bf 69 72 80\s+vcvtnebf162ibs\s+-0x100\(%edx\)\{1to16\},%ymm6\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 f5 7f 08 69 f5\s+vcvtbf162ibs\s+%xmm5,%xmm6
+\s*[a-f0-9]+:\s*62 f5 7f 28 69 f5\s+vcvtbf162ibs\s+%ymm5,%ymm6
+\s*[a-f0-9]+:\s*62 f5 7f 0f 69 b4 f4 00 00 00 10\s+vcvtbf162ibs\s+0x10000000\(%esp,%esi,8\),%xmm6\{%k7\}
+\s*[a-f0-9]+:\s*62 f5 7f 18 69 31\s+vcvtbf162ibs\s+\(%ecx\)\{1to8\},%xmm6
+\s*[a-f0-9]+:\s*62 f5 7f 08 69 71 7f\s+vcvtbf162ibs\s+0x7f0\(%ecx\),%xmm6
+\s*[a-f0-9]+:\s*62 f5 7f 9f 69 72 80\s+vcvtbf162ibs\s+-0x100\(%edx\)\{1to8\},%xmm6\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 f5 7f 2f 69 b4 f4 00 00 00 10\s+vcvtbf162ibs\s+0x10000000\(%esp,%esi,8\),%ymm6\{%k7\}
+\s*[a-f0-9]+:\s*62 f5 7f 38 69 31\s+vcvtbf162ibs\s+\(%ecx\)\{1to16\},%ymm6
+\s*[a-f0-9]+:\s*62 f5 7f 28 69 71 7f\s+vcvtbf162ibs\s+0xfe0\(%ecx\),%ymm6
+\s*[a-f0-9]+:\s*62 f5 7f bf 69 72 80\s+vcvtbf162ibs\s+-0x100\(%edx\)\{1to16\},%ymm6\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 f5 7c 08 69 f5\s+vcvtph2ibs\s+%xmm5,%xmm6
 \s*[a-f0-9]+:\s*62 f5 7c 28 69 f5\s+vcvtph2ibs\s+%ymm5,%ymm6
 \s*[a-f0-9]+:\s*62 f5 78 18 69 f5\s+vcvtph2ibs\s+\{rn-sae\},%ymm5,%ymm6
@@ -125,16 +125,16 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 f5 7e 08 6d 11\s+vcvttss2sis\s+\(%ecx\),%edx
 \s*[a-f0-9]+:\s*62 f5 7e 08 6d 51 7f\s+vcvttss2sis\s+0x1fc\(%ecx\),%edx
 \s*[a-f0-9]+:\s*62 f5 7e 08 6d 52 80\s+vcvttss2sis\s+-0x200\(%edx\),%edx
-\s*[a-f0-9]+:\s*62 f5 7f 08 6b f5\s+vcvtnebf162iubs\s+%xmm5,%xmm6
-\s*[a-f0-9]+:\s*62 f5 7f 28 6b f5\s+vcvtnebf162iubs\s+%ymm5,%ymm6
-\s*[a-f0-9]+:\s*62 f5 7f 0f 6b b4 f4 00 00 00 10\s+vcvtnebf162iubs\s+0x10000000\(%esp,%esi,8\),%xmm6\{%k7\}
-\s*[a-f0-9]+:\s*62 f5 7f 18 6b 31\s+vcvtnebf162iubs\s+\(%ecx\)\{1to8\},%xmm6
-\s*[a-f0-9]+:\s*62 f5 7f 08 6b 71 7f\s+vcvtnebf162iubs\s+0x7f0\(%ecx\),%xmm6
-\s*[a-f0-9]+:\s*62 f5 7f 9f 6b 72 80\s+vcvtnebf162iubs\s+-0x100\(%edx\)\{1to8\},%xmm6\{%k7\}\{z\}
-\s*[a-f0-9]+:\s*62 f5 7f 2f 6b b4 f4 00 00 00 10\s+vcvtnebf162iubs\s+0x10000000\(%esp,%esi,8\),%ymm6\{%k7\}
-\s*[a-f0-9]+:\s*62 f5 7f 38 6b 31\s+vcvtnebf162iubs\s+\(%ecx\)\{1to16\},%ymm6
-\s*[a-f0-9]+:\s*62 f5 7f 28 6b 71 7f\s+vcvtnebf162iubs\s+0xfe0\(%ecx\),%ymm6
-\s*[a-f0-9]+:\s*62 f5 7f bf 6b 72 80\s+vcvtnebf162iubs\s+-0x100\(%edx\)\{1to16\},%ymm6\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 f5 7f 08 6b f5\s+vcvtbf162iubs\s+%xmm5,%xmm6
+\s*[a-f0-9]+:\s*62 f5 7f 28 6b f5\s+vcvtbf162iubs\s+%ymm5,%ymm6
+\s*[a-f0-9]+:\s*62 f5 7f 0f 6b b4 f4 00 00 00 10\s+vcvtbf162iubs\s+0x10000000\(%esp,%esi,8\),%xmm6\{%k7\}
+\s*[a-f0-9]+:\s*62 f5 7f 18 6b 31\s+vcvtbf162iubs\s+\(%ecx\)\{1to8\},%xmm6
+\s*[a-f0-9]+:\s*62 f5 7f 08 6b 71 7f\s+vcvtbf162iubs\s+0x7f0\(%ecx\),%xmm6
+\s*[a-f0-9]+:\s*62 f5 7f 9f 6b 72 80\s+vcvtbf162iubs\s+-0x100\(%edx\)\{1to8\},%xmm6\{%k7\}\{z\}
+\s*[a-f0-9]+:\s*62 f5 7f 2f 6b b4 f4 00 00 00 10\s+vcvtbf162iubs\s+0x10000000\(%esp,%esi,8\),%ymm6\{%k7\}
+\s*[a-f0-9]+:\s*62 f5 7f 38 6b 31\s+vcvtbf162iubs\s+\(%ecx\)\{1to16\},%ymm6
+\s*[a-f0-9]+:\s*62 f5 7f 28 6b 71 7f\s+vcvtbf162iubs\s+0xfe0\(%ecx\),%ymm6
+\s*[a-f0-9]+:\s*62 f5 7f bf 6b 72 80\s+vcvtbf162iubs\s+-0x100\(%edx\)\{1to16\},%ymm6\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 f5 7c 08 6b f5\s+vcvtph2iubs\s+%xmm5,%xmm6
 \s*[a-f0-9]+:\s*62 f5 7c 28 6b f5\s+vcvtph2iubs\s+%ymm5,%ymm6
 \s*[a-f0-9]+:\s*62 f5 78 18 6b f5\s+vcvtph2iubs\s+\{rn-sae\},%ymm5,%ymm6

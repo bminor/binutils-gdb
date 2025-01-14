@@ -17,16 +17,16 @@ _start:
 	vcvtbiasph2\m	(%ecx){1to32}, %zmm5, %ymm6
 	vcvtbiasph2\m	8128(%ecx), %zmm5, %ymm6
 	vcvtbiasph2\m	-256(%edx){1to32}, %zmm5, %ymm6{%k7}{z}
-	vcvtne2ph2\m	%zmm4, %zmm5, %zmm6
-	vcvtne2ph2\m	0x10000000(%esp, %esi, 8), %zmm5, %zmm6{%k7}
-	vcvtne2ph2\m	(%ecx){1to32}, %zmm5, %zmm6
-	vcvtne2ph2\m	8128(%ecx), %zmm5, %zmm6
-	vcvtne2ph2\m	-256(%edx){1to32}, %zmm5, %zmm6{%k7}
-	vcvtneph2\m	%zmm5, %ymm6
-	vcvtneph2\m	0x10000000(%esp, %esi, 8), %ymm6{%k7}
-	vcvtneph2\m	(%ecx){1to32}, %ymm6
-	vcvtneph2\m	8128(%ecx), %ymm6
-	vcvtneph2\m	-256(%edx){1to32}, %ymm6{%k7}{z}
+	vcvt2ph2\m	%zmm4, %zmm5, %zmm6
+	vcvt2ph2\m	0x10000000(%esp, %esi, 8), %zmm5, %zmm6{%k7}
+	vcvt2ph2\m	(%ecx){1to32}, %zmm5, %zmm6
+	vcvt2ph2\m	8128(%ecx), %zmm5, %zmm6
+	vcvt2ph2\m	-256(%edx){1to32}, %zmm5, %zmm6{%k7}
+	vcvtph2\m	%zmm5, %ymm6
+	vcvtph2\m	0x10000000(%esp, %esi, 8), %ymm6{%k7}
+	vcvtph2\m	(%ecx){1to32}, %ymm6
+	vcvtph2\m	8128(%ecx), %ymm6
+	vcvtph2\m	-256(%edx){1to32}, %ymm6{%k7}{z}
 	.endr
 
 	vcvthf82ph	%ymm5, %zmm6
@@ -50,16 +50,16 @@ _intel:
 	vcvtbiasph2\m	ymm6, zmm5, WORD PTR [ecx]{1to32}
 	vcvtbiasph2\m	ymm6, zmm5, ZMMWORD PTR [ecx+8128]
 	vcvtbiasph2\m	ymm6{k7}{z}, zmm5, WORD PTR [edx-256]{1to32}
-	vcvtne2ph2\m	zmm6, zmm5, zmm4
-	vcvtne2ph2\m	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]
-	vcvtne2ph2\m	zmm6, zmm5, WORD PTR [ecx]{1to32}
-	vcvtne2ph2\m	zmm6, zmm5, ZMMWORD PTR [ecx+8128]
-	vcvtne2ph2\m	zmm6{k7}, zmm5, WORD PTR [edx-256]{1to32}
-	vcvtneph2\m	ymm6, zmm5
-	vcvtneph2\m	ymm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]
-	vcvtneph2\m	ymm6, WORD PTR [ecx]{1to32}
-	vcvtneph2\m	ymm6, ZMMWORD PTR [ecx+8128]
-	vcvtneph2\m	ymm6{k7}{z}, WORD PTR [edx-256]{1to32}
+	vcvt2ph2\m	zmm6, zmm5, zmm4
+	vcvt2ph2\m	zmm6{k7}, zmm5, ZMMWORD PTR [esp+esi*8+0x10000000]
+	vcvt2ph2\m	zmm6, zmm5, WORD PTR [ecx]{1to32}
+	vcvt2ph2\m	zmm6, zmm5, ZMMWORD PTR [ecx+8128]
+	vcvt2ph2\m	zmm6{k7}, zmm5, WORD PTR [edx-256]{1to32}
+	vcvtph2\m	ymm6, zmm5
+	vcvtph2\m	ymm6{k7}, ZMMWORD PTR [esp+esi*8+0x10000000]
+	vcvtph2\m	ymm6, WORD PTR [ecx]{1to32}
+	vcvtph2\m	ymm6, ZMMWORD PTR [ecx+8128]
+	vcvtph2\m	ymm6{k7}{z}, WORD PTR [edx-256]{1to32}
 	.endr
 
 	vcvthf82ph	zmm6, ymm5

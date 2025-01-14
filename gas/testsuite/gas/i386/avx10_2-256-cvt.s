@@ -27,25 +27,25 @@ _start:
 	vcvtbiasph2\m	(%ecx){1to16}, %ymm5, %xmm6
 	vcvtbiasph2\m	4064(%ecx), %ymm5, %xmm6
 	vcvtbiasph2\m	-256(%edx){1to16}, %ymm5, %xmm6{%k7}{z}
-	vcvtne2ph2\m	%xmm4, %xmm5, %xmm6
-	vcvtne2ph2\m	%ymm4, %ymm5, %ymm6
-	vcvtne2ph2\m	0x10000000(%esp, %esi, 8), %xmm5, %xmm6{%k7}
-	vcvtne2ph2\m	(%ecx){1to8}, %xmm5, %xmm6
-	vcvtne2ph2\m	2032(%ecx), %xmm5, %xmm6
-	vcvtne2ph2\m	-256(%edx){1to8}, %xmm5, %xmm6{%k7}
-	vcvtne2ph2\m	0x10000000(%esp, %esi, 8), %ymm5, %ymm6{%k7}
-	vcvtne2ph2\m	(%ecx){1to16}, %ymm5, %ymm6
-	vcvtne2ph2\m	4064(%ecx), %ymm5, %ymm6
-	vcvtne2ph2\m	-256(%edx){1to16}, %ymm5, %ymm6{%k7}
-	vcvtneph2\m	%xmm5, %xmm6
-	vcvtneph2\m	%ymm5, %xmm6
-	vcvtneph2\m\()x	0x10000000(%esp, %esi, 8), %xmm6{%k7}
-	vcvtneph2\m	(%ecx){1to8}, %xmm6
-	vcvtneph2\m\()x	2032(%ecx), %xmm6
-	vcvtneph2\m	-256(%edx){1to8}, %xmm6{%k7}{z}
-	vcvtneph2\m	(%ecx){1to16}, %xmm6
-	vcvtneph2\m\()y	4064(%ecx), %xmm6
-	vcvtneph2\m	-256(%edx){1to16}, %xmm6{%k7}{z}
+	vcvt2ph2\m	%xmm4, %xmm5, %xmm6
+	vcvt2ph2\m	%ymm4, %ymm5, %ymm6
+	vcvt2ph2\m	0x10000000(%esp, %esi, 8), %xmm5, %xmm6{%k7}
+	vcvt2ph2\m	(%ecx){1to8}, %xmm5, %xmm6
+	vcvt2ph2\m	2032(%ecx), %xmm5, %xmm6
+	vcvt2ph2\m	-256(%edx){1to8}, %xmm5, %xmm6{%k7}
+	vcvt2ph2\m	0x10000000(%esp, %esi, 8), %ymm5, %ymm6{%k7}
+	vcvt2ph2\m	(%ecx){1to16}, %ymm5, %ymm6
+	vcvt2ph2\m	4064(%ecx), %ymm5, %ymm6
+	vcvt2ph2\m	-256(%edx){1to16}, %ymm5, %ymm6{%k7}
+	vcvtph2\m	%xmm5, %xmm6
+	vcvtph2\m	%ymm5, %xmm6
+	vcvtph2\m\()x	0x10000000(%esp, %esi, 8), %xmm6{%k7}
+	vcvtph2\m	(%ecx){1to8}, %xmm6
+	vcvtph2\m\()x	2032(%ecx), %xmm6
+	vcvtph2\m	-256(%edx){1to8}, %xmm6{%k7}{z}
+	vcvtph2\m	(%ecx){1to16}, %xmm6
+	vcvtph2\m\()y	4064(%ecx), %xmm6
+	vcvtph2\m	-256(%edx){1to16}, %xmm6{%k7}{z}
 	.endr
 
 	vcvthf82ph	%xmm5, %xmm6
@@ -84,25 +84,25 @@ _intel:
 	vcvtbiasph2\m	xmm6, ymm5, WORD PTR [ecx]{1to16}
 	vcvtbiasph2\m	xmm6, ymm5, YMMWORD PTR [ecx+4064]
 	vcvtbiasph2\m	xmm6{k7}{z}, ymm5, WORD PTR [edx-256]{1to16}
-	vcvtne2ph2\m	xmm6, xmm5, xmm4
-	vcvtne2ph2\m	ymm6, ymm5, ymm4
-	vcvtne2ph2\m	xmm6{k7}, xmm5, XMMWORD PTR [esp+esi*8+0x10000000]
-	vcvtne2ph2\m	xmm6, xmm5, WORD PTR [ecx]{1to8}
-	vcvtne2ph2\m	xmm6, xmm5, XMMWORD PTR [ecx+2032]
-	vcvtne2ph2\m	xmm6{k7}, xmm5, WORD PTR [edx-256]{1to8}
-	vcvtne2ph2\m	ymm6{k7}, ymm5, YMMWORD PTR [esp+esi*8+0x10000000]
-	vcvtne2ph2\m	ymm6, ymm5, WORD PTR [ecx]{1to16}
-	vcvtne2ph2\m	ymm6, ymm5, YMMWORD PTR [ecx+4064]
-	vcvtne2ph2\m	ymm6{k7}, ymm5, WORD PTR [edx-256]{1to16}
-	vcvtneph2\m	xmm6, xmm5
-	vcvtneph2\m	xmm6, ymm5
-	vcvtneph2\m	xmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]
-	vcvtneph2\m	xmm6, WORD PTR [ecx]{1to8}
-	vcvtneph2\m	xmm6, XMMWORD PTR [ecx+2032]
-	vcvtneph2\m	xmm6{k7}{z}, WORD PTR [edx-256]{1to8}
-	vcvtneph2\m	xmm6, WORD PTR [ecx]{1to16}
-	vcvtneph2\m	xmm6, YMMWORD PTR [ecx+4064]
-	vcvtneph2\m	xmm6{k7}{z}, WORD PTR [edx-256]{1to16}
+	vcvt2ph2\m	xmm6, xmm5, xmm4
+	vcvt2ph2\m	ymm6, ymm5, ymm4
+	vcvt2ph2\m	xmm6{k7}, xmm5, XMMWORD PTR [esp+esi*8+0x10000000]
+	vcvt2ph2\m	xmm6, xmm5, WORD PTR [ecx]{1to8}
+	vcvt2ph2\m	xmm6, xmm5, XMMWORD PTR [ecx+2032]
+	vcvt2ph2\m	xmm6{k7}, xmm5, WORD PTR [edx-256]{1to8}
+	vcvt2ph2\m	ymm6{k7}, ymm5, YMMWORD PTR [esp+esi*8+0x10000000]
+	vcvt2ph2\m	ymm6, ymm5, WORD PTR [ecx]{1to16}
+	vcvt2ph2\m	ymm6, ymm5, YMMWORD PTR [ecx+4064]
+	vcvt2ph2\m	ymm6{k7}, ymm5, WORD PTR [edx-256]{1to16}
+	vcvtph2\m	xmm6, xmm5
+	vcvtph2\m	xmm6, ymm5
+	vcvtph2\m	xmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]
+	vcvtph2\m	xmm6, WORD PTR [ecx]{1to8}
+	vcvtph2\m	xmm6, XMMWORD PTR [ecx+2032]
+	vcvtph2\m	xmm6{k7}{z}, WORD PTR [edx-256]{1to8}
+	vcvtph2\m	xmm6, WORD PTR [ecx]{1to16}
+	vcvtph2\m	xmm6, YMMWORD PTR [ecx+4064]
+	vcvtph2\m	xmm6{k7}{z}, WORD PTR [edx-256]{1to16}
 	.endr
 
 	vcvthf82ph	xmm6, xmm5

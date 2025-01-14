@@ -5,16 +5,16 @@
 	.text
 _start:
 	.irp u, "", u
-	vcvtnebf162i\u\()bs	%xmm5, %xmm6
-	vcvtnebf162i\u\()bs	%ymm5, %ymm6
-	vcvtnebf162i\u\()bs	0x10000000(%esp, %esi, 8), %xmm6{%k7}
-	vcvtnebf162i\u\()bs	(%ecx){1to8}, %xmm6
-	vcvtnebf162i\u\()bs	2032(%ecx), %xmm6
-	vcvtnebf162i\u\()bs	-256(%edx){1to8}, %xmm6{%k7}{z}
-	vcvtnebf162i\u\()bs	0x10000000(%esp, %esi, 8), %ymm6{%k7}
-	vcvtnebf162i\u\()bs	(%ecx){1to16}, %ymm6
-	vcvtnebf162i\u\()bs	4064(%ecx), %ymm6
-	vcvtnebf162i\u\()bs	-256(%edx){1to16}, %ymm6{%k7}{z}
+	vcvtbf162i\u\()bs	%xmm5, %xmm6
+	vcvtbf162i\u\()bs	%ymm5, %ymm6
+	vcvtbf162i\u\()bs	0x10000000(%esp, %esi, 8), %xmm6{%k7}
+	vcvtbf162i\u\()bs	(%ecx){1to8}, %xmm6
+	vcvtbf162i\u\()bs	2032(%ecx), %xmm6
+	vcvtbf162i\u\()bs	-256(%edx){1to8}, %xmm6{%k7}{z}
+	vcvtbf162i\u\()bs	0x10000000(%esp, %esi, 8), %ymm6{%k7}
+	vcvtbf162i\u\()bs	(%ecx){1to16}, %ymm6
+	vcvtbf162i\u\()bs	4064(%ecx), %ymm6
+	vcvtbf162i\u\()bs	-256(%edx){1to16}, %ymm6{%k7}{z}
 
 	vcvtph2i\u\()bs	%xmm5, %xmm6
 	vcvtph2i\u\()bs	%ymm5, %ymm6
@@ -140,16 +140,16 @@ _start:
 _intel:
 	.intel_syntax noprefix
 	.irp u, "", u
-	vcvtnebf162i\u\()bs	xmm6, xmm5
-	vcvtnebf162i\u\()bs	ymm6, ymm5
-	vcvtnebf162i\u\()bs	xmm6{k7}, [esp+esi*8+0x10000000]
-	vcvtnebf162i\u\()bs	xmm6, [ecx]{1to8}
-	vcvtnebf162i\u\()bs	xmm6, XMMWORD PTR [ecx+2032]
-	vcvtnebf162i\u\()bs	xmm6{k7}{z}, WORD PTR [edx-256]{1to8}
-	vcvtnebf162i\u\()bs	ymm6{k7}, [esp+esi*8+0x10000000]
-	vcvtnebf162i\u\()bs	ymm6, [ecx]{1to16}
-	vcvtnebf162i\u\()bs	ymm6, YMMWORD PTR [ecx+4064]
-	vcvtnebf162i\u\()bs	ymm6{k7}{z}, WORD PTR [edx-256]{1to16}
+	vcvtbf162i\u\()bs	xmm6, xmm5
+	vcvtbf162i\u\()bs	ymm6, ymm5
+	vcvtbf162i\u\()bs	xmm6{k7}, [esp+esi*8+0x10000000]
+	vcvtbf162i\u\()bs	xmm6, [ecx]{1to8}
+	vcvtbf162i\u\()bs	xmm6, XMMWORD PTR [ecx+2032]
+	vcvtbf162i\u\()bs	xmm6{k7}{z}, WORD PTR [edx-256]{1to8}
+	vcvtbf162i\u\()bs	ymm6{k7}, [esp+esi*8+0x10000000]
+	vcvtbf162i\u\()bs	ymm6, [ecx]{1to16}
+	vcvtbf162i\u\()bs	ymm6, YMMWORD PTR [ecx+4064]
+	vcvtbf162i\u\()bs	ymm6{k7}{z}, WORD PTR [edx-256]{1to16}
 
 	vcvtph2i\u\()bs	xmm6, xmm5
 	vcvtph2i\u\()bs	ymm6, ymm5

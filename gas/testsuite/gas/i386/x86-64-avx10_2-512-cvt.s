@@ -17,16 +17,16 @@ _start:
 	vcvtbiasph2\m	(%r9){1to32}, %zmm29, %ymm30
 	vcvtbiasph2\m	8128(%rcx), %zmm29, %ymm30
 	vcvtbiasph2\m	-256(%rdx){1to32}, %zmm29, %ymm30{%k7}{z}
-	vcvtne2ph2\m	%zmm28, %zmm29, %zmm30
-	vcvtne2ph2\m	0x10000000(%rbp, %r14, 8), %zmm29, %zmm30{%k7}
-	vcvtne2ph2\m	(%r9){1to32}, %zmm29, %zmm30
-	vcvtne2ph2\m	8128(%rcx), %zmm29, %zmm30
-	vcvtne2ph2\m	-256(%rdx){1to32}, %zmm29, %zmm30{%k7}
-	vcvtneph2\m	%zmm29, %ymm30
-	vcvtneph2\m	0x10000000(%rbp, %r14, 8), %ymm30{%k7}
-	vcvtneph2\m	(%r9){1to32}, %ymm30
-	vcvtneph2\m	8128(%rcx), %ymm30
-	vcvtneph2\m	-256(%rdx){1to32}, %ymm30{%k7}{z}
+	vcvt2ph2\m	%zmm28, %zmm29, %zmm30
+	vcvt2ph2\m	0x10000000(%rbp, %r14, 8), %zmm29, %zmm30{%k7}
+	vcvt2ph2\m	(%r9){1to32}, %zmm29, %zmm30
+	vcvt2ph2\m	8128(%rcx), %zmm29, %zmm30
+	vcvt2ph2\m	-256(%rdx){1to32}, %zmm29, %zmm30{%k7}
+	vcvtph2\m	%zmm29, %ymm30
+	vcvtph2\m	0x10000000(%rbp, %r14, 8), %ymm30{%k7}
+	vcvtph2\m	(%r9){1to32}, %ymm30
+	vcvtph2\m	8128(%rcx), %ymm30
+	vcvtph2\m	-256(%rdx){1to32}, %ymm30{%k7}{z}
 	.endr
 
 	vcvthf82ph	%ymm29, %zmm30
@@ -50,16 +50,16 @@ _intel:
 	vcvtbiasph2\m	ymm30, zmm29, WORD PTR [r9]{1to32}
 	vcvtbiasph2\m	ymm30, zmm29, ZMMWORD PTR [rcx+8128]
 	vcvtbiasph2\m	ymm30{k7}{z}, zmm29, WORD PTR [rdx-256]{1to32}
-	vcvtne2ph2\m	zmm30, zmm29, zmm28
-	vcvtne2ph2\m	zmm30{k7}, zmm29, ZMMWORD PTR [rbp+r14*8+0x10000000]
-	vcvtne2ph2\m	zmm30, zmm29, WORD PTR [r9]{1to32}
-	vcvtne2ph2\m	zmm30, zmm29, ZMMWORD PTR [rcx+8128]
-	vcvtne2ph2\m	zmm30{k7}, zmm29, WORD PTR [rdx-256]{1to32}
-	vcvtneph2\m	ymm30, zmm29
-	vcvtneph2\m	ymm30{k7}, ZMMWORD PTR [rbp+r14*8+0x10000000]
-	vcvtneph2\m	ymm30, WORD PTR [r9]{1to32}
-	vcvtneph2\m	ymm30, ZMMWORD PTR [rcx+8128]
-	vcvtneph2\m	ymm30{k7}{z}, WORD PTR [rdx-256]{1to32}
+	vcvt2ph2\m	zmm30, zmm29, zmm28
+	vcvt2ph2\m	zmm30{k7}, zmm29, ZMMWORD PTR [rbp+r14*8+0x10000000]
+	vcvt2ph2\m	zmm30, zmm29, WORD PTR [r9]{1to32}
+	vcvt2ph2\m	zmm30, zmm29, ZMMWORD PTR [rcx+8128]
+	vcvt2ph2\m	zmm30{k7}, zmm29, WORD PTR [rdx-256]{1to32}
+	vcvtph2\m	ymm30, zmm29
+	vcvtph2\m	ymm30{k7}, ZMMWORD PTR [rbp+r14*8+0x10000000]
+	vcvtph2\m	ymm30, WORD PTR [r9]{1to32}
+	vcvtph2\m	ymm30, ZMMWORD PTR [rcx+8128]
+	vcvtph2\m	ymm30{k7}{z}, WORD PTR [rdx-256]{1to32}
 	.endr
 
 	vcvthf82ph	zmm30, ymm29
