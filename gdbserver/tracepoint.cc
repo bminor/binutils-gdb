@@ -215,15 +215,6 @@ write_e_ipa_not_loaded (char *buffer)
 	   "Fast tracepoints unavailable.");
 }
 
-/* Write an error to BUFFER indicating that static tracepoint support
-   does not exist.  */
-
-static void
-write_e_static_tracepoints_not_supported (char *buffer)
-{
-  sprintf (buffer, "E.GDBserver does not have static tracepoints support");
-}
-
 /* If the in-process agent library isn't loaded in the inferior, write
    an error to BUFFER, and return 1.  Otherwise, return 0.  */
 
@@ -621,10 +612,6 @@ enum tracepoint_type
 
   /* A fast tracepoint implemented with a jump instead of a trap.  */
   fast_tracepoint,
-
-  /* A static tracepoint, implemented by a program call into a tracing
-     library.  */
-  static_tracepoint
 };
 
 struct tracepoint_hit_ctx;
@@ -2311,17 +2298,6 @@ cmd_qtinit (char *packet)
   write_ok (packet);
 }
 
-/* Unprobe the UST marker at ADDRESS.  */
-
-static void
-unprobe_marker_at (CORE_ADDR address)
-{
-  char cmd[IPA_CMD_BUF_SIZE];
-
-  sprintf (cmd, "unprobe_marker_at:%s", paddress (address));
-  run_inferior_command (cmd, strlen (cmd) + 1);
-}
-
 /* Restore the program to its pre-tracing state.  This routine may be called
    in error situations, so it needs to be careful about only restoring
    from known-valid bits.  */
@@ -2330,11 +2306,8 @@ static void
 clear_installed_tracepoints (void)
 {
   struct tracepoint *tpoint;
-  struct tracepoint *prev_stpoint;
 
   target_pause_all (true);
-
-  prev_stpoint = NULL;
 
   /* Restore any bytes overwritten by tracepoints.  */
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
@@ -2366,19 +2339,6 @@ clear_installed_tracepoints (void)
 
 	    delete_fast_tracepoint_jump (jump);
 	  }
-	  break;
-	case static_tracepoint:
-	  if (prev_stpoint != NULL
-	      && prev_stpoint->address == tpoint->address)
-	    /* Nothing to do.  We already unprobed a tracepoint set at
-	       this marker address (and there can only be one probe
-	       per marker).  */
-	    ;
-	  else
-	    {
-	      unprobe_marker_at (tpoint->address);
-	      prev_stpoint = tpoint;
-	    }
 	  break;
 	}
 
@@ -2453,11 +2413,6 @@ cmd_qtdp (char *own_buf)
 	      packet = unpack_varlen_hex (packet, &count);
 	      tpoint->orig_size = count;
 	    }
-	  else if (*packet == 'S')
-	    {
-	      tpoint->type = static_tracepoint;
-	      ++packet;
-	    }
 	  else if (*packet == 'X')
 	    {
 	      tpoint->cond = gdb_parse_agent_expr (&packet);
@@ -2477,8 +2432,7 @@ cmd_qtdp (char *own_buf)
 
       trace_debug ("Defined %stracepoint %d at 0x%s, "
 		   "enabled %d step %" PRIu64 " pass %" PRIu64,
-		   tpoint->type == fast_tracepoint ? "fast "
-		   : tpoint->type == static_tracepoint ? "static " : "",
+		   tpoint->type == fast_tracepoint ? "fast " : "",
 		   tpoint->number, paddress (tpoint->address), tpoint->enabled,
 		   tpoint->step_count, tpoint->pass_count);
     }
@@ -2526,8 +2480,6 @@ cmd_qtdp (char *own_buf)
 	    {
 	      if (tpoint->type == fast_tracepoint)
 		clone_fast_tracepoint (tpoint, tp);
-	      else if (tpoint->type == static_tracepoint)
-		tpoint->handle = (void *) -1;
 	    }
 	}
 
@@ -2689,7 +2641,7 @@ cmd_qtenable_disable (char *own_buf, int enable)
 
       tp->enabled = enable;
 
-      if (tp->type == fast_tracepoint || tp->type == static_tracepoint)
+      if (tp->type == fast_tracepoint)
 	{
 	  int offset = offsetof (struct tracepoint, enabled);
 	  CORE_ADDR obj_addr = tp->obj_addr_on_target + offset;
@@ -2920,33 +2872,6 @@ have_fast_tracepoint_trampoline_buffer (char *buf)
   return trampoline_end != 0;
 }
 
-/* Ask the IPA to probe the marker at ADDRESS.  Returns -1 if running
-   the command fails, or 0 otherwise.  If the command ran
-   successfully, but probing the marker failed, ERROUT will be filled
-   with the error to reply to GDB, and -1 is also returned.  This
-   allows directly passing IPA errors to GDB.  */
-
-static int
-probe_marker_at (CORE_ADDR address, char *errout)
-{
-  char cmd[IPA_CMD_BUF_SIZE];
-  int err;
-
-  sprintf (cmd, "probe_marker_at:%s", paddress (address));
-  err = run_inferior_command (cmd, strlen (cmd) + 1);
-
-  if (err == 0)
-    {
-      if (*cmd == 'E')
-	{
-	  strcpy (errout, cmd);
-	  return -1;
-	}
-    }
-
-  return err;
-}
-
 static void
 clone_fast_tracepoint (struct tracepoint *to, const struct tracepoint *from)
 {
@@ -3046,32 +2971,17 @@ install_tracepoint (struct tracepoint *tpoint, char *own_buf)
       tpoint->handle = set_breakpoint_at (tpoint->address,
 					  tracepoint_handler);
     }
-  else if (tpoint->type == fast_tracepoint || tpoint->type == static_tracepoint)
+  else if (tpoint->type == fast_tracepoint)
     {
       if (!agent_loaded_p ())
 	{
-	  trace_debug ("Requested a %s tracepoint, but fast "
-		       "tracepoints aren't supported.",
-		       tpoint->type == static_tracepoint ? "static" : "fast");
+	  trace_debug ("Requested a fast tracepoint, but fast "
+		       "tracepoints aren't supported.");
 	  write_e_ipa_not_loaded (own_buf);
 	  return;
 	}
-      if (tpoint->type == static_tracepoint)
-	{
-	  trace_debug ("Requested a static tracepoint, but static "
-		       "tracepoints are not supported.");
-	  write_e_static_tracepoints_not_supported (own_buf);
-	  return;
-	}
 
-      if (tpoint->type == fast_tracepoint)
-	install_fast_tracepoint (tpoint, own_buf);
-      else
-	{
-	  if (probe_marker_at (tpoint->address, own_buf) == 0)
-	    tpoint->handle = (void *) -1;
-	}
-
+      install_fast_tracepoint (tpoint, own_buf);
     }
   else
     internal_error ("Unknown tracepoint type");
@@ -3144,56 +3054,44 @@ cmd_qtstart (char *packet)
 	  tpoint->handle = set_breakpoint_at (tpoint->address,
 					      tracepoint_handler);
 	}
-      else if (tpoint->type == fast_tracepoint
-	       || tpoint->type == static_tracepoint)
+      else if (tpoint->type == fast_tracepoint)
 	{
 	  if (maybe_write_ipa_not_loaded (packet))
 	    {
-	      trace_debug ("Requested a %s tracepoint, but fast "
-			   "tracepoints aren't supported.",
-			   tpoint->type == static_tracepoint
-			   ? "static" : "fast");
+	      trace_debug ("Requested a fast tracepoint, but fast "
+			   "tracepoints aren't supported.");
 	      break;
 	    }
 
-	  if (tpoint->type == fast_tracepoint)
+	  int use_agent_p
+	    = use_agent && agent_capability_check (AGENT_CAPA_FAST_TRACE);
+
+	  if (prev_ftpoint != NULL
+	      && prev_ftpoint->address == tpoint->address)
 	    {
-	      int use_agent_p
-		= use_agent && agent_capability_check (AGENT_CAPA_FAST_TRACE);
-
-	      if (prev_ftpoint != NULL
-		  && prev_ftpoint->address == tpoint->address)
-		{
-		  if (use_agent_p)
-		    tracepoint_send_agent (tpoint);
-		  else
-		    download_tracepoint_1 (tpoint);
-
-		  clone_fast_tracepoint (tpoint, prev_ftpoint);
-		}
+	      if (use_agent_p)
+		tracepoint_send_agent (tpoint);
 	      else
-		{
-		  /* Tracepoint is installed successfully?  */
-		  int installed = 0;
+		download_tracepoint_1 (tpoint);
 
-		  /* Download and install fast tracepoint by agent.  */
-		  if (use_agent_p)
-		    installed = !tracepoint_send_agent (tpoint);
-		  else
-		    {
-		      download_tracepoint_1 (tpoint);
-		      installed = !install_fast_tracepoint (tpoint, packet);
-		    }
-
-		  if (installed)
-		    prev_ftpoint = tpoint;
-		}
+	      clone_fast_tracepoint (tpoint, prev_ftpoint);
 	    }
 	  else
 	    {
-	      trace_debug ("Requested a static tracepoint, but static "
-			   "tracepoints are not supported.");
-	      break;
+	      /* Tracepoint is installed successfully?  */
+	      int installed = 0;
+
+	      /* Download and install fast tracepoint by agent.  */
+	      if (use_agent_p)
+		installed = !tracepoint_send_agent (tpoint);
+	      else
+		{
+		  download_tracepoint_1 (tpoint);
+		  installed = !install_fast_tracepoint (tpoint, packet);
+		}
+
+	      if (installed)
+		prev_ftpoint = tpoint;
 	    }
 
 	  prev_tpptr = tpptr;
@@ -3621,8 +3519,6 @@ response_tracepoint (char *packet, struct tracepoint *tpoint)
 	   tpoint->pass_count);
   if (tpoint->type == fast_tracepoint)
     sprintf (packet + strlen (packet), ":F%x", tpoint->orig_size);
-  else if (tpoint->type == static_tracepoint)
-    sprintf (packet + strlen (packet), ":S");
 
   if (tpoint->cond)
     {
@@ -4386,8 +4282,7 @@ tracepoint_was_hit (thread_info *tinfo, CORE_ADDR stop_pc)
       /* Note that we collect fast tracepoints here as well.  We'll
 	 step over the fast tracepoint jump later, which avoids the
 	 double collect.  */
-      if (tpoint->enabled && stop_pc == tpoint->address
-	  && tpoint->type != static_tracepoint)
+      if (tpoint->enabled && stop_pc == tpoint->address)
 	{
 	  trace_debug ("Thread %s at address of tracepoint %d at 0x%s",
 		       target_pid_to_str (tinfo->id).c_str (),
@@ -5753,8 +5648,7 @@ download_tracepoint_1 (struct tracepoint *tpoint)
   struct tracepoint target_tracepoint;
   CORE_ADDR tpptr = 0;
 
-  gdb_assert (tpoint->type == fast_tracepoint
-	      || tpoint->type == static_tracepoint);
+  gdb_assert (tpoint->type == fast_tracepoint);
 
   if (tpoint->cond != NULL && target_emit_ops () != NULL)
     {
@@ -5914,8 +5808,7 @@ download_tracepoint (struct tracepoint *tpoint)
 {
   struct tracepoint *tp, *tp_prev;
 
-  if (tpoint->type != fast_tracepoint
-      && tpoint->type != static_tracepoint)
+  if (tpoint->type != fast_tracepoint)
     return;
 
   download_tracepoint_1 (tpoint);
@@ -5925,7 +5818,7 @@ download_tracepoint (struct tracepoint *tpoint)
   tp_prev = NULL;
   for (tp = tracepoints; tp != tpoint; tp = tp->next)
     {
-      if (tp->type == fast_tracepoint || tp->type == static_tracepoint)
+      if (tp->type == fast_tracepoint)
 	tp_prev = tp;
     }
 
