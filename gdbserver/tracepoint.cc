@@ -435,12 +435,6 @@ struct eval_expr_action
   struct agent_expr *expr;
 };
 
-/* An 'L' (collect static trace data) action.  */
-struct collect_static_trace_data_action
-{
-  struct tracepoint_action base;
-};
-
 #ifndef IN_PROCESS_AGENT
 static CORE_ADDR
 m_tracepoint_action_download (const struct tracepoint_action *action)
@@ -532,24 +526,6 @@ x_tracepoint_action_send ( char *buffer, const struct tracepoint_action *action)
   return agent_expr_send (buffer, eaction->expr);
 }
 
-static CORE_ADDR
-l_tracepoint_action_download (const struct tracepoint_action *action)
-{
-  CORE_ADDR ipa_action
-    = target_malloc (sizeof (struct collect_static_trace_data_action));
-
-  target_write_memory (ipa_action, (unsigned char *) action,
-			 sizeof (struct collect_static_trace_data_action));
-
-  return ipa_action;
-}
-
-static char *
-l_tracepoint_action_send (char *buffer, const struct tracepoint_action *action)
-{
-  return buffer;
-}
-
 static char *
 tracepoint_action_send (char *buffer, const struct tracepoint_action *action)
 {
@@ -561,8 +537,6 @@ tracepoint_action_send (char *buffer, const struct tracepoint_action *action)
       return r_tracepoint_action_send (buffer, action);
     case 'X':
       return x_tracepoint_action_send (buffer, action);
-    case 'L':
-      return l_tracepoint_action_send (buffer, action);
     }
   error ("Unknown trace action '%c'.", action->type);
 }
@@ -578,8 +552,6 @@ tracepoint_action_download (const struct tracepoint_action *action)
       return r_tracepoint_action_download (action);
     case 'X':
       return x_tracepoint_action_download (action);
-    case 'L':
-      return l_tracepoint_action_download (action);
     }
   error ("Unknown trace action '%c'.", action->type);
 }
@@ -1861,18 +1833,6 @@ add_tracepoint_action (struct tracepoint *tpoint, const char *packet)
 	    /* skip past hex digits of mask for now */
 	    while (isxdigit(*act))
 	      ++act;
-	    break;
-	  }
-	case 'L':
-	  {
-	    struct collect_static_trace_data_action *raction =
-	      XNEW (struct collect_static_trace_data_action);
-
-	    raction->base.type = *act;
-	    action = &raction->base;
-
-	    trace_debug ("Want to collect static trace data");
-	    ++act;
 	    break;
 	  }
 	case 'S':
@@ -4545,12 +4505,6 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 	    record_tracepoint_error (tpoint, "action expression", err);
 	    return;
 	  }
-      }
-      break;
-    case 'L':
-      {
-	trace_debug ("warning: collecting static trace data, "
-		     "but static tracepoints are not supported");
       }
       break;
     default:
