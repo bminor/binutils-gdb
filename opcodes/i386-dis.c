@@ -1204,9 +1204,11 @@ enum
   PREFIX_EVEX_0F3838,
   PREFIX_EVEX_0F3839,
   PREFIX_EVEX_0F383A,
+  PREFIX_EVEX_0F384A_X86_64_W_0_L_2,
   PREFIX_EVEX_0F3852,
   PREFIX_EVEX_0F3853,
   PREFIX_EVEX_0F3868,
+  PREFIX_EVEX_0F386D_X86_64_W_0_L_2,
   PREFIX_EVEX_0F3872,
   PREFIX_EVEX_0F3874,
   PREFIX_EVEX_0F389A,
@@ -1214,6 +1216,7 @@ enum
   PREFIX_EVEX_0F38AA,
   PREFIX_EVEX_0F38AB,
 
+  PREFIX_EVEX_0F3A07_X86_64_W_0_L_2,
   PREFIX_EVEX_0F3A08,
   PREFIX_EVEX_0F3A0A,
   PREFIX_EVEX_0F3A26,
@@ -1225,6 +1228,7 @@ enum
   PREFIX_EVEX_0F3A57,
   PREFIX_EVEX_0F3A66,
   PREFIX_EVEX_0F3A67,
+  PREFIX_EVEX_0F3A77_X86_64_W_0_L_2,
   PREFIX_EVEX_0F3AC2,
 
   PREFIX_EVEX_MAP4_4x,
@@ -1374,6 +1378,9 @@ enum
   X86_64_VEX_MAP7_F8_L_0_W_0_R_0,
 
   X86_64_EVEX_0F384A,
+  X86_64_EVEX_0F386D,
+  X86_64_EVEX_0F3A07,
+  X86_64_EVEX_0F3A77,
 
   X86_64_EVEX_MAP5_6F,
 };
@@ -1573,10 +1580,12 @@ enum
   EVEX_LEN_0F384A_X86_64_W_0,
   EVEX_LEN_0F385A,
   EVEX_LEN_0F385B,
+  EVEX_LEN_0F386D_X86_64_W_0,
   EVEX_LEN_0F38C6,
   EVEX_LEN_0F38C7,
   EVEX_LEN_0F3A00,
   EVEX_LEN_0F3A01,
+  EVEX_LEN_0F3A07_X86_64_W_0,
   EVEX_LEN_0F3A18,
   EVEX_LEN_0F3A19,
   EVEX_LEN_0F3A1A,
@@ -1587,6 +1596,7 @@ enum
   EVEX_LEN_0F3A3A,
   EVEX_LEN_0F3A3B,
   EVEX_LEN_0F3A43,
+  EVEX_LEN_0F3A77_X86_64_W_0,
 
   EVEX_LEN_MAP5_6E,
   EVEX_LEN_MAP5_7E,
@@ -1806,12 +1816,14 @@ enum
   EVEX_W_0F3859,
   EVEX_W_0F385A_L_n,
   EVEX_W_0F385B_L_2,
+  EVEX_W_0F386D_X86_64,
   EVEX_W_0F3870,
   EVEX_W_0F3872_P_2,
   EVEX_W_0F387A,
   EVEX_W_0F387B,
   EVEX_W_0F3883,
 
+  EVEX_W_0F3A07_X86_64,
   EVEX_W_0F3A18_L_n,
   EVEX_W_0F3A19_L_n,
   EVEX_W_0F3A1A_L_2,
@@ -1826,6 +1838,7 @@ enum
   EVEX_W_0F3A43_L_n,
   EVEX_W_0F3A70,
   EVEX_W_0F3A72,
+  EVEX_W_0F3A77_X86_64,
 
   EVEX_W_MAP4_8F_R_0,
   EVEX_W_MAP4_F8_P1_M_1,
@@ -14034,6 +14047,25 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	}
 
       return true;
+
+    case v_mode:
+    case dq_mode:
+      if (ins->rex & REX_W)
+	oappend_register (ins, att_names64[reg]);
+      else if (bytemode == v_mode
+	       && !(sizeflag & DFLAG))
+	oappend_register (ins, att_names16[reg]);
+      else
+	oappend_register (ins, att_names32[reg]);
+      return true;
+
+    case b_mode:
+      oappend_register (ins, att_names8rex[reg]);
+      return true;
+
+    case q_mode:
+      oappend_register (ins, att_names64[reg]);
+      return true;
     }
 
   switch (ins->vex.length)
@@ -14044,22 +14076,6 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	case x_mode:
 	  names = att_names_xmm;
 	  ins->evex_used |= EVEX_len_used;
-	  break;
-	case v_mode:
-	case dq_mode:
-	  if (ins->rex & REX_W)
-	    names = att_names64;
-	  else if (bytemode == v_mode
-		   && !(sizeflag & DFLAG))
-	    names = att_names16;
-	  else
-	    names = att_names32;
-	  break;
-	case b_mode:
-	  names = att_names8rex;
-	  break;
-	case q_mode:
-	  names = att_names64;
 	  break;
 	case mask_bd_mode:
 	case mask_mode:

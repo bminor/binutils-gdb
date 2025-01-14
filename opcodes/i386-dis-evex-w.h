@@ -365,6 +365,10 @@
     { "vbroadcasti32x8",	{ XM, Mymm }, PREFIX_DATA },
     { "vbroadcasti64x4",	{ XM, Mymm }, PREFIX_DATA },
   },
+  /* EVEX_W_0F386D_X86_64 */
+  {
+    { EVEX_LEN_TABLE (EVEX_LEN_0F386D_X86_64_W_0) },
+  },
   /* EVEX_W_0F3870 */
   {
     { Bad_Opcode },
@@ -387,6 +391,10 @@
   {
     { Bad_Opcode },
     { "vpmultishiftqb",	{ XM, Vex, EXx }, PREFIX_DATA },
+  },
+  /* EVEX_W_0F3A07_X86_64 */
+  {
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A07_X86_64_W_0) },
   },
   /* EVEX_W_0F3A18_L_n */
   {
@@ -455,6 +463,10 @@
   {
     { Bad_Opcode },
     { "vpshrdw",   { XM, Vex, EXx, Ib }, 0 },
+  },
+  /* EVEX_W_0F3A77_X86_64 */
+  {
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A77_X86_64_W_0) },
   },
   /* EVEX_W_MAP4_8F_R_0 */
   {

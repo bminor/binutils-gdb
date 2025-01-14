@@ -415,7 +415,7 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_EVEX_0F386D) },
     { X86_64_EVEX_FROM_VEX_TABLE (X86_64_VEX_0F386E) },
     { X86_64_EVEX_FROM_VEX_TABLE (X86_64_VEX_0F386F) },
     /* 70 */
@@ -591,7 +591,7 @@ static const struct dis386 evex_table[][256] = {
     { VEX_W_TABLE (VEX_W_0F3A04) },
     { "%XEvpermilp%XD", { XM, EXx, Ib }, PREFIX_DATA },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_EVEX_0F3A07) },
     /* 08 */
     { PREFIX_TABLE (PREFIX_EVEX_0F3A08) },
     { "vrndscalep%XD", { XM, EXx, EXxEVexS, Ib }, PREFIX_DATA },
@@ -717,7 +717,7 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_EVEX_0F3A77) },
     /* 78 */
     { Bad_Opcode },
     { Bad_Opcode },
