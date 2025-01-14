@@ -3526,6 +3526,7 @@ ppc64_elf_link_hash_table_free (bfd *obfd)
   struct ppc_link_hash_table *htab;
 
   htab = (struct ppc_link_hash_table *) obfd->link.hash;
+  free (htab->relr);
   if (htab->tocsave_htab)
     htab_delete (htab->tocsave_htab);
   bfd_hash_table_free (&htab->branch_hash_table);
@@ -3894,7 +3895,7 @@ ppc_add_stub (const char *stub_name,
 
   /* Enter this entry into the linker stub hash table.  */
   stub_entry = ppc_stub_hash_lookup (&htab->stub_hash_table, stub_name,
-				     true, false);
+				     true, true);
   if (stub_entry == NULL)
     {
       /* xgettext:c-format */
@@ -5689,10 +5690,15 @@ opd_entry_value (asection *opd_sec,
 			break;
 		    }
 		  sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
+		  if (sec != NULL)
+		    {
+		      BFD_ASSERT ((sec->flags & SEC_MERGE) == 0);
+		      val = sym->st_value;
+		    }
+		  if (symndx >= symtab_hdr->sh_info)
+		    free (sym);
 		  if (sec == NULL)
 		    break;
-		  BFD_ASSERT ((sec->flags & SEC_MERGE) == 0);
-		  val = sym->st_value;
 		}
 
 	      val += look->r_addend;
@@ -12229,7 +12235,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       len1 = strlen (stub_str[stub_entry->type.main - 1]);
       len2 = strlen (stub_entry->root.string);
-      name = bfd_malloc (len1 + len2 + 2);
+      name = bfd_alloc (info->output_bfd, len1 + len2 + 2);
       if (name == NULL)
 	return false;
       memcpy (name, stub_entry->root.string, 9);
@@ -12684,7 +12690,7 @@ ppc64_elf_setup_section_lists (struct bfd_link_info *info)
 
   htab->sec_info_arr_size = _bfd_section_id;
   amt = sizeof (*htab->sec_info) * (htab->sec_info_arr_size);
-  htab->sec_info = bfd_zmalloc (amt);
+  htab->sec_info = bfd_zalloc (info->output_bfd, amt);
   if (htab->sec_info == NULL)
     return -1;
 
@@ -14174,9 +14180,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		    }
 
 		  stub_entry = ppc_add_stub (stub_name, section, info);
+		  free (stub_name);
 		  if (stub_entry == NULL)
 		    {
-		      free (stub_name);
 		    error_ret_free_internal:
 		      if (elf_section_data (section)->relocs == NULL)
 			free (internal_relocs);
@@ -14743,7 +14749,8 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 	if (htab->params->emit_stub_syms)
 	  {
 	    size_t len = strlen (h->root.root.string);
-	    char *name = bfd_malloc (sizeof "12345678.global_entry." + len);
+	    char *name = bfd_alloc (info->output_bfd,
+				    sizeof "12345678.global_entry." + len);
 
 	    if (name == NULL)
 	      return false;
@@ -15334,6 +15341,8 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	  loc += 8;
 	}
     }
+  free (htab->relr);
+  htab->relr = NULL;
 
   for (group = htab->group; group != NULL; group = group->next)
     if ((stub_sec = group->stub_sec) != NULL)
