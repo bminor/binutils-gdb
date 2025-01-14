@@ -14412,6 +14412,7 @@ OP_Rounding (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   if (ins->modrm.mod != 3 || !ins->vex.b)
     return true;
 
+  ins->evex_used |= EVEX_b_used;
   switch (bytemode)
     {
     case evex_rounding_64_mode:
@@ -14419,11 +14420,9 @@ OP_Rounding (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
         return true;
       /* Fall through.  */
     case evex_rounding_mode:
-      ins->evex_used |= EVEX_b_used;
       oappend (ins, names_rounding[ins->vex.ll]);
       break;
     case evex_sae_mode:
-      ins->evex_used |= EVEX_b_used;
       oappend (ins, "{");
       break;
     default:

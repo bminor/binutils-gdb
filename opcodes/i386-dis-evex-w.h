@@ -97,7 +97,7 @@
   },
   /* EVEX_W_0F7A_P_1 */
   {
-    { "vcvtudq2pd",	{ XM, EXEvexHalfBcstXmmq }, 0 },
+    { "vcvtudq2pd",	{ XM, EXEvexHalfBcstXmmq, EXxEVexR64 }, 0 },
     { "vcvtuqq2pd",	{ XM, EXx, EXxEVexR }, 0 },
   },
   /* EVEX_W_0F7A_P_2 */
@@ -161,7 +161,7 @@
   },
   /* EVEX_W_0FE6_P_1 */
   {
-    { "%XEvcvtdq2pd",	{ XM, EXEvexHalfBcstXmmq }, 0 },
+    { "%XEvcvtdq2pd",	{ XM, EXEvexHalfBcstXmmq, EXxEVexR64 }, 0 },
     { "vcvtqq2pd",	{ XM, EXx, EXxEVexR }, 0 },
   },
   /* EVEX_W_0FE7 */
