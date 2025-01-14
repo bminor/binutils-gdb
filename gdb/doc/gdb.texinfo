@@ -46002,7 +46002,7 @@ tracepoints (@pxref{Tracepoints}).
 
 @table @samp
 
-@item QTDP:@var{n}:@var{addr}:@var{ena}:@var{step}:@var{pass}[:F@var{flen}][:X@var{len},@var{bytes}]@r{[}-@r{]}
+@item QTDP:@var{n}:@var{addr}:@var{ena}:@var{step}:@var{pass}[:F@var{flen}][:S][:X@var{len},@var{bytes}]@r{[}-@r{]}
 @cindex @samp{QTDP} packet
 Create a new tracepoint, number @var{n}, at @var{addr}.  If @var{ena}
 is @samp{E}, then the tracepoint is enabled; if it is @samp{D}, then
@@ -46010,7 +46010,8 @@ the tracepoint is disabled.  The @var{step} gives the tracepoint's step
 count, and @var{pass} gives its pass count.  If an @samp{F} is present,
 then the tracepoint is to be a fast tracepoint, and the @var{flen} is
 the number of bytes that the target should copy elsewhere to make room
-for the tracepoint.  If an @samp{X} is present, it introduces a
+for the tracepoint.  If an @samp{S} is present, the tracepoint is to be
+a static tracepoint.  If an @samp{X} is present, it introduces a
 tracepoint condition, which consists of a hexadecimal length, followed
 by a comma and hex-encoded bytes, in a manner similar to action
 encodings as described below.  If the trailing @samp{-} is present,
