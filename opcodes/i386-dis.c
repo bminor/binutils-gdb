@@ -963,8 +963,6 @@ enum
   MOD_0F38F8,
 
   MOD_VEX_0F3849_X86_64_L_0_W_0,
-  MOD_VEX_0F386E_X86_64,
-  MOD_VEX_0F386F_X86_64,
 
   MOD_EVEX_MAP4_60,
   MOD_EVEX_MAP4_61,
@@ -1142,8 +1140,8 @@ enum
   PREFIX_VEX_0F385F_X86_64_L_0_W_0,
   PREFIX_VEX_0F386B_X86_64_L_0_W_0,
   PREFIX_VEX_0F386C_X86_64_L_0_W_0,
-  PREFIX_VEX_0F386E_X86_64_M_0_L_0_W_0,
-  PREFIX_VEX_0F386F_X86_64_M_0_L_0_W_0,
+  PREFIX_VEX_0F386E_X86_64_L_0_W_0,
+  PREFIX_VEX_0F386F_X86_64_L_0_W_0,
   PREFIX_VEX_0F3872,
   PREFIX_VEX_0F38B0_W_0,
   PREFIX_VEX_0F38B1_W_0,
@@ -1443,8 +1441,8 @@ enum
   VEX_LEN_0F385F_X86_64,
   VEX_LEN_0F386B_X86_64,
   VEX_LEN_0F386C_X86_64,
-  VEX_LEN_0F386E_X86_64_M_0,
-  VEX_LEN_0F386F_X86_64_M_0,
+  VEX_LEN_0F386E_X86_64,
+  VEX_LEN_0F386F_X86_64,
   VEX_LEN_0F38CB_P_3_W_0,
   VEX_LEN_0F38CC_P_3_W_0,
   VEX_LEN_0F38CD_P_3_W_0,
@@ -1622,8 +1620,8 @@ enum
   VEX_W_0F385F_X86_64_L_0,
   VEX_W_0F386B_X86_64_L_0,
   VEX_W_0F386C_X86_64_L_0,
-  VEX_W_0F386E_X86_64_M_0_L_0,
-  VEX_W_0F386F_X86_64_M_0_L_0,
+  VEX_W_0F386E_X86_64_L_0,
+  VEX_W_0F386F_X86_64_L_0,
   VEX_W_0F3872_P_1,
   VEX_W_0F3878,
   VEX_W_0F3879,
@@ -4161,14 +4159,14 @@ static const struct dis386 prefix_table[][4] = {
     { "ttdpfp16ps",	{ TMM, Rtmm, VexTmm }, 0 },
   },
 
-  /* PREFIX_VEX_0F386E_X86_64_M_0_L_0_W_0 */
+  /* PREFIX_VEX_0F386E_X86_64_L_0_W_0 */
   {
     { "t2rpntlvwz0",	{ TMM, MVexSIBMEM }, 0 },
     { Bad_Opcode },
     { "t2rpntlvwz1",	{ TMM, MVexSIBMEM }, 0 },
   },
 
-  /* PREFIX_VEX_0F386F_X86_64_M_0_L_0_W_0 */
+  /* PREFIX_VEX_0F386F_X86_64_L_0_W_0 */
   {
     { "t2rpntlvwz0t1",	{ TMM, MVexSIBMEM }, 0 },
     { Bad_Opcode },
@@ -4679,13 +4677,13 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_VEX_0F386E */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_VEX_0F386E_X86_64) },
+    { VEX_LEN_TABLE (VEX_LEN_0F386E_X86_64) },
   },
 
   /* X86_64_VEX_0F386F */
   {
     { Bad_Opcode },
-    { MOD_TABLE (MOD_VEX_0F386F_X86_64) },
+    { VEX_LEN_TABLE (VEX_LEN_0F386F_X86_64) },
   },
 
   /* X86_64_VEX_0F38Ex */
@@ -7277,14 +7275,14 @@ static const struct dis386 vex_len_table[][2] = {
     { VEX_W_TABLE (VEX_W_0F386C_X86_64_L_0) },
   },
 
-  /* VEX_LEN_0F386E_X86_64_M_0 */
+  /* VEX_LEN_0F386E_X86_64 */
   {
-    { VEX_W_TABLE (VEX_W_0F386E_X86_64_M_0_L_0) },
+    { VEX_W_TABLE (VEX_W_0F386E_X86_64_L_0) },
   },
 
-  /* VEX_LEN_0F386F_X86_64_M_0 */
+  /* VEX_LEN_0F386F_X86_64 */
   {
-    { VEX_W_TABLE (VEX_W_0F386F_X86_64_M_0_L_0) },
+    { VEX_W_TABLE (VEX_W_0F386F_X86_64_L_0) },
   },
 
   /* VEX_LEN_0F38CB_P_3_W_0 */
@@ -7988,12 +7986,12 @@ static const struct dis386 vex_w_table[][2] = {
     { PREFIX_TABLE (PREFIX_VEX_0F386C_X86_64_L_0_W_0) },
   },
   {
-    /* VEX_W_0F386E_X86_64_M_0_L_0 */
-    { PREFIX_TABLE (PREFIX_VEX_0F386E_X86_64_M_0_L_0_W_0) },
+    /* VEX_W_0F386E_X86_64_L_0 */
+    { PREFIX_TABLE (PREFIX_VEX_0F386E_X86_64_L_0_W_0) },
   },
   {
-    /* VEX_W_0F386F_X86_64_M_0_L_0 */
-    { PREFIX_TABLE (PREFIX_VEX_0F386F_X86_64_M_0_L_0_W_0) },
+    /* VEX_W_0F386F_X86_64_L_0 */
+    { PREFIX_TABLE (PREFIX_VEX_0F386F_X86_64_L_0_W_0) },
   },
   {
     /* VEX_W_0F3872_P_1 */
@@ -8492,14 +8490,6 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_VEX_0F3849_X86_64_L_0_W_0 */
     { PREFIX_TABLE (PREFIX_VEX_0F3849_X86_64_L_0_W_0_M_0) },
     { PREFIX_TABLE (PREFIX_VEX_0F3849_X86_64_L_0_W_0_M_1) },
-  },
-  {
-    /* MOD_VEX_0F386E_X86_64 */
-    { VEX_LEN_TABLE (VEX_LEN_0F386E_X86_64_M_0) },
-  },
-  {
-    /* MOD_VEX_0F386F_X86_64 */
-    { VEX_LEN_TABLE (VEX_LEN_0F386F_X86_64_M_0) },
   },
 
 #include "i386-dis-evex-mod.h"
