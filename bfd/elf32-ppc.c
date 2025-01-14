@@ -4985,7 +4985,7 @@ add_stub_sym (struct plt_entry *ent,
   len3 = 0;
   if (ent->sec)
     len3 = strlen (ent->sec->name);
-  name = bfd_malloc (len1 + len2 + len3 + 9);
+  name = bfd_alloc (info->output_bfd, len1 + len2 + len3 + 9);
   if (name == NULL)
     return false;
   sprintf (name, "%08x", (unsigned) ent->addend & 0xffffffff);
