@@ -24184,21 +24184,13 @@ of a multi-process mode debug session.
 @subsection Tracepoints support in @code{gdbserver}
 @cindex tracepoints support in @code{gdbserver}
 
-On some targets, @code{gdbserver} supports tracepoints, fast
-tracepoints and static tracepoints.
+On some targets, @code{gdbserver} supports tracepoints and fast
+tracepoints.
 
-For fast or static tracepoints to work, a special library called the
+For fast tracepoints to work, a special library called the
 @dfn{in-process agent} (IPA), must be loaded in the inferior process.
 This library is built and distributed as an integral part of
-@code{gdbserver}.  In addition, support for static tracepoints
-requires building the in-process agent library with static tracepoints
-support.  At present, the UST (LTTng Userspace Tracer,
-@url{http://lttng.org/ust}) tracing engine is supported.  This support
-is automatically available if UST development headers are found in the
-standard include path when @code{gdbserver} is built, or if
-@code{gdbserver} was explicitly configured using @option{--with-ust}
-to point at such headers.  You can explicitly disable the support
-using @option{--with-ust=no}.
+@code{gdbserver}.
 
 There are several ways to load the in-process agent in your program:
 

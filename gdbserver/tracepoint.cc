@@ -255,13 +255,7 @@ write_e_ipa_not_loaded (char *buffer)
 static void
 write_e_ust_not_loaded (char *buffer)
 {
-#ifdef HAVE_UST
-  sprintf (buffer,
-	   "E.UST library not loaded in process.  "
-	   "Static tracepoints unavailable.");
-#else
   sprintf (buffer, "E.GDBserver was built without static tracepoints support");
-#endif
 }
 
 /* If the in-process agent library isn't loaded in the inferior, write
@@ -1294,35 +1288,6 @@ struct fast_tracepoint_ctx
   unsigned char *regspace;
 
   unsigned char *regs;
-  struct tracepoint *tpoint;
-};
-
-/* Static tracepoint specific data to be passed down to
-   collect_data_at_tracepoint.  */
-struct static_tracepoint_ctx
-{
-  struct tracepoint_hit_ctx base;
-
-  /* The regcache corresponding to the registers state at the time of
-     the tracepoint hit.  Initialized lazily, from REGS.  */
-  struct regcache regcache;
-  int regcache_initted;
-
-  /* The buffer space REGCACHE above uses.  We use a separate buffer
-     instead of letting the regcache malloc for both signal safety and
-     performance reasons; this is allocated on the stack instead.  */
-  unsigned char *regspace;
-
-  /* The register buffer as passed on by lttng/ust.  */
-  struct registers *regs;
-
-  /* The "printf" formatter and the args the user passed to the marker
-     call.  We use this to be able to collect "static trace data"
-     ($_sdata).  */
-  const char *fmt;
-  va_list *args;
-
-  /* The GDB tracepoint matching the probed marker that was "hit".  */
   struct tracepoint *tpoint;
 };
 
@@ -4585,12 +4550,6 @@ tracepoint_was_hit (thread_info *tinfo, CORE_ADDR stop_pc)
 
 #endif
 
-#if defined IN_PROCESS_AGENT && defined HAVE_UST
-struct ust_marker_data;
-static void collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-					    struct traceframe *tframe);
-#endif
-
 /* Create a trace frame for the hit of the given tracepoint in the
    given thread.  */
 
@@ -4706,27 +4665,6 @@ get_context_regcache (struct tracepoint_hit_ctx *ctx)
 	}
       regcache = &fctx->regcache;
     }
-#ifdef HAVE_UST
-  if (ctx->type == static_tracepoint)
-    {
-      struct static_tracepoint_ctx *sctx
-	= (struct static_tracepoint_ctx *) ctx;
-
-      if (!sctx->regcache_initted)
-	{
-	  sctx->regcache_initted = 1;
-	  init_register_cache (&sctx->regcache, ipa_tdesc, sctx->regspace);
-	  supply_regblock (&sctx->regcache, NULL);
-	  /* Pass down the tracepoint address, because REGS doesn't
-	     include the PC, but we know what it must have been.  */
-	  supply_static_tracepoint_registers (&sctx->regcache,
-					      (const unsigned char *)
-					      sctx->regs,
-					      sctx->tpoint->address);
-	}
-      regcache = &sctx->regcache;
-    }
-#endif
 #else
   if (ctx->type == trap_tracepoint)
     {
@@ -4842,13 +4780,8 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
       break;
     case 'L':
       {
-#if defined IN_PROCESS_AGENT && defined HAVE_UST
-	trace_debug ("Want to collect static trace data");
-	collect_ust_data_at_tracepoint (ctx, tframe);
-#else
 	trace_debug ("warning: collecting static trace data, "
 		     "but static tracepoints are not supported");
-#endif
       }
       break;
     default:
@@ -6542,253 +6475,6 @@ upload_fast_traceframes (void)
 IP_AGENT_EXPORT_VAR int ust_loaded;
 IP_AGENT_EXPORT_VAR char cmd_buf[IPA_CMD_BUF_SIZE];
 
-#ifdef HAVE_UST
-
-/* Static tracepoints.  */
-
-/* UST puts a "struct tracepoint" in the global namespace, which
-   conflicts with our tracepoint.  Arguably, being a library, it
-   shouldn't take ownership of such a generic name.  We work around it
-   here.  */
-#define tracepoint ust_tracepoint
-#include <ust/ust.h>
-#undef tracepoint
-
-extern int serialize_to_text (char *outbuf, int bufsize,
-			      const char *fmt, va_list ap);
-
-#define GDB_PROBE_NAME "gdb"
-
-/* We dynamically search for the UST symbols instead of linking them
-   in.  This lets the user decide if the application uses static
-   tracepoints, instead of always pulling libust.so in.  This vector
-   holds pointers to all functions we care about.  */
-
-static struct
-{
-  int (*serialize_to_text) (char *outbuf, int bufsize,
-			    const char *fmt, va_list ap);
-
-  int (*ltt_probe_register) (struct ltt_available_probe *pdata);
-  int (*ltt_probe_unregister) (struct ltt_available_probe *pdata);
-
-  int (*ltt_marker_connect) (const char *channel, const char *mname,
-			     const char *pname);
-  int (*ltt_marker_disconnect) (const char *channel, const char *mname,
-				const char *pname);
-
-  void (*marker_iter_start) (struct marker_iter *iter);
-  void (*marker_iter_next) (struct marker_iter *iter);
-  void (*marker_iter_stop) (struct marker_iter *iter);
-  void (*marker_iter_reset) (struct marker_iter *iter);
-} ust_ops;
-
-#include <dlfcn.h>
-
-/* Cast through typeof to catch incompatible API changes.  Since UST
-   only builds with gcc, we can freely use gcc extensions here
-   too.  */
-#define GET_UST_SYM(SYM)					\
-  do								\
-    {								\
-      if (ust_ops.SYM == NULL)					\
-	ust_ops.SYM = (typeof (&SYM)) dlsym (RTLD_DEFAULT, #SYM);	\
-      if (ust_ops.SYM == NULL)					\
-	return 0;						\
-    } while (0)
-
-#define USTF(SYM) ust_ops.SYM
-
-/* Get pointers to all libust.so functions we care about.  */
-
-static int
-dlsym_ust (void)
-{
-  GET_UST_SYM (serialize_to_text);
-
-  GET_UST_SYM (ltt_probe_register);
-  GET_UST_SYM (ltt_probe_unregister);
-  GET_UST_SYM (ltt_marker_connect);
-  GET_UST_SYM (ltt_marker_disconnect);
-
-  GET_UST_SYM (marker_iter_start);
-  GET_UST_SYM (marker_iter_next);
-  GET_UST_SYM (marker_iter_stop);
-  GET_UST_SYM (marker_iter_reset);
-
-  ust_loaded = 1;
-  return 1;
-}
-
-/* Given an UST marker, return the matching gdb static tracepoint.
-   The match is done by address.  */
-
-static struct tracepoint *
-ust_marker_to_static_tracepoint (const struct marker *mdata)
-{
-  struct tracepoint *tpoint;
-
-  for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
-    {
-      if (tpoint->type != static_tracepoint)
-	continue;
-
-      if (tpoint->address == (uintptr_t) mdata->location)
-	return tpoint;
-    }
-
-  return NULL;
-}
-
-/* The probe function we install on lttng/ust markers.  Whenever a
-   probed ust marker is hit, this function is called.  This is similar
-   to gdb_collect, only for static tracepoints, instead of fast
-   tracepoints.  */
-
-static void
-gdb_probe (const struct marker *mdata, void *probe_private,
-	   struct registers *regs, void *call_private,
-	   const char *fmt, va_list *args)
-{
-  struct tracepoint *tpoint;
-  struct static_tracepoint_ctx ctx;
-  const struct target_desc *ipa_tdesc;
-
-  /* Don't do anything until the trace run is completely set up.  */
-  if (!tracing)
-    {
-      trace_debug ("gdb_probe: not tracing\n");
-      return;
-    }
-
-  ipa_tdesc = get_ipa_tdesc (ipa_tdesc_idx);
-  ctx.base.type = static_tracepoint;
-  ctx.regcache_initted = 0;
-  ctx.regs = regs;
-  ctx.fmt = fmt;
-  ctx.args = args;
-
-  /* Wrap the regblock in a register cache (in the stack, we don't
-     want to malloc here).  */
-  ctx.regspace = alloca (ipa_tdesc->registers_size);
-  if (ctx.regspace == NULL)
-    {
-      trace_debug ("Trace buffer block allocation failed, skipping");
-      return;
-    }
-
-  tpoint = ust_marker_to_static_tracepoint (mdata);
-  if (tpoint == NULL)
-    {
-      trace_debug ("gdb_probe: marker not known: "
-		   "loc:0x%p, ch:\"%s\",n:\"%s\",f:\"%s\"",
-		   mdata->location, mdata->channel,
-		   mdata->name, mdata->format);
-      return;
-    }
-
-  if (!tpoint->enabled)
-    {
-      trace_debug ("gdb_probe: tracepoint disabled");
-      return;
-    }
-
-  ctx.tpoint = tpoint;
-
-  trace_debug ("gdb_probe: collecting marker: "
-	       "loc:0x%p, ch:\"%s\",n:\"%s\",f:\"%s\"",
-	       mdata->location, mdata->channel,
-	       mdata->name, mdata->format);
-
-  /* Test the condition if present, and collect if true.  */
-  if (tpoint->cond == NULL
-      || condition_true_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-				       tpoint))
-    {
-      collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-				  tpoint->address, tpoint);
-
-      if (stopping_tracepoint
-	  || trace_buffer_is_full
-	  || expr_eval_result != expr_eval_no_error)
-	stop_tracing ();
-    }
-  else
-    {
-      /* If there was a condition and it evaluated to false, the only
-	 way we would stop tracing is if there was an error during
-	 condition expression evaluation.  */
-      if (expr_eval_result != expr_eval_no_error)
-	stop_tracing ();
-    }
-}
-
-/* Called if the gdb static tracepoint requested collecting "$_sdata",
-   static tracepoint string data.  This is a string passed to the
-   tracing library by the user, at the time of the tracepoint marker
-   call.  E.g., in the UST marker call:
-
-     trace_mark (ust, bar33, "str %s", "FOOBAZ");
-
-   the collected data is "str FOOBAZ".
-*/
-
-static void
-collect_ust_data_at_tracepoint (struct tracepoint_hit_ctx *ctx,
-				struct traceframe *tframe)
-{
-  struct static_tracepoint_ctx *umd = (struct static_tracepoint_ctx *) ctx;
-  unsigned char *bufspace;
-  int size;
-  va_list copy;
-  unsigned short blocklen;
-
-  if (umd == NULL)
-    {
-      trace_debug ("Wanted to collect static trace data, "
-		   "but there's no static trace data");
-      return;
-    }
-
-  va_copy (copy, *umd->args);
-  size = USTF(serialize_to_text) (NULL, 0, umd->fmt, copy);
-  va_end (copy);
-
-  trace_debug ("Want to collect ust data");
-
-  /* 'S' + size + string */
-  bufspace = add_traceframe_block (tframe, umd->tpoint,
-				   1 + sizeof (blocklen) + size + 1);
-  if (bufspace == NULL)
-    {
-      trace_debug ("Trace buffer block allocation failed, skipping");
-      return;
-    }
-
-  /* Identify a static trace data block.  */
-  *bufspace = 'S';
-
-  blocklen = size + 1;
-  memcpy (bufspace + 1, &blocklen, sizeof (blocklen));
-
-  va_copy (copy, *umd->args);
-  USTF(serialize_to_text) ((char *) bufspace + 1 + sizeof (blocklen),
-			   size + 1, umd->fmt, copy);
-  va_end (copy);
-
-  trace_debug ("Storing static tracepoint data in regblock: %s",
-	       bufspace + 1 + sizeof (blocklen));
-}
-
-/* The probe to register with lttng/ust.  */
-static struct ltt_available_probe gdb_ust_probe =
-  {
-    GDB_PROBE_NAME,
-    NULL,
-    gdb_probe,
-  };
-
-#endif /* HAVE_UST */
 #endif /* IN_PROCESS_AGENT */
 
 #ifndef IN_PROCESS_AGENT
@@ -6917,229 +6603,6 @@ gdb_agent_socket_init (void)
   return fd;
 }
 
-#ifdef HAVE_UST
-
-/* The next marker to be returned on a qTsSTM command.  */
-static const struct marker *next_st;
-
-/* Returns the first known marker.  */
-
-struct marker *
-first_marker (void)
-{
-  struct marker_iter iter;
-
-  USTF(marker_iter_reset) (&iter);
-  USTF(marker_iter_start) (&iter);
-
-  return iter.marker;
-}
-
-/* Returns the marker following M.  */
-
-const struct marker *
-next_marker (const struct marker *m)
-{
-  struct marker_iter iter;
-
-  USTF(marker_iter_reset) (&iter);
-  USTF(marker_iter_start) (&iter);
-
-  for (; iter.marker != NULL; USTF(marker_iter_next) (&iter))
-    {
-      if (iter.marker == m)
-	{
-	  USTF(marker_iter_next) (&iter);
-	  return iter.marker;
-	}
-    }
-
-  return NULL;
-}
-
-/* Return an hexstr version of the STR C string, fit for sending to
-   GDB.  */
-
-static char *
-cstr_to_hexstr (const char *str)
-{
-  int len = strlen (str);
-  char *hexstr = xmalloc (len * 2 + 1);
-  bin2hex ((gdb_byte *) str, hexstr, len);
-  return hexstr;
-}
-
-/* Compose packet that is the response to the qTsSTM/qTfSTM/qTSTMat
-   packets.  */
-
-static void
-response_ust_marker (char *packet, const struct marker *st)
-{
-  char *strid, *format, *tmp;
-
-  next_st = next_marker (st);
-
-  tmp = xmalloc (strlen (st->channel) + 1 +
-		 strlen (st->name) + 1);
-  sprintf (tmp, "%s/%s", st->channel, st->name);
-
-  strid = cstr_to_hexstr (tmp);
-  free (tmp);
-
-  format = cstr_to_hexstr (st->format);
-
-  sprintf (packet, "m%s:%s:%s",
-	   paddress ((uintptr_t) st->location),
-	   strid,
-	   format);
-
-  free (strid);
-  free (format);
-}
-
-/* Return the first static tracepoint, and initialize the state
-   machine that will iterate through all the static tracepoints.  */
-
-static void
-cmd_qtfstm (char *packet)
-{
-  trace_debug ("Returning first trace state variable definition");
-
-  if (first_marker ())
-    response_ust_marker (packet, first_marker ());
-  else
-    strcpy (packet, "l");
-}
-
-/* Return additional trace state variable definitions. */
-
-static void
-cmd_qtsstm (char *packet)
-{
-  trace_debug ("Returning static tracepoint");
-
-  if (next_st)
-    response_ust_marker (packet, next_st);
-  else
-    strcpy (packet, "l");
-}
-
-/* Disconnect the GDB probe from a marker at a given address.  */
-
-static void
-unprobe_marker_at (char *packet)
-{
-  char *p = packet;
-  ULONGEST address;
-  struct marker_iter iter;
-
-  p += sizeof ("unprobe_marker_at:") - 1;
-
-  p = unpack_varlen_hex (p, &address);
-
-  USTF(marker_iter_reset) (&iter);
-  USTF(marker_iter_start) (&iter);
-  for (; iter.marker != NULL; USTF(marker_iter_next) (&iter))
-    if ((uintptr_t ) iter.marker->location == address)
-      {
-	int result;
-
-	result = USTF(ltt_marker_disconnect) (iter.marker->channel,
-					      iter.marker->name,
-					      GDB_PROBE_NAME);
-	if (result < 0)
-	  warning ("could not disable marker %s/%s",
-		   iter.marker->channel, iter.marker->name);
-	break;
-      }
-}
-
-/* Connect the GDB probe to a marker at a given address.  */
-
-static int
-probe_marker_at (char *packet)
-{
-  char *p = packet;
-  ULONGEST address;
-  struct marker_iter iter;
-  struct marker *m;
-
-  p += sizeof ("probe_marker_at:") - 1;
-
-  p = unpack_varlen_hex (p, &address);
-
-  USTF(marker_iter_reset) (&iter);
-
-  for (USTF(marker_iter_start) (&iter), m = iter.marker;
-       m != NULL;
-       USTF(marker_iter_next) (&iter), m = iter.marker)
-    if ((uintptr_t ) m->location == address)
-      {
-	int result;
-
-	trace_debug ("found marker for address.  "
-		     "ltt_marker_connect (marker = %s/%s)",
-		     m->channel, m->name);
-
-	result = USTF(ltt_marker_connect) (m->channel, m->name,
-					   GDB_PROBE_NAME);
-	if (result && result != -EEXIST)
-	  trace_debug ("ltt_marker_connect (marker = %s/%s, errno = %d)",
-		       m->channel, m->name, -result);
-
-	if (result < 0)
-	  {
-	    sprintf (packet, "E.could not connect marker: channel=%s, name=%s",
-		     m->channel, m->name);
-	    return -1;
-	  }
-
-	strcpy (packet, "OK");
-	return 0;
-      }
-
-  sprintf (packet, "E.no marker found at 0x%s", paddress (address));
-  return -1;
-}
-
-static int
-cmd_qtstmat (char *packet)
-{
-  char *p = packet;
-  ULONGEST address;
-  struct marker_iter iter;
-  struct marker *m;
-
-  p += sizeof ("qTSTMat:") - 1;
-
-  p = unpack_varlen_hex (p, &address);
-
-  USTF(marker_iter_reset) (&iter);
-
-  for (USTF(marker_iter_start) (&iter), m = iter.marker;
-       m != NULL;
-       USTF(marker_iter_next) (&iter), m = iter.marker)
-    if ((uintptr_t ) m->location == address)
-      {
-	response_ust_marker (packet, m);
-	return 0;
-      }
-
-  strcpy (packet, "l");
-  return -1;
-}
-
-static void
-gdb_ust_init (void)
-{
-  if (!dlsym_ust ())
-    return;
-
-  USTF(ltt_probe_register) (&gdb_ust_probe);
-}
-
-#endif /* HAVE_UST */
-
 #include <sys/syscall.h>
 
 static void
@@ -7214,28 +6677,6 @@ gdb_agent_helper_thread (void *arg)
 		{
 		  stop_loop = 1;
 		}
-#ifdef HAVE_UST
-	      else if (strcmp ("qTfSTM", cmd_buf) == 0)
-		{
-		  cmd_qtfstm (cmd_buf);
-		}
-	      else if (strcmp ("qTsSTM", cmd_buf) == 0)
-		{
-		  cmd_qtsstm (cmd_buf);
-		}
-	      else if (startswith (cmd_buf, "unprobe_marker_at:"))
-		{
-		  unprobe_marker_at (cmd_buf);
-		}
-	      else if (startswith (cmd_buf, "probe_marker_at:"))
-		{
-		  probe_marker_at (cmd_buf);
-		}
-	      else if (startswith (cmd_buf, "qTSTMat:"))
-		{
-		  cmd_qtstmat (cmd_buf);
-		}
-#endif /* HAVE_UST */
 	    }
 
 	  /* Fix compiler's warning: ignoring return value of 'write'.  */
@@ -7295,10 +6736,6 @@ gdb_agent_init (void)
 
   while (helper_thread_id == 0)
     usleep (1);
-
-#ifdef HAVE_UST
-  gdb_ust_init ();
-#endif
 }
 
 #include <sys/mman.h>

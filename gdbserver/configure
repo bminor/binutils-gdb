@@ -637,8 +637,6 @@ REPORT_BUGS_TO
 PKGVERSION
 WERROR_CFLAGS
 WARN_CFLAGS
-ustinc
-ustlibs
 CCDEPMODE
 CONFIG_SRC_SUBDIR
 CATOBJEXT
@@ -775,9 +773,6 @@ with_libiconv_prefix
 with_libiconv_type
 with_libintl_prefix
 with_libintl_type
-with_ust
-with_ust_include
-with_ust_lib
 enable_werror
 enable_build_warnings
 enable_gdb_build_warnings
@@ -1451,11 +1446,6 @@ Optional Packages:
   --with-libintl-prefix[=DIR]  search for libintl in DIR/include and DIR/lib
   --without-libintl-prefix     don't search for libintl in includedir and libdir
   --with-libintl-type=TYPE     type of library to search for (auto/static/shared)
-  --with-ust=PATH       Specify prefix directory for the installed UST package
-                          Equivalent to --with-ust-include=PATH/include
-                          plus --with-ust-lib=PATH/lib
-  --with-ust-include=PATH Specify directory for installed UST include files
-  --with-ust-lib=PATH   Specify the directory for the installed UST library
   --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
   --with-bugurl=URL       Direct users to URL to report a bug
   --with-libthread-db=PATH
@@ -13599,90 +13589,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 fi
-
-
-# Check for UST
-ustlibs=""
-ustinc=""
-
-
-# Check whether --with-ust was given.
-if test "${with_ust+set}" = set; then :
-  withval=$with_ust;
-fi
-
-
-# Check whether --with-ust_include was given.
-if test "${with_ust_include+set}" = set; then :
-  withval=$with_ust_include;
-fi
-
-
-# Check whether --with-ust_lib was given.
-if test "${with_ust_lib+set}" = set; then :
-  withval=$with_ust_lib;
-fi
-
-
-case $with_ust in
-  no)
-    ustlibs=
-    ustinc=
-    ;;
-  "" | yes)
-    ustlibs=" -lust "
-    ustinc=""
-    ;;
-  *)
-    ustlibs="-L$with_ust/lib -lust"
-    ustinc="-I$with_ust/include "
-    ;;
-esac
-if test "x$with_ust_include" != x; then
-  ustinc="-I$with_ust_include "
-fi
-if test "x$with_ust_lib" != x; then
-  ustlibs="-L$with_ust_lib -lust"
-fi
-
-if test "x$with_ust" != "xno"; then
-  saved_CFLAGS="$CFLAGS"
-  CFLAGS="$CFLAGS $ustinc"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ust" >&5
-$as_echo_n "checking for ust... " >&6; }
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#define CONFIG_UST_GDB_INTEGRATION
-#include <ust/ust.h>
-
-int
-main ()
-{
-
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; };
-
-$as_echo "#define HAVE_UST 1" >>confdefs.h
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-     ustlibs= ; ustinc=
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  CFLAGS="$saved_CFLAGS"
-fi
-
-# Flags needed for UST
-
 
 
 
