@@ -1380,6 +1380,25 @@ struct target_ops
     /* Return the x86 XSAVE extended state area layout.  */
     virtual x86_xsave_layout fetch_x86_xsave_layout ()
       TARGET_DEFAULT_RETURN (x86_xsave_layout ());
+
+    /* Return true if the target supports displaced stepping for THREAD.  */
+    virtual bool supports_displaced_step (thread_info *thread)
+      TARGET_DEFAULT_FUNC (default_supports_displaced_step);
+
+    /* See documentation of gdbarch_displaced_step_prepare.  */
+    virtual displaced_step_prepare_status displaced_step_prepare (thread_info *thread,
+								  CORE_ADDR &displaced_pc)
+      TARGET_DEFAULT_FUNC (default_displaced_step_prepare);
+
+    /* See documentation of gdbarch_displaced_step_finish.  */
+    virtual displaced_step_finish_status displaced_step_finish
+      (thread_info *thread, const target_waitstatus &status)
+      TARGET_DEFAULT_FUNC (default_displaced_step_finish);
+
+    /* See documentation of gdbarch_displaced_step_restore_all_in_ptid.  */
+    virtual void displaced_step_restore_all_in_ptid (inferior *parent_inf,
+						     ptid_t child_ptid)
+      TARGET_DEFAULT_FUNC (default_displaced_step_restore_all_in_ptid);
   };
 
 /* Deleter for std::unique_ptr.  See comments in

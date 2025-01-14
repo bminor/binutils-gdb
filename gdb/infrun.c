@@ -1699,15 +1699,12 @@ show_can_use_displaced_stepping (struct ui_file *file, int from_tty,
 		  "to step over breakpoints is %s.\n"), value);
 }
 
-/* Return true if the gdbarch implements the required methods to use
-   displaced stepping.  */
+/* Return true if the target behind THREAD supports displaced stepping.  */
 
 static bool
-gdbarch_supports_displaced_stepping (gdbarch *arch)
+target_supports_displaced_stepping (thread_info *thread)
 {
-  /* Only check for the presence of `prepare`.  The gdbarch verification ensures
-     that if `prepare` is provided, so is `finish`.  */
-  return gdbarch_displaced_step_prepare_p (arch);
+  return thread->inf->top_target ()->supports_displaced_step (thread);
 }
 
 /* Return non-zero if displaced stepping can/should be used to step
@@ -1726,11 +1723,8 @@ use_displaced_stepping (thread_info *tp)
       && !target_is_non_stop_p ())
     return false;
 
-  gdbarch *gdbarch = get_thread_regcache (tp)->arch ();
-
-  /* If the architecture doesn't implement displaced stepping, don't use
-     it.  */
-  if (!gdbarch_supports_displaced_stepping (gdbarch))
+  /* If the target doesn't support displaced stepping, don't use it.  */
+  if (!target_supports_displaced_stepping (tp))
     return false;
 
   /* If recording, don't use displaced stepping.  */
@@ -1784,9 +1778,9 @@ displaced_step_prepare_throw (thread_info *tp)
   displaced_step_thread_state &disp_step_thread_state
     = tp->displaced_step_state;
 
-  /* We should never reach this function if the architecture does not
+  /* We should never reach this function if the target does not
      support displaced stepping.  */
-  gdb_assert (gdbarch_supports_displaced_stepping (gdbarch));
+  gdb_assert (target_supports_displaced_stepping (tp));
 
   /* Nor if the thread isn't meant to step over a breakpoint.  */
   gdb_assert (tp->control.trap_expected);
@@ -1847,8 +1841,8 @@ displaced_step_prepare_throw (thread_info *tp)
 				paddress (gdbarch, original_pc), dislen);
     }
 
-  displaced_step_prepare_status status
-    = gdbarch_displaced_step_prepare (gdbarch, tp, displaced_pc);
+  auto status
+    = tp->inf->top_target ()->displaced_step_prepare (tp, displaced_pc);
 
   if (status == DISPLACED_STEP_PREPARE_STATUS_CANT)
     {
@@ -2028,6 +2022,7 @@ displaced_step_finish (thread_info *event_thread,
 {
   /* Check whether the parent is displaced stepping.  */
   inferior *parent_inf = event_thread->inf;
+  target_ops *top_target = parent_inf->top_target ();
 
   /* If this was a fork/vfork/clone, this event indicates that the
      displaced stepping of the syscall instruction has been done, so
@@ -2044,15 +2039,10 @@ displaced_step_finish (thread_info *event_thread,
      gdbarch_displaced_step_restore_all_in_ptid.  This is not enforced
      during gdbarch validation to support architectures which support
      displaced stepping but not forks.  */
-  if (event_status.kind () == TARGET_WAITKIND_FORKED)
-    {
-      struct regcache *parent_regcache = get_thread_regcache (event_thread);
-      struct gdbarch *gdbarch = parent_regcache->arch ();
-
-      if (gdbarch_supports_displaced_stepping (gdbarch))
-	gdbarch_displaced_step_restore_all_in_ptid
-	  (gdbarch, parent_inf, event_status.child_ptid ());
-    }
+  if (event_status.kind () == TARGET_WAITKIND_FORKED
+      && target_supports_displaced_stepping (event_thread))
+    top_target->displaced_step_restore_all_in_ptid
+      (parent_inf, event_status.child_ptid ());
 
   displaced_step_thread_state *displaced = &event_thread->displaced_step_state;
 
@@ -2075,9 +2065,7 @@ displaced_step_finish (thread_info *event_thread,
 
   /* Do the fixup, and release the resources acquired to do the displaced
      step. */
-  displaced_step_finish_status status
-    = gdbarch_displaced_step_finish (displaced->get_original_gdbarch (),
-				     event_thread, event_status);
+  auto status = top_target->displaced_step_finish (event_thread, event_status);
 
   if (event_status.kind () == TARGET_WAITKIND_FORKED
       || event_status.kind () == TARGET_WAITKIND_VFORKED
