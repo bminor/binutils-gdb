@@ -44,6 +44,11 @@ static const struct dis386 evex_len_table[][3] = {
     { "vperm%DQ",	{ XM, Vex, EXx }, PREFIX_DATA },
   },
 
+  /* EVEX_LEN_0F384A_X86_64_W_0 */
+  {
+    { X86_64_EVEX_PFX_TABLE (PREFIX_VEX_0F384A_X86_64_W_0_L_0) },
+  },
+
   /* EVEX_LEN_0F385A */
   {
     { Bad_Opcode },

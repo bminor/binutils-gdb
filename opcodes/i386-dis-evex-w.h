@@ -346,6 +346,10 @@
   {
     { "vpbroadcastmw2dY",	{ XM, MaskR }, 0 },
   },
+  /* EVEX_W_0F384A_X86_64 */
+  {
+    { EVEX_LEN_TABLE (EVEX_LEN_0F384A_X86_64_W_0) },
+  },
   /* EVEX_W_0F3859 */
   {
     { "vbroadcasti32x2",	{ XM, EXq }, PREFIX_DATA },

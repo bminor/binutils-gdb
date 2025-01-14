@@ -3207,6 +3207,8 @@ tdpbsud, 0xf35e, AMX_INT8, Modrm|Vex128|Space0F38|Src2VVVV|VexW0|NoSuf, { RegTMM
 
 tileloadd, 0xf24b, APX_F(AMX_TILE), Sibmem|Vex128|EVex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex, RegTMM }
 tileloaddt1, 0x664b, APX_F(AMX_TILE), Sibmem|Vex128|EVex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex, RegTMM }
+tileloaddrs, 0xf24a, APX_F(AMX_MOVRS), Sibmem|Vex128|EVex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex, RegTMM }
+tileloaddrst1, 0x664a, APX_F(AMX_MOVRS), Sibmem|Vex128|EVex128|Space0F38|VexW0|NoSuf, { Unspecified|BaseIndex, RegTMM }
 tilestored, 0xf34b, APX_F(AMX_TILE), Sibmem|Vex128|EVex128|Space0F38|VexW0|NoSuf, { RegTMM, Unspecified|BaseIndex }
 
 tilerelease, 0x49c0, AMX_TILE, Vex128|Space0F38|VexW0|NoSuf, {}
@@ -3218,6 +3220,7 @@ tilezero, 0xf249, AMX_TILE, Modrm|Vex128|Space0F38|VexW0|NoSuf, { RegTMM }
 <loc:opc, $t:0x0, t1:0x1>
 
 t2rpntlvw<z><loc>, 0x<z:pfx>6e | <loc:opc>, APX_F(AMX_TRANSPOSE), Sibmem|Vex128|EVex128|Space0F38|VexW0|NoSuf|ImplicitGroup, { Unspecified|BaseIndex, RegTMM }
+t2rpntlvw<z>rs<loc>, 0x<z:pfx>f8 | <loc:opc>, AMX_TRANSPOSE&APX_F(AMX_MOVRS), Sibmem|Vex128|EVex128|Map5|VexW0|NoSuf|ImplicitGroup, { Unspecified|BaseIndex, RegTMM }
 
 <z>
 <loc>

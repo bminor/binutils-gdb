@@ -1185,6 +1185,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (amx_transpose, AMX_TRANSPOSE, ANY_AMX_TRANSPOSE, false),
   SUBARCH (amx_tf32, AMX_TF32, ANY_AMX_TF32, false),
   SUBARCH (amx_fp8, AMX_FP8, ANY_AMX_FP8, false),
+  SUBARCH (amx_movrs, AMX_MOVRS, ANY_AMX_MOVRS, false),
   SUBARCH (amx_tile, AMX_TILE, ANY_AMX_TILE, false),
   SUBARCH (movdiri, MOVDIRI, MOVDIRI, false),
   SUBARCH (movdir64b, MOVDIR64B, MOVDIR64B, false),
@@ -2251,12 +2252,22 @@ cpu_flags_match (const insn_template *t)
 	      || any.bitfield.cpuavx512f || any.bitfield.cpuavx512bw
 	      || any.bitfield.cpuavx512dq || any.bitfield.cpuamx_tile
 	      || any.bitfield.cpucmpccxadd || any.bitfield.cpuuser_msr
-	      || any.bitfield.cpumsr_imm || any.bitfield.cpuamx_transpose))
+	      || any.bitfield.cpumsr_imm || any.bitfield.cpuamx_transpose
+	      || any.bitfield.cpuamx_movrs))
 	{
 	  /* These checks (verifying that APX_F() was properly used in the
 	     opcode table entry) make sure there's no need for an "else" to
 	     the "if()" below.  */
 	  gas_assert (!cpu_flags_all_zero (&all));
+
+	  /* For APX_F extension of multiple cpuid enabled insns, we could not
+	     use APX_F(cpuid_A&cpuid_B) since the transformation could not be
+	     done. Instead, we will use cpuid_A & APX_F(cpuid_B), then the
+	     "any" bitfield would not be set for cpuid_A. Set cpuid_A for "any"
+	     here since it is its original meaning.  */
+	  if (all.bitfield.cpuamx_transpose && any.bitfield.cpuamx_movrs)
+	    any.bitfield.cpuamx_transpose = 1;
+
 	  cpu = cpu_flags_and (all, any);
 	  gas_assert (cpu_flags_equal (&cpu, &all));
 
@@ -4056,7 +4067,8 @@ install_template (const insn_template *t)
 	   || maybe_cpu (t, CpuAVX512F) || maybe_cpu (t, CpuAVX512DQ)
 	   || maybe_cpu (t, CpuAVX512BW) || maybe_cpu (t, CpuBMI)
 	   || maybe_cpu (t, CpuBMI2) || maybe_cpu (t, CpuUSER_MSR)
-	   || maybe_cpu (t, CpuMSR_IMM) || maybe_cpu (t, CpuAMX_TRANSPOSE))
+	   || maybe_cpu (t, CpuMSR_IMM) || maybe_cpu (t, CpuAMX_TRANSPOSE)
+	   || maybe_cpu (t, CpuAMX_MOVRS))
 	  && maybe_cpu (t, CpuAPX_F))
 	{
 	  if (need_evex_encoding (t))
