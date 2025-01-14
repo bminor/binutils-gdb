@@ -112,6 +112,10 @@ _start:
 	movdir64b	0x123(%r31,%rax,4),%r31
 	movdiri	%r25d,0x123(%r31,%rax,4)
 	movdiri	%r31,0x123(%r31,%rax,4)
+	movrs	0x123(%r31,%rax,4),%r16b
+	movrs	0x123(%r16,%rax,4),%r18w
+	movrs	0x123(%r31,%rax,4),%r25d
+	movrs	0x123(%r16,%rax,4),%r31
 	pdep	%r25d,%edx,%r10d
 	pdep	%r31,%r15,%r11
 	pdep	0x123(%r31,%rax,4),%r25d,%edx
@@ -249,6 +253,10 @@ _start:
 	movdir64b	r31,[r31+rax*4+0x123]
 	movdiri	DWORD PTR [r31+rax*4+0x123],r25d
 	movdiri	QWORD PTR [r31+rax*4+0x123],r31
+	movrs	r16b,BYTE PTR [r31+rax*4+0x123]
+	movrs	r18w,WORD PTR [r16+rax*4+0x123]
+	movrs	r25d,DWORD PTR [r31+rax*4+0x123]
+	movrs	r31,QWORD PTR [r16+rax*4+0x123]
 	pdep	r10d,edx,r25d
 	pdep	r11,r15,r31
 	pdep	edx,r25d,DWORD PTR [r31+rax*4+0x123]

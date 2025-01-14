@@ -1030,8 +1030,8 @@ static const struct dis386 evex_table[][256] = {
     /* 88 */
     { "%NFpopcntS",	{ Gv, Ev }, PREFIX_NP_OR_DATA },
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { "movrsB",	{ Gb, Mb }, NO_PREFIX },
+    { "movrsS",	{ Gv, Mv }, PREFIX_NP_OR_DATA },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -1290,7 +1290,7 @@ static const struct dis386 evex_table[][256] = {
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_6C) },
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_6D) },
     { EVEX_LEN_TABLE (EVEX_LEN_MAP5_6E) },
-    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_EVEX_MAP5_6F) },
     /* 70 */
     { Bad_Opcode },
     { Bad_Opcode },

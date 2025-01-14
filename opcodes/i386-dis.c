@@ -942,6 +942,7 @@ enum
   MOD_0F18_REG_1,
   MOD_0F18_REG_2,
   MOD_0F18_REG_3,
+  MOD_0F18_REG_4,
   MOD_0F18_REG_6,
   MOD_0F18_REG_7,
   MOD_0F1A_PREFIX_0,
@@ -1256,6 +1257,7 @@ enum
   PREFIX_EVEX_MAP5_6C,
   PREFIX_EVEX_MAP5_6D,
   PREFIX_EVEX_MAP5_6E_L_0,
+  PREFIX_EVEX_MAP5_6F_X86_64,
   PREFIX_EVEX_MAP5_74,
   PREFIX_EVEX_MAP5_78,
   PREFIX_EVEX_MAP5_79,
@@ -1344,6 +1346,8 @@ enum
   X86_64_0F18_REG_7_MOD_0,
   X86_64_0F24,
   X86_64_0F26,
+  X86_64_0F388A,
+  X86_64_0F388B,
   X86_64_0F38F8_M_1,
   X86_64_0FC7_REG_6_MOD_3_PREFIX_1,
 
@@ -1362,6 +1366,8 @@ enum
   X86_64_VEX_MAP5_FD,
   X86_64_VEX_MAP7_F6_L_0_W_0_R_0,
   X86_64_VEX_MAP7_F8_L_0_W_0_R_0,
+
+  X86_64_EVEX_MAP5_6F,
 };
 
 enum
@@ -2863,7 +2869,7 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F18_REG_1) },
     { MOD_TABLE (MOD_0F18_REG_2) },
     { MOD_TABLE (MOD_0F18_REG_3) },
-    { "nopQ",		{ Ev }, 0 },
+    { MOD_TABLE (MOD_0F18_REG_4) },
     { "nopQ",		{ Ev }, 0 },
     { MOD_TABLE (MOD_0F18_REG_6) },
     { MOD_TABLE (MOD_0F18_REG_7) },
@@ -4615,6 +4621,18 @@ static const struct dis386 x86_64_table[][2] = {
   },
 
   {
+    /* X86_64_0F388A */
+    { Bad_Opcode },
+    { "movrsB",		{ Gb, Mb }, PREFIX_OPCODE },
+  },
+
+  {
+    /* X86_64_0F388B */
+    { Bad_Opcode },
+    { "movrsS",		{ Gv, Mv }, PREFIX_OPCODE },
+  },
+
+  {
     /* X86_64_0F38F8_M_1 */
     { Bad_Opcode },
     { PREFIX_TABLE (PREFIX_0F38F8_M_1_X86_64) },
@@ -4709,6 +4727,8 @@ static const struct dis386 x86_64_table[][2] = {
     { Bad_Opcode },
     { PREFIX_TABLE (PREFIX_VEX_MAP7_F8_L_0_W_0_R_0_X86_64) },
   },
+
+#include "i386-dis-evex-x86-64.h"
 };
 
 static const struct dis386 three_byte_table[][256] = {
@@ -4871,8 +4891,8 @@ static const struct dis386 three_byte_table[][256] = {
     /* 88 */
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F388A) },
+    { X86_64_TABLE (X86_64_0F388B) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -8389,6 +8409,11 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F18_REG_3 */
     { "prefetcht2",	{ Mb }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+  },
+  {
+    /* MOD_0F18_REG_4 */
+    { "prefetchrst2",	{ Mb }, 0 },
     { "nopQ",		{ Ev }, 0 },
   },
   {

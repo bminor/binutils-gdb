@@ -231,6 +231,8 @@ enum i386_cpu
   CpuUSER_MSR,
   /* Intel MSR_IMM Instructions support required.  */
   CpuMSR_IMM,
+  /* Intel MOVRS Instructions support required.  */
+  CpuMOVRS,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -496,6 +498,7 @@ typedef union i386_cpu_flags
       unsigned int cpulkgs:1;
       unsigned int cpuuser_msr:1;
       unsigned int cpumsr_imm:1;
+      unsigned int cpumovrs:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;

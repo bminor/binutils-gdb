@@ -3557,3 +3557,15 @@ vcomxs<sdh>, 0x<sdh:spfx>2f, AVX10_2, Modrm|EVexLIG|<sdh:spc1>|<sdh:vexw>|Disp8M
 vucomxs<sdh>, 0x<sdh:spfx>2e, AVX10_2, Modrm|EVexLIG|<sdh:spc1>|<sdh:vexw>|Disp8MemShift|NoSuf|SAE, { RegXMM|<sdh:elem>|Unspecified|BaseIndex, RegXMM }
 
 // AVX10.2 instructions end.
+
+// MOVRS instructions.
+
+prefetchrst2, 0xf18/4, MOVRS, Modrm|Anysize|IgnoreSize|NoSuf, { BaseIndex }
+
+movrs, 0x8a, MOVRS&x64, D|W|Modrm|Space0F38|CheckOperandSize|No_sSuf, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
+movrs, 0x8a, MOVRS&APX_F, D|W|Modrm|EVexMap4|EVex128|CheckOperandSize|No_sSuf, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Reg8|Reg16|Reg32|Reg64 }
+
+vmovrs<bw>, 0xf26f, AVX10_2&MOVRS&x64, Modrm|Masking|Map5|<bw:vexw>|Disp8ShiftVL|CheckOperandSize|NoSuf, { Xmmword|Ymmword|Zmmword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+vmovrs<dq>, 0xf36f, AVX10_2&MOVRS&x64, Modrm|Masking|Map5|<dq:vexw>|Disp8ShiftVL|CheckOperandSize|NoSuf, { Xmmword|Ymmword|Zmmword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM }
+
+// MOVRS instructions end.

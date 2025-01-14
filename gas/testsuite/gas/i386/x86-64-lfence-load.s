@@ -22,6 +22,7 @@ _start:
 	prefetchw (%rbp)
 	prefetchit0 0x12345678(%rip)
 	prefetchit1 0x12345678(%rip)
+	prefetchrst2 (%rbp)
 	pop %fs
 	popf
 	xlatb (%rbx)

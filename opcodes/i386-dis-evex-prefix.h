@@ -580,6 +580,13 @@
     { VEX_W_TABLE (EVEX_W_MAP5_6E_P_1) },
     { "vmovwY",	{ XMScalar, Edw }, 0 },
   },
+  /* PREFIX_EVEX_MAP5_6F_X86_64 */
+  {
+    { Bad_Opcode },
+    { "vmovrs%DQ",	{ XM, Mx }, 0 },
+    { Bad_Opcode },
+    { "vmovrs%BW",	{ XM, Mx }, 0 },
+  },
   /* PREFIX_EVEX_MAP5_74 */
   {
     { "vcvtbiasp%XH2bf8s",	{ XMxmmq, Vex, EXxh }, 0 },

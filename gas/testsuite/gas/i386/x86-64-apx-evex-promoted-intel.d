@@ -118,6 +118,10 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7d 08 f8 bc 87 23 01 00 00[	 ]+movdir64b[	 ]+r31,\[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7c 08 f9 8c 87 23 01 00 00[	 ]+movdiri[	 ]+DWORD PTR \[r31\+rax\*4\+0x123\],r25d
 [	 ]*[a-f0-9]+:[	 ]*62 4c fc 08 f9 bc 87 23 01 00 00[	 ]+movdiri[	 ]+QWORD PTR \[r31\+rax\*4\+0x123\],r31
+[	 ]*[a-f0-9]+:[	 ]*62 cc 7c 08 8a 84 87 23 01 00 00[	 ]+movrs[	 ]+r16b,BYTE PTR \[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 ec 7d 08 8b 94 80 23 01 00 00[	 ]+movrs[	 ]+r18w,WORD PTR \[r16\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 4c 7c 08 8b 8c 87 23 01 00 00[	 ]+movrs[	 ]+r25d,DWORD PTR \[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 6c fc 08 8b bc 80 23 01 00 00[	 ]+movrs[	 ]+r31,QWORD PTR \[r16\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 5a 6f 08 f5 d1[	 ]+pdep[	 ]+r10d,edx,r25d
 [	 ]*[a-f0-9]+:[	 ]*62 5a 87 08 f5 df[	 ]+pdep[	 ]+r11,r15,r31
 [	 ]*[a-f0-9]+:[	 ]*62 da 37 00 f5 94 87 23 01 00 00[	 ]+pdep[	 ]+edx,r25d,DWORD PTR \[r31\+rax\*4\+0x123\]
@@ -253,6 +257,10 @@ Disassembly of section \.text:
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7d 08 f8 bc 87 23 01 00 00[	 ]+movdir64b[	 ]+r31,\[r31\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 4c 7c 08 f9 8c 87 23 01 00 00[	 ]+movdiri[	 ]+DWORD PTR \[r31\+rax\*4\+0x123\],r25d
 [	 ]*[a-f0-9]+:[	 ]*62 4c fc 08 f9 bc 87 23 01 00 00[	 ]+movdiri[	 ]+QWORD PTR \[r31\+rax\*4\+0x123\],r31
+[	 ]*[a-f0-9]+:[	 ]*62 cc 7c 08 8a 84 87 23 01 00 00[	 ]+movrs[	 ]+r16b,BYTE PTR \[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 ec 7d 08 8b 94 80 23 01 00 00[	 ]+movrs[	 ]+r18w,WORD PTR \[r16\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 4c 7c 08 8b 8c 87 23 01 00 00[	 ]+movrs[	 ]+r25d,DWORD PTR \[r31\+rax\*4\+0x123\]
+[	 ]*[a-f0-9]+:[	 ]*62 6c fc 08 8b bc 80 23 01 00 00[	 ]+movrs[	 ]+r31,QWORD PTR \[r16\+rax\*4\+0x123\]
 [	 ]*[a-f0-9]+:[	 ]*62 5a 6f 08 f5 d1[	 ]+pdep[	 ]+r10d,edx,r25d
 [	 ]*[a-f0-9]+:[	 ]*62 5a 87 08 f5 df[	 ]+pdep[	 ]+r11,r15,r31
 [	 ]*[a-f0-9]+:[	 ]*62 da 37 00 f5 94 87 23 01 00 00[	 ]+pdep[	 ]+edx,r25d,DWORD PTR \[r31\+rax\*4\+0x123\]
