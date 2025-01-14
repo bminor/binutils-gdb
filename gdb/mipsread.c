@@ -26,7 +26,6 @@
 #include "bfd.h"
 #include "symtab.h"
 #include "objfiles.h"
-#include "stabsread.h"
 #include "mdebugread.h"
 
 #include "coff/sym.h"
@@ -49,7 +48,6 @@ read_alphacoff_dynamic_symtab (minimal_symbol_reader &,
 static void
 mipscoff_new_init (struct objfile *ignore)
 {
-  stabsread_new_init ();
 }
 
 /* Initialize to read a symbol file (nothing to do).  */
