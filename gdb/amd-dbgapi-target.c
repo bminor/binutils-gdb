@@ -24,6 +24,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-style.h"
+#include "gdbsupport/unordered_map.h"
 #include "inf-loop.h"
 #include "inferior.h"
 #include "objfiles.h"
@@ -207,7 +208,7 @@ struct amd_dbgapi_inferior_info
     bool enabled = false;
   } precise_memory;
 
-  std::unordered_map<decltype (amd_dbgapi_breakpoint_id_t::handle),
+  gdb::unordered_map<decltype (amd_dbgapi_breakpoint_id_t::handle),
 		     struct breakpoint *>
     breakpoint_map;
 
@@ -221,7 +222,7 @@ struct amd_dbgapi_inferior_info
 
      wave_info objects are added when we first see the wave, and
      removed from a thread_deleted observer.  */
-  std::unordered_map<decltype (amd_dbgapi_wave_id_t::handle), wave_info>
+  gdb::unordered_map<decltype (amd_dbgapi_wave_id_t::handle), wave_info>
     wave_info_map;
 };
 
