@@ -1,10 +1,7 @@
 #source: empty.s
 #ld: -z memory-seal
 #readelf: -n
-#notarget: am33_2.0-*-* hppa*-*-hpux* mn10300-*-*
-# Assembly source file for the HPPA assembler is renamed and modifed by
-# sed.  mn10300 has relocations in .note.gnu.property section which
-# elf_parse_notes doesn't support.
+#notarget: ![check_memory_seal_support]
 
 #...
 Displaying notes found in: .note.gnu.property

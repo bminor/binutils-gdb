@@ -1,11 +1,11 @@
 	.section ".note.gnu.property", "a"
 	.p2align ALIGN
-	.long 1f - 0f		/* name length */
-	.long 3f - 2f		/* data length */
+	.long .L1 - .L0		/* name length */
+	.long .L3 - .L2		/* data length */
 	.long 5			/* note type */
-0:	.asciz "GNU"		/* vendor name */
-1:
+.L0:	.asciz "GNU"		/* vendor name */
+.L1:
 	.p2align ALIGN
-2:	.long 3			/* pr_type.  */
+.L2:	.long 3			/* pr_type.  */
 	.long 0			/* pr_datasz.  */
-3:
+.L3:
