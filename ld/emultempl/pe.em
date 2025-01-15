@@ -160,6 +160,7 @@ static char * thumb_entry_symbol = NULL;
 static lang_assignment_statement_type *image_base_statement = 0;
 static unsigned short pe_dll_characteristics = DEFAULT_DLL_CHARACTERISTICS;
 static bool insert_timestamp = true;
+static bool orphan_init_done;
 static const char *emit_build_id;
 #ifdef PDB_H
 static int pdb;
@@ -2032,6 +2033,10 @@ gld${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUTE
 static void
 gld${EMULATION_NAME}_finish (void)
 {
+  /* Support the object-only output.  */
+  if (config.emit_gnu_object_only)
+    orphan_init_done = false;
+
 #if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe)
   struct bfd_link_hash_entry * h;
 
@@ -2191,7 +2196,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 
   if (os == NULL)
     {
-      static struct orphan_save hold[] =
+      static struct orphan_save orig_hold[] =
 	{
 	  { ".text",
 	    SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE,
@@ -2209,6 +2214,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	    SEC_ALLOC,
 	    0, 0, 0, 0 }
 	};
+      static struct orphan_save hold[ARRAY_SIZE (orig_hold)];
       enum orphan_save_index
 	{
 	  orphan_text = 0,
@@ -2217,7 +2223,6 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	  orphan_data,
 	  orphan_bss
 	};
-      static int orphan_init_done = 0;
       struct orphan_save *place;
       lang_output_section_statement_type *after;
       etree_type *address;
@@ -2226,15 +2231,20 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 
       if (!orphan_init_done)
 	{
-	  struct orphan_save *ho;
-	  for (ho = hold; ho < hold + sizeof (hold) / sizeof (hold[0]); ++ho)
-	    if (ho->name != NULL)
-	      {
-		ho->os = lang_output_section_find (ho->name);
-		if (ho->os != NULL && ho->os->flags == 0)
-		  ho->os->flags = ho->flags;
-	      }
-	  orphan_init_done = 1;
+	  struct orphan_save *ho, *horig;
+	  for (ho = hold, horig = orig_hold;
+	       ho < hold + ARRAY_SIZE (hold);
+	       ++ho, ++horig)
+	    {
+	      *ho = *horig;
+	      if (ho->name != NULL)
+		{
+		  ho->os = lang_output_section_find (ho->name);
+		  if (ho->os != NULL && ho->os->flags == 0)
+		    ho->os->flags = ho->flags;
+	        }
+	    }
+	  orphan_init_done = true;
 	}
 
       flags = s->flags;
