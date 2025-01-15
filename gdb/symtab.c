@@ -124,6 +124,41 @@ struct main_info
 
 static const registry<program_space>::key<main_info> main_progspace_key;
 
+/* Symbol lookup is not reentrant (though this is not an intrinsic
+   restriction).  Keep track of whether a symbol lookup is active, to be able
+   to detect reentrancy.  */
+static bool in_symbol_lookup;
+
+/* Struct to mark that a symbol lookup is active for the duration of its
+   lifetime.  */
+
+struct enter_symbol_lookup
+{
+  enter_symbol_lookup ()
+  {
+    /* Ensure that the current language has been set.  Normally the
+       language is set lazily.  However, when performing a symbol lookup,
+       this could result in a recursive call into the lookup code in some
+       cases.  Set it now to ensure that this does not happen.  */
+    get_current_language ();
+
+    /* Detect symbol lookup reentrance.  */
+    gdb_assert (!in_symbol_lookup);
+
+    in_symbol_lookup = true;
+  }
+
+  ~enter_symbol_lookup ()
+  {
+    /* Sanity check.  */
+    gdb_assert (in_symbol_lookup);
+
+    in_symbol_lookup = false;
+  }
+
+  DISABLE_COPY_AND_ASSIGN (enter_symbol_lookup);
+};
+
 /* The default symbol cache size.
    There is no extra cpu cost for large N (except when flushing the cache,
    which is rare).  The value here is just a first attempt.  A better default
@@ -2259,6 +2294,8 @@ lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
 			const struct block *block,
 			const domain_search_flags domain)
 {
+  enter_symbol_lookup tmp;
+
   struct symbol *sym;
 
   if (symbol_lookup_debug)
@@ -2294,6 +2331,8 @@ lookup_global_symbol_from_objfile (struct objfile *main_objfile,
 				   const char *name,
 				   const domain_search_flags domain)
 {
+  enter_symbol_lookup tmp;
+
   gdb_assert (block_index == GLOBAL_BLOCK || block_index == STATIC_BLOCK);
 
   for (objfile *objfile : main_objfile->separate_debug_objfiles ())
@@ -2618,6 +2657,8 @@ lookup_global_or_static_symbol (const char *name,
 	return {};
       return result;
     }
+
+  enter_symbol_lookup tmp;
 
   /* Do a global search (of global blocks, heh).  */
   if (result.symbol == NULL)
