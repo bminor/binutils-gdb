@@ -931,21 +931,6 @@ extern bool dw2_expand_symtabs_matching_one
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher);
 
-/* Helper for dw2_expand_symtabs_matching that works with a
-   mapped_index_base instead of the containing objfile.  This is split
-   to a separate function in order to be able to unit test the
-   name_components matching using a mock mapped_index_base.  For each
-   symbol name that matches, calls MATCH_CALLBACK, passing it the
-   symbol's index in the mapped_index_base symbol table.  */
-
-extern bool dw2_expand_symtabs_matching_symbol
-  (mapped_index_base &index,
-   const lookup_name_info &lookup_name_in,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   gdb::function_view<bool (offset_type)> match_callback,
-   dwarf2_per_objfile *per_objfile,
-   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher);
-
 /* If FILE_MATCHER is non-NULL, set all the
    dwarf2_per_cu_quick_data::MARK of the current DWARF2_PER_OBJFILE
    that match FILE_MATCHER.  */
