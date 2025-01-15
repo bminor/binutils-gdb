@@ -586,8 +586,6 @@ enum tracepoint_type
   fast_tracepoint,
 };
 
-struct tracepoint_hit_ctx;
-
 typedef enum eval_result_type (*condfn) (unsigned char *,
 					 ULONGEST *);
 
