@@ -1169,8 +1169,6 @@ static char *tracing_stop_note;
 
 #endif
 
-/* Functions local to this file.  */
-
 /* Base "class" for tracepoint type specific data to be passed down to
    collect_data_at_tracepoint.  */
 struct tracepoint_hit_ctx
