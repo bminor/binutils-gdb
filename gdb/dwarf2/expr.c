@@ -1198,13 +1198,15 @@ dwarf_expr_context::stack_empty_p () const
 
 /* Add a new piece to the dwarf_expr_context's piece list.  */
 void
-dwarf_expr_context::add_piece (ULONGEST size, ULONGEST offset)
+dwarf_expr_context::add_piece (ULONGEST size, ULONGEST offset,
+			       enum dwarf_location_atom op)
 {
   dwarf_expr_piece &p = this->m_pieces.emplace_back ();
 
   p.location = this->m_location;
   p.size = size;
   p.offset = offset;
+  p.op = op;
 
   if (p.location == DWARF_VALUE_LITERAL)
     {
@@ -2170,7 +2172,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    /* Record the piece.  */
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
-	    add_piece (8 * size, 0);
+	    add_piece (8 * size, 0, op);
 
 	    /* Pop off the address/regnum, and reset the location
 	       type.  */
@@ -2188,7 +2190,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    /* Record the piece.  */
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uleb_offset);
-	    add_piece (size, uleb_offset);
+	    add_piece (size, uleb_offset, op);
 
 	    /* Pop off the address/regnum, and reset the location
 	       type.  */
@@ -2390,7 +2392,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
      pointer, then make a pieced value.  This is ok because we can't
      have implicit pointers in contexts where pieces are invalid.  */
   if (this->m_location == DWARF_VALUE_IMPLICIT_POINTER)
-    add_piece (8 * this->m_addr_size, 0);
+    add_piece (8 * this->m_addr_size, 0, DW_OP_implicit_pointer);
 
   this->m_recursion_depth--;
   gdb_assert (this->m_recursion_depth >= 0);

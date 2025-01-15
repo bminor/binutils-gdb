@@ -24,6 +24,7 @@
 
 #include "leb128.h"
 #include "dwarf2/call-site.h"
+#include "dwarf2.h"
 
 struct dwarf2_per_objfile;
 
@@ -54,6 +55,9 @@ enum dwarf_value_location
 /* A piece of an object, as recorded by DW_OP_piece or DW_OP_bit_piece.  */
 struct dwarf_expr_piece
 {
+  /* The DWARF operation for which the piece was created.  */
+  enum dwarf_location_atom op;
+
   enum dwarf_value_location location;
 
   union
@@ -208,7 +212,7 @@ private:
   struct type *address_type () const;
   void push (struct value *value, bool in_stack_memory);
   bool stack_empty_p () const;
-  void add_piece (ULONGEST size, ULONGEST offset);
+  void add_piece (ULONGEST size, ULONGEST offset, enum dwarf_location_atom op);
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
   void pop ();
   struct value *fetch (int n);
