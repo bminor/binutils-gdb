@@ -22,6 +22,7 @@
 
 require supports_reverse
 require have_avx
+require have_avx2
 
 # TODO: this is the case because I used xmm15 all over the test.
 # Some parts of the test require xmm15 to validate some code paths, but

@@ -10428,6 +10428,51 @@ gdb_caching_proc have_avx {} {
     return $status
 }
 
+# Return 1 if target supports avx2, otherwise return 0.
+gdb_caching_proc have_avx2 {} {
+	global srcdir
+
+	set me "have_avx2"
+	if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
+	    verbose "$me: target does not support avx2, returning 0" 2
+	    return 0
+	}
+
+	# Compile a test program.
+	set src {
+	   #include "nat/x86-cpuid.h"
+
+	    int main() {
+	      unsigned int eax, ebx, ecx, edx;
+
+	    if (!x86_cpuid_count (7, 0, &eax, &ebx, &ecx, &edx))
+	      return 0;
+
+	    if ((ebx & bit_AVX2) == bit_AVX2)
+	      return 1;
+	    else
+	      return 0;
+	    }
+	}
+	set compile_flags "incdir=${srcdir}/.."
+	if {![gdb_simple_compile $me $src executable $compile_flags]} {
+	    return 0
+	}
+
+	set target_obj [gdb_remote_download target $obj]
+	set result [remote_exec target $target_obj]
+	set status [lindex $result 0]
+	set output [lindex $result 1]
+	if { $output != "" } {
+	    set status 0
+	}
+
+	remote_file build delete $obj
+
+	verbose "$me: returning $status" 2
+	return $status
+}
+
 # Called as
 # - require ARG...
 #
