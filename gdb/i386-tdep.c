@@ -4842,10 +4842,15 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
 	}
       else
 	{
-	  /* VEX.pp stores whether we're moving a single or double precision
-	     float.  It just happens that pp is exactly one less than
-	     log2(size) so we can use that directly.  */
-	  ir->ot = ir->pp;
+	  /* Opcode 0x29 is trivial, the size of memory written is defined by
+	     VEX.L.  Opcode 0x11 can refer to vmovs[s|d] or vmovup[s|d]; they
+	     are differentiated by the most significant bit of VEX.pp, and the
+	     latter works exactly like 0x29, but the former encodes the size
+	     on VEX.pp itself.  */
+	  if (opcode == 0x11 && (ir->pp & 2) != 0)
+	    ir->ot = ir->pp;
+	  else
+	    ir->ot = 4 + ir->l;
 	  i386_record_lea_modrm (ir);
 	}
       break;

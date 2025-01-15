@@ -149,24 +149,24 @@ vmov_test ()
      opcodes, meaning they'll need to be tested separately.  */
 
   asm volatile ("vmovups %0, %%xmm0"  : : "m"(buf0));
-  asm volatile ("vmovupd %0, %%xmm15" : : "m"(buf1));
+  asm volatile ("vmovupd %0, %%ymm15" : : "m"(buf1));
   asm volatile ("vmovupd %%xmm0, %0"  : : "m"(buf1));
-  asm volatile ("vmovups %%xmm15, %0" : : "m"(buf1));
+  asm volatile ("vmovups %%ymm15, %0" : : "m"(buf1));
 
   asm volatile ("vmovups %0, %%xmm0"  : : "m"(global_buf0));
-  asm volatile ("vmovupd %0, %%xmm15" : : "m"(global_buf1));
+  asm volatile ("vmovupd %0, %%ymm15" : : "m"(global_buf1));
   asm volatile ("vmovupd %%xmm0, %0"  : : "m"(global_buf1));
-  asm volatile ("vmovups %%xmm15, %0" : : "m"(global_buf1));
+  asm volatile ("vmovups %%ymm15, %0" : : "m"(global_buf1));
 
   asm volatile ("vmovups %0, %%xmm0"  : : "m"(*dyn_buf0));
-  asm volatile ("vmovupd %0, %%xmm15" : : "m"(*dyn_buf1));
+  asm volatile ("vmovupd %0, %%ymm15" : : "m"(*dyn_buf1));
   asm volatile ("vmovupd %%xmm0, %0"  : : "m"(*dyn_buf1));
-  asm volatile ("vmovups %%xmm15, %0" : : "m"(*dyn_buf1));
+  asm volatile ("vmovups %%ymm15, %0" : : "m"(*dyn_buf1));
 
   asm volatile ("vmovaps %0, %%xmm0"  : : "m"(*dyn_buf0));
-  asm volatile ("vmovapd %0, %%xmm15" : : "m"(*dyn_buf1));
+  asm volatile ("vmovapd %0, %%ymm15" : : "m"(*dyn_buf1));
   asm volatile ("vmovapd %%xmm0, %0"  : : "m"(*dyn_buf1));
-  asm volatile ("vmovaps %%xmm15, %0" : : "m"(*dyn_buf1));
+  asm volatile ("vmovaps %%ymm15, %0" : : "m"(*dyn_buf1));
 
   /* We have a return statement to deal with
      epilogue in different compilers.  */
@@ -438,6 +438,7 @@ main ()
   asm volatile ("vmovq %0, %%xmm0": : "m" (global_buf1));
   asm volatile ("vmovq %0, %%xmm1": : "m" (global_buf1));
   asm volatile ("vmovq %0, %%xmm2": : "m" (global_buf1));
+  asm volatile ("vmovq %0, %%xmm3": : "m" (global_buf1));
   asm volatile ("vmovq %0, %%xmm15": : "m" (global_buf1));
 
   vmov_test ();
