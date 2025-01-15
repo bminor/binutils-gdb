@@ -69,7 +69,7 @@ gdb_test_multiple "core-file $corefile_1" "load core file no args" {
 }
 
 # Generate a core file, this time pass some arguments to the inferior.
-set args "aaaaa bbbbb ccccc ddddd eeeee"
+set args "aaaaa bbbbb ccccc ddddd e\\\\ e\\\\ e\\\\ e\\\\ e"
 set corefile [core_find $binfile {} $args]
 if {$corefile == ""} {
     untested "unable to create corefile"
@@ -100,6 +100,27 @@ gdb_test_multiple "core-file $corefile_2" "load core file with args" {
 # Also, the argument list should be available through 'show args'.
 gdb_test "show args" \
     "Argument list to give program being debugged when it is started is \"$args\"\\."
+
+# Move up to 'main'.  Do it this way because we cannot know how many
+# frames up 'main' actually is.
+gdb_test_multiple "up" "move up to main" {
+    -re -wrap "#$decimal\\s+\[^\r\n\]+ in main .*" {
+	pass $gdb_test_name
+    }
+
+    -re -wrap "#$decimal\\s+\[^\r\n\]+ in .*" {
+	send_gdb "up\n"
+	exp_continue
+    }
+}
+
+# Check that the inferior was started with the expected arguments.
+gdb_test "print argc" " = 6"
+gdb_test "print argv\[1\]" " = $hex \"aaaaa\""
+gdb_test "print argv\[2\]" " = $hex \"bbbbb\""
+gdb_test "print argv\[3\]" " = $hex \"ccccc\""
+gdb_test "print argv\[4\]" " = $hex \"ddddd\""
+gdb_test "print argv\[5\]" " = $hex \"e e e e e\""
 
 # Find the name of an environment variable that is not set.
 set env_var_base "GDB_TEST_ENV_VAR_"
