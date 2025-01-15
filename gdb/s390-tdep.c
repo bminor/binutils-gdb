@@ -1260,6 +1260,28 @@ s390_value_from_register (gdbarch *gdbarch, type *type, int regnum,
   return value;
 }
 
+/* Implementation of the gdbarch_dwarf2_reg_piece_offset hook.  */
+
+static ULONGEST
+s390_dwarf2_reg_piece_offset (gdbarch *gdbarch, int gdb_regnum, ULONGEST size)
+{
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
+
+  /* Floating point register.  */
+  if (gdb_regnum >= S390_F0_REGNUM && gdb_regnum <= S390_F15_REGNUM)
+    return 0;
+
+  /* Vector register, v0 - v15.  */
+  if (regnum_is_vxr_full (tdep, gdb_regnum))
+    return 0;
+
+  /* Vector register, v16 - v31.  */
+  if (gdb_regnum >= S390_V16_REGNUM && gdb_regnum <= S390_V31_REGNUM)
+    return 0;
+
+  return default_dwarf2_reg_piece_offset (gdbarch, gdb_regnum, size);
+}
+
 /* Implement pseudo_register_name tdesc method.  */
 
 static const char *
@@ -7273,6 +7295,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stab_reg_to_regnum (gdbarch, s390_dwarf_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_dwarf_reg_to_regnum);
   set_gdbarch_value_from_register (gdbarch, s390_value_from_register);
+  set_gdbarch_dwarf2_reg_piece_offset (gdbarch, s390_dwarf2_reg_piece_offset);
 
   /* Pseudo registers.  */
   set_gdbarch_pseudo_register_read (gdbarch, s390_pseudo_register_read);
