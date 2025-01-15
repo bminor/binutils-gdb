@@ -2275,19 +2275,17 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
     {
       struct orphan_save *ho, *horig;
 
-      for (ho = hold; ho < hold + sizeof (hold) / sizeof (hold[0]); ++ho)
       for (ho = hold, horig = orig_hold;
 	   ho < hold + ARRAY_SIZE (hold);
 	   ++ho, ++horig)
 	{
 	  *ho = *horig;
 	  if (ho->name != NULL)
-	if (ho->name != NULL)
-	  {
-	    ho->os = lang_output_section_find (ho->name);
-	    if (ho->os != NULL && ho->os->flags == 0)
-	      ho->os->flags = ho->flags;
-	  }
+	    {
+	      ho->os = lang_output_section_find (ho->name);
+	      if (ho->os != NULL && ho->os->flags == 0)
+		ho->os->flags = ho->flags;
+	    }
 	}
       orphan_init_done = true;
     }
