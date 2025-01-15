@@ -2863,9 +2863,11 @@ find_frame_for_function (const char *function_name)
 
   do
     {
+      CORE_ADDR frame_pc = get_frame_address_in_block (frame);
+
       for (size_t i = 0; (i < sals.size () && !found); i++)
-	found = (get_frame_pc (frame) >= func_bounds[i].low
-		 && get_frame_pc (frame) < func_bounds[i].high);
+	found = (frame_pc >= func_bounds[i].low
+		 && frame_pc < func_bounds[i].high);
       if (!found)
 	{
 	  level = 1;
