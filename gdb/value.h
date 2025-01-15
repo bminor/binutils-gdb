@@ -1128,6 +1128,8 @@ extern value *default_value_from_register (gdbarch *gdbarch, type *type,
 					   int regnum,
 					   const frame_info_ptr &this_frame);
 
+extern ULONGEST default_dwarf2_reg_piece_offset (gdbarch *gdbarch, int regnum, ULONGEST size);
+
 extern struct value *value_from_register (struct type *type, int regnum,
 					  const frame_info_ptr &frame);
 

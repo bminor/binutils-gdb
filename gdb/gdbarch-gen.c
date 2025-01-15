@@ -109,6 +109,7 @@ struct gdbarch
   gdbarch_register_to_value_ftype *register_to_value = nullptr;
   gdbarch_value_to_register_ftype *value_to_register = nullptr;
   gdbarch_value_from_register_ftype *value_from_register = default_value_from_register;
+  gdbarch_dwarf2_reg_piece_offset_ftype *dwarf2_reg_piece_offset = default_dwarf2_reg_piece_offset;
   gdbarch_pointer_to_address_ftype *pointer_to_address = unsigned_pointer_to_address;
   gdbarch_address_to_pointer_ftype *address_to_pointer = unsigned_address_to_pointer;
   gdbarch_integer_to_address_ftype *integer_to_address = nullptr;
@@ -372,6 +373,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_to_value, invalid_p == 0.  */
   /* Skip verify of value_to_register, invalid_p == 0.  */
   /* Skip verify of value_from_register, invalid_p == 0.  */
+  /* Skip verify of dwarf2_reg_piece_offset, invalid_p == 0.  */
   /* Skip verify of pointer_to_address, invalid_p == 0.  */
   /* Skip verify of address_to_pointer, invalid_p == 0.  */
   /* Skip verify of integer_to_address, has predicate.  */
@@ -789,6 +791,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
 	      "gdbarch_dump: value_from_register = <%s>\n",
 	      host_address_to_string (gdbarch->value_from_register));
+  gdb_printf (file,
+	      "gdbarch_dump: dwarf2_reg_piece_offset = <%s>\n",
+	      host_address_to_string (gdbarch->dwarf2_reg_piece_offset));
   gdb_printf (file,
 	      "gdbarch_dump: pointer_to_address = <%s>\n",
 	      host_address_to_string (gdbarch->pointer_to_address));
@@ -2586,6 +2591,23 @@ set_gdbarch_value_from_register (struct gdbarch *gdbarch,
 				 gdbarch_value_from_register_ftype value_from_register)
 {
   gdbarch->value_from_register = value_from_register;
+}
+
+ULONGEST
+gdbarch_dwarf2_reg_piece_offset (struct gdbarch *gdbarch, int regnum, ULONGEST size)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->dwarf2_reg_piece_offset != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_dwarf2_reg_piece_offset called\n");
+  return gdbarch->dwarf2_reg_piece_offset (gdbarch, regnum, size);
+}
+
+void
+set_gdbarch_dwarf2_reg_piece_offset (struct gdbarch *gdbarch,
+				     gdbarch_dwarf2_reg_piece_offset_ftype dwarf2_reg_piece_offset)
+{
+  gdbarch->dwarf2_reg_piece_offset = dwarf2_reg_piece_offset;
 }
 
 CORE_ADDR

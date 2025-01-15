@@ -430,6 +430,14 @@ typedef struct value * (gdbarch_value_from_register_ftype) (struct gdbarch *gdba
 extern struct value * gdbarch_value_from_register (struct gdbarch *gdbarch, struct type *type, int regnum, const frame_info_ptr &this_frame);
 extern void set_gdbarch_value_from_register (struct gdbarch *gdbarch, gdbarch_value_from_register_ftype *value_from_register);
 
+/* For a DW_OP_piece located in a register, but not occupying the
+   entire register, return the placement of the piece within that
+   register as defined by the ABI. */
+
+typedef ULONGEST (gdbarch_dwarf2_reg_piece_offset_ftype) (struct gdbarch *gdbarch, int regnum, ULONGEST size);
+extern ULONGEST gdbarch_dwarf2_reg_piece_offset (struct gdbarch *gdbarch, int regnum, ULONGEST size);
+extern void set_gdbarch_dwarf2_reg_piece_offset (struct gdbarch *gdbarch, gdbarch_dwarf2_reg_piece_offset_ftype *dwarf2_reg_piece_offset);
+
 typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);

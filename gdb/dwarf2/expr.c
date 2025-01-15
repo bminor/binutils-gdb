@@ -211,14 +211,33 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 	    ULONGEST reg_bits = 8 * register_size (arch, gdb_regnum);
 	    int optim, unavail;
 
-	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
-		&& p->offset + p->size < reg_bits)
+	    if (p->offset + p->size < reg_bits)
 	      {
-		/* Big-endian, and we want less than full size.  */
-		bits_to_skip += reg_bits - (p->offset + p->size);
+		/* We want less than full size.  */
+
+		if (p->op == DW_OP_piece)
+		  {
+		    gdb_assert (p->offset == 0);
+
+		    /* If the piece is located in a register, but does not
+		       occupy the entire register, the placement of the piece
+		       within that register is defined by the ABI. */
+		    bits_to_skip
+		      += 8 * gdbarch_dwarf2_reg_piece_offset (arch, gdb_regnum,
+							      p->size / 8);
+		  }
+		else if (p->op == DW_OP_bit_piece)
+		  {
+		    /* If the location is a register, the offset is from the
+		       least significant bit end of the register.  */
+		    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
+		      bits_to_skip += reg_bits - (p->offset + p->size);
+		    else
+		      bits_to_skip += p->offset;
+		  }
+		else
+		  error (_("Don't know how to get part of implicit pointer"));
 	      }
-	    else
-	      bits_to_skip += p->offset;
 
 	    this_size = bits_to_bytes (bits_to_skip, this_size_bits);
 	    buffer.resize (this_size);

@@ -830,6 +830,22 @@ allocate and return a struct value with all value attributes
 )
 
 Method(
+    comment="""
+For a DW_OP_piece located in a register, but not occupying the
+entire register, return the placement of the piece within that
+register as defined by the ABI.
+""",
+    type="ULONGEST",
+    name="dwarf2_reg_piece_offset",
+    params=[
+        ("int", "regnum"),
+        ("ULONGEST", "size")
+    ],
+    predefault="default_dwarf2_reg_piece_offset",
+    invalid=False,
+)
+
+Method(
     type="CORE_ADDR",
     name="pointer_to_address",
     params=[("struct type *", "type"), ("const gdb_byte *", "buf")],

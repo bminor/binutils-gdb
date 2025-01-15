@@ -541,6 +541,24 @@ default_value_from_register (gdbarch *gdbarch, type *type, int regnum,
   return value;
 }
 
+/* Default implementation of gdbarch_dwarf2_reg_piece_offset.  Implements
+   DW_OP_bits_piece for DW_OP_piece.  */
+
+ULONGEST
+default_dwarf2_reg_piece_offset (gdbarch *gdbarch, int gdb_regnum, ULONGEST size)
+{
+  ULONGEST reg_size = register_size (gdbarch, gdb_regnum);
+  gdb_assert (size <= reg_size);
+  if (reg_size == size)
+    return 0;
+
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+    return reg_size - size;
+
+  return 0;
+}
+
+
 /* VALUE must be an lval_register value.  If regnum is the value's
    associated register number, and len the length of the value's type,
    read one or more registers in VALUE's frame, starting with register REGNUM,
