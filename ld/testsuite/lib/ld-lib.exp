@@ -794,9 +794,8 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    pass $testname
 	    continue;
 	} else {
-	    set board_flags [get_board_flags]
 	    if { [string match "" $STATIC_LDFLAGS] \
-		 && [regexp -- ".* \[-\]+static .*" " $board_flags $ld_options $objfiles $ld_after "] } {
+		 && [regexp -- ".* \[-\]+static .*" " [get_board_flags] $ld_options $objfiles $ld_after "] } {
 		untested $testname
 		continue
 	    }
@@ -987,7 +986,7 @@ proc run_cc_link_tests { ldtests } {
 	    }
 
 	    if { [string match "" $STATIC_LDFLAGS] \
-		 && [regexp -- ".* \[-\]+static .*" " $board_flags $ldflags $objfiles "] } {
+		 && [regexp -- ".* \[-\]+static .*" " [get_board_flags] $ldflags $objfiles "] } {
 		untested $testname
 		continue
 	    }
