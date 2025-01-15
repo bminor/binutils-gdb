@@ -466,7 +466,7 @@ struct packet_reg
   long offset; /* Offset into G packet.  */
   long regnum; /* GDB's internal register number.  */
   LONGEST pnum; /* Remote protocol register number.  */
-  int in_g_packet; /* Always part of G packet.  */
+  bool in_g_packet; /* Always part of G packet.  */
   /* long size in bytes;  == register_size (arch, regnum);
      at present.  */
   /* char *name; == gdbarch_register_name (arch, regnum);
@@ -1924,7 +1924,7 @@ map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
 
   for (regnum = 0, offset = 0; regnum < num_remote_regs; regnum++)
     {
-      remote_regs[regnum]->in_g_packet = 1;
+      remote_regs[regnum]->in_g_packet = true;
       remote_regs[regnum]->offset = offset;
       offset += register_size (gdbarch, remote_regs[regnum]->regnum);
     }
@@ -8997,11 +8997,11 @@ remote_target::process_g_packet (struct regcache *regcache)
 	    continue;
 
 	  if (offset >= sizeof_g_packet)
-	    rsa->regs[i].in_g_packet = 0;
+	    rsa->regs[i].in_g_packet = false;
 	  else if (offset + reg_size > sizeof_g_packet)
 	    error (_("Truncated register %d in remote 'g' packet"), i);
 	  else
-	    rsa->regs[i].in_g_packet = 1;
+	    rsa->regs[i].in_g_packet = true;
 	}
 
       /* Looks valid enough, we can assume this is the correct length
