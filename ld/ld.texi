@@ -1126,13 +1126,13 @@ relocations.  Different output formats can have further restrictions; for
 example some @code{a.out}-based formats do not support partial linking
 with input files in other formats at all.
 
-On ELF platforms, when the relocatable output contains both contents
-which require link-time optimization (LTO) and contents which don't
-require LTO, a .gnu_object_only section will be created to contain a
-relocatable object file, as if @samp{-r} is applied to all relocatable
-inputs which don't require LTO.  When processing a relocatable input
-with a .gnu_object_only section, the linker will extract the
-.gnu_object_only section as a separate input.
+When the relocatable output contains both contents which require
+link-time optimization (LTO) and contents which don't require LTO,
+a .gnu_object_only section will be created to contain a relocatable
+object file, as if @samp{-r} is applied to all relocatable inputs
+which don't require LTO.  When processing a relocatable input with
+a .gnu_object_only section, the linker will extract the .gnu_object_only
+section as a separate input.
 
 Note that since @samp{-r} groups some sections from different input files
 together, there may be negative impacts on code size and locality in

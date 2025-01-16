@@ -10966,6 +10966,34 @@ cmdline_extract_object_only_section (bfd *abfd)
   return name;
 }
 
+/* Load the object-only section.   */
+
+static void
+cmdline_load_object_only_section (const char *name)
+{
+  lang_input_statement_type *entry
+    = new_afile (name, lang_input_file_is_file_enum, NULL, NULL);
+
+  if (!entry)
+    abort ();
+
+  ldfile_open_file (entry);
+
+  if (trace_files || verbose)
+    info_msg ("%pI\n", entry);
+
+  if (entry->flags.missing_file
+      || bfd_get_format (entry->the_bfd) != bfd_object)
+    abort ();
+
+  ldlang_add_file (entry);
+
+  if (bfd_link_add_symbols (entry->the_bfd, &link_info))
+    entry->flags.loaded = true;
+  else
+    einfo (_("%F%P: %pB: error adding symbols: %E\n"), entry->the_bfd);
+}
+
 /* Check and handle the object-only section.   */
 
 void
@@ -10987,8 +11015,7 @@ cmdline_check_object_only_section (bfd *abfd, bool lto)
 	  abort ();
 	case lto_mixed_object:
 	  filename = cmdline_extract_object_only_section (abfd);
-	  lang_add_input_file (filename,
-			       lang_input_file_is_file_enum, NULL);
+	  cmdline_load_object_only_section (filename);
 	  break;
 	case lto_non_ir_object:
 	case lto_slim_ir_object:
