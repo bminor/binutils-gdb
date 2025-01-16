@@ -5,7 +5,7 @@
 
 * Add support for the x86 Intel MOVRS instructions.
 
-* Add support for the x86 Zhaoxin PadLock RNG2 instruction.
+* Add support for the x86 Zhaoxin PadLock PHE2 and RNG2 instructions.
 
 * Add support for AArch64 SME and SVE non-widening BFloat16 (SVE_B16B16 and
   SME_B16B16) instructions.

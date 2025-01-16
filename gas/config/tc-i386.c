@@ -1228,6 +1228,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (gmi, GMI, GMI, false),
   SUBARCH (msr_imm, MSR_IMM, MSR_IMM, false),
   SUBARCH (padlockrng2, PADLOCKRNG2, PADLOCKRNG2, false),
+  SUBARCH (padlockphe2, PADLOCKPHE2, PADLOCKPHE2, false),
   SUBARCH (movrs, MOVRS, MOVRS, false),
 };
 
@@ -12047,6 +12048,7 @@ add_branch_prefix_frag_p (const struct last_insn *last_insn)
       || now_seg == absolute_section
       || is_cpu (&i.tm, CpuPadLock)
       || is_cpu (&i.tm, CpuPadLockRNG2)
+      || is_cpu (&i.tm, CpuPadLockPHE2)
       || !cpu_arch_flags.bitfield.cpui386)
     return 0;
 
@@ -12422,7 +12424,8 @@ output_insn (const struct last_insn *last_insn)
 	      break;
 	    case PREFIX_0XF3:
 	      if ((!is_cpu (&i.tm, CpuPadLock)
-		   && !is_cpu (&i.tm, CpuPadLockRNG2))
+		   && !is_cpu (&i.tm, CpuPadLockRNG2)
+		   && !is_cpu (&i.tm, CpuPadLockPHE2))
 		  || (i.prefix[REP_PREFIX] != 0xf3))
 		add_prefix (0xf3);
 	      break;

@@ -297,6 +297,8 @@ static const dependency isa_dependencies[] =
     "XSAVE|64" },
   { "PadLockRNG2",
     "PadLock" },
+  { "PadLockPHE2",
+    "PadLock" },
 };
 
 /* This array is populated as process_i386_initializers() walks cpu_flags[].  */
@@ -352,6 +354,7 @@ static bitfield cpu_flags[] =
   BITFIELD (PadLock),
   BITFIELD (GMI),
   BITFIELD (PadLockRNG2),
+  BITFIELD (PadLockPHE2),
   BITFIELD (SVME),
   BITFIELD (VMX),
   BITFIELD (SMX),
