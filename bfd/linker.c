@@ -402,6 +402,18 @@ SUBSUBSECTION
 	file at the end of <<NAME(aout,final_link)>>.
 */
 
+/* This structure is used to pass information to
+   _bfd_generic_link_write_global_symbol, which may be called via
+   _bfd_generic_link_hash_traverse.  */
+
+struct generic_write_global_symbol_info
+{
+  struct bfd_link_info *info;
+  bfd *output_bfd;
+  size_t *psymalloc;
+  bool failed;
+};
+
 static bool generic_link_add_object_symbols
   (bfd *, struct bfd_link_info *);
 static bool generic_link_check_archive_element
@@ -416,6 +428,10 @@ static bool default_data_link_order
 static bool default_indirect_link_order
   (bfd *, struct bfd_link_info *, asection *, struct bfd_link_order *,
    bool);
+static bool _bfd_generic_link_output_symbols
+  (bfd *, bfd *, struct bfd_link_info *, size_t *);
+static bool _bfd_generic_link_write_global_symbol
+  (struct generic_link_hash_entry *, void *);
 
 /* The link hash table structure is defined in bfdlink.h.  It provides
    a base hash table which the backend specific hash tables are built
@@ -735,7 +751,7 @@ bfd_link_repair_undef_list (struct bfd_link_hash_table *table)
 
 /* Routine to create an entry in a generic link hash table.  */
 
-struct bfd_hash_entry *
+static struct bfd_hash_entry *
 _bfd_generic_link_hash_newfunc (struct bfd_hash_entry *entry,
 				struct bfd_hash_table *table,
 				const char *string)
@@ -1869,9 +1885,12 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
   wginfo.info = info;
   wginfo.output_bfd = abfd;
   wginfo.psymalloc = &outsymalloc;
+  wginfo.failed = false;
   _bfd_generic_link_hash_traverse (_bfd_generic_hash_table (info),
 				   _bfd_generic_link_write_global_symbol,
 				   &wginfo);
+  if (wginfo.failed)
+    return false;
 
   /* Make sure we have a trailing NULL pointer on OUTSYMBOLS.  We
      shouldn't really need one, since we have SYMCOUNT, but some old
@@ -1996,7 +2015,7 @@ generic_add_output_symbol (bfd *output_bfd, size_t *psymalloc, asymbol *sym)
 
 /* Handle the symbols for an input BFD.  */
 
-bool
+static bool
 _bfd_generic_link_output_symbols (bfd *output_bfd,
 				  bfd *input_bfd,
 				  struct bfd_link_info *info,
@@ -2300,12 +2319,11 @@ set_symbol_from_hash (asymbol *sym, struct bfd_link_hash_entry *h)
 /* Write out a global symbol, if it hasn't already been written out.
    This is called for each symbol in the hash table.  */
 
-bool
+static bool
 _bfd_generic_link_write_global_symbol (struct generic_link_hash_entry *h,
 				       void *data)
 {
-  struct generic_write_global_symbol_info *wginfo =
-      (struct generic_write_global_symbol_info *) data;
+  struct generic_write_global_symbol_info *wginfo = data;
   asymbol *sym;
 
   if (h->written)
@@ -2325,7 +2343,10 @@ _bfd_generic_link_write_global_symbol (struct generic_link_hash_entry *h,
     {
       sym = bfd_make_empty_symbol (wginfo->output_bfd);
       if (!sym)
-	return false;
+	{
+	  wginfo->failed = true;
+	  return false;
+	}
       sym->name = h->root.root.string;
       sym->flags = 0;
     }
@@ -2337,8 +2358,8 @@ _bfd_generic_link_write_global_symbol (struct generic_link_hash_entry *h,
   if (! generic_add_output_symbol (wginfo->output_bfd, wginfo->psymalloc,
 				   sym))
     {
-      /* FIXME: No way to return failure.  */
-      abort ();
+      wginfo->failed = true;
+      return false;
     }
 
   return true;
