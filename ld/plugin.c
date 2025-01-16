@@ -1120,7 +1120,7 @@ plugin_load_plugins (void)
     }
 
   /* Allocate tv array and initialise constant part.  */
-  my_tv = xmalloc ((max_args + 1 + tv_header_size) * sizeof *my_tv);
+  my_tv = stat_alloc ((max_args + 1 + tv_header_size) * sizeof (*my_tv));
   set_tv_header (my_tv);
 
   /* Pass over plugins again, activating them.  */
