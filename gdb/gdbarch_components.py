@@ -837,10 +837,7 @@ register as defined by the ABI.
 """,
     type="ULONGEST",
     name="dwarf2_reg_piece_offset",
-    params=[
-        ("int", "regnum"),
-        ("ULONGEST", "size")
-    ],
+    params=[("int", "regnum"), ("ULONGEST", "size")],
     predefault="default_dwarf2_reg_piece_offset",
     invalid=False,
 )
