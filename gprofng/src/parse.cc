@@ -695,20 +695,6 @@ Experiment::process_seg_map_cmd (char */*cmd*/, hrtime_t ts, Vaddr vaddr,
   LoadObject *lo = loadObjMap->get (nm);
   if (lo == NULL)
     {
-      if (chk == 0)
-	{
-	  char *archName = checkFileInArchive (nm, false);
-	  if (archName)
-	    {
-	      Elf *elf = new Elf (archName);
-	      if (elf->status == Elf::ELF_ERR_NONE)
-		{
-		  chk = elf->elf_checksum ();
-		}
-	      free (archName);
-	      delete elf;
-	    }
-	}
       lo = dbeSession->find_lobj_by_name (nm, chk);
       if (lo == NULL)
 	{
