@@ -1,5 +1,6 @@
 #name: SVE2 instructions added to support SME
 #as: -march=armv8-a+sme
+#as: -march=armv8-a+sve2p1
 #objdump: -dr
 
 .*:     file format .*
