@@ -231,7 +231,6 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
   if (prop_sec && prop_sec->owner)
     remove_section (abfd, prop_sec);
   free (insn_contents);
-  free (internal_relocs);
 
   return false;
 }
