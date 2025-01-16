@@ -1,5 +1,7 @@
 #name: Test of SVE2.1 ld[1-4]q/st[1-4]q instructions.
 #as: -march=armv9.4-a
+#as: -march=armv8-a+sve2p1
+#as: -march=armv8-a+sme2p1
 #objdump: -dr
 
 [^:]+:     file format .*
@@ -8,15 +10,6 @@
 [^:]+:
 
 [^:]+:
-.*:	c400a000 	ld1q	{z0.q}, p0/z, \[z0.d, x0\]
-.*:	c400a01f 	ld1q	{z31.q}, p0/z, \[z0.d, x0\]
-.*:	c400bc00 	ld1q	{z0.q}, p7/z, \[z0.d, x0\]
-.*:	c400a3e0 	ld1q	{z0.q}, p0/z, \[z31.d, x0\]
-.*:	c41ea000 	ld1q	{z0.q}, p0/z, \[z0.d, x30\]
-.*:	c41fa000 	ld1q	{z0.q}, p0/z, \[z0.d\]
-.*:	c41fa000 	ld1q	{z0.q}, p0/z, \[z0.d\]
-.*:	c41ebfff 	ld1q	{z31.q}, p7/z, \[z31.d, x30\]
-.*:	c404acef 	ld1q	{z15.q}, p3/z, \[z7.d, x4\]
 .*:	a490e000 	ld2q	{z0.q-z1.q}, p0/z, \[x0\]
 .*:	a490e01f 	ld2q	{z31.q-z0.q}, p0/z, \[x0\]
 .*:	a490fc00 	ld2q	{z0.q-z1.q}, p7/z, \[x0\]
@@ -79,15 +72,6 @@
 .*:	a5a4886a 	ld4q	{z10.q-z13.q}, p2/z, \[x3, x4, lsl #4\]
 .*:	a5a4886a 	ld4q	{z10.q-z13.q}, p2/z, \[x3, x4, lsl #4\]
 .*:	a5a48bea 	ld4q	{z10.q-z13.q}, p2/z, \[sp, x4, lsl #4\]
-.*:	e4202000 	st1q	{z0.q}, p0, \[z0.d, x0\]
-.*:	e420201f 	st1q	{z31.q}, p0, \[z0.d, x0\]
-.*:	e4203c00 	st1q	{z0.q}, p7, \[z0.d, x0\]
-.*:	e42023e0 	st1q	{z0.q}, p0, \[z31.d, x0\]
-.*:	e43e2000 	st1q	{z0.q}, p0, \[z0.d, x30\]
-.*:	e43f2000 	st1q	{z0.q}, p0, \[z0.d\]
-.*:	e43f2000 	st1q	{z0.q}, p0, \[z0.d\]
-.*:	e43e3fff 	st1q	{z31.q}, p7, \[z31.d, x30\]
-.*:	e4242cef 	st1q	{z15.q}, p3, \[z7.d, x4\]
 .*:	e4400000 	st2q	{z0.q-z1.q}, p0, \[x0\]
 .*:	e440001f 	st2q	{z31.q-z0.q}, p0, \[x0\]
 .*:	e4401c00 	st2q	{z0.q-z1.q}, p7, \[x0\]

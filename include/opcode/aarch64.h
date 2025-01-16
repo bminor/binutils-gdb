@@ -264,6 +264,8 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_SME_F8F32,
   /* SME F8F16 instructions.  */
   AARCH64_FEATURE_SME_F8F16,
+  /* Armv9.5-A processors.  */
+  AARCH64_FEATURE_V9_5A,
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
@@ -275,8 +277,12 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_FP8DOT2_SVE,
   /* +sme-f16f16 or +sme-f8f16  */
   AARCH64_FEATURE_SME_F16F16_F8F16,
-  /* Armv9.5-A processors.  */
-  AARCH64_FEATURE_V9_5A,
+  /* +sve2p1 or +sme */
+  AARCH64_FEATURE_SVE2p1_SME,
+  /* +sve2p1 or +sme2 */
+  AARCH64_FEATURE_SVE2p1_SME2,
+  /* +sve2p1 or +sme2p1 */
+  AARCH64_FEATURE_SVE2p1_SME2p1,
   AARCH64_NUM_FEATURES
 };
 

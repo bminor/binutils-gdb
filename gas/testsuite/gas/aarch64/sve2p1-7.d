@@ -1,5 +1,7 @@
 #name: Test of SVE2.1 pmov instruction.
 #as: -march=armv9.4-a
+#as: -march=armv8-a+sve2p1
+#as: -march=armv8-a+sme2p1
 #objdump: -dr
 
 [^:]+:     file format .*
