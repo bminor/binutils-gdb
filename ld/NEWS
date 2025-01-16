@@ -5,6 +5,8 @@
 
 Changes in 2.44:
 
+* Add support for mixed LTO and non-LTO codes in relocatable output.
+
 * Add --image-base=<ADDR> option to the ELF linker to behave the same
   as -Ttext-segment for compatibility with LLD.
 
