@@ -193,7 +193,7 @@ proc test {step_over_mode non-stop target-non-stop schedlock cmd ns_stop_all} {
 		with_test_prefix "iter $i" {
 		    set ok 0
 		    set thread "<unknown>"
-		    gdb_test_multiple "continue" "" {
+		    gdb_test_multiple "continue" "" -no-prompt-anchor {
 			-re -wrap "Thread ($::decimal) .*hit Breakpoint $::decimal.* my_exit_syscall .*" {
 			    set thread $expect_out(1,string)
 			    set ok 1
@@ -206,7 +206,8 @@ proc test {step_over_mode non-stop target-non-stop schedlock cmd ns_stop_all} {
 		    }
 
 		    if {${non-stop}} {
-			gdb_test -nopass "thread $thread" "Switching to thread .*" \
+			gdb_test -nopass -no-prompt-anchor "thread $thread" \
+			    "Switching to thread .*" \
 			    "switch to event thread"
 		    }
 		}
