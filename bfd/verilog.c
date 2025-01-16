@@ -384,11 +384,9 @@ const bfd_target verilog_vec =
   bfd_target_verilog_flavour,
   BFD_ENDIAN_UNKNOWN,		/* Target byte order.  */
   BFD_ENDIAN_UNKNOWN,		/* Target headers byte order.  */
-  (HAS_RELOC | EXEC_P |		/* Object flags.  */
-   HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+  EXEC_P,			/* Object flags.  */
   (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
-   | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* Section flags.  */
+   | SEC_ALLOC | SEC_LOAD),	/* Section flags.  */
   0,				/* Leading underscore.  */
   ' ',				/* AR_pad_char.  */
   16,				/* AR_max_namelen.  */

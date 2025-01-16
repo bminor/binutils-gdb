@@ -1989,6 +1989,9 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
 static bool
 generic_add_output_symbol (bfd *output_bfd, size_t *psymalloc, asymbol *sym)
 {
+  if (!(bfd_applicable_file_flags (output_bfd) & HAS_SYMS))
+    return true;
+
   if (bfd_get_symcount (output_bfd) >= *psymalloc)
     {
       asymbol **newsyms;

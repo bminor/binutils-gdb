@@ -321,8 +321,8 @@ const bfd_target binary_vec =
   BFD_ENDIAN_UNKNOWN,		/* byteorder */
   BFD_ENDIAN_UNKNOWN,		/* header_byteorder */
   EXEC_P,			/* object_flags */
-  (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE | SEC_DATA
-   | SEC_ROM | SEC_HAS_CONTENTS), /* section_flags */
+  (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
+   | SEC_ALLOC | SEC_LOAD),	/* section_flags */
   0,				/* symbol_leading_char */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */

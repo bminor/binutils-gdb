@@ -873,7 +873,7 @@ tekhex_write_object_contents (bfd *abfd)
 		case 'C':
 		case 'U':
 		  bfd_set_error (bfd_error_wrong_format);
-		  return false;
+		  goto fail;
 		}
 
 	      writesym (&dst, sym->name);
@@ -885,8 +885,15 @@ tekhex_write_object_contents (bfd *abfd)
 
   /* And the terminator.  */
   if (bfd_write ("%0781010\n", 9, abfd) != 9)
-    abort ();
+    goto fail;
+  free (abfd->outsymbols);
+  abfd->outsymbols = NULL;
   return true;
+
+ fail:
+  free (abfd->outsymbols);
+  abfd->outsymbols = NULL;
+  return false;
 }
 
 static int
@@ -986,11 +993,9 @@ const bfd_target tekhex_vec =
   bfd_target_tekhex_flavour,
   BFD_ENDIAN_UNKNOWN,		/* Target byte order.  */
   BFD_ENDIAN_UNKNOWN,		/* Target headers byte order.  */
-  (EXEC_P |			/* Object flags.  */
-   HAS_SYMS | HAS_LINENO | HAS_DEBUG |
-   HAS_RELOC | HAS_LOCALS | WP_TEXT | D_PAGED),
+  EXEC_P | HAS_SYMS,		/* Object flags.  */
   (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
-   | SEC_ALLOC | SEC_LOAD | SEC_RELOC),	/* Section flags.  */
+   | SEC_ALLOC | SEC_LOAD),	/* Section flags.  */
   0,				/* Leading underscore.  */
   ' ',				/* AR_pad_char.  */
   16,				/* AR_max_namelen.  */
