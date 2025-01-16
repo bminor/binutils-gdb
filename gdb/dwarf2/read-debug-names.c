@@ -27,6 +27,7 @@
 #include "mapped-index.h"
 #include "read.h"
 #include "stringify.h"
+#include "extract-store-integer.h"
 
 /* This is just like cooked_index_functions, but overrides a single
    method so the test suite can distinguish the .debug_names case from

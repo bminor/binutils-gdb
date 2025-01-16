@@ -19,6 +19,7 @@
 
 #include "dwarf2/aranges.h"
 #include "dwarf2/read.h"
+#include "extract-store-integer.h"
 
 /* See aranges.h.  */
 

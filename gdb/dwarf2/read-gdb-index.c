@@ -28,6 +28,7 @@
 #include "gdbsupport/gdb-checked-static-cast.h"
 #include "mapped-index.h"
 #include "read.h"
+#include "extract-store-integer.h"
 
 /* When true, do not reject deprecated .gdb_index sections.  */
 static bool use_deprecated_index_sections = false;

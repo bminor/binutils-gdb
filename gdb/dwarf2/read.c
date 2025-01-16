@@ -97,6 +97,7 @@
 #include "dwarf2/error.h"
 #include <variant>
 #include "gdbsupport/unordered_set.h"
+#include "extract-store-integer.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.

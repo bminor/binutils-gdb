@@ -44,6 +44,7 @@
 #include "gmp-utils.h"
 #include "rust-lang.h"
 #include "ada-lang.h"
+#include "extract-store-integer.h"
 
 /* The value of an invalid conversion badness.  */
 #define INVALID_CONVERSION 100

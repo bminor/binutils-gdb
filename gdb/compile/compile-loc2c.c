@@ -31,6 +31,7 @@
 #include "dwarf2/frame.h"
 #include "value.h"
 #include "gdbarch.h"
+#include "extract-store-integer.h"
 
 
 
