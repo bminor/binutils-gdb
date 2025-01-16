@@ -887,44 +887,39 @@ print_symbol_name (signed int width, const char * symbol)
 }
 
 /* Returns a pointer to a static buffer containing a printable version of
-   the given section's name.  Like print_symbol, except that it does not try
-   to print multibyte characters, it just interprets them as hex values.  */
+   STRING.  Uses a rotating array of static buffers, so that multiple
+   successive calls will still work.  eg when used in a call to printf().
+
+   If supplied MAX_LEN is the maximum number of characters to be read
+   starting from STRING.
+
+   This function is similar to print_symbol_name(), except that it does
+   not try to print multibyte characters, it just shows them as hex values.
+
+   If the string is too long for the static buffer or if it is not
+   terminated then a truncated version of the string will be returned.  */
 
 static const char *
-printable_section_name (Filedata * filedata, const Elf_Internal_Shdr * sec)
+printable_string (const char * string, unsigned int max_len)
 {
-#define NUM_SEC_NAME_BUFS       5
-#define MAX_PRINT_SEC_NAME_LEN  256
+#define NUM_STRING_BUFS   5
+#define MAX_STRING_LEN  256
   
-  static int   sec_name_buf_index = 0;
-  /* We use a rotating array of static buffers, so that multiple successive calls
-     to printable_section_name() will still work.  eg when used in a printf.  */
-  static char  sec_name_buf [NUM_SEC_NAME_BUFS][MAX_PRINT_SEC_NAME_LEN + 1];
-  
-  const char * name;
+  static int   string_buf_index = 0;
+  static char  string_buf [NUM_STRING_BUFS][MAX_STRING_LEN + 1];
+
   char *       buf;
   char *       buf_start;
-  char         c;
-  unsigned int remaining = MAX_PRINT_SEC_NAME_LEN;
-
-  /* Validate the input parameters.  */
-  if (filedata == NULL)
-    return _("<internal error>");
-  if (sec == NULL)
-    return _("<none>");
-  if (filedata->string_table == NULL)
-    return _("<no-strings>");
-  if (sec->sh_name >= filedata->string_table_length)
-    return _("<corrupt>");
 
   /* Select a buffer to use.  */
-  buf_start = buf = sec_name_buf[sec_name_buf_index];
-  if (++sec_name_buf_index >= NUM_SEC_NAME_BUFS)
-    sec_name_buf_index = 0;
+  buf_start = buf = string_buf[string_buf_index];
+  if (++ string_buf_index >= NUM_STRING_BUFS)
+    string_buf_index = 0;
 
-  name = section_name (filedata, sec);
-
-  while ((c = * name ++) != 0)
+  char         c;
+  unsigned int remaining = MAX_STRING_LEN;
+  
+  while ((c = * string ++) != 0)
     {
       if (ISCNTRL (c))
 	{
@@ -955,10 +950,37 @@ printable_section_name (Filedata * filedata, const Elf_Internal_Shdr * sec)
 
       if (remaining == 0)
 	break;
+
+      if (max_len > 0)
+	{
+	  max_len -= 1;
+	  if (max_len == 0)
+	    break;
+	}
     }
 
   * buf = 0;
-  return buf_start;
+  return buf_start;  
+}
+
+/* Returns a pointer to a static buffer containing a
+   printable version of the given section's name.  */
+
+static const char *
+printable_section_name (Filedata * filedata, const Elf_Internal_Shdr * sec)
+{
+  /* Validate the input parameters.  */
+  if (filedata == NULL)
+    return _("<internal error>");
+  if (sec == NULL)
+    return _("<none>");
+  if (filedata->string_table == NULL)
+    return _("<no-strings>");
+  if (sec->sh_name >= filedata->string_table_length)
+    return _("<corrupt>");
+
+  return printable_string (section_name (filedata, sec),
+			   filedata->string_table_length - sec->sh_name);
 }
 
 /* Return TRUE if the current file is for IA-64 machine and OpenVMS ABI.
@@ -6804,7 +6826,8 @@ process_file_header (Filedata * filedata)
       unsigned i;
 
       if (filedata->is_separate)
-	printf (_("ELF Header in linked file '%s':\n"), filedata->file_name);
+	printf (_("ELF Header in linked file '%s':\n"),
+		printable_string (filedata->file_name, 0));
       else
 	printf (_("ELF Header:\n"));
       printf (_("  Magic:   "));
@@ -7059,7 +7082,7 @@ process_program_headers (Filedata * filedata)
 	{
 	  if (filedata->is_separate)
 	    printf (_("\nThere are no program headers in linked file '%s'.\n"),
-		    filedata->file_name);
+		    printable_string (filedata->file_name, 0));
 	  else
 	    printf (_("\nThere are no program headers in this file.\n"));
 	}
@@ -7070,7 +7093,8 @@ process_program_headers (Filedata * filedata)
     {
       if (filedata->is_separate)
 	printf ("\nIn linked file '%s' the ELF file type is %s\n",
-		filedata->file_name, get_file_type (filedata));
+		printable_string (filedata->file_name, 0),
+		get_file_type (filedata));
       else
 	printf (_("\nElf file type is %s\n"), get_file_type (filedata));
       printf (_("Entry point 0x%" PRIx64 "\n"),
@@ -7311,7 +7335,7 @@ the .dynamic section is not the same as the dynamic segment\n"));
 
 	      if (do_segments)
 		printf (_("      [Requesting program interpreter: %s]\n"),
-		    filedata->program_interpreter);
+			printable_string (filedata->program_interpreter, 0));
 	    }
 	  break;
 	}
@@ -8157,7 +8181,8 @@ process_section_headers (Filedata * filedata)
   if (do_sections && !do_header)
     {
       if (filedata->is_separate && process_links)
-	printf (_("In linked file '%s': "), filedata->file_name);
+	printf (_("In linked file '%s': "),
+		printable_string (filedata->file_name, 0));
       if (! filedata->is_separate || process_links)
 	printf (ngettext ("There is %d section header, "
 			  "starting at offset %#" PRIx64 ":\n",
@@ -8424,7 +8449,8 @@ process_section_headers (Filedata * filedata)
     return true;
 
   if (filedata->is_separate)
-    printf (_("\nSection Headers in linked file '%s':\n"), filedata->file_name);
+    printf (_("\nSection Headers in linked file '%s':\n"),
+	    printable_string (filedata->file_name, 0));
   else if (filedata->file_header.e_shnum > 1)
     printf (_("\nSection Headers:\n"));
   else
@@ -8920,7 +8946,7 @@ process_section_groups (Filedata * filedata)
 	{
 	  if (filedata->is_separate)
 	    printf (_("\nThere are no sections group in linked file '%s'.\n"),
-		    filedata->file_name);
+		    printable_string (filedata->file_name, 0));
 	  else
 	    printf (_("\nThere are no section groups in this file.\n"));
 	}
@@ -8959,7 +8985,7 @@ process_section_groups (Filedata * filedata)
 	{
 	  if (filedata->is_separate)
 	    printf (_("\nThere are no section groups in linked file '%s'.\n"),
-		    filedata->file_name);
+		    printable_string (filedata->file_name, 0));
 	  else
 	    printf (_("\nThere are no section groups in this file.\n"));
 	}
@@ -8984,7 +9010,8 @@ process_section_groups (Filedata * filedata)
   strtab_size = 0;
 
   if (filedata->is_separate)
-    printf (_("Section groups in linked file '%s'\n"), filedata->file_name);
+    printf (_("Section groups in linked file '%s'\n"),
+	    printable_string (filedata->file_name, 0));
 
   for (i = 0, section = filedata->section_headers, group = filedata->section_groups;
        i < filedata->file_header.e_shnum;
@@ -9412,7 +9439,7 @@ display_relocations (Elf_Internal_Shdr *  section,
 
   if (filedata->is_separate)
     printf (_("\nIn linked file '%s' relocation section "),
-	    filedata->file_name);
+	    printable_string (filedata->file_name, 0));
   else
     printf (_("\nRelocation section "));
 
@@ -12342,7 +12369,7 @@ process_dynamic_section (Filedata * filedata)
 	{
 	  if (filedata->is_separate)
 	    printf (_("\nThere is no dynamic section in linked file '%s'.\n"),
-		    filedata->file_name);
+		    printable_string (filedata->file_name, 0));
 	  else
 	    printf (_("\nThere is no dynamic section in this file.\n"));
 	}
