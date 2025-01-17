@@ -7011,7 +7011,16 @@ Note - some sections, eg @code{.text} and @code{.data} are considered to be
 special and have fixed types.  Any attempt to declare them with a different
 type will generate an error from the assembler.
 
-If @var{flags} contains the @code{M} and/or @code{S} symbol then the @var{type}
+If @var{flags} contains the @code{S} flag then the section contains
+zero-terminated strings.  The size of each character in the string is specified
+in octets by the entity size, @var{entsize}, which defaults to @code{1}, but
+can be set using the syntax
+
+@smallexample
+.section @var{name}, "@var{flags}"S[, @@@var{type}] [, @var{entsize}]
+@end smallexample
+
+If @var{flags} contains the @code{M} flag then the @var{type}
 argument must be specified as well as an extra argument---@var{entsize}---like
 this:
 
@@ -7019,15 +7028,14 @@ this:
 .section @var{name} , "@var{flags}"M, @@@var{type}, @var{entsize}
 @end smallexample
 
-Sections with the @code{M} flag but not @code{S} flag must contain fixed size
-constants, each @var{entsize} octets long. Sections with @code{S} must contain
-zero terminated strings where each character is @var{entsize} bytes long. For
-@code{M} sections the linker may remove duplicates within sections with
-the same name, same entity size and same flags.  @var{entsize} must be an
-absolute expression.  For sections with both @code{M} and @code{S}, a string
-which is a suffix of a larger string is considered a duplicate.  Thus
-@code{"def"} will be merged with @code{"abcdef"};  A reference to the first
-@code{"def"} will be changed to a reference to @code{"abcdef"+3}.
+Sections with the @code{M} flag but not the @code{S} flag must contain fixed
+size constants, each @var{entsize} octets long.  For @code{M} sections the
+linker may remove duplicates within sections with the same name, same entity
+size and same flags.  @var{entsize} must be an absolute expression.  For
+sections with both @code{M} and @code{S}, a string which is a suffix of a
+larger string is considered a duplicate.  Thus @code{"def"} will be merged with
+@code{"abcdef"}; A reference to the first @code{"def"} will be changed to a
+reference to @code{"abcdef"+3}.
 
 If @var{flags} contains the @code{o} flag, then the @var{type} argument
 must be present along with an additional field like this:

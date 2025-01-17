@@ -1340,10 +1340,20 @@ obj_elf_section (int push)
 	    fetch_entsize:
 	      entsize = now_seg->entsize;
 	    }
-	  else if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0)
+	  else if ((attr & SHF_MERGE) != 0)
 	    {
-	      as_warn (_("entity size for SHF_MERGE / SHF_STRINGS not specified"));
+	      /* ??? Perhaps we should error here.  The manual says that
+		 entsize must be specified if SHF_MERGE is set.  */
+	      as_warn (_("entity size for SHF_MERGE not specified"));
 	      attr &= ~(SHF_MERGE | SHF_STRINGS);
+	    }
+	  else if ((attr & SHF_STRINGS) != 0)
+	    {
+	      /* Ideally we would warn about this, but older versions
+		 of gas did not permit an entity size to be specified,
+		 so we have to default this silently for
+		 compatibility.  */
+	      entsize = 1;
 	    }
 
 	  if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0 && type == SHT_NOBITS)
