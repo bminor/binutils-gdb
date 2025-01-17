@@ -2187,7 +2187,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   xsnprintf (filename, sizeof (filename), "/proc/%d/cmdline", (int) pid);
   /* The full name of the program which generated the corefile.  */
   gdb_byte *buf = NULL;
-  size_t buf_len = target_fileio_read_alloc (NULL, filename, &buf);
+  ssize_t buf_len = target_fileio_read_alloc (NULL, filename, &buf);
   gdb::unique_xmalloc_ptr<char> fname ((char *)buf);
 
   if (buf_len < 1 || fname.get ()[0] == '\0')
