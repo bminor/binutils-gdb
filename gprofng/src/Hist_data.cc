@@ -1391,7 +1391,8 @@ DbeInstr::mapPCtoLine (SourceFile *sf)
   if (inlinedInd >= 0)
     {
       DbeLine *dl = func->inlinedSubr[inlinedInd].dbeLine;
-      return dl->sourceFile->find_dbeline (func, dl->lineno);
+      if (dl)
+	return dl->sourceFile->find_dbeline (func, dl->lineno);
     }
   return func->mapPCtoLine (addr, sf);
 }
@@ -1422,7 +1423,9 @@ DbeInstr::add_inlined_info (StringBuilder *sb)
 	      sb->append (' ');
 	    }
 	  DbeLine *dl = p->dbeLine;
-	  sb->appendf (NTXT ("%s:%lld <-- "), get_basename (dl->sourceFile->get_name ()), (long long) dl->lineno);
+	  if (dl)
+	    sb->appendf ("%s:%lld <-- ", get_basename (dl->sourceFile->get_name ()),
+		     (long long) dl->lineno);
 	}
       last = p;
     }
