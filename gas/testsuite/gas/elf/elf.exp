@@ -292,6 +292,7 @@ if { [is_elf_format] } then {
     run_dump_test "section29"
     run_dump_test "section30" $dump_opts
     run_dump_test "sh-link-zero"
+    run_dump_test "string"
     run_dump_test "size"
     run_dump_test "dwarf2-1" $dump_opts
     run_dump_test "dwarf2-2" $dump_opts
