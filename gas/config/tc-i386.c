@@ -13902,8 +13902,8 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	{
 	  if (!i.tm.opcode_modifier.evex)
 	    {
-	      /* Do _not_ consider AVX512VL here.  */
-	      if (i.rounding.type != rc_none || combined.bitfield.zmmword)
+	      /* Do _not_ consider AVX512VL / AVX10.2 here.  */
+	      if (combined.bitfield.zmmword)
 	        i.tm.opcode_modifier.evex = EVEX512;
 	      else if (combined.bitfield.ymmword)
 	        i.tm.opcode_modifier.evex = EVEX256;
