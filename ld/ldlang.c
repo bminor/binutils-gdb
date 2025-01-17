@@ -10778,8 +10778,7 @@ cmdline_add_object_only_section (bfd_byte *contents, size_t size)
 
   /* Must be freed after bfd_close ().  */
   free (isympp);
-  if (osympp)
-    free (osympp);
+  free (osympp);
 
   if (rename (ofilename, output_filename))
     {
@@ -10791,14 +10790,15 @@ cmdline_add_object_only_section (bfd_byte *contents, size_t size)
   return;
 
 loser:
-  if (isympp)
-    free (isympp);
-  if (osympp)
-    free (osympp);
+  free (isympp);
+  free (osympp);
   if (obfd)
     bfd_close (obfd);
   if (ofilename)
-    unlink (ofilename);
+    {
+      unlink (ofilename);
+      free (ofilename);
+    }
   einfo (_("%P%F: failed to add object-only section: %s\n"), err);
 }
 
