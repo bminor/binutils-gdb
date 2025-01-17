@@ -10728,7 +10728,7 @@ cmdline_add_object_only_section (bfd_byte *contents, size_t size)
       long src_count = 0, dst_count = 0;
       asymbol **from, **to;
 
-      osympp = (asymbol **) xmalloc (symcount * sizeof (asymbol *));
+      osympp = xmalloc ((symcount + 1) * sizeof (asymbol *));
       from = isympp;
       to = osympp;
       for (; src_count < symcount; src_count++)
