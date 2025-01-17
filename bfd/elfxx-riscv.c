@@ -1220,6 +1220,9 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zcmop", "+zca", check_implicit_always},
   {"zcmt", "+zca,+zicsr",	check_implicit_always},
 
+  {"zicfilp", "+zicsr", check_implicit_always},
+  {"zicfiss", "+zimop,+zicsr", check_implicit_always},
+
   {"shcounterenw", "+h", check_implicit_always},
   {"shgatpa", "+h", check_implicit_always},
   {"shtvala", "+h", check_implicit_always},
@@ -1355,6 +1358,8 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zihpm",		ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
   {"zimop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicfiss",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicfilp",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"za64rs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"za128rs",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2581,6 +2586,13 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zihintpause");
     case INSN_CLASS_ZIMOP:
       return riscv_subset_supports (rps, "zimop");
+    case INSN_CLASS_ZICFISS:
+      return riscv_subset_supports (rps, "zicfiss");
+    case INSN_CLASS_ZICFISS_AND_ZCMOP:
+      return riscv_subset_supports (rps, "zicfiss")
+	     && riscv_subset_supports (rps, "zcmop");
+    case INSN_CLASS_ZICFILP:
+      return riscv_subset_supports (rps, "zicfilp");
     case INSN_CLASS_M:
       return riscv_subset_supports (rps, "m");
     case INSN_CLASS_ZMMUL:
@@ -2830,6 +2842,19 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zicsr";
     case INSN_CLASS_ZIFENCEI:
       return "zifencei";
+    case INSN_CLASS_ZICFISS:
+      return "zicfiss";
+    case INSN_CLASS_ZICFISS_AND_ZCMOP:
+      if (!riscv_subset_supports (rps, "zicfiss"))
+	{
+	  if (!riscv_subset_supports (rps, "zcmop"))
+	    return _("zicfiss' and `zcmop");
+	  else
+	    return "zicfiss";
+	}
+      return "zcmop";
+    case INSN_CLASS_ZICFILP:
+      return "zicfilp";
     case INSN_CLASS_ZIHINTNTL:
       return "zihintntl";
     case INSN_CLASS_ZIHINTNTL_AND_C:

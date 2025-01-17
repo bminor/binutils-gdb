@@ -408,6 +408,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4447 \(sctrdepth\) at cfa\+1404
   DW_CFA_offset_extended_sf: r4686 \(vsctrctl\) at cfa\+2360
   DW_CFA_offset_extended_sf: r4942 \(mctrctl\) at cfa\+3384
+  DW_CFA_offset_extended_sf: r4113 \(ssp\) at cfa\+324
   DW_CFA_offset_extended: r4096 \(ustatus\) at cfa\+0
   DW_CFA_offset_extended_sf: r4100 \(uie\) at cfa\+16
   DW_CFA_offset_extended_sf: r4101 \(utvec\) at cfa\+20

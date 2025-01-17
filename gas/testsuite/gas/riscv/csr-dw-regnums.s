@@ -411,6 +411,8 @@ _start:
 	.cfi_offset sctrdepth, 1404
 	.cfi_offset vsctrctl, 2360
 	.cfi_offset mctrctl, 3384
+	# Zicfiss extension
+	.cfi_offset ssp, 324
 	# dropped
 	.cfi_offset ustatus, 0
 	.cfi_offset uie, 16

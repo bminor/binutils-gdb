@@ -735,6 +735,8 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+21459073[ 	]+csrw[ 	]+vsieh,a1
 [ 	]+[0-9a-f]+:[ 	]+25402573[ 	]+csrr[ 	]+a0,vsiph
 [ 	]+[0-9a-f]+:[ 	]+25459073[ 	]+csrw[ 	]+vsiph,a1
+[ 	]+[0-9a-f]+:[ 	]+01102573[ 	]+csrr[ 	]+a0,ssp
+[ 	]+[0-9a-f]+:[ 	]+01159073[ 	]+csrw[ 	]+ssp,a1
 [ 	]+[0-9a-f]+:[ 	]+15002573[ 	]+csrr[ 	]+a0,siselect
 [ 	]+[0-9a-f]+:[ 	]+15059073[ 	]+csrw[ 	]+siselect,a1
 [ 	]+[0-9a-f]+:[ 	]+15102573[ 	]+csrr[ 	]+a0,sireg

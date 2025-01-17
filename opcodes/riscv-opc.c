@@ -391,6 +391,30 @@ match_cm_jalt (const struct riscv_opcode *op, insn_t insn)
    Because of the lookup algorithm used, entries with the same opcode
    name must be contiguous.  */
 
+static int
+match_rs1_x1x5_opcode (const struct riscv_opcode *op,
+		       insn_t insn)
+{
+  int rs1 = (insn & MASK_RS1) >> OP_SH_RS1;
+  return match_opcode (op, insn) && (rs1 == 1 || rs1 == 5);
+}
+
+static int
+match_rs2_x1x5_opcode (const struct riscv_opcode *op,
+		       insn_t insn)
+{
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return match_opcode (op, insn) && (rs2 == 1 || rs2 == 5);
+}
+
+static int
+match_rd_x1x5_opcode (const struct riscv_opcode *op,
+		      insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  return match_opcode (op, insn) && (rd == 1 || rd == 5);
+}
+
 const struct riscv_opcode riscv_opcodes[] =
 {
 /* name, xlen, isa, operands, match, mask, match_func, pinfo.  */
@@ -546,6 +570,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"or",          0, INSN_CLASS_C, "Cs,Cw,Ct",  MATCH_C_OR, MASK_C_OR, match_opcode, INSN_ALIAS },
 {"or",          0, INSN_CLASS_C, "Cs,Ct,Cw",  MATCH_C_OR, MASK_C_OR, match_opcode, INSN_ALIAS },
 {"or",          0, INSN_CLASS_I, "d,s,t",     MATCH_OR, MASK_OR, match_opcode, 0 },
+
+/* Zicfilp instructions.  */
+{"lpad",        0, INSN_CLASS_ZICFILP, "u",   MATCH_LPAD, MASK_LPAD, match_opcode, 0 },
+
 {"auipc",       0, INSN_CLASS_I, "d,u",       MATCH_AUIPC, MASK_AUIPC, match_opcode, 0 },
 {"seqz",        0, INSN_CLASS_I, "d,s",       MATCH_SLTIU|ENCODE_ITYPE_IMM (1), MASK_SLTIU | MASK_IMM, match_opcode, INSN_ALIAS },
 {"snez",        0, INSN_CLASS_I, "d,t",       MATCH_SLTU, MASK_SLTU|MASK_RS1, match_opcode, INSN_ALIAS },
@@ -1149,6 +1177,23 @@ const struct riscv_opcode riscv_opcodes[] =
 /* Zicond instructions.  */
 {"czero.eqz",  0, INSN_CLASS_ZICOND, "d,s,t", MATCH_CZERO_EQZ, MASK_CZERO_EQZ, match_opcode, 0 },
 {"czero.nez",  0, INSN_CLASS_ZICOND, "d,s,t", MATCH_CZERO_NEZ, MASK_CZERO_NEZ, match_opcode, 0 },
+
+/* Zicfiss instructions.  */
+{"sspush",            0, INSN_CLASS_ZICFISS_AND_ZCMOP, "d", MATCH_C_SSPUSH, MASK_C_SSPUSH, match_rd_x1x5_opcode, INSN_ALIAS },
+{"sspush",            0, INSN_CLASS_ZICFISS,           "t", MATCH_SSPUSH, MASK_SSPUSH, match_rs2_x1x5_opcode, 0 },
+{"sspopchk",          0, INSN_CLASS_ZICFISS_AND_ZCMOP, "d", MATCH_C_SSPOPCHK, MASK_C_SSPOPCHK, match_rd_x1x5_opcode, INSN_ALIAS },
+{"sspopchk",          0, INSN_CLASS_ZICFISS,           "s", MATCH_SSPOPCHK, MASK_SSPOPCHK, match_rs1_x1x5_opcode, 0 },
+{"c.sspush",          0, INSN_CLASS_ZICFISS_AND_ZCMOP, "d", MATCH_C_SSPUSH, MASK_C_SSPUSH, match_rd_x1x5_opcode, 0 },
+{"c.sspopchk",        0, INSN_CLASS_ZICFISS_AND_ZCMOP, "d", MATCH_C_SSPOPCHK, MASK_C_SSPOPCHK, match_rd_x1x5_opcode, 0 },
+{"ssrdp",             0, INSN_CLASS_ZICFISS,           "d", MATCH_SSRDP, MASK_SSRDP, match_opcode, 0 },
+{"ssamoswap.w",      32, INSN_CLASS_ZICFISS,    "d,t,0(s)", MATCH_SSAMOSWAP_W, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"ssamoswap.w.aq",   32, INSN_CLASS_ZICFISS,    "d,t,0(s)", MATCH_SSAMOSWAP_W|MASK_AQ, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"ssamoswap.w.rl",   32, INSN_CLASS_ZICFISS,    "d,t,0(s)", MATCH_SSAMOSWAP_W|MASK_RL, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"ssamoswap.w.aqrl", 32, INSN_CLASS_ZICFISS,    "d,t,0(s)", MATCH_SSAMOSWAP_W|MASK_AQRL, MASK_SSAMOSWAP_W|MASK_AQRL, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"ssamoswap.d",      64, INSN_CLASS_ZICFISS,    "d,t,0(s)", MATCH_SSAMOSWAP_D, MASK_SSAMOSWAP_D|MASK_AQRL, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"ssamoswap.d.aq",   64, INSN_CLASS_ZICFISS,    "d,t,0(s)", MATCH_SSAMOSWAP_D|MASK_AQ, MASK_SSAMOSWAP_D|MASK_AQRL, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"ssamoswap.d.rl",   64, INSN_CLASS_ZICFISS,    "d,t,0(s)", MATCH_SSAMOSWAP_D|MASK_RL, MASK_SSAMOSWAP_D|MASK_AQRL, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"ssamoswap.d.aqrl", 64, INSN_CLASS_ZICFISS,    "d,t,0(s)", MATCH_SSAMOSWAP_D|MASK_AQRL, MASK_SSAMOSWAP_D|MASK_AQRL, match_opcode, INSN_DREF|INSN_8_BYTE },
 
 /* Zimop instructions.  */
 {"mop.r.0",    0, INSN_CLASS_ZIMOP, "d,s",    MATCH_MOP_R_0,  MASK_MOP_R_0,  match_opcode, 0 },

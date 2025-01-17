@@ -416,6 +416,9 @@
 	csr vsieh
 	csr vsiph
 
+	# Zicfiss
+	csr ssp
+
 	# Sscsrind
 	csr siselect
 	csr sireg
