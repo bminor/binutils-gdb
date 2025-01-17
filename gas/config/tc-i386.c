@@ -2262,14 +2262,6 @@ cpu_flags_match (const insn_template *t)
 	     the "if()" below.  */
 	  gas_assert (!cpu_flags_all_zero (&all));
 
-	  /* For APX_F extension of multiple cpuid enabled insns, we could not
-	     use APX_F(cpuid_A&cpuid_B) since the transformation could not be
-	     done. Instead, we will use cpuid_A & APX_F(cpuid_B), then the
-	     "any" bitfield would not be set for cpuid_A. Set cpuid_A for "any"
-	     here since it is its original meaning.  */
-	  if (all.bitfield.cpuamx_transpose && any.bitfield.cpuamx_movrs)
-	    any.bitfield.cpuamx_transpose = 1;
-
 	  cpu = cpu_flags_and (all, any);
 	  gas_assert (cpu_flags_equal (&cpu, &all));
 
