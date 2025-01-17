@@ -145,7 +145,9 @@ struct mapped_gdb_index : public dwarf_scanner_base
     return symbol_table[2 * idx + 1];
   }
 
-  bool symbol_name_slot_invalid (offset_type idx) const
+  /* Return whether the name at IDX in the symbol table should be
+     ignored.  */
+  virtual bool symbol_name_slot_invalid (offset_type idx) const
   {
     return (symbol_name_index (idx) == 0
 	    && symbol_vec_index (idx) == 0);
@@ -552,6 +554,9 @@ public:
   {}
 
   DISABLE_COPY_AND_ASSIGN (mock_mapped_index);
+
+  bool symbol_name_slot_invalid (offset_type idx) const override
+  { return false; }
 
   /* Return the number of names in the symbol table.  */
   size_t symbol_name_count () const override
