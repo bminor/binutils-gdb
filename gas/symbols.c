@@ -1596,7 +1596,7 @@ resolve_symbol_value (symbolS *symp)
 	    final_seg = absolute_section;
 
 	  if (op == O_uminus)
-	    left = -left;
+	    left = -(valueT) left;
 	  else if (op == O_logical_not)
 	    left = !left;
 	  else
@@ -1730,7 +1730,7 @@ resolve_symbol_value (symbolS *symp)
 		break;
 	      if (right == -1)
 		{
-		  left = -left;
+		  left = -(valueT) left;
 		  break;
 		}
 	      left /= right;
