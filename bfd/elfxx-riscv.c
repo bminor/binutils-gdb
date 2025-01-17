@@ -1218,7 +1218,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zcf", "+f,+zca", check_implicit_always},
   {"zcmp", "+zca", check_implicit_always},
   {"zcmop", "+zca", check_implicit_always},
-  {"zcmt", "+zca,+zicsr",	check_implicit_always},
+  {"zcmt", "+zca,+zicsr", check_implicit_always},
 
   {"zicfilp", "+zicsr", check_implicit_always},
   {"zicfiss", "+zimop,+zicsr", check_implicit_always},
