@@ -1496,7 +1496,7 @@ mmix_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  /* Shift this reloc to the end of the relocs to maintain
 		     the r_offset sorted reloc order.  */
 		  relcpy = *rel;
-		  memmove (rel, rel + 1, (char *) relend - (char *) rel);
+		  memmove (rel, rel + 1, (char *) relend - (char *) (rel + 1));
 		  relend[-1] = relcpy;
 
 		  /* Back up one reloc, or else we'd skip the next reloc
