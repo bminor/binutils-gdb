@@ -23,9 +23,14 @@
 
 * On x86 emulation support (for secondary targets) was dropped.
 
-* Add support for RISC-V Zcmp (cm.mva01s, cm.mvsa01), Smrnmi, S[sm]dbltrp,
-  CORE-V (xcvbitmanip, xcvsimd) extensions with version 1.0 and more SiFive
-  extensions (xsfvqmaccdod, xsfvqmaccqoq and xsfvfnrclipxfqf).
+* Add support for RISC-V standard extensions,
+  Zicfiss v1.0, Zicfilp v1.0, Zcmp v1.0 (cm.mva01s and cm.mvsa01 instructions),
+  Zcmt v1.0, Smrnmi v1.0, S[sm]dbltrp v1.0 and S[sm]ctr v1.0 (replaced the
+  dropped sfence.vm encoding since privileged spec v1.10).
+
+* Add support for RISC-V vendor extensions,
+  CORE-V, xcvbitmanip v1.0 and xcvsimd v1.0.
+  SiFive, xsfvqmaccdod v1.0, xsfvqmaccqoqv1.0 and xsfvfnrclipxfqf v1.0.
 
 Changes in 2.43:
 
