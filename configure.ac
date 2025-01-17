@@ -2594,7 +2594,7 @@ case " $configdirs " in
   *" lto-plugin "* | *" libcc1 "* | *" gdbserver "*)
     # When these are to be built as shared libraries, the same applies to
     # libiberty.
-    extra_host_libiberty_configure_flags=--enable-shared
+    extra_host_libiberty_configure_flags=--enable-static --disable-shared
     ;;
 esac
 AC_SUBST(extra_host_libiberty_configure_flags)
