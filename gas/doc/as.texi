@@ -6884,7 +6884,7 @@ This is one of the ELF section stack manipulation directives.  The others are
 For ELF targets, the @code{.section} directive is used like this:
 
 @smallexample
-.section @var{name} [, "@var{flags}"[, @@@var{type}[,@var{flag_specific_arguments}]]]
+.section @var{name} [, "@var{flags}"[, @@@var{type}][,@var{flag_specific_arguments}]]
 @end smallexample
 
 @anchor{Section Name Substitutions}
