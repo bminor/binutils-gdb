@@ -1746,7 +1746,7 @@ get_hash_table_data (bfd *abfd, bfd_size_type number,
   i_data = (bfd_vma *) bfd_malloc (number * sizeof (*i_data));
   if (i_data == NULL)
     {
-      free (e_data);
+      _bfd_munmap_temporary (e_data_addr, e_data_size);
       return NULL;
     }
 
@@ -1941,7 +1941,7 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
 	  break;
 	}
 
-      filepos = offset_from_vma (phdrs, phnum, dt_hash, sizeof (nb),
+      filepos = offset_from_vma (phdrs, phnum, dt_hash, 2 * hash_ent_size,
 				 NULL);
       if (filepos == (file_ptr) -1
 	  || bfd_seek (abfd, filepos, SEEK_SET) != 0
@@ -2012,8 +2012,7 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
 
       maxchain -= gnusymidx;
       filepos = offset_from_vma (phdrs, phnum,
-				 (buckets_vma +
-				  4 * (ngnubuckets + maxchain)),
+				 buckets_vma + 4 * (ngnubuckets + maxchain),
 				 4, NULL);
       if (filepos == (file_ptr) -1
 	  || bfd_seek (abfd, filepos, SEEK_SET) != 0)
@@ -2030,7 +2029,7 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
       while ((bfd_get_32 (abfd, nb) & 1) == 0);
 
       filepos = offset_from_vma (phdrs, phnum,
-				 (buckets_vma + 4 * ngnubuckets),
+				 buckets_vma + 4 * ngnubuckets,
 				 4, NULL);
       if (filepos == (file_ptr) -1
 	  || bfd_seek (abfd, filepos, SEEK_SET) != 0)
@@ -2044,8 +2043,7 @@ _bfd_elf_get_dynamic_symbols (bfd *abfd, Elf_Internal_Phdr *phdr,
       if (dt_mips_xhash)
 	{
 	  filepos = offset_from_vma (phdrs, phnum,
-				     (buckets_vma
-				      + 4 * (ngnubuckets + maxchain)),
+				     buckets_vma + 4 * (ngnubuckets + maxchain),
 				     4, NULL);
 	  if (filepos == (file_ptr) -1
 	      || bfd_seek (abfd, filepos, SEEK_SET) != 0)
