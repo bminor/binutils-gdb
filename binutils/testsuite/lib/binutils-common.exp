@@ -1567,12 +1567,16 @@ proc run_dump_test { name {extra_options {}} } {
 		verbose -log "$exitstat with: <$comp_output>, no expected output"
 	    }
 
-	    if { (($want_out(source) == "") == ($comp_output == "")) \
-		     && (($cmdret == 0) == ($want_out(terminal) == 0)) \
-		     && ((($want_out(source) == "regex") \
-			      && [regexp -- $want_out(regex) $comp_output]) \
-			     || (($want_out(source) == "file") \
-				     && (![regexp_diff "tmpdir/ld.messages" "$srcdir/$subdir/$want_out(file)"]))) } {
+	    set ok 0
+	    if { ($cmdret == 0) == ($want_out(terminal) == 0) } {
+		switch $want_out(source) {
+		    regex { set ok [regexp -- $want_out(regex) $comp_output] }
+		    file  { set ok [expr ![regexp_diff tmpdir/ld.messages \
+					   $srcdir/$subdir/$want_out(file)]] }
+		    ""    { set ok [string equal $comp_output ""] }
+		}
+	    }
+	    if { $ok } {
 		# We have the expected output.
 		if { $want_out(terminal) || $dumpprogram == "" } {
 		    pass $testname
