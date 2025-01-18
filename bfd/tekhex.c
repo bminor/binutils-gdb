@@ -886,13 +886,9 @@ tekhex_write_object_contents (bfd *abfd)
   /* And the terminator.  */
   if (bfd_write ("%0781010\n", 9, abfd) != 9)
     goto fail;
-  free (abfd->outsymbols);
-  abfd->outsymbols = NULL;
   return true;
 
  fail:
-  free (abfd->outsymbols);
-  abfd->outsymbols = NULL;
   return false;
 }
 

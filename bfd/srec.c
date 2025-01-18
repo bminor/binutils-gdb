@@ -1114,13 +1114,9 @@ srec_write_symbols (bfd *abfd)
 	goto fail;
     }
 
-  free (abfd->outsymbols);
-  abfd->outsymbols = NULL;
   return true;
 
  fail:
-  free (abfd->outsymbols);
-  abfd->outsymbols = NULL;
   return false;
 }
 
