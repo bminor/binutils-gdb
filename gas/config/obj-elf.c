@@ -1324,13 +1324,27 @@ obj_elf_section (int push)
 		  && (bfd_section_flags (now_seg)
 		      & (SEC_MERGE | SEC_STRINGS)) != 0)
 		goto fetch_entsize;
-	      entsize = get_absolute_expression ();
-	      SKIP_WHITESPACE ();
-	      if (entsize <= 0)
+	      if (is_end_of_line[(unsigned char) *input_line_pointer])
 		{
-		  as_warn (_("invalid merge / string entity size"));
-		  attr &= ~(SHF_MERGE | SHF_STRINGS);
-		  entsize = 0;
+		  /* ??? This is here for older versions of gcc that
+		     test for gas string merge support with
+		     '.section .rodata.str, "aMS", @progbits, 1'
+		     Unfortunately '@' begins a comment on arm.
+		     This isn't as_warn because gcc tests with
+		     --fatal-warnings. */
+		  as_tsktsk (_("missing merge / string entity size, 1 assumed"));
+		  entsize = 1;
+		}
+	      else
+		{
+		  entsize = get_absolute_expression ();
+		  SKIP_WHITESPACE ();
+		  if (entsize <= 0)
+		    {
+		      as_warn (_("invalid merge / string entity size"));
+		      attr &= ~(SHF_MERGE | SHF_STRINGS);
+		      entsize = 0;
+		    }
 		}
 	    }
 	  else if ((attr & (SHF_MERGE | SHF_STRINGS)) != 0 && inherit

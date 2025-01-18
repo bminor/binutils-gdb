@@ -8,3 +8,7 @@
 	.asciz "ghi"
 	.section .str4,"S",%progbits,2
 	.short 32, 0
+# The following is used in older versions of gcc to test for gas
+# string merge support.  On arm, @ begins a comment.
+	.section .rodata.str, "aMS", @progbits, 1
+	.asciz "jkl"
