@@ -3130,10 +3130,11 @@ namespace eval Dwarf {
        }
 	variable _debug_names
 	set _debug_names []
-	proc _debug_names_name { name tag cu hash } {
+	proc _debug_names_name { name tag cu hash {extra {}} } {
 	    variable _debug_names
 	    declare_labels entry_pool_offset
-	    lappend _debug_names [list $name $tag $cu $hash $entry_pool_offset]
+	    lappend _debug_names [list $name $tag $cu $hash $extra \
+				      $entry_pool_offset]
 	}
 	with_override Dwarf::cu Dwarf::_debug_names_cu {
 	with_override Dwarf::tu Dwarf::_debug_names_tu {
@@ -3196,14 +3197,13 @@ namespace eval Dwarf {
 
 	# Hash Lookup Table - array of hashes.
 	foreach idx $_debug_names {
-	    set name [lindex $idx 0]
-	    set hash [lindex $idx 3]
+	    lassign $idx name tag cu hash extra label
 	    _op .4byte $hash "hash: $name"
 	}
 
 	# Name Table - array of string offsets.
 	foreach idx $_debug_names {
-	    set name [lindex $idx 0]
+	    lassign $idx name tag cu hash extra label
 
 	    variable _strings
 	    if {![info exists _strings($name)]} {
@@ -3220,8 +3220,7 @@ namespace eval Dwarf {
 	# Name Table - array of entry offsets.
 	set base_label ""
 	foreach idx $_debug_names {
-	    set name [lindex $idx 0]
-	    set label [lindex $idx 4]
+	    lassign $idx name tag cu hash extra label
 	    if { [string equal $base_label ""]} {
 		set base_label $label
 	    }
@@ -3234,31 +3233,42 @@ namespace eval Dwarf {
 	set abbrev 1
 	variable _constants
 	foreach idx $_debug_names {
-	    set name [lindex $idx 0]
-	    set tag [lindex $idx 1]
-	    set cu [lindex $idx 2]
+	    lassign $idx name tag cu hash extra label
 
 	    if { [regexp "^CU-($decimal)$" $cu dummy cu_index] } {
-		set attr_name compile_unit
-		set attr_val 1
+		set attr_name DW_IDX_compile_unit
 	    } elseif { [regexp "^TU-($decimal)$" $cu dummy cu_index] } {
-		set attr_name type_unit
-		set attr_val 2
+		set attr_name DW_IDX_type_unit
 	    } else {
 		set cu_index [lsearch -exact $_debug_names_cus $cu]
 		if { $cu_index == -1 } {
-		    set attr_name type_unit
-		    set attr_val 2
+		    set attr_name DW_IDX_type_unit
 		} else {
-		    set attr_name compile_unit
-		    set attr_val 1
+		    set attr_name DW_IDX_compile_unit
 		}
 	    }
 
-	    _op .byte $abbrev "abbrev $abbrev"
+	    _op .uleb128 $abbrev "abbrev $abbrev"
 	    _op .uleb128 $_constants(DW_TAG_$tag) "DW_TAG_$tag"
-	    _op .byte $attr_val  "DW_IDX_$attr_name (attribute)"
-	    _op .byte 0x0f "DW_FORM_udata (form)"
+	    _op .uleb128 $_constants($attr_name)  \
+		"$attr_name (attribute)"
+	    _op .uleb128 0x0f "DW_FORM_udata (form)"
+	    foreach word $extra {
+		if {$word == "static"} {
+		    _op .uleb128 $_constants(DW_IDX_GNU_internal) \
+			"DW_IDX_GNU_internal"
+		    _op .uleb128 $_constants(DW_FORM_flag_present) \
+			"DW_FORM_flag_present"
+		} elseif {[string match DW_LANG_* $word]} {
+		    _op .uleb128 $_constants(DW_IDX_GNU_language) \
+			"DW_IDX_GNU_language"
+		    _op .uleb128 $_constants(DW_FORM_implicit_const) \
+			"DW_FORM_flag_present"
+		    _op .sleb128 $_constants($word) $word
+		} else {
+		    error "unrecognized extra keyword $word"
+		}
+	    }
 	    _op .byte 0  "abbrev terminator (attribute)"
 	    _op .byte 0  "abbrev terminator (form)"
 	    incr abbrev
@@ -3269,9 +3279,7 @@ namespace eval Dwarf {
 	# Entry Pool
 	set abbrev 1
 	foreach idx $_debug_names {
-	    set name [lindex $idx 0]
-	    set cu [lindex $idx 2]
-	    set label [lindex $idx 4]
+	    lassign $idx name tag cu hash extra label
 
 	    if { [regexp "^CU-($decimal)$" $cu dummy cu_index] } {
 		set comment "$name: CU index"

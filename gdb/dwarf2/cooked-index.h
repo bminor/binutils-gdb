@@ -333,12 +333,7 @@ private:
 			      enum language lang,
 			      const char *name,
 			      cooked_index_entry_ref parent_entry,
-			      dwarf2_per_cu *per_cu)
-  {
-    return new (&m_storage) cooked_index_entry (die_offset, tag, flags,
-						lang, name, parent_entry,
-						per_cu);
-  }
+			      dwarf2_per_cu *per_cu);
 
   /* GNAT only emits mangled ("encoded") names in the DWARF, and does
      not emit the module structure.  However, we need this structure

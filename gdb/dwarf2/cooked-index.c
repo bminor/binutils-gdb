@@ -271,6 +271,35 @@ cooked_index_entry::write_scope (struct obstack *storage,
 /* See cooked-index.h.  */
 
 cooked_index_entry *
+cooked_index_shard::create (sect_offset die_offset,
+			    enum dwarf_tag tag,
+			    cooked_index_flag flags,
+			    enum language lang,
+			    const char *name,
+			    cooked_index_entry_ref parent_entry,
+			    dwarf2_per_cu *per_cu)
+{
+  if (tag == DW_TAG_module || tag == DW_TAG_namespace)
+    flags &= ~IS_STATIC;
+  else if (lang == language_cplus
+	   && (tag == DW_TAG_class_type
+	       || tag == DW_TAG_interface_type
+	       || tag == DW_TAG_structure_type
+	       || tag == DW_TAG_union_type
+	       || tag == DW_TAG_enumeration_type
+	       || tag == DW_TAG_enumerator))
+    flags &= ~IS_STATIC;
+  else if (tag_is_type (tag))
+    flags |= IS_STATIC;
+
+  return new (&m_storage) cooked_index_entry (die_offset, tag, flags,
+					      lang, name, parent_entry,
+					      per_cu);
+}
+
+/* See cooked-index.h.  */
+
+cooked_index_entry *
 cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
 			 cooked_index_flag flags, enum language lang,
 			 const char *name, cooked_index_entry_ref parent_entry,

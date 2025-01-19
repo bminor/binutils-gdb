@@ -15606,20 +15606,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 	    }
 	}
 
-      if (abbrev->tag == DW_TAG_module || abbrev->tag == DW_TAG_namespace)
-	*flags &= ~IS_STATIC;
-
       if (abbrev->tag == DW_TAG_namespace && *name == nullptr)
 	*name = "(anonymous namespace)";
-
-      if (m_language == language_cplus
-	  && (abbrev->tag == DW_TAG_class_type
-	      || abbrev->tag == DW_TAG_interface_type
-	      || abbrev->tag == DW_TAG_structure_type
-	      || abbrev->tag == DW_TAG_union_type
-	      || abbrev->tag == DW_TAG_enumeration_type
-	      || abbrev->tag == DW_TAG_enumerator))
-	*flags &= ~IS_STATIC;
 
       /* Keep in sync with new_symbol.  */
       if (abbrev->tag == DW_TAG_subprogram

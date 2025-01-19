@@ -754,7 +754,8 @@ public:
 		m_abbrev_table.append_unsigned_leb128 (DW_FORM_ref_addr);
 		m_abbrev_table.append_unsigned_leb128 (DW_IDX_GNU_language);
 		m_abbrev_table.append_unsigned_leb128 (DW_FORM_udata);
-		if ((entry->flags & IS_STATIC) != 0)
+		if (!tag_is_type (entry->tag)
+		    && (entry->flags & IS_STATIC) != 0)
 		  {
 		    m_abbrev_table.append_unsigned_leb128 (DW_IDX_GNU_internal);
 		    m_abbrev_table.append_unsigned_leb128 (DW_FORM_flag_present);
