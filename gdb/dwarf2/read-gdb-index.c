@@ -1100,7 +1100,7 @@ dw2_expand_marked_cus (dwarf2_per_objfile *per_objfile, offset_type idx,
 	      mask = SEARCH_TYPE_DOMAIN | SEARCH_STRUCT_DOMAIN;
 	      break;
 	    case GDB_INDEX_SYMBOL_KIND_OTHER:
-	      mask = SEARCH_MODULE_DOMAIN;
+	      mask = SEARCH_MODULE_DOMAIN | SEARCH_TYPE_DOMAIN;
 	      break;
 	    }
 	  if ((kind & mask) == 0)

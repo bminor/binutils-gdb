@@ -102,6 +102,10 @@ tag_matches_domain (dwarf_tag tag, domain_search_flags search, language lang)
       }
       break;
 
+    case DW_TAG_imported_declaration:
+      /* DW_TAG_imported_declaration isn't necessarily a type, but the
+	 scanner doesn't track the referent, and the full reader
+	 also currently puts it in TYPE_DOMAIN.  */
     case DW_TAG_padding:
     case DW_TAG_array_type:
     case DW_TAG_pointer_type:

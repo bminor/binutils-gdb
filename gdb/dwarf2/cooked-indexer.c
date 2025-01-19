@@ -544,6 +544,11 @@ cooked_indexer::index_dies (cutu_reader *reader,
 	  flags &= ~IS_STATIC;
 	  flags |= parent_entry->flags & IS_STATIC;
 	}
+      else if (abbrev->tag == DW_TAG_imported_declaration)
+	{
+	  /* Match the full reader.  */
+	  flags &= ~IS_STATIC;
+	}
 
       if (abbrev->tag == DW_TAG_namespace
 	  && m_language == language_cplus
