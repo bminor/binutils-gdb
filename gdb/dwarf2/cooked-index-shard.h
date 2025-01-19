@@ -48,6 +48,13 @@ public:
 			   cooked_index_entry_ref parent_entry,
 			   dwarf2_per_cu *per_cu);
 
+  /* Add a copy of NAME to the index.  Return a pointer to the
+     copy.  */
+  const char *add (std::string_view name)
+  {
+    return m_names.insert (name);
+  }
+
   /* Install a new fixed addrmap from the given mutable addrmap.  */
   void install_addrmap (addrmap_mutable *map)
   {

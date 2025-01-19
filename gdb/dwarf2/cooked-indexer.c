@@ -21,6 +21,8 @@
 #include "dwarf2/cooked-index-worker.h"
 #include "dwarf2/error.h"
 #include "dwarf2/read.h"
+#include "cp-support.h"
+#include "demangle.h"
 
 /* See cooked-indexer.h.  */
 
@@ -559,6 +561,30 @@ cooked_indexer::index_dies (cutu_reader *reader,
 	     for the global namespace.  Work around this problem
 	     here.  */
 	  name = nullptr;
+	}
+
+      /* An otherwise anonymous type might be given a name (via
+	 typedef) for linkage purposes, and gdb tries to handle this
+	 case.  See anon-struct.exp.  In this case, GCC will emit a
+	 funny thing: a linkage name for the type, but in "type" form.
+	 That is, it will not start with _Z.  */
+      if ((abbrev->tag == DW_TAG_class_type
+	   || abbrev->tag == DW_TAG_structure_type
+	   || abbrev->tag == DW_TAG_union_type)
+	  && m_language == language_cplus
+	  && name == nullptr
+	  && linkage_name != nullptr)
+	{
+	  gdb::unique_xmalloc_ptr<char> dem
+	    = gdb_demangle (linkage_name, DMGL_GNU_V3 | DMGL_TYPES);
+	  if (dem != nullptr)
+	    {
+	      /* We're only interested in the last component.  */
+	      std::vector<std::string_view> split
+		= split_name (dem.get (), split_style::CXX);
+	      name = m_index_storage->add (split.back ());
+	      linkage_name = nullptr;
+	    }
 	}
 
       cooked_index_entry *this_entry = nullptr;

@@ -87,6 +87,13 @@ public:
 			 name, parent_entry, per_cu);
   }
 
+  /* Add a copy of NAME to the index.  Return a pointer to the
+     copy.  */
+  const char *add (std::string_view name)
+  {
+    return m_shard->add (name);
+  }
+
   /* Install the current addrmap into the shard being constructed,
      then transfer ownership of the index to the caller.  */
   cooked_index_shard_up release_shard ()
