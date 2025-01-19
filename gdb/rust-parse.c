@@ -1773,7 +1773,7 @@ rust_parser::parse_tuple_type ()
       std::string type_name = type_to_string (types[i]);
 
       if (i > 0)
-	obstack_1grow (&obstack, ',');
+	obstack_grow_str (&obstack, ", ");
       obstack_grow_str (&obstack, type_name.c_str ());
     }
 
