@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.44:
+
 * Support for Nios II target has been removed, as this architecture has been
   EOL'ed by Intel.
 

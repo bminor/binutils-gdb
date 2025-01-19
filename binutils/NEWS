@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.44:
+
 * Support for Nios II targets has been removed except in the readelf utility,
   as this architecture has been EOL'ed by Intel.
 

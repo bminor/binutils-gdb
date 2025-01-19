@@ -1,3 +1,7 @@
+2025-01-19  Nick Clifton  <nickc@redhat.com>
+
+	* 2.44 Branch point.
+
 2024-10-18  WANG Xuerui <git@xen0n.name>
 
 	* testsuite/ld-loongarch-elf/64_pcrel.d: Update assertions after

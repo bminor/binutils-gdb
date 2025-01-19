@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.44:
+
 * Add support for the x86 Intel Diamond Rapids AMX instructions, including
   AMX-AVX512, AMX-FP8, AMX-MOVRS, AMX-TF32 and AMX-TRANSPOSE.
 
