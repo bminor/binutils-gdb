@@ -25,11 +25,10 @@
 #include "elf-bfd.h"
 
 /* Return the number of bytes needed by I in uleb128 format.  */
-static int
-uleb128_size (unsigned int i)
+static uint32_t
+uleb128_size (uint32_t i)
 {
-  int size;
-  size = 1;
+  uint32_t size = 1;
   while (i >= 0x80)
     {
       i >>= 7;
@@ -127,7 +126,7 @@ bfd_elf_obj_attr_size (bfd *abfd)
 /* Write VAL in uleb128 format to P, returning a pointer to the
    following byte.  */
 static bfd_byte *
-write_uleb128 (bfd_byte *p, unsigned int val)
+write_uleb128 (bfd_byte *p, uint32_t val)
 {
   bfd_byte c;
   do
