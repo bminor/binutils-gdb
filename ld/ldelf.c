@@ -1752,7 +1752,7 @@ ldelf_append_to_separated_string (char **to, char *op_arg)
    sections, but before any sizes or addresses have been set.  */
 
 void
-ldelf_before_allocation (char *audit, char *depaudit,
+ldelf_before_allocation (char **audit, char **depaudit,
 			 const char *default_interpreter_name)
 {
   const char *rpath;
@@ -1834,7 +1834,7 @@ ldelf_before_allocation (char *audit, char *depaudit,
 		  }
 
 		if (cp != NULL && *cp != '\0')
-		  ldelf_append_to_separated_string (&depaudit, cp);
+		  ldelf_append_to_separated_string (depaudit, cp);
 
 		cp = more ? ++cp2 : NULL;
 	      }
@@ -1844,7 +1844,7 @@ ldelf_before_allocation (char *audit, char *depaudit,
 
   if (! (bfd_elf_size_dynamic_sections
 	 (link_info.output_bfd, command_line.soname, rpath,
-	  command_line.filter_shlib, audit, depaudit,
+	  command_line.filter_shlib, *audit, *depaudit,
 	  (const char * const *) command_line.auxiliary_filters,
 	  &link_info, &sinterp)))
     einfo (_("%F%P: failed to set dynamic section sizes: %E\n"));

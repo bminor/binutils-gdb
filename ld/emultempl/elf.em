@@ -170,7 +170,7 @@ fragment <<EOF
 static void
 gld${EMULATION_NAME}_before_allocation (void)
 {
-  ldelf_before_allocation (audit, depaudit, ${ELF_INTERPRETER_NAME});
+  ldelf_before_allocation (&audit, &depaudit, ${ELF_INTERPRETER_NAME});
 }
 
 EOF

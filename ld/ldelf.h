@@ -30,7 +30,7 @@ extern void ldelf_after_open (int, int, int, int, int, const char *);
 extern bool ldelf_setup_build_id (bfd *);
 extern bool ldelf_setup_package_metadata (bfd *);
 extern void ldelf_append_to_separated_string (char **, char *);
-extern void ldelf_before_allocation (char *, char *, const char *);
+extern void ldelf_before_allocation (char **, char **, const char *);
 extern bool ldelf_open_dynamic_archive
   (const char *, search_dirs_type *, lang_input_statement_type *);
 extern lang_output_section_statement_type *ldelf_place_orphan
