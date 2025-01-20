@@ -151,6 +151,22 @@ proc run_host_cmd_yesno { prog command } {
     return 0;
 }
 
+proc run_host_noleak { prog command } {
+    global env
+    if [info exists env(ASAN_OPTIONS)] {
+	set old_asan "$env(ASAN_OPTIONS)"
+    }
+    # don't fail the test due to gcc plugin or ld memory leaks
+    set env(ASAN_OPTIONS) "detect_leaks=0"
+    set result [run_host_cmd_yesno "$prog" "$command"]
+    if [info exists old_asan] {
+	set env(ASAN_OPTIONS) "$old_asan"
+    } else {
+	unset env(ASAN_OPTIONS)
+    }
+    return $result
+}
+
 # Link an object using relocation.
 #
 proc default_ld_relocate { ld target objects } {
@@ -1248,7 +1264,7 @@ proc check_compiler_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set compiler_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $src -o $output"]
+	set compiler_available_saved [run_host_noleak "$CC_FOR_TARGET" "$flags $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1311,7 +1327,7 @@ proc check_lto_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set lto_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags -flto -fuse-linker-plugin $src -o $output"]
+	set lto_available_saved [run_host_noleak "$CC_FOR_TARGET" "$flags -flto -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1347,7 +1363,7 @@ proc check_lto_fat_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set lto_fat_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
+	set lto_fat_available_saved [run_host_noleak "$CC_FOR_TARGET" "$flags -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1383,7 +1399,7 @@ proc check_lto_shared_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set lto_shared_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags -shared -fPIC -flto -fuse-linker-plugin $src -o $output"]
+	set lto_shared_available_saved [run_host_noleak "$CC_FOR_TARGET" "$flags -shared -fPIC -flto -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1444,7 +1460,7 @@ proc check_ifunc_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set ifunc_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $src -o $output"]
+	set ifunc_available_saved [run_host_noleak "$CC_FOR_TARGET" "$flags $src -o $output"]
 	if { [isnative] && $ifunc_available_saved == 1 } {
 	  set ifunc_available_saved [run_host_cmd_yesno "$output" ""]
 	}
@@ -1484,7 +1500,7 @@ proc check_ifunc_attribute_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set ifunc_attribute_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $src -o $output"]
+	set ifunc_attribute_available_saved [run_host_noleak "$CC_FOR_TARGET" "$flags $src -o $output"]
 	if { [isnative] && $ifunc_attribute_available_saved == 1 } {
 	  set ifunc_attribute_available_saved [run_host_cmd_yesno "$output" ""]
 	}
@@ -1522,7 +1538,7 @@ proc check_libdl_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set libdl_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$src -o $output -ldl"]
+	set libdl_available_saved [run_host_noleak "$CC_FOR_TARGET" "$src -o $output -ldl"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1571,11 +1587,11 @@ proc check_gnu2_tls_available { } {
 	if [is_remote host] {
 	    set src2 [remote_download host $src2]
 	}
-	set gnu2_tls_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "-fPIC -shared $flags $src1 -o $output1"]
+	set gnu2_tls_available_saved [run_host_noleak "$CC_FOR_TARGET" "-fPIC -shared $flags $src1 -o $output1"]
 	if { $gnu2_tls_available_saved == 1 } {
-	    set gnu2_tls_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $src2 $output1 -o $output2"]
+	    set gnu2_tls_available_saved [run_host_noleak "$CC_FOR_TARGET" "$flags $src2 $output1 -o $output2"]
 	    if { $gnu2_tls_available_saved == 1 } {
-		set gnu2_tls_available_saved [run_host_cmd_yesno "$output2" ""]
+		set gnu2_tls_available_saved [run_host_noleak "$output2" ""]
 	    }
 	}
 	remote_file host delete $src1
@@ -1597,7 +1613,7 @@ proc compile_one_cc { src output additional_flags } {
     if [is_remote host] {
 	set src [remote_download host $src]
     }
-    return [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $CFLAGS_FOR_TARGET $additional_flags $src -o $output"]
+    return [run_host_noleak "$CC_FOR_TARGET" "$flags $CFLAGS_FOR_TARGET $additional_flags $src -o $output"]
 }
 
 # Returns true if the target compiler supports -gctf.

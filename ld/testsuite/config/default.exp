@@ -422,7 +422,7 @@ proc compiler_supports { flag args } {
 	}
 	close $f
 	set rfn [remote_download host $fn]
-	set avail [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $flag $rfn -o $rfno"]
+	set avail [run_host_noleak "$CC_FOR_TARGET" "$flags $flag $rfn -o $rfno"]
 	remote_file host delete $rfno
 	remote_file host delete $rfn
 	file delete $fn
