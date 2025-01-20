@@ -128,7 +128,13 @@ Approx time to complete from here: 2 hours ...
 	  
      b. Create a source tarball of the BRANCH sources:
 
-          ./src-release.sh -x binutils
+         If this is an EVEN numbered release:
+	 
+            ./src-release.sh -x binutils
+
+	 If this is an ODD numbered release:
+	 
+            ./src-release.sh -x no_gold_bin
 
         FIXME: Not sure if the following steps are needed...
 	
@@ -300,11 +306,19 @@ How to create the release.
 
       Then create the release tarballs:
   
+       If this is an EVEN numbered release:
+	 
             ./src-release.sh -b -g -l -x -z binutils
 
-      OR ... for a more reproducible tarball:
+       If this is an ODD numbered release:
+	 
+            ./src-release.sh -b -g -l -x -z no_gold_bin
 
-            ./src-release.sh -b -g -l -x -z -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` binutils
+       OR ... for a more reproducible tarball:
+
+            ./src-release.sh -b -g -l -x -z \
+	      -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` \
+	      [binutils | no_gold_bin]
 
   24. Check that the files in the tarballs have the correct
       permissions.
@@ -607,9 +621,11 @@ looks like this:
 
        h. Create the release tarballs:
        
-              ./src-release.sh -b -g -l -x -z binutils
+              ./src-release.sh -b -g -l -x -z [ binutils | no_gold_bin ]
 	  or: 
-              ./src-release.sh -b -g -l -x -z -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` binutils
+              ./src-release.sh -b -g -l -x -z
+	        -r `git log -1 --format=%cd --date=format:%F bfd/version.m4`
+		[ binutils | no_gold_bin ]
 
        i. Check that the files in the tarballs have the correct
           permissions.
