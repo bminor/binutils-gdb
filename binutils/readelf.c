@@ -3534,7 +3534,7 @@ static char *
 decode_ARM_machine_flags (char *out, unsigned e_flags)
 {
   unsigned eabi;
-  bool unknown = false;
+  bool unknown_abi = false;
 
   eabi = EF_ARM_EABI_VERSION (e_flags);
   e_flags &= ~ EF_ARM_EABIMASK;
@@ -3558,7 +3558,7 @@ decode_ARM_machine_flags (char *out, unsigned e_flags)
     default:
       out = stpcpy (out, ", <unrecognized EABI>");
       if (e_flags)
-	unknown = true;
+	unknown_abi = true;
       break;
 
     case EF_ARM_EABI_VER1:
@@ -3578,7 +3578,7 @@ decode_ARM_machine_flags (char *out, unsigned e_flags)
 	      break;
 
 	    default:
-	      unknown = true;
+	      unknown_abi = true;
 	      break;
 	    }
 	}
@@ -3609,7 +3609,7 @@ decode_ARM_machine_flags (char *out, unsigned e_flags)
 	      break;
 
 	    default:
-	      unknown = true;
+	      unknown_abi = true;
 	      break;
 	    }
 	}
@@ -3640,7 +3640,7 @@ decode_ARM_machine_flags (char *out, unsigned e_flags)
 	      break;
 
 	    default:
-	      unknown = true;
+	      unknown_abi = true;
 	      break;
 	    }
 	}
@@ -3675,7 +3675,7 @@ decode_ARM_machine_flags (char *out, unsigned e_flags)
 	      break;
 
 	    default:
-	      unknown = true;
+	      unknown_abi = true;
 	      break;
 	    }
 	}
@@ -3730,13 +3730,13 @@ decode_ARM_machine_flags (char *out, unsigned e_flags)
 	      break;
 
 	    default:
-	      unknown = true;
+	      unknown_abi = true;
 	      break;
 	    }
 	}
     }
 
-  if (unknown)
+  if (unknown_abi)
     out = stpcpy (out,_(", <unknown>"));
   return out;
 }
