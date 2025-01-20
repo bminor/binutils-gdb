@@ -134,12 +134,12 @@ Approx time to complete from here: 2 hours ...
 	
 	Add a .dirstamp file to the gas/doc subdirectory:
 
-          touch -d `date +%Y-%m-%d` binutils-2.43.90/gas/doc/.dirstamp
-          tar rvf binutils-2.43.90.tar binutils-2.43.90/gas/doc/.dirstamp
-          rm binutils-2.43.90.tar.xz
-          xz -9 -k binutils-2.43.90.tar
+          touch -d `date +%Y-%m-%d` binutils-2.44.90/gas/doc/.dirstamp
+          tar rvf binutils-2.44.90.tar binutils-2.44.90/gas/doc/.dirstamp
+          rm binutils-2.44.90.tar.xz
+          xz -9 -k binutils-2.44.90.tar
 
-	 ...END OF FIXME   
+	 ...END OF FIXME
 
      c. Build a test target using this tarball.
 
@@ -156,8 +156,8 @@ Approx time to complete from here: 2 hours ...
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          scp binutils-2.43.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.43.90.tar.xz
+          scp binutils-2.44.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.44.90.tar.xz
 
         Paranoia: Compare the checksum with the local version.
 
@@ -172,7 +172,7 @@ Approx time to complete from here: 2 hours ...
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.43 release branch has been created for the GNU Binutils project.
+  The 2.44 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
