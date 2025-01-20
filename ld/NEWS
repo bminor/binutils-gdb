@@ -5,6 +5,8 @@ Changes in 2.44:
 * Support for Nios II target has been removed, as this architecture has been
   EOL'ed by Intel.
 
+* The default maximum page size was changed from 16KiB to 64KiB for LoongArch.
+
 Changes in 2.44:
 
 * Add support for mixed LTO and non-LTO codes in relocatable output.

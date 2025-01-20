@@ -34,6 +34,10 @@ Changes in 2.44:
   CORE-V, xcvbitmanip v1.0 and xcvsimd v1.0.
   SiFive, xsfvqmaccdod v1.0, xsfvqmaccqoqv1.0 and xsfvfnrclipxfqf v1.0.
 
+* Add support for 4 formats of .cfi directives register aliases for LoongArch,
+  for example, .cfi_offset r1,8, .cfi_offset ra,8, .cfi_offset $r1,8,
+  .cfi_offset $ra,8.
+
 Changes in 2.43:
 
 * Add support for LoongArch .option for fine-grained control of assembly
