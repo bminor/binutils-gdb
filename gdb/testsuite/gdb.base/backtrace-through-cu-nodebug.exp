@@ -17,8 +17,8 @@
 # trace goes through a function with no debug information.
 
 standard_testfile -caller.c -main.c
-set objmainfile ${testfile}-main.o
-set objcallerfile ${testfile}-caller.o
+set objmainfile [standard_output_file ${testfile}-main.o]
+set objcallerfile [standard_output_file ${testfile}-caller.o]
 
 # Recompile the inferior with or without CFI information, then run the
 # inferior until the point where the important test starts.
@@ -28,7 +28,7 @@ proc prepare_test {has_cfi} {
     if {$has_cfi} {
 	set extension "cfi"
 	if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" \
-	     "${srcdir}/${subdir}/${objcallerfile}" \
+	     "${objcallerfile}" \
 	     object [list {additional_flags=-fomit-frame-pointer \
 		 -funwind-tables -fasynchronous-unwind-tables}]] != "" } {
 	    untested "couldn't compile with cfi"
@@ -37,7 +37,7 @@ proc prepare_test {has_cfi} {
     } else {
 	set extension "no-cfi"
 	if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" \
-	     "${srcdir}/${subdir}/${objcallerfile}" \
+	     "${objcallerfile}" \
 	     object [list {additional_flags=-fomit-frame-pointer \
 		 -fno-unwind-tables \
 		 -fno-asynchronous-unwind-tables}]] != "" } {
@@ -45,8 +45,8 @@ proc prepare_test {has_cfi} {
 	    return false
       }
     }
-    if {[gdb_compile [list "${srcdir}/${subdir}/${objmainfile}" \
-	    "${srcdir}/${subdir}/${objcallerfile}"] \
+    if {[gdb_compile [list "${objmainfile}" \
+	    "${objcallerfile}"] \
 	    "${binfile}-${extension}" binfile {}] != ""} {
 	untested "couldn't link object files"
 	return false
@@ -66,7 +66,7 @@ proc prepare_test {has_cfi} {
 }
 
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" \
-	"${srcdir}/${subdir}/${objmainfile}" \
+	"${objmainfile}" \
 	object {debug}] != "" } {
     untested "couldn't compile main file"
     return
