@@ -516,7 +516,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 	    break;
 	}
 
-      add_symbol_to_list (sym, ccp->builder->get_file_symbols ());
+      add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
     }
 
   return sym;
@@ -1171,7 +1171,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	sym->set_domain (VAR_DOMAIN);
 	sym->set_loc_class_index (LOC_OPTIMIZED_OUT);
 	sym->compute_and_set_names (name, false, ccp->of->per_bfd);
-	add_symbol_to_list (sym, ccp->builder->get_file_symbols ());
+	add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
 	break;
       default:
 	complaint (_("ctf_add_var_cb: kind unsupported (%d)"), kind);
@@ -1510,7 +1510,7 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
 
   ccp->pst->add_psymbol (name, false,
 			 domain, loc_class, section,
-			 psymbol_placement::STATIC,
+			 psymbol_placement::GLOBAL,
 			 unrelocated_addr (0),
 			 language_c, ccp->partial_symtabs, ccp->of);
 
