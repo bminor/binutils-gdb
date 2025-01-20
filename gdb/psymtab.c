@@ -527,6 +527,12 @@ print_partial_symbols (struct gdbarch *gdbarch, struct objfile *objfile,
 	case COMMON_BLOCK_DOMAIN:
 	  gdb_puts ("common block domain, ", outfile);
 	  break;
+	case TYPE_DOMAIN:
+	  gdb_puts ("type domain, ", outfile);
+	  break;
+	case FUNCTION_DOMAIN:
+	  gdb_puts ("function domain, ", outfile);
+	  break;
 	default:
 	  gdb_puts ("<invalid domain>, ", outfile);
 	  break;
