@@ -1819,7 +1819,8 @@ desc_bounds_type (struct type *type)
 }
 
 /* If ARR is an array descriptor (fat or thin pointer), or pointer to
-   one, a pointer to its bounds data.   Otherwise NULL.  */
+   one, a pointer to its bounds data.  Otherwise, throw an
+   exception.  */
 
 static struct value *
 desc_bounds (struct value *arr)
@@ -1870,7 +1871,7 @@ desc_bounds (struct value *arr)
       return p_bounds;
     }
   else
-    return NULL;
+    error (_("Not an array"));
 }
 
 /* If TYPE is the type of an array-descriptor (fat pointer),  the bit
