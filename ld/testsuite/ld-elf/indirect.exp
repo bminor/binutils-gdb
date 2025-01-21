@@ -38,7 +38,7 @@ if { ![check_compiler_available] } {
 }
 
 # Some bare-metal targets don't support shared libs or PIC.
-if { ![run_host_cmd_yesno $CC_FOR_TARGET "-shared -fPIC $srcdir/$subdir/dummy.c -o tmpdir/t.so"] } {
+if { ![run_host_noleak $CC_FOR_TARGET "-shared -fPIC $srcdir/$subdir/dummy.c -o tmpdir/t.so"] } {
     return
 }
 
@@ -226,7 +226,7 @@ foreach t [list indirect5a indirect5b indirect6a indirect6b] {
     }
 }
 
-if { ![run_host_cmd_yesno $CC_FOR_TARGET "-fPIC -pie $srcdir/$subdir/main.c -o tmpdir/pie"] } {
+if { ![run_host_noleak $CC_FOR_TARGET "-fPIC -pie $srcdir/$subdir/main.c -o tmpdir/pie"] } {
     return
 }
 
