@@ -80,7 +80,8 @@
 
 standard_testfile .c
 
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" ${binfile} executable {debug}] != ""} {
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" ${binfile} executable \
+	 {debug macros}] != ""} {
     untested "failed to compile"
     return -1
 }
