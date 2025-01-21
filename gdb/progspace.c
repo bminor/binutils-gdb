@@ -148,14 +148,14 @@ program_space::free_all_objfiles ()
 
 void
 program_space::add_objfile (std::unique_ptr<objfile> &&objfile,
-			    struct objfile *before)
+			    struct objfile *after)
 {
-  if (before == nullptr)
+  if (after == nullptr)
     m_objfiles_list.push_back (std::move (objfile));
   else
     {
-      gdb_assert (before->is_linked ());
-      m_objfiles_list.insert (m_objfiles_list.iterator_to (*before),
+      gdb_assert (after->is_linked ());
+      m_objfiles_list.insert (++m_objfiles_list.iterator_to (*after),
 			      std::move (objfile));
     }
 }
@@ -176,6 +176,17 @@ program_space::remove_objfile (struct objfile *objfile)
 
   gdb_assert (objfile->is_linked ());
   m_objfiles_list.erase (m_objfiles_list.iterator_to (*objfile));
+}
+
+/* See progspace.h.  */
+
+void
+program_space::remove_objfiles_if
+  (gdb::function_view<bool (const objfile *objfile)> predicate)
+{
+  for (objfile *objf : objfiles_safe ())
+    if (predicate (objf))
+      remove_objfile (objf);
 }
 
 /* See progspace.h.  */
