@@ -1753,6 +1753,10 @@ complete_line_internal_1 (completion_tracker &tracker,
     {
       /* We've recognized a full command.  */
 
+      /* Disable pagination since responding to the pagination prompt
+	 overwrites rl_line_buffer.  */
+      scoped_restore pag_restore = make_scoped_restore (&pagination_enabled, false);
+
       if (p == tmp_command + point)
 	{
 	  /* There is no non-whitespace in the line beyond the
@@ -1852,7 +1856,8 @@ complete_line_internal_1 (completion_tracker &tracker,
 }
 
 /* Wrapper around complete_line_internal_1 to handle
-   MAX_COMPLETIONS_REACHED_ERROR.  */
+   MAX_COMPLETIONS_REACHED_ERROR and possible progress update
+   interactions.  */
 
 static void
 complete_line_internal (completion_tracker &tracker,
@@ -1860,6 +1865,11 @@ complete_line_internal (completion_tracker &tracker,
 			const char *line_buffer, int point,
 			complete_line_internal_reason reason)
 {
+  scoped_restore restore_prefix_state
+    = make_scoped_restore
+      (&cur_prefix_state,
+       ui_out::progress_update::prefix_state::NEWLINE_NEEDED);
+
   try
     {
       complete_line_internal_1 (tracker, text, line_buffer, point, reason);
@@ -1869,6 +1879,12 @@ complete_line_internal (completion_tracker &tracker,
       if (except.error != MAX_COMPLETIONS_REACHED_ERROR)
 	throw;
     }
+
+  /* If progress update messages printed, then the text being completed
+     needs to be printed again.  */
+  if (cur_prefix_state
+      == ui_out::progress_update::prefix_state::NEWLINE_PRINTED)
+    rl_forced_update_display ();
 }
 
 /* See completer.h.  */

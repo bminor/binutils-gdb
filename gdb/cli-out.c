@@ -307,16 +307,23 @@ cli_ui_out::do_progress_notify (const std::string &msg,
 
   if (info.state == progress_update::START)
     {
+      std::string prefix;
+      if (cur_prefix_state == prefix_state_t::NEWLINE_NEEDED)
+	{
+	  prefix = "\n";
+	  cur_prefix_state = prefix_state_t::NEWLINE_PRINTED;
+	}
+
       if (stream->isatty ()
 	  && current_ui->input_interactive_p ()
 	  && chars_per_line >= MIN_CHARS_PER_LINE)
 	{
-	  gdb_printf (stream, "%s\n", msg.c_str ());
+	  gdb_printf (stream, "%s\n", (prefix + msg).c_str ());
 	  info.state = progress_update::BAR;
 	}
       else
 	{
-	  gdb_printf (stream, "%s...\n", msg.c_str ());
+	  gdb_printf (stream, "%s...\n", (prefix + msg).c_str ());
 	  info.state = progress_update::WORKING;
 	}
     }

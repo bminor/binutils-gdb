@@ -31,6 +31,9 @@
 #include <memory>
 #include <string>
 
+/* Current state of newline prefixing for progress update messages.  */
+prefix_state_t cur_prefix_state = prefix_state_t::NEWLINE_OFF;
+
 namespace {
 
 /* A header of a ui_out_table.  */
