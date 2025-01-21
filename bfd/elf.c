@@ -10134,6 +10134,12 @@ _bfd_elf_free_cached_info (bfd *abfd)
 	    }
 	  free (elf_section_data (sec)->relocs);
 	  elf_section_data (sec)->relocs = NULL;
+	  if (sec->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
+	    {
+	      struct eh_frame_sec_info *sec_info
+		= elf_section_data (sec)->sec_info;
+	      free (sec_info->cies);
+	    }
 	}
       free (tdata->symtab_hdr.contents);
       tdata->symtab_hdr.contents = NULL;

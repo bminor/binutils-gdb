@@ -606,7 +606,9 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
       || (sec->flags & SEC_HAS_CONTENTS) == 0
       || sec->sec_info_type != SEC_INFO_TYPE_NONE)
     {
-      /* This file does not contain .eh_frame information.  */
+      /* This file does not contain .eh_frame information or
+	 .eh_frame has already been parsed, as can happen with
+	 --gc-sections.  */
       return;
     }
 
