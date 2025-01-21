@@ -541,3 +541,6 @@
 
 	# Zcmt
 	csr jvt
+
+	# Ssqosid
+	csr srmcfg
