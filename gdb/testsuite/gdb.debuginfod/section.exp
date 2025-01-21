@@ -1,0 +1,157 @@
+# Copyright 2023-2024 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test debuginfod functionality
+
+standard_testfile
+
+load_lib debuginfod-support.exp
+
+clean_restart
+require allow_debuginfod_tests
+require allow_debuginfod_section_downloads
+
+# BINFILE calls a function from LIB_SL1.
+set libfile1 "libsection1"
+set libsrc1 $srcdir/$subdir/$libfile1.c
+set lib_sl1 [standard_output_file $libfile1.sl]
+
+# LIB_SL1 calls functions from LIB_SL2.
+set libfile2 "libsection2"
+set libsrc2 $srcdir/$subdir/$libfile2.c
+set lib_sl2 [standard_output_file $libfile2.sl]
+
+# Build LIB_SL2, LIB_SL1 and BINFILE.
+if { [build_executable "build $libfile2" $lib_sl2 $libsrc2 \
+	{debug build-id shlib}] != 0 } {
+    return -1
+}
+
+if { [build_executable "build $libfile1" $lib_sl1 $libsrc1 \
+	[list debug build-id shlib_pthreads shlib=$lib_sl2]] != 0 } {
+    return -1
+}
+
+if { [build_executable "build executable" $binfile $srcfile \
+	[list debug build-id shlib=$lib_sl1 shlib=$lib_sl2]] != 0 } {
+    return -1
+}
+
+# Make sure libsection1 and libsection2 contain .gdb_index.
+if { [ensure_gdb_index $lib_sl1 "" "libsection1"] != 1 } {
+    untested "failed to add .gdb_index to $libfile1"
+    return -1
+}
+
+if { [ensure_gdb_index $lib_sl2 "" "libsection2"] != 1 } {
+    untested "failed to add .gdb_index to $libfile2"
+    return -1
+}
+
+# Strip solib debuginfo into separate files.
+if { [gdb_gnu_strip_debug $lib_sl1 ""] != 0} {
+   fail "strip $lib_sl1 debuginfo"
+   return -1
+}
+
+if { [gdb_gnu_strip_debug $lib_sl2 ""] != 0} {
+   fail "strip $lib_sl2 debuginfo"
+   return -1
+}
+
+# Move debuginfo files into directory that debuginfod will serve from.
+set debugdir [standard_output_file "debug"]
+set debuginfo_sl1 [standard_output_file $libfile1.sl.debug]
+set debuginfo_sl2 [standard_output_file $libfile2.sl.debug]
+
+file mkdir $debugdir
+file rename -force $debuginfo_sl1 $debugdir
+file rename -force $debuginfo_sl2 $debugdir
+
+# Restart GDB and clear the debuginfod client cache.  Then load BINFILE into
+# GDB and start running it.  Match output with pattern RES and use TESTNAME
+# as the test name.
+proc_with_prefix clean_restart_with_prompt { binfile testname } {
+    global cache
+
+    # Delete client cache so debuginfo downloads again.
+    file delete -force $cache
+    clean_restart
+
+    gdb_test_no_output "set debuginfod enabled on" \
+		       "clean_restart enable $testname"
+    gdb_load $binfile
+
+    runto_main
+}
+
+# Tests with no debuginfod server running.
+proc_with_prefix no_url { } {
+    global binfile libfile1 libfile2
+
+    gdb_load $binfile
+    if {![runto_main]} {
+       return
+    }
+
+    # Check that no section is downloaded and no debuginfo is found.
+    gdb_test "info sharedlibrary" ".*Yes \\(\\*\\).*$libfile1.*" \
+	     "found no url lib1"
+    gdb_test "info sharedlibrary" ".*Yes \\(\\*\\).*$libfile2.*" \
+	     "found no url lib2"
+}
+
+# Tests with a debuginfod server running.
+proc_with_prefix local_url { } {
+    global binfile
+    global libsrc1 lib_sl1 libfile1
+    global libsrc2 lib_sl2 libfile2
+    global debugdir db
+
+    set url [start_debuginfod $db $debugdir]
+    if { $url == "" } {
+	unresolved "failed to start debuginfod server"
+	return
+    }
+
+    # Point GDB to the server.
+    setenv DEBUGINFOD_URLS $url
+
+    clean_restart_with_prompt $binfile "index"
+
+    # Download debuginfo when stepping into a function.
+    set res ".*separate debug info for $lib_sl1.*\"In ${libfile1}\\\\n\".*"
+    gdb_test "step" $res "step"
+
+    clean_restart_with_prompt $binfile "break"
+
+    # Download debuginfo when setting a breakpoint.
+    set res ".*separate debug info for $lib_sl2.*"
+    gdb_test "br libsection2_test" $res "break set"
+
+    # Hit the breakpoint.
+    set res ".*Breakpoint 2, libsection2_test.*\"In ${libfile2}\\\\n\".*"
+    gdb_test "c" $res "break continue"
+}
+
+# Create CACHE and DB directories ready for debuginfod to use.
+prepare_for_debuginfod cache db
+
+with_debuginfod_env $cache {
+    no_url
+    local_url
+}
+
+stop_debuginfod

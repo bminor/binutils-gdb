@@ -987,6 +987,10 @@ syms_from_objfile (struct objfile *objfile,
 static void
 finish_new_objfile (struct objfile *objfile, symfile_add_flags add_flags)
 {
+  struct objfile *parent = objfile->separate_debug_objfile_backlink;
+  bool was_deferred
+    = (parent != nullptr) && ((parent->flags & OBJF_DOWNLOAD_DEFERRED) != 0);
+
   /* If this is the main symbol file we have to clean up all users of the
      old main symbol file.  Otherwise it is sufficient to fixup all the
      breakpoints that may have been redefined by this symbol file.  */
@@ -997,7 +1001,7 @@ finish_new_objfile (struct objfile *objfile, symfile_add_flags add_flags)
 
       clear_symtab_users (add_flags);
     }
-  else if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0)
+  else if ((add_flags & SYMFILE_DEFER_BP_RESET) == 0 && !was_deferred)
     {
       breakpoint_re_set ();
     }
@@ -1119,6 +1123,12 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
 
   if (objfile->sf != nullptr)
     finish_new_objfile (objfile, add_flags);
+
+  /* Remove deferred status now in case any observers trigger symtab
+     expansion.  Otherwise gdb might try to read parent for psymbols
+     when it should read the separate debug objfile instead.  */
+  if (parent != nullptr && ((parent->flags & OBJF_DOWNLOAD_DEFERRED) != 0))
+    parent->remove_deferred_status ();
 
   gdb::observers::new_objfile.notify (objfile);
 

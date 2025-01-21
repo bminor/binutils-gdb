@@ -54,7 +54,11 @@ dwarf2_section_info::get_bfd_owner () const
       section = get_containing_section ();
       gdb_assert (!section->is_virtual);
     }
-  gdb_assert (section->s.section != nullptr);
+
+  /* This error may occur when attempting to expand symtabs for an objfile
+     with OBJF_DOWNLOAD_DEFERRED set.  */
+  if (section->s.section == nullptr)
+    error (_("Can't find owner of DWARF section"));
   return section->s.section->owner;
 }
 

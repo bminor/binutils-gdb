@@ -967,4 +967,9 @@ extern void create_all_units (dwarf2_per_objfile *per_objfile);
 
 extern htab_up create_quick_file_names_table (unsigned int nr_initial_entries);
 
+/* If OBJFILE contains information from a separately downloaded .gdb_index,
+   attempt to download the full debuginfo.  */
+
+extern void read_full_dwarf_from_debuginfod (struct objfile *);
+
 #endif /* GDB_DWARF2_READ_H */

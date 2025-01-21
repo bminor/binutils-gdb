@@ -217,14 +217,22 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
   /* Compute where we would expect a gdb index file for this build id to be.  */
   std::string filename = make_index_filename (build_id, INDEX4_SUFFIX);
 
+  return lookup_gdb_index (filename.c_str (), resource);
+}
+
+/* See index-cache.h.  */
+
+gdb::array_view<const gdb_byte>
+index_cache::lookup_gdb_index (const char *filename,
+			       std::unique_ptr<index_cache_resource> *resource)
+{
   try
     {
-      index_cache_debug ("trying to read %s",
-			 filename.c_str ());
+      index_cache_debug ("trying to read %s", filename);
 
       /* Try to map that file.  */
       index_cache_resource_mmap *mmap_resource
-	= new index_cache_resource_mmap (filename.c_str ());
+	= new index_cache_resource_mmap (filename);
 
       /* Yay, it worked!  Hand the resource to the caller.  */
       resource->reset (mmap_resource);
@@ -236,7 +244,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
   catch (const gdb_exception_error &except)
     {
       index_cache_debug ("couldn't read %s: %s",
-			 filename.c_str (), except.what ());
+			 filename, except.what ());
     }
 
   return {};
@@ -253,6 +261,12 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
   return {};
 }
 
+gdb::array_view<const gdb_byte>
+index_cache::lookup_gdb_index_debuginfod
+  (const char *index_path, std::unique_ptr<index_cache_resource> *resource)
+{
+  return {};
+}
 #endif
 
 /* See dwarf-index-cache.h.  */

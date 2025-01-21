@@ -1216,7 +1216,8 @@ elf_symfile_read_dwarf2 (struct objfile *objfile,
 	   && objfile->separate_debug_objfile_backlink == NULL)
     {
       if (objfile->find_and_add_separate_symbol_file (symfile_flags))
-	gdb_assert (objfile->separate_debug_objfile != nullptr);
+	gdb_assert (objfile->separate_debug_objfile != nullptr
+		    || (objfile->flags & OBJF_DOWNLOAD_DEFERRED) != 0);
       else
 	has_dwarf2 = false;
     }

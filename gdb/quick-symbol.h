@@ -202,6 +202,10 @@ struct quick_symbol_functions
   virtual void compute_main_name (struct objfile *objfile)
   {
   }
+
+  /* True if this quick_symbol_functions is derived from a separately
+     downloaded index.  */
+  bool from_separate_index = false;
 };
 
 typedef std::unique_ptr<quick_symbol_functions> quick_symbol_functions_up;

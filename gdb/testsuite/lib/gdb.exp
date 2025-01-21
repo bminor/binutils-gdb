@@ -10130,10 +10130,14 @@ proc get_index_type { objfile { testname "" } } {
 # STYLE controls which style of index to add, if needed.  The empty
 # string (the default) means .gdb_index; "-dwarf-5" means .debug_names.
 
-proc ensure_gdb_index { binfile {style ""} } {
+proc ensure_gdb_index { binfile {style ""} {testname_prefix ""} } {
     set testfile [file tail $binfile]
-
     set test "check if index present"
+
+    if { $testname_prefix != "" } {
+      set test "$testname_prefix $test"
+    }
+
     set index_type [get_index_type $testfile $test]
 
     if { $index_type eq "gdb" || $index_type eq "dwarf5" } {
