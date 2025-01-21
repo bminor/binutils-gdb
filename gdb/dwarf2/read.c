@@ -20832,7 +20832,17 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
       str_offsets_section = &cu->dwo_unit->dwo_file
 			       ->sections.str_offsets;
       str_section = &cu->dwo_unit->dwo_file->sections.str;
-      str_offsets_base = cu->header.addr_size;
+      if (cu->header.version <= 4)
+	str_offsets_base = 0;
+      else
+	{
+	  bfd *abfd = str_offsets_section->get_bfd_owner ();
+	  unsigned int bytes_read = 0;
+	  read_initial_length (abfd, str_offsets_section->buffer, &bytes_read,
+			       false);
+	  const bool is_dwarf64 = bytes_read != 4;
+	  str_offsets_base = is_dwarf64 ? 16 : 8;
+	}
     }
   else
     {
