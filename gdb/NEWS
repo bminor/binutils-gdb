@@ -181,6 +181,10 @@ qExecAndArgs
   In systems that don't support linker namespaces, or if the inferior hasn't
   started yet, these always return the integer 0.
 
+* The 'org.gnu.gdb.i386.linux' target description feature can now
+  contain three additional registers which provide access to the TLS
+  related GDT entries on i386 (and x86-64 when compiling with -m32).
+
 * Add record full support for rv64gc architectures
 
 * Debugging Linux programs that use AArch64 Guarded Control Stacks is now

@@ -50388,8 +50388,15 @@ describe the upper 128 bits of @sc{ymm} registers:
 @samp{ymm0h} through @samp{ymm15h} for amd64
 @end itemize
 
-The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should
-describe a single register, @samp{orig_eax}.
+The @samp{org.gnu.gdb.i386.linux} feature is optional.  If the feature
+is present, then it should describe the 32 bit register, @samp{orig_eax}.
+
+Additionally, the @samp{org.gnu.gdb.i386.linux} feature can optionally
+contain three 128 bit registers called @samp{i386_tls_gdt_0},
+@samp{i386_tls_gdt_1}, and @samp{i386_tls_gdt_2}.  Each of these
+registers contains one 16 byte @samp{struct user_desc} (see @kbd{man
+2 get_thread_area}) object which describes one of the three TLS
+related GDT entries.
 
 The @samp{org.gnu.gdb.i386.segments} feature is optional.  It should
 describe two system registers: @samp{fs_base} and @samp{gs_base}.

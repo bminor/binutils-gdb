@@ -8,4 +8,9 @@
 <!DOCTYPE feature SYSTEM "gdb-target.dtd">
 <feature name="org.gnu.gdb.i386.linux">
   <reg name="orig_eax" bitsize="32" type="int" regnum="41"/>
+
+  <vector id="i386_tls_gdt_reg" type="uint32" count="4" />
+  <reg name="i386_tls_gdt_0" bitsize="128" type="i386_tls_gdt_reg" group="system" />
+  <reg name="i386_tls_gdt_1" bitsize="128" type="i386_tls_gdt_reg" group="system" />
+  <reg name="i386_tls_gdt_2" bitsize="128" type="i386_tls_gdt_reg" group="system" />
 </feature>

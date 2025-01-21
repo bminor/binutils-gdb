@@ -38,6 +38,9 @@
 #include "x86-linux-nat.h"
 #include "nat/linux-ptrace.h"
 #include "nat/amd64-linux-siginfo.h"
+#include "nat/i386-linux.h"
+
+#include <asm/ldt.h>
 
 /* This definition comes from prctl.h.  Kernels older than 2.5.64
    do not have it.  */
@@ -89,7 +92,8 @@ static int amd64_linux_gregset32_reg_offset[] =
   -1,				  /* PKEYS register PKRU  */
   -1,				  /* SSP register.  */
   -1, -1,			  /* fs/gs base registers.  */
-  ORIG_RAX * 8			  /* "orig_eax"  */
+  ORIG_RAX * 8,			  /* "orig_eax"  */
+  -1, -1, -1,			  /* TLS GDT regs: i386_tls_gdt_0...2.  */
 };
 
 
@@ -236,7 +240,13 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 
   if (regnum == -1 || !amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
-      elf_fpregset_t fpregs;
+      if (regnum == -1 || i386_is_tls_regnum_p (regnum))
+	{
+	  if (tdep->i386_linux_tls)
+	    i386_fetch_tls_regs (regcache, tid, regnum);
+	  if (regnum != -1)
+	    return;
+	}
 
       if (have_ptrace_getregset == TRIBOOL_TRUE)
 	{
@@ -266,6 +276,8 @@ amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 	}
       else
 	{
+	  elf_fpregset_t fpregs;
+
 	  if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
 	    perror_with_name (_("Couldn't get floating point status"));
 
@@ -308,7 +320,13 @@ amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 
   if (regnum == -1 || !amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
-      elf_fpregset_t fpregs;
+      if (regnum == -1 || i386_is_tls_regnum_p (regnum))
+	{
+	  if (tdep->i386_linux_tls)
+	    i386_store_tls_regs (regcache, tid, regnum);
+	  if (regnum != -1)
+	    return;
+	}
 
       if (have_ptrace_getregset == TRIBOOL_TRUE)
 	{
@@ -337,6 +355,8 @@ amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 	}
       else
 	{
+	  elf_fpregset_t fpregs;
+
 	  if (ptrace (PTRACE_GETFPREGS, tid, 0, (long) &fpregs) < 0)
 	    perror_with_name (_("Couldn't get floating point status"));
 

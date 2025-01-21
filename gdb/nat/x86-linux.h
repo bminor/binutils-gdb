@@ -21,6 +21,7 @@
 #define GDB_NAT_X86_LINUX_H
 
 #include "nat/linux-nat.h"
+#include <asm/ldt.h>
 
 /* Set whether our local mirror of LWP's debug registers has been
    changed since the values were last written to the thread.  Nonzero
@@ -78,5 +79,19 @@ extern x86_linux_arch_size x86_linux_ptrace_get_arch_size (int tid);
 /* Check shadow stack hardware and kernel support.  */
 
 extern bool x86_check_ssp_support (const int tid);
+
+/* Get the three TLS related GDT (Global Descriptor Table) entries from
+   the kernel for thread PID, placing the results into BUFFER, an array of
+   length 3.  */
+
+extern bool i386_ptrace_get_tls_data
+  (int pid, gdb::array_view<user_desc> buffer);
+
+/* Store the three TLS related GDT (Global Descriptor Table) entries held
+   in BUFFER back into the kernel for thread PID.  BUFFER must have a
+   length of three.  */
+
+extern bool i386_ptrace_set_tls_data
+  (int pid, gdb::array_view<user_desc> buffer);
 
 #endif /* GDB_NAT_X86_LINUX_H */

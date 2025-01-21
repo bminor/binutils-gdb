@@ -1,0 +1,335 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Check that the TLS GDT registers are available for i386 executable.
+
+require {is_any_target "i?86-*-linux*" "x86_64-*-linux*"}
+
+standard_testfile
+
+set options {debug pthreads}
+if {![istarget "i386-*-*"]} {
+    lappend options "additional_flags=-m32"
+}
+
+# Check that we can actually compile a 32-bit executable.
+#
+# It is possible that even with the above setting of OPTIONS, we might
+# still get a 64-bit executable, for example, running on x86-64 with
+# '--target_board=unix/-m64' will add the -m64 after the above -m32,
+# meaning we always end up with a 64-bit executable.
+#
+# If the following compiles then we are getting a 32-bit executable.
+if {![gdb_can_simple_compile is_lp64_target {
+	int dummy[sizeof (int) == 4
+		  && sizeof (void *) == 4
+		  && sizeof (long) == 4 ? 1 : -1];} \
+	  object $options]} {
+    unsupported "cannot compile 32-bit executable"
+    return
+}
+
+if { [build_executable "failed to prepare" $testfile $srcfile $options] } {
+    return
+}
+
+# Start an inferior and check we can read and modify the TLS registers.
+proc_with_prefix test_tls_reg_availability {} {
+    clean_restart $::testfile
+
+    if {![runto_main]} {
+	return
+    }
+
+    set tls_reg_vals { "" "" "" }
+    gdb_test_multiple "info registers system" "check for TLS regs" {
+	-re "^info registers system\r\n" {
+	    exp_continue
+	}
+	-re "^i386_tls_gdt_(\\d) \\{($::hex), ($::hex), ($::hex), ($::hex)\\}\r\n" {
+	    set idx $expect_out(1,string)
+	    set val0 $expect_out(2,string)
+	    set val1 $expect_out(3,string)
+	    set val2 $expect_out(4,string)
+	    set val3 $expect_out(5,string)
+	    set val [list $val0 $val1 $val2 $val3]
+	    set tls_reg_vals [lreplace $tls_reg_vals $idx $idx $val]
+	    exp_continue
+	}
+	-re "^$::gdb_prompt $" {
+	    gdb_assert {[lsearch -exact $tls_reg_vals ""] == -1} $gdb_test_name
+	}
+	-re "^\[^\r\n\]+\r\n" {
+	    exp_continue
+	}
+    }
+
+    if { [lindex $tls_reg_vals 0] != [lindex $tls_reg_vals 1] } {
+	set new_vals [lindex $tls_reg_vals 0]
+	set old_vals [lindex $tls_reg_vals 1]
+
+	set val0 [lindex $old_vals 0]
+	set val1 [lindex $new_vals 1]
+	set val2 [lindex $new_vals 2]
+	set val3 [lindex $new_vals 3]
+
+	set new_val_str "{$val0, $val1, $val2, $val3}"
+
+	gdb_test_no_output "set \$i386_tls_gdt_1 = $new_val_str"
+	set re [string_to_regexp $new_val_str]
+	gdb_test "print /x \$i386_tls_gdt_1" " = $re"
+    }
+
+    gdb_test_no_output "set should_dump_core_p=0"
+    gdb_test_no_output "set wait_for_gdb_p=0"
+
+    gdb_continue_to_end "" continue true
+}
+
+# Start GDB using global BINFILE, load COREFILE (which must match
+# BINFILE), and check that the core has two threads, that the TLS
+# registers are visible in both threads, and that the TLS register
+# values are different in each thread.
+proc load_core_and_test_tls_regs { corefile } {
+    clean_restart $::testfile
+
+    gdb_core_cmd $corefile "load corefile"
+
+    gdb_test "info threads" \
+	[multi_line \
+	     "\\*\\s+1\\s+Thread \[^\r\n\]+" \
+	     "\\s+2\\s+Thread \[^\r\n\]+"] \
+	"check for two threads"
+
+    # Record the TLS values in thread 1.
+    set tls_reg_vals_thr_1 { "" "" "" }
+    gdb_test_multiple "info registers system" "check for TLS regs thread 1" {
+	-re "^info registers system\r\n" {
+	    exp_continue
+	}
+	-re "^i386_tls_gdt_(\\d) (\\{$::hex, $::hex, $::hex, $::hex\\})\r\n" {
+	    set idx $expect_out(1,string)
+	    set val $expect_out(2,string)
+	    set tls_reg_vals_thr_1 [lreplace $tls_reg_vals_thr_1 $idx $idx $val]
+	    exp_continue
+	}
+	-re "^$::gdb_prompt $" {
+	    gdb_assert {[lsearch -exact $tls_reg_vals_thr_1 ""] == -1} $gdb_test_name
+	}
+	-re "^\[^\r\n\]+\r\n" {
+	    exp_continue
+	}
+    }
+
+    # Check a TLS variable in thread 1.
+    gdb_test "print local_var" " = 1" \
+	"check TLS variable in thread 1"
+
+    # Switch to thread 2 and confirm the values are different.
+    gdb_test "thread 2"
+
+    set tls_reg_vals_thr_2 { "" "" "" }
+    gdb_test_multiple "info registers system" "check for TLS regs thread 2" {
+	-re "^info registers system\r\n" {
+	    exp_continue
+	}
+	-re "^i386_tls_gdt_(\\d) (\\{$::hex, $::hex, $::hex, $::hex\\})\r\n" {
+	    set idx $expect_out(1,string)
+	    set val $expect_out(2,string)
+	    set tls_reg_vals_thr_2 \
+		[lreplace $tls_reg_vals_thr_2 $idx $idx $val]
+	    exp_continue
+	}
+	-re "^$::gdb_prompt $" {
+	    gdb_assert {[lsearch -exact $tls_reg_vals_thr_2 ""] == -1} \
+		$gdb_test_name
+	}
+	-re "^\[^\r\n\]+\r\n" {
+	    exp_continue
+	}
+    }
+
+    # Check a TLS variable in thread 2.
+    gdb_test "print local_var" " = 2" \
+	"check TLS variable in thread 2"
+
+    set all_same [expr {[lindex $tls_reg_vals_thr_1 0] == [lindex $tls_reg_vals_thr_2 0] \
+		      && [lindex $tls_reg_vals_thr_1 1] == [lindex $tls_reg_vals_thr_2 1] \
+		      && [lindex $tls_reg_vals_thr_1 2] == [lindex $tls_reg_vals_thr_2 2]}]
+    gdb_assert {!$all_same} \
+	"tls regs are different between threads"
+}
+
+# Generate a core file using the gcore command.  Load it into GDB and
+# check we can still read the TLS registers.
+proc_with_prefix test_gcore_tls {} {
+
+    if {![gcore_cmd_available]} {
+	unsupported "gcore command not available"
+	return
+    }
+
+    clean_restart $::testfile
+
+    if {![runto_main]} {
+	return
+    }
+
+    gdb_test_no_output "set should_dump_core_p=0"
+
+    gdb_breakpoint crash_func
+    gdb_continue_to_breakpoint "stop at crash_func"
+
+    set corefile [standard_output_file ${::testfile}.gcore]
+    if {![gdb_gcore_cmd $corefile "dump core"]} {
+	return
+    }
+
+    set readelf_program [gdb_find_readelf]
+    set res [catch {exec $readelf_program -n $corefile} output]
+    if { $res != 0 } {
+	unresolved "unable to run readelf to check for TLS notes"
+	return
+    }
+    set lines [split $output \n]
+    set tls_count 0
+    foreach line $lines {
+	if {[regexp "^\\s+LINUX\\s+$::hex\\s+NT_386_TLS" $line]} {
+	    incr tls_count
+	}
+    }
+    gdb_assert {$tls_count == 2} \
+	"expected number of TLS notes"
+
+    load_core_and_test_tls_regs $corefile
+}
+
+# Generate a core file using the gcore command, but before doing so,
+# clear all the TLS related GDT entries.  When the TLS GDT entries
+# have a base address and limit of zero the kernel doesn't emit the
+# NT_386_TLS note, GDB copies this behaviour.
+proc_with_prefix test_gcore_no_tls {} {
+
+    if {![gcore_cmd_available]} {
+	unsupported "gcore command not available"
+	return
+    }
+
+    clean_restart $::testfile
+
+    if {![runto_main]} {
+	return
+    }
+
+    gdb_test_no_output "set should_dump_core_p=0"
+
+    gdb_breakpoint crash_func
+    gdb_continue_to_breakpoint "stop at crash_func"
+
+    # Clear the TLS registers in each thread.
+    foreach_with_prefix thr { 1 2 } {
+	gdb_test "thread $thr" ".*" \
+	    "switch thread to clear tls regs"
+	gdb_test_no_output "set \$i386_tls_gdt_0 = { 0x0, 0x0, 0x0, 0x28 }"
+	gdb_test_no_output "set \$i386_tls_gdt_1 = { 0x0, 0x0, 0x0, 0x28 }"
+	gdb_test_no_output "set \$i386_tls_gdt_2 = { 0x0, 0x0, 0x0, 0x28 }"
+    }
+
+    set corefile [standard_output_file ${::testfile}.gcore]
+    if {![gdb_gcore_cmd $corefile "dump core"]} {
+	return
+    }
+
+    # Look in the core file for NT_386_TLS entries.  There should be
+    # none.
+    set readelf_program [gdb_find_readelf]
+    set res [catch {exec $readelf_program -n $corefile} output]
+    if { $res != 0 } {
+	unresolved "unable to run readelf to check for TLS notes"
+	return
+    }
+    set lines [split $output \n]
+    set tls_count 0
+    foreach line $lines {
+	if {[regexp "^\\s+LINUX\\s+$::hex\\s+NT_386_TLS" $line]} {
+	    incr tls_count
+	}
+    }
+    gdb_assert {$tls_count == 0} \
+	"expected number of TLS notes"
+
+    # Restart GDB and load the core file.  As there are no NT_386_TLS
+    # entries the TLS registers should show as unavailable.
+    clean_restart $::testfile
+
+    gdb_core_cmd $corefile "load corefile"
+
+    gdb_test "info threads" \
+	[multi_line \
+	     "\\*\\s+1\\s+Thread \[^\r\n\]+" \
+	     "\\s+2\\s+Thread \[^\r\n\]+"] \
+	"check for two threads"
+
+    foreach_with_prefix thr { 1 2 } {
+	set unavailable_tls_count 0
+	set valid_tls_count 0
+	gdb_test "thread $thr" ".*" \
+	    "switch thread to check TLS register status"
+	gdb_test_multiple "info registers system" "check TLS reg values" {
+	    -re "^info registers system\r\n" {
+		exp_continue
+	    }
+	    -re "^i386_tls_gdt_\\d \\{<unavailable>, <unavailable>, <unavailable>, <unavailable>\\}\r\n" {
+		incr unavailable_tls_count
+		exp_continue
+	    }
+	    -re "^i386_tls_gdt_\\d \[^\r\n\]+\r\n" {
+		incr valid_tls_count
+		exp_continue
+	    }
+
+	    -re "^$::gdb_prompt $" {
+		gdb_assert {$valid_tls_count == 0 && \
+				$unavailable_tls_count == 3} \
+		    $gdb_test_name
+	    }
+	    -re "^\[^\r\n\]+\r\n" {
+		exp_continue
+	    }
+	}
+
+	# Check a TLS variable in this thread.
+	gdb_test "print local_var" " = $thr" \
+	    "check TLS variable in thread $thr"
+    }
+}
+
+# Generate a native core file.  Load it into GDB and check the TLS
+# registers can be read.
+proc_with_prefix test_native_core {} {
+    set corefile [core_find $::binfile]
+    if { $corefile eq "" } {
+	unsupported "unable to generate core file"
+	return
+    }
+
+    load_core_and_test_tls_regs $corefile
+}
+
+# Run the tests.
+test_tls_reg_availability
+test_gcore_tls
+test_gcore_no_tls
+test_native_core

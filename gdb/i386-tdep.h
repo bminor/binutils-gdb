@@ -240,6 +240,11 @@ struct i386_gdbarch_tdep : gdbarch_tdep_base
   struct type *i386_zmm_type = nullptr;
   struct type *i387_ext_type = nullptr;
 
+  /* If the registers containing the i386 Linux TLS related global
+     descriptor table information are available.  This is used to decide
+     whether to add the NT_386_TLS note to the core file or not.  */
+  bool i386_linux_tls = false;
+
   /* Process record/replay target.  */
   /* The map for registers because the AMD64's registers order
      in GDB is not same as I386 instructions.  */

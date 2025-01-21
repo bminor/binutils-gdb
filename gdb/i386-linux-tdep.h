@@ -39,6 +39,13 @@ enum i386_linux_regnum
      is supposed to restart.  */
   I386_LINUX_ORIG_EAX_REGNUM = I386_NUM_REGS,
 
+  /* Register numbers for the three TLS GDT registers.  These contain the
+     'struct user_desc' (see 'man 2 get_thread_area') values for the three
+     TLS related Global Descriptor Table entries.  */
+  I386_LINUX_TLS_GDT_0,
+  I386_LINUX_TLS_GDT_1,
+  I386_LINUX_TLS_GDT_2,
+
   /* Total number of registers for GNU/Linux.  */
   I386_LINUX_NUM_REGS
 
@@ -60,5 +67,13 @@ extern bool i386_linux_core_read_x86_xsave_layout (struct gdbarch *gdbarch,
 						   x86_xsave_layout &layout);
 
 extern int i386_linux_gregset_reg_offset[];
+
+/* Return true if REGNUM is one of the 3 tls gdt registers.  */
+
+static inline bool
+i386_is_tls_regnum_p (int regnum)
+{
+  return regnum >= I386_LINUX_TLS_GDT_0 && regnum <= I386_LINUX_TLS_GDT_2;
+}
 
 #endif /* GDB_I386_LINUX_TDEP_H */
