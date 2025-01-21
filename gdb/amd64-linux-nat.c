@@ -52,6 +52,14 @@ struct amd64_linux_nat_target final : public x86_linux_nat_target
 
   bool low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
     override;
+
+  /* Override default xfer_partial, adding support for x86 specific OBJECT
+     types.  */
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex, gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
 };
 
 static amd64_linux_nat_target the_amd64_linux_nat_target;
@@ -327,6 +335,23 @@ amd64_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 	    perror_with_name (_("Couldn't write floating point status"));
 	}
     }
+}
+
+
+/* See class declaration above.  */
+
+enum target_xfer_status
+amd64_linux_nat_target::xfer_partial (enum target_object object,
+				      const char *annex, gdb_byte *readbuf,
+				      const gdb_byte *writebuf,
+				      ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+{
+  if (object == TARGET_OBJECT_X86_LINUX_TLS_DESC)
+    return x86_linux_nat_target::xfer_tls_desc (readbuf, writebuf, offset,
+						len, xfered_len, 12);
+
+  return x86_linux_nat_target::xfer_partial (object, annex, readbuf, writebuf,
+					     offset, len, xfered_len);
 }
 
 

@@ -37,6 +37,8 @@
 #include "arch-utils.h"
 #include "xml-syscall.h"
 #include "infrun.h"
+#include "elf/common.h"
+#include "elf-bfd.h"
 
 #include "i387-tdep.h"
 #include "gdbsupport/x86-xstate.h"
@@ -1237,6 +1239,31 @@ i386_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
   return closure_;
 }
 
+/* Wrap around linux_make_corefile_notes, this adds the TLS related note.  */
+
+static gdb::unique_xmalloc_ptr<char>
+i386_linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
+{
+  gdb::unique_xmalloc_ptr<char> note_data
+    = linux_make_corefile_notes (gdbarch, obfd, note_size);
+
+  /* Fetch the TLS data.  */
+  std::optional<gdb::byte_vector> tls =
+    target_read_alloc (current_inferior ()->top_target (),
+		       TARGET_OBJECT_X86_LINUX_TLS_DESC, nullptr);
+  if (tls.has_value () && !tls->empty ())
+    {
+      note_data.reset (elfcore_write_note (obfd, note_data.release (),
+					   note_size, "LINUX", NT_386_TLS,
+					   tls->data (), tls->size ()));
+
+      if (!note_data)
+	return nullptr;
+    }
+
+  return note_data;
+}
+
 static void
 i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1488,6 +1515,9 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_I386);
   set_gdbarch_get_syscall_number (gdbarch,
 				  i386_linux_get_syscall_number);
+
+  /* Custom core file notes function adds TLS descriptors.  */
+  set_gdbarch_make_corefile_notes (gdbarch, i386_linux_make_corefile_notes);
 }
 
 void _initialize_i386_linux_tdep ();

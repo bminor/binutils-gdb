@@ -2343,10 +2343,9 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   return 1;
 }
 
-/* Build the note section for a corefile, and return it in a malloc
-   buffer.  */
+/* See linux-tdep.h.  */
 
-static gdb::unique_xmalloc_ptr<char>
+gdb::unique_xmalloc_ptr<char>
 linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 {
   struct elf_internal_linux_prpsinfo prpsinfo;

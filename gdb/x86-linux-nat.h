@@ -79,6 +79,19 @@ protected:
   /* Override the GNU/Linux inferior startup hook.  */
   void post_startup_inferior (ptid_t) override;
 
+  /* Read TLS descriptor information from the target.  Writing is TLS
+     descriptor information is not supported.  The GDB_BASE_IDX is the
+     array index into the Linux kernel get_thread_area data; the index
+     differs between i386 and amd64, but is a fixed value for each.  All
+     other arguments are as for xfer_partial.
+
+     If there is no TLS descriptor information then this function will
+     return TARGET_XFER_E_IO.  */
+  enum target_xfer_status xfer_tls_desc
+	(gdb_byte *readbuf, const gdb_byte *writebuf,
+	 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len,
+	 uint32_t gdt_base_idx);
+
 private:
   x86_xsave_layout m_xsave_layout;
 };

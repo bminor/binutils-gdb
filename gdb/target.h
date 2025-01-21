@@ -208,6 +208,8 @@ enum target_object
   TARGET_OBJECT_FREEBSD_VMMAP,
   /* FreeBSD process strings.  */
   TARGET_OBJECT_FREEBSD_PS_STRINGS,
+  /* The x86/Linux GDT entries for TLS regions.  */
+  TARGET_OBJECT_X86_LINUX_TLS_DESC,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 

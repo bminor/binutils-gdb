@@ -117,4 +117,14 @@ extern CORE_ADDR linux_get_hwcap2 ();
 extern struct link_map_offsets *linux_ilp32_fetch_link_map_offsets ();
 extern struct link_map_offsets *linux_lp64_fetch_link_map_offsets ();
 
+/* Build the note section for a corefile, and return it in an allocated
+   buffer.  OBFD is the bfd object the notes are being written into,
+   GDBARCH is the architecture of the notes to be written.  *NOTE_SIZE will
+   be updated with the size of the allocated buffer.  If something goes
+   wrong then this function returns NULL.  *NOTE_SIZE can be updated even
+   if NULL is returned, but the updated value is meaningless.  */
+
+extern gdb::unique_xmalloc_ptr<char>
+linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
+
 #endif /* GDB_LINUX_TDEP_H */

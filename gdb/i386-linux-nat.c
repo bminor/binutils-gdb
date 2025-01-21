@@ -44,6 +44,14 @@ struct i386_linux_nat_target final : public x86_linux_nat_target
 
   /* Override the default ptrace resume method.  */
   void low_resume (ptid_t ptid, int step, enum gdb_signal sig) override;
+
+  /* Override default xfer_partial, adding support for x86 specific OBJECT
+     types.  */
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex, gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
 };
 
 static i386_linux_nat_target the_i386_linux_nat_target;
@@ -694,6 +702,22 @@ i386_linux_nat_target::low_resume (ptid_t ptid, int step, enum gdb_signal signal
 
   if (ptrace (request, pid, 0, gdb_signal_to_host (signal)) == -1)
     perror_with_name (("ptrace"));
+}
+
+/* See class declaration above.  */
+
+enum target_xfer_status
+i386_linux_nat_target::xfer_partial (enum target_object object,
+				    const char *annex, gdb_byte *readbuf,
+				    const gdb_byte *writebuf,
+				    ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
+{
+  if (object == TARGET_OBJECT_X86_LINUX_TLS_DESC)
+    return x86_linux_nat_target::xfer_tls_desc (readbuf, writebuf, offset,
+						len, xfered_len, 6);
+
+  return x86_linux_nat_target::xfer_partial (object, annex, readbuf, writebuf,
+					     offset, len, xfered_len);
 }
 
 void _initialize_i386_linux_nat ();

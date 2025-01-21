@@ -43,6 +43,13 @@
 #include "nat/linux-ptrace.h"
 #include "nat/x86-linux-tdesc.h"
 
+#include <asm/ldt.h>
+#include <linux/unistd.h>
+#include <linux/elf.h>
+#include <sys/user.h>
+#include <sys/procfs.h>
+#include <sys/uio.h>
+
 /* linux_nat_target::low_new_fork implementation.  */
 
 void
@@ -164,6 +171,85 @@ const struct btrace_config *
 x86_linux_nat_target::btrace_conf (const struct btrace_target_info *btinfo)
 {
   return linux_btrace_conf (btinfo);
+}
+
+/* ... */
+
+static int
+get_thread_area (pid_t pid, unsigned int idx, struct user_desc *ud)
+{
+  void *addr = (void *) (uintptr_t) idx;
+
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 25
+#endif
+
+  if (ptrace (PTRACE_GET_THREAD_AREA, pid, addr, ud) < 0)
+    return -1;
+
+  return 0;
+}
+
+/* Get all TLS area data.  */
+
+static gdb::byte_vector
+x86_linux_get_tls_desc (unsigned int base_gdt_idx)
+{
+  static_assert (sizeof (unsigned int) == 4);
+
+  struct user_desc tls_desc[3];
+  memset (tls_desc, 0, sizeof (tls_desc));
+
+  pid_t pid = inferior_ptid.pid ();
+
+  /* Set true if we see a non-empty GDT entry.  */
+  bool seen_non_empty = false;
+
+  /* Linux reserves 3 GDT entries for TLS.  */
+  for (unsigned int pos = 0; pos < 3; ++pos)
+    {
+      if (get_thread_area (pid, base_gdt_idx + pos, &tls_desc[pos]) != 0)
+	return {};
+      seen_non_empty |= (tls_desc[pos].base_addr != 0 || tls_desc[pos].limit != 0);
+    }
+
+  /* The kernel doesn't emit NT_I386_TLS if all the descriptors are empty.  */
+  if (!seen_non_empty)
+    return {};
+
+  /* Copy the descriptors into a byte vector for return.  */
+  gdb::byte_vector buf;
+  buf.resize (sizeof (tls_desc));
+  memcpy (buf.data (), tls_desc, sizeof (tls_desc));
+  return buf;
+}
+
+/* See x86-linux-nat.h.  */
+
+enum target_xfer_status
+x86_linux_nat_target::xfer_tls_desc (gdb_byte *readbuf, const gdb_byte *writebuf,
+				     ULONGEST offset, ULONGEST len, ULONGEST *xfered_len,
+				     uint32_t gdt_base_idx)
+{
+  /* Don't allow writting to the TLS GDT descriptors.  */
+  if (writebuf != nullptr)
+    return TARGET_XFER_E_IO;
+
+  gdb::byte_vector buf = x86_linux_get_tls_desc (gdt_base_idx);
+  if (buf.empty ())
+    return TARGET_XFER_E_IO;
+
+  ssize_t buf_size = buf.size ();
+  if (offset >= buf_size)
+    return TARGET_XFER_EOF;
+  buf_size -= offset;
+
+  if (buf_size > len)
+    buf_size = len;
+
+  memcpy (readbuf, buf.data () + offset, buf_size);
+  *xfered_len = buf_size;
+  return TARGET_XFER_OK;
 }
 
 
