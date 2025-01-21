@@ -1821,24 +1821,22 @@ ldelf_before_allocation (char **audit, char **depaudit,
 	   a dep audit entry.  */
 	if (audit_libs && *audit_libs != '\0')
 	  {
-	    char *cp = xstrdup (audit_libs);
+	    char *copy_audit_libs = xstrdup (audit_libs);
+	    char *cp = copy_audit_libs;
 	    do
 	      {
-		int more = 0;
 		char *cp2 = strchr (cp, config.rpath_separator);
 
 		if (cp2)
-		  {
-		    *cp2 = '\0';
-		    more = 1;
-		  }
+		  *cp2++ = '\0';
 
-		if (cp != NULL && *cp != '\0')
+		if (*cp != '\0')
 		  ldelf_append_to_separated_string (depaudit, cp);
 
-		cp = more ? ++cp2 : NULL;
+		cp = cp2;
 	      }
 	    while (cp != NULL);
+	    free (copy_audit_libs);
 	  }
       }
 
