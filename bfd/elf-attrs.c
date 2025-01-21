@@ -801,3 +801,21 @@ _bfd_elf_merge_unknown_attribute_list (bfd *ibfd, bfd *obfd)
 
   return result;
 }
+
+bool _bfd_elf_write_section_build_attributes (bfd *abfd,
+					      struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  asection *sec = elf_obj_build_attributes (abfd);
+
+  if (sec == NULL)
+    return true;
+
+  bfd_byte *contents = (bfd_byte *) bfd_malloc (sec->size);
+  if (contents == NULL)
+    return false; /* Bail out and fail.  */
+
+  bfd_elf_set_obj_attr_contents (abfd, contents, sec->size);
+  bfd_set_section_contents (abfd, sec, contents, 0, sec->size);
+  free (contents);
+  return true;
+}

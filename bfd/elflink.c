@@ -12610,9 +12610,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   size_t relr_entsize;
   asection *reldyn = 0;
   bfd_size_type amt;
-  asection *attr_section = NULL;
-  bfd_vma attr_size = 0;
-  const char *std_attrs_section;
   struct elf_link_hash_table *htab = elf_hash_table (info);
   bool sections_removed;
 
@@ -12658,12 +12655,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
      sections from the link, and set the contents of the output
      section.  */
   sections_removed = false;
-  std_attrs_section = get_elf_backend_data (abfd)->obj_attrs_section;
+  const char *obj_attrs_section = get_elf_backend_data (abfd)->obj_attrs_section;
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       bool remove_section = false;
 
-      if ((std_attrs_section && strcmp (o->name, std_attrs_section) == 0)
+      if ((obj_attrs_section && strcmp (o->name, obj_attrs_section) == 0)
 	  || strcmp (o->name, ".gnu.attributes") == 0)
 	{
 	  for (p = o->map_head.link_order; p != NULL; p = p->next)
@@ -12678,12 +12675,16 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      input_section->flags &= ~SEC_HAS_CONTENTS;
 	    }
 
-	  attr_size = bfd_elf_obj_attr_size (abfd);
-	  bfd_set_section_size (o, attr_size);
 	  /* Skip this section later on.  */
 	  o->map_head.link_order = NULL;
-	  if (attr_size)
-	    attr_section = o;
+
+	  bfd_vma attr_size = bfd_elf_obj_attr_size (abfd);
+	  /* Once ELF headers have been written, the size of a section is
+	     frozen. We need to set the size of the attribute section before
+	     _bfd_elf_compute_section_file_positions.  */
+	  bfd_set_section_size (o, attr_size);
+	  if (attr_size > 0)
+	    elf_obj_build_attributes (abfd) = o;
 	  else
 	    remove_section = true;
 	}
@@ -13798,20 +13799,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (! _bfd_elf_write_section_sframe (abfd, info))
     goto error_return;
 
+  if (! _bfd_elf_write_section_build_attributes (abfd, info))
+    goto error_ret2;
+
   if (info->callbacks->emit_ctf)
       info->callbacks->emit_ctf ();
 
   elf_final_link_free (abfd, &flinfo);
-
-  if (attr_section)
-    {
-      bfd_byte *contents = (bfd_byte *) bfd_malloc (attr_size);
-      if (contents == NULL)
-	goto error_ret2;
-      bfd_elf_set_obj_attr_contents (abfd, contents, attr_size);
-      bfd_set_section_contents (abfd, attr_section, contents, 0, attr_size);
-      free (contents);
-    }
 
   if (info->unique_symbol)
     bfd_hash_table_free (&flinfo.local_hash_table);
