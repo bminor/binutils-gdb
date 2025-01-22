@@ -8383,6 +8383,10 @@ _bfd_elf_link_hash_table_free (bfd *obfd)
       bfd_hash_table_free (htab->first_hash);
       free (htab->first_hash);
     }
+  if (htab->eh_info.frame_hdr_is_compact)
+    free (htab->eh_info.u.compact.entries);
+  else
+    free (htab->eh_info.u.dwarf.array);
   _bfd_generic_link_hash_table_free (obfd);
 }
 
