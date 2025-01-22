@@ -20,5 +20,10 @@ cmov:
 	cmoveq		(%rax), %rcx
 	cmovq.e		(%rax), %rcx
 
+	cmov.s		%eax, %ecx
+	cmovw.s		%ax, %cx
+	cmovl.s		%eax, %ecx
+	cmovq.s		%rax, %rcx
+
 	fcmovu		%st(1), %st
 	fcmov.u		%st(1), %st

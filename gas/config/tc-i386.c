@@ -7751,6 +7751,32 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 
   if (!current_templates.start)
     {
+#ifdef TE_SOLARIS
+      /* Sun specifies an alternative form for CMOVcc: Size suffix (if any)
+	 first, then a dot, then the condition code mnemonic.  */
+      if ((mnemonic + 4 == dot_p && !memcmp (mnemonic, "cmov", 4))
+	  /* While doc doesn't say so, gcc assumes it: Same for FCMOVcc,
+	     except that there's no size suffix to care about.  */
+	  || (mnemonic + 5 == dot_p && !memcmp (mnemonic, "fcmov", 5)))
+	{
+	  /* Simply strip the dot.  */
+	  memmove (dot_p, dot_p + 1, mnem_p - dot_p);
+	  dot_p = mnem_p - 1;
+	}
+      else if (!intel_syntax
+	       && mnemonic + 5 == dot_p
+	       && !memcmp (mnemonic, "cmov", 4)
+	       && strchr ("lqw", TOLOWER (dot_p[-1])))
+	{
+	  /* Strip the dot, while moving the suffix.  */
+	  char suffix = dot_p[-1];
+
+	  memmove (dot_p - 1, dot_p + 1, mnem_p - dot_p);
+	  mnem_p[-2] = suffix;
+	  dot_p = mnem_p - 1;
+	}
+      else
+#endif
       /* Deprecated functionality (new code should use pseudo-prefixes instead):
 	 Check if we should swap operand or force 32bit displacement in
 	 encoding.  */
@@ -7781,33 +7807,6 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	  else if (pp.disp_encoding != disp_encoding_32bit)
 	    as_warn (_("ignoring `.d32' suffix due to earlier `{disp<N>}'"));
 	}
-#ifdef TE_SOLARIS
-      /* Sun specifies an alternative form for CMOVcc: Size suffix (if any)
-	 first, then a dot, then the condition code mnemonic.  */
-      else if ((mnemonic + 4 == dot_p
-		&& !memcmp (mnemonic, "cmov", 4))
-	       /* While doc doesn't say so, gcc assumes it: Same for FCMOVcc,
-		  except that there's no size suffix to care about.  */
-	       || (mnemonic + 5 == dot_p
-		   && !memcmp (mnemonic, "fcmov", 5)))
-	{
-	  /* Simply strip the dot.  */
-	  memmove (dot_p, dot_p + 1, mnem_p - dot_p);
-	  dot_p = mnem_p - 1;
-	}
-      else if (!intel_syntax
-	       && mnemonic + 5 == dot_p
-	       && !memcmp (mnemonic, "cmov", 4)
-	       && strchr ("lqw", TOLOWER (dot_p[-1])))
-	{
-	  /* Strip the dot, while moving the suffix.  */
-	  char suffix = dot_p[-1];
-
-	  memmove (dot_p - 1, dot_p + 1, mnem_p - dot_p);
-	  mnem_p[-2] = suffix;
-	  dot_p = mnem_p - 1;
-	}
-#endif
       else
 	goto check_suffix;
       mnem_p = dot_p;
