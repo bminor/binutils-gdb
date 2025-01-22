@@ -73,20 +73,16 @@ _bfd_new_bfd (void)
     return NULL;
 
   if (!bfd_lock ())
-    return NULL;
+    goto loser;
   nbfd->id = bfd_id_counter++;
   if (!bfd_unlock ())
-    {
-      free (nbfd);
-      return NULL;
-    }
+    goto loser;
 
   nbfd->memory = objalloc_create ();
   if (nbfd->memory == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
-      free (nbfd);
-      return NULL;
+      goto loser;
     }
 
   nbfd->arch_info = &bfd_default_arch_struct;
@@ -94,14 +90,16 @@ _bfd_new_bfd (void)
   if (!bfd_hash_table_init_n (& nbfd->section_htab, bfd_section_hash_newfunc,
 			      sizeof (struct section_hash_entry), 13))
     {
-      objalloc_free ((struct objalloc *) nbfd->memory);
-      free (nbfd);
-      return NULL;
+      objalloc_free (nbfd->memory);
+      goto loser;
     }
 
   nbfd->archive_plugin_fd = -1;
-
   return nbfd;
+
+ loser:
+  free (nbfd);
+  return NULL;
 }
 
 static const struct bfd_iovec opncls_iovec;
@@ -153,13 +151,10 @@ _bfd_delete_bfd (bfd *abfd)
     bfd_free_cached_info (abfd);
 
   /* The target _bfd_free_cached_info may not have done anything..  */
+  if (abfd->section_htab.memory)
+    bfd_hash_table_free (&abfd->section_htab);
   if (abfd->memory)
-    {
-      bfd_hash_table_free (&abfd->section_htab);
-      objalloc_free ((struct objalloc *) abfd->memory);
-    }
-  else
-    free ((char *) bfd_get_filename (abfd));
+    objalloc_free (abfd->memory);
 
 #ifdef USE_MMAP
   struct bfd_mmapped *mmapped, *next;
@@ -191,41 +186,15 @@ DESCRIPTION
 bool
 _bfd_free_cached_info (bfd *abfd)
 {
-  if (abfd->memory)
-    {
-      const char *filename = bfd_get_filename (abfd);
-      if (filename)
-	{
-	  /* We can't afford to lose the bfd filename when freeing
-	     abfd->memory, because that would kill the cache.c scheme
-	     of closing and reopening files in order to limit the
-	     number of open files.  To reopen, you need the filename.
-	     And indeed _bfd_compute_and_write_armap calls
-	     _bfd_free_cached_info to free up space used by symbols
-	     and by check_format_matches.  Which we want to continue
-	     doing to handle very large archives.  Later the archive
-	     elements are copied, which might require reopening files.
-	     We also want to keep using objalloc memory for the
-	     filename since that allows the name to be updated
-	     without either leaking memory or implementing some sort
-	     of reference counted string for copies of the filename.  */
-	  size_t len = strlen (filename) + 1;
-	  char *copy = bfd_malloc (len);
-	  if (copy == NULL)
-	    return false;
-	  memcpy (copy, filename, len);
-	  abfd->filename = copy;
-	}
-      bfd_hash_table_free (&abfd->section_htab);
-      objalloc_free ((struct objalloc *) abfd->memory);
+  if (abfd->section_htab.memory)
+    bfd_hash_table_free (&abfd->section_htab);
 
-      abfd->sections = NULL;
-      abfd->section_last = NULL;
-      abfd->outsymbols = NULL;
-      abfd->tdata.any = NULL;
-      abfd->usrdata = NULL;
-      abfd->memory = NULL;
-    }
+  abfd->sections = NULL;
+  abfd->section_last = NULL;
+  abfd->section_count = 0;
+  abfd->outsymbols = NULL;
+  abfd->tdata.any = NULL;
+  abfd->usrdata = NULL;
 
   return true;
 }
@@ -1043,10 +1012,18 @@ bfd_make_readable (bfd *abfd)
       return false;
     }
 
-  if (! BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)))
+  if (!BFD_SEND_FMT (abfd, _bfd_write_contents, (abfd)))
     return false;
 
-  if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
+  if (!BFD_SEND (abfd, _bfd_free_cached_info, (abfd)))
+    return false;
+
+  if (!BFD_SEND (abfd, _close_and_cleanup, (abfd)))
+    return false;
+
+  _bfd_free_cached_info (abfd);
+  if (!bfd_hash_table_init_n (&abfd->section_htab, bfd_section_hash_newfunc,
+			      sizeof (struct section_hash_entry), 13))
     return false;
 
   abfd->arch_info = &bfd_default_arch_struct;
@@ -1057,20 +1034,17 @@ bfd_make_readable (bfd *abfd)
   abfd->origin = 0;
   abfd->opened_once = false;
   abfd->output_has_begun = false;
-  abfd->section_count = 0;
   abfd->usrdata = NULL;
   abfd->cacheable = false;
   abfd->mtime_set = false;
 
   abfd->target_defaulted = true;
   abfd->direction = read_direction;
-  abfd->sections = 0;
   abfd->symcount = 0;
   abfd->outsymbols = 0;
   abfd->tdata.any = 0;
   abfd->size = 0;
 
-  bfd_section_list_clear (abfd);
   bfd_check_format (abfd, bfd_object);
 
   return true;
