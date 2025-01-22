@@ -366,7 +366,8 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
 
   asym->the_bfd = abfd;
   asym->name = (ldsym->version
-		? concat (ldsym->name, "@", ldsym->version, (const char *) NULL)
+		? stat_concat (ldsym->name, "@", ldsym->version,
+			       (const char *) NULL)
 		: ldsym->name);
   asym->value = 0;
   switch (ldsym->def)
@@ -378,11 +379,11 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
       flags |= BSF_GLOBAL;
       if (ldsym->comdat_key)
 	{
-	  char *name = concat (".gnu.linkonce.t.", ldsym->comdat_key,
-			       (const char *) NULL);
+	  char *name = stat_concat (".gnu.linkonce.t.", ldsym->comdat_key,
+				    (const char *) NULL);
 	  section = bfd_get_section_by_name (abfd, name);
 	  if (section != NULL)
-	    free (name);
+	    stat_free (name);
 	  else
 	    {
 	      flagword sflags;

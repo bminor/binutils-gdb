@@ -188,6 +188,12 @@ stat_alloc (size_t size)
   return obstack_alloc (&stat_obstack, size);
 }
 
+void
+stat_free (void *str)
+{
+  obstack_free (&stat_obstack, str);
+}
+
 void *
 stat_memdup (const void *src, size_t copy_size, size_t alloc_size)
 {
@@ -203,6 +209,31 @@ stat_strdup (const char *str)
 {
   size_t len = strlen (str) + 1;
   return stat_memdup (str, len, len);
+}
+
+char *
+stat_concat (const char *first, ...)
+{
+  va_list args;
+  va_start (args, first);
+
+  size_t length = 0;
+  for (const char *arg = first; arg; arg = va_arg (args, const char *))
+    length += strlen (arg);
+  va_end (args);
+  char *new_str = stat_alloc (length + 1);
+
+  va_start (args, first);
+  char *end = new_str;
+  for (const char *arg = first; arg; arg = va_arg (args, const char *))
+    {
+      length = strlen (arg);
+      memcpy (end, arg, length);
+      end += length;
+    }
+  *end = 0;
+  va_end (args);
+  return new_str;
 }
 
 /* Code for handling simple wildcards without going through fnmatch,
@@ -648,7 +679,7 @@ wild_sort (lang_wild_statement_type *wild,
 	  || sec->spec.sorted == by_none))
     {
       /* We might be called even if _this_ spec doesn't need sorting,
-         in which case we simply append at the right end of tree.  */
+	 in which case we simply append at the right end of tree.  */
       return wild->rightmost;
     }
 
@@ -703,7 +734,7 @@ wild_sort (lang_wild_statement_type *wild,
 		i = filename_cmp (ln, fn);
 	      else
 		i = filename_cmp (fn, ln);
-	      
+
 	      if (i > 0)
 		{ tree = &((*tree)->right); continue; }
 	      else if (i < 0)
@@ -1233,9 +1264,9 @@ new_afile (const char *name,
       p->filename = name;
       p->local_sym_name = name;
       /* If name is a relative path, search the directory of the current linker
-         script first. */
+	 script first. */
       if (from_filename && !IS_ABSOLUTE_PATH (name))
-        p->extra_search_path = ldirname (from_filename);
+	p->extra_search_path = ldirname (from_filename);
       p->flags.real = true;
       p->flags.search_dirs = true;
       break;
@@ -2147,7 +2178,7 @@ lang_insert_orphan (asection *s,
 	  else if (first_orphan_note)
 	    {
 	      /* Don't place non-note sections in the middle of orphan
-	         note sections.  */
+		 note sections.  */
 	      after_sec_note = true;
 	      after_sec = as;
 	      for (sec = as->next;
@@ -4959,18 +4990,18 @@ ld_is_local_symbol (asymbol * sym)
   /* FIXME: This is intended to skip ARM mapping symbols,
      which for some reason are not excluded by bfd_is_local_label,
      but maybe it is wrong for other architectures.
-     It would be better to fix bfd_is_local_label.  */  
+     It would be better to fix bfd_is_local_label.  */
   if (*name == '$')
     return false;
 
   /* Some local symbols, eg _GLOBAL_OFFSET_TABLE_, are present
      in the hash table, so do not print duplicates here.  */
   struct bfd_link_hash_entry * h;
-  h = bfd_link_hash_lookup (link_info.hash, name, false /* create */, 
+  h = bfd_link_hash_lookup (link_info.hash, name, false /* create */,
 			    false /* copy */, true /* follow */);
   if (h == NULL)
     return true;
-  
+
   /* Symbols from the plugin owned BFD will not get their own
      iteration of this function, but can be on the link_info
      list.  So include them here.  */
@@ -5060,7 +5091,7 @@ print_input_section (asection *i, bool is_discarded)
 		{
 		  asymbol *     sym = symbol_table[j];
 		  bfd_vma       sym_addr = sym->value + i->output_section->vma;
-		  
+
 		  if (sym->section == i->output_section
 		      && (sym->flags & BSF_LOCAL) != 0
 		      && sym_addr >= addr
@@ -5536,9 +5567,9 @@ size_input_section
 	 then to the output section's requirement.  If this alignment
 	 is greater than any seen before, then record it too.  Perform
 	 the alignment by inserting a magic 'padding' statement.
-         We can force input section alignment within an output section 
-         by using SUBALIGN.  The value specified overrides any alignment 
-         given by input sections, whether larger or smaller.  */
+	 We can force input section alignment within an output section
+	 by using SUBALIGN.  The value specified overrides any alignment
+	 given by input sections, whether larger or smaller.  */
 
       if (output_section_statement->subsection_alignment != NULL)
 	o->alignment_power = i->alignment_power =
@@ -8788,7 +8819,7 @@ lang_add_string (const char *s)
 	    case 'n': c = '\n'; break;
 	    case 'r': c = '\r'; break;
 	    case 't': c = '\t'; break;
-	  
+
 	    case '0':
 	    case '1':
 	    case '2':
@@ -9898,30 +9929,30 @@ lang_do_memory_regions (bool update_regions_p)
       if (r->origin_exp)
 	{
 	  exp_fold_tree_no_dot (r->origin_exp, NULL);
-          if (update_regions_p)
-            {
-              if (expld.result.valid_p)
-                {
-                  r->origin = expld.result.value;
-                  r->current = r->origin;
-                }
-              else
-                einfo (_("%P: invalid origin for memory region %s\n"),
-                       r->name_list.name);
-            }
+	  if (update_regions_p)
+	    {
+	      if (expld.result.valid_p)
+		{
+		  r->origin = expld.result.value;
+		  r->current = r->origin;
+		}
+	      else
+		einfo (_("%P: invalid origin for memory region %s\n"),
+		       r->name_list.name);
+	    }
 	}
       if (r->length_exp)
 	{
 	  exp_fold_tree_no_dot (r->length_exp, NULL);
-          if (update_regions_p)
-            {
-              if (expld.result.valid_p)
-                r->length = expld.result.value;
-              else
-                einfo (_("%P: invalid length for memory region %s\n"),
-                       r->name_list.name);
-            }
-        }
+	  if (update_regions_p)
+	    {
+	      if (expld.result.valid_p)
+		r->length = expld.result.value;
+	      else
+		einfo (_("%P: invalid length for memory region %s\n"),
+		       r->name_list.name);
+	    }
+	}
     }
 }
 
