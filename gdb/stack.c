@@ -2696,7 +2696,7 @@ return_command (const char *retval_exp, int from_tty)
   thisfun = get_frame_function (thisframe);
   gdbarch = get_frame_arch (thisframe);
 
-  if (get_frame_type (get_current_frame ()) == INLINE_FRAME)
+  if (get_frame_type (thisframe) == INLINE_FRAME)
     error (_("Can not force return from an inlined function."));
 
   /* Compute the return value.  If the computation triggers an error,
