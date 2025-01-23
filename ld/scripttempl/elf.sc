@@ -912,7 +912,7 @@ emit_large_bss()
     return
   fi
 
-  if test "$1" == "0"; then
+  if test "$1" = "0"; then
     if test -n "${LARGE_BSS_AFTER_BSS}"; then
       return
     fi
