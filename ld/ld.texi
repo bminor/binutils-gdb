@@ -8055,9 +8055,9 @@ in certain ARM1176 processors.  The workaround is enabled by default if you
 are targeting ARM v6 (excluding ARM v6T2) or earlier.  It can be disabled
 unconditionally by specifying @samp{--no-fix-arm1176}.
 
-Further information is available in the ``ARM1176JZ-S and ARM1176JZF-S
-Programmer Advice Notice'' available on the ARM documentation website at:
-http://infocenter.arm.com/.
+Further information is available in ``ARM1176JZ-S and ARM1176JZF-S
+Programmer Advice Notice'' (UAN0002) available on the Arm documentation
+website at @uref{https://developer.arm.com/}.
 
 @cindex STM32L4xx erratum workaround
 @kindex --fix-stm32l4xx-629360

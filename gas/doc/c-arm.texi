@@ -1530,5 +1530,6 @@ The pseudo ops described above are sufficient for writing assembly
 code that calls functions which may throw exceptions.  If you need to
 know more about the object-file format used to represent unwind
 information, you may consult the @cite{Exception Handling ABI for the
-ARM Architecture} available from @uref{http://infocenter.arm.com}.
+Arm Architecture} available from
+@uref{https://github.com/ARM-software/abi-aa/blob/main/ehabi32/ehabi32.rst}.
 

@@ -2892,7 +2892,7 @@ AArch64_reloc_property_table* aarch64_reloc_property_table = NULL;
 
 // The aarch64 target class.
 // See the ABI at
-// http://infocenter.arm.com/help/topic/com.arm.doc.ihi0056b/IHI0056B_aaelf64.pdf
+// https://github.com/ARM-software/abi-aa/blob/main/aaelf64/aaelf64.rst
 template<int size, bool big_endian>
 class Target_aarch64 : public Sized_target<size, big_endian>
 {

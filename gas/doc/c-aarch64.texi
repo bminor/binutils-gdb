@@ -374,9 +374,9 @@ The @samp{#} can be optionally used to indicate immediate operands.
 
 @cindex AArch64 register names
 @cindex register names, AArch64
-Please refer to the section @samp{4.4 Register Names} of
-@samp{ARMv8 Instruction Set Overview}, which is available at
-@uref{http://infocenter.arm.com}.
+Please refer to the section @samp{Register names} of @samp{Arm
+Architecture Reference Manual for A-profile architecture}, which
+is available at @uref{https://developer.arm.com/}.
 
 @node AArch64-Relocations
 @subsection Relocations
@@ -626,8 +626,8 @@ already there) and a PC-relative LDR instruction will be generated.
 @end table
 
 For more information on the AArch64 instruction set and assembly language
-notation, see @samp{ARMv8 Instruction Set Overview} available at
-@uref{http://infocenter.arm.com}.
+notation, see @samp{Arm Architecture Reference Manual for A-profile
+architecture} available at @uref{https://developer.arm.com/}.
 
 
 @node AArch64 Mapping Symbols
