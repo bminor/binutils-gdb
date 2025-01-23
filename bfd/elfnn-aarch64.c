@@ -2631,6 +2631,11 @@ struct elf_aarch64_link_hash_table
   /* The bytes of the subsequent PLT entry.  */
   const bfd_byte *plt_entry;
 
+  /* PLT entries have a common shape, but may have some pre-amble
+     instructions (such as BTI).  This delta is used to factor this
+     out of the common code.  */
+  int plt_entry_delta;
+
   /* For convenience in allocate_dynrelocs.  */
   bfd *obfd;
 
@@ -2924,6 +2929,7 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
   ret->plt_header_size = PLT_ENTRY_SIZE;
   ret->plt0_entry = elfNN_aarch64_small_plt0_entry;
   ret->plt_entry_size = PLT_SMALL_ENTRY_SIZE;
+  ret->plt_entry_delta = 0;
   ret->plt_entry = elfNN_aarch64_small_plt_entry;
   ret->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
   ret->obfd = abfd;
@@ -4958,15 +4964,17 @@ setup_plt_values (struct bfd_link_info *link_info,
       globals->plt0_entry = elfNN_aarch64_small_plt0_bti_entry;
 
       /* Only in ET_EXEC we need PLTn with BTI.  */
-      if (bfd_link_pde (link_info))
+      if (bfd_link_executable (link_info))
 	{
 	  globals->plt_entry_size = PLT_BTI_PAC_SMALL_ENTRY_SIZE;
 	  globals->plt_entry = elfNN_aarch64_small_plt_bti_pac_entry;
+	  globals->plt_entry_delta = 4;
 	}
       else
 	{
 	  globals->plt_entry_size = PLT_PAC_SMALL_ENTRY_SIZE;
 	  globals->plt_entry = elfNN_aarch64_small_plt_pac_entry;
+	  globals->plt_entry_delta = 0;
 	}
     }
   else if (plt_type == PLT_BTI)
@@ -4974,10 +4982,11 @@ setup_plt_values (struct bfd_link_info *link_info,
       globals->plt0_entry = elfNN_aarch64_small_plt0_bti_entry;
 
       /* Only in ET_EXEC we need PLTn with BTI.  */
-      if (bfd_link_pde (link_info))
+      if (bfd_link_executable (link_info))
 	{
 	  globals->plt_entry_size = PLT_BTI_SMALL_ENTRY_SIZE;
 	  globals->plt_entry = elfNN_aarch64_small_plt_bti_entry;
+	  globals->plt_entry_delta = 4;
 	}
     }
   else if (plt_type == PLT_PAC)
@@ -9837,11 +9846,9 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
   /* Copy in the boiler-plate for the PLTn entry.  */
   memcpy (plt_entry, htab->plt_entry, htab->plt_entry_size);
 
-  /* First instruction in BTI enabled PLT stub is a BTI
-     instruction so skip it.  */
-  if (elf_aarch64_tdata (output_bfd)->sw_protections.plt_type & PLT_BTI
-      && elf_elfheader (output_bfd)->e_type == ET_EXEC)
-    plt_entry = plt_entry + 4;
+  /* Allow for any delta (such as a BTI instruction) before the common
+     sequence.  */
+  plt_entry += htab->plt_entry_delta;
 
   /* Fill in the top 21 bits for this: ADRP x16, PLT_GOT + n * 8.
      ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0x1fffff */
