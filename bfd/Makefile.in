@@ -1301,7 +1301,7 @@ SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
 TEXIDIR = $(srcdir)/../texinfo/fsf
 info_TEXINFOS = doc/bfd.texi
 doc_bfd_TEXINFOS = $(DOCFILES) doc/bfdsumm.texi
-AM_MAKEINFOFLAGS = --no-split -I "$(srcdir)/doc" -I doc
+AM_MAKEINFOFLAGS = --no-split -I "$(srcdir)/doc" -P doc
 TEXI2DVI = texi2dvi -I "$(srcdir)/doc" -I doc
 MKDOC = doc/chew$(EXEEXT_FOR_BUILD)
 

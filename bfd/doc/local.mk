@@ -72,7 +72,7 @@ TEXIDIR = $(srcdir)/../texinfo/fsf
 info_TEXINFOS = %D%/bfd.texi
 %C%_bfd_TEXINFOS = $(DOCFILES) %D%/bfdsumm.texi
 
-AM_MAKEINFOFLAGS = --no-split -I "$(srcdir)/%D%" -I %D%
+AM_MAKEINFOFLAGS = --no-split -I "$(srcdir)/%D%" -P %D%
 TEXI2DVI = texi2dvi -I "$(srcdir)/%D%" -I %D%
 
 MKDOC = %D%/chew$(EXEEXT_FOR_BUILD)
