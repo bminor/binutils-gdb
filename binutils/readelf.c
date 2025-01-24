@@ -19271,198 +19271,187 @@ process_attributes (Filedata * filedata,
 		    unsigned char * (* display_pub_attribute) (unsigned char *, const unsigned char * const),
 		    unsigned char * (* display_proc_gnu_attribute) (unsigned char *, unsigned int, const unsigned char * const))
 {
-  Elf_Internal_Shdr * sect;
-  unsigned i;
-  bool res = true;
-
   /* Find the section header so that we get the size.  */
-  for (i = 0, sect = filedata->section_headers;
-       i < filedata->file_header.e_shnum;
-       i++, sect++)
+  Elf_Internal_Shdr * sect = find_section_by_type (filedata, proc_type);
+  if (sect == NULL)
+    sect = find_section_by_type (filedata, SHT_GNU_ATTRIBUTES);
+
+  if (sect == NULL)
+    /* No section, exit without error.  */
+    return true;
+
+  unsigned char * contents = (unsigned char *)
+    get_data (NULL, filedata, sect->sh_offset, 1, sect->sh_size, _("attributes"));
+  if (contents == NULL)
+    return false;
+
+  bool res = true;
+  unsigned char * p = contents;
+  /* The first character is the version of the attributes.
+     Currently only version 1, (aka 'A') is recognised here.  */
+  if (*p != 'A')
     {
-      unsigned char * contents;
-      unsigned char * p;
-
-      if (sect->sh_type != proc_type && sect->sh_type != SHT_GNU_ATTRIBUTES)
-	continue;
-
-      contents = (unsigned char *) get_data (NULL, filedata, sect->sh_offset, 1,
-                                             sect->sh_size, _("attributes"));
-      if (contents == NULL)
-	{
-	  res = false;
-	  continue;
-	}
-
-      p = contents;
-      /* The first character is the version of the attributes.
-	 Currently only version 1, (aka 'A') is recognised here.  */
-      if (*p != 'A')
-	{
-	  printf (_("Unknown attributes version '%c'(%d) - expecting 'A'\n"), *p, *p);
-	  res = false;
-	}
-      else
-	{
-	  uint64_t section_len;
-
-	  section_len = sect->sh_size - 1;
-	  p++;
-
-	  while (section_len > 0)
-	    {
-	      uint64_t attr_len;
-	      unsigned int namelen;
-	      bool public_section;
-	      bool gnu_section;
-
-	      if (section_len <= 4)
-		{
-		  error (_("Tag section ends prematurely\n"));
-		  res = false;
-		  break;
-		}
-	      attr_len = byte_get (p, 4);
-	      p += 4;
-
-	      if (attr_len > section_len)
-		{
-		  error (_("Bad attribute length (%u > %u)\n"),
-			  (unsigned) attr_len, (unsigned) section_len);
-		  attr_len = section_len;
-		  res = false;
-		}
-	      /* PR 17531: file: 001-101425-0.004  */
-	      else if (attr_len < 5)
-		{
-		  error (_("Attribute length of %u is too small\n"), (unsigned) attr_len);
-		  res = false;
-		  break;
-		}
-
-	      section_len -= attr_len;
-	      attr_len -= 4;
-
-	      namelen = strnlen ((char *) p, attr_len) + 1;
-	      if (namelen == 0 || namelen >= attr_len)
-		{
-		  error (_("Corrupt attribute section name\n"));
-		  res = false;
-		  break;
-		}
-
-	      printf (_("Attribute Section: "));
-	      print_symbol_name (INT_MAX, (const char *) p);
-	      putchar ('\n');
-
-	      if (public_name && streq ((char *) p, public_name))
-		public_section = true;
-	      else
-		public_section = false;
-
-	      if (streq ((char *) p, "gnu"))
-		gnu_section = true;
-	      else
-		gnu_section = false;
-
-	      p += namelen;
-	      attr_len -= namelen;
-
-	      while (attr_len > 0 && p < contents + sect->sh_size)
-		{
-		  int tag;
-		  unsigned int val;
-		  uint64_t size;
-		  unsigned char * end;
-
-		  /* PR binutils/17531: Safe handling of corrupt files.  */
-		  if (attr_len < 6)
-		    {
-		      error (_("Unused bytes at end of section\n"));
-		      res = false;
-		      section_len = 0;
-		      break;
-		    }
-
-		  tag = *(p++);
-		  size = byte_get (p, 4);
-		  if (size > attr_len)
-		    {
-		      error (_("Bad subsection length (%u > %u)\n"),
-			      (unsigned) size, (unsigned) attr_len);
-		      res = false;
-		      size = attr_len;
-		    }
-		  /* PR binutils/17531: Safe handling of corrupt files.  */
-		  if (size < 6)
-		    {
-		      error (_("Bad subsection length (%u < 6)\n"),
-			      (unsigned) size);
-		      res = false;
-		      section_len = 0;
-		      break;
-		    }
-
-		  attr_len -= size;
-		  end = p + size - 1;
-		  assert (end <= contents + sect->sh_size);
-		  p += 4;
-
-		  switch (tag)
-		    {
-		    case 1:
-		      printf (_("File Attributes\n"));
-		      break;
-		    case 2:
-		      printf (_("Section Attributes:"));
-		      goto do_numlist;
-		    case 3:
-		      printf (_("Symbol Attributes:"));
-		      /* Fall through.  */
-		    do_numlist:
-		      for (;;)
-			{
-			  READ_ULEB (val, p, end);
-			  if (val == 0)
-			    break;
-			  printf (" %d", val);
-			}
-		      printf ("\n");
-		      break;
-		    default:
-		      printf (_("Unknown tag: %d\n"), tag);
-		      public_section = false;
-		      break;
-		    }
-
-		  if (public_section && display_pub_attribute != NULL)
-		    {
-		      while (p < end)
-			p = display_pub_attribute (p, end);
-		      assert (p == end);
-		    }
-		  else if (gnu_section && display_proc_gnu_attribute != NULL)
-		    {
-		      while (p < end)
-			p = display_gnu_attribute (p,
-						   display_proc_gnu_attribute,
-						   end);
-		      assert (p == end);
-		    }
-		  else if (p < end)
-		    {
-		      printf (_("  Unknown attribute:\n"));
-		      display_raw_attribute (p, end);
-		      p = end;
-		    }
-		  else
-		    attr_len = 0;
-		}
-	    }
-	}
-
-      free (contents);
+      printf (_("Unknown attributes version '%c'(%d) - expecting 'A'\n"), *p, *p);
+      res = false;
+      goto free_data;
     }
+
+  uint64_t section_len = sect->sh_size - 1;
+  p++;
+
+  while (section_len > 0)
+    {
+      uint64_t attr_len;
+      unsigned int namelen;
+      bool public_section;
+      bool gnu_section;
+
+      if (section_len <= 4)
+	{
+	  error (_("Tag section ends prematurely\n"));
+	  res = false;
+	  break;
+	}
+      attr_len = byte_get (p, 4);
+      p += 4;
+
+      if (attr_len > section_len)
+	{
+	  error (_("Bad attribute length (%u > %u)\n"),
+		  (unsigned) attr_len, (unsigned) section_len);
+	  attr_len = section_len;
+	  res = false;
+	}
+      /* PR 17531: file: 001-101425-0.004  */
+      else if (attr_len < 5)
+	{
+	  error (_("Attribute length of %u is too small\n"), (unsigned) attr_len);
+	  res = false;
+	  break;
+	}
+
+      section_len -= attr_len;
+      attr_len -= 4;
+
+      namelen = strnlen ((char *) p, attr_len) + 1;
+      if (namelen == 0 || namelen >= attr_len)
+	{
+	  error (_("Corrupt attribute section name\n"));
+	  res = false;
+	  break;
+	}
+
+      printf (_("Attribute Section: "));
+      print_symbol_name (INT_MAX, (const char *) p);
+      putchar ('\n');
+
+      if (public_name && streq ((char *) p, public_name))
+	public_section = true;
+      else
+	public_section = false;
+
+      if (streq ((char *) p, "gnu"))
+	gnu_section = true;
+      else
+	gnu_section = false;
+
+      p += namelen;
+      attr_len -= namelen;
+
+      while (attr_len > 0 && p < contents + sect->sh_size)
+	{
+	  int tag;
+	  unsigned int val;
+	  uint64_t size;
+	  unsigned char * end;
+
+	  /* PR binutils/17531: Safe handling of corrupt files.  */
+	  if (attr_len < 6)
+	    {
+	      error (_("Unused bytes at end of section\n"));
+	      res = false;
+	      section_len = 0;
+	      break;
+	    }
+
+	  tag = *(p++);
+	  size = byte_get (p, 4);
+	  if (size > attr_len)
+	    {
+	      error (_("Bad subsection length (%u > %u)\n"),
+		      (unsigned) size, (unsigned) attr_len);
+	      res = false;
+	      size = attr_len;
+	    }
+	  /* PR binutils/17531: Safe handling of corrupt files.  */
+	  if (size < 6)
+	    {
+	      error (_("Bad subsection length (%u < 6)\n"),
+		      (unsigned) size);
+	      res = false;
+	      section_len = 0;
+	      break;
+	    }
+
+	  attr_len -= size;
+	  end = p + size - 1;
+	  assert (end <= contents + sect->sh_size);
+	  p += 4;
+
+	  switch (tag)
+	    {
+	    case 1:
+	      printf (_("File Attributes\n"));
+	      break;
+	    case 2:
+	      printf (_("Section Attributes:"));
+	      goto do_numlist;
+	    case 3:
+	      printf (_("Symbol Attributes:"));
+	      /* Fall through.  */
+	    do_numlist:
+	      for (;;)
+		{
+		  READ_ULEB (val, p, end);
+		  if (val == 0)
+		    break;
+		  printf (" %d", val);
+		}
+	      printf ("\n");
+	      break;
+	    default:
+	      printf (_("Unknown tag: %d\n"), tag);
+	      public_section = false;
+	      break;
+	    }
+
+	  if (public_section && display_pub_attribute != NULL)
+	    {
+	      while (p < end)
+		p = display_pub_attribute (p, end);
+	      assert (p == end);
+	    }
+	  else if (gnu_section && display_proc_gnu_attribute != NULL)
+	    {
+	      while (p < end)
+		p = display_gnu_attribute (p,
+					   display_proc_gnu_attribute,
+					   end);
+	      assert (p == end);
+	    }
+	  else if (p < end)
+	    {
+	      printf (_("  Unknown attribute:\n"));
+	      display_raw_attribute (p, end);
+	      p = end;
+	    }
+	  else
+	    attr_len = 0;
+	}
+    }
+
+free_data:
+  free (contents);
 
   return res;
 }
