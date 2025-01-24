@@ -38,7 +38,7 @@ proc test {mode} {
 	return
     }
 
-    runto_main
+    runto marker1
 
     if [supports_process_record] {
 	# Activate process record/replay
@@ -51,9 +51,8 @@ proc test {mode} {
 
     gdb_continue_to_breakpoint "marker2" ".*$::srcfile:.*"
 
-    gdb_test "break marker1" \
-	"Breakpoint $::decimal at $::hex: file .*$::srcfile, line $::decimal.*" \
-	"set breakpoint at marker1"
+    # Show how many instructions we've recorded.
+    gdb_test "info record" "Active record target: .*"
 
     gdb_test "reverse-continue" ".*$::srcfile:$::decimal.*" "reverse to marker1"
 

@@ -41,8 +41,20 @@ time_t time_global = -1;
 int
 main (void)
 {
-  marker1 ();
+  /* Call once before recording to resolve the PLT, if any.  This reduces the
+     amount of instructions that is recorded.  */
   my_time (&time_global);
+
+  /* Reset back to initial value.  */
+  time_global = -1;
+
+  /* Start recording here.  */
+  marker1 ();
+
+  my_time (&time_global);
+
+  /* Stop recording here.  */
   marker2 ();
+
   return 0;
 }
