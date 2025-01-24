@@ -1,0 +1,52 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test continuing in all-stop mode when one thread is already running.
+
+standard_testfile .c
+
+if { [build_executable "failed to prepare" $testfile $srcfile \
+	  {debug pthreads}] \
+	 == -1 } {
+    return
+}
+
+proc test {} {
+    clean_restart $::binfile
+
+    if ![runto threads_started] {
+	return
+    }
+
+    delete_breakpoints
+
+    # Set a non-main thread running, while everything else is left
+    # stopped.
+    gdb_test_no_output "set scheduler-locking on"
+
+    gdb_test "thread 2" ".*" "switch to secondary thread"
+
+    gdb_test -no-prompt-anchor "continue &" "Continuing\\."
+
+    # Now resume all threads, while there is already one thread
+    # running.
+    gdb_test "thread 1" ".*" "switch to main thread"
+
+    gdb_test_no_output "set scheduler-locking off"
+
+    gdb_continue_to_end "" continue 1
+}
+
+test
