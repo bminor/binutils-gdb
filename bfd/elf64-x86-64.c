@@ -2222,13 +2222,15 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	      modrm = 0xc0 | (modrm & 0x38) >> 3;
 	      opcode = 0xf7;
 	    }
-	  else
+	  else if ((opcode | 0x38) == 0x3b)
 	    {
 	      /* Convert "binop foo@GOTPCREL(%rip), %reg" to
 		 "binop $foo, %reg".  */
-	      modrm = 0xc0 | (modrm & 0x38) >> 3 | (opcode & 0x3c);
+	      modrm = 0xc0 | ((modrm & 0x38) >> 3) | (opcode & 0x38);
 	      opcode = 0x81;
 	    }
+	  else
+	    return true;
 
 	  /* Use R_X86_64_32 with 32-bit operand to avoid relocation
 	     overflow when sign-extending imm32 to imm64.  */
