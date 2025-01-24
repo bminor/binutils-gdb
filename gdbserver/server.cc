@@ -2757,7 +2757,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	       "PacketSize=%x;QPassSignals+;QProgramSignals+;"
 	       "QStartupWithShell+;QEnvironmentHexEncoded+;"
 	       "QEnvironmentReset+;QEnvironmentUnset+;"
-	       "QSetWorkingDir+",
+	       "QSetWorkingDir+;binary-upload+",
 	       PBUFSIZ - 1);
 
       if (target_supports_catch_syscall ())

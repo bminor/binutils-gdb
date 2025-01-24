@@ -52,6 +52,14 @@ show riscv numeric-register-names
   ** New constant PARAM_COLOR represents color type of a value
      of a <gdb:parameter> object.  Parameter's value is <gdb::color> instance.
 
+* New remote packets
+
+binary-upload in qSupported reply
+  If the stub sends back 'binary-upload+' in it's qSupported reply,
+  then GDB will, where possible, make use of the 'x' packet.  If the
+  stub doesn't report this feature supported, then GDB will not use
+  the 'x' packet.
+
 *** Changes in GDB 16
 
 * Support for Nios II targets has been removed as this architecture
