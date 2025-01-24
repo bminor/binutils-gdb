@@ -10761,7 +10761,7 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_hash_symbol elf_aarch64_hash_symbol
 
 #undef	elf_backend_obj_attrs_section
-#define elf_backend_obj_attrs_section		".ARM.attributes"
+#define elf_backend_obj_attrs_section		SEC_AARCH64_ATTRIBUTES
 
 #include "elfNN-target.h"
 

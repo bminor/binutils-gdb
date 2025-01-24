@@ -30,6 +30,8 @@
 /* MTE memory tag segment type.  */
 #define PT_AARCH64_MEMTAG_MTE     (PT_LOPROC + 0x2)
 
+/* Name of the ELF section holding the attributes.  */
+#define SEC_AARCH64_ATTRIBUTES	".ARM.attributes"
 /* Additional section types.  */
 /* Section holds attributes.  */
 #define SHT_AARCH64_ATTRIBUTES	(SHT_LOPROC + 3)
