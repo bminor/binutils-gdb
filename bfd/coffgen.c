@@ -3299,11 +3299,13 @@ _bfd_coff_free_cached_info (bfd *abfd)
 
       /* Free raw syms, and any other data bfd_alloc'd after raw syms
 	 are read.  */
-      if (obj_raw_syments (abfd))
-	bfd_release (abfd, obj_raw_syments (abfd));
-      obj_raw_syments (abfd) = NULL;
-      obj_symbols (abfd) = NULL;
-      obj_convert (abfd) = NULL;
+      if (!obj_coff_keep_raw_syms (abfd) && obj_raw_syments (abfd))
+	{
+	  bfd_release (abfd, obj_raw_syments (abfd));
+	  obj_raw_syments (abfd) = NULL;
+	  obj_symbols (abfd) = NULL;
+	  obj_convert (abfd) = NULL;
+	}
     }
 
   return _bfd_generic_bfd_free_cached_info (abfd);

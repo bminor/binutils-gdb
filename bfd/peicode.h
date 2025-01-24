@@ -1154,6 +1154,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 
   obj_raw_syments (abfd) = vars.native_syms;
   obj_raw_syment_count (abfd) = vars.sym_index;
+  obj_coff_keep_raw_syms (abfd) = true;
 
   obj_coff_external_syms (abfd) = (void *) vars.esym_table;
   obj_coff_keep_syms (abfd) = true;
