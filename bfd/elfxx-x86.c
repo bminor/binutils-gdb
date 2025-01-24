@@ -3313,19 +3313,19 @@ _bfd_x86_elf_link_report_tls_transition_error
 	 asect);
       break;
 
-    case elf_x86_tls_error_add:
-      info->callbacks->einfo
-	/* xgettext:c-format */
-	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
-	   "in ADD only\n"),
-	 abfd, asect, rel->r_offset, from_reloc_name, name);
-      break;
-
     case elf_x86_tls_error_add_mov:
       info->callbacks->einfo
 	/* xgettext:c-format */
 	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
 	   "in ADD or MOV only\n"),
+	 abfd, asect, rel->r_offset, from_reloc_name, name);
+      break;
+
+    case elf_x86_tls_error_add_movrs:
+      info->callbacks->einfo
+	/* xgettext:c-format */
+	(_("%pB(%pA+0x%v): relocation %s against `%s' must be used "
+	   "in ADD or MOVRS only\n"),
 	 abfd, asect, rel->r_offset, from_reloc_name, name);
       break;
 

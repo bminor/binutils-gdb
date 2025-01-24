@@ -163,12 +163,18 @@ fn2:
 
 	/* IE against global var  */
 	movq	sG5@gottpoff(%rip), %r20
+	movrs	sG5@gottpoff(%rip), %r10
+	movrs	sG5@gottpoff(%rip), %r20
 
 	/* IE->LE against local var  */
 	movq	sl5@gottpoff(%rip), %r21
+	movrs	sl5@gottpoff(%rip), %r11
+	movrs	sl5@gottpoff(%rip), %r21
 
 	/* IE->LE against hidden var  */
 	movq	sh5@gottpoff(%rip), %r22
+	movrs	sh5@gottpoff(%rip), %r12
+	movrs	sh5@gottpoff(%rip), %r22
 
 	/* GD -> IE because variable is not defined in executable */
 	leaq	sG1@tlsdesc(%rip), %r16

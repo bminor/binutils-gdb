@@ -1363,19 +1363,45 @@ elf_x86_64_check_tls_transition (bfd *abfd,
       /* Check transition from IE access model:
 		mov foo@gottpoff(%rip), %reg
 		add foo@gottpoff(%rip), %reg
-		where reg is one of r16 to r31.  */
+		where reg is one of r16 to r31.
+         For x32 also:
+		movrs foo@gottpoff(%rip), %reg
+		where no REX prefix is present.  */
 
       if (offset < 4
-	  || (offset + 4) > sec->size
-	  || contents[offset - 4] != 0xd5)
+	  || (offset + 4) > sec->size)
+	return elf_x86_tls_error_yes;
+
+      if (!ABI_64_P (abfd)
+	  && contents[offset - 4] == 0x0f
+	  && contents[offset - 3] == 0x38
+	  && contents[offset - 2] == 0x8b)
+	goto check_gottpoff_modrm;
+
+      if (contents[offset - 4] != 0xd5)
 	return elf_x86_tls_error_yes;
 
       goto check_gottpoff;
 
+    case R_X86_64_CODE_5_GOTTPOFF:
+      /* Check transition from IE access model:
+		movrs foo@gottpoff(%rip), %reg
+		where reg isn't one of r16 to r31.  */
+      if (offset < 5
+	  || (offset + 4) > sec->size
+	  || (contents[offset - 5] | (ABI_64_P (abfd) ? 7 : 0xf)) != 0x4f
+	  || contents[offset - 4] != 0x0f
+	  || contents[offset - 3] != 0x38
+	  || contents[offset - 2] != 0x8b)
+	return elf_x86_tls_error_yes;
+
+      goto check_gottpoff_modrm;
+
     case R_X86_64_CODE_6_GOTTPOFF:
       /* Check transition from IE access model:
 		add %reg1, foo@gottpoff(%rip), %reg2
-		where reg1/reg2 are one of r16 to r31.  */
+		movrs foo@gottpoff(%rip), %reg
+		where reg1/reg2/reg are one of r16 to r31.  */
 
       if (offset < 6
 	  || (offset + 4) > sec->size
@@ -1383,13 +1409,10 @@ elf_x86_64_check_tls_transition (bfd *abfd,
 	return elf_x86_tls_error_yes;
 
       val = bfd_get_8 (abfd, contents + offset - 2);
-      if (val != 0x01 && val != 0x03)
-	return elf_x86_tls_error_add;
+      if (val != 0x01 && val != 0x03 && val != 0x8b)
+	return elf_x86_tls_error_add_movrs;
 
-      val = bfd_get_8 (abfd, contents + offset - 1);
-      return ((val & 0xc7) == 5
-	      ? elf_x86_tls_error_none
-	      : elf_x86_tls_error_yes);
+      goto check_gottpoff_modrm;
 
     case R_X86_64_GOTTPOFF:
       /* Check transition from IE access model:
@@ -1422,6 +1445,7 @@ elf_x86_64_check_tls_transition (bfd *abfd,
       if (val != 0x8b && val != 0x03)
 	return elf_x86_tls_error_add_mov;
 
+ check_gottpoff_modrm:
       val = bfd_get_8 (abfd, contents + offset - 1);
       return ((val & 0xc7) == 5
 	      ? elf_x86_tls_error_none
@@ -1548,6 +1572,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
     case R_X86_64_CODE_4_GOTPC32_TLSDESC:
     case R_X86_64_GOTTPOFF:
     case R_X86_64_CODE_4_GOTTPOFF:
+    case R_X86_64_CODE_5_GOTTPOFF:
     case R_X86_64_CODE_6_GOTTPOFF:
       if (bfd_link_executable (info))
 	{
@@ -1582,6 +1607,8 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 		   && (from_type == to_type
 		       || (from_type == R_X86_64_CODE_4_GOTTPOFF
 			   && to_type == R_X86_64_GOTTPOFF)
+		       || (from_type == R_X86_64_CODE_5_GOTTPOFF
+			   && to_type == R_X86_64_GOTTPOFF)
 		       || (from_type == R_X86_64_CODE_6_GOTTPOFF
 			   && to_type == R_X86_64_GOTTPOFF)));
 	  to_type = new_to_type;
@@ -1601,6 +1628,8 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
   /* Return TRUE if there is no transition.  */
   if (from_type == to_type
       || (from_type == R_X86_64_CODE_4_GOTTPOFF
+	  && to_type == R_X86_64_GOTTPOFF)
+      || (from_type == R_X86_64_CODE_5_GOTTPOFF
 	  && to_type == R_X86_64_GOTTPOFF)
       || (from_type == R_X86_64_CODE_6_GOTTPOFF
 	  && to_type == R_X86_64_GOTTPOFF))
@@ -1711,6 +1740,7 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
 
 /* With the local symbol, foo, we convert
    mov foo@GOTPCREL(%rip), %reg
+   movrs foo@GOTPCREL(%rip), %reg
    to
    lea foo(%rip), %reg
    and convert
@@ -1748,14 +1778,76 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   bfd_signed_vma raddend;
   unsigned int opcode;
   unsigned int modrm;
+  unsigned char evex[3] = { 0, 0, 0 };
   unsigned int r_type = *r_type_p;
   unsigned int r_symndx;
   bfd_vma roff = irel->r_offset;
   bfd_vma abs_relocation;
 
-  if (roff < (r_type == R_X86_64_CODE_4_GOTPCRELX
-	      ? 4 : (r_type == R_X86_64_REX_GOTPCRELX ? 3 : 2)))
-    return true;
+  switch (r_type)
+    {
+    default:
+      if (roff < 2)
+	return true;
+      relocx = (r_type == R_X86_64_GOTPCRELX);
+      break;
+
+    case R_X86_64_REX_GOTPCRELX:
+      if (roff < 3)
+	return true;
+      relocx = true;
+      break;
+
+    case R_X86_64_CODE_4_GOTPCRELX:
+      if (roff < 4)
+	return true;
+
+      /* Skip if this isn't a REX2 instruction, nor un-prefixed MOVRS.  */
+      opcode = bfd_get_8 (abfd, contents + roff - 4);
+      if (opcode != 0xd5
+	  && (opcode != 0x0f
+	      || bfd_get_8 (abfd, contents + roff - 3) != 0x38
+	      || bfd_get_8 (abfd, contents + roff - 2) != 0x8b))
+	return true;
+
+      relocx = true;
+      break;
+
+    case R_X86_64_CODE_5_GOTPCRELX:
+      if (roff < 5)
+	return true;
+
+      /* Skip if this isn't REX-prefixed MOVRS.  */
+      if ((bfd_get_8 (abfd, contents + roff - 5) | 0xf) != 0x4f
+	  || bfd_get_8 (abfd, contents + roff - 4) != 0x0f
+	  || bfd_get_8 (abfd, contents + roff - 3) != 0x38
+	  || bfd_get_8 (abfd, contents + roff - 2) != 0x8b)
+	return true;
+
+      relocx = true;
+      break;
+
+    case R_X86_64_CODE_6_GOTPCRELX:
+      if (roff < 6)
+	return true;
+
+      /* Skip if this isn't an EVEX instruction.  */
+      if (bfd_get_8 (abfd, contents + roff - 6) != 0x62)
+	return true;
+
+      evex[0] = bfd_get_8 (abfd, contents + roff - 5);
+      evex[1] = bfd_get_8 (abfd, contents + roff - 4);
+      evex[2] = bfd_get_8 (abfd, contents + roff - 3);
+
+      /* Skip if this isn't a Map 4 NP instruction.  */
+      if ((evex[0] & 7) != 4
+	  || (evex[1] & 3) != 0
+	  || (evex[2] & 0xe0) != 0)
+	return true;
+
+      relocx = true;
+      break;
+    }
 
   raddend = irel->r_addend;
   /* Addend for 32-bit PC-relative relocation must be -4.  */
@@ -1764,19 +1856,6 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 
   htab = elf_x86_hash_table (link_info, X86_64_ELF_DATA);
   is_pic = bfd_link_pic (link_info);
-
-  if (r_type == R_X86_64_CODE_4_GOTPCRELX)
-    {
-      /* Skip if this isn't a REX2 instruction.  */
-      opcode = bfd_get_8 (abfd, contents + roff - 4);
-      if (opcode != 0xd5)
-	return true;
-
-      relocx = true;
-    }
-  else
-    relocx = (r_type == R_X86_64_GOTPCRELX
-	      || r_type == R_X86_64_REX_GOTPCRELX);
 
   /* TRUE if --no-relax is used.  */
   no_overflow = link_info->disable_target_specific_optimizations > 1;
@@ -1789,7 +1868,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   if (opcode != 0x8b)
     {
       /* Only convert R_X86_64_GOTPCRELX, R_X86_64_REX_GOTPCRELX
-	 and R_X86_64_CODE_4_GOTPCRELX for call, jmp or one of adc,
+	 and R_X86_64_CODE_<n>_GOTPCRELX for call, jmp or one of adc,
 	 add, and, cmp, or, sbb, sub, test, xor instructions.  */
       if (!relocx)
 	return true;
@@ -1973,18 +2052,113 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
       bfd_put_8 (abfd, modrm, contents + irel->r_offset - 1);
       r_type = R_X86_64_PC32;
     }
+  else if (r_type == R_X86_64_CODE_6_GOTPCRELX && opcode != 0x8b)
+    {
+      /* R_X86_64_PC32 isn't supported.  */
+      if (to_reloc_pc32)
+	return true;
+
+      modrm = bfd_get_8 (abfd, contents + roff - 1);
+      if (opcode == 0x85)
+	{
+	  /* Convert "ctest<cc> %reg, foo@GOTPCREL(%rip)" to
+	     "ctest<cc> $foo, %reg".  */
+	  modrm = 0xc0 | (modrm & 0x38) >> 3;
+	  opcode = 0xf7;
+	}
+      else if ((opcode | 0x3a) == 0x3b)
+	{
+	  /* Don't convert (non-NDD) forms with memory destination.  */
+	  if (!(evex[2] & 0x10) && (opcode | 0x38) != 0x3b)
+	    return true;
+
+	  /* Don't convert non-commutative insns with the memory operand
+	     2nd.  */
+	  if ((evex[2] & 0x10) && (opcode | 0x38) != 0x3b
+	      && (opcode == 0x19 /* SBB */
+		  || opcode == 0x29 /* SUB */))
+	    return true;
+
+	  /* Convert "binop foo@GOTPCREL(%rip), %reg" to
+	     "binop $foo, %reg", or alike for 3-operand forms.  */
+	  modrm = 0xc0 | ((modrm & 0x38) >> 3) | (opcode & 0x38);
+	  opcode = 0x81;
+	}
+      else
+	return true;
+
+      /* Use R_X86_64_32 with 32-bit operand to avoid relocation
+	 overflow when sign-extending imm32 to 64 bits.  */
+      r_type = evex[1] & 0x80 ? R_X86_64_32S : R_X86_64_32;
+
+      if (abs_relocation) /* Bogus; should be abs_symbol.  */
+	{
+	  /* Check if R_X86_64_32S/R_X86_64_32 fits.  */
+	  if (r_type == R_X86_64_32S)
+	    {
+	      if ((abs_relocation + 0x80000000) > 0xffffffff)
+		return true;
+	    }
+	  else
+	    {
+	      if (abs_relocation > 0xffffffff)
+		return true;
+	    }
+	}
+
+      bfd_put_8 (abfd, opcode, contents + roff - 2);
+      bfd_put_8 (abfd, modrm, contents + roff - 1);
+
+      /* Move the R bits to the B bits in the first EXEX payload byte.  */
+      evex[0] = (evex[0] & ~0xa0) | ((evex[0] & 0x80) >> 2); /* R3 -> B3 */
+      evex[0] = (evex[0] & ~0x18) | ((~evex[0] & 0x10) >> 1); /* R4 -> B4 */
+      bfd_put_8 (abfd, evex[0], contents + roff - 5);
+
+      /* No addend for R_X86_64_32/R_X86_64_32S relocations.  */
+      irel->r_addend = 0;
+    }
   else
     {
       unsigned int rex = 0;
       unsigned int rex_mask = REX_R;
       unsigned int rex2 = 0;
       unsigned int rex2_mask = REX_R | REX_R << 4;
+      unsigned int movrs = 0;
       bool rex_w = false;
 
-      if (r_type == R_X86_64_CODE_4_GOTPCRELX)
+      if (r_type == R_X86_64_CODE_6_GOTPCRELX)
 	{
-	  rex2 = bfd_get_8 (abfd, contents + roff - 3);
-	  rex_w = (rex2 & REX_W) != 0;
+	  /* Synthesize a REX2 prefix from EVEX, just enough for the LEA
+	     and MOV case below.  */
+	  unsigned int p;
+
+	  p = bfd_get_8 (abfd, contents + roff - 5);
+	  if (!(p & 0x80))
+	    rex2 |= REX_R;
+	  if (!(p & 0x10))
+	    rex2 |= REX_R << 4;
+	  if (bfd_get_8 (abfd, contents + roff - 4) & 0x80)
+	    {
+	      rex2 |= REX_W;
+	      rex_w = true;
+	    }
+	  movrs = 6;
+	}
+      else if (r_type == R_X86_64_CODE_5_GOTPCRELX)
+	{
+	  rex = bfd_get_8 (abfd, contents + roff - 5);
+	  rex_w = (rex & REX_W) != 0;
+	  movrs = 5;
+	}
+      else if (r_type == R_X86_64_CODE_4_GOTPCRELX)
+	{
+	  if (bfd_get_8 (abfd, contents + roff - 4) == 0xd5)
+	    {
+	      rex2 = bfd_get_8 (abfd, contents + roff - 3);
+	      rex_w = (rex2 & REX_W) != 0;
+	    }
+	  else if (bfd_get_8 (abfd, contents + roff - 4) == 0x0f)
+	    movrs = 4;
 	}
       else if (r_type == R_X86_64_REX_GOTPCRELX)
 	{
@@ -2003,6 +2177,10 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 		 "lea foo(%rip), %reg".  */
 	      opcode = 0x8d;
 	      r_type = R_X86_64_PC32;
+
+	      /* For MOVRS move a possible REX prefix as necessary.  */
+	      if (movrs == 5)
+		bfd_put_8 (abfd, rex, contents + roff - 3);
 	    }
 	  else
 	    {
@@ -2093,6 +2271,20 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	}
 
       bfd_put_8 (abfd, opcode, contents + roff - 2);
+
+      /* For MOVRS zap the 0f38 or EVEX prefix, applying meaningless ES
+	 segment overrides instead.  When necessary also install the REX2
+	 prefix and payload (which may not have been written yet).  */
+      if (movrs)
+	{
+	  bfd_put_8 (abfd, 0x26, contents + roff - movrs);
+	  bfd_put_8 (abfd, 0x26, contents + roff - movrs + 1);
+	  if (movrs == 6)
+	    {
+	      bfd_put_8 (abfd, 0xd5, contents + roff - 4);
+	      bfd_put_8 (abfd, rex2, contents + roff - 3);
+	    }
+	}
     }
 
   *r_type_p = r_type;
@@ -2257,7 +2449,9 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
       if ((r_type == R_X86_64_GOTPCREL
 	   || r_type == R_X86_64_GOTPCRELX
 	   || r_type == R_X86_64_REX_GOTPCRELX
-	   || r_type == R_X86_64_CODE_4_GOTPCRELX)
+	   || r_type == R_X86_64_CODE_4_GOTPCRELX
+	   || r_type == R_X86_64_CODE_5_GOTPCRELX
+	   || r_type == R_X86_64_CODE_6_GOTPCRELX)
 	  && (h == NULL || h->type != STT_GNU_IFUNC))
 	{
 	  Elf_Internal_Rela *irel = (Elf_Internal_Rela *) rel;
@@ -2303,6 +2497,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_X86_64_GOTTPOFF:
 	case R_X86_64_CODE_4_GOTTPOFF:
+	case R_X86_64_CODE_5_GOTTPOFF:
 	case R_X86_64_CODE_6_GOTTPOFF:
 	  if (!bfd_link_executable (info))
 	    info->flags |= DF_STATIC_TLS;
@@ -2313,6 +2508,8 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_GOTPCRELX:
 	case R_X86_64_REX_GOTPCRELX:
 	case R_X86_64_CODE_4_GOTPCRELX:
+	case R_X86_64_CODE_5_GOTPCRELX:
+	case R_X86_64_CODE_6_GOTPCRELX:
 	case R_X86_64_TLSGD:
 	case R_X86_64_GOT64:
 	case R_X86_64_GOTPCREL64:
@@ -2341,6 +2538,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 		break;
 	      case R_X86_64_GOTTPOFF:
 	      case R_X86_64_CODE_4_GOTTPOFF:
+	      case R_X86_64_CODE_5_GOTTPOFF:
 	      case R_X86_64_CODE_6_GOTTPOFF:
 		tls_type = GOT_TLS_IE;
 		break;
@@ -2634,10 +2832,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	    }
 	  break;
 
-	case R_X86_64_CODE_5_GOTPCRELX:
-	case R_X86_64_CODE_5_GOTTPOFF:
 	case R_X86_64_CODE_5_GOTPC32_TLSDESC:
-	case R_X86_64_CODE_6_GOTPCRELX:
 	case R_X86_64_CODE_6_GOTPC32_TLSDESC:
 	    {
 	      /* These relocations are added only for completeness and
@@ -2942,6 +3137,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	    case R_X86_64_GOTPCRELX:
 	    case R_X86_64_REX_GOTPCRELX:
 	    case R_X86_64_CODE_4_GOTPCRELX:
+	    case R_X86_64_CODE_5_GOTPCRELX:
+	    case R_X86_64_CODE_6_GOTPCRELX:
 	    case R_X86_64_GOTPCREL64:
 	      base_got = htab->elf.sgot;
 	      off = h->got.offset;
@@ -3168,6 +3365,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	case R_X86_64_GOTPCRELX:
 	case R_X86_64_REX_GOTPCRELX:
 	case R_X86_64_CODE_4_GOTPCRELX:
+	case R_X86_64_CODE_5_GOTPCRELX:
+	case R_X86_64_CODE_6_GOTPCRELX:
 	case R_X86_64_GOTPCREL64:
 	  /* Use global offset table entry as symbol value.  */
 	case R_X86_64_GOTPLT64:
@@ -3259,7 +3458,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			   && (r_type == R_X86_64_GOTPCREL
 			       || r_type == R_X86_64_GOTPCRELX
 			       || r_type == R_X86_64_REX_GOTPCRELX
-			       || r_type == R_X86_64_CODE_4_GOTPCRELX)))
+			       || r_type == R_X86_64_CODE_4_GOTPCRELX
+			       || r_type == R_X86_64_CODE_5_GOTPCRELX
+			       || r_type == R_X86_64_CODE_6_GOTPCRELX)))
 		    relative_reloc = true;
 		}
 	    }
@@ -3298,6 +3499,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	      && r_type != R_X86_64_GOTPCRELX
 	      && r_type != R_X86_64_REX_GOTPCRELX
 	      && r_type != R_X86_64_CODE_4_GOTPCRELX
+	      && r_type != R_X86_64_CODE_5_GOTPCRELX
+	      && r_type != R_X86_64_CODE_6_GOTPCRELX
 	      && r_type != R_X86_64_GOTPCREL64)
 	    relocation -= htab->elf.sgotplt->output_section->vma
 			  - htab->elf.sgotplt->output_offset;
@@ -3720,6 +3923,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	case R_X86_64_TLSDESC_CALL:
 	case R_X86_64_GOTTPOFF:
 	case R_X86_64_CODE_4_GOTTPOFF:
+	case R_X86_64_CODE_5_GOTTPOFF:
 	case R_X86_64_CODE_6_GOTTPOFF:
 	  tls_type = GOT_UNKNOWN;
 	  if (h == NULL && local_got_offsets)
@@ -4037,10 +4241,12 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     Originally it can be one of:
 		     mov foo@gottpoff(%rip), %reg
 		     add foo@gottpoff(%rip), %reg
+		     movrs foo@gottpoff(%rip), %reg
 		     We change it into:
 		     mov $foo@tpoff, %reg
 		     add $foo@tpoff, %reg
-		     where reg is one of r16 to r31.  */
+		     where reg is one of r16 to r31, except for MOVRS, where
+		     it's not one of r8 to r31 and no REX byte is present.  */
 
 		  unsigned int rex2, type, reg;
 		  unsigned int rex2_mask = REX_R | REX_R << 4;
@@ -4055,7 +4261,16 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  /* Move the R bits to the B bits in REX2 payload
 		     byte.  */
 		  if (type == 0x8b)
-		    type = 0xc7;
+		    {
+		      /* For MOVRS emit meaningless ES prefixes.  */
+		      if (bfd_get_8 (input_bfd, contents + roff - 4) == 0x0f)
+			{
+			  bfd_put_8 (output_bfd, 0x26, contents + roff - 4);
+			  rex2 = 0x26;
+			  rex2_mask = 0;
+			}
+		      type = 0xc7;
+		    }
 		  else
 		    type = 0x81;
 		  bfd_put_8 (output_bfd,
@@ -4071,6 +4286,37 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			      contents + roff);
 		  continue;
 		}
+	      else if (r_type == R_X86_64_CODE_5_GOTTPOFF)
+		{
+		  /* IE->LE transition:
+		     Originally it is
+		     movrs foo@gottpoff(%rip), %reg
+		     We change it into:
+		     mov $foo@tpoff, %reg
+		     where reg isn't one of r16 to r31, but a REX
+		     byte is present.  */
+		  unsigned int rex = bfd_get_8 (input_bfd, contents + roff - 5);
+
+		  /* Move REX.R to REX.B.  */
+		  rex = (rex & ~(REX_R | REX_B))
+			| ((rex & REX_R) / (REX_R / REX_B));
+
+		  unsigned int reg = bfd_get_8 (input_bfd, contents + roff - 1);
+		  reg >>= 3;
+
+		  /* Replace 0f38 by meaningless ES prefixes, shifting the REX
+		     prefix forward.  */
+		  bfd_put_8 (output_bfd, 0x26, contents + roff - 5);
+		  bfd_put_8 (output_bfd, 0x26, contents + roff - 4);
+		  bfd_put_8 (output_bfd, rex, contents + roff - 3);
+		  bfd_put_8 (output_bfd, 0xc7, contents + roff - 2);
+		  bfd_put_8 (output_bfd, 0xc0 | reg, contents + roff - 1);
+
+		  bfd_put_32 (output_bfd,
+			      elf_x86_64_tpoff (info, relocation),
+			      contents + roff);
+		  continue;
+		}
 	      else if (r_type == R_X86_64_CODE_6_GOTTPOFF)
 		{
 		  /* IE->LE transition:
@@ -4078,18 +4324,53 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     add %reg1, foo@gottpoff(%rip), %reg2
 		     or
 		     add foo@gottpoff(%rip), %reg1, %reg2
+		     or
+		     movrs foo@gottpoff(%rip), %reg
 		     We change it into:
 		     add $foo@tpoff, %reg1, %reg2
-		   */
-		  unsigned int reg, byte1;
+		     mov $foo@tpoff, %reg
+		     where reg is one of r16 to r31.  */
+		  unsigned int type, reg, byte1;
 		  unsigned int updated_byte1;
 
 		  if (roff < 6)
 		    goto corrupt_input;
 
+		  byte1 = bfd_get_8 (input_bfd, contents + roff - 5);
+		  type = bfd_get_8 (input_bfd, contents + roff - 2);
+		  reg = bfd_get_8 (input_bfd, contents + roff - 1);
+		  reg >>= 3;
+
+		  if (type == 0x8b)
+		    {
+		      /* Convert MOVRS to REX2-encoded MOV.  */
+		      unsigned int rex2 = 0;
+
+		      /* Move the EVEX R bits to the REX2 B ones.  */
+		      if (!(byte1 & (1 << 7)))
+			rex2 |= REX_B;
+		      if (!(byte1 & (1 << 4)))
+			rex2 |= REX_B << 4;
+		      /* Propagate the EVEX W bit to the REX2 one.  */
+		      type = bfd_get_8 (input_bfd, contents + roff - 4);
+		      if (type & (1 << 7))
+			rex2 |= REX_W;
+
+
+		      bfd_put_8 (output_bfd, 0x26, contents + roff - 6);
+		      bfd_put_8 (output_bfd, 0x26, contents + roff - 5);
+		      bfd_put_8 (output_bfd, 0xd5, contents + roff - 4);
+		      bfd_put_8 (output_bfd, rex2, contents + roff - 3);
+		      bfd_put_8 (output_bfd, 0xc7, contents + roff - 2);
+		      bfd_put_8 (output_bfd, 0xc0 | reg, contents + roff - 1);
+		      bfd_put_32 (output_bfd,
+				  elf_x86_64_tpoff (info, relocation),
+				  contents + roff);
+		      continue;
+		    }
+
 		  /* Move the R bits to the B bits in EVEX payload
 		     byte 1.  */
-		  byte1 = bfd_get_8 (input_bfd, contents + roff - 5);
 		  updated_byte1 = byte1;
 
 		  /* Set the R bits since they is inverted.  */
@@ -4100,9 +4381,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		    updated_byte1 &= ~(1 << 5);
 		  if ((byte1 & (1 << 4)) == 0)
 		    updated_byte1 |= 1 << 3;
-
-		  reg = bfd_get_8 (input_bfd, contents + roff - 1);
-		  reg >>= 3;
 
 		  bfd_put_8 (output_bfd, updated_byte1,
 			     contents + roff - 5);

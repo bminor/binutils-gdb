@@ -777,8 +777,8 @@ struct elf_x86_plt
 enum elf_x86_tls_error_type
 {
   elf_x86_tls_error_none,
-  elf_x86_tls_error_add,
   elf_x86_tls_error_add_mov,
+  elf_x86_tls_error_add_movrs,
   elf_x86_tls_error_add_sub_mov,
   elf_x86_tls_error_indirect_call,
   elf_x86_tls_error_lea,
