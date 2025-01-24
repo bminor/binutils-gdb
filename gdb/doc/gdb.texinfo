@@ -43467,6 +43467,10 @@ and @var{length} is a multiple of the word size, the stub is free to
 use byte accesses, or not.  For this reason, this packet may not be
 suitable for accessing memory-mapped I/O devices.
 
+@value{GDBN} will only use this packet if the stub reports the
+@samp{binary-upload} feature is supported in its @samp{qSupported}
+reply (@pxref{qSupported}).
+
 Reply:
 @table @samp
 @item b @var{XX@dots{}}
@@ -45114,6 +45118,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{+}
 @tab No
 
+@item @samp{binary-upload}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -45360,6 +45369,9 @@ The remote stub supports replying with an error in a
 send this feature back to @value{GDBN} in the @samp{qSupported} reply,
 @value{GDBN} will always support @samp{E.@var{errtext}} format replies
 if it sent the @samp{error-message} feature.
+
+@item binary-upload
+The remote stub supports the @samp{x} packet (@pxref{x packet}).
 @end table
 
 @item qSymbol::

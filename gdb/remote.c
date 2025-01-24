@@ -5847,6 +5847,7 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_memory_tagging_feature },
   { "error-message", PACKET_ENABLE, remote_supported_packet,
     PACKET_accept_error_message },
+  { "binary-upload", PACKET_DISABLE, remote_supported_packet, PACKET_x },
 };
 
 static char *remote_support_xml;

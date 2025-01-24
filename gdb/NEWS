@@ -204,6 +204,12 @@ x addr,length
   equivalent to 'm', except that the data in the response are in
   binary format.
 
+binary-upload in qSupported reply
+  If the stub sends back 'binary-upload+' in it's qSupported reply,
+  then GDB will, where possible, make use of the 'x' packet.  If the
+  stub doesn't report this feature supported, then GDB will not use
+  the 'x' packet.
+
 *** Changes in GDB 15
 
 * The MPX commands "show/set mpx bound" have been deprecated, as Intel
