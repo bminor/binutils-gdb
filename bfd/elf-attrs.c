@@ -53,9 +53,18 @@ is_default_attr (obj_attribute *attr)
   return true;
 }
 
+/* Return the vendor name for a given object attributes section.  */
+static const char *
+obj_attr_v1_vendor_name (bfd *abfd, int vendor)
+{
+  return (vendor == OBJ_ATTR_PROC
+	  ? get_elf_backend_data (abfd)->obj_attrs_vendor
+	  : "gnu");
+}
+
 /* Return the size of a single attribute.  */
 static bfd_vma
-obj_attr_size (unsigned int tag, obj_attribute *attr)
+obj_attr_v1_size (unsigned int tag, obj_attribute *attr)
 {
   bfd_vma size;
 
@@ -70,26 +79,17 @@ obj_attr_size (unsigned int tag, obj_attribute *attr)
   return size;
 }
 
-/* Return the vendor name for a given object attributes section.  */
-static const char *
-vendor_obj_attr_name (bfd *abfd, int vendor)
-{
-  return (vendor == OBJ_ATTR_PROC
-	  ? get_elf_backend_data (abfd)->obj_attrs_vendor
-	  : "gnu");
-}
-
 /* Return the size of the object attributes section for VENDOR
    (OBJ_ATTR_PROC or OBJ_ATTR_GNU), or 0 if there are no attributes
    for that vendor to record and the vendor is OBJ_ATTR_GNU.  */
 static bfd_vma
-vendor_obj_attr_size (bfd *abfd, int vendor)
+vendor_obj_attrs_v1_size (bfd *abfd, int vendor)
 {
   bfd_vma size;
   obj_attribute *attr;
   obj_attribute_list *list;
   int i;
-  const char *vendor_name = vendor_obj_attr_name (abfd, vendor);
+  const char *vendor_name = obj_attr_v1_vendor_name (abfd, vendor);
 
   if (!vendor_name)
     return 0;
@@ -97,12 +97,12 @@ vendor_obj_attr_size (bfd *abfd, int vendor)
   attr = elf_known_obj_attributes (abfd)[vendor];
   size = 0;
   for (i = LEAST_KNOWN_OBJ_ATTRIBUTE; i < NUM_KNOWN_OBJ_ATTRIBUTES; i++)
-    size += obj_attr_size (i, &attr[i]);
+    size += obj_attr_v1_size (i, &attr[i]);
 
   for (list = elf_other_obj_attributes (abfd)[vendor];
        list;
        list = list->next)
-    size += obj_attr_size (list->tag, &list->attr);
+    size += obj_attr_v1_size (list->tag, &list->attr);
 
   /* <size> <vendor_name> NUL 0x1 <size> */
   return (size
@@ -110,17 +110,22 @@ vendor_obj_attr_size (bfd *abfd, int vendor)
 	  : 0);
 }
 
+static bfd_vma
+bfd_elf_obj_attrs_v1_size (bfd *abfd)
+{
+  bfd_vma size = 0;
+  size = vendor_obj_attrs_v1_size (abfd, OBJ_ATTR_PROC);
+  size += vendor_obj_attrs_v1_size (abfd, OBJ_ATTR_GNU);
+  if (size > 0)
+    size += sizeof(uint8_t); /* <format-version: ‘A’>  */
+  return size;
+}
+
 /* Return the size of the object attributes section.  */
 bfd_vma
 bfd_elf_obj_attr_size (bfd *abfd)
 {
-  bfd_vma size;
-
-  size = vendor_obj_attr_size (abfd, OBJ_ATTR_PROC);
-  size += vendor_obj_attr_size (abfd, OBJ_ATTR_GNU);
-
-  /* 'A' <sections for each vendor> */
-  return (size ? size + 1 : 0);
+  return bfd_elf_obj_attrs_v1_size (abfd);
 }
 
 /* Write VAL in uleb128 format to P, returning a pointer to the
@@ -144,7 +149,7 @@ write_uleb128 (bfd_byte *p, uint32_t val)
 /* Write attribute ATTR to butter P, and return a pointer to the following
    byte.  */
 static bfd_byte *
-write_obj_attribute (bfd_byte *p, unsigned int tag, obj_attribute *attr)
+write_obj_attr_v1 (bfd_byte *p, unsigned int tag, obj_attribute *attr)
 {
   /* Suppress default entries.  */
   if (is_default_attr (attr))
@@ -168,14 +173,14 @@ write_obj_attribute (bfd_byte *p, unsigned int tag, obj_attribute *attr)
 /* Write the contents of the object attributes section (length SIZE)
    for VENDOR to CONTENTS.  */
 static void
-vendor_set_obj_attr_contents (bfd *abfd, bfd_byte *contents, bfd_vma size,
-			      int vendor)
+write_vendor_obj_attrs_v1 (bfd *abfd, bfd_byte *contents, bfd_vma size,
+			   int vendor)
 {
   bfd_byte *p;
   obj_attribute *attr;
   obj_attribute_list *list;
   int i;
-  const char *vendor_name = vendor_obj_attr_name (abfd, vendor);
+  const char *vendor_name = obj_attr_v1_vendor_name (abfd, vendor);
   size_t vendor_length = strlen (vendor_name) + 1;
 
   p = contents;
@@ -193,37 +198,40 @@ vendor_set_obj_attr_contents (bfd *abfd, bfd_byte *contents, bfd_vma size,
       unsigned int tag = i;
       if (get_elf_backend_data (abfd)->obj_attrs_order)
 	tag = get_elf_backend_data (abfd)->obj_attrs_order (i);
-      p = write_obj_attribute (p, tag, &attr[tag]);
+      p = write_obj_attr_v1 (p, tag, &attr[tag]);
     }
 
   for (list = elf_other_obj_attributes (abfd)[vendor];
        list;
        list = list->next)
-    p = write_obj_attribute (p, list->tag, &list->attr);
+    p = write_obj_attr_v1 (p, list->tag, &list->attr);
+}
+
+static void
+write_obj_attr_section_v1 (bfd *abfd, bfd_byte *buffer, bfd_vma size)
+{
+  bfd_byte *p = buffer;
+
+  /* <format-version: ‘A’>  */
+  *(p++) = 'A';
+
+  for (int vendor = OBJ_ATTR_FIRST; vendor <= OBJ_ATTR_LAST; ++vendor)
+    {
+      bfd_vma vendor_size = vendor_obj_attrs_v1_size (abfd, vendor);
+      if (vendor_size > 0)
+	write_vendor_obj_attrs_v1 (abfd, p, vendor_size, vendor);
+      p += vendor_size;
+    }
+
+  /* We didn't overrun the buffer.  */
+  BFD_ASSERT (p <= buffer + size);
 }
 
 /* Write the contents of the object attributes section to CONTENTS.  */
 void
-bfd_elf_set_obj_attr_contents (bfd *abfd, bfd_byte *contents, bfd_vma size)
+bfd_elf_set_obj_attr_contents (bfd *abfd, bfd_byte *buffer, bfd_vma size)
 {
-  bfd_byte *p;
-  int vendor;
-  bfd_vma my_size;
-
-  p = contents;
-  *(p++) = 'A';
-  my_size = 1;
-  for (vendor = OBJ_ATTR_FIRST; vendor <= OBJ_ATTR_LAST; vendor++)
-    {
-      bfd_vma vendor_size = vendor_obj_attr_size (abfd, vendor);
-      if (vendor_size)
-	vendor_set_obj_attr_contents (abfd, p, vendor_size, vendor);
-      p += vendor_size;
-      my_size += vendor_size;
-    }
-
-  if (size != my_size)
-    abort ();
+  write_obj_attr_section_v1 (abfd, buffer, size);
 }
 
 /* Allocate/find an object attribute.  */
