@@ -2648,25 +2648,25 @@ namespace eval Dwarf {
 		set _line_address_update 0
 		variable _line_program_terminated
 		set _line_program_terminated 0
-		_op .byte 1
+		_op .byte 1 DW_LNS_copy
 	    }
 
 	    proc DW_LNS_negate_stmt {} {
 		variable _line_program_terminated
 		set _line_program_terminated 0
-		_op .byte 6
+		_op .byte 6 DW_LNS_negate_stmt
 	    }
 
 	    proc DW_LNS_set_prologue_end {} {
 		variable _line_program_terminated
 		set _line_program_terminated 0
-		_op .byte 0x0a
+		_op .byte 0x0a DW_LNS_set_prologue_end
 	    }
 
 	    proc DW_LNS_set_epilogue_begin {} {
 		variable _line_program_terminated
 		set _line_program_terminated 0
-		_op .byte 0x0b
+		_op .byte 0x0b DW_LNS_set_epilogue_begin
 	    }
 
 	    proc DW_LNS_advance_pc {offset} {
@@ -2674,7 +2674,7 @@ namespace eval Dwarf {
 		set _line_program_terminated 0
 		variable _line_address_update
 		set _line_address_update 1
-		_op .byte 2
+		_op .byte 2 DW_LNS_advance_pc
 		_op .uleb128 ${offset}
 	    }
 
@@ -2682,7 +2682,7 @@ namespace eval Dwarf {
 		variable _line_program_terminated
 		set _line_program_terminated 0
 		variable _line
-		_op .byte 3
+		_op .byte 3 DW_LNS_advance_line
 		_op .sleb128 ${offset}
 		set _line [expr $_line + $offset]
 	    }
@@ -2705,7 +2705,7 @@ namespace eval Dwarf {
 	    proc DW_LNS_set_file {num} {
 		variable _line_program_terminated
 		set _line_program_terminated 0
-		_op .byte 4
+		_op .byte 4 DW_LNS_set_file
 		_op .sleb128 ${num}
 	    }
 
