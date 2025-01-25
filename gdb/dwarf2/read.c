@@ -17785,16 +17785,15 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
     = unrelocated_addr (gdbarch_addr_bits_remove (gdbarch,
 						  (CORE_ADDR) address));
 
-  if (dwarf_line_debug)
-    {
-      gdb_printf (gdb_stdlog,
-		  "Recording line %u, file %s, address %s\n",
-		  line, lbasename (subfile->name.c_str ()),
-		  paddress (gdbarch, (CORE_ADDR) address));
-    }
-
   if (cu != nullptr)
-    cu->get_builder ()->record_line (subfile, line, addr, flags);
+    {
+      if (dwarf_line_debug)
+	gdb_printf (gdb_stdlog, "Recording line %u, file %s, address %s\n",
+		    line, lbasename (subfile->name.c_str ()),
+		    paddress (gdbarch, (CORE_ADDR) address));
+
+      cu->get_builder ()->record_line (subfile, line, addr, flags);
+    }
 }
 
 /* Subroutine of dwarf_decode_lines_1 to simplify it.
