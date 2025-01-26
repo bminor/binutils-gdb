@@ -421,7 +421,7 @@ extern bool _bfd_vms_lib_ia64_mkarchive
 /* Routines to use for BFD_JUMP_TABLE_SYMBOLS where there is no symbol
    support.  Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).  */
 
-#define _bfd_nosymbols_get_symtab_upper_bound _bfd_long_bfd_n1_error
+#define _bfd_nosymbols_get_symtab_upper_bound _bfd_long_bfd_0
 extern long _bfd_nosymbols_canonicalize_symtab
   (bfd *, asymbol **) ATTRIBUTE_HIDDEN;
 #define _bfd_nosymbols_make_empty_symbol _bfd_generic_make_empty_symbol
