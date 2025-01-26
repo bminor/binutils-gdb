@@ -5264,8 +5264,9 @@ void
 bfd_elfNN_loongarch_set_data_segment_info (struct bfd_link_info *info,
 				     int *data_segment_phase)
 {
-  struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
-  htab->data_segment_phase = data_segment_phase;
+  if (is_elf_hash_table (info->hash)
+      && elf_hash_table_id (elf_hash_table (info)) == LARCH_ELF_DATA)
+    loongarch_elf_hash_table (info)->data_segment_phase = data_segment_phase;
 }
 
 /* Implement R_LARCH_ALIGN by deleting excess alignment NOPs.
