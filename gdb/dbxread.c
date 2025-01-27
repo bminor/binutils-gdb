@@ -36,12 +36,14 @@
 #include "target.h"
 #include "libaout.h"
 #include "objfiles.h"
-#include "stabsread.h"
+#include "buildsym-legacy.h"
 #include "gdb-stabs.h"
 #include "cp-support.h"
-
-/* Required for the following registry.  */
-#include "gdb-stabs.h"
+#include "c-lang.h"
+#include "psymtab.h"
+#include "block.h"
+#include "aout/aout64.h"
+#include "aout/stab_gnu.h"
 
 /* Local function prototypes.  */
 
@@ -80,7 +82,6 @@ explicit_lookup_type (int real_filenum, int index)
 static void
 dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
-  read_stabs_symtab (objfile, symfile_flags);
 }
 
 /* Initialize anything that needs initializing when a completely new
@@ -90,9 +91,6 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 static void
 dbx_new_init (struct objfile *ignore)
 {
-  stabsread_new_init ();
-  init_header_files ();
-  warning (_("The a.out file format is deprecated and will be removed soon."));
 }
 
 
@@ -227,7 +225,6 @@ dbx_symfile_init (struct objfile *objfile)
 static void
 dbx_symfile_finish (struct objfile *objfile)
 {
-  free_header_files ();
 }
 
 
