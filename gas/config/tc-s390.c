@@ -2287,6 +2287,7 @@ s390_machinemode (int ignore ATTRIBUTE_UNUSED)
 	s390_setup_opcodes ();
     }
 
+  xfree (mode_string);
   demand_empty_rest_of_line ();
 }
 
