@@ -59,6 +59,18 @@ set s390tests {
      "-m31" {gotreloc-1.s}
      {{objdump -dzrj.text gotreloc_31-no-pie-1.dd}}
      "gotreloc_31-1"}
+    {"Helper shared library (PLT test)"
+     "-shared -m elf_s390" "" "-m31" {pltlib.s}
+     {}
+     "libpltlib_31.so"}
+    {"PLT: PLT generation (non-PIC/PIE)"
+     "-m elf_s390 tmpdir/libpltlib_31.so" "" "-m31" {plt_31-1.s}
+     {{objdump "-M insnlength -dzrj.plt" plt_31_non-pic-1.pd} {readelf "-wf" plt_31-1.wf}}
+     "plt_31_non-pic-1"}
+    {"PLT: PLT generation (PIC/PIE)"
+     "-m elf_s390 tmpdir/libpltlib_31.so -pic" "" "-m31" {plt_31-1.s}
+     {{objdump "-M insnlength -dzrj.plt" plt_31_pic-1.pd} {readelf "-wf" plt_31-1.wf}}
+     "plt_31_pic-1"}
 }
 
 set s390xtests {
@@ -101,6 +113,14 @@ set s390xtests {
     {"WEAKUNDEF2: overflow test (PLT32DBL)"
      "-m elf64_s390 -dT 8GB.ld --no-error-rwx-segments -no-pie" "" "-m64" {weakundef-2.s}
      {{objdump "-dzrj.text" weakundef-2.dd}} "weakundef-2"}
+    {"Helper shared library (PLT test)"
+     "-shared -m elf64_s390" "" "-m64" {pltlib.s}
+     {}
+     "libpltlib_64.so"}
+    {"PLT: PLT generation"
+     "-m elf64_s390 tmpdir/libpltlib_64.so" "" "-m64" {plt_64-1.s}
+     {{objdump "-dzrj.plt" plt_64-1.pd} {readelf "-wf" plt_64-1.wf}}
+     "plt_64-1"}
 }
 
 if [istarget "s390-*-*"] {
