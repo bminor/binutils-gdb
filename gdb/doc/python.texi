@@ -4952,7 +4952,7 @@ command, a string.  The arguments, @var{arg}, are passed to the
 command.  Each argument must also be a string.
 
 This function returns a Python dictionary whose contents reflect the
-corresponding @sc{GDB/MI} command's output.  Refer to the
+corresponding @sc{gdb/mi} command's output.  Refer to the
 documentation for these commands for details.  Lists are represented
 as Python lists, and tuples are represented as Python dictionaries.
 

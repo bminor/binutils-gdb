@@ -49375,7 +49375,7 @@ bytes.  @xref{svl}.
 @item
 @code{SVCR} is a 64-bit status pseudo-register with two valid bits.  Bit 0
 (@sc{sm}) shows whether the streaming @acronym{SVE} mode is enabled or disabled.
-Bit 1 (@sc{ZA}) shows whether the @code{ZA} register state is active (in use) or
+Bit 1 (@sc{za}) shows whether the @code{ZA} register state is active (in use) or
 not.
 @xref{aarch64 sme svcr}.
 
