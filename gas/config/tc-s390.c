@@ -2146,32 +2146,21 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
 
-  if (*input_line_pointer == '"')
-    {
-      int len;
-      cpu_string = demand_copy_C_string (&len);
-    }
-  else
-    {
-      char c;
+  {
+    char c;
 
-      cpu_string = input_line_pointer;
-      do
-	{
-	  char * str;
+    c = get_symbol_name (&cpu_string);
+    while (c == '+')
+      {
+	char *str;
 
-	  c = get_symbol_name (&str);
-	  c = restore_line_pointer (c);
-	  if (c == '+')
-	    ++ input_line_pointer;
-	}
-      while (c == '+');
-
-      c = *input_line_pointer;
-      *input_line_pointer = 0;
-      cpu_string = xstrdup (cpu_string);
-      (void) restore_line_pointer (c);
-    }
+	c = restore_line_pointer (c);
+	input_line_pointer++;
+	c = get_symbol_name (&str);
+      }
+    cpu_string = xstrdup (cpu_string);
+    (void) restore_line_pointer (c);
+  }
 
   if (cpu_string != NULL)
     {
@@ -2217,6 +2206,7 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
 	}
     }
 
+  xfree (cpu_string);
   demand_empty_rest_of_line ();
 }
 
