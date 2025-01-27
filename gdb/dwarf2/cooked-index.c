@@ -234,6 +234,7 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main,
     {
     case language_cplus:
     case language_rust:
+    case language_fortran:
       sep = "::";
       break;
 
