@@ -43,5 +43,13 @@ foo:
 	unpk	16,32			# syntax error: missing lengths
 
 #		V1,D2(VX2,B2),M3
-	vgef	%v1,16(,),0		# syntax error: explicitly omitted index & base
+	vgef	%v1,16(,%r3),0		# syntax error: omitted vector index
+	vgef	%v1,16(%r3),0		# syntax error: omitted vector index 
+	vgef	%v1,16(,%r0),0		# syntax error: omitted vector index
+	vgef	%v1,16(,0),0		# syntax error: omitted vector index
+	vgef	%v1,16(,),0		# syntax error: omitted vector index & base
 	vgef	%v1,16(),0		# syntax error: empty parentheses
+	vgef	%v1,16,0		# syntax error: omitted vector index & base
+	vgef	%v0,16,0		# syntax error: omitted vector index & base
+	vgef	0,16,0			# syntax error: omitted vector index & base
+	vgef	0,0,0			# syntax error: omitted vector index & base

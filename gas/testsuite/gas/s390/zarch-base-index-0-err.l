@@ -68,7 +68,17 @@
 .*:42: Error: operand 1: syntax error; expected ','
 .*:43: Error: operand 1: syntax error; missing '\(' after displacement
 .*:43: Error: operand 2: syntax error; missing '\(' after displacement
-.*:46: Error: bad expression
-.*:46: Error: operand 2: syntax error; missing '\)' after base register
-.*:47: Error: bad expression
-.*:47: Error: operand 2: syntax error; missing '\)' after base register
+.*:46: Error: operand 2: missing vector index register operand
+.*:47: Error: operand 2: missing vector index register operand
+.*:48: Error: operand 2: missing vector index register operand
+.*:49: Error: operand 2: missing vector index register operand
+.*:50: Error: operand 2: missing vector index register operand
+.*:50: Error: bad expression
+.*:50: Error: operand 2: syntax error; missing '\)' after base register
+.*:51: Error: operand 2: missing vector index register operand
+.*:51: Error: bad expression
+.*:51: Error: operand 2: syntax error; missing '\)' after base register
+.*:52: Error: operand 2: syntax error; missing '\(' after displacement
+.*:53: Error: operand 2: syntax error; missing '\(' after displacement
+.*:54: Error: operand 2: syntax error; missing '\(' after displacement
+.*:55: Error: operand 2: syntax error; missing '\(' after displacement

@@ -1452,6 +1452,11 @@ md_gather_operands (char *str,
 
       if (omitted_index && (operand->flags & S390_OPERAND_INDEX))
 	{
+	  /* Do not skip an omitted vector index register in D(VX,B).  */
+	  if (operand->flags & S390_OPERAND_VR)
+	    as_bad (_("operand %d: missing vector index register operand"),
+		    operand_number);
+
 	  /* Skip omitted optional index register operand in D(X,B) due to
 	     D(,B) or D(B). Skip comma, if D(,B).  */
 	  if (*str == ',')
@@ -1675,9 +1680,12 @@ md_gather_operands (char *str,
 	      /* There is no opening parentheses. Check if operands of
 		 parenthesized block can be skipped. Only index and base
 		 register operands as well as optional operands may be
-		 skipped. A length operand may not be skipped.  */
+		 skipped. Neither vector index nor length operands may
+		 be skipped.  */
 	      operand = s390_operands + *(++opindex_ptr);
-	      if (!(operand->flags & (S390_OPERAND_INDEX|S390_OPERAND_BASE)))
+	      if (!(((operand->flags & S390_OPERAND_INDEX) &&
+		     !(operand->flags & S390_OPERAND_VR))
+		    || (operand->flags & S390_OPERAND_BASE)))
 		as_bad (_("operand %d: syntax error; missing '(' after displacement"),
 			operand_number);
 

@@ -63,5 +63,3 @@
 .*:104: Warning: operand 2: base register specified but zero
 .*:106: Warning: operand 2: base register specified but zero
 .*:107: Warning: operand 2: base register specified but zero
-.*:109: Warning: operand 2: base register specified but zero
-.*:110: Warning: operand 2: base register specified but zero

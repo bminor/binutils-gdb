@@ -95,8 +95,8 @@ foo:
 	vgef	%v1,16(%v2,%r3),0
 	vgef	%v1,16(%v0,%r3),0
 	vgef	%v1,16(0,%r3),0
-	vgef	%v1,16(,%r3),0
-	vgef	%v1,16(%r3),0
+#	vgef	%v1,16(,%r3),0		# syntax error: omitted vector index
+#	vgef	%v1,16(%r3),0		# syntax error: omitted vector index
 	vgef	%v1,16(%v2,%r0),0
 	vgef	%v1,16(%v2,0),0
 	vgef	%v1,16(%v2,),0
@@ -106,11 +106,11 @@ foo:
 	vgef	%v1,16(0,%r0),0
 	vgef	%v1,16(0,0),0
 	vgef	%v1,16(0,),0
-	vgef	%v1,16(,%r0),0
-	vgef	%v1,16(,0),0
-#	vgef	%v1,16(,),0		# syntax error: explicitly omitted index & base
+#	vgef	%v1,16(,%r0),0		# syntax error: omitted vector index
+#	vgef	%v1,16(,0),0		# syntax error: omitted vector index
+#	vgef	%v1,16(,),0		# syntax error: omitted vector index & base
 #	vgef	%v1,16(),0		# syntax error: empty parentheses
-	vgef	%v1,16,0
-	vgef	%v0,16,0
-	vgef	0,16,0
-	vgef	0,0,0
+#	vgef	%v1,16,0		# syntax error: omitted vector index & base
+#	vgef	%v0,16,0		# syntax error: omitted vector index & base
+#	vgef	0,16,0			# syntax error: omitted vector index & base
+#	vgef	0,0,0			# syntax error: omitted vector index & base
