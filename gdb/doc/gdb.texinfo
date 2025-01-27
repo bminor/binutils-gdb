@@ -44393,7 +44393,7 @@ tags found in the requested memory range.
 @cindex check if a given address is in a memory tagged region
 @cindex @samp{qIsAddressTagged} packet
 @item qIsAddressTagged:@var{address}
-@anchor {qIsAddressTagged}
+@anchor{qIsAddressTagged}
 Check if address @var{address} is in a memory tagged region; if it is, it's
 said to be @dfn{tagged}.  The target is responsible for checking it, as this
 is architecture-specific.
