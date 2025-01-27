@@ -93,7 +93,12 @@ int
 cooked_index_entry::compare (const char *stra, const char *strb,
 			     comparison_mode mode)
 {
+#if defined (__GNUC__) && !defined (__clang__) && __GNUC__ <= 7
+  /* Work around error with gcc 7.5.0.  */
+  auto munge = [] (char c) -> unsigned char
+#else
   auto munge = [] (char c) constexpr -> unsigned char
+#endif
     {
       /* Treat '<' as if it ended the string.  This lets something
 	 like "func<t>" match "func<t<int>>".  See the "Breakpoints in
