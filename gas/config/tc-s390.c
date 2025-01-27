@@ -1506,6 +1506,7 @@ md_gather_operands (char *str,
 		as_bad (_("operand %d: invalid length field specified"),
 			operand_number);
 	      if ((operand->flags & S390_OPERAND_INDEX)
+		  && !(operand->flags & S390_OPERAND_VR)
 		  && ex.X_add_number == 0
 		  && warn_areg_zero)
 		as_warn (_("operand %d: index register specified but zero"),
