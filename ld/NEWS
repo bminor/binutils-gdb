@@ -1,5 +1,11 @@
 -*- text -*-
 
+* On s390, generate ".eh_frame" unwind information for the linker generated
+  .plt section.  Enabled by default.  Can be disabled using linker option
+  --no-ld-generated-unwind-info.
+
+* On s390, add support for linker option --[no-]ld-generated-unwind-info.
+
 Changes in 2.44:
 
 * Support for Nios II target has been removed, as this architecture has been

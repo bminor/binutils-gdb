@@ -74,7 +74,7 @@ set s390tests {
 }
 
 set s390xtests {
-    {"TLS -fpic -shared transitions" "-shared -melf64_s390 --hash-style=sysv" ""
+    {"TLS -fpic -shared transitions" "-shared -melf64_s390 --hash-style=sysv --no-ld-generated-unwind-info" ""
      "-m64 -Aesame" {tlspic1_64.s tlspic2_64.s}
      {{readelf -WSsrl tlspic_64.rd} {objdump -dzrj.text tlspic_64.dd}
       {objdump -sj.got tlspic_64.sd} {objdump -sj.tdata tlspic_64.td}}
@@ -82,7 +82,7 @@ set s390xtests {
     {"Helper shared library" "-shared -melf64_s390" ""
      "-m64 -Aesame" {tlslib_64.s} {} "libtlslib_64.so"}
     {"TLS -fpic and -fno-pic exec transitions"
-     "-melf64_s390 tmpdir/libtlslib_64.so --hash-style=sysv" ""
+     "-melf64_s390 tmpdir/libtlslib_64.so --hash-style=sysv --no-ld-generated-unwind-info" ""
      "-m64 -Aesame" {tlsbinpic_64.s tlsbin_64.s}
      {{readelf -WSsrl tlsbin_64.rd} {objdump -dzrj.text tlsbin_64.dd}
       {objdump -sj.got tlsbin_64.sd} {objdump -sj.tdata tlsbin_64.td}}
@@ -117,10 +117,14 @@ set s390xtests {
      "-shared -m elf64_s390" "" "-m64" {pltlib.s}
      {}
      "libpltlib_64.so"}
-    {"PLT: PLT generation"
-     "-m elf64_s390 tmpdir/libpltlib_64.so" "" "-m64" {plt_64-1.s}
+    {"PLT: PLT generation without .eh_frame unwind info"
+     "-m elf64_s390 tmpdir/libpltlib_64.so --no-ld-generated-unwind-info" "" "-m64" {plt_64-1.s}
      {{objdump "-dzrj.plt" plt_64-1.pd} {readelf "-wf" plt_64-1.wf}}
      "plt_64-1"}
+    {"PLT: PLT generation with .eh_frame unwind info"
+     "-m elf64_s390 tmpdir/libpltlib_64.so" "" "-m64" {plt_64-1.s}
+     {{objdump "-dzrj.plt" plt_64-1.pd} {readelf "-wf" plt_64-1_eh.wf}}
+     "plt_64-1_eh"}
 }
 
 if [istarget "s390-*-*"] {

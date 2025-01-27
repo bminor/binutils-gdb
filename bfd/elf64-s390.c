@@ -26,6 +26,7 @@
 #include "elf-bfd.h"
 #include "elf/s390.h"
 #include "elf-s390.h"
+#include "dwarf2.h"
 #include <stdarg.h>
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
@@ -564,6 +565,35 @@ static const bfd_byte elf_s390x_first_plt_entry[PLT_FIRST_ENTRY_SIZE] =
     0x07, 0x00				    /* nopr    %r0		 */
   };
 
+/* .eh_frame covering the .plt section.  */
+
+#define PLT_CIE_SIZE		24
+#define PLT_FDE_SIZE		20
+#define PLT_FDE_START_OFFSET	(PLT_CIE_SIZE + 8)
+#define PLT_FDE_LEN_OFFSET	(PLT_CIE_SIZE + 12)
+
+static const bfd_byte elf_s390x_eh_frame_plt[] =
+{
+  0, 0, 0, PLT_CIE_SIZE - 4,	/* CIE length */
+  0, 0, 0, 0,			/* CIE ID */
+  1,				/* CIE version */
+  'z', 'R', 0,			/* Augmentation string */
+  1,				/* Code alignment factor */
+  0x78,				/* Data alignment factor */
+  14,				/* Return address column */
+  1,				/* Augmentation size */
+  DW_EH_PE_pcrel | DW_EH_PE_sdata4, /* FDE encoding */
+  DW_CFA_def_cfa, 15, 0xa0, 0x01, /* DW_CFA_def_cfa: r15 ofs 160 */
+  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop,
+
+  0, 0, 0, PLT_FDE_SIZE - 4,	/* FDE length */
+  0, 0, 0, PLT_CIE_SIZE + 4,	/* CIE pointer */
+  0, 0, 0, 0,			/* R_S390_PC32 .plt goes here */
+  0, 0, 0, 0,			/* .plt size goes here */
+  0,				/* Augmentation size */
+  DW_CFA_nop, DW_CFA_nop, DW_CFA_nop
+};
+
 
 /* s390 ELF linker hash entry.  */
 
@@ -656,6 +686,7 @@ struct elf_s390_link_hash_table
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *irelifunc;
+  asection *plt_eh_frame;
 
   union {
     bfd_signed_vma refcount;
@@ -1852,6 +1883,15 @@ elf_s390_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
      sym dynamic relocs.  */
   elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, info);
 
+  if (_bfd_elf_eh_frame_present (info))
+    {
+      if (htab->plt_eh_frame != NULL
+	  && htab->elf.splt != NULL
+	  && htab->elf.splt->size != 0
+	  && !bfd_is_abs_section (htab->elf.splt->output_section))
+	htab->plt_eh_frame->size = sizeof (elf_s390x_eh_frame_plt);
+    }
+
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
   relocs = false;
@@ -1863,6 +1903,7 @@ elf_s390_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sgotplt
+	  || s == htab->plt_eh_frame
 	  || s == htab->elf.sdynbss
 	  || s == htab->elf.sdynrelro
 	  || s == htab->elf.iplt
@@ -1928,6 +1969,16 @@ elf_s390_late_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (s->contents == NULL)
 	return false;
       s->alloced = 1;
+    }
+
+  if (htab->plt_eh_frame != NULL
+      && htab->plt_eh_frame->contents != NULL)
+    {
+      memcpy (htab->plt_eh_frame->contents,
+	      elf_s390x_eh_frame_plt,
+	      htab->plt_eh_frame->size);
+      bfd_put_32 (dynobj, htab->elf.splt->size,
+		  htab->plt_eh_frame->contents + PLT_FDE_LEN_OFFSET);
     }
 
   return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs);
@@ -3703,6 +3754,38 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	  }
     }
 
+  /* Adjust .eh_frame for .plt section.  */
+  if (htab->plt_eh_frame != NULL
+      && htab->plt_eh_frame->contents != NULL)
+    {
+      if (htab->elf.splt != NULL
+	  && htab->elf.splt->size != 0
+	  && (htab->elf.splt->flags & SEC_EXCLUDE) == 0
+	  && htab->elf.splt->output_section != NULL
+	  && htab->plt_eh_frame->output_section != NULL)
+	{
+	  bfd_vma plt_start = htab->elf.splt->output_section->vma;
+	  bfd_vma eh_frame_start = htab->plt_eh_frame->output_section->vma
+				   + htab->plt_eh_frame->output_offset
+				   + PLT_FDE_START_OFFSET;
+	  /* Note: Linker may have discarded the FDE, so that store may
+	     be beyond current htab->plt_eh_frame->size.  Can be ignored,
+	     as htab->plt_eh_frame->contents got allocated with
+	     sizeof (elf_s390x_eh_frame_plt).  See PR 12570.  */
+	  bfd_put_signed_32 (dynobj, plt_start - eh_frame_start,
+			     htab->plt_eh_frame->contents
+			     + PLT_FDE_START_OFFSET);
+	}
+
+      if (htab->plt_eh_frame->sec_info_type == SEC_INFO_TYPE_EH_FRAME)
+	{
+	  if (! _bfd_elf_write_section_eh_frame (output_bfd, info,
+						 htab->plt_eh_frame,
+						 htab->plt_eh_frame->contents))
+	    return NULL;
+	}
+    }
+
   return true;
 }
 
@@ -3926,6 +4009,47 @@ bfd_elf_s390_set_options (struct bfd_link_info *info,
   return true;
 }
 
+/* Create .plt, .rela.plt, .got, .got.plt, .rela.got, .dynbss, and
+   .rela.bss sections in DYNOBJ, and set up shortcuts to them in our
+   hash table.  */
+
+static bool
+elf_s390_create_dynamic_sections (bfd *dynobj,
+                                  struct bfd_link_info *info)
+{
+  struct elf_s390_link_hash_table *htab;
+
+  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
+    return false;
+
+  htab = elf_s390_hash_table (info);
+  if (htab == NULL)
+    return false;
+
+  if (htab->elf.splt != NULL)
+    {
+      /* Create .eh_frame section for .plt section.  */
+      if (!info->no_ld_generated_unwind_info)
+        {
+          flagword flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+                            | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+                            | SEC_LINKER_CREATED);
+
+          if (htab->plt_eh_frame == NULL)
+            {
+              htab->plt_eh_frame
+                = bfd_make_section_anyway_with_flags (dynobj,
+                                                      ".eh_frame",
+                                                      flags);
+              if (htab->plt_eh_frame == NULL
+                  || !bfd_set_section_alignment (htab->plt_eh_frame, 3))
+                return false;
+            }
+        }
+    }
+
+  return true;
+}
 
 /* Why was the hash table entry size definition changed from
    ARCH_SIZE/8 to 4? This breaks the 64 bit dynamic linker and
@@ -3992,7 +4116,7 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_adjust_dynamic_symbol     elf_s390_adjust_dynamic_symbol
 #define elf_backend_check_relocs	      elf_s390_check_relocs
 #define elf_backend_copy_indirect_symbol      elf_s390_copy_indirect_symbol
-#define elf_backend_create_dynamic_sections   _bfd_elf_create_dynamic_sections
+#define elf_backend_create_dynamic_sections   elf_s390_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections   elf_s390_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol     elf_s390_finish_dynamic_symbol
 #define elf_backend_gc_mark_hook	      elf_s390_gc_mark_hook
