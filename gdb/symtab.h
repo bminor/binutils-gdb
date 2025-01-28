@@ -33,7 +33,6 @@
 #include <optional>
 #include <string_view>
 #include "gdbsupport/next-iterator.h"
-#include "gdbsupport/iterator-range.h"
 #include "completer.h"
 #include "gdb-demangle.h"
 #include "split-name.h"
