@@ -7190,14 +7190,6 @@ find_name_end (const char *name)
     }
 }
 
-/* See stabsread.h.  */
-
-int
-hashname (const char *name)
-{
-  return fast_hash (name, strlen (name)) % HASHSIZE;
-}
-
 /* Initializer for this module.  */
 
 INIT_GDB_FILE (stabsread)

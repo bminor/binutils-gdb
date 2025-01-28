@@ -21,6 +21,16 @@
 
 #include "buildsym.h"
 
+/* Legacy hash for symbol names used for several debuginfo formats.  */
+
+#define HASHSIZE 127
+
+static inline int
+hashname (const char *name)
+{
+  return fast_hash (name, strlen (name)) % HASHSIZE;
+}
+
 /* This module provides definitions used for creating and adding to
    the symbol table.  These routines are called from various symbol-
    file-reading routines.  This file holds the legacy API, which

@@ -19,19 +19,14 @@
 #ifndef GDB_STABSREAD_H
 #define GDB_STABSREAD_H
 
+#include "buildsym-legacy.h"
+
 struct objfile;
 struct legacy_psymtab;
 enum language;
 
 /* Definitions, prototypes, etc for stabs debugging format support
    functions.  */
-
-#define HASHSIZE 127		/* Size of things hashed via
-				   hashname().  */
-
-/* Compute a small integer hash code for the given name.  */
-
-extern int hashname (const char *name);
 
 /* Count symbols as they are processed, for error messages.  */
 
