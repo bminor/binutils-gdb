@@ -2,7 +2,7 @@
 # Copyright © 2021 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
 #
-# Grégoire Scano <gregoire.scano@malloc.fr>, 2015, 2018-2024.
+# Grégoire Scano <gregoire.scano@malloc.fr>, 2015, 2018-2025.
 # Christian Wiatr <w9204-fs@yahoo.com>, 2023.
 #
 # stub => espace d'amorçage
@@ -10,10 +10,10 @@
 # relocation => relocalisation
 msgid ""
 msgstr ""
-"Project-Id-Version: gold 2.41.90\n"
+"Project-Id-Version: gold 2.43.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2024-01-15 14:59+0000\n"
-"PO-Revision-Date: 2024-01-26 23:17+0800\n"
+"POT-Creation-Date: 2025-01-19 12:20+0000\n"
+"PO-Revision-Date: 2025-01-24 08:04+0800\n"
 "Last-Translator: Grégoire Scano <gregoire.scano@malloc.fr>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -87,7 +87,7 @@ msgstr "L'espace d'amorçage est bien trop loin, essayez une valeur plus petite 
 
 #: aarch64.cc:6017 arm.cc:8477 i386.cc:1772 mips.cc:12507 powerpc.cc:7848
 #: s390.cc:2185 s390.cc:2633 sparc.cc:2134 tilegx.cc:3137 tilegx.cc:3589
-#: x86_64.cc:3027 x86_64.cc:3497
+#: x86_64.cc:3034 x86_64.cc:3506
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr "%s : la relocalisation %u vers un symbole local n'est pas prise en charge"
@@ -113,7 +113,7 @@ msgstr "%s : relocalisation TLSLE %u non prise en charge dans un code partagé.
 
 #: aarch64.cc:6374 arm.cc:8885 i386.cc:2127 mips.cc:12520 powerpc.cc:8788
 #: s390.cc:3064 s390.cc:3081 sparc.cc:2572 tilegx.cc:3605 tilegx.cc:4144
-#: x86_64.cc:3513 x86_64.cc:4038
+#: x86_64.cc:3522 x86_64.cc:4050
 #, c-format
 msgid "%s: unsupported reloc %u against global symbol %s"
 msgstr "%s : la relocalisation %u vers le symbole global %s n'est pas prise en charge"
@@ -129,7 +129,7 @@ msgid "%s: unsupported reloc type in global scan"
 msgstr "%s : type de relocalisation non prise en charge lors d'un balayage global"
 
 #: aarch64.cc:6909 powerpc.cc:9925 s390.cc:4014 sparc.cc:3164 tilegx.cc:4211
-#: x86_64.cc:4103
+#: x86_64.cc:4115
 #, c-format
 msgid "%s: unsupported REL reloc section"
 msgstr "%s : section de relocalisation REL non prise en charge"
@@ -140,7 +140,7 @@ msgid "cannot relocate %s in object file"
 msgstr "impossible de relocaliser %s dans le fichier objet"
 
 #: aarch64.cc:7345 i386.cc:2987 i386.cc:3753 mips.cc:10114 powerpc.cc:12282
-#: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4597
+#: s390.cc:3465 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:4609
 #, c-format
 msgid "unexpected reloc %u in object file"
 msgstr "relocalisation %u inattendue dans le fichier objet"
@@ -389,12 +389,12 @@ msgid "requires unsupported dynamic reloc %s; recompile with -fPIC"
 msgstr "nécessite une relocalisation dynamique %s non prise en charge ; recompiler avec -fPIC"
 
 #: arm.cc:8547 i386.cc:1786 s390.cc:2276 sparc.cc:2247 tilegx.cc:3223
-#: x86_64.cc:3133
+#: x86_64.cc:3140
 #, c-format
 msgid "%s: unsupported TLS reloc %u for IFUNC symbol"
 msgstr "%s : la relocalisation TLS %u pour un symbole IFUNC n'est pas prise en charge"
 
-#: arm.cc:8643 i386.cc:1862 powerpc.cc:8257 s390.cc:2369 x86_64.cc:3233
+#: arm.cc:8643 i386.cc:1862 powerpc.cc:8257 s390.cc:2369 x86_64.cc:3240
 #, c-format
 msgid "section symbol %u has bad shndx %u"
 msgstr "le symbole de section %u a un mauvais shndx %u"
@@ -403,13 +403,13 @@ msgstr "le symbole de section %u a un mauvais shndx %u"
 #. dynamic linker, and should never be seen here.
 #: arm.cc:8752 arm.cc:9233 i386.cc:1950 i386.cc:2436 mips.cc:11296 s390.cc:2468
 #: s390.cc:2902 sparc.cc:2553 sparc.cc:3033 tilegx.cc:3584 tilegx.cc:4139
-#: x86_64.cc:3358 x86_64.cc:3898
+#: x86_64.cc:3365 x86_64.cc:3907
 #, c-format
 msgid "%s: unexpected reloc %u in object file"
 msgstr "%s : relocalisation %u inattendue dans le fichier objet"
 
 #: arm.cc:8784 i386.cc:1984 mips.cc:10745 s390.cc:2512 sparc.cc:2452
-#: tilegx.cc:3488 x86_64.cc:3399
+#: tilegx.cc:3488 x86_64.cc:3407
 #, c-format
 msgid "local symbol %u has bad shndx %u"
 msgstr "le symbole local %u a un mauvais shndx %u"
@@ -426,8 +426,8 @@ msgstr "impossible de fournir une correction de relocalisation V4BX interopérab
 #: arm.cc:10247 i386.cc:3019 i386.cc:3101 i386.cc:3166 i386.cc:3202
 #: i386.cc:3274 mips.cc:12342 powerpc.cc:12396 s390.cc:3471 s390.cc:3542
 #: s390.cc:3579 s390.cc:3601 s390.cc:3626 sparc.cc:3701 sparc.cc:3892
-#: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4620 x86_64.cc:4748
-#: x86_64.cc:4823 x86_64.cc:4857
+#: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:4633 x86_64.cc:4761
+#: x86_64.cc:4836 x86_64.cc:4870
 #, c-format
 msgid "unsupported reloc %u"
 msgstr "la relocalisation %u n'est pas prise en charge"
@@ -917,38 +917,38 @@ msgstr "%s introuvable"
 msgid "cannot open %s: %s"
 msgstr "impossible d'ouvrir %s : %s"
 
-#: gdb-index.cc:378
+#: gdb-index.cc:395
 #, c-format
 msgid "%s: --gdb-index currently supports only C and C++ languages"
 msgstr "%s : --gdb-index ne prend en charge que les langages C et C++ pour le moment"
 
 #. The top level DIE should be one of the above.
-#: gdb-index.cc:392
+#: gdb-index.cc:409
 #, c-format
 msgid "%s: top level DIE is not DW_TAG_compile_unit or DW_TAG_type_unit"
 msgstr "%s : le DIE du plus haut niveau n'est pas DW_TAG_compile_unit ou DW_TAG_type_unit"
 
-#: gdb-index.cc:845
+#: gdb-index.cc:862
 #, c-format
 msgid "%s: DWARF info may be corrupt; low_pc and high_pc are in different sections"
 msgstr "%s : les informations DWARF peuvent être corrompues ; low_pc et high_pc sont dans des sections différentes"
 
-#: gdb-index.cc:971
+#: gdb-index.cc:988
 #, c-format
 msgid "%s: DWARF CUs: %u\n"
 msgstr "%s : unités de compilation (CUs) DWARF : %u\n"
 
-#: gdb-index.cc:973
+#: gdb-index.cc:990
 #, c-format
 msgid "%s: DWARF CUs without pubnames/pubtypes: %u\n"
 msgstr "%s : unités de compilation (CUs) DWARF sans pubnames/pubtypes : %u\n"
 
-#: gdb-index.cc:975
+#: gdb-index.cc:992
 #, c-format
 msgid "%s: DWARF TUs: %u\n"
 msgstr "%s : unités de type (TUs) DWARF : %u\n"
 
-#: gdb-index.cc:977
+#: gdb-index.cc:994
 #, c-format
 msgid "%s: DWARF TUs without pubnames/pubtypes: %u\n"
 msgstr "%s : unités de type (TUs) DWARF sans pubnames/pubtypes : %u\n"
@@ -1065,7 +1065,7 @@ msgstr "impossible d'utiliser split-stack « %s » et non-split-stack « %s 
 
 #. FIXME: This needs to specify the location somehow.
 #: i386.cc:639 i386.cc:2800 sparc.cc:324 sparc.cc:3296 x86_64.cc:962
-#: x86_64.cc:4297
+#: x86_64.cc:4309
 msgid "missing expected TLS relocation"
 msgstr "absence de la relocalisation TLS attendue"
 
@@ -1103,7 +1103,7 @@ msgstr "SUN et GNU suivent les relocalisations TLS"
 msgid "unsupported reloc %u in object file"
 msgstr "la relocalisation %u n'est pas prise en charge dans le fichier objet"
 
-#: i386.cc:4036 powerpc.cc:9879 s390.cc:4886 x86_64.cc:5743
+#: i386.cc:4036 powerpc.cc:9879 s390.cc:4886 x86_64.cc:5782
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
 msgstr "l'association de séquence de la pile scindée (split-stack) à la position %2$0zx de la section %1$u a échoué"
@@ -1695,7 +1695,7 @@ msgstr "%s : ICF place la section « %s » du fichier « %s » dans la sect
 msgid "size of symbols is not multiple of symbol size"
 msgstr "la taille des symboles n'est pas un multiple de la taille d'un symbole"
 
-#: object.cc:2142 symtab.cc:1217
+#: object.cc:2142 symtab.cc:1280
 #, c-format
 msgid "%s: plugin needed to handle lto object"
 msgstr "%s : un greffon est nécessaire à la gestion d'objets lto"
@@ -3691,64 +3691,64 @@ msgstr "symbole STB_LOCAL invalide dans les symboles externes"
 msgid "unsupported symbol binding %d"
 msgstr "liaison de symbole %d non prise en charge"
 
-#: resolve.cc:288
+#: resolve.cc:274
 #, c-format
 msgid "STT_COMMON symbol '%s' in %s is not in a common section"
 msgstr "le symbole STT_COMMON « %s » dans %s n'est pas dans une section commune"
 
-#: resolve.cc:443
+#: resolve.cc:429
 #, c-format
 msgid "common of '%s' overriding smaller common"
 msgstr "le commun de « %s » écrase un commun plus petit"
 
-#: resolve.cc:448
+#: resolve.cc:434
 #, c-format
 msgid "common of '%s' overidden by larger common"
 msgstr "le commun de « %s » est écrasé par un commun plus grand"
 
-#: resolve.cc:453
+#: resolve.cc:439
 #, c-format
 msgid "multiple common of '%s'"
 msgstr "commun multiple de « %s »"
 
-#: resolve.cc:492
+#: resolve.cc:478
 #, c-format
 msgid "symbol '%s' used as both __thread and non-__thread"
 msgstr "le symbole « %s » est utilisé à la fois comme __thread et comme non-__thread"
 
-#: resolve.cc:535
+#: resolve.cc:521
 #, c-format
 msgid "multiple definition of '%s'"
 msgstr "définitions redondantes de « %s »"
 
-#: resolve.cc:574
+#: resolve.cc:560
 #, c-format
 msgid "definition of '%s' overriding common"
 msgstr "la définition de « %s » écrase le commun"
 
-#: resolve.cc:609
+#: resolve.cc:595
 #, c-format
 msgid "definition of '%s' overriding dynamic common definition"
 msgstr "la définition de « %s » écrase la définition du commun dynamique"
 
-#: resolve.cc:785
+#: resolve.cc:771
 #, c-format
 msgid "common '%s' overridden by previous definition"
 msgstr "le commun « %s » est écrasé par la définition précédente"
 
-#: resolve.cc:920
+#: resolve.cc:906
 msgid "COPY reloc"
 msgstr "COPIE de relocalisation"
 
-#: resolve.cc:924 resolve.cc:947
+#: resolve.cc:910 resolve.cc:933
 msgid "command line"
 msgstr "ligne de commande"
 
-#: resolve.cc:927
+#: resolve.cc:913
 msgid "linker script"
 msgstr "script de l'éditeur de liens"
 
-#: resolve.cc:931
+#: resolve.cc:917
 msgid "linker defined"
 msgstr "éditeur de liens défini"
 
@@ -3765,7 +3765,7 @@ msgstr "à court d'espace de retouche (PLT) ; rééditer les liens avec --incre
 msgid "relocation overflow"
 msgstr "débordement de relocalisation"
 
-#: s390.cc:3677 s390.cc:3733 x86_64.cc:4946
+#: s390.cc:3677 s390.cc:3733 x86_64.cc:4960
 #, c-format
 msgid "unsupported reloc type %u"
 msgstr "le type de relocalisation %u n'est pas pris en charge"
@@ -4078,75 +4078,75 @@ msgstr "%s : %s structures de données de chaînes de caractères : %zu\n"
 msgid "Cannot export local symbol '%s'"
 msgstr "Impossible d'exporter le symbole local « %s »"
 
-#: symtab.cc:948
+#: symtab.cc:957
 #, c-format
 msgid "%s: reference to %s"
 msgstr "%s : référence à %s"
 
-#: symtab.cc:950
+#: symtab.cc:959
 #, c-format
 msgid "%s: definition of %s"
 msgstr "%s : définition de %s"
 
-#: symtab.cc:1060
+#: symtab.cc:1123
 #, c-format
 msgid "%s: conflicting default version definition for %s@@%s"
 msgstr "%s : la définition de la version par défaut pour %s@@%s est en conflit"
 
-#: symtab.cc:1064
+#: symtab.cc:1127
 #, c-format
 msgid "%s: %s: previous definition of %s@@%s here"
 msgstr "%s : %s : définition précédente de %s@@%s ici"
 
-#: symtab.cc:1206
+#: symtab.cc:1269
 #, c-format
 msgid "bad global symbol name offset %u at %zu"
 msgstr "le décalage %u du nom de symbole global à la position %zu est incorrect"
 
-#: symtab.cc:1473
+#: symtab.cc:1536
 msgid "--just-symbols does not make sense with a shared object"
 msgstr "--just-symbols n'a pas de sens avec un objet partagé"
 
-#: symtab.cc:1484
+#: symtab.cc:1547
 msgid "too few symbol versions"
 msgstr "pas assez de versions de symboles"
 
-#: symtab.cc:1539
+#: symtab.cc:1602
 #, c-format
 msgid "bad symbol name offset %u at %zu"
 msgstr "le décalage %u du nom de symbole à la position %zu est incorrect"
 
-#: symtab.cc:1602
+#: symtab.cc:1665
 #, c-format
 msgid "versym for symbol %zu out of range: %u"
 msgstr "versym hors de portée pour le symbole %zu : %u"
 
-#: symtab.cc:1610
+#: symtab.cc:1673
 #, c-format
 msgid "versym for symbol %zu has no name: %u"
 msgstr "versym sans nom pour le symbole %zu : %u"
 
-#: symtab.cc:2633
+#: symtab.cc:2696
 #, c-format
 msgid "discarding version information for %s@%s, defined in unused shared library %s (linked with --as-needed)"
 msgstr "abandonne l'information de version pour %s@%s, défini dans la bibiliothèque partagée %s (liens édités avec --as-needed)"
 
-#: symtab.cc:2995 symtab.cc:3141
+#: symtab.cc:3058 symtab.cc:3204
 #, c-format
 msgid "%s: unsupported symbol section 0x%x"
 msgstr "%s : la section de symbole 0x%x n'est pas prise en charge"
 
-#: symtab.cc:3473
+#: symtab.cc:3536
 #, c-format
 msgid "%s: symbol table entries: %zu; buckets: %zu\n"
 msgstr "%s : entrées de la table des symboles : %zu ; groupes de blocs : %zu\n"
 
-#: symtab.cc:3476
+#: symtab.cc:3539
 #, c-format
 msgid "%s: symbol table entries: %zu\n"
 msgstr "%s : entrées de la table des symboles : %zu\n"
 
-#: symtab.cc:3633
+#: symtab.cc:3696
 #, c-format
 msgid "while linking %s: symbol '%s' defined in multiple places (possible ODR violation):"
 msgstr "lors de l'édition de liens de %s : le symbole « %s » est défini à plusieurs endroits (violation ODR possible) :"
@@ -4155,7 +4155,7 @@ msgstr "lors de l'édition de liens de %s : le symbole « %s » est défini �
 #. which may not be the location we expect to intersect
 #. with another definition.  We could print the whole
 #. set of locations, but that seems too verbose.
-#: symtab.cc:3640 symtab.cc:3643
+#: symtab.cc:3703 symtab.cc:3706
 #, c-format
 msgid "  %s from %s\n"
 msgstr "  %s depuis %s\n"
@@ -4215,7 +4215,7 @@ msgstr "TLS_DESC n'est pas encore pris en charge pour l'édition de liens incré
 msgid "TLS_DESC not yet supported for TILEGX"
 msgstr "TLS_DESC n'est pas encore pris en charge pour TILEGX"
 
-#: tilegx.cc:3202 x86_64.cc:3111
+#: tilegx.cc:3202 x86_64.cc:3118
 #, c-format
 msgid "requires unsupported dynamic reloc %u; recompile with -fPIC"
 msgstr "nécessite une relocalisation %u dynamique non prise en charge ; veuillez recompiler avec -fPIC"
@@ -4231,8 +4231,8 @@ msgstr "relocalisation TLS pour une instruction invalide"
 #. This output is intended to follow the GNU standards.
 #: version.cc:65
 #, c-format
-msgid "Copyright (C) 2024 Free Software Foundation, Inc.\n"
-msgstr "Copyright (C) 2024 Free Software Foundation, Inc.\n"
+msgid "Copyright (C) 2025 Free Software Foundation, Inc.\n"
+msgstr "Copyright (C) 2025 Free Software Foundation, Inc.\n"
 
 #: version.cc:66
 #, c-format
@@ -4271,26 +4271,26 @@ msgstr "débordement du décalage relatif au PC dans l'entrée PLT %d"
 msgid "PC-relative offset overflow in APLT entry %d"
 msgstr "débordement du décalage relatif au PC dans l'entrée APLT %d"
 
-#: x86_64.cc:3079
+#: x86_64.cc:3086
 msgid "requires dynamic R_X86_64_32 reloc which may overflow at runtime; recompile with -fPIC"
 msgstr "nécessite une relocalisation R_X86_64_32 dynamique pouvant déborder à l'exécution ; veuillez recompiler avec -fPIC"
 
-#: x86_64.cc:3096
+#: x86_64.cc:3103
 #, c-format
 msgid "requires dynamic %s reloc against '%s' which may overflow at runtime; recompile with -fPIC"
 msgstr "nécessite une relocalisation %s dynamique vers « %s » pouvant déborder à l'exécution ; recompiler avec -fPIC"
 
-#: x86_64.cc:4631
+#: x86_64.cc:4644
 #, c-format
 msgid "relocation overflow: reference to local symbol %u in %s"
 msgstr "débordement de relocalisation : référence au symbole local %u dans %s"
 
-#: x86_64.cc:4638
+#: x86_64.cc:4651
 #, c-format
 msgid "relocation overflow: reference to '%s' defined in %s"
 msgstr "débordement de relocalisation : la référence à  « %s » est définie dans %s"
 
-#: x86_64.cc:4646
+#: x86_64.cc:4659
 #, c-format
 msgid "relocation overflow: reference to '%s'"
 msgstr "débordement de relocalisation : référence à « %s »"
