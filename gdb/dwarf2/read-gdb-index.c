@@ -22,6 +22,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
 #include "complaints.h"
+#include "dwarf2/index-common.h"
 #include "dwz.h"
 #include "event-top.h"
 #include "gdb/gdb-index.h"

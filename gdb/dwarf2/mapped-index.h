@@ -20,8 +20,6 @@
 #ifndef GDB_DWARF2_MAPPED_INDEX_H
 #define GDB_DWARF2_MAPPED_INDEX_H
 
-#include "dwarf2/index-common.h"
-#include "language.h"
 #include "quick-symbol.h"
 
 class cooked_index;

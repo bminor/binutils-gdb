@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "dwarf2/cooked-index.h"
+#include "dwarf2/index-common.h"
 #include "dwarf2/read.h"
 #include "dwarf2/stringify.h"
 #include "dwarf2/index-cache.h"

@@ -23,6 +23,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "command.h"
+#include "dwarf2/index-common.h"
 #include "gdbsupport/scoped_mmap.h"
 #include "gdbsupport/pathstuff.h"
 #include "dwarf2/index-write.h"
