@@ -20,6 +20,8 @@
 #ifndef GDB_QUICK_SYMBOL_H
 #define GDB_QUICK_SYMBOL_H
 
+#include "symtab.h"
+
 /* Like block_enum, but used as flags to pass to lookup functions.  */
 
 enum block_search_flag_values
