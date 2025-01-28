@@ -34,7 +34,6 @@
 #include "dwarf2/comp-unit-head.h"
 #include "dwarf2/cu.h"
 #include "dwarf2/index-cache.h"
-#include "dwarf2/index-common.h"
 #include "dwarf2/leb.h"
 #include "dwarf2/line-header.h"
 #include "dwarf2/dwz.h"
