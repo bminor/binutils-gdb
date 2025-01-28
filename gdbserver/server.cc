@@ -50,6 +50,7 @@
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/scoped_restore.h"
 #include "gdbsupport/search.h"
+#include "gdbsupport/gdb_argv_vec.h"
 
 /* PBUFSIZ must also be at least as big as IPA_CMD_BUF_SIZE, because
    the client state data is passed directly to some agent
@@ -3404,7 +3405,7 @@ handle_v_run (char *own_buf)
 {
   client_state &cs = get_client_state ();
   char *p, *next_p;
-  std::vector<char *> new_argv;
+  gdb::argv_vec new_argv;
   gdb::unique_xmalloc_ptr<char> new_program_name;
   int i;
 
@@ -3435,7 +3436,6 @@ handle_v_run (char *own_buf)
 	  if (arg == nullptr)
 	    {
 	      write_enn (own_buf);
-	      free_vector_argv (new_argv);
 	      return;
 	    }
 
@@ -3455,15 +3455,13 @@ handle_v_run (char *own_buf)
       if (program_path.get () == nullptr)
 	{
 	  write_enn (own_buf);
-	  free_vector_argv (new_argv);
 	  return;
 	}
     }
   else
     program_path.set (new_program_name.get ());
 
-  program_args = construct_inferior_arguments (new_argv);
-  free_vector_argv (new_argv);
+  program_args = construct_inferior_arguments (new_argv.get ());
 
   try
     {
