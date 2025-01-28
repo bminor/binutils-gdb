@@ -257,9 +257,16 @@ if test x${all_targets} = xtrue; then
   if test x${enable_64_bit_bfd} = xyes; then
     TARGET_OBS='$(ALL_TARGET_OBS) $(ALL_64_TARGET_OBS)'
   else
-    # If all targets were requested, but 64 bit bfd is not enabled,
-    # the build will fail. See PR 28684.
-    AC_MSG_ERROR([--enable-targets=all requires --enable-64-bit-bfd])
+    case ${host} in
+    mips*)
+      # If all targets were requested, but 64 bit bfd is not enabled,
+      # the build will fail. See PR 28684.
+      AC_MSG_ERROR([--enable-targets=all requires --enable-64-bit-bfd])
+      ;;
+    *)
+      TARGET_OBS='$(ALL_TARGET_OBS)'
+      ;;
+    esac
   fi
 fi
 
