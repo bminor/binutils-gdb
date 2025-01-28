@@ -38,12 +38,10 @@
 #include "objfiles.h"
 #include "ada-lang.h"
 #include "dwarf2/tag.h"
-#include "gdbsupport/gdb_tilde_expand.h"
 #include "dwarf2/read-debug-names.h"
 #include "extract-store-integer.h"
 
 #include <algorithm>
-#include <cmath>
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
