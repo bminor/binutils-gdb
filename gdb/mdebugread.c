@@ -121,15 +121,7 @@ struct md_symloc
 #define SC_IS_SBSS(sc) ((sc) == scSBss)
 #define SC_IS_UNDEF(sc) ((sc) == scUndefined || (sc) == scSUndefined)
 
-static constexpr int hashsize = 127;
-struct symbol *fortran_global_syms[hashsize];
-
-/* Calculate the hash for a fortran symbol name.  */
-static int
-hash_fortran_symbol (const char *name)
-{
-  return fast_hash (name, strlen (name)) % hashsize;
-}
+struct symbol *fortran_global_syms[HASHSIZE];
 
 /* Finish up the symbols in the fortran_global_syms hashtable.  */
 static void
@@ -137,7 +129,7 @@ finish_fortran_symbol (struct objfile *objfile)
 {
   /* First, check if we have any fortran symbols at all.  */
   bool found = false;
-  for (int i = 0; i < hashsize && !found; i++)
+  for (int i = 0; i < HASHSIZE && !found; i++)
     found = fortran_global_syms[i] != nullptr;
 
   if (!found)
@@ -146,7 +138,7 @@ finish_fortran_symbol (struct objfile *objfile)
   /* We have symbols to fixup.  */
   for (minimal_symbol *msym : objfile->msymbols ())
     {
-      int hash = hash_fortran_symbol (msym->linkage_name ());
+      int hash = hashname (msym->linkage_name ());
       symbol *prev = nullptr;
 
       for (symbol *sym = fortran_global_syms[hash]; sym; )
@@ -184,7 +176,7 @@ finish_fortran_symbol (struct objfile *objfile)
 
   /* If any symbols remain, change the address class to unresolved
      and clear the misleading memory.  */
-  for (int hash = 0; hash < hashsize; hash++)
+  for (int hash = 0; hash < HASHSIZE; hash++)
     {
       symbol *sym, *prev;
       for (sym = fortran_global_syms[hash]; sym; )
@@ -723,7 +715,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	     address is not in the symbol; we need to fix it later in
 	     scan_file_globals.  */
 
-	  int bucket = hash_fortran_symbol (s->linkage_name ());
+	  int bucket = hashname (s->linkage_name ());
 	  s->set_value_chain (fortran_global_syms[bucket]);
 	  fortran_global_syms[bucket] = s;
 	}
