@@ -314,6 +314,9 @@ tui_source_window_base::refresh_window ()
      the screen, potentially creating a flicker.  */
   wnoutrefresh (handle.get ());
 
+  if (m_content.empty ())
+    return;
+
   int pad_width = getmaxx (m_pad.get ());
   int left_margin = this->left_margin ();
   int view_width = this->view_width ();
