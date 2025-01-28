@@ -42817,7 +42817,7 @@ seven repeats (@samp{$}) can be expanded using a repeat count of only
 five (@samp{"}).  For example, @samp{00000000} can be encoded as
 @samp{0*"00}.
 
-@xref{Standard Replies} for standard error responses, and how to
+@xref{Standard Replies}, for standard error responses, and how to
 respond indicating a command is not supported.
 
 In describing packets (commands and responses), each description has a
