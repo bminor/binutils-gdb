@@ -7188,14 +7188,6 @@ find_name_end (const char *name)
     }
 }
 
-/* See stabsread.h.  */
-
-int
-hashname (const char *name)
-{
-  return fast_hash (name, strlen (name)) % HASHSIZE;
-}
-
 /* Initializer for this module.  */
 
 void _initialize_stabsread ();

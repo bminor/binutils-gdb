@@ -240,6 +240,16 @@ fast_hash (const void *ptr, size_t len, unsigned int start_value = 0)
 #endif
 }
 
+/* Legacy hash for symbol names used for several debuginfo formats.  */
+
+#define HASHSIZE 127
+
+static inline int
+hashname (const char *name)
+{
+  return fast_hash (name, strlen (name)) % HASHSIZE;
+}
+
 namespace gdb
 {
 
