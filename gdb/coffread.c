@@ -30,13 +30,11 @@
 #include "libcoff.h"
 #include "objfiles.h"
 #include "buildsym-legacy.h"
-#include "stabsread.h"
 #include "complaints.h"
 #include "target.h"
 #include "block.h"
 #include "dictionary.h"
 #include "dwarf2/public.h"
-#include "gdb-stabs.h"
 
 #include "coff-pe-read.h"
 
@@ -159,6 +157,10 @@ static file_ptr linetab_size;
 static char *stringtab = NULL;
 static long stringtab_length = 0;
 
+/* Used when reading coff symbols.  */
+static int symnum;
+static bool within_function;
+
 extern void stabsread_clear_cache (void);
 
 static struct type *coff_read_struct_type (int, int, int,
@@ -203,99 +205,6 @@ static void read_one_sym (struct coff_symbol *,
 
 static void coff_symtab_read (minimal_symbol_reader &,
 			      file_ptr, unsigned int, struct objfile *);
-
-/* Scan and build partial symbols for an coff symbol file.
-   The coff file has already been processed to get its minimal symbols.
-
-   This routine is the equivalent of dbx_symfile_init and dbx_symfile_read
-   rolled into one.
-
-   OBJFILE is the object file we are reading symbols from.
-   ADDR is the address relative to which the symbols are (e.g.
-   the base address of the text segment).
-   TEXTADDR is the address of the text section.
-   TEXTSIZE is the size of the text section.
-   STABSECTS is the list of .stab sections in OBJFILE.
-   STABSTROFFSET and STABSTRSIZE define the location in OBJFILE where the
-   .stabstr section exists.
-
-   This routine is mostly copied from dbx_symfile_init and dbx_symfile_read,
-   adjusted for coff details.  */
-
-void
-coffstab_build_psymtabs (struct objfile *objfile,
-			 CORE_ADDR textaddr, unsigned int textsize,
-			 const std::vector<asection *> &stabsects,
-			 file_ptr stabstroffset, unsigned int stabstrsize)
-{
-  int val;
-  bfd *sym_bfd = objfile->obfd.get ();
-  const char *name = bfd_get_filename (sym_bfd);
-  unsigned int stabsize;
-
-  stabs_deprecated_warning ();
-  /* Allocate struct to keep track of stab reading.  */
-  dbx_objfile_data_key.emplace (objfile);
-  dbx_symfile_info *key = dbx_objfile_data_key.get (objfile);
-
-  DBX_TEXT_ADDR (objfile) = textaddr;
-  DBX_TEXT_SIZE (objfile) = textsize;
-
-#define	COFF_STABS_SYMBOL_SIZE	12	/* XXX FIXME XXX */
-  DBX_SYMBOL_SIZE (objfile) = COFF_STABS_SYMBOL_SIZE;
-  DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
-
-  if (stabstrsize > bfd_get_size (sym_bfd))
-    error (_("ridiculous string table size: %d bytes"), stabstrsize);
-  DBX_STRINGTAB (objfile) = (char *)
-    obstack_alloc (&objfile->objfile_obstack, stabstrsize + 1);
-  OBJSTAT (objfile, sz_strtab += stabstrsize + 1);
-
-  /* Now read in the string table in one big gulp.  */
-
-  val = bfd_seek (sym_bfd, stabstroffset, SEEK_SET);
-  if (val < 0)
-    perror_with_name (name);
-  val = bfd_read (DBX_STRINGTAB (objfile), stabstrsize, sym_bfd);
-  if (val != stabstrsize)
-    perror_with_name (name);
-
-  stabsread_new_init ();
-  free_header_files ();
-  init_header_files ();
-
-  key->ctx.processing_acc_compilation = 1;
-
-  /* In a coff file, we've already installed the minimal symbols that came
-     from the coff (non-stab) symbol table, so always act like an
-     incremental load here.  */
-  scoped_restore save_symbuf_sections
-    = make_scoped_restore (&key->ctx.symbuf_sections);
-  if (stabsects.size () == 1)
-    {
-      stabsize = bfd_section_size (stabsects[0]);
-      DBX_SYMCOUNT (objfile) = stabsize / DBX_SYMBOL_SIZE (objfile);
-      DBX_SYMTAB_OFFSET (objfile) = stabsects[0]->filepos;
-    }
-  else
-    {
-      DBX_SYMCOUNT (objfile) = 0;
-      for (asection *section : stabsects)
-	{
-	  stabsize = bfd_section_size (section);
-	  DBX_SYMCOUNT (objfile) += stabsize / DBX_SYMBOL_SIZE (objfile);
-	}
-
-      DBX_SYMTAB_OFFSET (objfile) = stabsects[0]->filepos;
-
-      key->ctx.sect_idx = 1;
-      key->ctx.symbuf_sections = &stabsects;
-      key->ctx.symbuf_left = bfd_section_size (stabsects[0]);
-      key->ctx.symbuf_read = 0;
-    }
-
-  read_stabs_symtab (objfile, 0);
-}
 
 /* We are called once per section from coff_symfile_read.  We
    need to examine each section we are passed, check to see
@@ -458,7 +367,6 @@ coff_alloc_type (int index)
 static void
 coff_start_compunit_symtab (struct objfile *objfile, const char *name)
 {
-  within_function = 0;
   start_compunit_symtab (objfile,
 			 name,
   /* We never know the directory name for COFF.  */
@@ -705,7 +613,6 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   unsigned int num_symbols;
   file_ptr symtab_offset;
   file_ptr stringtab_offset;
-  unsigned int stabstrsize;
 
   info = coff_objfile_data_key.get (objfile);
   symfile_bfd = abfd;		/* Kludge for swap routines.  */
@@ -793,23 +700,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
 
   if (!info->stabsects->empty())
-    {
-      if (!info->stabstrsect)
-	{
-	  error (_("The debugging information in `%s' is corrupted.\nThe "
-		   "file has a `.stabs' section, but no `.stabstr' section."),
-		 filename);
-	}
-
-      /* FIXME: dubious.  Why can't we use something normal like
-	 bfd_get_section_contents?  */
-      stabstrsize = bfd_section_size (info->stabstrsect);
-
-      coffstab_build_psymtabs (objfile,
-			       info->textaddr, info->textsize,
-			       *info->stabsects,
-			       info->stabstrsect->filepos, stabstrsize);
-    }
+    warning (_("stabs debug information is not supported."));
 
   if (dwarf2_initialize_objfile (objfile))
     {
@@ -840,8 +731,6 @@ coff_new_init (struct objfile *ignore)
 static void
 coff_symfile_finish (struct objfile *objfile)
 {
-  /* Let stabs reader clean up.  */
-  stabsread_clear_cache ();
 }
 
 
@@ -881,6 +770,9 @@ coff_symtab_read (minimal_symbol_reader &reader,
 
   scoped_free_pendings free_pending;
 
+  within_function = false;
+  symnum = 0;
+
   /* Position to read the symbol table.  */
   val = bfd_seek (objfile->obfd.get (), symtab_offset, 0);
   if (val < 0)
@@ -899,7 +791,6 @@ coff_symtab_read (minimal_symbol_reader &reader,
 
   coff_start_compunit_symtab (objfile, "");
 
-  symnum = 0;
   while (symnum < nsyms)
     {
       QUIT;			/* Make this command interruptible.  */
@@ -1122,7 +1013,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	case C_FCN:
 	  if (strcmp (cs->c_name, ".bf") == 0)
 	    {
-	      within_function = 1;
+	      within_function = true;
 
 	      /* Value contains address of first non-init type
 		 code.  */
@@ -1158,7 +1049,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		  complaint (_("`.ef' symbol without matching `.bf' "
 			       "symbol ignored starting at symnum %d"),
 			     cs->c_symnum);
-		  within_function = 0;
+		  within_function = false;
 		  break;
 		}
 
@@ -1169,7 +1060,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		  complaint (_("Unmatched .ef symbol(s) ignored "
 			       "starting at symnum %d"),
 			     cs->c_symnum);
-		  within_function = 0;
+		  within_function = false;
 		  break;
 		}
 	      if (cs->c_naux != 1)
@@ -1203,7 +1094,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 			    fcn_cs_saved.c_value
 			    + fcn_aux_saved.x_sym.x_misc.x_fsize
 			    + objfile->text_section_offset ());
-	      within_function = 0;
+	      within_function = false;
 	    }
 	  break;
 
