@@ -1184,11 +1184,20 @@ struct fast_tracepoint_ctx
 {
   struct tracepoint_hit_ctx base;
 
+  /* The regcache corresponding to the registers state at the time of
+     the tracepoint hit.  Initialized lazily, from REGS.  */
   struct regcache regcache;
   int regcache_initted;
+
+  /* The buffer space REGCACHE above uses.  We use a separate buffer
+     instead of letting the regcache malloc for both signal safety and
+     performance reasons; this is allocated on the stack instead.  */
   unsigned char *regspace;
 
+  /* The register buffer passed by the client.  */
   unsigned char *regs;
+
+  /* The GDB tracepoint matching the probed marker that was "hit".  */
   struct tracepoint *tpoint;
 };
 
