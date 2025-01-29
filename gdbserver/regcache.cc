@@ -42,7 +42,7 @@ get_thread_regcache (thread_info *thread, bool fetch)
 
       gdb_assert (proc->tdesc != NULL);
 
-      regcache = new_register_cache (proc->tdesc);
+      regcache = new struct regcache (proc->tdesc);
       thread->set_regcache (regcache);
     }
 
@@ -112,55 +112,29 @@ regcache_invalidate (void)
 
 #endif
 
-struct regcache *
-init_register_cache (struct regcache *regcache,
-		     const struct target_desc *tdesc,
-		     unsigned char *regbuf)
+regcache::regcache (const target_desc *tdesc, unsigned char *regbuf)
+  : tdesc (tdesc), registers (regbuf)
 {
-  if (regbuf == NULL)
-    {
-#ifndef IN_PROCESS_AGENT
-      /* Make sure to zero-initialize the register cache when it is
-	 created, in case there are registers the target never
-	 fetches.  This way they'll read as zero instead of
-	 garbage.  */
-      regcache->tdesc = tdesc;
-      regcache->registers
-	= (unsigned char *) xcalloc (1, tdesc->registers_size);
-      regcache->registers_owned = true;
-      regcache->register_status
-	= (unsigned char *) xmalloc (tdesc->reg_defs.size ());
-      memset ((void *) regcache->register_status, REG_UNAVAILABLE,
-	      tdesc->reg_defs.size ());
-#else
-      gdb_assert_not_reached ("can't allocate memory from the heap");
-#endif
-    }
-  else
-    {
-      regcache->tdesc = tdesc;
-      regcache->registers = regbuf;
-      regcache->registers_owned = false;
-#ifndef IN_PROCESS_AGENT
-      regcache->register_status = NULL;
-#endif
-    }
-
-  regcache->registers_fetched = false;
-
-  return regcache;
+  gdb_assert (regbuf != nullptr);
 }
 
 #ifndef IN_PROCESS_AGENT
 
-struct regcache *
-new_register_cache (const struct target_desc *tdesc)
+regcache::regcache (const target_desc *tdesc)
+  : tdesc (tdesc), registers_owned (true)
 {
-  struct regcache *regcache = new struct regcache;
-
   gdb_assert (tdesc->registers_size != 0);
 
-  return init_register_cache (regcache, tdesc, NULL);
+  /* Make sure to zero-initialize the register cache when it is
+     created, in case there are registers the target never
+     fetches.  This way they'll read as zero instead of
+     garbage.  */
+  this->registers
+    = (unsigned char *) xcalloc (1, tdesc->registers_size);
+  this->register_status
+    = (unsigned char *) xmalloc (tdesc->reg_defs.size ());
+  memset ((void *) this->register_status, REG_UNAVAILABLE,
+	  tdesc->reg_defs.size ());
 }
 
 void

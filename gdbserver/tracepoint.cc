@@ -1195,15 +1195,15 @@ struct fast_tracepoint_ctx : public tracepoint_hit_ctx
   {
     const struct target_desc *ipa_tdesc = get_ipa_tdesc (ipa_tdesc_idx);
 
-    if (!this->m_regcache_initted)
+    if (!this->m_regcache.has_value ())
       {
-	this->m_regcache_initted = 1;
-	init_register_cache (&this->m_regcache, ipa_tdesc, this->regspace);
-	supply_regblock (&this->m_regcache, nullptr);
-	supply_fast_tracepoint_registers (&this->m_regcache, this->regs);
+	this->m_regcache.emplace (ipa_tdesc, this->regspace);
+	supply_regblock (&this->m_regcache.value (), nullptr);
+	supply_fast_tracepoint_registers (&this->m_regcache.value (),
+					  this->regs);
       }
 
-    return &this->m_regcache;
+    return &this->m_regcache.value ();
   }
 
   /* The buffer space M_REGCACHE uses.  We use a separate buffer
@@ -1221,8 +1221,7 @@ private:
 
   /* The regcache corresponding to the registers state at the time of
      the tracepoint hit.  Initialized lazily, from REGS.  */
-  struct regcache m_regcache;
-  int m_regcache_initted = 0;
+  std::optional<struct regcache> m_regcache;
 };
 
 #else
@@ -4430,7 +4429,6 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
     case 'R':
       {
 	unsigned char *regspace;
-	struct regcache tregcache;
 	int regcache_size;
 
 	trace_debug ("Want to collect registers");
@@ -4450,8 +4448,7 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 
 	/* Wrap the regblock in a register cache (in the stack, we
 	   don't want to malloc here).  */
-	init_register_cache (&tregcache, context_regcache->tdesc,
-			     regspace + 1);
+	regcache tregcache (context_regcache->tdesc, regspace + 1);
 
 	/* Copy the register data to the regblock.  */
 	tregcache.copy_from (context_regcache);
@@ -4836,7 +4833,6 @@ fetch_traceframe_registers (int tfnum, struct regcache *regcache, int regnum)
 static CORE_ADDR
 traceframe_get_pc (struct traceframe *tframe)
 {
-  struct regcache regcache;
   unsigned char *dataptr;
   const struct target_desc *tdesc = current_target_desc ();
 
@@ -4844,7 +4840,7 @@ traceframe_get_pc (struct traceframe *tframe)
   if (dataptr == NULL)
     return 0;
 
-  init_register_cache (&regcache, tdesc, dataptr);
+  regcache regcache (tdesc, dataptr);
   return regcache_read_pc (&regcache);
 }
 

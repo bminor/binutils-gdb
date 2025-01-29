@@ -4678,7 +4678,7 @@ process_serial_event (void)
       if (cs.current_traceframe >= 0)
 	{
 	  struct regcache *regcache
-	    = new_register_cache (current_target_desc ());
+	    = new struct regcache (current_target_desc ());
 
 	  if (fetch_traceframe_registers (cs.current_traceframe,
 					  regcache, -1) == 0)

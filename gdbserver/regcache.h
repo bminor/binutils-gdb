@@ -45,7 +45,20 @@ struct regcache : public reg_buffer_common
 #ifndef IN_PROCESS_AGENT
   /* One of REG_UNAVAILABLE or REG_VALID.  */
   unsigned char *register_status = nullptr;
+
+  /* Construct a regcache using the register layout described by TDESC.
+
+     The regcache dynamically allocates its register buffer.  */
+  regcache (const target_desc *tdesc);
 #endif
+
+  /* Construct a regcache using the register layout described by TDESC
+     and REGBUF as the register buffer.
+
+     The regcache does *not* take ownership of the buffer.  */
+  regcache (const target_desc *tdesc, unsigned char *regbuf);
+
+  DISABLE_COPY_AND_ASSIGN (regcache);
 
   /* See gdbsupport/common-regcache.h.  */
   enum register_status get_register_status (int regnum) const override;
@@ -71,14 +84,6 @@ struct regcache : public reg_buffer_common
   /* Copy the contents of SRC into this regcache.  */
   void copy_from (regcache *src);
 };
-
-struct regcache *init_register_cache (struct regcache *regcache,
-				      const struct target_desc *tdesc,
-				      unsigned char *regbuf);
-
-/* Create a new register cache for INFERIOR.  */
-
-struct regcache *new_register_cache (const struct target_desc *tdesc);
 
 regcache *get_thread_regcache (thread_info *thread, bool fetch = true);
 
