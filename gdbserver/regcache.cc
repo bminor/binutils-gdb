@@ -42,8 +42,8 @@ get_thread_regcache (thread_info *thread, bool fetch)
 
       gdb_assert (proc->tdesc != NULL);
 
-      regcache = new struct regcache (proc->tdesc);
-      thread->set_regcache (regcache);
+      thread->set_regcache (std::make_unique<struct regcache> (proc->tdesc));
+      regcache = thread->regcache ();
     }
 
   if (fetch && !regcache->registers_fetched)
@@ -236,7 +236,6 @@ free_register_cache_thread (thread_info *thread)
   if (regcache != NULL)
     {
       regcache_invalidate_thread (thread);
-      delete regcache;
       thread->set_regcache (nullptr);
     }
 }
