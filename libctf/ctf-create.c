@@ -287,8 +287,8 @@ ctf_dynamic_type (const ctf_dict_t *fp, ctf_id_t type)
 
   idx = LCTF_TYPE_TO_INDEX(fp, type);
 
-  if ((unsigned long) idx <= fp->ctf_typemax)
-    return ctf_dtd_lookup (fp, id);
+  if ((unsigned long) idx > fp->ctf_stypes)
+    return ctf_dtd_lookup (fp, type);
   return NULL;
 }
 
