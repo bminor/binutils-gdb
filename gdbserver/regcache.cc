@@ -52,8 +52,7 @@ get_thread_regcache (thread_info *thread, bool fetch)
 
       switch_to_thread (thread);
       /* Invalidate all registers, to prevent stale left-overs.  */
-      memset (regcache->register_status, REG_UNKNOWN,
-	      regcache->tdesc->reg_defs.size ());
+      regcache->reset (REG_UNKNOWN);
       fetch_inferior_registers (regcache, -1);
       regcache->registers_fetched = true;
     }
@@ -130,11 +129,10 @@ regcache::regcache (const target_desc *tdesc)
      fetches.  This way they'll read as zero instead of
      garbage.  */
   this->registers
-    = (unsigned char *) xcalloc (1, tdesc->registers_size);
+    = (unsigned char *) xmalloc (tdesc->registers_size);
   this->register_status
     = (unsigned char *) xmalloc (tdesc->reg_defs.size ());
-  memset ((void *) this->register_status, REG_UNKNOWN,
-	  tdesc->reg_defs.size ());
+  reset (REG_UNKNOWN);
 }
 
 regcache::~regcache ()
@@ -145,6 +143,19 @@ regcache::~regcache ()
 }
 
 #endif
+
+void
+regcache::reset (enum register_status status)
+{
+  /* Zero-initialize the register cache, in case there are registers
+     the target never fetches.  This way they'll read as zero instead
+     of garbage.  */
+  memset (this->registers, 0, this->tdesc->registers_size);
+#ifndef IN_PROCESS_AGENT
+  if (this->register_status != nullptr)
+    memset (this->register_status, status, this->tdesc->reg_defs.size ());
+#endif
+}
 
 void
 regcache::copy_from (regcache *src)
@@ -360,15 +371,7 @@ supply_regblock (struct regcache *regcache, const void *buf)
 #endif
     }
   else
-    {
-      const struct target_desc *tdesc = regcache->tdesc;
-
-      memset (regcache->registers, 0, tdesc->registers_size);
-#ifndef IN_PROCESS_AGENT
-      for (int i = 0; i < tdesc->reg_defs.size (); i++)
-	regcache->set_register_status (i, REG_UNAVAILABLE);
-#endif
-    }
+    regcache->reset (REG_UNAVAILABLE);
 }
 
 #ifndef IN_PROCESS_AGENT

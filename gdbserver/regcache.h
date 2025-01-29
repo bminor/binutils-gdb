@@ -63,6 +63,10 @@ struct regcache : public reg_buffer_common
 
   DISABLE_COPY_AND_ASSIGN (regcache);
 
+  /* Clear the register values to all zeros and set the register
+     statuses to STATUS.  */
+  void reset (enum register_status status);
+
   /* See gdbsupport/common-regcache.h.  */
   enum register_status get_register_status (int regnum) const override;
 
