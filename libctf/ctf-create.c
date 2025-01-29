@@ -272,22 +272,20 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 ctf_dtdef_t *
 ctf_dtd_lookup (const ctf_dict_t *fp, ctf_id_t type)
 {
-  if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, type))
-    fp = fp->ctf_parent;
+  fp = ctf_get_dict (fp, type);
 
   return (ctf_dtdef_t *)
     ctf_dynhash_lookup (fp->ctf_dthash, (void *) (uintptr_t) type);
 }
 
 ctf_dtdef_t *
-ctf_dynamic_type (const ctf_dict_t *fp, ctf_id_t id)
+ctf_dynamic_type (const ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_id_t idx;
 
-  if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, id))
-    fp = fp->ctf_parent;
+  fp = ctf_get_dict (fp, type);
 
-  idx = LCTF_TYPE_TO_INDEX(fp, id);
+  idx = LCTF_TYPE_TO_INDEX(fp, type);
 
   if ((unsigned long) idx <= fp->ctf_typemax)
     return ctf_dtd_lookup (fp, id);
@@ -295,14 +293,13 @@ ctf_dynamic_type (const ctf_dict_t *fp, ctf_id_t id)
 }
 
 static int
-ctf_static_type (const ctf_dict_t *fp, ctf_id_t id)
+ctf_static_type (const ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_id_t idx;
 
-  if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, id))
-    fp = fp->ctf_parent;
+  fp = ctf_get_dict (fp, type);
 
-  idx = LCTF_TYPE_TO_INDEX(fp, id);
+  idx = LCTF_TYPE_TO_INDEX(fp, type);
 
   return ((unsigned long) idx <= fp->ctf_stypes);
 }
@@ -581,7 +578,7 @@ ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
   uint32_t type_idx = LCTF_TYPE_TO_INDEX (fp, type);
   uint32_t ref_idx = LCTF_TYPE_TO_INDEX (fp, ref);
 
-  if (LCTF_TYPE_ISCHILD (fp, ref) == child
+  if (ctf_type_ischild (fp, ref) == child
       && ref_idx < fp->ctf_typemax)
     fp->ctf_ptrtab[ref_idx] = type_idx;
 
@@ -711,8 +708,7 @@ ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
   ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, type);
   ctf_array_t *vlen;
 
-  if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, type))
-    fp = fp->ctf_parent;
+  fp = ctf_get_dict (fp, type);
 
   /* You can only call ctf_set_array on a type you have added, not a
      type that was read in via ctf_open().  */
@@ -1075,8 +1071,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (name == NULL)
     return (ctf_set_errno (fp, EINVAL));
 
-  if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, enid))
-    fp = fp->ctf_parent;
+  fp = ctf_get_dict (fp, enid);
 
   if (enid < fp->ctf_stypes)
     return (ctf_set_errno (ofp, ECTF_RDONLY));
@@ -1172,12 +1167,12 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
 
-  if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, souid))
+  if ((fp->ctf_flags & LCTF_CHILD) && ctf_type_isparent (fp, souid))
     {
       /* Adding a child type to a parent, even via the child, is prohibited.
 	 Otherwise, climb to the parent and do all work there.  */
 
-      if (LCTF_TYPE_ISCHILD (fp, type))
+      if (ctf_type_ischild (fp, type))
 	return (ctf_set_errno (ofp, ECTF_BADID));
 
       fp = fp->ctf_parent;
@@ -1587,13 +1582,14 @@ static void
 ctf_add_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type,
 		      ctf_dict_t *dst_fp, ctf_id_t dst_type)
 {
-  if (LCTF_TYPE_ISPARENT (src_fp, src_type) && src_fp->ctf_parent)
-    src_fp = src_fp->ctf_parent;
+  src_fp = ctf_get_dict (src_fp, src_type);
+  dst_fp = ctf_get_dict (dst_fp, dst_type);
+
+  /* Not imported? No mapping is meaningful.  */
+  if (src_fp == NULL || dst_fp == NULL)
+    return;
 
   src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
-
-  if (LCTF_TYPE_ISPARENT (dst_fp, dst_type) && dst_fp->ctf_parent)
-    dst_fp = dst_fp->ctf_parent;
 
   dst_type = LCTF_TYPE_TO_INDEX(dst_fp, dst_type);
 
@@ -1631,8 +1627,11 @@ ctf_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type, ctf_dict_t **dst_fp)
   ctf_dict_t *target_fp = *dst_fp;
   ctf_id_t dst_type = 0;
 
-  if (LCTF_TYPE_ISPARENT (src_fp, src_type) && src_fp->ctf_parent)
-    src_fp = src_fp->ctf_parent;
+  src_fp = ctf_get_dict (src_fp, src_type);
+
+  /* No mapping is possible if the parent is not imported.  */
+  if (src_fp == NULL)
+    return 0;
 
   src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
   key.cltk_fp = src_fp;
@@ -2098,7 +2097,9 @@ ctf_add_type (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type)
 {
   ctf_id_t id;
 
-  if ((src_fp->ctf_flags & LCTF_NO_STR) || (dst_fp->ctf_flags & LCTF_NO_STR))
+  if ((src_fp->ctf_flags & LCTF_NO_STR) || (dst_fp->ctf_flags & LCTF_NO_STR)
+      || ((src_fp->ctf_flags & LCTF_CHILD) && (src_fp->ctf_parent == NULL))
+      || ((dst_fp->ctf_flags & LCTF_CHILD) && (dst_fp->ctf_parent == NULL)))
     return (ctf_set_errno (dst_fp, ECTF_NOPARENT));
 
   if (!src_fp->ctf_add_processing)

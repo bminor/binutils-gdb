@@ -1084,7 +1084,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	     store the index of the pointer type in fp->ctf_ptrtab[ index of
 	     referenced type ].  */
 
-	  if (LCTF_TYPE_ISCHILD (fp, tp->ctt_type) == child
+	  if (ctf_type_ischild (fp, tp->ctt_type) == child
 	      && LCTF_TYPE_TO_INDEX (fp, tp->ctt_type) <= fp->ctf_typemax)
 	    fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, tp->ctt_type)] = id;
 	 /*FALLTHRU*/

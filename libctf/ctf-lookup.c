@@ -57,7 +57,7 @@ refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
 
       reffed_type = ctf_type_reference (fp, type);
 
-      if (LCTF_TYPE_ISPARENT (fp, reffed_type))
+      if (ctf_type_isparent (fp, reffed_type))
 	{
 	  uint32_t idx = LCTF_TYPE_TO_INDEX (fp, reffed_type);
 

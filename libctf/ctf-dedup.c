@@ -2087,7 +2087,7 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
       const char *hashval;						\
       int cited_type_input_num = input_num;				\
 									\
-      if ((fp->ctf_flags & LCTF_CHILD) && (LCTF_TYPE_ISPARENT (fp, type))) \
+      if ((fp->ctf_flags & LCTF_CHILD) && (ctf_type_isparent (fp, type))) \
 	cited_type_input_num = parents[input_num];			\
 									\
       type_id = CTF_DEDUP_GID (output, cited_type_input_num, type);	\
@@ -2549,7 +2549,7 @@ ctf_dedup_id_to_target (ctf_dict_t *output, ctf_dict_t *target,
   /* If the input type is in the parent type space, and this is a child, reset
      the input to the parent (which must already have been emitted, since
      emission of parent dicts happens before children).  */
-  if ((input->ctf_flags & LCTF_CHILD) && (LCTF_TYPE_ISPARENT (input, id)))
+  if ((input->ctf_flags & LCTF_CHILD) && (ctf_type_isparent (input, id)))
     {
       if (!ctf_assert (output, parents[input_num] <= ninputs))
 	return CTF_ERR;

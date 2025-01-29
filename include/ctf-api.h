@@ -473,8 +473,8 @@ extern void ctf_dict_close (ctf_dict_t *);
 extern const char *ctf_cuname (ctf_dict_t *);
 extern ctf_dict_t *ctf_parent_dict (ctf_dict_t *);
 extern const char *ctf_parent_name (ctf_dict_t *);
-extern int ctf_type_isparent (ctf_dict_t *, ctf_id_t);
-extern int ctf_type_ischild (ctf_dict_t *, ctf_id_t);
+extern int ctf_type_isparent (const ctf_dict_t *, ctf_id_t);
+extern int ctf_type_ischild (const ctf_dict_t *, ctf_id_t);
 extern int ctf_import (ctf_dict_t *, ctf_dict_t *);
 
 /* Set these names (used when creating dicts).  */

@@ -587,8 +587,6 @@ struct ctf_next
 /* * If an offs is not aligned already then round it up and align it. */
 #define LCTF_ALIGN_OFFS(offs, align) ((offs + (align - 1)) & ~(align - 1))
 
-#define LCTF_TYPE_ISPARENT(fp, id) ((id) <= fp->ctf_parmax)
-#define LCTF_TYPE_ISCHILD(fp, id) ((id) > fp->ctf_parmax)
 #define LCTF_TYPE_TO_INDEX(fp, id) ((id) & (fp->ctf_parmax))
 #define LCTF_INDEX_TO_TYPE(fp, id, child) (child ? ((id) | (fp->ctf_parmax+1)) : \
 					   (id))
@@ -627,7 +625,7 @@ extern int ctf_symtab_skippable (ctf_link_sym_t *sym);
 extern int ctf_add_funcobjt_sym (ctf_dict_t *, int is_function,
 				 const char *, ctf_id_t);
 
-extern ctf_dict_t *ctf_get_dict (ctf_dict_t *fp, ctf_id_t type);
+extern ctf_dict_t *ctf_get_dict (const ctf_dict_t *fp, ctf_id_t type);
 
 typedef unsigned int (*ctf_hash_fun) (const void *ptr);
 extern unsigned int ctf_hash_integer (const void *ptr);

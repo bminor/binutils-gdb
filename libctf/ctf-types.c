@@ -24,15 +24,15 @@
 /* Determine whether a type is a parent or a child.  */
 
 int
-ctf_type_isparent (ctf_dict_t *fp, ctf_id_t id)
+ctf_type_isparent (const ctf_dict_t *fp, ctf_id_t id)
 {
-  return (LCTF_TYPE_ISPARENT (fp, id));
+  return (id <= fp->ctf_parmax);
 }
 
 int
-ctf_type_ischild (ctf_dict_t * fp, ctf_id_t id)
+ctf_type_ischild (const ctf_dict_t *fp, ctf_id_t id)
 {
-  return (LCTF_TYPE_ISCHILD (fp, id));
+  return (!ctf_type_isparent (fp, id));
 }
 
 /* Expand a structure element into the passed-in ctf_lmember_t.  */
@@ -628,12 +628,12 @@ ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
    type is in the parent, return the parent.  Needed if you plan to access
    the type directly, without using the API.  */
 ctf_dict_t *
-ctf_get_dict (ctf_dict_t *fp, ctf_id_t type)
+ctf_get_dict (const ctf_dict_t *fp, ctf_id_t type)
 {
-    if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, type))
-      return fp->ctf_parent;
+  if ((fp->ctf_flags & LCTF_CHILD) && ctf_type_isparent (fp, type))
+    return fp->ctf_parent;
 
-    return fp;
+  return (ctf_dict_t *) fp;
 }
 
 /* Look up a name in the given name table, in the appropriate hash given the
@@ -1261,11 +1261,11 @@ ctf_type_cmp (ctf_dict_t *lfp, ctf_id_t ltype, ctf_dict_t *rfp,
   if (lfp == rfp)
     return rval;
 
-  if (LCTF_TYPE_ISPARENT (lfp, ltype) && lfp->ctf_parent != NULL)
-    lfp = lfp->ctf_parent;
+  if (lfp->ctf_parent != NULL)
+    lfp = ctf_get_dict (lfp, ltype);
 
-  if (LCTF_TYPE_ISPARENT (rfp, rtype) && rfp->ctf_parent != NULL)
-    rfp = rfp->ctf_parent;
+  if (rfp->ctf_parent != NULL)
+    rfp = ctf_get_dict (rfp, rtype);
 
   if (lfp < rfp)
     return -1;
@@ -1296,6 +1296,12 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
     return (ctf_set_errno (lfp, ECTF_NOPARENT));
 
   if (rfp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (rfp, ECTF_NOPARENT));
+
+  if (ctf_type_isparent (lfp, ltype) && !lfp->ctf_parent)
+    return (ctf_set_errno (rfp, ECTF_NOPARENT));
+
+  if (ctf_type_isparent (rfp, rtype) && !rfp->ctf_parent)
     return (ctf_set_errno (rfp, ECTF_NOPARENT));
 
   if (ctf_type_cmp (lfp, ltype, rfp, rtype) == 0)
