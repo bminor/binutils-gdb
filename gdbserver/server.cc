@@ -4677,15 +4677,13 @@ process_serial_event (void)
       require_running_or_break (cs.own_buf);
       if (cs.current_traceframe >= 0)
 	{
-	  struct regcache *regcache
-	    = new struct regcache (current_target_desc ());
+	  regcache a_regcache (current_target_desc ());
 
 	  if (fetch_traceframe_registers (cs.current_traceframe,
-					  regcache, -1) == 0)
-	    registers_to_string (regcache, cs.own_buf);
+					  &a_regcache, -1) == 0)
+	    registers_to_string (&a_regcache, cs.own_buf);
 	  else
 	    write_enn (cs.own_buf);
-	  free_register_cache (regcache);
 	}
       else
 	{

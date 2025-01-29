@@ -33,7 +33,7 @@ struct thread_info : public intrusive_list_node<thread_info>
 
   ~thread_info ()
   {
-    free_register_cache (m_regcache);
+    delete m_regcache;
   }
 
   /* Return the process owning this thread.  */

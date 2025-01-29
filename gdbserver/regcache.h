@@ -50,6 +50,9 @@ struct regcache : public reg_buffer_common
 
      The regcache dynamically allocates its register buffer.  */
   regcache (const target_desc *tdesc);
+
+  /* Destructor.  */
+  ~regcache ();
 #endif
 
   /* Construct a regcache using the register layout described by TDESC
@@ -86,10 +89,6 @@ struct regcache : public reg_buffer_common
 };
 
 regcache *get_thread_regcache (thread_info *thread, bool fetch = true);
-
-/* Release all memory associated with the register cache for INFERIOR.  */
-
-void free_register_cache (struct regcache *regcache);
 
 /* Invalidate cached registers for one thread.  */
 

@@ -137,16 +137,11 @@ regcache::regcache (const target_desc *tdesc)
 	  tdesc->reg_defs.size ());
 }
 
-void
-free_register_cache (struct regcache *regcache)
+regcache::~regcache ()
 {
-  if (regcache)
-    {
-      if (regcache->registers_owned)
-	free (regcache->registers);
-      free (regcache->register_status);
-      delete regcache;
-    }
+  if (registers_owned)
+    free (registers);
+  free (register_status);
 }
 
 #endif
@@ -241,7 +236,7 @@ free_register_cache_thread (thread_info *thread)
   if (regcache != NULL)
     {
       regcache_invalidate_thread (thread);
-      free_register_cache (regcache);
+      delete regcache;
       thread->set_regcache (nullptr);
     }
 }
