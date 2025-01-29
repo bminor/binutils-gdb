@@ -360,18 +360,14 @@ supply_register_by_name_zeroed (struct regcache *regcache,
 void
 supply_regblock (struct regcache *regcache, const void *buf)
 {
-  if (buf)
-    {
-      const struct target_desc *tdesc = regcache->tdesc;
+  gdb_assert (buf != nullptr);
+  const struct target_desc *tdesc = regcache->tdesc;
 
-      memcpy (regcache->registers, buf, tdesc->registers_size);
+  memcpy (regcache->registers, buf, tdesc->registers_size);
 #ifndef IN_PROCESS_AGENT
-      for (int i = 0; i < tdesc->reg_defs.size (); i++)
-	regcache->set_register_status (i, REG_VALID);
+  for (int i = 0; i < tdesc->reg_defs.size (); i++)
+    regcache->set_register_status (i, REG_VALID);
 #endif
-    }
-  else
-    regcache->reset (REG_UNAVAILABLE);
 }
 
 #ifndef IN_PROCESS_AGENT

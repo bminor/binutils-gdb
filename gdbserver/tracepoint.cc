@@ -1198,7 +1198,6 @@ struct fast_tracepoint_ctx : public tracepoint_hit_ctx
     if (!this->m_regcache.has_value ())
       {
 	this->m_regcache.emplace (ipa_tdesc, this->regspace);
-	supply_regblock (&this->m_regcache.value (), nullptr);
 	supply_fast_tracepoint_registers (&this->m_regcache.value (),
 					  this->regs);
       }
@@ -4815,7 +4814,7 @@ fetch_traceframe_registers (int tfnum, struct regcache *regcache, int regnum)
   if (dataptr == NULL)
     {
       /* Mark registers unavailable.  */
-      supply_regblock (regcache, NULL);
+      regcache->reset (REG_UNAVAILABLE);
 
       /* We can generally guess at a PC, although this will be
 	 misleading for while-stepping frames and multi-location
@@ -5369,6 +5368,8 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
       trace_debug ("Trace buffer block allocation failed, skipping");
       return;
     }
+
+  memset (ctx.regspace, 0, ipa_tdesc->registers_size);
 
   for (ctx.tpoint = tpoint;
        ctx.tpoint != NULL && ctx.tpoint->address == tpoint->address;
