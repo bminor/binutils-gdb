@@ -1173,29 +1173,40 @@ static char *tracing_stop_note;
    collect_data_at_tracepoint.  */
 struct tracepoint_hit_ctx
 {
-  explicit tracepoint_hit_ctx (enum tracepoint_type type)
-    : type (type)
-  {}
-
-  enum tracepoint_type type;
+  virtual struct regcache *regcache () = 0;
 };
 
 #ifdef IN_PROCESS_AGENT
+/* The target description index for IPA.  Passed from gdbserver, used
+   to select ipa_tdesc.  */
+extern "C" {
+IP_AGENT_EXPORT_VAR int ipa_tdesc_idx;
+}
 
 /* Fast/jump tracepoint specific data to be passed down to
    collect_data_at_tracepoint.  */
 struct fast_tracepoint_ctx : public tracepoint_hit_ctx
 {
   explicit fast_tracepoint_ctx (unsigned char *regs)
-    : tracepoint_hit_ctx (fast_tracepoint), regs (regs)
+    : regs (regs)
   {}
 
-  /* The regcache corresponding to the registers state at the time of
-     the tracepoint hit.  Initialized lazily, from REGS.  */
-  struct regcache regcache;
-  int regcache_initted = 0;
+  virtual struct regcache *regcache () override
+  {
+    const struct target_desc *ipa_tdesc = get_ipa_tdesc (ipa_tdesc_idx);
 
-  /* The buffer space REGCACHE above uses.  We use a separate buffer
+    if (!this->m_regcache_initted)
+      {
+	this->m_regcache_initted = 1;
+	init_register_cache (&this->m_regcache, ipa_tdesc, this->regspace);
+	supply_regblock (&this->m_regcache, nullptr);
+	supply_fast_tracepoint_registers (&this->m_regcache, this->regs);
+      }
+
+    return &this->m_regcache;
+  }
+
+  /* The buffer space M_REGCACHE uses.  We use a separate buffer
      instead of letting the regcache malloc for both signal safety and
      performance reasons; this is allocated on the stack instead.  */
   unsigned char *regspace = nullptr;
@@ -1205,6 +1216,13 @@ struct fast_tracepoint_ctx : public tracepoint_hit_ctx
 
   /* The GDB tracepoint matching the probed marker that was "hit".  */
   struct tracepoint *tpoint = nullptr;
+
+private:
+
+  /* The regcache corresponding to the registers state at the time of
+     the tracepoint hit.  Initialized lazily, from REGS.  */
+  struct regcache m_regcache;
+  int m_regcache_initted = 0;
 };
 
 #else
@@ -1214,10 +1232,17 @@ struct fast_tracepoint_ctx : public tracepoint_hit_ctx
 struct trap_tracepoint_ctx : public tracepoint_hit_ctx
 {
   explicit trap_tracepoint_ctx (struct regcache *regcache)
-    : tracepoint_hit_ctx (trap_tracepoint), regcache (regcache)
+    : m_regcache (regcache)
   {}
 
-  struct regcache *regcache;
+  virtual struct regcache *regcache () override
+  {
+    return this->m_regcache;
+  }
+
+private:
+
+  struct regcache *m_regcache;
 };
 
 #endif
@@ -4373,47 +4398,6 @@ collect_data_at_step (struct tracepoint_hit_ctx *ctx,
 
 #endif
 
-#ifdef IN_PROCESS_AGENT
-/* The target description index for IPA.  Passed from gdbserver, used
-   to select ipa_tdesc.  */
-extern "C" {
-IP_AGENT_EXPORT_VAR int ipa_tdesc_idx;
-}
-#endif
-
-static struct regcache *
-get_context_regcache (struct tracepoint_hit_ctx *ctx)
-{
-  struct regcache *regcache = NULL;
-#ifdef IN_PROCESS_AGENT
-  const struct target_desc *ipa_tdesc = get_ipa_tdesc (ipa_tdesc_idx);
-
-  if (ctx->type == fast_tracepoint)
-    {
-      auto fctx = static_cast<fast_tracepoint_ctx *> (ctx);
-
-      if (!fctx->regcache_initted)
-	{
-	  fctx->regcache_initted = 1;
-	  init_register_cache (&fctx->regcache, ipa_tdesc, fctx->regspace);
-	  supply_regblock (&fctx->regcache, NULL);
-	  supply_fast_tracepoint_registers (&fctx->regcache, fctx->regs);
-	}
-      regcache = &fctx->regcache;
-    }
-#else
-  if (ctx->type == trap_tracepoint)
-    {
-      auto tctx = static_cast<trap_tracepoint_ctx *> (ctx);
-      regcache = tctx->regcache;
-    }
-#endif
-
-  gdb_assert (regcache != NULL);
-
-  return regcache;
-}
-
 static void
 do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 			 CORE_ADDR stop_pc,
@@ -4447,12 +4431,11 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
       {
 	unsigned char *regspace;
 	struct regcache tregcache;
-	struct regcache *context_regcache;
 	int regcache_size;
 
 	trace_debug ("Want to collect registers");
 
-	context_regcache = get_context_regcache (ctx);
+	regcache *context_regcache = ctx->regcache ();
 	regcache_size = register_cache_size (context_regcache->tdesc);
 
 	/* Collect all registers for now.  */
@@ -4499,7 +4482,7 @@ do_action_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 	struct eval_agent_expr_context ax_ctx;
 
 	eaction = (struct eval_expr_action *) taction;
-	ax_ctx.regcache = get_context_regcache (ctx);
+	ax_ctx.regcache = ctx->regcache ();
 	ax_ctx.tframe = tframe;
 	ax_ctx.tpoint = tpoint;
 
@@ -4552,7 +4535,7 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
     {
       struct eval_agent_expr_context ax_ctx;
 
-      ax_ctx.regcache = get_context_regcache (ctx);
+      ax_ctx.regcache = ctx->regcache ();
       ax_ctx.tframe = NULL;
       ax_ctx.tpoint = tpoint;
 
