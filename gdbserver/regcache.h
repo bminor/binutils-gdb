@@ -43,7 +43,7 @@ struct regcache : public reg_buffer_common
   bool registers_owned = false;
   unsigned char *registers = nullptr;
 #ifndef IN_PROCESS_AGENT
-  /* One of REG_UNAVAILABLE or REG_VALID.  */
+  /* See gdbsupport/common-regcache.h.  */
   unsigned char *register_status = nullptr;
 
   /* Construct a regcache using the register layout described by TDESC.

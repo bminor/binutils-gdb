@@ -52,7 +52,7 @@ get_thread_regcache (thread_info *thread, bool fetch)
 
       switch_to_thread (thread);
       /* Invalidate all registers, to prevent stale left-overs.  */
-      memset (regcache->register_status, REG_UNAVAILABLE,
+      memset (regcache->register_status, REG_UNKNOWN,
 	      regcache->tdesc->reg_defs.size ());
       fetch_inferior_registers (regcache, -1);
       regcache->registers_fetched = true;
@@ -133,7 +133,7 @@ regcache::regcache (const target_desc *tdesc)
     = (unsigned char *) xcalloc (1, tdesc->registers_size);
   this->register_status
     = (unsigned char *) xmalloc (tdesc->reg_defs.size ());
-  memset ((void *) this->register_status, REG_UNAVAILABLE,
+  memset ((void *) this->register_status, REG_UNKNOWN,
 	  tdesc->reg_defs.size ());
 }
 
