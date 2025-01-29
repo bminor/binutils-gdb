@@ -6132,6 +6132,12 @@ proc gdb_compile {source dest type options} {
 
     set outdir [file dirname $dest]
 
+    # GDB doesn't support minimal symbols in AIX, so fail the compilation
+    # if nodebug is requested for an AIX target.
+    if { [istarget *-*-aix*] && [lsearch -exact $options nodebug] != -1} {
+	return "minsyms not supported in AIX"
+    }
+
     # If this is set, calling test_compiler_info will cause recursion.
     if { [lsearch -exact $options getting_compiler_info] == -1 } {
 	set getting_compiler_info false

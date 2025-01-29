@@ -23,7 +23,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "bfd.h"
-#include "gdb-stabs.h"
 #include "regcache.h"
 #include "arch-utils.h"
 #include "inf-child.h"
