@@ -26,6 +26,7 @@
 #include "symtab.h"
 #include "objfiles.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-style.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "regcache.h"
