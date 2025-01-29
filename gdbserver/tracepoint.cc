@@ -1169,10 +1169,14 @@ static char *tracing_stop_note;
 
 #endif
 
-/* Base "class" for tracepoint type specific data to be passed down to
+/* Base class for tracepoint type specific data to be passed down to
    collect_data_at_tracepoint.  */
 struct tracepoint_hit_ctx
 {
+  explicit tracepoint_hit_ctx (enum tracepoint_type type)
+    : type (type)
+  {}
+
   enum tracepoint_type type;
 };
 
@@ -1180,34 +1184,38 @@ struct tracepoint_hit_ctx
 
 /* Fast/jump tracepoint specific data to be passed down to
    collect_data_at_tracepoint.  */
-struct fast_tracepoint_ctx
+struct fast_tracepoint_ctx : public tracepoint_hit_ctx
 {
-  struct tracepoint_hit_ctx base;
+  explicit fast_tracepoint_ctx (unsigned char *regs)
+    : tracepoint_hit_ctx (fast_tracepoint), regs (regs)
+  {}
 
   /* The regcache corresponding to the registers state at the time of
      the tracepoint hit.  Initialized lazily, from REGS.  */
   struct regcache regcache;
-  int regcache_initted;
+  int regcache_initted = 0;
 
   /* The buffer space REGCACHE above uses.  We use a separate buffer
      instead of letting the regcache malloc for both signal safety and
      performance reasons; this is allocated on the stack instead.  */
-  unsigned char *regspace;
+  unsigned char *regspace = nullptr;
 
   /* The register buffer passed by the client.  */
   unsigned char *regs;
 
   /* The GDB tracepoint matching the probed marker that was "hit".  */
-  struct tracepoint *tpoint;
+  struct tracepoint *tpoint = nullptr;
 };
 
 #else
 
 /* Static tracepoint specific data to be passed down to
    collect_data_at_tracepoint.  */
-struct trap_tracepoint_ctx
+struct trap_tracepoint_ctx : public tracepoint_hit_ctx
 {
-  struct tracepoint_hit_ctx base;
+  explicit trap_tracepoint_ctx (struct regcache *regcache)
+    : tracepoint_hit_ctx (trap_tracepoint), regcache (regcache)
+  {}
 
   struct regcache *regcache;
 };
@@ -4048,7 +4056,6 @@ tracepoint_finished_step (thread_info *tinfo, CORE_ADDR stop_pc)
   struct tracepoint *tpoint;
   struct wstep_state *wstep;
   struct wstep_state **wstep_link;
-  struct trap_tracepoint_ctx ctx;
 
   /* Pull in fast tracepoint trace frames from the inferior lib buffer into
      our buffer.  */
@@ -4078,8 +4085,7 @@ tracepoint_finished_step (thread_info *tinfo, CORE_ADDR stop_pc)
 	       target_pid_to_str (tinfo->id).c_str (),
 	       wstep->tp_number, paddress (wstep->tp_address));
 
-  ctx.base.type = trap_tracepoint;
-  ctx.regcache = get_thread_regcache (tinfo);
+  trap_tracepoint_ctx ctx (get_thread_regcache (tinfo));
 
   while (wstep != NULL)
     {
@@ -4101,8 +4107,7 @@ tracepoint_finished_step (thread_info *tinfo, CORE_ADDR stop_pc)
       ++wstep->current_step;
 
       /* Collect data.  */
-      collect_data_at_step ((struct tracepoint_hit_ctx *) &ctx,
-			    stop_pc, tpoint, wstep->current_step);
+      collect_data_at_step (&ctx, stop_pc, tpoint, wstep->current_step);
 
       if (wstep->current_step >= tpoint->step_count)
 	{
@@ -4233,14 +4238,12 @@ tracepoint_was_hit (thread_info *tinfo, CORE_ADDR stop_pc)
 {
   struct tracepoint *tpoint;
   int ret = 0;
-  struct trap_tracepoint_ctx ctx;
 
   /* Not tracing, don't handle.  */
   if (!tracing)
     return 0;
 
-  ctx.base.type = trap_tracepoint;
-  ctx.regcache = get_thread_regcache (tinfo);
+  trap_tracepoint_ctx ctx (get_thread_regcache (tinfo));
 
   for (tpoint = tracepoints; tpoint; tpoint = tpoint->next)
     {
@@ -4255,10 +4258,8 @@ tracepoint_was_hit (thread_info *tinfo, CORE_ADDR stop_pc)
 
 	  /* Test the condition if present, and collect if true.  */
 	  if (!tpoint->cond
-	      || (condition_true_at_tracepoint
-		  ((struct tracepoint_hit_ctx *) &ctx, tpoint)))
-	    collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-					stop_pc, tpoint);
+	      || (condition_true_at_tracepoint (&ctx, tpoint)))
+	    collect_data_at_tracepoint (&ctx, stop_pc, tpoint);
 
 	  if (stopping_tracepoint
 	      || trace_buffer_is_full
@@ -4389,7 +4390,8 @@ get_context_regcache (struct tracepoint_hit_ctx *ctx)
 
   if (ctx->type == fast_tracepoint)
     {
-      struct fast_tracepoint_ctx *fctx = (struct fast_tracepoint_ctx *) ctx;
+      auto fctx = static_cast<fast_tracepoint_ctx *> (ctx);
+
       if (!fctx->regcache_initted)
 	{
 	  fctx->regcache_initted = 1;
@@ -4402,7 +4404,7 @@ get_context_regcache (struct tracepoint_hit_ctx *ctx)
 #else
   if (ctx->type == trap_tracepoint)
     {
-      struct trap_tracepoint_ctx *tctx = (struct trap_tracepoint_ctx *) ctx;
+      auto tctx = static_cast<trap_tracepoint_ctx *> (ctx);
       regcache = tctx->regcache;
     }
 #endif
@@ -4542,7 +4544,7 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
 #ifdef IN_PROCESS_AGENT
   if (tpoint->compiled_cond)
     {
-      struct fast_tracepoint_ctx *fctx = (struct fast_tracepoint_ctx *) ctx;
+      auto fctx = static_cast<fast_tracepoint_ctx *> (ctx);
       err = ((condfn) (uintptr_t) (tpoint->compiled_cond)) (fctx->regs, &value);
     }
   else
@@ -5371,7 +5373,6 @@ IP_AGENT_EXPORT_FUNC void gdb_collect (struct tracepoint *tpoint,
 IP_AGENT_EXPORT_FUNC void
 gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
 {
-  struct fast_tracepoint_ctx ctx;
   const struct target_desc *ipa_tdesc;
 
   /* Don't do anything until the trace run is completely set up.  */
@@ -5379,9 +5380,8 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
     return;
 
   ipa_tdesc = get_ipa_tdesc (ipa_tdesc_idx);
-  ctx.base.type = fast_tracepoint;
-  ctx.regs = regs;
-  ctx.regcache_initted = 0;
+  fast_tracepoint_ctx ctx (regs);
+
   /* Wrap the regblock in a register cache (in the stack, we don't
      want to malloc here).  */
   ctx.regspace = (unsigned char *) alloca (ipa_tdesc->registers_size);
@@ -5405,11 +5405,10 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
 
       /* Test the condition if present, and collect if true.  */
       if (ctx.tpoint->cond == NULL
-	  || condition_true_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-					   ctx.tpoint))
+	  || condition_true_at_tracepoint (&ctx, ctx.tpoint))
 	{
-	  collect_data_at_tracepoint ((struct tracepoint_hit_ctx *) &ctx,
-				      ctx.tpoint->address, ctx.tpoint);
+	  collect_data_at_tracepoint (&ctx, ctx.tpoint->address,
+				      ctx.tpoint);
 
 	  /* Note that this will cause original insns to be written back
 	     to where we jumped from, but that's OK because we're jumping
