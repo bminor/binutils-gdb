@@ -130,8 +130,8 @@ regcache::regcache (const target_desc *tdesc)
      garbage.  */
   this->registers
     = (unsigned char *) xmalloc (tdesc->registers_size);
-  this->register_status
-    = (unsigned char *) xmalloc (tdesc->reg_defs.size ());
+  size_t num_regs = tdesc->reg_defs.size ();
+  m_register_status.reset (new enum register_status[num_regs]);
   reset (REG_UNKNOWN);
 }
 
@@ -139,7 +139,6 @@ regcache::~regcache ()
 {
   if (registers_owned)
     free (registers);
-  free (register_status);
 }
 
 #endif
@@ -152,8 +151,8 @@ regcache::reset (enum register_status status)
      of garbage.  */
   memset (this->registers, 0, this->tdesc->registers_size);
 #ifndef IN_PROCESS_AGENT
-  if (this->register_status != nullptr)
-    memset (this->register_status, status, this->tdesc->reg_defs.size ());
+  for (int i = 0; i < this->tdesc->reg_defs.size (); i++)
+    set_register_status (i, status);
 #endif
 }
 
@@ -166,8 +165,8 @@ regcache::copy_from (regcache *src)
 
   memcpy (this->registers, src->registers, src->tdesc->registers_size);
 #ifndef IN_PROCESS_AGENT
-  if (this->register_status != nullptr && src->register_status != nullptr)
-    memcpy (this->register_status, src->register_status,
+  if (m_register_status != nullptr && src->m_register_status != nullptr)
+    memcpy (m_register_status.get (), src->m_register_status.get (),
 	    src->tdesc->reg_defs.size ());
 #endif
   this->registers_fetched = src->registers_fetched;
@@ -477,8 +476,8 @@ regcache::get_register_status (int regnum) const
 {
 #ifndef IN_PROCESS_AGENT
   gdb_assert (regnum >= 0 && regnum < tdesc->reg_defs.size ());
-  if (register_status != nullptr)
-    return (enum register_status) (register_status[regnum]);
+  if (m_register_status != nullptr)
+    return m_register_status[regnum];
   else
     return REG_VALID;
 #else
@@ -491,8 +490,8 @@ regcache::set_register_status (int regnum, enum register_status status)
 {
 #ifndef IN_PROCESS_AGENT
   gdb_assert (regnum >= 0 && regnum < tdesc->reg_defs.size ());
-  if (register_status != nullptr)
-    register_status[regnum] = status;
+  if (m_register_status != nullptr)
+    m_register_status[regnum] = status;
 #endif
 }
 

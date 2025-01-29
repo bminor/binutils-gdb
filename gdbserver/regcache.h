@@ -20,6 +20,7 @@
 #define GDBSERVER_REGCACHE_H
 
 #include "gdbsupport/common-regcache.h"
+#include <memory>
 
 struct thread_info;
 struct target_desc;
@@ -43,9 +44,6 @@ struct regcache : public reg_buffer_common
   bool registers_owned = false;
   unsigned char *registers = nullptr;
 #ifndef IN_PROCESS_AGENT
-  /* See gdbsupport/common-regcache.h.  */
-  unsigned char *register_status = nullptr;
-
   /* Construct a regcache using the register layout described by TDESC.
 
      The regcache dynamically allocates its register buffer.  */
@@ -90,6 +88,13 @@ struct regcache : public reg_buffer_common
 
   /* Copy the contents of SRC into this regcache.  */
   void copy_from (regcache *src);
+
+private:
+
+#ifndef IN_PROCESS_AGENT
+  /* See gdbsupport/common-regcache.h.  */
+  std::unique_ptr<enum register_status[]> m_register_status;
+#endif
 };
 
 regcache *get_thread_regcache (thread_info *thread, bool fetch = true);
