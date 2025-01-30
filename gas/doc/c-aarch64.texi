@@ -205,7 +205,7 @@ automatically cause those extensions to be disabled.
  @tab Enable Armv8.2 16-bit floating-point multiplication variant support.
 @item @code{fp16} @tab @code{fp}
  @tab Enable Armv8.2 16-bit floating-point support.
-@item @code{frintts} @tab @code{simd}
+@item @code{frintts} @tab @code{fp}
  @tab Enable floating-point round to integral value instructions.
 @item @code{gcs} @tab
  @tab Enable the Guarded Control Stack Extension.
