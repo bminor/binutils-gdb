@@ -489,160 +489,172 @@ _bfd_elf_obj_attrs_arg_type (bfd *abfd, int vendor, unsigned int tag)
     }
 }
 
+static void
+bfd_elf_parse_attr_section_v1 (bfd *abfd,
+			       Elf_Internal_Shdr * hdr,
+			       bfd_byte *contents)
+{
+  bfd_byte *p = contents;
+  bfd_byte *p_end = p + hdr->sh_size;
+  const char *std_sec = get_elf_backend_data (abfd)->obj_attrs_vendor;
+
+  while (p_end - p >= 4)
+    {
+      size_t len = p_end - p;
+      size_t namelen;
+      size_t section_len;
+      int vendor;
+
+      section_len = bfd_get_32 (abfd, p);
+      p += 4;
+      if (section_len == 0)
+	break;
+      if (section_len > len)
+	section_len = len;
+      if (section_len <= 4)
+	{
+	  _bfd_error_handler
+		(_("%pB: error: attribute section length too small: %ld"),
+		 abfd, (long) section_len);
+	  break;
+	}
+      section_len -= 4;
+      namelen = strnlen ((char *) p, section_len) + 1;
+      if (namelen >= section_len)
+	break;
+      if (std_sec && strcmp ((char *) p, std_sec) == 0)
+	vendor = OBJ_ATTR_PROC;
+      else if (strcmp ((char *) p, "gnu") == 0)
+	vendor = OBJ_ATTR_GNU;
+      else
+	{
+	  /* Other vendor section.  Ignore it.  */
+	  p += section_len;
+	  continue;
+	}
+
+      p += namelen;
+      section_len -= namelen;
+      while (section_len > 0)
+	{
+	  unsigned int tag;
+	  unsigned int val;
+	  size_t subsection_len;
+	  bfd_byte *end, *orig_p;
+
+	  orig_p = p;
+	  tag = _bfd_safe_read_leb128 (abfd, &p, false, p_end);
+	  if (p_end - p >= 4)
+	  {
+	    subsection_len = bfd_get_32 (abfd, p);
+	    p += 4;
+	  }
+	  else
+	  {
+	    p = p_end;
+	    break;
+	  }
+	  if (subsection_len > section_len)
+	    subsection_len = section_len;
+	  section_len -= subsection_len;
+	  end = orig_p + subsection_len;
+	  if (end < p)
+	    break;
+	  switch (tag)
+	    {
+	    case Tag_File:
+	      while (p < end)
+		{
+		  int type;
+		  bool ok = false;
+
+		  tag = _bfd_safe_read_leb128 (abfd, &p, false, end);
+		  type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
+		  switch (type & (ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL))
+		    {
+		    case ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL:
+		      val = _bfd_safe_read_leb128 (abfd, &p, false, end);
+		      ok = elf_add_obj_attr_int_string (abfd, vendor, tag,
+							val, (char *) p,
+							(char *) end);
+		      p += strnlen ((char *) p, end - p);
+		      if (p < end)
+			p++;
+		      break;
+		    case ATTR_TYPE_FLAG_STR_VAL:
+		      ok = elf_add_obj_attr_string (abfd, vendor, tag,
+						    (char *) p,
+						    (char *) end);
+		      p += strnlen ((char *) p, end - p);
+		      if (p < end)
+			p++;
+		      break;
+		    case ATTR_TYPE_FLAG_INT_VAL:
+		      val = _bfd_safe_read_leb128 (abfd, &p, false, end);
+		      ok = bfd_elf_add_obj_attr_int (abfd, vendor, tag, val);
+		      break;
+		    default:
+		      abort ();
+		    }
+		  if (!ok)
+		    bfd_perror (_("error adding attribute"));
+		}
+	      break;
+	    case Tag_Section:
+	    case Tag_Symbol:
+	      /* Don't have anywhere convenient to attach these.
+		 Fall through for now.  */
+	    default:
+	      /* Ignore things we don't know about.  */
+	      p = end;
+	      break;
+	    }
+	}
+    }
+}
+
 /* Parse an object attributes section.  */
 void
 _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 {
-  bfd_byte *contents;
-  bfd_byte *p;
-  bfd_byte *p_end;
-  const char *std_sec;
-  ufile_ptr filesize;
-
   /* PR 17512: file: 2844a11d.  */
   if (hdr->sh_size == 0)
     return;
 
-  filesize = bfd_get_file_size (abfd);
+  ufile_ptr filesize = bfd_get_file_size (abfd);
   if (filesize != 0 && hdr->sh_size > filesize)
     {
-      /* xgettext:c-format */
       _bfd_error_handler (_("%pB: error: attribute section '%pA' too big: %#llx"),
 			  abfd, hdr->bfd_section, (long long) hdr->sh_size);
       bfd_set_error (bfd_error_invalid_operation);
       return;
     }
 
-  contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
-  if (!contents)
+  bfd_byte *data = (bfd_byte *) bfd_malloc (hdr->sh_size);
+  if (!data)
     return;
-  if (!bfd_get_section_contents (abfd, hdr->bfd_section, contents, 0,
-				 hdr->sh_size))
-    {
-      free (contents);
-      return;
-    }
-  p = contents;
-  p_end = p + hdr->sh_size;
-  std_sec = get_elf_backend_data (abfd)->obj_attrs_vendor;
 
-  if (*p++ == 'A')
-    {
-      while (p_end - p >= 4)
-	{
-	  size_t len = p_end - p;
-	  size_t namelen;
-	  size_t section_len;
-	  int vendor;
+  if (!bfd_get_section_contents (abfd, hdr->bfd_section, data, 0, hdr->sh_size))
+    goto free_data;
 
-	  section_len = bfd_get_32 (abfd, p);
-	  p += 4;
-	  if (section_len == 0)
-	    break;
-	  if (section_len > len)
-	    section_len = len;
-	  if (section_len <= 4)
-	    {
-	      _bfd_error_handler
-		(_("%pB: error: attribute section length too small: %ld"),
-		 abfd, (long) section_len);
-	      break;
-	    }
-	  section_len -= 4;
-	  namelen = strnlen ((char *) p, section_len) + 1;
-	  if (namelen >= section_len)
-	    break;
-	  if (std_sec && strcmp ((char *) p, std_sec) == 0)
-	    vendor = OBJ_ATTR_PROC;
-	  else if (strcmp ((char *) p, "gnu") == 0)
-	    vendor = OBJ_ATTR_GNU;
-	  else
-	    {
-	      /* Other vendor section.  Ignore it.  */
-	      p += section_len;
-	      continue;
-	    }
+  unsigned char *cursor = data;
 
-	  p += namelen;
-	  section_len -= namelen;
-	  while (section_len > 0)
-	    {
-	      unsigned int tag;
-	      unsigned int val;
-	      size_t subsection_len;
-	      bfd_byte *end, *orig_p;
+  /* The first character is the version of the attributes.
+     Currently only version 'A' is recognised here.  */
+  if (*cursor != 'A')
+  {
+    _bfd_error_handler (_("%pB: error: unknown attributes version '%c'(%d) "
+			  "- expecting 'A'\n"), abfd, *cursor, *cursor);
+    bfd_set_error (bfd_error_wrong_format);
+    goto free_data;
+  }
 
-	      orig_p = p;
-	      tag = _bfd_safe_read_leb128 (abfd, &p, false, p_end);
-	      if (p_end - p >= 4)
-		{
-		  subsection_len = bfd_get_32 (abfd, p);
-		  p += 4;
-		}
-	      else
-		{
-		  p = p_end;
-		  break;
-		}
-	      if (subsection_len > section_len)
-		subsection_len = section_len;
-	      section_len -= subsection_len;
-	      end = orig_p + subsection_len;
-	      if (end < p)
-		break;
-	      switch (tag)
-		{
-		case Tag_File:
-		  while (p < end)
-		    {
-		      int type;
-		      bool ok = false;
+  ++cursor;
 
-		      tag = _bfd_safe_read_leb128 (abfd, &p, false, end);
-		      type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
-		      switch (type & (ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL))
-			{
-			case ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL:
-			  val = _bfd_safe_read_leb128 (abfd, &p, false, end);
-			  ok = elf_add_obj_attr_int_string (abfd, vendor, tag,
-							    val, (char *) p,
-							    (char *) end);
-			  p += strnlen ((char *) p, end - p);
-			  if (p < end)
-			    p++;
-			  break;
-			case ATTR_TYPE_FLAG_STR_VAL:
-			  ok = elf_add_obj_attr_string (abfd, vendor, tag,
-							(char *) p,
-							(char *) end);
-			  p += strnlen ((char *) p, end - p);
-			  if (p < end)
-			    p++;
-			  break;
-			case ATTR_TYPE_FLAG_INT_VAL:
-			  val = _bfd_safe_read_leb128 (abfd, &p, false, end);
-			  ok = bfd_elf_add_obj_attr_int (abfd, vendor, tag, val);
-			  break;
-			default:
-			  abort ();
-			}
-		      if (!ok)
-			bfd_perror (_("error adding attribute"));
-		    }
-		  break;
-		case Tag_Section:
-		case Tag_Symbol:
-		  /* Don't have anywhere convenient to attach these.
-		     Fall through for now.  */
-		default:
-		  /* Ignore things we don't know about.  */
-		  p = end;
-		  break;
-		}
-	    }
-	}
-    }
-  free (contents);
+  bfd_elf_parse_attr_section_v1 (abfd, hdr, cursor);
+
+free_data:
+  free (data);
 }
 
 /* Merge common object attributes from IBFD into OBFD.  Raise an error
