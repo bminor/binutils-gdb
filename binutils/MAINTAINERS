@@ -88,7 +88,6 @@ responsibility among the other maintainers.
   GOLD		   Ian Lance Taylor <iant@google.com>
   GOLD		   Cary Coutant <ccoutant@gmail.com>
   gprofng	   Vladimir Mezentsev <vladimir.mezentsev@oracle.com>
-  H8300		   Prafulla Thakare <prafulla.thakare@kpitcummins.com>
   HPPA		   Dave Anglin <dave.anglin@bell.net>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
   IA-64		   Jim Wilson <wilson@tuliptree.org>
@@ -108,7 +107,6 @@ responsibility among the other maintainers.
   MACH-O           Tristan Gingold <tgingold@free.fr>
   MAXQ		   Inderpreet Singh <inderpreetb@noida.hcltech.com>
   MEP		   Nick Clifton <nickc@redhat.com>
-  METAG            Markos Chandras <markos.chandras@imgtec.com>
   MICROBLAZE	   Michael Eager <eager@eagercon.com>
   MIPS		   Chenghua Xu <paul.hua.gm@gmail.com>
   MIPS I-IV	   Maciej W. Rozycki <macro@orcam.me.uk>
