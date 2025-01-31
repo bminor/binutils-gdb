@@ -2307,7 +2307,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "sysenter",		{ SEP }, PREFIX_REX2_ILLEGAL },
   { "sysexit%LQ",	{ SEP }, PREFIX_REX2_ILLEGAL },
   { Bad_Opcode },
-  { "getsec",		{ XX }, 0 },
+  { "getsec",		{ XX }, PREFIX_REX2_ILLEGAL },
   /* 38 */
   { THREE_BYTE_TABLE (THREE_BYTE_0F38) },
   { Bad_Opcode },
