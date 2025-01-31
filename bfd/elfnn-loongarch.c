@@ -5637,10 +5637,13 @@ loongarch_elf_relax_section (bfd *abfd, asection *sec,
 	}
       else
 	{
+	  /* Do not relax __[start|stop]_SECNAME, since the symbol value
+	     is not set yet.  */
 	  if (h != NULL
 	      && ((h->type == STT_GNU_IFUNC
 		   && r_type != R_LARCH_CALL36)
-		  || bfd_is_abs_section (h->root.u.def.section)))
+		  || bfd_is_abs_section (h->root.u.def.section)
+		  || h->start_stop))
 	    continue;
 
 	  /* The GOT entry of tls symbols must in current execute file or
