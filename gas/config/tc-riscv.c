@@ -5441,19 +5441,22 @@ riscv_elf_final_processing (void)
 static void
 s_riscv_leb128 (int sign)
 {
-  expressionS exp;
-  char *save_in = input_line_pointer;
+  do
+    {
+      expressionS exp;
 
-  expression (&exp);
-  if (sign && exp.X_op != O_constant)
-    as_bad (_("non-constant .sleb128 is not supported"));
-  else if (!sign && exp.X_op != O_constant && exp.X_op != O_subtract)
-    as_bad (_(".uleb128 only supports constant or subtract expressions"));
+      expression (&exp);
+      if (sign && exp.X_op != O_constant)
+	as_bad (_("non-constant .sleb128 is not supported"));
+      else if (!sign && exp.X_op != O_constant && exp.X_op != O_subtract)
+	as_bad (_(".uleb128 only supports constant or subtract expressions"));
+      else
+	emit_leb128_expr (&exp, sign);
+    }
+  while (*input_line_pointer++ == ',');
 
+  input_line_pointer--;
   demand_empty_rest_of_line ();
-
-  input_line_pointer = save_in;
-  return s_leb128 (sign);
 }
 
 /* Parse the .insn directive.  There are three formats,

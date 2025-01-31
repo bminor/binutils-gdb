@@ -2,7 +2,7 @@
 #readelf: -wlL
 #name: DWARF2 6
 # These targets either do not support or do not evaluate the subtraction of symbols at assembly time.
-#xfail: cr16-* crx-* riscv*-*
+#xfail: cr16-* crx-*
 
 Raw dump of debug contents of section .debug_line:
 

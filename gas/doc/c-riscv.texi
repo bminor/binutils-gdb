@@ -139,12 +139,13 @@ meant to be used by the compiler in shared libraries for DWARF debug info for
 thread local variables.
 
 @cindex LEB128 directives
-@item .uleb128 @var{value}
-@itemx .sleb128 @var{value}
-Emits a signed or unsigned LEB128 value at the current position.  This only
+@item .uleb128 @var{values}
+@itemx .sleb128 @var{values}
+Emits signed or unsigned LEB128 values at the current position.  This only
 accepts constant expressions, because symbol addresses can change with
 relaxation, and we don't support relocations to modify LEB128 values at link
-time.
+time.  An exception are differences between symbols, which may be used with
+@code{.uleb128}.
 
 @cindex Option directive
 @cindex @code{option} directive
