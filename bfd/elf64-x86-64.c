@@ -1738,6 +1738,16 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
   return false;
 }
 
+/* Move the R bits to the B bits in EVEX payload byte 1.  */
+static unsigned int evex_move_r_to_b (unsigned int byte1)
+{
+  byte1 = (byte1 & ~(1 << 5)) | ((byte1 & (1 << 7)) >> 2); /* R3 -> B3 */
+  byte1 = (byte1 & ~(1 << 3)) | ((~byte1 & (1 << 4)) >> 1); /* R4 -> B4 */
+
+  /* Set both R bits, as they're inverted.  */
+  return byte1 | (1 << 4) | (1 << 7);
+}
+
 /* With the local symbol, foo, we convert
    mov foo@GOTPCREL(%rip), %reg
    movrs foo@GOTPCREL(%rip), %reg
@@ -2109,9 +2119,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
       bfd_put_8 (abfd, opcode, contents + roff - 2);
       bfd_put_8 (abfd, modrm, contents + roff - 1);
 
-      /* Move the R bits to the B bits in the first EXEX payload byte.  */
-      evex[0] = (evex[0] & ~0xa0) | ((evex[0] & 0x80) >> 2); /* R3 -> B3 */
-      evex[0] = (evex[0] & ~0x18) | ((~evex[0] & 0x10) >> 1); /* R4 -> B4 */
+      evex[0] = evex_move_r_to_b (evex[0]);
       bfd_put_8 (abfd, evex[0], contents + roff - 5);
 
       /* No addend for R_X86_64_32/R_X86_64_32S relocations.  */
@@ -4333,7 +4341,6 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     mov $foo@tpoff, %reg
 		     where reg is one of r16 to r31.  */
 		  unsigned int type, reg, byte1;
-		  unsigned int updated_byte1;
 
 		  if (roff < 6)
 		    goto corrupt_input;
@@ -4371,25 +4378,10 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      continue;
 		    }
 
-		  /* Move the R bits to the B bits in EVEX payload
-		     byte 1.  */
-		  updated_byte1 = byte1;
-
-		  /* Set the R bits since they is inverted.  */
-		  updated_byte1 |= 1 << 7 | 1 << 4;
-
-		  /* Update the B bits from the R bits.  */
-		  if ((byte1 & (1 << 7)) == 0)
-		    updated_byte1 &= ~(1 << 5);
-		  if ((byte1 & (1 << 4)) == 0)
-		    updated_byte1 |= 1 << 3;
-
-		  bfd_put_8 (output_bfd, updated_byte1,
-			     contents + roff - 5);
-		  bfd_put_8 (output_bfd, 0x81,
-			     contents + roff - 2);
-		  bfd_put_8 (output_bfd, 0xc0 | reg,
-			     contents + roff - 1);
+		  byte1 = evex_move_r_to_b (byte1);
+		  bfd_put_8 (output_bfd, byte1, contents + roff - 5);
+		  bfd_put_8 (output_bfd, 0x81, contents + roff - 2);
+		  bfd_put_8 (output_bfd, 0xc0 | reg, contents + roff - 1);
 		  bfd_put_32 (output_bfd,
 			      elf_x86_64_tpoff (info, relocation),
 			      contents + roff);
