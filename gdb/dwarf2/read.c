@@ -631,6 +631,9 @@ private:
 				  dwarf2_cu *existing_cu,
 				  enum language pretend_language);
 
+  void prepare_one_comp_unit (struct dwarf2_cu *cu,
+			      enum language pretend_language);
+
   struct dwarf2_per_cu_data *m_this_cu;
   dwarf2_cu_up m_new_cu;
 
@@ -1060,10 +1063,6 @@ static const gdb_byte *skip_one_die (const struct die_reader_specs *reader,
 static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
   (sect_offset sect_off, unsigned int offset_in_dwz,
    dwarf2_per_bfd *per_bfd);
-
-static void prepare_one_comp_unit (struct dwarf2_cu *cu,
-				   struct die_info *comp_unit_die,
-				   enum language pretend_language);
 
 static struct type *set_die_type (struct die_info *, struct type *,
 				  struct dwarf2_cu *, bool = false);
@@ -3223,7 +3222,7 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
       dummy_p = true;
     }
 
-  prepare_one_comp_unit (cu, comp_unit_die, pretend_language);
+  prepare_one_comp_unit (cu, pretend_language);
 }
 
 /* Initialize a CU (or TU) and read its DIEs.
@@ -3440,7 +3439,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 
   /* Only a dummy unit can be missing the compunit DIE.  */
   gdb_assert (dummy_p || comp_unit_die != nullptr);
-  prepare_one_comp_unit (cu, comp_unit_die, pretend_language);
+  prepare_one_comp_unit (cu, pretend_language);
 }
 
 void
@@ -3533,7 +3532,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
       info_ptr = read_toplevel_die (this, &comp_unit_die, info_ptr);
     }
 
-  prepare_one_comp_unit (m_new_cu.get (), comp_unit_die, pretend_language);
+  prepare_one_comp_unit (m_new_cu.get (), pretend_language);
 }
 
 
@@ -21224,9 +21223,9 @@ run_test ()
    CU one with no contents; in this case default values are used for
    the fields.  */
 
-static void
-prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
-		       enum language pretend_language)
+void
+cutu_reader::prepare_one_comp_unit (struct dwarf2_cu *cu,
+				    enum language pretend_language)
 {
   struct attribute *attr;
 
