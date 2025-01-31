@@ -2750,10 +2750,6 @@ extern struct block_symbol
 				     const char *name,
 				     const domain_search_flags domain);
 
-/* Return 1 if the supplied producer string matches the ARM RealView
-   compiler (armcc).  */
-bool producer_is_realview (const char *producer);
-
 extern unsigned int symtab_create_debug;
 
 /* Print a "symtab-create" debug statement.  */

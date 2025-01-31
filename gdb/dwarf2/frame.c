@@ -32,6 +32,7 @@
 #include "value.h"
 #include "record.h"
 #include "extract-store-integer.h"
+#include "producer.h"
 
 #include "complaints.h"
 #include "dwarf2/frame.h"

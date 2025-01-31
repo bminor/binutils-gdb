@@ -195,6 +195,30 @@ producer_is_clang (const char *producer, int *major, int *minor)
   return false;
 }
 
+/* See producer.h.  */
+
+bool
+producer_is_realview (const char *producer)
+{
+  static const char *const arm_idents[] = {
+    "ARM C Compiler, ADS",
+    "Thumb C Compiler, ADS",
+    "ARM C++ Compiler, ADS",
+    "Thumb C++ Compiler, ADS",
+    "ARM/Thumb C/C++ Compiler, RVCT",
+    "ARM C/C++ Compiler, RVCT"
+  };
+
+  if (producer == NULL)
+    return false;
+
+  for (const char *ident : arm_idents)
+    if (startswith (producer, ident))
+      return true;
+
+  return false;
+}
+
 #if defined GDB_SELF_TEST
 namespace selftests {
 namespace producer {

@@ -6636,31 +6636,6 @@ main_language (void)
   return info->language_of_main;
 }
 
-/* Return 1 if the supplied producer string matches the ARM RealView
-   compiler (armcc).  */
-
-bool
-producer_is_realview (const char *producer)
-{
-  static const char *const arm_idents[] = {
-    "ARM C Compiler, ADS",
-    "Thumb C Compiler, ADS",
-    "ARM C++ Compiler, ADS",
-    "Thumb C++ Compiler, ADS",
-    "ARM/Thumb C/C++ Compiler, RVCT",
-    "ARM C/C++ Compiler, RVCT"
-  };
-
-  if (producer == NULL)
-    return false;
-
-  for (const char *ident : arm_idents)
-    if (startswith (producer, ident))
-      return true;
-
-  return false;
-}
-
 
 
 /* The next index to hand out in response to a registration request.  */

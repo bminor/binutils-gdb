@@ -50,4 +50,8 @@ extern bool producer_is_llvm (const char *producer);
    Sets MAJOR and MINOR accordingly, if not NULL.  */
 extern bool producer_is_clang (const char *producer, int *major, int *minor);
 
+/* Return true if the supplied producer string matches the ARM
+   RealView compiler (armcc).  */
+extern bool producer_is_realview (const char *producer);
+
 #endif /* GDB_PRODUCER_H */
