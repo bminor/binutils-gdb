@@ -524,6 +524,7 @@ fetch_error (const instr_info *ins)
 #define Xz { OP_DSreg, eSI_reg }
 #define Yb { OP_ESreg, eDI_reg }
 #define Yv { OP_ESreg, eDI_reg }
+#define DSCX { OP_DSreg, eCX_reg }
 #define DSBX { OP_DSreg, eBX_reg }
 
 #define es { OP_REG, es_reg }
@@ -4640,7 +4641,7 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_3 */
   {
     { Bad_Opcode },
-    { "rmpupdate",	{ Skip_MODRM }, 0 },
+    { "rmpupdate",	{ RMrAX, DSCX, Skip_MODRM }, 0 },
   },
 
   /* X86_64_0F01_REG_7_MOD_3_RM_7_PREFIX_1 */
@@ -13142,6 +13143,8 @@ OP_DSreg (instr_info *ins, int code, int sizeflag)
     {
       switch (ins->codep[-1])
 	{
+	case 0x01:	/* rmpupdate */
+	  break;
 	case 0x6f:	/* outsw/outsl */
 	  intel_operand_size (ins, z_mode, sizeflag);
 	  break;

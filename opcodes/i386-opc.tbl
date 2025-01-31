@@ -596,7 +596,7 @@ ssto, 0xaa, 0, W|No_sSuf|RepPrefixOk, {}
 ssto, 0xaa, 0, W|No_sSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ssto, 0xaa, 0, W|No_sSuf|IsStringEsOp1|RepPrefixOk, { Acc|Byte|Word|Dword|Qword, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|IntelSuffix, {}
-xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|IsString|IntelSuffix, { Byte|Unspecified|BaseIndex }
+xlat, 0xd7, 0, No_wSuf|No_lSuf|No_sSuf|No_qSuf|IsString|IntelSuffix, { RegB|Byte|Unspecified|BaseIndex }
 
 // Bit manipulation.
 bsf, 0xfbc, i386, Modrm|CheckOperandSize|No_bSuf|No_sSuf|RepPrefixOk, { Reg16|Reg32|Reg64|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
@@ -3159,6 +3159,7 @@ psmash, 0xf30f01ff, SNP&x64, NoSuf, {}
 psmash, 0xf30f01ff, SNP&x64, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword }
 pvalidate, 0xf20f01ff, SNP, NoSuf, {}
 pvalidate, 0xf20f01ff, SNP, AddrPrefixOpReg|NoSuf, { Acc|Word|Dword|Qword, RegC|Dword, RegD|Dword }
+// These two forms exist only for compatibility with older gas.
 rmpupdate, 0xf20f01fe, SNP&x64, NoSuf, {}
 rmpupdate, 0xf20f01fe, SNP&x64, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword, RegC|Qword }
 rmpadjust, 0xf30f01fe, SNP&x64, NoSuf, {}
@@ -3167,6 +3168,9 @@ rmpadjust, 0xf30f01fe, SNP&x64, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword, RegC|Q
 pvalidate, 0xf20f01ff, SNP, AddrPrefixOpReg|NoSuf, { Acc|Word|Dword|Qword }
 rmpupdate, 0xf20f01fe, SNP&x64, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword }
 rmpadjust, 0xf30f01fe, SNP&x64, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword }
+
+// This must come last, for its IsString attribute to take effect.
+rmpupdate, 0xf20f01fe, SNP&x64, IsString|NoSuf|NoRex64, { RegC|Unspecified|BaseIndex, Acc|Qword }
 
 // SNP instructions end
 

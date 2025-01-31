@@ -11,7 +11,8 @@ att:
         psmash	%eax
         rmpupdate
         rmpupdate %rax, %rcx
-        rmpupdate %eax, %rcx
+        rmpupdate (%rcx), %rax
+        rmpupdate (%ecx), %rax
         rmpadjust
         rmpadjust %rax, %rcx, %rdx
         rmpadjust %eax, %rcx, %rdx
@@ -30,7 +31,8 @@ intel:
         psmash	eax
         rmpupdate
         rmpupdate rax, rcx
-        rmpupdate eax, rcx
+        rmpupdate rax, [rcx]
+        rmpupdate rax, [ecx]
         rmpadjust
         rmpadjust rax, rcx, rdx
         rmpadjust eax, rcx, rdx

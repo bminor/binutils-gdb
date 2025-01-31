@@ -6999,10 +6999,10 @@ i386_assemble (char *line)
 
   /* All Intel opcodes have reversed operands except for "bound", "enter",
      "invlpg*", "monitor*", "mwait*", "tpause", "umwait", "pvalidate",
-     "rmpadjust", "rmpupdate", and "rmpquery".  We also don't reverse
-     intersegment "jmp" and "call" instructions with 2 immediate operands so
-     that the immediate segment precedes the offset consistently in Intel and
-     AT&T modes.  */
+     "rmpadjust", "rmpquery", and deprecated forms of "rmpupdate".
+     We also don't reverse intersegment "jmp" and "call" instructions with
+     2 immediate operands so that the immediate segment precedes the offset
+     consistently in Intel and AT&T modes.  */
   if (intel_syntax
       && i.operands > 1
       && (t->mnem_off != MN_bound)
@@ -7010,7 +7010,7 @@ i386_assemble (char *line)
       && !startswith (mnemonic, "monitor")
       && !startswith (mnemonic, "mwait")
       && (t->mnem_off != MN_pvalidate)
-      && !startswith (mnemonic, "rmp")
+      && (!startswith (mnemonic, "rmp") || i.mem_operands)
       && (t->mnem_off != MN_tpause)
       && (t->mnem_off != MN_umwait)
       && !(i.operands == 2
@@ -14874,7 +14874,7 @@ i386_index_check (const char *operand_string)
   if (t->opcode_modifier.isstring)
     {
       /* Memory operands of string insns are special in that they only allow
-	 a single register (rDI, rSI, or rBX) as their memory address.  */
+	 a single register (rDI or rSI) as their memory address.  */
       const reg_entry *expected_reg;
       static const char di_si[][2][4] =
 	{
@@ -14882,7 +14882,14 @@ i386_index_check (const char *operand_string)
 	  { "si", "di" },
 	  { "rsi", "rdi" }
 	};
-      static const char bx[][4] = { "ebx", "bx", "rbx" };
+      /* For a few other insns with fixed register addressing we (ab)use the
+	 IsString attribute as well.  */
+      static const char loregs[][4][4] =
+	{
+	  { "eax", "ecx", "edx", "ebx" },
+	  {  "ax",  "cx",  "dx",  "bx" },
+	  { "rax", "rcx", "rdx", "rbx" }
+	};
 
       kind = "string address";
 
@@ -14900,8 +14907,16 @@ i386_index_check (const char *operand_string)
 						 di_si[addr_mode][op == es_op]);
 	}
       else
-	expected_reg
-	  = (const reg_entry *)str_hash_find (reg_hash, bx[addr_mode]);
+	{
+	  unsigned int op = t->operand_types[0].bitfield.baseindex ? 0 : 1;
+
+	  if (!t->operand_types[op].bitfield.instance)
+	    return 1; /* Operand mismatch will be detected elsewhere.  */
+	  expected_reg
+	    = str_hash_find (reg_hash,
+			     loregs[addr_mode][t->operand_types[op]
+					       .bitfield.instance - 1]);
+	}
 
       if (i.base_reg != expected_reg
 	  || i.index_reg
