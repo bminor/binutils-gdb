@@ -10715,7 +10715,7 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"sve2-bitperm",	AARCH64_FEATURE (SVE2_BITPERM),
 			AARCH64_FEATURE (SVE2)},
   {"sme",		AARCH64_FEATURE (SME),
-			AARCH64_FEATURES (2, SVE2, BFLOAT16)},
+			AARCH64_FEATURES (3, BFLOAT16, F16, COMPNUM)},
   {"sme-f64",		AARCH64_FEATURE (SME_F64F64), AARCH64_FEATURE (SME)},
   {"sme-f64f64",	AARCH64_FEATURE (SME_F64F64), AARCH64_FEATURE (SME)},
   {"sme-i64",		AARCH64_FEATURE (SME_I16I64), AARCH64_FEATURE (SME)},
@@ -10837,6 +10837,13 @@ aarch64_feature_enable_set (aarch64_feature_set set)
       for (opt = aarch64_features; opt->name != NULL; opt++)
 	if (AARCH64_CPU_HAS_ALL_FEATURES (set, opt->value))
 	  AARCH64_MERGE_FEATURE_SETS (set, set, opt->require);
+      /* As a special case, we want +sme to imply +sve2, without letting
+	 +nosve2 imply +nosme.  This is to ensure maximum compatibility with
+	 both toolchains that assume this dependency and those that don't.  */
+      aarch64_feature_set sme = AARCH64_FEATURE (SME);
+      aarch64_feature_set sve2 = AARCH64_FEATURE (SVE2);
+      if (AARCH64_CPU_HAS_ALL_FEATURES (set, sme))
+	AARCH64_MERGE_FEATURE_SETS (set, set, sve2);
     }
   return set;
 }
@@ -10940,6 +10947,20 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
 
       str = ext;
     };
+
+  /* The special handling in aarch64_feature_enable_set ought to be sufficient
+     to accommodate uncertainty over whether or not +sme in a target string
+     implies +sve2.  Unfortunately, many streaming SVE instructions are
+     currently marked as requiring SVE or SVE2, and some parsing and error
+     reporting decisions also depend on SVE or SVE2 being specified.  So for
+     now we will reenable the SVE and SVE2 bits if SME is enabled.  This allows
+     us to support, for example, a compiler passing the command line
+     `-march=armv9-a+sme+nosve` and expecting all SME instructions to remain
+     enabled.  */
+  aarch64_feature_set sme = AARCH64_FEATURE (SME);
+  aarch64_feature_set sve_sve2 = AARCH64_FEATURES (2, SVE, SVE2);
+  if (AARCH64_CPU_HAS_ALL_FEATURES (*ext_set, sme))
+    AARCH64_MERGE_FEATURE_SETS (*ext_set, *ext_set, sve_sve2);
 
   *ext_set = aarch64_update_virtual_dependencies (*ext_set);
   return 1;
