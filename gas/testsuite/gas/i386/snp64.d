@@ -21,6 +21,8 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]+f3 0f 01 fe[ 	]+rmpadjust
 [ 	]*[a-f0-9]+:[ 	]+f3 0f 01 fe[ 	]+rmpadjust
 [ 	]*[a-f0-9]+:[ 	]+67 f3 0f 01 fe[ 	]+addr32 rmpadjust
+[ 	]*[a-f0-9]+:[ 	]+f2 0f 01 fd[ 	]+rmpread %rax,\(%rcx\)
+[ 	]*[a-f0-9]+:[ 	]+67 f2 0f 01 fd[ 	]+rmpread %rax,\(%ecx\)
 
 [0-9a-f]+ <intel>:
 [ 	]*[a-f0-9]+:[ 	]+f2 0f 01 ff[ 	]+pvalidate
@@ -36,4 +38,6 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]+f3 0f 01 fe[ 	]+rmpadjust
 [ 	]*[a-f0-9]+:[ 	]+f3 0f 01 fe[ 	]+rmpadjust
 [ 	]*[a-f0-9]+:[ 	]+67 f3 0f 01 fe[ 	]+addr32 rmpadjust
+[ 	]*[a-f0-9]+:[ 	]+f2 0f 01 fd[ 	]+rmpread %rax,\(%rcx\)
+[ 	]*[a-f0-9]+:[ 	]+67 f2 0f 01 fd[ 	]+rmpread %rax,\(%ecx\)
 #pass

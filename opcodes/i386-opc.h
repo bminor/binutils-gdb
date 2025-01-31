@@ -316,6 +316,8 @@ enum i386_cpu
   CpuSNP,
   /* RMPQUERY instruction required */
   CpuRMPQUERY,
+  /* RMPREAD instruction required */
+  CpuRMPREAD,
 
   /* NOTE: These items, which can be combined with other ISA flags above, need
      to remain second to last and in sync with CPU_FLAGS_COMMON. */
@@ -549,6 +551,7 @@ typedef union i386_cpu_flags
       unsigned int cputlbsync:1;
       unsigned int cpusnp:1;
       unsigned int cpurmpquery:1;
+      unsigned int cpurmpread:1;
       CPU_FLAGS_COMMON;
 #ifdef CpuUnused
       unsigned int unused:(CpuNumOfBits - CpuUnused);

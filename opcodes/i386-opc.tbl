@@ -3181,6 +3181,12 @@ rmpquery, 0xf30f01fd, RMPQUERY, AddrPrefixOpReg|NoSuf, { Acc|Dword|Qword, RegC|Q
 
 // RMPQUERY instruction end
 
+// RMPREAD instruction
+
+rmpread, 0xf20f01fd, RMPREAD&x64, IsString|NoSuf|NoRex64, { Acc|Qword, RegC|Unspecified|BaseIndex }
+
+// RMPREAD instruction end
+
 // RDPRU instruction
 
 rdpru, 0x0f01fd, RDPRU, NoSuf, {}

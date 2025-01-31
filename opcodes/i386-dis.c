@@ -1347,6 +1347,7 @@ enum
   X86_64_0F01_REG_5_MOD_3_RM_6_PREFIX_1,
   X86_64_0F01_REG_5_MOD_3_RM_7_PREFIX_1,
   X86_64_0F01_REG_7_MOD_3_RM_5_PREFIX_1,
+  X86_64_0F01_REG_7_MOD_3_RM_5_PREFIX_3,
   X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_1,
   X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_3,
   X86_64_0F01_REG_7_MOD_3_RM_7_PREFIX_1,
@@ -3253,6 +3254,8 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "rdpru", { Skip_MODRM }, 0 },
     { X86_64_TABLE (X86_64_0F01_REG_7_MOD_3_RM_5_PREFIX_1) },
+    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F01_REG_7_MOD_3_RM_5_PREFIX_3) },
   },
 
   /* PREFIX_0F01_REG_7_MOD_3_RM_6 */
@@ -4630,6 +4633,12 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { Bad_Opcode },
     { "rmpquery", { Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_3 */
+  {
+    { Bad_Opcode },
+    { "rmpread",	{ DSCX, RMrAX, Skip_MODRM }, 0 },
   },
 
   /* X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_1 */
@@ -13143,7 +13152,7 @@ OP_DSreg (instr_info *ins, int code, int sizeflag)
     {
       switch (ins->codep[-1])
 	{
-	case 0x01:	/* rmpupdate */
+	case 0x01:	/* rmpupdate/rmpread */
 	  break;
 	case 0x6f:	/* outsw/outsl */
 	  intel_operand_size (ins, z_mode, sizeflag);

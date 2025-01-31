@@ -16,6 +16,8 @@ att:
         rmpadjust
         rmpadjust %rax, %rcx, %rdx
         rmpadjust %eax, %rcx, %rdx
+        rmpread %rax, (%rcx)
+        rmpread %rax, (%ecx)
 .else
         pvalidate %ax, %ecx, %edx
 .endif
@@ -36,6 +38,8 @@ intel:
         rmpadjust
         rmpadjust rax, rcx, rdx
         rmpadjust eax, rcx, rdx
+        rmpread [rcx], rax
+        rmpread [ecx], rax
 .else
         pvalidate ax, ecx, edx
 .endif

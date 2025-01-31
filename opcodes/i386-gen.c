@@ -251,6 +251,8 @@ static const dependency isa_dependencies[] =
     "SEV_ES" },
   { "RMPQUERY",
     "SNP|64" },
+  { "RMPREAD",
+    "SNP|64" },
   { "TSX",
     "RTM|HLE" },
   { "TSXLDTRK",
@@ -470,6 +472,7 @@ static bitfield cpu_flags[] =
   BITFIELD (TLBSYNC),
   BITFIELD (SNP),
   BITFIELD (RMPQUERY),
+  BITFIELD (RMPREAD),
   BITFIELD (64),
   BITFIELD (No64),
 #ifdef CpuUnused
