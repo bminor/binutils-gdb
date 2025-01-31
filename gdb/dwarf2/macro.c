@@ -652,7 +652,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	    complaint (_("macro debug info has an unmatched "
 			 "`close_file' directive"));
 	  else if (current_file->included_by == nullptr
-		   && producer_is_clang (cu))
+		   && cu->producer_is_clang ())
 	    {
 	      /* Clang, until the current version, misplaces some macro
 		 definitions - such as ones defined in the command line,

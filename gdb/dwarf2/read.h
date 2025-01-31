@@ -893,9 +893,6 @@ extern void dwarf2_get_section_info (struct objfile *,
 				     asection **, const gdb_byte **,
 				     bfd_size_type *);
 
-/* Return true if the producer of the inferior is clang.  */
-extern bool producer_is_clang (struct dwarf2_cu *cu);
-
 /* Interface for DWARF indexing methods.  */
 
 struct dwarf2_base_index_functions : public quick_symbol_functions
