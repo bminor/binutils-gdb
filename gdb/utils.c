@@ -119,7 +119,7 @@ show_sevenbit_strings (struct ui_file *file, int from_tty,
 
 /* String to be printed before warning messages, if any.  */
 
-const char *warning_pre_print = "\nwarning: ";
+const char *warning_pre_print = "\n";
 
 bool pagination_enabled = true;
 static void
@@ -176,8 +176,8 @@ vwarning (const char *string, va_list args)
 	  term_state.emplace ();
 	  target_terminal::ours_for_output ();
 	}
-      if (warning_pre_print)
-	gdb_puts (warning_pre_print, gdb_stderr);
+      gdb_puts (warning_pre_print, gdb_stderr);
+      gdb_puts (_("warning: "), gdb_stderr);
       gdb_vprintf (gdb_stderr, string, args);
       gdb_printf (gdb_stderr, "\n");
     }

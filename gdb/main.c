@@ -705,7 +705,7 @@ captured_main_1 (struct captured_main_args *context)
 
   /* Prefix warning messages with the command name.  */
   gdb::unique_xmalloc_ptr<char> tmp_warn_preprint
-    = xstrprintf ("%s: warning: ", gdb_program_name);
+    = xstrprintf ("%s: ", gdb_program_name);
   warning_pre_print = tmp_warn_preprint.get ();
 
   current_directory = getcwd (NULL, 0);
@@ -1169,7 +1169,7 @@ captured_main_1 (struct captured_main_args *context)
 
   /* Set off error and warning messages with a blank line.  */
   tmp_warn_preprint.reset ();
-  warning_pre_print = _("\nwarning: ");
+  warning_pre_print = "\n";
 
   /* Read and execute the system-wide gdbinit file, if it exists.
      This is done *before* all the command line arguments are
@@ -1274,7 +1274,7 @@ captured_main_1 (struct captured_main_args *context)
     current_inferior ()->set_tty (ttyarg);
 
   /* Error messages should no longer be distinguished with extra output.  */
-  warning_pre_print = _("warning: ");
+  warning_pre_print = "";
 
   /* Read the .gdbinit file in the current directory, *if* it isn't
      the same as the $HOME/.gdbinit file (it should exist, also).  */
