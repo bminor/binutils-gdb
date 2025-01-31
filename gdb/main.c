@@ -1027,7 +1027,7 @@ captured_main_1 (struct captured_main_args *context)
 	quiet = 1;
 
 	/* Disable all output styling when running in batch mode.  */
-	cli_styling = 0;
+	cli_styling = false;
       }
   }
 
