@@ -412,6 +412,8 @@ if [istarget loongarch64-*-*] {
 		  "relax-segment-max" \
 	      ] \
 	  ]
+
+      run_dump_test "start_stop"
     }
 
     run_ld_link_tests \

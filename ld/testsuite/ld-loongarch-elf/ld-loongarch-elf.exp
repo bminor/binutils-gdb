@@ -154,6 +154,7 @@ if [istarget "loongarch64-*-*"] {
       ] \
   ]
 
+  if [check_pie_support] {
   # Using DESC and IE to access the same tls symbol but with
   # -mno-relax requires allocating GOT entries for both DESC and IE,
   # not just IE
@@ -169,6 +170,7 @@ if [istarget "loongarch64-*-*"] {
 	  "desc-ie-norelax" \
       ] \
   ] \
+  }
 }
 
 if [istarget "loongarch64-*-*"] {
