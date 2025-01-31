@@ -40,7 +40,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	9d                   	popf
  +[a-f0-9]+:	0f ae e8             	lfence
- +[a-f0-9]+:	d7                   	xlat   %ds:\(%rbx\)
+ +[a-f0-9]+:	d7                   	xlat   \(%rbx\)
  +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	d9 55 00             	fsts   0x0\(%rbp\)
  +[a-f0-9]+:	d9 45 00             	flds   0x0\(%rbp\)
@@ -109,17 +109,17 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	48 8d 04 40          	lea    \(%rax,%rax,2\),%rax
  +[a-f0-9]+:	c9                   	leave
- +[a-f0-9]+:	6e                   	outsb  %ds:\(%rsi\),\(%dx\)
+ +[a-f0-9]+:	6e                   	outsb  \(%rsi\),\(%dx\)
  +[a-f0-9]+:	0f ae e8             	lfence
- +[a-f0-9]+:	ac                   	lods   %ds:\(%rsi\),%al
+ +[a-f0-9]+:	ac                   	lods   \(%rsi\),%al
  +[a-f0-9]+:	0f ae e8             	lfence
- +[a-f0-9]+:	f3 a5                	rep movsl %ds:\(%rsi\),%es:\(%rdi\)
+ +[a-f0-9]+:	f3 a5                	rep movsl \(%rsi\),\(%rdi\)
  +[a-f0-9]+:	0f ae e8             	lfence
- +[a-f0-9]+:	f3 af                	repz scas %es:\(%rdi\),%eax
+ +[a-f0-9]+:	f3 af                	repz scas \(%rdi\),%eax
  +[a-f0-9]+:	0f ae e8             	lfence
- +[a-f0-9]+:	f3 a7                	repz cmpsl %es:\(%rdi\),%ds:\(%rsi\)
+ +[a-f0-9]+:	f3 a7                	repz cmpsl \(%rdi\),\(%rsi\)
  +[a-f0-9]+:	0f ae e8             	lfence
- +[a-f0-9]+:	f3 ad                	rep lods %ds:\(%rsi\),%eax
+ +[a-f0-9]+:	f3 ad                	rep lods \(%rsi\),%eax
  +[a-f0-9]+:	0f ae e8             	lfence
  +[a-f0-9]+:	41 83 03 01          	addl   \$0x1,\(%r11\)
  +[a-f0-9]+:	0f ae e8             	lfence

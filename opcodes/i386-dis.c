@@ -13126,8 +13126,11 @@ OP_ESreg (instr_info *ins, int code, int sizeflag)
 	  intel_operand_size (ins, b_mode, sizeflag);
 	}
     }
-  oappend_register (ins, att_names_seg[0]);
-  oappend_char (ins, ':');
+  if (ins->address_mode != mode_64bit)
+    {
+      oappend_register (ins, att_names_seg[0]);
+      oappend_char (ins, ':');
+    }
   ptr_reg (ins, code, sizeflag);
   return true;
 }
@@ -13151,9 +13154,9 @@ OP_DSreg (instr_info *ins, int code, int sizeflag)
 	  intel_operand_size (ins, b_mode, sizeflag);
 	}
     }
-  /* Set ins->active_seg_prefix to PREFIX_DS if it is unset so that the
-     default segment register DS is printed.  */
-  if (!ins->active_seg_prefix)
+  /* Outside of 64-bit mode set ins->active_seg_prefix to PREFIX_DS if it
+     is unset, so that the default segment register DS is printed.  */
+  if (ins->address_mode != mode_64bit && !ins->active_seg_prefix)
     ins->active_seg_prefix = PREFIX_DS;
   append_seg (ins);
   ptr_reg (ins, code, sizeflag);

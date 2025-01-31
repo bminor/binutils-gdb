@@ -38,9 +38,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	41 0f 20 c0          	mov    r8,cr0
 [ 	]*[a-f0-9]+:	44 0f 20 c0          	mov    rax,cr8
 [ 	]*[a-f0-9]+:	44 0f 22 c0          	mov    cr8,rax
-[ 	]*[a-f0-9]+:	f3 48 a5             	rep movs QWORD PTR es:\[rdi\],QWORD PTR ds:\[rsi\]
-[ 	]*[a-f0-9]+:	66 f3 a5             	rep movs WORD PTR es:\[rdi\],WORD PTR ds:\[rsi\]
-[ 	]*[a-f0-9]+:	f3 48 a5             	rep movs QWORD PTR es:\[rdi\],QWORD PTR ds:\[rsi\]
+[ 	]*[a-f0-9]+:	f3 48 a5             	rep movs QWORD PTR \[rdi\],QWORD PTR \[rsi\]
+[ 	]*[a-f0-9]+:	66 f3 a5             	rep movs WORD PTR \[rdi\],WORD PTR \[rsi\]
+[ 	]*[a-f0-9]+:	f3 48 a5             	rep movs QWORD PTR \[rdi\],QWORD PTR \[rsi\]
 [ 	]*[a-f0-9]+:	b0 11                	mov    al,0x11
 [ 	]*[a-f0-9]+:	b4 11                	mov    ah,0x11
 [ 	]*[a-f0-9]+:	40 b4 11             	mov    spl,0x11

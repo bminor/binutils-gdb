@@ -32,8 +32,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	81 38 89 00 00 00    	cmpl   \$0x89,\(%rax\)
  *[a-f0-9]+:	81 38 34 12 00 00    	cmpl   \$0x1234,\(%rax\)
  *[a-f0-9]+:	81 38 78 56 34 12    	cmpl   \$0x12345678,\(%rax\)
- *[a-f0-9]+:	a7                   	cmpsl  %es:\(%rdi\),%ds:\(%rsi\)
- *[a-f0-9]+:	a7                   	cmpsl  %es:\(%rdi\),%ds:\(%rsi\)
+ *[a-f0-9]+:	a7                   	cmpsl  \(%rdi\),\(%rsi\)
+ *[a-f0-9]+:	a7                   	cmpsl  \(%rdi\),\(%rsi\)
  *[a-f0-9]+:	f2 0f 38 f1 00       	crc32l \(%rax\),%eax
  *[a-f0-9]+:	f2 48 0f 38 f1 00    	crc32q \(%rax\),%rax
  *[a-f0-9]+:	62 f4 04 07 f7 00 89 00 00 00 	ctestal \{dfv=\} \$0x89,\(%rax\)
@@ -69,8 +69,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	e5 00                	in     \$0x0,%eax
  *[a-f0-9]+:	ed                   	in     \(%dx\),%eax
  *[a-f0-9]+:	ff 00                	incl   \(%rax\)
- *[a-f0-9]+:	6d                   	insl   \(%dx\),%es:\(%rdi\)
- *[a-f0-9]+:	6d                   	insl   \(%dx\),%es:\(%rdi\)
+ *[a-f0-9]+:	6d                   	insl   \(%dx\),\(%rdi\)
+ *[a-f0-9]+:	6d                   	insl   \(%dx\),\(%rdi\)
  *[a-f0-9]+:	cf                   	iret
  *[a-f0-9]+:	ff 20                	jmp    \*\(%rax\)
  *[a-f0-9]+:	ff 18                	lcall  \*\(%rax\)
@@ -79,8 +79,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	ff 28                	ljmp   \*\(%rax\)
  *[a-f0-9]+:	0f 00 10             	lldt   \(%rax\)
  *[a-f0-9]+:	0f 01 30             	lmsw   \(%rax\)
- *[a-f0-9]+:	ad                   	lods   %ds:\(%rsi\),%eax
- *[a-f0-9]+:	ad                   	lods   %ds:\(%rsi\),%eax
+ *[a-f0-9]+:	ad                   	lods   \(%rsi\),%eax
+ *[a-f0-9]+:	ad                   	lods   \(%rsi\),%eax
  *[a-f0-9]+:	cb                   	lret
  *[a-f0-9]+:	ca 04 00             	lret   \$0x4
  *[a-f0-9]+:	0f 00 18             	ltr    \(%rax\)
@@ -89,8 +89,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	c7 00 78 56 34 12    	movl   \$0x12345678,\(%rax\)
  *[a-f0-9]+:	8c 00                	mov    %es,\(%rax\)
  *[a-f0-9]+:	8e 00                	mov    \(%rax\),%es
- *[a-f0-9]+:	a5                   	movsl  %ds:\(%rsi\),%es:\(%rdi\)
- *[a-f0-9]+:	a5                   	movsl  %ds:\(%rsi\),%es:\(%rdi\)
+ *[a-f0-9]+:	a5                   	movsl  \(%rsi\),\(%rdi\)
+ *[a-f0-9]+:	a5                   	movsl  \(%rsi\),\(%rdi\)
  *[a-f0-9]+:	66 0f be 00          	movsbw \(%rax\),%ax
  *[a-f0-9]+:	0f be 00             	movsbl \(%rax\),%eax
  *[a-f0-9]+:	48 0f be 00          	movsbq \(%rax\),%rax
@@ -107,8 +107,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	81 08 78 56 34 12    	orl    \$0x12345678,\(%rax\)
  *[a-f0-9]+:	e7 00                	out    %eax,\$0x0
  *[a-f0-9]+:	ef                   	out    %eax,\(%dx\)
- *[a-f0-9]+:	6f                   	outsl  %ds:\(%rsi\),\(%dx\)
- *[a-f0-9]+:	6f                   	outsl  %ds:\(%rsi\),\(%dx\)
+ *[a-f0-9]+:	6f                   	outsl  \(%rsi\),\(%dx\)
+ *[a-f0-9]+:	6f                   	outsl  \(%rsi\),\(%dx\)
  *[a-f0-9]+:	8f 00                	pop    \(%rax\)
  *[a-f0-9]+:	0f a1                	pop    %fs
  *[a-f0-9]+:	f3 0f ae 20          	ptwritel \(%rax\)
@@ -134,8 +134,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	81 18 89 00 00 00    	sbbl   \$0x89,\(%rax\)
  *[a-f0-9]+:	81 18 34 12 00 00    	sbbl   \$0x1234,\(%rax\)
  *[a-f0-9]+:	81 18 78 56 34 12    	sbbl   \$0x12345678,\(%rax\)
- *[a-f0-9]+:	af                   	scas   %es:\(%rdi\),%eax
- *[a-f0-9]+:	af                   	scas   %es:\(%rdi\),%eax
+ *[a-f0-9]+:	af                   	scas   \(%rdi\),%eax
+ *[a-f0-9]+:	af                   	scas   \(%rdi\),%eax
  *[a-f0-9]+:	d1 20                	shll   \$1,\(%rax\)
  *[a-f0-9]+:	c1 20 02             	shll   \$0x2,\(%rax\)
  *[a-f0-9]+:	d3 20                	shll   %cl,\(%rax\)
@@ -152,8 +152,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	c1 28 02             	shrl   \$0x2,\(%rax\)
  *[a-f0-9]+:	d3 28                	shrl   %cl,\(%rax\)
  *[a-f0-9]+:	d1 28                	shrl   \$1,\(%rax\)
- *[a-f0-9]+:	ab                   	stos   %eax,%es:\(%rdi\)
- *[a-f0-9]+:	ab                   	stos   %eax,%es:\(%rdi\)
+ *[a-f0-9]+:	ab                   	stos   %eax,\(%rdi\)
+ *[a-f0-9]+:	ab                   	stos   %eax,\(%rdi\)
  *[a-f0-9]+:	83 28 01             	subl   \$0x1,\(%rax\)
  *[a-f0-9]+:	81 28 89 00 00 00    	subl   \$0x89,\(%rax\)
  *[a-f0-9]+:	81 28 34 12 00 00    	subl   \$0x1234,\(%rax\)
