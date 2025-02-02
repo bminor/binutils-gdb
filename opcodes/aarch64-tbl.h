@@ -2858,7 +2858,7 @@ static const aarch64_feature_set aarch64_feature_fp8dot2_sve =
 static const aarch64_feature_set aarch64_feature_sme_f8f32 =
   AARCH64_FEATURES (2, SME_F8F32, SME2);
 static const aarch64_feature_set aarch64_feature_sme_f8f16 =
-  AARCH64_FEATURES (2, SME_F8F32, SME2);
+  AARCH64_FEATURES (2, SME_F8F16, SME2);
 static const aarch64_feature_set aarch64_feature_sme_f16f16_f8f16 =
   AARCH64_FEATURES (2, SME_F16F16_F8F16, SME2);
 static const aarch64_feature_set aarch64_feature_sme_f16f16 =
