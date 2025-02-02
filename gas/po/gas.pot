@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2025-01-19 12:20+0000\n"
+"POT-Creation-Date: 2025-02-02 11:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -183,14 +183,14 @@ msgstr ""
 msgid "  --elf-stt-common=[no|yes] "
 msgstr ""
 
-#: as.c:296 as.c:307 config/tc-i386.c:17662 config/tc-i386.c:17682
-#: config/tc-i386.c:17691
+#: as.c:296 as.c:307 config/tc-i386.c:17661 config/tc-i386.c:17681
+#: config/tc-i386.c:17690
 #, c-format
 msgid "(default: yes)\n"
 msgstr ""
 
-#: as.c:298 as.c:309 config/tc-i386.c:17664 config/tc-i386.c:17684
-#: config/tc-i386.c:17693
+#: as.c:298 as.c:309 config/tc-i386.c:17663 config/tc-i386.c:17683
+#: config/tc-i386.c:17692
 #, c-format
 msgid "(default: no)\n"
 msgstr ""
@@ -1060,109 +1060,121 @@ msgstr ""
 msgid "section name '%s' already defined as another symbol"
 msgstr ""
 
-#: config/obj-elf.c:1331
+#. ??? This is here for older versions of gcc that
+#. test for gas string merge support with
+#. '.section .rodata.str, "aMS", @progbits, 1'
+#. Unfortunately '@' begins a comment on arm.
+#. This isn't as_warn because gcc tests with
+#. --fatal-warnings.
+#: config/obj-elf.c:1335
+msgid "missing merge / string entity size, 1 assumed"
+msgstr ""
+
+#: config/obj-elf.c:1344
 msgid "invalid merge / string entity size"
 msgstr ""
 
-#: config/obj-elf.c:1345
-msgid "entity size for SHF_MERGE / SHF_STRINGS not specified"
+#. ??? Perhaps we should error here.  The manual says that
+#. entsize must be specified if SHF_MERGE is set.
+#: config/obj-elf.c:1361
+msgid "entity size for SHF_MERGE not specified"
 msgstr ""
 
-#: config/obj-elf.c:1350
+#: config/obj-elf.c:1374
 msgid "bogus SHF_MERGE / SHF_STRINGS for SHT_NOBITS section"
 msgstr ""
 
-#: config/obj-elf.c:1391
+#: config/obj-elf.c:1415
 msgid "? section flag ignored with G present"
 msgstr ""
 
-#: config/obj-elf.c:1428
+#: config/obj-elf.c:1452
 msgid "group name for SHF_GROUP not specified"
 msgstr ""
 
-#: config/obj-elf.c:1454
+#: config/obj-elf.c:1478
 #, c-format
 msgid "unsupported mbind section info: %s"
 msgstr ""
 
-#: config/obj-elf.c:1507
+#: config/obj-elf.c:1531
 #, c-format
 msgid "unsupported section id: %s"
 msgstr ""
 
-#: config/obj-elf.c:1533
+#: config/obj-elf.c:1557
 msgid "character following name is not '#'"
 msgstr ""
 
-#: config/obj-elf.c:1561
+#: config/obj-elf.c:1585
 #, c-format
 msgid "SHF_ALLOC isn't set for GNU_MBIND section: %s"
 msgstr ""
 
-#: config/obj-elf.c:1568
+#: config/obj-elf.c:1592
 #, c-format
 msgid "%s section is supported only by GNU and FreeBSD targets"
 msgstr ""
 
-#: config/obj-elf.c:1706
+#: config/obj-elf.c:1730
 msgid ".previous without corresponding .section; ignored"
 msgstr ""
 
-#: config/obj-elf.c:1732
+#: config/obj-elf.c:1756
 msgid ".popsection without corresponding .pushsection; ignored"
 msgstr ""
 
-#: config/obj-elf.c:1776 config/obj-elf.c:1870
+#: config/obj-elf.c:1800 config/obj-elf.c:1894
 #, c-format
 msgid "missing version name in `%s' for symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:1795
+#: config/obj-elf.c:1819
 #, c-format
 msgid "only one version name with `@@@' is allowed for symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:1803
+#: config/obj-elf.c:1827
 #, c-format
 msgid "invalid version name '%s' for symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:1844
+#: config/obj-elf.c:1868
 msgid "expected comma after name in .symver"
 msgstr ""
 
-#: config/obj-elf.c:1861 config/obj-elf.c:2805
+#: config/obj-elf.c:1885 config/obj-elf.c:2829
 #, c-format
 msgid "`%s' can't be versioned to common symbol '%s'"
 msgstr ""
 
-#: config/obj-elf.c:1938
+#: config/obj-elf.c:1962
 #, c-format
 msgid "expected `%s' to have already been set for .vtable_inherit"
 msgstr ""
 
-#: config/obj-elf.c:1948
+#: config/obj-elf.c:1972
 msgid "expected comma after name in .vtable_inherit"
 msgstr ""
 
-#: config/obj-elf.c:2009
+#: config/obj-elf.c:2033
 msgid "expected comma after name in .vtable_entry"
 msgstr ""
 
-#: config/obj-elf.c:2148
+#: config/obj-elf.c:2172
 #, c-format
 msgid "Attribute name not recognised: %s"
 msgstr ""
 
-#: config/obj-elf.c:2165
+#: config/obj-elf.c:2189
 msgid "expected numeric constant"
 msgstr ""
 
-#: config/obj-elf.c:2174 config/tc-arm.c:6970
+#: config/obj-elf.c:2198 config/tc-arm.c:6970
 msgid "expected comma"
 msgstr ""
 
-#: config/obj-elf.c:2205 config/tc-arc.c:4946 config/tc-arc.c:4957
+#: config/obj-elf.c:2229 config/tc-arc.c:4946 config/tc-arc.c:4957
 #: config/tc-arc.c:5029 config/tc-arc.c:5080 config/tc-arm.c:32197
 #: config/tc-arm.c:32208 config/tc-csky.c:1697 config/tc-csky.c:1709
 #: config/tc-csky.c:1880 config/tc-mips.c:20645 config/tc-msp430.c:5148
@@ -1172,114 +1184,114 @@ msgstr ""
 msgid "error adding attribute: %s"
 msgstr ""
 
-#: config/obj-elf.c:2211
+#: config/obj-elf.c:2235
 msgid "bad string constant"
 msgstr ""
 
-#: config/obj-elf.c:2215
+#: config/obj-elf.c:2239
 msgid "expected <tag> , <value>"
 msgstr ""
 
-#: config/obj-elf.c:2344
+#: config/obj-elf.c:2368
 msgid "expected quoted string"
 msgstr ""
 
-#: config/obj-elf.c:2364
+#: config/obj-elf.c:2388
 #, c-format
 msgid "expected comma after name `%s' in .size directive"
 msgstr ""
 
-#: config/obj-elf.c:2373
+#: config/obj-elf.c:2397
 msgid "missing expression in .size directive"
-msgstr ""
-
-#: config/obj-elf.c:2500
-#, c-format
-msgid "symbol '%s' is already defined"
-msgstr ""
-
-#: config/obj-elf.c:2520
-#, c-format
-msgid "symbol type \"%s\" is supported only by GNU and FreeBSD targets"
 msgstr ""
 
 #: config/obj-elf.c:2524
 #, c-format
+msgid "symbol '%s' is already defined"
+msgstr ""
+
+#: config/obj-elf.c:2544
+#, c-format
+msgid "symbol type \"%s\" is supported only by GNU and FreeBSD targets"
+msgstr ""
+
+#: config/obj-elf.c:2548
+#, c-format
 msgid "symbol type \"%s\" is not supported by MIPS targets"
 msgstr ""
 
-#: config/obj-elf.c:2536
+#: config/obj-elf.c:2560
 #, c-format
 msgid "symbol type \"%s\" is supported only by GNU targets"
 msgstr ""
 
-#: config/obj-elf.c:2546 config/tc-kvx.c:2279
+#: config/obj-elf.c:2570 config/tc-kvx.c:2279
 #, c-format
 msgid "unrecognized symbol type \"%s\""
 msgstr ""
 
-#: config/obj-elf.c:2567
+#: config/obj-elf.c:2591
 #, c-format
 msgid "cannot change type of common symbol '%s'"
 msgstr ""
 
-#: config/obj-elf.c:2579
+#: config/obj-elf.c:2603
 #, c-format
 msgid "symbol '%s' already has its type set"
 msgstr ""
 
-#: config/obj-elf.c:2681
+#: config/obj-elf.c:2705
 #, c-format
 msgid "undefined linked-to symbol `%s' on section `%s'"
 msgstr ""
 
-#: config/obj-elf.c:2778 config/obj-elf.c:2781
+#: config/obj-elf.c:2802 config/obj-elf.c:2805
 #, c-format
 msgid ".size expression for %s does not evaluate to a constant"
 msgstr ""
 
-#: config/obj-elf.c:2870
+#: config/obj-elf.c:2894
 #, c-format
 msgid "symbol '%s' with multiple versions cannot be used in relocation"
 msgstr ""
 
-#: config/obj-elf.c:2888 ecoff.c:3576
+#: config/obj-elf.c:2912 ecoff.c:3576
 #, c-format
 msgid "symbol `%s' can not be both weak and common"
 msgstr ""
 
-#: config/obj-elf.c:2932
+#: config/obj-elf.c:2956
 #, c-format
 msgid "assuming all members of group `%s' are COMDAT"
 msgstr ""
 
-#: config/obj-elf.c:2944
+#: config/obj-elf.c:2968
 #, c-format
 msgid "can't create group: %s"
 msgstr ""
 
-#: config/obj-elf.c:3021
+#: config/obj-elf.c:3045
 #, c-format
 msgid ""
 "invalid attempt to declare external version name as default in symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:3031
+#: config/obj-elf.c:3055
 #, c-format
 msgid "multiple versions [`%s'|`%s'] for symbol `%s'"
 msgstr ""
 
-#: config/obj-elf.c:3120
+#: config/obj-elf.c:3144
 #, c-format
 msgid "failed to set up debugging information: %s"
 msgstr ""
 
-#: config/obj-elf.c:3140
+#: config/obj-elf.c:3164
 #, c-format
 msgid "can't start writing .mdebug section: %s"
 msgstr ""
 
-#: config/obj-elf.c:3148
+#: config/obj-elf.c:3172
 #, c-format
 msgid "could not write .mdebug section: %s"
 msgstr ""
@@ -2532,84 +2544,84 @@ msgstr ""
 msgid "do not output verbose error messages"
 msgstr ""
 
-#: config/tc-aarch64.c:10876 config/tc-arm.c:31614
+#: config/tc-aarch64.c:10883 config/tc-arm.c:31614
 msgid "invalid architectural extension"
 msgstr ""
 
-#: config/tc-aarch64.c:10901 config/tc-arm.c:31646
+#: config/tc-aarch64.c:10908 config/tc-arm.c:31646
 msgid "must specify extensions to add before specifying those to remove"
 msgstr ""
 
-#: config/tc-aarch64.c:10909 config/tc-arm.c:31654
+#: config/tc-aarch64.c:10916 config/tc-arm.c:31654
 msgid "missing architectural extension"
 msgstr ""
 
-#: config/tc-aarch64.c:10937 config/tc-arm.c:31740
+#: config/tc-aarch64.c:10944 config/tc-arm.c:31740
 #, c-format
 msgid "unknown architectural extension `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:10962 config/tc-arm.c:31790 config/tc-metag.c:5832
+#: config/tc-aarch64.c:10983 config/tc-arm.c:31790 config/tc-metag.c:5832
 #, c-format
 msgid "missing cpu name `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:10973 config/tc-aarch64.c:11194 config/tc-arm.c:31825
+#: config/tc-aarch64.c:10994 config/tc-aarch64.c:11215 config/tc-arm.c:31825
 #: config/tc-arm.c:32645 config/tc-csky.c:1218 config/tc-metag.c:5843
 #, c-format
 msgid "unknown cpu `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:10991 config/tc-arm.c:31843
+#: config/tc-aarch64.c:11012 config/tc-arm.c:31843
 #, c-format
 msgid "missing architecture name `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:11002 config/tc-aarch64.c:11239 config/tc-arm.c:31865
+#: config/tc-aarch64.c:11023 config/tc-aarch64.c:11260 config/tc-arm.c:31865
 #: config/tc-arm.c:32685 config/tc-arm.c:32721 config/tc-score.c:7626
 #, c-format
 msgid "unknown architecture `%s'\n"
 msgstr ""
 
-#: config/tc-aarch64.c:11029
+#: config/tc-aarch64.c:11050
 #, c-format
 msgid "missing abi name `%s'"
 msgstr ""
 
-#: config/tc-aarch64.c:11040
+#: config/tc-aarch64.c:11061
 #, c-format
 msgid "unknown abi `%s'\n"
 msgstr ""
 
-#: config/tc-aarch64.c:11053
+#: config/tc-aarch64.c:11074
 msgid "<abi name>\t  specify for ABI <abi name>"
 msgstr ""
 
-#: config/tc-aarch64.c:11055 config/tc-arm.c:31952 config/tc-metag.c:5909
+#: config/tc-aarch64.c:11076 config/tc-arm.c:31952 config/tc-metag.c:5909
 msgid "<cpu name>\t  assemble for CPU <cpu name>"
 msgstr ""
 
-#: config/tc-aarch64.c:11057 config/tc-arm.c:31954
+#: config/tc-aarch64.c:11078 config/tc-arm.c:31954
 msgid "<arch name>\t  assemble for architecture <arch name>"
 msgstr ""
 
-#: config/tc-aarch64.c:11096 config/tc-aarch64.c:11115 config/tc-arm.c:32022
+#: config/tc-aarch64.c:11117 config/tc-aarch64.c:11136 config/tc-arm.c:32022
 #: config/tc-arm.c:32040 config/tc-arm.c:32060 config/tc-metag.c:5933
 #, c-format
 msgid "option `-%c%s' is deprecated: %s"
 msgstr ""
 
-#: config/tc-aarch64.c:11135
+#: config/tc-aarch64.c:11156
 #, c-format
 msgid " AArch64-specific assembler options:\n"
 msgstr ""
 
-#: config/tc-aarch64.c:11146 config/tc-arc.c:3598 config/tc-arm.c:32091
+#: config/tc-aarch64.c:11167 config/tc-arc.c:3598 config/tc-arm.c:32091
 #, c-format
 msgid "  -EB                     assemble code for a big-endian cpu\n"
 msgstr ""
 
-#: config/tc-aarch64.c:11151 config/tc-arc.c:3600 config/tc-arm.c:32096
+#: config/tc-aarch64.c:11172 config/tc-arc.c:3600 config/tc-arm.c:32096
 #, c-format
 msgid "  -EL                     assemble code for a little-endian cpu\n"
 msgstr ""
@@ -6284,7 +6296,7 @@ msgstr ""
 msgid "internal error: reloc %d (`%s') not supported by object file format"
 msgstr ""
 
-#: config/tc-cr16.c:694 config/tc-i386.c:17857 config/tc-s390.c:2340
+#: config/tc-cr16.c:694 config/tc-i386.c:17856 config/tc-s390.c:2340
 msgid "GOT already in symbol table"
 msgstr ""
 
@@ -8361,7 +8373,7 @@ msgid "0x%<PRIx64> shortened to 0x%<PRIx64>"
 msgstr ""
 
 #: config/tc-i386.c:2964 config/tc-i386.c:4580 config/tc-i386.c:4591
-#: config/tc-i386.c:10628
+#: config/tc-i386.c:10627
 msgid "same type of prefix used twice"
 msgstr ""
 
@@ -8425,7 +8437,7 @@ msgstr ""
 msgid "Intel MCU is 32bit ELF only"
 msgstr ""
 
-#: config/tc-i386.c:3456 config/tc-i386.c:17765
+#: config/tc-i386.c:3456 config/tc-i386.c:17764
 msgid "unknown architecture"
 msgstr ""
 
@@ -8840,12 +8852,12 @@ msgstr ""
 msgid "{rex2} prefix invalid with `%s'"
 msgstr ""
 
-#: config/tc-i386.c:7576 config/tc-i386.c:7890
+#: config/tc-i386.c:7576 config/tc-i386.c:7889
 #, c-format
 msgid "no such instruction: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:7602 config/tc-i386.c:7941
+#: config/tc-i386.c:7602 config/tc-i386.c:7940
 #, c-format
 msgid "invalid character %s in mnemonic"
 msgstr ""
@@ -8867,281 +8879,281 @@ msgstr ""
 msgid "{nf} cannot be combined with {vex}/{vex3}"
 msgstr ""
 
-#: config/tc-i386.c:7762
+#: config/tc-i386.c:7788
 #, c-format
 msgid "ignoring `.s' suffix due to earlier `{%s}'"
 msgstr ""
 
-#: config/tc-i386.c:7772
+#: config/tc-i386.c:7798
 msgid "ignoring `.d8' suffix due to earlier `{disp<N>}'"
 msgstr ""
 
-#: config/tc-i386.c:7782
+#: config/tc-i386.c:7808
 msgid "ignoring `.d32' suffix due to earlier `{disp<N>}'"
 msgstr ""
 
-#: config/tc-i386.c:7873
+#: config/tc-i386.c:7872
 #, c-format
 msgid "found `%sd'; assuming `%sl' was meant"
 msgstr ""
 
-#: config/tc-i386.c:7990
+#: config/tc-i386.c:7989
 #, c-format
 msgid "invalid character %s before operand %d"
 msgstr ""
 
-#: config/tc-i386.c:8002
+#: config/tc-i386.c:8001
 #, c-format
 msgid "unbalanced double quotes in operand %d."
 msgstr ""
 
-#: config/tc-i386.c:8009
+#: config/tc-i386.c:8008
 #, c-format
 msgid "unbalanced parenthesis in operand %d."
 msgstr ""
 
-#: config/tc-i386.c:8022
+#: config/tc-i386.c:8021
 #, c-format
 msgid "invalid character %s in operand %d"
 msgstr ""
 
-#: config/tc-i386.c:8042
+#: config/tc-i386.c:8041
 #, c-format
 msgid "spurious operands; (%d operands/instruction max)"
 msgstr ""
 
-#: config/tc-i386.c:8052 config/tc-i386.c:13607
+#: config/tc-i386.c:8051 config/tc-i386.c:13606
 #, c-format
 msgid "too many memory references for `%s'"
 msgstr ""
 
-#: config/tc-i386.c:8073 config/tc-i386.c:13601
+#: config/tc-i386.c:8072 config/tc-i386.c:13600
 msgid "expecting operand after ','; got nothing"
 msgstr ""
 
-#: config/tc-i386.c:8078
+#: config/tc-i386.c:8077
 msgid "expecting operand before ','; got nothing"
 msgstr ""
 
-#: config/tc-i386.c:8368
+#: config/tc-i386.c:8367
 #, c-format
 msgid "0x%<PRIx64> out of range of signed 32bit displacement"
 msgstr ""
 
-#: config/tc-i386.c:8572
+#: config/tc-i386.c:8571
 msgid "mask, index, and destination registers should be distinct"
 msgstr ""
 
-#: config/tc-i386.c:8589
+#: config/tc-i386.c:8588
 msgid "index and destination registers should be distinct"
 msgstr ""
 
-#: config/tc-i386.c:9718
+#: config/tc-i386.c:9717
 #, c-format
 msgid "indirect %s without `*'"
 msgstr ""
 
 #. Warn them that a data or address size prefix doesn't
 #. affect assembly of the next line of code.
-#: config/tc-i386.c:9725
+#: config/tc-i386.c:9724
 #, c-format
 msgid "stand-alone `%s' prefix"
 msgstr ""
 
-#: config/tc-i386.c:9732
+#: config/tc-i386.c:9731
 #, c-format
 msgid "mnemonic suffix used with `%s'"
 msgstr ""
 
-#: config/tc-i386.c:9737
+#: config/tc-i386.c:9736
 msgid ""
 "NOTE: Such forms are deprecated and will be rejected by a future version of "
 "the assembler"
 msgstr ""
 
-#: config/tc-i386.c:9822
+#: config/tc-i386.c:9821
 #, c-format
 msgid "`%s' operand %u must use `%ses' segment"
 msgstr ""
 
-#: config/tc-i386.c:9952
+#: config/tc-i386.c:9951
 msgid "generating 16-bit `iret' for .code16gcc directive"
 msgstr ""
 
-#: config/tc-i386.c:9956
+#: config/tc-i386.c:9955
 #, c-format
 msgid "generating 32-bit `%s', unlike earlier gas versions"
 msgstr ""
 
-#: config/tc-i386.c:10120
+#: config/tc-i386.c:10119
 #, c-format
 msgid "ambiguous operand size for `%s'"
 msgstr ""
 
-#: config/tc-i386.c:10125
+#: config/tc-i386.c:10124
 #, c-format
 msgid ""
 "no instruction mnemonic suffix given and no register operands; can't size `%"
 "s'"
 msgstr ""
 
-#: config/tc-i386.c:10130
+#: config/tc-i386.c:10129
 #, c-format
 msgid "%s; using default for `%s'"
 msgstr ""
 
-#: config/tc-i386.c:10132
+#: config/tc-i386.c:10131
 msgid "ambiguous operand size"
 msgstr ""
 
-#: config/tc-i386.c:10133
+#: config/tc-i386.c:10132
 msgid "no instruction mnemonic suffix given and no register operands"
 msgstr ""
 
-#: config/tc-i386.c:10282
+#: config/tc-i386.c:10281
 #, c-format
 msgid "16-bit addressing unavailable for `%s'"
 msgstr ""
 
-#: config/tc-i386.c:10350
+#: config/tc-i386.c:10349
 #, c-format
 msgid "invalid register operand size for `%s'"
 msgstr ""
 
 #. Any other register is bad.
-#: config/tc-i386.c:10389 config/tc-i386.c:10413 config/tc-i386.c:10453
-#: config/tc-i386.c:10490
+#: config/tc-i386.c:10388 config/tc-i386.c:10412 config/tc-i386.c:10452
+#: config/tc-i386.c:10489
 #, c-format
 msgid "`%s%s' not allowed with `%s%c'"
 msgstr ""
 
-#: config/tc-i386.c:10426 config/tc-i386.c:10465 config/tc-i386.c:10502
+#: config/tc-i386.c:10425 config/tc-i386.c:10464 config/tc-i386.c:10501
 #, c-format
 msgid "incorrect register `%s%s' used with `%c' suffix"
 msgstr ""
 
-#: config/tc-i386.c:10592
+#: config/tc-i386.c:10591
 msgid "no instruction mnemonic suffix given; can't determine immediate size"
 msgstr ""
 
-#: config/tc-i386.c:10799
+#: config/tc-i386.c:10798
 #, c-format
 msgid "operand %u `%s%s' implicitly denotes `%s%s' to `%s%s' group in `%s'"
 msgstr ""
 
 #. Reversed arguments on faddp or fmulp.
-#: config/tc-i386.c:10846
+#: config/tc-i386.c:10845
 #, c-format
 msgid "translating to `%s %s%s,%s%s'"
 msgstr ""
 
 #. Extraneous `l' suffix on fp insn.
-#: config/tc-i386.c:10853
+#: config/tc-i386.c:10852
 #, c-format
 msgid "translating to `%s %s%s'"
 msgstr ""
 
-#: config/tc-i386.c:10866
+#: config/tc-i386.c:10865
 #, c-format
 msgid "you can't `%s %s%s'"
 msgstr ""
 
-#: config/tc-i386.c:10923
+#: config/tc-i386.c:10922
 #, c-format
 msgid "segment override on `%s' is ineffectual"
 msgstr ""
 
-#: config/tc-i386.c:11381 config/tc-loongarch.c:1245 config/tc-riscv.c:1979
+#: config/tc-i386.c:11380 config/tc-loongarch.c:1245 config/tc-riscv.c:1979
 msgid "relaxable branches not supported in absolute section"
 msgstr ""
 
-#: config/tc-i386.c:11416 config/tc-i386.c:11559 config/tc-i386.c:11641
+#: config/tc-i386.c:11415 config/tc-i386.c:11558 config/tc-i386.c:11640
 #, c-format
 msgid "skipping prefixes on `%s'"
 msgstr ""
 
-#: config/tc-i386.c:11667
+#: config/tc-i386.c:11666
 msgid "16-bit jump out of range"
 msgstr ""
 
-#: config/tc-i386.c:11694 config/tc-i386.c:12436
+#: config/tc-i386.c:11693 config/tc-i386.c:12435
 msgid "pseudo prefix without instruction"
 msgstr ""
 
-#: config/tc-i386.c:11706
+#: config/tc-i386.c:11705
 msgid "pseudo prefix ahead of label; ignoring"
 msgstr ""
 
-#: config/tc-i386.c:12025 config/tc-i386.c:12058 config/tc-i386.c:12147
+#: config/tc-i386.c:12024 config/tc-i386.c:12057 config/tc-i386.c:12146
 #, c-format
 msgid "`%s` skips -malign-branch-boundary on `%s`"
 msgstr ""
 
-#: config/tc-i386.c:12316
+#: config/tc-i386.c:12315
 msgid "use .code16 to ensure correct addressing mode"
 msgstr ""
 
-#: config/tc-i386.c:12344
+#: config/tc-i386.c:12343
 #, c-format
 msgid "Cannot convert `%s' in 16-bit mode"
 msgstr ""
 
-#: config/tc-i386.c:12346
+#: config/tc-i386.c:12345
 #, c-format
 msgid "Cannot convert `%s' with `-momit-lock-prefix=yes' in effect"
 msgstr ""
 
-#: config/tc-i386.c:12591 config/tc-i386.c:12594
+#: config/tc-i386.c:12590 config/tc-i386.c:12593
 #, c-format
 msgid "instruction length of %u bytes exceeds the limit of 15"
 msgstr ""
 
-#: config/tc-i386.c:13145
+#: config/tc-i386.c:13144
 #, c-format
 msgid "@%s reloc is not supported with %d-bit output format"
 msgstr ""
 
-#: config/tc-i386.c:13203
+#: config/tc-i386.c:13202
 #, c-format
 msgid "missing or invalid expression `%s'"
 msgstr ""
 
-#: config/tc-i386.c:13212
+#: config/tc-i386.c:13211
 #, c-format
 msgid "invalid PLT expression `%s'"
 msgstr ""
 
-#: config/tc-i386.c:13311
+#: config/tc-i386.c:13310
 msgid "pseudo-prefix conflicts with encoding specifier"
 msgstr ""
 
-#: config/tc-i386.c:13335
+#: config/tc-i386.c:13334
 msgid "illegal prefix used with VEX/XOP/EVEX"
 msgstr ""
 
-#: config/tc-i386.c:13646
+#: config/tc-i386.c:13645
 #, c-format
 msgid "opcode residual (%#<PRIx64>) too wide"
 msgstr ""
 
-#: config/tc-i386.c:13662
+#: config/tc-i386.c:13661
 msgid "eGPR use conflicts with encoding specifier"
 msgstr ""
 
-#: config/tc-i386.c:13683 config/tc-i386.c:13727
+#: config/tc-i386.c:13682 config/tc-i386.c:13726
 msgid "too many register/memory operands"
 msgstr ""
 
-#: config/tc-i386.c:13694 config/tc-i386.c:13701
+#: config/tc-i386.c:13693 config/tc-i386.c:13700
 msgid "too few register/memory operands"
 msgstr ""
 
-#: config/tc-i386.c:13714
+#: config/tc-i386.c:13713
 #, c-format
 msgid "constant doesn't fit in %d bits"
 msgstr ""
 
-#: config/tc-i386.c:13778
+#: config/tc-i386.c:13777
 msgid "VSIB unavailable with legacy encoding"
 msgstr ""
 
@@ -9149,373 +9161,373 @@ msgstr ""
 #. an 8-bit immediate like for 4-register-operand insns, but that
 #. would require ugly fiddling with process_operands() and/or
 #. build_modrm_byte().
-#: config/tc-i386.c:13789
+#: config/tc-i386.c:13788
 msgid "too many register operands with VSIB"
 msgstr ""
 
-#: config/tc-i386.c:13808
+#: config/tc-i386.c:13807
 #, c-format
 msgid "can't encode register '%s%s' with VEX/XOP/EVEX"
 msgstr ""
 
-#: config/tc-i386.c:14013
+#: config/tc-i386.c:14012
 msgid "conflicting .insn operands"
 msgstr ""
 
-#: config/tc-i386.c:14046 read.c:4318
+#: config/tc-i386.c:14045 read.c:4318
 msgid "SCFI: hand-crafting instructions not supported"
 msgstr ""
 
-#: config/tc-i386.c:14115
+#: config/tc-i386.c:14114
 #, c-format
 msgid "duplicated `{%s}'"
 msgstr ""
 
-#: config/tc-i386.c:14188
+#: config/tc-i386.c:14187
 #, c-format
 msgid "Unsupported broadcast: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:14263
+#: config/tc-i386.c:14262
 #, c-format
 msgid "`%s%s' can't be used for write mask"
 msgstr ""
 
-#: config/tc-i386.c:14283
+#: config/tc-i386.c:14282
 #, c-format
 msgid "invalid write mask `%s'"
 msgstr ""
 
-#: config/tc-i386.c:14304
+#: config/tc-i386.c:14303
 #, c-format
 msgid "duplicated `%s'"
 msgstr ""
 
-#: config/tc-i386.c:14314
+#: config/tc-i386.c:14313
 #, c-format
 msgid "invalid zeroing-masking `%s'"
 msgstr ""
 
-#: config/tc-i386.c:14332
+#: config/tc-i386.c:14331
 #, c-format
 msgid "missing `}' in `%s'"
 msgstr ""
 
 #. We don't know this one.
-#: config/tc-i386.c:14344
+#: config/tc-i386.c:14343
 #, c-format
 msgid "unknown vector operation: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:14350
+#: config/tc-i386.c:14349
 msgid "zeroing-masking only allowed with write mask"
 msgstr ""
 
-#: config/tc-i386.c:14370
+#: config/tc-i386.c:14369
 #, c-format
 msgid "at most %d immediate operands are allowed"
 msgstr ""
 
-#: config/tc-i386.c:14409 config/tc-i386.c:14668
+#: config/tc-i386.c:14408 config/tc-i386.c:14667
 #, c-format
 msgid "junk `%s' after expression"
 msgstr ""
 
-#: config/tc-i386.c:14422
+#: config/tc-i386.c:14421
 #, c-format
 msgid "illegal immediate register operand %s"
 msgstr ""
 
-#: config/tc-i386.c:14436
+#: config/tc-i386.c:14435
 #, c-format
 msgid "missing or invalid immediate expression `%s'"
 msgstr ""
 
-#: config/tc-i386.c:14459 config/tc-i386.c:14747
+#: config/tc-i386.c:14458 config/tc-i386.c:14746
 #, c-format
 msgid "unimplemented segment %s in operand"
 msgstr ""
 
-#: config/tc-i386.c:14508
+#: config/tc-i386.c:14507
 #, c-format
 msgid "expecting scale factor of 1, 2, 4, or 8: got `%s'"
 msgstr ""
 
-#: config/tc-i386.c:14517
+#: config/tc-i386.c:14516
 #, c-format
 msgid "scale factor of %d without an index register"
 msgstr ""
 
-#: config/tc-i386.c:14539
+#: config/tc-i386.c:14538
 #, c-format
 msgid "at most %d displacement operands are allowed"
 msgstr ""
 
-#: config/tc-i386.c:14723
+#: config/tc-i386.c:14722
 #, c-format
 msgid "missing or invalid displacement expression `%s'"
 msgstr ""
 
-#: config/tc-i386.c:14898
+#: config/tc-i386.c:14897
 #, c-format
 msgid "`%s' is not valid here (expected `%c%s%s%c')"
 msgstr ""
 
-#: config/tc-i386.c:14910
+#: config/tc-i386.c:14909
 #, c-format
 msgid "`%s' is not a valid %s expression"
 msgstr ""
 
-#: config/tc-i386.c:14924
+#: config/tc-i386.c:14923
 #, c-format
 msgid "invalid `%s' prefix"
 msgstr ""
 
-#: config/tc-i386.c:14954
+#: config/tc-i386.c:14953
 #, c-format
 msgid "`%s' cannot be used here"
 msgstr ""
 
-#: config/tc-i386.c:14961
+#: config/tc-i386.c:14960
 msgid "register scaling is being ignored here"
 msgstr ""
 
-#: config/tc-i386.c:15009
+#: config/tc-i386.c:15008
 #, c-format
 msgid "Missing '}': '%s'"
 msgstr ""
 
-#: config/tc-i386.c:15015
+#: config/tc-i386.c:15014
 #, c-format
 msgid "Junk after '}': '%s'"
 msgstr ""
 
-#: config/tc-i386.c:15090
+#: config/tc-i386.c:15089
 #, c-format
 msgid "bad memory operand `%s'"
 msgstr ""
 
-#: config/tc-i386.c:15106
+#: config/tc-i386.c:15105
 #, c-format
 msgid "junk `%s' after register"
 msgstr ""
 
-#: config/tc-i386.c:15113
+#: config/tc-i386.c:15112
 #, c-format
 msgid "`%s%s' cannot be used here"
 msgstr ""
 
-#: config/tc-i386.c:15136
+#: config/tc-i386.c:15135
 #, c-format
 msgid "`%s': misplaced `{%s}'"
 msgstr ""
 
-#: config/tc-i386.c:15143 config/tc-i386.c:15317 config/tc-i386.c:15361
+#: config/tc-i386.c:15142 config/tc-i386.c:15316 config/tc-i386.c:15360
 #, c-format
 msgid "bad register name `%s'"
 msgstr ""
 
-#: config/tc-i386.c:15151
+#: config/tc-i386.c:15150
 msgid "immediate operand illegal with absolute jump"
 msgstr ""
 
-#: config/tc-i386.c:15158
+#: config/tc-i386.c:15157
 #, c-format
 msgid "`%s': RC/SAE operand must follow immediate operands"
 msgstr ""
 
-#: config/tc-i386.c:15171
+#: config/tc-i386.c:15170
 #, c-format
 msgid "`%s': misplaced `%s'"
 msgstr ""
 
-#: config/tc-i386.c:15222
+#: config/tc-i386.c:15221
 msgid "unbalanced figure braces"
 msgstr ""
 
-#: config/tc-i386.c:15306
+#: config/tc-i386.c:15305
 #, c-format
 msgid "expecting `,' or `)' after index register in `%s'"
 msgstr ""
 
-#: config/tc-i386.c:15334
+#: config/tc-i386.c:15333
 #, c-format
 msgid "expecting `)' after scale factor in `%s'"
 msgstr ""
 
-#: config/tc-i386.c:15342
+#: config/tc-i386.c:15341
 #, c-format
 msgid "expecting index register or scale factor after `,'; got '%c'"
 msgstr ""
 
-#: config/tc-i386.c:15350
+#: config/tc-i386.c:15349
 #, c-format
 msgid "expecting `,' or `)' after base register in `%s'"
 msgstr ""
 
 #. It's not a memory operand; argh!
-#: config/tc-i386.c:15400
+#: config/tc-i386.c:15399
 #, c-format
 msgid "invalid char %s beginning operand %d `%s'"
 msgstr ""
 
-#: config/tc-i386.c:16059
+#: config/tc-i386.c:16058
 #, c-format
 msgid "%s:%u: add %d%s at 0x%llx to align %s within %d-byte boundary\n"
 msgstr ""
 
-#: config/tc-i386.c:16062
+#: config/tc-i386.c:16061
 #, c-format
 msgid ""
 "%s:%u: add additional %d%s at 0x%llx to align %s within %d-byte boundary\n"
 msgstr ""
 
-#: config/tc-i386.c:16068
+#: config/tc-i386.c:16067
 #, c-format
 msgid ""
 "%s:%u: add %d%s-byte nop at 0x%llx to align %s within %d-byte boundary\n"
 msgstr ""
 
-#: config/tc-i386.c:16135
+#: config/tc-i386.c:16134
 msgid "long jump required"
 msgstr ""
 
-#: config/tc-i386.c:16190
+#: config/tc-i386.c:16189
 msgid "jump target out of range"
 msgstr ""
 
-#: config/tc-i386.c:16668
+#: config/tc-i386.c:16667
 #, c-format
 msgid "register '%s%s' cannot be used here"
 msgstr ""
 
-#: config/tc-i386.c:16934
+#: config/tc-i386.c:16933
 #, c-format
 msgid "invalid -mx86-used-note= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:16957
+#: config/tc-i386.c:16956
 msgid "no compiled in support for x86_64"
 msgstr ""
 
-#: config/tc-i386.c:16976
+#: config/tc-i386.c:16975
 msgid "no compiled in support for 32bit x86_64"
 msgstr ""
 
-#: config/tc-i386.c:16997
+#: config/tc-i386.c:16996
 msgid "no compiled in support for ix86"
 msgstr ""
 
-#: config/tc-i386.c:17030 config/tc-i386.c:17116
+#: config/tc-i386.c:17029 config/tc-i386.c:17115
 #, c-format
 msgid "invalid -march= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17086
+#: config/tc-i386.c:17085
 msgid "Unrecognized vector size specifier ignored"
 msgstr ""
 
-#: config/tc-i386.c:17126 config/tc-i386.c:17138
+#: config/tc-i386.c:17125 config/tc-i386.c:17137
 #, c-format
 msgid "invalid -mtune= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17147
+#: config/tc-i386.c:17146
 #, c-format
 msgid "invalid -mmnemonic= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17156
+#: config/tc-i386.c:17155
 #, c-format
 msgid "invalid -msyntax= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17184
+#: config/tc-i386.c:17183
 #, c-format
 msgid "invalid -msse-check= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17195
+#: config/tc-i386.c:17194
 #, c-format
 msgid "invalid -moperand-check= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17204
+#: config/tc-i386.c:17203
 #, c-format
 msgid "invalid -mavxscalar= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17213
+#: config/tc-i386.c:17212
 #, c-format
 msgid "invalid -mvexwig= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17228
+#: config/tc-i386.c:17227
 #, c-format
 msgid "invalid -mevexlig= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17241
+#: config/tc-i386.c:17240
 #, c-format
 msgid "invalid -mevexrcig= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17250
+#: config/tc-i386.c:17249
 #, c-format
 msgid "invalid -mevexwig= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17265
+#: config/tc-i386.c:17264
 #, c-format
 msgid "invalid -momit-lock-prefix= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17274
+#: config/tc-i386.c:17273
 #, c-format
 msgid "invalid -mfence-as-lock-add= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17283
+#: config/tc-i386.c:17282
 #, c-format
 msgid "invalid -mlfence-after-load= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17300
+#: config/tc-i386.c:17299
 #, c-format
 msgid "invalid -mlfence-before-indirect-branch= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17314
+#: config/tc-i386.c:17313
 #, c-format
 msgid "invalid -mlfence-before-ret= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17324
+#: config/tc-i386.c:17323
 #, c-format
 msgid "invalid -mrelax-relocations= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17353
+#: config/tc-i386.c:17352
 #, c-format
 msgid "invalid -malign-branch-boundary= value: %s"
 msgstr ""
 
-#: config/tc-i386.c:17367
+#: config/tc-i386.c:17366
 #, c-format
 msgid "invalid -malign-branch-prefix-size= value: %s"
 msgstr ""
 
-#: config/tc-i386.c:17394
+#: config/tc-i386.c:17393
 #, c-format
 msgid "invalid -malign-branch= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17443
+#: config/tc-i386.c:17442
 #, c-format
 msgid "invalid -mtls-check= option: `%s'"
 msgstr ""
 
-#: config/tc-i386.c:17569
+#: config/tc-i386.c:17568
 #, c-format
 msgid ""
 "  -Qy, -Qn                ignored\n"
@@ -9523,7 +9535,7 @@ msgid ""
 "  -k                      ignored\n"
 msgstr ""
 
-#: config/tc-i386.c:17574
+#: config/tc-i386.c:17573
 #, c-format
 msgid ""
 "  -n                      do not optimize code alignment\n"
@@ -9531,32 +9543,32 @@ msgid ""
 "  -q                      quieten some warnings\n"
 msgstr ""
 
-#: config/tc-i386.c:17579
+#: config/tc-i386.c:17578
 #, c-format
 msgid "  -s                      ignored\n"
 msgstr ""
 
-#: config/tc-i386.c:17584
+#: config/tc-i386.c:17583
 #, c-format
 msgid "  --32/--64/--x32         generate 32bit/64bit/x32 object\n"
 msgstr ""
 
-#: config/tc-i386.c:17587
+#: config/tc-i386.c:17586
 #, c-format
 msgid "  --32/--64               generate 32bit/64bit object\n"
 msgstr ""
 
-#: config/tc-i386.c:17592
+#: config/tc-i386.c:17591
 #, c-format
 msgid "  --divide                do not treat `/' as a comment character\n"
 msgstr ""
 
-#: config/tc-i386.c:17595
+#: config/tc-i386.c:17594
 #, c-format
 msgid "  --divide                ignored\n"
 msgstr ""
 
-#: config/tc-i386.c:17598
+#: config/tc-i386.c:17597
 #, c-format
 msgid ""
 "  -march=CPU[,+EXTENSION...]\n"
@@ -9564,24 +9576,24 @@ msgid ""
 "of:\n"
 msgstr ""
 
-#: config/tc-i386.c:17602
+#: config/tc-i386.c:17601
 #, c-format
 msgid ""
 "                          EXTENSION is combination of (possibly \"no\"-"
 "prefixed):\n"
 msgstr ""
 
-#: config/tc-i386.c:17605
+#: config/tc-i386.c:17604
 #, c-format
 msgid "  -mtune=CPU              optimize for CPU, CPU is one of:\n"
 msgstr ""
 
-#: config/tc-i386.c:17608
+#: config/tc-i386.c:17607
 #, c-format
 msgid "  -msse2avx               encode SSE instructions with VEX prefix\n"
 msgstr ""
 
-#: config/tc-i386.c:17610
+#: config/tc-i386.c:17609
 #, c-format
 msgid ""
 "  -muse-unaligned-vector-move\n"
@@ -9589,21 +9601,21 @@ msgid ""
 "move\n"
 msgstr ""
 
-#: config/tc-i386.c:17613
+#: config/tc-i386.c:17612
 #, c-format
 msgid ""
 "  -msse-check=[none|error|warning] (default: none)\n"
 "                          check SSE instructions\n"
 msgstr ""
 
-#: config/tc-i386.c:17616
+#: config/tc-i386.c:17615
 #, c-format
 msgid ""
 "  -moperand-check=[none|error|warning] (default: warning)\n"
 "                          check operand combinations for validity\n"
 msgstr ""
 
-#: config/tc-i386.c:17619
+#: config/tc-i386.c:17618
 #, c-format
 msgid ""
 "  -mavxscalar=[128|256] (default: 128)\n"
@@ -9612,7 +9624,7 @@ msgid ""
 "                           length\n"
 msgstr ""
 
-#: config/tc-i386.c:17623
+#: config/tc-i386.c:17622
 #, c-format
 msgid ""
 "  -mvexwig=[0|1] (default: 0)\n"
@@ -9620,7 +9632,7 @@ msgid ""
 "                           for VEX.W bit ignored instructions\n"
 msgstr ""
 
-#: config/tc-i386.c:17627
+#: config/tc-i386.c:17626
 #, c-format
 msgid ""
 "  -mevexlig=[128|256|512] (default: 128)\n"
@@ -9629,7 +9641,7 @@ msgid ""
 "                           length\n"
 msgstr ""
 
-#: config/tc-i386.c:17631
+#: config/tc-i386.c:17630
 #, c-format
 msgid ""
 "  -mevexwig=[0|1] (default: 0)\n"
@@ -9638,7 +9650,7 @@ msgid ""
 "                           for EVEX.W bit ignored instructions\n"
 msgstr ""
 
-#: config/tc-i386.c:17635
+#: config/tc-i386.c:17634
 #, c-format
 msgid ""
 "  -mevexrcig=[rne|rd|ru|rz] (default: rne)\n"
@@ -9647,77 +9659,77 @@ msgid ""
 "                           for SAE-only ignored instructions\n"
 msgstr ""
 
-#: config/tc-i386.c:17639
+#: config/tc-i386.c:17638
 #, c-format
 msgid "  -mmnemonic=[att|intel] "
 msgstr ""
 
-#: config/tc-i386.c:17642
+#: config/tc-i386.c:17641
 #, c-format
 msgid "(default: att)\n"
 msgstr ""
 
-#: config/tc-i386.c:17644
+#: config/tc-i386.c:17643
 #, c-format
 msgid "(default: intel)\n"
 msgstr ""
 
-#: config/tc-i386.c:17645
+#: config/tc-i386.c:17644
 #, c-format
 msgid "                          use AT&T/Intel mnemonic (AT&T syntax only)\n"
 msgstr ""
 
-#: config/tc-i386.c:17647
+#: config/tc-i386.c:17646
 #, c-format
 msgid ""
 "  -msyntax=[att|intel] (default: att)\n"
 "                          use AT&T/Intel syntax\n"
 msgstr ""
 
-#: config/tc-i386.c:17650
+#: config/tc-i386.c:17649
 #, c-format
 msgid "  -mindex-reg             support pseudo index registers\n"
 msgstr ""
 
-#: config/tc-i386.c:17652
+#: config/tc-i386.c:17651
 #, c-format
 msgid "  -mnaked-reg             don't require `%%' prefix for registers\n"
 msgstr ""
 
-#: config/tc-i386.c:17654
+#: config/tc-i386.c:17653
 #, c-format
 msgid "  -madd-bnd-prefix        add BND prefix for all valid branches\n"
 msgstr ""
 
-#: config/tc-i386.c:17657
+#: config/tc-i386.c:17656
 #, c-format
 msgid "  -mshared                disable branch optimization for shared code\n"
 msgstr ""
 
-#: config/tc-i386.c:17659
+#: config/tc-i386.c:17658
 #, c-format
 msgid "  -mx86-used-note=[no|yes] "
 msgstr ""
 
-#: config/tc-i386.c:17665
+#: config/tc-i386.c:17664
 #, c-format
 msgid ""
 "                          generate x86 used ISA and feature properties\n"
 msgstr ""
 
-#: config/tc-i386.c:17669
+#: config/tc-i386.c:17668
 #, c-format
 msgid "  -mbig-obj               generate big object files\n"
 msgstr ""
 
-#: config/tc-i386.c:17672
+#: config/tc-i386.c:17671
 #, c-format
 msgid ""
 "  -momit-lock-prefix=[no|yes] (default: no)\n"
 "                          strip all lock prefixes\n"
 msgstr ""
 
-#: config/tc-i386.c:17675
+#: config/tc-i386.c:17674
 #, c-format
 msgid ""
 "  -mfence-as-lock-add=[no|yes] (default: no)\n"
@@ -9725,34 +9737,34 @@ msgid ""
 "                           lock addl $0x0, (%%{re}sp)\n"
 msgstr ""
 
-#: config/tc-i386.c:17679
+#: config/tc-i386.c:17678
 #, c-format
 msgid "  -mrelax-relocations=[no|yes] "
 msgstr ""
 
-#: config/tc-i386.c:17685
+#: config/tc-i386.c:17684
 #, c-format
 msgid "                          generate relax relocations\n"
 msgstr ""
 
-#: config/tc-i386.c:17688
+#: config/tc-i386.c:17687
 #, c-format
 msgid "  -mtls-check=[no|yes] "
 msgstr ""
 
-#: config/tc-i386.c:17694
+#: config/tc-i386.c:17693
 #, c-format
 msgid "                          check TLS relocation\n"
 msgstr ""
 
-#: config/tc-i386.c:17697
+#: config/tc-i386.c:17696
 #, c-format
 msgid ""
 "  -malign-branch-boundary=NUM (default: 0)\n"
 "                          align branches within NUM byte boundary\n"
 msgstr ""
 
-#: config/tc-i386.c:17700
+#: config/tc-i386.c:17699
 #, c-format
 msgid ""
 "  -malign-branch=TYPE[+TYPE...] (default: jcc+fused+jmp)\n"
@@ -9762,28 +9774,28 @@ msgid ""
 "                          specify types of branches to align\n"
 msgstr ""
 
-#: config/tc-i386.c:17705
+#: config/tc-i386.c:17704
 #, c-format
 msgid ""
 "  -malign-branch-prefix-size=NUM (default: 5)\n"
 "                          align branches with NUM prefixes per instruction\n"
 msgstr ""
 
-#: config/tc-i386.c:17708
+#: config/tc-i386.c:17707
 #, c-format
 msgid ""
 "  -mbranches-within-32B-boundaries\n"
 "                          align branches within 32 byte boundary\n"
 msgstr ""
 
-#: config/tc-i386.c:17711
+#: config/tc-i386.c:17710
 #, c-format
 msgid ""
 "  -mlfence-after-load=[no|yes] (default: no)\n"
 "                          generate lfence after load\n"
 msgstr ""
 
-#: config/tc-i386.c:17714
+#: config/tc-i386.c:17713
 #, c-format
 msgid ""
 "  -mlfence-before-indirect-branch=[none|all|register|memory] (default: "
@@ -9791,74 +9803,74 @@ msgid ""
 "                          generate lfence before indirect near branch\n"
 msgstr ""
 
-#: config/tc-i386.c:17717
+#: config/tc-i386.c:17716
 #, c-format
 msgid ""
 "  -mlfence-before-ret=[none|or|not|shl|yes] (default: none)\n"
 "                          generate lfence before ret\n"
 msgstr ""
 
-#: config/tc-i386.c:17720
+#: config/tc-i386.c:17719
 #, c-format
 msgid "  -mamd64                 accept only AMD64 ISA [default]\n"
 msgstr ""
 
-#: config/tc-i386.c:17722
+#: config/tc-i386.c:17721
 #, c-format
 msgid "  -mintel64               accept only Intel64 ISA\n"
 msgstr ""
 
-#: config/tc-i386.c:17761
+#: config/tc-i386.c:17760
 #, c-format
 msgid "Intel MCU doesn't support `%s' architecture"
 msgstr ""
 
-#: config/tc-i386.c:17769
+#: config/tc-i386.c:17768
 msgid "SCFI is not supported for this ABI"
 msgstr ""
 
-#: config/tc-i386.c:17820
+#: config/tc-i386.c:17819
 msgid "Intel MCU is 32bit only"
 msgstr ""
 
-#: config/tc-i386.c:17932
+#: config/tc-i386.c:17931
 #, c-format
 msgid "invalid %s relocation against register"
 msgstr ""
 
-#: config/tc-i386.c:18069
+#: config/tc-i386.c:18068
 msgid "symbol size computation overflow"
 msgstr ""
 
-#: config/tc-i386.c:18148 config/tc-sparc.c:3856
+#: config/tc-i386.c:18147 config/tc-sparc.c:3856
 #, c-format
 msgid "can not do %d byte pc-relative relocation"
 msgstr ""
 
-#: config/tc-i386.c:18166
+#: config/tc-i386.c:18165
 #, c-format
 msgid "can not do %d byte relocation"
 msgstr ""
 
-#: config/tc-i386.c:18234
+#: config/tc-i386.c:18233
 #, c-format
 msgid "cannot represent relocation type %s in x32 mode"
 msgstr ""
 
-#: config/tc-i386.c:18275 config/tc-s390.c:2835
+#: config/tc-i386.c:18274 config/tc-s390.c:2835
 #, c-format
 msgid "cannot represent relocation type %s"
 msgstr ""
 
-#: config/tc-i386.c:18410
+#: config/tc-i386.c:18409
 msgid "bad .section directive: want a,l,w,x,M,S,G,T in string"
 msgstr ""
 
-#: config/tc-i386.c:18413
+#: config/tc-i386.c:18412
 msgid "bad .section directive: want a,w,x,M,S,G,T in string"
 msgstr ""
 
-#: config/tc-i386.c:18423
+#: config/tc-i386.c:18422
 msgid ".largecomm supported only in 64bit mode, producing .comm"
 msgstr ""
 
