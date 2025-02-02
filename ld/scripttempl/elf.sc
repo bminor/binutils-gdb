@@ -122,7 +122,7 @@
 #
 # The following all mean "if foo is defined then do/insert <stuff>":
 #
-#    test -z "$foo" || <stuff> 
+#    test -z "$foo" || <stuff>
 #    test -n "$foo" && <stuff>
 #    if test -n "$foo"; then <stuff>
 #    if [ -n "$foo" ]; then <stuff>
@@ -140,7 +140,7 @@
 # positive tests and a NOR for negative tests.  ie, the following all do
 # <stuff> if either or both of <foo> and <bar> are defined:
 #
-#    test -z "$foo$bar" || <stuff> 
+#    test -z "$foo$bar" || <stuff>
 #    test -n "$foo$bar" && <stuff>
 #    if test -n "$foo$bar"; then <stuff>
 #
@@ -449,7 +449,7 @@ emit_noinit()
   if test "${HAVE_NOINIT}" != "yes"; then
     return
   fi
-cat <<EOF  
+cat <<EOF
   /* This section contains data that is not initialized during load,
      or during the application's initialization sequence.  */
   .noinit ${RELOCATING-0} (NOLOAD) : ${RELOCATING+ALIGN(${ALIGNMENT})}
@@ -467,7 +467,7 @@ emit_persistent()
   if test "${HAVE_PERSISTENT}" != "yes"; then
     return
   fi
-cat <<EOF    
+cat <<EOF
   /* This section contains data that is initialized during load,
      but not during the application's initialization sequence.  */
   .persistent ${RELOCATING-0} : ${RELOCATING+ALIGN(${ALIGNMENT})}
@@ -612,7 +612,7 @@ EOF
       sed -e '/^[	 ]*\.rel\.[^}]*$/,/}/d;/^[	 ]*\.rel\./d;/__rel_iplt_/d' ldscripts/dyntmp.$$
     fi
   fi
-  
+
   rm -f ldscripts/dyntmp.$$
 
   if test -n "${HAVE_DT_RELR}"; then
@@ -642,9 +642,9 @@ cat <<EOF
   } ${FILL}
 
   ${TEXT_PLT+${PLT_NEXT_DATA-${PLT} ${OTHER_PLT_SECTIONS}}}
-  
+
   ${TINY_READONLY_SECTION}
-  
+
   .text         ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
@@ -658,7 +658,7 @@ cat <<EOF
     *(.gnu.warning)
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
   } ${FILL}
-  
+
   .fini         ${RELOCATING-0}${RELOCATING+${FINI_ADDR}} :
   {
     ${RELOCATING+${FINI_START}}
@@ -691,14 +691,14 @@ if test -n "${SEPARATE_CODE}${SEPARATE_TEXT}"; then
     RODATA_ADDR="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
     RODATA_ADDR="SEGMENT_START(\"rodata-segment\", ${RODATA_ADDR})"
   fi
-  
+
   if test -n "${SHLIB_RODATA_ADDR}"; then
     SHLIB_RODATA_ADDR="SEGMENT_START(\"rodata-segment\", ${SHLIB_RODATA_ADDR}) + SIZEOF_HEADERS"
   else
     SHLIB_RODATA_ADDR="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
     SHLIB_RODATA_ADDR="SEGMENT_START(\"rodata-segment\", ${SHLIB_RODATA_ADDR})"
   fi
-  
+
 cat <<EOF
   ${RELOCATING+/* Adjust the address for the rodata segment.  We want to adjust up to
      the same address within the page on the next page up.  */
@@ -846,7 +846,7 @@ cat <<EOF
   ${SMALL_DATA_CTOR+${RELOCATING+${CTOR}}}
   ${SMALL_DATA_DTOR+${RELOCATING+${DTOR}}}
   ${SDATA_GOT+${DATA_PLT+${PLT_BEFORE_GOT+${PLT}}}}
-  
+
   ${SDATA_GOT+${RELOCATING+${OTHER_GOT_SYMBOLS+. = .; ${OTHER_GOT_SYMBOLS}}}}
 
   ${SDATA_GOT+${GOT}}
@@ -886,11 +886,11 @@ cat <<EOF
   $(emit_large_bss 0)
 
   ${RELOCATING+${OTHER_BSS_END_SYMBOLS}}
-
-  $(emit_noinit)
-
-  $(align_to_default_symbol_alignment)
 EOF
+
+  emit_noinit
+
+  align_to_default_symbol_alignment
 }
 
 align_large_data()
@@ -920,7 +920,7 @@ emit_large_bss()
     if test -z "${LARGE_BSS_AFTER_BSS}"; then
       return
     fi
-  fi  
+  fi
 
 cat <<EOF
   .lbss ${RELOCATING-0} :
@@ -937,7 +937,7 @@ emit_large_data()
   if test "${LARGE_SECTIONS}" != "yes"; then
     return
   fi
-    
+
 cat <<EOF
   .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
   {
@@ -949,9 +949,9 @@ cat <<EOF
     *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
     $(align_to_default_section_alignment)
   }
-
-  $(emit_large_bss 1)
 EOF
+
+  emit_large_bss 1
 }
 
 emit_end_symbols()
@@ -1039,7 +1039,7 @@ EOF
       align_text
     fi
   fi
-  
+
   #------Executable Code ----------------------------------------------------
 
   # We do not invoke "align_text" here as doing so will increase the file
@@ -1079,7 +1079,7 @@ EOF
 
   align_data
   emit_data
-  
+
   align_large_data
   emit_large_data
 
