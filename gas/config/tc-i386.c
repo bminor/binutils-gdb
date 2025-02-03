@@ -613,7 +613,6 @@ static char operand_chars[256];
 /* Lexical macros.  */
 #define is_operand_char(x) (operand_chars[(unsigned char) x])
 #define is_register_char(x) (register_chars[(unsigned char) x])
-#define is_space_char(x) ((x) == ' ')
 
 /* All non-digit non-letter characters that may occur in an operand and
    which aren't already in extra_symbol_chars[].  */
@@ -2115,7 +2114,7 @@ check_Scc_OszcOperations (const char *l)
 {
   const char *suffix_string = l;
 
-  while (is_space_char (*suffix_string))
+  while (is_whitespace (*suffix_string))
     suffix_string++;
 
   /* If {oszc flags} is absent, just return.  */
@@ -2126,7 +2125,7 @@ check_Scc_OszcOperations (const char *l)
   suffix_string++;
 
   /* Parse 'dfv='.  */
-  while (is_space_char (*suffix_string))
+  while (is_whitespace (*suffix_string))
     suffix_string++;
 
   if (strncasecmp (suffix_string, "dfv", 3) == 0)
@@ -2137,7 +2136,7 @@ check_Scc_OszcOperations (const char *l)
       return -1;
     }
 
-  while (is_space_char (*suffix_string))
+  while (is_whitespace (*suffix_string))
     suffix_string++;
 
   if (*suffix_string == '=')
@@ -2151,7 +2150,7 @@ check_Scc_OszcOperations (const char *l)
   /* Parse 'of, sf, zf, cf}'.  */
   while (*suffix_string)
     {
-      while (is_space_char (*suffix_string))
+      while (is_whitespace (*suffix_string))
 	suffix_string++;
 
       /* Return for '{dfv=}'.  */
@@ -2186,7 +2185,7 @@ check_Scc_OszcOperations (const char *l)
 
       suffix_string += 2;
 
-      while (is_space_char (*suffix_string))
+      while (is_whitespace (*suffix_string))
 	suffix_string++;
 
       if (*suffix_string == '}')
@@ -7568,7 +7567,7 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	{
 	  ++mnem_p;
 	  ++l;
-	  if (is_space_char (*l))
+	  if (is_whitespace (*l))
 	    ++l;
 	}
       else if (mode == parse_pseudo_prefix)
@@ -7587,7 +7586,7 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	  l++;
 	}
       split = l;
-      if (is_space_char (*l))
+      if (is_whitespace (*l))
 	++l;
       /* Pseudo-prefixes end with a closing figure brace.  */
       if (*mnemonic == '{' && *l == '}')
@@ -7597,7 +7596,7 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	    goto too_long;
 	  *mnem_p = '\0';
 
-	  if (is_space_char (*l))
+	  if (is_whitespace (*l))
 	    ++l;
 	}
       else if (l == split
@@ -7746,7 +7745,7 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	    }
 	  /* Skip past PREFIX_SEPARATOR and reset token_start.  */
 	  l += (!intel_syntax && *l == PREFIX_SEPARATOR);
-	  if (is_space_char (*l))
+	  if (is_whitespace (*l))
 	    ++l;
 	  token_start = l;
 	}
@@ -7919,10 +7918,10 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 	 may work in the future and it doesn't hurt to accept them
 	 now.  */
       token_start = l++;
-      if (is_space_char (*l))
+      if (is_whitespace (*l))
 	++l;
       if (TOLOWER (*l) == 'p' && ISALPHA (l[1])
-	  && (l[2] == END_OF_INSN || is_space_char (l[2])))
+	  && (l[2] == END_OF_INSN || is_whitespace (l[2])))
 	{
 	  if (TOLOWER (l[1]) == 't')
 	    {
@@ -7990,7 +7989,7 @@ parse_operands (char *l, const char *mnemonic)
       bool in_quotes = false;
 
       /* Skip optional white space before operand.  */
-      if (is_space_char (*l))
+      if (is_whitespace (*l))
 	++l;
       if (!is_operand_char (*l) && *l != END_OF_INSN && *l != '"')
 	{
@@ -8024,7 +8023,7 @@ parse_operands (char *l, const char *mnemonic)
 	    ++l;
 	  else if (*l == '"')
 	    in_quotes = !in_quotes;
-	  else if (!in_quotes && !is_operand_char (*l) && !is_space_char (*l))
+	  else if (!in_quotes && !is_operand_char (*l) && !is_whitespace (*l))
 	    {
 	      as_bad (_("invalid character %s in operand %d"),
 		      output_invalid (*l),
@@ -13151,7 +13150,7 @@ lex_got (enum bfd_reloc_code_real *rel,
 		 be necessary, but be safe.  */
 	      tmpbuf = XNEWVEC (char, first + second + 2);
 	      memcpy (tmpbuf, input_line_pointer, first);
-	      if (second != 0 && *past_reloc != ' ')
+	      if (second != 0 && !is_whitespace (*past_reloc))
 		/* Replace the relocation token with ' ', so that
 		   errors like foo@GOTOFF1 will be detected.  */
 		tmpbuf[first++] = ' ';
@@ -13298,7 +13297,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
   i.tm.extension_opcode = None;
 
   if (startswith (line, "VEX")
-      && (line[3] == '.' || is_space_char (line[3])))
+      && (line[3] == '.' || is_whitespace (line[3])))
     {
       vex = true;
       line += 3;
@@ -13309,7 +13308,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
       unsigned long n = strtoul (line + 3, &e, 16);
 
       if (e == line + 5 && n >= 0x08 && n <= 0x1f
-	  && (*e == '.' || is_space_char (*e)))
+	  && (*e == '.' || is_whitespace (*e)))
 	{
 	  xop = true;
 	  /* Arrange for build_vex_prefix() to emit 0x8f.  */
@@ -13319,7 +13318,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	}
     }
   else if (startswith (line, "EVEX")
-	   && (line[4] == '.' || is_space_char (line[4])))
+	   && (line[4] == '.' || is_whitespace (line[4])))
     {
       evex = true;
       line += 4;
@@ -13483,14 +13482,14 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	case '0':
 	  if (TOUPPER (line[2]) != 'F')
 	    break;
-	  if (line[3] == '.' || is_space_char (line[3]))
+	  if (line[3] == '.' || is_whitespace (line[3]))
 	    {
 	      i.insn_opcode_space = SPACE_0F;
 	      line += 3;
 	    }
 	  else if (line[3] == '3'
 		   && (line[4] == '8' || TOUPPER (line[4]) == 'A')
-		   && (line[5] == '.' || is_space_char (line[5])))
+		   && (line[5] == '.' || is_whitespace (line[5])))
 	    {
 	      i.insn_opcode_space = line[4] == '8' ? SPACE_0F38 : SPACE_0F3A;
 	      line += 5;
@@ -13504,7 +13503,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	      unsigned long n = strtoul (line + 2, &e, 10);
 
 	      if (n <= (evex ? 15 : 31)
-		  && (*e == '.' || is_space_char (*e)))
+		  && (*e == '.' || is_whitespace (*e)))
 		{
 		  i.insn_opcode_space = n;
 		  line = e;
@@ -13540,10 +13539,10 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	line += 3;
     }
 
-  if (line > end && *line && !is_space_char (*line))
+  if (line > end && *line && !is_whitespace (*line))
     {
       /* Improve diagnostic a little.  */
-      if (*line == '.' && line[1] && !is_space_char (line[1]))
+      if (*line == '.' && line[1] && !is_whitespace (line[1]))
 	++line;
       goto done;
     }
@@ -13560,7 +13559,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	break;
 
       if (*ptr == '+' && ptr[1] == 'r'
-	  && (ptr[2] == ',' || (is_space_char (ptr[2]) && ptr[3] == ',')))
+	  && (ptr[2] == ',' || (is_whitespace (ptr[2]) && ptr[3] == ',')))
 	{
 	  *ptr = ' ';
 	  ptr[1] = ' ';
@@ -13571,7 +13570,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
       if (*ptr == '/' && ISDIGIT (ptr[1])
 	  && (n = strtoul (ptr + 1, &e, 8)) < 8
 	  && e == ptr + 2
-	  && (ptr[2] == ',' || (is_space_char (ptr[2]) && ptr[3] == ',')))
+	  && (ptr[2] == ',' || (is_whitespace (ptr[2]) && ptr[3] == ',')))
 	{
 	  *ptr = ' ';
 	  ptr[1] = ' ';
@@ -14177,7 +14176,7 @@ check_VecOperations (char *op_string)
       if (*op_string == '{')
 	{
 	  op_string++;
-	  if (is_space_char (*op_string))
+	  if (is_whitespace (*op_string))
 	    op_string++;
 
 	  /* Check broadcasts.  */
@@ -14349,7 +14348,7 @@ check_VecOperations (char *op_string)
 	  else
 	    goto unknown_vec_op;
 
-	  if (is_space_char (*op_string))
+	  if (is_whitespace (*op_string))
 	    op_string++;
 	  if (*op_string != '}')
 	    {
@@ -14358,7 +14357,7 @@ check_VecOperations (char *op_string)
 	    }
 	  op_string++;
 
-	  if (is_space_char (*op_string))
+	  if (is_whitespace (*op_string))
 	    ++op_string;
 
 	  continue;
@@ -14399,7 +14398,7 @@ i386_immediate (char *imm_start)
   exp = &im_expressions[i.imm_operands++];
   i.op[this_operand].imms = exp;
 
-  if (is_space_char (*imm_start))
+  if (is_whitespace (*imm_start))
     ++imm_start;
 
   save_input_line_pointer = input_line_pointer;
@@ -15033,14 +15032,14 @@ RC_SAE_immediate (const char *imm_start)
     return 0;
 
   pstr++;
-  if (is_space_char (*pstr))
+  if (is_whitespace (*pstr))
     pstr++;
 
   pstr = RC_SAE_specifier (pstr);
   if (pstr == NULL)
     return 0;
 
-  if (is_space_char (*pstr))
+  if (is_whitespace (*pstr))
     pstr++;
 
   if (*pstr++ != '}')
@@ -15078,7 +15077,7 @@ i386_att_operand (char *operand_string)
   char *end_op;
   char *op_string = operand_string;
 
-  if (is_space_char (*op_string))
+  if (is_whitespace (*op_string))
     ++op_string;
 
   /* We check for an absolute prefix (differentiating,
@@ -15087,7 +15086,7 @@ i386_att_operand (char *operand_string)
       && current_templates.start->opcode_modifier.jump)
     {
       ++op_string;
-      if (is_space_char (*op_string))
+      if (is_whitespace (*op_string))
 	++op_string;
       i.jumpabsolute = true;
     }
@@ -15103,7 +15102,7 @@ i386_att_operand (char *operand_string)
       /* Check for a segment override by searching for ':' after a
 	 segment register.  */
       op_string = end_op;
-      if (is_space_char (*op_string))
+      if (is_whitespace (*op_string))
 	++op_string;
       if (*op_string == ':' && r->reg_type.bitfield.class == SReg)
 	{
@@ -15111,7 +15110,7 @@ i386_att_operand (char *operand_string)
 
 	  /* Skip the ':' and whitespace.  */
 	  ++op_string;
-	  if (is_space_char (*op_string))
+	  if (is_whitespace (*op_string))
 	    ++op_string;
 
 	  /* Handle case of %es:*foo.  */
@@ -15119,7 +15118,7 @@ i386_att_operand (char *operand_string)
 	      && current_templates.start->opcode_modifier.jump)
 	    {
 	      ++op_string;
-	      if (is_space_char (*op_string))
+	      if (is_whitespace (*op_string))
 		++op_string;
 	      i.jumpabsolute = true;
 	    }
@@ -15230,7 +15229,7 @@ i386_att_operand (char *operand_string)
 
       /* Handle vector operations.  */
       --base_string;
-      if (is_space_char (*base_string))
+      if (is_whitespace (*base_string))
 	--base_string;
 
       if (*base_string == '}')
@@ -15247,7 +15246,7 @@ i386_att_operand (char *operand_string)
 	      vop_start = base_string;
 
 	      --base_string;
-	      if (is_space_char (*base_string))
+	      if (is_whitespace (*base_string))
 		--base_string;
 
 	      if (*base_string != '}')
@@ -15299,7 +15298,7 @@ i386_att_operand (char *operand_string)
 	  /* Skip past '(' and whitespace.  */
 	  gas_assert (*base_string == '(');
 	  ++base_string;
-	  if (is_space_char (*base_string))
+	  if (is_whitespace (*base_string))
 	    ++base_string;
 
 	  if (*base_string == ','
@@ -15315,7 +15314,7 @@ i386_att_operand (char *operand_string)
 		  if (i.base_reg == &bad_reg)
 		    return 0;
 		  base_string = end_op;
-		  if (is_space_char (*base_string))
+		  if (is_whitespace (*base_string))
 		    ++base_string;
 		}
 
@@ -15323,7 +15322,7 @@ i386_att_operand (char *operand_string)
 	      if (*base_string == ',')
 		{
 		  ++base_string;
-		  if (is_space_char (*base_string))
+		  if (is_whitespace (*base_string))
 		    ++base_string;
 
 		  if ((i.index_reg = parse_register (base_string, &end_op))
@@ -15332,12 +15331,12 @@ i386_att_operand (char *operand_string)
 		      if (i.index_reg == &bad_reg)
 			return 0;
 		      base_string = end_op;
-		      if (is_space_char (*base_string))
+		      if (is_whitespace (*base_string))
 			++base_string;
 		      if (*base_string == ',')
 			{
 			  ++base_string;
-			  if (is_space_char (*base_string))
+			  if (is_whitespace (*base_string))
 			    ++base_string;
 			}
 		      else if (*base_string != ')')
@@ -15366,7 +15365,7 @@ i386_att_operand (char *operand_string)
 			return 0;
 
 		      base_string = end_scale;
-		      if (is_space_char (*base_string))
+		      if (is_whitespace (*base_string))
 			++base_string;
 		      if (*base_string != ')')
 			{
@@ -16611,7 +16610,7 @@ parse_real_register (const char *reg_string, char **end_op)
   if (*s == REGISTER_PREFIX)
     ++s;
 
-  if (is_space_char (*s))
+  if (is_whitespace (*s))
     ++s;
 
   p = reg_name_given;
@@ -16638,18 +16637,18 @@ parse_real_register (const char *reg_string, char **end_op)
 	  && !allow_pseudo_reg)
 	return (const reg_entry *) NULL;
 
-      if (is_space_char (*s))
+      if (is_whitespace (*s))
 	++s;
       if (*s == '(')
 	{
 	  ++s;
-	  if (is_space_char (*s))
+	  if (is_whitespace (*s))
 	    ++s;
 	  if (*s >= '0' && *s <= '7')
 	    {
 	      int fpr = *s - '0';
 	      ++s;
-	      if (is_space_char (*s))
+	      if (is_whitespace (*s))
 		++s;
 	      if (*s == ')')
 		{
