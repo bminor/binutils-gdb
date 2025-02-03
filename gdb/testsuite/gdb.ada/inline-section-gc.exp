@@ -23,10 +23,10 @@ set options {
     debug
     optimize=-O2
     additional_flags=-ffunction-sections
-    ldflags=-largs
-    ldflags=-Wl,--gc-sections
     ldflags=-margs
     additional_flags=-gnatn
+    ldflags=-largs
+    ldflags=-Wl,--gc-sections
 }
 if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $options] != ""} {
     return -1
