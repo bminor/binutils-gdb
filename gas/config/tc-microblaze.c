@@ -400,7 +400,7 @@ parse_reg (char * s, unsigned * reg)
   unsigned tmpreg = 0;
 
   /* Strip leading whitespace.  */
-  while (ISSPACE (* s))
+  while (is_whitespace (* s))
     ++ s;
 
   if (strncasecmp (s, "rpc", 3) == 0)
@@ -573,7 +573,7 @@ parse_exp (char *s, expressionS *e)
   char *new_pointer;
 
   /* Skip whitespace.  */
-  while (ISSPACE (* s))
+  while (is_whitespace (* s))
     ++ s;
 
   save = input_line_pointer;
@@ -892,12 +892,12 @@ md_assemble (char * str)
   char name[20];
 
   /* Drop leading whitespace.  */
-  while (ISSPACE (* str))
+  while (is_whitespace (* str))
     str ++;
 
   /* Find the op code end.  */
   for (op_start = op_end = str;
-       *op_end && !is_end_of_line[(unsigned char) *op_end] && *op_end != ' ';
+       !is_end_of_stmt (*op_end) && !is_whitespace (*op_end);
        op_end++)
     {
       name[nlen] = op_start[nlen];
@@ -1808,7 +1808,7 @@ md_assemble (char * str)
     }
 
   /* Drop whitespace after all the operands have been parsed.  */
-  while (ISSPACE (* op_end))
+  while (is_whitespace (* op_end))
     op_end ++;
 
   /* Give warning message if the insn has more operands than required.  */
