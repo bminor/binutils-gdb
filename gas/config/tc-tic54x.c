@@ -2327,8 +2327,8 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
     {
       SKIP_WHITESPACE ();
       len = 0;
-      while (!is_end_of_line[(unsigned char) *input_line_pointer]
-	     && !ISSPACE (*input_line_pointer))
+      while (!is_end_of_stmt (*input_line_pointer)
+	     && !is_whitespace (*input_line_pointer))
 	{
 	  obstack_1grow (&notes, *input_line_pointer);
 	  ++input_line_pointer;
@@ -3109,7 +3109,7 @@ get_operands (struct opstruct operands[], char *line)
       int paren_not_balanced = 0;
       char *op_start, *op_end;
 
-      while (*lptr && ISSPACE (*lptr))
+      while (is_whitespace (*lptr))
 	++lptr;
       op_start = lptr;
       while (paren_not_balanced || *lptr != ',')
@@ -3140,7 +3140,7 @@ get_operands (struct opstruct operands[], char *line)
 	  /* Trim trailing spaces; while the preprocessor gets rid of most,
 	     there are weird usage patterns that can introduce them
 	     (i.e. using strings for macro args).  */
-	  while (len > 0 && ISSPACE (operands[numexp].buf[len - 1]))
+	  while (len > 0 && is_whitespace (operands[numexp].buf[len - 1]))
 	    operands[numexp].buf[--len] = 0;
 	  lptr = op_end;
 	  ++numexp;
@@ -3164,8 +3164,8 @@ get_operands (struct opstruct operands[], char *line)
 	}
     }
 
-  while (*lptr && ISSPACE (*lptr++))
-    ;
+  while (is_whitespace (*lptr))
+    ++lptr;
   if (!is_end_of_line[(unsigned char) *lptr])
     {
       as_bad (_("Extra junk on line"));
@@ -4218,7 +4218,8 @@ static int
 next_line_shows_parallel (char *next_line)
 {
   /* Look for the second half.  */
-  while (*next_line != 0 && ISSPACE (*next_line))
+  while (*next_line != 0
+	 && (is_whitespace (*next_line) || is_end_of_stmt (*next_line)))
     ++next_line;
 
   return (next_line[0] == PARALLEL_SEPARATOR
@@ -4804,7 +4805,7 @@ tic54x_start_line_hook (void)
 	comment = replacement + strlen (replacement) - 1;
 
       /* Trim trailing whitespace.  */
-      while (ISSPACE (*comment))
+      while (is_whitespace (*comment))
 	{
 	  comment[0] = endc;
 	  comment[1] = 0;
@@ -4812,7 +4813,7 @@ tic54x_start_line_hook (void)
 	}
 
       /* Compact leading whitespace.  */
-      while (ISSPACE (tmp[0]) && ISSPACE (tmp[1]))
+      while (is_whitespace (tmp[0]) && is_whitespace (tmp[1]))
 	++tmp;
 
       input_line_pointer = endp;
@@ -4915,7 +4916,7 @@ md_assemble (char *line)
 	     otherwise let the assembler pick up the next line for us.  */
 	  if (tmp != NULL)
 	    {
-	      while (ISSPACE (tmp[2]))
+	      while (is_whitespace (tmp[2]))
 		++tmp;
 	      md_assemble (tmp + 2);
 	    }
@@ -5387,16 +5388,16 @@ tic54x_start_label (char * label_start, int nul_char, int next_char)
   rest = input_line_pointer;
   if (nul_char == '"')
     ++rest;
-  while (ISSPACE (next_char))
+  while (is_whitespace (next_char))
     next_char = *++rest;
   if (next_char != '.')
     return 1;
 
   /* Don't let colon () define a label for any of these...  */
-  return ((strncasecmp (rest, ".tag", 4) != 0 || !ISSPACE (rest[4]))
-	  && (strncasecmp (rest, ".struct", 7) != 0 || !ISSPACE (rest[7]))
-	  && (strncasecmp (rest, ".union", 6) != 0 || !ISSPACE (rest[6]))
-	  && (strncasecmp (rest, ".macro", 6) != 0 || !ISSPACE (rest[6]))
-	  && (strncasecmp (rest, ".set", 4) != 0 || !ISSPACE (rest[4]))
-	  && (strncasecmp (rest, ".equ", 4) != 0 || !ISSPACE (rest[4])));
+  return ((strncasecmp (rest, ".tag", 4) != 0 || !is_whitespace (rest[4]))
+	  && (strncasecmp (rest, ".struct", 7) != 0 || !is_whitespace (rest[7]))
+	  && (strncasecmp (rest, ".union", 6) != 0 || !is_whitespace (rest[6]))
+	  && (strncasecmp (rest, ".macro", 6) != 0 || !is_whitespace (rest[6]))
+	  && (strncasecmp (rest, ".set", 4) != 0 || !is_whitespace (rest[4]))
+	  && (strncasecmp (rest, ".equ", 4) != 0 || !is_whitespace (rest[4])));
 }
