@@ -320,7 +320,7 @@ md_chars_to_number (unsigned char *con, int nbytes)
 static char *
 skip_whitespace (char *str)
 {
-  while (*str == ' ' || *str == '\t')
+  while (is_whitespace (*str))
     str++;
   return str;
 }
@@ -328,7 +328,7 @@ skip_whitespace (char *str)
 static char *
 find_whitespace (char *str)
 {
-  while (*str != ' ' && *str != '\t' && *str != 0)
+  while (!is_whitespace (*str) && *str != 0)
     str++;
   return str;
 }
