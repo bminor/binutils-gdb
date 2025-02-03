@@ -1472,7 +1472,7 @@ tic4x_indirect_parse (tic4x_operand_t *operand,
 	  s++;
 	}
     }
-  if (*s != ' ' && *s != ',' && *s != '\0')
+  if (!is_whitespace (*s) && *s != ',' && !is_end_of_stmt (*s))
     return 0;
   input_line_pointer = s;
   return 1;
@@ -2428,7 +2428,7 @@ md_assemble (char *str)
       /* Find mnemonic (second part of parallel instruction).  */
       s = str;
       /* Skip past instruction mnemonic.  */
-      while (*s && *s != ' ')
+      while (!is_end_of_stmt (*s) && !is_whitespace (*s))
 	s++;
       if (*s)			/* Null terminate for str_hash_find.  */
 	*s++ = '\0';		/* and skip past null.  */
@@ -2492,7 +2492,7 @@ md_assemble (char *str)
     {
       /* Find mnemonic.  */
       s = str;
-      while (*s && *s != ' ')	/* Skip past instruction mnemonic.  */
+      while (!is_end_of_stmt (*s) && !is_whitespace (*s))	/* Skip past instruction mnemonic.  */
 	s++;
       if (*s)			/* Null terminate for str_hash_find.  */
 	*s++ = '\0';		/* and skip past null.  */
