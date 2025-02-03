@@ -3290,6 +3290,9 @@ aarch64_pseudo_read_value (gdbarch *gdbarch, const frame_info_ptr &next_frame,
     return aarch64_pseudo_read_value_1 (next_frame, pseudo_reg_num,
 					pseudo_offset - AARCH64_SVE_V0_REGNUM);
 
+  if (tdep->has_pauth () && pseudo_reg_num == tdep->ra_sign_state_regnum)
+    return value::zero (builtin_type (gdbarch)->builtin_uint64, lval_register);
+
   gdb_assert_not_reached ("regnum out of bound");
 }
 
