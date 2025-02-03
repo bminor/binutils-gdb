@@ -826,8 +826,12 @@ elf_x86_linker_defined (struct bfd_link_info *info, const char *name)
 {
   struct elf_link_hash_entry *h;
 
-  h = elf_link_hash_lookup (elf_hash_table (info), name,
-			    false, false, false);
+  /* NULL indicates __ehdr_start.  */
+  if (name == NULL)
+    h = elf_hash_table (info)->hehdr_start;
+  else
+    h = elf_link_hash_lookup (elf_hash_table (info), name,
+			      false, false, false);
   if (h == NULL)
     return;
 
@@ -894,9 +898,10 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 		}
 	    }
 
-	  /* "__ehdr_start" will be defined by linker as a hidden symbol
-	     later if it is referenced and not defined.  */
-	  elf_x86_linker_defined (info, "__ehdr_start");
+	  /* Pass NULL for __ehdr_start which will be defined by
+	     linker as a hidden symbol later if it is referenced and
+	     not defined.  */
+	  elf_x86_linker_defined (info, NULL);
 
 	  if (bfd_link_executable (info))
 	    {
