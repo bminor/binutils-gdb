@@ -878,7 +878,7 @@ md_assemble (char *str)
   int match;
 
   /* Get the opcode.  */
-  for (s = str; *s != '\0' && !ISSPACE (*s); s++)
+  for (s = str; !is_end_of_stmt (*s) && !is_whitespace (*s); s++)
     ;
   if (*s != '\0')
     *s++ = '\0';
@@ -892,7 +892,7 @@ md_assemble (char *str)
     }
 
   str = s;
-  while (ISSPACE (*str))
+  while (is_whitespace (*str))
     ++str;
 
   input_line_pointer = str;
@@ -929,7 +929,7 @@ md_assemble (char *str)
 
 	  errmsg = NULL;
 
-	  while (*str == ' ' || *str == ',')
+	  while (is_whitespace (*str) || *str == ',')
 	    ++str;
 
 	  if (operand->flags & MN10200_OPERAND_RELAX)
@@ -1102,7 +1102,7 @@ md_assemble (char *str)
 	  str = input_line_pointer;
 	  input_line_pointer = hold;
 
-	  while (*str == ' ' || *str == ',')
+	  while (is_whitespace (*str) || *str == ',')
 	    ++str;
 
 	}
@@ -1127,10 +1127,10 @@ md_assemble (char *str)
       break;
     }
 
-  while (ISSPACE (*str))
+  while (is_whitespace (*str))
     ++str;
 
-  if (*str != '\0')
+  if (!is_end_of_stmt (*str))
     as_bad (_("junk at end of line: `%s'"), str);
 
   input_line_pointer = str;
