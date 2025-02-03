@@ -1772,8 +1772,7 @@ ldelf_before_allocation (char **audit, char **depaudit,
       if (!bfd_link_relocatable (&link_info))
 	{
 	  struct elf_link_hash_table *htab = elf_hash_table (&link_info);
-	  struct elf_link_hash_entry *h
-	    = elf_link_hash_lookup (htab, "__ehdr_start", false, false, true);
+	  struct elf_link_hash_entry *h = htab->hehdr_start;
 
 	  /* Only adjust the export class if the symbol was referenced
 	     and not defined, otherwise leave it alone.  */

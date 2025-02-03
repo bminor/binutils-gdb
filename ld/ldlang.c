@@ -7176,6 +7176,7 @@ lang_symbol_tweaks (void)
 	  h->def_regular = 1;
 	  h->root.linker_def = 1;
 	  h->root.rel_from_abs = 1;
+	  elf_hash_table (&link_info)->hehdr_start = h;
 	}
     }
 }

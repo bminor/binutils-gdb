@@ -6419,9 +6419,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	 program headers, so provide a symbol __ehdr_start pointing there.
 	 A program can use this to examine itself robustly.  */
 
-      struct elf_link_hash_entry *hash
-	= elf_link_hash_lookup (elf_hash_table (link_info), "__ehdr_start",
-				false, false, true);
+      struct elf_link_hash_table *htab = elf_hash_table (link_info);
+      struct elf_link_hash_entry *hash = htab->hehdr_start;
+
       /* If the symbol was referenced and not defined, define it.  */
       if (hash != NULL
 	  && (hash->root.type == bfd_link_hash_new
