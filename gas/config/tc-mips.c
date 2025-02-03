@@ -45,7 +45,7 @@ typedef char static_assert2[sizeof (valueT) < 8 ? -1 : 1];
 #define streq(a, b)           (strcmp (a, b) == 0)
 
 #define SKIP_SPACE_TABS(S) \
-  do { while (*(S) == ' ' || *(S) == '\t') ++(S); } while (0)
+  do { while (is_whitespace (*(S))) ++(S); } while (0)
 
 /* Clean up namespace so we can include obj-elf.h too.  */
 static int mips_output_flavor (void);
@@ -14349,7 +14349,7 @@ mips_ip (char *str, struct mips_cl_insn *insn)
   opcode_extra = 0;
 
   /* We first try to match an instruction up to a space or to the end.  */
-  for (end = 0; str[end] != '\0' && !ISSPACE (str[end]); end++)
+  for (end = 0; !is_end_of_stmt (str[end]) && !is_whitespace (str[end]); end++)
     continue;
 
   first = mips_lookup_insn (hash, str, end, &opcode_extra);
@@ -14388,7 +14388,7 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
   struct mips_operand_token *tokens;
   unsigned int l;
 
-  for (s = str; *s != '\0' && *s != '.' && *s != ' '; ++s)
+  for (s = str; *s != '\0' && *s != '.' && !is_whitespace (*s); ++s)
     ;
   end = s;
   c = *end;
@@ -14399,8 +14399,9 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
     case '\0':
       break;
 
-    case ' ':
-      s++;
+    default:
+      if (is_whitespace (*s))
+	s++;
       break;
 
     case '.':
@@ -14417,7 +14418,7 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
 	}
       if (*s == '\0')
 	break;
-      else if (*s++ == ' ')
+      else if (is_whitespace (*s++))
 	break;
       set_insn_error (0, _("unrecognized opcode"));
       return;
@@ -14641,7 +14642,9 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc)
       {
 	int len = strlen (percent_op[i].str);
 
-	if (!ISSPACE ((*str)[len]) && (*str)[len] != '(')
+	if (!is_end_of_stmt ((*str)[len])
+	    && !is_whitespace ((*str)[len])
+	    && (*str)[len] != '(')
 	  continue;
 
 	*str += strlen (percent_op[i].str);
@@ -14691,7 +14694,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 
       /* Skip over whitespace and brackets, keeping count of the number
 	 of brackets.  */
-      while (*str == ' ' || *str == '\t' || *str == '(')
+      while (is_whitespace (*str) || *str == '(')
 	if (*str++ == '(')
 	  str_depth++;
     }
@@ -14703,7 +14706,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
   str = expr_parse_end;
 
   /* Match every open bracket.  */
-  while (crux_depth > 0 && (*str == ')' || *str == ' ' || *str == '\t'))
+  while (crux_depth > 0 && (*str == ')' || is_whitespace (*str)))
     if (*str++ == ')')
       crux_depth--;
 
