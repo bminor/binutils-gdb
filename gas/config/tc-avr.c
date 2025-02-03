@@ -618,7 +618,7 @@ show_mcu_list (FILE *stream)
 static inline char *
 skip_space (char *s)
 {
-  while (*s == ' ' || *s == '\t')
+  while (is_whitespace (*s))
     ++s;
   return s;
 }
