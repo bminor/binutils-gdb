@@ -1374,10 +1374,6 @@ tokenize_flags (const char *str,
     {
       switch (*input_line_pointer)
 	{
-	case ' ':
-	case '\0':
-	  goto fini;
-
 	case '.':
 	  input_line_pointer++;
 	  if (saw_dot)
@@ -1387,6 +1383,10 @@ tokenize_flags (const char *str,
 	  break;
 
 	default:
+	  if (is_end_of_stmt (*input_line_pointer)
+	      || is_whitespace (*input_line_pointer))
+	    goto fini;
+
 	  if (saw_flg && !saw_dot)
 	    goto err;
 
@@ -2536,8 +2536,8 @@ md_assemble (char *str)
   /* Scan up to the end of the mnemonic which must end in space or end
      of string.  */
   str += opnamelen;
-  for (; *str != '\0'; str++)
-    if (*str == ' ')
+  for (; !is_end_of_stmt (*str); str++)
+    if (is_whitespace (*str))
       break;
 
   /* Tokenize the rest of the line.  */
