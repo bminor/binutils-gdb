@@ -207,7 +207,7 @@ s12z_init_after_args (void)
 static char *
 skip_whites (char *p)
 {
-  while (*p == ' ' || *p == '\t')
+  while (is_whitespace (*p))
     p++;
 
   return p;
@@ -347,7 +347,7 @@ static bool
 lex_match_string (const char *s)
 {
   char *p = input_line_pointer;
-  while (p != 0 && *p != '\t' && *p != ' ' && *p != '\0')
+  while (p != 0 && !is_whitespace (*p) && !is_end_of_stmt (*p))
     {
       p++;
     }
@@ -3790,7 +3790,7 @@ md_assemble (char *str)
   /* Find the opcode end and get the opcode in 'name'.  The opcode is forced
      lower case (the opcode table only has lower case op-codes).  */
   for (op_start = op_end = str;
-       *op_end && !is_end_of_line[(int)*op_end] && *op_end != ' ';
+       !is_end_of_stmt (*op_end) && !is_whitespace (*op_end);
        op_end++)
     {
       name[nlen] = TOLOWER (op_start[nlen]);
