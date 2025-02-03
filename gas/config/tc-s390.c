@@ -1429,7 +1429,7 @@ md_gather_operands (char *str,
   char *f;
   int fc, i;
 
-  while (ISSPACE (*str))
+  while (is_whitespace (*str))
     str++;
 
   /* Gather the operands.  */
@@ -1820,7 +1820,7 @@ md_gather_operands (char *str,
 	}
     }
 
-  while (ISSPACE (*str))
+  while (is_whitespace (*str))
     str++;
 
   /* Check for tls instruction marker.  */
@@ -1925,7 +1925,7 @@ md_assemble (char *str)
   char *s;
 
   /* Get the opcode.  */
-  for (s = str; *s != '\0' && ! ISSPACE (*s); s++)
+  for (s = str; ! is_end_of_stmt (*s) && ! is_whitespace (*s); s++)
     ;
   if (*s != '\0')
     *s++ = '\0';
@@ -1981,7 +1981,7 @@ s390_insn (int ignore ATTRIBUTE_UNUSED)
 
   /* Get the opcode format.  */
   s = input_line_pointer;
-  while (*s != '\0' && *s != ',' && ! ISSPACE (*s))
+  while (! is_end_of_stmt (*s) && *s != ',' && ! is_whitespace (*s))
     s++;
   if (*s != ',')
     as_bad (_("Invalid .insn format\n"));
