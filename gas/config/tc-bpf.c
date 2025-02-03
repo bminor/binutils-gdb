@@ -1274,7 +1274,7 @@ parse_expression (char *s, expressionS *exp)
      these whitespaces.  */
   {
     char *p;
-    for (p = s - 1; p >= saved_s && *p == ' '; --p)
+    for (p = s - 1; p >= saved_s && is_whitespace (*p); --p)
       --s;
   }
 
@@ -1501,7 +1501,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
           if (*p == ' ')
             {
               /* Expect zero or more spaces.  */
-              while (*s != '\0' && (*s == ' ' || *s == '\t'))
+              while (is_whitespace (*s))
                 s += 1;
               p += 1;
             }
@@ -1520,20 +1520,20 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
               else if (*(p + 1) == 'w')
                 {
                   /* Expect zero or more spaces.  */
-                  while (*s != '\0' && (*s == ' ' || *s == '\t'))
+                  while (is_whitespace (*s))
                     s += 1;
                   p += 2;
                 }
               else if (*(p + 1) == 'W')
                 {
                   /* Expect one or more spaces.  */
-                  if (*s != ' ' && *s != '\t')
+                  if (!is_whitespace (*s))
                     {
                       PARSE_ERROR ("expected white space, got '%s'",
                                    s);
                       break;
                     }
-                  while (*s != '\0' && (*s == ' ' || *s == '\t'))
+                  while (is_whitespace (*s))
                     s += 1;
                   p += 2;
                 }
@@ -1620,7 +1620,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
 
                   if (p[1] == 'I')
                     {
-                      while (*s == ' ' || *s == '\t')
+                      while (is_whitespace (*s))
                         s += 1;
                       if (*s != '+' && *s != '-')
                         {
@@ -1643,7 +1643,7 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
                 {
                   char *exp = NULL;
 
-                  while (*s == ' ' || *s == '\t')
+                  while (is_whitespace (*s))
                     s += 1;
                   if (*s != '+' && *s != '-')
                     {
@@ -1735,9 +1735,9 @@ md_assemble (char *str ATTRIBUTE_UNUSED)
       if (*p == '\0')
         {
           /* Allow white spaces at the end of the line.  */
-          while (*s != '\0' && (*s == ' ' || *s == '\t'))
+          while (is_whitespace (*s))
             s += 1;
-          if (*s == '\0')
+          if (is_end_of_stmt (*s))
             /* We parsed an instruction successfully.  */
             break;
           PARSE_ERROR ("extra junk at end of line");
