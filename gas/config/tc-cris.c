@@ -1682,7 +1682,7 @@ cris_process_instruction (char *insn_text, struct cris_instruction *out_insnp,
 	      if (modified_char == '.' && *s == '.')
 		{
 		  if ((s[1] != 'd' && s[1] == 'D')
-		      || ! ISSPACE (s[2]))
+		      || ! is_whitespace (s[2]))
 		    break;
 		  s += 2;
 		  continue;
@@ -3231,7 +3231,7 @@ get_flags (char **cPP, int *flagsp)
 	     whitespace.  Anything else, and we consider it a failure.  */
 	  if (**cPP != ','
 	      && **cPP != 0
-	      && ! ISSPACE (**cPP))
+	      && ! is_whitespace (**cPP))
 	    return 0;
 	  else
 	    return 1;
@@ -4278,7 +4278,7 @@ cris_arch_from_string (const char **str)
       int len = strlen (ap->name);
 
       if (strncmp (*str, ap->name, len) == 0
-	  && (str[0][len] == 0 || ISSPACE (str[0][len])))
+	  && (is_end_of_stmt (str[0][len]) || is_whitespace (str[0][len])))
 	{
 	  *str += strlen (ap->name);
 	  return ap->arch;
