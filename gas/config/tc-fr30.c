@@ -359,7 +359,7 @@ fr30_is_colon_insn (char *start, char *nul_char)
     {
       /* Nope - check to see a 'd' follows the colon.  */
       if (   (i_l_p[1] == 'd' || i_l_p[1] == 'D')
-	  && (i_l_p[2] == ' ' || i_l_p[2] == '\t' || i_l_p[2] == '\n'))
+	  && (is_whitespace (i_l_p[2]) || is_end_of_stmt (i_l_p[2])))
 	{
 	  /* Yup - it might be delay slot instruction.  */
 	  int           i;
@@ -393,17 +393,17 @@ fr30_is_colon_insn (char *start, char *nul_char)
     }
 
   /* Check to see if the text following the colon is '8'.  */
-  if (i_l_p[1] == '8' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
+  if (i_l_p[1] == '8' && is_whitespace (i_l_p[2]))
     return restore_colon (i_l_p + 2, nul_char);
 
   /* Check to see if the text following the colon is '20'.  */
   else if (i_l_p[1] == '2' && i_l_p[2] =='0'
-	   && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
+	   && is_whitespace (i_l_p[3]))
     return restore_colon (i_l_p + 3, nul_char);
 
   /* Check to see if the text following the colon is '32'.  */
   else if (i_l_p[1] == '3' && i_l_p[2] =='2'
-	   && (i_l_p[3] == ' ' || i_l_p[3] == '\t'))
+	   && is_whitespace (i_l_p[3]))
     return restore_colon (i_l_p + 3, nul_char);
 
   return 0;
