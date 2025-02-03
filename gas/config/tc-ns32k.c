@@ -1097,7 +1097,9 @@ parse (const char *line, int recursive_level)
   if (recursive_level <= 0)
     {
       /* Called from md_assemble.  */
-      for (lineptr = line; (*lineptr) != '\0' && (*lineptr) != ' '; lineptr++)
+      for (lineptr = line;
+	   (*lineptr) != '\0' && !is_whitespace (*lineptr);
+	   lineptr++)
 	continue;
 
       c = *lineptr;
