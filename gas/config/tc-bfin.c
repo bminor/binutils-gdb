@@ -1939,7 +1939,8 @@ bfin_eol_in_insn (char *line)
 
   /* If the || is on the next line, there might be leading whitespace.  */
   temp++;
-  while (*temp == ' ' || *temp == '\t') temp++;
+  while (is_whitespace (*temp))
+    temp++;
 
   if (*temp == '|')
     return true;
