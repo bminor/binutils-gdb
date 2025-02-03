@@ -2484,7 +2484,7 @@ parse_relocation (char **str, bfd_reloc_code_real_type *reloc,
       {
 	size_t len = 1 + strlen (percent_op->str);
 
-	while (ISSPACE ((*str)[len]))
+	while (is_whitespace ((*str)[len]))
 	  ++len;
 	if ((*str)[len] != '(')
 	  continue;
@@ -2548,7 +2548,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 
       /* Skip over whitespace and brackets, keeping count of the number
 	 of brackets.  */
-      while (*str == ' ' || *str == '\t' || *str == '(')
+      while (is_whitespace (*str) || *str == '(')
 	if (*str++ == '(')
 	  str_depth++;
     }
@@ -2577,7 +2577,7 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
   probing_insn_operands = orig_probing;
 
   /* Match every open bracket.  */
-  while (crux_depth > 0 && (*str == ')' || *str == ' ' || *str == '\t'))
+  while (crux_depth > 0 && (*str == ')' || is_whitespace (*str)))
     if (*str++ == ')')
       crux_depth--;
 
@@ -2844,7 +2844,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   /* Parse the name of the instruction.  Terminate the string if whitespace
      is found so that str_hash_find only sees the name part of the string.  */
   for (asarg = str; *asarg!= '\0'; ++asarg)
-    if (ISSPACE (*asarg))
+    if (is_whitespace (*asarg))
       {
 	save_c = *asarg;
 	*asarg++ = '\0';
@@ -2891,7 +2891,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
       for (oparg = insn->args;; ++oparg)
 	{
 	  opargStart = oparg;
-	  asarg += strspn (asarg, " \t");
+	  while (is_whitespace (*asarg))
+	    ++asarg;
 	  switch (*oparg)
 	    {
 	    case '\0': /* End of args.  */
@@ -3520,7 +3521,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      if (reg_lookup (&asarg, RCLASS_GPR, &regno))
 		{
 		  char c = *oparg;
-		  if (*asarg == ' ')
+		  if (is_whitespace (*asarg))
 		    ++asarg;
 
 		  /* Now that we have assembled one operand, we use the args
@@ -3554,7 +3555,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			      ? RCLASS_GPR : RCLASS_FPR), &regno))
 		{
 		  char c = *oparg;
-		  if (*asarg == ' ')
+		  if (is_whitespace (*asarg))
 		    ++asarg;
 		  switch (c)
 		    {
@@ -4963,7 +4964,7 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
   else if (strncmp (name, "arch,", 5) == 0)
     {
       name += 5;
-      if (ISSPACE (*name) && *name != '\0')
+      if (is_whitespace (*name) && *name != '\0')
 	name++;
       riscv_update_subset (&riscv_rps_as, name);
       riscv_set_arch_str (&riscv_rps_as.subset_list->arch_str);
