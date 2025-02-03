@@ -164,7 +164,7 @@ register_name (expressionS *expressionP)
   int reg_number;
   char c, *p = input_line_pointer;
 
-  while (*p && *p != '\n' && *p != '\r' && *p != ',' && *p != ' ' && *p != ')')
+  while (!is_end_of_stmt (*p) && *p != ',' && !is_whitespace (*p) && *p != ')')
     p++;
 
   c = *p;
@@ -328,7 +328,7 @@ postfix (char *p)
 {
   while (*p != '-' && *p != '+')
     {
-      if (*p == 0 || *p == '\n' || *p == '\r' || *p == ' ' || *p == ',')
+      if (is_end_of_stmt (*p) || is_whitespace (*p) || *p == ',')
 	break;
       p++;
     }
@@ -400,7 +400,7 @@ get_operands (expressionS exp[], int cmp_hack)
 
   while (*p)
     {
-      while (*p == ' ' || *p == '\t' || *p == ',')
+      while (is_whitespace (*p) || *p == ',')
 	p++;
 
       if (*p == 0 || *p == '\n' || *p == '\r')
@@ -1294,7 +1294,7 @@ do_assemble (char *str,
   long long      insn;
 
   /* Drop leading whitespace.  */
-  while (*str == ' ')
+  while (is_whitespace (*str))
     str++;
 
   /* Find the opcode end.  */
@@ -1302,7 +1302,7 @@ do_assemble (char *str,
        *op_end
        && nlen < (NAME_BUF_LEN - 1)
        && *op_end != '/'
-       && !is_end_of_line[(unsigned char) *op_end] && *op_end != ' ';
+       && !is_end_of_stmt (*op_end) && !is_whitespace (*op_end);
        op_end++)
     {
       name[nlen] = TOLOWER (op_start[nlen]);
@@ -1829,7 +1829,7 @@ d30v_start_line (void)
 {
   char *c = input_line_pointer;
 
-  while (ISSPACE (*c))
+  while (is_whitespace (*c))
     c++;
 
   if (*c == '.')
