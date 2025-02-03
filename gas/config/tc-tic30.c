@@ -180,7 +180,7 @@ md_begin (void)
 	if (ISALPHA (c) || c == '_' || c == '.' || ISDIGIT (c))
 	  identifier_chars[c] = c;
 
-	if (c == ' ' || c == '\t')
+	if (is_whitespace (c))
 	  space_chars[c] = c;
 
 	if (c == '_')
