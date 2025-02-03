@@ -1231,7 +1231,7 @@ get_operands (sh_opcode_info *info, char *args, sh_operand_info *operand)
       /* The pre-processor will eliminate whitespace in front of '@'
 	 after the first argument; we may be called multiple times
 	 from assemble_ppi, so don't insist on finding whitespace here.  */
-      if (*ptr == ' ')
+      if (is_whitespace (*ptr))
 	ptr++;
 
       get_operand (&ptr, operand + 0);
@@ -2150,7 +2150,7 @@ find_cooked_opcode (char **str_p)
   unsigned int nlen = 0;
 
   /* Drop leading whitespace.  */
-  while (*str == ' ')
+  while (is_whitespace (*str))
     str++;
 
   /* Find the op code end.
@@ -2158,9 +2158,8 @@ find_cooked_opcode (char **str_p)
      any '@' after the first argument; we may be called from
      assemble_ppi, so the opcode might be terminated by an '@'.  */
   for (op_start = op_end = (unsigned char *) str;
-       *op_end
-       && nlen < sizeof (name) - 1
-       && !is_end_of_line[*op_end] && *op_end != ' ' && *op_end != '@';
+       nlen < sizeof (name) - 1
+       && !is_end_of_stmt (*op_end) && !is_whitespace (*op_end) && *op_end != '@';
        op_end++)
     {
       unsigned char c = op_start[nlen];
@@ -2514,10 +2513,11 @@ md_assemble (char *str)
       bool found = false;
 
       /* Identify opcode in string.  */
-      while (ISSPACE (*name))
+      while (is_whitespace (*name))
 	name++;
 
-      while (name[name_length] != '\0' && !ISSPACE (name[name_length]))
+      while (!is_end_of_stmt (name[name_length])
+	     && !is_whitespace (name[name_length]))
 	name_length++;
 
       /* Search for opcode in full list.  */
@@ -2576,7 +2576,7 @@ md_assemble (char *str)
 	    {
 	      /* Ignore trailing whitespace.  If there is any, it has already
 		 been compressed to a single space.  */
-	      if (*op_end == ' ')
+	      if (is_whitespace (*op_end))
 		op_end++;
 	    }
 	  else
