@@ -250,7 +250,7 @@ get_mri_string (int terminator, int *len)
 	     && ! is_end_of_line[(unsigned char) *input_line_pointer])
 	++input_line_pointer;
       s = input_line_pointer;
-      while (s > ret && (s[-1] == ' ' || s[-1] == '\t'))
+      while (s > ret && is_whitespace (s[-1]))
 	--s;
     }
 

@@ -29,10 +29,8 @@
 /* The routines in this file handle macro definition and expansion.
    They are called by gas.  */
 
-#define ISWHITE(x) ((x) == ' ' || (x) == '\t')
-
 #define ISSEP(x) \
- ((x) == ' ' || (x) == '\t' || (x) == ',' || (x) == '"' || (x) == ';' \
+ (is_whitespace (x) || (x) == ',' || (x) == '"' || (x) == ';' \
   || (x) == ')' || (x) == '(' \
   || ((flag_macro_alternate || flag_mri) && ((x) == '<' || (x) == '>')))
 
@@ -139,8 +137,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
       if (! LABELS_WITHOUT_COLONS)
 	{
 	  /* Skip leading whitespace.  */
-	  while (i < ptr->len && ISWHITE (ptr->ptr[i]))
-	    i++;
+	  i = sb_skip_white (i, ptr);
 	}
 
       for (;;)
@@ -154,8 +151,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	  if (i < ptr->len && is_name_ender (ptr->ptr[i]))
 	    i++;
 	  /* Skip whitespace.  */
-	  while (i < ptr->len && ISWHITE (ptr->ptr[i]))
-	    i++;
+	  i = sb_skip_white (i, ptr);
 	  /* Check for the colon.  */
 	  if (i >= ptr->len || ptr->ptr[i] != ':')
 	    {
@@ -174,8 +170,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	}
 
       /* Skip trailing whitespace.  */
-      while (i < ptr->len && ISWHITE (ptr->ptr[i]))
-	i++;
+      i = sb_skip_white (i, ptr);
 
       if (i < ptr->len && (ptr->ptr[i] == '.'
 			   || NO_PSEUDO_DOT
@@ -424,9 +419,7 @@ get_any_string (size_t idx, sb *in, sb *out)
 
 	  *in_br = '\0';
 	  while (idx < in->len
-		 && (*in_br
-		     || (in->ptr[idx] != ' '
-			 && in->ptr[idx] != '\t'))
+		 && (*in_br || !is_whitespace (in->ptr[idx]))
 		 && in->ptr[idx] != ','
 		 && (in->ptr[idx] != '<'
 		     || (! flag_macro_alternate && ! flag_mri)))
@@ -916,7 +909,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 	  if (! macro
 	      || src + 5 >= in->len
 	      || strncasecmp (in->ptr + src, "LOCAL", 5) != 0
-	      || ! ISWHITE (in->ptr[src + 5])
+	      || ! is_whitespace (in->ptr[src + 5])
 	      /* PR 11507: Skip keyword LOCAL if it is found inside a quoted string.  */
 	      || inquote)
 	    {
@@ -1069,9 +1062,7 @@ macro_expand (size_t idx, sb *in, macro_entry *m, sb *out)
 	  /* The Microtec assembler ignores this if followed by a white space.
 	     (Macro invocation with empty extension) */
 	  idx++;
-	  if (    idx < in->len
-		  && in->ptr[idx] != ' '
-		  && in->ptr[idx] != '\t')
+	  if (idx < in->len && !is_whitespace (in->ptr[idx]))
 	    {
 	      formal_entry *n = new_formal ();
 
@@ -1192,7 +1183,7 @@ macro_expand (size_t idx, sb *in, macro_entry *m, sb *out)
 	{
 	  if (idx < in->len && in->ptr[idx] == ',')
 	    ++idx;
-	  if (idx < in->len && ISWHITE (in->ptr[idx]))
+	  if (idx < in->len && is_whitespace (in->ptr[idx]))
 	    break;
 	}
     }

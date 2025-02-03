@@ -29,17 +29,18 @@ extern bool input_from_string;
 
 #ifdef PERMIT_WHITESPACE
 #define SKIP_WHITESPACE()			\
-  ((*input_line_pointer == ' ') ? ++input_line_pointer : 0)
+  (is_whitespace (*input_line_pointer) ? ++input_line_pointer : 0)
 #define SKIP_ALL_WHITESPACE()			\
-  while (*input_line_pointer == ' ') ++input_line_pointer
+  while (is_whitespace (*input_line_pointer)) ++input_line_pointer
 #else
-#define SKIP_WHITESPACE() know (*input_line_pointer != ' ' )
+#define SKIP_WHITESPACE() know (!is_whitespace (*input_line_pointer))
 #define SKIP_ALL_WHITESPACE() SKIP_WHITESPACE()
 #endif
 
-#define	LEX_NAME	(1)	/* may continue a name */
+#define LEX_NAME	(1)	/* may continue a name */
 #define LEX_BEGIN_NAME	(2)	/* may begin a name */
 #define LEX_END_NAME	(4)	/* ends a name */
+#define LEX_WHITE	(8)	/* whitespace */
 
 #define is_name_beginner(c) \
   ( lex_type[(unsigned char) (c)] & LEX_BEGIN_NAME )
@@ -47,6 +48,8 @@ extern bool input_from_string;
   ( lex_type[(unsigned char) (c)] & LEX_NAME       )
 #define is_name_ender(c) \
   ( lex_type[(unsigned char) (c)] & LEX_END_NAME   )
+#define is_whitespace(c) \
+  ( lex_type[(unsigned char) (c)] & LEX_WHITE      )
 
 /* The distinction of "line" and "statement" sadly is blurred by unhelpful
    naming of e.g. the underlying array.  Most users really mean "end of

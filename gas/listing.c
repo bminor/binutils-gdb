@@ -1152,7 +1152,7 @@ debugging_pseudo (list_info_type *list ATTRIBUTE_UNUSED, const char *line)
   in_debug = false;
 #endif
 
-  while (ISSPACE (*line))
+  while (is_whitespace (*line))
     line++;
 
   if (*line != '.')

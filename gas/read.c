@@ -76,6 +76,12 @@ bool input_from_string = false;
 die horribly;
 #endif
 
+#ifndef CR_EOL
+#define LEX_CR LEX_WHITE
+#else
+#define LEX_CR 0
+#endif
+
 #ifndef LEX_AT
 #define LEX_AT 0
 #endif
@@ -112,9 +118,9 @@ die horribly;
 
 /* Used by is_... macros. our ctype[].  */
 char lex_type[256] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, LEX_CR, 0, 0,	/* @ABCDEFGHIJKLMNO */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
-  0, 0, 0, LEX_HASH, LEX_DOLLAR, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, /* _!"#$%&'()*+,-./ */
+  8, 0, 0, LEX_HASH, LEX_DOLLAR, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, /* _!"#$%&'()*+,-./ */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, LEX_QM,	/* 0123456789:;<=>? */
   LEX_AT, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, LEX_BR, 0, LEX_BR, 0, 3, /* PQRSTUVWXYZ[\]^_ */
@@ -1068,11 +1074,11 @@ read_a_source_file (const char *name)
 
 			  if (*rest == ':')
 			    ++rest;
-			  if (*rest == ' ' || *rest == '\t')
+			  if (is_whitespace (*rest))
 			    ++rest;
 			  if ((strncasecmp (rest, "EQU", 3) == 0
 			       || strncasecmp (rest, "SET", 3) == 0)
-			      && (rest[3] == ' ' || rest[3] == '\t'))
+			      && is_whitespace (rest[3]))
 			    {
 			      input_line_pointer = rest + 3;
 			      equals (line_start,
@@ -1080,8 +1086,7 @@ read_a_source_file (const char *name)
 			      continue;
 			    }
 			  if (strncasecmp (rest, "MACRO", 5) == 0
-			      && (rest[5] == ' '
-				  || rest[5] == '\t'
+			      && (is_whitespace (rest[5])
 				  || is_end_of_line[(unsigned char) rest[5]]))
 			    mri_line_macro = 1;
 			}
@@ -1117,7 +1122,7 @@ read_a_source_file (const char *name)
 	     level.  */
 	  do
 	    nul_char = next_char = *input_line_pointer++;
-	  while (next_char == '\t' || next_char == ' ' || next_char == '\f');
+	  while (is_whitespace (next_char) || next_char == '\f');
 
 	  /* C is the 1st significant character.
 	     Input_line_pointer points after that character.  */
@@ -1146,12 +1151,12 @@ read_a_source_file (const char *name)
 		      if (*rest == ':')
 			++rest;
 
-		      if (*rest == ' ' || *rest == '\t')
+		      if (is_whitespace (*rest))
 			++rest;
 
 		      if ((strncasecmp (rest, "EQU", 3) == 0
 			   || strncasecmp (rest, "SET", 3) == 0)
-			  && (rest[3] == ' ' || rest[3] == '\t'))
+			  && is_whitespace (rest[3]))
 			{
 			  input_line_pointer = rest + 3;
 			  equals (s, 1);
@@ -1169,7 +1174,7 @@ read_a_source_file (const char *name)
 		  SKIP_WHITESPACE ();
 		}
 	      else if ((next_char == '=' && *rest == '=')
-		       || ((next_char == ' ' || next_char == '\t')
+		       || (is_whitespace (next_char)
 			   && rest[0] == '='
 			   && rest[1] == '='))
 		{
@@ -1177,7 +1182,7 @@ read_a_source_file (const char *name)
 		  demand_empty_rest_of_line ();
 		}
 	      else if ((next_char == '='
-		       || ((next_char == ' ' || next_char == '\t')
+		       || (is_whitespace (next_char)
 			    && *rest == '='))
 #ifdef TC_EQUAL_IN_INSN
 			   && !TC_EQUAL_IN_INSN (next_char, s)
@@ -1284,7 +1289,7 @@ read_a_source_file (const char *name)
 		      /* The following skip of whitespace is compulsory.
 			 A well shaped space is sometimes all that separates
 			 keyword from operands.  */
-		      if (next_char == ' ' || next_char == '\t')
+		      if (is_whitespace (next_char))
 			input_line_pointer++;
 
 		      /* Input_line is restored.
@@ -1497,7 +1502,7 @@ mri_comment_field (char *stopcp)
   know (flag_m68k_mri);
 
   for (s = input_line_pointer;
-       ((!is_end_of_line[(unsigned char) *s] && *s != ' ' && *s != '\t')
+       ((!is_end_of_line[(unsigned char) *s] && !is_whitespace (*s))
 	|| inquote);
        s++)
     {
@@ -6321,7 +6326,7 @@ equals (char *sym_name, int reassign)
   if (reassign < 0 && *input_line_pointer == '=')
     input_line_pointer++;
 
-  while (*input_line_pointer == ' ' || *input_line_pointer == '\t')
+  while (is_whitespace (*input_line_pointer))
     input_line_pointer++;
 
   if (flag_mri)
@@ -6495,8 +6500,7 @@ s_include (int arg ATTRIBUTE_UNUSED)
       SKIP_WHITESPACE ();
       i = 0;
       while (!is_end_of_line[(unsigned char) *input_line_pointer]
-	     && *input_line_pointer != ' '
-	     && *input_line_pointer != '\t')
+	     && !is_whitespace (*input_line_pointer))
 	{
 	  obstack_1grow (&notes, *input_line_pointer);
 	  ++input_line_pointer;

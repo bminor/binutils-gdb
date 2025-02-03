@@ -1432,7 +1432,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
      created.  Doing it here saves lines of code.  */
   clean_up_expression (expressionP);
   SKIP_ALL_WHITESPACE ();		/* -> 1st char after operand.  */
-  know (*input_line_pointer != ' ');
+  know (!is_whitespace (*input_line_pointer));
 
   /* The PA port needs this information.  */
   if (expressionP->X_add_symbol)
@@ -1854,7 +1854,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
   retval = operand (resultP, mode);
 
   /* operand () gobbles spaces.  */
-  know (*input_line_pointer != ' ');
+  know (!is_whitespace (*input_line_pointer));
 
   op_left = operatorf (&op_chars);
   while (op_left != O_illegal && op_rank[(int) op_left] > rank)
@@ -1876,7 +1876,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  right.X_op_symbol = NULL;
 	}
 
-      know (*input_line_pointer != ' ');
+      know (!is_whitespace (*input_line_pointer));
 
       if (op_left == O_index)
 	{

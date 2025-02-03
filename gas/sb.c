@@ -215,9 +215,7 @@ sb_terminate (sb *in)
 size_t
 sb_skip_white (size_t idx, sb *ptr)
 {
-  while (idx < ptr->len
-	 && (ptr->ptr[idx] == ' '
-	     || ptr->ptr[idx] == '\t'))
+  while (idx < ptr->len && is_whitespace (ptr->ptr[idx]))
     idx++;
   return idx;
 }
@@ -229,18 +227,14 @@ sb_skip_white (size_t idx, sb *ptr)
 size_t
 sb_skip_comma (size_t idx, sb *ptr)
 {
-  while (idx < ptr->len
-	 && (ptr->ptr[idx] == ' '
-	     || ptr->ptr[idx] == '\t'))
+  while (idx < ptr->len && is_whitespace (ptr->ptr[idx]))
     idx++;
 
   if (idx < ptr->len
       && ptr->ptr[idx] == ',')
     idx++;
 
-  while (idx < ptr->len
-	 && (ptr->ptr[idx] == ' '
-	     || ptr->ptr[idx] == '\t'))
+  while (idx < ptr->len && is_whitespace (ptr->ptr[idx]))
     idx++;
 
   return idx;
