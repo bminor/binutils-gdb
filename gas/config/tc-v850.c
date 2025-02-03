@@ -1338,8 +1338,7 @@ vector_register_name (expressionS *expressionP)
 static void
 skip_white_space (void)
 {
-  while (*input_line_pointer == ' '
-	 || *input_line_pointer == '\t')
+  while (is_whitespace (*input_line_pointer))
     ++input_line_pointer;
 }
 
@@ -2306,7 +2305,7 @@ md_assemble (char *str)
   most_match_errmsg[0] = 0;
 
   /* Get the opcode.  */
-  for (s = str; *s != '\0' && ! ISSPACE (*s); s++)
+  for (s = str; ! is_end_of_stmt (*s) && ! is_whitespace (*s); s++)
     continue;
 
   if (*s != '\0')
@@ -2323,7 +2322,7 @@ md_assemble (char *str)
     }
 
   str = s;
-  while (ISSPACE (*str))
+  while (is_whitespace (*str))
     ++str;
 
   start_of_operands = str;
@@ -2384,7 +2383,7 @@ md_assemble (char *str)
 
 	  errmsg = NULL;
 
-	  while (*str == ' ')
+	  while (is_whitespace (*str))
 	    ++str;
 
 	  if (operand->flags & V850_OPERAND_BANG
@@ -2397,7 +2396,7 @@ md_assemble (char *str)
 	  if (*str == ',' || *str == '[' || *str == ']')
 	    ++str;
 
-	  while (*str == ' ')
+	  while (is_whitespace (*str))
 	    ++str;
 
 	  if (   (strcmp (opcode->name, "pushsp") == 0
@@ -2792,7 +2791,7 @@ md_assemble (char *str)
 		  str = input_line_pointer;
 		  input_line_pointer = hold;
 
-		  while (*str == ' ' || *str == ','
+		  while (is_whitespace (*str) || *str == ','
 			 || *str == '[' || *str == ']')
 		    ++str;
 		  continue;
@@ -2996,12 +2995,12 @@ md_assemble (char *str)
 	  str = input_line_pointer;
 	  input_line_pointer = hold;
 
-	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']'
+	  while (is_whitespace (*str) || *str == ',' || *str == '[' || *str == ']'
 		 || *str == ')')
 	    ++str;
 	}
 
-      while (ISSPACE (*str))
+      while (is_whitespace (*str))
 	++str;
 
       if (*str == '\0')
