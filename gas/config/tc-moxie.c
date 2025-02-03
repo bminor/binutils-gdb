@@ -163,13 +163,13 @@ md_assemble (char *str)
   int nlen = 0;
 
   /* Drop leading whitespace.  */
-  while (*str == ' ')
+  while (is_whitespace (*str))
     str++;
 
   /* Find the op code end.  */
   op_start = str;
   for (op_end = str;
-       *op_end && !is_end_of_line[*op_end & 0xff] && *op_end != ' ';
+       !is_end_of_stmt (*op_end) && !is_whitespace (*op_end);
        op_end++)
     nlen++;
 
@@ -193,7 +193,7 @@ md_assemble (char *str)
     {
     case MOXIE_F2_A8V:
       iword = (1<<15) | (opcode->opcode << 12);
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	expressionS arg;
@@ -214,7 +214,7 @@ md_assemble (char *str)
       break;
     case MOXIE_F1_AB:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	int dest, src;
@@ -224,7 +224,7 @@ md_assemble (char *str)
 	op_end++;
 	src  = parse_register_operand (&op_end);
 	iword += (dest << 4) + src;
-	while (ISSPACE (*op_end))
+	while (is_whitespace (*op_end))
 	  op_end++;
 	if (*op_end != 0)
 	  as_warn (_("extra stuff on line ignored"));
@@ -232,7 +232,7 @@ md_assemble (char *str)
       break;
     case MOXIE_F1_A4:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	expressionS arg;
@@ -240,7 +240,7 @@ md_assemble (char *str)
 	int regnum;
 
  	regnum = parse_register_operand (&op_end);
-	while (ISSPACE (*op_end))
+	while (is_whitespace (*op_end))
 	  op_end++;
 
 	iword += (regnum << 4);
@@ -266,7 +266,7 @@ md_assemble (char *str)
     case MOXIE_F1_M:
     case MOXIE_F1_4:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	expressionS arg;
@@ -284,19 +284,19 @@ md_assemble (char *str)
       break;
     case MOXIE_F1_NARG:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       if (*op_end != 0)
 	as_warn (_("extra stuff on line ignored"));
       break;
     case MOXIE_F1_A:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	int reg;
 	reg = parse_register_operand (&op_end);
-	while (ISSPACE (*op_end))
+	while (is_whitespace (*op_end))
 	  op_end++;
 	if (*op_end != 0)
 	  as_warn (_("extra stuff on line ignored"));
@@ -305,7 +305,7 @@ md_assemble (char *str)
       break;
     case MOXIE_F1_ABi:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	int a, b;
@@ -329,7 +329,7 @@ md_assemble (char *str)
 	  }
 	op_end++;
 	iword += (a << 4) + b;
-	while (ISSPACE (*op_end))
+	while (is_whitespace (*op_end))
 	  op_end++;
 	if (*op_end != 0)
 	  as_warn (_("extra stuff on line ignored"));
@@ -337,7 +337,7 @@ md_assemble (char *str)
       break;
     case MOXIE_F1_AiB:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	int a, b;
@@ -361,7 +361,7 @@ md_assemble (char *str)
 	op_end++;
 	b = parse_register_operand (&op_end);
 	iword += (a << 4) + b;
-	while (ISSPACE (*op_end))
+	while (is_whitespace (*op_end))
 	  op_end++;
 	if (*op_end != 0)
 	  as_warn (_("extra stuff on line ignored"));
@@ -369,7 +369,7 @@ md_assemble (char *str)
       break;
     case MOXIE_F1_4A:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	expressionS arg;
@@ -394,7 +394,7 @@ md_assemble (char *str)
 	op_end++;
 
  	a = parse_register_operand (&op_end);
-	while (ISSPACE (*op_end))
+	while (is_whitespace (*op_end))
 	  op_end++;
 	if (*op_end != 0)
 	  as_warn (_("extra stuff on line ignored"));
@@ -404,7 +404,7 @@ md_assemble (char *str)
       break;
     case MOXIE_F1_ABi2:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	expressionS arg;
@@ -412,7 +412,7 @@ md_assemble (char *str)
 	int a, b;
 
  	a = parse_register_operand (&op_end);
-	while (ISSPACE (*op_end))
+	while (is_whitespace (*op_end))
 	  op_end++;
 
 	if (*op_end != ',')
@@ -448,7 +448,7 @@ md_assemble (char *str)
 	  }
 	op_end++;
 
-	while (ISSPACE (*op_end))
+	while (is_whitespace (*op_end))
 	  op_end++;
 	if (*op_end != 0)
 	  as_warn (_("extra stuff on line ignored"));
@@ -458,7 +458,7 @@ md_assemble (char *str)
       break;
     case MOXIE_F1_AiB2:
       iword = opcode->opcode << 8;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	expressionS arg;
@@ -499,10 +499,7 @@ md_assemble (char *str)
 	op_end++;
 
  	b = parse_register_operand (&op_end);
-	while (ISSPACE (*op_end))
-	  op_end++;
-
-	while (ISSPACE (*op_end))
+	while (is_whitespace (*op_end))
 	  op_end++;
 	if (*op_end != 0)
 	  as_warn (_("extra stuff on line ignored"));
@@ -512,14 +509,14 @@ md_assemble (char *str)
       break;
     case MOXIE_F2_NARG:
       iword = opcode->opcode << 12;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       if (*op_end != 0)
 	as_warn (_("extra stuff on line ignored"));
       break;
     case MOXIE_F3_PCREL:
       iword = (3<<14) | (opcode->opcode << 10);
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       {
 	expressionS arg;
@@ -535,7 +532,7 @@ md_assemble (char *str)
       break;
     case MOXIE_BAD:
       iword = 0;
-      while (ISSPACE (*op_end))
+      while (is_whitespace (*op_end))
 	op_end++;
       if (*op_end != 0)
 	as_warn (_("extra stuff on line ignored"));
@@ -547,7 +544,7 @@ md_assemble (char *str)
   md_number_to_chars (p, iword, 2);
   dwarf2_emit_insn (2);
 
-  while (ISSPACE (*op_end))
+  while (is_whitespace (*op_end))
     op_end++;
 
   if (*op_end != 0)
