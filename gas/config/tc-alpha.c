@@ -4201,7 +4201,7 @@ s_alpha_section_name (void)
     {
       char *end = input_line_pointer;
 
-      while (0 == strchr ("\n\t,; ", *end))
+      while (!is_whitespace (*end) && !is_end_of_stmt (*end) && *end != ',')
 	end++;
       if (end == input_line_pointer)
 	{
