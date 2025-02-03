@@ -282,7 +282,8 @@ rx_include (int ignore)
   last_char = find_end_of_line (filename, false);
   input_line_pointer = last_char;
 
-  while (last_char >= filename && (* last_char == ' ' || * last_char == '\n'))
+  while (last_char >= filename
+	 && (is_whitespace (* last_char) || is_end_of_stmt (* last_char)))
     -- last_char;
   end_char = *(++ last_char);
   * last_char = 0;
@@ -425,14 +426,14 @@ parse_rx_section (char * name)
 	{
 	  *p = end_char;
 
-	  if (end_char == ' ')
-	    while (ISSPACE (*p))
+	  if (is_whitespace (end_char))
+	    while (is_whitespace (*p))
 	      p++;
 
 	  if (*p == '=')
 	    {
 	      ++ p;
-	      while (ISSPACE (*p))
+	      while (is_whitespace (*p))
 		p++;
 	      switch (*p)
 		{
@@ -517,7 +518,7 @@ rx_section (int ignore)
     {
       int len = p - input_line_pointer;
 
-      while (ISSPACE (*++p))
+      while (is_whitespace (*++p))
 	;
 
       if (*p != '"' && *p != '#')
@@ -1060,7 +1061,7 @@ rx_equ (char * name, char * expression)
   char * name_end;
   char * saved_ilp;
 
-  while (ISSPACE (* name))
+  while (is_whitespace (* name))
     name ++;
 
   for (name_end = name + 1; *name_end; name_end ++)
@@ -1094,7 +1095,7 @@ scan_for_infix_rx_pseudo_ops (char * str)
     return false;
 
   /* A real pseudo-op must be preceded by whitespace.  */
-  if (dot[-1] != ' ' && dot[-1] != '\t')
+  if (!is_whitespace (dot[-1]))
     return false;
 
   pseudo_op = dot + 1;
