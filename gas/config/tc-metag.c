@@ -41,7 +41,6 @@ static char mnemonic_chars[256];
 
 #define is_register_char(x) (register_chars[(unsigned char) x])
 #define is_mnemonic_char(x) (mnemonic_chars[(unsigned char) x])
-#define is_whitespace_char(x) (((x) == ' ') || ((x) == '\t'))
 #define is_space_char(x) ((x) == ' ')
 
 #define FPU_PREFIX_CHAR 'f'
@@ -221,7 +220,7 @@ skip_whitespace (const char *line)
 {
   const char *l = line;
 
-  if (is_whitespace_char (*l))
+  if (is_whitespace (*l))
     {
       l++;
     }
@@ -6052,7 +6051,7 @@ parse_prefix (const char *line, metag_insn *insn)
 	      /* Check this isn't a split condition beginning with L.  */
 	      l2 = parse_split_condition (l2, insn);
 
-	      if (l2 && is_whitespace_char (*l2))
+	      if (l2 && is_whitespace (*l2))
 		{
 		  l = l2;
 		}
@@ -6090,7 +6089,7 @@ parse_prefix (const char *line, metag_insn *insn)
 	      l++;
 	    }
 
-	  if (! is_whitespace_char (*l))
+	  if (! is_whitespace (*l))
 	    {
 	      l = parse_split_condition (l, insn);
 
@@ -6116,7 +6115,7 @@ parse_prefix (const char *line, metag_insn *insn)
 
 	  insn->dsp_width = DSP_WIDTH_SINGLE;
 
-	  while (!is_whitespace_char (*l))
+	  while (!is_whitespace (*l))
 	    {
 	      /* We have to check for split condition codes first
 		 because they are the longest strings to match,
