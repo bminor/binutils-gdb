@@ -1857,11 +1857,12 @@ expression_end (const char *name)
 	case ',':
 	case ':':
 	  return name;
-	case ' ':
-	case '\t':
-	  ++name;
-	  continue;
 	default:
+	  if (is_whitespace (*name))
+	    {
+	      ++name;
+	      continue;
+	    }
 	  return 0;
 	}
     }
