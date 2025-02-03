@@ -1081,7 +1081,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXeEpPHh";
 
 /* Separator character handling.  */
 
-#define skip_whitespace(str)  do { if (*(str) == ' ') ++(str); } while (0)
+#define skip_whitespace(str)  do { if (is_whitespace (*(str))) ++(str); } while (0)
 
 enum fp_16bit_format
 {
@@ -1499,26 +1499,19 @@ parse_neon_type (struct neon_type *type, char **str)
 	  goto done;
 	case 'b':
 	  thistype = NT_bfloat;
-	  switch (TOLOWER (*(++ptr)))
+	  if (TOLOWER (*(++ptr)) != 'f')
 	    {
-	    case 'f':
-	      ptr += 1;
-	      thissize = strtoul (ptr, &ptr, 10);
-	      if (thissize != 16)
-		{
-		  as_bad (_("bad size %d in type specifier"), thissize);
-		  return FAIL;
-		}
-	      goto done;
-	    case '0': case '1': case '2': case '3': case '4':
-	    case '5': case '6': case '7': case '8': case '9':
-	    case ' ': case '.':
 	      as_bad (_("unexpected type character `b' -- did you mean `bf'?"));
 	      return FAIL;
-	    default:
-	      break;
 	    }
-	  break;
+	  ptr += 1;
+	  thissize = strtoul (ptr, &ptr, 10);
+	  if (thissize != 16)
+	    {
+	      as_bad (_("bad size %d in type specifier"), thissize);
+	      return FAIL;
+	    }
+	  goto done;
 	default:
 	  as_bad (_("unexpected character `%c' in type specifier"), *ptr);
 	  return FAIL;
@@ -5055,7 +5048,8 @@ set_fp16_format (int dummy ATTRIBUTE_UNUSED)
   new_format = ARM_FP16_FORMAT_DEFAULT;
 
   name = input_line_pointer;
-  while (*input_line_pointer && !ISSPACE (*input_line_pointer))
+  while (!is_end_of_stmt (*input_line_pointer)
+	 && !is_whitespace (*input_line_pointer))
     input_line_pointer++;
 
   saved_char = *input_line_pointer;
@@ -5366,7 +5360,7 @@ parse_qfloat_immediate (char **ccp, int *immed)
     return FAIL;
   else
     {
-      for (; *fpnum != '\0' && *fpnum != ' ' && *fpnum != '\n'; fpnum++)
+      for (; *fpnum != '\0' && !is_whitespace (*fpnum) && *fpnum != '\n'; fpnum++)
 	if (*fpnum == '.' || *fpnum == 'e' || *fpnum == 'E')
 	  {
 	    found_fpchar = 1;
@@ -22450,7 +22444,7 @@ opcode_lookup (char **str)
   /* Scan up to the end of the mnemonic, which must end in white space,
      '.' (in unified mode, or for Neon/VFP instructions), or end of string.  */
   for (base = end = *str; *end != '\0'; end++)
-    if (*end == ' ' || *end == '.')
+    if (is_whitespace (*end) || *end == '.')
       break;
 
   if (end == base)
@@ -22481,7 +22475,7 @@ opcode_lookup (char **str)
 	  if (parse_neon_type (&inst.vectype, str) == FAIL)
 	    return NULL;
 	}
-      else if (end[offset] != '\0' && end[offset] != ' ')
+      else if (end[offset] != '\0' && !is_whitespace (end[offset]))
 	return NULL;
     }
   else
