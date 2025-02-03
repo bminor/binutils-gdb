@@ -1424,9 +1424,9 @@ loongarch_assemble_INSNs (char *str, unsigned int expand_from_macro)
       the_one.name = str;
       the_one.expand_from_macro = expand_from_macro;
 
-      for (; *str && *str != ' '; str++)
+      for (; *str && !is_whitespace (*str); str++)
 	;
-      if (*str == ' ')
+      if (is_whitespace (*str))
 	*str++ = '\0';
 
       loongarch_split_args_by_comma (str, the_one.arg_strs);
