@@ -812,7 +812,7 @@ xgate_elf_final_processing (void)
 static inline char *
 skip_whitespace (char *s)
 {
-  while (*s == ' ' || *s == '\t' || *s == '(' || *s == ')')
+  while (is_whitespace (*s) || *s == '(' || *s == ')')
     s++;
 
   return s;
