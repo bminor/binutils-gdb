@@ -1082,7 +1082,7 @@ reg_name_search (char *name)
 static char *
 skip_whites (char *p)
 {
-  while (*p == ' ' || *p == '\t')
+  while (is_whitespace (*p))
     p++;
 
   return p;
@@ -1301,7 +1301,7 @@ get_operand (operand *oper, int which, long opmode)
       char c = 0;
 
       p = skip_whites (p);
-      while (*p && *p != ' ' && *p != '\t')
+      while (*p && !is_whitespace (*p))
 	p++;
 
       if (*p)
@@ -1461,7 +1461,7 @@ get_operand (operand *oper, int which, long opmode)
     mode = M6811_OP_IND16 | M6811_OP_JUMP_REL;
 
   p = input_line_pointer;
-  while (*p == ' ' || *p == '\t')
+  while (is_whitespace (*p))
     p++;
   input_line_pointer = p;
   oper->mode = mode;
@@ -2823,13 +2823,13 @@ md_assemble (char *str)
   int alias_id = -1;
 
   /* Drop leading whitespace.  */
-  while (*str == ' ')
+  while (is_whitespace (*str))
     str++;
 
   /* Find the opcode end and get the opcode in 'name'.  The opcode is forced
      lower case (the opcode table only has lower case op-codes).  */
   for (op_start = op_end = (unsigned char *) str;
-       *op_end && !is_end_of_line[*op_end] && *op_end != ' ';
+       !is_end_of_stmt (*op_end) && !is_whitespace (*op_end);
        op_end++)
     {
       name[nlen] = TOLOWER (op_start[nlen]);
@@ -3445,7 +3445,7 @@ md_assemble (char *str)
         {
           char *p = input_line_pointer;
 
-          while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
+          while (is_whitespace (*p) || *p == '\n' || *p == '\r')
 	    p++;
 
           if (*p != '\n' && *p)
@@ -3491,15 +3491,15 @@ md_assemble (char *str)
      to Motorola assembler specs.  */
   if (opc == NULL && flag_mri)
     {
-      if (*op_end == ' ' || *op_end == '\t')
+      if (is_whitespace (*op_end))
 	{
-	  while (*op_end == ' ' || *op_end == '\t')
+	  while (is_whitespace (*op_end))
 	    op_end++;
 
 	  if (nlen < 19
 	      && (*op_end &&
 		  (is_end_of_line[op_end[1]]
-		   || op_end[1] == ' ' || op_end[1] == '\t'
+		   || is_whitespace (op_end[1])
 		   || !ISALNUM (op_end[1])))
 	      && (*op_end == 'a' || *op_end == 'b'
 		  || *op_end == 'A' || *op_end == 'B'
@@ -3548,7 +3548,7 @@ md_assemble (char *str)
     {
       char *p = input_line_pointer;
 
-      while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
+      while (is_whitespace (*p) || *p == '\n' || *p == '\r')
 	p++;
 
       if (*p != '\n' && *p)
