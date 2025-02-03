@@ -741,6 +741,7 @@ ALL_64_TARGET_OBS = \
 	amd64-darwin-tdep.o \
 	amd64-dicos-tdep.o \
 	amd64-fbsd-tdep.o \
+	amd64-gnu-tdep.o \
 	amd64-linux-tdep.o \
 	amd64-netbsd-tdep.o \
 	amd64-obsd-tdep.o \
@@ -1700,6 +1701,7 @@ ALLDEPFILES = \
 	amd64-dicos-tdep.c \
 	amd64-fbsd-nat.c \
 	amd64-fbsd-tdep.c \
+	amd64-gnu-tdep.c \
 	amd64-linux-nat.c \
 	amd64-linux-tdep.c \
 	amd64-nat.c \
@@ -1755,7 +1757,6 @@ ALLDEPFILES = \
 	i386-dicos-tdep.c \
 	i386-fbsd-nat.c \
 	i386-fbsd-tdep.c \
-	i386-gnu-nat.c \
 	i386-gnu-tdep.c \
 	i386-linux-nat.c \
 	i386-linux-tdep.c \
@@ -1882,6 +1883,7 @@ ALLDEPFILES = \
 	vax-tdep.c \
 	windows-nat.c \
 	windows-tdep.c \
+	x86-gnu-nat.c \
 	x86-nat.c \
 	x86-tdep.c \
 	xcoffread.c \

@@ -22,9 +22,16 @@
 /* Thread flavors used in re-setting the T bit.  */
 #define THREAD_STATE_FLAVOR		i386_REGS_SEGS_STATE
 #define THREAD_STATE_SIZE		i386_THREAD_STATE_COUNT
+#ifdef __x86_64__
+#define THREAD_STATE_SET_TRACED(state) \
+	((struct i386_thread_state *) (state))->rfl |= 0x100
+#define THREAD_STATE_CLEAR_TRACED(state) \
+	((((struct i386_thread_state *) (state))->rfl &= ~0x100), 1)
+#else
 #define THREAD_STATE_SET_TRACED(state) \
   	((struct i386_thread_state *) (state))->efl |= 0x100
 #define THREAD_STATE_CLEAR_TRACED(state) \
   	((((struct i386_thread_state *) (state))->efl &= ~0x100), 1)
+#endif /* __x86_64__ */
 
 #endif /* CONFIG_I386_NM_I386GNU_H */
