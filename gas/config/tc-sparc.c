@@ -1743,13 +1743,15 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 
     case ',':
       comma = 1;
-      /* Fall through.  */
-
-    case ' ':
       *s++ = '\0';
       break;
 
     default:
+      if (is_whitespace (*s))
+	{
+	  *s++ = '\0';
+	  break;
+	}
       as_bad (_("Unknown opcode: `%s'"), str);
       *pinsn = NULL;
       return special_case;
@@ -1798,11 +1800,11 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 			    goto error;
 			  }
 			kmask |= jmask;
-			while (*s == ' ')
+			while (is_whitespace (*s))
 			  ++s;
 			if (*s == '|' || *s == '+')
 			  ++s;
-			while (*s == ' ')
+			while (is_whitespace (*s))
 			  ++s;
 		      }
 		  }
@@ -2039,7 +2041,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      goto immediate;
 
 	    case ')':
-	      if (*s == ' ')
+	      if (is_whitespace (*s))
 		s++;
 	      if ((s[0] == '0' && s[1] == 'x' && ISXDIGIT (s[2]))
 		  || ISDIGIT (*s))
@@ -2131,7 +2133,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case 'z':
-	      if (*s == ' ')
+	      if (is_whitespace (*s))
 		{
 		  ++s;
 		}
@@ -2144,7 +2146,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case 'Z':
-	      if (*s == ' ')
+	      if (is_whitespace (*s))
 		{
 		  ++s;
 		}
@@ -2157,7 +2159,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case '6':
-	      if (*s == ' ')
+	      if (is_whitespace (*s))
 		{
 		  ++s;
 		}
@@ -2169,7 +2171,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case '7':
-	      if (*s == ' ')
+	      if (is_whitespace (*s))
 		{
 		  ++s;
 		}
@@ -2181,7 +2183,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case '8':
-	      if (*s == ' ')
+	      if (is_whitespace (*s))
 		{
 		  ++s;
 		}
@@ -2193,7 +2195,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      break;
 
 	    case '9':
-	      if (*s == ' ')
+	      if (is_whitespace (*s))
 		{
 		  ++s;
 		}
@@ -2303,8 +2305,12 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	    case '[':		/* These must match exactly.  */
 	    case ']':
 	    case ',':
-	    case ' ':
 	      if (*s++ == *args)
+		continue;
+	      break;
+
+	    case ' ':
+	      if (is_whitespace (*s++))
 		continue;
 	      break;
 
@@ -2680,7 +2686,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      /* fallthrough */
 
 	    immediate:
-	      if (*s == ' ')
+	      if (is_whitespace (*s))
 		s++;
 
 	      {
