@@ -212,15 +212,14 @@ md_assemble (char *str)
   bool can_sc;
 
   /* Drop leading whitespace.  */
-  while (*str == ' ')
+  while (is_whitespace (*str))
     str++;
 
   /* Find the op code end.  */
   op_start = str;
   for (op_end = str;
-       *op_end
-       && !is_end_of_line[*op_end & 0xff]
-       && *op_end != ' '
+       !is_end_of_stmt (*op_end)
+       && !is_whitespace (*op_end)
        && *op_end != '.';
        op_end++)
     nlen++;
@@ -273,7 +272,7 @@ md_assemble (char *str)
       b |= dw << FT32_FLD_DW_BIT;
     }
 
-  while (ISSPACE (*op_end))
+  while (is_whitespace (*op_end))
     op_end++;
 
   output = frag_more (4);
@@ -392,7 +391,7 @@ md_assemble (char *str)
 
           if (f)
             {
-              while (ISSPACE (*op_end))
+              while (is_whitespace (*op_end))
                 op_end++;
 
               if (*op_end != ',')
@@ -402,13 +401,13 @@ md_assemble (char *str)
                 }
 
               op_end++;
-              while (ISSPACE (*op_end))
+              while (is_whitespace (*op_end))
                 op_end++;
             }
         }
     }
 
-  if (*op_end != 0)
+  if (!is_end_of_stmt (*op_end))
     as_warn (_("extra stuff on line ignored"));
 
   can_sc = ft32_shortcode (b, &sc);
@@ -434,10 +433,10 @@ md_assemble (char *str)
 
   dwarf2_emit_insn (4);
 
-  while (ISSPACE (*op_end))
+  while (is_whitespace (*op_end))
     op_end++;
 
-  if (*op_end != 0)
+  if (!is_end_of_stmt (*op_end))
     as_warn ("extra stuff on line ignored");
 
   if (pending_reloc)
