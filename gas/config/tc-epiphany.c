@@ -353,7 +353,7 @@ parse_reglist (const char * s, int * mask)
     {
       long value;
 
-      while (*s == ' ')
+      while (is_whitespace (*s))
 	++s;
 
       /* Parse a list with "," or "}" as limiters.  */
@@ -371,7 +371,7 @@ parse_reglist (const char * s, int * mask)
 	return _("register is out of order");
       *mask |= regmask;
 
-      while (*s==' ')
+      while (is_whitespace (*s))
 	++s;
 
       if (*s == '}')
