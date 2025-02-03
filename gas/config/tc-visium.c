@@ -866,7 +866,7 @@ md_atof (int type, char *litP, int *sizeP)
 static inline char *
 skip_space (char *s)
 {
-  while (*s == ' ' || *s == '\t')
+  while (is_whitespace (*s))
     ++s;
 
   return s;
@@ -1029,7 +1029,7 @@ md_assemble (char *str0)
   this_dest = 0;
 
   /* Drop leading whitespace (probably not required).  */
-  while (*str == ' ')
+  while (is_whitespace (*str))
     str++;
 
   /* Get opcode mnemonic and make sure it's in lower case.  */
