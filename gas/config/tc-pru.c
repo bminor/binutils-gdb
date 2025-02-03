@@ -1441,7 +1441,7 @@ pru_parse_args (pru_insn_infoS *insn ATTRIBUTE_UNUSED, char *argstr,
       /* Strip trailing whitespace.  */
       len = strlen (parsed_args[i]);
       for (char *temp = parsed_args[i] + len - 1;
-	   len && ISSPACE (*temp);
+	   len && is_whitespace (*temp);
 	   temp--, len--)
 	*temp = '\0';
 
@@ -1830,7 +1830,7 @@ pru_frob_label (symbolS *lab)
 static inline char *
 skip_space (char *s)
 {
-  while (*s == ' ' || *s == '\t')
+  while (is_whitespace (*s))
     ++s;
   return s;
 }
