@@ -429,7 +429,7 @@ get_ctrl_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UN
   char *src = *ptr;
   int i, l;
 
-  while (*src == ' ')
+  while (is_whitespace (*src))
     src++;
 
   mode->mode = CLASS_CTRL;
@@ -472,7 +472,7 @@ get_flags_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_U
   int i;
   int j;
 
-  while (*src == ' ')
+  while (is_whitespace (*src))
     src++;
 
   mode->mode = CLASS_FLAGS;
@@ -517,7 +517,7 @@ get_interrupt_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBU
   char *src = *ptr;
   int i, l;
 
-  while (*src == ' ')
+  while (is_whitespace (*src))
     src++;
 
   mode->mode = CLASS_IMM;
@@ -607,7 +607,7 @@ get_cc_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UNUS
   char *src = *ptr;
   int i, l;
 
-  while (*src == ' ')
+  while (is_whitespace (*src))
     src++;
 
   mode->mode = CLASS_CC;
@@ -634,7 +634,7 @@ get_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UNUSED)
 
   mode->mode = 0;
 
-  while (*src == ' ')
+  while (is_whitespace (*src))
     src++;
   if (*src == '#')
     {
@@ -737,7 +737,7 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
     case 0:
       operand[0].mode = 0;
       operand[1].mode = 0;
-      while (*ptr == ' ')
+      while (is_whitespace (*ptr))
         ptr++;
       break;
 
@@ -745,7 +745,7 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
       if (opcode->arg_info[0] == CLASS_CC)
         {
           get_cc_operand (&ptr, operand + 0, 0);
-          while (*ptr == ' ')
+          while (is_whitespace (*ptr))
             ptr++;
           if (*ptr && ! is_end_of_line[(unsigned char) *ptr])
             {
@@ -757,7 +757,7 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
       else if (opcode->arg_info[0] == CLASS_FLAGS)
 	{
 	  get_flags_operand (&ptr, operand + 0, 0);
-	  while (*ptr == ' ')
+	  while (is_whitespace (*ptr))
 	    ptr++;
 	  if (*ptr && ! is_end_of_line[(unsigned char) *ptr])
 	    {
@@ -779,7 +779,7 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
       if (opcode->arg_info[0] == CLASS_CC)
         {
           get_cc_operand (&ptr, operand + 0, 0);
-          while (*ptr == ' ')
+          while (is_whitespace (*ptr))
             ptr++;
           if (*ptr != ',' && strchr (ptr + 1, ','))
             {
@@ -1219,12 +1219,12 @@ md_assemble (char *str)
   opcode_entry_type *opcode;
 
   /* Drop leading whitespace.  */
-  while (*str == ' ')
+  while (is_whitespace (*str))
     str++;
 
   /* Find the op code end.  */
   for (op_start = op_end = str;
-       *op_end != 0 && *op_end != ' ' && ! is_end_of_line[(unsigned char) *op_end];
+       ! is_whitespace (*op_end) && ! is_end_of_stmt (*op_end);
        op_end++)
     ;
 
@@ -1258,7 +1258,7 @@ md_assemble (char *str)
 
       oc = *old;
       *old = '\n';
-      while (*input_line_pointer == ' ')
+      while (is_whitespace (*input_line_pointer))
 	input_line_pointer++;
       p = (pseudo_typeS *) (opcode->func);
 
