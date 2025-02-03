@@ -989,7 +989,7 @@ assemble_two_insns (char *str1, char *str2, int parallel_p)
   {
     char *s2 = str1;
 
-    while (ISSPACE (*s2++))
+    while (is_whitespace (*s2++))
       continue;
 
     --s2;
