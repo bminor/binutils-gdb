@@ -2287,7 +2287,7 @@ parse_exp (char *s, expressionS *e)
   char *new;
 
   /* Skip whitespace.  */
-  while (ISSPACE (*s))
+  while (is_whitespace (*s))
     ++s;
 
   save = input_line_pointer;
@@ -3325,14 +3325,14 @@ parse_opcode (char *str)
   char macro_name[OPCODE_MAX_LEN + 1];
 
   /* Remove space ahead of string.  */
-  while (ISSPACE (*str))
+  while (is_whitespace (*str))
     str++;
   opcode_end = str;
 
   /* Find the opcode end.  */
   while (nlen < OPCODE_MAX_LEN
-	 && !is_end_of_line [(unsigned char) *opcode_end]
-	 && *opcode_end != ' ')
+	 && !is_end_of_stmt (*opcode_end)
+	 && !is_whitespace (*opcode_end))
     {
       /* Is csky force 32 or 16 instruction?  */
       if (IS_CSKY_V2 (mach_flag)
@@ -3378,7 +3378,7 @@ parse_opcode (char *str)
   macro_name[nlen] = '\0';
 
   /* Get csky_insn.opcode_end.  */
-  while (ISSPACE (*opcode_end))
+  while (is_whitespace (*opcode_end))
     opcode_end++;
   csky_insn.opcode_end = opcode_end;
 
@@ -4333,13 +4333,13 @@ parse_operands_op (char *str, struct csky_opcode_info *op)
 
       for (j = 0; j < csky_insn.number; j++)
 	{
-	  while (ISSPACE (*oper))
+	  while (is_whitespace (*oper))
 	    oper++;
 	  flag_pass = get_operand_value (&op[i], &oper,
 					 &op[i].oprnd.oprnds[j]);
 	  if (!flag_pass)
 	    break;
-	  while (ISSPACE (*oper))
+	  while (is_whitespace (*oper))
 	    oper++;
 	  /* Skip the ','.  */
 	  if (j < csky_insn.number - 1 && op[i].operand_num != -1)
@@ -4578,7 +4578,7 @@ md_assemble (char *str)
   mapping_state (MAP_TEXT);
   /* Tie dwarf2 debug info to every insn if set option --gdwarf2.  */
   dwarf2_emit_insn (0);
-  while (ISSPACE (* str))
+  while (is_whitespace (* str))
     str++;
   /* Get opcode from str.  */
   if (!parse_opcode (str))
@@ -5905,7 +5905,7 @@ static int
 csky_get_macro_operand (char *src_s, char *dst_s, char end_sym)
 {
   int nlen = 0;
-  while (ISSPACE (*src_s))
+  while (is_whitespace (*src_s))
     ++src_s;
   while (*src_s != end_sym)
     dst_s[nlen++] = *(src_s++);
@@ -7778,11 +7778,11 @@ csky_s_section (int ignore)
      pool.  */
   char * ilp = input_line_pointer;
 
-  while (*ilp != 0 && ISSPACE (*ilp))
+  while (is_whitespace (*ilp))
     ++ ilp;
 
   if (startswith (ilp, ".line")
-      && (ISSPACE (ilp[5]) || *ilp == '\n' || *ilp == '\r'))
+      && (is_whitespace (ilp[5]) || is_end_of_stmt (ilp[5])))
     ;
   else
     dump_literals (0);
