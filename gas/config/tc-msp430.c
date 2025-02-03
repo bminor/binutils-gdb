@@ -436,11 +436,11 @@ del_spaces (char * s)
 {
   while (*s)
     {
-      if (ISSPACE (*s))
+      if (is_whitespace (*s))
 	{
 	  char *m = s + 1;
 
-	  while (ISSPACE (*m) && *m)
+	  while (is_whitespace (*m) && *m)
 	    m++;
 	  memmove (s, m, strlen (m) + 1);
 	}
@@ -452,7 +452,7 @@ del_spaces (char * s)
 static inline char *
 skip_space (char * s)
 {
-  while (ISSPACE (*s))
+  while (is_whitespace (*s))
     ++s;
   return s;
 }
@@ -1813,7 +1813,7 @@ extract_cmd (char * from, char * to, int limit)
 {
   int size = 0;
 
-  while (*from && ! ISSPACE (*from) && *from != '.' && limit > size)
+  while (*from && ! is_whitespace (*from) && *from != '.' && limit > size)
     {
       *(to + size) = *from;
       from++;
@@ -2833,14 +2833,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  check = true;
 	  break;
 
-	case 0:
-	case ' ':
-	case '\n':
-	case '\r':
-	  as_warn (_("no size modifier after period, .w assumed"));
-	  break;
-
 	default:
+	  if (is_whitespace (*line) || is_end_of_stmt(*line))
+	    {
+	      as_warn (_("no size modifier after period, .w assumed"));
+	      break;
+	    }
 	  as_bad (_("unrecognised instruction size modifier .%c"),
 		   * line);
 	  return 0;
@@ -2853,7 +2851,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	}
     }
 
-  if (*line && ! ISSPACE (*line))
+  if (*line && ! is_whitespace (*line))
     {
       as_bad (_("junk found after instruction: %s.%s"),
 	      opcode->name, line);
