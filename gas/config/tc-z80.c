@@ -582,7 +582,7 @@ z80_elf_final_processing (void)
 static const char *
 skip_space (const char *s)
 {
-  while (*s == ' ' || *s == '\t')
+  while (is_whitespace (*s))
     ++s;
   return s;
 }
@@ -623,7 +623,7 @@ z80_start_line_hook (void)
 	case '#': /* force to use next expression as immediate value in SDCC */
 	  if (!sdcc_compat)
 	   break;
-	  if (ISSPACE(p[1]) && *skip_space (p + 1) == '(')
+	  if (is_whitespace (p[1]) && *skip_space (p + 1) == '(')
 	    { /* ld a,# (expr)... -> ld a,0+(expr)... */
 	      *p++ = '0';
 	      *p = '+';
@@ -3384,7 +3384,7 @@ assemble_suffix (const char **suffix)
 
   for (i = 0; (i < 3) && (ISALPHA (*p)); i++)
     sbuf[i] = TOLOWER (*p++);
-  if (*p && !ISSPACE (*p))
+  if (*p && !is_whitespace (*p))
     return 0;
   *suffix = p;
   sbuf[i] = 0;
@@ -3670,7 +3670,7 @@ md_assemble (char *str)
   else
     {
       dwarf2_emit_insn (0);
-      if ((*p) && (!ISSPACE (*p)))
+      if ((*p) && !is_whitespace (*p))
         {
           if (*p != '.' || !(ins_ok & INS_EZ80) || !assemble_suffix (&p))
             {
