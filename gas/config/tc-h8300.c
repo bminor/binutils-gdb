@@ -1904,12 +1904,12 @@ md_assemble (char *str)
   int size, i;
 
   /* Drop leading whitespace.  */
-  while (*str == ' ')
+  while (is_whitespace (*str))
     str++;
 
   /* Find the op code end.  */
   for (op_start = op_end = str;
-       *op_end != 0 && *op_end != ' ';
+       !is_end_of_stmt (*op_end) && !is_whitespace (*op_end);
        op_end++)
     {
       if (*op_end == '.')
