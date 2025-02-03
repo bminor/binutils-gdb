@@ -259,7 +259,7 @@ const size_t md_longopts_size = sizeof (md_longopts);
 #define s3_BAD_SKIP_COMMA            s3_BAD_ARGS
 #define s3_BAD_GARBAGE               _("garbage following instruction");
 
-#define s3_skip_whitespace(str)  while (*(str) == ' ') ++(str)
+#define s3_skip_whitespace(str)  while (is_whitespace (*(str))) ++(str)
 
 /* The name of the readonly data section.  */
 #define s3_RDATA_SECTION_NAME (OUTPUT_FLAVOR == bfd_target_aout_flavour \
@@ -1099,7 +1099,7 @@ s3_skip_past_comma (char **str)
   char c;
   int comma = 0;
 
-  while ((c = *p) == ' ' || c == ',')
+  while (is_whitespace (c = *p) || c == ',')
     {
       p++;
       if (c == ',' && comma++)
@@ -1376,7 +1376,7 @@ s3_data_op2 (char **str, int shift, enum score_data_type data_type)
       for (; *dataptr != '\0'; dataptr++)
         {
           *dataptr = TOLOWER (*dataptr);
-          if (*dataptr == '!' || *dataptr == ' ')
+          if (*dataptr == '!' || is_whitespace (*dataptr))
             break;
         }
       dataptr = (char *)data_exp;
@@ -2650,7 +2650,7 @@ s3_parse_16_32_inst (char *insnstr, bool gen_frag_p)
   s3_skip_whitespace (operator);
 
   for (p = operator; *p != '\0'; p++)
-    if ((*p == ' ') || (*p == '!'))
+    if (is_whitespace (*p) || (*p == '!'))
       break;
 
   if (*p == '!')
@@ -2700,7 +2700,7 @@ s3_parse_48_inst (char *insnstr, bool gen_frag_p)
   s3_skip_whitespace (operator);
 
   for (p = operator; *p != '\0'; p++)
-    if (*p == ' ')
+    if (is_whitespace (*p))
       break;
 
   c = *p;

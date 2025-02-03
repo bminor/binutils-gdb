@@ -104,7 +104,7 @@ static void s7_do_lw_pic (char *);
 #define s7_BAD_SKIP_COMMA            s7_BAD_ARGS
 #define s7_BAD_GARBAGE               _("garbage following instruction");
 
-#define s7_skip_whitespace(str)  while (*(str) == ' ') ++(str)
+#define s7_skip_whitespace(str)  while (is_whitespace (*(str))) ++(str)
 
 /* The name of the readonly data section.  */
 #define s7_RDATA_SECTION_NAME (OUTPUT_FLAVOR == bfd_target_aout_flavour \
@@ -1187,7 +1187,7 @@ s7_skip_past_comma (char **str)
   char c;
   int comma = 0;
 
-  while ((c = *p) == ' ' || c == ',')
+  while (is_whitespace (c = *p) || c == ',')
     {
       p++;
       if (c == ',' && comma++)
@@ -1501,7 +1501,7 @@ s7_data_op2 (char **str, int shift, enum score_data_type data_type)
       for (; *dataptr != '\0'; dataptr++)
         {
           *dataptr = TOLOWER (*dataptr);
-          if (*dataptr == '!' || *dataptr == ' ')
+          if (*dataptr == '!' || is_whitespace (*dataptr))
             break;
         }
       dataptr = (char *) data_exp;
@@ -2781,7 +2781,7 @@ s7_parse_16_32_inst (char *insnstr, bool gen_frag_p)
   s7_skip_whitespace (operator);
 
   for (p = operator; *p != '\0'; p++)
-    if ((*p == ' ') || (*p == '!'))
+    if (is_whitespace (*p) || (*p == '!'))
       break;
 
   if (*p == '!')
