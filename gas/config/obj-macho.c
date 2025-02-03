@@ -111,7 +111,7 @@ collect_16char_name (char *dest, const char *msg, int require_comma)
   {
       int len = input_line_pointer - namstart; /* could be zero.  */
       /* lose any trailing space.  */
-      while (len > 0 && namstart[len-1] == ' ')
+      while (len > 0 && is_whitespace (namstart[len-1]))
         len--;
       if (len > 16)
         {
@@ -330,7 +330,7 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 
       len = input_line_pointer - p;
       /* strip trailing spaces.  */
-      while (len > 0 && p[len-1] == ' ')
+      while (len > 0 && is_whitespace (p[len - 1]))
 	len--;
       tmpc = p[len];
 
@@ -369,7 +369,7 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 
 	      len = input_line_pointer - p;
 	      /* strip trailing spaces.  */
-	      while (len > 0 && p[len-1] == ' ')
+	      while (len > 0 && is_whitespace (p[len - 1]))
 		len--;
 	      tmpc = p[len];
 

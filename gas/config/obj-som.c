@@ -79,7 +79,7 @@ obj_som_compiler (int unused ATTRIBUTE_UNUSED)
      quote.  */
   filename = buf + 1;
   p = filename;
-  while (*p != ' ' && *p != '\000')
+  while (!is_whitespace (*p) && *p != '\000')
     p++;
   if (*p == '\000')
     {
@@ -89,7 +89,7 @@ obj_som_compiler (int unused ATTRIBUTE_UNUSED)
   *p = '\000';
 
   language_name = ++p;
-  while (*p != ' ' && *p != '\000')
+  while (!is_whitespace (*p) && *p != '\000')
     p++;
   if (*p == '\000')
     {

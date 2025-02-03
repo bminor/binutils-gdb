@@ -567,9 +567,7 @@ obj_coff_ident (int ignore ATTRIBUTE_UNUSED)
    a C_EFCN. And a second reason is that the code is more clear this
    way. (at least I think it is :-).  */
 
-#define SKIP_SEMI_COLON()	while (*input_line_pointer++ != ';')
-#define SKIP_WHITESPACES()	while (*input_line_pointer == ' ' || \
-				       *input_line_pointer == '\t')  \
+#define SKIP_WHITESPACES()	while (is_whitespace (*input_line_pointer)) \
                                   input_line_pointer++;
 
 static void
