@@ -223,7 +223,7 @@ m32c_indirect_operand (char *str)
 	operand = 2;
       /* [abs] where abs is not a0 or a1  */
       if (s[1] == '[' && ! (s[2] == 'a' && (s[3] == '0' || s[3] == '1'))
-	  && (ISBLANK (s[0]) || s[0] == ','))
+	  && (is_whitespace (s[0]) || s[0] == ','))
 	indirection[operand] = absolute;
       if (s[0] == ']' && s[1] == ']')
 	indirection[operand] = relative;
@@ -1241,19 +1241,19 @@ m32c_is_colon_insn (char *start ATTRIBUTE_UNUSED, char *nul_char)
     ++i_l_p;
 
   /* Check to see if the text following the colon is 'G' */
-  if (TOLOWER (i_l_p[1]) == 'g' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
+  if (TOLOWER (i_l_p[1]) == 'g' && is_whitespace (i_l_p[2]))
     return restore_colon (i_l_p + 2, nul_char);
 
   /* Check to see if the text following the colon is 'Q' */
-  if (TOLOWER (i_l_p[1]) == 'q' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
+  if (TOLOWER (i_l_p[1]) == 'q' && is_whitespace (i_l_p[2]))
     return restore_colon (i_l_p + 2, nul_char);
 
   /* Check to see if the text following the colon is 'S' */
-  if (TOLOWER (i_l_p[1]) == 's' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
+  if (TOLOWER (i_l_p[1]) == 's' && is_whitespace (i_l_p[2]))
     return restore_colon (i_l_p + 2, nul_char);
 
   /* Check to see if the text following the colon is 'Z' */
-  if (TOLOWER (i_l_p[1]) == 'z' && (i_l_p[2] == ' ' || i_l_p[2] == '\t'))
+  if (TOLOWER (i_l_p[1]) == 'z' && is_whitespace (i_l_p[2]))
     return restore_colon (i_l_p + 2, nul_char);
 
   return 0;
