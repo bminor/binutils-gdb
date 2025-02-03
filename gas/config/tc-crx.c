@@ -721,7 +721,7 @@ set_operand (char *operand, ins * crx_ins)
       operandS = ++operandE;
 
       /* Set register base.  */
-      while ((*operandE != ',') && (! ISSPACE (*operandE)))
+      while ((*operandE != ',') && (! is_whitespace (*operandE)))
 	operandE++;
       *operandE++ = '\0';
       if ((cur_arg->r = get_register (operandS)) == nullregister)
@@ -729,7 +729,7 @@ set_operand (char *operand, ins * crx_ins)
 		operandS, ins_parse);
 
       /* Skip leading white space.  */
-      while (ISSPACE (*operandE))
+      while (is_whitespace (*operandE))
 	operandE++;
       operandS = operandE;
 
@@ -744,7 +744,7 @@ set_operand (char *operand, ins * crx_ins)
 		operandS, ins_parse);
 
       /* Skip leading white space.  */
-      while (ISSPACE (*operandE))
+      while (is_whitespace (*operandE))
 	operandE++;
       operandS = operandE;
 
@@ -883,7 +883,7 @@ parse_operands (ins * crx_ins, char *operands)
 	  continue;
 	}
 
-      if (*operandT == ' ')
+      if (is_whitespace (*operandT))
 	as_bad (_("Illegal operands (whitespace): `%s'"), ins_parse);
 
       if (*operandT == '(')
@@ -1030,7 +1030,7 @@ get_cinv_parameters (const char *operand)
 
   while (*++p != ']')
     {
-      if (*p == ',' || *p == ' ')
+      if (*p == ',' || is_whitespace (*p))
 	continue;
 
       if (*p == 'd')
@@ -1927,7 +1927,7 @@ md_assemble (char *op)
   reset_vars (op);
 
   /* Strip the mnemonic.  */
-  for (param = op; *param != 0 && !ISSPACE (*param); param++)
+  for (param = op; *param != 0 && !is_whitespace (*param); param++)
     ;
   c = *param;
   *param++ = '\0';
