@@ -263,7 +263,7 @@ md_assemble (char *op)
 
   /* skip over instruction to find parameters */
 
-  for (param = op; *param != 0 && !ISSPACE (*param); param++)
+  for (param = op; !is_end_of_stmt (*param) && !is_whitespace (*param); param++)
     ;
   c = *param;
   *param = 0;
@@ -388,7 +388,7 @@ calcop (struct spu_opcode *format, const char *param, struct spu_insn *insn)
       arg = format->arg[i];
       syntax_error_arg = i;
 
-      while (ISSPACE (*param))
+      while (is_whitespace (*param))
         param++;
       if (*param == 0 || *param == ',')
 	return 0;
@@ -406,7 +406,7 @@ calcop (struct spu_opcode *format, const char *param, struct spu_insn *insn)
       if (!param)
 	return 0;
 
-      while (ISSPACE (*param))
+      while (is_whitespace (*param))
         param++;
 
       if (arg != A_P && paren)
@@ -426,7 +426,7 @@ calcop (struct spu_opcode *format, const char *param, struct spu_insn *insn)
 	    }
 	}
     }
-  while (ISSPACE (*param))
+  while (is_whitespace (*param))
     param++;
   return !paren && (*param == 0 || *param == '\n');
 }
