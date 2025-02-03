@@ -198,8 +198,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   s = bfd_make_section_anyway_with_flags (abfd,
 					  (bed->rela_plts_and_copies_p
 					   ? ".rela.got" : ".rel.got"),
-					  (bed->dynamic_sec_flags
-					   | SEC_READONLY));
+					  flags | SEC_READONLY);
   if (s == NULL
       || !bfd_set_section_alignment (s, bed->s->log_file_align))
     return false;
@@ -397,8 +396,7 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   if (info->enable_dt_relr)
     {
       s = bfd_make_section_anyway_with_flags (abfd, ".relr.dyn",
-					      (bed->dynamic_sec_flags
-					       | SEC_READONLY));
+					      flags | SEC_READONLY);
       if (s == NULL
 	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
 	return false;
