@@ -634,7 +634,7 @@ const char FLT_CHARS[] = "rRsSfFdDxXeEpPhHb";
 
 /* Separator character handling.  */
 
-#define skip_whitespace(str)  do { if (*(str) == ' ') ++(str); } while (0)
+#define skip_whitespace(str)  do { if (is_whitespace (*(str))) ++(str); } while (0)
 
 static inline bool
 skip_past_char (char **str, char c)
