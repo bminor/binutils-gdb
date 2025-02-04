@@ -966,13 +966,13 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 	    if (((existing = ctf_dynhash_lookup_type (fp->ctf_names, name)) == 0)
 		|| ctf_type_encoding (fp, existing, &existing_en) != 0
-		|| (ctf_type_encoding (fp, LCTF_INDEX_TO_TYPE (fp, id, child), &this_en) == 0
+		|| (ctf_type_encoding (fp, ctf_index_to_type (fp, id), &this_en) == 0
 		    && this_en.cte_offset == 0
 		    && (existing_en.cte_offset != 0
 			|| existing_en.cte_bits < this_en.cte_bits)))
 	      {
 		err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					       LCTF_INDEX_TO_TYPE (fp, id, child),
+					       ctf_index_to_type (fp, id),
 					       tp->ctt_name);
 		if (err != 0)
 		  return err * -1;
@@ -991,7 +991,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 ctf_index_to_type (fp, id),
 					 tp->ctt_name);
 	  if (err != 0)
 	    return err * -1;
@@ -1005,7 +1005,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_structs,
-					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 ctf_index_to_type (fp, id),
 					 tp->ctt_name);
 
 	  if (err != 0)
@@ -1021,7 +1021,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_unions,
-					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 ctf_index_to_type (fp, id),
 					 tp->ctt_name);
 
 	  if (err != 0)
@@ -1034,7 +1034,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	      break;
 
 	    err = ctf_dynhash_insert_type (fp, fp->ctf_enums,
-					   LCTF_INDEX_TO_TYPE (fp, id, child),
+					   ctf_index_to_type (fp, id),
 					   tp->ctt_name);
 
 	    if (err != 0)
@@ -1043,7 +1043,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    /* Remember all enums for later rescanning.  */
 
 	    err = ctf_dynset_insert (all_enums, (void *) (ptrdiff_t)
-				     LCTF_INDEX_TO_TYPE (fp, id, child));
+				     ctf_index_to_type (fp, id));
 	    if (err != 0)
 	      return err * -1;
 	    break;
@@ -1054,7 +1054,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 ctf_index_to_type (fp, id),
 					 tp->ctt_name);
 	  if (err != 0)
 	    return err * -1;
@@ -1071,7 +1071,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	       name is not already present.  */
 	    if (ctf_dynhash_lookup_type (h, name) == 0)
 	      {
-		err = ctf_dynhash_insert_type (fp, h, LCTF_INDEX_TO_TYPE (fp, id, child),
+		err = ctf_dynhash_insert_type (fp, h, ctf_index_to_type (fp, id),
 					       tp->ctt_name);
 		if (err != 0)
 		  return err * -1;
@@ -1085,8 +1085,8 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	     referenced type ].  */
 
 	  if (ctf_type_ischild (fp, tp->ctt_type) == child
-	      && LCTF_TYPE_TO_INDEX (fp, tp->ctt_type) <= fp->ctf_typemax)
-	    fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, tp->ctt_type)] = id;
+	      && ctf_type_to_index (fp, tp->ctt_type) <= fp->ctf_typemax)
+	    fp->ctf_ptrtab[ctf_type_to_index (fp, tp->ctt_type)] = id;
 	 /*FALLTHRU*/
 
 	case CTF_K_VOLATILE:
@@ -1096,7 +1096,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					 LCTF_INDEX_TO_TYPE (fp, id, child),
+					 ctf_index_to_type (fp, id),
 					 tp->ctt_name);
 	  if (err != 0)
 	    return err * -1;
