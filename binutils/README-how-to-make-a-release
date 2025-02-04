@@ -130,11 +130,11 @@ Approx time to complete from here: 2 hours ...
 
          If this is an EVEN numbered release:
 	 
-            ./src-release.sh -x binutils
+            ./src-release.sh -x binutils_with_gold
 
 	 If this is an ODD numbered release:
 	 
-            ./src-release.sh -x no_gold_bin
+            ./src-release.sh -x binutils
 
         FIXME: Not sure if the following steps are needed...
 	
@@ -178,11 +178,11 @@ Approx time to complete from here: 2 hours ...
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.44 release branch has been created for the GNU Binutils project.
+  The 2.45 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.42.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.44.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
@@ -250,7 +250,7 @@ How to create the release.
 
   21. a. Update the release number in bfd/version.m4 on the release
          branch to a whole new minor version number, without a point
-         value.  Eg "2.43.90" becomes "2.44".  NB/ Not: "2.44.00"
+         value.  Eg "2.44.90" becomes "2.45".  NB/ Not: "2.45.00"
 
       b. Change bfd/development.sh to set all values to "false".
 
@@ -281,7 +281,7 @@ How to create the release.
          "this-is-the-2.43-release" comment and commit.
 
 	   git add .
-           git commit -m "this-is-the-2.44-release"
+           git commit -m "This is the 2.45 release"
 	   git push
 	   
   22. Check that your file creation mask will create the
@@ -308,26 +308,26 @@ How to create the release.
   
        If this is an EVEN numbered release:
 	 
-            ./src-release.sh -b -g -l -x -z binutils
+            ./src-release.sh -b -g -l -x -z binutils_with_gold
 
        If this is an ODD numbered release:
 	 
-            ./src-release.sh -b -g -l -x -z no_gold_bin
+            ./src-release.sh -b -g -l -x -z binutils
 
        OR ... for a more reproducible tarball:
 
             ./src-release.sh -b -g -l -x -z \
 	      -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` \
-	      [binutils | no_gold_bin]
+	      [binutils | binutils_with_gold]
 
   24. Check that the files in the tarballs have the correct
       permissions.
 
-           tar tvf binutils-*.tar.xz | grep -e "---"
+           tar tvf binutils-*.tar | grep -e "---"
 
       Also check that the man files are not empty.  (cf PR 28144).
 
-           tar tvf binutils-*.tar.xz | grep -e "\.1"
+           tar tvf binutils-*.tar | grep -e "\.1"
 
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
        running the testsuites (gas, gold, binutils and ld).
@@ -344,11 +344,19 @@ How to create the release.
 	mkdir build
 	cd build
 	../binutils-2.*/configure --quiet --enable-gold --prefix=`pwd`/install --enable-plugins --enable-shared
-	make -j1 all-gas all-gold all-ld all-binutils all-gprof all-gprofng
-	make check-gas check-binutils check-ld check-gold
-        make install-gas install-gold install-ld install-binutils install-gprofng
+	
+	make -j1 all-gas all-ld all-binutils all-gprof all-gprofng
+	make check-gas check-binutils check-ld 
+        make install-gas install-ld install-binutils install-gprofng
 
-        # Needed for step 29...
+     If this is an ODD numbered release:
+     
+	make -j1 all-gold
+	make check-gold
+        make install-gold
+
+      Needed for step 29...
+      
 	make html pdf html-libctf pdf-libctf html-libsframe pdf-libsframe
 
         popd
@@ -361,7 +369,7 @@ How to create the release.
 	  eg:
 	    git tag -a binutils-2_44 -u DD9E3C4F      <=== Be careful to get the tag right
 	  or:
-	    git tag -a binutils-2_44 -u DD9E3C4F -m "Official GNU Binutils 2.43 release"
+	    git tag -a binutils-2_44 -u DD9E3C4F -m "Official GNU Binutils 2.44 release"
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
@@ -381,8 +389,9 @@ How to create the release.
         Be prepared to provide the password for the key, if you
 	signed the binaries.
       
-        The gnupload script is in the gnulib/build-aux directory.
-	It uses the ncftp package for transmitting the files.
+        The gnupload script is in the build-aux/ directory of the gnulib
+	project's srouces.  It uses the ncftp package for transmitting
+	the files.
 
         NB/ This step can be done in PARALLEL with step 28.
 
@@ -408,15 +417,16 @@ How to create the release.
       Create a new docs sub-directory and move into it:
 
         cd binutils-htdocs
-	mkdir docs-2.44
-        cd docs-2.44
+	mkdir docs-2.45
+        cd docs-2.45
 	
       Copy the index.html from the previous release
 
         cp ../docs/index.html .
 
       Update the index.html file to reference this new release and to
-      point back to the current (now old) release.
+      point back to the current (now old) release.  Update the last
+      modified date as well.
 
       If necessary make the html documentation locally with the "make
       html" command.  (This should have been done by step 25 above).
@@ -457,7 +467,7 @@ How to create the release.
 
          cd ..     [Should now be in be in binutils-htdocs/ ]
 	 rm docs
-	 ln -s docs-2.44 docs
+	 ln -s docs-2.45 docs
 	 
       Edit index.html file to change the links to point to the new
       release, mention any new features, update dates and so on.
@@ -469,7 +479,7 @@ How to create the release.
       Add the new directories and files, commit and push the changes:
 
         git add .
-        git commit -m"Update documenation for the 2.4x release"a
+        git commit -m"Update documenation for the 2.45 release"
 	git push
 
 
@@ -512,13 +522,12 @@ Cheers
 
           checksums: xxxx
 
-        As an experiment these tarballs were made with the new "-r <date>"
-        option supported by the src-release.sh script.  This attempts to make
-        reproducible tarballs by sorting the files and passing the
-        "--mtime=<date>" option to tar.  The date used for these tarballs was
-        obtained by running:
-  
-          git log -1 --format=%cd --date=format:%F bfd/version.m4
+        These tarballs were made with the "-r <date>" option supported by
+        the src-release.sh script.  This attempts to make reproducible
+        tarballs by sorting the files and passing the "--mtime=<date>" option
+        to tar.  The date used for these tarballs was obtained by running:
+
+           git log -1 --format=%cd --date=format:%F bfd/version.m4
 
         This release contains numerous bug fixes, and also the
         following new features:
@@ -555,6 +564,7 @@ Cheers
       section.  Create a changelog entry and commit.
 
   Sit back and relax, you are all done.
+
 --------------------------------------------------------------------------
 How to perform a POINT release.
 --------------------------------------------------------------------------
@@ -621,11 +631,11 @@ looks like this:
 
        h. Create the release tarballs:
        
-              ./src-release.sh -b -g -l -x -z [ binutils | no_gold_bin ]
+              ./src-release.sh -b -g -l -x -z [ binutils | binutils_with_gold ]
 	  or: 
               ./src-release.sh -b -g -l -x -z
 	        -r `git log -1 --format=%cd --date=format:%F bfd/version.m4`
-		[ binutils | no_gold_bin ]
+		[ binutils | binutils_with_gold ]
 
        i. Check that the files in the tarballs have the correct
           permissions.
