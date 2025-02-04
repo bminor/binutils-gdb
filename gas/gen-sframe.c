@@ -1003,11 +1003,11 @@ sframe_xlate_do_def_cfa (struct sframe_xlate_ctx *xlate_ctx,
   /* Define the current CFA rule to use the provided register and
      offset.  However, if the register is not FP/SP, skip creating
      SFrame stack trace info for the function.  */
-  if (cfi_insn->u.r != SFRAME_CFA_SP_REG
-      && cfi_insn->u.r != SFRAME_CFA_FP_REG)
+  if (cfi_insn->u.ri.reg != SFRAME_CFA_SP_REG
+      && cfi_insn->u.ri.reg != SFRAME_CFA_FP_REG)
     {
       as_warn (_("skipping SFrame FDE; non-SP/FP register %u in .cfi_def_cfa"),
-	       cfi_insn->u.r);
+	       cfi_insn->u.ri.reg);
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
     }
   sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
@@ -1040,7 +1040,7 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
 	       cfi_insn->u.r);
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
     }
-  sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.ri.reg);
+  sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.r);
   sframe_fre_set_cfa_offset (cur_fre, last_fre->cfa_offset);
   cur_fre->merge_candidate = false;
 
@@ -1097,7 +1097,7 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
   /* Change the rule for the register indicated by the register number to
      be the specified offset.  */
   /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
-  if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
+  if (cfi_insn->u.ri.reg == SFRAME_CFA_FP_REG)
     {
       gas_assert (!cur_fre->base_reg);
       sframe_fre_set_bp_track (cur_fre, cfi_insn->u.ri.offset);
@@ -1105,7 +1105,7 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
     }
 #ifdef SFRAME_FRE_RA_TRACKING
   else if (sframe_ra_tracking_p ()
-	   && cfi_insn->u.r == SFRAME_CFA_RA_REG)
+	   && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG)
     {
       sframe_fre_set_ra_track (cur_fre, cfi_insn->u.ri.offset);
       cur_fre->merge_candidate = false;
@@ -1127,15 +1127,15 @@ sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
      register is not interesting (FP or RA reg), the current DW_CFA_val_offset
      instruction can be safely skipped without sacrificing the asynchronicity of
      stack trace information.  */
-  if (cfi_insn->u.r == SFRAME_CFA_FP_REG
+  if (cfi_insn->u.ri.reg == SFRAME_CFA_FP_REG
 #ifdef SFRAME_FRE_RA_TRACKING
-      || (sframe_ra_tracking_p () && cfi_insn->u.r == SFRAME_CFA_RA_REG)
+      || (sframe_ra_tracking_p () && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG)
 #endif
       /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
       )
     {
       as_warn (_("skipping SFrame FDE; %s register %u in .cfi_val_offset"),
-	       sframe_register_name (cfi_insn->u.r), cfi_insn->u.r);
+	       sframe_register_name (cfi_insn->u.ri.reg), cfi_insn->u.ri.reg);
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
     }
 
