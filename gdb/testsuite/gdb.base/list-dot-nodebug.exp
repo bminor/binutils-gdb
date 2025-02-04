@@ -55,7 +55,7 @@ foreach_with_prefix debug {"none" "some"} {
 
 	# Stripping is a backup in case the system has static libc debuginfo.
 	# We can continue the test even if it fails.
-	gdb_gnu_strip_debug $executable no-debuglink
+	gdb_gnu_strip_debug [standard_output_file $executable] no-debuglink
 
 	clean_restart ${executable}
 
