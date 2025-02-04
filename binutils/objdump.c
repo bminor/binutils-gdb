@@ -4981,44 +4981,20 @@ dump_ctf (bfd *abfd ATTRIBUTE_UNUSED, const char *sect_name ATTRIBUTE_UNUSED,
 #endif
 
 static void
-dump_section_sframe (bfd *abfd ATTRIBUTE_UNUSED,
-		     const char * sect_name)
+dump_sframe_section (bfd *abfd, const char *sect_name, bool is_mainfile)
+
 {
-  asection *sec;
-  sframe_decoder_ctx *sfd_ctx = NULL;
-  bfd_size_type sf_size;
-  bfd_byte *sframe_data;
-  bfd_vma sf_vma;
-  int err = 0;
-
-  if (sect_name == NULL)
-    sect_name = ".sframe";
-
-  sec = read_section (abfd, sect_name, &sframe_data);
-  if (sec == NULL)
+  /* Error checking for user provided SFrame section name, if any.  */
+  if (sect_name)
     {
-      my_bfd_nonfatal (bfd_get_filename (abfd));
-      return;
+      asection *sec = bfd_get_section_by_name (abfd, sect_name);
+      if (sec == NULL)
+	{
+	  printf (_("No %s section present\n\n"), sanitize_string (sect_name));
+	  return;
+	}
     }
-  sf_size = bfd_section_size (sec);
-  sf_vma = bfd_section_vma (sec);
-
-  /* Decode the contents of the section.  */
-  sfd_ctx = sframe_decode ((const char*)sframe_data, sf_size, &err);
-  if (!sfd_ctx)
-    {
-      my_bfd_nonfatal (bfd_get_filename (abfd));
-      free (sframe_data);
-      return;
-    }
-
-  printf (_("Contents of the SFrame section %s:"),
-	  sanitize_string (sect_name));
-  /* Dump the contents as text.  */
-  dump_sframe (sfd_ctx, sf_vma);
-
-  sframe_decoder_free (&sfd_ctx);
-  free (sframe_data);
+  dump_dwarf (abfd, is_mainfile);
 }
 
 
@@ -5840,7 +5816,7 @@ dump_bfd (bfd *abfd, bool is_mainfile)
 	dump_ctf (abfd, dump_ctf_section_name, dump_ctf_parent_name,
 		  dump_ctf_parent_section_name);
       if (dump_sframe_section_info)
-	dump_section_sframe (abfd, dump_sframe_section_name);
+	dump_sframe_section (abfd, dump_sframe_section_name, is_mainfile);
       if (dump_stab_section_info)
 	dump_stabs (abfd);
       if (dump_reloc_info && ! disassemble)
@@ -6345,8 +6321,15 @@ main (int argc, char **argv)
 #endif
 	case OPTION_SFRAME:
 	  dump_sframe_section_info = true;
+
 	  if (optarg)
 	    dump_sframe_section_name = xstrdup (optarg);
+
+	  /* Error checking for user-provided section name is done in
+	     dump_sframe_section ().  Initialize for now with the default name:
+	     "sframe".  */
+	  dwarf_select_sections_by_names ("sframe");
+
 	  seenflag = true;
 	  break;
 	case 'G':
