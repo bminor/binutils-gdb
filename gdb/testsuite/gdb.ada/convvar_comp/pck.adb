@@ -16,6 +16,6 @@
 package body Pck is
   function Break_Me (Item : T) return Boolean is
   begin
-     return False;
+     return False; -- BREAK
    end Break_Me;
 end Pck;

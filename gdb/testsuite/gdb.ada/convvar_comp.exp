@@ -25,7 +25,9 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" }
 
 clean_restart ${testfile}
 
-if {![runto "break_me"]} {
+set bp_location [gdb_get_line_number "BREAK" "$testdir/pck.adb"]
+
+if {![runto pck.adb:$bp_location]} {
   return
 }
 
