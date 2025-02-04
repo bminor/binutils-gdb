@@ -316,6 +316,7 @@ tui_source_window_base::refresh_window ()
 
   if (m_content.empty ())
     return;
+  gdb_assert (m_pad != nullptr);
 
   int pad_width = getmaxx (m_pad.get ());
   int left_margin = this->left_margin ();
@@ -339,8 +340,8 @@ tui_source_window_base::refresh_window ()
      should only occur during the initial startup.  In this case the first
      condition in the following asserts will not be true, but the nullptr
      check will.  */
-  gdb_assert (pad_width > 0 || m_pad.get () == nullptr);
-  gdb_assert (pad_x + view_width <= pad_width || m_pad.get () == nullptr);
+  gdb_assert (pad_width > 0);
+  gdb_assert (pad_x + view_width <= pad_width);
 
   int sminrow = y + box_width ();
   int smincol = x + box_width () + left_margin;
