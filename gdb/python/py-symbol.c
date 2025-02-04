@@ -1,6 +1,6 @@
 /* Python interface to symbols.
 
-   Copyright (C) 2008-2024 Free Software Foundation, Inc.
+   Copyright (C) 2008-2025 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -151,6 +151,19 @@ sympy_get_addr_class (PyObject *self, void *closure)
   SYMPY_REQUIRE_VALID (self, symbol);
 
   return gdb_py_object_from_longest (symbol->aclass ()).release ();
+}
+
+/* Implement gdb.Symbol.domain attribute.  Return the domain as an
+   integer.  */
+
+static PyObject *
+sympy_get_domain (PyObject *self, void *closure)
+{
+  struct symbol *symbol = nullptr;
+
+  SYMPY_REQUIRE_VALID (self, symbol);
+
+  return gdb_py_object_from_longest (symbol->domain ()).release ();
 }
 
 static PyObject *
@@ -719,6 +732,7 @@ static gdb_PyGetSetDef symbol_object_getset[] = {
 This is either name or linkage_name, depending on whether the user asked GDB\n\
 to display demangled or mangled names.", NULL },
   { "addr_class", sympy_get_addr_class, NULL, "Address class of the symbol." },
+  { "domain", sympy_get_domain, nullptr, "Domain of the symbol." },
   { "is_argument", sympy_is_argument, NULL,
     "True if the symbol is an argument of a function." },
   { "is_artificial", sympy_is_artificial, nullptr,

@@ -155,6 +155,8 @@ binary-upload in qSupported reply
   ** Added gdb.Block.subblocks.  Returns a list of blocks contained in that
      block.
 
+  ** Added gdb.Symbol.domain.  Contains the domain of the symbol.
+
 * Debugger Adapter Protocol changes
 
   ** The "scopes" request will now return a scope holding global

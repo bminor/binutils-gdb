@@ -1,4 +1,4 @@
-# Copyright (C) 2010-2024 Free Software Foundation, Inc.
+# Copyright (C) 2010-2025 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -142,6 +142,7 @@ gdb_test "python print (func.name)" "func" "test func.name"
 gdb_test "python print (func.print_name)" "func" "test func.print_name"
 gdb_test "python print (func.linkage_name)" "func" "test func.linkage_name"
 gdb_test "python print (func.addr_class == gdb.SYMBOL_LOC_BLOCK)" "True" "test func.addr_class"
+gdb_test "python print (func.domain == gdb.SYMBOL_FUNCTION_DOMAIN)" "True" "test func.domain"
 
 # Stop in a second file and ensure we find its local static symbol.
 gdb_breakpoint "function_in_other_file"
