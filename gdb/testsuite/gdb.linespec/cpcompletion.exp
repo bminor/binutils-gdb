@@ -22,7 +22,11 @@ standard_testfile cpcompletion.cc cpls.cc cpls2.cc cpls-hyphen.cc
 
 set opts {}
 lappend opts debug
+lappend opts c++
 lappend opts additional_flags=-std=c++11
+
+set flags {}
+lappend flags debug
 
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2 $srcfile3 $srcfile4] $opts]} {

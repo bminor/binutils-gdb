@@ -22,7 +22,11 @@ require allow_guile_tests
 
 standard_testfile .cc
 
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+set flags {}
+lappend flags debug
+lappend flags c++
+
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $flags] } {
     return -1
 }
 

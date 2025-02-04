@@ -20,7 +20,11 @@ standard_testfile main.cc
 
 require !readnow
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
+set opts {}
+lappend opts debug
+lappend opts c++
+
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile $opts] } {
     return -1
 }
 

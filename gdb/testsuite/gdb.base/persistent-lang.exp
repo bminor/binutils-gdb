@@ -15,7 +15,11 @@
 
 standard_testfile .cc
 
-if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
+set flags {}
+lappend flags debug
+lappend flags c++
+
+if {[build_executable "failed to prepare" $testfile $srcfile $flags]} {
     return -1
 }
 
