@@ -50,3 +50,6 @@ Term::check_contents "show main after file" \
 # Ensure that "file" clears the source window.
 Term::command "file"
 Term::check_contents "file clears window" "No Source Available"
+
+Term::check_region_contents "empty title" \
+    0 0 80 1 {^\+-*\+$}

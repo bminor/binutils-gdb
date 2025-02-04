@@ -51,6 +51,10 @@ struct tui_source_window : public tui_source_window_base
   void erase_source_content () override
   {
     do_erase_source_content (_("[ No Source Available ]"));
+
+    /* The source window's title shows the filename, so no source available
+       means no title.  */
+    set_title ("");
   }
 
   void display_start_addr (struct gdbarch **gdbarch_p,
