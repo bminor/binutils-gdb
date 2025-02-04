@@ -157,6 +157,9 @@ binary-upload in qSupported reply
 
   ** Added gdb.Symbol.domain.  Contains the domain of the symbol.
 
+  ** Added gdb.Architecture.void_type. Returns a gdb.Type representing "void"
+     type for that architecture.
+
 * Debugger Adapter Protocol changes
 
   ** The "scopes" request will now return a scope holding global

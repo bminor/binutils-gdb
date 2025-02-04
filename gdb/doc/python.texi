@@ -7193,6 +7193,10 @@ If the indicated type cannot be found, this function will throw a
 @code{ValueError} exception.
 @end defun
 
+@defun Architecture.void_type ()
+This function returns a void type.
+@end defun
+
 @anchor{gdbpy_architecture_registers}
 @defun Architecture.registers (@r{[} reggroup @r{]})
 Return a @code{gdb.RegisterDescriptorIterator} (@pxref{Registers In
