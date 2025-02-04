@@ -102,6 +102,7 @@ enum dwarf_section_display_enum
   weaknames,
   gdb_index,
   debug_names,
+  sframe,
   trace_info,
   trace_abbrev,
   trace_aranges,
