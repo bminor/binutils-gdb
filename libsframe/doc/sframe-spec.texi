@@ -459,7 +459,9 @@ Following table describes each component of the SFrame FDE structure:
 @tab @code{int32_t}
 @tab @code{sfde_func_start_address}
 @tab Signed 32-bit integral field denoting the virtual memory address of the
-described function.
+described function, for which the SFrame FDE applies.  The value encoded in
+the @code{sfde_func_start_address} field is the offset in bytes of the
+function's start address, from the SFrame section.
 
 @item 0x04
 @tab @code{uint32_t}
@@ -684,10 +686,10 @@ serializing and deserializing entities, if unaligned accesses need to be
 avoided.
 
 @code{sfre_start_address} is an unsigned 8-bit/16-bit/32-bit integral field
-identifies the start address of the range of program counters, for which the
+denoting the start address of a range of program counters, for which the
 SFrame FRE applies.  The value encoded in the @code{sfre_start_address} field
-is the offset in bytes of the start address of the SFrame FRE, from the start
-address of the function.
+is the offset in bytes of the range's start address, from the start address
+of the function.
 
 Further SFrame FRE types may be added in future.
 
