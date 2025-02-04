@@ -49,7 +49,7 @@ refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
   uint32_t i;
   for (i = fp->ctf_pptrtab_typemax; i <= fp->ctf_typemax; i++)
     {
-      ctf_id_t type = LCTF_INDEX_TO_TYPE (fp, i, 1);
+      ctf_id_t type = ctf_index_to_type (fp, i);
       ctf_id_t reffed_type;
 
       if (ctf_type_kind (fp, type) != CTF_K_POINTER)
@@ -59,7 +59,7 @@ refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
 
       if (ctf_type_isparent (fp, reffed_type))
 	{
-	  uint32_t idx = LCTF_TYPE_TO_INDEX (fp, reffed_type);
+	  uint32_t idx = ctf_type_to_index (fp, reffed_type);
 
 	  /* Guard against references to invalid types.  No need to consider
 	     the CTF dict corrupt in this case: this pointer just can't be a
@@ -172,7 +172,7 @@ ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
 	     ctf_lookup_by_name.  (Pointers to types are never of type 0, so
 	     this is unambiguous, just fiddly to deal with.)  */
 
-	  uint32_t idx = LCTF_TYPE_TO_INDEX (fp, type);
+	  uint32_t idx = ctf_type_to_index (fp, type);
 	  int in_child = 0;
 
 	  ntype = CTF_ERR;
@@ -203,7 +203,7 @@ ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
 	      if (ntype == CTF_ERR)
 		goto notype;
 
-	      idx = LCTF_TYPE_TO_INDEX (fp, ntype);
+	      idx = ctf_type_to_index (fp, ntype);
 
 	      ntype = CTF_ERR;
 	      if (child && idx < child->ctf_pptrtab_len)
@@ -225,8 +225,10 @@ ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
 		goto notype;
 	    }
 
-	  type = LCTF_INDEX_TO_TYPE (fp, ntype, (fp->ctf_flags & LCTF_CHILD)
-				     || in_child);
+	  if (in_child)
+	    type = ctf_index_to_type (child, ntype);
+	  else
+	    type = ctf_index_to_type (fp, ntype);
 
 	  /* We are looking up a type in the parent, but the pointed-to type is
 	     in the child.  Switch to looking in the child: if we need to go
@@ -341,7 +343,7 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type)
       return NULL;
     }
 
-  idx = LCTF_TYPE_TO_INDEX (fp, type);
+  idx = ctf_type_to_index (fp, type);
   if (idx > 0 && (unsigned long) idx <= fp->ctf_typemax)
     {
       *fpp = fp;		/* Possibly the parent CTF dict.  */

@@ -285,7 +285,7 @@ ctf_dynamic_type (const ctf_dict_t *fp, ctf_id_t type)
 
   fp = ctf_get_dict (fp, type);
 
-  idx = LCTF_TYPE_TO_INDEX(fp, type);
+  idx = ctf_type_to_index (fp, type);
 
   if ((unsigned long) idx > fp->ctf_stypes)
     return ctf_dtd_lookup (fp, type);
@@ -299,7 +299,7 @@ ctf_static_type (const ctf_dict_t *fp, ctf_id_t type)
 
   fp = ctf_get_dict (fp, type);
 
-  idx = LCTF_TYPE_TO_INDEX(fp, type);
+  idx = ctf_type_to_index (fp, type);
 
   return ((unsigned long) idx <= fp->ctf_stypes);
 }
@@ -378,7 +378,7 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 
       ntd = ctf_list_next (dtd);
 
-      if (LCTF_TYPE_TO_INDEX (fp, dtd->dtd_type) <= id.dtd_id)
+      if (ctf_type_to_index (fp, dtd->dtd_type) <= id.dtd_id)
 	continue;
 
       kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
@@ -426,10 +426,10 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
   if (flag != CTF_ADD_NONROOT && flag != CTF_ADD_ROOT)
     return (ctf_set_typed_errno (fp, EINVAL));
 
-  if (LCTF_INDEX_TO_TYPE (fp, fp->ctf_typemax, 1) >= CTF_MAX_TYPE)
+  if (ctf_index_to_type (fp, fp->ctf_typemax) >= CTF_MAX_TYPE)
     return (ctf_set_typed_errno (fp, ECTF_FULL));
 
-  if (LCTF_INDEX_TO_TYPE (fp, fp->ctf_typemax, 1) == (CTF_MAX_PTYPE - 1))
+  if (ctf_index_to_type (fp, fp->ctf_typemax) == (CTF_MAX_PTYPE - 1))
     return (ctf_set_typed_errno (fp, ECTF_FULL));
 
   if (fp->ctf_flags & LCTF_NO_STR)
@@ -465,7 +465,7 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
     dtd->dtd_vlen = NULL;
 
   type = ++fp->ctf_typemax;
-  type = LCTF_INDEX_TO_TYPE (fp, type, (fp->ctf_flags & LCTF_CHILD));
+  type = ctf_index_to_type (fp, type);
 
   dtd->dtd_data.ctt_name = ctf_str_add_ref (fp, name, &dtd->dtd_data.ctt_name);
   dtd->dtd_type = type;
@@ -575,8 +575,8 @@ ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
      addition of this type.  The pptrtab is lazily-updated as needed, so is not
      touched here.  */
 
-  uint32_t type_idx = LCTF_TYPE_TO_INDEX (fp, type);
-  uint32_t ref_idx = LCTF_TYPE_TO_INDEX (fp, ref);
+  uint32_t type_idx = ctf_type_to_index (fp, type);
+  uint32_t ref_idx = ctf_type_to_index (fp, ref);
 
   if (ctf_type_ischild (fp, ref) == child
       && ref_idx < fp->ctf_typemax)
@@ -1589,9 +1589,9 @@ ctf_add_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type,
   if (src_fp == NULL || dst_fp == NULL)
     return;
 
-  src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
+  src_type = ctf_type_to_index (src_fp, src_type);
 
-  dst_type = LCTF_TYPE_TO_INDEX(dst_fp, dst_type);
+  dst_type = ctf_type_to_index (dst_fp, dst_type);
 
   if (dst_fp->ctf_link_type_mapping == NULL)
     {
@@ -1633,7 +1633,7 @@ ctf_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type, ctf_dict_t **dst_fp)
   if (src_fp == NULL)
     return 0;
 
-  src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
+  src_type = ctf_type_to_index (src_fp, src_type);
   key.cltk_fp = src_fp;
   key.cltk_idx = src_type;
 
@@ -1643,8 +1643,7 @@ ctf_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type, ctf_dict_t **dst_fp)
 
   if (dst_type != 0)
     {
-      dst_type = LCTF_INDEX_TO_TYPE (target_fp, dst_type,
-				     target_fp->ctf_parent != NULL);
+      dst_type = ctf_index_to_type (target_fp, dst_type);
       *dst_fp = target_fp;
       return dst_type;
     }
@@ -1659,8 +1658,7 @@ ctf_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type, ctf_dict_t **dst_fp)
 					       &key);
 
   if (dst_type)
-    dst_type = LCTF_INDEX_TO_TYPE (target_fp, dst_type,
-				   target_fp->ctf_parent != NULL);
+    dst_type = ctf_index_to_type (target_fp, dst_type);
 
   *dst_fp = target_fp;
   return dst_type;

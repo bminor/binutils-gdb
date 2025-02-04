@@ -35,6 +35,24 @@ ctf_type_ischild (const ctf_dict_t *fp, ctf_id_t id)
   return (!ctf_type_isparent (fp, id));
 }
 
+/* Get the index in the internal type array (or otherwise) for a given type ID.
+   Only ever called on the right dictionary for the type and can fail otherwise.
+   If called on an invalid type, may return an index that does not correspond to
+   any type (such as -1).  */
+
+uint32_t
+ctf_type_to_index (const ctf_dict_t *fp, ctf_id_t type)
+{
+  return type & fp->ctf_parmax;
+}
+
+/* The inverse of ctf_type_to_index.  */
+ctf_id_t
+ctf_index_to_type (const ctf_dict_t *fp, uint32_t idx)
+{
+  return (fp->ctf_flags & LCTF_CHILD) ? ((idx) | (fp->ctf_parmax+1)) : idx;
+}
+
 /* Expand a structure element into the passed-in ctf_lmember_t.  */
 
 static int
@@ -461,7 +479,7 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
 
       if (flag)
 	*flag = LCTF_INFO_ISROOT (fp, tp->ctt_info);
-      return LCTF_INDEX_TO_TYPE (fp, i->ctn_type++, fp->ctf_flags & LCTF_CHILD);
+      return ctf_index_to_type (fp, i->ctn_type++);
     }
   ctf_next_destroy (i);
   *it = NULL;
@@ -1164,8 +1182,8 @@ ctf_type_pointer (ctf_dict_t *fp, ctf_id_t type)
   if (ctf_lookup_by_id (&fp, type) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  if ((ntype = fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, type)]) != 0)
-    return (LCTF_INDEX_TO_TYPE (fp, ntype, (fp->ctf_flags & LCTF_CHILD)));
+  if ((ntype = fp->ctf_ptrtab[ctf_type_to_index (fp, type)]) != 0)
+    return (ctf_index_to_type (fp, ntype));
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
@@ -1173,8 +1191,8 @@ ctf_type_pointer (ctf_dict_t *fp, ctf_id_t type)
   if (ctf_lookup_by_id (&fp, type) == NULL)
     return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 
-  if ((ntype = fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, type)]) != 0)
-    return (LCTF_INDEX_TO_TYPE (fp, ntype, (fp->ctf_flags & LCTF_CHILD)));
+  if ((ntype = fp->ctf_ptrtab[ctf_type_to_index (fp, type)]) != 0)
+    return (ctf_index_to_type (fp, ntype));
 
   return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 }

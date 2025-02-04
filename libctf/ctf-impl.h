@@ -579,6 +579,9 @@ struct ctf_next
   } cu;
 };
 
+extern uint32_t ctf_type_to_index (const ctf_dict_t *, ctf_id_t);
+extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
+
 /* Return x rounded up to an alignment boundary.
    eg, P2ROUNDUP(0x1234, 0x100) == 0x1300 (0x13*align)
    eg, P2ROUNDUP(0x5600, 0x100) == 0x5600 (0x56*align)  */
@@ -587,15 +590,10 @@ struct ctf_next
 /* * If an offs is not aligned already then round it up and align it. */
 #define LCTF_ALIGN_OFFS(offs, align) ((offs + (align - 1)) & ~(align - 1))
 
-#define LCTF_TYPE_TO_INDEX(fp, id) ((id) & (fp->ctf_parmax))
-#define LCTF_INDEX_TO_TYPE(fp, id, child) (child ? ((id) | (fp->ctf_parmax+1)) : \
-					   (id))
-
-#define LCTF_INDEX_TO_TYPEPTR(fp, i) \
-  ((i > fp->ctf_stypes) ?							\
-     &(ctf_dtd_lookup (fp, LCTF_INDEX_TO_TYPE				\
-		       (fp, i, fp->ctf_flags & LCTF_CHILD))->dtd_data) : \
-     (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]))
+#define LCTF_INDEX_TO_TYPEPTR(fp, i)					\
+  ((i > fp->ctf_stypes) ?						\
+   &(ctf_dtd_lookup (fp, ctf_index_to_type (fp, i))->dtd_data) :	\
+   (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]))
 
 #define LCTF_INFO_KIND(fp, info)	((fp)->ctf_dictops->ctfo_get_kind(info))
 #define LCTF_INFO_ISROOT(fp, info)	((fp)->ctf_dictops->ctfo_get_root(info))
