@@ -33,6 +33,7 @@ LIBSFRAME_1.0 {
     sframe_encoder_add_funcdesc_v2;
     sframe_encoder_write;
     dump_sframe;
+    dump_sframe_reloc;
     sframe_errmsg;
 
   local:

@@ -219,13 +219,20 @@ dump_sframe_functions (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 }
 
 void
+dump_sframe_reloc (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr, bool relocate)
+{
+  if (relocate)
+    sframe_fde_tbl_reloc_fixup (sfd_ctx);
+
+  dump_sframe (sfd_ctx, sec_addr);
+}
+
+void
 dump_sframe (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 {
-  uint8_t ver;
-
   dump_sframe_header (sfd_ctx);
 
-  ver = sframe_decoder_get_version (sfd_ctx);
+  uint8_t ver = sframe_decoder_get_version (sfd_ctx);
   if (ver == SFRAME_VERSION)
     dump_sframe_functions (sfd_ctx, sec_addr);
   else
