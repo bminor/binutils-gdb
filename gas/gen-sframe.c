@@ -1124,15 +1124,15 @@ sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
 			    struct cfi_insn_data *cfi_insn)
 {
   /* Previous value of register is CFA + offset.  However, if the specified
-     register is not interesting (FP or RA reg), the current DW_CFA_val_offset
-     instruction can be safely skipped without sacrificing the asynchronicity of
-     stack trace information.  */
+     register is not interesting (SP, FP, or RA reg), the current
+     DW_CFA_val_offset instruction can be safely skipped without sacrificing
+     the asynchronicity of stack trace information.  */
   if (cfi_insn->u.ri.reg == SFRAME_CFA_FP_REG
 #ifdef SFRAME_FRE_RA_TRACKING
       || (sframe_ra_tracking_p () && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG)
 #endif
-      /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
-      )
+      /* Ignore SP reg, if offset matches assumed default rule.  */
+      || (cfi_insn->u.ri.reg == SFRAME_CFA_SP_REG && cfi_insn->u.ri.offset != 0))
     {
       as_warn (_("skipping SFrame FDE; %s register %u in .cfi_val_offset"),
 	       sframe_register_name (cfi_insn->u.ri.reg), cfi_insn->u.ri.reg);
