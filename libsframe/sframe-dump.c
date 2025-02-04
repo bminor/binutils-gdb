@@ -219,6 +219,19 @@ dump_sframe_functions (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 }
 
 void
+dump_sframe_reloc (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr,
+		   bool relocate_p)
+{
+  if (relocate_p && sframe_fde_tbl_reloc_fixup (sfd_ctx))
+    {
+      printf ("\n Unexpected error in processing relocations.");
+      return;
+    }
+
+  dump_sframe (sfd_ctx, sec_addr);
+}
+
+void
 dump_sframe (sframe_decoder_ctx *sfd_ctx, uint64_t sec_addr)
 {
   uint8_t ver;

@@ -189,6 +189,11 @@ sframe_decoder_get_funcdesc_v2 (sframe_decoder_ctx *ctx,
 extern void
 dump_sframe (sframe_decoder_ctx *decoder, uint64_t addr);
 
+/* SFrame textual dump - with relocation.  */
+extern void
+dump_sframe_reloc (sframe_decoder_ctx *dctx, uint64_t sec_addr,
+		   bool relocate_p);
+
 /* Get the base reg id from the FRE info.  Sets errp if fails.  */
 extern uint8_t
 sframe_fre_get_base_reg_id (sframe_frame_row_entry *fre, int *errp);

@@ -102,6 +102,37 @@ sframe_ret_set_errno (int *errp, int error)
   return NULL;
 }
 
+/* If the input buffer containing the SFrame section has been relocated, there
+   will be a need to do fixups too.  The fixup merely accounts for the offset
+   of the byte from the start of the section.
+
+   Currently used by dump_sframe_reloc.  The caller must have decoded (and
+   hence, endian flipped) the input buffer before calling this function.  */
+
+int
+sframe_fde_tbl_reloc_fixup (sframe_decoder_ctx *dctx)
+{
+  uint8_t sframe_ver = sframe_decoder_get_version (dctx);
+  uint32_t num_fdes = sframe_decoder_get_num_fidx (dctx);
+  unsigned int buf_offset = 0;
+  sframe_func_desc_entry *fde;
+  uint32_t i = 0;
+
+  if (sframe_ver != SFRAME_VERSION_2 || !dctx->sfd_funcdesc)
+    return SFRAME_ERR;
+
+  buf_offset += sframe_decoder_get_hdr_size (dctx);
+  while (i < num_fdes)
+    {
+      fde = &dctx->sfd_funcdesc[i];
+      fde->sfde_func_start_address += buf_offset;
+      buf_offset += sizeof (sframe_func_desc_entry);
+      i++;
+    }
+
+  return 0;
+}
+
 /* Get the SFrame header size.  */
 
 static uint32_t

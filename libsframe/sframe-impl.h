@@ -64,6 +64,8 @@ struct sframe_encoder_ctx
   size_t sfe_data_size;
 };
 
+int sframe_fde_tbl_reloc_fixup (sframe_decoder_ctx *dctx);
+
 #ifdef  __cplusplus
 }
 #endif
