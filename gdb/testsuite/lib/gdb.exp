@@ -5946,6 +5946,23 @@ proc gdb_compile {source dest type options} {
 	}
     }
 
+    # On AIX systems, until GCC 12 (maybe later), stabs was the default
+    # debug option, but we'd like to have dwarf instead.
+    # If we're running on one of those systems and debug was requested,
+    # but no explicit -g<format> option was given, use -gdwarf to force
+    # that as the debug info for the inferior.
+    # This list should be exhaustive:
+    set debug_format "btf|ctf|stabs|vms|coff|xcoff"
+    # Since additional_flags is a comma separated list, identify if there
+    # are other (optional) flags in the list.
+    set other_options "-\[a-zA-Z0-9\]*,"
+    set full_regexp "^additional_flags=\($other_options\)*-g\($debug_format\)"
+    if { [istarget *-*-aix*]
+	 && [lsearch -exact $options debug] != -1
+	 && [lsearch -regexp $options $full_regexp] == -1} {
+	lappend new_options "additional_flags=-gdwarf"
+    }
+
     set shlib_found 0
     set shlib_load 0
     foreach opt $options {
