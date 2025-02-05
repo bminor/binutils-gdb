@@ -96,22 +96,37 @@ _bfd_elf_link_keep_memory (struct bfd_link_info *info)
   return true;
 }
 
-asection *
-_bfd_elf_section_for_symbol (struct elf_reloc_cookie *cookie,
-			     unsigned long r_symndx,
-			     bool discard)
+static struct elf_link_hash_entry *
+get_ext_sym_hash (struct elf_reloc_cookie *cookie, unsigned long r_symndx)
 {
-  if (r_symndx >= cookie->locsymcount
-      || ELF_ST_BIND (cookie->locsyms[r_symndx].st_info) != STB_LOCAL)
-    {
-      struct elf_link_hash_entry *h;
+  struct elf_link_hash_entry *h = NULL;
 
+  if ((r_symndx >= cookie->locsymcount
+       || ELF_ST_BIND (cookie->locsyms[r_symndx].st_info) != STB_LOCAL)
+      /* Guard against corrupt input.  See PR 32636 for an example.  */
+      && r_symndx >= cookie->extsymoff)
+    {
       h = cookie->sym_hashes[r_symndx - cookie->extsymoff];
 
       while (h->root.type == bfd_link_hash_indirect
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+    }
 
+  return h;
+}
+
+asection *
+_bfd_elf_section_for_symbol (struct elf_reloc_cookie *cookie,
+			     unsigned long r_symndx,
+			     bool discard)
+{
+  struct elf_link_hash_entry *h;
+
+  h = get_ext_sym_hash (cookie, r_symndx);
+  
+  if (h != NULL)
+    {
       if ((h->root.type == bfd_link_hash_defined
 	   || h->root.type == bfd_link_hash_defweak)
 	   && discarded_section (h->root.u.def.section))
@@ -119,21 +134,20 @@ _bfd_elf_section_for_symbol (struct elf_reloc_cookie *cookie,
       else
 	return NULL;
     }
-  else
-    {
-      /* It's not a relocation against a global symbol,
-	 but it could be a relocation against a local
-	 symbol for a discarded section.  */
-      asection *isec;
-      Elf_Internal_Sym *isym;
 
-      /* Need to: get the symbol; get the section.  */
-      isym = &cookie->locsyms[r_symndx];
-      isec = bfd_section_from_elf_index (cookie->abfd, isym->st_shndx);
-      if (isec != NULL
-	  && discard ? discarded_section (isec) : 1)
-	return isec;
-     }
+  /* It's not a relocation against a global symbol,
+     but it could be a relocation against a local
+     symbol for a discarded section.  */
+  asection *isec;
+  Elf_Internal_Sym *isym;
+
+  /* Need to: get the symbol; get the section.  */
+  isym = &cookie->locsyms[r_symndx];
+  isec = bfd_section_from_elf_index (cookie->abfd, isym->st_shndx);
+  if (isec != NULL
+      && discard ? discarded_section (isec) : 1)
+    return isec;
+
   return NULL;
 }
 
@@ -13997,21 +14011,11 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
   if (r_symndx == STN_UNDEF)
     return NULL;
 
-  if (r_symndx >= cookie->locsymcount
-      || ELF_ST_BIND (cookie->locsyms[r_symndx].st_info) != STB_LOCAL)
+  h = get_ext_sym_hash (cookie, r_symndx);
+  
+  if (h != NULL)
     {
       bool was_marked;
-
-      h = cookie->sym_hashes[r_symndx - cookie->extsymoff];
-      if (h == NULL)
-	{
-	  info->callbacks->einfo (_("%F%P: corrupt input: %pB\n"),
-				  sec->owner);
-	  return NULL;
-	}
-      while (h->root.type == bfd_link_hash_indirect
-	     || h->root.type == bfd_link_hash_warning)
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
       was_marked = h->mark;
       h->mark = 1;
@@ -15067,17 +15071,12 @@ bfd_elf_reloc_symbol_deleted_p (bfd_vma offset, void *cookie)
       if (r_symndx == STN_UNDEF)
 	return true;
 
-      if (r_symndx >= rcookie->locsymcount
-	  || ELF_ST_BIND (rcookie->locsyms[r_symndx].st_info) != STB_LOCAL)
+      struct elf_link_hash_entry *h;
+
+      h = get_ext_sym_hash (rcookie, r_symndx);
+      
+      if (h != NULL)
 	{
-	  struct elf_link_hash_entry *h;
-
-	  h = rcookie->sym_hashes[r_symndx - rcookie->extsymoff];
-
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
 	  if ((h->root.type == bfd_link_hash_defined
 	       || h->root.type == bfd_link_hash_defweak)
 	      && (h->root.u.def.section->owner != rcookie->abfd
@@ -15101,6 +15100,7 @@ bfd_elf_reloc_symbol_deleted_p (bfd_vma offset, void *cookie)
 		  || discarded_section (isec)))
 	    return true;
 	}
+
       return false;
     }
   return false;
