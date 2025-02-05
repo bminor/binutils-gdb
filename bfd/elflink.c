@@ -15116,6 +15116,10 @@ bfd_elf_reloc_symbol_deleted_p (bfd_vma offset, void *cookie)
 	}
       else
 	{
+	  if (r_symndx >= rcookie->locsymcount)
+	    /* This can happen with corrupt input.  */
+	    return false;
+
 	  /* It's not a relocation against a global symbol,
 	     but it could be a relocation against a local
 	     symbol for a discarded section.  */
