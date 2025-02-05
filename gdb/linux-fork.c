@@ -959,7 +959,7 @@ checkpoint_command (const char *args, int from_tty)
     {
       int parent_pid;
 
-      gdb_printf (_("checkpoint %s: fork returned pid %ld.\n"),
+      gdb_printf (_("Checkpoint %s: fork returned pid %ld.\n"),
 		  ((number_of_inferiors () > 1)
 		   ? string_printf ("%d.%d", inf->num, fp->num).c_str ()
 		   : string_printf ("%d", fp->num).c_str ()),

@@ -93,7 +93,7 @@ proc run_test { exit_p checkpoint_p } {
 
 	# Set the checkpoint.
 	gdb_test "checkpoint" \
-	    "checkpoint 1: fork returned pid $::decimal\\."
+	    "Checkpoint 1: fork returned pid $::decimal\\."
     }
 
     # Must get the PID before we resume the inferior.

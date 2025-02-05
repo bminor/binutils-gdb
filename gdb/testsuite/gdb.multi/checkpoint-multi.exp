@@ -24,7 +24,7 @@ require gdb_protocol_is_native
 
 set checkpoints_header_re " +Id +Active Target Id +Frame.*?"
 set proc_re "(?:process $::decimal|Thread $::hex \\(LWP $::decimal\\))"
-set ckpt_re "checkpoint"
+set ckpt_re "Checkpoint"
 set main_proc "\\(main process\\)"
 set hello_c "hello\\.c"
 set goodbye_c "goodbye\\.c"
