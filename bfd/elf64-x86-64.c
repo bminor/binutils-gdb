@@ -5303,6 +5303,15 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 
       if (generate_dynamic_reloc)
 	{
+	  /* If the relgot section has not been created, then
+	     generate an error instead of a reloc.  cf PR 32638.  */
+	  if (relgot == NULL || relgot->size == 0)
+	    {
+	      info->callbacks->einfo (_("%F%pB: Unable to generate dynamic relocs because a suitable section does not exist\n"),
+					output_bfd);
+	      return false;
+	    }
+	  
 	  if (relative_reloc_name != NULL
 	      && htab->params->report_relative_reloc)
 	    _bfd_x86_elf_link_report_relative_reloc
