@@ -274,17 +274,17 @@ gdb_test "kill" "" "kill all one" \
 # and confirm that all are gone
 #
 
-gdb_test "restart 0" "Not found.*" "no more checkpoint 0"
-gdb_test "restart 1" "Not found.*" "no more checkpoint 1"
-gdb_test "restart 2" "Not found.*" "no more checkpoint 2"
-gdb_test "restart 3" "Not found.*" "no more checkpoint 3"
-gdb_test "restart 4" "Not found.*" "no more checkpoint 4"
-gdb_test "restart 5" "Not found.*" "no more checkpoint 5"
-gdb_test "restart 6" "Not found.*" "no more checkpoint 6"
-gdb_test "restart 7" "Not found.*" "no more checkpoint 7"
-gdb_test "restart 8" "Not found.*" "no more checkpoint 8"
-gdb_test "restart 9" "Not found.*" "no more checkpoint 9"
-gdb_test "restart 10" "Not found.*" "no more checkpoint 10"
+gdb_test "restart 0" "has no checkpoints" "no more checkpoint 0"
+gdb_test "restart 1" "has no checkpoints" "no more checkpoint 1"
+gdb_test "restart 2" "has no checkpoints" "no more checkpoint 2"
+gdb_test "restart 3" "has no checkpoints" "no more checkpoint 3"
+gdb_test "restart 4" "has no checkpoints" "no more checkpoint 4"
+gdb_test "restart 5" "has no checkpoints" "no more checkpoint 5"
+gdb_test "restart 6" "has no checkpoints" "no more checkpoint 6"
+gdb_test "restart 7" "has no checkpoints" "no more checkpoint 7"
+gdb_test "restart 8" "has no checkpoints" "no more checkpoint 8"
+gdb_test "restart 9" "has no checkpoints" "no more checkpoint 9"
+gdb_test "restart 10" "has no checkpoints" "no more checkpoint 10"
 
 #
 # Now let's try setting a large number of checkpoints (>600)
@@ -331,7 +331,7 @@ gdb_assert { $nr_ok == 600 } "break1 with many checkpoints"
 set count 0
 set msg "info checkpoints with at least 600 checkpoints"
 gdb_test_multiple "info checkpoints" $msg {
-    -re "\r\n  $decimal process \[^\r\]*" {
+    -re "\r\n *$decimal n +process \[^\r\]*" {
 	incr count
 	exp_continue
     }

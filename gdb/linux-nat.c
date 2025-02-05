@@ -1558,13 +1558,13 @@ linux_nat_target::detach (inferior *inf, int from_tty)
   gdb_assert (num_lwps (pid) == 1
 	      || (target_is_non_stop_p () && num_lwps (pid) == 0));
 
-  if (pid == inferior_ptid.pid () && forks_exist_p ())
+  if (forks_exist_p (inf))
     {
       /* Multi-fork case.  The current inferior_ptid is being detached
 	 from, but there are other viable forks to debug.  Detach from
 	 the current fork, and context-switch to the first
 	 available.  */
-      linux_fork_detach (from_tty, find_lwp_pid (ptid_t (pid)));
+      linux_fork_detach (from_tty, find_lwp_pid (ptid_t (pid)), inf);
     }
   else
     {
@@ -2082,8 +2082,12 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	  detach_breakpoints (ptid_t (new_pid, new_pid));
 
 	  /* Retain child fork in ptrace (stopped) state.  */
-	  if (!find_fork_pid (new_pid))
-	    add_fork (new_pid);
+	  if (find_fork_pid (new_pid).first == nullptr)
+	    {
+	      struct inferior *inf = find_inferior_ptid (linux_target,
+							 lp->ptid);
+	      add_fork (new_pid, inf);
+	    }
 
 	  /* Report as spurious, so that infrun doesn't want to follow
 	     this fork.  We're actually doing an infcall in
@@ -3729,8 +3733,8 @@ linux_nat_target::kill ()
      parent will be sleeping if this is a vfork.  */
   iterate_over_lwps (pid_ptid, kill_unfollowed_child_callback);
 
-  if (forks_exist_p ())
-    linux_fork_killall ();
+  if (forks_exist_p (current_inferior ()))
+    linux_fork_killall (current_inferior ());
   else
     {
       /* Stop all threads before killing them, since ptrace requires
@@ -3761,7 +3765,7 @@ linux_nat_target::mourn_inferior ()
 
   close_proc_mem_file (pid);
 
-  if (! forks_exist_p ())
+  if (! forks_exist_p (current_inferior ()))
     /* Normal case, no other forks available.  */
     inf_ptrace_target::mourn_inferior ();
   else
