@@ -56,7 +56,12 @@ void
 tui_win_info::refresh_window ()
 {
   if (handle != NULL)
-    wnoutrefresh (handle.get ());
+    {
+      if (suppress_output)
+	wnoutrefresh (handle.get ());
+      else
+	wrefresh (handle.get ());
+    }
 }
 
 /* Draw a border around the window.  */
