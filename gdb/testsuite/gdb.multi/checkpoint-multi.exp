@@ -23,7 +23,7 @@ require {istarget "*-*-linux*"}
 require gdb_protocol_is_native
 
 set checkpoints_header_re " +Id +Active Target Id +Frame.*?"
-set proc_re "(?:process $::decimal|Thread $::hex \\(LWP $::decimal\\))"
+set proc_re "(?:process $::decimal)"
 set ckpt_re "Checkpoint"
 set main_proc "\\(main process\\)"
 set hello_c "hello\\.c"

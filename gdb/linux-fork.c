@@ -429,6 +429,17 @@ fork_save_infrun_state (struct fork_info *fp)
     }
 }
 
+/* Given a ptid, return a "process ptid" in which only the pid member
+   is present.  This is used in calls to target_pid_to_str() to ensure
+   that only process ptids are printed by this file.  */
+
+static inline ptid_t
+proc_ptid (ptid_t ptid)
+{
+  ptid_t process_ptid (ptid.pid ());
+  return process_ptid;
+}
+
 /* Kill 'em all, let God sort 'em out...  */
 
 void
@@ -492,7 +503,7 @@ linux_fork_mourn_inferior ()
   last = find_last_fork (inf);
   fork_load_infrun_state (last);
   gdb_printf (_("[Switching to %s]\n"),
-	      target_pid_to_str (inferior_ptid).c_str ());
+	      target_pid_to_str (proc_ptid (inferior_ptid)).c_str ());
 
   /* If there's only one fork, switch back to non-fork mode.  */
   if (one_fork_p (inf))
@@ -520,7 +531,7 @@ linux_fork_detach (int from_tty, lwp_info *lp, inferior *inf)
     {
       if (ptrace (PTRACE_DETACH, inferior_ptid.pid (), 0, 0))
 	error (_("Unable to detach %s"),
-	       target_pid_to_str (inferior_ptid).c_str ());
+	       target_pid_to_str (proc_ptid (inferior_ptid)).c_str ());
     }
 
   delete_fork (inferior_ptid, inf);
@@ -535,7 +546,7 @@ linux_fork_detach (int from_tty, lwp_info *lp, inferior *inf)
 
   if (from_tty)
     gdb_printf (_("[Switching to %s]\n"),
-		target_pid_to_str (inferior_ptid).c_str ());
+		target_pid_to_str (proc_ptid (inferior_ptid)).c_str ());
 
   /* If there's only one fork, switch back to non-fork mode.  */
   if (one_fork_p (inf))
@@ -610,7 +621,7 @@ public:
 	catch (const gdb_exception &ex)
 	  {
 	    warning (_("Couldn't restore checkpoint state in %s: %s"),
-		     target_pid_to_str (m_oldfp->ptid).c_str (),
+		     target_pid_to_str (proc_ptid (m_oldfp->ptid)).c_str (),
 		     ex.what ());
 	  }
       }
@@ -688,10 +699,12 @@ delete_checkpoint_command (const char *args, int from_tty)
     error (_("Cannot delete active checkpoint"));
 
   if (ptrace (PTRACE_KILL, ptid.pid (), 0, 0))
-    error (_("Unable to kill pid %s"), target_pid_to_str (ptid).c_str ());
+    error (_("Unable to kill pid %s"),
+	   target_pid_to_str (proc_ptid (ptid)).c_str ());
 
   if (from_tty)
-    gdb_printf (_("Killed %s\n"), target_pid_to_str (ptid).c_str ());
+    gdb_printf (_("Killed %s\n"),
+		target_pid_to_str (proc_ptid (ptid)).c_str ());
 
   delete_fork (ptid, inf);
 
@@ -716,7 +729,7 @@ delete_checkpoint_command (const char *args, int from_tty)
     {
       if (inferior_call_waitpid (pptid, ptid.pid ()))
 	warning (_("Unable to wait pid %s"),
-		 target_pid_to_str (ptid).c_str ());
+		 target_pid_to_str (proc_ptid (ptid)).c_str ());
     }
 }
 
@@ -736,10 +749,12 @@ detach_checkpoint_command (const char *args, int from_tty)
 Please switch to another checkpoint before detaching the current one"));
 
   if (ptrace (PTRACE_DETACH, ptid.pid (), 0, 0))
-    error (_("Unable to detach %s"), target_pid_to_str (ptid).c_str ());
+    error (_("Unable to detach %s"),
+	   target_pid_to_str (proc_ptid (ptid)).c_str ());
 
   if (from_tty)
-    gdb_printf (_("Detached %s\n"), target_pid_to_str (ptid).c_str ());
+    gdb_printf (_("Detached %s\n"),
+		target_pid_to_str (proc_ptid (ptid)).c_str ());
 
   delete_fork (ptid, current_inferior ());
 }
@@ -790,7 +805,7 @@ info_checkpoints_command (const char *arg, int from_tty)
 			  + (print_inf ? 1 : 0));
 	  targid_width
 	    = std::max (targid_width,
-			target_pid_to_str (fi.ptid).size ());
+			target_pid_to_str (proc_ptid (fi.ptid)).size ());
 	}
     }
 
@@ -847,7 +862,7 @@ info_checkpoints_command (const char *arg, int from_tty)
 
 	  /* Print target id.  */
 	  gdb_printf ("%-*s", (int) targid_width,
-		      target_pid_to_str (fi.ptid).c_str ());
+		      target_pid_to_str (proc_ptid (fi.ptid)).c_str ());
 
 	  if (t->state == THREAD_RUNNING && is_current)
 	    gdb_printf (_(" (running)"));
@@ -1013,7 +1028,7 @@ linux_fork_context (struct fork_info *newfp, int from_tty, inferior *newinf)
       insert_breakpoints ();
       if (!inferior_changed)
 	gdb_printf (_("Switching to %s\n"),
-		    target_pid_to_str (inferior_ptid).c_str ());
+		    target_pid_to_str (proc_ptid (inferior_ptid)).c_str ());
     }
 
   notify_user_selected_context_changed
