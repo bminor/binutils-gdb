@@ -96,6 +96,27 @@ _bfd_elf_link_keep_memory (struct bfd_link_info *info)
   return true;
 }
 
+struct elf_link_hash_entry *
+_bfd_elf_get_link_hash_entry (struct elf_link_hash_entry **  sym_hashes,
+			      unsigned int                   symndx,
+			      Elf_Internal_Shdr *            symtab_hdr)
+{
+  if (symndx < symtab_hdr->sh_info)
+    return NULL;
+
+  struct elf_link_hash_entry *h = sym_hashes[symndx - symtab_hdr->sh_info];
+
+  /* The hash might be empty.  See PR 32641 for an example of this.  */
+  if (h == NULL)
+    return NULL;
+
+  while (h->root.type == bfd_link_hash_indirect
+	 || h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  return h;
+}
+
 static struct elf_link_hash_entry *
 get_ext_sym_hash (struct elf_reloc_cookie *cookie, unsigned long r_symndx)
 {
@@ -107,6 +128,9 @@ get_ext_sym_hash (struct elf_reloc_cookie *cookie, unsigned long r_symndx)
       && r_symndx >= cookie->extsymoff)
     {
       h = cookie->sym_hashes[r_symndx - cookie->extsymoff];
+
+      if (h == NULL)
+	return NULL;
 
       while (h->root.type == bfd_link_hash_indirect
 	     || h->root.type == bfd_link_hash_warning)

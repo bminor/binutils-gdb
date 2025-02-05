@@ -3153,6 +3153,9 @@ extern bool _bfd_elf_link_mmap_section_contents
 extern void _bfd_elf_link_munmap_section_contents
   (asection *);
 
+extern struct elf_link_hash_entry * _bfd_elf_get_link_hash_entry
+  (struct elf_link_hash_entry **, unsigned int, Elf_Internal_Shdr *);
+
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;
 

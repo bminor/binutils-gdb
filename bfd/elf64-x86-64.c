@@ -1784,7 +1784,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   bool to_reloc_pc32;
   bool abs_symbol;
   bool local_ref;
-  asection *tsec;
+  asection *tsec = NULL;
   bfd_signed_vma raddend;
   unsigned int opcode;
   unsigned int modrm;
@@ -1998,6 +1998,9 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
       else
 	return true;
     }
+
+  if (tsec == NULL)
+    return false;
 
   /* Don't convert GOTPCREL relocation against large section.  */
   if (elf_section_data (tsec) !=  NULL
@@ -2408,10 +2411,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
       else
 	{
 	  isym = NULL;
-	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  h = _bfd_elf_get_link_hash_entry (sym_hashes, r_symndx, symtab_hdr);
 	}
 
       /* Check invalid x32 relocations.  */
