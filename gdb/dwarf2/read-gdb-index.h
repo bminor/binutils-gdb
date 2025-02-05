@@ -37,9 +37,10 @@ typedef gdb::function_view
     get_gdb_index_contents_dwz_ftype;
 
 /* Read .gdb_index.  If everything went ok, initialize the "quick"
-   elements of all the CUs and return 1.  Otherwise, return 0.  */
+   elements of all the CUs and return true.  Otherwise, return
+   false.  */
 
-int dwarf2_read_gdb_index
+bool dwarf2_read_gdb_index
   (dwarf2_per_objfile *per_objfile,
    get_gdb_index_contents_ftype get_gdb_index_contents,
    get_gdb_index_contents_dwz_ftype get_gdb_index_contents_dwz);

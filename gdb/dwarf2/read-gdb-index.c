@@ -1478,7 +1478,7 @@ set_main_name_from_gdb_index (dwarf2_per_objfile *per_objfile,
 
 /* See read-gdb-index.h.  */
 
-int
+bool
 dwarf2_read_gdb_index
   (dwarf2_per_objfile *per_objfile,
    get_gdb_index_contents_ftype get_gdb_index_contents,
@@ -1494,7 +1494,7 @@ dwarf2_read_gdb_index
     = get_gdb_index_contents (objfile, per_bfd);
 
   if (main_index_contents.empty ())
-    return 0;
+    return false;
 
   auto map = std::make_unique<mapped_gdb_index> ();
   if (!read_gdb_index_from_buffer (objfile_name (objfile),
@@ -1502,11 +1502,11 @@ dwarf2_read_gdb_index
 				   main_index_contents, map.get (), &cu_list,
 				   &cu_list_elements, &types_list,
 				   &types_list_elements))
-    return 0;
+    return false;
 
   /* Don't use the index if it's empty.  */
   if (map->symbol_table.empty ())
-    return 0;
+    return false;
 
   /* If there is a .dwz file, read it so we can get its CU list as
      well.  */
@@ -1521,7 +1521,7 @@ dwarf2_read_gdb_index
 	= get_gdb_index_contents_dwz (objfile, dwz);
 
       if (dwz_index_content.empty ())
-	return 0;
+	return false;
 
       if (!read_gdb_index_from_buffer (bfd_get_filename (dwz->dwz_bfd.get ()),
 				       1, dwz_index_content, &dwz_map,
@@ -1531,7 +1531,7 @@ dwarf2_read_gdb_index
 	{
 	  warning (_("could not read '.gdb_index' section from %s; skipping"),
 		   bfd_get_filename (dwz->dwz_bfd.get ()));
-	  return 0;
+	  return false;
 	}
     }
 
@@ -1546,7 +1546,7 @@ dwarf2_read_gdb_index
 	  || per_bfd->types.size () > 1)
 	{
 	  per_bfd->all_units.clear ();
-	  return 0;
+	  return false;
 	}
 
       dwarf2_section_info *section
@@ -1568,7 +1568,7 @@ dwarf2_read_gdb_index
   per_bfd->quick_file_names_table =
     create_quick_file_names_table (per_bfd->all_units.size ());
 
-  return 1;
+  return true;
 }
 
 void _initialize_read_gdb_index ();
