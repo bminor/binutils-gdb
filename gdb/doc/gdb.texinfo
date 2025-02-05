@@ -4322,10 +4322,26 @@ listed:
 
 @table @code
 @item Checkpoint ID
+@item Active state indicator
 @item Process ID
 @item Code Address
 @item Source line, or label
 @end table
+
+Checkpoint IDs will be displayed as either a non-negative integer or
+in the form @var{i}.@var{n}, where @var{i} is the inferior number, a
+positive integer, as shown by the command @code{info inferiors}, and
+@var{n}, a non-negative integer, is the checkpoint number for that
+inferior.  The single non-negative integer form is used when
+there is only one inferior.  The @var{i}.@var{n} form is used when
+there are multiple inferiors.
+
+The active state indicator is a single letter, either @samp{y} or
+@samp{n}, indicating yes or no.  Only one checkpoint per inferior may
+be active at once.  The active checkpoint in the current inferior is
+also shown by a @samp{*} at the start of the line.  Checkpoints whose
+active state is @samp{n} can be switched to using the @code{restart}
+command or deleted using the @code{delete checkpoint} command.
 
 @kindex restart @var{checkpoint-id}
 @item restart @var{checkpoint-id}
@@ -4333,7 +4349,9 @@ Restore the program state that was saved as checkpoint number
 @var{checkpoint-id}.  All program variables, registers, stack frames
 etc.@:  will be returned to the values that they had when the checkpoint
 was saved.  In essence, gdb will ``wind back the clock'' to the point
-in time when the checkpoint was saved.
+in time when the checkpoint was saved.  The checkpoint number
+@var{checkpoint-id} is specified in the same form as that output by the
+@code{info checkpoints} command.
 
 Note that breakpoints, @value{GDBN} variables, command history etc.
 are not affected by restoring a checkpoint.  In general, a checkpoint

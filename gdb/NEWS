@@ -24,6 +24,8 @@
 
 * UST (static tracepoint) support from gdbserver has been removed.
 
+* Linux checkpoint code has been updated to work with multiple inferiors.
+
 * New commands
 
 maintenance check psymtabs
