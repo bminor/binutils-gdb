@@ -485,11 +485,9 @@ tui_disasm_window::addr_is_displayed (CORE_ADDR addr) const
 }
 
 void
-tui_disasm_window::maybe_update (const frame_info_ptr &fi, symtab_and_line sal)
+tui_disasm_window::maybe_update (struct gdbarch *gdbarch, symtab_and_line sal)
 {
   CORE_ADDR low;
-
-  struct gdbarch *frame_arch = get_frame_arch (fi);
 
   if (find_pc_partial_function (sal.pc, NULL, &low, NULL) == 0)
     {
@@ -498,7 +496,7 @@ tui_disasm_window::maybe_update (const frame_info_ptr &fi, symtab_and_line sal)
       low = sal.pc;
     }
   else
-    low = tui_get_low_disassembly_address (frame_arch, low, sal.pc);
+    low = tui_get_low_disassembly_address (gdbarch, low, sal.pc);
 
   struct tui_line_or_address a;
 
@@ -507,7 +505,7 @@ tui_disasm_window::maybe_update (const frame_info_ptr &fi, symtab_and_line sal)
   if (!addr_is_displayed (sal.pc))
     {
       sal.pc = low;
-      update_source_window (frame_arch, sal);
+      update_source_window (gdbarch, sal);
     }
   else
     {

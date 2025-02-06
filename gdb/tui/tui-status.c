@@ -278,8 +278,9 @@ tui_show_frame_info (const frame_info_ptr &fi)
       else
 	func_name = _("<unavailable>");
 
+      struct gdbarch *gdbarch = get_frame_arch (fi);
       status_changed_p
-	= tui_location.set_location (get_frame_arch (fi), sal, func_name);
+	= tui_location.set_location (gdbarch, sal, func_name);
 
       /* If the status information has not changed, then frame information has
 	 not changed.  If frame information has not changed, then the windows'
@@ -289,7 +290,7 @@ tui_show_frame_info (const frame_info_ptr &fi)
 
       for (struct tui_source_window_base *win_info : tui_source_windows ())
 	{
-	  win_info->maybe_update (fi, sal);
+	  win_info->maybe_update (gdbarch, sal);
 	  win_info->update_exec_info ();
 	}
     }
