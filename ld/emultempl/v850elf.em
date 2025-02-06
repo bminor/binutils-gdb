@@ -63,7 +63,7 @@ v850_create_output_section_statements (void)
 	 These will only be created if the output format is an arm format,
 	 hence we do not support linking and changing output formats at the
 	 same time.  Use a link followed by objcopy to change output formats.  */
-      einfo (_("%F%P: error: cannot change output format"
+      fatal (_("%P: error: cannot change output format"
 	       " whilst linking %s binaries\n"), "V850");
       return;
     }

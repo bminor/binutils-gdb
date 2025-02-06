@@ -83,11 +83,11 @@ gld${EMULATION_NAME}_after_allocation (void)
       && !bfd_link_relocatable (&link_info))
     {
       if (lang_phdr_list == NULL)
-        elf_seg_map (link_info.output_bfd) = NULL;
+	elf_seg_map (link_info.output_bfd) = NULL;
       if (!_bfd_elf_map_sections_to_segments (link_info.output_bfd,
 					      &link_info,
 					      NULL))
-        einfo (_("%F%P: map sections to segments failed: %E\n"));
+	fatal (_("%P: map sections to segments failed: %E\n"));
     }
 
   /* Adjust program header size and .eh_frame_hdr size before

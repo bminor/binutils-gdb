@@ -59,10 +59,8 @@ tic6x_after_open (void)
   if (is_tic6x_target ())
     {
       if (params.dsbt_index >= params.dsbt_size)
-	{
-	  einfo (_("%F%P: invalid --dsbt-index %d, outside DSBT size\n"),
-		 params.dsbt_index);
-	}
+	fatal (_("%P: invalid --dsbt-index %d, outside DSBT size\n"),
+	       params.dsbt_index);
       elf32_tic6x_setup (&link_info, &params);
     }
 
@@ -186,7 +184,7 @@ PARSE_AND_LIST_ARGS_CASES='
 	if (*end == 0
 	    && params.dsbt_index >= 0 && params.dsbt_index < 0x7fff)
 	  break;
-	einfo (_("%F%P: invalid --dsbt-index %s\n"), optarg);
+	fatal (_("%P: invalid --dsbt-index %s\n"), optarg);
       }
       break;
     case OPTION_DSBT_SIZE:
@@ -196,7 +194,7 @@ PARSE_AND_LIST_ARGS_CASES='
 	if (*end == 0
 	    && params.dsbt_size >= 0 && params.dsbt_size < 0x7fff)
 	  break;
-	einfo (_("%F%P: invalid --dsbt-size %s\n"), optarg);
+	fatal (_("%P: invalid --dsbt-size %s\n"), optarg);
       }
       break;
    case OPTION_NO_MERGE_EXIDX_ENTRIES:

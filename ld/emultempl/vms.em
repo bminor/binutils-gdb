@@ -200,7 +200,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   if (bed->elf_backend_late_size_sections
       && !bed->elf_backend_late_size_sections (link_info.output_bfd,
 					       &link_info))
-    einfo (_("%F%P: failed to set dynamic section sizes: %E\n"));
+    fatal (_("%P: failed to set dynamic section sizes: %E\n"));
 
   before_allocation_default ();
 }

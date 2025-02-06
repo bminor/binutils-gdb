@@ -116,7 +116,7 @@ avr_elf_create_output_section_statements (void)
 
   if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
     {
-      einfo (_("%F%P: error: cannot change output format "
+      fatal (_("%P: error: cannot change output format "
 	       "whilst linking %s binaries\n"), "AVR");
       return;
     }

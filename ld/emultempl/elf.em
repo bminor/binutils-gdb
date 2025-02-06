@@ -886,12 +886,12 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	{
 #ifndef HAVE_ZSTD
 	  if (config.compress_debug == COMPRESS_DEBUG_ZSTD)
-	    einfo (_ ("%F%P: --compress-debug-sections=zstd: ld is not built "
-		  "with zstd support\n"));
+	    fatal (_("%P: --compress-debug-sections=zstd: ld is not built "
+		     "with zstd support\n"));
 #endif
 	}
       if (config.compress_debug == COMPRESS_UNKNOWN)
-	einfo (_("%F%P: invalid --compress-debug-sections option: \`%s'\n"),
+	fatal (_("%P: invalid --compress-debug-sections option: \`%s'\n"),
 	       optarg);
       break;
 
@@ -953,7 +953,7 @@ fragment <<EOF
 	  link_info.emit_gnu_hash = true;
 	}
       else
-	einfo (_("%F%P: invalid hash style \`%s'\n"), optarg);
+	fatal (_("%P: invalid hash style \`%s'\n"), optarg);
       break;
 
 EOF
@@ -973,7 +973,7 @@ fragment <<EOF
 	  link_info.maxpagesize = strtoul (optarg + 14, &end, 0);
 	  if (*end
 	      || (link_info.maxpagesize & (link_info.maxpagesize - 1)) != 0)
-	    einfo (_("%F%P: invalid maximum page size \`%s'\n"),
+	    fatal (_("%P: invalid maximum page size \`%s'\n"),
 		   optarg + 14);
 	  link_info.maxpagesize_is_set = true;
 	}
@@ -983,7 +983,7 @@ fragment <<EOF
 	  link_info.commonpagesize = strtoul (optarg + 17, &end, 0);
 	  if (*end
 	      || (link_info.commonpagesize & (link_info.commonpagesize - 1)) != 0)
-	    einfo (_("%F%P: invalid common page size \`%s'\n"),
+	    fatal (_("%P: invalid common page size \`%s'\n"),
 		   optarg + 17);
 	  link_info.commonpagesize_is_set = true;
 	}
@@ -992,7 +992,7 @@ fragment <<EOF
 	  char *end;
 	  link_info.stacksize = strtoul (optarg + 11, &end, 0);
 	  if (*end || link_info.stacksize < 0)
-	    einfo (_("%F%P: invalid stack size \`%s'\n"), optarg + 11);
+	    fatal (_("%P: invalid stack size \`%s'\n"), optarg + 11);
 	  if (!link_info.stacksize)
 	    /* Use -1 for explicit no-stack, because zero means
 	       'default'.   */
@@ -1031,7 +1031,7 @@ fragment <<EOF
 	  else if (strcmp (optarg, "start-stop-visibility=protected") == 0)
 	    link_info.start_stop_visibility = STV_PROTECTED;
 	  else
-	    einfo (_("%F%P: invalid visibility in \`-z %s'; "
+	    fatal (_("%P: invalid visibility in \`-z %s'; "
 		     "must be default, internal, hidden, or protected"),
 		   optarg);
 	}

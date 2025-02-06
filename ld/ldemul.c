@@ -349,7 +349,7 @@ ldemul_choose_mode (char *target)
   einfo (_("%P: unrecognised emulation mode: %s\n"), target);
   einfo (_("Supported emulations: "));
   ldemul_list_emulations (stderr);
-  einfo ("%F\n");
+  fatal ("\n");
 }
 
 void

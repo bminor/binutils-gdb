@@ -70,7 +70,7 @@
 void
 vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 {
-  bool fatal = false;
+  bool isfatal = false;
   const char *scan;
   int arg_type;
   unsigned int arg_count = 0;
@@ -282,7 +282,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 
 	    case 'F':
 	      /* Error is fatal.  */
-	      fatal = true;
+	      isfatal = true;
 	      break;
 
 	    case 'P':
@@ -324,7 +324,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 		if (abfd != NULL)
 		  {
 		    if (!bfd_generic_link_read_symbols (abfd))
-		      einfo (_("%F%P: %pB: could not read symbols: %E\n"), abfd);
+		      fatal (_("%P: %pB: could not read symbols: %E\n"), abfd);
 
 		    asymbols = bfd_get_outsymbols (abfd);
 		  }
@@ -587,7 +587,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
   if (is_warning && config.fatal_warnings)
     config.make_executable = false;
 
-  if (fatal)
+  if (isfatal)
     xexit (1);
 }
 
@@ -618,6 +618,21 @@ einfo (const char *fmt, ...)
   vfinfo (stderr, fmt, arg, true);
   va_end (arg);
   fflush (stderr);
+}
+
+/* Fatal error.  */
+
+void
+fatal (const char *fmt, ...)
+{
+  va_list arg;
+
+  fflush (stdout);
+  va_start (arg, fmt);
+  vfinfo (stderr, fmt, arg, true);
+  va_end (arg);
+  fflush (stderr);
+  xexit (1);
 }
 
 /* The buffer size for each command-line option warning.  */
@@ -698,7 +713,7 @@ output_unknown_cmdline_warnings (void)
 void
 info_assert (const char *file, unsigned int line)
 {
-  einfo (_("%F%P: internal error %s %d\n"), file, line);
+  fatal (_("%P: internal error %s %d\n"), file, line);
 }
 
 /* ('m' for map) Format info message and print on map.  */
@@ -767,8 +782,7 @@ ld_abort (const char *file, int line, const char *fn)
   else
     einfo (_("%P: internal error: aborting at %s:%d\n"),
 	   file, line);
-  einfo (_("%F%P: please report this bug\n"));
-  xexit (1);
+  fatal (_("%P: please report this bug\n"));
 }
 
 /* Decode a hexadecimal character. Return -1 on error. */

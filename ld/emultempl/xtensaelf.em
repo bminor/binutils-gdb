@@ -390,7 +390,7 @@ check_xtensa_info (bfd *abfd, asection *info_sec)
 
   data = xmalloc (info_sec->size);
   if (! bfd_get_section_contents (abfd, info_sec, data, 0, info_sec->size))
-    einfo (_("%F%P: %pB: cannot read contents of section %pA\n"), abfd, info_sec);
+    fatal (_("%P: %pB: cannot read contents of section %pA\n"), abfd, info_sec);
 
   if (info_sec->size > 24
       && info_sec->size >= 24 + bfd_get_32 (abfd, data + 4)
@@ -431,13 +431,13 @@ elf_xtensa_before_allocation (void)
   if (is_big_endian
       && link_info.output_bfd->xvec->byteorder == BFD_ENDIAN_LITTLE)
     {
-      einfo (_("%F%P: little endian output does not match "
+      fatal (_("%P: little endian output does not match "
 	       "Xtensa configuration\n"));
     }
   if (!is_big_endian
       && link_info.output_bfd->xvec->byteorder == BFD_ENDIAN_BIG)
     {
-      einfo (_("%F%P: big endian output does not match "
+      fatal (_("%P: big endian output does not match "
 	       "Xtensa configuration\n"));
     }
 
@@ -456,7 +456,7 @@ elf_xtensa_before_allocation (void)
 	 cannot go any further if there are any mismatches.  */
       if ((is_big_endian && f->the_bfd->xvec->byteorder == BFD_ENDIAN_LITTLE)
 	  || (!is_big_endian && f->the_bfd->xvec->byteorder == BFD_ENDIAN_BIG))
-	einfo (_("%F%P: cross-endian linking for %pB not supported\n"),
+	fatal (_("%P: cross-endian linking for %pB not supported\n"),
 	       f->the_bfd);
 
       if (! first_bfd)
@@ -487,7 +487,7 @@ elf_xtensa_before_allocation (void)
       info_sec = bfd_make_section_with_flags (first_bfd, ".xtensa.info",
 					      SEC_HAS_CONTENTS | SEC_READONLY);
       if (! info_sec)
-	einfo (_("%F%P: failed to create .xtensa.info section\n"));
+	fatal (_("%P: failed to create .xtensa.info section\n"));
     }
   if (info_sec)
     {
@@ -1226,7 +1226,7 @@ ld_build_required_section_dependence (lang_statement_union_type *s)
       lang_statement_union_type *l = iter_stack_current (&stack);
 
       if (l == NULL && link_info.non_contiguous_regions)
-	einfo (_("%F%P: Relaxation not supported with "
+	fatal (_("%P: Relaxation not supported with "
 		 "--enable-non-contiguous-regions.\n"));
 
       if (l->header.type == lang_input_section_enum)

@@ -82,7 +82,7 @@ m68k_elf_after_open (void)
 	  asection *datasec;
 
 	  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
-	    einfo (_("%F%P: %pB: all input objects must be ELF "
+	    fatal (_("%P: %pB: all input objects must be ELF "
 		     "for --embedded-relocs\n"));
 
 	  datasec = bfd_get_section_by_name (abfd, ".data");
@@ -106,7 +106,7 @@ m68k_elf_after_open (void)
 	      if (relsec == NULL
 		  || !bfd_set_section_alignment (relsec, 2)
 		  || !bfd_set_section_size (relsec, datasec->reloc_count * 12))
-		einfo (_("%F%P: %pB: can not create .emreloc section: %E\n"));
+		fatal (_("%P: %pB: can not create .emreloc section: %E\n"));
 	    }
 
 	  /* Double check that all other data sections are empty, as is

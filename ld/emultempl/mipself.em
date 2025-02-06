@@ -152,7 +152,7 @@ mips_add_stub_section (const char *stub_sec_name, asection *input_section,
 				 bfd_get_arch (link_info.output_bfd),
 				 bfd_get_mach (link_info.output_bfd)))
 	{
-	  einfo (_("%F%P: can not create BFD: %E\n"));
+	  fatal (_("%P: can not create BFD: %E\n"));
 	  return NULL;
 	}
       stub_bfd->flags |= BFD_LINKER_CREATED;
