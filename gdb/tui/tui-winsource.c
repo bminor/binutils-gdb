@@ -185,7 +185,7 @@ tui_source_window_base::update_source_window_with_addr (struct gdbarch *gdbarch,
   if (addr != 0)
     sal = find_pc_line (addr, 0);
 
-  update_source_window (gdbarch, sal);
+  maybe_update (gdbarch, sal);
 }
 
 /* Function to ensure that the source and/or disassembly windows
