@@ -2535,6 +2535,8 @@ extern bool _bfd_elf_discard_section_sframe
   (asection *, bool (*) (bfd_vma, void *), struct elf_reloc_cookie *);
 extern bool _bfd_elf_merge_section_sframe
   (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
+extern bfd_vma _bfd_elf_sframe_section_offset
+  (bfd *, struct bfd_link_info *, asection *, bfd_vma);
 extern bool _bfd_elf_write_section_sframe
   (bfd *, struct bfd_link_info *);
 extern bool _bfd_elf_set_section_sframe (bfd *, struct bfd_link_info *);

@@ -515,6 +515,56 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
   return true;
 }
 
+/* Adjust an address in the .sframe section.  Given OFFSET within
+   SEC, this returns the new offset in the merged .sframe section,
+   or -1 if the address refers to an FDE which has been removed.
+
+   PS: This function assumes that _bfd_elf_merge_section_sframe has not been
+   called on the input section SEC yet.  */
+
+bfd_vma
+_bfd_elf_sframe_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
+				struct bfd_link_info *info,
+				asection *sec,
+				bfd_vma offset)
+{
+  struct sframe_dec_info *sfd_info;
+  struct sframe_enc_info *sfe_info;
+  sframe_decoder_ctx *sfd_ctx;
+  sframe_encoder_ctx *sfe_ctx;
+  struct elf_link_hash_table *htab;
+
+  unsigned int sec_fde_idx, out_fde_idx = 0;
+  unsigned int i, sfe_num_fdes;
+
+  if (sec->sec_info_type != SEC_INFO_TYPE_SFRAME)
+    return offset;
+
+  sfd_info = (struct sframe_dec_info *) elf_section_data (sec)->sec_info;
+  sfd_ctx = sfd_info->sfd_ctx;
+
+  htab = elf_hash_table (info);
+  sfe_info = &(htab->sfe_info);
+  sfe_ctx = sfe_info->sfe_ctx;
+
+  sfe_num_fdes = sframe_encoder_get_num_fidx (sfe_ctx);
+  /* Identify the index of the FDE (at OFFSET) in the input section.  */
+  sec_fde_idx = ((offset - sframe_decoder_get_hdr_size (sfd_ctx))
+		 / sizeof (sframe_func_desc_entry));
+  /* The index of this FDE in the output section depends on number of deleted
+     functions, if any.  */
+  for (i = 0; i < sec_fde_idx; i++)
+    {
+      if (!sframe_decoder_func_deleted_p (sfd_info, i))
+	out_fde_idx++;
+    }
+  /* The actual index of the FDE in the output SFrame section.  */
+  out_fde_idx += sfe_num_fdes;
+
+  return (sframe_decoder_get_hdr_size (sfd_ctx)
+	  + out_fde_idx * sizeof (sframe_func_desc_entry));
+}
+
 /* Write out the .sframe section.  This must be called after
    _bfd_elf_merge_section_sframe has been called on all input
    .sframe sections.  */
