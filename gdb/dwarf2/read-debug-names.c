@@ -769,13 +769,11 @@ do_dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
   map.shard = std::make_unique<cooked_index_shard> ();
   map.shard->install_addrmap (&addrmap);
 
-  cooked_index *idx
-    = new debug_names_index (per_objfile,
-			     (std::make_unique<cooked_index_debug_names>
-			      (per_objfile, std::move (map))));
-  per_bfd->index_table.reset (idx);
-
-  idx->start_reading ();
+  auto cidn = (std::make_unique<cooked_index_debug_names>
+	       (per_objfile, std::move (map)));
+  auto idx = std::make_unique<debug_names_index> (per_objfile,
+						  std::move (cidn));
+  per_bfd->start_reading (std::move (idx));
 
   return true;
 }

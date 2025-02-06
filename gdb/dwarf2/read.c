@@ -1608,6 +1608,16 @@ dwarf2_per_bfd::map_info_sections (struct objfile *objfile)
     section.read (objfile);
 }
 
+/* See dwarf2/read.h.  */
+
+void
+dwarf2_per_bfd::start_reading (std::unique_ptr<dwarf_scanner_base> new_table)
+{
+  gdb_assert (index_table == nullptr);
+  index_table = std::move (new_table);
+  index_table->start_reading ();
+}
+
 
 /* DWARF quick_symbol_functions support.  */
 
@@ -16340,12 +16350,9 @@ start_debug_info_reader (dwarf2_per_objfile *per_objfile)
      scanning; and then start the scanning.  */
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   std::unique_ptr<cooked_index_worker> worker
-    (new cooked_index_debug_info (per_objfile));
-  cooked_index *idx = new cooked_index (per_objfile, std::move (worker));
-  per_bfd->index_table.reset (idx);
-  /* Don't start reading until after 'index_table' is set.  This
-     avoids races.  */
-  idx->start_reading ();
+    = std::make_unique<cooked_index_debug_info> (per_objfile);
+  per_bfd->start_reading (std::make_unique<cooked_index> (per_objfile,
+							  std::move (worker)));
 }
 
 

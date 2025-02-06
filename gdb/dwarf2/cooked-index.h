@@ -633,7 +633,7 @@ public:
   DISABLE_COPY_AND_ASSIGN (cooked_index);
 
   /* Start reading the DWARF.  */
-  void start_reading ();
+  void start_reading () override;
 
   /* Called by cooked_index_worker to set the contents of this index
      and transition to the MAIN_AVAILABLE state.  WARN is used to

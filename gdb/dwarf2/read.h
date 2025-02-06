@@ -451,6 +451,10 @@ struct dwarf2_per_bfd
      .debug_info.  */
   void map_info_sections (struct objfile *objfile);
 
+  /* Set the 'index_table' member and then call start_reading on
+     it.  */
+  void start_reading (std::unique_ptr<dwarf_scanner_base> new_table);
+
 private:
   /* This function is mapped across the sections and remembers the
      offset and size of each of the debugging sections we are

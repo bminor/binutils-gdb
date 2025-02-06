@@ -32,6 +32,11 @@ struct dwarf_scanner_base
   virtual ~dwarf_scanner_base () = default;
   DISABLE_COPY_AND_ASSIGN (dwarf_scanner_base);
 
+  /* Start the reading.  This is only really relevant to the cooked
+     index; see cooked-index.h.  */
+  virtual void start_reading ()
+  { }
+
   /* Return a quick_symbol_functions instance that refers back to this
      dwarf_scanner_base.  */
   virtual quick_symbol_functions_up make_quick_functions () const = 0;
