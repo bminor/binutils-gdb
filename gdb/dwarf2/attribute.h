@@ -69,7 +69,7 @@ struct attribute
      form.  */
   LONGEST as_signed () const
   {
-    gdb_assert (form_is_signed ());
+    gdb_assert (form_is_strictly_signed ());
     return u.snd;
   }
 
@@ -97,7 +97,7 @@ struct attribute
   {
     if (form_is_unsigned ())
       return true;
-    if (form_is_signed ())
+    if (form_is_strictly_signed ())
       return as_signed () >= 0;
     return false;
   }
@@ -108,7 +108,7 @@ struct attribute
   {
     if (form_is_unsigned ())
       return as_unsigned ();
-    if (form_is_signed ())
+    if (form_is_strictly_signed ())
       return (ULONGEST)as_signed ();
     gdb_assert (false);
   }
@@ -168,8 +168,11 @@ struct attribute
   /* Check if the attribute's form is an unsigned integer form.  */
   bool form_is_unsigned () const;
 
-  /* Check if the attribute's form is a signed integer form.  */
-  bool form_is_signed () const;
+  /* Check if the attribute's form is a signed integer form.  This
+     only returns true for forms that are strictly signed -- that is,
+     for a context-dependent form like DW_FORM_data1, this returns
+     false.  */
+  bool form_is_strictly_signed () const;
 
   /* Check if the attribute's form is a form that requires
      "reprocessing".  */
