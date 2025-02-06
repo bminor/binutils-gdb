@@ -741,7 +741,7 @@ detach_checkpoint_command (const char *args, int from_tty)
   if (!args || !*args)
     error (_("Requires argument (checkpoint id to detach)"));
 
-  auto [fi, inf] = parse_checkpoint_id (args);
+  auto fi = parse_checkpoint_id (args).first;
   ptid = fi->ptid;
 
   if (ptid == inferior_ptid)
@@ -1017,7 +1017,7 @@ linux_fork_context (struct fork_info *newfp, int from_tty, inferior *newinf)
       inferior_changed = true;
     }
 
-  auto [oldfp, oldinf] = find_fork_ptid (inferior_ptid);
+  auto oldfp = find_fork_ptid (inferior_ptid).first;
   gdb_assert (oldfp != NULL);
 
   if (oldfp != newfp)
