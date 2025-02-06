@@ -11131,16 +11131,11 @@ get_alignment (struct dwarf2_cu *cu, struct die_info *die)
       return 0;
     }
 
-  LONGEST val = attr->constant_value (0);
-  if (val < 0)
-    {
-      complaint (_("DW_AT_alignment value must not be negative"
-		   " - DIE at %s [in module %s]"),
-		 sect_offset_str (die->sect_off),
-		 objfile_name (cu->per_objfile->objfile));
-      return 0;
-    }
-  ULONGEST align = val;
+  std::optional<ULONGEST> val = attr->unsigned_constant ();
+  if (!val.has_value ())
+    return 0;
+
+  ULONGEST align = *val;
 
   if (align == 0)
     {
