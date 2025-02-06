@@ -9967,8 +9967,8 @@ dwarf2_record_block_entry_pc (struct die_info *die, struct block *block,
 	    {
 	      /* We could possibly handle signed constants, but this is out
 		 of spec, so for now, just complain and ignore it.  */
-	      complaint (_("Unhandled constant for DW_AT_entry_pc, value (%s)"),
-			 plongest (attr->as_nonnegative ()));
+	      complaint (_("Invalid form for DW_AT_entry_pc: %s"),
+			 dwarf_form_name (attr->form));
 	    }
 	}
       else
