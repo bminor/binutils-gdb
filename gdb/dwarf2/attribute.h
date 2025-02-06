@@ -124,6 +124,18 @@ struct attribute
 
   bool form_is_section_offset () const;
 
+  /* Return an unsigned constant value.  This only handles constant
+     forms (i.e., form_is_constant -- and not the extended list of
+     "unsigned" forms) and assumes an unsigned value is desired.  This
+     can intended for use with DWARF-defined enumerations like DW_CC_*
+     or DW_INL_*, but also in situations where a nonnegative constant
+     integer is specified by DWARF.
+
+     If a signed form and negative value is used, or if a non-constant
+     form is used, then complaint is issued and an empty value is
+     returned.  */
+  std::optional<ULONGEST> unsigned_constant () const;
+
   /* Return non-zero if ATTR's value falls in the 'constant' class, or
      zero otherwise.  When this function returns true, you can apply
      the constant_value method to it.

@@ -8499,8 +8499,10 @@ dwarf2_func_is_main_p (struct die_info *die, struct dwarf2_cu *cu)
   if (dwarf2_flag_true_p (die, DW_AT_main_subprogram, cu))
     return true;
   struct attribute *attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
-  return (attr != nullptr
-	  && attr->constant_value (DW_CC_normal) == DW_CC_program);
+  if (attr == nullptr)
+    return false;
+  std::optional<ULONGEST> value = attr->unsigned_constant ();
+  return value.has_value () && *value == DW_CC_program;
 }
 
 /* A helper to handle Ada's "Pragma Import" feature when it is applied
@@ -8620,11 +8622,14 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  attr = dwarf2_attr (die, DW_AT_external, cu);
 	  bool external_p = attr != nullptr && attr->as_boolean ();
 	  attr = dwarf2_attr (die, DW_AT_inline, cu);
-	  bool inlined_p
-	    = (attr != nullptr
-	       && attr->is_nonnegative ()
-	       && (attr->as_nonnegative () == DW_INL_inlined
-		   || attr->as_nonnegative () == DW_INL_declared_inlined));
+	  bool inlined_p = false;
+	  if (attr != nullptr)
+	    {
+	      std::optional<ULONGEST> value = attr->unsigned_constant ();
+	      inlined_p = (value.has_value ()
+			   && (*value == DW_INL_inlined
+			       || *value == DW_INL_declared_inlined));
+	    }
 	  attr = dwarf2_attr (die, DW_AT_declaration, cu);
 	  bool decl_p = attr != nullptr && attr->as_boolean ();
 	  if (!external_p && !inlined_p && !decl_p)
@@ -10093,13 +10098,16 @@ dwarf2_access_attribute (struct die_info *die, struct dwarf2_cu *cu)
   attribute *attr = dwarf2_attr (die, DW_AT_accessibility, cu);
   if (attr != nullptr)
     {
-      LONGEST value = attr->constant_value (-1);
-      if (value == DW_ACCESS_public
-	  || value == DW_ACCESS_protected
-	  || value == DW_ACCESS_private)
-	return (dwarf_access_attribute) value;
-      complaint (_("Unhandled DW_AT_accessibility value (%s)"),
-		 plongest (value));
+      std::optional<ULONGEST> value = attr->unsigned_constant ();
+      if (value.has_value ())
+	{
+	  if (*value == DW_ACCESS_public
+	      || *value == DW_ACCESS_protected
+	      || *value == DW_ACCESS_private)
+	    return (dwarf_access_attribute) *value;
+	  complaint (_("Unhandled DW_AT_accessibility value (%s)"),
+		     pulongest (*value));
+	}
     }
 
   if (cu->header.version < 3 || cu->producer_is_gxx_lt_4_6 ())
@@ -11302,12 +11310,16 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
      the die.  Otherwise the calling convention remains set to
      the default value DW_CC_normal.  */
   attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
-  if (attr != nullptr
-      && is_valid_DW_AT_calling_convention_for_type (attr->constant_value (0)))
+  if (attr != nullptr)
     {
-      ALLOCATE_CPLUS_STRUCT_TYPE (type);
-      TYPE_CPLUS_CALLING_CONVENTION (type)
-	= (enum dwarf_calling_convention) (attr->constant_value (0));
+      std::optional<ULONGEST> value = attr->unsigned_constant ();
+      if (value.has_value ()
+	  && is_valid_DW_AT_calling_convention_for_type (*value))
+	{
+	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
+	  TYPE_CPLUS_CALLING_CONVENTION (type)
+	    = (enum dwarf_calling_convention) *value;
+	}
     }
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
@@ -11773,19 +11785,23 @@ die_byte_order (die_info *die, dwarf2_cu *cu, enum bfd_endian *byte_order)
   attribute *attr = dwarf2_attr (die, DW_AT_endianity, cu);
   if (attr != nullptr && attr->form_is_constant ())
     {
-      int endianity = attr->constant_value (0);
+      std::optional<ULONGEST> endianity = attr->unsigned_constant ();
 
-      switch (endianity)
+      if (endianity.has_value ())
 	{
-	case DW_END_big:
-	  new_order = BFD_ENDIAN_BIG;
-	  break;
-	case DW_END_little:
-	  new_order = BFD_ENDIAN_LITTLE;
-	  break;
-	default:
-	  complaint (_("DW_AT_endianity has unrecognized value %d"), endianity);
-	  break;
+	  switch (*endianity)
+	    {
+	    case DW_END_big:
+	      new_order = BFD_ENDIAN_BIG;
+	      break;
+	    case DW_END_little:
+	      new_order = BFD_ENDIAN_LITTLE;
+	      break;
+	    default:
+	      complaint (_("DW_AT_endianity has unrecognized value %s"),
+			 pulongest (*endianity));
+	      break;
+	    }
 	}
     }
 
@@ -12439,9 +12455,10 @@ read_array_order (struct die_info *die, struct dwarf2_cu *cu)
 
   if (attr != nullptr)
     {
-      LONGEST val = attr->constant_value (-1);
-      if (val == DW_ORD_row_major || val == DW_ORD_col_major)
-	return (enum dwarf_array_dim_ordering) val;
+      std::optional<ULONGEST> val = attr->unsigned_constant ();
+      if (val.has_value () &&
+	  (*val == DW_ORD_row_major || *val == DW_ORD_col_major))
+	return (enum dwarf_array_dim_ordering) *val;
     }
 
   /* GNU F77 is a special case, as at 08/2004 array type info is the
@@ -12847,7 +12864,7 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
   struct attribute *attr_byte_size;
   struct attribute *attr_address_class;
-  int byte_size, addr_class;
+  int byte_size;
   struct type *target_type;
 
   target_type = die_type (die, cu);
@@ -12866,8 +12883,10 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
     byte_size = cu_header->addr_size;
 
   attr_address_class = dwarf2_attr (die, DW_AT_address_class, cu);
+  ULONGEST addr_class;
   if (attr_address_class)
-    addr_class = attr_address_class->constant_value (DW_ADDR_none);
+    addr_class = (attr_address_class->unsigned_constant ()
+		  .value_or (DW_ADDR_none));
   else
     addr_class = DW_ADDR_none;
 
@@ -13269,10 +13288,14 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
      the subroutine die.  Otherwise set the calling convention to
      the default value DW_CC_normal.  */
   attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
-  if (attr != nullptr
-      && is_valid_DW_AT_calling_convention_for_subroutine (attr->constant_value (0)))
-    TYPE_CALLING_CONVENTION (ftype)
-      = (enum dwarf_calling_convention) attr->constant_value (0);
+  if (attr != nullptr)
+    {
+      std::optional<ULONGEST> value = attr->unsigned_constant ();
+      if (value.has_value ()
+	  && is_valid_DW_AT_calling_convention_for_subroutine (*value))
+	TYPE_CALLING_CONVENTION (ftype)
+	  = (enum dwarf_calling_convention) *value;
+    }
   else if (cu->producer_is_xlc_opencl ())
     TYPE_CALLING_CONVENTION (ftype) = DW_CC_GDB_IBM_OpenCL;
   else
@@ -13863,12 +13886,17 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->per_objfile->objfile;
   struct type *type;
   struct attribute *attr;
-  int encoding = 0, bits = 0;
+  ULONGEST encoding = 0;
+  int bits = 0;
   const char *name;
 
   attr = dwarf2_attr (die, DW_AT_encoding, cu);
-  if (attr != nullptr && attr->form_is_constant ())
-    encoding = attr->constant_value (0);
+  if (attr != nullptr)
+    {
+      std::optional<ULONGEST> value = attr->unsigned_constant ();
+      if (value.has_value ())
+	encoding = *value;
+    }
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
     bits = attr->constant_value (0) * TARGET_CHAR_BIT;
@@ -15699,7 +15727,7 @@ leb128_size (const gdb_byte *buf)
 /* Converts DWARF language names to GDB language names.  */
 
 enum language
-dwarf_lang_to_enum_language (unsigned int lang)
+dwarf_lang_to_enum_language (ULONGEST lang)
 {
   enum language language;
 
@@ -19730,8 +19758,15 @@ cutu_reader::prepare_one_comp_unit (struct dwarf2_cu *cu,
     }
   else if (attr != nullptr)
     {
-      lang = dwarf_lang_to_enum_language (attr->constant_value (0));
-      dw_lang = (dwarf_source_language) attr->constant_value (0);
+      std::optional<ULONGEST> lang_val = attr->unsigned_constant ();
+      if (lang_val.has_value ())
+	{
+	  lang = dwarf_lang_to_enum_language (*lang_val);
+	  if (lang_val <= DW_LANG_hi_user)
+	    dw_lang = (dwarf_source_language) *lang_val;
+	}
+      else
+	lang = language_minimal;
     }
   else
     lang = pretend_language;

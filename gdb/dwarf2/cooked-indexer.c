@@ -202,8 +202,11 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 	   the DW_AT_calling_convention attribute was used instead as
 	   the only means available.  We handle both variants then.  */
 	case DW_AT_calling_convention:
-	  if (attr.constant_value (DW_CC_normal) == DW_CC_program)
-	    *flags |= IS_MAIN;
+	  {
+	    std::optional<ULONGEST> value = attr.unsigned_constant ();
+	    if (value.has_value () && *value == DW_CC_program)
+	      *flags |= IS_MAIN;
+	  }
 	  break;
 
 	case DW_AT_declaration:

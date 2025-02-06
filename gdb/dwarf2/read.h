@@ -1047,7 +1047,7 @@ private:
 
 /* Converts DWARF language names to GDB language names.  */
 
-enum language dwarf_lang_to_enum_language (unsigned int lang);
+enum language dwarf_lang_to_enum_language (ULONGEST lang);
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
 

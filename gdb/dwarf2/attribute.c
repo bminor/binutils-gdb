@@ -164,6 +164,27 @@ attribute::constant_value (int default_value) const
 
 /* See attribute.h.  */
 
+std::optional<ULONGEST>
+attribute::unsigned_constant () const
+{
+  if (form_is_strictly_signed ())
+    {
+      if (u.snd >= 0)
+	return u.snd;
+      complaint (_("Attribute value is not unsigned (%s)"),
+		 dwarf_form_name (form));
+    }
+  else if (form_is_constant ())
+    return u.unsnd;
+
+  /* For DW_FORM_data16 see attribute::form_is_constant.  */
+  complaint (_("Attribute value is not a constant (%s)"),
+	     dwarf_form_name (form));
+  return {};
+}
+
+/* See attribute.h.  */
+
 bool
 attribute::form_is_unsigned () const
 {
@@ -216,21 +237,24 @@ attribute::form_requires_reprocessing () const
 dwarf_defaulted_attribute
 attribute::defaulted () const
 {
-  LONGEST value = constant_value (-1);
+  std::optional<ULONGEST> value = unsigned_constant ();
 
-  switch (value)
+  if (value.has_value ())
     {
-    case DW_DEFAULTED_no:
-    case DW_DEFAULTED_in_class:
-    case DW_DEFAULTED_out_of_class:
-      return (dwarf_defaulted_attribute) value;
+      switch (*value)
+	{
+	case DW_DEFAULTED_no:
+	case DW_DEFAULTED_in_class:
+	case DW_DEFAULTED_out_of_class:
+	  return (dwarf_defaulted_attribute) *value;
+
+	default:
+	  complaint (_("unrecognized DW_AT_defaulted value (%s)"),
+		     plongest (*value));
+	  break;
+	}
     }
 
-  /* If the form was not constant, we already complained in
-     constant_value, so there's no need to complain again.  */
-  if (form_is_constant ())
-    complaint (_("unrecognized DW_AT_defaulted value (%s)"),
-	       plongest (value));
   return DW_DEFAULTED_no;
 }
 
@@ -239,21 +263,24 @@ attribute::defaulted () const
 dwarf_virtuality_attribute
 attribute::as_virtuality () const
 {
-  LONGEST value = constant_value (-1);
+  std::optional<ULONGEST> value = unsigned_constant ();
 
-  switch (value)
+  if (value.has_value ())
     {
-    case DW_VIRTUALITY_none:
-    case DW_VIRTUALITY_virtual:
-    case DW_VIRTUALITY_pure_virtual:
-      return (dwarf_virtuality_attribute) value;
+      switch (*value)
+	{
+	case DW_VIRTUALITY_none:
+	case DW_VIRTUALITY_virtual:
+	case DW_VIRTUALITY_pure_virtual:
+	  return (dwarf_virtuality_attribute) *value;
+
+	default:
+	  complaint (_("unrecognized DW_AT_virtuality value (%s)"),
+		     plongest (*value));
+	  break;
+	}
     }
 
-  /* If the form was not constant, we already complained in
-     constant_value, so there's no need to complain again.  */
-  if (form_is_constant ())
-    complaint (_("unrecognized DW_AT_virtuality value (%s)"),
-	       plongest (value));
   return DW_VIRTUALITY_none;
 }
 
