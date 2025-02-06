@@ -159,7 +159,7 @@ m68hc11elf_create_output_section_statements (void)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo (_("%F%P: can not create BFD: %E\n"));
+      fatal (_("%P: can not create BFD: %E\n"));
       return;
     }
 

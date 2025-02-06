@@ -202,7 +202,7 @@ spu_elf_load_ovl_mgr (void)
       /* User supplied __ovly_load.  */
     }
   else if (mgr_stream->start == mgr_stream->end)
-    einfo (_("%F%P: no built-in overlay manager\n"));
+    fatal (_("%P: no built-in overlay manager\n"));
   else
     {
       lang_input_statement_type *ovl_is;
@@ -379,7 +379,7 @@ spu_elf_open_overlay_script (void)
   if (script == NULL)
     {
     file_err:
-      einfo (_("%F%P: can not open script: %E\n"));
+      fatal (_("%P: can not open script: %E\n"));
     }
   return script;
 }
@@ -695,7 +695,7 @@ PARSE_AND_LIST_ARGS_CASES='
 	    if (*end == 0)
 	      break;
 	  }
-	einfo (_("%F%P: invalid --local-store address range `%s'\''\n"), optarg);
+	fatal (_("%P: invalid --local-store address range `%s'\''\n"), optarg);
       }
       break;
 
@@ -731,12 +731,12 @@ PARSE_AND_LIST_ARGS_CASES='
       if (!num_lines_set)
 	params.num_lines = 32;
       else if ((params.num_lines & -params.num_lines) != params.num_lines)
-	einfo (_("%F%P: invalid --num-lines/--num-regions `%u'\''\n"),
+	fatal (_("%P: invalid --num-lines/--num-regions `%u'\''\n"),
 	       params.num_lines);
       if (!line_size_set)
 	params.line_size = 1024;
       else if ((params.line_size & -params.line_size) != params.line_size)
-	einfo (_("%F%P: invalid --line-size/--region-size `%u'\''\n"),
+	fatal (_("%P: invalid --line-size/--region-size `%u'\''\n"),
 	       params.line_size);
       break;
 
@@ -757,7 +757,7 @@ PARSE_AND_LIST_ARGS_CASES='
 	    && (params.ovly_flavour != ovly_soft_icache
 		|| (params.num_lines & -params.num_lines) == params.num_lines))
 	  break;
-	einfo (_("%F%P: invalid --num-lines/--num-regions `%s'\''\n"), optarg);
+	fatal (_("%P: invalid --num-lines/--num-regions `%s'\''\n"), optarg);
       }
       break;
 
@@ -770,7 +770,7 @@ PARSE_AND_LIST_ARGS_CASES='
 	    && (params.ovly_flavour != ovly_soft_icache
 		|| (params.line_size & -params.line_size) == params.line_size))
 	  break;
-	einfo (_("%F%P: invalid --line-size/--region-size `%s'\''\n"), optarg);
+	fatal (_("%P: invalid --line-size/--region-size `%s'\''\n"), optarg);
       }
       break;
 
@@ -779,7 +779,7 @@ PARSE_AND_LIST_ARGS_CASES='
 	char *end;
 	params.auto_overlay_fixed = strtoul (optarg, &end, 0);
 	if (*end != 0)
-	  einfo (_("%F%P: invalid --fixed-space value `%s'\''\n"), optarg);
+	  fatal (_("%P: invalid --fixed-space value `%s'\''\n"), optarg);
       }
       break;
 
@@ -788,7 +788,7 @@ PARSE_AND_LIST_ARGS_CASES='
 	char *end;
 	params.auto_overlay_reserved = strtoul (optarg, &end, 0);
 	if (*end != 0)
-	  einfo (_("%F%P: invalid --reserved-space value `%s'\''\n"), optarg);
+	  fatal (_("%P: invalid --reserved-space value `%s'\''\n"), optarg);
       }
       break;
 
@@ -797,7 +797,7 @@ PARSE_AND_LIST_ARGS_CASES='
 	char *end;
 	params.extra_stack_space = strtol (optarg, &end, 0);
 	if (*end != 0)
-	  einfo (_("%F%P: invalid --extra-stack-space value `%s'\''\n"), optarg);
+	  fatal (_("%P: invalid --extra-stack-space value `%s'\''\n"), optarg);
       }
       break;
 

@@ -35,9 +35,8 @@ elf${ELFSIZE}_kvx_before_allocation (void)
 EOF
 if test x"${EMULATION_NAME}" != x"elf64kvx_linux"; then
 fragment <<EOF
-  if (bfd_link_pie (&link_info)) {
-          einfo (_("%F:%P: -pie not supported\n"));
-  }
+  if (bfd_link_pie (&link_info))
+    fatal (_(":%P: -pie not supported\n"));
 EOF
 fi
 fragment <<EOF
@@ -300,7 +299,7 @@ kvx_elf_create_output_section_statements (void)
   ldlang_add_file (stub_file);
 
   if (!kvx_elf${ELFSIZE}_init_stub_bfd (&link_info, stub_file->the_bfd))
-    einfo ("%F%P: can not init BFD: %E\n");
+    einfo ("%P: can not init BFD: %E\n");
 }
 
 

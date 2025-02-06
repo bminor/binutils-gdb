@@ -184,7 +184,7 @@ ldfile_add_remap_file (const char * file)
 
       if (*p == '\0')
 	{
-	  einfo ("%F%P: malformed remap file entry: %s\n", line);
+	  fatal ("%P: malformed remap file entry: %s\n", line);
 	  continue;
 	}
 
@@ -196,7 +196,7 @@ ldfile_add_remap_file (const char * file)
 
       if (*p == '\0')
 	{
-	  einfo ("%F%P: malformed remap file entry: %s\n", line);
+	  fatal ("%P: malformed remap file entry: %s\n", line);
 	  continue;
 	}
 
@@ -361,7 +361,7 @@ ldfile_try_open_bfd (const char *attempt,
   if (entry->the_bfd == NULL)
     {
       if (bfd_get_error () == bfd_error_invalid_target)
-	einfo (_("%F%P: invalid BFD target `%s'\n"), entry->target);
+	fatal (_("%P: invalid BFD target `%s'\n"), entry->target);
       return false;
     }
 
@@ -491,7 +491,7 @@ ldfile_try_open_bfd (const char *attempt,
 
 	  if (!entry->flags.dynamic && (entry->the_bfd->flags & DYNAMIC) != 0)
 	    {
-	      einfo (_("%F%P: attempted static link of dynamic object `%s'\n"),
+	      fatal (_("%P: attempted static link of dynamic object `%s'\n"),
 		     attempt);
 	      bfd_close (entry->the_bfd);
 	      entry->the_bfd = NULL;
@@ -897,7 +897,7 @@ ldfile_open_command_file_1 (const char *name, enum script_open_style open_how)
       if ((open_how != script_nonT || script->open_how != script_nonT)
 	  && strcmp (name, script->name) == 0)
 	{
-	  einfo (_("%F%P: error: linker script file '%s'"
+	  fatal (_("%P: error: linker script file '%s'"
 		   " appears multiple times\n"), name);
 	  return;
 	}
@@ -916,7 +916,7 @@ ldfile_open_command_file_1 (const char *name, enum script_open_style open_how)
   if (ldlex_input_stack == NULL)
     {
       bfd_set_error (bfd_error_system_call);
-      einfo (_("%F%P: cannot open linker script file %s: %E\n"), name);
+      fatal (_("%P: cannot open linker script file %s: %E\n"), name);
       return;
     }
 
@@ -1010,7 +1010,7 @@ ldfile_set_output_arch (const char *string, enum bfd_architecture defarch)
   else if (defarch != bfd_arch_unknown)
     ldfile_output_architecture = defarch;
   else
-    einfo (_("%F%P: cannot represent machine `%s'\n"), string);
+    fatal (_("%P: cannot represent machine `%s'\n"), string);
 }
 
 /* Tidy up memory.  */

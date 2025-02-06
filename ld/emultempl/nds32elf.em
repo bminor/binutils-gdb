@@ -44,7 +44,7 @@ nds32_elf_create_output_section_statements (void)
   if (strstr (bfd_get_target (link_info.output_bfd), "nds32") == NULL)
     {
       /* Check the output target is nds32.  */
-      einfo (_("%F%P: error: cannot change output format whilst "
+      fatal (_("%P: error: cannot change output format whilst "
 	       "linking %s binaries\n"), "NDS32");
       return;
     }
@@ -96,7 +96,7 @@ nds32_elf_after_open (void)
 	       && abi_ver != (elf_elfheader (abfd)->e_flags & EF_NDS_ABI))
 	{
 	  /* Incompatible objects.  */
-	  einfo (_("%F%P: %pB: ABI version of object files mismatched\n"),
+	  fatal (_("%P: %pB: ABI version of object files mismatched\n"),
 		 abfd);
 	}
     }
@@ -183,7 +183,7 @@ PARSE_AND_LIST_ARGS_CASES='
       {
 	sym_ld_script = fopen (optarg, FOPEN_WT);
 	if(sym_ld_script == NULL)
-	  einfo (_("%F%P: cannot open map file %s: %E\n"), optarg);
+	  fatal (_("%P: cannot open map file %s: %E\n"), optarg);
       }
     break;
   case OPTION_HYPER_RELAX:

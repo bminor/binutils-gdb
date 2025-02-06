@@ -521,7 +521,7 @@ arm_elf_create_output_section_statements (void)
 	 These will only be created if the output format is an arm format,
 	 hence we do not support linking and changing output formats at the
 	 same time.  Use a link followed by objcopy to change output formats.  */
-      einfo (_("%F%P: error: cannot change output format "
+      fatal (_("%P: error: cannot change output format "
 	       "whilst linking %s binaries\n"), "ARM");
       return;
     }
@@ -532,10 +532,10 @@ arm_elf_create_output_section_statements (void)
 					bfd_get_target (link_info.output_bfd));
 
       if (params.in_implib_bfd == NULL)
-	einfo (_("%F%P: %s: can't open: %E\n"), in_implib_filename);
+	fatal (_("%P: %s: can't open: %E\n"), in_implib_filename);
 
       if (!bfd_check_format (params.in_implib_bfd, bfd_object))
-	einfo (_("%F%P: %s: not a relocatable file: %E\n"), in_implib_filename);
+	fatal (_("%P: %s: not a relocatable file: %E\n"), in_implib_filename);
     }
 
   bfd_elf32_arm_set_target_params (link_info.output_bfd, &link_info, &params);
@@ -549,7 +549,7 @@ arm_elf_create_output_section_statements (void)
 			      bfd_get_arch (link_info.output_bfd),
 			      bfd_get_mach (link_info.output_bfd)))
     {
-      einfo (_("%F%P: can not create BFD: %E\n"));
+      fatal (_("%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -709,7 +709,7 @@ PARSE_AND_LIST_ARGS_CASES='
 
 	group_size = bfd_scan_vma (optarg, &end, 0);
 	if (*end)
-	  einfo (_("%F%P: invalid number `%s'\''\n"), optarg);
+	  fatal (_("%P: invalid number `%s'\''\n"), optarg);
       }
       break;
 

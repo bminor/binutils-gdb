@@ -625,7 +625,7 @@ set_pep_subsystem (void)
 
       if (v[i].name == NULL)
 	{
-	  einfo (_("%F%P: invalid subsystem type %s\n"), optarg);
+	  fatal (_("%P: invalid subsystem type %s\n"), optarg);
 	  return;
 	}
 
@@ -646,7 +646,7 @@ set_pep_value (char *name)
   set_pep_name (name,  (bfd_vma) strtoull (optarg, &end, 0));
 
   if (end == optarg)
-    einfo (_("%F%P: invalid hex number for PE parameter '%s'\n"), optarg);
+    fatal (_("%P: invalid hex number for PE parameter '%s'\n"), optarg);
 
   optarg = end;
 }
@@ -663,7 +663,7 @@ set_pep_stack_heap (char *resname, char *comname)
       set_pep_value (comname);
     }
   else if (*optarg)
-    einfo (_("%F%P: strange hex info for PE parameter '%s'\n"), optarg);
+    fatal (_("%P: strange hex info for PE parameter '%s'\n"), optarg);
 }
 
 #define DEFAULT_BUILD_ID_STYLE	"md5"
@@ -680,7 +680,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
     case OPTION_BASE_FILE:
       link_info.base_file = fopen (optarg, FOPEN_WB);
       if (link_info.base_file == NULL)
-	einfo (_("%F%P: cannot open base file %s\n"), optarg);
+	fatal (_("%P: cannot open base file %s\n"), optarg);
       break;
 
       /* PE options.  */
@@ -1233,7 +1233,7 @@ make_runtime_ref (void)
     = bfd_wrapped_link_hash_lookup (link_info.output_bfd, &link_info,
 				    rr, true, false, true);
   if (!h)
-    einfo (_("%F%P: bfd_link_hash_lookup failed: %E\n"));
+    fatal (_("%P: bfd_link_hash_lookup failed: %E\n"));
   else
     {
       if (h->type == bfd_link_hash_new)
@@ -1533,7 +1533,7 @@ gld${EMULATION_NAME}_after_open (void)
   if (bfd_get_flavour (link_info.output_bfd) != bfd_target_coff_flavour
       || coff_data (link_info.output_bfd) == NULL
       || !obj_pe (link_info.output_bfd))
-    einfo (_("%F%P: cannot perform PE operations on non PE output file '%pB'\n"),
+    fatal (_("%P: cannot perform PE operations on non PE output file '%pB'\n"),
 	   link_info.output_bfd);
 
   pe_data (link_info.output_bfd)->pe_opthdr = pep;
@@ -1645,7 +1645,7 @@ gld${EMULATION_NAME}_after_open (void)
 
 		    if (!bfd_generic_link_read_symbols (is->the_bfd))
 		      {
-			einfo (_("%F%P: %pB: could not read symbols: %E\n"),
+			fatal (_("%P: %pB: could not read symbols: %E\n"),
 			       is->the_bfd);
 			return;
 		      }
@@ -1849,7 +1849,7 @@ gld${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIBU
 
 	      h = bfd_link_hash_lookup (link_info.hash, buf, true, true, true);
 	      if (h == (struct bfd_link_hash_entry *) NULL)
-		einfo (_("%F%P: bfd_link_hash_lookup failed: %E\n"));
+		fatal (_("%P: bfd_link_hash_lookup failed: %E\n"));
 	      if (h->type == bfd_link_hash_new)
 		{
 		  h->type = bfd_link_hash_undefined;

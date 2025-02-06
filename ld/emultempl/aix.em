@@ -307,7 +307,7 @@ read_file_list (const char *filename)
   f = fopen (filename, FOPEN_RT);
   if (f == NULL)
     {
-      einfo (_("%F%P: cannot open %s\n"), filename);
+      fatal (_("%P: cannot open %s\n"), filename);
       return;
     }
   if (fseek (f, 0L, SEEK_END) == -1)
@@ -354,8 +354,8 @@ read_file_list (const char *filename)
   return;
 
  error:
-  einfo (_("%F%P: cannot read %s\n"), optarg);
   fclose (f);
+  fatal (_("%P: cannot read %s\n"), optarg);
 }
 
 static bool
@@ -706,7 +706,7 @@ gld${EMULATION_NAME}_after_open (void)
       size = (p->count + 2) * 4;
       if (!bfd_xcoff_link_record_set (link_info.output_bfd, &link_info,
 				      p->h, size))
-	einfo (_("%F%P: bfd_xcoff_link_record_set failed: %E\n"));
+	fatal (_("%P: bfd_xcoff_link_record_set failed: %E\n"));
     }
 }
 
@@ -736,9 +736,9 @@ gld${EMULATION_NAME}_before_allocation (void)
 
       h = bfd_link_hash_lookup (link_info.hash, el->name, false, false, false);
       if (h == NULL)
-	einfo (_("%F%P: bfd_link_hash_lookup of export symbol failed: %E\n"));
+	fatal (_("%P: bfd_link_hash_lookup of export symbol failed: %E\n"));
       if (!bfd_xcoff_export_symbol (link_info.output_bfd, &link_info, h))
-	einfo (_("%F%P: bfd_xcoff_export_symbol failed: %E\n"));
+	fatal (_("%P: bfd_xcoff_export_symbol failed: %E\n"));
     }
 
   /* Track down all relocations called for by the linker script (these
@@ -821,7 +821,7 @@ gld${EMULATION_NAME}_before_allocation (void)
       (link_info.output_bfd, &link_info, libpath, entry_symbol.name,
        file_align, maxstack, maxdata, gc && !unix_ld,
        modtype, textro, flags, special_sections, rtld))
-    einfo (_("%F%P: failed to set dynamic section sizes: %E\n"));
+    fatal (_("%P: failed to set dynamic section sizes: %E\n"));
 
   /* Look through the special sections, and put them in the right
      place in the link ordering.  This is especially magic.  */
@@ -843,8 +843,8 @@ gld${EMULATION_NAME}_before_allocation (void)
       is = NULL;
       os = lang_output_section_get (sec->output_section);
       if (os == NULL)
-	einfo (_("%F%P: can't find output section %s\n"),
-	       sec->output_section->name);
+	fatal (_("%P: can't find output section %pA\n"),
+	       sec->output_section);
 
       for (pls = &os->children.head; *pls != NULL; pls = &(*pls)->header.next)
 	{
@@ -880,8 +880,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 
       if (is == NULL)
 	{
-	  einfo (_("%F%P: can't find %s in output section\n"),
-		 bfd_section_name (sec));
+	  fatal (_("%P: can't find %pA in output section\n"), sec);
 	}
 
       /* Now figure out where the section should go.  */
@@ -1134,7 +1133,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 
   /* Now that everything is in place, finalize the dynamic sections.  */
   if (!bfd_xcoff_build_dynamic_sections (link_info.output_bfd, &link_info))
-    einfo (_("%F%P: failed to layout dynamic sections: %E\n"));
+    fatal (_("%P: failed to layout dynamic sections: %E\n"));
 
   if (!bfd_link_relocatable (&link_info))
     {
@@ -1285,7 +1284,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
   if (f == NULL)
     {
       bfd_set_error (bfd_error_system_call);
-      einfo ("%F%P: %s: %E\n", filename);
+      fatal ("%P: %s: %E\n", filename);
       return;
     }
 
@@ -1347,7 +1346,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 	      obstack_free (o, obstack_base (o));
 	    }
 	  else if (*s == '(')
-	    einfo (_("%F%P:%s:%d: #! ([member]) is not supported "
+	    fatal (_("%P:%s:%d: #! ([member]) is not supported "
 		     "in import files\n"),
 		   filename, linenumber);
 	  else
@@ -1364,7 +1363,7 @@ gld${EMULATION_NAME}_read_file (const char *filename, bool import)
 	      *s = '\0';
 	      if (!bfd_xcoff_split_import_path (link_info.output_bfd,
 						start, &imppath, &impfile))
-		einfo (_("%F%P: could not parse import path: %E\n"));
+		fatal (_("%P: could not parse import path: %E\n"));
 	      while (ISSPACE (cs))
 		{
 		  ++s;
@@ -1519,10 +1518,10 @@ gld${EMULATION_NAME}_find_relocs (lang_statement_union_type *s)
 
       rs = &s->reloc_statement;
       if (rs->name == NULL)
-	einfo (_("%F%P: only relocations against symbols are permitted\n"));
+	fatal (_("%P: only relocations against symbols are permitted\n"));
       if (!bfd_xcoff_link_count_reloc (link_info.output_bfd, &link_info,
 				       rs->name))
-	einfo (_("%F%P: bfd_xcoff_link_count_reloc failed: %E\n"));
+	fatal (_("%P: bfd_xcoff_link_count_reloc failed: %E\n"));
     }
 
   if (s->header.type == lang_assignment_statement_enum)
@@ -1551,7 +1550,7 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 	  if (!bfd_xcoff_record_link_assignment (link_info.output_bfd,
 						 &link_info,
 						 exp->assign.dst))
-	    einfo (_("%F%P: failed to record assignment to %s: %E\n"),
+	    fatal (_("%P: failed to record assignment to %s: %E\n"),
 		   exp->assign.dst);
 	}
       gld${EMULATION_NAME}_find_exp_assignment (exp->assign.src);
@@ -1646,7 +1645,7 @@ gld${EMULATION_NAME}_create_output_section_statements (void)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo (_("%F%P: can not create stub BFD: %E\n"));
+      fatal (_("%P: can not create stub BFD: %E\n"));
       return;
     }
 
@@ -1656,7 +1655,7 @@ gld${EMULATION_NAME}_create_output_section_statements (void)
 
   /* Pass linker params to the back-end. */
   if (!bfd_xcoff_link_init (&link_info, &params))
-    einfo (_("%F%P: can not init BFD: %E\n"));
+    fatal (_("%P: can not init BFD: %E\n"));
 
   /* __rtinit */
   if (link_info.init_function != NULL
@@ -1673,7 +1672,7 @@ gld${EMULATION_NAME}_create_output_section_statements (void)
 				  bfd_get_arch (link_info.output_bfd),
 				  bfd_get_mach (link_info.output_bfd)))
 	{
-	  einfo (_("%F%P: can not create BFD: %E\n"));
+	  fatal (_("%P: can not create BFD: %E\n"));
 	  return;
 	}
 
@@ -1683,7 +1682,7 @@ gld${EMULATION_NAME}_create_output_section_statements (void)
 					    link_info.fini_function,
 					    rtld))
 	{
-	  einfo (_("%F%P: can not create BFD: %E\n"));
+	  fatal (_("%P: can not create BFD: %E\n"));
 	  return;
 	}
 

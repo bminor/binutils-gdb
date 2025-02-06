@@ -288,7 +288,7 @@ mri_format (const char *name)
     lang_add_output_format ("srec", NULL, NULL, 1);
 
   else
-    einfo (_("%F%P: unknown format type %s\n"), name);
+    fatal (_("%P: unknown format type %s\n"), name);
 }
 
 void

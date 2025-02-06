@@ -779,7 +779,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
 	  if (!bfd_generic_link_read_symbols (b))
 	    {
-	      einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
+	      fatal (_("%P: %pB: could not read symbols: %E\n"), b);
 	      return;
 	    }
 
@@ -1071,7 +1071,7 @@ build_filler_bfd (bool include_edata)
 			     bfd_get_arch (link_info.output_bfd),
 			     bfd_get_mach (link_info.output_bfd)))
     {
-      einfo (_("%F%P: can not create BFD: %E\n"));
+      fatal (_("%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -1349,7 +1349,7 @@ pe_walk_relocs (struct bfd_link_info *info,
 
       if (!bfd_generic_link_read_symbols (b))
 	{
-	  einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
+	  fatal (_("%P: %pB: could not read symbols: %E\n"), b);
 	  return;
 	}
 
@@ -1430,7 +1430,7 @@ pe_find_data_imports (const char *symhead,
       if (!bfd_hash_table_init (import_hash,
 				bfd_hash_newfunc,
 				sizeof (struct bfd_hash_entry)))
-	einfo (_("%F%P: bfd_hash_table_init failed: %E\n"));
+	fatal (_("%P: bfd_hash_table_init failed: %E\n"));
     }
   else
     import_hash = NULL;
@@ -1470,7 +1470,7 @@ pe_find_data_imports (const char *symhead,
 
 		if (!bfd_generic_link_read_symbols (b))
 		  {
-		    einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
+		    fatal (_("%P: %pB: could not read symbols: %E\n"), b);
 		    return;
 		  }
 
@@ -1572,7 +1572,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
       if (!bfd_generic_link_read_symbols (b))
 	{
-	  einfo (_("%F%P: %pB: could not read symbols: %E\n"), b);
+	  fatal (_("%P: %pB: could not read symbols: %E\n"), b);
 	  return;
 	}
 

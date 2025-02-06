@@ -95,7 +95,7 @@ ldelf_after_parse (void)
       else if (!link_info.maxpagesize_is_set)
 	link_info.maxpagesize = link_info.commonpagesize;
       else
-	einfo (_("%F%P: common page size (0x%v) > maximum page size (0x%v)\n"),
+	fatal (_("%P: common page size (0x%v) > maximum page size (0x%v)\n"),
 	       link_info.commonpagesize, link_info.maxpagesize);
     }
 }
@@ -121,7 +121,7 @@ ldelf_load_symbols (lang_input_statement_type *entry)
 
   if (entry->flags.just_syms
       && (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) != 0)
-    einfo (_("%F%P: %pB: --just-symbols may not be used on DSO\n"),
+    fatal (_("%P: %pB: --just-symbols may not be used on DSO\n"),
 	   entry->the_bfd);
 
   if (link_class == 0
@@ -321,7 +321,7 @@ ldelf_try_needed (struct dt_needed *needed, int force, int is_linux)
       struct bfd_link_needed_list *needs;
 
       if (! bfd_elf_get_bfd_needed_list (abfd, &needs))
-	einfo (_("%F%P: %pB: bfd_elf_get_bfd_needed_list failed: %E\n"), abfd);
+	fatal (_("%P: %pB: bfd_elf_get_bfd_needed_list failed: %E\n"), abfd);
 
       if (needs != NULL)
 	{
@@ -369,7 +369,7 @@ ldelf_try_needed (struct dt_needed *needed, int force, int is_linux)
      can only check that using stat.  */
 
   if (bfd_stat (abfd, &global_stat) != 0)
-    einfo (_("%F%P: %pB: bfd_stat failed: %E\n"), abfd);
+    fatal (_("%P: %pB: bfd_stat failed: %E\n"), abfd);
 
   /* First strip off everything before the last '/'.  */
   soname = lbasename (bfd_get_filename (abfd));
@@ -408,7 +408,7 @@ ldelf_try_needed (struct dt_needed *needed, int force, int is_linux)
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
-    einfo (_("%F%P: %pB: error adding symbols: %E\n"), abfd);
+    fatal (_("%P: %pB: error adding symbols: %E\n"), abfd);
 
   return true;
 }
@@ -1206,7 +1206,7 @@ ldelf_handle_dt_needed (struct elf_link_hash_table *htab,
 	  && elf_dt_name (abfd) != NULL)
 	{
 	  if (bfd_elf_add_dt_needed_tag (abfd, &link_info) < 0)
-	    einfo (_("%F%P: failed to add DT_NEEDED dynamic tag\n"));
+	    fatal (_("%P: failed to add DT_NEEDED dynamic tag\n"));
 	}
 
   link_info.input_bfds_tail = save_input_bfd_tail;
@@ -1257,10 +1257,8 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 		     bfd_get_target (link_info.output_bfd));
 
       if (link_info.out_implib_bfd == NULL)
-	{
-	  einfo (_("%F%P: %s: can't open for writing: %E\n"),
-		 command_line.out_implib_filename);
-	}
+	fatal (_("%P: %s: can't open for writing: %E\n"),
+	       command_line.out_implib_filename);
     }
 
   if (ldelf_emit_note_gnu_build_id != NULL
@@ -1314,7 +1312,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	  && (elf_tdata (abfd)->elf_header->e_type == ET_EXEC
 	      || (elf_tdata (abfd)->elf_header->e_type == ET_DYN
 		  && elf_tdata (abfd)->is_pie)))
-	einfo (_("%F%P: cannot use executable file '%pB' as input to a link\n"),
+	fatal (_("%P: cannot use executable file '%pB' as input to a link\n"),
 	       abfd);
     }
 
@@ -1368,7 +1366,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 		}
 	      else if (seen_type != type)
 		{
-		  einfo (_("%F%P: compact frame descriptions incompatible with"
+		  fatal (_("%P: compact frame descriptions incompatible with"
 			   " DWARF2 .eh_frame from %pB\n"),
 			 type == DWARF2_EH_HDR ? abfd : elfbfd);
 		  break;
@@ -1410,7 +1408,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 
   if (link_info.eh_frame_hdr_type == COMPACT_EH_HDR)
     if (!bfd_elf_parse_eh_frame_entries (NULL, &link_info))
-      einfo (_("%F%P: failed to parse EH frame entries\n"));
+      fatal (_("%P: failed to parse EH frame entries\n"));
 
   ldelf_handle_dt_needed (htab, use_libpath, native, is_linux,
 			  is_freebsd, elfsize, prefix);
@@ -1669,7 +1667,7 @@ ldelf_find_exp_assignment (etree_type *exp)
 					       &link_info,
 					       exp->assign.dst, provide,
 					       exp->assign.hidden))
-	    einfo (_("%F%P: failed to record assignment to %s: %E\n"),
+	    fatal (_("%P: failed to record assignment to %s: %E\n"),
 		   exp->assign.dst);
 	}
       ldelf_find_exp_assignment (exp->assign.src);
@@ -1844,7 +1842,7 @@ ldelf_before_allocation (char **audit, char **depaudit,
 	  command_line.filter_shlib, *audit, *depaudit,
 	  (const char * const *) command_line.auxiliary_filters,
 	  &link_info, &sinterp)))
-    einfo (_("%F%P: failed to set dynamic section sizes: %E\n"));
+    fatal (_("%P: failed to set dynamic section sizes: %E\n"));
 
   if (sinterp != NULL)
     {
@@ -1882,8 +1880,8 @@ ldelf_before_allocation (char **audit, char **depaudit,
 	msg = (char *) xmalloc ((size_t) (sz + 1));
 	if (! bfd_get_section_contents (is->the_bfd, s,	msg,
 					(file_ptr) 0, sz))
-	  einfo (_("%F%P: %pB: can't read contents of section .gnu.warning: %E\n"),
-		 is->the_bfd);
+	  fatal (_("%P: %pB: can't read contents of section %pA: %E\n"),
+		 is->the_bfd, s);
 	msg[sz] = '\0';
 	(*link_info.callbacks->warning) (&link_info, msg,
 					 (const char *) NULL, is->the_bfd,
@@ -1910,7 +1908,7 @@ ldelf_before_allocation (char **audit, char **depaudit,
   before_allocation_default ();
 
   if (!bfd_elf_size_dynsym_hash_dynstr (link_info.output_bfd, &link_info))
-    einfo (_("%F%P: failed to set dynamic section sizes: %E\n"));
+    fatal (_("%P: failed to set dynamic section sizes: %E\n"));
 
   if (ehdr_start != NULL)
     {

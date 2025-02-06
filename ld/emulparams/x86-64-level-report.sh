@@ -16,7 +16,7 @@ PARSE_AND_LIST_ARGS_CASE_Z_X86_64_LEVEL_REPORT='
 	  else if (strcmp (optarg + 17, "used") == 0)
 	    params.isa_level_report = isa_level_report_used;
 	  else
-	    einfo (_("%F%P: invalid option for -z isa-level-report=: %s\n"),
+	    fatal (_("%P: invalid option for -z isa-level-report=: %s\n"),
 		   optarg + 17);
 	}
 '

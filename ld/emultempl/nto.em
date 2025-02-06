@@ -51,7 +51,7 @@ nto_create_QNX_note_section(int type)
      is called before this function, stub_file should already be defined.  */
   if (!stub_file)
     {
-      einfo (_("%F%P: cannot create .note section in stub BFD.\n"));
+      fatal (_("%P: cannot create .note section in stub BFD.\n"));
       return NULL;
     }
 
@@ -60,7 +60,7 @@ nto_create_QNX_note_section(int type)
   note_sec = bfd_make_section_anyway_with_flags (stub_file->the_bfd, ".note", flags);
   if (! note_sec)
     {
-      einfo (_("%F%P: failed to create .note section\n"));
+      fatal (_("%P: failed to create .note section\n"));
       return NULL;
     }
 
@@ -101,7 +101,7 @@ nto_lookup_QNX_note_section(int type)
       sec->contents = xmalloc(sec->size);
       if (!bfd_get_section_contents (sec->owner, sec, sec->contents, (file_ptr) 0,
 				     sec->size))
-	einfo (_("%F%P: %pB: can't read contents of section .note: %E\n"),
+	fatal (_("%P: %pB: can't read contents of section .note: %E\n"),
 	       sec->owner);
 
       e_note = (Elf_External_Note *) sec->contents;
@@ -144,7 +144,7 @@ nto_add_note_section (void) {
 
   if (nto_lazy_stack && !link_info.stacksize)
     {
-      einfo (_("%F%P: error: --lazy-stack must follow -zstack-size=<size>\n"));
+      fatal (_("%P: error: --lazy-stack must follow -zstack-size=<size>\n"));
       return;
     }
 
@@ -198,22 +198,22 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
 PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   fprintf (file, _("\
   --stack <size>              Set size of the initial stack\n\
-  --lazy-stack		      Set lazy allocation of stack\n\
+  --lazy-stack                Set lazy allocation of stack\n\
 "));
 '
 
 PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
     case OPTION_STACK:
       {
-        char *end;
-        link_info.stacksize = strtoul (optarg, &end, 0);
-        if (*end || link_info.stacksize < 0)
-          einfo (_("%F%P: invalid stack size `%s'\''\n"), optarg + 11);
-        if (!link_info.stacksize)
-          /* Use -1 for explicit no-stack, because zero means
-             'default'.   */
-          link_info.stacksize = -1;
-        break;
+	char *end;
+	link_info.stacksize = strtoul (optarg, &end, 0);
+	if (*end || link_info.stacksize < 0)
+	  fatal (_("%P: invalid stack size `%s'\''\n"), optarg + 11);
+	if (!link_info.stacksize)
+	  /* Use -1 for explicit no-stack, because zero means
+	     'default'.   */
+	  link_info.stacksize = -1;
+	break;
       }
     case OPTION_LAZY_STACK:
       nto_lazy_stack = true;

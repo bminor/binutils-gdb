@@ -324,7 +324,7 @@ aarch64_elf_create_output_section_statements (void)
 	 These will only be created if the output format is an AArch64 format,
 	 hence we do not support linking and changing output formats at the
 	 same time.  Use a link followed by objcopy to change output formats.  */
-      einfo (_("%F%P: error: cannot change output format "
+      fatal (_("%P: error: cannot change output format "
 	       "whilst linking %s binaries\n"), "AArch64");
       return;
     }
@@ -346,7 +346,7 @@ aarch64_elf_create_output_section_statements (void)
 			      bfd_get_arch (link_info.output_bfd),
 			      bfd_get_mach (link_info.output_bfd)))
     {
-      einfo (_("%F%P: can not create BFD: %E\n"));
+      fatal (_("%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -583,7 +583,7 @@ PARSE_AND_LIST_ARGS_CASES='
 
 	group_size = bfd_scan_vma (optarg, &end, 0);
 	if (*end)
-	  einfo (_("%F%P: invalid number `%s'\''\n"), optarg);
+	  fatal (_("%P: invalid number `%s'\''\n"), optarg);
       }
       break;
 '

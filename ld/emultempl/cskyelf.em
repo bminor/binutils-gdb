@@ -151,7 +151,7 @@ csky_elf_create_output_section_statements (void)
 	  bfd_get_arch (link_info.output_bfd),
 	  bfd_get_mach (link_info.output_bfd)))
     {
-      einfo (_("%F%P: can not create BFD: %E\n"));
+      fatal (_("%P: can not create BFD: %E\n"));
       return;
     }
 
@@ -318,7 +318,7 @@ PARSE_AND_LIST_ARGS_CASES='
 
       group_size = bfd_scan_vma (optarg, &end, 0);
       if (*end)
-	einfo (_("%F%P: invalid number `%s'\''\n"), optarg);
+	fatal (_("%P: invalid number `%s'\''\n"), optarg);
     }
     break;
 '
