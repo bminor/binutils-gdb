@@ -10081,7 +10081,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get bit size of field (zero if none).  */
       attr = dwarf2_attr (die, DW_AT_bit_size, cu);
       if (attr != nullptr)
-	fp->set_bitsize (attr->constant_value (0));
+	fp->set_bitsize (attr->unsigned_constant ().value_or (0));
       else
 	fp->set_bitsize (0);
 
@@ -10116,7 +10116,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		  /* The size of the anonymous object containing
 		     the bit field is explicit, so use the
 		     indicated size (in bytes).  */
-		  anonymous_size = attr->constant_value (0);
+		  anonymous_size = attr->unsigned_constant ().value_or (0);
 		}
 	      else
 		{
@@ -11089,7 +11089,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr != nullptr)
     {
       if (attr->form_is_constant ())
-	type->set_length (attr->constant_value (0));
+	type->set_length (attr->unsigned_constant ().value_or (0));
       else
 	{
 	  struct dynamic_prop prop;
@@ -11668,7 +11668,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
-    type->set_length (attr->constant_value (0));
+    type->set_length (attr->unsigned_constant ().value_or (0));
   else
     type->set_length (0);
 
@@ -12603,7 +12603,8 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
 
   attr_byte_size = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr_byte_size)
-    byte_size = attr_byte_size->constant_value (cu_header->addr_size);
+    byte_size = (attr_byte_size->unsigned_constant ()
+		 .value_or (cu_header->addr_size));
   else
     byte_size = cu_header->addr_size;
 
@@ -12715,7 +12716,8 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu,
   type = lookup_reference_type (target_type, refcode);
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
-    type->set_length (attr->constant_value (cu_header->addr_size));
+    type->set_length (attr->unsigned_constant ()
+		      .value_or (cu_header->addr_size));
   else
     type->set_length (cu_header->addr_size);
 
@@ -12879,9 +12881,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
 	len = dwarf2_attr (die, DW_AT_byte_size, cu);
       if (len != nullptr && len->form_is_constant ())
 	{
-	  /* Pass 0 as the default as we know this attribute is constant
-	     and the default value will not be returned.  */
-	  LONGEST sz = len->constant_value (0);
+	  LONGEST sz = len->unsigned_constant ().value_or (0);
 	  prop_type = objfile_int_type (objfile, sz, true);
 	}
       else
@@ -12900,15 +12900,14 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
   else if (attr != nullptr)
     {
       /* This DW_AT_string_length just contains the length with no
-	 indirection.  There's no need to create a dynamic property in this
-	 case.  Pass 0 for the default value as we know it will not be
-	 returned in this case.  */
-      length = attr->constant_value (0);
+	 indirection.  There's no need to create a dynamic property in
+	 this case.  */
+      length = attr->unsigned_constant ().value_or (0);
     }
   else if ((attr = dwarf2_attr (die, DW_AT_byte_size, cu)) != nullptr)
     {
       /* We don't currently support non-constant byte sizes for strings.  */
-      length = attr->constant_value (1);
+      length = attr->unsigned_constant ().value_or (1);
     }
   else
     {
@@ -13618,7 +13617,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
     }
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
-    bits = attr->constant_value (0) * TARGET_CHAR_BIT;
+    bits = attr->unsigned_constant ().value_or (0) * TARGET_CHAR_BIT;
   name = dwarf2_full_name (nullptr, die, cu);
   if (!name)
     complaint (_("DW_AT_name missing from DW_TAG_base_type"));
@@ -13769,7 +13768,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       attr = dwarf2_attr (die, DW_AT_bit_size, cu);
       if (attr != nullptr && attr->form_is_constant ())
 	{
-	  unsigned real_bit_size = attr->constant_value (0);
+	  unsigned real_bit_size = attr->unsigned_constant ().value_or (0);
 	  if (real_bit_size >= 0 && real_bit_size <= 8 * type->length ())
 	    {
 	      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
@@ -14185,7 +14184,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
-    range_type->set_length (attr->constant_value (0));
+    range_type->set_length (attr->unsigned_constant ().value_or (0));
 
   maybe_set_alignment (cu, die, range_type);
 
