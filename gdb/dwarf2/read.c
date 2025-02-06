@@ -5947,17 +5947,14 @@ read_decl_line (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *decl_line = dwarf2_attr (die, DW_AT_decl_line, cu);
   if (decl_line == nullptr)
     return 0;
-  if (decl_line->form_is_constant ())
+
+  std::optional<ULONGEST> val = decl_line->unsigned_constant ();
+  if (val.has_value ())
     {
-      LONGEST val = decl_line->constant_value (0);
-      if (0 <= val && val <= UINT_MAX)
-	return (unsigned int) val;
-
+      if (*val <= UINT_MAX)
+	return (unsigned int) *val;
       complaint (_("Declared line for using directive is too large"));
-      return 0;
     }
-
-  complaint (_("Declared line for using directive is of incorrect format"));
   return 0;
 }
 
@@ -17001,7 +16998,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			  inlined_func ? DW_AT_call_line : DW_AT_decl_line,
 			  cu);
       if (attr != nullptr)
-	sym->set_line (attr->constant_value (0));
+	sym->set_line (attr->unsigned_constant ().value_or (0));
 
       struct dwarf2_cu *file_cu = cu;
       attr = dwarf2_attr (die,
