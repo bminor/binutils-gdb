@@ -31,3 +31,12 @@ main ()
   foo (&x);
   return 0;
 }
+
+void
+_start ()
+{
+  (void) main ();
+
+  while (1)
+    ;
+}
