@@ -102,7 +102,6 @@ extern int print_insn_loongarch		(bfd_vma, disassemble_info *);
 
 extern disassembler_ftype csky_get_disassembler (bfd *);
 extern disassembler_ftype rl78_get_disassembler (bfd *);
-extern disassembler_ftype riscv_get_disassembler (bfd *);
 
 extern void disassemble_free_riscv (disassemble_info *);
 extern void disassemble_free_powerpc (disassemble_info *);

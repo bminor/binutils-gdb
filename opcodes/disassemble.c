@@ -382,7 +382,7 @@ disassembler (enum bfd_architecture a,
 #endif
 #ifdef ARCH_riscv
     case bfd_arch_riscv:
-      disassemble = riscv_get_disassembler (abfd);
+      disassemble = print_insn_riscv;
       break;
 #endif
 #ifdef ARCH_rl78
