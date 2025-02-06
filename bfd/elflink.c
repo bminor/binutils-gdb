@@ -11974,7 +11974,11 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		      continue;
 		    }
 
-		  irela->r_offset += o->output_offset;
+		  /* All SFrame FDEs from input sections are clubbed together
+		     in the beginning of the output section.  RELA offsets are
+		     already up to date.  PR ld/32666.  */
+		  if (o->sec_info_type != SEC_INFO_TYPE_SFRAME)
+		    irela->r_offset += o->output_offset;
 
 		  /* Relocs in an executable have to be virtual addresses.  */
 		  if (!bfd_link_relocatable (flinfo->info))

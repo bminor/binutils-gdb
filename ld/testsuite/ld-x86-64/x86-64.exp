@@ -566,6 +566,7 @@ run_dump_test "pr32591-4-x32"
 
 if { ![skip_sframe_tests] } {
     run_dump_test "sframe-simple-1"
+    run_dump_test "sframe-reloc-1"
     run_dump_test "sframe-plt-1"
     run_dump_test "sframe-ibt-plt-1"
     run_dump_test "sframe-pltgot-1"

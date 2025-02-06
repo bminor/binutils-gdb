@@ -503,12 +503,21 @@ struct sframe_func_bfdinfo
   unsigned int func_reloc_index;
 };
 
+/* Link state information of the SFrame section.  */
+enum sframe_sec_state
+{
+  SFRAME_SEC_DECODED = 1,
+  SFRAME_SEC_MERGED,
+};
+
 /* SFrame decoder info.
    Contains all information for a decoded .sframe section.  */
 struct sframe_dec_info
 {
   /* Decoder context.  */
   struct sframe_decoder_ctx *sfd_ctx;
+  /* SFrame section state as it progresses through the link process.  */
+  enum sframe_sec_state sfd_state;
   /* Number of function descriptor entries in this .sframe.  */
   unsigned int sfd_fde_count;
   /* Additional information for linking.  */
@@ -2540,6 +2549,8 @@ extern bool _bfd_elf_discard_section_sframe
   (asection *, bool (*) (bfd_vma, void *), struct elf_reloc_cookie *);
 extern bool _bfd_elf_merge_section_sframe
   (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
+extern bfd_vma _bfd_elf_sframe_section_offset
+  (bfd *, struct bfd_link_info *, asection *, bfd_vma);
 extern bool _bfd_elf_write_section_sframe
   (bfd *, struct bfd_link_info *);
 extern bool _bfd_elf_set_section_sframe (bfd *, struct bfd_link_info *);
