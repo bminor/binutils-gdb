@@ -418,7 +418,7 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
    fashion in the dtd_data's info word.  */
 static ctf_id_t
 ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
-		 size_t vlen, ctf_dtdef_t **rp)
+		 size_t vbytes, ctf_dtdef_t **rp)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type;
@@ -455,10 +455,10 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
   if ((dtd = calloc (1, sizeof (ctf_dtdef_t))) == NULL)
     return (ctf_set_typed_errno (fp, EAGAIN));
 
-  dtd->dtd_vlen_alloc = vlen;
-  if (vlen > 0)
+  dtd->dtd_vlen_alloc = vbytes;
+  if (vbytes > 0)
     {
-      if ((dtd->dtd_vlen = calloc (1, vlen)) == NULL)
+      if ((dtd->dtd_vlen = calloc (1, vbytes)) == NULL)
 	goto oom;
     }
   else
@@ -736,7 +736,7 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
   uint32_t vlen;
   uint32_t *vdat;
   ctf_dict_t *tmp = fp;
-  size_t initial_vlen;
+  size_t initial_vbytes;
   size_t i;
 
   if (ctc == NULL || (ctc->ctc_flags & ~CTF_FUNC_VARARG) != 0
@@ -758,9 +758,9 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
      Not reflected in vlen: we don't want to copy anything into it, and
      it's in addition to (e.g.) the trailing 0 indicating varargs.  */
 
-  initial_vlen = (sizeof (uint32_t) * (vlen + (vlen & 1)));
+  initial_vbytes = (sizeof (uint32_t) * (vlen + (vlen & 1)));
   if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_FUNCTION,
-			       initial_vlen, &dtd)) == CTF_ERR)
+			       initial_vbytes, &dtd)) == CTF_ERR)
     return CTF_ERR;				/* errno is set for us.  */
 
   vdat = (uint32_t *) dtd->dtd_vlen;
@@ -788,7 +788,7 @@ ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
-  size_t initial_vlen = sizeof (ctf_lmember_t) * INITIAL_VLEN;
+  size_t initial_vbytes = sizeof (ctf_lmember_t) * INITIAL_VLEN;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -804,15 +804,15 @@ ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
     dtd = ctf_dtd_lookup (fp, type);
   else if ((type = ctf_add_generic (fp, flag, name, CTF_K_STRUCT,
-				    initial_vlen, &dtd)) == CTF_ERR)
+				    initial_vbytes, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   /* Forwards won't have any vlen yet.  */
   if (dtd->dtd_vlen_alloc == 0)
     {
-      if ((dtd->dtd_vlen = calloc (1, initial_vlen)) == NULL)
+      if ((dtd->dtd_vlen = calloc (1, initial_vbytes)) == NULL)
 	return (ctf_set_typed_errno (fp, ENOMEM));
-      dtd->dtd_vlen_alloc = initial_vlen;
+      dtd->dtd_vlen_alloc = initial_vbytes;
     }
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_STRUCT, flag, 0);
@@ -835,7 +835,7 @@ ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
-  size_t initial_vlen = sizeof (ctf_lmember_t) * INITIAL_VLEN;
+  size_t initial_vbytes = sizeof (ctf_lmember_t) * INITIAL_VLEN;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -851,15 +851,15 @@ ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
     dtd = ctf_dtd_lookup (fp, type);
   else if ((type = ctf_add_generic (fp, flag, name, CTF_K_UNION,
-				    initial_vlen, &dtd)) == CTF_ERR)
+				    initial_vbytes, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   /* Forwards won't have any vlen yet.  */
   if (dtd->dtd_vlen_alloc == 0)
     {
-      if ((dtd->dtd_vlen = calloc (1, initial_vlen)) == NULL)
+      if ((dtd->dtd_vlen = calloc (1, initial_vbytes)) == NULL)
 	return (ctf_set_typed_errno (fp, ENOMEM));
-      dtd->dtd_vlen_alloc = initial_vlen;
+      dtd->dtd_vlen_alloc = initial_vbytes;
     }
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_UNION, flag, 0);
@@ -881,7 +881,7 @@ ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
-  size_t initial_vlen = sizeof (ctf_enum_t) * INITIAL_VLEN;
+  size_t initial_vbytes = sizeof (ctf_enum_t) * INITIAL_VLEN;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -897,15 +897,15 @@ ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
     dtd = ctf_dtd_lookup (fp, type);
   else if ((type = ctf_add_generic (fp, flag, name, CTF_K_ENUM,
-				    initial_vlen, &dtd)) == CTF_ERR)
+				    initial_vbytes, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   /* Forwards won't have any vlen yet.  */
   if (dtd->dtd_vlen_alloc == 0)
     {
-      if ((dtd->dtd_vlen = calloc (1, initial_vlen)) == NULL)
+      if ((dtd->dtd_vlen = calloc (1, initial_vbytes)) == NULL)
 	return (ctf_set_typed_errno (fp, ENOMEM));
-      dtd->dtd_vlen_alloc = initial_vlen;
+      dtd->dtd_vlen_alloc = initial_vbytes;
     }
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_ENUM, flag, 0);

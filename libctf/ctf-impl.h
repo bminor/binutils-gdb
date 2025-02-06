@@ -179,7 +179,7 @@ typedef struct ctf_dtdef
   ctf_list_t dtd_list;		/* List forward/back pointers.  */
   ctf_id_t dtd_type;		/* Type identifier for this definition.  */
   ctf_type_t dtd_data;		/* Type node, including name.  */
-  size_t dtd_vlen_alloc;	/* Total vlen space allocated.  */
+  size_t dtd_vlen_alloc;	/* Total vlen space allocated (vbytes).  */
   unsigned char *dtd_vlen;	/* Variable-length data for this type.  */
 } ctf_dtdef_t;
 
