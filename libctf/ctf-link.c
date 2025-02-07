@@ -2140,8 +2140,10 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
   ctf_dprintf ("Deduplicating strings.\n");
 
   for (i = 0; i < arg.i; i++)
-    all_strlens += arg.files[i]->ctf_str_prov_offset;
-  old_parent_strlen = arg.files[0]->ctf_str_prov_offset;
+    all_strlens += arg.files[i]->ctf_str[0].cts_len
+      + arg.files[i]->ctf_str_prov_len;
+  old_parent_strlen = arg.files[0]->ctf_str[0].cts_len
+    + arg.files[0]->ctf_str_prov_len;
 
   if (ctf_dedup_strings (fp) < 0)
     {
@@ -2154,7 +2156,7 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
   ctf_dprintf ("Deduplicated strings: original parent strlen: %zu; "
 	       "original lengths: %zu; final length: %zu.\n",
 	       (size_t) old_parent_strlen, (size_t) all_strlens,
-	       (size_t) arg.files[0]->ctf_str_prov_offset);
+	       (size_t) arg.files[0]->ctf_str_prov_len);
 
   if ((f = tmpfile ()) == NULL)
     {

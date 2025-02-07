@@ -19,11 +19,32 @@
 
 #include <assert.h>
 #include <ctf-impl.h>
+#include <ctf-ref.h>
 #include <string.h>
 
 static ctf_str_atom_t *
 ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
 			  int flags, uint32_t *ref);
+
+/* Get the provisional offset, possibly climbing to the parent to do so.  */
+static uint32_t
+get_prov_offset (ctf_dict_t *fp)
+{
+  if (fp->ctf_parent)
+    return fp->ctf_parent->ctf_str_prov_offset;
+  else
+    return fp->ctf_str_prov_offset;
+}
+
+/* Similarly, set it.  */
+static void
+set_prov_offset (ctf_dict_t *fp, uint32_t prov_offset)
+{
+  if (fp->ctf_parent)
+    fp->ctf_parent->ctf_str_prov_offset = prov_offset;
+  else
+    fp->ctf_str_prov_offset = prov_offset;
+}
 
 /* Convert an encoded CTF string name into a pointer to a C string, possibly
    using an explicit internal provisional strtab rather than the fp-based
@@ -33,14 +54,52 @@ ctf_strraw_explicit (ctf_dict_t *fp, uint32_t name, ctf_strs_t *strtab)
 {
   int stid_tab = CTF_NAME_STID (name);
   ctf_strs_t *ctsp = &fp->ctf_str[stid_tab];
+  uint32_t prov_offset;
 
-  /* For dicts in a parent/child relationship, there are two phases to string
+  /* Special case: "" is at position zero.  */
+
+  if (name == 0)
+    return "";
+
+  /* If the name (adjusted to allow for names in the parent) is in the internal
+     strtab, and the name offset is at least the ctf_str_prov_offset, this is a
+     provisional string added by ctf_str_add*() but not yet built into a real
+     strtab: get the value out of the ctf_prov_strtab.  This value is not
+     adjusted to account for parent lengths or anything, it just descends from
+     the top of the non-external string offset space, intermingling parent and
+     child strings.  */
+
+  prov_offset = get_prov_offset (fp);
+
+  if (prov_offset < fp->ctf_str[CTF_STRTAB_0].cts_len)
+    {
+      ctf_set_errno (fp, ECTF_INTERNAL);
+      ctf_err_warn (fp, 0, 0, _("internal error: overlapping strtabs!"));
+    }
+
+  /* Provisional strings may be in the parent as well as the child: check
+     both.  (Provisional offsets cannot appear in both.)  */
+
+  if (stid_tab == CTF_STRTAB_0 && name >= prov_offset)
+    {
+      const char *str;
+
+      str = ctf_dynhash_lookup (fp->ctf_prov_strtab,
+				(void *) (uintptr_t) name);
+      if (!str && fp->ctf_parent)
+	str = ctf_dynhash_lookup (fp->ctf_parent->ctf_prov_strtab,
+				  (void *) (uintptr_t) name);
+      return str;
+    }
+
+  /* Nonprovisional string.
+
+     For dicts in a parent/child relationship, there are two phases to string
      lookup: before writeout, fp->ctf_parent->cts_len is 0, and the parent and
      child are uncorrelated and lookups start at offset 0; and after writeout,
      the parent's strings are incorporated into the child and further
      modification of the parent's strtab (even the addition of new strings) is
-     prohibited.  This prohibition means that ctf_prov_strtab is safe to use:
-     the "start" of the child strtab will never be observed changing.  */
+     prohibited.  */
 
   if (stid_tab == CTF_STRTAB_0)
     {
@@ -87,22 +146,11 @@ ctf_strraw_explicit (ctf_dict_t *fp, uint32_t name, ctf_strs_t *strtab)
     return ctf_dynhash_lookup (fp->ctf_syn_ext_strtab,
 			       (void *) (uintptr_t) name);
 
-  /* If the name (adjusted to allow for names in the parent) is in the internal
-     strtab, and the name offset is beyond the end of the ctsp->cts_len but
-     below the ctf_str_prov_offset, this is a provisional string added by
-     ctf_str_add*() but not yet built into a real strtab: get the value out of
-     the ctf_prov_strtab.  */
-
-  if (stid_tab == CTF_STRTAB_0
-      && name >= ctsp->cts_len && name < fp->ctf_str_prov_offset)
-      return ctf_dynhash_lookup (fp->ctf_prov_strtab,
-				 (void *) (uintptr_t) name);
-
   if (ctsp->cts_strs != NULL && CTF_NAME_OFFSET (name) < ctsp->cts_len)
     return (ctsp->cts_strs + CTF_NAME_OFFSET (name));
 
-  ctf_err_warn (fp, 1, 0, _("offset %x: strtab not found or corrupt offset: cts_len is %zx, parent strlen is %u, cts_strs is %p"),
-		CTF_NAME_OFFSET (name), ctsp->cts_len, fp->ctf_header->cth_parent_strlen, ctsp->cts_strs);
+  ctf_err_warn (fp, 1, 0, _("offset %x: strtab not found or corrupt offset: cts_len is %zx, parent strlen is %u, cts_strs is %p, prov offset is %x, stid_tab is %u"),
+		CTF_NAME_OFFSET (name), ctsp->cts_len, fp->ctf_header->cth_parent_strlen, ctsp->cts_strs, prov_offset, stid_tab);
 
   /* String table not loaded or corrupt offset.  */
   return NULL;
@@ -197,17 +245,12 @@ ctf_str_create_atoms (ctf_dict_t *fp)
   if (!fp->ctf_prov_strtab)
     goto oom_prov_strtab;
 
-  errno = 0;
-  ctf_str_add (fp, "");
-  if (errno == ENOMEM)
-    goto oom_str_add;
-
-  /* Pull in all the strings in the strtab as new atoms.  The provisional
-     strtab must be empty at this point, so there is no need to populate
-     atoms from it as well.  Types in this subset are frozen and readonly,
-     so the refs list and movable refs list need not be populated.  The
-     offsets are not parent-relative, so we don't need to have imported any
-     dicts at this stage, and the parent need not be considered.  */
+  /* Pull in all the strings in the strtab as new atoms.  The provisional strtab
+     must be empty at this point, so there is no need to populate atoms from it
+     as well.  Types in this subset are frozen and readonly, so the refs list
+     need not be populated.  The offsets are not parent-relative, so we don't
+     need to have imported any dicts at this stage, and the parent need not be
+     considered.  */
 
   for (i = 0; i < fp->ctf_str[CTF_STRTAB_0].cts_len;
        i += strlen (&fp->ctf_str[CTF_STRTAB_0].cts_strs[i]) + 1)
@@ -226,7 +269,10 @@ ctf_str_create_atoms (ctf_dict_t *fp)
       atom->csa_offset = i;
     }
 
-  fp->ctf_str_prov_offset = fp->ctf_str[CTF_STRTAB_0].cts_len + 1;
+  /* Provisional offsets start from the offset before the STID-1 range and count
+     down.  */
+  fp->ctf_str_prov_offset = (1U << 31) - 1;
+  fp->ctf_str_prov_len = 0;
 
   return 0;
 
@@ -244,6 +290,7 @@ void
 ctf_str_free_atoms (ctf_dict_t *fp)
 {
   ctf_dynhash_destroy (fp->ctf_prov_strtab);
+  ctf_dynhash_destroy (fp->ctf_syn_ext_strtab);
   ctf_dynhash_destroy (fp->ctf_str_atoms);
   if (fp->ctf_dynstrtab)
     {
@@ -254,9 +301,8 @@ ctf_str_free_atoms (ctf_dict_t *fp)
 
 #define CTF_STR_ADD_REF		0x1
 #define CTF_STR_PROVISIONAL	0x2
-#define CTF_STR_MOVABLE		0x4
-#define CTF_STR_COPY		0x8
-#define CTF_STR_NO_DEDUP	0x10
+#define CTF_STR_COPY		0x4
+#define CTF_STR_NO_DEDUP	0x8
 
 /* Add a string to the atoms table, copying the passed-in string if
    necessary.  Return the atom added. Return NULL only when out of memory
@@ -274,8 +320,17 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
   char *newstr = NULL;
   ctf_str_atom_t *atom = NULL;
   int added = 0;
+  ctf_dict_t *lookup_fp = fp;
+
+  /* Check for existing atoms in the parent as well.  */
 
   atom = ctf_dynhash_lookup (fp->ctf_str_atoms, str);
+
+  if (!atom && fp->ctf_parent)
+    {
+      lookup_fp = fp->ctf_parent;
+      atom = ctf_dynhash_lookup (lookup_fp->ctf_str_atoms, str);
+    }
 
   /* Existing atoms get refs added only if they are provisional:
      non-provisional strings already have a fixed strtab offset, and just
@@ -286,23 +341,22 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
       if (flags & CTF_STR_NO_DEDUP)
 	atom->csa_flags |= CTF_STR_ATOM_NO_DEDUP;
 
-      if (!ctf_dynhash_lookup (fp->ctf_prov_strtab, (void *) (uintptr_t)
-			       atom->csa_offset))
+      if (atom->csa_offset < get_prov_offset (fp)
+	  || atom->csa_external_offset != 0)
 	{
 	  if (flags & CTF_STR_ADD_REF)
 	    {
 	      if (atom->csa_external_offset)
 		*ref = atom->csa_external_offset;
 	      else
-		*ref = atom->csa_offset;
+		*ref = atom->csa_offset + lookup_fp->ctf_header->cth_parent_strlen;
 	    }
 	  return atom;
 	}
 
       if (flags & CTF_STR_ADD_REF)
 	{
-	  if (!ctf_create_ref (fp, &atom->csa_refs, ref,
-			       flags & CTF_STR_MOVABLE))
+	  if (!ctf_create_ref (lookup_fp, &atom->csa_refs, ref))
 	    {
 	      ctf_set_errno (fp, ENOMEM);
 	      return NULL;
@@ -312,15 +366,27 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
       return atom;
     }
 
-  /* New atom.  Prohibited if this is a parent dict with children and a
-     non-empty existing strtab.  */
+  /* New atom.  */
 
   if (fp->ctf_str[CTF_STRTAB_0].cts_len != 0
-      && fp->ctf_max_children != 0)
+      && fp->ctf_max_children != 0
+      && !(flags & CTF_STR_PROVISIONAL))
     {
       ctf_set_errno (fp, ECTF_RDONLY);
-      ctf_err_warn (fp, 0, 0, _("attempt to add strings to a serialized parent dict"));
+      ctf_err_warn (fp, 0, 0, _("attempt to add non-provisional strings to an "
+				"already-serialized parent dict"));
       return NULL;
+    }
+
+  if (flags & CTF_STR_PROVISIONAL)
+    {
+      if (get_prov_offset (fp) < fp->ctf_header->cth_parent_strlen
+	  + fp->ctf_str[CTF_STRTAB_0].cts_len)
+	{
+	  ctf_set_errno (fp, ECTF_FULL);
+	  ctf_err_warn (fp, 0, 0, _("strtab is full: cannot add more strings"));
+	  return NULL;
+	}
     }
 
   if ((atom = malloc (sizeof (struct ctf_str_atom))) == NULL)
@@ -358,23 +424,31 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
   atom->csa_snapshot_id = fp->ctf_snapshots;
 
   /* New atoms marked provisional go into the provisional strtab, and get a ref
-     added.  The offset starts at 1, so may overlap with values in the parent:
-     offsets are always adjusted by the size of the parent strtab before lookup
-     to compensate for this.  */
+     added.  Provisional offsets are shared among the parent and all children.
+
+     Special-case "" again: it gets a real offset of zero, not a high
+     provisional one.  This atom's offset is never returned (see the special
+     case in ctf_strraw_explicit) and mostly exists for the sake of the
+     deduplicator.  */
 
   if (flags & CTF_STR_PROVISIONAL)
     {
-      atom->csa_offset = fp->ctf_str_prov_offset;
+      if (str[0] == 0)
+	atom->csa_offset = 0;
+      else
+	{
+	  set_prov_offset (fp, get_prov_offset (fp) - strlen (atom->csa_str) - 1);
+	  atom->csa_offset = get_prov_offset (fp);
+	  fp->ctf_str_prov_len += strlen (atom->csa_str) + 1;
+	}
 
       if (ctf_dynhash_insert (fp->ctf_prov_strtab, (void *) (uintptr_t)
 			      atom->csa_offset, (void *) atom->csa_str) < 0)
 	goto oom;
 
-      fp->ctf_str_prov_offset += strlen (atom->csa_str) + 1;
-
       if (flags & CTF_STR_ADD_REF)
       {
-	if (!ctf_create_ref (fp, &atom->csa_refs, ref, flags & CTF_STR_MOVABLE))
+	if (!ctf_create_ref (fp, &atom->csa_refs, ref))
 	  goto oom;
       }
     }
@@ -401,23 +475,23 @@ ctf_str_add_flagged (ctf_dict_t *fp, const char *str, uint32_t *ref,
     str = "";
 
   atom = ctf_str_add_ref_internal (fp, str, flags, ref);
+  /* TODO handle failure better */
   if (!atom)
     return 0;
 
-  offset = atom->csa_offset + fp->ctf_header->cth_parent_strlen;
-
   if (atom->csa_external_offset)
     offset = atom->csa_external_offset;
+  else
+    offset = atom->csa_offset;
 
   return offset;
 }
 
-
 /* Add a string to the atoms table, without augmenting the ref list for this
-   string: return a 'provisional offset' which can be used to return this string
-   until ctf_str_write_strtab is called, or 0 on failure.  (Everywhere the
-   provisional offset is assigned to should be added as a ref using
-   ctf_str_add_ref() as well.)
+   string: if the string is not already known, return a 'provisional offset'
+   which can be used to return this string until ctf_str_write_strtab is called,
+   or 0 on failure.  (Everywhere the provisional offset is assigned to should be
+   added as a ref using ctf_str_add_ref() as well.)
 
    If this atom is already known to have an external offset, the external offset
    is simply returned unchanged.  */
@@ -455,15 +529,6 @@ ctf_str_add_no_dedup_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
 			      | CTF_STR_NO_DEDUP);
 }
 
-/* Like ctf_str_add_ref(), but note that the ref may be moved later on.  */
-uint32_t
-ctf_str_add_movable_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
-{
-  return ctf_str_add_flagged (fp, str, ref,
-			      CTF_STR_ADD_REF | CTF_STR_PROVISIONAL
-			      | CTF_STR_MOVABLE);
-}
-
 /* Add an external strtab reference at OFFSET.  Returns zero if the addition
    failed, nonzero otherwise.  */
 int
@@ -480,6 +545,11 @@ ctf_str_add_external (ctf_dict_t *fp, const char *str, uint32_t offset)
 
   atom->csa_external_offset = CTF_SET_STID (offset, CTF_STRTAB_1);
 
+  /* The "synthetic external strtab" contains all strings that the linker has
+     told us about, kept around so that we can look them up by external offset
+     even in situations in which no ELF information is available, such as
+     during late serialization.  */
+
   if (!fp->ctf_syn_ext_strtab)
     fp->ctf_syn_ext_strtab = ctf_dynhash_create (ctf_hash_integer,
 						 ctf_hash_eq_integer,
@@ -495,26 +565,14 @@ ctf_str_add_external (ctf_dict_t *fp, const char *str, uint32_t offset)
 			  atom->csa_external_offset,
 			  (void *) atom->csa_str) < 0)
     {
-      /* No need to bother freeing the syn_ext_strtab: it will get freed at
-	 ctf_str_write_strtab time if unreferenced.  */
+      ctf_dynhash_destroy (fp->ctf_syn_ext_strtab);
+      fp->ctf_syn_ext_strtab = NULL;
+
       ctf_set_errno (fp, ENOMEM);
       return 0;
     }
 
   return 1;
-}
-
-/* Remove a single ref to a string.  */
-void
-ctf_str_remove_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
-{
-  ctf_str_atom_t *atom = NULL;
-
-  atom = ctf_dynhash_lookup (fp->ctf_str_atoms, str);
-  if (!atom)
-    return;
-
-  ctf_remove_ref (fp, &atom->csa_refs, ref);
 }
 
 /* A ctf_dynhash_iter_remove() callback that removes atoms later than a given
@@ -579,6 +637,8 @@ ctf_str_sort_strtab (const void *a, const void *b)
    serialization does not change the dict passed in, because the alternative
    is to copy the entire atoms table on every reserialization just to avoid
    modifying the original, which is excessively costly for minimal gain.
+   There can be no references to the strings in the newly-added portion
+   of the strtab on return, though some may appear at a later date.
 
    We use the lazy man's approach and double memory costs by always storing
    atoms as individually allocated entities whenever they come from anywhere
@@ -608,14 +668,14 @@ ctf_str_write_strtab (ctf_dict_t *fp)
   void *v;
   int err;
   int new_strtab = 0;
-  int any_external = 0;
+  uint32_t prov_offset;
 
   /* Writing a full v4 shared-with-parent child strtab is possible only if the
      parent has already been written out.  */
 
   if (fp->ctf_parent && fp->ctf_header->cth_parent_strlen != 0)
     {
-      if (ctf_dynhash_elements (fp->ctf_parent->ctf_prov_strtab) != 0)
+      if (fp->ctf_parent->ctf_str_prov_len != 0)
 	{
 	  ctf_set_errno (fp, ECTF_NOTSERIALIZED);
 	  ctf_err_warn (fp, 0, 0, _("attempt to write strtab with unserialized parent"));
@@ -655,9 +715,11 @@ ctf_str_write_strtab (ctf_dict_t *fp)
       strtab->cts_len++; 			/* For the \0.  */
     }
 
-  /* Count new entries in the strtab: i.e. entries in the provisional
-     strtab.  Ignore any entry for \0, entries which ended up in the
-     external strtab, and unreferenced entries.  */
+  /* Count new entries in the strtab: i.e. entries in the provisional strtab, in
+     the provisional range.  Ignore any entry for \0, entries which ended up in
+     the external strtab, and unreferenced entries.  */
+
+  prov_offset = get_prov_offset (fp);
 
   while ((err = ctf_dynhash_next (fp->ctf_prov_strtab, &it, NULL, &v)) == 0)
     {
@@ -669,6 +731,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 	goto err_strtab;
 
       if (atom->csa_str[0] == 0 || atom->csa_external_offset
+	  || atom->csa_offset < prov_offset
 	  || ctf_list_empty_p (&atom->csa_refs))
 	continue;
 
@@ -705,6 +768,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 	goto err_sorttab;
 
       if (atom->csa_str[0] == 0 || atom->csa_external_offset
+	  || atom->csa_offset < prov_offset
 	  || ctf_list_empty_p (&atom->csa_refs))
 	continue;
 
@@ -758,10 +822,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 	continue;
 
       if (atom->csa_external_offset)
-	{
-	  any_external = 1;
-	  offset = atom->csa_external_offset;
-	}
+	offset = atom->csa_external_offset;
       else
 	{
 	  if (atom->csa_flags & CTF_STR_ATOM_IN_PARENT
@@ -782,6 +843,9 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 	    offset = atom->csa_offset + fp->ctf_header->cth_parent_strlen;
 	}
 
+      if (!ctf_assert (fp, offset < prov_offset))
+	goto err_strtab;
+
       ctf_update_refs (&atom->csa_refs, offset);
     }
   if (err != ECTF_NEXT_END)
@@ -791,12 +855,6 @@ ctf_str_write_strtab (ctf_dict_t *fp)
       goto err_strtab;
     }
   ctf_str_purge_refs (fp);
-
-  if (!any_external)
-    {
-      ctf_dynhash_destroy (fp->ctf_syn_ext_strtab);
-      fp->ctf_syn_ext_strtab = NULL;
-    }
 
   /* Replace the old strtab with the new one in this dict.  */
 
@@ -810,12 +868,9 @@ ctf_str_write_strtab (ctf_dict_t *fp)
   fp->ctf_str[CTF_STRTAB_0].cts_strs = strtab->cts_strs;
   fp->ctf_str[CTF_STRTAB_0].cts_len = strtab->cts_len;
 
-  /* All the provisional strtab entries are now real strtab entries, and
-     ctf_strptr() will find them there.  The provisional offset now starts right
-     beyond the new end of the strtab.  */
+  /* Note that all strings have been written out.  */
+  fp->ctf_str_prov_len = 0;
 
-  ctf_dynhash_empty (fp->ctf_prov_strtab);
-  fp->ctf_str_prov_offset = strtab->cts_len + 1;
   return strtab;
 
  err_sorttab:

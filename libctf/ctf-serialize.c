@@ -26,6 +26,8 @@
 #include <elf.h>
 #include "elf-bfd.h"
 
+#include <ctf-ref.h>
+
 /* Symtypetab sections.  */
 
 /* Symtypetab emission flags.  */
@@ -898,7 +900,6 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 		const char *name = ctf_strraw (fp, dtd_vlen[i].cte_name);
 
 		ctf_str_add_ref (fp, name, &t_vlen[i].cte_name);
-		ctf_str_add_ref (fp, name, &dtd_vlen[i].cte_name);
 	      }
 	    t += sizeof (struct ctf_enum) * vlen;
 
@@ -963,8 +964,24 @@ ctf_preserialize (ctf_dict_t *fp)
      this applies only to CTFv1 dicts, which have a different parent/child type
      offset to v2 and higher, and nowhere to record this in CTFv4.  */
 
-  if (fp->ctf_flags & LCTF_NO_SERIALIZE)
-    return (ctf_set_errno (fp, ECTF_CTFVERS_NO_SERIALIZE));
+  if (!fp->ctf_parent)
+    {
+      /* Prohibit serialization of a parent dict which has already been
+	 serialized, has children, and has had strings added since the last
+	 serialization: because we update strtabs in the dict itself, not just
+	 the serialized copy, this would cause overlapping strtabs.
+
+	 TODO: lift this restriction.  */
+
+      if (fp->ctf_str[CTF_STRTAB_0].cts_len != 0
+	  && fp->ctf_max_children > 0
+	  && fp->ctf_str_prov_len != 0)
+	{
+	  ctf_set_errno (fp, EINVAL);
+	  ctf_err_warn (fp, 0, 0, _("cannot write out already-written dict with children and newly-added strings"));
+	  return -1;
+	}
+    }
 
   /* Fill in an initial CTF header.  The type section begins at a 4-byte aligned
      boundary past the CTF header itself (at relative offset zero).  The flag

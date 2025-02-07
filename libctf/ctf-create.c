@@ -221,7 +221,6 @@ void
 ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 {
   int kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-  size_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
   int name_kind = kind;
   const char *name;
 
@@ -229,27 +228,6 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 
   switch (kind)
     {
-    case CTF_K_STRUCT:
-    case CTF_K_UNION:
-      {
-	ctf_lmember_t *memb = (ctf_lmember_t *) dtd->dtd_vlen;
-	size_t i;
-
-	for (i = 0; i < vlen; i++)
-	  ctf_str_remove_ref (fp, ctf_strraw (fp, memb[i].ctlm_name),
-			      &memb[i].ctlm_name);
-      }
-      break;
-    case CTF_K_ENUM:
-      {
-	ctf_enum_t *en = (ctf_enum_t *) dtd->dtd_vlen;
-	size_t i;
-
-	for (i = 0; i < vlen; i++)
-	  ctf_str_remove_ref (fp, ctf_strraw (fp, en[i].cte_name),
-			      &en[i].cte_name);
-      }
-      break;
     case CTF_K_FORWARD:
       name_kind = dtd->dtd_data.ctt_type;
       break;
@@ -262,7 +240,6 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
     {
       if (LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
 	ctf_dynhash_remove (ctf_name_table (fp, name_kind), name);
-      ctf_str_remove_ref (fp, name, &dtd->dtd_data.ctt_name);
     }
 
   ctf_list_delete (&fp->ctf_dtdefs, dtd);
@@ -388,10 +365,7 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
       if (dtd->dtd_data.ctt_name
 	  && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL
 	  && LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
-	{
-	  ctf_dynhash_remove (ctf_name_table (fp, kind), name);
-	  ctf_str_remove_ref (fp, name, &dtd->dtd_data.ctt_name);
-	}
+	ctf_dynhash_remove (ctf_name_table (fp, kind), name);
 
       ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type);
       ctf_dtd_delete (fp, dtd);
@@ -467,7 +441,7 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
   type = ++fp->ctf_typemax;
   type = ctf_index_to_type (fp, type);
 
-  dtd->dtd_data.ctt_name = ctf_str_add_ref (fp, name, &dtd->dtd_data.ctt_name);
+  dtd->dtd_data.ctt_name = ctf_str_add (fp, name);
   dtd->dtd_type = type;
 
   if (dtd->dtd_data.ctt_name == 0 && name != NULL && name[0] != '\0')
@@ -1063,7 +1037,6 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 {
   ctf_dict_t *ofp = fp;
   ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, enid);
-  unsigned char *old_vlen;
   ctf_enum_t *en;
 
   uint32_t kind, vlen, root;
@@ -1104,16 +1077,10 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (vlen == CTF_MAX_VLEN)
     return (ctf_set_errno (ofp, ECTF_DTFULL));
 
-  old_vlen = dtd->dtd_vlen;
-
   if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum_t) * (vlen + 1)) < 0)
     return -1;					/* errno is set for us.  */
 
   en = (ctf_enum_t *) dtd->dtd_vlen;
-
-  /* Remove refs in the old vlen region and reapply them.  */
-
-  ctf_move_refs (fp, old_vlen, sizeof (ctf_enum_t) * vlen, dtd->dtd_vlen);
 
   /* Check for constant duplication within any given enum: only needed for
      non-root-visible types, since the duplicate detection above does the job
@@ -1128,7 +1095,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 	  return (ctf_set_errno (ofp, ECTF_DUPLICATE));
     }
 
-  en[vlen].cte_name = ctf_str_add_movable_ref (fp, name, &en[vlen].cte_name);
+  en[vlen].cte_name = ctf_str_add (fp, name);
   en[vlen].cte_value = value;
 
   if (en[vlen].cte_name == 0 && name != NULL && name[0] != '\0')
@@ -1161,7 +1128,6 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   uint32_t kind, vlen, root;
   size_t i;
   int is_incomplete = 0;
-  unsigned char *old_vlen;
   ctf_lmember_t *memb;
 
   if (fp->ctf_flags & LCTF_NO_STR)
@@ -1197,14 +1163,9 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   if (vlen == CTF_MAX_VLEN)
     return (ctf_set_errno (ofp, ECTF_DTFULL));
 
-  old_vlen = dtd->dtd_vlen;
   if (ctf_grow_vlen (fp, dtd, sizeof (ctf_lmember_t) * (vlen + 1)) < 0)
     return (ctf_set_errno (ofp, ctf_errno (fp)));
   memb = (ctf_lmember_t *) dtd->dtd_vlen;
-
-  /* Remove refs in the old vlen region and reapply them.  */
-
-  ctf_move_refs (fp, old_vlen, sizeof (ctf_lmember_t) * vlen, dtd->dtd_vlen);
 
   if (name != NULL)
     {
@@ -1235,7 +1196,7 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	return -1;		/* errno is set for us.  */
     }
 
-  memb[vlen].ctlm_name = ctf_str_add_movable_ref (fp, name, &memb[vlen].ctlm_name);
+  memb[vlen].ctlm_name = ctf_str_add (fp, name);
   memb[vlen].ctlm_type = type;
   if (memb[vlen].ctlm_name == 0 && name != NULL && name[0] != '\0')
     return -1;			/* errno is set for us.  */

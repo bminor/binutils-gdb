@@ -1798,7 +1798,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   fp->ctf_str[CTF_STRTAB_0].cts_strs = (const char *) fp->ctf_buf
     + hp->cth_stroff;
   fp->ctf_str[CTF_STRTAB_0].cts_len = hp->cth_strlen;
-  if (ctf_init_refs (fp) < 0 || ctf_str_create_atoms (fp) < 0)
+  if (ctf_str_create_atoms (fp) < 0)
     {
       err = ENOMEM;
       goto bad;
@@ -2021,9 +2021,8 @@ ctf_dict_close (ctf_dict_t *fp)
      the atoms (since in a link the outputs contain references to the parent's
      atoms), but we must destroy the inputs after that (since many type strings
      ultimately come from the inputs).  In addition, if there are
-     ctf_link_outputs, the parent dict's atoms table may have movable refs that
-     refer to the outputs: so purge the refs first, including the movable
-     ones.  */
+     ctf_link_outputs, the parent dict's atoms table may have refs that refer to
+     the outputs: so purge the refs first.  */
 
   if (fp->ctf_link_outputs && ctf_dynhash_elements (fp->ctf_link_outputs) > 0)
     ctf_str_purge_refs (fp);
@@ -2032,7 +2031,6 @@ ctf_dict_close (ctf_dict_t *fp)
   ctf_dynhash_destroy (fp->ctf_link_out_cu_mapping);
 
   ctf_str_free_atoms (fp);
-  ctf_free_refs (fp);
   free (fp->ctf_tmp_typeslice);
 
   if (fp->ctf_data.cts_name != _CTF_NULLSTR)
@@ -2048,7 +2046,6 @@ ctf_dict_close (ctf_dict_t *fp)
 
   free (fp->ctf_dynbase);
 
-  ctf_dynhash_destroy (fp->ctf_syn_ext_strtab);
   ctf_dynhash_destroy (fp->ctf_link_inputs);
   ctf_dynhash_destroy (fp->ctf_link_type_mapping);
   ctf_dynhash_destroy (fp->ctf_link_in_cu_mapping);
@@ -2221,6 +2218,17 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 		    _("ctf_import: incorrect parent dict: %u bytes of strings expected, %u found"),
 		    fp->ctf_header->cth_parent_strlen, pfp->ctf_header->cth_strlen);
       return (ctf_set_errno (fp, ECTF_WRONGPARENT));
+    }
+
+  /* We might in time be able to lift this restriction, but it is unlikely to be
+     something anyone would want to do, so let's not bother for now.  */
+
+  if (ctf_dynhash_elements (fp->ctf_prov_strtab) != 0)
+    {
+      ctf_err_warn (fp, 0, EINVAL,
+		    _("ctf_import: child dict already has %zi bytes of strings, cannot import"),
+		    ctf_dynhash_elements (fp->ctf_prov_strtab));
+      return (ctf_set_errno (fp, EINVAL));
     }
 
   fp->ctf_parent = NULL;
