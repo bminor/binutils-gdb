@@ -52,6 +52,11 @@ main (int argc, char *argv[])
   else
     printf ("zygal's name is %s\n", name);
 
+  if (ctf_type_name (fp, autoschediastic, name, sizeof (name)) == NULL)
+    fprintf (stderr, "Can't get name of autoschediastic: %s\n", ctf_errmsg (ctf_errno (fp)));
+  else
+    printf ("autoschediastic's name is %s after serialization\n", name);
+
   /* Add another new name, roll back, and make sure the strings are
      uncorrupted.  */
 

@@ -37,23 +37,24 @@ no_prop_err (void)
 int main (void)
 {
   ctf_dict_t *parent;
-  ctf_dict_t *blank;
   ctf_dict_t *child;
+  ctf_dict_t *wrong;
   ctf_id_t void_id;
+  ctf_id_t wrong_id;
   ctf_id_t base;
   ctf_id_t slice;
   ctf_id_t function;
+  ctf_id_t ptr;
   ctf_encoding_t long_encoding = { CTF_INT_SIGNED, 0, sizeof (long) };
   ctf_encoding_t void_encoding = { CTF_INT_SIGNED, 0, 0 };
   ctf_encoding_t foo;
   ctf_funcinfo_t fi;
   ctf_id_t bar;
-  char *funcname;
   int err;
 
   if ((parent = ctf_create (&err)) == NULL
       || (child = ctf_create (&err)) == NULL
-      || (blank = ctf_create (&err)) == NULL)
+      || (wrong = ctf_create (&err)) == NULL)
     {
       fprintf (stderr, "Cannot create dicts: %s\n", ctf_errmsg (err));
       return 1;
@@ -65,11 +66,49 @@ int main (void)
       return 1;
     }
 
-  if ((void_id = ctf_add_integer (parent, CTF_ADD_ROOT, "void", &void_encoding))
+  /* Populate two dicts, one with the same types in a different order.  This
+     passes all ctf_import checks (type and strtab count), but will still
+     induce errors due to type mismatches with the child.  In particular, base
+     in the right parent is a non-integral type (a pointer) in the wrong one,
+     and "void" in the parent is an unknown type in the wrong one.  */
+
+  if ((ctf_add_unknown (parent, CTF_ADD_ROOT, "spacer")) /* 1 */
       == CTF_ERR)
     goto parent_err;
 
-  if ((base = ctf_add_integer (parent, CTF_ADD_ROOT, "long int", &long_encoding))
+  if ((ctf_add_unknown (parent, CTF_ADD_ROOT, "spacer2")) /* 2 */
+      == CTF_ERR)
+    goto parent_err;
+
+  if ((void_id = ctf_add_integer (parent, CTF_ADD_ROOT, "void", &void_encoding)) /* 3 */
+      == CTF_ERR)
+    goto parent_err;
+
+  if ((base = ctf_add_integer (parent, CTF_ADD_ROOT, "long int", &long_encoding)) /* 4 */
+      == CTF_ERR)
+    goto parent_err;
+
+  if ((ptr = ctf_add_pointer (parent, CTF_ADD_ROOT, void_id)) /* 5 */
+      == CTF_ERR)
+    goto parent_err;
+
+  if ((ctf_add_integer (wrong, CTF_ADD_ROOT, "long int", &long_encoding)) /* 1 */
+      == CTF_ERR)
+    goto parent_err;
+
+  if ((wrong_id = ctf_add_integer (wrong, CTF_ADD_ROOT, "void", &void_encoding)) /* 2 */
+      == CTF_ERR)
+    goto parent_err;
+
+  if ((ctf_add_unknown (parent, CTF_ADD_ROOT, "spacer")) /* 3 */
+      == CTF_ERR)
+    goto parent_err;
+
+  if ((ptr = ctf_add_pointer (wrong, CTF_ADD_ROOT, wrong_id)) /* 4 */
+      == CTF_ERR)
+    goto parent_err;
+  
+  if ((ctf_add_unknown (wrong, CTF_ADD_ROOT, "spacer2")) /* 5 */
       == CTF_ERR)
     goto parent_err;
 
@@ -79,7 +118,8 @@ int main (void)
   if ((slice = ctf_add_slice (child, CTF_ADD_ROOT, base, &foo)) == CTF_ERR)
     goto parent_err;
 
-  if (ctf_add_variable (parent, "foo", base) < 0)
+  /* Same name as a type: no change in strtab.strlen.  */
+  if (ctf_add_variable (parent, "base", base) < 0)
     goto child_err;
 
   fi.ctc_return = void_id;
@@ -98,58 +138,51 @@ int main (void)
     no_prop_err ();
   check_prop_err (child, parent, ECTF_NOTFUNC);
 
-  if ((ctf_import (child, blank)) < 0)
+  /* Write out and reopen to get a child with no parent.  */
+  if ((ctf_import (child, wrong)) < 0)
     {
       fprintf (stderr, "cannot reimport: %s\n", ctf_errmsg (ctf_errno (child)));
       return 1;
     }
 
   /* This is testing ctf_type_resolve_unsliced(), which is called by the enum
-     functions (which are not themselves buggy).  This typea isn't an enum, but
+     functions (which are not themselves buggy).  This type isn't an enum, but
      that's OK: we're after an error, after all, and the type we're slicing is
      not visible any longer, so nothing can tell it's not an enum.  */
 
   desc = "child slice resolution";
   if ((ctf_enum_value (child, slice, "foo", NULL)) != CTF_ERR)
     no_prop_err ();
-  check_prop_err (child, parent, ECTF_BADID);
+  check_prop_err (child, wrong, ECTF_NONREPRESENTABLE);
 
   desc = "child slice encoding lookup";
   if ((ctf_type_encoding (child, slice, &foo)) != CTF_ERR)
     no_prop_err ();
-  check_prop_err (child, parent, ECTF_BADID);
+  check_prop_err (child, wrong, ECTF_BADID);
 
-  desc = "func info lookup of non-function";
+  desc = "func info lookup of nonrepresentable function";
   if ((ctf_func_type_info (child, base, &fi)) != CTF_ERR)
     no_prop_err ();
-  check_prop_err (child, parent, ECTF_BADID);
+  check_prop_err (child, wrong, ECTF_NONREPRESENTABLE);
 
-  desc = "func args lookup of non-function";
+  desc = "func args lookup of nonrepresentable function";
   if ((ctf_func_type_args (child, base, 0, &bar)) != CTF_ERR)
     no_prop_err ();
-  check_prop_err (child, parent, ECTF_BADID);
+  check_prop_err (child, wrong, ECTF_NONREPRESENTABLE);
 
   desc = "child slice addition";
   if ((slice = ctf_add_slice (child, CTF_ADD_ROOT, base, &foo)) != CTF_ERR)
     no_prop_err ();
-  check_prop_err (child, parent, ECTF_BADID);
+  check_prop_err (child, wrong, ECTF_NOTINTFP);
 
   desc = "variable lookup";
-  if (ctf_lookup_variable (child, "foo") != CTF_ERR)
+  if (ctf_lookup_variable (child, "base") != CTF_ERR)
     no_prop_err ();
-  check_prop_err (child, parent, ECTF_NOTYPEDAT);
-
-  desc = "function lookup via ctf_type_aname";
-  if ((funcname = ctf_type_aname (child, function)) != NULL)
-    {
-      no_prop_err ();
-      free (funcname);
-    }
-  check_prop_err (child, parent, ECTF_BADID);
+  check_prop_err (child, wrong, ECTF_NOTYPEDAT);
 
   ctf_dict_close (child);
   ctf_dict_close (parent);
-  ctf_dict_close (blank);
+  ctf_dict_close (wrong);
   fprintf (stderr, "All done.\n");
   return 0;
 

@@ -19,6 +19,7 @@
 
 #include <ctf-impl.h>
 #include <string.h>
+#include "ctf-ref.h"
 #include "ctf-endian.h"
 
 /* Simple doubly-linked list append routine.  This implementation assumes that
@@ -146,29 +147,12 @@ ctf_str_append_noerr (char *s, const char *append)
   return new_s;
 }
 
-/* Initialize the ref system.  */
-int
-ctf_init_refs (ctf_dict_t *fp)
-{
-  fp->ctf_movable_refs = ctf_dynhash_create (ctf_hash_integer,
-					     ctf_hash_eq_integer,
-					     NULL, NULL);
-  if (!fp->ctf_movable_refs)
-    return -ENOMEM;
-  return 0;
-}
-/* Destroy the ref system.  */
-void
-ctf_free_refs (ctf_dict_t *fp)
-{
-  ctf_dynhash_destroy (fp->ctf_movable_refs);
-}
-
 /* Allocate a ref and bind it into a ref list.  Does not actually
    initialize anything through the ref: the caller must do that.  */
 
 ctf_ref_t *
-ctf_create_ref (ctf_dict_t *fp, ctf_list_t *reflist, uint32_t *ref, int movable)
+ctf_create_ref (ctf_dict_t *fp _libctf_unused_, ctf_list_t *reflist,
+		uint32_t *ref)
 {
   ctf_ref_t *aref;
 
@@ -178,80 +162,14 @@ ctf_create_ref (ctf_dict_t *fp, ctf_list_t *reflist, uint32_t *ref, int movable)
     return NULL;
 
   aref->cre_ref = ref;
-
-  /* Movable refs get a backpointer to them in ctf_movable_refs: they can be
-     moved later in batches via a call to ctf_move_refs.  */
-
-  if (movable)
-    {
-      if (ctf_dynhash_insert (fp->ctf_movable_refs, ref, aref) < 0)
-	{
-	  free (aref);
-	  return NULL;
-	}
-    }
-
   ctf_list_append (reflist, aref);
 
   return aref;
 }
 
-/* Note that refs have moved from (SRC, LEN) to DEST.  We use the movable
-   refs backpointer for this, because it is done an amortized-constant
-   number of times during structure member and enumerand addition, and if we
-   did a linear search this would turn such addition into an O(n^2)
-   operation.  */
-int
-ctf_move_refs (ctf_dict_t *fp, void *src, size_t len, void *dest)
-{
-  uintptr_t p;
-
-  if (src == dest)
-    return 0;
-
-  for (p = (uintptr_t) src; p - (uintptr_t) src < len; p++)
-    {
-      ctf_ref_t *ref;
-
-      if ((ref = ctf_dynhash_lookup (fp->ctf_movable_refs,
-				     (ctf_ref_t *) p)) != NULL)
-	{
-	  int out_of_memory;
-
-	  ref->cre_ref = (uint32_t *) (((uintptr_t) ref->cre_ref +
-					(uintptr_t) dest - (uintptr_t) src));
-	  ctf_dynhash_remove (fp->ctf_movable_refs, (ctf_ref_t *) p);
-	  out_of_memory = ctf_dynhash_insert (fp->ctf_movable_refs,
-					      ref->cre_ref, ref);
-	  assert (out_of_memory == 0);
-	}
-    }
-
-  return 0;
-}
-
-/* Remove a single ref.  */
-void
-ctf_remove_ref (ctf_dict_t *fp, ctf_list_t *reflist, uint32_t *ref)
-{
-  ctf_ref_t *aref, *anext;
-
-  for (aref = ctf_list_next (reflist); aref != NULL; aref = anext)
-    {
-      anext = ctf_list_next (aref);
-      if (aref->cre_ref == ref)
-	{
-	  ctf_list_delete (reflist, aref);
-	  ctf_dynhash_remove (fp->ctf_movable_refs, ref);
-	  free (aref);
-	}
-    }
-}
-
-
 /* Remove all refs to a given entity.  */
 void
-ctf_purge_ref_list (ctf_dict_t *fp, ctf_list_t *reflist)
+ctf_purge_ref_list (ctf_dict_t *fp _libctf_unused_, ctf_list_t *reflist)
 {
   ctf_ref_t *ref, *next;
 
@@ -259,13 +177,12 @@ ctf_purge_ref_list (ctf_dict_t *fp, ctf_list_t *reflist)
     {
       next = ctf_list_next (ref);
       ctf_list_delete (reflist, ref);
-      ctf_dynhash_remove (fp->ctf_movable_refs, ref);
       free (ref);
     }
 }
 
-
 /* Update a list of refs to the specified value. */
+
 void
 ctf_update_refs (ctf_list_t *reflist, uint32_t value)
 {
@@ -344,3 +261,4 @@ ctf_next_copy (ctf_next_t *i)
   ctf_next_destroy (i2);
   return NULL;
 }
+
