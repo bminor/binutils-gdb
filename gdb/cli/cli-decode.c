@@ -2912,13 +2912,19 @@ parse_cli_var_color (const char **args)
   if (len != 7)
     error_no_arg (_("invalid RGB hex triplet format"));
 
+  uint32_t rgb;
   uint8_t r, g, b;
   int scanned_chars = 0;
-  int parsed_args = sscanf (*args, "#%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%n",
-			    &r, &g, &b, &scanned_chars);
+  int parsed_args = sscanf (*args, "#%6" SCNx32 "%n",
+			    &rgb, &scanned_chars);
 
-  if (parsed_args != 3 || scanned_chars != 7)
+  if (parsed_args != 1 || scanned_chars != 7)
     error_no_arg (_("invalid RGB hex triplet format"));
+
+  gdb_assert ((rgb >> 24) == 0);
+  r = (rgb >> 16) & 0xff;
+  g = (rgb >> 8) & 0xff;
+  b = rgb & 0xff;
 
   *args += len;
   return ui_file_style::color (r, g, b);
