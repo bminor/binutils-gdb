@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the x86 Zhaoxin PadLock XMODX instructions.
+
 Changes in 2.44:
 
 * Add support for the x86 Intel Diamond Rapids AMX instructions, including

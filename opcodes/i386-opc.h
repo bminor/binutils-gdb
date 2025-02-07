@@ -74,6 +74,8 @@ enum i386_cpu
   CpuPadLockRNG2,
   /* Zhaoxin PadLock PHE2 required */
   CpuPadLockPHE2,
+  /* Zhaoxin PadLock XMODX required */
+  CpuPadLockXMODX,
   /* AMD Secure Virtual Machine Ext-s required */
   CpuSVME,
   /* VMX Instructions required */
@@ -430,6 +432,7 @@ typedef union i386_cpu_flags
       unsigned int cpugmiccs:1;
       unsigned int cpupadlockrng2:1;
       unsigned int cpupadlockphe2:1;
+      unsigned int cpupadlockxmodx:1;
       unsigned int cpusvme:1;
       unsigned int cpuvmx:1;
       unsigned int cpusmx:1;

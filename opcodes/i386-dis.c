@@ -2977,6 +2977,8 @@ static const struct dis386 reg_table[][8] = {
     { "xsha384",	{ { OP_0f07, 0 } }, 0 },
     { "xsha512",	{ { OP_0f07, 0 } }, 0 },
     { PREFIX_TABLE (PREFIX_0FA6_REG_5) },
+    { "montmul2",	{ { OP_0f07, 0 } }, 0 },
+    { "xmodexp",	{ { OP_0f07, 0 } }, 0 },
   },
   /* REG_0FA7 */
   {
