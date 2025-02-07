@@ -51,6 +51,10 @@ extern bool input_from_string;
 #define is_whitespace(c) \
   ( lex_type[(unsigned char) (c)] & LEX_WHITE      )
 
+/* Don't allow safe-ctype.h's counterparts to be used.  */
+#undef ISSPACE
+#undef ISBLANK
+
 /* The distinction of "line" and "statement" sadly is blurred by unhelpful
    naming of e.g. the underlying array.  Most users really mean "end of
    statement".  Going forward only these wrappers are supposed to be used.  */
