@@ -135,7 +135,7 @@ elf_solaris2_before_allocation (void)
       basever->vernum = 0;
     }
 
-  gld${EMULATION_NAME}_before_allocation ();
+  ${LDEMUL_BEFORE_ALLOCATION-gld${EMULATION_NAME}_before_allocation} ();
 }
 
 EOF
