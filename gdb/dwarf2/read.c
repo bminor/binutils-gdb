@@ -16130,6 +16130,7 @@ cooked_index_functions::expand_symtabs_matching
 	  bool found = true;
 
 	  const cooked_index_entry *parent = entry->get_parent ();
+	  const language_defn *lang_def = language_def (entry->lang);
 	  for (int i = name_vec.size () - 1; i > 0; --i)
 	    {
 	      /* If we ran out of entries, or if this segment doesn't
@@ -16141,7 +16142,6 @@ cooked_index_functions::expand_symtabs_matching
 		}
 	      if (parent->lang != language_unknown)
 		{
-		  const language_defn *lang_def = language_def (parent->lang);
 		  symbol_name_matcher_ftype *name_matcher
 		    = lang_def->get_symbol_name_matcher
 		      (segment_lookup_names[i-1]);
@@ -16172,7 +16172,6 @@ cooked_index_functions::expand_symtabs_matching
 
 		  if (entry->lang != language_unknown)
 		    {
-		      const language_defn *lang_def = language_def (entry->lang);
 		      symbol_name_matcher_ftype *name_matcher
 			= lang_def->get_symbol_name_matcher
 			  (segment_lookup_names.back ());
