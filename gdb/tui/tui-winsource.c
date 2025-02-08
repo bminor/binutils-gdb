@@ -37,6 +37,7 @@
 #include "tui/tui-source.h"
 #include "tui/tui-disasm.h"
 #include "tui/tui-location.h"
+#include "tui/tui-wingeneral.h"
 #include "gdb_curses.h"
 
 /* Function to display the "main" routine.  */
@@ -52,10 +53,10 @@ tui_display_main ()
       tui_get_begin_asm_address (&gdbarch, &addr);
       if (addr != (CORE_ADDR) 0)
 	{
-	  struct symtab *s;
+	  tui_batch_rendering defer;
 
 	  tui_update_source_windows_with_addr (gdbarch, addr);
-	  s = find_pc_line_symtab (addr);
+	  struct symtab *s = find_pc_line_symtab (addr);
 	  tui_location.set_location (s);
 	}
     }
@@ -607,6 +608,8 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
 void
 tui_update_all_breakpoint_info (struct breakpoint *being_deleted)
 {
+  tui_batch_rendering defer;
+
   for (tui_source_window_base *win : tui_source_windows ())
     {
       if (win->update_breakpoint_info (being_deleted, false))

@@ -969,6 +969,8 @@ tui_set_win_size (const char *arg, bool set_width_p)
 	      new_size = curr_size + input_no;
 	    }
 
+	  tui_batch_rendering defer;
+
 	  /* Now change the window's height, and adjust
 	     all other windows around it.  */
 	  if (set_width_p)
