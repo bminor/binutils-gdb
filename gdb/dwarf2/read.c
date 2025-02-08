@@ -18780,17 +18780,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_union_type:
 	case DW_TAG_set_type:
 	case DW_TAG_enumeration_type:
-	case DW_TAG_namelist:
-	  if (die->tag == DW_TAG_namelist)
-	    {
-	      sym->set_aclass_index (LOC_STATIC);
-	      sym->set_domain (VAR_DOMAIN);
-	    }
-	  else if (cu->lang () == language_c
-		   || cu->lang () == language_cplus
-		   || cu->lang () == language_objc
-		   || cu->lang () == language_opencl
-		   || cu->lang () == language_minimal)
+	  if (cu->lang () == language_c
+	      || cu->lang () == language_cplus
+	      || cu->lang () == language_objc
+	      || cu->lang () == language_opencl
+	      || cu->lang () == language_minimal)
 	    {
 	      /* These languages have a tag namespace.  Note that
 		 there's a special hack for C++ in the matching code,
@@ -18882,6 +18876,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_common_block:
 	  sym->set_aclass_index (LOC_COMMON_BLOCK);
 	  sym->set_domain (COMMON_BLOCK_DOMAIN);
+	  list_to_add = cu->list_in_scope;
+	  break;
+	case DW_TAG_namelist:
+	  sym->set_aclass_index (LOC_STATIC);
+	  sym->set_domain (VAR_DOMAIN);
 	  list_to_add = cu->list_in_scope;
 	  break;
 	default:
