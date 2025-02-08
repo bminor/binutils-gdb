@@ -851,6 +851,11 @@ static struct dwarf2_section_info *cu_debug_loc_section (struct dwarf2_cu *cu);
 static struct dwarf2_section_info *cu_debug_rnglists_section
   (struct dwarf2_cu *cu, dwarf_tag tag);
 
+static void dw_expand_symtabs_matching_file_matcher
+  (dwarf2_per_objfile *per_objfile,
+   auto_bool_vector &cus_to_skip,
+   expand_symtabs_file_matcher file_matcher);
+
 static void get_scope_pc_bounds (struct die_info *,
 				 unrelocated_addr *, unrelocated_addr *,
 				 struct dwarf2_cu *);
@@ -2030,9 +2035,10 @@ dw2_expand_symtabs_matching_one
   return true;
 }
 
-/* See read.h.  */
+/* If FILE_MATCHER is non-NULL, update CUS_TO_SKIP as appropriate
+   based on FILE_MATCHER.  */
 
-void
+static void
 dw_expand_symtabs_matching_file_matcher
   (dwarf2_per_objfile *per_objfile,
    auto_bool_vector &cus_to_skip,
