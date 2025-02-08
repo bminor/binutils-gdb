@@ -253,8 +253,8 @@ tui_status_window::rerender ()
   waddstr (handle.get (), string.c_str ());
   wclrtoeol (handle.get ());
   (void) wstandend (handle.get ());
+
   refresh_window ();
-  wmove (handle.get (), 0, 0);
 }
 
 /* Function to print the frame information for the TUI.  The windows
