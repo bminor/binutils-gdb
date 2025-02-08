@@ -1426,6 +1426,16 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  h->plt.refcount += 1;
 	}
 
+      /* If a relocation refers to _GLOBAL_OFFSET_TABLE_, create the .got.  */
+      if (h != NULL
+	  && htab->elf.sgot == NULL
+	  && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	{
+	  if (!_bfd_elf_create_got_section (htab->elf.dynobj, info))
+	    return false;
+	  BFD_ASSERT (h == htab->elf.hgot);
+	}
+
       /* Compatibility with old R_SPARC_REV32 reloc conflicting
 	 with R_SPARC_TLS_GD_HI22.  */
       if (! ABI_64_P (abfd) && ! checked_tlsgd)
@@ -1645,8 +1655,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (h != NULL)
 	    h->non_got_ref = 1;
 
-	  if (h != NULL
-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	  if (h != NULL && h == htab->elf.hgot)
 	    break;
 	  /* Fall through.  */
 
@@ -3252,8 +3261,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	case R_SPARC_PC_HH22:
 	case R_SPARC_PC_HM10:
 	case R_SPARC_PC_LM22:
-	  if (h != NULL
-	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
+	  if (h != NULL && h == htab->elf.hgot)
 	    break;
 	  /* Fall through.  */
 	case R_SPARC_DISP8:

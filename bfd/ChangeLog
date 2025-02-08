@@ -1,3 +1,10 @@
+2025-02-08  Alexandre Oliva <oliva@adacore.com>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Check for
+	_GLOBAL_OFFSET_TABLE_ references early, then compare hashed
+	symbols instead of strings.
+	(_bfd_sparc_elf_relocate_section): Compare hashed symbols.
+
 2025-01-23  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* doc/local.mk (AM_MAKEINFOFLAGS): Prepend the build directory to

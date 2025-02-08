@@ -94,6 +94,10 @@ set sparctests {
     {"32-bit: TLS -fpie" "-melf32_sparc -pie tmpdir/libtlslib32.so" ""
      "--32 -K PIC" {tlspie32.s}
      {{objdump -drj.text tlspie32.dd}} "tlspie32"}
+    {"32-bit: GOT definition"
+     "-melf32_sparc" ""
+     "--32 -K PIC" {got-def.s}
+     {} "got-def"}
     {"32-bit: GOTDATA relocations"
      "-shared -melf32_sparc --hash-style=sysv" ""
      "--32 -K PIC" {gotop32.s}
@@ -134,6 +138,10 @@ set sparc64tests {
      "-melf64_sparc -pie -Ttext-segment=0x100000 tmpdir/libtlslib64.so" ""
      "--64 -Av9 -K PIC" {tlspie64.s}
      {{objdump -drj.text tlspie64.dd}} "tlspie64"}
+    {"64-bit: GOT definition"
+     "-melf64_sparc" ""
+     "--64 -Av9 -K PIC" {got-def.s}
+     {} "got-def"}
     {"64-bit: GOTDATA relocations"
      "-shared -melf64_sparc --hash-style=sysv" ""
      "--64 -Av9 -K PIC" {gotop64.s}
