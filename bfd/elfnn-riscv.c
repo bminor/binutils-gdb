@@ -2263,6 +2263,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       reloc_howto_type *howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
       const char *msg = NULL;
       bool resolved_to_zero;
+      bool via_plt = false;
 
       if (howto == NULL)
 	continue;
@@ -2565,6 +2566,12 @@ riscv_elf_relocate_section (bfd *output_bfd,
       resolved_to_zero = (h != NULL
 			  && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
 
+      /* Refer to the PLT entry.  This check has to match the check in
+	 _bfd_riscv_relax_section.  */
+      via_plt = (htab->elf.splt != NULL
+		 && h != NULL
+		 && h->plt.offset != MINUS_ONE);
+
       switch (r_type)
 	{
 	case R_RISCV_NONE:
@@ -2776,8 +2783,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_CALL_PLT:
 	  /* Handle a call to an undefined weak function.  This won't be
 	     relaxed, so we have to handle it here.  */
-	  if (h != NULL && h->root.type == bfd_link_hash_undefweak
-	      && (!bfd_link_pic (info) || h->plt.offset == MINUS_ONE))
+	  if (h->root.type == bfd_link_hash_undefweak && !via_plt)
 	    {
 	      /* We can use x0 as the base register.  */
 	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset + 4);
@@ -2791,42 +2797,40 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	case R_RISCV_JAL:
 	case R_RISCV_RVC_JUMP:
-	  if (bfd_link_pic (info) && h != NULL)
+	  if (via_plt)
 	    {
-	      if (h->plt.offset != MINUS_ONE)
-		{
-		  /* Refer to the PLT entry.  This check has to match the
-		     check in _bfd_riscv_relax_section.  */
-		  relocation = sec_addr (htab->elf.splt) + h->plt.offset;
-		  unresolved_reloc = false;
-		}
-	      else if (!SYMBOL_REFERENCES_LOCAL (info, h)
-		       && (input_section->flags & SEC_ALLOC) != 0
-		       && (input_section->flags & SEC_READONLY) != 0
-		       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-		{
-		  /* PR 28509, when generating the shared object, these
-		     referenced symbols may bind externally, which means
-		     they will be exported to the dynamic symbol table,
-		     and are preemptible by default.  These symbols cannot
-		     be referenced by the non-pic relocations, like
-		     R_RISCV_JAL and R_RISCV_RVC_JUMP relocations.
+	      relocation = sec_addr (htab->elf.splt) + h->plt.offset;
+	      unresolved_reloc = false;
+	    }
+	  else if (bfd_link_pic (info)
+		   && h != NULL
+		   && h->plt.offset == MINUS_ONE
+		   && !SYMBOL_REFERENCES_LOCAL (info, h)
+		   && (input_section->flags & SEC_ALLOC) != 0
+		   && (input_section->flags & SEC_READONLY) != 0
+		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+	    {
+	      /* PR 28509, when generating the shared object, these
+		 referenced symbols may bind externally, which means
+		 they will be exported to the dynamic symbol table,
+		 and are preemptible by default.  These symbols cannot
+		 be referenced by the non-pic relocations, like
+		 R_RISCV_JAL and R_RISCV_RVC_JUMP relocations.
 
-		     However, consider that linker may relax the R_RISCV_CALL
-		     relocations to R_RISCV_JAL or R_RISCV_RVC_JUMP, if
-		     these relocations are relocated to the plt entries,
-		     then we won't report error for them.
+		 However, consider that linker may relax the R_RISCV_CALL
+		 relocations to R_RISCV_JAL or R_RISCV_RVC_JUMP, if
+		 these relocations are relocated to the plt entries,
+		 then we won't report error for them.
 
-		     Perhaps we also need the similar checks for the
-		     R_RISCV_BRANCH and R_RISCV_RVC_BRANCH relocations.  */
-		  msg = bfd_asprintf (_("%%X%%P: relocation %s against `%s'"
-					" which may bind externally"
-					" can not be used"
-					" when making a shared object;"
-					" recompile with -fPIC\n"),
-				      howto->name, h->root.root.string);
-		  r = bfd_reloc_notsupported;
-		}
+		 Perhaps we also need the similar checks for the
+		 R_RISCV_BRANCH and R_RISCV_RVC_BRANCH relocations.  */
+	      msg = bfd_asprintf (_("%%X%%P: relocation %s against `%s'"
+				    " which may bind externally"
+				    " can not be used"
+				    " when making a shared object;"
+				    " recompile with -fPIC\n"),
+				  howto->name, h->root.root.string);
+	      r = bfd_reloc_notsupported;
 	    }
 	  break;
 
@@ -5365,9 +5369,9 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	      undefined_weak = true;
 	    }
 
-	  /* This line has to match the check in riscv_elf_relocate_section
-	     in the R_RISCV_CALL[_PLT] case.  */
-	  if (bfd_link_pic (info) && h->plt.offset != MINUS_ONE)
+	  /* This line has to match the via_pltcheck in
+	     riscv_elf_relocate_section in the R_RISCV_CALL[_PLT] case.  */
+	  if (h->plt.offset != MINUS_ONE)
 	    {
 	      sym_sec = htab->elf.splt;
 	      symval = h->plt.offset;
