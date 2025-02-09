@@ -2066,7 +2066,6 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
     {
       asymbol *sym;
       struct generic_link_hash_entry *h;
-      bool output;
 
       h = NULL;
       sym = *sym_ptr;
@@ -2160,12 +2159,20 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	    }
 	}
 
+      bool output = false;
       if ((sym->flags & BSF_KEEP) == 0
 	  && (info->strip == strip_all
 	      || (info->strip == strip_some
 		  && bfd_hash_lookup (info->keep_hash, bfd_asymbol_name (sym),
 				      false, false) == NULL)))
-	output = false;
+	;
+      /* If this symbol is in a section which is not being included
+	 in the output file, then we don't want to output the
+	 symbol.  */
+      else if (!bfd_is_abs_section (sym->section)
+	       && bfd_section_removed_from_list (output_bfd,
+						 sym->section->output_section))
+	;
       else if ((sym->flags & (BSF_GLOBAL | BSF_WEAK | BSF_GNU_UNIQUE)) != 0)
 	{
 	  /* If this symbol is marked as occurring now, rather
@@ -2175,34 +2182,27 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	  if (bfd_asymbol_bfd (sym) == input_bfd
 	      && (sym->flags & BSF_NOT_AT_END) != 0)
 	    output = true;
-	  else
-	    output = false;
 	}
       else if ((sym->flags & BSF_KEEP) != 0)
 	output = true;
       else if (bfd_is_ind_section (sym->section))
-	output = false;
+	;
       else if ((sym->flags & BSF_DEBUGGING) != 0)
 	{
 	  if (info->strip == strip_none)
 	    output = true;
-	  else
-	    output = false;
 	}
       else if (bfd_is_und_section (sym->section)
 	       || bfd_is_com_section (sym->section))
-	output = false;
+	;
       else if ((sym->flags & BSF_LOCAL) != 0)
 	{
-	  if ((sym->flags & BSF_WARNING) != 0)
-	    output = false;
-	  else
+	  if ((sym->flags & BSF_WARNING) == 0)
 	    {
 	      switch (info->discard)
 		{
 		default:
 		case discard_all:
-		  output = false;
 		  break;
 		case discard_sec_merge:
 		  output = true;
@@ -2211,9 +2211,7 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 		    break;
 		  /* FALLTHROUGH */
 		case discard_l:
-		  if (bfd_is_local_label (input_bfd, sym))
-		    output = false;
-		  else
+		  if (!bfd_is_local_label (input_bfd, sym))
 		    output = true;
 		  break;
 		case discard_none:
@@ -2226,25 +2224,15 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	{
 	  if (info->strip != strip_all)
 	    output = true;
-	  else
-	    output = false;
 	}
-      else if (sym->flags == 0
-	       && (sym->section->owner->flags & BFD_PLUGIN) != 0)
+      else if (sym->flags == 0)
 	/* LTO doesn't set symbol information.  We get here with the
 	   generic linker for a symbol that was "common" but no longer
-	   needs to be global.  */
-	output = false;
+	   needs to be global.  We also get here on fuzzed ELF objects
+	   with bogus symbol type and binding.  */
+	;
       else
-	abort ();
-
-      /* If this symbol is in a section which is not being included
-	 in the output file, then we don't want to output the
-	 symbol.  */
-      if (!bfd_is_abs_section (sym->section)
-	  && bfd_section_removed_from_list (output_bfd,
-					    sym->section->output_section))
-	output = false;
+	BFD_FAIL ();
 
       if (output)
 	{
