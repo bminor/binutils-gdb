@@ -2886,7 +2886,7 @@ after it has previously been enabled then use
 @item --disassembler-color=off
 @itemx --disassembler-color=terminal
 @itemx --disassembler-color=on|color|colour
-@itemx --disassembler-color=extened|extended-color|extened-colour
+@itemx --disassembler-color=extended|extended-color|extended-colour
 Enables or disables the use of colored syntax highlighting in
 disassembly output.  The default behaviour is determined via a
 configure time option.  Note, not all architectures support colored
