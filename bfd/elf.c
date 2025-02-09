@@ -3542,6 +3542,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
   if (arg->link_info
       && (abfd->flags & BFD_COMPRESS) != 0
       && (asect->flags & SEC_DEBUGGING) != 0
+      && (asect->flags & SEC_ALLOC) == 0
       && name[1] == 'd'
       && name[6] == '_')
     {
