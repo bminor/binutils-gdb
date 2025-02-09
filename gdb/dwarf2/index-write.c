@@ -130,6 +130,15 @@ public:
     ::store_unsigned_integer (grow (len), len, byte_order, val);
   }
 
+  /* Accept a host-format integer in VAL and write it in the buffer at offset
+     OFFSET as a target-format integer which is LEN bytes long.  */
+  void write_uint (size_t offset, size_t len, bfd_endian byte_order,
+		   ULONGEST val)
+  {
+    gdb_assert (offset + len <= m_vec.size ());
+    ::store_unsigned_integer (&m_vec[offset], len, byte_order, val);
+  }
+
   /* Copy VALUE to the end of the buffer, little-endian.  */
   void append_offset (offset_type value)
   {
@@ -675,10 +684,7 @@ public:
     if (entry->lang == language_ada && entry->tag == DW_TAG_namespace)
       return;
 
-    const auto insertpair
-      = m_name_to_value_set.try_emplace (c_str_view (entry->name));
-    entry_list &elist = insertpair.first->second;
-    elist.entries.push_back (entry);
+    m_name_to_value_set[entry->name].emplace_back (entry);
   }
 
   /* Build all the tables.  All symbols must be already inserted.
@@ -692,25 +698,16 @@ public:
     m_name_table_string_offs.reserve (name_count);
     m_name_table_entry_offs.reserve (name_count);
 
-    /* The name table is indexed from 1.  The numbers are needed here
-       so that parent entries can be handled correctly.  */
-    int next_name = 1;
-    for (auto &item : m_name_to_value_set)
-      item.second.index = next_name++;
-
     /* The next available abbrev number.  */
     int next_abbrev = 1;
 
-    for (auto &item : m_name_to_value_set)
+    for (auto &[name, these_entries] : m_name_to_value_set)
       {
-	const c_str_view &name = item.first;
-	entry_list &these_entries = item.second;
-
 	/* Sort the items within each bucket.  This ensures that the
 	   generated index files will be the same no matter the order in
 	   which symbols were added into the index.  */
-	std::sort (these_entries.entries.begin (),
-		   these_entries.entries.end (),
+	std::sort (these_entries.begin (),
+		   these_entries.end (),
 		   [] (const cooked_index_entry *a,
 		       const cooked_index_entry *b)
 		   {
@@ -730,7 +727,7 @@ public:
 	  (m_debugstrlookup.lookup (name.c_str ())); /* ??? */
 	m_name_table_entry_offs.push_back_reorder (m_entry_pool.size ());
 
-	for (const cooked_index_entry *entry : these_entries.entries)
+	for (const cooked_index_entry *entry : these_entries)
 	  {
 	    unit_kind kind = (entry->per_cu->is_debug_types
 			      ? unit_kind::tu
@@ -778,7 +775,7 @@ public:
 		if (parent != nullptr)
 		  {
 		    m_abbrev_table.append_unsigned_leb128 (DW_IDX_parent);
-		    m_abbrev_table.append_unsigned_leb128 (DW_FORM_udata);
+		    m_abbrev_table.append_unsigned_leb128 (DW_FORM_data4);
 		  }
 
 		/* Terminate attributes list.  */
@@ -786,6 +783,14 @@ public:
 		m_abbrev_table.append_unsigned_leb128 (0);
 	      }
 
+	    /* Record the offset in the pool at which this entry will
+	       reside.  */
+	    const auto offset_inserted
+	      = (m_entry_pool_offsets.emplace (entry, m_entry_pool.size ())
+		 .second);
+	    gdb_assert (offset_inserted);
+
+	    /* Write the entry to the pool.  */
 	    m_entry_pool.append_unsigned_leb128 (idx);
 
 	    const auto it = m_cu_index_htab.find (entry->per_cu);
@@ -800,11 +805,11 @@ public:
 
 	    if (parent != nullptr)
 	      {
-		c_str_view par_name (parent->name);
-		auto name_iter = m_name_to_value_set.find (par_name);
-		gdb_assert (name_iter != m_name_to_value_set.end ());
-		gdb_assert (name_iter->second.index != 0);
-		m_entry_pool.append_unsigned_leb128 (name_iter->second.index);
+		m_offsets_to_patch.emplace_back (m_entry_pool.size (), parent);
+
+		/* Write a dummy number, this gets patched later.  */
+		m_entry_pool.append_uint (4, m_dwarf5_byte_order,
+					  0xfafafafa);
 	      }
 	  }
 
@@ -814,6 +819,15 @@ public:
 
     /* Terminate tags list.  */
     m_abbrev_table.append_unsigned_leb128 (0);
+
+    /* Write the parent offset values.  */
+    for (const auto &[reloc_offset, parent] : m_offsets_to_patch)
+      {
+	const auto parent_offset_it = m_entry_pool_offsets.find (parent);
+	gdb_assert (parent_offset_it != m_entry_pool_offsets.cend ());
+	m_entry_pool.write_uint (reloc_offset, 4, m_dwarf5_byte_order,
+				 parent_offset_it->second);
+      }
   }
 
   /* Return .debug_names names count.  This must be called only after
@@ -1059,15 +1073,26 @@ private:
     offset_vec_tmpl<OffsetSize> m_name_table_entry_offs;
   };
 
-  struct entry_list
-  {
-    unsigned index = 0;
-    std::vector<const cooked_index_entry *> entries;
-  };
+  /* Store the index entries for each name.
 
-  /* Store value of each symbol.  Note that we rely on the sorting
-     behavior of map to make the output stable.  */
-  std::map<c_str_view, entry_list> m_name_to_value_set;
+     Note that we rely on the sorting behavior of map to make the output
+     stable.  */
+  std::map<c_str_view, std::vector<const cooked_index_entry *>>
+    m_name_to_value_set;
+
+  /* Offset at which each entry is written in the entry pool.  */
+  gdb::unordered_map<const cooked_index_entry *, offset_type>
+    m_entry_pool_offsets;
+
+  /* The locations where we need to patch offset to entries.
+
+     The first element of the pair is the offset into the pool that needs to
+     be patched.
+
+     The second element is the entry the offset to which needs to be
+     patched in.  */
+  std::vector<std::pair<offset_type, const cooked_index_entry *>>
+    m_offsets_to_patch;
 
   const bfd_endian m_dwarf5_byte_order;
   dwarf_tmpl<uint32_t> m_dwarf32;
@@ -1406,7 +1431,7 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
   const offset_type bytes_of_header
     = ((dwarf5_is_dwarf64 ? 12 : 4)
        + 2 + 2 + 7 * 4
-       + sizeof (dwarf5_augmentation));
+       + sizeof (dwarf5_augmentation_3));
   size_t expected_bytes = 0;
   expected_bytes += bytes_of_header;
   expected_bytes += cu_list.size ();
@@ -1458,9 +1483,9 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
 
   /* augmentation_string_size - The size in bytes of the augmentation
      string.  This value is rounded up to a multiple of 4.  */
-  static_assert (sizeof (dwarf5_augmentation) % 4 == 0);
-  header.append_uint (4, dwarf5_byte_order, sizeof (dwarf5_augmentation));
-  header.append_array (dwarf5_augmentation);
+  static_assert (sizeof (dwarf5_augmentation_3) % 4 == 0);
+  header.append_uint (4, dwarf5_byte_order, sizeof (dwarf5_augmentation_3));
+  header.append_array (dwarf5_augmentation_3);
 
   gdb_assert (header.size () == bytes_of_header);
 

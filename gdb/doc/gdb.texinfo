@@ -22976,16 +22976,48 @@ The DWARF specification documents an optional index section called
 section.  However, in order to work with @value{GDBN}, some extensions
 were necessary.
 
-@value{GDBN} uses the augmentation string @samp{GDB2}.  Earlier
-versions used the string @samp{GDB}, but these versions of the index
-are no longer supported.
+@value{GDBN} uses an augmentation string to specify which extensions
+are in use and to allow support of backwards-incompatible changes in
+this functionality.  The augmentation string has the form
+@samp{GDB@var{n}}, where @var{n} is an integral version number of the
+extensions, which is incremented when the extensions are added or
+modified.  The smallest @var{n} is 2; earlier versions of
+@value{GDBN} used just @samp{GDB} with no version number, but these
+versions of the index are no longer supported.
+
+Here is a list of augmentation string versions along with the changes
+introduced with each version, compared to the previous version.
+
+@table @samp
+
+@item GDB2
+Specifies the use of attributes @code{DW_IDX_GNU_internal},
+@code{DW_IDX_GNU_main}, @code{DW_IDX_GNU_language} and
+@code{DW_IDX_GNU_linkage_name}, described below.
+
+@item GDB3
+Changes the semantic of the @code{DW_IDX_parent} attribute.
+With @samp{GDB2}, @code{DW_IDX_parent} provided an offset into the name
+table.  With @samp{GDB3}, it now provides an offset to the index entry
+of the parent, relative to the start of the entry pool region.
+
+@end table
+
+@value{GDBN} produces indexes with the augmentation string @samp{GDB3}.
+
+@value{GDBN} can read indexes with augmentation strings @samp{GDB2} or
+@samp{GDB3}.  @value{GDBN} does not support reading indexes with any
+other augmentation strings.
 
 @value{GDBN} does not use the specified hash table.  Therefore,
 because this hash table is optional, @value{GDBN} also does not write
 it.
 
-@value{GDBN} also generates and uses some extra index attributes:
+@value{GDBN} generates and uses the following non-standard index
+attributes:
+
 @table @code
+
 @item DW_IDX_GNU_internal
 This has the value @samp{0x2000}.  It is a flag that, when set,
 indicates that the associated entry has @code{static} linkage.
@@ -23002,6 +23034,7 @@ indicating the language of the associated entry.
 This has the value @samp{0x2004}.  It is a flag that, when set,
 indicates that the associated entry is a linkage name, and not a
 source name.
+
 @end table
 
 @node Symbol Errors
