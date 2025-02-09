@@ -109,7 +109,7 @@ read_histogram_header (histogram *record,
       done (1);
     }
 
-  n_hist_scale = (double)((record->highpc - record->lowpc) / sizeof (UNIT))
+  n_hist_scale = (double)(record->highpc - record->lowpc) / sizeof (UNIT)
     / record->num_bins;
 
   if (first)
