@@ -155,7 +155,7 @@ read_histogram_header (histogram *record,
       if (fabs (hist_scale - n_hist_scale) > 0.000001)
 	{
 	  fprintf (stderr,
-		   _("%s: different scales in histogram records"),
+		   _("%s: different scales in histogram records\n"),
 		   whoami);
 	  done (1);
 	}
