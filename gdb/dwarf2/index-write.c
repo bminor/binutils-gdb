@@ -1358,7 +1358,8 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
   /* Dump the address map.  */
   data_buf addr_vec;
   for (auto map : table->get_addrmaps ())
-    write_address_map (map, addr_vec, cu_index_htab);
+    if (map != nullptr)
+      write_address_map (map, addr_vec, cu_index_htab);
 
   /* Ensure symbol hash is built domestically.  */
   symtab.sort ();

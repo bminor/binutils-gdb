@@ -319,6 +319,9 @@ private:
      found.  */
   dwarf2_per_cu_data *lookup (unrelocated_addr addr)
   {
+    if (m_addrmap == nullptr)
+      return nullptr;
+
     return (static_cast<dwarf2_per_cu_data *>
 	    (m_addrmap->find ((CORE_ADDR) addr)));
   }
@@ -669,7 +672,9 @@ public:
   dwarf2_per_cu_data *lookup (unrelocated_addr addr) override;
 
   /* Return a new vector of all the addrmaps used by all the indexes
-     held by this object.  */
+     held by this object.
+
+     Elements of the vector may be nullptr.  */
   std::vector<const addrmap *> get_addrmaps ();
 
   /* Return the entry that is believed to represent the program's

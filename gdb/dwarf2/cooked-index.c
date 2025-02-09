@@ -841,12 +841,15 @@ cooked_index::dump (gdbarch *arch)
   std::vector<const addrmap *> addrmaps = this->get_addrmaps ();
   for (i = 0; i < addrmaps.size (); ++i)
     {
-      const addrmap &addrmap = *addrmaps[i];
+      const addrmap *addrmap = addrmaps[i];
 
-      gdb_printf ("    [%zu] ((addrmap *) %p)\n", i, &addrmap);
+      gdb_printf ("    [%zu] ((addrmap *) %p)\n", i, addrmap);
       gdb_printf ("\n");
 
-      addrmap.foreach ([arch] (CORE_ADDR start_addr, const void *obj)
+      if (addrmap == nullptr)
+	continue;
+
+      addrmap->foreach ([arch] (CORE_ADDR start_addr, const void *obj)
 	{
 	  QUIT;
 
