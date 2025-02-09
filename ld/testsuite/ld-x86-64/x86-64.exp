@@ -216,6 +216,11 @@ set x86_64tests {
     {"Build textrel-1" "-no-pie -melf_x86_64 -z nocopyreloc --warn-textrel"
      "tmpdir/textrel-1.so"
      "--64" { textrel-1b.s } {{ld "textrel-1.err"}} "textrel-1"}
+    {"Build pr32665"
+     "-melf_x86_64"
+     "" ""
+     { pr32665.o.bz2 }
+     {{ld "pr32665.err"}} "pr32665"}
 }
 
 run_ld_link_tests $x86_64tests

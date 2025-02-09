@@ -2441,6 +2441,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
       bool size_reloc;
       bool converted_reloc;
       bool no_dynreloc;
+      reloc_howto_type *howto;
 
       r_symndx = htab->r_sym (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -2454,6 +2455,17 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: bad symbol index: %d"),
 			      abfd, r_symndx);
+	  goto error_return;
+	}
+
+      howto = elf_x86_64_rtype_to_howto (abfd, r_type);
+      if (rel->r_offset + bfd_get_reloc_size (howto) > sec->size)
+	{
+	  /* xgettext:c-format */
+	  _bfd_error_handler
+	    (_("%pB: bad reloc offset (%#" PRIx64 " > %#" PRIx64 ") for"
+	       " section `%pA'"), abfd, (uint64_t) rel->r_offset,
+	     (uint64_t) sec->size, sec);
 	  goto error_return;
 	}
 

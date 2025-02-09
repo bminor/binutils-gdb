@@ -1531,6 +1531,7 @@ elf_i386_scan_relocs (bfd *abfd,
       const char *name;
       bool size_reloc;
       bool no_dynreloc;
+      reloc_howto_type *howto;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1544,6 +1545,17 @@ elf_i386_scan_relocs (bfd *abfd,
 	  /* xgettext:c-format */
 	  _bfd_error_handler (_("%pB: bad symbol index: %d"),
 			      abfd, r_symndx);
+	  goto error_return;
+	}
+
+      howto = elf_i386_rtype_to_howto (r_type);
+      if (rel->r_offset + bfd_get_reloc_size (howto) > sec->size)
+	{
+	  /* xgettext:c-format */
+	  _bfd_error_handler
+	    (_("%pB: bad reloc offset (%#" PRIx32 " > %#" PRIx32 ") for"
+	       " section `%pA'"), abfd, (uint32_t) rel->r_offset,
+	     (uint32_t) sec->size, sec);
 	  goto error_return;
 	}
 
