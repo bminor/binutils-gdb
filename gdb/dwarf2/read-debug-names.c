@@ -28,6 +28,7 @@
 #include "read.h"
 #include "stringify.h"
 #include "extract-store-integer.h"
+#include "gdbsupport/thread-pool.h"
 
 /* This is just like cooked_index_functions, but overrides a single
    method so the test suite can distinguish the .debug_names case from
@@ -113,7 +114,14 @@ struct mapped_debug_names_reader
 
   std::unordered_map<ULONGEST, index_val> abbrev_map;
 
-  std::unique_ptr<cooked_index_shard> shard;
+  /* Even though the scanning of .debug_names and creation of the cooked index
+     entries is done serially, we create multiple shards so that the
+     finalization step can be parallelized.  The shards are filled in a round
+     robin fashion.  */
+  std::vector<cooked_index_shard_up> shards;
+
+  /* Next shard to insert an entry in.  */
+  int next_shard = 0;
 
   /* Maps entry pool offsets to cooked index entries.  */
   gdb::unordered_map<ULONGEST, cooked_index_entry *>
@@ -267,8 +275,14 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
   /* Skip if we couldn't find a valid CU/TU index.  */
   if (per_cu != nullptr)
     {
-      *result = shard->add (die_offset, (dwarf_tag) indexval.dwarf_tag, flags,
-			    lang, name, nullptr, per_cu);
+      *result
+	= shards[next_shard]->add (die_offset, (dwarf_tag) indexval.dwarf_tag,
+				   flags, lang, name, nullptr, per_cu);
+
+      ++next_shard;
+      if (next_shard == shards.size ())
+	next_shard = 0;
+
       entry_pool_offsets_to_entries.emplace (offset_in_entry_pool, *result);
     }
 
@@ -403,14 +417,13 @@ cooked_index_debug_names::do_reading ()
 			  complaint_handler.release (),
 			  std::move (exceptions),
 			  parent_map ());
-  std::vector<std::unique_ptr<cooked_index_shard>> indexes;
-  indexes.push_back (std::move (m_map.shard));
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_bfd->index_table.get ()));
+
   /* Note that this code never uses IS_PARENT_DEFERRED, so it is safe
      to pass nullptr here.  */
-  table->set_contents (std::move (indexes), &m_warnings, nullptr);
+  table->set_contents (std::move (m_map.shards), &m_warnings, nullptr);
 
   bfd_thread_cleanup ();
 }
@@ -818,8 +831,18 @@ do_dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 			     &addrmap, &warnings);
   warnings.emit ();
 
-  map.shard = std::make_unique<cooked_index_shard> ();
-  map.shard->install_addrmap (&addrmap);
+  const auto n_workers
+    = std::max<std::size_t> (gdb::thread_pool::g_thread_pool->thread_count (),
+			     1);
+
+  /* Create as many index shard as there are worker threads.  */
+  for (int i = 0; i < n_workers; ++i)
+    map.shards.emplace_back (std::make_unique<cooked_index_shard> ());
+
+  /* There is a single address map for the whole index (coming from
+     .debug_aranges).  We only need to install it into a single shard for it to
+     get searched by cooked_index.  */
+  map.shards[0]->install_addrmap (&addrmap);
 
   auto cidn = (std::make_unique<cooked_index_debug_names>
 	       (per_objfile, std::move (map)));

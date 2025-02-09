@@ -367,6 +367,8 @@ private:
   std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
 };
 
+using cooked_index_shard_up = std::unique_ptr<cooked_index_shard>;
+
 class cutu_reader;
 
 /* An instance of this is created when scanning DWARF to create a
