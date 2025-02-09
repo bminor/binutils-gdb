@@ -294,6 +294,15 @@ make_array_view (U *array, size_t size) noexcept
   return {array, size};
 }
 
+/* Create an array view from an array.  */
+
+template <typename U, std::size_t Size>
+constexpr inline array_view<U>
+make_array_view (U (&array)[Size])
+{
+  return {array};
+}
+
 } /* namespace gdb */
 
 #endif /* GDBSUPPORT_ARRAY_VIEW_H */
