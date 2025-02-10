@@ -1649,8 +1649,8 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
     {
       reloc_howto_type *from, *to;
 
-      from = elf_x86_64_rtype_to_howto (abfd, from_type);
-      to = elf_x86_64_rtype_to_howto (abfd, to_type);
+      from = &x86_64_elf_howto_table[from_type];
+      to = &x86_64_elf_howto_table[to_type];
 
       if (from == NULL || to == NULL)
 	return false;
@@ -2065,7 +2065,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
       r_type = R_X86_64_PC32;
 
       /* Skip if the converted relocation will overflow.  */
-      howto = elf_x86_64_rtype_to_howto (abfd, r_type);
+      howto = &x86_64_elf_howto_table[r_type];
       r = _bfd_final_link_relocate (howto, abfd, input_section,
 				    contents, irel->r_offset,
 				    relocation, raddend);
@@ -2250,7 +2250,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	      r_type = R_X86_64_PC32;
 
 	      /* Skip if the converted relocation will overflow.  */
-	      howto = elf_x86_64_rtype_to_howto (abfd, r_type);
+	      howto = &x86_64_elf_howto_table[r_type];
 	      r = _bfd_final_link_relocate (howto, abfd, input_section,
 					    contents, irel->r_offset,
 					    relocation,
