@@ -658,9 +658,9 @@ public:
   {
     wait (cooked_state::FINALIZED, true);
     std::vector<cooked_index_shard::range> result_range;
-    result_range.reserve (m_vector.size ());
-    for (auto &entry : m_vector)
-      result_range.push_back (entry->all_entries ());
+    result_range.reserve (m_shards.size ());
+    for (auto &shard : m_shards)
+      result_range.push_back (shard->all_entries ());
     return range (std::move (result_range));
   }
 
@@ -710,7 +710,7 @@ private:
 
   /* The vector of cooked_index objects.  This is stored because the
      entries are stored on the obstacks in those objects.  */
-  std::vector<cooked_index_shard_up> m_vector;
+  std::vector<cooked_index_shard_up> m_shards;
 
   /* This tracks the current state.  When this is nullptr, it means
      that the state is CACHE_DONE -- it's important to note that only

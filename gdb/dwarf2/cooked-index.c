@@ -647,12 +647,12 @@ cooked_index::wait (cooked_state desired_state, bool allow_quit)
 }
 
 void
-cooked_index::set_contents (std::vector<cooked_index_shard_up> &&vec,
+cooked_index::set_contents (std::vector<cooked_index_shard_up> &&shards,
 			    deferred_warnings *warn,
 			    const parent_map_map *parent_maps)
 {
-  gdb_assert (m_vector.empty ());
-  m_vector = std::move (vec);
+  gdb_assert (m_shards.empty ());
+  m_shards = std::move (shards);
 
   m_state->set (cooked_state::MAIN_AVAILABLE);
 
@@ -668,10 +668,10 @@ cooked_index::set_contents (std::vector<cooked_index_shard_up> &&vec,
     m_state->set (cooked_state::CACHE_DONE);
   });
 
-  for (auto &idx : m_vector)
+  for (auto &shard : m_shards)
     {
-      auto this_index = idx.get ();
-      finalizers.add_task ([=] () { this_index->finalize (parent_maps); });
+      auto this_shard = shard.get ();
+      finalizers.add_task ([=] () { this_shard->finalize (parent_maps); });
     }
 
   finalizers.start ();
@@ -697,9 +697,9 @@ cooked_index::lookup (unrelocated_addr addr)
 {
   /* Ensure that the address maps are ready.  */
   wait (cooked_state::MAIN_AVAILABLE, true);
-  for (const auto &index : m_vector)
+  for (const auto &shard : m_shards)
     {
-      dwarf2_per_cu_data *result = index->lookup (addr);
+      dwarf2_per_cu_data *result = shard->lookup (addr);
       if (result != nullptr)
 	return result;
     }
@@ -714,8 +714,8 @@ cooked_index::get_addrmaps ()
   /* Ensure that the address maps are ready.  */
   wait (cooked_state::MAIN_AVAILABLE, true);
   std::vector<const addrmap *> result;
-  for (const auto &index : m_vector)
-    result.push_back (index->m_addrmap);
+  for (const auto &shard : m_shards)
+    result.push_back (shard->m_addrmap);
   return result;
 }
 
@@ -726,9 +726,9 @@ cooked_index::find (const std::string &name, bool completing)
 {
   wait (cooked_state::FINALIZED, true);
   std::vector<cooked_index_shard::range> result_range;
-  result_range.reserve (m_vector.size ());
-  for (auto &entry : m_vector)
-    result_range.push_back (entry->find (name, completing));
+  result_range.reserve (m_shards.size ());
+  for (auto &shard : m_shards)
+    result_range.push_back (shard->find (name, completing));
   return range (std::move (result_range));
 }
 
@@ -752,9 +752,9 @@ const cooked_index_entry *
 cooked_index::get_main () const
 {
   const cooked_index_entry *best_entry = nullptr;
-  for (const auto &index : m_vector)
+  for (const auto &shard : m_shards)
     {
-      const cooked_index_entry *entry = index->get_main ();
+      const cooked_index_entry *entry = shard->get_main ();
       /* Choose the first "main" we see.  We only do this for names
 	 not requiring canonicalization.  At this point in the process
 	 names might not have been canonicalized.  However, currently,
