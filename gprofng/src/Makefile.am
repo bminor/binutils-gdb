@@ -179,10 +179,8 @@ $(srcdir)/DbeSession.cc: QLParser.tab.hh
 .PHONY: install-exec-local
 install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
-	rm -f $(DESTDIR)$(bindir)/gp-{archive,collect-app,display-html,display-src,display-text}
-	ln -s gprofng-archive $(DESTDIR)$(bindir)/gp-archive
-	ln -s gprofng-collect-app $(DESTDIR)$(bindir)/gp-collect-app
-	ln -s gprofng-display-html $(DESTDIR)$(bindir)/gp-display-html
-	ln -s gprofng-display-src $(DESTDIR)$(bindir)/gp-display-src
-	ln -s gprofng-display-text $(DESTDIR)$(bindir)/gp-display-text
-
+	for i in gp-{archive,collect-app,display-html,display-src,display-text}; do \
+		oldname=`echo $$i | sed '$(transform)'`; \
+		rm -f $(DESTDIR)$(bindir)/$$oldname ; \
+		ln -s `echo $$oldname | sed 's&gp-&gprofng-&'` $(DESTDIR)$(bindir)/$$oldname; \
+	done
