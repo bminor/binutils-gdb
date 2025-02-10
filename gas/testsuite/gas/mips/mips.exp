@@ -1523,6 +1523,8 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips16-sprel-swap"
     run_dump_test "mips16-sdrasp"
     run_dump_test "mips16-insn-length-noargs"
+    run_dump_test_arches "mips16-insn-length-bad" \
+					[mips_arch_list_matching mips16-32]
 
     run_dump_test "mips16-branch-unextended-1"
     run_dump_test "mips16-branch-unextended-2"
