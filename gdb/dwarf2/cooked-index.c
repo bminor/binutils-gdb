@@ -647,7 +647,8 @@ cooked_index::wait (cooked_state desired_state, bool allow_quit)
 }
 
 void
-cooked_index::set_contents (vec_type &&vec, deferred_warnings *warn,
+cooked_index::set_contents (std::vector<cooked_index_shard_up> &&vec,
+			    deferred_warnings *warn,
 			    const parent_map_map *parent_maps)
 {
   gdb_assert (m_vector.empty ());

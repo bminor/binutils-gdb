@@ -626,11 +626,6 @@ protected:
 class cooked_index : public dwarf_scanner_base
 {
 public:
-
-  /* A convenience typedef for the vector that is contained in this
-     object.  */
-  using vec_type = std::vector<std::unique_ptr<cooked_index_shard>>;
-
   cooked_index (dwarf2_per_objfile *per_objfile,
 		std::unique_ptr<cooked_index_worker> &&worker);
   ~cooked_index () override;
@@ -646,7 +641,8 @@ public:
      PARENT_MAPS is used when resolving pending parent links.
      PARENT_MAPS may be NULL if there are no IS_PARENT_DEFERRED
      entries in VEC.  */
-  void set_contents (vec_type &&vec, deferred_warnings *warn,
+  void set_contents (std::vector<cooked_index_shard_up> &&vec,
+		     deferred_warnings *warn,
 		     const parent_map_map *parent_maps);
 
   /* A range over a vector of subranges.  */
@@ -714,7 +710,7 @@ private:
 
   /* The vector of cooked_index objects.  This is stored because the
      entries are stored on the obstacks in those objects.  */
-  vec_type m_vector;
+  std::vector<cooked_index_shard_up> m_vector;
 
   /* This tracks the current state.  When this is nullptr, it means
      that the state is CACHE_DONE -- it's important to note that only
