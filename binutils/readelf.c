@@ -17080,7 +17080,10 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
 	    printable_section_name (filedata, section));
 
  while ((fp = ctf_archive_next (ctfa, &i, &name, 0, &err)) != NULL)
-    dump_ctf_archive_member (fp, name, parent, member++);
+   {
+     dump_ctf_archive_member (fp, name, parent, member++);
+     ctf_dict_close (fp);
+   }
  if (err != ECTF_NEXT_END)
    {
      dump_ctf_errs (NULL);
