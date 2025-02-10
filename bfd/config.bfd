@@ -959,7 +959,6 @@ case "${targ}" in
   mips64*el-*-linux*-gnuabi64)
     targ_defvec=mips_elf64_trad_le_vec
     targ_selvecs="mips_elf64_trad_be_vec mips_elf32_ntrad_le_vec mips_elf32_ntrad_be_vec mips_elf32_trad_le_vec mips_elf32_trad_be_vec"
-    want64=true
     ;;
   mips64*el-*-linux*)
     targ_defvec=mips_elf32_ntrad_le_vec
@@ -968,7 +967,6 @@ case "${targ}" in
   mips64*-*-linux*-gnuabi64)
     targ_defvec=mips_elf64_trad_be_vec
     targ_selvecs="mips_elf64_trad_le_vec mips_elf32_ntrad_be_vec mips_elf32_ntrad_le_vec mips_elf32_trad_be_vec mips_elf32_trad_le_vec"
-    want64=true
     ;;
   mips64*-*-linux*)
     targ_defvec=mips_elf32_ntrad_be_vec
