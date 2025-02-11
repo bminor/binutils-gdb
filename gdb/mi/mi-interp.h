@@ -103,7 +103,7 @@ public:
      command was issued.  */
   int mi_proceeded;
 
-  const char *current_token;
+  const char *current_token = nullptr;
 };
 
 /* Output the shared object attributes to UIOUT.  */
