@@ -54,6 +54,8 @@ gdb_test "watch -location c\[28\]" \
 
 proc continue_to_watchpoint {array_re source_function function_re
 			     old_value_re new_value_re} {
+    set thread_prefix_re "(?:Thread $::decimal \[^\r\n\]* hit )?"
+
     set saw_watch_trigger 0
     set saw_function 0
     set is_supported 1
@@ -61,7 +63,7 @@ proc continue_to_watchpoint {array_re source_function function_re
 	[multi_line \
 	     "Continuing\\." \
 	     "" \
-	     "(Hardware w|W)atchpoint ${::decimal}: -location ${array_re}\\\[28\\\]" \
+	     "${thread_prefix_re}(Hardware w|W)atchpoint ${::decimal}: -location ${array_re}\\\[28\\\]" \
 	     "" \
 	     "Old value = ${old_value_re}" \
 	     "New value = ${new_value_re}"]
