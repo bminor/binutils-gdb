@@ -1036,7 +1036,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 		    int value)
 {
   ctf_dict_t *ofp = fp;
-  ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, enid);
+  ctf_dtdef_t *dtd;
   ctf_enum_t *en;
 
   uint32_t kind, vlen, root;
@@ -1044,6 +1044,10 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (name == NULL)
     return (ctf_set_errno (fp, EINVAL));
 
+  if ((enid = ctf_type_resolve_unsliced (fp, enid)) == CTF_ERR)
+      return -1;				/* errno is set for us.  */
+
+  dtd = ctf_dtd_lookup (fp, enid);
   fp = ctf_get_dict (fp, enid);
 
   if (enid < fp->ctf_stypes)
