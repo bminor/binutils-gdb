@@ -33,8 +33,8 @@
    Neither of these values may exceed the width of dr_changed_t
    measured in bits.  */
 
-#define LOONGARCH_HBP_MAX_NUM 8
-#define LOONGARCH_HWP_MAX_NUM 8
+#define LOONGARCH_HBP_MAX_NUM 14
+#define LOONGARCH_HWP_MAX_NUM 14
 
 
 /* The maximum length of a memory region that can be watched by one

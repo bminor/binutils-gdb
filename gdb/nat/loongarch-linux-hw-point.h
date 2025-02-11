@@ -32,7 +32,7 @@ struct loongarch_user_watch_state {
 		uint64_t    mask;
 		uint32_t    ctrl;
 		uint32_t    pad;
-	} dbg_regs[8];
+	} dbg_regs[14];
 };
 
 
