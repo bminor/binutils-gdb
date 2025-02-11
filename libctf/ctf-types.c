@@ -594,21 +594,31 @@ ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
+  ctf_id_t resolved_type;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return CTF_ERR;
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
+  resolved_type = type;
 
-  if ((LCTF_INFO_KIND (fp, tp->ctt_info)) == CTF_K_SLICE)
+  do
     {
-      ctf_id_t ret;
+      type = resolved_type;
 
-      if ((ret = ctf_type_reference (fp, type)) == CTF_ERR)
-	return (ctf_set_typed_errno (ofp, ctf_errno (fp)));
-      return ret;
+      if ((LCTF_INFO_KIND (fp, tp->ctt_info)) == CTF_K_SLICE)
+	if ((type = ctf_type_reference (fp, type)) == CTF_ERR)
+	  return (ctf_set_typed_errno (ofp, ctf_errno (fp)));
+
+      if ((resolved_type = ctf_type_resolve (fp, type)) == CTF_ERR)
+	return CTF_ERR;
+
+      if ((tp = ctf_lookup_by_id (&fp, resolved_type)) == NULL)
+	return CTF_ERR;		/* errno is set for us.  */
     }
+  while (LCTF_INFO_KIND (fp, tp->ctt_info) == CTF_K_SLICE);
+
   return type;
 }
 
