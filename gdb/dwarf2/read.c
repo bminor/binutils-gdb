@@ -3640,7 +3640,7 @@ cooked_index_storage::cooked_index_storage ()
 				      eq_cutu_reader,
 				      htab_delete_entry<cutu_reader>,
 				      xcalloc, xfree)),
-    m_index (new cooked_index_shard)
+    m_shard (new cooked_index_shard)
 {
 }
 
@@ -4204,18 +4204,19 @@ cooked_index_debug_info::done_reading ()
 {
   /* Only handle the scanning results here.  Complaints and exceptions
      can only be dealt with on the main thread.  */
-  std::vector<std::unique_ptr<cooked_index_shard>> indexes;
+  std::vector<std::unique_ptr<cooked_index_shard>> shards;
+
   for (auto &one_result : m_results)
     {
-      indexes.push_back (std::move (std::get<0> (one_result)));
+      shards.push_back (std::move (std::get<0> (one_result)));
       m_all_parents_map.add_map (std::get<3> (one_result));
     }
 
   /* This has to wait until we read the CUs, we need the list of DWOs.  */
   process_skeletonless_type_units (m_per_objfile, &m_index_storage);
 
-  indexes.push_back (m_index_storage.release ());
-  indexes.shrink_to_fit ();
+  shards.push_back (m_index_storage.release ());
+  shards.shrink_to_fit ();
 
   m_all_parents_map.add_map (m_index_storage.release_parent_map ());
 
@@ -4223,7 +4224,7 @@ cooked_index_debug_info::done_reading ()
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_bfd->index_table.get ()));
-  table->set_contents (std::move (indexes), &m_warnings,
+  table->set_contents (std::move (shards), &m_warnings,
 		       &m_all_parents_map);
 }
 

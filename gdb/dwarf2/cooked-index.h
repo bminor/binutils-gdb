@@ -400,7 +400,7 @@ public:
 			   cooked_index_entry_ref parent_entry,
 			   dwarf2_per_cu_data *per_cu)
   {
-    return m_index->add (die_offset, tag, flags, per_cu->lang (),
+    return m_shard->add (die_offset, tag, flags, per_cu->lang (),
 			 name, parent_entry, per_cu);
   }
 
@@ -408,8 +408,8 @@ public:
      then transfer ownership of the index to the caller.  */
   std::unique_ptr<cooked_index_shard> release ()
   {
-    m_index->install_addrmap (&m_addrmap);
-    return std::move (m_index);
+    m_shard->install_addrmap (&m_addrmap);
+    return std::move (m_shard);
   }
 
   /* Return the mutable addrmap that is currently being created.  */
@@ -445,7 +445,7 @@ private:
   /* A hash table of cutu_reader objects.  */
   htab_up m_reader_hash;
   /* The index shard that is being constructed.  */
-  std::unique_ptr<cooked_index_shard> m_index;
+  std::unique_ptr<cooked_index_shard> m_shard;
 
   /* Parent map for each CU that is read.  */
   parent_map m_parent_map;
