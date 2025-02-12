@@ -289,3 +289,12 @@ gdb_caching_proc ada_minimal_encodings {} {
 gdb_caching_proc ada_og {} {
     return [ada_simple_compile gnat_og additional_flags=-Og]
 }
+
+# Return 1 if GNAT can link with -shared.
+gdb_caching_proc ada_shared_link {} {
+    return [ada_simple_compile ada_shared_link {
+	additional_flags=-bargs
+	additional_flags=-shared
+	additional_flags=-margs
+    }]
+}

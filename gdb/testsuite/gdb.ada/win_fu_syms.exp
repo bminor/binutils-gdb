@@ -16,6 +16,7 @@
 load_lib "ada.exp"
 
 require allow_ada_tests
+require ada_shared_link
 
 standard_ada_testfile foo
 
