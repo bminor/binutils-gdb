@@ -417,6 +417,9 @@ do_seh_endproc (void)
 
   write_function_xdata (seh_ctx_cur);
   write_function_pdata (seh_ctx_cur);
+  free (seh_ctx_cur->elems);
+  free (seh_ctx_cur->func_name);
+  free (seh_ctx_cur);
   seh_ctx_cur = NULL;
 }
 
