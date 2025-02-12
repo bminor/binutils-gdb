@@ -194,7 +194,7 @@ esac])
 AC_ARG_ENABLE(binary_file_formats,
 	      AS_HELP_STRING([--enable-binary-file-formats=FORMATS],
 			     [enable support for selected file formats (default 'all')
-			      available formats: coff, dbx, elf, macho, mips, xcoff, all]),
+			      available formats: coff, elf, macho, mips, xcoff, all]),
 [case "${enableval}" in
  yes | "") AC_MSG_ERROR(enable-binary-file-formats option must specify file formats or 'all')
             ;;
@@ -1998,7 +1998,7 @@ WIN32LIBS="$WIN32LIBS $WIN32APILIBS"
 # Object files to be used when building with support for all file formats.
 # This should not have elf or macho, as support for those formats depends
 # on BFD enabling them as well.
-all_binary_file_srcs="\$(dbx_SRCS) \$(mips_SRCS) \$(coff_SRCS) \$(xcoff_SRCS)"
+all_binary_file_srcs="\$(mips_SRCS) \$(coff_SRCS) \$(xcoff_SRCS)"
 
 bfd_supports_elf=no
 # Add ELF support to GDB, but only if BFD includes ELF support.

@@ -33,6 +33,8 @@
 
 * Support for stabs debug information has been removed.
 
+* Support for the binary file format dbx has been removed.
+
 * New targets
 
 GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*
