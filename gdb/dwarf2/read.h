@@ -28,6 +28,7 @@
 #include "dwarf2/mapped-index.h"
 #include "dwarf2/section.h"
 #include "dwarf2/cu.h"
+#include "dwarf2/dwz.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/packed.h"
@@ -87,8 +88,8 @@ struct dwarf2_per_cu_data_deleter
 
 /* A specialization of unique_ptr for dwarf2_per_cu_data and
    subclasses.  */
-typedef std::unique_ptr<dwarf2_per_cu_data, dwarf2_per_cu_data_deleter>
-    dwarf2_per_cu_data_up;
+using dwarf2_per_cu_data_up
+  = std::unique_ptr<dwarf2_per_cu_data, dwarf2_per_cu_data_deleter>;
 
 /* Persistent data held for a compilation unit, even when not
    processing it.  We put a pointer to this structure in the
@@ -224,7 +225,7 @@ public:
      don't need to re-examine the DWO in some situations.  This may be
      nullptr, depending on the CU; for example a partial unit won't
      have one.  */
-  std::unique_ptr<file_and_directory> fnd;
+  file_and_directory_up fnd;
 
   /* The file table.  This can be NULL if there was no file table
      or it's currently not read in.
@@ -397,6 +398,10 @@ struct signatured_type : public dwarf2_per_cu_data
 
 using signatured_type_up = std::unique_ptr<signatured_type>;
 
+struct dwp_file;
+
+using dwp_file_up = std::unique_ptr<dwp_file>;
+
 /* Some DWARF data can be shared across objfiles who share the same BFD,
    this data is stored in this object.
 
@@ -453,7 +458,7 @@ struct dwarf2_per_bfd
 
   /* Set the 'index_table' member and then call start_reading on
      it.  */
-  void start_reading (std::unique_ptr<dwarf_scanner_base> new_table);
+  void start_reading (dwarf_scanner_base_up new_table);
 
 private:
   /* This function is mapped across the sections and remembers the
@@ -524,11 +529,11 @@ public:
   bool dwp_checked = false;
 
   /* The DWP file if there is one, or NULL.  */
-  std::unique_ptr<struct dwp_file> dwp_file;
+  dwp_file_up dwp_file;
 
   /* The shared '.dwz' file, if one exists.  This is used when the
      original data was compressed using 'dwz -m'.  */
-  std::optional<std::unique_ptr<struct dwz_file>> dwz_file;
+  std::optional<dwz_file_up> dwz_file;
 
   /* Whether copy relocations are supported by this object format.  */
   bool can_copy;
@@ -538,7 +543,7 @@ public:
   bool has_section_at_zero = false;
 
   /* The mapped index, or NULL in the readnow case.  */
-  std::unique_ptr<dwarf_scanner_base> index_table;
+  dwarf_scanner_base_up index_table;
 
   /* When using index_table, this keeps track of all quick_file_names entries.
      TUs typically share line table entries with a CU, so we maintain a
@@ -554,7 +559,7 @@ public:
 
   /* If we loaded the index from an external file, this contains the
      resources associated to the open file, memory mapping, etc.  */
-  std::unique_ptr<index_cache_resource> index_cache_res;
+  index_cache_resource_up index_cache_res;
 
   /* Mapping from abstract origin DIE to concrete DIEs that reference it as
      DW_AT_abstract_origin.  */
@@ -659,6 +664,9 @@ struct type_unit_group_unshareable
   struct symtab **symtabs = nullptr;
 };
 
+using type_unit_group_unshareable_up
+  = std::unique_ptr<type_unit_group_unshareable>;
+
 struct per_cu_and_offset
 {
   dwarf2_per_cu_data *per_cu;
@@ -729,7 +737,7 @@ struct dwarf2_per_objfile
   dwarf2_cu *get_cu (dwarf2_per_cu_data *per_cu);
 
   /* Set the dwarf2_cu matching PER_CU for this objfile.  */
-  void set_cu (dwarf2_per_cu_data *per_cu, std::unique_ptr<dwarf2_cu> cu);
+  void set_cu (dwarf2_per_cu_data *per_cu, dwarf2_cu_up cu);
 
   /* Remove/free the dwarf2_cu matching PER_CU for this objfile.  */
   void remove_cu (dwarf2_per_cu_data *per_cu);
@@ -785,11 +793,8 @@ private:
      that the CU/TU has not been expanded yet.  */
   std::vector<compunit_symtab *> m_symtabs;
 
-  /* Map from a type unit group to the corresponding unshared
-     structure.  */
-  typedef std::unique_ptr<type_unit_group_unshareable>
-    type_unit_group_unshareable_up;
-
+ /* Map from a type unit group to the corresponding unshared
+    structure.  */
   std::unordered_map<type_unit_group *, type_unit_group_unshareable_up>
     m_type_units;
 
@@ -798,8 +803,7 @@ private:
 
   /* Map from the objfile-independent dwarf2_per_cu_data instances to the
      corresponding objfile-dependent dwarf2_cu instances.  */
-  std::unordered_map<dwarf2_per_cu_data *,
-		     std::unique_ptr<dwarf2_cu>> m_dwarf2_cus;
+  std::unordered_map<dwarf2_per_cu_data *, dwarf2_cu_up> m_dwarf2_cus;
 };
 
 /* Converts DWARF language names to GDB language names.  */

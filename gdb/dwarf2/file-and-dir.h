@@ -126,4 +126,6 @@ private:
   gdb::unique_xmalloc_ptr<char> m_fullname;
 };
 
+using file_and_directory_up = std::unique_ptr<file_and_directory>;
+
 #endif /* GDB_DWARF2_FILE_AND_DIR_H */

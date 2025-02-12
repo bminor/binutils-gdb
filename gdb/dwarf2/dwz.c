@@ -265,8 +265,7 @@ dwarf2_read_dwz_file (dwarf2_per_objfile *per_objfile)
     error (_("could not find '.gnu_debugaltlink' file for %s"),
 	   bfd_get_filename (per_bfd->obfd));
 
-  std::unique_ptr<struct dwz_file> result
-    (new struct dwz_file (std::move (dwz_bfd)));
+  auto result = std::make_unique<dwz_file> (std::move (dwz_bfd));
 
   for (asection *sec : gdb_bfd_sections (result->dwz_bfd))
     locate_dwz_sections (per_objfile->objfile, result->dwz_bfd.get (),

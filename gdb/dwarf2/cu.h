@@ -120,7 +120,7 @@ struct dwarf2_cu
 private:
   /* The symtab builder for this CU.  This is only non-NULL when full
      symbols are being read.  */
-  std::unique_ptr<buildsym_compunit> m_builder;
+  buildsym_compunit_up m_builder;
 
   /* A set of pointers to dwarf2_per_cu_data objects for compilation
      units referenced by this one.  Only used during full symbol processing;
@@ -279,5 +279,7 @@ public:
   /* Get the buildsym_compunit for this CU.  */
   buildsym_compunit *get_builder ();
 };
+
+using dwarf2_cu_up = std::unique_ptr<dwarf2_cu>;
 
 #endif /* GDB_DWARF2_CU_H */

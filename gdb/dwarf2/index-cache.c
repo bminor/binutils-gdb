@@ -203,7 +203,7 @@ struct index_cache_resource_mmap final : public index_cache_resource
 
 gdb::array_view<const gdb_byte>
 index_cache::lookup_gdb_index (const bfd_build_id *build_id,
-			       std::unique_ptr<index_cache_resource> *resource)
+			       index_cache_resource_up *resource)
 {
   if (!enabled ())
     return {};
@@ -249,7 +249,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
 
 gdb::array_view<const gdb_byte>
 index_cache::lookup_gdb_index (const bfd_build_id *build_id,
-			       std::unique_ptr<index_cache_resource> *resource)
+			       index_cache_resource_up *resource)
 {
   return {};
 }

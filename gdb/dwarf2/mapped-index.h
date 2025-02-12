@@ -69,4 +69,6 @@ struct dwarf_scanner_base
   { return nullptr; }
 };
 
+using dwarf_scanner_base_up = std::unique_ptr<dwarf_scanner_base>;
+
 #endif /* GDB_DWARF2_MAPPED_INDEX_H */

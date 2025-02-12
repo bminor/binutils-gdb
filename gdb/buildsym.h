@@ -448,7 +448,7 @@ private:
   struct pending *m_local_symbols = nullptr;
 };
 
-
+using buildsym_compunit_up = std::unique_ptr<buildsym_compunit>;
 
 extern void add_symbol_to_list (struct symbol *symbol,
 				struct pending **listhead);

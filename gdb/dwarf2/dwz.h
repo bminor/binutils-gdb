@@ -56,7 +56,7 @@ struct dwz_file
 
   /* If we loaded the index from an external file, this contains the
      resources associated to the open file, memory mapping, etc.  */
-  std::unique_ptr<index_cache_resource> index_cache_res;
+  index_cache_resource_up index_cache_res;
 
   /* Read a string at offset STR_OFFSET in the .debug_str section from
      this dwz file.  Throw an error if the offset is too large.  If
@@ -65,6 +65,8 @@ struct dwz_file
 
   const char *read_string (struct objfile *objfile, LONGEST str_offset);
 };
+
+using dwz_file_up = std::unique_ptr<dwz_file>;
 
 /* Return the separate '.dwz' debug file.  If there is no
    .gnu_debugaltlink section in the file, then the result depends on

@@ -200,7 +200,7 @@ struct line_header
   const char *m_comp_dir = nullptr;
 };
 
-typedef std::unique_ptr<line_header> line_header_up;
+using line_header_up = std::unique_ptr<line_header>;
 
 inline const char *
 file_entry::include_dir (const line_header *lh) const

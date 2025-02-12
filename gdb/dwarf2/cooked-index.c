@@ -612,7 +612,7 @@ cooked_index_worker::write_to_cache (const cooked_index *idx,
 }
 
 cooked_index::cooked_index (dwarf2_per_objfile *per_objfile,
-			    std::unique_ptr<cooked_index_worker> &&worker)
+			    cooked_index_worker_up &&worker)
   : m_state (std::move (worker)),
     m_per_bfd (per_objfile->per_bfd)
 {
