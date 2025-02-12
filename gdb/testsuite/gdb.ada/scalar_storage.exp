@@ -22,8 +22,20 @@ require allow_ada_tests
 
 standard_ada_testfile storage
 
-if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
-  return -1
+# Compilation here will fail with gnat-llvm, because at the moment it
+# does not support Scalar_Storage_Order.  However, if that is ever
+# implemented, we want the test to start working.  So, we examine the
+# output before deciding if this is a real failure.
+set output [gdb_compile_ada_1 "${srcfile}" "${binfile}" executable debug]
+if {$output != ""} {
+    if {[regexp "error: reverse storage order .* not supported by LLVM" $output]} {
+	unsupported "scalar storage order not supported"
+    } else {
+	# Otherwise issue the fail.
+	gdb_compile_test $srcfile $result
+    }
+    # Either way we're not running this test.
+    return
 }
 
 clean_restart ${testfile}
