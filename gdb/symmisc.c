@@ -59,9 +59,6 @@ print_objfile_statistics (void)
       {
 	QUIT;
 	gdb_printf (_("Statistics for '%s':\n"), objfile_name (&objfile));
-	if (OBJSTAT ((&objfile), n_stabs) > 0)
-	  gdb_printf (_("  Number of \"stab\" symbols read: %d\n"),
-		      OBJSTAT ((&objfile), n_stabs));
 	if (objfile.per_bfd->n_minsyms > 0)
 	  gdb_printf (_("  Number of \"minimal\" symbols read: %d\n"),
 		      objfile.per_bfd->n_minsyms);

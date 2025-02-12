@@ -1838,8 +1838,6 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_return_value (gdbarch, sparc64_return_value);
   set_gdbarch_return_value_as_value (gdbarch, default_gdbarch_return_value);
-  set_gdbarch_stabs_argument_has_addr
-    (gdbarch, default_stabs_argument_has_addr);
 
   set_gdbarch_skip_prologue (gdbarch, sparc64_skip_prologue);
   set_gdbarch_stack_frame_destroyed_p (gdbarch, sparc_stack_frame_destroyed_p);

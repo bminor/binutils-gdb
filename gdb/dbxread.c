@@ -74,6 +74,15 @@ explicit_lookup_type (int real_filenum, int index)
 }
 #endif
 
+
+const registry<objfile>::key<dbx_symfile_info> dbx_objfile_data_key;
+
+/* This could leak memory, but it will be removed soon, so it
+   shouldn't have a large impact.  */
+dbx_symfile_info::~dbx_symfile_info ()
+{
+}
+
 /* Scan and build partial symbols for a symbol file.
    We have been initialized by a call to dbx_symfile_init, which
    put all the relevant info into a "struct dbx_symfile_info",

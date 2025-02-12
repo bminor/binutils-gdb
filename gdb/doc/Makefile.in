@@ -94,15 +94,15 @@ SET_TEXINPUTS = \
    TEXINPUTS=${TEXIDIR}:.:$(srcdir):$(READLINE_DIR):$(GDBMI_DIR):$$TEXINPUTS
 
 # Files which should be generated via 'info' and installed by 'install-info'
-INFO_DEPS = gdb.info stabs.info annotate.info
+INFO_DEPS = gdb.info annotate.info
 
 # Files which should be generated via 'dvi' and installed by 'install-dvi'
-DVIFILES = gdb.dvi stabs.dvi refcard.dvi annotate.dvi
+DVIFILES = gdb.dvi refcard.dvi annotate.dvi
 # Files which should be generated via 'pdf' and installed by 'install-pdf'
-PDFFILES = gdb.pdf stabs.pdf refcard.pdf annotate.pdf
+PDFFILES = gdb.pdf refcard.pdf annotate.pdf
 # Files which should be generated via 'html' and installed by 'install-html'
-HTMLFILES =  gdb/index.html stabs/index.html annotate/index.html
-HTMLFILES_INSTALL = gdb stabs annotate
+HTMLFILES =  gdb/index.html annotate/index.html
+HTMLFILES_INSTALL = gdb annotate
 
 # There may be alternate predefined collections of switches to configure
 # the GDB manual.  Normally this is not done in synch with the software
@@ -156,17 +156,6 @@ GDB_DOC_FILES = \
 	$(GDB_DOC_SOURCE_INCLUDES) \
 	$(GDB_DOC_BUILD_INCLUDES)
 
-# Stabs manual: All files
-STABS_DOC_SOURCE_INCLUDES = \
-	$(srcdir)/fdl.texi
-STABS_DOC_BUILD_INCLUDES = \
-	gdb-cfg.texi \
-	GDBvn.texi
-STABS_DOC_FILES = \
-	$(srcdir)/stabs.texinfo \
-	$(STABS_DOC_SOURCE_INCLUDES) \
-	$(STABS_DOC_BUILD_INCLUDES)
-
 # Annotate migration document
 ANNOTATE_DOC_SOURCE_INCLUDES = \
 	$(srcdir)/fdl.texi
@@ -207,7 +196,7 @@ all: info
 
 info: $(INFO_DEPS)
 dvi: $(DVIFILES)
-ps: gdb.ps stabs.ps refcard.ps annotate.ps
+ps: gdb.ps refcard.ps annotate.ps
 html: $(HTMLFILES)
 pdf: $(PDFFILES)
 man: $(MANS)
@@ -592,29 +581,6 @@ gdb/index.html: ${GDB_DOC_FILES}
 		-o gdb \
 		$(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) \
 		$(srcdir)/gdb.texinfo
-
-stabs.info: $(STABS_DOC_FILES)
-	$(ECHO_MAKEINFO) $(MAKEINFO_CMD) -I $(srcdir) -o stabs.info $(srcdir)/stabs.texinfo
-
-# STABS DOCUMENTATION: HTML file
-
-stabs/index.html: $(STABS_DOC_FILES)
-	$(ECHO_GEN) $(MAKEHTML) $(MAKEHTMLFLAGS) \
-		-o stabs \
-		-I $(srcdir) \
-		$(srcdir)/stabs.texinfo
-
-# STABS DOCUMENTATION: TeX dvi file
-stabs.dvi : $(STABS_DOC_FILES)
-	$(ECHO_TEXI2DVI) $(TEXI2DVI_CMD) $(SILENT_Q_FLAG) -I $(srcdir) \
-		$(srcdir)/stabs.texinfo
-
-stabs.ps: stabs.dvi
-	$(ECHO_DVIPS) $(DVIPS) $(SILENT_Q_FLAG) -o $@ $?
-
-stabs.pdf: $(STABS_DOC_FILES)
-	$(ECHO_TEXI2DVI) $(TEXI2DVI_CMD) $(SILENT_Q_FLAG) --pdf -I $(srcdir) \
-		$(srcdir)/stabs.texinfo
 
 # ANNOTATE DOCUMENTATION: TeX dvi file
 annotate.dvi : $(ANNOTATE_DOC_FILES)

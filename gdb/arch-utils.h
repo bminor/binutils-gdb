@@ -261,9 +261,6 @@ extern int default_code_of_frame_writable (struct gdbarch *gdbarch,
 extern int generic_convert_register_p (struct gdbarch *gdbarch, int regnum,
 				       struct type *type);
 
-extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
-					    struct type *type);
-
 extern int generic_instruction_nullified (struct gdbarch *gdbarch,
 					  struct regcache *regcache);
 

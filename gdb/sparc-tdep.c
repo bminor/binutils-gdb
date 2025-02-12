@@ -1541,14 +1541,6 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
 }
 
 static int
-sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
-{
-  return (sparc_structure_or_union_p (type)
-	  || (sparc_floating_p (type) && type->length () == 16)
-	  || sparc_complex_floating_p (type));
-}
-
-static int
 sparc32_dwarf2_struct_return_p (const frame_info_ptr &this_frame)
 {
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
@@ -1859,8 +1851,6 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, sparc32_push_dummy_call);
 
   set_gdbarch_return_value_as_value (gdbarch, sparc32_return_value);
-  set_gdbarch_stabs_argument_has_addr
-    (gdbarch, sparc32_stabs_argument_has_addr);
 
   set_gdbarch_skip_prologue (gdbarch, sparc32_skip_prologue);
 

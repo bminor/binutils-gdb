@@ -152,9 +152,6 @@ struct objstats
   /* Number of full symbols read.  */
   int n_syms = 0;
 
-  /* Number of ".stabs" read (if applicable).  */
-  int n_stabs = 0;
-
   /* Number of types.  */
   int n_types = 0;
 

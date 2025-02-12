@@ -584,12 +584,6 @@ microblaze_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-static int
-microblaze_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
-{
-  return (type->length () == 16);
-}
-
 /* Return next pc values : next in sequence and/or branch/return target.  */
 
 static std::vector<CORE_ADDR>
@@ -794,8 +788,6 @@ microblaze_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
 
   set_gdbarch_return_value (gdbarch, microblaze_return_value);
-  set_gdbarch_stabs_argument_has_addr
-    (gdbarch, microblaze_stabs_argument_has_addr);
 
   set_gdbarch_skip_prologue (gdbarch, microblaze_skip_prologue);
 

@@ -34,11 +34,6 @@
 #include "dictionary.h"
 #include <algorithm>
 
-/* For cleanup_undefined_stabs_types and finish_global_stabs (somewhat
-   questionable--see comment where we call them).  */
-
-#include "stabsread.h"
-
 /* List of blocks already made (lexical contexts already closed).
    This is used at the end to make the blockvector.  */
 
@@ -805,19 +800,6 @@ buildsym_compunit::end_compunit_symtab_get_static_block (CORE_ADDR end_addr,
       for (pb = m_pending_blocks; pb != NULL; pb = pb->next)
 	pb->block = barray[i++];
     }
-
-  /* Cleanup any undefined types that have been left hanging around
-     (this needs to be done before the finish_blocks so that
-     file_symbols is still good).
-
-     Both cleanup_undefined_stabs_types and finish_global_stabs are stabs
-     specific, but harmless for other symbol readers, since on gdb
-     startup or when finished reading stabs, the state is set so these
-     are no-ops.  FIXME: Is this handled right in case of QUIT?  Can
-     we make this cleaner?  */
-
-  cleanup_undefined_stabs_types (m_objfile);
-  finish_global_stabs (m_objfile);
 
   if (!required
       && m_pending_blocks == NULL

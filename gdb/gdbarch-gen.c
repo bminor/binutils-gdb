@@ -140,7 +140,6 @@ struct gdbarch
   gdbarch_unwind_sp_ftype *unwind_sp = default_unwind_sp;
   gdbarch_frame_num_args_ftype *frame_num_args = nullptr;
   gdbarch_frame_align_ftype *frame_align = nullptr;
-  gdbarch_stabs_argument_has_addr_ftype *stabs_argument_has_addr = default_stabs_argument_has_addr;
   int frame_red_zone_size = 0;
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr = convert_from_func_ptr_addr_identity;
   gdbarch_addr_bits_remove_ftype *addr_bits_remove = core_addr_identity;
@@ -409,7 +408,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of unwind_sp, invalid_p == 0.  */
   /* Skip verify of frame_num_args, has predicate.  */
   /* Skip verify of frame_align, has predicate.  */
-  /* Skip verify of stabs_argument_has_addr, invalid_p == 0.  */
   /* Skip verify of frame_red_zone_size, invalid_p == 0.  */
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0.  */
   /* Skip verify of addr_bits_remove, invalid_p == 0.  */
@@ -910,9 +908,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
 	      "gdbarch_dump: frame_align = <%s>\n",
 	      host_address_to_string (gdbarch->frame_align));
-  gdb_printf (file,
-	      "gdbarch_dump: stabs_argument_has_addr = <%s>\n",
-	      host_address_to_string (gdbarch->stabs_argument_has_addr));
   gdb_printf (file,
 	      "gdbarch_dump: frame_red_zone_size = %s\n",
 	      plongest (gdbarch->frame_red_zone_size));
@@ -3172,23 +3167,6 @@ set_gdbarch_frame_align (struct gdbarch *gdbarch,
 			 gdbarch_frame_align_ftype frame_align)
 {
   gdbarch->frame_align = frame_align;
-}
-
-int
-gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->stabs_argument_has_addr != NULL);
-  if (gdbarch_debug >= 2)
-    gdb_printf (gdb_stdlog, "gdbarch_stabs_argument_has_addr called\n");
-  return gdbarch->stabs_argument_has_addr (gdbarch, type);
-}
-
-void
-set_gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch,
-				     gdbarch_stabs_argument_has_addr_ftype stabs_argument_has_addr)
-{
-  gdbarch->stabs_argument_has_addr = stabs_argument_has_addr;
 }
 
 int

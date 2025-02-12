@@ -1199,7 +1199,6 @@ COMMON_SFILES = \
 	source.c \
 	source-cache.c \
 	split-name.c \
-	stabsread.c \
 	stack.c \
 	std-regs.c \
 	symfile.c \
@@ -1674,7 +1673,6 @@ HFILES_NO_SRCDIR = \
 	sparc-ravenscar-thread.h \
 	sparc-tdep.h \
 	split-name.h \
-	stabsread.h \
 	stack.h \
 	stap-probe.h \
 	svr4-tls-tdep.h \

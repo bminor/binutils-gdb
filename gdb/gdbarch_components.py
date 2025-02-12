@@ -1201,14 +1201,6 @@ Method(
     predicate=True,
 )
 
-Method(
-    type="int",
-    name="stabs_argument_has_addr",
-    params=[("struct type *", "type")],
-    predefault="default_stabs_argument_has_addr",
-    invalid=False,
-)
-
 Value(
     type="int",
     name="frame_red_zone_size",

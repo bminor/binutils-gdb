@@ -325,12 +325,6 @@ generic_convert_register_p (struct gdbarch *gdbarch, int regnum,
 }
 
 int
-default_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
-{
-  return 0;
-}
-
-int
 generic_instruction_nullified (struct gdbarch *gdbarch,
 			       struct regcache *regcache)
 {

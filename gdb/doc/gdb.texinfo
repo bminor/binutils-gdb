@@ -20453,7 +20453,7 @@ if the debug information provides it, the program that compiled the file
 (which may include, e.g., the compiler version and command line arguments),
 @item
 whether the executable includes debugging information for that file, and
-if so, what format the information is in (e.g., STABS, Dwarf 2, etc.), and
+if so, what format the information is in (e.g., Dwarf 2), and
 @item
 whether the debugging information includes information about
 preprocessor macros.
@@ -22038,9 +22038,7 @@ Warnings and Messages}.)
 
 We have not implemented the two-stage strategy for COFF yet.  When the
 symbol table is stored in COFF format, @code{symbol-file} reads the
-symbol table data in full right away.  Note that ``stabs-in-COFF''
-still does the two-stage strategy, since the debug info is actually
-in stabs format.
+symbol table data in full right away.
 
 @kindex readnow
 @cindex reading symbols immediately
@@ -23148,7 +23146,7 @@ Instead you must do, for example,
 $ gdb -iex "set use-deprecated-index-sections on" <program>
 @end smallexample
 
-Indices only work when using DWARF debugging information, not stabs.
+Indices only work when using DWARF debugging information.
 
 @subsection Automatic symbol index cache
 
@@ -42476,14 +42474,13 @@ and the full path if known.
 This command prints, for each object file in the program, various data
 about that object file followed by the byte cache (@dfn{bcache})
 statistics for the object file.  The objfile data includes the number
-of minimal, partial, full, and stabs symbols, the number of types
-defined by the objfile, the number of as yet unexpanded psym tables,
-the number of line tables and string tables, and the amount of memory
-used by the various tables.  The bcache statistics include the counts,
-sizes, and counts of duplicates of all and unique objects, max,
-average, and median entry size, total memory used and its overhead and
-savings, and various measures of the hash table size and chain
-lengths.
+of minimal, partial, and full, the number of types defined by the
+objfile, the number of as yet unexpanded psym tables, the number of
+line tables and string tables, and the amount of memory used by the
+various tables.  The bcache statistics include the counts, sizes, and
+counts of duplicates of all and unique objects, max, average, and
+median entry size, total memory used and its overhead and savings,
+and various measures of the hash table size and chain lengths.
 
 @kindex maint print target-stack
 @cindex target stack description

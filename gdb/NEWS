@@ -31,6 +31,8 @@
   subsequent runs of the inferior will use the same arguments as the
   first run.
 
+* Support for stabs debug information has been removed.
+
 * New targets
 
 GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*
