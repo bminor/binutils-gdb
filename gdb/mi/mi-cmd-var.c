@@ -29,7 +29,6 @@
 #include "mi-getopt.h"
 #include "gdbthread.h"
 #include "mi-parse.h"
-#include <optional>
 #include "inferior.h"
 
 static void varobj_update_one (struct varobj *var,

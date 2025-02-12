@@ -20,13 +20,12 @@
 #include "mi-cmds.h"
 #include "mi-getopt.h"
 #include "mi-interp.h"
+#include "progspace.h"
 #include "ui-out.h"
 #include "symtab.h"
 #include "source.h"
-#include "objfiles.h"
 #include "solib.h"
 #include "solist.h"
-#include "gdbsupport/gdb_regex.h"
 
 /* Return to the client the absolute path and line number of the 
    current file being executed.  */

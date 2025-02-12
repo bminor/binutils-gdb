@@ -19,7 +19,6 @@
 
 #include "arch-utils.h"
 #include "progspace.h"
-#include "target.h"
 #include "value.h"
 #include "mi-cmds.h"
 #include "mi-getopt.h"

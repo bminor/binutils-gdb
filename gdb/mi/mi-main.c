@@ -30,11 +30,9 @@
 #include "mi-cmds.h"
 #include "mi-parse.h"
 #include "mi-getopt.h"
-#include "mi-console.h"
 #include "ui-out.h"
 #include "mi-out.h"
 #include "interps.h"
-#include "gdbsupport/event-loop.h"
 #include "event-top.h"
 #include "gdbcore.h"
 #include "value.h"
@@ -45,7 +43,6 @@
 #include "language.h"
 #include "valprint.h"
 #include "osdata.h"
-#include "gdbsupport/gdb_splay_tree.h"
 #include "tracepoint.h"
 #include "ada-lang.h"
 #include "linespec.h"
@@ -60,7 +57,6 @@
 #include <chrono>
 #include "progspace-and-thread.h"
 #include "gdbsupport/rsp-low.h"
-#include <algorithm>
 #include <set>
 #include <map>
 

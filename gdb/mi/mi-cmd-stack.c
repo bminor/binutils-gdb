@@ -18,18 +18,15 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "event-top.h"
-#include "target.h"
 #include "frame.h"
 #include "value.h"
 #include "mi-cmds.h"
 #include "ui-out.h"
 #include "symtab.h"
 #include "block.h"
-#include "stack.h"
 #include "dictionary.h"
 #include "language.h"
 #include "valprint.h"
-#include "utils.h"
 #include "mi-getopt.h"
 #include "extension.h"
 #include <ctype.h>
@@ -37,7 +34,6 @@
 #include <optional>
 #include "gdbsupport/gdb-safe-ctype.h"
 #include "inferior.h"
-#include "observable.h"
 
 enum what_to_list { locals, arguments, all };
 

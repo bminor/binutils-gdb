@@ -21,7 +21,6 @@
 
 #include "mi-cmds.h"
 #include "mi-parse.h"
-#include "charset.h"
 
 #include <ctype.h>
 #include "cli/cli-utils.h"

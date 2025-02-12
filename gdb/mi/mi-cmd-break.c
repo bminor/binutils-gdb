@@ -20,8 +20,6 @@
 #include "arch-utils.h"
 #include "exceptions.h"
 #include "mi-cmds.h"
-#include "ui-out.h"
-#include "mi-out.h"
 #include "breakpoint.h"
 #include "mi-getopt.h"
 #include "observable.h"
@@ -30,7 +28,6 @@
 #include "language.h"
 #include "location.h"
 #include "linespec.h"
-#include "gdbsupport/gdb_obstack.h"
 #include <ctype.h>
 #include "tracepoint.h"
 
