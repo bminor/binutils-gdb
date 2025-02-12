@@ -78,6 +78,8 @@ private:
     std::string fullname;
     /* The contents of the file.  */
     std::string contents;
+    /* True if CONTENTS are styled.  Otherwise, false.  */
+    bool styled;
   };
 
   /* A helper function for get_source_lines reads a source file.

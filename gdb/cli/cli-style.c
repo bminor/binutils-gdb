@@ -372,7 +372,9 @@ set_style_enabled  (const char *args, int from_tty, struct cmd_list_element *c)
     warning ("The current terminal doesn't support styling.  Styled output "
 	     "might not appear as expected.");
 
-  g_source_cache.clear ();
+  /* It is not necessary to flush the source cache here.  The source cache
+     tracks whether entries are styled or not.  */
+
   gdb::observers::styling_changed.notify ();
 }
 
