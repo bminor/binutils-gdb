@@ -465,6 +465,13 @@ mkdir_recursive (const char *dir)
   char *component_start = start;
   char *component_end = start;
 
+#ifdef WIN32
+  /* If we're making an absolute path on windows, need to skip the drive
+     letter, which is the form 'C:/'.  */
+  if (dir[0] != '\0' && dir[1] == ':' && dir[2] == '/')
+    component_start += 3;
+#endif
+
   while (1)
     {
       /* Find the beginning of the next component.  */
