@@ -263,3 +263,8 @@ proc ada_simple_compile {name options} {
     set output [gdb_compile_ada_1 $src $dest executable $options]
     return [expr {[gdb_compile_test_nofail $output] == 1}]
 }
+
+# Return 1 if GNAT supports -fvar-tracking.
+gdb_caching_proc ada_fvar_tracking {} {
+    return [ada_simple_compile fvar_tracking additional_flags=-fvar-tracking]
+}

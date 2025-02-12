@@ -21,7 +21,7 @@ standard_ada_testfile p
 
 set opts {}
 lappend opts debug
-if { [have_fvar_tracking] } {
+if { [ada_fvar_tracking] } {
     lappend opts "additional_flags=-fvar-tracking"
 }
 
