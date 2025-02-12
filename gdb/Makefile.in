@@ -1092,36 +1092,6 @@ COMMON_SFILES = \
 	disasm.c \
 	displaced-stepping.c \
 	dummy-frame.c \
-	dwarf2/abbrev.c \
-	dwarf2/abbrev-table-cache.c \
-	dwarf2/ada-imported.c \
-	dwarf2/aranges.c \
-	dwarf2/attribute.c \
-	dwarf2/cooked-index.c \
-	dwarf2/cooked-index-entry.c \
-	dwarf2/cooked-index-shard.c \
-	dwarf2/cooked-index-worker.c \
-	dwarf2/cooked-indexer.c \
-	dwarf2/cu.c \
-	dwarf2/die.c \
-	dwarf2/dwz.c \
-	dwarf2/expr.c \
-	dwarf2/frame-tailcall.c \
-	dwarf2/frame.c \
-	dwarf2/index-cache.c \
-	dwarf2/index-common.c \
-	dwarf2/index-write.c \
-	dwarf2/leb.c \
-	dwarf2/line-header.c \
-	dwarf2/loc.c \
-	dwarf2/macro.c \
-	dwarf2/parent-map.c \
-	dwarf2/read.c \
-	dwarf2/read-debug-names.c \
-	dwarf2/read-gdb-index.c \
-	dwarf2/section.c \
-	dwarf2/stringify.c \
-	dwarf2/unit-head.c \
 	extract-store-integer.c \
 	eval.c \
 	event-top.c \
@@ -1910,6 +1880,40 @@ ALLDEPFILES = \
 TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 	$(CONFIG_SRCS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
+
+# Files that are used to support certain debuginfo formats
+DWARF2_SRCS = \
+	dwarf2/abbrev.c \
+	dwarf2/abbrev-table-cache.c \
+	dwarf2/ada-imported.c \
+	dwarf2/aranges.c \
+	dwarf2/attribute.c \
+	dwarf2/cooked-index.c \
+	dwarf2/cooked-index-entry.c \
+	dwarf2/cooked-index-shard.c \
+	dwarf2/cooked-index-worker.c \
+	dwarf2/cooked-indexer.c \
+	dwarf2/cu.c \
+	dwarf2/die.c \
+	dwarf2/dwz.c \
+	dwarf2/expr.c \
+	dwarf2/frame-tailcall.c \
+	dwarf2/frame.c \
+	dwarf2/index-cache.c \
+	dwarf2/index-common.c \
+	dwarf2/index-write.c \
+	dwarf2/leb.c \
+	dwarf2/line-header.c \
+	dwarf2/loc.c \
+	dwarf2/macro.c \
+	dwarf2/parent-map.c \
+	dwarf2/read.c \
+	dwarf2/read-debug-names.c \
+	dwarf2/read-gdb-index.c \
+	dwarf2/section.c \
+	dwarf2/stringify.c \
+	dwarf2/unit-head.c
+DWARF2_OBS = $(patsubst %.c,%.o, $(DWARF2_SRCS))
 
 COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	mi/mi-common.o \

@@ -49,6 +49,7 @@ static constexpr std::initializer_list<const frame_unwind *>
   standard_unwinders =
 {
   &dummy_frame_unwind,
+#if defined(DWARF_FORMAT_AVAILABLE)
   /* The DWARF tailcall sniffer must come before the inline sniffer.
      Otherwise, we can end up in a situation where a DWARF frame finds
      tailcall information, but then the inline sniffer claims a frame
@@ -57,6 +58,7 @@ static constexpr std::initializer_list<const frame_unwind *>
      activated if the newer frame was created using the DWARF
      unwinder, and it also found tailcall information.  */
   &dwarf2_tailcall_frame_unwind,
+#endif
   &inline_frame_unwind,
 };
 

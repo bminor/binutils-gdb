@@ -198,6 +198,15 @@ struct dwarf2_frame_state
   bool armcc_cfa_offsets_reversed = false;
 };
 
+/* If DWARF supoprt was requested, create the real prototype for the
+   append_unwinders function.  Otherwise, create a fake inline function.
+
+   There is no need to emit a warning for some of these, because they aren't
+   actively reading DWARF when this is called, they're just initializing GDB.
+
+   These should probably be moved to dwarf2/public.h.  */
+#if defined(DWARF_FORMAT_AVAILABLE)
+
 /* Set the architecture-specific register state initialization
    function for GDBARCH to INIT_REG.  */
 
@@ -286,5 +295,57 @@ extern void *dwarf2_frame_allocate_fn_data (const frame_info_ptr &this_frame,
 extern void *dwarf2_frame_get_fn_data (const frame_info_ptr &this_frame,
 				       void **this_cache,
 				       fn_prev_register cookie);
+
+#else /* DWARF_FORMAT_AVAILABLE */
+
+static inline void dwarf2_append_unwinders (struct gdbarch *gdbarch) { }
+
+static inline void dwarf2_frame_set_init_reg (
+  gdbarch *gdbarch, void (*init_reg) (struct gdbarch *,int,
+				      dwarf2_frame_state_reg *,
+				      const frame_info_ptr &)) { }
+
+static inline const struct frame_base *
+  dwarf2_frame_base_sniffer (const frame_info_ptr &this_frame)
+{
+  warning (_("No dwarf support available."));
+  return nullptr;
+}
+
+static inline void dwarf2_frame_set_signal_frame_p
+  (gdbarch *gdbarch, int (*signal_frame_p) (struct gdbarch *,
+			  const frame_info_ptr &)) { }
+
+static inline void *dwarf2_frame_get_fn_data (const frame_info_ptr &this_frame,
+					      void **this_cache,
+					      fn_prev_register cookie)
+{
+  return nullptr;
+}
+
+static inline void *dwarf2_frame_allocate_fn_data
+  (const frame_info_ptr &this_frame, void **this_cache,
+   fn_prev_register cookie, unsigned long size)
+{
+  return nullptr;
+}
+
+static inline int dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
+					 struct dwarf2_per_cu_data *data,
+					 int *regnum_out, LONGEST *offset_out,
+					 CORE_ADDR *text_offset_out,
+					 const gdb_byte **cfa_start_out,
+					 const gdb_byte **cfa_end_out)
+{
+  return 0;
+}
+
+static inline void
+  dwarf2_frame_set_adjust_regnum (struct gdbarch *gdbarch,
+				  int (*adjust_regnum) (struct gdbarch *,
+							int, int))
+{}
+
+#endif /* DWARF_FORMAT_AVAILABLE */
 
 #endif /* GDB_DWARF2_FRAME_H */

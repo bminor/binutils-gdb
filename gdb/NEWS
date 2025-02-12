@@ -209,6 +209,10 @@ qXfer:threads:read
   subsystem to be disabled at configure time, in the form of
   --disable-gdb-compile.
 
+* A new configure option was added, allowing support for DWARF debug
+  information to be disabled at configure time.  The flag is
+  --disable-gdb-dwarf-support.
+
 * A new configure option was added, allowing support for mdebug/ecoff
   debug information to be disabled at configure time.  The flag to do
   that is --disable-gdb-mdebug-support.

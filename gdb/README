@@ -443,7 +443,11 @@ more obscure GDB `configure' options are not listed here.
      supported).
 
 `--disable-gdb-compile'
-    Build GDB without support for the 'compile' command.
+    Build GDB without support for the 'compile' command. DWARF support
+    is required for this feature.
+
+`--disable-gdb-dwarf-support'
+    Build GDB without support for reading DWARF debug information.
 
 `--disable-gdb-mdebug-support'
     Build GDB without support for reading mdebug debug information.

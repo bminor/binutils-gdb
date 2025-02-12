@@ -6184,12 +6184,22 @@ builtin_type (struct objfile *objfile)
   return builtin_type (objfile->arch ());
 }
 
-/* See gdbtypes.h.  */
+/* See dwarf2/call-site.h.  */
 
 CORE_ADDR
 call_site::pc () const
 {
+  /* dwarf2_per_objfile is defined in dwarf/read.c, so if that is disabled
+     at configure time, we won't be able to use this relocate function.
+     This is dwarf-specific, and would ideally be in call-site.h, but
+     including dwarf2/read.h in dwarf2/call-site.h will lead to things being
+     included in the wrong order and many compilation errors will happen.
+     This is the next best thing.  */
+#if defined(DWARF_FORMAT_AVAILABLE)
   return per_objfile->relocate (m_unrelocated_pc);
+#else
+  gdb_assert_not_reached ("unexpected call_site object found");
+#endif
 }
 
 void _initialize_gdbtypes ();

@@ -103,28 +103,6 @@ struct property_addr_info
   const property_addr_info *next;
 };
 
-/* Converts a dynamic property into a static one.  FRAME is the frame in which
-   the property is evaluated; if NULL, the selected frame (if any) is used
-   instead.
-
-   ADDR_STACK is the stack of addresses that might be needed to evaluate the
-   property. When evaluating a property that is not related to a type, it can
-   be NULL.
-
-   Returns true if PROP could be converted and the static value is passed
-   back into VALUE, otherwise returns false.
-
-   Any values in PUSH_VALUES will be pushed before evaluating the location
-   expression, PUSH_VALUES[0] will be pushed first, then PUSH_VALUES[1],
-   etc.  This means the during evaluation PUSH_VALUES[0] will be at the
-   bottom of the stack.  */
-
-bool dwarf2_evaluate_property (const struct dynamic_prop *prop,
-			       const frame_info_ptr &frame,
-			       const property_addr_info *addr_stack,
-			       CORE_ADDR *value,
-			       gdb::array_view<CORE_ADDR> push_values = {});
-
 /* A helper for the compiler interface that compiles a single dynamic
    property to C code.
 
@@ -311,8 +289,53 @@ extern struct value *indirect_synthetic_pointer
    Function always returns non-NULL value.  It throws NO_ENTRY_VALUE_ERROR if
    it cannot resolve the parameter for any reason.  */
 
+#if defined(DWARF_FORMAT_AVAILABLE)
+
+/* Converts a dynamic property into a static one.  FRAME is the frame in which
+   the property is evaluated; if NULL, the selected frame (if any) is used
+   instead.
+
+   ADDR_STACK is the stack of addresses that might be needed to evaluate the
+   property. When evaluating a property that is not related to a type, it can
+   be NULL.
+
+   Returns true if PROP could be converted and the static value is passed
+   back into VALUE, otherwise returns false.
+
+   Any values in PUSH_VALUES will be pushed before evaluating the location
+   expression, PUSH_VALUES[0] will be pushed first, then PUSH_VALUES[1],
+   etc.  This means the during evaluation PUSH_VALUES[0] will be at the
+   bottom of the stack.  */
+
+bool dwarf2_evaluate_property (const struct dynamic_prop *prop,
+			       const frame_info_ptr &frame,
+			       const property_addr_info *addr_stack,
+			       CORE_ADDR *value,
+			       gdb::array_view<CORE_ADDR> push_values = {});
+
 extern struct value *value_of_dwarf_reg_entry (struct type *type,
 					       const frame_info_ptr &frame,
 					       enum call_site_parameter_kind kind,
 					       union call_site_parameter_u kind_u);
+
+#else /* DWARF_FORMAT_AVAILABLE */
+
+static inline bool
+dwarf2_evaluate_property (const struct dynamic_prop *, const frame_info_ptr &,
+			  const property_addr_info *, CORE_ADDR *,
+			  gdb::array_view<CORE_ADDR> = {})
+{
+  return false;
+}
+
+static inline struct value *
+value_of_dwarf_reg_entry (struct type *type, const frame_info_ptr &frame,
+			  enum call_site_parameter_kind kind,
+			  union call_site_parameter_u kind_u)
+{
+  error (_("No dwarf support available."));
+}
+
+#endif /* DWARF_FORMAT_AVAILABLE */
+
 #endif /* GDB_DWARF2_LOC_H */

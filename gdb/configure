@@ -933,6 +933,7 @@ with_auto_load_dir
 with_auto_load_safe_path
 enable_targets
 enable_gdb_mdebug_support
+enable_gdb_dwarf_support
 with_amd_dbgapi
 enable_tui
 enable_gdbtk
@@ -1646,6 +1647,9 @@ Optional Features:
                           alternative target configurations
   --enable-gdb-mdebug-support
                           Enable support for the mdebug debuginfo format
+                          (default 'yes')
+  --enable-gdb-dwarf-support
+                          Enable support for the dwarf debuginfo format
                           (default 'yes')
   --enable-tui            enable full-screen terminal user interface (TUI)
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
@@ -11503,7 +11507,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11506 "configure"
+#line 11510 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11609,7 +11613,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11612 "configure"
+#line 11616 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -24904,6 +24908,31 @@ $as_echo "#define MDEBUG_FORMAT_AVAILABLE 1" >>confdefs.h
 
 fi
 
+# Check whether to support dwarf debug information
+# Check whether --enable-gdb-dwarf-support was given.
+if test "${enable_gdb_dwarf_support+set}" = set; then :
+  enableval=$enable_gdb_dwarf_support;
+	   case $enableval in
+	     yes | no)
+	       ;;
+	     *)
+	       as_fn_error $? "bad value $enableval for --enable-gdb-dwarf-support" "$LINENO" 5
+	       ;;
+	   esac
+
+else
+  enable_gdb_dwarf_support=yes
+fi
+
+
+if test "x${enable_gdb_dwarf_support}" != "xno"; then
+
+$as_echo "#define DWARF_FORMAT_AVAILABLE 1" >>confdefs.h
+
+    CONFIG_SRCS="$CONFIG_SRCS \$(DWARF2_SRCS)"
+    CONFIG_OBS="$CONFIG_OBS \$(DWARF2_OBS)"
+fi
+
 # See whether 64-bit bfd lib has been enabled.
 OLD_CPPFLAGS=$CPPFLAGS
 # Put the old CPPFLAGS last, in case the user's CPPFLAGS point somewhere
@@ -28973,21 +29002,37 @@ if test "${enable_gdb_compile+set}" = set; then :
 	   esac
 
 else
-  enable_gdb_compile=yes
+  enable_gdb_compile=default
 fi
 
 
-if test "${enable_gdb_compile}" = yes; then
-
-$as_echo "#define HAVE_COMPILE 1" >>confdefs.h
-
-    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GCC_COMPILE_OBS)"
-else
+case ${enable_gdb_compile}-${enable_gdb_dwarf_support} in
+    yes-no)
+      as_fn_error $? "enabling gdb compile requires dwarf support" "$LINENO" 5
+      ;;
+    default-no)
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Defaulting compile support to 'no'" >&5
+$as_echo "$as_me: WARNING: Defaulting compile support to 'no'" >&2;}
+      # Fallthrough.
+      ;&
+    no-*)
     # Even if compile support is not enabled, we need this file to define
     # the "compile" command.
     CONFIG_OBS="$CONFIG_OBS compile/compile.o"
     CONFIG_SRCS="$CONFIG_SRCS compile/compile.c"
-fi
+      ;;
+    default-yes)
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Defaulting compile support to 'yes'" >&5
+$as_echo "$as_me: WARNING: Defaulting compile support to 'yes'" >&2;}
+      # Fallthrough.
+      ;&
+    yes-*)
+
+$as_echo "#define HAVE_COMPILE 1" >>confdefs.h
+
+      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GCC_COMPILE_OBS)"
+      ;;
+esac
 
 # ---------------------------- #
 # Check for source highlight.  #

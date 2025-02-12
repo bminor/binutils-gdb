@@ -30,6 +30,8 @@ enum class dw_index_kind
   DEBUG_NAMES,
 };
 
+#if defined(DWARF_FORMAT_AVAILABLE)
+
 /* Try to locate the sections we need for DWARF 2 debugging
    information.  If these are found, begin reading the DWARF and
    return true.  Otherwise, return false.  NAMES points to the dwarf2
@@ -43,5 +45,28 @@ extern bool dwarf2_initialize_objfile
       bool = false);
 
 extern void dwarf2_build_frame_info (struct objfile *);
+
+/* Append the DWARF-2 frame unwinders to GDBARCH's list.  */
+
+void dwarf2_append_unwinders (struct gdbarch *gdbarch);
+
+#else /* DWARF_FORMAT_AVAILABLE */
+
+static inline bool
+dwarf2_initialize_objfile (struct objfile  *,
+			   const struct dwarf2_debug_sections * = nullptr,
+			   bool = false)
+{
+  warning (_("No dwarf support available."));
+  return false;
+}
+
+static inline void
+dwarf2_build_frame_info (struct objfile *)
+{
+  warning (_("No dwarf support available."));
+}
+
+#endif /* DWARF_FORMAT_AVAILABLE */
 
 #endif /* GDB_DWARF2_PUBLIC_H */
