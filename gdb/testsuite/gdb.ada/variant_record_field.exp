@@ -17,6 +17,10 @@ load_lib "ada.exp"
 
 require allow_ada_tests
 
+# LLVM does not have -Og, and anyway this is a regression test for a
+# GCC bug.
+require ada_og
+
 standard_ada_testfile foo
 
 # The compiler used to emit an invalid DWARF expression for the record

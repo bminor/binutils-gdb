@@ -284,3 +284,8 @@ gdb_caching_proc ada_minimal_encodings {} {
     return [ada_simple_compile minimal_encodings \
 		additional_flags=-fgnat-encodings=minimal]
 }
+
+# Return 1 if GNAT supports -Og.
+gdb_caching_proc ada_og {} {
+    return [ada_simple_compile gnat_og additional_flags=-Og]
+}
