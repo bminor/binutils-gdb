@@ -4118,10 +4118,10 @@ process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
 /* A subclass of cooked_index_worker that handles scanning
    .debug_info.  */
 
-class cooked_index_debug_info : public cooked_index_worker
+class cooked_index_worker_debug_info : public cooked_index_worker
 {
 public:
-  cooked_index_debug_info (dwarf2_per_objfile *per_objfile)
+  cooked_index_worker_debug_info (dwarf2_per_objfile *per_objfile)
     : cooked_index_worker (per_objfile)
   {
     gdb_assert (is_main_thread ());
@@ -4170,7 +4170,7 @@ private:
 };
 
 void
-cooked_index_debug_info::process_cus (size_t task_number, unit_iterator first,
+cooked_index_worker_debug_info::process_cus (size_t task_number, unit_iterator first,
 				      unit_iterator end)
 {
   SCOPE_EXIT { bfd_thread_cleanup (); };
@@ -4200,7 +4200,7 @@ cooked_index_debug_info::process_cus (size_t task_number, unit_iterator first,
 }
 
 void
-cooked_index_debug_info::done_reading ()
+cooked_index_worker_debug_info::done_reading ()
 {
   /* Only handle the scanning results here.  Complaints and exceptions
      can only be dealt with on the main thread.  */
@@ -4229,7 +4229,7 @@ cooked_index_debug_info::done_reading ()
 }
 
 void
-cooked_index_debug_info::do_reading ()
+cooked_index_worker_debug_info::do_reading ()
 {
   dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
 
@@ -16351,7 +16351,7 @@ start_debug_info_reader (dwarf2_per_objfile *per_objfile)
      scanning; and then start the scanning.  */
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   std::unique_ptr<cooked_index_worker> worker
-    = std::make_unique<cooked_index_debug_info> (per_objfile);
+    = std::make_unique<cooked_index_worker_debug_info> (per_objfile);
   per_bfd->start_reading (std::make_unique<cooked_index> (per_objfile,
 							  std::move (worker)));
 }
