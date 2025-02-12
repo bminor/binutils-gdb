@@ -19,9 +19,13 @@ require allow_ada_tests
 
 standard_ada_testfile bias
 
-if {[gdb_compile_ada "${srcfile}" "${binfile}" executable \
-	 {debug additional_flags=-fgnat-encodings=minimal}] != "" } {
-  return -1
+set flags {debug}
+if {[ada_minimal_encodings]} {
+    lappend flags additional_flags=-fgnat-encodings=minimal
+}
+
+if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
+    return -1
 }
 
 clean_restart ${testfile}

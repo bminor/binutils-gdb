@@ -21,11 +21,21 @@
 # to run, and BODY is what actually does the work.
 
 proc foreach_gnat_encoding {scenario_arg flags_arg list body} {
+    # gnat-llvm does not understand -fgnat-encodings at all.  However,
+    # some tests examine the precise setting of the scenario -- so
+    # pretend we support minimal.  What is going on here is that for
+    # gnat-llvm, there are no "GNAT encodings", only minimal
+    # encodings, aka, real DWARF.
+    set has_flag [ada_minimal_encodings]
+    if {!$has_flag} {
+	set list minimal
+    }
+
     upvar 1 $scenario_arg scenario
     upvar 1 $flags_arg flags
     foreach_with_prefix scenario $list {
 	set flags {}
-	if {$scenario != "none"} {
+	if {$scenario != "none" && $has_flag} {
 	    lappend flags additional_flags=-fgnat-encodings=$scenario
 	}
 	uplevel 1 $body
@@ -267,4 +277,10 @@ proc ada_simple_compile {name options} {
 # Return 1 if GNAT supports -fvar-tracking.
 gdb_caching_proc ada_fvar_tracking {} {
     return [ada_simple_compile fvar_tracking additional_flags=-fvar-tracking]
+}
+
+# Return 1 if GNAT supports the minimal encodings option.
+gdb_caching_proc ada_minimal_encodings {} {
+    return [ada_simple_compile minimal_encodings \
+		additional_flags=-fgnat-encodings=minimal]
 }
