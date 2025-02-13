@@ -807,22 +807,6 @@ public:
   }
 
   /* See language.h.  */
-  std::unique_ptr<compile_instance> get_compile_instance () const override
-  {
-    return c_get_compile_context ();
-  }
-
-  /* See language.h.  */
-  std::string compute_program (compile_instance *inst,
-			       const char *input,
-			       struct gdbarch *gdbarch,
-			       const struct block *expr_block,
-			       CORE_ADDR expr_pc) const override
-  {
-    return c_compute_program (inst, input, gdbarch, expr_block, expr_pc);
-  }
-
-  /* See language.h.  */
 
   bool can_print_type_offsets () const override
   {
@@ -940,22 +924,6 @@ public:
     const override
   {
     return cp_lookup_transparent_type (name, flags);
-  }
-
-  /* See language.h.  */
-  std::unique_ptr<compile_instance> get_compile_instance () const override
-  {
-    return cplus_get_compile_context ();
-  }
-
-  /* See language.h.  */
-  std::string compute_program (compile_instance *inst,
-			       const char *input,
-			       struct gdbarch *gdbarch,
-			       const struct block *expr_block,
-			       CORE_ADDR expr_pc) const override
-  {
-    return cplus_compute_program (inst, input, gdbarch, expr_block, expr_pc);
   }
 
   /* See language.h.  */

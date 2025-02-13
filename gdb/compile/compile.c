@@ -527,6 +527,41 @@ print_callback (void *ignore, const char *message)
   gdb_puts (message, gdb_stderr);
 }
 
+/* Helper for compile_to_object, to find the compile context
+   based on the current language.  */
+static std::unique_ptr<compile_instance>
+get_language_compile_context ()
+{
+  switch (current_language->la_language)
+    {
+    case language_c:
+      return c_get_compile_context ();
+    case language_cplus:
+      return cplus_get_compile_context ();
+    default:
+      return {};
+    }
+}
+
+/* Helper for compile_to_object, to call the correct
+   compute_program based on the current language.  */
+static std::string
+compute_program_language (compile_instance *inst, const char *input,
+			  struct gdbarch *gdbarch,
+			  const struct block *block,
+			  CORE_ADDR pc)
+{
+  switch (current_language->la_language)
+    {
+    case language_c:
+      return c_compute_program (inst, input, gdbarch, block, pc);
+    case language_cplus:
+      return cplus_compute_program (inst, input, gdbarch, block, pc);
+    default:
+      gdb_assert_not_reached ("Unsupported language");
+    }
+}
+
 /* Process the compilation request.  On success it returns the object
    and source file names.  On an error condition, error () is
    called.  */
@@ -550,7 +585,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 
   /* Set up instance and context for the compiler.  */
   std::unique_ptr<compile_instance> compiler
-    = current_language->get_compile_instance ();
+    = get_language_compile_context ();
+
   if (compiler == nullptr)
     error (_("No compiler support for language %s."),
 	   current_language->name ());
@@ -582,8 +618,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     error (_("Neither a simple expression, or a multi-line specified."));
 
   std::string code
-    = current_language->compute_program (compiler.get (), input, gdbarch,
-					 expr_block, expr_pc);
+    = compute_program_language (compiler.get (), input, gdbarch,
+				expr_block, expr_pc);
   if (compile_debug)
     gdb_printf (gdb_stdlog, "debug output:\n\n%s", code.c_str ());
 
