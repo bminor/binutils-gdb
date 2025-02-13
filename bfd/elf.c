@@ -10392,6 +10392,12 @@ elfcore_grok_xstatereg (bfd *abfd, Elf_Internal_Note *note)
 }
 
 static bool
+elfcore_grok_sspreg (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ssp", note);
+}
+
+static bool
 elfcore_grok_ppc_vmx (bfd *abfd, Elf_Internal_Note *note)
 {
   return elfcore_make_note_pseudosection (abfd, ".reg-ppc-vmx", note);
@@ -11083,6 +11089,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 6
 	  && strcmp (note->namedata, "LINUX") == 0)
 	return elfcore_grok_xstatereg (abfd, note);
+      else
+	return true;
+
+    case NT_X86_SHSTK:		/* Linux CET extension.  */
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_sspreg (abfd, note);
       else
 	return true;
 
@@ -12536,6 +12549,15 @@ elfcore_write_xstatereg (bfd *abfd, char *buf, int *bufsiz,
 			     note_name, NT_X86_XSTATE, xfpregs, size);
 }
 
+static char *
+elfcore_write_sspreg (bfd *abfd, char *buf, int *bufsiz,
+		      const void *ssp, int size)
+{
+  const char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_X86_SHSTK, ssp, size);
+}
+
 char *
 elfcore_write_x86_segbases (bfd *abfd, char *buf, int *bufsiz,
 			    const void *regs, int size)
@@ -13131,6 +13153,8 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_xstatereg (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-x86-segbases") == 0)
     return elfcore_write_x86_segbases (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ssp") == 0)
+    return elfcore_write_sspreg (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-ppc-vmx") == 0)
     return elfcore_write_ppc_vmx (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-ppc-vsx") == 0)
