@@ -2325,7 +2325,22 @@ get_prev_frame_always_1 (const frame_info_ptr &this_frame)
      until we have unwound all the way down to the previous non-inline
      frame.  */
   if (get_frame_type (this_frame) == INLINE_FRAME)
-    return get_prev_frame_maybe_check_cycle (this_frame);
+    {
+      frame_info_ptr fi = get_prev_frame_maybe_check_cycle (this_frame);
+
+      /* If this_frame is the current frame, then compute and stash its frame
+	 id so that the cycle check in get_prev_frame_maybe_check_cycle works
+	 correctly in the case where inline frame 0 has been duplicated.
+
+	 The this_id.p check is required to avoid recursion as computing the
+	 frame id results in a call to inline_frame_this_id which calls back
+	 into get_prev_frame_always.  */
+      if (this_frame->level == 0
+	  && this_frame->this_id.p != frame_id_status::COMPUTING)
+	get_frame_id (this_frame);
+
+      return fi;
+    }
 
   /* If this_frame is the current frame, then compute and stash its
      frame id prior to fetching and computing the frame id of the
