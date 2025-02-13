@@ -149,10 +149,12 @@ gdb_breakpoint "function_in_other_file"
 gdb_continue_to_breakpoint "function_in_other_file"
 gdb_test "python print (gdb.lookup_static_symbol ('rr').value ())" "99" \
     "print value of rr from other file"
-gdb_test "python print (gdb.lookup_static_symbols ('rr')\[0\].value ())" "99" \
-    "print value of gdb.lookup_static_symbols ('rr')\[0\], from the other file"
-gdb_test "python print (gdb.lookup_static_symbols ('rr')\[1\].value ())" "42" \
-    "print value of gdb.lookup_static_symbols ('rr')\[1\], from the other file"
+# GDB doesn't really guarantee the order of these, so sort the values.
+gdb_test_no_output "python rrs = gdb.lookup_static_symbols ('rr')" \
+    "fetch all rr symbols, from the other file"
+gdb_test "python print (sorted(\[int(x.value()) for x in rrs\]))" \
+    "\\\[42, 99\\\]" \
+    "print values of all 'rr' symbols, from the other file"
 
 # Now continue back to the first source file.
 set linenum [gdb_get_line_number "Break at end."]
@@ -164,10 +166,12 @@ gdb_py_test_silent_cmd "python frame = gdb.selected_frame()" "Get Frame" 0
 # static symbol from the second source file.
 gdb_test "python print (gdb.lookup_static_symbol ('rr').value ())" "42" \
     "print value of rr from main file"
-gdb_test "python print (gdb.lookup_static_symbols ('rr')\[0\].value ())" "99" \
-    "print value of gdb.lookup_static_symbols ('rr')\[0\], from the main file"
-gdb_test "python print (gdb.lookup_static_symbols ('rr')\[1\].value ())" "42" \
-    "print value of gdb.lookup_static_symbols ('rr')\[1\], from the main file"
+# This should be consistent with the first file.
+gdb_test_no_output "python rrs = gdb.lookup_static_symbols ('rr')" \
+    "fetch all rr symbols, from the main file"
+gdb_test "python print (sorted(\[int(x.value()) for x in rrs\]))" \
+    "\\\[42, 99\\\]" \
+    "print values of all 'rr' symbols, from the main file"
 
 # Test is_variable attribute.
 gdb_py_test_silent_cmd "python a = gdb.lookup_symbol(\'a\')" "Get variable a" 0
