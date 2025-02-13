@@ -69,7 +69,7 @@ def _repl(command, frame_id):
     }
 
 
-@request("evaluate")
+@request("evaluate", defer_events=False)
 @capability("supportsEvaluateForHovers")
 @capability("supportsValueFormattingOptions")
 def eval_request(
@@ -110,7 +110,7 @@ def variables(
 
 
 @capability("supportsSetExpression")
-@request("setExpression")
+@request("setExpression", defer_events=False)
 def set_expression(
     *, expression: str, value: str, frameId: Optional[int] = None, format=None, **args
 ):
@@ -126,7 +126,7 @@ def set_expression(
 
 
 @capability("supportsSetVariable")
-@request("setVariable")
+@request("setVariable", defer_events=False)
 def set_variable(
     *, variablesReference: int, name: str, value: str, format=None, **args
 ):

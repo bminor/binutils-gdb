@@ -17,7 +17,7 @@ import gdb
 
 from .modules import is_module, make_module
 from .scopes import set_finish_value
-from .server import send_event, send_event_maybe_later
+from .server import send_event
 from .startup import exec_and_log, in_gdb_thread, log
 
 # True when the inferior is thought to be running, False otherwise.
@@ -240,7 +240,7 @@ def _on_stop(event):
     else:
         obj["reason"] = stop_reason_map[event.details["reason"]]
     _expected_pause = False
-    send_event_maybe_later("stopped", obj)
+    send_event("stopped", obj)
 
 
 # This keeps a bit of state between the start of an inferior call and

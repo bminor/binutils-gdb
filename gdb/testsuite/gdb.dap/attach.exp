@@ -33,10 +33,10 @@ set attach_id [dap_attach $testpid $binfile]
 
 dap_check_request_and_response "configurationDone" configurationDone
 
+dap_check_response "attach response" attach $attach_id
+
 dap_wait_for_event_and_check "stopped" stopped \
     "body reason" attach
-
-dap_check_response "attach response" attach $attach_id
 
 dap_shutdown true
 
