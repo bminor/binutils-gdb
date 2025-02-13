@@ -474,6 +474,7 @@ write_res_id (windres_bfd *wrbfd, rc_uint_type off, const rc_res_id *id)
 	    windres_put_16 (wrbfd, d + (i * sizeof (unichar)), id->u.n.name[i]);
 	  windres_put_16 (wrbfd, d + (i * sizeof (unichar)), 0);
 	  set_windres_bfd_content (wrbfd, d, off, (len * sizeof (unichar)));
+	  free (d);
 	}
       off += (len * sizeof (unichar));
     }
