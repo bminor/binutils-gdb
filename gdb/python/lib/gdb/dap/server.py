@@ -115,10 +115,10 @@ class CancellationHandler:
         # The request currently being handled, or None.
         self.in_flight_dap_thread = None
         self.in_flight_gdb_thread = None
-        self.reqs = []
+        self._reqs = []
         # A set holding the request IDs of all deferred requests that
         # are still unresolved.
-        self.deferred_ids = set()
+        self._deferred_ids = set()
 
     @contextmanager
     def current_request(self, req):
@@ -138,7 +138,7 @@ class CancellationHandler:
     def defer_request(self, req):
         """Indicate that the request REQ has been deferred."""
         with self.lock:
-            self.deferred_ids.add(req)
+            self._deferred_ids.add(req)
 
     def request_finished(self, req):
         """Indicate that the request REQ is finished.
@@ -150,7 +150,7 @@ class CancellationHandler:
         with self.lock:
             # Use discard here, not remove, because this is called
             # regardless of whether REQ was deferred.
-            self.deferred_ids.discard(req)
+            self._deferred_ids.discard(req)
 
     def check_cancel(self, req):
         """Check whether request REQ is cancelled.
@@ -163,15 +163,15 @@ class CancellationHandler:
             deferred = []
             try:
                 # If the request is cancelled, don't execute the region.
-                while len(self.reqs) > 0 and self.reqs[0] <= req:
+                while len(self._reqs) > 0 and self._reqs[0] <= req:
                     # In most cases, if we see a cancellation request
                     # on the heap that is before REQ, we can just
                     # ignore it -- we missed our chance to cancel that
                     # request.
-                    next_id = heapq.heappop(self.reqs)
+                    next_id = heapq.heappop(self._reqs)
                     if next_id == req:
                         raise KeyboardInterrupt()
-                    elif next_id in self.deferred_ids:
+                    elif next_id in self._deferred_ids:
                         # We could be in a situation where we're
                         # processing request 23, but request 18 is
                         # still deferred.  In this case, popping
@@ -180,7 +180,7 @@ class CancellationHandler:
                         deferred.append(next_id)
             finally:
                 for x in deferred:
-                    heapq.heappush(self.reqs, x)
+                    heapq.heappush(self._reqs, x)
 
     def cancel(self, req):
         """Call to cancel a request.
@@ -198,7 +198,7 @@ class CancellationHandler:
                 # the weird property that a request can be cancelled
                 # before it is even sent.  It didn't seem worthwhile
                 # to try to check for this.
-                heapq.heappush(self.reqs, req)
+                heapq.heappush(self._reqs, req)
 
     @contextmanager
     def interruptable_region(self, req):
@@ -225,20 +225,20 @@ class Server:
     """The DAP server class."""
 
     def __init__(self, in_stream, out_stream, child_stream):
-        self.in_stream = in_stream
-        self.out_stream = out_stream
-        self.child_stream = child_stream
-        self.delayed_fns_lock = threading.Lock()
+        self._in_stream = in_stream
+        self._out_stream = out_stream
+        self._child_stream = child_stream
+        self._delayed_fns_lock = threading.Lock()
         self.defer_stop_events = False
-        self.delayed_fns = []
+        self._delayed_fns = []
         # This queue accepts JSON objects that are then sent to the
         # DAP client.  Writing is done in a separate thread to avoid
         # blocking the read loop.
-        self.write_queue = DAPQueue()
+        self._write_queue = DAPQueue()
         # Reading is also done in a separate thread, and a queue of
         # requests is kept.
-        self.read_queue = DAPQueue()
-        self.done = False
+        self._read_queue = DAPQueue()
+        self._done = False
         self.canceller = CancellationHandler()
         global _server
         _server = self
@@ -315,7 +315,7 @@ class Server:
     # is run in its own thread.
     def _read_inferior_output(self):
         while True:
-            line = self.child_stream.readline()
+            line = self._child_stream.readline()
             self.send_event(
                 "output",
                 {
@@ -327,7 +327,7 @@ class Server:
     # Send OBJ to the client, logging first if needed.
     def _send_json(self, obj):
         log("WROTE: <<<" + json.dumps(obj) + ">>>")
-        self.write_queue.put(obj)
+        self._write_queue.put(obj)
 
     # This is run in a separate thread and simply reads requests from
     # the client and puts them into a queue.  A separate thread is
@@ -335,7 +335,7 @@ class Server:
     # will normally block, waiting for each request to complete.
     def _reader_thread(self):
         while True:
-            cmd = read_json(self.in_stream)
+            cmd = read_json(self._in_stream)
             if cmd is None:
                 break
             log("READ: <<<" + json.dumps(cmd) + ">>>")
@@ -351,9 +351,9 @@ class Server:
                 and "requestId" in cmd["arguments"]
             ):
                 self.canceller.cancel(cmd["arguments"]["requestId"])
-            self.read_queue.put(cmd)
+            self._read_queue.put(cmd)
         # When we hit EOF, signal it with None.
-        self.read_queue.put(None)
+        self._read_queue.put(None)
 
     @in_dap_thread
     def main_loop(self):
@@ -361,10 +361,10 @@ class Server:
         # Before looping, start the thread that writes JSON to the
         # client, and the thread that reads output from the inferior.
         start_thread("output reader", self._read_inferior_output)
-        json_writer = start_json_writer(self.out_stream, self.write_queue)
+        json_writer = start_json_writer(self._out_stream, self._write_queue)
         start_thread("JSON reader", self._reader_thread)
-        while not self.done:
-            cmd = self.read_queue.get()
+        while not self._done:
+            cmd = self._read_queue.get()
             # A None value here means the reader hit EOF.
             if cmd is None:
                 break
@@ -372,16 +372,16 @@ class Server:
             with self.canceller.current_request(req):
                 self._handle_command(cmd)
             fns = None
-            with self.delayed_fns_lock:
-                fns = self.delayed_fns
-                self.delayed_fns = []
+            with self._delayed_fns_lock:
+                fns = self._delayed_fns
+                self._delayed_fns = []
                 self.defer_stop_events = False
             for fn in fns:
                 fn()
         # Got the terminate request.  This is handled by the
         # JSON-writing thread, so that we can ensure that all
         # responses are flushed to the client before exiting.
-        self.write_queue.put(None)
+        self._write_queue.put(None)
         json_writer.join()
         send_gdb("quit")
 
@@ -389,8 +389,8 @@ class Server:
     def send_event_later(self, event, body=None):
         """Send a DAP event back to the client, but only after the
         current request has completed."""
-        with self.delayed_fns_lock:
-            self.delayed_fns.append(lambda: self.send_event(event, body))
+        with self._delayed_fns_lock:
+            self._delayed_fns.append(lambda: self.send_event(event, body))
 
     @in_gdb_thread
     def send_event_maybe_later(self, event, body=None):
@@ -400,17 +400,17 @@ class Server:
         the client."""
         with self.canceller.lock:
             if self.canceller.in_flight_dap_thread:
-                with self.delayed_fns_lock:
+                with self._delayed_fns_lock:
                     if self.defer_stop_events:
-                        self.delayed_fns.append(lambda: self.send_event(event, body))
+                        self._delayed_fns.append(lambda: self.send_event(event, body))
                         return
         self.send_event(event, body)
 
     @in_dap_thread
     def call_function_later(self, fn):
         """Call FN later -- after the current request's response has been sent."""
-        with self.delayed_fns_lock:
-            self.delayed_fns.append(fn)
+        with self._delayed_fns_lock:
+            self._delayed_fns.append(fn)
 
     # Note that this does not need to be run in any particular thread,
     # because it just creates an object and writes it to a thread-safe
@@ -432,7 +432,7 @@ class Server:
         # Just set a flag.  This operation is complicated because we
         # want to write the result of the request before exiting.  See
         # main_loop.
-        self.done = True
+        self._done = True
 
 
 def send_event(event, body=None):
@@ -629,19 +629,19 @@ class Invoker(object):
     """A simple class that can invoke a gdb command."""
 
     def __init__(self, cmd):
-        self.cmd = cmd
+        self._cmd = cmd
 
     # This is invoked in the gdb thread to run the command.
     @in_gdb_thread
     def __call__(self):
-        exec_and_log(self.cmd)
+        exec_and_log(self._cmd)
 
 
 class Cancellable(object):
 
     def __init__(self, fn, result_q=None):
-        self.fn = fn
-        self.result_q = result_q
+        self._fn = fn
+        self._result_q = result_q
         with _server.canceller.lock:
             self.req = _server.canceller.in_flight_dap_thread
 
@@ -650,13 +650,13 @@ class Cancellable(object):
     def __call__(self):
         try:
             with _server.canceller.interruptable_region(self.req):
-                val = self.fn()
-                if self.result_q is not None:
-                    self.result_q.put(val)
+                val = self._fn()
+                if self._result_q is not None:
+                    self._result_q.put(val)
         except (Exception, KeyboardInterrupt) as e:
-            if self.result_q is not None:
+            if self._result_q is not None:
                 # Pass result or exception to caller.
-                self.result_q.put(e)
+                self._result_q.put(e)
             elif isinstance(e, KeyboardInterrupt):
                 # Fn was cancelled.
                 pass

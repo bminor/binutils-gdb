@@ -218,11 +218,11 @@ class _PrintBreakpoint(gdb.Breakpoint):
     def __init__(self, logMessage, **args):
         super().__init__(**args)
         # Split the message up for easier processing.
-        self.message = re.split("{(.*?)}", logMessage)
+        self._message = re.split("{(.*?)}", logMessage)
 
     def stop(self):
         output = ""
-        for idx, item in enumerate(self.message):
+        for idx, item in enumerate(self._message):
             if idx % 2 == 0:
                 # Even indices are plain text.
                 output += item

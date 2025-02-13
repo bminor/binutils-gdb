@@ -75,16 +75,16 @@ def select_frame(id):
 # what is needed for the current callers.
 class _MemoizingIterator:
     def __init__(self, iterator):
-        self.iterator = iterator
-        self.seen = []
+        self._iterator = iterator
+        self._seen = []
 
     def __iter__(self):
         # First the memoized items.
-        for item in self.seen:
+        for item in self._seen:
             yield item
         # Now memoize new items.
-        for item in self.iterator:
-            self.seen.append(item)
+        for item in self._iterator:
+            self._seen.append(item)
             yield item
 
 
