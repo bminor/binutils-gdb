@@ -285,7 +285,7 @@ offered for debugging purposes only, expect them to change over time.
 A string containing the python directory (@pxref{Python}).
 @end defvar
 
-@defun gdb.execute (command @r{[}, from_tty @r{[}, to_string@r{]]})
+@defun gdb.execute (command @r{[}, from_tty @r{[}, to_string @w{@r{[}, styling @r{]]]}})
 Evaluate @var{command}, a string, as a @value{GDBN} CLI command.
 If a GDB exception happens while @var{command} runs, it is
 translated as described in @ref{Exception Handling,,Exception Handling}.
@@ -302,6 +302,14 @@ returned as a string.  The default is @code{False}, in which case the
 return value is @code{None}.  If @var{to_string} is @code{True}, the
 @value{GDBN} virtual terminal will be temporarily set to unlimited width
 and height, and its pagination will be disabled; @pxref{Screen Size}.
+
+When @var{styling} is @code{True}, the output, whether sent to
+standard output, or to a string, will have styling applied, if
+@value{GDBN}'s standard output supports styling, and @kbd{show style
+enabled} is @kbd{on}.  When @var{styling} is @code{False} then no
+styling is applied.  The default for @var{styling} is @code{True} when
+@var{to_string} is @code{False}, and @code{False} when @var{to_string}
+is @code{True}.
 @end defun
 
 @defun gdb.breakpoints ()

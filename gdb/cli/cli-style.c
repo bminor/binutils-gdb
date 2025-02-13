@@ -51,6 +51,25 @@ static const char * const cli_intensities[] = {
   nullptr
 };
 
+/* When true styling is being temporarily suppressed.  */
+
+static bool scoped_disable_styling_p = false;
+
+/* See cli/cli-style.h.  */
+
+scoped_disable_styling::scoped_disable_styling ()
+{
+  m_old_value = scoped_disable_styling_p;
+  scoped_disable_styling_p = true;
+}
+
+/* See cli/cli-style.h.  */
+
+scoped_disable_styling::~scoped_disable_styling ()
+{
+  scoped_disable_styling_p = m_old_value;
+}
+
 /* Return true if GDB's output terminal should support styling, otherwise,
    return false.  This function really checks for things that indicate
    styling might not be supported, so a return value of false indicates
@@ -91,7 +110,7 @@ disable_cli_styling ()
 bool
 term_cli_styling ()
 {
-  return cli_styling;
+  return cli_styling && !scoped_disable_styling_p;
 }
 
 /* See cli/cli-style.h.  */

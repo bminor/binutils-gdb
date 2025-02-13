@@ -65,6 +65,11 @@ info sharedlibrary
      was never documented in the GDB manual, so users should not have
      been using it.
 
+  ** gdb.execute has an additional 'styling' argument.  When True, then
+     output will be styled.  The default for this argument is True
+     when output is going to standard output, and False when output is
+     going to a string.
+
 * Guile API
 
   ** New type <gdb:color> for dealing with colors.

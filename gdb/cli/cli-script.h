@@ -143,10 +143,12 @@ extern void execute_control_commands (struct command_line *cmdlines,
 
 /* Run execute_control_commands for COMMANDS.  Capture its output into
    the returned string, do not display it to the screen.  BATCH_FLAG
-   will be temporarily set to true.  */
+   will be temporarily set to true.  When TERM_OUT is true the output is
+   collected with terminal behavior (e.g. with styling).  When TERM_OUT is
+   false raw output will be collected (e.g. no styling).  */
 
 extern std::string execute_control_commands_to_string
-    (struct command_line *commands, int from_tty);
+    (struct command_line *commands, int from_tty, bool term_out);
 
 /* Exported to gdb/breakpoint.c */
 
