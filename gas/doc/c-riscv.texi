@@ -548,6 +548,9 @@ Opcode space for misc instructions.
 @item SYSTEM
 Opcode space for system instructions.
 
+@item OP_VE
+Opcode space for crypto vector instructions.
+
 @item CUSTOM_0
 @item CUSTOM_1
 @item CUSTOM_2

@@ -82,5 +82,6 @@ insn.s +78 +0x16a.*
 insn.s +79 +0x180.*
 insn.s +80 +0x196.*
 insn.s +81 +0x1ac.*
-insn.s +- +0x1c2
+insn.s +83 +0x1c2.*
+insn.s +- +0x1c6
 #pass

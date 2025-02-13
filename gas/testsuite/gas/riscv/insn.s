@@ -79,3 +79,5 @@ target:
 	.insn 22, 0x00dcba98765432100123456789abcdef55aa33cc607f
 	.insn 0xfedcba98765432100123456789abcdef55aa33cc607f
 	.insn 22, 0xfedcba98765432100123456789abcdef55aa33cc607f
+
+	.insn r  OP_VE, 0b010, 0b1011101, x4, x12, x8

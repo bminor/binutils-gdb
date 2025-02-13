@@ -1,4 +1,4 @@
-#as: -march=rv32ifcv
+#as: -march=rv32ifcv_zvknha
 #objdump: -dr
 
 .*:[ 	]+file format .*
@@ -114,3 +114,4 @@ Disassembly of section .text:
 [^:]+:[ 	]+607f 33cc 55aa cdef[ 	]+\.insn[ 	]+22, 0xfedcba98765432100123456789abcdef55aa33cc607f
 [^:]+:[ 	]+89ab 4567 0123 3210 ?
 [^:]+:[ 	]+7654 ba98 fedc ?
+[^:]+:[ 	]+ba862277[ 	]+vsha2ch\.vv[ 	]+v4,v8,v12

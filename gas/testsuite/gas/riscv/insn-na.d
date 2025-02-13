@@ -1,4 +1,4 @@
-#as: -march=rv32ifcv
+#as: -march=rv32ifcv_zvknha
 #source: insn.s
 #objdump: -dw -Mno-aliases
 
@@ -81,3 +81,4 @@ Disassembly of section .text:
 [^:]+:[ 	]+607f 33cc 55aa cdef 89ab 4567 0123 3210 7654 ba98 00dc[ 	]+\.insn[ 	]+22, 0x00dcba98765432100123456789abcdef55aa33cc607f
 [^:]+:[ 	]+607f 33cc 55aa cdef 89ab 4567 0123 3210 7654 ba98 fedc[ 	]+\.insn[ 	]+22, 0xfedcba98765432100123456789abcdef55aa33cc607f
 [^:]+:[ 	]+607f 33cc 55aa cdef 89ab 4567 0123 3210 7654 ba98 fedc[ 	]+\.insn[ 	]+22, 0xfedcba98765432100123456789abcdef55aa33cc607f
+[^:]+:[ 	]+ba862277[ 	]+vsha2ch\.vv[ 	]+v4,v8,v12

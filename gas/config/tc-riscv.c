@@ -898,7 +898,7 @@ static const struct opcode_name_t opcode_name_list[] =
   /*reserved    0x5b.  */
   {"JAL",       0x6f},
   {"SYSTEM",    0x73},
-  /*reserved    0x77.  */
+  {"OP_VE",     0x77},
   {"CUSTOM_3",  0x7b},
   /* >80b       0x7f.  */
 
