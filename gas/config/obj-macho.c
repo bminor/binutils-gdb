@@ -1818,13 +1818,8 @@ obj_mach_o_set_indirect_symbols (bfd *abfd, asection *sec,
 	      if (nactual < bfd_get_symcount (abfd))
 		nactual = bfd_get_symcount (abfd);
 
-	      ms->indirect_syms =
-			bfd_zalloc (abfd,
-				    nactual * sizeof (bfd_mach_o_asymbol *));
-
-	      if (ms->indirect_syms == NULL)
-		as_fatal (_("internal error: failed to allocate %d indirect"
-			    "symbol pointers"), nactual);
+	      ms->indirect_syms = notes_calloc (nactual,
+						sizeof (*ms->indirect_syms));
 
 	      for (isym = list, n = 0; isym != NULL; isym = isym->next, n++)
 		{

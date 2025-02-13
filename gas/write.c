@@ -1804,9 +1804,8 @@ set_symtab (void)
   if (nsyms)
     {
       int i;
-      bfd_size_type amt = (bfd_size_type) nsyms * sizeof (asymbol *);
 
-      asympp = (asymbol **) bfd_alloc (stdoutput, amt);
+      asympp = notes_alloc (nsyms * sizeof (asymbol *));
       symp = symbol_rootP;
       for (i = 0; i < nsyms; symp = symbol_next (symp))
 	if (!symbol_removed_p (symp)
