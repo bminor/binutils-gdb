@@ -13,8 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This file is part of the GDB testsuite.  It checks for memory leaks
-# associated with allocating and deallocation gdb.Inferior objects.
+# Check that the Python pygments module can be used for source
+# highlighting when GNU source highlight is not available (or is
+# disabled, as is done in this test).
+
+require allow_python_tests
 
 load_lib gdb-python.exp
 
@@ -26,14 +29,12 @@ with_ansi_styling_terminal {
     # capable, otherwise we'll get a UnicodeEncodeError trying to
     # encode the output.
     if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
-	return -1
+	return
     }
-
-    if { ![allow_python_tests] } { continue }
 
     if { ![gdb_py_module_available "pygments"] } {
 	unsupported "pygments module not available"
-	return -1
+	return
     }
 
     if ![runto_main] {
@@ -55,8 +56,7 @@ with_ansi_styling_terminal {
 	    exp_continue
 	}
 	-re "$gdb_prompt $" {
-	    gdb_assert { $seen_style_escape }
-	    pass $gdb_test_name
+	    gdb_assert { $seen_style_escape } $gdb_test_name
 	}
     }
 }
