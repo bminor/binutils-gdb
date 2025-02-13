@@ -660,9 +660,13 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
       }
 
     case compile_control:
+#if defined(HAVE_COMPILE)
       eval_compile_command (cmd, NULL, cmd->control_u.compile.scope,
 			    cmd->control_u.compile.scope_data);
       ret = simple_control;
+#else
+      error (_("compile support has not been compiled into gdb"));
+#endif
       break;
 
     case define_control:

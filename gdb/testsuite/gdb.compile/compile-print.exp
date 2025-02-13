@@ -19,6 +19,8 @@ standard_testfile
 
 require is_c_compiler_gcc
 
+require allow_compile_tests
+
 if { [prepare_for_testing "failed to prepare" "$testfile"] } {
     return -1
 }

@@ -19,6 +19,8 @@ standard_testfile .c compile-shlib.c compile-constvar.S compile-nodebug.c
 
 require is_c_compiler_gcc
 
+require allow_compile_tests
+
 set options {}
 if { [test_compiler_info gcc*] || [test_compiler_info clang*] } {
     lappend options additional_flags=-g3

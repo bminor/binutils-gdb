@@ -19,6 +19,8 @@ standard_testfile .c
 
 require is_c_compiler_gcc
 
+require allow_compile_tests
+
 if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	 executable {debug}] != "" } {
     return -1

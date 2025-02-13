@@ -46,15 +46,16 @@
 #include "gdbsupport/scoped_ignore_signal.h"
 #include "gdbsupport/buildargv.h"
 
+/* Hold "compile" commands.  */
+
+static struct cmd_list_element *compile_command_list;
+
 
+#ifdef HAVE_COMPILE
 
 /* Initial filename for temporary files.  */
 
 #define TMP_PREFIX "/tmp/gdbobj-"
-
-/* Hold "compile" commands.  */
-
-static struct cmd_list_element *compile_command_list;
 
 /* Debug flag for "compile" commands.  */
 
@@ -852,6 +853,18 @@ compile_instance::compile (const char *filename, int verbose_level)
 
 #undef FORWARD
 
+#else /* HAVE_COMPILE */
+
+/* The "compile" prefix command, when support was disabled.  */
+
+static void
+compile_command (const char *args, int from_tty)
+{
+  error (_("This command is not supported."));
+}
+
+#endif /* HAVE_COMPILE */
+
 /* See compile.h.  */
 cmd_list_element *compile_cmd_element = nullptr;
 
@@ -859,13 +872,24 @@ void _initialize_compile ();
 void
 _initialize_compile ()
 {
-  struct cmd_list_element *c = NULL;
-
   compile_cmd_element = add_prefix_cmd ("compile", class_obscure,
-					compile_command, _("\
+					compile_command,
+#ifdef HAVE_COMPILE
+					_("\
 Command to compile source code and inject it into the inferior."),
+#else /* HAVE_COMPILE */
+					_("\
+Command to compile source code and inject it into the inferior.\n\
+\n\
+Code compilation and injection is not supported in this copy of GDB.\n\
+This command is only a placeholder."),
+#endif /* HAVE_COMPILE */
 		  &compile_command_list, 1, &cmdlist);
   add_com_alias ("expression", compile_cmd_element, class_obscure, 0);
+
+#ifdef HAVE_COMPILE
+
+  struct cmd_list_element *c = NULL;
 
   const auto compile_opts = make_compile_options_def_group (nullptr);
 
@@ -973,4 +997,5 @@ It should be absolute filename of the gcc executable.\n\
 If empty the default target triplet will be searched in $PATH."),
 				     NULL, show_compile_gcc, &setlist,
 				     &showlist);
+#endif /* HAVE_COMPILE */
 }

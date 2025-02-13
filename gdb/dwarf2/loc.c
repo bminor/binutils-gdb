@@ -1784,6 +1784,7 @@ dwarf2_compile_property_to_c (string_file *stream,
 			      CORE_ADDR pc,
 			      struct symbol *sym)
 {
+#if defined (HAVE_COMPILE)
   const dwarf2_property_baton *baton = prop->baton ();
   const gdb_byte *data;
   size_t size;
@@ -1810,6 +1811,9 @@ dwarf2_compile_property_to_c (string_file *stream,
 			     gdbarch, registers_used,
 			     per_cu->addr_size (),
 			     data, data + size, per_cu, per_objfile);
+#else
+  gdb_assert_not_reached ("Compile support was disabled");
+#endif
 }
 
 /* Compute the correct symbol_needs_kind value for the location
@@ -3852,6 +3856,7 @@ locexpr_generate_c_location (struct symbol *sym, string_file *stream,
 			     std::vector<bool> &registers_used,
 			     CORE_ADDR pc, const char *result_name)
 {
+#if defined (HAVE_COMPILE)
   struct dwarf2_locexpr_baton *dlbaton
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (sym);
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
@@ -3863,6 +3868,9 @@ locexpr_generate_c_location (struct symbol *sym, string_file *stream,
 			   sym, pc, gdbarch, registers_used, addr_size,
 			   dlbaton->data, dlbaton->data + dlbaton->size,
 			   dlbaton->per_cu, dlbaton->per_objfile);
+#else
+  gdb_assert_not_reached ("Compile support was disabled");
+#endif
 }
 
 /* The set of location functions used with the DWARF-2 expression
@@ -4088,6 +4096,7 @@ loclist_generate_c_location (struct symbol *sym, string_file *stream,
 			     std::vector<bool> &registers_used,
 			     CORE_ADDR pc, const char *result_name)
 {
+#if defined (HAVE_COMPILE)
   struct dwarf2_loclist_baton *dlbaton
     = (struct dwarf2_loclist_baton *) SYMBOL_LOCATION_BATON (sym);
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
@@ -4103,6 +4112,9 @@ loclist_generate_c_location (struct symbol *sym, string_file *stream,
 			   data, data + size,
 			   dlbaton->per_cu,
 			   dlbaton->per_objfile);
+#else
+  gdb_assert_not_reached ("Compile support was disabled");
+#endif
 }
 
 /* The set of location functions used with the DWARF-2 expression

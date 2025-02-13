@@ -442,6 +442,9 @@ more obscure GDB `configure' options are not listed here.
      Requires a curses library (ncurses and cursesX are also
      supported).
 
+`--disable-gdb-compile'
+    Build GDB without support for the 'compile' command.
+
 `--with-curses'
      Use the curses library instead of the termcap library, for
      text-mode terminal operations.

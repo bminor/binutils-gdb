@@ -381,11 +381,15 @@ proc run_mid_line_completion_tests { root cmd } {
 proc run_quoting_and_escaping_tests { root } {
     # Test all the commands which allow quoting of filenames, and
     # which require whitespace to be escaped in unquoted filenames.
-    foreach_with_prefix cmd { file exec-file symbol-file add-symbol-file \
-				  remove-symbol-file \
-				  "target core" "target exec" "target tfile" \
-				  "maint print c-tdesc" "compile file" \
-				  "save gdb-index" "save gdb-index -dwarf-5" } {
+    set all_cmds { file exec-file symbol-file add-symbol-file \
+		      remove-symbol-file \
+		      "target core" "target exec" "target tfile" \
+		      "maint print c-tdesc" "save gdb-index"
+		      "save gdb-index -dwarf-5" }
+    if { [allow_compile_tests] } {
+	lappend all_cmds "compile file"
+    }
+    foreach_with_prefix cmd $all_cmds {
 	# Try each test placing the filename as the first argument
 	# then again with a quoted string immediately after the
 	# command.  This works because the filename completer will

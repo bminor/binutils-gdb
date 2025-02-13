@@ -1912,8 +1912,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	$(patsubst %.c,%.o,$(COMMON_SFILES)) \
 	$(SUBDIR_CLI_OBS) \
 	$(SUBDIR_MI_OBS) \
-	$(SUBDIR_TARGET_OBS) \
-	$(SUBDIR_GCC_COMPILE_OBS)
+	$(SUBDIR_TARGET_OBS)
 
 SUBDIRS = doc @subdirs@ data-directory
 CLEANDIRS = $(SUBDIRS)

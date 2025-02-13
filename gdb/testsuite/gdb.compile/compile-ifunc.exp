@@ -17,6 +17,8 @@ load_lib compile-support.exp
 
 require allow_ifunc_tests
 
+require allow_compile_tests
+
 standard_testfile
 
 require is_c_compiler_gcc

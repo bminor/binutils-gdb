@@ -45,6 +45,9 @@ proc _do_check_compile {expr} {
 	    # This appears to be a bug in the compiler plugin.
 	    set result "apparent compiler plugin bug"
 	}
+	-re "This command is not supported." {
+	    set result "compiler disabled at configure time"
+	}
 	-re "\r\n$gdb_prompt $" {
 	}
     }

@@ -1222,6 +1222,26 @@ AC_SUBST(GUILE_LIBS)
 AM_CONDITIONAL(HAVE_GUILE, test "${have_libguile}" != no)
 
 # ---------------------------- #
+# Check for compile support.   #
+# ---------------------------- #
+
+AC_ARG_ENABLE([gdb-compile],
+    AS_HELP_STRING([--enable-gdb-compile],
+	      [enable support for the compile subsystem, default 'yes']),
+	      [GDB_CHECK_YES_NO_VAL([$enableval], [--enable-gdb-compile])],
+	      [enable_gdb_compile=yes])
+
+if test "${enable_gdb_compile}" == yes; then
+    AC_DEFINE(HAVE_COMPILE, 1, [Define if compiling support to gdb compile.])
+    CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GCC_COMPILE_OBS)"
+else
+    # Even if compile support is not enabled, we need this file to define
+    # the "compile" command.
+    CONFIG_OBS="$CONFIG_OBS compile/compile.o"
+    CONFIG_SRCS="$CONFIG_SRCS compile/compile.c"
+fi
+
+# ---------------------------- #
 # Check for source highlight.  #
 # ---------------------------- #
 

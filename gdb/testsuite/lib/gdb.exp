@@ -2799,6 +2799,12 @@ gdb_caching_proc allow_python_tests {} {
     return [expr {[string first "--with-python" $output] != -1}]
 }
 
+# Return a 1 if GDB was configured to support compile commands.
+gdb_caching_proc allow_compile_tests {} {
+    set output [remote_exec host $::GDB "$::INTERNAL_GDBFLAGS -ex \"compile int x = 1\" -batch"]
+    return [expr {[string first "The program must be running" $output] != -1}]
+}
+
 # Return a 1 for configurations that use system readline rather than the
 # in-repo copy.
 
