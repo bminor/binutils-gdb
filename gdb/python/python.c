@@ -772,7 +772,8 @@ execute_gdb_command (PyObject *self, PyObject *args, PyObject *kw)
     }
 
   if (to_string)
-    return PyUnicode_FromString (to_string_res.c_str ());
+    return PyUnicode_Decode (to_string_res.c_str (), to_string_res.size (),
+			     host_charset (), nullptr);
   Py_RETURN_NONE;
 }
 

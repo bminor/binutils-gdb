@@ -13,9 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Check that the Python pygments module can be used for source
-# highlighting when GNU source highlight is not available (or is
-# disabled, as is done in this test).
+# Test related to source code highlighting and Python.  Includes a
+# test for using the Pygments module as a fall back to GNU source
+# highlight.
+#
+# This script also includes tests for handling a non-uft-8 character
+# with both Pygments highlighting, and with gdb.execute (when using
+# the list command).
 
 require allow_python_tests
 
@@ -23,14 +27,17 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-with_ansi_styling_terminal {
-    # We need an ANSI-capable terminal to get the output, additionally
-    # we need to set LC_ALL so GDB knows the terminal is UTF-8
-    # capable, otherwise we'll get a UnicodeEncodeError trying to
-    # encode the output.
-    if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
-	return
-    }
+if { [build_executable "failed to build" ${testfile} ${srcfile}] == -1 } {
+    return
+}
+
+set line_number [gdb_get_line_number "List this line."]
+
+# Check that the Python pygments module can be used for source
+# highlighting when GNU source highlight is not available (or is
+# disabled, as is done in this test).
+proc test_pygments_styling {} {
+    clean_restart $::binfile
 
     if { ![gdb_py_module_available "pygments"] } {
 	unsupported "pygments module not available"
@@ -46,8 +53,7 @@ with_ansi_styling_terminal {
     gdb_test "maint flush source-cache" "Source cache flushed\\."
 
     set seen_style_escape false
-    set line_number [gdb_get_line_number "List this line."]
-    gdb_test_multiple "list ${line_number}" "" {
+    gdb_test_multiple "list $::line_number" "" {
 	-re "Python Exception.*" {
 	    fail $gdb_test_name
 	}
@@ -55,8 +61,43 @@ with_ansi_styling_terminal {
 	    set seen_style_escape true
 	    exp_continue
 	}
-	-re "$gdb_prompt $" {
+	-re "$::gdb_prompt $" {
 	    gdb_assert { $seen_style_escape } $gdb_test_name
 	}
     }
+}
+
+# Use gdb.execute to list source code containing non-utf-8 character.
+# Check that initially GDB fails to convert the source code to a
+# string, then set the correct host encoding, and try again.  This
+# time the conversion should succeed.
+proc test_gdb_execute_non_utf8_source {} {
+    clean_restart $::binfile
+
+    # The default host charset is utf-8, the source code contains a
+    # non-utf-8 character, so this will fail.
+    gdb_test \
+	"python source = gdb.execute('list $::line_number', True, True)" \
+	[multi_line \
+	     "Python Exception <class 'UnicodeDecodeError'>: 'ascii' codec can't decode byte 0xc0 in position 250: ordinal not in range\\(128\\)" \
+	     "Error occurred in Python: 'ascii' codec can't decode byte 0xc0 in position 250: ordinal not in range\\(128\\)"] \
+	"gdb.execute fails to convert result to string"
+
+    # Set the correct host charset, and try the conversion again.
+    gdb_test_no_output "set host-charset ISO-8859-1"
+    gdb_test_no_output \
+	"python source = gdb.execute('list $::line_number', True, True)" \
+	"gdb.execute does convert result to string"
+
+    # Check that we captured something that looks like the expected source.
+    gdb_test "python print(source)" ".*List this line.*"
+}
+
+# We need an ANSI-capable terminal to get the output, additionally we
+# need to set LC_ALL so GDB knows the terminal is UTF-8 capable,
+# otherwise we'll get a UnicodeEncodeError trying to encode the
+# output.
+with_ansi_styling_terminal {
+    test_pygments_styling
+    test_gdb_execute_non_utf8_source
 }
