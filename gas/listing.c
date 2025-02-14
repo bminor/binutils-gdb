@@ -820,9 +820,8 @@ calc_hex (list_info_type *list)
 	}
       else if (frag_ptr->fr_type == rs_fill_nop && frag_ptr->fr_opcode)
 	{
-	  gas_assert (!octet_in_frag);
-
 	  /* Print as many bytes from fr_opcode as is sensible.  */
+	  octet_in_frag = 0;
 	  while (octet_in_frag < (unsigned int) frag_ptr->fr_offset
 		 && data_buffer_size < MAX_BYTES - 3)
 	    {
