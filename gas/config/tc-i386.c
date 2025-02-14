@@ -12234,21 +12234,23 @@ output_insn (const struct last_insn *last_insn)
 #ifdef OBJ_ELF
   if (x86_used_note && now_seg != absolute_section)
     {
+      unsigned int feature_2_used = 0;
+
       if ((i.xstate & xstate_tmm) == xstate_tmm
 	  || is_cpu (&i.tm, CpuAMX_TILE))
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_TMM;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_TMM;
 
       if (is_cpu (&i.tm, Cpu8087)
 	  || is_cpu (&i.tm, Cpu287)
 	  || is_cpu (&i.tm, Cpu387)
 	  || is_cpu (&i.tm, Cpu687)
 	  || is_cpu (&i.tm, CpuFISTTP))
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X87;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X87;
 
       if ((i.xstate & xstate_mmx)
 	  || i.tm.mnem_off == MN_emms
 	  || i.tm.mnem_off == MN_femms)
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
 
       if (i.index_reg)
 	{
@@ -12271,25 +12273,29 @@ output_insn (const struct last_insn *last_insn)
 		  || is_cpu (&i.tm, CpuAVX)))
 	  || is_cpu (&i.tm, CpuWideKL)
 	  || is_cpu (&i.tm, CpuKL))
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
 
       if ((i.xstate & xstate_ymm) == xstate_ymm)
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_YMM;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_YMM;
       if ((i.xstate & xstate_zmm) == xstate_zmm)
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_ZMM;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_ZMM;
       if (i.mask.reg || (i.xstate & xstate_mask) == xstate_mask)
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MASK;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MASK;
       if (is_cpu (&i.tm, CpuFXSR))
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_FXSR;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_FXSR;
       if (is_cpu (&i.tm, CpuXsave))
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVE;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVE;
       if (is_cpu (&i.tm, CpuXsaveopt))
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT;
       if (is_cpu (&i.tm, CpuXSAVEC))
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEC;
+	feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEC;
+
+      x86_feature_2_used |= feature_2_used;
 
       if (object_64bit
-	  || x86_feature_2_used
+	  || (feature_2_used
+	      & (GNU_PROPERTY_X86_FEATURE_2_XMM
+		 | GNU_PROPERTY_X86_FEATURE_2_FXSR)) != 0
 	  || is_cpu (&i.tm, CpuCMOV)
 	  || is_cpu (&i.tm, CpuSYSCALL)
 	  || i.tm.mnem_off == MN_cmpxchg8b)
@@ -12317,13 +12323,13 @@ output_insn (const struct last_insn *last_insn)
 	      && !is_cpu (&i.tm, CpuFMA4)
 	      && !is_cpu (&i.tm, CpuLWP)
 	      && !is_cpu (&i.tm, CpuTBM)
-	      && !(x86_feature_2_used & GNU_PROPERTY_X86_FEATURE_2_TMM))
+	      && !(feature_2_used & GNU_PROPERTY_X86_FEATURE_2_TMM))
 	  || is_cpu (&i.tm, CpuF16C)
 	  || is_cpu (&i.tm, CpuFMA)
 	  || is_cpu (&i.tm, CpuLZCNT)
 	  || is_cpu (&i.tm, CpuMovbe)
 	  || is_cpu (&i.tm, CpuXSAVES)
-	  || (x86_feature_2_used
+	  || (feature_2_used
 	      & (GNU_PROPERTY_X86_FEATURE_2_XSAVE
 		 | GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT
 		 | GNU_PROPERTY_X86_FEATURE_2_XSAVEC)) != 0)
