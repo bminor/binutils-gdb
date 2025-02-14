@@ -194,6 +194,17 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 	  ull = read_offset (abfd, entry, offset_size);
 	  entry += offset_size;
 	  break;
+	case DW_FORM_data1:
+	  ull = *entry++;
+	  break;
+	case DW_FORM_data2:
+	  ull = read_2_bytes (abfd, entry);
+	  entry += 2;
+	  break;
+	case DW_FORM_data4:
+	  ull = read_4_bytes (abfd, entry);
+	  entry += 4;
+	  break;
 	case DW_FORM_ref4:
 	  ull = read_4_bytes (abfd, entry);
 	  entry += 4;
@@ -207,9 +218,12 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 	  entry += 8;
 	  break;
 	default:
-	  complaint (_("Unsupported .debug_names form %s [in module %s]"),
-		     dwarf_form_name (attr.form),
-		     bfd_get_filename (abfd));
+	  /* A warning instead of a complaint, because this one is
+	     more like a bug in gdb.  */
+	  warning (_("Unsupported .debug_names form %s [in module %s].\n"
+		     "This normally should not happen, please file a bug report."),
+		   dwarf_form_name (attr.form),
+		   bfd_get_filename (abfd));
 	  return nullptr;
 	}
       switch (attr.dw_idx)
