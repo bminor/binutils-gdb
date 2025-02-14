@@ -702,7 +702,7 @@ operand, as long as there is one.
 syntax tries to resemble that used in documentation:
 @itemize @bullet
 @item @code{VEX}[@code{.@var{len}}][@code{.@var{prefix}}][@code{.@var{space}}][@code{.@var{w}}]
-@item @code{EVEX}[@code{.@var{len}}][@code{.@var{prefix}}][@code{.@var{space}}][@code{.@var{w}}]
+@item @code{EVEX}[@code{.@var{len}}][@code{.@var{prefix}}][@code{.@var{space}}][@code{.@var{w}}][@code{.@var{opt}}]
 @item @code{XOP}@var{space}[@code{.@var{len}}][@code{.@var{prefix}}][@code{.@var{w}}]
 @end itemize
 
@@ -717,10 +717,11 @@ only) @code{512} as well as @code{L0} / @code{L1} for VEX / XOP and
 @item @code{0f}, @code{0f38}, @code{0f3a}, or @code{M0}...@code{M31}
 for VEX
 @item @code{08}...@code{1f} for XOP
-@item @code{0f}, @code{0f38}, @code{0f3a}, or @code{M0}...@code{M15}
+@item @code{0f}, @code{0f38}, @code{0f3a}, or @code{M0}...@code{M7}
 for EVEX
 @end itemize
 @item @var{w} can be @code{WIG}, @code{W0}, or @code{W1}
+@item @var{opt} can be @code{ND} or @code{ZU}
 @end itemize
 
 Defaults:
@@ -807,6 +808,12 @@ specify the respective size.  In AT&T syntax the memory operands can
 be suffixed by @code{@{:d@var{n}@}} to specify the size (in bytes).
 This can be combined with an embedded broadcast specifier:
 @samp{8(%eax)@{1to8:d8@}}.
+
+For SCC EVEX the @code{@{dfv=@}} specifier used by ordinary insns is
+extended and immediately follows the opcode specifier.  The extension
+is that the SCC value needs to be specified and goes first, as in
+@code{@{scc=@var{n},dfv=...@}}.  Unlike for ordinary insns @code{dfv=}
+may be omitted for brevity.
 
 @cindex @code{noopt} directive
 @item .noopt

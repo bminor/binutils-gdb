@@ -104,3 +104,24 @@ insn:
 	# vcvtph2pd
 	.insn EVEX.M5.W0 0x5a, 16(%rax){:d16}, %zmm0
 	.insn EVEX.M5.W0 0x5a, 2(%rax){1to8:d2}, %zmm0
+
+	# movrs (APX)
+	.insn EVEX.L0.NP.M4 0x8b, (%rax), %r16d
+	.insn EVEX.L0.NP.M4 0x8b, (%r16), %eax
+	.insn EVEX.L0.NP.M4 0x8b, (%rax,%r16), %eax
+
+	# movbe (APX)
+	.insn EVEX.L0.NP.M4 0x60, %r16d, %eax
+
+	# add (APX)
+	.insn {nf} EVEX.L0.NP.M4 0x01, %eax, %eax
+	.insn EVEX.L0.NP.M4.ND 0x01, %eax, %eax, %eax
+
+	# push2p
+	.insn EVEX.L0.NP.M4.W1.ND 0xff/6, %rcx, %rdx
+
+	# setzub
+	.insn EVEX.L0.F2.M4.ZU 0x42/0, %eax
+
+	# ccmpf
+	.insn EVEX.L0.NP.M4 0x39 {scc=0b1011,dfv=of}, %eax, %eax

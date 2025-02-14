@@ -12,7 +12,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:[ 	]+c7[ 	]+\(bad\)
 [ 	]*[a-f0-9]+:[ 	]+62 fc 7f 08 60[ 	]+\(bad\)
 [ 	]*[a-f0-9]+:[ 	]+c7[ 	]+\(bad\)
-[ 	]*[a-f0-9]+:[ 	]+62 e2 f9 41 91 84[ 	]+vpgatherqq \(bad\),%zmm16\{%k1\}
+[ 	]*[a-f0-9]+:[ 	]+62 e2 f9 41 91 44[ 	]+vpgatherqq \(bad\),%zmm16\{%k1\}
 [ 	]*[a-f0-9]+:[ 	]+cd ff[ 	]+int    \$0xff
 [ 	]*[a-f0-9]+:[ 	]+62 fd 7d 08 60[ 	]+\(bad\)
 [ 	]*[a-f0-9]+:[ 	]+c7[ 	]+.*

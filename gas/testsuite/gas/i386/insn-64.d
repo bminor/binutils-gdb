@@ -63,4 +63,13 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f5 fd 58 5a 40 01[ 	]+vcvtpd2ph (0x)?8\(%rax\)\{1to8\},%xmm0
 [ 	]*[a-f0-9]+:	62 f5 7c 48 5a 40 01[ 	]+vcvtph2pd 0x10\(%rax\),%zmm0
 [ 	]*[a-f0-9]+:	62 f5 7c 58 5a 40 01[ 	]+vcvtph2pd (0x)?2\(%rax\)\{1to8\},%zmm0
+[ 	]*[a-f0-9]+:	62 e4 7c 08 8b 00[ 	]+movrs  \(%rax\),%r16d
+[ 	]*[a-f0-9]+:	62 fc 7c 08 8b 00[ 	]+movrs  \(%r16\),%eax
+[ 	]*[a-f0-9]+:	62 f4 78 08 8b 04 00[ 	]+movrs  \(%rax,%r16(,1)?\),%eax
+[ 	]*[a-f0-9]+:	62 fc 7c 08 60 c0[ 	]+movbe  %r16d,%eax
+[ 	]*[a-f0-9]+:	62 f4 7c 0c 01 c0[ 	]+\{nf\} add %eax,%eax
+[ 	]*[a-f0-9]+:	62 f4 7c 18 01 c0[ 	]+add    %eax,%eax,%eax
+[ 	]*[a-f0-9]+:	62 f4 ec 18 ff f1[ 	]+push2p %rcx,%rdx
+[ 	]*[a-f0-9]+:	62 f4 7f 18 42 c0[ 	]+setzub %al
+[ 	]*[a-f0-9]+:	62 f4 44 0b 39 c0[ 	]+ccmpf \{dfv=of\} %eax,%eax
 #pass

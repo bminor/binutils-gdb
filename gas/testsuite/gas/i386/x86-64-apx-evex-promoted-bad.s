@@ -9,9 +9,8 @@ _start:
 	#movbe %r23w,%ax set EVEX.pp = f2.
 	.insn EVEX.L0.f2.M12.W0 0x60, %di, %ax
 
-	#VSIB vpgatherqq (%rbp,%zmm17,8),%zmm16{%k1} set EVEX.P[10] == 0
-	.byte 0x62, 0xe2, 0xf9, 0x41, 0x91, 0x84, 0xcd
-	.byte 0xff
+	#VSIB vpgatherqq -8(%rbp,%zmm17,8),%zmm16{%k1} set EVEX.U = 0.
+	.insn EVEX.512.66.0f38.W1 0x91, -8(%rbp,%r17,8){:d8}, %zmm16{%k1}, %r16
 
 	#EVEX_MAP4 movbe %r23w,%ax set EVEX.mm == 0b01.
 	.insn EVEX.L0.66.M13.W0 0x60, %di, %ax
@@ -38,11 +37,11 @@ _start:
 	#EVEX from VEX bzhi %rax,(%rax,%rbx),%rcx EVEX.P[20](EVEX.b) == 0b1
 	.insn EVEX.L0.NP.0f38.W1 0xf5, %rax, (%rax,%rbx){1to8}, %rcx
 
-	#{evex} inc %rax %rbx EVEX.vvvv != 1111 && EVEX.ND = 0.
-	.byte 0x62, 0xf4, 0xe4, 0x08, 0xff, 0x04, 0x08
+	#{evex} inc (%rax,%rcx), %rbx EVEX.vvvv != 1111 && EVEX.ND = 0.
+	.insn EVEX.L0.NP.M4 0xff/0, (%rax,%rcx), %rbx
 
 	# pop2 %rdi, %r8 set EVEX.ND=0.
-	.byte 0x62, 0xf4, 0x3c, 0x08, 0x8f, 0xc7
+	.insn EVEX.L0.NP.M4.W0 0x8f/0, %rdi, %r8
 
 	# pop2 %rax, %rax
 	.insn EVEX.L0.NP.M4.W0 0x8f/0, %rax, {sae}, %rax
@@ -59,7 +58,7 @@ _start:
 	#EVEX_MAP4 movbe %r18w,%ax set EVEX.nf = 1.
 	.insn EVEX.L0.66.M12.W0 0x60, %di, %ax {%k4}
 
-	# EVEX_MAP4 movbe %r23w,%ax set EVEX.P[10] = 0.
+	# EVEX_MAP4 movbe %r23w,%ax set EVEX.U = 0.
 	.byte 0x62, 0xfc, 0x79, 0x08, 0x60, 0xc7
 
 	# ccmps {dfv=of,sf,zf,cf} %r15, %rdx set EVEX.ND = 1.
