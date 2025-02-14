@@ -10828,6 +10828,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 	      uint64_t abbrev_tag;
 	      uint64_t dwarf_tag;
 	      const struct abbrev_lookup_entry *entry;
+	      uint64_t this_entry = entryptr - entry_pool;
 
 	      READ_ULEB (abbrev_tag, entryptr, unit_end);
 	      if (tagno == -1)
@@ -10840,9 +10841,9 @@ display_debug_names (struct dwarf_section *section, void *file)
 	      if (abbrev_tag == 0)
 		break;
 	      if (tagno >= 0)
-		printf ("%s<%" PRIu64 ">",
+		printf ("%s<%#" PRIx64 "><%" PRIu64 ">",
 			(tagno == 0 && second_abbrev_tag == 0 ? " " : "\n\t"),
-			abbrev_tag);
+			this_entry, abbrev_tag);
 
 	      for (entry = abbrev_lookup;
 		   entry < abbrev_lookup + abbrev_lookup_used;
