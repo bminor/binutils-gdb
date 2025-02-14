@@ -12943,17 +12943,14 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		  && (i.rm.mode == 2
 		      || (i.rm.mode == 0 && i.rm.regmem == 5))
 		  && ((space == SPACE_BASE
-		       && i.operands == 1
 		       && i.tm.base_opcode == 0xff
 		       && (i.rm.reg == 2 || i.rm.reg == 4))
 		      || ((space == SPACE_BASE
 			   || space == SPACE_0F38
 			   || space == SPACE_MAP4)
-			  && i.operands == 2
 			  && i.tm.base_opcode == 0x8b)
 		      || ((space == SPACE_BASE
 			   || space == SPACE_MAP4)
-			  && i.operands >= 2
 			  && (i.tm.base_opcode == 0x85
 			      || (i.tm.base_opcode
 				  | (i.operands > 2 ? 0x3a : 0x38)) == 0x3b))))
