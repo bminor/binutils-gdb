@@ -1683,5 +1683,8 @@ void disassemble_free_riscv (struct disassemble_info *info ATTRIBUTE_UNUSED)
 {
   struct riscv_private_data *pd = info->private_data;
   if (pd)
-    riscv_release_subset_list (pd->riscv_rps_dis.subset_list);
+    {
+      riscv_release_subset_list (pd->riscv_rps_dis.subset_list);
+      free (pd->riscv_rps_dis.subset_list);
+    }
 }
