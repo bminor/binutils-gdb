@@ -394,6 +394,9 @@ changequote([,])dnl
 	esac
 	# If Vendor is IMG, then MIPSr6 is used
 	case ${target} in
+	  mips64*-img-*)
+	    mips_cpu=mips64r6
+	    ;;
 	  mips*-img-*)
 	    mips_cpu=mips32r6
 	    ;;
