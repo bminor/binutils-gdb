@@ -124,11 +124,15 @@ proc mips_arch_init {} {
 # the entry specified by EXTENDS.  (The new architecture is considered
 # to extend the capabilities provided by that architecture.)
 #
-# If DEFAULT_FOR_TARGETS is specified, it is a list of targets for which
-# this architecture is the default architecture.  If "istarget" returns
-# true for any of the targets in the list, a "default" entry will be
-# added to the architecture array which indicates that ARCH is the default
-# architecture.
+# If DEFAULT_FOR_TARGETS is specified, it is a list of targets to match
+# against for the purpose of setting the default architecture.  Entries
+# are examined in turn with any preceding "!" stripped until either all
+# have been processed or "istarget" returns true for a match.  In the
+# case of a match a "default" entry will be added to the architecture
+# array which indicates that ARCH is the default architecture unless
+# the match was for a target preceded by "!".  This lets an early match
+# against a more specific entry preceded by "!" prevent from matching a
+# more general entry placed later in the list.
 proc mips_arch_create {arch gprsize extends props as_flags objdump_flags
 		       {default_for_targets {}}} {
     global mips_arches
@@ -154,6 +158,10 @@ proc mips_arch_create {arch gprsize extends props as_flags objdump_flags
 
     # Set as default if appropriate.
     foreach target $default_for_targets {
+	if { [string match {!*} $target]
+	     && [istarget [string range $target 1 end]] } {
+	    break
+	}
 	if { [istarget $target] } {
 	    if { [info exists mips_arches(default)] } {
 		error "mips_arch_create: default arch already exists"
