@@ -392,7 +392,7 @@ changequote([,])dnl
 	    use_ef_mips_abi_o32=1
 	    ;;
 	esac
-	# If Vendor is IMG, then MIPSr6 is used
+	# If target vendor is IMG, then MIPSr6 is used.
 	case ${target} in
 	  mips64*-img-*)
 	    mips_cpu=mips64r6
