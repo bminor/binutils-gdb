@@ -1340,11 +1340,15 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "gpr-names-32"
     run_dump_test "gpr-names-n32"
     run_dump_test "gpr-names-64"
+    run_dump_test "gpr-names-eabi32"
+    run_dump_test "gpr-names-eabi64"
 
     run_dump_test "fpr-names-numeric"
     run_dump_test "fpr-names-32"
     run_dump_test "fpr-names-n32"
     run_dump_test "fpr-names-64"
+    run_dump_test "fpr-names-eabi32"
+    run_dump_test "fpr-names-eabi64"
 
     run_dump_test "cp0-names-numeric"
     run_dump_test "cp0-names-r3000"
