@@ -32,5 +32,5 @@ if [istarget score-*-*] then {
     run_dump_test "move"
     run_dump_test "rD_rA_BN"
     run_dump_test "rD_rA"
+    run_dump_test pr32700
 }
-

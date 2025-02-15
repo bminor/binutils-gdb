@@ -6845,7 +6845,7 @@ s7_gen_reloc (asection * section ATTRIBUTE_UNUSED, fixS * fixp)
       s7_number_to_chars (buf, newval, s7_INSN_SIZE);
 
       retval[1] = notes_alloc (sizeof (arelent));
-      retval[2]->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
+      retval[1]->sym_ptr_ptr = notes_alloc (sizeof (asymbol *));
       retval[2] = NULL;
       *retval[1]->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
       retval[1]->address = (reloc->address + s7_RELAX_RELOC2 (fixp->fx_frag->fr_subtype));
