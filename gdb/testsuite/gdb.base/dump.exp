@@ -26,12 +26,6 @@ set endian "auto"
 
 set formats {binary ihex srec tekhex  verilog}
 
-if {[istarget "alpha*-*-*"]} {
-    # SREC etc cannot handle 64-bit addresses.  Force the test
-    # program into the low 31 bits of the address space.
-    lappend options "ldflags=-Wl,-taso"
-}
-
 # Runs the command 'print zero_all ()'.  Uses the PRINT_ZERO_ALL_COUNT
 # global to ensure the test names are unique.
 set print_zero_all_count 0

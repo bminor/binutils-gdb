@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Remove the linker -taso option for Alpha target, as Linux/Alpha kernel
+  support for 32-bit pointers has been removed.
+
 * On s390, generate ".eh_frame" unwind information for the linker generated
   .plt section.  Enabled by default.  Can be disabled using linker option
   --no-ld-generated-unwind-info.

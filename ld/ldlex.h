@@ -246,7 +246,6 @@ enum option_values
   OPTION_LIBPATH,
   OPTION_NOLIBPATH,
   /* Used by emultempl/alphaelf.em.  */
-  OPTION_TASO,
   OPTION_SECUREPLT,
   OPTION_NO_SECUREPLT,
   /* Used by emultempl/armelf.em.  */
