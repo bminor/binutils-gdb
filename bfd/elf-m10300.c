@@ -2646,8 +2646,8 @@ mn10300_elf_relax_section (bfd *abfd,
   bfd_vma align_gap_adjustment;
 
   if (bfd_link_relocatable (link_info))
-    (*link_info->callbacks->einfo)
-      (_("%P%F: --relax and -r may not be used together\n"));
+    link_info->callbacks->fatal
+      (_("%P: --relax and -r may not be used together\n"));
 
   /* Assume nothing changes.  */
   *again = false;

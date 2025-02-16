@@ -877,6 +877,9 @@ struct bfd_link_callbacks
     (struct bfd_link_info *, struct bfd_link_hash_entry *h,
      struct bfd_link_hash_entry *inh,
      bfd *abfd, asection *section, bfd_vma address, flagword flags);
+  /* Fatal error.  */
+  void (*fatal)
+    (const char *fmt, ...) ATTRIBUTE_NORETURN;
   /* Error or warning link info message.  */
   void (*einfo)
     (const char *fmt, ...);

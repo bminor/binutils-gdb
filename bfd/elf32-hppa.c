@@ -728,7 +728,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	 section.  The user should fix his linker script.  */
       if (hsh->target_section->output_section == NULL
 	  && info->non_contiguous_regions)
-	info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output "
+	info->callbacks->fatal (_("%P: Could not assign `%pA' to an output "
 				  "section. Retry without "
 				  "--enable-non-contiguous-regions.\n"),
 				hsh->target_section);
@@ -757,7 +757,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	 section.  The user should fix his linker script.  */
       if (hsh->target_section->output_section == NULL
 	  && info->non_contiguous_regions)
-	info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output "
+	info->callbacks->fatal (_("%P: Could not assign `%pA' to an output "
 				  "section. Retry without "
 				  "--enable-non-contiguous-regions.\n"),
 				hsh->target_section);
@@ -838,7 +838,7 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	 section.  The user should fix his linker script.  */
       if (hsh->target_section->output_section == NULL
 	  && info->non_contiguous_regions)
-	info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output "
+	info->callbacks->fatal (_("%P: Could not assign `%pA' to an output "
 				  "section. Retry without "
 				  "--enable-non-contiguous-regions.\n"),
 				hsh->target_section);

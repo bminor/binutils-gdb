@@ -4334,8 +4334,8 @@ elf_link_add_to_first_hash (bfd *abfd, struct bfd_link_info *info,
     = ((struct elf_link_first_hash_entry *)
        bfd_hash_lookup (htab->first_hash, name, true, copy));
   if (e == NULL)
-    info->callbacks->einfo
-      (_("%F%P: %pB: failed to add %s to first hash\n"), abfd, name);
+    info->callbacks->fatal
+      (_("%P: %pB: failed to add %s to first hash\n"), abfd, name);
 
   if (e->abfd == NULL)
     /* Store ABFD in abfd.  */
@@ -4402,8 +4402,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      || !bfd_hash_table_init
 		   (htab->first_hash, elf_link_first_hash_newfunc,
 		    sizeof (struct elf_link_first_hash_entry)))
-	    info->callbacks->einfo
-	      (_("%F%P: first_hash failed to create: %E\n"));
+	    info->callbacks->fatal
+	      (_("%P: first_hash failed to create: %E\n"));
 	}
     }
   else
@@ -13074,8 +13074,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (info->enable_dt_relr
       && bed->finish_relative_relocs
       && !bed->finish_relative_relocs (info))
-    info->callbacks->einfo
-      (_("%F%P: %pB: failed to finish relative relocations\n"), abfd);
+    info->callbacks->fatal
+      (_("%P: %pB: failed to finish relative relocations\n"), abfd);
 
   /* Since ELF permits relocations to be against local symbols, we
      must have the local symbols available when we do the relocations.
@@ -14002,7 +14002,7 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
       h = cookie->sym_hashes[r_symndx - cookie->extsymoff];
       if (h == NULL)
 	{
-	  info->callbacks->einfo (_("%F%P: corrupt input: %pB\n"),
+	  info->callbacks->fatal (_("%P: corrupt input: %pB\n"),
 				  sec->owner);
 	  return NULL;
 	}
@@ -14255,7 +14255,7 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 	  else if (strcmp (bfd_section_name (isec),
 			   "__patchable_function_entries") == 0
 		   && elf_linked_to_section (isec) == NULL)
-	      info->callbacks->einfo (_("%F%P: %pB(%pA): error: "
+	      info->callbacks->fatal (_("%P: %pB(%pA): error: "
 					"need linked-to section "
 					"for --gc-sections\n"),
 				      isec->owner, isec);
@@ -15432,7 +15432,7 @@ _bfd_elf_section_already_linked (bfd *abfd,
 
   /* This is the first section with this name.  Record it.  */
   if (!bfd_section_already_linked_table_insert (already_linked_list, sec))
-    info->callbacks->einfo (_("%F%P: already_linked_table: %E\n"));
+    info->callbacks->fatal (_("%P: already_linked_table: %E\n"));
   return sec->output_section == bfd_abs_section_ptr;
 }
 

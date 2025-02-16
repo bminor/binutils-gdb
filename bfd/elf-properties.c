@@ -637,11 +637,11 @@ _bfd_elf_link_create_gnu_property_sec (struct bfd_link_info *info, bfd *elf_bfd,
 				      | SEC_HAS_CONTENTS
 				      | SEC_DATA));
   if (sec == NULL)
-    info->callbacks->einfo (_("%F%P: failed to create GNU property section\n"));
+    info->callbacks->fatal (_("%P: failed to create GNU property section\n"));
 
   if (!bfd_set_section_alignment (sec,
 				  elfclass == ELFCLASS64 ? 3 : 2))
-    info->callbacks->einfo (_("%F%pA: failed to align section\n"),
+    info->callbacks->fatal (_("%pA: failed to align section\n"),
 			    sec);
 
   elf_section_type (sec) = SHT_NOTE;

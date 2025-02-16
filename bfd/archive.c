@@ -744,8 +744,8 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos,
 	    case bfd_error_system_call:
 	      if (info != NULL)
 		{
-		  info->callbacks->einfo
-		    (_("%F%P: %pB(%s): error opening thin archive member: %E\n"),
+		  info->callbacks->fatal
+		    (_("%P: %pB(%s): error opening thin archive member: %E\n"),
 		     archive, filename);
 		  break;
 		}
