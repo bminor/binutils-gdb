@@ -751,81 +751,22 @@ core_create_function_syms (void)
 void
 core_create_line_syms (void)
 {
-  char *prev_name, *prev_filename;
-  unsigned int prev_name_len, prev_filename_len;
   bfd_vma vma;
-  Sym *prev, dummy, *sym;
+  Sym prev, *sym;
   const char *filename;
-  int prev_line_num;
   Sym_Table ltab;
   bfd_vma vma_high;
+  size_t ltab_reserved;
 
   /* Create symbols for functions as usual.  This is necessary in
      cases where parts of a program were not compiled with -g.  For
      those parts we still want to get info at the function level.  */
   core_create_function_syms ();
 
-  /* Pass 1: count the number of symbols.  */
-
-  /* To find all line information, walk through all possible
-     text-space addresses (one by one!) and get the debugging
-     info for each address.  When the debugging info changes,
-     it is time to create a new symbol.
-
-     Of course, this is rather slow and it would be better if
-     BFD would provide an iterator for enumerating all line infos.  */
-  prev_name_len = 1024;
-  prev_filename_len = 1024;
-  prev_name = (char *) xmalloc (prev_name_len);
-  prev_filename = (char *) xmalloc (prev_filename_len);
+  ltab_reserved = 1024;
   ltab.len = 0;
-  prev_line_num = 0;
-
-  vma_high = core_text_sect->vma + bfd_section_size (core_text_sect);
-  for (vma = core_text_sect->vma; vma < vma_high; vma += insn_boundary)
-    {
-      unsigned int len;
-
-      if (!get_src_info (vma, &filename, &dummy.name, &dummy.line_num)
-	  || (prev_line_num == dummy.line_num
-	      && prev_name != NULL
-	      && strcmp (prev_name, dummy.name) == 0
-	      && filename_cmp (prev_filename, filename) == 0))
-	continue;
-
-      ++ltab.len;
-      prev_line_num = dummy.line_num;
-
-      len = strlen (dummy.name);
-      if (len >= prev_name_len)
-	{
-	  prev_name_len = len + 1024;
-	  free (prev_name);
-	  prev_name = (char *) xmalloc (prev_name_len);
-	}
-
-      strcpy (prev_name, dummy.name);
-      len = strlen (filename);
-
-      if (len >= prev_filename_len)
-	{
-	  prev_filename_len = len + 1024;
-	  free (prev_filename);
-	  prev_filename = (char *) xmalloc (prev_filename_len);
-	}
-
-      strcpy (prev_filename, filename);
-    }
-
-  free (prev_name);
-  free (prev_filename);
-
-  /* Make room for function symbols, too.  */
-  ltab.len += symtab.len;
-  ltab.base = (Sym *) xmalloc (ltab.len * sizeof (Sym));
+  ltab.base = xmalloc (ltab_reserved * sizeof (Sym));
   ltab.limit = ltab.base;
-
-  /* Pass 2 - create symbols.  */
 
   /* We now set is_static as we go along, rather than by running
      through the symbol table at the end.
@@ -843,16 +784,24 @@ core_create_line_syms (void)
      Perhaps symtab_finalize should be modified to make this
      distinction as well, but the current fix works and the code is a
      lot cleaner now.  */
-  prev = 0;
+  memset (&prev, 0, sizeof (prev));
 
+  vma_high = core_text_sect->vma + bfd_section_size (core_text_sect);
   for (vma = core_text_sect->vma; vma < vma_high; vma += insn_boundary)
     {
+      if (ltab.len >= ltab_reserved)
+	{
+	  /* Reserve more space for line symbols.  */
+	  ltab_reserved *= 2;
+	  ltab.base = (Sym *) xrealloc (ltab.base, ltab_reserved * sizeof (Sym));
+	  ltab.limit = ltab.base + ltab.len;
+	}
       sym_init (ltab.limit);
 
       if (!get_src_info (vma, &filename, &ltab.limit->name, &ltab.limit->line_num)
-	  || (prev && prev->line_num == ltab.limit->line_num
-	      && strcmp (prev->name, ltab.limit->name) == 0
-	      && filename_cmp (prev->file->name, filename) == 0))
+	  || (prev.name && prev.line_num == ltab.limit->line_num
+	      && strcmp (prev.name, ltab.limit->name) == 0
+	      && filename_cmp (prev.file->name, filename) == 0))
 	continue;
 
       /* Make name pointer a malloc'ed string.  */
@@ -864,10 +813,10 @@ core_create_line_syms (void)
       /* Set is_static based on the enclosing function, using either:
 	 1) the previous symbol, if it's from the same function, or
 	 2) a symtab lookup.  */
-      if (prev && ltab.limit->file == prev->file &&
-	  strcmp (ltab.limit->name, prev->name) == 0)
+      if (ltab.limit->file == prev.file
+	  && strcmp (ltab.limit->name, prev.name) == 0)
 	{
-	  ltab.limit->is_static = prev->is_static;
+	  ltab.limit->is_static = prev.is_static;
 	}
       else
 	{
@@ -876,26 +825,25 @@ core_create_line_syms (void)
 	    ltab.limit->is_static = sym->is_static;
 	}
 
-      prev = ltab.limit;
+      prev = *ltab.limit;
 
       DBG (AOUTDEBUG, printf ("[core_create_line_syms] %lu %s 0x%lx\n",
 			      (unsigned long) (ltab.limit - ltab.base),
 			      ltab.limit->name,
 			      (unsigned long) ltab.limit->addr));
       ++ltab.limit;
+      ++ltab.len;
     }
+
+  /* Reserve space for function symbols and/or trim excess space.  */
+  ltab_reserved = ltab.len + symtab.len;
+  ltab.base = xrealloc (ltab.base, ltab_reserved * sizeof (Sym));
+  ltab.limit = ltab.base + ltab.len;
 
   /* Copy in function symbols.  */
   memcpy (ltab.limit, symtab.base, symtab.len * sizeof (Sym));
   ltab.limit += symtab.len;
-
-  if ((unsigned int) (ltab.limit - ltab.base) != ltab.len)
-    {
-      fprintf (stderr,
-	       _("%s: somebody miscounted: ltab.len=%d instead of %ld\n"),
-	       whoami, ltab.len, (long) (ltab.limit - ltab.base));
-      done (1);
-    }
+  ltab.len += symtab.len;
 
   /* Finalize ltab and make it symbol table.  */
   symtab_finalize (&ltab);
