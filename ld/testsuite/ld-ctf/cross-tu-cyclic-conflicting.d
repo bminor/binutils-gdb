@@ -31,7 +31,7 @@ Contents of CTF section \.ctf:
 CTF archive member: .*/ld/testsuite/ld-ctf/cross-tu-cyclic-1\.c:
 #...
   Types:
-    0x80[0-9a-f]*: \(kind 6\) struct A .*
+    0x[0-9a-f]*: \(kind 6\) struct A .*
         *\[0x0\] a: ID 0x[0-9a-f]*: \(kind 1\) long int .*
         *\[0x[0-9a-f]*\] foo: ID 0x[0-9a-f]*\: \(kind 3\) struct B \* .*
 
@@ -41,7 +41,7 @@ CTF archive member: .*/ld/testsuite/ld-ctf/cross-tu-cyclic-1\.c:
 CTF archive member: .*/ld/testsuite/ld-ctf/cross-tu-cyclic-2\.c:
 #...
   Types:
-    0x80[0-9a-f]*: \(kind 6\) struct A .*
+    0x[0-9a-f]*: \(kind 6\) struct A .*
         *\[0x0\] a: ID 0x[0-9a-f]*: \(kind 1\) long int .*
         *\[0x[0-9a-f]*\] foo: ID 0x[0-9a-f]*: \(kind 3\) struct B \* .*
         *\[0x[0-9a-f]*\] bar: ID 0x[0-9a-f]*: \(kind 3\) struct C \* .*

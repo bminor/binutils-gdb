@@ -28,12 +28,12 @@ CTF archive member: .*/C-2.c:
   Function objects:
 
   Variables:
-    c -> 0x80000001: \(kind 6\) struct C \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    c -> 0x[0-9a-f]*: \(kind 6\) struct C \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 
   Types:
-    0x80000001: \(kind 6\) struct C \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
-                \[0x0\] a: ID 0x[0-9a-f]*: \(kind 3\) struct A \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
-                \[0x[0-9a-f]*\] wombat: ID 0x[0-9a-f]*: \(kind 1\) int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x[0-9a-f]*: \(kind 6\) struct C \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+         \[0x0\] a: ID 0x[0-9a-f]*: \(kind 3\) struct A \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+         \[0x[0-9a-f]*\] wombat: ID 0x[0-9a-f]*: \(kind 1\) int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 
   Strings:
 #...

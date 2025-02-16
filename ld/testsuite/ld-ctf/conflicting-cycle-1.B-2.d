@@ -30,10 +30,10 @@ CTF archive member: .*/B-2.c:
   Function objects:
 
   Variables:
-    b -> 0x80000001: \(kind 6\) struct B \(.*
+    b -> 0x[0-9a-f]*: \(kind 6\) struct B \(.*
 
   Types:
-    0x8[0-9a-f]*: \(kind 6\) struct B \(.*
+    0x[0-9a-f]*: \(kind 6\) struct B \(.*
         *\[0x0\] c: ID 0x[0-9a-f]*: \(kind 3\) struct C \* \(.*
         *\[0x[0-9a-f]*\] wombat: ID 0x[0-9a-f]*: \(kind 1\) int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 

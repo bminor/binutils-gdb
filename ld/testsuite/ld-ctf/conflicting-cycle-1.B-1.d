@@ -30,10 +30,10 @@ CTF archive member: .*/B.c:
   Function objects:
 
   Variables:
-    b -> 0x80000001: \(kind 6\) struct B \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    b -> 0x[0-9a-f]*: \(kind 6\) struct B \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 
   Types:
-    0x8[0-9a-f]*: \(kind 6\) struct B .*
+    0x[0-9a-f]*: \(kind 6\) struct B .*
         *\[0x0\] c: ID 0x[0-9a-f]*: \(kind 3\) struct C \* \(.*
 
   Strings:
