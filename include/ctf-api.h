@@ -475,7 +475,7 @@ extern ctf_dict_t *ctf_parent_dict (ctf_dict_t *);
 extern const char *ctf_parent_name (ctf_dict_t *);
 extern int ctf_type_isparent (const ctf_dict_t *, ctf_id_t);
 extern int ctf_type_ischild (const ctf_dict_t *, ctf_id_t);
-extern int ctf_import (ctf_dict_t *, ctf_dict_t *);
+extern int ctf_import (ctf_dict_t *child, ctf_dict_t *parent);
 
 /* Set these names (used when creating dicts).  */
 
