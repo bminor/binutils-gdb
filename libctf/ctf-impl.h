@@ -802,6 +802,7 @@ _libctf_printflike_ (4, 5)
 extern void ctf_err_warn (ctf_dict_t *, int is_warning, int err,
 			  const char *, ...);
 extern void ctf_err_warn_to_open (ctf_dict_t *);
+extern void ctf_err_copy (ctf_dict_t *dest, ctf_dict_t *src);
 extern void ctf_assert_fail_internal (ctf_dict_t *, const char *,
 				      size_t, const char *);
 extern const char *ctf_link_input_name (ctf_dict_t *);

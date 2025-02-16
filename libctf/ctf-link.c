@@ -2030,7 +2030,6 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
   long fsize;
   const char *errloc;
   unsigned char *buf = NULL;
-  uint64_t old_parent_strlen, all_strlens = 0;
 
   memset (&arg, 0, sizeof (ctf_name_list_accum_cb_arg_t));
   arg.fp = fp;
@@ -2101,41 +2100,6 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
   memmove (&(arg.files[1]), arg.files, sizeof (ctf_dict_t *) * (arg.i));
   arg.files[0] = fp;
 
-  /* Preserialize everything, doing everything but strtab generation and things that
-     depend on that.  */
-  for (i = 0; i < arg.i + 1; i++)
-    {
-      if (ctf_preserialize (arg.files[i]) < 0)
-	{
-	  errno = ctf_errno (arg.files[i]);
-	  for (i--; i >= 0; i--)
-	    ctf_depreserialize (arg.files[i]);
-	  errloc = "preserialization";
-	  goto err_no;
-	}
-    }
-
-  ctf_dprintf ("Deduplicating strings.\n");
-
-  for (i = 0; i < arg.i; i++)
-    all_strlens += arg.files[i]->ctf_str[0].cts_len
-      + arg.files[i]->ctf_str_prov_len;
-  old_parent_strlen = arg.files[0]->ctf_str[0].cts_len
-    + arg.files[0]->ctf_str_prov_len;
-
-  if (ctf_dedup_strings (fp) < 0)
-    {
-      for (i = 0; i < arg.i + 1; i++)
-	ctf_depreserialize (arg.files[i]);
-      errloc = "string deduplication";
-      goto err_str_dedup;
-    }
-
-  ctf_dprintf ("Deduplicated strings: original parent strlen: %zu; "
-	       "original lengths: %zu; final length: %zu.\n",
-	       (size_t) old_parent_strlen, (size_t) all_strlens,
-	       (size_t) arg.files[0]->ctf_str_prov_len);
-
   if ((f = tmpfile ()) == NULL)
     {
       errloc = "tempfile creation";
@@ -2146,9 +2110,8 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 			       (const char **) arg.names,
 			       threshold)) < 0)
     {
-      errloc = "archive writing";
-      errno = err;
-      goto err_no;
+      errloc = NULL;				/* errno is set for us.  */
+      goto err_set;
     }
 
   if (fseek (f, 0, SEEK_END) < 0)
@@ -2207,7 +2170,7 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 
  err_no:
   ctf_set_errno (fp, errno);
- err_str_dedup:
+ err_set:
   /* Turn off the is-linking flag on all the dicts in this link, as above.  */
   for (i = 0; i < arg.i; i++)
     {
@@ -2229,7 +2192,8 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 	free (arg.dynames[i]);
       free (arg.dynames);
     }
-  ctf_err_warn (fp, 0, 0, _("cannot write archive in link: %s failure"),
-		errloc);
+  if (errloc)
+    ctf_err_warn (fp, 0, 0, _("cannot write archive in link: %s failure"),
+		  errloc);
   return NULL;
 }

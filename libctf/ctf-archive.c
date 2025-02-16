@@ -51,6 +51,64 @@ static int ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp,
    and ctfi_symnamedicts.  Never initialized.  */
 static ctf_dict_t enosym;
 
+/* Prepare to serialize everything.  Members of archives have dependencies on
+   each other, because the strtabs and type IDs of children depend on the
+   parent: so we have to work over the archive as a whole to prepare for final
+   serialization.
+
+   Returns zero on success, or an errno, or an ECTF_* value.
+
+   Updates the first dict in the archive with the errno value.  */
+
+static int
+ctf_arc_preserialize (ctf_dict_t **ctf_dicts, ssize_t ctf_dict_cnt)
+{
+  uint64_t old_parent_strlen, all_strlens = 0;
+  ssize_t i;
+  int err;
+
+  ctf_dprintf ("Preserializing dicts.\n");
+
+  /* Preserialize everything, doing everything but strtab generation and things
+     that depend on that.  */
+  for (i = 0; i < ctf_dict_cnt; i++)
+    if (ctf_preserialize (ctf_dicts[i]) < 0)
+      goto err;
+
+  ctf_dprintf ("Deduplicating strings.\n");
+
+  for (i = 0; i < ctf_dict_cnt; i++)
+    all_strlens += ctf_dicts[i]->ctf_str[0].cts_len
+      + ctf_dicts[i]->ctf_str_prov_len;
+
+  /* If linking, deduplicate strings against the children in every dict that has
+     any.  (String deduplication is not yet implemented for non-linked dicts.)  */
+  for (i = 0; i < ctf_dict_cnt; i++)
+    if (ctf_dicts[i]->ctf_flags & LCTF_LINKING && ctf_dicts[i]->ctf_link_outputs)
+      {
+	old_parent_strlen = ctf_dicts[i]->ctf_str[0].cts_len
+	  + ctf_dicts[i]->ctf_str_prov_len;
+
+	if (ctf_dedup_strings (ctf_dicts[i]) < 0)
+	  goto err;
+
+	ctf_dprintf ("Deduplicated strings in archive member %zi: "
+		     "original parent strlen: %zu; original lengths: %zu; "
+		     "final length: %zu.\n", i, (size_t) old_parent_strlen,
+		     (size_t) all_strlens,
+		     (size_t) ctf_dicts[i]->ctf_str_prov_len);
+      }
+
+  return 0;
+
+ err:
+  err = ctf_errno (ctf_dicts[i]);
+  ctf_err_copy (ctf_dicts[0], ctf_dicts[i]);
+  for (i--; i >= 0; i--)
+    ctf_depreserialize (ctf_dicts[i]);
+  return err;
+}
+
 /* Write out a CTF archive to the start of the file referenced by the passed-in
    fd.  The entries in CTF_DICTS are referenced by name: the names are passed in
    the names array, which must have CTF_DICTS entries.
@@ -70,7 +128,14 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
   char *nametbl = NULL;		/* The name table.  */
   char *np;
   off_t nameoffs;
+  int err;
   struct ctf_archive_modent *modent;
+
+  /* Prepare by serializing everything.  Done first because it allocates a lot
+     of space and thus is more likely to fail.  */
+  if (ctf_dict_cnt > 0 &&
+      (err = ctf_arc_preserialize (ctf_dicts, ctf_dict_cnt)) < 0)
+    return err;
 
   ctf_dprintf ("Writing CTF archive with %lu files\n",
 	       (unsigned long) ctf_dict_cnt);
