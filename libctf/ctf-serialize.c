@@ -28,6 +28,16 @@
 
 #include <ctf-ref.h>
 
+/* Functions in this file are roughly divided into two types: sizing functions,
+   which work out the size of various structures in the final serialized
+   representation, and emission functions that actually emit data into them.
+
+   When the sizing functions are called, the buffer into which the output will
+   be serialized has not yet been created: so no functions which create
+   references into that buffer (notably, ctf_*_add_ref) should be called.
+
+   This requirement is to some degree enforced by ctf_assert calls.  */
+
 /* Symtypetab sections.  */
 
 /* Symtypetab emission flags.  */
@@ -62,6 +72,54 @@ typedef struct emit_symtypetab_state
   size_t maxfunc;
 } emit_symtypetab_state_t;
 
+/* Emit a ref to a type in this dict.  As with string refs, this ref can be
+   updated later on to change the type ID recorded in this location.  The ref
+   may not be emitted if the value is already known and cannot change.
+
+   All refs must point within the ctf_serializing_buf.  */
+
+static int
+ctf_type_add_ref (ctf_dict_t *fp, uint32_t *ref)
+{
+  ctf_dtdef_t *dtd;
+
+  /* Type in the static portion: cannot change, value already correct.  */
+  if (*ref <= fp->ctf_stypes)
+    return 0;
+
+  dtd = ctf_dtd_lookup (fp, *ref);
+
+  if (!ctf_assert (fp, dtd))
+    return 0;
+
+  if (!ctf_assert (fp, fp->ctf_serializing_buf != NULL
+		   && (unsigned char *) ref > fp->ctf_serializing_buf
+		   && (unsigned char *) ref < fp->ctf_serializing_buf + fp->ctf_serializing_buf_size))
+    return -1;
+
+  /* Simple case: final ID different from what is recorded, but already known.
+     Just set it.  */
+  if (dtd->dtd_final_type)
+    *ref = dtd->dtd_final_type;
+  /* Otherwise, create a ref to it so we can set it later.  */
+  else if (!ctf_create_ref (fp, &dtd->dtd_refs, ref))
+    return (ctf_set_errno (fp, ENOMEM));
+
+  return 0;
+}
+
+/* Purge all refs to this dict's dynamic types (all refs added by
+   ctf_type_add_ref while serializing this dict).  */
+static void
+ctf_type_purge_refs (ctf_dict_t *fp)
+{
+  ctf_dtdef_t *dtd;
+
+  for (dtd = ctf_list_next (&fp->ctf_dtdefs); dtd != NULL;
+       dtd = ctf_list_next (dtd))
+    ctf_purge_ref_list (fp, &dtd->dtd_refs);
+}
+
 /* Determine if a symbol is "skippable" and should never appear in the
    symtypetab sections.  */
 
@@ -94,7 +152,10 @@ ctf_symtab_skippable (ctf_link_sym_t *sym)
    will always be set in the flags.
 
    Also figure out if any symbols need to be moved to the variable section, and
-   add them (if not already present).  */
+   add them (if not already present).
+
+   This is a sizing function, called before the output buffer is
+   constructed.  Do not add any refs in this function!  */
 
 _libctf_nonnull_ ((1,3,4,5,6,7,8))
 static int
@@ -259,7 +320,10 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
    elements in it: unindexed output would terminate at symbol OUTMAX and is in
    any case no larger than SIZE bytes.  Some index elements are expected to be
    skipped: see symtypetab_density.  The linker-reported set of symbols (if any)
-   is found in SYMFP. */
+   is found in SYMFP.
+
+   Note down type ID refs as we go.  */
+
 static int
 emit_symtypetab (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
 		 ctf_link_sym_t **idx, const char **nameidx, uint32_t nidx,
@@ -343,7 +407,9 @@ emit_symtypetab (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
       if (!ctf_assert (fp, (((char *) dpp) - (char *) dp) < size))
 	return -1;				/* errno is set for us.  */
 
-      *dpp++ = (ctf_id_t) (uintptr_t) type;
+      *dpp = (ctf_id_t) (uintptr_t) type;
+      if (ctf_type_add_ref (fp, dpp++) < 0)
+	return -1;				/* errno is set for us.  */
 
       /* When emitting unindexed output, all later symbols are pads: stop
 	 early.  */
@@ -437,9 +503,10 @@ emit_symtypetab_index (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
   return 0;
 }
 
-/* Delete symbols that have been assigned names from the variable section.  Must
-   be called from within ctf_serialize, because that is the only place you can
-   safely delete variables without messing up ctf_rollback.  */
+/* Delete variables with the same name as symbols that have been reported by
+   the linker from the variable section.  Must be called from within
+   ctf_serialize, because that is the only place you can safely delete
+   variables without messing up ctf_rollback.  */
 
 static int
 symtypetab_delete_nonstatics (ctf_dict_t *fp, ctf_dict_t *symfp)
@@ -464,7 +531,11 @@ symtypetab_delete_nonstatics (ctf_dict_t *fp, ctf_dict_t *symfp)
 }
 
 /* Figure out the sizes of the symtypetab sections, their indexed state,
-   etc.  */
+   etc.
+
+   This is a sizing function, called before the output buffer is
+   constructed.  Do not add any refs in this function!  */
+
 static int
 ctf_symtypetab_sect_sizes (ctf_dict_t *fp, emit_symtypetab_state_t *s,
 			   ctf_header_t *hdr, size_t *objt_size,
@@ -578,6 +649,8 @@ ctf_symtypetab_sect_sizes (ctf_dict_t *fp, emit_symtypetab_state_t *s,
 
   return 0;
 }
+
+/* Emit the symtypetab sections.  */
 
 static int
 ctf_emit_symtypetab_sects (ctf_dict_t *fp, emit_symtypetab_state_t *s,
@@ -727,7 +800,10 @@ symerr:
 /* Type section.  */
 
 /* Iterate through the static types and the dynamic type definition list and
-   compute the size of the CTF type section.  */
+   compute the size of the CTF type section.
+
+   This is a sizing function, called before the output buffer is
+   constructed.  Do not add any refs in this function!  */
 
 static size_t
 ctf_type_sect_size (ctf_dict_t *fp)
@@ -790,17 +866,23 @@ ctf_type_sect_size (ctf_dict_t *fp)
 }
 
 /* Take a final lap through the dynamic type definition list and copy the
-   appropriate type records to the output buffer, noting down the strings as
-   we go.  */
+   appropriate type records to the output buffer, noting down the strings
+   and type IDs as we go.  */
 
-static void
+static int
 ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 {
   unsigned char *t = *tptr;
   ctf_dtdef_t *dtd;
+  ctf_id_t id;
+
+  if (!(fp->ctf_flags & LCTF_CHILD))
+    id = fp->ctf_stypes + 1;
+  else
+    id = fp->ctf_header->cth_parent_typemax + 1;
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs);
-       dtd != NULL; dtd = ctf_list_next (dtd))
+       dtd != NULL; dtd = ctf_list_next (dtd), id++)
     {
       uint32_t kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
       uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
@@ -809,6 +891,13 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
       ctf_stype_t *copied;
       const char *name;
       size_t i;
+
+      /* Make sure the ID hasn't changed, if already assigned by a previous
+	 serialization.  */
+
+      if (dtd->dtd_final_type != 0
+	  && !ctf_assert (fp, dtd->dtd_final_type == id))
+	return -1;				/* errno is set for us.  */
 
       /* Shrink ctf_type_t-using types from a ctf_type_t to a ctf_stype_t
 	 if possible.  */
@@ -842,22 +931,65 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  t += sizeof (uint32_t);
 	  break;
 
+	case CTF_K_POINTER:
+	case CTF_K_VOLATILE:
+	case CTF_K_CONST:
+	case CTF_K_RESTRICT:
+	case CTF_K_TYPEDEF:
+	  if (ctf_type_add_ref (fp, &copied->ctt_type) < 0)
+	    return -1;				/* errno is set for us.  */
+	  break;
+
 	case CTF_K_SLICE:
-	  memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_slice));
+	  {
+	    ctf_slice_t *slice = (ctf_slice_t *) t;
+
+	    memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_slice));
+
+	    if (ctf_type_add_ref (fp, &slice->cts_type) < 0)
+	      return -1;			/* errno is set for us. */
+	  }
+
 	  t += sizeof (struct ctf_slice);
+
 	  break;
 
 	case CTF_K_ARRAY:
-	  memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_array));
+	  {
+	    ctf_array_t *array = (ctf_array_t *) t;
+
+	    memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_array));
+
+	    if (ctf_type_add_ref (fp, &array->cta_contents) < 0)
+	      return -1;			/* errno is set for us.  */
+
+	    if (ctf_type_add_ref (fp, &array->cta_index) < 0)
+	      return -1;			/* errno is set for us.  */
+	  }
 	  t += sizeof (struct ctf_array);
 	  break;
 
 	case CTF_K_FUNCTION:
-	  /* Functions with no args also have no vlen.  */
-	  if (dtd->dtd_vlen)
-	    memcpy (t, dtd->dtd_vlen, sizeof (uint32_t) * (vlen + (vlen & 1)));
+	  {
+	    uint32_t *args = (uint32_t *) t;
+
+	    /* Functions with no args also have no vlen.  */
+
+	    if (dtd->dtd_vlen)
+	      memcpy (t, dtd->dtd_vlen, sizeof (uint32_t) * (vlen + (vlen & 1)));
+
+	    if (ctf_type_add_ref (fp, &copied->ctt_type) < 0)
+	      return -1;			/* errno is set for us.  */
+
+	    for (i = 0; i < vlen; i++)
+	      {
+		if (ctf_type_add_ref (fp, &args[i]) < 0)
+		  return -1;			/* errno is set for us.  */
+	      }
+
 	  t += sizeof (uint32_t) * (vlen + (vlen & 1));
 	  break;
+	  }
 
 	  /* These need to be copied across element by element, depending on
 	     their ctt_size.  */
@@ -879,12 +1011,18 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 		    t_vlen[i].ctm_name = dtd_vlen[i].ctlm_name;
 		    t_vlen[i].ctm_type = dtd_vlen[i].ctlm_type;
 		    t_vlen[i].ctm_offset = CTF_LMEM_OFFSET (&dtd_vlen[i]);
+
 		    ctf_str_add_ref (fp, name, &t_vlen[i].ctm_name);
+		    if (ctf_type_add_ref (fp, &t_vlen[i].ctm_type) < 0)
+		      return -1;		/* errno is set for us.  */
 		  }
 		else
 		  {
 		    t_lvlen[i] = dtd_vlen[i];
+
 		    ctf_str_add_ref (fp, name, &t_lvlen[i].ctlm_name);
+		    if (ctf_type_add_ref (fp, &t_lvlen[i].ctlm_type) < 0)
+		      return -1;		/* errno is set for us.  */
 		  }
 	      }
 	  }
@@ -912,9 +1050,12 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	    break;
 	  }
 	}
+      dtd->dtd_final_type = id;
     }
 
   *tptr = t;
+
+  return 0;
 }
 
 /* Variable section.  */
@@ -941,15 +1082,17 @@ ctf_sort_var (const void *one_, const void *two_, void *arg_)
 /* Overall serialization.  */
 
 /* Do all aspects of serialization up to strtab writeout and variable table
-   sorting.  The resulting dict will have the LCTF_PRESERIALIZED flag on and
-   must not be modified in any way before serialization.  (This is not enforced,
-   as this feature is internal-only, employed by the linker machinery.)  */
+   sorting, including final type ID assignment.  The resulting dict will have
+   the LCTF_PRESERIALIZED flag on and must not be modified in any way before
+   serialization.  (This is only lightly enforced, as this feature is internal-
+   only, employed by the linker machinery.)  */
 
 int
 ctf_preserialize (ctf_dict_t *fp)
 {
   ctf_header_t hdr, *hdrp;
   ctf_dvdef_t *dvd;
+  ctf_dtdef_t *dtd;
   int sym_functions = 0;
 
   unsigned char *t;
@@ -962,15 +1105,50 @@ ctf_preserialize (ctf_dict_t *fp)
   emit_symtypetab_state_t symstate;
   memset (&symstate, 0, sizeof (emit_symtypetab_state_t));
 
+  ctf_dprintf ("Preserializing dict for %s\n", ctf_cuname (fp));
+
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
 
-  /* Prohibit reserialization of dicts for which we have dynamic state inherited
-     from the upgrade process which we cannot record in the dict.  Right now,
-     this applies only to CTFv1 dicts, which have a different parent/child type
-     offset to v2 and higher, and nowhere to record this in CTFv4.  */
+  /* Make sure that any parents have been serialized at least once since the
+     last type was added to them, so we have known final IDs for all their
+     types.  */
 
-  if (!fp->ctf_parent)
+  if (fp->ctf_parent)
+    {
+      if (fp->ctf_parent->ctf_nprovtypes > 0)
+	{
+	  ctf_dtdef_t *dtd;
+
+	  dtd = ctf_list_prev (&fp->ctf_parent->ctf_dtdefs);
+
+	  if (dtd && dtd->dtd_final_type == 0)
+	    {
+	      ctf_set_errno (fp, ECTF_NOTSERIALIZED);
+	      ctf_err_warn (fp, 0, 0, _("cannot write out child dict: write out the parent dict first"));
+	      return -1;			/* errno is set for us.  */
+	    }
+	}
+
+      /* Prohibit serialization of a dict which has already been serialized and
+	 whose parent has had more types added to it since then: this dict would
+	 have overlapping types if serialized, since we only pass through
+	 newly-added types to renumber them, not already-existing types in the
+	 read-in buffer.  You can emit such dicts using ctf_link, which can
+	 change type IDs arbitrarily, resolving all overlaps.  */
+
+      if (fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff > 0 &&
+	  fp->ctf_header->cth_parent_typemax < fp->ctf_parent->ctf_typemax)
+	{
+	  ctf_set_errno (fp, ECTF_NOTSERIALIZED);
+	  ctf_err_warn (fp, 0, 0, _("cannot write out already-written child dict: parent has had %u types added"),
+			fp->ctf_parent->ctf_typemax - fp->ctf_header->cth_parent_typemax);
+	  return -1;				/* errno is set for us.  */
+	}
+
+      fp->ctf_header->cth_parent_typemax = fp->ctf_parent->ctf_typemax;
+    }
+  else
     {
       /* Prohibit serialization of a parent dict which has already been
 	 serialized, has children, and has had strings added since the last
@@ -1060,11 +1238,16 @@ ctf_preserialize (ctf_dict_t *fp)
   hdr.cth_stroff = hdr.cth_typeoff + type_size;
   hdr.cth_strlen = 0;
   hdr.cth_parent_strlen = 0;
+  if (fp->ctf_parent)
+    hdr.cth_parent_typemax = fp->ctf_parent->ctf_typemax;
 
   buf_size = sizeof (ctf_header_t) + hdr.cth_stroff + hdr.cth_strlen;
 
   if ((buf = malloc (buf_size)) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
+
+  fp->ctf_serializing_buf = buf;
+  fp->ctf_serializing_buf_size = buf_size;
 
   memcpy (buf, &hdr, sizeof (ctf_header_t));
   t = (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_objtoff;
@@ -1077,10 +1260,7 @@ ctf_preserialize (ctf_dict_t *fp)
 
   if (ctf_emit_symtypetab_sects (fp, &symstate, &t, objt_size, func_size,
 				 objtidx_size, funcidx_size) < 0)
-    {
-      free (buf);
-      return -1;				/* errno is set for us.  */
-    }
+    goto err;
 
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_varoff);
 
@@ -1095,6 +1275,9 @@ ctf_preserialize (ctf_dict_t *fp)
 
       ctf_str_add_ref (fp, dvd->dvd_name, &var->ctv_name);
       var->ctv_type = (uint32_t) dvd->dvd_type;
+
+      if (ctf_type_add_ref (fp, &var->ctv_type) < 0)
+	goto err;
     }
   assert (i == nvars);
 
@@ -1108,39 +1291,66 @@ ctf_preserialize (ctf_dict_t *fp)
   memcpy (t, fp->ctf_buf + fp->ctf_header->cth_typeoff,
 	  fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff);
   t += fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff;
-  ctf_emit_type_sect (fp, &t);
+
+  if (ctf_emit_type_sect (fp, &t) < 0)
+    goto err;
 
   assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_stroff);
 
-  fp->ctf_serializing_buf = buf;
-  fp->ctf_serializing_buf_size = buf_size;
+  /* All types laid out: update all refs to types to cite the final IDs.  */
 
-  /* Prohibit additions and the like from this point on.  */
-  fp->ctf_flags |= LCTF_NO_STR;
+  for (dtd = ctf_list_next (&fp->ctf_dtdefs);
+       dtd != NULL; dtd = ctf_list_next (dtd))
+    {
+      if (!ctf_assert (fp, dtd->dtd_type != 0 && dtd->dtd_final_type != 0))
+	goto err;
+
+      ctf_update_refs (&dtd->dtd_refs, dtd->dtd_final_type);
+    }
+
+  ctf_type_purge_refs (fp);
+
+  /* Prohibit type and string additions from this point on.  */
+
+  fp->ctf_flags |= LCTF_NO_STR | LCTF_NO_TYPE;
 
   return 0;
+
+ err:
+  fp->ctf_serializing_buf = NULL;
+  fp->ctf_serializing_buf_size = 0;
+
+  free (buf);
+  ctf_str_purge_refs (fp);
+  ctf_type_purge_refs (fp);
+
+  return -1;				/* errno is set for us.  */
 }
 
 /* Undo preserialization (called on error).  */
 void
 ctf_depreserialize (ctf_dict_t *fp)
 {
-  fp->ctf_flags &= ~LCTF_NO_STR;
+  ctf_str_purge_refs (fp);
+  ctf_type_purge_refs (fp);
+
   free (fp->ctf_serializing_buf);
   fp->ctf_serializing_buf = NULL;
   fp->ctf_serializing_vars = NULL;
   fp->ctf_serializing_buf_size = 0;
   fp->ctf_serializing_nvars = 0;
+
+  fp->ctf_flags &= ~(LCTF_NO_STR | LCTF_NO_TYPE);
 }
 
-/* Emit a new CTF dict which is a serialized copy of this one: also reify
-   the string table and update all offsets in the current dict suitably.
-   (This simplifies ctf-string.c a little, at the cost of storing a second
-   copy of the strtab if this dict was originally read in via ctf_open.)
+/* Emit a new CTF dict which is a serialized copy of this one: also reify the
+   string table and update all offsets in the newly-serialized dict suitably.
+   (This simplifies ctf-string.c a little, at the cost of storing a second copy
+   of the strtab during serialization.)
 
-   Other aspects of the existing dict are unchanged, although some
-   static entries may be duplicated in the dynamic state (which should
-   have no effect on visible operation).  */
+   Other aspects of the existing dict are unchanged, although some static
+   entries may be duplicated in the dynamic state (which should have no effect
+   on visible operation).  */
 
 static unsigned char *
 ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
@@ -1183,13 +1393,15 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
 
   hdrp = (ctf_header_t *) fp->ctf_serializing_buf;
 
+  ctf_dprintf ("Writing strtab for %s\n", ctf_cuname (fp));
   strtab = ctf_str_write_strtab (fp);
 
   if (strtab == NULL)
     goto err;
 
-  /* Now the string table is constructed, we can sort the buffer of
-     ctf_varent_t's.  */
+  /* Now the string table is constructed and all the refs updated, we can sort
+     the buffer of ctf_varent_t's.  */
+
   ctf_sort_var_arg_cb_t sort_var_arg = { fp, (ctf_strs_t *) strtab };
   ctf_qsort_r (fp->ctf_serializing_vars, fp->ctf_serializing_nvars,
 	       sizeof (ctf_varent_t), ctf_sort_var, &sort_var_arg);
@@ -1213,6 +1425,7 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   fp->ctf_serializing_vars = NULL;
   fp->ctf_serializing_buf_size = 0;
   fp->ctf_serializing_nvars = 0;
+  fp->ctf_flags &= ~LCTF_NO_TYPE;
 
   return buf;
 

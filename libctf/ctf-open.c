@@ -690,8 +690,7 @@ upgrade_types (ctf_dict_t *fp, ctf_header_t *cth)
 	 parent/child boundary is unchanged (and much lower).  */
 
     case CTF_VERSION_1_UPGRADED_3:
-      fp->ctf_parmax = CTF_MAX_PTYPE_V1;
-      fp->ctf_flags |= LCTF_NO_SERIALIZE;
+      fp->ctf_header->cth_parent_typemax = CTF_MAX_PTYPE_V1;
       break;
 
       /* v2 and v3 are currently just the same as v4 except for new types and
@@ -700,6 +699,7 @@ upgrade_types (ctf_dict_t *fp, ctf_header_t *cth)
 	 UPTODO: this is really going to change.  */
     case CTF_VERSION_2: ;
     case CTF_VERSION_3: ;
+      fp->ctf_header->cth_parent_typemax = CTF_MAX_PTYPE;
       /* FALLTHRU */
     }
   return 0;
@@ -730,6 +730,11 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
   int pop_enumerators = 0;
   const ctf_type_t *tp;
   unsigned long typemax = 0;
+
+  /* Provisional types always start from the top of the type space and work
+     down.  */
+
+  fp->ctf_provtypemax = (uint32_t) -1;
 
   /* We determine whether the dict is a child or a parent based on the value of
      cth_parname.  */
@@ -838,6 +843,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
   fp->ctf_ptrtab_len = typemax + 1;
   fp->ctf_stypes = typemax;
   fp->ctf_typemax = typemax;
+  fp->ctf_idmax = typemax;
 
   if (fp->ctf_txlate == NULL || fp->ctf_ptrtab == NULL)
     return ENOMEM;		/* Memory allocation failed.  */
@@ -850,7 +856,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
       return 0;
     }
 
-  ctf_dprintf ("%lu types initialized (other than names)\n", fp->ctf_typemax);
+  ctf_dprintf ("%u types initialized (other than names)\n", fp->ctf_typemax);
 
   return init_static_types_names (fp, cth);
 }
@@ -1111,7 +1117,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
   fp->ctf_typemax--;
   assert (fp->ctf_typemax == typemax);
 
-  ctf_dprintf ("%lu total types processed\n", fp->ctf_typemax);
+  ctf_dprintf ("%u total types processed\n", fp->ctf_typemax);
 
   /* In the third pass, we traverse the enums we spotted earlier and track all
      the enumeration constants to aid in future detection of duplicates.
@@ -1806,7 +1812,6 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       goto bad;
     }
 
-  fp->ctf_parmax = CTF_MAX_PTYPE;		/* May be reset by upgrade_types.  */
   memcpy (&fp->ctf_data, ctfsect, sizeof (ctf_sect_t));
 
   if (symsect != NULL)
@@ -2220,6 +2225,36 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 		    _("ctf_import: incorrect parent dict: %u bytes of strings expected, %u found"),
 		    fp->ctf_header->cth_parent_strlen, pfp->ctf_header->cth_strlen);
       return (ctf_set_errno (fp, ECTF_WRONGPARENT));
+    }
+
+  /* If the child dict expects the parent to have types, make sure it has that
+     number of types.  (Provisional types excepted: they go at the top of the
+     type ID space, and will not overlap any child types.)  */
+
+  if (pfp->ctf_idmax != fp->ctf_header->cth_parent_typemax)
+    {
+      if (fp->ctf_header->cth_parent_typemax != 0)
+	{
+	  ctf_err_warn (fp, 0, ECTF_WRONGPARENT,
+			_("ctf_import: incorrect parent dict: %u types expected, %u found"),
+			fp->ctf_header->cth_parent_typemax, pfp->ctf_idmax);
+	  return (ctf_set_errno (fp, ECTF_WRONGPARENT));
+	}
+      else if (fp->ctf_header->cth_parent_typemax == 0)
+	{
+	  /* If we are importing into a parent dict, the child dict had better
+	     be empty.  Set its starting type ID, which need not be zero: the
+	     parent can already have types.  */
+
+	  if (fp->ctf_typemax != 0)
+	    {
+	      ctf_err_warn (fp, 0, EINVAL,
+			    _("ctf_import: dict already has %u types, cannot turn into a new child"),
+			    fp->ctf_typemax);
+	      return (ctf_set_errno (fp, EINVAL));
+	    }
+	  fp->ctf_header->cth_parent_typemax = pfp->ctf_typemax;
+	}
     }
 
   /* We might in time be able to lift this restriction, but it is unlikely to be

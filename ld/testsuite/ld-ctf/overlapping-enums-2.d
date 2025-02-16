@@ -28,9 +28,9 @@ Contents of CTF section .ctf:
 CTF archive member: .*enum.*\.c:
 #...
   Types:
-    0x80000001: \(kind 8\) enum intersecting_days_of_the_week \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
-                Montag: 1
-                Tuesday: 2
+    0x[0-9a-f]*: \(kind 8\) enum intersecting_days_of_the_week \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+         Montag: 1
+         Tuesday: 2
 
   Strings:
 #...

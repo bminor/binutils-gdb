@@ -26,7 +26,7 @@ CTF archive member: .*/unshared-strings-A.c:
 #...
   Types:
     0x[0-9a-f]*: \(kind 6\) struct A .*
-                \[0x0\] wurblefrotz: ID .*
+         \[0x0\] wurblefrotz: ID .*
 
   Strings:
     0x0: .ctf
@@ -37,7 +37,7 @@ CTF archive member: .*/unshared-strings-B.c:
 #...
   Types:
     0x[0-9a-f]*: \(kind 6\) struct A .*
-                \[0x0\] wurblefritz: ID .*
+         \[0x0\] wurblefritz: ID .*
 
   Strings:
     0x0: .ctf

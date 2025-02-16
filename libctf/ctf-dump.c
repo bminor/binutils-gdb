@@ -393,6 +393,9 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
   if (ctf_dump_header_sizefield (fp, state, "Parent strlen", hp->cth_parent_strlen) < 0)
     goto err;
 
+  if (ctf_dump_header_sizefield (fp, state, "Parent max type", hp->cth_parent_typemax) < 0)
+    goto err;
+
   if (ctf_dump_header_sectfield (fp, state, "Label section", hp->cth_lbloff,
 				 hp->cth_objtoff) < 0)
     goto err;

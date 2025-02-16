@@ -752,6 +752,18 @@ ctf_dict_open_cached (ctf_archive_t *arc, const char *name, int *errp)
   if (arc->ctfi_crossdict_cache == NULL)
     arc->ctfi_crossdict_cache = fp;
 
+  /* If this archive has multiple members, and this is a parent, pretend
+     that we have opened at least one child.  This forces type and string
+     allocations in the parent to use provisional IDs, permitting you to
+     import children into it even if you modify the parent before you import
+     any.  */
+  if (arc->ctfi_is_archive && arc->ctfi_archive->ctfa_ndicts > 1
+      && !(fp->ctf_flags & LCTF_CHILD))
+    {
+      ctf_dprintf ("archived parent: max children bumped.\n");
+      fp->ctf_max_children++;
+    }
+
   return fp;
 
  oom:
