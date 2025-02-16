@@ -23,7 +23,7 @@
    This code was contributed by:
 
      David Mosberger-Tang <David.Mosberger@acm.org>  */
-
+
 #include <stdio.h>
 #include <strings.h>
 #include "bfd.h"

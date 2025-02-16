@@ -18,7 +18,7 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
-
+
 /* A gmon.out file consists of a header (defined by gmon_hdr) followed
    by a sequence of records.  Each record starts with a one-byte tag
    identifying the type of records, followed by records specific data.  */
