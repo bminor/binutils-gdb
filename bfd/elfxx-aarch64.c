@@ -744,13 +744,11 @@ _bfd_aarch64_elf_create_gnu_property_section (struct bfd_link_info *info,
 				      | SEC_HAS_CONTENTS
 				      | SEC_DATA));
   if (sec == NULL)
-    info->callbacks->einfo (
-      _("%F%P: failed to create GNU property section\n"));
+    info->callbacks->fatal (_("%P: failed to create GNU property section\n"));
 
   unsigned align = (bfd_get_mach (ebfd) & bfd_mach_aarch64_ilp32) ? 2 : 3;
   if (!bfd_set_section_alignment (sec, align))
-    info->callbacks->einfo (_("%F%pA: failed to align section\n"),
-			    sec);
+    info->callbacks->fatal (_("%pA: failed to align section\n"), sec);
 
   elf_section_type (sec) = SHT_NOTE;
 }

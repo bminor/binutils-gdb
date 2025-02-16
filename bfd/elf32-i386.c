@@ -4111,8 +4111,8 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
     {
       if (bfd_is_abs_section (htab->elf.splt->output_section))
 	{
-	  info->callbacks->einfo
-	    (_("%F%P: discarded output section: `%pA'\n"),
+	  info->callbacks->fatal
+	    (_("%P: discarded output section: `%pA'\n"),
 	     htab->elf.splt);
 	  return false;
 	}

@@ -4689,8 +4689,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
  file_err:
   bfd_set_error (bfd_error_system_call);
  err_exit:
-  info->callbacks->einfo (_("%F%P: auto overlay error: %E\n"));
-  xexit (1);
+  info->callbacks->fatal (_("%P: auto overlay error: %E\n"));
 }
 
 /* Provide an estimate of total stack required.  */
@@ -4743,7 +4742,7 @@ spu_elf_final_link (bfd *output_bfd, struct bfd_link_info *info)
     info->callbacks->einfo (_("%X%P: stack/lrlive analysis error: %E\n"));
 
   if (!spu_elf_build_stubs (info))
-    info->callbacks->einfo (_("%F%P: can not build overlay stubs: %E\n"));
+    info->callbacks->fatal (_("%P: can not build overlay stubs: %E\n"));
 
   return bfd_elf_final_link (output_bfd, info);
 }

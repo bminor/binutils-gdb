@@ -12294,7 +12294,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (stub_entry->target_section != NULL
       && stub_entry->target_section->output_section == NULL
       && info->non_contiguous_regions)
-    info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output section. "
+    info->callbacks->fatal (_("%P: Could not assign `%pA' to an output section. "
 			      "Retry without --enable-non-contiguous-regions.\n"),
 			    stub_entry->target_section);
 
@@ -12302,7 +12302,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (stub_entry->group->stub_sec != NULL
       && stub_entry->group->stub_sec->output_section == NULL
       && info->non_contiguous_regions)
-    info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output section. "
+    info->callbacks->fatal (_("%P: Could not assign `%pA' to an output section. "
 			      "Retry without --enable-non-contiguous-regions.\n"),
 			    stub_entry->group->stub_sec);
 

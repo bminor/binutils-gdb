@@ -2687,8 +2687,8 @@ _bfd_sparc_elf_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
 			      bool *again)
 {
   if (bfd_link_relocatable (link_info))
-    (*link_info->callbacks->einfo)
-      (_("%P%F: --relax and -r may not be used together\n"));
+    link_info->callbacks->fatal
+      (_("%P: --relax and -r may not be used together\n"));
 
   *again = false;
   sec_do_relax (section) = 1;

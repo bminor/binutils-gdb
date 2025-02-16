@@ -148,6 +148,7 @@ static struct bfd_link_callbacks link_callbacks =
   reloc_dangerous,
   unattached_reloc,
   notice,
+  fatal,
   einfo,
   info_msg,
   minfo,

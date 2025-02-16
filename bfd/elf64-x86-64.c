@@ -4093,8 +4093,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			      || (roff - 3 + 22) > input_section->size)
 			    {
 			    corrupt_input:
-			      info->callbacks->einfo
-				(_("%F%P: corrupt input: %pB\n"),
+			      info->callbacks->fatal
+				(_("%P: corrupt input: %pB\n"),
 				 input_bfd);
 			      return false;
 			    }
@@ -5122,7 +5122,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       /* Check PC-relative offset overflow in PLT entry.  */
       if ((plt_got_pcrel_offset + 0x80000000) > 0xffffffff)
 	/* xgettext:c-format */
-	info->callbacks->einfo (_("%F%pB: PC-relative offset overflow in PLT entry for `%s'\n"),
+	info->callbacks->fatal (_("%pB: PC-relative offset overflow in PLT entry for `%s'\n"),
 				output_bfd, h->root.root.string);
 
       bfd_put_32 (output_bfd, plt_got_pcrel_offset,
@@ -5195,7 +5195,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 		 will overflow first.  */
 	      if (plt0_offset > 0x80000000)
 		/* xgettext:c-format */
-		info->callbacks->einfo (_("%F%pB: branch displacement overflow in PLT entry for `%s'\n"),
+		info->callbacks->fatal (_("%pB: branch displacement overflow in PLT entry for `%s'\n"),
 					output_bfd, h->root.root.string);
 	      bfd_put_32 (output_bfd, - plt0_offset,
 			  (plt->contents + h->plt.offset
@@ -5248,7 +5248,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       if ((got_after_plt && got_pcrel_offset < 0)
 	  || (!got_after_plt && got_pcrel_offset > 0))
 	/* xgettext:c-format */
-	info->callbacks->einfo (_("%F%pB: PC-relative offset overflow in GOT PLT entry for `%s'\n"),
+	info->callbacks->fatal (_("%pB: PC-relative offset overflow in GOT PLT entry for `%s'\n"),
 				output_bfd, h->root.root.string);
 
       bfd_put_32 (output_bfd, got_pcrel_offset,
@@ -5396,8 +5396,8 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	     generate an error instead of a reloc.  cf PR 32638.  */
 	  if (relgot == NULL || relgot->size == 0)
 	    {
-	      info->callbacks->einfo (_("%F%pB: Unable to generate dynamic relocs because a suitable section does not exist\n"),
-					output_bfd);
+	      info->callbacks->fatal (_("%pB: Unable to generate dynamic relocs because a suitable section does not exist\n"),
+				      output_bfd);
 	      return false;
 	    }
 	  
@@ -5535,8 +5535,8 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
     {
       if (bfd_is_abs_section (htab->elf.splt->output_section))
 	{
-	  info->callbacks->einfo
-	    (_("%F%P: discarded output section: `%pA'\n"),
+	  info->callbacks->fatal
+	    (_("%P: discarded output section: `%pA'\n"),
 	     htab->elf.splt);
 	  return false;
 	}

@@ -3263,7 +3263,7 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
      section.  The user should fix his linker script.  */
   if (stub_entry->target_section->output_section == NULL
       && info->non_contiguous_regions)
-    info->callbacks->einfo (_("%F%P: Could not assign `%pA' to an output section. "
+    info->callbacks->fatal (_("%P: Could not assign `%pA' to an output section. "
 			      "Retry without "
 			      "--enable-non-contiguous-regions.\n"),
 			    stub_entry->target_section);
@@ -8927,9 +8927,9 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	asection *s = p->sec->output_section;
 	if (s != NULL && (s->flags & SEC_READONLY) != 0)
 	  {
-	    info->callbacks->einfo
+	    info->callbacks->fatal
 		/* xgettext:c-format */
-		(_ ("%F%P: %pB: copy relocation against non-copyable "
+		(_ ("%P: %pB: copy relocation against non-copyable "
 		    "protected symbol `%s'\n"),
 		 p->sec->owner, h->root.root.string);
 	    return false;
