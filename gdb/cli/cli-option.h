@@ -340,7 +340,7 @@ struct color_option_def : option_def
 		    const char *set_doc_,
 		    const char *show_doc_ = nullptr,
 		    const char *help_doc_ = nullptr)
-    : option_def (long_option_, var_color,
+    : option_def (long_option_, var_color, nullptr,
 		  (erased_get_var_address_ftype *) get_var_address_cb_,
 		  show_cmd_cb_,
 		  set_doc_, show_doc_, help_doc_)
