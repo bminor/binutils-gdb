@@ -522,8 +522,6 @@ void
 core_create_syms_from (const char * sym_table_file)
 {
   char type;
-  bfd_vma min_vma = ~(bfd_vma) 0;
-  bfd_vma max_vma = 0;
   FILE * f;
 
   f = fopen (sym_table_file, "r");
@@ -578,8 +576,6 @@ core_create_syms_from (const char * sym_table_file)
       symtab.limit->is_func = true;
       symtab.limit->is_bb_head = true;
       symtab.limit->is_static = (type == 't');
-      min_vma = MIN (symtab.limit->addr, min_vma);
-      max_vma = MAX (symtab.limit->addr, max_vma);
 
       ++symtab.limit;
     }
@@ -601,8 +597,6 @@ search_mapped_symbol (const void * l, const void * r)
 void
 core_create_function_syms (void)
 {
-  bfd_vma min_vma = ~ (bfd_vma) 0;
-  bfd_vma max_vma = 0;
   int cxxclass;
   long i;
   struct function_map * found = NULL;
@@ -740,17 +734,6 @@ core_create_function_syms (void)
       if (cxxclass == 't')
 	symtab.limit->is_static = true;
 
-      /* Keep track of the minimum and maximum vma addresses used by all
-	 symbols.  When computing the max_vma, use the ending address of the
-	 section containing the symbol, if available.  */
-      min_vma = MIN (symtab.limit->addr, min_vma);
-      if (sym_sec)
-	max_vma = MAX (bfd_section_vma (sym_sec)
-		       + bfd_section_size (sym_sec) - 1,
-		       max_vma);
-      else
-	max_vma = MAX (symtab.limit->addr, max_vma);
-
       DBG (AOUTDEBUG, printf ("[core_create_function_syms] %ld %s 0x%lx\n",
 			      (long) (symtab.limit - symtab.base),
 			      symtab.limit->name,
@@ -770,7 +753,7 @@ core_create_line_syms (void)
 {
   char *prev_name, *prev_filename;
   unsigned int prev_name_len, prev_filename_len;
-  bfd_vma vma, min_vma = ~(bfd_vma) 0, max_vma = 0;
+  bfd_vma vma;
   Sym *prev, dummy, *sym;
   const char *filename;
   int prev_line_num;
@@ -832,9 +815,6 @@ core_create_line_syms (void)
 	}
 
       strcpy (prev_filename, filename);
-
-      min_vma = MIN (vma, min_vma);
-      max_vma = MAX (vma, max_vma);
     }
 
   free (prev_name);
