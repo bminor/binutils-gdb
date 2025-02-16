@@ -14,8 +14,8 @@ Contents of CTF section .ctf:
     Version: 5 \(CTF_VERSION_4\)
 #...
     0x[0-9a-f]*: \(kind 6\) struct A \(.*
-                \[0x0\] : ID 0x[0-9a-f]*: \(kind 7\) union  \(.*
+         \[0x0\] : ID 0x[0-9a-f]*: \(kind 7\) union  \(.*
 #...
     0x[0-9a-f]*: \(kind 6\) struct A \(.*
-                \[0x0\] : ID 0x[0-9a-f]*: \(kind 7\) union  \(.*
+         \[0x0\] : ID 0x[0-9a-f]*: \(kind 7\) union  \(.*
 #...

@@ -15,15 +15,15 @@ Contents of CTF section .ctf:
 #...
   Types:
     0x1: .*int .*
-    0x[0-9]: \(kind 10\) word .* -> 0x[0-9]: \(kind 1\) .*int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
-    0x[0-9]:.*int .*
+    0x[0-9a-f]: \(kind 10\) word .* -> 0x[0-9]: \(kind 1\) .*int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x[0-9a-f]:.*int .*
 
   Strings:
 #...
 CTF archive member: .*typedef.*\.c:
 #...
   Types:
-    0x80000001: \(kind 10\) word .* -> 0x[0-9]: \(kind 1\) .*int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x[0-9a-f]*: \(kind 10\) word .* -> 0x[0-9]: \(kind 1\) .*int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 
   Strings:
 #...

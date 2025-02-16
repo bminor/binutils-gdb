@@ -21,12 +21,38 @@
 #include <assert.h>
 #include <string.h>
 
-/* Determine whether a type is a parent or a child.  */
+/* Determine whether a type is a parent or a child.  Bad IDs are not
+   diagnosed!  */
 
 int
 ctf_type_isparent (const ctf_dict_t *fp, ctf_id_t id)
 {
-  return (id <= fp->ctf_parmax);
+  /* All types visible in the parent are parent types, by definition.  */
+
+  if (!(fp->ctf_flags & LCTF_CHILD))
+    return 1;
+
+  /* Not imported: no provisional types are possible because no types can
+     have been added.  Simple range check.  */
+
+  if (!fp->ctf_parent)
+    return (fp->ctf_header->cth_parent_typemax >= id);
+
+  /* Types in the parent's idmax range (which encompasses its stypes range) are
+     in the parent.  */
+
+  if (id <= fp->ctf_parent->ctf_idmax)
+    return 1;
+
+  /* Types in the provisional ID range are in the parent: otherwise, they are in
+     the child.  */
+
+  if (id >= fp->ctf_parent->ctf_provtypemax)
+    return (ctf_dynhash_lookup (fp->ctf_dthash,
+				(void *) (uintptr_t) id) == NULL);
+
+  /* Child type.  */
+  return 0;
 }
 
 int
@@ -36,21 +62,76 @@ ctf_type_ischild (const ctf_dict_t *fp, ctf_id_t id)
 }
 
 /* Get the index in the internal type array (or otherwise) for a given type ID.
-   Only ever called on the right dictionary for the type and can fail otherwise.
+   Only ever called on the right dictionary for the type, and can fail otherwise.
    If called on an invalid type, may return an index that does not correspond to
-   any type (such as -1).  */
+   any type (such as -1), but will not return an index that does correspond to a
+   type.  */
+
+static uint32_t
+ctf_type_to_index_internal (const ctf_dict_t *fp, ctf_id_t type)
+{
+  uint32_t idx = type;
+
+  assert (((fp->ctf_flags & LCTF_CHILD) && (type > fp->ctf_header->cth_parent_typemax)) ||
+	  (!(fp->ctf_flags & LCTF_CHILD)));
+
+  if (fp->ctf_flags & LCTF_CHILD)
+    {
+      /* Non-dynamic type in parent: no index permitted.  */
+
+      assert (type > fp->ctf_header->cth_parent_typemax);
+
+      idx -= fp->ctf_header->cth_parent_typemax;
+    }
+
+  if (idx <= fp->ctf_stypes)
+    return idx;
+
+  /* Dynamic types.  In children this is easy.  */
+
+  if (fp->ctf_flags & LCTF_CHILD)
+    return idx;
+
+  /* For parents, there are three ranges of types: below stypes (static), above
+     stypes and below typemax - nprovtypes (dynamic, non-provisional, added
+     before any children were imported, type ID derived identically to stypes),
+     and above that (provisional, running backwards from the top of the ID
+     space).  We have already handled the first.  Once we start inserting
+     provisional types, no further nonprovisional types can be inserted:
+     typemax, provtypemax and nprovtypes will rise in concert.  */
+
+  if (idx <= (fp->ctf_typemax - fp->ctf_nprovtypes))
+    return type;
+  else /* Provisional type.  */
+    return fp->ctf_typemax - (type - fp->ctf_provtypemax);
+}
+
+/* Verification of type_to_index -> index_to_type roundtripping.
+   Doubles the cost of this core operation, so done under
+   hash debugging only.  */
 
 uint32_t
 ctf_type_to_index (const ctf_dict_t *fp, ctf_id_t type)
 {
-  return type & fp->ctf_parmax;
+  uint32_t idx = ctf_type_to_index_internal (fp, type);
+
+#ifdef ENABLE_LIBCTF_HASH_DEBUGGING
+  assert (ctf_index_to_type (fp, idx) == type);
+#endif
+  return idx;
 }
 
 /* The inverse of ctf_type_to_index.  */
 ctf_id_t
 ctf_index_to_type (const ctf_dict_t *fp, uint32_t idx)
 {
-  return (fp->ctf_flags & LCTF_CHILD) ? ((idx) | (fp->ctf_parmax+1)) : idx;
+  if (fp->ctf_flags & LCTF_CHILD)
+    return idx + fp->ctf_header->cth_parent_typemax;
+
+  if (idx <= (fp->ctf_typemax - fp->ctf_nprovtypes))
+    return idx;
+  else	/* Provisional type.  */
+    return fp->ctf_provtypemax + (fp->ctf_typemax - idx);
 }
 
 /* Expand a structure element into the passed-in ctf_lmember_t.  */

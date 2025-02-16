@@ -53,19 +53,19 @@ CTF archive member: .*/data-func-1\.c:
   Labels:
 
   Data objects:
-    var_[0-9]* -> 0x80000001*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
-    var_[0-9]* -> 0x80000001*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
-    var_[0-9]* -> 0x80000001*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
-    var_[0-9]* -> 0x80000001*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
-    var_[0-9]* -> 0x80000001*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
-    var_[0-9]* -> 0x80000001*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
-    var_[0-9]* -> 0x80000001*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
-    var_[0-9]* -> 0x80000001*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
+    var_[0-9]* -> 0x[0-9a-f]*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
+    var_[0-9]* -> 0x[0-9a-f]*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
+    var_[0-9]* -> 0x[0-9a-f]*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
+    var_[0-9]* -> 0x[0-9a-f]*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
+    var_[0-9]* -> 0x[0-9a-f]*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
+    var_[0-9]* -> 0x[0-9a-f]*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
+    var_[0-9]* -> 0x[0-9a-f]*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
+    var_[0-9]* -> 0x[0-9a-f]*: \(kind 10\) foo_t \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> .*
 #...
   Function objects:
 
   Variables:
 
   Types:
-    0x80000001: \(kind 10\) foo_t .* -> .* int .*
+    0x[0-9a-f]*: \(kind 10\) foo_t .* -> .* int .*
 #...
