@@ -47,6 +47,7 @@ static int
 refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
 {
   uint32_t i;
+
   for (i = fp->ctf_pptrtab_typemax; i <= fp->ctf_typemax; i++)
     {
       ctf_id_t type = ctf_index_to_type (fp, i);
@@ -59,7 +60,7 @@ refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
 
       if (ctf_type_isparent (fp, reffed_type))
 	{
-	  uint32_t idx = ctf_type_to_index (fp, reffed_type);
+	  uint32_t idx = ctf_type_to_index (pfp, reffed_type);
 
 	  /* Guard against references to invalid types.  No need to consider
 	     the CTF dict corrupt in this case: this pointer just can't be a
@@ -122,6 +123,63 @@ isqualifier (const char *s, size_t len)
 	  strncmp (qp->q_name, s, qp->q_len) == 0);
 }
 
+/* Find a pointer to type by looking in the's ctf_pptrtab (if child is set) and
+   fp->ctf_ptrtab.  Return -1 / ECTF_NOTYPE if no type exists.
+
+   Skip lookups if this is a child type and we are looking in the parent (with
+   child set), because you cannot have a pointer in the parent to a type in the
+   child (an earlier loop checks for pointers to child types).
+
+   There is extra complexity here because uninitialized elements in the pptrtab
+   and ptrtab are set to zero, but zero (as the type ID meaning the
+   unimplemented type) is a valid return type from ctf_lookup_by_name.
+   (Pointers to types are never of type 0, so this is unambiguous, just fiddly
+   to deal with.)  */
+
+static ctf_id_t
+lookup_ptrtab (ctf_dict_t *fp, ctf_dict_t *child, ctf_id_t type, int *in_child)
+{
+  ctf_id_t ntype = 0;
+  uint32_t idx;
+
+  *in_child = 0;
+
+  /* If we're looking up types in the parent from the perspective of a child,
+     don't even try looking if this is a child type: this is done earlier.  */
+
+  if (child && ctf_type_ischild (fp, type))
+    return ctf_set_typed_errno (fp, ECTF_NOTYPE);
+
+  idx = ctf_type_to_index (fp, type);
+  ntype = CTF_ERR;
+
+  /* Lookup of parent type in child: check pptrtab.  */
+  if (child)
+    {
+      if (idx < child->ctf_pptrtab_len)
+	{
+	  ntype = child->ctf_pptrtab[idx];
+	  if (ntype)
+	    *in_child = 1;
+	  else
+	    ntype = CTF_ERR;
+	}
+    }
+  /* Type, and pointer to it, might still be in the parent: check its ptrtab.  */
+  if (ntype == CTF_ERR)
+    {
+      idx = ctf_type_to_index (fp, type);
+      ntype = fp->ctf_ptrtab[idx];
+
+      if (ntype == 0)
+	ntype = CTF_ERR;
+    }
+  if (ntype == CTF_ERR)
+    return ctf_set_typed_errno (fp, ECTF_NOTYPE);
+
+  return ntype;
+}
+
 /* Attempt to convert the given C type name into the corresponding CTF type ID.
    It is not possible to do complete and proper conversion of type names
    without implementing a more full-fledged parser, which is necessary to
@@ -164,65 +222,51 @@ ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
 	     from resolving the type down to its base type and use that instead.
 	     This helps with cases where the CTF data includes "struct foo *"
 	     but not "foo_t *" and the user tries to access "foo_t *" in the
-	     debugger.
+	     debugger.  */
 
-	     There is extra complexity here because uninitialized elements in
-	     the pptrtab and ptrtab are set to zero, but zero (as the type ID
-	     meaning the unimplemented type) is a valid return type from
-	     ctf_lookup_by_name.  (Pointers to types are never of type 0, so
-	     this is unambiguous, just fiddly to deal with.)  */
-
-	  uint32_t idx = ctf_type_to_index (fp, type);
 	  int in_child = 0;
 
-	  ntype = CTF_ERR;
-	  if (child && idx < child->ctf_pptrtab_len)
-	    {
-	      ntype = child->ctf_pptrtab[idx];
-	      if (ntype)
-		in_child = 1;
-	      else
-		ntype = CTF_ERR;
-	    }
+	  /* Parent type, not looking in the parent yet?  Do so. */
 
-	  if (ntype == CTF_ERR)
-	    {
-	      ntype = fp->ctf_ptrtab[idx];
-	      if (ntype == 0)
-		ntype = CTF_ERR;
-	    }
+	  if (!child && fp->ctf_flags & LCTF_CHILD
+	      && ctf_type_isparent (fp, type))
+	    goto notype;
+
+	  ntype = lookup_ptrtab (fp, child, type, &in_child);
 
 	  /* Try resolving to its base type and check again.  */
+	  if (ntype == CTF_ERR && ctf_errno (fp) == ECTF_NOTYPE)
+	    {
+	      int err;
+
+	      if (child)
+		{
+		  ntype = ctf_type_resolve_unsliced (child, type);
+		  err = ctf_errno (child);
+		}
+	      else
+		{
+		  ntype = ctf_type_resolve_unsliced (fp, type);
+		  err = ctf_errno (fp);
+		}
+
+	      if (ntype == CTF_ERR)
+		{
+		  if (err == ECTF_BADID)
+		    goto notype;
+		  else
+		    return ctf_set_typed_errno (fp, err);
+		}
+
+	      ntype = lookup_ptrtab (fp, child, type, &in_child);
+	    }
 	  if (ntype == CTF_ERR)
 	    {
-	      if (child)
-		ntype = ctf_type_resolve_unsliced (child, type);
+	      if (ctf_errno (fp) == ECTF_BADID
+		  || ctf_errno (fp) == ECTF_NOTYPE)
+		goto notype;
 	      else
-		ntype = ctf_type_resolve_unsliced (fp, type);
-
-	      if (ntype == CTF_ERR)
-		goto notype;
-
-	      idx = ctf_type_to_index (fp, ntype);
-
-	      ntype = CTF_ERR;
-	      if (child && idx < child->ctf_pptrtab_len)
-		{
-		  ntype = child->ctf_pptrtab[idx];
-		  if (ntype)
-		    in_child = 1;
-		  else
-		    ntype = CTF_ERR;
-		}
-
-	      if (ntype == CTF_ERR)
-		{
-		  ntype = fp->ctf_ptrtab[idx];
-		  if (ntype == 0)
-		    ntype = CTF_ERR;
-		}
-	      if (ntype == CTF_ERR)
-		goto notype;
+		return -1;			/* errno is set for us.  */
 	    }
 
 	  if (in_child)
