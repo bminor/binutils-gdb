@@ -36,7 +36,8 @@ static asymbol **core_syms;
 asection *core_text_sect;
 void * core_text_space;
 
-static int min_insn_size;
+/* Greatest common divisor of instruction sizes and alignments.  */
+static int insn_boundary;
 int offset_to_code;
 
 /* For mapping symbols to specific .o files during file ordering.  */
@@ -245,7 +246,7 @@ core_init (const char * aout_name)
       *symp = 0;
     }
 
-  min_insn_size = 1;
+  insn_boundary = 1;
   offset_to_code = 0;
 
   switch (bfd_get_arch (core_bfd))
@@ -255,7 +256,7 @@ core_init (const char * aout_name)
       break;
 
     case bfd_arch_alpha:
-      min_insn_size = 4;
+      insn_boundary = 4;
       break;
 
     default:
@@ -791,7 +792,7 @@ core_create_line_syms (void)
   prev_line_num = 0;
 
   vma_high = core_text_sect->vma + bfd_section_size (core_text_sect);
-  for (vma = core_text_sect->vma; vma < vma_high; vma += min_insn_size)
+  for (vma = core_text_sect->vma; vma < vma_high; vma += insn_boundary)
     {
       unsigned int len;
 
@@ -857,7 +858,7 @@ core_create_line_syms (void)
      lot cleaner now.  */
   prev = 0;
 
-  for (vma = core_text_sect->vma; vma < vma_high; vma += min_insn_size)
+  for (vma = core_text_sect->vma; vma < vma_high; vma += insn_boundary)
     {
       sym_init (ltab.limit);
 
