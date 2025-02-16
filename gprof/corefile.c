@@ -255,6 +255,13 @@ core_init (const char * aout_name)
       offset_to_code = 2;
       break;
 
+    case bfd_arch_mips:/* and microMIPS */
+    case bfd_arch_powerpc:/* and VLE */
+    case bfd_arch_riscv:/* and RVC */
+    case bfd_arch_sh:
+      insn_boundary = 2;
+      break;
+
     case bfd_arch_alpha:
       insn_boundary = 4;
       break;
