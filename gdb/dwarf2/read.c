@@ -4718,7 +4718,7 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
   if (!per_objfile->symtab_set_p (per_cu))
     {
       /* Add it to the queue.  */
-      queue_comp_unit (per_cu, per_objfile,  pretend_language);
+      queue_comp_unit (per_cu, per_objfile, pretend_language);
       queued = true;
     }
 
