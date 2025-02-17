@@ -2964,6 +2964,8 @@ const char *bfd_format_string (bfd_format format);
    && bfd_is_abs_section ((H)->u.def.section) \
    && !(H)->rel_from_abs)
 
+bool bfd_link_align_section (asection *, unsigned int);
+
 bool bfd_link_split_section (bfd *abfd, asection *sec);
 
 #define bfd_link_split_section(abfd, sec) \

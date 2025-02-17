@@ -3384,12 +3384,9 @@ _bfd_elf_adjust_dynamic_copy (struct bfd_link_info *info,
        --power_of_two;
     }
 
-  if (power_of_two > bfd_section_alignment (dynbss))
-    {
-      /* Adjust the section alignment if needed.  */
-      if (!bfd_set_section_alignment (dynbss, power_of_two))
-	return false;
-    }
+  /* Adjust the section alignment if needed.  */
+  if (!bfd_link_align_section (dynbss, power_of_two))
+    return false;
 
   /* We make sure that the symbol will be aligned properly.  */
   dynbss->size = BFD_ALIGN (dynbss->size, mask + 1);
