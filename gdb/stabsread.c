@@ -2226,6 +2226,8 @@ read_stabs_symtab (struct objfile *objfile, symfile_add_flags symfile_flags)
 
   sym_bfd = objfile->obfd.get ();
 
+  stabs_deprecated_warning ();
+
   /* .o and .nlm files are relocatables with text, data and bss segs based at
      0.  This flag disables special (Solaris stabs-in-elf only) fixups for
      symbols with a value of 0.  */

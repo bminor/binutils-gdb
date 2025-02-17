@@ -2807,6 +2807,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
 
   if (num_symbols > 0)
     {
+      stabs_deprecated_warning ();
       /* Read the string table.  */
       init_stringtab (abfd, stringtab_offset, objfile);
 

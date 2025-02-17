@@ -305,4 +305,10 @@ struct symloc
     int file_string_offset;
     enum language pst_language;
   };
+
+static inline void
+stabs_deprecated_warning ()
+{
+  warning (_("Stabs support is deprecated and will be removed soon."));
+}
 #endif /* GDB_STABSREAD_H */

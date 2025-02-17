@@ -110,6 +110,7 @@ dbx_new_init (struct objfile *ignore)
 {
   stabsread_new_init ();
   init_header_files ();
+  warning (_("The a.out file format is deprecated and will be removed soon."));
 }
 
 

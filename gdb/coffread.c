@@ -234,6 +234,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
   const char *name = bfd_get_filename (sym_bfd);
   unsigned int stabsize;
 
+  stabs_deprecated_warning ();
   /* Allocate struct to keep track of stab reading.  */
   dbx_objfile_data_key.emplace (objfile);
   dbx_symfile_info *key = dbx_objfile_data_key.get (objfile);

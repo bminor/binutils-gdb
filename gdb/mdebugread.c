@@ -2671,7 +2671,10 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			  &sh);
 	  if (strcmp (debug_info->ss + fh->issBase + sh.iss,
 		      stabs_symbol) == 0)
-	    processing_gcc_compilation = 2;
+	    {
+	      processing_gcc_compilation = 2;
+	      stabs_deprecated_warning ();
+	    }
 	}
 
       if (processing_gcc_compilation != 0)
