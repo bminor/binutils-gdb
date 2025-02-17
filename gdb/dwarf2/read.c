@@ -1835,7 +1835,6 @@ dwarf2_per_bfd::allocate_signatured_type (dwarf2_section_info *section,
   auto result
     = std::make_unique<signatured_type> (this, section, sect_off, signature);
   result->index = all_units.size ();
-  result->is_debug_types = true;
   tu_stats.nr_tus++;
   return result;
 }
@@ -7149,7 +7148,6 @@ create_cus_hash_table (dwarf2_per_objfile *per_objfile,
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
 
       dwarf2_per_cu_data per_cu (per_bfd, &section, sect_off);
-      per_cu.is_debug_types = 0;
 
       cutu_reader reader (&per_cu, per_objfile, cu, &dwo_file);
       if (!reader.dummy_p)

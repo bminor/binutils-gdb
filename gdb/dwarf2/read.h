@@ -375,7 +375,9 @@ struct signatured_type : public dwarf2_per_cu_data
 		   sect_offset sect_off, ULONGEST signature)
     : dwarf2_per_cu_data (per_bfd, section, sect_off),
       signature (signature)
-  {}
+  {
+    this->is_debug_types = true;
+  }
 
   /* The type's signature.  */
   ULONGEST signature;
