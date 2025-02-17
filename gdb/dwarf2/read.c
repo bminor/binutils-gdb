@@ -4688,7 +4688,7 @@ queue_comp_unit (dwarf2_per_cu_data *per_cu,
    indicator of whether the CU's DIEs are loaded right now, it should check
    that by calling `dwarf2_per_objfile::get_cu` instead.  */
 
-static int
+static bool
 maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
 		       dwarf2_per_cu_data *per_cu,
 		       dwarf2_per_objfile *per_objfile,
@@ -4711,7 +4711,7 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
       gdb_assert (!per_objfile->symtab_set_p (per_cu));
 
       /* The DIEs are already loaded, the caller doesn't need to do it.  */
-      return 0;
+      return false;
     }
 
   bool queued = false;
