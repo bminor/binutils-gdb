@@ -1816,9 +1816,9 @@ dw2_instantiate_symtab (dwarf2_per_cu_data *per_cu,
 /* See read.h.  */
 
 dwarf2_per_cu_data_up
-dwarf2_per_bfd::allocate_per_cu ()
+dwarf2_per_bfd::allocate_per_cu (sect_offset sect_off)
 {
-  dwarf2_per_cu_data_up result (new dwarf2_per_cu_data (this));
+  dwarf2_per_cu_data_up result (new dwarf2_per_cu_data (this, sect_off));
   result->index = all_units.size ();
   return result;
 }
@@ -1826,9 +1826,9 @@ dwarf2_per_bfd::allocate_per_cu ()
 /* See read.h.  */
 
 signatured_type_up
-dwarf2_per_bfd::allocate_signatured_type (ULONGEST signature)
+dwarf2_per_bfd::allocate_signatured_type (sect_offset sect_off, ULONGEST signature)
 {
-  signatured_type_up result (new signatured_type (this, signature));
+  signatured_type_up result (new signatured_type (this, sect_off, signature));
   result->index = all_units.size ();
   result->is_debug_types = true;
   tu_stats.nr_tus++;
@@ -1843,8 +1843,7 @@ create_cu_from_index_list (dwarf2_per_bfd *per_bfd,
 			   int is_dwz,
 			   sect_offset sect_off, ULONGEST length)
 {
-  dwarf2_per_cu_data_up the_cu = per_bfd->allocate_per_cu ();
-  the_cu->sect_off = sect_off;
+  dwarf2_per_cu_data_up the_cu = per_bfd->allocate_per_cu (sect_off);
   the_cu->set_length (length);
   the_cu->section = section;
   the_cu->is_dwz = is_dwz;
@@ -2719,12 +2718,14 @@ create_debug_types_hash_table (dwarf2_per_objfile *per_objfile,
    Otherwise we find one.  */
 
 static struct signatured_type *
-add_type_unit (dwarf2_per_bfd *per_bfd, ULONGEST sig, void **slot)
+add_type_unit (dwarf2_per_bfd *per_bfd, sect_offset sect_off, ULONGEST sig,
+	       void **slot)
 {
   if (per_bfd->all_units.size () == per_bfd->all_units.capacity ())
     ++per_bfd->tu_stats.nr_all_type_units_reallocs;
 
-  signatured_type_up sig_type_holder = per_bfd->allocate_signatured_type (sig);
+  signatured_type_up sig_type_holder
+    = per_bfd->allocate_signatured_type (sect_off, sig);
   signatured_type *sig_type = sig_type_holder.get ();
 
   per_bfd->all_units.emplace_back (sig_type_holder.release ());
@@ -2746,8 +2747,6 @@ fill_in_sig_entry_from_dwo_entry (dwarf2_per_objfile *per_objfile,
 				  struct signatured_type *sig_entry,
 				  struct dwo_unit *dwo_entry)
 {
-  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-
   /* Make sure we're not clobbering something we don't expect to.  */
   gdb_assert (! sig_entry->queued);
   gdb_assert (per_objfile->get_cu (sig_entry) == NULL);
@@ -2761,7 +2760,6 @@ fill_in_sig_entry_from_dwo_entry (dwarf2_per_objfile *per_objfile,
 	      || sig_entry->dwo_unit == dwo_entry);
 
   sig_entry->section = dwo_entry->section;
-  sig_entry->sect_off = dwo_entry->sect_off;
   sig_entry->set_length (dwo_entry->length, false);
   sig_entry->reading_dwo_directly = 1;
   sig_entry->type_offset_in_tu = dwo_entry->type_offset_in_tu;
@@ -2802,7 +2800,7 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
      the TU has an entry in .gdb_index, replace the recorded data from
      .gdb_index with this TU.  */
 
-  signatured_type find_sig_entry (nullptr, sig);
+  signatured_type find_sig_entry (nullptr, sect_offset {}, sig);
   slot = htab_find_slot (per_bfd->signatured_types.get (), &find_sig_entry,
 			 INSERT);
   signatured_type *sig_entry = (struct signatured_type *) *slot;
@@ -2834,7 +2832,7 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 
   /* If the global table doesn't have an entry for this TU, add one.  */
   if (sig_entry == NULL)
-    sig_entry = add_type_unit (per_bfd, sig, slot);
+    sig_entry = add_type_unit (per_bfd, dwo_entry->sect_off, sig, slot);
 
   if (sig_entry->dwo_unit == nullptr)
     fill_in_sig_entry_from_dwo_entry (per_objfile, sig_entry, dwo_entry);
@@ -2864,7 +2862,7 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (per_bfd->signatured_types == NULL)
     per_bfd->signatured_types = allocate_signatured_type_table ();
 
-  signatured_type find_sig_entry (nullptr, sig);
+  signatured_type find_sig_entry (nullptr, sect_offset {}, sig);
   slot = htab_find_slot (per_bfd->signatured_types.get (), &find_sig_entry,
 			 INSERT);
   signatured_type *sig_entry = (struct signatured_type *) *slot;
@@ -2882,7 +2880,7 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (dwo_entry == NULL)
     return NULL;
 
-  sig_entry = add_type_unit (per_bfd, sig, slot);
+  sig_entry = add_type_unit (per_bfd, dwo_entry->sect_off, sig, slot);
   fill_in_sig_entry_from_dwo_entry (per_objfile, sig_entry, dwo_entry);
 
   return sig_entry;
@@ -2910,7 +2908,7 @@ lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
     {
       if (per_objfile->per_bfd->signatured_types == NULL)
 	return NULL;
-      signatured_type find_entry (nullptr, sig);
+      signatured_type find_entry (nullptr, sect_offset {}, sig);
       return ((struct signatured_type *)
 	      htab_find (per_objfile->per_bfd->signatured_types.get (),
 			 &find_entry));
@@ -4049,7 +4047,7 @@ process_skeletonless_type_unit (void **slot, void *info)
   if (per_bfd->signatured_types == NULL)
     per_bfd->signatured_types = allocate_signatured_type_table ();
 
-  signatured_type find_entry (nullptr, dwo_unit->signature);
+  signatured_type find_entry (nullptr, sect_offset {}, dwo_unit->signature);
   slot = htab_find_slot (per_bfd->signatured_types.get (), &find_entry, INSERT);
 
   /* If we've already seen this type there's nothing to do.  What's happening
@@ -4059,7 +4057,8 @@ process_skeletonless_type_unit (void **slot, void *info)
 
   /* This does the job that create_all_units would have done for
      this TU.  */
-  signatured_type *entry = add_type_unit (per_bfd, dwo_unit->signature, slot);
+  signatured_type *entry
+    = add_type_unit (per_bfd, dwo_unit->sect_off, dwo_unit->signature, slot);
   fill_in_sig_entry_from_dwo_entry (per_objfile, entry, dwo_unit);
   *slot = entry;
 
@@ -4322,14 +4321,14 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 
       /* Save the compilation unit for later lookup.  */
       if (cu_header.unit_type != DW_UT_type)
-	this_cu = per_objfile->per_bfd->allocate_per_cu ();
+	this_cu = per_objfile->per_bfd->allocate_per_cu (sect_off);
       else
 	{
 	  if (types_htab == nullptr)
 	    types_htab = allocate_signatured_type_table ();
 
 	  auto sig_type = per_objfile->per_bfd->allocate_signatured_type
-	    (cu_header.signature);
+	    (sect_off, cu_header.signature);
 	  signatured_type *sig_ptr = sig_type.get ();
 	  sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
 	  this_cu.reset (sig_type.release ());
@@ -4344,7 +4343,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 		       hex_string (sig_ptr->signature));
 	  *slot = sig_ptr;
 	}
-      this_cu->sect_off = sect_off;
+
       this_cu->set_length (cu_header.get_length_with_initial ());
       this_cu->is_dwz = is_dwz;
       this_cu->section = section;
@@ -7144,9 +7143,8 @@ create_cus_hash_table (dwarf2_per_objfile *per_objfile,
       void **slot;
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
 
-      dwarf2_per_cu_data per_cu (per_bfd);
+      dwarf2_per_cu_data per_cu (per_bfd, sect_off);
       per_cu.is_debug_types = 0;
-      per_cu.sect_off = sect_offset (info_ptr - section.buffer);
       per_cu.section = &section;
 
       cutu_reader reader (&per_cu, per_objfile, cu, &dwo_file);
@@ -21142,13 +21140,19 @@ namespace find_containing_comp_unit {
 static void
 run_test ()
 {
-  dwarf2_per_cu_data_up one (new dwarf2_per_cu_data (nullptr));
+  const auto create_dummy_per_cu = [] ()
+    {
+      return (dwarf2_per_cu_data_up
+	      (new dwarf2_per_cu_data (nullptr,sect_offset {})));
+    };
+
+  dwarf2_per_cu_data_up one = create_dummy_per_cu ();
   dwarf2_per_cu_data *one_ptr = one.get ();
-  dwarf2_per_cu_data_up two (new dwarf2_per_cu_data (nullptr));
+  dwarf2_per_cu_data_up two = create_dummy_per_cu ();
   dwarf2_per_cu_data *two_ptr = two.get ();
-  dwarf2_per_cu_data_up three (new dwarf2_per_cu_data (nullptr));
+  dwarf2_per_cu_data_up three = create_dummy_per_cu ();
   dwarf2_per_cu_data *three_ptr = three.get ();
-  dwarf2_per_cu_data_up four (new dwarf2_per_cu_data (nullptr));
+  dwarf2_per_cu_data_up four = create_dummy_per_cu ();
   dwarf2_per_cu_data *four_ptr = four.get ();
 
   one->set_length (5);

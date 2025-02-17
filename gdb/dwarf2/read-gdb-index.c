@@ -1380,10 +1380,9 @@ create_signatured_type_table_from_gdb_index
       signature = extract_unsigned_integer (bytes + 16, 8, BFD_ENDIAN_LITTLE);
       bytes += 3 * 8;
 
-      sig_type = per_bfd->allocate_signatured_type (signature);
+      sig_type = per_bfd->allocate_signatured_type (sect_off, signature);
       sig_type->type_offset_in_tu = type_offset_in_tu;
       sig_type->section = section;
-      sig_type->sect_off = sect_off;
 
       slot = htab_find_slot (sig_types_hash.get (), sig_type.get (), INSERT);
       *slot = sig_type.get ();
