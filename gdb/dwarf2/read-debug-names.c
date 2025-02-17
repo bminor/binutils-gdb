@@ -112,7 +112,7 @@ struct mapped_debug_names_reader
     std::vector<attr> attr_vec;
   };
 
-  std::unordered_map<ULONGEST, index_val> abbrev_map;
+  gdb::unordered_map<ULONGEST, index_val> abbrev_map;
 
   /* Even though the scanning of .debug_names and creation of the cooked index
      entries is done serially, we create multiple shards so that the

@@ -21,7 +21,6 @@
 #define GDB_DWARF2_READ_H
 
 #include <queue>
-#include <unordered_map>
 #include "dwarf2/comp-unit-head.h"
 #include "dwarf2/file-and-dir.h"
 #include "dwarf2/index-cache.h"
@@ -563,7 +562,7 @@ public:
 
   /* Mapping from abstract origin DIE to concrete DIEs that reference it as
      DW_AT_abstract_origin.  */
-  std::unordered_map<sect_offset, std::vector<sect_offset>>
+  gdb::unordered_map<sect_offset, std::vector<sect_offset>>
     abstract_to_concrete;
 
   /* Current directory, captured at the moment that object this was
@@ -793,17 +792,17 @@ private:
      that the CU/TU has not been expanded yet.  */
   std::vector<compunit_symtab *> m_symtabs;
 
- /* Map from a type unit group to the corresponding unshared
-    structure.  */
-  std::unordered_map<type_unit_group *, type_unit_group_unshareable_up>
+  /* Map from a type unit group to the corresponding unshared
+     structure.  */
+  gdb::unordered_map<type_unit_group *, type_unit_group_unshareable_up>
     m_type_units;
 
   /* Map from signatured types to the corresponding struct type.  */
-  std::unordered_map<signatured_type *, struct type *> m_type_map;
+  gdb::unordered_map<signatured_type *, struct type *> m_type_map;
 
   /* Map from the objfile-independent dwarf2_per_cu_data instances to the
      corresponding objfile-dependent dwarf2_cu instances.  */
-  std::unordered_map<dwarf2_per_cu_data *, dwarf2_cu_up> m_dwarf2_cus;
+  gdb::unordered_map<dwarf2_per_cu_data *, dwarf2_cu_up> m_dwarf2_cus;
 };
 
 /* Converts DWARF language names to GDB language names.  */

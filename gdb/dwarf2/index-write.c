@@ -43,8 +43,6 @@
 
 #include <algorithm>
 #include <map>
-#include <unordered_map>
-#include <unordered_set>
 
 /* Ensure only legit values are used.  */
 #define DW2_GDB_INDEX_SYMBOL_STATIC_SET_VALUE(cu_index, value) \
@@ -432,7 +430,7 @@ symtab_index_entry::minimize ()
      this, we want to keep the entry from the first CU -- but this is
      implicit due to the sort.  This choice is done because it's
      similar to what gdb historically did for partial symbols.  */
-  std::unordered_set<offset_type> seen;
+  gdb::unordered_set<offset_type> seen;
   from = std::remove_if (cu_indices.begin (), cu_indices.end (),
 			 [&] (offset_type val)
     {
@@ -478,7 +476,7 @@ private:
   const char *const m_cstr;
 };
 
-/* A std::unordered_map::hasher for c_str_view that uses the right
+/* A gdb::unordered_map::hasher for c_str_view that uses the right
    hash function for strings in a mapped index.  */
 class c_str_view_hasher
 {
@@ -489,7 +487,7 @@ public:
   }
 };
 
-/* A std::unordered_map::hasher for std::vector<>.  */
+/* A gdb::unordered_map::hasher for std::vector<>.  */
 template<typename T>
 class vector_hasher
 {
@@ -510,7 +508,7 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
   {
     /* Elements are sorted vectors of the indices of all the CUs that
        hold an object of this name.  */
-    std::unordered_map<std::vector<offset_type>, offset_type,
+    gdb::unordered_map<std::vector<offset_type>, offset_type,
 		       vector_hasher<offset_type>>
       symbol_hash_table;
 
@@ -537,7 +535,7 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
   }
 
   /* Now write out the hash table.  */
-  std::unordered_map<c_str_view, offset_type, c_str_view_hasher> str_table;
+  gdb::unordered_map<c_str_view, offset_type, c_str_view_hasher> str_table;
   for (const auto &entry : *symtab)
     {
       offset_type str_off, vec_off;
@@ -564,7 +562,7 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
 }
 
 using cu_index_map
-  = std::unordered_map<const dwarf2_per_cu_data *, unsigned int>;
+  = gdb::unordered_map<const dwarf2_per_cu_data *, unsigned int>;
 
 /* Helper struct for building the address table.  */
 struct addrmap_index_data
@@ -924,7 +922,7 @@ private:
     }
 
   private:
-    std::unordered_map<c_str_view, size_t, c_str_view_hasher> m_str_table;
+    gdb::unordered_map<c_str_view, size_t, c_str_view_hasher> m_str_table;
     bfd *const m_abfd;
     dwarf2_per_bfd *m_per_bfd;
 
@@ -963,7 +961,7 @@ private:
     const bool has_parent;
   };
 
-  /* Provide std::unordered_map::hasher for index_key.  */
+  /* Provide gdb::unordered_map::hasher for index_key.  */
   class index_key_hasher
   {
   public:
@@ -1103,7 +1101,7 @@ private:
 
   /* Map each used .debug_names abbreviation tag parameter to its
      index value.  */
-  std::unordered_map<index_key, int, index_key_hasher> m_indexkey_to_idx;
+  gdb::unordered_map<index_key, int, index_key_hasher> m_indexkey_to_idx;
 
   /* .debug_names abbreviation table.  */
   data_buf m_abbrev_table;

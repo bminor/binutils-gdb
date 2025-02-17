@@ -37,13 +37,12 @@
 #include "gdbsupport/task-group.h"
 #include "gdbsupport/thread-pool.h"
 #include <chrono>
-#include <unordered_set>
 #include "cli/cli-cmds.h"
 
 /* We don't want gdb to exit while it is in the process of writing to
    the index cache.  So, all live cooked index vectors are stored
    here, and then these are all waited for before exit proceeds.  */
-static std::unordered_set<cooked_index *> active_vectors;
+static gdb::unordered_set<cooked_index *> active_vectors;
 
 /* See cooked-index.h.  */
 
@@ -547,7 +546,7 @@ cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
     }
 
   /* Only show a given exception a single time.  */
-  std::unordered_set<gdb_exception> seen_exceptions;
+  gdb::unordered_set<gdb_exception> seen_exceptions;
   for (auto &one_result : m_results)
     {
       re_emit_complaints (std::get<1> (one_result));

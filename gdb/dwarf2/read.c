@@ -82,12 +82,10 @@
 #include "producer.h"
 #include <fcntl.h>
 #include <algorithm>
-#include <unordered_map>
 #include "gdbsupport/selftest.h"
 #include "rust-lang.h"
 #include "gdbsupport/pathstuff.h"
 #include "count-one-bits.h"
-#include <unordered_set>
 #include "dwarf2/abbrev-table-cache.h"
 #include "cooked-index.h"
 #include "gdbsupport/thread-pool.h"
@@ -2289,7 +2287,7 @@ dwarf2_base_index_functions::map_symbol_filenames
 
   /* Use caches to ensure we only call FUN once for each filename.  */
   filename_seen_cache filenames_cache;
-  std::unordered_set<quick_file_names *> qfn_cache;
+  gdb::unordered_set<quick_file_names *> qfn_cache;
 
   /* The rule is CUs specify all the files, including those used by any TU,
      so there's no need to scan TUs here.  We can ignore file names coming
@@ -5251,7 +5249,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       /* We need a way to find the correct discriminant given a
 	 variant name.  For convenience we build a map here.  */
       struct type *enum_type = disr_field->type ();
-      std::unordered_map<std::string_view, ULONGEST> discriminant_map;
+      gdb::unordered_map<std::string_view, ULONGEST> discriminant_map;
       for (int i = 0; i < enum_type->num_fields (); ++i)
 	{
 	  if (enum_type->field (i).loc_kind () == FIELD_LOC_KIND_ENUMVAL)
@@ -11270,7 +11268,7 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
 
 /* A convenience typedef that's used when finding the discriminant
    field for a variant part.  */
-typedef std::unordered_map<sect_offset, int> offset_map_type;
+using offset_map_type = gdb::unordered_map<sect_offset, int>;
 
 /* Compute the discriminant range for a given variant.  OBSTACK is
    where the results will be stored.  VARIANT is the variant to

@@ -44,7 +44,6 @@
 #include "gdbsupport/selftest.h"
 #include "selftest-arch.h"
 #endif
-#include <unordered_map>
 
 #include <algorithm>
 
@@ -104,7 +103,7 @@ struct dwarf2_cie
 
 /* The CIE table is used to find CIEs during parsing, but then
    discarded.  It maps from the CIE's offset to the CIE.  */
-typedef std::unordered_map<ULONGEST, dwarf2_cie *> dwarf2_cie_table;
+using dwarf2_cie_table = gdb::unordered_map<ULONGEST, dwarf2_cie *>;
 
 /* Frame Description Entry (FDE).  */
 
