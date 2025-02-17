@@ -113,6 +113,12 @@ static unsigned int dwarf_read_debug = 0;
   debug_prefixed_printf_cond (dwarf_read_debug >= 2, "dwarf-read", fmt, \
 			      ##__VA_ARGS__)
 
+/* Print "dwarf-read" start/end debug statements.  */
+
+#define DWARF_READ_SCOPED_DEBUG_START_END(fmt, ...)                           \
+  scoped_debug_start_end ([] { return dwarf_read_debug >= 1; }, "dwarf-read", \
+			  fmt, ##__VA_ARGS__)
+
 /* When non-zero, dump DIEs after they are read in.  */
 static unsigned int dwarf_die_debug = 0;
 
@@ -4715,6 +4721,12 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
       /* Add it to the queue.  */
       queue_comp_unit (per_cu, per_objfile, pretend_language);
       queued = true;
+
+      dwarf_read_debug_printf ("Queuing CU for expansion: "
+			       "section offset = 0x%" PRIx64 ", "
+			       "queue size = %zu",
+			       to_underlying (per_cu->sect_off),
+			       per_objfile->queue->size ());
     }
 
   /* If the compilation unit is already loaded, just mark it as
@@ -4733,8 +4745,11 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
 static void
 process_queue (dwarf2_per_objfile *per_objfile)
 {
-  dwarf_read_debug_printf ("Expanding one or more symtabs of objfile %s ...",
-			   objfile_name (per_objfile->objfile));
+  DWARF_READ_SCOPED_DEBUG_START_END
+    ("Expanding one or more symtabs of objfile %s ...",
+     objfile_name (per_objfile->objfile));
+
+  unsigned int expanded_count = 0;
 
   /* The queue starts out with one item, but following a DIE reference
      may load a new CU, adding it to the end of the queue.  */
@@ -4750,8 +4765,11 @@ process_queue (dwarf2_per_objfile *per_objfile)
 	  /* Skip dummy CUs.  */
 	  if (cu != nullptr)
 	    {
+	      namespace chr = std::chrono;
+
 	      unsigned int debug_print_threshold;
 	      char buf[100];
+	      std::optional<chr::time_point<chr::steady_clock>> start_time;
 
 	      if (per_cu->is_debug_types)
 		{
@@ -4773,7 +4791,12 @@ process_queue (dwarf2_per_objfile *per_objfile)
 		}
 
 	      if (dwarf_read_debug >= debug_print_threshold)
-		dwarf_read_debug_printf ("Expanding symtab of %s", buf);
+		{
+		  dwarf_read_debug_printf ("Expanding symtab of %s", buf);
+		  start_time = chr::steady_clock::now ();
+		}
+
+	      ++expanded_count;
 
 	      if (per_cu->is_debug_types)
 		process_full_type_unit (cu, item.pretend_language);
@@ -4781,7 +4804,15 @@ process_queue (dwarf2_per_objfile *per_objfile)
 		process_full_comp_unit (cu, item.pretend_language);
 
 	      if (dwarf_read_debug >= debug_print_threshold)
-		dwarf_read_debug_printf ("Done expanding %s", buf);
+		{
+		  const auto end_time = chr::steady_clock::now ();
+		  const auto time_spent = end_time - *start_time;
+		  const auto ms
+		    = chr::duration_cast<chr::milliseconds> (time_spent);
+
+		  dwarf_read_debug_printf ("Done expanding %s, took %.3fs", buf,
+					   ms.count () / 1000.0);
+		}
 	    }
 	}
 
@@ -4789,8 +4820,7 @@ process_queue (dwarf2_per_objfile *per_objfile)
       per_objfile->queue->pop ();
     }
 
-  dwarf_read_debug_printf ("Done expanding symtabs of %s.",
-			   objfile_name (per_objfile->objfile));
+  dwarf_read_debug_printf ("Done expanding %u symtabs.", expanded_count);
 }
 
 /* Load the DIEs associated with PER_CU into memory.
