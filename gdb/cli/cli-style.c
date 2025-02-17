@@ -371,9 +371,17 @@ Configure various disassembler style-related variables."),
   add_setshow_boolean_cmd ("enabled", no_class, &disassembler_styling, _("\
 Set whether disassembler output styling is enabled."), _("\
 Show whether disassembler output styling is enabled."), _("\
-If enabled, disassembler output is styled.  Disassembler highlighting\n\
-requires the Python Pygments library, if this library is not available\n\
-then disassembler highlighting will not be possible."
+If enabled, disassembler output is styled.\n\
+\n\
+Disassembler styling requires a library that is able to style the current\n\
+instruction architecture.  By default, GDB will use its builtin library\n\
+for disassembler styling, but this cannot style every architecture.\n\
+\n\
+For architectures that cannot be styled by the builtin disassembler library\n\
+GDB will use the Python Pygments library, if this library is available.\n\
+\n\
+If neither option is able to style the current architecture, then\n\
+disassembler output will be unstyled, even when this option is enabled."
 			   ), set_style_enabled, show_style_disassembler,
 			   &style_disasm_set_list, &style_disasm_show_list);
 
