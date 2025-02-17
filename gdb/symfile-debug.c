@@ -33,7 +33,6 @@
 #include "symfile.h"
 #include "block.h"
 #include "filenames.h"
-#include "cli/cli-style.h"
 #include "build-id.h"
 #include "debuginfod-support.h"
 
