@@ -96,7 +96,8 @@ using dwarf2_per_cu_data_up
 
 struct dwarf2_per_cu_data
 {
-  dwarf2_per_cu_data (dwarf2_per_bfd *per_bfd, sect_offset sect_off)
+  dwarf2_per_cu_data (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
+		      sect_offset sect_off)
     : sect_off (sect_off),
       is_debug_types (false),
       is_dwz (false),
@@ -108,6 +109,7 @@ struct dwarf2_per_cu_data
       mark (false),
       files_read (false),
       scanned (false),
+      section (section),
       per_bfd (per_bfd)
   {
   }
@@ -369,9 +371,9 @@ public:
 
 struct signatured_type : public dwarf2_per_cu_data
 {
-  signatured_type (dwarf2_per_bfd *per_bfd, sect_offset sect_off,
-		   ULONGEST signature)
-    : dwarf2_per_cu_data (per_bfd, sect_off),
+  signatured_type (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
+		   sect_offset sect_off, ULONGEST signature)
+    : dwarf2_per_cu_data (per_bfd, section, sect_off),
       signature (signature)
   {}
 
@@ -448,12 +450,14 @@ struct dwarf2_per_bfd
   /* A convenience function to allocate a dwarf2_per_cu_data.  The
      returned object has its "index" field set properly.  The object
      is allocated on the dwarf2_per_bfd obstack.  */
-  dwarf2_per_cu_data_up allocate_per_cu (sect_offset sect_off);
+  dwarf2_per_cu_data_up allocate_per_cu (dwarf2_section_info *section,
+					 sect_offset sect_off);
 
   /* A convenience function to allocate a signatured_type.  The
      returned object has its "index" field set properly.  The object
      is allocated on the dwarf2_per_bfd obstack.  */
-  signatured_type_up allocate_signatured_type (sect_offset sect_off,
+  signatured_type_up allocate_signatured_type (dwarf2_section_info *section,
+					       sect_offset sect_off,
 					       ULONGEST signature);
 
   /* Map all the DWARF section data needed when scanning
