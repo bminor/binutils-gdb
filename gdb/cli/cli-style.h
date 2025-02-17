@@ -160,4 +160,10 @@ extern bool disassembler_styling;
 /* True if styling is enabled.  */
 extern bool cli_styling;
 
+/* Check for environment variables that indicate styling should start as
+   disabled.  If any are found then disable styling.  Styling is never
+   enabled by this call.  If styling was already disabled then it remains
+   disabled after this call.  */
+extern void disable_styling_from_environment ();
+
 #endif /* GDB_CLI_CLI_STYLE_H */
