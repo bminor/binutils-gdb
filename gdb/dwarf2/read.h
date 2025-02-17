@@ -96,7 +96,7 @@ using dwarf2_per_cu_data_up
 
 struct dwarf2_per_cu_data
 {
-  dwarf2_per_cu_data ()
+  dwarf2_per_cu_data (dwarf2_per_bfd *per_bfd)
     : is_debug_types (false),
       is_dwz (false),
       reading_dwo_directly (false),
@@ -106,7 +106,8 @@ struct dwarf2_per_cu_data
       m_header_read_in (false),
       mark (false),
       files_read (false),
-      scanned (false)
+      scanned (false),
+      per_bfd (per_bfd)
   {
   }
 
@@ -209,7 +210,7 @@ public:
   struct dwarf2_section_info *section = nullptr;
 
   /* Backlink to the owner of this.  */
-  dwarf2_per_bfd *per_bfd = nullptr;
+  dwarf2_per_bfd *per_bfd;
 
   /* DWARF header of this CU.  Note that dwarf2_cu reads its own version of the
      header, which may differ from this one, since it may pass rcuh_kind::TYPE
@@ -367,8 +368,9 @@ public:
 
 struct signatured_type : public dwarf2_per_cu_data
 {
-  signatured_type (ULONGEST signature)
-    : signature (signature)
+  signatured_type (dwarf2_per_bfd *per_bfd, ULONGEST signature)
+    : dwarf2_per_cu_data (per_bfd),
+      signature (signature)
   {}
 
   /* The type's signature.  */

@@ -1818,8 +1818,7 @@ dw2_instantiate_symtab (dwarf2_per_cu_data *per_cu,
 dwarf2_per_cu_data_up
 dwarf2_per_bfd::allocate_per_cu ()
 {
-  dwarf2_per_cu_data_up result (new dwarf2_per_cu_data);
-  result->per_bfd = this;
+  dwarf2_per_cu_data_up result (new dwarf2_per_cu_data (this));
   result->index = all_units.size ();
   return result;
 }
@@ -1829,8 +1828,7 @@ dwarf2_per_bfd::allocate_per_cu ()
 signatured_type_up
 dwarf2_per_bfd::allocate_signatured_type (ULONGEST signature)
 {
-  signatured_type_up result (new signatured_type (signature));
-  result->per_bfd = this;
+  signatured_type_up result (new signatured_type (this, signature));
   result->index = all_units.size ();
   result->is_debug_types = true;
   tu_stats.nr_tus++;
@@ -2766,7 +2764,6 @@ fill_in_sig_entry_from_dwo_entry (dwarf2_per_objfile *per_objfile,
   sig_entry->sect_off = dwo_entry->sect_off;
   sig_entry->set_length (dwo_entry->length, false);
   sig_entry->reading_dwo_directly = 1;
-  sig_entry->per_bfd = per_bfd;
   sig_entry->type_offset_in_tu = dwo_entry->type_offset_in_tu;
   sig_entry->dwo_unit = dwo_entry;
 }
@@ -2805,7 +2802,7 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
      the TU has an entry in .gdb_index, replace the recorded data from
      .gdb_index with this TU.  */
 
-  signatured_type find_sig_entry (sig);
+  signatured_type find_sig_entry (nullptr, sig);
   slot = htab_find_slot (per_bfd->signatured_types.get (), &find_sig_entry,
 			 INSERT);
   signatured_type *sig_entry = (struct signatured_type *) *slot;
@@ -2867,7 +2864,7 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (per_bfd->signatured_types == NULL)
     per_bfd->signatured_types = allocate_signatured_type_table ();
 
-  signatured_type find_sig_entry (sig);
+  signatured_type find_sig_entry (nullptr, sig);
   slot = htab_find_slot (per_bfd->signatured_types.get (), &find_sig_entry,
 			 INSERT);
   signatured_type *sig_entry = (struct signatured_type *) *slot;
@@ -2913,7 +2910,7 @@ lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
     {
       if (per_objfile->per_bfd->signatured_types == NULL)
 	return NULL;
-      signatured_type find_entry (sig);
+      signatured_type find_entry (nullptr, sig);
       return ((struct signatured_type *)
 	      htab_find (per_objfile->per_bfd->signatured_types.get (),
 			 &find_entry));
@@ -4052,7 +4049,7 @@ process_skeletonless_type_unit (void **slot, void *info)
   if (per_bfd->signatured_types == NULL)
     per_bfd->signatured_types = allocate_signatured_type_table ();
 
-  signatured_type find_entry (dwo_unit->signature);
+  signatured_type find_entry (nullptr, dwo_unit->signature);
   slot = htab_find_slot (per_bfd->signatured_types.get (), &find_entry, INSERT);
 
   /* If we've already seen this type there's nothing to do.  What's happening
@@ -7142,13 +7139,12 @@ create_cus_hash_table (dwarf2_per_objfile *per_objfile,
   end_ptr = info_ptr + section.size;
   while (info_ptr < end_ptr)
     {
-      struct dwarf2_per_cu_data per_cu;
       struct dwo_unit read_unit {};
       struct dwo_unit *dwo_unit;
       void **slot;
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
 
-      per_cu.per_bfd = per_bfd;
+      dwarf2_per_cu_data per_cu (per_bfd);
       per_cu.is_debug_types = 0;
       per_cu.sect_off = sect_offset (info_ptr - section.buffer);
       per_cu.section = &section;
@@ -21146,13 +21142,13 @@ namespace find_containing_comp_unit {
 static void
 run_test ()
 {
-  dwarf2_per_cu_data_up one (new dwarf2_per_cu_data);
+  dwarf2_per_cu_data_up one (new dwarf2_per_cu_data (nullptr));
   dwarf2_per_cu_data *one_ptr = one.get ();
-  dwarf2_per_cu_data_up two (new dwarf2_per_cu_data);
+  dwarf2_per_cu_data_up two (new dwarf2_per_cu_data (nullptr));
   dwarf2_per_cu_data *two_ptr = two.get ();
-  dwarf2_per_cu_data_up three (new dwarf2_per_cu_data);
+  dwarf2_per_cu_data_up three (new dwarf2_per_cu_data (nullptr));
   dwarf2_per_cu_data *three_ptr = three.get ();
-  dwarf2_per_cu_data_up four (new dwarf2_per_cu_data);
+  dwarf2_per_cu_data_up four (new dwarf2_per_cu_data (nullptr));
   dwarf2_per_cu_data *four_ptr = four.get ();
 
   one->set_length (5);
