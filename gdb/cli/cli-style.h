@@ -157,13 +157,18 @@ extern bool source_styling;
 /* True if disassembler styling is enabled.  */
 extern bool disassembler_styling;
 
-/* True if styling is enabled.  */
-extern bool cli_styling;
-
 /* Check for environment variables that indicate styling should start as
    disabled.  If any are found then disable styling.  Styling is never
    enabled by this call.  If styling was already disabled then it remains
    disabled after this call.  */
 extern void disable_styling_from_environment ();
+
+/* Equivalent to 'set style enabled off'.  Can be used during GDB's start
+   up if a command line option, or environment variable, indicates that
+   styling should be turned off.  */
+extern void disable_cli_styling ();
+
+/* Return true styled output is currently enabled.  */
+extern bool term_cli_styling ();
 
 #endif /* GDB_CLI_CLI_STYLE_H */

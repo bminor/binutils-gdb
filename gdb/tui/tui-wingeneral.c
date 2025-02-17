@@ -80,7 +80,7 @@ box_win (struct tui_win_info *win_info,
 
   /* tui_apply_style resets the style entirely, so be sure to call it
      before applying ATTRS.  */
-  if (cli_styling)
+  if (term_cli_styling ())
     tui_apply_style (win, (highlight_flag
 			   ? tui_active_border_style.style ()
 			   : tui_border_style.style ()));

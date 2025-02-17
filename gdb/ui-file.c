@@ -180,16 +180,6 @@ null_file::write_async_safe (const char *buf, long sizeof_buf)
 
 
 
-/* Return true if styling is currently enabled.  */
-
-static bool
-term_cli_styling ()
-{
-  return cli_styling;
-}
-
-
-
 string_file::~string_file ()
 {}
 

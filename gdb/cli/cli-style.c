@@ -27,9 +27,9 @@
 /* True if styling is enabled.  */
 
 #if defined (__MSDOS__)
-bool cli_styling = false;
+static bool cli_styling = false;
 #else
-bool cli_styling = true;
+static bool cli_styling = true;
 #endif
 
 /* True if source styling is enabled.  Note that this is only
@@ -76,6 +76,22 @@ terminal_supports_styling ()
 #endif
 
   return true;
+}
+
+/* See cli/cli-style.h.  */
+
+void
+disable_cli_styling ()
+{
+  cli_styling = false;
+}
+
+/* See cli/cli-style.h.  */
+
+bool
+term_cli_styling ()
+{
+  return cli_styling;
 }
 
 /* See cli/cli-style.h.  */
