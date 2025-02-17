@@ -1133,10 +1133,15 @@ namespace eval Term {
 	gdb_assert {![regexp -- $regexp $contents]} $test_name
     }
 
-    # Get the region of the screen described by X, Y, WIDTH,
-    # and HEIGHT, and separate the lines using SEP.
-    proc get_region { x y width height sep } {
+    # Get the region of the screen described by X, Y, WIDTH, and
+    # HEIGHT, and separate the lines using SEP.  If ATTRS is true then
+    # include attribute information in the output.
+    proc get_region { x y width height sep { attrs false } } {
 	variable _chars
+
+	if { $attrs } {
+	    _reset_attrs region_attrs
+	}
 
 	# Grab the contents of the box, join each line together
 	# using $sep.
@@ -1148,8 +1153,18 @@ namespace eval Term {
 		append result $sep
 	    }
 	    for {set xx $x} {$xx < [expr {$x + $width}]} {incr xx} {
-		append result [lindex $_chars($xx,$yy) 0]
+		if { $attrs } {
+		    set char_attrs [lindex $_chars($xx,$yy) 1]
+		    append result [apply_attrs region_attrs $char_attrs]
+		}
+
+		append result [get_char $xx $yy]
 	    }
+	}
+	if { $attrs } {
+	    _reset_attrs zero_attrs
+	    set char_attrs [array get zero_attrs]
+	    append result [apply_attrs region_attrs $char_attrs]
 	}
 	return $result
     }

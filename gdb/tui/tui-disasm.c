@@ -98,7 +98,7 @@ tui_disassemble (struct gdbarch *gdbarch,
 		 CORE_ADDR pc, int count,
 		 size_t *addr_size = nullptr)
 {
-  bool term_out = source_styling && gdb_stdout->can_emit_style_escape ();
+  bool term_out = disassembler_styling && gdb_stdout->can_emit_style_escape ();
   string_file gdb_dis_out (term_out);
 
   /* Must start with an empty list.  */
