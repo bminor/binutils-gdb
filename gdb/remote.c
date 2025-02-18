@@ -12502,14 +12502,12 @@ remote_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 	  return true;
 	}
       else if (result.status () == PACKET_UNKNOWN)
-	error (_("Remote target doesn't support qGetTIBAddr packet"));
+	return false;
       else
 	error (_("Remote target failed to process qGetTIBAddr request, %s"),
 		 result.err_msg ());
     }
-  else
-    error (_("qGetTIBAddr not supported or disabled on this target"));
-  /* Not reached.  */
+
   return false;
 }
 
