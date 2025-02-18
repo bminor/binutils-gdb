@@ -131,7 +131,7 @@ proc mi_create_inferior_pty {} {
     }
 }
 
-# Create a new pty, and reate a new MI UI (using the new-ui command) on it.
+# Create a new pty, and create a new MI UI (using the new-ui command) on it.
 #
 # Return a list with the spawn id for that pty and the pty file name.
 
@@ -247,7 +247,7 @@ proc default_mi_gdb_start { { flags {} } } {
 	return [mi_gdb_start_separate_mi_tty $flags]
     }
 
-    # Set the default value, it may be overriden later by specific testfile.
+    # Set the default value, it may be overridden later by specific testfile.
     set use_gdb_stub [target_info exists use_gdb_stub]
 
     # Start SID.

@@ -174,7 +174,7 @@ class FrameDecorator(_FrameDecoratorBase):
     sub-classed from FrameDecorator.  If Decorator1 just overrides the
     'function' method, then all of the other methods are carried out
     by the super-class FrameDecorator.  But Decorator2 may have
-    overriden other methods, so FrameDecorator will look at the
+    overridden other methods, so FrameDecorator will look at the
     'base' parameter and defer to that class's methods.  And so on,
     down the chain."""
 

@@ -2491,7 +2491,7 @@ proc default_gdb_spawn { } {
     global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_spawn_id
 
-    # Set the default value, it may be overriden later by specific testfile.
+    # Set the default value, it may be overridden later by specific testfile.
     #
     # Use `set_board_info use_gdb_stub' for the board file to flag the inferior
     # is already started after connecting and run/attach are not supported.
@@ -5241,7 +5241,7 @@ proc is_any_target {args} {
 #
 # This is the preferred way of checking use_gdb_stub, since it allows to check
 # the value before the gdb has been spawned and it will return the correct value
-# even when it was overriden by the test.
+# even when it was overridden by the test.
 #
 # Note that stub targets are not able to spawn new inferiors.  Use this
 # check for skipping respective tests.
