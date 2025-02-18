@@ -2666,7 +2666,7 @@ _bfd_x86_elf_late_size_sections (bfd *output_bfd,
 	 it is empty.  Update its section alignment now since it
 	 is non-empty.  */
       if (s == htab->elf.iplt
-	  && !bfd_set_section_alignment (s, htab->plt.iplt_alignment))
+	  && !bfd_link_align_section (s, htab->plt.iplt_alignment))
 	abort ();
 
       /* Allocate memory for the section contents.  We use bfd_zalloc

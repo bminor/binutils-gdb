@@ -1946,7 +1946,7 @@ mips_elf_add_la25_intro (struct mips_elf_la25_stub *stub,
 
   /* Make sure that any padding goes before the stub.  */
   align = input_section->alignment_power;
-  if (!bfd_set_section_alignment (s, align))
+  if (!bfd_link_align_section (s, align))
     return false;
   if (align > 3)
     s->size = (1 << align) - 8;
@@ -1983,7 +1983,7 @@ mips_elf_add_la25_trampoline (struct mips_elf_la25_stub *stub,
       asection *input_section = stub->h->root.root.u.def.section;
       s = htab->add_stub_section (".text", NULL,
 				  input_section->output_section);
-      if (s == NULL || !bfd_set_section_alignment (s, 4))
+      if (s == NULL || !bfd_link_align_section (s, 4))
 	return false;
       htab->strampoline = s;
     }
@@ -9447,13 +9447,13 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     Encourage better cache usage by aligning.  We do this
 	     lazily to avoid pessimizing traditional objects.  */
 	  if (htab->root.target_os != is_vxworks
-	      && !bfd_set_section_alignment (htab->root.splt, 5))
+	      && !bfd_link_align_section (htab->root.splt, 5))
 	    return false;
 
 	  /* Make sure that .got.plt is word-aligned.  We do this lazily
 	     for the same reason as above.  */
-	  if (!bfd_set_section_alignment (htab->root.sgotplt,
-					  MIPS_ELF_LOG_FILE_ALIGN (dynobj)))
+	  if (!bfd_link_align_section (htab->root.sgotplt,
+				       MIPS_ELF_LOG_FILE_ALIGN (dynobj)))
 	    return false;
 
 	  /* On non-VxWorks targets, the first two entries in .got.plt

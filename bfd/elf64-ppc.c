@@ -10207,8 +10207,8 @@ size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 	   non-empty.  Otherwise the .text output section will be
 	   aligned at least to plt_stub_align even when no global
 	   entry stubs are needed.  */
-	if (s->alignment_power < align_power)
-	  s->alignment_power = align_power;
+	if (!bfd_link_align_section (s, align_power))
+	  return false;
 	stub_align = (bfd_vma) 1 << align_power;
 	if (htab->params->plt_stub_align >= 0
 	    || ((((stub_off + stub_size - 1) & -stub_align)
