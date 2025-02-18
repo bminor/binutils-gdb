@@ -435,6 +435,7 @@ display_info (void)
   if (!arg.error)
     display_target_tables (&arg);
 
+  free (arg.info);
   return arg.error;
 }
 
