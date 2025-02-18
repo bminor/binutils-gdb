@@ -18,7 +18,7 @@ require can_spawn_for_attach
 
 standard_testfile
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}] == -1} {
+if {[build_executable "failed to prepare" $testfile $srcfile {debug}] == -1} {
     return -1
 }
 
@@ -62,7 +62,7 @@ if { ![gdb_assert { ![expr {$res < 0 || $res == ""}] } $test] } {
 set test "got backtrace"
 set saw_backtrace false
 set no_awk false
-gdb_test_multiple "" $test {
+gdb_expect {
     -i "$res" -re "#0 +(0x\[0-9a-f\]+ in )?main \(\).*\r\nGSTACK-END\r\n\$" {
 	set saw_backtrace true
 	pass $test
