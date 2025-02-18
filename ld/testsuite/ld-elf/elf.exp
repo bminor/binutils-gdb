@@ -497,6 +497,17 @@ if { [istarget *-*-linux*]
 	]
     }
 
+    run_cc_link_tests [list \
+	[list \
+	    "Build pr32690.so" \
+	    "-shared" \
+	    "-O2 -fPIC" \
+	    { pr32690b.c } \
+	    {} \
+	    "pr32690.so" \
+	] \
+    ]
+
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run mbind2a" \
@@ -515,6 +526,18 @@ if { [istarget *-*-linux*]
 	    "mbind2b" \
 	    "pass.out" \
 	    "-O2 -I../bfd" \
+	] \
+	[list \
+	    "Run pr32690" \
+	    "-pie -Wl,-z,now" \
+	    "" \
+	    { pr32690a.c } \
+	    "pr32690" \
+	    "pass.out" \
+	    "-O2 -fPIE" \
+	    "C" \
+	    {} \
+	    "-Wl,-R,tmpdir tmpdir/pr32690.so" \
 	] \
     ]
 }
