@@ -14733,6 +14733,60 @@ cutu_reader::read_toplevel_die (die_info **diep, const gdb_byte *info_ptr,
   return result;
 }
 
+void
+cooked_index_functions::dump (struct objfile *objfile)
+{
+  /* Building the index fills some information in dwarf2_per_cu (e.g. the
+     unit type), which we print in the CU/TU list.  We also need to wait for the
+     index to be built before calling `cooked_index::dump` below.  */
+  cooked_index *index = this->wait (objfile, true);
+
+  const auto per_bfd = get_dwarf2_per_objfile (objfile)->per_bfd;
+
+  gdb_printf ("  Number of compilation units: %u\n", per_bfd->num_comp_units);
+  gdb_printf ("  Number of type units: %u\n", per_bfd->num_type_units);
+  gdb_printf ("\n");
+
+  gdb_printf ("  Compilation/type units:\n");
+  gdb_printf ("\n");
+
+  for (std::size_t i = 0; i < per_bfd->all_units.size (); ++i)
+    {
+      const auto &unit = *per_bfd->all_units[i];
+      const char *gdb_type_name
+	= unit.is_debug_types ? "signatured_type" : "dwarf2_per_cu";
+      const auto bool_str
+	= [] (const bool val) { return val ? "true" : "false"; };
+
+      gdb_printf ("    [%zu] ((%s *) %p)\n", i, gdb_type_name, &unit);
+      gdb_printf ("    type:       %s\n",
+		  dwarf_unit_type_name (unit.unit_type (false)));
+      gdb_printf ("    offset:     0x%" PRIx64 "\n",
+		  to_underlying (unit.sect_off));
+      gdb_printf ("    size:       0x%x\n", unit.length ());
+
+      if (unit.is_debug_types)
+	{
+	  const auto &tu = static_cast<const signatured_type &> (unit);
+
+	  gdb_printf ("    signature:  0x%s\n", phex (tu.signature, 8));
+	}
+      else
+	{
+	  gdb_printf ("    artificial: %s\n", bool_str (unit.lto_artificial));
+	  gdb_printf ("    GDB lang:   %s\n", language_str (unit.lang (false)));
+	  gdb_printf ("    DWARF lang: %s\n",
+		      dwarf_source_language_name (unit.dw_lang ()));
+	}
+
+      gdb_printf ("\n");
+    }
+
+  gdb_printf ("Cooked index in use:\n");
+  gdb_printf ("\n");
+  index->dump (objfile->arch ());
+}
+
 struct compunit_symtab *
 cooked_index_functions::find_compunit_symtab_by_address
      (struct objfile *objfile, CORE_ADDR address)

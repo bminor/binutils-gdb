@@ -696,13 +696,7 @@ struct cooked_index_functions : public dwarf2_base_index_functions
     dwarf2_base_index_functions::print_stats (objfile, print_bcache);
   }
 
-  void dump (struct objfile *objfile) override
-  {
-    cooked_index *index = wait (objfile, true);
-    gdb_printf ("Cooked index in use:\n");
-    gdb_printf ("\n");
-    index->dump (objfile->arch ());
-  }
+  void dump (struct objfile *objfile) override;
 
   void expand_all_symtabs (struct objfile *objfile) override
   {
