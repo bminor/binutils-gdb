@@ -3025,6 +3025,8 @@ _bfd_generic_section_already_linked (bfd *abfd ATTRIBUTE_UNUSED,
   name = bfd_section_name (sec);
 
   already_linked_list = bfd_section_already_linked_table_lookup (name);
+  if (!already_linked_list)
+    goto bad;
 
   l = already_linked_list->entry;
   if (l != NULL)
@@ -3036,7 +3038,10 @@ _bfd_generic_section_already_linked (bfd *abfd ATTRIBUTE_UNUSED,
 
   /* This is the first section with this name.  Record it.  */
   if (!bfd_section_already_linked_table_insert (already_linked_list, sec))
-    info->callbacks->fatal (_("%P: already_linked_table: %E\n"));
+    {
+    bad:
+      info->callbacks->fatal (_("%P: already_linked_table: %E\n"));
+    }
   return false;
 }
 

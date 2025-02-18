@@ -2767,6 +2767,8 @@ _bfd_coff_section_already_linked (bfd *abfd,
     }
 
   already_linked_list = bfd_section_already_linked_table_lookup (key);
+  if (!already_linked_list)
+    goto bad;
 
   for (l = already_linked_list->entry; l != NULL; l = l->next)
     {
@@ -2794,7 +2796,10 @@ _bfd_coff_section_already_linked (bfd *abfd,
 
   /* This is the first section with this name.  Record it.  */
   if (!bfd_section_already_linked_table_insert (already_linked_list, sec))
-    info->callbacks->fatal (_("%P: already_linked_table: %E\n"));
+    {
+    bad:
+      info->callbacks->fatal (_("%P: already_linked_table: %E\n"));
+    }
   return false;
 }
 
