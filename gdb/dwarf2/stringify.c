@@ -124,3 +124,16 @@ dwarf_unit_type_name (int unit_type)
 
   return name;
 }
+
+/* See stringify.h.  */
+
+const char *
+dwarf_source_language_name (unsigned int lang)
+{
+  const char *name = get_DW_LANG_name (lang);
+
+  if (name == nullptr)
+    return dwarf_unknown ("LANG", lang);
+
+  return name;
+}
