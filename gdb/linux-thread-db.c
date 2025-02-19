@@ -1361,7 +1361,7 @@ record_thread (struct thread_db_info *info,
   /* Add the thread to GDB's thread list.  If we already know about a
      thread with this PTID, but it's marked exited, then the kernel
      reused the tid of an old thread.  */
-  if (tp == NULL || tp->state == THREAD_EXITED)
+  if (tp == NULL || tp->state () == THREAD_EXITED)
     tp = add_thread_with_info (info->process_target, ptid,
 			       private_thread_info_up (priv));
   else
@@ -1625,7 +1625,7 @@ thread_db_target::update_thread_list ()
 	continue;
 
       thread_info *thread = any_live_thread_of_inferior (inf);
-      if (thread == NULL || thread->executing ())
+      if (thread == NULL || thread->internal_state () == THREAD_INT_RUNNING)
 	continue;
 
       /* It's best to avoid td_ta_thr_iter if possible.  That walks

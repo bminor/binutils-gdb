@@ -239,7 +239,7 @@ mi_cmd_exec_jump (const char *args, const char *const *argv, int argc)
 static void
 proceed_thread (struct thread_info *thread, int pid)
 {
-  if (thread->state != THREAD_STOPPED)
+  if (thread->state () != THREAD_STOPPED)
     return;
 
   if (pid != 0 && thread->ptid.pid () != pid)
@@ -367,7 +367,7 @@ mi_cmd_exec_interrupt (const char *command, const char *const *argv, int argc)
 
       iterate_over_threads ([&] (struct thread_info *thread)
 	{
-	  if (thread->state != THREAD_RUNNING)
+	  if (thread->state () != THREAD_RUNNING)
 	    return false;
 
 	  if (thread->ptid.pid () != inf->pid)
@@ -508,7 +508,7 @@ mi_cmd_target_detach (const char *command, const char *const *argv, int argc)
 	 target_detach detaches from the parent of inferior_ptid.  */
       tp = iterate_over_threads ([&] (struct thread_info *ti)
 	{
-	  return ti->ptid.pid () == pid && ti->state != THREAD_EXITED;
+	  return ti->ptid.pid () == pid && ti->state () != THREAD_EXITED;
 	});
       if (!tp)
 	error (_("Thread group is empty"));
@@ -2059,7 +2059,7 @@ mi_cmd_execute (struct mi_parse *parse)
       if (tp == NULL)
 	error (_("Invalid thread id: %d"), parse->thread);
 
-      if (tp->state == THREAD_EXITED)
+      if (tp->state () == THREAD_EXITED)
 	error (_("Thread id: %d has terminated"), parse->thread);
 
       if (parse->cmd->preserve_user_selected_context ())

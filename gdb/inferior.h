@@ -201,8 +201,8 @@ extern void child_interrupt (struct target_ops *self);
 /* From fork-child.c */
 
 /* Helper function to call STARTUP_INFERIOR with PID and NUM_TRAPS.
-   This function already calls set_executing.  Return the ptid_t from
-   STARTUP_INFERIOR.  */
+   This function already sets the threads' internal state to
+   THREAD_STOPPED.  Return the ptid_t from STARTUP_INFERIOR.  */
 extern ptid_t gdb_startup_inferior (pid_t pid, int num_traps);
 
 /* From infcmd.c */

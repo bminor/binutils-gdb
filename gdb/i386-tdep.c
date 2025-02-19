@@ -4811,8 +4811,8 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
   /* Since we are reading pseudo registers, we need to tell GDB that it is
      safe to do so, by saying we aren't _really_ running the inferior right
      now.  */
-  SCOPE_EXIT { inferior_thread ()->set_executing (true); };
-  inferior_thread () -> set_executing (false);
+  SCOPE_EXIT { inferior_thread ()->set_internal_state (THREAD_INT_RUNNING); };
+  inferior_thread ()->set_internal_state (THREAD_INT_STOPPED);
 
   switch (opcode)
     {

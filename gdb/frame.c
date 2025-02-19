@@ -1873,11 +1873,11 @@ has_stack_frames ()
 
       thread_info *tp = inferior_thread ();
       /* Don't try to read from a dead thread.  */
-      if (tp->state == THREAD_EXITED)
+      if (tp->internal_state () == THREAD_INT_EXITED)
 	return false;
 
       /* ... or from a spinning thread.  */
-      if (tp->executing ())
+      if (tp->internal_state () == THREAD_INT_RUNNING)
 	return false;
     }
 

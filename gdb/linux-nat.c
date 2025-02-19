@@ -1246,8 +1246,8 @@ linux_nat_target::attach (const char *args, int from_tty)
 		       if (lwp->ptid.pid () != lwp->ptid.lwp ())
 			 {
 			   add_thread (linux_target, lwp->ptid);
-			   set_running (linux_target, lwp->ptid, true);
-			   set_executing (linux_target, lwp->ptid, true);
+			   set_state (linux_target, lwp->ptid, THREAD_RUNNING);
+			   set_internal_state (linux_target, lwp->ptid, THREAD_INT_RUNNING);
 			 }
 		       return 0;
 		     });
@@ -1331,7 +1331,8 @@ get_detach_signal (struct lwp_info *lp)
     {
       thread_info *tp = linux_target->find_thread (lp->ptid);
 
-      if (target_is_non_stop_p () && !tp->executing ())
+      if (target_is_non_stop_p ()
+	  && tp->internal_state () != THREAD_INT_RUNNING)
 	{
 	  if (tp->has_pending_waitstatus ())
 	    {

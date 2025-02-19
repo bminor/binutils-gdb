@@ -1270,10 +1270,12 @@ record_full_wait_1 (struct target_ops *ops,
 			{
 			  /* Try to insert the software single step breakpoint.
 			     If insert success, set step to 0.  */
-			  set_executing (proc_target, inferior_ptid, false);
+			  set_internal_state (proc_target, inferior_ptid,
+					      THREAD_INT_STOPPED);
 			  SCOPE_EXIT
 			    {
-			      set_executing (proc_target, inferior_ptid, true);
+			      set_internal_state (proc_target, inferior_ptid,
+						  THREAD_INT_RUNNING);
 			    };
 
 			  reinit_frame_cache ();

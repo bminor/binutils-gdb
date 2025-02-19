@@ -363,8 +363,7 @@ fork_load_infrun_state (struct fork_info *fp)
 
   inferior_thread ()->set_stop_pc
     (regcache_read_pc (get_thread_regcache (inferior_thread ())));
-  inferior_thread ()->set_executing (false);
-  inferior_thread ()->set_resumed (false);
+  inferior_thread ()->set_internal_state (THREAD_INT_STOPPED);
   nullify_last_target_wait_ptid ();
 
   /* Now restore the file positions of open file descriptors.  */
@@ -726,7 +725,7 @@ delete_checkpoint_command (const char *args, int from_tty)
      ptid.  */
   thread_info *parent = linux_target->find_thread (pptid);
   if ((parent == NULL && find_fork_ptid (pptid).first != nullptr)
-      || (parent != NULL && parent->state == THREAD_STOPPED))
+      || (parent != NULL && parent->state () == THREAD_STOPPED))
     {
       if (inferior_call_waitpid (pptid, ptid.pid ()))
 	warning (_("Unable to wait pid %s"),
@@ -866,7 +865,7 @@ print_checkpoints (struct ui_out *uiout, inferior *req_inf, fork_info *req_fi)
 	  uiout->field_string
 	    ("target-id", target_pid_to_str (proc_ptid (fi.ptid)).c_str ());
 
-	  if (t->state == THREAD_RUNNING && is_current)
+	  if (t->state () == THREAD_RUNNING && is_current)
 	    uiout->text ("(running)");
 	  else
 	    {
@@ -1108,7 +1107,7 @@ restart_command (const char *args, int from_tty)
   /* Don't allow switching from a thread/fork that's running.  */
   inferior *curinf = current_inferior ();
   if (curinf->pid != 0
-      && any_thread_of_inferior (curinf)->state == THREAD_RUNNING)
+      && any_thread_of_inferior (curinf)->state () == THREAD_RUNNING)
     error (_("Cannot execute this command while "
 	     "the selected thread is running."));
 

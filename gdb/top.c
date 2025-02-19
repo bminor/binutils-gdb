@@ -586,7 +586,7 @@ execute_command (const char *p, int from_tty)
      we just finished executing did not resume the inferior's execution.
      If it did resume the inferior, we will do that check after
      the inferior stopped.  */
-  if (has_stack_frames () && inferior_thread ()->state != THREAD_RUNNING)
+  if (has_stack_frames () && inferior_thread ()->state () != THREAD_RUNNING)
     check_frame_language_change ();
 
   cleanup_if_error.release ();

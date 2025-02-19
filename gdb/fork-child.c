@@ -130,8 +130,8 @@ gdb_startup_inferior (pid_t pid, int num_traps)
 
   ptid_t ptid = startup_inferior (proc_target, pid, num_traps, NULL, NULL);
 
-  /* Mark all threads non-executing.  */
-  set_executing (proc_target, ptid, false);
+  /* Mark all threads internally stopped.  */
+  set_internal_state (proc_target, ptid, THREAD_INT_STOPPED);
 
   return ptid;
 }
