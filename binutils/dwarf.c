@@ -3807,13 +3807,11 @@ process_debug_info (struct dwarf_section * section,
     }
 
   if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
-      && num_debug_info_entries == 0
-      && ! do_types)
+      && alloc_num_debug_info_entries == 0
+      && !do_types)
     {
-
       /* Then allocate an array to hold the information.  */
-      debug_information = (debug_info *) cmalloc (num_units,
-						  sizeof (* debug_information));
+      debug_information = cmalloc (num_units, sizeof (*debug_information));
       if (debug_information == NULL)
 	{
 	  error (_("Not enough memory for a debug info array of %u entries\n"),
