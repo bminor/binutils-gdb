@@ -807,6 +807,12 @@ process_stratum_target::thread_name (ptid_t thread)
   return nullptr;
 }
 
+std::string
+process_stratum_target::thread_id_str (thread_info *thread)
+{
+  return "";
+}
+
 bool
 process_stratum_target::thread_handle (ptid_t ptid, gdb_byte **handle,
 				       int *handle_len)

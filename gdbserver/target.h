@@ -475,6 +475,13 @@ public:
      caller.  */
   virtual const char *thread_name (ptid_t thread);
 
+  /* Return the string translation for THREAD's id.  This gives the
+     target a chance to completely re-interpret the thread id and
+     present a target-specific description for displaying to the user.
+     Return empty if the target is fine with how an id is displayed
+     by default.  */
+  virtual std::string thread_id_str (thread_info *thread);
+
   /* Thread ID to (numeric) thread handle: Return true on success and
      false for failure.  Return pointer to thread handle via HANDLE
      and the handle's length via HANDLE_LEN.  */
@@ -734,5 +741,11 @@ bool set_desired_thread ();
 bool set_desired_process ();
 
 std::string target_pid_to_str (ptid_t);
+
+static inline std::string
+target_thread_id_str (thread_info *thread)
+{
+  return the_target->thread_id_str (thread);
+}
 
 #endif /* GDBSERVER_TARGET_H */

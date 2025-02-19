@@ -1623,6 +1623,12 @@ struct remote_thread_info : public private_thread_info
   std::string name;
   int core = -1;
 
+  /* The string representation for the thread's id.
+
+     The target specifies this if they want to display the thread id
+     in a specific way.  If empty, the default approach is used.  */
+  std::string id_str;
+
   /* Thread handle, perhaps a pthread_t or thread_t value, stored as a
      sequence of bytes.  */
   gdb::byte_vector thread_handle;
@@ -4030,6 +4036,9 @@ struct thread_item
   /* The thread's name.  */
   std::string name;
 
+  /* The thread's id, translated to a string for displaying.  */
+  std::string id_str;
+
   /* The core the thread was running on.  -1 if not known.  */
   int core = -1;
 
@@ -4156,6 +4165,10 @@ start_thread (struct gdb_xml_parser *parser,
   if (attr != NULL)
     item.name = (const char *) attr->value.get ();
 
+  attr = xml_find_attribute (attributes, "id_str");
+  if (attr != nullptr)
+    item.id_str = (const char *) attr->value.get ();
+
   attr = xml_find_attribute (attributes, "handle");
   if (attr != NULL)
     item.thread_handle = hex2bin ((const char *) attr->value.get ());
@@ -4177,6 +4190,7 @@ const struct gdb_xml_attribute thread_attributes[] = {
   { "id", GDB_XML_AF_NONE, NULL, NULL },
   { "core", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
   { "name", GDB_XML_AF_OPTIONAL, NULL, NULL },
+  { "id_str", GDB_XML_AF_OPTIONAL, NULL, NULL },
   { "handle", GDB_XML_AF_OPTIONAL, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
@@ -4361,6 +4375,7 @@ remote_target::update_thread_list ()
 	      info->core = item.core;
 	      info->extra = std::move (item.extra);
 	      info->name = std::move (item.name);
+	      info->id_str = std::move (item.id_str);
 	      info->thread_handle = std::move (item.thread_handle);
 	    }
 	}
@@ -12392,7 +12407,16 @@ remote_target::pid_to_str (ptid_t ptid)
     {
       if (magic_null_ptid == ptid)
 	return "Thread <main>";
-      else if (m_features.remote_multi_process_p ())
+
+      thread_info *thread = this->find_thread (ptid);
+      if ((thread != nullptr) && (thread->priv != nullptr))
+	{
+	  remote_thread_info *priv = get_remote_thread_info (thread);
+	  if (!priv->id_str.empty ())
+	    return priv->id_str;
+	}
+
+      if (m_features.remote_multi_process_p ())
 	if (ptid.lwp () == 0)
 	  return normal_pid_to_str (ptid);
 	else

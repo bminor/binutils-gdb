@@ -48444,7 +48444,7 @@ the following structure:
 @smallexample
 <?xml version="1.0"?>
 <threads>
-    <thread id="id" core="0" name="name" handle="1a2b3c">
+    <thread id="id" core="0" name="name" id_str="Thread 12.34" handle="1a2b3c">
     ... description ...
     </thread>
 </threads>
@@ -48456,7 +48456,10 @@ identifies the thread (@pxref{thread-id syntax}).  The
 the thread was last executing on.  The @samp{name} attribute, if
 present, specifies the human-readable name of the thread.  The content
 of the of @samp{thread} element is interpreted as human-readable
-auxiliary information.  The @samp{handle} attribute, if present,
+auxiliary information.  The @samp{id_str} attribute, if present,
+specifies what @value{GDBN} should print as the target ID of the
+thread (e.g.@: in the @samp{info threads} command or when switching
+to the thread).  The @samp{handle} attribute, if present,
 is a hex encoded representation of the thread handle.
 
 
