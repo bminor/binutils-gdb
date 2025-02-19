@@ -478,7 +478,7 @@ display_one_tib (ptid_t ptid)
   
   tib = (gdb_byte *) alloca (tib_size);
 
-  if (target_get_tib_address (ptid, &thread_local_base) == 0)
+  if (!target_get_tib_address (ptid, &thread_local_base))
     {
       gdb_printf (_("Unable to get thread local base for %s\n"),
 		  target_pid_to_str (ptid).c_str ());

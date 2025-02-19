@@ -12473,9 +12473,6 @@ remote_target::get_thread_local_address (ptid_t ptid, CORE_ADDR lm,
   return 0;
 }
 
-/* Provide thread local base, i.e. Thread Information Block address.
-   Returns 1 if ptid is found and thread_local_base is non zero.  */
-
 bool
 remote_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
