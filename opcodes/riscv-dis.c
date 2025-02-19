@@ -1289,6 +1289,7 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
 			disassemble_info *info)
 {
   info->display_endian = info->endian;
+  int i;
 
   switch (info->bytes_per_chunk)
     {
@@ -1307,14 +1308,6 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
       (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_immediate, "0x%04x", (unsigned) data);
-      break;
-    case 3:
-      info->bytes_per_line = 7;
-      (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".word");
-      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
-      (*info->fprintf_styled_func)
-	(info->stream, dis_style_immediate, "0x%06x", (unsigned) data);
       break;
     case 4:
       info->bytes_per_line = 8;
@@ -1335,7 +1328,22 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
 	 (unsigned long long) data);
       break;
     default:
-      abort ();
+      /* Arbitrary data so just print the bits in the shape of an .<N>byte
+	 directive.  */
+      info->bytes_per_line = info->bytes_per_chunk;
+      (*info->fprintf_styled_func)
+	(info->stream, dis_style_assembler_directive, ".%dbyte", info->bytes_per_chunk);
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
+      (*info->fprintf_styled_func) (info->stream, dis_style_immediate, "0x");
+      for (i = info->bytes_per_line; i > 0;)
+	{
+	  i--;
+	  data = bfd_get_bits (packet + i, 8, false);
+	  (*info->fprintf_styled_func)
+	    (info->stream, dis_style_immediate, "%02x",
+	      (unsigned) data);
+	}
+      break;
     }
   return info->bytes_per_chunk;
 }
