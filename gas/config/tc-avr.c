@@ -1915,8 +1915,8 @@ md_assemble (char *str)
       return;
     }
 
-    if (opcode == avr_gccisr_opcode
-	&& !avr_opt.have_gccisr)
+  if (opcode == avr_gccisr_opcode
+      && !avr_opt.have_gccisr)
     {
       as_bad (_("pseudo instruction `%s' not supported"), op);
       return;
