@@ -4265,7 +4265,7 @@ aarch64_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
 
       /* If the thread is running, we will not be able to fetch the mask
 	 registers.  */
-      if (thread != nullptr && thread->state != THREAD_RUNNING)
+      if (thread != nullptr && thread->state () != THREAD_RUNNING)
 	{
 	  /* Otherwise, fetch the register cache and the masks.  */
 	  struct regcache *regs

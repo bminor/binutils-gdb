@@ -797,7 +797,7 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
 
   struct gdb_exception caught_error;
   ptid_t call_thread_ptid = call_thread->ptid;
-  int was_running = call_thread->state == THREAD_RUNNING;
+  int was_running = call_thread->state () == THREAD_RUNNING;
   *timed_out_p = false;
 
   infcall_debug_printf ("call function at %s in thread %s, was_running = %d",
@@ -928,7 +928,7 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
      of error out of resume()), then we wouldn't need this.  */
   if (caught_error.reason < 0)
     {
-      if (call_thread->state != THREAD_EXITED)
+      if (call_thread->state () != THREAD_EXITED)
 	breakpoint_auto_delete (call_thread->control.stop_bpstat);
     }
 
@@ -1565,7 +1565,7 @@ call_function_by_hand_dummy (struct value *function,
       infcall_debug_printf ("after inferior call, exception (%d): %s",
 			    e.reason, e.what ());
     infcall_debug_printf ("after inferior call, thread state is: %s",
-			  thread_state_string (call_thread->state));
+			  thread_state_string (call_thread->state ()));
 
     gdb::observers::inferior_call_post.notify (call_thread_ptid, funaddr);
 
@@ -1576,7 +1576,7 @@ call_function_by_hand_dummy (struct value *function,
        threads appear after GDB has reported a stop.  */
     update_thread_list ();
 
-    if (call_thread->state != THREAD_EXITED)
+    if (call_thread->state () != THREAD_EXITED)
       {
 	/* The FSM should still be the same.  */
 	gdb_assert (call_thread->thread_fsm () == sm);

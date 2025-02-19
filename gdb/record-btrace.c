@@ -2042,18 +2042,18 @@ get_thread_current_frame_id (struct thread_info *tp)
 
   process_stratum_target *proc_target = tp->inf->process_target ();
 
-  /* Clear the executing flag to allow changes to the current frame.
-     We are not actually running, yet.  We just started a reverse execution
-     command or a record goto command.
-     For the latter, EXECUTING is false and this has no effect.
-     For the former, EXECUTING is true and we're in wait, about to
-     move the thread.  Since we need to recompute the stack, we temporarily
-     set EXECUTING to false.  */
-  bool executing = tp->executing ();
-  set_executing (proc_target, inferior_ptid, false);
+  /* Temporarily set the thread to internally stopped to allow changes
+     to the current frame.  We are not actually running, yet.  We just
+     started a reverse execution command or a record goto command.
+     For the latter, the thread is stopped and this has no effect.
+     For the former, the thread is running and we're in wait, about to
+     move the thread.  Since we need to recompute the stack, we
+     temporarily set the thread to internally stopped.  */
+  thread_int_state prev_int_state = tp->internal_state ();
+  set_internal_state (proc_target, inferior_ptid, THREAD_INT_STOPPED);
   SCOPE_EXIT
     {
-      set_executing (proc_target, inferior_ptid, executing);
+      set_internal_state (proc_target, inferior_ptid, prev_int_state);
     };
   return get_frame_id (get_current_frame ());
 }

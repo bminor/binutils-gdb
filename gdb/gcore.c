@@ -846,7 +846,7 @@ thread_info *
 gcore_find_signalled_thread ()
 {
   thread_info *curr_thr = inferior_thread ();
-  if (curr_thr->state != THREAD_EXITED
+  if (curr_thr->state () != THREAD_EXITED
       && curr_thr->stop_signal () != GDB_SIGNAL_0)
     return curr_thr;
 
@@ -855,7 +855,7 @@ gcore_find_signalled_thread ()
       return thr;
 
   /* Default to the current thread, unless it has exited.  */
-  if (curr_thr->state != THREAD_EXITED)
+  if (curr_thr->state () != THREAD_EXITED)
     return curr_thr;
 
   return nullptr;

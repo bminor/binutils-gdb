@@ -608,14 +608,14 @@ mi_cmd_var_update_iter (struct varobj *var, bool only_floating,
   if (thread_id == -1)
     {
       thread_stopped = (inferior_ptid == null_ptid
-			|| inferior_thread ()->state == THREAD_STOPPED);
+			|| inferior_thread ()->state () == THREAD_STOPPED);
     }
   else
     {
       thread_info *tp = find_thread_global_id (thread_id);
 
       thread_stopped = (tp == NULL
-			|| tp->state == THREAD_STOPPED);
+			|| tp->state () == THREAD_STOPPED);
     }
 
   if (thread_stopped

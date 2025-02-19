@@ -429,7 +429,7 @@ get_thread_regcache (process_stratum_target *target, ptid_t ptid)
 struct regcache *
 get_thread_regcache (thread_info *thread)
 {
-  gdb_assert (thread->state != THREAD_EXITED);
+  gdb_assert (thread->state () != THREAD_EXITED);
 
   return get_thread_regcache (thread->inf->process_target (),
 			      thread->ptid);

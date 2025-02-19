@@ -1220,12 +1220,15 @@ public: /* Remote specific methods.  */
   ptid_t select_thread_for_ambiguous_stop_reply
     (const struct target_waitstatus &status);
 
-  void remote_notice_new_inferior (ptid_t currthread, bool executing);
+  void remote_notice_new_inferior (ptid_t currthread,
+				   thread_int_state internal_state);
 
   void print_one_stopped_thread (thread_info *thread);
   void process_initial_stop_replies (int from_tty);
 
-  thread_info *remote_add_thread (ptid_t ptid, bool running, bool executing,
+  thread_info *remote_add_thread (ptid_t ptid,
+				  thread_state state,
+				  thread_int_state internal_state,
 				  bool silent_p);
 
   void btrace_sync_conf (const btrace_config *conf);
@@ -2924,13 +2927,16 @@ static remote_thread_info *get_remote_thread_info (thread_info *thread);
 static remote_thread_info *get_remote_thread_info (remote_target *target,
 						   ptid_t ptid);
 
-/* Add thread PTID to GDB's thread list.  Tag it as executing/running
-   according to EXECUTING and RUNNING respectively.  If SILENT_P (or the
-   remote_state::starting_up flag) is true then the new thread is added
-   silently, otherwise the new thread will be announced to the user.  */
+/* Add thread PTID to GDB's thread list.  Tag its user and internal
+   states according to STATE and INTERNAL_STATE respectively.  If
+   SILENT_P (or the remote_state::starting_up flag) is true then the
+   new thread is added silently, otherwise the new thread will be
+   announced to the user.  */
 
 thread_info *
-remote_target::remote_add_thread (ptid_t ptid, bool running, bool executing,
+remote_target::remote_add_thread (ptid_t ptid,
+				  thread_state state,
+				  thread_int_state internal_state,
 				  bool silent_p)
 {
   struct remote_state *rs = get_remote_state ();
@@ -2947,10 +2953,10 @@ remote_target::remote_add_thread (ptid_t ptid, bool running, bool executing,
   else
     thread = add_thread (this, ptid);
 
-  if (executing)
+  if (internal_state == THREAD_INT_RUNNING)
     get_remote_thread_info (thread)->set_resumed ();
-  set_executing (this, ptid, executing);
-  set_running (this, ptid, running);
+  set_internal_state (this, ptid, internal_state);
+  set_state (this, ptid, state);
 
   return thread;
 }
@@ -2959,26 +2965,29 @@ remote_target::remote_add_thread (ptid_t ptid, bool running, bool executing,
    It may be the first time we hear about such thread, so take the
    opportunity to add it to GDB's thread list.  In case this is the
    first time we're noticing its corresponding inferior, add it to
-   GDB's inferior list as well.  EXECUTING indicates whether the
-   thread is (internally) executing or stopped.  */
+   GDB's inferior list as well.  INTERNAL_STATE indicates whether the
+   thread is internally running or stopped.  */
 
 void
-remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
+remote_target::remote_notice_new_inferior (ptid_t currthread,
+					   thread_int_state internal_state)
 {
   /* In non-stop mode, we assume new found threads are (externally)
      running until proven otherwise with a stop reply.  In all-stop,
      we can only get here if all threads are stopped.  */
-  bool running = target_is_non_stop_p ();
+  thread_state state = (target_is_non_stop_p ()
+			? THREAD_RUNNING
+			: THREAD_STOPPED);
 
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
 
   thread_info *tp = this->find_thread (currthread);
-  if (tp != NULL && tp->state == THREAD_EXITED)
+  if (tp != NULL && tp->state () == THREAD_EXITED)
     {
       /* We're seeing an event on a thread id we knew had exited.
 	 This has to be a new thread reusing the old id.  Add it.  */
-      remote_add_thread (currthread, running, executing, false);
+      remote_add_thread (currthread, state, internal_state, false);
       return;
     }
 
@@ -3000,7 +3009,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
 	  else
 	    {
 	      thread_info *thr
-		= remote_add_thread (currthread, running, executing, false);
+		= remote_add_thread (currthread, state, internal_state, false);
 	      switch_to_thread (thr);
 	    }
 	  return;
@@ -3031,7 +3040,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
 
       /* This is really a new thread.  Add it.  */
       thread_info *new_thr
-	= remote_add_thread (currthread, running, executing, false);
+	= remote_add_thread (currthread, state, internal_state, false);
 
       /* If we found a new inferior, let the common code do whatever
 	 it needs to with it (e.g., read shared libraries, insert
@@ -3042,7 +3051,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
 	  struct remote_state *rs = get_remote_state ();
 
 	  if (!rs->starting_up)
-	    notice_new_inferior (new_thr, executing, 0);
+	    notice_new_inferior (new_thr, internal_state, 0);
 	}
     }
 }
@@ -4363,12 +4372,14 @@ remote_target::update_thread_list ()
 	  if (item.ptid != null_ptid)
 	    {
 	      /* In non-stop mode, we assume new found threads are
-		 executing until proven otherwise with a stop reply.
-		 In all-stop, we can only get here if all threads are
+		 running until proven otherwise with a stop reply.  In
+		 all-stop, we can only get here if all threads are
 		 stopped.  */
-	      bool executing = target_is_non_stop_p ();
+	      thread_int_state internal_state = (target_is_non_stop_p ()
+						 ? THREAD_INT_RUNNING
+						 : THREAD_INT_STOPPED);
 
-	      remote_notice_new_inferior (item.ptid, executing);
+	      remote_notice_new_inferior (item.ptid, internal_state);
 
 	      thread_info *tp = this->find_thread (item.ptid);
 	      remote_thread_info *info = get_remote_thread_info (tp);
@@ -4982,8 +4993,8 @@ remote_target::process_initial_stop_replies (int from_tty)
 	  || ws.sig () != GDB_SIGNAL_0)
 	evthread->set_pending_waitstatus (ws);
 
-      set_executing (this, event_ptid, false);
-      set_running (this, event_ptid, false);
+      set_internal_state (this, event_ptid, THREAD_INT_STOPPED);
+      set_state (this, event_ptid, THREAD_STOPPED);
       get_remote_thread_info (evthread)->set_not_resumed ();
     }
 
@@ -4996,7 +5007,7 @@ remote_target::process_initial_stop_replies (int from_tty)
       if (non_stop)
 	{
 	  thread_info *thread = any_live_thread_of_inferior (inf);
-	  notice_new_inferior (thread, thread->state == THREAD_RUNNING,
+	  notice_new_inferior (thread, thread->state () == THREAD_RUNNING,
 			       from_tty);
 	}
     }
@@ -5038,8 +5049,8 @@ remote_target::process_initial_stop_replies (int from_tty)
 	first = thread;
 
       if (!non_stop)
-	thread->set_running (false);
-      else if (thread->state != THREAD_STOPPED)
+	thread->set_state (THREAD_STOPPED);
+      else if (thread->state () != THREAD_STOPPED)
 	continue;
 
       if (selected == nullptr && thread->has_pending_waitstatus ())
@@ -6585,7 +6596,7 @@ remote_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 void
 remote_target::follow_clone (ptid_t child_ptid)
 {
-  remote_add_thread (child_ptid, false, false, false);
+  remote_add_thread (child_ptid, THREAD_STOPPED, THREAD_INT_STOPPED, false);
 }
 
 /* Target follow-exec function for remote targets.  Save EXECD_PATHNAME
@@ -6693,7 +6704,8 @@ extended_remote_target::attach (const char *args, int from_tty)
 
       /* Add the main thread to the thread list.  We add the thread
 	 silently in this case (the final true parameter).  */
-      thread_info *thr = remote_add_thread (curr_ptid, true, true, true);
+      thread_info *thr = remote_add_thread (curr_ptid, THREAD_RUNNING,
+					    THREAD_INT_RUNNING, true);
 
       switch_to_thread (thr);
     }
@@ -8571,7 +8583,7 @@ remote_target::process_stop_reply (stop_reply_up stop_reply,
       && status->kind () != TARGET_WAITKIND_SIGNALLED
       && status->kind () != TARGET_WAITKIND_NO_RESUMED)
     {
-      remote_notice_new_inferior (ptid, false);
+      remote_notice_new_inferior (ptid, THREAD_INT_STOPPED);
 
       /* Expedited registers.  */
       if (!stop_reply->regcache.empty ())
@@ -8677,7 +8689,7 @@ static ptid_t
 first_remote_resumed_thread (remote_target *target)
 {
   for (thread_info *tp : all_non_exited_threads (target, minus_one_ptid))
-    if (tp->resumed ())
+    if (tp->internal_state () != THREAD_INT_STOPPED)
       return tp->ptid;
   return null_ptid;
 }

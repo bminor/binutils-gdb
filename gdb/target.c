@@ -2653,10 +2653,10 @@ target_resume (ptid_t scope_ptid, int step, enum gdb_signal signal)
   current_inferior ()->top_target ()->resume (scope_ptid, step, signal);
 
   registers_changed_ptid (curr_target, scope_ptid);
-  /* We only set the internal executing state here.  The user/frontend
-     running state is set at a higher level.  This also clears the
-     thread's stop_pc as side effect.  */
-  set_executing (curr_target, scope_ptid, true);
+  /* We only set the internal state here.  The user/frontend state is
+     set at a higher level.  This also clears the thread's stop_pc as
+     side effect.  */
+  set_internal_state (curr_target, scope_ptid, THREAD_INT_RUNNING);
   clear_inline_frame_state (curr_target, scope_ptid);
 
   if (target_can_async_p ())
@@ -3805,9 +3805,10 @@ target_pass_ctrlc (void)
 
       for (thread_info *thr : inf->non_exited_threads ())
 	{
-	  /* A thread can be THREAD_STOPPED and executing, while
-	     running an infcall.  */
-	  if (thr->state == THREAD_RUNNING || thr->executing ())
+	  /* A thread can be externally THREAD_STOPPED and internally
+	     THREAD_INT_RUNNING, while running an infcall.  */
+	  if (thr->state () == THREAD_RUNNING
+	      || thr->internal_state () == THREAD_INT_RUNNING)
 	    {
 	      /* We can get here quite deep in target layers.  Avoid
 		 switching thread context or anything that would

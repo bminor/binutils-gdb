@@ -175,7 +175,7 @@ inf_ptrace_target::attach (const char *args, int from_tty)
 
   /* Don't consider the thread stopped until we've processed its
      initial SIGSTOP stop.  */
-  set_executing (this, thr->ptid, true);
+  set_internal_state (this, thr->ptid, THREAD_INT_RUNNING);
 
   unpusher.release ();
 }

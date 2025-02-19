@@ -525,7 +525,7 @@ child_interrupt (struct target_ops *self)
   thread_info *resumed = NULL;
   for (thread_info *thr : all_non_exited_threads ())
     {
-      if (thr->executing ())
+      if (thr->internal_state () == THREAD_INT_RUNNING)
 	{
 	  resumed = thr;
 	  break;
