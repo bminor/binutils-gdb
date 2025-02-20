@@ -704,29 +704,29 @@ _bfd_aarch64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_ty
 static bfd *
 _bfd_aarch64_elf_find_1st_bfd_input_with_gnu_property (
   struct bfd_link_info *info,
-  bool *has_gnu_property)
+  bool *has_note_section)
 {
-  BFD_ASSERT (has_gnu_property);
-  const struct elf_backend_data *obfd = get_elf_backend_data (info->output_bfd);
+  const struct elf_backend_data *be = get_elf_backend_data (info->output_bfd);
   bfd *pbfd = info->input_bfds;
-  bfd *prev = NULL;
+  bfd *prev_bfd = NULL;
   for (; pbfd != NULL; pbfd = pbfd->link.next)
     if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
 	&& bfd_count_sections (pbfd) != 0
 	&& (pbfd->flags & (DYNAMIC | BFD_PLUGIN | BFD_LINKER_CREATED)) == 0
-	&& (obfd->elf_machine_code
+	&& (be->elf_machine_code
 	    == get_elf_backend_data (pbfd)->elf_machine_code)
-	&& (obfd->s->elfclass == get_elf_backend_data (pbfd)->s->elfclass))
+	&& (be->s->elfclass == get_elf_backend_data (pbfd)->s->elfclass))
       {
+	prev_bfd = pbfd;
+
 	/* Does the input have a list of GNU properties ? */
 	if (elf_properties (pbfd) != NULL)
-	  {
-	    *has_gnu_property = true;
-	    return pbfd;
-	  }
-	prev = pbfd;
+	  break;
       }
-  return prev;
+  if (prev_bfd != NULL)
+    *has_note_section =
+      bfd_get_section_by_name (prev_bfd, NOTE_GNU_PROPERTY_SECTION_NAME) != NULL;
+  return prev_bfd;
 }
 
 /* Create a GNU property section for the given bfd input.  */
@@ -861,19 +861,28 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
   struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
   uint32_t outprop = tdata->gnu_property_aarch64_feature_1_and;
 
-  bool has_gnu_property = false;
+  bool has_note_section = false;
   bfd *ebfd =
     _bfd_aarch64_elf_find_1st_bfd_input_with_gnu_property (info,
-							   &has_gnu_property);
+							   &has_note_section);
 
   /* If ebfd != NULL it is either an input with property note or the last input.
      Either way if we have an output GNU property that was provided, we should
      add it (by creating a section if needed).  */
   if (ebfd != NULL)
     {
-      /* If no GNU property node was found, create the GNU property note
-	 section.  */
-      if (!has_gnu_property)
+      /* If no GNU property note section was found, create one.
+
+	 Note: If there is no .gnu.note.property section, we might think that
+	 elf_properties (ebfd) is always NULL.  However, this is not always
+	 true.  In PR23900: old linkers were treating .note.gnu.property as a
+	 generic note section, so old objects might contain properties inside
+	 .note instead of .note.gnu.property. In this case, the section won't be
+	 detected but the properties are still parsed. Consequently,
+	 elf_properties (ebfd) is populated and different from NULL (see
+	 https://sourceware.org/bugzilla/show_bug.cgi?id=23900 for more
+	 details).  */
+      if (!has_note_section && elf_properties (ebfd) == NULL)
 	_bfd_aarch64_elf_create_gnu_property_section (info, ebfd);
 
       /* Merge the found input property with output properties. Note: if no
