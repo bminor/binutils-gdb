@@ -51669,7 +51669,7 @@ the @value{GDBN} manual in node @code{Index Files}
 @c man begin OPTIONS gdb-add-index
 @table @env
 @item -dwarf-5
-Add DWARF 5 sections instead of previous @code{.debug_index} section.
+Add DWARF 5 sections instead of previous @code{.gdb_index} section.
 
 @end table
 @c man end
