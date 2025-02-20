@@ -22865,10 +22865,9 @@ To create an index file, use the @code{save gdb-index} command:
 @kindex save gdb-index
 Create index files for all symbol files currently known by
 @value{GDBN}.  For each known @var{symbol-file}, this command by
-default creates it produces a single file
-@file{@var{symbol-file}.gdb-index}.  If you invoke this command with
-the @option{-dwarf-5} option, it produces 2 files:
-@file{@var{symbol-file}.debug_names} and
+default produces a single file @file{@var{symbol-file}.gdb-index}.
+If you invoke this command with the @option{-dwarf-5} option, it
+produces 2 files: @file{@var{symbol-file}.debug_names} and
 @file{@var{symbol-file}.debug_str}.  The files are created in the
 given @var{directory}.
 
