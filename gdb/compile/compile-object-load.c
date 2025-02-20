@@ -299,6 +299,7 @@ static const struct bfd_link_callbacks link_callbacks =
   link_callbacks_reloc_dangerous, /* reloc_dangerous */
   link_callbacks_unattached_reloc, /* unattached_reloc */
   NULL, /* notice */
+  NULL, /* fatal */
   link_callbacks_einfo, /* einfo */
   NULL, /* info */
   NULL, /* minfo */
