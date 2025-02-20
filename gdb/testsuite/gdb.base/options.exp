@@ -99,21 +99,21 @@ proc make_cmd {variant} {
 # operand.
 proc expect_none {operand} {
     return "-flag 0 -xx1 0 -xx2 0 -bool 0 -enum xxx -uint-unl 0 -pint-unl 0\
-	    -string '' -filename '' -- $operand"
+	    -string '' -filename '' -color magenta -- $operand"
 }
 
 # Return a string for the expected result of running "maint
 # test-options xxx", with -flag set.  OPERAND is the expected operand.
 proc expect_flag {operand} {
     return "-flag 1 -xx1 0 -xx2 0 -bool 0 -enum xxx -uint-unl 0 -pint-unl 0\
-	    -string '' -filename '' -- $operand"
+	    -string '' -filename '' -color magenta -- $operand"
 }
 
 # Return a string for the expected result of running "maint
 # test-options xxx", with -bool set.  OPERAND is the expected operand.
 proc expect_bool {operand} {
     return "-flag 0 -xx1 0 -xx2 0 -bool 1 -enum xxx -uint-unl 0 -pint-unl 0\
-	    -string '' -filename '' -- $operand"
+	    -string '' -filename '' -color magenta -- $operand"
 }
 
 # Return a string for the expected result of running "maint
@@ -123,10 +123,10 @@ proc expect_bool {operand} {
 proc expect_integer {option val operand} {
     if {$option == "uinteger-unlimited"} {
 	return "-flag 0 -xx1 0 -xx2 0 -bool 0 -enum xxx -uint-unl $val\
-		-pint-unl 0 -string '' -filename '' -- $operand"
+		-pint-unl 0 -string '' -filename '' -color magenta -- $operand"
     } elseif {$option == "pinteger-unlimited"} {
 	return "-flag 0 -xx1 0 -xx2 0 -bool 0 -enum xxx -uint-unl 0\
-		-pint-unl $val -string '' -filename '' -- $operand"
+		-pint-unl $val -string '' -filename '' -color magenta -- $operand"
     } else {
 	error "unsupported option: $option"
     }
@@ -144,7 +144,7 @@ proc expect_string {str operand} {
 	set str [string range $str 1 end-1]
     }
     return "-flag 0 -xx1 0 -xx2 0 -bool 0 -enum xxx -uint-unl 0 -pint-unl 0\
-	    -string '$str' -filename '' -- $operand"
+	    -string '$str' -filename '' -color magenta -- $operand"
 }
 
 # Return a string for the expected result of running "maint
@@ -159,11 +159,12 @@ proc expect_filename {str operand} {
 	set str [string range $str 1 end-1]
     }
     return "-flag 0 -xx1 0 -xx2 0 -bool 0 -enum xxx -uint-unl 0 -pint-unl 0\
-	    -string '' -filename '$str' -- $operand"
+	    -string '' -filename '$str' -color magenta -- $operand"
 }
 
 set all_options {
     "-bool"
+    "-color"
     "-enum"
     "-filename"
     "-flag"
@@ -628,7 +629,7 @@ proc_with_prefix test-flag {variant} {
     # Extract twice the same flag, separated by one space.
     gdb_test "$cmd -xx1     -xx2 -xx1  -xx2 -xx1    -- non flags args" \
 	"-flag 0 -xx1 1 -xx2 1 -bool 0 -enum xxx -uint-unl 0 -pint-unl 0\
-	 -string '' -filename '' -- non flags args"
+	 -string '' -filename '' -color magenta -- non flags args"
 
     # Extract 2 known flags in front of unknown flags.
     gdb_test "$cmd -xx1 -xx2 -a -b -c -xx1 --" \
