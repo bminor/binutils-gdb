@@ -91,7 +91,6 @@ responsibility among the other maintainers.
   HPPA		   Dave Anglin <dave.anglin@bell.net>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
   IA-64		   Jim Wilson <wilson@tuliptree.org>
-  IQ2000	   Stan Cox <scox@redhat.com>
   ix86		   H.J. Lu <hjl.tools@gmail.com>
   ix86 COFF	   DJ Delorie <dj@redhat.com>
   ix86 PE/COFF	   Dave Korn <dave.korn.cygwin@gmail.com>
