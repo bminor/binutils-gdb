@@ -118,5 +118,11 @@ _start:
 	sub	%rbp, bar@GOTPCREL(%rip), %r21
 	xor	%rsi, bar@GOTPCREL(%rip), %r22
 
+	imul	bar@GOTPCREL(%rip), %r17
+	{nf} imul bar@GOTPCREL(%rip), %r17
+	imul	bar@GOTPCREL(%rip), %r17, %rdx
+	imul	bar@GOTPCREL(%rip), %rcx, %r18
+	{rex2} pushq bar@GOTPCREL(%rip)
+
 	.size	_start, .-_start
 	.p2align 12, 0x90

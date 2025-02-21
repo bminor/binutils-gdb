@@ -1209,6 +1209,10 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
    to
    test $foo, %reg1
    and convert
+   push foo@GOT[(%reg)]
+   to
+   push $foo
+   and convert
    binop foo@GOT[(%reg1)], %reg2
    to
    binop $foo, %reg2
@@ -1233,7 +1237,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   unsigned int addend;
   unsigned int nop;
   bfd_vma nop_offset;
-  bool is_pic;
+  bool is_pic, is_branch = false;
   bool to_reloc_32;
   bool abs_symbol;
   unsigned int r_type;
@@ -1301,6 +1305,23 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 
   opcode = bfd_get_8 (abfd, contents + roff - 2);
 
+  if (opcode == 0xff)
+    {
+      switch (modrm & 0x38)
+	{
+	case 0x10: /* CALL */
+	case 0x20: /* JMP */
+	  is_branch = true;
+	  break;
+
+	case 0x30: /* PUSH */
+	  break;
+
+	default:
+	  return true;
+	}
+    }
+
   /* Convert to R_386_32 if PIC is false or there is no base
      register.  */
   to_reloc_32 = !is_pic || baseless;
@@ -1311,7 +1332,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
      reloc.  */
   if (h == NULL)
     {
-      if (opcode == 0x0ff)
+      if (is_branch)
 	/* Convert "call/jmp *foo@GOT[(%reg)]".  */
 	goto convert_branch;
       else
@@ -1327,7 +1348,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
       && !eh->linker_def
       && local_ref)
     {
-      if (opcode == 0xff)
+      if (is_branch)
 	{
 	  /* No direct branch to 0 for PIC.  */
 	  if (is_pic)
@@ -1343,7 +1364,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	}
     }
 
-  if (opcode == 0xff)
+  if (is_branch)
     {
       /* We have "call/jmp *foo@GOT[(%reg)]".  */
       if ((h->root.type == bfd_link_hash_defined
@@ -1399,7 +1420,8 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   else
     {
       /* We have "mov foo@GOT[(%re1g)], %reg2",
-	 "test %reg1, foo@GOT(%reg2)" and
+	 "test %reg1, foo@GOT(%reg2)",
+	 "push foo@GOT[(%reg)]", or
 	 "binop foo@GOT[(%reg1)], %reg2".
 
 	 Avoid optimizing _DYNAMIC since ld.so may use its
@@ -1459,6 +1481,13 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 		     "binop $foo, %reg2".  */
 		  modrm = 0xc0 | ((modrm & 0x38) >> 3) | (opcode & 0x38);
 		  opcode = 0x81;
+		}
+	      else if (opcode == 0xff)
+		{
+		  /* Convert "push foo@GOT(%reg)" to
+		     "push $foo".  */
+		  modrm = 0x68; /* Really the opcode.  */
+		  opcode = 0x2e; /* Really a meaningless %cs: prefix.  */
 		}
 	      else
 		return true;

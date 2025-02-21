@@ -1739,13 +1739,16 @@ elf_x86_64_need_pic (struct bfd_link_info *info,
 }
 
 /* Move the R bits to the B bits in EVEX payload byte 1.  */
-static unsigned int evex_move_r_to_b (unsigned int byte1)
+static unsigned int evex_move_r_to_b (unsigned int byte1, bool copy)
 {
   byte1 = (byte1 & ~(1 << 5)) | ((byte1 & (1 << 7)) >> 2); /* R3 -> B3 */
   byte1 = (byte1 & ~(1 << 3)) | ((~byte1 & (1 << 4)) >> 1); /* R4 -> B4 */
 
   /* Set both R bits, as they're inverted.  */
-  return byte1 | (1 << 4) | (1 << 7);
+  if (!copy)
+    byte1 |= (1 << 4) | (1 << 7);
+
+  return byte1;
 }
 
 /* With the local symbol, foo, we convert
@@ -1762,10 +1765,14 @@ static unsigned int evex_move_r_to_b (unsigned int byte1)
    to
    test $foo, %reg
    and convert
+   push foo@GOTPCREL(%rip)
+   to
+   push $foo
+   and convert
    binop foo@GOTPCREL(%rip), %reg
    to
    binop $foo, %reg
-   where binop is one of adc, add, and, cmp, or, sbb, sub, xor
+   where binop is one of adc, add, and, cmp, imul, or, sbb, sub, xor
    instructions.  */
 
 static bool
@@ -1782,6 +1789,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   bool is_pic;
   bool no_overflow;
   bool relocx;
+  bool is_branch = false;
   bool to_reloc_pc32;
   bool abs_symbol;
   bool local_ref;
@@ -1878,6 +1886,23 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   r_symndx = htab->r_sym (irel->r_info);
 
   opcode = bfd_get_8 (abfd, contents + roff - 2);
+  modrm = bfd_get_8 (abfd, contents + roff - 1);
+  if (opcode == 0xff)
+    {
+      switch (modrm & 0x38)
+	{
+	case 0x10: /* CALL */
+	case 0x20: /* JMP */
+	  is_branch = true;
+	  break;
+
+	case 0x30: /* PUSH */
+	  break;
+
+	default:
+	  return true;
+	}
+    }
 
   /* Convert mov to lea since it has been done for a while.  */
   if (opcode != 0x8b)
@@ -1895,7 +1920,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
      3. no_overflow is true.
      4. PIC.
      */
-  to_reloc_pc32 = (opcode == 0xff
+  to_reloc_pc32 = (is_branch
 		   || !relocx
 		   || no_overflow
 		   || is_pic);
@@ -1950,7 +1975,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	      && !eh->linker_def
 	      && local_ref))
 	{
-	  if (opcode == 0xff)
+	  if (is_branch)
 	    {
 	      /* Skip for branch instructions since R_X86_64_PC32
 		 may overflow.  */
@@ -2055,7 +2080,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   else
     relocation = 0;
 
-  if (opcode == 0xff)
+  if (is_branch)
     {
       /* We have "call/jmp *foo@GOTPCREL(%rip)".  */
       unsigned int nop;
@@ -2074,7 +2099,6 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 
       /* Convert R_X86_64_GOTPCRELX and R_X86_64_REX_GOTPCRELX to
 	 R_X86_64_PC32.  */
-      modrm = bfd_get_8 (abfd, contents + roff - 1);
       if (modrm == 0x25)
 	{
 	  /* Convert to "jmp foo nop".  */
@@ -2119,11 +2143,12 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
     }
   else if (r_type == R_X86_64_CODE_6_GOTPCRELX && opcode != 0x8b)
     {
+      bool move_v_r = false;
+
       /* R_X86_64_PC32 isn't supported.  */
       if (to_reloc_pc32)
 	return true;
 
-      modrm = bfd_get_8 (abfd, contents + roff - 1);
       if (opcode == 0x85)
 	{
 	  /* Convert "ctest<cc> %reg, foo@GOTPCREL(%rip)" to
@@ -2148,6 +2173,23 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	     "binop $foo, %reg", or alike for 3-operand forms.  */
 	  modrm = 0xc0 | ((modrm & 0x38) >> 3) | (opcode & 0x38);
 	  opcode = 0x81;
+	}
+      else if (opcode == 0xaf)
+	{
+	  if (!(evex[2] & 0x10))
+	    {
+	      /* Convert "imul foo@GOTPCREL(%rip), %reg" to
+	         "imul $foo, %reg, %reg".  */
+	      modrm = 0xc0 | ((modrm & 0x38) >> 3) | (modrm & 0x38);
+	    }
+	  else
+	    {
+	      /* Convert "imul foo@GOTPCREL(%rip), %reg1, %reg2" to
+	         "imul $foo, %reg1, %reg2".  */
+	      modrm = 0xc0 | ((modrm & 0x38) >> 3) | (~evex[1] & 0x38);
+	      move_v_r = true;
+	    }
+	  opcode = 0x69;
 	}
       else
 	return true;
@@ -2182,7 +2224,23 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
       bfd_put_8 (abfd, opcode, contents + roff - 2);
       bfd_put_8 (abfd, modrm, contents + roff - 1);
 
-      evex[0] = evex_move_r_to_b (evex[0]);
+      evex[0] = evex_move_r_to_b (evex[0], opcode == 0x69 && !move_v_r);
+      if (move_v_r)
+	{
+	  /* Move the top two V bits to the R bits in EVEX payload byte 1.
+	     Note that evex_move_r_to_b() set both R bits.  */
+	  if (!(evex[1] & (1 << 6)))
+	    evex[0] &= ~(1 << 7); /* V3 -> R3 */
+	  if (!(evex[2] & (1 << 3)))
+	    evex[0] &= ~(1 << 4); /* V4 -> R4 */
+	  /* Set all V bits, as they're inverted.  */
+	  evex[1] |= 0xf << 3;
+	  evex[2] |= 1 << 3;
+	  /* Clear the ND (ZU) bit (it ought to be ignored anyway).  */
+	  evex[2] &= ~(1 << 4);
+	  bfd_put_8 (abfd, evex[2], contents + roff - 3);
+	  bfd_put_8 (abfd, evex[1], contents + roff - 4);
+	}
       bfd_put_8 (abfd, evex[0], contents + roff - 5);
 
       /* No addend for R_X86_64_32/R_X86_64_32S relocations.  */
@@ -2225,7 +2283,10 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	{
 	  if (bfd_get_8 (abfd, contents + roff - 4) == 0xd5)
 	    {
-	      rex2 = bfd_get_8 (abfd, contents + roff - 3);
+	      /* Make sure even an all-zero payload leaves a non-zero value
+		 in the variable.  */
+	      rex2 = bfd_get_8 (abfd, contents + roff - 3) | 0x100;
+	      rex2_mask |= 0x100;
 	      rex_w = (rex2 & REX_W) != 0;
 	    }
 	  else if (bfd_get_8 (abfd, contents + roff - 4) == 0x0f)
@@ -2267,7 +2328,6 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	      /* Convert "mov foo@GOTPCREL(%rip), %reg" to
 		 "mov $foo, %reg".  */
 	      opcode = 0xc7;
-	      modrm = bfd_get_8 (abfd, contents + roff - 1);
 	      modrm = 0xc0 | (modrm & 0x38) >> 3;
 	      if (rex_w && ABI_64_P (link_info->output_bfd))
 		{
@@ -2294,7 +2354,6 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	  if (to_reloc_pc32)
 	    return true;
 
-	  modrm = bfd_get_8 (abfd, contents + roff - 1);
 	  if (opcode == 0x85)
 	    {
 	      /* Convert "test %reg, foo@GOTPCREL(%rip)" to
@@ -2308,6 +2367,39 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 		 "binop $foo, %reg".  */
 	      modrm = 0xc0 | ((modrm & 0x38) >> 3) | (opcode & 0x38);
 	      opcode = 0x81;
+	    }
+	  else if (opcode == 0xaf && (rex2 & (REX2_M << 4)))
+	    {
+	      /* Convert "imul foo@GOTPCREL(%rip), %reg" to
+		 "imul $foo, %reg, %reg".  */
+	      modrm = 0xc0 | ((modrm & 0x38) >> 3) | (modrm & 0x38);
+	      rex_mask = 0;
+	      rex2_mask = REX2_M << 4;
+	      opcode = 0x69;
+	    }
+	  else if (opcode == 0xff && !(rex2 & (REX2_M << 4)))
+	    {
+	      /* Convert "push foo@GOTPCREL(%rip)" to
+		 "push $foo".  */
+	      bfd_put_8 (abfd, 0x68, contents + roff - 1);
+	      if (rex)
+		{
+		  bfd_put_8 (abfd, 0x2e, contents + roff - 3);
+		  bfd_put_8 (abfd, rex, contents + roff - 2);
+		}
+	      else if (rex2)
+		{
+		  bfd_put_8 (abfd, 0x2e, contents + roff - 4);
+		  bfd_put_8 (abfd, 0xd5, contents + roff - 3);
+		  bfd_put_8 (abfd, rex2, contents + roff - 2);
+		}
+	      else
+		bfd_put_8 (abfd, 0x2e, contents + roff - 2);
+
+	      r_type = R_X86_64_32S;
+	      /* No addend for R_X86_64_32S relocations.  */
+	      irel->r_addend = 0;
+	      goto finish;
 	    }
 	  else
 	    return true;
@@ -2377,6 +2469,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	}
     }
 
+ finish:
   *r_type_p = r_type;
   irel->r_info = htab->r_info (r_symndx,
 			       r_type | R_X86_64_converted_reloc_bit);
@@ -4467,7 +4560,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      continue;
 		    }
 
-		  byte1 = evex_move_r_to_b (byte1);
+		  byte1 = evex_move_r_to_b (byte1, false);
 		  bfd_put_8 (output_bfd, byte1, contents + roff - 5);
 		  bfd_put_8 (output_bfd, 0x81, contents + roff - 2);
 		  bfd_put_8 (output_bfd, 0xc0 | reg, contents + roff - 1);

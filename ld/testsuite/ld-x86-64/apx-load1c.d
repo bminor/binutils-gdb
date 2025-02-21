@@ -108,4 +108,9 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 f4 dc 10 19 25 54 0d 20 00 	sbb    %rsp,0x200d54\(%rip\),%r20        # 2020e0 <.*>
  +[a-f0-9]+:	62 f4 d4 10 29 2d 4a 0d 20 00 	sub    %rbp,0x200d4a\(%rip\),%r21        # 2020e0 <.*>
  +[a-f0-9]+:	62 f4 cc 10 31 35 40 0d 20 00 	xor    %rsi,0x200d40\(%rip\),%r22        # 2020e0 <.*>
+ +[a-f0-9]+:	d5 c8 af 0d 38 0d 20 00 	imul   0x200d38\(%rip\),%r17        # 2020e0 <.*>
+ +[a-f0-9]+:	62 e4 fc 0c af 0d 2e 0d 20 00 	\{nf\} imul 0x200d2e\(%rip\),%r17        # 2020e0 <.*>
+ +[a-f0-9]+:	62 e4 ec 18 af 0d 24 0d 20 00 	imul   0x200d24\(%rip\),%r17,%rdx        # 2020e0 <.*>
+ +[a-f0-9]+:	62 f4 ec 10 af 0d 1a 0d 20 00 	imul   0x200d1a\(%rip\),%rcx,%r18        # 2020e0 <.*>
+ +[a-f0-9]+:	d5 00 ff 35 12 0d 20 00 	\{rex2 0x0\} push 0x200d12\(%rip\)        # 2020e0 <.*>
 #pass

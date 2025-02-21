@@ -12932,9 +12932,9 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	      else if (object_64bit)
 		continue;
 
-	      /* Check for "call/jmp *mem", "mov mem, %reg", "movrs mem, %reg",
-		 "test %reg, mem" and "binop mem, %reg" where binop
-		 is one of adc, add, and, cmp, or, sbb, sub, xor
+	      /* Check for "call/jmp *mem", "push mem", "mov mem, %reg",
+		 "movrs mem, %reg", "test %reg, mem" and "binop mem, %reg" where
+		 binop is one of adc, add, and, cmp, or, sbb, sub, xor, or imul
 		 instructions without data prefix.  Always generate
 		 R_386_GOT32X for "sym*GOT" operand in 32-bit mode.  */
 	      unsigned int space = dot_insn () ? i.insn_opcode_space
@@ -12944,7 +12944,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		      || (i.rm.mode == 0 && i.rm.regmem == 5))
 		  && ((space == SPACE_BASE
 		       && i.tm.base_opcode == 0xff
-		       && (i.rm.reg == 2 || i.rm.reg == 4))
+		       && (i.rm.reg == 2 || i.rm.reg == 4 || i.rm.reg == 6))
 		      || ((space == SPACE_BASE
 			   || space == SPACE_0F38
 			   || space == SPACE_MAP4)
@@ -12953,7 +12953,13 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 			   || space == SPACE_MAP4)
 			  && (i.tm.base_opcode == 0x85
 			      || (i.tm.base_opcode
-				  | (i.operands > 2 ? 0x3a : 0x38)) == 0x3b))))
+				  | (i.operands > 2 ? 0x3a : 0x38)) == 0x3b))
+		      || (((space == SPACE_0F
+			    /* Because of the 0F prefix, no suitable relocation
+			       exists for this unless it's REX2-encoded.  */
+			    && is_apx_rex2_encoding ())
+			   || space == SPACE_MAP4)
+			  && i.tm.base_opcode == 0xaf)))
 		{
 		  if (object_64bit)
 		    {
