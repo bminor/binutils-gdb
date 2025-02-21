@@ -1925,7 +1925,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
 				      0, /* func start addr.  */
 				      plt0_entry_size,
 				      func_info,
-				      16,
+				      0,
 				      0 /* Num FREs.  */);
       sframe_frame_row_entry plt0_fre;
       unsigned int num_plt0_fres = htab->sframe_plt->plt0_num_fres;
