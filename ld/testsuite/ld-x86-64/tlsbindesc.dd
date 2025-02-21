@@ -256,18 +256,18 @@ Disassembly of section .text:
  +[0-9a-f]+:	d5 18 c7 c5 90 ff ff[ 	]+mov    \$0xf+90,%r21
 #							sl5
  +[0-9a-f]+:	ff *
- +[0-9a-f]+:	26 26 49 c7 c3 90 ff[ 	]+(es ){2}mov \$0xf+90,%r11
+ +[0-9a-f]+:	2e 2e 49 c7 c3 90 ff[ 	]+(cs ){2}mov \$0xf+90,%r11
 #							sl5
  +[0-9a-f]+:	ff ff *
- +[0-9a-f]+:	26 26 d5 18 c7 c5 90[ 	]+(es ){2}mov \$0xf+90,%r21
+ +[0-9a-f]+:	2e 2e d5 18 c7 c5 90[ 	]+(cs ){2}mov \$0xf+90,%r21
 #							sl5
  +[0-9a-f]+:	ff ff ff *
 #  IE->LE against hidden var
  +[0-9a-f]+:	d5 18 c7 c6 b0 ff ff[ 	]+mov    \$0xf+b0,%r22
  +[0-9a-f]+:	ff *
- +[0-9a-f]+:	26 26 49 c7 c4 b0 ff[ 	]+(es ){2}mov \$0xf+b0,%r12
+ +[0-9a-f]+:	2e 2e 49 c7 c4 b0 ff[ 	]+(cs ){2}mov \$0xf+b0,%r12
  +[0-9a-f]+:	ff ff *
- +[0-9a-f]+:	26 26 d5 18 c7 c6 b0[ 	]+(es ){2}mov \$0xf+b0,%r22
+ +[0-9a-f]+:	2e 2e d5 18 c7 c6 b0[ 	]+(cs ){2}mov \$0xf+b0,%r22
  +[0-9a-f]+:	ff ff ff *
 #  GD -> IE because variable is not defined in executable
  +[0-9a-f]+:	d5 48 8b 05 ([0-9a-f]{2} ){3}[ 	]+mov    0x[0-9a-f]+\(%rip\),%r16 +# [0-9a-f]+ <sG1>

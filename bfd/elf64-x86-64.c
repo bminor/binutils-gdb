@@ -2362,13 +2362,13 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 
       bfd_put_8 (abfd, opcode, contents + roff - 2);
 
-      /* For MOVRS zap the 0f38 or EVEX prefix, applying meaningless ES
+      /* For MOVRS zap the 0f38 or EVEX prefix, applying meaningless CS
 	 segment overrides instead.  When necessary also install the REX2
 	 prefix and payload (which may not have been written yet).  */
       if (movrs)
 	{
-	  bfd_put_8 (abfd, 0x26, contents + roff - movrs);
-	  bfd_put_8 (abfd, 0x26, contents + roff - movrs + 1);
+	  bfd_put_8 (abfd, 0x2e, contents + roff - movrs);
+	  bfd_put_8 (abfd, 0x2e, contents + roff - movrs + 1);
 	  if (movrs == 6)
 	    {
 	      bfd_put_8 (abfd, 0xd5, contents + roff - 4);
@@ -4361,11 +4361,11 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		     byte.  */
 		  if (type == 0x8b)
 		    {
-		      /* For MOVRS emit meaningless ES prefixes.  */
+		      /* For MOVRS emit meaningless CS prefixes.  */
 		      if (bfd_get_8 (input_bfd, contents + roff - 4) == 0x0f)
 			{
-			  bfd_put_8 (output_bfd, 0x26, contents + roff - 4);
-			  rex2 = 0x26;
+			  bfd_put_8 (output_bfd, 0x2e, contents + roff - 4);
+			  rex2 = 0x2e;
 			  rex2_mask = 0;
 			}
 		      type = 0xc7;
@@ -4403,10 +4403,10 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  unsigned int reg = bfd_get_8 (input_bfd, contents + roff - 1);
 		  reg >>= 3;
 
-		  /* Replace 0f38 by meaningless ES prefixes, shifting the REX
+		  /* Replace 0f38 by meaningless CS prefixes, shifting the REX
 		     prefix forward.  */
-		  bfd_put_8 (output_bfd, 0x26, contents + roff - 5);
-		  bfd_put_8 (output_bfd, 0x26, contents + roff - 4);
+		  bfd_put_8 (output_bfd, 0x2e, contents + roff - 5);
+		  bfd_put_8 (output_bfd, 0x2e, contents + roff - 4);
 		  bfd_put_8 (output_bfd, rex, contents + roff - 3);
 		  bfd_put_8 (output_bfd, 0xc7, contents + roff - 2);
 		  bfd_put_8 (output_bfd, 0xc0 | reg, contents + roff - 1);
@@ -4455,8 +4455,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 			rex2 |= REX_W;
 
 
-		      bfd_put_8 (output_bfd, 0x26, contents + roff - 6);
-		      bfd_put_8 (output_bfd, 0x26, contents + roff - 5);
+		      bfd_put_8 (output_bfd, 0x2e, contents + roff - 6);
+		      bfd_put_8 (output_bfd, 0x2e, contents + roff - 5);
 		      bfd_put_8 (output_bfd, 0xd5, contents + roff - 4);
 		      bfd_put_8 (output_bfd, rex2, contents + roff - 3);
 		      bfd_put_8 (output_bfd, 0xc7, contents + roff - 2);
