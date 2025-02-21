@@ -12932,6 +12932,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	      else if (object_64bit)
 		continue;
 
+#ifdef OBJ_ELF
 	      /* Check for "call/jmp *mem", "push mem", "mov mem, %reg",
 		 "movrs mem, %reg", "test %reg, mem" and "binop mem, %reg" where
 		 binop is one of adc, add, and, cmp, or, sbb, sub, xor, or imul
@@ -12994,9 +12995,11 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 			}
 		    }
 		  else if (generate_relax_relocations
-			   || (i.rm.mode == 0 && i.rm.regmem == 5))
+			   ? (!shared || i.rm.mode != 0 || i.rm.regmem != 5)
+			   : (!shared && i.rm.mode == 0 && i.rm.regmem == 5))
 		    fixP->fx_tcbit2 = 1;
 		}
+#endif
 	    }
 	}
     }
