@@ -1453,15 +1453,16 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 		  modrm = 0xc0 | (modrm & 0x38) >> 3;
 		  opcode = 0xf7;
 		}
-	      else
+	      else if ((opcode | 0x38) == 0x3b)
 		{
 		  /* Convert "binop foo@GOT(%reg1), %reg2" to
 		     "binop $foo, %reg2".  */
-		  modrm = (0xc0
-			   | (modrm & 0x38) >> 3
-			   | (opcode & 0x3c));
+		  modrm = 0xc0 | ((modrm & 0x38) >> 3) | (opcode & 0x38);
 		  opcode = 0x81;
 		}
+	      else
+		return true;
+
 	      bfd_put_8 (abfd, modrm, contents + roff - 1);
 	      r_type = R_386_32;
 	    }
