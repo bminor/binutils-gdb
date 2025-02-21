@@ -14926,31 +14926,33 @@ cooked_index_functions::expand_symtabs_matching
 
 	  /* Might have been looking for "a::b" and found
 	     "x::a::b".  */
-	  if (symbol_matcher == nullptr)
-	    {
-	      if ((match_type == symbol_name_match_type::FULL
-		   || (lang != language_ada
-		       && match_type == symbol_name_match_type::EXPRESSION)))
-		{
-		  if (parent != nullptr)
-		    continue;
+	  if (((match_type == symbol_name_match_type::FULL
+		|| (lang != language_ada
+		    && match_type == symbol_name_match_type::EXPRESSION)))
+	      && parent != nullptr)
+	    continue;
 
-		  if (entry->lang != language_unknown)
-		    {
-		      symbol_name_matcher_ftype *name_matcher
-			= lang_def->get_symbol_name_matcher
-			  (segment_lookup_names.back ());
-		      if (!name_matcher (entry->canonical,
-					 segment_lookup_names.back (), nullptr))
-			continue;
-		    }
-	      }
-	    }
-	  else
+	  /* Check that the full name matches -- either by matching
+	     the lookup name ourselves, or by passing the full name to
+	     the symbol matcher.  The former is a bit of a hack: it
+	     seems like the loop above could just examine every
+	     element of the name, avoiding the need to check here; but
+	     this is hard.  See PR symtab/32733.  */
+	  if (symbol_matcher != nullptr || entry->lang != language_unknown)
 	    {
 	      auto_obstack temp_storage;
-	      const char *full_name = entry->full_name (&temp_storage);
-	      if (!symbol_matcher (full_name))
+	      const char *full_name = entry->full_name (&temp_storage,
+							false, true);
+	      if (symbol_matcher == nullptr)
+		{
+		  symbol_name_matcher_ftype *name_matcher
+		    = (lang_def->get_symbol_name_matcher
+		       (lookup_name_without_params));
+		  if (!name_matcher (full_name, lookup_name_without_params,
+				     nullptr))
+		    continue;
+		}
+	      else if (!symbol_matcher (full_name))
 		continue;
 	    }
 
