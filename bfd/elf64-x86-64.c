@@ -2354,14 +2354,14 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 	  if (to_reloc_pc32)
 	    return true;
 
-	  if (opcode == 0x85)
+	  if (opcode == 0x85 && !(rex2 & (REX2_M << 4)))
 	    {
 	      /* Convert "test %reg, foo@GOTPCREL(%rip)" to
 		 "test $foo, %reg".  */
 	      modrm = 0xc0 | (modrm & 0x38) >> 3;
 	      opcode = 0xf7;
 	    }
-	  else if ((opcode | 0x38) == 0x3b)
+	  else if ((opcode | 0x38) == 0x3b && !(rex2 & (REX2_M << 4)))
 	    {
 	      /* Convert "binop foo@GOTPCREL(%rip), %reg" to
 		 "binop $foo, %reg".  */
