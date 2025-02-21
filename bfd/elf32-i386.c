@@ -1322,9 +1322,9 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	}
     }
 
-  /* Convert to R_386_32 if PIC is false or there is no base
-     register.  */
-  to_reloc_32 = !is_pic || baseless;
+  /* Convert to R_386_32 if PIC is false (if PIC is true we already know
+     there is a base register).  */
+  to_reloc_32 = !is_pic;
 
   eh = elf_x86_hash_entry (h);
 
