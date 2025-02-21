@@ -698,35 +698,48 @@ _bfd_aarch64_elf_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_ty
     }
 }
 
+typedef struct
+{
+  bfd *pbfd;
+  asection* sec;
+} bfd_search_result_t;
+
 /* Find the first input bfd with GNU properties.
    If such an input is found, set found to true and return the relevant input.
    Otherwise, return the last input of bfd inputs.  */
-static bfd *
-_bfd_aarch64_elf_find_1st_bfd_input_with_gnu_property (
-  struct bfd_link_info *info,
-  bool *has_note_section)
+static bfd_search_result_t
+bfd_linear_search_one_with_gnu_property (struct bfd_link_info *info)
 {
   const struct elf_backend_data *be = get_elf_backend_data (info->output_bfd);
-  bfd *pbfd = info->input_bfds;
-  bfd *prev_bfd = NULL;
-  for (; pbfd != NULL; pbfd = pbfd->link.next)
-    if (bfd_get_flavour (pbfd) == bfd_target_elf_flavour
-	&& bfd_count_sections (pbfd) != 0
-	&& (pbfd->flags & (DYNAMIC | BFD_PLUGIN | BFD_LINKER_CREATED)) == 0
-	&& (be->elf_machine_code
-	    == get_elf_backend_data (pbfd)->elf_machine_code)
-	&& (be->s->elfclass == get_elf_backend_data (pbfd)->s->elfclass))
+
+  bool bfd_is_non_dynamic_elf_object (bfd *abfd)
+  {
+    return (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	&& (bfd_count_sections (abfd) != 0)
+	&& (abfd->flags & (DYNAMIC | BFD_PLUGIN | BFD_LINKER_CREATED)) == 0
+	&& (be->elf_machine_code == get_elf_backend_data (abfd)->elf_machine_code)
+	&& (be->s->elfclass == get_elf_backend_data (abfd)->s->elfclass);
+  }
+
+  bfd_search_result_t res = {
+    .pbfd = NULL,
+    .sec = NULL,
+  };
+
+  for (bfd *pbfd = info->input_bfds; pbfd != NULL; pbfd = pbfd->link.next)
+    if (bfd_is_non_dynamic_elf_object (pbfd))
       {
-	prev_bfd = pbfd;
+	res.pbfd = pbfd;
 
 	/* Does the input have a list of GNU properties ? */
 	if (elf_properties (pbfd) != NULL)
 	  break;
       }
-  if (prev_bfd != NULL)
-    *has_note_section =
-      bfd_get_section_by_name (prev_bfd, NOTE_GNU_PROPERTY_SECTION_NAME) != NULL;
-  return prev_bfd;
+
+  if (res.pbfd != NULL)
+    res.sec = bfd_get_section_by_name (res.pbfd, NOTE_GNU_PROPERTY_SECTION_NAME);
+
+  return res;
 }
 
 /* Create a GNU property section for the given bfd input.  */
@@ -861,34 +874,31 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
   struct elf_aarch64_obj_tdata *tdata = elf_aarch64_tdata (info->output_bfd);
   uint32_t outprop = tdata->gnu_property_aarch64_feature_1_and;
 
-  bool has_note_section = false;
-  bfd *ebfd =
-    _bfd_aarch64_elf_find_1st_bfd_input_with_gnu_property (info,
-							   &has_note_section);
+  bfd_search_result_t res = bfd_linear_search_one_with_gnu_property (info);
 
   /* If ebfd != NULL it is either an input with property note or the last input.
      Either way if we have an output GNU property that was provided, we should
      add it (by creating a section if needed).  */
-  if (ebfd != NULL)
+  if (res.pbfd != NULL)
     {
       /* If no GNU property note section was found, create one.
 
 	 Note: If there is no .gnu.note.property section, we might think that
-	 elf_properties (ebfd) is always NULL.  However, this is not always
+	 elf_properties (res.pbfd) is always NULL.  However, this is not always
 	 true.  In PR23900: old linkers were treating .note.gnu.property as a
 	 generic note section, so old objects might contain properties inside
 	 .note instead of .note.gnu.property. In this case, the section won't be
 	 detected but the properties are still parsed. Consequently,
-	 elf_properties (ebfd) is populated and different from NULL (see
+	 elf_properties (res.pbfd) is populated and different from NULL (see
 	 https://sourceware.org/bugzilla/show_bug.cgi?id=23900 for more
 	 details).  */
-      if (!has_note_section && elf_properties (ebfd) == NULL)
-	_bfd_aarch64_elf_create_gnu_property_section (info, ebfd);
+      if (res.sec == NULL && elf_properties (res.pbfd) == NULL)
+	_bfd_aarch64_elf_create_gnu_property_section (info, res.pbfd);
 
       /* Merge the found input property with output properties. Note: if no
 	 property was found, _bfd_elf_get_property will create one.  */
       elf_property *prop =
-	_bfd_elf_get_property (ebfd,
+	_bfd_elf_get_property (res.pbfd,
 			       GNU_PROPERTY_AARCH64_FEATURE_1_AND,
 			       4);
 
@@ -897,13 +907,13 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	 outprop.  */
       if ((outprop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI)
 	   && !(prop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_BTI))
-	_bfd_aarch64_elf_check_bti_report (info, ebfd);
+	_bfd_aarch64_elf_check_bti_report (info, res.pbfd);
 
       if (tdata->sw_protections.gcs_type == GCS_NEVER)
 	prop->u.number &= ~GNU_PROPERTY_AARCH64_FEATURE_1_GCS;
       else if ((outprop & GNU_PROPERTY_AARCH64_FEATURE_1_GCS)
 	       && !(prop->u.number & GNU_PROPERTY_AARCH64_FEATURE_1_GCS))
-	_bfd_aarch64_elf_check_gcs_report (info, ebfd);
+	_bfd_aarch64_elf_check_gcs_report (info, res.pbfd);
 
       prop->u.number |= outprop;
       if (prop->u.number == 0)
