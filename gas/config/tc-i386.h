@@ -144,6 +144,7 @@ int i386_validate_fix (struct fix *);
 extern int tc_i386_fix_adjustable (struct fix *);
 #else
 #define tc_fix_adjustable(X)  ((void)(X), 1)
+#define md_undefined_symbol(N) ((void)(N), NULL)
 #endif
 
 /* Values passed to md_apply_fix don't include the symbol value.  */

@@ -18033,6 +18033,7 @@ i386_target_format (void)
 
 #endif /* ELF / PE / MACH_O  */
 
+#ifdef OBJ_ELF
 symbolS *
 md_undefined_symbol (char *name)
 {
@@ -18050,8 +18051,9 @@ md_undefined_symbol (char *name)
 	};
       return GOT_symbol;
     }
-  return 0;
+  return NULL;
 }
+#endif
 
 #ifdef OBJ_AOUT
 /* Round up a section size to the appropriate boundary.  */
