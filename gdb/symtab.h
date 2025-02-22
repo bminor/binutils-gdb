@@ -145,7 +145,7 @@ private:
   std::string m_encoded_name;
 
   /* The decoded lookup name.  This is formed by calling ada_decode
-     with both 'operators' and 'wide' set to false.  */
+     with 'translate' set to false.  */
   std::string m_decoded_name;
 
   /* Whether the user-provided lookup name was Ada encoded.  If so,

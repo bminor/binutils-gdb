@@ -108,7 +108,7 @@ cooked_index_shard::handle_gnat_encoded_entry
      characters are left as-is.  This is done to make name matching a
      bit simpler; and for wide characters, it means the choice of Ada
      source charset does not affect the indexer directly.  */
-  std::string canonical = ada_decode (entry->name, false, false, false);
+  std::string canonical = ada_decode (entry->name, false, false);
   if (canonical.empty ())
     {
       entry->canonical = entry->name;
