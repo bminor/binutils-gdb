@@ -50,8 +50,21 @@ subsegs_end (struct obstack **obs)
   for (; *obs; obs++)
     _obstack_free (*obs, NULL);
   _obstack_free (&frchains, NULL);
-  bfd_set_section_userdata (bfd_abs_section_ptr, NULL);
+  bfd_set_section_userdata (bfd_com_section_ptr, NULL);
   bfd_set_section_userdata (bfd_und_section_ptr, NULL);
+  bfd_set_section_userdata (bfd_abs_section_ptr, NULL);
+  bfd_set_section_userdata (bfd_ind_section_ptr, NULL);
+  /* Reverse bfd_std_section_init, so the sections look as they did
+     initially.  This, and clearing out userdata above, is so we don't
+     leave dangling pointers into freed memory for oss-fuzz to mess
+     with.  */
+  asymbol *global_syms = bfd_com_section_ptr->symbol;
+  bfd_und_section_ptr->used_by_bfd = NULL;
+  bfd_und_section_ptr->symbol = global_syms + (bfd_und_section_ptr
+					       - bfd_com_section_ptr);
+  bfd_abs_section_ptr->used_by_bfd = NULL;
+  bfd_abs_section_ptr->symbol = global_syms + (bfd_abs_section_ptr
+					       - bfd_com_section_ptr);
 }
 
 static void
