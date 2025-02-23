@@ -96,6 +96,9 @@ run_tests ()
   CHECK (language_cplus, "A::B::C()", "A::B::C");
   CHECK (language_cplus, "A::B::C", "A::B::C");
 
+  CHECK (language_cplus, "Foozle<int>::fogey<Empty<int>> (Empty<int>)",
+	 "Foozle<int>::fogey<Empty<int> >");
+
 #undef CHECK
 #undef CHECK_INCOMPL
 }
