@@ -220,6 +220,7 @@ static std::string mips_disassembler_options;
    to the ABI we have selected, perhaps via a `set mips abi ...'
    override, rather than ones inferred from the ABI set in the ELF
    headers of the binary file selected for debugging.  */
+
 static const char mips_disassembler_options_o32[] = "gpr-names=32";
 static const char mips_disassembler_options_n32[] = "gpr-names=n32";
 static const char mips_disassembler_options_n64[] = "gpr-names=64";
@@ -633,7 +634,6 @@ static const char * const mips_linux_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
   "fsr", "fir"
 };
 
-
 /* Return the name of the register corresponding to REGNO.  */
 static const char *
 mips_register_name (struct gdbarch *gdbarch, int regno)
@@ -668,6 +668,7 @@ mips_register_name (struct gdbarch *gdbarch, int regno)
      configured to be 32-bits wide.  The registers that the user
      sees - the pseudo registers - match the users expectations
      given the programming model being used.  */
+
   int rawnum = regno % gdbarch_num_regs (gdbarch);
   if (regno < gdbarch_num_regs (gdbarch))
     return "";
@@ -1236,6 +1237,7 @@ mips_pc_is_mips16 (struct gdbarch *gdbarch, CORE_ADDR memaddr)
      elfread.c in the high bit of the info field.  Use this to decide
      if the function is MIPS16.  Otherwise if bit 0 of the address is
      set, then ELF file flags will tell if this is a MIPS16 function.  */
+
   bound_minimal_symbol sym
     = lookup_minimal_symbol_by_pc (make_compact_addr (memaddr));
   if (sym.minsym)
@@ -1254,6 +1256,7 @@ mips_pc_is_micromips (struct gdbarch *gdbarch, CORE_ADDR memaddr)
      if the function is microMIPS.  Otherwise if bit 0 of the address
      is set, then ELF file flags will tell if this is a microMIPS
      function.  */
+
   bound_minimal_symbol sym
     = lookup_minimal_symbol_by_pc (make_compact_addr (memaddr));
   if (sym.minsym)
@@ -1273,6 +1276,7 @@ mips_pc_isa (struct gdbarch *gdbarch, CORE_ADDR memaddr)
      this to decide if the function is MIPS16 or microMIPS or normal
      MIPS.  Otherwise if bit 0 of the address is set, then ELF file
      flags will tell if this is a MIPS16 or a microMIPS function.  */
+
   bound_minimal_symbol sym
     = lookup_minimal_symbol_by_pc (make_compact_addr (memaddr));
   if (sym.minsym)
@@ -1706,7 +1710,6 @@ mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	  else
 	    pc += 8;        /* After the delay slot.  */
 	}
-
       else
 	pc += 4;		/* Not a branch, next instruction is easy.  */
     }
@@ -2150,6 +2153,7 @@ enum mips16_inst_fmts
   extRi64type,			/* 20  5,6,5,5,3,3,5 */
   extshift64type		/* 21  5,5,1,1,1,1,1,1,5,1,1,1,3,5 */
 };
+
 /* I am heaping all the fields of the formats into one structure and
    then, only the fields which are involved in instruction extension.  */
 struct upk_mips16
@@ -2158,7 +2162,6 @@ struct upk_mips16
   unsigned int regx;		/* Function in i8 type.  */
   unsigned int regy;
 };
-
 
 /* The EXT-I, EXT-ri nad EXT-I8 instructions all have the same format
    for the bits which make up the immediate extension.  */
@@ -2266,7 +2269,6 @@ unpack_mips16 (struct gdbarch *gdbarch, CORE_ADDR pc,
   upk->regx = regx;
   upk->regy = regy;
 }
-
 
 /* Calculate the destination of a branch whose 16-bit opcode word is at PC,
    and having a signed 16-bit OFFSET.  */
@@ -2395,6 +2397,7 @@ mips16_next_pc (struct regcache *regcache, CORE_ADDR pc)
    It works by decoding the current instruction and predicting where a
    branch will go.  This isn't hard because all the data is available.
    The MIPS32, MIPS16 and microMIPS variants are quite different.  */
+
 static CORE_ADDR
 mips_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
@@ -2482,7 +2485,6 @@ set_reg_offset (struct gdbarch *gdbarch, struct mips_frame_cache *this_cache,
     }
 }
 
-
 /* Fetch the immediate value from a MIPS16 instruction.
    If the previous instruction was an EXTEND, use it to extend
    the upper bits of the immediate value.  This is a helper function
@@ -2516,7 +2518,6 @@ mips16_get_imm (unsigned short prev_inst,	/* previous instruction */
       return offset * scale;
     }
 }
-
 
 /* Analyze the function prologue from START_PC to LIMIT_PC. Builds
    the associated FRAME_CACHE if not null.
@@ -3924,7 +3925,6 @@ mips_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
     return addr;
 }
 
-
 /* Checks for an atomic sequence of instructions beginning with a LL/LLD
    instruction and ending with a SC/SCD instruction.  If such a sequence
    is found, attempt to step through it.  A breakpoint is placed at the end of
@@ -4244,7 +4244,6 @@ mips_about_to_return (struct gdbarch *gdbarch, CORE_ADDR pc)
   return (insn & ~hint) == 0x3e00008;			/* jr(.hb) $ra */
 }
 
-
 /* This fencepost looks highly suspicious to me.  Removing it also
    seems suspicious as it could affect remote debugging across serial
    lines.  */
@@ -4476,6 +4475,7 @@ mips_type_needs_double_align (struct type *type)
 
 /* Adjust the address downward (direction of stack growth) so that it
    is correctly aligned for a new stack frame.  */
+
 static CORE_ADDR
 mips_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
@@ -4860,7 +4860,6 @@ mips_eabi_return_value (struct gdbarch *gdbarch, struct value *function,
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
-
 
 /* N32/N64 ABI stuff.  */
 
@@ -6525,7 +6524,6 @@ print_fp_register_row (struct ui_file *file, const frame_info_ptr &frame,
   return regnum + 1;
 }
 
-
 /* Print a row's worth of GP (int) registers, with name labels above.  */
 
 static int
@@ -6963,7 +6961,6 @@ show_mipsfpu_command (const char *args, int from_tty)
     gdb_printf
       ("The MIPS floating-point coprocessor is assumed to be %s\n", fpu);
 }
-
 
 static void
 set_mipsfpu_single_command (const char *args, int from_tty)
@@ -7922,7 +7919,6 @@ mips_stab_reg_to_regnum (struct gdbarch *gdbarch, int num)
   return gdbarch_num_regs (gdbarch) + regnum;
 }
 
-
 /* Convert a dwarf, dwarf2, or ecoff register number to a GDB [1 *
    gdbarch_num_regs .. 2 * gdbarch_num_regs) REGNUM.  */
 
@@ -7959,7 +7955,6 @@ mips_register_sim_regno (struct gdbarch *gdbarch, int regnum)
   else
     return LEGACY_SIM_REGNO_IGNORE;
 }
-
 
 /* Convert an integer into an address.  Extracting the value signed
    guarantees a correctly sign extended address.  */
@@ -8360,7 +8355,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       for (i = MIPS_ZERO_REGNUM; i <= MIPS_RA_REGNUM; i++)
 	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 					    mips_gprs[i]);
-
 
       valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  mips_regnum.lo, "lo");
