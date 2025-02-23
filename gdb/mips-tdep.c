@@ -1746,7 +1746,7 @@ mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	  break;		/* end SPECIAL */
 	case 1:			/* REGIMM */
 	  {
-	    op = itype_rt (inst);	/* branch condition */
+	    op = itype_rt (inst);	/* Branch condition.  */
 	    switch (op)
 	      {
 	      case 0:		/* BLTZ */
@@ -1757,7 +1757,7 @@ mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 		if (regcache_raw_get_signed (regcache, itype_rs (inst)) < 0)
 		  pc += mips32_relative_offset (inst) + 4;
 		else
-		  pc += 8;	/* after the delay slot */
+		  pc += 8;	/* After the delay slot.  */
 		break;
 	      case 1:		/* BGEZ */
 	      case 3:		/* BGEZL */
@@ -1766,7 +1766,7 @@ mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 		if (regcache_raw_get_signed (regcache, itype_rs (inst)) >= 0)
 		  pc += mips32_relative_offset (inst) + 4;
 		else
-		  pc += 8;	/* after the delay slot */
+		  pc += 8;	/* After the delay slot.  */
 		break;
 	      case 0x1c:	/* BPOSGE32 */
 	      case 0x1e:	/* BPOSGE64 */
@@ -2519,7 +2519,7 @@ mips16_get_imm (unsigned short prev_inst,	/* previous instruction */
     }
 }
 
-/* Analyze the function prologue from START_PC to LIMIT_PC. Builds
+/* Analyze the function prologue from START_PC to LIMIT_PC.  Builds
    the associated FRAME_CACHE if not null.
    Return the address of the first instruction past the prologue.  */
 
@@ -2539,10 +2539,10 @@ mips16_scan_prologue (struct gdbarch *gdbarch,
   long frame_offset = 0;        /* Size of stack frame.  */
   long frame_adjust = 0;        /* Offset of FP from SP.  */
   int frame_reg = MIPS_SP_REGNUM;
-  unsigned short prev_inst = 0;	/* saved copy of previous instruction.  */
-  unsigned inst = 0;		/* current instruction */
-  unsigned entry_inst = 0;	/* the entry instruction */
-  unsigned save_inst = 0;	/* the save instruction */
+  unsigned short prev_inst = 0;	/* Saved copy of previous instruction.  */
+  unsigned inst = 0;		/* Current instruction.  */
+  unsigned entry_inst = 0;	/* The entry instruction.  */
+  unsigned save_inst = 0;	/* The save instruction.  */
   int prev_delay_slot = 0;
   int in_delay_slot;
   int reg, offset;
@@ -3274,7 +3274,7 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 				    gdbarch_num_regs (gdbarch) + frame_reg)
 	 + frame_offset - frame_adjust);
       /* FIXME: brobecker/2004-10-10: Just as in the mips32 case, we should
-	 be able to get rid of the assignment below, evetually. But it's
+	 be able to get rid of the assignment below, evetually.  But it's
 	 still needed for now.  */
       this_cache->saved_regs[gdbarch_num_regs (gdbarch)
 			     + mips_regnum (gdbarch)->pc]
@@ -3293,7 +3293,7 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 
 /* Heuristic unwinder for procedures using microMIPS instructions.
    Procedures that use the 32-bit instruction set are handled by the
-   mips_insn32 unwinder.  Likewise MIPS16 and the mips_insn16 unwinder. */
+   mips_insn32 unwinder.  Likewise MIPS16 and the mips_insn16 unwinder.  */
 
 static struct mips_frame_cache *
 mips_micro_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
@@ -3438,7 +3438,7 @@ mips32_scan_prologue (struct gdbarch *gdbarch,
   int prev_non_prologue_insn;
   int this_non_prologue_insn;
   int non_prologue_insns;
-  CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for
+  CORE_ADDR frame_addr = 0; /* Value of $r30.  Used by gcc for
 			       frame-pointer.  */
   int prev_delay_slot;
   CORE_ADDR prev_pc;
@@ -3674,7 +3674,7 @@ restart:
 /* Heuristic unwinder for procedures using 32-bit instructions (covers
    both 32-bit and 64-bit MIPS ISAs).  Procedures using 16-bit
    instructions (a.k.a. MIPS16) are handled by the mips_insn16
-   unwinder.  Likewise microMIPS and the mips_micro unwinder. */
+   unwinder.  Likewise microMIPS and the mips_micro unwinder.  */
 
 static struct mips_frame_cache *
 mips_insn32_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
@@ -4130,7 +4130,7 @@ micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
 	    case 0x35: /* J: bits 110101 */
 	    case 0x3d: /* JAL: bits 111101 */
 	    case 0x3c: /* JALX: bits 111100 */
-	      return {}; /* Fall back to the standard single-step code. */
+	      return {}; /* Fall back to the standard single-step code.  */
 
 	    case 0x18: /* POOL32C: bits 011000 */
 	      if ((b12s4_op (insn) & 0xb) == 0xb)
@@ -4157,10 +4157,10 @@ micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
 		  && b5s5_op (insn) != 0x18)
 				/* JRADDIUSP: bits 010001 11000 */
 		break;
-	      return {}; /* Fall back to the standard single-step code. */
+	      return {}; /* Fall back to the standard single-step code.  */
 
 	    case 0x33: /* B16: bits 110011 */
-	      return {}; /* Fall back to the standard single-step code. */
+	      return {}; /* Fall back to the standard single-step code.  */
 	    }
 	  break;
 	}
@@ -7390,7 +7390,7 @@ mips_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
   /* Make sure we don't scan back before the beginning of the current
      function, since we may fetch constant data or insns that look like
      a jump.  Of course we might do that anyway if the compiler has
-     moved constants inline. :-(  */
+     moved constants inline.  :-(  */
   if (find_pc_partial_function (bpaddr, NULL, &func_addr, NULL)
       && func_addr > boundary && func_addr <= bpaddr)
     boundary = func_addr;
@@ -7401,7 +7401,7 @@ mips_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
 	return bpaddr;
 
       /* If the previous instruction has a branch delay slot, we have
-	 to move the breakpoint to the branch instruction. */
+	 to move the breakpoint to the branch instruction.  */
       prev_addr = bpaddr - 4;
       if (mips32_insn_at_pc_has_delay_slot (gdbarch, prev_addr))
 	bpaddr = prev_addr;
