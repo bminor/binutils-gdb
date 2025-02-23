@@ -312,7 +312,8 @@ mapped_symtab::hash_expand ()
 
 /* See mapped_symtab class declaration.  */
 
-void mapped_symtab::sort ()
+void
+mapped_symtab::sort ()
 {
   /* Move contents out of this->data vector.  */
   std::vector<symtab_index_entry> original_data = std::move (m_data);
