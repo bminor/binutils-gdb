@@ -657,7 +657,7 @@ mips_register_name (struct gdbarch *gdbarch, int regno)
 
   enum mips_abi abi = mips_abi (gdbarch);
 
-  /* Map [gdbarch_num_regs .. 2*gdbarch_num_regs) onto the raw registers, 
+  /* Map [gdbarch_num_regs .. 2*gdbarch_num_regs) onto the raw registers,
      but then don't make the raw register names visible.  This (upper)
      range of user visible register numbers are the pseudo-registers.
 
@@ -1005,7 +1005,7 @@ mips_value_to_register (const frame_info_ptr &frame, int regnum,
       size_t len = type->length ();
       frame_info_ptr next_frame = get_next_frame_sentinel_okay (frame);
 
-      /* Sign extend values, irrespective of type, that are stored to 
+      /* Sign extend values, irrespective of type, that are stored to
 	 a 64-bit general purpose register.  (32-bit unsigned values
 	 are stored as signed quantities within a 64-bit register.
 	 When performing an operation, in compiled code, that combines
@@ -2888,7 +2888,7 @@ mips_insn16_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
     mips16_scan_prologue (gdbarch, start_addr, pc, this_frame,
 			  (struct mips_frame_cache *) *this_cache);
   }
-  
+
   /* gdbarch_sp_regnum contains the value and not the address.  */
   cache->saved_regs[gdbarch_num_regs (gdbarch)
 		    + MIPS_SP_REGNUM].set_value (cache->base);
@@ -3425,7 +3425,7 @@ reset_saved_regs (struct gdbarch *gdbarch, struct mips_frame_cache *this_cache)
 }
 
 /* Analyze the function prologue from START_PC to LIMIT_PC.  Builds
-   the associated FRAME_CACHE if not null.  
+   the associated FRAME_CACHE if not null.
    Return the address of the first instruction past the prologue.  */
 
 static CORE_ADDR
@@ -3641,7 +3641,7 @@ restart:
 
   if (this_cache != NULL)
     {
-      this_cache->base = 
+      this_cache->base =
 	(get_frame_register_signed (this_frame,
 				    gdbarch_num_regs (gdbarch) + frame_reg)
 	 + frame_offset);
@@ -3660,7 +3660,7 @@ restart:
      its address instead.  */
   end_prologue_addr
     = prev_non_prologue_insn || prev_delay_slot ? prev_pc : cur_pc;
-     
+
   /* In a frameless function, we might have incorrectly
      skipped some load immediate instructions.  Undo the skipping
      if the load immediate was not followed by a stack adjustment.  */
@@ -3704,7 +3704,7 @@ mips_insn32_frame_cache (const frame_info_ptr &this_frame, void **this_cache)
     mips32_scan_prologue (gdbarch, start_addr, pc, this_frame,
 			  (struct mips_frame_cache *) *this_cache);
   }
-  
+
   /* gdbarch_sp_regnum contains the value and not the address.  */
   cache->saved_regs[gdbarch_num_regs (gdbarch)
 		    + MIPS_SP_REGNUM].set_value (cache->base);
@@ -3927,7 +3927,7 @@ mips_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 
 /* Checks for an atomic sequence of instructions beginning with a LL/LLD
    instruction and ending with a SC/SCD instruction.  If such a sequence
-   is found, attempt to step through it.  A breakpoint is placed at the end of 
+   is found, attempt to step through it.  A breakpoint is placed at the end of
    the sequence.  */
 
 /* Instructions used during single-stepping of atomic sequences, standard
@@ -3946,7 +3946,7 @@ mips_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
   ULONGEST insn;
   int insn_count;
   int index;
-  int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */  
+  int last_breakpoint = 0; /* Defaults to 0 (no breakpoints placed).  */
   const int atomic_sequence_length = 16; /* Instruction sequence length.  */
 
   insn = mips_fetch_instruction (gdbarch, ISA_MIPS, loc, NULL);
@@ -3954,7 +3954,7 @@ mips_deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (itype_op (insn) != LL_OPCODE && itype_op (insn) != LLD_OPCODE)
     return {};
 
-  /* Assume that no atomic sequence is longer than "atomic_sequence_length" 
+  /* Assume that no atomic sequence is longer than "atomic_sequence_length"
      instructions.  */
   for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
     {
@@ -4817,7 +4817,7 @@ mips_eabi_return_value (struct gdbarch *gdbarch, struct value *function,
     {
       if (type->code () == TYPE_CODE_FLT)
 	fp_return_type = 1;
-      /* Structs with a single field of float type 
+      /* Structs with a single field of float type
 	 are returned in a floating point register.  */
       if ((type->code () == TYPE_CODE_STRUCT
 	   || type->code () == TYPE_CODE_UNION)
@@ -4830,7 +4830,7 @@ mips_eabi_return_value (struct gdbarch *gdbarch, struct value *function,
 	}
     }
 
-  if (fp_return_type)      
+  if (fp_return_type)
     {
       /* A floating-point value belongs in the least significant part
 	 of FP0/FP1.  */
@@ -4838,7 +4838,7 @@ mips_eabi_return_value (struct gdbarch *gdbarch, struct value *function,
 	gdb_printf (gdb_stderr, "Return float in $fp0\n");
       regnum = mips_regnum (gdbarch)->fp0;
     }
-  else 
+  else
     {
       /* An integer value goes in V0/V1.  */
       if (mips_debug)
@@ -7146,7 +7146,7 @@ mips32_instruction_has_delay_slot (struct gdbarch *gdbarch, ULONGEST inst)
     {
       rs = itype_rs (inst);
       rt = itype_rt (inst);
-      return (is_octeon_bbit_op (op, gdbarch) 
+      return (is_octeon_bbit_op (op, gdbarch)
 	      || op >> 2 == 5	/* BEQL, BNEL, BLEZL, BGTZL: bits 0101xx  */
 	      || op == 29	/* JALX: bits 011101  */
 	      || (op == 17
@@ -7978,7 +7978,7 @@ mips_integer_to_address (struct gdbarch *gdbarch,
    an assertion failure.  */
 
 static void
-mips_virtual_frame_pointer (struct gdbarch *gdbarch, 
+mips_virtual_frame_pointer (struct gdbarch *gdbarch,
 			    CORE_ADDR pc, int *reg, LONGEST *offset)
 {
   *reg = MIPS_SP_REGNUM;
@@ -8832,7 +8832,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   for (i = 0; i < ARRAY_SIZE (mips_numeric_register_aliases); i++)
     user_reg_add (gdbarch, mips_numeric_register_aliases[i].name,
-		  value_of_mips_user_reg, 
+		  value_of_mips_user_reg,
 		  &mips_numeric_register_aliases[i].regnum);
 
   return gdbarch;
@@ -8860,7 +8860,7 @@ show_mips_abi (struct ui_file *file,
   if (gdbarch_bfd_arch_info (current_inferior ()->arch  ())->arch
       != bfd_arch_mips)
     gdb_printf
-      (file, 
+      (file,
        "The MIPS ABI is unknown because the current architecture "
        "is not MIPS.\n");
   else
@@ -8871,7 +8871,7 @@ show_mips_abi (struct ui_file *file,
 
       if (global_abi == MIPS_ABI_UNKNOWN)
 	gdb_printf
-	  (file, 
+	  (file,
 	   "The MIPS ABI is set automatically (currently \"%s\").\n",
 	   actual_abi_str);
       else if (global_abi == actual_abi)
