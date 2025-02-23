@@ -1708,7 +1708,7 @@ mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	      == branch_if)
 	    pc += mips32_relative_offset (inst) + 4;
 	  else
-	    pc += 8;        /* After the delay slot.  */
+	    pc += 8;		/* After the delay slot.  */
 	}
       else
 	pc += 4;		/* Not a branch, next instruction is easy.  */
@@ -1728,7 +1728,7 @@ mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	      /* Set PC to that address.  */
 	      pc = regcache_raw_get_signed (regcache, rtype_rs (inst));
 	      break;
-	    case 12:            /* SYSCALL */
+	    case 12:		/* SYSCALL */
 	      {
 		mips_gdbarch_tdep *tdep
 		  = gdbarch_tdep<mips_gdbarch_tdep> (gdbarch);
@@ -1743,8 +1743,8 @@ mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	      pc += 4;
 	    }
 
-	  break;		/* end SPECIAL */
-	case 1:			/* REGIMM */
+	  break;	/* end SPECIAL */
+	case 1:		/* REGIMM */
 	  {
 	    op = itype_rt (inst);	/* Branch condition.  */
 	    switch (op)
@@ -1792,7 +1792,7 @@ mips32_next_pc (struct regcache *regcache, CORE_ADDR pc)
 		pc += 4;
 	      }
 	  }
-	  break;		/* end REGIMM */
+	  break;	/* end REGIMM */
 	case 2:		/* J */
 	case 3:		/* JAL */
 	  {
@@ -2536,8 +2536,8 @@ mips16_scan_prologue (struct gdbarch *gdbarch,
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r17, used as frame pointer.  */
   CORE_ADDR sp;
-  long frame_offset = 0;        /* Size of stack frame.  */
-  long frame_adjust = 0;        /* Offset of FP from SP.  */
+  long frame_offset = 0;	/* Size of stack frame.  */
+  long frame_adjust = 0;	/* Offset of FP from SP.  */
   int frame_reg = MIPS_SP_REGNUM;
   unsigned short prev_inst = 0;	/* Saved copy of previous instruction.  */
   unsigned inst = 0;		/* Current instruction.  */
@@ -3577,7 +3577,7 @@ restart:
 		}
 	    }
 	}
-      else if ((high_word & 0xFFE0) == 0xafc0 	/* sw reg,offset($30) */
+      else if ((high_word & 0xFFE0) == 0xafc0	/* sw reg,offset($30) */
 	       && !regsize_is_64_bits)
 	{
 	  set_reg_offset (gdbarch, this_cache, reg, frame_addr + offset);
@@ -6721,7 +6721,7 @@ mips_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      that bound, then use an arbitrary large number as the upper bound.  */
   limit_pc = skip_prologue_using_sal (gdbarch, pc);
   if (limit_pc == 0)
-    limit_pc = pc + 100;          /* Magic.  */
+    limit_pc = pc + 100;	/* Magic.  */
 
   if (mips_pc_is_mips16 (gdbarch, pc))
     return mips16_scan_prologue (gdbarch, pc, limit_pc, NULL, NULL);
