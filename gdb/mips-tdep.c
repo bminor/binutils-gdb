@@ -1570,7 +1570,7 @@ mips_insn_size (enum mips_isa isa, ULONGEST insn)
       else
 	return MIPS_INSN16_SIZE;
     case ISA_MIPS:
-	return MIPS_INSN32_SIZE;
+      return MIPS_INSN32_SIZE;
     }
   internal_error (_("invalid ISA"));
 }
@@ -2049,27 +2049,27 @@ micromips_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	case 0x1d: /* JALS: bits 011101 */
 	case 0x35: /* J: bits 110101 */
 	case 0x3d: /* JAL: bits 111101 */
-	    pc = ((pc | 0x7fffffe) ^ 0x7fffffe) | (b0s26_imm (insn) << 1);
+	  pc = ((pc | 0x7fffffe) ^ 0x7fffffe) | (b0s26_imm (insn) << 1);
 	  break;
 
 	case 0x25: /* BEQ: bits 100101 */
-	    if (regcache_raw_get_signed (regcache, b0s5_reg (insn >> 16))
-		== regcache_raw_get_signed (regcache, b5s5_reg (insn >> 16)))
-	      pc += micromips_relative_offset16 (insn);
-	    else
-	      pc += micromips_pc_insn_size (gdbarch, pc);
+	  if (regcache_raw_get_signed (regcache, b0s5_reg (insn >> 16))
+	      == regcache_raw_get_signed (regcache, b5s5_reg (insn >> 16)))
+	    pc += micromips_relative_offset16 (insn);
+	  else
+	    pc += micromips_pc_insn_size (gdbarch, pc);
 	  break;
 
 	case 0x2d: /* BNE: bits 101101 */
 	  if (regcache_raw_get_signed (regcache, b0s5_reg (insn >> 16))
-		!= regcache_raw_get_signed (regcache, b5s5_reg (insn >> 16)))
-	      pc += micromips_relative_offset16 (insn);
+	      != regcache_raw_get_signed (regcache, b5s5_reg (insn >> 16)))
+	    pc += micromips_relative_offset16 (insn);
 	  else
-	      pc += micromips_pc_insn_size (gdbarch, pc);
+	    pc += micromips_pc_insn_size (gdbarch, pc);
 	  break;
 
 	case 0x3c: /* JALX: bits 111100 */
-	    pc = ((pc | 0xfffffff) ^ 0xfffffff) | (b0s26_imm (insn) << 2);
+	  pc = ((pc | 0xfffffff) ^ 0xfffffff) | (b0s26_imm (insn) << 2);
 	  break;
 	}
       break;
@@ -3064,7 +3064,7 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 		  && dreg == MIPS_SP_REGNUM && sreg == MIPS_SP_REGNUM
 		  && treg == 3)
 				/* (D)SUBU $sp, $v1 */
-		    sp_adj = v1_off;
+		sp_adj = v1_off;
 	      else if (op != 0x150
 				/* ADDU: bits 000000 00101010000 */
 				/* DADDU: bits 010110 00101010000 */
