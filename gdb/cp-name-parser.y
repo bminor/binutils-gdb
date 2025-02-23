@@ -75,19 +75,27 @@
 
 struct cpname_state
 {
+  cpname_state (const char *input, demangle_parse_info *info)
+    : lexptr (input),
+      prev_lexptr (input),
+      demangle_info (info)
+  { }
+
   /* LEXPTR is the current pointer into our lex buffer.  PREV_LEXPTR
      is the start of the last token lexed, only used for diagnostics.
      ERROR_LEXPTR is the first place an error occurred.  GLOBAL_ERRMSG
      is the first error message encountered.  */
 
-  const char *lexptr, *prev_lexptr, *error_lexptr, *global_errmsg;
+  const char *lexptr, *prev_lexptr;
+  const char *error_lexptr = nullptr;
+  const char *global_errmsg = nullptr;
 
   demangle_parse_info *demangle_info;
 
   /* The parse tree created by the parser is stored here after a
      successful parse.  */
 
-  struct demangle_component *global_result;
+  struct demangle_component *global_result = nullptr;
 
   struct demangle_component *d_grab ();
 
@@ -2018,14 +2026,8 @@ struct std::unique_ptr<demangle_parse_info>
 cp_demangled_name_to_comp (const char *demangled_name,
 			   std::string *errmsg)
 {
-  cpname_state state;
-
-  state.prev_lexptr = state.lexptr = demangled_name;
-  state.error_lexptr = NULL;
-  state.global_errmsg = NULL;
-
   auto result = std::make_unique<demangle_parse_info> ();
-  state.demangle_info = result.get ();
+  cpname_state state (demangled_name, result.get ());
 
   if (yyparse (&state))
     {
