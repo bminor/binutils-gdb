@@ -11783,6 +11783,9 @@ die_byte_order (die_info *die, dwarf2_cu *cu, enum bfd_endian *byte_order)
 	{
 	  switch (*endianity)
 	    {
+	    case DW_END_default:
+	      /* Nothing.  */
+	      break;
 	    case DW_END_big:
 	      new_order = BFD_ENDIAN_BIG;
 	      break;
