@@ -5473,7 +5473,7 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 static void
 dump_relocs_in_section (bfd *abfd,
 			asection *section,
-			void *dummy ATTRIBUTE_UNUSED)
+			void *counter)
 {
   arelent **relpp;
   long relcount;
@@ -5522,41 +5522,71 @@ dump_relocs_in_section (bfd *abfd,
       printf ("\n\n");
     }
   free (relpp);
+
+  * ((unsigned int *) counter) += 1;
+}
+
+static void
+is_relr_section (bfd *abfd ATTRIBUTE_UNUSED,
+		 asection * section, void *data)
+{
+  if (section->flags & SEC_LINKER_CREATED)
+    return;
+
+  struct bfd_elf_section_data * esd = elf_section_data (section);
+  if (esd == NULL)
+    return;
+
+  if (esd->this_hdr.sh_type == SHT_RELR)
+    * ((bool *) data) = true;
+}
+
+static bool
+contains_relr_relocs (bfd *abfd)
+{
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return false;
+
+  bool result = false;
+
+  bfd_map_over_sections (abfd, is_relr_section, &result);
+
+  return result;
 }
 
 static void
 dump_relocs (bfd *abfd)
 {
-  bfd_map_over_sections (abfd, dump_relocs_in_section, NULL);
+  unsigned int counter = 0;
+
+  bfd_map_over_sections (abfd, dump_relocs_in_section, & counter);
+
+  if (counter == 0 && contains_relr_relocs (abfd))
+    {
+      printf (_("%s: This file does not contain any ordinary relocations.\n"),
+	      sanitize_string (bfd_get_filename (abfd)));
+
+      printf (_("%s: It does however contain RELR relocations.  These can be displayed by the readelf program\n"),
+	      sanitize_string (bfd_get_filename (abfd)));
+    }
 }
 
 static void
 dump_dynamic_relocs (bfd *abfd)
 {
   long relsize;
-  arelent **relpp;
+  arelent **relpp = NULL;
   long relcount;
 
   relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
 
   printf ("DYNAMIC RELOCATION RECORDS");
 
-  if (relsize == 0)
-    {
-      printf (" (none)\n\n");
-      return;
-    }
+  if (relsize <= 0)
+    goto none;
 
-  if (relsize < 0)
-    {
-      relpp = NULL;
-      relcount = relsize;
-    }
-  else
-    {
-      relpp = (arelent **) xmalloc (relsize);
-      relcount = bfd_canonicalize_dynamic_reloc (abfd, relpp, dynsyms);
-    }
+  relpp = (arelent **) xmalloc (relsize);
+  relcount = bfd_canonicalize_dynamic_reloc (abfd, relpp, dynsyms);
 
   if (relcount < 0)
     {
@@ -5566,13 +5596,25 @@ dump_dynamic_relocs (bfd *abfd)
       my_bfd_nonfatal (_("error message was"));
     }
   else if (relcount == 0)
-    printf (" (none)\n\n");
+    goto none;
   else
     {
       printf ("\n");
       dump_reloc_set (abfd, NULL, relpp, relcount);
       printf ("\n\n");
     }
+  free (relpp);
+  return;
+
+ none:
+  printf (" (none)\n\n");
+
+  if (contains_relr_relocs (abfd))
+    printf (_("%s: contains RELR relocations which are not displayed by %s.\n\
+These can be displayed by the readelf program instead.\n"),
+	    sanitize_string (bfd_get_filename (abfd)),
+	    program_name);
+
   free (relpp);
 }
 
