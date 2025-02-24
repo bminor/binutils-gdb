@@ -114,6 +114,15 @@ struct attribute
      returned.  */
   std::optional<ULONGEST> unsigned_constant () const;
 
+  /* Return a signed constant value.  This only handles constant forms
+     (i.e., form_is_constant -- and not the extended list of
+     "unsigned" forms) and assumes a signed value is desired.  This
+     function will sign-extend DW_FORM_data* values.
+
+     If non-constant form is used, then complaint is issued and an
+     empty value is returned.  */
+  std::optional<LONGEST> signed_constant () const;
+
   /* Return non-zero if ATTR's value falls in the 'constant' class, or
      zero otherwise.  When this function returns true, you can apply
      the constant_value method to it.
