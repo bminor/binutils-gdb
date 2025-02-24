@@ -118,7 +118,7 @@ gdb_caching_proc allow_hipcc_tests {} {
 	return {0 "no suitable amdgpu targets found"}
     }
 
-    # Check we have a working hipcc compiler available.
+    # Check if we have a working hipcc compiler available.
     # TARGETS won't be empty, because there's at least one GPU device.
     set targets [hcc_amdgpu_targets]
     set flags [list hip additional_flags=--offload-arch=[join $targets ","]]
