@@ -18,6 +18,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+extern asection _bfd_ecoff_scom_section;
+
 extern bool bfd_ecoff_set_gp_value
   (bfd *abfd, bfd_vma gp_value);
 extern bool bfd_ecoff_set_regmasks

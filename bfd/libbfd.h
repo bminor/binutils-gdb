@@ -3668,6 +3668,49 @@ bool _bfd_unrecognized_reloc
     unsigned int r_type) ATTRIBUTE_HIDDEN;
 
 /* Extracted from section.c.  */
+#define BFD_FAKE_SECTION(SEC, SYM, NAME, IDX, FLAGS)                   \
+  /* name, next, prev, id,  section_id, index, flags, user_set_vma, */ \
+  {  NAME, NULL, NULL, IDX, 0,          0,     FLAGS, 0,               \
+								       \
+  /* linker_mark, linker_has_input, gc_mark, decompress_status,     */ \
+     0,           0,                1,       0,                        \
+								       \
+  /* segment_mark, sec_info_type, use_rela_p, mmapped_p, alloced,   */ \
+     0,            0,             0,          0,         0,            \
+								       \
+  /* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,    */ \
+     0,        0,        0,        0,        0,        0,              \
+								       \
+  /* vma, lma, size, rawsize, compressed_size,                      */ \
+     0,   0,   0,    0,       0,                                       \
+								       \
+  /* output_offset, output_section, relocation, orelocation,        */ \
+     0,             &SEC,           NULL,       NULL,                  \
+								       \
+  /* reloc_count, alignment_power, filepos, rel_filepos,            */ \
+     0,           0,               0,       0,                         \
+								       \
+  /* line_filepos, userdata, contents, lineno, lineno_count,        */ \
+     0,            NULL,     NULL,     NULL,   0,                      \
+								       \
+  /* entsize, kept_section, moving_line_filepos,                    */ \
+     0,       NULL,         0,                                         \
+								       \
+  /* target_index, used_by_bfd, constructor_chain, owner,           */ \
+     0,            NULL,        NULL,              NULL,               \
+								       \
+  /* symbol,                                                        */ \
+     (struct bfd_symbol *) SYM,                                        \
+								       \
+  /* map_head, map_tail, already_assigned, type                     */ \
+     { NULL }, { NULL }, NULL,             0                           \
+								       \
+  }
+
+#define GLOBAL_SYM_INIT(NAME, SECTION)                                 \
+  /* the_bfd, name, value, attr,            section, udata  */         \
+  {  0,       NAME, 0,     BSF_SECTION_SYM, SECTION, { 0 } }
+
 /* Extracted from stabs.c.  */
 bool _bfd_link_section_stabs
    (bfd *, struct stab_info *, asection *, asection *, void **,

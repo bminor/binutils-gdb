@@ -36,6 +36,7 @@
 #include "aout/stab_gnu.h"
 #include "filenames.h"
 #include "safe-ctype.h"
+#include "ecoff-bfd.h"
 
 /* Why isn't this in coff/sym.h?  */
 #define ST_RFDESCAPE 0xfff
@@ -3549,13 +3550,6 @@ ecoff_stab (int what,
   cur_file_ptr = save_file_ptr;
 }
 
-static asection ecoff_scom_section;
-static const asymbol ecoff_scom_symbol =
-  GLOBAL_SYM_INIT (SCOMMON, &ecoff_scom_section);
-static asection ecoff_scom_section =
-  BFD_FAKE_SECTION (ecoff_scom_section, &ecoff_scom_symbol,
-		    SCOMMON, 0, SEC_IS_COMMON | SEC_SMALL_DATA);
-
 /* Frob an ECOFF symbol.  Small common symbols go into a special
    .scommon section rather than bfd_com_section.  */
 
@@ -3566,7 +3560,7 @@ ecoff_frob_symbol (symbolS *sym)
       && S_GET_VALUE (sym) > 0
       && S_GET_VALUE (sym) <= bfd_get_gp_size (stdoutput))
     {
-      S_SET_SEGMENT (sym, &ecoff_scom_section);
+      S_SET_SEGMENT (sym, &_bfd_ecoff_scom_section);
     }
 
   /* Double check weak symbols.  */

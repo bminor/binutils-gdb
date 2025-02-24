@@ -712,6 +712,7 @@ EXTERNAL
 .          && sec->sec_info_type != SEC_INFO_TYPE_JUST_SYMS);
 .}
 .
+INTERNAL
 .#define BFD_FAKE_SECTION(SEC, SYM, NAME, IDX, FLAGS)			\
 .  {* name, next, prev, id,  section_id, index, flags, user_set_vma, *}	\
 .  {  NAME, NULL, NULL, IDX, 0,          0,     FLAGS, 0,		\
@@ -749,19 +750,11 @@ EXTERNAL
 .  {* map_head, map_tail, already_assigned, type                     *}	\
 .     { NULL }, { NULL }, NULL,             0				\
 .									\
-.    }
+.  }
 .
-.{* We use a macro to initialize the static asymbol structures because
-.   traditional C does not permit us to initialize a union member while
-.   gcc warns if we don't initialize it.
-.   the_bfd, name, value, attr, section [, udata]  *}
-.#ifdef __STDC__
-.#define GLOBAL_SYM_INIT(NAME, SECTION) \
-.  { 0, NAME, 0, BSF_SECTION_SYM, SECTION, { 0 }}
-.#else
-.#define GLOBAL_SYM_INIT(NAME, SECTION) \
-.  { 0, NAME, 0, BSF_SECTION_SYM, SECTION }
-.#endif
+.#define GLOBAL_SYM_INIT(NAME, SECTION)					\
+.  {* the_bfd, name, value, attr,            section, udata  *}		\
+.  {  0,       NAME, 0,     BSF_SECTION_SYM, SECTION, { 0 } }
 .
 */
 
