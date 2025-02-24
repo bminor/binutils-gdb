@@ -786,8 +786,9 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	    }
 	}
       else
-	elf_find_and_remove_property (&elf_properties (elf_bfd),
-				      GNU_PROPERTY_MEMORY_SEAL, true);
+	for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
+	  elf_find_and_remove_property (&elf_properties (abfd),
+					GNU_PROPERTY_MEMORY_SEAL, true);
     }
 
   /* Do nothing if there is no .note.gnu.property section.  */
