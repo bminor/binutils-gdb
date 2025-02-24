@@ -12999,15 +12999,6 @@ ada_add_exceptions_from_frame (compiled_regex *preg,
     }
 }
 
-/* Return true if NAME matches PREG or if PREG is NULL.  */
-
-static bool
-name_matches_regex (const char *name, compiled_regex *preg)
-{
-  return (preg == NULL
-	  || preg->exec (ada_decode (name).c_str (), 0, NULL, 0) == 0);
-}
-
 /* Add all exceptions defined globally whose name name match
    a regular expression, excluding standard exceptions.
 
@@ -13031,6 +13022,13 @@ static void
 ada_add_global_exceptions (compiled_regex *preg,
 			   std::vector<ada_exc_info> *exceptions)
 {
+  /* Return true if NAME matches PREG or if PREG is NULL.  */
+  auto name_matches_regex = [&] (const char *name)
+    {
+      return preg == nullptr || preg->exec (name, 0, NULL, 0) == 0;
+    };
+
+
   /* In Ada, the symbol "search name" is a linkage name, whereas the
      regular expression used to do the matching refers to the natural
      name.  So match against the decoded name.  */
@@ -13039,7 +13037,7 @@ ada_add_global_exceptions (compiled_regex *preg,
 			   [&] (const char *search_name)
 			   {
 			     std::string decoded = ada_decode (search_name);
-			     return name_matches_regex (decoded.c_str (), preg);
+			     return name_matches_regex (decoded.c_str ());
 			   },
 			   NULL,
 			   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
@@ -13065,7 +13063,7 @@ ada_add_global_exceptions (compiled_regex *preg,
 
 	      for (struct symbol *sym : block_iterator_range (b))
 		if (ada_is_non_standard_exception_sym (sym)
-		    && name_matches_regex (sym->natural_name (), preg))
+		    && name_matches_regex (sym->natural_name ()))
 		  {
 		    struct ada_exc_info info
 		      = {sym->print_name (), sym->value_address ()};
