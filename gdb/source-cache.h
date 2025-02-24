@@ -19,8 +19,8 @@
 #ifndef GDB_SOURCE_CACHE_H
 #define GDB_SOURCE_CACHE_H
 
-#include <unordered_map>
-#include <unordered_set>
+#include "gdbsupport/unordered_map.h"
+#include "gdbsupport/unordered_set.h"
 
 /* This caches two things related to source files.
 
@@ -95,10 +95,10 @@ private:
 
   /* The file offset cache.  The key is the full name of the source
      file.  */
-  std::unordered_map<std::string, std::vector<off_t>> m_offset_cache;
+  gdb::unordered_map<std::string, std::vector<off_t>> m_offset_cache;
 
   /* The list of files where styling failed.  */
-  std::unordered_set<std::string> m_no_styling_files;
+  gdb::unordered_set<std::string> m_no_styling_files;
 };
 
 /* The global source cache.  */
