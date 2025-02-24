@@ -52,6 +52,9 @@ struct riscv_private_data
   enum riscv_spec_class default_priv_spec;
   /* Used for architecture parser.  */
   riscv_parse_subset_t riscv_rps_dis;
+  /* Default architecture string for the object file.  It will be changed once
+     elf architecture attribute exits.  This is used for mapping symbol $x.  */
+  const char* default_arch;
   /* Used for mapping symbols.  */
   int last_map_symbol;
   bfd_vma last_stop_offset;
@@ -1065,10 +1068,14 @@ riscv_update_map_state (int n,
     return;
 
   name = bfd_asymbol_name(info->symtab[n]);
-  if (strcmp (name, "$x") == 0)
-    *state = MAP_INSN;
-  else if (strcmp (name, "$d") == 0)
+  if (strcmp (name, "$d") == 0)
     *state = MAP_DATA;
+  else if (strcmp (name, "$x") == 0)
+    {
+      *state = MAP_INSN;
+      riscv_release_subset_list (pd->riscv_rps_dis.subset_list);
+      riscv_parse_subset (&pd->riscv_rps_dis, pd->default_arch);
+    }
   else if (strncmp (name, "$xrv", 4) == 0)
     {
       *state = MAP_INSN;
@@ -1380,7 +1387,7 @@ riscv_init_disasm_info (struct disassemble_info *info)
   pd->riscv_rps_dis.xlen = &pd->xlen;
   pd->riscv_rps_dis.isa_spec = &pd->default_isa_spec;
   pd->riscv_rps_dis.check_unknown_prefixed_ext = false;
-  const char *default_arch = "rv64gc";
+  pd->default_arch = "rv64gc";
   if (info->section != NULL)
     {
       bfd *abfd = info->section->owner;
@@ -1398,12 +1405,12 @@ riscv_init_disasm_info (struct disassemble_info *info)
 						      attr[Tag_b].i,
 						      attr[Tag_c].i,
 						      &pd->default_priv_spec);
-	      default_arch = attr[Tag_RISCV_arch].s;
+	      pd->default_arch = attr[Tag_RISCV_arch].s;
 	    }
 	}
     }
   riscv_release_subset_list (pd->riscv_rps_dis.subset_list);
-  riscv_parse_subset (&pd->riscv_rps_dis, default_arch);
+  riscv_parse_subset (&pd->riscv_rps_dis, pd->default_arch);
 
   pd->last_map_symbol = -1;
   pd->last_stop_offset = 0;
