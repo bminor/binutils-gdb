@@ -30,6 +30,7 @@
 #include "gdbthread.h"
 #include "source.h"
 #include "progspace-and-thread.h"
+#include "cli/cli-style.h"
 
 #include "nat/gdb_ptrace.h"
 #include "gdbsupport/gdb_wait.h"
@@ -759,19 +760,13 @@ Please switch to another checkpoint before detaching the current one"));
   delete_fork (ptid, current_inferior ());
 }
 
-/* Print information about currently known checkpoints.  */
+/* Helper for info_checkpoints_command.  */
 
 static void
-info_checkpoints_command (const char *arg, int from_tty)
+print_checkpoints (struct ui_out *uiout, inferior *req_inf, fork_info *req_fi)
 {
-  struct gdbarch *gdbarch = get_current_arch ();
   struct inferior *cur_inf = current_inferior ();
-  inferior *req_inf = nullptr;
-  fork_info *req_fi = nullptr;
   bool will_print_something = false;
-
-  if (arg && *arg)
-    std::tie (req_fi, req_inf) = parse_checkpoint_id (arg);
 
   /* Figure out whether to print the inferior number in the
      checkpoint list.  */
@@ -821,18 +816,21 @@ info_checkpoints_command (const char *arg, int from_tty)
   if (!print_inf && num_width < 2)
     num_width = 2;
 
-  /* Print column headers...  */
-  gdb_printf ("  ");
-  gdb_printf ("%-*s", (print_inf ? (int) inf_width : 0)
-		      + (int) num_width + 1, "Id");
-  gdb_printf ("Active ");
-  gdb_printf ("%-*s", (int) targid_width + 1, "Target Id");
-  gdb_printf ("Frame\n");
+  ui_out_emit_table table_emitter (uiout, 5, -1, "checkpoints");
 
-  /* Print each checkpoint padded, as needed, with spaces so that everything
-     lines up.  */
+  /* Define the columns / headers...  */
+  uiout->table_header (1, ui_left, "current", "");
+  uiout->table_header ((print_inf ? (int) inf_width : 0) + (int) num_width,
+		       ui_right, "id", "Id");
+  uiout->table_header (6, ui_left, "active", "Active");
+  uiout->table_header (targid_width, ui_left, "target-id", "Target Id");
+  uiout->table_header (1, ui_left, "frame", "Frame");
+  uiout->table_body ();
+
   for (inferior *inf : all_inferiors (linux_target))
     {
+      /* If asked to print a partciular inferior, skip all of
+	 those which don't match.  */
       if (req_inf != nullptr && req_inf != inf)
 	continue;
 
@@ -841,57 +839,118 @@ info_checkpoints_command (const char *arg, int from_tty)
 
       for (const fork_info &fi : fork_list (inf))
 	{
+	  /* If asked to print a particular checkpoint, skip all
+	     which don't match.  */
 	  if (req_fi != nullptr && req_fi != &fi)
 	    continue;
 
 	  thread_info *t = any_thread_of_inferior (inf);
 	  bool is_current = fi.ptid.pid () == inf->pid;
+
+	  ui_out_emit_tuple tuple_emitter (uiout, nullptr);
+
 	  if (is_current && cur_inf == inf)
-	    gdb_printf ("* ");
+	    uiout->field_string ("current", "*");
 	  else
-	    gdb_printf ("  ");
+	    uiout->field_skip ("current");
 
 	  if (print_inf)
-	    gdb_printf ("%*d.%-*d", (int) inf_width, inf->num,
-				    (int) num_width, fi.num);
+	    uiout->field_fmt ("id", "%d.%d", inf->num, fi.num);
 	  else
-	    gdb_printf ("%*d ", (int) num_width, fi.num);
+	    uiout->field_fmt ("id", "%d", fi.num);
 
 	  /* Print out 'y' or 'n' for whether the checkpoint is current.  */
-	  gdb_printf ("%-7s", is_current ? "y" : "n");
+	  uiout->field_string ("active", is_current ? "y" : "n");
 
 	  /* Print target id.  */
-	  gdb_printf ("%-*s", (int) targid_width,
-		      target_pid_to_str (proc_ptid (fi.ptid)).c_str ());
+	  uiout->field_string
+	    ("target-id", target_pid_to_str (proc_ptid (fi.ptid)).c_str ());
 
 	  if (t->state == THREAD_RUNNING && is_current)
-	    gdb_printf (_(" (running)"));
+	    uiout->text ("(running)");
 	  else
 	    {
-	      gdb_printf (_(" at "));
+	      /* Print frame info for the checkpoint under
+		 consideration.
+
+		 Ideally, we'd call print_stack_frame() here in order
+		 to have consistency (with regard to how frames are
+		 printed) with other parts of GDB as well as to reduce
+		 the amount of code required here.
+
+		 However, we can't simply print the frame without
+		 switching checkpoint contexts.	 To do that, we could
+		 first call scoped_switch_fork_info() - that mostly
+		 works - except when the active fork/checkpoint is
+		 running, i.e. when t->state == THREAD_RUNNING.
+		 Switching context away from a running fork has certain
+		 problems associated with it.  Certainly, the
+		 fork_info struct would need some new fields, but
+		 work would also need to be done to do something
+		 reasonable should the state of the running fork
+		 have changed when switching back to it.
+
+		 Note: If scoped_switch_fork_info() is someday
+		 changed to allow switching from a running
+		 fork/checkpoint, then it might also be possible to
+		 allow a restart from a running checkpoint to some
+		 other checkpoint.  */
+
+	      ui_out_emit_tuple frame_tuple_emitter (uiout, "frame");
+	      uiout->text ("at ");
+
 	      ULONGEST pc
 		= (is_current
 		   ? regcache_read_pc (get_thread_regcache (t))
 		   : fi.pc);
-	      gdb_puts (paddress (gdbarch, pc));
+	      uiout->field_core_addr ("addr", get_current_arch (), pc);
 
 	      symtab_and_line sal = find_pc_line (pc, 0);
 	      if (sal.symtab)
-		gdb_printf (_(", file %s"),
-			    symtab_to_filename_for_display (sal.symtab));
+		{
+		  uiout->text (", file ");
+		  uiout->field_string ("file",
+		    symtab_to_filename_for_display (sal.symtab),
+		    file_name_style.style ());
+		}
 	      if (sal.line)
-		gdb_printf (_(", line %d"), sal.line);
+		{
+		  uiout->text (", line ");
+		  uiout->field_signed ("line", sal.line,
+				       line_number_style.style ());
+		}
 	      if (!sal.symtab && !sal.line)
 		{
 		  bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (pc);
 		  if (msym.minsym)
-		    gdb_printf (", <%s>", msym.minsym->linkage_name ());
+		    {
+		      uiout->text (", <");
+		      uiout->field_string ("linkage-name",
+					   msym.minsym->linkage_name (),
+					   function_name_style.style ());
+		      uiout->text (">");
+		    }
 		}
 	    }
 
-	  gdb_putc ('\n');
+	  uiout->text ("\n");
 	}
     }
+}
+
+/* Print information about currently known checkpoints.  */
+
+static void
+info_checkpoints_command (const char *arg, int from_tty)
+{
+  inferior *req_inf = nullptr;
+  fork_info *req_fi = nullptr;
+
+  if (arg && *arg)
+    std::tie (req_fi, req_inf) = parse_checkpoint_id (arg);
+
+  print_checkpoints (current_uiout, req_inf, req_fi);
+
 }
 
 /* The PID of the process we're checkpointing.  */
