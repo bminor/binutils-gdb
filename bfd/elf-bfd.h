@@ -3085,6 +3085,8 @@ extern bool elf_read_notes (bfd *, file_ptr, bfd_size_type, size_t);
 
 extern bool _bfd_elf_parse_gnu_properties
   (bfd *, Elf_Internal_Note *);
+extern elf_property_list * _bfd_elf_find_property
+  (elf_property_list *, unsigned int, elf_property_list **);
 extern elf_property * _bfd_elf_get_property
   (bfd *, unsigned int, unsigned int);
 extern bfd *_bfd_elf_link_setup_gnu_properties
