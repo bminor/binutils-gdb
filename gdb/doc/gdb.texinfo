@@ -6900,7 +6900,7 @@ fatal so it can carry out the purpose of the interrupt: to kill the program.
 
 @value{GDBN} has the ability to detect any occurrence of a signal in your
 program.  You can tell @value{GDBN} in advance what to do for each kind of
-signal.
+signal, apart from SIGKILL, which has its usual effect regardless.
 
 When specifying a signal by number, @value{GDBN} translates the number
 to the target platform according to the corresponding signal name.
