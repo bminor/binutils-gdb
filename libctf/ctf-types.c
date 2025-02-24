@@ -187,10 +187,21 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 	*membtype = memb.ctlm_type;
       offset = (unsigned long) CTF_LMEM_OFFSET (&memb);
 
-      if (membname[0] == 0
-	  && (ctf_type_kind (fp, memb.ctlm_type) == CTF_K_STRUCT
-	      || ctf_type_kind (fp, memb.ctlm_type) == CTF_K_UNION))
-	i->ctn_type = memb.ctlm_type;
+      if (membname[0] == 0)
+	{
+	  ctf_id_t resolved;
+
+	  if ((resolved = ctf_type_resolve (fp, memb.ctlm_type)) == CTF_ERR)
+	    {
+	      if (ctf_errno (fp) != ECTF_NONREPRESENTABLE)
+		return -1;			/* errno is set for us.  */
+	      resolved = memb.ctlm_type;
+	    }
+
+	  if (ctf_type_kind (fp, resolved) == CTF_K_STRUCT
+	      || ctf_type_kind (fp, resolved) == CTF_K_UNION)
+	    i->ctn_type = resolved;
+	}
       i->ctn_n++;
 
       /* The callers might want automatic recursive sub-struct traversal.  */
@@ -1406,16 +1417,24 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
     {
       ctf_lmember_t memb;
       const char *membname;
+      ctf_id_t resolved;
 
       if (ctf_struct_member (fp, &memb, tp, vlen, vbytes, i) < 0)
         return (ctf_set_errno (ofp, ctf_errno (fp)));
 
       membname = ctf_strptr (fp, memb.ctlm_name);
 
+      if ((resolved = ctf_type_resolve (fp, memb.ctlm_type)) == CTF_ERR)
+	{
+	  if (ctf_errno (fp) != ECTF_NONREPRESENTABLE)
+	    return (ctf_set_errno (ofp, ctf_errno (fp)));
+	  resolved = memb.ctlm_type;
+	}
+
       if (membname[0] == 0
-	  && (ctf_type_kind (fp, memb.ctlm_type) == CTF_K_STRUCT
-	      || ctf_type_kind (fp, memb.ctlm_type) == CTF_K_UNION)
-	  && (ctf_member_info (fp, memb.ctlm_type, name, mip) == 0))
+	  && (ctf_type_kind (fp, resolved) == CTF_K_STRUCT
+	      || ctf_type_kind (fp, resolved) == CTF_K_UNION)
+	  && (ctf_member_info (fp, resolved, name, mip) == 0))
 	{
 	  mip->ctm_offset += (unsigned long) CTF_LMEM_OFFSET (&memb);
 	  return 0;
