@@ -24,7 +24,7 @@
 #include "frame.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
-#include <unordered_set>
+#include "gdbsupport/unordered_set.h"
 
 #include "tui/tui.h"
 #include "tui/tui-command.h"
@@ -1221,7 +1221,7 @@ tui_new_layout_command (const char *spec, int from_tty)
 
   std::vector<std::unique_ptr<tui_layout_split>> splits;
   splits.emplace_back (new tui_layout_split (is_vertical));
-  std::unordered_set<std::string> seen_windows;
+  gdb::unordered_set<std::string> seen_windows;
   while (true)
     {
       spec = skip_spaces (spec);
