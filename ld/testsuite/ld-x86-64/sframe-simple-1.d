@@ -2,7 +2,7 @@
 #source: sframe-foo.s
 #source: sframe-bar.s
 #objdump: --sframe=.sframe
-#ld: -shared --no-rosegment
+#ld: -shared --no-rosegment -z separate-code
 #name: SFrame simple link
 
 .*: +file format .*

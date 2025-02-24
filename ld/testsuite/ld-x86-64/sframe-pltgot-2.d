@@ -1,7 +1,7 @@
 #as: --gsframe
 #source: sframe-pltgot-1.s
 #objdump: --sframe=.sframe
-#ld: -shared --no-rosegment
+#ld: -shared --no-rosegment -z separate-code
 #name: SFrame for .plt.got
 
 .*: +file format .*

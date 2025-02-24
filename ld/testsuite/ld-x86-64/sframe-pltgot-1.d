@@ -1,7 +1,7 @@
 #as: --gsframe
 #source: sframe-pltgot-1.s
 #objdump: --sframe=.sframe
-#ld: -shared -z ibtplt --no-rosegment
+#ld: -shared -z ibtplt --no-rosegment -z separate-code
 #name: SFrame for IBT .plt.got
 
 .*: +file format .*
