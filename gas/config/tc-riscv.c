@@ -531,15 +531,12 @@ make_mapping_symbol (enum riscv_seg_mstate state,
       name = "$d";
       break;
     case MAP_INSN:
-      if (arch_str != NULL)
-	{
-	  size_t size = strlen (arch_str) + 3; /* "$x" + '\0'  */
-	  buff = xmalloc (size);
-	  snprintf (buff, size, "$x%s", arch_str);
-	  name = buff;
-	}
-      else
-	name = "$x";
+      gas_assert (arch_str);
+
+      size_t size = strlen (arch_str) + 3; /* "$x" + '\0'  */
+      buff = xmalloc (size);
+      snprintf (buff, size, "$x%s", arch_str);
+      name = buff;
       break;
     default:
       abort ();
@@ -585,11 +582,22 @@ make_mapping_symbol (enum riscv_seg_mstate state,
 
   if (odd_data_padding)
     {
-      /* If the removed mapping symbol is $x+arch, then add it back to
-	 the next $x.  */
-      const char *str = removed != NULL
-			&& strncmp (S_GET_NAME (removed), "$xrv", 4) == 0
-			? S_GET_NAME (removed) + 2 : NULL;
+      /* Search and find the previous $x+isa which in the same section.
+	 We added $x+isa at the start of all sections, so should find at
+	 least that one.  */
+      const char *str = NULL;
+      symbolS *p = symbol_previous (symbol);
+      for (; p != NULL; p = symbol_previous (p))
+	{
+	  if (now_seg == S_GET_SEGMENT (p)
+	      && S_GET_NAME (p)
+	      && strncmp (S_GET_NAME (p), "$xrv", 4) == 0
+	      && S_GET_VALUE (p) <= S_GET_VALUE (symbol))
+	    {
+	      str = S_GET_NAME (p) + 2;
+	      break;
+	    }
+	}
       make_mapping_symbol (MAP_INSN, frag->fr_fix + 1, frag, str,
 			   false/* odd_data_padding */);
     }
@@ -607,7 +615,6 @@ riscv_mapping_state (enum riscv_seg_mstate to_state,
 {
   enum riscv_seg_mstate from_state =
 	seg_info (now_seg)->tc_segment_info_data.map_state;
-  bool reset_seg_arch_str = false;
 
   if (!SEG_NORMAL (now_seg)
       /* For now we only add the mapping symbols to text sections.
@@ -622,26 +629,22 @@ riscv_mapping_state (enum riscv_seg_mstate to_state,
   symbolS *seg_arch_symbol =
 	seg_info (now_seg)->tc_segment_info_data.arch_map_symbol;
   if (to_state == MAP_INSN && seg_arch_symbol == 0)
-    {
-      /* Always add $x+arch at the first instruction of section.  */
-      reset_seg_arch_str = true;
-    }
+    /* The start of section.  */
+    ;
   else if (seg_arch_symbol != 0
 	   && to_state == MAP_INSN
 	   && !fr_align_code
 	   && strcmp (riscv_rps_as.subset_list->arch_str,
 		      S_GET_NAME (seg_arch_symbol) + 2) != 0)
-    {
-      reset_seg_arch_str = true;
-    }
+    /* Different architecture string.  */
+    ;
   else if (from_state == to_state)
     return;
 
   valueT value = (valueT) (frag_now_fix () - max_chars);
   seg_info (now_seg)->tc_segment_info_data.map_state = to_state;
   seg_info (now_seg)->tc_segment_info_data.last_insn16 = false;
-  const char *arch_str = reset_seg_arch_str
-			 ? riscv_rps_as.subset_list->arch_str : NULL;
+  const char *arch_str = riscv_rps_as.subset_list->arch_str;
   make_mapping_symbol (to_state, value, frag_now, arch_str,
 		       false/* odd_data_padding */);
 }
