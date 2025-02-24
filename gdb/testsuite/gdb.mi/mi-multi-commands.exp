@@ -123,6 +123,10 @@ proc run_test { args } {
 	    break
 	}
     }
+
+    # mi_clean_restart and gdb_finish call gdb_exit, which doesn't work for
+    # separate-mi-tty.  Use mi_gdb_exit instead.
+    mi_gdb_exit
 }
 
 foreach_with_prefix args { "" "separate-mi-tty" } {

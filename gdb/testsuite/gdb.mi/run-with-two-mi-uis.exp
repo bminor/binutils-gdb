@@ -59,6 +59,10 @@ proc do_test { ui_to_run } {
 	# the expected ^running record.
 	mi_runto_main
     }
+
+    # mi_clean_restart and gdb_finish call gdb_exit, which doesn't work for
+    # separate-mi-tty.  Use mi_gdb_exit instead.
+    mi_gdb_exit
 }
 
 foreach_with_prefix ui_to_run {first second} {

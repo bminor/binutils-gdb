@@ -385,20 +385,9 @@ proc_with_prefix test_setup { mode } {
     global mi_spawn_id
     global decimal
     global binfile
-    global GDBFLAGS
     global async
 
     set any "\[^\r\n\]*"
-
-    save_vars { GDBFLAGS } {
-	if { $mode == "non-stop" } {
-	    set GDBFLAGS [concat $GDBFLAGS " -ex \"set non-stop 1\""]
-	}
-
-	if { [mi_clean_restart $binfile "separate-mi-tty"] != 0 } {
-	    return -1
-	}
-    }
 
     if { [mi_runto_main] < 0 } {
 	return -1
@@ -1300,7 +1289,7 @@ proc_with_prefix test_cli_in_mi_frame { mode cli_in_mi_mode } {
     }
 }
 
-foreach_with_prefix mode { "all-stop" "non-stop" } {
+proc do_test { mode } {
     set test "setup done"
     if { [test_setup $mode] == -1 } {
 	fail $test
@@ -1329,5 +1318,27 @@ foreach_with_prefix mode { "all-stop" "non-stop" } {
 	test_cli_in_mi_inferior $mode $exec_mode
 	test_cli_in_mi_thread $mode $exec_mode
 	test_cli_in_mi_frame $mode $exec_mode
+    }
+}
+
+foreach_with_prefix mode { "all-stop" "non-stop" } {
+    save_vars { GDBFLAGS } {
+	if { $mode == "non-stop" } {
+	    set GDBFLAGS [concat $GDBFLAGS " -ex \"set non-stop 1\""]
+	}
+
+	if { [mi_clean_restart $binfile "separate-mi-tty"] != 0 } {
+	    break
+	}
+    }
+
+    set res [do_test $mode]
+
+    # mi_clean_restart and gdb_finish call gdb_exit, which doesn't work for
+    # separate-mi-tty.  Use mi_gdb_exit instead.
+    mi_gdb_exit
+
+    if { $res == -1 } {
+	break
     }
 }
