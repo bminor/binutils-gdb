@@ -91,28 +91,6 @@ struct attribute
     return u.unsnd;
   }
 
-  /* Return true if the value is nonnegative.  Requires that that
-     reprocessing not be needed.  */
-  bool is_nonnegative () const
-  {
-    if (form_is_unsigned ())
-      return true;
-    if (form_is_strictly_signed ())
-      return as_signed () >= 0;
-    return false;
-  }
-
-  /* Return the nonnegative value.  Requires that that reprocessing not be
-     needed.  */
-  ULONGEST as_nonnegative () const
-  {
-    if (form_is_unsigned ())
-      return as_unsigned ();
-    if (form_is_strictly_signed ())
-      return (ULONGEST)as_signed ();
-    gdb_assert (false);
-  }
-
   /* Return non-zero if ATTR's value is a section offset --- classes
      lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
      You may use the as_unsigned method to retrieve such offsets.

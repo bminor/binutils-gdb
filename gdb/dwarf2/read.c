@@ -17002,27 +17002,30 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       attr = dwarf2_attr (die,
 			  inlined_func ? DW_AT_call_file : DW_AT_decl_file,
 			  &file_cu);
-      if (attr != nullptr && attr->is_nonnegative ())
+      if (attr != nullptr)
 	{
-	  file_name_index file_index
-	    = (file_name_index) attr->as_nonnegative ();
-	  struct file_entry *fe;
-
-	  if (file_cu->line_header == nullptr)
+	  std::optional<ULONGEST> index_cst = attr->unsigned_constant ();
+	  if (index_cst.has_value ())
 	    {
-	      file_and_directory fnd (nullptr, nullptr);
-	      handle_DW_AT_stmt_list (file_cu->dies, file_cu, fnd, {}, false);
+	      file_name_index file_index = (file_name_index) *index_cst;
+	      struct file_entry *fe;
+
+	      if (file_cu->line_header == nullptr)
+		{
+		  file_and_directory fnd (nullptr, nullptr);
+		  handle_DW_AT_stmt_list (file_cu->dies, file_cu, fnd, {}, false);
+		}
+
+	      if (file_cu->line_header != nullptr)
+		fe = file_cu->line_header->file_name_at (file_index);
+	      else
+		fe = NULL;
+
+	      if (fe == NULL)
+		complaint (_("file index out of range"));
+	      else
+		sym->set_symtab (fe->symtab);
 	    }
-
-	  if (file_cu->line_header != nullptr)
-	    fe = file_cu->line_header->file_name_at (file_index);
-	  else
-	    fe = NULL;
-
-	  if (fe == NULL)
-	    complaint (_("file index out of range"));
-	  else
-	    sym->set_symtab (fe->symtab);
 	}
 
       switch (die->tag)
