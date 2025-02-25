@@ -57,8 +57,8 @@
 #include <chrono>
 #include "progspace-and-thread.h"
 #include "gdbsupport/rsp-low.h"
-#include <set>
-#include <map>
+#include "gdbsupport/unordered_map.h"
+#include "gdbsupport/unordered_set.h"
 
 enum
   {
@@ -583,13 +583,13 @@ mi_cmd_thread_info (const char *command, const char *const *argv, int argc)
 
 static void
 print_one_inferior (struct inferior *inferior, bool recurse,
-		    const std::set<int> &ids)
+		    const gdb::unordered_set<int> &ids)
 {
   struct ui_out *uiout = current_uiout;
 
   if (ids.empty () || (ids.find (inferior->pid) != ids.end ()))
     {
-      std::set<int> cores;
+      gdb::unordered_set<int> cores;
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       uiout->field_fmt ("id", "i%d", inferior->num);
@@ -648,13 +648,13 @@ output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
 }
 
 static void
-list_available_thread_groups (const std::set<int> &ids, int recurse)
+list_available_thread_groups (const gdb::unordered_set<int> &ids, int recurse)
 {
   struct ui_out *uiout = current_uiout;
 
   /* This keeps a map from integer (pid) to vector of struct osdata_item.
      The vector contains information about all threads for the given pid.  */
-  std::map<int, std::vector<osdata_item>> tree;
+  gdb::unordered_map<int, std::vector<osdata_item>> tree;
 
   /* get_osdata will throw if it cannot return data.  */
   std::unique_ptr<osdata> data = get_osdata ("processes");
@@ -731,7 +731,7 @@ mi_cmd_list_thread_groups (const char *command, const char *const *argv,
   struct ui_out *uiout = current_uiout;
   int available = 0;
   int recurse = 0;
-  std::set<int> ids;
+  gdb::unordered_set<int> ids;
 
   enum opt
   {
