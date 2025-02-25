@@ -3761,14 +3761,13 @@ symfile_free_objfile (struct objfile *objfile)
    See quick_symbol_functions.expand_symtabs_matching for details.  */
 
 bool
-expand_symtabs_matching
-  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   const lookup_name_info &lookup_name,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-   block_search_flags search_flags,
-   domain_search_flags domain,
-   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
+expand_symtabs_matching (expand_symtabs_file_matcher file_matcher,
+			 const lookup_name_info &lookup_name,
+			 expand_symtabs_symbol_matcher symbol_matcher,
+			 expand_symtabs_expansion_listener expansion_notify,
+			 block_search_flags search_flags,
+			 domain_search_flags domain,
+			 expand_symtabs_lang_matcher lang_matcher)
 {
   for (objfile *objfile : current_program_space->objfiles ())
     if (!objfile->expand_symtabs_matching (file_matcher,
@@ -3787,8 +3786,7 @@ expand_symtabs_matching
    See quick_symbol_functions.map_symbol_filenames for details.  */
 
 void
-map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
-		      bool need_fullname)
+map_symbol_filenames (symbol_filename_listener fun, bool need_fullname)
 {
   for (objfile *objfile : current_program_space->objfiles ())
     objfile->map_symbol_filenames (fun, need_fullname);

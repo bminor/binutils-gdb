@@ -929,8 +929,7 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
     return nullptr;
   }
 
-  void map_symbol_filenames (struct objfile *objfile,
-			     gdb::function_view<symbol_filename_ftype> fun,
+  void map_symbol_filenames (objfile *objfile, symbol_filename_listener fun,
 			     bool need_fullname) override;
 };
 
@@ -942,9 +941,9 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
 extern bool dw2_expand_symtabs_matching_one
   (dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher);
+   expand_symtabs_file_matcher file_matcher,
+   expand_symtabs_expansion_listener expansion_notify,
+   expand_symtabs_lang_matcher lang_matcher);
 
 /* If FILE_MATCHER is non-NULL, set all the
    dwarf2_per_cu_quick_data::MARK of the current DWARF2_PER_OBJFILE
@@ -952,7 +951,7 @@ extern bool dw2_expand_symtabs_matching_one
 
 extern void dw_expand_symtabs_matching_file_matcher
   (dwarf2_per_objfile *per_objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher);
+   expand_symtabs_file_matcher file_matcher);
 
 /* Return pointer to string at .debug_str offset STR_OFFSET.  */
 

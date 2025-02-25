@@ -1661,14 +1661,13 @@ struct readnow_functions : public dwarf2_base_index_functions
 
   bool expand_symtabs_matching
     (struct objfile *objfile,
-     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     expand_symtabs_file_matcher file_matcher,
      const lookup_name_info *lookup_name,
-     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     expand_symtabs_symbol_matcher symbol_matcher,
+     expand_symtabs_expansion_listener expansion_notify,
      block_search_flags search_flags,
      domain_search_flags domain,
-     gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
-       override
+     expand_symtabs_lang_matcher lang_matcher) override
   {
     return true;
   }
@@ -2094,9 +2093,9 @@ bool
 dw2_expand_symtabs_matching_one
   (dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
+   expand_symtabs_file_matcher file_matcher,
+   expand_symtabs_expansion_listener expansion_notify,
+   expand_symtabs_lang_matcher lang_matcher)
 {
   if (file_matcher != nullptr && !per_cu->mark)
     return true;
@@ -2125,8 +2124,7 @@ dw2_expand_symtabs_matching_one
 
 void
 dw_expand_symtabs_matching_file_matcher
-  (dwarf2_per_objfile *per_objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher)
+  (dwarf2_per_objfile *per_objfile, expand_symtabs_file_matcher file_matcher)
 {
   if (file_matcher == NULL)
     return;
@@ -2281,10 +2279,9 @@ dwarf2_base_index_functions::find_pc_sect_compunit_symtab
 }
 
 void
-dwarf2_base_index_functions::map_symbol_filenames
-     (struct objfile *objfile,
-      gdb::function_view<symbol_filename_ftype> fun,
-      bool need_fullname)
+dwarf2_base_index_functions::map_symbol_filenames (objfile *objfile,
+						   symbol_filename_listener fun,
+						   bool need_fullname)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -15996,14 +15993,14 @@ cooked_index_functions::find_compunit_symtab_by_address
 
 bool
 cooked_index_functions::expand_symtabs_matching
-     (struct objfile *objfile,
-      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-      const lookup_name_info *lookup_name,
-      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-      block_search_flags search_flags,
-      domain_search_flags domain,
-      gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
+  (objfile *objfile,
+   expand_symtabs_file_matcher file_matcher,
+   const lookup_name_info *lookup_name,
+   expand_symtabs_symbol_matcher symbol_matcher,
+   expand_symtabs_expansion_listener expansion_notify,
+   block_search_flags search_flags,
+   domain_search_flags domain,
+   expand_symtabs_lang_matcher lang_matcher)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 

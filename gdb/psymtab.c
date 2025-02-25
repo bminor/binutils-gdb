@@ -735,10 +735,9 @@ psymbol_functions::expand_all_symtabs (struct objfile *objfile)
    the definition of quick_symbol_functions in symfile.h.  */
 
 void
-psymbol_functions::map_symbol_filenames
-     (struct objfile *objfile,
-      gdb::function_view<symbol_filename_ftype> fun,
-      bool need_fullname)
+psymbol_functions::map_symbol_filenames (objfile *objfile,
+					 symbol_filename_listener fun,
+					 bool need_fullname)
 {
   for (partial_symtab *ps : partial_symbols (objfile))
     {
@@ -797,13 +796,11 @@ psymtab_to_fullname (struct partial_symtab *ps)
    various psymtabs that it searches.  */
 
 static bool
-recursively_search_psymtabs
-  (struct partial_symtab *ps,
-   struct objfile *objfile,
-   block_search_flags search_flags,
-   domain_search_flags domain,
-   const lookup_name_info &lookup_name,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> sym_matcher)
+recursively_search_psymtabs (partial_symtab *ps, objfile *objfile,
+			     block_search_flags search_flags,
+			     domain_search_flags domain,
+			     const lookup_name_info &lookup_name,
+			     expand_symtabs_symbol_matcher sym_matcher)
 {
   int keep_going = 1;
   enum psymtab_search_status result = PST_SEARCHED_AND_NOT_FOUND;
@@ -894,14 +891,13 @@ recursively_search_psymtabs
 bool
 psymbol_functions::expand_symtabs_matching
   (struct objfile *objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   expand_symtabs_file_matcher file_matcher,
    const lookup_name_info *lookup_name,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   expand_symtabs_symbol_matcher symbol_matcher,
+   expand_symtabs_expansion_listener expansion_notify,
    block_search_flags search_flags,
    domain_search_flags domain,
-   gdb::function_view<expand_symtabs_lang_matcher_ftype>
-     lang_matcher ATTRIBUTE_UNUSED)
+   expand_symtabs_lang_matcher lang_matcher ATTRIBUTE_UNUSED)
 {
   /* Clear the search flags.  */
   for (partial_symtab *ps : partial_symbols (objfile))

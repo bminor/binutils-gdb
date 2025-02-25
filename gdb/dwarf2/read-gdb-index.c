@@ -434,10 +434,10 @@ static bool
 dw2_expand_symtabs_matching_symbol
   (mapped_gdb_index &index,
    const lookup_name_info &lookup_name_in,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   expand_symtabs_symbol_matcher symbol_matcher,
    gdb::function_view<bool (offset_type)> match_callback,
    dwarf2_per_objfile *per_objfile,
-   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
+   expand_symtabs_lang_matcher lang_matcher)
 {
   lookup_name_info lookup_name_without_params
     = lookup_name_in.make_ignore_params ();
@@ -999,14 +999,13 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
 
   bool expand_symtabs_matching
     (struct objfile *objfile,
-     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     expand_symtabs_file_matcher file_matcher,
      const lookup_name_info *lookup_name,
-     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     expand_symtabs_symbol_matcher symbol_matcher,
+     expand_symtabs_expansion_listener expansion_notify,
      block_search_flags search_flags,
      domain_search_flags domain,
-     gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
-       override;
+     expand_symtabs_lang_matcher lang_matcher) override;
 };
 
 /* This dumps minimal information about the index.
@@ -1030,13 +1029,12 @@ dwarf2_gdb_index::dump (struct objfile *objfile)
    index of the symbol name that matched.  */
 
 static bool
-dw2_expand_marked_cus
-  (dwarf2_per_objfile *per_objfile, offset_type idx,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-   block_search_flags search_flags,
-   domain_search_flags kind,
-   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
+dw2_expand_marked_cus (dwarf2_per_objfile *per_objfile, offset_type idx,
+		       expand_symtabs_file_matcher file_matcher,
+		       expand_symtabs_expansion_listener expansion_notify,
+		       block_search_flags search_flags,
+		       domain_search_flags kind,
+		       expand_symtabs_lang_matcher lang_matcher)
 {
   offset_type vec_len, vec_idx;
   bool global_seen = false;
@@ -1126,14 +1124,14 @@ dw2_expand_marked_cus
 
 bool
 dwarf2_gdb_index::expand_symtabs_matching
-    (struct objfile *objfile,
-     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-     const lookup_name_info *lookup_name,
-     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-     block_search_flags search_flags,
-     domain_search_flags domain,
-     gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
+  (objfile *objfile,
+   expand_symtabs_file_matcher file_matcher,
+   const lookup_name_info *lookup_name,
+   expand_symtabs_symbol_matcher symbol_matcher,
+   expand_symtabs_expansion_listener expansion_notify,
+   block_search_flags search_flags,
+   domain_search_flags domain,
+   expand_symtabs_lang_matcher lang_matcher)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 

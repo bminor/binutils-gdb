@@ -370,13 +370,13 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
 
 bool
 objfile::expand_symtabs_matching
-  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+  (expand_symtabs_file_matcher file_matcher,
    const lookup_name_info *lookup_name,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   expand_symtabs_symbol_matcher symbol_matcher,
+   expand_symtabs_expansion_listener expansion_notify,
    block_search_flags search_flags,
    domain_search_flags domain,
-   gdb::function_view<expand_symtabs_lang_matcher_ftype> lang_matcher)
+   expand_symtabs_lang_matcher lang_matcher)
 {
   /* This invariant is documented in quick-functions.h.  */
   gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
@@ -435,8 +435,7 @@ objfile::find_pc_sect_compunit_symtab (bound_minimal_symbol msymbol,
 }
 
 void
-objfile::map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
-			       bool need_fullname)
+objfile::map_symbol_filenames (symbol_filename_listener fun, bool need_fullname)
 {
   if (debug_symfile)
     gdb_printf (gdb_stdlog,
