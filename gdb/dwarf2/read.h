@@ -405,6 +405,40 @@ struct signatured_type : public dwarf2_per_cu_data
 
 using signatured_type_up = std::unique_ptr<signatured_type>;
 
+/* Hash a signatured_type object based on its signature.  */
+
+struct signatured_type_hash
+{
+  using is_transparent = void;
+
+  std::size_t operator() (ULONGEST signature) const noexcept
+  { return signature; }
+
+  std::size_t operator() (const signatured_type *sig_type) const noexcept
+  { return (*this) (sig_type->signature); }
+};
+
+/* Compare signatured_type objects based on their signatures.  */
+
+struct signatured_type_eq
+{
+  using is_transparent = void;
+
+  bool operator() (ULONGEST sig, const signatured_type *sig_type) const noexcept
+  { return sig == sig_type->signature; }
+
+  bool operator() (const signatured_type *sig_type_a,
+		   const signatured_type *sig_type_b) const noexcept
+  { return (*this) (sig_type_a->signature, sig_type_b); }
+};
+
+/* Unordered set of signatured_type objects using their signature as the
+   key.  */
+
+using signatured_type_set
+  = gdb::unordered_set<signatured_type *, signatured_type_hash,
+		       signatured_type_eq>;
+
 struct dwp_file;
 
 using dwp_file_up = std::unique_ptr<dwp_file>;
@@ -523,9 +557,8 @@ public:
      The hash key is the DW_AT_stmt_list value.  */
   htab_up type_unit_groups;
 
-  /* A table mapping .debug_types signatures to its signatured_type entry.
-     This is NULL if the .debug_types section hasn't been read in yet.  */
-  htab_up signatured_types;
+  /* Set of signatured_types, used to look up by signature.  */
+  signatured_type_set signatured_types;
 
   /* Type unit statistics, to see how well the scaling improvements
      are doing.  */
@@ -957,10 +990,6 @@ extern void dw_expand_symtabs_matching_file_matcher
 
 extern const char *read_indirect_string_at_offset
   (dwarf2_per_objfile *per_objfile, LONGEST str_offset);
-
-/* Allocate a hash table for signatured types.  */
-
-extern htab_up allocate_signatured_type_table ();
 
 /* Return a new dwarf2_per_cu_data allocated on the per-bfd
    obstack, and constructed with the specified field values.  */

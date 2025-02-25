@@ -2570,36 +2570,6 @@ read_abbrev_offset (dwarf2_per_objfile *per_objfile,
   return (sect_offset) read_offset (abfd, info_ptr, offset_size);
 }
 
-static hashval_t
-hash_signatured_type (const void *item)
-{
-  const struct signatured_type *sig_type
-    = (const struct signatured_type *) item;
-
-  /* This drops the top 32 bits of the signature, but is ok for a hash.  */
-  return sig_type->signature;
-}
-
-static int
-eq_signatured_type (const void *item_lhs, const void *item_rhs)
-{
-  const struct signatured_type *lhs = (const struct signatured_type *) item_lhs;
-  const struct signatured_type *rhs = (const struct signatured_type *) item_rhs;
-
-  return lhs->signature == rhs->signature;
-}
-
-/* See read.h.  */
-
-htab_up
-allocate_signatured_type_table ()
-{
-  return htab_up (htab_create_alloc (41,
-				     hash_signatured_type,
-				     eq_signatured_type,
-				     NULL, xcalloc, xfree));
-}
-
 /* A helper for create_debug_types_hash_table.  Read types from SECTION
    and fill them into TYPES_HTAB.  It will process only type units,
    therefore DW_UT_type.  */
@@ -2716,13 +2686,11 @@ create_debug_types_hash_table (dwarf2_per_objfile *per_objfile,
 				  rcuh_kind::TYPE);
 }
 
-/* Add an entry for signature SIG to per_bfd->signatured_types.
-   If SLOT is non-NULL, it is the entry to use in the hash table.
-   Otherwise we find one.  */
+/* Add an entry for signature SIG to per_bfd->signatured_types.  */
 
-static struct signatured_type *
+static signatured_type_set::iterator
 add_type_unit (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
-	       sect_offset sect_off, ULONGEST sig, void **slot)
+	       sect_offset sect_off, ULONGEST sig)
 {
   if (per_bfd->all_units.size () == per_bfd->all_units.capacity ())
     ++per_bfd->tu_stats.nr_all_type_units_reallocs;
@@ -2732,14 +2700,14 @@ add_type_unit (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
   signatured_type *sig_type = sig_type_holder.get ();
 
   per_bfd->all_units.emplace_back (sig_type_holder.release ());
+  auto emplace_ret = per_bfd->signatured_types.emplace (sig_type);
 
-  if (slot == NULL)
-    slot = htab_find_slot (per_bfd->signatured_types.get (), sig_type, INSERT);
+  /* Assert that an insertion took place - that there wasn't a type unit with
+     that signature already.  */
+  gdb_assert (emplace_ret.second);
 
-  gdb_assert (*slot == NULL);
-  *slot = sig_type;
   /* The rest of sig_type must be filled in by the caller.  */
-  return sig_type;
+  return emplace_ret.first;
 }
 
 /* Subroutine of lookup_dwo_signatured_type and lookup_dwp_signatured_type.
@@ -2785,16 +2753,8 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-  struct dwo_file *dwo_file;
-  struct dwo_unit find_dwo_entry, *dwo_entry;
-  void **slot;
 
   gdb_assert (cu->dwo_unit);
-
-  /* If TU skeletons have been removed then we may not have read in any
-     TUs yet.  */
-  if (per_bfd->signatured_types == NULL)
-    per_bfd->signatured_types = allocate_signatured_type_table ();
 
   /* We only ever need to read in one copy of a signatured type.
      Use the global signatured_types array to do our own comdat-folding
@@ -2802,10 +2762,7 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
      the TU has an entry in .gdb_index, replace the recorded data from
      .gdb_index with this TU.  */
 
-  signatured_type find_sig_entry (nullptr, nullptr, sect_offset {}, sig);
-  slot = htab_find_slot (per_bfd->signatured_types.get (), &find_sig_entry,
-			 INSERT);
-  signatured_type *sig_entry = (struct signatured_type *) *slot;
+  auto sig_type_it = per_bfd->signatured_types.find (sig);
 
   /* We can get here with the TU already read, *or* in the process of being
      read.  Don't reassign the global entry to point to this DWO if that's
@@ -2816,31 +2773,36 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   /* Have we already tried to read this TU?
      Note: sig_entry can be NULL if the skeleton TU was removed (thus it
      needn't exist in the global table yet).  */
-  if (sig_entry != NULL && sig_entry->tu_read)
-    return sig_entry;
+  if (sig_type_it != per_bfd->signatured_types.end ()
+      && (*sig_type_it)->tu_read)
+    return *sig_type_it;
 
   /* Note: cu->dwo_unit is the dwo_unit that references this TU, not the
      dwo_unit of the TU itself.  */
-  dwo_file = cu->dwo_unit->dwo_file;
+  dwo_file *dwo_file = cu->dwo_unit->dwo_file;
 
   /* Ok, this is the first time we're reading this TU.  */
   if (dwo_file->tus == NULL)
     return NULL;
+
+  dwo_unit find_dwo_entry;
   find_dwo_entry.signature = sig;
-  dwo_entry = (struct dwo_unit *) htab_find (dwo_file->tus.get (),
-					     &find_dwo_entry);
+  auto dwo_entry
+    = (struct dwo_unit *) htab_find (dwo_file->tus.get (), &find_dwo_entry);
+
   if (dwo_entry == NULL)
     return NULL;
 
   /* If the global table doesn't have an entry for this TU, add one.  */
-  if (sig_entry == NULL)
-    sig_entry = add_type_unit (per_bfd, dwo_entry->section, dwo_entry->sect_off,
-			       sig, slot);
+  if (sig_type_it == per_bfd->signatured_types.end ())
+    sig_type_it
+      = add_type_unit (per_bfd, dwo_entry->section, dwo_entry->sect_off, sig);
 
-  if (sig_entry->dwo_unit == nullptr)
-    fill_in_sig_entry_from_dwo_entry (per_objfile, sig_entry, dwo_entry);
-  sig_entry->tu_read = 1;
-  return sig_entry;
+  if ((*sig_type_it)->dwo_unit == nullptr)
+    fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_entry);
+
+  (*sig_type_it)->tu_read = 1;
+  return *sig_type_it;
 }
 
 /* Subroutine of lookup_signatured_type.
@@ -2854,39 +2816,30 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct dwp_file *dwp_file = get_dwp_file (per_objfile);
-  struct dwo_unit *dwo_entry;
-  void **slot;
 
   gdb_assert (cu->dwo_unit);
   gdb_assert (dwp_file != NULL);
 
-  /* If TU skeletons have been removed then we may not have read in any
-     TUs yet.  */
-  if (per_bfd->signatured_types == NULL)
-    per_bfd->signatured_types = allocate_signatured_type_table ();
-
-  signatured_type find_sig_entry (nullptr, nullptr, sect_offset {}, sig);
-  slot = htab_find_slot (per_bfd->signatured_types.get (), &find_sig_entry,
-			 INSERT);
-  signatured_type *sig_entry = (struct signatured_type *) *slot;
+  auto sig_type_it = per_bfd->signatured_types.find (sig);
 
   /* Have we already tried to read this TU?
      Note: sig_entry can be NULL if the skeleton TU was removed (thus it
      needn't exist in the global table yet).  */
-  if (sig_entry != NULL)
-    return sig_entry;
+  if (sig_type_it != per_bfd->signatured_types.end ())
+    return *sig_type_it;
 
   if (dwp_file->tus == NULL)
     return NULL;
-  dwo_entry = lookup_dwo_unit_in_dwp (per_bfd, dwp_file, NULL, sig,
-				      1 /* is_debug_types */);
+
+  auto dwo_entry = lookup_dwo_unit_in_dwp (per_bfd, dwp_file, NULL, sig,
+					   1 /* is_debug_types */);
   if (dwo_entry == NULL)
     return NULL;
 
-  sig_entry = add_type_unit (per_bfd, nullptr, dwo_entry->sect_off, sig, slot);
-  fill_in_sig_entry_from_dwo_entry (per_objfile, sig_entry, dwo_entry);
+  sig_type_it = add_type_unit (per_bfd, nullptr, dwo_entry->sect_off, sig);
+  fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_entry);
 
-  return sig_entry;
+  return *sig_type_it;
 }
 
 /* Lookup a signature based type for DW_FORM_ref_sig8.
@@ -2897,6 +2850,7 @@ static struct signatured_type *
 lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   if (cu->dwo_unit)
     {
@@ -2909,12 +2863,12 @@ lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
     }
   else
     {
-      if (per_objfile->per_bfd->signatured_types == NULL)
-	return NULL;
-      signatured_type find_entry (nullptr, nullptr, sect_offset {}, sig);
-      return ((struct signatured_type *)
-	      htab_find (per_objfile->per_bfd->signatured_types.get (),
-			 &find_entry));
+      auto sig_type_it = per_bfd->signatured_types.find (sig);
+
+      if (sig_type_it != per_bfd->signatured_types.end ())
+	return *sig_type_it;
+
+      return nullptr;
     }
 }
 
@@ -4057,29 +4011,21 @@ process_skeletonless_type_unit (void **slot, void *info)
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   /* If this TU doesn't exist in the global table, add it and read it in.  */
-
-  if (per_bfd->signatured_types == NULL)
-    per_bfd->signatured_types = allocate_signatured_type_table ();
-
-  signatured_type find_entry (nullptr, nullptr, sect_offset {},
-			      dwo_unit->signature);
-  slot = htab_find_slot (per_bfd->signatured_types.get (), &find_entry, INSERT);
+  auto sig_type_it = per_bfd->signatured_types.find (dwo_unit->signature);
 
   /* If we've already seen this type there's nothing to do.  What's happening
      is we're doing our own version of comdat-folding here.  */
-  if (*slot != NULL)
+  if (sig_type_it != per_bfd->signatured_types.end ())
     return 1;
 
   /* This does the job that create_all_units would have done for
      this TU.  */
-  signatured_type *entry
-    = add_type_unit (per_bfd, dwo_unit->section, dwo_unit->sect_off,
-		     dwo_unit->signature, slot);
-  fill_in_sig_entry_from_dwo_entry (per_objfile, entry, dwo_unit);
-  *slot = entry;
+  sig_type_it = add_type_unit (per_bfd, dwo_unit->section, dwo_unit->sect_off,
+			       dwo_unit->signature);
+  fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_unit);
 
   /* This does the job that build_type_psymtabs would have done.  */
-  cutu_reader reader (entry, per_objfile, nullptr, nullptr, false,
+  cutu_reader reader (*sig_type_it, per_objfile, nullptr, nullptr, false,
 		      language_minimal);
   if (!reader.dummy_p)
     build_type_psymtabs_reader (&reader, data->storage);
@@ -4311,7 +4257,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 			      struct dwarf2_section_info *section,
 			      struct dwarf2_section_info *abbrev_section,
 			      unsigned int is_dwz,
-			      htab_up &types_htab,
+			      signatured_type_set &sig_types,
 			      rcuh_kind section_kind)
 {
   const gdb_byte *info_ptr;
@@ -4341,24 +4287,20 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 	this_cu = per_objfile->per_bfd->allocate_per_cu (section, sect_off);
       else
 	{
-	  if (types_htab == nullptr)
-	    types_htab = allocate_signatured_type_table ();
-
 	  auto sig_type = per_objfile->per_bfd->allocate_signatured_type
 	    (section, sect_off, cu_header.signature);
 	  signatured_type *sig_ptr = sig_type.get ();
 	  sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
 	  this_cu.reset (sig_type.release ());
 
-	  void **slot = htab_find_slot (types_htab.get (), sig_ptr, INSERT);
-	  gdb_assert (slot != nullptr);
-	  if (*slot != nullptr)
+	  auto [sig_type_it, inserted] = sig_types.emplace (sig_ptr);
+
+	  if (!inserted)
 	    complaint (_("debug type entry at offset %s is duplicate to"
 			 " the entry at offset %s, signature %s"),
 		       sect_offset_str (sect_off),
 		       sect_offset_str (sig_ptr->sect_off),
 		       hex_string (sig_ptr->signature));
-	  *slot = sig_ptr;
 	}
 
       this_cu->set_length (cu_header.get_length_with_initial ());
@@ -4390,23 +4332,24 @@ finalize_all_units (dwarf2_per_bfd *per_bfd)
 void
 create_all_units (dwarf2_per_objfile *per_objfile)
 {
-  htab_up types_htab;
   gdb_assert (per_objfile->per_bfd->all_units.empty ());
+
+  signatured_type_set sig_types;
 
   for (dwarf2_section_info &section : per_objfile->per_bfd->infos)
     read_comp_units_from_section (per_objfile, &section,
-				  &per_objfile->per_bfd->abbrev, 0,
-				  types_htab, rcuh_kind::COMPILE);
+				  &per_objfile->per_bfd->abbrev, 0, sig_types,
+				  rcuh_kind::COMPILE);
   for (dwarf2_section_info &section : per_objfile->per_bfd->types)
     read_comp_units_from_section (per_objfile, &section,
-				  &per_objfile->per_bfd->abbrev, 0,
-				  types_htab, rcuh_kind::TYPE);
+				  &per_objfile->per_bfd->abbrev, 0, sig_types,
+				  rcuh_kind::TYPE);
 
   dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
   if (dwz != NULL)
     {
       read_comp_units_from_section (per_objfile, &dwz->info, &dwz->abbrev, 1,
-				    types_htab, rcuh_kind::COMPILE);
+				    sig_types, rcuh_kind::COMPILE);
 
       if (!dwz->types.empty ())
 	{
@@ -4418,7 +4361,7 @@ create_all_units (dwarf2_per_objfile *per_objfile)
 	}
     }
 
-  per_objfile->per_bfd->signatured_types = std::move (types_htab);
+  per_objfile->per_bfd->signatured_types = std::move (sig_types);
 
   finalize_all_units (per_objfile->per_bfd);
 }

@@ -1360,31 +1360,25 @@ create_signatured_type_table_from_gdb_index
   (dwarf2_per_bfd *per_bfd, struct dwarf2_section_info *section,
    const gdb_byte *bytes, offset_type elements)
 {
-  htab_up sig_types_hash = allocate_signatured_type_table ();
+  signatured_type_set sig_types_hash;
 
   for (offset_type i = 0; i < elements; i += 3)
     {
-      signatured_type_up sig_type;
-      ULONGEST signature;
-      void **slot;
-      cu_offset type_offset_in_tu;
-
       static_assert (sizeof (ULONGEST) >= 8);
       sect_offset sect_off
 	= (sect_offset) extract_unsigned_integer (bytes, 8, BFD_ENDIAN_LITTLE);
-      type_offset_in_tu
+	cu_offset type_offset_in_tu
 	= (cu_offset) extract_unsigned_integer (bytes + 8, 8,
 						BFD_ENDIAN_LITTLE);
-      signature = extract_unsigned_integer (bytes + 16, 8, BFD_ENDIAN_LITTLE);
+      ULONGEST signature
+	= extract_unsigned_integer (bytes + 16, 8, BFD_ENDIAN_LITTLE);
       bytes += 3 * 8;
 
-      sig_type
+      signatured_type_up sig_type
 	= per_bfd->allocate_signatured_type (section, sect_off, signature);
       sig_type->type_offset_in_tu = type_offset_in_tu;
 
-      slot = htab_find_slot (sig_types_hash.get (), sig_type.get (), INSERT);
-      *slot = sig_type.get ();
-
+      sig_types_hash.emplace (sig_type.get ());
       per_bfd->all_units.emplace_back (sig_type.release ());
     }
 
