@@ -79,7 +79,6 @@
 #include <optional>
 #include "gdbsupport/underlying.h"
 #include "filename-seen-cache.h"
-#include "producer.h"
 #include <fcntl.h>
 #include <algorithm>
 #include "gdbsupport/selftest.h"
