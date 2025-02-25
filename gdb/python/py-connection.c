@@ -27,8 +27,7 @@
 #include "arch-utils.h"
 #include "remote.h"
 #include "charset.h"
-
-#include <map>
+#include "gdbsupport/unordered_map.h"
 
 /* The Python object that represents a connection.  */
 
@@ -65,8 +64,8 @@ extern PyTypeObject remote_connection_object_type
 /* A map between process_stratum targets and the Python object representing
    them.  We actually hold a gdbpy_ref around the Python object so that
    reference counts are handled correctly when entries are deleted.  */
-static std::map<process_stratum_target *,
-		gdbpy_ref<connection_object>> all_connection_objects;
+static gdb::unordered_map<process_stratum_target *,
+			  gdbpy_ref<connection_object>> all_connection_objects;
 
 /* Return a reference to a gdb.TargetConnection object for TARGET.  If
    TARGET is nullptr then a reference to None is returned.
