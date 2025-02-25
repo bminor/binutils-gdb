@@ -1520,14 +1520,14 @@ dwarf2_read_gdb_index
       if (dwz_index_content.empty ())
 	return false;
 
-      if (!read_gdb_index_from_buffer (bfd_get_filename (dwz->dwz_bfd.get ()),
+      if (!read_gdb_index_from_buffer (dwz->filename (),
 				       1, dwz_index_content, &dwz_map,
 				       &dwz_list, &dwz_list_elements,
 				       &dwz_types_ignore,
 				       &dwz_types_elements_ignore))
 	{
 	  warning (_("could not read '.gdb_index' section from %s; skipping"),
-		   bfd_get_filename (dwz->dwz_bfd.get ()));
+		   dwz->filename ());
 	  return false;
 	}
     }

@@ -39,11 +39,11 @@ dwz_file::read_string (struct objfile *objfile, LONGEST str_offset)
   if (str.buffer == NULL)
     error (_("DW_FORM_GNU_strp_alt used without .debug_str "
 	     "section [in module %s]"),
-	   bfd_get_filename (dwz_bfd.get ()));
+	   this->filename ());
   if (str_offset >= str.size)
     error (_("DW_FORM_GNU_strp_alt pointing outside of "
 	     ".debug_str section [in module %s]"),
-	   bfd_get_filename (dwz_bfd.get ()));
+	   this->filename ());
   gdb_assert (HOST_CHAR_BIT == 8);
   if (str.buffer[str_offset] == '\0')
     return NULL;
