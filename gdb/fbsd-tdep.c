@@ -637,14 +637,11 @@ fbsd_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
   return len;
 }
 
-static int
-find_signalled_thread (struct thread_info *info, void *data)
+static bool
+find_signalled_thread (struct thread_info *info)
 {
-  if (info->stop_signal () != GDB_SIGNAL_0
-      && info->ptid.pid () == inferior_ptid.pid ())
-    return 1;
-
-  return 0;
+  return (info->stop_signal () != GDB_SIGNAL_0
+	  && info->ptid.pid () == inferior_ptid.pid ());
 }
 
 /* Return a byte_vector containing the contents of a core dump note
@@ -718,7 +715,7 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     signalled_thr = curr_thr;
   else
     {
-      signalled_thr = iterate_over_threads (find_signalled_thread, NULL);
+      signalled_thr = iterate_over_threads (find_signalled_thread);
       if (signalled_thr == NULL)
 	signalled_thr = curr_thr;
     }

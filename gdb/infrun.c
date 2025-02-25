@@ -6671,9 +6671,8 @@ restart_threads (struct thread_info *event_thread, inferior *inf)
 /* Callback for iterate_over_threads.  Find a resumed thread that has
    a pending waitstatus.  */
 
-static int
-resumed_thread_with_pending_status (struct thread_info *tp,
-				    void *arg)
+static bool
+resumed_thread_with_pending_status (struct thread_info *tp)
 {
   return tp->resumed () && tp->has_pending_waitstatus ();
 }
@@ -6751,8 +6750,7 @@ finish_step_over (struct execution_control_state *ecs)
       if (ecs->ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
        return 0;
 
-      pending = iterate_over_threads (resumed_thread_with_pending_status,
-				      nullptr);
+      pending = iterate_over_threads (resumed_thread_with_pending_status);
       if (pending != nullptr)
 	{
 	  struct thread_info *tp = ecs->event_thread;

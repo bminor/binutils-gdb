@@ -1108,25 +1108,14 @@ info_solthreads (const char *args, int from_tty)
 		    TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
 }
 
-/* Callback routine used to find a thread based on the TID part of
-   its PTID.  */
-
-static int
-thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
-{
-  ULONGEST *tid = (ULONGEST *) data;
-
-  if (thread->ptid.tid () == *tid)
-    return 1;
-
-  return 0;
-}
-
 ptid_t
 sol_thread_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 {
-  struct thread_info *thread_info =
-    iterate_over_threads (thread_db_find_thread_from_tid, &thread);
+  struct thread_info *thread_info
+    = iterate_over_threads ([&] (struct thread_info *thread)
+       {
+	 return thread->ptid.tid () == thread;
+       });
 
   if (thread_info == NULL)
     {

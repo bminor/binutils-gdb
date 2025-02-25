@@ -734,8 +734,8 @@ void thread_change_ptid (process_stratum_target *targ,
 
 /* Iterator function to call a user-provided callback function
    once for each known thread.  */
-typedef int (*thread_callback_func) (struct thread_info *, void *);
-extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
+typedef gdb::function_view<bool (struct thread_info *)> thread_callback_func;
+extern struct thread_info *iterate_over_threads (thread_callback_func);
 
 /* Pull in the internals of the inferiors/threads ranges and
    iterators.  Must be done after struct thread_info is defined.  */

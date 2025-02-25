@@ -250,15 +250,6 @@ proceed_thread (struct thread_info *thread, int pid)
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
 }
 
-static int
-proceed_thread_callback (struct thread_info *thread, void *arg)
-{
-  int pid = *(int *)arg;
-
-  proceed_thread (thread, pid);
-  return 0;
-}
-
 static void
 exec_continue (const char *const *argv, int argc)
 {
@@ -288,7 +279,11 @@ exec_continue (const char *const *argv, int argc)
 	      pid = inf->pid;
 	    }
 
-	  iterate_over_threads (proceed_thread_callback, &pid);
+	  iterate_over_threads ([&] (struct thread_info *thread)
+	    {
+	      proceed_thread (thread, pid);
+	      return false;
+	    });
 	  disable_commit_resumed.reset_and_commit ();
 	}
       else
@@ -341,21 +336,6 @@ mi_cmd_exec_continue (const char *command, const char *const *argv, int argc)
     exec_continue (argv, argc);
 }
 
-static int
-interrupt_thread_callback (struct thread_info *thread, void *arg)
-{
-  int pid = *(int *)arg;
-
-  if (thread->state != THREAD_RUNNING)
-    return 0;
-
-  if (thread->ptid.pid () != pid)
-    return 0;
-
-  target_stop (thread->ptid);
-  return 0;
-}
-
 /* Interrupt the execution of the target.  Note how we must play
    around with the token variables, in order to display the current
    token in the result of the interrupt command, and the previous
@@ -385,7 +365,17 @@ mi_cmd_exec_interrupt (const char *command, const char *const *argv, int argc)
       scoped_disable_commit_resumed disable_commit_resumed
 	("interrupting all threads of thread group");
 
-      iterate_over_threads (interrupt_thread_callback, &inf->pid);
+      iterate_over_threads ([&] (struct thread_info *thread)
+	{
+	  if (thread->state != THREAD_RUNNING)
+	    return false;
+
+	  if (thread->ptid.pid () != inf->pid)
+	    return false;
+
+	  target_stop (thread->ptid);
+	  return false;
+	});
     }
   else
     {
@@ -478,18 +468,6 @@ mi_cmd_exec_run (const char *command, const char *const *argv, int argc)
     }
 }
 
-
-static int
-find_thread_of_process (struct thread_info *ti, void *p)
-{
-  int pid = *(int *)p;
-
-  if (ti->ptid.pid () == pid && ti->state != THREAD_EXITED)
-    return 1;
-
-  return 0;
-}
-
 void
 mi_cmd_target_detach (const char *command, const char *const *argv, int argc)
 {
@@ -528,7 +506,10 @@ mi_cmd_target_detach (const char *command, const char *const *argv, int argc)
 
       /* Pick any thread in the desired process.  Current
 	 target_detach detaches from the parent of inferior_ptid.  */
-      tp = iterate_over_threads (find_thread_of_process, &pid);
+      tp = iterate_over_threads ([&] (struct thread_info *ti)
+	{
+	  return ti->ptid.pid () == pid && ti->state != THREAD_EXITED;
+	});
       if (!tp)
 	error (_("Thread group is empty"));
 
@@ -600,28 +581,6 @@ mi_cmd_thread_info (const char *command, const char *const *argv, int argc)
   print_thread_info (current_uiout, argv[0], -1);
 }
 
-struct collect_cores_data
-{
-  int pid;
-  std::set<int> cores;
-};
-
-static int
-collect_cores (struct thread_info *ti, void *xdata)
-{
-  struct collect_cores_data *data = (struct collect_cores_data *) xdata;
-
-  if (ti->ptid.pid () == data->pid)
-    {
-      int core = target_core_of_thread (ti->ptid);
-
-      if (core != -1)
-	data->cores.insert (core);
-    }
-
-  return 0;
-}
-
 static void
 print_one_inferior (struct inferior *inferior, bool recurse,
 		    const std::set<int> &ids)
@@ -630,7 +589,7 @@ print_one_inferior (struct inferior *inferior, bool recurse,
 
   if (ids.empty () || (ids.find (inferior->pid) != ids.end ()))
     {
-      struct collect_cores_data data;
+      std::set<int> cores;
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
       uiout->field_fmt ("id", "i%d", inferior->num);
@@ -646,15 +605,24 @@ print_one_inferior (struct inferior *inferior, bool recurse,
 
       if (inferior->pid != 0)
 	{
-	  data.pid = inferior->pid;
-	  iterate_over_threads (collect_cores, &data);
+	  iterate_over_threads ([&] (struct thread_info *ti)
+	    {
+	      if (ti->ptid.pid () == inferior->pid)
+		{
+		  int core = target_core_of_thread (ti->ptid);
+
+		  if (core != -1)
+		    cores.insert (core);
+		}
+	      return false;
+	    });
 	}
 
-      if (!data.cores.empty ())
+      if (!cores.empty ())
 	{
 	  ui_out_emit_list list_emitter (uiout, "cores");
 
-	  for (int b : data.cores)
+	  for (int b : cores)
 	    uiout->field_signed (NULL, b);
 	}
 

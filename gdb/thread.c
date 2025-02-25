@@ -602,11 +602,10 @@ find_thread_by_handle (gdb::array_view<const gdb_byte> handle,
  */
 
 struct thread_info *
-iterate_over_threads (int (*callback) (struct thread_info *, void *),
-		      void *data)
+iterate_over_threads (gdb::function_view<bool (struct thread_info *)> callback)
 {
   for (thread_info *tp : all_threads_safe ())
-    if ((*callback) (tp, data))
+    if (callback (tp))
       return tp;
 
   return NULL;

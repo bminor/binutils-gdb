@@ -11831,16 +11831,6 @@ bpstat_remove_bp_location (bpstat *bps, struct breakpoint *bpt)
       }
 }
 
-/* Callback for iterate_over_threads.  */
-static int
-bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
-{
-  struct breakpoint *bpt = (struct breakpoint *) data;
-
-  bpstat_remove_bp_location (th->control.stop_bpstat, bpt);
-  return 0;
-}
-
 /* See breakpoint.h.  */
 
 void
@@ -12685,7 +12675,11 @@ delete_breakpoint (struct breakpoint *bpt)
      event-top.c won't do anything, and temporary breakpoints with
      commands won't work.  */
 
-  iterate_over_threads (bpstat_remove_breakpoint_callback, bpt);
+  iterate_over_threads ([&] (struct thread_info *th)
+    {
+      bpstat_remove_bp_location (th->control.stop_bpstat, bpt);
+      return false;
+    });
 
   /* Now that breakpoint is removed from breakpoint list, update the
      global location list.  This will remove locations that used to
