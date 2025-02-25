@@ -38,12 +38,12 @@ extern struct cmd_list_element *show_dwarf_cmdlist;
 
 struct tu_stats
 {
-  int nr_uniq_abbrev_tables;
-  int nr_symtabs;
-  int nr_symtab_sharers;
-  int nr_stmt_less_type_units;
-  int nr_all_type_units_reallocs;
-  int nr_tus;
+  int nr_uniq_abbrev_tables = 0;
+  int nr_symtabs = 0;
+  int nr_symtab_sharers = 0;
+  int nr_stmt_less_type_units = 0;
+  int nr_all_type_units_reallocs = 0;
+  int nr_tus = 0;
 };
 
 struct dwarf2_cu;
@@ -529,7 +529,7 @@ public:
 
   /* Type unit statistics, to see how well the scaling improvements
      are doing.  */
-  struct tu_stats tu_stats {};
+  struct tu_stats tu_stats;
 
   /* A table mapping DW_AT_dwo_name values to struct dwo_file objects.
      This is NULL if the table hasn't been allocated yet.  */
