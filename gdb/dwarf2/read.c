@@ -2836,7 +2836,8 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (dwo_entry == NULL)
     return NULL;
 
-  sig_type_it = add_type_unit (per_bfd, nullptr, dwo_entry->sect_off, sig);
+  sig_type_it
+    = add_type_unit (per_bfd, dwo_entry->section, dwo_entry->sect_off, sig);
   fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_entry);
 
   return *sig_type_it;

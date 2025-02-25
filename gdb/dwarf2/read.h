@@ -112,6 +112,8 @@ struct dwarf2_per_cu_data
       section (section),
       per_bfd (per_bfd)
   {
+    gdb_assert (per_bfd != nullptr);
+    gdb_assert (section != nullptr);
   }
 
   /* The start offset and length of this compilation unit.
