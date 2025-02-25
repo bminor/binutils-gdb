@@ -806,7 +806,7 @@ just very frequently @emph{referenced}.)
 Here's the set of kinds so far.  Each kind has a @code{#define} associated with
 it, also given here.
 
-@multitable {Kind} {@code{CTF_K_VOLATILE}} {Indicates a type that cannot be represented in CTF, or that} {@xref{Pointers typedefs and cvr-quals}}
+@multitable {Kind} {@code{CTF_K_VOLATILE}} {Indicates a type that cannot be represented in CTF, or that}
 @headitem Kind @tab Macro @tab Purpose
 @item 0
 @tab @code{CTF_K_UNKNOWN}
