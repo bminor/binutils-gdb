@@ -8246,8 +8246,8 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
    NOTE: This function is derived from symfile_bfd_open.  */
 
 static gdb_bfd_ref_ptr
-try_open_dwop_file (dwarf2_per_objfile *per_objfile,
-		    const char *file_name, int is_dwp, int search_cwd)
+try_open_dwop_file (dwarf2_per_bfd *per_bfd, const char *file_name, int is_dwp,
+		    int search_cwd)
 {
   int desc;
   /* Blech.  OPF_TRY_CWD_FIRST also disables searching the path list if
@@ -8259,7 +8259,7 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
   gdb::unique_xmalloc_ptr<char> search_path_holder;
   if (search_cwd)
     {
-      const std::string &debug_dir = per_objfile->per_bfd->captured_debug_dir;
+      const std::string &debug_dir = per_bfd->captured_debug_dir;
 
       if (!debug_dir.empty ())
 	{
@@ -8272,10 +8272,10 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
 	search_path = ".";
     }
   else
-    search_path = per_objfile->per_bfd->captured_debug_dir.c_str ();
+    search_path = per_bfd->captured_debug_dir.c_str ();
 
   /* Add the path for the executable binary to the list of search paths.  */
-  std::string objfile_dir = ldirname (objfile_name (per_objfile->objfile));
+  std::string objfile_dir = ldirname (bfd_get_filename (per_bfd->obfd));
   search_path_holder.reset (concat (objfile_dir.c_str (),
 				    dirname_separator_string,
 				    search_path, nullptr));
@@ -8286,9 +8286,8 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
     flags |= OPF_SEARCH_IN_PATH;
 
   gdb::unique_xmalloc_ptr<char> absolute_name;
-  desc = openp (search_path, flags, file_name,
-		O_RDONLY | O_BINARY, &absolute_name,
-		per_objfile->per_bfd->captured_cwd.c_str ());
+  desc = openp (search_path, flags, file_name, O_RDONLY | O_BINARY,
+		&absolute_name, per_bfd->captured_cwd.c_str ());
   if (desc < 0)
     return NULL;
 
@@ -8304,7 +8303,7 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
      This is important because things like demangled_names_hash lives in the
      objfile's per_bfd space and may have references to things like symbol
      names that live in the DWO/DWP file's per_bfd space.  PR 16426.  */
-  gdb_bfd_record_inclusion (per_objfile->objfile->obfd.get (), sym_bfd.get ());
+  gdb_bfd_record_inclusion (per_bfd->obfd, sym_bfd.get ());
 
   return sym_bfd;
 }
@@ -8317,11 +8316,11 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
    same as symfile_bfd_open.  */
 
 static gdb_bfd_ref_ptr
-open_dwo_file (dwarf2_per_objfile *per_objfile,
-	       const char *file_name, const char *comp_dir)
+open_dwo_file (dwarf2_per_bfd *per_bfd, const char *file_name,
+	       const char *comp_dir)
 {
   if (IS_ABSOLUTE_PATH (file_name))
-    return try_open_dwop_file (per_objfile, file_name,
+    return try_open_dwop_file (per_bfd, file_name,
 			       0 /*is_dwp*/, 0 /*search_cwd*/);
 
   /* Before trying the search path, try DWO_NAME in COMP_DIR.  */
@@ -8332,8 +8331,9 @@ open_dwo_file (dwarf2_per_objfile *per_objfile,
 
       /* NOTE: If comp_dir is a relative path, this will also try the
 	 search path, which seems useful.  */
-      gdb_bfd_ref_ptr abfd (try_open_dwop_file
-	(per_objfile, path_to_try.c_str (), 0 /*is_dwp*/, 1 /*search_cwd*/));
+      gdb_bfd_ref_ptr abfd
+	= try_open_dwop_file (per_bfd, path_to_try.c_str (), 0 /* is_dwp */,
+			      1 /* search_cwd */);
 
       if (abfd != NULL)
 	return abfd;
@@ -8342,11 +8342,11 @@ open_dwo_file (dwarf2_per_objfile *per_objfile,
   /* That didn't work, try debug-file-directory, which, despite its name,
      is a list of paths.  */
 
-  if (per_objfile->per_bfd->captured_debug_dir.empty ())
+  if (per_bfd->captured_debug_dir.empty ())
     return NULL;
 
-  return try_open_dwop_file (per_objfile, file_name,
-			     0 /*is_dwp*/, 1 /*search_cwd*/);
+  return try_open_dwop_file (per_bfd, file_name, 0 /* is_dwp */,
+			     1 /* search_cwd */);
 }
 
 /* This function is mapped across the sections and remembers the offset and
@@ -8407,7 +8407,8 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
 
-  gdb_bfd_ref_ptr dbfd = open_dwo_file (per_objfile, dwo_name, comp_dir);
+  gdb_bfd_ref_ptr dbfd
+    = open_dwo_file (per_objfile->per_bfd, dwo_name, comp_dir);
   if (dbfd == NULL)
     {
       dwarf_read_debug_printf ("DWO file not found: %s", dwo_name);
@@ -8607,11 +8608,11 @@ allocate_dwp_loaded_cutus_table ()
    same as symfile_bfd_open.  */
 
 static gdb_bfd_ref_ptr
-open_dwp_file (dwarf2_per_objfile *per_objfile, const char *file_name)
+open_dwp_file (dwarf2_per_bfd *per_bfd, const char *file_name)
 {
-  gdb_bfd_ref_ptr abfd (try_open_dwop_file (per_objfile, file_name,
-					    1 /*is_dwp*/,
-					    1 /*search_cwd*/));
+  gdb_bfd_ref_ptr abfd
+    = try_open_dwop_file (per_bfd, file_name, 1 /* is_dwp */,
+			  1 /* search_cwd */);
   if (abfd != NULL)
     return abfd;
 
@@ -8623,14 +8624,13 @@ open_dwp_file (dwarf2_per_objfile *per_objfile, const char *file_name)
      [IWBN if the dwp file name was recorded in the executable, akin to
      .gnu_debuglink, but that doesn't exist yet.]
      Strip the directory from FILE_NAME and search again.  */
-  if (!per_objfile->per_bfd->captured_debug_dir.empty ())
+  if (!per_bfd->captured_debug_dir.empty ())
     {
       /* Don't implicitly search the current directory here.
 	 If the user wants to search "." to handle this case,
 	 it must be added to debug-file-directory.  */
-      return try_open_dwop_file (per_objfile, lbasename (file_name),
-				 1 /*is_dwp*/,
-				 0 /*search_cwd*/);
+      return try_open_dwop_file (per_bfd, lbasename (file_name),
+				 1 /* is_dwp */, 0 /* search_cwd */);
     }
 
   return NULL;
@@ -8644,6 +8644,7 @@ static dwp_file_up
 open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
 {
   struct objfile *objfile = per_objfile->objfile;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   /* Try to find first .dwp for the binary file before any symbolic links
      resolving.  */
@@ -8663,14 +8664,14 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
 
   dwp_name += ".dwp";
 
-  gdb_bfd_ref_ptr dbfd (open_dwp_file (per_objfile, dwp_name.c_str ()));
+  gdb_bfd_ref_ptr dbfd (open_dwp_file (per_bfd, dwp_name.c_str ()));
   if (dbfd == NULL
       && strcmp (objfile->original_name, objfile_name (objfile)) != 0)
     {
       /* Try to find .dwp for the binary file after gdb_realpath resolving.  */
       dwp_name = objfile_name (objfile);
       dwp_name += ".dwp";
-      dbfd = open_dwp_file (per_objfile, dwp_name.c_str ());
+      dbfd = open_dwp_file (per_bfd, dwp_name.c_str ());
     }
 
   if (dbfd == NULL)
@@ -8684,9 +8685,8 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
   auto dwp_file = std::make_unique<struct dwp_file> (name, std::move (dbfd));
 
   dwp_file->num_sections = elf_numsections (dwp_file->dbfd);
-  dwp_file->elf_sections =
-    OBSTACK_CALLOC (&per_objfile->per_bfd->obstack,
-		    dwp_file->num_sections, asection *);
+  dwp_file->elf_sections
+    = OBSTACK_CALLOC (&per_bfd->obstack, dwp_file->num_sections, asection *);
 
   for (asection *sec : gdb_bfd_sections (dwp_file->dbfd))
     dwarf2_locate_common_dwp_sections (objfile, dwp_file->dbfd.get (), sec,
