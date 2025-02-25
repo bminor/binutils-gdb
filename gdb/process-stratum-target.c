@@ -195,11 +195,11 @@ process_stratum_target::find_thread (ptid_t ptid)
 
 /* See process-stratum-target.h.  */
 
-std::set<process_stratum_target *>
+gdb::unordered_set<process_stratum_target *>
 all_non_exited_process_targets ()
 {
   /* Inferiors may share targets.  To eliminate duplicates, use a set.  */
-  std::set<process_stratum_target *> targets;
+  gdb::unordered_set<process_stratum_target *> targets;
   for (inferior *inf : all_non_exited_inferiors ())
     targets.insert (inf->process_target ());
 
