@@ -70,6 +70,27 @@ _bfd_elf_insert_property (elf_property_list *l,
   return l;
 }
 
+/* Remove a property from the list after prev.  */
+static elf_property_list *
+_bfd_elf_remove_property (elf_property_list *l,
+			  elf_property_list *what,
+			  elf_property_list *prev)
+{
+  if (l == NULL)
+    return l;
+
+  if (prev == NULL) // Pop front
+    {
+      BFD_ASSERT (what == l);
+      l = what->next;
+    }
+  else
+    prev->next = what->next;
+
+  what->next = NULL;
+  return l;
+}
+
 /* Get a property, allocate a new one if needed.  */
 
 elf_property *
@@ -395,23 +416,16 @@ static elf_property *
 elf_find_and_remove_property (elf_property_list **listp,
 			      unsigned int type, bool rm)
 {
-  elf_property_list *list;
+  elf_property_list *prev;
+  elf_property_list *p = _bfd_elf_find_property (*listp, type, &prev);
+  if (p == NULL)
+    return NULL;
 
-  for (list = *listp; list; list = list->next)
-    {
-      if (type == list->property.pr_type)
-	{
-	  /* Remove this property.  */
-	  if (rm)
-	    *listp = list->next;
-	  return &list->property;
-	}
-      else if (type < list->property.pr_type)
-	break;
-      listp = &list->next;
-    }
+  if (rm)
+    *listp = _bfd_elf_remove_property (*listp, p, prev);
 
-  return NULL;
+  /* FIXME: we leak memory with this approach.  */
+  return &p->property;
 }
 
 /* Merge GNU property list *LISTP in ABFD with FIRST_PBFD.  */
