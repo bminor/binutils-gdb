@@ -57,7 +57,7 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
       gdb_assert (insertpair.second);
     }
 
-  std::set<sect_offset> debug_info_offset_seen;
+  gdb::unordered_set<sect_offset> debug_info_offset_seen;
   const bfd_endian dwarf5_byte_order = gdbarch_byte_order (gdbarch);
   const gdb_byte *addr = section->buffer;
   while (addr < section->buffer + section->size)
