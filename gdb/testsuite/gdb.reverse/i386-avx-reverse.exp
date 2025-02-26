@@ -527,9 +527,39 @@ gdb_test_no_output \
     "set \$ymm0.v8_float = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}"
 gdb_test_no_output \
     "set \$ymm1.v8_float = {0, 1, 2, 3, 4, 5, 6, 7}"
+gdb_test_no_output "set \$ymm2.v2_int128 = {0,0}"
 gdb_test_no_output "set \$ymm15.v2_int128 = {0,0}"
 
 if {[record_full_function "arith"] == true} {
+    test_one_register "vpandn" "ymm15" \
+	"0x40400000400000003f80000000000000, 0x0"
+    test_one_register "vpand" "ymm15" \
+	"0x10080000000000000000000000000000, 0x10649c00000000001044480000000000"
+    test_one_register "vxorpd" "ymm2" \
+	"0x20000000200000004000003f000000, 0x0"
+    test_one_register "vxorps" "ymm2" \
+	"0x10280000100800000fd0000000000000, 0x10740000106400001054000010440000"
+
+    test_one_register "vpmuludq" "ymm15" \
+	"0x10280000100800000fd0000000000000, 0x10740000106400001054000010440000"
+    test_one_register "vpmulhuw" "ymm15" \
+	"0x0, 0x0"
+    test_one_register "vpmulhw" "ymm2" \
+	"0x18000000000000002000000000000000, 0x0"
+    test_one_register "vpmulld" "ymm15" \
+	"0x80a00000802000007f4000003f000000, 0x81d00000819000008150000081100000"
+    test_one_register "vpmullw" "ymm2" \
+	"0x80a00000802000007f4000003f000000, 0x81d00000819000008150000081100000"
+
+    test_one_register "vpaddq" "ymm15" \
+	"0x80a00000802000007f4000003f000000, 0x0"
+    test_one_register "vpaddd" "ymm2" \
+	"0x80a00000802000007e4000003f000000, 0x0"
+    test_one_register "vpaddw" "ymm15" \
+	"0x40400000400000003fc000003f000000, 0x0"
+    test_one_register "vpaddb" "ymm2" \
+	"0x0, 0x0"
+
     test_one_register "vmaxsd" "ymm15" \
 	"0x40400000400000003f8000003f000000, 0x0" "ymm operation: "
     test_one_register "vmaxss" "ymm15" \

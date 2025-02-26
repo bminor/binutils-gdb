@@ -372,6 +372,7 @@ arith_test ()
   /* Using GDB, load these values onto registers for testing.
      ymm0.v8_float = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}
      ymm1.v8_float = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}
+     ymm2.v2_int128 = {0x0, 0x0}
      ymm15.v2_int128 = {0x0, 0x0}
      this way it's easy to confirm we're undoing things correctly.  */
   asm volatile ("vaddps %xmm0, %xmm1, %xmm15");
@@ -415,6 +416,23 @@ arith_test ()
   asm volatile ("vmaxpd %ymm0, %ymm1, %ymm15");
   asm volatile ("vmaxss %xmm0, %xmm1, %xmm15");
   asm volatile ("vmaxsd %xmm0, %xmm1, %xmm15");
+
+  /* Some sanity checks for other arithmetic instructions.  */
+  asm volatile ("vpaddb %xmm0, %xmm1, %xmm2");
+  asm volatile ("vpaddw %xmm0, %xmm1, %xmm15");
+  asm volatile ("vpaddd %ymm0, %ymm1, %ymm2");
+  asm volatile ("vpaddq %ymm0, %ymm1, %ymm15");
+
+  asm volatile ("vpmullw %xmm0, %xmm1, %xmm2");
+  asm volatile ("vpmulld %xmm0, %xmm1, %xmm15");
+  asm volatile ("vpmulhw %ymm0, %ymm1, %ymm2");
+  asm volatile ("vpmulhuw %ymm0, %ymm1, %ymm15");
+  asm volatile ("vpmuludq %ymm0, %ymm1, %ymm15");
+
+  asm volatile ("vxorps %xmm0, %xmm1, %xmm2");
+  asm volatile ("vxorpd %ymm0, %ymm1, %ymm2");
+  asm volatile ("vpand %xmm0, %xmm1, %xmm15");
+  asm volatile ("vpandn %ymm0, %ymm1, %ymm15");
 
   return 0; /* end arith_test  */
 }

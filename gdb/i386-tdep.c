@@ -4800,7 +4800,7 @@ static int i386_record_floats (struct gdbarch *gdbarch,
 
 static int
 i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
-		 int opcode, struct gdbarch *gdbarch)
+		 struct gdbarch *gdbarch)
 {
   /* We need this to find YMM (and once AVX-512 is supported, ZMM) registers.
      We should always save the largest available register, since an
@@ -4813,6 +4813,11 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
      now.  */
   SCOPE_EXIT { inferior_thread ()->set_executing (true); };
   inferior_thread () -> set_executing (false);
+
+  uint8_t opcode;
+  if (record_read_memory (gdbarch, ir->addr, &opcode, 1))
+    return -1;
+  ir->addr++;
 
   switch (opcode)
     {
@@ -5016,14 +5021,26 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
       }
       break;
 
-    case 0x78:	/* VPBROADCASTB  */
-    case 0x79:	/* VPBROADCASTW  */
+    case 0x40:	/* VPMULLD  */
+    case 0x57:	/* VXORP[S|D]  */
     case 0x58:	/* VPBROADCASTD and VADD[P|S][S|D]  */
     case 0x59:	/* VPBROADCASTQ and VMUL[P|S][S|D]  */
     case 0x5c:	/* VSUB[P|S][S|D]  */
     case 0x5d:	/* VMIN[P|S][S|D]  */
     case 0x5e:	/* VDIV[P|S][S|D]  */
     case 0x5f:	/* VMAX[P|S][S|D]  */
+    case 0x78:	/* VPBROADCASTB  */
+    case 0x79:	/* VPBROADCASTW  */
+    case 0xd4:	/* VPADDQ  */
+    case 0xd5:	/* VPMULLW  */
+    case 0xdb:	/* VPAND  */
+    case 0xdf:	/* VPANDN  */
+    case 0xe5:	/* VPMULHW  */
+    case 0xe4:	/* VPMULHUW  */
+    case 0xf4:	/* VPMULUDQ  */
+    case 0xfc:	/* VPADDB  */
+    case 0xfd:	/* VPADDW  */
+    case 0xfe:	/* VPADDD  */
       {
 	/* vpbroadcast and arithmetic operations are differentiated
 	   by map_select, but it doesn't change the recording mechanics.  */
@@ -5127,8 +5144,11 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		"addr = %s\n",
 		paddress (gdbarch, ir.addr));
 
-  /* prefixes */
-  while (1)
+  /* Process the prefixes.  This used to be an infinite loop, but since
+     a VEX prefix is always the last one before the opcode, according to
+     Intel's manual anyway, and some AVX opcodes may conflict with
+     prefixes, it's safe to leave the loop as soon as we see VEX.  */
+  while (!vex_prefix)
     {
       if (record_read_memory (gdbarch, ir.addr, &opcode8, 1))
 	return -1;
@@ -5268,7 +5288,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       /* If we found the VEX prefix, i386 will either record or warn that
 	 the instruction isn't supported, so we can return the VEX result.  */
-      return i386_record_vex (&ir, rex_w, rex_r, opcode, gdbarch);
+      return i386_record_vex (&ir, rex_w, rex_r, gdbarch);
     }
  reswitch:
   switch (opcode)
