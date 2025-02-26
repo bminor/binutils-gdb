@@ -1676,7 +1676,7 @@ struct elf_backend_data
      Returns the value to be installed in the ST_SHNDX field of the
      emitted symbol.  If not defined, the value is left unchanged.  */
   unsigned int (*symbol_section_index) (bfd *, elf_symbol_type *);
-  
+
   /* Called when a section has extra reloc sections.  */
   bool (*init_secondary_reloc_section) (bfd *, Elf_Internal_Shdr *,
 					const char *, unsigned int);
