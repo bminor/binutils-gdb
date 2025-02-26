@@ -1110,6 +1110,7 @@ COMMON_SFILES = \
 	dwarf2/line-header.c \
 	dwarf2/loc.c \
 	dwarf2/macro.c \
+	dwarf2/parent-map.c \
 	dwarf2/read.c \
 	dwarf2/read-debug-names.c \
 	dwarf2/read-gdb-index.c \
