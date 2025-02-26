@@ -368,12 +368,6 @@ generic_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 }
 #endif
 
-struct cfi_escape_data
-{
-  struct cfi_escape_data *next;
-  expressionS exp;
-};
-
 struct cie_entry
 {
   struct cie_entry *next;

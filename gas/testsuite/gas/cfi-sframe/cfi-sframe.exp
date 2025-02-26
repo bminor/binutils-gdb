@@ -78,6 +78,7 @@ if  { ([istarget "x86_64-*-*"] || [istarget "aarch64*-*-*"]) \
     run_dump_test "cfi-sframe-common-6"
     run_dump_test "cfi-sframe-common-7"
     run_dump_test "cfi-sframe-common-8"
+    run_dump_test "cfi-sframe-common-9"
 
     run_dump_test "common-empty-1"
     run_dump_test "common-empty-2"
@@ -89,6 +90,9 @@ if { [istarget "x86_64-*-*"] && [gas_sframe_check] } then {
     if { [gas_x86_64_check] } then {
 	set ASFLAGS "$ASFLAGS --64"
 	run_dump_test "cfi-sframe-x86_64-1"
+	run_dump_test "cfi-sframe-x86_64-empty-1"
+	run_dump_test "cfi-sframe-x86_64-empty-2"
+	run_dump_test "cfi-sframe-x86_64-empty-3"
 	set ASFLAGS "$old_ASFLAGS"
     }
 }

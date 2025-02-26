@@ -1117,11 +1117,15 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
 }
 
 /* Translate DW_CFA_val_offset into SFrame context.
-   Return SFRAME_XLATE_OK if success.  */
+   Return SFRAME_XLATE_OK if success.
+
+   When CFI_ESC_P is true, the CFI_INSN is hand-crafted using CFI_escape
+   data.  See sframe_xlate_do_escape_val_offset.  */
 
 static int
-sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
-			    struct cfi_insn_data *cfi_insn)
+sframe_xlate_do_val_offset (const struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
+			    const struct cfi_insn_data *cfi_insn,
+			    bool cfi_esc_p)
 {
   /* Previous value of register is CFA + offset.  However, if the specified
      register is not interesting (SP, FP, or RA reg), the current
@@ -1134,7 +1138,8 @@ sframe_xlate_do_val_offset (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
       /* Ignore SP reg, if offset matches assumed default rule.  */
       || (cfi_insn->u.ri.reg == SFRAME_CFA_SP_REG && cfi_insn->u.ri.offset != 0))
     {
-      as_warn (_("skipping SFrame FDE; %s register %u in .cfi_val_offset"),
+      as_warn (_("skipping SFrame FDE; %s with %s reg %u"),
+	       cfi_esc_p ? ".cfi_escape DW_CFA_val_offset" : ".cfi_val_offset",
 	       sframe_register_name (cfi_insn->u.ri.reg), cfi_insn->u.ri.reg);
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
     }
@@ -1310,6 +1315,221 @@ sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
   return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
 }
 
+/* Handle DW_CFA_expression in .cfi_escape.
+
+   As with sframe_xlate_do_cfi_escape, the intent of this function is to detect
+   only the simple-to-process but common cases, where skipping over the escape
+   expr data does not affect correctness of the SFrame stack trace data.
+
+   Sets CALLER_WARN_P for skipped cases (and returns SFRAME_XLATE_OK) where the
+   caller must warn.  The caller then must also set
+   SFRAME_XLATE_ERR_NOTREPRESENTED for their callers.  */
+
+static int
+sframe_xlate_do_escape_expr (const struct sframe_xlate_ctx *xlate_ctx,
+			     const struct cfi_insn_data *cfi_insn,
+			     bool *caller_warn_p)
+{
+  const struct cfi_escape_data *e = cfi_insn->u.esc;
+  int err = SFRAME_XLATE_OK;
+  unsigned int reg = 0;
+  unsigned int i = 0;
+
+  /* Check roughly for an expression
+     DW_CFA_expression: r1 (rdx) (DW_OP_bregN (reg): OFFSET).  */
+#define CFI_ESC_NUM_EXP 4
+  offsetT items[CFI_ESC_NUM_EXP] = {0};
+  while (e->next)
+    {
+      e = e->next;
+      if ((i == 2 && (items[1] != 2)) /* Expected len of 2 in DWARF expr.  */
+	  /* We do not care for the exact values of items[2] and items[3],
+	     so an explicit check for O_constant isnt necessary either.  */
+	  || i >= CFI_ESC_NUM_EXP || (i < 2 && e->exp.X_op != O_constant))
+	goto warn_and_exit;
+      items[i] = e->exp.X_add_number;
+      i++;
+    }
+
+  if (i <= CFI_ESC_NUM_EXP - 1)
+    goto warn_and_exit;
+
+  /* reg operand to DW_CFA_expression is ULEB128.  For the purpose at hand,
+     however, the register value will be less than 128 (CFI_ESC_NUM_EXP set
+     to 4).  See an extended comment in sframe_xlate_do_escape_expr for why
+     reading ULEB is okay to skip without sacrificing correctness.  */
+  reg = items[0];
+#undef CFI_ESC_NUM_EXP
+
+  if (reg == SFRAME_CFA_SP_REG || reg == SFRAME_CFA_FP_REG
+#ifdef SFRAME_FRE_RA_TRACKING
+      || (sframe_ra_tracking_p () && reg == SFRAME_CFA_RA_REG)
+#endif
+      || reg == xlate_ctx->cur_fre->cfa_base_reg)
+    {
+      as_warn (_("skipping SFrame FDE; "
+		 ".cfi_escape DW_CFA_expression with %s reg %u"),
+	       sframe_register_name (reg), reg);
+      err = SFRAME_XLATE_ERR_NOTREPRESENTED;
+    }
+  /* else safe to skip, so continue to return SFRAME_XLATE_OK.  */
+
+  return err;
+
+warn_and_exit:
+  *caller_warn_p = true;
+  return err;
+}
+
+/* Handle DW_CFA_val_offset in .cfi_escape.
+
+   As with sframe_xlate_do_cfi_escape, the intent of this function is to detect
+   only the simple-to-process but common cases, where skipping over the escape
+   expr data does not affect correctness of the SFrame stack trace data.
+
+   Sets CALLER_WARN_P for skipped cases (and returns SFRAME_XLATE_OK) where the
+   caller must warn.  The caller then must also set
+   SFRAME_XLATE_ERR_NOTREPRESENTED for their callers.  */
+
+static int
+sframe_xlate_do_escape_val_offset (const struct sframe_xlate_ctx *xlate_ctx,
+				   const struct cfi_insn_data *cfi_insn,
+				   bool *caller_warn_p)
+{
+  const struct cfi_escape_data *e = cfi_insn->u.esc;
+  int err = SFRAME_XLATE_OK;
+  unsigned int i = 0;
+  unsigned int reg;
+  offsetT offset;
+
+  /* Check for (DW_CFA_val_offset reg scaled_offset) sequence.  */
+#define CFI_ESC_NUM_EXP 2
+  offsetT items[CFI_ESC_NUM_EXP] = {0};
+  while (e->next)
+    {
+      e = e->next;
+      if (i >= CFI_ESC_NUM_EXP || e->exp.X_op != O_constant)
+	goto warn_and_exit;
+      items[i] = e->exp.X_add_number;
+      i++;
+    }
+  if (i <= CFI_ESC_NUM_EXP - 1)
+    goto warn_and_exit;
+
+  /* Both arguments to DW_CFA_val_offset are ULEB128.  Especially with APX (on
+     x86) we're going to see DWARF register numbers above 127, for the extended
+     GPRs.  And large enough stack frames would also require multi-byte offset
+     representation.  However, since we limit our focus on cases when
+     CFI_ESC_NUM_EXP is 2, reading ULEB can be skipped.  IOW, although not
+     ideal, SFrame FDE generation in case of an APX register in
+     DW_CFA_val_offset is being skipped (PS: this does _not_ mean incorrect
+     SFrame stack trace data).
+
+     Recall that the intent here is to check for simple and prevalent cases,
+     when feasible.  */
+
+  reg = items[0];
+  offset = items[1];
+#undef CFI_ESC_NUM_EXP
+
+  /* Invoke sframe_xlate_do_val_offset itself for checking.  */
+  struct cfi_insn_data temp = {
+    .insn = DW_CFA_val_offset,
+    .u = {
+      .ri = {
+	.reg = reg,
+	.offset = offset * DWARF2_CIE_DATA_ALIGNMENT
+      }
+    }
+  };
+  err = sframe_xlate_do_val_offset (xlate_ctx, &temp, true);
+  return err;
+
+warn_and_exit:
+  *caller_warn_p = true;
+  return err;
+}
+
+/* Handle CFI_escape in SFrame context.
+
+   .cfi_escape CFI directive allows the user to add arbitrary data to the
+   unwind info.  DWARF expressions commonly follow after CFI_escape (fake CFI)
+   DWARF opcode.  One might also use CFI_escape to add OS-specific CFI opcodes
+   even.
+
+   Complex unwind info added using .cfi_escape directive _may_ be of no
+   consequence for SFrame when the affected registers are not SP, FP, RA or
+   CFA.  The challenge in confirming the afore-mentioned is that it needs full
+   parsing (and validation) of the data presented after .cfi_escape.  Here we
+   take a case-by-case approach towards skipping _some_ instances of
+   .cfi_escape: skip those that can be *easily* determined to be harmless in
+   the context of SFrame stack trace information.
+
+   This function partially processes data following .cfi_escape and returns
+   SFRAME_XLATE_OK if OK to skip.  */
+
+static int
+sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
+			    const struct cfi_insn_data *cfi_insn)
+{
+  const struct cfi_escape_data *e;
+  bool warn_p = false;
+  int err = SFRAME_XLATE_OK;
+  offsetT firstop;
+
+  e = cfi_insn->u.esc;
+
+  if (!e)
+    return SFRAME_XLATE_ERR_INVAL;
+
+  if (e->exp.X_op != O_constant)
+    return SFRAME_XLATE_ERR_NOTREPRESENTED;
+
+  firstop = e->exp.X_add_number;
+  switch (firstop)
+    {
+    case DW_CFA_nop:
+      /* One or more nops together are harmless for SFrame.  */
+      while (e->next)
+	{
+	  e = e->next;
+	  if (e->exp.X_op != O_constant || e->exp.X_add_number != DW_CFA_nop)
+	    {
+	      warn_p = true;
+	      break;
+	    }
+	}
+      break;
+
+    case DW_CFA_expression:
+      err = sframe_xlate_do_escape_expr (xlate_ctx, cfi_insn, &warn_p);
+      break;
+
+    case DW_CFA_val_offset:
+      err = sframe_xlate_do_escape_val_offset (xlate_ctx, cfi_insn, &warn_p);
+      break;
+
+    /* FIXME - Also add processing for DW_CFA_GNU_args_size in future?  */
+
+    default:
+      warn_p = true;
+      break;
+    }
+
+  if (warn_p)
+    {
+      /* In all other cases (e.g., DW_CFA_def_cfa_expression or other
+	 OS-specific CFI opcodes), skip inspecting the DWARF expression.
+	 This may impact the asynchronicity due to loss of coverage.
+	 Continue to warn the user and bail out.  */
+      as_warn (_("skipping SFrame FDE; .cfi_escape with op (%#lx)"),
+	       (unsigned long)firstop);
+      err = SFRAME_XLATE_ERR_NOTREPRESENTED;
+    }
+
+  return err;
+}
+
 /* Returns the DWARF call frame instruction name or fake CFI name for the
    specified CFI opcode, or NULL if the value is not recognized.  */
 
@@ -1384,7 +1604,7 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
       err = sframe_xlate_do_offset (xlate_ctx, cfi_insn);
       break;
     case DW_CFA_val_offset:
-      err = sframe_xlate_do_val_offset (xlate_ctx, cfi_insn);
+      err = sframe_xlate_do_val_offset (xlate_ctx, cfi_insn, false);
       break;
     case DW_CFA_remember_state:
       err = sframe_xlate_do_remember_state (xlate_ctx);
@@ -1406,6 +1626,9 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
     case DW_CFA_register:
       err = sframe_xlate_do_register (xlate_ctx, cfi_insn);
       break;
+    case CFI_escape:
+      err = sframe_xlate_do_cfi_escape (xlate_ctx, cfi_insn);
+      break;
     /* Following CFI opcodes are not processed at this time.
        These do not impact the coverage of the basic stack tracing
        information as conveyed in the SFrame format.  */
@@ -1413,8 +1636,7 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
     case DW_CFA_same_value:
       break;
     default:
-      /* Following skipped operations do, however, impact the asynchronicity:
-	  - CFI_escape.  */
+      /* Other skipped operations may, however, impact the asynchronicity.  */
       {
 	const char *cfi_name = sframe_get_cfi_name (op);
 

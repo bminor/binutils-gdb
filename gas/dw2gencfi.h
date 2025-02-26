@@ -93,6 +93,12 @@ extern void cfi_add_CFA_restore_state (void);
 #define MULTIPLE_FRAME_SECTIONS (SUPPORT_FRAME_LINKONCE || SUPPORT_COMPACT_EH \
 				 || TARGET_MULTIPLE_EH_FRAME_SECTIONS)
 
+struct cfi_escape_data
+{
+  struct cfi_escape_data *next;
+  expressionS exp;
+};
+
 struct cfi_insn_data
 {
   struct cfi_insn_data *next;
