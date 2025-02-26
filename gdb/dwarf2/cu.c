@@ -26,8 +26,7 @@
 
 /* Initialize dwarf2_cu to read PER_CU, in the context of PER_OBJFILE.  */
 
-dwarf2_cu::dwarf2_cu (dwarf2_per_cu_data *per_cu,
-		      dwarf2_per_objfile *per_objfile)
+dwarf2_cu::dwarf2_cu (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile)
   : per_cu (per_cu),
     per_objfile (per_objfile),
     m_mark (false),
@@ -141,7 +140,7 @@ dwarf2_cu::mark ()
 
   m_mark = true;
 
-  for (dwarf2_per_cu_data *per_cu : m_dependencies)
+  for (dwarf2_per_cu *per_cu : m_dependencies)
     {
       /* cu->m_dependencies references may not yet have been ever
 	 read if QUIT aborts reading of the chain.  As such

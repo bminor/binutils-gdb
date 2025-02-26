@@ -273,9 +273,8 @@ cooked_index_entry::write_scope (struct obstack *storage,
 cooked_index_entry *
 cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
 			 cooked_index_flag flags, enum language lang,
-			 const char *name,
-			 cooked_index_entry_ref parent_entry,
-			 dwarf2_per_cu_data *per_cu)
+			 const char *name, cooked_index_entry_ref parent_entry,
+			 dwarf2_per_cu *per_cu)
 {
   cooked_index_entry *result = create (die_offset, tag, flags, lang, name,
 				       parent_entry, per_cu);
@@ -691,14 +690,14 @@ cooked_index::~cooked_index ()
 
 /* See cooked-index.h.  */
 
-dwarf2_per_cu_data *
+dwarf2_per_cu *
 cooked_index::lookup (unrelocated_addr addr)
 {
   /* Ensure that the address maps are ready.  */
   wait (cooked_state::MAIN_AVAILABLE, true);
   for (const auto &shard : m_shards)
     {
-      dwarf2_per_cu_data *result = shard->lookup (addr);
+      dwarf2_per_cu *result = shard->lookup (addr);
       if (result != nullptr)
 	return result;
     }
@@ -857,14 +856,13 @@ cooked_index::dump (gdbarch *arch)
 
 	  if (obj != nullptr)
 	    {
-	      const dwarf2_per_cu_data *per_cu
-		= static_cast<const dwarf2_per_cu_data *> (obj);
-	      gdb_printf ("      [%s] ((dwarf2_per_cu_data *) %p)\n",
+	      const dwarf2_per_cu *per_cu
+		= static_cast<const dwarf2_per_cu *> (obj);
+	      gdb_printf ("      [%s] ((dwarf2_per_cu *) %p)\n",
 			  start_addr_str, per_cu);
 	    }
 	  else
-	    gdb_printf ("      [%s] ((dwarf2_per_cu_data *) 0)\n",
-			start_addr_str);
+	    gdb_printf ("      [%s] ((dwarf2_per_cu *) 0)\n", start_addr_str);
 
 	  return 0;
 	});

@@ -129,7 +129,7 @@ struct mapped_gdb_index : public dwarf_scanner_base
   /* The shortcut table data.  */
   gdb::array_view<const gdb_byte> shortcut_table;
 
-  /* An address map that maps from PC to dwarf2_per_cu_data.  */
+  /* An address map that maps from PC to dwarf2_per_cu.  */
   addrmap_fixed *index_addrmap = nullptr;
 
   /* Return the index into the constant pool of the name of the IDXth
@@ -186,13 +186,13 @@ struct mapped_gdb_index : public dwarf_scanner_base
     return version >= 8;
   }
 
-  dwarf2_per_cu_data *lookup (unrelocated_addr addr) override
+  dwarf2_per_cu *lookup (unrelocated_addr addr) override
   {
     if (index_addrmap == nullptr)
       return nullptr;
 
     void *obj = index_addrmap->find (static_cast<CORE_ADDR> (addr));
-    return static_cast<dwarf2_per_cu_data *> (obj);
+    return static_cast<dwarf2_per_cu *> (obj);
   }
 
   cooked_index *index_for_writing () override
@@ -1113,7 +1113,8 @@ dw2_expand_marked_cus (dwarf2_per_objfile *per_objfile, offset_type idx,
 	  continue;
 	}
 
-      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cu (cu_index);
+      dwarf2_per_cu *per_cu = per_objfile->per_bfd->get_cu (cu_index);
+
       if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile, file_matcher,
 					    expansion_notify, lang_matcher))
 	return false;
@@ -1141,8 +1142,7 @@ dwarf2_gdb_index::expand_symtabs_matching
   gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
   if (lookup_name == nullptr)
     {
-      for (dwarf2_per_cu_data *per_cu
-	     : all_units_range (per_objfile->per_bfd))
+      for (dwarf2_per_cu *per_cu : all_units_range (per_objfile->per_bfd))
 	{
 	  QUIT;
 
@@ -1324,7 +1324,7 @@ create_cus_from_gdb_index_list (dwarf2_per_bfd *per_bfd,
       ULONGEST length = extract_unsigned_integer (cu_list + 8, 8, BFD_ENDIAN_LITTLE);
       cu_list += 2 * 8;
 
-      dwarf2_per_cu_data_up per_cu
+      dwarf2_per_cu_up per_cu
 	= create_cu_from_index_list (per_bfd, section, is_dwz, sect_off,
 				     length);
       per_bfd->all_units.push_back (std::move (per_cu));

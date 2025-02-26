@@ -50,8 +50,7 @@ struct delayed_method_info
 /* Internal state when decoding a particular compilation unit.  */
 struct dwarf2_cu
 {
-  explicit dwarf2_cu (dwarf2_per_cu_data *per_cu,
-		      dwarf2_per_objfile *per_objfile);
+  explicit dwarf2_cu (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile);
 
   DISABLE_COPY_AND_ASSIGN (dwarf2_cu);
 
@@ -97,7 +96,7 @@ struct dwarf2_cu
   }
 
   /* Add a dependence relationship from this cu to REF_PER_CU.  */
-  void add_dependence (struct dwarf2_per_cu_data *ref_per_cu)
+  void add_dependence (dwarf2_per_cu *ref_per_cu)
   { m_dependencies.emplace (ref_per_cu); }
 
   /* The header of the compilation unit.  */
@@ -268,10 +267,10 @@ private:
      symbols are being read.  */
   buildsym_compunit_up m_builder;
 
-  /* A set of pointers to dwarf2_per_cu_data objects for compilation
-     units referenced by this one.  Only used during full symbol processing;
-     partial symbol tables do not have dependencies.  */
-  gdb::unordered_set<dwarf2_per_cu_data *> m_dependencies;
+  /* A set of pointers to dwarf2_per_cu objects for compilation units referenced
+     by this one.  Only used during full symbol processing; partial symbol
+     tables do not have dependencies.  */
+  gdb::unordered_set<dwarf2_per_cu *> m_dependencies;
 
 public:
   /* The generic symbol table building routines have separate lists for
@@ -290,7 +289,7 @@ public:
   auto_obstack comp_unit_obstack;
 
   /* Backlink to our per_cu entry.  */
-  struct dwarf2_per_cu_data *per_cu;
+  dwarf2_per_cu *per_cu;
 
   /* The dwarf2_per_objfile that owns this.  */
   dwarf2_per_objfile *per_objfile;

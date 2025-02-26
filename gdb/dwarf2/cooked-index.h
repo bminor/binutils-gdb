@@ -40,7 +40,7 @@
 #include <condition_variable>
 #endif /* CXX_STD_THREAD */
 
-struct dwarf2_per_cu_data;
+struct dwarf2_per_cu;
 struct dwarf2_per_bfd;
 struct index_cache_store_context;
 struct cooked_index_entry;
@@ -105,7 +105,7 @@ struct cooked_index_entry : public allocate_on_obstack<cooked_index_entry>
 		      cooked_index_flag flags_,
 		      enum language lang_, const char *name_,
 		      cooked_index_entry_ref parent_entry_,
-		      dwarf2_per_cu_data *per_cu_)
+		      dwarf2_per_cu *per_cu_)
     : name (name_),
       tag (tag_),
       flags (flags_),
@@ -241,7 +241,7 @@ struct cooked_index_entry : public allocate_on_obstack<cooked_index_entry>
   /* The offset of this DIE.  */
   sect_offset die_offset;
   /* The CU from which this entry originates.  */
-  dwarf2_per_cu_data *per_cu;
+  dwarf2_per_cu *per_cu;
 
 private:
 
@@ -279,7 +279,7 @@ public:
 			   cooked_index_flag flags, enum language lang,
 			   const char *name,
 			   cooked_index_entry_ref parent_entry,
-			   dwarf2_per_cu_data *per_cu);
+			   dwarf2_per_cu *per_cu);
 
   /* Install a new fixed addrmap from the given mutable addrmap.  */
   void install_addrmap (addrmap_mutable *map)
@@ -317,13 +317,12 @@ private:
   /* Look up ADDR in the address map, and return either the
      corresponding CU, or nullptr if the address could not be
      found.  */
-  dwarf2_per_cu_data *lookup (unrelocated_addr addr)
+  dwarf2_per_cu *lookup (unrelocated_addr addr)
   {
     if (m_addrmap == nullptr)
       return nullptr;
 
-    return (static_cast<dwarf2_per_cu_data *>
-	    (m_addrmap->find ((CORE_ADDR) addr)));
+    return (static_cast<dwarf2_per_cu *> (m_addrmap->find ((CORE_ADDR) addr)));
   }
 
   /* Create a new cooked_index_entry and register it with this object.
@@ -334,7 +333,7 @@ private:
 			      enum language lang,
 			      const char *name,
 			      cooked_index_entry_ref parent_entry,
-			      dwarf2_per_cu_data *per_cu)
+			      dwarf2_per_cu *per_cu)
   {
     return new (&m_storage) cooked_index_entry (die_offset, tag, flags,
 						lang, name, parent_entry,
@@ -360,8 +359,7 @@ private:
   std::vector<cooked_index_entry *> m_entries;
   /* If we found an entry with 'is_main' set, store it here.  */
   cooked_index_entry *m_main = nullptr;
-  /* The addrmap.  This maps address ranges to dwarf2_per_cu_data
-     objects.  */
+  /* The addrmap.  This maps address ranges to dwarf2_per_cu objects.  */
   addrmap_fixed *m_addrmap = nullptr;
   /* Storage for canonical names.  */
   std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
@@ -389,7 +387,7 @@ public:
 
   /* Return the DIE reader corresponding to PER_CU.  If no such reader
      has been registered, return NULL.  */
-  cutu_reader *get_reader (dwarf2_per_cu_data *per_cu);
+  cutu_reader *get_reader (dwarf2_per_cu *per_cu);
 
   /* Preserve READER by storing it in the local hash table.  */
   cutu_reader *preserve (cutu_reader_up reader);
@@ -400,7 +398,7 @@ public:
 			   cooked_index_flag flags,
 			   const char *name,
 			   cooked_index_entry_ref parent_entry,
-			   dwarf2_per_cu_data *per_cu)
+			   dwarf2_per_cu *per_cu)
   {
     return m_shard->add (die_offset, tag, flags, per_cu->lang (),
 			 name, parent_entry, per_cu);
@@ -671,7 +669,7 @@ public:
   /* Look up ADDR in the address map, and return either the
      corresponding CU, or nullptr if the address could not be
      found.  */
-  dwarf2_per_cu_data *lookup (unrelocated_addr addr) override;
+  dwarf2_per_cu *lookup (unrelocated_addr addr) override;
 
   /* Return a new vector of all the addrmaps used by all the indexes
      held by this object.

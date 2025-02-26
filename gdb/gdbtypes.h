@@ -56,7 +56,7 @@ struct field;
 struct block;
 struct value_print_options;
 struct language_defn;
-struct dwarf2_per_cu_data;
+struct dwarf2_per_cu;
 struct dwarf2_per_objfile;
 struct dwarf2_property_baton;
 

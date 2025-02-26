@@ -24,7 +24,7 @@
 
 struct gdbarch;
 class frame_info_ptr;
-struct dwarf2_per_cu_data;
+struct dwarf2_per_cu;
 struct agent_expr;
 struct axs_value;
 
@@ -251,12 +251,11 @@ CORE_ADDR dwarf2_frame_cfa (const frame_info_ptr &this_frame);
    in other cases.  These are only used when 0 is returned.  */
 
 extern int dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
-				  struct dwarf2_per_cu_data *data,
-				  int *regnum_out, LONGEST *offset_out,
+				  dwarf2_per_cu *data, int *regnum_out,
+				  LONGEST *offset_out,
 				  CORE_ADDR *text_offset_out,
 				  const gdb_byte **cfa_start_out,
 				  const gdb_byte **cfa_end_out);
-
 
 /* Allocate a new instance of the function unique data.
 

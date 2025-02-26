@@ -174,7 +174,7 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
   cooked_index_flag flags = 0;
   sect_offset die_offset {};
   enum language lang = language_unknown;
-  dwarf2_per_cu_data *per_cu = nullptr;
+  dwarf2_per_cu *per_cu = nullptr;
   for (const auto &attr : indexval.attr_vec)
     {
       ULONGEST ull;

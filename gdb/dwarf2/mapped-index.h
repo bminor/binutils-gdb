@@ -65,7 +65,7 @@ struct dwarf_scanner_base
 
   /* Look up ADDR, and return either the corresponding CU, or nullptr
      if the address could not be found.  */
-  virtual dwarf2_per_cu_data *lookup (unrelocated_addr addr)
+  virtual dwarf2_per_cu *lookup (unrelocated_addr addr)
   { return nullptr; }
 };
 

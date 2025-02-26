@@ -39,8 +39,7 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
   struct gdbarch *gdbarch = objfile->arch ();
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
-  gdb::unordered_map<sect_offset, dwarf2_per_cu_data *>
-    debug_info_offset_to_per_cu;
+  gdb::unordered_map<sect_offset, dwarf2_per_cu *> debug_info_offset_to_per_cu;
   for (const auto &per_cu : per_bfd->all_units)
     {
       /* A TU will not need aranges, and skipping them here is an easy
@@ -123,7 +122,7 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		      sect_offset_str (sect_offset (debug_info_offset)));
 	  return false;
 	}
-      dwarf2_per_cu_data *const per_cu = per_cu_it->second;
+      dwarf2_per_cu *const per_cu = per_cu_it->second;
 
       const uint8_t address_size = *addr++;
       if (address_size < 1 || address_size > 8)

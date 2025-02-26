@@ -772,9 +772,8 @@ dwarf2_frame_find_quirks (struct dwarf2_frame_state *fs,
 
 int
 dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
-		       struct dwarf2_per_cu_data *data,
-		       int *regnum_out, LONGEST *offset_out,
-		       CORE_ADDR *text_offset_out,
+		       dwarf2_per_cu *data, int *regnum_out,
+		       LONGEST *offset_out, CORE_ADDR *text_offset_out,
 		       const gdb_byte **cfa_start_out,
 		       const gdb_byte **cfa_end_out)
 {
