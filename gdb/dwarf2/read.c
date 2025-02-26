@@ -4294,7 +4294,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 	  sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
 	  this_cu.reset (sig_type.release ());
 
-	  auto [sig_type_it, inserted] = sig_types.emplace (sig_ptr);
+	  auto inserted = sig_types.emplace (sig_ptr).second;
 
 	  if (!inserted)
 	    complaint (_("debug type entry at offset %s is duplicate to"
