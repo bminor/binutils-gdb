@@ -20946,9 +20946,16 @@ namespace find_containing_comp_unit {
 static void
 run_test ()
 {
-  const auto create_dummy_per_cu = [] (sect_offset sect_off, unsigned int length)
+  char dummy_per_bfd;
+  char dummy_section;
+
+  const auto create_dummy_per_cu = [&] (sect_offset sect_off,
+					unsigned int length)
     {
-      return dwarf2_per_cu_data_up (new dwarf2_per_cu_data (nullptr, nullptr,
+      auto per_bfd = reinterpret_cast<dwarf2_per_bfd *> (&dummy_per_bfd);
+      auto section = reinterpret_cast<dwarf2_section_info *> (&dummy_section);
+
+      return dwarf2_per_cu_data_up (new dwarf2_per_cu_data (per_bfd, section,
 							    sect_off, length));
     };
 
