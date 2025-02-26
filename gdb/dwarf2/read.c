@@ -1819,10 +1819,10 @@ dw2_instantiate_symtab (dwarf2_per_cu_data *per_cu,
 
 dwarf2_per_cu_data_up
 dwarf2_per_bfd::allocate_per_cu (dwarf2_section_info *section,
-				 sect_offset sect_off)
+				 sect_offset sect_off, unsigned int length)
 {
   dwarf2_per_cu_data_up result (new dwarf2_per_cu_data (this, section,
-							sect_off));
+							sect_off, length));
   result->index = all_units.size ();
   return result;
 }
@@ -1832,10 +1832,11 @@ dwarf2_per_bfd::allocate_per_cu (dwarf2_section_info *section,
 signatured_type_up
 dwarf2_per_bfd::allocate_signatured_type (dwarf2_section_info *section,
 					  sect_offset sect_off,
+					  unsigned int length,
 					  ULONGEST signature)
 {
-  auto result
-    = std::make_unique<signatured_type> (this, section, sect_off, signature);
+  auto result = std::make_unique<signatured_type> (this, section, sect_off,
+						   length, signature);
   result->index = all_units.size ();
   tu_stats.nr_tus++;
   return result;
@@ -1849,8 +1850,7 @@ create_cu_from_index_list (dwarf2_per_bfd *per_bfd,
 			   int is_dwz,
 			   sect_offset sect_off, ULONGEST length)
 {
-  dwarf2_per_cu_data_up the_cu = per_bfd->allocate_per_cu (section, sect_off);
-  the_cu->set_length (length);
+  dwarf2_per_cu_data_up the_cu = per_bfd->allocate_per_cu (section, sect_off, length);
   the_cu->is_dwz = is_dwz;
   return the_cu;
 }
@@ -2690,13 +2690,13 @@ create_debug_types_hash_table (dwarf2_per_objfile *per_objfile,
 
 static signatured_type_set::iterator
 add_type_unit (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
-	       sect_offset sect_off, ULONGEST sig)
+	       sect_offset sect_off, unsigned int length, ULONGEST sig)
 {
   if (per_bfd->all_units.size () == per_bfd->all_units.capacity ())
     ++per_bfd->tu_stats.nr_all_type_units_reallocs;
 
   signatured_type_up sig_type_holder
-    = per_bfd->allocate_signatured_type (section, sect_off, sig);
+    = per_bfd->allocate_signatured_type (section, sect_off, length, sig);
   signatured_type *sig_type = sig_type_holder.get ();
 
   per_bfd->all_units.emplace_back (sig_type_holder.release ());
@@ -2730,7 +2730,6 @@ fill_in_sig_entry_from_dwo_entry (dwarf2_per_objfile *per_objfile,
   gdb_assert (sig_entry->dwo_unit == NULL
 	      || sig_entry->dwo_unit == dwo_entry);
 
-  sig_entry->set_length (dwo_entry->length, false);
   sig_entry->reading_dwo_directly = 1;
   sig_entry->type_offset_in_tu = dwo_entry->type_offset_in_tu;
   sig_entry->dwo_unit = dwo_entry;
@@ -2795,8 +2794,8 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 
   /* If the global table doesn't have an entry for this TU, add one.  */
   if (sig_type_it == per_bfd->signatured_types.end ())
-    sig_type_it
-      = add_type_unit (per_bfd, dwo_entry->section, dwo_entry->sect_off, sig);
+    sig_type_it = add_type_unit (per_bfd, dwo_entry->section,
+				 dwo_entry->sect_off, dwo_entry->length, sig);
 
   if ((*sig_type_it)->dwo_unit == nullptr)
     fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_entry);
@@ -2836,8 +2835,8 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (dwo_entry == NULL)
     return NULL;
 
-  sig_type_it
-    = add_type_unit (per_bfd, dwo_entry->section, dwo_entry->sect_off, sig);
+  sig_type_it = add_type_unit (per_bfd, dwo_entry->section,
+			       dwo_entry->sect_off, dwo_entry->length, sig);
   fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_entry);
 
   return *sig_type_it;
@@ -4022,7 +4021,7 @@ process_skeletonless_type_unit (void **slot, void *info)
   /* This does the job that create_all_units would have done for
      this TU.  */
   sig_type_it = add_type_unit (per_bfd, dwo_unit->section, dwo_unit->sect_off,
-			       dwo_unit->signature);
+			       dwo_unit->length, dwo_unit->signature);
   fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_unit);
 
   /* This does the job that build_type_psymtabs would have done.  */
@@ -4283,13 +4282,16 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 				     abbrev_section, info_ptr,
 				     section_kind);
 
+      unsigned int length = cu_header.get_length_with_initial ();
+
       /* Save the compilation unit for later lookup.  */
       if (cu_header.unit_type != DW_UT_type)
-	this_cu = per_objfile->per_bfd->allocate_per_cu (section, sect_off);
+	this_cu
+	  = per_objfile->per_bfd->allocate_per_cu (section, sect_off, length);
       else
 	{
 	  auto sig_type = per_objfile->per_bfd->allocate_signatured_type
-	    (section, sect_off, cu_header.signature);
+	    (section, sect_off, length, cu_header.signature);
 	  signatured_type *sig_ptr = sig_type.get ();
 	  sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
 	  this_cu.reset (sig_type.release ());
@@ -4304,7 +4306,6 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 		       hex_string (sig_ptr->signature));
 	}
 
-      this_cu->set_length (cu_header.get_length_with_initial ());
       this_cu->is_dwz = is_dwz;
       /* Init this asap, to avoid a data race in the set_version in
 	 cutu_reader::cutu_reader (which may be run in parallel for the cooked
@@ -7065,10 +7066,11 @@ create_cus_hash_table (dwarf2_per_objfile *per_objfile,
       void **slot;
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
 
-      dwarf2_per_cu_data per_cu (per_bfd, &section, sect_off);
-
+      /* The length of the CU gets set by the cutu_reader just below.  */
+      dwarf2_per_cu_data per_cu (per_bfd, &section, sect_off, 0);
       cutu_reader reader (&per_cu, per_objfile, language_minimal,
 			  cu, &dwo_file);
+
       if (!reader.dummy_p)
 	create_dwo_cu_reader (&reader, reader.info_ptr, reader.comp_unit_die,
 			      &dwo_file, &read_unit);
@@ -20944,29 +20946,27 @@ namespace find_containing_comp_unit {
 static void
 run_test ()
 {
-  const auto create_dummy_per_cu = [] ()
+  const auto create_dummy_per_cu = [] (sect_offset sect_off, unsigned int length)
     {
-      return (dwarf2_per_cu_data_up
-	      (new dwarf2_per_cu_data (nullptr, nullptr, sect_offset {})));
+      return dwarf2_per_cu_data_up (new dwarf2_per_cu_data (nullptr, nullptr,
+							    sect_off, length));
     };
 
-  dwarf2_per_cu_data_up one = create_dummy_per_cu ();
+  /* Units in the main file.  */
+  dwarf2_per_cu_data_up one = create_dummy_per_cu (sect_offset (0), 5);
   dwarf2_per_cu_data *one_ptr = one.get ();
-  dwarf2_per_cu_data_up two = create_dummy_per_cu ();
+  dwarf2_per_cu_data_up two
+    = create_dummy_per_cu (sect_offset (one->length ()), 7);
   dwarf2_per_cu_data *two_ptr = two.get ();
-  dwarf2_per_cu_data_up three = create_dummy_per_cu ();
+
+  /* Units in the supplementary (dwz) file.  */
+  dwarf2_per_cu_data_up three = create_dummy_per_cu (sect_offset (0), 5);
   dwarf2_per_cu_data *three_ptr = three.get ();
-  dwarf2_per_cu_data_up four = create_dummy_per_cu ();
+  dwarf2_per_cu_data_up four
+    = create_dummy_per_cu (sect_offset (three->length ()), 7);
   dwarf2_per_cu_data *four_ptr = four.get ();
 
-  one->set_length (5);
-  two->sect_off = sect_offset (one->length ());
-  two->set_length (7);
-
-  three->set_length (5);
   three->is_dwz = 1;
-  four->sect_off = sect_offset (three->length ());
-  four->set_length (7);
   four->is_dwz = 1;
 
   std::vector<dwarf2_per_cu_data_up> units;

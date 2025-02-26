@@ -1374,8 +1374,11 @@ create_signatured_type_table_from_gdb_index
 	= extract_unsigned_integer (bytes + 16, 8, BFD_ENDIAN_LITTLE);
       bytes += 3 * 8;
 
+      /* The length of the type unit is unknown at this time.  It gets
+	 (presumably) set by a cutu_reader when it gets expanded later.  */
       signatured_type_up sig_type
-	= per_bfd->allocate_signatured_type (section, sect_off, signature);
+	= per_bfd->allocate_signatured_type (section, sect_off, 0 /* length */,
+					     signature);
       sig_type->type_offset_in_tu = type_offset_in_tu;
 
       sig_types_hash.emplace (sig_type.get ());
