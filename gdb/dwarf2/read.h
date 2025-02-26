@@ -468,6 +468,10 @@ struct dwarf2_per_bfd
 
   DISABLE_COPY_AND_ASSIGN (dwarf2_per_bfd);
 
+  /* Return the filename of the BFD.  */
+  const char *filename () const
+  { return bfd_get_filename (this->obfd); }
+
   /* Return the CU given its index.  */
   dwarf2_per_cu_data *get_cu (int index) const
   {

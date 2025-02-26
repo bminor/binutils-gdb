@@ -3109,7 +3109,7 @@ lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die, const char *dwo_name)
 	error (_(DWARF_ERROR_PREFIX
 		 "missing dwo_id for dwo_name %s"
 		 " [in module %s]"),
-	       dwo_name, bfd_get_filename (per_cu->per_bfd->obfd));
+	       dwo_name, per_cu->per_bfd->filename ());
 
       dwo_unit = lookup_dwo_comp_unit (cu, dwo_name, comp_dir, *signature);
     }
@@ -7757,7 +7757,7 @@ create_dwp_v2_or_v5_section (dwarf2_per_bfd *per_bfd,
 	       "Bad DWP V2 or V5 section info, doesn't fit in section %s"
 	       " [in module %s]"),
 	     sectp ? bfd_section_name (sectp) : "<unknown>",
-	     bfd_get_filename (per_bfd->obfd));
+	     per_bfd->filename ());
     }
 
   result.virtual_offset = offset;
@@ -8221,7 +8221,7 @@ try_open_dwop_file (dwarf2_per_bfd *per_bfd, const char *file_name, int is_dwp,
     search_path = per_bfd->captured_debug_dir.c_str ();
 
   /* Add the path for the executable binary to the list of search paths.  */
-  std::string objfile_dir = ldirname (bfd_get_filename (per_bfd->obfd));
+  std::string objfile_dir = ldirname (per_bfd->filename ());
   search_path_holder.reset (concat (objfile_dir.c_str (),
 				    dirname_separator_string,
 				    search_path, nullptr));
@@ -20922,7 +20922,7 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
 	error (_(DWARF_ERROR_PREFIX
 		 "could not find CU containing offset %s [in module %s]"),
 	       sect_offset_str (sect_off),
-	       bfd_get_filename (per_bfd->obfd));
+	       per_bfd->filename ());
 
       gdb_assert (per_bfd->all_units[low-1]->sect_off
 		  <= sect_off);

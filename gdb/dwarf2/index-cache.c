@@ -103,8 +103,7 @@ index_cache_store_context::index_cache_store_context (const index_cache &ic,
   const bfd_build_id *build_id = build_id_bfd_get (per_bfd->obfd);
   if (build_id == nullptr)
     {
-      index_cache_debug ("objfile %s has no build id",
-			 bfd_get_filename (per_bfd->obfd));
+      index_cache_debug ("objfile %s has no build id", per_bfd->filename ());
       m_enabled = false;
       return;
     }
@@ -149,7 +148,7 @@ index_cache_store_context::index_cache_store_context (const index_cache &ic,
   catch (const gdb_exception_error &except)
     {
       index_cache_debug ("couldn't store index cache for objfile %s: %s",
-			 bfd_get_filename (per_bfd->obfd), except.what ());
+			 per_bfd->filename (), except.what ());
       m_enabled = false;
     }
 }
@@ -169,7 +168,7 @@ index_cache_store_context::store () const
   try
     {
       index_cache_debug ("writing index cache for objfile %s",
-			 bfd_get_filename (m_per_bfd->obfd));
+			 m_per_bfd->filename ());
 
       /* Write the index itself to the directory, using the build id as the
 	 filename.  */
@@ -180,7 +179,7 @@ index_cache_store_context::store () const
   catch (const gdb_exception_error &except)
     {
       index_cache_debug ("couldn't store index cache for objfile %s: %s",
-			 bfd_get_filename (m_per_bfd->obfd), except.what ());
+			 m_per_bfd->filename (), except.what ());
     }
 }
 
