@@ -106,26 +106,6 @@ struct include_dir
 };
 
 static struct include_dir *include_dirs;
-
-/* Static functions.  */
-
-static void res_init (void);
-static int extended_menuitems (const rc_menuitem *);
-static enum res_format format_from_name (const char *, int);
-static enum res_format format_from_filename (const char *, int);
-static void usage (FILE *, int);
-static int cmp_res_entry (const void *, const void *);
-static rc_res_directory *sort_resources (rc_res_directory *);
-static void reswr_init (void);
-static const char * quot (const char *);
-
-static rc_uint_type target_get_8 (const void *, rc_uint_type);
-static void target_put_8 (void *, rc_uint_type);
-static rc_uint_type target_get_16 (const void *, rc_uint_type);
-static void target_put_16 (void *, rc_uint_type);
-static rc_uint_type target_get_32 (const void *, rc_uint_type);
-static void target_put_32 (void *, rc_uint_type);
-
 
 /* When we are building a resource tree, we allocate everything onto
    an obstack, so that we can free it all at once if we want.  */
@@ -504,12 +484,6 @@ extended_dialog (const rc_dialog *dialog)
 
 /* Return whether MENUITEMS are a MENU or a MENUEX.  */
 
-int
-extended_menu (const rc_menu *menu)
-{
-  return extended_menuitems (menu->items);
-}
-
 static int
 extended_menuitems (const rc_menuitem *menuitems)
 {
@@ -540,6 +514,12 @@ extended_menuitems (const rc_menuitem *menuitems)
     }
 
   return 0;
+}
+
+int
+extended_menu (const rc_menu *menu)
+{
+  return extended_menuitems (menu->items);
 }
 
 /* Convert a string to a format type, or exit if it can't be done.  */
@@ -1194,6 +1174,71 @@ get_windres_bfd_content (windres_bfd *wrbfd, void *data, rc_uint_type off,
     abort ();
 }
 
+static void
+target_put_8 (void *p, rc_uint_type value)
+{
+  assert (!! p);
+  *((bfd_byte *) p)=(bfd_byte) value;
+}
+
+static void
+target_put_16 (void *p, rc_uint_type value)
+{
+  assert (!! p);
+
+  if (target_is_bigendian)
+    bfd_putb16 (value, p);
+  else
+    bfd_putl16 (value, p);
+}
+
+static void
+target_put_32 (void *p, rc_uint_type value)
+{
+  assert (!! p);
+
+  if (target_is_bigendian)
+    bfd_putb32 (value, p);
+  else
+    bfd_putl32 (value, p);
+}
+
+static rc_uint_type
+target_get_8 (const void *p, rc_uint_type length)
+{
+  rc_uint_type ret;
+
+  if (length < 1)
+    fatal ("Resource too small for getting 8-bit value.");
+
+  ret = (rc_uint_type) *((const bfd_byte *) p);
+  return ret & 0xff;
+}
+
+static rc_uint_type
+target_get_16 (const void *p, rc_uint_type length)
+{
+  if (length < 2)
+    fatal ("Resource too small for getting 16-bit value.");
+
+  if (target_is_bigendian)
+    return bfd_getb16 (p);
+  else
+    return bfd_getl16 (p);
+}
+
+static rc_uint_type
+target_get_32 (const void *p, rc_uint_type length)
+{
+  if (length < 4)
+    fatal ("Resource too small for getting 32-bit value.");
+
+  if (target_is_bigendian)
+    return bfd_getb32 (p);
+  else
+    return bfd_getl32 (p);
+}
+
 void
 windres_put_8 (windres_bfd *wrbfd, void *p, rc_uint_type value)
 {
@@ -1309,71 +1354,6 @@ windres_get_32 (windres_bfd *wrbfd, const void *data, rc_uint_type length)
       abort ();
     }
   return 0;
-}
-
-static rc_uint_type
-target_get_8 (const void *p, rc_uint_type length)
-{
-  rc_uint_type ret;
-
-  if (length < 1)
-    fatal ("Resource too small for getting 8-bit value.");
-
-  ret = (rc_uint_type) *((const bfd_byte *) p);
-  return ret & 0xff;
-}
-
-static rc_uint_type
-target_get_16 (const void *p, rc_uint_type length)
-{
-  if (length < 2)
-    fatal ("Resource too small for getting 16-bit value.");
-
-  if (target_is_bigendian)
-    return bfd_getb16 (p);
-  else
-    return bfd_getl16 (p);
-}
-
-static rc_uint_type
-target_get_32 (const void *p, rc_uint_type length)
-{
-  if (length < 4)
-    fatal ("Resource too small for getting 32-bit value.");
-
-  if (target_is_bigendian)
-    return bfd_getb32 (p);
-  else
-    return bfd_getl32 (p);
-}
-
-static void
-target_put_8 (void *p, rc_uint_type value)
-{
-  assert (!! p);
-  *((bfd_byte *) p)=(bfd_byte) value;
-}
-
-static void
-target_put_16 (void *p, rc_uint_type value)
-{
-  assert (!! p);
-
-  if (target_is_bigendian)
-    bfd_putb16 (value, p);
-  else
-    bfd_putl16 (value, p);
-}
-
-static void
-target_put_32 (void *p, rc_uint_type value)
-{
-  assert (!! p);
-
-  if (target_is_bigendian)
-    bfd_putb32 (value, p);
-  else
-    bfd_putl32 (value, p);
 }
 
 static int isInComment = 0;
