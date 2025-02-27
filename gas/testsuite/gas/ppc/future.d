@@ -57,4 +57,39 @@ Disassembly of section \.text:
 .*:	(d0 1e 22 f0|f0 22 1e d0) 	xxgfmul128gcm vs1,vs2,vs3
 .*:	(d6 0f e0 f3|f3 e0 0f d6) 	xxgfmul128xts vs31,vs32,vs33
 .*:	(d6 0f e0 f3|f3 e0 0f d6) 	xxgfmul128xts vs31,vs32,vs33
+.*:	(06 00 00 00|00 00 00 06) 	paddis  r12,r9,15
+.*:	(3d 89 00 0f|0f 00 89 3d) 
+.*:	(06 00 00 00|00 00 00 06) 	paddis  r12,r9,15
+.*:	(3d 89 00 0f|0f 00 89 3d) 
+.*:	(06 00 ff ff|ff ff 00 06) 	paddis  r12,r9,-32769
+.*:	(3d 89 7f ff|ff 7f 89 3d) 
+.*:	(06 00 ff ff|ff ff 00 06) 	paddis  r12,r9,-32769
+.*:	(3d 89 7f ff|ff 7f 89 3d) 
+.*:	(06 10 00 00|00 00 10 06) 	paddis  r9,0,25,1	# e4
+.*:	(3d 20 00 19|19 00 20 3d) 
+.*:	(06 00 7f ff|ff 7f 00 06) 	plis    r24,2147483647
+.*:	(3f 00 ff ff|ff ff 00 3f) 
+.*:	(06 00 7f ff|ff 7f 00 06) 	plis    r24,2147483647
+.*:	(3f 00 ff ff|ff ff 00 3f) 
+.*:	(60 00 00 00|00 00 00 60) 	nop
+.*:	(06 00 7f ff|ff 7f 00 06) 	plis    r24,2147483647
+.*:	(3f 00 ff ff|ff ff 00 3f) 
+.*:	(06 00 80 00|00 80 00 06) 	paddis  r30,r10,-2147483648
+.*:	(3f ca 00 00|00 00 ca 3f) 
+.*:	(06 00 80 00|00 80 00 06) 	paddis  r30,r10,-2147483648
+.*:	(3f ca 00 00|00 00 ca 3f) 
+.*:	(06 00 80 00|00 80 00 06) 	paddis  r30,r10,-2147483648
+.*:	(3f ca 00 00|00 00 ca 3f) 
+.*:	(60 00 00 00|00 00 00 60) 	nop
+.*:	(06 00 7f ff|ff 7f 00 06) 	paddis  r30,r10,2147483647
+.*:	(3f ca ff ff|ff ff ca 3f) 
+.*:	(06 00 7f ff|ff 7f 00 06) 	paddis  r30,r10,2147483647
+.*:	(3f ca ff ff|ff ff ca 3f) 
+.*:	(06 00 7f ff|ff 7f 00 06) 	paddis  r30,r10,2147483647
+.*:	(3f ca ff ff|ff ff ca 3f) 
+.*:	(60 00 00 00|00 00 00 60) 	nop
+.*:	(06 10 7f ff|ff 7f 10 06) 	paddis  r15,0,2147483647,1	# 140
+.*	(3d e0 ff ff|ff ff e0 3d) 
+.*:	(06 10 7f ff|ff 7f 10 06) 	paddis  r15,0,2147483647,1	# 148
+.*	(3d e0 ff ff|ff ff e0 3d) 
 #pass

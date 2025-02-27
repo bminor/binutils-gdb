@@ -691,6 +691,52 @@ extract_imm32 (uint64_t insn,
   return (insn & 0xffff) | ((insn >> 16) & 0xffff0000);
 }
 
+/* The 32bit SI field in a 64-bit D form prefix instruction when the field is split
+   into separate SI0 and SI1 fields.  */
+
+static uint64_t
+insert_si32 (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0xffff0000ULL) << 16) | (value & 0xffff);
+}
+
+static int64_t
+extract_si32 (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid ATTRIBUTE_UNUSED)
+{
+  int64_t mask = 1ULL << 31;
+  int64_t value = ((insn >> 16) & 0xffff0000ULL) | (insn & 0xffff);
+  value = (value ^ mask) - mask;
+  return value;
+}
+
+/* The NSI32 field in an 8-byte D form prefix instruction.  This is the same
+   as the SI32 field, only negated.  The extraction function always marks it
+   as invalid, since we never want to recognize an instruction which uses
+   a field of this type.  */
+static uint64_t
+insert_nsi32 (uint64_t insn,
+	      int64_t value,
+	      ppc_cpu_t dialect,
+	      const char **errmsg)
+{
+  return insert_si32 (insn, -value, dialect, errmsg);
+}
+
+static int64_t
+extract_nsi32 (uint64_t insn,
+	       ppc_cpu_t dialect,
+	       int *invalid)
+{
+  int64_t value = extract_si32 (insn, dialect, invalid);
+  *invalid = 1;
+  return -value;
+}
+
 /* The R field in an 8-byte prefix instruction when there are restrictions
    between R's value and the RA value (ie, they cannot both be non zero).  */
 
@@ -3073,8 +3119,18 @@ const struct powerpc_operand powerpc_operands[] =
   { UINT64_C(0x3ffffffff), PPC_OPSHIFT_INV, insert_nsi34, extract_nsi34,
     PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
 
+  /* The 32bit SI field in an 8-byte D form prefix instruction.  */
+#define SI32 NSI34 + 1
+  { UINT64_C(0xffffffff), PPC_OPSHIFT_INV, insert_si32, extract_si32, PPC_OPERAND_SIGNED },
+
+  /* The NSI field in an 8-byte D form prefix instruction with 32bit SI field.  This is
+     the same as the SI32 field, only negated.  */
+#define NSI32 SI32 + 1
+  { UINT64_C(0xffffffff), PPC_OPSHIFT_INV, insert_nsi32, extract_nsi32,
+    PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
+
   /* The IMM32 field in a vector splat immediate prefix instruction.  */
-#define IMM32 NSI34 + 1
+#define IMM32 NSI32 + 1
   { 0xffffffff, PPC_OPSHIFT_INV, insert_imm32, extract_imm32, 0},
 
   /* The UIM field in a vector permute extended prefix instruction.  */
@@ -4031,8 +4087,14 @@ const unsigned int num_powerpc_operands = ARRAY_SIZE (powerpc_operands);
 /* An 8-byte D form prefix instruction.  */
 #define P_D_MASK (((-1ULL << 50) & ~PCREL_MASK) | OP_MASK)
 
+/* An 8-byte D form prefix instruction with 32bit SI field.  */
+#define P_D_SI32_MASK (((-1ULL << 48) & ~PCREL_MASK) | OP_MASK)
+
 /* The same as P_D_MASK, but with the RA and PCREL fields specified.  */
 #define P_DRAPCREL_MASK (P_D_MASK | PCREL_MASK | RA_MASK)
+
+/* The same as P_D_SI32_MASK, but with the RA and PCREL fields specified.  */
+#define P_DRAPCREL_SI32_MASK (P_D_SI32_MASK | PCREL_MASK | RA_MASK)
 
 /* Mask for prefix X form instructions.  */
 #define P_X_MASK (PREFIX_MASK | X_MASK)
@@ -9863,6 +9925,9 @@ const struct powerpc_opcode prefix_opcodes[] = {
 {"pla",		  PMLS|OP(14),	       P_D_MASK,	POWER10, EXT,	{RT, D34, PRA0, PCREL1}},
 {"paddi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, 0,	{RT, RA0, SI34, PCREL}},
 {"psubi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, EXT,	{RT, RA0, NSI34, PCREL}},
+{"plis",	  PMLS|OP(15),	       P_DRAPCREL_SI32_MASK,	FUTURE,  EXT,	{RT, SI32}},
+{"paddis",	  PMLS|OP(15),	       P_D_SI32_MASK,		FUTURE,  0,	{RT, RA0, SI32, PCREL}},
+{"psubis",	  PMLS|OP(15),	       P_D_SI32_MASK,		FUTURE,  EXT,	{RT, RA0, NSI32, PCREL}},
 {"xxsplti32dx",	  P8RR|VSOP(32,0),     P_VSI_MASK,	POWER10, 0,	{XTS, IX, IMM32}},
 {"xxspltidp",	  P8RR|VSOP(32,2),     P_VS_MASK,	POWER10, 0,	{XTS, IMM32}},
 {"xxspltiw",	  P8RR|VSOP(32,3),     P_VS_MASK,	POWER10, 0,	{XTS, IMM32}},
