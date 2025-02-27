@@ -133,6 +133,9 @@ read_coff_rsrc (const char *filename, const char *target)
 	list_matching_formats (matching);
       xexit (1);
     }
+  if (bfd_get_flavour (abfd) != bfd_target_coff_flavour
+      || !obj_pe (abfd))
+    fatal (_("%s: not a PE file"), filename);
 
   sec = bfd_get_section_by_name (abfd, ".rsrc");
   if (sec == NULL)
@@ -196,7 +199,7 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
      Microsoft only defines 3 levels.  Corrupt files however might
      claim to use more.  */
   if (level > 4)
-    overrun (flaginfo, _("Resources nest too deep"));
+    fatal (_("%s: resources nest too deep"), flaginfo->filename);
 
   if ((size_t) (flaginfo->data_end - data) < sizeof (struct extern_res_directory))
     overrun (flaginfo, _("directory"));
