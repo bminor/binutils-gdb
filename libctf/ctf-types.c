@@ -1359,7 +1359,9 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 	ctf_id_t underlying;
 
 	slice = (ctf_slice_t *) vlen;
-	underlying = ctf_type_resolve (ofp, slice->cts_type);
+	if ((underlying = ctf_type_resolve (ofp, slice->cts_type)) == CTF_ERR)
+	  return -1;
+
 	if (ctf_type_encoding (ofp, underlying, &underlying_en) < 0)
 	  return -1;				/* errno is set for us.  */
 
@@ -1419,7 +1421,7 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
   const ctf_type_t *ltp, *rtp;
   ctf_encoding_t le, re;
   ctf_arinfo_t la, ra;
-  uint32_t lkind, rkind;
+  int lkind, rkind;
   int same_names = 0;
 
   if (lfp->ctf_flags & LCTF_NO_STR)
@@ -1438,10 +1440,16 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
     return 1;
 
   ltype = ctf_type_resolve (lfp, ltype);
-  lkind = ctf_type_kind (lfp, ltype);
-
   rtype = ctf_type_resolve (rfp, rtype);
+
+  if (ltype == CTF_ERR || rtype == CTF_ERR)
+    return -1;					/* errno is set for us.  */
+
+  lkind = ctf_type_kind (lfp, ltype);
   rkind = ctf_type_kind (rfp, rtype);
+
+  if (lkind < 0 || rkind < 0)
+    return -1;					/* errno is set for us.  */
 
   ltp = ctf_lookup_by_id (&lfp, ltype);
   rtp = ctf_lookup_by_id (&rfp, rtype);

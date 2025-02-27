@@ -689,7 +689,8 @@ ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
      point to the unimplemented type, for now, because the compiler can emit
      such slices, though they're not very much use.  */
 
-  resolved_ref = ctf_type_resolve_unsliced (fp, ref);
+  if ((resolved_ref = ctf_type_resolve_unsliced (fp, ref)) == CTF_ERR)
+    return CTF_ERR;		/* errno is set for us.  */
   kind = ctf_type_kind_unsliced (fp, resolved_ref);
 
   if ((kind != CTF_K_INTEGER) && (kind != CTF_K_FLOAT) &&
@@ -1228,6 +1229,7 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 		       ctf_id_t type, unsigned long bit_offset)
 {
   ctf_dict_t *ofp = fp;
+  ctf_dict_t *tmp = fp;
   ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, souid);
 
   ssize_t msize, malign, ssize;
@@ -1258,6 +1260,9 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 
   if (dtd == NULL)
     return (ctf_set_errno (ofp, ECTF_BADID));
+
+  if ((ctf_lookup_by_id (&tmp, type)) == NULL)
+    return -1;			/* errno is set for us.  */
 
   if (name != NULL && name[0] == '\0')
     name = NULL;
