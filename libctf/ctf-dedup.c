@@ -3210,7 +3210,7 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
 	  if (name == NULL)
 	    name = "";
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
-	  ctf_dprintf ("Emitting %s, offset %zi\n", name, offset);
+	  ctf_dprintf ("Emitting %s, target-mapped type %lx, offset %zi\n", name, membtype, offset);
 #endif
 	  if (ctf_add_member_offset (target, target_type, name,
 				     membtype, offset) < 0)

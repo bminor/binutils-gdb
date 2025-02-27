@@ -1147,7 +1147,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
     return (ctf_set_errno (fp, EINVAL));
 
   if ((enid = ctf_type_resolve_unsliced (fp, enid)) == CTF_ERR)
-      return -1;				/* errno is set for us.  */
+    return -1;					/* errno is set for us.  */
 
   dtd = ctf_dtd_lookup (fp, enid);
   fp = ctf_get_dict (fp, enid);
@@ -1327,7 +1327,7 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	     cannot insert right after such a member without explicit offset
 	     specification, because its alignment and size is not known.  */
 	  if (ltype == CTF_ERR)
-	    return -1;	/* errno is set for us.  */
+	    return -1;				/* errno is set for us.  */
 
 	  if (is_incomplete)
 	    {
@@ -1668,7 +1668,6 @@ ctf_add_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type,
     return;
 
   src_type = ctf_type_to_index (src_fp, src_type);
-
   dst_type = ctf_type_to_index (dst_fp, dst_type);
 
   if (dst_fp->ctf_link_type_mapping == NULL)
