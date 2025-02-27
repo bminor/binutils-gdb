@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: bfd 2.43.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
 "POT-Creation-Date: 2025-01-19 12:19+0000\n"
-"PO-Revision-Date: 2025-01-26 21:02+0800\n"
+"PO-Revision-Date: 2025-02-25 23:26+0800\n"
 "Last-Translator: Sharuzzaman Ahmat Raslan <sharuzzaman@gmail.com>\n"
 "Language-Team: Malay <translation-team-ms@lists.sourceforge.net>\n"
 "Language: ms\n"
@@ -3738,7 +3738,7 @@ msgstr ""
 #: elf32-spu.c:4023
 #, fuzzy
 msgid "  calls:\n"
-msgstr "Panggilan"
+msgstr "Tiada panggilan"
 
 #: elf32-spu.c:4338
 #, c-format
@@ -7089,7 +7089,7 @@ msgstr "Lemah"
 #: vms-alpha.c:6242
 #, fuzzy
 msgid " DEF"
-msgstr "Takr. Pengguna 1"
+msgstr "DEF"
 
 #: vms-alpha.c:6244
 #, fuzzy
@@ -7210,7 +7210,7 @@ msgstr ""
 #: vms-alpha.c:6336 vms-alpha.c:6402 vms-alpha.c:6470
 #, fuzzy, c-format
 msgid "   name       : %.*s\n"
-msgstr "Nama %s sudah digunakan"
+msgstr "Nama: %s, EntitiID: %s"
 
 #: vms-alpha.c:6348
 #, c-format
@@ -7235,7 +7235,7 @@ msgstr ""
 #: vms-alpha.c:6360
 #, fuzzy, c-format
 msgid "   name          : %.*s\n"
-msgstr "Nama %s sudah digunakan"
+msgstr "Nama: %s, EntitiID: %s"
 
 #: vms-alpha.c:6376
 #, c-format
@@ -7270,7 +7270,7 @@ msgstr ""
 #: vms-alpha.c:6392 vms-alpha.c:6492 vms-alpha.c:6515
 #, fuzzy, c-format
 msgid "   name        : %.*s\n"
-msgstr "Nama %s sudah digunakan"
+msgstr "Nama: %s, EntitiID: %s"
 
 #: vms-alpha.c:6400
 #, c-format
@@ -7867,7 +7867,7 @@ msgstr "tidak aktif"
 #: vms-alpha.c:7348
 #, fuzzy, c-format
 msgid "(not allocated)\n"
-msgstr "@r tidak diumpukkan.  "
+msgstr "DIUMPUKKAN"
 
 #: vms-alpha.c:7351
 #, fuzzy, c-format
@@ -7986,7 +7986,7 @@ msgstr ""
 #: vms-alpha.c:7572 vms-alpha.c:7696
 #, fuzzy, c-format
 msgid "    name: %.*s\n"
-msgstr "Nama %s sudah digunakan"
+msgstr "Nama: %s, EntitiID: %s"
 
 #: vms-alpha.c:7580
 #, c-format
@@ -8282,14 +8282,12 @@ msgid " image type: %u (%s)"
 msgstr ""
 
 #: vms-alpha.c:8099
-#, fuzzy
 msgid "native"
-msgstr "Asli"
+msgstr "asli"
 
 #: vms-alpha.c:8102
-#, fuzzy
 msgid "CLI"
-msgstr "Infrastruktur Mono/CLI"
+msgstr "CLI"
 
 #: vms-alpha.c:8109
 #, c-format
@@ -8364,19 +8362,17 @@ msgid "cannot read EIHVN version\n"
 msgstr ""
 
 #: vms-alpha.c:8208
-#, fuzzy, c-format
+#, c-format
 msgid "   %02u "
-msgstr "%u:%02u:%02u"
+msgstr "   %02u "
 
 #: vms-alpha.c:8212
-#, fuzzy
 msgid "BASE_IMAGE       "
-msgstr "[ Imej Asas ]"
+msgstr "IMEJ_ASAS        "
 
 #: vms-alpha.c:8215
-#, fuzzy
 msgid "MEMORY_MANAGEMENT"
-msgstr "Benarkan Unit Pengurusan Ingatan, diperlukan oleh sesetengah permainan. (HIDUP = Serasi, MATI = Pantas)"
+msgstr "PENGURUSAN_INGATAN"
 
 #: vms-alpha.c:8218
 msgid "IO               "
