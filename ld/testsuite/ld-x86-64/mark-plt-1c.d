@@ -1,6 +1,6 @@
 #source: mark-plt-1.s
 #as: --64
-#ld: -melf_x86_64 -shared -z mark-plt -z ibtplt --no-rosegment
+#ld: -melf_x86_64 -shared -z mark-plt -z separate-code -z ibtplt --no-rosegment
 #readelf: -drW
 
 #...
