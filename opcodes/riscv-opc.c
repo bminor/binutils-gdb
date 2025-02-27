@@ -3510,6 +3510,15 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sf.vfnrclip.xu.f.qf", 0, INSN_CLASS_XSFVFNRCLIPXFQF, "Vd,Vt,S", MATCH_SFVFNRCLIPXUFQF, MASK_SFVFNRCLIPXUFQF, match_opcode, 0},
 {"sf.vfnrclip.x.f.qf",  0, INSN_CLASS_XSFVFNRCLIPXFQF, "Vd,Vt,S", MATCH_SFVFNRCLIPXFQF, MASK_SFVFNRCLIPXFQF, match_opcode, 0},
 
+/* qualcomm uC Xqccmp */
+{"qc.cm.mva01s", 0, INSN_CLASS_XQCCMP, "Wc1,Wc2", MATCH_QC_CM_MVA01S, MASK_QC_CM_MVA01S, match_opcode, 0},
+{"qc.cm.mvsa01", 0, INSN_CLASS_XQCCMP, "Wc1,Wc2", MATCH_QC_CM_MVSA01, MASK_QC_CM_MVSA01, match_sreg1_not_eq_sreg2, 0},
+{"qc.cm.pop", 0, INSN_CLASS_XQCCMP, "{Wcr},Wcp", MATCH_QC_CM_POP, MASK_QC_CM_POP, match_opcode, 0},
+{"qc.cm.popret", 0, INSN_CLASS_XQCCMP, "{Wcr},Wcp", MATCH_QC_CM_POPRET, MASK_QC_CM_POPRET, match_opcode, 0},
+{"qc.cm.popretz", 0, INSN_CLASS_XQCCMP, "{Wcr},Wcp", MATCH_QC_CM_POPRETZ, MASK_QC_CM_POPRETZ, match_opcode, 0},
+{"qc.cm.push", 0, INSN_CLASS_XQCCMP, "{Wcr},Wcp", MATCH_QC_CM_PUSH, MASK_QC_CM_PUSH, match_opcode, 0},
+{"qc.cm.pushfp", 0, INSN_CLASS_XQCCMP, "{Wcr},Wcp", MATCH_QC_CM_PUSHFP, MASK_QC_CM_PUSHFP, match_opcode, 0},
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };

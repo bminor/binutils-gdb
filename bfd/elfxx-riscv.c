@@ -1282,6 +1282,9 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"svade", "+zicsr", check_implicit_always},
   {"svadu", "+zicsr", check_implicit_always},
   {"svbare", "+zicsr", check_implicit_always},
+
+  {"xqccmp", "+zca",  check_implicit_always},
+
   {NULL, NULL, NULL}
 };
 
@@ -1513,6 +1516,7 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xsfvqmaccqoq",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0},
   {"xsfvqmaccdod",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0},
   {"xsfvfnrclipxfqf",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0},
+  {"xqccmp",	ISA_SPEC_CLASS_DRAFT,	0, 1, 0 },
   {NULL, 0, 0, 0, 0}
 };
 
@@ -2121,6 +2125,13 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
     {
       rps->error_handler
 	(_("`xtheadvector' is conflict with the `v' extension"));
+      no_conflict = false;
+    }
+  if (riscv_subset_supports (rps, "xqccmp")
+      && riscv_subset_supports (rps, "zcd"))
+    {
+      rps->error_handler
+	(_("xqccmp' is incompatible with `zcd' extension"));
       no_conflict = false;
     }
 
@@ -2812,6 +2823,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xsfvqmaccdod");
     case INSN_CLASS_XSFVFNRCLIPXFQF:
       return riscv_subset_supports (rps, "xsfvfnrclipxfqf");
+    case INSN_CLASS_XQCCMP:
+      return riscv_subset_supports (rps, "xqccmp");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
@@ -3107,6 +3120,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xtheadzvamo";
     case INSN_CLASS_XSFCEASE:
       return "xsfcease";
+    case INSN_CLASS_XQCCMP:
+      return "xqccmp";
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));

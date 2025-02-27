@@ -3786,6 +3786,21 @@
 #define MASK_SFVFNRCLIPXUFQF 0xfe00707f
 #define MATCH_SFVFNRCLIPXFQF 0x8e00505b
 #define MASK_SFVFNRCLIPXFQF 0xfe00707f
+/* qualcomm uC Xqccmp */
+#define MATCH_QC_CM_MVA01S 0xac62
+#define MASK_QC_CM_MVA01S 0xfc63
+#define MATCH_QC_CM_MVSA01 0xac22
+#define MASK_QC_CM_MVSA01 0xfc63
+#define MATCH_QC_CM_POP 0xba02
+#define MASK_QC_CM_POP 0xff03
+#define MATCH_QC_CM_POPRET 0xbe02
+#define MASK_QC_CM_POPRET 0xff03
+#define MATCH_QC_CM_POPRETZ 0xbc02
+#define MASK_QC_CM_POPRETZ 0xff03
+#define MATCH_QC_CM_PUSH 0xb802
+#define MASK_QC_CM_PUSH 0xff03
+#define MATCH_QC_CM_PUSHFP 0xb902
+#define MASK_QC_CM_PUSHFP 0xff03
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
