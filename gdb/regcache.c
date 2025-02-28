@@ -2228,7 +2228,7 @@ regcache_thread_ptid_changed ()
   gdb_assert (regcaches.empty ());
 }
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 void _initialize_regcache ();

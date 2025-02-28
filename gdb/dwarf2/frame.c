@@ -574,7 +574,7 @@ execute_cfa_program_test (struct gdbarch *gdbarch)
   SELF_CHECK (fs.regs.prev == NULL);
 }
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 

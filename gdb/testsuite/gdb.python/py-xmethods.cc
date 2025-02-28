@@ -137,7 +137,7 @@ G<T>::mul (const T1 t1)
   return t1 * t;
 }
 
-}  // namespace dop
+}  /* namespace dop */
 
 using namespace dop;
 

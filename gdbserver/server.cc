@@ -4071,7 +4071,7 @@ test_memory_tagging_functions (void)
 	      && tags.size () == 5);
 }
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 /* Main function.  This is called by the real "main" function,
@@ -5121,5 +5121,5 @@ void
 reset ()
 {}
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */

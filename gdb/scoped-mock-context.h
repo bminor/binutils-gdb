@@ -75,7 +75,7 @@ struct scoped_mock_context
   }
 };
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 #endif /* GDB_SCOPED_MOCK_CONTEXT_H */

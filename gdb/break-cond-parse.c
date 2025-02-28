@@ -684,7 +684,7 @@ create_breakpoint_parse_arg_string_tests ()
   test_error ("task 1xxx", "Junk 'xxx' after task keyword.");
 }
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 void _initialize_break_cond_parse ();

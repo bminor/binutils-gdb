@@ -108,5 +108,5 @@ reset ()
   registers_changed ();
   reinit_frame_cache ();
 }
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */

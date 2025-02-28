@@ -179,7 +179,7 @@ check_stack_growth (struct gdbarch *gdbarch)
   SELF_CHECK (stack_grows_up != stack_grows_down);
 }
 
-} // namespace selftests
+} /* namespace selftests */
 
 void _initialize_gdbarch_selftests ();
 void

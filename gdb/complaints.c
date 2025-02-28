@@ -185,7 +185,7 @@ test_complaints ()
 }
 
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 void _initialize_complaints ();

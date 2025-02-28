@@ -14846,7 +14846,7 @@ arm_analyze_prologue_test ()
     }
 }
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 /* Cleans up local record registers and memory allocations.  */

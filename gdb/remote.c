@@ -16159,7 +16159,7 @@ test_packet_check_result ()
 
   SELF_CHECK (packet_check_result ("").status () == PACKET_UNKNOWN);
 }
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 void _initialize_remote ();

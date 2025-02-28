@@ -2634,7 +2634,7 @@ test_python ()
 
 #undef CHECK_OUTPUT
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 #endif /* HAVE_PYTHON */

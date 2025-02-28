@@ -329,7 +329,7 @@ memory_error_test (struct gdbarch *gdbarch)
   SELF_CHECK (saw_memory_error);
 }
 
-} // namespace selftests
+} /* namespace selftests */
 
 void _initialize_disasm_selftests ();
 void

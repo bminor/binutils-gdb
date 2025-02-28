@@ -70,9 +70,9 @@ int_Templ1_t_func (int_Templ1_t *)
 {
 }
 
-} // namespace NS2
+} /* namespace NS2 */
 
-} // namespace NS1
+} /* namespace NS1 */
 
 /* These typedefs have the same name as some of the components within
    NS1 that they alias to, on purpose, to try to confuse GDB and cause

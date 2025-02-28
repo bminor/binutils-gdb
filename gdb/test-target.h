@@ -59,7 +59,7 @@ public:
   }
 };
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 #endif /* GDB_TEST_TARGET_H */

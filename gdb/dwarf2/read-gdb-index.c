@@ -985,7 +985,7 @@ run_test ()
   test_dw2_expand_symtabs_matching_symbol ();
 }
 
-}} // namespace selftests::dw2_expand_symtabs_matching
+}} /* namespace selftests::dw2_expand_symtabs_matching */
 
 #endif /* GDB_SELF_TEST */
 

@@ -333,7 +333,7 @@ extract_integer_test ()
   do_extract_tests<int8_t> (0x00, 0x00, 0x00);
 }
 
-} // namespace selftests
+} /* namespace selftests */
 
 #endif
 

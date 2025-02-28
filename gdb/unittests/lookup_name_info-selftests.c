@@ -100,7 +100,7 @@ run_tests ()
 #undef CHECK_INCOMPL
 }
 
-}} // namespace selftests::lookup_name
+}} /* namespace selftests::lookup_name */
 
 void _initialize_lookup_name_info_selftests ();
 void

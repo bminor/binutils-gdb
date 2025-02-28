@@ -2267,7 +2267,7 @@ test_cp_remove_params ()
 #undef CHECK_INCOMPL
 }
 
-} // namespace selftests
+} /* namespace selftests */
 
 #endif /* GDB_SELF_CHECK */
 

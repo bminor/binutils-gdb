@@ -138,4 +138,4 @@ all_selftests ()
   return selftests_range (tests.cbegin (), tests.cend ());
 }
 
-} // namespace selftests
+} /* namespace selftests */

@@ -2972,7 +2972,7 @@ aarch64_linux_ltag_tests (void)
     }
 }
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 void _initialize_aarch64_linux_tdep ();

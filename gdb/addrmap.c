@@ -480,7 +480,7 @@ test_addrmap ()
   CHECK_ADDRMAP_FIND (map, array, 14, 19, nullptr);
 }
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 void _initialize_addrmap ();

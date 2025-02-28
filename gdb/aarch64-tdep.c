@@ -949,7 +949,7 @@ aarch64_analyze_prologue_test (void)
 	}
     }
 }
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 /* Implement the "skip_prologue" gdbarch method.  */
@@ -5946,7 +5946,7 @@ aarch64_process_record_test (void)
   deallocate_reg_mem (&aarch64_record);
 }
 
-} // namespace selftests
+} /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
 /* Parse the current instruction and record the values of the registers and
