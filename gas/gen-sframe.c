@@ -608,7 +608,8 @@ output_sframe_row_entry (symbolS *fde_start_addr,
 }
 
 static void
-output_sframe_funcdesc (symbolS *start_of_fre_section,
+output_sframe_funcdesc (symbolS *sframe_start,
+			symbolS *start_of_fre_section,
 			symbolS *fre_symbol,
 			struct sframe_func_entry *sframe_fde)
 {
@@ -624,7 +625,7 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   /* Start address of the function.  */
   exp.X_op = O_subtract;
   exp.X_add_symbol = dw_fde_start_addrS; /* to location.  */
-  exp.X_op_symbol = symbol_temp_new_now (); /* from location.  */
+  exp.X_op_symbol = sframe_start; /* from location.  */
   exp.X_add_number = 0;
   emit_expr (&exp, addr_size);
 
@@ -682,6 +683,8 @@ output_sframe_internal (void)
   int fixed_fp_offset = SFRAME_CFA_FIXED_FP_INVALID;
   int fixed_ra_offset = SFRAME_CFA_FIXED_RA_INVALID;
   unsigned int addr_size;
+
+  symbolS *sframe_start = symbol_temp_new_now ();
 
   addr_size = SFRAME_RELOC_SIZE;
 
@@ -766,7 +769,7 @@ output_sframe_internal (void)
   i = 0;
   for (sframe_fde = all_sframe_fdes; sframe_fde; sframe_fde = sframe_fde->next)
     {
-      output_sframe_funcdesc (start_of_fre_section,
+      output_sframe_funcdesc (sframe_start, start_of_fre_section,
 			      fre_symbols[i], sframe_fde);
       i += sframe_fde->num_fres;
     }
@@ -1767,7 +1770,6 @@ void
 output_sframe (segT sframe_seg)
 {
   (void) sframe_seg;
-
   /* Setup the version specific access functions.  */
   sframe_set_version (SFRAME_VERSION_2);
 

@@ -174,7 +174,7 @@ typedef struct sframe_header
 typedef struct sframe_func_desc_entry
 {
   /* Function start address.  Encoded as a signed offset, relative to the
-     beginning of the current FDE.  */
+     beginning of the SFrame section.  */
   int32_t sfde_func_start_address;
   /* Size of the function in bytes.  */
   uint32_t sfde_func_size;

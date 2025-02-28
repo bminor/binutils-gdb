@@ -2986,8 +2986,7 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 	{
 	  bfd_vma plt_start = htab->elf.splt->output_section->vma;
 	  bfd_vma sframe_start = htab->plt_sframe->output_section->vma
-				   + htab->plt_sframe->output_offset
-				   + PLT_SFRAME_FDE_START_OFFSET;
+				   + htab->plt_sframe->output_offset;
 #if 0 /* FIXME Testing only. Remove before review.  */
 	  bfd_vma test_value = (plt_start - sframe_start)
 	    + htab->plt_sframe->output_section->vma
@@ -3020,8 +3019,7 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 	  bfd_vma plt_start = htab->plt_second->output_section->vma;
 	  bfd_vma sframe_start
 	    = (htab->plt_second_sframe->output_section->vma
-	       + htab->plt_second_sframe->output_offset
-	       + PLT_SFRAME_FDE_START_OFFSET);
+	       + htab->plt_second_sframe->output_offset);
 #if 0 /* FIXME Testing only. Remove before review.  */
 	  bfd_vma test_value = (plt_start - sframe_start)
 	    + htab->plt_second_sframe->output_section->vma
@@ -3054,8 +3052,7 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 	  bfd_vma plt_start = htab->plt_got->output_section->vma;
 	  bfd_vma sframe_start
 	    = (htab->plt_got_sframe->output_section->vma
-	       + htab->plt_got_sframe->output_offset
-	       + PLT_SFRAME_FDE_START_OFFSET);
+	       + htab->plt_got_sframe->output_offset);
 	  bfd_put_signed_32 (dynobj, plt_start - sframe_start,
 			     htab->plt_got_sframe->contents
 			     + PLT_SFRAME_FDE_START_OFFSET);

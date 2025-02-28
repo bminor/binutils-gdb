@@ -429,7 +429,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
       uint32_t func_size = 0;
       unsigned char func_info = 0;
       unsigned int r_offset = 0;
-      bool pltn_reloc_by_hand = false;
+      bool pltn_reloc = false;
       unsigned int pltn_r_offset = 0;
       uint8_t rep_block_size = 0;
 
@@ -465,6 +465,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 		     of PLT_SFRAME_FDE_START_OFFSET is also set to the
 		     same.  */
 		  r_offset = sframe_decoder_get_hdr_size (sfd_ctx);
+
 		  /* For any further SFrame FDEs, the generator has already put
 		     in an offset in place of sfde_func_start_address of the
 		     corresponding FDE.  We will use it by hand to relocate.  */
@@ -472,19 +473,16 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 		    {
 		      pltn_r_offset
 			= r_offset + (i * sizeof (sframe_func_desc_entry));
-		      pltn_reloc_by_hand = true;
+		      pltn_reloc = true;
 		    }
 		}
 
 	      /* Get the SFrame FDE function start address after relocation.  */
 	      address = sframe_read_value (abfd, contents, r_offset, 4);
-	      if (pltn_reloc_by_hand)
+	      if (pltn_reloc)
 		address += sframe_read_value (abfd, contents,
 					      pltn_r_offset, 4);
-	      address += (sec->output_offset + r_offset);
-
-	      /* FIXME For testing only. Cleanup later.  */
-	      // address += (sec->output_section->vma);
+	      address += sec->output_offset;
 
 	      func_start_addr = address;
 	    }
