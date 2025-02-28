@@ -1107,6 +1107,28 @@ remove_useless_symbols (asymbol **symbols, long count)
   return out_ptr - symbols;
 }
 
+/* Return true iff SEC1 and SEC2 are the same section.
+   This would just be a simple pointer comparison except that one of
+   the sections might be from a separate debug info file.  */
+
+static bool
+is_same_section (const asection *sec1, const asection *sec2)
+{
+  if (sec1 == sec2)
+    return true;
+  if (sec1->owner == sec2->owner
+      || sec1->owner == NULL
+      || sec2->owner == NULL)
+    return false;
+  /* OK, so we have one section in a debug info file.  (Or they both
+     are, but the way this function is currently used sec1 will be in
+     a normal object.)  Compare names, vma and size.  This ought to
+     cover all the usual cases.  */
+  return (sec1->vma == sec2->vma
+	  && sec1->size == sec2->size
+	  && strcmp (sec1->name, sec2->name) == 0);
+}
+
 static const asection *compare_section;
 
 /* Sort symbols into value order.  */
@@ -1131,10 +1153,9 @@ compare_symbols (const void *ap, const void *bp)
 
   /* Prefer symbols from the section currently being disassembled.
      Don't sort symbols from other sections by section, since there
-     isn't much reason to prefer one section over another otherwise.
-     See sym_ok comment for why we compare by section name.  */
-  as = strcmp (compare_section->name, a->section->name) == 0;
-  bs = strcmp (compare_section->name, b->section->name) == 0;
+     isn't much reason to prefer one section over another otherwise.  */
+  as = is_same_section (compare_section, a->section);
+  bs = is_same_section (compare_section, b->section);
   if (as && !bs)
     return -1;
   if (!as && bs)
@@ -1353,26 +1374,8 @@ sym_ok (bool want_section,
 	asection *sec,
 	struct disassemble_info *inf)
 {
-  if (want_section)
-    {
-      /* NB: An object file can have different sections with the same
-	 section name.  Compare compare section pointers if they have
-	 the same owner.  */
-      if (sorted_syms[place]->section->owner == sec->owner
-	  && sorted_syms[place]->section != sec)
-	return false;
-
-      /* Note - we cannot just compare section pointers because they could
-	 be different, but the same...  Ie the symbol that we are trying to
-	 find could have come from a separate debug info file.  Under such
-	 circumstances the symbol will be associated with a section in the
-	 debug info file, whilst the section we want is in a normal file.
-	 So the section pointers will be different, but the section names
-	 will be the same.  */
-      if (strcmp (bfd_section_name (sorted_syms[place]->section),
-		  bfd_section_name (sec)) != 0)
-	return false;
-    }
+  if (want_section && !is_same_section (sec, sorted_syms[place]->section))
+    return false;
 
   return inf->symbol_is_valid (sorted_syms[place], inf);
 }
