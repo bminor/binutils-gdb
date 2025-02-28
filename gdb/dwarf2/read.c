@@ -1261,7 +1261,7 @@ dwarf2_per_bfd::dwarf2_per_bfd (bfd *obfd, const dwarf2_debug_sections *names,
     names = &dwarf2_elf_names;
 
   for (asection *sec = obfd->sections; sec != NULL; sec = sec->next)
-    locate_sections (obfd, sec, *names);
+    this->locate_sections (sec, *names);
 }
 
 dwarf2_per_bfd::~dwarf2_per_bfd ()
@@ -1422,7 +1422,7 @@ dwarf2_has_info (struct objfile *objfile,
 /* See declaration.  */
 
 void
-dwarf2_per_bfd::locate_sections (bfd *abfd, asection *sectp,
+dwarf2_per_bfd::locate_sections (asection *sectp,
 				 const dwarf2_debug_sections &names)
 {
   flagword aflag = bfd_section_flags (sectp);
@@ -1430,13 +1430,13 @@ dwarf2_per_bfd::locate_sections (bfd *abfd, asection *sectp,
   if ((aflag & SEC_HAS_CONTENTS) == 0)
     {
     }
-  else if (bfd_section_size_insane (abfd, sectp))
+  else if (bfd_section_size_insane (this->obfd, sectp))
     {
       bfd_size_type size = sectp->size;
       warning (_("Discarding section %s which has an invalid size (%s) "
 		 "[in module %s]"),
 	       bfd_section_name (sectp), phex_nz (size, sizeof (size)),
-	       bfd_get_filename (abfd));
+	       this->filename ());
     }
   else if (names.info.matches (sectp->name))
     {

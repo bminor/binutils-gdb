@@ -517,8 +517,7 @@ private:
   /* This function is mapped across the sections and remembers the
      offset and size of each of the debugging sections we are
      interested in.  */
-  void locate_sections (bfd *abfd, asection *sectp,
-			const dwarf2_debug_sections &names);
+  void locate_sections (asection *sectp, const dwarf2_debug_sections &names);
 
 public:
   /* The corresponding BFD.  */
