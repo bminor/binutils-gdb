@@ -97,6 +97,7 @@ PYTHON_FILE_LIST = \
 	gdb/command/xmethods.py \
 	gdb/dap/breakpoint.py \
 	gdb/dap/bt.py \
+	gdb/dap/completions.py \
 	gdb/dap/disassemble.py \
 	gdb/dap/evaluate.py \
 	gdb/dap/events.py \

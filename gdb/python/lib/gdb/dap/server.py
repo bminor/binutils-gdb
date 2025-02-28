@@ -49,6 +49,7 @@ _server = None
 # This is set by the initialize request and is used when rewriting
 # line numbers.
 _lines_start_at_1 = False
+_columns_start_at_1 = False
 
 
 class DeferredRequest:
@@ -593,6 +594,8 @@ def initialize(**args):
     _server.send_event_later("initialized")
     global _lines_start_at_1
     _lines_start_at_1 = client_bool_capability("linesStartAt1", True)
+    global _columns_start_at_1
+    _columns_start_at_1 = client_bool_capability("columnsStartAt1", True)
     return _capabilities.copy()
 
 
@@ -698,7 +701,7 @@ def send_gdb_with_response(fn):
     return val
 
 
-def export_line(line):
+def export_line(line: int) -> int:
     """Rewrite LINE according to client capability.
     This applies the linesStartAt1 capability as needed,
     when sending a line number from gdb to the client."""
@@ -710,7 +713,7 @@ def export_line(line):
     return line
 
 
-def import_line(line):
+def import_line(line: int) -> int:
     """Rewrite LINE according to client capability.
     This applies the linesStartAt1 capability as needed,
     when the client sends a line number to gdb."""
@@ -720,3 +723,17 @@ def import_line(line):
         # the client starts at 0.
         line = line + 1
     return line
+
+
+def export_column(column: int) -> int:
+    """Rewrite COLUMN according to client capability.
+    This applies the columnsStartAt1 capability as needed,
+    when sending a column number from gdb to the client."""
+    return column if _columns_start_at_1 else column - 1
+
+
+def import_column(column: int) -> int:
+    """Rewrite COLUMN according to client capability.
+    This applies the columnsStartAt1 capability as needed,
+    when the client sends a column number to gdb."""
+    return column if _columns_start_at_1 else column + 1

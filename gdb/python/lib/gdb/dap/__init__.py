@@ -26,6 +26,7 @@ from . import startup
 # server object.  "F401" is the flake8 "imported but unused" code.
 from . import breakpoint  # noqa: F401
 from . import bt  # noqa: F401
+from . import completions  # noqa: F401
 from . import disassemble  # noqa: F401
 from . import evaluate  # noqa: F401
 from . import launch  # noqa: F401
