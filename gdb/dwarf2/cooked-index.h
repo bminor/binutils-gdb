@@ -520,7 +520,7 @@ protected:
 
   /* Each thread returns a tuple holding a cooked index, any collected
      complaints, a vector of errors that should be printed, and a
-     vector of parent maps.
+     parent map.
 
      The errors are retained because GDB's I/O system is not
      thread-safe.  run_on_main_thread could be used, but that would
