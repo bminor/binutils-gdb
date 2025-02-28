@@ -503,7 +503,7 @@ regcache::raw_compare (int regnum, const void *buf, int offset) const
   gdb_assert (buf != NULL);
 
   gdb::array_view<const gdb_byte> regbuf = register_data (this, regnum);
-  gdb_assert (offset < regbuf.size ());
+  gdb_assert (offset <= regbuf.size ());
   regbuf = regbuf.slice (offset);
 
   return memcmp (buf, regbuf.data (), regbuf.size ()) == 0;
