@@ -41,7 +41,7 @@ struct dwarf2_debug_names_index : public cooked_index_functions
   void dump (struct objfile *objfile) override
   {
     gdb_printf (".debug_names: exists\n");
-    /* This could call the superclass method if that's useful.  */
+    cooked_index_functions::dump (objfile);
   }
 };
 
