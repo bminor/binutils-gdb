@@ -4092,6 +4092,33 @@ test_memory_tagging_functions (void)
 	      && tags.size () == 5);
 }
 
+/* Exercise the behavior of doing a 0-length comparison for a register in a
+   register buffer, which should return true.  */
+
+static void test_registers_raw_compare_zero_length ()
+{
+  /* Start off with a dummy target description.  */
+  target_desc dummy_tdesc;
+
+  /* Make it 8 bytes long.  */
+  dummy_tdesc.registers_size = 8;
+
+  /* Add a couple dummy 32-bit registers.  */
+  dummy_tdesc.reg_defs.emplace_back ("r0", 0, 32);
+  dummy_tdesc.reg_defs.emplace_back ("r1", 32, 32);
+
+  /* Create our dummy register cache so we can invoke the raw_compare method
+     we want to validate.  */
+  regcache dummy_regcache (&dummy_tdesc);
+
+  /* Create a dummy byte buffer we can pass to the raw_compare method.  */
+  gdb_byte dummy_buffer[8];
+
+  /* Validate the 0-length comparison (due to the comparison offset being
+     equal to the length of the register) returns true.  */
+  SELF_CHECK (dummy_regcache.raw_compare (0, dummy_buffer, 4));
+}
+
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
@@ -4115,6 +4142,8 @@ captured_main (int argc, char *argv[])
 
   selftests::register_test ("remote_memory_tagging",
 			    selftests::test_memory_tagging_functions);
+  selftests::register_test ("test_registers_raw_compare_zero_length",
+			    selftests::test_registers_raw_compare_zero_length);
 #endif
 
   current_directory = getcwd (NULL, 0);
