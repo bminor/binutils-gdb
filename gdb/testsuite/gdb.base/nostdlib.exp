@@ -52,13 +52,33 @@ foreach_with_prefix pie { "nopie" "pie" } {
     clean_restart $binfile
 
     gdb_breakpoint "*marker"
-    gdb_breakpoint "*_start"
+
+    # Say we set a permanent breakpoint on *_start.  When setting the
+    # breakpoint, it will resolve to _start in the exec.
+    # After starting to run, that may stay the same, and consequently
+    # execution will stop there.
+    # OTOH, after starting to run, that may change to *_start in the dynamic
+    # linker, and consequently execution will stop there.
+    # There's currently no way to enforce one or the other (PR32748).
+    #
+    # Say we run into a stop in *_start in the dynamic linker.  Continuing
+    # from this situation, the dynamic linker is reported as unloaded, which
+    # makes the breakpoint resolve again to *_start in the exec, and
+    # consequently execution will stop there as well.
+    #
+    # However, we cannot rely on this behavior either.  Reporting the dynamic
+    # linker as unloaded is a GLIBC bug, which may get fixed eventually.
+    #
+    # Instead of trying to cater for all these possibilities in a controlled
+    # fashion, make the breakpoint temporary, ensuring that there will just be
+    # one stop.
+    gdb_breakpoint "*_start" temporary
 
     gdb_run_cmd
 
     # Breakpoint 2, Stopped due to shared library event
     # _start () at ./gdb.base/nostdlib.c:20
-    gdb_test "" {Breakpoint [0-9]+, .*_start .*} "stop at run"
+    gdb_test "" {Temporary breakpoint [0-9]+, .*_start .*} "stop at run"
 
     gdb_test "continue" {Breakpoint [0-9]+, marker .*} "continue to marker"
 
