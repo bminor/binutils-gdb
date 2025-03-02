@@ -11939,7 +11939,9 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	      last_offset = o->output_offset;
 	      if (!bfd_link_relocatable (flinfo->info))
 		last_offset += o->output_section->vma;
-	      for (next_erel = 0; irela < irelaend; irela++, next_erel++)
+	      unsigned int num_reloc = 0;
+	      for (next_erel = 0; irela < irelaend;
+		   irela++, next_erel++, num_reloc++)
 		{
 		  unsigned long r_symndx;
 		  asection *sec;
@@ -12070,10 +12072,24 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 			    }
 			}
 
-		      /* Adjust the addend according to where the
-			 section winds up in the output section.  */
 		      if (rela_normal)
-			irela->r_addend += sec->output_offset;
+			{
+			  if (o->sec_info_type == SEC_INFO_TYPE_SFRAME)
+			    {
+			      bfd_vma addend
+			       = _bfd_elf_sframe_section_addend (output_bfd,
+							       flinfo->info, o,
+							       num_reloc,
+							       irela->r_addend);
+			      /* Adjust the addend in the output RELA.  The
+				 input SFrame section has already been
+				 relocated.  */
+			      irela->r_addend = addend + irela->r_offset;
+			    }
+			  /* Adjust the addend according to where the
+			     section winds up in the output section.  */
+			  irela->r_addend += sec->output_offset;
+			}
 		    }
 		  else
 		    {

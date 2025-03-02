@@ -2551,6 +2551,8 @@ extern bool _bfd_elf_merge_section_sframe
   (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
 extern bfd_vma _bfd_elf_sframe_section_offset
   (bfd *, struct bfd_link_info *, asection *, bfd_vma);
+extern bfd_vma _bfd_elf_sframe_section_addend
+  (bfd *, struct bfd_link_info *, asection *, unsigned int, bfd_vma);
 extern bool _bfd_elf_write_section_sframe
   (bfd *, struct bfd_link_info *);
 extern bool _bfd_elf_set_section_sframe (bfd *, struct bfd_link_info *);

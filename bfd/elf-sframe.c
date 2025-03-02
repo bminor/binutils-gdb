@@ -574,6 +574,37 @@ _bfd_elf_sframe_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  + out_fde_idx * sizeof (sframe_func_desc_entry));
 }
 
+/* Get the "canonicalized" addend for the symbol reference corresponding to the
+   relocation at RELOC_INDEX.  E.g.,  for the following reloc for the SFrame
+   FDE function start address:
+	Offset          Type          Sym. Name + Addend
+	00000000001c  R_X86_64_PC32   .text + 1c
+	000000000030  R_X86_64_PC32   .text + 3b
+   The canonicalized addend are 0 and b respectively as the relocs are for
+   symbols (.text + 0) and (.text + b) respectively.
+
+   This is used to manually adjust the RELA addends to ensure correct values
+   for relocatable links.  */
+
+bfd_vma
+_bfd_elf_sframe_section_addend (bfd *output_bfd ATTRIBUTE_UNUSED,
+			      struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			      asection *sec,
+			      unsigned int reloc_index,
+			      bfd_vma addend)
+{
+  struct sframe_dec_info *sfd_info;
+
+  if (sec->sec_info_type != SEC_INFO_TYPE_SFRAME)
+    return addend;
+
+  sfd_info = (struct sframe_dec_info *) elf_section_data (sec)->sec_info;
+  BFD_ASSERT (sfd_info && sfd_info->sfd_ctx);
+
+  return (addend - (sframe_decoder_get_hdr_size (sfd_info->sfd_ctx)
+		    + reloc_index * sizeof (sframe_func_desc_entry)));
+}
+
 /* Write out the .sframe section.  This must be called after
    _bfd_elf_merge_section_sframe has been called on all input
    .sframe sections.  */
