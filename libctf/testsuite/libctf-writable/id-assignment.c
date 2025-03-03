@@ -12,7 +12,7 @@ test (int empty_parent, int unserialized_parent)
   ctf_dict_t *parent;
   ctf_dict_t *child;
   ctf_id_t pint = 0, pprovint = 0, pptr = 0, parray = 0, pfunction = 0;
-  ctf_id_t ctype, ctype2, cslice, ctypedef, cfunction;
+  ctf_id_t ctype, ctype2, cslice, ctypedef, cfunction, cself;
   ctf_id_t foo;
   ctf_encoding_t encoding = { CTF_INT_SIGNED, 0, (sizeof (char) * 8) - 1 };
   ctf_encoding_t slice_encoding = { CTF_INT_SIGNED, 1, (sizeof (char) * 8) - 1 };
@@ -120,6 +120,12 @@ test (int empty_parent, int unserialized_parent)
       /* (pptr is provisional.) */
 
       if (ctf_add_member (child, ctype2, "b", pptr) < 0)
+	goto child_add_memb_err;
+
+      if ((cself = ctf_add_pointer (child, CTF_ADD_ROOT, ctype2)) == CTF_ERR)
+	goto child_add_err;
+
+      if (ctf_add_member (child, ctype2, "self", cself) < 0)
 	goto child_add_memb_err;
 
       /* Make sure types are distinct.  */
@@ -348,10 +354,7 @@ test (int empty_parent, int unserialized_parent)
 	goto memb_err;
 
       if (ctf_type_kind (child, memb.ctm_type) != CTF_K_POINTER)
-	{
-	  fprintf (stderr, "parent member pointer lookup yielded %lx, not %x\n", memb.ctm_type, CTF_K_POINTER);
-	  exit (1);
-	}
+	goto memb_ptr_err;
 
       if ((foo = ctf_type_reference (child, memb.ctm_type)) == CTF_ERR)
 	goto memb_err;
@@ -439,6 +442,19 @@ test (int empty_parent, int unserialized_parent)
 	  fprintf (stderr, "func args lookup not as expected\n");
 	  exit (1);
 	}
+
+      if (ctf_member_info (child, ctype2, "self", &memb) < 0)
+	goto memb_err;
+
+      if (ctf_type_kind (child, memb.ctm_type) != CTF_K_POINTER)
+	goto memb_ptr_err;
+
+      if (ctf_type_reference (child, memb.ctm_type) != ctype2)
+	{
+	  fprintf (stderr, "structure self-ref yields type %lx, not %lx as expected\n",
+		   ctf_type_reference (child, memb.ctm_type), ctype2);
+	  exit (1);
+	}
     }
 
   ctf_dict_close (child);
@@ -494,6 +510,10 @@ test (int empty_parent, int unserialized_parent)
 
  memb_err:
   fprintf (stderr, "cannot look up members: %s\n", ctf_errmsg (ctf_errno (child)));
+  exit (1);
+
+ memb_ptr_err:
+  fprintf (stderr, "parent member pointer lookup yielded %lx, not %x\n", memb.ctm_type, CTF_K_POINTER);
   exit (1);
 
  typedef_td_err:
