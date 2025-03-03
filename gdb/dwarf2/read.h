@@ -44,7 +44,6 @@ struct tu_stats
   int nr_symtab_sharers = 0;
   int nr_stmt_less_type_units = 0;
   int nr_all_type_units_reallocs = 0;
-  int nr_tus = 0;
 };
 
 struct abbrev_table_cache;
@@ -603,6 +602,9 @@ public:
      vector that are limited to either the CU part or the TU part.  */
   gdb::array_view<dwarf2_per_cu_up> all_comp_units;
   gdb::array_view<dwarf2_per_cu_up> all_type_units;
+
+  unsigned int num_comp_units = 0;
+  unsigned int num_type_units = 0;
 
   std::vector<dwarf2_per_cu *> all_comp_units_index_cus;
   std::vector<dwarf2_per_cu *> all_comp_units_index_tus;

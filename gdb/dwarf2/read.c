@@ -1733,6 +1733,7 @@ dwarf2_per_bfd::allocate_per_cu (dwarf2_section_info *section,
   dwarf2_per_cu_up result (new dwarf2_per_cu (this, section, sect_off,
 					      length, is_dwz));
   result->index = all_units.size ();
+  this->num_comp_units++;
   return result;
 }
 
@@ -1749,7 +1750,7 @@ dwarf2_per_bfd::allocate_signatured_type (dwarf2_section_info *section,
     = std::make_unique<signatured_type> (this, section, sect_off, length,
 					 is_dwz, signature);
   result->index = all_units.size ();
-  tu_stats.nr_tus++;
+  this->num_type_units++;
   return result;
 }
 
@@ -3629,10 +3630,11 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile,
 static void
 print_tu_stats (dwarf2_per_objfile *per_objfile)
 {
-  struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
+  struct tu_stats *tu_stats = &per_bfd->tu_stats;
 
   dwarf_read_debug_printf ("Type unit statistics:");
-  dwarf_read_debug_printf ("  %d TUs", tu_stats->nr_tus);
+  dwarf_read_debug_printf ("  %d TUs", per_bfd->num_type_units);
   dwarf_read_debug_printf ("  %d uniq abbrev tables",
 			   tu_stats->nr_uniq_abbrev_tables);
   dwarf_read_debug_printf ("  %d symtabs from stmt_list entries",
@@ -3941,11 +3943,10 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 void
 finalize_all_units (dwarf2_per_bfd *per_bfd)
 {
-  size_t nr_tus = per_bfd->tu_stats.nr_tus;
-  size_t nr_cus = per_bfd->all_units.size () - nr_tus;
   gdb::array_view<dwarf2_per_cu_up> tmp = per_bfd->all_units;
-  per_bfd->all_comp_units = tmp.slice (0, nr_cus);
-  per_bfd->all_type_units = tmp.slice (nr_cus, nr_tus);
+  per_bfd->all_comp_units = tmp.slice (0, per_bfd->num_comp_units);
+  per_bfd->all_type_units
+    = tmp.slice (per_bfd->num_comp_units, per_bfd->num_type_units);
 }
 
 /* See read.h.  */
