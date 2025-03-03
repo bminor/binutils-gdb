@@ -388,12 +388,12 @@ dwarf2_find_location_expression (const dwarf2_loclist_baton *baton,
       enum debug_loc_kind kind;
       const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
 
-      if (baton->per_cu->version () < 5 && baton->from_dwo)
+      if (baton->dwarf_version < 5 && baton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (baton->per_cu,
 					       baton->per_objfile,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
-      else if (baton->per_cu->version () < 5)
+      else if (baton->dwarf_version < 5)
 	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
 					   &low, &high,
 					   byte_order, addr_size,
@@ -444,7 +444,7 @@ dwarf2_find_location_expression (const dwarf2_loclist_baton *baton,
 	  high = (unrelocated_addr) ((CORE_ADDR) high + (CORE_ADDR) base_address);
 	}
 
-      if (baton->per_cu->version () < 5)
+      if (baton->dwarf_version < 5)
 	{
 	  length = extract_unsigned_integer (loc_ptr, 2, byte_order);
 	  loc_ptr += 2;
@@ -3976,12 +3976,12 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       enum debug_loc_kind kind;
       const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
 
-      if (dlbaton->per_cu->version () < 5 && dlbaton->from_dwo)
+      if (dlbaton->dwarf_version < 5 && dlbaton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (dlbaton->per_cu,
 					       per_objfile,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
-      else if (dlbaton->per_cu->version () < 5)
+      else if (dlbaton->dwarf_version < 5)
 	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
 					   &low, &high,
 					   byte_order, addr_size,
@@ -4031,7 +4031,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       CORE_ADDR low_reloc = per_objfile->relocate (low);
       CORE_ADDR high_reloc = per_objfile->relocate (high);
 
-      if (dlbaton->per_cu->version () < 5)
+      if (dlbaton->dwarf_version < 5)
 	 {
 	   length = extract_unsigned_integer (loc_ptr, 2, byte_order);
 	   loc_ptr += 2;

@@ -3153,8 +3153,6 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 	  /* Establish the type offset that can be used to lookup the type.  */
 	  sig_type->type_offset_in_section =
 	    this_cu->sect_off + to_underlying (sig_type->type_offset_in_tu);
-
-	  this_cu->set_version (cu->header.version);
 	}
       else
 	{
@@ -3165,7 +3163,6 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 
 	  gdb_assert (this_cu->sect_off == cu->header.sect_off);
 	  this_cu->set_length (cu->header.get_length_with_initial ());
-	  this_cu->set_version (cu->header.version);
 	}
     }
 
@@ -3936,11 +3933,6 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 		       sect_offset_str (sig_ptr->sect_off),
 		       hex_string (sig_ptr->signature));
 	}
-
-      /* Init this asap, to avoid a data race in the set_version in
-	 cutu_reader::cutu_reader (which may be run in parallel for the cooked
-	 index case).  */
-      this_cu->set_version (cu_header.version);
 
       info_ptr = info_ptr + this_cu->length ();
       per_objfile->per_bfd->all_units.push_back (std::move (this_cu));
@@ -7895,7 +7887,7 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 
   create_cus_hash_table (cu, *dwo_file);
 
-  if (cu->per_cu->version () < 5)
+  if (cu->header.version < 5)
     create_debug_types_hash_table (per_objfile, dwo_file.get (),
 				   dwo_file->sections.types);
   else
@@ -13322,8 +13314,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   if (type->code () == TYPE_CODE_VOID
       && !type->is_stub ()
       && die->child == nullptr
-      && (cu->per_cu->version () == 2
-	  || cu->producer_is_gas_2_39 ()))
+      && (cu->header.version == 2 || cu->producer_is_gas_2_39 ()))
     {
       /* Work around PR gas/29517, pretend we have an DW_TAG_unspecified_type
 	 return type.  */
@@ -19516,6 +19507,7 @@ fill_in_loclist_baton (struct dwarf2_cu *cu,
   else
     baton->base_address = {};
   baton->from_dwo = cu->dwo_unit != NULL;
+  baton->dwarf_version = cu->header.version;
 }
 
 static void
