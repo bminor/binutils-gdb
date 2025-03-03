@@ -9697,11 +9697,12 @@ of a valid expression).  In Ada, this is @code{@var{function}'Address}
 This form specifies the address of the function's first instruction,
 before the stack frame and arguments have been set up.
 
-@item '@var{filename}':@var{funcaddr}
+@item '@var{filename}'::@var{funcaddr}
 Like @var{funcaddr} above, but also specifies the name of the source
 file explicitly.  This is useful if the name of the function does not
 specify the function unambiguously, e.g., if there are several
-functions with identical names in different source files.
+functions with identical names in different source files,
+see @ref{variable name conflict}.
 @end table
 
 @node Edit
@@ -11000,6 +11001,7 @@ executing within the function @code{foo}, but you can only use or
 examine the variable @code{b} while your program is executing inside
 the block where @code{b} is declared.
 
+@anchor{variable name conflict}
 @cindex variable name conflict
 There is an exception: you can refer to a variable or function whose
 scope is a single source file even if the current execution point is not
