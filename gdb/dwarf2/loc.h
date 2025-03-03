@@ -197,6 +197,9 @@ struct dwarf2_loclist_baton
   /* Non-zero if the location list lives in .debug_loc.dwo.
      The format of entries in this section are different.  */
   unsigned char from_dwo;
+
+  /* The version of DWARF this loclist comes from.  */
+  unsigned char dwarf_version;
 };
 
 /* The baton used when a dynamic property is an offset to a parent

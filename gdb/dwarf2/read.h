@@ -120,9 +120,6 @@ struct dwarf2_per_cu_data
 private:
   unsigned int m_length = 0;
 
-  /* DWARF standard version this data has been read from (such as 4 or 5).  */
-  unsigned char m_dwarf_version = 0;
-
 public:
   /* Non-zero if this CU is from .debug_types.
      Struct dwarf2_per_cu_data is contained in struct signatured_type iff
@@ -279,24 +276,6 @@ public:
     else if (strict_p)
       /* If already set, verify that it's the same value.  */
       gdb_assert (m_length == length);
-  }
-
-  /* Return DWARF version number of this CU.  */
-  short version () const
-  {
-    /* Make sure it's set already.  */
-    gdb_assert (m_dwarf_version != 0);
-    return m_dwarf_version;
-  }
-
-  void set_version (short version)
-  {
-    if (m_dwarf_version == 0)
-      /* Set if not set already.  */
-      m_dwarf_version = version;
-    else
-      /* If already set, verify that it's the same value.  */
-      gdb_assert (m_dwarf_version == version);
   }
 
   dwarf_unit_type unit_type (bool strict_p = true) const
