@@ -3132,9 +3132,9 @@ _bfd_ecoff_write_armap (bfd *abfd,
      complain that the index is out of date.  Actually, the Ultrix
      linker just checks the archive name; the GNU linker may check the
      date.  */
-  stat (bfd_get_filename (abfd), &statbuf);
-  _bfd_ar_spacepad (hdr.ar_date, sizeof (hdr.ar_date), "%ld",
-		    (long) (statbuf.st_mtime + 60));
+  if (stat (bfd_get_filename (abfd), &statbuf) == 0)
+    _bfd_ar_spacepad (hdr.ar_date, sizeof (hdr.ar_date), "%ld",
+		      (long) (statbuf.st_mtime + ARMAP_TIME_OFFSET));
 
   /* The DECstation uses zeroes for the uid, gid and mode of the
      armap.  */
