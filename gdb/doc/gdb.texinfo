@@ -9702,7 +9702,8 @@ Like @var{funcaddr} above, but also specifies the name of the source
 file explicitly.  This is useful if the name of the function does not
 specify the function unambiguously, e.g., if there are several
 functions with identical names in different source files,
-see @ref{variable name conflict}.
+see @ref{variable name conflict}.  This may not be supported for all
+languages, see @ref{Expressions}.
 @end table
 
 @node Edit
@@ -10843,8 +10844,9 @@ this manual are in C.  @xref{Languages, , Using @value{GDBN} with Different
 Languages}, for information on how to use expressions in other
 languages.
 
-In this section, we discuss operators that you can use in @value{GDBN}
-expressions regardless of your programming language.
+In this section, we discuss operators that may be available in @value{GDBN}
+expressions in addition to those of your programming language.  However,
+they are not necessarily available in all working languages.
 
 @cindex casts, in expressions
 Casts are supported in all languages, not just in C, because it is so
@@ -10863,6 +10865,7 @@ to programming languages:
 @item ::
 @samp{::} allows you to specify a variable in terms of the file or
 function where it is defined.  @xref{Variables, ,Program Variables}.
+This is currently not supported in Ada, Rust, Pascal, Modula-2 and D.
 
 @cindex @{@var{type}@}
 @cindex type casting memory
@@ -11009,7 +11012,8 @@ in this file.  But it is possible to have more than one such variable or
 function with the same name (in different source files).  If that
 happens, referring to that name has unpredictable effects.  If you wish,
 you can specify a static variable in a particular function or file by
-using the colon-colon (@code{::}) notation:
+using the colon-colon (@code{::}) notation (this may not be supported for all
+languages, @pxref{Expressions}):
 
 @cindex colon-colon, context for variables/functions
 @ifnotinfo
