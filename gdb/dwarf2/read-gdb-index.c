@@ -1324,9 +1324,9 @@ create_cus_from_gdb_index_list (dwarf2_per_bfd *per_bfd,
       ULONGEST length = extract_unsigned_integer (cu_list + 8, 8, BFD_ENDIAN_LITTLE);
       cu_list += 2 * 8;
 
-      dwarf2_per_cu_up per_cu
-	= create_cu_from_index_list (per_bfd, section, is_dwz, sect_off,
-				     length);
+      dwarf2_per_cu_up per_cu = per_bfd->allocate_per_cu (section, sect_off, length);
+      per_cu->is_dwz = is_dwz;
+
       per_bfd->all_units.push_back (std::move (per_cu));
     }
 }

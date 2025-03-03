@@ -1841,20 +1841,6 @@ dwarf2_per_bfd::allocate_signatured_type (dwarf2_section_info *section,
   return result;
 }
 
-/* See read.h.  */
-
-dwarf2_per_cu_up
-create_cu_from_index_list (dwarf2_per_bfd *per_bfd,
-			   struct dwarf2_section_info *section,
-			   int is_dwz,
-			   sect_offset sect_off, ULONGEST length)
-{
-  dwarf2_per_cu_up the_cu
-    = per_bfd->allocate_per_cu (section, sect_off, length);
-  the_cu->is_dwz = is_dwz;
-  return the_cu;
-}
-
 /* die_reader_func for dw2_get_file_names.  */
 
 static void

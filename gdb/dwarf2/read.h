@@ -998,13 +998,6 @@ extern void dw_expand_symtabs_matching_file_matcher
 extern const char *read_indirect_string_at_offset
   (dwarf2_per_objfile *per_objfile, LONGEST str_offset);
 
-/* Return a new dwarf2_per_cu allocated on the per-bfd obstack, and constructed
-   with the specified field values.  */
-
-extern dwarf2_per_cu_up create_cu_from_index_list
-  (dwarf2_per_bfd *per_bfd, struct dwarf2_section_info *section,
-   int is_dwz, sect_offset sect_off, ULONGEST length);
-
 /* Initialize the views on all_units.  */
 
 extern void finalize_all_units (dwarf2_per_bfd *per_bfd);
