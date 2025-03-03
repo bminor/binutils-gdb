@@ -97,11 +97,11 @@ struct dwarf2_per_cu
   /* LENGTH is the length of the unit.  If the value is 0, it means it is not
      known, and may be set later using the set_length method.  */
   dwarf2_per_cu (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
-		 sect_offset sect_off, unsigned int length)
+		 sect_offset sect_off, unsigned int length, bool is_dwz)
     : sect_off (sect_off),
       m_length (length),
       is_debug_types (false),
-      is_dwz (false),
+      is_dwz (is_dwz),
       reading_dwo_directly (false),
       tu_read (false),
       lto_artificial (false),
@@ -375,9 +375,9 @@ public:
 struct signatured_type : public dwarf2_per_cu
 {
   signatured_type (dwarf2_per_bfd *per_bfd, dwarf2_section_info *section,
-		   sect_offset sect_off, unsigned int length,
+		   sect_offset sect_off, unsigned int length, bool is_dwz,
 		   ULONGEST signature)
-    : dwarf2_per_cu (per_bfd, section, sect_off, length),
+    : dwarf2_per_cu (per_bfd, section, sect_off, length, is_dwz),
       signature (signature)
   {
     this->is_debug_types = true;
@@ -515,7 +515,8 @@ struct dwarf2_per_bfd
      has its "index" field set properly.  The object is allocated on the
      dwarf2_per_bfd obstack.  */
   dwarf2_per_cu_up allocate_per_cu (dwarf2_section_info *section,
-				    sect_offset sect_off, unsigned int length);
+				    sect_offset sect_off, unsigned int length,
+				    bool is_dwz);
 
   /* A convenience function to allocate a signatured_type.  The
      returned object has its "index" field set properly.  The object
@@ -523,6 +524,7 @@ struct dwarf2_per_bfd
   signatured_type_up allocate_signatured_type (dwarf2_section_info *section,
 					       sect_offset sect_off,
 					       unsigned int length,
+					       bool is_dwz,
 					       ULONGEST signature);
 
   /* Map all the DWARF section data needed when scanning

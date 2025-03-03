@@ -1324,10 +1324,10 @@ create_cus_from_gdb_index_list (dwarf2_per_bfd *per_bfd,
       ULONGEST length = extract_unsigned_integer (cu_list + 8, 8, BFD_ENDIAN_LITTLE);
       cu_list += 2 * 8;
 
-      dwarf2_per_cu_up per_cu = per_bfd->allocate_per_cu (section, sect_off, length);
-      per_cu->is_dwz = is_dwz;
-
-      per_bfd->all_units.push_back (std::move (per_cu));
+      per_bfd->all_units.emplace_back (per_bfd->allocate_per_cu (section,
+								 sect_off,
+								 length,
+								 is_dwz));
     }
 }
 
@@ -1378,7 +1378,7 @@ create_signatured_type_table_from_gdb_index
 	 (presumably) set by a cutu_reader when it gets expanded later.  */
       signatured_type_up sig_type
 	= per_bfd->allocate_signatured_type (section, sect_off, 0 /* length */,
-					     signature);
+					     false /* is_dwz */, signature);
       sig_type->type_offset_in_tu = type_offset_in_tu;
 
       sig_types_hash.emplace (sig_type.get ());
