@@ -110,7 +110,7 @@ index_cache_store_context::index_cache_store_context (const index_cache &ic,
   m_build_id_str = build_id_to_string (build_id);
 
   /* Get build id of dwz file, if present.  */
-  const dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
+  const dwz_file *dwz = per_bfd->get_dwz_file ();
 
   if (dwz != nullptr)
     {

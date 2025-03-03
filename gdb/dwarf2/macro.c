@@ -503,8 +503,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 		    || macinfo_type == DW_MACRO_undef_sup
 		    || section_is_dwz)
 		  {
-		    dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd,
-							 true);
+		    dwz_file *dwz = per_objfile->per_bfd->get_dwz_file (true);
 
 		    body = dwz->read_string (objfile, str_offset);
 		  }
@@ -710,8 +709,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 
 	    if (macinfo_type == DW_MACRO_import_sup)
 	      {
-		dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd,
-						     true);
+		dwz_file *dwz = per_objfile->per_bfd->get_dwz_file (true);
 
 		include_section = &dwz->macro;
 		include_bfd = include_section->get_bfd_owner ();

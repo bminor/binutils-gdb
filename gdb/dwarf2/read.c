@@ -2516,7 +2516,7 @@ get_abbrev_section_for_cu (dwarf2_per_cu *this_cu)
   dwarf2_per_bfd *per_bfd = this_cu->per_bfd;
 
   if (this_cu->is_dwz)
-    abbrev = &dwarf2_get_dwz_file (per_bfd, true)->abbrev;
+    abbrev = &per_bfd->get_dwz_file (true)->abbrev;
   else
     abbrev = &per_bfd->abbrev;
 
@@ -4328,7 +4328,7 @@ create_all_units (dwarf2_per_objfile *per_objfile)
 				  &per_objfile->per_bfd->abbrev, 0, sig_types,
 				  rcuh_kind::TYPE);
 
-  dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
+  dwz_file *dwz = per_objfile->per_bfd->get_dwz_file ();
   if (dwz != NULL)
     {
       read_comp_units_from_section (per_objfile, &dwz->info, &dwz->abbrev, 1,
@@ -16467,7 +16467,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       [[fallthrough]];
     case DW_FORM_GNU_strp_alt:
       {
-	dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd, true);
+	dwz_file *dwz = per_objfile->per_bfd->get_dwz_file (true);
 	LONGEST str_offset = cu_header->read_offset (abfd, info_ptr,
 						     &bytes_read);
 
@@ -17156,11 +17156,7 @@ get_debug_line_section (struct dwarf2_cu *cu)
   if (cu->dwo_unit && cu->per_cu->is_debug_types)
     section = &cu->dwo_unit->dwo_file->sections.line;
   else if (cu->per_cu->is_dwz)
-    {
-      dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd, true);
-
-      section = &dwz->line;
-    }
+    section = &per_objfile->per_bfd->get_dwz_file (true)->line;
   else
     section = &per_objfile->per_bfd->line;
 

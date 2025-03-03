@@ -1348,7 +1348,7 @@ create_cus_from_gdb_index (dwarf2_per_bfd *per_bfd,
   if (dwz_elements == 0)
     return;
 
-  dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
+  dwz_file *dwz = per_bfd->get_dwz_file ();
   create_cus_from_gdb_index_list (per_bfd, dwz_list, dwz_elements,
 				  &dwz->info, 1);
 }
@@ -1480,7 +1480,6 @@ dwarf2_read_gdb_index
 {
   const gdb_byte *cu_list, *types_list, *dwz_list = NULL;
   offset_type cu_list_elements, types_list_elements, dwz_list_elements = 0;
-  struct dwz_file *dwz;
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
@@ -1504,7 +1503,7 @@ dwarf2_read_gdb_index
 
   /* If there is a .dwz file, read it so we can get its CU list as
      well.  */
-  dwz = dwarf2_get_dwz_file (per_bfd);
+  dwz_file *dwz = per_bfd->get_dwz_file ();
   if (dwz != NULL)
     {
       mapped_gdb_index dwz_map;

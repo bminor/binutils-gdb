@@ -68,14 +68,6 @@ struct dwz_file
 
 using dwz_file_up = std::unique_ptr<dwz_file>;
 
-/* Return the separate '.dwz' debug file.  If there is no
-   .gnu_debugaltlink section in the file, then the result depends on
-   REQUIRE: if REQUIRE is true, then error; if REQUIRE is false,
-   return NULL.  */
-
-extern dwz_file *dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd,
-				      bool require = false);
-
 /* Open the separate '.dwz' debug file, if needed.  This just sets the
    appropriate field in the per-BFD structure.  If the DWZ file
    exists, the relevant sections are read in as well.  Throws an error

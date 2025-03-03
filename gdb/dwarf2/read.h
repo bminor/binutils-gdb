@@ -491,6 +491,26 @@ struct dwarf2_per_bfd
     return this->all_comp_units_index_tus[index];
   }
 
+  /* Return the separate '.dwz' debug file.  If there is no
+     .gnu_debugaltlink section in the file, then the result depends on
+     REQUIRE: if REQUIRE is true, error out; if REQUIRE is false,
+     return nullptr.  */
+  struct dwz_file *get_dwz_file (bool require = false)
+  {
+    gdb_assert (!require || this->dwz_file.has_value ());
+
+    struct dwz_file *result = nullptr;
+
+    if (this->dwz_file.has_value ())
+      {
+	result = this->dwz_file->get ();
+	if (require && result == nullptr)
+	  error (_("could not read '.gnu_debugaltlink' section"));
+      }
+
+    return result;
+  }
+
   /* A convenience function to allocate a dwarf2_per_cu.  The returned object
      has its "index" field set properly.  The object is allocated on the
      dwarf2_per_bfd obstack.  */
