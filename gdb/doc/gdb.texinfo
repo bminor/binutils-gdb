@@ -9689,11 +9689,10 @@ Any expression valid in the current working language.
 
 @item @var{funcaddr}
 An address of a function or procedure derived from its name.  In C,
-C@t{++}, Objective-C, Fortran, minimal, and assembly, this is
+C@t{++}, Objective-C, Fortran, Pascal, Modula-2, minimal, and assembly, this is
 simply the function's name @var{function} (and actually a special case
-of a valid expression).  In Pascal and Modula-2, this is
-@code{&@var{function}}.  In Ada, this is @code{@var{function}'Address}
-(although the Pascal form also works).
+of a valid expression).  In Ada, this is @code{@var{function}'Address}
+(although @code{&@var{function}} also works).
 
 This form specifies the address of the function's first instruction,
 before the stack frame and arguments have been set up.
