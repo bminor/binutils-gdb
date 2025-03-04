@@ -3093,6 +3093,37 @@ svr4_truncate_ptr (CORE_ADDR addr)
     return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (current_inferior ()->arch ())) - 1);
 }
 
+/* Find the LOAD-able program header in ABFD that contains ASECT.  Return
+   NULL if no such header can be found.  */
+
+static Elf_Internal_Phdr *
+find_loadable_elf_internal_phdr (bfd *abfd, bfd_section *asect)
+{
+  Elf_Internal_Ehdr *ehdr = elf_tdata (abfd)->elf_header;
+  Elf_Internal_Phdr *phdr = elf_tdata (abfd)->phdr;
+
+  for (int i = 0; i < ehdr->e_phnum; i++)
+    {
+      if (phdr[i].p_type == PT_LOAD)
+	{
+	  /* A section without the SEC_LOAD flag is a no-bits section
+	     (e.g. .bss) and has zero size within ABFD.  */
+	  ULONGEST section_file_size
+	    = (((bfd_section_flags (asect) & SEC_LOAD) != 0)
+	       ? bfd_section_size (asect)
+	       : 0);
+
+	  if (asect->filepos >= phdr[i].p_offset
+	      && ((asect->filepos + section_file_size)
+		  <= (phdr[i].p_offset + phdr[i].p_filesz)))
+	    return &phdr[i];
+	}
+    }
+
+  return nullptr;
+}
+
+/* Implement solib_ops::relocate_section_addresses() for svr4 targets.  */
 
 static void
 svr4_relocate_section_addresses (solib &so, target_section *sec)
@@ -3101,6 +3132,74 @@ svr4_relocate_section_addresses (solib &so, target_section *sec)
 
   sec->addr = svr4_truncate_ptr (sec->addr + lm_addr_check (so, abfd));
   sec->endaddr = svr4_truncate_ptr (sec->endaddr + lm_addr_check (so, abfd));
+
+  struct bfd_section *asect = sec->the_bfd_section;
+  gdb_assert (asect != nullptr);
+
+  /* Update the address range of SO based on ASECT.  */
+  if ((bfd_section_flags (asect) & SEC_ALLOC) != 0
+      && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      /* First, SO must cover the contents of ASECT.  */
+      if (so.addr_low == 0 || sec->addr < so.addr_low)
+	so.addr_low = sec->addr;
+
+      if (so.addr_high == 0 || sec->endaddr > so.addr_high)
+	so.addr_high = sec->endaddr;
+
+      gdb_assert (so.addr_low <= so.addr_high);
+
+      /* But we can do better.  Find the program header which contains
+	 ASECT, and figure out its extents.  This gives an larger possible
+	 region for SO.  */
+      Elf_Internal_Phdr *phdr = find_loadable_elf_internal_phdr (abfd, asect);
+
+      if (phdr != nullptr)
+	{
+	  /* Figure out the alignment required by this segment.  */
+	  ULONGEST minpagesize = get_elf_backend_data (abfd)->minpagesize;
+	  ULONGEST segment_alignment
+	    = std::max (minpagesize, static_cast<ULONGEST> (phdr->p_align));
+	  ULONGEST at_pagesz;
+	  if (target_auxv_search (AT_PAGESZ, &at_pagesz) > 0)
+	    segment_alignment = std::max (segment_alignment, at_pagesz);
+
+	  /* The offset of this section within the segment.  */
+	  ULONGEST section_offset = asect->vma - phdr->p_vaddr;
+
+	  /* The start address for the segment, without alignment.  */
+	  CORE_ADDR unaligned_start = sec->addr - section_offset;
+
+	  /* And the start address with downward alignment.  */
+	  CORE_ADDR aligned_start
+	    = align_down (unaligned_start, segment_alignment);
+
+	  /* The end address of the segment depends on its size.  Start
+	     with the size as described in the ELF.  This check of the
+	     memory size and file size is what BFD does, so assume it
+	     knows best and copy this logic.  */
+	  ULONGEST seg_size = std::max (phdr->p_memsz, phdr->p_filesz);
+
+	  /* But by aligning the start address down we need to also include
+	     that difference in the segment size.  */
+	  seg_size += (unaligned_start - aligned_start);
+
+	  /* And align the segment size upward.  */
+	  seg_size = align_up (seg_size, segment_alignment);
+
+	  /* Finally, we can compute the end address.  */
+	  CORE_ADDR end = aligned_start + seg_size;
+
+	  /* And now we can update the extend of SO.  */
+	  if (so.addr_low == 0 || aligned_start < so.addr_low)
+	    so.addr_low = aligned_start;
+
+	  if (so.addr_high == 0 || end > so.addr_high)
+	    so.addr_high = end;
+
+	  gdb_assert (so.addr_low <= so.addr_high);
+	}
+    }
 }
 
 

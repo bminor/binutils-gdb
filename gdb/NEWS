@@ -45,6 +45,13 @@ show riscv numeric-register-names
   (e.g 'x1') or their abi names (e.g. 'ra').
   Defaults to 'off', matching the old behaviour (abi names).
 
+* Changed commands
+
+info sharedlibrary
+  On Linux and FreeBSD, the addresses shown in the output of this
+  command are now for the full memory range allocated to the shared
+  library.
+
 * Python API
 
   ** New class gdb.Color for dealing with colors.

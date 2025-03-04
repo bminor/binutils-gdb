@@ -22166,6 +22166,12 @@ Print the names of the shared libraries which are currently loaded
 that match @var{regex}.  If @var{regex} is omitted then print
 all shared libraries that are loaded.
 
+For each library, @value{GDBN} also lists the address range allocated
+to that library if it can be determined.  If the address range cannot
+be determined then the address range for the @code{.text} section from
+the library will be listed.  If the @code{.text} section cannot be
+found then no addresses will be listed.
+
 @kindex info dll
 @item info dll @var{regex}
 This is an alias of @code{info sharedlibrary}.
