@@ -40,6 +40,7 @@
 #include "gdbsupport/selftest.h"
 #include "inferior.h"
 #include "gdbsupport/thread-pool.h"
+#include "event-top.h"
 
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
@@ -373,6 +374,8 @@ maint_print_all_sections (const char *header, bfd *abfd, objfile *objfile,
 
   for (asection *sect : gdb_bfd_sections (abfd))
     {
+      QUIT;
+
       obj_section *osect = nullptr;
 
       if (objfile != nullptr)
