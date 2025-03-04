@@ -511,6 +511,9 @@
 #define PT_GNU_MBIND_LO (PT_LOOS + 0x474e555)
 #define PT_GNU_MBIND_HI (PT_GNU_MBIND_LO + PT_GNU_MBIND_NUM - 1)
 
+/* Memory sealing mutable section */
+#define PT_GNU_MUTABLE	(PT_GNU_MBIND_HI + 1) /* Mutable section.  */
+
 #define PT_LOPROC	0x70000000	/* Processor-specific */
 #define PT_HIPROC	0x7FFFFFFF	/* Processor-specific */
 
@@ -887,6 +890,7 @@
 
 #define NOTE_GNU_PROPERTY_SECTION_NAME	".note.gnu.property"
 #define GNU_BUILD_ATTRS_SECTION_NAME	".gnu.build.attributes"
+#define GNU_MUTABLE_SECTION_NAME	".gnu.mutable"
 
 /* Values used in GNU .note.gnu.property notes (NT_GNU_PROPERTY_TYPE_0).  */
 #define GNU_PROPERTY_STACK_SIZE			1

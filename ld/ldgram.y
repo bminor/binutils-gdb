@@ -1312,6 +1312,8 @@ phdr_type:
 			    $$ = exp_intop (0x6474e552);
 			  else if (strcmp (s, "PT_GNU_PROPERTY") == 0)
 			    $$ = exp_intop (0x6474e553);
+			  else if (strcmp (s, "PT_GNU_MUTABLE") == 0)
+			    $$ = exp_intop (0x6474f555);
 			  else
 			    {
 			      einfo (_("\
