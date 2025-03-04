@@ -2115,9 +2115,10 @@ static const char path_var_name[] = "PATH";
 static void
 path_info (const char *args, int from_tty)
 {
-  gdb_puts ("Executable and object file path: ");
-  gdb_puts (current_inferior ()->environment.get (path_var_name));
-  gdb_puts ("\n");
+  const char *env = current_inferior ()->environment.get (path_var_name);
+
+  gdb_printf (_("Executable and object file path: %s\n"),
+	      env != nullptr ? env : "");
 }
 
 /* Add zero or more directories to the front of the execution path.  */
