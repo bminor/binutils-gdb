@@ -1238,7 +1238,7 @@ if { [isnative]
 	    ] \
 	    [list \
 		"Build ifunc-1a with PIE -z ibtplt" \
-		"-Wl,-z,ibtplt -pie tmpdir/ifunc-1a.o \
+		"-Wl,-z,ibtplt -Wl,-z,lazy -pie tmpdir/ifunc-1a.o \
 		 tmpdir/ifunc-1b.o tmpdir/ifunc-1c.o tmpdir/ifunc-1d.o" \
 		"-Wa,-mx86-used-note=yes" \
 		{ dummy.c } \
