@@ -704,6 +704,18 @@ typedef struct
   asection* sec;
 } bfd_search_result_t;
 
+static inline bool
+bfd_is_non_dynamic_elf_object (bfd *abfd, const struct elf_backend_data *out_be)
+{
+  const struct elf_backend_data *in_be = get_elf_backend_data (abfd);
+  
+  return bfd_get_flavour (abfd) == bfd_target_elf_flavour
+    && bfd_count_sections (abfd) != 0
+    && (abfd->flags & (DYNAMIC | BFD_PLUGIN | BFD_LINKER_CREATED)) == 0
+    && out_be->elf_machine_code == in_be->elf_machine_code
+    && out_be->s->elfclass == in_be->s->elfclass;
+}
+
 /* Find the first input bfd with GNU properties.
    If such an input is found, set found to true and return the relevant input.
    Otherwise, return the last input of bfd inputs.  */
@@ -712,22 +724,13 @@ bfd_linear_search_one_with_gnu_property (struct bfd_link_info *info)
 {
   const struct elf_backend_data *be = get_elf_backend_data (info->output_bfd);
 
-  bool bfd_is_non_dynamic_elf_object (bfd *abfd)
-  {
-    return (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-	&& (bfd_count_sections (abfd) != 0)
-	&& (abfd->flags & (DYNAMIC | BFD_PLUGIN | BFD_LINKER_CREATED)) == 0
-	&& (be->elf_machine_code == get_elf_backend_data (abfd)->elf_machine_code)
-	&& (be->s->elfclass == get_elf_backend_data (abfd)->s->elfclass);
-  }
-
   bfd_search_result_t res = {
     .pbfd = NULL,
     .sec = NULL,
   };
 
   for (bfd *pbfd = info->input_bfds; pbfd != NULL; pbfd = pbfd->link.next)
-    if (bfd_is_non_dynamic_elf_object (pbfd))
+    if (bfd_is_non_dynamic_elf_object (pbfd, be))
       {
 	res.pbfd = pbfd;
 
