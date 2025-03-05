@@ -686,6 +686,10 @@ public:
   }
 
 private:
+  void init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
+			   struct dwo_file *dwo_file,
+			   const struct abbrev_table *abbrev_table);
+
   void init_tu_and_read_dwo_dies (dwarf2_per_cu *this_cu,
 				  dwarf2_per_objfile *per_objfile,
 				  dwarf2_cu *existing_cu,
@@ -2907,19 +2911,19 @@ lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 
 /* Initialize a cutu_reader from a dwarf2_cu.  */
 
-static void
-init_cu_die_reader (cutu_reader *reader, dwarf2_cu *cu,
-		    dwarf2_section_info *section, dwo_file *dwo_file,
-		    const abbrev_table *abbrev_table)
+void
+cutu_reader::init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
+				 struct dwo_file *dwo_file,
+				 const struct abbrev_table *abbrev_table)
 {
   gdb_assert (section->readin && section->buffer != NULL);
-  reader->abfd = section->get_bfd_owner ();
-  reader->cu = cu;
-  reader->dwo_file = dwo_file;
-  reader->die_section = section;
-  reader->buffer = section->buffer;
-  reader->buffer_end = section->buffer + section->size;
-  reader->abbrev_table = abbrev_table;
+  this->abfd = section->get_bfd_owner ();
+  this->cu = cu;
+  this->dwo_file = dwo_file;
+  this->die_section = section;
+  this->buffer = section->buffer;
+  this->buffer_end = section->buffer + section->size;
+  this->abbrev_table = abbrev_table;
 }
 
 /* Subroutine of cutu_reader to simplify it.
@@ -3067,8 +3071,8 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
   dwo_abbrev_section->read (objfile);
   *result_dwo_abbrev_table
     = abbrev_table::read (dwo_abbrev_section, cu->header.abbrev_sect_off);
-  init_cu_die_reader (this, cu, section, dwo_unit->dwo_file,
-		      result_dwo_abbrev_table->get ());
+  this->init_cu_die_reader (cu, section, dwo_unit->dwo_file,
+			    result_dwo_abbrev_table->get ());
 
   /* Read in the die, filling in the attributes from the stub.  This
      has the benefit of simplifying the rest of the code - all the
@@ -3351,7 +3355,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 	}
 
       /* Read the top level CU/TU die.  */
-      init_cu_die_reader (this, cu, section, NULL, abbrev_table);
+      this->init_cu_die_reader (cu, section, NULL, abbrev_table);
       info_ptr = read_toplevel_die (this, &comp_unit_die, info_ptr);
 
       if (skip_partial && comp_unit_die->tag == DW_TAG_partial_unit)
@@ -3496,8 +3500,8 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 	= abbrev_table::read (abbrev_section,
 			      m_new_cu->header.abbrev_sect_off);
 
-      init_cu_die_reader (this, m_new_cu.get (), section, dwo_file,
-			  m_abbrev_table_holder.get ());
+      this->init_cu_die_reader (m_new_cu.get (), section, dwo_file,
+				m_abbrev_table_holder.get ());
       info_ptr = read_toplevel_die (this, &comp_unit_die, info_ptr);
     }
 
