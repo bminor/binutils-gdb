@@ -818,10 +818,6 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 				   pop[CTF_K_FLOAT] +
 				   pop[CTF_K_FUNCTION] +
 				   pop[CTF_K_TYPEDEF] +
-				   pop[CTF_K_POINTER] +
-				   pop[CTF_K_VOLATILE] +
-				   pop[CTF_K_CONST] +
-				   pop[CTF_K_RESTRICT] +
 				   pop_enumerators,
 				   ctf_hash_string,
 				   ctf_hash_eq_string,
@@ -1102,8 +1098,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 ctf_index_to_type (fp, id), 0);
 	  if (err != 0)
 	    return err * -1;
 	  break;
