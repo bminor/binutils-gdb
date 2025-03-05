@@ -1636,8 +1636,6 @@ begin_line (void)
 void
 pager_file::puts (const char *linebuffer)
 {
-  const char *lineptr;
-
   gdb_assert (linebuffer != nullptr);
 
   /* Don't do any filtering or wrapping if both are disabled.  */
@@ -1669,8 +1667,7 @@ pager_file::puts (const char *linebuffer)
      when this is necessary; prompt user for new page when this is
      necessary.  */
 
-  lineptr = linebuffer;
-  while (*lineptr)
+  while (*linebuffer != '\0')
     {
       /* Possible new page.  Note that PAGINATION_DISABLED_FOR_COMMAND
 	 might be set during this loop, so we must continue to check
@@ -1680,39 +1677,39 @@ pager_file::puts (const char *linebuffer)
 	  && lines_printed >= lines_allowed)
 	prompt_for_continue ();
 
-      while (*lineptr && *lineptr != '\n')
+      while (*linebuffer != '\0' && *linebuffer != '\n')
 	{
 	  int skip_bytes;
 
 	  /* Print a single line.  */
-	  if (*lineptr == '\t')
+	  if (*linebuffer == '\t')
 	    {
 	      m_wrap_buffer.push_back ('\t');
 	      /* Shifting right by 3 produces the number of tab stops
 		 we have already passed, and then adding one and
 		 shifting left 3 advances to the next tab stop.  */
 	      chars_printed = ((chars_printed >> 3) + 1) << 3;
-	      lineptr++;
+	      linebuffer++;
 	    }
-	  else if (*lineptr == '\033'
-		   && skip_ansi_escape (lineptr, &skip_bytes))
+	  else if (*linebuffer == '\033'
+		   && skip_ansi_escape (linebuffer, &skip_bytes))
 	    {
-	      m_wrap_buffer.append (lineptr, skip_bytes);
+	      m_wrap_buffer.append (linebuffer, skip_bytes);
 	      /* Note that we don't consider this a character, so we
 		 don't increment chars_printed here.  */
-	      lineptr += skip_bytes;
+	      linebuffer += skip_bytes;
 	    }
-	  else if (*lineptr == '\r')
+	  else if (*linebuffer == '\r')
 	    {
-	      m_wrap_buffer.push_back (*lineptr);
+	      m_wrap_buffer.push_back (*linebuffer);
 	      chars_printed = 0;
-	      lineptr++;
+	      linebuffer++;
 	    }
 	  else
 	    {
-	      m_wrap_buffer.push_back (*lineptr);
+	      m_wrap_buffer.push_back (*linebuffer);
 	      chars_printed++;
-	      lineptr++;
+	      linebuffer++;
 	    }
 
 	  if (chars_printed >= chars_per_line)
@@ -1786,13 +1783,13 @@ pager_file::puts (const char *linebuffer)
 	    }
 	}
 
-      if (*lineptr == '\n')
+      if (*linebuffer == '\n')
 	{
 	  chars_printed = 0;
 	  wrap_here (0); /* Spit out chars, cancel further wraps.  */
 	  lines_printed++;
 	  m_stream->puts ("\n");
-	  lineptr++;
+	  linebuffer++;
 	}
     }
 
