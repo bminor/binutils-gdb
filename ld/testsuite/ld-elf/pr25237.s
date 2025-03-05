@@ -10,10 +10,10 @@ main:
 	.globl	_main	/* Used by LynxOS targets.  */
 _main:
 	.dc.a 0
-	.bss
+	.section	.bss, "aw", %nobits
 	.p2align 16
 	.type	bss, %object
-	.size	bss, 11918568
+	.size	bss, 0xb60000
 bss:
-	.zero	11918568
+	.zero	0xb60000
 	.section	.note.GNU-stack,"",%progbits
