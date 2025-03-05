@@ -2574,7 +2574,6 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
   end_ptr = info_ptr + section->size;
   while (info_ptr < end_ptr)
     {
-      signatured_type_up sig_type;
       struct dwo_unit *dwo_tu;
       void **slot;
       const gdb_byte *ptr = info_ptr;
