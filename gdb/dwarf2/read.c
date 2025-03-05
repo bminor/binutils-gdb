@@ -691,6 +691,13 @@ private:
 				  dwarf2_cu *existing_cu,
 				  enum language pretend_language);
 
+  int read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
+			      die_info *stub_comp_unit_die,
+			      const char *stub_comp_dir,
+			      const gdb_byte **result_info_ptr,
+			      die_info **result_comp_unit_die,
+			      abbrev_table_up *result_dwo_abbrev_table);
+
   void prepare_one_comp_unit (struct dwarf2_cu *cu,
 			      enum language pretend_language);
 
@@ -2934,13 +2941,13 @@ init_cu_die_reader (cutu_reader *reader, dwarf2_cu *cu,
 
    The result is non-zero if a valid (non-dummy) DIE was found.  */
 
-static int
-read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
-			die_info *stub_comp_unit_die, const char *stub_comp_dir,
-			cutu_reader *result_reader,
-			const gdb_byte **result_info_ptr,
-			die_info **result_comp_unit_die,
-			abbrev_table_up *result_dwo_abbrev_table)
+int
+cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
+				     die_info *stub_comp_unit_die,
+				     const char *stub_comp_dir,
+				     const gdb_byte **result_info_ptr,
+				     die_info **result_comp_unit_die,
+				     abbrev_table_up *result_dwo_abbrev_table)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   dwarf2_per_cu *per_cu = cu->per_cu;
@@ -3060,16 +3067,16 @@ read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
   dwo_abbrev_section->read (objfile);
   *result_dwo_abbrev_table
     = abbrev_table::read (dwo_abbrev_section, cu->header.abbrev_sect_off);
-  init_cu_die_reader (result_reader, cu, section, dwo_unit->dwo_file,
+  init_cu_die_reader (this, cu, section, dwo_unit->dwo_file,
 		      result_dwo_abbrev_table->get ());
 
   /* Read in the die, filling in the attributes from the stub.  This
      has the benefit of simplifying the rest of the code - all the
      work to maintain the illusion of a single
      DW_TAG_{compile,type}_unit DIE is done here.  */
-  info_ptr = read_toplevel_die (result_reader, result_comp_unit_die, info_ptr,
-				gdb::make_array_view (attributes,
-						      next_attr_idx));
+  info_ptr
+    = read_toplevel_die (this, result_comp_unit_die, info_ptr,
+			 gdb::make_array_view (attributes, next_attr_idx));
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + dwo_unit->length
@@ -3179,10 +3186,9 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu *this_cu,
 
   if (read_cutu_die_from_dwo (cu, sig_type->dwo_unit,
 			      NULL /* stub_comp_unit_die */,
-			      sig_type->dwo_unit->dwo_file->comp_dir,
-			      this, &info_ptr,
-			      &comp_unit_die,
-			      &m_dwo_abbrev_table) == 0)
+			      sig_type->dwo_unit->dwo_file->comp_dir, &info_ptr,
+			      &comp_unit_die, &m_dwo_abbrev_table)
+      == 0)
     {
       /* Dummy die.  */
       dummy_p = true;
@@ -3378,11 +3384,10 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 	      dwo_unit = lookup_dwo_unit (cu, comp_unit_die, dwo_name);
 	      if (dwo_unit != NULL)
 		{
-		  if (read_cutu_die_from_dwo (cu, dwo_unit,
-					      comp_unit_die, NULL,
-					      this, &info_ptr,
-					      &dwo_comp_unit_die,
-					      &m_dwo_abbrev_table) == 0)
+		  if (read_cutu_die_from_dwo (cu, dwo_unit, comp_unit_die, NULL,
+					      &info_ptr, &dwo_comp_unit_die,
+					      &m_dwo_abbrev_table)
+		      == 0)
 		    {
 		      /* Dummy die.  */
 		      dummy_p = true;
