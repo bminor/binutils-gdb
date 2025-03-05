@@ -685,6 +685,23 @@ public:
     return std::move (m_abbrev_table_holder);
   }
 
+  die_info *read_die_and_siblings (const gdb_byte *info_ptr,
+				   const gdb_byte **new_info_ptr,
+				   die_info *parent);
+
+  const gdb_byte *read_attribute (attribute *attr, const attr_abbrev *abbrev,
+				  const gdb_byte *info_ptr,
+				  bool allow_reprocess = true);
+
+  const abbrev_info *peek_die_abbrev (const gdb_byte *info_ptr,
+				      unsigned int *bytes_read);
+
+  const gdb_byte *skip_one_die (const gdb_byte *info_ptr,
+				const abbrev_info *abbrev,
+				bool do_skip_children = true);
+
+  const gdb_byte *skip_children (const gdb_byte *info_ptr);
+
 private:
   void init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
 			   struct dwo_file *dwo_file,
@@ -704,6 +721,30 @@ private:
 
   void prepare_one_comp_unit (struct dwarf2_cu *cu,
 			      enum language pretend_language);
+
+  const gdb_byte *read_toplevel_die (die_info **diep, const gdb_byte *info_ptr,
+				     gdb::array_view<attribute *> extra_attrs
+				     = {});
+
+  die_info *read_die_and_siblings_1 (const gdb_byte *, const gdb_byte **,
+				     die_info *);
+
+  die_info *read_die_and_children (const gdb_byte *info_ptr,
+				   const gdb_byte **new_info_ptr,
+				   die_info *parent);
+
+  const gdb_byte *read_full_die_1 (die_info **diep, const gdb_byte *info_ptr,
+				   int num_extra_attrs, bool allow_reprocess);
+
+  const gdb_byte *read_attribute_value (attribute *attr, unsigned form,
+					LONGEST implicit_const,
+					const gdb_byte *info_ptr,
+					bool allow_reprocess);
+
+  void read_attribute_reprocess (attribute *attr,
+				 dwarf_tag tag = DW_TAG_padding);
+
+  const char *read_dwo_str_index (ULONGEST str_index);
 
   dwarf2_per_cu *m_this_cu;
   dwarf2_cu_up m_new_cu;
@@ -850,17 +891,6 @@ static void var_decode_location (struct attribute *attr,
 
 static unsigned int peek_abbrev_code (bfd *, const gdb_byte *);
 
-static const gdb_byte *read_attribute (const cutu_reader *, attribute *,
-				       const attr_abbrev *, const gdb_byte *,
-				       bool allow_reprocess = true);
-
-/* Note that the default for TAG is chosen because it only matters
-   when reading the top-level DIE, and that function is careful to
-   pass the correct tag.  */
-static void read_attribute_reprocess (const cutu_reader *reader,
-				      attribute *attr,
-				      dwarf_tag tag = DW_TAG_padding);
-
 static unrelocated_addr read_addr_index (struct dwarf2_cu *cu,
 					 unsigned int addr_index);
 
@@ -874,9 +904,6 @@ static const char *read_indirect_string
 static unrelocated_addr read_addr_index_from_leb128 (struct dwarf2_cu *,
 						     const gdb_byte *,
 						     unsigned int *);
-
-static const char *read_dwo_str_index (const cutu_reader *reader,
-				       ULONGEST str_index);
 
 static const char *read_stub_str_index (struct dwarf2_cu *cu,
 					ULONGEST str_index);
@@ -1045,21 +1072,6 @@ static bool decode_locdesc (struct dwarf_block *, struct dwarf2_cu *,
 static enum dwarf_array_dim_ordering read_array_order (struct die_info *,
 						       struct dwarf2_cu *);
 
-static die_info *read_die_and_siblings_1 (const cutu_reader *, const gdb_byte *,
-					  const gdb_byte **, die_info *);
-
-static die_info *read_die_and_siblings (const cutu_reader *,
-					const gdb_byte *info_ptr,
-					const gdb_byte **new_info_ptr,
-					die_info *parent);
-
-static const gdb_byte *read_full_die_1 (const cutu_reader *, die_info **,
-					const gdb_byte *, int, bool);
-
-static const gdb_byte *read_toplevel_die (const cutu_reader *, die_info **,
-					  const gdb_byte *,
-					  gdb::array_view<attribute *> = {});
-
 static void process_die (struct die_info *, struct dwarf2_cu *);
 
 static const char *dwarf2_canonicalize_name (const char *, struct dwarf2_cu *,
@@ -1120,11 +1132,6 @@ static void dwarf2_symbol_mark_computed (const struct attribute *attr,
 					 struct symbol *sym,
 					 struct dwarf2_cu *cu,
 					 int is_block);
-
-static const gdb_byte *skip_one_die (const cutu_reader *reader,
-				     const gdb_byte *info_ptr,
-				     const abbrev_info *abbrev,
-				     bool do_skip_children = true);
 
 static dwarf2_per_cu *dwarf2_find_containing_comp_unit
   (sect_offset sect_off, unsigned int offset_in_dwz,
@@ -3081,9 +3088,9 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
      has the benefit of simplifying the rest of the code - all the
      work to maintain the illusion of a single
      DW_TAG_{compile,type}_unit DIE is done here.  */
-  info_ptr
-    = read_toplevel_die (this, result_comp_unit_die, info_ptr,
-			 gdb::make_array_view (attributes, next_attr_idx));
+  info_ptr = this->read_toplevel_die (result_comp_unit_die, info_ptr,
+				      gdb::make_array_view (attributes,
+							    next_attr_idx));
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + dwo_unit->length
@@ -3359,7 +3366,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 
       /* Read the top level CU/TU die.  */
       this->init_cu_die_reader (cu, section, NULL, abbrev_table);
-      info_ptr = read_toplevel_die (this, &comp_unit_die, info_ptr);
+      info_ptr = this->read_toplevel_die (&comp_unit_die, info_ptr);
 
       if (skip_partial && comp_unit_die->tag == DW_TAG_partial_unit)
 	dummy_p = true;
@@ -3505,7 +3512,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 
       this->init_cu_die_reader (m_new_cu.get (), section, dwo_file,
 				m_abbrev_table_holder.get ());
-      info_ptr = read_toplevel_die (this, &comp_unit_die, info_ptr);
+      info_ptr = this->read_toplevel_die (&comp_unit_die, info_ptr);
     }
 
   prepare_one_comp_unit (m_new_cu.get (), pretend_language);
@@ -4319,20 +4326,19 @@ peek_abbrev_code (bfd *abfd, const gdb_byte *info_ptr)
    an empty DIE).  In either case *BYTES_READ will be set to the length of
    the initial number.  */
 
-static const abbrev_info *
-peek_die_abbrev (const cutu_reader &reader, const gdb_byte *info_ptr,
-		 unsigned int *bytes_read)
+const abbrev_info *
+cutu_reader::peek_die_abbrev (const gdb_byte *info_ptr,
+			      unsigned int *bytes_read)
 {
-  dwarf2_cu *cu = reader.cu;
-  bfd *abfd = reader.abfd;
+  dwarf2_cu *cu = this->cu;
+  bfd *abfd = this->abfd;
   unsigned int abbrev_number
     = read_unsigned_leb128 (abfd, info_ptr, bytes_read);
 
   if (abbrev_number == 0)
     return NULL;
 
-  const abbrev_info *abbrev
-    = reader.abbrev_table->lookup_abbrev (abbrev_number);
+  const abbrev_info *abbrev = this->abbrev_table->lookup_abbrev (abbrev_number);
   if (!abbrev)
     {
       error (_(DWARF_ERROR_PREFIX
@@ -4349,19 +4355,18 @@ peek_die_abbrev (const cutu_reader &reader, const gdb_byte *info_ptr,
    Returns a pointer to the end of a series of DIEs, terminated by an empty
    DIE.  Any children of the skipped DIEs will also be skipped.  */
 
-static const gdb_byte *
-skip_children (const cutu_reader *reader, const gdb_byte *info_ptr)
+const gdb_byte *
+cutu_reader::skip_children (const gdb_byte *info_ptr)
 {
   while (1)
     {
       unsigned int bytes_read;
-      const abbrev_info *abbrev = peek_die_abbrev (*reader, info_ptr,
-						   &bytes_read);
+      const abbrev_info *abbrev = this->peek_die_abbrev (info_ptr, &bytes_read);
 
       if (abbrev == NULL)
 	return info_ptr + bytes_read;
       else
-	info_ptr = skip_one_die (reader, info_ptr + bytes_read, abbrev);
+	info_ptr = this->skip_one_die (info_ptr + bytes_read, abbrev);
     }
 }
 
@@ -4374,16 +4379,16 @@ skip_children (const cutu_reader *reader, const gdb_byte *info_ptr)
    returns a pointer to this DIE's sibling, skipping any children.
    Otherwise, returns a pointer to the DIE's first child.  */
 
-static const gdb_byte *
-skip_one_die (const cutu_reader *reader, const gdb_byte *info_ptr,
-	      const abbrev_info *abbrev, bool do_skip_children)
+const gdb_byte *
+cutu_reader::skip_one_die (const gdb_byte *info_ptr, const abbrev_info *abbrev,
+			   bool do_skip_children)
 {
   unsigned int bytes_read;
   struct attribute attr;
-  bfd *abfd = reader->abfd;
-  struct dwarf2_cu *cu = reader->cu;
-  const gdb_byte *buffer = reader->buffer;
-  const gdb_byte *buffer_end = reader->buffer_end;
+  bfd *abfd = this->abfd;
+  struct dwarf2_cu *cu = this->cu;
+  const gdb_byte *buffer = this->buffer;
+  const gdb_byte *buffer_end = this->buffer_end;
   unsigned int form, i;
 
   if (do_skip_children && abbrev->sibling_offset != (unsigned short) -1)
@@ -4393,7 +4398,7 @@ skip_one_die (const cutu_reader *reader, const gdb_byte *info_ptr,
       unsigned int offset = read_4_bytes (abfd, sibling_data);
       const gdb_byte *sibling_ptr
 	= buffer + to_underlying (cu->header.sect_off) + offset;
-      if (sibling_ptr >= info_ptr && sibling_ptr < reader->buffer_end)
+      if (sibling_ptr >= info_ptr && sibling_ptr < this->buffer_end)
 	return sibling_ptr;
       /* Fall through to the slow way.  */
     }
@@ -4401,7 +4406,7 @@ skip_one_die (const cutu_reader *reader, const gdb_byte *info_ptr,
     {
       info_ptr += abbrev->size_if_constant;
       if (do_skip_children && abbrev->has_children)
-	return skip_children (reader, info_ptr);
+	return this->skip_children (info_ptr);
       return info_ptr;
     }
 
@@ -4413,7 +4418,7 @@ skip_one_die (const cutu_reader *reader, const gdb_byte *info_ptr,
 	  /* Note there is no need for the extra work of
 	     "reprocessing" here, so we pass false for that
 	     argument.  */
-	  read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr, false);
+	  this->read_attribute (&attr, &abbrev->attrs[i], info_ptr, false);
 	  if (attr.form == DW_FORM_ref_addr)
 	    complaint (_("ignoring absolute DW_AT_sibling"));
 	  else
@@ -4423,8 +4428,8 @@ skip_one_die (const cutu_reader *reader, const gdb_byte *info_ptr,
 
 	      if (sibling_ptr < info_ptr)
 		complaint (_("DW_AT_sibling points backwards"));
-	      else if (sibling_ptr > reader->buffer_end)
-		reader->die_section->overflow_complaint ();
+	      else if (sibling_ptr > this->buffer_end)
+		this->die_section->overflow_complaint ();
 	      else
 		return sibling_ptr;
 	    }
@@ -4529,7 +4534,7 @@ skip_one_die (const cutu_reader *reader, const gdb_byte *info_ptr,
     }
 
   if (do_skip_children && abbrev->has_children)
-    return skip_children (reader, info_ptr);
+    return this->skip_children (info_ptr);
   else
     return info_ptr;
 }
@@ -4735,8 +4740,8 @@ load_full_comp_unit (dwarf2_per_cu *this_cu,
 
   if (reader.comp_unit_die->has_children)
     reader.comp_unit_die->child
-      = read_die_and_siblings (&reader, reader.info_ptr,
-			       &info_ptr, reader.comp_unit_die);
+      = reader.read_die_and_siblings (reader.info_ptr, &info_ptr,
+				      reader.comp_unit_die);
   cu->dies = reader.comp_unit_die;
   /* comp_unit_die is not stored in die_hash, no need.  */
 
@@ -14815,25 +14820,26 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
    location of the info_ptr after reading all of those dies.  PARENT
    is the parent of the die in question.  */
 
-static die_info *
-read_die_and_children (const cutu_reader *reader, const gdb_byte *info_ptr,
-		       const gdb_byte **new_info_ptr, die_info *parent)
+die_info *
+cutu_reader::read_die_and_children (const gdb_byte *info_ptr,
+				    const gdb_byte **new_info_ptr,
+				    die_info *parent)
 {
   struct die_info *die;
-  const gdb_byte *cur_ptr;
+  
 
-  cur_ptr = read_full_die_1 (reader, &die, info_ptr, 0, true);
+  const gdb_byte *cur_ptr = this->read_full_die_1 (&die, info_ptr, 0, true);
   if (die == NULL)
     {
       *new_info_ptr = cur_ptr;
       return NULL;
     }
 
-  bool inserted = reader->cu->die_hash.emplace (die).second;
+  bool inserted = this->cu->die_hash.emplace (die).second;
   gdb_assert (inserted);
 
   if (die->has_children)
-    die->child = read_die_and_siblings_1 (reader, cur_ptr, new_info_ptr, die);
+    die->child = this->read_die_and_siblings_1 (cur_ptr, new_info_ptr, die);
   else
     {
       die->child = NULL;
@@ -14849,9 +14855,10 @@ read_die_and_children (const cutu_reader *reader, const gdb_byte *info_ptr,
    all of the fields of all of the dies correctly.  Arguments are as
    in read_die_and_children.  */
 
-static die_info *
-read_die_and_siblings_1 (const cutu_reader *reader, const gdb_byte *info_ptr,
-			 const gdb_byte **new_info_ptr, die_info *parent)
+die_info *
+cutu_reader::read_die_and_siblings_1 (const gdb_byte *info_ptr,
+				      const gdb_byte **new_info_ptr,
+				      die_info *parent)
 {
   struct die_info *first_die, *last_sibling;
   const gdb_byte *cur_ptr;
@@ -14861,8 +14868,7 @@ read_die_and_siblings_1 (const cutu_reader *reader, const gdb_byte *info_ptr,
 
   while (1)
     {
-      struct die_info *die
-	= read_die_and_children (reader, cur_ptr, &cur_ptr, parent);
+      die_info *die = this->read_die_and_children (cur_ptr, &cur_ptr, parent);
 
       if (die == NULL)
 	{
@@ -14884,20 +14890,21 @@ read_die_and_siblings_1 (const cutu_reader *reader, const gdb_byte *info_ptr,
    in read_die_and_children.
    This the main entry point for reading a DIE and all its children.  */
 
-static die_info *
-read_die_and_siblings (const cutu_reader *reader, const gdb_byte *info_ptr,
-		       const gdb_byte **new_info_ptr, die_info *parent)
+die_info *
+cutu_reader::read_die_and_siblings (const gdb_byte *info_ptr,
+				    const gdb_byte **new_info_ptr,
+				    die_info *parent)
 {
-  struct die_info *die = read_die_and_siblings_1 (reader, info_ptr,
+  struct die_info *die = read_die_and_siblings_1 (info_ptr,
 						  new_info_ptr, parent);
 
   if (dwarf_die_debug)
     {
       gdb_printf (gdb_stdlog,
 		  "Read die from %s@0x%x of %s:\n",
-		  reader->die_section->get_name (),
-		  (unsigned) (info_ptr - reader->die_section->buffer),
-		  bfd_get_filename (reader->abfd));
+		  this->die_section->get_name (),
+		  (unsigned) (info_ptr - this->die_section->buffer),
+		  bfd_get_filename (this->abfd));
       die->dump (dwarf_die_debug);
     }
 
@@ -14911,18 +14918,17 @@ read_die_and_siblings (const cutu_reader *reader, const gdb_byte *info_ptr,
    Set DIEP to point to a newly allocated die with its information,
    except for its child, sibling, and parent fields.  */
 
-static const gdb_byte *
-read_full_die_1 (const cutu_reader *reader, die_info **diep,
-		 const gdb_byte *info_ptr, int num_extra_attrs,
-		 bool allow_reprocess)
+const gdb_byte *
+cutu_reader::read_full_die_1 (die_info **diep, const gdb_byte *info_ptr,
+			      int num_extra_attrs, bool allow_reprocess)
 {
   unsigned int abbrev_number, bytes_read, i;
   const struct abbrev_info *abbrev;
   struct die_info *die;
-  struct dwarf2_cu *cu = reader->cu;
-  bfd *abfd = reader->abfd;
+  struct dwarf2_cu *cu = this->cu;
+  bfd *abfd = this->abfd;
 
-  sect_offset sect_off = (sect_offset) (info_ptr - reader->buffer);
+  sect_offset sect_off = (sect_offset) (info_ptr - this->buffer);
   abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
   if (!abbrev_number)
@@ -14931,7 +14937,7 @@ read_full_die_1 (const cutu_reader *reader, die_info **diep,
       return info_ptr;
     }
 
-  abbrev = reader->abbrev_table->lookup_abbrev (abbrev_number);
+  abbrev = this->abbrev_table->lookup_abbrev (abbrev_number);
   if (!abbrev)
     error (_(DWARF_ERROR_PREFIX
 	     "could not find abbrev number %d [in module %s]"),
@@ -14951,8 +14957,8 @@ read_full_die_1 (const cutu_reader *reader, die_info **diep,
   die->num_attrs = abbrev->num_attrs;
 
   for (i = 0; i < abbrev->num_attrs; ++i)
-    info_ptr = read_attribute (reader, &die->attrs[i], &abbrev->attrs[i],
-			       info_ptr, allow_reprocess);
+    info_ptr = this->read_attribute (&die->attrs[i], &abbrev->attrs[i],
+				     info_ptr, allow_reprocess);
 
   *diep = die;
   return info_ptr;
@@ -14962,16 +14968,14 @@ read_full_die_1 (const cutu_reader *reader, die_info **diep,
    Set DIEP to point to a newly allocated die with its information,
    except for its child, sibling, and parent fields.  */
 
-static const gdb_byte *
-read_toplevel_die (const cutu_reader *reader, die_info **diep,
-		   const gdb_byte *info_ptr,
-		   gdb::array_view<attribute *> extra_attrs)
+const gdb_byte *
+cutu_reader::read_toplevel_die (die_info **diep, const gdb_byte *info_ptr,
+				gdb::array_view<attribute *> extra_attrs)
 {
   const gdb_byte *result;
-  struct dwarf2_cu *cu = reader->cu;
+  struct dwarf2_cu *cu = this->cu;
 
-  result = read_full_die_1 (reader, diep, info_ptr, extra_attrs.size (),
-			    false);
+  result = this->read_full_die_1 (diep, info_ptr, extra_attrs.size (), false);
 
   /* Copy in the extra attributes, if any.  */
   attribute *next = &(*diep)->attrs[(*diep)->num_attrs];
@@ -14997,7 +15001,7 @@ read_toplevel_die (const cutu_reader *reader, die_info **diep,
   for (int i = 0; i < (*diep)->num_attrs; ++i)
     {
       if ((*diep)->attrs[i].form_requires_reprocessing ())
-	read_attribute_reprocess (reader, &(*diep)->attrs[i], (*diep)->tag);
+	this->read_attribute_reprocess (&(*diep)->attrs[i], (*diep)->tag);
     }
 
   (*diep)->num_attrs += extra_attrs.size ();
@@ -15006,9 +15010,9 @@ read_toplevel_die (const cutu_reader *reader, die_info **diep,
     {
       gdb_printf (gdb_stdlog,
 		  "Read die from %s@0x%x of %s:\n",
-		  reader->die_section->get_name (),
-		  (unsigned) (info_ptr - reader->die_section->buffer),
-		  bfd_get_filename (reader->abfd));
+		  this->die_section->get_name (),
+		  (unsigned) (info_ptr - this->die_section->buffer),
+		  bfd_get_filename (this->abfd));
       (*diep)->dump (dwarf_die_debug);
     }
 
@@ -15137,7 +15141,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
   for (int i = 0; i < abbrev->num_attrs; ++i)
     {
       attribute attr;
-      info_ptr = read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr);
+      info_ptr = reader->read_attribute (&attr, &abbrev->attrs[i], info_ptr);
 
       /* Store the data if it is of an attribute we want to keep in a
 	 partial symbol table.  */
@@ -15314,9 +15318,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 	}
 
       unsigned int bytes_read;
-      const abbrev_info *new_abbrev = peek_die_abbrev (*new_reader,
-						       new_info_ptr,
-						       &bytes_read);
+      const abbrev_info *new_abbrev
+	= new_reader->peek_die_abbrev (new_info_ptr, &bytes_read);
 
       if (new_abbrev == nullptr)
 	error (_(DWARF_ERROR_PREFIX
@@ -15387,7 +15390,7 @@ cooked_indexer::index_imported_unit (cutu_reader *reader,
     {
       /* Note that we never need to reprocess attributes here.  */
       attribute attr;
-      info_ptr = read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr);
+      info_ptr = reader->read_attribute (&attr, &abbrev->attrs[i], info_ptr);
 
       if (attr.name == DW_AT_import)
 	{
@@ -15458,8 +15461,8 @@ cooked_indexer::index_dies (cutu_reader *reader,
     {
       sect_offset this_die = (sect_offset) (info_ptr - reader->buffer);
       unsigned int bytes_read;
-      const abbrev_info *abbrev = peek_die_abbrev (*reader, info_ptr,
-						   &bytes_read);
+      const abbrev_info *abbrev
+	= reader->peek_die_abbrev (info_ptr, &bytes_read);
       info_ptr += bytes_read;
       if (abbrev == nullptr)
 	break;
@@ -15488,7 +15491,7 @@ cooked_indexer::index_dies (cutu_reader *reader,
 
       if (!die_interesting)
 	{
-	  info_ptr = skip_one_die (reader, info_ptr, abbrev, !fully);
+	  info_ptr = reader->skip_one_die (info_ptr, abbrev, !fully);
 	  if (fully && abbrev->has_children)
 	    info_ptr = index_dies (reader, info_ptr, parent, fully);
 	  continue;
@@ -15638,7 +15641,7 @@ cooked_indexer::index_dies (cutu_reader *reader,
 		info_ptr = sibling_ptr;
 	    }
 	  else
-	    info_ptr = skip_children (reader, info_ptr);
+	    info_ptr = reader->skip_children (info_ptr);
 	}
     }
 
@@ -16068,11 +16071,10 @@ read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
    They could not have been processed in the first round, because at the time
    the values of str_offsets_base or addr_base may not have been known.  */
 
-static void
-read_attribute_reprocess (const cutu_reader *reader, attribute *attr,
-			  dwarf_tag tag)
+void
+cutu_reader::read_attribute_reprocess (attribute *attr, dwarf_tag tag)
 {
-  struct dwarf2_cu *cu = reader->cu;
+  struct dwarf2_cu *cu = this->cu;
   switch (attr->form)
     {
       case DW_FORM_addrx:
@@ -16105,9 +16107,9 @@ read_attribute_reprocess (const cutu_reader *reader, attribute *attr,
 	{
 	  unsigned int str_index = attr->as_unsigned_reprocess ();
 	  gdb_assert (!attr->canonical_string_p ());
-	  if (reader->dwo_file != NULL)
-	    attr->set_string_noncanonical (read_dwo_str_index (reader,
-							       str_index));
+	  if (this->dwo_file != NULL)
+	    attr->set_string_noncanonical
+	      (this->read_dwo_str_index (str_index));
 	  else
 	    attr->set_string_noncanonical (read_stub_str_index (cu,
 								str_index));
@@ -16120,15 +16122,16 @@ read_attribute_reprocess (const cutu_reader *reader, attribute *attr,
 
 /* Read an attribute value described by an attribute form.  */
 
-static const gdb_byte *
-read_attribute_value (const cutu_reader *reader, attribute *attr, unsigned form,
-		      LONGEST implicit_const, const gdb_byte *info_ptr,
-		      bool allow_reprocess)
+const gdb_byte *
+cutu_reader::read_attribute_value (attribute *attr, unsigned form,
+				   LONGEST implicit_const,
+				   const gdb_byte *info_ptr,
+				   bool allow_reprocess)
 {
-  struct dwarf2_cu *cu = reader->cu;
+  struct dwarf2_cu *cu = this->cu;
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
-  bfd *abfd = reader->abfd;
+  bfd *abfd = this->abfd;
   struct comp_unit_head *cu_header = &cu->header;
   unsigned int bytes_read;
   struct dwarf_block *blk;
@@ -16204,7 +16207,7 @@ read_attribute_value (const cutu_reader *reader, attribute *attr, unsigned form,
 							    &bytes_read));
 	info_ptr += bytes_read;
 	if (allow_reprocess)
-	  read_attribute_reprocess (reader, attr);
+	  this->read_attribute_reprocess (attr);
       }
       break;
     case DW_FORM_string:
@@ -16279,7 +16282,7 @@ read_attribute_value (const cutu_reader *reader, attribute *attr, unsigned form,
 							    &bytes_read));
 	info_ptr += bytes_read;
 	if (allow_reprocess)
-	  read_attribute_reprocess (reader, attr);
+	  this->read_attribute_reprocess (attr);
       }
       break;
     case DW_FORM_udata:
@@ -16324,8 +16327,8 @@ read_attribute_value (const cutu_reader *reader, attribute *attr, unsigned form,
 	  implicit_const = read_signed_leb128 (abfd, info_ptr, &bytes_read);
 	  info_ptr += bytes_read;
 	}
-      info_ptr = read_attribute_value (reader, attr, form, implicit_const,
-				       info_ptr, allow_reprocess);
+      info_ptr = this->read_attribute_value (attr, form, implicit_const,
+					     info_ptr, allow_reprocess);
       break;
     case DW_FORM_implicit_const:
       attr->set_signed (implicit_const);
@@ -16336,7 +16339,7 @@ read_attribute_value (const cutu_reader *reader, attribute *attr, unsigned form,
 							  &bytes_read));
       info_ptr += bytes_read;
       if (allow_reprocess)
-	read_attribute_reprocess (reader, attr);
+	this->read_attribute_reprocess (attr);
       break;
     case DW_FORM_strx:
     case DW_FORM_strx1:
@@ -16373,7 +16376,7 @@ read_attribute_value (const cutu_reader *reader, attribute *attr, unsigned form,
 	  }
 	attr->set_unsigned_reprocess (str_index);
 	if (allow_reprocess)
-	  read_attribute_reprocess (reader, attr);
+	  this->read_attribute_reprocess (attr);
       }
       break;
     default:
@@ -16408,16 +16411,14 @@ read_attribute_value (const cutu_reader *reader, attribute *attr, unsigned form,
 
 /* Read an attribute described by an abbreviated attribute.  */
 
-static const gdb_byte *
-read_attribute (const cutu_reader *reader, attribute *attr,
-		const attr_abbrev *abbrev, const gdb_byte *info_ptr,
-		bool allow_reprocess)
+const gdb_byte *
+cutu_reader::read_attribute (attribute *attr, const attr_abbrev *abbrev,
+			     const gdb_byte *info_ptr, bool allow_reprocess)
 {
   attr->name = abbrev->name;
   attr->string_is_canonical = 0;
-  return read_attribute_value (reader, attr, abbrev->form,
-			       abbrev->implicit_const, info_ptr,
-			       allow_reprocess);
+  return this->read_attribute_value (attr, abbrev->form, abbrev->implicit_const,
+				     info_ptr, allow_reprocess);
 }
 
 /* See read.h.  */
@@ -16611,19 +16612,19 @@ read_str_index (struct dwarf2_cu *cu,
 
 /* Given a DW_FORM_GNU_str_index from a DWO file, fetch the string.  */
 
-static const char *
-read_dwo_str_index (const cutu_reader *reader, ULONGEST str_index)
+const char *
+cutu_reader::read_dwo_str_index (ULONGEST str_index)
 {
   unsigned offset_size;
   ULONGEST str_offsets_base;
-  if (reader->cu->header.version >= 5)
+  if (this->cu->header.version >= 5)
     {
       /* We have a DWARF5 CU with a reference to a .debug_str_offsets section,
 	 so assume the .debug_str_offsets section is DWARF5 as well, and
 	 parse the header.  FIXME: Parse the header only once.  */
       unsigned int bytes_read = 0;
-      bfd *abfd = reader->dwo_file->sections.str_offsets.get_bfd_owner ();
-      const gdb_byte *p = reader->dwo_file->sections.str_offsets.buffer;
+      bfd *abfd = this->dwo_file->sections.str_offsets.get_bfd_owner ();
+      const gdb_byte *p = this->dwo_file->sections.str_offsets.buffer;
 
       /* Header: Initial length.  */
       read_initial_length (abfd, p + bytes_read, &bytes_read);
@@ -16644,7 +16645,7 @@ read_dwo_str_index (const cutu_reader *reader, ULONGEST str_index)
 	     least has a limit. */
 	  complaint (_("Section .debug_str_offsets in %s has unsupported"
 		       " version %d, use empty string."),
-		     reader->dwo_file->dwo_name.c_str (), version);
+		       this->dwo_file->dwo_name.c_str (), version);
 	  return "";
 	}
 
@@ -16661,12 +16662,12 @@ read_dwo_str_index (const cutu_reader *reader, ULONGEST str_index)
       str_offsets_base = 0;
 
       /* Determine offset_size based on the .debug_info header.  */
-      offset_size = reader->cu->header.offset_size;
+      offset_size = this->cu->header.offset_size;
   }
 
-  return read_str_index (reader->cu,
-			 &reader->dwo_file->sections.str,
-			 &reader->dwo_file->sections.str_offsets,
+  return read_str_index (this->cu,
+			 &this->dwo_file->sections.str,
+			 &this->dwo_file->sections.str_offsets,
 			 str_offsets_base, str_index, offset_size);
 }
 
@@ -20066,8 +20067,8 @@ read_signatured_type (signatured_type *sig_type,
 
       if (reader.comp_unit_die->has_children)
 	reader.comp_unit_die->child
-	  = read_die_and_siblings (&reader, info_ptr, &info_ptr,
-				   reader.comp_unit_die);
+	  = reader.read_die_and_siblings (info_ptr, &info_ptr,
+					  reader.comp_unit_die);
       cu->dies = reader.comp_unit_die;
       /* comp_unit_die is not stored in die_hash, no need.  */
 
