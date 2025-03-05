@@ -416,8 +416,6 @@ struct dwo_file
   dwo_unit_set tus;
 };
 
-using dwo_file_up = std::unique_ptr<dwo_file>;
-
 /* See dwarf2/read.h.  */
 
 std::size_t
@@ -434,7 +432,7 @@ dwo_file_hash::operator() (const dwo_file_search &search) const noexcept
 /* See dwarf2/read.h.  */
 
 std::size_t
-dwo_file_hash::operator() (const dwo_file *file) const noexcept
+dwo_file_hash::operator() (const dwo_file_up &file) const noexcept
 {
   return (*this) ({ file->dwo_name.c_str (), file->comp_dir });
 }
@@ -443,7 +441,7 @@ dwo_file_hash::operator() (const dwo_file *file) const noexcept
 
 bool
 dwo_file_eq::operator() (const dwo_file_search &search,
-			 const dwo_file *dwo_file) const noexcept
+			 const dwo_file_up &dwo_file) const noexcept
 {
   if (search.dwo_name != dwo_file->dwo_name)
     return false;
@@ -457,7 +455,8 @@ dwo_file_eq::operator() (const dwo_file_search &search,
 /* See dwarf2/read.h.  */
 
 bool
-dwo_file_eq::operator() (const dwo_file *a, const dwo_file *b) const noexcept
+dwo_file_eq::operator() (const dwo_file_up &a,
+			 const dwo_file_up &b) const noexcept
 { return (*this) ({ a->dwo_name.c_str (), a->comp_dir }, b); }
 
 /* These sections are what may appear in a DWP file.  */
@@ -3985,7 +3984,7 @@ process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
 {
   /* Skeletonless TUs in DWP files without .gdb_index is not supported yet.  */
   if (get_dwp_file (per_objfile) == nullptr)
-    for (dwo_file *file : per_objfile->per_bfd->dwo_files)
+    for (const dwo_file_up &file : per_objfile->per_bfd->dwo_files)
       for (dwo_unit *unit : file->tus)
 	process_skeletonless_type_unit (unit, per_objfile, storage);
 }
@@ -6813,7 +6812,7 @@ lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
 {
   auto it = per_bfd->dwo_files.find (dwo_file_search {dwo_name, comp_dir});
 
-  return it != per_bfd->dwo_files.end () ? *it : nullptr;
+  return it != per_bfd->dwo_files.end () ? it->get() : nullptr;
 }
 
 /* die_reader_func for create_dwo_cu.  */
@@ -7484,18 +7483,18 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
       dwarf_read_debug_printf ("Creating virtual DWO: %s",
 			       virtual_dwo_name.c_str ());
 
-      dwo_file = new struct dwo_file;
-      dwo_file->dwo_name = std::move (virtual_dwo_name);
-      dwo_file->comp_dir = comp_dir;
-      dwo_file->sections.abbrev = sections.abbrev;
-      dwo_file->sections.line = sections.line;
-      dwo_file->sections.loc = sections.loc;
-      dwo_file->sections.macinfo = sections.macinfo;
-      dwo_file->sections.macro = sections.macro;
-      dwo_file->sections.str_offsets = sections.str_offsets;
+      dwo_file_up new_dwo_file = std::make_unique<struct dwo_file> ();
+      new_dwo_file->dwo_name = std::move (virtual_dwo_name);
+      new_dwo_file->comp_dir = comp_dir;
+      new_dwo_file->sections.abbrev = sections.abbrev;
+      new_dwo_file->sections.line = sections.line;
+      new_dwo_file->sections.loc = sections.loc;
+      new_dwo_file->sections.macinfo = sections.macinfo;
+      new_dwo_file->sections.macro = sections.macro;
+      new_dwo_file->sections.str_offsets = sections.str_offsets;
 
       /* The "str" section is global to the entire DWP file.  */
-      dwo_file->sections.str = dwp_file->sections.str;
+      new_dwo_file->sections.str = dwp_file->sections.str;
 
       /* The info or types section is assigned below to dwo_unit,
 	 there's no need to record it in dwo_file.
@@ -7504,8 +7503,10 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
 	 types we'll grow the vector and eventually have to reallocate space
 	 for it, invalidating all copies of pointers into the previous
 	 contents.  */
-      auto [it, inserted] = per_bfd->dwo_files.emplace (dwo_file);
+      auto [it, inserted]
+	= per_bfd->dwo_files.emplace (std::move (new_dwo_file));
       gdb_assert (inserted);
+      dwo_file = it->get ();
     }
   else
     dwarf_read_debug_printf ("Using existing virtual DWO: %s",
@@ -7670,36 +7671,35 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
       dwarf_read_debug_printf ("Creating virtual DWO: %s",
 			       virtual_dwo_name.c_str ());
 
-      dwo_file = new struct dwo_file;
-      dwo_file->dwo_name = std::move (virtual_dwo_name);
-      dwo_file->comp_dir = comp_dir;
-      dwo_file->sections.abbrev =
-	create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.abbrev,
-				     sections.abbrev_offset,
-				     sections.abbrev_size);
-      dwo_file->sections.line =
-	create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.line,
-				     sections.line_offset,
-				     sections.line_size);
-      dwo_file->sections.loc =
-	create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.loc,
-				     sections.loc_offset, sections.loc_size);
-      dwo_file->sections.macinfo =
-	create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.macinfo,
-				     sections.macinfo_offset,
-				     sections.macinfo_size);
-      dwo_file->sections.macro =
-	create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.macro,
-				     sections.macro_offset,
-				     sections.macro_size);
-      dwo_file->sections.str_offsets =
-	create_dwp_v2_or_v5_section (per_bfd,
-				     &dwp_file->sections.str_offsets,
-				     sections.str_offsets_offset,
-				     sections.str_offsets_size);
+      dwo_file_up new_dwo_file = std::make_unique<struct dwo_file> ();
+      new_dwo_file->dwo_name = std::move (virtual_dwo_name);
+      new_dwo_file->comp_dir = comp_dir;
+      new_dwo_file->sections.abbrev
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.abbrev,
+				       sections.abbrev_offset,
+				       sections.abbrev_size);
+      new_dwo_file->sections.line
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.line,
+				       sections.line_offset,
+				       sections.line_size);
+      new_dwo_file->sections.loc
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.loc,
+				       sections.loc_offset, sections.loc_size);
+      new_dwo_file->sections.macinfo
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.macinfo,
+				       sections.macinfo_offset,
+				       sections.macinfo_size);
+      new_dwo_file->sections.macro
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.macro,
+				       sections.macro_offset,
+				       sections.macro_size);
+      new_dwo_file->sections.str_offsets
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.str_offsets,
+				       sections.str_offsets_offset,
+				       sections.str_offsets_size);
 
       /* The "str" section is global to the entire DWP file.  */
-      dwo_file->sections.str = dwp_file->sections.str;
+      new_dwo_file->sections.str = dwp_file->sections.str;
 
       /* The info or types section is assigned below to dwo_unit,
 	 there's no need to record it in dwo_file.
@@ -7708,8 +7708,10 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
 	 types we'll grow the vector and eventually have to reallocate space
 	 for it, invalidating all copies of pointers into the previous
 	 contents.  */
-      auto [it, inserted] = per_bfd->dwo_files.emplace (dwo_file);
+      auto [it, inserted]
+	= per_bfd->dwo_files.emplace (std::move (new_dwo_file));
       gdb_assert (inserted);
+      dwo_file = it->get ();
     }
   else
     dwarf_read_debug_printf ("Using existing virtual DWO: %s",
@@ -7838,41 +7840,36 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_bfd *per_bfd,
       dwarf_read_debug_printf ("Creating virtual DWO: %s",
 			       virtual_dwo_name.c_str ());
 
-      dwo_file = new struct dwo_file;
-      dwo_file->dwo_name = std::move (virtual_dwo_name);
-      dwo_file->comp_dir = comp_dir;
-      dwo_file->sections.abbrev =
-	create_dwp_v2_or_v5_section (per_bfd,
-				     &dwp_file->sections.abbrev,
-				     sections.abbrev_offset,
-				     sections.abbrev_size);
-      dwo_file->sections.line =
-	create_dwp_v2_or_v5_section (per_bfd,
-				     &dwp_file->sections.line,
-				     sections.line_offset, sections.line_size);
-      dwo_file->sections.macro =
-	create_dwp_v2_or_v5_section (per_bfd,
-				     &dwp_file->sections.macro,
-				     sections.macro_offset,
-				     sections.macro_size);
-      dwo_file->sections.loclists =
-	create_dwp_v2_or_v5_section (per_bfd,
-				     &dwp_file->sections.loclists,
-				     sections.loclists_offset,
-				     sections.loclists_size);
-      dwo_file->sections.rnglists =
-	create_dwp_v2_or_v5_section (per_bfd,
-				     &dwp_file->sections.rnglists,
-				     sections.rnglists_offset,
-				     sections.rnglists_size);
-      dwo_file->sections.str_offsets =
-	create_dwp_v2_or_v5_section (per_bfd,
-				     &dwp_file->sections.str_offsets,
-				     sections.str_offsets_offset,
-				     sections.str_offsets_size);
+      dwo_file_up new_dwo_file = std::make_unique<struct dwo_file> ();
+      new_dwo_file->dwo_name = std::move (virtual_dwo_name);
+      new_dwo_file->comp_dir = comp_dir;
+      new_dwo_file->sections.abbrev
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.abbrev,
+				       sections.abbrev_offset,
+				       sections.abbrev_size);
+      new_dwo_file->sections.line
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.line,
+				       sections.line_offset,
+				       sections.line_size);
+      new_dwo_file->sections.macro
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.macro,
+				       sections.macro_offset,
+				       sections.macro_size);
+      new_dwo_file->sections.loclists
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.loclists,
+				       sections.loclists_offset,
+				       sections.loclists_size);
+      new_dwo_file->sections.rnglists
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.rnglists,
+				       sections.rnglists_offset,
+				       sections.rnglists_size);
+      new_dwo_file->sections.str_offsets
+	= create_dwp_v2_or_v5_section (per_bfd, &dwp_file->sections.str_offsets,
+				       sections.str_offsets_offset,
+				       sections.str_offsets_size);
 
       /* The "str" section is global to the entire DWP file.  */
-      dwo_file->sections.str = dwp_file->sections.str;
+      new_dwo_file->sections.str = dwp_file->sections.str;
 
       /* The info or types section is assigned below to dwo_unit,
 	 there's no need to record it in dwo_file.
@@ -7881,8 +7878,10 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_bfd *per_bfd,
 	 types we'll grow the vector and eventually have to reallocate space
 	 for it, invalidating all copies of pointers into the previous
 	 contents.  */
-      auto [it, inserted] = per_bfd->dwo_files.emplace (dwo_file);
+      auto [it, inserted]
+	= per_bfd->dwo_files.emplace (std::move (new_dwo_file));
       gdb_assert (inserted);
+      dwo_file = it->get ();
     }
   else
     dwarf_read_debug_printf ("Using existing virtual DWO: %s",
@@ -8134,7 +8133,7 @@ dwarf2_locate_dwo_sections (struct objfile *objfile, bfd *abfd,
    by PER_CU.  This is for the non-DWP case.
    The result is NULL if DWO_NAME can't be found.  */
 
-static struct dwo_file *
+static dwo_file_up
 open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 			const char *comp_dir)
 {
@@ -8149,7 +8148,7 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
       return NULL;
     }
 
-  dwo_file_up dwo_file (new struct dwo_file);
+  dwo_file_up dwo_file = std::make_unique<struct dwo_file> ();
   dwo_file->dwo_name = dwo_name;
   dwo_file->comp_dir = comp_dir;
   dwo_file->dbfd = std::move (dbfd);
@@ -8171,7 +8170,7 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 
   bfd_cache_close (dwo_file->dbfd.get ());
 
-  return dwo_file.release ();
+  return dwo_file;
 }
 
 /* This function is mapped across the sections and remembers the offset and
@@ -8507,12 +8506,15 @@ lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
 	  /* Read in the file and build a table of the CUs/TUs it contains.
 
 	     NOTE: This will be nullptr if unable to open the file.  */
-	  dwo_file = open_and_init_dwo_file (cu, dwo_name, comp_dir);
+	  dwo_file_up new_dwo_file
+	    = open_and_init_dwo_file (cu, dwo_name, comp_dir);
 
-	  if (dwo_file != nullptr)
+	  if (new_dwo_file != nullptr)
 	    {
-	      auto [it, inserted] = per_bfd->dwo_files.emplace (dwo_file);
+	      auto [it, inserted]
+		= per_bfd->dwo_files.emplace (std::move (new_dwo_file));
 	      gdb_assert (inserted);
+	      dwo_file = (*it).get ();
 	    }
 	}
 

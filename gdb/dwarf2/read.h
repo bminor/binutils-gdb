@@ -445,6 +445,8 @@ using signatured_type_set
 
 struct dwo_file;
 
+using dwo_file_up = std::unique_ptr<dwo_file>;
+
 /* This is used when looking up entries in a dwo_file_set.  */
 
 struct dwo_file_search
@@ -464,7 +466,7 @@ struct dwo_file_hash
   using is_transparent = void;
 
   std::size_t operator() (const dwo_file_search &search) const noexcept;
-  std::size_t operator() (const dwo_file *file) const noexcept;
+  std::size_t operator() (const dwo_file_up &file) const noexcept;
 };
 
 /* Equal function for dwo_file objects, using their dwo_name and comp_dir as
@@ -475,13 +477,14 @@ struct dwo_file_eq
   using is_transparent = void;
 
   bool operator() (const dwo_file_search &search,
-		   const dwo_file *dwo_file) const noexcept;
-  bool operator() (const dwo_file *a, const dwo_file *b) const noexcept;
+		   const dwo_file_up &dwo_file) const noexcept;
+  bool operator() (const dwo_file_up &a, const dwo_file_up &b) const noexcept;
 };
 
 /* Set of dwo_file objects, using their dwo_name and comp_dir as identity.  */
 
-using dwo_file_set = gdb::unordered_set<dwo_file *, dwo_file_hash, dwo_file_eq>;
+using dwo_file_up_set
+  = gdb::unordered_set<dwo_file_up, dwo_file_hash, dwo_file_eq>;
 
 struct dwp_file;
 
@@ -635,7 +638,7 @@ public:
   struct tu_stats tu_stats;
 
   /* Set of dwo_file objects.  */
-  dwo_file_set dwo_files;
+  dwo_file_up_set dwo_files;
 
   /* True if we've checked for whether there is a DWP file.  */
   bool dwp_checked = false;
