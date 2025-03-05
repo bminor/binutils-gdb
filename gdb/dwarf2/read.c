@@ -2933,12 +2933,15 @@ cutu_reader::init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
 
    STUB_COMP_UNIT_DIE is for the stub DIE, we copy over certain attributes
    from it to the DIE in the DWO.  If NULL we are skipping the stub.
+
    STUB_COMP_DIR is similar to STUB_COMP_UNIT_DIE: When reading a TU directly
    from the DWO file, bypassing the stub, it contains the DW_AT_comp_dir
    attribute of the referencing CU.  At most one of STUB_COMP_UNIT_DIE and
    STUB_COMP_DIR may be non-NULL.
+
    *RESULT_READER,*RESULT_INFO_PTR,*RESULT_COMP_UNIT_DIE
    are filled in with the info of the DIE from the DWO file.
+
    *RESULT_DWO_ABBREV_TABLE will be filled in with the abbrev table allocated
    from the dwo.  Since *RESULT_READER references this abbrev table, it must be
    kept around for at least as long as *RESULT_READER.
