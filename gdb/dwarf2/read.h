@@ -443,6 +443,46 @@ using signatured_type_set
   = gdb::unordered_set<signatured_type *, signatured_type_hash,
 		       signatured_type_eq>;
 
+struct dwo_file;
+
+/* This is used when looking up entries in a dwo_file_set.  */
+
+struct dwo_file_search
+{
+  /* Name of the DWO to look for.  */
+  const char *dwo_name;
+
+  /* Compilation directory to look for.  */
+  const char *comp_dir;
+};
+
+/* Hash function for dwo_file objects, using their dwo_name and comp_dir as
+   identity.  */
+
+struct dwo_file_hash
+{
+  using is_transparent = void;
+
+  std::size_t operator() (const dwo_file_search &search) const noexcept;
+  std::size_t operator() (const dwo_file *file) const noexcept;
+};
+
+/* Equal function for dwo_file objects, using their dwo_name and comp_dir as
+   identity.  */
+
+struct dwo_file_eq
+{
+  using is_transparent = void;
+
+  bool operator() (const dwo_file_search &search,
+		   const dwo_file *dwo_file) const noexcept;
+  bool operator() (const dwo_file *a, const dwo_file *b) const noexcept;
+};
+
+/* Set of dwo_file objects, using their dwo_name and comp_dir as identity.  */
+
+using dwo_file_set = gdb::unordered_set<dwo_file *, dwo_file_hash, dwo_file_eq>;
+
 struct dwp_file;
 
 using dwp_file_up = std::unique_ptr<dwp_file>;
@@ -594,9 +634,8 @@ public:
      are doing.  */
   struct tu_stats tu_stats;
 
-  /* A table mapping DW_AT_dwo_name values to struct dwo_file objects.
-     This is NULL if the table hasn't been allocated yet.  */
-  htab_up dwo_files;
+  /* Set of dwo_file objects.  */
+  dwo_file_set dwo_files;
 
   /* True if we've checked for whether there is a DWP file.  */
   bool dwp_checked = false;

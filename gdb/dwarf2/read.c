@@ -418,6 +418,48 @@ struct dwo_file
 
 using dwo_file_up = std::unique_ptr<dwo_file>;
 
+/* See dwarf2/read.h.  */
+
+std::size_t
+dwo_file_hash::operator() (const dwo_file_search &search) const noexcept
+{
+  hashval_t hash = htab_hash_string (search.dwo_name);
+
+  if (search.comp_dir != nullptr)
+    hash += htab_hash_string (search.comp_dir);
+
+  return hash;
+}
+
+/* See dwarf2/read.h.  */
+
+std::size_t
+dwo_file_hash::operator() (const dwo_file *file) const noexcept
+{
+  return (*this) ({ file->dwo_name.c_str (), file->comp_dir });
+}
+
+/* See dwarf2/read.h.  */
+
+bool
+dwo_file_eq::operator() (const dwo_file_search &search,
+			 const dwo_file *dwo_file) const noexcept
+{
+  if (search.dwo_name != dwo_file->dwo_name)
+    return false;
+
+  if (search.comp_dir == nullptr || dwo_file->comp_dir == nullptr)
+    return search.comp_dir == dwo_file->comp_dir;
+
+  return std::strcmp (search.comp_dir, dwo_file->comp_dir) == 0;
+}
+
+/* See dwarf2/read.h.  */
+
+bool
+dwo_file_eq::operator() (const dwo_file *a, const dwo_file *b) const noexcept
+{ return (*this) ({ a->dwo_name.c_str (), a->comp_dir }, b); }
+
 /* These sections are what may appear in a DWP file.  */
 
 struct dwp_sections
@@ -3902,19 +3944,14 @@ print_tu_stats (dwarf2_per_objfile *per_objfile)
 			   tu_stats->nr_all_type_units_reallocs);
 }
 
-struct skeleton_data
-{
-  dwarf2_per_objfile *per_objfile;
-  cooked_index_storage *storage;
-};
-
-/* Traversal function for process_skeletonless_type_unit.
+/* Traversal function for process_skeletonless_type_units.
    Read a TU in a DWO file and build partial symbols for it.  */
 
-static int
-process_skeletonless_type_unit (dwo_unit *dwo_unit, skeleton_data *data)
+static void
+process_skeletonless_type_unit (dwo_unit *dwo_unit,
+				dwarf2_per_objfile *per_objfile,
+				cooked_index_storage *storage)
 {
-  dwarf2_per_objfile *per_objfile = data->per_objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   /* If this TU doesn't exist in the global table, add it and read it in.  */
@@ -3923,7 +3960,7 @@ process_skeletonless_type_unit (dwo_unit *dwo_unit, skeleton_data *data)
   /* If we've already seen this type there's nothing to do.  What's happening
      is we're doing our own version of comdat-folding here.  */
   if (sig_type_it != per_bfd->signatured_types.end ())
-    return 1;
+    return;
 
   /* This does the job that create_all_units would have done for
      this TU.  */
@@ -3935,22 +3972,7 @@ process_skeletonless_type_unit (dwo_unit *dwo_unit, skeleton_data *data)
   cutu_reader reader (*sig_type_it, per_objfile, nullptr, nullptr, false,
 		      language_minimal);
   if (!reader.dummy_p)
-    build_type_psymtabs_reader (&reader, data->storage);
-
-  return 1;
-}
-
-/* Traversal function for process_skeletonless_type_units.  */
-
-static int
-process_dwo_file_for_skeletonless_type_units (void **slot, void *info)
-{
-  struct dwo_file *dwo_file = (struct dwo_file *) *slot;
-
-  for (dwo_unit *unit : dwo_file->tus)
-    process_skeletonless_type_unit (unit, static_cast<skeleton_data *> (info));
-
-  return 1;
+    build_type_psymtabs_reader (&reader, storage);
 }
 
 /* Scan all TUs of DWO files, verifying we've processed them.
@@ -3961,16 +3983,11 @@ static void
 process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
 				 cooked_index_storage *storage)
 {
-  skeleton_data data { per_objfile, storage };
-
   /* Skeletonless TUs in DWP files without .gdb_index is not supported yet.  */
-  if (get_dwp_file (per_objfile) == NULL
-      && per_objfile->per_bfd->dwo_files != NULL)
-    {
-      htab_traverse_noresize (per_objfile->per_bfd->dwo_files.get (),
-			      process_dwo_file_for_skeletonless_type_units,
-			      &data);
-    }
+  if (get_dwp_file (per_objfile) == nullptr)
+    for (dwo_file *file : per_objfile->per_bfd->dwo_files)
+      for (dwo_unit *unit : file->tus)
+	process_skeletonless_type_unit (unit, per_objfile, storage);
 }
 
 /* A subclass of cooked_index_worker that handles scanning
@@ -6788,86 +6805,15 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
    and DWP files (a file with the DWOs packaged up into one file), we treat
    DWP files as having a collection of virtual DWO files.  */
 
-/* A helper function to hash two file names.  This is a separate
-   function because the hash table uses a search with a different
-   type.  The second file may be NULL.  */
-
-static hashval_t
-hash_two_files (const char *one, const char *two)
-{
-  hashval_t hash = htab_hash_string (one);
-  if (two != nullptr)
-    hash += htab_hash_string (two);
-  return hash;
-}
-
-static hashval_t
-hash_dwo_file (const void *item)
-{
-  const struct dwo_file *dwo_file = (const struct dwo_file *) item;
-  return hash_two_files (dwo_file->dwo_name.c_str (), dwo_file->comp_dir);
-}
-
-/* This is used when looking up entries in the DWO hash table.  */
-
-struct dwo_file_search
-{
-  /* Name of the DWO to look for.  */
-  const char *dwo_name;
-  /* Compilation directory to look for.  */
-  const char *comp_dir;
-
-  /* Return a hash value compatible with the table.  */
-  hashval_t hash () const
-  {
-    return hash_two_files (dwo_name, comp_dir);
-  }
-};
-
-static int
-eq_dwo_file (const void *item_lhs, const void *item_rhs)
-{
-  const struct dwo_file *lhs = (const struct dwo_file *) item_lhs;
-  const struct dwo_file_search *rhs
-    = (const struct dwo_file_search *) item_rhs;
-
-  if (lhs->dwo_name != rhs->dwo_name)
-    return 0;
-  if (lhs->comp_dir == NULL || rhs->comp_dir == NULL)
-    return lhs->comp_dir == rhs->comp_dir;
-  return strcmp (lhs->comp_dir, rhs->comp_dir) == 0;
-}
-
-/* Allocate a hash table for DWO files.  */
-
-static htab_up
-allocate_dwo_file_hash_table ()
-{
-  return htab_up (htab_create_alloc (41,
-				     hash_dwo_file,
-				     eq_dwo_file,
-				     htab_delete_entry<dwo_file>,
-				     xcalloc, xfree));
-}
-
 /* Lookup DWO file DWO_NAME.  */
 
-static void **
-lookup_dwo_file_slot (dwarf2_per_bfd *per_bfd, const char *dwo_name,
-		      const char *comp_dir)
+static dwo_file *
+lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
+		 const char *comp_dir)
 {
-  struct dwo_file_search find_entry;
-  void **slot;
+  auto it = per_bfd->dwo_files.find (dwo_file_search {dwo_name, comp_dir});
 
-  if (per_bfd->dwo_files == NULL)
-    per_bfd->dwo_files = allocate_dwo_file_hash_table ();
-
-  find_entry.dwo_name = dwo_name;
-  find_entry.comp_dir = comp_dir;
-  slot = htab_find_slot_with_hash (per_bfd->dwo_files.get (), &find_entry,
-				   find_entry.hash (), INSERT);
-
-  return slot;
+  return it != per_bfd->dwo_files.end () ? *it : nullptr;
 }
 
 /* die_reader_func for create_dwo_cu.  */
@@ -7446,10 +7392,7 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
     is_debug_types ? dwp_file->tus : dwp_file->cus;
   bfd *dbfd = dwp_file->dbfd.get ();
   const char *kind = is_debug_types ? "TU" : "CU";
-  struct dwo_file *dwo_file;
-  struct dwo_unit *dwo_unit;
   struct virtual_v1_dwo_sections sections;
-  void **dwo_file_slot;
   int i;
 
   gdb_assert (dwp_file->version == 1);
@@ -7530,12 +7473,13 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
 		   sections.line.get_id (),
 		   sections.loc.get_id (),
 		   sections.str_offsets.get_id ());
+
   /* Can we use an existing virtual DWO file?  */
-  dwo_file_slot
-    = lookup_dwo_file_slot (per_bfd, virtual_dwo_name.c_str (), comp_dir);
+  dwo_file *dwo_file
+    = lookup_dwo_file (per_bfd, virtual_dwo_name.c_str (), comp_dir);
 
   /* Create one if necessary.  */
-  if (*dwo_file_slot == NULL)
+  if (dwo_file == nullptr)
     {
       dwarf_read_debug_printf ("Creating virtual DWO: %s",
 			       virtual_dwo_name.c_str ());
@@ -7549,8 +7493,10 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
       dwo_file->sections.macinfo = sections.macinfo;
       dwo_file->sections.macro = sections.macro;
       dwo_file->sections.str_offsets = sections.str_offsets;
+
       /* The "str" section is global to the entire DWP file.  */
       dwo_file->sections.str = dwp_file->sections.str;
+
       /* The info or types section is assigned below to dwo_unit,
 	 there's no need to record it in dwo_file.
 	 Also, we can't simply record type sections in dwo_file because
@@ -7558,17 +7504,14 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
 	 types we'll grow the vector and eventually have to reallocate space
 	 for it, invalidating all copies of pointers into the previous
 	 contents.  */
-      *dwo_file_slot = dwo_file;
+      auto [it, inserted] = per_bfd->dwo_files.emplace (dwo_file);
+      gdb_assert (inserted);
     }
   else
-    {
-      dwarf_read_debug_printf ("Using existing virtual DWO: %s",
-			       virtual_dwo_name.c_str ());
+    dwarf_read_debug_printf ("Using existing virtual DWO: %s",
+			     virtual_dwo_name.c_str ());
 
-      dwo_file = (struct dwo_file *) *dwo_file_slot;
-    }
-
-  dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
+  dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
   dwo_unit->section = XOBNEW (&per_bfd->obstack, struct dwarf2_section_info);
@@ -7640,10 +7583,7 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
     is_debug_types ? dwp_file->tus : dwp_file->cus;
   bfd *dbfd = dwp_file->dbfd.get ();
   const char *kind = is_debug_types ? "TU" : "CU";
-  struct dwo_file *dwo_file;
-  struct dwo_unit *dwo_unit;
   struct virtual_v2_or_v5_dwo_sections sections;
-  void **dwo_file_slot;
   int i;
 
   gdb_assert (dwp_file->version == 2);
@@ -7719,11 +7659,13 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
 		   (long) (sections.loc_size ? sections.loc_offset : 0),
 		   (long) (sections.str_offsets_size
 			   ? sections.str_offsets_offset : 0));
+
   /* Can we use an existing virtual DWO file?  */
-  dwo_file_slot
-    = lookup_dwo_file_slot (per_bfd, virtual_dwo_name.c_str (), comp_dir);
+  dwo_file *dwo_file
+    = lookup_dwo_file (per_bfd, virtual_dwo_name.c_str (), comp_dir);
+
   /* Create one if necessary.  */
-  if (*dwo_file_slot == NULL)
+  if (dwo_file == nullptr)
     {
       dwarf_read_debug_printf ("Creating virtual DWO: %s",
 			       virtual_dwo_name.c_str ());
@@ -7755,8 +7697,10 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
 				     &dwp_file->sections.str_offsets,
 				     sections.str_offsets_offset,
 				     sections.str_offsets_size);
+
       /* The "str" section is global to the entire DWP file.  */
       dwo_file->sections.str = dwp_file->sections.str;
+
       /* The info or types section is assigned below to dwo_unit,
 	 there's no need to record it in dwo_file.
 	 Also, we can't simply record type sections in dwo_file because
@@ -7764,17 +7708,14 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
 	 types we'll grow the vector and eventually have to reallocate space
 	 for it, invalidating all copies of pointers into the previous
 	 contents.  */
-      *dwo_file_slot = dwo_file;
+      auto [it, inserted] = per_bfd->dwo_files.emplace (dwo_file);
+      gdb_assert (inserted);
     }
   else
-    {
-      dwarf_read_debug_printf ("Using existing virtual DWO: %s",
-			       virtual_dwo_name.c_str ());
+    dwarf_read_debug_printf ("Using existing virtual DWO: %s",
+			     virtual_dwo_name.c_str ());
 
-      dwo_file = (struct dwo_file *) *dwo_file_slot;
-    }
-
-  dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
+  dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
   dwo_unit->section = XOBNEW (&per_bfd->obstack, struct dwarf2_section_info);
@@ -7806,10 +7747,7 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_bfd *per_bfd,
     = is_debug_types ? dwp_file->tus : dwp_file->cus;
   bfd *dbfd = dwp_file->dbfd.get ();
   const char *kind = is_debug_types ? "TU" : "CU";
-  struct dwo_file *dwo_file;
-  struct dwo_unit *dwo_unit;
   struct virtual_v2_or_v5_dwo_sections sections {};
-  void **dwo_file_slot;
 
   gdb_assert (dwp_file->version == 5);
 
@@ -7889,12 +7827,13 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_bfd *per_bfd,
 			    ? sections.str_offsets_offset : 0),
 		 (long) (sections.macro_size ? sections.macro_offset : 0),
 		 (long) (sections.rnglists_size ? sections.rnglists_offset: 0));
+
   /* Can we use an existing virtual DWO file?  */
-  dwo_file_slot = lookup_dwo_file_slot (per_bfd,
-					virtual_dwo_name.c_str (),
-					comp_dir);
+  dwo_file *dwo_file
+    = lookup_dwo_file (per_bfd, virtual_dwo_name.c_str (), comp_dir);
+
   /* Create one if necessary.  */
-  if (*dwo_file_slot == NULL)
+  if (dwo_file == nullptr)
     {
       dwarf_read_debug_printf ("Creating virtual DWO: %s",
 			       virtual_dwo_name.c_str ());
@@ -7931,8 +7870,10 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_bfd *per_bfd,
 				     &dwp_file->sections.str_offsets,
 				     sections.str_offsets_offset,
 				     sections.str_offsets_size);
+
       /* The "str" section is global to the entire DWP file.  */
       dwo_file->sections.str = dwp_file->sections.str;
+
       /* The info or types section is assigned below to dwo_unit,
 	 there's no need to record it in dwo_file.
 	 Also, we can't simply record type sections in dwo_file because
@@ -7940,17 +7881,14 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_bfd *per_bfd,
 	 types we'll grow the vector and eventually have to reallocate space
 	 for it, invalidating all copies of pointers into the previous
 	 contents.  */
-      *dwo_file_slot = dwo_file;
+      auto [it, inserted] = per_bfd->dwo_files.emplace (dwo_file);
+      gdb_assert (inserted);
     }
   else
-    {
-      dwarf_read_debug_printf ("Using existing virtual DWO: %s",
-			       virtual_dwo_name.c_str ());
+    dwarf_read_debug_printf ("Using existing virtual DWO: %s",
+			     virtual_dwo_name.c_str ());
 
-      dwo_file = (struct dwo_file *) *dwo_file_slot;
-    }
-
-  dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
+  dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
   dwo_unit->section
@@ -8530,8 +8468,6 @@ lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct objfile *objfile = per_objfile->objfile;
   const char *kind = is_debug_types ? "TU" : "CU";
-  void **dwo_file_slot;
-  struct dwo_file *dwo_file;
   struct dwp_file *dwp_file;
 
   /* First see if there's a DWP file.
@@ -8564,15 +8500,21 @@ lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
   else
     {
       /* No DWP file, look for the DWO file.  */
+      dwo_file *dwo_file = lookup_dwo_file (per_bfd, dwo_name, comp_dir);
 
-      dwo_file_slot = lookup_dwo_file_slot (per_bfd, dwo_name, comp_dir);
-      if (*dwo_file_slot == NULL)
+      if (dwo_file == nullptr)
 	{
-	  /* Read in the file and build a table of the CUs/TUs it contains.  */
-	  *dwo_file_slot = open_and_init_dwo_file (cu, dwo_name, comp_dir);
+	  /* Read in the file and build a table of the CUs/TUs it contains.
+
+	     NOTE: This will be nullptr if unable to open the file.  */
+	  dwo_file = open_and_init_dwo_file (cu, dwo_name, comp_dir);
+
+	  if (dwo_file != nullptr)
+	    {
+	      auto [it, inserted] = per_bfd->dwo_files.emplace (dwo_file);
+	      gdb_assert (inserted);
+	    }
 	}
-      /* NOTE: This will be NULL if unable to open the file.  */
-      dwo_file = (struct dwo_file *) *dwo_file_slot;
 
       if (dwo_file != NULL)
 	{
