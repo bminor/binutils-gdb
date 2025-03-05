@@ -1922,10 +1922,8 @@ dwarf2_per_bfd::allocate_signatured_type (dwarf2_section_info *section,
 /* die_reader_func for dw2_get_file_names.  */
 
 static void
-dw2_get_file_names_reader (const cutu_reader *reader,
-			   struct die_info *comp_unit_die)
+dw2_get_file_names_reader (dwarf2_cu *cu, die_info *comp_unit_die)
 {
-  struct dwarf2_cu *cu = reader->cu;
   dwarf2_per_cu *this_cu = cu->per_cu;
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct attribute *attr;
@@ -2029,7 +2027,7 @@ dw2_get_file_names (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile)
 
   cutu_reader reader (this_cu, per_objfile, language_minimal);
   if (!reader.dummy_p)
-    dw2_get_file_names_reader (&reader, reader.comp_unit_die);
+    dw2_get_file_names_reader (reader.cu, reader.comp_unit_die);
 
   return this_cu->file_names;
 }
@@ -6835,11 +6833,10 @@ lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
 /* die_reader_func for create_dwo_cu.  */
 
 static void
-create_dwo_cu_reader (const cutu_reader *reader, const gdb_byte *info_ptr,
+create_dwo_cu_reader (dwarf2_cu *cu, const gdb_byte *info_ptr,
 		      die_info *comp_unit_die, dwo_file *dwo_file,
 		      dwo_unit *dwo_unit)
 {
-  struct dwarf2_cu *cu = reader->cu;
   sect_offset sect_off = cu->per_cu->sect_off;
   struct dwarf2_section_info *section = cu->per_cu->section;
 
@@ -6899,7 +6896,7 @@ create_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
 			  cu, &dwo_file);
 
       if (!reader.dummy_p)
-	create_dwo_cu_reader (&reader, reader.info_ptr, reader.comp_unit_die,
+	create_dwo_cu_reader (reader.cu, reader.info_ptr, reader.comp_unit_die,
 			      &dwo_file, &read_unit);
       info_ptr += per_cu.length ();
 
