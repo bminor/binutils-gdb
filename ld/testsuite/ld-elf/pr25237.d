@@ -1,0 +1,6 @@
+#ld:
+#readelf: -l -W
+
+#...
+ +LOAD +0x0+ +0x[0-9a-f]+ +0x[0-9a-f]+ +0x0+ +0xb5dce8+ +RW +0x10000
+#pass
