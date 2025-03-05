@@ -36,7 +36,7 @@ ctf_type_isparent (const ctf_dict_t *fp, ctf_id_t id)
      have been added.  Simple range check.  */
 
   if (!fp->ctf_parent)
-    return (fp->ctf_header->cth_parent_typemax >= id);
+    return (fp->ctf_header->cth_parent_ntypes >= id);
 
   /* Types in the parent's idmax range (which encompasses its stypes range) are
      in the parent.  */
@@ -72,16 +72,16 @@ ctf_type_to_index_internal (const ctf_dict_t *fp, ctf_id_t type)
 {
   uint32_t idx = type;
 
-  assert (((fp->ctf_flags & LCTF_CHILD) && (type > fp->ctf_header->cth_parent_typemax)) ||
+  assert (((fp->ctf_flags & LCTF_CHILD) && (type > fp->ctf_header->cth_parent_ntypes)) ||
 	  (!(fp->ctf_flags & LCTF_CHILD)));
 
   if (fp->ctf_flags & LCTF_CHILD)
     {
       /* Non-dynamic type in parent: no index permitted.  */
 
-      assert (type > fp->ctf_header->cth_parent_typemax);
+      assert (type > fp->ctf_header->cth_parent_ntypes);
 
-      idx -= fp->ctf_header->cth_parent_typemax;
+      idx -= fp->ctf_header->cth_parent_ntypes;
     }
 
   if (idx <= fp->ctf_stypes)
@@ -126,7 +126,7 @@ ctf_id_t
 ctf_index_to_type (const ctf_dict_t *fp, uint32_t idx)
 {
   if (fp->ctf_flags & LCTF_CHILD)
-    return idx + fp->ctf_header->cth_parent_typemax;
+    return idx + fp->ctf_header->cth_parent_ntypes;
 
   if (idx <= (fp->ctf_typemax - fp->ctf_nprovtypes))
     return idx;
@@ -244,7 +244,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 	  unsigned long vlen = LCTF_INFO_VLEN (fp, tp->ctt_info);
 
 	  i->u.ctn_vlen = (unsigned char *) tp + increment;
-	  i->ctn_size = LCTF_VBYTES (fp, kind, size, vlen);;
+	  i->ctn_size = LCTF_VBYTES (fp, kind, size, vlen);
 	}
       i->ctn_iter_fun = (void (*) (void)) ctf_member_next;
       i->ctn_n = 0;
@@ -1159,7 +1159,10 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
     }
 }
 
-/* Return the kind (CTF_K_* constant) for the specified type ID.  */
+/* Return the kind (CTF_K_* constant) for the specified type ID.
+
+   Pretend that all forwards are of type CTF_K_FORWARD, for ease of
+   use and compatibility.  */
 
 int
 ctf_type_kind_unsliced (ctf_dict_t *fp, ctf_id_t type)
@@ -1168,6 +1171,10 @@ ctf_type_kind_unsliced (ctf_dict_t *fp, ctf_id_t type)
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
     return -1;			/* errno is set for us.  */
+
+  if (LCTF_INFO_KIND (fp, tp->ctt_info) == CTF_K_ENUM
+      && CTF_INFO_KFLAG (fp, fp->ctt_info) == 1)
+    return CTF_K_FORWARD;
 
   return (LCTF_INFO_KIND (fp, tp->ctt_info));
 }
@@ -1210,7 +1217,13 @@ ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  return tp->ctt_type;
+  if (LCTF_INFO_KIND (tp->ctt_info) == CTF_K_ENUM)
+    return CTF_K_ENUM;
+
+  if (LCTF_INFO_KFLAG (tp->ctt_info))
+    return CTF_K_UNION;
+  else
+    return CTF_K_STRUCT;
 }
 
 /* If the type is one that directly references another type (such as POINTER),

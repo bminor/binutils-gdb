@@ -622,7 +622,10 @@ extern ssize_t ctf_type_align (ctf_dict_t *, ctf_id_t);
 /* Return the kind of a type (CTF_K_* constant).  Slices are considered to be
    the kind they are a slice of.  Forwards to incomplete structs, etc, return
    CTF_K_FORWARD (but deduplication resolves most forwards to their concrete
-   types).  */
+   types).
+
+   CTFv4 note: forwardds to enums also return CTF_K_FORWARD, even though they
+   are encoded differently.  */
 
 extern int ctf_type_kind (ctf_dict_t *, ctf_id_t);
 
@@ -697,7 +700,7 @@ extern ssize_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				int flags);
 
 /* Return all enumeration constants in a given enum type.  */
-extern int ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);
+extern int64_t ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);
 extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				  int *);
 
@@ -1020,13 +1023,6 @@ extern ctf_dict_t *ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
    decompression.  */
 
 extern int ctf_gzwrite (ctf_dict_t *fp, gzFile fd);
-
-/* Deprecated functions with no current use.  */
-
-extern const char *ctf_label_topmost (ctf_dict_t *);
-extern int ctf_label_info (ctf_dict_t *, const char *, ctf_lblinfo_t *);
-extern int ctf_label_iter (ctf_dict_t *, ctf_label_f *, void *);
-extern int ctf_label_next (ctf_dict_t *, ctf_next_t **, const char **); /* TBD */
 
 #ifdef	__cplusplus
 }

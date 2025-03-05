@@ -982,7 +982,7 @@ ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
   if (fp != i->cu.ctn_fp)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
 
-  /* TODO-v4: Indexed after non-indexed portions?  */
+  /* TODO: Indexed after non-indexed portions?  */
 
   if ((!functions && fp->ctf_objtidx_names) ||
       (functions && fp->ctf_funcidx_names))
@@ -994,13 +994,13 @@ ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
 
       if (functions)
 	{
-	  len = (hp->cth_varoff - hp->cth_funcidxoff) / sizeof (uint32_t);
-	  tab = (uint32_t *) (fp->ctf_buf + hp->cth_funcoff);
+	  len = hp->cth_funcidx_len / sizeof (uint32_t);
+	  tab = (uint32_t *) (fp->ctf_buf + hp->cth_func_off);
 	}
       else
 	{
-	  len = (hp->cth_funcidxoff - hp->cth_objtidxoff) / sizeof (uint32_t);
-	  tab = (uint32_t *) (fp->ctf_buf + hp->cth_objtoff);
+	  len = hp->cth_objtidx_len / sizeof (uint32_t);
+	  tab = (uint32_t *) (fp->ctf_buf + hp->cth_objt_off);
 	}
 
       do
@@ -1033,14 +1033,14 @@ ctf_symbol_next_static (ctf_dict_t *fp, ctf_next_t **it, const char **name,
 
 	  if (functions)
 	    {
-	      if (fp->ctf_sxlate[n] >= hp->cth_funcoff
-		  && fp->ctf_sxlate[n] < hp->cth_objtidxoff)
+	      if (fp->ctf_sxlate[n] >= hp->cth_func_off
+		  && fp->ctf_sxlate[n] < hp->cth_func_off + hp->cth_func_len)
 		break;
 	    }
 	  else
 	    {
-	      if (fp->ctf_sxlate[n] >= hp->cth_objtoff
-		  && fp->ctf_sxlate[n] < hp->cth_funcoff)
+	      if (fp->ctf_sxlate[n] >= hp->cth_objt_off
+		  && fp->ctf_sxlate[n] < hp->cth_objt_off + hp->cth_objt_len)
 		break;
 	    }
 	}
@@ -1107,16 +1107,15 @@ ctf_try_lookup_indexed (ctf_dict_t *fp, unsigned long symidx,
 	{
 	  if ((fp->ctf_funcidx_sxlate
 	       = ctf_symidx_sort (fp, (uint32_t *)
-				  (fp->ctf_buf + hp->cth_funcidxoff),
-				  &fp->ctf_nfuncidx,
-				  hp->cth_varoff - hp->cth_funcidxoff))
+				  (fp->ctf_buf + hp->cth_funcidx_off),
+				  &fp->ctf_nfuncidx, hp->cth_funcidx_len))
 	      == NULL)
 	    {
 	      ctf_err_warn (fp, 0, 0, _("cannot sort function symidx"));
 	      return CTF_ERR;				/* errno is set for us.  */
 	    }
 	}
-      symtypetab = (uint32_t *) (fp->ctf_buf + hp->cth_funcoff);
+      symtypetab = (uint32_t *) (fp->ctf_buf + hp->cth_func_off);
       sxlate = fp->ctf_funcidx_sxlate;
       names = fp->ctf_funcidx_names;
       nidx = fp->ctf_nfuncidx;
@@ -1127,9 +1126,8 @@ ctf_try_lookup_indexed (ctf_dict_t *fp, unsigned long symidx,
 	{
 	  if ((fp->ctf_objtidx_sxlate
 	       = ctf_symidx_sort (fp, (uint32_t *)
-				  (fp->ctf_buf + hp->cth_objtidxoff),
-				  &fp->ctf_nobjtidx,
-				  hp->cth_funcidxoff - hp->cth_objtidxoff))
+				  (fp->ctf_buf + hp->cth_objtidx_off),
+				  &fp->ctf_nobjtidx, hp->cth_objtidx_len))
 	      == NULL)
 	    {
 	      ctf_err_warn (fp, 0, 0, _("cannot sort object symidx"));
@@ -1137,7 +1135,7 @@ ctf_try_lookup_indexed (ctf_dict_t *fp, unsigned long symidx,
 	    }
 	}
 
-      symtypetab = (uint32_t *) (fp->ctf_buf + hp->cth_objtoff);
+      symtypetab = (uint32_t *) (fp->ctf_buf + hp->cth_objt_off);
       sxlate = fp->ctf_objtidx_sxlate;
       names = fp->ctf_objtidx_names;
       nidx = fp->ctf_nobjtidx;

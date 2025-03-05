@@ -836,11 +836,11 @@ ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
 static int
 ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp, int *errp)
 {
-  if ((fp->ctf_flags & LCTF_CHILD) && fp->ctf_parname && !fp->ctf_parent)
+  if ((fp->ctf_flags & LCTF_CHILD) && fp->ctf_parent_name && !fp->ctf_parent)
     {
       int err;
       ctf_dict_t *parent = ctf_dict_open_cached ((ctf_archive_t *) arc,
-						 fp->ctf_parname, &err);
+						 fp->ctf_parent_name, &err);
       if (errp)
 	*errp = err;
 

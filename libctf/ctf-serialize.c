@@ -815,9 +815,10 @@ ctf_type_sect_size (ctf_dict_t *fp)
       /* Shrink ctf_type_t-using types from a ctf_type_t to a ctf_stype_t
 	 if possible.  */
 
+      /* XXX UPTODO */
       if (kind == CTF_K_STRUCT || kind == CTF_K_UNION)
 	{
-	  size_t lsize = CTF_TYPE_LSIZE (&dtd->dtd_data);
+	  size_t lsize = CTF_V3_TYPE_LSIZE (&dtd->dtd_data);
 
 	  if (lsize <= CTF_MAX_SIZE)
 	    type_ctt_size = lsize;
@@ -873,7 +874,7 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
   if (!(fp->ctf_flags & LCTF_CHILD))
     id = fp->ctf_stypes + 1;
   else
-    id = fp->ctf_header->cth_parent_typemax + 1;
+    id = fp->ctf_header->cth_parent_ntypes + 1;
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs);
        dtd != NULL; dtd = ctf_list_next (dtd), id++)
@@ -1132,15 +1133,15 @@ ctf_preserialize (ctf_dict_t *fp)
 	 change type IDs arbitrarily, resolving all overlaps.  */
 
       if (fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff > 0 &&
-	  fp->ctf_header->cth_parent_typemax < fp->ctf_parent->ctf_typemax)
+	  fp->ctf_header->cth_parent_ntypes < fp->ctf_parent->ctf_typemax)
 	{
 	  ctf_set_errno (fp, ECTF_NOTSERIALIZED);
 	  ctf_err_warn (fp, 0, 0, _("cannot write out already-written child dict: parent has had %u types added"),
-			fp->ctf_parent->ctf_typemax - fp->ctf_header->cth_parent_typemax);
+			fp->ctf_parent->ctf_typemax - fp->ctf_header->cth_parent_ntypes);
 	  return -1;				/* errno is set for us.  */
 	}
 
-      fp->ctf_header->cth_parent_typemax = fp->ctf_parent->ctf_typemax;
+      fp->ctf_header->cth_parent_ntypes = fp->ctf_parent->ctf_typemax;
     }
   else
     {
@@ -1233,7 +1234,7 @@ ctf_preserialize (ctf_dict_t *fp)
   hdr.cth_strlen = 0;
   hdr.cth_parent_strlen = 0;
   if (fp->ctf_parent)
-    hdr.cth_parent_typemax = fp->ctf_parent->ctf_typemax;
+    hdr.cth_parent_ntypes = fp->ctf_parent->ctf_typemax;
 
   buf_size = sizeof (ctf_header_t) + hdr.cth_stroff + hdr.cth_strlen;
 
@@ -1247,10 +1248,10 @@ ctf_preserialize (ctf_dict_t *fp)
   t = (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_objtoff;
 
   hdrp = (ctf_header_t *) buf;
-  if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parname != NULL))
-    ctf_str_add_no_dedup_ref (fp, fp->ctf_parname, &hdrp->cth_parname);
+  if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent_name != NULL))
+    ctf_str_add_no_dedup_ref (fp, fp->ctf_parent_name, &hdrp->cth_parent_name);
   if (fp->ctf_cuname != NULL)
-    ctf_str_add_no_dedup_ref (fp, fp->ctf_cuname, &hdrp->cth_cuname);
+    ctf_str_add_no_dedup_ref (fp, fp->ctf_cuname, &hdrp->cth_cu_name);
 
   if (ctf_emit_symtypetab_sects (fp, &symstate, &t, objt_size, func_size,
 				 objtidx_size, funcidx_size) < 0)

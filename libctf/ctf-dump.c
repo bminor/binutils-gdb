@@ -1,5 +1,5 @@
 /* Textual dumping of CTF data.
-   Copyright (C) 2019-2025 Free Software Foundation, Inc.
+   Copyright (C) 2019-2024 Free Software Foundation, Inc.
 
    This file is part of libctf.
 
@@ -303,22 +303,41 @@ ctf_dump_header_sectfield (ctf_dict_t *fp, ctf_dump_state_t *state,
   return (ctf_set_errno (fp, errno));
 }
 
-/* Dump the file header into the cds_items.  */
+/* Dump one section-offset+len field from the file header into the cds_items.  */
 static int
-ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
+ctf_dump_header_sectlenfield (ctf_dict_t *fp, ctf_dump_state_t *state,
+			   const char *sect, uint32_t off, uint32_t len)
+{
+  char *str;
+  if (nextoff - off)
+    {
+      if (asprintf (&str, "%s:\t0x%lx -- 0x%lx (0x%lx bytes)\n", sect,
+		    (unsigned long) off, (unsigned long) (off + len),
+		    (unsigned long) len) < 0)
+	goto err;
+      ctf_dump_append (state, str);
+    }
+  return 0;
+
+ err:
+  return (ctf_set_errno (fp, errno));
+}
+
+/* Dump the CTFv3-or-below file header into the cds_items.  */
+
+static int
+ctf_dump_v3_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   char *str;
   char *flagstr = NULL;
-  const ctf_header_t *hp = fp->ctf_header;
+  const ctf_v3_header_t *hp = fp->ctf_header_v3;
   const char *vertab[] =
     {
      NULL, "CTF_VERSION_1",
      "CTF_VERSION_1_UPGRADED_3 (latest format, version 1 type "
      "boundaries)",
      "CTF_VERSION_2",
-     "CTF_VERSION_3",
-     "CTF_VERSION_4",
-     NULL
+     "CTF_VERSION_3"
     };
   const char *verstr = NULL;
 
@@ -326,7 +345,7 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
       goto err;
   ctf_dump_append (state, str);
 
-  if (hp->cth_version <= CTF_VERSION)
+  if (hp->cth_version < CTF_VERSION_4)
     verstr = vertab[hp->cth_version];
 
   if (verstr == NULL)
@@ -339,35 +358,33 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 
   /* Everything else is only printed if present.  */
 
-  /* The flags are unusual in that they represent the ctf_dict_t *in memory*:
-     flags representing compression, etc, are turned off as the file is
-     decompressed.  So we store a copy of the flags before they are changed, for
-     the dumper.  */
+  /* We store the original version of the header, to let us dump un-upgraded
+     info that is lost or radically changed on upgrade.  */
 
-  if (fp->ctf_openflags > 0)
+  if (hp->cth_flags > 0)
     {
       if (asprintf (&flagstr, "%s%s%s%s%s%s%s",
-		    fp->ctf_openflags & CTF_F_COMPRESS
+		    hp->cth_flags & CTF_F_COMPRESS
 		    ? "CTF_F_COMPRESS": "",
-		    (fp->ctf_openflags & CTF_F_COMPRESS)
-		    && (fp->ctf_openflags & ~CTF_F_COMPRESS)
+		    (hp->cth_flags & CTF_F_COMPRESS)
+		    && (hp->cth_flags & ~CTF_F_COMPRESS)
 		    ? ", " : "",
-		    fp->ctf_openflags & CTF_F_NEWFUNCINFO
+		    hp->cth_flags & CTF_F_NEWFUNCINFO
 		    ? "CTF_F_NEWFUNCINFO" : "",
-		    (fp->ctf_openflags & (CTF_F_NEWFUNCINFO))
-		    && (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO))
+		    (hp->cth_flags & (CTF_F_NEWFUNCINFO))
+		    && (hp->cth_flags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO))
 		    ? ", " : "",
-		    fp->ctf_openflags & CTF_F_IDXSORTED
+		    hp->cth_flags & CTF_F_IDXSORTED
 		    ? "CTF_F_IDXSORTED" : "",
-		    fp->ctf_openflags & (CTF_F_IDXSORTED)
-		    && (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
-					      | CTF_F_IDXSORTED))
+		    hp->cth_flags & (CTF_F_IDXSORTED)
+		    && (hp->cth_flags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
+					  | CTF_F_IDXSORTED))
 		    ? ", " : "",
-		    fp->ctf_openflags & CTF_F_DYNSTR
+		    hp->cth_flags & CTF_F_DYNSTR
 		    ? "CTF_F_DYNSTR" : "") < 0)
 	goto err;
 
-      if (asprintf (&str, "Flags: 0x%x (%s)", fp->ctf_openflags, flagstr) < 0)
+      if (asprintf (&str, "Flags: 0x%x (%s)", hp->cth_flags, flagstr) < 0)
 	goto err;
       free (flagstr);
       ctf_dump_append (state, str);
@@ -382,12 +399,6 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 
   if (ctf_dump_header_strfield (fp, state, "Compilation unit name",
 				hp->cth_cuname) < 0)
-    goto err;
-
-  if (ctf_dump_header_sizefield (fp, state, "Parent strlen", hp->cth_parent_strlen) < 0)
-    goto err;
-
-  if (ctf_dump_header_sizefield (fp, state, "Parent max type", hp->cth_parent_typemax) < 0)
     goto err;
 
   if (ctf_dump_header_sectfield (fp, state, "Label section", hp->cth_lbloff,
@@ -428,31 +439,115 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
   return (ctf_set_errno (fp, errno));
 }
 
-/* Dump a single label into the cds_items.  */
-
+/* Dump the file header into the cds_items.  */
 static int
-ctf_dump_label (const char *name, const ctf_lblinfo_t *info,
-		void *arg)
+ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   char *str;
-  char *typestr;
-  ctf_dump_state_t *state = arg;
-
-  if (asprintf (&str, "%s -> ", name) < 0)
-    return (ctf_set_errno (state->cds_fp, errno));
-
-  if ((typestr = ctf_dump_format_type (state->cds_fp, info->ctb_type,
-				       CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
+  char *flagstr = NULL;
+  const ctf_header_t *hp = fp->ctf_header;
+  int v3 = 0, v4 = 0;
+  const char *vertab[] =
     {
-      free (str);
-      return 0;				/* Swallow the error.  */
+     "CTF_VERSION_4"
+    };
+  const char *verstr = NULL;
+
+  /* Figure out what we're dumping, first.  */
+
+  if (fp->ctf_v3_header)
+    {
+      ctf_dump_v3_header (fp, state);
+      return 0;
     }
 
-  str = str_append (str, typestr);
-  free (typestr);
-
+  if (asprintf (&str, "Magic number: 0x%x\n", hp->cth_magic) < 0)
+      goto err;
   ctf_dump_append (state, str);
+
+  if (hp->cth_version != CTF_VERSION_4)
+    verstr = "(not a valid version)";
+  else
+    verstr = vertab[hp->cth_version - CTF_VERSION_4];
+
+  if (asprintf (&str, "Version: %i (%s)\n", hp->cth_version,
+		verstr) < 0)
+    goto err;
+  ctf_dump_append (state, str);
+
+  /* Everything else is only printed if present.  */
+
+  /* The flags are unusual in that they represent the ctf_dict_t *in memory*:
+     flags representing compression, etc, are turned off as the file is
+     decompressed.  So we store a copy of the flags before they are changed, for
+     the dumper.  We also store the original version of the header, to let us
+     dump un-upgraded info that is lost or radically changed on upgrade.  */
+
+  if (fp->ctf_openflags > 0)
+    {
+      if (asprintf (&flagstr, "%s%s%s%s%s%s%s",
+		    fp->ctf_openflags & CTF_F_COMPRESS
+		    ? "CTF_F_COMPRESS": "",
+		    (fp->ctf_openflags & CTF_F_COMPRESS)
+		    && (fp->ctf_openflags & ~CTF_F_COMPRESS)
+		    ? ", " : "",
+		    fp->ctf_openflags & CTF_F_IDXSORTED
+		    ? "CTF_F_IDXSORTED" : "",
+		    (fp->ctf_openflags & (~CTF_F_COMPRESS | CTF_F_IDXSORTED))
+		    ? "; unknown flags present" : "") < 0)
+	goto err;
+
+      if (asprintf (&str, "Flags: 0x%x (%s)", fp->ctf_openflags, flagstr) < 0)
+	goto err;
+      free (flagstr);
+      ctf_dump_append (state, str);
+    }
+
+  if (ctf_dump_header_strfield (fp, state, "Parent name", hp->cth_parent_name) < 0)
+    goto err;
+
+  if (ctf_dump_header_strfield (fp, state, "Compilation unit name",
+				hp->cth_cu_name) < 0)
+    goto err;
+
+  if (ctf_dump_header_sizefield (fp, state, "Parent strlen", hp->cth_parent_strlen) < 0)
+    goto err;
+
+  if (ctf_dump_header_sizefield (fp, state, "Parent types", hp->cth_parent_ntypes) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Layout section",
+				    hp->cth_layout_off, hp->cth_layout_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Data object section",
+				    hp->cth_objt_off, hp->cth_objt_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Function info section",
+				    hp->cth_func_off, hp->cth_func_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Object index section",
+				    hp->cth_objtidx_off, hp->cth_objtidx_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Function index section",
+				    hp->cth_funcidx_off, hp->cth_funcidx_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Type section",
+				    hp->btf.bth_type_off, hp->btf.bth_type_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "String section", hp->btf.bth_stroff,
+				    hp->btf.bth_stroff + hp->btf.bth_strlen + 1) < 0)
+    goto err;
+
   return 0;
+ err:
+  free (flagstr);
+  return (ctf_set_errno (fp, errno));
 }
 
 /* Dump all the object or function entries into the cds_items.  */
@@ -755,12 +850,7 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	  ctf_dump_header (fp, state);
 	  break;
 	case CTF_SECT_LABEL:
-	  if (ctf_label_iter (fp, ctf_dump_label, state) < 0)
-	    {
-	      if (ctf_errno (fp) != ECTF_NOLABELDATA)
-		goto end;		/* errno is set for us.  */
-	      ctf_set_errno (fp, 0);
-	    }
+	  /* Not implemented. */
 	  break;
 	case CTF_SECT_OBJT:
 	  if (ctf_dump_objts (fp, state, 0) < 0)

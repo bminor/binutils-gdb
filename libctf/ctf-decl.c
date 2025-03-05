@@ -88,7 +88,7 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
       return;
     }
 
-  switch (kind = LCTF_INFO_KIND (fp, tp->ctt_info))
+  switch (kind = ctf_type_kind (fp, type))
     {
     case CTF_K_ARRAY:
       (void) ctf_array_info (fp, type, &ar);
