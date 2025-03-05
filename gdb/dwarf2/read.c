@@ -6955,10 +6955,10 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
    Note: This function processes DWO files only, not DWP files.  */
 
 static void
-create_cus_hash_table (dwarf2_per_objfile *per_objfile,
-		       dwarf2_cu *cu, struct dwo_file &dwo_file,
+create_cus_hash_table (dwarf2_cu *cu, struct dwo_file &dwo_file,
 		       dwarf2_section_info &section, htab_up &cus_htab)
 {
+  dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   const gdb_byte *info_ptr, *end_ptr;
@@ -8287,8 +8287,7 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
     dwarf2_locate_dwo_sections (per_objfile->objfile, dwo_file->dbfd.get (),
 				sec, &dwo_file->sections);
 
-  create_cus_hash_table (per_objfile, cu, *dwo_file, dwo_file->sections.info,
-			 dwo_file->cus);
+  create_cus_hash_table (cu, *dwo_file, dwo_file->sections.info, dwo_file->cus);
 
   if (cu->per_cu->version () < 5)
     {
