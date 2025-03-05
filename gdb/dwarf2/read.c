@@ -1865,7 +1865,6 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   if (comp_unit_die->tag == DW_TAG_partial_unit)
     return;
 
-  dwarf2_per_cu *lh_cu = this_cu;
   slot = NULL;
 
   line_header_up lh;
@@ -1888,7 +1887,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 			     &find_entry, INSERT);
       if (*slot != NULL)
 	{
-	  lh_cu->file_names = (struct quick_file_names *) *slot;
+	  this_cu->file_names = (struct quick_file_names *) *slot;
 	  return;
 	}
 
@@ -1938,7 +1937,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 
   qfn->real_names = NULL;
 
-  lh_cu->file_names = qfn;
+  this_cu->file_names = qfn;
 }
 
 /* A helper for the "quick" functions which attempts to read the line
