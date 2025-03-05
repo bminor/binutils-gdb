@@ -1638,8 +1638,7 @@ pager_file::puts (const char *linebuffer)
 {
   const char *lineptr;
 
-  if (linebuffer == 0)
-    return;
+  gdb_assert (linebuffer != nullptr);
 
   /* Don't do any filtering or wrapping if both are disabled.  */
   if (batch_flag
