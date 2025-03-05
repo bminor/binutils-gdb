@@ -328,6 +328,40 @@ struct dwo_unit
   cu_offset type_offset_in_tu;
 };
 
+/* Hash function for dwo_unit objects, based on the signature.  */
+
+struct dwo_unit_hash
+{
+  using is_transparent = void;
+
+  std::size_t operator() (ULONGEST signature) const noexcept
+  { return signature; }
+
+  std::size_t operator() (const dwo_unit *unit) const noexcept
+  { return (*this) (unit->signature); }
+};
+
+/* Equal function for dwo_unit objects, based on the signature.
+
+   The signature is assumed to be unique within the DWO file.  So while object
+   file CU dwo_id's always have the value zero, that's OK, assuming each object
+   file DWO file has only one CU, and that's the rule for now.  */
+
+struct dwo_unit_eq
+{
+  using is_transparent = void;
+
+  bool operator() (ULONGEST sig, const dwo_unit *unit) const noexcept
+  { return sig == unit->signature; }
+
+  bool operator() (const dwo_unit *a, const dwo_unit *b) const noexcept
+  { return (*this) (a->signature, b); }
+};
+
+/* Set of dwo_unit object, using their signature as identity.  */
+
+using dwo_unit_set = gdb::unordered_set<dwo_unit *, dwo_unit_hash, dwo_unit_eq>;
+
 /* include/dwarf2.h defines the DWP section codes.
    It defines a max value but it doesn't define a min value, which we
    use for error checking, so provide one.  */
@@ -372,14 +406,14 @@ struct dwo_file
   struct dwo_sections sections {};
 
   /* The CUs in the file.
-     Each element is a struct dwo_unit. Multiple CUs per DWO are supported as
-     an extension to handle LLVM's Link Time Optimization output (where
-     multiple source files may be compiled into a single object/dwo pair). */
-  htab_up cus;
 
-  /* Table of TUs in the file.
-     Each element is a struct dwo_unit.  */
-  htab_up tus;
+     Multiple CUs per DWO are supported as an extension to handle LLVM's Link
+     Time Optimization output (where multiple source files may be compiled into
+     a single object/dwo pair).  */
+  dwo_unit_set cus;
+
+  /* Table of TUs in the file.  */
+  dwo_unit_set tus;
 };
 
 using dwo_file_up = std::unique_ptr<dwo_file>;
@@ -541,9 +575,9 @@ struct dwp_file
   /* Table of TUs in the file.  */
   const struct dwp_hash_table *tus = nullptr;
 
-  /* Tables of loaded CUs/TUs.  Each entry is a struct dwo_unit *.  */
-  htab_up loaded_cus;
-  htab_up loaded_tus;
+  /* Tables of loaded CUs/TUs.  */
+  dwo_unit_set loaded_cus;
+  dwo_unit_set loaded_tus;
 
   /* Table to map ELF section numbers to their sections.
      This is only needed for the DWP V1 file format.  */
@@ -1135,8 +1169,6 @@ static const char *compute_include_file_name
       const file_entry &fe,
       const file_and_directory &cu_info,
       std::string &name_holder);
-
-static htab_up allocate_dwo_unit_table ();
 
 static struct dwo_unit *lookup_dwo_unit_in_dwp
   (dwarf2_per_bfd *per_bfd, struct dwp_file *dwp_file,
@@ -2574,8 +2606,6 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
   end_ptr = info_ptr + section->size;
   while (info_ptr < end_ptr)
     {
-      struct dwo_unit *dwo_tu;
-      void **slot;
       const gdb_byte *ptr = info_ptr;
       struct comp_unit_head header;
       unsigned int length;
@@ -2604,10 +2634,8 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
 	  continue;
 	}
 
-      if (dwo_file->tus == nullptr)
-	dwo_file->tus = allocate_dwo_unit_table ();
-
-      dwo_tu = OBSTACK_ZALLOC (&per_objfile->per_bfd->obstack, dwo_unit);
+      dwo_unit *dwo_tu
+	= OBSTACK_ZALLOC (&per_objfile->per_bfd->obstack, dwo_unit);
       dwo_tu->dwo_file = dwo_file;
       dwo_tu->signature = header.signature;
       dwo_tu->type_offset_in_tu = header.type_cu_offset_in_tu;
@@ -2615,15 +2643,13 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
       dwo_tu->sect_off = sect_off;
       dwo_tu->length = length;
 
-      slot = htab_find_slot (dwo_file->tus.get (), dwo_tu, INSERT);
-      gdb_assert (slot != NULL);
-      if (*slot != NULL)
+      auto [it, inserted] = dwo_file->tus.emplace (dwo_tu);
+      if (!inserted)
 	complaint (_("debug type entry at offset %s is duplicate to"
 		     " the entry at offset %s, signature %s"),
 		   sect_offset_str (sect_off),
-		   sect_offset_str (dwo_tu->sect_off),
+		   sect_offset_str ((*it)->sect_off),
 		   hex_string (header.signature));
-      *slot = dwo_tu;
 
       dwarf_read_debug_printf_v ("  offset %s, signature %s",
 				 sect_offset_str (sect_off),
@@ -2743,18 +2769,11 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   /* Note: cu->dwo_unit is the dwo_unit that references this TU, not the
      dwo_unit of the TU itself.  */
   dwo_file *dwo_file = cu->dwo_unit->dwo_file;
+  auto it = dwo_file->tus.find (sig);
+  if (it == dwo_file->tus.end ())
+    return nullptr;
 
-  /* Ok, this is the first time we're reading this TU.  */
-  if (dwo_file->tus == NULL)
-    return NULL;
-
-  dwo_unit find_dwo_entry;
-  find_dwo_entry.signature = sig;
-  auto dwo_entry
-    = (struct dwo_unit *) htab_find (dwo_file->tus.get (), &find_dwo_entry);
-
-  if (dwo_entry == NULL)
-    return NULL;
+  dwo_unit *dwo_entry = *it;
 
   /* If the global table doesn't have an entry for this TU, add one.  */
   if (sig_type_it == per_bfd->signatured_types.end ())
@@ -3893,10 +3912,8 @@ struct skeleton_data
    Read a TU in a DWO file and build partial symbols for it.  */
 
 static int
-process_skeletonless_type_unit (void **slot, void *info)
+process_skeletonless_type_unit (dwo_unit *dwo_unit, skeleton_data *data)
 {
-  struct dwo_unit *dwo_unit = (struct dwo_unit *) *slot;
-  skeleton_data *data = (skeleton_data *) info;
   dwarf2_per_objfile *per_objfile = data->per_objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
@@ -3930,9 +3947,8 @@ process_dwo_file_for_skeletonless_type_units (void **slot, void *info)
 {
   struct dwo_file *dwo_file = (struct dwo_file *) *slot;
 
-  if (dwo_file->tus != NULL)
-    htab_traverse_noresize (dwo_file->tus.get (),
-			    process_skeletonless_type_unit, info);
+  for (dwo_unit *unit : dwo_file->tus)
+    process_skeletonless_type_unit (unit, static_cast<skeleton_data *> (info));
 
   return 1;
 }
@@ -6854,42 +6870,6 @@ lookup_dwo_file_slot (dwarf2_per_bfd *per_bfd, const char *dwo_name,
   return slot;
 }
 
-static hashval_t
-hash_dwo_unit (const void *item)
-{
-  const struct dwo_unit *dwo_unit = (const struct dwo_unit *) item;
-
-  /* This drops the top 32 bits of the id, but is ok for a hash.  */
-  return dwo_unit->signature;
-}
-
-static int
-eq_dwo_unit (const void *item_lhs, const void *item_rhs)
-{
-  const struct dwo_unit *lhs = (const struct dwo_unit *) item_lhs;
-  const struct dwo_unit *rhs = (const struct dwo_unit *) item_rhs;
-
-  /* The signature is assumed to be unique within the DWO file.
-     So while object file CU dwo_id's always have the value zero,
-     that's OK, assuming each object file DWO file has only one CU,
-     and that's the rule for now.  */
-  return lhs->signature == rhs->signature;
-}
-
-/* Allocate a hash table for DWO CUs,TUs.
-   There is one of these tables for each of CUs,TUs for each DWO file.  */
-
-static htab_up
-allocate_dwo_unit_table ()
-{
-  /* Start out with a pretty small number.
-     Generally DWO files contain only one CU and maybe some TUs.  */
-  return htab_up (htab_create_alloc (3,
-				     hash_dwo_unit,
-				     eq_dwo_unit,
-				     NULL, xcalloc, xfree));
-}
-
 /* die_reader_func for create_dwo_cu.  */
 
 static void
@@ -6948,8 +6928,6 @@ create_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
   while (info_ptr < end_ptr)
     {
       struct dwo_unit read_unit {};
-      struct dwo_unit *dwo_unit;
-      void **slot;
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
 
       /* The length of the CU gets set by the cutu_reader just below.  */
@@ -6967,25 +6945,16 @@ create_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
       if (read_unit.dwo_file == NULL)
 	continue;
 
-      if (dwo_file.cus == nullptr)
-	dwo_file.cus = allocate_dwo_unit_table ();
-
-      dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack,
-				 struct dwo_unit);
+      dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
       *dwo_unit = read_unit;
-      slot = htab_find_slot (dwo_file.cus.get (), dwo_unit, INSERT);
-      gdb_assert (slot != NULL);
-      if (*slot != NULL)
-	{
-	  const struct dwo_unit *dup_cu = (const struct dwo_unit *)*slot;
-	  sect_offset dup_sect_off = dup_cu->sect_off;
 
-	  complaint (_("debug cu entry at offset %s is duplicate to"
-		       " the entry at offset %s, signature %s"),
-		     sect_offset_str (sect_off), sect_offset_str (dup_sect_off),
-		     hex_string (dwo_unit->signature));
-	}
-      *slot = (void *)dwo_unit;
+      auto [it, inserted] = dwo_file.cus.emplace (dwo_unit);
+      if (!inserted)
+	complaint (_("debug cu entry at offset %s is duplicate to"
+		     " the entry at offset %s, signature %s"),
+		   sect_offset_str (sect_off),
+		   sect_offset_str ((*it)->sect_off),
+		   hex_string (dwo_unit->signature));
     }
 }
 
@@ -8009,22 +7978,15 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
   uint32_t mask = dwp_htab->nr_slots - 1;
   uint32_t hash = signature & mask;
   uint32_t hash2 = ((signature >> 32) & mask) | 1;
-  unsigned int i;
-  void **slot;
-  struct dwo_unit find_dwo_cu;
+  auto &dwo_unit_set
+    = is_debug_types ? dwp_file->loaded_tus : dwp_file->loaded_cus;
 
-  memset (&find_dwo_cu, 0, sizeof (find_dwo_cu));
-  find_dwo_cu.signature = signature;
-  slot = htab_find_slot (is_debug_types
-			 ? dwp_file->loaded_tus.get ()
-			 : dwp_file->loaded_cus.get (),
-			 &find_dwo_cu, INSERT);
-
-  if (*slot != NULL)
-    return (struct dwo_unit *) *slot;
+  if (auto it = dwo_unit_set.find (signature);
+      it != dwo_unit_set.end ())
+    return *it;
 
   /* Use a for loop so that we don't loop forever on bad debug info.  */
-  for (i = 0; i < dwp_htab->nr_slots; ++i)
+  for (unsigned int i = 0; i < dwp_htab->nr_slots; ++i)
     {
       ULONGEST signature_in_table;
 
@@ -8035,29 +7997,29 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
 	  uint32_t unit_index =
 	    read_4_bytes (dbfd,
 			  dwp_htab->unit_table + hash * sizeof (uint32_t));
+	  dwo_unit *dwo_unit;
 
 	  if (dwp_file->version == 1)
-	    {
-	      *slot = create_dwo_unit_in_dwp_v1 (per_bfd, dwp_file,
-						 unit_index, comp_dir,
-						 signature, is_debug_types);
-	    }
+	    dwo_unit
+	      = create_dwo_unit_in_dwp_v1 (per_bfd, dwp_file, unit_index,
+					   comp_dir, signature, is_debug_types);
 	  else if (dwp_file->version == 2)
-	    {
-	      *slot = create_dwo_unit_in_dwp_v2 (per_bfd, dwp_file,
-						 unit_index, comp_dir,
-						 signature, is_debug_types);
-	    }
+	    dwo_unit
+	      = create_dwo_unit_in_dwp_v2 (per_bfd, dwp_file, unit_index,
+					   comp_dir, signature, is_debug_types);
 	  else /* version == 5  */
-	    {
-	      *slot = create_dwo_unit_in_dwp_v5 (per_bfd, dwp_file,
-						 unit_index, comp_dir,
-						 signature, is_debug_types);
-	    }
-	  return (struct dwo_unit *) *slot;
+	    dwo_unit
+	      = create_dwo_unit_in_dwp_v5 (per_bfd, dwp_file, unit_index,
+					   comp_dir, signature, is_debug_types);
+
+	  auto [it, inserted] = dwo_unit_set.emplace (dwo_unit);
+	  gdb_assert (inserted);
+	  return *it;
 	}
+
       if (signature_in_table == 0)
 	return NULL;
+
       hash = (hash + hash2) & mask;
     }
 
@@ -8395,39 +8357,6 @@ dwarf2_locate_v5_dwp_sections (struct objfile *objfile, bfd *abfd,
     }
 }
 
-/* Hash function for dwp_file loaded CUs/TUs.  */
-
-static hashval_t
-hash_dwp_loaded_cutus (const void *item)
-{
-  const struct dwo_unit *dwo_unit = (const struct dwo_unit *) item;
-
-  /* This drops the top 32 bits of the signature, but is ok for a hash.  */
-  return dwo_unit->signature;
-}
-
-/* Equality function for dwp_file loaded CUs/TUs.  */
-
-static int
-eq_dwp_loaded_cutus (const void *a, const void *b)
-{
-  const struct dwo_unit *dua = (const struct dwo_unit *) a;
-  const struct dwo_unit *dub = (const struct dwo_unit *) b;
-
-  return dua->signature == dub->signature;
-}
-
-/* Allocate a hash table for dwp_file loaded CUs/TUs.  */
-
-static htab_up
-allocate_dwp_loaded_cutus_table ()
-{
-  return htab_up (htab_create_alloc (3,
-				     hash_dwp_loaded_cutus,
-				     eq_dwp_loaded_cutus,
-				     NULL, xcalloc, xfree));
-}
-
 /* Try to open DWP file FILE_NAME.
    The result is the bfd handle of the file.
    If there is a problem finding or opening the file, return NULL.
@@ -8554,9 +8483,6 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
 				       dwp_file.get ());
     }
 
-  dwp_file->loaded_cus = allocate_dwp_loaded_cutus_table ();
-  dwp_file->loaded_tus = allocate_dwp_loaded_cutus_table ();
-
   dwarf_read_debug_printf ("DWP file found: %s", dwp_file->name);
   dwarf_read_debug_printf ("    %s CUs, %s TUs",
 			   pulongest (dwp_file->cus ? dwp_file->cus->nr_units : 0),
@@ -8652,24 +8578,17 @@ lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
 	{
 	  struct dwo_unit *dwo_cutu = NULL;
 
-	  if (is_debug_types && dwo_file->tus)
+	  if (is_debug_types && !dwo_file->tus.empty ())
 	    {
-	      struct dwo_unit find_dwo_cutu;
-
-	      memset (&find_dwo_cutu, 0, sizeof (find_dwo_cutu));
-	      find_dwo_cutu.signature = signature;
-	      dwo_cutu
-		= (struct dwo_unit *) htab_find (dwo_file->tus.get (),
-						 &find_dwo_cutu);
+	      if (auto it = dwo_file->tus.find (signature);
+		  it != dwo_file->tus.end ())
+		dwo_cutu = *it;
 	    }
-	  else if (!is_debug_types && dwo_file->cus)
+	  else if (!is_debug_types && !dwo_file->cus.empty ())
 	    {
-	      struct dwo_unit find_dwo_cutu;
-
-	      memset (&find_dwo_cutu, 0, sizeof (find_dwo_cutu));
-	      find_dwo_cutu.signature = signature;
-	      dwo_cutu = (struct dwo_unit *)htab_find (dwo_file->cus.get (),
-						       &find_dwo_cutu);
+	      if (auto it = dwo_file->cus.find (signature);
+		  it != dwo_file->cus.end ())
+		dwo_cutu = *it;
 	    }
 
 	  if (dwo_cutu != NULL)
@@ -8737,10 +8656,8 @@ lookup_dwo_type_unit (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir)
 /* Traversal function for queue_and_load_all_dwo_tus.  */
 
 static int
-queue_and_load_dwo_tu (void **slot, void *info)
+queue_and_load_dwo_tu (dwo_unit *dwo_unit, dwarf2_cu *cu)
 {
-  struct dwo_unit *dwo_unit = (struct dwo_unit *) *slot;
-  dwarf2_cu *cu = (dwarf2_cu *) info;
   ULONGEST signature = dwo_unit->signature;
   signatured_type *sig_type = lookup_dwo_signatured_type (cu, signature);
 
@@ -8777,8 +8694,9 @@ queue_and_load_all_dwo_tus (dwarf2_cu *cu)
   gdb_assert (dwo_unit != NULL);
 
   dwo_file = dwo_unit->dwo_file;
-  if (dwo_file->tus != NULL)
-    htab_traverse_noresize (dwo_file->tus.get (), queue_and_load_dwo_tu, cu);
+
+  for (struct dwo_unit *unit : dwo_file->tus)
+    queue_and_load_dwo_tu (unit, cu);
 }
 
 /* Read in various DIEs.  */
