@@ -1407,8 +1407,8 @@ private:
 bool
 dwarf2_per_objfile::symtab_set_p (const dwarf2_per_cu *per_cu) const
 {
-  if (per_cu->index < this->m_symtabs.size ())
-    return this->m_symtabs[per_cu->index] != nullptr;
+  if (per_cu->index < m_symtabs.size ())
+    return m_symtabs[per_cu->index] != nullptr;
   return false;
 }
 
@@ -1417,8 +1417,8 @@ dwarf2_per_objfile::symtab_set_p (const dwarf2_per_cu *per_cu) const
 compunit_symtab *
 dwarf2_per_objfile::get_symtab (const dwarf2_per_cu *per_cu) const
 {
-  if (per_cu->index < this->m_symtabs.size ())
-    return this->m_symtabs[per_cu->index];
+  if (per_cu->index < m_symtabs.size ())
+    return m_symtabs[per_cu->index];
   return nullptr;
 }
 
@@ -1428,10 +1428,10 @@ void
 dwarf2_per_objfile::set_symtab (const dwarf2_per_cu *per_cu,
 				compunit_symtab *symtab)
 {
-  if (per_cu->index >= this->m_symtabs.size ())
-    this->m_symtabs.resize (per_cu->index + 1);
-  gdb_assert (this->m_symtabs[per_cu->index] == nullptr);
-  this->m_symtabs[per_cu->index] = symtab;
+  if (per_cu->index >= m_symtabs.size ())
+    m_symtabs.resize (per_cu->index + 1);
+  gdb_assert (m_symtabs[per_cu->index] == nullptr);
+  m_symtabs[per_cu->index] = symtab;
 }
 
 /* Helper function for dwarf2_initialize_objfile that creates the
@@ -2938,13 +2938,13 @@ cutu_reader::init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
 				 const struct abbrev_table *abbrev_table)
 {
   gdb_assert (section->readin && section->buffer != NULL);
-  this->m_abfd = section->get_bfd_owner ();
-  this->m_cu = cu;
-  this->m_dwo_file = dwo_file;
-  this->m_die_section = section;
-  this->m_buffer = section->buffer;
-  this->m_buffer_end = section->buffer + section->size;
-  this->m_abbrev_table = abbrev_table;
+  m_abfd = section->get_bfd_owner ();
+  m_cu = cu;
+  m_dwo_file = dwo_file;
+  m_die_section = section;
+  m_buffer = section->buffer;
+  m_buffer_end = section->buffer + section->size;
+  m_abbrev_table = abbrev_table;
 }
 
 /* Subroutine of cutu_reader to simplify it.
@@ -4354,8 +4354,7 @@ cutu_reader::peek_die_abbrev (const gdb_byte *info_ptr,
   if (abbrev_number == 0)
     return NULL;
 
-  const abbrev_info *abbrev
-    = this->m_abbrev_table->lookup_abbrev (abbrev_number);
+  const abbrev_info *abbrev = m_abbrev_table->lookup_abbrev (abbrev_number);
   if (!abbrev)
     {
       error (_(DWARF_ERROR_PREFIX
@@ -4412,7 +4411,7 @@ cutu_reader::skip_one_die (const gdb_byte *info_ptr, const abbrev_info *abbrev,
       unsigned int offset = read_4_bytes (m_abfd, sibling_data);
       const gdb_byte *sibling_ptr
 	= m_buffer + to_underlying (m_cu->header.sect_off) + offset;
-      if (sibling_ptr >= info_ptr && sibling_ptr < this->m_buffer_end)
+      if (sibling_ptr >= info_ptr && sibling_ptr < m_buffer_end)
 	return sibling_ptr;
       /* Fall through to the slow way.  */
     }
@@ -4442,8 +4441,8 @@ cutu_reader::skip_one_die (const gdb_byte *info_ptr, const abbrev_info *abbrev,
 
 	      if (sibling_ptr < info_ptr)
 		complaint (_("DW_AT_sibling points backwards"));
-	      else if (sibling_ptr > this->m_buffer_end)
-		this->m_die_section->overflow_complaint ();
+	      else if (sibling_ptr > m_buffer_end)
+		m_die_section->overflow_complaint ();
 	      else
 		return sibling_ptr;
 	    }
@@ -5245,13 +5244,13 @@ rust_union_quirks (struct dwarf2_cu *cu)
 type_unit_group_unshareable *
 dwarf2_per_objfile::get_type_unit_group_unshareable (type_unit_group *tu_group)
 {
-  auto iter = this->m_type_units.find (tu_group);
-  if (iter != this->m_type_units.end ())
+  auto iter = m_type_units.find (tu_group);
+  if (iter != m_type_units.end ())
     return iter->second.get ();
 
   type_unit_group_unshareable_up uniq (new type_unit_group_unshareable);
   type_unit_group_unshareable *result = uniq.get ();
-  this->m_type_units[tu_group] = std::move (uniq);
+  m_type_units[tu_group] = std::move (uniq);
   return result;
 }
 
@@ -5259,8 +5258,8 @@ struct type *
 dwarf2_per_objfile::get_type_for_signatured_type
   (signatured_type *sig_type) const
 {
-  auto iter = this->m_type_map.find (sig_type);
-  if (iter == this->m_type_map.end ())
+  auto iter = m_type_map.find (sig_type);
+  if (iter == m_type_map.end ())
     return nullptr;
 
   return iter->second;
@@ -5269,9 +5268,9 @@ dwarf2_per_objfile::get_type_for_signatured_type
 void dwarf2_per_objfile::set_type_for_signatured_type
   (signatured_type *sig_type, struct type *type)
 {
-  gdb_assert (this->m_type_map.find (sig_type) == this->m_type_map.end ());
+  gdb_assert (m_type_map.find (sig_type) == m_type_map.end ());
 
-  this->m_type_map[sig_type] = type;
+  m_type_map[sig_type] = type;
 }
 
 /* A helper function for computing the list of all symbol tables
@@ -14847,7 +14846,7 @@ cutu_reader::read_die_and_children (const gdb_byte *info_ptr,
       return NULL;
     }
 
-  bool inserted = this->m_cu->die_hash.emplace (die).second;
+  bool inserted = m_cu->die_hash.emplace (die).second;
   gdb_assert (inserted);
 
   if (die->has_children)
@@ -14913,9 +14912,9 @@ cutu_reader::read_die_and_siblings (const gdb_byte *info_ptr,
   if (dwarf_die_debug)
     {
       gdb_printf (gdb_stdlog, "Read die from %s@0x%x of %s:\n",
-		  this->m_die_section->get_name (),
-		  (unsigned) (info_ptr - this->m_die_section->buffer),
-		  bfd_get_filename (this->m_abfd));
+		  m_die_section->get_name (),
+		  (unsigned) (info_ptr - m_die_section->buffer),
+		  bfd_get_filename (m_abfd));
       die->dump (dwarf_die_debug);
     }
 
@@ -14937,7 +14936,7 @@ cutu_reader::read_full_die_1 (die_info **diep, const gdb_byte *info_ptr,
   const struct abbrev_info *abbrev;
   struct die_info *die;
 
-  sect_offset sect_off = (sect_offset) (info_ptr - this->m_buffer);
+  sect_offset sect_off = (sect_offset) (info_ptr - m_buffer);
   abbrev_number = read_unsigned_leb128 (m_abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
   if (!abbrev_number)
@@ -14946,7 +14945,7 @@ cutu_reader::read_full_die_1 (die_info **diep, const gdb_byte *info_ptr,
       return info_ptr;
     }
 
-  abbrev = this->m_abbrev_table->lookup_abbrev (abbrev_number);
+  abbrev = m_abbrev_table->lookup_abbrev (abbrev_number);
   if (!abbrev)
     error (_(DWARF_ERROR_PREFIX
 	     "could not find abbrev number %d [in module %s]"),
@@ -15015,9 +15014,9 @@ cutu_reader::read_toplevel_die (die_info **diep, const gdb_byte *info_ptr,
   if (dwarf_die_debug)
     {
       gdb_printf (gdb_stdlog, "Read die from %s@0x%x of %s:\n",
-		  this->m_die_section->get_name (),
-		  (unsigned) (info_ptr - this->m_die_section->buffer),
-		  bfd_get_filename (this->m_abfd));
+		  m_die_section->get_name (),
+		  (unsigned) (info_ptr - m_die_section->buffer),
+		  bfd_get_filename (m_abfd));
       (*diep)->dump (dwarf_die_debug);
     }
 
@@ -16115,7 +16114,7 @@ cutu_reader::read_attribute_reprocess (attribute *attr, dwarf_tag tag)
 	{
 	  unsigned int str_index = attr->as_unsigned_reprocess ();
 	  gdb_assert (!attr->canonical_string_p ());
-	  if (this->m_dwo_file != NULL)
+	  if (m_dwo_file != NULL)
 	    attr->set_string_noncanonical
 	      (this->read_dwo_str_index (str_index));
 	  else
@@ -16623,14 +16622,14 @@ cutu_reader::read_dwo_str_index (ULONGEST str_index)
 {
   unsigned offset_size;
   ULONGEST str_offsets_base;
-  if (this->m_cu->header.version >= 5)
+  if (m_cu->header.version >= 5)
     {
       /* We have a DWARF5 CU with a reference to a .debug_str_offsets section,
 	 so assume the .debug_str_offsets section is DWARF5 as well, and
 	 parse the header.  FIXME: Parse the header only once.  */
       unsigned int bytes_read = 0;
-      bfd *abfd = this->m_dwo_file->sections.str_offsets.get_bfd_owner ();
-      const gdb_byte *p = this->m_dwo_file->sections.str_offsets.buffer;
+      bfd *abfd = m_dwo_file->sections.str_offsets.get_bfd_owner ();
+      const gdb_byte *p = m_dwo_file->sections.str_offsets.buffer;
 
       /* Header: Initial length.  */
       read_initial_length (abfd, p + bytes_read, &bytes_read);
@@ -16651,7 +16650,7 @@ cutu_reader::read_dwo_str_index (ULONGEST str_index)
 	     least has a limit. */
 	  complaint (_("Section .debug_str_offsets in %s has unsupported"
 		       " version %d, use empty string."),
-		       this->m_dwo_file->dwo_name.c_str (), version);
+		       m_dwo_file->dwo_name.c_str (), version);
 	  return "";
 	}
 
@@ -16668,12 +16667,12 @@ cutu_reader::read_dwo_str_index (ULONGEST str_index)
       str_offsets_base = 0;
 
       /* Determine offset_size based on the .debug_info header.  */
-      offset_size = this->m_cu->header.offset_size;
+      offset_size = m_cu->header.offset_size;
   }
 
-  return read_str_index (this->m_cu, &this->m_dwo_file->sections.str,
-			 &this->m_dwo_file->sections.str_offsets,
-			 str_offsets_base, str_index, offset_size);
+  return read_str_index (m_cu, &m_dwo_file->sections.str,
+			 &m_dwo_file->sections.str_offsets, str_offsets_base,
+			 str_index, offset_size);
 }
 
 /* Given a DW_FORM_GNU_str_index from a Fission stub, fetch the string.  */
