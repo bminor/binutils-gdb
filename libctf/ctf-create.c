@@ -187,6 +187,7 @@ ctf_name_table (ctf_dict_t *fp, int kind)
     case CTF_K_UNION:
       return fp->ctf_unions;
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       return fp->ctf_enums;
     default:
       return fp->ctf_names;

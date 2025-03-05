@@ -52,13 +52,13 @@ noinst_LTLIBRARIES = libctf.la libctf-nobfd.la
 endif
 
 libctf_nobfd_la_LIBADD = @CTF_LIBADD@ $(ZLIB)
-libctf_ldflags_nover = -version-info 0:0:0 @SHARED_LDFLAGS@
+libctf_version_info = -version-info `grep -v '^\#' $(srcdir)/libtool-version`
+libctf_ldflags_nover = $(libctf_version_info) @SHARED_LDFLAGS@
 libctf_nobfd_la_LDFLAGS = $(libctf_ldflags_nover) @VERSION_FLAGS_NOBFD@
 libctf_nobfd_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=1
 libctf_nobfd_la_SOURCES = ctf-api.c ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c ctf-error.c \
-			  ctf-hash.c ctf-labels.c ctf-dedup.c ctf-link.c ctf-lookup.c \
-			  ctf-open.c ctf-port.c ctf-serialize.c ctf-sha1.c ctf-string.c \
-			  ctf-types.c ctf-util.c
+			  ctf-hash.c ctf-dedup.c ctf-link.c ctf-lookup.c ctf-open.c ctf-port.c \
+			  ctf-serialize.c ctf-sha1.c ctf-string.c ctf-types.c ctf-util.c
 if NEED_CTF_QSORT_R
 libctf_nobfd_la_SOURCES += ctf-qsort_r.c
 endif
@@ -122,5 +122,7 @@ CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 
 DISTCLEANFILES += site.exp development.exp
+
+EXTRA_DIST = libtool-version libctf.ver
 
 include doc/local.mk

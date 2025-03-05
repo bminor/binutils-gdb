@@ -133,11 +133,13 @@ typedef struct ctf_lookup
 typedef struct ctf_dictops
 {
   uint32_t (*ctfo_get_kind) (uint32_t);
+  uint32_t (*ctfo_get_prefixed_kind) (const ctf_type_t *);
   uint32_t (*ctfo_get_root) (uint32_t);
   uint32_t (*ctfo_get_vlen) (uint32_t);
+  uint32_t (*ctfo_get_prefixed_vlen) (const ctf_type_t *);
   ssize_t (*ctfo_get_ctt_size) (const ctf_dict_t *, const ctf_type_t *,
 				ssize_t *, ssize_t *);
-  ssize_t (*ctfo_get_vbytes) (ctf_dict_t *, unsigned short, ssize_t, size_t);
+  ssize_t (*ctfo_get_vbytes) (ctf_dict_t *, const ctf_type_t *, ssize_t);
 } ctf_dictops_t;
 
 typedef struct ctf_list
@@ -363,7 +365,9 @@ typedef struct ctf_dedup
 struct ctf_dict
 {
   const ctf_dictops_t *ctf_dictops; /* Version-specific dict operations.  */
-  struct ctf_header *ctf_header;    /* The header from this CTF dict.  */
+  ctf_header_t *ctf_header;    /* The header from this CTF dict.  */
+  ctf_header_v3_t *ctf_v3_header; /* The header from an upgraded CTF dict.  */
+  int ctf_is_btf;		  /* If 1, dict can be written as BTF.  */
   unsigned char ctf_openflags;	    /* Flags the dict had when opened.  */
   ctf_sect_t ctf_data;		    /* CTF data from object file.  */
   ctf_sect_t ctf_ext_symtab;	    /* Symbol table from object file.  */
@@ -380,6 +384,10 @@ struct ctf_dict
   ctf_dynhash_t *ctf_structs;	    /* Hash table of struct types.  */
   ctf_dynhash_t *ctf_unions;	    /* Hash table of union types.  */
   ctf_dynhash_t *ctf_enums;	    /* Hash table of enum types.  */
+  ctf_dynhash_t *ctf_vars;	    /* Hash table of variables.  */
+  ctf_dynhash_t *ctf_datasecs;	    /* Hash table of datasecs.  */
+  ctf_dynhash_t *ctf_type_tags;	    /* Hash table of dynsets of type tags.  */
+  ctf_dynhash_t *ctf_decl_tags;	    /* Hash table of dynsets of decl tags.  */
   ctf_dynhash_t *ctf_names;	    /* Hash table of remaining types, plus
 				       enumeration constants.  */
   ctf_lookup_t ctf_lookups[5];	    /* Pointers to nametabs for name lookup.  */
@@ -395,8 +403,6 @@ struct ctf_dict
   size_t ctf_size;		  /* Size of CTF header + uncompressed data.  */
   unsigned char *ctf_serializing_buf; /* CTF buffer in mid-serialization.  */
   size_t ctf_serializing_buf_size; /* Length of that buffer.  */
-  ctf_varent_t *ctf_serializing_vars; /* Unsorted vars in mid-serialization.  */
-  size_t ctf_serializing_nvars;	  /* Number of those vars.  */
   uint32_t *ctf_sxlate;		  /* Translation table for unindexed symtypetab
 				     entries.  */
   unsigned long ctf_nsyms;	  /* Number of entries in symtab xlate table.  */
@@ -423,8 +429,6 @@ struct ctf_dict
   ctf_link_sym_t **ctf_dynsymidx;  /* Indexes ctf_dynsyms by symidx.  */
   uint32_t ctf_dynsymmax;	  /* Maximum ctf_dynsym index.  */
   ctf_list_t ctf_in_flight_dynsyms; /* Dynsyms during accumulation.  */
-  struct ctf_varent *ctf_vars;	  /* Sorted variable->type mapping.  */
-  unsigned long ctf_nvars;	  /* Number of variables in ctf_vars.  */
   uint32_t ctf_typemax;		  /* Maximum valid type index.  */
   uint32_t ctf_idmax;		  /* Maximum valid non-provisional type ID.  */
   uint32_t ctf_stypes;		  /* Number of static (non-dynamic) types.  */
@@ -433,12 +437,11 @@ struct ctf_dict
   uint32_t ctf_nprovtypes;	  /* Number of provisional types (convenience).  */
   const ctf_dmodel_t *ctf_dmodel; /* Data model pointer (see above).  */
   const char *ctf_cuname;	  /* Compilation unit name (if any).  */
-  char *ctf_dyncuname;		  /* Dynamically allocated name of CU.  */
+  char *ctf_dyn_cuname;		  /* Dynamically allocated name of CU.  */
   struct ctf_dict *ctf_parent;	  /* Parent CTF dict (if any).  */
   int ctf_parent_unreffed;	  /* Parent set by ctf_import_unref?  */
-  const char *ctf_parlabel;	  /* Label in parent dict (if any).  */
-  const char *ctf_parname;	  /* Basename of parent (if any).  */
-  char *ctf_dynparname;		  /* Dynamically allocated name of parent.  */
+  const char *ctf_parent_name;	  /* Basename of parent (if any).  */
+  char *ctf_dyn_parent_name;	  /* Dynamically allocated name of parent.  */
   uint32_t ctf_refcnt;		  /* Reference count (for parent links).  */
   uint32_t ctf_flags;		  /* Libctf flags (see below).  */
   uint32_t ctf_max_children;	  /* Max number of child dicts.  */
@@ -446,7 +449,6 @@ struct ctf_dict
   int ctf_version;		  /* CTF data version.  */
   ctf_dynhash_t *ctf_dthash;	  /* Hash of dynamic type definitions.  */
   ctf_list_t ctf_dtdefs;	  /* List of dynamic type definitions.  */
-  ctf_dynhash_t *ctf_dvhash;	  /* Hash of dynamic variable mappings.  */
   ctf_list_t ctf_dvdefs;	  /* List of dynamic variable definitions.  */
   unsigned long ctf_dtoldid;	  /* Oldest id that has been committed.  */
   unsigned long ctf_snapshots;	  /* ctf_snapshot() plus ctf_update() count.  */
@@ -593,11 +595,13 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
    &(ctf_dtd_lookup (fp, ctf_index_to_type (fp, i))->dtd_data) :	\
    (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]))
 
-#define LCTF_INFO_KIND(fp, info)	((fp)->ctf_dictops->ctfo_get_kind(info))
+#define LCTF_INFO_UNPREFIXED_KIND(fp, info) ((fp)->ctf_dictops->ctfo_get_kind(info))
+#define LCTF_INFO_KIND(fp, tp)		((fp)->ctf_dictops->ctfo_get_prefixed_kind(tp))
 #define LCTF_INFO_ISROOT(fp, info)	((fp)->ctf_dictops->ctfo_get_root(info))
-#define LCTF_INFO_VLEN(fp, info)	((fp)->ctf_dictops->ctfo_get_vlen(info))
-#define LCTF_VBYTES(fp, kind, size, vlen) \
-  ((fp)->ctf_dictops->ctfo_get_vbytes(fp, kind, size, vlen))
+#define LCTF_INFO_VLEN(fp, tp)		((fp)->ctf_dictops->ctfo_get_prefixed_vlen(tp))
+#define LCTF_INFO_UNPREFIXED_VLEN(fp, info)	((fp)->ctf_dictops->ctfo_get_vlen(info))
+#define LCTF_VBYTES(fp, tp, size) \
+  ((fp)->ctf_dictops->ctfo_get_vbytes (fp, tp, size))
 
 #define LCTF_CHILD		0x0001	/* CTF dict is a child.  */
 #define LCTF_LINKING		0x0002  /* CTF link is underway: respect ctf_link_flags.  */
