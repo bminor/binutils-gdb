@@ -2452,7 +2452,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
     }
   else if (c == CMD_LIST_AMBIGUOUS)
     {
-      /* Ambigous.  Local values should be off subcommands or called
+      /* Ambiguous.  Local values should be off subcommands or called
 	 values.  */
       int local_allow_unknown = (last_list ? last_list->allow_unknown :
 				 allow_unknown);

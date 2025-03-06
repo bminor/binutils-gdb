@@ -82,7 +82,7 @@ public:
   /* STRING is the string to be parsed.  */
   void init (const char *string);
 
-  /* While processing a range, this fuction is called iteratively; At
+  /* While processing a range, this function is called iteratively; At
      each call it will return the next value in the range.
 
      At the beginning of parsing a range, the char pointer
