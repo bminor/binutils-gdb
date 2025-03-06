@@ -1062,8 +1062,8 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 			  const struct elfinfo *ei)
 {
   bfd *synth_abfd, *abfd = objfile->obfd.get ();
-  long symcount = 0, dynsymcount = 0, synthcount, storage_needed;
-  asymbol **symbol_table = NULL, **dyn_symbol_table = NULL;
+  long dynsymcount = 0, synthcount;
+  asymbol **dyn_symbol_table = NULL;
   asymbol *synthsyms;
 
   symtab_create_debug_printf ("reading minimal symbols of objfile %s",
@@ -1087,32 +1087,16 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 
   /* Process the normal ELF symbol table first.  */
 
-  storage_needed = bfd_get_symtab_upper_bound (objfile->obfd.get ());
-  if (storage_needed < 0)
-    error (_("Can't read symbols from %s: %s"),
-	   bfd_get_filename (objfile->obfd.get ()),
-	   bfd_errmsg (bfd_get_error ()));
+  gdb::array_view<asymbol *> symbol_table
+    = gdb_bfd_canonicalize_symtab (objfile->obfd.get ());
 
-  if (storage_needed > 0)
-    {
-      /* Memory gets permanently referenced from ABFD after
-	 bfd_canonicalize_symtab so it must not get freed before ABFD gets.  */
-
-      symbol_table = (asymbol **) bfd_alloc (abfd, storage_needed);
-      symcount = bfd_canonicalize_symtab (objfile->obfd.get (), symbol_table);
-
-      if (symcount < 0)
-	error (_("Can't read symbols from %s: %s"),
-	       bfd_get_filename (objfile->obfd.get ()),
-	       bfd_errmsg (bfd_get_error ()));
-
-      elf_symtab_read (reader, objfile, ST_REGULAR, symcount, symbol_table,
-		       false);
-    }
+  elf_symtab_read (reader, objfile, ST_REGULAR, symbol_table.size (),
+		   symbol_table.data (), false);
 
   /* Add the dynamic symbols.  */
 
-  storage_needed = bfd_get_dynamic_symtab_upper_bound (objfile->obfd.get ());
+  long storage_needed
+    = bfd_get_dynamic_symtab_upper_bound (objfile->obfd.get ());
 
   if (storage_needed > 0)
     {
@@ -1157,7 +1141,8 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 
   /* Add synthetic symbols - for instance, names for any PLT entries.  */
 
-  synthcount = bfd_get_synthetic_symtab (synth_abfd, symcount, symbol_table,
+  synthcount = bfd_get_synthetic_symtab (synth_abfd, symbol_table.size (),
+					 symbol_table.data (),
 					 dynsymcount, dyn_symbol_table,
 					 &synthsyms);
   if (synthcount > 0)

@@ -143,6 +143,13 @@ struct gdb_bfd_data
   /* Table of all the bfds this bfd has included.  */
   std::vector<gdb_bfd_ref_ptr> included_bfds;
 
+  /* This is used by gdb_bfd_canonicalize_symtab to hold the symbols
+     returned by canonicalization.  */
+  std::optional<gdb::def_vector<asymbol *>> symbol_table;
+  /* If an error occurred while canonicalizing the symtab, this holds
+     the error message.  */
+  std::string symbol_error;
+
   /* The registry.  */
   registry<bfd> registry_fields;
 
@@ -1175,6 +1182,54 @@ gdb_bfd_errmsg (bfd_error_type error_tag, char **matching)
   xfree (matching);
 
   return ret;
+}
+
+/* See gdb_bfd.h.  */
+
+gdb::array_view<asymbol *>
+gdb_bfd_canonicalize_symtab (bfd *abfd, bool should_throw)
+{
+  struct gdb_bfd_data *gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
+
+  if (!gdata->symbol_table.has_value ())
+    {
+      /* Ensure it exists.  */
+      gdb::def_vector<asymbol *> &symbol_table
+	= gdata->symbol_table.emplace ();
+
+      long storage_needed = bfd_get_symtab_upper_bound (abfd);
+      if (storage_needed < 0)
+	gdata->symbol_error = bfd_errmsg (bfd_get_error ());
+      else if (storage_needed > 0)
+	{
+	  symbol_table.resize (storage_needed / sizeof (asymbol *));
+	  long number_of_symbols
+	    = bfd_canonicalize_symtab (abfd, symbol_table.data ());
+	  if (number_of_symbols < 0)
+	    {
+	      symbol_table.clear ();
+	      gdata->symbol_error = bfd_errmsg (bfd_get_error ());
+	    }
+	}
+    }
+
+  if (!gdata->symbol_error.empty ())
+    {
+      if (should_throw)
+	error (_("Cannot parse symbols of \"%s\": %s"),
+	       bfd_get_filename (abfd), gdata->symbol_error.c_str ());
+      return {};
+    }
+
+  gdb::def_vector<asymbol *> &symbol_table = *gdata->symbol_table;
+  if (symbol_table.empty ())
+    return {};
+
+  /* bfd_canonicalize_symtab adds a trailing NULL, but don't include
+     this in the array view.  */
+  gdb_assert (symbol_table.back () == nullptr);
+  return gdb::make_array_view (symbol_table.data (),
+			       symbol_table.size () - 1);
 }
 
 /* Implement the 'maint info bfd' command.  */

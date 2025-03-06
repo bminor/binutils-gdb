@@ -274,4 +274,16 @@ extern std::string gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
 
 extern void gdb_bfd_init ();
 
+/* A wrapper for bfd_canonicalize_symtab that caches the result.  This
+   is important to avoid excess memory use on repeated calls.  See
+   PR gdb/32758. bfd_canonicalize_symtab should not be called directly
+   by other code in gdb.
+
+   When SHOULD_THROW is true (the default), this will throw an
+   exception if symbols could not be read.  When SHOULD_THROW is
+   false, an empty view is returned instead.  */
+
+extern gdb::array_view<asymbol *> gdb_bfd_canonicalize_symtab
+     (bfd *abfd, bool should_throw = true);
+
 #endif /* GDB_GDB_BFD_H */

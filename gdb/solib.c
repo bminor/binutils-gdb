@@ -1431,49 +1431,38 @@ CORE_ADDR
 gdb_bfd_lookup_symbol_from_symtab (
   bfd *abfd, gdb::function_view<bool (const asymbol *)> match_sym)
 {
-  long storage_needed = bfd_get_symtab_upper_bound (abfd);
   CORE_ADDR symaddr = 0;
+  gdb::array_view<asymbol *> symbol_table
+    = gdb_bfd_canonicalize_symtab (abfd, false);
 
-  if (storage_needed > 0)
+  for (asymbol *sym : symbol_table)
     {
-      unsigned int i;
-
-      gdb::def_vector<asymbol *> storage (storage_needed / sizeof (asymbol *));
-      asymbol **symbol_table = storage.data ();
-      unsigned int number_of_symbols
-	= bfd_canonicalize_symtab (abfd, symbol_table);
-
-      for (i = 0; i < number_of_symbols; i++)
+      if (match_sym (sym))
 	{
-	  asymbol *sym = *symbol_table++;
+	  gdbarch *gdbarch = current_inferior ()->arch ();
+	  symaddr = sym->value;
 
-	  if (match_sym (sym))
+	  /* Some ELF targets fiddle with addresses of symbols they
+	     consider special.  They use minimal symbols to do that
+	     and this is needed for correct breakpoint placement,
+	     but we do not have full data here to build a complete
+	     minimal symbol, so just set the address and let the
+	     targets cope with that.  */
+	  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	      && gdbarch_elf_make_msymbol_special_p (gdbarch))
 	    {
-	      gdbarch *gdbarch = current_inferior ()->arch ();
-	      symaddr = sym->value;
-
-	      /* Some ELF targets fiddle with addresses of symbols they
-		 consider special.  They use minimal symbols to do that
-		 and this is needed for correct breakpoint placement,
-		 but we do not have full data here to build a complete
-		 minimal symbol, so just set the address and let the
-		 targets cope with that.  */
-	      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
-		  && gdbarch_elf_make_msymbol_special_p (gdbarch))
+	      struct minimal_symbol msym
 		{
-		  struct minimal_symbol msym
-		  {
-		  };
+		};
 
-		  msym.set_value_address (symaddr);
-		  gdbarch_elf_make_msymbol_special (gdbarch, sym, &msym);
-		  symaddr = CORE_ADDR (msym.unrelocated_address ());
-		}
-
-	      /* BFD symbols are section relative.  */
-	      symaddr += sym->section->vma;
-	      break;
+	      msym.set_value_address (symaddr);
+	      gdbarch_elf_make_msymbol_special (gdbarch, sym, &msym);
+	      symaddr = CORE_ADDR (msym.unrelocated_address ());
 	    }
+
+	  /* BFD symbols are section relative.  */
+	  symaddr += sym->section->vma;
+	  break;
 	}
     }
 

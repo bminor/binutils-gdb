@@ -36,8 +36,6 @@ arm_pikeos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static enum gdb_osabi
 arm_pikeos_osabi_sniffer (bfd *abfd)
 {
-  long number_of_symbols;
-  long i;
   int pikeos_stack_found = 0;
   int pikeos_stack_size_found = 0;
 
@@ -50,20 +48,15 @@ arm_pikeos_osabi_sniffer (bfd *abfd)
      OS ABI sniffers are called before the minimal symtabs are
      created. So inspect the symbol table using BFD.  */
 
-  long storage_needed = bfd_get_symtab_upper_bound (abfd);
-  if (storage_needed <= 0)
+  gdb::array_view<asymbol *> symbol_table
+    = gdb_bfd_canonicalize_symtab (abfd, false);
+
+  if (symbol_table.empty ())
     return GDB_OSABI_UNKNOWN;
 
-  gdb::unique_xmalloc_ptr<asymbol *> symbol_table
-    ((asymbol **) xmalloc (storage_needed));
-  number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table.get ());
-
-  if (number_of_symbols <= 0)
-    return GDB_OSABI_UNKNOWN;
-
-  for (i = 0; i < number_of_symbols; i++)
+  for (const asymbol *sym : symbol_table)
     {
-      const char *name = bfd_asymbol_name (symbol_table.get ()[i]);
+      const char *name = bfd_asymbol_name (sym);
 
       if (strcmp (name, "_vm_stack") == 0
 	  || strcmp (name, "__p4_stack") == 0)

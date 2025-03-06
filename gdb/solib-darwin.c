@@ -146,24 +146,13 @@ struct lm_info_darwin final : public lm_info
 static CORE_ADDR
 lookup_symbol_from_bfd (bfd *abfd, const char *symname)
 {
-  long storage_needed;
-  asymbol **symbol_table;
-  unsigned int number_of_symbols;
-  unsigned int i;
   CORE_ADDR symaddr = 0;
 
-  storage_needed = bfd_get_symtab_upper_bound (abfd);
+  gdb::array_view<asymbol *> symbol_table
+    = gdb_bfd_canonicalize_symtab (abfd, false);
 
-  if (storage_needed <= 0)
-    return 0;
-
-  symbol_table = (asymbol **) xmalloc (storage_needed);
-  number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
-
-  for (i = 0; i < number_of_symbols; i++)
+  for (const asymbol *sym : symbol_table)
     {
-      asymbol *sym = symbol_table[i];
-
       if (strcmp (sym->name, symname) == 0
 	  && (sym->section->flags & (SEC_CODE | SEC_DATA)) != 0)
 	{
@@ -172,7 +161,6 @@ lookup_symbol_from_bfd (bfd *abfd, const char *symname)
 	  break;
 	}
     }
-  xfree (symbol_table);
 
   return symaddr;
 }
