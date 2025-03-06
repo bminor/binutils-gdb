@@ -153,7 +153,7 @@
    and builds with -O2, and ... the assert doesn't trigger, because it's
    optimized away by gcc.
 
-   There's no suppported recipe to prevent the assertion from being optimized
+   There's no supported recipe to prevent the assertion from being optimized
    away (other than: build with -O0, or remove the nonnull attribute).  Note
    that -fno-delete-null-pointer-checks does not help.  A patch was submitted
    to improve gcc documentation to point this out more clearly (
