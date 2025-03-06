@@ -634,6 +634,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+NATIVE_FALSE
+NATIVE_TRUE
 WARN_WRITE_STRINGS
 NO_WERROR
 WARN_CFLAGS_FOR_BUILD
@@ -10653,7 +10655,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10656 "configure"
+#line 10658 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10759,7 +10761,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10762 "configure"
+#line 10764 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13963,7 +13965,33 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile po/Makefile.in:po/Make-in"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether gprof tests can run" >&5
+$as_echo_n "checking whether gprof tests can run... " >&6; }
+if ${gprof_cv_sys_native+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+    gprof_cv_sys_native=no
+  if test x"${host}" = x"${target}" \
+     && ${CC-cc} -O2 -pg -o tst-gmon $srcdir/testsuite/tst-gmon.c; then
+    ./tst-gmon
+    if test -s gmon.out; then
+      gprof_cv_sys_native=yes
+    fi
+    rm -f tst-gmon gmon.out
+  fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gprof_cv_sys_native" >&5
+$as_echo "$gprof_cv_sys_native" >&6; }
+ if test "$gprof_cv_sys_native" = "yes"; then
+  NATIVE_TRUE=
+  NATIVE_FALSE='#'
+else
+  NATIVE_TRUE='#'
+  NATIVE_FALSE=
+fi
+
+
+ac_config_files="$ac_config_files Makefile testsuite/Makefile po/Makefile.in:po/Make-in"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -14104,6 +14132,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${GENINSRC_NEVER_TRUE}" && test -z "${GENINSRC_NEVER_FALSE}"; then
   as_fn_error $? "conditional \"GENINSRC_NEVER\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${NATIVE_TRUE}" && test -z "${NATIVE_FALSE}"; then
+  as_fn_error $? "conditional \"NATIVE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -14978,6 +15010,7 @@ do
     "default-1") CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
     "default-2") CONFIG_COMMANDS="$CONFIG_COMMANDS default-2" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "testsuite/Makefile") CONFIG_FILES="$CONFIG_FILES testsuite/Makefile" ;;
     "po/Makefile.in") CONFIG_FILES="$CONFIG_FILES po/Makefile.in:po/Make-in" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

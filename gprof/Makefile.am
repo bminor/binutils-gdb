@@ -23,7 +23,7 @@ TEXINFO_TEX = ../texinfo/texinfo.tex
 
 SUFFIXES = .c .m
 
-SUBDIRS = po
+SUBDIRS = po testsuite
 
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
