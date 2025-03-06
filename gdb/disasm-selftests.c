@@ -29,7 +29,7 @@ namespace selftests {
    of the returned buffer.
 
    If there's no known instruction to disassemble for GDBARCH (because we
-   haven't figured on out, not because no instructions exist) then nullptr
+   haven't figured one out, not because no instructions exist) then nullptr
    is returned, and *LEN is set to 0.  */
 
 static const gdb_byte *

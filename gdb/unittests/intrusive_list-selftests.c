@@ -1,4 +1,4 @@
-/* Tests fpr intrusive double linked list for GDB, the GNU debugger.
+/* Tests for intrusive double linked list for GDB, the GNU debugger.
    Copyright (C) 2021-2024 Free Software Foundation, Inc.
 
    This file is part of GDB.
