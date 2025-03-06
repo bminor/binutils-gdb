@@ -23549,7 +23549,7 @@ on the @code{gdbserver} command line or use the @option{--attach} option
 on the @code{gdbserver} command line, or you can load the program or attach
 to it using @value{GDBN} commands after connecting to @code{gdbserver}.
 
-@anchor{--multi Option in Types of Remote Connnections}
+@anchor{--multi Option in Types of Remote Connections}
 You can start @code{gdbserver} without supplying an initial command to run
 or process ID to attach.  To do this, use the @option{--multi} command line
 option.  Then you can connect using @code{target extended-remote} and start
@@ -24038,7 +24038,7 @@ You can use the @option{--multi} option to start @code{gdbserver} without
 specifying a program to debug or a process to attach to.  Then you can
 attach in @code{target extended-remote} mode and run or attach to a
 program.  For more information,
-@pxref{--multi Option in Types of Remote Connnections}.
+@pxref{--multi Option in Types of Remote Connections}.
 
 @cindex @option{--debug}, @code{gdbserver} option
 The @option{--debug[=option1,option2,@dots{}]} option tells
@@ -30042,7 +30042,7 @@ but it was deemed this would be confusing, and so is not allowed.}.
 
 For example, if you often use the command @code{thread apply all}
 specifying to work on the threads in ascending order and to continue in case it
-encounters an error, you can tell @value{GDBN} to automatically preprend
+encounters an error, you can tell @value{GDBN} to automatically prepend
 the @code{-ascending} and @code{-c} options by using:
 
 @smallexample
@@ -42398,7 +42398,7 @@ required.
 @end table
 
 @var{name} and @var{class} are always case insensitive.  If no option
-starting wth @code{-} is given, @value{GDBN} assumes @code{-class}.
+starting with @code{-} is given, @value{GDBN} assumes @code{-class}.
 
 @kindex maint set worker-threads
 @kindex maint show worker-threads
