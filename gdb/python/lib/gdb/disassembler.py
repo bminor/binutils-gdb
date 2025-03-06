@@ -81,7 +81,7 @@ def register_disassembler(disassembler, architecture=None):
 
     # Call the private _set_enabled function within the
     # _gdb.disassembler module.  This function sets a global flag
-    # within GDB's C++ code that enables or dissables the Python
+    # within GDB's C++ code that enables or disables the Python
     # disassembler functionality, this improves performance of the
     # disassembler by avoiding unneeded calls into Python when we know
     # that no disassemblers are registered.

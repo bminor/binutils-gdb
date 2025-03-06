@@ -37,7 +37,7 @@ def parse_xm_command_args(arg):
     Returns:
         A 3-tuple: (<locus matching regular expression>,
                     <matcher matching regular expression>,
-                    <name matching regular experession>)
+                    <name matching regular expression>)
     """
     argv = gdb.string_to_argv(arg)
     argc = len(argv)
