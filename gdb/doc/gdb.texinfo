@@ -51419,7 +51419,7 @@ The optional argument @var{prefix} specifies the prefix to be used
 when composing the file names of the core dumps.  The file name is
 composed as @file{@var{prefix}.@var{pid}}, where @var{pid} is the
 process ID of the running program being analyzed by @command{gcore}.
-If not specified, @var{prefix} defaults to @var{gcore}.
+If not specified, @var{prefix} defaults to @var{core}.
 
 @item -d @var{directory}
 Use @var{directory} as the data directory when invoking @value{GDBN} for running
