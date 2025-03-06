@@ -287,7 +287,7 @@ maintenance print remote-registers
   which registers were included in the last stop reply packet received by
   GDB.
 
-mainenance info frame-unwinders
+maintenance info frame-unwinders
   Add a CLASS column to the output.  This class is a somewhat arbitrary
   grouping of unwinders, based on which area of GDB adds the unwinder.
   Also add an ENABLED column, that will show if the unwinder is enabled
@@ -345,7 +345,7 @@ generate-core-file
 
 maintenance info line-table
   Add an EPILOGUE-BEGIN column to the output of the command.  It indicates
-  if the line is considered the start of the epilgoue, and thus a point at
+  if the line is considered the start of the epilogue, and thus a point at
   which the frame can be considered destroyed.
 
 set unwindonsignal on|off
@@ -606,7 +606,7 @@ qIsAddressTagged
 
 * For both the break and watch commands, it is now invalid to use both
   the 'thread' and 'task' keywords within the same command.  For
-  example the following commnds will now give an error:
+  example the following commands will now give an error:
     break foo thread 1 task 1
     watch var thread 2 task 3
 
@@ -2204,7 +2204,7 @@ info connections
 
 help
   The "help" command uses the title style to enhance the
-  readibility of its output by styling the classes and
+  readability of its output by styling the classes and
   command names.
 
 apropos [-v] REGEXP
@@ -2559,7 +2559,7 @@ info variables [-q] [-t TYPEREGEXP] [NAMEREGEXP]
   These commands can now print only the searched entities
   matching the provided regexp(s), giving a condition
   on the entity names or entity types.  The flag -q disables
-  printing headers or informations messages.
+  printing headers or information messages.
 
 info functions
 info types
@@ -4093,7 +4093,7 @@ show mi-async
   commands have been replaced with "target native".  The QNX/NTO port
   leaves the "procfs" target in place and adds a "native" target for
   consistency with other ports.  The impact on users should be minimal
-  as these commands previously either throwed an error, or were
+  as these commands previously either threw an error, or were
   no-ops.  The target's name is visible in the output of the following
   commands: "help target", "info target", "info files", "maint print
   target-stack".
@@ -4820,7 +4820,7 @@ qXfer:btrace:read
   ** "dprintf location,format,args..." creates a dynamic printf, which
      is basically a breakpoint that does a printf and immediately
      resumes your program's execution, so it is like a printf that you
-     can insert dynamically at runtime instead of at compiletime.
+     can insert dynamically at runtime instead of at compile time.
 
   ** "set print symbol"
      "show print symbol"
@@ -5726,8 +5726,8 @@ ARM Symbian			arm*-*-symbianelf*
 
   GDB now supports importing of namespaces in C++.  This enables the
   user to inspect variables from imported namespaces.  Support for
-  namepace aliasing has also been added.  So, if a namespace is 
-  aliased in the current scope (e.g. namepace C=A; ) the user can 
+  namespace aliasing has also been added.  So, if a namespace is
+  aliased in the current scope (e.g. namespace C=A; ) the user can
   print variables using the alias (e.g. (gdb) print C::x).
 
   ** Bug Fixes
@@ -9369,7 +9369,7 @@ on an SVR4 system (including the one you are debugging).  At the moment,
 it prints the address mappings of the process.
 
 If you bring up GDB on another SVR4 system, please send mail to
-bug-gdb@prep.ai.mit.edu to let us know what changes were reqired (if any).
+bug-gdb@prep.ai.mit.edu to let us know what changes were required (if any).
 
  * Better dynamic linking support in SunOS
 
@@ -9384,7 +9384,7 @@ same code linked statically.
 GDB is now using the latest `getopt' routines from the FSF.  This
 version accepts the -- prefix for options with long names.  GDB will
 continue to accept the old forms (-option and +option) as well.
-Various single letter abbreviations for options have been explicity
+Various single letter abbreviations for options have been explicitly
 added to the option table so that they won't get overshadowed in the
 future by other options that begin with the same letter.
 
@@ -9417,7 +9417,7 @@ GDB can read ELF object files on System V Release 4, and can handle
 debugging records for C, in DWARF format, in ELF files.  This support
 is preliminary.  If you bring up GDB on another SVR4 system, please
 send mail to bug-gdb@prep.ai.mit.edu to let us know what changes were
-reqired (if any).
+required (if any).
 
  * New Readline
 
