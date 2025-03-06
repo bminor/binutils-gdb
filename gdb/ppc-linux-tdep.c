@@ -1638,14 +1638,15 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
    gdbarch.h.  This implementation is used for the ELFv2 ABI only.  */
 
 static void
-ppc_elfv2_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+ppc_elfv2_elf_make_msymbol_special (const asymbol *sym,
+				    struct minimal_symbol *msym)
 {
   if ((sym->flags & BSF_SYNTHETIC) != 0)
     /* ELFv2 synthetic symbols (the PLT stubs and the __glink_PLTresolve
        trampoline) do not have a local entry point.  */
     return;
 
-  elf_symbol_type *elf_sym = (elf_symbol_type *)sym;
+  const elf_symbol_type *elf_sym = (const elf_symbol_type *)sym;
 
   /* If the symbol is marked as having a local entry point, set a target
      flag in the msymbol.  We currently only support local entry point

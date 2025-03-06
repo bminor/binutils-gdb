@@ -793,11 +793,12 @@ ppc64_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
    from that symbol.  */
 
 void
-ppc64_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+ppc64_elf_make_msymbol_special (const asymbol *sym,
+				struct minimal_symbol *msym)
 {
   if ((sym->flags & BSF_SYNTHETIC) != 0 && sym->udata.p != NULL)
     {
-      elf_symbol_type *elf_sym = (elf_symbol_type *) sym->udata.p;
+      const elf_symbol_type *elf_sym = (const elf_symbol_type *) sym->udata.p;
       msym->set_size (elf_sym->internal_elf_sym.st_size);
     }
 }

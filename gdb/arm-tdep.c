@@ -9719,9 +9719,9 @@ coff_sym_is_thumb (int val)
    symbol to indicate that it does.  */
    
 static void
-arm_elf_make_msymbol_special(asymbol *sym, struct minimal_symbol *msym)
+arm_elf_make_msymbol_special (const asymbol *sym, struct minimal_symbol *msym)
 {
-  elf_symbol_type *elfsym = (elf_symbol_type *) sym;
+  const elf_symbol_type *elfsym = (const elf_symbol_type *) sym;
 
   if (ARM_GET_SYM_BRANCH_TYPE (elfsym->internal_elf_sym.st_target_internal)
       == ST_BRANCH_TO_THUMB)
@@ -9737,7 +9737,7 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
 
 static void
 arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
-			   asymbol *sym)
+			   const asymbol *sym)
 {
   const char *name = bfd_asymbol_name (sym);
   struct arm_per_bfd *data;

@@ -3562,7 +3562,7 @@ gdbarch_elf_make_msymbol_special_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, asymbol *sym, struct minimal_symbol *msym)
+gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, const asymbol *sym, struct minimal_symbol *msym)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->elf_make_msymbol_special != NULL);
@@ -4575,7 +4575,7 @@ gdbarch_record_special_symbol_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile, asymbol *sym)
+gdbarch_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile, const asymbol *sym)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->record_special_symbol != NULL);

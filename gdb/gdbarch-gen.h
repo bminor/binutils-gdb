@@ -867,8 +867,8 @@ extern void set_gdbarch_stack_frame_destroyed_p (struct gdbarch *gdbarch, gdbarc
 
 extern bool gdbarch_elf_make_msymbol_special_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_elf_make_msymbol_special_ftype) (asymbol *sym, struct minimal_symbol *msym);
-extern void gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, asymbol *sym, struct minimal_symbol *msym);
+typedef void (gdbarch_elf_make_msymbol_special_ftype) (const asymbol *sym, struct minimal_symbol *msym);
+extern void gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, const asymbol *sym, struct minimal_symbol *msym);
 extern void set_gdbarch_elf_make_msymbol_special (struct gdbarch *gdbarch, gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special);
 
 typedef void (gdbarch_coff_make_msymbol_special_ftype) (int val, struct minimal_symbol *msym);
@@ -1325,8 +1325,8 @@ extern void set_gdbarch_get_siginfo_type (struct gdbarch *gdbarch, gdbarch_get_s
 
 extern bool gdbarch_record_special_symbol_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_record_special_symbol_ftype) (struct gdbarch *gdbarch, struct objfile *objfile, asymbol *sym);
-extern void gdbarch_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile, asymbol *sym);
+typedef void (gdbarch_record_special_symbol_ftype) (struct gdbarch *gdbarch, struct objfile *objfile, const asymbol *sym);
+extern void gdbarch_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile, const asymbol *sym);
 extern void set_gdbarch_record_special_symbol (struct gdbarch *gdbarch, gdbarch_record_special_symbol_ftype *record_special_symbol);
 
 /* Function for the 'catch syscall' feature.

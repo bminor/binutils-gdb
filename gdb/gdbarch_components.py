@@ -1506,7 +1506,7 @@ the main symbol table and DWARF-2 records.
 """,
     type="void",
     name="elf_make_msymbol_special",
-    params=[("asymbol *", "sym"), ("struct minimal_symbol *", "msym")],
+    params=[("const asymbol *", "sym"), ("struct minimal_symbol *", "msym")],
     predicate=True,
 )
 
@@ -2126,7 +2126,7 @@ Record architecture-specific information from the symbol table.
 """,
     type="void",
     name="record_special_symbol",
-    params=[("struct objfile *", "objfile"), ("asymbol *", "sym")],
+    params=[("struct objfile *", "objfile"), ("const asymbol *", "sym")],
     predicate=True,
 )
 

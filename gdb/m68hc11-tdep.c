@@ -1326,11 +1326,12 @@ m68hc11_return_value (struct gdbarch *gdbarch, struct value *function,
    rti to return.  */
    
 static void
-m68hc11_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+m68hc11_elf_make_msymbol_special (const asymbol *sym,
+				  struct minimal_symbol *msym)
 {
   unsigned char flags;
 
-  flags = ((elf_symbol_type *)sym)->internal_elf_sym.st_other;
+  flags = ((const elf_symbol_type *) sym)->internal_elf_sym.st_other;
   if (flags & STO_M68HC12_FAR)
     MSYMBOL_SET_RTC (msym);
   if (flags & STO_M68HC12_INTERRUPT)

@@ -422,9 +422,10 @@ mips_unmake_compact_addr (CORE_ADDR addr)
    in a minimal symbol.  */
 
 static void
-mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
+mips_elf_make_msymbol_special (const asymbol * sym,
+			       struct minimal_symbol *msym)
 {
-  elf_symbol_type *elfsym = (elf_symbol_type *) sym;
+  const elf_symbol_type *elfsym = (const elf_symbol_type *) sym;
   unsigned char st_other;
 
   if ((sym->flags & BSF_SYNTHETIC) == 0)
