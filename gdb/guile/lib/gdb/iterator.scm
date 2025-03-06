@@ -62,7 +62,7 @@
 	  (iterator-for-each proc iter)))))
 
 (define-public (iterator-filter pred iter)
-  "Return the elements that satify predicate PRED."
+  "Return the elements that satisfy predicate PRED."
   (let loop ((result '()))
     (let ((next (iterator-next! iter)))
       (cond ((end-of-iteration? next) (reverse! result))
