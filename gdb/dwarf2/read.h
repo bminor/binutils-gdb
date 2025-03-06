@@ -1222,4 +1222,91 @@ extern void create_all_units (dwarf2_per_objfile *per_objfile);
 
 extern htab_up create_quick_file_names_table (unsigned int nr_initial_entries);
 
+/* Find the base address of the compilation unit for range lists and
+   location lists.  It will normally be specified by DW_AT_low_pc.
+   In DWARF-3 draft 4, the base address could be overridden by
+   DW_AT_entry_pc.  It's been removed, but GCC still uses this for
+   compilation units with discontinuous ranges.  */
+
+extern void dwarf2_find_base_address (die_info *die, dwarf2_cu *cu);
+
+/* How dwarf2_get_pc_bounds constructed its *LOWPC and *HIGHPC return
+   values.  Keep the items ordered with increasing constraints compliance.  */
+
+enum pc_bounds_kind
+{
+  /* No attribute DW_AT_low_pc, DW_AT_high_pc or DW_AT_ranges was found.  */
+  PC_BOUNDS_NOT_PRESENT,
+
+  /* Some of the attributes DW_AT_low_pc, DW_AT_high_pc or DW_AT_ranges
+	were present but they do not form a valid range of PC addresses.  */
+  PC_BOUNDS_INVALID,
+
+  /* Discontiguous range was found - that is DW_AT_ranges was found.  */
+  PC_BOUNDS_RANGES,
+
+  /* Contiguous range was found - DW_AT_low_pc and DW_AT_high_pc were found.  */
+  PC_BOUNDS_HIGH_LOW,
+};
+
+/* Get low and high pc attributes from a die.  See enum pc_bounds_kind
+   definition for the return value.  *LOWPC and *HIGHPC are set iff
+   neither PC_BOUNDS_NOT_PRESENT nor PC_BOUNDS_INVALID are returned.  */
+
+extern pc_bounds_kind dwarf2_get_pc_bounds (die_info *die,
+					    unrelocated_addr *lowpc,
+					    unrelocated_addr *highpc,
+					    dwarf2_cu *cu, addrmap_mutable *map,
+					    void *datum);
+
+/* Locate the .debug_info compilation unit from CU's objfile which contains
+   the DIE at OFFSET.  Raises an error on failure.  */
+
+extern dwarf2_per_cu *dwarf2_find_containing_comp_unit (sect_offset sect_off,
+							unsigned int
+							  offset_in_dwz,
+							dwarf2_per_bfd
+							  *per_bfd);
+
+/* Decode simple location descriptions.
+
+   Given a pointer to a DWARF block that defines a location, compute
+   the location.  Returns true if the expression was computable by
+   this function, false otherwise.  On a true return, *RESULT is set.
+
+   Note that this function does not implement a full DWARF expression
+   evaluator.  Instead, it is used for a few limited purposes:
+
+   - Getting the address of a symbol that has a constant address.  For
+   example, if a symbol has a location like "DW_OP_addr", the address
+   can be extracted.
+
+   - Getting the offset of a virtual function in its vtable.  There
+   are two forms of this, one of which involves DW_OP_deref -- so this
+   function handles derefs in a peculiar way to make this 'work'.
+   (Probably this area should be rewritten.)
+
+   - Getting the offset of a field, when it is constant.
+
+   Opcodes that cannot be part of a constant expression, for example
+   those involving registers, simply result in a return of
+   'false'.
+
+   This function may emit a complaint.  */
+
+extern bool decode_locdesc (dwarf_block *blk, dwarf2_cu *cu, CORE_ADDR *result);
+
+/* Get low and high pc attributes from DW_AT_ranges attribute value OFFSET.
+   Return 1 if the attributes are present and valid, otherwise, return 0.
+   TAG is passed to dwarf2_ranges_process.  If MAP is not NULL, then
+   ranges in MAP are set, using DATUM as the value.  */
+
+extern int dwarf2_ranges_read (unsigned offset, unrelocated_addr *low_return,
+			       unrelocated_addr *high_return, dwarf2_cu *cu,
+			       addrmap_mutable *map, void *datum,
+			       dwarf_tag tag);
+
+extern file_and_directory &find_file_and_directory (die_info *die,
+						    dwarf2_cu *cu);
+
 #endif /* GDB_DWARF2_READ_H */
