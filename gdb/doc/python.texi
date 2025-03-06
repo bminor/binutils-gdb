@@ -7062,17 +7062,17 @@ argument tells @value{GDBN} which color space @var{value} belongs.
 @end defun
 
 @defvar Color.is_none
-This atribute is boolean.  If its value is @code{True} then color is terminal's
+This attribute is boolean.  If its value is @code{True} then color is terminal's
 default.
 @end defvar
 
 @defvar Color.is_indexed
-This atribute is boolean.  If its value is @code{True} then color is indexed,
+This attribute is boolean.  If its value is @code{True} then color is indexed,
 i.e. belongs to some palette.
 @end defvar
 
 @defvar Color.is_direct
-This atribute is boolean.  If its value is @code{True} then this object
+This attribute is boolean.  If its value is @code{True} then this object
 describes direct colour in the sense of ISO/IEC 8613-6.
 @end defvar
 
