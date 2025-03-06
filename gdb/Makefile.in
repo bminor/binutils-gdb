@@ -1097,6 +1097,7 @@ COMMON_SFILES = \
 	dwarf2/attribute.c \
 	dwarf2/comp-unit-head.c \
 	dwarf2/cooked-index.c \
+	dwarf2/cooked-index-storage.c \
 	dwarf2/cu.c \
 	dwarf2/die.c \
 	dwarf2/dwz.c \
@@ -1354,6 +1355,7 @@ HFILES_NO_SRCDIR = \
 	dummy-frame.h \
 	dwarf2/aranges.h \
 	dwarf2/cooked-index.h \
+	dwarf2/cooked-index-storage.h \
 	dwarf2/cu.h \
 	dwarf2/frame-tailcall.h \
 	dwarf2/frame.h \

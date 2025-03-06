@@ -32,6 +32,7 @@
 #include "dwarf2/aranges.h"
 #include "dwarf2/attribute.h"
 #include "dwarf2/comp-unit-head.h"
+#include "dwarf2/cooked-index-storage.h"
 #include "dwarf2/cu.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/leb.h"
@@ -3501,55 +3502,6 @@ get_type_unit_group (struct dwarf2_cu *cu, const struct attribute *stmt_list)
   tu_group = (struct type_unit_group *) *slot;
   gdb_assert (tu_group != nullptr);
   return tu_group;
-}
-
-
-cooked_index_storage::cooked_index_storage ()
-  : m_reader_hash (htab_create_alloc (10, hash_cutu_reader,
-				      eq_cutu_reader,
-				      htab_delete_entry<cutu_reader>,
-				      xcalloc, xfree)),
-    m_shard (new cooked_index_shard)
-{
-}
-
-cutu_reader *
-cooked_index_storage::get_reader (dwarf2_per_cu *per_cu)
-{
-  int index = per_cu->index;
-  return (cutu_reader *) htab_find_with_hash (m_reader_hash.get (),
-					      &index, index);
-}
-
-cutu_reader *
-cooked_index_storage::preserve (cutu_reader_up reader)
-{
-  m_abbrev_table_cache.add (reader->release_abbrev_table ());
-
-  int index = reader->cu ()->per_cu->index;
-  void **slot = htab_find_slot_with_hash (m_reader_hash.get (), &index,
-					  index, INSERT);
-  gdb_assert (*slot == nullptr);
-  cutu_reader *result = reader.get ();
-  *slot = reader.release ();
-  return result;
-}
-
-/* Hash function for a cutu_reader.  */
-hashval_t
-cooked_index_storage::hash_cutu_reader (const void *a)
-{
-  const cutu_reader *reader = (const cutu_reader *) a;
-  return reader->cu ()->per_cu->index;
-}
-
-/* Equality function for cutu_reader.  */
-int
-cooked_index_storage::eq_cutu_reader (const void *a, const void *b)
-{
-  const cutu_reader *ra = (const cutu_reader *) a;
-  const int *rb = (const int *) b;
-  return ra->cu ()->per_cu->index == *rb;
 }
 
 /* An instance of this is created to index a CU.  */
