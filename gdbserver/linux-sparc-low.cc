@@ -109,7 +109,7 @@ static int sparc_regmap[] = {
    17 *8, /*    pc */
    18 *8, /*   npc */
    16 *8, /* state */
-  /* FSR offset also corresponds to GET/SETFPREGSET, ans is placed
+  /* FSR offset also corresponds to GET/SETFPREGSET, and is placed
      next to f62.  */
    32 *8, /*   fsr */
       -1, /*  fprs */

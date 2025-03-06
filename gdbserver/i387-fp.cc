@@ -230,7 +230,7 @@ i387_cache_to_fxsave (struct regcache *regcache, void *buf)
   fp->fctrl = regcache_raw_get_unsigned_by_name (regcache, "fctrl");
   fp->fstat = regcache_raw_get_unsigned_by_name (regcache, "fstat");
 
-  /* Convert to the simplifed tag form stored in fxsave data.  */
+  /* Convert to the simplified tag form stored in fxsave data.  */
   val = regcache_raw_get_unsigned_by_name (regcache, "ftag");
   val2 = 0;
   for (i = 7; i >= 0; i--)
@@ -505,7 +505,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
 	  fp->fstat = val;
 	}
 
-      /* Convert to the simplifed tag form stored in fxsave data.  */
+      /* Convert to the simplified tag form stored in fxsave data.  */
       val = regcache_raw_get_unsigned_by_name (regcache, "ftag");
       val2 = 0;
       for (i = 7; i >= 0; i--)

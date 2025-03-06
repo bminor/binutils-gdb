@@ -441,7 +441,7 @@ play (FILE *fp)
     }
 
   /* Packet starts with '+$' or '$', we don't want to calculate those
-     to the checksum, substract the offset to adjust the line length.
+     to the checksum, subtract the offset to adjust the line length.
      If the line starts with '$', the offset remains set to 1.  */
   if (line[0] == '+')
     offset = 2;
