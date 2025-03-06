@@ -384,7 +384,7 @@ intel_supports_bts (const struct btrace_cpu *cpu)
 	case 0x3a: /* Ivy Bridge */
 
 	  /* AAJ122: LBR, BTM, or BTS records may have incorrect branch
-	     "from" information afer an EIST transition, T-states, C1E, or
+	     "from" information after an EIST transition, T-states, C1E, or
 	     Adaptive Thermal Throttling.  */
 	  return 0;
 	}
