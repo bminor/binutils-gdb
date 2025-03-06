@@ -1177,8 +1177,6 @@ ctf_flip_header (void *cthp, int is_btf, int ctf_version)
   swap_thing (cth->cth_parent_name);
   swap_thing (cth->cth_parent_strlen);
   swap_thing (cth->cth_parent_ntypes);
-  swap_thing (cth->cth_layout_off);
-  swap_thing (cth->cth_layout_len);
   swap_thing (cth->cth_objt_off);
   swap_thing (cth->cth_objt_len);
   swap_thing (cth->cth_func_off);
@@ -1430,7 +1428,6 @@ ctf_flip (ctf_dict_t *fp, ctf_header_t *cth, unsigned char *buf,
 {
   ctf_dprintf ("Flipping endianness\n");
 
-  /* UPTODO: what does a layout section look like?  */
   flip_objts (buf + sizeof (btf_header_t) + cth->cth_objt_off, cth->cth_objt_len);
   flip_objts (buf + sizeof (btf_header_t) + cth->cth_func_off, cth->cth_func_len);
   flip_objts (buf + sizeof (btf_header_t) + cth->cth_objtidx_off, cth->cth_objtidx_len);
@@ -1785,8 +1782,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
      the end of the BTF header, we must also check that they don't overlap the
      CTF header that can follow it.  */
   if (_libctf_unlikely_
-      (hp->cth_layout_off + hp->cth_layout_len > hp->cth_objt_off
-       || hp->cth_objt_off + hp->cth_objt_len > hp->cth_func_off
+      (hp->cth_objt_off + hp->cth_objt_len > hp->cth_func_off
        || hp->cth_func_off + hp->cth_func_len > hp->cth_objtidx_off
        || hp->cth_objtidx_off + hp->cth_objtidx_len > hp->cth_funcidx_off
        || hp->btf.bth_type_off < ctf_adjustment
@@ -1866,8 +1862,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   fp->ctf_openflags = hp->cth_flags;
   fp->ctf_size = hp->btf.cth_str_off + hp->btf.cth_str_len;
 
-  if (_libctf_unlikely (hp->cth_layout_off > fp->ctf_size
-			|| hp->cth_objt_off > fp->ctf_size
+  if (_libctf_unlikely (hp->cth_objt_off > fp->ctf_size
 			|| hp->cth_func_off > fp->ctf_size
 			|| hp->cth_objtidx_off > fp->ctf_size
 			|| hp->cth_funcidx_off > fp->ctf_size

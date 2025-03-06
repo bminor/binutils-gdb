@@ -227,8 +227,6 @@ typedef struct ctf_header
   uint32_t cth_parent_name;	/* Ref to basename of parent.  */
   uint32_t cth_parent_strlen;	/* cth_strlen of parent (may be 0).  */
   uint32_t cth_parent_ntypes;	/* Number of types in parent (may be 0).  */
-  uint32_t cth_layout_off;	/* Offset of layout section.  */
-  uint32_t cth_layout_len;	/* Length of layout section.  */
   uint32_t cth_objt_off;	/* Offset of object section.  */
   uint32_t cth_objt_len;	/* Length of object section.  */
   uint32_t cth_func_off;	/* Offset of function section.  */
