@@ -2278,7 +2278,7 @@ GDB_AC_SELFTEST([
 
 GDB_AC_TRANSFORM([gdb], [GDB_TRANSFORM_NAME])
 GDB_AC_TRANSFORM([gcore], [GCORE_TRANSFORM_NAME])
-AC_CONFIG_FILES([gcore], [chmod +x gcore])
+AC_CONFIG_FILES([gcore.in:gcore-1.in])
 AC_CONFIG_FILES([gstack.in:gstack-1.in])
 AC_CONFIG_FILES([Makefile gdb-gdb.gdb gdb-gdb.py doc/Makefile data-directory/Makefile])
 

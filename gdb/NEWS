@@ -26,6 +26,9 @@
 
 * Linux checkpoint code has been updated to work with multiple inferiors.
 
+* The gcore script now has a -v or --version option, which prints the
+  version number, and then exits.
+
 * New commands
 
 maintenance check psymtabs

@@ -2352,17 +2352,14 @@ run: Makefile
 jit-reader.h: $(srcdir)/jit-reader.in config.status
 	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
-gcore: $(srcdir)/gcore.in config.status
+gstack.in gcore.in: %.in : $(srcdir)/%-1.in config.status
 	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
-gstack: gstack.in version.c
+gstack gcore: % : %.in version.c
 	$(ECHO_GEN) \
 	vv=`grep 'version\[\] = ' version.c | grep -o '".*"' | tr -d \"`; \
 	sed -e "s,@VERSION@,$$vv," $< > $@
 	@chmod +x $@
-
-gstack.in: $(srcdir)/gstack-1.in config.status
-	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
 gdb-gdb.py: $(srcdir)/gdb-gdb.py.in config.status
 	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@

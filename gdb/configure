@@ -33775,7 +33775,7 @@ fi
   fi
 
 
-ac_config_files="$ac_config_files gcore"
+ac_config_files="$ac_config_files gcore.in:gcore-1.in"
 
 ac_config_files="$ac_config_files gstack.in:gstack-1.in"
 
@@ -34878,7 +34878,7 @@ do
     "default-1") CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
     "jit-reader.h") CONFIG_FILES="$CONFIG_FILES jit-reader.h:jit-reader.in" ;;
     "nm.h") CONFIG_LINKS="$CONFIG_LINKS nm.h:$GDB_NM_FILE" ;;
-    "gcore") CONFIG_FILES="$CONFIG_FILES gcore" ;;
+    "gcore.in") CONFIG_FILES="$CONFIG_FILES gcore.in:gcore-1.in" ;;
     "gstack.in") CONFIG_FILES="$CONFIG_FILES gstack.in:gstack-1.in" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "gdb-gdb.gdb") CONFIG_FILES="$CONFIG_FILES gdb-gdb.gdb" ;;
@@ -36425,7 +36425,6 @@ _LT_EOF
       esac
     done ;;
     "nm.h":L) echo > stamp-nmh ;;
-    "gcore":F) chmod +x gcore ;;
 
   esac
 done # for ac_tag
