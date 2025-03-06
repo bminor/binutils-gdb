@@ -61,7 +61,7 @@ show_tui_debug (struct ui_file *file, int from_tty,
 }
 
 /* This redefines CTRL if it is not already defined, so it must come
-   after terminal state releated include files like <term.h> and
+   after terminal state related include files like <term.h> and
    "gdb_curses.h".  */
 #include "readline/readline.h"
 
