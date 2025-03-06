@@ -859,7 +859,7 @@ extern void set_gdbarch_stack_frame_destroyed_p (struct gdbarch *gdbarch, gdbarc
 
 /* Process an ELF symbol in the minimal symbol table in a backend-specific
    way.  Normally this hook is supposed to do nothing, however if required,
-   then this hook can be used to apply tranformations to symbols that are
+   then this hook can be used to apply transformations to symbols that are
    considered special in some way.  For example the MIPS backend uses it
    to interpret `st_other' information to mark compressed code symbols so
    that they can be treated in the appropriate manner in the processing of
@@ -877,7 +877,7 @@ extern void set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, gdba
 
 /* Process a symbol in the main symbol table in a backend-specific way.
    Normally this hook is supposed to do nothing, however if required,
-   then this hook can be used to apply tranformations to symbols that
+   then this hook can be used to apply transformations to symbols that
    are considered special in some way.  This is currently used by the
    MIPS backend to make sure compressed code symbols have the ISA bit
    set.  This in turn is needed for symbol values seen in GDB to match
@@ -1389,7 +1389,7 @@ extern void set_gdbarch_stap_register_suffixes (struct gdbarch *gdbarch, const c
 
    (%eax) ;; indirecting eax
 
-   in this case, this prefix would be the charater `('.
+   in this case, this prefix would be the character `('.
 
    Please note that we use the indirection prefix also for register
    displacement, e.g., `4(%eax)' on x86. */
@@ -1403,7 +1403,7 @@ extern void set_gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdba
 
    (%eax) ;; indirecting eax
 
-   in this case, this prefix would be the charater `)'.
+   in this case, this prefix would be the character `)'.
 
    Please note that we use the indirection suffix also for register
    displacement, e.g., `4(%eax)' on x86. */
@@ -1623,7 +1623,7 @@ typedef void (gdbarch_info_proc_ftype) (struct gdbarch *gdbarch, const char *arg
 extern void gdbarch_info_proc (struct gdbarch *gdbarch, const char *args, enum info_proc_what what);
 extern void set_gdbarch_info_proc (struct gdbarch *gdbarch, gdbarch_info_proc_ftype *info_proc);
 
-/* Implement the "info proc" command for core files.  Noe that there
+/* Implement the "info proc" command for core files.  Note that there
    are two "info_proc"-like methods on gdbarch -- one for core files,
    one for live targets. */
 

@@ -1498,7 +1498,7 @@ Function(
     comment="""
 Process an ELF symbol in the minimal symbol table in a backend-specific
 way.  Normally this hook is supposed to do nothing, however if required,
-then this hook can be used to apply tranformations to symbols that are
+then this hook can be used to apply transformations to symbols that are
 considered special in some way.  For example the MIPS backend uses it
 to interpret `st_other' information to mark compressed code symbols so
 that they can be treated in the appropriate manner in the processing of
@@ -1522,7 +1522,7 @@ Function(
     comment="""
 Process a symbol in the main symbol table in a backend-specific way.
 Normally this hook is supposed to do nothing, however if required,
-then this hook can be used to apply tranformations to symbols that
+then this hook can be used to apply transformations to symbols that
 are considered special in some way.  This is currently used by the
 MIPS backend to make sure compressed code symbols have the ISA bit
 set.  This in turn is needed for symbol values seen in GDB to match
@@ -2224,7 +2224,7 @@ For example, on x86 the register indirection is written as:
 
 (%eax) ;; indirecting eax
 
-in this case, this prefix would be the charater `('.
+in this case, this prefix would be the character `('.
 
 Please note that we use the indirection prefix also for register
 displacement, e.g., `4(%eax)' on x86.
@@ -2243,7 +2243,7 @@ For example, on x86 the register indirection is written as:
 
 (%eax) ;; indirecting eax
 
-in this case, this prefix would be the charater `)'.
+in this case, this prefix would be the character `)'.
 
 Please note that we use the indirection suffix also for register
 displacement, e.g., `4(%eax)' on x86.
@@ -2552,7 +2552,7 @@ Implement the "info proc" command.
 
 Method(
     comment="""
-Implement the "info proc" command for core files.  Noe that there
+Implement the "info proc" command for core files.  Note that there
 are two "info_proc"-like methods on gdbarch -- one for core files,
 one for live targets.
 """,
