@@ -32,7 +32,7 @@ struct lazy_string_object {
   /*  Holds the encoding that will be applied to the string
       when the string is printed by GDB.  If the encoding is set
       to None then GDB will select the most appropriate
-      encoding when the sting is printed.  */
+      encoding when the string is printed.  */
   char *encoding;
 
   /* If TYPE is an array: If the length is known, then this value is the
