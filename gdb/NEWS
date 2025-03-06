@@ -27,7 +27,8 @@
 * Linux checkpoint code has been updated to work with multiple inferiors.
 
 * The gcore script now has a -v or --version option, which prints the
-  version number, and then exits.
+  version number, and then exits.  As well as a -h or --help option,
+  which prints each options and a brief description.
 
 * New commands
 

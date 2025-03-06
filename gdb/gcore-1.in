@@ -32,11 +32,38 @@ dump_all_cmds=()
 
 data_directory_opt=()
 
+function print_usage() {
+    prefix="Usage: $0"
+    paddin=$(printf '%*s' ${#prefix})
+
+    echo "$prefix [-h|--help] [-v|--version]"
+    echo "$paddin [-a] [-o prefix] [-d data-directory]"
+    echo "$paddin pid1 [pid2...pidN]"
+}
+
+function print_try_help() {
+    echo "Try '$0 --help' for more information."
+}
+
+function print_help() {
+    print_usage
+    echo
+    echo "Create a core file of a running program using GDB."
+    echo
+    echo "  -h, --help         Print this message then exit."
+    echo "  -v, --version      Print version information then exit."
+    echo "  -a                 Dump all memory mappings."
+    echo "  -o prefix          Use 'prefix.pid' as the core file name."
+    echo "                       The default prefix is 'core'."
+    echo "  -d dir             Pass '--data-directory dir' as an argument"
+    echo "                       to GDB."
+}
+
 function print_version() {
     echo "GNU gcore (${PKGVERSION}) ${VERSION}"
 }
 
-while getopts :vao:d:-: OPT; do
+while getopts vhao:d:-: OPT; do
     if [ "$OPT" = "-" ]; then
 	OPT="${OPTARG%%=*}"
 	OPTARG="${OPTARG#'$OPT'}"
@@ -58,13 +85,26 @@ while getopts :vao:d:-: OPT; do
         d)
             data_directory_opt=("--data-directory" "$OPTARG")
             ;;
+	h | help)
+	    print_help
+	    exit 0
+	    ;;
 	v | version)
 	    print_version
 	    exit 0
 	    ;;
+	\?)
+	    # getopts has already output an error message.
+	    print_try_help 1>&2
+	    exit 2
+	    ;;
         *)
-            echo "usage:  @GCORE_TRANSFORM_NAME@ [-v | --version] [-a] [-o prefix] [-d data-directory] pid1 [pid2...pidN]"
-            exit 2
+	    # Unknown single character options are handled by the \?
+	    # case above.  This is formatted to match the error
+	    # getopts gives for an unknown single character option.
+	    echo "$0: illegal option -- $OPT" 1>&2
+	    print_try_help 1>&2
+	    exit 2
             ;;
     esac
 done
@@ -73,8 +113,8 @@ shift $((OPTIND-1))
 
 if [ "$#" -eq "0" ]
 then
-    echo "usage:  @GCORE_TRANSFORM_NAME@ [-a] [-o prefix] [-d data-directory] pid1 [pid2...pidN]"
-    exit 2
+    print_usage 1>&2
+    exit 1
 fi
 
 # Attempt to fetch the absolute path to the gcore script that was

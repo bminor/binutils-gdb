@@ -51391,7 +51391,7 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 
 @format
 @c man begin SYNOPSIS gcore
-gcore [-v | --version] [-a] [-o @var{prefix}] [-d @var{directory}]
+gcore [-v | --version] [-h | --help] [-a] [-o @var{prefix}] [-d @var{directory}]
       @var{pid1} [@var{pid2}...@var{pidN}]
 @c man end
 @end format
@@ -51424,6 +51424,10 @@ If not specified, @var{prefix} defaults to @var{gcore}.
 @item -d @var{directory}
 Use @var{directory} as the data directory when invoking @value{GDBN} for running
 the gcore command. This argument is optional.
+
+@item --help
+@itemx -h
+List all options, with brief explanations.
 
 @item --version
 @itemx -v
