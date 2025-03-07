@@ -2247,7 +2247,7 @@ lex_got (enum bfd_reloc_code_real *reloc,
   unsigned int j;
 
   for (cp = input_line_pointer; *cp != '@'; cp++)
-    if (is_end_of_line[(unsigned char) *cp])
+    if (is_end_of_stmt (*cp))
       return NULL;
 
   for (j = 0; j < sizeof (gotrel) / sizeof (gotrel[0]); j++)
@@ -2332,17 +2332,17 @@ parse_fexp (char *s, expressionS *e, unsigned char isdouble, uint64_t *dbnum)
   know (length <= 8);
   know (err != NULL || length > 0);
 
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     as_bad (_("immediate operand required"));
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     input_line_pointer++;
 
   if (err)
     {
       as_bad (_("bad floating literal: %s"), err);
-      while (!is_end_of_line[(unsigned char) *input_line_pointer])
+      while (!is_end_of_stmt (*input_line_pointer))
 	input_line_pointer++;
-      know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
+      know (is_end_of_stmt (input_line_pointer[-1]));
       return input_line_pointer;
     }
 
@@ -3278,14 +3278,14 @@ csky_count_operands (char *str)
   unsigned int oprnd_num;
   int bracket_cnt = 0;
 
-  if (is_end_of_line[(unsigned char) *oper_end])
+  if (is_end_of_stmt (*oper_end))
     oprnd_num = 0;
   else
     oprnd_num = 1;
 
   /* Count how many operands.  */
   if (oprnd_num)
-    while (!is_end_of_line[(unsigned char) *oper_end])
+    while (!is_end_of_stmt (*oper_end))
       {
 	if (*oper_end == '(' || *oper_end == '<')
 	  {
@@ -4353,7 +4353,7 @@ parse_operands_op (char *str, struct csky_opcode_info *op)
 		  break;
 		}
 	    }
-	  else if (!is_end_of_line[(unsigned char) *oper])
+	  else if (!is_end_of_stmt (*oper))
 	    {
 	      SET_ERROR_STRING (ERROR_BAD_END, NULL);
 	      flag_pass = false;
