@@ -298,7 +298,7 @@ integer_constant (int radix, expressionS *expressionP)
 #define valuesize 32
 #endif
 
-  if (is_end_of_line[(unsigned char) *input_line_pointer])
+  if (is_end_of_stmt (*input_line_pointer))
     {
       expressionP->X_op = O_absent;
       return;
@@ -803,7 +803,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
   SKIP_WHITESPACE ();		/* Leading whitespace is part of operand.  */
   c = *input_line_pointer++;	/* input_line_pointer -> past char in c.  */
 
-  if (is_end_of_line[(unsigned char) c])
+  if (is_end_of_stmt (c))
     goto eol;
 
   switch (c)
@@ -946,7 +946,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      /* If it says "0f" and it could possibly be a floating point
 		 number, make it one.  Otherwise, make it a local label,
 		 and try to deal with parsing the rest later.  */
-	      if (!is_end_of_line[(unsigned char) input_line_pointer[1]]
+	      if (!is_end_of_stmt (input_line_pointer[1])
 		  && strchr (FLT_CHARS, 'f') != NULL)
 		{
 		  char *cp = input_line_pointer + 1;
@@ -1668,7 +1668,7 @@ operatorf (int *num_chars)
   c = *input_line_pointer & 0xff;
   *num_chars = 1;
 
-  if (is_end_of_line[c])
+  if (is_end_of_stmt (c))
     return O_illegal;
 
 #ifdef md_operator

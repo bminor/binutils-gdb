@@ -888,7 +888,7 @@ tokenize_arguments (char *str,
 
 #ifdef RELOC_OP_P
   /* ??? Wrest control of ! away from the regular expression parser.  */
-  is_end_of_line[(unsigned char) '!'] = 1;
+  lex_type[(unsigned char) '!'] |= LEX_EOS;
 #endif
 
   while (tok < end_tok && *input_line_pointer)
@@ -1029,21 +1029,21 @@ tokenize_arguments (char *str,
   debug_exp (orig_tok, ntok - (end_tok - tok));
 #endif
 #ifdef RELOC_OP_P
-  is_end_of_line[(unsigned char) '!'] = 0;
+  lex_type[(unsigned char) '!'] &= ~LEX_EOS;
 #endif
 
   return ntok - (end_tok - tok);
 
  err:
 #ifdef RELOC_OP_P
-  is_end_of_line[(unsigned char) '!'] = 0;
+  lex_type[(unsigned char) '!'] &= ~LEX_EOS;
 #endif
   input_line_pointer = old_input_line_pointer;
   return TOKENIZE_ERROR;
 
 #ifdef RELOC_OP_P
  err_report:
-  is_end_of_line[(unsigned char) '!'] = 0;
+  lex_type[(unsigned char) '!'] &= ~LEX_EOS;
 #endif
   input_line_pointer = old_input_line_pointer;
   return TOKENIZE_ERROR_REPORT;

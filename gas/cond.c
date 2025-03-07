@@ -141,7 +141,7 @@ s_if (int arg)
   if (current_cframe != NULL && current_cframe->ignoring)
     {
       operand.X_add_number = 0;
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
   else
@@ -201,7 +201,7 @@ s_ifb (int test_blank)
       int is_eol;
 
       SKIP_WHITESPACE ();
-      is_eol = is_end_of_line[(unsigned char) *input_line_pointer];
+      is_eol = is_end_of_stmt (*input_line_pointer);
       cframe.ignoring = (test_blank == !is_eol);
     }
 
@@ -232,7 +232,7 @@ get_mri_string (int terminator, int *len)
     {
       ++s;
       ++input_line_pointer;
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	{
 	  *s++ = *input_line_pointer++;
 	  if (s[-1] == '\'')
@@ -247,7 +247,7 @@ get_mri_string (int terminator, int *len)
   else
     {
       while (*input_line_pointer != terminator
-	     && ! is_end_of_line[(unsigned char) *input_line_pointer])
+	     && ! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
       s = input_line_pointer;
       while (s > ret && is_whitespace (s[-1]))
@@ -330,7 +330,7 @@ s_elseif (int arg)
 
   if (current_cframe == NULL || current_cframe->ignoring)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
 
       if (current_cframe == NULL)
@@ -401,7 +401,7 @@ s_endif (int arg ATTRIBUTE_UNUSED)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -448,7 +448,7 @@ s_else (int arg ATTRIBUTE_UNUSED)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 

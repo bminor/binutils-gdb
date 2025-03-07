@@ -362,8 +362,7 @@ listing_newline (char *ps)
 	  int seen_slash = 0;
 
 	  for (copy = input_line_pointer;
-	       *copy && (seen_quote
-			 || is_end_of_line [(unsigned char) *copy] != 1);
+	       seen_quote ? *copy : !is_end_of_line (*copy);
 	       copy++)
 	    {
 	      if (seen_slash)
@@ -1580,7 +1579,7 @@ listing_title (int depth)
     {
       if (quoted
 	  ? *input_line_pointer == '\"'
-	  : is_end_of_line[(unsigned char) *input_line_pointer])
+	  : is_end_of_stmt (*input_line_pointer))
 	{
 	  if (listing)
 	    {

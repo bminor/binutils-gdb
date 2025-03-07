@@ -41,6 +41,8 @@ extern bool input_from_string;
 #define LEX_BEGIN_NAME	(2)	/* may begin a name */
 #define LEX_END_NAME	(4)	/* ends a name */
 #define LEX_WHITE	(8)	/* whitespace */
+#define LEX_EOS	(0x10)  /* end of statement */
+#define LEX_EOL	(0x20)  /* end of line */
 
 #define is_name_beginner(c) \
   ( lex_type[(unsigned char) (c)] & LEX_BEGIN_NAME )
@@ -56,12 +58,11 @@ extern bool input_from_string;
 #undef ISBLANK
 
 /* The distinction of "line" and "statement" sadly is blurred by unhelpful
-   naming of e.g. the underlying array.  Most users really mean "end of
-   statement".  Going forward only these wrappers are supposed to be used.  */
+   naming in a few places.  Most users really mean "end of statement".  */
 #define is_end_of_stmt(c) \
-  (is_end_of_line[(unsigned char) (c)])
+  ( lex_type[(unsigned char) (c)] & (LEX_EOS | LEX_EOL) )
 #define is_end_of_line(c) \
-  (is_end_of_line[(unsigned char) (c)] == 1)
+  ( lex_type[(unsigned char) (c)] & LEX_EOL )
 
 #ifndef is_a_char
 #define CHAR_MASK	(0xff)
@@ -70,7 +71,6 @@ extern bool input_from_string;
 #endif /* is_a_char() */
 
 extern char lex_type[];
-extern char is_end_of_line[];
 
 extern int is_it_end_of_statement (void);
 extern char *find_end_of_line (char *, int);

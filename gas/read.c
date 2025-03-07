@@ -79,7 +79,7 @@ die horribly;
 #ifndef CR_EOL
 #define LEX_CR LEX_WHITE
 #else
-#define LEX_CR 0
+#define LEX_CR LEX_EOL
 #endif
 
 #ifndef LEX_AT
@@ -118,7 +118,7 @@ die horribly;
 
 /* Used by is_... macros. our ctype[].  */
 char lex_type[256] = {
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, LEX_CR, 0, 0,	/* @ABCDEFGHIJKLMNO */
+  0x20, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0x20, 0, 0, LEX_CR, 0, 0, /* @ABCDEFGHIJKLMNO */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
   8, 0, 0, LEX_HASH, LEX_DOLLAR, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, /* _!"#$%&'()*+,-./ */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, LEX_QM,	/* 0123456789:;<=>? */
@@ -134,32 +134,6 @@ char lex_type[256] = {
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3
-};
-
-/* In: a character.
-   Out: 1 if this character ends a line.
-	2 if this character is a line separator.  */
-char is_end_of_line[256] = {
-#ifdef CR_EOL
-  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0,	/* @abcdefghijklmno */
-#else
-  1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,	/* @abcdefghijklmno */
-#endif
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* _!"#$%&'()*+,-./ */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* 0123456789:;<=>? */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* */
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0	/* */
 };
 
 #ifndef TC_CASE_SENSITIVE
@@ -290,8 +264,7 @@ read_begin (void)
 #endif
   /* Use machine dependent syntax.  */
   for (p = tc_line_separator_chars; *p; p++)
-    is_end_of_line[(unsigned char) *p] = 2;
-  /* Use more.  FIXME-SOMEDAY.  */
+    lex_type[(unsigned char) *p] = LEX_EOS;
 
   if (flag_mri)
     lex_type['?'] = LEX_BEGIN_NAME | LEX_NAME;
@@ -944,7 +917,8 @@ read_a_source_file (const char *name)
 	  /* We now have input_line_pointer->1st char of next line.
 	     If input_line_pointer [-1] == '\n' then we just
 	     scanned another line: so bump line counters.  */
-	  was_new_line = is_end_of_line[(unsigned char) input_line_pointer[-1]];
+	  was_new_line = lex_type[(unsigned char) input_line_pointer[-1]]
+			 & (LEX_EOL | LEX_EOS);
 	  if (was_new_line)
 	    {
 	      symbol_set_value_now (&dot_symbol);
@@ -993,7 +967,7 @@ read_a_source_file (const char *name)
 #endif
 
 	  next_char = *input_line_pointer;
-	  if (was_new_line == 1
+	  if ((was_new_line & LEX_EOL)
              && (strchr (line_comment_chars, '#')
 		  ? next_char == '#'
 		  : next_char && strchr (line_comment_chars, next_char)))
@@ -1087,7 +1061,7 @@ read_a_source_file (const char *name)
 			    }
 			  if (strncasecmp (rest, "MACRO", 5) == 0
 			      && (is_whitespace (rest[5])
-				  || is_end_of_line[(unsigned char) rest[5]]))
+				  || is_end_of_stmt (rest[5])))
 			    mri_line_macro = 1;
 			}
 
@@ -1343,7 +1317,7 @@ read_a_source_file (const char *name)
 	    }
 
 	  /* Empty statement?  */
-	  if (is_end_of_line[(unsigned char) next_char])
+	  if (is_end_of_stmt (next_char))
 	    continue;
 
 	  if ((LOCAL_LABELS_DOLLAR || LOCAL_LABELS_FB) && ISDIGIT (next_char))
@@ -1502,7 +1476,7 @@ mri_comment_field (char *stopcp)
   know (flag_m68k_mri);
 
   for (s = input_line_pointer;
-       ((!is_end_of_line[(unsigned char) *s] && !is_whitespace (*s))
+       ((!is_end_of_stmt (*s) && !is_whitespace (*s))
 	|| inquote);
        s++)
     {
@@ -1511,7 +1485,7 @@ mri_comment_field (char *stopcp)
     }
 #else
   for (s = input_line_pointer;
-       !is_end_of_line[(unsigned char) *s];
+       !is_end_of_stmt (*s);
        s++)
     ;
 #endif
@@ -1530,7 +1504,7 @@ mri_comment_end (char *stop, int stopc)
 
   input_line_pointer = stop;
   *stop = stopc;
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     ++input_line_pointer;
 }
 
@@ -1562,7 +1536,7 @@ s_align (signed int arg, int bytes_p)
   if (flag_mri)
     stop = mri_comment_field (&stopc);
 
-  if (is_end_of_line[(unsigned char) *input_line_pointer])
+  if (is_end_of_stmt (*input_line_pointer))
     {
       if (arg < 0)
 	align = 0;
@@ -2038,7 +2012,7 @@ s_file (int ignore ATTRIBUTE_UNUSED)
 	 backquote.  */
       if (flag_m68k_mri
 	  && *input_line_pointer == '\''
-	  && is_end_of_line[(unsigned char) input_line_pointer[1]])
+	  && is_end_of_stmt (input_line_pointer[1]))
 	++input_line_pointer;
 
       demand_empty_rest_of_line ();
@@ -2161,7 +2135,7 @@ s_linefile (int ignore ATTRIBUTE_UNUSED)
 		break;
 	      }
 
-	  if (!is_end_of_line[(unsigned char)*input_line_pointer])
+	  if (!is_end_of_stmt (*input_line_pointer))
 	    file = NULL;
         }
 
@@ -2196,7 +2170,7 @@ s_end (int ignore ATTRIBUTE_UNUSED)
       /* The MRI assembler permits the start symbol to follow .end,
 	 but we don't support that.  */
       SKIP_WHITESPACE ();
-      if (!is_end_of_line[(unsigned char) *input_line_pointer]
+      if (!is_end_of_stmt (*input_line_pointer)
 	  && *input_line_pointer != '*'
 	  && *input_line_pointer != '!')
 	as_warn (_("start address not supported"));
@@ -2425,7 +2399,7 @@ s_globl (int ignore ATTRIBUTE_UNUSED)
 	{
 	  input_line_pointer++;
 	  SKIP_WHITESPACE ();
-	  if (is_end_of_line[(unsigned char) *input_line_pointer])
+	  if (is_end_of_stmt (*input_line_pointer))
 	    c = '\n';
 	}
 
@@ -2485,7 +2459,7 @@ s_linkonce (int ignore ATTRIBUTE_UNUSED)
 
   type = LINKONCE_DISCARD;
 
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       char *s;
       char c;
@@ -4016,7 +3990,7 @@ demand_empty_rest_of_line (void)
   SKIP_WHITESPACE ();
   if (input_line_pointer > buffer_limit)
     return;
-  if (is_end_of_line[(unsigned char) *input_line_pointer])
+  if (is_end_of_stmt (*input_line_pointer))
     input_line_pointer++;
   else
     {
@@ -5784,7 +5758,7 @@ s_base64 (int dummy ATTRIBUTE_UNUSED)
       	{
 	  c = * input_line_pointer ++;
 
-	  if (c >= 256 || is_end_of_line [c])
+	  if (c >= 256 || is_end_of_stmt (c))
 	    {
 	      as_bad (_("end of line encountered inside .base64 string"));
 	      ignore_rest_of_line ();
@@ -6311,7 +6285,7 @@ int
 is_it_end_of_statement (void)
 {
   SKIP_WHITESPACE ();
-  return (is_end_of_line[(unsigned char) *input_line_pointer]);
+  return is_end_of_stmt (*input_line_pointer);
 }
 
 void
@@ -6499,7 +6473,7 @@ s_include (int arg ATTRIBUTE_UNUSED)
     {
       SKIP_WHITESPACE ();
       i = 0;
-      while (!is_end_of_line[(unsigned char) *input_line_pointer]
+      while (!is_end_of_stmt (*input_line_pointer)
 	     && !is_whitespace (*input_line_pointer))
 	{
 	  obstack_1grow (&notes, *input_line_pointer);
@@ -6509,7 +6483,7 @@ s_include (int arg ATTRIBUTE_UNUSED)
 
       obstack_1grow (&notes, '\0');
       filename = (char *) obstack_finish (&notes);
-      while (!is_end_of_line[(unsigned char) *input_line_pointer])
+      while (!is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -6795,7 +6769,7 @@ _find_end_of_line (char *s, int mri_string, int insn ATTRIBUTE_UNUSED,
   char inquote = '\0';
   int inescape = 0;
 
-  while (!is_end_of_line[(unsigned char) *s]
+  while (!is_end_of_stmt (*s)
 	 || (inquote && !ISCNTRL (*s))
 	 || (inquote == '\'' && flag_mri)
 #ifdef TC_EOL_IN_INSN
@@ -6804,7 +6778,7 @@ _find_end_of_line (char *s, int mri_string, int insn ATTRIBUTE_UNUSED,
 	 /* PR 6926:  When we are parsing the body of a macro the sequence
 	    \@ is special - it refers to the invocation count.  If the @
 	    character happens to be registered as a line-separator character
-	    by the target, then the is_end_of_line[] test above will have
+	    by the target, then the is_end_of_stmt() test above will have
 	    returned true, but we need to ignore the line separating
 	    semantics in this particular case.  */
 	 || (in_macro && inescape && *s == '@')
