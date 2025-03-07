@@ -846,7 +846,7 @@ tic6x_unrecognized_line (int c)
 	 If it looks like one but not a valid one, give a better
 	 error.  */
       p = input_line_pointer;
-      while (*p != ']' && !is_end_of_line[(unsigned char) *p])
+      while (*p != ']' && !is_end_of_stmt (*p))
 	p++;
       if (*p != ']')
 	return 0;
@@ -1329,7 +1329,7 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
 	  char *rq = q + 2;
 
 	  skip_whitespace (rq);
-	  if (is_end_of_line[(unsigned char) *rq] || *rq == ',')
+	  if (is_end_of_stmt (*rq) || *rq == ',')
 	    {
 	      op->form = TIC6X_OP_FUNC_UNIT;
 	      op->value.func_unit.base = base;
@@ -1350,7 +1350,7 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
 	  char *rq = q + 3;
 
 	  skip_whitespace (rq);
-	  if (is_end_of_line[(unsigned char) *rq] || *rq == ',')
+	  if (is_end_of_stmt (*rq) || *rq == ',')
 	    {
 	      op->form = TIC6X_OP_IRP;
 	      operand_parsed = true;
@@ -1369,7 +1369,7 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
 	  char *rq = q + 3;
 
 	  skip_whitespace (rq);
-	  if (is_end_of_line[(unsigned char) *rq] || *rq == ',')
+	  if (is_end_of_stmt (*rq) || *rq == ',')
 	    {
 	      op->form = TIC6X_OP_NRP;
 	      operand_parsed = true;
@@ -1392,7 +1392,7 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
 	      char *rq = q + len;
 
 	      skip_whitespace (rq);
-	      if (is_end_of_line[(unsigned char) *rq] || *rq == ',')
+	      if (is_end_of_stmt (*rq) || *rq == ',')
 		{
 		  op->form = TIC6X_OP_CTRL;
 		  op->value.ctrl = crid;
@@ -1560,7 +1560,7 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
       if (mem_ok)
 	{
 	  skip_whitespace (mq);
-	  if (!is_end_of_line[(unsigned char) *mq] && *mq != ',')
+	  if (!is_end_of_stmt (*mq) && *mq != ',')
 	    mem_ok = false;
 	}
 
@@ -1604,7 +1604,7 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
 	      if (reg_ok)
 		{
 		  skip_whitespace (rq);
-		  if (is_end_of_line[(unsigned char) *rq] || *rq == ',')
+		  if (is_end_of_stmt (*rq) || *rq == ',')
 		    {
 		      if ((second_reg.num & 1)
 			  || (first_reg.num != second_reg.num + 1)
@@ -1622,7 +1622,7 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
 	  else if (op_forms & TIC6X_OP_REG)
 	    {
 	      skip_whitespace (rq);
-	      if (is_end_of_line[(unsigned char) *rq] || *rq == ',')
+	      if (is_end_of_stmt (*rq) || *rq == ',')
 		{
 		  op->form = TIC6X_OP_REG;
 		  op->value.reg = first_reg;
@@ -1662,12 +1662,12 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
       /* Now the operand has been parsed, there must be nothing more
 	 before the comma or end of line.  */
       skip_whitespace (q);
-      if (!is_end_of_line[(unsigned char) *q] && *q != ',')
+      if (!is_end_of_stmt (*q) && *q != ',')
 	{
 	  operand_parsed = false;
 	  as_bad (_("junk after operand %u of '%.*s'"), opno,
 		  opc_len, str);
-	  while (!is_end_of_line[(unsigned char) *q] && *q != ',')
+	  while (!is_end_of_stmt (*q) && *q != ',')
 	    q++;
 	}
     }
@@ -1704,7 +1704,7 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
 	  break;
 
 	}
-      while (!is_end_of_line[(unsigned char) *q] && *q != ',')
+      while (!is_end_of_stmt (*q) && *q != ',')
 	q++;
     }
   *p = q;
@@ -3357,7 +3357,7 @@ md_assemble (char *str)
   while (true)
     {
       skip_whitespace (p);
-      if (is_end_of_line[(unsigned char) *p])
+      if (is_end_of_stmt (*p))
 	{
 	  if (num_operands_read > 0)
 	    {
@@ -3380,7 +3380,7 @@ md_assemble (char *str)
 	bad_operands = true;
       num_operands_read++;
 
-      if (is_end_of_line[(unsigned char) *p])
+      if (is_end_of_stmt (*p))
 	break;
       else if (*p == ',')
 	{
