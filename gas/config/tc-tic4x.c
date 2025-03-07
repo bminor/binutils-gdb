@@ -1010,7 +1010,7 @@ tic4x_sect (int x ATTRIBUTE_UNUSED)
      recognised and scanning extends into the next line, stopping with
      an error (blame Volker Kuhlmann <v.kuhlmann@elec.canterbury.ac.nz>
      if this is not true).  */
-  if (is_end_of_line[(unsigned char) c])
+  if (is_end_of_stmt (c))
     *(--input_line_pointer) = c;
 
   demand_empty_rest_of_line ();
