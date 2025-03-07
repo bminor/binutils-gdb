@@ -50,6 +50,7 @@
 #include "osabi.h"
 #include "x86-tdep.h"
 #include "amd64-ravenscar-thread.h"
+#include "gdbsupport/selftest.h"
 
 /* Note that the AMD64 architecture was previously known as x86-64.
    The latter is (forever) engraved into the canonical system name as
@@ -1207,20 +1208,25 @@ amd64_skip_prefixes (gdb_byte *insn)
 }
 
 /* Return a register mask for the integer registers that are used as an input
-   operand in INSN.  */
+   operand in INSN.  If !ASSUMPTIONS, only return the registers we actually
+   found, for the benefit of self tests.  */
 
 static uint32_t
-amd64_get_used_input_int_regs (const struct amd64_insn *details)
+amd64_get_used_input_int_regs (const struct amd64_insn *details,
+			       bool assumptions = true)
 {
   /* 1 bit for each reg */
   uint32_t used_regs_mask = 0;
 
-  /* Assume RAX is used.  If not, we'd have to detect opcodes that implicitly
-     use RAX.  */
-  used_regs_mask |= 1 << EAX_REG_NUM;
-  /* Assume RDX is used.  If not, we'd have to detect opcodes that implicitly
-     use RDX, like divides.  */
-  used_regs_mask |= 1 << EDX_REG_NUM;
+  if (assumptions)
+    {
+      /* Assume RAX is used.  If not, we'd have to detect opcodes that implicitly
+	 use RAX.  */
+      used_regs_mask |= 1 << EAX_REG_NUM;
+      /* Assume RDX is used.  If not, we'd have to detect opcodes that implicitly
+	 use RDX, like divides.  */
+      used_regs_mask |= 1 << EDX_REG_NUM;
+    }
 
   /* If the opcode is one byte long and there's no ModRM byte,
      assume the opcode specifies a register.  */
@@ -3395,6 +3401,51 @@ amd64_target_description (uint64_t xcr0, bool segments)
   return *tdesc;
 }
 
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+/* Test amd64_get_insn_details.  */
+
+static void
+test_amd64_get_insn_details (void)
+{
+  struct amd64_insn details;
+  gdb::byte_vector insn;
+
+  /* INSN: add %eax,(%rcx).  */
+  insn = { 0x01, 0x01 };
+  amd64_get_insn_details (insn.data (), &details);
+  SELF_CHECK (details.opcode_len == 1);
+  SELF_CHECK (details.enc_prefix_offset == -1);
+  SELF_CHECK (details.opcode_offset == 0);
+  SELF_CHECK (details.modrm_offset == 1);
+  SELF_CHECK (amd64_get_used_input_int_regs (&details, false)
+	      == ((1 << EAX_REG_NUM) | (1 << ECX_REG_NUM)));
+  SELF_CHECK (rip_relative_offset (&details) == 0);
+
+  /* INSN: push %rax.  This exercises the "opcode specifies register" case in
+     amd64_get_used_input_int_regs.  */
+  insn = { 0x50 };
+  amd64_get_insn_details (insn.data (), &details);
+  SELF_CHECK (details.opcode_len == 1);
+  SELF_CHECK (details.enc_prefix_offset == -1);
+  SELF_CHECK (details.opcode_offset == 0);
+  SELF_CHECK (details.modrm_offset == -1);
+  SELF_CHECK (amd64_get_used_input_int_regs (&details, false)
+	      == ((1 << EAX_REG_NUM)));
+  SELF_CHECK (rip_relative_offset (&details) == 0);
+}
+
+static void
+amd64_insn_decode (void)
+{
+  test_amd64_get_insn_details ();
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 void _initialize_amd64_tdep ();
 void
 _initialize_amd64_tdep ()
@@ -3403,6 +3454,10 @@ _initialize_amd64_tdep ()
 			  amd64_none_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x64_32, GDB_OSABI_NONE,
 			  amd64_x32_none_init_abi);
+#if GDB_SELF_TEST
+  selftests::register_test ("amd64-insn-decode",
+			    selftests::amd64_insn_decode);
+#endif
 }
 
 
