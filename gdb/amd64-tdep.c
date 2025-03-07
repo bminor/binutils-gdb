@@ -1217,7 +1217,7 @@ static int
 amd64_get_unused_input_int_reg (const struct amd64_insn *details)
 {
   /* 1 bit for each reg */
-  int used_regs_mask = 0;
+  uint32_t used_regs_mask = 0;
 
   /* There can be at most 3 int regs used as inputs in an insn, and we have
      7 to choose from (RAX ... RDI, sans RSP).
@@ -1268,7 +1268,7 @@ amd64_get_unused_input_int_reg (const struct amd64_insn *details)
   {
     int i;
 
-    for (i = 0; i < 8; ++i)
+    for (i = 0; i < 32; ++i)
       {
 	if (! (used_regs_mask & (1 << i)))
 	  return i;
