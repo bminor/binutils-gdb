@@ -220,17 +220,6 @@ static FILE *list_file;
 
 static char *data_buffer;
 
-/* Prototypes.  */
-static void listing_message (const char *, const char *);
-static file_info_type *file_info (const char *);
-static void new_frag (void);
-static void listing_page (list_info_type *);
-static unsigned int calc_hex (list_info_type *);
-static void print_lines (list_info_type *, unsigned int, const char *,
-			 unsigned int);
-static void list_symbol_table (void);
-static void listing_listing (char *);
-
 static void
 listing_message (const char *name, const char *message)
 {
