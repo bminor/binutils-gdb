@@ -1206,13 +1206,11 @@ amd64_skip_prefixes (gdb_byte *insn)
   return insn;
 }
 
-/* Return an integer register in ALLOWED_REGS_MASK that is unused as an input
-   operand in INSN.  The register numbering of the result follows architecture
-   ordering, e.g. RDI = 7.  Return -1 if no register can be found.  */
+/* Return a register mask for the integer registers that are used as an input
+   operand in INSN.  */
 
-static int
-amd64_get_unused_input_int_reg (const struct amd64_insn *details,
-				uint32_t allowed_regs_mask)
+static uint32_t
+amd64_get_used_input_int_regs (const struct amd64_insn *details)
 {
   /* 1 bit for each reg */
   uint32_t used_regs_mask = 0;
@@ -1255,6 +1253,19 @@ amd64_get_unused_input_int_reg (const struct amd64_insn *details,
     }
 
   gdb_assert (used_regs_mask < 256);
+  return used_regs_mask;
+}
+
+/* Return an integer register in ALLOWED_REGS_MASK that is unused as an input
+   operand in INSN.  The register numbering of the result follows architecture
+   ordering, e.g. RDI = 7.  Return -1 if no register can be found.  */
+
+static int
+amd64_get_unused_input_int_reg (const struct amd64_insn *details,
+				uint32_t allowed_regs_mask)
+{
+  /* 1 bit for each reg */
+  uint32_t used_regs_mask = amd64_get_used_input_int_regs (details);
 
   /* Finally, find a free reg.  */
   {
