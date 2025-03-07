@@ -264,7 +264,7 @@ elf_common_parse (int ignore ATTRIBUTE_UNUSED, symbolS *symbolP, addressT size)
 
 	      while (*--p != '"')
 		;
-	      while (!is_end_of_line[(unsigned char) *input_line_pointer])
+	      while (!is_end_of_stmt (*input_line_pointer))
 		if (*input_line_pointer++ == '"')
 		  break;
 	      c = *input_line_pointer;
@@ -1324,7 +1324,7 @@ obj_elf_section (int push)
 		  && (bfd_section_flags (now_seg)
 		      & (SEC_MERGE | SEC_STRINGS)) != 0)
 		goto fetch_entsize;
-	      if (is_end_of_line[(unsigned char) *input_line_pointer])
+	      if (is_end_of_stmt (*input_line_pointer))
 		{
 		  /* ??? This is here for older versions of gcc that
 		     test for gas string merge support with
