@@ -3668,7 +3668,7 @@ tc_start_label_without_colon (void)
     {
       const char *label = input_line_pointer;
 
-      while (!is_end_of_line[(int) label[-1]])
+      while (!is_end_of_stmt (label[-1]))
 	--label;
 
       if (*label == '.')
