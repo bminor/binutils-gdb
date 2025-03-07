@@ -105,7 +105,7 @@ collect_16char_name (char *dest, const char *msg, int require_comma)
   namstart = input_line_pointer;
 
   while ( (c = *input_line_pointer) != ','
-	 && !is_end_of_line[(unsigned char) c])
+	 && !is_end_of_stmt (c))
     input_line_pointer++;
 
   {
@@ -325,7 +325,7 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
       SKIP_WHITESPACE ();
       p = input_line_pointer;
       while ((c = *input_line_pointer) != ','
-	      && !is_end_of_line[(unsigned char) c])
+	      && !is_end_of_stmt (c))
 	input_line_pointer++;
 
       len = input_line_pointer - p;
@@ -364,7 +364,7 @@ obj_mach_o_section (int ignore ATTRIBUTE_UNUSED)
 	      p = input_line_pointer;
 	      while ((c = *input_line_pointer) != '+'
 		      && c != ','
-		      && !is_end_of_line[(unsigned char) c])
+		      && !is_end_of_stmt (c))
 		input_line_pointer++;
 
 	      len = input_line_pointer - p;
@@ -1135,7 +1135,7 @@ obj_mach_o_sym_qual (int ntype)
 	{
 	  input_line_pointer++;
 	  SKIP_WHITESPACE ();
-	  if (is_end_of_line[(unsigned char) *input_line_pointer])
+	  if (is_end_of_stmt (*input_line_pointer))
 	    c = '\n';
 	}
     }
