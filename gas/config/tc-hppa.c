@@ -2420,14 +2420,14 @@ pa_chk_field_selector (char **str)
     s++;
   *str = s;
 
-  if (is_end_of_line [(unsigned char) s[0]])
+  if (is_end_of_stmt (s[0]))
     return e_fsel;
   else if (s[1] == '\'' || s[1] == '%')
     {
       name[0] = TOLOWER (s[0]);
       name[1] = 0;
     }
-  else if (is_end_of_line [(unsigned char) s[1]])
+  else if (is_end_of_stmt (s[1]))
     return e_fsel;
   else if (s[2] == '\'' || s[2] == '%')
     {
@@ -2435,7 +2435,7 @@ pa_chk_field_selector (char **str)
       name[1] = TOLOWER (s[1]);
       name[2] = 0;
     }
-  else if (is_end_of_line [(unsigned char) s[2]])
+  else if (is_end_of_stmt (s[2]))
     return e_fsel;
   else if (s[3] == '\'' || s[3] == '%')
     {
