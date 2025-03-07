@@ -4111,6 +4111,8 @@ pseudo_set (symbolS *symbolP)
 
     case O_symbol:
       seg = S_GET_SEGMENT (exp.X_add_symbol);
+      if (seg == expr_section)
+	goto expr;
       /* For x=undef+const, create an expression symbol.
 	 For x=x+const, just update x except when x is an undefined symbol
 	 For x=defined+const, evaluate x.  */
@@ -4142,6 +4144,7 @@ pseudo_set (symbolS *symbolP)
       break;
 
     default:
+    expr:
       /* The value is some complex expression.  */
       S_SET_SEGMENT (symbolP, expr_section);
       symbol_set_value_expression (symbolP, &exp);

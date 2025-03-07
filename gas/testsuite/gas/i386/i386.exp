@@ -848,6 +848,9 @@ run_list_test "unspec" ""
 run_dump_test "fp"
 run_dump_test "cond"
 run_dump_test pr30248
+if {![is_aout_format]} then {
+    run_list_test pr32721 ""
+}
 if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
     run_list_test_stdin "list-1" "-al"
     run_list_test_stdin "list-2" "-al"

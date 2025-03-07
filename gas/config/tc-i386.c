@@ -16847,9 +16847,9 @@ parse_register (const char *reg_string, char **end_op)
 	{
 	  const expressionS *e = symbol_get_value_expression (symbolP);
 
-	  if (e->X_op == O_register
-	      && (valueT) e->X_add_number < i386_regtab_size)
+	  if (e->X_op == O_register)
 	    {
+	      know ((valueT) e->X_add_number < i386_regtab_size);
 	      r = i386_regtab + e->X_add_number;
 	      *end_op = (char *) reg_string + (input_line_pointer - buf);
 	    }
