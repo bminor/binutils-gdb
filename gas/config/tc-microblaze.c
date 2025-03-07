@@ -318,7 +318,7 @@ microblaze_s_weakext (int ignore ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
 
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       if (S_IS_DEFINED (symbolP))
 	{
@@ -680,7 +680,7 @@ parse_imm (char * s, expressionS * e, offsetT min, offsetT max)
 
   /* Find the start of "@GOT" or "@PLT" suffix (if any) */
   for (atp = s; *atp != '@'; atp++)
-    if (is_end_of_line[(unsigned char) *atp])
+    if (is_end_of_stmt (*atp))
       break;
 
   if (*atp == '@')
@@ -754,7 +754,7 @@ check_got (int * got_type, int * got_len)
 
   /* Find the start of "@GOT" or "@PLT" suffix (if any).  */
   for (atp = input_line_pointer; *atp != '@'; atp++)
-    if (is_end_of_line[(unsigned char) *atp])
+    if (is_end_of_stmt (*atp))
       return NULL;
 
   if (startswith (atp + 1, "GOTOFF"))
@@ -781,7 +781,7 @@ check_got (int * got_type, int * got_len)
   first = atp - input_line_pointer;
 
   past_got = atp + *got_len + 1;
-  for (new_pointer = past_got; !is_end_of_line[(unsigned char) *new_pointer++];)
+  for (new_pointer = past_got; !is_end_of_stmt (*new_pointer++); )
     ;
   second = new_pointer - past_got;
   /* One extra byte for ' ' and one for NUL.  */
