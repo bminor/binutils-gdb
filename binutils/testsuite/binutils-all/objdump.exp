@@ -263,6 +263,7 @@ if { ![istarget "*-*-aix*"]
      && [file normalize "$LD"] == [file normalize "$objdir/../ld/ld-new"]} then {
     run_dump_test multi-1
     run_dump_test multi-2
+    run_dump_test multi-3
 }
 
 # Test objdump --disassemble=<symbol>

@@ -2432,11 +2432,11 @@ with ctags tool.
 Display the assembler mnemonics for the machine instructions from the
 input file.  This option only disassembles those sections which are 
 expected to contain instructions.  If the optional @var{symbol}
-argument is given, then display the assembler mnemonics starting at
-@var{symbol}.  If @var{symbol} is a function name then disassembly
-will stop at the end of the function, otherwise it will stop when the
-next symbol is encountered.  If there are no matches for @var{symbol}
-then nothing will be displayed.
+argument is given (perhaps multiple times), then display the assembler
+mnemonics starting at (all the) @var{symbol}.  If @var{symbol} is a
+function name then disassembly will stop at the end of the function,
+otherwise it will stop when the next symbol is encountered.  If there
+are no matches for any @var{symbol} then nothing will be displayed.
 
 Note if the @option{--dwarf=follow-links} option is enabled
 then any symbol tables in linked debug info files will be read in and

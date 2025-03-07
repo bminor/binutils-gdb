@@ -132,7 +132,6 @@ static const char *prefix;		/* --prefix */
 static int prefix_strip;		/* --prefix-strip */
 static size_t prefix_length;
 static bool unwind_inlines;		/* --inlines.  */
-static const char * disasm_sym;		/* Disassembly start symbol.  */
 static const char * source_comment;     /* --source_comment.  */
 static bool visualize_jumps = false;	/* --visualize-jumps.  */
 static bool color_output = false;	/* --visualize-jumps=color.  */
@@ -140,6 +139,12 @@ static bool extended_color_output = false; /* --visualize-jumps=extended-color. 
 static int process_links = false;       /* --process-links.  */
 static int show_all_symbols;            /* --show-all-symbols.  */
 static bool decompressed_dumps = false; /* -Z, --decompress.  */
+
+static struct symbol_entry
+  {
+    const char *name;
+    struct symbol_entry *next;
+  } *disasm_sym_list;			/* Disassembly start symbol(s).  */
 
 static enum color_selection
   {
@@ -187,7 +192,7 @@ struct objdump_disasm_info
   bool require_sec;
   disassembler_ftype disassemble_fn;
   arelent *reloc;
-  const char *symbol;
+  struct symbol_entry *symbol_list;
 };
 
 /* Architecture to disassemble for, or default if NULL.  */
@@ -3898,7 +3903,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
      the symbol we have just found.  Then print the symbol and find the
      next symbol on.  Repeat until we have disassembled the entire section
      or we have reached the end of the address range we are interested in.  */
-  do_print = paux->symbol == NULL;
+  do_print = paux->symbol_list == NULL;
   loop_until = stop_offset_reached;
 
   while (addr_offset < stop_offset)
@@ -3938,9 +3943,9 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	  pinfo->symtab_pos = -1;
 	}
 
-      /* If we are only disassembling from a specific symbol,
+      /* If we are only disassembling from specific symbols,
 	 check to see if we should start or stop displaying.  */
-      if (sym && paux->symbol)
+      if (sym && paux->symbol_list)
 	{
 	  if (do_print)
 	    {
@@ -3977,8 +3982,16 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 		}
 
 	      /* We are not currently printing.  Check to see
-		 if the current symbol matches the requested symbol.  */
-	      if (streq (name, paux->symbol)
+		 if the current symbol matches any of the requested symbols.  */
+	      for (const struct symbol_entry *ent = paux->symbol_list;
+		   ent;
+		   ent = ent->next)
+		if (streq (name, ent->name))
+		  {
+		    do_print = true;
+		    break;
+		  }
+	      if (do_print
 		  && bfd_asymbol_value (sym) <= addr)
 		{
 		  do_print = true;
@@ -4175,7 +4188,7 @@ disassemble_data (bfd *abfd)
   disasm_info.dynrelbuf = NULL;
   disasm_info.dynrelcount = 0;
   aux.reloc = NULL;
-  aux.symbol = disasm_sym;
+  aux.symbol_list = disasm_sym_list;
 
   disasm_info.print_address_func = objdump_print_address;
   disasm_info.symbol_at_address_func = objdump_symbol_at_address;
@@ -6229,7 +6242,14 @@ main (int argc, char **argv)
 	case 'd':
 	  disassemble = true;
 	  seenflag = true;
-	  disasm_sym = optarg;
+	  if (optarg)
+	    {
+	      struct symbol_entry *sym = xmalloc (sizeof (*sym));
+
+	      sym->name = optarg;
+	      sym->next = disasm_sym_list;
+	      disasm_sym_list = sym;
+	    }
 	  break;
 	case 'z':
 	  disassemble_zeroes = true;
