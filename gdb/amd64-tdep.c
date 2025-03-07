@@ -1328,8 +1328,7 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
     }
   else if (vex2_prefix_p (*insn))
     {
-      /* Don't record the offset in this case because this prefix has
-	 no REX.B equivalent.  */
+      details->enc_prefix_offset = insn - start;
       insn += 2;
     }
   else if (vex3_prefix_p (*insn))
@@ -1395,6 +1394,10 @@ fixup_riprel (const struct amd64_insn &details, gdb_byte *insn,
       gdb_byte *pfx = &insn[details.enc_prefix_offset];
       if (rex_prefix_p (pfx[0]))
 	pfx[0] &= ~REX_B;
+      else if (vex2_prefix_p (pfx[0]))
+	{
+	  /* VEX.!B is set implicitly.  */
+	}
       else if (vex3_prefix_p (pfx[0]))
 	pfx[1] |= VEX3_NOT_B;
       else
@@ -3519,7 +3522,7 @@ test_amd64_get_insn_details (void)
   vex2 = { 0xc5, 0xfc, 0x77 };
   amd64_get_insn_details (vex2.data (), &details);
   SELF_CHECK (details.opcode_len == 1);
-  SELF_CHECK (details.enc_prefix_offset == -1);
+  SELF_CHECK (details.enc_prefix_offset == 0);
   SELF_CHECK (details.opcode_offset == 2);
   SELF_CHECK (details.modrm_offset == -1);
 
@@ -3535,7 +3538,7 @@ test_amd64_get_insn_details (void)
   vex2 = { 0xc5, 0xf8, 0x77 };
   amd64_get_insn_details (vex2.data (), &details);
   SELF_CHECK (details.opcode_len == 1);
-  SELF_CHECK (details.enc_prefix_offset == -1);
+  SELF_CHECK (details.enc_prefix_offset == 0);
   SELF_CHECK (details.opcode_offset == 2);
   SELF_CHECK (details.modrm_offset == -1);
 
