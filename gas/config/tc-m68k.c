@@ -5772,7 +5772,7 @@ static void
 skip_to_comma (int arg ATTRIBUTE_UNUSED, int on ATTRIBUTE_UNUSED)
 {
   while (*input_line_pointer != ','
-	 && ! is_end_of_line[(unsigned char) *input_line_pointer])
+	 && ! is_end_of_stmt (*input_line_pointer))
     ++input_line_pointer;
 }
 
@@ -6507,7 +6507,7 @@ s_mri_if (int qual)
      This is important when assembling:
        if d0 <ne> 12(a0,d0*2) then
        if d0 <ne> #CONST*20   then.  */
-  while (! (is_end_of_line[(unsigned char) *s]
+  while (! (is_end_of_stmt (*s)
             || (flag_mri
                 && *s == '*'
                 && (s == input_line_pointer
@@ -6545,7 +6545,7 @@ s_mri_if (int qual)
   if (ignore_input ())
     {
       *input_line_pointer = c;
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
       demand_empty_rest_of_line ();
       return;
@@ -6564,7 +6564,7 @@ s_mri_if (int qual)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -6596,7 +6596,7 @@ s_mri_else (int qual)
   if (ignore_input ())
     {
       *input_line_pointer = c;
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
       demand_empty_rest_of_line ();
       return;
@@ -6625,7 +6625,7 @@ s_mri_else (int qual)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -6656,7 +6656,7 @@ s_mri_endi (int ignore ATTRIBUTE_UNUSED)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -6694,7 +6694,7 @@ s_mri_break (int extent)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -6732,7 +6732,7 @@ s_mri_next (int extent)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -6764,7 +6764,7 @@ s_mri_for (int qual)
   varstart = input_line_pointer;
 
   /* Look for the '='.  */
-  while (! is_end_of_line[(unsigned char) *input_line_pointer]
+  while (! is_end_of_stmt (*input_line_pointer)
 	 && *input_line_pointer != '=')
     ++input_line_pointer;
   if (*input_line_pointer != '=')
@@ -6786,7 +6786,7 @@ s_mri_for (int qual)
   /* Look for TO or DOWNTO.  */
   up = 1;
   initstop = NULL;
-  while (! is_end_of_line[(unsigned char) *input_line_pointer])
+  while (! is_end_of_stmt (*input_line_pointer))
     {
       if (strncasecmp (input_line_pointer, "TO", 2) == 0
 	  && ! is_part_of_name (input_line_pointer[2]))
@@ -6821,7 +6821,7 @@ s_mri_for (int qual)
   /* Look for BY or DO.  */
   by = 0;
   endstop = NULL;
-  while (! is_end_of_line[(unsigned char) *input_line_pointer])
+  while (! is_end_of_stmt (*input_line_pointer))
     {
       if (strncasecmp (input_line_pointer, "BY", 2) == 0
 	  && ! is_part_of_name (input_line_pointer[2]))
@@ -6863,7 +6863,7 @@ s_mri_for (int qual)
 
       /* Look for DO.  */
       bystop = NULL;
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	{
 	  if (strncasecmp (input_line_pointer, "DO", 2) == 0
 	      && (input_line_pointer[2] == '.'
@@ -6963,7 +6963,7 @@ s_mri_for (int qual)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -6998,7 +6998,7 @@ s_mri_endf (int ignore ATTRIBUTE_UNUSED)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -7016,7 +7016,7 @@ s_mri_repeat (int ignore ATTRIBUTE_UNUSED)
   colon (n->top);
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
   demand_empty_rest_of_line ();
@@ -7039,7 +7039,7 @@ s_mri_until (int qual)
 
   colon (mri_control_stack->next);
 
-  for (s = input_line_pointer; ! is_end_of_line[(unsigned char) *s]; s++)
+  for (s = input_line_pointer; ! is_end_of_stmt (*s); s++)
     ;
 
   parse_mri_control_expression (s, qual, (const char *) NULL,
@@ -7053,7 +7053,7 @@ s_mri_until (int qual)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -7075,7 +7075,7 @@ s_mri_while (int qual)
      This is important when assembling:
        while d0 <ne> 12(a0,d0*2) do
        while d0 <ne> #CONST*20   do.  */
-  while (! (is_end_of_line[(unsigned char) *s]
+  while (! (is_end_of_stmt (*s)
 	    || (flag_mri
 		&& *s == '*'
 		&& (s == input_line_pointer
@@ -7108,7 +7108,7 @@ s_mri_while (int qual)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
@@ -7141,7 +7141,7 @@ s_mri_endw (int ignore ATTRIBUTE_UNUSED)
 
   if (flag_mri)
     {
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+      while (! is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
     }
 
