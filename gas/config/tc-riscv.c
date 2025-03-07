@@ -4939,7 +4939,7 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
 {
   char *name = input_line_pointer, ch;
 
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     ++input_line_pointer;
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
@@ -5481,7 +5481,7 @@ s_riscv_insn (int x ATTRIBUTE_UNUSED)
   bfd_reloc_code_real_type imm_reloc = BFD_RELOC_UNUSED;
   char save_c;
 
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     ++input_line_pointer;
 
   save_c = *input_line_pointer;
