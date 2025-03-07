@@ -725,7 +725,7 @@ static void
 mmix_discard_rest_of_line (void)
 {
   while (*input_line_pointer
-	 && (! is_end_of_line[(unsigned char) *input_line_pointer]
+	 && (! is_end_of_stmt (*input_line_pointer)
 	     || TC_EOL_IN_INSN (input_line_pointer)))
     input_line_pointer++;
 }
@@ -2065,7 +2065,7 @@ s_greg (int unused ATTRIBUTE_UNUSED)
   if (c == '"')
     c = * ++ input_line_pointer;
 
-  if (! is_end_of_line[(unsigned char) c])
+  if (! is_end_of_stmt (c))
     input_line_pointer++;
 
   if (*p)
