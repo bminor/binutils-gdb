@@ -3427,6 +3427,45 @@ amd64_target_description (uint64_t xcr0, bool segments)
 
 namespace selftests {
 
+/* Recode a vex2 instruction into a vex3 instruction.  */
+
+static void
+vex2_to_vex3 (gdb::byte_vector &vex2, gdb::byte_vector &vex3)
+{
+  gdb_assert (vex2.size () >= 2);
+  gdb_assert (vex2[0] == 0xc5);
+
+  unsigned char r = vex2[1] >> 7;
+  unsigned char b = 0x1;
+  unsigned char x = 0x1;
+  unsigned char m = 0x1;
+  unsigned char w = 0x0;
+
+  vex3.resize (3);
+  vex3[0] = 0xc4;
+  vex3[1] = (r << 7) | (x << 6) | (b << 5) | m;
+  vex3[2] = (vex2[1] & ~0x80) | (w << 7);
+
+  std::copy (vex2.begin () + 2, vex2.end (),
+	     std::back_inserter (vex3));
+}
+
+/* Test vex2 to vex3.  */
+
+static void
+test_vex2_to_vex3 (void)
+{
+  /* INSN: vzeroall, vex2 prefix.  */
+  gdb::byte_vector vex2 = { 0xc5, 0xfc, 0x77 };
+
+  gdb::byte_vector vex3;
+  vex2_to_vex3 (vex2, vex3);
+
+  /* INSN: vzeroall, vex3 prefix.  */
+  gdb::byte_vector vex3_ref = { 0xc4, 0xe1, 0x7c, 0x77 };
+  SELF_CHECK (vex3 == vex3_ref);
+}
+
 /* Test amd64_get_insn_details.  */
 
 static void
@@ -3478,6 +3517,7 @@ test_amd64_get_insn_details (void)
 static void
 amd64_insn_decode (void)
 {
+  test_vex2_to_vex3 ();
   test_amd64_get_insn_details ();
 }
 
