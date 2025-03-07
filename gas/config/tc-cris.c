@@ -2094,7 +2094,7 @@ cris_process_instruction (char *insn_text, struct cris_instruction *out_insnp,
 
 	      /* As discard_rest_of_line, but without continuing to the
 		 next line.  */
-	      while (!is_end_of_line[(unsigned char) *input_line_pointer])
+	      while (!is_end_of_stmt (*input_line_pointer))
 		input_line_pointer++;
 	      return;
 	    }
