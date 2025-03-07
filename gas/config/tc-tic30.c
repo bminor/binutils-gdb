@@ -287,7 +287,7 @@ tic30_find_parallel_insn (char *current_line, char *next_line)
   char *parallel_insn;
 
   debug ("In tic30_find_parallel_insn()\n");
-  while (!is_end_of_line[(unsigned char) *next_line])
+  while (!is_end_of_stmt (*next_line))
     {
       if (*next_line == PARALLEL_SEPARATOR
 	  && *(next_line + 1) == PARALLEL_SEPARATOR)
@@ -326,7 +326,7 @@ tic30_find_parallel_insn (char *current_line, char *next_line)
 	  int char_ptr = 0;
 	  char c;
 
-	  while (!is_end_of_line[(unsigned char) (c = *line)])
+	  while (!is_end_of_stmt (c = *line))
 	    {
 	      if (is_opcode_char (c) && search_status == NONE)
 		{
@@ -1206,7 +1206,7 @@ md_atof (int what_statement_type,
   debug ("literal = %s\n", literalP);
   debug ("line = ");
   token = input_line_pointer;
-  while (!is_end_of_line[(unsigned char) *input_line_pointer]
+  while (!is_end_of_stmt (*input_line_pointer)
 	 && (*input_line_pointer != ','))
     {
       debug ("%c", *input_line_pointer);
