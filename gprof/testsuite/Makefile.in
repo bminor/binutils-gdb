@@ -875,7 +875,7 @@ uninstall-am:
 @NATIVE_TRUE@	$(COMPILE) -c -o $@ $<
 @NATIVE_TRUE@tst-gmon: tst-gmon.$(OBJEXT)
 @NATIVE_TRUE@	$(LINK) tst-gmon.$(OBJEXT)
-@NATIVE_TRUE@tst-gmon-gprof.out: tst-gmon$(EXEEXT)
+@NATIVE_TRUE@tst-gmon-gprof.out: tst-gmon$(EXEEXT) $(GPROF)
 @NATIVE_TRUE@	$(srcdir)/tst-gmon-gprof.sh $(GPROF) tst-gmon$(EXEEXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

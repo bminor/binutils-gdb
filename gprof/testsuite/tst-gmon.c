@@ -16,8 +16,6 @@
    License along with the GNU C Library; if not, see
    <https://www.gnu.org/licenses/>.  */
 
-#include <sys/cdefs.h>
-
 /* This program does not use the test harness because we want tight
    control over the call graph.  */
 

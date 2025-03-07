@@ -28,7 +28,7 @@ program="$2"
 data=gmon.out
 rm -f $data
 ./$program
-if test ! -f $data; then
+if test ! -s $data; then
     echo "FAIL"
     exit 1
 fi

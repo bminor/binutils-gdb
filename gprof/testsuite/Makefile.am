@@ -32,7 +32,7 @@ tst-gmon.$(OBJEXT): tst-gmon.c
 	$(COMPILE) -c -o $@ $<
 tst-gmon: tst-gmon.$(OBJEXT)
 	$(LINK) tst-gmon.$(OBJEXT)
-tst-gmon-gprof.out: tst-gmon$(EXEEXT)
+tst-gmon-gprof.out: tst-gmon$(EXEEXT) $(GPROF)
 	$(srcdir)/tst-gmon-gprof.sh $(GPROF) tst-gmon$(EXEEXT)
 
 endif NATIVE
