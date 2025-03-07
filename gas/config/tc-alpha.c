@@ -4138,7 +4138,7 @@ s_alpha_usepv (int unused ATTRIBUTE_UNUSED)
 
   sym = symbol_find_or_make (name);
   name_end = restore_line_pointer (name_end);
-  if (! is_end_of_line[(unsigned char) name_end])
+  if (! is_end_of_stmt (name_end))
     input_line_pointer++;
 
   if (name_end != ',')
