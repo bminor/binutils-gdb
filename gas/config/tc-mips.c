@@ -16507,7 +16507,7 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
       restore_line_pointer (c);
       SKIP_WHITESPACE ();
 
-      if (!is_end_of_line[(unsigned char) *input_line_pointer]
+      if (!is_end_of_stmt (*input_line_pointer)
 	  && (*input_line_pointer != ','))
 	{
 	  char *secname;
@@ -16528,7 +16528,7 @@ s_mips_globl (int x ATTRIBUTE_UNUSED)
 	{
 	  input_line_pointer++;
 	  SKIP_WHITESPACE ();
-	  if (is_end_of_line[(unsigned char) *input_line_pointer])
+	  if (is_end_of_stmt (*input_line_pointer))
 	    c = '\n';
 	}
     }
@@ -16753,7 +16753,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 
   file_mips_check_options ();
 
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     ++input_line_pointer;
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
@@ -16896,7 +16896,7 @@ s_module (int ignore ATTRIBUTE_UNUSED)
 {
   char *name = input_line_pointer, ch;
 
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     ++input_line_pointer;
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
@@ -17508,7 +17508,7 @@ s_nan (int ignore ATTRIBUTE_UNUSED)
   static const char str_2008[] = "2008";
   size_t i;
 
-  for (i = 0; !is_end_of_line[(unsigned char) input_line_pointer[i]]; i++);
+  for (i = 0; !is_end_of_stmt (input_line_pointer[i]); i++);
 
   if (i == sizeof (str_2008) - 1
       && memcmp (input_line_pointer, str_2008, i) == 0)
@@ -17568,7 +17568,7 @@ s_mips_weakext (int ignore ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
 
-  if (! is_end_of_line[(unsigned char) *input_line_pointer])
+  if (! is_end_of_stmt (*input_line_pointer))
     {
       if (S_IS_DEFINED (symbolP))
 	{
@@ -19774,7 +19774,7 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
   mips_frame_reg_valid = 0;
   mips_cprestore_valid = 0;
 
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       p = get_symbol ();
       demand_empty_rest_of_line ();
