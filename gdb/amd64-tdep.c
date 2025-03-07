@@ -1158,6 +1158,14 @@ rex_prefix_p (gdb_byte pfx)
   return REX_PREFIX_P (pfx);
 }
 
+/* True if PFX is the start of the 2-byte REX2 prefix.  */
+
+static bool
+rex2_prefix_p (gdb_byte pfx)
+{
+  return pfx == REX2_OPCODE;
+}
+
 /* True if PFX is the start of the 2-byte VEX prefix.  */
 
 static bool
@@ -1172,6 +1180,14 @@ static bool
 vex3_prefix_p (gdb_byte pfx)
 {
   return pfx == 0xc4;
+}
+
+/* Return true if PFX is the start of the 4-byte EVEX prefix.  */
+
+static bool
+evex_prefix_p (gdb_byte pfx)
+{
+  return pfx == 0x62;
 }
 
 /* Skip the legacy instruction prefixes in INSN.
@@ -1326,6 +1342,11 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
       details->enc_prefix_offset = insn - start;
       ++insn;
     }
+  else if (rex2_prefix_p (*insn))
+    {
+      details->enc_prefix_offset = insn - start;
+      insn += 2;
+    }
   else if (vex2_prefix_p (*insn))
     {
       details->enc_prefix_offset = insn - start;
@@ -1336,13 +1357,32 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
       details->enc_prefix_offset = insn - start;
       insn += 3;
     }
+  else if (evex_prefix_p (*insn))
+    {
+      details->enc_prefix_offset = insn - start;
+      insn += 4;
+    }
   gdb_byte *prefix = (details->enc_prefix_offset == -1
 		      ? nullptr
 		      : &start[details->enc_prefix_offset]);
 
   details->opcode_offset = insn - start;
 
-  if (prefix != nullptr && vex2_prefix_p (*prefix))
+  if (prefix != nullptr && rex2_prefix_p (*prefix))
+    {
+      bool m = (prefix[1] & (REX2_M << 4)) != 0;
+      if (!m)
+	{
+	  need_modrm = onebyte_has_modrm[*insn];
+	  details->opcode_len = 1;
+	}
+      else
+	{
+	  need_modrm = twobyte_has_modrm[*insn];
+	  details->opcode_len = 2;
+	}
+    }
+  else if (prefix != nullptr && vex2_prefix_p (*prefix))
     {
       need_modrm = twobyte_has_modrm[*insn];
       details->opcode_len = 2;
@@ -1371,6 +1411,27 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
 	{
 	  /* Todo: URDMSR/UWRMSR instructions.  */
 	  return;
+	}
+      else
+	{
+	  /* Unknown opcode map.  */
+	  return;
+	}
+    }
+  else if (prefix != nullptr && evex_prefix_p (*prefix))
+    {
+      need_modrm = twobyte_has_modrm[*insn];
+
+      gdb_byte m = prefix[1] & 0x7;
+      if (m == 1)
+	{
+	  /* Escape 0x0f.  */
+	  details->opcode_len = 2;
+	}
+      else if (m == 2 || m == 3)
+	{
+	  /* Escape 0x0f 0x38 or 0x0f 0x3a.  */
+	  details->opcode_len = 3;
 	}
       else
 	{
@@ -1425,6 +1486,15 @@ fixup_riprel (const struct amd64_insn &details, gdb_byte *insn,
   /* Position of the not-B bit in the 3-byte VEX prefix (in byte 1).  */
   static constexpr gdb_byte VEX3_NOT_B = 0x20;
 
+  /* Position of the B3 and B4 bits in the REX2 prefix (in byte 1).  */
+  static constexpr gdb_byte REX2_B = 0x11;
+
+  /* Position of the not-B3 bit in the EVEX prefix (in byte 1).  */
+  static constexpr gdb_byte EVEX_NOT_B = VEX3_NOT_B;
+
+  /* Position of the B4 bit in the EVEX prefix (in byte 1).  */
+  static constexpr gdb_byte EVEX_B = 0x08;
+
   /* REX.B should be unset (VEX.!B set) as we were using rip-relative
      addressing, but ensure it's unset (set for VEX) anyway, tmp_regno
      is not r8-r15.  */
@@ -1433,12 +1503,19 @@ fixup_riprel (const struct amd64_insn &details, gdb_byte *insn,
       gdb_byte *pfx = &insn[details.enc_prefix_offset];
       if (rex_prefix_p (pfx[0]))
 	pfx[0] &= ~REX_B;
+      else if (rex2_prefix_p (pfx[0]))
+	pfx[1] &= ~REX2_B;
       else if (vex2_prefix_p (pfx[0]))
 	{
 	  /* VEX.!B is set implicitly.  */
 	}
       else if (vex3_prefix_p (pfx[0]))
 	pfx[1] |= VEX3_NOT_B;
+      else if (evex_prefix_p (pfx[0]))
+	{
+	  pfx[1] |= EVEX_NOT_B;
+	  pfx[1] &= ~EVEX_B;
+	}
       else
 	gdb_assert_not_reached ("unhandled prefix");
     }
@@ -3620,6 +3697,37 @@ test_amd64_get_insn_details (void)
   tmp = vex3;
   fixup_riprel (details, tmp.data (), ECX_REG_NUM);
   SELF_CHECK (tmp == updated_vex3);
+
+  /* INSN: lea 0x0(%eip),%r31d, rex2 prefix.  */
+  insn = { 0x67, 0xd5, 0x44, 0x8d, 0x3d, 0x00, 0x00, 0x00, 0x00 };
+  amd64_get_insn_details (insn.data (), &details);
+  SELF_CHECK (details.opcode_len == 1);
+  SELF_CHECK (details.enc_prefix_offset == 1);
+  SELF_CHECK (details.opcode_offset == 3);
+  SELF_CHECK (details.modrm_offset == 4);
+  /* This is incorrect, r31 is used instead of rdi, but currently that doesn't
+     matter.  */
+  SELF_CHECK (amd64_get_used_input_int_regs (&details, false)
+	      == (1 << EDI_REG_NUM));
+
+  /* INSN: lea 0x0(%ecx),%r31d, rex2 prefix.  */
+  updated_insn = { 0x67, 0xd5, 0x44, 0x8d, 0xb9, 0x00, 0x00, 0x00, 0x00 };
+  fixup_riprel (details, insn.data (), ECX_REG_NUM);
+  SELF_CHECK (insn == updated_insn);
+
+  /* INSN: vmovaps -0x400(%rip),%zmm0, evex prefix.  */
+  insn = { 0x62, 0xf1, 0x7c, 0x48, 0x28, 0x05, 0x00, 0xfc, 0xff, 0xff };
+  amd64_get_insn_details (insn.data (), &details);
+  SELF_CHECK (details.opcode_len == 2);
+  SELF_CHECK (details.enc_prefix_offset == 0);
+  SELF_CHECK (details.opcode_offset == 4);
+  SELF_CHECK (details.modrm_offset == 5);
+
+  /* INSN: vmovaps -0x400(%rcx),%zmm0, evex prefix.  */
+  updated_insn
+    = { 0x62, 0xf1, 0x7c, 0x48, 0x28, 0x81, 0x00, 0xfc, 0xff, 0xff };
+  fixup_riprel (details, insn.data (), ECX_REG_NUM);
+  SELF_CHECK (insn == updated_insn);
 }
 
 static void
