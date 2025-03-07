@@ -600,7 +600,7 @@ static void
 s_loongarch_option (int x ATTRIBUTE_UNUSED)
 {
   char *name = input_line_pointer, ch;
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     ++input_line_pointer;
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
