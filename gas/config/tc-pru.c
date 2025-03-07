@@ -423,7 +423,7 @@ s_pru_set (int equiv)
      trying a directive.  This prevents
      us from polluting the name space.  */
   SKIP_WHITESPACE ();
-  if (is_end_of_line[(unsigned char) *input_line_pointer])
+  if (is_end_of_stmt (*input_line_pointer))
     {
       bool done = true;
       *endline = 0;
