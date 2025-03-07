@@ -3584,7 +3584,13 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		if (op1.exp.X_op == O_constant)
 		  {
 		    n = op1.exp.X_add_number;
-		    if (n > 0xfffff || n < - (0x7ffff))
+		    /* Strictly speaking the positive value test should be for "n > 0x7ffff"
+		       but traditionally when specifying immediates as hex values any valid
+		       bit pattern is allowed.  Hence "suba #0xfffff, r6" is allowed, and so
+		       the positive value test has to be "n > 0xfffff".
+		       FIXME: We could pre-parse the expression to find out if it starts with
+		       0x and only then allow positive values > 0x7fffff.  */
+		    if (n > 0xfffff || n < -0x80000)
 		      {
 			as_bad (_("expected value of first argument of %s to fit into 20-bits"),
 				opcode->name);
