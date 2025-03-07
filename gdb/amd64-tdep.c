@@ -1336,10 +1336,49 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
       details->enc_prefix_offset = insn - start;
       insn += 3;
     }
+  gdb_byte *prefix = (details->enc_prefix_offset == -1
+		      ? nullptr
+		      : &start[details->enc_prefix_offset]);
 
   details->opcode_offset = insn - start;
 
-  if (*insn == TWO_BYTE_OPCODE_ESCAPE)
+  if (prefix != nullptr && vex2_prefix_p (*prefix))
+    {
+      need_modrm = twobyte_has_modrm[*insn];
+      details->opcode_len = 2;
+    }
+  else if (prefix != nullptr && vex3_prefix_p (*prefix))
+    {
+      need_modrm = twobyte_has_modrm[*insn];
+
+      gdb_byte m = prefix[1] & 0x1f;
+      if (m == 0)
+	{
+	  /* Todo: Xeon Phi-specific JKZD/JKNZD.  */
+	  return;
+	}
+      else if (m == 1)
+	{
+	  /* Escape 0x0f.  */
+	  details->opcode_len = 2;
+	}
+      else if (m == 2 || m == 3)
+	{
+	  /* Escape 0x0f 0x38 or 0x0f 0x3a.  */
+	  details->opcode_len = 3;
+	}
+      else if (m == 7)
+	{
+	  /* Todo: URDMSR/UWRMSR instructions.  */
+	  return;
+	}
+      else
+	{
+	  /* Unknown opcode map.  */
+	  return;
+	}
+    }
+  else if (*insn == TWO_BYTE_OPCODE_ESCAPE)
     {
       /* Two or three-byte opcode.  */
       ++insn;
@@ -1513,6 +1552,8 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   memset (buf + len, 0, fixup_sentinel_space);
 
   amd64_get_insn_details (buf, details);
+  if (details->opcode_len == -1)
+    return nullptr;
 
   /* GDB may get control back after the insn after the syscall.
      Presumably this is a kernel bug.
@@ -3475,7 +3516,7 @@ static void
 test_amd64_get_insn_details (void)
 {
   struct amd64_insn details;
-  gdb::byte_vector insn;
+  gdb::byte_vector insn, tmp;
 
   /* INSN: add %eax,(%rcx).  */
   insn = { 0x01, 0x01 };
@@ -3521,7 +3562,7 @@ test_amd64_get_insn_details (void)
   /* INSN: vzeroall, vex2 prefix.  */
   vex2 = { 0xc5, 0xfc, 0x77 };
   amd64_get_insn_details (vex2.data (), &details);
-  SELF_CHECK (details.opcode_len == 1);
+  SELF_CHECK (details.opcode_len == 2);
   SELF_CHECK (details.enc_prefix_offset == 0);
   SELF_CHECK (details.opcode_offset == 2);
   SELF_CHECK (details.modrm_offset == -1);
@@ -3529,7 +3570,7 @@ test_amd64_get_insn_details (void)
   /* INSN: vzeroall, vex3 prefix.  */
   vex2_to_vex3 (vex2, vex3);
   amd64_get_insn_details (vex3.data (), &details);
-  SELF_CHECK (details.opcode_len == 1);
+  SELF_CHECK (details.opcode_len == 2);
   SELF_CHECK (details.enc_prefix_offset == 0);
   SELF_CHECK (details.opcode_offset == 3);
   SELF_CHECK (details.modrm_offset == -1);
@@ -3537,7 +3578,7 @@ test_amd64_get_insn_details (void)
   /* INSN: vzeroupper, vex2 prefix.  */
   vex2 = { 0xc5, 0xf8, 0x77 };
   amd64_get_insn_details (vex2.data (), &details);
-  SELF_CHECK (details.opcode_len == 1);
+  SELF_CHECK (details.opcode_len == 2);
   SELF_CHECK (details.enc_prefix_offset == 0);
   SELF_CHECK (details.opcode_offset == 2);
   SELF_CHECK (details.modrm_offset == -1);
@@ -3545,10 +3586,40 @@ test_amd64_get_insn_details (void)
   /* INSN: vzeroupper, vex3 prefix.  */
   vex2_to_vex3 (vex2, vex3);
   amd64_get_insn_details (vex3.data (), &details);
-  SELF_CHECK (details.opcode_len == 1);
+  SELF_CHECK (details.opcode_len == 2);
   SELF_CHECK (details.enc_prefix_offset == 0);
   SELF_CHECK (details.opcode_offset == 3);
   SELF_CHECK (details.modrm_offset == -1);
+
+  /* INSN: vmovdqu 0x9(%rip),%ymm3, vex2 prefix.  */
+  vex2 = { 0xc5, 0xfe, 0x6f, 0x1d, 0x09, 0x00, 0x00, 0x00 };
+  amd64_get_insn_details (vex2.data (), &details);
+  SELF_CHECK (details.opcode_len == 2);
+  SELF_CHECK (details.enc_prefix_offset == 0);
+  SELF_CHECK (details.opcode_offset == 2);
+  SELF_CHECK (details.modrm_offset == 3);
+
+  /* INSN: vmovdqu 0x9(%rcx),%ymm3, vex2 prefix.  */
+  gdb::byte_vector updated_vex2
+    = { 0xc5, 0xfe, 0x6f, 0x99, 0x09, 0x00, 0x00, 0x00 };
+  tmp = vex2;
+  fixup_riprel (details, tmp.data (), ECX_REG_NUM);
+  SELF_CHECK (tmp == updated_vex2);
+
+  /* INSN: vmovdqu 0x9(%rip),%ymm3, vex3 prefix.  */
+  vex2_to_vex3 (vex2, vex3);
+  amd64_get_insn_details (vex3.data (), &details);
+  SELF_CHECK (details.opcode_len == 2);
+  SELF_CHECK (details.enc_prefix_offset == 0);
+  SELF_CHECK (details.opcode_offset == 3);
+  SELF_CHECK (details.modrm_offset == 4);
+
+  /* INSN: vmovdqu 0x9(%rcx),%ymm3, vex3 prefix.  */
+  gdb::byte_vector updated_vex3;
+  vex2_to_vex3 (updated_vex2, updated_vex3);
+  tmp = vex3;
+  fixup_riprel (details, tmp.data (), ECX_REG_NUM);
+  SELF_CHECK (tmp == updated_vex3);
 }
 
 static void
