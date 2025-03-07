@@ -669,7 +669,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	ret = 0;
     }
 
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       if (ret)
 	as_bad (_("junk `%s' after expression"), input_line_pointer);

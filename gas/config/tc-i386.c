@@ -3077,7 +3077,7 @@ set_intel_syntax (int syntax_flag)
   int ask_naked_reg = 0;
 
   SKIP_WHITESPACE ();
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       char *string;
       int e = get_symbol_name (&string);
@@ -3132,7 +3132,7 @@ set_check (int what)
 
   SKIP_WHITESPACE ();
 
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       char *string;
       int e = get_symbol_name (&string);
@@ -3241,7 +3241,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
 
-  if (is_end_of_line[(unsigned char) *input_line_pointer])
+  if (is_end_of_stmt (*input_line_pointer))
     {
       as_bad (_("missing cpu architecture"));
       input_line_pointer++;
@@ -3452,7 +3452,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
   no_cond_jump_promotion = 0;
   if (restore_line_pointer (e) == ','
-      && !is_end_of_line[(unsigned char) input_line_pointer[1]])
+      && !is_end_of_stmt (input_line_pointer[1]))
     {
       ++input_line_pointer;
       e = get_symbol_name (&s);
@@ -13177,7 +13177,7 @@ lex_got (enum bfd_reloc_code_real *rel,
   unsigned int j;
 
   for (cp = input_line_pointer; *cp != '@'; cp++)
-    if (is_end_of_line[(unsigned char) *cp] || *cp == ',')
+    if (is_end_of_stmt (*cp) || *cp == ',')
       return NULL;
 
   for (j = 0; j < ARRAY_SIZE (gotrel); j++)
@@ -13214,7 +13214,7 @@ lex_got (enum bfd_reloc_code_real *rel,
 		 (and including) an end_of_line char or comma.  */
 	      past_reloc = cp + 1 + len;
 	      cp = past_reloc;
-	      while (!is_end_of_line[(unsigned char) *cp] && *cp != ',')
+	      while (!is_end_of_stmt (*cp) && *cp != ',')
 		++cp;
 	      second = cp + 1 - past_reloc;
 
