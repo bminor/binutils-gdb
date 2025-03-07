@@ -86,7 +86,21 @@ cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
      implicit "main" discovery.  */
   if ((flags & IS_MAIN) != 0)
     m_main = result;
-  else if ((flags & IS_PARENT_DEFERRED) == 0
+  /* The language check here is subtle: it exists solely to work
+     around a bug in .gdb_index.  That index does not record
+     languages, but it might emit an entry for "main".  However,
+     recognizing this "main" as being the main program would be wrong
+     -- for example, an Ada program has a C "main" but this is not the
+     desired target of the "start" command.  Requiring the language to
+     be set here avoids over-eagerly setting the "main" when using
+     .gdb_index.  Should .gdb_index ever be removed (PR symtab/31363),
+     the language_unknown check here could also be removed.
+
+     Note that this explicit check isn't truly needed (it is covered
+     by language_may_use_plain_main as well), but it's handy as a spot
+     to document.  */
+  else if (lang != language_unknown
+	   && (flags & IS_PARENT_DEFERRED) == 0
 	   && parent_entry.resolved == nullptr
 	   && m_main == nullptr
 	   && language_may_use_plain_main (lang)

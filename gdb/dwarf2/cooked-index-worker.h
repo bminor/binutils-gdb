@@ -110,6 +110,12 @@ public:
     return &m_addrmap;
   }
 
+  /* Set the mutable addrmap.  */
+  void set_addrmap (addrmap_mutable new_map)
+  {
+    m_addrmap = std::move (new_map);
+  }
+
   /* Return the parent_map that is currently being created.  */
   parent_map *get_parent_map ()
   {
@@ -217,7 +223,7 @@ enum class cooked_state
 
    This is an abstract base class that defines the basic behavior of
    scanners.  Separate concrete implementations exist for scanning
-   .debug_names and .debug_info.  */
+   .debug_names, .gdb_index, and .debug_info.  */
 
 class cooked_index_worker
 {

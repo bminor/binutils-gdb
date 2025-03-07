@@ -25,6 +25,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "dwarf2.h"
+#include "dwarf2/read-gdb-index.h"
 #include "dwarf2/stringify.h"
 
 /* A convenience function that returns an "unknown" DWARF name,
@@ -44,6 +45,11 @@ dwarf_unknown (const char *str, unsigned v)
 const char *
 dwarf_tag_name (unsigned tag)
 {
+  if (tag == DW_TAG_GDB_INDEX_OTHER)
+    return "DW_TAG_GDB_INDEX_OTHER";
+  else if (tag == DW_TAG_GDB_INDEX_TYPE)
+    return "DW_TAG_GDB_INDEX_TYPE";
+
   const char *name = get_DW_TAG_name (tag);
 
   if (name == NULL)

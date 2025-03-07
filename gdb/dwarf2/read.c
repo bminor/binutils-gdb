@@ -14713,13 +14713,26 @@ cooked_index_functions::expand_symtabs_matching
 		continue;
 	    }
 
+	  /* This is a bit of a hack to support .gdb_index.  Since
+	     .gdb_index does not record languages, and since we want
+	     to know the language to avoid excessive CU expansion due
+	     to false matches, if we see a symbol with an unknown
+	     language we find the CU's language.  Only the .gdb_index
+	     reader creates such symbols.  */
+	  enum language entry_lang = entry->lang;
+	  if (entry_lang == language_unknown)
+	    {
+	      entry->per_cu->ensure_lang (per_objfile);
+	      entry_lang = entry->per_cu->lang ();
+	    }
+
 	  /* We've found the base name of the symbol; now walk its
 	     parentage chain, ensuring that each component
 	     matches.  */
 	  bool found = true;
 
 	  const cooked_index_entry *parent = entry->get_parent ();
-	  const language_defn *lang_def = language_def (entry->lang);
+	  const language_defn *lang_def = language_def (entry_lang);
 	  for (int i = name_vec.size () - 1; i > 0; --i)
 	    {
 	      /* If we ran out of entries, or if this segment doesn't
@@ -14729,17 +14742,15 @@ cooked_index_functions::expand_symtabs_matching
 		  found = false;
 		  break;
 		}
-	      if (parent->lang != language_unknown)
+
+	      symbol_name_matcher_ftype *name_matcher
+		= (lang_def->get_symbol_name_matcher
+		   (segment_lookup_names[i-1]));
+	      if (!name_matcher (parent->canonical,
+				 segment_lookup_names[i-1], nullptr))
 		{
-		  symbol_name_matcher_ftype *name_matcher
-		    = lang_def->get_symbol_name_matcher
-		      (segment_lookup_names[i-1]);
-		  if (!name_matcher (parent->canonical,
-				     segment_lookup_names[i-1], nullptr))
-		    {
-		      found = false;
-		      break;
-		    }
+		  found = false;
+		  break;
 		}
 
 	      parent = parent->get_parent ();
@@ -14762,23 +14773,20 @@ cooked_index_functions::expand_symtabs_matching
 	     seems like the loop above could just examine every
 	     element of the name, avoiding the need to check here; but
 	     this is hard.  See PR symtab/32733.  */
-	  if (symbol_matcher != nullptr || entry->lang != language_unknown)
+	  auto_obstack temp_storage;
+	  const char *full_name = entry->full_name (&temp_storage,
+						    FOR_ADA_LINKAGE_NAME);
+	  if (symbol_matcher == nullptr)
 	    {
-	      auto_obstack temp_storage;
-	      const char *full_name = entry->full_name (&temp_storage,
-							FOR_ADA_LINKAGE_NAME);
-	      if (symbol_matcher == nullptr)
-		{
-		  symbol_name_matcher_ftype *name_matcher
-		    = (lang_def->get_symbol_name_matcher
-		       (lookup_name_without_params));
-		  if (!name_matcher (full_name, lookup_name_without_params,
-				     nullptr))
-		    continue;
-		}
-	      else if (!symbol_matcher (full_name))
+	      symbol_name_matcher_ftype *name_matcher
+		= (lang_def->get_symbol_name_matcher
+		   (lookup_name_without_params));
+	      if (!name_matcher (full_name, lookup_name_without_params,
+				 nullptr))
 		continue;
 	    }
+	  else if (!symbol_matcher (full_name))
+	    continue;
 
 	  if (!dw2_expand_symtabs_matching_one (entry->per_cu, per_objfile,
 						cus_to_skip, file_matcher,

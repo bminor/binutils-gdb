@@ -27,6 +27,20 @@ struct dwarf2_per_objfile;
 struct dwz_file;
 struct objfile;
 
+/* .gdb_index doesn't distinguish between the various "other" symbols
+   -- but the symbol search machinery really wants to.  For example,
+   an imported decl is "other" but is really a namespace and thus in
+   TYPE_DOMAIN; whereas a Fortran module is also "other" but is in the
+   MODULE_DOMAIN.  We use this value internally to represent the
+   "other" case so that matching can work.  The exact value does not
+   matter, all that matters here is that it won't overlap with any
+   symbol that gdb might create.  */
+#define DW_TAG_GDB_INDEX_OTHER 0xffff
+
+/* Similarly, .gdb_index can't distinguish between the type and struct
+   domains.  This is a special tag that inhabits both.  */
+#define DW_TAG_GDB_INDEX_TYPE 0xfffe
+
 /* Callback types for dwarf2_read_gdb_index.  */
 
 typedef gdb::function_view
