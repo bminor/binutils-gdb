@@ -536,7 +536,7 @@ get_interrupt_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBU
 		  *ptr = src + l;
 		invalid:
 		  as_bad (_("unknown interrupt %s"), src);
-		  while (**ptr && ! is_end_of_line[(unsigned char) **ptr])
+		  while (! is_end_of_stmt (**ptr))
 		    (*ptr)++;	 /* Consume rest of line.  */
 		  return;
 		}
@@ -747,10 +747,10 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
           get_cc_operand (&ptr, operand + 0, 0);
           while (is_whitespace (*ptr))
             ptr++;
-          if (*ptr && ! is_end_of_line[(unsigned char) *ptr])
+          if (! is_end_of_stmt (*ptr))
             {
               as_bad (_("invalid condition code '%s'"), ptr);
-              while (*ptr && ! is_end_of_line[(unsigned char) *ptr])
+              while (! is_end_of_stmt (*ptr))
                 ptr++;   /* Consume rest of line.  */
             }
         }
@@ -759,10 +759,10 @@ get_operands (const opcode_entry_type *opcode, char *op_end, op_type *operand)
 	  get_flags_operand (&ptr, operand + 0, 0);
 	  while (is_whitespace (*ptr))
 	    ptr++;
-	  if (*ptr && ! is_end_of_line[(unsigned char) *ptr])
+	  if (! is_end_of_stmt (*ptr))
 	    {
 	      as_bad (_("invalid flag '%s'"), ptr);
-	      while (*ptr && ! is_end_of_line[(unsigned char) *ptr])
+	      while (*ptr && ! is_end_of_stmt (*ptr))
 		ptr++;	 /* Consume rest of line.  */
 	    }
 	}
