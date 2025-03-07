@@ -1859,7 +1859,9 @@ dw2_get_file_names (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile)
   if (this_cu->files_read)
     return this_cu->file_names;
 
-  cutu_reader reader (this_cu, per_objfile, language_minimal);
+  cutu_reader reader (this_cu, per_objfile, nullptr,
+		      per_objfile->get_cu (this_cu), true, language_minimal,
+		      nullptr);
   if (!reader.is_dummy ())
     dw2_get_file_names_reader (reader.cu (), reader.comp_unit_die ());
 
@@ -3296,8 +3298,10 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
   struct objfile *objfile = per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
   bfd *abfd = section->get_bfd_owner ();
-  struct dwarf2_section_info *abbrev_section;
   const gdb_byte *begin_info_ptr, *info_ptr;
+
+  gdb_assert (parent_cu != nullptr);
+  gdb_assert (dwo_file != nullptr);
 
   if (dwarf_die_debug)
     gdb_printf (gdb_stdlog, "Reading %s unit at offset %s\n",
@@ -3306,9 +3310,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 
   gdb_assert (per_objfile->get_cu (this_cu) == nullptr);
 
-  abbrev_section = (dwo_file != NULL
-		    ? &dwo_file->sections.abbrev
-		    : get_abbrev_section_for_cu (this_cu));
+  dwarf2_section_info *abbrev_section = &dwo_file->sections.abbrev;
 
   /* This is cheap if the section is already read in.  */
   section->read (objfile);
@@ -3322,11 +3324,9 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 					     ? rcuh_kind::TYPE
 					     : rcuh_kind::COMPILE));
 
-  if (parent_cu != nullptr)
-    {
-      m_new_cu->str_offsets_base = parent_cu->str_offsets_base;
-      m_new_cu->addr_base = parent_cu->addr_base;
-    }
+  m_new_cu->str_offsets_base = parent_cu->str_offsets_base;
+  m_new_cu->addr_base = parent_cu->addr_base;
+
   this_cu->set_length (m_new_cu->header.get_length_with_initial ());
 
   /* Skip dummy compilation units.  */
@@ -19660,7 +19660,8 @@ dwarf2_per_cu::ensure_lang (dwarf2_per_objfile *per_objfile)
 
   /* Constructing this object will set the language as a side
      effect.  */
-  cutu_reader reader (this, per_objfile, language_minimal);
+  cutu_reader reader (this, per_objfile, nullptr, per_objfile->get_cu (this),
+		      true, language_minimal, nullptr);
 }
 
 /* A helper function for dwarf2_find_containing_comp_unit that returns

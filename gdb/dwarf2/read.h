@@ -938,8 +938,8 @@ public:
   cutu_reader (dwarf2_per_cu *this_cu,
 	       dwarf2_per_objfile *per_objfile,
 	       enum language pretend_language,
-	       struct dwarf2_cu *parent_cu = nullptr,
-	       struct dwo_file *dwo_file = nullptr);
+	       struct dwarf2_cu *parent_cu,
+	       struct dwo_file *dwo_file);
 
   DISABLE_COPY_AND_ASSIGN (cutu_reader);
 
