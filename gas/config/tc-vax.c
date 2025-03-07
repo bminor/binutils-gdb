@@ -3293,7 +3293,7 @@ vax_cons (expressionS *exp, int size)
 	      char *end = ++input_line_pointer;
 	      int npar = 0;
 
-	      while (! is_end_of_line[(c = *end)])
+	      while (! is_end_of_stmt (c = *end))
 		{
 		  if (c == '(')
 	  	    npar++;
@@ -3324,7 +3324,7 @@ vax_cons (expressionS *exp, int size)
 		      input_line_pointer++;
 		      SKIP_WHITESPACE ();
 		      c = *input_line_pointer;
-		      if (! is_end_of_line[c] && c != ',')
+		      if (! is_end_of_stmt (c) && c != ',')
 			as_bad (_("Illegal operands: garbage after %%r_%s%d()"),
 			        vax_cons_special_reloc, size * 8);
 		    }
