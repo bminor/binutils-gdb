@@ -1207,6 +1207,18 @@ amd64_skip_prefixes (gdb_byte *insn)
   return insn;
 }
 
+/* Return true if the MODRM byte of an insn indicates that the insn is
+   rip-relative.  */
+
+static bool
+rip_relative_p (gdb_byte modrm)
+{
+  gdb_byte mod = MODRM_MOD_FIELD (modrm);
+  gdb_byte rm = MODRM_RM_FIELD (modrm);
+
+  return mod == 0 && rm == 0x05;
+}
+
 /* Return a register mask for the integer registers that are used as an input
    operand in INSN.  If !ASSUMPTIONS, only return the registers we actually
    found, for the benefit of self tests.  */
@@ -1455,7 +1467,7 @@ fixup_displaced_copy (struct gdbarch *gdbarch,
     {
       gdb_byte modrm = details->raw_insn[details->modrm_offset];
 
-      if ((modrm & 0xc7) == 0x05)
+      if (rip_relative_p (modrm))
 	{
 	  /* The insn uses rip-relative addressing.
 	     Deal with it.  */
@@ -1789,7 +1801,7 @@ rip_relative_offset (struct amd64_insn *insn)
     {
       gdb_byte modrm = insn->raw_insn[insn->modrm_offset];
 
-      if ((modrm & 0xc7) == 0x05)
+      if (rip_relative_p (modrm))
 	{
 	  /* The displacement is found right after the ModRM byte.  */
 	  return insn->modrm_offset + 1;
