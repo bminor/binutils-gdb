@@ -4179,6 +4179,20 @@ static void
 parse_mri_cons (expressionS *exp, unsigned int nbytes);
 #endif
 
+/* This function is used by .cfi_* directive handling, and hence must not
+   invoke parse_repeat_cons().  */
+
+void
+do_parse_cons_expression (expressionS *exp,
+			  int nbytes ATTRIBUTE_UNUSED)
+{
+#ifdef TC_PARSE_CONS_EXPRESSION
+  (void) TC_PARSE_CONS_EXPRESSION (exp, nbytes);
+#else
+  expression (exp);
+#endif
+}
+
 #ifndef TC_PARSE_CONS_EXPRESSION
 #ifdef REPEAT_CONS_EXPRESSIONS
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) \
@@ -4193,14 +4207,6 @@ parse_repeat_cons (expressionS *exp, unsigned int nbytes);
   (expression (EXP), TC_PARSE_CONS_RETURN_NONE)
 #endif
 #endif
-
-void
-do_parse_cons_expression (expressionS *exp,
-			  int nbytes ATTRIBUTE_UNUSED)
-{
-  (void) TC_PARSE_CONS_EXPRESSION (exp, nbytes);
-}
-
 
 /* Worker to do .byte etc statements.
    Clobbers input_line_pointer and checks end-of-line.  */
