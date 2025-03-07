@@ -1206,31 +1206,23 @@ amd64_skip_prefixes (gdb_byte *insn)
   return insn;
 }
 
-/* Return an integer register (other than RSP) that is unused as an input
-   operand in INSN.
-   In order to not require adding a rex prefix if the insn doesn't already
-   have one, the result is restricted to RAX ... RDI, sans RSP.
-   The register numbering of the result follows architecture ordering,
-   e.g. RDI = 7.  Return -1 if no register can be found.  */
+/* Return an integer register in ALLOWED_REGS_MASK that is unused as an input
+   operand in INSN.  The register numbering of the result follows architecture
+   ordering, e.g. RDI = 7.  Return -1 if no register can be found.  */
 
 static int
-amd64_get_unused_input_int_reg (const struct amd64_insn *details)
+amd64_get_unused_input_int_reg (const struct amd64_insn *details,
+				uint32_t allowed_regs_mask)
 {
   /* 1 bit for each reg */
   uint32_t used_regs_mask = 0;
 
-  /* There can be at most 3 int regs used as inputs in an insn, and we have
-     7 to choose from (RAX ... RDI, sans RSP).
-     This allows us to take a conservative approach and keep things simple.
-     E.g. By avoiding RAX, we don't have to specifically watch for opcodes
-     that implicitly specify RAX.  */
-
-  /* Avoid RAX.  */
+  /* Assume RAX is used.  If not, we'd have to detect opcodes that implicitly
+     use RAX.  */
   used_regs_mask |= 1 << EAX_REG_NUM;
-  /* Similarly avoid RDX, implicit operand in divides.  */
+  /* Assume RDX is used.  If not, we'd have to detect opcodes that implicitly
+     use RDX, like divides.  */
   used_regs_mask |= 1 << EDX_REG_NUM;
-  /* Avoid RSP.  */
-  used_regs_mask |= 1 << ESP_REG_NUM;
 
   /* If the opcode is one byte long and there's no ModRM byte,
      assume the opcode specifies a register.  */
@@ -1270,6 +1262,9 @@ amd64_get_unused_input_int_reg (const struct amd64_insn *details)
 
     for (i = 0; i < 32; ++i)
       {
+	if (! (allowed_regs_mask & (1 << i)))
+	  continue;
+
 	if (! (used_regs_mask & (1 << i)))
 	  return i;
       }
@@ -1379,13 +1374,19 @@ fixup_riprel (struct gdbarch *gdbarch,
 					  dsc->insn_buf.size (), from);
   rip_base = from + insn_length;
 
-  /* We need a register to hold the address.
-     Pick one not used in the insn.
-     NOTE: arch_tmp_regno uses architecture ordering, e.g. RDI = 7.  */
-  arch_tmp_regno = amd64_get_unused_input_int_reg (insn_details);
+  /* We need a register to hold the address.  Pick one not used in the insn.
+     In order to not require adding a rex prefix if the insn doesn't already
+     have one, the range is restricted to RAX ... RDI, without RSP.
+     We avoid RSP, because when patched into in the modrm byte, it doesn't
+     indicate the use of the register, but instead the use of a SIB byte.  */
+  uint32_t allowed_regs_mask = 0xff & ~(1 << ESP_REG_NUM);
+  arch_tmp_regno
+    = amd64_get_unused_input_int_reg (insn_details, allowed_regs_mask);
   if (arch_tmp_regno == -1)
     return false;
 
+  /* Convert arch_tmp_regno, which uses architecture ordering (e.g. RDI = 7),
+     to GDB regnum.  */
   tmp_regno = amd64_arch_reg_to_regnum (arch_tmp_regno);
 
   /* Position of the not-B bit in the 3-byte VEX prefix (in byte 1).  */
