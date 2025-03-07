@@ -26,7 +26,7 @@ SECTIONS
   /* This saves a little space in the ELF file, since the zda starts
      at a higher location that the ELF headers take up.  */
 
-  .zdata ${ZDATA_START_ADDR} :
+  .zdata ${RELOCATING+${ZDATA_START_ADDR}} :
   {
 	*(.zdata)
 	${RELOCATING+*(.zbss)
@@ -40,7 +40,7 @@ SECTIONS
      section.  Specifically it prevents the zdata
      section from being marked READONLY.  */
 
-  .rozdata ${ROZDATA_START_ADDR} :
+  .rozdata ${RELOCATING+${ROZDATA_START_ADDR}} :
   {
 	*(.rozdata)
 	${RELOCATING+*(romzdata)
@@ -48,7 +48,7 @@ SECTIONS
   }
 
   /* Read-only sections, merged into text segment.  */
-  . = ${TEXT_START_ADDR};
+  ${RELOCATING+. = ${TEXT_START_ADDR};}
   .interp	: { *(.interp) }
   .hash		: { *(.hash) }
   .dynsym	: { *(.dynsym) }
@@ -95,7 +95,7 @@ SECTIONS
       It contains a small lookup table at the start followed by the
       code pointed to by entries in the lookup table.  */
 
-  .call_table_data ${CALL_TABLE_START_ADDR} :
+  .call_table_data ${RELOCATING+${CALL_TABLE_START_ADDR}} :
   {
     ${RELOCATING+PROVIDE(__ctbp = .);}
     *(.call_table_data)
@@ -144,7 +144,7 @@ SECTIONS
   .got		: {${RELOCATING+ *(.got.plt)} *(.got) }
   .dynamic	: { *(.dynamic) }
 
-  .tdata ${TDATA_START_ADDR} :
+  .tdata ${RELOCATING+${TDATA_START_ADDR}} :
   {
 	${RELOCATING+PROVIDE (__ep = .);
 	*(.tbyte)
@@ -158,14 +158,14 @@ SECTIONS
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
 
-  .sdata ${SDATA_START_ADDR} :
+  .sdata ${RELOCATING+${SDATA_START_ADDR}} :
   {
 	${RELOCATING+PROVIDE (__gp = . + 0x8000);}
 	*(.sdata)
    }
 
   /* See comment about .rozdata. */
-  .rosdata ${ROSDATA_START_ADDR} :
+  .rosdata ${RELOCATING+${ROSDATA_START_ADDR}} :
   {
 	*(.rosdata)
   }
