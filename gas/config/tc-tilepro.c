@@ -1042,9 +1042,9 @@ parse_operands (const char *opcode_name,
 
       if (i + 1 < num_operands)
 	{
-	  int separator = (unsigned char)*input_line_pointer++;
+	  char separator = *input_line_pointer++;
 
-	  if (is_end_of_line[separator] || (separator == '}'))
+	  if (is_end_of_stmt (separator) || (separator == '}'))
 	    {
 	      as_bad (_("Too few operands to '%s'."), opcode_name);
 	      return;
@@ -1052,7 +1052,7 @@ parse_operands (const char *opcode_name,
 	  else if (separator != ',')
 	    {
 	      as_bad (_("Unexpected character '%c' after operand %d to %s."),
-		      (char)separator, i + 1, opcode_name);
+		      separator, i + 1, opcode_name);
 	      return;
 	    }
 	}
@@ -1079,7 +1079,7 @@ parse_operands (const char *opcode_name,
 	}
     }
 
-  if (!is_end_of_line[(unsigned char)*input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       switch (*input_line_pointer)
 	{
