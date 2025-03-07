@@ -1572,13 +1572,13 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
 	exp = get_absolute_expression ();
       else
 	{
-	  unsigned char attr;
+	  char attr;
 	  int readonly_removed = 0;
 	  int load_removed = 0;
 
 	  while (attr = *++input_line_pointer,
 		 attr != '"'
-		 && ! is_end_of_line[attr])
+		 && ! is_end_of_stmt (attr))
 	    {
 	      if (ISDIGIT (attr))
 		{
