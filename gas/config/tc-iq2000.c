@@ -682,7 +682,7 @@ s_iq2000_set (int x ATTRIBUTE_UNUSED)
   char *name = input_line_pointer, ch;
   char *save_ILP = input_line_pointer;
 
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     input_line_pointer++;
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
@@ -803,7 +803,7 @@ s_iq2000_end (int x ATTRIBUTE_UNUSED)
   symbolS *p;
   int maybe_text;
 
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       p = get_symbol ();
       demand_empty_rest_of_line ();
