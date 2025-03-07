@@ -5608,7 +5608,7 @@ s7_s_score_end (int x ATTRIBUTE_UNUSED)
   expressionS exp;
   char *fragp;
 
-  if (!is_end_of_line[(unsigned char)*input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       p = s7_get_symbol ();
       demand_empty_rest_of_line ();
@@ -5679,7 +5679,7 @@ s7_s_score_set (int x ATTRIBUTE_UNUSED)
   char name[s7_MAX_LITERAL_POOL_SIZE];
   char * orig_ilp = input_line_pointer;
 
-  while (!is_end_of_line[(unsigned char)*input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     {
       name[i] = (char) * input_line_pointer;
       i++;
@@ -5931,7 +5931,7 @@ s7_s_score_lcomm (int bytes_p)
       SKIP_WHITESPACE ();
     }
 
-  if (is_end_of_line[(unsigned char)*input_line_pointer])
+  if (is_end_of_stmt (*input_line_pointer))
     {
       as_bad (_("missing size expression"));
       return;
@@ -5965,7 +5965,7 @@ s7_s_score_lcomm (int bytes_p)
       ++input_line_pointer;
       SKIP_WHITESPACE ();
 
-      if (is_end_of_line[(unsigned char)*input_line_pointer])
+      if (is_end_of_stmt (*input_line_pointer))
         {
           as_bad (_("missing alignment"));
           return;
