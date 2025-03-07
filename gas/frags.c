@@ -192,10 +192,7 @@ frag_new (size_t old_frags_var_max_size
   frchP->frch_last = frag_now;
 
 #ifndef NO_LISTING
-  {
-    extern struct list_info_struct *listing_tail;
-    frag_now->line = listing_tail;
-  }
+  frag_now->line = listing_tail;
 #endif
 
   gas_assert (frchain_now->frch_last == frag_now);

@@ -62,6 +62,8 @@ extern int listing_lhs_width_second;
 extern int listing_lhs_cont_lines;
 extern int listing_rhs_width;
 
+extern struct list_info_struct *listing_tail;
+
 #endif /* __listing_h__ */
 
 /* end of listing.h */

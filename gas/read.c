@@ -3270,7 +3270,6 @@ assign_symbol (char *name, int mode)
 	 for this symbol.  */
       if (listing & LISTING_SYMBOLS)
 	{
-	  extern struct list_info_struct *listing_tail;
 	  fragS *dummy_frag = notes_calloc (1, sizeof (*dummy_frag));
 	  dummy_frag->line = listing_tail;
 	  dummy_frag->fr_symbol = symbolP;
