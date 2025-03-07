@@ -1264,7 +1264,7 @@ amd64_get_used_input_int_regs (const struct amd64_insn *details,
 	  used_regs_mask |= 1 << base;
 	  used_regs_mask |= 1 << idx;
 	}
-      else
+      else if (!rip_relative_p (modrm))
 	{
 	  used_regs_mask |= 1 << rm;
 	}
@@ -3447,6 +3447,17 @@ test_amd64_get_insn_details (void)
   SELF_CHECK (amd64_get_used_input_int_regs (&details, false)
 	      == ((1 << EAX_REG_NUM)));
   SELF_CHECK (rip_relative_offset (&details) == 0);
+
+  /* INSN: lea 0x1e(%rip),%rdi, rex prefix.  */
+  insn = { 0x48, 0x8d, 0x3d, 0x1e, 0x00, 0x00, 0x00 };
+  amd64_get_insn_details (insn.data (), &details);
+  SELF_CHECK (details.opcode_len == 1);
+  SELF_CHECK (details.enc_prefix_offset == 0);
+  SELF_CHECK (details.opcode_offset == 1);
+  SELF_CHECK (details.modrm_offset == 2);
+  SELF_CHECK (amd64_get_used_input_int_regs (&details, false)
+	      == (1 << EDI_REG_NUM));
+  SELF_CHECK (rip_relative_offset (&details) == 3);
 }
 
 static void
