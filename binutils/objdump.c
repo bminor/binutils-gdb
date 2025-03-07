@@ -3957,15 +3957,13 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 		  break;
 
 		case next_sym:
-		  /* FIXME: There is an implicit assumption here
-		     that the name of sym is different from
-		     paux->symbol.  */
 		  if (! bfd_is_local_label (abfd, sym))
 		    do_print = false;
 		  break;
 		}
 	    }
-	  else
+
+	  if (!do_print)
 	    {
 	      const char * name = bfd_asymbol_name (sym);
 	      char * alloc = NULL;

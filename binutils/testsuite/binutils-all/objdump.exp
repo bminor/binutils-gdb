@@ -249,6 +249,22 @@ if { [ remote_file host exists $testarchive ] } then {
     test_objdump_d $testarchive bintest2.${obj}
 }
 
+# AIX gas doesn't add local symbols to the symbol table.
+# TI C30 and C54x ld emits various "address .. of tmpdir/dump section `...' is
+# not within region `...'" errors, which look bogus for relocatable linking.
+# alpha-vms doesn't support relocatable linking.
+# i?86-msdos ld generates an executable despite being passed -r.
+# Don't chance other than our own ld improperly handling -r.
+if { ![istarget "*-*-aix*"]
+     && ![istarget "*c30-*-*"]
+     && ![istarget "*c54x-*-*"]
+     && ![istarget "alpha-*-*vms*"]
+     && ![istarget "i?86-*-msdos"]
+     && [file normalize "$LD"] == [file normalize "$objdir/../ld/ld-new"]} then {
+    run_dump_test multi-1
+    run_dump_test multi-2
+}
+
 # Test objdump --disassemble=<symbol>
 proc test_objdump_d_sym { testfile dumpfile } {
     global OBJDUMP
