@@ -431,8 +431,7 @@ require_end_of_expr (const char *fname)
   if (is_end_of_stmt (* input_line_pointer)
       || * input_line_pointer == ','
       || strchr (comment_chars, * input_line_pointer)
-      || strchr (line_comment_chars, * input_line_pointer)
-      || strchr (line_separator_chars, * input_line_pointer))
+      || strchr (line_comment_chars, * input_line_pointer))
     return;
 
   as_bad (_("%%%s() must be outermost term in expression"), fname);
