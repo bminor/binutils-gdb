@@ -217,7 +217,7 @@ s_proc (int end_p)
 
       current_name = current_label = NULL;
       SKIP_WHITESPACE ();
-      while (!is_end_of_line[(unsigned char) *input_line_pointer])
+      while (!is_end_of_stmt (*input_line_pointer))
         input_line_pointer++;
     }
   else
