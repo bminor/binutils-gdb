@@ -452,7 +452,7 @@ sh_elf_cons (int nbytes)
   input_line_pointer--;		/* Put terminator back into stream.  */
   if (*input_line_pointer == '#' || *input_line_pointer == '!')
     {
-       while (! is_end_of_line[(unsigned char) *input_line_pointer++]);
+       while (! is_end_of_stmt (*input_line_pointer++));
     }
   else
     demand_empty_rest_of_line ();
