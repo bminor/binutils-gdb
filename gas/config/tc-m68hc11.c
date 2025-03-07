@@ -2813,7 +2813,7 @@ md_assemble (char *str)
   struct m68hc11_opcode *opcode;
 
   struct m68hc11_opcode opcode_local;
-  unsigned char *op_start, *op_end;
+  char *op_start, *op_end;
   char *save;
   char name[20];
   int nlen = 0;
@@ -2828,7 +2828,7 @@ md_assemble (char *str)
 
   /* Find the opcode end and get the opcode in 'name'.  The opcode is forced
      lower case (the opcode table only has lower case op-codes).  */
-  for (op_start = op_end = (unsigned char *) str;
+  for (op_start = op_end = str;
        !is_end_of_stmt (*op_end) && !is_whitespace (*op_end);
        op_end++)
     {
@@ -2862,7 +2862,7 @@ md_assemble (char *str)
       opcode_local.format = opc->opcode->format;
 
       save = input_line_pointer;
-      input_line_pointer = (char *) op_end;
+      input_line_pointer = op_end;
 
       if (opc->format == M68XG_OP_NONE)
         {
@@ -3430,7 +3430,7 @@ md_assemble (char *str)
                   else
                     {
                       as_bad ("Failed to find opcode for %s %s\n",
-			      opc->opcode->name, (char *)op_end);
+			      opc->opcode->name, op_end);
                     }
                 }
             }
@@ -3498,7 +3498,7 @@ md_assemble (char *str)
 
 	  if (nlen < 19
 	      && (*op_end &&
-		  (is_end_of_line[op_end[1]]
+		  (is_end_of_stmt (op_end[1])
 		   || is_whitespace (op_end[1])
 		   || !ISALNUM (op_end[1])))
 	      && (*op_end == 'a' || *op_end == 'b'
@@ -3534,7 +3534,7 @@ md_assemble (char *str)
       return;
     }
   save = input_line_pointer;
-  input_line_pointer = (char *) op_end;
+  input_line_pointer = op_end;
 
   if (opc)
     {
@@ -3715,7 +3715,7 @@ s_m68hc11_mode (int x ATTRIBUTE_UNUSED)
 {
   char *name = input_line_pointer, ch;
 
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     input_line_pointer++;
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
