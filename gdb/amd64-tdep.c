@@ -1377,6 +1377,36 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
     }
 }
 
+/* Convert a %rip-relative INSN to use BASEREG+disp addressing, leaving
+   displacement unchanged.  */
+
+static void
+fixup_riprel (const struct amd64_insn &details, gdb_byte *insn,
+	      int basereg)
+{
+  /* Position of the not-B bit in the 3-byte VEX prefix (in byte 1).  */
+  static constexpr gdb_byte VEX3_NOT_B = 0x20;
+
+  /* REX.B should be unset (VEX.!B set) as we were using rip-relative
+     addressing, but ensure it's unset (set for VEX) anyway, tmp_regno
+     is not r8-r15.  */
+  if (details.enc_prefix_offset != -1)
+    {
+      gdb_byte *pfx = &insn[details.enc_prefix_offset];
+      if (rex_prefix_p (pfx[0]))
+	pfx[0] &= ~REX_B;
+      else if (vex3_prefix_p (pfx[0]))
+	pfx[1] |= VEX3_NOT_B;
+      else
+	gdb_assert_not_reached ("unhandled prefix");
+    }
+
+  int modrm_offset = details.modrm_offset;
+  /* Convert the ModRM field to be base+disp.  */
+  insn[modrm_offset] &= ~0xc7;
+  insn[modrm_offset] |= 0x80 + basereg;
+}
+
 /* Update %rip-relative addressing in INSN.
 
    %rip-relative addressing only uses a 32-bit displacement.
@@ -1392,7 +1422,6 @@ fixup_riprel (struct gdbarch *gdbarch,
 	      CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
   const struct amd64_insn *insn_details = &dsc->insn_details;
-  int modrm_offset = insn_details->modrm_offset;
   CORE_ADDR rip_base;
   int insn_length;
   int arch_tmp_regno, tmp_regno;
@@ -1414,35 +1443,16 @@ fixup_riprel (struct gdbarch *gdbarch,
   if (arch_tmp_regno == -1)
     return false;
 
+  fixup_riprel (dsc->insn_details, dsc->insn_buf.data (), arch_tmp_regno);
+
   /* Convert arch_tmp_regno, which uses architecture ordering (e.g. RDI = 7),
      to GDB regnum.  */
   tmp_regno = amd64_arch_reg_to_regnum (arch_tmp_regno);
-
-  /* Position of the not-B bit in the 3-byte VEX prefix (in byte 1).  */
-  static constexpr gdb_byte VEX3_NOT_B = 0x20;
-
-  /* REX.B should be unset (VEX.!B set) as we were using rip-relative
-     addressing, but ensure it's unset (set for VEX) anyway, tmp_regno
-     is not r8-r15.  */
-  if (insn_details->enc_prefix_offset != -1)
-    {
-      gdb_byte *pfx = &dsc->insn_buf[insn_details->enc_prefix_offset];
-      if (rex_prefix_p (pfx[0]))
-	pfx[0] &= ~REX_B;
-      else if (vex3_prefix_p (pfx[0]))
-	pfx[1] |= VEX3_NOT_B;
-      else
-	gdb_assert_not_reached ("unhandled prefix");
-    }
 
   regcache_cooked_read_unsigned (regs, tmp_regno, &orig_value);
   dsc->tmp_regno = tmp_regno;
   dsc->tmp_save = orig_value;
   dsc->tmp_used = 1;
-
-  /* Convert the ModRM field to be base+disp.  */
-  dsc->insn_buf[modrm_offset] &= ~0xc7;
-  dsc->insn_buf[modrm_offset] |= 0x80 + arch_tmp_regno;
 
   regcache_cooked_write_unsigned (regs, tmp_regno, rip_base);
 
@@ -3458,6 +3468,11 @@ test_amd64_get_insn_details (void)
   SELF_CHECK (amd64_get_used_input_int_regs (&details, false)
 	      == (1 << EDI_REG_NUM));
   SELF_CHECK (rip_relative_offset (&details) == 3);
+
+  /* INSN: lea 0x1e(%ecx),%rdi, rex prefix.  */
+  gdb::byte_vector updated_insn = { 0x48, 0x8d, 0xb9, 0x1e, 0x00, 0x00, 0x00 };
+  fixup_riprel (details, insn.data (), ECX_REG_NUM);
+  SELF_CHECK (insn == updated_insn);
 }
 
 static void
