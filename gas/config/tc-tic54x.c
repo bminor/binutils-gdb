@@ -361,7 +361,7 @@ tic54x_asg (int x ATTRIBUTE_UNUSED)
       str = input_line_pointer;
       while ((c = *input_line_pointer) != ',')
 	{
-	  if (is_end_of_line[(unsigned char) c])
+	  if (is_end_of_stmt (c))
 	    break;
 	  ++input_line_pointer;
 	}
@@ -677,7 +677,7 @@ tic54x_struct (int arg)
     {
       /* Offset is ignored in inner structs.  */
       SKIP_WHITESPACE ();
-      if (!is_end_of_line[(unsigned char) *input_line_pointer])
+      if (!is_end_of_stmt (*input_line_pointer))
 	start_offset = get_absolute_expression ();
       else
 	start_offset = 0;
@@ -867,7 +867,7 @@ tic54x_struct_field (int type)
   int longword_align = 0;
 
   SKIP_WHITESPACE ();
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     count = get_absolute_expression ();
 
   switch (type)
@@ -1137,7 +1137,7 @@ tic54x_global (int type)
       if (c == ',')
 	{
 	  input_line_pointer++;
-	  if (is_end_of_line[(unsigned char) *input_line_pointer])
+	  if (is_end_of_stmt (*input_line_pointer))
 	    c = *input_line_pointer;
 	}
     }
@@ -1546,7 +1546,7 @@ tic54x_version (int x ATTRIBUTE_UNUSED)
 
   SKIP_WHITESPACE ();
   ver = input_line_pointer;
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+  while (!is_end_of_stmt (*input_line_pointer))
     ++input_line_pointer;
   c = *input_line_pointer;
   *input_line_pointer = 0;
@@ -1679,7 +1679,7 @@ tic54x_stringer (int type)
 	}
       SKIP_WHITESPACE ();
       c = *input_line_pointer;
-      if (!is_end_of_line[c])
+      if (!is_end_of_stmt (c))
 	++input_line_pointer;
     }
 
@@ -1704,7 +1704,7 @@ tic54x_align_words (int arg)
   /* Only ".align" with no argument is allowed within .struct/.union.  */
   int count = arg;
 
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     {
       if (arg == 2)
 	as_warn (_("Argument to .even ignored"));
@@ -1959,7 +1959,7 @@ tic54x_include (int ignored ATTRIBUTE_UNUSED)
   else
     {
       filename = input_line_pointer;
-      while (!is_end_of_line[(unsigned char) *input_line_pointer])
+      while (!is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
       c = *input_line_pointer;
       *input_line_pointer = '\0';
@@ -1995,7 +1995,7 @@ tic54x_message (int type)
   else
     {
       msg = input_line_pointer;
-      while (!is_end_of_line[(unsigned char) *input_line_pointer])
+      while (!is_end_of_stmt (*input_line_pointer))
 	++input_line_pointer;
       c = *input_line_pointer;
       *input_line_pointer = 0;
@@ -2073,7 +2073,7 @@ tic54x_loop (int count)
   ILLEGAL_WITHIN_STRUCT ();
 
   SKIP_WHITESPACE ();
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     count = get_absolute_expression ();
 
   do_repeat ((size_t) count, "LOOP", "ENDLOOP", NULL);
@@ -2098,7 +2098,7 @@ tic54x_break (int ignore ATTRIBUTE_UNUSED)
   ILLEGAL_WITHIN_STRUCT ();
 
   SKIP_WHITESPACE ();
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+  if (!is_end_of_stmt (*input_line_pointer))
     cond = get_absolute_expression ();
 
   if (cond)
@@ -2186,7 +2186,7 @@ tic54x_sblock (int ignore ATTRIBUTE_UNUSED)
       seg->flags |= SEC_TIC54X_BLOCK;
 
       c = *input_line_pointer;
-      if (!is_end_of_line[(unsigned char) c])
+      if (!is_end_of_stmt (c))
 	++input_line_pointer;
     }
 
@@ -2291,7 +2291,7 @@ tic54x_var (int ignore ATTRIBUTE_UNUSED)
       if (c == ',')
 	{
 	  ++input_line_pointer;
-	  if (is_end_of_line[(unsigned char) *input_line_pointer])
+	  if (is_end_of_stmt (*input_line_pointer))
 	    c = *input_line_pointer;
 	}
     }
@@ -3104,7 +3104,7 @@ get_operands (struct opstruct operands[], char *line)
   int expecting_operand = 0;
   int i;
 
-  while (numexp < MAX_OPERANDS && !is_end_of_line[(unsigned char) *lptr])
+  while (numexp < MAX_OPERANDS && !is_end_of_stmt (*lptr))
     {
       int paren_not_balanced = 0;
       char *op_start, *op_end;
@@ -3166,7 +3166,7 @@ get_operands (struct opstruct operands[], char *line)
 
   while (is_whitespace (*lptr))
     ++lptr;
-  if (!is_end_of_line[(unsigned char) *lptr])
+  if (!is_end_of_stmt (*lptr))
     {
       as_bad (_("Extra junk on line"));
       return -1;
@@ -4415,7 +4415,7 @@ subsym_substitute (char *line, int forced)
   int recurse = 1;
   int line_conditional = 0;
   char *tmp;
-  unsigned char current_char;
+  char current_char;
 
   /* Flag lines where we might need to replace a single '=' with two;
      GAS uses single '=' to assign macro args values, and possibly other
@@ -4439,7 +4439,7 @@ subsym_substitute (char *line, int forced)
   replacement = xstrdup (line);
   ptr = head = replacement;
 
-  while (!is_end_of_line[(current_char = * (unsigned char *) ptr)])
+  while (!is_end_of_stmt (current_char = * ptr))
     {
       /* Need to update this since LINE may have been modified.  */
       if (eval_line)
@@ -4771,7 +4771,7 @@ tic54x_start_line_hook (void)
 
   /* Work with a copy of the input line, including EOL char.  */
   for (endp = input_line_pointer; *endp != 0; )
-    if (is_end_of_line[(unsigned char) *endp++])
+    if (is_end_of_stmt (*endp++))
       break;
 
   line = xmemdup0 (input_line_pointer, endp - input_line_pointer);
@@ -5382,7 +5382,7 @@ tic54x_start_label (char * label_start, int nul_char, int next_char)
 	}
     }
 
-  if (is_end_of_line[(unsigned char) next_char])
+  if (is_end_of_stmt (next_char))
     return 1;
 
   rest = input_line_pointer;
