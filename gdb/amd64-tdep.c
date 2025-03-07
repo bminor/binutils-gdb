@@ -1211,7 +1211,7 @@ amd64_skip_prefixes (gdb_byte *insn)
    In order to not require adding a rex prefix if the insn doesn't already
    have one, the result is restricted to RAX ... RDI, sans RSP.
    The register numbering of the result follows architecture ordering,
-   e.g. RDI = 7.  */
+   e.g. RDI = 7.  Return -1 if no register can be found.  */
 
 static int
 amd64_get_unused_input_int_reg (const struct amd64_insn *details)
@@ -1263,7 +1263,6 @@ amd64_get_unused_input_int_reg (const struct amd64_insn *details)
     }
 
   gdb_assert (used_regs_mask < 256);
-  gdb_assert (used_regs_mask != 255);
 
   /* Finally, find a free reg.  */
   {
@@ -1274,10 +1273,9 @@ amd64_get_unused_input_int_reg (const struct amd64_insn *details)
 	if (! (used_regs_mask & (1 << i)))
 	  return i;
       }
-
-    /* We shouldn't get here.  */
-    internal_error (_("unable to find free reg"));
   }
+
+  return -1;
 }
 
 /* Extract the details of INSN that we need.  */
@@ -1361,9 +1359,10 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
    32 bits is not enough to be guaranteed to cover the distance between where
    the real instruction is and where its copy is.
    Convert the insn to use base+disp addressing.
-   We set base = pc + insn_length so we can leave disp unchanged.  */
+   We set base = pc + insn_length so we can leave disp unchanged.
+   Return true if successful, false otherwise.  */
 
-static void
+static bool
 fixup_riprel (struct gdbarch *gdbarch,
 	      amd64_displaced_step_copy_insn_closure *dsc,
 	      CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
@@ -1384,6 +1383,9 @@ fixup_riprel (struct gdbarch *gdbarch,
      Pick one not used in the insn.
      NOTE: arch_tmp_regno uses architecture ordering, e.g. RDI = 7.  */
   arch_tmp_regno = amd64_get_unused_input_int_reg (insn_details);
+  if (arch_tmp_regno == -1)
+    return false;
+
   tmp_regno = amd64_arch_reg_to_regnum (arch_tmp_regno);
 
   /* Position of the not-B bit in the 3-byte VEX prefix (in byte 1).  */
@@ -1418,9 +1420,13 @@ fixup_riprel (struct gdbarch *gdbarch,
   displaced_debug_printf ("using temp reg %d, old value %s, new value %s",
 			  dsc->tmp_regno, paddress (gdbarch, dsc->tmp_save),
 			  paddress (gdbarch, rip_base));
+  return true;
 }
 
-static void
+/* Fixup the insn in DSC->insn_buf, which was copied from address FROM to TO.
+   Return true if successful, false otherwise.  */
+
+static bool
 fixup_displaced_copy (struct gdbarch *gdbarch,
 		      amd64_displaced_step_copy_insn_closure *dsc,
 		      CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
@@ -1435,9 +1441,11 @@ fixup_displaced_copy (struct gdbarch *gdbarch,
 	{
 	  /* The insn uses rip-relative addressing.
 	     Deal with it.  */
-	  fixup_riprel (gdbarch, dsc, from, to, regs);
+	  return fixup_riprel (gdbarch, dsc, from, to, regs);
 	}
     }
+
+  return true;
 }
 
 displaced_step_copy_insn_closure_up
@@ -1475,7 +1483,8 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   /* Modify the insn to cope with the address where it will be executed from.
      In particular, handle any rip-relative addressing.	 */
-  fixup_displaced_copy (gdbarch, dsc.get (), from, to, regs);
+  if (!fixup_displaced_copy (gdbarch, dsc.get (), from, to, regs))
+    return nullptr;
 
   write_memory (to, buf, len);
 
