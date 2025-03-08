@@ -490,12 +490,8 @@ _bfd_elf_obj_attrs_arg_type (bfd *abfd, int vendor, unsigned int tag)
 }
 
 static void
-bfd_elf_parse_attr_section_v1 (bfd *abfd,
-			       Elf_Internal_Shdr * hdr,
-			       bfd_byte *contents)
+bfd_elf_parse_attr_section_v1 (bfd *abfd, bfd_byte *p, bfd_byte *p_end)
 {
-  bfd_byte *p = contents;
-  bfd_byte *p_end = p + hdr->sh_size;
   const char *std_sec = get_elf_backend_data (abfd)->obj_attrs_vendor;
 
   while (p_end - p >= 4)
@@ -651,9 +647,9 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 
   ++cursor;
 
-  bfd_elf_parse_attr_section_v1 (abfd, hdr, cursor);
+  bfd_elf_parse_attr_section_v1 (abfd, cursor, data + hdr->sh_size);
 
-free_data:
+ free_data:
   free (data);
 }
 
