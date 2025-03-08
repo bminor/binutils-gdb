@@ -45,9 +45,9 @@ cooked_indexer::check_bounds (cutu_reader *reader)
   unrelocated_addr best_lowpc = {}, best_highpc = {};
   /* Possibly set the default values of LOWPC and HIGHPC from
      `DW_AT_ranges'.  */
-  dwarf2_find_base_address (reader->comp_unit_die (), cu);
+  dwarf2_find_base_address (reader->top_level_die (), cu);
   enum pc_bounds_kind cu_bounds_kind
-    = dwarf2_get_pc_bounds (reader->comp_unit_die (), &best_lowpc, &best_highpc,
+    = dwarf2_get_pc_bounds (reader->top_level_die (), &best_lowpc, &best_highpc,
 			    cu, m_index_storage->get_addrmap (), cu->per_cu);
   if (cu_bounds_kind == PC_BOUNDS_HIGH_LOW && best_lowpc < best_highpc)
     {
@@ -113,16 +113,16 @@ cooked_indexer::ensure_cu_exists (cutu_reader *reader,
 			      language_minimal,
 			      &m_index_storage->get_abbrev_table_cache ());
 
-      if (new_reader.is_dummy () || new_reader.comp_unit_die () == nullptr
-	  || !new_reader.comp_unit_die ()->has_children)
+      if (new_reader.is_dummy () || new_reader.top_level_die () == nullptr
+	  || !new_reader.top_level_die ()->has_children)
 	return nullptr;
 
       auto copy = std::make_unique<cutu_reader> (std::move (new_reader));
       result = m_index_storage->preserve (std::move (copy));
     }
 
-  if (result->is_dummy () || result->comp_unit_die () == nullptr
-      || !result->comp_unit_die ()->has_children)
+  if (result->is_dummy () || result->top_level_die () == nullptr
+      || !result->top_level_die ()->has_children)
     return nullptr;
 
   if (for_scanning)
@@ -684,9 +684,9 @@ void
 cooked_indexer::make_index (cutu_reader *reader)
 {
   check_bounds (reader);
-  find_file_and_directory (reader->comp_unit_die (), reader->cu ());
+  find_file_and_directory (reader->top_level_die (), reader->cu ());
 
-  if (!reader->comp_unit_die ()->has_children)
+  if (!reader->top_level_die ()->has_children)
     return;
 
   index_dies (reader, reader->info_ptr (), nullptr, false);

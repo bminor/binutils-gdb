@@ -954,7 +954,7 @@ public:
 
   dwarf2_cu *cu () const { return m_cu; }
 
-  die_info *comp_unit_die () const { return m_comp_unit_die; }
+  die_info *top_level_die () const { return m_top_level_die; }
 
   const gdb_byte *info_ptr () const { return m_info_ptr; }
 
@@ -1061,7 +1061,7 @@ private:
   const struct abbrev_table *m_abbrev_table;
 
   const gdb_byte *m_info_ptr = nullptr;
-  struct die_info *m_comp_unit_die = nullptr;
+  struct die_info *m_top_level_die = nullptr;
   bool m_dummy_p = false;
 
   dwarf2_per_cu *m_this_cu;
