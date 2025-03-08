@@ -77,7 +77,7 @@ AC_CACHE_CHECK([whether gprof tests can run],
   [gprof_cv_sys_native], [dnl
   gprof_cv_sys_native=no
   if test x"${host}" = x"${target}" \
-     && ${CC-cc} -O2 -pg -o tst-gmon $srcdir/testsuite/tst-gmon.c; then
+     && ${CC-cc} -O2 -fno-omit-frame-pointer -pg -o tst-gmon $srcdir/testsuite/tst-gmon.c; then
     rm -f gmon.out
     ./tst-gmon
     if test -s gmon.out; then

@@ -4,13 +4,13 @@ AUTOMAKE_OPTIONS = foreign
 
 GPROF = ../gprof$(EXEEXT)
 
-GPROF_FLAGS = -pg
-
-AM_CFLAGS = $(GPROF_FLAGS)
+# NB: -O2 -fno-omit-frame-pointer is needed for expected call graph.  See
+# https://sourceware.org/bugzilla/show_bug.cgi?id=32768
+GPROF_FLAGS = -O2 -fno-omit-frame-pointer -pg
 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LINK = $(CC) $(AM_CFLAGS) $(CFLAGS) $(OPT_NO_PLUGINS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) $(GPROF_FLAGS)
+LINK = $(CC) $(AM_CFLAGS) $(CFLAGS) $(OPT_NO_PLUGINS) $(GPROF_FLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 
 # We will add to these later, for each individual test.  Note
