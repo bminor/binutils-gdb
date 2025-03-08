@@ -784,14 +784,17 @@ int
 ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
 {
   ctf_dict_t *ofp = fp;
-  ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, type);
+  ctf_dtdef_t *dtd;
   ctf_array_t *vlen;
+  uint32_t idx;
 
   fp = ctf_get_dict (fp, type);
+  idx = ctf_type_to_index (fp, type);
+  dtd = ctf_dtd_lookup (fp, type);
 
   /* You can only call ctf_set_array on a type you have added, not a
      type that was read in via ctf_open().  */
-  if (type < fp->ctf_stypes)
+  if (idx < fp->ctf_stypes)
     return (ctf_set_errno (ofp, ECTF_RDONLY));
 
   if (dtd == NULL
