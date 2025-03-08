@@ -945,6 +945,11 @@ public:
 
   cutu_reader (cutu_reader &&) = default;
 
+  /* Return true if either:
+
+      - the unit is empty (just a header without any DIE)
+      - the unit is a partial unit and this cutu_reader was built with SKIP
+	PARTIAL true.  */
   bool is_dummy () const { return m_dummy_p; }
 
   dwarf2_cu *cu () const { return m_cu; }
