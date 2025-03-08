@@ -28,6 +28,7 @@
 
 extern int gmon_input;		/* What input did we see?  */
 extern int gmon_file_version;	/* File version are we dealing with.  */
+extern bool gmon_histograms_first;
 
 extern int gmon_io_read_vma (FILE *ifp, bfd_vma *valp);
 extern int gmon_io_read_32 (FILE *ifp, unsigned int *valp);

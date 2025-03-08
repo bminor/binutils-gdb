@@ -278,13 +278,14 @@ sym_id_parse (void)
   Sym *sym, *left, *right;
   struct sym_id *id;
   Sym_Table *tab;
+  Sym_Table *symtab = get_symtab_direct ();
 
   /* Convert symbol ids into Syms, so we can deal with them more easily.  */
   for (id = id_list; id; id = id->next)
     parse_id (id);
 
   /* First determine size of each table.  */
-  for (sym = symtab.base; sym < symtab.limit; ++sym)
+  for (sym = symtab->base; sym < symtab->limit; ++sym)
     {
       for (id = id_list; id; id = id->next)
 	{
@@ -315,7 +316,7 @@ sym_id_parse (void)
     }
 
   /* Make a second pass through symtab, creating syms as necessary.  */
-  for (sym = symtab.base; sym < symtab.limit; ++sym)
+  for (sym = symtab->base; sym < symtab->limit; ++sym)
     {
       for (id = id_list; id; id = id->next)
 	{

@@ -58,6 +58,10 @@ static int gmon_write_raw_arc
 int gmon_input = 0;
 int gmon_file_version = 0;	/* 0 == old (non-versioned) file format.  */
 
+/* True if all histogram records come before any call-graph records and
+   basic-block records.  */
+bool gmon_histograms_first = false;
+
 static enum gmon_ptr_size
 gmon_get_ptr_size (void)
 {
@@ -327,6 +331,10 @@ gmon_out_read (const char *filename)
 	  switch (tag)
 	    {
 	    case GMON_TAG_TIME_HIST:
+	      if (narcs || nbbs)
+		gmon_histograms_first = false;
+	      else
+		gmon_histograms_first = true;
 	      ++nhist;
 	      gmon_input |= INPUT_HISTOGRAM;
 	      hist_read_rec (ifp, filename);
@@ -576,6 +584,7 @@ gmon_out_write (const char *filename)
 {
   FILE *ofp;
   struct gmon_hdr ghdr;
+  Sym_Table *symtab;
 
   ofp = fopen (filename, FOPEN_WB);
   if (!ofp)
@@ -583,6 +592,8 @@ gmon_out_write (const char *filename)
       perror (filename);
       done (1);
     }
+
+  symtab = get_symtab ();
 
   if (file_format == FF_AUTO || file_format == FF_MAGIC)
     {
@@ -704,7 +715,7 @@ gmon_out_write (const char *filename)
 	}
 
       /* Dump the normalized raw arc information.  */
-      for (sym = symtab.base; sym < symtab.limit; ++sym)
+      for (sym = symtab->base; sym < symtab->limit; ++sym)
 	{
 	  for (arc = sym->cg.children; arc; arc = arc->next_child)
 	    {

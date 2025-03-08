@@ -28,8 +28,40 @@
 
 static int cmp_addr (const void *, const void *);
 
-Sym_Table symtab;
+/* The symbol table.  */
+static Sym_Table symtab;
 
+/* Return the pointer to the symbol table.  */
+
+Sym_Table *
+get_symtab_direct (void)
+{
+  return &symtab;
+}
+
+/* Return the pointer to the symbol table and initialize it if it isn't
+   initialized yet.  */
+
+Sym_Table *
+get_symtab (void)
+{
+  static Sym_Table *symtab_p;
+  if (!symtab_p)
+    {
+      symtab_init ();
+
+      symtab_p = &symtab;
+    }
+  return symtab_p;
+}
+
+/* Set the symbol table to *LTAB.  */
+
+void
+set_symtab (Sym_Table *ltab)
+{
+  symtab = *ltab;
+}
 
 /* Initialize a symbol (so it's empty).  */
 

@@ -110,7 +110,9 @@ typedef struct
   }
 Sym_Table;
 
-extern Sym_Table symtab;	/* The symbol table.  */
+extern Sym_Table *get_symtab (void);
+extern Sym_Table *get_symtab_direct (void);
+extern void set_symtab       (Sym_Table *);
 
 extern void sym_init        (Sym *);
 extern void symtab_finalize (Sym_Table *);
