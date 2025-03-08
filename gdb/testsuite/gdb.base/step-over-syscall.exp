@@ -176,7 +176,7 @@ proc setup { syscall } {
     #   0xf7fd5159 <__kernel_vsyscall+9>:    pop    %ebp
     # then a stepi at sysenter will step over the int insn, so make sure
     # next_insn_addr points after the int insn.
-    if { $actual_syscall_insn == "sysenter" } {
+    if { $actual_syscall_insn == "sysenter" || $actual_syscall_insn == "syscall" } {
 	set test "pc after sysenter instruction"
 	set re_int_insn "\[ \t\]*int\[ \t\]\[^\r\n\]*"
 	set re [multi_line \
