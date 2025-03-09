@@ -16,8 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef CONFIG_I386_NM_I386GNU_H
-#define CONFIG_I386_NM_I386GNU_H
+#ifndef GDB_CONFIG_I386_NM_X86_GNU_H
+#define GDB_CONFIG_I386_NM_X86_GNU_H
 
 /* Thread flavors used in re-setting the T bit.  */
 #define THREAD_STATE_FLAVOR		i386_REGS_SEGS_STATE
@@ -34,4 +34,4 @@
   	((((struct i386_thread_state *) (state))->efl &= ~0x100), 1)
 #endif /* __x86_64__ */
 
-#endif /* CONFIG_I386_NM_I386GNU_H */
+#endif /* GDB_CONFIG_I386_NM_X86_GNU_H */

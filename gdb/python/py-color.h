@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef PYTHON_PY_COLOR_H
-#define PYTHON_PY_COLOR_H
+#ifndef GDB_PYTHON_PY_COLOR_H
+#define GDB_PYTHON_PY_COLOR_H
 
 #include "python-internal.h"
 #include "ui-style.h"
@@ -32,4 +32,4 @@ extern bool gdbpy_is_color (PyObject *obj);
 /* Extracts value from OBJ object of gdb.Color type.  */
 extern const ui_file_style::color &gdbpy_get_color (PyObject *obj);
 
-#endif /* PYTHON_PY_COLOR_H */
+#endif /* GDB_PYTHON_PY_COLOR_H */

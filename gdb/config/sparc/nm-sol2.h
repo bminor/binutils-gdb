@@ -17,10 +17,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef CONFIG_SPARC_NM_SOL2_H
-#define CONFIG_SPARC_NM_SOL2_H
+#ifndef GDB_CONFIG_SPARC_NM_SOL2_H
+#define GDB_CONFIG_SPARC_NM_SOL2_H
 
 #define GDB_GREGSET_T prgregset_t
 #define GDB_FPREGSET_T prfpregset_t
 
-#endif /* CONFIG_SPARC_NM_SOL2_H */
+#endif /* GDB_CONFIG_SPARC_NM_SOL2_H */

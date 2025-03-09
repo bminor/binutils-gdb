@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SCOPED_SIGNAL_HANDLER_H
-#define SCOPED_SIGNAL_HANDLER_H
+#ifndef GDBSUPPORT_SCOPED_SIGNAL_HANDLER_H
+#define GDBSUPPORT_SCOPED_SIGNAL_HANDLER_H
 
 #include <signal.h>
 
@@ -70,4 +70,4 @@ private:
 #endif
 };
 
-#endif /* SCOPED_SIGNAL_HANDLER_H  */
+#endif /* GDBSUPPORT_SCOPED_SIGNAL_HANDLER_H */

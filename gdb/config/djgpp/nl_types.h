@@ -17,9 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef CONFIG_DJGPP_NL_TYPES_H
-#define CONFIG_DJGPP_NL_TYPES_H
+#ifndef GDB_CONFIG_DJGPP_NL_TYPES_H
+#define GDB_CONFIG_DJGPP_NL_TYPES_H
 
 typedef int nl_item;
 
-#endif /* CONFIG_DJGPP_NL_TYPES_H */
+#endif /* GDB_CONFIG_DJGPP_NL_TYPES_H */
