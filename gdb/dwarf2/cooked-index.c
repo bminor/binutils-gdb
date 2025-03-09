@@ -374,13 +374,11 @@ cooked_index_shard::handle_gnat_encoded_entry
       cooked_index_entry *last = (cooked_index_entry *) *slot;
       if (last == nullptr || last->per_cu != entry->per_cu)
 	{
-	  gdb::unique_xmalloc_ptr<char> new_name
-	    = make_unique_xstrndup (name.data (), name.length ());
+	  const char *new_name = m_names.insert (name);
 	  last = create (entry->die_offset, DW_TAG_module,
-			 IS_SYNTHESIZED, language_ada, new_name.get (), parent,
+			 IS_SYNTHESIZED, language_ada, new_name, parent,
 			 entry->per_cu);
 	  last->canonical = last->name;
-	  m_names.push_back (std::move (new_name));
 	  new_entries.push_back (last);
 	  *slot = last;
 	}
@@ -389,9 +387,7 @@ cooked_index_shard::handle_gnat_encoded_entry
     }
 
   entry->set_parent (parent);
-  auto new_canon = make_unique_xstrndup (tail.data (), tail.length ());
-  entry->canonical = new_canon.get ();
-  m_names.push_back (std::move (new_canon));
+  entry->canonical = m_names.insert (tail);
 }
 
 /* See cooked-index.h.  */
@@ -509,10 +505,7 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
 	      if (canon_name == nullptr)
 		entry->canonical = entry->name;
 	      else
-		{
-		  entry->canonical = canon_name.get ();
-		  m_names.push_back (std::move (canon_name));
-		}
+		entry->canonical = m_names.insert (std::move (canon_name));
 	      *slot = entry;
 	    }
 	  else
@@ -532,7 +525,6 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
   m_entries.insert (m_entries.end (), new_gnat_entries.begin (),
 		    new_gnat_entries.end ());
 
-  m_names.shrink_to_fit ();
   m_entries.shrink_to_fit ();
   std::sort (m_entries.begin (), m_entries.end (),
 	     [] (const cooked_index_entry *a, const cooked_index_entry *b)

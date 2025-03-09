@@ -32,6 +32,7 @@
 #include "dwarf2/read.h"
 #include "dwarf2/parent-map.h"
 #include "gdbsupport/range-chain.h"
+#include "gdbsupport/string-set.h"
 #include "complaints.h"
 
 #if CXX_STD_THREAD
@@ -381,7 +382,7 @@ private:
   /* The addrmap.  This maps address ranges to dwarf2_per_cu objects.  */
   addrmap_fixed *m_addrmap = nullptr;
   /* Storage for canonical names.  */
-  std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
+  gdb::string_set m_names;
 };
 
 using cooked_index_shard_up = std::unique_ptr<cooked_index_shard>;
