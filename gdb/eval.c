@@ -1071,20 +1071,6 @@ is_integral_or_integral_reference (struct type *type)
 	  && is_integral_type (type->target_type ()));
 }
 
-/* Helper function that implements the body of OP_SCOPE.  */
-
-struct value *
-eval_op_scope (struct type *expect_type, struct expression *exp,
-	       enum noside noside,
-	       struct type *type, const char *string)
-{
-  struct value *arg1 = value_aggregate_elt (type, string, expect_type,
-					    0, noside);
-  if (arg1 == NULL)
-    error (_("There is no field named %s"), string);
-  return arg1;
-}
-
 /* Helper function that implements the body of OP_VAR_ENTRY_VALUE.  */
 
 struct value *
@@ -2615,14 +2601,16 @@ operation::evaluate_for_address (struct expression *exp, enum noside noside)
 }
 
 value *
-scope_operation::evaluate_for_address (struct expression *exp,
-				       enum noside noside)
+scope_operation::evaluate_internal (struct type *expect_type,
+				    struct expression *exp,
+				    enum noside noside,
+				    bool want_address)
 {
-  value *x = value_aggregate_elt (std::get<0> (m_storage),
-				  std::get<1> (m_storage).c_str (),
-				  NULL, 1, noside);
-  if (x == NULL)
-    error (_("There is no field named %s"), std::get<1> (m_storage).c_str ());
+  const char *string = std::get<1> (m_storage).c_str ();
+  value *x = value_aggregate_elt (std::get<0> (m_storage), string,
+				  expect_type, want_address, noside);
+  if (x == nullptr)
+    error (_("There is no field named %s"), string);
   return x;
 }
 
