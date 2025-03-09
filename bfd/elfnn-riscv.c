@@ -2783,7 +2783,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	case R_RISCV_CALL_PLT:
 	  /* Handle a call to an undefined weak function.  This won't be
 	     relaxed, so we have to handle it here.  */
-	  if (h->root.type == bfd_link_hash_undefweak && !via_plt)
+	  if (h != NULL && h->root.type == bfd_link_hash_undefweak && !via_plt)
 	    {
 	      /* We can use x0 as the base register.  */
 	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset + 4);
