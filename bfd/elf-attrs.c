@@ -510,8 +510,8 @@ bfd_elf_parse_attr_section_v1 (bfd *abfd, bfd_byte *p, bfd_byte *p_end)
       if (section_len <= 4)
 	{
 	  _bfd_error_handler
-		(_("%pB: error: attribute section length too small: %ld"),
-		 abfd, (long) section_len);
+	    (_("%pB: error: attribute section length too small: %ld"),
+	     abfd, (long) section_len);
 	  break;
 	}
       section_len -= 4;
@@ -541,15 +541,15 @@ bfd_elf_parse_attr_section_v1 (bfd *abfd, bfd_byte *p, bfd_byte *p_end)
 	  orig_p = p;
 	  tag = _bfd_safe_read_leb128 (abfd, &p, false, p_end);
 	  if (p_end - p >= 4)
-	  {
-	    subsection_len = bfd_get_32 (abfd, p);
-	    p += 4;
-	  }
+	    {
+	      subsection_len = bfd_get_32 (abfd, p);
+	      p += 4;
+	    }
 	  else
-	  {
-	    p = p_end;
-	    break;
-	  }
+	    {
+	      p = p_end;
+	      break;
+	    }
 	  if (subsection_len > section_len)
 	    subsection_len = section_len;
 	  section_len -= subsection_len;
@@ -638,12 +638,12 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
   /* The first character is the version of the attributes.
      Currently only version 'A' is recognised here.  */
   if (*cursor != 'A')
-  {
-    _bfd_error_handler (_("%pB: error: unknown attributes version '%c'(%d) "
-			  "- expecting 'A'\n"), abfd, *cursor, *cursor);
-    bfd_set_error (bfd_error_wrong_format);
-    goto free_data;
-  }
+    {
+      _bfd_error_handler (_("%pB: error: unknown attributes version '%c'(%d) "
+			    "- expecting 'A'\n"), abfd, *cursor, *cursor);
+      bfd_set_error (bfd_error_wrong_format);
+      goto free_data;
+    }
 
   ++cursor;
 
@@ -685,9 +685,9 @@ _bfd_elf_merge_object_attributes (bfd *ibfd, struct bfd_link_info *info)
 	{
 	  _bfd_error_handler
 	    /* xgettext:c-format */
-		(_("error: %pB: object has vendor-specific contents that "
-		   "must be processed by the '%s' toolchain"),
-		 ibfd, in_attr->s);
+	    (_("error: %pB: object has vendor-specific contents that "
+	       "must be processed by the '%s' toolchain"),
+	     ibfd, in_attr->s);
 	  return false;
 	}
 
