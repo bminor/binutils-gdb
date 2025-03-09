@@ -90,8 +90,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-@NATIVE_TRUE@am__append_1 = tst-gmon-gprof.sh
-@NATIVE_TRUE@am__append_2 = tst-gmon-gprof.out
+@NATIVE_TRUE@am__append_1 = tst-gmon-gprof.sh tst-gmon-gprof-l.sh
+@NATIVE_TRUE@am__append_2 = tst-gmon-gprof.out tst-gmon-gprof-l.out
 @NATIVE_TRUE@am__append_3 = tst-gmon.$(OBJEXT) tst-gmon$(EXEEXT) gmon.out
 subdir = testsuite
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -705,6 +705,13 @@ tst-gmon-gprof.sh.log: tst-gmon-gprof.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+tst-gmon-gprof-l.sh.log: tst-gmon-gprof-l.sh
+	@p='tst-gmon-gprof-l.sh'; \
+	b='tst-gmon-gprof-l.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .test.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -879,6 +886,8 @@ uninstall-am:
 @NATIVE_TRUE@	$(LINK) tst-gmon.$(OBJEXT)
 @NATIVE_TRUE@tst-gmon-gprof.out: tst-gmon$(EXEEXT) $(GPROF)
 @NATIVE_TRUE@	$(srcdir)/tst-gmon-gprof.sh $(GPROF) tst-gmon$(EXEEXT)
+@NATIVE_TRUE@tst-gmon-gprof-l.out: tst-gmon$(EXEEXT) $(GPROF)
+@NATIVE_TRUE@	$(srcdir)/tst-gmon-gprof-l.sh $(GPROF) tst-gmon$(EXEEXT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

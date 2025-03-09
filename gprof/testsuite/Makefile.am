@@ -35,4 +35,9 @@ tst-gmon: tst-gmon.$(OBJEXT)
 tst-gmon-gprof.out: tst-gmon$(EXEEXT) $(GPROF)
 	$(srcdir)/tst-gmon-gprof.sh $(GPROF) tst-gmon$(EXEEXT)
 
+check_SCRIPTS += tst-gmon-gprof-l.sh
+check_DATA += tst-gmon-gprof-l.out
+tst-gmon-gprof-l.out: tst-gmon$(EXEEXT) $(GPROF)
+	$(srcdir)/tst-gmon-gprof-l.sh $(GPROF) tst-gmon$(EXEEXT)
+
 endif NATIVE
