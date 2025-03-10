@@ -38,9 +38,9 @@ export LC_ALL
 set -e
 exec 2>&1
 
-actual=${program}.actual
-expected=${program}.expected
-expected_dot=${program}.expected_dot
+actual=${program}.actual-l
+expected=${program}.expected-l
+expected_dot=${program}.expected_dot-l
 cleanup () {
     rm -f "$actual"
     rm -f "$expected"
