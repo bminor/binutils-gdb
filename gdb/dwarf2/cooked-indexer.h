@@ -56,9 +56,8 @@ private:
      up just a single DIE.  */
   cutu_reader *ensure_cu_exists (cutu_reader *reader,
 				 dwarf2_per_objfile *per_objfile,
-				 sect_offset sect_off,
-				 bool is_dwz,
-				 bool for_scanning);
+				 const dwarf2_section_info &section,
+				 sect_offset sect_off, bool for_scanning);
 
   /* Index DIEs in the READER starting at INFO_PTR.  PARENT is
      the entry for the enclosing scope (nullptr at top level).  FULLY

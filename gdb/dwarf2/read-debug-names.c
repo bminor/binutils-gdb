@@ -95,6 +95,14 @@ struct mapped_debug_names_reader
   const gdb_byte *name_table_entry_offs_reordered = nullptr;
   const gdb_byte *entry_pool = nullptr;
 
+  /* The compilation units table, as found in this index.  The CU indices in
+     index entries can index directly into this.  */
+  std::vector<dwarf2_per_cu *> comp_units_table;
+
+  /* The type units table, as found in this index.  The TU indices in index
+     entries can index directly into this.  */
+  std::vector<dwarf2_per_cu *> type_units_table;
+
   struct index_val
   {
     ULONGEST dwarf_tag;
@@ -464,36 +472,36 @@ build_and_check_tu_list_from_debug_names (dwarf2_per_objfile *per_objfile,
 {
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-  int nr_cus = per_bfd->all_comp_units.size ();
-  int nr_cus_tus = per_bfd->all_units.size ();
 
   section->read (objfile);
 
-  uint32_t j = nr_cus;
   for (uint32_t i = 0; i < map.tu_count; ++i)
     {
+      /* Read one entry from the TU list.  */
       sect_offset sect_off
 	= (sect_offset) (extract_unsigned_integer
 			 (map.tu_table_reordered + i * map.offset_size,
 			  map.offset_size,
 			  map.dwarf5_byte_order));
 
-      bool found = false;
-      for (; j < nr_cus_tus; j++)
-	if (per_bfd->get_cu (j)->sect_off == sect_off)
-	  {
-	    found = true;
-	    break;
-	  }
-      if (!found)
+      /* Find the matching dwarf2_per_cu.  */
+      auto found
+	= std::find_if (per_bfd->all_units.begin (), per_bfd->all_units.end (),
+			[sect_off] (const dwarf2_per_cu_up &unit) {
+			  return unit->sect_off == sect_off
+				 && unit->is_debug_types;
+			});
+
+      if (found == per_bfd->all_units.end ())
 	{
 	  warning (_("Section .debug_names has incorrect entry in TU table,"
 		     " ignoring .debug_names."));
 	  return false;
 	}
 
-      map.type_units.emplace_back (per_bfd->get_cu (j));
+      map.type_units.emplace_back (found);
     }
+
   return true;
 }
 
@@ -720,7 +728,6 @@ build_and_check_cu_list_from_debug_names (dwarf2_per_bfd *per_bfd,
 					  dwarf2_section_info &section,
 					  bool is_dwz)
 {
-
   if (map.cu_count != per_bfd->num_comp_units)
     {
       warning (_("Section .debug_names has incorrect number of CUs in CU table,"
@@ -736,18 +743,17 @@ build_and_check_cu_list_from_debug_names (dwarf2_per_bfd *per_bfd,
 			 (map.cu_table_reordered + i * map.offset_size,
 			  map.offset_size,
 			  map.dwarf5_byte_order));
-      dwarf2_per_cu *found = nullptr;
 
       /* Find the matching dwarf2_per_cu.  */
-      for (auto &unit : per_bfd->all_units)
-	if (unit->sect_off == sect_off && !unit->is_debug_types
-	    && unit->is_dwz == is_dwz)
-	  {
-	    found = unit.get ();
-	    break;
-	  }
+      auto found
+	= std::find_if (per_bfd->all_units.begin (), per_bfd->all_units.end (),
+			[is_dwz, sect_off] (const dwarf2_per_cu_up &unit) {
+			  return unit->sect_off == sect_off
+				 && !unit->is_debug_types
+				 && unit->is_dwz == is_dwz;
+			});
 
-      if (found == nullptr)
+      if (found == per_bfd->all_units.end ())
 	{
 	  warning (_("Section .debug_names has incorrect entry in CU table,"
 		     " ignoring .debug_names."));

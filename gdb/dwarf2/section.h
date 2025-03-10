@@ -43,6 +43,8 @@
    the real section this "virtual" section is contained in, and BUFFER,SIZE
    describe the virtual section.  */
 
+#include "dwarf2/types.h"
+
 struct dwarf2_section_info
 {
   /* Return the name of this section.  */
@@ -123,6 +125,14 @@ struct dwarf2_section_info
   /* True if this is a virtual section, False otherwise.
      This specifies which of s.section and s.containing_section to use.  */
   bool is_virtual;
+};
+
+/* A pair-like structure to represent an offset into a section.  */
+
+struct section_and_offset
+{
+  const dwarf2_section_info *section;
+  sect_offset offset;
 };
 
 #endif /* GDB_DWARF2_SECTION_H */
