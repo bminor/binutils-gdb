@@ -1872,6 +1872,19 @@ struct internalvar
     : name (std::move (name))
   {}
 
+  internalvar (internalvar &&other)
+    : name (std::move(other.name)),
+      kind (other.kind),
+      u (other.u)
+  {
+    other.kind = INTERNALVAR_VOID;
+  }
+
+  ~internalvar ()
+  {
+    clear_internalvar (this);
+  }
+
   std::string name;
 
   /* We support various different kinds of content of an internal variable.
