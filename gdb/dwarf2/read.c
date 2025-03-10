@@ -3589,15 +3589,14 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile,
   sorted_by_abbrev.reserve (per_objfile->per_bfd->all_type_units.size ());
 
   for (const auto &cu : per_objfile->per_bfd->all_units)
-    {
-      if (cu->is_debug_types)
-	{
-	  auto sig_type = static_cast<signatured_type *> (cu.get ());
-	  sorted_by_abbrev.emplace_back
-	    (sig_type, read_abbrev_offset (per_objfile, sig_type->section,
-					   sig_type->sect_off));
-	}
-    }
+    if (cu->is_debug_types)
+      {
+	auto sig_type = static_cast<signatured_type *> (cu.get ());
+	sorted_by_abbrev.emplace_back (sig_type,
+				       read_abbrev_offset (per_objfile,
+							   sig_type->section,
+							   sig_type->sect_off));
+      }
 
   std::sort (sorted_by_abbrev.begin (), sorted_by_abbrev.end ());
 
