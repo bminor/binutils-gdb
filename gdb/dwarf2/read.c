@@ -13398,14 +13398,14 @@ finish_fixed_point_type (struct type *type, const char *suffix,
     }
   else if (attr->name == DW_AT_binary_scale)
     {
-      LONGEST scale_exp = attr->constant_value (0);
+      LONGEST scale_exp = attr->signed_constant ().value_or (0);
       gdb_mpz &num_or_denom = scale_exp > 0 ? scale_num : scale_denom;
 
       num_or_denom <<= std::abs (scale_exp);
     }
   else if (attr->name == DW_AT_decimal_scale)
     {
-      LONGEST scale_exp = attr->constant_value (0);
+      LONGEST scale_exp = attr->signed_constant ().value_or (0);
       gdb_mpz &num_or_denom = scale_exp > 0 ? scale_num : scale_denom;
 
       num_or_denom = gdb_mpz::pow (10, std::abs (scale_exp));
