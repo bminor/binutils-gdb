@@ -6170,7 +6170,10 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		    align = p->p_align;
 		  if (align < 1)
 		    align = 1;
-		  p->p_offset = off % align;
+		  /* Avoid p_offset of zero, which might be wrongly
+		     interpreted as the segment being the first one,
+		     containing the file header.  PR32763.  */
+		  p->p_offset = (off + align - 1) % align + 1;
 		}
 	    }
 	  else
