@@ -26,9 +26,8 @@
 
 #ifdef support_sframe_p
 
-/* By default, use 32-bit relocations from .sframe into .text.  */
-#ifndef SFRAME_RELOC_SIZE
-# define SFRAME_RELOC_SIZE 4
+#ifndef sizeof_member
+# define sizeof_member(type, member)	(sizeof (((type *)0)->member))
 #endif
 
 /* Whether frame row entries track RA.
@@ -613,11 +612,9 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
 			struct sframe_func_entry *sframe_fde)
 {
   expressionS exp;
-  unsigned int addr_size;
   symbolS *dw_fde_start_addrS, *dw_fde_end_addrS;
   unsigned int pauth_key;
 
-  addr_size = SFRAME_RELOC_SIZE;
   dw_fde_start_addrS = get_dw_fde_start_addrS (sframe_fde->dw_fde);
   dw_fde_end_addrS = get_dw_fde_end_addrS (sframe_fde->dw_fde);
 
@@ -626,21 +623,24 @@ output_sframe_funcdesc (symbolS *start_of_fre_section,
   exp.X_add_symbol = dw_fde_start_addrS; /* to location.  */
   exp.X_op_symbol = symbol_temp_new_now (); /* from location.  */
   exp.X_add_number = 0;
-  emit_expr (&exp, addr_size);
+  emit_expr (&exp, sizeof_member (sframe_func_desc_entry,
+				  sfde_func_start_address));
 
   /* Size of the function in bytes.  */
   exp.X_op = O_subtract;
   exp.X_add_symbol = dw_fde_end_addrS;
   exp.X_op_symbol = dw_fde_start_addrS;
   exp.X_add_number = 0;
-  emit_expr (&exp, addr_size);
+  emit_expr (&exp, sizeof_member (sframe_func_desc_entry,
+				  sfde_func_size));
 
   /* Offset to the first frame row entry.  */
   exp.X_op = O_subtract;
   exp.X_add_symbol = fre_symbol; /* Minuend.  */
   exp.X_op_symbol = start_of_fre_section; /* Subtrahend.  */
   exp.X_add_number = 0;
-  emit_expr (&exp, addr_size);
+  emit_expr (&exp, sizeof_member (sframe_func_desc_entry,
+				  sfde_func_start_fre_off));
 
   /* Number of FREs.  */
   out_four (sframe_fde->num_fres);
@@ -681,9 +681,6 @@ output_sframe_internal (void)
   unsigned char abi_arch = 0;
   int fixed_fp_offset = SFRAME_CFA_FIXED_FP_INVALID;
   int fixed_ra_offset = SFRAME_CFA_FIXED_RA_INVALID;
-  unsigned int addr_size;
-
-  addr_size = SFRAME_RELOC_SIZE;
 
   /* The function descriptor entries as dumped by the assembler are not
      sorted on PCs.  */
@@ -738,26 +735,26 @@ output_sframe_internal (void)
   out_four (num_fdes); /* Number of FDEs.  */
   out_four (num_fres); /* Number of FREs.  */
 
-  /* FRE sub-section len.  */
+  /* Size of FRE sub-section.  */
   exp.X_op = O_subtract;
   exp.X_add_symbol = end_of_frame_section;
   exp.X_op_symbol = start_of_fre_section;
   exp.X_add_number = 0;
-  emit_expr (&exp, addr_size);
+  emit_expr (&exp, sizeof_member (sframe_header, sfh_fre_len));
 
-  /* Offset of Function Index sub-section.  */
+  /* Offset of FDE sub-section.  */
   exp.X_op = O_subtract;
   exp.X_add_symbol = end_of_frame_hdr;
   exp.X_op_symbol = start_of_func_desc_section;
   exp.X_add_number = 0;
-  emit_expr (&exp, addr_size);
+  emit_expr (&exp, sizeof_member (sframe_header, sfh_fdeoff));
 
   /* Offset of FRE sub-section.  */
   exp.X_op = O_subtract;
   exp.X_add_symbol = start_of_fre_section;
   exp.X_op_symbol = end_of_frame_hdr;
   exp.X_add_number = 0;
-  emit_expr (&exp, addr_size);
+  emit_expr (&exp, sizeof_member (sframe_header, sfh_freoff));
 
   symbol_set_value_now (end_of_frame_hdr);
   symbol_set_value_now (start_of_func_desc_section);
