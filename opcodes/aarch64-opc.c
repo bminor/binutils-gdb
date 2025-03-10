@@ -5222,6 +5222,8 @@ const aarch64_sys_ins_reg aarch64_sys_regs_dc[] =
     { "cisw",       CPENS (0, C7, C14, 2), F_HASXT, AARCH64_NO_FEATURES },
     { "cigsw",      CPENS (0, C7, C14, 4), F_HASXT | F_ARCHEXT, AARCH64_FEATURE (MEMTAG) },
     { "cigdsw",     CPENS (0, C7, C14, 6), F_HASXT | F_ARCHEXT, AARCH64_FEATURE (MEMTAG) },
+    { "cipae",      CPENS (4, C7, C14, 0), F_HASXT | F_ARCHEXT, AARCH64_FEATURE (V8_7A) },
+    { "cigdpae",    CPENS (4, C7, C14, 7), F_HASXT | F_ARCHEXT, AARCH64_FEATURE (V8_7A) },
     { "cipapa",     CPENS (6, C7, C14, 1), F_HASXT, AARCH64_NO_FEATURES },
     { "cigdpapa",   CPENS (6, C7, C14, 5), F_HASXT, AARCH64_NO_FEATURES },
     { 0,       CPENS(0,0,0,0), 0, AARCH64_NO_FEATURES }

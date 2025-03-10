@@ -18,3 +18,7 @@ msr mecid_a1_el2, x0
 msr vmecid_p_el2, x0
 msr vmecid_a_el2, x0
 msr mecid_rl_a_el3, x0
+
+// MEC data cache operations.
+dc cipae, x0
+dc cigdpae, x0

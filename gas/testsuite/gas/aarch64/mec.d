@@ -1,4 +1,5 @@
 #name: MEC System registers
+#as: -march=armv9.2-a
 #objdump: -dr
 
 .*:     file format .*
@@ -22,3 +23,5 @@ Disassembly of section .text:
 [^:]*:	d51ca900 	msr	vmecid_p_el2, x0
 [^:]*:	d51ca920 	msr	vmecid_a_el2, x0
 [^:]*:	d51eaa20 	msr	mecid_rl_a_el3, x0
+[^:]*:	d50c7e00 	dc	cipae, x0
+[^:]*:	d50c7ee0 	dc	cigdpae, x0
