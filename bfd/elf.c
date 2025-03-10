@@ -6002,21 +6002,20 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		    align_power = secalign;
 		}
 	      align = (bfd_size_type) 1 << align_power;
+	      /* If a section requires alignment higher than the
+		 minimum p_align value, don't reduce a maxpagesize
+		 p->p_align set earlier in this function.  */
+	      if (align > bed->p_align)
+		align_pagesize = 0;
 	      if (align < maxpagesize)
-		{
-		  /* If a section requires alignment higher than the
-		     minimum p_align value, don't reduce a maxpagesize
-		     p->p_align set earlier in this function.  */
-		  if (align > bed->p_align)
-		    align_pagesize = 0;
-		  align = maxpagesize;
-		}
+		align = maxpagesize;
 	      else
 		{
 		  /* If a section requires alignment higher than the
 		     maximum page size, set p_align to the section
 		     alignment.  */
-		  align_pagesize = align;
+		  if ((abfd->flags & D_PAGED) != 0)
+		    p->p_align = align;
 		}
 	    }
 
@@ -6184,6 +6183,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      p->p_memsz += adjust;
 	    }
 	}
+
+      if (align_pagesize)
+	p->p_align = align_pagesize;
 
       /* Set up p_filesz, p_memsz, p_align and p_flags from the section
 	 maps.  Set filepos for sections in PT_LOAD segments, and in
@@ -6403,9 +6405,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  print_segment_map (m);
 		}
 	    }
-
-	  if (align_pagesize)
-	    p->p_align = align_pagesize;
 	}
     }
 
