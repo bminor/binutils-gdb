@@ -74,6 +74,8 @@ struct internal_function
   void *cookie;
 };
 
+using internal_function_up = std::unique_ptr<internal_function>;
+
 /* Returns true if the ranges defined by [offset1, offset1+len1) and
    [offset2, offset2+len2) overlap.  */
 
@@ -2297,13 +2299,13 @@ set_internalvar_string (struct internalvar *var, const char *string)
 }
 
 static void
-set_internalvar_function (struct internalvar *var, struct internal_function *f)
+set_internalvar_function (internalvar *var, internal_function_up f)
 {
   /* Clean up old contents.  */
   clear_internalvar (var);
 
   var->kind = INTERNALVAR_FUNCTION;
-  var->u.fn.function = f;
+  var->u.fn.function = f.release ();
   var->u.fn.canonical = 1;
   /* Variables installed here are always the canonical version.  */
 }
@@ -2385,11 +2387,9 @@ static struct cmd_list_element *
 do_add_internal_function (const char *name, const char *doc,
 			  internal_function_fn_noside handler, void *cookie)
 {
-  struct internal_function *ifn;
-  struct internalvar *var = lookup_internalvar (name);
-
-  ifn = new internal_function (name, handler, cookie);
-  set_internalvar_function (var, ifn);
+  set_internalvar_function (lookup_internalvar (name),
+			    std::make_unique<internal_function> (name, handler,
+								 cookie));
 
   return add_cmd (name, no_class, function_command, doc, &functionlist);
 }
