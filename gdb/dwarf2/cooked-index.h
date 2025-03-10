@@ -65,6 +65,17 @@ enum cooked_index_flag_enum : unsigned char
 };
 DEF_ENUM_FLAGS_TYPE (enum cooked_index_flag_enum, cooked_index_flag);
 
+/* Flags used when requesting the full name of an entry.  */
+enum cooked_index_full_name_enum : unsigned char
+{
+  /* Set when requesting the name of "main".  See the method for the
+     full description.  */
+  FOR_MAIN = 1,
+  /* Set when requesting the linkage name for an Ada entry.  */
+  FOR_ADA_LINKAGE_NAME = 2,
+};
+DEF_ENUM_FLAGS_TYPE (enum cooked_index_full_name_enum, cooked_index_full_name_flag);
+
 /* Type representing either a resolved or deferred cooked_index_entry.  */
 
 union cooked_index_entry_ref
@@ -139,18 +150,22 @@ struct cooked_index_entry : public allocate_on_obstack<cooked_index_entry>
 
   /* Construct the fully-qualified name of this entry and return a
      pointer to it.  If allocation is needed, it will be done on
-     STORAGE.  FOR_MAIN is true if we are computing the name of the
-     "main" entry -- one marked DW_AT_main_subprogram.  This matters
-     for avoiding name canonicalization and also a related race (if
-     "main" computation is done during finalization).  If
-     FOR_ADA_LINKAGE is true, then Ada-language symbols will have
-     their "linkage-style" name computed.  The default is
-     source-style.  If the language
-     doesn't prescribe a separator, one can be specified using
-     DEFAULT_SEP.  */
+     STORAGE.
+
+     FLAGS affects the result.  If the FOR_MAIN flag is set, we are
+     computing the name of the "main" entry -- one marked
+     DW_AT_main_subprogram.  This matters for avoiding name
+     canonicalization and also a related race (if "main" computation
+     is done during finalization).
+
+     If the FOR_ADA_LINKAGE_NAME flag is set, then Ada-language
+     symbols will have their "linkage-style" name computed.  The
+     default is source-style.
+
+     If the language doesn't prescribe a separator, one can be
+     specified using DEFAULT_SEP.  */
   const char *full_name (struct obstack *storage,
-			 bool for_main = false,
-			 bool for_ada_linkage = false,
+			 cooked_index_full_name_flag name_flags = 0,
 			 const char *default_sep = nullptr) const;
 
   /* Comparison modes for the 'compare' function.  See the function
@@ -255,10 +270,9 @@ private:
   /* A helper method for full_name.  Emits the full scope of this
      object, followed by the separator, to STORAGE.  If this entry has
      a parent, its write_scope method is called first.  See full_name
-     for a description of the FOR_MAIN and FOR_ADA_LINKAGE
-     parameters.  */
+     for a description of the FLAGS parameter.  */
   void write_scope (struct obstack *storage, const char *sep,
-		    bool for_main, bool for_ada_linkage) const;
+		    cooked_index_full_name_flag flags) const;
 
   /* The parent entry.  This is NULL for top-level entries.
      Otherwise, it points to the parent entry, such as a namespace or

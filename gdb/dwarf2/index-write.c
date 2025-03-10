@@ -1280,7 +1280,7 @@ write_shortcuts_table (cooked_index *table, data_buf &shortcuts,
       if (dw_lang != 0)
 	{
 	  auto_obstack obstack;
-	  const auto main_name = main_info->full_name (&obstack, true);
+	  const auto main_name = main_info->full_name (&obstack, FOR_MAIN);
 
 	  main_name_offset = cpool.size ();
 	  cpool.append_cstr0 (main_name);

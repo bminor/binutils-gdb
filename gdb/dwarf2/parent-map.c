@@ -60,7 +60,7 @@ dump_parent_map (dwarf2_per_bfd *per_bfd, const struct addrmap *map)
 
 	  gdb_printf (outfile, " -> (0x%" PRIx64 ": %s)",
 		      to_underlying (parent_entry->die_offset),
-		      parent_entry->full_name (&temp_storage, false));
+		      parent_entry->full_name (&temp_storage));
 	};
 
   addrmap_dump (const_cast<addrmap *> (map), gdb_stdlog, nullptr,

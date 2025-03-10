@@ -14942,7 +14942,7 @@ cooked_index_functions::expand_symtabs_matching
 	    {
 	      auto_obstack temp_storage;
 	      const char *full_name = entry->full_name (&temp_storage,
-							false, true);
+							FOR_ADA_LINKAGE_NAME);
 	      if (symbol_matcher == nullptr)
 		{
 		  symbol_name_matcher_ftype *name_matcher

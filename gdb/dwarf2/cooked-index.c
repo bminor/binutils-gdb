@@ -221,11 +221,11 @@ cooked_index_entry::matches (domain_search_flags kind) const
 /* See cooked-index.h.  */
 
 const char *
-cooked_index_entry::full_name (struct obstack *storage, bool for_main,
-			       bool for_ada_linkage,
+cooked_index_entry::full_name (struct obstack *storage,
+			       cooked_index_full_name_flag name_flags,
 			       const char *default_sep) const
 {
-  const char *local_name = for_main ? name : canonical;
+  const char *local_name = ((name_flags & FOR_MAIN) != 0) ? name : canonical;
 
   if ((flags & IS_LINKAGE) != 0 || get_parent () == nullptr)
     return local_name;
@@ -240,7 +240,7 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main,
       break;
 
     case language_ada:
-      if (for_ada_linkage)
+      if ((name_flags & FOR_ADA_LINKAGE_NAME) != 0)
 	{
 	  sep = "__";
 	  break;
@@ -257,7 +257,12 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main,
       break;
     }
 
-  get_parent ()->write_scope (storage, sep, for_main, for_ada_linkage);
+  /* The FOR_ADA_LINKAGE_NAME flag should only affect Ada entries, so
+     disable it here if we don't need it.  */
+  if (lang != language_ada)
+    name_flags &= ~FOR_ADA_LINKAGE_NAME;
+
+  get_parent ()->write_scope (storage, sep, name_flags);
   obstack_grow0 (storage, local_name, strlen (local_name));
   return (const char *) obstack_finish (storage);
 }
@@ -267,14 +272,15 @@ cooked_index_entry::full_name (struct obstack *storage, bool for_main,
 void
 cooked_index_entry::write_scope (struct obstack *storage,
 				 const char *sep,
-				 bool for_main,
-				 bool for_ada_linkage) const
+				 cooked_index_full_name_flag flags) const
 {
   if (get_parent () != nullptr)
-    get_parent ()->write_scope (storage, sep, for_main, for_ada_linkage);
+    get_parent ()->write_scope (storage, sep, flags);
   /* When computing the Ada linkage name, the entry might not have
      been canonicalized yet, so use the 'name'.  */
-  const char *local_name = (for_main || for_ada_linkage) ? name : canonical;
+  const char *local_name = ((flags & (FOR_MAIN | FOR_ADA_LINKAGE_NAME)) != 0
+			    ? name
+			    : canonical);
   obstack_grow (storage, local_name, strlen (local_name));
   obstack_grow (storage, sep, strlen (sep));
 }
@@ -471,8 +477,8 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
 		 code in cooked_index_entry::full_name).  */
 	      if (entry->get_parent () != nullptr)
 		{
-		  const char *fullname = entry->full_name (&m_storage, false,
-							   true);
+		  const char *fullname
+		    = entry->full_name (&m_storage, FOR_ADA_LINKAGE_NAME);
 		  cooked_index_entry *linkage = create (entry->die_offset,
 							entry->tag,
 							(entry->flags
@@ -834,7 +840,7 @@ cooked_index::get_main_name (struct obstack *obstack, enum language *lang)
     return nullptr;
 
   *lang = entry->lang;
-  return entry->full_name (obstack, true);
+  return entry->full_name (obstack, FOR_MAIN);
 }
 
 /* See cooked_index.h.  */
@@ -902,7 +908,7 @@ cooked_index::dump (gdbarch *arch)
       gdb_printf ("    name:       %s\n", entry->name);
       gdb_printf ("    canonical:  %s\n", entry->canonical);
       gdb_printf ("    qualified:  %s\n",
-		  entry->full_name (&temp_storage, false, "::"));
+		  entry->full_name (&temp_storage, 0, "::"));
       gdb_printf ("    DWARF tag:  %s\n", dwarf_tag_name (entry->tag));
       gdb_printf ("    flags:      %s\n", to_string (entry->flags).c_str ());
       gdb_printf ("    DIE offset: %s\n", sect_offset_str (entry->die_offset));
