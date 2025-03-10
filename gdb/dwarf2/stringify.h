@@ -38,7 +38,4 @@ extern const char *dwarf_type_encoding_name (unsigned enc);
 /* Convert a DWARF unit type into its string name.  */
 extern const char *dwarf_unit_type_name (int unit_type);
 
-/* Convert a DWARF language into its string name.  */
-extern const char *dwarf_source_language_name (unsigned int lang);
-
 #endif /* GDB_DWARF2_STRINGIFY_H */

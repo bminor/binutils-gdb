@@ -1313,27 +1313,14 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
   /* Store out the .debug_type CUs, if any.  */
   data_buf types_cu_list;
 
-  /* dwarf_per_bfd::all_units is not necessarily sorted as needed in .gdb_index,
-     so sort it here.  */
-  std::vector<dwarf2_per_cu *> units;
-
-  for (const auto &per_cu : per_bfd->all_units)
-    units.emplace_back (per_cu.get ());
-
-  std::sort (units.begin (), units.end (),
-	     [] (const dwarf2_per_cu *a, const dwarf2_per_cu *b)
-	       {
-		 /* Comp units go before type units.  */
-		 if (a->is_debug_types != b->is_debug_types)
-		   return a->is_debug_types < b->is_debug_types;
-
-		 /* Then, sort by section offset.  */
-		 return a->sect_off < b->sect_off;
-	     });
+  /* The CU list is already sorted, so we don't need to do additional
+     work here.  */
 
   int counter = 0;
-  for (const dwarf2_per_cu *per_cu : units)
+  for (int i = 0; i < per_bfd->all_units.size (); ++i)
     {
+      dwarf2_per_cu *per_cu = per_bfd->all_units[i].get ();
+
       const auto insertpair = cu_index_htab.emplace (per_cu, counter);
       gdb_assert (insertpair.second);
 
@@ -1350,7 +1337,7 @@ write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
 			   to_underlying (per_cu->sect_off));
       if (per_cu->is_debug_types)
 	{
-	  const signatured_type *sig_type = (const signatured_type *) per_cu;
+	  signatured_type *sig_type = (signatured_type *) per_cu;
 	  cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
 			       to_underlying (sig_type->type_offset_in_tu));
 	  cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
@@ -1413,12 +1400,14 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
   debug_names nametable (per_bfd, dwarf5_is_dwarf64, dwarf5_byte_order);
   int counter = 0;
   int types_counter = 0;
-  for (const dwarf2_per_cu_up &per_cu : per_bfd->all_units)
+  for (int i = 0; i < per_bfd->all_units.size (); ++i)
     {
+      dwarf2_per_cu *per_cu = per_bfd->all_units[i].get ();
+
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
       data_buf &this_list = per_cu->is_debug_types ? types_cu_list : cu_list;
 
-      nametable.add_cu (per_cu.get (), this_counter);
+      nametable.add_cu (per_cu, this_counter);
       this_list.append_uint (nametable.dwarf5_offset_size (),
 			     dwarf5_byte_order,
 			     to_underlying (per_cu->sect_off));
@@ -1426,8 +1415,8 @@ write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
     }
 
    /* Verify that all units are represented.  */
-  gdb_assert (counter == per_bfd->num_comp_units);
-  gdb_assert (types_counter == per_bfd->num_type_units);
+  gdb_assert (counter == per_bfd->all_comp_units.size ());
+  gdb_assert (types_counter == per_bfd->all_type_units.size ());
 
   for (const cooked_index_entry *entry : table->all_entries ())
     nametable.insert (entry);

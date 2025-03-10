@@ -56,7 +56,6 @@
 #define DW_IDX(name, value) , name = value
 #define DW_IDX_DUP(name, value) , name = value
 #define DW_UT(name, value) , name = value
-#define DW_LANG(name, value) , name = value
 
 #define DW_FIRST_TAG(name, value) enum dwarf_tag { \
   name = value
@@ -87,9 +86,6 @@
 #define DW_FIRST_UT(name, value) enum dwarf_unit_type { \
   name = value
 #define DW_END_UT };
-#define DW_FIRST_LANG(name, value) enum dwarf_source_language { \
-  name = value
-#define DW_END_LANG };
 
 #include "dwarf2.def"
 
@@ -109,8 +105,6 @@
 #undef DW_END_IDX
 #undef DW_FIRST_UT
 #undef DW_END_UT
-#undef DW_FIRST_LANG
-#undef DW_END_LANG
 
 #undef DW_TAG
 #undef DW_TAG_DUP
@@ -126,7 +120,6 @@
 #undef DW_IDX
 #undef DW_IDX_DUP
 #undef DW_UT
-#undef DW_LANG
 
 /* Flag that tells whether entry has a child or not.  */
 #define DW_children_no   0
@@ -343,6 +336,98 @@ enum dwarf_location_list_entry_type
 
 #define DW_ADDR_none		0
 
+/* Source language names and codes.  */
+enum dwarf_source_language
+  {
+    DW_LANG_C89 = 0x0001,
+    DW_LANG_C = 0x0002,
+    DW_LANG_Ada83 = 0x0003,
+    DW_LANG_C_plus_plus = 0x0004,
+    DW_LANG_Cobol74 = 0x0005,
+    DW_LANG_Cobol85 = 0x0006,
+    DW_LANG_Fortran77 = 0x0007,
+    DW_LANG_Fortran90 = 0x0008,
+    DW_LANG_Pascal83 = 0x0009,
+    DW_LANG_Modula2 = 0x000a,
+    /* DWARF 3.  */
+    DW_LANG_Java = 0x000b,
+    DW_LANG_C99 = 0x000c,
+    DW_LANG_Ada95 = 0x000d,
+    DW_LANG_Fortran95 = 0x000e,
+    DW_LANG_PLI = 0x000f,
+    DW_LANG_ObjC = 0x0010,
+    DW_LANG_ObjC_plus_plus = 0x0011,
+    DW_LANG_UPC = 0x0012,
+    DW_LANG_D = 0x0013,
+    /* DWARF 4.  */
+    DW_LANG_Python = 0x0014,
+    /* DWARF 5.  */
+    DW_LANG_OpenCL = 0x0015,
+    DW_LANG_Go = 0x0016,
+    DW_LANG_Modula3 = 0x0017,
+    DW_LANG_Haskell = 0x0018,
+    DW_LANG_C_plus_plus_03 = 0x0019,
+    DW_LANG_C_plus_plus_11 = 0x001a,
+    DW_LANG_OCaml = 0x001b,
+    DW_LANG_Rust = 0x001c,
+    DW_LANG_C11 = 0x001d,
+    DW_LANG_Swift = 0x001e,
+    DW_LANG_Julia = 0x001f,
+    DW_LANG_Dylan = 0x0020,
+    DW_LANG_C_plus_plus_14 = 0x0021,
+    DW_LANG_Fortran03 = 0x0022,
+    DW_LANG_Fortran08 = 0x0023,
+    DW_LANG_RenderScript = 0x0024,
+    DW_LANG_BLISS = 0x0025,
+    /* Post DWARF 5 additions to the DWARF set.
+       See https://dwarfstd.org/languages.html .  */
+    DW_LANG_Kotlin = 0x0026,
+    DW_LANG_Zig = 0x0027,
+    DW_LANG_Crystal = 0x0028,
+    DW_LANG_C_plus_plus_17 = 0x002a,
+    DW_LANG_C_plus_plus_20 = 0x002b,
+    DW_LANG_C17 = 0x002c,
+    DW_LANG_Fortran18 = 0x002d,
+    DW_LANG_Ada2005 = 0x002e,
+    DW_LANG_Ada2012 = 0x002f,
+    DW_LANG_HIP = 0x0030,
+    DW_LANG_Assembly = 0x0031,
+    DW_LANG_C_sharp = 0x0032,
+    DW_LANG_Mojo = 0x0033,
+    DW_LANG_GLSL = 0x0034,
+    DW_LANG_GLSL_ES = 0x0035,
+    DW_LANG_HLSL = 0x0036,
+    DW_LANG_OpenCL_CPP = 0x0037,
+    DW_LANG_CPP_for_OpenCL = 0x0038,
+    DW_LANG_SYCL = 0x0039,
+    DW_LANG_C_plus_plus_23 = 0x003a,
+    DW_LANG_Odin = 0x003b,
+    DW_LANG_P4 = 0x003c,
+    DW_LANG_Metal = 0x003d,
+    DW_LANG_C23 = 0x003e,
+    DW_LANG_Fortran23 = 0x003f,
+    DW_LANG_Ruby = 0x0040,
+    DW_LANG_Move = 0x0041,
+    DW_LANG_Hylo = 0x0042,
+
+    DW_LANG_lo_user = 0x8000,	/* Implementation-defined range start.  */
+    DW_LANG_hi_user = 0xffff,	/* Implementation-defined range start.  */
+
+    /* MIPS.  */
+    DW_LANG_Mips_Assembler = 0x8001,
+    /* UPC.  */
+    DW_LANG_Upc = 0x8765,
+    /* HP extensions.  */
+    DW_LANG_HP_Bliss     = 0x8003,
+    DW_LANG_HP_Basic91   = 0x8004,
+    DW_LANG_HP_Pascal91  = 0x8005,
+    DW_LANG_HP_IMacro    = 0x8006,
+    DW_LANG_HP_Assembler = 0x8007,
+
+    /* Rust extension, but replaced in DWARF 5.  */
+    DW_LANG_Rust_old = 0x9000
+  };
+
 /* Names and codes for macro information.  */
 enum dwarf_macinfo_record_type
   {
@@ -499,10 +584,6 @@ extern const char *get_DW_IDX_name (unsigned int idx);
 /* Return the name of a DW_UT_ constant, or NULL if the value is not
    recognized.  */
 extern const char *get_DW_UT_name (unsigned int ut);
-
-/* Return the name of a DW_LANG_ constant, or NULL if the value is not
-   recognized.  */
-extern const char *get_DW_LANG_name (unsigned int lang);
 
 #ifdef __cplusplus
 }

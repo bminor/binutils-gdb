@@ -205,8 +205,8 @@ set re \
 	 "(  Number of \"partial\" symbols read: $decimal" \
 	 ")?(  Number of psym tables \\(not yet expanded\\): $decimal" \
 	 ")?(  Total memory used for psymbol cache: $decimal" \
-	 ")?(  Number of read units: $decimal" \
-	 "  Number of unread units: $decimal" \
+	 ")?(  Number of read CUs: $decimal" \
+	 "  Number of unread CUs: $decimal" \
 	 ")?  Total memory used for objfile obstack: $decimal" \
 	 "  Total memory used for BFD obstack: $decimal" \
 	 "  Total memory used for string cache: $decimal" \
