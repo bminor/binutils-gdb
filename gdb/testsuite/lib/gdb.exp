@@ -2315,7 +2315,9 @@ proc default_gdb_exit {} {
     }
 
     if ![is_remote host] {
-	remote_close host
+	if {[catch { remote_close host } message]} {
+	    warning "closing gdb failed with: $message"
+	}
     }
     unset gdb_spawn_id
     unset ::gdb_tty_name
