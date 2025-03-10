@@ -37,7 +37,7 @@ ctf_get_ctt_size (const ctf_dict_t *fp,
 		  ssize_t *sizep,
 		  ssize_t *incrementp)
 {
-  return (fp->ctf_dictops->ctfo_get_ctt_size (fp, tp, sizep, incrementp));
+  return (fp->ctf_dictops->ctfo_get_ctt_size (fp, tprefix, sizep, incrementp));
 }
 
 static inline int

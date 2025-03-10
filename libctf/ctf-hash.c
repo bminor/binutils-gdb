@@ -544,7 +544,7 @@ ctf_dynhash_next (ctf_dynhash_t *h, ctf_next_t **it, void **key, void **value)
       i->u.ctn_hash_slot = h->htab->entries;
       i->cu.ctn_h = h;
       i->ctn_n = 0;
-      i->ctn_size = (ssize_t) size;
+      i->ctn_size = size;
       i->ctn_iter_fun = (void (*) (void)) ctf_dynhash_next;
       *it = i;
     }
@@ -555,10 +555,10 @@ ctf_dynhash_next (ctf_dynhash_t *h, ctf_next_t **it, void **key, void **value)
   if (h != i->cu.ctn_h)
     return ECTF_NEXT_WRONGFP;
 
-  if ((ssize_t) i->ctn_n == i->ctn_size)
+  if (i->ctn_n == i->ctn_size)
     goto hash_end;
 
-  while ((ssize_t) i->ctn_n < i->ctn_size
+  while (i->ctn_n < i->ctn_size
 	 && (*i->u.ctn_hash_slot == HTAB_EMPTY_ENTRY
 	     || *i->u.ctn_hash_slot == HTAB_DELETED_ENTRY))
     {
@@ -566,7 +566,7 @@ ctf_dynhash_next (ctf_dynhash_t *h, ctf_next_t **it, void **key, void **value)
       i->ctn_n++;
     }
 
-  if ((ssize_t) i->ctn_n == i->ctn_size)
+  if (i->ctn_n == i->ctn_size)
     goto hash_end;
 
   slot = *i->u.ctn_hash_slot;
@@ -650,7 +650,7 @@ ctf_dynhash_next_sorted (ctf_dynhash_t *h, ctf_next_t **it, void **key,
 		       (int (*) (const void *, const void *, void *)) sort_fun,
 		       sort_arg);
       i->ctn_n = 0;
-      i->ctn_size = (ssize_t) els;
+      i->ctn_size = els;
       i->ctn_iter_fun = (void (*) (void)) ctf_dynhash_next_sorted;
       *it = i;
     }
@@ -661,7 +661,7 @@ ctf_dynhash_next_sorted (ctf_dynhash_t *h, ctf_next_t **it, void **key,
   if (h != i->cu.ctn_h)
     return ECTF_NEXT_WRONGFP;
 
-  if ((ssize_t) i->ctn_n == i->ctn_size)
+  if (i->ctn_n == i->ctn_size)
     {
       ctf_next_destroy (i);
       *it = NULL;
@@ -847,7 +847,7 @@ ctf_dynset_next (ctf_dynset_t *hp, ctf_next_t **it, void **key)
       i->u.ctn_hash_slot = htab->entries;
       i->cu.ctn_s = hp;
       i->ctn_n = 0;
-      i->ctn_size = (ssize_t) size;
+      i->ctn_size = size;
       i->ctn_iter_fun = (void (*) (void)) ctf_dynset_next;
       *it = i;
     }
@@ -858,10 +858,10 @@ ctf_dynset_next (ctf_dynset_t *hp, ctf_next_t **it, void **key)
   if (hp != i->cu.ctn_s)
     return ECTF_NEXT_WRONGFP;
 
-  if ((ssize_t) i->ctn_n == i->ctn_size)
+  if (i->ctn_n == i->ctn_size)
     goto set_end;
 
-  while ((ssize_t) i->ctn_n < i->ctn_size
+  while (i->ctn_n < i->ctn_size
 	 && (*i->u.ctn_hash_slot == HTAB_EMPTY_ENTRY
 	     || *i->u.ctn_hash_slot == HTAB_DELETED_ENTRY))
     {
@@ -869,7 +869,7 @@ ctf_dynset_next (ctf_dynset_t *hp, ctf_next_t **it, void **key)
       i->ctn_n++;
     }
 
-  if ((ssize_t) i->ctn_n == i->ctn_size)
+  if (i->ctn_n == i->ctn_size)
     goto set_end;
 
   slot = *i->u.ctn_hash_slot;

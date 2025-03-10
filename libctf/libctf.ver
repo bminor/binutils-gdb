@@ -63,6 +63,7 @@ LIBCTF_2.0 {
 	ctf_arc_lookup_symbol_name;
 
 	ctf_lookup_variable;
+	ctf_lookup_kind;
 
 	ctf_type_resolve;
 	ctf_type_lname;
@@ -74,12 +75,16 @@ LIBCTF_2.0 {
 	ctf_type_align;
 	ctf_type_kind;
 	ctf_type_kind_forwarded;
+	ctf_type_conflicting;
 	ctf_type_reference;
+	ctf_type_linkage;
 	ctf_type_pointer;
 	ctf_type_encoding;
 	ctf_type_visit;
 	ctf_type_cmp;
 	ctf_type_compat;
+	ctf_tag;
+	ctf_decl_tag;
 
 	ctf_member_info;
 	ctf_member_next;
@@ -88,6 +93,8 @@ LIBCTF_2.0 {
 
 	ctf_enum_name;
 	ctf_enum_value;
+	ctf_enum_unsigned_value;
+	ctf_enum_unsigned;
 	ctf_lookup_enumerator;
 	ctf_lookup_enumerator_next;
 	ctf_arc_lookup_enumerator_next;
@@ -98,8 +105,12 @@ LIBCTF_2.0 {
 	ctf_type_iter;
 	ctf_type_next;
 	ctf_type_iter_all;
+	ctf_type_kind_iter;
+	ctf_type_kind_next;
 	ctf_variable_iter;
 	ctf_variable_next;
+	ctf_datasec_iter;
+	ctf_datasec_next;
 
 	ctf_next_create;
 	ctf_next_destroy;
@@ -109,29 +120,37 @@ LIBCTF_2.0 {
 	ctf_add_const;
 	ctf_add_enum;
 	ctf_add_enum_encoded;
+	ctf_add_enum64;
+	ctf_add_enum64_encoded;
 	ctf_add_float;
+	ctf_add_btf_float;
+	ctf_add_datasec;
 	ctf_add_forward;
 	ctf_add_function;
+	ctf_add_function_linkage;
 	ctf_add_integer;
 	ctf_add_pointer;
 	ctf_add_type;
 	ctf_add_typedef;
 	ctf_add_restrict;
+	ctf_add_section_variable;
 	ctf_add_slice;
 	ctf_add_struct;
 	ctf_add_union;
 	ctf_add_struct_sized;
 	ctf_add_union_sized;
 	ctf_add_unknown;
+	ctf_add_variable;
 	ctf_add_volatile;
 
 	ctf_add_enumerator;
 	ctf_add_member;
 	ctf_add_member_offset;
 	ctf_add_member_encoded;
-	ctf_add_variable;
+	ctf_add_member_bitfield;
 
 	ctf_set_array;
+	ctf_set_conflicting;
 
 	ctf_update;
 	ctf_discard;

@@ -479,8 +479,6 @@ union
 #define CTF_TYPE_NAME(stid, offset) \
 	(((stid) << 31) | ((offset) & CTF_MAX_NAME))
 
-#define CTF_PREFIXED(tp) ((ctf_type_t *) ((uintptr_t) tp + sizeof (ctf_type_t)));
-
 /* The next set of macros are for public consumption only.  Not used internally,
    since the relevant type boundary is dependent upon the version of the file at
    *opening* time, not the version after transparent upgrade.  Use
@@ -515,7 +513,7 @@ union
 
 /* Values for CTF_TYPE_KIND().  If the kind has an associated data list,
    CTF_INFO_VLEN() will extract the number of elements in the list, and
-   the type of each element is shown in the comments below. */
+   the type of each element is shown in the comments below.  */
 
 #define CTF_V3_K_UNKNOWN 0	/* Unknown type (used for padding and
 				   unrepresentable types).  */
@@ -539,7 +537,7 @@ union
 #define CTF_V3_K_MAX	14	/* Maximum possible (V3) CTF_K_* value.  */
 
 /* Values for CTF_TYPE_KIND() for BTF, shared by CTFv4.  Kind names as unchanged
-   as posssible, since they are user-exposed, but their values all differ  */
+   as possible, since they are user-exposed, but their values all differ.  */
 
 #define CTF_K_UNKNOWN  0	/* Unknown type (used for padding and
 				   unrepresentable types).  */
@@ -556,12 +554,11 @@ union
 #define CTF_K_VOLATILE 9	/* ctt_type is base type.  */
 #define CTF_K_CONST    10	/* ctt_type is base type.  */
 #define CTF_K_RESTRICT 11	/* ctt_type is base type.  */
-#define CTF_K_FUNC     12	/* ctt_type is ctf_linkage_t.ctl_linkage.
-				   Named.  */
+#define CTF_K_FUNC_LINKAGE 12	/* Variant data is ctf_linkage_t; ctt_type
+				   is CTF_K_FUNC_PROTO.  Named.  */
 #define CTF_K_FUNCTION 13	/* ctt_type is return type, variant data is
 				   list of ctf_param_t.  Unnamed.  */
-#define CTF_K_VAR      14	/* Variable.  Variant data is ctf_linkage_t.
-				   Emitted sorted by libctf.  */
+#define CTF_K_VAR      14	/* Variable.  Variant data is ctf_linkage_t.  */
 #define CTF_K_DATASEC  15	/* Variant data is list of ctf_var_secinfo_t.  */
 #define CTF_K_BTF_FLOAT 16	/* No data beyond a size.  */
 #define CTF_K_DECL_TAG 17	/* ctt_type is referenced type.  Variant data is
@@ -573,16 +570,22 @@ union
 /* Values for CTF_TYPE_KIND() for CTFv4.  Count down from the top of the ID
    space, */
 
-#define CTF_K_FLOAT   31	/* Variant data is CTF_FP_DATA (see below).  */
+#define CTF_K_FLOAT   31	/* Variant data is a CTF_FP_* value.  */
 #define CTF_K_SLICE   30	/* Variant data is a ctf_slice_t.  */
 #define CTF_K_BIG     29	/* Prefix type; variant data is ctf_type_t.
 				   vlen is high 16 bits of type vlen;
 				   size is high 32 bits of type size.  */
 #define CTF_K_CONFLICTING 28	/* Prefix type; variant data is ctf_type_t.
 				   Name is disambiguator for cnflicting type
-				   (e.g. translation unit name).  */
+				   (e.g. translation unit name).
+
+				   If a type is both CONFLICTING and BIG,
+				   CONFLICTING will always prefix BIG.  */
 #define BTF_K_MAX	19	/* Maximum possible (V4) BTF_K_* value.  */
 #define CTF_K_MAX	31	/* Maximum possible (V4) CTF_K_* value.  */
+
+
+#define CTF_PREFIX_KIND(kind) ((kind) == CTF_K_BIG || (kind) == CTF_K_CONFLICTING)
 
 /* Values for ctt_type when kind is CTF_K_INTEGER.  The flags, offset in bits,
    and size in bits are encoded as a single word using the following macros.
@@ -626,6 +629,7 @@ union
    v3 lose their offset and bits flags (which were meaningless anyway). */
 #define CTF_V3_FP_ENCODING(data)	(((data) & 0xff000000) >> 24)
 
+#define CTF_FP_UNKNOWN  0	/* Unknown encoding.  */
 #define CTF_FP_SINGLE	1	/* IEEE 32-bit float encoding.  */
 #define CTF_FP_DOUBLE	2	/* IEEE 64-bit float encoding.  */
 #define CTF_FP_CPLX	3	/* Complex encoding.  */
@@ -767,14 +771,14 @@ typedef struct ctf_var_secinfo
 #define CTF_FUNC_GLOBAL 1
 #define CTF_FUNC_EXTERN 2
 
-/* Linkage of a CTF_K_FUNC and CTF_K_VAR (holds CTF_FUNC_* or CTF_VAR_*,
-   depending).  */
+/* Linkage of a CTF_K_FUNC_LINKAGE and CTF_K_VAR (holds CTF_FUNC_*
+   or CTF_VAR_*, depending).  */
 typedef struct ctf_linkage
 {
   uint32_t ctl_linkage;
 } ctf_linkage_t;
 
-/* Parameter data for CTF_K_FUNC_PROTO.  Aligned with btf_param.  */
+/* Parameter data for CTF_K_FUNCTION.  Aligned with btf_param.  */
 
 typedef struct ctf_param
 {
@@ -784,6 +788,7 @@ typedef struct ctf_param
 
 /* Variant data of CTF_K_DECL_TAG.  component_idx != -1 means that this tag
    applies to the given member or func argument.  */
+
 typedef struct ctf_decl_tag
 {
   int32_t cdt_component_idx;

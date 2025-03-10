@@ -52,7 +52,7 @@ get_prefixed_kind_v1 (const ctf_type_t *tp)
 static uint32_t
 get_root_v1 (uint32_t info)
 {
-  return (CTF_V1_INFO_ISROOT (info));
+  return !!(CTF_V1_INFO_ISROOT (info));
 }
 
 static uint32_t
@@ -82,7 +82,7 @@ get_prefixed_kind_v2 (const ctf_type_t *tp)
 static uint32_t
 get_root_v2 (uint32_t info)
 {
-  return (CTF_V2_INFO_ISROOT (info));
+  return !!(CTF_V2_INFO_ISROOT (info));
 }
 
 static uint32_t
@@ -108,16 +108,12 @@ get_prefixed_kind_v4 (const ctf_type_t *tp)
 {
   uint32_t kind;
 
-  switch (kind = CTF_INFO_KIND (tp->info))
-    {
-    case CTF_K_CONFLICTING:
-    case CTF_K_BIG:
-      {
-	const ctf_type_t *tprefixed = CTF_PREFIXED (tp);
-	return (CTF_INFO_KIND (tprefixed->info));
-      }
-    }
-  return kind;
+  /* Resolve away as many prefixes as exist.  */
+
+  while (LCTF_IS_PREFIXED_KIND (tp->info))
+    tp++;
+
+  return CTF_INFO_KIND (tp->info);
 }
 
 static uint32_t
@@ -135,20 +131,21 @@ get_vlen_v4 (uint32_t info)
 static uint32_t
 get_prefixed_vlen_v4 (const ctf_type_t *tp)
 {
-  switch (CTF_INFO_KIND (tp->info))
-    {
-    case CTF_K_CONFLICTING:
-      {
-	const ctf_type_t *tprefixed = CTF_PREFIXED (tp);
-	return (CTF_INFO_VLEN (tprefixed->info));
-      }
-    case CTF_K_BIG:
-      {
-	const ctf_type_t *tprefixed = CTF_PREFIXED (tp);
-	return (CTF_INFO_VLEN (tp->info) << 16 | CTF_INFO_VLEN (tprefixed->info));
-      }
-    }
-  return (CTF_INFO_VLEN (tp->info));
+  ctf_type_t *suffix;
+
+  /* Resolve away non-BIG prefixes (which have no affect on vlen).  */
+
+  while (LCTF_IS_PREFIXED_KIND (tp->info)
+	 && CTF_INFO_KIND (info) != CTF_K_BIG)
+    tp++;
+
+  if (!LCTF_IS_PREFIXED_KIND (CTF_INFO_KIND (tp->info)))
+    return (CTF_INFO_VLEN (tp->info));
+
+  suffix = tp + 1;
+
+  /* CTF_K_BIG.  */
+  return (CTF_INFO_VLEN (tp->info) << 16 | CTF_INFO_VLEN (suffix->info));
 }
 
 static inline ssize_t
@@ -221,30 +218,23 @@ static ssize_t
 get_ctt_size_v4 (const ctf_dict_t *fp, const ctf_type_t *tp,
 		 ssize_t *sizep, ssize_t *incrementp)
 {
-  ssize_t size;
+  ssize_t size = 0;
 
-  switch (CTF_INFO_KIND (tp->info))
+  /* Figure out how many prefixes there are, and adjust the size appropriately
+     if we pass a BIG.  */
+
+  while (LCTF_IS_PREFIXED_KIND (tp->info))
     {
-    case CTF_K_CONFLICTING:
-    case CTF_K_BIG:
-      {
-	const ctf_type_t *tprefixed = CTF_PREFIXED (tp);
+      if (CTF_INFO_KIND (tp->info) == CTF_KIND_BIG)
+	size = tp->ctt_size << 32;
 
-	size = get_ctt_size_v4 (fp, tprefixed, sizep, incrementp);
+      if (incrementp)
+	*increment += sizeof (ctf_type_t);
 
-	if (incrementp)
-	  *increment += sizeof (ctf_type_t);
-	break;
-      }
-    default:
-      size = tp->ctt_size;
+      tp++;
     }
 
-  if (CTF_INFO_KIND (tp->info) == CTF_KIND_BIG)
-    {
-      const ctf_type_t *tprefixed = CTF_PREFIXED (tp);
-      size = size << 32 | tprefixed->size;
-    }
+  size |= tp->ctt_size;
 
   if (sizep)
     *sizep = size;
@@ -329,8 +319,8 @@ static ssize_t
 get_vbytes_v4 (ctf_dict_t *fp, const ctf_type_t *tp,
 	       ssize_t size _libctf_unused_)
 {
-  unsigned short kind = LCTF_INFO_KIND (fp, tp);
-  ssize_t vlen = LCTF_INFO_VLEN (fp, tp);
+  unsigned short kind = LCTF_KIND (fp, tp, NULL);
+  ssize_t vlen = LCTF_VLEN (fp, tp, NULL);
 
   switch (kind)
     {
@@ -367,7 +357,7 @@ get_vbytes_v4 (ctf_dict_t *fp, const ctf_type_t *tp,
     case CTF_K_FUNC:
     case CTF_K_BTF_FLOAT:
       return 0;
-    /* These should have been resolved away by LCTF_INFO_KIND.
+    /* These should have been resolved away by LCTF_KIND.
        If this somehow didn't work, fail.  */
     case CTF_K_BIG:
     case CTF_K_CONFLICTING:
@@ -620,12 +610,39 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
   for (tp = tbuf; tp < tend; typemax++)
     {
       unsigned short kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info);
-      unsigned short pkind = LCTF_INFO_KIND (fp, tp);
-      size_t vlen = LCTF_INFO_VLEN (fp, tp);
+      size_t vlen = LCTF_VLEN (fp, tp);
+      int nonroot = 0;
       ssize_t size, increment, vbytes;
+      ctf_type_t *suffix = tp;
 
       (void) ctf_get_ctt_size (fp, tp, &size, &increment);
-      vbytes = LCTF_VBYTES (fp, tp, size);
+
+      /* Go to the first unprefixed type, incrementing all prefixed types'
+	 popcounts along the way.  If we find a CTF_K_CONFLICTING, stop: these
+	 counts are used to increment identifier hashtab sizes, and conflicting
+	 types do not appear in identifier hashtabs.  */
+
+      while (LCTF_IS_PREFIXED_KIND (kind))
+	{
+	  pop[suffix->ctt_type]++;
+
+	  if (kind == CTF_K_CONFLICTING)
+	    {
+	      nonroot = 1;
+	      break;
+	    }
+
+	  suffix++;
+	  if (suffix >= tend)
+	    return ECTF_CORRUPT;
+
+	  kind = LCTF_INFO_UNPREFIXED_KIND (fp, suffix->ctt_info);
+	}
+
+      if (nonroot)
+	continue;
+
+      vbytes = LCTF_VBYTES (fp, suffix, size);
 
       if (vbytes < 0)
 	return ECTF_CORRUPT;
@@ -633,11 +650,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
       /* For forward declarations, ctt_type is the CTF_K_* kind for the tag,
 	 so bump that population count too.  */
       if (kind == CTF_K_FORWARD)
-	pop[tp->ctt_type]++;
-
-      /* For prefixed kinds, increment both.  */
-      if (kind != pkind)
-	pop[tp->pkind]++;
+	pop[suffix->ctt_type]++;
 
       if (kind == CTF_K_ENUM)
 	pop_enumerators += vlen;
@@ -689,6 +702,12 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 				   NULL, NULL, NULL)) == NULL)
     return ENOMEM;
 
+  if ((fp->ctf_vars
+       = ctf_dynhash_create_sized (pop[CTF_K_VAR], ctf_hash_string,
+				   ctf_hash_eq_string,
+				   NULL, NULL, NULL)) == NULL)
+    return ENOMEM;
+
   if ((fp->ctf_type_tags
        = ctf_dynhash_create_sized (pop[CTF_K_DECL_TAG], ctf_hash_string,
 				   ctf_hash_eq_string,
@@ -705,13 +724,17 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
        = ctf_dynhash_create_sized (pop[CTF_K_UNKNOWN] +
 				   pop[CTF_K_INTEGER] +
 				   pop[CTF_K_FLOAT] +
-				   pop[CTF_K_FUNCTION] +
+				   pop[CTF_K_FUNC_LINKAGE] +
 				   pop[CTF_K_TYPEDEF] +
-				   pop[CTF_K_VAR] +
 				   pop_enumerators,
 				   ctf_hash_string,
 				   ctf_hash_eq_string,
 				   NULL, NULL, NULL)) == NULL)
+    return ENOMEM;
+
+  if ((fp->ctf_var_datasecs
+       = ctf_dynhash_create (ctf_hash_pointer, ctf_hash_pointer, NULL, NULL))
+      == NULL)
     return ENOMEM;
 
   if ((fp->ctf_conflicting_enums
@@ -784,6 +807,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
   const ctf_type_t *tp;
   uint32_t id;
   uint32_t *xp;
+  ssize_t biggest_datasec = -1;
 
   unsigned long typemax = fp->ctf_typemax;
 
@@ -815,18 +839,23 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
   for (id = 1, fp->ctf_typemax = 1, tp = tbuf; tp < tend; xp++, id++, fp->ctf_typemax++)
     {
-      unsigned short kind = LCTF_INFO_KIND (fp, tp);
+      unsigned short kind = LCTF_KIND (fp, tp);
       unsigned short isroot = LCTF_INFO_ISROOT (fp, tp->ctt_info);
-      size_t vlen = LCTF_INFO_VLEN (fp, tp);
+      size_t vlen = LCTF_VLEN (fp, tp);
       ssize_t size, increment, vbytes;
-      ctf_dynhash_t *tagtab = NULL;
-
+      ctf_type_t *suffix = tp;
       const char *name;
 
+      /* Prefixed type: pull off the prefixes (for most purposes).  (We already
+	 know the prefixes cannot overflow.)  */
+
+      while (LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, suffix->ctt_info)))
+	suffix++;
+
       (void) ctf_get_ctt_size (fp, tp, &size, &increment);
-      name = ctf_strptr (fp, tp->ctt_name);
+      name = ctf_strptr (fp, suffix->ctt_name);
       /* Cannot fail: shielded by call in init_static_types.  */
-      vbytes = LCTF_VBYTES (fp, tp, size);
+      vbytes = LCTF_VBYTES (fp, suffix, size);
 
       *xp = (uint32_t) ((uintptr_t) tp - (uintptr_t) fp->ctf_buf);
 
@@ -866,7 +895,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	      {
 		err = ctf_dynhash_insert_type (fp, fp->ctf_names,
 					       ctf_index_to_type (fp, id),
-					       tp->ctt_name);
+					       suffix->ctt_name);
 		if (err != 0)
 		  return err * -1;
 	      }
@@ -885,7 +914,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 	  if (err != 0)
 	    return err * -1;
 	  break;
@@ -897,19 +926,16 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	case CTF_K_VOLATILE:
 	case CTF_K_CONST:
 	case CTF_K_RESTRICT:
-	  /* UPTODO: may need to play games here with v3 and below,
-	     possibly introducing new CTF_K_FUNCTION types at upgrade
-	     time.  */
 	case CTF_K_FUNCTION:
 	  break;
 
-	case CTF_K_FUNC_PROTO:
+	case CTF_K_FUNC_LINKAGE:
 	  if (!isroot)
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 	  if (err != 0)
 	    return err * -1;
 	  break;
@@ -920,7 +946,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_structs,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 
 	  if (err != 0)
 	    return err * -1;
@@ -933,7 +959,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_unions,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 
 	  if (err != 0)
 	    return err * -1;
@@ -947,12 +973,13 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 	    /* Only insert forward types if the type is not already present.  */
 	    if (vlen == 0
-		&& ctf_dynhash_lookup_type (ctf_name_table (fp, tp->ctt_type)) != 0)
+		&& ctf_dynhash_lookup_type (ctf_name_table (fp, kind),
+					    suffix->ctt_name) != 0)
 	      break;
 
 	    err = ctf_dynhash_insert_type (fp, fp->ctf_enums,
 					   ctf_index_to_type (fp, id),
-					   tp->ctt_name);
+					   suffix->ctt_name);
 
 	    if (err != 0)
 	      return err * -1;
@@ -972,7 +999,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 	  if (err != 0)
 	    return err * -1;
 	  break;
@@ -983,7 +1010,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_vars,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 	  if (err != 0)
 	    return err * -1;
 	  break;
@@ -994,36 +1021,40 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_datasecs,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 	  if (err != 0)
 	    return err * -1;
+
+	  /* Remember the biggest datasec we've seen.  */
+	  
+	  if (vlen > biggest_datasec)
+	    {
+	      biggest_datasec = vlen;
+	      fp->ctf_default_var_datasec = id;
+	    }
 	  break;
 
 	case CTF_K_DECL_TAG:
-	  tagtab = fp->ctf_decl_tags;
-	  /* FALLTHRU */
 	case CTF_K_TYPE_TAG:
 	  {
 	    ctf_dynset_t *ids;
+	    ctf_dynhash_t *h = ctf_name_table (fp, kind);
 	    const char *str;
 
-	    if ((str = ctf_strptr_validate (fp, tp->ctt_name)) == NULL)
+	    if ((str = ctf_strptr_validate (fp, suffix->ctt_name)) == NULL)
 	      return ctf_errno (fp);
-
-	    if (!tagtab)
-	      tagtab = fp->ctf_type_tags;
 
 	    if (!isroot)
 	      break;
 
-	    if ((ids = ctf_dynhash_lookup (fp, tagtab, str)) == NULL)
+	    if ((ids = ctf_dynhash_lookup (fp, h, str)) == NULL)
 	      {
 		ids = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer, NULL);
 
 		if (!ids)
 		  return ENOMEM;
 
-		err = ctf_dynhash_insert (fp, tagtab, name, ids);
+		err = ctf_dynhash_insert (fp, h, str, ids);
 		if (err != 0)
 		  return err * -1;
 	      }
@@ -1048,7 +1079,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    if (ctf_dynhash_lookup_type (h, name) == 0)
 	      {
 		err = ctf_dynhash_insert_type (fp, h, ctf_index_to_type (fp, id),
-					       tp->ctt_name);
+					       suffix->ctt_name);
 		if (err != 0)
 		  return err * -1;
 	      }
@@ -1060,11 +1091,12 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	     store the index of the pointer type in fp->ctf_ptrtab[ index of
 	     referenced type ].  */
 
-	  if (ctf_type_ischild (fp, tp->ctt_type) == child
-	      && ctf_type_to_index (fp, tp->ctt_type) <= fp->ctf_typemax)
-	    fp->ctf_ptrtab[ctf_type_to_index (fp, tp->ctt_type)] = id;
+	  if (ctf_type_ischild (fp, suffix->ctt_type) == child
+	      && ctf_type_to_index (fp, suffix->ctt_type) <= fp->ctf_typemax)
+	    fp->ctf_ptrtab[ctf_type_to_index (fp, suffix->ctt_type)] = id;
 
 	  break;
+	
 	default:
 	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
 			_("init_static_types(): unhandled CTF kind: %x"), kind);
@@ -1107,6 +1139,39 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
     }
   if (err != ECTF_NEXT_END)
     return err;
+
+  /* In the final pass, we traverse all datasecs and remember the variables in
+     each but the largest, so we can rapidly map from variable back to datasec.
+
+     For simplicity, the "any but the largest" optimization is only applied at
+     open time: if another datasec grows to be larger due to dynamic additions,
+     its membership is still recorded. */
+
+  while ((id = ctf_type_kind_next (fp, &i, CTF_K_DATASEC)) != CTF_ERR)
+    {
+      ctf_next_t *i_sec = NULL;
+      ctf_id_t var_id;
+
+      if (id == fp->ctf_default_var_datasec)
+	continue;
+
+      while ((var_id = ctf_datasec_var_next (fp, id, &i_sec, NULL, NULL))
+	     != CTF_ERR)
+	{
+	  err = ctf_dynhash_insert (fp->ctf_var_datasecs,
+				    (void *) (ptrdiff_t) var_id,
+				    (void *) (ptrdiff_t) id);
+	  if (err != 0)
+	    return err * -1;
+	}
+      if (err != ECTF_NEXT_END)
+	{
+	  ctf_next_destroy (i);
+	  return ctf_errno (fp);
+	}
+    }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    return ctf_errno (fp);
 
   ctf_dprintf ("%zu enum names hashed\n",
 	       ctf_dynhash_elements (fp->ctf_enums));
@@ -1215,13 +1280,14 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
       size_t size;
       uint32_t vlen;
       size_t vbytes;
+      const ctf_type_t *tprefixed;
 
       if (to_foreign)
 	{
-	  kind = LCTF_INFO_KIND (fp, t);
+	  kind = LCTF_KIND (fp, t);
 	  raw_kind = CTF_INFO_UNPREFIXED_KIND (t->ctt_info);
 	  size = t->ctt_size;
-	  vlen = CTF_INFO_VLEN (t->ctt_info);
+	  vlen = CTF_VLEN (fp, t);
 	  vbytes = get_vbytes_v4 (fp, t, 0);
 	}
 
@@ -1229,28 +1295,44 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
       swap_thing (t->ctt_info);
       swap_thing (t->ctt_size);
 
-      /* Prefixed kind: flip the kind being prefixed too.  */
-      if (kind == CTF_K_CONFLICTING || kind == CTF_K_BIG)
+      /* Prefixed kind: flip the kind being prefixed too (for as many prefixes
+	 as there are).  */
+      tprefixed = t;
+      while (LCTF_IS_PREFIXED_KIND (raw_kind))
 	{
-	  const ctf_type_t *tprefixed = CTF_PREFIXED (t);
+	  tprefixed++;
+
+	  if (tprefixed > ((uintptr_t) start) + len)
+	    goto overflow;
 
 	  swap_thing (tprefixed->ctt_name);
 	  swap_thing (tprefixed->ctt_info);
 	  swap_thing (tprefixed->ctt_size);
+	  raw_kind = CTF_INFO_UNPREFIXED_KIND (tprefixed->ctt_info);
 	}
 
       if (!to_foreign)
 	{
-	  kind = LCTF_INFO_KIND (fp, t);
+	  kind = LCTF_KIND (fp, t);
 	  raw_kind = LCTF_INFO_UNPREFIXED_KIND (t->ctt_info);
 	  size = t->ctt_size;
-	  vlen = CTF_INFO_VLEN (t->ctt_info);
+	  vlen = CTF_VLEN (fp, t);
 	  vbytes = get_vbytes_v4 (fp, t, 0);
 	}
 
-      if (raw_kind == CTF_K_CONFLICTING || kind == CTF_K_BIG)
-	t = CTF_PREFIXED (t);
-      t = CTF_PREFIXED (t);
+      /* Move on to the vlen region.  */
+      raw_kind = CTF_INFO_UNPREFIXED_KIND (t->ctt_info);
+      while (LCTF_IS_PREFIXED_KIND (raw_kind))
+	{
+	  t++;
+	  raw_kind = CTF_INFO_UNPREFIXED_KIND (t->ctt_info);
+	}
+
+      if (((uintptr_t) t) + sizeof (ctf_type_t) + vbytes
+	  > ((uintptr_t) start) + len)
+	goto overflow;
+
+      t++;
 
       switch (kind)
 	{
@@ -1260,7 +1342,6 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	case CTF_K_TYPEDEF:
 	case CTF_K_VOLATILE:
 	case CTF_K_CONST:
-	case CTF_K_FUNC:
 	case CTF_K_RESTRICT:
 	case CTF_K_TYPE_TAG:
 	case CTF_K_BTF_FLOAT:
@@ -1279,6 +1360,7 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	    break;
 	  }
 
+	case CTF_K_FUNC_LINKAGE:
 	case CTF_K_VAR:
 	  {
 	    /* This has a single ctf_linkage_t.  */
@@ -1311,7 +1393,6 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	      }
 	    break;
 	  }
-
 	case CTF_K_ARRAY:
 	  {
 	    /* This has a single ctf_array_t.  */
@@ -1417,6 +1498,10 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
     }
 
   return 0;
+
+ overflow:
+  ctf_err_warn (fp, 0, ECTF_CORRUPT, _("overflow byteswapping CTF"));
+  return ECTF_CORRUPT;
 }
 
 /* Flip the endianness of BUF, given the offsets in the (native-endianness) CTH.
@@ -1451,12 +1536,24 @@ void ctf_set_ctl_hashes (ctf_dict_t *fp)
   fp->ctf_lookups[2].ctl_prefix = "enum";
   fp->ctf_lookups[2].ctl_len = strlen (fp->ctf_lookups[2].ctl_prefix);
   fp->ctf_lookups[2].ctl_hash = fp->ctf_enums;
-  fp->ctf_lookups[3].ctl_prefix = _CTF_NULLSTR;
+  fp->ctf_lookups[3].ctl_prefix = "type_tag";
   fp->ctf_lookups[3].ctl_len = strlen (fp->ctf_lookups[3].ctl_prefix);
-  fp->ctf_lookups[3].ctl_hash = fp->ctf_names;
-  fp->ctf_lookups[4].ctl_prefix = NULL;
-  fp->ctf_lookups[4].ctl_len = 0;
-  fp->ctf_lookups[4].ctl_hash = NULL;
+  fp->ctf_lookups[3].ctl_hash = fp->ctf_type_tags;
+  fp->ctf_lookups[4].ctl_prefix = "decl_tag";
+  fp->ctf_lookups[4].ctl_len = strlen (fp->ctf_lookups[4].ctl_prefix);
+  fp->ctf_lookups[4].ctl_hash = fp->ctf_decl_tags;
+  fp->ctf_lookups[5].ctl_prefix = "datasec";
+  fp->ctf_lookups[5].ctl_len = strlen (fp->ctf_lookups[5].ctl_prefix);
+  fp->ctf_lookups[5].ctl_hash = fp->ctf_decl_tags;
+  fp->ctf_lookups[6].ctl_prefix = "var";
+  fp->ctf_lookups[6].ctl_len = strlen (fp->ctf_lookups[6].ctl_prefix);
+  fp->ctf_lookups[6].ctl_hash = fp->ctf_var;
+  fp->ctf_lookups[7].ctl_prefix = _CTF_NULLSTR;
+  fp->ctf_lookups[7].ctl_len = strlen (fp->ctf_lookups[7].ctl_prefix);
+  fp->ctf_lookups[7].ctl_hash = fp->ctf_names;
+  fp->ctf_lookups[8].ctl_prefix = NULL;
+  fp->ctf_lookups[8].ctl_len = 0;
+  fp->ctf_lookups[8].ctl_hash = NULL;
 }
 
 /* Open a CTF file, mocking up a suitable ctf_sect.  */
@@ -2143,7 +2240,6 @@ void
 ctf_dict_close (ctf_dict_t *fp)
 {
   ctf_dtdef_t *dtd, *ntd;
-  ctf_dvdef_t *dvd, *nvd;
   ctf_in_flight_dynsym_t *did, *nid;
   ctf_err_warning_t *err, *nerr;
 
@@ -2186,12 +2282,7 @@ ctf_dict_close (ctf_dict_t *fp)
   ctf_dynhash_destroy (fp->ctf_type_tags);
   ctf_dynhash_destroy (fp->ctf_decl_tags);
   ctf_dynhash_destroy (fp->ctf_names);
-
-  for (dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL; dvd = nvd)
-    {
-      nvd = ctf_list_next (dvd);
-      ctf_dvd_delete (fp, dvd);
-    }
+  ctf_dynhash_destroy (fp->ctf_var_datasecs);
 
   ctf_dynhash_destroy (fp->ctf_symhash_func);
   ctf_dynhash_destroy (fp->ctf_symhash_objt);

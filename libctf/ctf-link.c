@@ -519,7 +519,7 @@ check_variable (const char *name, ctf_dict_t *fp, ctf_id_t type,
 }
 
 /* Link one variable named NAME of type TYPE found in IN_FP into FP.  */
-
+/* UPTODO */
 static int
 ctf_link_one_variable (ctf_dict_t *fp, ctf_dict_t *in_fp, const char *name,
 		       ctf_id_t type, int cu_mapped)
@@ -552,7 +552,7 @@ ctf_link_one_variable (ctf_dict_t *fp, ctf_dict_t *in_fp, const char *name,
       if (check_variable (name, fp, dst_type, &dvd))
 	{
 	  /* No variable here: we can add it.  */
-	  if (ctf_add_variable (fp, name, dst_type) < 0)
+	  if (ctf_add_variable (fp, name, dst_type) == CTF_ERR)
 	    return -1; 				/* errno is set for us.  */
 	  return 0;
 	}
@@ -595,8 +595,9 @@ ctf_link_one_variable (ctf_dict_t *fp, ctf_dict_t *in_fp, const char *name,
 	}
     }
 
+  /* UPTODO: linkage */
   if (check_variable (name, per_cu_out_fp, dst_type, &dvd))
-    if (ctf_add_variable (per_cu_out_fp, name, dst_type) < 0)
+    if (ctf_add_variable (per_cu_out_fp, name, dst_type) == CTF_ERR)
       return (ctf_set_errno (fp, ctf_errno (per_cu_out_fp)));
   return 0;
 }

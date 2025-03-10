@@ -115,6 +115,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       buf = ctf_type_aname (fp, id);
       if (!buf)
 	{
+		printf("kind is: %u\n", ctf_type_kind(fp, id));
 	  if (id == 0 || ctf_errno (fp) == ECTF_NONREPRESENTABLE)
 	    {
 	      ctf_set_errno (fp, ECTF_NONREPRESENTABLE);
@@ -602,7 +603,8 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
 
 /* Dump a single variable into the cds_items.  */
 static int
-ctf_dump_var (const char *name, ctf_id_t type, void *arg)
+ctf_dump_var (ctf_dic_t *fp _libctf_unused_, const char *name, ctf_id_t type,
+	      void *arg)
 {
   char *str;
   char *typestr;
@@ -627,8 +629,8 @@ ctf_dump_var (const char *name, ctf_id_t type, void *arg)
 
 /* Dump a single struct/union member into the string in the membstate.  */
 static int
-ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
-		 int depth, void *arg)
+ctf_dump_member (ctf_dict_t *fp _libctf_unused_, const char *name,
+		 ctf_id_t id, unsigned long offset, int depth, void *arg)
 {
   ctf_dump_membstate_t *state = arg;
   char *typestr = NULL;
@@ -682,7 +684,7 @@ type_hex_digits (ctf_id_t id)
 
 /* Dump a single type into the cds_items.  */
 static int
-ctf_dump_type (ctf_id_t id, int flag, void *arg)
+ctf_dump_type (ctf_dict_t *fp _libctf_unused_, ctf_id_t id, int flag, void *arg)
 {
   char *str;
   char *indent;
@@ -848,9 +850,6 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	{
 	case CTF_SECT_HEADER:
 	  ctf_dump_header (fp, state);
-	  break;
-	case CTF_SECT_LABEL:
-	  /* Not implemented. */
 	  break;
 	case CTF_SECT_OBJT:
 	  if (ctf_dump_objts (fp, state, 0) < 0)

@@ -133,11 +133,11 @@ typedef struct ctf_lookup
 typedef struct ctf_dictops
 {
   uint32_t (*ctfo_get_kind) (uint32_t);
-  uint32_t (*ctfo_get_prefixed_kind) (const ctf_type_t *);
+  uint32_t (*ctfo_get_prefixed_kind) (const ctf_type_t *tp);
   uint32_t (*ctfo_get_root) (uint32_t);
   uint32_t (*ctfo_get_vlen) (uint32_t);
-  uint32_t (*ctfo_get_prefixed_vlen) (const ctf_type_t *);
-  ssize_t (*ctfo_get_ctt_size) (const ctf_dict_t *, const ctf_type_t *,
+  uint32_t (*ctfo_get_prefixed_vlen) (const ctf_type_t *tp);
+  ssize_t (*ctfo_get_ctt_size) (const ctf_dict_t *, const ctf_type_t *tp,
 				ssize_t *, ssize_t *);
   ssize_t (*ctfo_get_vbytes) (ctf_dict_t *, const ctf_type_t *, ssize_t);
 } ctf_dictops_t;
@@ -182,18 +182,13 @@ typedef struct ctf_dtdef
   ctf_id_t dtd_type;		/* Type identifier for this definition.  */
   ctf_id_t dtd_final_type;	/* Final (nonprovisional) id, if nonzero.  */
   ctf_list_t dtd_refs;		/* Refs to this DTD's dtd_type: see below.  */
-  ctf_type_t dtd_data;		/* Type node, including name.  */
-  size_t dtd_vlen_alloc;	/* Total vlen space allocated (vbytes).  */
-  unsigned char *dtd_vlen;	/* Variable-length data for this type.  */
+  ctf_type_t *dtd_buf;		/* Type nodes plus variable-length data for this type.  */
+  size_t dtd_buf_size;		/* Length of dtd_buf in bytes.  */
+  ctf_type_t *dtd_data;		/* True type node, including name (pointer into dtd_buf).  */
+  unsigned char *dtd_vlen;	/* Actual vlen data (pointer into dtd_buf).  */
+  size_t dtd_vlen_size;		/* Total vlen space so far (vbytes).  */
+  uint64_t dtd_last_offset;	/* Offset of the last struct field.  */
 } ctf_dtdef_t;
-
-typedef struct ctf_dvdef
-{
-  ctf_list_t dvd_list;		/* List forward/back pointers.  */
-  char *dvd_name;		/* Name associated with variable.  */
-  ctf_id_t dvd_type;		/* Type of variable.  */
-  unsigned long dvd_snapshots;	/* Snapshot count when inserted.  */
-} ctf_dvdef_t;
 
 typedef struct ctf_err_warning
 {
@@ -286,7 +281,7 @@ typedef struct ctf_dedup
      (The actual allocations are in the CTF dict for the former and the real
      atoms table for the latter).  Uses the same namespaces as ctf_lookups,
      below, but has no need for null-termination.  */
-  ctf_dynhash_t *cd_decorated_names[4];
+  ctf_dynhash_t *cd_decorated_names[7];
 
   /* Map type names to a hash from type hash value -> number of times each value
      has appeared.  Enumeration constants are tracked via the enum they appear
@@ -390,7 +385,9 @@ struct ctf_dict
   ctf_dynhash_t *ctf_decl_tags;	    /* Hash table of dynsets of decl tags.  */
   ctf_dynhash_t *ctf_names;	    /* Hash table of remaining types, plus
 				       enumeration constants.  */
-  ctf_lookup_t ctf_lookups[5];	    /* Pointers to nametabs for name lookup.  */
+  ctf_lookup_t ctf_lookups[8];	    /* Pointers to nametabs for name lookup.  */
+  ctf_dynhash_t *ctf_var_datasecs;  /* Non-default var -> datasec mappings.  */
+  ctf_id_t ctf_default_var_datasec; /* Datasec not recorded in ctf_var_datasecs.  */
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
   ctf_strs_writable_t *ctf_dynstrtab; /* Dynamically allocated string table, if any. */
   ctf_dynhash_t *ctf_str_atoms;	  /* Hash table of ctf_str_atoms_t.  */
@@ -449,7 +446,6 @@ struct ctf_dict
   int ctf_version;		  /* CTF data version.  */
   ctf_dynhash_t *ctf_dthash;	  /* Hash of dynamic type definitions.  */
   ctf_list_t ctf_dtdefs;	  /* List of dynamic type definitions.  */
-  ctf_list_t ctf_dvdefs;	  /* List of dynamic variable definitions.  */
   unsigned long ctf_dtoldid;	  /* Oldest id that has been committed.  */
   unsigned long ctf_snapshots;	  /* ctf_snapshot() plus ctf_update() count.  */
   unsigned long ctf_snapshot_lu;  /* ctf_snapshot() call count at last update.  */
@@ -542,8 +538,8 @@ struct ctf_next
 {
   void (*ctn_iter_fun) (void);
   ctf_id_t ctn_type;
-  ssize_t ctn_size;
-  ssize_t ctn_increment;
+  size_t ctn_size;
+  size_t ctn_increment;
   const ctf_type_t *ctn_tp;
   uint32_t ctn_n;
 
@@ -555,19 +551,20 @@ struct ctf_next
 
   /* We can save space on this side of things by noting that a type is either
      dynamic or not, as a whole, and a given iterator can only iterate over one
-     kind of thing at once: so we can overlap the DTD and non-DTD members, and
-     the structure, variable and enum members, etc.  */
+     kind of thing at once: so we can overlap the DTD and non-DTD members, the
+     structure and enum members, etc.  */
   union
   {
-    unsigned char *ctn_vlen;
+    const ctf_dtdef_t *ctn_dtd;
     const ctf_enum_t *ctn_en;
-    const ctf_dvdef_t *ctn_dvd;
+    const ctf_enum64_t *ctn_en64;
+    const ctf_var_secinfo_t *ctn_datasec;
     ctf_next_hkv_t *ctn_sorted_hkv;
     void **ctn_hash_slot;
   } u;
 
   /* This union is of various sorts of dict we can iterate over: currently
-     archives, dictionaries, dynhashes, and dynsets.  ctn_fp is non-const
+     archives, dictionaries, dynhashes, and dynsets.  ctn_fp is non-consta
      because we need to set errors on it.  */
 
   union
@@ -592,16 +589,24 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 
 #define LCTF_INDEX_TO_TYPEPTR(fp, i)					\
   ((i > fp->ctf_stypes) ?						\
-   &(ctf_dtd_lookup (fp, ctf_index_to_type (fp, i))->dtd_data) :	\
+   ctf_dtd_lookup (fp, ctf_index_to_type (fp, i))->dtd_data :		\
    (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]))
 
+/* The non *INFO variants of these macros acquire the relevant info from the
+   suffixed type, if the type is prefixed.  (Internally to libctf, all types
+   that may ever take a prefix are prefixed until they are written out, so that
+   nothing special needs to be done to handle them should their size later
+   expand past the limit where prefixing is needed.)  */
+
 #define LCTF_INFO_UNPREFIXED_KIND(fp, info) ((fp)->ctf_dictops->ctfo_get_kind(info))
-#define LCTF_INFO_KIND(fp, tp)		((fp)->ctf_dictops->ctfo_get_prefixed_kind(tp))
+#define LCTF_KIND(fp, tp)		((fp)->ctf_dictops->ctfo_get_prefixed_kind(tp))
 #define LCTF_INFO_ISROOT(fp, info)	((fp)->ctf_dictops->ctfo_get_root(info))
-#define LCTF_INFO_VLEN(fp, tp)		((fp)->ctf_dictops->ctfo_get_prefixed_vlen(tp))
+#define LCTF_VLEN(fp, tp)		((fp)->ctf_dictops->ctfo_get_prefixed_vlen(tp))
 #define LCTF_INFO_UNPREFIXED_VLEN(fp, info)	((fp)->ctf_dictops->ctfo_get_vlen(info))
 #define LCTF_VBYTES(fp, tp, size) \
   ((fp)->ctf_dictops->ctfo_get_vbytes (fp, tp, size))
+
+#define LCTF_IS_PREFIXED_KIND(kind) (kind == CTF_K_BIG || kind == CTF_K_CONFLICTING)
 
 #define LCTF_CHILD		0x0001	/* CTF dict is a child.  */
 #define LCTF_LINKING		0x0002  /* CTF link is underway: respect ctf_link_flags.  */
@@ -611,8 +616,9 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 #define LCTF_PRESERIALIZED	0x0020  /* Already serialized all but the strtab.  */
 
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
-extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t);
-extern ctf_id_t ctf_lookup_variable_here (ctf_dict_t *fp, const char *name);
+extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t,
+					   const ctf_type_t **suffix);
+extern ctf_type_t *ctf_find_prefix (ctf_type_t *, int kind);
 extern ctf_id_t ctf_lookup_by_sym_or_name (ctf_dict_t *, unsigned long symidx,
 					   const char *symname, int try_parent,
 					   int is_function);
@@ -716,15 +722,10 @@ extern void ctf_dtd_delete (ctf_dict_t *, ctf_dtdef_t *);
 extern ctf_dtdef_t *ctf_dtd_lookup (const ctf_dict_t *, ctf_id_t);
 extern ctf_dtdef_t *ctf_dynamic_type (const ctf_dict_t *, ctf_id_t);
 
-extern int ctf_dvd_insert (ctf_dict_t *, ctf_dvdef_t *);
-extern void ctf_dvd_delete (ctf_dict_t *, ctf_dvdef_t *);
-extern ctf_dvdef_t *ctf_dvd_lookup (const ctf_dict_t *, const char *);
-
 extern ctf_id_t ctf_add_encoded (ctf_dict_t *, uint32_t, const char *,
 				 const ctf_encoding_t *, uint32_t kind);
 extern ctf_id_t ctf_add_reftype (ctf_dict_t *, uint32_t, ctf_id_t,
 				 uint32_t kind);
-extern int ctf_add_variable_forced (ctf_dict_t *, const char *, ctf_id_t);
 extern int ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
 					const char *, ctf_id_t);
 
@@ -792,6 +793,8 @@ extern char *ctf_str_append_noerr (char *, const char *);
 
 extern ctf_id_t ctf_type_resolve_unsliced (ctf_dict_t *, ctf_id_t);
 extern int ctf_type_kind_unsliced (ctf_dict_t *, ctf_id_t);
+extern ssize_t ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
+				       ctf_type_t type, ssize_t bit_offset);
 
 _libctf_printflike_ (1, 2)
 extern void ctf_dprintf (const char *, ...);

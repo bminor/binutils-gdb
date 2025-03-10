@@ -371,15 +371,20 @@ ctf_lookup_by_name (ctf_dict_t *fp, const char *name)
   return ctf_lookup_by_name_internal (fp, NULL, name);
 }
 
-/* Return the pointer to the internal CTF type data corresponding to the
-   given type ID.  If the ID is invalid, the function returns NULL.
+/* Return the pointer to the internal CTF type data corresponding to the given
+   type ID.  If the ID is invalid, the function returns NULL.  The type data
+   returned is the prefix, if this is a a prefixed kind: if SUFFIX is set, also
+   provide the suffix.  If there is no prefix, the SUFFIX is the same as the
+   return value.  (See ctf-open.c's dictops for why.)
+
    This function is not exported outside of the library.  */
 
 const ctf_type_t *
-ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type)
+ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, ctf_type_t **suffix)
 {
   ctf_dict_t *fp = *fpp;
   ctf_id_t idx;
+  int kind;
 
   if ((fp = ctf_get_dict (fp, type)) == NULL)
     {
@@ -388,14 +393,53 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type)
     }
 
   idx = ctf_type_to_index (fp, type);
-  if (idx > 0 && (unsigned long) idx <= fp->ctf_typemax)
+  if (idx < 0 || (unsigned long) idx > fp->ctf_typemax)
     {
-      *fpp = fp;		/* Possibly the parent CTF dict.  */
-      return (LCTF_INDEX_TO_TYPEPTR (fp, idx));
+      ctf_set_errno (*fpp, ECTF_BADID);
+      return NULL;
     }
+    
+  *fpp = fp;		/* Possibly the parent CTF dict.  */
+  if (i->ctn_type > fp->ctf_stypes)
+    {
+      ctf_dtdef_t *dtd;
 
-  (void) ctf_set_errno (*fpp, ECTF_BADID);
-  return NULL;
+      dtd = ctf_dtd_lookup (fp, ctf_index_to_type (fp, idx));
+      if (suffix)
+	*suffix = dtd->dtd_data;
+      return dtd->dtd_buf;
+    }
+  else
+    {
+      ctf_type_t *tp;
+	  
+      tp = (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]);
+      if (suffix)
+	{
+	  ctf_type_t *suff;
+
+	  suff = tp;
+	  while (LCTF_IS_PREFIXED_KIND (CTF_INFO_UNPREFIXED_KIND (fp, suff->ctt_info)))
+	    suff++;
+
+	  *suffix = suff;
+	}
+      return tp;
+    }
+}
+
+/* Find a given prefix in some type, if any.  */
+ctf_type_t *
+ctf_find_prefix (ctf_type_t *tp, int kind)
+{
+  while (LCTF_IS_PREFIXED_KIND (tp->info)
+	 && CTF_INFO_KIND (tp->info) != kind)
+    tp++;
+
+  if (LCTF_INFO_UNPREFIXED_KIND (tp->ctt_info) != kind)
+    return NULL;
+
+  return tp;
 }
 
 typedef struct ctf_lookup_idx_key
@@ -405,64 +449,33 @@ typedef struct ctf_lookup_idx_key
   uint32_t *clik_names;
 } ctf_lookup_idx_key_t;
 
-/* A bsearch function for variable names.  */
-
-static int
-ctf_lookup_var (const void *key_, const void *lookup_)
-{
-  const ctf_lookup_idx_key_t *key = key_;
-  const ctf_varent_t *lookup = lookup_;
-
-  return (strcmp (key->clik_name, ctf_strptr (key->clik_fp, lookup->ctv_name)));
-}
-
-/* Given a variable name, return the type of the variable with that name.
-   Look only in this dict, not in the parent. */
+/* Look up some kind of thing in the name tables.  */
 
 ctf_id_t
-ctf_lookup_variable_here (ctf_dict_t *fp, const char *name)
-{
-  ctf_dvdef_t *dvd = ctf_dvd_lookup (fp, name);
-  ctf_varent_t *ent;
-  ctf_lookup_idx_key_t key = { fp, name, NULL };
-
-  if (dvd != NULL)
-    return dvd->dvd_type;
-
-  /* This array is sorted, so we can bsearch for it.  */
-
-  ent = bsearch (&key, fp->ctf_vars, fp->ctf_nvars, sizeof (ctf_varent_t),
-		 ctf_lookup_var);
-
-  if (ent == NULL)
-      return (ctf_set_typed_errno (fp, ECTF_NOTYPEDAT));
-
-  return ent->ctv_type;
-}
-
-/* As above, but look in the parent too.  */
-
-ctf_id_t
-ctf_lookup_variable (ctf_dict_t *fp, const char *name)
+ctf_lookup_kind (ctf_dict_t *fp, int kind, const char *name)
 {
   ctf_id_t type;
 
-  if (fp->ctf_flags & LCTF_NO_STR)
-    return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
+  if (kind == CTF_K_TYPE_TAG || kind == CTF_K_DECL_TAG)
+    return (ctf_set_typed_errno (fp, ECTF_NEVERTAG));
 
-  if ((type = ctf_lookup_variable_here (fp, name)) == CTF_ERR)
-    {
-      if (ctf_errno (fp) == ECTF_NOTYPEDAT && fp->ctf_parent != NULL)
-	{
-	  if ((type = ctf_lookup_variable_here (fp->ctf_parent, name)) != CTF_ERR)
-	    return type;
-	  return (ctf_set_typed_errno (fp, ctf_errno (fp->ctf_parent)));
-	}
+  if ((type == ctf_dynhash_lookup_type (ctf_name_table (fp, kind),
+					name)) != CTF_ERR)
+    return type;
 
-      return -1;				/* errno is set for us.  */
-    }
+  if (fp->ctf_parent
+      && (type == ctf_dynhash_lookup_type (ctf_name_table (fp->ctf_parent, kind),
+					   name)) != CTF_ERR)
+    return type;
 
-  return type;
+  return ctf_set_typed_errno (fp, ECTF_NOTYPE);
+}
+
+/* Look up a variable by name, in this dict or the parent.  */
+ctf_id_t
+ctf_lookup_variable (ctf_dict_t *fp, const char *name)
+{
+  return ctf_lookup_kind (fp, CTF_K_VAR, name);
 }
 
 /* Look up a single enumerator by enumeration constant name.  Returns the ID of

@@ -120,7 +120,6 @@ typedef struct ctf_link_sym
 typedef enum ctf_sect_names
   {
    CTF_SECT_HEADER,
-   CTF_SECT_LABEL,
    CTF_SECT_OBJT,
    CTF_SECT_OBJTIDX = CTF_SECT_OBJT,
    CTF_SECT_FUNC,
@@ -132,7 +131,9 @@ typedef enum ctf_sect_names
 
 /* Encoding information for integers, floating-point values, and certain other
    intrinsics can be obtained by calling ctf_type_encoding, below.  The flags
-   field will contain values appropriate for the type defined in <ctf.h>.  */
+   field will contain values appropriate for the type defined in <ctf.h>.
+
+   For floats, only the first of these fields is meaningful.  */
 
 typedef struct ctf_encoding
 {
@@ -141,10 +142,15 @@ typedef struct ctf_encoding
   uint32_t cte_bits;		 /* Size of storage in bits.  */
 } ctf_encoding_t;
 
+/* "Not bitfield" here really means "not recorded as a bitfield in the
+   structure". ctf_type_encoding() may reveal that the base type or an
+   intervening slice has bitfield encoding nonetheless.  */
+
 typedef struct ctf_membinfo
 {
   ctf_id_t ctm_type;		/* Type of struct or union member.  */
   unsigned long ctm_offset;	/* Offset of member in bits.  */
+  int ctm_bit_width;		/* Width of member in bits: -1: not bitfield */
 } ctf_membinfo_t;
 
 typedef struct ctf_arinfo
@@ -160,11 +166,6 @@ typedef struct ctf_funcinfo
   uint32_t ctc_argc;		/* Number of typed arguments to function.  */
   uint32_t ctc_flags;		/* Function attributes (see below).  */
 } ctf_funcinfo_t;
-
-typedef struct ctf_lblinfo
-{
-  ctf_id_t ctb_type;		/* Last type associated with the label.  */
-} ctf_lblinfo_t;
 
 typedef struct ctf_snapshot_id
 {
@@ -217,15 +218,13 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOFUNCDAT, "No function information available for function.") \
   _CTF_ITEM (ECTF_NOTDATA, "Symbol table entry does not refer to a data object.") \
   _CTF_ITEM (ECTF_NOTYPEDAT, "No type information available for symbol.") \
-  _CTF_ITEM (ECTF_NOLABEL, "No label found corresponding to name.") \
-  _CTF_ITEM (ECTF_NOLABELDATA, "File does not contain any labels.") \
   _CTF_ITEM (ECTF_NOTSUP, "Feature not supported.") \
   _CTF_ITEM (ECTF_NOENUMNAM, "Enumerator name not found.") \
   _CTF_ITEM (ECTF_NOMEMBNAM, "Member name not found.") \
   _CTF_ITEM (ECTF_RDONLY, "CTF container is read-only.") \
   _CTF_ITEM (ECTF_DTFULL, "CTF type is full (no more members allowed).") \
   _CTF_ITEM (ECTF_FULL, "CTF container is full.") \
-  _CTF_ITEM (ECTF_DUPLICATE, "Duplicate member, enumerator, or variable name.") \
+  _CTF_ITEM (ECTF_DUPLICATE, "Duplicate member, enumerator, datasec, or variable name.") \
   _CTF_ITEM (ECTF_CONFLICT, "Conflicting type is already defined.") \
   _CTF_ITEM (ECTF_OVERROLLBACK, "Attempt to roll back past a ctf_update.") \
   _CTF_ITEM (ECTF_COMPRESS, "Failed to compress CTF data.") \
@@ -249,7 +248,17 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_UNSTABLE, "Attempt to write unstable file format version: set I_KNOW_LIBCTF_IS_UNSTABLE in the environment.") \
   _CTF_ITEM (ECTF_HASPARENT, "Cannot ctf_import: dict already has a parent.") \
   _CTF_ITEM (ECTF_WRONGPARENT, "Cannot ctf_import: incorrect parent provided.") \
-  _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.")
+  _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.") \
+  _CTF_ITEM (ECTF_BADCOMPONENT, "Declaration tag component_idx is invalid.") \
+  _CTF_ITEM (ECTF_NODATASEC, "DATASEC name not found in dictionary.") \
+  _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
+  _CTF_ITEM (ECTF_DESCENDING, "Field offsets may not descend.") \
+  _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
+  _CTF_ITEM (ECTF_LINKKIND, "Only functions and variables have linkage.") \
+  _CTF_ITEM (ECTF_NEVERTAG, "Cannot call this function with a tag kind.") \
+  _CTF_ITEM (ECTF_NOTDATASEC, "This function requires a datasec.") \
+  _CTF_ITEM (ECTF_NOTVAR, "This function requires a variable.") \
+  _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -262,7 +271,7 @@ _CTF_ERRORS
 #undef _CTF_FIRST
   };
 
-#define ECTF_NERR (ECTF_NOTSERIALIZED - ECTF_BASE + 1) /* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_NOTDECLTAG - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */
@@ -283,6 +292,7 @@ _CTF_ERRORS
 
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
+#define CTF_ADD_STRUCT_BITFIELDS 2 /* Struct/union field-level bitfields */
 
 /* Flags for ctf_member_next.  */
 
@@ -298,16 +308,20 @@ _CTF_ERRORS
    can be used with the iteration and visit functions below.  There is also a
    family of iteration functions that do not require callbacks.  */
 
-typedef int ctf_visit_f (const char *name, ctf_id_t type, unsigned long offset,
-			 int depth, void *arg);
-typedef int ctf_member_f (const char *name, ctf_id_t membtype,
-			  unsigned long offset, void *arg);
-typedef int ctf_enum_f (const char *name, int val, void *arg);
-typedef int ctf_variable_f (const char *name, ctf_id_t type, void *arg);
-typedef int ctf_type_f (ctf_id_t type, void *arg);
-typedef int ctf_type_all_f (ctf_id_t type, int flag, void *arg);
-typedef int ctf_label_f (const char *name, const ctf_lblinfo_t *info,
+typedef int ctf_visit_f (ctf_dict_t *, const char *name, ctf_id_t type,
+			 unsigned long offset, int bit_width, int depth,
 			 void *arg);
+typedef int ctf_member_f (ctf_dict_t *, const char *name, ctf_id_t membtype,
+			  unsigned long offset, int bit_width, void *arg);
+typedef int ctf_enum_f (const char *name, int64_t val, void *arg);
+typedef int ctf_unsigned_enum_f (const char *name, uint64_t val, void *arg);
+typedef int ctf_variable_f (ctf_dict_t *, const char *name, ctf_id_t type,
+			    void *arg);
+typedef int ctf_datasec_var_f (ctf_dict_t *fp, ctf_id_t type, size_t offset,
+			       size_t datasec_size, void *arg);
+typedef int ctf_type_f (ctf_dict_t *, ctf_id_t type, void *arg);
+typedef int ctf_type_all_f (ctf_dict_t *, ctf_id_t type, int flag, void *arg);
+typedef int ctf_type_kind_f (ctf_dict_t *, ctf_id_t type, int kind, void *arg);
 typedef int ctf_archive_member_f (ctf_dict_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
 				      size_t len, void *arg);
@@ -527,11 +541,15 @@ extern int ctf_version (int);
 
 extern int ctf_func_info (ctf_dict_t *, unsigned long, ctf_funcinfo_t *);
 extern int ctf_func_args (ctf_dict_t *, unsigned long, uint32_t, ctf_id_t *);
-
+=
 /* As above, but for CTF_K_FUNCTION types in CTF dicts.  */
 
 extern int ctf_func_type_info (ctf_dict_t *, ctf_id_t, ctf_funcinfo_t *);
 extern int ctf_func_type_args (ctf_dict_t *, ctf_id_t, uint32_t, ctf_id_t *);
+
+/* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
+
+extern int ctf_type_linkage (ctf_dict_t *, ctf_id_t, ctf_linkage_t *);
 
 /* Look up function or data symbols by name and return their CTF type ID,
   if any.  (For both function symbols and data symbols that are function
@@ -548,7 +566,9 @@ extern ctf_id_t ctf_symbol_next (ctf_dict_t *, ctf_next_t **,
 
 /* Look up a type by name: some simple C type parsing is done, but this is by no
    means comprehensive.  Structures, unions and enums need "struct ", "union "
-   or "enum " on the front, as usual in C.  */
+   or "enum " on the front, as usual in C.  Some prefixes not seen in C exist
+   as well: variables use "var ", datasecs "datasec ", type and decl tags
+   "type_tag" and "decl_tag". */
 
 extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
 
@@ -556,7 +576,10 @@ extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
    relationship to a symbol table.  Before linking, everything with types in the
    symbol table will be in the variable table as well; after linking, only those
    typed functions and data objects that are not asssigned to symbols by the
-   linker are left in the variable table here.  */
+   linker are left in the variable table here.
+
+   Note: this looks up a variable's *type*, not the variable itself.
+   For that, use ctf_lookup_kind, below.  */
 
 extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 
@@ -569,6 +592,14 @@ extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 
 extern ctf_id_t ctf_lookup_enumerator (ctf_dict_t *, const char *,
 				       int64_t *enum_value);
+
+/* Look up a type of a given kind by name.  This serves to look up kinds in
+   their own namespaces which do not have explicit lookup functions above:
+   datasecs.  The only kinds you can't look up with this function are
+   CTF_K_TYPE_TAG and CTF_K_DECL_TAG, since they may be associated with many
+   types: use ctf_tag_next. */
+
+extern ctf_id_t ctf_lookup_kind (ctf_dict_t *, int kind, const char *);
 
 /* Type lookup functions.  */
 
@@ -635,6 +666,12 @@ extern int ctf_type_kind (ctf_dict_t *, ctf_id_t);
 
 extern int ctf_type_kind_forwarded (ctf_dict_t *, ctf_id_t);
 
+/* Return nonzero if this type is conflicting, zero if it's not, < 0 on error; if
+   CUNAME is set, set it to the name of the conflicting compilation unit for the
+   passed-in type (which may be a null string if the cuname is not known).  */
+
+extern int ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const **cuname);
+
 /* Return the type a pointer, typedef, cvr-qual, or slice refers to, or return
    an ECTF_NOTREF error otherwise.  ctf_type_kind pretends that slices are
    actually the type they are a slice of: this is usually want you want, but if
@@ -674,8 +711,14 @@ extern int ctf_type_cmp (ctf_dict_t *, ctf_id_t, ctf_dict_t *, ctf_id_t);
 /* Get the name of an enumerator given its value, or vice versa.  If many
    enumerators have the same value, the first with that value is returned.  */
 
-extern const char *ctf_enum_name (ctf_dict_t *, ctf_id_t, int);
-extern int ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *, int *);
+extern const char *ctf_enum_name (ctf_dict_t *, ctf_id_t, int64_t);
+extern int ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *, int64_t *);
+extern int ctf_enum_unsigned_value (ctf_dict_t *, ctf_id_t, const char *, uint64_t *);
+
+/* Return 1 if this enum's contents are unsigned, so you can tell which of the
+   above functions to use.  */
+
+extern int ctf_enum_unsigned (ctf_dict_t *, ctf_id_t);
 
 /* Get the size and member type of an array.  */
 
@@ -688,6 +731,29 @@ extern int ctf_member_info (ctf_dict_t *, ctf_id_t, const char *,
 			    ctf_membinfo_t *);
 extern int ctf_member_count (ctf_dict_t *, ctf_id_t);
 
+/* Search a datasec for a variable covering a given offset.
+
+   Errors with ECTF_NOTYPEDAT if not found.  */
+
+extern ctf_id_t ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec,
+					uint32_t offset);
+
+/* Return the datasec that a given variable appears in.  */
+extern ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var);
+
+/* Type and decl tags.  */
+
+/* Return the type ID of the type to which a given type tag is attached, or of
+   the type of the declaration to which a decl tag is attached (so a decl tag on
+   a function parameter would return the type ID of the parameter's type).  */
+
+extern ctf_id_t ctf_tag (ctf_dict_t *, ctf_id_t tag);
+
+/* Return the component ID and declaration to which a decl tag is attached.
+   -1 means "whole type".  */
+
+extern ctf_id_t ctf_decl_tag (ctf_dict_t *, ctf_id_t decl_tag, int64_t *);
+
 /* Iterators.  */
 
 /* ctf_member_next is a _next-style iterator that can additionally traverse into
@@ -697,12 +763,13 @@ extern int ctf_member_count (ctf_dict_t *, ctf_id_t);
 extern int ctf_member_iter (ctf_dict_t *, ctf_id_t, ctf_member_f *, void *);
 extern ssize_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				const char **name, ctf_id_t *membtype,
-				int flags);
+				int *bit_width, int flags);
 
-/* Return all enumeration constants in a given enum type.  */
+/* Return all enumeration constants in a given enum type.  The return value, and
+   VAL argument, may need to be cast to uint64_t: see ctf_enum_unsigned().  */
 extern int64_t ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);
 extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
-				  int *);
+				  int64_t *);
 
 /* Return all enumeration constants with a given name in a given dict, similar
    to ctf_lookup_enumerator above but capable of returning multiple values.
@@ -738,16 +805,26 @@ extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *nam
    of CTF_ADD_ROOT for such types.  ctf_type_next allows you to choose whether
    to see non-root types or not with the want_hidden arg: if set, the flag (if
    passed) returns the non-root state of each type in turn.  Types in parent
-   dictionaries are not returned.  */
+   dictionaries are not returned.
+
+   These days, even variables are included in the things returned by ctf_type*()
+   (type kind CTF_K_VAR).  */
 
 extern int ctf_type_iter (ctf_dict_t *, ctf_type_f *, void *);
 extern int ctf_type_iter_all (ctf_dict_t *, ctf_type_all_f *, void *);
+extern int ctf_type_kind_iter (ctf_dict_t *, int kind, ctf_type_kind_f *, void *);
 extern ctf_id_t ctf_type_next (ctf_dict_t *, ctf_next_t **,
 			       int *flag, int want_hidden);
+extern ctf_id_t ctf_type_kind_next (ctf_dict_t *, ctf_next_t **, int kind);
 
 extern int ctf_variable_iter (ctf_dict_t *, ctf_variable_f *, void *);
 extern ctf_id_t ctf_variable_next (ctf_dict_t *, ctf_next_t **,
 				   const char **);
+
+extern int ctf_datasec_var_iter (ctf_dict_t *, ctf_id_t, ctf_datasec_var_f *, 
+				 void *);
+extern ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **, 
+				      size_t *size, size_t *offset);
 
 /* ctf_archive_iter and ctf_archive_next open each member dict for you,
    automatically importing any parent dict as usual: ctf_archive_iter closes the
@@ -809,17 +886,35 @@ extern ctf_dict_t *ctf_create (int *);
 extern ctf_id_t ctf_add_array (ctf_dict_t *, uint32_t,
 			       const ctf_arinfo_t *);
 extern ctf_id_t ctf_add_const (ctf_dict_t *, uint32_t, ctf_id_t);
+
+/* enums are created signed by default.  If you want an unsigned enum,
+   use ctf_add_enum_encoded() with an encoding of 0 (CTF_INT_SIGNED and
+   everything else off).  This will not create a slice, unlike all other
+   uses of ctf_add_enum_encoded(), and the result is still representable
+   as BTF.  */
+
+extern ctf_id_t ctf_add_enum64_encoded (ctf_dict_t *, uint32_t, const char *,
+				      const ctf_encoding_t *);
+extern ctf_id_t ctf_add_enum64 (ctf_dict_t *, uint32_t, const char *);
 extern ctf_id_t ctf_add_enum_encoded (ctf_dict_t *, uint32_t, const char *,
 				      const ctf_encoding_t *);
 extern ctf_id_t ctf_add_enum (ctf_dict_t *, uint32_t, const char *);
+extern ctf_id_t ctf_add_btf_float (ctf_dict_t *, uint32_t,
+				   const char *, const ctf_encoding_t *);
 extern ctf_id_t ctf_add_float (ctf_dict_t *, uint32_t,
 			       const char *, const ctf_encoding_t *);
 extern ctf_id_t ctf_add_forward (ctf_dict_t *, uint32_t, const char *,
 				 uint32_t);
-extern ctf_id_t ctf_add_function (ctf_dict_t *, uint32_t,
-				  const ctf_funcinfo_t *, const ctf_id_t *);
 extern ctf_id_t ctf_add_integer (ctf_dict_t *, uint32_t, const char *,
 				 const ctf_encoding_t *);
+
+/* ctf_add_function adds an unnamed function with a bundle of arguments and a
+   return type.  ctf_add_function_linkage provides a function with a name
+   and linkage, which is one of the CTF_FUNC_LINKAGE_* constants.  */
+extern ctf_id_t ctf_add_function (ctf_dict_t *, uint32_t,
+				  const ctf_funcinfo_t *, const ctf_id_t *);
+extern ctf_id_t ctf_add_function_linkage (ctf_dict_t *, uint32_t,
+					  ctf_id_t, const char *, int linkage);
 
 /* Add a "slice", which wraps some integral type and changes its encoding
    (useful for bitfields, etc).  In most respects slices are treated the same
@@ -836,14 +931,20 @@ extern ctf_id_t ctf_add_restrict (ctf_dict_t *, uint32_t, ctf_id_t);
 /* Struct and union addition.  Straight addition uses possibly-confusing rules
    to guess the final size of the struct/union given its members: to explicitly
    state the size of the struct or union (to report compiler-generated padding,
-   etc) use the _sized variants.  */
+   etc) use the _sized variants.  The FLAG parameter can take the value
+   CTF_ADD_STRUCT_BITFIELDS, indicating that bitfields can be directly added
+   to this struct via ctf_add_member_bitfield.  */
 
-extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t, const char *);
-extern ctf_id_t ctf_add_union (ctf_dict_t *, uint32_t, const char *);
-extern ctf_id_t ctf_add_struct_sized (ctf_dict_t *, uint32_t, const char *,
+extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t flag, const char *);
+extern ctf_id_t ctf_add_union (ctf_dict_t *, uint32_t flag, const char *);
+extern ctf_id_t ctf_add_struct_sized (ctf_dict_t *, uint32_t flag, const char *,
 				      size_t);
-extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t, const char *,
+extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t flag, const char *,
 				     size_t);
+
+/* Add a datasec to hang variable information from. Works in a similar manner
+   to struct/union membership paradigms.  */
+extern ctf_id_t ctf_add_datasec (ctf_dict_t *, uint32_t flag, const char *);
 
 /* Note that CTF cannot encode a given type.  This usually returns an
    ECTF_NONREPRESENTABLE error when queried.  Mostly useful for struct members,
@@ -852,15 +953,17 @@ extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t, const char *,
 extern ctf_id_t ctf_add_unknown (ctf_dict_t *, uint32_t, const char *);
 extern ctf_id_t ctf_add_volatile (ctf_dict_t *, uint32_t, ctf_id_t);
 
-/* Add an enumerator to an enum.  If the enum is non-root, so are all the
-   constants added to it by ctf_add_enumerator.  */
+/* Add an enumerator to an enum or enum64.  If the enum is non-root, so are all
+   the constants added to it by ctf_add_enumerator.  */
 
-extern int ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int);
+extern int ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int64_t);
 
 /* Add a member to a struct or union, either at the next available offset (with
    suitable padding for the alignment) or at a specific offset, and possibly
    with a specific encoding (creating a slice for you).  Offsets need not be
-   unique, and need not be added in ascending order.  */
+   unique, and need not be added in ascending order.  ctf_add_member_bitfield
+   with a nonzero bit_width will fail unless the struct was created with
+   CTF_ADD_STRUCT_BITFIELDS.  */
 
 extern int ctf_add_member (ctf_dict_t *, ctf_id_t, const char *, ctf_id_t);
 extern int ctf_add_member_offset (ctf_dict_t *, ctf_id_t, const char *,
@@ -868,14 +971,26 @@ extern int ctf_add_member_offset (ctf_dict_t *, ctf_id_t, const char *,
 extern int ctf_add_member_encoded (ctf_dict_t *, ctf_id_t, const char *,
 				   ctf_id_t, unsigned long,
 				   const ctf_encoding_t);
+extern int ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
+                                    const char *, ctf_id_t type,
+                                    unsigned long bit_offset,
+                                    int bit_width);
 
 extern int ctf_add_variable (ctf_dict_t *, const char *, ctf_id_t);
+extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, const char *, const char *,
+					  ctf_id_t, size_t, size_t);
 
 /* Set the size and member and index types of an array.  */
 
 extern int ctf_set_array (ctf_dict_t *, ctf_id_t, const ctf_arinfo_t *);
 
-/* Add a function oor object symbol type with a particular name, without saying
+/* Mark a type as conflicting, residing in some other translation unit with a
+   given name.  The type is hidden from all name lookups, just like
+   CTF_ADD_NONROOT.  */
+
+extern int ctf_set_conflicting (ctf_dict_t *, ctf_id_t, const char *);
+  
+/* Add a function or object symbol type with a particular name, without saying
    anything about the actual symbol index.  (The linker will then associate them
    with actual symbol indexes using the ctf_link functions below.)  */
 
