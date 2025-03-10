@@ -55,10 +55,17 @@
 /* Definition of a user function.  */
 struct internal_function
 {
+  internal_function (std::string name, internal_function_fn_noside handler,
+		     void *cookie)
+    : name (std::move (name)),
+      handler (handler),
+      cookie (cookie)
+  {}
+
   /* The name of the function.  It is a bit odd to have this in the
      function itself -- the user might use a differently-named
      convenience variable to hold the function.  */
-  char *name;
+  std::string name;
 
   /* The handler.  */
   internal_function_fn_noside handler;
@@ -2316,18 +2323,6 @@ internalvar_name (const struct internalvar *var)
   return var->name.c_str ();
 }
 
-static struct internal_function *
-create_internal_function (const char *name,
-			  internal_function_fn_noside handler, void *cookie)
-{
-  struct internal_function *ifn = new (struct internal_function);
-
-  ifn->name = xstrdup (name);
-  ifn->handler = handler;
-  ifn->cookie = cookie;
-  return ifn;
-}
-
 const char *
 value_internal_function_name (struct value *val)
 {
@@ -2338,7 +2333,7 @@ value_internal_function_name (struct value *val)
   result = get_internalvar_function (VALUE_INTERNALVAR (val), &ifn);
   gdb_assert (result);
 
-  return ifn->name;
+  return ifn->name.c_str ();
 }
 
 struct value *
@@ -2376,7 +2371,7 @@ do_add_internal_function (const char *name, const char *doc,
   struct internal_function *ifn;
   struct internalvar *var = lookup_internalvar (name);
 
-  ifn = create_internal_function (name, handler, cookie);
+  ifn = new internal_function (name, handler, cookie);
   set_internalvar_function (var, ifn);
 
   return add_cmd (name, no_class, function_command, doc, &functionlist);
