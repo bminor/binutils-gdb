@@ -6,12 +6,12 @@ GPROF = ../gprof$(EXEEXT)
 
 # NB: -O2 -fno-omit-frame-pointer is needed for expected call graph.  See
 # https://sourceware.org/bugzilla/show_bug.cgi?id=32768
-GPROF_FLAGS = -O2 -fno-omit-frame-pointer -pg
+# -g is needed for line number info checked by tst-gmon-gprof-l.sh.  See
+# https://sourceware.org/bugzilla/show_bug.cgi?id=32779
+GPROF_FLAGS = -O2 -fno-omit-frame-pointer -pg -g
 
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) $(GPROF_FLAGS)
-LINK = $(CC) $(AM_CFLAGS) $(CFLAGS) $(OPT_NO_PLUGINS) $(GPROF_FLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+COMPILE = $(CC) $(AM_CFLAGS) $(GPROF_FLAGS)
+LINK = $(CC) $(AM_CFLAGS) $(GPROF_FLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS;
