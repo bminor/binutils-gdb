@@ -5921,8 +5921,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
       asection **secpp;
       bfd_vma off_adjust;  /* Octets.  */
       bool no_contents;
-      bfd_size_type p_align;
-      bool p_align_p;
+      bfd_size_type align_pagesize;
 
       /* An ELF segment (described by Elf_Internal_Phdr) may contain a
 	 number of sections with contents contributing to both p_filesz
@@ -5933,8 +5932,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
       p = phdrs + m->idx;
       p->p_type = m->p_type;
       p->p_flags = m->p_flags;
-      p_align = bed->p_align;
-      p_align_p = false;
 
       if (m->count == 0)
 	p->p_vaddr = m->p_vaddr_offset * opb;
@@ -5948,6 +5945,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
       else
 	p->p_paddr = (m->sections[0]->lma + m->p_vaddr_offset) * opb;
 
+      align_pagesize = 0;
       if (p->p_type == PT_LOAD
 	  && (abfd->flags & D_PAGED) != 0)
 	{
@@ -5961,15 +5959,17 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	     segment.  */
 	  if (m->p_align_valid)
 	    maxpagesize = m->p_align;
-	  else if (p_align != 0
+	  else if (bed->p_align != 0
 		   && (link_info == NULL
 		       || !link_info->maxpagesize_is_set))
-	    /* Set p_align to the default p_align value while laying
-	       out segments aligning to the maximum page size or the
-	       largest section alignment.  The run-time loader can
-	       align segments to the default p_align value or the
-	       maximum page size, depending on system page size.  */
-	    p_align_p = true;
+	    /* We will lay out this binary using maxpagesize but set
+	       p->p_align later to the possibly smaller bed->p_align.
+	       The run-time loader will then be able to load this
+	       binary when the system page size is maxpagesize, but if
+	       the system page size is smaller can use p->p_align.
+	       In either case p->p_align will be increased if
+	       necessary to match section alignment.  */
+	    align_pagesize = bed->p_align;
 
 	  p->p_align = maxpagesize;
 	}
@@ -6005,10 +6005,10 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      if (align < maxpagesize)
 		{
 		  /* If a section requires alignment higher than the
-		     default p_align value, don't set p_align to the
-		     default p_align value.  */
-		  if (align > p_align)
-		    p_align_p = false;
+		     minimum p_align value, don't reduce a maxpagesize
+		     p->p_align set earlier in this function.  */
+		  if (align > bed->p_align)
+		    align_pagesize = 0;
 		  align = maxpagesize;
 		}
 	      else
@@ -6016,8 +6016,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  /* If a section requires alignment higher than the
 		     maximum page size, set p_align to the section
 		     alignment.  */
-		  p_align_p = true;
-		  p_align = align;
+		  align_pagesize = align;
 		}
 	    }
 
@@ -6405,8 +6404,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 	    }
 
-	  if (p_align_p)
-	    p->p_align = p_align;
+	  if (align_pagesize)
+	    p->p_align = align_pagesize;
 	}
     }
 
