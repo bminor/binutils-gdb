@@ -2322,6 +2322,10 @@ clear_internalvar (struct internalvar *var)
       xfree (var->u.string);
       break;
 
+    case INTERNALVAR_FUNCTION:
+      delete var->u.fn.function;
+      break;
+
     default:
       break;
     }
