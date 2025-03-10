@@ -57,7 +57,7 @@ proc run_test {megs} {
 	set inferior_pid [spawn_id_get_pid $inferior_spawn_id]
 	set gdb_pid [exp_pid -i [board_info host fileid]]
 
-	gdb_test "attach $inferior_pid" "Attaching to.*"
+	gdb_test "attach $inferior_pid" "Attaching to.*" attach
 	set line [gdb_get_line_number "TAG: BREAK HERE" $::testfile.c]
 	gdb_breakpoint "${::srcfile}:$line" "break at to known line"
 	gdb_continue_to_breakpoint "continue to known line"
