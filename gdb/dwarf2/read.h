@@ -500,20 +500,6 @@ struct dwarf2_per_bfd
     return this->all_units[index].get ();
   }
 
-  /* Return the CU given its index in the CU table in the index.  */
-  dwarf2_per_cu *get_index_cu (int index) const
-  {
-    if (this->all_comp_units_index_cus.empty ())
-      return get_cu (index);
-
-    return this->all_comp_units_index_cus[index];
-  }
-
-  dwarf2_per_cu *get_index_tu (int index) const
-  {
-    return this->all_comp_units_index_tus[index];
-  }
-
   /* Return the separate '.dwz' debug file.  If there is no
      .gnu_debugaltlink section in the file, then the result depends on
      REQUIRE: if REQUIRE is true, error out; if REQUIRE is false,
@@ -605,9 +591,6 @@ public:
 
   unsigned int num_comp_units = 0;
   unsigned int num_type_units = 0;
-
-  std::vector<dwarf2_per_cu *> all_comp_units_index_cus;
-  std::vector<dwarf2_per_cu *> all_comp_units_index_tus;
 
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */

@@ -114,6 +114,14 @@ struct mapped_debug_names_reader
 
   gdb::unordered_map<ULONGEST, index_val> abbrev_map;
 
+  /* List of CUs in the same order as found in the index header (DWARF 5 section
+     6.1.1.4.2).  */
+  std::vector<dwarf2_per_cu *> comp_units;
+
+  /* List of local TUs in the same order as found in the index (DWARF 5 section
+     6.1.1.4.3).  */
+  std::vector<dwarf2_per_cu *> type_units;
+
   /* Even though the scanning of .debug_names and creation of the cooked index
      entries is done serially, we create multiple shards so that the
      finalization step can be parallelized.  The shards are filled in a round
@@ -231,7 +239,7 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 	case DW_IDX_compile_unit:
 	  {
 	    /* Don't crash on bad data.  */
-	    if (ull >= per_objfile->per_bfd->all_comp_units.size ())
+	    if (ull >= this->comp_units.size ())
 	      {
 		complaint (_(".debug_names entry has bad CU index %s"
 			     " [in module %s]"),
@@ -239,30 +247,31 @@ mapped_debug_names_reader::scan_one_entry (const char *name,
 			   bfd_get_filename (abfd));
 		continue;
 	      }
+
+	    per_cu = this->comp_units[ull];
+	    break;
 	  }
-	  per_cu = per_objfile->per_bfd->get_cu (ull);
-	  break;
 	case DW_IDX_type_unit:
-	  /* Don't crash on bad data.  */
-	  if (ull >= per_objfile->per_bfd->all_type_units.size ())
-	    {
-	      complaint (_(".debug_names entry has bad TU index %s"
-			   " [in module %s]"),
-			 pulongest (ull),
-			 bfd_get_filename (abfd));
-	      continue;
-	    }
 	  {
-	    int nr_cus = per_objfile->per_bfd->all_comp_units.size ();
-	    per_cu = per_objfile->per_bfd->get_cu (nr_cus + ull);
+	    /* Don't crash on bad data.  */
+	    if (ull >= this->type_units.size ())
+	      {
+		complaint (_(".debug_names entry has bad TU index %s"
+			     " [in module %s]"),
+			   pulongest (ull),
+			   bfd_get_filename (abfd));
+		continue;
+	      }
+
+	    per_cu = this->type_units[ull];
+	    break;
 	  }
-	  break;
 	case DW_IDX_die_offset:
 	  die_offset = sect_offset (ull);
 	  /* In a per-CU index (as opposed to a per-module index), index
 	     entries without CU attribute implicitly refer to the single CU.  */
-	  if (per_cu == NULL)
-	    per_cu = per_objfile->per_bfd->get_cu (0);
+	  if (per_cu == nullptr)
+	    per_cu = this->comp_units[0];
 	  break;
 	case DW_IDX_parent:
 	  parent = ull;
@@ -442,13 +451,16 @@ cooked_index_worker_debug_names::do_reading ()
   bfd_thread_cleanup ();
 }
 
-/* Check the signatured type hash table from .debug_names.  */
+/* Build the list of TUs (mapped_debug_names_reader::type_units) from the index
+   header and verify that it matches the list of TUs read from the DIEs in
+   `.debug_info`.
+
+   Return true if they match, false otherwise.  */
 
 static bool
-check_signatured_type_table_from_debug_names
-  (dwarf2_per_objfile *per_objfile,
-   const mapped_debug_names_reader &map,
-   struct dwarf2_section_info *section)
+build_and_check_tu_list_from_debug_names (dwarf2_per_objfile *per_objfile,
+					  mapped_debug_names_reader &map,
+					  dwarf2_section_info *section)
 {
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
@@ -479,7 +491,8 @@ check_signatured_type_table_from_debug_names
 		     " ignoring .debug_names."));
 	  return false;
 	}
-      per_bfd->all_comp_units_index_tus.push_back (per_bfd->get_cu (j));
+
+      map.type_units.emplace_back (per_bfd->get_cu (j));
     }
   return true;
 }
@@ -702,42 +715,13 @@ read_debug_names_from_section (dwarf2_per_objfile *per_objfile,
    list.  */
 
 static bool
-check_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
-				  const mapped_debug_names_reader &map,
-				  dwarf2_section_info &section,
-				  bool is_dwz)
+build_and_check_cu_list_from_debug_names (dwarf2_per_bfd *per_bfd,
+					  mapped_debug_names_reader &map,
+					  dwarf2_section_info &section,
+					  bool is_dwz)
 {
-  int nr_cus = per_bfd->all_comp_units.size ();
 
-  if (!map.augmentation_is_gdb)
-    {
-      uint32_t j = 0;
-      for (uint32_t i = 0; i < map.cu_count; ++i)
-	{
-	  sect_offset sect_off
-	    = (sect_offset) (extract_unsigned_integer
-			     (map.cu_table_reordered + i * map.offset_size,
-			      map.offset_size,
-			      map.dwarf5_byte_order));
-	  bool found = false;
-	  for (; j < nr_cus; j++)
-	    if (per_bfd->get_cu (j)->sect_off == sect_off)
-	      {
-		found = true;
-		break;
-	      }
-	  if (!found)
-	    {
-	      warning (_("Section .debug_names has incorrect entry in CU table,"
-			 " ignoring .debug_names."));
-	      return false;
-	    }
-	  per_bfd->all_comp_units_index_cus.push_back (per_bfd->get_cu (j));
-	}
-      return true;
-    }
-
-  if (map.cu_count != nr_cus)
+  if (map.cu_count != per_bfd->num_comp_units)
     {
       warning (_("Section .debug_names has incorrect number of CUs in CU table,"
 		 " ignoring .debug_names."));
@@ -746,40 +730,58 @@ check_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 
   for (uint32_t i = 0; i < map.cu_count; ++i)
     {
+      /* Read one entry from the CU list.  */
       sect_offset sect_off
 	= (sect_offset) (extract_unsigned_integer
 			 (map.cu_table_reordered + i * map.offset_size,
 			  map.offset_size,
 			  map.dwarf5_byte_order));
-      if (sect_off != per_bfd->get_cu (i)->sect_off)
+      dwarf2_per_cu *found = nullptr;
+
+      /* Find the matching dwarf2_per_cu.  */
+      for (auto &unit : per_bfd->all_units)
+	if (unit->sect_off == sect_off && !unit->is_debug_types
+	    && unit->is_dwz == is_dwz)
+	  {
+	    found = unit.get ();
+	    break;
+	  }
+
+      if (found == nullptr)
 	{
 	  warning (_("Section .debug_names has incorrect entry in CU table,"
 		     " ignoring .debug_names."));
 	  return false;
 	}
+
+	map.comp_units.emplace_back (found);
     }
 
   return true;
 }
 
-/* Read the CU list from the mapped index, and use it to create all
-   the CU objects for this dwarf2_per_objfile.  */
+/* Build the list of CUs (mapped_debug_names_reader::compile_units) from the
+   index header and verify that it matches the list of CUs read from the DIEs in
+   `.debug_info`.
+
+   Return true if they match, false otherwise.  */
 
 static bool
-check_cus_from_debug_names (dwarf2_per_bfd *per_bfd,
-			     const mapped_debug_names_reader &map,
-			     const mapped_debug_names_reader &dwz_map)
+build_and_check_cu_lists_from_debug_names (dwarf2_per_bfd *per_bfd,
+					   mapped_debug_names_reader &map,
+					   mapped_debug_names_reader &dwz_map)
 {
-  if (!check_cus_from_debug_names_list (per_bfd, map, per_bfd->infos[0],
-					false /* is_dwz */))
+  if (!build_and_check_cu_list_from_debug_names (per_bfd, map,
+						 per_bfd->infos[0],
+						 false /* is_dwz */))
     return false;
 
   if (dwz_map.cu_count == 0)
     return true;
 
   dwz_file *dwz = per_bfd->get_dwz_file ();
-  return check_cus_from_debug_names_list (per_bfd, dwz_map, dwz->info,
-					  true /* is_dwz */);
+  return build_and_check_cu_list_from_debug_names (per_bfd, dwz_map, dwz->info,
+						   true /* is_dwz */);
 }
 
 /* This does all the work for dwarf2_read_debug_names, but putting it
@@ -817,7 +819,7 @@ do_dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
     }
 
   create_all_units (per_objfile);
-  if (!check_cus_from_debug_names (per_bfd, map, dwz_map))
+  if (!build_and_check_cu_lists_from_debug_names (per_bfd, map, dwz_map))
     return false;
 
   if (map.tu_count != 0)
@@ -833,8 +835,8 @@ do_dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 	   ? &per_bfd->types[0]
 	   : &per_bfd->infos[0]);
 
-      if (!check_signatured_type_table_from_debug_names (per_objfile,
-							 map, section))
+      if (!build_and_check_tu_list_from_debug_names (per_objfile, map,
+						     section))
 	return false;
     }
 
