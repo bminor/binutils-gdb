@@ -7069,8 +7069,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 
   if (ecs->event_thread->stop_signal () == GDB_SIGNAL_TRAP
       && ecs->event_thread->control.trap_expected
-      && gdbarch_single_step_through_delay_p (gdbarch)
-      && currently_stepping (ecs->event_thread))
+      && gdbarch_single_step_through_delay_p (gdbarch))
     {
       /* We're trying to step off a breakpoint.  Turns out that we're
 	 also on an instruction that needs to be stepped multiple
