@@ -4,6 +4,11 @@
 #ld: -z stack-size=0x10000
 #readelf: -n
 
+Displaying notes found in: .note.gnu.property
+.*
+.*
+.*
+
 Displaying notes found in: .note
 [ 	]+Owner[ 	]+Data size[ 	]+Description
   QNX                  0x0000000c	QNX stack
