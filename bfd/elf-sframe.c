@@ -98,12 +98,13 @@ sframe_decoder_set_func_reloc_index (struct sframe_dec_info *sfd_info,
 
 static bool
 sframe_decoder_init_func_bfdinfo (bfd *abfd,
-				  asection *sec,
+				  const asection *sec,
 				  struct sframe_dec_info *sfd_info,
-				  struct elf_reloc_cookie *cookie)
+				  const struct elf_reloc_cookie *cookie)
 {
   unsigned int fde_count;
   unsigned int func_bfdinfo_size, i;
+  const Elf_Internal_Rela *rel;
 
   fde_count = sframe_decoder_get_num_fidx (sfd_info->sfd_ctx);
   sfd_info->sfd_fde_count = fde_count;
@@ -118,19 +119,17 @@ sframe_decoder_init_func_bfdinfo (bfd *abfd,
   if ((sec->flags & SEC_LINKER_CREATED) && cookie->rels == NULL)
     return true;
 
+  BFD_ASSERT (cookie->rels + fde_count == cookie->relend);
+  rel = cookie->rels;
   for (i = 0; i < fde_count; i++)
     {
-      cookie->rel = cookie->rels + i;
-      BFD_ASSERT (cookie->rel < cookie->relend);
       /* Bookkeep the relocation offset and relocation index of each function
 	 for later use.  */
-      sframe_decoder_set_func_r_offset (sfd_info, i, cookie->rel->r_offset);
-      sframe_decoder_set_func_reloc_index (sfd_info, i,
-					   (cookie->rel - cookie->rels));
+      sframe_decoder_set_func_r_offset (sfd_info, i, rel->r_offset);
+      sframe_decoder_set_func_reloc_index (sfd_info, i, i);
 
-      cookie->rel++;
+      rel++;
     }
-  BFD_ASSERT (cookie->rel == cookie->relend);
 
   return true;
 }
