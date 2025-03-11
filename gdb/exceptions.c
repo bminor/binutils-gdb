@@ -82,7 +82,7 @@ print_exception (struct ui_file *file, const struct gdb_exception &e)
 	  end++;
 	  file->write (start, end - start);
 	}
-    }					    
+    }
   gdb_printf (file, "\n");
 
   /* Now append the annotation.  */
