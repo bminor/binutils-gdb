@@ -23,14 +23,14 @@
 #include "run-on-main-thread.h"
 #include "top.h"
 #include "gdbsupport/selftest.h"
-#include <unordered_map>
+#include "gdbsupport/unordered_map.h"
 #if CXX_STD_THREAD
 #include <mutex>
 #endif
 
 /* Map format strings to counters.  */
 
-static std::unordered_map<const char *, int> counters;
+static gdb::unordered_map<const char *, int> counters;
 
 /* How many complaints about a particular thing should be printed
    before we stop whining about it?  Default is no whining at all,
@@ -149,7 +149,7 @@ namespace selftests {
 static void
 test_complaints ()
 {
-  std::unordered_map<const char *, int> tmp;
+  gdb::unordered_map<const char *, int> tmp;
   scoped_restore reset_counters = make_scoped_restore (&counters, tmp);
   scoped_restore reset_stop_whining = make_scoped_restore (&stop_whining, 2);
 
