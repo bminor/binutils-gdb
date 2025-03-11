@@ -52,6 +52,7 @@
 #include "namespace.h"
 #include "cli/cli-style.h"
 #include "cli/cli-decode.h"
+#include "gdbsupport/string-set.h"
 
 #include "value.h"
 #include "mi/mi-common.h"
@@ -1603,7 +1604,7 @@ ada_decode_tests ()
    storage leak, it should not be significant unless there are massive
    changes in the set of decoded names in successive versions of a 
    symbol table loaded during a single session.  */
-static struct htab *decoded_names_store;
+static gdb::string_set decoded_names_store;
 
 /* Returns the decoded name of GSYMBOL, as for ada_decode, caching it
    in the language-specific part of GSYMBOL, if it has not been
@@ -1637,13 +1638,7 @@ ada_decode_symbol (const struct general_symbol_info *arg)
 	     which case, we put the result on the heap.  Since we only
 	     decode when needed, we hope this usually does not cause a
 	     significant memory leak (FIXME).  */
-
-	  char **slot = (char **) htab_find_slot (decoded_names_store,
-						  decoded.c_str (), INSERT);
-
-	  if (*slot == NULL)
-	    *slot = xstrdup (decoded.c_str ());
-	  *resultp = *slot;
+	  *resultp = decoded_names_store.insert (decoded);
 	}
     }
 
@@ -14048,10 +14043,6 @@ the regular expression are listed."));
 When enabled, the debugger will stop using the DW_AT_GNAT_descriptive_type\n\
 DWARF attribute."),
      NULL, NULL, &maint_set_ada_cmdlist, &maint_show_ada_cmdlist);
-
-  decoded_names_store = htab_create_alloc (256, htab_hash_string,
-					   htab_eq_string,
-					   NULL, xcalloc, xfree);
 
   /* The ada-lang observers.  */
   gdb::observers::new_objfile.attach (ada_new_objfile_observer, "ada-lang");
