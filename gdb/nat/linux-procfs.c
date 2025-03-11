@@ -18,9 +18,9 @@
 
 #include "linux-procfs.h"
 #include "gdbsupport/filestuff.h"
+#include "gdbsupport/unordered_set.h"
 #include <dirent.h>
 #include <sys/stat.h>
-#include <unordered_set>
 #include <utility>
 
 /* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
@@ -358,20 +358,9 @@ linux_proc_attach_tgid_threads (pid_t pid,
       return;
     }
 
-  /* Callable object to hash elements in visited_lpws.  */
-  struct pair_hash
-  {
-    std::size_t operator() (const std::pair<unsigned long, ULONGEST> &v) const
-    {
-      return (std::hash<unsigned long>() (v.first)
-	      ^ std::hash<ULONGEST>() (v.second));
-    }
-  };
-
   /* Keeps track of the LWPs we have already visited in /proc,
      identified by their PID and starttime to detect PID reuse.  */
-  std::unordered_set<std::pair<unsigned long, ULONGEST>,
-		     pair_hash> visited_lwps;
+  gdb::unordered_set<std::pair<unsigned long, ULONGEST>> visited_lwps;
 
   /* Scan the task list for existing threads.  While we go through the
      threads, new threads may be spawned.  Cycle through the list of
