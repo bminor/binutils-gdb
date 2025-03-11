@@ -33,7 +33,7 @@
 #include "gdbsupport/fileio.h"
 #include "inferior.h"
 #include "cli/cli-style.h"
-#include <unordered_map>
+#include "gdbsupport/unordered_map.h"
 #include "gdbsupport/unordered_set.h"
 
 #if CXX_STD_THREAD
@@ -1207,7 +1207,7 @@ maintenance_info_bfds (const char *arg, int from_tty)
 
 struct bfd_inferior_data
 {
-  std::unordered_map<std::string, unsigned long> bfd_error_string_counts;
+  gdb::unordered_map<std::string, unsigned long> bfd_error_string_counts;
 };
 
 /* Per-inferior data key.  */
