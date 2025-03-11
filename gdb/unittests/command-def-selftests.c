@@ -20,8 +20,7 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 #include "gdbsupport/selftest.h"
-
-#include <map>
+#include "gdbsupport/unordered_map.h"
 
 namespace selftests {
 
@@ -134,7 +133,7 @@ static unsigned int nr_invalid_prefixcmd = 0;
 
 /* A map associating a list with the prefix leading to it.  */
 
-static std::map<cmd_list_element **, const char *> lists;
+static gdb::unordered_map<cmd_list_element **, const char *> lists;
 
 /* Store each command list in lists, associated with the prefix to reach it.  A
    list must only be found once.

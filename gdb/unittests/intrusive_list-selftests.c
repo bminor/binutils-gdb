@@ -20,7 +20,7 @@
 #include "gdbsupport/intrusive_list.h"
 #include "gdbsupport/owning_intrusive_list.h"
 #include "gdbsupport/selftest.h"
-#include <unordered_set>
+#include "gdbsupport/unordered_set.h"
 
 /* Count of how many item_with_base or item_with_member objects are
    currently alive.  */
@@ -717,7 +717,7 @@ struct intrusive_list_test
     item_type a ("a"), b ("b"), c ("c");
     ListType list;
     std::vector<const item_type *> expected;
-    std::unordered_set<const item_type *> disposer_seen;
+    gdb::unordered_set<const item_type *> disposer_seen;
     int disposer_calls = 0;
 
     list.push_back (a);
