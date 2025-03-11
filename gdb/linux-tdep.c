@@ -44,9 +44,9 @@
 #include "solib-svr4.h"
 #include "memtag.h"
 #include "cli/cli-style.h"
+#include "gdbsupport/unordered_map.h"
 
 #include <ctype.h>
-#include <unordered_map>
 
 /* This enum represents the values that the user can choose when
    informing the Linux kernel about which memory mappings will be
@@ -1189,7 +1189,7 @@ linux_read_core_file_mappings
     warning (_("malformed note - filename area is too big"));
 
   const bfd_build_id *orig_build_id = cbfd->build_id;
-  std::unordered_map<ULONGEST, const bfd_build_id *> vma_map;
+  gdb::unordered_map<ULONGEST, const bfd_build_id *> vma_map;
 
   /* Search for solib build-ids in the core file.  Each time one is found,
      map the start vma of the corresponding elf header to the build-id.  */
