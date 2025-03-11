@@ -22,7 +22,7 @@
 #include "reggroups.h"
 #include "python-internal.h"
 #include "user-regs.h"
-#include <unordered_map>
+#include "gdbsupport/unordered_map.h"
 
 /* Per-gdbarch data type.  */
 typedef std::vector<gdbpy_ref<>> gdbpy_register_type;
@@ -98,7 +98,7 @@ gdbpy_get_reggroup (const reggroup *reggroup)
   /* Map from GDB's internal reggroup objects to the Python representation.
      GDB's reggroups are global, and are never deleted, so using a map like
      this is safe.  */
-  static std::unordered_map<const struct reggroup *,gdbpy_ref<>>
+  static gdb::unordered_map<const struct reggroup *,gdbpy_ref<>>
     gdbpy_reggroup_object_map;
 
   /* If there is not already a suitable Python object in the map then

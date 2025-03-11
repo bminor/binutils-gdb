@@ -30,10 +30,10 @@
 #include "py-event.h"
 #include "py-stopevent.h"
 #include "progspace-and-thread.h"
-#include <unordered_map>
+#include "gdbsupport/unordered_map.h"
 
 using thread_map_t
-  = std::unordered_map<thread_info *, gdbpy_ref<thread_object>>;
+  = gdb::unordered_map<thread_info *, gdbpy_ref<thread_object>>;
 
 struct inferior_object
 {
