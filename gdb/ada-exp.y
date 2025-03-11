@@ -36,7 +36,7 @@
 %{
 
 #include <ctype.h>
-#include <unordered_map>
+#include "gdbsupport/unordered_map.h"
 #include "expression.h"
 #include "value.h"
 #include "parser-defs.h"
@@ -98,7 +98,7 @@ struct ada_parse_state
   std::vector<ada_assign_up> assignments;
 
   /* Track currently active iterated assignment names.  */
-  std::unordered_map<std::string, std::vector<ada_index_var_operation *>>
+  gdb::unordered_map<std::string, std::vector<ada_index_var_operation *>>
        iterated_associations;
 
   auto_obstack temp_space;
