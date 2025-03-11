@@ -50,6 +50,7 @@
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "event-top.h"
+#include "exceptions.h"
 #include "gdbsupport/task-group.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -19427,9 +19428,19 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
       str_offsets_base = cu->str_offsets_base;
     }
 
-  dwarf_decode_macros (per_objfile, builder, section, lh,
-		       offset_size, offset, str_section, str_offsets_section,
-		       str_offsets_base, section_is_gnu, cu);
+  try
+    {
+      dwarf_decode_macros (per_objfile, builder, section, lh, offset_size,
+			   offset, str_section, str_offsets_section,
+			   str_offsets_base, section_is_gnu, cu);
+    }
+  catch (const gdb_exception_error &error)
+    {
+      /* Print the error and carry on with no (or partial) macro
+	 information.  */
+      exception_fprintf (gdb_stderr, error, _("While reading section %s: "),
+			 section->get_name ());
+    }
 }
 
 /* Return the .debug_loc section to use for CU.
