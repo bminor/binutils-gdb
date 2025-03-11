@@ -915,23 +915,6 @@ struct multidictionary
   unsigned short n_allocated_dictionaries;
 };
 
-/* A hasher for enum language.  Injecting this into std is a convenience
-   when using unordered_map with C++11.  */
-
-namespace std
-{
-  template<> struct hash<enum language>
-  {
-    typedef enum language argument_type;
-    typedef std::size_t result_type;
-
-    result_type operator() (const argument_type &l) const noexcept
-    {
-      return static_cast<result_type> (l);
-    }
-  };
-} /* namespace std */
-
 /* A helper function to collate symbols on the pending list by language.  */
 
 static std::unordered_map<enum language, std::vector<symbol *>>
