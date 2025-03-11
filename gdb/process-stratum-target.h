@@ -21,7 +21,6 @@
 #define GDB_PROCESS_STRATUM_TARGET_H
 
 #include "target.h"
-#include "gdbsupport/intrusive_list.h"
 #include "gdbsupport/gdb-checked-static-cast.h"
 #include "gdbsupport/unordered_set.h"
 #include "gdbthread.h"
