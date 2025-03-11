@@ -63,7 +63,7 @@ struct thread_info;
 #include "process-stratum-target.h"
 #include "displaced-stepping.h"
 
-#include <unordered_map>
+#include "gdbsupport/unordered_map.h"
 
 struct infcall_suspend_state;
 struct infcall_control_state;
@@ -459,7 +459,7 @@ public:
 
   /* A map of ptid_t to thread_info*, for average O(1) ptid_t lookup.
      Exited threads do not appear in the map.  */
-  std::unordered_map<ptid_t, thread_info *> ptid_thread_map;
+  gdb::unordered_map<ptid_t, thread_info *> ptid_thread_map;
 
   /* Returns a range adapter covering the inferior's threads,
      including exited threads.  Used like this:
