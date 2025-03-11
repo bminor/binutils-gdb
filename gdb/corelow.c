@@ -48,8 +48,8 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_fd.h"
 #include "gdbsupport/x86-xstate.h"
-#include <unordered_map>
-#include <unordered_set>
+#include "gdbsupport/unordered_map.h"
+#include "gdbsupport/unordered_set.h"
 #include "cli/cli-cmds.h"
 #include "xml-tdesc.h"
 #include "memtag.h"
@@ -125,11 +125,11 @@ private:
 
   /* A type that maps a string to a build-id.  */
   using string_to_build_id_map
-    = std::unordered_map<std::string, const bfd_build_id *>;
+    = gdb::unordered_map<std::string, const bfd_build_id *>;
 
   /* A type that maps a build-id to a string.  */
   using build_id_to_string_map
-    = std::unordered_map<const bfd_build_id *, std::string>;
+    = gdb::unordered_map<const bfd_build_id *, std::string>;
 
   /* When loading a core file, the build-ids are extracted based on the
      file backed mappings.  This map associates the name of a file that was
@@ -405,11 +405,11 @@ core_target::build_file_mappings ()
     std::vector<region> regions;
   };
 
-  std::unordered_map<std::string, struct bfd *> bfd_map;
-  std::unordered_set<std::string> unavailable_paths;
+  gdb::unordered_map<std::string, struct bfd *> bfd_map;
+  gdb::unordered_set<std::string> unavailable_paths;
 
   /* All files mapped into the core file.  The key is the filename.  */
-  std::unordered_map<std::string, mapped_file> mapped_files;
+  gdb::unordered_map<std::string, mapped_file> mapped_files;
 
   /* See linux_read_core_file_mappings() in linux-tdep.c for an example
      read_core_file_mappings method.  */
@@ -774,7 +774,7 @@ rename_vmcore_idle_reg_sections (bfd *abfd, inferior *inf)
 
   /* The set of all /NN numbers found.  Needed so we can easily find unused
      numbers in the case that we need to rename some sections.  */
-  std::unordered_set<int> all_lwpids;
+  gdb::unordered_set<int> all_lwpids;
 
   /* A count of how many sections called .reg/0 we have found.  */
   unsigned zero_lwpid_count = 0;
