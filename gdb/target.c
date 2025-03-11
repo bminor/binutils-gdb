@@ -50,7 +50,7 @@
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/search.h"
 #include "terminal.h"
-#include <unordered_map>
+#include "gdbsupport/unordered_map.h"
 #include "target-connection.h"
 #include "valprint.h"
 #include "cli/cli-decode.h"
@@ -72,7 +72,7 @@ static int default_verify_memory (struct target_ops *self,
    TARGET_NAME" command that when invoked calls the factory registered
    here.  The target_info object is associated with the command via
    the command's context.  */
-static std::unordered_map<const target_info *, target_open_ftype *>
+static gdb::unordered_map<const target_info *, target_open_ftype *>
   target_factories;
 
 /* The singleton debug target.  */
