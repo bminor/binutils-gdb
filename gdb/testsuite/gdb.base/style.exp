@@ -431,7 +431,13 @@ proc test_disable_disassembler_styling { } {
 # disassembled instruction part.
 proc get_single_disassembled_insn {} {
     set disasm_line [capture_command_output "x/1i *main" ""]
-    regexp "^\[^:\]+:\\s*(.*)$" $disasm_line whole_match insn
+    set ret [regexp "^\[^:\]+:\\s*(.*)$" $disasm_line whole_match insn]
+
+    if { $ret == 0 } {
+	fail "failed to disassemble main"
+	return ""
+    }
+
     return $insn
 }
 
@@ -463,7 +469,10 @@ proc test_disassembler_error_handling { } {
 
 	# Disassemble a single instruction and ensure that the output
 	# has styling markers in it.
-	set insn_before [get_single_disassembled_insn]
+	with_test_prefix "before" {
+	    set insn_before [get_single_disassembled_insn]
+	}
+
 	gdb_assert { [regexp "\033" $insn_before] } \
 	    "have style markers when Pygments is working fine"
 
@@ -481,7 +490,10 @@ proc test_disassembler_error_handling { } {
 	    "setup replacement colorize_disasm function" \
 	    true
 
-	set insn_after [get_single_disassembled_insn]
+	with_test_prefix "after" {
+	    set insn_after [get_single_disassembled_insn]
+	}
+
 	gdb_assert { ![regexp "\033" $insn_after] } \
 	    "have no style markers when Pygments is broken"
     }
