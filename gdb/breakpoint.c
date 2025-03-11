@@ -70,7 +70,6 @@
 #include "tid-parse.h"
 #include "cli/cli-style.h"
 #include "cli/cli-decode.h"
-#include <unordered_set>
 #include "break-cond-parse.h"
 
 /* readline include files */
@@ -7860,7 +7859,7 @@ check_longjmp_breakpoint_for_call_dummy (struct thread_info *tp)
   /* We would need to delete breakpoints other than the current one while
      iterating, so all_breakpoints_safe is not sufficient to make that safe.
      Save all breakpoints to delete in that set and delete them at the end.  */
-  std::unordered_set<breakpoint *> to_delete;
+  gdb::unordered_set<breakpoint *> to_delete;
 
   for (struct breakpoint &b : all_breakpoints ())
     {
