@@ -109,12 +109,12 @@ private:
     using is_transparent = void;
     using is_avalanching = void;
 
-    bool operator() (const local_string &rhs) const noexcept
+    uint64_t operator() (const local_string &rhs) const noexcept
     {
       return (*this) (rhs.as_view ());
     }
 
-    bool operator() (std::string_view rhs) const noexcept
+    uint64_t operator() (std::string_view rhs) const noexcept
     {
       return ankerl::unordered_dense::hash<std::string_view> () (rhs);
     }
