@@ -25,7 +25,7 @@
 #include "xml-tdesc.h"
 #include "osabi.h"
 #include "filenames.h"
-#include <unordered_map>
+#include "gdbsupport/unordered_map.h"
 #include <string>
 
 /* Maximum sizes.
@@ -64,7 +64,7 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher)
    then we will create unnecessary duplicate gdbarches.  See
    gdbarch_list_lookup_by_info.  */
 
-static std::unordered_map<std::string, target_desc_up> xml_cache;
+static gdb::unordered_map<std::string, target_desc_up> xml_cache;
 
 /* Callback data for target description parsing.  */
 
