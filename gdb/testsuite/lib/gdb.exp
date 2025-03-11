@@ -7007,6 +7007,24 @@ proc gdb_load_cmd { args } {
     return -1
 }
 
+# Return non-zero if 'gcore' command is available.
+gdb_caching_proc gcore_cmd_available { } {
+    gdb_exit
+    gdb_start
+
+    # Does this gdb support gcore?
+    gdb_test_multiple "help gcore" "" {
+	-re -wrap "Undefined command: .*" {
+	    return 0
+	}
+	-re -wrap "Save a core file .*" {
+	    return 1
+	}
+    }
+
+    return 0
+}
+
 # Invoke "gcore".  CORE is the name of the core file to write.  TEST
 # is the name of the test case.  This will return 1 if the core file
 # was created, 0 otherwise.  If this fails to make a core file because

@@ -18,6 +18,8 @@
 #
 # Ref.: https://bugzilla.redhat.com/show_bug.cgi?id=1765117
 
+require gcore_cmd_available
+
 tuiterm_env
 
 standard_testfile tui-layout.c

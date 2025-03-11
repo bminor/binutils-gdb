@@ -15,7 +15,7 @@
 
 load_lib "ada.exp"
 
-require allow_ada_tests
+require allow_ada_tests gcore_cmd_available
 
 standard_ada_testfile crash
 

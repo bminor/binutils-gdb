@@ -28,7 +28,7 @@ if { ![istarget *-*-linux*] } {
     untested "$testfile.exp"
     return -1
 }
-require is_x86_64_m64_target
+require is_x86_64_m64_target gcore_cmd_available
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug build-id}] } {
     return -1
