@@ -36,7 +36,7 @@
 #include "objfiles.h"
 #include "breakpoint.h"
 #include "gdbcore.h"
-#include "hashtab.h"
+#include "gdbsupport/unordered_set.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "ada-lang.h"
 #include "completer.h"
@@ -350,56 +350,58 @@ struct cache_entry_search
 {
   const char *name;
   domain_search_flags domain;
+};
 
-  hashval_t hash () const
+/* Hash function for cache entry.  */
+
+struct cache_entry_hash
+{
+  using is_transparent = void;
+  using is_avalanching = void;
+
+  /* This implementation works for both cache_entry and
+     cache_entry_search.  */
+  template<typename T>
+  uint64_t operator() (const T &entry) const noexcept
   {
-    /* This must agree with hash_cache_entry, below.  */
-    return htab_hash_string (name);
+    return ankerl::unordered_dense::hash<std::string_view> () (entry.name);
   }
 };
 
-/* Hash function for cache_entry.  */
+/* Equality function for cache entry.  */
 
-static hashval_t
-hash_cache_entry (const void *v)
+struct cache_entry_eq
 {
-  const cache_entry *entry = (const cache_entry *) v;
-  return htab_hash_string (entry->name.c_str ());
-}
+  using is_transparent = void;
 
-/* Equality function for cache_entry.  */
+  /* This implementation works for both cache_entry and
+     cache_entry_search.  */
+  template<typename T>
+  bool operator() (const T &lhs, const cache_entry &rhs) const noexcept
+  {
+    return lhs.domain == rhs.domain && lhs.name == rhs.name;
+  }
+};
 
-static int
-eq_cache_entry (const void *a, const void *b)
-{
-  const cache_entry *entrya = (const cache_entry *) a;
-  const cache_entry_search *entryb = (const cache_entry_search *) b;
-
-  return entrya->domain == entryb->domain && entrya->name == entryb->name;
-}
+using cache_entry_set
+   = gdb::unordered_set<cache_entry, cache_entry_hash, cache_entry_eq>;
 
 /* Key to our per-program-space data.  */
-static const registry<program_space>::key<htab, htab_deleter>
+static const registry<program_space>::key<cache_entry_set>
   ada_pspace_data_handle;
 
-/* Return this module's data for the given program space (PSPACE).
-   If not is found, add a zero'ed one now.
+/* Return this module's data for the given program space (PSPACE).  If
+   not is found, one is created.  This function always returns a valid
+   object.  */
 
-   This function always returns a valid object.  */
-
-static htab_t
+static cache_entry_set &
 get_ada_pspace_data (struct program_space *pspace)
 {
-  htab_t data = ada_pspace_data_handle.get (pspace);
+  cache_entry_set *data = ada_pspace_data_handle.get (pspace);
   if (data == nullptr)
-    {
-      data = htab_create_alloc (10, hash_cache_entry, eq_cache_entry,
-				htab_delete_entry<cache_entry>,
-				xcalloc, xfree);
-      ada_pspace_data_handle.set (pspace, data);
-    }
+    data = ada_pspace_data_handle.emplace (pspace);
 
-  return data;
+  return *data;
 }
 
 			/* Utilities */
@@ -4690,19 +4692,18 @@ static int
 lookup_cached_symbol (const char *name, domain_search_flags domain,
 		      struct symbol **sym, const struct block **block)
 {
-  htab_t tab = get_ada_pspace_data (current_program_space);
+  cache_entry_set &htab = get_ada_pspace_data (current_program_space);
   cache_entry_search search;
   search.name = name;
   search.domain = domain;
 
-  cache_entry *e = (cache_entry *) htab_find_with_hash (tab, &search,
-							search.hash ());
-  if (e == nullptr)
+  auto iter = htab.find (search);
+  if (iter == htab.end ())
     return 0;
   if (sym != nullptr)
-    *sym = e->sym;
+    *sym = iter->sym;
   if (block != nullptr)
-    *block = e->block;
+    *block = iter->block;
   return 1;
 }
 
@@ -4730,21 +4731,8 @@ cache_symbol (const char *name, domain_search_flags domain,
 	return;
     }
 
-  htab_t tab = get_ada_pspace_data (current_program_space);
-  cache_entry_search search;
-  search.name = name;
-  search.domain = domain;
-
-  void **slot = htab_find_slot_with_hash (tab, &search,
-					  search.hash (), INSERT);
-
-  cache_entry *e = new cache_entry;
-  e->name = name;
-  e->domain = domain;
-  e->sym = sym;
-  e->block = block;
-
-  *slot = e;
+  cache_entry_set &tab = get_ada_pspace_data (current_program_space);
+  tab.insert (cache_entry {name, domain, sym, block});
 }
 
 				/* Symbol Lookup */
