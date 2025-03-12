@@ -540,11 +540,41 @@ core_target::build_file_mappings ()
 	  /* If ABFD was opened, but the wrong format, close it now.  */
 	  abfd = nullptr;
 
+	  /* When true, this indicates that the mapped contents of this
+	     file are available within the core file.  When false, some of
+	     the mapped contents are not available.  If the contents are
+	     entirely available within the core file, then we don't need to
+	     warn the user if GDB cannot find the file.  */
+	  bool content_is_in_core_file_p = true;
+
 	  /* Record all regions for this file as unavailable.  */
 	  for (const mapped_file::region &region : file_data.regions)
-	    m_core_unavailable_mappings.emplace_back (region.start,
-						      region.end
-						      - region.start);
+	    {
+	      /* Check to see if the region is available within the core
+		 file.  */
+	      bool found_region_in_core_file = false;
+	      for (const target_section &ts : m_core_section_table)
+		{
+		  if (ts.addr <= region.start && ts.endaddr >= region.end
+		      && (ts.the_bfd_section->flags & SEC_HAS_CONTENTS) != 0)
+		    {
+		      found_region_in_core_file = true;
+		      break;
+		    }
+		}
+
+	      /* This region is not available within the core file.
+		 Without the file available to read from it is not possible
+		 for GDB to read this mapping within the inferior.  Warn
+		 the user about this case.  */
+	      if (!found_region_in_core_file)
+		content_is_in_core_file_p = false;
+
+	      /* Record the unavailable region.  */
+	      m_core_unavailable_mappings.emplace_back (region.start,
+							region.end
+							- region.start);
+	    }
 
 	  /* And give the user an appropriate warning.  */
 	  if (build_id_mismatch)
@@ -564,7 +594,7 @@ core_target::build_file_mappings ()
 			 styled_string (file_name_style.style (),
 					expanded_fname.get ()));
 	    }
-	  else
+	  else if (!content_is_in_core_file_p)
 	    {
 	      if (expanded_fname == nullptr
 		  || filename == expanded_fname.get ())
