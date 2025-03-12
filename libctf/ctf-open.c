@@ -708,13 +708,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 				   NULL, NULL, NULL)) == NULL)
     return ENOMEM;
 
-  if ((fp->ctf_type_tags
-       = ctf_dynhash_create_sized (pop[CTF_K_DECL_TAG], ctf_hash_string,
-				   ctf_hash_eq_string,
-				   NULL, ctf_dynset_destroy, NULL)) == NULL)
-    return ENOMEM;
-
-  if ((fp->ctf_decl_tags
+  if ((fp->ctf_tags
        = ctf_dynhash_create_sized (pop[CTF_K_DECL_TAG], ctf_hash_string,
 				   ctf_hash_eq_string,
 				   NULL, ctf_dynset_destroy, NULL)) == NULL)
@@ -1037,8 +1031,6 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	case CTF_K_DECL_TAG:
 	case CTF_K_TYPE_TAG:
 	  {
-	    ctf_dynset_t *ids;
-	    ctf_dynhash_t *h = ctf_name_table (fp, kind);
 	    const char *str;
 
 	    if ((str = ctf_strptr_validate (fp, suffix->ctt_name)) == NULL)
@@ -1047,21 +1039,9 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    if (!isroot)
 	      break;
 
-	    if ((ids = ctf_dynhash_lookup (fp, h, str)) == NULL)
-	      {
-		ids = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer, NULL);
+	    if (ctf_insert_type_decl_tag (fp, id, name, kind) < 0)
+	      return ctf_errno (fp);
 
-		if (!ids)
-		  return ENOMEM;
-
-		err = ctf_dynhash_insert (fp, h, str, ids);
-		if (err != 0)
-		  return err * -1;
-	      }
-
-	    err = ctf_dynset_insert (fp, ids, ctf_index_to_type (fp, id));
-	    if (err != 0)
-	      return err * -1;
 	    break;
 	  }
 
@@ -1536,24 +1516,18 @@ void ctf_set_ctl_hashes (ctf_dict_t *fp)
   fp->ctf_lookups[2].ctl_prefix = "enum";
   fp->ctf_lookups[2].ctl_len = strlen (fp->ctf_lookups[2].ctl_prefix);
   fp->ctf_lookups[2].ctl_hash = fp->ctf_enums;
-  fp->ctf_lookups[3].ctl_prefix = "type_tag";
+  fp->ctf_lookups[3].ctl_prefix = "datasec";
   fp->ctf_lookups[3].ctl_len = strlen (fp->ctf_lookups[3].ctl_prefix);
-  fp->ctf_lookups[3].ctl_hash = fp->ctf_type_tags;
-  fp->ctf_lookups[4].ctl_prefix = "decl_tag";
+  fp->ctf_lookups[3].ctl_hash = fp->ctf_datasecs;
+  fp->ctf_lookups[4].ctl_prefix = "var";
   fp->ctf_lookups[4].ctl_len = strlen (fp->ctf_lookups[4].ctl_prefix);
-  fp->ctf_lookups[4].ctl_hash = fp->ctf_decl_tags;
-  fp->ctf_lookups[5].ctl_prefix = "datasec";
+  fp->ctf_lookups[4].ctl_hash = fp->ctf_var;
+  fp->ctf_lookups[5].ctl_prefix = _CTF_NULLSTR;
   fp->ctf_lookups[5].ctl_len = strlen (fp->ctf_lookups[5].ctl_prefix);
-  fp->ctf_lookups[5].ctl_hash = fp->ctf_decl_tags;
-  fp->ctf_lookups[6].ctl_prefix = "var";
-  fp->ctf_lookups[6].ctl_len = strlen (fp->ctf_lookups[6].ctl_prefix);
-  fp->ctf_lookups[6].ctl_hash = fp->ctf_var;
-  fp->ctf_lookups[7].ctl_prefix = _CTF_NULLSTR;
-  fp->ctf_lookups[7].ctl_len = strlen (fp->ctf_lookups[7].ctl_prefix);
-  fp->ctf_lookups[7].ctl_hash = fp->ctf_names;
-  fp->ctf_lookups[8].ctl_prefix = NULL;
-  fp->ctf_lookups[8].ctl_len = 0;
-  fp->ctf_lookups[8].ctl_hash = NULL;
+  fp->ctf_lookups[5].ctl_hash = fp->ctf_names;
+  fp->ctf_lookups[6].ctl_prefix = NULL;
+  fp->ctf_lookups[6].ctl_len = 0;
+  fp->ctf_lookups[6].ctl_hash = NULL;
 }
 
 /* Open a CTF file, mocking up a suitable ctf_sect.  */
@@ -2279,8 +2253,7 @@ ctf_dict_close (ctf_dict_t *fp)
   ctf_dynhash_destroy (fp->ctf_enums);
   ctf_dynhash_destroy (fp->ctf_vars);
   ctf_dynhash_destroy (fp->ctf_datasecs);
-  ctf_dynhash_destroy (fp->ctf_type_tags);
-  ctf_dynhash_destroy (fp->ctf_decl_tags);
+  ctf_dynhash_destroy (fp->ctf_tags);
   ctf_dynhash_destroy (fp->ctf_names);
   ctf_dynhash_destroy (fp->ctf_var_datasecs);
 

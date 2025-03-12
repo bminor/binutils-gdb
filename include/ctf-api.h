@@ -258,7 +258,8 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NEVERTAG, "Cannot call this function with a tag kind.") \
   _CTF_ITEM (ECTF_NOTDATASEC, "This function requires a datasec.") \
   _CTF_ITEM (ECTF_NOTVAR, "This function requires a variable.") \
-  _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.")
+  _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.") \
+  _CTF_ITEM (ECTF_NOTTAG, "This function requires a type or decl tag.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -271,7 +272,7 @@ _CTF_ERRORS
 #undef _CTF_FIRST
   };
 
-#define ECTF_NERR (ECTF_NOTDECLTAG - ECTF_BASE + 1) /* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_NOTTAG - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */
@@ -541,8 +542,8 @@ extern int ctf_version (int);
 
 extern int ctf_func_info (ctf_dict_t *, unsigned long, ctf_funcinfo_t *);
 extern int ctf_func_args (ctf_dict_t *, unsigned long, uint32_t, ctf_id_t *);
-=
-/* As above, but for CTF_K_FUNCTION types in CTF dicts.  */
+
+/* As above, but for CTF_K_FUNCTION or CTF_K_FUNC_LINKAGE types in CTF dicts.  */
 
 extern int ctf_func_type_info (ctf_dict_t *, ctf_id_t, ctf_funcinfo_t *);
 extern int ctf_func_type_args (ctf_dict_t *, ctf_id_t, uint32_t, ctf_id_t *);
@@ -567,8 +568,7 @@ extern ctf_id_t ctf_symbol_next (ctf_dict_t *, ctf_next_t **,
 /* Look up a type by name: some simple C type parsing is done, but this is by no
    means comprehensive.  Structures, unions and enums need "struct ", "union "
    or "enum " on the front, as usual in C.  Some prefixes not seen in C exist
-   as well: variables use "var ", datasecs "datasec ", type and decl tags
-   "type_tag" and "decl_tag". */
+   as well: variables use "var ", datasecs "datasec ". */
 
 extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
 
@@ -752,7 +752,8 @@ extern ctf_id_t ctf_tag (ctf_dict_t *, ctf_id_t tag);
 /* Return the component ID and declaration to which a decl tag is attached.
    -1 means "whole type".  */
 
-extern ctf_id_t ctf_decl_tag (ctf_dict_t *, ctf_id_t decl_tag, int64_t *);
+extern ctf_id_t ctf_decl_tag (ctf_dict_t *, ctf_id_t decl_tag,
+			      int64_t *component_idx);
 
 /* Iterators.  */
 
@@ -825,6 +826,9 @@ extern int ctf_datasec_var_iter (ctf_dict_t *, ctf_id_t, ctf_datasec_var_f *,
 				 void *);
 extern ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **, 
 				      size_t *size, size_t *offset);
+
+/* Iterate over all tags with the given TAG, returning the ID of each tag.  */
+extern ctf_id_t ctf_tag_next (ctf_dict_t *, const char *tag, ctf_next_t **);
 
 /* ctf_archive_iter and ctf_archive_next open each member dict for you,
    automatically importing any parent dict as usual: ctf_archive_iter closes the

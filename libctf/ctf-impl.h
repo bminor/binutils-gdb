@@ -281,7 +281,7 @@ typedef struct ctf_dedup
      (The actual allocations are in the CTF dict for the former and the real
      atoms table for the latter).  Uses the same namespaces as ctf_lookups,
      below, but has no need for null-termination.  */
-  ctf_dynhash_t *cd_decorated_names[7];
+  ctf_dynhash_t *cd_decorated_names[5];
 
   /* Map type names to a hash from type hash value -> number of times each value
      has appeared.  Enumeration constants are tracked via the enum they appear
@@ -381,11 +381,10 @@ struct ctf_dict
   ctf_dynhash_t *ctf_enums;	    /* Hash table of enum types.  */
   ctf_dynhash_t *ctf_vars;	    /* Hash table of variables.  */
   ctf_dynhash_t *ctf_datasecs;	    /* Hash table of datasecs.  */
-  ctf_dynhash_t *ctf_type_tags;	    /* Hash table of dynsets of type tags.  */
-  ctf_dynhash_t *ctf_decl_tags;	    /* Hash table of dynsets of decl tags.  */
+  ctf_dynhash_t *ctf_tags;	    /* Hash table of dynsets of type/decl tags.  */
   ctf_dynhash_t *ctf_names;	    /* Hash table of remaining types, plus
 				       enumeration constants.  */
-  ctf_lookup_t ctf_lookups[8];	    /* Pointers to nametabs for name lookup.  */
+  ctf_lookup_t ctf_lookups[6];	    /* Pointers to nametabs for name lookup.  */
   ctf_dynhash_t *ctf_var_datasecs;  /* Non-default var -> datasec mappings.  */
   ctf_id_t ctf_default_var_datasec; /* Datasec not recorded in ctf_var_datasecs.  */
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
@@ -729,6 +728,8 @@ extern ctf_id_t ctf_add_reftype (ctf_dict_t *, uint32_t, ctf_id_t,
 extern int ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
 					const char *, ctf_id_t);
 
+extern int ctf_insert_type_decl_tag (ctf_dict_t *, ctf_id_t, const char *,
+				     int kind);
 extern int ctf_track_enumerator (ctf_dict_t *, ctf_id_t, const char *);
 
 extern int ctf_dedup_atoms_init (ctf_dict_t *);

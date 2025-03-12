@@ -111,6 +111,7 @@ LIBCTF_2.0 {
 	ctf_variable_next;
 	ctf_datasec_iter;
 	ctf_datasec_next;
+	ctf_tag_next;
 
 	ctf_next_create;
 	ctf_next_destroy;

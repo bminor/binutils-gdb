@@ -848,6 +848,51 @@ ctf_datasec_var_next (ctf_dict_t *fp, ctf_id_t datasec, ctf_next_t **it,
   *it = NULL;
   return ctf_set_typed_errno (fp, ECTF_NEXT_END);
 }
+
+/* Iterate over all tags with the given TAG, returning the ID of each tag.  */
+
+ctf_id_t
+ctf_tag_next (ctf_dict_t *fp, const char *tag, ctf_next_t **it)
+{
+  ctf_next_t *i = *it;
+  ctf_id_t type;
+  ctf_dtdef_t *dtd;
+  int err;
+  const void *type;
+
+  if (!i)
+    {
+      if ((i = ctf_next_create ()) == NULL)
+	{
+	  ctf_set_errno (ofp, ENOMEM);
+	  return NULL;
+	}
+      i->cu.ctn_fp = ofp;
+      i->ctn_iter_fun = (void (*) (void)) ctf_tag_next;
+
+      i->cu.ctn_s = ctf_dynhash_lookup (ctf->ctf_tags, tag);
+
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_tag_next != i->ctn_iter_fun)
+    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
+
+  if (fp != i->cu.ctn_fp)
+    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
+
+  err = ctf_dynset_next (i->cu.ctn_s, &i->u.ctn_next, &type);
+  if (err != 0 && err != CTF_NEXT_END)
+    return ctf_set_typed_errno (fp, err);
+
+  if (err == 0)
+    return (ctf_id_t) (uintptr_t) type;
+
+  ctf_next_destroy (i);
+  *it = NULL;
+  return (ctf_set_typed_errno (fp, ECTF_NEXT_END));
+}
+
 /* Follow a given type through the graph for TYPEDEF, VOLATILE, CONST, and
    RESTRICT nodes until we reach a "base" type node.  This is useful when
    we want to follow a type ID to a node that has members or a size.  To guard
@@ -1602,10 +1647,87 @@ ctf_decl_tag (ctf_dict_t *fp, ctf_id_t decl_tag, int64_t *component_idx)
    the type of the declaration to which a decl tag is attached (so a decl tag on
    a function parameter would return the type ID of the parameter's type).  */
 
-extern ctf_id_t ctf_tag (ctf_dict_t *, ctf_id_t tag)
+ctf_id_t
+ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
 {
-  /* ... underway ... */
-  abort();
+  int kind = ctf_type_kind (fp, tag);
+  int64_t component_idx;
+  int ref;
+
+  if (kind != CTF_TYPE_TAG && kind != CTF_DECL_TAG)
+    return (ctf_set_typed_errno (fp, ECTF_NOTTAG));
+
+  if (ref = ctf_type_reference (fp, tag) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if (kind == CTF_TYPE_TAG)
+    return ref;
+
+  if (ctf_decl_tag (fp, decl_tag, &component_idx) == CTF_ERR)
+    return -1;			/* errno is set for us.  */
+
+  if (component_idx == -1)
+    return ref;
+
+  /* See ctf_add_tag.  */
+
+  switch (ctf_type_kind (fp, ref))
+    {
+      ctf_id_t type;
+      ctf_funcinfo_t fi;
+
+    case CTF_K_STRUCT:
+    case CTF_K_UNION:
+      {
+	ctf_next_t *i = NULL;
+
+	while (ctf_member_next (fp, ref, &i, NULL, &type, NULL, 0) != CTF_ERR)
+	  {
+	    if (i++ == component_idx)
+	      {
+		ctf_next_destroy (i);
+		return type;
+	      }
+	  }
+	if (ctf_errno (fp) != ECTF_NEXT_END)
+	  return -1;		/* errno is set for us.  */
+      }
+      break;
+    case CTF_K_FUNC_LINKAGE:
+    case CTF_K_FUNCTION:
+      {
+	ctf_funcinfo_t fi;
+	ctf_id_t *args;
+	ctf_id_t argtype;
+
+	if (ctf_func_type_info (fp, ref, &fi) < 0)
+	  return -1;		/* errno is set for us.  */
+
+	if (component_idx + 1 > fi.ctc_argc)
+	  break;
+
+	if ((args = malloc ((component_idx + 1) * sizeof (ctf_id_t))) == NULL)
+	  return (ctf_set_typed_errno (fp, ENOMEM));
+
+	if (ctf_func_type_args (fp, ref, component_idx + 1, args))
+	  {
+	    free (args);
+	    return -1;		/* errno is set for us. */
+	  }
+	argtype = args[component_idx];
+	free (args);
+	return argtype;
+      }
+
+    default:
+      return -1;		/* errno is set for us.  */
+    }
+
+  ctf_err_warn (ofp, 0, ECTF_NOTREF, _("decl tag %lx refers to type %x, "
+				       "component %i, which does not exist"),
+		tag, ref, component_idx);
+
+  return ECTF_NOTREF;
 }
 
 /* Find a pointer to type by looking in fp->ctf_ptrtab and fp->ctf_pptrtab.  If
@@ -1810,8 +1932,17 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
 	      && ctf_type_encoding (rfp, rtype, &re) == 0
 	      && memcmp (&le, &re, sizeof (ctf_encoding_t)) == 0);
     case CTF_K_POINTER:
-      return (ctf_type_compat (lfp, ctf_type_reference (lfp, ltype),
-			       rfp, ctf_type_reference (rfp, rtype)));
+      {
+	ctf_id_t lref = ctf_type_reference (lfp, ltype);
+	ctf_id_t rref = ctf_type_reference (rfp, rtype);
+
+	/* void * is only compatible with itself.  */
+
+	if (lref == 0 && rref == 0)
+	  return 1;
+	else
+	  return (ctf_type_compat (lfp, lref, rfp, rref));
+      }
     case CTF_K_ARRAY:
       return (ctf_array_info (lfp, ltype, &la) == 0
 	      && ctf_array_info (rfp, rtype, &ra) == 0

@@ -147,8 +147,7 @@ ctf_create (int *errp)
   static const ctf_header_t hdr = { .cth_preamble = { CTF_MAGIC, CTF_VERSION, 0 } };
 
   ctf_dynhash_t *structs = NULL, *unions = NULL, *enums = NULL, *names = NULL;
-  ctf_dynhash_t *datasecs = NULL, *vars = NULL;
-  ctf_dynhash_t *type_tags = NULL, *decl_tags = NULL;
+  ctf_dynhash_t *datasecs = NULL, *vars = NULL, *tags = NULL;
   ctf_sect_t cts;
   ctf_dict_t *fp;
 
@@ -166,12 +165,9 @@ ctf_create (int *errp)
 				 NULL, NULL);
   vars = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 			     NULL, NULL);
-  type_tags = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
-				 NULL, ctf_dynset_destroy);
-  decl_tags = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
-				  NULL, ctf_dynset_destroy);
-  if (!structs || !unions || !enums || !names || !datasecs || !type_tags
-      || !decl_tags)
+  tags = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+			     NULL, ctf_dynset_destroy);
+  if (!structs || !unions || !enums || !names || !datasecs || !tags)
     {
       ctf_set_open_errno (errp, EAGAIN);
       goto err;
@@ -193,16 +189,14 @@ ctf_create (int *errp)
   ctf_dynhash_destroy (fp->ctf_names);
   ctf_dynhash_destroy (fp->ctf_datasecs);
   ctf_dynhash_destroy (fp->ctf_vars);
-  ctf_dynhash_destroy (fp->ctf_type_tags);
-  ctf_dynhash_destroy (fp->ctf_decl_tags);
+  ctf_dynhash_destroy (fp->ctf_tags);
   fp->ctf_structs = structs;
   fp->ctf_unions = unions;
   fp->ctf_enums = enums;
   fp->ctf_names = names;
   fp->ctf_datasecs = datasecs;
   fp->ctf_vars = vars;
-  fp->ctf_type_tags = type_tags;
-  fp->ctf_decl_tags = decl_tags;
+  fp->ctf_tags = tags;
   fp->ctf_dtoldid = 0;
   fp->ctf_snapshot_lu = 0;
 
@@ -225,8 +219,7 @@ ctf_create (int *errp)
   ctf_dynhash_destroy (names);
   ctf_dynhash_destroy (datasecs);
   ctf_dynhash_destroy (vars);
-  ctf_dynhash_destroy (type_tags);
-  ctf_dynhash_destroy (decl_tags);
+  ctf_dynhash_destroy (tags);
   return NULL;
 }
 
@@ -251,9 +244,8 @@ ctf_name_table (ctf_dict_t *fp, int kind)
     case CTF_K_ENUM64:
       return fp->ctf_enums;
     case CTF_K_TYPE_TAG:
-      return fp->ctf_type_tags;
     case CTF_K_DECL_TAG:
-      return fp->ctf_decl_tags;
+      return fp->ctf_tags;
     case CTF_K_DATASECS:
       return fp->ctf_datasecs;
     case CTF_K_VAR:
@@ -261,6 +253,37 @@ ctf_name_table (ctf_dict_t *fp, int kind)
     default:
       return fp->ctf_names;
     }
+}
+
+int
+ctf_insert_type_decl_tag (ctf_dict_t *fp, ctf_id_t type, const char *name,
+			  int kind)
+{
+  ctf_dynset_t *types;
+  ctf_dynhash_t *h = ctf_name_table (fp, kind);
+
+  if ((types = ctf_dynhash_lookup (fp, h, str)) == NULL)
+    {
+      types = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer, NULL);
+
+      if (!types)
+	return (ctf_set_errno (fp, ENOMEM));
+
+      err = ctf_dynhash_insert (fp, h, name, types);
+      if (err != 0)
+	{
+	  err *= -1;
+	  return (ctf_set_errno (fp, err));
+	}
+    }
+
+  err = ctf_dynset_insert (fp, ids, ctf_index_to_type (fp, id));
+  if (err != 0)
+    {
+      err *= -1;
+      return (ctf_set_errno (fp, err));
+    }
+  return 0;
 }
 
 int
@@ -288,26 +311,8 @@ ctf_dtd_insert (ctf_dict_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
 	      return ctf_set_errno (fp, ENOMEM);
 	    }
 	}
-      else
-	{
-	  ctf_dynset_t *ids;
-	  ctf_dynhash_t *h = ctf_name_table (fp, kind);
-	  const char *str;
-
-	  if ((ids = ctf_dynhash_lookup (fp, h, name)) == NULL)
-	    {
-	      ids = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer, NULL);
-
-	      if (!ids)
-		return ctf_set_errno (fp, ENOMEM);
-
-	      if (ctf_dynhash_insert (fp, h, (char *) str, ids) != 0)
-		return ctf_set_errno (fp, ENOMEM);
-	    }
-
-	  if (ctf_dynset_insert (fp, ids, (void *) (uintptr_t) dtd->dtd_type) != 0)
-	    return ctf_set_errno (fp, ENOMEM);
-	}
+      else if (ctf_insert_type_decl_tag (fp, dtd->dtd_type, name, kind) < 0)
+	return -1;			/* errno is set for us.  */
     }
   ctf_list_append (&fp->ctf_dtdefs, dtd);
   return 0;
@@ -971,6 +976,8 @@ ctf_add_tag (ctf_dict_t *fp, int flag, ctf_id_t type, const char *tag,
     }
   else if (component_idx != -1)
     {
+      ctf_type_t func_type;
+
       /* Within-type declarations.  */
 
       switch (ref_kind)
@@ -983,12 +990,13 @@ ctf_add_tag (ctf_dict_t *fp, int flag, ctf_id_t type, const char *tag,
 	  break;
 
 	case CTF_K_FUNC_LINKAGE:
-	  {
-	    ctf_type_t func_type = ctf_type_reference (fp, type);
-	    ctf_funcinfo_t fi;
+	  if ((func_type = ctf_type_reference (fp, type)) == CTF_ERR)
+	    return (ctf_set_typed_errno (fp, ECTF_BADID));
+	  /* FALLTHRU */
 
-	    if (func_type == CTF_ERR)
-	      return (ctf_set_typed_errno (fp, ECTF_BADID));
+	case CTF_K_FUNCTION:
+	  {
+	    ctf_funcinfo_t fi;
 
 	    if (ctf_func_type_info (fp, func_type, &fi) < 0)
 	      return -1;	/* errno is set for us.  */
