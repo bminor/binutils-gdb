@@ -6543,9 +6543,8 @@ lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
 /* die_reader_func for create_dwo_cu.  */
 
 static void
-create_dwo_cu_reader (dwarf2_cu *cu, const gdb_byte *info_ptr,
-		      die_info *comp_unit_die, dwo_file *dwo_file,
-		      dwo_unit *dwo_unit)
+create_dwo_cu_reader (dwarf2_cu *cu, die_info *comp_unit_die,
+		      dwo_file *dwo_file, dwo_unit *dwo_unit)
 {
   sect_offset sect_off = cu->per_cu->sect_off;
   struct dwarf2_section_info *section = cu->per_cu->section;
@@ -6606,8 +6605,8 @@ create_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
 			  cu, &dwo_file);
 
       if (!reader.is_dummy ())
-	create_dwo_cu_reader (reader.cu (), reader.info_ptr (),
-			      reader.top_level_die (), &dwo_file, &read_unit);
+	create_dwo_cu_reader (reader.cu (), reader.top_level_die (), &dwo_file,
+			      &read_unit);
       info_ptr += per_cu.length ();
 
       /* If the unit could not be parsed, skip it.  */
