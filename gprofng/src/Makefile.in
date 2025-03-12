@@ -1124,6 +1124,7 @@ install-exec-local:
 		rm -f $(DESTDIR)$(bindir)/$$oldname ; \
 		ln -s `echo $$oldname | sed 's&gp-&gprofng-&'` $(DESTDIR)$(bindir)/$$oldname; \
 	done
+
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
