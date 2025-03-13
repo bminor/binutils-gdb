@@ -28,6 +28,7 @@
 #include "reggroups.h"
 #include "observable.h"
 #include "regset.h"
+#include "gdbsupport/unordered_map.h"
 #include <unordered_map>
 #include "cli/cli-cmds.h"
 
@@ -349,12 +350,12 @@ using ptid_regcache_map
 
 /* Type holding regcaches for a given pid.  */
 
-using pid_ptid_regcache_map = std::unordered_map<int, ptid_regcache_map>;
+using pid_ptid_regcache_map = gdb::unordered_map<int, ptid_regcache_map>;
 
 /* Type holding regcaches for a given target.  */
 
 using target_pid_ptid_regcache_map
-  = std::unordered_map<process_stratum_target *, pid_ptid_regcache_map>;
+  = gdb::unordered_map<process_stratum_target *, pid_ptid_regcache_map>;
 
 /* Global structure containing the existing regcaches.  */
 
