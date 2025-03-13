@@ -1051,6 +1051,23 @@ riscv_disassemble_insn (bfd_vma memaddr,
   return insnlen;
 }
 
+/* Decide if we need to parse the architecture string again, also record the
+   string into the current subset list.  */
+
+static void
+riscv_dis_parse_subset (struct disassemble_info *info, const char *arch_new)
+{
+  struct riscv_private_data *pd = info->private_data;
+  const char *arch_subset_list = pd->riscv_rps_dis.subset_list->arch_str;
+  if (arch_subset_list == NULL || strcmp (arch_subset_list, arch_new) != 0)
+    {
+      riscv_release_subset_list (pd->riscv_rps_dis.subset_list);
+      riscv_parse_subset (&pd->riscv_rps_dis, arch_new);
+      riscv_arch_str (pd->xlen, pd->riscv_rps_dis.subset_list,
+		      true/* update */);
+    }
+}
+
 /* If we find the suitable mapping symbol update the STATE.
    Otherwise, do nothing.  */
 
@@ -1073,13 +1090,11 @@ riscv_update_map_state (int n,
   else if (strcmp (name, "$x") == 0)
     {
       *state = MAP_INSN;
-      riscv_release_subset_list (pd->riscv_rps_dis.subset_list);
-      riscv_parse_subset (&pd->riscv_rps_dis, pd->default_arch);
+      riscv_dis_parse_subset (info, pd->default_arch);
     }
   else if (strncmp (name, "$xrv", 4) == 0)
     {
       *state = MAP_INSN;
-      riscv_release_subset_list (pd->riscv_rps_dis.subset_list);
 
       /* ISA mapping string may be numbered, suffixed with '.n'. Do not
 	 consider this as part of the ISA string.  */
@@ -1090,11 +1105,11 @@ riscv_update_map_state (int n,
 	  char *name_substr = xmalloc (suffix_index + 1);
 	  strncpy (name_substr, name, suffix_index);
 	  name_substr[suffix_index] = '\0';
-	  riscv_parse_subset (&pd->riscv_rps_dis, name_substr + 2);
+	  riscv_dis_parse_subset (info, name_substr + 2);
 	  free (name_substr);
 	}
       else
-	riscv_parse_subset (&pd->riscv_rps_dis, name + 2);
+	riscv_dis_parse_subset (info, name + 2);
     }
 }
 
@@ -1409,8 +1424,6 @@ riscv_init_disasm_info (struct disassemble_info *info)
 	    }
 	}
     }
-  riscv_release_subset_list (pd->riscv_rps_dis.subset_list);
-  riscv_parse_subset (&pd->riscv_rps_dis, pd->default_arch);
 
   pd->last_map_symbol = -1;
   pd->last_stop_offset = 0;
@@ -1423,6 +1436,7 @@ riscv_init_disasm_info (struct disassemble_info *info)
   pd->all_ext = false;
 
   info->private_data = pd;
+  riscv_dis_parse_subset (info, pd->default_arch);
   return true;
 }
 

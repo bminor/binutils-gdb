@@ -98,7 +98,7 @@ extern void
 riscv_release_subset_list (riscv_subset_list_t *);
 
 extern char *
-riscv_arch_str (unsigned, const riscv_subset_list_t *);
+riscv_arch_str (unsigned, riscv_subset_list_t *, bool);
 
 extern size_t
 riscv_estimate_digit (unsigned);

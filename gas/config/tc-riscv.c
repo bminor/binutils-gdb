@@ -325,19 +325,6 @@ static riscv_parse_subset_t riscv_rps_as =
   true,			/* check_unknown_prefixed_ext.  */
 };
 
-/* Update file/function-level architecture string according to the
-   subset_list.  */
-
-static void
-riscv_set_arch_str (const char **arch_str_p)
-{
-  riscv_subset_list_t *subsets = riscv_rps_as.subset_list;
-  const char *arch_str = *arch_str_p;
-  if (arch_str != NULL)
-    free ((void *) arch_str);
-  *arch_str_p = riscv_arch_str (xlen, subsets);
-}
-
 /* This structure is used to hold a stack of .option values.  */
 struct riscv_option_stack
 {
@@ -369,8 +356,8 @@ riscv_set_arch (const char *s)
     }
   riscv_release_subset_list (riscv_rps_as.subset_list);
   riscv_parse_subset (&riscv_rps_as, s);
-  riscv_set_arch_str (&file_arch_str);
-  riscv_set_arch_str (&riscv_rps_as.subset_list->arch_str);
+  riscv_arch_str (xlen, riscv_rps_as.subset_list, true/* update */);
+  file_arch_str = strdup (riscv_rps_as.subset_list->arch_str);
 
   riscv_set_rvc (riscv_subset_supports (&riscv_rps_as, "c")
 		 || riscv_subset_supports (&riscv_rps_as, "zca"));
@@ -4947,13 +4934,13 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
   if (strcmp (name, "rvc") == 0)
     {
       riscv_update_subset (&riscv_rps_as, "+c");
-      riscv_set_arch_str (&riscv_rps_as.subset_list->arch_str);
+      riscv_arch_str (xlen, riscv_rps_as.subset_list, true/* update */);
       riscv_set_rvc (true);
     }
   else if (strcmp (name, "norvc") == 0)
     {
       riscv_update_subset (&riscv_rps_as, "-c");
-      riscv_set_arch_str (&riscv_rps_as.subset_list->arch_str);
+      riscv_arch_str (xlen, riscv_rps_as.subset_list, true/* update */);
       riscv_set_rvc (false);
     }
   else if (strcmp (name, "pic") == 0)
@@ -4974,7 +4961,7 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
       if (is_whitespace (*name) && *name != '\0')
 	name++;
       riscv_update_subset (&riscv_rps_as, name);
-      riscv_set_arch_str (&riscv_rps_as.subset_list->arch_str);
+      riscv_arch_str (xlen, riscv_rps_as.subset_list, true/* update */);
 
       riscv_set_rvc (riscv_subset_supports (&riscv_rps_as, "c")
 		     || riscv_subset_supports (&riscv_rps_as, "zca"));

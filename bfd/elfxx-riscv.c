@@ -2328,7 +2328,7 @@ riscv_arch_str1 (riscv_subset_t *subset,
 /* Convert subset information into string with explicit versions.  */
 
 char *
-riscv_arch_str (unsigned xlen, const riscv_subset_list_t *subset)
+riscv_arch_str (unsigned xlen, riscv_subset_list_t *subset, bool update)
 {
   size_t arch_str_len = riscv_estimate_arch_strlen (subset);
   char *attr_str = xmalloc (arch_str_len);
@@ -2338,6 +2338,13 @@ riscv_arch_str (unsigned xlen, const riscv_subset_list_t *subset)
 
   riscv_arch_str1 (subset->head, attr_str, buf, arch_str_len);
   free (buf);
+
+  if (update)
+    {
+      if (subset->arch_str != NULL)
+	free ((void *) subset->arch_str);
+      subset->arch_str = attr_str;
+    }
 
   return attr_str;
 }

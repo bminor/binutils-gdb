@@ -4004,7 +4004,8 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
   /* Free the previous merged_arch_str which called xmalloc.  */
   free (merged_arch_str);
 
-  merged_arch_str = riscv_arch_str (ARCH_SIZE, &merged_subsets);
+  merged_arch_str = riscv_arch_str (ARCH_SIZE, &merged_subsets,
+				    false/* update */);
 
   /* Release the subset lists.  */
   riscv_release_subset_list (&in_subsets);
