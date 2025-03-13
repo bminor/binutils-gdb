@@ -51643,7 +51643,7 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 @c man title gdb-add-index Add index files to speed up GDB
 
 @c man begin SYNOPSIS gdb-add-index
-gdb-add-index [-dwarf-5] @var{filename}
+gdb-add-index [-h | --help] [-v | --version] [--dwarf-5] @var{filename}
 @c man end
 
 @c man begin DESCRIPTION gdb-add-index
@@ -51661,8 +51661,8 @@ which use ELF binaries and DWARF debug information (i.e., sections
 named @code{.debug_*}).
 
 By default @command{gdb-add-index} will add a pre-DWARF 5
-@code{.gdb_index} section to @var{filename}.  With @option{-dwarf-5}
-DWARF 5 sections are added instead.
+@code{.gdb_index} section to @var{filename}.  With @option{--dwarf-5}
+the DWARF 5 section @code{.debug_names} is added instead.
 
 @var{filename} must be writable.
 
@@ -51686,9 +51686,16 @@ the @value{GDBN} manual in node @code{Index Files}
 
 @c man begin OPTIONS gdb-add-index
 @table @env
-@item -dwarf-5
+@item --dwarf-5
 Add DWARF 5 sections instead of previous @code{.gdb_index} section.
 
+@item --help
+@itemx -h
+List all options, with brief explanations.
+
+@item --version
+@itemx -v
+Print version information and then exit.
 @end table
 @c man end
 

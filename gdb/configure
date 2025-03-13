@@ -33779,6 +33779,8 @@ ac_config_files="$ac_config_files gcore.in:gcore-1.in"
 
 ac_config_files="$ac_config_files gstack.in:gstack-1.in"
 
+ac_config_files="$ac_config_files gdb-add-index.in:contrib/gdb-add-index.sh"
+
 ac_config_files="$ac_config_files Makefile gdb-gdb.gdb gdb-gdb.py doc/Makefile data-directory/Makefile"
 
 
@@ -34880,6 +34882,7 @@ do
     "nm.h") CONFIG_LINKS="$CONFIG_LINKS nm.h:$GDB_NM_FILE" ;;
     "gcore.in") CONFIG_FILES="$CONFIG_FILES gcore.in:gcore-1.in" ;;
     "gstack.in") CONFIG_FILES="$CONFIG_FILES gstack.in:gstack-1.in" ;;
+    "gdb-add-index.in") CONFIG_FILES="$CONFIG_FILES gdb-add-index.in:contrib/gdb-add-index.sh" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "gdb-gdb.gdb") CONFIG_FILES="$CONFIG_FILES gdb-gdb.gdb" ;;
     "gdb-gdb.py") CONFIG_FILES="$CONFIG_FILES gdb-gdb.py" ;;

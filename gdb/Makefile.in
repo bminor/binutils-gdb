@@ -1956,7 +1956,7 @@ generated_files = \
 # Flags needed to compile Python code
 PYTHON_CFLAGS = @PYTHON_CFLAGS@
 
-all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb gcore gstack
+all: gdb$(EXEEXT) $(CONFIG_ALL) gdb-gdb.py gdb-gdb.gdb gcore gstack gdb-add-index
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=$(SUBDIRS)" subdir_do
 
 # Rule for compiling .c files in the top-level gdb directory.
@@ -2135,7 +2135,7 @@ install-only: $(CONFIG_INSTALL)
 	else \
 	  true ; \
 	fi ; \
-	$(INSTALL_SCRIPT) $(srcdir)/contrib/gdb-add-index.sh \
+	$(INSTALL_SCRIPT) gdb-add-index \
 		$(DESTDIR)$(bindir)/$$transformed_name
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
@@ -2355,7 +2355,10 @@ jit-reader.h: $(srcdir)/jit-reader.in config.status
 gstack.in gcore.in: %.in : $(srcdir)/%-1.in config.status
 	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
 
-gstack gcore: % : %.in version.c
+gdb-add-index.in : $(srcdir)/contrib/gdb-add-index.sh config.status
+	$(ECHO_GEN) $(SHELL) config.status $(SILENT_FLAG) $@
+
+gstack gcore gdb-add-index: % : %.in version.c
 	$(ECHO_GEN) \
 	vv=`grep 'version\[\] = ' version.c | grep -o '".*"' | tr -d \"`; \
 	sed -e "s,@VERSION@,$$vv," $< > $@
