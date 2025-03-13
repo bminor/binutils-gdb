@@ -537,16 +537,20 @@ extern const char *ctf_errmsg (int);
 extern int ctf_version (int);
 
 /* Given a symbol table index corresponding to a function symbol, return info on
-   the type of a given function's arguments or return value.  Vararg functions
-   have a final arg with CTF_FUNC_VARARG on in ctc_flags.  */
+   the type of a given function's arguments or return value, or its parameter
+   names.  Vararg functions have a final arg with CTF_FUNC_VARARG on in
+   ctc_flags.  */
 
 extern int ctf_func_info (ctf_dict_t *, unsigned long, ctf_funcinfo_t *);
 extern int ctf_func_args (ctf_dict_t *, unsigned long, uint32_t, ctf_id_t *);
+extern int ctf_func_arg_names (ctf_dict_t *, unsigned long, uint32_t, const char **);
 
 /* As above, but for CTF_K_FUNCTION or CTF_K_FUNC_LINKAGE types in CTF dicts.  */
 
 extern int ctf_func_type_info (ctf_dict_t *, ctf_id_t, ctf_funcinfo_t *);
 extern int ctf_func_type_args (ctf_dict_t *, ctf_id_t, uint32_t, ctf_id_t *);
+extern int ctf_func_type_arg_names (ctf_dict_t *, ctf_id_t, uint32_t,
+				    const char **);
 
 /* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
 
@@ -916,7 +920,8 @@ extern ctf_id_t ctf_add_integer (ctf_dict_t *, uint32_t, const char *,
    return type.  ctf_add_function_linkage provides a function with a name
    and linkage, which is one of the CTF_FUNC_LINKAGE_* constants.  */
 extern ctf_id_t ctf_add_function (ctf_dict_t *, uint32_t,
-				  const ctf_funcinfo_t *, const ctf_id_t *);
+				  const ctf_funcinfo_t *, const ctf_id_t *,
+				  const char **arg_names);
 extern ctf_id_t ctf_add_function_linkage (ctf_dict_t *, uint32_t,
 					  ctf_id_t, const char *, int linkage);
 

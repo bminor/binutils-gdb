@@ -52,8 +52,10 @@ LIBCTF_2.0 {
 
 	ctf_func_info;
 	ctf_func_args;
+	ctf_func_arg_names;
 	ctf_func_type_info;
 	ctf_func_type_args;
+	ctf_func_type_arg_names;
 
 	ctf_lookup_by_name;
 	ctf_lookup_by_symbol;

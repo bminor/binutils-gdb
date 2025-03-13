@@ -1056,11 +1056,12 @@ ctf_add_decl_tag (ctf_dict_t *fp, int flag, ctf_id_t type, const char *tag,
 
 ctf_id_t
 ctf_add_function (ctf_dict_t *fp, uint32_t flag,
-		  const ctf_funcinfo_t *ctc, const ctf_id_t *argv)
+		  const ctf_funcinfo_t *ctc, const ctf_id_t *argv,
+		  const char **arg_names)
 {
   ctf_dtdef_t *dtd;
   uint32_t vlen;
-  uint32_t *vdat;
+  ctf_param_t *vdat;
   ctf_dict_t *tmp = fp;
   size_t i;
 
@@ -1092,19 +1093,25 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
     return (ctf_set_typed_errno (fp, EOVERFLOW));
 
   if ((dtd = ctf_add_generic (fp, flag, NULL, CTF_K_FUNCTION, 0,
-			      sizeof (uint32_t) * vlen, NULL)) == NULL)
+			      sizeof (ctf_param_t) * vlen, NULL)) == NULL)
     return CTF_ERR;				/* errno is set for us.  */
 
-  vdat = (uint32_t *) dtd->dtd_vlen;
+  vdat = (ctf_param_t *) dtd->dtd_vlen;
 
   for (i = 0; i < ctc->ctc_argc; i++)
-    vdat[i] = (uint32_t) argv[i];
+    {
+      vdat[i].cfp_name = ctf_str_add (fp, arg_names);
+      vdat[i].cfp_type = (uint32_t) argv[i];
+    }
 
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_FUNCTION, 0, vlen);
   dtd->dtd_data->ctt_type = (uint32_t) ctc->ctc_return;
 
   if (ctc->ctc_flags & CTF_FUNC_VARARG)
-    vdat[vlen - 1] = 0;		   /* Add trailing zero to indicate varargs.  */
+    {
+      vdat[vlen - 1].cfp_type = 0;   /* Add trailing zero to indicate varargs.  */
+      vdat[vlen - 1].cfp_name = 0;
+    }
 
   return dtd->dtd_type;
 }
