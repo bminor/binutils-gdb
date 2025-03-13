@@ -5203,9 +5203,9 @@ aarch64_record_asimd_load_store (aarch64_insn_decode_record *aarch64_insn_r)
   CORE_ADDR address;
   uint64_t addr_offset = 0;
   uint32_t record_buf[24];
-  uint64_t record_buf_mem[24];
+  std::vector<uint64_t> record_buf_mem;
   uint32_t reg_rn, reg_rt;
-  uint32_t reg_index = 0, mem_index = 0;
+  uint32_t reg_index = 0;
   uint8_t opcode_bits, size_bits;
 
   reg_rt = bits (aarch64_insn_r->aarch64_insn, 0, 4);
@@ -5268,8 +5268,8 @@ aarch64_record_asimd_load_store (aarch64_insn_decode_record *aarch64_insn_r)
 		record_buf[reg_index++] = reg_rt + AARCH64_V0_REGNUM;
 	      else
 		{
-		  record_buf_mem[mem_index++] = esize / 8;
-		  record_buf_mem[mem_index++] = address + addr_offset;
+		  record_buf_mem.push_back (esize / 8);
+		  record_buf_mem.push_back (address + addr_offset);
 		}
 	      addr_offset = addr_offset + (esize / 8);
 	      reg_rt = (reg_rt + 1) % 32;
@@ -5340,8 +5340,8 @@ aarch64_record_asimd_load_store (aarch64_insn_decode_record *aarch64_insn_r)
 		  record_buf[reg_index++] = reg_tt + AARCH64_V0_REGNUM;
 		else
 		  {
-		    record_buf_mem[mem_index++] = esize / 8;
-		    record_buf_mem[mem_index++] = address + addr_offset;
+		    record_buf_mem.push_back (esize / 8);
+		    record_buf_mem.push_back (address + addr_offset);
 		  }
 		addr_offset = addr_offset + (esize / 8);
 		reg_tt = (reg_tt + 1) % 32;
@@ -5353,9 +5353,9 @@ aarch64_record_asimd_load_store (aarch64_insn_decode_record *aarch64_insn_r)
     record_buf[reg_index++] = reg_rn;
 
   aarch64_insn_r->reg_rec_count = reg_index;
-  aarch64_insn_r->mem_rec_count = mem_index / 2;
+  aarch64_insn_r->mem_rec_count = record_buf_mem.size () / 2;
   MEM_ALLOC (aarch64_insn_r->aarch64_mems, aarch64_insn_r->mem_rec_count,
-	     record_buf_mem);
+	     record_buf_mem.data ());
   REG_ALLOC (aarch64_insn_r->aarch64_regs, aarch64_insn_r->reg_rec_count,
 	     record_buf);
   return AARCH64_RECORD_SUCCESS;
