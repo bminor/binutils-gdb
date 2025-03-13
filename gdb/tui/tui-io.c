@@ -42,7 +42,7 @@
 #include "gdbsupport/filestuff.h"
 #include "completer.h"
 #include "gdb_curses.h"
-#include <map>
+#include "gdbsupport/unordered_map.h"
 #include "pager.h"
 #include "gdbsupport/gdb-checked-static-cast.h"
 
@@ -178,9 +178,19 @@ tui_putc (char c)
   update_cmdwin_start_line ();
 }
 
+/* Hasher for colors.  */
+
+struct color_hash
+{
+  size_t operator() (const ui_file_style::color &color) const noexcept
+  {
+    return color.hash ();
+  }
+};
+
 /* This maps colors to their corresponding color index.  */
 
-static std::map<ui_file_style::color, int> color_map;
+static gdb::unordered_map<ui_file_style::color, int, color_hash> color_map;
 
 /* This holds a pair of colors and is used to track the mapping
    between a color pair index and the actual colors.  */
@@ -190,16 +200,27 @@ struct color_pair
   int fg;
   int bg;
 
-  bool operator< (const color_pair &o) const
+  bool operator== (const color_pair &other) const noexcept
   {
-    return fg < o.fg || (fg == o.fg && bg < o.bg);
+    return fg == other.fg && bg == other.bg;
+  }
+};
+
+struct color_pair_hash
+{
+  using is_avalanching = void;
+
+  size_t operator() (const color_pair &val) const noexcept
+  {
+    static_assert (std::has_unique_object_representations_v<color_pair>);
+    return ankerl::unordered_dense::detail::wyhash::hash (&val, sizeof (val));
   }
 };
 
 /* This maps pairs of colors to their corresponding color pair
    index.  */
 
-static std::map<color_pair, int> color_pair_map;
+static gdb::unordered_map<color_pair, int, color_pair_hash> color_pair_map;
 
 /* This is indexed by ANSI color offset from the base color, and holds
    the corresponding curses color constant.  */

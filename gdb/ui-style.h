@@ -151,22 +151,12 @@ struct ui_file_style
       return ! (*this == other);
     }
 
-    bool operator< (const color &other) const
+    /* Compute a simple hash code for this object.  */
+    size_t hash () const
     {
-      if (m_color_space != other.m_color_space)
-	return m_color_space < other.m_color_space;
       if (is_simple ())
-	return m_value < other.m_value;
-      if (m_red < other.m_red)
-	return true;
-      if (m_red == other.m_red)
-	{
-	  if (m_green < other.m_green)
-	    return true;
-	  if (m_green == other.m_green)
-	    return m_blue < other.m_blue;
-	}
-      return false;
+	return m_value;
+      return (m_red << 16) + (m_green << 8) + m_red;
     }
 
     color_space colorspace () const
