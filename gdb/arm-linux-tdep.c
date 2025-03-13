@@ -1629,7 +1629,9 @@ arm_canonicalize_syscall (int syscall)
     case 363: return gdb_sys_rt_tgsigqueueinfo;
     case 364: return gdb_sys_perf_event_open;
     case 365: return gdb_sys_recvmmsg;
+      */
     case 366: return gdb_sys_accept4;
+      /*
     case 367: return gdb_sys_fanotify_init;
     case 368: return gdb_sys_fanotify_mark;
     case 369: return gdb_sys_prlimit64;

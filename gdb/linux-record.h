@@ -541,6 +541,7 @@ enum gdb_syscall {
   gdb_sys_msgrcv = 530,
   gdb_sys_msgctl = 531,
   gdb_sys_semtimedop = 532,
+  gdb_sys_accept4 = 533,
   gdb_sys_newfstatat = 540,
 };
 

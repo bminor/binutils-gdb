@@ -764,7 +764,7 @@ i386_canonicalize_syscall (int syscall)
       SYSCALL_MAP (bind);
       SYSCALL_MAP (connect);
       SYSCALL_MAP (listen);
-      UNSUPPORTED_SYSCALL_MAP (accept4);
+      SYSCALL_MAP (accept4);
       SYSCALL_MAP (getsockopt);
       SYSCALL_MAP (setsockopt);
       SYSCALL_MAP (getsockname);

@@ -725,6 +725,7 @@ Do you want to stop the program?"),
       break;
 
     case gdb_sys_accept:
+    case gdb_sys_accept4:
     case gdb_sys_getsockname:
     case gdb_sys_getpeername:
       {
