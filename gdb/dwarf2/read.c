@@ -1967,14 +1967,14 @@ dwarf2_base_index_functions::expand_all_symtabs (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  for (const dwarf2_per_cu_up &per_cu : per_objfile->per_bfd->all_units)
+  for (dwarf2_per_cu *per_cu : all_units_range (per_objfile->per_bfd))
     {
       /* We don't want to directly expand a partial CU, because if we
 	 read it with the wrong language, then assertion failures can
 	 be triggered later on.  See PR symtab/23010.  So, tell
 	 dw2_instantiate_symtab to skip partial CUs -- any important
 	 partial CU will be read via DW_TAG_imported_unit anyway.  */
-      dw2_instantiate_symtab (per_cu.get (), per_objfile, true);
+      dw2_instantiate_symtab (per_cu, per_objfile, true);
     }
 }
 
