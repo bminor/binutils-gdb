@@ -2524,13 +2524,13 @@ riscv_update_subset1 (riscv_parse_subset_t *rps,
     }
   while (*p++ == ',');
 
-  bool conflict = false;
+  bool no_conflict = true;
   if (explicit_subset == NULL)
     {
       riscv_parse_add_implicit_subsets (rps);
-      conflict = riscv_parse_check_conflicts (rps);
+      no_conflict = riscv_parse_check_conflicts (rps);
     }
-  return conflict;
+  return no_conflict;
 }
 
 /* Add/Remove an extension to/from the subset list.  This is used for
