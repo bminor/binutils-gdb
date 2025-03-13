@@ -452,7 +452,7 @@ typedef struct ctf_lookup_idx_key
 /* Look up some kind of thing in the name tables.  */
 
 ctf_id_t
-ctf_lookup_kind (ctf_dict_t *fp, int kind, const char *name)
+ctf_lookup_by_kind (ctf_dict_t *fp, int kind, const char *name)
 {
   ctf_id_t type;
 
@@ -475,7 +475,7 @@ ctf_lookup_kind (ctf_dict_t *fp, int kind, const char *name)
 ctf_id_t
 ctf_lookup_variable (ctf_dict_t *fp, const char *name)
 {
-  return ctf_lookup_kind (fp, CTF_K_VAR, name);
+  return ctf_lookup_by_kind (fp, CTF_K_VAR, name);
 }
 
 /* Look up a single enumerator by enumeration constant name.  Returns the ID of

@@ -579,7 +579,7 @@ extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
    linker are left in the variable table here.
 
    Note: this looks up a variable's *type*, not the variable itself.
-   For that, use ctf_lookup_kind, below.  */
+   For that, use ctf_lookup_by_kind, below.  */
 
 extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 
@@ -599,7 +599,7 @@ extern ctf_id_t ctf_lookup_enumerator (ctf_dict_t *, const char *,
    CTF_K_TYPE_TAG and CTF_K_DECL_TAG, since they may be associated with many
    types: use ctf_tag_next. */
 
-extern ctf_id_t ctf_lookup_kind (ctf_dict_t *, int kind, const char *);
+extern ctf_id_t ctf_lookup_by_kind (ctf_dict_t *, int kind, const char *);
 
 /* Type lookup functions.  */
 
