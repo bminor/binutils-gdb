@@ -81,12 +81,12 @@ proc get_dyld_info {} {
     set dyld_count 0
     set dyld_start_addr ""
     gdb_test_multiple "info sharedlibrary" "" {
-	-re "~\"From\\s+To\\s+Syms\\s+Read\\s+Shared Object Library\\\\n\"\r\n" {
+	-re "~\"From\\s+To(\\s+NS)?\\s+Syms\\s+Read\\s+Shared Object Library\\\\n\"\r\n" {
 	    exp_continue
 	}
-	-re "^~\"($::hex)\\s+$::hex\\s+\[^/\]+(/\[^\r\n\]+)\\\\n\"\r\n" {
+	-re "^~\"($::hex)\\s+${::hex}(\\s+$::decimal)?\\s+\[^/\]+(/\[^\r\n\]+)\\\\n\"\r\n" {
 	    set addr $expect_out(1,string)
-	    set lib $expect_out(2,string)
+	    set lib $expect_out(3,string)
 
 	    if { [is_dyln $lib] } {
 		# This looks like it might be the dynamic linker.

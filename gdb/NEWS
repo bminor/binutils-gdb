@@ -35,6 +35,11 @@
   a -h or --help option, which prints each options and a brief
   description.
 
+* On systems that support linkage namespaces, the output of the command
+  "info sharedlibraries" may add one more column, NS, which identifies the
+  namespace into which the library was loaded, if more than one namespace
+  is active.
+
 * New commands
 
 maintenance check psymtabs

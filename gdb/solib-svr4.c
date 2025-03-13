@@ -405,10 +405,53 @@ struct svr4_info
      The special entry zero is reserved for a linear list to support
      gdbstubs that do not support namespaces.  */
   std::map<CORE_ADDR, std::vector<svr4_so>> solib_lists;
+
+  /* Mapping between r_debug[_ext] addresses and a user-friendly
+     identifier for the namespace.  A vector is used to make it
+     easy to assign new internal IDs to namespaces.
+
+     For gdbservers that don't support namespaces, the first (and only)
+     entry of the vector will be 0.
+
+     A note on consistency. We can't make the IDs be consistent before
+     and after the initial relocation of the inferior (when the global
+     _r_debug is relocated, as mentioned in the previous comment).  It is
+     likely that this is a non-issue, since the inferior can't have called
+     dlmopen yet, but I think it is worth noting.
+
+     The only issue I am aware at this point is that, if when parsing an
+     XML file, we read an LMID that given by an XML file (and read in
+     library_list_start_library) is the identifier obtained with dlinfo
+     instead of the address of r_debug[_ext], and after attaching the
+     inferior adds another SO to that namespace, we might double-count it
+     since we won't have access to the LMID later on.  However, this is
+     already a problem with the existing solib_lists code.  */
+  std::vector<CORE_ADDR> namespace_id;
+
+  /* This identifies which namespaces are active.  A namespace is considered
+     active when there is at least one shared object loaded into it.  */
+  std::set<size_t> active_namespaces;
 };
 
 /* Per-program-space data key.  */
 static const registry<program_space>::key<svr4_info> solib_svr4_pspace_data;
+
+/* Check if the lmid address is already assigned an ID in the svr4_info,
+   and if not, assign it one and add it to the list of known namespaces.  */
+static void
+svr4_maybe_add_namespace (svr4_info *info, CORE_ADDR lmid)
+{
+  int i;
+  for (i = 0; i < info->namespace_id.size (); i++)
+    {
+      if (info->namespace_id[i] == lmid)
+	break;
+    }
+  if (i == info->namespace_id.size ())
+    info->namespace_id.push_back (lmid);
+
+  info->active_namespaces.insert (i);
+}
 
 /* Return whether DEBUG_BASE is the default namespace of INFO.  */
 
@@ -1041,14 +1084,18 @@ library_list_start_library (struct gdb_xml_parser *parser,
   /* Older versions did not supply lmid.  Put the element into the flat
      list of the special namespace zero in that case.  */
   gdb_xml_value *at_lmid = xml_find_attribute (attributes, "lmid");
+  svr4_info *info = get_svr4_info (current_program_space);
   if (at_lmid == nullptr)
-    solist = list->cur_list;
+    {
+      solist = list->cur_list;
+      svr4_maybe_add_namespace (info, 0);
+    }
   else
     {
       ULONGEST lmid = *(ULONGEST *) at_lmid->value.get ();
       solist = &list->solib_lists[lmid];
+      svr4_maybe_add_namespace (info, lmid);
     }
-
   solist->emplace_back (name, std::move (li));
 }
 
@@ -1286,6 +1333,8 @@ svr4_current_sos_direct (struct svr4_info *info)
   /* Remove any old libraries.  We're going to read them back in again.  */
   info->solib_lists.clear ();
 
+  info->active_namespaces.clear ();
+
   /* Fall back to manual examination of the target if the packet is not
      supported or gdbserver failed to find DT_DEBUG.  gdb.server/solib-list.exp
      tests a case where gdbserver cannot find the shared libraries list while
@@ -1333,7 +1382,10 @@ svr4_current_sos_direct (struct svr4_info *info)
     ignore_first = true;
 
   auto cleanup = make_scope_exit ([info] ()
-    { info->solib_lists.clear (); });
+    {
+      info->solib_lists.clear ();
+      info->active_namespaces.clear ();
+    });
 
   /* Collect the sos in each namespace.  */
   CORE_ADDR debug_base = info->debug_base;
@@ -1343,8 +1395,11 @@ svr4_current_sos_direct (struct svr4_info *info)
       /* Walk the inferior's link map list, and build our so_list list.  */
       lm = solib_svr4_r_map (debug_base);
       if (lm != 0)
-	svr4_read_so_list (info, lm, 0, info->solib_lists[debug_base],
-			   ignore_first);
+	{
+	  svr4_maybe_add_namespace (info, debug_base);
+	  svr4_read_so_list (info, lm, 0, info->solib_lists[debug_base],
+			     ignore_first);
+	}
     }
 
   /* On Solaris, the dynamic linker is not in the normal list of
@@ -1361,8 +1416,11 @@ svr4_current_sos_direct (struct svr4_info *info)
     {
       /* Add the dynamic linker's namespace unless we already did.  */
       if (info->solib_lists.find (debug_base) == info->solib_lists.end ())
-	svr4_read_so_list (info, debug_base, 0, info->solib_lists[debug_base],
-			   0);
+	{
+	  svr4_maybe_add_namespace (info, debug_base);
+	  svr4_read_so_list (info, debug_base, 0, info->solib_lists[debug_base],
+			     0);
+	}
     }
 
   cleanup.release ();
@@ -1778,6 +1836,10 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
 	return 0;
 
       prev_lm = 0;
+
+      /* If the list is empty, we are seeing a new namespace for the
+	 first time, so assign it an internal ID.  */
+      svr4_maybe_add_namespace (info, debug_base);
     }
   else
     prev_lm = solist.back ().lm_info->lm_addr;
@@ -1845,6 +1907,8 @@ disable_probes_interface (svr4_info *info)
 
   free_probes_table (info);
   info->solib_lists.clear ();
+  info->namespace_id.clear ();
+  info->active_namespaces.clear ();
 }
 
 /* Update the solib list as appropriate when using the
@@ -3042,6 +3106,8 @@ svr4_solib_create_inferior_hook (int from_tty)
   /* Clear the probes-based interface's state.  */
   free_probes_table (info);
   info->solib_lists.clear ();
+  info->namespace_id.clear ();
+  info->active_namespaces.clear ();
 
   /* Relocate the main executable if necessary.  */
   svr4_relocate_main_executable ();
@@ -3460,6 +3526,32 @@ svr4_find_solib_addr (solib &so)
   return li->l_addr_inferior;
 }
 
+/* See solib_ops::find_solib_ns in solist.h.  */
+
+static int
+svr4_find_solib_ns (const solib &so)
+{
+  CORE_ADDR debug_base = find_debug_base_for_solib (&so);
+  svr4_info *info = get_svr4_info (current_program_space);
+  for (int i = 0; i < info->namespace_id.size (); i++)
+    {
+      if (info->namespace_id[i] == debug_base)
+	{
+	  gdb_assert (info->active_namespaces.count (i) == 1);
+	  return i;
+	}
+    }
+  error (_("No namespace found"));
+}
+
+/* see solib_ops::num_active_namespaces in solist.h.  */
+static int
+svr4_num_active_namespaces ()
+{
+  svr4_info *info = get_svr4_info (current_program_space);
+  return info->active_namespaces.size ();
+}
+
 const struct solib_ops svr4_so_ops =
 {
   svr4_relocate_section_addresses,
@@ -3475,6 +3567,8 @@ const struct solib_ops svr4_so_ops =
   svr4_update_solib_event_breakpoints,
   svr4_handle_solib_event,
   svr4_find_solib_addr,
+  svr4_find_solib_ns,
+  svr4_num_active_namespaces,
 };
 
 void _initialize_svr4_solib ();

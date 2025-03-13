@@ -180,6 +180,20 @@ struct solib_ops
      name).  */
 
   std::optional<CORE_ADDR> (*find_solib_addr) (solib &so);
+
+  /* Return which linker namespace contains the current so.
+     If the linker or libc does not support linkage namespaces at all
+     (which is basically all of them but solib-svr4), this function should
+     be set to nullptr, so that "info shared" won't add an unnecessary
+     column.
+
+     If the namespace can not be determined (such as when we're stepping
+     though the dynamic linker), this function should throw a
+     gdb_exception_error.  */
+  int (*find_solib_ns) (const solib &so);
+
+  /* Returns the number of active namespaces in the inferior.  */
+  int (*num_active_namespaces) ();
 };
 
 /* A unique pointer to a so_list.  */

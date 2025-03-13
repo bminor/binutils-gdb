@@ -1051,12 +1051,24 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 	}
     }
 
+  /* How many columns the table should have.  If the inferior has
+     more than one namespace active, we need a column to show that.  */
+  int num_cols = 4;
+  const solib_ops *ops = gdbarch_so_ops (gdbarch);
+  if (ops->num_active_namespaces != nullptr
+      && ops->num_active_namespaces () > 1)
+    num_cols++;
+
   {
-    ui_out_emit_table table_emitter (uiout, 4, nr_libs, "SharedLibraryTable");
+    ui_out_emit_table table_emitter (uiout, num_cols, nr_libs,
+				     "SharedLibraryTable");
 
     /* The "- 1" is because ui_out adds one space between columns.  */
     uiout->table_header (addr_width - 1, ui_left, "from", "From");
     uiout->table_header (addr_width - 1, ui_left, "to", "To");
+    if (ops->num_active_namespaces != nullptr
+	&& ops->num_active_namespaces () > 1)
+      uiout->table_header (5, ui_left, "namespace", "NS");
     uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
     uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
 
@@ -1081,6 +1093,19 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 	  {
 	    uiout->field_skip ("from");
 	    uiout->field_skip ("to");
+	  }
+
+	if (ops->num_active_namespaces != nullptr
+	    && ops->num_active_namespaces ()> 1)
+	  {
+	    try
+	      {
+		uiout->field_fmt ("namespace", "[[%d]]", ops->find_solib_ns (so));
+	      }
+	    catch (const gdb_exception_error &er)
+	      {
+		uiout->field_skip ("namespace");
+	      }
 	  }
 
 	if (!top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()

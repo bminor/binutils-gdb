@@ -22172,6 +22172,11 @@ be determined then the address range for the @code{.text} section from
 the library will be listed.  If the @code{.text} section cannot be
 found then no addresses will be listed.
 
+On systems that support linkage namespaces, the output includes an
+additional column @code{NS} if the inferior has more than one active
+namespace when the command is used.  This column the linkage namespace
+that the shared library was loaded into.
+
 @kindex info dll
 @item info dll @var{regex}
 This is an alias of @code{info sharedlibrary}.
