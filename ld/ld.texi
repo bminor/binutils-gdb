@@ -5965,7 +5965,13 @@ parentheses.  The following types are defined:
 
 @item NOLOAD
 The section should be marked as not loadable, so that it will not be
-loaded into memory when the program is run.
+loaded into memory when the program is run.  When generating an ELF
+output file, the memory space is allocated for the section at run-time,
+except for SHT_NOTE sections.  For other output files, no memory space
+is allocated at run-time.
+
+Note - the ELF behaviour is a bug that may change to be consistent
+with non-ELF targets.
 
 @item READONLY
 The section should be marked as read-only.
