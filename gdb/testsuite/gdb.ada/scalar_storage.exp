@@ -32,7 +32,7 @@ if {$output != ""} {
 	unsupported "scalar storage order not supported"
     } else {
 	# Otherwise issue the fail.
-	gdb_compile_test $srcfile $result
+	gdb_compile_test $srcfile $output
     }
     # Either way we're not running this test.
     return
