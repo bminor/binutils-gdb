@@ -47,6 +47,7 @@ void listing_error (const char *message);
 void listing_file (const char *name);
 void listing_list (int on);
 void listing_newline (char *ps);
+struct list_info_struct *listing_override_tail (struct list_info_struct *);
 void listing_prev_line (void);
 void listing_print (char *, char **);
 void listing_psize (int);

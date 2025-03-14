@@ -52,7 +52,7 @@ extern void dot_cfi_sections (int);
 extern void cfi_finish (void);
 
 /* Entry points for backends to add unwind information.  */
-extern void cfi_new_fde (struct symbol *);
+extern void cfi_new_fde (struct symbol *, bool);
 extern void cfi_end_fde (struct symbol *);
 extern void cfi_set_last_fde (struct fde_entry *fde);
 extern void cfi_set_return_column (unsigned);
@@ -105,6 +105,9 @@ struct cfi_insn_data
   struct cfi_insn_data *next;
 #if MULTIPLE_FRAME_SECTIONS
   segT cur_seg;
+#endif
+#ifndef NO_LISTING
+  struct list_info_struct *listing_ctxt;
 #endif
   int insn;
   union
@@ -193,6 +196,10 @@ struct fde_entry
   symbolS *end_address;
   struct cfi_insn_data *data;
   struct cfi_insn_data **last;
+#ifndef NO_LISTING
+  struct list_info_struct *listing_ctxt;
+  struct list_info_struct *listing_end;
+#endif
   unsigned char per_encoding;
   unsigned char lsda_encoding;
   int personality_id;

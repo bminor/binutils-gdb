@@ -116,6 +116,11 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
 
 run_list_test "cfi-diag-1" ""
 
+# ARC and HPPA use ';' as comment char rather than as statement separator.
+if { ![istarget "arc*-*-*"] && ![istarget "hppa*-*"] } then {
+    run_list_test "listing" "-aln --listing-cont-lines=1"
+}
+
 # HPPA64 uses 64-bit relocations, which results in all of the dump
 # offset numbers not matching up.
 if { ![istarget "hppa64*-*"] } then {

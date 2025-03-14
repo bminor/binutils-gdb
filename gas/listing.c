@@ -431,6 +431,51 @@ listing_newline (char *ps)
 #endif
 }
 
+/* Set listing context back to where it was when input was parsed, to allow
+   associating late code/data emission to segments with their origin.  */
+
+struct list_info_struct *listing_override_tail (struct list_info_struct *info)
+{
+  struct list_info_struct *prev = listing_tail;
+  const fragS *frag;
+
+  if (!info)
+    return NULL;
+
+  listing_tail = info;
+
+  /* The first frag created by listing_newline() is still associated with the
+     earlier line.  For the adjustment done below this property doesn't hold,
+     though.  */
+  frag = info->frag;
+  if (frag->line != info)
+    frag = frag->fr_next;
+
+  /* Check whether there's any other output data already for this line.  Replace
+     info->frag only if there's none.  This is to cover for contributions to
+     multiple sections from a single line not being properly represented in the
+     listing, at the time of writing.  Prefer the listing to show any "ordinary"
+     code/data contributions over any .eh_frame ones.  (This way multiple .cfi_*
+     on a single line will also have all their contributions listed, rather
+     than just those from the last such directive.)  */
+  for (; frag; frag = frag->fr_next)
+    if (frag->line != info
+	|| (frag->fr_type != rs_dummy
+	    && (frag->fr_type != rs_fill
+		|| frag->fr_fix
+		|| (frag->fr_var && frag->fr_offset))))
+      break;
+
+  if (!frag || frag->line != info)
+    {
+      new_frag ();
+      info->frag = frag_now;
+      new_frag ();
+    }
+
+  return prev;
+}
+
 /* Attach all current frags to the previous line instead of the
    current line.  This is called by the MIPS backend when it discovers
    that it needs to add some NOP instructions; the added NOP

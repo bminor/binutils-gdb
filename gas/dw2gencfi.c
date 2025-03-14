@@ -440,16 +440,25 @@ alloc_cfi_insn_data (void)
   *cur_fde_data->last = insn;
   cur_fde_data->last = &insn->next;
   SET_CUR_SEG (insn, is_now_linkonce_segment ());
+#ifndef NO_LISTING
+  insn->listing_ctxt = cur_fde_data->listing_ctxt ? listing_tail : NULL;
+#endif
   return insn;
 }
 
 /* Construct a new FDE structure that begins at LABEL.  */
 
 void
-cfi_new_fde (symbolS *label)
+cfi_new_fde (symbolS *label, bool do_listing)
 {
   struct fde_entry *fde = alloc_fde_entry ();
   fde->start_address = label;
+  if (do_listing)
+    {
+#ifndef NO_LISTING
+      fde->listing_ctxt = listing_tail;
+#endif
+    }
   frchain_now->frch_cfi_data->last_address = label;
 }
 
@@ -458,7 +467,12 @@ cfi_new_fde (symbolS *label)
 void
 cfi_end_fde (symbolS *label)
 {
-  frchain_now->frch_cfi_data->cur_fde_data->end_address = label;
+  struct fde_entry *cur_fde_data = frchain_now->frch_cfi_data->cur_fde_data;
+
+  cur_fde_data->end_address = label;
+#ifndef NO_LISTING
+  cur_fde_data->listing_end = cur_fde_data->listing_ctxt ? listing_tail : NULL;
+#endif
   frchain_now->frch_cfi_data = NULL;
 }
 
@@ -1279,7 +1293,7 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
-  cfi_new_fde (symbol_temp_new_now ());
+  cfi_new_fde (symbol_temp_new_now (), listing & LISTING_LISTING);
 
   SKIP_WHITESPACE ();
   if (is_name_beginner (*input_line_pointer) || *input_line_pointer == '"')
@@ -2058,7 +2072,19 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
 
   for (; first; first = first->next)
     if (CUR_SEG (first) == CUR_SEG (fde))
-      output_cfi_insn (first);
+      {
+#ifndef NO_LISTING
+	if (eh_frame)
+	  listing_override_tail (first->listing_ctxt);
+#endif
+	output_cfi_insn (first);
+      }
+
+#ifndef NO_LISTING
+  /* Associate any padding with .cfi_endproc.  */
+  if (eh_frame)
+    listing_override_tail (fde->listing_end);
+#endif
 
   frag_align (align, DW_CFA_nop, 0);
   symbol_set_value_now (end_address);
@@ -2305,6 +2331,12 @@ cfi_finish (void)
   segT cfi_seg, ccseg;
   struct fde_entry *fde;
   struct cfi_insn_data *first;
+#ifndef NO_LISTING
+  /* We may temporarily replace listing_tail, which otherwise isn't supposed
+     to be changing anymore.  Play safe and restore the original value
+     afterwards.  */
+  struct list_info_struct *saved_listing_tail = NULL;
+#endif
   int save_flag_traditional_format, seek_next_seg;
 
   if (all_fde_data == 0)
@@ -2386,6 +2418,16 @@ cfi_finish (void)
 			    "missing .cfi_endproc directive"));
 		  fde->end_address = fde->start_address;
 		}
+
+#ifndef NO_LISTING
+	      {
+		struct list_info_struct *listing_prev
+		  = listing_override_tail (fde->listing_ctxt);
+
+		if (!saved_listing_tail)
+		  saved_listing_tail = listing_prev;
+	      }
+#endif
 
 	      cie = select_cie_for_fde (fde, true, &first, 2);
 	      fde->eh_loc = symbol_temp_new_now ();
@@ -2593,6 +2635,11 @@ cfi_finish (void)
       htab_delete (dwcfi_hash);
       dwcfi_hash = NULL;
     }
+
+#ifndef NO_LISTING
+  if (saved_listing_tail)
+    listing_tail = saved_listing_tail;
+#endif
 }
 
 #else /* TARGET_USE_CFIPOP */

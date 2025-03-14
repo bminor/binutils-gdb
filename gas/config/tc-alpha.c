@@ -4059,7 +4059,8 @@ alpha_elf_md_finish (void)
 	   function symbol.  This prevents problems with globals.  */
 	cfi_new_fde (symbol_temp_new (S_GET_SEGMENT (p->func_sym),
 				      symbol_get_frag (p->func_sym),
-				      S_GET_VALUE (p->func_sym)));
+				      S_GET_VALUE (p->func_sym)),
+		     false);
 
 	cfi_set_sections ();
 	cfi_set_return_column (p->ra_regno);
