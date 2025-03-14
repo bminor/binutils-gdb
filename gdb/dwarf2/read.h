@@ -952,7 +952,8 @@ public:
     return std::move (m_abbrev_table_holder);
   }
 
-  die_info *read_die_and_siblings (die_info *parent);
+  /* Read all DIES of the debug info section in memory.  */
+  void read_all_dies ();
 
   const gdb_byte *read_attribute (attribute *attr, const attr_abbrev *abbrev,
 				  const gdb_byte *info_ptr,

@@ -4400,18 +4400,7 @@ load_full_comp_unit (dwarf2_per_cu *this_cu,
   if (reader.is_dummy ())
     return;
 
-  struct dwarf2_cu *cu = reader.cu ();
-
-  gdb_assert (cu->die_hash.empty ());
-  cu->die_hash.reserve (cu->header.get_length_without_initial () / 12);
-
-  if (reader.top_level_die ()->has_children)
-    reader.top_level_die ()->child
-      = reader.read_die_and_siblings (reader.top_level_die ());
-
-  cu->dies = reader.top_level_die ();
-  /* comp_unit_die is not stored in die_hash, no need.  */
-
+  reader.read_all_dies ();
   reader.keep ();
 }
 
@@ -14577,16 +14566,21 @@ cutu_reader::read_die_and_siblings_1 (die_info *parent)
     }
 }
 
-/* Read a die, all of its descendents, and all of its siblings; set
-   all of the fields of all of the dies correctly.  Arguments are as
-   in read_die_and_children.
-   This the main entry point for reading a DIE and all its children.  */
+/* See read.h.  */
 
-die_info *
-cutu_reader::read_die_and_siblings (die_info *parent)
+void
+cutu_reader::read_all_dies ()
 {
   const gdb_byte *begin_info_ptr = m_info_ptr;
-  struct die_info *die = this->read_die_and_siblings_1 (parent);
+
+  if (m_top_level_die->has_children)
+    {
+      gdb_assert (m_cu->die_hash.empty ());
+      m_cu->die_hash.reserve (m_cu->header.get_length_without_initial () / 12);
+      m_top_level_die->child = this->read_die_and_siblings_1 (m_top_level_die);
+    }
+
+  m_cu->dies = m_top_level_die;
 
   if (dwarf_die_debug)
     {
@@ -14594,10 +14588,8 @@ cutu_reader::read_die_and_siblings (die_info *parent)
 		  m_die_section->get_name (),
 		  begin_info_ptr - m_die_section->buffer,
 		  bfd_get_filename (m_abfd));
-      die->dump (dwarf_die_debug);
+      m_top_level_die->child->dump (dwarf_die_debug);
     }
-
-  return die;
 }
 
 /* Read a die and all its attributes, leave space for NUM_EXTRA_ATTRS
@@ -19109,18 +19101,7 @@ read_signatured_type (signatured_type *sig_type,
 
   if (!reader.is_dummy ())
     {
-      struct dwarf2_cu *cu = reader.cu ();
-
-      gdb_assert (cu->die_hash.empty ());
-      cu->die_hash.reserve (cu->header.get_length_without_initial () / 12);
-
-      if (reader.top_level_die ()->has_children)
-	reader.top_level_die ()->child
-	  = reader.read_die_and_siblings (reader.top_level_die ());
-
-      cu->dies = reader.top_level_die ();
-      /* comp_unit_die is not stored in die_hash, no need.  */
-
+      reader.read_all_dies ();
       reader.keep ();
     }
 
