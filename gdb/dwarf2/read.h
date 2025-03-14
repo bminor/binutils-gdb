@@ -952,9 +952,7 @@ public:
     return std::move (m_abbrev_table_holder);
   }
 
-  die_info *read_die_and_siblings (const gdb_byte *info_ptr,
-				   const gdb_byte **new_info_ptr,
-				   die_info *parent);
+  die_info *read_die_and_siblings (die_info *parent);
 
   const gdb_byte *read_attribute (attribute *attr, const attr_abbrev *abbrev,
 				  const gdb_byte *info_ptr,
@@ -987,26 +985,21 @@ private:
   int read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
 			      die_info *stub_comp_unit_die,
 			      const char *stub_comp_dir,
-			      const gdb_byte **result_info_ptr,
 			      die_info **result_comp_unit_die,
 			      abbrev_table_up *result_dwo_abbrev_table);
 
   void prepare_one_comp_unit (struct dwarf2_cu *cu,
 			      enum language pretend_language);
 
-  const gdb_byte *read_toplevel_die (die_info **diep, const gdb_byte *info_ptr,
-				     gdb::array_view<attribute *> extra_attrs
-				     = {});
+  /* Helpers to build the in-memory DIE tree.  */
 
-  die_info *read_die_and_siblings_1 (const gdb_byte *, const gdb_byte **,
-				     die_info *);
+  die_info *read_toplevel_die (gdb::array_view<attribute *> extra_attrs = {});
 
-  die_info *read_die_and_children (const gdb_byte *info_ptr,
-				   const gdb_byte **new_info_ptr,
-				   die_info *parent);
+  die_info *read_die_and_siblings_1 (die_info *parent);
 
-  const gdb_byte *read_full_die_1 (die_info **diep, const gdb_byte *info_ptr,
-				   int num_extra_attrs, bool allow_reprocess);
+  die_info *read_die_and_children (die_info *parent);
+
+  die_info *read_full_die_1 (int num_extra_attrs, bool allow_reprocess);
 
   const gdb_byte *read_attribute_value (attribute *attr, unsigned form,
 					LONGEST implicit_const,

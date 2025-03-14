@@ -2769,8 +2769,8 @@ cutu_reader::init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
    attribute of the referencing CU.  At most one of STUB_COMP_UNIT_DIE and
    STUB_COMP_DIR may be non-NULL.
 
-   *RESULT_READER,*RESULT_INFO_PTR,*RESULT_TOP_LEVEL_DIE
-   are filled in with the info of the DIE from the DWO file.
+   *RESULT_READER and *RESULT_TOP_LEVEL_DIE are filled in with the info of the
+   DIE from the DWO file.
 
    *RESULT_DWO_ABBREV_TABLE will be filled in with the abbrev table allocated
    from the dwo.  Since *RESULT_READER references this abbrev table, it must be
@@ -2782,7 +2782,6 @@ int
 cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
 				     die_info *stub_comp_unit_die,
 				     const char *stub_comp_dir,
-				     const gdb_byte **result_info_ptr,
 				     die_info **result_top_level_die,
 				     abbrev_table_up *result_dwo_abbrev_table)
 {
@@ -2790,7 +2789,6 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
   dwarf2_per_cu *per_cu = cu->per_cu;
   struct objfile *objfile = per_objfile->objfile;
   bfd *abfd;
-  const gdb_byte *begin_info_ptr, *info_ptr;
   struct dwarf2_section_info *dwo_abbrev_section;
 
   /* At most one of these may be provided.  */
@@ -2857,17 +2855,17 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
   dwarf2_section_info *section = dwo_unit->section;
   section->read (objfile);
   abfd = section->get_bfd_owner ();
-  begin_info_ptr = info_ptr = (section->buffer
-			       + to_underlying (dwo_unit->sect_off));
+  m_info_ptr = section->buffer + to_underlying (dwo_unit->sect_off);
+  const gdb_byte *begin_info_ptr = m_info_ptr;
   dwo_abbrev_section = &dwo_unit->dwo_file->sections.abbrev;
 
   if (per_cu->is_debug_types)
     {
       signatured_type *sig_type = (struct signatured_type *) per_cu;
 
-      info_ptr = read_and_check_comp_unit_head (per_objfile, &cu->header,
-						section, dwo_abbrev_section,
-						info_ptr, rcuh_kind::TYPE);
+      m_info_ptr = read_and_check_comp_unit_head (per_objfile, &cu->header,
+						  section, dwo_abbrev_section,
+						  m_info_ptr, rcuh_kind::TYPE);
       /* This is not an assert because it can be caused by bad debug info.  */
       if (sig_type->signature != cu->header.signature)
 	{
@@ -2892,9 +2890,10 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
     }
   else
     {
-      info_ptr = read_and_check_comp_unit_head (per_objfile, &cu->header,
-						section, dwo_abbrev_section,
-						info_ptr, rcuh_kind::COMPILE);
+      m_info_ptr
+	= read_and_check_comp_unit_head (per_objfile, &cu->header, section,
+					 dwo_abbrev_section, m_info_ptr,
+					 rcuh_kind::COMPILE);
       gdb_assert (dwo_unit->sect_off == cu->header.sect_off);
       /* For DWOs coming from DWP files, we don't know the CU length
 	 until now.  */
@@ -2911,16 +2910,15 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
      has the benefit of simplifying the rest of the code - all the
      work to maintain the illusion of a single
      DW_TAG_{compile,type}_unit DIE is done here.  */
-  info_ptr = this->read_toplevel_die (result_top_level_die, info_ptr,
-				      gdb::make_array_view (attributes,
-							    next_attr_idx));
+  *result_top_level_die
+    = this->read_toplevel_die (gdb::make_array_view (attributes,
+						     next_attr_idx));
 
   /* Skip dummy compilation units.  */
-  if (info_ptr >= begin_info_ptr + dwo_unit->length
-      || peek_abbrev_code (abfd, info_ptr) == 0)
+  if (m_info_ptr >= begin_info_ptr + dwo_unit->length
+      || peek_abbrev_code (abfd, m_info_ptr) == 0)
     return 0;
 
-  *result_info_ptr = info_ptr;
   return 1;
 }
 
@@ -3024,8 +3022,7 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu *this_cu,
   if (read_cutu_die_from_dwo (cu, sig_type->dwo_unit,
 			      NULL /* stub_comp_unit_die */,
 			      sig_type->dwo_unit->dwo_file->comp_dir,
-			      &m_info_ptr, &m_top_level_die,
-			      &m_dwo_abbrev_table)
+			      &m_top_level_die, &m_dwo_abbrev_table)
       == 0)
     {
       /* Dummy die.  */
@@ -3189,7 +3186,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 
       /* Read the top level CU/TU die.  */
       this->init_cu_die_reader (cu, section, NULL, abbrev_table);
-      m_info_ptr = this->read_toplevel_die (&m_top_level_die, m_info_ptr);
+      m_top_level_die = this->read_toplevel_die ();
 
       if (skip_partial && m_top_level_die->tag == DW_TAG_partial_unit)
 	m_dummy_p = true;
@@ -3222,8 +3219,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 	      if (dwo_unit != NULL)
 		{
 		  if (read_cutu_die_from_dwo (cu, dwo_unit, m_top_level_die,
-					      nullptr, &m_info_ptr,
-					      &dwo_comp_unit_die,
+					      nullptr, &dwo_comp_unit_die,
 					      &m_dwo_abbrev_table)
 		      == 0)
 		    {
@@ -3290,7 +3286,6 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
   struct objfile *objfile = per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
   bfd *abfd = section->get_bfd_owner ();
-  const gdb_byte *begin_info_ptr, *info_ptr;
 
   gdb_assert (parent_cu != nullptr);
   gdb_assert (dwo_file != nullptr);
@@ -3309,12 +3304,14 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 
   m_new_cu = std::make_unique<dwarf2_cu> (this_cu, per_objfile);
 
-  begin_info_ptr = info_ptr = section->buffer + to_underlying (this_cu->sect_off);
-  info_ptr = read_and_check_comp_unit_head (per_objfile, &m_new_cu->header,
-					    section, abbrev_section, info_ptr,
-					    (this_cu->is_debug_types
-					     ? rcuh_kind::TYPE
-					     : rcuh_kind::COMPILE));
+  m_info_ptr = section->buffer + to_underlying (this_cu->sect_off);
+  const gdb_byte *begin_info_ptr = m_info_ptr;
+  m_info_ptr
+    = read_and_check_comp_unit_head (per_objfile, &m_new_cu->header, section,
+				     abbrev_section, m_info_ptr,
+				     (this_cu->is_debug_types
+				      ? rcuh_kind::TYPE
+				      : rcuh_kind::COMPILE));
 
   m_new_cu->str_offsets_base = parent_cu->str_offsets_base;
   m_new_cu->addr_base = parent_cu->addr_base;
@@ -3322,8 +3319,8 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
   this_cu->set_length (m_new_cu->header.get_length_with_initial ());
 
   /* Skip dummy compilation units.  */
-  if (info_ptr >= begin_info_ptr + this_cu->length ()
-      || peek_abbrev_code (abfd, info_ptr) == 0)
+  if (m_info_ptr >= begin_info_ptr + this_cu->length ()
+      || peek_abbrev_code (abfd, m_info_ptr) == 0)
     m_dummy_p = true;
   else
     {
@@ -3334,7 +3331,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 
       this->init_cu_die_reader (m_new_cu.get (), section, dwo_file,
 				m_abbrev_table_holder.get ());
-      info_ptr = this->read_toplevel_die (&m_top_level_die, info_ptr);
+      m_top_level_die = this->read_toplevel_die ();
     }
 
   prepare_one_comp_unit (m_new_cu.get (), pretend_language);
@@ -4404,15 +4401,14 @@ load_full_comp_unit (dwarf2_per_cu *this_cu,
     return;
 
   struct dwarf2_cu *cu = reader.cu ();
-  const gdb_byte *info_ptr = reader.info_ptr ();
 
   gdb_assert (cu->die_hash.empty ());
   cu->die_hash.reserve (cu->header.get_length_without_initial () / 12);
 
   if (reader.top_level_die ()->has_children)
     reader.top_level_die ()->child
-      = reader.read_die_and_siblings (reader.info_ptr (), &info_ptr,
-				      reader.top_level_die ());
+      = reader.read_die_and_siblings (reader.top_level_die ());
+
   cu->dies = reader.top_level_die ();
   /* comp_unit_die is not stored in die_hash, no need.  */
 
@@ -14531,37 +14527,26 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
 
 /* Read a single die and all its descendents.  Set the die's sibling
    field to NULL; set other fields in the die correctly, and set all
-   of the descendents' fields correctly.  Set *NEW_INFO_PTR to the
-   location of the info_ptr after reading all of those dies.  PARENT
-   is the parent of the die in question.  */
+   of the descendents' fields correctly.  PARENT is the parent of the
+   die in question.  */
 
 die_info *
-cutu_reader::read_die_and_children (const gdb_byte *info_ptr,
-				    const gdb_byte **new_info_ptr,
-				    die_info *parent)
+cutu_reader::read_die_and_children (die_info *parent)
 {
-  struct die_info *die;
-  
+  die_info *die = this->read_full_die_1 (0, true);
 
-  const gdb_byte *cur_ptr = this->read_full_die_1 (&die, info_ptr, 0, true);
-  if (die == NULL)
-    {
-      *new_info_ptr = cur_ptr;
-      return NULL;
-    }
+  if (die == nullptr)
+    return nullptr;
 
   bool inserted = m_cu->die_hash.emplace (die).second;
   gdb_assert (inserted);
 
   if (die->has_children)
-    die->child = this->read_die_and_siblings_1 (cur_ptr, new_info_ptr, die);
+    die->child = this->read_die_and_siblings_1 (die);
   else
-    {
-      die->child = NULL;
-      *new_info_ptr = cur_ptr;
-    }
+    die->child = nullptr;
 
-  die->sibling = NULL;
+  die->sibling = nullptr;
   die->parent = parent;
   return die;
 }
@@ -14571,27 +14556,19 @@ cutu_reader::read_die_and_children (const gdb_byte *info_ptr,
    in read_die_and_children.  */
 
 die_info *
-cutu_reader::read_die_and_siblings_1 (const gdb_byte *info_ptr,
-				      const gdb_byte **new_info_ptr,
-				      die_info *parent)
+cutu_reader::read_die_and_siblings_1 (die_info *parent)
 {
-  struct die_info *first_die, *last_sibling;
-  const gdb_byte *cur_ptr;
+  die_info *first_die = nullptr;
+  die_info *last_sibling = nullptr;
 
-  cur_ptr = info_ptr;
-  first_die = last_sibling = NULL;
-
-  while (1)
+  while (true)
     {
-      die_info *die = this->read_die_and_children (cur_ptr, &cur_ptr, parent);
+      die_info *die = this->read_die_and_children (parent);
 
-      if (die == NULL)
-	{
-	  *new_info_ptr = cur_ptr;
-	  return first_die;
-	}
+      if (die == nullptr)
+	return first_die;
 
-      if (!first_die)
+      if (first_die == nullptr)
 	first_die = die;
       else
 	last_sibling->sibling = die;
@@ -14606,18 +14583,16 @@ cutu_reader::read_die_and_siblings_1 (const gdb_byte *info_ptr,
    This the main entry point for reading a DIE and all its children.  */
 
 die_info *
-cutu_reader::read_die_and_siblings (const gdb_byte *info_ptr,
-				    const gdb_byte **new_info_ptr,
-				    die_info *parent)
+cutu_reader::read_die_and_siblings (die_info *parent)
 {
-  struct die_info *die = read_die_and_siblings_1 (info_ptr,
-						  new_info_ptr, parent);
+  const gdb_byte *begin_info_ptr = m_info_ptr;
+  struct die_info *die = this->read_die_and_siblings_1 (parent);
 
   if (dwarf_die_debug)
     {
-      gdb_printf (gdb_stdlog, "Read die from %s@0x%x of %s:\n",
+      gdb_printf (gdb_stdlog, "Read die from %s@0x%tx of %s:\n",
 		  m_die_section->get_name (),
-		  (unsigned) (info_ptr - m_die_section->buffer),
+		  begin_info_ptr - m_die_section->buffer,
 		  bfd_get_filename (m_abfd));
       die->dump (dwarf_die_debug);
     }
@@ -14627,27 +14602,26 @@ cutu_reader::read_die_and_siblings (const gdb_byte *info_ptr,
 
 /* Read a die and all its attributes, leave space for NUM_EXTRA_ATTRS
    attributes.
+
    The caller is responsible for filling in the extra attributes
-   and updating (*DIEP)->num_attrs.
-   Set DIEP to point to a newly allocated die with its information,
-   except for its child, sibling, and parent fields.  */
+   and updating die_info::num_attrs.
 
-const gdb_byte *
-cutu_reader::read_full_die_1 (die_info **diep, const gdb_byte *info_ptr,
-			      int num_extra_attrs, bool allow_reprocess)
+   Return a newly allocated die with its information, except for its
+   child, sibling, and parent fields.  */
+
+die_info *
+cutu_reader::read_full_die_1 (int num_extra_attrs, bool allow_reprocess)
 {
-  unsigned int abbrev_number, bytes_read, i;
+  unsigned int bytes_read, i;
   const struct abbrev_info *abbrev;
-  struct die_info *die;
 
-  sect_offset sect_off = (sect_offset) (info_ptr - m_buffer);
-  abbrev_number = read_unsigned_leb128 (m_abfd, info_ptr, &bytes_read);
-  info_ptr += bytes_read;
-  if (!abbrev_number)
-    {
-      *diep = NULL;
-      return info_ptr;
-    }
+  sect_offset sect_off = static_cast<sect_offset> (m_info_ptr - m_buffer);
+  unsigned int abbrev_number
+    = read_unsigned_leb128 (m_abfd, m_info_ptr, &bytes_read);
+  m_info_ptr += bytes_read;
+
+  if (abbrev_number == 0)
+    return nullptr;
 
   abbrev = m_abbrev_table->lookup_abbrev (abbrev_number);
   if (!abbrev)
@@ -14655,8 +14629,8 @@ cutu_reader::read_full_die_1 (die_info **diep, const gdb_byte *info_ptr,
 	     "could not find abbrev number %d [in module %s]"),
 	   abbrev_number, bfd_get_filename (m_abfd));
 
-  die = die_info::allocate (&m_cu->comp_unit_obstack,
-			    abbrev->num_attrs + num_extra_attrs);
+  die_info *die = die_info::allocate (&m_cu->comp_unit_obstack,
+				      abbrev->num_attrs + num_extra_attrs);
   die->sect_off = sect_off;
   die->tag = abbrev->tag;
   die->abbrev = abbrev_number;
@@ -14668,63 +14642,62 @@ cutu_reader::read_full_die_1 (die_info **diep, const gdb_byte *info_ptr,
   die->num_attrs = abbrev->num_attrs;
 
   for (i = 0; i < abbrev->num_attrs; ++i)
-    info_ptr = this->read_attribute (&die->attrs[i], &abbrev->attrs[i],
-				     info_ptr, allow_reprocess);
+    m_info_ptr = this->read_attribute (&die->attrs[i], &abbrev->attrs[i],
+				       m_info_ptr, allow_reprocess);
 
-  *diep = die;
-  return info_ptr;
+  return die;
 }
 
 /* Read a die and all its attributes.
-   Set DIEP to point to a newly allocated die with its information,
-   except for its child, sibling, and parent fields.  */
 
-const gdb_byte *
-cutu_reader::read_toplevel_die (die_info **diep, const gdb_byte *info_ptr,
-				gdb::array_view<attribute *> extra_attrs)
+   Return a newly allocated die with its information, except for its
+   child, sibling, and parent fields.  */
+
+die_info *
+cutu_reader::read_toplevel_die (gdb::array_view<attribute *> extra_attrs)
 {
-  const gdb_byte *result
-    = this->read_full_die_1 (diep, info_ptr, extra_attrs.size (), false);
+  const gdb_byte *begin_info_ptr = m_info_ptr;
+  die_info *die = this->read_full_die_1 (extra_attrs.size (), false);
 
   /* Copy in the extra attributes, if any.  */
-  attribute *next = &(*diep)->attrs[(*diep)->num_attrs];
+  attribute *next = &die->attrs[die->num_attrs];
   for (attribute *extra : extra_attrs)
     *next++ = *extra;
 
-  struct attribute *attr = (*diep)->attr (DW_AT_str_offsets_base);
+  struct attribute *attr = die->attr (DW_AT_str_offsets_base);
   if (attr != nullptr && attr->form_is_unsigned ())
     m_cu->str_offsets_base = attr->as_unsigned ();
 
-  attr = (*diep)->attr (DW_AT_loclists_base);
+  attr = die->attr (DW_AT_loclists_base);
   if (attr != nullptr)
     m_cu->loclist_base = attr->as_unsigned ();
 
-  auto maybe_addr_base = (*diep)->addr_base ();
+  auto maybe_addr_base = die->addr_base ();
   if (maybe_addr_base.has_value ())
     m_cu->addr_base = *maybe_addr_base;
 
-  attr = (*diep)->attr (DW_AT_rnglists_base);
+  attr = die->attr (DW_AT_rnglists_base);
   if (attr != nullptr)
     m_cu->rnglists_base = attr->as_unsigned ();
 
-  for (int i = 0; i < (*diep)->num_attrs; ++i)
+  for (int i = 0; i < die->num_attrs; ++i)
     {
-      if ((*diep)->attrs[i].form_requires_reprocessing ())
-	this->read_attribute_reprocess (&(*diep)->attrs[i], (*diep)->tag);
+      if (die->attrs[i].form_requires_reprocessing ())
+	this->read_attribute_reprocess (&die->attrs[i], die->tag);
     }
 
-  (*diep)->num_attrs += extra_attrs.size ();
+  die->num_attrs += extra_attrs.size ();
 
   if (dwarf_die_debug)
     {
-      gdb_printf (gdb_stdlog, "Read die from %s@0x%x of %s:\n",
+      gdb_printf (gdb_stdlog, "Read die from %s@0x%tx of %s:\n",
 		  m_die_section->get_name (),
-		  (unsigned) (info_ptr - m_die_section->buffer),
+		  (begin_info_ptr - m_die_section->buffer),
 		  bfd_get_filename (m_abfd));
-      (*diep)->dump (dwarf_die_debug);
+      die->dump (dwarf_die_debug);
     }
 
-  return result;
+  return die;
 }
 
 struct compunit_symtab *
@@ -19137,15 +19110,14 @@ read_signatured_type (signatured_type *sig_type,
   if (!reader.is_dummy ())
     {
       struct dwarf2_cu *cu = reader.cu ();
-      const gdb_byte *info_ptr = reader.info_ptr ();
 
       gdb_assert (cu->die_hash.empty ());
       cu->die_hash.reserve (cu->header.get_length_without_initial () / 12);
 
       if (reader.top_level_die ()->has_children)
 	reader.top_level_die ()->child
-	  = reader.read_die_and_siblings (info_ptr, &info_ptr,
-					  reader.top_level_die ());
+	  = reader.read_die_and_siblings (reader.top_level_die ());
+
       cu->dies = reader.top_level_die ();
       /* comp_unit_die is not stored in die_hash, no need.  */
 
