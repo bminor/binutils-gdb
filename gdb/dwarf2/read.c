@@ -984,11 +984,9 @@ static void load_full_comp_unit (dwarf2_per_cu *per_cu,
 				 bool skip_partial,
 				 enum language pretend_language);
 
-static void process_full_comp_unit (dwarf2_cu *cu,
-				    enum language pretend_language);
+static void process_full_comp_unit (dwarf2_cu *cu);
 
-static void process_full_type_unit (dwarf2_cu *cu,
-				    enum language pretend_language);
+static void process_full_type_unit (dwarf2_cu *cu);
 
 static struct type *get_die_type_at_offset (sect_offset,
 					    dwarf2_per_cu *per_cu,
@@ -997,8 +995,7 @@ static struct type *get_die_type_at_offset (sect_offset,
 static struct type *get_die_type (struct die_info *die, struct dwarf2_cu *cu);
 
 static void queue_comp_unit (dwarf2_per_cu *per_cu,
-			     dwarf2_per_objfile *per_objfile,
-			     enum language pretend_language);
+			     dwarf2_per_objfile *per_objfile);
 
 static void process_queue (dwarf2_per_objfile *per_objfile);
 
@@ -1680,7 +1677,7 @@ dw2_do_instantiate_symtab (dwarf2_per_cu *per_cu,
 
     if (!per_objfile->symtab_set_p (per_cu))
       {
-	queue_comp_unit (per_cu, per_objfile, language_minimal);
+	queue_comp_unit (per_cu, per_objfile);
 	dwarf2_cu *cu = load_cu (per_cu, per_objfile, skip_partial);
 
 	/* If we just loaded a CU from a DWO, and we're working with an index
@@ -4216,13 +4213,12 @@ cutu_reader::skip_one_die (const gdb_byte *info_ptr, const abbrev_info *abbrev,
 /* Add PER_CU to the queue.  */
 
 static void
-queue_comp_unit (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile,
-		 enum language pretend_language)
+queue_comp_unit (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile)
 {
   per_cu->queued = 1;
 
   gdb_assert (per_objfile->queue.has_value ());
-  per_objfile->queue->emplace (per_cu, per_objfile, pretend_language);
+  per_objfile->queue->emplace (per_cu, per_objfile);
 }
 
 /* If PER_CU is not yet expanded of queued for expansion, add it to the queue.
@@ -4252,8 +4248,7 @@ queue_comp_unit (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile,
 
 static bool
 maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu, dwarf2_per_cu *per_cu,
-		       dwarf2_per_objfile *per_objfile,
-		       enum language pretend_language)
+		       dwarf2_per_objfile *per_objfile)
 {
   /* Mark the dependence relation so that we don't flush PER_CU
      too early.  */
@@ -4279,7 +4274,7 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu, dwarf2_per_cu *per_cu,
   if (!per_objfile->symtab_set_p (per_cu))
     {
       /* Add it to the queue.  */
-      queue_comp_unit (per_cu, per_objfile, pretend_language);
+      queue_comp_unit (per_cu, per_objfile);
       queued = true;
 
       dwarf_read_debug_printf ("Queuing CU for expansion: "
@@ -4359,9 +4354,9 @@ process_queue (dwarf2_per_objfile *per_objfile)
 	      ++expanded_count;
 
 	      if (per_cu->is_debug_types)
-		process_full_type_unit (cu, item.pretend_language);
+		process_full_type_unit (cu);
 	      else
-		process_full_comp_unit (cu, item.pretend_language);
+		process_full_comp_unit (cu);
 
 	      if (dwarf_read_debug >= debug_print_threshold)
 		{
@@ -5039,7 +5034,7 @@ process_cu_includes (dwarf2_per_objfile *per_objfile)
    already been loaded into memory.  */
 
 static void
-process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
+process_full_comp_unit (dwarf2_cu *cu)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   unrelocated_addr lowpc, highpc;
@@ -5151,8 +5146,7 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
    already been loaded into memory.  */
 
 static void
-process_full_type_unit (dwarf2_cu *cu,
-			enum language pretend_language)
+process_full_type_unit (dwarf2_cu *cu)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct compunit_symtab *cust;
@@ -5250,8 +5244,7 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
 	return;
 
       /* If necessary, add it to the queue and load its DIEs.  */
-      if (maybe_queue_comp_unit (cu, per_cu, per_objfile,
-				 cu->lang ()))
+      if (maybe_queue_comp_unit (cu, per_cu, per_objfile))
 	load_full_comp_unit (per_cu, per_objfile, per_objfile->get_cu (per_cu),
 			     false, cu->lang ());
 
@@ -8334,8 +8327,7 @@ queue_and_load_dwo_tu (dwo_unit *dwo_unit, dwarf2_cu *cu)
       /* We pass NULL for DEPENDENT_CU because we don't yet know if there's
 	 a real dependency of PER_CU on SIG_TYPE.  That is detected later
 	 while processing PER_CU.  */
-      if (maybe_queue_comp_unit (NULL, sig_type, cu->per_objfile,
-				 cu->lang ()))
+      if (maybe_queue_comp_unit (NULL, sig_type, cu->per_objfile))
 	load_full_type_unit (sig_type, cu->per_objfile);
       cu->per_cu->imported_symtabs.push_back (sig_type);
     }
@@ -18552,7 +18544,7 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 	 Even if maybe_queue_comp_unit doesn't require us to load the CU's DIEs,
 	 it doesn't mean they are currently loaded.  Since we require them
 	 to be loaded, we must check for ourselves.  */
-      if (maybe_queue_comp_unit (cu, per_cu, per_objfile, cu->lang ())
+      if (maybe_queue_comp_unit (cu, per_cu, per_objfile)
 	  || per_objfile->get_cu (per_cu) == nullptr)
 	load_full_comp_unit (per_cu, per_objfile, per_objfile->get_cu (per_cu),
 			     false, cu->lang ());
@@ -18943,8 +18935,7 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
      Even if maybe_queue_comp_unit doesn't require us to load the CU's DIEs,
      it doesn't mean they are currently loaded.  Since we require them
      to be loaded, we must check for ourselves.  */
-  if (maybe_queue_comp_unit (*ref_cu, sig_type, per_objfile,
-			     language_minimal)
+  if (maybe_queue_comp_unit (*ref_cu, sig_type, per_objfile)
       || per_objfile->get_cu (sig_type) == nullptr)
     read_signatured_type (sig_type, per_objfile);
 

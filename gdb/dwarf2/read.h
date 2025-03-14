@@ -61,12 +61,9 @@ struct type_unit_group;
    for.  */
 struct dwarf2_queue_item
 {
-  dwarf2_queue_item (dwarf2_per_cu *cu, dwarf2_per_objfile *per_objfile,
-		     enum language lang)
+  dwarf2_queue_item (dwarf2_per_cu *cu, dwarf2_per_objfile *per_objfile)
     : per_cu (cu),
-      per_objfile (per_objfile),
-      pretend_language (lang)
-  {
+      per_objfile (per_objfile)  {
   }
 
   ~dwarf2_queue_item ();
@@ -75,7 +72,6 @@ struct dwarf2_queue_item
 
   dwarf2_per_cu *per_cu;
   dwarf2_per_objfile *per_objfile;
-  enum language pretend_language;
 };
 
 /* A deleter for dwarf2_per_cu that knows to downcast to signatured_type as
