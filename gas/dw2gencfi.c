@@ -938,6 +938,21 @@ dot_cfi (int arg)
   demand_empty_rest_of_line ();
 }
 
+#ifndef TC_ADDRESS_BYTES
+#define TC_ADDRESS_BYTES address_bytes
+
+static inline unsigned int
+address_bytes (void)
+{
+  /* Choose smallest of 1, 2, 4, 8 bytes that is large enough to
+     contain an address.  */
+  unsigned int n = (stdoutput->arch_info->bits_per_address - 1) / 8;
+  n |= n >> 1;
+  n |= n >> 2;
+  return n + 1;
+}
+#endif
+
 static void
 dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
 {
@@ -968,6 +983,14 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
 	e->type = CFI_ESC_sleb128;
       else if (strcmp (id, "uleb128") == 0)
 	e->type = CFI_ESC_uleb128;
+      else if (strcmp (id, "data2") == 0)
+	e->type = 2;
+      else if (TC_ADDRESS_BYTES () >= 4 && strcmp (id, "data4") == 0)
+	e->type = 4;
+      else if (TC_ADDRESS_BYTES () >= 8 && strcmp (id, "data8") == 0)
+	e->type = 8;
+      else if (strcmp (id, "addr") == 0)
+	e->type = TC_ADDRESS_BYTES ();
       else
 	e->type = CFI_ESC_byte;
 
@@ -991,7 +1014,11 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
 	  expression (&e->exp);
 	}
       else
-	e->reloc = do_parse_cons_expression (&e->exp, 1);
+	{
+	  /* We may still be at the opening parenthesis.  Leave it to expression()
+	     to parse it and find the matching closing one.  */
+	  e->reloc = do_parse_cons_expression (&e->exp, e->type);
+	}
 
       *tail = e;
       tail = &e->next;
@@ -1813,7 +1840,7 @@ output_cfi_insn (struct cfi_insn_data *insn)
 	    if (e->type == CFI_ESC_sleb128 || e->type == CFI_ESC_uleb128)
 	      emit_leb128_expr (&e->exp, e->type == CFI_ESC_sleb128);
 	    else
-	      emit_expr_with_reloc (&e->exp, 1, e->reloc);
+	      emit_expr_with_reloc (&e->exp, e->type, e->reloc);
 	  }
 	break;
       }

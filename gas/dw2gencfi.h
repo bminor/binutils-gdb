@@ -98,7 +98,14 @@ struct cfi_escape_data
   struct cfi_escape_data *next;
   expressionS exp;
   enum {
-    CFI_ESC_byte,
+    /* "Plain" data is indicated just by their size, such that values can be
+       easily passed to other functions.  The CFI_ESC_data<N> enumerators exist
+       here only as placeholders.  */
+    CFI_ESC_byte = 1,
+    CFI_ESC_data2 = 2,
+    CFI_ESC_data4 = 4,
+    CFI_ESC_data8 = 8,
+    /* LEB128 data needs dedicated enumerators.  */
     CFI_ESC_sleb128,
     CFI_ESC_uleb128,
   } type;
