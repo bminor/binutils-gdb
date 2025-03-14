@@ -724,6 +724,10 @@ extern int ctf_enum_unsigned_value (ctf_dict_t *, ctf_id_t, const char *, uint64
 
 extern int ctf_enum_unsigned (ctf_dict_t *, ctf_id_t);
 
+/* Return nonzero if this struct or union uses bitfield encoding.  */
+
+extern int ctf_struct_bitfield (ctf_dict_t *, ctf_id_t);
+
 /* Get the size and member type of an array.  */
 
 extern int ctf_array_info (ctf_dict_t *, ctf_id_t, ctf_arinfo_t *);

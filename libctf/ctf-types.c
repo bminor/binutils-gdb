@@ -2207,6 +2207,56 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
   return ctf_set_errno (ofp, ECTF_NOENUMNAM);
 }
 
+/* Like ctf_enum_value, but returns an unsigned int64_t instead.  */
+int
+ctf_enum_unsigned_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
+{
+  int ret;
+  uint64_t retval;
+
+  ret = ctf_enum_value (fp, type, name, &retval);
+  *valp = (uint64_t) retval;
+  return ret;
+}
+
+/* Determine whether an enum's values are signed.  */
+int
+ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
+{
+  int kind;
+  const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
+
+  if ((kind = ctf_type_kind (fp, type)) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
+    retrn (ctf_set_errno (fp, ECTF_NOTENUM))
+
+  if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  return !LCTF_INFO_KFLAG (tp->ctt_info);
+}
+
+/* Return nonzero if this struct or union uses bitfield encoding.  */
+int
+ctf_struct_bitfield (ctf_dict_t * fp, ctf_id_t type)
+{
+  int kind;
+  const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
+
+  if ((kind = ctf_type_kind (fp, type)) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
+    retrn (ctf_set_errno (fp, ECTF_NOTSOU))
+
+  if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  return LCTF_INFO_KFLAG (tp->ctt_info);
+}
+
 /* Given a type ID relating to a function type, return info on return types and
    arg counts for that function.  */
 

@@ -1,0 +1,116 @@
+* Additions
+
+** #defines
+
+#define CTF_ADD_STRUCT_BITFIELDS 2 /* Struct/union field-level bitfields */
+
+** typedefs
+
+typedef struct ctf_membinfo
+  int ctm_bit_width;		/* Width of member in bits: -1: not bitfield */
+
+typedef enum ctf_sect_names
+  CTF_SECT_LABEL removed.
+
+** Function typedefs
+
+ctf_unsigned_enum_f
+ctf_datasec_var_f
+ctf_type_kind_f
+
+** Functions
+
+ctf_id_t ctf_add_enum64_encoded (ctf_dict_t *, uint32_t, const char *,
+                                 const ctf_encoding_t *);
+ctf_id_t ctf_add_enum64 (ctf_dict_t *, uint32_t, const char *);
+ctf_id_t ctf_add_btf_float (ctf_dict_t *, uint32_t,
+                            const char *, const ctf_encoding_t *);
+ctf_id_t ctf_add_function_linkage (ctf_dict_t *, uint32_t,
+                                   ctf_id_t, const char *, int linkage);
+int ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
+                             const char *, ctf_id_t type,
+                             unsigned long bit_offset,
+                             int bit_width);
+ctf_id_t ctf_add_datasec (ctf_dict_t *, uint32_t flag, const char *);
+ctf_id_t ctf_add_section_variable (ctf_dict_t *, const char *, const char *,
+                                   ctf_id_t, size_t, size_t);
+int ctf_set_conflicting (ctf_dict_t *, ctf_id_t, const char *);
+
+int ctf_struct_bitfield (ctf_dict_t *, ctf_id_t);
+int ctf_func_arg_names (ctf_dict_t *, unsigned long, uint32_t, const char **);
+int ctf_func_type_arg_names (ctf_dict_t *, ctf_id_t, uint32_t,
+                             const char **);
+int ctf_type_linkage (ctf_dict_t *, ctf_id_t, ctf_linkage_t *);
+ctf_id_t ctf_lookup_by_kind (ctf_dict_t *, int kind, const char *);
+int ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const **cuname);
+int ctf_enum_unsigned_value (ctf_dict_t *, ctf_id_t, const char *, uint64_t *);
+int ctf_enum_unsigned (ctf_dict_t *, ctf_id_t);
+ctf_id_t ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec,
+                                 uint32_t offset);
+ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var);
+ctf_id_t ctf_tag (ctf_dict_t *, ctf_id_t tag);
+ctf_id_t ctf_decl_tag (ctf_dict_t *, ctf_id_t decl_tag,
+                       int64_t *component_idx);
+int ctf_type_kind_iter (ctf_dict_t *, int kind, ctf_type_kind_f *, void *);
+ctf_id_t ctf_type_kind_next (ctf_dict_t *, ctf_next_t **, int kind);
+int ctf_datasec_var_iter (ctf_dict_t *, ctf_id_t, ctf_datasec_var_f *, 
+                          void *);
+ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **, 
+                               size_t *size, size_t *offset);
+ctf_id_t ctf_tag_next (ctf_dict_t *, const char *tag, ctf_next_t **);
+
+... more to come...
+
+* Changes
+
+* function typedefs
+
+ctf_visit_f, ctf_member_f, ctf_variable_f, ctf_type_f, ctf_type_all_f, gain a
+ctf_dict_t arg
+
+ctf_member_f, ctf_visit_f gain int bit_width arg
+
+ctf_enum_f val arg becomes int -> int64_t
+
+* Functions
+
+ctf_add_function gains arg_names arg
+
+ctf_add_enumerator, ctf_enum_name ctf_enum_value int val -> int64 val
+ctf_enum_iter return value int -> int64
+ctf_enum_next int * val -> int64 * val
+
+ctf_member_next gains bit_width arg
+
+* Behaviour
+
+Symtypetab entries now point at types of kind CTF_K_FUNC_LINKAGE
+
+* Removals
+
+typedef struct ctf_lblinfo ... ctf_lblinfo_t
+ctf_label_f
+
+ctf_label_topmost, ctf_label_info, ctf_label_iter, ctf_label_next (last never
+implemented, prototype only)
+
+** Errors
+
+*** Additions (so far)
+
+  _CTF_ITEM (ECTF_BADCOMPONENT, "Declaration tag component_idx is invalid.") \
+  _CTF_ITEM (ECTF_NODATASEC, "DATASEC name not found in dictionary.") \
+  _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
+  _CTF_ITEM (ECTF_DESCENDING, "Field offsets may not descend.") \
+  _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
+  _CTF_ITEM (ECTF_LINKKIND, "Only functions and variables have linkage.") \
+  _CTF_ITEM (ECTF_NEVERTAG, "Cannot call this function with a tag kind.") \
+  _CTF_ITEM (ECTF_NOTDATASEC, "This function requires a datasec.") \
+  _CTF_ITEM (ECTF_NOTVAR, "This function requires a variable.") \
+  _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.") \
+  _CTF_ITEM (ECTF_NOTTAG, "This function requires a type or decl tag.")
+
+*** Removals (never generated)
+
+ECTF_NOLABEL
+ECTF_NOLABELDATA
