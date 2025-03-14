@@ -1676,7 +1676,10 @@ dw2_do_instantiate_symtab (dwarf2_per_cu *per_cu,
     if (!per_objfile->symtab_set_p (per_cu))
       {
 	queue_comp_unit (per_cu, per_objfile);
-	dwarf2_cu *cu = load_cu (per_cu, per_objfile, skip_partial);
+	dwarf2_cu *cu = per_objfile->get_cu (per_cu);
+
+	if (cu == nullptr)
+	  cu = load_cu (per_cu, per_objfile, skip_partial);
 
 	/* If we just loaded a CU from a DWO, and we're working with an index
 	   that may badly handle TUs, load all the TUs in that DWO as well.
@@ -3250,6 +3253,7 @@ dwarf2_cu_up
 cutu_reader::release_cu ()
 {
   gdb_assert (!m_dummy_p);
+  gdb_assert (m_new_cu != nullptr);
 
   return std::move (m_new_cu);
 }
@@ -4380,21 +4384,18 @@ load_full_comp_unit (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile,
 		     bool skip_partial, enum language pretend_language)
 {
   gdb_assert (! this_cu->is_debug_types);
+  gdb_assert (per_objfile->get_cu (this_cu) == nullptr);
 
-  cutu_reader reader (this_cu, per_objfile, NULL, per_objfile->get_cu (this_cu),
-		      skip_partial, pretend_language);
+  cutu_reader reader (this_cu, per_objfile, nullptr, nullptr, skip_partial,
+		      pretend_language);
   if (reader.is_dummy ())
     return;
 
   reader.read_all_dies ();
 
-  if (auto new_cu = reader.release_cu ();
-      new_cu != nullptr)
-    {
-      /* Save this dwarf2_cu in the per_objfile.  The per_objfile owns it
-	 now.  */
-      per_objfile->set_cu (this_cu, std::move (new_cu));
-    }
+  /* Save this dwarf2_cu in the per_objfile.  The per_objfile owns it
+     now.  */
+  per_objfile->set_cu (this_cu, reader.release_cu ());
 }
 
 /* Add a DIE to the delayed physname list.  */
@@ -19091,9 +19092,7 @@ read_signatured_type (signatured_type *sig_type,
 
       /* Save this dwarf2_cu in the per_objfile.  The per_objfile owns it
 	 now.  */
-      dwarf2_cu_up new_cu = reader.release_cu ();
-      gdb_assert (new_cu != nullptr);
-      per_objfile->set_cu (sig_type, std::move (new_cu));
+      per_objfile->set_cu (sig_type, reader.release_cu ());
     }
 
   sig_type->tu_read = 1;
