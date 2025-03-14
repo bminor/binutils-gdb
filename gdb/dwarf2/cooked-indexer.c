@@ -83,7 +83,6 @@ tag_can_have_linkage_name (enum dwarf_tag tag)
 
 cutu_reader *
 cooked_indexer::ensure_cu_exists (cutu_reader *reader,
-				  dwarf2_per_objfile *per_objfile,
 				  sect_offset sect_off, bool is_dwz,
 				  bool for_scanning)
 {
@@ -93,6 +92,7 @@ cooked_indexer::ensure_cu_exists (cutu_reader *reader,
       && reader->cu ()->header.offset_in_cu_p (sect_off))
     return reader;
 
+  dwarf2_per_objfile *per_objfile = reader->cu ()->per_objfile;
   dwarf2_per_cu *per_cu
     = dwarf2_find_containing_comp_unit (sect_off, is_dwz,
 					per_objfile->per_bfd);
@@ -311,8 +311,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 	   && origin_offset != sect_offset (0))
     {
       cutu_reader *new_reader
-	= ensure_cu_exists (reader, reader->cu ()->per_objfile, origin_offset,
-			    origin_is_dwz, false);
+	= ensure_cu_exists (reader, origin_offset, origin_is_dwz, false);
       if (new_reader == nullptr)
 	error (_(DWARF_ERROR_PREFIX
 		 "cannot follow reference to DIE at %s"
@@ -430,9 +429,8 @@ cooked_indexer::index_imported_unit (cutu_reader *reader,
   if (sect_off == sect_offset (0))
     return info_ptr;
 
-  dwarf2_per_objfile *per_objfile = reader->cu ()->per_objfile;
   cutu_reader *new_reader
-    = ensure_cu_exists (reader, per_objfile, sect_off, is_dwz, true);
+    = ensure_cu_exists (reader, sect_off, is_dwz, true);
   if (new_reader != nullptr)
     {
       index_dies (new_reader, new_reader->info_ptr (), nullptr, false);

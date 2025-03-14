@@ -55,7 +55,6 @@ private:
      the DIEs in the CU; when false, this use is assumed to be to look
      up just a single DIE.  */
   cutu_reader *ensure_cu_exists (cutu_reader *reader,
-				 dwarf2_per_objfile *per_objfile,
 				 sect_offset sect_off,
 				 bool is_dwz,
 				 bool for_scanning);
