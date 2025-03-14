@@ -105,6 +105,7 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
 
     set nm_status [gas_host_run "$NM $NMFLAGS --help" ""]
     run_dump_test "cfi-sparc-1"
+    run_dump_test "cfi-sparc-2"
     if { [regexp "elf64\[_-\]sparc" [lindex $nm_status 1]] } then {
 	run_dump_test "cfi-sparc64-1"
     }

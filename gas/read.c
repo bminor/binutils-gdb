@@ -4182,14 +4182,15 @@ parse_mri_cons (expressionS *exp, unsigned int nbytes);
 /* This function is used by .cfi_* directive handling, and hence must not
    invoke parse_repeat_cons().  */
 
-void
+TC_PARSE_CONS_RETURN_TYPE
 do_parse_cons_expression (expressionS *exp,
 			  int nbytes ATTRIBUTE_UNUSED)
 {
 #ifdef TC_PARSE_CONS_EXPRESSION
-  (void) TC_PARSE_CONS_EXPRESSION (exp, nbytes);
+  return TC_PARSE_CONS_EXPRESSION (exp, nbytes);
 #else
   expression (exp);
+  return TC_PARSE_CONS_RETURN_NONE;
 #endif
 }
 

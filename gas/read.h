@@ -159,7 +159,7 @@ extern void stabs_begin (void);
 extern void stabs_end (void);
 extern void do_repeat (size_t, const char *, const char *, const char *);
 extern void end_repeat (int);
-extern void do_parse_cons_expression (expressionS *, int);
+extern TC_PARSE_CONS_RETURN_TYPE do_parse_cons_expression (expressionS *, int);
 extern void generate_lineno_debug (void);
 extern void do_align (unsigned int align, char *fill, unsigned int length,
 		      unsigned int max);

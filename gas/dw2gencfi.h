@@ -97,6 +97,7 @@ struct cfi_escape_data
 {
   struct cfi_escape_data *next;
   expressionS exp;
+  TC_PARSE_CONS_RETURN_TYPE reloc;
 };
 
 struct cfi_insn_data

@@ -947,7 +947,7 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
   do
     {
       e = notes_alloc (sizeof (*e));
-      do_parse_cons_expression (&e->exp, 1);
+      e->reloc = do_parse_cons_expression (&e->exp, 1);
       *tail = e;
       tail = &e->next;
     }
@@ -1419,7 +1419,10 @@ dot_cfi_fde_data (int ignored ATTRIBUTE_UNUSED)
 	  do
 	    {
 	      e = XNEW (struct cfi_escape_data);
-	      do_parse_cons_expression (&e->exp, 1);
+	      e->reloc = do_parse_cons_expression (&e->exp, 1);
+	      if (e->reloc != TC_PARSE_CONS_RETURN_NONE
+		  || e->exp.X_op != O_constant)
+		as_bad (_("only constants may be used with .cfi_fde_data"));
 	      *tail = e;
 	      tail = &e->next;
 	      num_ops++;
@@ -1761,7 +1764,7 @@ output_cfi_insn (struct cfi_insn_data *insn)
       {
 	struct cfi_escape_data *e;
 	for (e = insn->u.esc; e ; e = e->next)
-	  emit_expr (&e->exp, 1);
+	  emit_expr_with_reloc (&e->exp, 1, e->reloc);
 	break;
       }
 

@@ -1342,7 +1342,10 @@ sframe_xlate_do_escape_expr (const struct sframe_xlate_ctx *xlate_ctx,
       if ((i == 2 && (items[1] != 2)) /* Expected len of 2 in DWARF expr.  */
 	  /* We do not care for the exact values of items[2] and items[3],
 	     so an explicit check for O_constant isnt necessary either.  */
-	  || i >= CFI_ESC_NUM_EXP || (i < 2 && e->exp.X_op != O_constant))
+	  || i >= CFI_ESC_NUM_EXP
+	  || (i < 2
+	      && (e->exp.X_op != O_constant
+		  || e->reloc != TC_PARSE_CONS_RETURN_NONE)))
 	goto warn_and_exit;
       items[i] = e->exp.X_add_number;
       i++;
@@ -1405,7 +1408,8 @@ sframe_xlate_do_escape_val_offset (const struct sframe_xlate_ctx *xlate_ctx,
   while (e->next)
     {
       e = e->next;
-      if (i >= CFI_ESC_NUM_EXP || e->exp.X_op != O_constant)
+      if (i >= CFI_ESC_NUM_EXP || e->exp.X_op != O_constant
+	  || e->reloc != TC_PARSE_CONS_RETURN_NONE)
 	goto warn_and_exit;
       items[i] = e->exp.X_add_number;
       i++;
@@ -1479,7 +1483,7 @@ sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
   if (!e)
     return SFRAME_XLATE_ERR_INVAL;
 
-  if (e->exp.X_op != O_constant)
+  if (e->exp.X_op != O_constant || e->reloc != TC_PARSE_CONS_RETURN_NONE)
     return SFRAME_XLATE_ERR_NOTREPRESENTED;
 
   firstop = e->exp.X_add_number;
@@ -1490,7 +1494,8 @@ sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
       while (e->next)
 	{
 	  e = e->next;
-	  if (e->exp.X_op != O_constant || e->exp.X_add_number != DW_CFA_nop)
+	  if (e->exp.X_op != O_constant || e->exp.X_add_number != DW_CFA_nop
+	      || e->reloc != TC_PARSE_CONS_RETURN_NONE)
 	    {
 	      warn_p = true;
 	      break;
