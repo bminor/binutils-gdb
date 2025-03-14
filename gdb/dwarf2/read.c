@@ -18482,7 +18482,8 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
   dwarf2_cu *target_cu = source_cu;
   dwarf2_per_objfile *per_objfile = source_cu->per_objfile;
 
-  gdb_assert (source_cu->per_cu != NULL);
+  gdb_assert (source_cu->per_cu != nullptr);
+  gdb_assert (source_cu->dies != nullptr);
 
   dwarf_read_debug_printf_v ("source CU offset: %s, target offset: %s, "
 			     "source CU contains target offset: %d",
@@ -18528,12 +18529,6 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 		 " [in module %s]"),
 	       sect_offset_str (sect_off),
 	       objfile_name (per_objfile->objfile));
-    }
-  else if (source_cu->dies == NULL)
-    {
-      /* We're loading full DIEs during partial symbol reading.  */
-      load_full_comp_unit (source_cu->per_cu, per_objfile, source_cu, false,
-			   language_minimal);
     }
 
   *ref_cu = target_cu;
