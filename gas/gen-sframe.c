@@ -1345,6 +1345,7 @@ sframe_xlate_do_escape_expr (const struct sframe_xlate_ctx *xlate_ctx,
 	  || i >= CFI_ESC_NUM_EXP
 	  || (i < 2
 	      && (e->exp.X_op != O_constant
+	 	  || e->type != CFI_ESC_byte
 		  || e->reloc != TC_PARSE_CONS_RETURN_NONE)))
 	goto warn_and_exit;
       items[i] = e->exp.X_add_number;
@@ -1409,6 +1410,7 @@ sframe_xlate_do_escape_val_offset (const struct sframe_xlate_ctx *xlate_ctx,
     {
       e = e->next;
       if (i >= CFI_ESC_NUM_EXP || e->exp.X_op != O_constant
+	  || e->type != CFI_ESC_byte
 	  || e->reloc != TC_PARSE_CONS_RETURN_NONE)
 	goto warn_and_exit;
       items[i] = e->exp.X_add_number;
@@ -1483,7 +1485,9 @@ sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
   if (!e)
     return SFRAME_XLATE_ERR_INVAL;
 
-  if (e->exp.X_op != O_constant || e->reloc != TC_PARSE_CONS_RETURN_NONE)
+  if (e->exp.X_op != O_constant
+      || e->type != CFI_ESC_byte
+      || e->reloc != TC_PARSE_CONS_RETURN_NONE)
     return SFRAME_XLATE_ERR_NOTREPRESENTED;
 
   firstop = e->exp.X_add_number;
@@ -1495,6 +1499,7 @@ sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
 	{
 	  e = e->next;
 	  if (e->exp.X_op != O_constant || e->exp.X_add_number != DW_CFA_nop
+	      || e->type != CFI_ESC_byte
 	      || e->reloc != TC_PARSE_CONS_RETURN_NONE)
 	    {
 	      warn_p = true;

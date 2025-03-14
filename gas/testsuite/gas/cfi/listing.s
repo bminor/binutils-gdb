@@ -19,4 +19,15 @@ func:
 func2:
 	.cfi_startproc
 	.nop
+	/* DW_CFA_register reg127, reg129.  */
+	.cfi_escape 0x09, uleb128(127), uleb128(129)
+	/* DW_CFA_val_expression reg250, ...  */
+	.cfi_escape 0x16, uleb128(250)
+	/* ... <len>.  */
+	.cfi_escape uleb128(.LE0e - .LE0s)
+	.cfi_label .LE0s
+	/* DW_OP_breg3.  */
+	.cfi_escape 0x73, sleb128(-1024)
+	.cfi_label .LE0e
+	.nop
 	.cfi_endproc

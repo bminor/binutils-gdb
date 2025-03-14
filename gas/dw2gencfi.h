@@ -97,6 +97,11 @@ struct cfi_escape_data
 {
   struct cfi_escape_data *next;
   expressionS exp;
+  enum {
+    CFI_ESC_byte,
+    CFI_ESC_sleb128,
+    CFI_ESC_uleb128,
+  } type;
   TC_PARSE_CONS_RETURN_TYPE reloc;
 };
 

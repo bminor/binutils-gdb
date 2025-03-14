@@ -941,7 +941,7 @@ dot_cfi (int arg)
 static void
 dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
 {
-  struct cfi_escape_data *head, **tail, *e;
+  struct cfi_escape_data *head, **tail;
   struct cfi_insn_data *insn;
 
   if (frchain_now->frch_cfi_data == NULL)
@@ -960,8 +960,39 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
   tail = &head;
   do
     {
-      e = notes_alloc (sizeof (*e));
-      e->reloc = do_parse_cons_expression (&e->exp, 1);
+      struct cfi_escape_data *e = notes_alloc (sizeof (*e));
+      char *id, *ilp_save = input_line_pointer;
+      char c = get_symbol_name (&id);
+
+      if (strcmp (id, "sleb128") == 0)
+	e->type = CFI_ESC_sleb128;
+      else if (strcmp (id, "uleb128") == 0)
+	e->type = CFI_ESC_uleb128;
+      else
+	e->type = CFI_ESC_byte;
+
+      c = restore_line_pointer (c);
+
+      if (e->type != CFI_ESC_byte)
+	{
+	  if (is_whitespace (c))
+	    c = *++input_line_pointer;
+	  if (c != '(')
+	    {
+	      input_line_pointer = ilp_save;
+	      e->type = CFI_ESC_byte;
+	    }
+	}
+
+      if (e->type == CFI_ESC_sleb128 || e->type == CFI_ESC_uleb128)
+	{
+	  /* We're still at the opening parenthesis.  Leave it to expression()
+	     to parse it and find the matching closing one.  */
+	  expression (&e->exp);
+	}
+      else
+	e->reloc = do_parse_cons_expression (&e->exp, 1);
+
       *tail = e;
       tail = &e->next;
     }
@@ -1778,7 +1809,12 @@ output_cfi_insn (struct cfi_insn_data *insn)
       {
 	struct cfi_escape_data *e;
 	for (e = insn->u.esc; e ; e = e->next)
-	  emit_expr_with_reloc (&e->exp, 1, e->reloc);
+	  {
+	    if (e->type == CFI_ESC_sleb128 || e->type == CFI_ESC_uleb128)
+	      emit_leb128_expr (&e->exp, e->type == CFI_ESC_sleb128);
+	    else
+	      emit_expr_with_reloc (&e->exp, 1, e->reloc);
+	  }
 	break;
       }
 

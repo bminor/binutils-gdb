@@ -5176,7 +5176,18 @@ SPARC register window has been saved.
 @subsection @code{.cfi_escape} @var{expression}[, @dots{}]
 Allows the user to add arbitrary bytes to the unwind info.  One
 might use this to add OS-specific CFI opcodes, or generic CFI
-opcodes that GAS does not yet support.
+opcodes that GAS does not yet support.  To emit multi-byte data one may
+also use extended kind-of-expression forms:
+
+@itemize @bullet
+
+@item @code{sleb128(@var{expression})}
+to emit a SLEB128 item,
+
+@item @code{uleb128(@var{expression})}
+to emit a ULEB128 item.
+
+@end itemize
 
 @subsection @code{.cfi_val_encoded_addr @var{register}, @var{encoding}, @var{label}}
 The current value of @var{register} is @var{label}.  The value of @var{label}
