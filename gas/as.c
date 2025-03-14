@@ -469,10 +469,12 @@ parse_args (int * pargc, char *** pargv)
       OPTION_EMULATION,
       OPTION_DEBUG_PREFIX_MAP,
       OPTION_DEFSYM,
+#ifndef NO_LISTING
       OPTION_LISTING_LHS_WIDTH,
       OPTION_LISTING_LHS_WIDTH2, /* = STD_BASE + 10 */
       OPTION_LISTING_RHS_WIDTH,
       OPTION_LISTING_CONT_LINES,
+#endif
       OPTION_DEPFILE,
       OPTION_GSTABS,
       OPTION_GSTABS_PLUS,
@@ -573,10 +575,12 @@ parse_args (int * pargc, char *** pargv)
        ports use -k to enable PIC assembly.  */
     ,{"keep-locals", no_argument, NULL, 'L'}
     ,{"keep-locals", no_argument, NULL, 'L'}
+#ifndef NO_LISTING
     ,{"listing-lhs-width", required_argument, NULL, OPTION_LISTING_LHS_WIDTH}
     ,{"listing-lhs-width2", required_argument, NULL, OPTION_LISTING_LHS_WIDTH2}
     ,{"listing-rhs-width", required_argument, NULL, OPTION_LISTING_RHS_WIDTH}
     ,{"listing-cont-lines", required_argument, NULL, OPTION_LISTING_CONT_LINES}
+#endif
     ,{"MD", required_argument, NULL, OPTION_DEPFILE}
     ,{"mri", no_argument, NULL, 'M'}
     ,{"nocpp", no_argument, NULL, OPTION_NOCPP}
@@ -918,6 +922,7 @@ This program has absolutely no warranty.\n"));
 	  flag_keep_locals = 1;
 	  break;
 
+#ifndef NO_LISTING
 	case OPTION_LISTING_LHS_WIDTH:
 	  listing_lhs_width = atoi (optarg);
 	  if (listing_lhs_width_second < listing_lhs_width)
@@ -937,6 +942,7 @@ This program has absolutely no warranty.\n"));
 	case OPTION_LISTING_CONT_LINES:
 	  listing_lhs_cont_lines = atoi (optarg);
 	  break;
+#endif /* NO_LISTING */
 
 	case 'M':
 	  flag_mri = 1;
@@ -1382,7 +1388,9 @@ gas_init (void)
 int
 main (int argc, char ** argv)
 {
+#ifndef NO_LISTING
   char ** argv_orig = argv;
+#endif
   struct stat sob;
 
   gas_early_init (&argc, &argv);

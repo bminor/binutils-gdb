@@ -58,6 +58,18 @@ void listing_title (int depth);
 void listing_warning (const char *message);
 void listing_width (unsigned int x);
 
+#ifdef NO_LISTING
+#define listing_list s_ignore
+#define listing_eject s_ignore
+#define listing_psize s_ignore
+#define listing_nopage s_ignore
+#define listing_title s_ignore
+#define listing_file(name) ((void)(name))
+#define listing_newline(ps) ((void)(ps))
+#define listing_source_file(file) ((void)(file))
+#define listing_source_line(line) ((void)(line))
+#endif
+
 extern int listing_lhs_width;
 extern int listing_lhs_width_second;
 extern int listing_lhs_cont_lines;
