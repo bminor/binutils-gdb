@@ -3246,18 +3246,14 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
   prepare_one_comp_unit (cu, pretend_language);
 }
 
-void
-cutu_reader::keep ()
+/* See read.h.  */
+
+dwarf2_cu_up
+cutu_reader::release_cu ()
 {
-  /* Done, clean up.  */
   gdb_assert (!m_dummy_p);
-  if (m_new_cu != NULL)
-    {
-      /* Save this dwarf2_cu in the per_objfile.  The per_objfile owns it
-	 now.  */
-      dwarf2_per_objfile *per_objfile = m_new_cu->per_objfile;
-      per_objfile->set_cu (m_this_cu, std::move (m_new_cu));
-    }
+
+  return std::move (m_new_cu);
 }
 
 /* Read CU/TU THIS_CU but do not follow DW_AT_GNU_dwo_name (DW_AT_dwo_name)
@@ -4401,7 +4397,14 @@ load_full_comp_unit (dwarf2_per_cu *this_cu,
     return;
 
   reader.read_all_dies ();
-  reader.keep ();
+
+  if (auto new_cu = reader.release_cu ();
+      new_cu != nullptr)
+    {
+      /* Save this dwarf2_cu in the per_objfile.  The per_objfile owns it
+	 now.  */
+      per_objfile->set_cu (this_cu, std::move (new_cu));
+    }
 }
 
 /* Add a DIE to the delayed physname list.  */
@@ -19102,7 +19105,12 @@ read_signatured_type (signatured_type *sig_type,
   if (!reader.is_dummy ())
     {
       reader.read_all_dies ();
-      reader.keep ();
+
+      /* Save this dwarf2_cu in the per_objfile.  The per_objfile owns it
+	 now.  */
+      dwarf2_cu_up new_cu = reader.release_cu ();
+      gdb_assert (new_cu != nullptr);
+      per_objfile->set_cu (sig_type, std::move (new_cu));
     }
 
   sig_type->tu_read = 1;

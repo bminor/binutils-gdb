@@ -941,9 +941,8 @@ public:
 
   const dwarf2_section_info *section () const { return m_die_section; }
 
-  /* Release the new CU, putting it on the chain.  This cannot be done
-     for dummy CUs.  */
-  void keep ();
+  /* Release the CU created by this cutu_reader.  */
+  dwarf2_cu_up release_cu ();
 
   /* Release the abbrev table, transferring ownership to the
      caller.  */
