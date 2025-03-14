@@ -980,7 +980,6 @@ static struct type *set_die_type (struct die_info *, struct type *,
 
 static void load_full_comp_unit (dwarf2_per_cu *per_cu,
 				 dwarf2_per_objfile *per_objfile,
-				 dwarf2_cu *existing_cu,
 				 bool skip_partial,
 				 enum language pretend_language);
 
@@ -1651,8 +1650,7 @@ load_cu (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile,
   if (per_cu->is_debug_types)
     load_full_type_unit (per_cu, per_objfile);
   else
-    load_full_comp_unit (per_cu, per_objfile, per_objfile->get_cu (per_cu),
-			 skip_partial, language_minimal);
+    load_full_comp_unit (per_cu, per_objfile, skip_partial, language_minimal);
 
   dwarf2_cu *cu = per_objfile->get_cu (per_cu);
   if (cu == nullptr)
@@ -4375,24 +4373,16 @@ process_queue (dwarf2_per_objfile *per_objfile)
   dwarf_read_debug_printf ("Done expanding %u symtabs.", expanded_count);
 }
 
-/* Load the DIEs associated with PER_CU into memory.
-
-   In some cases, the caller, while reading partial symbols, will need to load
-   the full symbols for the CU for some reason.  It will already have a
-   dwarf2_cu object for THIS_CU and pass it as EXISTING_CU, so it can be re-used
-   rather than creating a new one.  */
+/* Load the DIEs associated with PER_CU into memory.  */
 
 static void
-load_full_comp_unit (dwarf2_per_cu *this_cu,
-		     dwarf2_per_objfile *per_objfile,
-		     dwarf2_cu *existing_cu,
-		     bool skip_partial,
-		     enum language pretend_language)
+load_full_comp_unit (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile,
+		     bool skip_partial, enum language pretend_language)
 {
   gdb_assert (! this_cu->is_debug_types);
 
-  cutu_reader reader (this_cu, per_objfile, NULL, existing_cu, skip_partial,
-		      pretend_language);
+  cutu_reader reader (this_cu, per_objfile, NULL, per_objfile->get_cu (this_cu),
+		      skip_partial, pretend_language);
   if (reader.is_dummy ())
     return;
 
@@ -5237,8 +5227,7 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
 
       /* If necessary, add it to the queue and load its DIEs.  */
       if (maybe_queue_comp_unit (cu, per_cu, per_objfile))
-	load_full_comp_unit (per_cu, per_objfile, per_objfile->get_cu (per_cu),
-			     false, cu->lang ());
+	load_full_comp_unit (per_cu, per_objfile, false, cu->lang ());
 
       cu->per_cu->imported_symtabs.push_back (per_cu);
     }
@@ -18518,8 +18507,7 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 	 to be loaded, we must check for ourselves.  */
       if (maybe_queue_comp_unit (source_cu, target_per_cu, per_objfile)
 	  || per_objfile->get_cu (target_per_cu) == nullptr)
-	load_full_comp_unit (target_per_cu, per_objfile,
-			     per_objfile->get_cu (target_per_cu), false,
+	load_full_comp_unit (target_per_cu, per_objfile, false,
 			     source_cu->lang ());
 
       target_cu = per_objfile->get_cu (target_per_cu);
