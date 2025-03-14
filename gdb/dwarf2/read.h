@@ -995,11 +995,11 @@ private:
 
   die_info *read_toplevel_die (gdb::array_view<attribute *> extra_attrs = {});
 
-  die_info *read_die_and_siblings_1 (die_info *parent);
+  die_info *read_die_and_siblings (die_info *parent);
 
   die_info *read_die_and_children (die_info *parent);
 
-  die_info *read_full_die_1 (int num_extra_attrs, bool allow_reprocess);
+  die_info *read_full_die (int num_extra_attrs, bool allow_reprocess);
 
   const gdb_byte *read_attribute_value (attribute *attr, unsigned form,
 					LONGEST implicit_const,

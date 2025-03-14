@@ -14525,7 +14525,7 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
 die_info *
 cutu_reader::read_die_and_children (die_info *parent)
 {
-  die_info *die = this->read_full_die_1 (0, true);
+  die_info *die = this->read_full_die (0, true);
 
   if (die == nullptr)
     return nullptr;
@@ -14534,7 +14534,7 @@ cutu_reader::read_die_and_children (die_info *parent)
   gdb_assert (inserted);
 
   if (die->has_children)
-    die->child = this->read_die_and_siblings_1 (die);
+    die->child = this->read_die_and_siblings (die);
   else
     die->child = nullptr;
 
@@ -14548,7 +14548,7 @@ cutu_reader::read_die_and_children (die_info *parent)
    in read_die_and_children.  */
 
 die_info *
-cutu_reader::read_die_and_siblings_1 (die_info *parent)
+cutu_reader::read_die_and_siblings (die_info *parent)
 {
   die_info *first_die = nullptr;
   die_info *last_sibling = nullptr;
@@ -14580,7 +14580,7 @@ cutu_reader::read_all_dies ()
     {
       gdb_assert (m_cu->die_hash.empty ());
       m_cu->die_hash.reserve (m_cu->header.get_length_without_initial () / 12);
-      m_top_level_die->child = this->read_die_and_siblings_1 (m_top_level_die);
+      m_top_level_die->child = this->read_die_and_siblings (m_top_level_die);
     }
 
   m_cu->dies = m_top_level_die;
@@ -14605,7 +14605,7 @@ cutu_reader::read_all_dies ()
    child, sibling, and parent fields.  */
 
 die_info *
-cutu_reader::read_full_die_1 (int num_extra_attrs, bool allow_reprocess)
+cutu_reader::read_full_die (int num_extra_attrs, bool allow_reprocess)
 {
   unsigned int bytes_read, i;
   const struct abbrev_info *abbrev;
@@ -14652,7 +14652,7 @@ die_info *
 cutu_reader::read_toplevel_die (gdb::array_view<attribute *> extra_attrs)
 {
   const gdb_byte *begin_info_ptr = m_info_ptr;
-  die_info *die = this->read_full_die_1 (extra_attrs.size (), false);
+  die_info *die = this->read_full_die (extra_attrs.size (), false);
 
   /* Copy in the extra attributes, if any.  */
   attribute *next = &die->attrs[die->num_attrs];
