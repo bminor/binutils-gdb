@@ -4044,6 +4044,106 @@ cutu_reader::skip_children (const gdb_byte *info_ptr)
     }
 }
 
+/* See read.h.  */
+
+const gdb_byte *
+cutu_reader::skip_one_attribute (dwarf_form form, const gdb_byte *info_ptr)
+{
+  unsigned int bytes_read;
+
+  switch (form)
+    {
+    case DW_FORM_ref_addr:
+      /* In DWARF 2, DW_FORM_ref_addr is address sized; in DWARF 3
+	       and later it is offset sized.  */
+      if (m_cu->header.version == 2)
+	return info_ptr + m_cu->header.addr_size;
+      else
+	return info_ptr + m_cu->header.offset_size;
+
+    case DW_FORM_GNU_ref_alt:
+      return info_ptr + m_cu->header.offset_size;
+
+    case DW_FORM_addr:
+      return info_ptr + m_cu->header.addr_size;
+
+    case DW_FORM_data1:
+    case DW_FORM_ref1:
+    case DW_FORM_flag:
+    case DW_FORM_strx1:
+      return info_ptr + 1;
+
+    case DW_FORM_flag_present:
+    case DW_FORM_implicit_const:
+      return info_ptr;
+
+    case DW_FORM_data2:
+    case DW_FORM_ref2:
+    case DW_FORM_strx2:
+      return info_ptr + 2;
+
+    case DW_FORM_strx3:
+      return info_ptr + 3;
+
+    case DW_FORM_data4:
+    case DW_FORM_ref4:
+    case DW_FORM_strx4:
+      return info_ptr + 4;
+
+    case DW_FORM_data8:
+    case DW_FORM_ref8:
+    case DW_FORM_ref_sig8:
+      return info_ptr + 8;
+
+    case DW_FORM_data16:
+      return info_ptr + 16;
+
+    case DW_FORM_string:
+      read_direct_string (m_abfd, info_ptr, &bytes_read);
+      return info_ptr + bytes_read;
+
+    case DW_FORM_sec_offset:
+    case DW_FORM_strp:
+    case DW_FORM_GNU_strp_alt:
+      return info_ptr + m_cu->header.offset_size;
+
+    case DW_FORM_exprloc:
+    case DW_FORM_block:
+      info_ptr += read_unsigned_leb128 (m_abfd, info_ptr, &bytes_read);
+      return info_ptr + bytes_read;
+
+    case DW_FORM_block1:
+      return info_ptr + 1 + read_1_byte (m_abfd, info_ptr);
+
+    case DW_FORM_block2:
+      return info_ptr + 2 + read_2_bytes (m_abfd, info_ptr);
+
+    case DW_FORM_block4:
+      return info_ptr + 4 + read_4_bytes (m_abfd, info_ptr);
+
+    case DW_FORM_addrx:
+    case DW_FORM_strx:
+    case DW_FORM_sdata:
+    case DW_FORM_udata:
+    case DW_FORM_ref_udata:
+    case DW_FORM_GNU_addr_index:
+    case DW_FORM_GNU_str_index:
+    case DW_FORM_rnglistx:
+    case DW_FORM_loclistx:
+      return safe_skip_leb128 (info_ptr, m_buffer_end);
+
+    case DW_FORM_indirect:
+      form = static_cast<dwarf_form> (read_unsigned_leb128 (m_abfd, info_ptr,
+							    &bytes_read));
+      return this->skip_one_attribute(form, info_ptr + bytes_read);
+
+    default:
+      error (_ (DWARF_ERROR_PREFIX
+		"Cannot handle %s in DWARF reader [in module %s]"),
+	     dwarf_form_name (form), bfd_get_filename (m_abfd));
+    }
+}
+
 /* Scan the debug information for CU starting at INFO_PTR in buffer BUFFER.
    INFO_PTR should point just after the initial uleb128 of a DIE, and the
    abbrev corresponding to that skipped uleb128 should be passed in
@@ -4057,10 +4157,6 @@ const gdb_byte *
 cutu_reader::skip_one_die (const gdb_byte *info_ptr, const abbrev_info *abbrev,
 			   bool do_skip_children)
 {
-  unsigned int bytes_read;
-  struct attribute attr;
-  unsigned int form, i;
-
   if (do_skip_children && abbrev->sibling_offset != (unsigned short) -1)
     {
       /* We only handle DW_FORM_ref4 here.  */
@@ -4080,7 +4176,7 @@ cutu_reader::skip_one_die (const gdb_byte *info_ptr, const abbrev_info *abbrev,
       return info_ptr;
     }
 
-  for (i = 0; i < abbrev->num_attrs; i++)
+  for (unsigned int i = 0; i < abbrev->num_attrs; i++)
     {
       /* The only abbrev we care about is DW_AT_sibling.  */
       if (do_skip_children && abbrev->attrs[i].name == DW_AT_sibling)
@@ -4088,6 +4184,7 @@ cutu_reader::skip_one_die (const gdb_byte *info_ptr, const abbrev_info *abbrev,
 	  /* Note there is no need for the extra work of
 	     "reprocessing" here, so we pass false for that
 	     argument.  */
+	  attribute attr;
 	  this->read_attribute (&attr, &abbrev->attrs[i], info_ptr, false);
 	  if (attr.form == DW_FORM_ref_addr)
 	    complaint (_("ignoring absolute DW_AT_sibling"));
@@ -4106,100 +4203,7 @@ cutu_reader::skip_one_die (const gdb_byte *info_ptr, const abbrev_info *abbrev,
 	}
 
       /* If it isn't DW_AT_sibling, skip this attribute.  */
-      form = abbrev->attrs[i].form;
-    skip_attribute:
-      switch (form)
-	{
-	case DW_FORM_ref_addr:
-	  /* In DWARF 2, DW_FORM_ref_addr is address sized; in DWARF 3
-	     and later it is offset sized.  */
-	  if (m_cu->header.version == 2)
-	    info_ptr += m_cu->header.addr_size;
-	  else
-	    info_ptr += m_cu->header.offset_size;
-	  break;
-	case DW_FORM_GNU_ref_alt:
-	  info_ptr += m_cu->header.offset_size;
-	  break;
-	case DW_FORM_addr:
-	  info_ptr += m_cu->header.addr_size;
-	  break;
-	case DW_FORM_data1:
-	case DW_FORM_ref1:
-	case DW_FORM_flag:
-	case DW_FORM_strx1:
-	  info_ptr += 1;
-	  break;
-	case DW_FORM_flag_present:
-	case DW_FORM_implicit_const:
-	  break;
-	case DW_FORM_data2:
-	case DW_FORM_ref2:
-	case DW_FORM_strx2:
-	  info_ptr += 2;
-	  break;
-	case DW_FORM_strx3:
-	  info_ptr += 3;
-	  break;
-	case DW_FORM_data4:
-	case DW_FORM_ref4:
-	case DW_FORM_strx4:
-	  info_ptr += 4;
-	  break;
-	case DW_FORM_data8:
-	case DW_FORM_ref8:
-	case DW_FORM_ref_sig8:
-	  info_ptr += 8;
-	  break;
-	case DW_FORM_data16:
-	  info_ptr += 16;
-	  break;
-	case DW_FORM_string:
-	  read_direct_string (m_abfd, info_ptr, &bytes_read);
-	  info_ptr += bytes_read;
-	  break;
-	case DW_FORM_sec_offset:
-	case DW_FORM_strp:
-	case DW_FORM_GNU_strp_alt:
-	  info_ptr += m_cu->header.offset_size;
-	  break;
-	case DW_FORM_exprloc:
-	case DW_FORM_block:
-	  info_ptr += read_unsigned_leb128 (m_abfd, info_ptr, &bytes_read);
-	  info_ptr += bytes_read;
-	  break;
-	case DW_FORM_block1:
-	  info_ptr += 1 + read_1_byte (m_abfd, info_ptr);
-	  break;
-	case DW_FORM_block2:
-	  info_ptr += 2 + read_2_bytes (m_abfd, info_ptr);
-	  break;
-	case DW_FORM_block4:
-	  info_ptr += 4 + read_4_bytes (m_abfd, info_ptr);
-	  break;
-	case DW_FORM_addrx:
-	case DW_FORM_strx:
-	case DW_FORM_sdata:
-	case DW_FORM_udata:
-	case DW_FORM_ref_udata:
-	case DW_FORM_GNU_addr_index:
-	case DW_FORM_GNU_str_index:
-	case DW_FORM_rnglistx:
-	case DW_FORM_loclistx:
-	  info_ptr = safe_skip_leb128 (info_ptr, m_buffer_end);
-	  break;
-	case DW_FORM_indirect:
-	  form = read_unsigned_leb128 (m_abfd, info_ptr, &bytes_read);
-	  info_ptr += bytes_read;
-	  /* We need to continue parsing from here, so just go back to
-	     the top.  */
-	  goto skip_attribute;
-
-	default:
-	  error (_(DWARF_ERROR_PREFIX
-		   "Cannot handle %s in DWARF reader [in module %s]"),
-		 dwarf_form_name (form), bfd_get_filename (m_abfd));
-	}
+      info_ptr = this->skip_one_attribute (abbrev->attrs[i].form, info_ptr);
     }
 
   if (do_skip_children && abbrev->has_children)

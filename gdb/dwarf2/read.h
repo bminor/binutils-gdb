@@ -970,6 +970,11 @@ public:
   const gdb_byte *skip_children (const gdb_byte *info_ptr);
 
 private:
+  /* Skip the attribute at INFO_PTR, knowing it has form FORM.  Return a pointer
+     just past the attribute.  */
+  const gdb_byte *skip_one_attribute (dwarf_form form,
+				      const gdb_byte *info_ptr);
+
   void init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
 			   struct dwo_file *dwo_file,
 			   const struct abbrev_table *abbrev_table);
