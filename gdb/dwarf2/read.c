@@ -18478,50 +18478,50 @@ static struct die_info *
 follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 		   struct dwarf2_cu **ref_cu)
 {
-  struct dwarf2_cu *target_cu, *cu = *ref_cu;
-  dwarf2_per_objfile *per_objfile = cu->per_objfile;
+  dwarf2_cu *source_cu = *ref_cu;
+  dwarf2_cu *target_cu = source_cu;
+  dwarf2_per_objfile *per_objfile = source_cu->per_objfile;
 
-  gdb_assert (cu->per_cu != NULL);
-
-  target_cu = cu;
+  gdb_assert (source_cu->per_cu != NULL);
 
   dwarf_read_debug_printf_v ("source CU offset: %s, target offset: %s, "
 			     "source CU contains target offset: %d",
-			     sect_offset_str (cu->per_cu->sect_off),
+			     sect_offset_str (source_cu->per_cu->sect_off),
 			     sect_offset_str (sect_off),
-			     cu->header.offset_in_cu_p (sect_off));
+			     source_cu->header.offset_in_cu_p (sect_off));
 
-  if (cu->per_cu->is_debug_types)
+  if (source_cu->per_cu->is_debug_types)
     {
       /* .debug_types CUs cannot reference anything outside their CU.
 	 If they need to, they have to reference a signatured type via
 	 DW_FORM_ref_sig8.  */
-      if (!cu->header.offset_in_cu_p (sect_off))
+      if (!source_cu->header.offset_in_cu_p (sect_off))
 	return NULL;
     }
-  else if (offset_in_dwz != cu->per_cu->is_dwz
-	   || !cu->header.offset_in_cu_p (sect_off))
+  else if (offset_in_dwz != source_cu->per_cu->is_dwz
+	   || !source_cu->header.offset_in_cu_p (sect_off))
     {
-      dwarf2_per_cu *per_cu
+      dwarf2_per_cu *target_per_cu
 	= dwarf2_find_containing_comp_unit (sect_off, offset_in_dwz,
 					    per_objfile->per_bfd);
 
       dwarf_read_debug_printf_v ("target CU offset: %s, "
 				 "target CU DIEs loaded: %d",
-				 sect_offset_str (per_cu->sect_off),
-				 per_objfile->get_cu (per_cu) != nullptr);
+				 sect_offset_str (target_per_cu->sect_off),
+				 per_objfile->get_cu (target_per_cu) != nullptr);
 
       /* If necessary, add it to the queue and load its DIEs.
 
 	 Even if maybe_queue_comp_unit doesn't require us to load the CU's DIEs,
 	 it doesn't mean they are currently loaded.  Since we require them
 	 to be loaded, we must check for ourselves.  */
-      if (maybe_queue_comp_unit (cu, per_cu, per_objfile)
-	  || per_objfile->get_cu (per_cu) == nullptr)
-	load_full_comp_unit (per_cu, per_objfile, per_objfile->get_cu (per_cu),
-			     false, cu->lang ());
+      if (maybe_queue_comp_unit (source_cu, target_per_cu, per_objfile)
+	  || per_objfile->get_cu (target_per_cu) == nullptr)
+	load_full_comp_unit (target_per_cu, per_objfile,
+			     per_objfile->get_cu (target_per_cu), false,
+			     source_cu->lang ());
 
-      target_cu = per_objfile->get_cu (per_cu);
+      target_cu = per_objfile->get_cu (target_per_cu);
       if (target_cu == nullptr)
 	error (_(DWARF_ERROR_PREFIX
 		 "cannot follow reference to DIE at %s"
@@ -18529,10 +18529,10 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 	       sect_offset_str (sect_off),
 	       objfile_name (per_objfile->objfile));
     }
-  else if (cu->dies == NULL)
+  else if (source_cu->dies == NULL)
     {
       /* We're loading full DIEs during partial symbol reading.  */
-      load_full_comp_unit (cu->per_cu, per_objfile, cu, false,
+      load_full_comp_unit (source_cu->per_cu, per_objfile, source_cu, false,
 			   language_minimal);
     }
 
