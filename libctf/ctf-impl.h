@@ -182,9 +182,11 @@ typedef struct ctf_dtdef
   ctf_id_t dtd_type;		/* Type identifier for this definition.  */
   ctf_id_t dtd_final_type;	/* Final (nonprovisional) id, if nonzero.  */
   ctf_list_t dtd_refs;		/* Refs to this DTD's dtd_type: see below.  */
-  ctf_type_t *dtd_buf;		/* Type nodes plus variable-length data for this type.  */
+  ctf_type_t *dtd_buf;		/* Type nodes plus variable-length data for
+				   this type.  */
   size_t dtd_buf_size;		/* Length of dtd_buf in bytes.  */
-  ctf_type_t *dtd_data;		/* True type node, including name (pointer into dtd_buf).  */
+  ctf_type_t *dtd_data;		/* True type node, including name (pointer into
+				   dtd_buf).  */
   unsigned char *dtd_vlen;	/* Actual vlen data (pointer into dtd_buf).  */
   size_t dtd_vlen_size;		/* Total vlen space so far (vbytes).  */
   uint64_t dtd_last_offset;	/* Offset of the last struct field.  */

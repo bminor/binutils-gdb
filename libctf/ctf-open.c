@@ -1181,7 +1181,7 @@ ctf_flip_header (void *cthp, int is_btf, int ctf_version)
 
   if (is_btf)
     {
-      btf_header_t *bth = (btf_header_t *) cthp;
+      ctf_btf_header_t *bth = (ctf_btf_header_t *) cthp;
 
       swap_thing (cth->btf.bth_preamble.btf_magic);
       swap_thing (cth->btf.bth_preamble.btf_version);
@@ -1493,10 +1493,10 @@ ctf_flip (ctf_dict_t *fp, ctf_header_t *cth, unsigned char *buf,
 {
   ctf_dprintf ("Flipping endianness\n");
 
-  flip_objts (buf + sizeof (btf_header_t) + cth->cth_objt_off, cth->cth_objt_len);
-  flip_objts (buf + sizeof (btf_header_t) + cth->cth_func_off, cth->cth_func_len);
-  flip_objts (buf + sizeof (btf_header_t) + cth->cth_objtidx_off, cth->cth_objtidx_len);
-  flip_objts (buf + sizeof (btf_header_t) + cth->cth_funcidx_off, cth->cth_funcidx_len);
+  flip_objts (buf + sizeof (ctf_btf_header_t) + cth->cth_objt_off, cth->cth_objt_len);
+  flip_objts (buf + sizeof (ctf_btf_header_t) + cth->cth_func_off, cth->cth_func_len);
+  flip_objts (buf + sizeof (ctf_btf_header_t) + cth->cth_objtidx_off, cth->cth_objtidx_len);
+  flip_objts (buf + sizeof (ctf_btf_header_t) + cth->cth_funcidx_off, cth->cth_funcidx_len);
   return flip_types (fp, buf + cth->btf.bth_type_off, cth->btf.bth_type_len,
 		     to_foreign);
 }
@@ -1586,7 +1586,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	     const ctf_sect_t *strsect, int *errp)
 {
   const ctf_preamble_v3_t *pp;
-  const btf_preamble_t *bp;
+  const ctf_btf_preamble_t *bp;
   size_t hdrsz = 0;
   ctf_header_t *hp;
   ctf_header_v3_t *header_v3 = NULL;
@@ -1632,7 +1632,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     return (ctf_set_open_errno (errp, ECTF_STRBAD));
 
   if (ctfsect->cts_data == NULL
-      || ctfsect->cts_size < sizeof (btf_preamble_t))
+      || ctfsect->cts_size < sizeof (ctf_btf_preamble_t))
     return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
 
   /* Validate each part of the CTF header.
@@ -1658,14 +1658,14 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	{
 	  format = IS_BTF;
 	  foreign_endian = 1;
-	  hdrsz = sizeof (struct btf_header);
+	  hdrsz = sizeof (struct ctf_btf_header);
 	  version = bp->btf_version;
 	}
     }
     else
       {
 	format = IS_BTF;
-	hdrsz = sizeof (struct btf_header);
+	hdrsz = sizeof (struct ctf_btf_header);
 	version = bp->btf_version;
       }
 
@@ -1708,7 +1708,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	  format = IS_CTF;
 	  version = hp->cth_version;
 	  hdrsz = sizeof (ctf_header_t);
-	  ctf_adjustment = sizeof (ctf_header_t) - sizeof (btf_header_t);
+	  ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
 	}
       else if (bswap_64 (hp->cth_preamble.ctp_magic_version) >> 16 == CTFv4_MAGIC)
 	{
@@ -1717,7 +1717,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	  /* See cth_version in ctf.h.  */
 	  version = bswap_64 (hp->cth_preamble.ctp_magic_version) & ((~0) >> 48);
 	  hdrsz = sizeof (ctf_header_t);
-	  ctf_adjustment = sizeof (ctf_header_t) - sizeof (btf_header_t);
+	  ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
 	}
       /* Neither hit: confirmed BTF, not CTFv4.  */
     }
@@ -1797,12 +1797,12 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     }
 
   if (_libctf_unlikely (format == IS_BTF && version != 1
-			|| hp->btf.bth_hdr_len != sizeof (struct btf_header)))
+			|| hp->btf.bth_hdr_len != sizeof (struct ctf_btf_header)))
     {
       ctf_err_warn (NULL, 0, ECTF_CTFVERS,
 		    _("BTF version %zi or header length %zi unknown: expecting 1, %zi\n"),
 		   version, hp->btf.bth_hdr_len,
-		   sizeof (struct btf_header));
+		   sizeof (struct ctf_btf_header));
       ctf_set_open_errno (errp, ECTF_CTFVERS);
       goto validation_fail;
     }

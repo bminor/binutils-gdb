@@ -34,6 +34,10 @@ extern "C"
 {
 #endif
 
+/* Version of the libctf API.  */
+
+#define LIBCTF_API_VERSION 2
+
 /* Clients can open one or more CTF containers and obtain a pointer to an
    opaque ctf_dict_t.  Types are identified by an opaque ctf_id_t token.
    They can also open or create read-only archives of CTF containers in a
@@ -124,7 +128,7 @@ typedef enum ctf_sect_names
    CTF_SECT_OBJTIDX = CTF_SECT_OBJT,
    CTF_SECT_FUNC,
    CTF_SECT_FUNCIDX = CTF_SECT_FUNC,
-   CTF_SECT_VAR,
+   CTF_SECT_VAR,				/* UPTODO */
    CTF_SECT_TYPE,
    CTF_SECT_STR
   } ctf_sect_names_t;
@@ -149,7 +153,7 @@ typedef struct ctf_encoding
 typedef struct ctf_membinfo
 {
   ctf_id_t ctm_type;		/* Type of struct or union member.  */
-  unsigned long ctm_offset;	/* Offset of member in bits.  */
+  size_t ctm_offset;		/* Offset of member in bits.  */
   int ctm_bit_width;		/* Width of member in bits: -1: not bitfield */
 } ctf_membinfo_t;
 
@@ -157,13 +161,13 @@ typedef struct ctf_arinfo
 {
   ctf_id_t ctr_contents;	/* Type of array contents.  */
   ctf_id_t ctr_index;		/* Type of array index.  */
-  uint32_t ctr_nelems;		/* Number of elements.  */
+  size_t ctr_nelems;		/* Number of elements.  */
 } ctf_arinfo_t;
 
 typedef struct ctf_funcinfo
 {
   ctf_id_t ctc_return;		/* Function return type.  */
-  uint32_t ctc_argc;		/* Number of typed arguments to function.  */
+  size_t ctc_argc;		/* Number of typed arguments to function.  */
   uint32_t ctc_flags;		/* Function attributes (see below).  */
 } ctf_funcinfo_t;
 
@@ -737,7 +741,7 @@ extern int ctf_array_info (ctf_dict_t *, ctf_id_t, ctf_arinfo_t *);
 
 extern int ctf_member_info (ctf_dict_t *, ctf_id_t, const char *,
 			    ctf_membinfo_t *);
-extern int ctf_member_count (ctf_dict_t *, ctf_id_t);
+extern ssize_t ctf_member_count (ctf_dict_t *, ctf_id_t);
 
 /* Search a datasec for a variable covering a given offset.
 

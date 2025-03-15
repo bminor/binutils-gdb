@@ -72,6 +72,11 @@ ctf_member_f, ctf_visit_f gain int bit_width arg
 
 ctf_enum_f val arg becomes int -> int64_t
 
+* Structs/unions
+
+ctf_membinfo.ctm_offset, ctf_arinfo.ctr_nelems, ctf_funcinfo.ctc_argc are all
+size_t.
+
 * Functions
 
 ctf_add_function gains arg_names arg
@@ -81,6 +86,9 @@ ctf_enum_iter return value int -> int64
 ctf_enum_next int * val -> int64 * val
 
 ctf_member_next gains bit_width arg
+ctf_member_count returns ssize_t
+
+ctf_version gains btf_hdr_len, btf_mode args.
 
 * Behaviour
 

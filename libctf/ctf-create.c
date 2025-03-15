@@ -696,6 +696,9 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
 
   memcpy (dtd->dtd_vlen, &encoding, sizeof (encoding));
 
+  if (kind == CTF_K_FLOAT)
+    fp->ctf_is_btf = 0;
+
   return dtd->dtd_type;
 }
 
@@ -934,6 +937,11 @@ ctf_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
   prefix->ctt_info = CTF_TYPE_INFO (CTF_K_CONFLICTING, 0,
 				    dtd->dtd_vlen_size < 65536
 				    ? dtd->dtd_vlen_size : 0);
+
+  /* This is not valid BTF any more.  */
+
+  fp->ctf_is_btf = 0;
+
   return 0;
 }
 
@@ -1573,6 +1581,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 
   ssize_t msize, ssize;
   uint32_t kind, kflag, root;
+  size_t vlen;
   size_t i;
   int is_incomplete = 0;
   ctf_member_t *memb;
@@ -1777,7 +1786,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   /* If we needed to use the additional space CTF_K_BIG allows, this is not
      valid BTF any more.  */
 
-  if (prefix->ctt_size != 0 || CTF_INFO_VLEN(prefix->ctt_info) != 0)
+  if (prefix->ctt_size != 0 || CTF_INFO_VLEN (prefix->ctt_info) != 0)
     fp->ctf_is_btf = 0;
 
   return 0;
@@ -1847,7 +1856,8 @@ ctf_add_section_variable (ctf_dict_t *fp, const char *datasec, const char *name,
   ctf_dtdef_t *sec_dtd = NULL;
   ctf_dtdef_t *var_dtd = NULL;
 
-  uint32_t kind, vlen, kflag;
+  uint32_t kind, kflag;
+  size_t vlen;
 
   ctf_linkage_t *linkage;
   ctf_var_secinfo_t *sec;
@@ -2272,7 +2282,8 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
   ctf_id_t tmp;
 
   const char *name;
-  uint32_t kind, forward_kind, flag, vlen;
+  uint32_t kind, forward_kind, flag;
+  size_t vlen;
 
   const ctf_type_t *src_prefix, *src_tp, *dst_prefix;
   ctf_bundle_t src, dst;

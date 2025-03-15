@@ -1802,7 +1802,7 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 
-  vlen = ctf_vlen (fp, type, tp, &vlen);
+  vlen = ctf_vlen (fp, type, tp, NULL);
 
   switch (LCTF_KIND (fp, tp))
     {
@@ -1988,7 +1988,7 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
 /* Return the number of members in a STRUCT or UNION, or the number of
    enumerators in an ENUM.  The count does not include unnamed sub-members.  */
 
-int
+ssize_t
 ctf_member_count (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_dict_t *ofp = fp;
@@ -2018,7 +2018,8 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   unsigned char *vlen;
-  uint32_t kind, n, i = 0;
+  uint32_t kind, i = 0;
+  size_t n;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -2099,7 +2100,7 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int64_t value)
   const ctf_type_t *tp;
   unsigned char *vlen;
   int kind;
-  uint32_t n;
+  size_t n;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     {
@@ -2158,7 +2159,7 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
   unsigned char *vlen;
   const ctf_enum_t *ep;
   int kind;
-  uint32_t n;
+  size_t n;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));

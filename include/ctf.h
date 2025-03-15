@@ -50,28 +50,30 @@ extern "C"
    typically named .ctf.  Data structures are aligned so that a raw CTF file or
    CTF ELF section may be manipulated using mmap(2).
 
-   The CTF file or section itself has the following structure:
+   The CTF file or section is a superset of BTF, and has the following structure:
 
    +--------+--------+---------+----------+--------+----------+...
-   |  file  |  type  |  data   | function | object | function |...
-   | header | labels | objects |   info   | index  |  index   |...
-   +--------+--------+---------+----------+--------+----------+...
+   +   BTF  |   CTF  |  data   | function | object | function |...
+   | header | header | objects |   info   | index  |  index   |...
+   +--------+--------+----------+--------+-------------------+...
 
-   ...+----------+-------+--------+
-   ...| variable | data  | string |
-   ...|   info   | types | table  |
-      +----------+-------+--------+
+   ...+-------+--------+
+   ...| data  | string |
+   ...| types | table  |
+      +-------+--------+
 
    The file header stores a magic number and version information, encoding
-   flags, and the byte offset of each of the sections relative to the end of the
-   header itself.  If the CTF data has been uniquified against another set of
-   CTF data, a reference to that data also appears in the the header.  This
-   reference is the name of the label corresponding to the types uniquified
-   against.
+   flags, and the byte offset and length of each of the sections relative to
+   the end of the header itself.  There are two headers: the BTF header contains
+   offsets relative to the end of the BTF header, and immediately following it
+   there may be a CTF header containing offsets relative to the end of the CTF
+   header.  If the BTF header is not followed by a CTFv4_MAGIC, no CTF header
+   is present and this dict is pure BTF (and cannot contain CTF-specific type
+   kinds).
 
-   Following the header is a list of labels, used to group the types included in
-   the data types section.  Each label is accompanied by a type ID i.  A given
-   label refers to the group of types whose IDs are in the range [0, i].
+   If the CTF data has been uniquified against another set of CTF data, a
+   reference to that data also appears in the the header.  This reference is the
+   name of the parent dict containing the types uniquified against.
 
    Data object and function records (collectively, "symtypetabs") are stored in
    the same order as they appear in the corresponding symbol table, except that
@@ -193,22 +195,22 @@ typedef struct ctf_header_v3
 /* Derived from btf.h in the Linux kernel, but independent (to ensure that btf.h
    changes do not change the CTF file format) and using userspace types.  */
 
-typedef struct btf_preamble
+typedef struct ctf_btf_preamble
 {
   uint16_t btf_magic;		/* BTF_MAGIC */
   uint8_t btf_version;		/* Always 1, foror now */
   uint8_t btf_flags;		/* Always 0, for now */
-} btf_preamble_t;
+} ctf_btf_preamble_t;
 
-typedef struct btf_header
+typedef struct ctf_btf_header
 {
-  btf_preamble_t bth_preamble;
+  ctf_btf_preamble_t bth_preamble;
   uint32_t bth_hdr_len;		/* De-facto BTF version number */
   uint32_t bth_type_off;	/* Offset of type section.  */
   uint32_t bth_type_len;	/* Length of type section.  */
   uint32_t bth_str_off;		/* Offset of string section.  */
   uint32_t bth_str_len;		/* Length of string section.  */
-} btf_header_t;
+} ctf_btf_header_t;
 
 typedef struct ctf_preamble
 {
@@ -217,11 +219,12 @@ typedef struct ctf_preamble
 } ctf_preamble_t;
 
 /* Offsets in this header are relative to the end of the ctf_header, except for
-   those in the btf_portion, which are relative to the end of the btf_header.  */
+   those in the btf_portion, which are relative to the end of the
+   ctf_btf_header.  */
 
 typedef struct ctf_header
 {
-  btf_header_t btf;		/* Leading component is BTF. */
+  ctf_btf_header_t btf;		/* Leading component is BTF. */
   ctf_preamble_t cth_preamble;
   uint32_t cth_cu_name;		/* Ref to CU name (may be 0).  */
   uint32_t cth_parent_name;	/* Ref to basename of parent.  */
@@ -576,7 +579,7 @@ union
 				   vlen is high 16 bits of type vlen;
 				   size is high 32 bits of type size.  */
 #define CTF_K_CONFLICTING 28	/* Prefix type; variant data is ctf_type_t.
-				   Name is disambiguator for cnflicting type
+				   Name is disambiguator for conflicting type
 				   (e.g. translation unit name).
 
 				   If a type is both CONFLICTING and BIG,
