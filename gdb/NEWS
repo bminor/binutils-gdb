@@ -51,6 +51,12 @@ show riscv numeric-register-names
   ** New constant gdb.PARAM_COLOR represents color type of a
      gdb.Parameter.value.  Parameter's value is gdb.Color instance.
 
+  ** The memory_source argument (the second argument) has been removed
+     from gdb.disassembler.builtin_disassemble.  This argument was
+     never used by GDB, and was added my mistake.  The only place this
+     argument was ever documented was in the NEWS file, the official
+     documentation never mentioned this argument.
+
 * Guile API
 
   ** New type <gdb:color> for dealing with colors.

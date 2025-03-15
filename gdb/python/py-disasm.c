@@ -133,7 +133,7 @@ static bool python_print_insn_enabled = false;
 struct gdbpy_disassembler : public gdb_disassemble_info
 {
   /* Constructor.  */
-  gdbpy_disassembler (disasm_info_object *obj, PyObject *memory_source);
+  gdbpy_disassembler (disasm_info_object *obj);
 
   /* Get the DisassembleInfo object pointer.  */
   disasm_info_object *
@@ -221,11 +221,6 @@ private:
   /* When the user indicates that a memory error has occurred then the
      address of the memory error is stored in here.  */
   std::optional<CORE_ADDR> m_memory_error_address;
-
-  /* When the user calls the builtin_disassemble function, if they pass a
-     memory source object then a pointer to the object is placed in here,
-     otherwise, this field is nullptr.  */
-  PyObject *m_memory_source;
 
   /* Move the exception EX into this disassembler object.  */
   void store_exception (gdbpy_err_fetch &&ex)
@@ -539,18 +534,17 @@ disasmpy_init_disassembler_result (disasm_result_object *obj, int length,
 static PyObject *
 disasmpy_builtin_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 {
-  PyObject *info_obj, *memory_source_obj = nullptr;
-  static const char *keywords[] = { "info", "memory_source", nullptr };
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O!|O", keywords,
-					&disasm_info_object_type, &info_obj,
-					&memory_source_obj))
+  PyObject *info_obj;
+  static const char *keywords[] = { "info", nullptr };
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O!", keywords,
+					&disasm_info_object_type, &info_obj))
     return nullptr;
 
   disasm_info_object *disasm_info = (disasm_info_object *) info_obj;
   DISASMPY_DISASM_INFO_REQUIRE_VALID (disasm_info);
 
   /* Where the result will be written.  */
-  gdbpy_disassembler disassembler (disasm_info, memory_source_obj);
+  gdbpy_disassembler disassembler (disasm_info);
 
   /* Now actually perform the disassembly.  LENGTH is set to the length of
      the disassembled instruction, or -1 if there was a memory-error
@@ -1139,16 +1133,14 @@ gdbpy_disassembler::print_address_func (bfd_vma addr,
 
 /* constructor.  */
 
-gdbpy_disassembler::gdbpy_disassembler (disasm_info_object *obj,
-					PyObject *memory_source)
+gdbpy_disassembler::gdbpy_disassembler (disasm_info_object *obj)
   : gdb_disassemble_info (obj->gdbarch,
 			  read_memory_func,
 			  memory_error_func,
 			  print_address_func,
 			  fprintf_func,
 			  fprintf_styled_func),
-    m_disasm_info_object (obj),
-    m_memory_source (memory_source)
+    m_disasm_info_object (obj)
 { /* Nothing.  */ }
 
 /* A wrapper around a reference to a Python DisassembleInfo object, which
@@ -1610,10 +1602,9 @@ PyMethodDef python_disassembler_methods[] =
 {
   { "builtin_disassemble", (PyCFunction) disasmpy_builtin_disassemble,
     METH_VARARGS | METH_KEYWORDS,
-    "builtin_disassemble (INFO, MEMORY_SOURCE = None) -> None\n\
+    "builtin_disassemble (INFO) -> None\n\
 Disassemble using GDB's builtin disassembler.  INFO is an instance of\n\
-gdb.disassembler.DisassembleInfo.  The MEMORY_SOURCE, if not None, should\n\
-be an object with the read_memory method." },
+gdb.disassembler.DisassembleInfo." },
   { "_set_enabled", (PyCFunction) disasmpy_set_enabled,
     METH_VARARGS | METH_KEYWORDS,
     "_set_enabled (STATE) -> None\n\
