@@ -860,8 +860,7 @@ do_dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 
   auto cidn = (std::make_unique<cooked_index_worker_debug_names>
 	       (per_objfile, std::move (map)));
-  auto idx = std::make_unique<debug_names_index> (per_objfile,
-						  std::move (cidn));
+  auto idx = std::make_unique<debug_names_index> (std::move (cidn));
   per_bfd->start_reading (std::move (idx));
 
   return true;

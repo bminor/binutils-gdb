@@ -712,8 +712,7 @@ cooked_index_worker::write_to_cache (const cooked_index *idx,
     }
 }
 
-cooked_index::cooked_index (dwarf2_per_objfile *per_objfile,
-			    cooked_index_worker_up &&worker)
+cooked_index::cooked_index (cooked_index_worker_up &&worker)
   : m_state (std::move (worker))
 {
   /* ACTIVE_VECTORS is not locked, and this assert ensures that this

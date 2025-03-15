@@ -561,8 +561,7 @@ using cooked_index_worker_up = std::unique_ptr<cooked_index_worker>;
 class cooked_index : public dwarf_scanner_base
 {
 public:
-  cooked_index (dwarf2_per_objfile *per_objfile,
-		cooked_index_worker_up &&worker);
+  cooked_index (cooked_index_worker_up &&worker);
   ~cooked_index () override;
 
   DISABLE_COPY_AND_ASSIGN (cooked_index);

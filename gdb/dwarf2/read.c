@@ -14914,8 +14914,7 @@ start_debug_info_reader (dwarf2_per_objfile *per_objfile)
      scanning; and then start the scanning.  */
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   auto worker = std::make_unique<cooked_index_worker_debug_info> (per_objfile);
-  per_bfd->start_reading (std::make_unique<cooked_index> (per_objfile,
-							  std::move (worker)));
+  per_bfd->start_reading (std::make_unique<cooked_index> (std::move (worker)));
 }
 
 
