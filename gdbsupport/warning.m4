@@ -57,7 +57,13 @@ build_warnings=" \
 -Wsuggest-override \
 -Wunused-but-set-parameter \
 -Wunused-but-set-variable \
+-Wunused-const-variable=1 \
 -Wunused-function \
+-Wunused-label \
+-Wunused-lambda-capture \
+-Wunused-local-typedefs \
+-Wunused-member-function \
+-Wunused-private-field \
 -Wunused-value \
 -Wunused-variable \
 -Wvla \

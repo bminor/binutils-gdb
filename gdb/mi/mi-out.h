@@ -139,7 +139,6 @@ private:
   }
 
   bool m_suppress_field_separator;
-  bool m_suppress_output;
   int m_mi_version;
   std::vector<ui_file *> m_streams;
 };

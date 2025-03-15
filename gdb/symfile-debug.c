@@ -789,24 +789,6 @@ debug_sym_relocate (struct objfile *objfile, asection *sectp, bfd_byte *buf)
   return retval;
 }
 
-/* Template of debugging version of struct sym_fns.
-   A copy is made, with sym_flavour updated, and a pointer to the real table
-   installed in real_sf, and then a pointer to the copy is installed in the
-   objfile.  */
-
-static const struct sym_fns debug_sym_fns =
-{
-  debug_sym_new_init,
-  debug_sym_init,
-  debug_sym_read,
-  debug_sym_finish,
-  debug_sym_offsets,
-  debug_sym_segments,
-  debug_sym_read_linetable,
-  debug_sym_relocate,
-  &debug_sym_probe_fns,
-};
-
 /* Install the debugging versions of the symfile functions for OBJFILE.
    Do not call this if the debug versions are already installed.  */
 

@@ -592,7 +592,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
   std::string string_buffer;
 
   /* Does ADDRESS reside in SECTION of OBFD?  */
-  auto within_section = [obfd] (asection *section, CORE_ADDR address)
+  auto within_section = [] (asection *section, CORE_ADDR address)
     {
       if (section == NULL)
 	return false;

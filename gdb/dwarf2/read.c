@@ -3050,7 +3050,6 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 			  bool skip_partial,
 			  enum language pretend_language,
 			  const abbrev_table_cache *cache)
-  : m_this_cu (this_cu)
 {
   struct objfile *objfile = per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
@@ -3279,7 +3278,6 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 			  enum language pretend_language,
 			  struct dwarf2_cu *parent_cu,
 			  struct dwo_file *dwo_file)
-  : m_this_cu (this_cu)
 {
   struct objfile *objfile = per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
@@ -16192,9 +16190,6 @@ private:
 
   /* Additional bits of state we need to track.  */
 
-  /* The last file that we called dwarf2_start_subfile for.
-     This is only used for TLLs.  */
-  unsigned int m_last_file = 0;
   /* The last file a line number was recorded for.  */
   struct subfile *m_last_subfile = NULL;
 

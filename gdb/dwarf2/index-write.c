@@ -887,8 +887,7 @@ private:
 
     /* Object constructor to be called for current DWARF2_PER_BFD.  */
     debug_str_lookup (dwarf2_per_bfd *per_bfd)
-      : m_abfd (per_bfd->obfd),
-	m_per_bfd (per_bfd)
+      : m_per_bfd (per_bfd)
     {
     }
 
@@ -922,7 +921,6 @@ private:
 
   private:
     gdb::unordered_map<c_str_view, size_t, c_str_view_hasher> m_str_table;
-    bfd *const m_abfd;
     dwarf2_per_bfd *m_per_bfd;
 
     /* Data to add at the end of .debug_str for new needed symbol names.  */

@@ -651,8 +651,6 @@ private:
      that the state is CACHE_DONE -- it's important to note that only
      the main thread may change the value of this pointer.  */
   cooked_index_worker_up m_state;
-
-  dwarf2_per_bfd *m_per_bfd;
 };
 
 /* An implementation of quick_symbol_functions for the cooked DWARF

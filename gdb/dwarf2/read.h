@@ -1037,7 +1037,6 @@ private:
   struct die_info *m_top_level_die = nullptr;
   bool m_dummy_p = false;
 
-  dwarf2_per_cu *m_this_cu;
   dwarf2_cu_up m_new_cu;
 
   /* The ordinary abbreviation table.  */

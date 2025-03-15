@@ -323,7 +323,6 @@ mi_ui_out::version ()
 mi_ui_out::mi_ui_out (int mi_version)
 : ui_out (make_flags (mi_version)),
   m_suppress_field_separator (false),
-  m_suppress_output (false),
   m_mi_version (mi_version)
 {
   string_file *stream = new string_file ();
