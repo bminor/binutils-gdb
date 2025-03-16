@@ -659,14 +659,6 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
       pop[kind]++;
     }
 
-  /* CTF-only kinds: this dict cannot be written as BTF.  (There may be further
-     reasons why this dict cannot be written as BTF that we haven't discovered
-     yet.)  */
-
-  if (pop[CTF_K_FLOAT] > 0 || pop[CTF_K_SLICE] > 0 || pop[CTF_K_BIG] > 0
-      || pop[CTF_K_CONFLICTING] > 0)
-    fp->ctf_is_btf = 0;
-
   if (child)
     {
       ctf_dprintf ("CTF dict %p is a child\n", (void *) fp);
@@ -2062,7 +2054,6 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (version == IS_BTF)
     hp->cth_version = CTF_VERSION_4;
 
-  fp->ctf_is_btf = 1;
   fp->ctf_version = hp->cth_version;
   fp->ctf_dictops = &ctf_dictops[ctf_version];
 

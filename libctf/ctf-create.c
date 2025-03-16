@@ -698,9 +698,6 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
 
   memcpy (dtd->dtd_vlen, &encoding, sizeof (encoding));
 
-  if (kind == CTF_K_FLOAT)
-    fp->ctf_is_btf = 0;
-
   return dtd->dtd_type;
 }
 
@@ -791,8 +788,6 @@ ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
   slice.cts_bits = ep->cte_bits;
   slice.cts_offset = ep->cte_offset;
   memcpy (dtd->dtd_vlen, &slice, sizeof (ctf_slice_t));
-
-  fp->ctf_is_btf = 0;
 
   return dtd->dtd_type;
 }
@@ -939,10 +934,6 @@ ctf_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
   prefix->ctt_info = CTF_TYPE_INFO (CTF_K_CONFLICTING, 0,
 				    dtd->dtd_vlen_size < 65536
 				    ? dtd->dtd_vlen_size : 0);
-
-  /* This is not valid BTF any more.  */
-
-  fp->ctf_is_btf = 0;
 
   return 0;
 }
@@ -1732,12 +1723,10 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
       if (kflag)
 	bound = CTF_MAX_BIT_OFFSET;
       else
-	bound = 0xffffffff;
+	bound = CTF_MAX_SIZE;
 
       while (bit_offset > bound)
 	{
-	  fp->ctf_is_btf = 0;
-
 	  off = bound;
 	  if (kflag)
 	    off = CTF_MEMBER_BIT_OFFSET (bound);
@@ -1761,7 +1750,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
       vlen = LCTF_VLEN (fp, prefix);
       memb = (ctf_member_t *) dtd->dtd_vlen;
 
-      memb[vlen].ctm_offset = off | CTF_MEMBER_BIT_SIZE (bit_width);
+      memb[vlen].ctm_offset = CTF_MEMBER_MAKE_BIT_OFFSET (bit_width, off);
       ssize = ctf_get_ctt_size (fp, prefix, NULL, NULL);
       ssize = MAX (ssize, ((signed) ((bit_offset + dtd->dtd_last_offset)) / CHAR_BIT) + msize);
     }
@@ -1784,12 +1773,6 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   prefix->ctt_info = CTF_TYPE_INFO (CTF_K_BIG, 0, CTF_VLEN_TO_VLEN_HI(vlen + 1));
 
   dtd->dtd_last_offset += bit_offset;
-
-  /* If we needed to use the additional space CTF_K_BIG allows, this is not
-     valid BTF any more.  */
-
-  if (prefix->ctt_size != 0 || CTF_INFO_VLEN (prefix->ctt_info) != 0)
-    fp->ctf_is_btf = 0;
 
   return 0;
 }

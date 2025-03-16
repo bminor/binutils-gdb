@@ -364,7 +364,6 @@ struct ctf_dict
   const ctf_dictops_t *ctf_dictops; /* Version-specific dict operations.  */
   ctf_header_t *ctf_header;    /* The header from this CTF dict.  */
   ctf_header_v3_t *ctf_v3_header; /* The header from an upgraded CTF dict.  */
-  int ctf_is_btf;		  /* If 1, dict can be written as BTF.  */
   unsigned char ctf_openflags;	    /* Flags the dict had when opened.  */
   int ctf_opened_btf;		    /* Whether this dict was pure BTF when
 				       opened.  */
