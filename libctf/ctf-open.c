@@ -551,7 +551,7 @@ ctf_set_base (ctf_dict_t *fp, const ctf_header_t *hp, unsigned char *base)
 }
 
 static int
-init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth);
+init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth, int is_btf);
 
 /* Populate statically-defined types (those loaded from a saved buffer).
 
@@ -566,7 +566,7 @@ init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth);
    function that does all the actual work.  */
 
 static int
-init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
+init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 {
   const ctf_type_t *tbuf;
   const ctf_type_t *tend;
@@ -624,6 +624,9 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 
       while (LCTF_IS_PREFIXED_KIND (kind))
 	{
+	  if (is_btf)
+	    return ECTF_CORRUPT;
+
 	  pop[suffix->ctt_type]++;
 
 	  if (kind == CTF_K_CONFLICTING)
@@ -641,6 +644,9 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 
       if (nonroot)
 	continue;
+
+      if (is_btf && kind > CTF_BTF_K_MAX)
+	return ECTF_CORRUPT;
 
       vbytes = LCTF_VBYTES (fp, suffix, size);
 
@@ -751,17 +757,17 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 
   ctf_dprintf ("%u types initialized (other than names)\n", fp->ctf_typemax);
 
-  return init_static_types_names (fp, cth);
+  return init_static_types_names (fp, cth, is_btf);
 }
 
 static int
-init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
+init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 				  ctf_dynset_t *all_enums);
 
 /* A wrapper to simplify memory allocation.  */
 
 static int
-init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth)
+init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 {
   ctf_dynset_t *all_enums;
   int err;
@@ -770,7 +776,7 @@ init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth)
 				      NULL)) == NULL)
     return ENOMEM;
 
-  err = init_static_types_names_internal (fp, cth, all_enums);
+  err = init_static_types_names_internal (fp, cth, is_btf, all_enums);
   ctf_dynset_destroy (all_enums);
   return err;
 }
@@ -783,8 +789,8 @@ init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth)
    As a function largely called at open time, this function does not reliably
    set the ctf_errno, but instead returns a positive error code.  */
 
-static  int
-init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
+static int
+init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 				  ctf_dynset_t *all_enums)
 {
   const ctf_type_t *tbuf;
@@ -836,7 +842,12 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	 know the prefixes cannot overflow.)  */
 
       while (LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, suffix->ctt_info)))
-	suffix++;
+	{
+	  if (is_btf)
+	    return ECTF_CORRUPT;
+
+	  suffix++;
+	}
 
       (void) ctf_get_ctt_size (fp, tp, &size, &increment);
       name = ctf_strptr (fp, suffix->ctt_name);
@@ -2141,7 +2152,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   ctf_set_base (fp, hp, fp->ctf_base);
 
-  if ((err = init_static_types (fp, hp)) != 0)
+  if ((err = init_static_types (fp, hp, format == IS_BTF)) != 0)
     goto bad;
 
   /* Allocate and initialize the symtab translation table, pointed to by
