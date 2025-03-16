@@ -524,8 +524,8 @@ ctf_set_base (ctf_dict_t *fp, const ctf_header_t *hp, unsigned char *base)
   fp->ctf_base = base;
 
   fp->ctf_str[CTF_STRTAB_0].cts_strs = (const char *) fp->ctf_buf
-    + hp->cth_stroff;
-  fp->ctf_str[CTF_STRTAB_0].cts_len = hp->cth_strlen;
+    + hp->btf.bth_str_off;
+  fp->ctf_str[CTF_STRTAB_0].cts_len = hp->btf.bth_str_len;
 
   /* If we have a parent dict name and label, store the relocated string
      pointers in the CTF dict for easy access later. */
@@ -593,8 +593,8 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
 	return err;				/* Upgrade failed.  */
     }
 
-  tbuf = (ctf_type_t *) (fp->ctf_buf + cth->cth_typeoff);
-  tend = (ctf_type_t *) (fp->ctf_buf + cth->cth_stroff);
+  tbuf = (ctf_type_t *) (fp->ctf_buf + cth->btf.bth_type_off);
+  tend = (ctf_type_t *) (tbuf + cth->btf.bth_type_len);
 
   /* We make two passes through the entire type section, and one third pass
      through part of it: but only the first is guaranteed to happen at this
@@ -811,8 +811,8 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
   int child = cth->cth_parent_name != 0;
 
-  tbuf = (ctf_type_t *) (fp->ctf_buf + cth->cth_typeoff);
-  tend = (ctf_type_t *) (fp->ctf_buf + cth->cth_stroff);
+  tbuf = (ctf_type_t *) (fp->ctf_buf + cth->btf.bth_type_off);
+  tend = (ctf_type_t *) (tbuf + cth->btf.bth_type_len);
 
   assert (!(fp->ctf_flags & LCTF_NO_STR));
 
@@ -1489,14 +1489,17 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 
 int
 ctf_flip (ctf_dict_t *fp, ctf_header_t *cth, unsigned char *buf,
-	  int to_foreign)
+	  int is_btf, int to_foreign)
 {
   ctf_dprintf ("Flipping endianness\n");
 
-  flip_objts (buf + sizeof (ctf_btf_header_t) + cth->cth_objt_off, cth->cth_objt_len);
-  flip_objts (buf + sizeof (ctf_btf_header_t) + cth->cth_func_off, cth->cth_func_len);
-  flip_objts (buf + sizeof (ctf_btf_header_t) + cth->cth_objtidx_off, cth->cth_objtidx_len);
-  flip_objts (buf + sizeof (ctf_btf_header_t) + cth->cth_funcidx_off, cth->cth_funcidx_len);
+  if (!is_btf)
+    {
+      flip_objts (buf + cth->cth_objt_off, cth->cth_objt_len);
+      flip_objts (buf + cth->cth_func_off, cth->cth_func_len);
+      flip_objts (buf + cth->cth_objtidx_off, cth->cth_objtidx_len);
+      flip_objts (buf + cth->cth_funcidx_off, cth->cth_funcidx_len);
+    }
   return flip_types (fp, buf + cth->btf.bth_type_off, cth->btf.bth_type_len,
 		     to_foreign);
 }
@@ -1849,17 +1852,21 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   /* Check for overlaps. BTF and v4 have a lot more freedom to reorder sections
      than earlier versions do, but we assume for simplicity that they are
-     always emitted in the same order.  Because the BTF offsets are relative to
+     always emitted in the same order.  Because all the offsets are relative to
      the end of the BTF header, we must also check that they don't overlap the
      CTF header that can follow it.  */
   if (_libctf_unlikely_
       (hp->cth_objt_off + hp->cth_objt_len > hp->cth_func_off
        || hp->cth_func_off + hp->cth_func_len > hp->cth_objtidx_off
        || hp->cth_objtidx_off + hp->cth_objtidx_len > hp->cth_funcidx_off
+       || hp->cth_funcidx_off + hp->cth_funcidx_len > hp->btf.bth_type_off
+       || hp->btf.bth_type_off + hp->btf.bth_type_len > hp->btf.cth_str_off
+       || hp->cth_objt_off < ctf_adjustment
+       || hp->cth_func_off < ctf_adjustment
+       || hp->cth_objtidx_off < ctf_adjustment
+       || hp->cth_funcidx_off < ctf_adjustment
        || hp->btf.bth_type_off < ctf_adjustment
-       || hp->btf.bth_str_off < ctf_adjustment
-       || hp->cth_funcidx_off + hp->cth_funcidx_len + ctf_adjustment > hp->btf.bth_type_off
-       || hp->btf.bth_type_off + hp->btf.bth_type_len > hp->btf.cth_str_off))
+       || hp->btf.bth_str_off < ctf_adjustment))
     {
       ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("overlapping or misordered BTF/CTF sections"));
       ctf_set_open_errno (errp, ECTF_CORRUPT);
@@ -1931,13 +1938,17 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   fp->ctf_v3_header = header_v3;
 
   fp->ctf_openflags = hp->cth_flags;
+  fp->ctf_opened_btf = (format == IS_BTF);
+
+  /* The ctf_size includes the entire CTFv4 header excepting only the portion
+     shared with BTF (see ctf_adjustment).  */
   fp->ctf_size = hp->btf.cth_str_off + hp->btf.cth_str_len;
 
   if (_libctf_unlikely (hp->cth_objt_off > fp->ctf_size
 			|| hp->cth_func_off > fp->ctf_size
 			|| hp->cth_objtidx_off > fp->ctf_size
 			|| hp->cth_funcidx_off > fp->ctf_size
-			|| hp->btf.cth_type_off - ctf_adjustment > fp->ctf_size))
+			|| hp->btf.cth_type_off > fp->ctf_size))
     {
       ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("header offset or length exceeds CTF size"));
       err = ECTF_CORRUPT;
@@ -1972,10 +1983,16 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
       src = (unsigned char *) ctfsect->cts_data + hdrsz;
       srclen = ctfsect->cts_size - hdrsz;
-      dstlen = fp->ctf_size;
+      dstlen = fp->ctf_size - fp->ctf_adjustment;
       fp->ctf_buf = fp->ctf_base;
 
-      if ((rc = uncompress (fp->ctf_base, &dstlen, src, srclen)) != Z_OK)
+      /* Stick the CTF-only header portion into the buffer.  Not much use, but
+	 it makes sure all the header offsets are right. */
+      memcpy (fp->ctf_base, (unsigned char *) ctfsect->cts_data
+	      + sizeof (ctf_btf_header_t), ctf_adjustment);
+
+      if ((rc = uncompress (fp->ctf_base + ctf_adjustment, &dstlen,
+			    src, srclen)) != Z_OK)
 	{
 	  ctf_err_warn (NULL, 0, ECTF_DECOMPRESS, _("zlib inflate err: %s"),
 			zError (rc));
@@ -1983,23 +2000,24 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	  goto bad;
 	}
 
-      if ((size_t) dstlen != fp->ctf_size)
+      if ((size_t) dstlen != (fp->ctf_size - ctf_adjustment))
 	{
 	  ctf_err_warn (NULL, 0, ECTF_CORRUPT,
 			_("zlib inflate short: got %lu of %lu bytes"),
-			(unsigned long) dstlen, (unsigned long) fp->ctf_size);
+			(unsigned long) dstlen,
+			(unsigned long) (fp->ctf_size - ctf_adjustment));
 	  err = ECTF_CORRUPT;
 	  goto bad;
 	}
     }
   else
     {
-      if (_libctf_unlikely_ (ctfsect->cts_size < hdrsz + fp->ctf_size))
+      if (_libctf_unlikely_ (ctfsect->cts_size < fp->ctf_size + hdrsz - ctf_adjustment))
 	{
 	  ctf_err_warn (NULL, 0, ECTF_CORRUPT,
 			_("%lu byte long CTF dictionary overruns %lu byte long CTF section"),
 			(unsigned long) ctfsect->cts_size,
-			(unsigned long) (hdrsz + fp->ctf_size));
+			(unsigned long) (fp->ctf_size + hdrsz - ctf_adjustment));
 	  err = ECTF_CORRUPT;
 	  goto bad;
 	}
@@ -2012,19 +2030,19 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	      goto bad;
 	    }
 	  fp->ctf_dynbase = fp->ctf_base;
-	  memcpy (fp->ctf_base, ((unsigned char *) ctfsect->cts_data) + hdrsz,
-		  fp->ctf_size);
-	  fp->ctf_buf = fp->ctf_base;
+	  memcpy (fp->ctf_base, ((unsigned char *) ctfsect->cts_data)
+		  + sizeof (ctf_btf_header), fp->ctf_size);
 	}
       else
 	{
-	  /* We are just using the section passed in -- but its header may
-	     be an old version.  Point ctf_buf past the old header, and
-	     never touch it again.  */
 	  fp->ctf_base = (unsigned char *) ctfsect->cts_data;
 	  fp->ctf_dynbase = NULL;
-	  fp->ctf_buf = fp->ctf_base + hdrsz;
 	}
+
+      /* Ensure that the buffer we are using has offset 0 at the end of the BTF
+	 header, if there is one, to avoid breaking all offset lookups.  */
+
+      fp->ctf_buf = fp->ctf_base + hdrsz - ctf_adjustment;
     }
 
   /* Once we have uncompressed and validated the (BTF or) CTF data buffer, we
@@ -2053,8 +2071,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
      cannot reliably look up strings until after ctf_import.  */
 
   fp->ctf_str[CTF_STRTAB_0].cts_strs = (const char *) fp->ctf_buf
-    + hp->cth_stroff;
-  fp->ctf_str[CTF_STRTAB_0].cts_len = hp->cth_strlen;
+    + hp->btf.bth_str_off;
+  fp->ctf_str[CTF_STRTAB_0].cts_len = hp->btf.bth_str_len;
   if (ctf_str_create_atoms (fp) < 0)
     {
       err = ENOMEM;
@@ -2120,7 +2138,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     }
 
   if (foreign_endian &&
-      (err = ctf_flip (fp, hp, fp->ctf_buf, 0)) != 0)
+      (err = ctf_flip (fp, hp, 0, fp->ctf_buf, 0)) != 0)
     {
       /* We can be certain that ctf_flip() will have endian-flipped everything
 	 other than the types table when we return.  In particular the header
@@ -2467,11 +2485,11 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
     return (ctf_set_errno (fp, ECTF_HASPARENT));
 
   if (fp->ctf_header->cth_parent_strlen != 0 &&
-      pfp->ctf_header->cth_strlen != fp->ctf_header->cth_parent_strlen)
+      pfp->ctf_header->btf.bth_str_len != fp->ctf_header->cth_parent_strlen)
     {
       ctf_err_warn (fp, 0, ECTF_WRONGPARENT,
 		    _("ctf_import: incorrect parent dict: %u bytes of strings expected, %u found"),
-		    fp->ctf_header->cth_parent_strlen, pfp->ctf_header->cth_strlen);
+		    fp->ctf_header->cth_parent_strlen, pfp->ctf_header->btf.bth_str_len);
       return (ctf_set_errno (fp, ECTF_WRONGPARENT));
     }
 
@@ -2487,6 +2505,13 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 			_("ctf_import: incorrect parent dict: %u types expected, %u found"),
 			fp->ctf_header->cth_parent_ntypes, pfp->ctf_idmax);
 	  return (ctf_set_errno (fp, ECTF_WRONGPARENT));
+	}
+      else if (fp->ctf_opened_btf)
+	{
+	  /* A pure BTF dict does not track the number of types in the parent:
+	     just update and hope.  */
+
+	  fp->ctf_header->cth_parent_ntypes = pfp->ctf_idmax;
 	}
       else if (fp->ctf_header->cth_parent_ntypes == 0)
 	{

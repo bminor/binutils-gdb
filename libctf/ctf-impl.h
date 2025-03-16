@@ -366,6 +366,8 @@ struct ctf_dict
   ctf_header_v3_t *ctf_v3_header; /* The header from an upgraded CTF dict.  */
   int ctf_is_btf;		  /* If 1, dict can be written as BTF.  */
   unsigned char ctf_openflags;	    /* Flags the dict had when opened.  */
+  int ctf_opened_btf;		    /* Whether this dict was pure BTF when
+				       opened.  */
   ctf_sect_t ctf_data;		    /* CTF data from object file.  */
   ctf_sect_t ctf_ext_symtab;	    /* Symbol table from object file.  */
   ctf_sect_t ctf_ext_strtab;	    /* String table from object file.  */
@@ -397,7 +399,8 @@ struct ctf_dict
   size_t ctf_str_prov_len;	  /* Length of all unwritten provisional strings.  */
   unsigned char *ctf_base;	  /* CTF file pointer.  */
   unsigned char *ctf_dynbase;	  /* Freeable CTF file pointer. */
-  unsigned char *ctf_buf;	  /* Uncompressed CTF data buffer.  */
+  unsigned char *ctf_buf;	  /* Uncompressed CTF data buffer, including
+				     CTFv4 header portion.  */
   size_t ctf_size;		  /* Size of CTF header + uncompressed data.  */
   unsigned char *ctf_serializing_buf; /* CTF buffer in mid-serialization.  */
   size_t ctf_serializing_buf_size; /* Length of that buffer.  */
@@ -780,7 +783,8 @@ extern void ctf_arc_close_internal (struct ctf_archive *);
 extern const ctf_preamble_t *ctf_arc_bufpreamble (const ctf_sect_t *);
 extern void *ctf_set_open_errno (int *, int);
 extern void ctf_flip_header (ctf_header_t *);
-extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *, int);
+extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *,
+		     int is_btf, int to_foreign);
 
 extern int ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp);
 

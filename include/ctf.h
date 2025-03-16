@@ -198,7 +198,7 @@ typedef struct ctf_header_v3
 typedef struct ctf_btf_preamble
 {
   uint16_t btf_magic;		/* BTF_MAGIC */
-  uint8_t btf_version;		/* Always 1, foror now */
+  uint8_t btf_version;		/* Always 1, for now */
   uint8_t btf_flags;		/* Always 0, for now */
 } ctf_btf_preamble_t;
 
@@ -218,9 +218,7 @@ typedef struct ctf_preamble
   uint64_t ctp_flags;		/* Flags (see below).  */
 } ctf_preamble_t;
 
-/* Offsets in this header are relative to the end of the ctf_header, except for
-   those in the btf_portion, which are relative to the end of the
-   ctf_btf_header.  */
+/* Offsets in this header are relative to the end of the ctf_btf_header.  */
 
 typedef struct ctf_header
 {

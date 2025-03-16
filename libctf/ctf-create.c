@@ -144,7 +144,7 @@ ctf_add_prefix (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
 ctf_dict_t *
 ctf_create (int *errp)
 {
-  static const ctf_header_t hdr = { .cth_preamble = { CTF_MAGIC, CTF_VERSION, 0 } };
+  static const ctf_header_t hdr = { .btf.bth_preamble = { BTF_MAGIC, BTF_VERSION, 0 } };
 
   ctf_dynhash_t *structs = NULL, *unions = NULL, *enums = NULL, *names = NULL;
   ctf_dynhash_t *datasecs = NULL, *vars = NULL, *tags = NULL;
@@ -152,6 +152,8 @@ ctf_create (int *errp)
   ctf_dict_t *fp;
 
   libctf_init_debug();
+
+  hdr.btf.bth_hdr_len = sizeof (ctf_btf_header_t);
 
   structs = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 				NULL, NULL);
