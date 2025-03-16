@@ -500,7 +500,9 @@ emit_symtypetab_index (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
 /* Delete variables with the same name as symbols that have been reported by
    the linker from the variable section.  Must be called from within
    ctf_serialize, because that is the only place you can safely delete
-   variables without messing up ctf_rollback.  */
+   variables without messing up ctf_rollback.
+
+   XXX UPTODO  */
 
 static int
 symtypetab_delete_nonstatics (ctf_dict_t *fp, ctf_dict_t *symfp)
@@ -793,6 +795,152 @@ symerr:
 
 /* Type section.  */
 
+/* Kind suppression.  */
+
+int
+ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited)
+{
+  ctf_dynset_t *set;
+
+  if (kind < CTF_K_UNKNOWN || kind > CTF_K_MAX)
+    return (ctf_set_errno (fp, EINVAL));
+
+  if (prohibited)
+    set = fp->ctf_write_prohibitions;
+  else
+    set = fp->ctf_write_suppressions;
+
+  if (!set)
+    {
+      set = ctf_dynset_create (fp, ctf_hash_integer, ctf_hash_eq_integer, NULL);
+      if (!set)
+	return (ctf_set_errno (fp, errno));
+
+      if (prohibited)
+	fp->ctf_write_prohibitions = set;
+      else
+	fp->ctf_write_suppressions = set;
+    }
+
+  if ((ctf_dynset_cinsert (fp, (const void *) kind)) < 0)
+    return (ctf_set_errno (fp, errno));
+
+  return 0;
+}
+
+/* Determine whether newly-defined or modified types indicate that we will be
+   able to emit a BTF type section or must emit a CTF one.  Only called if we
+   have already verified that the CTF-specific sections (typetabs, etc) will be
+   empty, and that the input dict was freshly-created or read in from BTF.  */
+
+static int
+ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
+{
+  ctf_dtdef_t *dtd;
+  ctf_next_t *i = NULL;
+  ctf_next_t *prohibit_i = NULL;
+  void *pkind;
+  int err;
+
+  /* Verify prohibitions.  Do this first, for a fast return if a kind is
+     prohibited.  */
+
+  if (fp->ctf_write_prohibitions)
+    {
+      while (err = ctf_dynset_next (fp->ctf_write_prohibitions,
+				    &prohibit_i, &pkind) == 0)
+	{
+	  int kind = (uintptr_t) pkind;
+
+	  if (ctf_type_kind_next (fp, &i, kind) != CTF_ERR)
+	    {
+	      ctf_next_destroy (i);
+	      ctf_next_destroy (prohibit_i);
+	      ctf_err_warn (fp, 0, ECTF_KIND_PROHIBITED,
+			    _("Attempt to write out kind %i, which is prohibited by ctf_write_suppress_kind"), i);
+	      return (ctf_set_errno (fp, ECTF_KIND_PROHIBITED));
+	    }
+	}
+      if ((err != ECTF_NEXT_END) ((err != 0)))
+	{
+	  ctf_next_destroy (fp, prohibit_i);
+	  ctf_err_warn (fp, 0, err, _("ctf_write: iteration error checking prohibited kinds"));
+	  return (ctf_set_errno (fp, err));
+	}
+    }
+
+  /* Prohibitions checked: if the user requested CTF come what may, we know this
+     cannot be BTF.  */
+
+  if (force_ctf)
+    return 0;
+
+  /* Check all types for invalid-in-BTF features.  */
+
+  for (dtd = ctf_list_next (&fp->ctf_dtdefs);
+       dtd != NULL; dtd = ctf_list_next (dtd))
+    {
+      ctf_type_t *tp = dtd->dtd_buf;
+      int kind;
+
+      /* Any un-suppressed prefixes other than an empty/redundant CTF_K_BIG must
+	 be CTF. (Redundant CTF_K_BIGs will be elided instead.)  */
+
+      while (LCTF_IS_PREFIXED_KIND (kind = LCTF_INFO_UNPREFIXED_KIND (tp->ctt_info)))
+	{
+	  if ((kind != CTF_K_BIG) || tp->ctt_size != 0
+	      || LCTF_INFO_UNPREFIXED_VLEN (tp->ctt_info) != 0)
+	    if (!fp->ctf_write_suppressions
+		|| ctf_dynset_lookup (fp->ctf_write_suppressions,
+				      (const void *) kind) == NULL)
+	    return 0;
+
+	  tp++;
+	}
+
+      /* Prefixes checked.  If this kind is suppressed, it won't influence the
+	 result.  */
+
+      kind = LCTF_INFO_UNPREFIXED_KIND (tp->ctt_info);
+
+      if (fp->ctf_write_suppressions
+	  && ctf_dynset_lookup (fp->ctf_write_suppressions,
+				(const void *) kind))
+	continue;
+
+      if (kind == CTF_K_FLOAT || kind == CTF_K_SLICE)
+	return 0;
+
+      if (kind == CTF_K_STRUCT)
+	{
+	  ctf_member_t *memb = (ctf_member_t *) dtd->dtd_vlen;
+	  size_t off = 0;
+
+	  for (i = 0; i < LCTF_VLEN (fp, dtd->dtd_buf); i++)
+	    {
+	      /* For bitfields, we must check if the individual members will
+		 still fit into a BTF type if they are encoded as offsets rather
+		 than offset-since-last.  (For non-bitfields, this is satisfied
+		 by a check of the ctt_size, which is equivalent to checking
+		 that the CTF_K_BIG's ctt_size is zero, done above.)  */
+
+	      if (LCTF_INFO_KFLAG (tp->ctt_info))
+		{
+		  off += CTF_MEMBER_BIT_OFFSET (memb[i].ctm_offset);
+		  if (off > CTF_MAX_BIT_OFFSET)
+		    return 0;
+		}
+
+	      /* Check for nameless padding members.  */
+	      if (memb[i].ctt_name == 0 && memb[i].ctt_type == CTF_K_UNKNOWN)
+		return 0;
+	    }
+	}
+    }
+
+  return 1;
+}
+
 /* Iterate through the static types and the dynamic type definition list and
    compute the size of the CTF type section.
 
@@ -803,66 +951,61 @@ static size_t
 ctf_type_sect_size (ctf_dict_t *fp)
 {
   ctf_dtdef_t *dtd;
-  size_t type_size;
+  size_t type_size = 0;
 
-  for (type_size = 0, dtd = ctf_list_next (&fp->ctf_dtdefs);
+  for (dtd = ctf_list_next (&fp->ctf_dtdefs);
        dtd != NULL; dtd = ctf_list_next (dtd))
     {
-      uint32_t kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-      uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
-      size_t type_ctt_size = dtd->dtd_data.ctt_size;
+      uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
+      ctf_type_t *tp = dtd->dtd_buf;
 
-      /* Shrink ctf_type_t-using types from a ctf_type_t to a ctf_stype_t
-	 if possible.  */
+      /* Check for suppressions.  */
 
-      /* XXX UPTODO */
-      if (kind == CTF_K_STRUCT || kind == CTF_K_UNION)
+      if (fp->ctf_write_suppressions)
 	{
-	  size_t lsize = CTF_V3_TYPE_LSIZE (&dtd->dtd_data);
+	  int suppress = 0;
 
-	  if (lsize <= CTF_MAX_SIZE)
-	    type_ctt_size = lsize;
+	  while (LCTF_IS_PREFIXED_KIND (kind = LCTF_INFO_UNPREFIXED_KIND (tp->ctt_info)))
+	    {
+	      if ((kind != CTF_K_BIG) || tp->ctt_size != 0
+		  || LCTF_INFO_UNPREFIXED_VLEN (tp->ctt_info) != 0)
+	    if (ctf_dynset_lookup (fp->ctf_write_suppressions,
+				   (const void *) kind) == NULL)
+	      {
+		type_size += sizeof (ctf_type_t);
+		suppress = 1;
+		break;
+	      }
+
+	      tp++;
+	    }
+	  if (suppress)
+	    continue;
 	}
 
-      if (type_ctt_size != CTF_LSIZE_SENT)
-	type_size += sizeof (ctf_stype_t);
-      else
-	type_size += sizeof (ctf_type_t);
+      /* Type headers: elide CTF_K_BIG from types if possible.  */
 
-      switch (kind)
+      tp = dtd->dtd_buf;
+      while (LCTF_IS_PREFIXED_KIND (kind = LCTF_INFO_UNPREFIXED_KIND (tp->ctt_info)))
 	{
-	case CTF_K_INTEGER:
-	case CTF_K_FLOAT:
-	  type_size += sizeof (uint32_t);
-	  break;
-	case CTF_K_ARRAY:
-	  type_size += sizeof (ctf_array_t);
-	  break;
-	case CTF_K_SLICE:
-	  type_size += sizeof (ctf_slice_t);
-	  break;
-	case CTF_K_FUNCTION:
-	  type_size += sizeof (uint32_t) * (vlen + (vlen & 1));
-	  break;
-	case CTF_K_STRUCT:
-	case CTF_K_UNION:
-	  if (type_ctt_size < CTF_LSTRUCT_THRESH)
-	    type_size += sizeof (ctf_member_t) * vlen;
-	  else
-	    type_size += sizeof (ctf_lmember_t) * vlen;
-	  break;
-	case CTF_K_ENUM:
-	  type_size += sizeof (ctf_enum_t) * vlen;
-	  break;
+	  if ((kind != CTF_K_BIG) || tp->ctt_size != 0
+	      || LCTF_INFO_UNPREFIXED_VLEN (tp->ctt_info) != 0)
+	    type_size += sizeof (ctf_type_t);
+	  tp++;
 	}
+
+      type_size += dtd->dtd_vlen_size;
     }
 
-  return type_size + fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff;
+  return type_size + fp->ctf_header->btf.btf_type_len;
 }
 
 /* Take a final lap through the dynamic type definition list and copy the
    appropriate type records to the output buffer, noting down the strings
-   and type IDs as we go.  */
+   and type IDs as we go.
+
+   By this stage we no longer need to worry about CTF-versus-BTF, only about
+   whether a type has been suppressed or not.  */
 
 static int
 ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
@@ -879,12 +1022,13 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
   for (dtd = ctf_list_next (&fp->ctf_dtdefs);
        dtd != NULL; dtd = ctf_list_next (dtd), id++)
     {
-      uint32_t kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-      uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
-      size_t type_ctt_size = dtd->dtd_data.ctt_size;
-      size_t len;
+      uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
+      size_t vlen = LCTF_VLEN (fp, dtd->dtd_buf);
+      ctf_type_t *tp = dtd->dtd_buf;
       ctf_stype_t *copied;
       const char *name;
+      int suppress = 0;
+      int big = 0;
       size_t i;
 
       /* Make sure the ID hasn't changed, if already assigned by a previous
@@ -894,36 +1038,90 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  && !ctf_assert (fp, dtd->dtd_final_type == id))
 	return -1;				/* errno is set for us.  */
 
-      /* Shrink ctf_type_t-using types from a ctf_type_t to a ctf_stype_t
-	 if possible.  */
+      /* Suppress everything if this kind is suppressed.  */
 
-      if (kind == CTF_K_STRUCT || kind == CTF_K_UNION)
+      while (LCTF_IS_PREFIXED_KIND (kind = LCTF_INFO_UNPREFIXED_KIND (tp->ctt_info)))
 	{
-	  size_t lsize = CTF_TYPE_LSIZE (&dtd->dtd_data);
-
-	  if (lsize <= CTF_MAX_SIZE)
-	    type_ctt_size = lsize;
+	  if (ctf_dynset_lookup (fp->ctf_write_suppressions,
+				 (const void *) kind) == NULL)
+	    if (_libctf_btf_mode == CTF_BTM_BTF)
+	      {
+		ctf_err_warn (fp, 0, ECTF_NOTBTF, _("type %lx: Attempt to write out CTF-specific kind %i, as BTF"),
+			      id, kind);
+		return (ctf_set_errno (fp, ECTF_NOTBTF));
+	      }
+	    else
+	      {
+		suppress = 1;
+		break;
+	      }
+	  tp++;
 	}
 
-      if (type_ctt_size != CTF_LSIZE_SENT)
-	len = sizeof (ctf_stype_t);
-      else
-	len = sizeof (ctf_type_t);
+      kind = CTF_INFO_UNPREFIXED_KIND (tp->ctt_info);
+      if (ctf_dynset_lookup (fp->ctf_write_suppressions,
+			     (const void *) kind) != NULL)
+	suppress = 1;
 
-      memcpy (t, &dtd->dtd_data, len);
-      copied = (ctf_stype_t *) t;  /* name is at the start: constant offset.  */
+      if (suppress)
+	{
+	  ctf_type_t suppressed = { 0 };
+
+	  suppressed.ctt_info = CTF_TYPE_INFO (CTF_K_UNKNOWN, 0, 0);
+	  memcpy (t, &suppressed, sizeof (ctf_type_t));
+	  t += sizeof (ctf_type_t);
+	  continue;
+	}
+
+      /* Write out all the type headers, eliding empty CTF_K_BIG, and noting if
+	 this type is BIG.  */
+
+      tp = dtd->dtd_buf;
+      while (LCTF_IS_PREFIXED_KIND (kind = LCTF_INFO_UNPREFIXED_KIND (tp->ctt_info)))
+	{
+	  if (kind == CTF_K_BIG)
+	    {
+	      big = 1;
+	      if (tp->ctt_size == 0
+		  && LCTF_INFO_UNPREFIXED_VLEN (tp->ctt_info) == 0)
+		continue;
+	    }
+
+	  memcpy (t, tp, sizeof (ctf_type_t));
+	  copied = (ctf_type_t *) t;
+
+	  /* CTF_K_CONFLICTING has a name to keep track of.  */
+
+	  if (copied->ctt_name
+	      && (name = ctf_strraw (fp, copied->ctt_name)) != NULL)
+	    ctf_str_add_ref (fp, name, &copied->ctt_name);
+
+	  /* No prefixed kinds have any ctt_types to deal with. */
+
+	  tp++;
+	  t += sizeof (ctf_type_t);
+	}
+
+      memcpy (t, tp, sizeof (ctf_type_t));
+      copied = (ctf_type_t *) t;
       if (copied->ctt_name
 	  && (name = ctf_strraw (fp, copied->ctt_name)) != NULL)
         ctf_str_add_ref (fp, name, &copied->ctt_name);
-      copied->ctt_size = type_ctt_size;
-      t += len;
+      t += sizeof (ctf_type_t);
+      memcpy (t, dtd->dtd_vlen, dtd->dtd_vlen_size);
 
       switch (kind)
 	{
-	case CTF_K_INTEGER:
-	case CTF_K_FLOAT:
-	  memcpy (t, dtd->dtd_vlen, sizeof (uint32_t));
-	  t += sizeof (uint32_t);
+	case CTF_K_ARRAY:
+	  {
+	    ctf_array_t *array = (ctf_array_t *) t;
+
+	    if (ctf_type_add_ref (fp, &array->cta_contents) < 0)
+	      return -1;			/* errno is set for us.  */
+
+	    if (ctf_type_add_ref (fp, &array->cta_index) < 0)
+	      return -1;			/* errno is set for us.  */
+	  }
 	  break;
 
 	case CTF_K_POINTER:
@@ -931,6 +1129,10 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	case CTF_K_CONST:
 	case CTF_K_RESTRICT:
 	case CTF_K_TYPEDEF:
+	case CTF_K_FUNC_LINKAGE:
+	case CTF_K_TYPE_TAG:
+	case CTF_K_DECL_TAG:
+	case CTF_K_VAR:
 	  if (ctf_type_add_ref (fp, &copied->ctt_type) < 0)
 	    return -1;				/* errno is set for us.  */
 	  break;
@@ -938,8 +1140,6 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	case CTF_K_SLICE:
 	  {
 	    ctf_slice_t *slice = (ctf_slice_t *) t;
-
-	    memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_slice));
 
 	    if (ctf_type_add_ref (fp, &slice->cts_type) < 0)
 	      return -1;			/* errno is set for us. */
@@ -949,102 +1149,113 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 
 	  break;
 
-	case CTF_K_ARRAY:
-	  {
-	    ctf_array_t *array = (ctf_array_t *) t;
-
-	    memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_array));
-
-	    if (ctf_type_add_ref (fp, &array->cta_contents) < 0)
-	      return -1;			/* errno is set for us.  */
-
-	    if (ctf_type_add_ref (fp, &array->cta_index) < 0)
-	      return -1;			/* errno is set for us.  */
-	  }
-	  t += sizeof (struct ctf_array);
-	  break;
-
 	case CTF_K_FUNCTION:
 	  {
-	    uint32_t *args = (uint32_t *) t;
-
-	    /* Functions with no args also have no vlen.  */
-
-	    if (dtd->dtd_vlen)
-	      memcpy (t, dtd->dtd_vlen, sizeof (uint32_t) * (vlen + (vlen & 1)));
+	    ctf_param_t *args = (ctf_param_t *) t;
+	    ctf_param_t *dtd_args = (ctf_param_t *) dtd->dtd_vlen;
 
 	    if (ctf_type_add_ref (fp, &copied->ctt_type) < 0)
 	      return -1;			/* errno is set for us.  */
 
 	    for (i = 0; i < vlen; i++)
 	      {
-		if (ctf_type_add_ref (fp, &args[i]) < 0)
+		const char *name = ctf_strraw (fp, args[i].cfp_name);
+
+		ctf_str_add_ref (fp, name, &args[i].cfp_name);
+		ctf_str_add_ref (fp, name, &dtd_args[i].cfp_name);
+
+		if (ctf_type_add_ref (fp, &args[i].cfp_type) < 0)
 		  return -1;			/* errno is set for us.  */
 	      }
-
-	  t += sizeof (uint32_t) * (vlen + (vlen & 1));
-	  break;
+	    break;
 	  }
 
-	  /* These need to be copied across element by element, depending on
-	     their ctt_size.  */
+	  /* These may need all their offsets adjusting.  */
 	case CTF_K_STRUCT:
 	case CTF_K_UNION:
 	  {
-	    ctf_lmember_t *dtd_vlen = (ctf_lmember_t *) dtd->dtd_vlen;
-	    ctf_lmember_t *t_lvlen = (ctf_lmember_t *) t;
-	    ctf_member_t *t_vlen = (ctf_member_t *) t;
+	    size_t offset = 0;
+	    int bitwise = LCTF_INFO_KFLAG (tp->ctt_info);
+
+	    ctf_member_t *memb = (ctf_member_t *) t;
+	    ctf_member_t *dtd_memb = (ctf_member_t *) dtd->dtd_vlen;
 
 	    for (i = 0; i < vlen; i++)
 	      {
-		const char *name = ctf_strraw (fp, dtd_vlen[i].ctlm_name);
+		const char *name = ctf_strraw (fp, memb[i].ctm_name);
 
-		ctf_str_add_ref (fp, name, &dtd_vlen[i].ctlm_name);
+		ctf_str_add_ref (fp, name, &memb[i].ctm_name);
+		ctf_str_add_ref (fp, name, &dtd_memb[i].ctm_name);
 
-		if (type_ctt_size < CTF_LSTRUCT_THRESH)
+		if (big)
 		  {
-		    t_vlen[i].ctm_name = dtd_vlen[i].ctlm_name;
-		    t_vlen[i].ctm_type = dtd_vlen[i].ctlm_type;
-		    t_vlen[i].ctm_offset = CTF_LMEM_OFFSET (&dtd_vlen[i]);
+		    size_t this_offset, this_size;
 
-		    ctf_str_add_ref (fp, name, &t_vlen[i].ctm_name);
-		    if (ctf_type_add_ref (fp, &t_vlen[i].ctm_type) < 0)
-		      return -1;		/* errno is set for us.  */
+		    if (bitwise)
+		      {
+			this_offset = CTF_MEMBER_BIT_OFFSET (memb[i].ctm_offset);
+			this_size = CTF_MEMBER_BIT_SIZE (memb[i].ctm_size);
+			offset += this_offset;
+			memb[i].ctm_offset = CTF_MEMBER_MAKE_BIT_OFFSET (this_size,
+									 offset);
+		      }
+		    else
+		      {
+			offset += memb[i].ctm_offset;
+			memb[i].ctm_offset = offset;
+		      }
 		  }
-		else
-		  {
-		    t_lvlen[i] = dtd_vlen[i];
 
-		    ctf_str_add_ref (fp, name, &t_lvlen[i].ctlm_name);
-		    if (ctf_type_add_ref (fp, &t_lvlen[i].ctlm_type) < 0)
-		      return -1;		/* errno is set for us.  */
-		  }
+		if (ctf_type_add_ref (fp, &memb[i].ctm_type) < 0)
+		  return -1;			/* errno is set for us.  */
 	      }
 	  }
-
-	  if (type_ctt_size < CTF_LSTRUCT_THRESH)
-	    t += sizeof (ctf_member_t) * vlen;
-	  else
-	    t += sizeof (ctf_lmember_t) * vlen;
 	  break;
 
 	case CTF_K_ENUM:
 	  {
-	    ctf_enum_t *dtd_vlen = (struct ctf_enum *) dtd->dtd_vlen;
-	    ctf_enum_t *t_vlen = (struct ctf_enum *) t;
+	    ctf_enum_t *dtd_vlen = (ctf_enum_t *) dtd->dtd_vlen;
+	    ctf_enum_t *t_vlen = (ctf_enum_t *) t;
 
-	    memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_enum) * vlen);
 	    for (i = 0; i < vlen; i++)
 	      {
 		const char *name = ctf_strraw (fp, dtd_vlen[i].cte_name);
 
+		ctf_str_add_ref (fp, name, &dtd_vlen[i].cte_name);
 		ctf_str_add_ref (fp, name, &t_vlen[i].cte_name);
 	      }
-	    t += sizeof (struct ctf_enum) * vlen;
 
 	    break;
 	  }
+
+	case CTF_K_ENUM64:
+	  {
+	    ctf_enum64_t *dtd_vlen = (ctf_enum64_t *) dtd->dtd_vlen;
+	    ctf_enum64_t *t_vlen = (ctf_enum64_t *) t;
+
+	    for (i = 0; i < vlen; i++)
+	      {
+		const char *name = ctf_strraw (fp, dtd_vlen[i].cte_name);
+
+		ctf_str_add_ref (fp, name, &dtd_vlen[i].cte_name);
+		ctf_str_add_ref (fp, name, &t_vlen[i].cte_name);
+	      }
+
+	    break;
+	  }
+	case CTF_K_DATASEC:
+	  {
+	    ctf_datasec_t *vlen = (ctf_secinfo_t *) t;
+
+	    for (i = 0; i < vlen; i++)
+	      {
+		if (ctf_type_add_ref (fp, vlen[i].cvs_type) < 0)
+		  return -1;			/* errno is set for us.  */
+	      }
+	    break;
+	  }
 	}
+      t += dtd->dtd_vlen_size;
       dtd->dtd_final_type = id;
     }
 
@@ -1053,48 +1264,33 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
   return 0;
 }
 
-/* Variable section.  */
-
-/* Sort a newly-constructed static variable array.  */
-
-typedef struct ctf_sort_var_arg_cb
-{
-  ctf_dict_t *fp;
-  ctf_strs_t *strtab;
-} ctf_sort_var_arg_cb_t;
-
-static int
-ctf_sort_var (const void *one_, const void *two_, void *arg_)
-{
-  const ctf_varent_t *one = one_;
-  const ctf_varent_t *two = two_;
-  ctf_sort_var_arg_cb_t *arg = arg_;
-
-  return (strcmp (ctf_strraw_explicit (arg->fp, one->ctv_name, arg->strtab),
-		  ctf_strraw_explicit (arg->fp, two->ctv_name, arg->strtab)));
-}
-
 /* Overall serialization.  */
 
-/* Do all aspects of serialization up to strtab writeout and variable table
-   sorting, including final type ID assignment.  The resulting dict will have
-   the LCTF_PRESERIALIZED flag on and must not be modified in any way before
-   serialization.  (This is only lightly enforced, as this feature is internal-
-   only, employed by the linker machinery.)  */
+/* Do all aspects of serialization up to strtab writeout, including final type
+   ID assignment.  The resulting dict will have the LCTF_PRESERIALIZED flag on
+   and must not be modified in any way before serialization.  (This is only
+   lightly enforced, as this feature is internal-only, employed by the linker
+   machinery.)
+
+   If FORCE_CTF is enabled, always emit CTF in LIBCTF_BTM_POSSIBLE mode, and
+   error in LIBCTF_BTM_BTF mode.
+*/
 
 int
-ctf_preserialize (ctf_dict_t *fp)
+ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 {
   ctf_header_t hdr, *hdrp;
-  ctf_dvdef_t *dvd;
   ctf_dtdef_t *dtd;
   int sym_functions = 0;
+  int type_sect_is_btf = 0;
+  int ctf_needed = 0;
+  size_t hdr_len;
+  int ctf_adjustment;
 
   unsigned char *t;
   unsigned long i;
   size_t buf_size, type_size, objt_size, func_size;
   size_t funcidx_size, objtidx_size;
-  size_t nvars;
   unsigned char *buf = NULL;
 
   emit_symtypetab_state_t symstate;
@@ -1163,19 +1359,17 @@ ctf_preserialize (ctf_dict_t *fp)
     }
 
   /* Fill in an initial CTF header.  The type section begins at a 4-byte aligned
-     boundary past the CTF header itself (at relative offset zero).  The flag
-     indicating a new-style function info section (an array of CTF_K_FUNCTION
-     type IDs in the types section) is flipped on.  */
+     boundary past the CTF header itself (at relative offset zero).
+
+     It is quite possible that we will only write out the leading
+     ctf_btf_header_t portion of this structure.  */
 
   memset (&hdr, 0, sizeof (hdr));
-  hdr.cth_magic = CTF_MAGIC;
-  hdr.cth_version = CTF_VERSION;
-
-  /* This is a new-format func info section, and the symtab and strtab come out
-     of the dynsym and dynstr these days.  */
-
-  /* UPTODO: remove.  */
-  hdr.cth_flags = (CTF_F_NEWFUNCINFO | CTF_F_DYNSTR);
+  hdr.btf.bth_preamble.btf_magic = BTF_MAGIC;
+  hdr.btf.bth_preamble.btf_version = CTF_BTF_VERSION;
+  hdr.btf.bth_preamble.btf_flags = 0;
+  hdr.btf.bth_hdr_len = sizeof (struct ctf_btf_header_t);
+  hdr.cth_preamble.ctp_magic_version = (CTFv4_MAGIC << 16) | CTF_VERSION;
 
   /* Propagate all symbols in the symtypetabs into the dynamic state, so that
      we can put them back in the right order.  Symbols already in the dynamic
@@ -1202,95 +1396,106 @@ ctf_preserialize (ctf_dict_t *fp)
 				 &objtidx_size, &funcidx_size) < 0)
     return -1;					/* errno is set for us.  */
 
-  /* Propagate all vars into the dynamic state, so we can put them back later.
-     Variables already in the dynamic state, likely due to repeated
-     serialization, are left unchanged.  */
+  /* Complain if we're asked to emit BTF only, but we have symtypetabs to emit,
+     or types that call for CTFv4 extensions, or we are forced to emit CTF
+     because the caller requested compression.  (We check the idx sizes purely
+     for completeness' sake: they cannot be nonzero if the corresponding non-idx
+     size is zero.)  */
 
-  for (i = 0; i < fp->ctf_nvars; i++)
-    {
-      const char *name = ctf_strptr (fp, fp->ctf_vars[i].ctv_name);
+  if (force_ctf)
+    ctf_needed = 1;
 
-      if (name != NULL && !ctf_dvd_lookup (fp, name))
-	if (ctf_add_variable_forced (fp, name, fp->ctf_vars[i].ctv_type) < 0)
-	  return -1;				/* errno is set for us.  */
-    }
+  if (objt_size > 0 || func_size > 0
+      || objtidx_size > 0 || funcidx_size > 0)
+    ctf_needed = 1;
 
-  for (nvars = 0, dvd = ctf_list_next (&fp->ctf_dvdefs);
-       dvd != NULL; dvd = ctf_list_next (dvd), nvars++);
+  if (ctf_needed && _libctf_btf_mode == LIBCTF_BTM_BTF)
+    goto err_not_btf;
+
+  /* Relatively expensive, so done after cheap checks.  */
+
+  type_sect_is_btf = ctf_type_sect_is_btf (fp);
+
+  if (!type_sect_is_btf)
+    ctf_needed = 1;
+
+  if (ctf_needed && _libctf_btf_mode == LIBCTF_BTM_BTF)
+    goto err_not_btf;
 
   type_size = ctf_type_sect_size (fp);
 
   /* Compute the size of the CTF buffer we need, sans only the string table,
      then allocate a new buffer and memcpy the finished header to the start of
-     the buffer.  (We will adjust this later with strtab length info.)  */
+     the buffer.  (We will adjust this later with strtab length info.)
 
-  hdr.cth_lbloff = hdr.cth_objtoff = 0;
-  hdr.cth_funcoff = hdr.cth_objtoff + objt_size;
-  hdr.cth_objtidxoff = hdr.cth_funcoff + func_size;
-  hdr.cth_funcidxoff = hdr.cth_objtidxoff + objtidx_size;
-  hdr.cth_varoff = hdr.cth_funcidxoff + funcidx_size;
-  hdr.cth_typeoff = hdr.cth_varoff + (nvars * sizeof (ctf_varent_t));
-  hdr.cth_stroff = hdr.cth_typeoff + type_size;
-  hdr.cth_strlen = 0;
+     Offsets in the BTF and CTF headers are relative to the end of te header in
+     question.  */
+
+  ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
+
+  hdr.cth_objt_off = 0;
+  hdr.cth.objt_len = objt_size;
+  hdr.cth_func_off = hdr.cth_objt_off + objt_size;
+  hdr.cth_func_len = func_size;
+  hdr.cth_objtidx_off = hdr.cth_func_off + func_size;
+  hdr.cth_objtidx_len = objtidx_size;
+  hdr.cth_funcidx_off = hdr.cth_objtidx_off + objtidx_size;
+  hdr.cth_funcidx_len = funcidx_size;
+  hdr.btf.bth_type_off = hdr.funcidx_off + hdx.funcidx_size + ctf_adjustment;
+  hdr.btf.bth_type_len = type_size;
+  hdr.btf.bth_str_off = hdr.btf.bth_type_off + type_size;
+  hdr.btf.bth_str_len = 0;
   hdr.cth_parent_strlen = 0;
   if (fp->ctf_parent)
     hdr.cth_parent_ntypes = fp->ctf_parent->ctf_typemax;
 
-  buf_size = sizeof (ctf_header_t) + hdr.cth_stroff + hdr.cth_strlen;
+  if (_libctf_btf_mode = LIBCTF_BTM_ALWAYS
+      || (_libctf_btf_mode == LIBCTF_BTM_POSSIBLE && ctf_needed))
+    hdr_len = sizeof (ctf_header_t);
+  else
+    hdr_len = sizeof (ctf_btf_header_t);
+
+  /* No strings yet.  */
+  buf_size = sizeof (ctf_btf_header_t) + hdr.btf.bth_str_off;
 
   if ((buf = malloc (buf_size)) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
   fp->ctf_serializing_buf = buf;
   fp->ctf_serializing_buf_size = buf_size;
+  fp->ctf_serializing_is_btf = (hdr_len == sizeof (ctf_btf_header_t));
 
-  memcpy (buf, &hdr, sizeof (ctf_header_t));
-  t = (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_objtoff;
+  memcpy (buf, &hdr, hdr_len);
+  t = (unsigned char *) buf + hdr_len + objt_off;
 
   hdrp = (ctf_header_t *) buf;
-  if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent_name != NULL))
-    ctf_str_add_no_dedup_ref (fp, fp->ctf_parent_name, &hdrp->cth_parent_name);
-  if (fp->ctf_cuname != NULL)
-    ctf_str_add_no_dedup_ref (fp, fp->ctf_cuname, &hdrp->cth_cu_name);
 
-  if (ctf_emit_symtypetab_sects (fp, &symstate, &t, objt_size, func_size,
-				 objtidx_size, funcidx_size) < 0)
-    goto err;
-
-  assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_varoff);
-
-  /* Work over the variable list, translating everything into ctf_varent_t's and
-     prepping the string table.  */
-
-  fp->ctf_serializing_vars = (ctf_varent_t *) t;
-  for (i = 0, dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL;
-       dvd = ctf_list_next (dvd), i++)
+  if (!fp->ctf_serializing_is_btf)
     {
-      ctf_varent_t *var = &fp->ctf_serializing_vars[i];
+      if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent_name != NULL))
+	ctf_str_add_no_dedup_ref (fp, fp->ctf_parent_name,
+				  &hdrp->cth_parent_name);
+      if (fp->ctf_cuname != NULL)
+	ctf_str_add_no_dedup_ref (fp, fp->ctf_cuname, &hdrp->cth_cu_name);
 
-      ctf_str_add_ref (fp, dvd->dvd_name, &var->ctv_name);
-      var->ctv_type = (uint32_t) dvd->dvd_type;
-
-      if (ctf_type_add_ref (fp, &var->ctv_type) < 0)
+      if (ctf_emit_symtypetab_sects (fp, &symstate, &t, objt_size, func_size,
+				     objtidx_size, funcidx_size) < 0)
 	goto err;
     }
-  assert (i == nvars);
-
-  t += sizeof (ctf_varent_t) * nvars;
-  fp->ctf_serializing_nvars = nvars;
-
-  assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_typeoff);
+  assert (t == (unsigned char *) buf + sizeof (ctf_btf_header_t)
+	  + hdr.btf.bth_type_off);
 
   /* Copy in existing static types, then emit new dynamic types.  */
 
-  memcpy (t, fp->ctf_buf + fp->ctf_header->cth_typeoff,
-	  fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff);
-  t += fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff;
+  memcpy (t, fp->ctf_buf + fp->ctf_header->btf.bth_type_off,
+	  fp->ctf_header->btf.bth_type_len);
+  t += fp->ctf_header->btf.bth_type_len;
 
   if (ctf_emit_type_sect (fp, &t) < 0)
     goto err;
 
-  assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_stroff);
+  assert (t == (unsigned char *) buf + sizeof (ctf_btf_header_t)
+	  + hdr.bth_str_off);
 
   /* All types laid out: update all refs to types to cite the final IDs.  */
 
@@ -1310,6 +1515,15 @@ ctf_preserialize (ctf_dict_t *fp)
   fp->ctf_flags |= LCTF_NO_STR | LCTF_NO_TYPE;
 
   return 0;
+
+ err_not_btf:
+  ctf_set_errno (fp, ECTF_NOTBTF);
+  /* TODO: a little more info?  */
+  if (force_ctf)
+    ctf_err_warn (fp, 0, 0, _("Cannot write out dict as BTF: compression requested"));
+  else
+    ctf_err_warn (fp, 0, 0, _("Cannot write out dict as BTF: would lose information"));
+  return -1;
 
  err:
   fp->ctf_serializing_buf = NULL;
@@ -1331,9 +1545,7 @@ ctf_depreserialize (ctf_dict_t *fp)
 
   free (fp->ctf_serializing_buf);
   fp->ctf_serializing_buf = NULL;
-  fp->ctf_serializing_vars = NULL;
   fp->ctf_serializing_buf_size = 0;
-  fp->ctf_serializing_nvars = 0;
 
   fp->ctf_flags &= ~(LCTF_NO_STR | LCTF_NO_TYPE);
 }
@@ -1348,7 +1560,7 @@ ctf_depreserialize (ctf_dict_t *fp)
    on visible operation).  */
 
 static unsigned char *
-ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
+ctf_serialize (ctf_dict_t *fp, size_t *bufsiz, int force_ctf)
 {
   const ctf_strs_writable_t *strtab;
   unsigned char *buf, *newbuf;
@@ -1368,12 +1580,10 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   /* Preserialize, if we need to.  */
 
   if (!fp->ctf_serializing_buf)
-    if (ctf_preserialize (fp) < 0)
+    if (ctf_preserialize (fp, force_ctf) < 0)
       return NULL;				/* errno is set for us.  */
 
-  /* UPTODO: prevent writing of BTF dicts when upgrading from CTFv3.  */
-
-  /* Allow string lookup again, now we need it to sort the vartab.  */
+  /* Allow string lookup again.  */
   fp->ctf_flags &= ~LCTF_NO_STR;
 
   /* Construct the final string table and fill out all the string refs with the
@@ -1394,13 +1604,6 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   if (strtab == NULL)
     goto err;
 
-  /* Now the string table is constructed and all the refs updated, we can sort
-     the buffer of ctf_varent_t's.  */
-
-  ctf_sort_var_arg_cb_t sort_var_arg = { fp, (ctf_strs_t *) strtab };
-  ctf_qsort_r (fp->ctf_serializing_vars, fp->ctf_serializing_nvars,
-	       sizeof (ctf_varent_t), ctf_sort_var, &sort_var_arg);
-
   if ((newbuf = realloc (fp->ctf_serializing_buf, fp->ctf_serializing_buf_size
 			 + strtab->cts_len)) == NULL)
     goto oom;
@@ -1409,17 +1612,15 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   memcpy (fp->ctf_serializing_buf + fp->ctf_serializing_buf_size, strtab->cts_strs,
 	  strtab->cts_len);
   hdrp = (ctf_header_t *) fp->ctf_serializing_buf;
-  hdrp->cth_strlen = strtab->cts_len;
+  hdrp->btf.bth_str_len = strtab->cts_len;
   hdrp->cth_parent_strlen = fp->ctf_header->cth_parent_strlen;
-  fp->ctf_serializing_buf_size += hdrp->cth_strlen;
+  fp->ctf_serializing_buf_size += hdrp->btf.bth_str_len;
   *bufsiz = fp->ctf_serializing_buf_size;
 
   buf = fp->ctf_serializing_buf;
 
   fp->ctf_serializing_buf = NULL;
-  fp->ctf_serializing_vars = NULL;
   fp->ctf_serializing_buf_size = 0;
-  fp->ctf_serializing_nvars = 0;
   fp->ctf_flags &= ~LCTF_NO_TYPE;
 
   return buf;
@@ -1480,26 +1681,33 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
   unsigned char *src;
   size_t rawbufsiz;
   size_t alloc_len = 0;
+  size_t hdrlen;
   int uncompressed = 0;
   int flip_endian;
   int rc;
 
   flip_endian = getenv ("LIBCTF_WRITE_FOREIGN_ENDIAN") != NULL;
 
-  if ((rawbuf = ctf_serialize (fp, &rawbufsiz)) == NULL)
+  if ((rawbuf = ctf_serialize (fp, &rawbufsiz,
+			       threshold != (size_t) -1)) == NULL)
     return NULL;				/* errno is set for us.  */
 
-  if (!ctf_assert (fp, rawbufsiz >= sizeof (ctf_header_t)))
+  if (fp->ctf_serializing_is_btf)
+    hdrlen = sizeof (ctf_header_t);
+  else
+    hdrlen = sizeof (ctf_btf_header_t);
+
+  if (!ctf_assert (fp, rawbufsiz >= hdrlen))
     goto err;
 
-  if (rawbufsiz >= threshold)
+  if (rawbufsiz >= threshold && !fp->ctf_serializing_is_btf)
     alloc_len = compressBound (rawbufsiz - sizeof (ctf_header_t))
       + sizeof (ctf_header_t);
 
   /* Trivial operation if the buffer is too small to bother compressing, and
      we're not doing a forced write-time flip.  */
 
-  if (rawbufsiz < threshold)
+  if (rawbufsiz < threshold || fp->ctf_serializing_is_btf)
     {
       alloc_len = rawbufsiz;
       uncompressed = 1;
@@ -1521,28 +1729,30 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
 
   rawhp = (ctf_header_t *) rawbuf;
   hp = (ctf_header_t *) buf;
-  memcpy (hp, rawbuf, sizeof (ctf_header_t));
-  bp = buf + sizeof (ctf_header_t);
-  *size = sizeof (ctf_header_t);
 
-  if (!uncompressed)
+  memcpy (hp, rawbuf, hdrlen);
+  bp = buf + hdrlen;
+  *size = hdrlen;
+
+  if (!uncompressed && !fp->ctf_serializing_is_btf)
     hp->cth_flags |= CTF_F_COMPRESS;
 
-  src = rawbuf + sizeof (ctf_header_t);
+  src = rawbuf + hdrsz;
 
   if (flip_endian)
     {
-      ctf_flip_header (hp);
-      if (ctf_flip (fp, rawhp, src, 1) < 0)
+      ctf_flip_header (hp, fp->ctf_serializing_is_btf, 0);
+      if (ctf_flip (fp, rawhp, src, fp->ctf_serializing_is_btf, 1) < 0)
 	goto err;				/* errno is set for us.  */
     }
 
+  /* Must be CTFv4.  */
   if (!uncompressed)
     {
       size_t compress_len = alloc_len - sizeof (ctf_header_t);
 
       if ((rc = compress (bp, (uLongf *) &compress_len,
-			  src, rawbufsiz - sizeof (ctf_header_t))) != Z_OK)
+			  src, rawbufsiz - hdrsz)) != Z_OK)
 	{
 	  ctf_set_errno (fp, ECTF_COMPRESS);
 	  ctf_err_warn (fp, 0, 0, _("zlib deflate err: %s"), zError (rc));
@@ -1552,8 +1762,8 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
     }
   else
     {
-      memcpy (bp, src, rawbufsiz - sizeof (ctf_header_t));
-      *size += rawbufsiz - sizeof (ctf_header_t);
+      memcpy (bp, src, rawbufsiz - hdrsz);
+      *size += rawbufsiz - hdrsz;
     }
 
   free (rawbuf);

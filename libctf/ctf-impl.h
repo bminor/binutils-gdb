@@ -362,8 +362,10 @@ typedef struct ctf_dedup
 struct ctf_dict
 {
   const ctf_dictops_t *ctf_dictops; /* Version-specific dict operations.  */
-  ctf_header_t *ctf_header;    /* The header from this CTF dict.  */
-  ctf_header_v3_t *ctf_v3_header; /* The header from an upgraded CTF dict.  */
+  ctf_header_t *ctf_header;	    /* The header from this CTF dict.  */
+  ctf_header_v3_t *ctf_v3_header;   /* The header from an upgraded CTF dict.  */
+  ctf_dynset_t *ctf_write_prohibitions; /* Kinds writeout causes error for.  */
+  ctf_dynset_t *ctf_write_suppressions;	/* Kinds that are skipped on write.  */
   unsigned char ctf_openflags;	    /* Flags the dict had when opened.  */
   int ctf_opened_btf;		    /* Whether this dict was pure BTF when
 				       opened.  */
@@ -403,6 +405,7 @@ struct ctf_dict
   size_t ctf_size;		  /* Size of CTF header + uncompressed data.  */
   unsigned char *ctf_serializing_buf; /* CTF buffer in mid-serialization.  */
   size_t ctf_serializing_buf_size; /* Length of that buffer.  */
+  int ctf_serializing_is_btf;	   /* Whether the buffer written out is pure BTF.  */
   uint32_t *ctf_sxlate;		  /* Translation table for unindexed symtypetab
 				     entries.  */
   unsigned long ctf_nsyms;	  /* Number of entries in symtab xlate table.  */
@@ -769,7 +772,7 @@ extern void ctf_str_purge_refs (ctf_dict_t *fp);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
 extern const ctf_strs_writable_t *ctf_str_write_strtab (ctf_dict_t *);
 
-extern int ctf_preserialize (ctf_dict_t *fp);
+extern int ctf_preserialize (ctf_dict_t *fp, int force_ctf);
 extern void ctf_depreserialize (ctf_dict_t *fp);
 
 extern struct ctf_archive_internal *
