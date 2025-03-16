@@ -272,6 +272,8 @@ typedef struct ctf_header
 #define CTF_VERSION CTF_VERSION_4 /* Current version.  */
 #define CTF_STABLE_VERSION 4
 
+#define CTF_BTF_VERSION 1
+
 /* All of these flags bar CTF_F_COMPRESS and CTF_F_IDXSORTED are bug-workaround
    flags and are valid only in format v3: in v2 and below they cannot occur and
    in v4 and later, they will be recycled for other purposes.  */
@@ -541,7 +543,7 @@ union
    as possible, since they are user-exposed, but their values all differ.  */
 
 #define CTF_K_UNKNOWN  0	/* Unknown type (used for padding and
-				   unrepresentable types).  */
+				   unrepresentable and suppressed types).  */
 #define CTF_K_INTEGER  1	/* Variant data is CTF_INT_DATA (see below).  */
 #define CTF_K_POINTER  2	/* ctt_type is referenced type.  */
 #define CTF_K_ARRAY    3	/* Variant data is single ctf_array_t.  */
@@ -559,7 +561,8 @@ union
 				   is CTF_K_FUNC_PROTO.  Named.  */
 #define CTF_K_FUNCTION 13	/* ctt_type is return type, variant data is
 				   list of ctf_param_t.  Unnamed.  */
-#define CTF_K_VAR      14	/* Variable.  Variant data is ctf_linkage_t.  */
+#define CTF_K_VAR      14	/* Variable.  ctt_type is variable type.
+				   Variant data is ctf_linkage_t.  */
 #define CTF_K_DATASEC  15	/* Variant data is list of ctf_var_secinfo_t.  */
 #define CTF_K_BTF_FLOAT 16	/* No data beyond a size.  */
 #define CTF_K_DECL_TAG 17	/* ctt_type is referenced type.  Variant data is
@@ -573,16 +576,16 @@ union
 
 #define CTF_K_FLOAT   31	/* Variant data is a CTF_FP_* value.  */
 #define CTF_K_SLICE   30	/* Variant data is a ctf_slice_t.  */
-#define CTF_K_BIG     29	/* Prefix type; variant data is ctf_type_t.
+#define CTF_K_BIG     29	/* Prefix type.
 				   vlen is high 16 bits of type vlen;
 				   size is high 32 bits of type size.  */
-#define CTF_K_CONFLICTING 28	/* Prefix type; variant data is ctf_type_t.
-				   Name is disambiguator for conflicting type
-				   (e.g. translation unit name).
+#define CTF_K_CONFLICTING 28	/* Prefix type.  Name is disambiguator for
+				   conflicting type (e.g. translation unit
+				   name).
 
 				   If a type is both CONFLICTING and BIG,
 				   CONFLICTING will always prefix BIG.  */
-#define BTF_K_MAX	19	/* Maximum possible (V4) BTF_K_* value.  */
+#define CTF_BTF_K_MAX	19	/* Maximum possible (V4) BTF_K_* value.  */
 #define CTF_K_MAX	31	/* Maximum possible (V4) CTF_K_* value.  */
 
 
@@ -751,6 +754,7 @@ typedef struct ctf_member
 #define CTF_MAX_BIT_OFFSET 0xffffff
 #define CTF_MEMBER_BIT_SIZE(val) ((val) >> 24)
 #define CTF_MEMBER_BIT_OFFSET(val) ((val) & CTF_MAX_BIT_OFFSET);
+#define CTF_MEMBER_MAKE_BIT_OFFSET (size, offset) ((size) << 24 | val)
 
 /* Data sections, aligned with btf_var_secinfo.
 
