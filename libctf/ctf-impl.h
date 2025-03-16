@@ -824,9 +824,7 @@ extern ctf_link_sym_t *ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *ds
 
 extern const char _CTF_SECTION[];	/* name of CTF ELF section */
 extern const char _CTF_NULLSTR[];	/* empty string */
-
-extern int _libctf_version;	/* library client version */
-extern int _libctf_debug;	/* debugging messages enabled */
+extern ctf_btf_mode_t _libctf_btf_mode; /* BTF writeout mode.  */
 
 #include "ctf-inlines.h"
 

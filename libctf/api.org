@@ -1,8 +1,15 @@
 * Additions
 
-** #defines
+** #defines and enums
 
 #define CTF_ADD_STRUCT_BITFIELDS 2 /* Struct/union field-level bitfields */
+
+typedef enum ctf_btf_mode
+{
+  LIBCTF_BTM_BTF = 0,
+  LIBCTF_BTM_POSSIBLE = 1,
+  LIBCTF_BTM_ALWAYS = 2
+} ctf_btf_mode_t;
 
 ** typedefs
 
