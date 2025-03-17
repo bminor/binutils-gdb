@@ -937,7 +937,7 @@ extern ctf_id_t ctf_add_const (ctf_dict_t *, uint32_t, ctf_id_t);
    as BTF.  */
 
 extern ctf_id_t ctf_add_enum64_encoded (ctf_dict_t *, uint32_t, const char *,
-				      const ctf_encoding_t *);
+					const ctf_encoding_t *);
 extern ctf_id_t ctf_add_enum64 (ctf_dict_t *, uint32_t, const char *);
 extern ctf_id_t ctf_add_enum_encoded (ctf_dict_t *, uint32_t, const char *,
 				      const ctf_encoding_t *);
@@ -971,6 +971,14 @@ extern ctf_id_t ctf_add_type (ctf_dict_t *, ctf_dict_t *, ctf_id_t);
 extern ctf_id_t ctf_add_typedef (ctf_dict_t *, uint32_t, const char *,
 				 ctf_id_t);
 extern ctf_id_t ctf_add_restrict (ctf_dict_t *, uint32_t, ctf_id_t);
+
+/* Add type and decl tags to whole types or (for decl tags) specific
+   components of types (parameter count for functions, member count for structs
+   and unions).  */
+extern ctf_id_t ctf_add_type_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *);
+extern ctf_id_t ctf_add_decl_type_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *);
+extern ctf_id_t ctf_add_decl_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *,
+				  int component_idx);
 
 /* Struct and union addition.  Straight addition uses possibly-confusing rules
    to guess the final size of the struct/union given its members: to explicitly

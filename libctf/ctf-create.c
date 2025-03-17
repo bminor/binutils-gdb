@@ -936,7 +936,7 @@ ctf_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
    component of a type.  Component -1 is a whole type.  */
 
 static ctf_id_t
-ctf_add_tag (ctf_dict_t *fp, int flag, ctf_id_t type, const char *tag,
+ctf_add_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
 	     int is_decl, int32_t component_idx)
 {
   ctf_dtdef_t *dtd;
@@ -1024,26 +1024,26 @@ ctf_add_tag (ctf_dict_t *fp, int flag, ctf_id_t type, const char *tag,
   return dtd->dtd_type;
 }
 
-/* Convenience function: create a type tag.  */
+/* Create a type tag.  */
 
 ctf_id_t
-ctf_add_type_tag (ctf_dict_t *fp, int flag, ctf_id_t type, const char *tag)
+ctf_add_type_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag)
 {
   return ctf_add_tag (fp, flag, type, tag, 0, -1);
 }
 
-/* Convenience function: create a decl tag applied to an entire type.  */
+/* Create a decl tag applied to an entire type.  */
 
 ctf_id_t
-ctf_add_decl_type_tag (ctf_dict_t *fp, int flag, ctf_id_t type, const char *tag)
+ctf_add_decl_type_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag)
 {
   return ctf_add_tag (fp, flag, type, tag, 1, -1);
 }
 
-/* Convenience function: create a decl tag applied to one element of a type.
+/* Create a decl tag applied to one element of a type.
    component_idx must be >= 0.  */
 ctf_id_t
-ctf_add_decl_tag (ctf_dict_t *fp, int flag, ctf_id_t type, const char *tag,
+ctf_add_decl_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
 		  int component_idx)
 {
   return ctf_add_tag (fp, flag, type, tag, 1, component_idx);

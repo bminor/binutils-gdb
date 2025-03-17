@@ -1168,6 +1168,7 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	      ctf_decl_sprintf (&cd, "union %s", name);
 	      break;
 	    case CTF_K_ENUM:
+	    case CTF_K_ENUM64:
 	      ctf_decl_sprintf (&cd, "enum %s", name);
 	      break;
 	    case CTF_K_TYPE_TAG:
@@ -1201,6 +1202,7 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 		    ctf_decl_sprintf (&cd, "union %s", name);
 		    break;
 		  case CTF_K_ENUM:
+		  case CTF_K_ENUM64:
 		    ctf_decl_sprintf (&cd, "enum %s", name);
 		    break;
 		  default:
@@ -1866,11 +1868,11 @@ int
 ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 {
   ctf_dict_t *ofp = fp;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
   const unsigned char *vlen;
   uint32_t data;
 
-  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
@@ -1893,8 +1895,8 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
       ep->cte_bits = CTF_FP_BITS (data);
       break;
     case CTF_K_ENUM:
-      /* v3 only: we must guess at the underlying integral format.  */
-      ep->cte_format = CTF_INT_SIGNED;
+    case CTF_K_ENUM64:
+      ep->cte_format = CTF_INFO_KFLAG (suffix->ctt_info) ? CTF_INT_SIGNED : 0;
       ep->cte_offset = 0;
       ep->cte_bits = 0;
       break;
@@ -2041,6 +2043,7 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
     case CTF_K_UNION:
       return (same_names && (ctf_type_size (lfp, ltype)
 			     == ctf_type_size (rfp, rtype)));
+    case CTF_K_ENUM64:
     case CTF_K_ENUM:
       {
 	int lencoded, rencoded;
@@ -2392,7 +2395,7 @@ ctf_func_type_args (ctf_dict_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv
   if (ctf_func_type_info (fp, type, &f) < 0)
     return -1;			/* errno is set for us.  */
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
   vlen = ctf_vlen (fp, type, tp, NULL);
@@ -2425,7 +2428,7 @@ ctf_func_type_arg_names (ctf_dict_t *fp, ctf_id_t type, uint32_t argc,
   if (ctf_func_type_info (fp, type, &f) < 0)
     return -1;			/* errno is set for us.  */
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
   vlen = ctf_vlen (fp, type, tp, NULL);
@@ -2448,7 +2451,7 @@ ctf_type_linkage (ctf_dict_t *fp, ctf_id_t type, ctf_linkage_t *linkage)
 
   int kind;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
   kind = ctf_type_kind_unsliced (fp, type);
@@ -2487,21 +2490,21 @@ ctf_datasec_variable_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
   ctf_id_t type;
   const ctf_type_t *tp;
   unsigned char *vlen;
+  size_t vlen_len;
   ctf_var_secinfo_t *sec;
   ctf_var_secinfo_t *el;
   ssize_t size;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
   if (ctf_type_kind (fp, datasec) != CTF_K_DATASEC)
     return ctf_set_typed_errno (fp, ECTF_NOTDATASEC);
 
-  vlen = ctf_vlen (fp, type, tp, NULL);
+  vlen = ctf_vlen (fp, type, tp, &vlen_len);
   sec = (ctf_var_secinfo_t *) vlen;
 
-  if ((el = bsearch (&offset, sec, CTF_VLEN (fp, tp),
-		     sizeof (ctf_var_secinfo_t),
+  if ((el = bsearch (&offset, sec, vlen_len, sizeof (ctf_var_secinfo_t),
 		     search_datasec_by_offset)) == NULL)
     return ctf_set_typed_errno (fp, ECTF_NOTYPE);
 
