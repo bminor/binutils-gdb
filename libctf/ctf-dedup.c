@@ -1107,8 +1107,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
   /* We have never seen this type before, and must figure out its hash and the
      hashes of the types it cites.
 
-     Hash this type, and call ourselves recursively.  (The hashing part is
-     optional, and is disabled if overidden_hval is set.)  */
+     Hash this type, and call ourselves recursively.  */
 
   if ((hval = ctf_dedup_rhash_type (fp, input, inputs, input_num,
 				    type, type_id, tp, name, decorated,
