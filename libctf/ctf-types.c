@@ -1687,6 +1687,10 @@ ctf_type_reference (ctf_dict_t *fp, ctf_id_t type)
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
     case CTF_K_FUNC:
+    case CTF_K_TYPE_TAG:
+    case CTF_K_DECL_TAG:
+    case CTF_K_FUNC_LINKAGE:
+    case CTF_K_VAR:
       return suffix->ctt_type;
       /* Slices store their type in an unusual place.  */
     case CTF_K_SLICE:
