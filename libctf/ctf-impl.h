@@ -384,7 +384,6 @@ struct ctf_dict
   ctf_dynhash_t *ctf_structs;	    /* Hash table of struct types.  */
   ctf_dynhash_t *ctf_unions;	    /* Hash table of union types.  */
   ctf_dynhash_t *ctf_enums;	    /* Hash table of enum types.  */
-  ctf_dynhash_t *ctf_vars;	    /* Hash table of variables.  */
   ctf_dynhash_t *ctf_datasecs;	    /* Hash table of datasecs.  */
   ctf_dynhash_t *ctf_tags;	    /* Hash table of dynsets of type/decl tags.  */
   ctf_dynhash_t *ctf_names;	    /* Hash table of remaining types, plus

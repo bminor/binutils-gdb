@@ -700,12 +700,6 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 				   NULL, NULL, NULL)) == NULL)
     return ENOMEM;
 
-  if ((fp->ctf_vars
-       = ctf_dynhash_create_sized (pop[CTF_K_VAR], ctf_hash_string,
-				   ctf_hash_eq_string,
-				   NULL, NULL, NULL)) == NULL)
-    return ENOMEM;
-
   if ((fp->ctf_tags
        = ctf_dynhash_create_sized (pop[CTF_K_DECL_TAG], ctf_hash_string,
 				   ctf_hash_eq_string,
@@ -1005,7 +999,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	  if (!isroot)
 	    break;
 
-	  err = ctf_dynhash_insert_type (fp, fp->ctf_vars,
+	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
 					 ctf_index_to_type (fp, id),
 					 suffix->ctt_name);
 	  if (err != 0)
@@ -1525,15 +1519,12 @@ void ctf_set_ctl_hashes (ctf_dict_t *fp)
   fp->ctf_lookups[3].ctl_prefix = "datasec";
   fp->ctf_lookups[3].ctl_len = strlen (fp->ctf_lookups[3].ctl_prefix);
   fp->ctf_lookups[3].ctl_hash = fp->ctf_datasecs;
-  fp->ctf_lookups[4].ctl_prefix = "var";
-  fp->ctf_lookups[4].ctl_len = strlen (fp->ctf_lookups[4].ctl_prefix);
-  fp->ctf_lookups[4].ctl_hash = fp->ctf_var;
-  fp->ctf_lookups[5].ctl_prefix = _CTF_NULLSTR;
-  fp->ctf_lookups[5].ctl_len = strlen (fp->ctf_lookups[5].ctl_prefix);
-  fp->ctf_lookups[5].ctl_hash = fp->ctf_names;
-  fp->ctf_lookups[6].ctl_prefix = NULL;
-  fp->ctf_lookups[6].ctl_len = 0;
-  fp->ctf_lookups[6].ctl_hash = NULL;
+  fp->ctf_lookups[4].ctl_prefix = _CTF_NULLSTR;
+  fp->ctf_lookups[4].ctl_len = strlen (fp->ctf_lookups[5].ctl_prefix);
+  fp->ctf_lookups[4].ctl_hash = fp->ctf_names;
+  fp->ctf_lookups[5].ctl_prefix = NULL;
+  fp->ctf_lookups[5].ctl_len = 0;
+  fp->ctf_lookups[5].ctl_hash = NULL;
 }
 
 /* Open a CTF file, mocking up a suitable ctf_sect.  */
@@ -2271,7 +2262,6 @@ ctf_dict_close (ctf_dict_t *fp)
   ctf_dynhash_destroy (fp->ctf_structs);
   ctf_dynhash_destroy (fp->ctf_unions);
   ctf_dynhash_destroy (fp->ctf_enums);
-  ctf_dynhash_destroy (fp->ctf_vars);
   ctf_dynhash_destroy (fp->ctf_datasecs);
   ctf_dynhash_destroy (fp->ctf_tags);
   ctf_dynhash_destroy (fp->ctf_names);

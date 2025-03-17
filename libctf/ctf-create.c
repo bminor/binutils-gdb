@@ -147,7 +147,7 @@ ctf_create (int *errp)
   static const ctf_header_t hdr = { .btf.bth_preamble = { BTF_MAGIC, BTF_VERSION, 0 } };
 
   ctf_dynhash_t *structs = NULL, *unions = NULL, *enums = NULL, *names = NULL;
-  ctf_dynhash_t *datasecs = NULL, *vars = NULL, *tags = NULL;
+  ctf_dynhash_t *datasecs = NULL, *tags = NULL;
   ctf_sect_t cts;
   ctf_dict_t *fp;
 
@@ -165,8 +165,6 @@ ctf_create (int *errp)
 			      NULL, NULL);
   datasecs = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 				 NULL, NULL);
-  vars = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
-			     NULL, NULL);
   tags = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 			     NULL, ctf_dynset_destroy);
   if (!structs || !unions || !enums || !names || !datasecs || !tags)
@@ -190,14 +188,12 @@ ctf_create (int *errp)
   ctf_dynhash_destroy (fp->ctf_enums);
   ctf_dynhash_destroy (fp->ctf_names);
   ctf_dynhash_destroy (fp->ctf_datasecs);
-  ctf_dynhash_destroy (fp->ctf_vars);
   ctf_dynhash_destroy (fp->ctf_tags);
   fp->ctf_structs = structs;
   fp->ctf_unions = unions;
   fp->ctf_enums = enums;
   fp->ctf_names = names;
   fp->ctf_datasecs = datasecs;
-  fp->ctf_vars = vars;
   fp->ctf_tags = tags;
   fp->ctf_dtoldid = 0;
   fp->ctf_snapshot_lu = 0;
@@ -220,7 +216,6 @@ ctf_create (int *errp)
   ctf_dynhash_destroy (enums);
   ctf_dynhash_destroy (names);
   ctf_dynhash_destroy (datasecs);
-  ctf_dynhash_destroy (vars);
   ctf_dynhash_destroy (tags);
   return NULL;
 }
@@ -250,8 +245,6 @@ ctf_name_table (ctf_dict_t *fp, int kind)
       return fp->ctf_tags;
     case CTF_K_DATASECS:
       return fp->ctf_datasecs;
-    case CTF_K_VAR:
-      return fp->ctf_vars;
     default:
       return fp->ctf_names;
     }
