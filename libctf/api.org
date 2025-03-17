@@ -51,7 +51,7 @@ int ctf_struct_bitfield (ctf_dict_t *, ctf_id_t);
 int ctf_func_arg_names (ctf_dict_t *, unsigned long, uint32_t, const char **);
 int ctf_func_type_arg_names (ctf_dict_t *, ctf_id_t, uint32_t,
                              const char **);
-int ctf_type_linkage (ctf_dict_t *, ctf_id_t, ctf_linkage_t *);
+int ctf_type_linkage (ctf_dict_t *, ctf_id_t);
 ctf_id_t ctf_lookup_by_kind (ctf_dict_t *, int kind, const char *);
 int ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const **cuname);
 int ctf_enum_unsigned_value (ctf_dict_t *, ctf_id_t, const char *, uint64_t *);

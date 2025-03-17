@@ -2443,7 +2443,7 @@ ctf_func_type_arg_names (ctf_dict_t *fp, ctf_id_t type, uint32_t argc,
 /* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
 
 int
-ctf_type_linkage (ctf_dict_t *fp, ctf_id_t type, ctf_linkage_t *linkage)
+ctf_type_linkage (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
   unsigned char *vlen;
@@ -2461,8 +2461,7 @@ ctf_type_linkage (ctf_dict_t *fp, ctf_id_t type, ctf_linkage_t *linkage)
   vlen = ctf_vlen (fp, type, tp, NULL);
   l = (ctf_linkage_t *) vlen;
 
-  *linkage = *l;
-  return 0;
+  return linkage.ctl_linkage;
 }
 
 /* bsearch_r comparison function for datasec searches.  */

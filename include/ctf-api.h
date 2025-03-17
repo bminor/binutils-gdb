@@ -585,7 +585,7 @@ extern int ctf_func_type_arg_names (ctf_dict_t *, ctf_id_t, uint32_t,
 
 /* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
 
-extern int ctf_type_linkage (ctf_dict_t *, ctf_id_t, ctf_linkage_t *);
+extern int ctf_type_linkage (ctf_dict_t *, ctf_id_t);
 
 /* Look up function or data symbols by name and return their CTF type ID,
   if any.  (For both function symbols and data symbols that are function

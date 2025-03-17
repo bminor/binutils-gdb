@@ -1138,6 +1138,7 @@ ctf_add_function_linkage (ctf_dict_t *fp, uint32_t flag,
   dtd->dtd_data->ctt_type = (uint32_t) ref;
 
   linkage = (ctf_linkage_t *) dtd->dtd_vlen;
+  linkage->ctl_linkage = linkage;
 
   return dtd->dtd_type;
 }
