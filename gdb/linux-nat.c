@@ -4029,24 +4029,21 @@ linux_nat_target::pid_to_exec_file (int pid)
 class proc_mem_file
 {
 public:
-  proc_mem_file (ptid_t ptid, int fd)
-    : m_ptid (ptid), m_fd (fd)
+  proc_mem_file (ptid_t ptid, scoped_fd fd)
+    : m_ptid (ptid), m_fd (std::move (fd))
   {
-    gdb_assert (m_fd != -1);
+    gdb_assert (m_fd.get () != -1);
   }
 
   ~proc_mem_file ()
   {
     linux_nat_debug_printf ("closing fd %d for /proc/%d/task/%ld/mem",
-			    m_fd, m_ptid.pid (), m_ptid.lwp ());
-    close (m_fd);
+			    m_fd.get (), m_ptid.pid (), m_ptid.lwp ());
   }
 
-  DISABLE_COPY_AND_ASSIGN (proc_mem_file);
-
-  int fd ()
+  int fd () const noexcept
   {
-    return m_fd;
+    return m_fd.get ();
   }
 
 private:
@@ -4055,7 +4052,7 @@ private:
   ptid_t m_ptid;
 
   /* The file descriptor.  */
-  int m_fd = -1;
+  scoped_fd m_fd;
 };
 
 /* The map between an inferior process id, and the open /proc/PID/mem
@@ -4093,9 +4090,9 @@ open_proc_mem_file (ptid_t ptid)
   xsnprintf (filename, sizeof filename,
 	     "/proc/%d/task/%ld/mem", ptid.pid (), ptid.lwp ());
 
-  int fd = gdb_open_cloexec (filename, O_RDWR | O_LARGEFILE, 0).release ();
+  scoped_fd fd = gdb_open_cloexec (filename, O_RDWR | O_LARGEFILE, 0);
 
-  if (fd == -1)
+  if (fd.get () == -1)
     {
       warning (_("opening /proc/PID/mem file for lwp %d.%ld failed: %s (%d)"),
 	       ptid.pid (), ptid.lwp (),
@@ -4103,12 +4100,11 @@ open_proc_mem_file (ptid_t ptid)
       return;
     }
 
+  linux_nat_debug_printf ("opened fd %d for lwp %d.%ld",
+			  fd.get (), ptid.pid (), ptid.lwp ());
   proc_mem_file_map.emplace (std::piecewise_construct,
 			     std::forward_as_tuple (ptid.pid ()),
-			     std::forward_as_tuple (ptid, fd));
-
-  linux_nat_debug_printf ("opened fd %d for lwp %d.%ld",
-			  fd, ptid.pid (), ptid.lwp ());
+			     std::forward_as_tuple (ptid, std::move (fd)));
 }
 
 /* Helper for linux_proc_xfer_memory_partial and
