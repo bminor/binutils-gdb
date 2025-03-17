@@ -116,7 +116,8 @@ rust_tuple_type_p (struct type *type)
 }
 
 /* Return true if all non-static fields of a structlike type are in a
-   sequence like __0, __1, __2.  */
+   sequence like 0, 1, 2.  "__" prefixes are also accepted -- rustc
+   emits "__0" but gccrs emits "0".  */
 
 static bool
 rust_underscore_fields (struct type *type)
@@ -131,8 +132,12 @@ rust_underscore_fields (struct type *type)
 	{
 	  char buf[20];
 
-	  xsnprintf (buf, sizeof (buf), "__%d", field_number);
-	  if (strcmp (buf, type->field (i).name ()) != 0)
+	  xsnprintf (buf, sizeof (buf), "%d", field_number);
+
+	  const char *field_name = type->field (i).name ();
+	  if (startswith (field_name, "__"))
+	    field_name += 2;
+	  if (strcmp (buf, field_name) != 0)
 	    return false;
 	  field_number++;
 	}
@@ -1476,7 +1481,7 @@ rust_struct_anon::evaluate (struct type *expect_type,
   value *lhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
   int field_number = std::get<0> (m_storage);
 
-  struct type *type = lhs->type ();
+  struct type *type = check_typedef (lhs->type ());
 
   if (type->code () == TYPE_CODE_STRUCT)
     {
