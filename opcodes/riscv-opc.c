@@ -3459,6 +3459,15 @@ const struct riscv_opcode riscv_opcodes[] =
 {"th.vrgather.vi",0, INSN_CLASS_XTHEADVECTOR, "Vd,Vt,VjVm", MATCH_VRGATHERVI, MASK_VRGATHERVI, match_opcode, 0},
 {"th.vcompress.vm",0, INSN_CLASS_XTHEADVECTOR, "Vd,Vt,Vs", MATCH_VCOMPRESSVM, MASK_VCOMPRESSVM, match_opcode, 0},
 
+/* Vendor-specific (T-Head) XTheadVdot instructions.  */
+{"th.vmaqa.vv",        0, INSN_CLASS_XTHEADVDOT,  "Vd,Vs,VtVm",  MATCH_TH_VMAQA_VV, MASK_TH_VMAQA_VV, match_opcode, 0},
+{"th.vmaqau.vv",       0, INSN_CLASS_XTHEADVDOT,  "Vd,Vs,VtVm",  MATCH_TH_VMAQAU_VV, MASK_TH_VMAQAU_VV, match_opcode, 0},
+{"th.vmaqasu.vv",      0, INSN_CLASS_XTHEADVDOT,  "Vd,Vs,VtVm",  MATCH_TH_VMAQASU_VV, MASK_TH_VMAQASU_VV, match_opcode, 0},
+{"th.vmaqa.vx",        0, INSN_CLASS_XTHEADVDOT,  "Vd,s,VtVm",  MATCH_TH_VMAQA_VX, MASK_TH_VMAQA_VX, match_opcode, 0},
+{"th.vmaqau.vx",       0, INSN_CLASS_XTHEADVDOT,  "Vd,s,VtVm",  MATCH_TH_VMAQAU_VX, MASK_TH_VMAQAU_VX, match_opcode, 0},
+{"th.vmaqasu.vx",      0, INSN_CLASS_XTHEADVDOT,  "Vd,s,VtVm",  MATCH_TH_VMAQASU_VX, MASK_TH_VMAQASU_VX, match_opcode, 0},
+{"th.vmaqaus.vx",      0, INSN_CLASS_XTHEADVDOT,  "Vd,s,VtVm",  MATCH_TH_VMAQAUS_VX, MASK_TH_VMAQAUS_VX, match_opcode, 0},
+
 /* Vendor-specific (Ventana Microsystems) XVentanaCondOps instructions */
 {"vt.maskc",   64, INSN_CLASS_XVENTANACONDOPS, "d,s,t", MATCH_VT_MASKC, MASK_VT_MASKC, match_opcode, 0 },
 {"vt.maskcn",  64, INSN_CLASS_XVENTANACONDOPS, "d,s,t", MATCH_VT_MASKCN, MASK_VT_MASKCN, match_opcode, 0 },
