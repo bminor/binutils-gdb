@@ -1024,10 +1024,10 @@ extern int ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
                                     int bit_width);
 
 extern int ctf_add_variable (ctf_dict_t *, const char *, ctf_id_t);
-extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, const char *datasec,
-					  const char *name, int linkage,
-					  ctf_id_t type, size_t size,
-					  size_t offset);
+extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, uint32_t,
+					  const char *datasec, const char *name,
+					  int linkage, ctf_id_t type,
+					  size_t size, size_t offset);
 
 /* Set the size and member and index types of an array.  */
 

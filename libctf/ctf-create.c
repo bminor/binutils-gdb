@@ -1829,8 +1829,9 @@ ctf_add_variable (ctf_dict_t *fp, const char *name, int linkage, ctf_id_t ref)
    alignment".  A size of zero means "get it from the type" and is the common
    case.  */
 ctf_id_t
-ctf_add_section_variable (ctf_dict_t *fp, const char *datasec, const char *name,
-			  int linkage, ctf_id_t type, size_t size, size_t offset)
+ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
+			  const char *name, int linkage, ctf_id_t type,
+			  size_t size, size_t offset)
 {
   ctf_dtdef_t *sec_dtd = NULL;
   ctf_dtdef_t *var_dtd = NULL;
@@ -1881,7 +1882,7 @@ ctf_add_section_variable (ctf_dict_t *fp, const char *datasec, const char *name,
       && (ctf_errno (fp) == ECTF_NONREPRESENTABLE))
     return CTF_ERR;
 
-  if ((var_dtd = ctf_add_generic (fp, CTF_ADD_ROOT, name, CTF_K_VAR, 0,
+  if ((var_dtd = ctf_add_generic (fp, flag, name, CTF_K_VAR, 0,
 				  sizeof (ctf_linkage_t), 0, NULL)) == NULL)
     return CTF_ERR;			/* errno is set for us.  */
 
