@@ -390,30 +390,41 @@ cooked_index_shard::handle_gnat_encoded_entry
   entry->canonical = m_names.insert (tail);
 }
 
+/* Hash a cooked index entry by name pointer value.
+
+   We can use pointer equality here because names come from .debug_str, which
+   will normally be unique-ified by the linker.  Also, duplicates are relatively
+   harmless -- they just mean a bit of extra memory is used.  */
+
+struct cooked_index_entry_name_ptr_hash
+{
+  using is_avalanching = void;
+
+  std::uint64_t operator () (const cooked_index_entry *entry) const noexcept
+  {
+    return ankerl::unordered_dense::hash<const char *> () (entry->name);
+  }
+};
+
+/* Compare cooked index entries by name pointer value.  */
+
+struct cooked_index_entry_name_ptr_eq
+{
+  bool operator () (const cooked_index_entry *a,
+		    const cooked_index_entry *b) const noexcept
+  {
+    return a->name == b->name;
+  }
+};
+
 /* See cooked-index.h.  */
 
 void
 cooked_index_shard::finalize (const parent_map_map *parent_maps)
 {
-  auto hash_name_ptr = [] (const void *p)
-    {
-      const cooked_index_entry *entry = (const cooked_index_entry *) p;
-      return htab_hash_pointer (entry->name);
-    };
-
-  auto eq_name_ptr = [] (const void *a, const void *b) -> int
-    {
-      const cooked_index_entry *ea = (const cooked_index_entry *) a;
-      const cooked_index_entry *eb = (const cooked_index_entry *) b;
-      return ea->name == eb->name;
-    };
-
-  /* We can use pointer equality here because names come from
-     .debug_str, which will normally be unique-ified by the linker.
-     Also, duplicates are relatively harmless -- they just mean a bit
-     of extra memory is used.  */
-  htab_up seen_names (htab_create_alloc (10, hash_name_ptr, eq_name_ptr,
-					 nullptr, xcalloc, xfree));
+  gdb::unordered_set<const cooked_index_entry *,
+		     cooked_index_entry_name_ptr_hash,
+		     cooked_index_entry_name_ptr_eq> seen_names;
 
   auto hash_entry = [] (const void *e)
     {
@@ -494,10 +505,12 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
 	}
       else if (entry->lang == language_cplus || entry->lang == language_c)
 	{
-	  void **slot = htab_find_slot (seen_names.get (), entry,
-					INSERT);
-	  if (*slot == nullptr)
+	  auto [it, inserted] = seen_names.insert (entry);
+
+	  if (inserted)
 	    {
+	      /* No entry with that name was present, compute the canonical
+		 name.  */
 	      gdb::unique_xmalloc_ptr<char> canon_name
 		= (entry->lang == language_cplus
 		   ? cp_canonicalize_string (entry->name)
@@ -506,13 +519,12 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
 		entry->canonical = entry->name;
 	      else
 		entry->canonical = m_names.insert (std::move (canon_name));
-	      *slot = entry;
 	    }
 	  else
 	    {
-	      const cooked_index_entry *other
-		= (const cooked_index_entry *) *slot;
-	      entry->canonical = other->canonical;
+	      /* An entry with that name was present, re-use its canonical
+		 name.  */
+	      entry->canonical = (*it)->canonical;
 	    }
 	}
       else
