@@ -801,6 +801,9 @@ extern char *ctf_str_append_noerr (char *, const char *);
 
 extern ctf_id_t ctf_type_resolve_unsliced (ctf_dict_t *, ctf_id_t);
 extern int ctf_type_kind_unsliced (ctf_dict_t *, ctf_id_t);
+extern int ctf_type_kind_unsliced_tp (ctf_dict_t *, ctf_type_t *);
+extern int ctf_type_kind_tp (ctf_dict_t *, ctf_type_t *);
+extern int ctf_type_kind_forwarded_tp (ctf_dict_t *, ctf_type_t *);
 extern ssize_t ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
 				       ctf_type_t type, ssize_t bit_offset);
 

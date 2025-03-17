@@ -1498,6 +1498,75 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
     }
 }
 
+/* Return the kind (CTF_K_* constant) for the specified type pointer.
+   Internal use only.
+
+   Pretend that all forwards are of type CTF_K_FORWARD, for ease of
+   use and compatibility.  */
+
+int
+ctf_type_kind_unsliced_tp (ctf_dict_t *fp, ctf_type_t *tp)
+{
+  const ctf_type_t *suffix = NULL;
+
+  if (LCTF_KIND (fp, tp) == CTF_K_ENUM
+      && LCTF_VLEN (fp, tp) == 0)
+    return CTF_K_FORWARD;
+
+  return (LCTF_KIND (fp, tp));
+}
+
+/* Return the kind (CTF_K_* constant) for the specified type pointer.
+   Slices are considered to be of the same kind as the type sliced.  */
+
+int
+ctf_type_kind_tp (ctf_dict_t *fp, ctf_type_t *tp)
+{
+  int kind;
+
+  if ((kind = ctf_type_kind_unsliced_tp (fp, tp)) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if (kind == CTF_K_SLICE)
+    {
+      unsigned char *vlen;
+      const ctf_slice_t *sp;
+
+      vlen = ctf_vlen (fp, type, tp, NULL);
+      sp = (const ctf_slice_t *) vlen;
+
+      kind = ctf_type_kind_unsliced (fp, sp->cts_type);
+    }
+
+  return kind;
+}
+
+/* Return the kind of this type pointer, except, for forwards, return the kind
+   of thing this is a forward to.  */
+int
+ctf_type_kind_forwarded_tp (ctf_dict_t *fp, ctf_type_t *tp)
+{
+  int kind;
+  const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
+
+  if ((kind = ctf_type_kind (fp, type)) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if (kind != CTF_K_FORWARD)
+    return kind;
+
+  if (LCTF_KIND (fp, tp) == CTF_K_ENUM)
+    return CTF_K_ENUM;
+
+  while (LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info)))
+    tp++;
+
+  if (LCTF_INFO_KFLAG (tp->ctt_info))
+    return CTF_K_UNION;
+  else
+    return CTF_K_STRUCT;
+}
+
 /* Return the kind (CTF_K_* constant) for the specified type ID.
 
    Pretend that all forwards are of type CTF_K_FORWARD, for ease of
@@ -1533,7 +1602,7 @@ ctf_type_kind (ctf_dict_t *fp, ctf_id_t type)
   if (kind == CTF_K_SLICE)
     {
       if ((type = ctf_type_reference (fp, type)) == CTF_ERR)
-	return -1;
+	return -1;		/* errno is set for us.  */
       kind = ctf_type_kind_unsliced (fp, type);
     }
 
@@ -1546,16 +1615,17 @@ int
 ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
 {
   int kind;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
-
-  if ((kind = ctf_type_kind (fp, type)) < 0)
-    return -1;			/* errno is set for us.  */
-
-  if (kind != CTF_K_FORWARD)
-    return kind;
 
   if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
     return -1;			/* errno is set for us.  */
+
+  if ((kind = ctf_type_kind_tp (fp, tp)) < 0)
+    return (ctf_set_errno (ofp, ctf_errno (fp)));
+
+  if (kind != CTF_K_FORWARD)
+    return kind;
 
   if (LCTF_KIND (fp, tp) == CTF_K_ENUM)
     return CTF_K_ENUM;
