@@ -1477,6 +1477,11 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {"svnapot",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svpbmt",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssqosid",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"ssnpm",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"smnpm",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"smmpm",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"sspm",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"supm",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {NULL, 0, 0, 0, 0}
 };
 
@@ -2123,6 +2128,36 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
     {
       rps->error_handler
 	(_("`xtheadvector' is conflict with the `v' extension"));
+      no_conflict = false;
+    }
+  if (riscv_lookup_subset (rps->subset_list, "ssnpm", &subset) && xlen != 64)
+    {
+      rps->error_handler (_ ("rv%d does not support the `ssnpm' extension"),
+			  xlen);
+      no_conflict = false;
+    }
+  if (riscv_lookup_subset (rps->subset_list, "smnpm", &subset) && xlen != 64)
+    {
+      rps->error_handler (_ ("rv%d does not support the `smnpm' extension"),
+			  xlen);
+      no_conflict = false;
+    }
+  if (riscv_lookup_subset (rps->subset_list, "smmpm", &subset) && xlen != 64)
+    {
+      rps->error_handler (_ ("rv%d does not support the `smmpm' extension"),
+			  xlen);
+      no_conflict = false;
+    }
+  if (riscv_lookup_subset (rps->subset_list, "sspm", &subset) && xlen != 64)
+    {
+      rps->error_handler (_ ("rv%d does not support the `sspm' extension"),
+			  xlen);
+      no_conflict = false;
+    }
+  if (riscv_lookup_subset (rps->subset_list, "supm", &subset) && xlen != 64)
+    {
+      rps->error_handler (_ ("rv%d does not support the `supm' extension"),
+			  xlen);
       no_conflict = false;
     }
 

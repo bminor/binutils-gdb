@@ -6,7 +6,7 @@
   directives, the file need to be rebuilt since 2.45.
 
 * Add support for RISC-V standard extensions:
-  ssqosid v1.0.
+  ssqosid v1.0, ssnpm v1.0, smnpm v1.0, smmpm v1.0, sspm v1.0, supm v1.0.
 
 * Add support for RISC-V vendor extensions:
   T-Head: xtheadvdot v1.0.
