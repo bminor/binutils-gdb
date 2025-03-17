@@ -982,11 +982,11 @@ private:
 				  dwarf2_cu *existing_cu,
 				  enum language pretend_language);
 
-  int read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
-			      die_info *stub_comp_unit_die,
-			      const char *stub_comp_dir,
-			      die_info **result_comp_unit_die,
-			      abbrev_table_up *result_dwo_abbrev_table);
+  void read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
+			       die_info *stub_comp_unit_die,
+			       const char *stub_comp_dir,
+			       die_info **result_comp_unit_die,
+			       abbrev_table_up *result_dwo_abbrev_table);
 
   void prepare_one_comp_unit (struct dwarf2_cu *cu,
 			      enum language pretend_language);

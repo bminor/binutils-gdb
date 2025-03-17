@@ -2775,11 +2775,9 @@ cutu_reader::init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
 
    *RESULT_DWO_ABBREV_TABLE will be filled in with the abbrev table allocated
    from the dwo.  Since *RESULT_READER references this abbrev table, it must be
-   kept around for at least as long as *RESULT_READER.
+   kept around for at least as long as *RESULT_READER.  */
 
-   The result is non-zero if a valid (non-dummy) DIE was found.  */
-
-int
+void
 cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
 				     die_info *stub_comp_unit_die,
 				     const char *stub_comp_dir,
@@ -2918,9 +2916,7 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
   /* Skip dummy compilation units.  */
   if (m_info_ptr >= begin_info_ptr + dwo_unit->length
       || peek_abbrev_code (abfd, m_info_ptr) == 0)
-    return 0;
-
-  return 1;
+    m_dummy_p = true;
 }
 
 /* Return the signature of the compile unit, if found. In DWARF 4 and before,
@@ -3020,16 +3016,9 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu *this_cu,
      abbrev table.  When reading DWOs with skeletonless TUs, all the TUs
      could share abbrev tables.  */
 
-  if (read_cutu_die_from_dwo (cu, sig_type->dwo_unit,
-			      NULL /* stub_comp_unit_die */,
-			      sig_type->dwo_unit->dwo_file->comp_dir,
-			      &m_top_level_die, &m_dwo_abbrev_table)
-      == 0)
-    {
-      /* Dummy die.  */
-      m_dummy_p = true;
-    }
-
+  read_cutu_die_from_dwo (cu, sig_type->dwo_unit, NULL /* stub_comp_unit_die */,
+			  sig_type->dwo_unit->dwo_file->comp_dir,
+			  &m_top_level_die, &m_dwo_abbrev_table);
   prepare_one_comp_unit (cu, pretend_language);
 }
 
@@ -3218,16 +3207,10 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 	      dwo_unit = lookup_dwo_unit (cu, m_top_level_die, dwo_name);
 	      if (dwo_unit != NULL)
 		{
-		  if (read_cutu_die_from_dwo (cu, dwo_unit, m_top_level_die,
-					      nullptr, &dwo_comp_unit_die,
-					      &m_dwo_abbrev_table)
-		      == 0)
-		    {
-		      /* Dummy die.  */
-		      m_dummy_p = true;
-		    }
-		  else
-		    m_top_level_die = dwo_comp_unit_die;
+		  read_cutu_die_from_dwo (cu, dwo_unit, m_top_level_die,
+					  nullptr, &dwo_comp_unit_die,
+					  &m_dwo_abbrev_table);
+		  m_top_level_die = dwo_comp_unit_die;
 		}
 	      else
 		{
