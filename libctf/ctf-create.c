@@ -1312,26 +1312,6 @@ ctf_add_enum_encoded_internal (ctf_dict_t *fp, uint32_t flag, const char *name,
   return ctf_add_slice (fp, flag, type, ep);
 }
 
-/* Add a DATASEC to hang types off of.  The resulting structure should be 
-   populated at some point with the variables it contains. */
-
-ctf_id_t
-ctf_add_datasec (ctf_dict_t *fp, uint32_t flag, const char *datasec)
-{
-  ctf_dtdef_t *dtd;
-  ctf_id_t type = 0;
-  size_t initial_vlen = sizeof (ctf_var_secinfo_t) * INITIAL_VLEN;
-
-  if ((type = ctf_add_generic (fp, flag, datasec, CTF_K_DATASEC, 
-			       0, 0, initial_vlen, &dtd)) == NULL)
-    return CTF_ERR;		/* errno is set for us. */
-
-  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_DATASEC, 0, 0);
-  dtd->dtd_data->ctt_size = 0;
-
-  return type;
-}
-
 ctf_id_t
 ctf_add_enum_encoded (ctf_dict_t *fp, uint32_t flag, const char *name,
 		      const ctf_encoding_t *ep)
@@ -1818,6 +1798,25 @@ ctf_add_member (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   return ctf_add_member_offset (fp, souid, name, type, (unsigned long) - 1);
 }
 
+/* Add a DATASEC to hang variables off of.  */
+
+static ctf_id_t
+ctf_add_datasec (ctf_dict_t *fp, uint32_t flag, const char *datasec)
+{
+  ctf_dtdef_t *dtd;
+  ctf_id_t type = 0;
+  size_t initial_vlen = sizeof (ctf_var_secinfo_t) * INITIAL_VLEN;
+
+  if ((type = ctf_add_generic (fp, flag, datasec, CTF_K_DATASEC,
+			       0, 0, initial_vlen, &dtd)) == NULL)
+    return CTF_ERR;		/* errno is set for us. */
+
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_DATASEC, 0, 0);
+  dtd->dtd_data->ctt_size = 0;
+
+  return type;
+}
+
 ctf_id_t
 ctf_add_variable (ctf_dict_t *fp, const char *name, int linkage, ctf_id_t ref)
 {
@@ -1859,7 +1858,10 @@ ctf_add_section_variable (ctf_dict_t *fp, const char *datasec, const char *name,
   /* This actually deals with many possible malformed calls.  */
 
   if ((datasec_id = ctf_lookup_by_rawname (fp, CTF_K_DATASEC, datasec)) == 0)
-    return (ctf_set_typed_errno (fp, ECTF_NOSEC));
+    {
+      if ((datasec_id = ctf_add_datasec (fp, CTF_ADD_ROOT, datasec)) == CTF_ERR)
+	return CTF_ERR;			/* errno is set for us.  */
+    }
 
   sec_dtd = ctf_dtd_lookup (fp, datasec_id);
 

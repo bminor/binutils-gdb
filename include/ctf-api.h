@@ -254,7 +254,6 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_WRONGPARENT, "Cannot ctf_import: incorrect parent provided.") \
   _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.") \
   _CTF_ITEM (ECTF_BADCOMPONENT, "Declaration tag component_idx is invalid.") \
-  _CTF_ITEM (ECTF_NODATASEC, "DATASEC name not found in dictionary.") \
   _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
   _CTF_ITEM (ECTF_DESCENDING, "Field offsets may not descend.") \
   _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
@@ -993,10 +992,6 @@ extern ctf_id_t ctf_add_struct_sized (ctf_dict_t *, uint32_t flag, const char *,
 				      size_t);
 extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t flag, const char *,
 				     size_t);
-
-/* Add a datasec to hang variable information from. Works in a similar manner
-   to struct/union membership paradigms.  */
-extern ctf_id_t ctf_add_datasec (ctf_dict_t *, uint32_t flag, const char *);
 
 /* Note that CTF cannot encode a given type.  This usually returns an
    ECTF_NONREPRESENTABLE error when queried.  Mostly useful for struct members,
