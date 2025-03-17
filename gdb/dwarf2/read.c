@@ -2781,7 +2781,6 @@ void
 cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
 				     die_info *stub_comp_unit_die,
 				     const char *stub_comp_dir,
-				     die_info **result_top_level_die,
 				     abbrev_table_up *result_dwo_abbrev_table)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
@@ -2909,7 +2908,7 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
      has the benefit of simplifying the rest of the code - all the
      work to maintain the illusion of a single
      DW_TAG_{compile,type}_unit DIE is done here.  */
-  *result_top_level_die
+  m_top_level_die
     = this->read_toplevel_die (gdb::make_array_view (attributes,
 						     next_attr_idx));
 
@@ -3018,7 +3017,7 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu *this_cu,
 
   read_cutu_die_from_dwo (cu, sig_type->dwo_unit, NULL /* stub_comp_unit_die */,
 			  sig_type->dwo_unit->dwo_file->comp_dir,
-			  &m_top_level_die, &m_dwo_abbrev_table);
+			  &m_dwo_abbrev_table);
   prepare_one_comp_unit (cu, pretend_language);
 }
 
@@ -3195,7 +3194,6 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 	  if (dwo_name != nullptr)
 	    {
 	      struct dwo_unit *dwo_unit;
-	      struct die_info *dwo_comp_unit_die;
 
 	      if (m_top_level_die->has_children)
 		{
@@ -3204,14 +3202,11 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 			     sect_offset_str (this_cu->sect_off),
 			     bfd_get_filename (abfd));
 		}
+
 	      dwo_unit = lookup_dwo_unit (cu, m_top_level_die, dwo_name);
 	      if (dwo_unit != NULL)
-		{
-		  read_cutu_die_from_dwo (cu, dwo_unit, m_top_level_die,
-					  nullptr, &dwo_comp_unit_die,
-					  &m_dwo_abbrev_table);
-		  m_top_level_die = dwo_comp_unit_die;
-		}
+		read_cutu_die_from_dwo (cu, dwo_unit, m_top_level_die, nullptr,
+					&m_dwo_abbrev_table);
 	      else
 		{
 		  /* Yikes, we couldn't find the rest of the DIE, we only have
