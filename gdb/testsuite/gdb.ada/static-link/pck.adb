@@ -1,4 +1,4 @@
---  Copyright 2023-2024 Free Software Foundation, Inc.
+--  Copyright 2025 Free Software Foundation, Inc.
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -13,25 +13,11 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-with Pck; use Pck;
+package body Pck is
 
-procedure Prog is
-
-   Upper : Integer := Some_Value;
-   Value : array (1 .. Upper) of Integer := (23, 24, 25);
-
-   procedure Inner_Most is
+   procedure Do_Nothing (A : System.Address) is
    begin
-      null;  -- STOP
-   end;
+      null;
+   end Do_Nothing;
 
-   procedure Intermediate is
-   begin
-      Inner_Most;
-   end;
-
-begin
-   Intermediate;
-   Do_Nothing (Upper'Address);
-   Do_Nothing (Value'Address);
-end Prog;
+end Pck;
