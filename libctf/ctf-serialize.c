@@ -497,35 +497,6 @@ emit_symtypetab_index (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
   return 0;
 }
 
-/* Delete variables with the same name as symbols that have been reported by
-   the linker from the variable section.  Must be called from within
-   ctf_serialize, because that is the only place you can safely delete
-   variables without messing up ctf_rollback.
-
-   XXX UPTODO  */
-
-static int
-symtypetab_delete_nonstatics (ctf_dict_t *fp, ctf_dict_t *symfp)
-{
-  ctf_dvdef_t *dvd, *nvd;
-  ctf_id_t type;
-
-  for (dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL; dvd = nvd)
-    {
-      nvd = ctf_list_next (dvd);
-
-      if ((((type = (ctf_id_t) (uintptr_t)
-	     ctf_dynhash_lookup (fp->ctf_objthash, dvd->dvd_name)) > 0)
-	   || (type = (ctf_id_t) (uintptr_t)
-	       ctf_dynhash_lookup (fp->ctf_funchash, dvd->dvd_name)) > 0)
-	  && ctf_dynhash_lookup (symfp->ctf_dynsyms, dvd->dvd_name) != NULL
-	  && type == dvd->dvd_type)
-	ctf_dvd_delete (fp, dvd);
-    }
-
-  return 0;
-}
-
 /* Figure out the sizes of the symtypetab sections, their indexed state,
    etc.
 
@@ -542,13 +513,13 @@ ctf_symtypetab_sect_sizes (ctf_dict_t *fp, emit_symtypetab_state_t *s,
   size_t objt_unpadsize, func_unpadsize, objt_padsize, func_padsize;
 
   /* If doing a writeout as part of linking, and the link flags request it,
-     filter out reported symbols from the variable section, and filter out all
-     other symbols from the symtypetab sections.  (If we are not linking, the
-     symbols are sorted; if we are linking, don't bother sorting if we are not
-     filtering out reported symbols: this is almost certainly an ld -r and only
-     the linker is likely to consume these symtypetabs again.  The linker
-     doesn't care what order the symtypetab entries are in, since it only
-     iterates over symbols and does not use the ctf_lookup_by_symbol* API.)  */
+     filter out all unreported symbols from the symtypetab sections.  (If we are
+     not linking, the symbols are sorted; if we are linking, don't bother
+     sorting if we are not filtering out reported symbols: this is almost
+     certainly an ld -r and only the linker is likely to consume these
+     symtypetabs again.  The linker doesn't care what order the symtypetab
+     entries are in, since it only iterates over symbols and does not use the
+     ctf_lookup_by_symbol* API.)  */
 
   s->sort_syms = 1;
   if (fp->ctf_flags & LCTF_LINKING)
@@ -632,16 +603,6 @@ ctf_symtypetab_sect_sizes (ctf_dict_t *fp, emit_symtypetab_state_t *s,
       *func_size += func_padsize;
       *funcidx_size = 0;
     }
-
-  /* If we are filtering symbols out, those symbols that the linker has not
-     reported have now been removed from the ctf_objthash and ctf_funchash.
-     Delete entries from the variable section that duplicate newly-added
-     symbols.  There's no need to migrate new ones in: we do that (if necessary)
-     in ctf_link_deduplicating_variables.  */
-
-  if (s->filter_syms && s->symfp->ctf_dynsyms &&
-      symtypetab_delete_nonstatics (fp, s->symfp) < 0)
-    return -1;
 
   return 0;
 }
