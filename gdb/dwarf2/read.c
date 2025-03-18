@@ -6514,36 +6514,6 @@ lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
   return it != per_bfd->dwo_files.end () ? it->get() : nullptr;
 }
 
-/* die_reader_func for create_dwo_cu.  */
-
-static void
-create_dwo_cu_reader (dwarf2_cu *cu, die_info *comp_unit_die,
-		      dwo_file *dwo_file, dwo_unit *dwo_unit)
-{
-  sect_offset sect_off = cu->per_cu->sect_off;
-  struct dwarf2_section_info *section = cu->per_cu->section;
-
-  std::optional<ULONGEST> signature = lookup_dwo_id (cu, comp_unit_die);
-  if (!signature.has_value ())
-    {
-      complaint (_(DWARF_ERROR_PREFIX
-		   "debug entry at offset %s is missing its dwo_id"
-		   " [in module %s]"),
-		 sect_offset_str (sect_off), dwo_file->dwo_name.c_str ());
-      return;
-    }
-
-  dwo_unit->dwo_file = dwo_file;
-  dwo_unit->signature = *signature;
-  dwo_unit->section = section;
-  dwo_unit->sect_off = sect_off;
-  dwo_unit->length = cu->per_cu->length ();
-
-  dwarf_read_debug_printf ("  offset %s, dwo_id %s",
-			   sect_offset_str (sect_off),
-			   hex_string (dwo_unit->signature));
-}
-
 /* Create the dwo_units for the CUs in a DWO_FILE.
    Note: This function processes DWO files only, not DWP files.  */
 
@@ -6569,7 +6539,6 @@ create_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
   end_ptr = info_ptr + section.size;
   while (info_ptr < end_ptr)
     {
-      struct dwo_unit read_unit {};
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
 
       /* The length of the CU gets set by the cutu_reader just below.  */
@@ -6578,17 +6547,34 @@ create_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
       cutu_reader reader (&per_cu, per_objfile, language_minimal,
 			  cu, &dwo_file);
 
-      if (!reader.is_dummy ())
-	create_dwo_cu_reader (reader.cu (), reader.top_level_die (), &dwo_file,
-			      &read_unit);
       info_ptr += per_cu.length ();
 
-      /* If the unit could not be parsed, skip it.  */
-      if (read_unit.dwo_file == NULL)
+      if (reader.is_dummy())
 	continue;
 
+      std::optional<ULONGEST> signature
+	= lookup_dwo_id (cu, reader.top_level_die ());
+      if (!signature.has_value ())
+	{
+	  complaint (_(DWARF_ERROR_PREFIX
+		       "debug entry at offset %s is missing its dwo_id"
+		       " [in module %s]"),
+		     sect_offset_str (sect_off),
+		     dwo_file.dwo_name.c_str ());
+	  continue;
+	}
+
       dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
-      *dwo_unit = read_unit;
+
+      dwo_unit->dwo_file = &dwo_file;
+      dwo_unit->signature = *signature;
+      dwo_unit->section = &section;
+      dwo_unit->sect_off = sect_off;
+      dwo_unit->length = per_cu.length ();
+
+      dwarf_read_debug_printf ("  offset %s, dwo_id %s",
+			       sect_offset_str (sect_off),
+			       hex_string (dwo_unit->signature));
 
       auto [it, inserted] = dwo_file.cus.emplace (dwo_unit);
       if (!inserted)
