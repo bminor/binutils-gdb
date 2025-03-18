@@ -90,18 +90,34 @@ public:
   }
 
 private:
-
-  /* Hash function for a cutu_reader.  */
-  static hashval_t hash_cutu_reader (const void *a);
-
-  /* Equality function for cutu_reader.  */
-  static int eq_cutu_reader (const void *a, const void *b);
-
   /* The abbrev table cache used by this indexer.  */
   abbrev_table_cache m_abbrev_table_cache;
 
+  /* Hash function for a cutu_reader.  */
+  struct cutu_reader_hash
+  {
+    using is_transparent = void;
+
+    std::uint64_t operator() (const cutu_reader_up &reader) const noexcept;
+    std::uint64_t operator() (const dwarf2_per_cu &per_cu) const noexcept;
+  };
+
+  /* Equality function for cutu_reader.  */
+  struct cutu_reader_eq
+  {
+    using is_transparent = void;
+
+    bool operator() (const cutu_reader_up &a,
+		     const cutu_reader_up &b) const noexcept;
+
+    bool operator() (const dwarf2_per_cu &per_cu,
+		     const cutu_reader_up &reader) const noexcept;
+  };
+
   /* A hash table of cutu_reader objects.  */
-  htab_up m_reader_hash;
+  gdb::unordered_set<cutu_reader_up, cutu_reader_hash, cutu_reader_eq>
+    m_reader_hash;
+
   /* The index shard that is being constructed.  */
   cooked_index_shard_up m_shard;
 

@@ -22,11 +22,7 @@
 /* See cooked-index-storage.h.  */
 
 cooked_index_storage::cooked_index_storage ()
-  : m_reader_hash (htab_create_alloc (10, hash_cutu_reader,
-				      eq_cutu_reader,
-				      htab_delete_entry<cutu_reader>,
-				      xcalloc, xfree)),
-    m_shard (new cooked_index_shard)
+  : m_shard (new cooked_index_shard)
 {
 }
 
@@ -35,9 +31,8 @@ cooked_index_storage::cooked_index_storage ()
 cutu_reader *
 cooked_index_storage::get_reader (dwarf2_per_cu *per_cu)
 {
-  int index = per_cu->index;
-  return (cutu_reader *) htab_find_with_hash (m_reader_hash.get (),
-					      &index, index);
+  auto it = m_reader_hash.find (*per_cu);
+  return it != m_reader_hash.end () ? it->get () : nullptr;
 }
 
 /* See cooked-index-storage.h.  */
@@ -47,30 +42,43 @@ cooked_index_storage::preserve (cutu_reader_up reader)
 {
   m_abbrev_table_cache.add (reader->release_abbrev_table ());
 
-  int index = reader->cu ()->per_cu->index;
-  void **slot = htab_find_slot_with_hash (m_reader_hash.get (), &index,
-					  index, INSERT);
-  gdb_assert (*slot == nullptr);
-  cutu_reader *result = reader.get ();
-  *slot = reader.release ();
-  return result;
+  auto [it, inserted] = m_reader_hash.insert (std::move (reader));
+  gdb_assert (inserted);
+
+  return it->get();
 }
 
 /* See cooked-index-storage.h.  */
 
-hashval_t
-cooked_index_storage::hash_cutu_reader (const void *a)
+std::uint64_t
+cooked_index_storage::cutu_reader_hash::operator()
+  (const cutu_reader_up &reader) const noexcept
 {
-  const cutu_reader *reader = (const cutu_reader *) a;
-  return reader->cu ()->per_cu->index;
+  return (*this) (*reader->cu ()->per_cu);
 }
 
 /* See cooked-index-storage.h.  */
 
-int
-cooked_index_storage::eq_cutu_reader (const void *a, const void *b)
+std::uint64_t
+cooked_index_storage::cutu_reader_hash::operator() (const dwarf2_per_cu &per_cu)
+  const noexcept
 {
-  const cutu_reader *ra = (const cutu_reader *) a;
-  const int *rb = (const int *) b;
-  return ra->cu ()->per_cu->index == *rb;
+  return per_cu.index;
+}
+
+/* See cooked-index-storage.h.  */
+
+bool
+cooked_index_storage::cutu_reader_eq::operator() (const cutu_reader_up &a,
+						  const cutu_reader_up &b) const noexcept
+{
+  return (*this) (*a->cu ()->per_cu, b);
+}
+
+/* See cooked-index-storage.h.  */
+
+bool cooked_index_storage::cutu_reader_eq::operator()
+  (const dwarf2_per_cu &per_cu, const cutu_reader_up &reader) const noexcept
+{
+  return per_cu.index == reader->cu ()->per_cu->index;
 }
