@@ -282,8 +282,9 @@ typedef struct ctf_dedup
   /* Atoms tables of decorated names: maps undecorated name to decorated name.
      (The actual allocations are in the CTF dict for the former and the real
      atoms table for the latter).  Uses the same namespaces as ctf_lookups,
-     below, but has no need for null-termination.  */
-  ctf_dynhash_t *cd_decorated_names[5];
+     below, with the addition of type and decl tags, and with no need for
+     null-termination.  */
+  ctf_dynhash_t *cd_decorated_names[6];
 
   /* Map type names to a hash from type hash value -> number of times each value
      has appeared.  Enumeration constants are tracked via the enum they appear
@@ -305,15 +306,20 @@ typedef struct ctf_dedup
      can be cited from multiple TUs.  Only populated in that link mode.  */
   ctf_dynhash_t *cd_struct_origin;
 
+  /* Maps from the GID of variables on the input to a (type ID, component_idx)
+     pair identifying the corresponding datasec row.  */
+  ctf_dynhash_t *cd_var_datasec;
+
   /* Maps type hash values to a set of hash values of the types that cite them:
      i.e., pointing backwards up the type graph.  Used for recursive conflict
      marking.  Citations from tagged structures, unions, and forwards do not
-     appear in this graph.  */
+     appear in this graph, except that decorated names of tagged structs and
+     unions are mapped to hash values of decl tags that cite specific struct
+     fields.  */
   ctf_dynhash_t *cd_citers;
 
   /* Maps type hash values to input global type IDs.  The value is a set (a
-     hash) of global type IDs.  Discarded before each rehashing.  The result of
-     the ctf_dedup function.  */
+     hash) of global type IDs.  The result of the ctf_dedup function.  */
   ctf_dynhash_t *cd_output_mapping;
 
   /* A map giving the GID of the first appearance of each type for each type
@@ -330,6 +336,11 @@ typedef struct ctf_dedup
      ID represents a *target* ID (i.e. the cd_output_mapping of some specified
      input): we encode the shared (parent) dict with an ID of -1.  */
   ctf_dynhash_t *cd_emission_struct_members;
+
+  /* Maps the global type IDs of input decl tags that cite structure members to
+     the global type IDs of the structures they tag: these are all emitted
+     late.  */
+  ctf_dynhash_t *cd_emission_struct_decl_tags;
 
   /* A set (a hash) of hash values of conflicting types.  */
   ctf_dynset_t *cd_conflicting_types;
@@ -806,6 +817,8 @@ extern int ctf_type_kind_tp (ctf_dict_t *, ctf_type_t *);
 extern int ctf_type_kind_forwarded_tp (ctf_dict_t *, ctf_type_t *);
 extern ssize_t ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
 				       ctf_type_t type, ssize_t bit_offset);
+extern ctf_datasec_t *ctf_datasec_entry (ctf_dict_t *, ctf_id_t,
+					 int component_idx);
 
 _libctf_printflike_ (1, 2)
 extern void ctf_dprintf (const char *, ...);

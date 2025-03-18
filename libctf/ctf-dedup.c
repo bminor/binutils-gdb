@@ -128,6 +128,11 @@
     - all cycles in C depend on the presence of tagged structs/unions
     - all tagged structs/unions have a unique name they can be disambiguated by
 
+   Datasecs and vars are a special case.  We skip datasecs entirely, treat decl
+   tags into datasecs as if they pointed at the variable their decl cites, and
+   hash the name and datasec content that references a given variable into the
+   variable's hash, uniquifying variables and their datasec portion as one unit.
+
    [ctf_dedup_is_stub]
    This means that we can break all cycles by ceasing to hash in cited types at
    every tagged struct/union and instead hashing in a stub consisting of the
@@ -155,13 +160,22 @@
    *type hash values*, so it's small: in effect it is automatically
    deduplicated.)
 
+   One caveat: decl tags to struct and union members are only considered the
+   same type if they have the same name; so decl tags to one conflicting
+   structure in several different inputs can be considered unconflicting even
+   though they are citing a specific member in an input struct, as long as that
+   member has the same number in both!  So we pay a small efficiency cost and
+   generate a citers graph from decl tags to struct/union members specifically
+   so that when structs or unions are marked conflicted, we chase down all
+   the decl tags that cite any of their members and mark them confliocted too.
+
    2) COLLISIONAL MARKING.
 
-   [ctf_dedup_detect_name_ambiguity, ctf_dedup_mark_conflicting_hash]
-   We identify types whose names collide during the hashing process, and count
-   the rough number of uses of each name (caching may throw it off a bit: this
+   [ctf_dedup_detect_name_ambiguity, ctf_dedup_mark_conflicting_hash] We
+   identify types whose names collide during the hashing process, and count the
+   rough number of uses of each name (caching may throw it off a bit: this
    doesn't need to be accurate).  We then mark the less-frequently-cited types
-   with each names conflicting: the most-frequently-cited one goes into the
+   with each name conflicting: the most-frequently-cited one goes into the
    shared type dictionary, while all others are duplicated into per-TU
    dictionaries, named after the input TU, that have the shared dictionary as a
    parent.  For structures and unions this is not quite good enough: we'd like
@@ -172,6 +186,9 @@
    the forward, leaving no sign.  So structures and unions do not take part in
    this popularity contest: if their names are ambiguous, they are just
    duplicated, and only a forward appears in the shared dict.
+
+   Datasecs are again ignored, and so are tags: their names are always
+   nonconflicting.
 
    [ctf_dedup_propagate_conflictedness]
    The process of marking types conflicted is itself recursive: we recursively
@@ -231,6 +248,9 @@
    because you cannot cite a single structure member from another type, we avoid
    emitting the members at this stage to keep recursion depths down a bit.
 
+   Variable emission naturally emits the relevant piece of the datasec as well,
+   in the appropriate dict.
+
    At this point, if we have by some mischance decided that two different types
    with child types that hash to different values have in fact got the same hash
    value themselves and *not* marked it conflicting, the type walk will walk
@@ -256,6 +276,12 @@
    Walk over all structures with members that need emission and emit all of
    them. Every type has been emitted at this stage, so emission cannot
    fail.
+
+   [ctf_dedup_emit_decl_tags]
+   This has to be done last, because it can point at individual struct members,
+   which are not emitted until this stage.  Nonetheless, since structs do not
+   change at emission time, the actual component_idx of struct member decl tags
+   never changes from its source.
 
    [ctf_dedup_strings]
    Accumulate a (string -> dict count) hash for all strings with refs in
@@ -442,12 +468,31 @@ ctf_decorate_type_name (ctf_dict_t *fp, const char *name, int kind)
       i = 1;
       break;
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       k = "e ";
       i = 2;
       break;
+
+    /* These decorated names have an underscore in because of an optimization in
+       a hot path in ctf_dedup_detect_name/ambiguity: all non-default C
+       namespaces contain only types that can have forwards to them
+       ("forwardable kinds"); so we check to see if the second character is a
+       space to see if the kind is forwardable.  The next two namespaces, being
+       non-C and more-or-less internal implementation details, indicate this
+       with a leading underscore. */
+
+    case CTF_K_TYPE_TAG:
+    case CTF_K_DECL_TAG:
+      k = "_t ";
+      i = 3;
+      break;
+    case CTF_K_DATASEC:
+      k = "_s ";
+      i = 4;
+      break;
     default:
       k = "";
-      i = 3;
+      i = 5;
     }
 
   if ((ret = ctf_dynhash_lookup (d->cd_decorated_names[i], name)) == NULL)
@@ -472,6 +517,44 @@ ctf_decorate_type_name (ctf_dict_t *fp, const char *name, int kind)
  oom:
   ctf_set_errno (fp, ENOMEM);
   return NULL;
+}
+
+/* Keep track of the variable -> datasec mappings for one datasec in one
+   input.  */
+
+static int
+ctf_dedup_track_var (ctf_dict_t *fp, ctf_dict_t *input, ctf_id_t datasec)
+{
+  ctf_dedup_t *d = &fp->ctf_dedup;
+  ctf_next_t *it = NULL;
+  ctf_id_t var;
+  int component_idx = 0;
+
+  /* This is a hash of variable GID -> (datasec type ID, component_idx),
+     but since the types match we can abuse the GID machinery to
+     make it look like a hash of GID -> GID by tracking
+     (component_idx, datasec type ID).  */
+
+  while ((var = ctf_datasec_var_next (input, datasec, &it,
+				      NULL, NULL)) != CTF_ERR)
+    {
+      if (ctf_dynhash_cinsert (d->cd_var_datasec,
+			       CTF_DEDUP_GID (fp, input, var),
+			       CTF_DEDUP_GID (fp, component_idx, datasec)) < 0)
+	{
+	  ctf_next_destroy (it);
+	  return ctf_set_errno (fp, errno);
+	}
+    }
+  if (ctf_errno (input) != ECTF_NEXT_END)
+    {
+      ctf_next_destroy (it);
+      ctf_err_warn (fp, 0, ctf_errno (input),
+		    _("iteration failure tracking datasec vars"));
+      return ctf_set_typed_errno (fp, ctf_errno (input));
+    }
+
+  return 0;
 }
 
 /* Hash a type, possibly debugging-dumping something about it as well.  */
@@ -581,6 +664,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
   const char *hval = NULL;
   const char *whaterr;
   int err = 0;
+  int64_t component_idx = -1;
 
   /* "citer" is for types that reference only one other type: "citers" can store
      many of them, but is more expensive to both populate and traverse.  */
@@ -602,12 +686,30 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
     }									\
   while (0)
 
+  /* We never directly hash datasecs.  Make sure of that, even if a corrupted
+     type graph has some type somehow point to one.  */
+
+  if (_libctf_unlikely_ (kind == CTF_K_DATASEC))
+    {
+      ctf_set_errno (fp, ECTF_CORRUPT);
+      ctf_err_warn (fp, 0, ECTF_CORRUPT, _("%s (%i): some type points to a datasec, "
+					   "during type hashing for type %lx, "
+					   "kind %i"), ctf_link_input_name (input),
+		    input_num, type, kind);
+      return NULL;
+    }
+
+  /* We never directly hash prefix kinds.  */
+
+  if (!ctf_assert (fp, kind != CTF_K_BIG && kind != CTF_K_CONFLICTING))
+    return NULL;				/* errno is set for us.  */
+
   /* If this is a named struct or union or a forward to one, and this is a child
      traversal, treat this type as if it were a forward -- do not recurse to
      children, ignore all content not already hashed in, and hash in the
      decorated name of the type instead.  */
 
-  if (ctf_dedup_is_stub (name, kind, tp->ctt_type, flags))
+  if (ctf_dedup_is_stub (name, kind, ctf_type_kind_forwarded_tp (input, tp), flags))
     {
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
       ctf_dprintf ("Struct/union/forward citation: substituting forwarding "
@@ -677,7 +779,9 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
      possible.  Equally, we do not want to hash in the isroot flag: both the
      compiler and the deduplicator set the nonroot flag to indicate clashes with
      *other types in the same TU* with the same name: so two types can easily
-     have distinct nonroot flags, yet be exactly the same type.*/
+     have distinct nonroot flags, yet be exactly the same type.  For the same
+     reason, type prefixes are not hashed: one of them indicates only
+     nonrootness, and the other is merely an implementation detail.  */
 
   ctf_sha1_init (&hash);
   if (name)
@@ -691,19 +795,24 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       /* No extra state.  */
       break;
     case CTF_K_FORWARD:
+      {
+	int fwdkind = ctf_type_kind_forwarded_tp (input, tp);
 
-      /* Add the forwarded kind, stored in the ctt_type.  */
-      ctf_dedup_sha1_add (&hash, &tp->ctt_type, sizeof (tp->ctt_type),
-			  "forwarded kind", depth);
-      break;
+	/* Add the forwarded kind.  */
+	ctf_dedup_sha1_add (&hash, &fwdkind, sizeof (fwdkind), "forwarded kind",
+			    depth);
+	break;
+      }
     case CTF_K_INTEGER:
     case CTF_K_FLOAT:
       {
 	ctf_encoding_t ep;
+	size_t size;
+
 	memset (&ep, 0, sizeof (ctf_encoding_t));
 
-	ctf_dedup_sha1_add (&hash, &tp->ctt_size, sizeof (uint32_t), "size",
-			    depth);
+	ctf_get_ctt_size (input, tp, &size, NULL);
+	ctf_dedup_sha1_add (&hash, &size, sizeof (uint32_t), "size", depth);
 	if (ctf_type_encoding (input, type, &ep) < 0)
 	  {
 	    whaterr = N_("error getting encoding");
@@ -713,12 +822,38 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 			    depth);
 	break;
       }
+    case CTF_K_BTF_FLOAT:
+      {
+	size_t size;
+
+	ctf_get_ctt_size (input, tp, &size, NULL);
+	ctf_dedup_sha1_add (&hash, &size, sizeof (size_t), "size", depth);
+	break;
+      }
+    case CTF_K_DECL_TAG:
+      {
+	ctf_id_t ref;
+	int ref_kind;
+
+	/* Decl tags with component indexes mix in the index.  We mix in the
+	   component index unconditionally, because an index of -1 is fine
+	   too.  */
+
+	if ((ref = ctf_decl_tag (input, type, &component_idx)) == CTF_ERR)
+	  {
+	    whaterr = N_("error doing decl tag hashing");
+	    goto err;
+	  }
+	ctf_dedup_sha1_add (&hash, &component_idx, sizeof (component_idx),
+			    "component index", depth);
+      }
       /* Types that reference other types.  */
     case CTF_K_TYPEDEF:
     case CTF_K_VOLATILE:
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
     case CTF_K_POINTER:
+    case CTF_K_TYPE_TAG:
       /* Hash the referenced type, if not already hashed, and mix it in.  */
       child_type = ctf_type_reference (input, type);
       if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
@@ -730,6 +865,36 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "referenced type",
 			  depth);
       citer = hval;
+
+      /* Note: for references to structs/unions, the citer will be a stub: this
+	 is basically unused.  However, for decl tags with a component_idx where
+	 the referenced type is a struct or union, we add a citer entry which
+	 maps from the struct/union's decorated name to the hash value of the
+	 decl_tag.  */
+
+      if (kind == CTF_K_DECL_TAG && component_idx > -1)
+	{
+	  int child_kind = ctf_type_kind (input, child_type);
+
+	  if (child_kind == CTF_K_STRUCT || child_kind == CTF_K_UNION)
+	    {
+	      ctf_dynset_t *citer_hashes;
+	      const char *child_name;
+
+	      if (((child_name = ctf_type_name_raw (input, child_type)) == NULL)
+		  || (child_name = ctf_decorate_type_name (fp, child_name,
+							   child_kind)) == NULL)
+		{
+		  whaterr = N_("error tracking struct -> decl tag mappings");
+		  goto err;
+		}
+
+	      if ((citer_hashes = make_set_element (d->cd_citers, child_name)) == NULL)
+		goto oom;
+	      if (ctf_dynset_cinsert (citer_hashes, hval) < 0)
+		goto oom;
+	    }
+	}
 
       break;
 
@@ -865,13 +1030,45 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	free (args);
 	break;
       }
-    case CTF_K_ENUM:
+    case CTF_K_FUNC_LINKAGE:
       {
-	int val;
-	const char *ename;
+	int linkage;
 
-	ctf_dedup_sha1_add (&hash, &tp->ctt_size, sizeof (uint32_t),
-			    "enum size", depth);
+	/* Hash the linkage.  */
+	if ((linkage = ctf_type_linkage (input, type)) < 0)
+	  {
+	    whaterr = N_("error doing linkage determination during hashing");
+	    goto input_err;
+	  }
+	ctf_dedup_sha1_add (&hash, &linkage, sizeof (linkage),
+			    "type linkage", depth);
+
+	/* Hash the referenced function, if not already hashed, and mix it in.  */
+	child_type = ctf_type_reference (input, type);
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
+					 flags, depth, populate_fun)) == NULL)
+	  {
+	    whaterr = N_("error doing referenced type hashing");
+	    goto err;
+	  }
+	ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "referenced type",
+			    depth);
+	citer = hval;
+
+	break;
+      }
+    case CTF_K_ENUM:
+    case CTF_K_ENUM64:
+      {
+	int64_t val;
+	const char *ename;
+	size_t size;
+	int enum_unsigned = ctf_enum_unsigned (input, type);
+
+	ctf_get_ctt_size (input, tp, &size, NULL);
+	ctf_dedup_sha1_add (&hash, &size, sizeof (size_t), "enum size", depth);
+	ctf_dedup_sha1_add (&hash, &enum_unsigned, sizeof (enum_unsigned),
+			    "enum unsignedness", depth);
 	while ((ename = ctf_enum_next (input, type, &i, &val)) != NULL)
 	  {
 	    ctf_dedup_sha1_add (&hash, ename, strlen (ename) + 1, "enumerator",
@@ -880,6 +1077,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  }
 	if (ctf_errno (input) != ECTF_NEXT_END)
 	  {
+	    ctf_next_destroy (i);
 	    whaterr = N_("error doing enum member iteration");
 	    goto input_err;
 	  }
@@ -893,13 +1091,23 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	const char *mname;
 	ctf_id_t membtype;
 	ssize_t size;
+	int bit_width;
+	int is_bitfield;
 
 	ctf_get_ctt_size (input, tp, &size, NULL);
 	ctf_dedup_sha1_add (&hash, &size, sizeof (ssize_t), "struct size",
 			    depth);
 
+	if ((is_bitfield = ctf_struct_bitfield (input, type)) < 0)
+	  {
+	    whaterr = N_("error doing struct/union member bitfield checking");
+	    goto input_err;
+	  }
+	ctf_dedup_sha1_add (&hash, &is_bitfield, sizeof (is_bitfield),
+			    "struct/union bitfieldness", depth);
+
 	while ((offset = ctf_member_next (input, type, &i, &mname, &membtype,
-					  0)) >= 0)
+					  &bit_width, 0)) >= 0)
 	  {
 	    if (mname == NULL)
 	      mname = "";
@@ -921,6 +1129,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 				depth);
 	    ctf_dedup_sha1_add (&hash, &offset, sizeof (offset), "member offset",
 				depth);
+	    ctf_dedup_sha1_add (&hash, &bit_width, sizeof (bit_width),
+				"member bit width", depth);
 	    ADD_CITER (citers, hval);
 	  }
 	if (ctf_errno (input) != ECTF_NEXT_END)
@@ -930,6 +1140,74 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  }
 	break;
       }
+    case CTF_K_VAR:
+      {
+	void *datasec;
+	ctf_id_t datasec_type;
+	int component_idx;
+	const char *datasec_name;
+	ctf_var_secinfo_t *entry;
+	int linkage;
+
+	/* Hash the linkage.  */
+	if ((linkage = ctf_type_linkage (input, type)) < 0)
+	  {
+	    whaterr = N_("error doing linkage determination during hashing");
+	    goto input_err;
+	  }
+	ctf_dedup_sha1_add (&hash, &linkage, sizeof (linkage),
+			    "var linkage", depth);
+
+	/* Hash the datasec info.  The "input" here is the component_idx.  */
+
+	if (!ctf_dynhash_lookup_kv (d->cd_var_datasec,
+				    CTF_DEDUP_GID (fp, input, type), NULL,
+				    &datasec))
+	  {
+	    whaterr = N_("error getting var->datasec info during dedup");
+	    goto err;
+	  }
+	datasec_type = CTF_DEDUP_GID_TO_TYPE (datasec);
+	component_idx = CTF_DEDUP_GID_TO_INPUT (datasec);
+
+	if (((datasec_name = ctf_type_name_raw (input, datasec_type)) == NULL)
+	    || (datasec_name = ctf_decorate_type_name (fp, datasec_name,
+						       CTF_K_DATASEC)) == NULL)
+	  {
+	    whaterr = N_("error getting datasec name during dedup");
+	    goto err;
+	  }
+	ctf_dedup_sha1_add (&hash, datasec_name, strlen (datasec_name) + 1,
+			    "var datasec name", depth);
+
+	if ((entry = ctf_datasec_entry (input, datasec_type,
+					component_idx)) == NULL)
+	  {
+	    whaterr = N_("datasec component_idx out of range during dedup");
+	    goto err;
+	  }
+
+	ctf_dedup_sha1_add (&hash, &entry->cvs_offset,
+			    sizeof (entry->cvs_offset), "datasec offset", depth)
+	ctf_dedup_sha1_add (&hash, &entry->cvs_size,
+			    sizeof (entry->cvs_size), "datasec size", depth)
+
+	child_type = ctf_type_reference (input, type);
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
+					 flags, depth, populate_fun)) == NULL)
+	  {
+	    whaterr = N_("error doing referenced type hashing");
+	    goto err;
+	  }
+	ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "var type",
+			    depth);
+	citer = hval;
+
+	break;
+      }
+    case CTF_K_DATASEC:
+      whaterr = N_("error: attempt to hash datasec");
+      goto err;
     default:
       whaterr = N_("error: unknown type kind");
       goto err;
@@ -1031,7 +1309,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
 					  const char *hash))
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
   void *type_id;
   const char *hval = NULL;
   const char *name;
@@ -1056,7 +1334,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
 
   type_id = CTF_DEDUP_GID (fp, input_num, type);
 
-  if ((tp = ctf_lookup_by_id (&input, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&input, type, &suffix)) == NULL)
     {
       ctf_set_errno (fp, ctf_errno (input));
       ctf_err_warn (fp, 0, 0, _("%s (%i): lookup failure for type %lx: "
@@ -1065,10 +1343,10 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
       return NULL;		/* errno is set for us.  */
     }
 
-  kind = LCTF_INFO_KIND (input, tp->ctt_info);
-  name = ctf_strraw (input, tp->ctt_name);
+  kind = LCTF_KIND (input, tp);
+  name = ctf_strraw (input, suffix->ctt_name);
 
-  if (tp->ctt_name == 0 || !name || name[0] == '\0')
+  if (suffix->ctt_name == 0 || !name || name[0] == '\0')
     name = NULL;
 
   /* Decorate the name appropriately for the namespace it appears in: forwards
@@ -1078,7 +1356,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
   if (name)
     {
       if (kind == CTF_K_FORWARD)
-	fwdkind = tp->ctt_type;
+	ctf_type_kind_forwarded_tp (input, tp);
 
       if ((decorated = ctf_decorate_type_name (fp, name, fwdkind)) == NULL)
 	return NULL;				/* errno is set for us.  */
@@ -1173,6 +1451,7 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
   ctf_dynset_t *type_ids;
+  int kind;
 
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
   ctf_dprintf ("Hash %s, %s, into output mapping for %i/%lx @ %s\n",
@@ -1265,7 +1544,8 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
       && ctf_dynset_insert (type_ids, id) < 0)
     return ctf_set_errno (fp, errno);
 
-  if (ctf_type_kind_unsliced (input, type) == CTF_K_ENUM)
+  kind = ctf_type_kind_unsliced (input, type);
+  if (kind == CTF_K_ENUM || kind == CTF_K_ENUM64)
     {
       ctf_next_t *i = NULL;
       const char *enumerator;
@@ -1328,61 +1608,11 @@ ctf_dedup_count_name (ctf_dict_t *fp, const char *name, void *id)
   return 0;
 }
 
-/* Mark a single hash as corresponding to a conflicting type.  Mark all types
-   that cite it as conflicting as well, terminating the recursive walk only when
-   types that are already conflicted or types do not cite other types are seen.
-   (Tagged structures and unions do not appear in the cd_citers graph, so the
-   walk also terminates there, since any reference to a conflicting structure is
-   just going to reference an unconflicting forward instead: see
-   ctf_dedup_maybe_synthesize_forward.)  */
-
+/* Look up a type kind from the output mapping, given a type hash value.
+   Optionally return its GID as well.  */
 static int
-ctf_dedup_mark_conflicting_hash (ctf_dict_t *fp, const char *hval)
-{
-  ctf_dedup_t *d = &fp->ctf_dedup;
-  ctf_next_t *i = NULL;
-  int err;
-  const void *k;
-  ctf_dynset_t *citers;
-
-  /* Mark conflicted if not already so marked.  */
-  if (ctf_dynset_exists (d->cd_conflicting_types, hval, NULL))
-    return 0;
-
-  ctf_dprintf ("Marking %s as conflicted\n", hval);
-
-  if (ctf_dynset_cinsert (d->cd_conflicting_types, hval) < 0)
-    {
-      ctf_dprintf ("Out of memory marking %s as conflicted\n", hval);
-      return ctf_set_errno (fp, errno);
-    }
-
-  /* If any types cite this type, mark them conflicted too.  */
-  if ((citers = ctf_dynhash_lookup (d->cd_citers, hval)) == NULL)
-    return 0;
-
-  while ((err = ctf_dynset_cnext (citers, &i, &k)) == 0)
-    {
-      const char *hv = (const char *) k;
-
-      if (ctf_dynset_exists (d->cd_conflicting_types, hv, NULL))
-	continue;
-
-      if (ctf_dedup_mark_conflicting_hash (fp, hv) < 0)
-	{
-	  ctf_next_destroy (i);
-	  return -1;				/* errno is set for us.  */
-	}
-    }
-  if (err != ECTF_NEXT_END)
-    return ctf_set_errno (fp, err);
-
-  return 0;
-}
-
-/* Look up a type kind from the output mapping, given a type hash value.  */
-static int
-ctf_dedup_hash_kind (ctf_dict_t *fp, ctf_dict_t **inputs, const char *hash)
+ctf_dedup_hash_kind_gid (ctf_dict_t *fp, ctf_dict_t **inputs, const char *hash,
+			 void **gid)
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
   void *id;
@@ -1407,8 +1637,121 @@ ctf_dedup_hash_kind (ctf_dict_t *fp, ctf_dict_t **inputs, const char *hash)
   if (!ctf_assert (fp, id))
     return -1;
 
+  if (gid)
+    *gid = id;
+
   return ctf_type_kind_unsliced (inputs[CTF_DEDUP_GID_TO_INPUT (id)],
 				 CTF_DEDUP_GID_TO_TYPE (id));
+}
+
+/* Mark the types that cite a type with a given hash as a conflicting type.
+   Internal implementation detail of ctf_dedup_mark_conflicting_hash(),
+   which see.  */
+
+static int
+ctf_dedup_mark_conflicting_hash_citers (ctf_dict_t *fp, ctf_dict_t **inputs,
+					const char *hval)
+{
+  ctf_dedup_t *d = &fp->ctf_dedup;
+  ctf_next_t *i = NULL;
+  const void *k;
+  ctf_dynset_t *citers;
+
+  /* If any types cite this type, mark them conflicted too.  */
+  if ((citers = ctf_dynhash_lookup (d->cd_citers, hval)) == NULL)
+    return 0;
+
+  while ((err = ctf_dynset_cnext (citers, &i, &k)) == 0)
+    {
+      const char *hv = (const char *) k;
+
+      if (ctf_dynset_exists (d->cd_conflicting_types, hv, NULL))
+	continue;
+
+      if (ctf_dedup_mark_conflicting_hash (fp, inputs, hv) < 0)
+	{
+	  ctf_next_destroy (i);
+	  return -1;				/* errno is set for us.  */
+	}
+    }
+  if (err != ECTF_NEXT_END)
+    return ctf_set_errno (fp, err);
+
+}
+
+/* Mark a single hash as corresponding to a conflicting type.  Mark all types
+   that cite it as conflicting as well, terminating the recursive walk only when
+   types that are already conflicted or types do not cite other types are seen.
+   Tagged structures and unions appear in the cd_citers graph only as stubs, so
+   the walk also terminates there, since any reference to a conflicting
+   structure is just going to reference an unconflicting forward instead: see
+   ctf_dedup_maybe_synthesize_forward.)
+
+   One exception is decl tags pointing to struct or union members, which appear
+   in the citers graph as a *decorated struct/union name* mapping to a set of
+   decl tags:  */
+
+static int
+ctf_dedup_mark_conflicting_hash (ctf_dict_t *fp, ctf_dict_t **inputs,
+				 const char *hval)
+{
+  ctf_dedup_t *d = &fp->ctf_dedup;
+  int err;
+  const char *name;
+  int kind;
+  void *id;
+  ctf_dict_t *input;
+
+  /* Mark conflicted if not already so marked.  */
+  if (ctf_dynset_exists (d->cd_conflicting_types, hval, NULL))
+    return 0;
+
+  ctf_dprintf ("Marking %s as conflicted\n", hval);
+
+  if (ctf_dynset_cinsert (d->cd_conflicting_types, hval) < 0)
+    {
+      ctf_dprintf ("Out of memory marking %s as conflicted\n", hval);
+      return ctf_set_errno (fp, errno);
+    }
+
+  if (ctf_dedup_mark_conflicting_hash_citers (fp, inputs, hval) < 0)
+    return -1;					/* errno is set for us.  */
+
+  /* If this is a struct or union, see if it has any decl tags we want to drag
+     into the conflicting set.  These are identified in the citers graph with
+     the decorated name as the key.  Nothing ever cites a decl tag, so the
+     marking will terminate at this point, dragging the decl tags and only the
+     decl tags in.  */
+
+  kind = ctf_dedup_hash_kind_gid (fp, inputs, hval, &id);
+
+  if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
+    return 0;
+
+  input = inputs[CTF_DEDUP_GID_TO_INPUT (id)];
+
+  if ((name = ctf_type_name_raw (input, CTF_DEDUP_GID_TO_TYPE (id))) == NULL)
+    {
+      ctf_set_errno (fp, ctf_errno (input));
+      goto err;
+    }
+
+  if ((name = ctf_decorate_type_name (fp, name, kind)) == NULL)
+    goto err;
+
+  /* We can reuse the same mark-as-conflcting code, pretending the decorated
+     name is a type hash value.  */
+
+  if (ctf_dedup_mark_conflicting_hash_citers (fp, inputs, name) < 0)
+    return -1;					/* errno is set for us. */
+
+  return 0;
+
+err:
+  ctf_err_warn (fp, 0, 0, _("Cannot decorate type name during conflict marking "
+			    "for type %i/%lx with hval %s"),
+		CTF_DEDUP_GID_TO_INPUT (id), CTF_DEDUP_GID_TO_TYPE (id), hval);
+  return -1;
 }
 
 /* Used to keep a count of types: i.e. distinct type hash values.  */
@@ -1427,10 +1770,10 @@ ctf_dedup_count_types (void *key_, void *value _libctf_unused_, void *arg_)
   int kind;
   ctf_dedup_type_counter_t *arg = (ctf_dedup_type_counter_t *) arg_;
 
-  kind = ctf_dedup_hash_kind (arg->fp, arg->inputs, hval);
+  kind = ctf_dedup_hash_kind_gid (arg->fp, arg->inputs, hval, NULL);
 
-  /* We rely on ctf_dedup_hash_kind setting the fp to -ECTF_INTERNAL on error to
-     smuggle errors out of here.  */
+  /* We rely on ctf_dedup_hash_kind_gid setting the fp to -ECTF_INTERNAL on
+     error to smuggle errors out of here.  */
 
   if (kind != CTF_K_FORWARD)
     {
@@ -1517,7 +1860,7 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 		      ctf_dprintf ("Marking %p, with hash %s, conflicting: one "
 				   "of many non-forward GIDs for %s\n", id,
 				   hval, (char *) k);
-		      ctf_dedup_mark_conflicting_hash (fp, hval);
+		      ctf_dedup_mark_conflicting_hash (fp, inputs, hval, 0);
 		    }
 		}
 	      if (err != ECTF_NEXT_END)
@@ -1538,9 +1881,10 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 	     that this type is conflicting.  TODO: improve this in future by
 	     setting such forwards non-root-visible.)
 
-	     If multiple distinct types are "most common", pick the one that
-	     appears first on the link line, and within that, the one with the
-	     lowest type ID.  (See sort_output_mapping.)  */
+	     If multiple distinct types are "most common" (common for things
+	     like variables that cannot be pointed to by other types), pick the
+	     one that appears first on the link line, and within that, the one
+	     with the lowest type ID.  (See sort_output_mapping.)  */
 
 	  const void *key;
 	  const void *count;
@@ -1591,7 +1935,7 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 
 	      ctf_dprintf ("Marking %s, an uncommon hash for %s, conflicting\n",
 			   hval, (const char *) k);
-	      if (ctf_dedup_mark_conflicting_hash (fp, hval) < 0)
+	      if (ctf_dedup_mark_conflicting_hash (fp, inputs, hval, 0) < 0)
 		{
 		  whaterr = N_("error marking hashes as conflicting");
 		  goto err;
@@ -1644,7 +1988,7 @@ ctf_dedup_init (ctf_dict_t *fp)
     goto oom;
 #endif
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 5; i++)
     {
       if ((d->cd_decorated_names[i] = ctf_dynhash_create (ctf_hash_string,
 							  ctf_hash_eq_string,
@@ -1667,6 +2011,12 @@ ctf_dedup_init (ctf_dict_t *fp)
   if ((d->cd_struct_origin
        = ctf_dynhash_create (ctf_hash_string,
 			     ctf_hash_eq_string,
+			     NULL, NULL)) == NULL)
+    goto oom;
+
+  if ((d->cd_var_datasec
+       = ctf_dynhash_create (ctf_hash_integer,
+			     ctf_hash_eq_integer,
 			     NULL, NULL)) == NULL)
     goto oom;
 
@@ -1707,6 +2057,12 @@ ctf_dedup_init (ctf_dict_t *fp)
 			     NULL, NULL)) == NULL)
     goto oom;
 
+  if ((d->cd_emission_struct_decl_tags
+       = ctf_dynhash_create (ctf_hash_integer,
+			     ctf_hash_eq_integer,
+			     NULL)) == NULL)
+    goto oom;
+
   if ((d->cd_conflicting_types
        = ctf_dynset_create (htab_hash_string,
 			    htab_eq_string, NULL)) == NULL)
@@ -1732,11 +2088,12 @@ ctf_dedup_fini (ctf_dict_t *fp, ctf_dict_t **outputs, uint32_t noutputs)
 #if IDS_NEED_ALLOCATION
   ctf_dynhash_destroy (d->cd_id_to_dict_t);
 #endif
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 5; i++)
     ctf_dynhash_destroy (d->cd_decorated_names[i]);
   ctf_dynhash_destroy (d->cd_name_counts);
   ctf_dynhash_destroy (d->cd_type_hashes);
   ctf_dynhash_destroy (d->cd_struct_origin);
+  ctf_dynhash_destroy (d->cd_var_datasec);
   ctf_dynhash_destroy (d->cd_citers);
   ctf_dynhash_destroy (d->cd_output_mapping);
   ctf_dynhash_destroy (d->cd_output_first_gid);
@@ -1745,6 +2102,7 @@ ctf_dedup_fini (ctf_dict_t *fp, ctf_dict_t **outputs, uint32_t noutputs)
 #endif
   ctf_dynhash_destroy (d->cd_input_nums);
   ctf_dynhash_destroy (d->cd_emission_struct_members);
+  ctf_dynhash_destroy (d->cd_emission_struct_decl_tags);
   ctf_dynset_destroy (d->cd_conflicting_types);
 
   /* Free the per-output state.  */
@@ -1895,7 +2253,7 @@ ctf_dedup_conflictify_unshared (ctf_dict_t *output, ctf_dict_t **inputs)
     {
       const char *hval = (const char *) k;
 
-      if (ctf_dedup_mark_conflicting_hash (output, hval) < 0)
+      if (ctf_dedup_mark_conflicting_hash (output, inputs, hval, 0) < 0)
 	goto err;
     }
   if (err != ECTF_NEXT_END)
@@ -1973,15 +2331,46 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
     {
       ctf_id_t id;
 
-      while ((id = ctf_type_next (inputs[i], &it, NULL, 1)) != CTF_ERR)
+      /* First, populate the variable -> datasec mappings.  We do this first so
+	 that we do not depend on any particular ordering between datasecs and
+	 the variables they contain.  */
+
+      while ((id = ctf_type_kind_next (inputs[i], &it, CTF_K_DATASEC)) != CTF_ERR)
 	{
-	  if (ctf_dedup_hash_type (output, inputs[i], inputs,
-				   i, id, 0, 0,
-				   ctf_dedup_populate_mappings) == NULL)
-	    goto err;				/* errno is set for us.  */
+	  if (ctf_dedup_track_var (output, inputs[i], id) < 0)
+	    {
+	      ctf_next_destroy (it);
+	      goto err;
+	    }
 	}
       if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
 	{
+	  ctf_next_destroy (it);
+	  ctf_set_errno (output, ctf_errno (inputs[i]));
+	  ctf_err_warn (output, 0, 0, _("iteration failure "
+					"tracking datasec membership"));
+	  goto err;
+	}
+
+      /* Now hash the types.  */
+      while ((id = ctf_type_next (inputs[i], &it, NULL, 1)) != CTF_ERR)
+	{
+	  /* Skip datasecs (handled above).  */
+
+	  if (ctf_type_kind_unsliced (inputs[i], id) == CTF_K_DATASEC)
+	    continue;
+
+	  if (ctf_dedup_hash_type (output, inputs[i], inputs,
+				   i, id, 0, 0,
+				   ctf_dedup_populate_mappings) == NULL)
+	    {
+	      ctf_next_destroy (it);
+	      goto err;				/* errno is set for us.  */
+	    }
+	}
+      if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
+	{
+	  ctf_next_destroy (it);
 	  ctf_set_errno (output, ctf_errno (inputs[i]));
 	  ctf_err_warn (output, 0, 0, _("iteration failure "
 					"computing type hashes"));
@@ -2013,6 +2402,25 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
  err:
   ctf_dedup_fini (output, NULL, 0);
   return -1;
+}
+
+/* Return 1 if this decl tag points to a structure/union member.  */
+static int
+ctf_dedup_member_decl_tag (ctf_dict_t *fp, ctf_id_t type)
+{
+  int ref_kind = ctf_type_kind (fp, ctf_type_reference (fp, type));
+
+  if (ref_kind == CTF_K_STRUCT || ref_kind == CTF_K_UNION)
+    {
+      int component_idx;
+
+      if (ctf_decl_tag (fp, type, &component_idx) == CTF_ERR)
+	return -1;
+
+      if (component_idx > -1)
+	return 1;
+    }
+  return 0;
 }
 
 static int
@@ -2125,9 +2533,25 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
     case CTF_K_FORWARD:
     case CTF_K_INTEGER:
     case CTF_K_FLOAT:
+    case CTF_K_BTF_FLOAT:
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       /* No types referenced.  */
       break;
+
+    case CTF_K_DECL_TAG:
+      {
+	int to_sou_member = ctf_dedup_member_decl_tag (fp, type);
+
+	if (to_sou_member < 0)
+	  {
+	    whaterr = N_("error during referenced type decl tag check");
+	    goto err_msg;
+	  }
+	if (to_sou_member)
+	  break;
+      }
+      /* FALLTHRU */
 
     case CTF_K_TYPEDEF:
     case CTF_K_VOLATILE:
@@ -2135,6 +2559,9 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
     case CTF_K_RESTRICT:
     case CTF_K_POINTER:
     case CTF_K_SLICE:
+    case CTF_K_FUNC_LINKAGE:
+    case CTF_K_VAR:
+    case CTF_K_TYPE_TAG:
       CTF_TYPE_WALK (ctf_type_reference (fp, type), err,
 		     N_("error during referenced type walk"));
       break;
@@ -2186,7 +2613,7 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
 
 	for (j = 0; j < fi.ctc_argc; j++)
 	  CTF_TYPE_WALK (args[j], err_free_args,
-			 N_("error during Func arg type walk"));
+			 N_("error during func arg type walk"));
 	free (args);
 	break;
 
@@ -2199,6 +2626,11 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
       /* We do not recursively traverse the members of structures: they are
 	 emitted later, in a separate pass.  */
 	break;
+    case CTF_K_DATASEC:
+    case CTF_K_CONFLICTING:
+    case CTF_K_BIG:
+      whaterr = N_("CTF dict corruption: attempt to directly emit prefix type kind or datasec");
+      goto err_msg;
     default:
       whaterr = N_("CTF dict corruption: unknown type kind");
       goto err_msg;
@@ -2645,20 +3077,21 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   const char *name;
   ctf_dict_t *target = output;
   ctf_dict_t *real_input;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
   int input_num = CTF_DEDUP_GID_TO_INPUT (id);
   int output_num = (uint32_t) -1;		/* 'shared' */
   int cu_mapped = *(int *)arg;
   int isroot;
   int is_conflicting;
+  int mark_type_conflicting = 0;
 
   ctf_next_t *i = NULL;
   ctf_id_t new_type;
   ctf_id_t ref;
   ctf_id_t maybe_dup = 0;
   ctf_encoding_t ep;
+  int linkage;
   const char *errtype;
-  int emission_hashed = 0;
 
   /* We don't want to re-emit something we've already emitted.  */
 
@@ -2709,7 +3142,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
     }
 
   real_input = input;
-  if ((tp = ctf_lookup_by_id (&real_input, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&real_input, type, &suffix)) == NULL)
     {
       ctf_err_warn (output, 0, ctf_errno (input),
 		    _("%s: lookup failure for type %lx"),
@@ -2717,14 +3150,18 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       return ctf_set_errno (output, ctf_errno (input));
     }
 
-  name = ctf_strraw (real_input, tp->ctt_name);
-  isroot = LCTF_INFO_ISROOT (real_input, tp->ctt_info);
+  /* Using isroot here throws away any filename attached to the underlying
+     CTF_K_CONFLICTING entry, but we cannot usefully retain this in any case,
+     since a cu-mapped link will want to emit a *different* CTF_K_CONFLICTING
+     entry in its place.  */
+  name = ctf_strraw (real_input, suffix->ctt_name);
+  isroot = LCTF_ISROOT (real_input, tp);
 
   /* Hide conflicting types, if we were asked to: also hide if a type with this
      name already exists and is not a forward, or if this type is hidden on the
      input.  */
   if (cu_mapped && is_conflicting)
-    isroot = 0;
+    mark_type_conflicting = 1;
   else if (name
 	   && (maybe_dup = ctf_lookup_by_rawname (target, kind, name)) != 0)
     {
@@ -2768,6 +3205,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       break;
 
     case CTF_K_FLOAT:
+    case CTF_K_BTF_FLOAT:
     case CTF_K_INTEGER:
       errtype = _("float/int");
       if (ctf_type_encoding (input, type, &ep) < 0)
@@ -2778,10 +3216,21 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       break;
 
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       {
-	int val;
+	int64_t val;
+	ctf_encoding_t en;
 	errtype = _("enum");
-	if ((new_type = ctf_add_enum (target, isroot, name)) == CTF_ERR)
+
+	if ((en = ctf_type_encoding (input, type, &en)) < 0)
+	  goto err_input;
+
+	if (kind == CTF_K_ENUM)
+	  new_type = ctf_add_enum (target, isroot, name, encoding);
+	else
+	  new_type = ctf_add_enum64 (target, isroot, name, encoding);
+
+	if (new_type == CTF_ERR)
 	  goto err_input;				/* errno is set for us.  */
 
 	while ((name = ctf_enum_next (input, type, &i, &val)) != NULL)
@@ -2831,6 +3280,19 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	goto err_target;			/* errno is set for us.  */
       break;
 
+    case CTF_K_TYPE_TAG:
+      errtype = _("type tag");
+
+      ref = ctf_type_reference (input, type);
+      if ((ref = ctf_dedup_id_to_target (output, target, inputs, ninputs,
+					 parents, input, input_num,
+					 ref)) == CTF_ERR)
+	goto err_input;				/* errno is set for us.  */
+
+      if ((new_type = ctf_add_type_tag (target, isroot, ref, name)) == CTF_ERR)
+	goto err_target;			/* errno is set for us.  */
+      break;
+
     case CTF_K_SLICE:
       errtype = _("slice");
 
@@ -2870,6 +3332,23 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 
 	break;
       }
+
+    case CTF_K_FUNC_LINKAGE:
+      errtype = _("function linkage");
+
+      ref = ctf_type_reference (input, type);
+      if ((ref = ctf_dedup_id_to_target (output, target, inputs, ninputs,
+					 parents, input, input_num,
+					 ref)) == CTF_ERR)
+	goto err_input;				/* errno is set for us.  */
+
+      if ((linkage = ctf_type_linkage (input, type)) < 0)
+	goto err_input;
+
+      if ((new_type = ctf_add_function_linkage (target, isroot, ref, name,
+						linkage)) == CTF_ERR)
+	goto err_target;			/* errno is set for us.  */
+      break;
 
     case CTF_K_FUNCTION:
       {
@@ -2924,9 +3403,20 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       {
 	size_t size = ctf_type_size (input, type);
 	void *out_id;
+	int is_bitfield;
+
 	/* Insert the structure itself, so other types can refer to it.  */
 
 	errtype = _("structure/union");
+
+	is_bitfield = ctf_struct_bitfield (input, type);
+
+	if (is_bitfield < 0 || size < 0)
+	  goto err_input;
+
+	if (is_bitfield)
+	  isroot |= CTF_ADD_STRUCT_BITFIELDS;
+
 	if (kind == CTF_K_STRUCT)
 	  new_type = ctf_add_struct_sized (target, isroot, name, size);
 	else
@@ -2946,27 +3436,138 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	  }
 	break;
       }
+
+    case CTF_K_DECL_TAG:
+      {
+	int to_sou_member = ctf_dedup_member_decl_tag (input, type);
+	int component_idx;
+
+	errtype = _("decl tag");
+
+	ref = ctf_type_reference (input, type);
+	if ((ref = ctf_dedup_id_to_target (output, target, inputs, ninputs,
+					   parents, input, input_num,
+					   ref)) == CTF_ERR)
+	  goto err_input;			/* errno is set for us.  */
+
+	if (to_sou_member < 0)
+	  goto err_input;
+
+	/* Decl tags to SoU members get remembered for later emission, because
+	   we can't emit them until the struct members are emitted.  No need to
+	   remember where to emit them: they are always emitted into the same
+	   dict as the structure they tag, which can be found in
+	   cd_emission_struct_members.  */
+
+	if (to_sou_member)
+	  {
+	    void *out_id;
+
+	    out_id = CTF_DEDUP_GID (output, output_num, ref);
+	    if (ctf_dynhash_insert (d->cd_emission_struct_decl_tags, id, out_id) < 0)
+	      {
+		ctf_set_errno (target, errno);
+		goto err_target;
+	      }
+	  }
+
+	if (ctf_decl_tag (input, type, &component_idx) == CTF_ERR)
+	  goto err_input;
+
+	if ((new_type = ctf_add_decl_tag (target, isroot, ref,
+					  name, component_idx)) == CTF_ERR)
+	  goto err_target;			/* errno is set for us.  */
+
+	break;
+      }
+
+    case CTF_K_VAR:
+      {
+	void *datasec;
+	ctf_id_t datasec_type;
+	int component_idx;
+	const char *datasec_name;
+	ctf_var_secinfo_t *entry;
+	int linkage;
+
+	errtype = _("variable");
+
+	if ((linkage = ctf_type_linkage (input, type)) < 0)
+	  goto err_input;
+
+	/* Dig out the relevant bit of datasec info for this variable.  */
+
+	if (!ctf_dynhash_lookup_kv (d->cd_var_datasec, id, NULL, &datasec))
+	  goto err_input;
+
+	datasec_type = CTF_DEDUP_GID_TO_TYPE (datasec);
+	component_idx = CTF_DEDUP_GID_TO_INPUT (datasec);
+
+	if ((datasec_name = ctf_type_name_raw (input, datasec_type)) == NULL)
+	  goto err_input;
+
+	if ((entry = ctf_datasec_entry (input, datasec_type,
+					component_idx)) == NULL)
+	  goto err_input;
+
+	ref = ctf_type_reference (input, type);
+	if ((ref = ctf_dedup_id_to_target (output, target, inputs, ninputs,
+					   parents, input, input_num,
+					   ref)) == CTF_ERR)
+	  goto err_input;			/* errno is set for us.  */
+
+	if ((new_type = ctf_add_section_variable (target, isroot, datasec_name,
+						  name, linkage, ref,
+						  entry->cvs_size,
+						  entry->cvs_offset)) == CTF_ERR)
+	  goto err_target;			/* errno is set for us.  */
+
+	break;
+      }
+
+    /* If datasecs appear in the output mapping, something is wrong.  */
+    case CTF_K_DATASEC:
+      ctf_err_warn (output, 0, ECTF_INTERNAL,
+		    _("%s: unexpected datasec in output mapping for input "
+		      "type %lx"),
+		    ctf_link_input_name (input), type);
+      return ctf_set_errno (output, ECTF_INTERNAL);
+
+      /* Prefix types even more so.  */
+    case CTF_K_BIG:
+    case CTF_K_CONFLICTING:
+      ctf_err_warn (output, 0, ECTF_INTERNAL,
+		    _("%s: attempt to directly emit prefix type in output "
+		      "mapping for input type %lx"),
+		    ctf_link_input_name (input), type);
+      return ctf_set_errno (output, ECTF_INTERNAL);
+
     default:
-      ctf_err_warn (output, 0, ECTF_CORRUPT, _("%s: unknown type kind for "
-					       "input type %lx"),
+      ctf_err_warn (output, 0, ECTF_CORRUPT,
+		    _("%s: unknown type kind for input type %lx"),
 		    ctf_link_input_name (input), type);
       return ctf_set_errno (output, ECTF_CORRUPT);
     }
 
-  if (!emission_hashed
-      && new_type != 0
+  if (new_type != 0
       && ctf_dynhash_cinsert (target->ctf_dedup.cd_output_emission_hashes,
 			      hval, (void *) (uintptr_t) new_type) < 0)
     {
-      ctf_err_warn (output, 0, ENOMEM, _("out of memory tracking deduplicated "
-					 "global type IDs"));
+      ctf_err_warn (output, 0, ENOMEM,
+		    _("out of memory tracking deduplicated global type IDs"));
 	return ctf_set_errno (output, ENOMEM);
     }
 
-  if (!emission_hashed && new_type != 0)
+  if (new_type != 0)
     ctf_dprintf ("%i: Inserted %s, %i/%lx -> %lx into emission hash for "
 		 "target %p (%s)\n", depth, hval, input_num, type, new_type,
 		 (void *) target, ctf_link_input_name (target));
+
+  /* If this type is meant to be marked conflicting in this dict rather than
+     moved into a child, mark it, and note which CU it came from.  */
+  if (new_type != 0 && mark_type_conflicting)
+    if (ctf_set_conflicting (target, new_type, ctf_cuname (input)) < 0)
+      goto err_target;
 
   return 0;
 
@@ -2992,7 +3593,9 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 
 /* Traverse the cd_emission_struct_members and emit the members of all
    structures and unions.  All other types are emitted and complete by this
-   point.  */
+   point, other than decl tags referencing struct/union members, which cannot be
+   emitted until the members have been (and which are not C types, so cannot be
+   referenced by struct members).  */
 
 static int
 ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
@@ -3006,6 +3609,8 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
   int input_num;
   ctf_id_t err_type;
 
+  /* TODO: deduplicate this bit and the corresponding bit in
+     ctf_dedup_emit_decl_tags(), below.  */
   while ((err = ctf_dynhash_next (d->cd_emission_struct_members, &i,
 				  &input_id, &target_id)) == 0)
     {
@@ -3087,6 +3692,123 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
   return ctf_set_errno (output, err);
 }
 
+/* Traverse the cd_emission_struct_decl_tags and emit all the decl tags
+   mentioned there.  All other types are emitted and complete by this
+   point.  */
+
+static int
+ctf_dedup_emit_decl_tags (ctf_dict_t *output, ctf_dict_t **inputs,
+			  uint32_t ninputs, uint32_t *parents)
+{
+  ctf_dedup_t *d = &output->ctf_dedup;
+  ctf_next_t *i = NULL;
+  void *input_id, *struct_id;
+  int err;
+  ctf_dict_t *err_fp, *input_fp;
+  int input_num;
+  ctf_id_t err_type;
+
+  while ((err = ctf_dynhash_next (d->cd_emission_struct_decl_tags, &i,
+				  &input_id, &struct_id)) == 0)
+    {
+      ctf_dict_t *target;
+      uint32_t target_num;
+      ctf_id_t input_type, struct_type, new_type;
+      const char *name;
+      int component_idx;
+      int isroot;
+      const char *hval;
+
+      input_num = CTF_DEDUP_GID_TO_INPUT (input_id);
+      input_fp = inputs[input_num];
+      input_type = CTF_DEDUP_GID_TO_TYPE (input_id);
+
+      /* The output we want is either -1 (for the shared, parent output dict) or
+	 the number of the input corresponding to the struct we are a decl tag
+	 for.  */
+      target_num = CTF_DEDUP_GID_TO_INPUT (struct_id);
+      if (target_num == (uint32_t) -1)
+	target = output;
+      else
+	{
+	  target = inputs[target_num]->ctf_dedup.cd_output;
+	  if (!ctf_assert (output, target))
+	    {
+	      err_fp = output;
+	      err_type = input_type;
+	      goto err_target;
+	    }
+	}
+      struct_type = CTF_DEDUP_GID_TO_TYPE (struct_id);
+
+      err_fp = input_fp;
+      err_type = input_type;
+
+      if ((isroot = !ctf_type_conflicting (input_fp, input_type, NULL)) < 0)
+	goto err_input;
+
+      if (ctf_decl_tag (input_fp, input_type, &component_idx) == CTF_ERR)
+	goto err_input;
+
+      if ((name = ctf_type_name_raw (input_fp, input_type)) == NULL)
+	goto err_input;
+
+      if ((new_type = ctf_add_decl_tag (target, isroot ? CTF_ADD_ROOT
+					: CTF_ADD_NONROOT,
+					struct_type, name,
+					component_idx)) == CTF_ERR)
+	{
+	  err_fp = target;
+	  err_type = struct_type;
+	  goto err_target;
+	}
+
+      hval = ctf_dynhash_lookup (d->cd_type_hashes,
+				 CTF_DEDUP_GID (output, input_num, input_type));
+
+      if (!ctf_assert (output, hval != NULL))
+	return CTF_ERR;				/* errno is set for us.  */
+
+      if (new_type != 0
+	  && ctf_dynhash_cinsert (target->ctf_dedup.cd_output_emission_hashes,
+				  hval, (void *) (uintptr_t) new_type) < 0)
+	{
+	  ctf_err_warn (output, 0, ENOMEM,
+			_("out of memory tracking deduplicated global type IDs"));
+	  return ctf_set_errno (output, ENOMEM);
+	}
+
+      if (new_type != 0)
+	ctf_dprintf ("Inserted %s, %i/%lx -> %lx into emission hash for "
+		     "target %p (%s)\n", hval, input_num, input_type,
+		     new_type, (void *) target, ctf_link_input_name (target));
+    }
+  if (err != ECTF_NEXT_END)
+    goto iterr;
+
+  return 0;
+
+ err_input:
+  ctf_next_destroy (i);
+  ctf_set_errno (output, ctf_errno (input_fp));
+  ctf_err_warn (output, 0, ctf_errno (err_fp),
+		_("%s (%i): error looking at decl tag %lx while emitting decl tags"),
+		ctf_link_input_name (input_fp), input_num, err_type);
+  return ctf_set_errno (output, ctf_errno (err_fp));
+
+ err_target:
+  ctf_next_destroy (i);
+  ctf_err_warn (output, 0, ctf_errno (err_fp),
+		_("%s (%i): error emitting decl tag for structure type %lx"),
+		ctf_link_input_name (input_fp), input_num, err_type);
+  return ctf_set_errno (output, ctf_errno (err_fp));
+
+ iterr:
+  ctf_err_warn (output, 0, err, _("iteration failure emitting "
+				  "structure members"));
+  return ctf_set_errno (output, err);
+}
+
 /* Emit deduplicated types into the outputs.  The shared type repository is
    OUTPUT, on which the ctf_dedup function must have already been called.  The
    PARENTS array contains the INPUTS index of the parent dict for every child
@@ -3118,6 +3840,10 @@ ctf_dedup_emit (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
   ctf_dprintf ("Populating struct members.\n");
   if (ctf_dedup_emit_struct_members (output, inputs, ninputs, parents) < 0)
     return NULL;				/* errno is set for us.  */
+
+  ctf_dprintf ("Populating decl tags pointing at struct members.\n");
+  if (ctf_dedup_emit_decl_tags (output, inputs, ninputs, parents) < 0)
+    return NULL;
 
   for (i = 0; i < ninputs; i++)
     {

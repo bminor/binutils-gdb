@@ -2517,6 +2517,36 @@ ctf_datasec_variable_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
   return ctf_set_typed_errno (fp, ECTF_NOTYPE);
 }
 
+/* Return the entry corresponding to a given component_idx in a datasec.
+
+   Not currently public API.  */
+
+ctf_datasec_t *
+ctf_datasec_entry (ctf_dict_t *fp, ctf_id_t datasec, int component_idx)
+{
+  ctf_type_t *tp;
+  unsigned char *vlen;
+  size_t vlen_len;
+  ctf_var_secinfo_t *sec;
+  ctf_var_secinfo_t *el;
+  ssize_t size;
+
+  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+    return NULL;		/* errno is set for us.  */
+
+  /* No type kind check: internal function.  */
+  vlen = ctf_vlen (fp, type, tp, &vlen_len);
+  sec = (ctf_var_secinfo_t *) vlen;
+
+  if (component_idx > vlen_len)
+    {
+      ctf_set_errno (fp, EOVERFLOW);
+      return NULL;
+    }
+
+  return &sec[component_idx];
+}
+
 /* Return the datasec that a given variable appears in.  */
 
 ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var)
