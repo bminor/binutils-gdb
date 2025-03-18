@@ -46,3 +46,19 @@ main (void)
   return 0;
 }
 
+void
+exit (int status)
+{
+#if HAVE_BUILTIN_TRAP
+  __builtin_trap ();
+#endif
+  while (1)
+    ;
+}
+
+void
+_start (void)
+{
+  main ();
+  exit (0);
+}

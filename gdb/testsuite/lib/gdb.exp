@@ -11072,5 +11072,17 @@ proc section_get {exec section} {
     return $retval
 }
 
+# Return 1 if the compiler supports __builtin_trap, else return 0.
+
+gdb_caching_proc have_builtin_trap {} {
+
+    return [gdb_can_simple_compile builtin_trap {
+	int main() {
+	    __builtin_trap ();
+	    return 0;
+	}
+    } executable]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
