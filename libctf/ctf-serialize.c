@@ -1247,6 +1247,9 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  {
 	    ctf_datasec_t *vlen = (ctf_secinfo_t *) t;
 
+	    if (dtd->dtd_flags & DTD_F_UNSORTED)
+	      ctf_datasec_sort (fp, dtd);
+
 	    for (i = 0; i < vlen; i++)
 	      {
 		if (ctf_type_add_ref (fp, vlen[i].cvs_type) < 0)

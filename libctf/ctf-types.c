@@ -779,7 +779,10 @@ ctf_datasec_var_iter (ctf_dict_t *fp, ctf_id_t datasec,
 
 /* Iterate over every variable in the given CTF datasec, in arbitrary order,
    returning the name and type of each variable in turn.  Returns CTF_ERR on end
-   of iteration or error.  */
+   of iteration or error.
+
+   (The order is arbitrary so we don't need to worry about sorting unsorted
+   datasecs.)  */
 
 ctf_id_t
 ctf_datasec_var_next (ctf_dict_t *fp, ctf_id_t datasec, ctf_next_t **it, 
@@ -2487,6 +2490,7 @@ ctf_id_t
 ctf_datasec_variable_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
 {
   ctf_id_t type;
+  ctf_dtdef_t *dtd;
   const ctf_type_t *tp;
   unsigned char *vlen;
   size_t vlen_len;
@@ -2499,6 +2503,12 @@ ctf_datasec_variable_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
 
   if (ctf_type_kind (fp, datasec) != CTF_K_DATASEC)
     return ctf_set_typed_errno (fp, ECTF_NOTDATASEC);
+
+  if ((dtd = ctf_dynamic_type (fp, datasec)) != NULL)
+    {
+      if (dtd->dtd_flags & DTD_F_UNSORTED)
+	ctf_datasec_sort (fp, dtd);
+    }
 
   vlen = ctf_vlen (fp, type, tp, &vlen_len);
   sec = (ctf_var_secinfo_t *) vlen;

@@ -176,6 +176,8 @@ typedef struct ctf_decl
   int cd_enomem;		     /* Nonzero if OOM during printing.  */
 } ctf_decl_t;
 
+#define DTD_F_UNSORTED	0x0001	/* set on a datasec if it needs sorting.  */
+
 typedef struct ctf_dtdef
 {
   ctf_list_t dtd_list;		/* List forward/back pointers.  */
@@ -190,6 +192,7 @@ typedef struct ctf_dtdef
   unsigned char *dtd_vlen;	/* Actual vlen data (pointer into dtd_buf).  */
   size_t dtd_vlen_size;		/* Total vlen space so far (vbytes).  */
   uint64_t dtd_last_offset;	/* Offset of the last struct field.  */
+  int dtd_flags;		/* Some of the DTD_F_ flags.  */
 } ctf_dtdef_t;
 
 typedef struct ctf_err_warning
@@ -819,6 +822,7 @@ extern ssize_t ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
 				       ctf_type_t type, ssize_t bit_offset);
 extern ctf_datasec_t *ctf_datasec_entry (ctf_dict_t *, ctf_id_t,
 					 int component_idx);
+extern void ctf_datasec_sort (ctf_dict_t *, ctf_dtdef_t *);
 
 _libctf_printflike_ (1, 2)
 extern void ctf_dprintf (const char *, ...);

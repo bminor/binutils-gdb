@@ -1945,11 +1945,11 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
 	    offset = bit_offset / CHAR_BIT;
 	}
 
+      /* This DTD may need sorting.  */
+
       if (offset < sec[vlen - 1])
-	{
-	  ctf_set_typed_errno (fp, ECTF_DESCENDING);
-	  goto err;
-	}
+	sec_dtd->dtd_flags |= ~DTD_F_UNSORTED;
+
     } else if (offset == (unsigned long) -1)
 	offset = 0;
 
@@ -2037,6 +2037,39 @@ int
 ctf_add_func_sym (ctf_dict_t *fp, const char *name, ctf_id_t id)
 {
   return (ctf_add_funcobjt_sym (fp, 1, name, id));
+}
+
+/* Sort function used by ctf_datasec_sort.  */
+
+static int
+ctf_datasec_sort_ascending (const void *one_, const void *two_)
+{
+  ctf_var_secinfo_t *one = (ctf_var_secinfo_t *) one_;
+  ctf_var_secinfo_t *two = (ctf_var_secinfo_t *) two_;
+
+  if (one->cvs_offset < two->cvs_offset)
+    return -1;
+  else if (one->cvs_offset > two->cvs_offset)
+    return 1;
+  return 0;
+}
+
+/* Sort a datasec into order.  Needed before serialization or query
+   operations.  */
+
+void
+ctf_datasec_sort (ctf_dict_t *fp, ctf_dtdef_t *dtd)
+{
+  size_t vlen;
+
+  if (!(dtd->dtd_flags & DTD_F_UNSORTED))
+    return;
+
+  vlen = LCTF_VLEN (fp, dtd->dtd_buf);
+
+  qsort (dtd->dtd_vlen, vlen, sizeof (ctf_var_secinfo_t),
+	 ctf_datasec_sort_ascending);
+  dtd->dtd_flags &= ~DTD_F_UNSORTED;
 }
 
 /* Add an enumeration constant observed in a given enum type as an identifier.

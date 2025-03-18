@@ -255,7 +255,6 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.") \
   _CTF_ITEM (ECTF_BADCOMPONENT, "Declaration tag component_idx is invalid.") \
   _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
-  _CTF_ITEM (ECTF_DESCENDING, "Field offsets may not descend.") \
   _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
   _CTF_ITEM (ECTF_LINKKIND, "Only functions and variables have linkage.") \
   _CTF_ITEM (ECTF_NEVERTAG, "Cannot call this function with a tag kind.") \
