@@ -265,29 +265,6 @@ struct loclists_rnglists_header
   unsigned int offset_entry_count;
 };
 
-/* A struct that can be used as a hash key for tables based on DW_AT_stmt_list.
-   This includes type_unit_group and quick_file_names.  */
-
-struct stmt_list_hash
-{
-  bool operator== (const stmt_list_hash &other) const noexcept;
-
-  /* The DWO unit this table is from or NULL if there is none.  */
-  struct dwo_unit *dwo_unit;
-
-  /* Offset in .debug_line or .debug_line.dwo.  */
-  sect_offset line_sect_off;
-};
-
-/* Each element of dwarf2_per_bfd->type_unit_groups is a pointer to
-   an object of this type.  This contains elements of type unit groups
-   that can be shared across objfiles.  The non-shareable parts are in
-   type_unit_group_unshareable.  */
-
-struct type_unit_group
-{
-};
-
 /* These sections are what may appear in a (real or virtual) DWO file.  */
 
 struct dwo_sections
@@ -2552,7 +2529,7 @@ fill_in_sig_entry_from_dwo_entry (dwarf2_per_objfile *per_objfile,
   gdb_assert (to_underlying (sig_entry->type_offset_in_section) == 0
 	      || (to_underlying (sig_entry->type_offset_in_section)
 		  == to_underlying (dwo_entry->type_offset_in_tu)));
-  gdb_assert (sig_entry->type_unit_group == NULL);
+  gdb_assert (!sig_entry->type_unit_group_key.has_value ());
   gdb_assert (sig_entry->dwo_unit == NULL
 	      || sig_entry->dwo_unit == dwo_entry);
 
@@ -3279,14 +3256,13 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 #define NO_STMT_LIST_TYPE_UNIT_PSYMTAB (1 << 31)
 #define NO_STMT_LIST_TYPE_UNIT_PSYMTAB_SIZE 10
 
-/* Look up the type_unit_group for type unit CU, and create it if necessary.
-   STMT_LIST is a DW_AT_stmt_list attribute.  */
+/* Get the type unit group key for type unit CU.  STMT_LIST is a DW_AT_stmt_list
+   attribute.  */
 
-static struct type_unit_group *
-get_type_unit_group (struct dwarf2_cu *cu, const struct attribute *stmt_list)
+static stmt_list_hash
+get_type_unit_group_key (struct dwarf2_cu *cu, const struct attribute *stmt_list)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
-  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
   unsigned int line_offset;
 
@@ -3310,16 +3286,7 @@ get_type_unit_group (struct dwarf2_cu *cu, const struct attribute *stmt_list)
       ++tu_stats->nr_stmt_less_type_units;
     }
 
-  stmt_list_hash key {cu->dwo_unit, static_cast<sect_offset> (line_offset)};
-  auto [it, inserted] = per_bfd->type_unit_groups.emplace (key, nullptr);
-
-  if (inserted)
-    {
-      (*it).second = std::make_unique<type_unit_group> ();
-      ++tu_stats->nr_symtabs;
-    }
-
-  return it->second.get ();
+  return {cu->dwo_unit, static_cast<sect_offset> (line_offset)};
 }
 
 /* Subroutine of dwarf2_build_psymtabs_hard to simplify it.
@@ -3423,9 +3390,6 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile,
   struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
   abbrev_table_up abbrev_table;
   sect_offset abbrev_offset;
-
-  /* It's up to the caller to not call us multiple times.  */
-  gdb_assert (per_objfile->per_bfd->type_unit_groups.empty ());
 
   if (per_objfile->per_bfd->all_type_units.size () == 0)
     return;
@@ -4753,16 +4717,15 @@ rust_union_quirks (struct dwarf2_cu *cu)
 /* See read.h.  */
 
 type_unit_group_unshareable *
-dwarf2_per_objfile::get_type_unit_group_unshareable (type_unit_group *tu_group)
+dwarf2_per_objfile::get_type_unit_group_unshareable
+  (stmt_list_hash tu_group_key)
 {
-  auto iter = m_type_units.find (tu_group);
-  if (iter != m_type_units.end ())
-    return iter->second.get ();
+  auto [it, inserted] = m_type_units.emplace (tu_group_key, nullptr);
 
-  type_unit_group_unshareable_up uniq (new type_unit_group_unshareable);
-  type_unit_group_unshareable *result = uniq.get ();
-  m_type_units[tu_group] = std::move (uniq);
-  return result;
+  if (inserted)
+    it->second = std::make_unique<type_unit_group_unshareable> ();
+
+  return it->second.get ();
 }
 
 struct type *
@@ -5034,7 +4997,7 @@ process_full_type_unit (dwarf2_cu *cu)
      of it with end_expandable_symtab.  Otherwise, complete the addition of
      this TU's symbols to the existing symtab.  */
   type_unit_group_unshareable *tug_unshare =
-    per_objfile->get_type_unit_group_unshareable (sig_type->type_unit_group);
+    per_objfile->get_type_unit_group_unshareable (*sig_type->type_unit_group_key);
   if (tug_unshare->compunit_symtab == NULL)
     {
       buildsym_compunit *builder = cu->get_builder ();
@@ -6222,7 +6185,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 void
 dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 {
-  struct type_unit_group *tu_group;
   int first_time;
   struct attribute *attr;
   unsigned int i;
@@ -6235,16 +6197,15 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 
   /* If we're using .gdb_index (includes -readnow) then
      per_cu->type_unit_group may not have been set up yet.  */
-  if (sig_type->type_unit_group == NULL)
-    sig_type->type_unit_group = get_type_unit_group (this, attr);
-  tu_group = sig_type->type_unit_group;
+  if (!sig_type->type_unit_group_key.has_value ())
+    sig_type->type_unit_group_key = get_type_unit_group_key (this, attr);
 
   /* If we've already processed this stmt_list there's no real need to
      do it again, we could fake it and just recreate the part we need
      (file name,index -> symtab mapping).  If data shows this optimization
      is useful we can do it then.  */
   type_unit_group_unshareable *tug_unshare
-    = per_objfile->get_type_unit_group_unshareable (tu_group);
+    = per_objfile->get_type_unit_group_unshareable (*sig_type->type_unit_group_key);
   first_time = tug_unshare->compunit_symtab == NULL;
 
   /* We have to handle the case of both a missing DW_AT_stmt_list or bad

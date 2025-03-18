@@ -55,7 +55,6 @@ struct dwarf2_per_cu;
 struct mapped_index;
 struct mapped_debug_names;
 struct signatured_type;
-struct type_unit_group;
 
 /* One item on the queue of compilation units to read in full symbols
    for.  */
@@ -72,6 +71,27 @@ struct dwarf2_queue_item
 
   dwarf2_per_cu *per_cu;
   dwarf2_per_objfile *per_objfile;
+};
+
+/* A struct that can be used as a hash key for tables based on DW_AT_stmt_list.
+   This includes type_unit_group and quick_file_names.  */
+
+struct stmt_list_hash
+{
+  bool operator== (const stmt_list_hash &other) const noexcept;
+
+  /* The DWO unit this table is from or NULL if there is none.  */
+  struct dwo_unit *dwo_unit;
+
+  /* Offset in .debug_line or .debug_line.dwo.  */
+  sect_offset line_sect_off;
+};
+
+struct stmt_list_hash_hash
+{
+  using is_avalanching = void;
+
+  std::uint64_t operator() (const stmt_list_hash &key) const noexcept;
 };
 
 /* A deleter for dwarf2_per_cu that knows to downcast to signatured_type as
@@ -376,8 +396,9 @@ struct signatured_type : public dwarf2_per_cu
   sect_offset type_offset_in_section {};
 
   /* Type units are grouped by their DW_AT_stmt_list entry so that they
-     can share them.  This points to the containing symtab.  */
-  struct type_unit_group *type_unit_group = nullptr;
+     can share them.  This is the key of the group this type unit is part
+     of.  */
+  std::optional<stmt_list_hash> type_unit_group_key;
 
   /* Containing DWO unit.
      This field is valid iff per_cu.reading_dwo_directly.  */
@@ -466,17 +487,6 @@ using dwo_file_up_set
 struct dwp_file;
 
 using dwp_file_up = std::unique_ptr<dwp_file>;
-
-struct stmt_list_hash;
-
-struct stmt_list_hash_hash
-{
-  using is_avalanching = void;
-
-  std::uint64_t operator() (const stmt_list_hash &key) const noexcept;
-};
-
-using type_unit_group_up = std::unique_ptr<type_unit_group>;
 
 /* Some DWARF data can be shared across objfiles who share the same BFD,
    this data is stored in this object.
@@ -613,11 +623,6 @@ public:
 
   std::vector<dwarf2_per_cu *> all_comp_units_index_cus;
   std::vector<dwarf2_per_cu *> all_comp_units_index_tus;
-
-  /* Table of struct type_unit_group objects.
-     The hash key is the DW_AT_stmt_list value.  */
-  gdb::unordered_map<stmt_list_hash, type_unit_group_up, stmt_list_hash_hash>
-    type_unit_groups;
 
   /* Set of signatured_types, used to look up by signature.  */
   signatured_type_set signatured_types;
@@ -828,10 +833,10 @@ struct dwarf2_per_objfile
   /* Set the compunit_symtab associated to PER_CU.  */
   void set_symtab (const dwarf2_per_cu *per_cu, compunit_symtab *symtab);
 
-  /* Get the type_unit_group_unshareable corresponding to TU_GROUP.  If one
+  /* Get the type_unit_group_unshareable corresponding to TU_GROUP_KEY.  If one
      does not exist, create it.  */
   type_unit_group_unshareable *get_type_unit_group_unshareable
-    (type_unit_group *tu_group);
+    (stmt_list_hash tu_group_key);
 
   struct type *get_type_for_signatured_type (signatured_type *sig_type) const;
 
@@ -898,9 +903,10 @@ private:
      expanded yet.  */
   std::vector<compunit_symtab *> m_symtabs;
 
-  /* Map from a type unit group to the corresponding unshared
+  /* Map from a type unit group key to the corresponding unshared
      structure.  */
-  gdb::unordered_map<type_unit_group *, type_unit_group_unshareable_up>
+  gdb::unordered_map<stmt_list_hash, type_unit_group_unshareable_up,
+		     stmt_list_hash_hash>
     m_type_units;
 
   /* Map from signatured types to the corresponding struct type.  */
