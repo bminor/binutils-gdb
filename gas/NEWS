@@ -1,5 +1,16 @@
 -*- text -*-
 
+* For RISC-V, stop generating mapping symbols $x and replace with $x<isa>.  The
+  $x was defined to have the same ISA as previous $x<isa>, but now is defined
+  to have the same ISA as elf architecture attribute.  Once used .option arch
+  directives, the file need to be rebuilt since 2.45.
+
+* Add support for RISC-V standard extensions:
+  ssqosid v1.0.
+
+* Add support for RISC-V vendor extensions:
+  T-Head: xtheadvdot v1.0.
+
 * Add support for the x86 Zhaoxin PadLock XMODX instructions.
 
 Changes in 2.44:

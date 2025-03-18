@@ -1,5 +1,8 @@
 -*- text -*-
 
+* For RISC-V dis-assembler, the definition of mapping symbol $x is changed,
+  so the file needs to be rebuilt since 2.45 once used .option arch directives.
+
 Changes in 2.44:
 
 * Support for Nios II targets has been removed except in the readelf utility,
