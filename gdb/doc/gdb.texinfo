@@ -7807,9 +7807,9 @@ previous instruction; otherwise, it will work in record mode, if the
 platform supports reverse execution, or stop if not.
 
 Currently, process record and replay is supported on ARM, Aarch64,
-LoongArch, Moxie, PowerPC, PowerPC64, S/390, and x86 (i386/amd64) running
-GNU/Linux.  Process record and replay can be used both when native
-debugging, and when remote debugging via @code{gdbserver}.
+LoongArch, Moxie, PowerPC, PowerPC64, S/390, RISC-V and x86 (i386/amd64)
+running GNU/Linux.  Process record and replay can be used both when
+native debugging, and when remote debugging via @code{gdbserver}.
 
 When recording an inferior, @value{GDBN} may print auxiliary information
 during stepping commands and commands displaying the execution history.

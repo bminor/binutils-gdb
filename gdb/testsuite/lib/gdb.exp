@@ -3758,7 +3758,8 @@ proc supports_reverse {} {
          || [istarget "aarch64*-*-linux*"]
 	 || [istarget "loongarch*-*-linux*"]
          || [istarget "powerpc*-*-linux*"]
-         || [istarget "s390*-*-linux*"] } {
+	 || [istarget "s390*-*-linux*"]
+	 || [istarget "riscv*-*-*"] } {
 	return 1
     }
 

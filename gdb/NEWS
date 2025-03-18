@@ -40,6 +40,8 @@
   namespace into which the library was loaded, if more than one namespace
   is active.
 
+ * Add record full support for rv64gc architectures
+
 * New commands
 
 maintenance check psymtabs

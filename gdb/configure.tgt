@@ -534,8 +534,9 @@ riscv*-*-freebsd*)
 
 riscv*-*-linux*)
 	# Target: Linux/RISC-V
-	gdb_target_obs="riscv-linux-tdep.o glibc-tdep.o \
- 			linux-tdep.o solib-svr4.o symfile-mem.o linux-record.o"
+	gdb_target_obs="riscv-linux-tdep.o riscv-canonicalize-syscall-gen.o \
+			glibc-tdep.o linux-tdep.o solib-svr4.o symfile-mem.o \
+			linux-record.o"
 	;;
 
 riscv*-*-*)
