@@ -2038,11 +2038,17 @@ enum aarch64_syscall {
 static enum gdb_syscall
 aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
 {
-#define SYSCALL_MAP(SYSCALL) case aarch64_sys_##SYSCALL: \
-  return gdb_sys_##SYSCALL
+#define SYSCALL_MAP(SYSCALL)			\
+  case aarch64_sys_ ## SYSCALL:			\
+    return gdb_sys_ ## SYSCALL
 
-#define UNSUPPORTED_SYSCALL_MAP(SYSCALL) case aarch64_sys_##SYSCALL: \
-  return gdb_sys_no_syscall
+#define SYSCALL_MAP_RENAME(SYSCALL, GDB_SYSCALL)	\
+  case aarch64_sys_ ## SYSCALL:				\
+    return GDB_SYSCALL;
+
+#define UNSUPPORTED_SYSCALL_MAP(SYSCALL)	\
+  case aarch64_sys_ ## SYSCALL:			\
+    return gdb_sys_no_syscall
 
   switch (syscall_number)
     {
@@ -2269,8 +2275,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (clone);
       SYSCALL_MAP (execve);
 
-    case aarch64_sys_mmap:
-      return gdb_sys_mmap2;
+      SYSCALL_MAP_RENAME (mmap, gdb_sys_mmap2);
 
       SYSCALL_MAP (fadvise64);
       SYSCALL_MAP (swapon);
@@ -2312,9 +2317,14 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       UNSUPPORTED_SYSCALL_MAP (sched_setattr);
       UNSUPPORTED_SYSCALL_MAP (sched_getattr);
       SYSCALL_MAP (getrandom);
-  default:
-    return gdb_sys_no_syscall;
-  }
+
+    default:
+      return gdb_sys_no_syscall;
+    }
+
+#undef SYSCALL_MAP
+#undef SYSCALL_MAP_RENAME
+#undef UNSUPPORTED_SYSCALL_MAP
 }
 
 /* Retrieve the syscall number at a ptrace syscall-stop, either on syscall entry
