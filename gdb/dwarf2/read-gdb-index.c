@@ -1558,8 +1558,6 @@ dwarf2_read_gdb_index
   set_main_name_from_gdb_index (per_objfile, map.get ());
 
   per_bfd->index_table = std::move (map);
-  per_bfd->quick_file_names_table =
-    create_quick_file_names_table (per_bfd->all_units.size ());
 
   return true;
 }

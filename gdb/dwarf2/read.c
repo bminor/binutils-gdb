@@ -270,6 +270,8 @@ struct loclists_rnglists_header
 
 struct stmt_list_hash
 {
+  bool operator== (const stmt_list_hash &other) const noexcept;
+
   /* The DWO unit this table is from or NULL if there is none.  */
   struct dwo_unit *dwo_unit;
 
@@ -284,11 +286,7 @@ struct stmt_list_hash
 
 struct type_unit_group
 {
-  /* The data used to construct the hash key.  */
-  struct stmt_list_hash hash {};
 };
-
-using type_unit_group_up = std::unique_ptr<type_unit_group>;
 
 /* These sections are what may appear in a (real or virtual) DWO file.  */
 
@@ -1535,9 +1533,6 @@ dwarf2_per_bfd::start_reading (dwarf_scanner_base_up new_table)
    line_header when we're done and don't need to record it here.  */
 struct quick_file_names
 {
-  /* The data used to construct the hash key.  */
-  struct stmt_list_hash hash;
-
   /* The number of entries in file_names, real_names.  */
   unsigned int num_file_names;
 
@@ -1579,64 +1574,34 @@ struct readnow_functions : public dwarf2_base_index_functions
   }
 };
 
-/* Utility hash function for a stmt_list_hash.  */
+/* See read.h.  */
 
-static hashval_t
-hash_stmt_list_entry (const struct stmt_list_hash *stmt_list_hash)
+std::uint64_t
+stmt_list_hash_hash::operator() (const stmt_list_hash &key) const noexcept
 {
-  hashval_t v = 0;
+  std::uint64_t v = 0;
 
-  if (stmt_list_hash->dwo_unit != NULL)
-    v += (uintptr_t) stmt_list_hash->dwo_unit->dwo_file;
-  v += to_underlying (stmt_list_hash->line_sect_off);
+  if (key.dwo_unit != nullptr)
+    v += ankerl::unordered_dense::hash<dwo_file *> () (key.dwo_unit->dwo_file);
+
+  v += (ankerl::unordered_dense::hash<std::uint64_t> ()
+	(to_underlying (key.line_sect_off)));
   return v;
-}
-
-/* Utility equality function for a stmt_list_hash.  */
-
-static int
-eq_stmt_list_entry (const struct stmt_list_hash *lhs,
-		    const struct stmt_list_hash *rhs)
-{
-  if ((lhs->dwo_unit != NULL) != (rhs->dwo_unit != NULL))
-    return 0;
-  if (lhs->dwo_unit != NULL
-      && lhs->dwo_unit->dwo_file != rhs->dwo_unit->dwo_file)
-    return 0;
-
-  return lhs->line_sect_off == rhs->line_sect_off;
-}
-
-/* Hash function for a quick_file_names.  */
-
-static hashval_t
-hash_file_name_entry (const void *e)
-{
-  const struct quick_file_names *file_data
-    = (const struct quick_file_names *) e;
-
-  return hash_stmt_list_entry (&file_data->hash);
-}
-
-/* Equality function for a quick_file_names.  */
-
-static int
-eq_file_name_entry (const void *a, const void *b)
-{
-  const struct quick_file_names *ea = (const struct quick_file_names *) a;
-  const struct quick_file_names *eb = (const struct quick_file_names *) b;
-
-  return eq_stmt_list_entry (&ea->hash, &eb->hash);
 }
 
 /* See read.h.  */
 
-htab_up
-create_quick_file_names_table (unsigned int nr_initial_entries)
+bool
+stmt_list_hash::operator== (const stmt_list_hash &rhs) const noexcept
 {
-  return htab_up (htab_create_alloc (nr_initial_entries,
-				     hash_file_name_entry, eq_file_name_entry,
-				     nullptr, xcalloc, xfree));
+  if ((this->dwo_unit != nullptr) != (rhs.dwo_unit != nullptr))
+    return false;
+
+  if (this->dwo_unit != nullptr
+      && this->dwo_unit->dwo_file != rhs.dwo_unit->dwo_file)
+    return false;
+
+  return this->line_sect_off == rhs.line_sect_off;
 }
 
 /* Read in CU (dwarf2_cu object) for PER_CU in the context of PER_OBJFILE.  This
@@ -1759,9 +1724,7 @@ dw2_get_file_names_reader (dwarf2_cu *cu, die_info *comp_unit_die)
 {
   dwarf2_per_cu *this_cu = cu->per_cu;
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
-  struct attribute *attr;
-  void **slot;
-  struct quick_file_names *qfn;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   gdb_assert (! this_cu->is_debug_types);
 
@@ -1771,29 +1734,24 @@ dw2_get_file_names_reader (dwarf2_cu *cu, die_info *comp_unit_die)
   if (comp_unit_die->tag == DW_TAG_partial_unit)
     return;
 
-  slot = NULL;
-
   line_header_up lh;
-  sect_offset line_offset {};
 
   file_and_directory &fnd = find_file_and_directory (comp_unit_die, cu);
+  std::optional<stmt_list_hash> stmt_list_hash_key;
+  attribute *attr = dwarf2_attr (comp_unit_die, DW_AT_stmt_list, cu);
 
-  attr = dwarf2_attr (comp_unit_die, DW_AT_stmt_list, cu);
   if (attr != nullptr && attr->form_is_unsigned ())
     {
-      struct quick_file_names find_entry;
-
-      line_offset = (sect_offset) attr->as_unsigned ();
+      sect_offset line_offset = (sect_offset) attr->as_unsigned ();
 
       /* We may have already read in this line header (TU line header sharing).
 	 If we have we're done.  */
-      find_entry.hash.dwo_unit = cu->dwo_unit;
-      find_entry.hash.line_sect_off = line_offset;
-      slot = htab_find_slot (per_objfile->per_bfd->quick_file_names_table.get (),
-			     &find_entry, INSERT);
-      if (*slot != NULL)
+      stmt_list_hash_key = {cu->dwo_unit, line_offset};
+
+      if (auto it = per_bfd->quick_file_names_table.find (*stmt_list_hash_key);
+	  it != per_bfd->quick_file_names_table.end ())
 	{
-	  this_cu->file_names = (struct quick_file_names *) *slot;
+	  this_cu->file_names = it->second;
 	  return;
 	}
 
@@ -1806,12 +1764,11 @@ dw2_get_file_names_reader (dwarf2_cu *cu, die_info *comp_unit_die)
   else if (lh == nullptr)
     return;
 
-  qfn = XOBNEW (&per_objfile->per_bfd->obstack, struct quick_file_names);
-  qfn->hash.dwo_unit = cu->dwo_unit;
-  qfn->hash.line_sect_off = line_offset;
+  auto *qfn = XOBNEW (&per_bfd->obstack, quick_file_names);
+
   /* There may not be a DW_AT_stmt_list.  */
-  if (slot != nullptr)
-    *slot = qfn;
+  if (stmt_list_hash_key.has_value ())
+    per_bfd->quick_file_names_table.emplace (*stmt_list_hash_key, qfn);
 
   std::vector<const char *> include_names;
   if (lh != nullptr)
@@ -1831,9 +1788,8 @@ dw2_get_file_names_reader (dwarf2_cu *cu, die_info *comp_unit_die)
 
   qfn->num_file_names = offset + include_names.size ();
   qfn->comp_dir = fnd.intern_comp_dir (per_objfile->objfile);
-  qfn->file_names =
-    XOBNEWVEC (&per_objfile->per_bfd->obstack, const char *,
-	       qfn->num_file_names);
+  qfn->file_names
+    = XOBNEWVEC (&per_bfd->obstack, const char *, qfn->num_file_names);
   if (offset != 0)
     qfn->file_names[0] = per_objfile->objfile->intern (fnd.get_name ());
 
@@ -2348,9 +2304,6 @@ dwarf2_initialize_objfile (struct objfile *objfile,
       dwarf_read_debug_printf ("readnow requested");
 
       create_all_units (per_objfile);
-      per_bfd->quick_file_names_table
-	= create_quick_file_names_table (per_bfd->all_units.size ());
-
       objfile->qf.emplace_front (new readnow_functions);
     }
   /* Was a GDB index already read when we processed an objfile sharing
@@ -3320,55 +3273,11 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
    together.  A future step could be to put the types in the same symtab as
    the CU the types ultimately came from.  */
 
-static hashval_t
-hash_type_unit_group (const void *item)
-{
-  const struct type_unit_group *tu_group
-    = (const struct type_unit_group *) item;
-
-  return hash_stmt_list_entry (&tu_group->hash);
-}
-
-static int
-eq_type_unit_group (const void *item_lhs, const void *item_rhs)
-{
-  const struct type_unit_group *lhs = (const struct type_unit_group *) item_lhs;
-  const struct type_unit_group *rhs = (const struct type_unit_group *) item_rhs;
-
-  return eq_stmt_list_entry (&lhs->hash, &rhs->hash);
-}
-
-/* Allocate a hash table for type unit groups.  */
-
-static htab_up
-allocate_type_unit_groups_table ()
-{
-  return htab_up (htab_create_alloc (3,
-				     hash_type_unit_group,
-				     eq_type_unit_group,
-				     htab_delete_entry<type_unit_group>,
-				     xcalloc, xfree));
-}
-
 /* Type units that don't have DW_AT_stmt_list are grouped into their own
    partial symtabs.  We combine several TUs per psymtab to not let the size
    of any one psymtab grow too big.  */
 #define NO_STMT_LIST_TYPE_UNIT_PSYMTAB (1 << 31)
 #define NO_STMT_LIST_TYPE_UNIT_PSYMTAB_SIZE 10
-
-/* Helper routine for get_type_unit_group.
-   Create the type_unit_group object used to hold one or more TUs.  */
-
-static type_unit_group_up
-create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
-{
-  auto tu_group = std::make_unique<type_unit_group> ();
-
-  tu_group->hash.dwo_unit = cu->dwo_unit;
-  tu_group->hash.line_sect_off = line_offset_struct;
-
-  return tu_group;
-}
 
 /* Look up the type_unit_group for type unit CU, and create it if necessary.
    STMT_LIST is a DW_AT_stmt_list attribute.  */
@@ -3377,14 +3286,9 @@ static struct type_unit_group *
 get_type_unit_group (struct dwarf2_cu *cu, const struct attribute *stmt_list)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
-  struct type_unit_group *tu_group;
-  void **slot;
   unsigned int line_offset;
-  struct type_unit_group type_unit_group_for_lookup;
-
-  if (per_objfile->per_bfd->type_unit_groups == NULL)
-    per_objfile->per_bfd->type_unit_groups = allocate_type_unit_groups_table ();
 
   /* Do we need to create a new group, or can we use an existing one?  */
 
@@ -3406,21 +3310,16 @@ get_type_unit_group (struct dwarf2_cu *cu, const struct attribute *stmt_list)
       ++tu_stats->nr_stmt_less_type_units;
     }
 
-  type_unit_group_for_lookup.hash.dwo_unit = cu->dwo_unit;
-  type_unit_group_for_lookup.hash.line_sect_off = (sect_offset) line_offset;
-  slot = htab_find_slot (per_objfile->per_bfd->type_unit_groups.get (),
-			 &type_unit_group_for_lookup, INSERT);
-  if (*slot == nullptr)
+  stmt_list_hash key {cu->dwo_unit, static_cast<sect_offset> (line_offset)};
+  auto [it, inserted] = per_bfd->type_unit_groups.emplace (key, nullptr);
+
+  if (inserted)
     {
-      sect_offset line_offset_struct = (sect_offset) line_offset;
-      auto grp = create_type_unit_group (cu, line_offset_struct);
-      *slot = grp.release ();
+      (*it).second = std::make_unique<type_unit_group> ();
       ++tu_stats->nr_symtabs;
     }
 
-  tu_group = (struct type_unit_group *) *slot;
-  gdb_assert (tu_group != nullptr);
-  return tu_group;
+  return it->second.get ();
 }
 
 /* Subroutine of dwarf2_build_psymtabs_hard to simplify it.
@@ -3526,7 +3425,7 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile,
   sect_offset abbrev_offset;
 
   /* It's up to the caller to not call us multiple times.  */
-  gdb_assert (per_objfile->per_bfd->type_unit_groups == NULL);
+  gdb_assert (per_objfile->per_bfd->type_unit_groups.empty ());
 
   if (per_objfile->per_bfd->all_type_units.size () == 0)
     return;
@@ -3781,8 +3680,6 @@ cooked_index_worker_debug_info::do_reading ()
   create_all_units (m_per_objfile);
   build_type_psymtabs (m_per_objfile, &m_index_storage);
 
-  per_bfd->quick_file_names_table
-    = create_quick_file_names_table (per_bfd->all_units.size ());
   if (!per_bfd->debug_aranges.empty ())
     read_addrmap_from_aranges (m_per_objfile, &per_bfd->debug_aranges,
 			       m_index_storage.get_addrmap (),

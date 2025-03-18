@@ -424,13 +424,12 @@ cooked_index_worker_debug_names::do_reading ()
       exceptions.push_back (std::move (exc));
     }
 
-  dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
-  per_bfd->quick_file_names_table
-    = create_quick_file_names_table (per_bfd->all_units.size ());
   m_results.emplace_back (nullptr,
 			  complaint_handler.release (),
 			  std::move (exceptions),
 			  parent_map ());
+
+  dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_bfd->index_table.get ()));

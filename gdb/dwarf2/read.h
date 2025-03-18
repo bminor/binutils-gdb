@@ -467,6 +467,17 @@ struct dwp_file;
 
 using dwp_file_up = std::unique_ptr<dwp_file>;
 
+struct stmt_list_hash;
+
+struct stmt_list_hash_hash
+{
+  using is_avalanching = void;
+
+  std::uint64_t operator() (const stmt_list_hash &key) const noexcept;
+};
+
+using type_unit_group_up = std::unique_ptr<type_unit_group>;
+
 /* Some DWARF data can be shared across objfiles who share the same BFD,
    this data is stored in this object.
 
@@ -605,7 +616,8 @@ public:
 
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */
-  htab_up type_unit_groups;
+  gdb::unordered_map<stmt_list_hash, type_unit_group_up, stmt_list_hash_hash>
+    type_unit_groups;
 
   /* Set of signatured_types, used to look up by signature.  */
   signatured_type_set signatured_types;
@@ -644,7 +656,8 @@ public:
      sorted all the TUs into "type unit groups", grouped by their
      DW_AT_stmt_list value.  Therefore the only sharing done here is with a
      CU and its associated TU group if there is one.  */
-  htab_up quick_file_names_table;
+  gdb::unordered_map<stmt_list_hash, quick_file_names *, stmt_list_hash_hash>
+    quick_file_names_table;
 
   /* The CUs we recently read.  */
   std::vector<dwarf2_per_cu *> just_read_cus;
@@ -1193,10 +1206,6 @@ extern void finalize_all_units (dwarf2_per_bfd *per_bfd);
 /* Create a list of all compilation units in OBJFILE.  */
 
 extern void create_all_units (dwarf2_per_objfile *per_objfile);
-
-/* Create a quick_file_names hash table.  */
-
-extern htab_up create_quick_file_names_table (unsigned int nr_initial_entries);
 
 /* Find the base address of the compilation unit for range lists and
    location lists.  It will normally be specified by DW_AT_low_pc.
