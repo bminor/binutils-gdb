@@ -381,7 +381,7 @@ symbol_to_symbol_object (struct symbol *sym)
 {
   symbol_object *sym_obj;
 
-  /* Look if there's already a gdb.Symtab object for given SYMTAB
+  /* Look if there's already a gdb.Symbol object for given SYMBOL
      and if so, return it.  */
   if (sym->is_objfile_owned ())
     sym_obj = sympy_objfile_data_key.get (sym->objfile ());
