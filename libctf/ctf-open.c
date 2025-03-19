@@ -340,6 +340,7 @@ get_vbytes_v4 (ctf_dict_t *fp, const ctf_type_t *tp,
       return (sizeof (ctf_member_t) * vlen);
     case CTF_K_FUNCTION:
       return (sizeof (ctf_param_t) * vlen);
+    case CTF_K_FUNC_LINKAGE:
     case CTF_K_VAR:
       return (sizeof (ctf_linkage_t));
     case CTF_K_DATASEC:
@@ -354,7 +355,6 @@ get_vbytes_v4 (ctf_dict_t *fp, const ctf_type_t *tp,
     case CTF_K_VOLATILE:
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
-    case CTF_K_FUNC:
     case CTF_K_BTF_FLOAT:
       return 0;
     /* These should have been resolved away by LCTF_KIND.
@@ -1659,9 +1659,9 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   bp = (const ctf_preamble_t *) ctfsect->cts_data;
   pp = (const ctf_preamble_t *) ctfsect->cts_data; /* CTFv3 or below.  */
 
-  if (_libctf_unlikely_ (bp->btf_magic != BTF_MAGIC))
+  if (_libctf_unlikely_ (bp->btf_magic != CTF_BTF_MAGIC))
     {
-      if (bp->btf_magic == bswap_16 (BTF_MAGIC))
+      if (bp->btf_magic == bswap_16 (CTF_BTF_MAGIC))
 	{
 	  format = IS_BTF;
 	  foreign_endian = 1;

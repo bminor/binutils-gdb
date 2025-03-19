@@ -144,7 +144,7 @@ ctf_add_prefix (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
 ctf_dict_t *
 ctf_create (int *errp)
 {
-  static const ctf_header_t hdr = { .btf.bth_preamble = { BTF_MAGIC, BTF_VERSION, 0 } };
+  static const ctf_header_t hdr = { .btf.bth_preamble = { CTF_BTF_MAGIC, CTF_BTF_VERSION, 0 } };
 
   ctf_dynhash_t *structs = NULL, *unions = NULL, *enums = NULL, *names = NULL;
   ctf_dynhash_t *datasecs = NULL, *tags = NULL;
@@ -243,7 +243,7 @@ ctf_name_table (ctf_dict_t *fp, int kind)
     case CTF_K_TYPE_TAG:
     case CTF_K_DECL_TAG:
       return fp->ctf_tags;
-    case CTF_K_DATASECS:
+    case CTF_K_DATASEC:
       return fp->ctf_datasecs;
     default:
       return fp->ctf_names;
@@ -257,7 +257,7 @@ ctf_insert_type_decl_tag (ctf_dict_t *fp, ctf_id_t type, const char *name,
   ctf_dynset_t *types;
   ctf_dynhash_t *h = ctf_name_table (fp, kind);
 
-  if ((types = ctf_dynhash_lookup (fp, h, str)) == NULL)
+  if ((types = ctf_dynhash_lookup (fp, h, name)) == NULL)
     {
       types = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer, NULL);
 
@@ -1018,7 +1018,7 @@ ctf_add_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
   if (is_decl)
     {
       ctf_decl_tag_t *vlen = (ctf_decl_tag_t *) dtd->dtd_vlen;
-      vlen->component_idx = component_idx;
+      vlen->cdt_component_idx = component_idx;
     }
 
   return dtd->dtd_type;
@@ -2130,7 +2130,7 @@ enumcmp (const char *name, int64_t value, void *arg)
   if (value != bvalue)
     {
       ctf_err_warn (ctb->ctb_dict, 1, ECTF_CONFLICT,
-		    _("conflict due to enum value change: %i versus %i"),
+		    _("conflict due to enum value change: %li versus %li"),
 		    value, bvalue);
       return 1;
     }
@@ -2298,7 +2298,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
   ctf_id_t tmp;
 
   const char *name;
-  uint32_t kind, forward_kind, flag;
+  uint32_t kind, forward_kind, flag, bitfields;
   size_t vlen;
 
   const ctf_type_t *src_prefix, *src_tp, *dst_prefix;

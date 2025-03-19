@@ -162,7 +162,7 @@ typedef struct ctf_preamble_v3
 /* Header for CTFv1 and v2.  */
 typedef struct ctf_header_v2
 {
-  ctf_preamble_t cth_preamble;
+  ctf_preamble_v3_t cth_preamble;
   uint32_t cth_parlabel;	/* Ref to name of parent lbl uniq'd against.  */
   uint32_t cth_parname;		/* Ref to basename of parent.  */
   uint32_t cth_lbloff;		/* Offset of label section.  */
@@ -177,7 +177,7 @@ typedef struct ctf_header_v2
 /* Header for CTFv3 only.  */
 typedef struct ctf_header_v3
 {
-  ctf_preamble_t cth_preamble;
+  ctf_preamble_v3_t cth_preamble;
   uint32_t cth_parlabel;	/* Ref to name of parent lbl uniq'd against.  */
   uint32_t cth_parname;		/* Ref to basename of parent.  */
   uint32_t cth_cuname;		/* Ref to CU name (may be 0).  */
@@ -246,7 +246,7 @@ typedef struct ctf_header
 #define cth_flags   cth_preamble.ctp_flags
 
 #define CTF_MAGIC	0xdff2	/* v3 and below: magic number identifying header.  */
-#define BTF_MAGIC	0xeb9f
+#define CTF_BTF_MAGIC	0xeb9f
 #define CTFv4_MAGIC	0xd167ae03a2c5		/* 48 bits */
 
 /* Data format version number.  */

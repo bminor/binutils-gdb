@@ -51,21 +51,21 @@ ctf_btf_mode_t _libctf_btf_mode = LIBCTF_BTM_POSSIBLE;	/* BTF writeout mode.  */
     You can influence what type kinds are written out to a CTFv4 dict via the
     ctf_write_suppress_kind() function.  */
 int
-ctf_version (int ctf_version, size_t btf_hdr_len, enum ctf_btf_mode_t btf_mode)
+ctf_version (int ctf_version_, size_t btf_hdr_len, ctf_btf_mode_t btf_mode)
 {
-  if (version < 0 || btf_mode < 0 || btf_mode > 2)
+  if (ctf_version_ < 0 || btf_mode < 0 || btf_mode > 2)
     {
       errno = EINVAL;
       return -1;
     }
 
-  if (version > 0)
+  if (ctf_version_ > 0)
     {
       /*  Dynamic version switching is not presently supported. */
-      if (version != _libctf_version)
+      if (ctf_version_ != _libctf_version)
 	goto err;
 
-      ctf_dprintf ("ctf_version: client using version %i\n", version);
+      ctf_dprintf ("ctf_version: client using version %i\n", ctf_version_);
     }
 
   if (btf_hdr_len > 0)
@@ -77,9 +77,9 @@ ctf_version (int ctf_version, size_t btf_hdr_len, enum ctf_btf_mode_t btf_mode)
       ctf_dprintf ("ctf_version: client using BTF header length %zi\n", btf_hdr_len);
     }
 
-  _btf_mode = btf_mode;
+  _libctf_btf_mode = btf_mode;
 
-  return _libctf_version;
+  return ctf_version_;
 
  err:
   errno = ENOTSUP;

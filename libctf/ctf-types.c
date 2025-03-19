@@ -1647,7 +1647,7 @@ ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
    known).  */
 
 int
-ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const **cuname)
+ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const char **cuname)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
@@ -2531,7 +2531,7 @@ ctf_datasec_variable_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
 
    Not currently public API.  */
 
-ctf_datasec_t *
+ctf_var_secinfo_t *
 ctf_datasec_entry (ctf_dict_t *fp, ctf_id_t datasec, int component_idx)
 {
   ctf_type_t *tp;

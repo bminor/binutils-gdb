@@ -79,10 +79,10 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
   uint32_t kind, n = 1;
   int is_qual = 0;
 
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
   ctf_arinfo_t ar;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     {
       cd->cd_err = fp->ctf_errno;
       return;
@@ -98,16 +98,16 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
       break;
 
     case CTF_K_TYPEDEF:
-      if (ctf_strptr (fp, tp->ctt_name)[0] == '\0')
+      if (ctf_strptr (fp, suffix->ctt_name)[0] == '\0')
 	{
-	  ctf_decl_push (cd, fp, tp->ctt_type);
+	  ctf_decl_push (cd, fp, suffix->ctt_type);
 	  return;
 	}
       prec = CTF_PREC_BASE;
       break;
 
-    case CTF_K_FUNC:
-      ctf_decl_push (cd, fp, tp->ctt_type);
+    case CTF_K_FUNC_LINKAGE:
+      ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = CTF_PREC_FUNCTION;
       break;
 

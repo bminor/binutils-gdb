@@ -562,8 +562,8 @@ typedef enum ctf_btf_mode
     You can influence what type kinds are written out to a CTFv4 dict via the
     ctf_write_suppress_kind() function.  */
 
-extern int ctf_version (int ctf_version, size_t btf_hdr_len,
-			enum ctf_btf_mode_t btf_mode);
+extern int ctf_version (int ctf_version_, size_t btf_hdr_len,
+			ctf_btf_mode_t btf_mode);
 
 /* Given a symbol table index corresponding to a function symbol, return info on
    the type of a given function's arguments or return value, or its parameter
@@ -703,7 +703,7 @@ extern int ctf_type_kind_forwarded (ctf_dict_t *, ctf_id_t);
    CUNAME is set, set it to the name of the conflicting compilation unit for the
    passed-in type (which may be a null string if the cuname is not known).  */
 
-extern int ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const **cuname);
+extern int ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const char **cuname);
 
 /* Return the type a pointer, typedef, cvr-qual, or slice refers to, or return
    an ECTF_NOTREF error otherwise.  ctf_type_kind pretends that slices are
