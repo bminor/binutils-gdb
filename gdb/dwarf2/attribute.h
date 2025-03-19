@@ -105,8 +105,8 @@ struct attribute
   /* Return an unsigned constant value.  This only handles constant
      forms (i.e., form_is_constant -- and not the extended list of
      "unsigned" forms) and assumes an unsigned value is desired.  This
-     can intended for use with DWARF-defined enumerations like DW_CC_*
-     or DW_INL_*, but also in situations where a nonnegative constant
+     can be used with DWARF-defined enumerations like DW_CC_* or
+     DW_INL_*, but also in situations where a nonnegative constant
      integer is specified by DWARF.
 
      If a signed form and negative value is used, or if a non-constant
