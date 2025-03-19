@@ -175,6 +175,15 @@ struct attribute
      false.  */
   bool form_is_strictly_signed () const;
 
+  /* Check if the attribute's form is an unsigned constant form.  This
+     only returns true for forms that are strictly unsigned -- that
+     is, for a context-dependent form like DW_FORM_data1, this returns
+     false.  */
+  bool form_is_strictly_unsigned () const
+  {
+    return form == DW_FORM_udata;
+  }
+
   /* Check if the attribute's form is a form that requires
      "reprocessing".  */
   bool form_requires_reprocessing () const;

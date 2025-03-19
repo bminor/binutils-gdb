@@ -13216,10 +13216,10 @@ get_mpz (struct dwarf2_cu *cu, gdb_mpz *value, struct attribute *attr)
 		   ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE,
 		   true);
     }
-  else if (attr->form_is_unsigned ())
+  else if (attr->form_is_strictly_unsigned ())
     *value = gdb_mpz (attr->as_unsigned ());
   else
-    *value = gdb_mpz (attr->constant_value (1));
+    *value = gdb_mpz (attr->signed_constant ().value_or (1));
 }
 
 /* Assuming DIE is a rational DW_TAG_constant, read the DIE's
