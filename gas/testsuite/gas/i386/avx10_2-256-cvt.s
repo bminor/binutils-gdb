@@ -6,7 +6,6 @@
 _start:
 	vcvt2ps2phx	%xmm4, %xmm5, %xmm6
 	vcvt2ps2phx	%ymm4, %ymm5, %ymm6
-	vcvt2ps2phx	{rn-sae}, %ymm4, %ymm5, %ymm6
 	vcvt2ps2phx	0x10000000(%esp, %esi, 8), %xmm5, %xmm6{%k7}
 	vcvt2ps2phx	(%ecx){1to4}, %xmm5, %xmm6
 	vcvt2ps2phx	2032(%ecx), %xmm5, %xmm6
@@ -63,7 +62,6 @@ _intel:
 	.intel_syntax noprefix
 	vcvt2ps2phx	xmm6, xmm5, xmm4
 	vcvt2ps2phx	ymm6, ymm5, ymm4
-	vcvt2ps2phx	ymm6, ymm5, ymm4, {rn-sae}
 	vcvt2ps2phx	xmm6{k7}, xmm5, XMMWORD PTR [esp+esi*8+0x10000000]
 	vcvt2ps2phx	xmm6, xmm5, DWORD PTR [ecx]{1to4}
 	vcvt2ps2phx	xmm6, xmm5, XMMWORD PTR [ecx+2032]

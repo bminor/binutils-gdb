@@ -17,17 +17,14 @@ _start:
 	vminmaxbf16	$123, -256(%rdx){1to16}, %ymm29, %ymm30{%k7}{z}
 	vminmaxbf16	$123, (%r9){1to8}, %xmm29, %xmm30
 	vminmaxbf16	$123, -256(%rdx){1to8}, %xmm29, %xmm30{%k7}{z}
-	vminmaxpd	$123, {sae}, %ymm28, %ymm29, %ymm30
 	vminmaxpd	$123, (%r9){1to4}, %ymm29, %ymm30
 	vminmaxpd	$123, -1024(%rdx){1to4}, %ymm29, %ymm30{%k7}{z}
 	vminmaxpd	$123, (%r9){1to2}, %xmm29, %xmm30
 	vminmaxpd	$123, -1024(%rdx){1to2}, %xmm29, %xmm30{%k7}{z}
-	vminmaxph	$123, {sae}, %ymm28, %ymm29, %ymm30
 	vminmaxph	$123, (%r9){1to16}, %ymm29, %ymm30
 	vminmaxph	$123, -256(%rdx){1to16}, %ymm29, %ymm30{%k7}{z}
 	vminmaxph	$123, (%r9){1to8}, %xmm29, %xmm30
 	vminmaxph	$123, -256(%rdx){1to8}, %xmm29, %xmm30{%k7}{z}
-	vminmaxps	$123, {sae}, %ymm28, %ymm29, %ymm30
 	vminmaxps	$123, (%r9){1to8}, %ymm29, %ymm30
 	vminmaxps	$123, -512(%rdx){1to8}, %ymm29, %ymm30{%k7}{z}
 	vminmaxps	$123, (%r9){1to4}, %xmm29, %xmm30
@@ -83,17 +80,14 @@ _intel:
 	vminmaxbf16	ymm30{k7}{z}, ymm29, WORD PTR [rdx-256]{1to16}, 123
 	vminmaxbf16	xmm30, xmm29, [r9]{1to8}, 123
 	vminmaxbf16	xmm30{k7}{z}, xmm29, WORD PTR [rdx-256]{1to8}, 123
-	vminmaxpd	ymm30, ymm29, ymm28, {sae}, 123
 	vminmaxpd	ymm30, ymm29, QWORD PTR [r9]{1to4}, 123
 	vminmaxpd	ymm30{k7}{z}, ymm29, [rdx-1024]{1to4}, 123
 	vminmaxpd	xmm30, xmm29, QWORD PTR [r9]{1to2}, 123
 	vminmaxpd	xmm30{k7}{z}, xmm29, [rdx-1024]{1to2}, 123
-	vminmaxph	ymm30, ymm29, ymm28, {sae}, 123
 	vminmaxph	ymm30, ymm29, [r9]{1to16}, 123
 	vminmaxph	ymm30{k7}{z}, ymm29, WORD PTR [rdx-256]{1to16}, 123
 	vminmaxph	xmm30, xmm29, WORD PTR [r9]{1to8}, 123
 	vminmaxph	xmm30{k7}{z}, xmm29, [rdx-256]{1to8}, 123
-	vminmaxps	ymm30, ymm29, ymm28, {sae}, 123
 	vminmaxps	ymm30, ymm29, DWORD PTR [r9]{1to8}, 123
 	vminmaxps	ymm30{k7}{z}, ymm29, [rdx-512]{1to8}, 123
 	vminmaxps	xmm30, xmm29, [r9]{1to4}, 123

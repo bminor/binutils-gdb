@@ -8,7 +8,6 @@ Disassembly of section \.text:
 0+ <_start>:
 \s*[a-f0-9]+:\s*62 f2 55 08 67 f4\s+vcvt2ps2phx\s+%xmm4,%xmm5,%xmm6
 \s*[a-f0-9]+:\s*62 f2 55 28 67 f4\s+vcvt2ps2phx\s+%ymm4,%ymm5,%ymm6
-\s*[a-f0-9]+:\s*62 f2 51 18 67 f4\s+vcvt2ps2phx\s+\{rn-sae\},%ymm4,%ymm5,%ymm6
 \s*[a-f0-9]+:\s*62 f2 55 0f 67 b4 f4 00 00 00 10\s+vcvt2ps2phx\s+0x10000000\(%esp,%esi,8\),%xmm5,%xmm6\{%k7\}
 \s*[a-f0-9]+:\s*62 f2 55 18 67 31\s+vcvt2ps2phx\s+\(%ecx\)\{1to4\},%xmm5,%xmm6
 \s*[a-f0-9]+:\s*62 f2 55 08 67 71 7f\s+vcvt2ps2phx\s+0x7f0\(%ecx\),%xmm5,%xmm6

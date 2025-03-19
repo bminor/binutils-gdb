@@ -4422,7 +4422,7 @@ static void
 build_evex_prefix (void)
 {
   unsigned int register_specifier;
-  bool w, u;
+  bool w;
   rex_byte vrex_used = 0;
 
   /* Check register specifier.  */
@@ -4545,12 +4545,10 @@ build_evex_prefix (void)
 	abort ();
     }
 
-  u = i.rounding.type == rc_none || i.tm.opcode_modifier.evex != EVEX256;
-
   /* The third byte of the EVEX prefix.  */
   i.vex.bytes[2] = ((w << 7)
 		    | (register_specifier << 3)
-		    | (u << 2)
+		    | 4 /* Encode the U bit.  */
 		    | i.tm.opcode_modifier.opcodeprefix);
 
   /* The fourth byte of the EVEX prefix.  */
@@ -8824,19 +8822,14 @@ check_VecOperands (const insn_template *t)
 	  return 1;
 	}
 
-      /* Non-EVEX.{LIG,512,256} forms need to have a ZMM or YMM register as at
-	 least one operand.  For YMM register or EVEX256, we will need AVX10.2
-	 enabled.  There's no need to check all operands, though: Either of the
-	 last two operands will be of the right size in all relevant templates.  */
+      /* Non-EVEX.{LIG,512} forms need to have a ZMM or YMM register as at
+	 least one operand.  There's no need to check all operands, though:
+	 Either of the last two operands will be of the right size in all
+	 relevant templates.  */
       if (t->opcode_modifier.evex != EVEXLIG
 	  && t->opcode_modifier.evex != EVEX512
-	  && (t->opcode_modifier.evex != EVEX256
-	      || !cpu_arch_flags.bitfield.cpuavx10_2)
 	  && !i.types[t->operands - 1].bitfield.zmmword
-	  && !i.types[t->operands - 2].bitfield.zmmword
-	  && ((!i.types[t->operands - 1].bitfield.ymmword
-	       && !i.types[t->operands - 2].bitfield.ymmword)
-	      || !cpu_arch_flags.bitfield.cpuavx10_2))
+	  && !i.types[t->operands - 2].bitfield.zmmword)
 	{
 	  i.error = operand_size_mismatch;
 	  return 1;
@@ -14032,7 +14025,7 @@ s_insn (int dummy ATTRIBUTE_UNUSED)
 	{
 	  if (!i.tm.opcode_modifier.evex)
 	    {
-	      /* Do _not_ consider AVX512VL / AVX10.2 here.  */
+	      /* Do _not_ consider AVX512VL here.  */
 	      if (combined.bitfield.zmmword)
 	        i.tm.opcode_modifier.evex = EVEX512;
 	      else if (combined.bitfield.ymmword)

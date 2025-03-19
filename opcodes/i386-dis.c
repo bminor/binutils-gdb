@@ -230,7 +230,6 @@ struct instr_info
     bool b;
     bool no_broadcast;
     bool nf;
-    bool u;
   }
   vex;
 
@@ -9452,8 +9451,6 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       if (!(*ins->codep & 0x4))
 	ins->rex2 |= REX_X;
 
-      ins->vex.u = *ins->codep & 0x4;
-
       switch ((*ins->codep & 0x3))
 	{
 	case 0:
@@ -9488,8 +9485,8 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	{
 	  /* Report bad for !evex_default and when two fixed values of evex
 	     change.  */
-	  if (ins->evex_type != evex_default || (ins->rex2 & REX_B)
-	      || ((ins->rex2 & REX_X) && (ins->modrm.mod != 3)))
+	  if (ins->evex_type != evex_default
+	      || (ins->rex2 & (REX_B | REX_X)))
 	    return &bad_opcode;
 	  /* In 16/32-bit mode silently ignore following bits.  */
 	  ins->rex &= ~REX_B;
@@ -9513,22 +9510,14 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       if (!fetch_modrm (ins))
 	return &err_opcode;
 
-      /* When modrm.mod != 3, the U bit is used by APX for bit X4.
-	 When modrm.mod == 3, the U bit is used by AVX10.  The U bit and
-	 the b bit should not be zero at the same time.  */
-      if (ins->modrm.mod == 3 && !ins->vex.u && !ins->vex.b)
+      if (ins->modrm.mod == 3 && (ins->rex2 & REX_X))
 	return &bad_opcode;
 
       /* Set vector length. For EVEX-promoted instructions, evex.ll == 0b00,
 	 which has the same encoding as vex.length == 128 and they can share
 	 the same processing with vex.length in OP_VEX.  */
       if (ins->modrm.mod == 3 && ins->vex.b && ins->evex_type != evex_from_legacy)
-	{
-	  if (ins->vex.u)
-	    ins->vex.length = 512;
-	  else
-	    ins->vex.length = 256;
-	}
+	ins->vex.length = 512;
       else
 	{
 	  switch (ins->vex.ll)

@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Support for x86 AVX10.2 256 bit rounding has been dropped, as all the
+  hardware would directly support 512 bit vecotr width.
+
 * For RISC-V, stop generating mapping symbols $x and replace with $x<isa>.  The
   $x was defined to have the same ISA as previous $x<isa>, but now is defined
   to have the same ISA as elf architecture attribute.  Once used .option arch

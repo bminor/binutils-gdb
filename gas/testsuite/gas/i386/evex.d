@@ -19,7 +19,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	62 e1 7e 08 2d c0    	\{evex\} vcvtss2si %xmm0,%eax
  +[a-f0-9]+:	62 e1 7c 08 c2 c0 00 	vcmpeqps %xmm0,%xmm0,%k0
  +[a-f0-9]+:	62 f1 7e 38 e6 f5    	vcvtdq2pd %ymm5,%zmm6
- +[a-f0-9]+:	62 f1 7a 38 e6 f5    	vcvtdq2pd %xmm5,%ymm6
  +[a-f0-9]+:	62 f1 7e 38 7a f5    	vcvtudq2pd %ymm5,%zmm6
- +[a-f0-9]+:	62 f1 7a 38 7a f5    	vcvtudq2pd %xmm5,%ymm6
 #pass
