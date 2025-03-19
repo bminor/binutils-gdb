@@ -90,6 +90,8 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  gdb_puts (hex_string (die->attrs[i].as_unsigned ()), f);
 	  break;
 	case DW_FORM_GNU_ref_alt:
+	case DW_FORM_ref_sup4:
+	case DW_FORM_ref_sup8:
 	  gdb_printf (f, "alt ref address: ");
 	  gdb_puts (hex_string (die->attrs[i].as_unsigned ()), f);
 	  break;
@@ -123,6 +125,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_strx:
 	case DW_FORM_GNU_str_index:
 	case DW_FORM_GNU_strp_alt:
+	case DW_FORM_strp_sup:
 	  gdb_printf (f, "string: \"%s\" (%s canonicalized)",
 		      die->attrs[i].as_string ()
 		      ? die->attrs[i].as_string () : "",

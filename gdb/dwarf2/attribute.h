@@ -144,7 +144,9 @@ struct attribute
 	    || form == DW_FORM_ref4
 	    || form == DW_FORM_ref8
 	    || form == DW_FORM_ref_udata
-	    || form == DW_FORM_GNU_ref_alt);
+	    || form == DW_FORM_GNU_ref_alt
+	    || form == DW_FORM_ref_sup4
+	    || form == DW_FORM_ref_sup8);
   }
 
   /* Check if the attribute's form is a DW_FORM_block*
@@ -167,6 +169,16 @@ struct attribute
   /* Check if the attribute's form is a form that requires
      "reprocessing".  */
   bool form_requires_reprocessing () const;
+
+  /* Check if attribute's form refers to the separate "dwz" file.
+     This is only useful for references to the .debug_info section,
+     not to the supplementary .debug_str section.  */
+  bool form_is_alt () const
+  {
+    return (form == DW_FORM_GNU_ref_alt
+	    || form == DW_FORM_ref_sup4
+	    || form == DW_FORM_ref_sup8);
+  }
 
   /* Return DIE offset of this attribute.  Return 0 with complaint if
      the attribute is not of the required kind.  */

@@ -222,7 +222,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu *scanning_per_cu,
 	case DW_AT_abstract_origin:
 	case DW_AT_extension:
 	  origin_offset = attr.get_ref_die_offset ();
-	  origin_is_dwz = attr.form == DW_FORM_GNU_ref_alt;
+	  origin_is_dwz = attr.form_is_alt ();
 	  break;
 
 	case DW_AT_external:
@@ -423,7 +423,7 @@ cooked_indexer::index_imported_unit (cutu_reader *reader,
       if (attr.name == DW_AT_import)
 	{
 	  sect_off = attr.get_ref_die_offset ();
-	  is_dwz = (attr.form == DW_FORM_GNU_ref_alt
+	  is_dwz = (attr.form_is_alt ()
 		    || reader->cu ()->per_cu->is_dwz);
 	}
     }

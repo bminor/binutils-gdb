@@ -259,6 +259,7 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
     case DW_FORM_sec_offset:
     case DW_FORM_strp:
     case DW_FORM_GNU_strp_alt:
+    case DW_FORM_strp_sup:
       bytes += offset_size;
       break;
 

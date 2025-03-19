@@ -34,8 +34,8 @@ struct dwz_file
   /* Open the separate '.dwz' debug file, if needed.  This will set
      the appropriate field in the per-BFD structure.  If the DWZ file
      exists, the relevant sections are read in as well.  Throws an
-     error if the .gnu_debugaltlink section exists but the file cannot
-     be found.  */
+     exception if the .gnu_debugaltlink or .debug_sup section exists
+     but is invalid or if the file cannot be found.  */
   static void read_dwz_file (dwarf2_per_objfile *per_objfile);
 
   const char *filename () const

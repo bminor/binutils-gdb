@@ -38,7 +38,7 @@ if { [build_executable $testfile.exp $testfile [list $srcfile $asm_file]] } {
 clean_restart
 gdb_test_no_output "maint set dwarf synchronous on"
 
-set msg "\r\nwarning: could not find '\.gnu_debugaltlink' file for \[^\r\n\]*"
+set msg "\r\nwarning: could not find supplementary DWARF file \[^\r\n\]*"
 gdb_test "file $binfile" "$msg" "file command"
 
 set question "Load new symbol table from .*\? .y or n. "

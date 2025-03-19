@@ -3068,6 +3068,24 @@ namespace eval Dwarf {
 	}
     }
 
+    # Emit a .debug_sup section with the given file name and build-id.
+    # The buildid should be represented as a hexadecimal string, like
+    # "ffeeddcc".
+    proc debug_sup {is_sup filename buildid} {
+	_defer_output .debug_sup {
+	    # The version.
+	    _op .2byte 0x5
+	    # Supplementary marker.
+	    _op .byte $is_sup
+	    _op .ascii [_quote $filename]
+	    set len [expr {[string length $buildid] / 2}]
+	    _op .uleb128 $len
+	    foreach {a b} [split $buildid {}] {
+		_op .byte 0x$a$b
+	    }
+	}
+    }
+
     proc _note {type name hexdata} {
 	set namelen [expr [string length $name] + 1]
 	set datalen [expr [string length $hexdata] / 2]

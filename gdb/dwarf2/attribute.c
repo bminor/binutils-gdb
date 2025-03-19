@@ -73,7 +73,8 @@ attribute::form_is_string () const
 	  || form == DW_FORM_strx3
 	  || form == DW_FORM_strx4
 	  || form == DW_FORM_GNU_str_index
-	  || form == DW_FORM_GNU_strp_alt);
+	  || form == DW_FORM_GNU_strp_alt
+	  || form == DW_FORM_strp_sup);
 }
 
 /* See attribute.h.  */
@@ -190,6 +191,8 @@ attribute::form_is_unsigned () const
 {
   return (form == DW_FORM_ref_addr
 	  || form == DW_FORM_GNU_ref_alt
+	  || form == DW_FORM_ref_sup4
+	  || form == DW_FORM_ref_sup8
 	  || form == DW_FORM_data2
 	  || form == DW_FORM_data4
 	  || form == DW_FORM_data8

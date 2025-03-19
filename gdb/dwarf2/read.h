@@ -533,9 +533,9 @@ struct dwarf2_per_bfd
   }
 
   /* Return the separate '.dwz' debug file.  If there is no
-     .gnu_debugaltlink section in the file, then the result depends on
-     REQUIRE: if REQUIRE is true, error out; if REQUIRE is false,
-     return nullptr.  */
+     .gnu_debugaltlink or .debug_sup section in the file, then the
+     result depends on REQUIRE: if REQUIRE is true, error out; if
+     REQUIRE is false, return nullptr.  */
   struct dwz_file *get_dwz_file (bool require = false)
   {
     gdb_assert (!require || this->dwz_file.has_value ());
@@ -546,7 +546,7 @@ struct dwarf2_per_bfd
       {
 	result = this->dwz_file->get ();
 	if (require && result == nullptr)
-	  error (_("could not read '.gnu_debugaltlink' section"));
+	  error (_("could not find supplementary DWARF file"));
       }
 
     return result;
