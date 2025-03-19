@@ -9941,7 +9941,7 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
       attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
       if (attr != nullptr)
 	{
-	  *offset = attr->constant_value (0);
+	  *offset = attr->unsigned_constant ().value_or (0);
 	  return 1;
 	}
     }
@@ -10012,7 +10012,7 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
     {
       attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
       if (attr != nullptr)
-	field->set_loc_bitpos (attr->constant_value (0));
+	field->set_loc_bitpos (attr->unsigned_constant ().value_or (0));
     }
 }
 
@@ -10090,6 +10090,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
       if (attr != nullptr && attr->form_is_constant ())
 	{
+	  ULONGEST bit_offset = attr->unsigned_constant ().value_or (0);
 	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	    {
 	      /* For big endian bits, the DW_AT_bit_offset gives the
@@ -10097,7 +10098,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		 anonymous object to the MSB of the field.  We don't
 		 have to do anything special since we don't need to
 		 know the size of the anonymous object.  */
-	      fp->set_loc_bitpos (fp->loc_bitpos () + attr->constant_value (0));
+	      fp->set_loc_bitpos (fp->loc_bitpos () + bit_offset);
 	    }
 	  else
 	    {
@@ -10108,7 +10109,6 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		 the field itself.  The result is the bit offset of
 		 the LSB of the field.  */
 	      int anonymous_size;
-	      int bit_offset = attr->constant_value (0);
 
 	      attr = dwarf2_attr (die, DW_AT_byte_size, cu);
 	      if (attr != nullptr && attr->form_is_constant ())
@@ -13773,17 +13773,23 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
 	      /* Only use the attributes if they make sense together.  */
-	      if (attr == nullptr
-		  || (attr->form_is_constant ()
-		      && attr->constant_value (0) >= 0
-		      && (attr->constant_value (0) + real_bit_size
-			  <= 8 * type->length ())))
+	      std::optional<ULONGEST> bit_offset;
+	      if (attr == nullptr)
+		bit_offset = 0;
+	      else if (attr->form_is_constant ())
+		{
+		  bit_offset = attr->unsigned_constant ();
+		  if (bit_offset.has_value ()
+		      && *bit_offset + real_bit_size > 8 * type->length ())
+		    bit_offset.reset ();
+		}
+	      if (bit_offset.has_value ())
 		{
 		  TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_size
 		    = real_bit_size;
 		  if (attr != nullptr)
 		    TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_offset
-		      = attr->constant_value (0);
+		      = *bit_offset;
 		}
 	    }
 	}
