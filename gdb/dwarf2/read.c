@@ -12064,7 +12064,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
   attr = dwarf2_attr (die, DW_AT_bit_stride, cu);
   if (attr != NULL)
-    bit_stride = attr->constant_value (0);
+    bit_stride = attr->unsigned_constant ().value_or (0);
 
   /* Irix 6.2 native cc creates array types without children for
      arrays with unspecified length.  */
