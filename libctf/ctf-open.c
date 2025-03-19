@@ -588,9 +588,14 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 
   if (fp->ctf_version < CTF_VERSION_4)
     {
+#if 0
       int err;
+
       if ((err = upgrade_types (fp, cth)) != 0)
 	return err;				/* Upgrade failed.  */
+#endif
+      ctf_err_warn (ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+      return (ctf_set_open_errno (errp, ECTF_INTERNAL));
     }
 
   tbuf = (ctf_type_t *) (fp->ctf_buf + cth->btf.bth_type_off);
@@ -1171,7 +1176,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 
 /* Flip the endianness of the CTF header.  */
 
-void
+int
 ctf_flip_header (void *cthp, int is_btf, int ctf_version)
 {
   ctf_header_t *cth = (ctf_header_t *) cthp;
@@ -1203,10 +1208,15 @@ ctf_flip_header (void *cthp, int is_btf, int ctf_version)
       case CTF_VERSION_1:
       case CTF_VERSION_1_UPGRADED_3:
       case CTF_VERSION_2:
-	ctf_flip_header_v2 (cth);
+	ctf_err_warn (ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+	return (ctf_set_open_errno (errp, ECTF_INTERNAL));
+/*	ctf_flip_header_v2 (cth); */
       break;
       case CTF_VERSION_3:
-	ctf_flip_header_v3 (cth);
+      ctf_err_warn (ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+      return (ctf_set_open_errno (errp, ECTF_INTERNAL));
+	
+/*	ctf_flip_header_v3 (cth); */
       }
       return;
     }
@@ -1748,7 +1758,13 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   memcpy (fliphp, ctfsect->cts_data, hdrsz);
 
   if (foreign_endian)
-    ctf_flip_header (fliphp, format >= IS_BTF, version);
+    {
+      if (ctf_flip_header (fliphp, format >= IS_BTF, version) < 0)
+	{
+	  free (fliphp);
+	  return NULL;				/* errno is set for us.  */
+	}
+    }
 
   if ((hp = malloc (sizeof (struct ctf_header_t))) == NULL)
     {
@@ -1761,7 +1777,11 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   free (fliphp);
 
   if (format < CTF_VERSION_3)
-    upgrade_header_v2 (hp); /* Upgrades to v3 */
+    {
+      ctf_err_warn (ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+      return (ctf_set_open_errno (errp, ECTF_INTERNAL));
+/*    upgrade_header_v2 (hp); /* Upgrades to v3 */
+    }
 
   if (format < CTF_VERSION_4)
     {
@@ -1774,7 +1794,9 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	}
       memcpy (hp, header_v3, sizeof (struct ctf_header_t));
 
-      upgrade_header_v3 (hp);
+      ctf_err_warn (ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+      return (ctf_set_open_errno (errp, ECTF_INTERNAL));
+/*    upgrade_header_v3 (hp); */
     }
 
   /* Validation.  */
