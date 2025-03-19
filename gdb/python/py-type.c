@@ -1162,8 +1162,11 @@ typy_richcompare (PyObject *self, PyObject *other, int op)
 
 
 
+/* Forward declaration, see below.  */
+static void set_type (type_object *obj, struct type *type);
+
 /* Deleter that saves types when an objfile is being destroyed.  */
-struct typy_deleter
+struct typy_deleter_for_objfile_owned
 {
   void operator() (type_object *obj)
   {
@@ -1181,25 +1184,54 @@ struct typy_deleter
 	type_object *next = obj->next;
 
 	copied_types.clear ();
-	obj->type = copy_type_recursive (obj->type, copied_types);
 
-	obj->next = NULL;
-	obj->prev = NULL;
+	/* Set a copied (now arch-owned) type.  As a side-effect this
+	   adds OBJ to per-arch list.  We do not need to remove it from
+	   per-objfile list since the objfile is going to go completely
+	   anyway.  */
+	set_type (obj, copy_type_recursive (obj->type, copied_types));
 
 	obj = next;
       }
   }
 };
 
-static const registry<objfile>::key<type_object, typy_deleter>
+/* Deleter that is used when an arch is is about to be freed.  */
+struct typy_deleter_for_arch_owned
+{
+  void operator() (type_object *obj)
+  {
+    while (obj)
+      {
+	type_object *next = obj->next;
+
+	obj->type = nullptr;
+
+	obj->next = nullptr;
+	obj->prev = nullptr;
+
+	obj = next;
+      }
+  }
+};
+
+
+
+static const registry<objfile>::key<type_object, typy_deleter_for_objfile_owned>
      typy_objfile_data_key;
+static const registry<gdbarch>::key<type_object, typy_deleter_for_arch_owned>
+     typy_gdbarch_data_key;
 
 static void
 set_type (type_object *obj, struct type *type)
 {
+  gdb_assert (type != nullptr);
+
   obj->type = type;
-  obj->prev = NULL;
-  if (type != nullptr && type->objfile_owner () != nullptr)
+  obj->prev = nullptr;
+
+  /* Can it really happen that type is NULL?  */
+  if (type->objfile_owner () != nullptr)
     {
       struct objfile *objfile = type->objfile_owner ();
 
@@ -1209,9 +1241,15 @@ set_type (type_object *obj, struct type *type)
       typy_objfile_data_key.set (objfile, obj);
     }
   else
-    obj->next = NULL;
-}
+    {
+      struct gdbarch *arch = type->arch_owner ();
 
+      obj->next = typy_gdbarch_data_key.get (arch);
+      if (obj->next)
+	obj->next->prev = obj;
+      typy_gdbarch_data_key.set (arch, obj);
+    }
+}
 static void
 typy_dealloc (PyObject *obj)
 {
@@ -1219,13 +1257,19 @@ typy_dealloc (PyObject *obj)
 
   if (type->prev)
     type->prev->next = type->next;
-  else if (type->type != nullptr && type->type->objfile_owner () != nullptr)
+  else if (type->type != nullptr)
     {
-      /* Must reset head of list.  */
-      struct objfile *objfile = type->type->objfile_owner ();
-
-      if (objfile)
-	typy_objfile_data_key.set (objfile, type->next);
+      if (type->type->is_objfile_owned ())
+	{
+	  /* Must reset head of list.  */
+	  struct objfile *objfile = type->type->objfile_owner ();
+	  typy_objfile_data_key.set (objfile, type->next);
+	}
+      else
+	{
+	  struct gdbarch *arch = type->type->arch_owner ();
+	  typy_gdbarch_data_key.set (arch, type->next);
+	}
     }
   if (type->next)
     type->next->prev = type->prev;
@@ -1471,6 +1515,23 @@ type_to_type_object (struct type *type)
   catch (const gdb_exception &except)
     {
       return gdbpy_handle_gdb_exception (nullptr, except);
+    }
+
+  /* Look if there's already a gdb.Type object for given TYPE
+     and if so, return it.  */
+  if (type->is_objfile_owned ())
+    type_obj = typy_objfile_data_key.get (type->objfile_owner ());
+  else
+    type_obj = typy_gdbarch_data_key.get (type->arch_owner ());
+
+  while (type_obj != nullptr)
+    {
+      if (type_obj->type == type)
+	{
+	  Py_INCREF (type_obj);
+	  return (PyObject*)type_obj;
+	}
+      type_obj = type_obj->next;
     }
 
   type_obj = PyObject_New (type_object, &type_object_type);

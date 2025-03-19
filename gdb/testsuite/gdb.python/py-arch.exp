@@ -108,6 +108,11 @@ gdb_test "python print(arch.void_type())" \
     "void" \
     "get void type"
 
+# Test type identity
+gdb_test "python print(arch.integer_type(32) is arch.integer_type(32))" \
+    "True" \
+    "arch.integer_type(32) always return the same Python object"
+
 # Test for gdb.architecture_names().  First we're going to grab the
 # complete list of architecture names using the 'complete' command.
 set arch_names []
