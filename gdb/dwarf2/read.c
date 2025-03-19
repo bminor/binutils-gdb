@@ -2710,8 +2710,7 @@ cutu_reader::init_cu_die_reader (dwarf2_cu *cu, dwarf2_section_info *section,
 void
 cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
 				     die_info *stub_comp_unit_die,
-				     const char *stub_comp_dir,
-				     abbrev_table_up *result_dwo_abbrev_table)
+				     const char *stub_comp_dir)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   dwarf2_per_cu *per_cu = cu->per_cu;
@@ -2829,10 +2828,10 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
     }
 
   dwo_abbrev_section->read (objfile);
-  *result_dwo_abbrev_table
+  m_dwo_abbrev_table
     = abbrev_table::read (dwo_abbrev_section, cu->header.abbrev_sect_off);
   this->init_cu_die_reader (cu, section, dwo_unit->dwo_file,
-			    result_dwo_abbrev_table->get ());
+			    m_dwo_abbrev_table.get ());
 
   /* Read in the die, filling in the attributes from the stub.  This
      has the benefit of simplifying the rest of the code - all the
@@ -2946,8 +2945,7 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu *this_cu,
      could share abbrev tables.  */
 
   read_cutu_die_from_dwo (cu, sig_type->dwo_unit, NULL /* stub_comp_unit_die */,
-			  sig_type->dwo_unit->dwo_file->comp_dir,
-			  &m_dwo_abbrev_table);
+			  sig_type->dwo_unit->dwo_file->comp_dir);
   prepare_one_comp_unit (cu, pretend_language);
 }
 
@@ -3135,8 +3133,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 
 	      dwo_unit = lookup_dwo_unit (cu, m_top_level_die, dwo_name);
 	      if (dwo_unit != NULL)
-		read_cutu_die_from_dwo (cu, dwo_unit, m_top_level_die, nullptr,
-					&m_dwo_abbrev_table);
+		read_cutu_die_from_dwo (cu, dwo_unit, m_top_level_die, nullptr);
 	      else
 		{
 		  /* Yikes, we couldn't find the rest of the DIE, we only have
