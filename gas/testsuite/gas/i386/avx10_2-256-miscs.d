@@ -34,17 +34,14 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 f3 57 bf 52 72 80 7b\s+vminmaxbf16\s\$0x7b,-0x100\(%edx\)\{1to16\},%ymm5,%ymm6\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 f3 57 18 52 31 7b\s+vminmaxbf16\s\$0x7b,\(%ecx\)\{1to8\},%xmm5,%xmm6
 \s*[a-f0-9]+:\s*62 f3 57 9f 52 72 80 7b\s+vminmaxbf16\s\$0x7b,-0x100\(%edx\)\{1to8\},%xmm5,%xmm6\{%k7\}\{z\}
-\s*[a-f0-9]+:\s*62 f3 d1 18 52 f4 7b\s+vminmaxpd\s\$0x7b,\{sae\},%ymm4,%ymm5,%ymm6
 \s*[a-f0-9]+:\s*62 f3 d5 38 52 31 7b\s+vminmaxpd\s\$0x7b,\(%ecx\)\{1to4\},%ymm5,%ymm6
 \s*[a-f0-9]+:\s*62 f3 d5 bf 52 72 80 7b\s+vminmaxpd\s\$0x7b,-0x400\(%edx\)\{1to4\},%ymm5,%ymm6\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 f3 d5 18 52 31 7b\s+vminmaxpd\s\$0x7b,\(%ecx\)\{1to2\},%xmm5,%xmm6
 \s*[a-f0-9]+:\s*62 f3 d5 9f 52 72 80 7b\s+vminmaxpd\s\$0x7b,-0x400\(%edx\)\{1to2\},%xmm5,%xmm6\{%k7\}\{z\}
-\s*[a-f0-9]+:\s*62 f3 50 18 52 f4 7b\s+vminmaxph\s\$0x7b,\{sae\},%ymm4,%ymm5,%ymm6
 \s*[a-f0-9]+:\s*62 f3 54 38 52 31 7b\s+vminmaxph\s\$0x7b,\(%ecx\)\{1to16\},%ymm5,%ymm6
 \s*[a-f0-9]+:\s*62 f3 54 bf 52 72 80 7b\s+vminmaxph\s\$0x7b,-0x100\(%edx\)\{1to16\},%ymm5,%ymm6\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 f3 54 18 52 31 7b\s+vminmaxph\s\$0x7b,\(%ecx\)\{1to8\},%xmm5,%xmm6
 \s*[a-f0-9]+:\s*62 f3 54 9f 52 72 80 7b\s+vminmaxph\s\$0x7b,-0x100\(%edx\)\{1to8\},%xmm5,%xmm6\{%k7\}\{z\}
-\s*[a-f0-9]+:\s*62 f3 51 18 52 f4 7b\s+vminmaxps\s\$0x7b,\{sae\},%ymm4,%ymm5,%ymm6
 \s*[a-f0-9]+:\s*62 f3 55 38 52 31 7b\s+vminmaxps\s\$0x7b,\(%ecx\)\{1to8\},%ymm5,%ymm6
 \s*[a-f0-9]+:\s*62 f3 55 bf 52 72 80 7b\s+vminmaxps\s\$0x7b,-0x200\(%edx\)\{1to8\},%ymm5,%ymm6\{%k7\}\{z\}
 \s*[a-f0-9]+:\s*62 f3 55 18 52 31 7b\s+vminmaxps\s\$0x7b,\(%ecx\)\{1to4\},%xmm5,%xmm6

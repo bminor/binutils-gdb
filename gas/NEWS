@@ -2,6 +2,10 @@
 
 Changes in 2.44:
 
+* Support for x86 AVX10.2 256 bit rounding has been dropped after
+  Binutils 2.44 got released, as all the hardware would directly support
+  512 bit vector width.
+
 * Add support for the x86 Intel Diamond Rapids AMX instructions, including
   AMX-AVX512, AMX-FP8, AMX-MOVRS, AMX-TF32 and AMX-TRANSPOSE.
 

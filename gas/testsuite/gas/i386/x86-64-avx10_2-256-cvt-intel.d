@@ -10,7 +10,6 @@ Disassembly of section \.text:
 [a-f0-9]+ <_intel>:
 \s*[a-f0-9]+:\s*62 02 15 00 67 f4\s+vcvt2ps2phx xmm30,xmm29,xmm28
 \s*[a-f0-9]+:\s*62 02 15 20 67 f4\s+vcvt2ps2phx ymm30,ymm29,ymm28
-\s*[a-f0-9]+:\s*62 02 11 10 67 f4\s+vcvt2ps2phx ymm30,ymm29,ymm28\{rn-sae\}
 \s*[a-f0-9]+:\s*62 22 15 07 67 b4 f5 00 00 00 10\s+vcvt2ps2phx xmm30\{k7\},xmm29,XMMWORD PTR \[rbp\+r14\*8\+0x10000000\]
 \s*[a-f0-9]+:\s*62 42 15 10 67 31\s+vcvt2ps2phx xmm30,xmm29,DWORD BCST \[r9\]
 \s*[a-f0-9]+:\s*62 62 15 00 67 71 7f\s+vcvt2ps2phx xmm30,xmm29,XMMWORD PTR \[rcx\+0x7f0\]

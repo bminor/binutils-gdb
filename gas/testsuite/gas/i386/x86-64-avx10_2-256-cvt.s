@@ -6,7 +6,6 @@
 _start:
 	vcvt2ps2phx	%xmm28, %xmm29, %xmm30
 	vcvt2ps2phx	%ymm28, %ymm29, %ymm30
-	vcvt2ps2phx	{rn-sae}, %ymm28, %ymm29, %ymm30
 	vcvt2ps2phx	0x10000000(%rbp, %r14, 8), %xmm29, %xmm30{%k7}
 	vcvt2ps2phx	(%r9){1to4}, %xmm29, %xmm30
 	vcvt2ps2phx	2032(%rcx), %xmm29, %xmm30
@@ -63,7 +62,6 @@ _intel:
 	.intel_syntax noprefix
 	vcvt2ps2phx	xmm30, xmm29, xmm28
 	vcvt2ps2phx	ymm30, ymm29, ymm28
-	vcvt2ps2phx	ymm30, ymm29, ymm28, {rn-sae}
 	vcvt2ps2phx	xmm30{k7}, xmm29, XMMWORD PTR [rbp+r14*8+0x10000000]
 	vcvt2ps2phx	xmm30, xmm29, DWORD PTR [r9]{1to4}
 	vcvt2ps2phx	xmm30, xmm29, XMMWORD PTR [rcx+2032]

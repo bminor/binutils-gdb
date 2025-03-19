@@ -18,7 +18,6 @@ _start:
 
 	vcvtph2i\u\()bs	%xmm29, %xmm30
 	vcvtph2i\u\()bs	%ymm29, %ymm30
-	vcvtph2i\u\()bs	{rn-sae}, %ymm29, %ymm30
 	vcvtph2i\u\()bs	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
 	vcvtph2i\u\()bs	(%r9){1to8}, %xmm30
 	vcvtph2i\u\()bs	2032(%rcx), %xmm30
@@ -30,7 +29,6 @@ _start:
 
 	vcvtps2i\u\()bs	%xmm29, %xmm30
 	vcvtps2i\u\()bs	%ymm29, %ymm30
-	vcvtps2i\u\()bs	{rn-sae}, %ymm29, %ymm30
 	vcvtps2i\u\()bs	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
 	vcvtps2i\u\()bs	(%r9){1to4}, %xmm30
 	vcvtps2i\u\()bs	2032(%rcx), %xmm30
@@ -53,7 +51,6 @@ _start:
 
 	vcvttph2i\u\()bs	%xmm29, %xmm30
 	vcvttph2i\u\()bs	%ymm29, %ymm30
-	vcvttph2i\u\()bs	{sae}, %ymm29, %ymm30
 	vcvttph2i\u\()bs	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
 	vcvttph2i\u\()bs	(%r9){1to8}, %xmm30
 	vcvttph2i\u\()bs	2032(%rcx), %xmm30
@@ -65,7 +62,6 @@ _start:
 
 	vcvttps2i\u\()bs	%xmm29, %xmm30
 	vcvttps2i\u\()bs	%ymm29, %ymm30
-	vcvttps2i\u\()bs	{sae}, %ymm29, %ymm30
 	vcvttps2i\u\()bs	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
 	vcvttps2i\u\()bs	(%r9){1to4}, %xmm30
 	vcvttps2i\u\()bs	2032(%rcx), %xmm30
@@ -77,7 +73,6 @@ _start:
 
 	vcvttpd2\u\()dqs	%xmm29, %xmm30
 	vcvttpd2\u\()dqs	%ymm29, %xmm30
-	vcvttpd2\u\()dqs	{sae}, %ymm29, %xmm30
 	vcvttpd2\u\()dqsx	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
 	vcvttpd2\u\()dqs	(%r9){1to2}, %xmm30
 	vcvttpd2\u\()dqsx	2032(%rcx), %xmm30
@@ -88,7 +83,6 @@ _start:
 
 	vcvttpd2\u\()qqs	%xmm29, %xmm30
 	vcvttpd2\u\()qqs	%ymm29, %ymm30
-	vcvttpd2\u\()qqs	{sae}, %ymm29, %ymm30
 	vcvttpd2\u\()qqs	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
 	vcvttpd2\u\()qqs	(%r9){1to2}, %xmm30
 	vcvttpd2\u\()qqs	2032(%rcx), %xmm30
@@ -100,7 +94,6 @@ _start:
 
 	vcvttps2\u\()dqs	%xmm29, %xmm30
 	vcvttps2\u\()dqs	%ymm29, %ymm30
-	vcvttps2\u\()dqs	{sae}, %ymm29, %ymm30
 	vcvttps2\u\()dqs	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
 	vcvttps2\u\()dqs	(%r9){1to4}, %xmm30
 	vcvttps2\u\()dqs	2032(%rcx), %xmm30
@@ -112,7 +105,6 @@ _start:
 
 	vcvttps2\u\()qqs	%xmm29, %xmm30
 	vcvttps2\u\()qqs	%xmm29, %ymm30
-	vcvttps2\u\()qqs	{sae}, %xmm29, %ymm30
 	vcvttps2\u\()qqs	0x10000000(%rbp, %r14, 8), %xmm30{%k7}
 	vcvttps2\u\()qqs	(%r9){1to2}, %xmm30
 	vcvttps2\u\()qqs	1016(%rcx), %xmm30
@@ -165,7 +157,6 @@ _intel:
 
 	vcvtph2i\u\()bs	xmm30, xmm29
 	vcvtph2i\u\()bs	ymm30, ymm29
-	vcvtph2i\u\()bs	ymm30, ymm29, {rn-sae}
 	vcvtph2i\u\()bs	xmm30{k7}, XMMWORD PTR [rbp+r14*8+0x10000000]
 	vcvtph2i\u\()bs	xmm30, WORD PTR [r9]{1to8}
 	vcvtph2i\u\()bs	xmm30, [rcx+2032]
@@ -177,7 +168,6 @@ _intel:
 
 	vcvtps2i\u\()bs	xmm30, xmm29
 	vcvtps2i\u\()bs	ymm30, ymm29
-	vcvtps2i\u\()bs	ymm30, ymm29, {rn-sae}
 	vcvtps2i\u\()bs	xmm30{k7}, [rbp+r14*8+0x10000000]
 	vcvtps2i\u\()bs	xmm30, [r9]{1to4}
 	vcvtps2i\u\()bs	xmm30, XMMWORD PTR [rcx+2032]
@@ -200,7 +190,6 @@ _intel:
 
 	vcvttph2i\u\()bs	xmm30, xmm29
 	vcvttph2i\u\()bs	ymm30, ymm29
-	vcvttph2i\u\()bs	ymm30, ymm29, {sae}
 	vcvttph2i\u\()bs	xmm30{k7}, XMMWORD PTR [rbp+r14*8+0x10000000]
 	vcvttph2i\u\()bs	xmm30, WORD PTR [r9]{1to8}
 	vcvttph2i\u\()bs	xmm30, [rcx+2032]
@@ -212,7 +201,6 @@ _intel:
 
 	vcvttps2i\u\()bs	xmm30, xmm29
 	vcvttps2i\u\()bs	ymm30, ymm29
-	vcvttps2i\u\()bs	ymm30, ymm29, {sae}
 	vcvttps2i\u\()bs	xmm30{k7}, [rbp+r14*8+0x10000000]
 	vcvttps2i\u\()bs	xmm30, [r9]{1to4}
 	vcvttps2i\u\()bs	xmm30, XMMWORD PTR [rcx+2032]
@@ -224,7 +212,6 @@ _intel:
 
 	vcvttpd2\u\()dqs	xmm30, xmm29
 	vcvttpd2\u\()dqs	xmm30, ymm29
-	vcvttpd2\u\()dqs	xmm30, ymm29, {sae}
 	vcvttpd2\u\()dqs	xmm30{k7}, XMMWORD PTR [rbp+r14*8+0x10000000]
 	vcvttpd2\u\()dqs	xmm30, QWORD PTR [r9]{1to2}
 	vcvttpd2\u\()dqs	xmm30, XMMWORD PTR [rcx+2032]
@@ -235,7 +222,6 @@ _intel:
 
 	vcvttpd2\u\()qqs	xmm30, xmm29
 	vcvttpd2\u\()qqs	ymm30, ymm29
-	vcvttpd2\u\()qqs	ymm30, ymm29, {sae}
 	vcvttpd2\u\()qqs	xmm30{k7}, XMMWORD PTR [rbp+r14*8+0x10000000]
 	vcvttpd2\u\()qqs	xmm30, [r9]{1to2}
 	vcvttpd2\u\()qqs	xmm30, [rcx+2032]
@@ -247,7 +233,6 @@ _intel:
 
 	vcvttps2\u\()dqs	xmm30, xmm29
 	vcvttps2\u\()dqs	ymm30, ymm29
-	vcvttps2\u\()dqs	ymm30, ymm29, {sae}
 	vcvttps2\u\()dqs	xmm30{k7}, [rbp+r14*8+0x10000000]
 	vcvttps2\u\()dqs	xmm30, DWORD PTR [r9]{1to4}
 	vcvttps2\u\()dqs	xmm30, XMMWORD PTR [rcx+2032]
@@ -259,7 +244,6 @@ _intel:
 
 	vcvttps2\u\()qqs	xmm30, xmm29
 	vcvttps2\u\()qqs	ymm30, xmm29
-	vcvttps2\u\()qqs	ymm30, xmm29, {sae}
 	vcvttps2\u\()qqs	xmm30{k7}, QWORD PTR [rbp+r14*8+0x10000000]
 	vcvttps2\u\()qqs	xmm30, [r9]{1to2}
 	vcvttps2\u\()qqs	xmm30, QWORD PTR [rcx+1016]

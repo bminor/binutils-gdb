@@ -17,17 +17,14 @@ _start:
 	vminmaxbf16	$123, -256(%edx){1to16}, %ymm5, %ymm6{%k7}{z}
 	vminmaxbf16	$123, (%ecx){1to8}, %xmm5, %xmm6
 	vminmaxbf16	$123, -256(%edx){1to8}, %xmm5, %xmm6{%k7}{z}
-	vminmaxpd	$123, {sae}, %ymm4, %ymm5, %ymm6
 	vminmaxpd	$123, (%ecx){1to4}, %ymm5, %ymm6
 	vminmaxpd	$123, -1024(%edx){1to4}, %ymm5, %ymm6{%k7}{z}
 	vminmaxpd	$123, (%ecx){1to2}, %xmm5, %xmm6
 	vminmaxpd	$123, -1024(%edx){1to2}, %xmm5, %xmm6{%k7}{z}
-	vminmaxph	$123, {sae}, %ymm4, %ymm5, %ymm6
 	vminmaxph	$123, (%ecx){1to16}, %ymm5, %ymm6
 	vminmaxph	$123, -256(%edx){1to16}, %ymm5, %ymm6{%k7}{z}
 	vminmaxph	$123, (%ecx){1to8}, %xmm5, %xmm6
 	vminmaxph	$123, -256(%edx){1to8}, %xmm5, %xmm6{%k7}{z}
-	vminmaxps	$123, {sae}, %ymm4, %ymm5, %ymm6
 	vminmaxps	$123, (%ecx){1to8}, %ymm5, %ymm6
 	vminmaxps	$123, -512(%edx){1to8}, %ymm5, %ymm6{%k7}{z}
 	vminmaxps	$123, (%ecx){1to4}, %xmm5, %xmm6
@@ -83,17 +80,14 @@ _intel:
 	vminmaxbf16	ymm6{k7}{z}, ymm5, WORD PTR [edx-256]{1to16}, 123
 	vminmaxbf16	xmm6, xmm5, [ecx]{1to8}, 123
 	vminmaxbf16	xmm6{k7}{z}, xmm5, WORD PTR [edx-256]{1to8}, 123
-	vminmaxpd	ymm6, ymm5, ymm4, {sae}, 123
 	vminmaxpd	ymm6, ymm5, QWORD PTR [ecx]{1to4}, 123
 	vminmaxpd	ymm6{k7}{z}, ymm5, [edx-1024]{1to4}, 123
 	vminmaxpd	xmm6, xmm5, QWORD PTR [ecx]{1to2}, 123
 	vminmaxpd	xmm6{k7}{z}, xmm5, [edx-1024]{1to2}, 123
-	vminmaxph	ymm6, ymm5, ymm4, {sae}, 123
 	vminmaxph	ymm6, ymm5, [ecx]{1to16}, 123
 	vminmaxph	ymm6{k7}{z}, ymm5, WORD PTR [edx-256]{1to16}, 123
 	vminmaxph	xmm6, xmm5, WORD PTR [ecx]{1to8}, 123
 	vminmaxph	xmm6{k7}{z}, xmm5, [edx-256]{1to8}, 123
-	vminmaxps	ymm6, ymm5, ymm4, {sae}, 123
 	vminmaxps	ymm6, ymm5, DWORD PTR [ecx]{1to8}, 123
 	vminmaxps	ymm6{k7}{z}, ymm5, [edx-512]{1to8}, 123
 	vminmaxps	xmm6, xmm5, [ecx]{1to4}, 123

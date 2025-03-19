@@ -18,7 +18,6 @@ _start:
 
 	vcvtph2i\u\()bs	%xmm5, %xmm6
 	vcvtph2i\u\()bs	%ymm5, %ymm6
-	vcvtph2i\u\()bs	{rn-sae}, %ymm5, %ymm6
 	vcvtph2i\u\()bs	0x10000000(%esp, %esi, 8), %xmm6{%k7}
 	vcvtph2i\u\()bs	(%ecx){1to8}, %xmm6
 	vcvtph2i\u\()bs	2032(%ecx), %xmm6
@@ -30,7 +29,6 @@ _start:
 
 	vcvtps2i\u\()bs	%xmm5, %xmm6
 	vcvtps2i\u\()bs	%ymm5, %ymm6
-	vcvtps2i\u\()bs	{rn-sae}, %ymm5, %ymm6
 	vcvtps2i\u\()bs	0x10000000(%esp, %esi, 8), %xmm6{%k7}
 	vcvtps2i\u\()bs	(%ecx){1to4}, %xmm6
 	vcvtps2i\u\()bs	2032(%ecx), %xmm6
@@ -53,7 +51,6 @@ _start:
 
 	vcvttph2i\u\()bs	%xmm5, %xmm6
 	vcvttph2i\u\()bs	%ymm5, %ymm6
-	vcvttph2i\u\()bs	{sae}, %ymm5, %ymm6
 	vcvttph2i\u\()bs	0x10000000(%esp, %esi, 8), %xmm6{%k7}
 	vcvttph2i\u\()bs	(%ecx){1to8}, %xmm6
 	vcvttph2i\u\()bs	2032(%ecx), %xmm6
@@ -65,7 +62,6 @@ _start:
 
 	vcvttps2i\u\()bs	%xmm5, %xmm6
 	vcvttps2i\u\()bs	%ymm5, %ymm6
-	vcvttps2i\u\()bs	{sae}, %ymm5, %ymm6
 	vcvttps2i\u\()bs	0x10000000(%esp, %esi, 8), %xmm6{%k7}
 	vcvttps2i\u\()bs	(%ecx){1to4}, %xmm6
 	vcvttps2i\u\()bs	2032(%ecx), %xmm6
@@ -77,7 +73,6 @@ _start:
 
 	vcvttpd2\u\()dqs	%xmm5, %xmm6
 	vcvttpd2\u\()dqs	%ymm5, %xmm6
-	vcvttpd2\u\()dqs	{sae}, %ymm5, %xmm6
 	vcvttpd2\u\()dqsx	0x10000000(%esp, %esi, 8), %xmm6{%k7}
 	vcvttpd2\u\()dqs	(%ecx){1to2}, %xmm6
 	vcvttpd2\u\()dqsx	2032(%ecx), %xmm6
@@ -88,7 +83,6 @@ _start:
 
 	vcvttpd2\u\()qqs	%xmm5, %xmm6
 	vcvttpd2\u\()qqs	%ymm5, %ymm6
-	vcvttpd2\u\()qqs	{sae}, %ymm5, %ymm6
 	vcvttpd2\u\()qqs	0x10000000(%esp, %esi, 8), %xmm6{%k7}
 	vcvttpd2\u\()qqs	(%ecx){1to2}, %xmm6
 	vcvttpd2\u\()qqs	2032(%ecx), %xmm6
@@ -100,7 +94,6 @@ _start:
 
 	vcvttps2\u\()dqs	%xmm5, %xmm6
 	vcvttps2\u\()dqs	%ymm5, %ymm6
-	vcvttps2\u\()dqs	{sae}, %ymm5, %ymm6
 	vcvttps2\u\()dqs	0x10000000(%esp, %esi, 8), %xmm6{%k7}
 	vcvttps2\u\()dqs	(%ecx){1to4}, %xmm6
 	vcvttps2\u\()dqs	2032(%ecx), %xmm6
@@ -112,7 +105,6 @@ _start:
 
 	vcvttps2\u\()qqs	%xmm5, %xmm6
 	vcvttps2\u\()qqs	%xmm5, %ymm6
-	vcvttps2\u\()qqs	{sae}, %xmm5, %ymm6
 	vcvttps2\u\()qqs	0x10000000(%esp, %esi, 8), %xmm6{%k7}
 	vcvttps2\u\()qqs	(%ecx){1to2}, %xmm6
 	vcvttps2\u\()qqs	1016(%ecx), %xmm6
@@ -153,7 +145,6 @@ _intel:
 
 	vcvtph2i\u\()bs	xmm6, xmm5
 	vcvtph2i\u\()bs	ymm6, ymm5
-	vcvtph2i\u\()bs	ymm6, ymm5, {rn-sae}
 	vcvtph2i\u\()bs	xmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]
 	vcvtph2i\u\()bs	xmm6, WORD PTR [ecx]{1to8}
 	vcvtph2i\u\()bs	xmm6, [ecx+2032]
@@ -165,7 +156,6 @@ _intel:
 
 	vcvtps2i\u\()bs	xmm6, xmm5
 	vcvtps2i\u\()bs	ymm6, ymm5
-	vcvtps2i\u\()bs	ymm6, ymm5, {rn-sae}
 	vcvtps2i\u\()bs	xmm6{k7}, [esp+esi*8+0x10000000]
 	vcvtps2i\u\()bs	xmm6, [ecx]{1to4}
 	vcvtps2i\u\()bs	xmm6, XMMWORD PTR [ecx+2032]
@@ -188,7 +178,6 @@ _intel:
 
 	vcvttph2i\u\()bs	xmm6, xmm5
 	vcvttph2i\u\()bs	ymm6, ymm5
-	vcvttph2i\u\()bs	ymm6, ymm5, {sae}
 	vcvttph2i\u\()bs	xmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]
 	vcvttph2i\u\()bs	xmm6, WORD PTR [ecx]{1to8}
 	vcvttph2i\u\()bs	xmm6, [ecx+2032]
@@ -200,7 +189,6 @@ _intel:
 
 	vcvttps2i\u\()bs	xmm6, xmm5
 	vcvttps2i\u\()bs	ymm6, ymm5
-	vcvttps2i\u\()bs	ymm6, ymm5, {sae}
 	vcvttps2i\u\()bs	xmm6{k7}, [esp+esi*8+0x10000000]
 	vcvttps2i\u\()bs	xmm6, [ecx]{1to4}
 	vcvttps2i\u\()bs	xmm6, XMMWORD PTR [ecx+2032]
@@ -212,7 +200,6 @@ _intel:
 
 	vcvttpd2\u\()dqs	xmm6, xmm5
 	vcvttpd2\u\()dqs	xmm6, ymm5
-	vcvttpd2\u\()dqs	xmm6, ymm5, {sae}
 	vcvttpd2\u\()dqs	xmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]
 	vcvttpd2\u\()dqs	xmm6, QWORD PTR [ecx]{1to2}
 	vcvttpd2\u\()dqs	xmm6, XMMWORD PTR [ecx+2032]
@@ -223,7 +210,6 @@ _intel:
 
 	vcvttpd2\u\()qqs	xmm6, xmm5
 	vcvttpd2\u\()qqs	ymm6, ymm5
-	vcvttpd2\u\()qqs	ymm6, ymm5, {sae}
 	vcvttpd2\u\()qqs	xmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]
 	vcvttpd2\u\()qqs	xmm6, [ecx]{1to2}
 	vcvttpd2\u\()qqs	xmm6, [ecx+2032]
@@ -235,7 +221,6 @@ _intel:
 
 	vcvttps2\u\()dqs	xmm6, xmm5
 	vcvttps2\u\()dqs	ymm6, ymm5
-	vcvttps2\u\()dqs	ymm6, ymm5, {sae}
 	vcvttps2\u\()dqs	xmm6{k7}, XMMWORD PTR [esp+esi*8+0x10000000]
 	vcvttps2\u\()dqs	xmm6, DWORD PTR [ecx]{1to4}
 	vcvttps2\u\()dqs	xmm6, [ecx+2032]
@@ -247,7 +232,6 @@ _intel:
 
 	vcvttps2\u\()qqs	xmm6, xmm5
 	vcvttps2\u\()qqs	ymm6, xmm5
-	vcvttps2\u\()qqs	ymm6, xmm5, {sae}
 	vcvttps2\u\()qqs	xmm6{k7}, [esp+esi*8+0x10000000]
 	vcvttps2\u\()qqs	xmm6, [ecx]{1to2}
 	vcvttps2\u\()qqs	xmm6, QWORD PTR [ecx+1016]

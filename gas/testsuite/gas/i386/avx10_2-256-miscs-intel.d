@@ -36,17 +36,14 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 f3 57 bf 52 72 80 7b\s+vminmaxbf16 ymm6\{k7\}\{z\},ymm5,WORD BCST \[edx-0x100\],0x7b
 \s*[a-f0-9]+:\s*62 f3 57 18 52 31 7b\s+vminmaxbf16 xmm6,xmm5,WORD BCST \[ecx\],0x7b
 \s*[a-f0-9]+:\s*62 f3 57 9f 52 72 80 7b\s+vminmaxbf16 xmm6\{k7\}\{z\},xmm5,WORD BCST \[edx-0x100\],0x7b
-\s*[a-f0-9]+:\s*62 f3 d1 18 52 f4 7b\s+vminmaxpd ymm6,ymm5,ymm4\{sae\},0x7b
 \s*[a-f0-9]+:\s*62 f3 d5 38 52 31 7b\s+vminmaxpd ymm6,ymm5,QWORD BCST \[ecx\],0x7b
 \s*[a-f0-9]+:\s*62 f3 d5 bf 52 72 80 7b\s+vminmaxpd ymm6\{k7\}\{z\},ymm5,QWORD BCST \[edx-0x400\],0x7b
 \s*[a-f0-9]+:\s*62 f3 d5 18 52 31 7b\s+vminmaxpd xmm6,xmm5,QWORD BCST \[ecx\],0x7b
 \s*[a-f0-9]+:\s*62 f3 d5 9f 52 72 80 7b\s+vminmaxpd xmm6\{k7\}\{z\},xmm5,QWORD BCST \[edx-0x400\],0x7b
-\s*[a-f0-9]+:\s*62 f3 50 18 52 f4 7b\s+vminmaxph ymm6,ymm5,ymm4\{sae\},0x7b
 \s*[a-f0-9]+:\s*62 f3 54 38 52 31 7b\s+vminmaxph ymm6,ymm5,WORD BCST \[ecx\],0x7b
 \s*[a-f0-9]+:\s*62 f3 54 bf 52 72 80 7b\s+vminmaxph ymm6\{k7\}\{z\},ymm5,WORD BCST \[edx-0x100\],0x7b
 \s*[a-f0-9]+:\s*62 f3 54 18 52 31 7b\s+vminmaxph xmm6,xmm5,WORD BCST \[ecx\],0x7b
 \s*[a-f0-9]+:\s*62 f3 54 9f 52 72 80 7b\s+vminmaxph xmm6\{k7\}\{z\},xmm5,WORD BCST \[edx-0x100\],0x7b
-\s*[a-f0-9]+:\s*62 f3 51 18 52 f4 7b\s+vminmaxps ymm6,ymm5,ymm4\{sae\},0x7b
 \s*[a-f0-9]+:\s*62 f3 55 38 52 31 7b\s+vminmaxps ymm6,ymm5,DWORD BCST \[ecx\],0x7b
 \s*[a-f0-9]+:\s*62 f3 55 bf 52 72 80 7b\s+vminmaxps ymm6\{k7\}\{z\},ymm5,DWORD BCST \[edx-0x200\],0x7b
 \s*[a-f0-9]+:\s*62 f3 55 18 52 31 7b\s+vminmaxps xmm6,xmm5,DWORD BCST \[ecx\],0x7b
