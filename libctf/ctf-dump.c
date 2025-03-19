@@ -36,7 +36,6 @@ typedef struct ctf_dump_item
 struct ctf_dump_state
 {
   ctf_sect_names_t cds_sect;
-  ctf_dict_t *cds_fp;
   ctf_dump_item_t *cds_current;
   ctf_list_t cds_items;
 };
@@ -46,17 +45,16 @@ struct ctf_dump_state
 typedef struct ctf_dump_membstate
 {
   char **cdm_str;
-  ctf_dict_t *cdm_fp;
   const char *cdm_toplevel_indent;
 } ctf_dump_membstate_t;
 
 static int
-ctf_dump_append (ctf_dump_state_t *state, char *str)
+ctf_dump_append (ctf_dict_t *fp, ctf_dump_state_t *state, char *str)
 {
   ctf_dump_item_t *cdi;
 
   if ((cdi = malloc (sizeof (struct ctf_dump_item))) == NULL)
-    return (ctf_set_errno (state->cds_fp, ENOMEM));
+    return (ctf_set_errno (fp, ENOMEM));
 
   cdi->cdi_item = str;
   ctf_list_append (&state->cds_items, cdi);
@@ -257,7 +255,7 @@ ctf_dump_header_strfield (ctf_dict_t *fp, ctf_dump_state_t *state,
     {
       if (asprintf (&str, "%s: %s\n", name, ctf_strptr (fp, value)) < 0)
 	goto err;
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
   return 0;
 
@@ -275,7 +273,7 @@ ctf_dump_header_sizefield (ctf_dict_t *fp, ctf_dump_state_t *state,
     {
       if (asprintf (&str, "%s: %x\n", name, value) < 0)
 	goto err;
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
   return 0;
 
@@ -295,7 +293,7 @@ ctf_dump_header_sectfield (ctf_dict_t *fp, ctf_dump_state_t *state,
 		    (unsigned long) off, (unsigned long) (nextoff - 1),
 		    (unsigned long) (nextoff - off)) < 0)
 	goto err;
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
   return 0;
 
@@ -315,7 +313,7 @@ ctf_dump_header_sectlenfield (ctf_dict_t *fp, ctf_dump_state_t *state,
 		    (unsigned long) off, (unsigned long) (off + len),
 		    (unsigned long) len) < 0)
 	goto err;
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
   return 0;
 
@@ -343,7 +341,7 @@ ctf_dump_v3_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 
   if (asprintf (&str, "Magic number: 0x%x\n", hp->cth_preamble.ctp_magic) < 0)
       goto err;
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
 
   if (hp->cth_preamble.ctp_version < CTF_VERSION_4)
     verstr = vertab[hp->cth_preammble.ctp_version];
@@ -354,7 +352,7 @@ ctf_dump_v3_header (ctf_dict_t *fp, ctf_dump_state_t *state)
   if (asprintf (&str, "Version: %i (%s)\n", hp->cth_preamble.ctp_version,
 		verstr) < 0)
     goto err;
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
 
   /* Everything else is only printed if present.  */
 
@@ -387,7 +385,7 @@ ctf_dump_v3_header (ctf_dict_t *fp, ctf_dump_state_t *state)
       if (asprintf (&str, "Flags: 0x%x (%s)", hp->cth_flags, flagstr) < 0)
 	goto err;
       free (flagstr);
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
 
   if (ctf_dump_header_strfield (fp, state, "Parent label",
@@ -462,7 +460,7 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 
   if (asprintf (&str, "Magic number: 0x%lx\n", CTH_MAGIC (hp)) < 0)
       goto err;
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
 
   if (CTH_VERSION (hp) != CTF_VERSION_4)
     verstr = "(not a valid version)";
@@ -472,7 +470,7 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
   if (asprintf (&str, "Version: %li (%s)\n", CTH_VERSION (hp),
 		verstr) < 0)
     goto err;
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
 
   /* Everything else is only printed if present.  */
 
@@ -499,7 +497,7 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
       if (asprintf (&str, "Flags: 0x%x (%s)", fp->ctf_openflags, flagstr) < 0)
 	goto err;
       free (flagstr);
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
 
   if (ctf_dump_header_strfield (fp, state, "Parent name", hp->cth_parent_name) < 0)
@@ -575,16 +573,16 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
       else
 	str = xstrdup ("");
 
-      if ((typestr = ctf_dump_format_type (state->cds_fp, id,
-					   CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
+      if ((typestr = ctf_dump_format_type (fp, id, CTF_ADD_ROOT
+					   | CTF_FT_REFS)) == NULL)
 	{
-	  ctf_dump_append (state, str);
+	  ctf_dump_append (fp, state, str);
 	  continue;				/* Swallow the error.  */
 	}
 
       str = str_append (str, typestr);
       free (typestr);
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
       continue;
 
     oom:
@@ -608,10 +606,10 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
   /* UPTODO check for a decl tag.  */
 
   if (asprintf (&str, "  %lx: ", offset) < 0)
-    return (ctf_set_errno (state->cds_fp, errno));
+    return (ctf_set_errno (fp, errno));
 
-  if ((typestr = ctf_dump_format_type (state->cds_fp, type,
-				       CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
+  if ((typestr = ctf_dump_format_type (fp, type, CTF_ADD_ROOT
+				       | CTF_FT_REFS)) == NULL)
     {
       free (str);
       return 0;					/* Swallow the error.  */
@@ -620,7 +618,7 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
   str = str_append (str, typestr);
   free (typestr);
 
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
   return 0;
 }
 
@@ -637,8 +635,8 @@ ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *state)
     {
       /* Dump DATASEC name.  */
       if (asprintf (&str, "Section %s:", ctf_type_aname (fp, type)) < 0)
-        return (ctf_set_errno (state->cds_fp, errno));
-      ctf_dump_append (state, str);
+        return (ctf_set_errno (fp, errno));
+      ctf_dump_append (fp, state, str);
 
       /* Dump all variables in the datasec.  */
       if (ctf_datasec_var_iter (fp, type, ctf_dump_var, state) < 0)
@@ -655,8 +653,8 @@ ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *state)
 
 /* Dump a single struct/union member into the string in the membstate.  */
 static int
-ctf_dump_member (ctf_dict_t *fp _libctf_unused_, const char *name,
-		 ctf_id_t id, unsigned long offset, int depth, void *arg)
+ctf_dump_member (ctf_dict_t *fp, const char *name, ctf_id_t id,
+		 unsigned long offset, int depth, void *arg)
 {
   ctf_dump_membstate_t *state = arg;
   char *typestr = NULL;
@@ -671,8 +669,7 @@ ctf_dump_member (ctf_dict_t *fp _libctf_unused_, const char *name,
   *state->cdm_str = str_append (*state->cdm_str, bit);
   free (bit);
 
-  if ((typestr = ctf_dump_format_type (state->cdm_fp, id,
-				       CTF_ADD_ROOT | CTF_FT_BITFIELD
+  if ((typestr = ctf_dump_format_type (fp, id, CTF_ADD_ROOT | CTF_FT_BITFIELD
 				       | CTF_FT_ID)) == NULL)
     return -1;				/* errno is set for us.  */
 
@@ -690,7 +687,7 @@ ctf_dump_member (ctf_dict_t *fp _libctf_unused_, const char *name,
  oom:
   free (typestr);
   free (bit);
-  return (ctf_set_errno (state->cdm_fp, errno));
+  return (ctf_set_errno (fp, errno));
 }
 
 /* Report the number of digits in the hexadecimal representation of a type
@@ -710,37 +707,36 @@ type_hex_digits (ctf_id_t id)
 
 /* Dump a single type into the cds_items.  */
 static int
-ctf_dump_type (ctf_dict_t *fp _libctf_unused_, ctf_id_t id, int flag, void *arg)
+ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, int flag, void *arg)
 {
   char *str;
   char *indent;
   ctf_dump_state_t *state = arg;
-  ctf_dump_membstate_t membstate = { &str, state->cds_fp, NULL };
+  ctf_dump_membstate_t membstate = { &str, fp, NULL };
 
   /* Indent neatly.  */
   if (asprintf (&indent, "    %*s", type_hex_digits (id), "") < 0)
-    return (ctf_set_errno (state->cds_fp, ENOMEM));
+    return (ctf_set_errno (fp, ENOMEM));
 
   /* Dump the type itself.  */
-  if ((str = ctf_dump_format_type (state->cds_fp, id,
-				   flag | CTF_FT_REFS)) == NULL)
+  if ((str = ctf_dump_format_type (fp, id, flag | CTF_FT_REFS)) == NULL)
     goto err;
   str = str_append (str, "\n");
 
   membstate.cdm_toplevel_indent = indent;
 
   /* Member dumping for structs, unions...  */
-  if (ctf_type_kind (state->cds_fp, id) == CTF_K_STRUCT
-      || ctf_type_kind (state->cds_fp, id) == CTF_K_UNION)
+  if (ctf_type_kind (fp, id) == CTF_K_STRUCT
+      || ctf_type_kind (fp, id) == CTF_K_UNION)
     {
-      if ((ctf_type_visit (state->cds_fp, id, ctf_dump_member, &membstate)) < 0)
+      if ((ctf_type_visit (fp, id, ctf_dump_member, &membstate)) < 0)
 	{
-	  if (id == 0 || ctf_errno (state->cds_fp) == ECTF_NONREPRESENTABLE)
+	  if (id == 0 || ctf_errno (fp) == ECTF_NONREPRESENTABLE)
 	    {
-	      ctf_dump_append (state, str);
+	      ctf_dump_append (fp, state, str);
 	      return 0;
 	    }
-	  ctf_err_warn (state->cds_fp, 1, ctf_errno (state->cds_fp),
+	  ctf_err_warn (fp, 1, ctf_errno (fp),
 			_("cannot visit members dumping type 0x%lx"), id);
 	  goto err;
 	}
@@ -748,17 +744,17 @@ ctf_dump_type (ctf_dict_t *fp _libctf_unused_, ctf_id_t id, int flag, void *arg)
 
   /* ... and enums, for which we dump the first and last few members and skip
      the ones in the middle.  */
-  if (ctf_type_kind (state->cds_fp, id) == CTF_K_ENUM ||
-      ctf_type_kind (state->cds_fp, id) == CTF_K_ENUM64)
+  if (ctf_type_kind (fp, id) == CTF_K_ENUM ||
+      ctf_type_kind (fp, id) == CTF_K_ENUM64)
     {
-      int enum_count = ctf_member_count (state->cds_fp, id);
+      int enum_count = ctf_member_count (fp, id);
       ctf_next_t *it = NULL;
       int i = 0;
       const char *enumerand;
       char *bit;
       int64_t value;
 
-      while ((enumerand = ctf_enum_next (state->cds_fp, id,
+      while ((enumerand = ctf_enum_next (fp, id,
 					 &it, &value)) != NULL)
 	{
 	  int ret;
@@ -769,7 +765,7 @@ ctf_dump_type (ctf_dict_t *fp _libctf_unused_, ctf_id_t id, int flag, void *arg)
 
 	  str = str_append (str, indent);
 
-	  if (!ctf_enum_unsigned (state->cds_fp, id))
+	  if (!ctf_enum_unsigned (fp, id))
 	    ret = asprintf (&bit, "%s: %lli\n", enumerand, value);
 	  else
 	    ret = asprintf (&bit, "%s: %llu\n", enumerand, (uint64_t) value);
@@ -789,15 +785,15 @@ ctf_dump_type (ctf_dict_t *fp _libctf_unused_, ctf_id_t id, int flag, void *arg)
 	      str = str_append (str, "...\n");
 	    }
 	}
-      if (ctf_errno (state->cds_fp) != ECTF_NEXT_END)
+      if (ctf_errno (fp) != ECTF_NEXT_END)
 	{
-	  ctf_err_warn (state->cds_fp, 1, ctf_errno (state->cds_fp),
+	  ctf_err_warn (fp, 1, ctf_errno (fp),
 			_("cannot visit enumerands dumping type 0x%lx"), id);
 	  goto err;
 	}
     }
 
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
   free (indent);
 
   return 0;
@@ -813,7 +809,7 @@ ctf_dump_type (ctf_dict_t *fp _libctf_unused_, ctf_id_t id, int flag, void *arg)
  oom:
   free (indent);
   free (str);
-  return ctf_set_errno (state->cds_fp, ENOMEM);
+  return ctf_set_errno (fp, ENOMEM);
 }
 
 /* Dump the string table into the cds_items.  */
@@ -831,7 +827,7 @@ ctf_dump_str (ctf_dict_t *fp, ctf_dump_state_t *state)
 		    (unsigned long) (s - fp->ctf_str[CTF_STRTAB_0].cts_strs),
 		    s) < 0)
 	return (ctf_set_errno (fp, errno));
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
       s += strlen (s) + 1;
     }
 
@@ -878,7 +874,6 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
       state = *statep;
 
       memset (state, 0, sizeof (struct ctf_dump_state));
-      state->cds_fp = fp;
       state->cds_sect = sect;
 
       switch (sect)
