@@ -9923,7 +9923,7 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	 so if we see it, we can assume that a constant form is really
 	 a constant and not a section offset.  */
       if (attr->form_is_constant ())
-	*offset = attr->constant_value (0);
+	*offset = attr->unsigned_constant ().value_or (0);
       else if (attr->form_is_section_offset ())
 	dwarf2_complex_location_expr_complaint ();
       else if (attr->form_is_block ()
@@ -9963,7 +9963,7 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
     {
       if (attr->form_is_constant ())
 	{
-	  LONGEST offset = attr->constant_value (0);
+	  LONGEST offset = attr->unsigned_constant ().value_or (0);
 
 	  /* Work around this GCC 11 bug, where it would erroneously use -1
 	     data member locations, instead of 0:
@@ -12288,7 +12288,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
 
   if (member_loc->form_is_constant ())
     {
-      offset = member_loc->constant_value (0);
+      offset = member_loc->unsigned_constant ().value_or (0);
       baton->size += 1 /* DW_OP_addr */ + cu->header.addr_size;
     }
   else
