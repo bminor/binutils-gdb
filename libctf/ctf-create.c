@@ -2566,19 +2566,68 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	dst_type = ctf_add_array (dst_fp, flag, &src_ar);
       break;
 
-    /* UPTODO: FUNC_LINKAGE, FUNCTION, DATASEC, VAR, *TAG */
+    /* UPTODO: FUNC_LINKAGE, DATASEC, VAR, *TAG */
     case CTF_K_FUNCTION:
-      ctc.ctc_return = ctf_add_type_internal (dst_fp, src_fp,
-					      src_tp->ctt_type,
-					      proc_tracking_fp);
-      ctc.ctc_argc = 0;
-      ctc.ctc_flags = 0;
+      {
+	ctf_funcinfo_t fi;
+	ctf_id_t *argv;
+	const char **arg_names;
+	size_t i;
 
-      if (ctc.ctc_return == CTF_ERR)
-	return CTF_ERR;				/* errno is set for us.  */
+	if (ctf_func_type_info (src_fp, src_type, &fi) < 0)
+	  return CTF_ERR;			/* errno is set for us. */
 
-      dst_type = ctf_add_function (dst_fp, flag, &ctc, NULL);
-      break;
+	fi.ctc_return = ctf_add_type_internal (dst_fp, src_fp,
+					       src_tp->ctt_type,
+					       proc_tracking_fp);
+
+	if (fi.ctc_return == CTF_ERR)
+	  return CTF_ERR;			/* errno is set for us.  */
+
+	if ((argv = calloc (fi.ctc_argc, sizeof (ctf_id_t *))) == NULL)
+	  {
+	    ctf_set_errno (src_fp, errno);
+	    return CTF_ERR;
+	  }
+
+	if (ctf_func_type_args (src_fp, src_type, fi.ctc_argc, argv) < 0)
+	  {
+	    free (argv);
+	    return CTF_ERR;			/* errno is set for us. */
+	  }
+
+	for (i = 0; i < fi.ctc_argc; i++)
+	  {
+	    argv[i] = ctf_add_type_internal (dst_fp, src_fp,
+					     argv[i],
+					     proc_tracking_fp);
+	    if (argv[i] == CTF_ERR)
+	      {
+		free (argv);
+		return CTF_ERR;			/* errno is set for us.  */
+	      }
+	  }
+
+	if ((arg_names = calloc (fi.ctc_argc, sizeof (const char **))) == NULL)
+	  {
+	    free (argv);
+	    free (arg_names);
+	    return CTF_ERR;			/* errno is set for us. */
+	  }
+
+	if (ctf_func_type_arg_names (src_fp, src_type, fi.ctc_argc,
+				     arg_names) < 0)
+	  {
+	    free (argv);
+	    free (arg_names);
+	    return CTF_ERR;			/* errno is set for us. */
+	  }
+
+	dst_type = ctf_add_function (dst_fp, flag, &fi, argv, arg_names);
+	free (argv);
+	free (arg_names);
+	break;
+      }
 
     case CTF_K_STRUCT:
     case CTF_K_UNION:
