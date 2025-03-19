@@ -65,30 +65,19 @@ struct sal_object {
    data.  All access to obj->sal should be gated by
    SALPY_REQUIRE_VALID which will raise an exception on invalid symbol
    table and line objects.  */
-struct salpy_deleter
+struct salpy_invalidator
 {
   void operator() (sal_object *obj)
   {
-    gdbpy_enter enter_py;
-
-    while (obj)
-      {
-	sal_object *next = obj->next;
-
-	obj->next = nullptr;
-	obj->prev = nullptr;
-	xfree (obj->sal);
-	obj->sal = nullptr;
-
-	obj = next;
-      }
+    xfree (obj->sal);
+    obj->sal = nullptr;
   }
 };
 
 extern PyTypeObject sal_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("sal_object");
-static const registry<objfile>::key<sal_object, salpy_deleter>
-     salpy_objfile_data_key;
+static const gdbpy_registry<gdbpy_tracking_registry_storage<sal_object,
+  symtab_and_line, &sal_object::sal, salpy_invalidator>> salpy_registry;
 
 /* Require a valid symbol table and line object.  All access to
    sal_object->sal should be gated by this call.  */
@@ -335,15 +324,9 @@ salpy_dealloc (PyObject *self)
 {
   sal_object *self_sal = (sal_object *) self;
 
-  if (self_sal->prev)
-    self_sal->prev->next = self_sal->next;
-  else if (self_sal->sal != nullptr && self_sal->sal->symtab != nullptr)
-    salpy_objfile_data_key.set
-      (self_sal->sal->symtab->compunit ()->objfile (),
-       self_sal->next);
-
-  if (self_sal->next)
-    self_sal->next->prev = self_sal->prev;
+  if (self_sal->sal != nullptr && self_sal->sal->symtab != nullptr)
+    salpy_registry.remove (self_sal->sal->symtab->compunit ()->objfile (),
+			   self_sal);
 
   xfree (self_sal->sal);
   Py_TYPE (self)->tp_free (self);
@@ -360,22 +343,14 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
   sal_obj->sal = ((struct symtab_and_line *)
 		  xmemdup (&sal, sizeof (struct symtab_and_line),
 			   sizeof (struct symtab_and_line)));
-  sal_obj->prev = NULL;
+  sal_obj->prev = nullptr;
+  sal_obj->next = nullptr;
 
   /* If the SAL does not have a symtab, we do not add it to the
      objfile cleanup observer linked list.  */
   symtab *symtab = sal_obj->sal->symtab;
   if (symtab != nullptr)
-    {
-      sal_obj->next
-	= salpy_objfile_data_key.get (symtab->compunit ()->objfile ());
-      if (sal_obj->next)
-	sal_obj->next->prev = sal_obj;
-
-      salpy_objfile_data_key.set (symtab->compunit ()->objfile (), sal_obj);
-    }
-  else
-    sal_obj->next = NULL;
+    salpy_registry.add (symtab->compunit ()->objfile (), sal_obj);
 }
 
 /* Given a symtab, and a symtab_object that has previously been
