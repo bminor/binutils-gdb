@@ -14096,8 +14096,13 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   LONGEST bias = 0;
   struct attribute *bias_attr = dwarf2_attr (die, DW_AT_GNU_bias, cu);
-  if (bias_attr != nullptr && bias_attr->form_is_constant ())
-    bias = bias_attr->constant_value (0);
+  if (bias_attr != nullptr)
+    {
+      if (base_type->is_unsigned ())
+	bias = (LONGEST) bias_attr->unsigned_constant ().value_or (0);
+      else
+	bias = bias_attr->signed_constant ().value_or (0);
+    }
 
   /* Normally, the DWARF producers are expected to use a signed
      constant form (Eg. DW_FORM_sdata) to express negative bounds.
