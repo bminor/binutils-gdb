@@ -70,6 +70,8 @@ struct symbol_object_deleter
 
 static const registry<objfile>::key<symbol_object, symbol_object_deleter>
      sympy_objfile_data_key;
+static const registry<gdbarch>::key<symbol_object, symbol_object_deleter>
+     sympy_gdbarch_data_key;
 
 static PyObject *
 sympy_str (PyObject *self)
@@ -347,19 +349,29 @@ static void
 set_symbol (symbol_object *obj, struct symbol *symbol)
 {
   obj->symbol = symbol;
-  obj->prev = NULL;
-  if (symbol->is_objfile_owned ()
-      && symbol->symtab () != NULL)
+  obj->prev = nullptr;
+  if (symbol->is_objfile_owned ())
     {
-      struct objfile *objfile = symbol->objfile ();
+      /* Can it really happen that symbol->symtab () is NULL?  */
+      if (symbol->symtab () != nullptr)
+	{
+	  struct objfile *objfile = symbol->objfile ();
 
-      obj->next = sympy_objfile_data_key.get (objfile);
-      if (obj->next)
-	obj->next->prev = obj;
-      sympy_objfile_data_key.set (objfile, obj);
+	  obj->next = sympy_objfile_data_key.get (objfile);
+	  if (obj->next)
+	    obj->next->prev = obj;
+	  sympy_objfile_data_key.set (objfile, obj);
+	}
     }
   else
-    obj->next = NULL;
+    {
+      struct gdbarch *arch = symbol->arch ();
+
+      obj->next = sympy_gdbarch_data_key.get (arch);
+      if (obj->next)
+	obj->next->prev = obj;
+      sympy_gdbarch_data_key.set (arch, obj);
+    }
 }
 
 /* Create a new symbol object (gdb.Symbol) that encapsulates the struct
@@ -368,6 +380,23 @@ PyObject *
 symbol_to_symbol_object (struct symbol *sym)
 {
   symbol_object *sym_obj;
+
+  /* Look if there's already a gdb.Symtab object for given SYMTAB
+     and if so, return it.  */
+  if (sym->is_objfile_owned ())
+    sym_obj = sympy_objfile_data_key.get (sym->objfile ());
+  else
+    sym_obj = sympy_gdbarch_data_key.get (sym->arch ());
+
+  while (sym_obj != nullptr)
+    {
+      if (sym_obj->symbol == sym)
+	{
+	  Py_INCREF (sym_obj);
+	  return (PyObject*)sym_obj;
+	}
+      sym_obj = sym_obj->next;
+    }
 
   sym_obj = PyObject_New (symbol_object, &symbol_object_type);
   if (sym_obj)
@@ -392,10 +421,19 @@ sympy_dealloc (PyObject *obj)
 
   if (sym_obj->prev)
     sym_obj->prev->next = sym_obj->next;
-  else if (sym_obj->symbol != NULL
-	   && sym_obj->symbol->is_objfile_owned ()
-	   && sym_obj->symbol->symtab () != NULL)
-    sympy_objfile_data_key.set (sym_obj->symbol->objfile (), sym_obj->next);
+  else if (sym_obj->symbol != nullptr)
+    {
+      if (sym_obj->symbol->is_objfile_owned ())
+	{
+	  /* Can it really happen that symbol->symtab () is NULL?  */
+	  if (sym_obj->symbol->symtab () != nullptr)
+	    sympy_objfile_data_key.set (sym_obj->symbol->objfile (),
+					sym_obj->next);
+	}
+      else
+	sympy_gdbarch_data_key.set (sym_obj->symbol->arch (),
+				    sym_obj->next);
+    }
   if (sym_obj->next)
     sym_obj->next->prev = sym_obj->prev;
   sym_obj->symbol = NULL;
