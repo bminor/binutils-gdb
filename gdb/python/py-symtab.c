@@ -28,39 +28,12 @@ struct symtab_object {
   PyObject_HEAD
   /* The GDB Symbol table structure.  */
   struct symtab *symtab;
-  /* A symtab object is associated with an objfile, so keep track with
-     a doubly-linked list, rooted in the objfile.  This allows
-     invalidation of the underlying struct symtab when the objfile is
-     deleted.  */
-  symtab_object *prev;
-  symtab_object *next;
-};
-
-/* This function is called when an objfile is about to be freed.
-   Invalidate the symbol table as further actions on the symbol table
-   would result in bad data.  All access to obj->symtab should be
-   gated by STPY_REQUIRE_VALID which will raise an exception on
-   invalid symbol tables.  */
-struct stpy_deleter
-{
-  void operator() (symtab_object *obj)
-  {
-    while (obj)
-      {
-	symtab_object *next = obj->next;
-
-	obj->symtab = NULL;
-	obj->next = NULL;
-	obj->prev = NULL;
-	obj = next;
-      }
-  }
 };
 
 extern PyTypeObject symtab_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symtab_object");
-static const registry<objfile>::key<symtab_object, stpy_deleter>
-     stpy_objfile_data_key;
+static const gdbpy_registry<gdbpy_memoizing_registry_storage<symtab_object,
+  symtab, &symtab_object::symtab>> stpy_registry;
 
 /* Require a valid symbol table.  All access to symtab_object->symtab
    should be gated by this call.  */
@@ -283,16 +256,12 @@ salpy_str (PyObject *self)
 static void
 stpy_dealloc (PyObject *obj)
 {
-  symtab_object *symtab = (symtab_object *) obj;
+  symtab_object *symtab_obj = (symtab_object *) obj;
 
-  if (symtab->prev)
-    symtab->prev->next = symtab->next;
-  else if (symtab->symtab)
-    stpy_objfile_data_key.set (symtab->symtab->compunit ()->objfile (),
-			       symtab->next);
-  if (symtab->next)
-    symtab->next->prev = symtab->prev;
-  symtab->symtab = NULL;
+  if (symtab_obj->symtab != nullptr)
+    stpy_registry.remove (symtab_obj->symtab->compunit ()->objfile(),
+			  symtab_obj);
+
   Py_TYPE (obj)->tp_free (obj);
 }
 
@@ -418,16 +387,8 @@ static void
 set_symtab (symtab_object *obj, struct symtab *symtab)
 {
   obj->symtab = symtab;
-  obj->prev = NULL;
   if (symtab != nullptr)
-    {
-      obj->next = stpy_objfile_data_key.get (symtab->compunit ()->objfile ());
-      if (obj->next)
-	obj->next->prev = obj;
-      stpy_objfile_data_key.set (symtab->compunit ()->objfile (), obj);
-    }
-  else
-    obj->next = NULL;
+    stpy_registry.add (symtab->compunit ()->objfile (), obj);
 }
 
 /* Create a new symbol table (gdb.Symtab) object that encapsulates the
@@ -441,16 +402,10 @@ symtab_to_symtab_object (struct symtab *symtab)
      and if so, return it.  */
   if (symtab != nullptr)
     {
-      symtab_obj = stpy_objfile_data_key.get (symtab->compunit ()->objfile ());
-      while (symtab_obj != nullptr)
-	{
-	  if (symtab_obj->symtab == symtab)
-	    {
-	      Py_INCREF (symtab_obj);
-	      return (PyObject*)symtab_obj;
-	    }
-	  symtab_obj = symtab_obj->next;
-	}
+      symtab_obj = stpy_registry.lookup (symtab->compunit ()->objfile (),
+					 symtab);
+      if (symtab_obj != nullptr)
+	return (PyObject*)symtab_obj;
     }
 
   symtab_obj = PyObject_New (symtab_object, &symtab_object_type);
@@ -545,7 +500,7 @@ PyTypeObject symtab_object_type = {
   "gdb.Symtab",			  /*tp_name*/
   sizeof (symtab_object),	  /*tp_basicsize*/
   0,				  /*tp_itemsize*/
-  stpy_dealloc,			  /*tp_dealloc*/
+  stpy_dealloc,		          /*tp_dealloc*/
   0,				  /*tp_print*/
   0,				  /*tp_getattr*/
   0,				  /*tp_setattr*/
