@@ -32,12 +32,6 @@ struct type_object
 {
   PyObject_HEAD
   struct type *type;
-
-  /* If a Type object is associated with an objfile, it is kept on a
-     doubly-linked list, rooted in the objfile.  This lets us copy the
-     underlying struct type when the objfile is deleted.  */
-  struct type_object *prev;
-  struct type_object *next;
 };
 
 extern PyTypeObject type_object_type
@@ -1165,62 +1159,30 @@ typy_richcompare (PyObject *self, PyObject *other, int op)
 /* Forward declaration, see below.  */
 static void set_type (type_object *obj, struct type *type);
 
-/* Deleter that saves types when an objfile is being destroyed.  */
-struct typy_deleter_for_objfile_owned
+/* Invalidator that saves types when an objfile is being destroyed.  */
+struct typy_invalidator
 {
   void operator() (type_object *obj)
   {
-    if (!gdb_python_initialized)
-      return;
-
-    /* This prevents another thread from freeing the objects we're
-       operating on.  */
-    gdbpy_enter enter_py;
-
-    copied_types_hash_t copied_types;
-
-    while (obj)
+    if (obj->type->is_objfile_owned ())
       {
-	type_object *next = obj->next;
-
-	copied_types.clear ();
+	copied_types_hash_t copied_types;
 
 	/* Set a copied (now arch-owned) type.  As a side-effect this
 	   adds OBJ to per-arch list.  We do not need to remove it from
 	   per-objfile list since the objfile is going to go completely
 	   anyway.  */
 	set_type (obj, copy_type_recursive (obj->type, copied_types));
-
-	obj = next;
       }
-  }
-};
-
-/* Deleter that is used when an arch is is about to be freed.  */
-struct typy_deleter_for_arch_owned
-{
-  void operator() (type_object *obj)
-  {
-    while (obj)
+    else
       {
-	type_object *next = obj->next;
-
 	obj->type = nullptr;
-
-	obj->next = nullptr;
-	obj->prev = nullptr;
-
-	obj = next;
       }
   }
 };
 
-
-
-static const registry<objfile>::key<type_object, typy_deleter_for_objfile_owned>
-     typy_objfile_data_key;
-static const registry<gdbarch>::key<type_object, typy_deleter_for_arch_owned>
-     typy_gdbarch_data_key;
+static const gdbpy_registry<gdbpy_memoizing_registry_storage<type_object,
+  type, &type_object::type, typy_invalidator>> typy_registry;
 
 static void
 set_type (type_object *obj, struct type *type)
@@ -1228,53 +1190,27 @@ set_type (type_object *obj, struct type *type)
   gdb_assert (type != nullptr);
 
   obj->type = type;
-  obj->prev = nullptr;
 
-  /* Can it really happen that type is NULL?  */
   if (type->objfile_owner () != nullptr)
-    {
-      struct objfile *objfile = type->objfile_owner ();
-
-      obj->next = typy_objfile_data_key.get (objfile);
-      if (obj->next)
-	obj->next->prev = obj;
-      typy_objfile_data_key.set (objfile, obj);
-    }
+    typy_registry.add (type->objfile_owner (), obj);
   else
-    {
-      struct gdbarch *arch = type->arch_owner ();
-
-      obj->next = typy_gdbarch_data_key.get (arch);
-      if (obj->next)
-	obj->next->prev = obj;
-      typy_gdbarch_data_key.set (arch, obj);
-    }
+    typy_registry.add (type->arch_owner (), obj);
 }
+
 static void
 typy_dealloc (PyObject *obj)
 {
-  type_object *type = (type_object *) obj;
+  type_object *type_obj = (type_object *) obj;
 
-  if (type->prev)
-    type->prev->next = type->next;
-  else if (type->type != nullptr)
+  if (type_obj->type != nullptr)
     {
-      if (type->type->is_objfile_owned ())
-	{
-	  /* Must reset head of list.  */
-	  struct objfile *objfile = type->type->objfile_owner ();
-	  typy_objfile_data_key.set (objfile, type->next);
-	}
+      if (type_obj->type->is_objfile_owned ())
+	typy_registry.remove (type_obj->type->objfile_owner (), type_obj);
       else
-	{
-	  struct gdbarch *arch = type->type->arch_owner ();
-	  typy_gdbarch_data_key.set (arch, type->next);
-	}
+	typy_registry.remove (type_obj->type->arch_owner (), type_obj);
     }
-  if (type->next)
-    type->next->prev = type->prev;
 
-  Py_TYPE (type)->tp_free (type);
+  Py_TYPE (obj)->tp_free (obj);
 }
 
 /* Return number of fields ("length" of the field dictionary).  */
@@ -1520,19 +1456,12 @@ type_to_type_object (struct type *type)
   /* Look if there's already a gdb.Type object for given TYPE
      and if so, return it.  */
   if (type->is_objfile_owned ())
-    type_obj = typy_objfile_data_key.get (type->objfile_owner ());
+    type_obj = typy_registry.lookup (type->objfile_owner (), type);
   else
-    type_obj = typy_gdbarch_data_key.get (type->arch_owner ());
+    type_obj = typy_registry.lookup (type->arch_owner (), type);
 
-  while (type_obj != nullptr)
-    {
-      if (type_obj->type == type)
-	{
-	  Py_INCREF (type_obj);
-	  return (PyObject*)type_obj;
-	}
-      type_obj = type_obj->next;
-    }
+  if (type_obj != nullptr)
+    return (PyObject*)type_obj;
 
   type_obj = PyObject_New (type_object, &type_object_type);
   if (type_obj)
@@ -1745,7 +1674,7 @@ PyTypeObject type_object_type =
   "gdb.Type",			  /*tp_name*/
   sizeof (type_object),		  /*tp_basicsize*/
   0,				  /*tp_itemsize*/
-  typy_dealloc,			  /*tp_dealloc*/
+  typy_dealloc,		          /*tp_dealloc*/
   0,				  /*tp_print*/
   0,				  /*tp_getattr*/
   0,				  /*tp_setattr*/
