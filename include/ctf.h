@@ -241,8 +241,8 @@ typedef struct ctf_header
 /* The ctp_magic_version field is a magic number (high 48 bits) and a version
    (low 16).  Of course this may be in the wrong endianness for the running
    system. */
-#define cth_magic   (cth_preamble.ctp_magic_version >> 16)
-#define cth_version (cth_preamble.ctp_magic_version & ((~0) >> 48))
+#define CTH_MAGIC(hdr)   ((hdr->cth_preamble.ctp_magic_version) >> 16)
+#define CTH_VERSION(hdr) ((hdr->cth_preamble.ctp_magic_version) & ((~0) >> 48))
 #define cth_flags   cth_preamble.ctp_flags
 
 #define CTF_MAGIC	0xdff2	/* v3 and below: magic number identifying header.  */

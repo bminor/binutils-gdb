@@ -115,7 +115,6 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       buf = ctf_type_aname (fp, id);
       if (!buf)
 	{
-		printf("kind is: %u\n", ctf_type_kind(fp, id));
 	  if (id == 0 || ctf_errno (fp) == ECTF_NONREPRESENTABLE)
 	    {
 	      ctf_set_errno (fp, ECTF_NONREPRESENTABLE);
@@ -310,7 +309,7 @@ ctf_dump_header_sectlenfield (ctf_dict_t *fp, ctf_dump_state_t *state,
 			   const char *sect, uint32_t off, uint32_t len)
 {
   char *str;
-  if (nextoff - off)
+  if (len - off)
     {
       if (asprintf (&str, "%s:\t0x%lx -- 0x%lx (0x%lx bytes)\n", sect,
 		    (unsigned long) off, (unsigned long) (off + len),
@@ -331,7 +330,7 @@ ctf_dump_v3_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   char *str;
   char *flagstr = NULL;
-  const ctf_v3_header_t *hp = fp->ctf_header_v3;
+  const ctf_header_v3_t *hp = fp->ctf_v3_header;
   const char *vertab[] =
     {
      NULL, "CTF_VERSION_1",
@@ -342,17 +341,17 @@ ctf_dump_v3_header (ctf_dict_t *fp, ctf_dump_state_t *state)
     };
   const char *verstr = NULL;
 
-  if (asprintf (&str, "Magic number: 0x%x\n", hp->cth_magic) < 0)
+  if (asprintf (&str, "Magic number: 0x%x\n", hp->cth_preamble.ctp_magic) < 0)
       goto err;
   ctf_dump_append (state, str);
 
-  if (hp->cth_version < CTF_VERSION_4)
-    verstr = vertab[hp->cth_version];
+  if (hp->cth_preamble.ctp_version < CTF_VERSION_4)
+    verstr = vertab[hp->cth_preammble.ctp_version];
 
   if (verstr == NULL)
     verstr = "(not a valid version)";
 
-  if (asprintf (&str, "Version: %i (%s)\n", hp->cth_version,
+  if (asprintf (&str, "Version: %i (%s)\n", hp->cth_preamble.ctp_version,
 		verstr) < 0)
     goto err;
   ctf_dump_append (state, str);
@@ -447,7 +446,6 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
   char *str;
   char *flagstr = NULL;
   const ctf_header_t *hp = fp->ctf_header;
-  int v3 = 0, v4 = 0;
   const char *vertab[] =
     {
      "CTF_VERSION_4"
@@ -462,16 +460,16 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
       return 0;
     }
 
-  if (asprintf (&str, "Magic number: 0x%x\n", hp->cth_magic) < 0)
+  if (asprintf (&str, "Magic number: 0x%lx\n", CTH_MAGIC (hp)) < 0)
       goto err;
   ctf_dump_append (state, str);
 
-  if (hp->cth_version != CTF_VERSION_4)
+  if (CTH_VERSION (hp) != CTF_VERSION_4)
     verstr = "(not a valid version)";
   else
-    verstr = vertab[hp->cth_version - CTF_VERSION_4];
+    verstr = vertab[CTH_VERSION (hp) - CTF_VERSION_4];
 
-  if (asprintf (&str, "Version: %i (%s)\n", hp->cth_version,
+  if (asprintf (&str, "Version: %li (%s)\n", CTH_VERSION (hp),
 		verstr) < 0)
     goto err;
   ctf_dump_append (state, str);
@@ -486,7 +484,7 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 
   if (fp->ctf_openflags > 0)
     {
-      if (asprintf (&flagstr, "%s%s%s%s%s%s%s",
+      if (asprintf (&flagstr, "%s%s%s%s",
 		    fp->ctf_openflags & CTF_F_COMPRESS
 		    ? "CTF_F_COMPRESS": "",
 		    (fp->ctf_openflags & CTF_F_COMPRESS)
@@ -517,10 +515,6 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
   if (ctf_dump_header_sizefield (fp, state, "Parent types", hp->cth_parent_ntypes) < 0)
     goto err;
 
-  if (ctf_dump_header_sectlenfield (fp, state, "Layout section",
-				    hp->cth_layout_off, hp->cth_layout_len) < 0)
-    goto err;
-
   if (ctf_dump_header_sectlenfield (fp, state, "Data object section",
 				    hp->cth_objt_off, hp->cth_objt_len) < 0)
     goto err;
@@ -541,8 +535,8 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 				    hp->btf.bth_type_off, hp->btf.bth_type_len) < 0)
     goto err;
 
-  if (ctf_dump_header_sectlenfield (fp, state, "String section", hp->btf.bth_stroff,
-				    hp->btf.bth_stroff + hp->btf.bth_strlen + 1) < 0)
+  if (ctf_dump_header_sectlenfield (fp, state, "String section", hp->btf.bth_str_off,
+				    hp->btf.bth_str_off + hp->btf.bth_str_len + 1) < 0)
     goto err;
 
   return 0;
@@ -603,21 +597,24 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
 
 /* Dump a single variable into the cds_items.  */
 static int
-ctf_dump_var (ctf_dic_t *fp _libctf_unused_, const char *name, ctf_id_t type,
-	      void *arg)
+ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
+	      unsigned long offset,
+	      size_t size _libctf_unused_, void *arg)
 {
   char *str;
   char *typestr;
   ctf_dump_state_t *state = arg;
 
-  if (asprintf (&str, "%s -> ", name) < 0)
+  /* UPTODO check for a decl tag.  */
+
+  if (asprintf (&str, "  %lx: ", offset) < 0)
     return (ctf_set_errno (state->cds_fp, errno));
 
   if ((typestr = ctf_dump_format_type (state->cds_fp, type,
 				       CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
     {
       free (str);
-      return 0;			/* Swallow the error.  */
+      return 0;					/* Swallow the error.  */
     }
 
   str = str_append (str, typestr);
@@ -625,6 +622,35 @@ ctf_dump_var (ctf_dic_t *fp _libctf_unused_, const char *name, ctf_id_t type,
 
   ctf_dump_append (state, str);
   return 0;
+}
+
+/* Dump all DATASECs with associated vars.  */
+static int
+ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *state)
+{
+  ctf_dump_state_t *state = arg;
+  char *str;
+  ctf_id_t type;
+  ctf_next_t *next = NULL;
+
+  while ((type = ctf_type_kind_next (fp, &next, CTF_K_DATASEC)) != NULL)
+    {
+      /* Dump DATASEC name.  */
+      if (asprintf (&str, "Section %s:", ctf_type_aname (fp, type)) < 0)
+        return (ctf_set_errno (state->cds_fp, errno));
+      ctf_dump_append (state, str);
+
+      /* Dump all variables in the datasec.  */
+      if (ctf_datasec_var_iter (fp, type, ctf_dump_var, state) < 0)
+        goto err;
+    }
+
+  return 0;
+
+ err:
+  free (str);
+  free (next);
+  return -1;
 }
 
 /* Dump a single struct/union member into the string in the membstate.  */
@@ -722,29 +748,38 @@ ctf_dump_type (ctf_dict_t *fp _libctf_unused_, ctf_id_t id, int flag, void *arg)
 
   /* ... and enums, for which we dump the first and last few members and skip
      the ones in the middle.  */
-  if (ctf_type_kind (state->cds_fp, id) == CTF_K_ENUM)
+  if (ctf_type_kind (state->cds_fp, id) == CTF_K_ENUM ||
+      ctf_type_kind (state->cds_fp, id) == CTF_K_ENUM64)
     {
       int enum_count = ctf_member_count (state->cds_fp, id);
       ctf_next_t *it = NULL;
       int i = 0;
       const char *enumerand;
       char *bit;
-      int value;
+      int64_t value;
 
       while ((enumerand = ctf_enum_next (state->cds_fp, id,
 					 &it, &value)) != NULL)
 	{
+	  int ret;
+
 	  i++;
 	  if ((i > 5) && (i < enum_count - 4))
 	    continue;
 
 	  str = str_append (str, indent);
 
-	  if (asprintf (&bit, "%s: %i\n", enumerand, value) < 0)
+	  if (!ctf_enum_unsigned (state->cds_fp, id))
+	    ret = asprintf (&bit, "%s: %lli\n", enumerand, value);
+	  else
+	    ret = asprintf (&bit, "%s: %llu\n", enumerand, (uint64_t) value);
+
+	  if (ret < 0)
 	    {
 	      ctf_next_destroy (it);
 	      goto oom;
 	    }
+
 	  str = str_append (str, bit);
 	  free (bit);
 
@@ -860,7 +895,7 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	    goto end;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_VAR:
-	  if (ctf_variable_iter (fp, ctf_dump_var, state) < 0)
+	  if (ctf_dump_datasecs (fp, state) < 0)
 	    goto end;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_TYPE:

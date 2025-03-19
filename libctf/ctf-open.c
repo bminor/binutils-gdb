@@ -1710,10 +1710,10 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     {
       hp = (ctf_header_t *) ctfsect->cts_data;
 
-      if (hp->cth_magic == CTFv4_MAGIC)
+      if (CTH_MAGIC (hp) == CTFv4_MAGIC)
 	{
 	  format = IS_CTF;
-	  version = hp->cth_version;
+	  version = CTH_VERSION (hp);
 	  hdrsz = sizeof (ctf_header_t);
 	  ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
 	}
@@ -1721,8 +1721,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	{
 	  format = IS_CTF;
 	  foreign_endian = 1;
-	  /* See cth_version in ctf.h.  */
-	  version = bswap_64 (hp->cth_preamble.ctp_magic_version) & ((~0) >> 48);
+	  version = bswap_64 (CTH_VERSION (hp));
 	  hdrsz = sizeof (ctf_header_t);
 	  ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
 	}
@@ -2076,7 +2075,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
      information.  */
 
   if (version == IS_BTF)
-    hp->cth_version = CTF_VERSION_4;
+    hp->cth_preamble.ctp_magic_version = (CTFv4_MAGIC << 16) | CTF_VERSION;
 
   fp->ctf_version = hp->cth_version;
   fp->ctf_dictops = &ctf_dictops[ctf_version];

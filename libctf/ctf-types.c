@@ -1722,13 +1722,13 @@ ctf_decl_tag (ctf_dict_t *fp, ctf_id_t decl_tag, int64_t *component_idx)
   unsigned char *vlen;
   ctf_decl_tag_t *cdt;
 
-  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, decl_tag, &suffix)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   if (LCTF_KIND (fp, tp) != CTF_DECL_TAG)
     return (ctf_set_typed_errno (ofp, ECTF_NOTDECLTAG));
 
-  vlen = ctf_vlen (fp, type, tp, NULL);
+  vlen = ctf_vlen (fp, decl_tag, tp, NULL);
   cdt = (ctf_decl_tag_t *) vlen;
 
   *component_idx = cdt->cdt_component_idx;
