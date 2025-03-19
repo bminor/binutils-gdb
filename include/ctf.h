@@ -242,7 +242,7 @@ typedef struct ctf_header
    (low 16).  Of course this may be in the wrong endianness for the running
    system. */
 #define CTH_MAGIC(hdr)   ((hdr->cth_preamble.ctp_magic_version) >> 16)
-#define CTH_VERSION(hdr) ((hdr->cth_preamble.ctp_magic_version) & ((~0) >> 48))
+#define CTH_VERSION(hdr) ((hdr->cth_preamble.ctp_magic_version) & (((uint64_t) ~0) >> 48))
 #define cth_flags   cth_preamble.ctp_flags
 
 #define CTF_MAGIC	0xdff2	/* v3 and below: magic number identifying header.  */
@@ -477,7 +477,7 @@ union
 
 /* V4 only. */
 #define CTF_TYPE_INFO(kind, kflag, vlen) \
-	(((kind) << 24) | (((flag) ? 1 : 0) << 31) | ((vlen) & CTF_MAX_RAW_VLEN))
+	(((kind) << 24) | (((kflag) ? 1 : 0) << 31) | ((vlen) & CTF_MAX_RAW_VLEN))
 
 #define CTF_TYPE_NAME(stid, offset) \
 	(((stid) << 31) | ((offset) & CTF_MAX_NAME))
@@ -754,7 +754,7 @@ typedef struct ctf_member
 #define CTF_MAX_BIT_OFFSET 0xffffff
 #define CTF_MEMBER_BIT_SIZE(val) ((val) >> 24)
 #define CTF_MEMBER_BIT_OFFSET(val) ((val) & CTF_MAX_BIT_OFFSET);
-#define CTF_MEMBER_MAKE_BIT_OFFSET (size, offset) ((size) << 24 | val)
+#define CTF_MEMBER_MAKE_BIT_OFFSET(size, offset) ((size) << 24 | offset)
 
 /* Data sections, aligned with btf_var_secinfo.
 

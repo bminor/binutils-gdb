@@ -79,14 +79,14 @@ ctf_grow_ptrtab (ctf_dict_t *fp)
 static int
 ctf_grow_vlen (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
 {
-  unsigned char *old = dtd->dtd_buf;
+  unsigned char *old = (unsigned char *) dtd->dtd_buf;
 
   size_t size = dtd->dtd_buf_size;
   size_t old_size = size;
   size_t vlen_size = dtd->dtd_vlen_size;
   size_t prefix_size = size - vlen_size;
-  size_t old_data_offset = dtd->dtd_data - dtd->dtd_buf;
-  size_t old_vlen_offset = dtd->dtd_vlen - dtd->dtd_buf;
+  size_t old_data_index = dtd->dtd_data - dtd->dtd_buf;
+  size_t old_vlen_offset = dtd->dtd_vlen - old;
 
   if ((size - vlen_size) > vbytes)
     return 0;
@@ -99,13 +99,13 @@ ctf_grow_vlen (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
 
   if ((dtd->dtd_buf = realloc (dtd->dtd_buf, size)) == NULL)
     {
-      dtd->dtd_buf = old;
+      dtd->dtd_buf = (ctf_type_t *) old;
       return (ctf_set_errno (fp, ENOMEM));
     }
 
   memset (dtd->dtd_buf + old_size, 0, size - old_size);
-  dtd->dtd_data = dtd->dtd_buf + old_data_offset;
-  dtd->dtd_vlen = dtd->dtd_buf + old_vlen_offset;
+  dtd->dtd_data = dtd->dtd_buf + old_data_index;
+  dtd->dtd_vlen = ((unsigned char *) dtd->dtd_buf) + old_vlen_offset;
   dtd->dtd_buf_size = size;
 
   return 0;
@@ -129,7 +129,7 @@ ctf_add_prefix (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
     return NULL;				/* errno is set for us.  */
 
   memmove (dtd->dtd_vlen + sizeof (ctf_type_t), dtd->dtd_vlen, dtd->dtd_vlen_size);
-  new_prefix = dtd->dtd_vlen;
+  new_prefix = (ctf_type_t *) dtd->dtd_vlen;
   dtd->dtd_vlen += sizeof (ctf_type_t);
   memset (new_prefix, 0, sizeof (ctf_type_t));
 
@@ -144,7 +144,11 @@ ctf_add_prefix (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
 ctf_dict_t *
 ctf_create (int *errp)
 {
-  static const ctf_header_t hdr = { .btf.bth_preamble = { CTF_BTF_MAGIC, CTF_BTF_VERSION, 0 } };
+  static ctf_header_t hdr =
+    {
+      .btf.bth_preamble = { CTF_BTF_MAGIC, CTF_BTF_VERSION, 0 },
+      .btf.bth_hdr_len = sizeof (ctf_btf_header_t),
+    };
 
   ctf_dynhash_t *structs = NULL, *unions = NULL, *enums = NULL, *names = NULL;
   ctf_dynhash_t *datasecs = NULL, *tags = NULL;
@@ -153,7 +157,7 @@ ctf_create (int *errp)
 
   libctf_init_debug();
 
-  hdr.btf.bth_hdr_len = sizeof (ctf_btf_header_t);
+  hdr.cth_preamble.ctp_magic_version = (CTFv4_MAGIC << 16) | CTF_VERSION;
 
   structs = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 				NULL, NULL);
@@ -166,7 +170,7 @@ ctf_create (int *errp)
   datasecs = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 				 NULL, NULL);
   tags = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
-			     NULL, ctf_dynset_destroy);
+			     NULL, (ctf_hash_free_fun) ctf_dynset_destroy);
   if (!structs || !unions || !enums || !names || !datasecs || !tags)
     {
       ctf_set_open_errno (errp, EAGAIN);
@@ -256,15 +260,16 @@ ctf_insert_type_decl_tag (ctf_dict_t *fp, ctf_id_t type, const char *name,
 {
   ctf_dynset_t *types;
   ctf_dynhash_t *h = ctf_name_table (fp, kind);
+  int err;
 
-  if ((types = ctf_dynhash_lookup (fp, h, name)) == NULL)
+  if ((types = ctf_dynhash_lookup (h, name)) == NULL)
     {
       types = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer, NULL);
 
       if (!types)
 	return (ctf_set_errno (fp, ENOMEM));
 
-      err = ctf_dynhash_insert (fp, h, name, types);
+      err = ctf_dynhash_cinsert (h, name, types);
       if (err != 0)
 	{
 	  err *= -1;
@@ -272,8 +277,7 @@ ctf_insert_type_decl_tag (ctf_dict_t *fp, ctf_id_t type, const char *name,
 	}
     }
 
-  err = ctf_dynset_insert (fp, ids, ctf_index_to_type (fp, id));
-  if (err != 0)
+  if ((err = ctf_dynset_insert (types, (void *) (uintptr_t) type)) != 0)
     {
       err *= -1;
       return (ctf_set_errno (fp, err));
@@ -327,7 +331,7 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 
   if (name != NULL && name[0] != '\0'
       && LCTF_INFO_ISROOT (fp, dtd->dtd_buf->ctt_info))
-	ctf_dynhash_remove (ctf_name_table (name_kind), name);
+    ctf_dynhash_remove (ctf_name_table (fp, name_kind), name);
 
   free (dtd->dtd_buf);
   ctf_list_delete (&fp->ctf_dtdefs, dtd);
@@ -397,7 +401,6 @@ int
 ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 {
   ctf_dtdef_t *dtd, *ntd;
-  ctf_dvdef_t *dvd, *nvd;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -410,14 +413,11 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs); dtd != NULL; dtd = ntd)
     {
-      int kind;
-      const char *name;
-
       ntd = ctf_list_next (dtd);
 
       if (ctf_type_to_index (fp, dtd->dtd_type) <= id.dtd_id)
 	continue;
-      ctf_dtd_delete (fp, dtd->dtd_type);
+      ctf_dtd_delete (fp, dtd);
     }
 
   fp->ctf_typemax = id.dtd_id;
@@ -541,10 +541,16 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
     pfp = fp->ctf_parent;
 
   if (flag != CTF_ADD_NONROOT && flag != CTF_ADD_ROOT)
-    return (ctf_set_typed_errno (fp, EINVAL));
+    {
+      ctf_set_errno (fp, EINVAL);
+      return NULL;
+    }
 
   if (fp->ctf_typemax + 1 >= pfp->ctf_provtypemax)
-    return (ctf_set_typed_errno (fp, ECTF_FULL));
+    {
+      ctf_set_errno (fp, ECTF_FULL);
+      return NULL;
+    }
 
   /* Prohibit addition of types in the middle of serialization.  */
 
@@ -606,8 +612,9 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
 
   if ((dtd->dtd_buf = calloc (1, dtd->dtd_buf_size)) == NULL)
     goto oom;
-  dtd->dtd_vlen = dtd->dtd_buf + dtd->dtd_buf_size - vbytes - vbytes_extra;
-  dtd->dtd_data = dtd->dtd_vlen - sizeof (ctf_type_t);
+  dtd->dtd_vlen = ((unsigned char *) dtd->dtd_buf) + dtd->dtd_buf_size
+    - vbytes - vbytes_extra;
+  dtd->dtd_data = (ctf_type_t *) (dtd->dtd_vlen - sizeof (ctf_type_t));
 
   type = ctf_assign_id (fp);
 
@@ -627,9 +634,6 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
 
   if (ctf_dtd_insert (fp, dtd, flag, kind) < 0)
     goto err;					/* errno is set for us.  */
-
-  if (dtdp)
-    *dtdp = dtd;
 
   /* Return a pointer to the first user-requested prefix, if any.  i.e., don't
      return a pointer to the non-root CONFLICTING header.  */
@@ -702,6 +706,8 @@ ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
   ctf_dict_t *typedict = fp;
   ctf_dict_t *refdict = fp;
   int child = fp->ctf_flags & LCTF_CHILD;
+  uint32_t type_idx;
+  uint32_t ref_idx;
 
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_typed_errno (fp, EINVAL));
@@ -724,9 +730,10 @@ ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
      addition of this type.  The pptrtab is lazily-updated as needed, so is not
      touched here.  */
 
-  typedict = ctf_get_dict (fp, type);
-  uint32_t type_idx = ctf_type_to_index (typedict, type);
-  uint32_t ref_idx = ctf_type_to_index (refdict, ref);
+  typedict = ctf_get_dict (fp, dtd->dtd_type);
+
+  type_idx = ctf_type_to_index (typedict, dtd->dtd_type);
+  ref_idx = ctf_type_to_index (refdict, ref);
 
   if (ctf_type_ischild (fp, ref) == child
       && ref_idx < fp->ctf_typemax)
@@ -824,7 +831,7 @@ ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
     return (ctf_set_typed_errno (fp, EINVAL));
 
   if (arp->ctr_contents != 0
-      && ctf_lookup_by_id (&tmp, arp->ctr_contents) == NULL)
+      && ctf_lookup_by_id (&tmp, arp->ctr_contents, NULL) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   tmp = fp;
@@ -853,7 +860,6 @@ ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
   cta->cta_nelems = arp->ctr_nelems;
 
   return dtd->dtd_type;
-  return type;
 }
 
 int
@@ -865,7 +871,7 @@ ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
   uint32_t idx;
 
   if (ctf_lookup_by_id (&fp, type, NULL) == NULL)
-    return CTF_ERR;			/* errno is set for us.  */
+    return -1;				/* errno is set for us.  */
 
   idx = ctf_type_to_index (fp, type);
   dtd = ctf_dtd_lookup (fp, type);
@@ -894,9 +900,10 @@ ctf_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
   ctf_dict_t *ofp = fp;
   ctf_dtdef_t *dtd;
   ctf_type_t *prefix;
+  uint32_t idx;
 
   if (ctf_lookup_by_id (&fp, type, NULL) == NULL)
-    return CTF_ERR;			/* errno is set for us.  */
+    return -1;				/* errno is set for us.  */
 
   idx = ctf_type_to_index (fp, type);
   dtd = ctf_dtd_lookup (fp, type);
@@ -924,7 +931,7 @@ ctf_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
       while (CTF_INFO_KIND (prefix->ctt_info) != CTF_K_CONFLICTING)
 	prefix++;
     }
-  prefix->ctt_name = ctf_str_add (fp, name);
+  prefix->ctt_name = ctf_str_add (fp, cuname);
   prefix->ctt_info = CTF_TYPE_INFO (CTF_K_CONFLICTING, 0,
 				    dtd->dtd_vlen_size < 65536
 				    ? dtd->dtd_vlen_size : 0);
@@ -971,7 +978,7 @@ ctf_add_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
     }
   else if (component_idx != -1)
     {
-      ctf_type_t func_type;
+      ctf_id_t func_type;
 
       /* Within-type declarations.  */
 
@@ -996,7 +1003,7 @@ ctf_add_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
 	    if (ctf_func_type_info (fp, func_type, &fi) < 0)
 	      return -1;	/* errno is set for us.  */
 
-	    if (component_idx >= fi.ctc_argc)
+	    if ((size_t) component_idx >= fi.ctc_argc)
 	      return (ctf_set_typed_errno (fp, ECTF_BADCOMPONENT));
 
 	    break;
@@ -1009,7 +1016,8 @@ ctf_add_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
   if (tag == NULL || tag[0] == '\0')
     return (ctf_set_typed_errno (fp, ECTF_NONAME));
 
-  if ((dtd = ctf_add_generic (fp, flag, tag, kind, 0, vlen_size, 0, &dtd)) == NULL)
+  if ((dtd = ctf_add_generic (fp, flag, tag, kind, 0, vlen_size,
+			      0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, flag, 0);
@@ -1074,13 +1082,13 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
     vlen++;	       /* Add trailing zero to indicate varargs (see below).  */
 
   if (ctc->ctc_return != 0
-      && ctf_lookup_by_id (&tmp, ctc->ctc_return) == NULL)
+      && ctf_lookup_by_id (&tmp, ctc->ctc_return, NULL) == NULL)
     return CTF_ERR;				/* errno is set for us.  */
 
   for (i = 0; i < ctc->ctc_argc; i++)
     {
       tmp = fp;
-      if (argv[i] != 0 && ctf_lookup_by_id (&tmp, argv[i]) == NULL)
+      if (argv[i] != 0 && ctf_lookup_by_id (&tmp, argv[i], NULL) == NULL)
 	return CTF_ERR;				/* errno is set for us.  */
     }
 
@@ -1095,7 +1103,7 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
 
   for (i = 0; i < ctc->ctc_argc; i++)
     {
-      vdat[i].cfp_name = ctf_str_add (fp, arg_names);
+      vdat[i].cfp_name = ctf_str_add (fp, arg_names[i]);
       vdat[i].cfp_type = (uint32_t) argv[i];
     }
 
@@ -1113,10 +1121,11 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
 
 ctf_id_t
 ctf_add_function_linkage (ctf_dict_t *fp, uint32_t flag,
-			  ctf_id_t ref, const char *name, int linkage);
+			  ctf_id_t ref, const char *name, int linkage)
 {
   ctf_dtdef_t *dtd;
-  ctf_linkage_t *linkage;
+  ctf_linkage_t *l;
+  ctf_dict_t *tmp = fp;
 
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_typed_errno (fp, EINVAL));
@@ -1124,21 +1133,21 @@ ctf_add_function_linkage (ctf_dict_t *fp, uint32_t flag,
   if (linkage < 0 || linkage > 2)
     return (ctf_set_typed_errno (fp, ECTF_LINKAGE));
 
-  if (ref != 0 && ctf_lookup_by_id (&refdict, ref, NULL) == NULL)
+  if (ref != 0 && ctf_lookup_by_id (&tmp, ref, NULL) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  if (ctf_type_kind (ref) != CTF_K_FUNCTION)
+  if (ctf_type_kind (fp, ref) != CTF_K_FUNCTION)
     return (ctf_set_typed_errno (fp, ECTF_NOTFUNC));
 
-  if ((dtd = ctf_add_generic (fp, flag, name, kind, 0,
+  if ((dtd = ctf_add_generic (fp, flag, name, CTF_K_FUNC_LINKAGE, 0,
 			      sizeof (ctf_linkage_t), 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_FUNC_LINKAGE, 0, 0);
   dtd->dtd_data->ctt_type = (uint32_t) ref;
 
-  linkage = (ctf_linkage_t *) dtd->dtd_vlen;
-  linkage->ctl_linkage = linkage;
+  l = (ctf_linkage_t *) dtd->dtd_vlen;
+  l->ctl_linkage = linkage;
 
   return dtd->dtd_type;
 }
@@ -1149,8 +1158,10 @@ ctf_add_sou_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
 {
   ctf_dtdef_t *dtd;
   ctf_type_t *prefix;
-  ctf_id_t type = 0, idx;
+  ctf_id_t type = 0;
+  uint32_t idx;
   size_t initial_vbytes = sizeof (ctf_member_t) * INITIAL_VLEN;
+  int root_flag = flag & (~CTF_ADD_STRUCT_BITFIELDS);
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -1173,8 +1184,8 @@ ctf_add_sou_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
       if ((prefix = ctf_add_prefix (fp, dtd, initial_vbytes)) == NULL)
 	return CTF_ERR;				/* errno is set for us.  */
     }
-  else if ((dtd = ctf_add_generic (fp, flag, name, kind, 1, 0, initial_vbytes,
-				   &prefix)) == NULL)
+  else if ((dtd = ctf_add_generic (fp, root_flag, name, kind, 1, 0,
+				   initial_vbytes, &prefix)) == NULL)
     return CTF_ERR;				/* errno is set for us.  */
 
   prefix->ctt_info = CTF_TYPE_INFO (CTF_K_BIG, 0, 0);
@@ -1220,7 +1231,7 @@ ctf_add_enum_internal (ctf_dict_t *fp, uint32_t flag, const char *name,
   size_t initial_vbytes;
   ctf_type_t *prefix;
 
-  if (!ctf_assert (fp, ind == CTF_K_ENUM || kind == CTF_K_ENUM64))
+  if (!ctf_assert (fp, kind == CTF_K_ENUM || kind == CTF_K_ENUM64))
     return -1;			/* errno is set for us. */
 
   if (kind == CTF_K_ENUM)
@@ -1426,7 +1437,7 @@ ctf_add_typedef (ctf_dict_t *fp, uint32_t flag, const char *name,
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_TYPEDEF, 0, 0);
   dtd->dtd_data->ctt_type = (uint32_t) ref;
 
-  return type;
+  return dtd->dtd_type;
 }
 
 ctf_id_t
@@ -1548,7 +1559,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   ctf_type_t *prefix;
 
   ssize_t msize, ssize;
-  uint32_t kind, kflag, root;
+  uint32_t kind, kflag;
   size_t vlen;
   size_t i;
   int is_incomplete = 0;
@@ -1583,11 +1594,11 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   if (name != NULL && name[0] == '\0')
     name = NULL;
 
-  if ((prefix = ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
+  if ((prefix = ctf_find_prefix (dtd->dtd_buf, CTF_K_BIG)) == NULL)
     return (ctf_set_errno (ofp, ECTF_CORRUPT));
 
   kind = LCTF_KIND (fp, prefix);
-  kflag = LCTF_INFO_KFLAG (fp, dtd->dtd_data->ctt_info);
+  kflag = CTF_INFO_KFLAG (dtd->dtd_data->ctt_info);
   vlen = LCTF_VLEN (fp, prefix);
 
   if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
@@ -1653,11 +1664,10 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
     }
   else 				/* Subsequent struct member. */
     {
+      size_t bound, off;
+
       if (bit_offset == (unsigned long) - 1)
 	{
-	  size_t bit_offset;
-	  uint32_t bound;
-
 	  /* Natural alignment.  */
 
 	  if (is_incomplete)
@@ -1670,8 +1680,8 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	      return (ctf_set_errno (ofp, ECTF_INCOMPLETE));
 	    }
 
-	  if ((bit_offset = ctf_type_align_natural (fp, memb[vlen - 1].ctm_type,
-						    type, dtd->dtd_last_offset)) < 0)
+	  if ((off = ctf_type_align_natural (fp, memb[vlen - 1].ctm_type,
+					     type, dtd->dtd_last_offset)) < 0)
 	    {
 	      if (ctf_errno (fp) == ECTF_INCOMPLETE)
 		{
@@ -1681,15 +1691,17 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 				_("ctf_add_member_offset: cannot add member %s "
 				  "of type %lx to struct %lx without "
 				  "specifying explicit offset after member %s"
-				  "of type %lx, which is an incomplete type\n"),
+				  "of type %x, which is an incomplete type\n"),
 				name ? name : _("(unnamed member)"), type, souid,
-				lname ? lname : _("(unnamed member)"), ltype);
+				lname ? lname : _("(unnamed member)"),
+				memb[vlen -1].ctm_type);
 		}
 	      return (ctf_set_errno (ofp, ctf_errno (fp)));
 	    }
 
 	  /* Convert the offset to a gap-since-the-last.  */
-	  bit_offset -= dtd->dtd_last_offset;
+	  off -= dtd->dtd_last_offset;
+	  bit_offset = off;
 	}
 
       /* Insert as many nameless members as needed.  If we need any, this is
@@ -1706,7 +1718,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	  if (kflag)
 	    off = CTF_MEMBER_BIT_OFFSET (bound);
 
-	  if (ctf_add_member_bitfield (fp, enid, "", 0, off) < 0)
+	  if (ctf_add_member_bitfield (fp, souid, "", 0, off, 0) < 0)
 	    return -1;		/* errno is set for us.  */
 
 	  bit_offset =- off;
@@ -1719,7 +1731,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
       /* Hunt down the prefix and member list again: they may have been moved by
 	 the realloc()s involved in field additions.  */
 
-      if ((prefix = ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
+      if ((prefix = ctf_find_prefix (dtd->dtd_buf, CTF_K_BIG)) == NULL)
 	return (ctf_set_errno (ofp, ECTF_CORRUPT));
 
       vlen = LCTF_VLEN (fp, prefix);
@@ -1764,7 +1776,7 @@ ctf_add_member_encoded (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   if (dtd == NULL)
     return (ctf_set_errno (fp, ECTF_BADID));
 
-  kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
+  kind = LCTF_KIND (fp, dtd->dtd_buf);
 
   if ((kind != CTF_K_INTEGER) && (kind != CTF_K_FLOAT) && (kind != CTF_K_ENUM))
     return (ctf_set_errno (fp, ECTF_NOTINTFP));
@@ -1804,24 +1816,23 @@ static ctf_id_t
 ctf_add_datasec (ctf_dict_t *fp, uint32_t flag, const char *datasec)
 {
   ctf_dtdef_t *dtd;
-  ctf_id_t type = 0;
   size_t initial_vlen = sizeof (ctf_var_secinfo_t) * INITIAL_VLEN;
 
-  if ((type = ctf_add_generic (fp, flag, datasec, CTF_K_DATASEC,
-			       0, 0, initial_vlen, &dtd)) == NULL)
+  if ((dtd = ctf_add_generic (fp, flag, datasec, CTF_K_DATASEC,
+			      0, 0, initial_vlen, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us. */
 
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_DATASEC, 0, 0);
   dtd->dtd_data->ctt_size = 0;
 
-  return type;
+  return dtd->dtd_type;
 }
 
 ctf_id_t
 ctf_add_variable (ctf_dict_t *fp, const char *name, int linkage, ctf_id_t ref)
 {
-  return ctf_add_section_variable (fp, NULL, name, linkage, ref, 0,
-				   (unsigned long) -1);
+  return ctf_add_section_variable (fp, CTF_ADD_ROOT, NULL, name, linkage, ref,
+				   0, (unsigned long) -1);
 }
 
 /* Add variable, interning it in the specified DATASEC (which must be in the
@@ -1839,7 +1850,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   uint32_t kind, kflag;
   size_t vlen;
 
-  ctf_linkage_t *linkage;
+  ctf_linkage_t *l;
   ctf_var_secinfo_t *sec;
 
   ctf_dict_t *tmp = fp;
@@ -1866,19 +1877,26 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
 
   sec_dtd = ctf_dtd_lookup (fp, datasec_id);
 
+  kind = LCTF_KIND (fp, sec_dtd->dtd_buf);
+  kflag = CTF_INFO_KFLAG (sec_dtd->dtd_data->ctt_info);  
+  vlen = LCTF_VLEN (fp, sec_dtd->dtd_buf);
+
+  if (vlen == CTF_MAX_RAW_VLEN)
+    return (ctf_set_typed_errno (fp, ECTF_DTFULL));
+
   if (ctf_lookup_by_rawname (fp, CTF_K_VAR, name) != 0)
     return (ctf_set_typed_errno (fp, ECTF_DUPLICATE));
 
-  /* First, create the variable.  */
+  /* First, create the variable.  Make sure its type exists.  */
 
-  if (ctf_lookup_by_id (&tmp, type) == NULL)
+  if (ctf_lookup_by_id (&tmp, type, NULL) == NULL)
     return CTF_ERR;			/* errno is set for us.  */
 
   /* Make sure this type is representable: if a variable is nonrepresentable
      there's nothing the end-user can do with it even if they know it's
      there.  */
 
-  if ((ctf_type_resolve (fp, ref) == CTF_ERR)
+  if ((ctf_type_resolve (fp, type) == CTF_ERR)
       && (ctf_errno (fp) == ECTF_NONREPRESENTABLE))
     return CTF_ERR;
 
@@ -1886,16 +1904,12 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
 				  sizeof (ctf_linkage_t), 0, NULL)) == NULL)
     return CTF_ERR;			/* errno is set for us.  */
 
-  linkage = (ctf_linkage_t *) var_dtd->dtd_vlen;
+  l = (ctf_linkage_t *) var_dtd->dtd_vlen;
   var_dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_VAR, 0, 0);
   var_dtd->dtd_data->ctt_type = type;
-  linkage->ctl_linkage = linkage;
+  l->ctl_linkage = linkage;
 
   /* Add it to the datasec.  */
-
-  kind = LCTF_KIND (fp, sec_dtd->dtd_buf);
-  kflag = LCTF_INFO_KFLAG (fp, sec_dtd->dtd_data->ctt_info);  
-  vlen = LCTF_VLEN (fp, sec_dtd->dtd_buf);
 
   /* DATASECs do not support CTF_K_BIG (yet).  */
   if (vlen == CTF_MAX_RAW_VLEN)
@@ -1931,7 +1945,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
 	 should suffice for a long time to come.  */
 
       if (offset == (unsigned long) -1 && is_incomplete)
-	off = roundup (offset, 8);
+	offset = roundup (offset, 8);
       else if (offset == (unsigned long) -1)
 	{
 	  /* Natural alignment.  */
@@ -1940,14 +1954,14 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
 
 	  if ((bit_offset = ctf_type_align_natural (fp, sec[vlen - 1].cvs_type,
 						    type, sec[vlen -1].cvs_offset)) < 0)
-	    off = roundup (offset, 8);
+	    offset = roundup (offset, 8);
 	  else
 	    offset = bit_offset / CHAR_BIT;
 	}
 
       /* This DTD may need sorting.  */
 
-      if (offset < sec[vlen - 1])
+      if (offset < sec[vlen - 1].cvs_offset)
 	sec_dtd->dtd_flags |= ~DTD_F_UNSORTED;
 
     } else if (offset == (unsigned long) -1)
@@ -1971,9 +1985,10 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
 
   sec = (ctf_var_secinfo_t *) sec_dtd->dtd_vlen;
   
-  memb[vlen].cvs_type = (uint32_t) var_dtd->dtd_type;
-  memb[vlen].cvs_offset = (uint32_t) offset;
-  memb[vlen].cvs_size = (uint32_t) size;
+  sec[vlen].cvs_type = (uint32_t) var_dtd->dtd_type;
+  sec[vlen].cvs_offset = (uint32_t) offset;
+  sec[vlen].cvs_size = (uint32_t) size;
+  sec_dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, kflag, vlen + 1);
 
   return 0;
 
@@ -2148,8 +2163,8 @@ enumadd (const char *name, int64_t value, void *arg)
 
 static int
 membcmp (ctf_dict_t *src_fp _libctf_unused_, const char *name,
-	 ctf_id_t type _libctf_unused_, unsigned long offset,
-	 int bit_width, void *arg)
+	 ctf_id_t type _libctf_unused_, size_t offset, int bit_width,
+	 void *arg)
 {
   ctf_bundle_t *ctb = arg;
   ctf_membinfo_t ctm;
@@ -2170,7 +2185,7 @@ membcmp (ctf_dict_t *src_fp _libctf_unused_, const char *name,
     {
       ctf_err_warn (ctb->ctb_dict, 1, ECTF_CONFLICT,
 		    _("conflict due to struct member %s offset change: "
-		      "%lx versus %lx"),
+		      "%zx versus %zx"),
 		    name, ctm.ctm_offset, offset);
       return 1;
     }
@@ -2306,8 +2321,6 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
   ctf_encoding_t src_en, dst_en;
   ctf_arinfo_t src_ar, dst_ar;
 
-  ctf_funcinfo_t ctc;
-
   ctf_id_t orig_src_type = src_type;
 
   if ((src_prefix = ctf_lookup_by_id (&src_fp, src_type, &src_tp)) == NULL)
@@ -2320,7 +2333,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
   name = ctf_strptr (src_fp, src_tp->ctt_name);
   kind = ctf_type_kind (src_fp, src_type);
   flag = LCTF_INFO_ISROOT (src_fp, src_prefix->ctt_info);
-  bitfields = LCTF_INFO_KFLAG (src_fp, src_tp->ctt_info);
+  bitfields = CTF_INFO_KFLAG (src_tp->ctt_info);
   vlen = LCTF_VLEN (src_fp, src_prefix);
 
   /* If this is a type we are currently in the middle of adding, hand it
@@ -2356,7 +2369,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 
   forward_kind = kind;
   if (kind == CTF_K_FORWARD)
-    forward_kind = ctf_type_kind_forwarded (src_tp, src_type);
+    forward_kind = ctf_type_kind_forwarded (src_fp, src_type);
 
   /* If the source type has a name and is a root type (visible at the top-level
      scope), look up the name in the destination dictionary and verify that it is
@@ -2541,7 +2554,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	    {
 	      ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
 			    _("conflict for type %s against ID %lx: array info "
-			      "differs, old %lx/%lx/%x; new: %lx/%lx/%x"),
+			      "differs, old %lx/%lx/%zx; new: %lx/%lx/%zx"),
 			    name, dst_type, src_ar.ctr_contents,
 			    src_ar.ctr_index, src_ar.ctr_nelems,
 			    dst_ar.ctr_contents, dst_ar.ctr_index,

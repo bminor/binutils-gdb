@@ -255,6 +255,7 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.") \
   _CTF_ITEM (ECTF_BADCOMPONENT, "Declaration tag component_idx is invalid.") \
   _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
+  _CTF_ITEM (ECTF_DESCENDING, "Structure offsets may not descend.") \
   _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
   _CTF_ITEM (ECTF_LINKKIND, "Only functions and variables have linkage.") \
   _CTF_ITEM (ECTF_NEVERTAG, "Cannot call this function with a tag kind.") \
@@ -314,10 +315,10 @@ _CTF_ERRORS
    family of iteration functions that do not require callbacks.  */
 
 typedef int ctf_visit_f (ctf_dict_t *, const char *name, ctf_id_t type,
-			 unsigned long offset, int bit_width, int depth,
+			 size_t offset, int bit_width, int depth,
 			 void *arg);
 typedef int ctf_member_f (ctf_dict_t *, const char *name, ctf_id_t membtype,
-			  unsigned long offset, int bit_width, void *arg);
+			  size_t offset, int bit_width, void *arg);
 typedef int ctf_enum_f (const char *name, int64_t val, void *arg);
 typedef int ctf_unsigned_enum_f (const char *name, uint64_t val, void *arg);
 typedef int ctf_variable_f (ctf_dict_t *, const char *name, ctf_id_t type,
@@ -1022,7 +1023,8 @@ extern int ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
                                     unsigned long bit_offset,
                                     int bit_width);
 
-extern int ctf_add_variable (ctf_dict_t *, const char *, ctf_id_t);
+extern ctf_id_t ctf_add_variable (ctf_dict_t *, const char *, int linkage,
+				  ctf_id_t);
 extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, uint32_t,
 					  const char *datasec, const char *name,
 					  int linkage, ctf_id_t type,

@@ -252,7 +252,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   if (i->u.ctn_dtd)
     i->u.ctn_tp = dtd->dtd_buf;
 
-  if ((prefix = ctf_find_prefix (fp, i->u.ctn_tp, CTF_K_BIG)) == NULL)
+  if ((prefix = ctf_find_prefix (i->u.ctn_tp, CTF_K_BIG)) == NULL)
     prefix = i->u.ctn_tp;
 
   /* When we hit an unnamed struct/union member, we set ctn_type to indicate
@@ -1118,7 +1118,7 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 		    goto err;
 		  }
 
-		if ((argv = calloc (fi.ctc_argc, sizeof (const char *))) == NULL)
+		if ((arg_names = calloc (fi.ctc_argc, sizeof (const char *))) == NULL)
 		  {
 		    ctf_set_errno (rfp, errno);
 		    goto err;
@@ -1395,7 +1395,7 @@ ctf_type_size (ctf_dict_t *fp, ctf_id_t type)
 
 ssize_t
 ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
-			ctf_type_t type, ssize_t bit_offset)
+			ctf_id_t type, ssize_t bit_offset)
 {
   ctf_encoding_t info;
   ssize_t size;

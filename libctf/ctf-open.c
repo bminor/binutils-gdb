@@ -706,9 +706,10 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
     return ENOMEM;
 
   if ((fp->ctf_tags
-       = ctf_dynhash_create_sized (pop[CTF_K_DECL_TAG], ctf_hash_string,
-				   ctf_hash_eq_string,
-				   NULL, ctf_dynset_destroy, NULL)) == NULL)
+       = ctf_dynhash_create_sized (pop[CTF_K_DECL_TAG] + pop [CTF_K_TYPE_TAG],
+				   ctf_hash_string, ctf_hash_eq_string,
+				   NULL, (ctf_hash_free_fun) ctf_dynset_destroy,
+				   NULL)) == NULL)
     return ENOMEM;
 
   if ((fp->ctf_names

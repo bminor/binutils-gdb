@@ -819,7 +819,7 @@ extern int ctf_type_kind_unsliced_tp (ctf_dict_t *, ctf_type_t *);
 extern int ctf_type_kind_tp (ctf_dict_t *, ctf_type_t *);
 extern int ctf_type_kind_forwarded_tp (ctf_dict_t *, ctf_type_t *);
 extern ssize_t ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
-				       ctf_type_t type, ssize_t bit_offset);
+				       ctf_id_t type, ssize_t bit_offset);
 extern ctf_var_secinfo_t *ctf_datasec_entry (ctf_dict_t *, ctf_id_t,
 					     int component_idx);
 extern void ctf_datasec_sort (ctf_dict_t *, ctf_dtdef_t *);

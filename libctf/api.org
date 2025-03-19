@@ -80,7 +80,8 @@ ctf_id_t ctf_tag_next (ctf_dict_t *, const char *tag, ctf_next_t **);
 ctf_visit_f, ctf_member_f, ctf_variable_f, ctf_type_f, ctf_type_all_f, gain a
 ctf_dict_t arg
 
-ctf_member_f, ctf_visit_f gain int bit_width arg
+ctf_member_f, ctf_visit_f gain int bit_width arg, and their offset arg becomes a
+size_t
 
 ctf_enum_f val arg becomes int -> int64_t
 
@@ -92,6 +93,8 @@ size_t.
 * Functions
 
 ctf_add_function gains arg_names arg
+ctf_add_variable gains linkage arg, returns ctf_id_t like other type-addition
+functions (error return checking changes to == CTF_ERR)
 
 ctf_add_enumerator, ctf_enum_name ctf_enum_value int val -> int64 val
 ctf_enum_iter return value int -> int64
@@ -120,6 +123,7 @@ implemented, prototype only)
 
   _CTF_ITEM (ECTF_BADCOMPONENT, "Declaration tag component_idx is invalid.") \
   _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
+  _CTF_ITEM (ECTF_DESCENDING, "Structure offsets may not descend.") \
   _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
   _CTF_ITEM (ECTF_LINKKIND, "Only functions and variables have linkage.") \
   _CTF_ITEM (ECTF_NEVERTAG, "Cannot call this function with a tag kind.") \

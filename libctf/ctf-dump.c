@@ -144,7 +144,8 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       /* Report encodings of everything with an encoding other than enums:
 	 base-type enums cannot have a nonzero cte_offset or cte_bits value.
 	 (Slices of them can, but they are of kind CTF_K_SLICE.)  */
-      if (unsliced_kind != CTF_K_ENUM && ctf_type_encoding (fp, id, &ep) == 0)
+      if (unsliced_kind != CTF_K_ENUM && unsliced_kind != CTF_K_ENUM64
+	  && ctf_type_encoding (fp, id, &ep) == 0)
 	{
 	  if ((ssize_t) ep.cte_bits != ctf_type_size (fp, id) * CHAR_BIT
 	      && flag & CTF_FT_BITFIELD)
@@ -180,7 +181,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	}
 
       size = ctf_type_size (fp, id);
-      if (kind != CTF_K_FUNCTION && size >= 0)
+      if (kind != CTF_K_FUNCTION && kind != CTF_K_FUNC_LINKAGE && size >= 0)
 	{
 	  if (asprintf (&bit, " (size 0x%lx)", (unsigned long int) size) < 0)
 	    goto oom;
@@ -203,7 +204,17 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	}
 
       if (nonroot_trailer[0] != 0)
-	str = str_append (str, nonroot_trailer);
+	{
+	  const char *conflicting_cu;
+	  if (ctf_type_conflicting (fp, id, &conflicting_cu) < 0)
+	    goto oom;
+	  if (conflicting_cu[0] != 0)
+	    {
+	      str = str_append (str, ": conflicting in ");
+	      str = str_append (str, conflicting_cu);
+	    }
+	  str = str_append (str, nonroot_trailer);
+	}
 
       /* Just exit after one iteration if we are not showing the types this type
 	 references.  */
@@ -344,7 +355,7 @@ ctf_dump_v3_header (ctf_dict_t *fp, ctf_dump_state_t *state)
   ctf_dump_append (fp, state, str);
 
   if (hp->cth_preamble.ctp_version < CTF_VERSION_4)
-    verstr = vertab[hp->cth_preammble.ctp_version];
+    verstr = vertab[hp->cth_preamble.ctp_version];
 
   if (verstr == NULL)
     verstr = "(not a valid version)";
@@ -624,14 +635,14 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
 
 /* Dump all DATASECs with associated vars.  */
 static int
-ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *state)
+ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *arg)
 {
   ctf_dump_state_t *state = arg;
-  char *str;
+  char *str = NULL;
   ctf_id_t type;
   ctf_next_t *next = NULL;
 
-  while ((type = ctf_type_kind_next (fp, &next, CTF_K_DATASEC)) != NULL)
+  while ((type = ctf_type_kind_next (fp, &next, CTF_K_DATASEC)) != CTF_ERR)
     {
       /* Dump DATASEC name.  */
       if (asprintf (&str, "Section %s:", ctf_type_aname (fp, type)) < 0)
@@ -642,19 +653,24 @@ ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *state)
       if (ctf_datasec_var_iter (fp, type, ctf_dump_var, state) < 0)
         goto err;
     }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    {
+      ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot visit datasecs\n"));
+      goto err;
+    }
 
   return 0;
 
  err:
   free (str);
-  free (next);
+  ctf_next_destroy (next);
   return -1;
 }
 
 /* Dump a single struct/union member into the string in the membstate.  */
 static int
 ctf_dump_member (ctf_dict_t *fp, const char *name, ctf_id_t id,
-		 unsigned long offset, int depth, void *arg)
+		 unsigned long offset, int bit_width, int depth, void *arg)
 {
   ctf_dump_membstate_t *state = arg;
   char *typestr = NULL;
@@ -673,12 +689,26 @@ ctf_dump_member (ctf_dict_t *fp, const char *name, ctf_id_t id,
 				       | CTF_FT_ID)) == NULL)
     return -1;				/* errno is set for us.  */
 
-  if (asprintf (&bit, "[0x%lx] %s: %s\n", offset, name, typestr) < 0)
+  if (asprintf (&bit, "[0x%lx] %s:", offset, name) < 0)
     goto oom;
-
   *state->cdm_str = str_append (*state->cdm_str, bit);
+  free (bit);
+
+  if (bit_width > 0)
+    {
+      if (asprintf (&bit, "%i:", bit_width) < 0)
+	goto oom;
+      *state->cdm_str = str_append (*state->cdm_str, bit);
+      free (bit);
+    }
+
+  if (asprintf (&bit, " %s\n", typestr) < 0)
+    goto oom;
+  *state->cdm_str = str_append (*state->cdm_str, bit);
+
   free (typestr);
   free (bit);
+
   typestr = NULL;
   bit = NULL;
 
@@ -712,7 +742,7 @@ ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, int flag, void *arg)
   char *str;
   char *indent;
   ctf_dump_state_t *state = arg;
-  ctf_dump_membstate_t membstate = { &str, fp, NULL };
+  ctf_dump_membstate_t membstate = { &str, NULL };
 
   /* Indent neatly.  */
   if (asprintf (&indent, "    %*s", type_hex_digits (id), "") < 0)
@@ -766,9 +796,9 @@ ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, int flag, void *arg)
 	  str = str_append (str, indent);
 
 	  if (!ctf_enum_unsigned (fp, id))
-	    ret = asprintf (&bit, "%s: %lli\n", enumerand, value);
+	    ret = asprintf (&bit, "%s: %" PRIi64 "\n", enumerand, value);
 	  else
-	    ret = asprintf (&bit, "%s: %llu\n", enumerand, (uint64_t) value);
+	    ret = asprintf (&bit, "%s: %" PRIu64 "\n", enumerand, (uint64_t) value);
 
 	  if (ret < 0)
 	    {
