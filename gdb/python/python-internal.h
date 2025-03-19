@@ -22,6 +22,7 @@
 
 #include "extension.h"
 #include "extension-priv.h"
+#include "registry.h"
 
 /* These WITH_* macros are defined by the CPython API checker that
    comes with the Python plugin for GCC.  See:
@@ -1144,5 +1145,199 @@ gdbpy_type_ready (PyTypeObject *type, PyObject *mod = nullptr)
 #else
 # define PyType_Ready POISONED_PyType_Ready
 #endif
+
+/* A class to manage lifecycle of Python objects for objects that are "owned" 
+   by an objfile or a gdbarch.  It keeps track of Python objects and when
+   the "owning" object (objfile or gdbarch) is about to be freed, ensures that
+   all Python objects "owned" by that object are properly invalidated.
+
+   The actual tracking of "owned" Python objects is handled externally
+   by storage class.  Storage object is created for each owning object
+   on demand and it is deleted when owning object is about to be freed.
+
+   The storage class must provide two member types:
+     
+     * obj_type - the type of Python object whose lifecycle is managed. 
+     * val_type - the type of GDB structure the Python objects are 
+       representing.
+
+   It must also provide following methods:
+
+     void add (obj_type *obj);
+     void remove (obj_type *obj);
+
+   Memoizing storage must in addition to method above provide:
+
+     obj_type *lookup (val_type *val);
+
+   Finally it must invalidate all registered Python objects upon deletion.  */
+template <typename Storage>
+class gdbpy_registry
+{
+public:
+  using obj_type = typename Storage::obj_type;
+  using val_type = typename Storage::val_type;
+
+  /* Register Python object OBJ as being "owned" by OWNER.  When OWNER is
+     about to be freed, OBJ will be invalidated.  */
+  template <typename O>
+  void add (O *owner, obj_type *obj) const
+  {
+    get_storage (owner)->add (obj);
+  }
+
+  /* Unregister Python object OBJ.  OBJ will no longer be invalidated when
+     OWNER is about to be be freed.  */
+  template <typename O>
+  void remove (O *owner, obj_type *obj) const
+  {
+    get_storage (owner)->remove (obj);
+  }
+
+  /* Lookup pre-existing Python object for given VAL.  Return such object
+     if found, otherwise return NULL.  This method always returns new
+     reference.  */
+  template <typename O>
+  obj_type *lookup (O *owner, val_type *val) const
+  {
+    obj_type *obj = get_storage (owner)->lookup (val);
+    Py_XINCREF (obj);
+    return obj;
+  }
+
+private:
+
+  template<typename O>
+  using StorageKey = typename registry<O>::key<Storage>;
+
+  template<typename O>
+  Storage *get_storage (O *owner, const StorageKey<O> &key) const
+  {
+    Storage *r = key.get (owner);
+    if (r == nullptr)
+      {
+	r = new Storage();
+	key.set (owner, r);
+      }
+    return r;
+  }
+
+  Storage *get_storage (struct objfile* objf) const
+  {
+    return get_storage (objf, m_key_for_objf);
+  }
+
+  Storage *get_storage (struct gdbarch* arch) const
+  {
+    return get_storage (arch, m_key_for_arch);
+  }
+
+  const registry<objfile>::key<Storage> m_key_for_objf;
+  const registry<gdbarch>::key<Storage> m_key_for_arch;
+};
+
+/* Default invalidator for Python objects.  */
+template <typename P, typename V, V* P::*val_slot>
+struct gdbpy_default_invalidator
+{
+  void operator() (P *obj)
+  {
+    obj->*val_slot = nullptr;
+  }
+};
+
+/* A "storage" implementation suitable for temporary (on-demand) objects.  */
+template <typename P, 
+          typename V, 
+          V* P::*val_slot, 
+	  typename Invalidator = gdbpy_default_invalidator<P, V, val_slot>>
+class gdbpy_tracking_registry_storage
+{
+public:
+  using obj_type = P;
+  using val_type = V;
+
+  void add (obj_type *obj)
+  {
+    gdb_assert (obj != nullptr && obj->*val_slot != nullptr);
+
+    m_objects.insert (obj);    
+  }
+
+  void remove (obj_type *obj)
+  {
+    gdb_assert (obj != nullptr && obj->*val_slot != nullptr);
+    gdb_assert (m_objects.contains (obj));
+
+    m_objects.erase (obj);    
+  }
+
+  ~gdbpy_tracking_registry_storage ()
+  {
+    Invalidator invalidate;
+    gdbpy_enter enter_py;
+
+    for (auto each : m_objects)
+      invalidate (each);
+    m_objects.clear ();
+  }
+
+protected:
+  gdb::unordered_set<obj_type *> m_objects;
+};
+
+/* A "storage" implementation suitable for memoized (interned) Python objects.
+
+   Python objects are memoized (interned) temporarily, meaning that when user
+   drops all their references the Python object is deallocated and removed
+   from storage.
+   */
+template <typename P, 
+          typename V, 
+          V* P::*val_slot, 
+	  typename Invalidator = gdbpy_default_invalidator<P, V, val_slot>>
+class gdbpy_memoizing_registry_storage
+{
+public:
+  using obj_type = P;
+  using val_type = V;
+
+  void add (obj_type *obj)
+  {
+    gdb_assert (obj != nullptr && obj->*val_slot != nullptr);
+
+    m_objects[obj->*val_slot] = obj;
+  }
+
+  void remove (obj_type *obj)
+  {
+    gdb_assert (obj != nullptr && obj->*val_slot != nullptr);
+    gdb_assert (m_objects.contains (obj->*val_slot));
+
+    m_objects.erase (obj->*val_slot);
+  }
+
+  obj_type *lookup (val_type *val) const
+  {
+    auto result = m_objects.find (val);
+    if (result != m_objects.end ())
+      return result->second;
+    else
+      return nullptr;
+  }
+
+  ~gdbpy_memoizing_registry_storage ()
+  {
+    Invalidator invalidate;
+    gdbpy_enter enter_py;
+
+    for (auto each : m_objects)
+      invalidate (each.second);
+    m_objects.clear ();
+  }
+
+protected:
+  gdb::unordered_map<val_type *, obj_type *> m_objects;
+};
 
 #endif /* GDB_PYTHON_PYTHON_INTERNAL_H */
