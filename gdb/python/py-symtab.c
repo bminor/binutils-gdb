@@ -449,7 +449,7 @@ set_symtab (symtab_object *obj, struct symtab *symtab)
 {
   obj->symtab = symtab;
   obj->prev = NULL;
-  if (symtab)
+  if (symtab != nullptr)
     {
       obj->next = stpy_objfile_data_key.get (symtab->compunit ()->objfile ());
       if (obj->next)
@@ -466,6 +466,22 @@ PyObject *
 symtab_to_symtab_object (struct symtab *symtab)
 {
   symtab_object *symtab_obj;
+
+  /* Look if there's already a gdb.Symtab object for given SYMTAB
+     and if so, return it.  */
+  if (symtab != nullptr)
+    {
+      symtab_obj = stpy_objfile_data_key.get (symtab->compunit ()->objfile ());
+      while (symtab_obj != nullptr)
+	{
+	  if (symtab_obj->symtab == symtab)
+	    {
+	      Py_INCREF (symtab_obj);
+	      return (PyObject*)symtab_obj;
+	    }
+	  symtab_obj = symtab_obj->next;
+	}
+    }
 
   symtab_obj = PyObject_New (symtab_object, &symtab_object_type);
   if (symtab_obj)
