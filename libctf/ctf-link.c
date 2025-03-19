@@ -44,10 +44,10 @@
 const char *
 ctf_link_input_name (ctf_dict_t *fp)
 {
-  if (fp->ctf_parent && fp->ctf_parent->ctf_cuname)
-    return fp->ctf_parent->ctf_cuname;
-  else if (fp->ctf_cuname)
-    return fp->ctf_cuname;
+  if (fp->ctf_parent && fp->ctf_parent->ctf_cu_name)
+    return fp->ctf_parent->ctf_cu_name;
+  else if (fp->ctf_cu_name)
+    return fp->ctf_cu_name;
   else
     return "(unnamed)";
 }

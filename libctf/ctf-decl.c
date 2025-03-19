@@ -82,7 +82,7 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
   const ctf_type_t *tp, *suffix;
   ctf_arinfo_t ar;
 
-  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     {
       cd->cd_err = fp->ctf_errno;
       return;
@@ -112,12 +112,12 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
       break;
 
     case CTF_K_FUNCTION:
-      ctf_decl_push (cd, fp, tp->ctt_type);
+      ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = CTF_PREC_FUNCTION;
       break;
 
     case CTF_K_POINTER:
-      ctf_decl_push (cd, fp, tp->ctt_type);
+      ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = CTF_PREC_POINTER;
       break;
 
@@ -130,7 +130,7 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
     case CTF_K_VOLATILE:
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
-      ctf_decl_push (cd, fp, tp->ctt_type);
+      ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = cd->cd_qualp;
       is_qual++;
       break;

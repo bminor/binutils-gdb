@@ -730,7 +730,7 @@ typedef struct ctf_lmember_v2
   uint32_t ctlm_offsethi;	/* High 32 bits of member offset in bits.  */
   uint32_t ctlm_type;		/* Reference to type of member.  */
   uint32_t ctlm_offsetlo;	/* Low 32 bits of member offset in bits.  */
-} ctf_lmember_v3_t;
+} ctf_lmember_v2_t;
 
 #define	CTF_V3_LMEM_OFFSET(ctlmp) \
 	(((uint64_t)(ctlmp)->ctlm_offsethi) << 32 | (ctlmp)->ctlm_offsetlo)

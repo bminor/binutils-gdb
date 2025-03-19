@@ -380,11 +380,10 @@ ctf_lookup_by_name (ctf_dict_t *fp, const char *name)
    This function is not exported outside of the library.  */
 
 const ctf_type_t *
-ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, ctf_type_t **suffix)
+ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, const ctf_type_t **suffix)
 {
   ctf_dict_t *fp = *fpp;
   ctf_id_t idx;
-  int kind;
 
   if ((fp = ctf_get_dict (fp, type)) == NULL)
     {
@@ -393,14 +392,14 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, ctf_type_t **suffix)
     }
 
   idx = ctf_type_to_index (fp, type);
-  if (idx < 0 || (unsigned long) idx > fp->ctf_typemax)
+  if ((unsigned long) idx > fp->ctf_typemax)
     {
       ctf_set_errno (*fpp, ECTF_BADID);
       return NULL;
     }
     
   *fpp = fp;		/* Possibly the parent CTF dict.  */
-  if (i->ctn_type > fp->ctf_stypes)
+  if (idx > fp->ctf_stypes)
     {
       ctf_dtdef_t *dtd;
 
@@ -413,13 +412,13 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, ctf_type_t **suffix)
     {
       ctf_type_t *tp;
 	  
-      tp = (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]);
+      tp = (ctf_type_t *)((uintptr_t) fp->ctf_buf + fp->ctf_txlate[idx]);
       if (suffix)
 	{
 	  ctf_type_t *suff;
 
 	  suff = tp;
-	  while (LCTF_IS_PREFIXED_KIND (CTF_INFO_UNPREFIXED_KIND (fp, suff->ctt_info)))
+	  while (LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, suff->ctt_info)))
 	    suff++;
 
 	  *suffix = suff;
@@ -430,13 +429,15 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, ctf_type_t **suffix)
 
 /* Find a given prefix in some type, if any.  */
 ctf_type_t *
-ctf_find_prefix (ctf_type_t *tp, int kind)
+ctf_find_prefix (ctf_dict_t *fp, ctf_type_t *tp, int kind)
 {
-  while (LCTF_IS_PREFIXED_KIND (tp->info)
-	 && CTF_INFO_KIND (tp->info) != kind)
+  uint32_t kind_ = kind;
+
+  while (LCTF_IS_PREFIXED_KIND (tp->ctt_info)
+	 && CTF_INFO_KIND (tp->ctt_info) != kind_)
     tp++;
 
-  if (LCTF_INFO_UNPREFIXED_KIND (tp->ctt_info) != kind)
+  if (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info) != kind_)
     return NULL;
 
   return tp;
@@ -459,13 +460,13 @@ ctf_lookup_by_kind (ctf_dict_t *fp, int kind, const char *name)
   if (kind == CTF_K_TYPE_TAG || kind == CTF_K_DECL_TAG)
     return (ctf_set_typed_errno (fp, ECTF_NEVERTAG));
 
-  if ((type == ctf_dynhash_lookup_type (ctf_name_table (fp, kind),
-					name)) != CTF_ERR)
+  if ((type = ctf_dynhash_lookup_type (ctf_name_table (fp, kind),
+				       name)) != CTF_ERR)
     return type;
 
   if (fp->ctf_parent
-      && (type == ctf_dynhash_lookup_type (ctf_name_table (fp->ctf_parent, kind),
-					   name)) != CTF_ERR)
+      && (type = ctf_dynhash_lookup_type (ctf_name_table (fp->ctf_parent, kind),
+					  name)) != CTF_ERR)
     return type;
 
   return ctf_set_typed_errno (fp, ECTF_NOTYPE);
@@ -603,7 +604,6 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 	    vlen = dtd->dtd_vlen;
 	  else
 	    {
-	      unsigned char *vlen;
 	      ctf_get_ctt_size (fp, tp, NULL, &i->ctn_increment);
 	      vlen = (unsigned char *) ((uintptr_t) tp + i->ctn_increment);
 	    }

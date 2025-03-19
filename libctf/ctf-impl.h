@@ -452,8 +452,8 @@ struct ctf_dict
 				     Counts down.  Parent only.  */
   uint32_t ctf_nprovtypes;	  /* Number of provisional types (convenience).  */
   const ctf_dmodel_t *ctf_dmodel; /* Data model pointer (see above).  */
-  const char *ctf_cuname;	  /* Compilation unit name (if any).  */
-  char *ctf_dyn_cuname;		  /* Dynamically allocated name of CU.  */
+  const char *ctf_cu_name;	  /* Compilation unit name (if any).  */
+  char *ctf_dyn_cu_name;	  /* Dynamically allocated name of CU.  */
   struct ctf_dict *ctf_parent;	  /* Parent CTF dict (if any).  */
   int ctf_parent_unreffed;	  /* Parent set by ctf_import_unref?  */
   const char *ctf_parent_name;	  /* Basename of parent (if any).  */
@@ -558,7 +558,7 @@ struct ctf_next
   void (*ctn_iter_fun) (void);
   ctf_id_t ctn_type;
   size_t ctn_size;
-  size_t ctn_increment;
+  ssize_t ctn_increment;
   const ctf_type_t *ctn_tp;
   uint32_t ctn_n;
 
@@ -637,7 +637,7 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t,
 					   const ctf_type_t **suffix);
-extern ctf_type_t *ctf_find_prefix (ctf_type_t *, int kind);
+extern ctf_type_t *ctf_find_prefix (ctf_dict_t *, ctf_type_t *, int kind);
 extern ctf_id_t ctf_lookup_by_sym_or_name (ctf_dict_t *, unsigned long symidx,
 					   const char *symname, int try_parent,
 					   int is_function);
@@ -717,6 +717,7 @@ extern int ctf_dynset_insert (ctf_dynset_t *, void *);
 extern void ctf_dynset_remove (ctf_dynset_t *, const void *);
 extern size_t ctf_dynset_elements (ctf_dynset_t *);
 extern void ctf_dynset_destroy (ctf_dynset_t *);
+extern void ctf_dynset_destroy_arg (ctf_dynset_t *, void *unused);
 extern void *ctf_dynset_lookup (ctf_dynset_t *, const void *);
 extern int ctf_dynset_exists (ctf_dynset_t *, const void *key,
 			      const void **orig_key);
@@ -797,7 +798,7 @@ extern struct ctf_archive *ctf_arc_open_internal (const char *, int *);
 extern void ctf_arc_close_internal (struct ctf_archive *);
 extern const ctf_preamble_t *ctf_arc_bufpreamble (const ctf_sect_t *);
 extern void *ctf_set_open_errno (int *, int);
-extern void ctf_flip_header (ctf_header_t *);
+extern void ctf_flip_header (void *, int, int);
 extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *,
 		     int is_btf, int to_foreign);
 
@@ -815,9 +816,9 @@ extern char *ctf_str_append_noerr (char *, const char *);
 
 extern ctf_id_t ctf_type_resolve_unsliced (ctf_dict_t *, ctf_id_t);
 extern int ctf_type_kind_unsliced (ctf_dict_t *, ctf_id_t);
-extern int ctf_type_kind_unsliced_tp (ctf_dict_t *, ctf_type_t *);
-extern int ctf_type_kind_tp (ctf_dict_t *, ctf_type_t *);
-extern int ctf_type_kind_forwarded_tp (ctf_dict_t *, ctf_type_t *);
+extern int ctf_type_kind_unsliced_tp (ctf_dict_t *, const ctf_type_t *);
+extern int ctf_type_kind_tp (ctf_dict_t *, const ctf_type_t *);
+extern int ctf_type_kind_forwarded_tp (ctf_dict_t *, const ctf_type_t *);
 extern ssize_t ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
 				       ctf_id_t type, ssize_t bit_offset);
 extern ctf_var_secinfo_t *ctf_datasec_entry (ctf_dict_t *, ctf_id_t,

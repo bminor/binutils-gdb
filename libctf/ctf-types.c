@@ -252,7 +252,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   if (i->u.ctn_dtd)
     i->u.ctn_tp = dtd->dtd_buf;
 
-  if ((prefix = ctf_find_prefix (i->u.ctn_tp, CTF_K_BIG)) == NULL)
+  if ((prefix = ctf_find_prefix (fp, i->u.ctn_tp, CTF_K_BIG)) == NULL)
     prefix = i->u.ctn_tp;
 
   /* When we hit an unnamed struct/union member, we set ctn_type to indicate
@@ -615,7 +615,7 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
       if (i->ctn_type > fp->ctf_stypes)
 	tp = ctf_dtd_lookup (fp, ctf_index_to_type (fp, i->ctn_type))->dtd_data;
       else
-	tp = (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]);
+	tp = (ctf_type_t *)((uintptr_t) fp->ctf_buf + fp->ctf_txlate[i->ctn_type]);
 
       if ((!want_hidden) && (!LCTF_INFO_ISROOT (fp, tp->ctt_info)))
 	{
@@ -1128,8 +1128,8 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 					fi.ctc_argc, argv) < 0)
 		  goto err;		/* errno is set for us.  */
 
-		if (ctf_func_type_params (rfp, cdp->cd_type,
-					  fi.ctc_argc, arg_names) < 0)
+		if (ctf_func_type_arg_names (rfp, cdp->cd_type,
+					     fi.ctc_argc, arg_names) < 0)
 		  goto err;		/* errno is set for us.  */
 
 		ctf_decl_sprintf (&cd, "(*) (");
@@ -1510,7 +1510,7 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
    use and compatibility.  */
 
 int
-ctf_type_kind_unsliced_tp (ctf_dict_t *fp, ctf_type_t *tp)
+ctf_type_kind_unsliced_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 {
   const ctf_type_t *suffix = NULL;
 
@@ -1525,7 +1525,7 @@ ctf_type_kind_unsliced_tp (ctf_dict_t *fp, ctf_type_t *tp)
    Slices are considered to be of the same kind as the type sliced.  */
 
 int
-ctf_type_kind_tp (ctf_dict_t *fp, ctf_type_t *tp)
+ctf_type_kind_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 {
   int kind;
 
@@ -1549,7 +1549,7 @@ ctf_type_kind_tp (ctf_dict_t *fp, ctf_type_t *tp)
 /* Return the kind of this type pointer, except, for forwards, return the kind
    of thing this is a forward to.  */
 int
-ctf_type_kind_forwarded_tp (ctf_dict_t *fp, ctf_type_t *tp)
+ctf_type_kind_forwarded_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 {
   int kind;
   const ctf_type_t *tp;		/* The suffixed kind, if prefixed */

@@ -1555,7 +1555,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 {
   ctf_dict_t *ofp = fp;
   ctf_dict_t *tmp = fp;
-  ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, souid);
+  ctf_dtdef_t *dtd;
   ctf_type_t *prefix;
 
   ssize_t msize, ssize;
@@ -1582,6 +1582,8 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
       fp = fp->ctf_parent;
     }
 
+  dtd = ctf_dtd_lookup (fp, souid);
+
   if (souid < fp->ctf_stypes)
     return (ctf_set_errno (ofp, ECTF_RDONLY));
 
@@ -1594,7 +1596,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   if (name != NULL && name[0] == '\0')
     name = NULL;
 
-  if ((prefix = ctf_find_prefix (dtd->dtd_buf, CTF_K_BIG)) == NULL)
+  if ((prefix = ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
     return (ctf_set_errno (ofp, ECTF_CORRUPT));
 
   kind = LCTF_KIND (fp, prefix);
@@ -1664,7 +1666,8 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
     }
   else 				/* Subsequent struct member. */
     {
-      size_t bound, off;
+      size_t bound;
+      ssize_t off;
 
       if (bit_offset == (unsigned long) - 1)
 	{
@@ -1731,7 +1734,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
       /* Hunt down the prefix and member list again: they may have been moved by
 	 the realloc()s involved in field additions.  */
 
-      if ((prefix = ctf_find_prefix (dtd->dtd_buf, CTF_K_BIG)) == NULL)
+      if ((prefix = ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
 	return (ctf_set_errno (ofp, ECTF_CORRUPT));
 
       vlen = LCTF_VLEN (fp, prefix);
@@ -2671,7 +2674,8 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	    break;
 	  }
 
-	dst_type = ctf_add_struct_sized (dst_fp, flag | (kflag ? CTF_ADD_STRUCT_BITFIELDS),
+	dst_type = ctf_add_struct_sized (dst_fp, flag
+					 | (bitfields ? CTF_ADD_STRUCT_BITFIELDS : 0),
 					 name, ctf_type_size (src_fp, src_type));
 	if (dst_type == CTF_ERR)
 	  return CTF_ERR;			/* errno is set for us.  */
