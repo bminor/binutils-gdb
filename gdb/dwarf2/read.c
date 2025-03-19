@@ -2833,6 +2833,14 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
   this->init_cu_die_reader (cu, section, dwo_unit->dwo_file,
 			    m_dwo_abbrev_table.get ());
 
+  /* Skip dummy compilation units.  */
+  if (m_info_ptr >= begin_info_ptr + dwo_unit->length
+      || peek_abbrev_code (abfd, m_info_ptr) == 0)
+    {
+      m_dummy_p = true;
+      return;
+    }
+
   /* Read in the die, filling in the attributes from the stub.  This
      has the benefit of simplifying the rest of the code - all the
      work to maintain the illusion of a single
@@ -2840,11 +2848,6 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
   m_top_level_die
     = this->read_toplevel_die (gdb::make_array_view (attributes,
 						     next_attr_idx));
-
-  /* Skip dummy compilation units.  */
-  if (m_info_ptr >= begin_info_ptr + dwo_unit->length
-      || peek_abbrev_code (abfd, m_info_ptr) == 0)
-    m_dummy_p = true;
 }
 
 /* Return the signature of the compile unit, if found. In DWARF 4 and before,
