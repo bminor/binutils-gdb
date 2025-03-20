@@ -7326,7 +7326,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
   unsigned int *array = NULL;
   const char *suffix = strrchr (section->name, '.');
   bool is_dwo = false;
-  int is_loclists = strstr (section->name, "debug_loclists") != NULL;
+  bool is_loclists = strstr (section->name, "debug_loclists") != NULL;
   uint64_t next_header_offset = 0;
 
   if (suffix && strcmp (suffix, ".dwo") == 0)
@@ -7454,6 +7454,16 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	uint32_t offset_count;
 	
 
+      /* .debug_loclists section is loaded into debug_information as
+	 DWARF-5 debug info and .debug_loc section is loaded into
+	 debug_information as pre-DWARF-5 debug info.  When dumping
+	 .debug_loc section, we should only process pre-DWARF-5 debug
+	 info in debug_information.  When dumping .debug_loclists
+	 section, we should only process DWARF-5 info in
+	 debug_information.  */
+      if ((debug_info_p->dwarf_version >= 5) != is_loclists)
+	continue;
+
       if (!locs_sorted)
 	{
 	  for (k = 0; k < debug_info_p->num_loc_offsets; k++)
@@ -7466,7 +7476,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
 
       /* .debug_loclists has a per-unit header.
 	 Update start if we are detecting it.  */
-      if (debug_info_p->dwarf_version == 5)
+      if (debug_info_p->dwarf_version >= 5)
 	{
 	  j = locs_sorted ? 0 : array [0];
 
