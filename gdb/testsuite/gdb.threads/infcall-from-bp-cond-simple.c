@@ -43,6 +43,7 @@ function_that_segfaults ()
 {
   int *p = 0;
   *p = 1;	/* Segfault happens here.   */
+  return 0;
 }
 
 int
@@ -55,6 +56,7 @@ void *
 worker_func (void *arg)
 {
   int a = 42;	/* Breakpoint here.  */
+  return NULL;
 }
 
 void
