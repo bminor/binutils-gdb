@@ -22,6 +22,7 @@
 
 #include "complaints.h"
 #include "dwarf2/attribute.h"
+#include "gdbsupport/next-iterator.h"
 
 /* This data structure holds a complete die structure.  */
 struct die_info
@@ -101,6 +102,13 @@ struct die_info
 	}
 
     return 0;
+  }
+
+  /* Return a range suitable for iterating over the children of this
+     DIE.  */
+  next_range<die_info> children () const
+  {
+    return next_range<die_info> (child);
   }
 
   /* DWARF-2 tag for this DIE.  */
