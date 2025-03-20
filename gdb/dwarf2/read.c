@@ -622,15 +622,21 @@ struct variant_field
   /* A variant can contain other variant parts.  */
   std::vector<variant_part_builder> variant_parts;
 
-  /* If we see a DW_TAG_variant, then this will be set if this is the
-     default branch.  */
-  bool default_branch = false;
   /* If we see a DW_AT_discr_value, then this will be the discriminant
-     value.  */
-  ULONGEST discriminant_value = 0;
+     value.  Just the attribute is stored here, because we have to
+     defer deciding whether the value is signed or unsigned until the
+     end.  */
+  const attribute *discriminant_attr = nullptr;
   /* If we see a DW_AT_discr_list, then this is a pointer to the list
      data.  */
   struct dwarf_block *discr_list_data = nullptr;
+
+  /* If both DW_AT_discr_value and DW_AT_discr_list are absent, then
+     this is the default branch.  */
+  bool is_default () const
+  {
+    return discriminant_attr == nullptr && discr_list_data == nullptr;
+  }
 };
 
 /* This represents a DW_TAG_variant_part.  */
@@ -10269,13 +10275,19 @@ convert_variant_range (struct obstack *obstack, const variant_field &variant,
 {
   std::vector<discriminant_range> ranges;
 
-  if (variant.default_branch)
+  if (variant.is_default ())
     return {};
 
   if (variant.discr_list_data == nullptr)
     {
-      discriminant_range r
-	= {variant.discriminant_value, variant.discriminant_value};
+      ULONGEST value;
+
+      if (is_unsigned)
+	value = variant.discriminant_attr->unsigned_constant ().value_or (0);
+      else
+	value = variant.discriminant_attr->signed_constant ().value_or (0);
+
+      discriminant_range r = { value, value };
       ranges.push_back (r);
     }
   else
@@ -11234,12 +11246,14 @@ handle_variant (struct die_info *die, struct type *type,
     {
       discr = dwarf2_attr (die, DW_AT_discr_list, cu);
       if (discr == nullptr || discr->as_block ()->size == 0)
-	variant.default_branch = true;
+	{
+	  /* Nothing to do here -- default branch.  */
+	}
       else
 	variant.discr_list_data = discr->as_block ();
     }
   else
-    variant.discriminant_value = discr->constant_value (0);
+    variant.discriminant_attr = discr;
 
   for (die_info *variant_child : die->children ())
     handle_struct_member_die (variant_child, type, fi, template_args, cu);
