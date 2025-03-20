@@ -11579,25 +11579,30 @@ die_byte_order (die_info *die, dwarf2_cu *cu, enum bfd_endian *byte_order)
 
 /* Assuming DIE is an enumeration type, and TYPE is its associated
    type, update TYPE using some information only available in DIE's
-   children.  In particular, the fields are computed.  */
+   children.  In particular, the fields are computed.  If IS_UNSIGNED
+   is set, the enumeration type's sign is already known (a true value
+   means unsigned), and so examining the constants to determine the
+   sign isn't needed; when this is unset, the enumerator constants are
+   read as signed values.  */
 
 static void
 update_enumeration_type_from_children (struct die_info *die,
 				       struct type *type,
-				       struct dwarf2_cu *cu)
+				       struct dwarf2_cu *cu,
+				       std::optional<bool> is_unsigned)
 {
-  bool unsigned_enum = true;
+  /* This is used to check whether the enum is signed or unsigned; for
+     simplicity, it is always correct regardless of whether
+     IS_UNSIGNED is set.  */
+  bool unsigned_enum = is_unsigned.value_or (true);
   bool flag_enum = true;
 
-  auto_obstack obstack;
   std::vector<struct field> fields;
 
   for (die_info *child_die : die->children ())
     {
       struct attribute *attr;
       LONGEST value;
-      const gdb_byte *bytes;
-      struct dwarf2_locexpr_baton *baton;
       const char *name;
 
       if (child_die->tag != DW_TAG_enumerator)
@@ -11611,18 +11616,25 @@ update_enumeration_type_from_children (struct die_info *die,
       if (name == NULL)
 	name = "<anonymous enumerator>";
 
-      dwarf2_const_value_attr (attr, type, name, &obstack, cu,
-			       &value, &bytes, &baton);
-      if (value < 0)
-	{
-	  unsigned_enum = false;
-	  flag_enum = false;
-	}
+      /* Can't check UNSIGNED_ENUM here because that is
+	 optimistic.  */
+      if (is_unsigned.has_value () && *is_unsigned)
+	value = attr->unsigned_constant ().value_or (0);
       else
 	{
-	  if (count_one_bits_ll (value) >= 2)
-	    flag_enum = false;
+	  /* Read as signed, either because we don't know the sign or
+	     because we know it is definitely signed.  */
+	  value = attr->signed_constant ().value_or (0);
+
+	  if (value < 0)
+	    {
+	      unsigned_enum = false;
+	      flag_enum = false;
+	    }
 	}
+
+      if (flag_enum && count_one_bits_ll (value) >= 2)
+	flag_enum = false;
 
       struct field &field = fields.emplace_back ();
       field.set_name (dwarf2_physname (name, child_die, cu));
@@ -11634,11 +11646,8 @@ update_enumeration_type_from_children (struct die_info *die,
   else
     flag_enum = false;
 
-  if (unsigned_enum)
-    type->set_is_unsigned (true);
-
-  if (flag_enum)
-    type->set_is_flag_enum (true);
+  type->set_is_unsigned (unsigned_enum);
+  type->set_is_flag_enum (flag_enum);
 }
 
 /* Given a DW_AT_enumeration_type die, set its type.  We do not
@@ -11696,6 +11705,11 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   if (die_is_declaration (die, cu))
     type->set_is_stub (true);
 
+  /* If the underlying type is known, and is unsigned, then we'll
+     assume the enumerator constants are unsigned.  Otherwise we have
+     to assume they are signed.  */
+  std::optional<bool> is_unsigned;
+
   /* If this type has an underlying type that is not a stub, then we
      may use its attributes.  We always use the "unsigned" attribute
      in this situation, because ordinarily we guess whether the type
@@ -11708,7 +11722,8 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
       struct type *underlying_type = type->target_type ();
       underlying_type = check_typedef (underlying_type);
 
-      type->set_is_unsigned (underlying_type->is_unsigned ());
+      is_unsigned = underlying_type->is_unsigned ();
+      type->set_is_unsigned (*is_unsigned);
 
       if (type->length () == 0)
 	type->set_length (underlying_type->length ());
@@ -11728,7 +11743,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
      Note that, as usual, this must come after set_die_type to avoid
      infinite recursion when trying to compute the names of the
      enumerators.  */
-  update_enumeration_type_from_children (die, type, cu);
+  update_enumeration_type_from_children (die, type, cu, is_unsigned);
 
   return type;
 }
