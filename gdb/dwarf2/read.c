@@ -11586,8 +11586,8 @@ update_enumeration_type_from_children (struct die_info *die,
 				       struct type *type,
 				       struct dwarf2_cu *cu)
 {
-  int unsigned_enum = 1;
-  int flag_enum = 1;
+  bool unsigned_enum = true;
+  bool flag_enum = true;
 
   auto_obstack obstack;
   std::vector<struct field> fields;
@@ -11615,13 +11615,13 @@ update_enumeration_type_from_children (struct die_info *die,
 			       &value, &bytes, &baton);
       if (value < 0)
 	{
-	  unsigned_enum = 0;
-	  flag_enum = 0;
+	  unsigned_enum = false;
+	  flag_enum = false;
 	}
       else
 	{
 	  if (count_one_bits_ll (value) >= 2)
-	    flag_enum = 0;
+	    flag_enum = false;
 	}
 
       struct field &field = fields.emplace_back ();
@@ -11632,7 +11632,7 @@ update_enumeration_type_from_children (struct die_info *die,
   if (!fields.empty ())
     type->copy_fields (fields);
   else
-    flag_enum = 0;
+    flag_enum = false;
 
   if (unsigned_enum)
     type->set_is_unsigned (true);
