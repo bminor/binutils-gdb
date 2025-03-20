@@ -326,5 +326,8 @@ attribute::as_boolean () const
     return true;
   else if (form == DW_FORM_flag)
     return u.unsnd != 0;
-  return constant_value (0) != 0;
+  /* Using signed_constant here will work even for the weird case
+     where a negative value is provided.  Probably doesn't matter but
+     also seems harmless.  */
+  return signed_constant ().value_or (0) != 0;
 }
