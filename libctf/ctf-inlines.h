@@ -47,7 +47,7 @@ ctf_forwardable_kind (int kind)
 }
 
 static inline int
-ctf_dynhash_cnext_sorted (ctf_dynhash_t *h, ctf_next_t **i, const void **key,
+ctf_dynhash_cnext_sorted (const ctf_dynhash_t *h, ctf_next_t **i, const void **key,
 			  const void **value, ctf_hash_sort_f sort_fun,
 			  void *sort_arg)
 {
@@ -56,7 +56,7 @@ ctf_dynhash_cnext_sorted (ctf_dynhash_t *h, ctf_next_t **i, const void **key,
 }
 
 static inline int
-ctf_dynhash_cnext (ctf_dynhash_t *h, ctf_next_t **it,
+ctf_dynhash_cnext (const ctf_dynhash_t *h, ctf_next_t **it,
 		  const void **key, const void **value)
 {
   return ctf_dynhash_next (h, it, (void **) key, (void **) value);
@@ -69,7 +69,7 @@ ctf_dynhash_cinsert (ctf_dynhash_t *h, const void *k, const void *v)
 }
 
 static inline int
-ctf_dynset_cnext (ctf_dynset_t *h, ctf_next_t **it, const void **key)
+ctf_dynset_cnext (const ctf_dynset_t *h, ctf_next_t **it, const void **key)
 {
   return ctf_dynset_next (h, it, (void **) key);
 }

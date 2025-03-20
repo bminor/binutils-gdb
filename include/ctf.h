@@ -285,7 +285,7 @@ typedef struct ctf_header
 #define CTF_F_MAX_3 (CTF_F_COMPRESS | CTF_F_NEWFUNCINFO | CTF_F_IDXSORTED	\
 		     | CTF_F_DYNSTR)
 
-#define CTF_MAX (CTF_F_COMPRESS | CTF_F_IDXSORTED);
+#define CTF_F_MAX (CTF_F_COMPRESS | CTF_F_IDXSORTED)
 
   /* CTFv3 and below: variable entries.  */
 typedef struct ctf_varent_v3
@@ -621,11 +621,11 @@ union
    the following macros.  (However, you can also encode the offset and bitness
    in a slice.)  */
 
-#define CTF_V3_FP_ENCODING(data)  (((data) & 0xff000000) >> 24)
-#define CTF_V3_FP_OFFSET(data)    (((data) & 0x00ff0000) >> 16)
-#define CTF_V3_FP_BITS(data)      (((data) & 0x0000ffff))
+#define CTF_FP_ENCODING(data)  (((data) & 0xff000000) >> 24)
+#define CTF_FP_OFFSET(data)    (((data) & 0x00ff0000) >> 16)
+#define CTF_FP_BITS(data)      (((data) & 0x0000ffff))
 
-#define CTF_V3_FP_DATA(encoding, offset, bits) \
+#define CTF_FP_DATA(encoding, offset, bits) \
        (((encoding) << 24) | ((offset) << 16) | (bits))
 
 /* Variant data when kind is CTF_K_FLOAT is an encoding in the top eight bits.
@@ -753,7 +753,7 @@ typedef struct ctf_member
 
 #define CTF_MAX_BIT_OFFSET 0xffffff
 #define CTF_MEMBER_BIT_SIZE(val) ((val) >> 24)
-#define CTF_MEMBER_BIT_OFFSET(val) ((val) & CTF_MAX_BIT_OFFSET);
+#define CTF_MEMBER_BIT_OFFSET(val) ((val) & CTF_MAX_BIT_OFFSET)
 #define CTF_MEMBER_MAKE_BIT_OFFSET(size, offset) ((size) << 24 | offset)
 
 /* Data sections, aligned with btf_var_secinfo.
@@ -829,8 +829,10 @@ typedef struct ctf_enum64
    This is *not* the same as the data structure returned by the ctf_arc_*()
    functions:  this is the low-level on-disk representation.  */
 
+/* UPTODO: new native-endianness archive format */
+#if 0
 #define CTFA_MAGIC 0x8b47f2a4d7623eec		/* Incremented. */
-struct ctf_archive
+typedef struct ctf_archive
 {
   /* Magic number.  (In loaded files, overwritten with the file size
      so ctf_arc_close() knows how much to munmap()).  */
@@ -854,11 +856,11 @@ struct ctf_archive
   /* Offset of the CTF table.  Each element starts with a size (a little-
      endian uint64_t) then a ctf_dict_t of that size.  */
   uint64_t ctfa_ctfs;
-};
+} ctf_archive_t;
+#endif
+#define CTFA_MAGIC 0x8b47f2a4d7623eeb	/* Random.  */
 
-#define CTFA_MAGIC_V1 0x8b47f2a4d7623eeb	/* Random.  */
-
-struct ctf_archive_v1
+typedef struct ctf_archive
 {
   /* Magic number.  (In loaded files, overwritten with the file size
      so ctf_arc_close() knows how much to munmap()).  */

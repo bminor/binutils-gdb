@@ -141,7 +141,7 @@ ctf_index_to_type (const ctf_dict_t *fp, uint32_t idx)
 /* Figure out the vlen and optionally vlen length for some type.  */
 
 static unsigned char *
-ctf_vlen (ctf_dict_t *fp, ctf_id_t type, ctf_type_t *tp, size_t *vlen_len)
+ctf_vlen (ctf_dict_t *fp, ctf_id_t type, const ctf_type_t *tp, size_t *vlen_len)
 {
   ctf_dtdef_t *dtd;
 
@@ -170,13 +170,15 @@ ctf_member_iter (ctf_dict_t *fp, ctf_id_t type, ctf_member_f *func, void *arg)
 {
   ctf_next_t *i = NULL;
   ssize_t offset;
+  int bit_width;
   const char *name;
   ctf_id_t membtype;
 
-  while ((offset = ctf_member_next (fp, type, &i, &name, &membtype, 0)) >= 0)
+  while ((offset = ctf_member_next (fp, type, &i, &name, &membtype,
+				    &bit_width, 0)) >= 0)
     {
       int rc;
-      if ((rc = func (fp, name, membtype, offset, arg)) != 0)
+      if ((rc = func (fp, name, membtype, offset, bit_width, arg)) != 0)
 	{
 	  ctf_next_destroy (i);
 	  return rc;
@@ -203,14 +205,15 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   size_t nmemb;
   unsigned char *vlen;
   ctf_next_t *i = *it;
-  ctf_type_t *prefix;
+  const ctf_type_t *prefix;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   if (!i)
     {
-      ctf_type_t *tp;
+      const ctf_type_t *tp;
+
       if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
 	return -1;			/* errno is set for us.  */
 
@@ -250,10 +253,10 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
      can move it, and hunt down any CTF_K_BIG prefix.  */
 
   if (i->u.ctn_dtd)
-    i->u.ctn_tp = dtd->dtd_buf;
+    i->ctn_tp = i->u.ctn_dtd->dtd_buf;
 
-  if ((prefix = ctf_find_prefix (fp, i->u.ctn_tp, CTF_K_BIG)) == NULL)
-    prefix = i->u.ctn_tp;
+  if ((prefix = ctf_find_prefix (fp, i->ctn_tp, CTF_K_BIG)) == NULL)
+    prefix = i->ctn_tp;
 
   /* When we hit an unnamed struct/union member, we set ctn_type to indicate
      that we are inside one, then return the unnamed member: on the next call,
@@ -265,7 +268,6 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
     {
       ctf_member_t *memb = (ctf_member_t *) vlen;
       const char *membname;
-      size_t offset;
 
       if (i->ctn_n >= nmemb)
 	goto end_iter;
@@ -299,12 +301,10 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       /* CTF_K_BIG offsets are gap sizes: convert to offset-from-start.
 	 Keep track of the offset-so-far in ctn_size.  */
 
-      if (prefix != i->u.ctn_tp)
+      if (prefix != i->ctn_tp)
 	{
-	  if (width)
-	    *width = offset + i->ctn_size;
 	  i->ctn_size += offset;
-	  offset += i->ctn_size;
+	  offset = i->ctn_size;
 	}
 
       if (membname[0] == 0
@@ -326,7 +326,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   else
     {
       ssize_t ret = ctf_member_next (fp, i->ctn_type, &i->ctn_next, name,
-				     membtype, flags, width);
+				     membtype, bit_width, flags);
 
       if (ret >= 0)
 	return ret + i->ctn_increment;
@@ -359,12 +359,12 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 /* Iterate over the members of an ENUM.  We pass the string name and associated
    integer value of each enum element to the specified callback function.  */
 
-int
+int64_t
 ctf_enum_iter (ctf_dict_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
 {
   ctf_next_t *i = NULL;
   const char *name;
-  int val;
+  int64_t val;
 
   while ((name = ctf_enum_next (fp, type, &i, &val)) != NULL)
     {
@@ -403,7 +403,6 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   if (!i)
     {
       const ctf_type_t *tp;
-      ctf_dtdef_t *dtd;
       unsigned char *en;
 
       if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
@@ -563,10 +562,10 @@ ctf_type_kind_iter (ctf_dict_t *fp, int kind, ctf_type_kind_f *func, void *arg)
   ctf_next_t *i = NULL;
   ctf_id_t type;
 
-  while ((type = ctf_type_kind_next (fp, &i, kind, arg)) != CTF_ERR)
+  while ((type = ctf_type_kind_next (fp, &i, kind)) != CTF_ERR)
     {
       int rc;
-      if ((rc = func (dict, type, kind, arg)) != 0)
+      if ((rc = func (fp, type, kind, arg)) != 0)
 	{
 	  ctf_next_destroy (i);
 	  return rc;
@@ -696,7 +695,7 @@ ctf_variable_iter (ctf_dict_t *fp, ctf_variable_f *func, void *arg)
   while ((type = ctf_variable_next (fp, &i, &name)) != CTF_ERR)
     {
       int rc;
-      if ((rc = func (name, type, arg)) != 0)
+      if ((rc = func (fp, name, type, arg)) != 0)
 	{
 	  ctf_next_destroy (i);
 	  return rc;
@@ -731,7 +730,7 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
 
       i->cu.ctn_fp = fp;
       i->ctn_iter_fun = (void (*) (void)) ctf_variable_next;
-      i->u.ctn_next = NULL;
+      i->ctn_next = NULL;
       *it = i;
     }
 
@@ -743,9 +742,13 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
 
   if ((id = ctf_type_kind_next (fp, &i->ctn_next, CTF_K_VAR)) == CTF_ERR)
     {
-      if (ctf_errno (fp, id) == CTF_NEXT_END)
+      if (ctf_errno (fp) == ECTF_NEXT_END)
 	ctf_next_destroy (i);
     }
+
+  if (name)
+    *name = ctf_type_name_raw (fp, id);
+
   return id;
 }
 
@@ -760,9 +763,8 @@ ctf_datasec_var_iter (ctf_dict_t *fp, ctf_id_t datasec,
   ctf_next_t *i = NULL;
   ctf_id_t type;
   size_t size, offset;
-  const char *name;
 
-  while ((type = ctf_datasec_next (fp, datasec, &i, &size, &offset)) != CTF_ERR)
+  while ((type = ctf_datasec_var_next (fp, datasec, &i, &size, &offset)) != CTF_ERR)
     {
       int rc;
       if ((rc = func (fp, type, offset, size, arg)) != 0)
@@ -789,44 +791,35 @@ ctf_datasec_var_next (ctf_dict_t *fp, ctf_id_t datasec, ctf_next_t **it,
 		      size_t *size, size_t *offset)
 {
   ctf_next_t *i = *it;
-  ctf_id_t type;
-  ctf_dtdef_t *dtd;
 
   if (!i)
     {
       const ctf_type_t *tp;
-      ctf_dtdef_t *dtd;
       unsigned char *vlen;
+      ctf_dict_t *ofp = fp;
 
-      if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
-	return NULL;			/* errno is set for us.  */
+      if ((datasec = ctf_type_resolve_unsliced (fp, datasec)) == CTF_ERR)
+	return CTF_ERR;			/* errno is set for us.  */
 
-      if (ctf_type_kind (fp, type) != CTF_K_DATASEC)
-	{
-	  ctf_next_destroy (i);
-	  ctf_set_errno (ofp, ECTF_NOTDATASEC);
-	  return NULL;
-	}
+      if (ctf_type_kind (fp, datasec) != CTF_K_DATASEC)
+	return (ctf_set_typed_errno (ofp, ECTF_NOTDATASEC));
 
-      if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
-	return NULL;			/* errno is set for us.  */
+      if ((tp = ctf_lookup_by_id (&fp, datasec, NULL)) == NULL)
+	return CTF_ERR;			/* errno is set for us.  */
 
       if ((i = ctf_next_create ()) == NULL)
-	{
-	  ctf_set_errno (ofp, ENOMEM);
-	  return NULL;
-	}
+	return (ctf_set_typed_errno (ofp, ENOMEM));
+
       i->cu.ctn_fp = ofp;
-
       i->ctn_iter_fun = (void (*) (void)) ctf_datasec_var_next;
-      vlen = ctf_vlen (fp, type, tp, &i->ctn_n);
+      vlen = ctf_vlen (fp, datasec, tp, &i->ctn_n);
 
-      i->u.ctn_datasec = (const ctf_enum_t *) en;
+      i->u.ctn_datasec = (const ctf_var_secinfo_t *) vlen;
 
       *it = i;
     }
 
-  if ((void (*) (void)) ctf_datasec_next != i->ctn_iter_fun)
+  if ((void (*) (void)) ctf_datasec_var_next != i->ctn_iter_fun)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
 
   if (fp != i->cu.ctn_fp)
@@ -835,21 +828,20 @@ ctf_datasec_var_next (ctf_dict_t *fp, ctf_id_t datasec, ctf_next_t **it,
   if (i->ctn_n == 0)
     goto end_iter;
 
-  type = i->u.ctn_datasec->cvs_type;
   if (size)
     *size = i->u.ctn_datasec->cvs_size;
   if (offset)
     *offset = i->u.ctn_datasec->cvs_offset;
 
-  i->ctn_datasec++;
+  i->u.ctn_datasec++;
   i->ctn_n--;
 
-  return type;
+  return i->u.ctn_datasec->cvs_type;
 
  end_iter:
   ctf_next_destroy (i);
   *it = NULL;
-  return ctf_set_typed_errno (fp, ECTF_NEXT_END);
+  return (ctf_set_typed_errno (fp, ECTF_NEXT_END));
 }
 
 /* Iterate over all tags with the given TAG, returning the ID of each tag.  */
@@ -858,22 +850,17 @@ ctf_id_t
 ctf_tag_next (ctf_dict_t *fp, const char *tag, ctf_next_t **it)
 {
   ctf_next_t *i = *it;
-  ctf_id_t type;
-  ctf_dtdef_t *dtd;
   int err;
-  const void *type;
+  void *type;
 
   if (!i)
     {
       if ((i = ctf_next_create ()) == NULL)
-	{
-	  ctf_set_errno (ofp, ENOMEM);
-	  return NULL;
-	}
-      i->cu.ctn_fp = ofp;
+	return (ctf_set_typed_errno (fp, ENOMEM));
+      i->cu.ctn_fp = fp;
       i->ctn_iter_fun = (void (*) (void)) ctf_tag_next;
 
-      i->cu.ctn_s = ctf_dynhash_lookup (ctf->ctf_tags, tag);
+      i->cu.ctn_s = ctf_dynhash_lookup (fp->ctf_tags, tag);
 
       *it = i;
     }
@@ -884,8 +871,8 @@ ctf_tag_next (ctf_dict_t *fp, const char *tag, ctf_next_t **it)
   if (fp != i->cu.ctn_fp)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
 
-  err = ctf_dynset_next (i->cu.ctn_s, &i->u.ctn_next, &type);
-  if (err != 0 && err != CTF_NEXT_END)
+  err = ctf_dynset_next (i->cu.ctn_s, &i->ctn_next, &type);
+  if (err != 0 && err != ECTF_NEXT_END)
     return ctf_set_typed_errno (fp, err);
 
   if (err == 0)
@@ -919,8 +906,6 @@ ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 
   while ((tp = ctf_lookup_by_id (&fp, type, NULL)) != NULL)
     {
-      ctf_dtdef_t *dtd;
-
       switch (LCTF_KIND (fp, tp))
 	{
 	case CTF_K_TYPEDEF:
@@ -958,13 +943,12 @@ ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
-  ctf_dtdef_t *dtd;
   ctf_id_t resolved_type;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return CTF_ERR;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
   resolved_type = type;
 
@@ -979,7 +963,7 @@ ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
       if ((resolved_type = ctf_type_resolve (fp, type)) == CTF_ERR)
 	return CTF_ERR;
 
-      if ((tp = ctf_lookup_by_id (&fp, resolved_type)) == NULL)
+      if ((tp = ctf_lookup_by_id (&fp, resolved_type, NULL)) == NULL)
 	return CTF_ERR;		/* errno is set for us.  */
     }
   while (LCTF_KIND (fp, tp) == CTF_K_SLICE);
@@ -1061,7 +1045,6 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	{
 	  ctf_dict_t *rfp = fp;
 	  const ctf_type_t *tp = NULL;
-	  ctf_dtdef_t *dtd;
 	  const char *name;
 
 	  ctf_lookup_by_id (&rfp, cdp->cd_type, &tp);
@@ -1094,7 +1077,10 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 		  return NULL;
 		}
 
-	      ctf_decl_sprintf (&cd, "%s", name);
+	      if (cdp->cd_kind != CTF_K_DATASEC)
+		ctf_decl_sprintf (&cd, "%s", name);
+	      else
+		ctf_decl_sprintf (&cd, "DATASEC (\"%s\")", name);
 	      break;
 	    case CTF_K_POINTER:
 	      ctf_decl_sprintf (&cd, "*");
@@ -1178,20 +1164,23 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	      ctf_decl_sprintf (&cd, "%s", name);
 	      break;
 	    /* UPTODO: decl tags... I guess we print them when we print the
-	       associated variable, somehow?  */
+	       associated variable, somehow?  For now, just this...  */
+	    case CTF_K_DECL_TAG:
+	      ctf_decl_sprintf (&cd, "btf_decl_tag (\"%s\")", name);
+	      break;
 	    case CTF_K_FUNC_LINKAGE:
 	    case CTF_K_VAR:
 	      {
-		ctf_linkage_t l;
-		if (ctf_type_linkage (fp, cdp->cd_type, &l) < 0)
+		int linkage;
+		if ((linkage = ctf_type_linkage (fp, cdp->cd_type)) < 0)
 		  {
 		    ctf_set_errno (fp, ECTF_CORRUPT);
 		    ctf_decl_fini (&cd);
 		    return NULL;
 		  }
-		
+
 		ctf_decl_sprintf (&cd, "%s%s", linkage == 0 ? "static " :
-				  (linkage == 2 ? "extern " : "") name);
+				  (linkage == 2 ? "extern " : ""), name);
 		break;
 	      }
 	    case CTF_K_FORWARD:
@@ -1223,15 +1212,6 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	      break;
 	    case CTF_K_RESTRICT:
 	      ctf_decl_sprintf (&cd, "restrict");
-	      break;
-	    case CTF_K_TYPE_TAG:
-	      ctf_decl_sprintf (&cd, "btf_type_tag (\"%s\")", name);
-	      break;
-	    case CTF_K_DECL_TAG:
-	      ctf_decl_sprintf (&cd, "btf_decl_tag (\"%s\")", name);
-	      break;
-	    case CTF_K_DATASEC:
-	      ctf_decl_sprintf (&cd, "DATASEC (\"%s\")", name);
 	      break;
 
 	    case CTF_K_UNKNOWN:
@@ -1339,7 +1319,6 @@ ctf_type_size (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
-  ctf_dtdef_t *dtd;
   ssize_t size;
   ctf_arinfo_t ar;
  
@@ -1409,8 +1388,8 @@ ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
       /* Ignore incompleteness and nonrepresentability of the type we're
 	 inserting: just assume such a type has no alignment constraints of its
 	 own.  */
-      if (ctf_errno (fp, type) == ECTF_NONREPRESENTABLE
-	  || ctf_errno (fp, type) == ECTF_INCOMPLETE)
+      if (ctf_errno (fp) == ECTF_NONREPRESENTABLE
+	  || ctf_errno (fp) == ECTF_INCOMPLETE)
 	align = 0;
       else
 	return -1;		/* errno is set for us.  */
@@ -1447,7 +1426,6 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
   ctf_dict_t *ofp = fp;
-  ctf_dtdef_t *dtd;
   int kind;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
@@ -1477,7 +1455,8 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
       {
 	size_t align = 0;
 	unsigned char *vlen;
-	uint32_t i = 0, n;
+	uint32_t i = 0;
+	size_t n;
 
 	vlen = ctf_vlen (fp, type, tp, &n);
 
@@ -1488,7 +1467,7 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 	  {
 	    ctf_member_t *memb = (ctf_member_t *) vlen;
 
-	    ssize_t am = ctf_type_align (ofp, memb[i->ctn_n].ctm_type);
+	    ssize_t am = ctf_type_align (ofp, memb[i].ctm_type);
 	    align = MAX (align, (size_t) am);
 	  }
 	return align;
@@ -1512,8 +1491,6 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 int
 ctf_type_kind_unsliced_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 {
-  const ctf_type_t *suffix = NULL;
-
   if (LCTF_KIND (fp, tp) == CTF_K_ENUM
       && LCTF_VLEN (fp, tp) == 0)
     return CTF_K_FORWARD;
@@ -1534,11 +1511,11 @@ ctf_type_kind_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 
   if (kind == CTF_K_SLICE)
     {
-      unsigned char *vlen;
       const ctf_slice_t *sp;
+      ssize_t increment;
 
-      vlen = ctf_vlen (fp, type, tp, NULL);
-      sp = (const ctf_slice_t *) vlen;
+      ctf_get_ctt_size (fp, tp, NULL, &increment);
+      sp = (const ctf_slice_t *) tp + increment;
 
       kind = ctf_type_kind_unsliced (fp, sp->cts_type);
     }
@@ -1552,21 +1529,18 @@ int
 ctf_type_kind_forwarded_tp (ctf_dict_t *fp, const ctf_type_t *tp)
 {
   int kind;
-  const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
 
-  if ((kind = ctf_type_kind (fp, type)) < 0)
+  if ((kind = ctf_type_kind_tp (fp, tp)) < 0)
     return -1;			/* errno is set for us.  */
 
+  /* Covers forwards to enums, too.  */
   if (kind != CTF_K_FORWARD)
     return kind;
-
-  if (LCTF_KIND (fp, tp) == CTF_K_ENUM)
-    return CTF_K_ENUM;
 
   while (LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info)))
     tp++;
 
-  if (LCTF_INFO_KFLAG (tp->ctt_info))
+  if (CTF_INFO_KFLAG (tp->ctt_info))
     return CTF_K_UNION;
   else
     return CTF_K_STRUCT;
@@ -1586,11 +1560,7 @@ ctf_type_kind_unsliced (ctf_dict_t *fp, ctf_id_t type)
   if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  if (LCTF_KIND (fp, tp) == CTF_K_ENUM
-      && LCTF_VLEN (fp, tp) == 0)
-    return CTF_K_FORWARD;
-
-  return (LCTF_KIND (fp, tp));
+  return (ctf_type_kind_unsliced_tp (fp, tp));
 }
 
 /* Return the kind (CTF_K_* constant) for the specified type ID.
@@ -1619,26 +1589,17 @@ ctf_type_kind (ctf_dict_t *fp, ctf_id_t type)
 int
 ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
 {
-  int kind;
+  int ret;
   ctf_dict_t *ofp = fp;
-  const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
+  const ctf_type_t *tp, *suffix;
 
-  if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  if ((kind = ctf_type_kind_tp (fp, tp)) < 0)
+  if ((ret = ctf_type_kind_forwarded_tp (fp, tp)) < 0)
     return (ctf_set_errno (ofp, ctf_errno (fp)));
 
-  if (kind != CTF_K_FORWARD)
-    return kind;
-
-  if (LCTF_KIND (fp, tp) == CTF_K_ENUM)
-    return CTF_K_ENUM;
-
-  if (LCTF_INFO_KFLAG (tp->ctt_info))
-    return CTF_K_UNION;
-  else
-    return CTF_K_STRUCT;
+  return ret;
 }
 
 /* Return nonzero if this type is conflicting, nonzero if it's not, < 0 on
@@ -1647,11 +1608,10 @@ ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
    known).  */
 
 int
-ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const char **cuname)
+ctf_type_conflicting (ctf_dict_t *fp, ctf_id_t type, const char **cuname)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
-  uint32_t kind;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
@@ -1665,8 +1625,14 @@ ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const char **cuname)
   if (!cuname)
     return 1;
 
-  while (CTF_INFO_KIND (tp->ctt_info) != CTF_K_CONFLICTING)
-    prefix++;
+  while (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info) != CTF_K_CONFLICTING
+	 && LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info)))
+    tp++;
+
+  /* We already checked that this is a non-root-visible type, so this must be
+     CTF_K_CONFLICTING.  */
+  if (!ctf_assert (ofp, LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info))))
+    return -1;					/* errno is set for us.  */
 
   *cuname = ctf_strptr (fp, tp->ctt_name);
   return 1;
@@ -1691,9 +1657,9 @@ ctf_type_reference (ctf_dict_t *fp, ctf_id_t type)
     case CTF_K_VOLATILE:
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
-    case CTF_K_FUNC:
     case CTF_K_TYPE_TAG:
     case CTF_K_DECL_TAG:
+    case CTF_K_FUNCTION:
     case CTF_K_FUNC_LINKAGE:
     case CTF_K_VAR:
       return suffix->ctt_type;
@@ -1725,7 +1691,7 @@ ctf_decl_tag (ctf_dict_t *fp, ctf_id_t decl_tag, int64_t *component_idx)
   if ((tp = ctf_lookup_by_id (&fp, decl_tag, &suffix)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  if (LCTF_KIND (fp, tp) != CTF_DECL_TAG)
+  if (LCTF_KIND (fp, tp) != CTF_K_DECL_TAG)
     return (ctf_set_typed_errno (ofp, ECTF_NOTDECLTAG));
 
   vlen = ctf_vlen (fp, decl_tag, tp, NULL);
@@ -1745,19 +1711,19 @@ ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
 {
   int kind = ctf_type_kind (fp, tag);
   int64_t component_idx;
-  int ref;
+  ctf_id_t ref;
 
-  if (kind != CTF_TYPE_TAG && kind != CTF_DECL_TAG)
+  if (kind != CTF_K_TYPE_TAG && kind != CTF_K_DECL_TAG)
     return (ctf_set_typed_errno (fp, ECTF_NOTTAG));
 
-  if (ref = ctf_type_reference (fp, tag) < 0)
-    return -1;			/* errno is set for us.  */
+  if ((ref = ctf_type_reference (fp, tag)) == CTF_ERR)
+    return CTF_ERR;		/* errno is set for us.  */
 
-  if (kind == CTF_TYPE_TAG)
+  if (kind == CTF_K_TYPE_TAG)
     return ref;
 
-  if (ctf_decl_tag (fp, decl_tag, &component_idx) == CTF_ERR)
-    return -1;			/* errno is set for us.  */
+  if (ctf_decl_tag (fp, tag, &component_idx) == CTF_ERR)
+    return CTF_ERR;		/* errno is set for us.  */
 
   if (component_idx == -1)
     return ref;
@@ -1766,24 +1732,26 @@ ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
 
   switch (ctf_type_kind (fp, ref))
     {
-      ctf_id_t type;
-      ctf_funcinfo_t fi;
-
     case CTF_K_STRUCT:
     case CTF_K_UNION:
       {
 	ctf_next_t *i = NULL;
+	int64_t j = 0;
+	ctf_id_t type;
 
-	while (ctf_member_next (fp, ref, &i, NULL, &type, NULL, 0) != CTF_ERR)
+	while (ctf_member_next (fp, ref, &i, NULL, &type, NULL, 0) >= 0)
 	  {
-	    if (i++ == component_idx)
+	    if (j++ == component_idx)
 	      {
 		ctf_next_destroy (i);
 		return type;
 	      }
 	  }
 	if (ctf_errno (fp) != ECTF_NEXT_END)
-	  return -1;		/* errno is set for us.  */
+	  {
+	    ctf_next_destroy (i);
+	    return CTF_ERR;	/* errno is set for us.  */
+	  }
       }
       break;
     case CTF_K_FUNC_LINKAGE:
@@ -1794,9 +1762,9 @@ ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
 	ctf_id_t argtype;
 
 	if (ctf_func_type_info (fp, ref, &fi) < 0)
-	  return -1;		/* errno is set for us.  */
+	  return CTF_ERR;	/* errno is set for us.  */
 
-	if (component_idx + 1 > fi.ctc_argc)
+	if (component_idx + 1 > (ssize_t) fi.ctc_argc)
 	  break;
 
 	if ((args = malloc ((component_idx + 1) * sizeof (ctf_id_t))) == NULL)
@@ -1805,7 +1773,7 @@ ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
 	if (ctf_func_type_args (fp, ref, component_idx + 1, args))
 	  {
 	    free (args);
-	    return -1;		/* errno is set for us. */
+	    return CTF_ERR;	/* errno is set for us. */
 	  }
 	argtype = args[component_idx];
 	free (args);
@@ -1813,14 +1781,14 @@ ctf_tag (ctf_dict_t *fp, ctf_id_t tag)
       }
 
     default:
-      return -1;		/* errno is set for us.  */
+      return CTF_ERR;		/* errno is set for us.  */
     }
 
-  ctf_err_warn (ofp, 0, ECTF_NOTREF, _("decl tag %lx refers to type %x, "
-				       "component %i, which does not exist"),
-		tag, ref, component_idx);
+  ctf_err_warn (fp, 0, ECTF_NOTREF, _("decl tag %lx refers to type %lx, "
+				      "component %" PRIi64 ", which does not exist"),
+		tag, (long) ref, component_idx);
 
-  return ECTF_NOTREF;
+  return (ctf_set_typed_errno (fp, ECTF_NOTREF));
 }
 
 /* Find a pointer to type by looking in fp->ctf_ptrtab and fp->ctf_pptrtab.  If
@@ -1851,7 +1819,7 @@ ctf_type_pointer (ctf_dict_t *fp, ctf_id_t type)
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 
-  if (ctf_lookup_by_id (&fp, type) == NULL)
+  if (ctf_lookup_by_id (&fp, type, NULL) == NULL)
     return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 
   idx = ctf_type_to_index (fp, type);
@@ -2096,7 +2064,9 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
 		 ctf_membinfo_t *mip)
 {
   ctf_dict_t *ofp = fp;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
+  int big = 0;
+  size_t total_offset = 0;
   unsigned char *vlen;
   uint32_t kind, i = 0;
   size_t n;
@@ -2107,7 +2077,7 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
 
-  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
 
   kind = LCTF_KIND (fp, tp);
@@ -2117,26 +2087,51 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
 
   vlen = ctf_vlen (fp, type, tp, &n);
 
+  big = (ctf_find_prefix (fp, tp, CTF_K_BIG) != NULL);
+
   for (; n != 0; n--, i++)
     {
       ctf_member_t *memb = (ctf_member_t *) vlen;
       const char *membname;
+      size_t offset;
+      int bit_width = 0;
 
-      membname = ctf_strptr (fp, memb.ctlm_name);
+      membname = ctf_strptr (fp, memb->ctm_name);
 
-      if (membname[0] == 0
-	  && (ctf_type_kind (fp, memb.ctlm_type) == CTF_K_STRUCT
-	      || ctf_type_kind (fp, memb.ctlm_type) == CTF_K_UNION)
-	  && (ctf_member_info (fp, memb.ctlm_type, name, mip) == 0))
+      if (CTF_INFO_KFLAG (suffix->ctt_info))
 	{
-	  mip->ctm_offset += (unsigned long) CTF_LMEM_OFFSET (&memb);
+	  offset = CTF_MEMBER_BIT_OFFSET (memb->ctm_offset);
+	  bit_width = CTF_MEMBER_BIT_SIZE (memb->ctm_offset);
+	}
+      else
+	offset = memb->ctm_offset; 
+
+      total_offset += offset;
+
+      /* Unnamed struct/union member.  */
+      if (membname[0] == 0
+	  && (ctf_type_kind (fp, memb->ctm_type) == CTF_K_STRUCT
+	      || ctf_type_kind (fp, memb->ctm_type) == CTF_K_UNION)
+	  && (ctf_member_info (fp, memb->ctm_type, name, mip) == 0))
+	{
+	  if (!big)
+	    mip->ctm_offset += total_offset;
+	  else
+	    mip->ctm_offset += offset;
+
 	  return 0;
 	}
 
+      /* Ordinary member.  */
       if (strcmp (membname, name) == 0)
 	{
-	  mip->ctm_type = memb.ctlm_type;
-	  mip->ctm_offset = (unsigned long) CTF_LMEM_OFFSET (&memb);
+	  mip->ctm_type = memb->ctm_type;
+	  if (big)
+	    mip->ctm_offset = total_offset + memb->ctm_offset;
+	  else
+	    mip->ctm_offset = memb->ctm_offset;
+	  mip->ctm_bit_width = bit_width;
+
 	  return 0;
 	}
     }
@@ -2237,7 +2232,6 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   unsigned char *vlen;
-  const ctf_enum_t *ep;
   int kind;
   size_t n;
 
@@ -2290,10 +2284,10 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
 
 /* Like ctf_enum_value, but returns an unsigned int64_t instead.  */
 int
-ctf_enum_unsigned_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
+ctf_enum_unsigned_value (ctf_dict_t *fp, ctf_id_t type, const char *name, uint64_t *valp)
 {
   int ret;
-  uint64_t retval;
+  int64_t retval;
 
   ret = ctf_enum_value (fp, type, name, &retval);
   *valp = (uint64_t) retval;
@@ -2311,12 +2305,12 @@ ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
     return -1;			/* errno is set for us.  */
 
   if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
-    retrn (ctf_set_errno (fp, ECTF_NOTENUM))
+    return (ctf_set_errno (fp, ECTF_NOTENUM));
 
   if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
     return -1;			/* errno is set for us.  */
 
-  return !LCTF_INFO_KFLAG (tp->ctt_info);
+  return !CTF_INFO_KFLAG (tp->ctt_info);
 }
 
 /* Return nonzero if this struct or union uses bitfield encoding.  */
@@ -2330,12 +2324,12 @@ ctf_struct_bitfield (ctf_dict_t * fp, ctf_id_t type)
     return -1;			/* errno is set for us.  */
 
   if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
-    retrn (ctf_set_errno (fp, ECTF_NOTSOU))
+    return (ctf_set_errno (fp, ECTF_NOTSOU));
 
   if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
     return -1;			/* errno is set for us.  */
 
-  return LCTF_INFO_KFLAG (tp->ctt_info);
+  return CTF_INFO_KFLAG (tp->ctt_info);
 }
 
 /* Given a type ID relating to a function type, return info on return types and
@@ -2389,7 +2383,7 @@ ctf_func_type_args (ctf_dict_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv
   unsigned char *vlen;
   ctf_funcinfo_t f;
 
-  if ((type = ctf_type_resolve (fp, type, NULL)) == CTF_ERR)
+  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
 
   if (ctf_type_kind (fp, type) == CTF_K_FUNC_LINKAGE)
@@ -2405,7 +2399,7 @@ ctf_func_type_args (ctf_dict_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv
   args = (const ctf_param_t *) vlen;
 
   for (argc = MIN (argc, f.ctc_argc); argc != 0; argc--)
-    *argv++ = *(args++).cfp_type;
+    *argv++ = (args++)->cfp_type;
 
   return 0;
 }
@@ -2422,7 +2416,7 @@ ctf_func_type_arg_names (ctf_dict_t *fp, ctf_id_t type, uint32_t argc,
   unsigned char *vlen;
   ctf_funcinfo_t f;
 
-  if ((type = ctf_type_resolve (fp, type, NULL)) == CTF_ERR)
+  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
 
   if (ctf_type_kind (fp, type) == CTF_K_FUNC_LINKAGE)
@@ -2435,10 +2429,10 @@ ctf_func_type_arg_names (ctf_dict_t *fp, ctf_id_t type, uint32_t argc,
     return -1;			/* errno is set for us.  */
 
   vlen = ctf_vlen (fp, type, tp, NULL);
-  args = (const ctf_param_t * *) vlen;
+  args = (const ctf_param_t *) vlen;
 
   for (argc = MIN (argc, f.ctc_argc); argc != 0; argc--)
-    *arg_names++ = ctf_strptr (fp, *(args++).cfp_name);
+    *arg_names++ = ctf_strptr (fp, (args++)->cfp_name);
 
   return 0;
 }
@@ -2464,19 +2458,19 @@ ctf_type_linkage (ctf_dict_t *fp, ctf_id_t type)
   vlen = ctf_vlen (fp, type, tp, NULL);
   l = (ctf_linkage_t *) vlen;
 
-  return linkage.ctl_linkage;
+  return l->ctl_linkage;
 }
 
 /* bsearch_r comparison function for datasec searches.  */
 static int
 search_datasec_by_offset (const void *key_, const void *arr_)
 {
-  ctf_datasec_t *key = (ctf_datasec_t *) key_;
-  ctf_datasec_t *arr = (ctf_datasec_t *) arr_;
+  uint32_t *key = (uint32_t *) key_;
+  ctf_var_secinfo_t *arr = (ctf_var_secinfo_t *) arr_;
 
-  if (key->cvs_offset < arr->cvs_offset)
+  if (*key < arr->cvs_offset)
     return -1;
-  else if (key->cvs_offset > arr->cvs_offset)
+  else if (*key > arr->cvs_offset)
     return 1;
 
   return 0;
@@ -2487,9 +2481,8 @@ search_datasec_by_offset (const void *key_, const void *arr_)
    Errors with ECTF_NOTYPEDAT if not found.  */
 
 ctf_id_t
-ctf_datasec_variable_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
+ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
 {
-  ctf_id_t type;
   ctf_dtdef_t *dtd;
   const ctf_type_t *tp;
   unsigned char *vlen;
@@ -2498,7 +2491,7 @@ ctf_datasec_variable_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
   ctf_var_secinfo_t *el;
   ssize_t size;
 
-  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, datasec, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
   if (ctf_type_kind (fp, datasec) != CTF_K_DATASEC)
@@ -2510,7 +2503,7 @@ ctf_datasec_variable_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
 	ctf_datasec_sort (fp, dtd);
     }
 
-  vlen = ctf_vlen (fp, type, tp, &vlen_len);
+  vlen = ctf_vlen (fp, datasec, tp, &vlen_len);
   sec = (ctf_var_secinfo_t *) vlen;
 
   if ((el = bsearch (&offset, sec, vlen_len, sizeof (ctf_var_secinfo_t),
@@ -2534,21 +2527,19 @@ ctf_datasec_variable_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
 ctf_var_secinfo_t *
 ctf_datasec_entry (ctf_dict_t *fp, ctf_id_t datasec, int component_idx)
 {
-  ctf_type_t *tp;
+  const ctf_type_t *tp;
   unsigned char *vlen;
   size_t vlen_len;
   ctf_var_secinfo_t *sec;
-  ctf_var_secinfo_t *el;
-  ssize_t size;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, datasec, NULL)) == NULL)
     return NULL;		/* errno is set for us.  */
 
   /* No type kind check: internal function.  */
-  vlen = ctf_vlen (fp, type, tp, &vlen_len);
+  vlen = ctf_vlen (fp, datasec, tp, &vlen_len);
   sec = (ctf_var_secinfo_t *) vlen;
 
-  if (component_idx > vlen_len)
+  if (component_idx < 0 || (size_t) component_idx > vlen_len)
     {
       ctf_set_errno (fp, EOVERFLOW);
       return NULL;
@@ -2561,15 +2552,14 @@ ctf_datasec_entry (ctf_dict_t *fp, ctf_id_t datasec, int component_idx)
 
 ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var)
 {
-  ctf_id_t sec;
-  void *sec_v;
+  void *sec;
 
   if (ctf_type_kind (fp, var) != CTF_K_VAR)
     return (ctf_set_typed_errno (fp, ECTF_NOTVAR));
 
   if (ctf_dynhash_lookup_kv (fp->ctf_var_datasecs, (void *) (ptrdiff_t) var,
-			     NULL, &sec_v))
-    return (ctf_id_t) sec_v;
+			     NULL, &sec))
+    return (ctf_id_t) sec;
 
   return fp->ctf_default_var_datasec;
 }
@@ -2583,16 +2573,15 @@ ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var)
 static int
 ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
 		 void *arg, const char *name, unsigned long offset,
-		 int bit_offset, int depth)
+		 int bit_width, int depth)
 {
-  ctf_dict_t *ofp = fp;
   ctf_id_t otype = type;
   int nonrepresentable = 0;
   uint32_t kind;
   ctf_next_t *it = NULL;
   ctf_id_t membtype;
-  size_t this_offset, bit_offset;
-  int bit_width;
+  ssize_t this_offset;
+  int this_bit_width;
   int rc;
 
   if (fp->ctf_flags & LCTF_NO_STR)
@@ -2605,7 +2594,7 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
       nonrepresentable = 1;
   }
 
-  if ((rc = func (fp, name, otype, offset, bit_offset, depth, arg)) != 0)
+  if ((rc = func (fp, name, otype, offset, bit_width, depth, arg)) != 0)
     return rc;
 
   if (!nonrepresentable)
@@ -2614,11 +2603,11 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
   if (nonrepresentable || (kind != CTF_K_STRUCT && kind != CTF_K_UNION))
     return 0;
 
-  while ((offset = ctf_member_next (fp, type, &it, &name, &membtype,
-				    &bit_width, 0)) >= 0)
+  while ((this_offset = ctf_member_next (fp, type, &it, &name, &membtype,
+					 &this_bit_width, 0)) >= 0)
     {
-      if ((rc = ctf_type_rvisit (fp, membtype, func, arg, name, offset,
-				 offset + this_offset, bit_offset,
+      if ((rc = ctf_type_rvisit (fp, membtype, func, arg, name,
+				 offset + this_offset, this_bit_width,
 				 depth + 1)) != 0)
 	return rc;
     }

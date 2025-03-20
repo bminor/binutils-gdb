@@ -1596,7 +1596,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   if (name != NULL && name[0] == '\0')
     name = NULL;
 
-  if ((prefix = ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
+  if ((prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
     return (ctf_set_errno (ofp, ECTF_CORRUPT));
 
   kind = LCTF_KIND (fp, prefix);
@@ -1734,7 +1734,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
       /* Hunt down the prefix and member list again: they may have been moved by
 	 the realloc()s involved in field additions.  */
 
-      if ((prefix = ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
+      if ((prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
 	return (ctf_set_errno (ofp, ECTF_CORRUPT));
 
       vlen = LCTF_VLEN (fp, prefix);

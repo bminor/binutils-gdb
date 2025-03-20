@@ -560,7 +560,7 @@ struct ctf_next
   size_t ctn_size;
   ssize_t ctn_increment;
   const ctf_type_t *ctn_tp;
-  uint32_t ctn_n;
+  size_t ctn_n;
 
   /* Some iterators contain other iterators, in addition to their other
      state.  We allow for inner and outer iterators, for two-layer nested loops
@@ -637,7 +637,8 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t,
 					   const ctf_type_t **suffix);
-extern ctf_type_t *ctf_find_prefix (ctf_dict_t *, ctf_type_t *, int kind);
+extern const ctf_type_t *ctf_find_prefix (ctf_dict_t *, const ctf_type_t *,
+					  int kind);
 extern ctf_id_t ctf_lookup_by_sym_or_name (ctf_dict_t *, unsigned long symidx,
 					   const char *symname, int try_parent,
 					   int is_function);
@@ -690,7 +691,7 @@ extern ctf_dynhash_t *ctf_dynhash_create_sized (unsigned long, ctf_hash_fun,
 
 extern int ctf_dynhash_insert (ctf_dynhash_t *, void *, void *);
 extern void ctf_dynhash_remove (ctf_dynhash_t *, const void *);
-extern size_t ctf_dynhash_elements (ctf_dynhash_t *);
+extern size_t ctf_dynhash_elements (const ctf_dynhash_t *);
 extern void ctf_dynhash_empty (ctf_dynhash_t *);
 extern int ctf_dynhash_insert_type (ctf_dict_t *, ctf_dynhash_t *, uint32_t, uint32_t);
 extern ctf_id_t ctf_dynhash_lookup_type (ctf_dynhash_t *, const char *);
@@ -706,22 +707,22 @@ extern void *ctf_dynhash_iter_find (ctf_dynhash_t *, ctf_hash_iter_find_f,
 extern int ctf_dynhash_sort_by_name (const ctf_next_hkv_t *,
 				     const ctf_next_hkv_t *,
 				     void * _libctf_unused_);
-extern int ctf_dynhash_next (ctf_dynhash_t *, ctf_next_t **,
+extern int ctf_dynhash_next (const ctf_dynhash_t *, ctf_next_t **,
 			     void **key, void **value);
-extern int ctf_dynhash_next_sorted (ctf_dynhash_t *, ctf_next_t **,
+extern int ctf_dynhash_next_sorted (const ctf_dynhash_t *, ctf_next_t **,
 				    void **key, void **value, ctf_hash_sort_f,
 				    void *);
 
 extern ctf_dynset_t *ctf_dynset_create (htab_hash, htab_eq, ctf_hash_free_fun);
 extern int ctf_dynset_insert (ctf_dynset_t *, void *);
 extern void ctf_dynset_remove (ctf_dynset_t *, const void *);
-extern size_t ctf_dynset_elements (ctf_dynset_t *);
+extern size_t ctf_dynset_elements (const ctf_dynset_t *);
 extern void ctf_dynset_destroy (ctf_dynset_t *);
 extern void ctf_dynset_destroy_arg (ctf_dynset_t *, void *unused);
 extern void *ctf_dynset_lookup (ctf_dynset_t *, const void *);
 extern int ctf_dynset_exists (ctf_dynset_t *, const void *key,
 			      const void **orig_key);
-extern int ctf_dynset_next (ctf_dynset_t *, ctf_next_t **, void **key);
+extern int ctf_dynset_next (const ctf_dynset_t *, ctf_next_t **, void **key);
 extern void *ctf_dynset_lookup_any (ctf_dynset_t *);
 
 extern void ctf_sha1_init (ctf_sha1_t *);
@@ -798,7 +799,7 @@ extern struct ctf_archive *ctf_arc_open_internal (const char *, int *);
 extern void ctf_arc_close_internal (struct ctf_archive *);
 extern const ctf_preamble_t *ctf_arc_bufpreamble (const ctf_sect_t *);
 extern void *ctf_set_open_errno (int *, int);
-extern void ctf_flip_header (void *, int, int);
+extern int ctf_flip_header (void *, int, int);
 extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *,
 		     int is_btf, int to_foreign);
 
@@ -842,6 +843,9 @@ extern ctf_link_sym_t *ctf_elf32_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *ds
 					      const Elf32_Sym *src, uint32_t symidx);
 extern ctf_link_sym_t *ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst,
 					      const Elf64_Sym *src, uint32_t symidx);
+
+ssize_t get_ctt_size_v2_unconverted (const ctf_dict_t *, const ctf_type_t *,
+				     ssize_t *sizep, ssize_t *incrementp);
 
 /* Variables, all underscore-prepended. */
 

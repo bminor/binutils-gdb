@@ -67,6 +67,20 @@ upgrade_header_v3 (ctf_header_t *hp)
   hp->cth_parent_ntypes = 0;
 }
 
+/* Set the version of the CTF file. */
+
+/* When this is reset, LCTF_* changes behaviour, but there is no guarantee that
+   the variable data list associated with each type has been upgraded: the
+   caller must ensure this has been done in advance.  */
+
+static void
+ctf_set_version (ctf_dict_t *fp, ctf_header_t *cth, int ctf_version)
+{
+  fp->ctf_version = ctf_version;
+  cth->cth_version = ctf_version;
+  fp->ctf_dictops = &ctf_dictops[ctf_version];
+}
+
 /* Upgrade the type table to CTF_VERSION_3 (really CTF_VERSION_1_UPGRADED_3)
    from CTF_VERSION_1.
 
