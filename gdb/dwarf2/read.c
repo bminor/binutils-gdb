@@ -5461,7 +5461,7 @@ dwarf2_compute_name (const char *name,
 
 	      die->building_fullname = 1;
 
-	      for (child = die->child; child != NULL; child = child->sibling)
+	      for (child = die->child; child != NULL; child = child->next)
 		{
 		  struct type *type;
 		  LONGEST value;
@@ -5911,7 +5911,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   if (die->tag == DW_TAG_imported_module
       && cu->lang () == language_fortran)
     for (child_die = die->child; child_die && child_die->tag;
-	 child_die = child_die->sibling)
+	 child_die = child_die->next)
       {
 	/* DWARF-4: A Fortran use statement with a “rename list” may be
 	   represented by an imported module entry with an import attribute
@@ -6151,7 +6151,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
       while (child_die && child_die->tag)
 	{
 	  process_die (child_die, cu);
-	  child_die = child_die->sibling;
+	  child_die = child_die->next;
 	}
     }
   per_objfile->sym_cu = nullptr;
@@ -6322,7 +6322,7 @@ read_type_unit_scope (struct die_info *die, struct dwarf2_cu *cu)
       while (child_die && child_die->tag)
 	{
 	  process_die (child_die, cu);
-	  child_die = child_die->sibling;
+	  child_die = child_die->next;
 	}
     }
 }
@@ -8210,8 +8210,8 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	  break;
 	}
 
-      concrete_child = concrete_child->sibling;
-      abstract_child = abstract_child->sibling;
+      concrete_child = concrete_child->next;
+      abstract_child = abstract_child->next;
     }
 
   /* Walk the origin's children in parallel to the concrete children.
@@ -8226,7 +8226,7 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 
   for (die_info *child_die = die->child;
        child_die && child_die->tag;
-       child_die = child_die->sibling)
+       child_die = child_die->next)
     {
       /* We are trying to process concrete instance entries:
 	 DW_TAG_call_site DIEs indeed have a DW_AT_abstract_origin tag, but
@@ -8238,7 +8238,7 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  if (are_isomorphic)
 	    corresponding_abstract_child
-	      = corresponding_abstract_child->sibling;
+	      = corresponding_abstract_child->next;
 	  continue;
 	}
 
@@ -8296,7 +8296,7 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	}
 
       if (are_isomorphic)
-	corresponding_abstract_child = corresponding_abstract_child->sibling;
+	corresponding_abstract_child = corresponding_abstract_child->next;
     }
 
   if (!offsets.empty ())
@@ -8333,7 +8333,7 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	    process_die (origin_child_die, origin_cu);
 	}
 
-      origin_child_die = origin_child_die->sibling;
+      origin_child_die = origin_child_die->next;
     }
 
   origin_cu->list_in_scope = origin_previous_list_in_scope;
@@ -8501,7 +8501,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   /* If we have any template arguments, then we must allocate a
      different sort of symbol.  */
-  for (child_die = die->child; child_die; child_die = child_die->sibling)
+  for (child_die = die->child; child_die; child_die = child_die->next)
     {
       if (child_die->tag == DW_TAG_template_type_param
 	  || child_die->tag == DW_TAG_template_value_param)
@@ -8554,7 +8554,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	  else
 	    process_die (child_die, cu);
-	  child_die = child_die->sibling;
+	  child_die = child_die->next;
 	}
     }
 
@@ -8576,7 +8576,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      if (child_die->tag == DW_TAG_imported_module)
 		process_die (child_die, spec_cu);
-	      child_die = child_die->sibling;
+	      child_die = child_die->next;
 	    }
 
 	  /* In some cases, GCC generates specification DIEs that
@@ -8663,7 +8663,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 	 GCC does no longer produces such DWARF since GCC r224161.  */
       for (child_die = die->child;
 	   child_die != NULL && child_die->tag;
-	   child_die = child_die->sibling)
+	   child_die = child_die->next)
 	{
 	  /* We might already be processing this DIE.  This can happen
 	     in an unusual circumstance -- where a subroutine A
@@ -8688,7 +8688,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
       while (child_die && child_die->tag)
 	{
 	  process_die (child_die, cu);
-	  child_die = child_die->sibling;
+	  child_die = child_die->next;
 	}
     }
   inherit_abstract_dies (die, cu);
@@ -8755,7 +8755,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   nparams = 0;
   for (child_die = die->child; child_die && child_die->tag;
-       child_die = child_die->sibling)
+       child_die = child_die->next)
     {
       if (child_die->tag != DW_TAG_call_site_parameter
 	  && child_die->tag != DW_TAG_GNU_call_site_parameter)
@@ -8926,7 +8926,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   for (child_die = die->child;
        child_die && child_die->tag;
-       child_die = child_die->sibling)
+       child_die = child_die->next)
     {
       struct call_site_parameter *parameter;
       struct attribute *loc, *origin;
@@ -9669,7 +9669,7 @@ dwarf2_get_subprogram_pc_bounds (struct die_info *die,
       if (child->tag == DW_TAG_subprogram
 	  || child->tag == DW_TAG_lexical_block)
 	dwarf2_get_subprogram_pc_bounds (child, lowpc, highpc, cu);
-      child = child->sibling;
+      child = child->next;
     }
 }
 
@@ -9726,7 +9726,7 @@ get_scope_pc_bounds (struct die_info *die,
 	    break;
 	  }
 
-	  child = child->sibling;
+	  child = child->next;
 	}
     }
 
@@ -11279,7 +11279,7 @@ handle_variant_part (struct die_info *die, struct type *type,
 
   for (die_info *child_die = die->child;
        child_die != NULL;
-       child_die = child_die->sibling)
+       child_die = child_die->next)
     handle_struct_member_die (child_die, type, fi, template_args, cu);
 }
 
@@ -11332,7 +11332,7 @@ handle_variant (struct die_info *die, struct type *type,
 
   for (die_info *variant_child = die->child;
        variant_child != NULL;
-       variant_child = variant_child->sibling)
+       variant_child = variant_child->next)
     handle_struct_member_die (variant_child, type, fi, template_args, cu);
 
   variant.last_field = fi->fields.size ();
@@ -11419,7 +11419,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
       while (child_die && child_die->tag)
 	{
 	  handle_struct_member_die (child_die, type, &fi, &template_args, cu);
-	  child_die = child_die->sibling;
+	  child_die = child_die->next;
 	}
 
       /* Attach template arguments to type.  */
@@ -11573,7 +11573,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
       else
 	process_die (child_die, cu);
 
-      child_die = child_die->sibling;
+      child_die = child_die->next;
     }
 
   /* Do not consider external references.  According to the DWARF standard,
@@ -11682,7 +11682,7 @@ update_enumeration_type_from_children (struct die_info *die,
 
   for (child_die = die->child;
        child_die != NULL && child_die->tag;
-       child_die = child_die->sibling)
+       child_die = child_die->next)
     {
       struct attribute *attr;
       LONGEST value;
@@ -11852,7 +11852,7 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  else
 	    new_symbol (child_die, this_type, cu);
 
-	  child_die = child_die->sibling;
+	  child_die = child_die->next;
 	}
     }
 
@@ -12035,7 +12035,7 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
   std::vector<struct field> range_fields;
   for (struct die_info *child_die = die->child;
        child_die;
-       child_die = child_die->sibling)
+       child_die = child_die->next)
     {
       if (child_die->tag == DW_TAG_subrange_type)
 	{
@@ -12206,7 +12206,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 	      range_types.push_back (child_type);
 	    }
 	}
-      child_die = child_die->sibling;
+      child_die = child_die->next;
     }
 
   if (range_types.empty ())
@@ -12480,7 +12480,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 
       for (child_die = die->child;
 	   child_die && child_die->tag;
-	   child_die = child_die->sibling)
+	   child_die = child_die->next)
 	++n_entries;
 
       size = (sizeof (struct common_block)
@@ -12493,7 +12493,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 
       for (child_die = die->child;
 	   child_die && child_die->tag;
-	   child_die = child_die->sibling)
+	   child_die = child_die->next)
 	{
 	  /* Create the symbol in the DW_TAG_common_block block in the current
 	     symbol scope.  */
@@ -12621,7 +12621,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
       while (child_die && child_die->tag)
 	{
 	  process_die (child_die, cu);
-	  child_die = child_die->sibling;
+	  child_die = child_die->next;
 	}
     }
 }
@@ -12669,7 +12669,7 @@ read_module (struct die_info *die, struct dwarf2_cu *cu)
   while (child_die && child_die->tag)
     {
       process_die (child_die, cu);
-      child_die = child_die->sibling;
+      child_die = child_die->next;
     }
 }
 
@@ -13183,7 +13183,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	  else if (child_die->tag == DW_TAG_unspecified_parameters)
 	    ftype->set_has_varargs (true);
 
-	  child_die = child_die->sibling;
+	  child_die = child_die->next;
 	}
 
       /* Allocate storage for parameters and fill them in.  */
@@ -13253,7 +13253,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	      ftype->field (iparams).set_type (arg_type);
 	      iparams++;
 	    }
-	  child_die = child_die->sibling;
+	  child_die = child_die->next;
 	}
     }
 
@@ -14350,7 +14350,7 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, type, cu);
 }
 
-/* Read a single die and all its descendents.  Set the die's sibling
+/* Read a single die and all its descendents.  Set the die's next
    field to NULL; set other fields in the die correctly, and set all
    of the descendents' fields correctly.  PARENT is the parent of the
    die in question.  */
@@ -14371,7 +14371,7 @@ cutu_reader::read_die_and_children (die_info *parent)
   else
     die->child = nullptr;
 
-  die->sibling = nullptr;
+  die->next = nullptr;
   die->parent = parent;
   return die;
 }
@@ -14396,7 +14396,7 @@ cutu_reader::read_die_and_siblings (die_info *parent)
       if (first_die == nullptr)
 	first_die = die;
       else
-	last_sibling->sibling = die;
+	last_sibling->next = die;
 
       last_sibling = die;
     }
@@ -14435,7 +14435,7 @@ cutu_reader::read_all_dies ()
    and updating die_info::num_attrs.
 
    Return a newly allocated die with its information, except for its
-   child, sibling, and parent fields.  */
+   child, next, and parent fields.  */
 
 die_info *
 cutu_reader::read_full_die (int num_extra_attrs, bool allow_reprocess)
@@ -14479,7 +14479,7 @@ cutu_reader::read_full_die (int num_extra_attrs, bool allow_reprocess)
 /* Read a die and all its attributes.
 
    Return a newly allocated die with its information, except for its
-   child, sibling, and parent fields.  */
+   child, next, and parent fields.  */
 
 die_info *
 cutu_reader::read_toplevel_die (gdb::array_view<attribute *> extra_attrs)
@@ -17780,7 +17780,7 @@ guess_full_die_structure_name (struct die_info *die, struct dwarf2_cu *cu)
 
   for (child = die->child;
        child != NULL;
-       child = child->sibling)
+       child = child->next)
     {
       if (child->tag == DW_TAG_subprogram)
 	{
@@ -18116,7 +18116,7 @@ unnamed_template_tag_name (die_info *die, dwarf2_cu *cu)
 	if (dwarf2_attr (child, DW_AT_name, cu) == nullptr)
 	  ++nth_unnamed;
       }
-    child = child->sibling;
+    child = child->next;
   }
 
   const std::string name_str = "<unnamed" + std::to_string (nth_unnamed) + ">";

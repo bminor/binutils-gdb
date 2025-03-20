@@ -128,9 +128,9 @@ struct die_info
   /* The dies in a compilation unit form an n-ary tree.  PARENT
      points to this die's parent; CHILD points to the first child of
      this node; and all the children of a given node are chained
-     together via their SIBLING fields.  */
+     together via their NEXT fields.  */
   struct die_info *child;	/* Its first child, if any.  */
-  struct die_info *sibling;	/* Its next sibling, if any.  */
+  struct die_info *next;	/* Its next sibling, if any.  */
   struct die_info *parent;	/* Its parent, if any.  */
 
   /* An array of attributes, with NUM_ATTRS elements.  There may be

@@ -184,9 +184,9 @@ dump_die_1 (struct ui_file *f, int level, int max_level, struct die_info *die)
 	}
     }
 
-  if (die->sibling != NULL && level > 0)
+  if (die->next != NULL && level > 0)
     {
-      dump_die_1 (f, level, max_level, die->sibling);
+      dump_die_1 (f, level, max_level, die->next);
     }
 }
 
