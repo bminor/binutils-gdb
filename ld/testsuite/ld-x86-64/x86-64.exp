@@ -563,6 +563,7 @@ run_dump_test "pr32591-3"
 run_dump_test "pr32591-3-x32"
 run_dump_test "pr32591-4"
 run_dump_test "pr32591-4-x32"
+run_dump_test "pr32809"
 
 if { ![skip_sframe_tests] } {
     run_dump_test "sframe-simple-1"
