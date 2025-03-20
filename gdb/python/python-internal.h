@@ -1208,7 +1208,7 @@ public:
 private:
 
   template<typename O>
-  using StorageKey = typename registry<O>::key<Storage>;
+  using StorageKey = typename registry<O>::template key<Storage>;
 
   template<typename O>
   Storage *get_storage (O *owner, const StorageKey<O> &key) const
