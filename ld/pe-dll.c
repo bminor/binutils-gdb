@@ -381,6 +381,7 @@ static const autofilter_entry_type autofilter_liblist[] =
   { STRING_COMMA_LEN ("libmsvcrt") },
   { STRING_COMMA_LEN ("libmsvcrt-os") },
   { STRING_COMMA_LEN ("libucrt") },
+  { STRING_COMMA_LEN ("libucrtapp") },
   { STRING_COMMA_LEN ("libucrtbase") },
   { STRING_COMMA_LEN ("libpthread") },
   { STRING_COMMA_LEN ("libwinpthread") },
