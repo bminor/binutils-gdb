@@ -17196,13 +17196,10 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
    list was that this is unspecified.  We choose to always zero-extend
    because that is the interpretation long in use by GCC.  */
 
-static gdb_byte *
-dwarf2_const_value_data (const struct attribute *attr, struct obstack *obstack,
-			 struct dwarf2_cu *cu, LONGEST *value, int bits)
+static void
+dwarf2_const_value_data (const struct attribute *attr, LONGEST *value,
+			 int bits)
 {
-  struct objfile *objfile = cu->per_objfile->objfile;
-  enum bfd_endian byte_order = bfd_big_endian (objfile->obfd.get ()) ?
-				BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
   LONGEST l = attr->constant_value (0);
 
   if (bits < sizeof (*value) * 8)
@@ -17210,16 +17207,8 @@ dwarf2_const_value_data (const struct attribute *attr, struct obstack *obstack,
       l &= ((LONGEST) 1 << bits) - 1;
       *value = l;
     }
-  else if (bits == sizeof (*value) * 8)
-    *value = l;
   else
-    {
-      gdb_byte *bytes = (gdb_byte *) obstack_alloc (obstack, bits / 8);
-      store_unsigned_integer (bytes, bits / 8, byte_order, l);
-      return bytes;
-    }
-
-  return NULL;
+    *value = l;
 }
 
 /* Read a constant value from an attribute.  Either set *VALUE, or if
@@ -17305,16 +17294,16 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 	 converted to host endianness, so we just need to sign- or
 	 zero-extend it as appropriate.  */
     case DW_FORM_data1:
-      *bytes = dwarf2_const_value_data (attr, obstack, cu, value, 8);
+      dwarf2_const_value_data (attr, value, 8);
       break;
     case DW_FORM_data2:
-      *bytes = dwarf2_const_value_data (attr, obstack, cu, value, 16);
+      dwarf2_const_value_data (attr, value, 16);
       break;
     case DW_FORM_data4:
-      *bytes = dwarf2_const_value_data (attr, obstack, cu, value, 32);
+      dwarf2_const_value_data (attr, value, 32);
       break;
     case DW_FORM_data8:
-      *bytes = dwarf2_const_value_data (attr, obstack, cu, value, 64);
+      dwarf2_const_value_data (attr, value, 64);
       break;
 
     case DW_FORM_sdata:
@@ -18519,31 +18508,23 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
 	 zero-extend it as appropriate.  */
     case DW_FORM_data1:
       type = die_type (die, cu);
-      result = dwarf2_const_value_data (attr, obstack, cu, &value, 8);
-      if (result == NULL)
-	result = write_constant_as_bytes (obstack, byte_order,
-					  type, value, len);
+      dwarf2_const_value_data (attr, &value, 8);
+      result = write_constant_as_bytes (obstack, byte_order, type, value, len);
       break;
     case DW_FORM_data2:
       type = die_type (die, cu);
-      result = dwarf2_const_value_data (attr, obstack, cu, &value, 16);
-      if (result == NULL)
-	result = write_constant_as_bytes (obstack, byte_order,
-					  type, value, len);
+      dwarf2_const_value_data (attr, &value, 16);
+      result = write_constant_as_bytes (obstack, byte_order, type, value, len);
       break;
     case DW_FORM_data4:
       type = die_type (die, cu);
-      result = dwarf2_const_value_data (attr, obstack, cu, &value, 32);
-      if (result == NULL)
-	result = write_constant_as_bytes (obstack, byte_order,
-					  type, value, len);
+      dwarf2_const_value_data (attr, &value, 32);
+      result = write_constant_as_bytes (obstack, byte_order, type, value, len);
       break;
     case DW_FORM_data8:
       type = die_type (die, cu);
-      result = dwarf2_const_value_data (attr, obstack, cu, &value, 64);
-      if (result == NULL)
-	result = write_constant_as_bytes (obstack, byte_order,
-					  type, value, len);
+      dwarf2_const_value_data (attr, &value, 64);
+      result = write_constant_as_bytes (obstack, byte_order, type, value, len);
       break;
 
     case DW_FORM_sdata:
