@@ -6920,7 +6920,7 @@ proc kill_wait_spawned_process { proc_spawn_id } {
 proc spawn_id_get_pid { spawn_id } {
     set testpid [exp_pid -i $spawn_id]
 
-    if { [istarget "*-*-cygwin*"] } {
+    if { [istarget "*-*-cygwin*"] || [istarget "*-*-mingw*"] } {
 	# testpid is the Cygwin PID, GDB uses the Windows PID, which
 	# might be different due to the way fork/exec works.
 	set testpid [ exec ps -e | gawk "{ if (\$1 == $testpid) print \$4; }" ]
