@@ -54,7 +54,7 @@ extern bool startup_with_shell;
 
 /* Combine elements of ARGV into a single string, placing a single
    whitespace character between each element.  When ESCAPE_SHELL_CHAR is
-   true then any special shell characters in elemets of ARGV will be
+   true then any special shell characters in elements of ARGV will be
    escaped.  When ESCAPE_SHELL_CHAR is false only the characters that GDB
    sees as special (quotes and whitespace) are escaped.  */
 extern std::string
