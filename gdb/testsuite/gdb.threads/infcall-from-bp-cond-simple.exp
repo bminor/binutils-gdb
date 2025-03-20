@@ -79,7 +79,7 @@ proc run_condition_test { message n_expected_hits condition \
 	gdb_breakpoint \
 	    "${::srcfile}:${::cond_bp_line} if ((++\$n_cond_eval) && (${condition}))"
 
-	# And a breakpoint that we hit when the test is over, this one is
+	# Add a breakpoint that we hit when the test is over, this one is
 	# not conditional.  Only the main thread gets here once all the
 	# other threads have finished.
 	gdb_breakpoint "${::srcfile}:${::stop_bp_line}"
@@ -114,7 +114,7 @@ proc run_condition_test { message n_expected_hits condition \
 # includes an inferior call), it is still possible to kill the running
 # inferior, and then restart the inferior.
 #
-# At once point doing this would result in GDB giving an assertion error.
+# At one point doing this would result in GDB giving an assertion error.
 proc_with_prefix run_kill_and_restart_test { target_async target_non_stop } {
     # This test relies on the 'start' command, which is not possible with
     # the plain 'remote' target.
