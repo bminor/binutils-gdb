@@ -802,14 +802,15 @@ typedef struct ctf_decl_tag
 typedef struct ctf_enum
 {
   uint32_t cte_name;		/* Reference to name in string table.  */
-  int32_t cte_value;		/* Value associated with this name.  */
+  uint32_t cte_value;		/* Value associated with this name.  */
 } ctf_enum_t;
 
 typedef struct ctf_enum64
 {
   uint32_t cte_name;		/* Reference to name in string table.  */
-  int64_t cte_value;		/* Value associated with this name.
-				   (May actually be signed.)  */
+  uint32_t cte_val_low;		/* Low word of value.  */
+  uint32_t cte_val_high;	/* High word of value.  (May actually be
+				   unsigned.)  */
 } ctf_enum64_t;
 
 /* The ctf_archive is a collection of ctf_dict_t's stored together. The format

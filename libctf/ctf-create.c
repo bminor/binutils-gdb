@@ -1462,9 +1462,8 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 {
   ctf_dict_t *ofp = fp;
   ctf_dtdef_t *dtd;
-  ctf_enum_t *en;
 
-  uint32_t kind, vlen, root;
+  uint32_t kind, vlen, root, en_name;
 
   if (name == NULL)
     return (ctf_set_errno (fp, EINVAL));
@@ -1500,7 +1499,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 	return (ctf_set_errno (ofp, ctf_errno (fp)));
     }
 
-  if (kind != CTF_K_ENUM)
+  if ((kind != CTF_K_ENUM) && (kind != CTF_K_ENUM64))
     return (ctf_set_errno (ofp, ECTF_NOTENUM));
 
   if (vlen == CTF_MAX_VLEN)
@@ -1508,8 +1507,6 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 
   if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum_t) * (vlen + 1)) < 0)
     return -1;					/* errno is set for us.  */
-
-  en = (ctf_enum_t *) dtd->dtd_vlen;
 
   /* Check for constant duplication within any given enum: only needed for
      non-root-visible types, since the duplicate detection above does the job
@@ -1519,15 +1516,46 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
     {
       size_t i;
 
-      for (i = 0; i < vlen; i++)
-	if (strcmp (ctf_strptr (fp, en[i].cte_name), name) == 0)
-	  return (ctf_set_errno (ofp, ECTF_DUPLICATE));
+      if (kind == CTF_K_ENUM)
+	{
+	  ctf_enum_t *en = (ctf_enum_t *) dtd->dtd_vlen;
+
+	  for (i = 0; i < vlen; i++)
+	    if (strcmp (ctf_strptr (fp, en[i].cte_name), name) == 0)
+	      return (ctf_set_errno (ofp, ECTF_DUPLICATE));
+	}
+      else
+	{
+	  ctf_enum64_t *en = (ctf_enum64_t *) dtd->dtd_vlen;
+
+	  for (i = 0; i < vlen; i++)
+	    if (strcmp (ctf_strptr (fp, en[i].cte_name), name) == 0)
+	      return (ctf_set_errno (ofp, ECTF_DUPLICATE));
+
+	}
     }
 
-  en[vlen].cte_name = ctf_str_add (fp, name);
-  en[vlen].cte_value = value;
+  if (kind == CTF_K_ENUM)
+    {
+      ctf_enum_t *en = (ctf_enum_t *) dtd->dtd_vlen;
 
-  if (en[vlen].cte_name == 0 && name != NULL && name[0] != '\0')
+      en[vlen].cte_name = ctf_str_add (fp, name);
+      en[vlen].cte_value = value;
+
+      name = en[vlen].cte_name;
+    }
+  else
+    {
+      ctf_enum64_t *en = (ctf_enum64_t *) dtd->dtd_vlen;
+
+      en[vlen].cte_name = ctf_str_add (fp, name);
+      en[vlen].cte_val_low = ((uint64_t) value) & 0xffffffff;
+      en[vlen].cte_val_high = ((uint64_t) value) >> 32;
+
+      en_name = en[vlen].cte_name;
+    }
+
+  if (en_name == 0 && name != NULL && name[0] != '\0')
     return (ctf_set_errno (ofp, ctf_errno (fp)));
 
   /* Put the newly-added enumerator name into the name table if this type is
@@ -1536,7 +1564,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (root == CTF_ADD_ROOT)
     {
       if (ctf_dynhash_insert (fp->ctf_names,
-			      (char *) ctf_strptr (fp, en[vlen].cte_name),
+			      (char *) ctf_strptr (fp, en_name),
 			      (void *) (uintptr_t) enid) < 0)
 	return ctf_set_errno (fp, ENOMEM);
     }

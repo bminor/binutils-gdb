@@ -1469,7 +1469,8 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	    for (i = vlen; i > 0; item++, i--)
 	      {
 		swap_thing (item->cte_name);
-		swap_thing (item->cte_value);
+		swap_thing (item->cte_val_low);
+		swap_thing (item->cte_val_high);
 	      }
 	    break;
 	  }

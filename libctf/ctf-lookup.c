@@ -629,7 +629,7 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 	  if (val)
 	    {
 	      if (is_enum64)
-		*val = i->u.ctn_en64->cte_value;
+		*val = ((uint64_t) i->u.ctn_en64->cte_val_high) << 32 | (i->u.ctn_en64->cte_val_low);
 	      else
 		*val = i->u.ctn_en->cte_value;
 	    }

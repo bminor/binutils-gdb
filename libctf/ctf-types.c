@@ -475,7 +475,7 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
     {
       name = ctf_strptr (fp, i->u.ctn_en64->cte_name);
       if (val)
-	*val = i->u.ctn_en64->cte_value;
+	*val = ((uint64_t) i->u.ctn_en64->cte_val_high) << 32 | (i->u.ctn_en64->cte_val_low);
       i->u.ctn_en64++;
     }
   i->ctn_n--;
@@ -2220,7 +2220,9 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int64_t value)
 
       for (; n != 0; n--, ep++)
 	{
-	  if (ep->cte_value == value)
+	  int64_t this_value = ((uint64_t) ep->cte_val_high << 32) | (ep->cte_val_low);
+
+	  if (this_value == value)
 	    return (ctf_strptr (fp, ep->cte_name));
 	}
     }
@@ -2279,7 +2281,7 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
 	  if (strcmp (ctf_strptr (fp, ep->cte_name), name) == 0)
 	    {
 	      if (valp != NULL)
-		*valp = ep->cte_value;
+		*valp = ((uint64_t) ep->cte_val_high << 32) | ep->cte_val_low;
 	      return 0;
 	    }
 	}
