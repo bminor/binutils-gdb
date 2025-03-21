@@ -791,6 +791,7 @@ ctf_datasec_var_next (ctf_dict_t *fp, ctf_id_t datasec, ctf_next_t **it,
 		      size_t *size, size_t *offset)
 {
   ctf_next_t *i = *it;
+  ctf_id_t type;
 
   if (!i)
     {
@@ -832,11 +833,12 @@ ctf_datasec_var_next (ctf_dict_t *fp, ctf_id_t datasec, ctf_next_t **it,
     *size = i->u.ctn_datasec->cvs_size;
   if (offset)
     *offset = i->u.ctn_datasec->cvs_offset;
+  type = i->u.ctn_datasec->cvs_type;
 
   i->u.ctn_datasec++;
   i->ctn_n--;
 
-  return i->u.ctn_datasec->cvs_type;
+  return type;
 
  end_iter:
   ctf_next_destroy (i);
