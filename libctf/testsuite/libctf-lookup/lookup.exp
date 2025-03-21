@@ -33,7 +33,8 @@ if {[info exists env(LC_ALL)]} {
 }
 set env(LC_ALL) "C"
 
-set ctf_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.lk]]
+#set ctf_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.lk $srcdir/$subdir/by-kind/*.lk]]
+set ctf_test_list [lsort [glob -nocomplain $srcdir/$subdir/by-kind/*.lk]]
 
 foreach ctf_test $ctf_test_list {
     verbose [file rootname $ctf_test]

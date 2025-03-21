@@ -217,17 +217,17 @@ proc run_lookup_test { name } {
 	return 0
     }
 
-    # Compile the inputs and posibly link them together.
+    # Compile the inputs and possibly link them together.
 
     set lookup_output ""
     if { [llength $opts(source)] > 0 } {
 	set lookup_flags ""
 	if { $run_ld } {
 	    set lookup_output "tmpdir/out.so"
-	    set lookup_flags "-gctf -fPIC $shared $opts(link_flags)"
+	    set lookup_flags "-gbtf -fPIC $shared $opts(link_flags)"
 	} else {
 	    set lookup_output "tmpdir/out.o"
-	    set lookup_flags "-gctf -fPIC -c"
+	    set lookup_flags "-gbtf -fPIC -c"
 	}
 	if [board_info [target_info name] exists cflags] {
 	    append lookup_flags " [board_info [target_info name] cflags]"
