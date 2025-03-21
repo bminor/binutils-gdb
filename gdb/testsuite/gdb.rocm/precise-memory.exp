@@ -54,6 +54,25 @@ proc do_test { } {
 	gdb_test "show amdgpu precise-memory" \
 	    "AMDGPU precise memory access reporting is on \\(currently ${cli_effective_value}\\)\\." \
 	    "show precise-memory setting in CLI after"
+
+	if { $cli_effective_value eq "disabled" } {
+	    return
+	}
+
+	# Get to the begining of the GPU kernel without precise memory enabled.
+	with_test_prefix "goto gpu code" {
+	    gdb_test_no_output "set amdgpu precise-memory off"
+	    gdb_breakpoint "kernel" allow-pending
+	    gdb_test "continue" "Thread ${::decimal}.* hit Breakpoint .*"
+	    gdb_test_no_output "set amdgpu precise-memory on"
+	}
+
+	# If precise-memory is available, run until a SIGSEGV is reported.  At
+	# that point, the PC should point to the s_nop instruction (the one
+	# following the one which caused the memory violation).
+	gdb_test "continue" "Thread ${::decimal}\[^\r\n\]* received signal SIGSEGV, Segmentation fault.*"
+
+	gdb_test "x/i \$pc" "=> ${::hex} <_Z6kernelv\\+${::decimal}>:\[ \t\]+s_nop\[ \t\]+0"
     }
 }
 
