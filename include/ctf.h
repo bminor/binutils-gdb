@@ -467,7 +467,7 @@ union
 #define CTF_V2_INFO_ISROOT(info)	(((info) & 0x2000000) >> 25)
 #define CTF_V2_INFO_VLEN(info)		(((info) & CTF_MAX_VLEN_V2))
 
-#define CTF_INFO_KFLAG(info)		(((info) & 0x7fffffff) >> 31)
+#define CTF_INFO_KFLAG(info)		(((info) & 0x80000000) >> 31)
 #define CTF_INFO_KIND(info)		(((info) >> 24) & 0x1f)
 #define CTF_INFO_VLEN(info)		(((info) & CTF_MAX_RAW_VLEN))
 
