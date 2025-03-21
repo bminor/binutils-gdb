@@ -81,11 +81,6 @@
 	ldiapp w0, w0, [x1], #8
 	ldiapp x0, x0, [x1], #16
 
-	stilp w0, w0, [x1]
-	stilp x0, x0, [x1]
-	stilp w0, w0, [x1, #-8]!
-	stilp x0, x0, [x1, #-16]!
-
 	/* Invalid write back overlap (load)*/
 	ldiapp x0, x1, [x0], #16
 	ldiapp x0, x1, [x1], #16

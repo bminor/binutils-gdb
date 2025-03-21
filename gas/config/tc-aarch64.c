@@ -8465,6 +8465,7 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
     case ldst_imm10:
     case ldst_unscaled:
     case ldst_unpriv:
+    ldst_single:
       /* Loading/storing the base register is unpredictable if writeback.  */
       if ((aarch64_get_operand_class (opnds[0].type)
 	   == AARCH64_OPND_CLASS_INT_REG)
@@ -8477,43 +8478,9 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
       break;
 
     case rcpc3:
-      {
-	const int nb_operands = aarch64_num_of_operands (opcode);
-	if (aarch64_get_operand_class (opnds[0].type)
-	    == AARCH64_OPND_CLASS_INT_REG)
-	  {
-	    /* Load Pair transfer with register overlap. */
-	    if (nb_operands == 3 && opnds[0].reg.regno == opnds[1].reg.regno)
-	      { // ldiapp, stilp
-		as_warn (_("unpredictable load pair transfer with register "
-			   "overlap -- `%s'"),
-			 str);
-	      }
-	    /* Loading/storing the base register is unpredictable if writeback. */
-	    else if ((nb_operands == 2
-		      && opnds[0].reg.regno == opnds[1].addr.base_regno
-		      && opnds[1].addr.base_regno != REG_SP
-		      && opnds[1].addr.writeback)
-		     || (nb_operands == 3
-			 && (opnds[0].reg.regno == opnds[2].addr.base_regno
-			     || opnds[1].reg.regno == opnds[2].addr.base_regno)
-			 && opnds[2].addr.base_regno != REG_SP
-			 && opnds[2].addr.writeback))
-	      {
-		if (strcmp (opcode->name, "ldapr") == 0
-		    || strcmp (opcode->name, "ldiapp") == 0)
-		  as_warn (
-		    _("unpredictable transfer with writeback (load) -- `%s'"),
-		    str);
-		else // stlr, stilp
-		  as_warn (
-		    _("unpredictable transfer with writeback (store) -- `%s'"),
-		    str);
-	      }
-	  }
-      }
-      break;
-
+      if (aarch64_num_of_operands (opcode) == 2)
+	goto ldst_single;
+      /* Fall through.  */
     case ldstpair_off:
     case ldstnapair_offs:
     case ldstpair_indexed:

@@ -28,8 +28,10 @@ Disassembly of section \.text:
 [^:]+:	99010860 	stilp	w0, w1, \[x3, #-8\]!
 [^:]+:	d9011820 	stilp	x0, x1, \[x1\]
 [^:]+:	d9011800 	stilp	x0, x1, \[x0\]
+[^:]+:	d9001800 	stilp	x0, x0, \[x0\]
 [^:]+:	99011820 	stilp	w0, w1, \[x1\]
 [^:]+:	99011800 	stilp	w0, w1, \[x0\]
+[^:]+:	99001800 	stilp	w0, w0, \[x0\]
 [^:]+:	b8bfc020 	ldapr	w0, \[x1\]
 [^:]+:	b8bfc020 	ldapr	w0, \[x1\]
 [^:]+:	f8bfc020 	ldapr	x0, \[x1\]
@@ -44,8 +46,10 @@ Disassembly of section \.text:
 [^:]+:	d9c00be0 	ldapr	x0, \[sp\], #8
 [^:]+:	889ffc20 	stlr	w0, \[x1\]
 [^:]+:	889ffc20 	stlr	w0, \[x1\]
+[^:]+:	889ffc00 	stlr	w0, \[x0\]
 [^:]+:	c89ffc20 	stlr	x0, \[x1\]
 [^:]+:	c89ffc20 	stlr	x0, \[x1\]
+[^:]+:	c89ffc00 	stlr	x0, \[x0\]
 [^:]+:	99800841 	stlr	w1, \[x2, #-4\]!
 [^:]+:	d9800841 	stlr	x1, \[x2, #-8\]!
 [^:]+:	d980081e 	stlr	x30, \[x0, #-8\]!

@@ -29,8 +29,10 @@
 	// for store is fine.
 	stilp x0, x1, [x1]
 	stilp x0, x1, [x0]
+	stilp x0, x0, [x0]
 	stilp w0, w1, [x1]
 	stilp w0, w1, [x0]
+	stilp w0, w0, [x0]
 
 	ldapr w0, [x1]
 	ldapr w0, [x1, #0]
@@ -47,8 +49,10 @@
 
 	stlr w0, [x1]
 	stlr w0, [x1, #0]
+	stlr w0, [x0]
 	stlr x0, [x1]
 	stlr x0, [x1, #0]
+	stlr x0, [x0]
 	stlr w1, [x2, #-4]!
 	stlr x1, [x2, #-8]!
 	stlr x30, [x0, #-8]!
