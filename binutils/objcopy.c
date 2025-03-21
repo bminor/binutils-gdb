@@ -2832,7 +2832,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
       if (pe_file_alignment != (bfd_vma) -1)
 	pe->pe_opthdr.FileAlignment = pe_file_alignment;
-      else
+      else if (!is_strip)
 	pe_file_alignment = PE_DEF_FILE_ALIGNMENT;
 
       if (pe_heap_commit != (bfd_vma) -1)
@@ -2846,7 +2846,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
       if (pe_section_alignment != (bfd_vma) -1)
 	pe->pe_opthdr.SectionAlignment = pe_section_alignment;
-      else
+      else if (!is_strip)
 	pe_section_alignment = PE_DEF_SECTION_ALIGNMENT;
 
       if (pe_stack_commit != (bfd_vma) -1)
