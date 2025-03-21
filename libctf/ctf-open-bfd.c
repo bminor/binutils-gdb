@@ -56,8 +56,8 @@ ctf_bfdopen (struct bfd *abfd, int *errp)
 
   libctf_init_debug();
 
-//   if ((ctf_asect = bfd_get_section_by_name (abfd, _CTF_SECTION)) == NULL)
-  if ((ctf_asect = bfd_get_section_by_name (abfd, ".BTF")) == NULL)
+  if (((ctf_asect = bfd_get_section_by_name (abfd, _CTF_SECTION)) == NULL)
+      && ((ctf_asect = bfd_get_section_by_name (abfd, ".BTF")) == NULL))
     {
       return (ctf_set_open_errno (errp, ECTF_NOCTFDATA));
     }

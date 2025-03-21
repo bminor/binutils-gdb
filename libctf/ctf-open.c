@@ -1102,6 +1102,9 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
      enum appears with a constant FOO, then later a type named FOO appears,
      too late to spot the conflict by checking the enum's constants.  */
 
+  ctf_dprintf ("Extracting enumeration constants from %zu enums\n",
+	       ctf_dynset_elements (all_enums));
+
   while ((err = ctf_dynset_next (all_enums, &i, &k)) == 0)
     {
       ctf_id_t enum_id = (uintptr_t) k;
@@ -1132,6 +1135,8 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
      For simplicity, the "any but the largest" optimization is only applied at
      open time: if another datasec grows to be larger due to dynamic additions,
      its membership is still recorded. */
+
+  ctf_dprintf ("Getting variable datasec membership\n");
 
   while ((type = ctf_type_kind_next (fp, &i, CTF_K_DATASEC)) != CTF_ERR)
     {
@@ -1535,7 +1540,7 @@ void ctf_set_ctl_hashes (ctf_dict_t *fp)
   fp->ctf_lookups[3].ctl_len = strlen (fp->ctf_lookups[3].ctl_prefix);
   fp->ctf_lookups[3].ctl_hash = fp->ctf_datasecs;
   fp->ctf_lookups[4].ctl_prefix = _CTF_NULLSTR;
-  fp->ctf_lookups[4].ctl_len = strlen (fp->ctf_lookups[5].ctl_prefix);
+  fp->ctf_lookups[4].ctl_len = strlen (fp->ctf_lookups[4].ctl_prefix);
   fp->ctf_lookups[4].ctl_hash = fp->ctf_names;
   fp->ctf_lookups[5].ctl_prefix = NULL;
   fp->ctf_lookups[5].ctl_len = 0;
@@ -1681,15 +1686,18 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	version = bp->btf_version;
       }
 
-  if (format == IS_UNKNOWN && pp->ctp_magic == CTF_MAGIC)
-    format = pp->ctp_version;
-  else if (format == IS_UNKNOWN && pp->ctp_magic == bswap_16 (CTF_MAGIC))
+  if (format == IS_UNKNOWN)
     {
-      format = pp->ctp_version;
-      foreign_endian = 1;
+      if (pp->ctp_magic == CTF_MAGIC)
+	format = pp->ctp_version;
+      else if (format == IS_UNKNOWN && pp->ctp_magic == bswap_16 (CTF_MAGIC))
+	{
+	  format = pp->ctp_version;
+	  foreign_endian = 1;
+	}
+      else
+	return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
     }
-  else
-    return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
 
   if (format != IS_UNKNOWN && format < IS_BTF)
     {

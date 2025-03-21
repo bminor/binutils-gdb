@@ -661,7 +661,7 @@ ctf_type_kind_next (ctf_dict_t *fp, ctf_next_t **it, int kind)
       *it = i;
     }
 
-  if ((void (*) (void)) ctf_type_next != i->ctn_iter_fun)
+  if ((void (*) (void)) ctf_type_kind_next != i->ctn_iter_fun)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
 
   if (fp != i->cu.ctn_fp)
