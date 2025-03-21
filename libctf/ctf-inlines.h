@@ -90,6 +90,10 @@ ctf_assert_internal (ctf_dict_t *fp, const char *file, size_t line,
   return expr;
 }
 
+/* Un-inline these functions if debugging, so you can drop breakpoints on the
+   setting of any error anywhere by the library.  */
+
+#ifndef ENABLE_LIBCTF_HASH_DEBUGGING
 static inline int
 ctf_set_errno (ctf_dict_t *fp, int err)
 {
@@ -105,7 +109,10 @@ ctf_set_typed_errno (ctf_dict_t *fp, int err)
   fp->ctf_errno = err;
   return CTF_ERR;
 }
-
+#else
+extern int ctf_set_errno (ctf_dict_t *fp, int err);
+extern ctf_id_t ctf_set_typed_errno (ctf_dict_t *fp, int err);
+#endif
 
 #ifdef	__cplusplus
 }
