@@ -205,7 +205,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   size_t nmemb;
   unsigned char *vlen;
   ctf_next_t *i = *it;
-  const ctf_type_t *prefix;
+  const ctf_type_t *prefix, *tp;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -233,7 +233,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       i->u.ctn_dtd = ctf_dynamic_type (fp, type);
 
       i->ctn_iter_fun = (void (*) (void)) ctf_member_next;
-      i->ctn_n = LCTF_VLEN (fp, tp);
+      i->ctn_n = 0;
       *it = i;
     }
 
@@ -257,6 +257,10 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 
   if ((prefix = ctf_find_prefix (fp, i->ctn_tp, CTF_K_BIG)) == NULL)
     prefix = i->ctn_tp;
+  tp = prefix;
+
+  while (LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info)))
+    tp++;
 
   /* When we hit an unnamed struct/union member, we set ctn_type to indicate
      that we are inside one, then return the unnamed member: on the next call,
@@ -287,13 +291,13 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 	*membtype = memb[i->ctn_n].ctm_type;
       if (bit_width)
 	{
-	  if (CTF_INFO_KFLAG (i->ctn_tp->ctt_info))
+	  if (CTF_INFO_KFLAG (tp->ctt_info))
 	    *bit_width = CTF_MEMBER_BIT_SIZE (memb[i->ctn_n].ctm_offset);
 	  else
 	    *bit_width = 0;
 	}
 
-      if (CTF_INFO_KFLAG (i->ctn_tp->ctt_info))
+      if (CTF_INFO_KFLAG (tp->ctt_info))
 	offset = CTF_MEMBER_BIT_OFFSET (memb[i->ctn_n].ctm_offset);
       else
 	offset = memb[i->ctn_n].ctm_offset;
@@ -301,7 +305,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       /* CTF_K_BIG offsets are gap sizes: convert to offset-from-start.
 	 Keep track of the offset-so-far in ctn_size.  */
 
-      if (prefix != i->ctn_tp)
+      if (prefix != tp)
 	{
 	  i->ctn_size += offset;
 	  offset = i->ctn_size;
