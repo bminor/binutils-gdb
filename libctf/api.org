@@ -134,6 +134,9 @@ implemented, prototype only)
   _CTF_ITEM (ECTF_KIND_PROHIBITED, "Writeout of suppressed kind attempted.")
   _CTF_ITEM (ECTF_NOTBTF, "Cannot write out this dict as BTF.")
 
+A bit of reshuffling of the constants to put ECTF_NEXT_END at the top, for
+easier use in breakpoint conditions.
+
 *** Removals (never generated)
 
 ECTF_NOLABEL

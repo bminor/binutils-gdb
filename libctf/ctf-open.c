@@ -117,7 +117,7 @@ get_prefixed_kind_v4 (const ctf_type_t *tp)
 static uint32_t
 get_root_v4 (uint32_t info)
 {
-  return (CTF_INFO_KIND (info) == CTF_K_CONFLICTING);
+  return (CTF_INFO_KIND (info) != CTF_K_CONFLICTING);
 }
 
 static uint32_t
@@ -221,6 +221,9 @@ get_ctt_size_v4 (const ctf_dict_t *fp _libctf_unused_, const ctf_type_t *tp,
   /* Figure out how many prefixes there are, and adjust the size appropriately
      if we pass a BIG.  */
 
+  if (incrementp)
+    *incrementp = 0;
+
   while (LCTF_IS_PREFIXED_KIND (tp->ctt_info))
     {
       if (CTF_INFO_KIND (tp->ctt_info) == CTF_K_BIG)
@@ -231,6 +234,9 @@ get_ctt_size_v4 (const ctf_dict_t *fp _libctf_unused_, const ctf_type_t *tp,
 
       tp++;
     }
+
+  if (incrementp)
+    *incrementp += sizeof (ctf_type_t);
 
   size |= tp->ctt_size;
 
@@ -597,7 +603,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
     }
 
   tbuf = (ctf_type_t *) (fp->ctf_buf + cth->btf.bth_type_off);
-  tend = (ctf_type_t *) (tbuf + cth->btf.bth_type_len);
+  tend = (ctf_type_t *) ((uintptr_t) tbuf + cth->btf.bth_type_len);
 
   /* We make two passes through the entire type section, and one third pass
      through part of it: but only the first is guaranteed to happen at this
@@ -809,7 +815,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
   int child = cth->cth_parent_name != 0;
 
   tbuf = (ctf_type_t *) (fp->ctf_buf + cth->btf.bth_type_off);
-  tend = (ctf_type_t *) (tbuf + cth->btf.bth_type_len);
+  tend = (ctf_type_t *) ((uintptr_t) tbuf + cth->btf.bth_type_len);
 
   assert (!(fp->ctf_flags & LCTF_NO_STR));
 
@@ -1155,7 +1161,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	  if (err != 0)
 	    return err * -1;
 	}
-      if (err != ECTF_NEXT_END)
+      if (ctf_errno (fp) != ECTF_NEXT_END)
 	{
 	  ctf_next_destroy (i);
 	  return ctf_errno (fp);

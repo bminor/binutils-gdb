@@ -850,8 +850,6 @@ ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
 			      sizeof (ctf_array_t), 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  memset (&cta, 0, sizeof (ctf_array_t));
-
   cta = (ctf_array_t *) dtd->dtd_vlen;
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_ARRAY, 0, 0);
   dtd->dtd_data->ctt_size = 0;
