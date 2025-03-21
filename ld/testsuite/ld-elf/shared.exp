@@ -1664,7 +1664,7 @@ proc mix_pic_and_non_pic {xfails cflags ldflags exe} {
 
     run_ld_link_exec_tests [list \
 	[list \
-	    "Run $exe fun defined" \
+	    "Run $exe fun undefined" \
 	    "-Wl,--no-as-needed,-rpath,tmpdir $ldflags tmpdir/libpr19719b.o tmpdir/libpr19719.so" \
 	    "" \
 	    { pr19719a.c pr19719c.c } \
@@ -1682,15 +1682,15 @@ proc mix_pic_and_non_pic {xfails cflags ldflags exe} {
     }
 
     if ![isnative] {
-	unsupported "Run $exe fun undefined"
+	unsupported "Run $exe fun defined"
 	return
     }
 
     set exec_output [run_host_cmd "tmpdir/$exe" ""]
     if {![string match "PASS\n" $exec_output]} {
-	fail "Run $exe fun undefined"
+	fail "Run $exe fun defined"
     } else {
-	pass "Run $exe fun undefined"
+	pass "Run $exe fun defined"
     }
 }
 
