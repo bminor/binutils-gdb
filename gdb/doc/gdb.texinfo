@@ -13046,6 +13046,18 @@ variable which may be @samp{truecolor} or @samp{24bit}. Other color spaces are
 determined by the "Co" termcap which in turn depends on the @env{TERM}
 environment variable.
 
+@vindex $_active_linker_namespaces@r{, convenience variable}
+@item $_active_linker_namespaces
+Number of active linkage namespaces in the inferior.  In systems with no
+support for linkage namespaces, this variable will always be set to @samp{1}.
+
+@vindex $_current_linker_namespace@r{, convenience variable}
+@item $_current_linker_namespace
+The namespace which contains the current location in the inferior.  This
+returns GDB's internal identifier for namespaces, which is @samp{[[@var{n}]]}
+where @var{n} is a zero-based namespace number.  In systems with no support
+for linkage namespaces, this variable will always be set to @samp{[[0]]}.
+
 @end table
 
 @node Convenience Funs

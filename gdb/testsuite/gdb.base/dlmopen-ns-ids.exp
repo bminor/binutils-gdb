@@ -105,4 +105,59 @@ proc test_info_shared {} {
 	"after unloading everything"
 }
 
+# Run all tests related to the linkage namespaces convenience
+# variables, _active_namespaces and _current_namespaces.
+proc_with_prefix test_conv_vars {} {
+    clean_restart $::binfile
+
+    gdb_test "print \$_active_linker_namespaces" "1" \
+	"1 namespace before starting inferior"
+    gdb_test "print \$_current_linker_namespace" "No registers." \
+	"No current namespace before starting inferior"
+
+    if { ![runto_main] } {
+	return
+    }
+
+    gdb_test "print \$_active_linker_namespaces" "1" \
+	"Before activating namespaces"
+    gdb_test "print \$_current_linker_namespace" ".*\"\\\[\\\[0\\\]\\\]\"" \
+	"Still in the default namespace"
+
+    gdb_breakpoint "inc" allow-pending
+    gdb_breakpoint [gdb_get_line_number "TAG: first dlclose"]
+
+    foreach_with_prefix dl {3 2 1} {
+	gdb_continue_to_breakpoint "inc"
+
+	gdb_test "print \$_current_linker_namespace" ".*\"\\\[\\\[$dl\\\]\\\]\"" \
+	    "Verify we're in namespace $dl"
+    }
+
+    gdb_continue_to_breakpoint "first dlclose"
+    gdb_test "print \$_active_linker_namespaces" "4" "all SOs loaded"
+
+    gdb_test "next" ".*second dlclose.*" "close one SO"
+    gdb_test "print \$_active_linker_namespaces" "3" "one SOs unloaded"
+    gdb_test "next" ".*third dlclose.*" "close another SO"
+    gdb_test "print \$_active_linker_namespaces" "2" "two SOs unloaded"
+
+    # Restarting GDB so that we can test setting a breakpoint
+    # using the convenience variable, while a proper bp syntax
+    # isn't implemented for namespaces
+    clean_restart $::binfile
+    if {![runto_main]} {
+	return
+    }
+
+    # We need to load one SO because you can't have confitional
+    # breakpoints and pending breakpoints at the same time with
+    # gdb_breakpoint.
+    gdb_test "next" ".*assert.*" "load the first SO"
+    gdb_breakpoint "inc if \$_streq(\$_current_linker_namespace, \"\[\[2\]\]\")"
+    gdb_continue_to_breakpoint "inc"
+    gdb_continue_to_end "" continue 1
+}
+
 test_info_shared
+test_conv_vars

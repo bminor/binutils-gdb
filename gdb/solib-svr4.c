@@ -451,6 +451,12 @@ svr4_maybe_add_namespace (svr4_info *info, CORE_ADDR lmid)
     info->namespace_id.push_back (lmid);
 
   info->active_namespaces.insert (i);
+
+  /* Create or update the convenience variable "active_namespaces".
+     It only needs to be updated here, as this only changes when a
+     dlmopen or dlclose call happens.  */
+  set_internalvar_integer (lookup_internalvar ("_active_linker_namespaces"),
+			   info->active_namespaces.size ());
 }
 
 /* Return whether DEBUG_BASE is the default namespace of INFO.  */

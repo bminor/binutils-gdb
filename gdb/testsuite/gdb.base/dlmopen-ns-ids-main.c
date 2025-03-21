@@ -41,6 +41,12 @@ main (void)
   handle[2] = dlmopen (LM_ID_NEWLM, DSO_NAME, RTLD_LAZY | RTLD_LOCAL);
   assert (handle[2] != NULL);
 
+  for (dl = 2; dl >= 0; dl--)
+    {
+      fun = dlsym (handle[dl], "inc");
+      fun (dl);
+    }
+
   dlclose (handle[0]); /* TAG: first dlclose */
   dlclose (handle[1]); /* TAG: second dlclose */
   dlclose (handle[2]); /* TAG: third dlclose */
