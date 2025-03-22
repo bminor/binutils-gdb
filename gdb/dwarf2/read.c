@@ -1282,7 +1282,7 @@ dwarf2_has_info (struct objfile *objfile,
 	 BFD, to avoid races.  */
       try
 	{
-	  dwarf2_read_dwz_file (per_objfile);
+	  dwz_file::read_dwz_file (per_objfile);
 	}
       catch (const gdb_exception_error &err)
 	{

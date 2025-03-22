@@ -34,7 +34,9 @@
 const char *
 dwz_file::read_string (struct objfile *objfile, LONGEST str_offset)
 {
-  str.read (objfile);
+  /* This must be true because the sections are read in when the
+     dwz_file is created.  */
+  gdb_assert (str.readin);
 
   if (str.buffer == NULL)
     error (_("DW_FORM_GNU_strp_alt used without .debug_str "
@@ -177,7 +179,7 @@ dwz_search_other_debugdirs (std::string &filename, bfd_byte *buildid,
 /* See dwz.h.  */
 
 void
-dwarf2_read_dwz_file (dwarf2_per_objfile *per_objfile)
+dwz_file::read_dwz_file (dwarf2_per_objfile *per_objfile)
 {
   bfd_size_type buildid_len_arg;
   size_t buildid_len;
@@ -261,7 +263,7 @@ dwarf2_read_dwz_file (dwarf2_per_objfile *per_objfile)
     error (_("could not find '.gnu_debugaltlink' file for %s"),
 	   per_bfd->filename ());
 
-  auto result = std::make_unique<dwz_file> (std::move (dwz_bfd));
+  dwz_file_up result (new dwz_file (std::move (dwz_bfd)));
 
   for (asection *sec : gdb_bfd_sections (result->dwz_bfd))
     locate_dwz_sections (per_objfile->objfile, result->dwz_bfd.get (),
