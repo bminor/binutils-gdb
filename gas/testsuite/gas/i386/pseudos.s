@@ -408,3 +408,31 @@ _start:
 	.code16
 	{disp16} jmp .
 	.byte -1, -1
+
+	.att_syntax prefix
+	.code32
+{noimm8s} addl	$0,(%ebx)
+{noimm8s} addl	$255,(%ebx)
+{noimm8s} addw	$0,(%ebx)
+{noimm8s} addw	$255,(%ebx)
+{noimm8s} addb	$0,(%ebx)
+{noimm8s} addb	$255,(%ebx)
+{noimm8s} add	$0,%ebx
+{noimm8s} add	$255,%ebx
+{noimm8s} add	$0,%bx
+{noimm8s} add	$255,%bx
+{noimm8s} add	$0,%bl
+{noimm8s} add	$255,%bl
+{noimm8s} movl	$0,(%ebx)
+{noimm8s} movl	$255,(%ebx)
+{noimm8s} movw	$0,(%ebx)
+{noimm8s} movw	$255,(%ebx)
+{noimm8s} movb	$0,(%ebx)
+{noimm8s} movb	$255,(%ebx)
+{noimm8s} mov	$0,%ebx
+{noimm8s} mov	$255,%ebx
+{noimm8s} mov	$0,%bx
+{noimm8s} mov	$255,%bx
+{noimm8s} mov	$0,%bl
+{noimm8s} mov	$255,%bl
+{noimm8s} rol	$255,%ebx

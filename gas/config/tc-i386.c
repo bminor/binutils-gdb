@@ -513,6 +513,9 @@ static struct pseudo_prefixes {
     disp_encoding_32bit
   } disp_encoding;
 
+  /* Exclude sign-extended 8bit immediate in encoding.  */
+  bool no_imm8s;
+
   /* Prefer the REX byte in encoding.  */
   bool rex_encoding;
 
@@ -2589,6 +2592,19 @@ operand_size_match (const insn_template *t)
   /* Check memory and accumulator operand size.  */
   for (j = 0; j < i.operands; j++)
     {
+      /* Instruction templates with only sign-extended 8-bit immediate
+	 operand also have a second template with full-operand-size
+	 immediate operand under a different opcode.  Don't match the
+	 first template if sign-extended 8-bit immediate operand should
+	 be excluded.  */
+      if (pp.no_imm8s
+	  && !t->operand_types[j].bitfield.imm8
+	  && t->operand_types[j].bitfield.imm8s)
+	{
+	  match = 0;
+	  break;
+	}
+
       if (i.types[j].bitfield.class != Reg
 	  && i.types[j].bitfield.class != RegSIMD
 	  && t->opcode_modifier.operandconstraint == ANY_SIZE)
@@ -7763,6 +7779,10 @@ parse_insn (const char *line, char *mnemonic, enum parse_mode mode)
 		case Prefix_NoOptimize:
 		  /* {nooptimize} */
 		  pp.no_optimize = true;
+		  break;
+		case Prefix_NoImm8s:
+		  /* {noimm8s} */
+		  pp.no_imm8s = true;
 		  break;
 		default:
 		  abort ();

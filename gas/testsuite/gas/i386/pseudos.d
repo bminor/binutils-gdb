@@ -443,4 +443,29 @@ Disassembly of section .text:
  +[a-f0-9]+:	67 8a 86 00 00       	mov    0x0\(%bp\),%al
  +[a-f0-9]+:	e9 fb ff ff ff       	jmp    [0-9a-f]* <.*>
  +[a-f0-9]+:	e9 fd ff ff ff       	jmp    [0-9a-f]* <.*>
+ +[a-f0-9]+:	81 03 00 00 00 00    	addl   \$0x0,\(%ebx\)
+ +[a-f0-9]+:	81 03 ff 00 00 00    	addl   \$0xff,\(%ebx\)
+ +[a-f0-9]+:	66 81 03 00 00       	addw   \$0x0,\(%ebx\)
+ +[a-f0-9]+:	66 81 03 ff 00       	addw   \$0xff,\(%ebx\)
+ +[a-f0-9]+:	80 03 00             	addb   \$0x0,\(%ebx\)
+ +[a-f0-9]+:	80 03 ff             	addb   \$0xff,\(%ebx\)
+ +[a-f0-9]+:	81 c3 00 00 00 00    	add    \$0x0,%ebx
+ +[a-f0-9]+:	81 c3 ff 00 00 00    	add    \$0xff,%ebx
+ +[a-f0-9]+:	66 81 c3 00 00       	add    \$0x0,%bx
+ +[a-f0-9]+:	66 81 c3 ff 00       	add    \$0xff,%bx
+ +[a-f0-9]+:	80 c3 00             	add    \$0x0,%bl
+ +[a-f0-9]+:	80 c3 ff             	add    \$0xff,%bl
+ +[a-f0-9]+:	c7 03 00 00 00 00    	movl   \$0x0,\(%ebx\)
+ +[a-f0-9]+:	c7 03 ff 00 00 00    	movl   \$0xff,\(%ebx\)
+ +[a-f0-9]+:	66 c7 03 00 00       	movw   \$0x0,\(%ebx\)
+ +[a-f0-9]+:	66 c7 03 ff 00       	movw   \$0xff,\(%ebx\)
+ +[a-f0-9]+:	c6 03 00             	movb   \$0x0,\(%ebx\)
+ +[a-f0-9]+:	c6 03 ff             	movb   \$0xff,\(%ebx\)
+ +[a-f0-9]+:	bb 00 00 00 00       	mov    \$0x0,%ebx
+ +[a-f0-9]+:	bb ff 00 00 00       	mov    \$0xff,%ebx
+ +[a-f0-9]+:	66 bb 00 00          	mov    \$0x0,%bx
+ +[a-f0-9]+:	66 bb ff 00          	mov    \$0xff,%bx
+ +[a-f0-9]+:	b3 00                	mov    \$0x0,%bl
+ +[a-f0-9]+:	b3 ff                	mov    \$0xff,%bl
+ +[a-f0-9]+:	c1 c3 ff             	rol    \$0xff,%ebx
 #pass

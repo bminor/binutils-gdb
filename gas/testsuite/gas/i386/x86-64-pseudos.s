@@ -504,3 +504,37 @@ _start:
 	{disp32} mov al, BYTE PTR [r13d]
 
 	.insn {rex} 0x8a, al, cl
+
+	.att_syntax prefix
+{noimm8s} addq	$0,(%rbx)
+{noimm8s} addq	$255,(%rbx)
+{noimm8s} addl	$0,(%rbx)
+{noimm8s} addl	$255,(%rbx)
+{noimm8s} addw	$0,(%rbx)
+{noimm8s} addw	$255,(%rbx)
+{noimm8s} addb	$0,(%rbx)
+{noimm8s} addb	$255,(%rbx)
+{noimm8s} add	$0,%rbx
+{noimm8s} add	$255,%rbx
+{noimm8s} add	$0,%ebx
+{noimm8s} add	$255,%ebx
+{noimm8s} add	$0,%bx
+{noimm8s} add	$255,%bx
+{noimm8s} add	$0,%bl
+{noimm8s} add	$255,%bl
+{noimm8s} movq	$0,(%rbx)
+{noimm8s} movq	$255,(%rbx)
+{noimm8s} movl	$0,(%rbx)
+{noimm8s} movl	$255,(%rbx)
+{noimm8s} movw	$0,(%rbx)
+{noimm8s} movw	$255,(%rbx)
+{noimm8s} movb	$0,(%rbx)
+{noimm8s} movb	$255,(%rbx)
+{noimm8s} mov	$0,%ebx
+{noimm8s} mov	$255,%ebx
+{noimm8s} mov	$0,%bx
+{noimm8s} mov	$255,%bx
+{noimm8s} mov	$0,%bl
+{noimm8s} mov	$255,%bl
+{noimm8s} rol	$255,%rbx
+{noimm8s} rol	$255,%ebx

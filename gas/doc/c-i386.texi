@@ -1046,6 +1046,9 @@ prefix which generates REX prefix unconditionally.
 instructions (APX_F only).
 
 @item
+@samp{@{noimm8s@}} -- exclude sign-extended 8-bit immediate.
+
+@item
 @samp{@{nooptimize@}} -- disable instruction size optimization.
 @end itemize
 
