@@ -1,0 +1,15 @@
+# lookup: open-and-dump.c
+# source: type-tag.c
+
+#...
+Section \.bss:
+
+  0: 0x2: foo: 0x3: \(kind 18\) ttag .* -> 0x1: \(kind 1\) int .*
+
+Types: 
+
+0x1: \(kind 1\) int .*
+0x2: \(kind 14\) foo .* -> 0x3: \(kind 18\) ttag .* -> 0x1: \(kind 1\) int .*
+0x3: \(kind 18\) ttag .* -> 0x1: \(kind 1\) int .*
+0x4: \(kind 15\) DATASEC \(".bss"\)
+
