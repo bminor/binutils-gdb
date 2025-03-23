@@ -17,3 +17,6 @@ Disassembly of section .text:
   18:	60000080 	blt         	\$a0, \$zero, 0	# 18 <L1\+0x18>
   1c:	64000080 	bge         	\$a0, \$zero, 0	# 1c <L1\+0x1c>
   20:	64000004 	bge         	\$zero, \$a0, 0	# 20 <L1\+0x20>
+  24:	00006004 	rdtimel.w   	\$a0, \$zero
+  28:	000060a0 	rdtimel.w   	\$zero, \$a1
+  2c:	00006406 	rdtimeh.w   	\$a2, \$zero

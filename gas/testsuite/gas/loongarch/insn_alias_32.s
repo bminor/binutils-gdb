@@ -8,3 +8,8 @@ L1:
   bltz  $a0,.L1
   bgez  $a0,.L1
   blez  $a0,.L1
+
+  # LA32R aliases
+  rdcntvl.w $a0
+  rdcntid.w $a1
+  rdcntvh.w $a2
