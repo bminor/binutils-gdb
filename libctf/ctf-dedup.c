@@ -164,10 +164,11 @@
    same type if they have the same name; so decl tags to one conflicting
    structure in several different inputs can be considered unconflicting even
    though they are citing a specific member in an input struct, as long as that
-   member has the same number in both!  So we pay a small efficiency cost and
-   generate a citers graph from decl tags to struct/union members specifically
-   so that when structs or unions are marked conflicted, we chase down all
-   the decl tags that cite any of their members and mark them confliocted too.
+   member has the same component index in both!  So we pay a small efficiency
+   cost and generate a citers graph from decl tags to struct/union members
+   specifically, so that when structs or unions are marked conflicted, we chase
+   down all the decl tags that cite any of their members and mark them conflicted
+   too.
 
    2) COLLISIONAL MARKING.
 
@@ -190,14 +191,14 @@
    Datasecs are again ignored, and so are tags: their names are always
    nonconflicting.
 
-   [ctf_dedup_propagate_conflictedness]
    The process of marking types conflicted is itself recursive: we recursively
    traverse the cd_citers graph populated in the hashing pass above and mark
    everything that we encounter conflicted (without wasting time re-marking
    anything that is already marked).  This naturally terminates just where we
    want it to (at types that are cited by no other types, and at structures and
    unions) and suffices to ensure that types that cite conflicted types are
-   always marked conflicted.
+   always marked conflicted.  We also do a single-step nonrecursive marking
+   of decl tags that refer to conflicted structures, as noted above.
 
    [ctf_dedup_conflictify_unshared, ctf_dedup_multiple_input_dicts]
    When linking in CTF_LINK_SHARE_DUPLICATED mode, we would like all types that
