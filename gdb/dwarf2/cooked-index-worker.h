@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_DWARF2_COOKED_INDEX_STORAGE_H
-#define GDB_DWARF2_COOKED_INDEX_STORAGE_H
+#ifndef GDB_DWARF2_COOKED_INDEX_WORKER_H
+#define GDB_DWARF2_COOKED_INDEX_WORKER_H
 
 #include "dwarf2/abbrev-table-cache.h"
 #include "dwarf2/cooked-index.h"
@@ -128,4 +128,4 @@ private:
   addrmap_mutable m_addrmap;
 };
 
-#endif /* GDB_DWARF2_COOKED_INDEX_STORAGE_H */
+#endif /* GDB_DWARF2_COOKED_INDEX_WORKER_H */

@@ -17,16 +17,16 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "dwarf2/cooked-index-storage.h"
+#include "dwarf2/cooked-index-worker.h"
 
-/* See cooked-index-storage.h.  */
+/* See cooked-index-worker.h.  */
 
 cooked_index_storage::cooked_index_storage ()
   : m_shard (new cooked_index_shard)
 {
 }
 
-/* See cooked-index-storage.h.  */
+/* See cooked-index-worker.h.  */
 
 cutu_reader *
 cooked_index_storage::get_reader (dwarf2_per_cu *per_cu)
@@ -35,7 +35,7 @@ cooked_index_storage::get_reader (dwarf2_per_cu *per_cu)
   return it != m_reader_hash.end () ? it->get () : nullptr;
 }
 
-/* See cooked-index-storage.h.  */
+/* See cooked-index-worker.h.  */
 
 cutu_reader *
 cooked_index_storage::preserve (cutu_reader_up reader)
@@ -48,7 +48,7 @@ cooked_index_storage::preserve (cutu_reader_up reader)
   return it->get();
 }
 
-/* See cooked-index-storage.h.  */
+/* See cooked-index-worker.h.  */
 
 std::uint64_t
 cooked_index_storage::cutu_reader_hash::operator()
@@ -57,7 +57,7 @@ cooked_index_storage::cutu_reader_hash::operator()
   return (*this) (*reader->cu ()->per_cu);
 }
 
-/* See cooked-index-storage.h.  */
+/* See cooked-index-worker.h.  */
 
 std::uint64_t
 cooked_index_storage::cutu_reader_hash::operator() (const dwarf2_per_cu &per_cu)
@@ -66,7 +66,7 @@ cooked_index_storage::cutu_reader_hash::operator() (const dwarf2_per_cu &per_cu)
   return per_cu.index;
 }
 
-/* See cooked-index-storage.h.  */
+/* See cooked-index-worker.h.  */
 
 bool
 cooked_index_storage::cutu_reader_eq::operator() (const cutu_reader_up &a,
@@ -75,7 +75,7 @@ cooked_index_storage::cutu_reader_eq::operator() (const cutu_reader_up &a,
   return (*this) (*a->cu ()->per_cu, b);
 }
 
-/* See cooked-index-storage.h.  */
+/* See cooked-index-worker.h.  */
 
 bool cooked_index_storage::cutu_reader_eq::operator()
   (const dwarf2_per_cu &per_cu, const cutu_reader_up &reader) const noexcept

@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "dwarf2/cooked-indexer.h"
-#include "dwarf2/cooked-index-storage.h"
+#include "dwarf2/cooked-index-worker.h"
 #include "dwarf2/error.h"
 
 /* See cooked-indexer.h.  */
