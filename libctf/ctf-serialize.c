@@ -1009,8 +1009,9 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
       while (kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
 	     LCTF_IS_PREFIXED_KIND (kind))
 	{
-	  if (ctf_dynset_lookup (fp->ctf_write_suppressions,
-				 (const void *) (uintptr_t) kind) == NULL)
+	  if (!fp->ctf_write_suppressions
+	      || ctf_dynset_lookup (fp->ctf_write_suppressions,
+				    (const void *) (uintptr_t) kind) == NULL)
 	    {
 	      if (_libctf_btf_mode == LIBCTF_BTM_BTF)
 		{
@@ -1028,8 +1029,9 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	}
 
       kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info);
-      if (ctf_dynset_lookup (fp->ctf_write_suppressions,
-			     (const void *) (uintptr_t) kind) != NULL)
+      if (fp->ctf_write_suppressions
+	  && ctf_dynset_lookup (fp->ctf_write_suppressions,
+				(const void *) (uintptr_t) kind) != NULL)
 	suppress = 1;
 
       if (suppress)
