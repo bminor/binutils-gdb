@@ -3829,8 +3829,14 @@ ldlang_open_ctf (void)
       /* Prevent the contents of this section from being written, while
 	 requiring the section itself to be duplicated in the output, but only
 	 once.  */
-      /* This section must exist if ctf_bfdopen() succeeded.  */
-      sect = bfd_get_section_by_name (file->the_bfd, ".ctf");
+      /* One of these sections must exist if ctf_bfdopen() succeeded.  */
+      if ((sect = bfd_get_section_by_name (file->the_bfd, ".ctf")) == NULL)
+	{
+	  sect = bfd_get_section_by_name (file->the_bfd, ".BTF");
+	  /* UPTODO don't keep this kludge */
+	  ctf_version (CTF_VERSION, sizeof (ctf_btf_header_t), LIBCTF_BTM_BTF);
+	}
+
       sect->size = 0;
       sect->flags |= SEC_NEVER_LOAD | SEC_HAS_CONTENTS | SEC_LINKER_CREATED;
 
@@ -3867,7 +3873,8 @@ lang_merge_ctf (void)
   if (!ctf_output)
     return;
 
-  output_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf");
+  if ((output_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf")) == NULL)
+    output_sect = bfd_get_section_by_name (link_info.output_bfd, ".BTF");
 
   /* If the section was discarded, don't waste time merging.  */
   if (output_sect == NULL)
@@ -3948,6 +3955,7 @@ lang_write_ctf (int late)
 {
   size_t output_size;
   asection *output_sect;
+  int compression_threshold = CTF_COMPRESSION_THRESHOLD;
 
   if (!ctf_output)
     return;
@@ -3969,13 +3977,19 @@ lang_write_ctf (int late)
 
   ldemul_new_dynsym_for_ctf (ctf_output, 0, NULL);
 
-  /* Emit CTF.  */
+  /* Emit CTF or BTF, whichever was used (we do not support or even check using
+     both yet).  BTF has no compression.  */
 
-  output_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf");
+  if ((output_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf")) == NULL)
+    {
+      output_sect = bfd_get_section_by_name (link_info.output_bfd, ".BTF");
+      compression_threshold = 0;
+    }
+
   if (output_sect)
     {
       output_sect->contents = ctf_link_write (ctf_output, &output_size,
-					      CTF_COMPRESSION_THRESHOLD);
+					      compression_threshold);
       output_sect->size = output_size;
       output_sect->flags |= SEC_IN_MEMORY | SEC_KEEP;
 
@@ -4015,14 +4029,15 @@ ldlang_open_ctf (void)
     {
       asection *sect;
 
-      /* If built without CTF, warn and delete all CTF sections from the output.
-	 (The alternative would be to simply concatenate them, which does not
-	 yield a valid CTF section.)  */
+      /* If built without CTF or BTF, warn and delete all CTF sections from the
+	 output.  (The alternative would be to simply concatenate them, which
+	 does not yield a valid CTF section.)  */
 
-      if ((sect = bfd_get_section_by_name (file->the_bfd, ".ctf")) != NULL)
+      if (((sect = bfd_get_section_by_name (file->the_bfd, ".ctf")) != NULL) ||
+	  ((sect = bfd_get_section_by_name (file->the_bfd, ".BTF")) != NULL))
 	{
-	    einfo (_("%P: warning: CTF section in %pB not linkable: "
-		     "%P was built without support for CTF\n"), file->the_bfd);
+	    einfo (_("%P: warning: BTF or CTF section in %pB not linkable: "
+		     "%P was built without support for libctf\n"), file->the_bfd);
 	    sect->size = 0;
 	    sect->flags |= SEC_EXCLUDE;
 	}
@@ -8564,7 +8579,7 @@ lang_process (void)
 	}
     }
 
-  /* Merge together CTF sections.  After this, only the symtab-dependent
+  /* Merge together CTF and BTF sections.  After this, only the symtab-dependent
      function and data object sections need adjustment.  */
   lang_merge_ctf ();
 

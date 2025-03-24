@@ -3305,12 +3305,14 @@ extern asection _bfd_elf_large_com_section;
 	 || (H)->start_stop \
 	 || ((INFO)->dynamic && !(H)->dynamic)))
 
-/* Determine if a section contains CTF data, using its name.  */
+/* Determine if a section contains data deduplicable using the libctf
+   deduplicator, using its name.  */
 static inline bool
-bfd_section_is_ctf (const asection *sec)
+bfd_section_is_libctf_deduppable (const asection *sec)
 {
   const char *name = bfd_section_name (sec);
-  return startswith (name, ".ctf") && (name[4] == 0 || name[4] == '.');
+  return (startswith (name, ".ctf") || startswith (name, ".BTF"))
+    && (name[4] == 0 || name[4] == '.');
 }
 
 #ifdef __cplusplus
