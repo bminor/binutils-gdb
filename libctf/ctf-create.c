@@ -1892,6 +1892,9 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   if (name == NULL || name[0] == '\0')
     return (ctf_set_typed_errno (fp, ECTF_NONAME));
 
+  if (linkage < 0 || linkage > 2)
+    return (ctf_set_typed_errno (fp, ECTF_LINKAGE));
+
   /* Dynamically added variables go into the unnamed datasec by default.  */
   if (datasec == NULL)
     datasec = "";
