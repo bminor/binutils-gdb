@@ -4875,12 +4875,22 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name,
   ctf_next_t *i = NULL;
   const char *name;
   size_t member = 0;
+  int try_defaults = 0;
   int err;
 
   if (sect_name == NULL)
-    sect_name = ".ctf";
+    {
+      sect_name = ".ctf";
+      try_defaults = 1;
+    }
 
   sec = read_section (abfd, sect_name, &ctfdata);
+  if (sec == NULL && try_defaults)
+    {
+      sect_name = ".BTF";
+      sec = read_section (abfd, sect_name, &ctfdata);
+    }
+
   if (sec == NULL)
     {
       my_bfd_nonfatal (bfd_get_filename (abfd));
