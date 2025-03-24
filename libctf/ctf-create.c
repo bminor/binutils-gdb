@@ -1885,6 +1885,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   ctf_dict_t *tmp = fp;
   ctf_id_t datasec_id = 0;
   int is_incomplete = 0;
+  ctf_snapshot_id_t err_snap = ctf_snapshot (fp);
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
@@ -1898,23 +1899,6 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   /* Dynamically added variables go into the unnamed datasec by default.  */
   if (datasec == NULL)
     datasec = "";
-
-  /* This actually deals with many possible malformed calls.  */
-
-  if ((datasec_id = ctf_lookup_by_rawname (fp, CTF_K_DATASEC, datasec)) == 0)
-    {
-      if ((datasec_id = ctf_add_datasec (fp, CTF_ADD_ROOT, datasec)) == CTF_ERR)
-	return CTF_ERR;			/* errno is set for us.  */
-    }
-
-  sec_dtd = ctf_dtd_lookup (fp, datasec_id);
-
-  kind = LCTF_KIND (fp, sec_dtd->dtd_buf);
-  kflag = CTF_INFO_KFLAG (sec_dtd->dtd_data->ctt_info);  
-  vlen = LCTF_VLEN (fp, sec_dtd->dtd_buf);
-
-  if (vlen == CTF_MAX_RAW_VLEN)
-    return (ctf_set_typed_errno (fp, ECTF_DTFULL));
 
   if (ctf_lookup_by_rawname (fp, CTF_K_VAR, name) != 0)
     return (ctf_set_typed_errno (fp, ECTF_DUPLICATE));
@@ -1941,13 +1925,31 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   var_dtd->dtd_data->ctt_type = type;
   l->ctl_linkage = linkage;
 
-  /* Add it to the datasec.  */
+  /* Add it to the datasec, creating the datasec if need be.  */
+
+  if ((datasec_id = ctf_lookup_by_rawname (fp, CTF_K_DATASEC, datasec)) == 0)
+    {
+      if ((datasec_id = ctf_add_datasec (fp, CTF_ADD_ROOT, datasec)) == CTF_ERR)
+	goto err;				/* errno is set for us.  */
+    }
+
+  sec_dtd = ctf_dtd_lookup (fp, datasec_id);
+
+  kind = LCTF_KIND (fp, sec_dtd->dtd_buf);
+  kflag = CTF_INFO_KFLAG (sec_dtd->dtd_data->ctt_info);
+  vlen = LCTF_VLEN (fp, sec_dtd->dtd_buf);
+
+  if (vlen == CTF_MAX_RAW_VLEN)
+    {
+      ctf_set_typed_errno (fp, ECTF_DTFULL);
+      goto err;
+    }
 
   /* DATASECs do not support CTF_K_BIG (yet).  */
   if (vlen == CTF_MAX_RAW_VLEN)
     {
-      ctf_dtd_delete (fp, var_dtd);
-      return (ctf_set_typed_errno (fp, ECTF_DTFULL));
+      ctf_set_typed_errno (fp, ECTF_DTFULL);
+      goto err;
     }
 
   if (ctf_type_align (fp, type) < 0)
@@ -2028,7 +2030,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
 err:
   ctf_dynhash_remove (fp->ctf_var_datasecs,
 		      (void *) (ptrdiff_t) var_dtd->dtd_type);
-  ctf_dtd_delete (fp, var_dtd);
+  ctf_rollback (fp, err_snap);
   return CTF_ERR;
 }
 
