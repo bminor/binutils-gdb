@@ -21,11 +21,10 @@
 #define GDB_DWARF2_COOKED_INDEX_WORKER_H
 
 #include "dwarf2/abbrev-table-cache.h"
-#include "dwarf2/cooked-index.h"
+#include "dwarf2/cooked-index-entry.h"
+#include "dwarf2/cooked-index-shard.h"
 #include "dwarf2/types.h"
-
-struct cutu_reader;
-struct dwarf2_per_cu;
+#include "dwarf2/read.h"
 
 using cutu_reader_up = std::unique_ptr<cutu_reader>;
 
