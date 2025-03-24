@@ -3109,11 +3109,14 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	       depth, hval, ctf_link_input_name (input));
 
   /* Conflicting types go into a per-CU output dictionary, unless this is a
-     CU-mapped run.  The import is not refcounted, since it goes into the
-     ctf_link_outputs dict of the output that is its parent.  */
+     CU-mapped run or the input CU name is empty.  The import is not refcounted,
+     since it goes into the ctf_link_outputs dict of the output that is its
+     parent.  */
   is_conflicting = ctf_dynset_exists (d->cd_conflicting_types, hval, NULL);
 
-  if (is_conflicting && !cu_mapped)
+  if (is_conflicting && !cu_mapped
+      && (ctf_cuname (input) == NULL ||
+	  strcmp (ctf_cuname (input), "") != 0))
     {
       ctf_dprintf ("%i: Type %s in %i/%lx is conflicted: "
 		   "inserting into per-CU target.\n",
