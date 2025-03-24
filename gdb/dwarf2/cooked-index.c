@@ -122,11 +122,8 @@ cooked_index_entry::compare (const char *stra, const char *strb,
 
   /* When completing, if STRB ends earlier than STRA, consider them as
      equal.  */
-  if (mode == COMPLETE || (mode == MATCH && a == munge ('<')))
-    {
-      if (b == '\0')
-	return 0;
-    }
+  if (mode == COMPLETE && b == '\0')
+    return 0;
 
   return a < b ? -1 : 1;
 }
