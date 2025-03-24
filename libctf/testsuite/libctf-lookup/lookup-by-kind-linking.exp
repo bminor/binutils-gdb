@@ -33,12 +33,12 @@ if {[info exists env(LC_ALL)]} {
 }
 set env(LC_ALL) "C"
 
-set ctf_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.lk]]
+set ctf_test_list [lsort [glob -nocomplain $srcdir/$subdir/by-kind/*.lk]]
 
 foreach ctf_test $ctf_test_list {
     verbose [file rootname $ctf_test]
     verbose running lookup test on $ctf_test
-    run_lookup_test [file rootname $ctf_test]
+    run_lookup_test [file rootname $ctf_test ] {link: on}
 }
 
 if {[info exists old_lc_all]} {
