@@ -26,6 +26,11 @@
 #include "dwarf2/types.h"
 #include "dwarf2/read.h"
 
+#if CXX_STD_THREAD
+#include <mutex>
+#include <condition_variable>
+#endif /* CXX_STD_THREAD */
+
 using cutu_reader_up = std::unique_ptr<cutu_reader>;
 
 /* An instance of this is created when scanning DWARF to create a
@@ -130,5 +135,123 @@ private:
   /* A writeable addrmap being constructed by this scanner.  */
   addrmap_mutable m_addrmap;
 };
+
+/* The possible states of the index.  See the explanatory comment
+   before cooked_index for more details.  */
+enum class cooked_state
+{
+  /* The default state.  This is not a valid argument to 'wait'.  */
+  INITIAL,
+  /* The initial scan has completed.  The name of "main" is now
+     available (if known).  The addrmaps are usable now.
+     Finalization has started but is not complete.  */
+  MAIN_AVAILABLE,
+  /* Finalization has completed.  This means the index is fully
+     available for queries.  */
+  FINALIZED,
+  /* Writing to the index cache has finished.  */
+  CACHE_DONE,
+};
+
+/* An object of this type controls the scanning of the DWARF.  It
+   schedules the worker tasks and tracks the current state.  Once
+   scanning is done, this object is discarded.
+
+   This is an abstract base class that defines the basic behavior of
+   scanners.  Separate concrete implementations exist for scanning
+   .debug_names and .debug_info.  */
+
+class cooked_index_worker
+{
+public:
+
+  explicit cooked_index_worker (dwarf2_per_objfile *per_objfile)
+    : m_per_objfile (per_objfile),
+      m_cache_store (global_index_cache, per_objfile->per_bfd)
+  { }
+  virtual ~cooked_index_worker ()
+  { }
+  DISABLE_COPY_AND_ASSIGN (cooked_index_worker);
+
+  /* Start reading.  */
+  void start ();
+
+  /* Wait for a particular state to be achieved.  If ALLOW_QUIT is
+     true, then the loop will check the QUIT flag.  Normally this
+     method may only be called from the main thread; however, it can
+     be called from a worker thread provided that the desired state
+     has already been attained.  (This oddity is used by the index
+     cache writer.)  */
+  bool wait (cooked_state desired_state, bool allow_quit);
+
+protected:
+
+  /* Let cooked_index call the 'set' and 'write_to_cache' methods.  */
+  friend class cooked_index;
+
+  /* Set the current state.  */
+  void set (cooked_state desired_state);
+
+  /* Write to the index cache.  */
+  void write_to_cache (const cooked_index *idx,
+		       deferred_warnings *warn) const;
+
+  /* Helper function that does the work of reading.  This must be able
+     to be run in a worker thread without problems.  */
+  virtual void do_reading () = 0;
+
+  /* A callback that can print stats, if needed.  This is called when
+     transitioning to the 'MAIN_AVAILABLE' state.  */
+  virtual void print_stats ()
+  { }
+
+  /* Each thread returns a tuple holding a cooked index, any collected
+     complaints, a vector of errors that should be printed, and a
+     parent map.
+
+     The errors are retained because GDB's I/O system is not
+     thread-safe.  run_on_main_thread could be used, but that would
+     mean the messages are printed after the prompt, which looks
+     weird.  */
+  using result_type = std::tuple<cooked_index_shard_up,
+				 complaint_collection,
+				 std::vector<gdb_exception>,
+				 parent_map>;
+
+  /* The per-objfile object.  */
+  dwarf2_per_objfile *m_per_objfile;
+  /* Result of each worker task.  */
+  std::vector<result_type> m_results;
+  /* Any warnings emitted.  This is not in 'result_type' because (for
+     the time being at least), it's only needed in do_reading, not in
+     every worker.  Note that deferred_warnings uses gdb_stderr in its
+     constructor, and this should only be done from the main thread.
+     This is enforced in the cooked_index_worker constructor.  */
+  deferred_warnings m_warnings;
+
+  /* A map of all parent maps.  Used during finalization to fix up
+     parent relationships.  */
+  parent_map_map m_all_parents_map;
+
+#if CXX_STD_THREAD
+  /* Current state of this object.  */
+  cooked_state m_state = cooked_state::INITIAL;
+  /* Mutex and condition variable used to synchronize.  */
+  std::mutex m_mutex;
+  std::condition_variable m_cond;
+#endif /* CXX_STD_THREAD */
+  /* This flag indicates whether any complaints or exceptions that
+     arose during scanning have been reported by 'wait'.  This may
+     only be modified on the main thread.  */
+  bool m_reported = false;
+  /* If set, an exception occurred during reading; in this case the
+     scanning is stopped and this exception will later be reported by
+     the 'wait' method.  */
+  std::optional<gdb_exception> m_failed;
+  /* An object used to write to the index cache.  */
+  index_cache_store_context m_cache_store;
+};
+
+using cooked_index_worker_up = std::unique_ptr<cooked_index_worker>;
 
 #endif /* GDB_DWARF2_COOKED_INDEX_WORKER_H */
