@@ -1668,9 +1668,9 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
     return NULL;				/* errno is set for us.  */
 
   if (fp->ctf_serializing_is_btf)
-    hdrlen = sizeof (ctf_header_t);
-  else
     hdrlen = sizeof (ctf_btf_header_t);
+  else
+    hdrlen = sizeof (ctf_header_t);
 
   if (!ctf_assert (fp, rawbufsiz >= hdrlen))
     goto err;
