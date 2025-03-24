@@ -2301,7 +2301,8 @@ proc default_gdb_exit {} {
 	}
     }
 
-    if { [is_remote host] && [board_info host exists fileid] } {
+    if { ([is_remote host] && [board_info host exists fileid])
+	 || [istarget *-*-mingw*] } {
 	send_gdb "quit\n"
 	gdb_expect 10 {
 	    -re "y or n" {
