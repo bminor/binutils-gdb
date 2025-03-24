@@ -728,7 +728,7 @@ show_dwarf_synchronous (struct ui_file *file, int from_tty,
 /* local function prototypes */
 
 static void build_type_psymtabs_reader (cutu_reader *reader,
-					cooked_index_storage *storage);
+					cooked_index_worker_result *storage);
 
 static void var_decode_location (struct attribute *attr,
 				 struct symbol *sym,
@@ -3289,7 +3289,7 @@ get_type_unit_group_key (struct dwarf2_cu *cu, const struct attribute *stmt_list
 static void
 process_psymtab_comp_unit (dwarf2_per_cu *this_cu,
 			   dwarf2_per_objfile *per_objfile,
-			   cooked_index_storage *storage)
+			   cooked_index_worker_result *storage)
 {
   cutu_reader *reader = storage->get_reader (this_cu);
   if (reader == nullptr)
@@ -3326,7 +3326,7 @@ process_psymtab_comp_unit (dwarf2_per_cu *this_cu,
 
 static void
 build_type_psymtabs_reader (cutu_reader *reader,
-			    cooked_index_storage *storage)
+			    cooked_index_worker_result *storage)
 {
   struct dwarf2_cu *cu = reader->cu ();
   dwarf2_per_cu *per_cu = cu->per_cu;
@@ -3379,7 +3379,7 @@ struct tu_abbrev_offset
 
 static void
 build_type_psymtabs (dwarf2_per_objfile *per_objfile,
-		     cooked_index_storage *storage)
+		     cooked_index_worker_result *storage)
 {
   struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
   abbrev_table_up abbrev_table;
@@ -3476,7 +3476,7 @@ print_tu_stats (dwarf2_per_objfile *per_objfile)
 static void
 process_skeletonless_type_unit (dwo_unit *dwo_unit,
 				dwarf2_per_objfile *per_objfile,
-				cooked_index_storage *storage)
+				cooked_index_worker_result *storage)
 {
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
@@ -3507,7 +3507,7 @@ process_skeletonless_type_unit (dwo_unit *dwo_unit,
 
 static void
 process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
-				 cooked_index_storage *storage)
+				 cooked_index_worker_result *storage)
 {
   /* Skeletonless TUs in DWP files without .gdb_index is not supported yet.  */
   if (get_dwp_file (per_objfile) == nullptr)
@@ -3567,7 +3567,7 @@ private:
   /* A storage object for "leftovers" -- see the 'start' method, but
      essentially things not parsed during the normal CU parsing
      passes.  */
-  cooked_index_storage m_index_storage;
+  cooked_index_worker_result m_index_storage;
 };
 
 void
@@ -3580,7 +3580,7 @@ cooked_index_worker_debug_info::process_cus (size_t task_number, unit_iterator f
   complaint_interceptor complaint_handler;
 
   std::vector<gdb_exception> errors;
-  cooked_index_storage thread_storage;
+  cooked_index_worker_result thread_storage;
   for (auto inner = first; inner != end; ++inner)
     {
       dwarf2_per_cu *per_cu = inner->get ();

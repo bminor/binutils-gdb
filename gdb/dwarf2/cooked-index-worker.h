@@ -30,14 +30,18 @@ struct dwarf2_per_cu;
 using cutu_reader_up = std::unique_ptr<cutu_reader>;
 
 /* An instance of this is created when scanning DWARF to create a
-   cooked index.  */
+   cooked index.  This class is the result of a single task to store
+   results while working -- that is, it is an implementation detail of
+   the threads managed by cooked_index_worker.  Once scanning is done,
+   selected parts of the state here are stored into the shard, and
+   then these temporary objects are destroyed.  */
 
-class cooked_index_storage
+class cooked_index_worker_result
 {
 public:
 
-  cooked_index_storage ();
-  DISABLE_COPY_AND_ASSIGN (cooked_index_storage);
+  cooked_index_worker_result ();
+  DISABLE_COPY_AND_ASSIGN (cooked_index_worker_result);
 
   /* Return the current abbrev table_cache.  */
   const abbrev_table_cache &get_abbrev_table_cache () const

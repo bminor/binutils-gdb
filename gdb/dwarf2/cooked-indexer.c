@@ -23,7 +23,7 @@
 
 /* See cooked-indexer.h.  */
 
-cooked_indexer::cooked_indexer (cooked_index_storage *storage,
+cooked_indexer::cooked_indexer (cooked_index_worker_result *storage,
 				dwarf2_per_cu *per_cu, enum language language)
   : m_index_storage (storage),
     m_per_cu (per_cu),

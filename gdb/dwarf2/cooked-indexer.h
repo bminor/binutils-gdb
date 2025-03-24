@@ -26,7 +26,7 @@
 #include <variant>
 
 struct abbrev_info;
-struct cooked_index_storage;
+struct cooked_index_worker_result;
 struct cutu_reader;
 struct dwarf2_per_cu;
 struct dwarf2_per_objfile;
@@ -36,7 +36,7 @@ struct dwarf2_per_objfile;
 class cooked_indexer
 {
 public:
-  cooked_indexer (cooked_index_storage *storage, dwarf2_per_cu *per_cu,
+  cooked_indexer (cooked_index_worker_result *storage, dwarf2_per_cu *per_cu,
 		  enum language language);
 
   DISABLE_COPY_AND_ASSIGN (cooked_indexer);
@@ -103,7 +103,7 @@ private:
 			   bool fully);
 
   /* The storage object, where the results are kept.  */
-  cooked_index_storage *m_index_storage;
+  cooked_index_worker_result *m_index_storage;
   /* The CU that we are reading on behalf of.  This object might be
      asked to index one CU but to treat the results as if they come
      from some including CU; in this case the including CU would be

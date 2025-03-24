@@ -21,7 +21,7 @@
 
 /* See cooked-index-worker.h.  */
 
-cooked_index_storage::cooked_index_storage ()
+cooked_index_worker_result::cooked_index_worker_result ()
   : m_shard (new cooked_index_shard)
 {
 }
@@ -29,7 +29,7 @@ cooked_index_storage::cooked_index_storage ()
 /* See cooked-index-worker.h.  */
 
 cutu_reader *
-cooked_index_storage::get_reader (dwarf2_per_cu *per_cu)
+cooked_index_worker_result::get_reader (dwarf2_per_cu *per_cu)
 {
   auto it = m_reader_hash.find (*per_cu);
   return it != m_reader_hash.end () ? it->get () : nullptr;
@@ -38,7 +38,7 @@ cooked_index_storage::get_reader (dwarf2_per_cu *per_cu)
 /* See cooked-index-worker.h.  */
 
 cutu_reader *
-cooked_index_storage::preserve (cutu_reader_up reader)
+cooked_index_worker_result::preserve (cutu_reader_up reader)
 {
   m_abbrev_table_cache.add (reader->release_abbrev_table ());
 
@@ -51,7 +51,7 @@ cooked_index_storage::preserve (cutu_reader_up reader)
 /* See cooked-index-worker.h.  */
 
 std::uint64_t
-cooked_index_storage::cutu_reader_hash::operator()
+cooked_index_worker_result::cutu_reader_hash::operator()
   (const cutu_reader_up &reader) const noexcept
 {
   return (*this) (*reader->cu ()->per_cu);
@@ -60,7 +60,7 @@ cooked_index_storage::cutu_reader_hash::operator()
 /* See cooked-index-worker.h.  */
 
 std::uint64_t
-cooked_index_storage::cutu_reader_hash::operator() (const dwarf2_per_cu &per_cu)
+cooked_index_worker_result::cutu_reader_hash::operator() (const dwarf2_per_cu &per_cu)
   const noexcept
 {
   return per_cu.index;
@@ -69,7 +69,7 @@ cooked_index_storage::cutu_reader_hash::operator() (const dwarf2_per_cu &per_cu)
 /* See cooked-index-worker.h.  */
 
 bool
-cooked_index_storage::cutu_reader_eq::operator() (const cutu_reader_up &a,
+cooked_index_worker_result::cutu_reader_eq::operator() (const cutu_reader_up &a,
 						  const cutu_reader_up &b) const noexcept
 {
   return (*this) (*a->cu ()->per_cu, b);
@@ -77,7 +77,7 @@ cooked_index_storage::cutu_reader_eq::operator() (const cutu_reader_up &a,
 
 /* See cooked-index-worker.h.  */
 
-bool cooked_index_storage::cutu_reader_eq::operator()
+bool cooked_index_worker_result::cutu_reader_eq::operator()
   (const dwarf2_per_cu &per_cu, const cutu_reader_up &reader) const noexcept
 {
   return per_cu.index == reader->cu ()->per_cu->index;
