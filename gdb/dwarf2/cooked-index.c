@@ -547,25 +547,28 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
 cooked_index_shard::range
 cooked_index_shard::find (const std::string &name, bool completing) const
 {
-  cooked_index_entry::comparison_mode mode = (completing
-					      ? cooked_index_entry::COMPLETE
-					      : cooked_index_entry::MATCH);
-
-  auto lower = std::lower_bound (m_entries.cbegin (), m_entries.cend (), name,
-				 [=] (const cooked_index_entry *entry,
-				      const std::string &n)
+  struct comparator
   {
-    return cooked_index_entry::compare (entry->canonical, n.c_str (), mode) < 0;
-  });
+    cooked_index_entry::comparison_mode mode;
 
-  auto upper = std::upper_bound (m_entries.cbegin (), m_entries.cend (), name,
-				 [=] (const std::string &n,
-				      const cooked_index_entry *entry)
-  {
-    return cooked_index_entry::compare (entry->canonical, n.c_str (), mode) > 0;
-  });
+    bool operator() (const cooked_index_entry *entry,
+		     const char *name) const noexcept
+    {
+      return cooked_index_entry::compare (entry->canonical, name, mode) < 0;
+    }
 
-  return range (lower, upper);
+    bool operator() (const char *name,
+		     const cooked_index_entry *entry) const noexcept
+    {
+      return cooked_index_entry::compare (entry->canonical, name, mode) > 0;
+    }
+  };
+
+  return std::make_from_tuple<range>
+    (std::equal_range (m_entries.cbegin (), m_entries.cend (), name.c_str (),
+		       comparator { (completing
+				     ? cooked_index_entry::COMPLETE
+				     : cooked_index_entry::MATCH) }));
 }
 
 /* See cooked-index.h.  */
