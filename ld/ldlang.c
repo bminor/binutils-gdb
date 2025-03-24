@@ -3955,7 +3955,7 @@ lang_write_ctf (int late)
 {
   size_t output_size;
   asection *output_sect;
-  int compression_threshold = CTF_COMPRESSION_THRESHOLD;
+  size_t compression_threshold = CTF_COMPRESSION_THRESHOLD;
 
   if (!ctf_output)
     return;
@@ -3983,7 +3983,7 @@ lang_write_ctf (int late)
   if ((output_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf")) == NULL)
     {
       output_sect = bfd_get_section_by_name (link_info.output_bfd, ".BTF");
-      compression_threshold = 0;
+      compression_threshold = (size_t) -1;
     }
 
   if (output_sect)
