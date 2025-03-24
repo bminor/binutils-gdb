@@ -524,7 +524,8 @@ ctf_decorate_type_name (ctf_dict_t *fp, const char *name, int kind)
    input.  */
 
 static int
-ctf_dedup_track_var (ctf_dict_t *fp, ctf_dict_t *input, ctf_id_t datasec)
+ctf_dedup_track_var (ctf_dict_t *fp, ctf_dict_t *input, int input_num,
+		     ctf_id_t datasec)
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
   ctf_next_t *it = NULL;
@@ -540,7 +541,7 @@ ctf_dedup_track_var (ctf_dict_t *fp, ctf_dict_t *input, ctf_id_t datasec)
 				      NULL, NULL)) != CTF_ERR)
     {
       if (ctf_dynhash_cinsert (d->cd_var_datasec,
-			       CTF_DEDUP_GID (fp, input, var),
+			       CTF_DEDUP_GID (fp, input_num, var),
 			       CTF_DEDUP_GID (fp, component_idx, datasec)) < 0)
 	{
 	  ctf_next_destroy (it);
@@ -1164,7 +1165,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	/* Hash the datasec info.  The "input" here is the component_idx.  */
 
 	if (!ctf_dynhash_lookup_kv (d->cd_var_datasec,
-				    CTF_DEDUP_GID (fp, input, type), NULL,
+				    CTF_DEDUP_GID (fp, input_num, type), NULL,
 				    &datasec))
 	  {
 	    whaterr = N_("error getting var->datasec info during dedup");
@@ -2345,7 +2346,7 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 
       while ((id = ctf_type_kind_next (inputs[i], &it, CTF_K_DATASEC)) != CTF_ERR)
 	{
-	  if (ctf_dedup_track_var (output, inputs[i], id) < 0)
+	  if (ctf_dedup_track_var (output, inputs[i], i, id) < 0)
 	    {
 	      ctf_next_destroy (it);
 	      goto err;
