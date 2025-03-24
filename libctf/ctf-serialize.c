@@ -959,7 +959,7 @@ ctf_type_sect_size (ctf_dict_t *fp)
 	    type_size += sizeof (ctf_type_t);
 	  tp++;
 	}
-
+      type_size += sizeof (ctf_type_t);
       type_size += dtd->dtd_vlen_size;
     }
 
