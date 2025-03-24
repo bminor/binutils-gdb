@@ -1260,7 +1260,7 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
   int type_sect_is_btf = 0;
   int ctf_needed = 0;
   size_t hdr_len;
-  int ctf_adjustment;
+  int ctf_adjustment = 0;
 
   unsigned char *t;
   size_t buf_size, type_size, objt_size, func_size;
@@ -1405,7 +1405,14 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
      Offsets in the BTF and CTF headers are relative to the end of te header in
      question.  */
 
-  ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
+  if (_libctf_btf_mode == LIBCTF_BTM_ALWAYS
+      || (_libctf_btf_mode == LIBCTF_BTM_POSSIBLE && ctf_needed))
+    {
+      hdr_len = sizeof (ctf_header_t);
+      ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
+    }
+  else
+    hdr_len = sizeof (ctf_btf_header_t);
 
   hdr.cth_objt_off = 0;
   hdr.cth_objt_len = objt_size;
@@ -1422,12 +1429,6 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
   hdr.cth_parent_strlen = 0;
   if (fp->ctf_parent)
     hdr.cth_parent_ntypes = fp->ctf_parent->ctf_typemax;
-
-  if (_libctf_btf_mode == LIBCTF_BTM_ALWAYS
-      || (_libctf_btf_mode == LIBCTF_BTM_POSSIBLE && ctf_needed))
-    hdr_len = sizeof (ctf_header_t);
-  else
-    hdr_len = sizeof (ctf_btf_header_t);
 
   /* No strings yet.  */
   buf_size = sizeof (ctf_btf_header_t) + hdr.btf.bth_str_off;
