@@ -2311,6 +2311,9 @@
 /* Smctr/Ssctr instruction.  */
 #define MATCH_SCTRCLR 0x10400073
 #define MASK_SCTRCLR 0xffffffff
+/* Smrnmi instruction.  */
+#define MATCH_MNRET 0x70200073
+#define MASK_MNRET 0xffffffff
 /* Svinval instruction.  */
 #define MATCH_SINVAL_VMA 0x16000073
 #define MASK_SINVAL_VMA 0xfe007fff
@@ -4808,6 +4811,8 @@ DECLARE_INSN(cm_jt, MATCH_CM_JT, MASK_CM_JT)
 DECLARE_INSN(cm_jalt, MATCH_CM_JALT, MASK_CM_JALT)
 /* Smctr/Ssctr instruction.  */
 DECLARE_INSN(sctrclr, MATCH_SCTRCLR, MASK_SCTRCLR)
+/* Smrnmi instruction */
+DECLARE_INSN(mnret, MATCH_MNRET, MASK_MNRET)
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 DECLARE_INSN(th_addsl, MATCH_TH_ADDSL, MASK_TH_ADDSL)
 /* Vendor-specific (T-Head) XTheadBb instructions.  */

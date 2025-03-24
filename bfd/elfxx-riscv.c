@@ -2801,6 +2801,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     case INSN_CLASS_SMCTR_OR_SSCTR:
       return (riscv_subset_supports (rps, "smctr")
 	      || riscv_subset_supports (rps, "ssctr"));
+    case INSN_CLASS_SMRNMI:
+      return riscv_subset_supports (rps, "smrnmi");
     case INSN_CLASS_SVINVAL:
       return riscv_subset_supports (rps, "svinval");
     case INSN_CLASS_H:
@@ -3108,6 +3110,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zcmt";
     case INSN_CLASS_SMCTR_OR_SSCTR:
       return _("smctr' or `ssctr");
+    case INSN_CLASS_SMRNMI:
+      return "smrnmi";
     case INSN_CLASS_SVINVAL:
       return "svinval";
     case INSN_CLASS_H:

@@ -2305,6 +2305,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"hinval.vvma",     0, INSN_CLASS_SVINVAL, "s,t", MATCH_HINVAL_VVMA, MASK_HINVAL_VVMA, match_opcode, 0 },
 {"hinval.gvma",     0, INSN_CLASS_SVINVAL, "s,t", MATCH_HINVAL_GVMA, MASK_HINVAL_GVMA, match_opcode, 0 },
 
+/* Smrnmi instruction */
+{"mnret", 0, INSN_CLASS_SMRNMI, "", MATCH_MNRET, MASK_MNRET, match_opcode, 0 },
+
 /* Hypervisor instructions.  */
 {"hfence.vvma", 0, INSN_CLASS_H, "",       MATCH_HFENCE_VVMA, MASK_HFENCE_VVMA|MASK_RS1|MASK_RS2, match_opcode, INSN_ALIAS },
 {"hfence.vvma", 0, INSN_CLASS_H, "s",      MATCH_HFENCE_VVMA, MASK_HFENCE_VVMA|MASK_RS2, match_opcode, INSN_ALIAS },
