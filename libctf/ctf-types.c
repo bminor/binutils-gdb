@@ -1185,8 +1185,10 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 		    return NULL;
 		  }
 
-		ctf_decl_sprintf (&cd, "%s%s", linkage == 0 ? "static " :
-				  (linkage == 2 ? "extern " : ""), name);
+		ctf_decl_sprintf (&cd, "%s%s", linkage == 0 ? "static "
+				  : (linkage == 2 ? "extern " :
+				     (linkage == 1 ? "" : "(invalid linkage) ")),
+				  name);
 		break;
 	      }
 	    case CTF_K_FORWARD:
