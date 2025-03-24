@@ -1996,7 +1996,7 @@ ctf_dedup_init (ctf_dict_t *fp)
     goto oom;
 #endif
 
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 6; i++)
     {
       if ((d->cd_decorated_names[i] = ctf_dynhash_create (ctf_hash_string,
 							  ctf_hash_eq_string,
@@ -2096,7 +2096,7 @@ ctf_dedup_fini (ctf_dict_t *fp, ctf_dict_t **outputs, uint32_t noutputs)
 #if IDS_NEED_ALLOCATION
   ctf_dynhash_destroy (d->cd_id_to_dict_t);
 #endif
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 6; i++)
     ctf_dynhash_destroy (d->cd_decorated_names[i]);
   ctf_dynhash_destroy (d->cd_name_counts);
   ctf_dynhash_destroy (d->cd_type_hashes);
