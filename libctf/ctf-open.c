@@ -605,10 +605,10 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
   tbuf = (ctf_type_t *) (fp->ctf_buf + cth->btf.bth_type_off);
   tend = (ctf_type_t *) ((uintptr_t) tbuf + cth->btf.bth_type_len);
 
-  /* We make two passes through the entire type section, and one third pass
-     through part of it: but only the first is guaranteed to happen at this
-     stage.  The second and third passes require working string lookup, so in
-     child dicts can only happen at ctf_import time.
+  /* We make two passes through the entire type section, and more passes through
+     parts of it: but only the first is guaranteed to happen at this stage.  The
+     later passes require working string lookup, so in child dicts can only
+     happen at ctf_import time.
 
      For prefixed kinds, we are interested in the thing we are prefixing:
      that is the true type.
@@ -1901,7 +1901,10 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
      than earlier versions do, but we assume for simplicity that they are
      always emitted in the same order.  Because all the offsets are relative to
      the end of the BTF header, we must also check that they don't overlap the
-     CTF header that can follow it.  */
+     CTF header that can follow it.  We do allow such overlaps if the section
+     length is zero, since that lets us treat a BTF header stuffed into a
+     ctf_header_t as valid (with all remaining offsets zero).  */
+
   if (_libctf_unlikely_
       (hp->cth_objt_off + hp->cth_objt_len > hp->cth_func_off
        || hp->cth_func_off + hp->cth_func_len > hp->cth_objtidx_off
