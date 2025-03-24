@@ -1508,6 +1508,8 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum_t) * (vlen + 1)) < 0)
     return -1;					/* errno is set for us.  */
 
+  dtd->dtd_vlen_size += sizeof (ctf_enum_t);
+
   /* Check for constant duplication within any given enum: only needed for
      non-root-visible types, since the duplicate detection above does the job
      for root-visible types just fine.  */
@@ -1775,6 +1777,8 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 
   if (ctf_grow_vlen (fp, dtd, sizeof (ctf_member_t) * (vlen + 1)) < 0)
     return (ctf_set_errno (ofp, ctf_errno (fp)));
+
+  dtd->dtd_vlen_size += sizeof (ctf_member_t);
   memb = (ctf_member_t *) dtd->dtd_vlen;
 
   memb[vlen].ctm_name = ctf_str_add (fp, name);
@@ -2012,6 +2016,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   if (ctf_grow_vlen (fp, sec_dtd, sizeof (ctf_var_secinfo_t) * (vlen + 1)) < 0)
     goto err;
 
+  sec_dtd->dtd_vlen_size += sizeof (ctf_var_secinfo_t);
   sec = (ctf_var_secinfo_t *) sec_dtd->dtd_vlen;
   
   sec[vlen].cvs_type = (uint32_t) var_dtd->dtd_type;
