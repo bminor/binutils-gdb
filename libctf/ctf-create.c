@@ -1542,7 +1542,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
       en[vlen].cte_name = ctf_str_add (fp, name);
       en[vlen].cte_value = value;
 
-      name = en[vlen].cte_name;
+      en_name = en[vlen].cte_name;
     }
   else
     {
