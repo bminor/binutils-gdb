@@ -1908,12 +1908,12 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
        || hp->cth_objtidx_off + hp->cth_objtidx_len > hp->cth_funcidx_off
        || hp->cth_funcidx_off + hp->cth_funcidx_len > hp->btf.bth_type_off
        || hp->btf.bth_type_off + hp->btf.bth_type_len > hp->btf.bth_str_off
-       || hp->cth_objt_off < ctf_adjustment
-       || hp->cth_func_off < ctf_adjustment
-       || hp->cth_objtidx_off < ctf_adjustment
-       || hp->cth_funcidx_off < ctf_adjustment
-       || hp->btf.bth_type_off < ctf_adjustment
-       || hp->btf.bth_str_off < ctf_adjustment))
+       || (hp->cth_objt_off < ctf_adjustment && hp->cth_objt_len != 0)
+       || (hp->cth_func_off < ctf_adjustment && hp->cth_func_len != 0)
+       || (hp->cth_objtidx_off < ctf_adjustment && hp->cth_objtidx_len != 0)
+       || (hp->cth_funcidx_off < ctf_adjustment && hp->cth_funcidx_len != 0)
+       || (hp->btf.bth_type_off < ctf_adjustment && hp->btf.bth_type_len != 0)
+       || (hp->btf.bth_str_off < ctf_adjustment && hp->btf.bth_str_len != 0)))
     {
       ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("overlapping or misordered BTF/CTF sections"));
       ctf_set_open_errno (errp, ECTF_CORRUPT);
