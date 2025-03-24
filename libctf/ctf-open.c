@@ -142,6 +142,11 @@ get_prefixed_vlen_v4 (const ctf_type_t *tp)
 
   suffix = tp + 1;
 
+  /* Special case: CTF_K_FUNC_LINKAGE reuses the vlen field for the linkage: its
+     vlen is always zero.  */
+  if (CTF_INFO_KIND (suffix->ctt_info) == CTF_K_FUNC_LINKAGE)
+    return 0;
+
   /* CTF_K_BIG.  */
   return (CTF_INFO_VLEN (tp->ctt_info) << 16 | CTF_INFO_VLEN (suffix->ctt_info));
 }
@@ -344,7 +349,6 @@ get_vbytes_v4 (ctf_dict_t *fp, const ctf_type_t *tp,
       return (sizeof (ctf_member_t) * vlen);
     case CTF_K_FUNCTION:
       return (sizeof (ctf_param_t) * vlen);
-    case CTF_K_FUNC_LINKAGE:
     case CTF_K_VAR:
       return (sizeof (ctf_linkage_t));
     case CTF_K_DATASEC:
@@ -359,6 +363,7 @@ get_vbytes_v4 (ctf_dict_t *fp, const ctf_type_t *tp,
     case CTF_K_VOLATILE:
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
+    case CTF_K_FUNC_LINKAGE:
     case CTF_K_BTF_FLOAT:
       return 0;
     /* These should have been resolved away by LCTF_KIND.
@@ -1348,6 +1353,7 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	case CTF_K_RESTRICT:
 	case CTF_K_TYPE_TAG:
 	case CTF_K_BTF_FLOAT:
+	case CTF_K_FUNC_LINKAGE:
 	  /* These kinds have no vlen data to swap.  */
 	  assert (vbytes == 0);
 	  break;
@@ -1363,7 +1369,6 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	    break;
 	  }
 
-	case CTF_K_FUNC_LINKAGE:
 	case CTF_K_VAR:
 	  {
 	    /* This has a single ctf_linkage_t.  */

@@ -1122,7 +1122,6 @@ ctf_add_function_linkage (ctf_dict_t *fp, uint32_t flag,
 			  ctf_id_t ref, const char *name, int linkage)
 {
   ctf_dtdef_t *dtd;
-  ctf_linkage_t *l;
   ctf_dict_t *tmp = fp;
 
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
@@ -1141,11 +1140,8 @@ ctf_add_function_linkage (ctf_dict_t *fp, uint32_t flag,
 			      sizeof (ctf_linkage_t), 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_FUNC_LINKAGE, 0, 0);
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_FUNC_LINKAGE, 0, linkage);
   dtd->dtd_data->ctt_type = (uint32_t) ref;
-
-  l = (ctf_linkage_t *) dtd->dtd_vlen;
-  l->ctl_linkage = linkage;
 
   return dtd->dtd_type;
 }

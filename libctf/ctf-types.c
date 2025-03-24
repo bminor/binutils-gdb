@@ -2451,22 +2451,29 @@ int
 ctf_type_linkage (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
+  const ctf_type_t *suffix;
   unsigned char *vlen;
   ctf_linkage_t *l;
 
   int kind;
 
-  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
 
   kind = ctf_type_kind_unsliced (fp, type);
   if (kind != CTF_K_FUNC_LINKAGE && kind != CTF_K_VAR)
     return ctf_set_errno (fp, ECTF_LINKKIND);
 
-  vlen = ctf_vlen (fp, type, tp, NULL);
-  l = (ctf_linkage_t *) vlen;
+  if (kind == CTF_K_VAR)
+    {
+      vlen = ctf_vlen (fp, type, tp, NULL);
+      l = (ctf_linkage_t *) vlen;
 
-  return l->ctl_linkage;
+      return l->ctl_linkage;
+    }
+
+  /* CTF_K_FUNC_LINKAGE.  */
+  return CTF_INFO_VLEN (suffix->ctt_info);
 }
 
 /* bsearch_r comparison function for datasec searches.  */

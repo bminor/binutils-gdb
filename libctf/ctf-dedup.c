@@ -3357,6 +3357,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       if ((linkage = ctf_type_linkage (input, type)) < 0)
 	goto err_input;
 
+      ctf_dprintf ("Linkage: %i\n", linkage);
+
       if ((new_type = ctf_add_function_linkage (target, isroot, ref, name,
 						linkage)) == CTF_ERR)
 	goto err_target;			/* errno is set for us.  */

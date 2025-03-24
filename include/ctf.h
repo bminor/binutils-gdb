@@ -557,8 +557,8 @@ union
 #define CTF_K_VOLATILE 9	/* ctt_type is base type.  */
 #define CTF_K_CONST    10	/* ctt_type is base type.  */
 #define CTF_K_RESTRICT 11	/* ctt_type is base type.  */
-#define CTF_K_FUNC_LINKAGE 12	/* Variant data is ctf_linkage_t; ctt_type
-				   is CTF_K_FUNC_PROTO.  Named.  */
+#define CTF_K_FUNC_LINKAGE 12	/* Literal vlen field is ctf_linkage_t.ctl.linkage;
+				   ctt_type is CTF_K_FUNC_PROTO.  Named.  */
 #define CTF_K_FUNCTION 13	/* ctt_type is return type, variant data is
 				   list of ctf_param_t.  Unnamed.  */
 #define CTF_K_VAR      14	/* Variable.  ctt_type is variable type.
@@ -777,7 +777,8 @@ typedef struct ctf_var_secinfo
 #define CTF_FUNC_EXTERN 2
 
 /* Linkage of a CTF_K_FUNC_LINKAGE and CTF_K_VAR (holds CTF_FUNC_*
-   or CTF_VAR_*, depending).  */
+   or CTF_VAR_*, depending; CTF_K_FUNC_LINKAGE is literally just
+   the ctl_linkage field, stuffed into the vlen).  */
 typedef struct ctf_linkage
 {
   uint32_t ctl_linkage;
