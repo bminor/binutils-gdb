@@ -1545,7 +1545,7 @@ ctf_type_kind_forwarded_tp (ctf_dict_t *fp, const ctf_type_t *tp)
   if (kind != CTF_K_FORWARD)
     return kind;
 
-  while (LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info)))
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info))
     tp++;
 
   if (CTF_INFO_KFLAG (tp->ctt_info))
@@ -1563,9 +1563,8 @@ int
 ctf_type_kind_unsliced (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
-  const ctf_type_t *suffix = NULL;
 
-  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
   return (ctf_type_kind_unsliced_tp (fp, tp));
@@ -1634,12 +1633,12 @@ ctf_type_conflicting (ctf_dict_t *fp, ctf_id_t type, const char **cuname)
     return 1;
 
   while (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info) != CTF_K_CONFLICTING
-	 && LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info)))
+	 && LCTF_IS_PREFIXED_INFO (tp->ctt_info))
     tp++;
 
   /* We already checked that this is a non-root-visible type, so this must be
      CTF_K_CONFLICTING.  */
-  if (!ctf_assert (ofp, LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info))))
+  if (!ctf_assert (ofp, LCTF_IS_PREFIXED_INFO (tp->ctt_info)))
     return -1;					/* errno is set for us.  */
 
   *cuname = ctf_strptr (fp, tp->ctt_name);

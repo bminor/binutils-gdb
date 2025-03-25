@@ -418,7 +418,7 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, const ctf_type_t **suffix)
 	  ctf_type_t *suff;
 
 	  suff = tp;
-	  while (LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, suff->ctt_info)))
+	  while (LCTF_IS_PREFIXED_INFO (suff->ctt_info))
 	    suff++;
 
 	  *suffix = suff;
@@ -433,7 +433,7 @@ ctf_find_prefix (ctf_dict_t *fp, const ctf_type_t *tp, int kind)
 {
   uint32_t kind_ = kind;
 
-  while (LCTF_IS_PREFIXED_KIND (tp->ctt_info)
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info)
 	 && CTF_INFO_KIND (tp->ctt_info) != kind_)
     tp++;
 

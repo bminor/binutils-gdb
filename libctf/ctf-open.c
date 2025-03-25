@@ -108,7 +108,7 @@ get_prefixed_kind_v4 (const ctf_type_t *tp)
 {
   /* Resolve away as many prefixes as exist.  */
 
-  while (LCTF_IS_PREFIXED_KIND (tp->ctt_info))
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info))
     tp++;
 
   return CTF_INFO_KIND (tp->ctt_info);
@@ -133,11 +133,11 @@ get_prefixed_vlen_v4 (const ctf_type_t *tp)
 
   /* Resolve away non-BIG prefixes (which have no affect on vlen).  */
 
-  while (LCTF_IS_PREFIXED_KIND (tp->ctt_info)
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info)
 	 && CTF_INFO_KIND (tp->ctt_info) != CTF_K_BIG)
     tp++;
 
-  if (!LCTF_IS_PREFIXED_KIND (CTF_INFO_KIND (tp->ctt_info)))
+  if (!LCTF_IS_PREFIXED_INFO (tp->ctt_info))
     return (CTF_INFO_VLEN (tp->ctt_info));
 
   suffix = tp + 1;
@@ -229,7 +229,7 @@ get_ctt_size_v4 (const ctf_dict_t *fp _libctf_unused_, const ctf_type_t *tp,
   if (incrementp)
     *incrementp = 0;
 
-  while (LCTF_IS_PREFIXED_KIND (tp->ctt_info))
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info))
     {
       if (CTF_INFO_KIND (tp->ctt_info) == CTF_K_BIG)
 	size = ((ssize_t) tp->ctt_size) << 32;
@@ -851,7 +851,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
       /* Prefixed type: pull off the prefixes (for most purposes).  (We already
 	 know the prefixes cannot overflow.)  */
 
-      while (LCTF_IS_PREFIXED_KIND (LCTF_INFO_UNPREFIXED_KIND (fp, suffix->ctt_info)))
+      while (LCTF_IS_PREFIXED_INFO (suffix->ctt_info))
 	{
 	  if (is_btf)
 	    return ECTF_CORRUPT;
