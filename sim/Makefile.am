@@ -106,9 +106,6 @@ include testsuite/local.mk
 if SIM_ENABLE_ARCH_aarch64
 include aarch64/local.mk
 endif
-if SIM_ENABLE_ARCH_arm
-include arm/local.mk
-endif
 if SIM_ENABLE_ARCH_avr
 include avr/local.mk
 endif

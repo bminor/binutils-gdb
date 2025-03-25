@@ -839,11 +839,6 @@ SIM_ENABLE_ARCH_avr_TRUE
 CC_FOR_TARGET_AVR
 LD_FOR_TARGET_AVR
 AS_FOR_TARGET_AVR
-SIM_ENABLE_ARCH_arm_FALSE
-SIM_ENABLE_ARCH_arm_TRUE
-CC_FOR_TARGET_ARM
-LD_FOR_TARGET_ARM
-AS_FOR_TARGET_ARM
 SIM_ENABLE_ARCH_aarch64_FALSE
 SIM_ENABLE_ARCH_aarch64_TRUE
 CC_FOR_TARGET_AARCH64
@@ -1067,9 +1062,6 @@ SDL_LIBS
 AS_FOR_TARGET_AARCH64
 LD_FOR_TARGET_AARCH64
 CC_FOR_TARGET_AARCH64
-AS_FOR_TARGET_ARM
-LD_FOR_TARGET_ARM
-CC_FOR_TARGET_ARM
 AS_FOR_TARGET_AVR
 LD_FOR_TARGET_AVR
 CC_FOR_TARGET_AVR
@@ -1900,12 +1892,6 @@ Some influential environment variables:
               Linker for aarch64 tests
   CC_FOR_TARGET_AARCH64
               C compiler for aarch64 tests
-  AS_FOR_TARGET_ARM
-              Assembler for arm tests
-  LD_FOR_TARGET_ARM
-              Linker for arm tests
-  CC_FOR_TARGET_ARM
-              C compiler for arm tests
   AS_FOR_TARGET_AVR
               Assembler for avr tests
   LD_FOR_TARGET_AVR
@@ -12892,7 +12878,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12895 "configure"
+#line 12881 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12998,7 +12984,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13001 "configure"
+#line 12987 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15051,41 +15037,6 @@ as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_AARCH64 LD_FOR_TARGET_AARCH64 CC
 else
   SIM_ENABLE_ARCH_aarch64_TRUE='#'
   SIM_ENABLE_ARCH_aarch64_FALSE=
-fi
-
-  sim_enable_arch_arm=false
-  case "${targ}" in
-    all|arm*-*-*)
-      if test "${targ}" = "${target}"; then
-        SIM_PRIMARY_TARGET=arm
-      fi
-        ENABLE_SIM=yes
-  as_fn_append SIM_ENABLED_ARCHES " arm"
-  ac_config_files="$ac_config_files arm/.gdbinit:common/gdbinit.in"
-
-
-      sim_enable_arch_arm=true
-      ;;
-  esac
-
-
-
-
-  if test "$SIM_PRIMARY_TARGET" = "arm"; then :
-      : "${AS_FOR_TARGET_ARM:=\$(AS_FOR_TARGET)}"
-    : "${LD_FOR_TARGET_ARM:=\$(LD_FOR_TARGET)}"
-    : "${CC_FOR_TARGET_ARM:=\$(CC_FOR_TARGET)}"
-
-fi
-
-as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_ARM LD_FOR_TARGET_ARM CC_FOR_TARGET_ARM"
-
-   if ${sim_enable_arch_arm}; then
-  SIM_ENABLE_ARCH_arm_TRUE=
-  SIM_ENABLE_ARCH_arm_FALSE='#'
-else
-  SIM_ENABLE_ARCH_arm_TRUE='#'
-  SIM_ENABLE_ARCH_arm_FALSE=
 fi
 
   sim_enable_arch_avr=false
@@ -17655,10 +17606,6 @@ if test -z "${SIM_ENABLE_ARCH_aarch64_TRUE}" && test -z "${SIM_ENABLE_ARCH_aarch
   as_fn_error $? "conditional \"SIM_ENABLE_ARCH_aarch64\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${SIM_ENABLE_ARCH_arm_TRUE}" && test -z "${SIM_ENABLE_ARCH_arm_FALSE}"; then
-  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_arm\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${SIM_ENABLE_ARCH_avr_TRUE}" && test -z "${SIM_ENABLE_ARCH_avr_FALSE}"; then
   as_fn_error $? "conditional \"SIM_ENABLE_ARCH_avr\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -18656,7 +18603,6 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "aarch64/.gdbinit") CONFIG_FILES="$CONFIG_FILES aarch64/.gdbinit:common/gdbinit.in" ;;
-    "arm/.gdbinit") CONFIG_FILES="$CONFIG_FILES arm/.gdbinit:common/gdbinit.in" ;;
     "avr/.gdbinit") CONFIG_FILES="$CONFIG_FILES avr/.gdbinit:common/gdbinit.in" ;;
     "bfin/.gdbinit") CONFIG_FILES="$CONFIG_FILES bfin/.gdbinit:common/gdbinit.in" ;;
     "bpf/.gdbinit") CONFIG_FILES="$CONFIG_FILES bpf/.gdbinit:common/gdbinit.in" ;;
