@@ -4946,7 +4946,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name,
       return;
     }
 
-  printf (_("Contents of CTF section %s:\n"), sanitize_string (sect_name));
+  printf (_("Contents of type section %s:\n"), sanitize_string (sect_name));
 
   while ((fp = ctf_archive_next (ctfa, &i, &name, 0, &err)) != NULL)
     {

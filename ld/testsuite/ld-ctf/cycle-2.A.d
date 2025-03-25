@@ -8,7 +8,7 @@
 
 .*: +file format .*
 
-Contents of CTF section .ctf:
+Contents of type section .ctf:
 
   Header:
     Magic number: 0xdff2
