@@ -1010,6 +1010,100 @@ solib_add (const char *pattern, int from_tty, int readsyms)
   }
 }
 
+/* Helper function for "info sharedlibrary" and "info namespace".
+   This receives a list of solibs to be printed, and prints a table
+   with all the relevant data.  If PRINT_NAMESPACE is true, figure out
+   the solib_ops of the current gdbarch, to calculate the namespace
+   that contains an solib.
+   Returns true if one or more solibs are missing debug information,
+   false otherwise.  */
+
+static void
+print_solib_list_table (std::vector<const solib *> solib_list,
+			bool print_namespace)
+{
+  gdbarch *gdbarch = current_inferior ()->arch ();
+  /* "0x", a little whitespace, and two hex digits per byte of pointers.  */
+  int addr_width = 4 + (gdbarch_ptr_bit (gdbarch) / 4);
+  const solib_ops *ops = gdbarch_so_ops (gdbarch);
+  struct ui_out *uiout = current_uiout;
+  bool so_missing_debug_info = false;
+
+  /* There are 3 conditions for this command to print solib namespaces,
+     first PRINT_NAMESPACE has to be true, second the solib_ops has to
+     support multiple namespaces, and third there must be more than one
+     active namespace.  Fold all these into the PRINT_NAMESPACE condition.  */
+  print_namespace = print_namespace && ops->num_active_namespaces != nullptr
+		    && ops->num_active_namespaces () > 1;
+
+  int num_cols = 4;
+  if (print_namespace)
+    num_cols++;
+
+  {
+    ui_out_emit_table table_emitter (uiout, num_cols, solib_list.size (),
+				     "SharedLibraryTable");
+
+    /* The "- 1" is because ui_out adds one space between columns.  */
+    uiout->table_header (addr_width - 1, ui_left, "from", "From");
+    uiout->table_header (addr_width - 1, ui_left, "to", "To");
+    if (print_namespace)
+      uiout->table_header (5, ui_left, "namespace", "NS");
+    uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
+    uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
+
+    uiout->table_body ();
+
+    for (const solib *so : solib_list)
+      {
+	if (so->so_name.empty ())
+	  continue;
+
+	ui_out_emit_tuple tuple_emitter (uiout, "lib");
+
+	if (so->addr_high != 0)
+	  {
+	    uiout->field_core_addr ("from", gdbarch, so->addr_low);
+	    uiout->field_core_addr ("to", gdbarch, so->addr_high);
+	  }
+	else
+	  {
+	    uiout->field_skip ("from");
+	    uiout->field_skip ("to");
+	  }
+
+	if (print_namespace)
+	  {
+	    try
+	      {
+		uiout->field_fmt ("namespace", "[[%d]]", ops->find_solib_ns (*so));
+	      }
+	    catch (const gdb_exception_error &er)
+	      {
+		uiout->field_skip ("namespace");
+	      }
+	  }
+
+	if (!top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()
+	    && so->symbols_loaded && !objfile_has_symbols (so->objfile))
+	  {
+	    so_missing_debug_info = true;
+	    uiout->field_string ("syms-read", "Yes (*)");
+	  }
+	else
+	  uiout->field_string ("syms-read", so->symbols_loaded ? "Yes" : "No");
+
+	uiout->field_string ("name", so->so_name, file_name_style.style ());
+
+	uiout->text ("\n");
+      }
+  }
+
+  if (so_missing_debug_info)
+    uiout->message (_ ("(*): Shared library is missing "
+		       "debugging information.\n"));
+}
+
 /* Implement the "info sharedlibrary" command.  Walk through the
    shared library list and print information about each attached
    library matching PATTERN.  If PATTERN is elided, print them
@@ -1018,10 +1112,6 @@ solib_add (const char *pattern, int from_tty, int readsyms)
 static void
 info_sharedlibrary_command (const char *pattern, int from_tty)
 {
-  bool so_missing_debug_info = false;
-  int addr_width;
-  int nr_libs;
-  gdbarch *gdbarch = current_inferior ()->arch ();
   struct ui_out *uiout = current_uiout;
 
   if (pattern)
@@ -1032,109 +1122,30 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 	error (_ ("Invalid regexp: %s"), re_err);
     }
 
-  /* "0x", a little whitespace, and two hex digits per byte of pointers.  */
-  addr_width = 4 + (gdbarch_ptr_bit (gdbarch) / 4);
-
   update_solib_list (from_tty);
 
   /* ui_out_emit_table table_emitter needs to know the number of rows,
      so we need to make two passes over the libs.  */
 
-  nr_libs = 0;
+  std::vector<const solib *> print_libs;
   for (const solib &so : current_program_space->solibs ())
     {
       if (!so.so_name.empty ())
 	{
 	  if (pattern && !re_exec (so.so_name.c_str ()))
 	    continue;
-	  ++nr_libs;
+	  print_libs.push_back (&so);
 	}
     }
 
-  /* How many columns the table should have.  If the inferior has
-     more than one namespace active, we need a column to show that.  */
-  int num_cols = 4;
-  const solib_ops *ops = gdbarch_so_ops (gdbarch);
-  if (ops->num_active_namespaces != nullptr
-      && ops->num_active_namespaces () > 1)
-    num_cols++;
+  print_solib_list_table (print_libs, true);
 
-  {
-    ui_out_emit_table table_emitter (uiout, num_cols, nr_libs,
-				     "SharedLibraryTable");
-
-    /* The "- 1" is because ui_out adds one space between columns.  */
-    uiout->table_header (addr_width - 1, ui_left, "from", "From");
-    uiout->table_header (addr_width - 1, ui_left, "to", "To");
-    if (ops->num_active_namespaces != nullptr
-	&& ops->num_active_namespaces () > 1)
-      uiout->table_header (5, ui_left, "namespace", "NS");
-    uiout->table_header (12 - 1, ui_left, "syms-read", "Syms Read");
-    uiout->table_header (0, ui_noalign, "name", "Shared Object Library");
-
-    uiout->table_body ();
-
-    for (const solib &so : current_program_space->solibs ())
-      {
-	if (so.so_name.empty ())
-	  continue;
-
-	if (pattern && !re_exec (so.so_name.c_str ()))
-	  continue;
-
-	ui_out_emit_tuple tuple_emitter (uiout, "lib");
-
-	if (so.addr_high != 0)
-	  {
-	    uiout->field_core_addr ("from", gdbarch, so.addr_low);
-	    uiout->field_core_addr ("to", gdbarch, so.addr_high);
-	  }
-	else
-	  {
-	    uiout->field_skip ("from");
-	    uiout->field_skip ("to");
-	  }
-
-	if (ops->num_active_namespaces != nullptr
-	    && ops->num_active_namespaces ()> 1)
-	  {
-	    try
-	      {
-		uiout->field_fmt ("namespace", "[[%d]]", ops->find_solib_ns (so));
-	      }
-	    catch (const gdb_exception_error &er)
-	      {
-		uiout->field_skip ("namespace");
-	      }
-	  }
-
-	if (!top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()
-	    && so.symbols_loaded && !objfile_has_symbols (so.objfile))
-	  {
-	    so_missing_debug_info = true;
-	    uiout->field_string ("syms-read", "Yes (*)");
-	  }
-	else
-	  uiout->field_string ("syms-read", so.symbols_loaded ? "Yes" : "No");
-
-	uiout->field_string ("name", so.so_name, file_name_style.style ());
-
-	uiout->text ("\n");
-      }
-  }
-
-  if (nr_libs == 0)
+  if (print_libs.size () == 0)
     {
       if (pattern)
 	uiout->message (_ ("No shared libraries matched.\n"));
       else
 	uiout->message (_ ("No shared libraries loaded at this time.\n"));
-    }
-  else
-    {
-      if (so_missing_debug_info)
-	uiout->message (_ ("(*): Shared library is missing "
-			   "debugging information.\n"));
     }
 }
 
