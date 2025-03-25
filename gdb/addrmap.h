@@ -126,8 +126,12 @@ struct addrmap_mutable final : public addrmap
 {
 public:
 
-  addrmap_mutable ();
-  ~addrmap_mutable ();
+  addrmap_mutable () = default;
+  ~addrmap_mutable ()
+  {
+    clear ();
+  }
+
   DISABLE_COPY_AND_ASSIGN (addrmap_mutable);
 
   addrmap_mutable (addrmap_mutable &&other)
@@ -138,7 +142,13 @@ public:
 
   addrmap_mutable &operator= (addrmap_mutable &&other)
   {
-    std::swap (tree, other.tree);
+    /* Handle self-move.  */
+    if (this != &other)
+      {
+	clear ();
+	tree = other.tree;
+	other.tree = nullptr;
+      }
     return *this;
   }
 
@@ -183,6 +193,9 @@ public:
 		  void *obj);
   void relocate (CORE_ADDR offset) override;
 
+  /* Clear this addrmap.  */
+  void clear ();
+
 private:
   void *do_find (CORE_ADDR addr) const override;
   int do_foreach (addrmap_foreach_fn fn) const override;
@@ -204,7 +217,7 @@ private:
      function, we can't keep a freelist for keys.  Since mutable
      addrmaps are only used temporarily right now, we just leak keys
      from deleted nodes; they'll be freed when the obstack is freed.  */
-  splay_tree tree;
+  splay_tree tree = nullptr;
 
   /* Various helper methods.  */
   splay_tree_key allocate_key (CORE_ADDR addr);
