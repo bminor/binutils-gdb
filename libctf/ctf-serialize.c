@@ -1559,7 +1559,7 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz, int force_ctf)
 {
   const ctf_strs_writable_t *strtab;
   unsigned char *buf, *newbuf;
-  ctf_header_t *hdrp;
+  ctf_btf_header_t *hdrp;
 
   /* Stop unstable file formats (subject to change) getting out into the
      wild.  */
@@ -1591,8 +1591,6 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz, int force_ctf)
   if ((fp->ctf_flags & LCTF_LINKING) && fp->ctf_parent)
     fp->ctf_header->cth_parent_strlen = fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len;
 
-  hdrp = (ctf_header_t *) fp->ctf_serializing_buf;
-
   ctf_dprintf ("Writing strtab for %s\n", ctf_cuname (fp));
   strtab = ctf_str_write_strtab (fp);
 
@@ -1606,10 +1604,19 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz, int force_ctf)
   fp->ctf_serializing_buf = newbuf;
   memcpy (fp->ctf_serializing_buf + fp->ctf_serializing_buf_size, strtab->cts_strs,
 	  strtab->cts_len);
-  hdrp = (ctf_header_t *) fp->ctf_serializing_buf;
-  hdrp->btf.bth_str_len = strtab->cts_len;
-  hdrp->cth_parent_strlen = fp->ctf_header->cth_parent_strlen;
-  fp->ctf_serializing_buf_size += hdrp->btf.bth_str_len;
+
+  hdrp = (ctf_btf_header_t *) fp->ctf_serializing_buf;
+  hdrp->bth_str_len = strtab->cts_len;
+  fp->ctf_serializing_buf_size += hdrp->bth_str_len;
+
+  if (!fp->ctf_serializing_is_btf)
+    {
+      ctf_header_t *ctf_hdrp;
+
+      ctf_hdrp = (ctf_header_t *) (void *) hdrp;
+      ctf_hdrp->cth_parent_strlen = fp->ctf_header->cth_parent_strlen;
+    }
+
   *bufsiz = fp->ctf_serializing_buf_size;
 
   buf = fp->ctf_serializing_buf;
