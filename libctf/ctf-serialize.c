@@ -934,13 +934,13 @@ ctf_type_sect_size (ctf_dict_t *fp)
 	    {
 	      if ((kind != CTF_K_BIG) || tp->ctt_size != 0
 		  || LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) != 0)
-	    if (ctf_dynset_lookup (fp->ctf_write_suppressions,
-				   (const void *) (uintptr_t) kind) == NULL)
-	      {
-		type_size += sizeof (ctf_type_t);
-		suppress = 1;
-		break;
-	      }
+		if (ctf_dynset_lookup (fp->ctf_write_suppressions,
+				       (const void *) (uintptr_t) kind) == NULL)
+		  {
+		    type_size += sizeof (ctf_type_t);
+		    suppress = 1;
+		    break;
+		  }
 
 	      tp++;
 	    }
@@ -948,7 +948,8 @@ ctf_type_sect_size (ctf_dict_t *fp)
 	    continue;
 	}
 
-      /* Type headers: elide CTF_K_BIG from types if possible.  */
+      /* Type headers: elide CTF_K_BIG from types if possible.  Must match
+	 corresponding elision in ctf_emit_type_sect.  */
 
       tp = dtd->dtd_buf;
       while (kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
@@ -1009,13 +1010,22 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
       while (kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
 	     LCTF_IS_PREFIXED_KIND (kind))
 	{
+	  /* Don't worry about BIGs that will be elided.  */
+
+	  if ((kind == CTF_K_BIG) && tp->ctt_size == 0
+	      && LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) == 0)
+	    {
+	      tp++;
+	      continue;
+	    }
+
 	  if (!fp->ctf_write_suppressions
 	      || ctf_dynset_lookup (fp->ctf_write_suppressions,
 				    (const void *) (uintptr_t) kind) == NULL)
 	    {
 	      if (_libctf_btf_mode == LIBCTF_BTM_BTF)
 		{
-		  ctf_err_warn (fp, 0, ECTF_NOTBTF, _("type %lx: Attempt to write out CTF-specific kind %i, as BTF"),
+		  ctf_err_warn (fp, 0, ECTF_NOTBTF, _("type %lx: Attempt to write out CTF-specific kind %i as BTF"),
 				id, kind);
 		  return (ctf_set_errno (fp, ECTF_NOTBTF));
 		}
@@ -1054,9 +1064,13 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  if (kind == CTF_K_BIG)
 	    {
 	      big = 1;
+
 	      if (tp->ctt_size == 0
 		  && LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) == 0)
-		continue;
+		{
+		  tp++;
+		  continue;
+		}
 	    }
 
 	  memcpy (t, tp, sizeof (ctf_type_t));
