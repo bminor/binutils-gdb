@@ -3167,21 +3167,17 @@ cutu_reader::release_cu ()
   return std::move (m_new_cu);
 }
 
-/* Read CU/TU THIS_CU but do not follow DW_AT_GNU_dwo_name (DW_AT_dwo_name)
-   if present. DWO_FILE, if non-NULL, is the DWO file to read (the caller is
-   assumed to have already done the lookup to find the DWO file).
+/* This constructor exists for the special case of reading many units in a row
+   from a given known DWO file.
 
-   The caller is required to fill in THIS_CU->section, THIS_CU->offset, and
-   THIS_CU->is_debug_types, but nothing else.
+   THIS_CU is a special dwarf2_per_cu to represent where to read the unit from,
+   in the DWO file.  The caller is required to fill THIS_CU::SECTION,
+   THIS_CU::SECT_OFF, and THIS_CU::IS_DEBUG_TYPES.  This constructor will fill
+   in the length.  THIS_CU::SECTION must point to a section from the DWO file,
+   which is normally not the case for regular dwarf2_per_cu uses.
 
-   We fill in THIS_CU->length.
-
-   THIS_CU->cu is always freed when done.
-   This is done in order to not leave THIS_CU->cu in a state where we have
-   to care whether it refers to the "main" CU or the DWO CU.
-
-   When parent_cu is passed, it is used to provide a default value for
-   str_offsets_base and addr_base from the parent.  */
+   PARENT_CU is the CU created when reading the skeleton unit, and is used to
+   provide a default value for str_offsets_base and addr_base.  */
 
 cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 			  dwarf2_per_objfile *per_objfile,
