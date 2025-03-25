@@ -1422,11 +1422,17 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
   if (_libctf_btf_mode == LIBCTF_BTM_ALWAYS
       || (_libctf_btf_mode == LIBCTF_BTM_POSSIBLE && ctf_needed))
     {
+      ctf_dprintf ("Writing out as CTF\n");
+
       hdr_len = sizeof (ctf_header_t);
       ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
     }
   else
-    hdr_len = sizeof (ctf_btf_header_t);
+    {
+      ctf_dprintf ("Writing out as BTF\n");
+
+      hdr_len = sizeof (ctf_btf_header_t);
+    }
 
   hdr.cth_objt_off = 0;
   hdr.cth_objt_len = objt_size;
