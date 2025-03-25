@@ -2866,8 +2866,12 @@ lookup_dwo_id (struct dwarf2_cu *cu, struct die_info* comp_unit_die)
 }
 
 /* Subroutine of cutu_reader to simplify it.
-   Look up the DWO unit specified by COMP_UNIT_DIE of THIS_CU.
-   Returns NULL if the specified DWO unit cannot be found.  */
+   Look up the DWO unit specified by COMP_UNIT_DIE of CU.
+
+   DWO_NAME is the name (DW_AT_dwo_name) of the DWO unit already read from
+   COMP_UNIT_DIE.
+
+   Returns nullptr if the specified DWO unit cannot be found.  */
 
 static struct dwo_unit *
 lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die, const char *dwo_name)
@@ -2885,8 +2889,6 @@ lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die, const char *dwo_name)
 
   gdb_assert (cu != NULL);
 
-  /* Yeah, we look dwo_name up again, but it simplifies the code.  */
-  dwo_name = dwarf2_dwo_name (comp_unit_die, cu);
   comp_dir = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
   if (per_cu->is_debug_types)
