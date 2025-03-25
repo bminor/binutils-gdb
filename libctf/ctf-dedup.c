@@ -3500,6 +3500,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 		ctf_set_errno (target, errno);
 		goto err_target;
 	      }
+	    new_type = 0;
+	    break;
 	  }
 
 	if (ctf_decl_tag (input, type, &component_idx) == CTF_ERR)
