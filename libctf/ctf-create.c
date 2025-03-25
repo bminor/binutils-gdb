@@ -954,6 +954,8 @@ ctf_add_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
 
   if (is_decl)
     {
+      vlen_size = sizeof (ctf_decl_tag_t);
+
       /* Whole-type declarations.  */
 
       if (component_idx == 0)
@@ -967,7 +969,6 @@ ctf_add_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
 	      /* TODO: support addition and querying on CTF_K_FUNCTION too, chasing back
 		 to relevant CTF_K_FUNC_LINKAGEs.  */
 	    case CTF_K_FUNC_LINKAGE:
-	      vlen_size = sizeof (ctf_decl_tag_t);
 	      break;
 	    default:
 	      return (ctf_set_typed_errno (fp, ECTF_BADID));
