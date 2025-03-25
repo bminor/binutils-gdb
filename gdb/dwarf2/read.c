@@ -3571,8 +3571,9 @@ private:
 };
 
 void
-cooked_index_worker_debug_info::process_cus (size_t task_number, unit_iterator first,
-				      unit_iterator end)
+cooked_index_worker_debug_info::process_cus (size_t task_number,
+					     unit_iterator first,
+					     unit_iterator end)
 {
   SCOPE_EXIT { bfd_thread_cleanup (); };
 
@@ -3591,14 +3592,12 @@ cooked_index_worker_debug_info::process_cus (size_t task_number, unit_iterator f
 	}
       catch (gdb_exception &except)
 	{
-	  errors.push_back (std::move (except));
+	  thread_storage.note_error (std::move (except));
 	}
     }
 
-  m_results[task_number] = result_type (thread_storage.release (),
-					complaint_handler.release (),
-					std::move (errors),
-					thread_storage.release_parent_map ());
+  thread_storage.done_reading (complaint_handler.release ());
+  m_results[task_number] = std::move (thread_storage);
 }
 
 void
@@ -3610,17 +3609,17 @@ cooked_index_worker_debug_info::done_reading ()
 
   for (auto &one_result : m_results)
     {
-      shards.push_back (std::move (std::get<0> (one_result)));
-      m_all_parents_map.add_map (std::get<3> (one_result));
+      shards.push_back (one_result.release_shard ());
+      m_all_parents_map.add_map (*one_result.get_parent_map ());
     }
 
   /* This has to wait until we read the CUs, we need the list of DWOs.  */
   process_skeletonless_type_units (m_per_objfile, &m_index_storage);
 
-  shards.push_back (m_index_storage.release ());
+  shards.push_back (m_index_storage.release_shard ());
   shards.shrink_to_fit ();
 
-  m_all_parents_map.add_map (m_index_storage.release_parent_map ());
+  m_all_parents_map.add_map (*m_index_storage.get_parent_map ());
 
   dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
   cooked_index *table

@@ -30,6 +30,9 @@ public:
   abbrev_table_cache () = default;
   DISABLE_COPY_AND_ASSIGN (abbrev_table_cache);
 
+  abbrev_table_cache (abbrev_table_cache &&) = default;
+  abbrev_table_cache &operator= (abbrev_table_cache &&) = default;
+
   /* Find an abbrev table coming from the abbrev section SECTION at
      offset OFFSET.  Return the table, or nullptr if it has not yet
      been registered.  */

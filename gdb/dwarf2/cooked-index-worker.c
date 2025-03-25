@@ -91,6 +91,22 @@ bool cooked_index_worker_result::cutu_reader_eq::operator()
 /* See cooked-index-worker.h.  */
 
 void
+cooked_index_worker_result::emit_complaints_and_exceptions
+     (gdb::unordered_set<gdb_exception> &seen_exceptions)
+{
+  gdb_assert (is_main_thread ());
+
+  re_emit_complaints (m_complaints);
+
+  /* Only show a given exception a single time.  */
+  for (auto &one_exc : m_exceptions)
+    if (seen_exceptions.insert (one_exc).second)
+      exception_print (gdb_stderr, one_exc);
+}
+
+/* See cooked-index-worker.h.  */
+
+void
 cooked_index_worker::start ()
 {
   gdb::thread_pool::g_thread_pool->post_task ([this] ()
@@ -167,12 +183,7 @@ cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
   /* Only show a given exception a single time.  */
   gdb::unordered_set<gdb_exception> seen_exceptions;
   for (auto &one_result : m_results)
-    {
-      re_emit_complaints (std::get<1> (one_result));
-      for (auto &one_exc : std::get<2> (one_result))
-	if (seen_exceptions.insert (one_exc).second)
-	  exception_print (gdb_stderr, one_exc);
-    }
+    one_result.emit_complaints_and_exceptions (seen_exceptions);
 
   print_stats ();
 
