@@ -1774,11 +1774,16 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 
       vlen = LCTF_VLEN (fp, prefix);
       memb = (ctf_member_t *) dtd->dtd_vlen;
+      bit_offset = off;
 
-      memb[vlen].ctm_offset = CTF_MEMBER_MAKE_BIT_OFFSET (bit_width, off);
       ssize = ctf_get_ctt_size (fp, prefix, NULL, NULL);
       ssize = MAX (ssize, ((signed) ((bit_offset + dtd->dtd_last_offset)) / CHAR_BIT) + msize);
     }
+
+  if (kflag)
+    memb[vlen].ctm_offset = CTF_MEMBER_MAKE_BIT_OFFSET (bit_width, bit_offset);
+  else
+    memb[vlen].ctm_offset = bit_offset;
 
   vlen = LCTF_VLEN (fp, prefix);
 
