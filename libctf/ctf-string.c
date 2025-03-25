@@ -46,11 +46,10 @@ set_prov_offset (ctf_dict_t *fp, uint32_t prov_offset)
     fp->ctf_str_prov_offset = prov_offset;
 }
 
-/* Convert an encoded CTF string name into a pointer to a C string, possibly
-   using an explicit internal provisional strtab rather than the fp-based
-   one.  */
+/* Convert an encoded CTF string name into a pointer to a C string by looking
+  up the appropriate string table buffer and then adding the offset.  */
 const char *
-ctf_strraw_explicit (ctf_dict_t *fp, uint32_t name, ctf_strs_t *strtab)
+ctf_strraw (ctf_dict_t *fp, uint32_t name)
 {
   int stid_tab = CTF_NAME_STID (name);
   ctf_strs_t *ctsp = &fp->ctf_str[stid_tab];
@@ -129,11 +128,7 @@ ctf_strraw_explicit (ctf_dict_t *fp, uint32_t name, ctf_strs_t *strtab)
       else
 	{
 	  name -= fp->ctf_header->cth_parent_strlen;
-
-	  if (strtab != NULL)
-	    ctsp = strtab;
-	  else
-	    ctsp = &fp->ctf_str[CTF_STRTAB_0];
+	  ctsp = &fp->ctf_str[CTF_STRTAB_0];
 	}
     }
 
@@ -158,14 +153,6 @@ ctf_strraw_explicit (ctf_dict_t *fp, uint32_t name, ctf_strs_t *strtab)
 
   /* String table not loaded or corrupt offset.  */
   return NULL;
-}
-
-/* Convert an encoded CTF string name into a pointer to a C string by looking
-  up the appropriate string table buffer and then adding the offset.  */
-const char *
-ctf_strraw (ctf_dict_t *fp, uint32_t name)
-{
-  return ctf_strraw_explicit (fp, name, NULL);
 }
 
 /* Return a guaranteed-non-NULL pointer to the string with the given CTF
@@ -432,8 +419,7 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
 
      Special-case "" again: it gets a real offset of zero, not a high
      provisional one.  This atom's offset is never returned (see the special
-     case in ctf_strraw_explicit) and mostly exists for the sake of the
-     deduplicator.  */
+     case in ctf_strraw) and mostly exists for the sake of the deduplicator.  */
 
   if (flags & CTF_STR_PROVISIONAL)
     {
