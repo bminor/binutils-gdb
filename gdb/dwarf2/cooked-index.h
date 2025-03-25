@@ -46,6 +46,14 @@
    possible.  This combination should help hide the effort from the
    user to the maximum possible degree.
 
+   There are a number of different objects involved in this process.
+   Most of them are temporary -- they are created to handle different
+   phases of scanning, then discarded when possible.  The "steady
+   state" objects are index itself (cooked_index, below), which holds
+   the entries (cooked_index_entry), and the implementation of the
+   "quick" API (e.g., cooked_index_functions, though there are
+   other variants).
+
    . Main Thread                |       Worker Threads
    ============================================================
    . dwarf2_initialize_objfile
@@ -77,6 +85,7 @@
    .                                        v
    .                              maybe write to index cache
    .                                  state = CACHE_DONE
+   .                                 ~cooked_index_worker
    .
    .
    .   if main thread calls...
