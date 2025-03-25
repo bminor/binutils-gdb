@@ -672,7 +672,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
       if (kind == CTF_K_FORWARD)
 	pop[suffix->ctt_type]++;
 
-      if (kind == CTF_K_ENUM)
+      if (kind == CTF_K_ENUM || kind == CTF_K_ENUM64)
 	pop_enumerators += vlen;
 
       tp = (ctf_type_t *) ((uintptr_t) tp + increment + vbytes);
