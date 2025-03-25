@@ -1138,7 +1138,7 @@ ctf_add_function_linkage (ctf_dict_t *fp, uint32_t flag,
     return (ctf_set_typed_errno (fp, ECTF_NOTFUNC));
 
   if ((dtd = ctf_add_generic (fp, flag, name, CTF_K_FUNC_LINKAGE, 0,
-			      sizeof (ctf_linkage_t), 0, NULL)) == NULL)
+			      0, 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_FUNC_LINKAGE, 0, linkage);
