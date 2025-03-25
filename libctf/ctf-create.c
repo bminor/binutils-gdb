@@ -2025,7 +2025,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   sec[vlen].cvs_size = (uint32_t) size;
   sec_dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, kflag, vlen + 1);
 
-  return 0;
+  return sec_dtd->dtd_type;
 
 err:
   ctf_dynhash_remove (fp->ctf_var_datasecs,
