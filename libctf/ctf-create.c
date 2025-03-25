@@ -1502,10 +1502,20 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (vlen == CTF_MAX_VLEN)
     return (ctf_set_errno (ofp, ECTF_DTFULL));
 
-  if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum_t) * (vlen + 1)) < 0)
-    return -1;					/* errno is set for us.  */
+  if (kind == CTF_K_ENUM)
+    {
+      if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum_t) * (vlen + 1)) < 0)
+	return -1;				/* errno is set for us.  */
 
-  dtd->dtd_vlen_size += sizeof (ctf_enum_t);
+      dtd->dtd_vlen_size += sizeof (ctf_enum_t);
+    }
+  else
+    {
+      if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum64_t) * (vlen + 1)) < 0)
+	return -1;				/* errno is set for us.  */
+
+      dtd->dtd_vlen_size += sizeof (ctf_enum64_t);
+    }
 
   /* Check for constant duplication within any given enum: only needed for
      non-root-visible types, since the duplicate detection above does the job
