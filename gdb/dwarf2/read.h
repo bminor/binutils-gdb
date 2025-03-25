@@ -921,19 +921,19 @@ class cutu_reader
 {
 public:
 
-  cutu_reader (dwarf2_per_cu *this_cu,
-	       dwarf2_per_objfile *per_objfile,
+  cutu_reader (dwarf2_per_cu &this_cu,
+	       dwarf2_per_objfile &per_objfile,
 	       const struct abbrev_table *abbrev_table,
 	       dwarf2_cu *existing_cu,
 	       bool skip_partial,
 	       enum language pretend_language,
 	       const abbrev_table_cache *cache = nullptr);
 
-  cutu_reader (dwarf2_per_cu *this_cu,
-	       dwarf2_per_objfile *per_objfile,
+  cutu_reader (dwarf2_per_cu &this_cu,
+	       dwarf2_per_objfile &per_objfile,
 	       enum language pretend_language,
-	       struct dwarf2_cu *parent_cu,
-	       struct dwo_file *dwo_file);
+	       struct dwarf2_cu &parent_cu,
+	       struct dwo_file &dwo_file);
 
   DISABLE_COPY_AND_ASSIGN (cutu_reader);
 

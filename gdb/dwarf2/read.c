@@ -1791,7 +1791,7 @@ dw2_get_file_names (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile)
   if (this_cu->files_read)
     return this_cu->file_names;
 
-  cutu_reader reader (this_cu, per_objfile, nullptr,
+  cutu_reader reader (*this_cu, *per_objfile, nullptr,
 		      per_objfile->get_cu (this_cu), true, language_minimal,
 		      nullptr);
   if (!reader.is_dummy ())
@@ -2964,16 +2964,16 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu *this_cu,
    If EXISTING_CU is non-NULL, then use it.  Otherwise, a new CU is
    allocated.  */
 
-cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
-			  dwarf2_per_objfile *per_objfile,
+cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
+			  dwarf2_per_objfile &per_objfile,
 			  const struct abbrev_table *abbrev_table,
 			  dwarf2_cu *existing_cu,
 			  bool skip_partial,
 			  enum language pretend_language,
 			  const abbrev_table_cache *cache)
 {
-  struct objfile *objfile = per_objfile->objfile;
-  struct dwarf2_section_info *section = this_cu->section;
+  struct objfile *objfile = per_objfile.objfile;
+  struct dwarf2_section_info *section = this_cu.section;
   bfd *abfd = section->get_bfd_owner ();
   const gdb_byte *begin_info_ptr;
   struct signatured_type *sig_type = NULL;
@@ -2985,17 +2985,17 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 
   if (dwarf_die_debug)
     gdb_printf (gdb_stdlog, "Reading %s unit at offset %s\n",
-		this_cu->is_debug_types ? "type" : "comp",
-		sect_offset_str (this_cu->sect_off));
+		this_cu.is_debug_types ? "type" : "comp",
+		sect_offset_str (this_cu.sect_off));
 
   /* If we're reading a TU directly from a DWO file, including a virtual DWO
      file (instead of going through the stub), short-circuit all of this.  */
-  if (this_cu->reading_dwo_directly)
+  if (this_cu.reading_dwo_directly)
     {
       /* Narrow down the scope of possibilities to have to understand.  */
-      gdb_assert (this_cu->is_debug_types);
+      gdb_assert (this_cu.is_debug_types);
       gdb_assert (abbrev_table == NULL);
-      init_tu_and_read_dwo_dies (this_cu, per_objfile, existing_cu,
+      init_tu_and_read_dwo_dies (&this_cu, &per_objfile, existing_cu,
 				 pretend_language);
       return;
     }
@@ -3004,9 +3004,9 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
   section->read (objfile);
 
   begin_info_ptr = m_info_ptr
-    = section->buffer + to_underlying (this_cu->sect_off);
+    = section->buffer + to_underlying (this_cu.sect_off);
 
-  abbrev_section = get_abbrev_section_for_cu (this_cu);
+  abbrev_section = get_abbrev_section_for_cu (&this_cu);
 
   dwarf2_cu *cu;
 
@@ -3031,8 +3031,8 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 	 is irrelevant, and (2) the get_cu method is not
 	 thread-safe.  */
       gdb_assert (cache != nullptr
-		  || per_objfile->get_cu (this_cu) == nullptr);
-      m_new_cu = std::make_unique<dwarf2_cu> (this_cu, per_objfile);
+		  || per_objfile.get_cu (&this_cu) == nullptr);
+      m_new_cu = std::make_unique<dwarf2_cu> (&this_cu, &per_objfile);
       cu = m_new_cu.get ();
     }
 
@@ -3044,43 +3044,43 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
     }
   else
     {
-      if (this_cu->is_debug_types)
+      if (this_cu.is_debug_types)
 	{
 	  m_info_ptr
-	    = read_and_check_comp_unit_head (per_objfile, &cu->header, section,
+	    = read_and_check_comp_unit_head (&per_objfile, &cu->header, section,
 					     abbrev_section, m_info_ptr,
 					     rcuh_kind::TYPE);
 
 	  /* Since per_cu is the first member of struct signatured_type,
 	     we can go from a pointer to one to a pointer to the other.  */
-	  sig_type = (struct signatured_type *) this_cu;
+	  sig_type = (struct signatured_type *) &this_cu;
 	  gdb_assert (sig_type->signature == cu->header.signature);
 	  gdb_assert (sig_type->type_offset_in_tu
 		      == cu->header.type_cu_offset_in_tu);
-	  gdb_assert (this_cu->sect_off == cu->header.sect_off);
+	  gdb_assert (this_cu.sect_off == cu->header.sect_off);
 
 	  /* LENGTH has not been set yet for type units if we're
 	     using .gdb_index.  */
-	  this_cu->set_length (cu->header.get_length_with_initial ());
+	  this_cu.set_length (cu->header.get_length_with_initial ());
 
 	  /* Establish the type offset that can be used to lookup the type.  */
 	  sig_type->type_offset_in_section =
-	    this_cu->sect_off + to_underlying (sig_type->type_offset_in_tu);
+	    this_cu.sect_off + to_underlying (sig_type->type_offset_in_tu);
 	}
       else
 	{
 	  m_info_ptr
-	    = read_and_check_comp_unit_head (per_objfile, &cu->header, section,
+	    = read_and_check_comp_unit_head (&per_objfile, &cu->header, section,
 					     abbrev_section, m_info_ptr,
 					     rcuh_kind::COMPILE);
 
-	  gdb_assert (this_cu->sect_off == cu->header.sect_off);
-	  this_cu->set_length (cu->header.get_length_with_initial ());
+	  gdb_assert (this_cu.sect_off == cu->header.sect_off);
+	  this_cu.set_length (cu->header.get_length_with_initial ());
 	}
     }
 
   /* Skip dummy compilation units.  */
-  if (m_info_ptr >= begin_info_ptr + this_cu->length ()
+  if (m_info_ptr >= begin_info_ptr + this_cu.length ()
       || peek_abbrev_code (abfd, m_info_ptr) == 0)
     m_dummy_p = true;
   else
@@ -3132,7 +3132,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 		{
 		  complaint (_("compilation unit with DW_AT_GNU_dwo_name"
 			       " has children (offset %s) [in module %s]"),
-			     sect_offset_str (this_cu->sect_off),
+			     sect_offset_str (this_cu.sect_off),
 			     bfd_get_filename (abfd));
 		}
 
@@ -3179,49 +3179,45 @@ cutu_reader::release_cu ()
    PARENT_CU is the CU created when reading the skeleton unit, and is used to
    provide a default value for str_offsets_base and addr_base.  */
 
-cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
-			  dwarf2_per_objfile *per_objfile,
-			  enum language pretend_language,
-			  struct dwarf2_cu *parent_cu,
-			  struct dwo_file *dwo_file)
+cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
+			  dwarf2_per_objfile &per_objfile,
+			  language pretend_language, dwarf2_cu &parent_cu,
+			  dwo_file &dwo_file)
 {
-  struct objfile *objfile = per_objfile->objfile;
-  struct dwarf2_section_info *section = this_cu->section;
+  struct objfile *objfile = per_objfile.objfile;
+  struct dwarf2_section_info *section = this_cu.section;
   bfd *abfd = section->get_bfd_owner ();
-
-  gdb_assert (parent_cu != nullptr);
-  gdb_assert (dwo_file != nullptr);
 
   if (dwarf_die_debug)
     gdb_printf (gdb_stdlog, "Reading %s unit at offset %s\n",
-		this_cu->is_debug_types ? "type" : "comp",
-		sect_offset_str (this_cu->sect_off));
+		this_cu.is_debug_types ? "type" : "comp",
+		sect_offset_str (this_cu.sect_off));
 
-  gdb_assert (per_objfile->get_cu (this_cu) == nullptr);
+  gdb_assert (per_objfile.get_cu (&this_cu) == nullptr);
 
-  dwarf2_section_info *abbrev_section = &dwo_file->sections.abbrev;
+  dwarf2_section_info *abbrev_section = &dwo_file.sections.abbrev;
 
   /* This is cheap if the section is already read in.  */
   section->read (objfile);
 
-  m_new_cu = std::make_unique<dwarf2_cu> (this_cu, per_objfile);
+  m_new_cu = std::make_unique<dwarf2_cu> (&this_cu, &per_objfile);
 
-  m_info_ptr = section->buffer + to_underlying (this_cu->sect_off);
+  m_info_ptr = section->buffer + to_underlying (this_cu.sect_off);
   const gdb_byte *begin_info_ptr = m_info_ptr;
   m_info_ptr
-    = read_and_check_comp_unit_head (per_objfile, &m_new_cu->header, section,
+    = read_and_check_comp_unit_head (&per_objfile, &m_new_cu->header, section,
 				     abbrev_section, m_info_ptr,
-				     (this_cu->is_debug_types
+				     (this_cu.is_debug_types
 				      ? rcuh_kind::TYPE
 				      : rcuh_kind::COMPILE));
 
-  m_new_cu->str_offsets_base = parent_cu->str_offsets_base;
-  m_new_cu->addr_base = parent_cu->addr_base;
+  m_new_cu->str_offsets_base = parent_cu.str_offsets_base;
+  m_new_cu->addr_base = parent_cu.addr_base;
 
-  this_cu->set_length (m_new_cu->header.get_length_with_initial ());
+  this_cu.set_length (m_new_cu->header.get_length_with_initial ());
 
   /* Skip dummy compilation units.  */
-  if (m_info_ptr >= begin_info_ptr + this_cu->length ()
+  if (m_info_ptr >= begin_info_ptr + this_cu.length ()
       || peek_abbrev_code (abfd, m_info_ptr) == 0)
     m_dummy_p = true;
   else
@@ -3231,7 +3227,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu *this_cu,
 	= abbrev_table::read (abbrev_section,
 			      m_new_cu->header.abbrev_sect_off);
 
-      this->init_cu_die_reader (m_new_cu.get (), section, dwo_file,
+      this->init_cu_die_reader (m_new_cu.get (), section, &dwo_file,
 				m_abbrev_table_holder.get ());
       m_top_level_die = this->read_toplevel_die ();
     }
@@ -3298,7 +3294,7 @@ process_psymtab_comp_unit (dwarf2_per_cu *this_cu,
   cutu_reader *reader = storage->get_reader (this_cu);
   if (reader == nullptr)
     {
-      cutu_reader new_reader (this_cu, per_objfile, nullptr, nullptr, false,
+      cutu_reader new_reader (*this_cu, *per_objfile, nullptr, nullptr, false,
 			      language_minimal,
 			      &storage->get_abbrev_table_cache ());
 
@@ -3445,7 +3441,7 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile,
 	  ++tu_stats->nr_uniq_abbrev_tables;
 	}
 
-      cutu_reader reader (tu.sig_type, per_objfile,
+      cutu_reader reader (*tu.sig_type, *per_objfile,
 			  abbrev_table.get (), nullptr, false,
 			  language_minimal);
       if (!reader.is_dummy ())
@@ -3499,7 +3495,7 @@ process_skeletonless_type_unit (dwo_unit *dwo_unit,
   fill_in_sig_entry_from_dwo_entry (per_objfile, *sig_type_it, dwo_unit);
 
   /* This does the job that build_type_psymtabs would have done.  */
-  cutu_reader reader (*sig_type_it, per_objfile, nullptr, nullptr, false,
+  cutu_reader reader (**sig_type_it, *per_objfile, nullptr, nullptr, false,
 		      language_minimal);
   if (!reader.is_dummy ())
     build_type_psymtabs_reader (&reader, storage);
@@ -4221,7 +4217,7 @@ load_full_comp_unit (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile,
   gdb_assert (! this_cu->is_debug_types);
   gdb_assert (per_objfile->get_cu (this_cu) == nullptr);
 
-  cutu_reader reader (this_cu, per_objfile, nullptr, nullptr, skip_partial,
+  cutu_reader reader (*this_cu, *per_objfile, nullptr, nullptr, skip_partial,
 		      pretend_language);
   if (reader.is_dummy ())
     return;
@@ -6356,8 +6352,8 @@ create_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
       /* The length of the CU gets set by the cutu_reader just below.  */
       dwarf2_per_cu per_cu (per_bfd, &section, sect_off, 0 /* length */,
 			    false /* is_dwz */);
-      cutu_reader reader (&per_cu, per_objfile, language_minimal,
-			  cu, &dwo_file);
+      cutu_reader reader (per_cu, *per_objfile, language_minimal,
+			  *cu, dwo_file);
 
       info_ptr += per_cu.length ();
 
@@ -15321,7 +15317,7 @@ dwarf2_read_addr_index (dwarf2_per_cu *per_cu, dwarf2_per_objfile *per_objfile,
     }
   else
     {
-      cutu_reader reader (per_cu, per_objfile, nullptr, nullptr, false,
+      cutu_reader reader (*per_cu, *per_objfile, nullptr, nullptr, false,
 			  language_minimal);
       addr_base = reader.cu ()->addr_base;
       addr_size = reader.cu ()->header.addr_size;
@@ -18821,7 +18817,7 @@ read_signatured_type (signatured_type *sig_type,
   gdb_assert (sig_type->is_debug_types);
   gdb_assert (per_objfile->get_cu (sig_type) == nullptr);
 
-  cutu_reader reader (sig_type, per_objfile, nullptr, nullptr, false,
+  cutu_reader reader (*sig_type, *per_objfile, nullptr, nullptr, false,
 		      language_minimal);
 
   if (!reader.is_dummy ())
@@ -19334,7 +19330,7 @@ dwarf2_per_cu::ensure_lang (dwarf2_per_objfile *per_objfile)
 
   /* Constructing this object will set the language as a side
      effect.  */
-  cutu_reader reader (this, per_objfile, nullptr, per_objfile->get_cu (this),
+  cutu_reader reader (*this, *per_objfile, nullptr, per_objfile->get_cu (this),
 		      true, language_minimal, nullptr);
 }
 
