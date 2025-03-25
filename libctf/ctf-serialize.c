@@ -1716,7 +1716,7 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
 
   if (flip_endian)
     {
-      if (ctf_flip_header (hp, fp->ctf_serializing_is_btf, 0) <0)
+      if (ctf_flip_header (hp, fp->ctf_serializing_is_btf, 0) < 0)
 	goto err;				/* errno is set for us.  */
       if (ctf_flip (fp, rawhp, src, fp->ctf_serializing_is_btf, 1) < 0)
 	goto err;				/* errno is set for us.  */
