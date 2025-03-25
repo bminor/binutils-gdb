@@ -239,3 +239,27 @@ cooked_index_worker::write_to_cache (const cooked_index *idx,
       m_cache_store.store ();
     }
 }
+
+/* See cooked-index-worker.h.  */
+
+void
+cooked_index_worker::done_reading ()
+{
+  /* Only handle the scanning results here.  Complaints and exceptions
+     can only be dealt with on the main thread.  */
+  std::vector<cooked_index_shard_up> shards;
+
+  for (auto &one_result : m_results)
+    {
+      shards.push_back (one_result.release_shard ());
+      m_all_parents_map.add_map (*one_result.get_parent_map ());
+    }
+
+  shards.shrink_to_fit ();
+
+  dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
+  cooked_index *table
+    = (gdb::checked_static_cast<cooked_index *>
+       (per_bfd->index_table.get ()));
+  table->set_contents (std::move (shards), &m_warnings, &m_all_parents_map);
+}

@@ -240,6 +240,12 @@ protected:
      to be run in a worker thread without problems.  */
   virtual void do_reading () = 0;
 
+  /* Helper function that should be called when done reading.  This
+     assumes that m_results is filled in, and will initialize
+     m_all_parents_map and end by calling
+     cooked_index::set_contents.  */
+  virtual void done_reading ();
+
   /* A callback that can print stats, if needed.  This is called when
      transitioning to the 'MAIN_AVAILABLE' state.  */
   virtual void print_stats ()

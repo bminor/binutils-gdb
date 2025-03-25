@@ -426,7 +426,6 @@ cooked_index_worker_debug_names::do_reading ()
       m_map.indices[0].note_error (std::move (exc));
     }
 
-  std::vector<cooked_index_shard_up> shards;
   bool first = true;
   for (auto &iter : m_map.indices)
     {
@@ -437,20 +436,10 @@ cooked_index_worker_debug_names::do_reading ()
 	}
       else
 	iter.done_reading ({});
-      shards.push_back (iter.release_shard ());
-      m_all_parents_map.add_map (*iter.get_parent_map ());
     }
 
   m_results = std::move (m_map.indices);
-
-  dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
-  cooked_index *table
-    = (gdb::checked_static_cast<cooked_index *>
-       (per_bfd->index_table.get ()));
-
-  /* Note that this code never uses IS_PARENT_DEFERRED, so it is safe
-     to pass nullptr here.  */
-  table->set_contents (std::move (shards), &m_warnings, nullptr);
+  done_reading ();
 
   bfd_thread_cleanup ();
 }

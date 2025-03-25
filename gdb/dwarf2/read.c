@@ -3553,7 +3553,7 @@ private:
 
   /* After the last DWARF-reading task has finished, this function
      does the remaining work to finish the scan.  */
-  void done_reading ();
+  void done_reading () override;
 
   /* An iterator for the comp units.  */
   using unit_iterator = std::vector<dwarf2_per_cu_up>::iterator;
@@ -3603,30 +3603,13 @@ cooked_index_worker_debug_info::process_cus (size_t task_number,
 void
 cooked_index_worker_debug_info::done_reading ()
 {
-  /* Only handle the scanning results here.  Complaints and exceptions
-     can only be dealt with on the main thread.  */
-  std::vector<cooked_index_shard_up> shards;
-
-  for (auto &one_result : m_results)
-    {
-      shards.push_back (one_result.release_shard ());
-      m_all_parents_map.add_map (*one_result.get_parent_map ());
-    }
-
   /* This has to wait until we read the CUs, we need the list of DWOs.  */
   process_skeletonless_type_units (m_per_objfile, &m_index_storage);
 
-  shards.push_back (m_index_storage.release_shard ());
-  shards.shrink_to_fit ();
+  m_results.push_back (std::move (m_index_storage));
 
-  m_all_parents_map.add_map (*m_index_storage.get_parent_map ());
-
-  dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
-  cooked_index *table
-    = (gdb::checked_static_cast<cooked_index *>
-       (per_bfd->index_table.get ()));
-  table->set_contents (std::move (shards), &m_warnings,
-		       &m_all_parents_map);
+  /* Call into the base class.  */
+  cooked_index_worker::done_reading ();
 }
 
 void
