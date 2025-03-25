@@ -1482,7 +1482,7 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 
   kind = LCTF_KIND (fp, dtd->dtd_buf);
   root = LCTF_INFO_ISROOT (fp, dtd->dtd_buf->ctt_info);
-  vlen = dtd->dtd_vlen_size;
+  vlen = LCTF_VLEN (fp, dtd->dtd_buf);
 
   /* Enumeration constant names are only added, and only checked for duplicates,
      if the enum they are part of is a root-visible type.  */
