@@ -3944,7 +3944,7 @@ ctf_dedup_strings (ctf_dict_t *fp)
 	  if (ctf_list_empty_p (&atom->csa_refs))
 	    continue;
 
-	  if (atom->csa_external_offset
+	  if ((!fp->ctf_serializing_is_btf && atom->csa_external_offset)
 	      || atom->csa_str[0] == '\0'
 	      || atom->csa_flags & CTF_STR_ATOM_NO_DEDUP)
 	    continue;
@@ -3993,7 +3993,7 @@ ctf_dedup_strings (ctf_dict_t *fp)
 	  if (ctf_list_empty_p (&atom->csa_refs))
 	      continue;
 
-	  if (atom->csa_external_offset
+	  if ((!fp->ctf_serializing_is_btf && atom->csa_external_offset)
 	      || atom->csa_str[0] == '\0'
 	      || atom->csa_flags & CTF_STR_ATOM_NO_DEDUP)
 	    continue;
