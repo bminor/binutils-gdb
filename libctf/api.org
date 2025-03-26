@@ -132,7 +132,8 @@ implemented, prototype only)
   _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.") \
   _CTF_ITEM (ECTF_NOTTAG, "This function requires a type or decl tag.")
   _CTF_ITEM (ECTF_KIND_PROHIBITED, "Writeout of suppressed kind attempted.")
-  _CTF_ITEM (ECTF_NOTBTF, "Cannot write out this dict as BTF.")
+  _CTF_ITEM (ECTF_NOTBTF, "Cannot write out this dict as BTF.") \
+  _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.")
 
 A bit of reshuffling of the constants to put ECTF_NEXT_END at the top, for
 easier use in breakpoint conditions.

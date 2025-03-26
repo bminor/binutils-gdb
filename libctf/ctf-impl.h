@@ -404,7 +404,6 @@ struct ctf_dict
 				       enumeration constants.  */
   ctf_lookup_t ctf_lookups[6];	    /* Pointers to nametabs for name lookup.  */
   ctf_dynhash_t *ctf_var_datasecs;  /* Non-default var -> datasec mappings.  */
-  ctf_id_t ctf_default_var_datasec; /* Datasec not recorded in ctf_var_datasecs.  */
   ctf_strs_t ctf_str[2];	    /* Array of string table base and bounds.  */
   ctf_strs_writable_t *ctf_dynstrtab; /* Dynamically allocated string table, if any. */
   ctf_dynhash_t *ctf_str_atoms;	  /* Hash table of ctf_str_atoms_t.  */

@@ -1148,9 +1148,6 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       {
 	void *datasec;
 	ctf_id_t datasec_type;
-	int component_idx;
-	const char *datasec_name;
-	ctf_var_secinfo_t *entry;
 	int linkage;
 
 	/* Hash the linkage.  */
@@ -1162,39 +1159,42 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	ctf_dedup_sha1_add (&hash, &linkage, sizeof (linkage),
 			    "var linkage", depth);
 
-	/* Hash the datasec info.  The "input" here is the component_idx.  */
+	/* Hash the datasec info, if any (if none, use all zeroes).  The "input"
+	   here is the component_idx.  */
 
-	if (!ctf_dynhash_lookup_kv (d->cd_var_datasec,
-				    CTF_DEDUP_GID (fp, input_num, type), NULL,
-				    &datasec))
+	if (ctf_dynhash_lookup_kv (d->cd_var_datasec,
+				   CTF_DEDUP_GID (fp, input_num, type), NULL,
+				   &datasec))
 	  {
-	    whaterr = N_("error getting var->datasec info during dedup");
-	    goto err;
-	  }
-	datasec_type = CTF_DEDUP_GID_TO_TYPE (datasec);
-	component_idx = CTF_DEDUP_GID_TO_INPUT (datasec);
+	    int component_idx;
+	    const char *datasec_name;
+	    ctf_var_secinfo_t *entry;
 
-	if (((datasec_name = ctf_type_name_raw (input, datasec_type)) == NULL)
-	    || (datasec_name = ctf_decorate_type_name (fp, datasec_name,
-						       CTF_K_DATASEC)) == NULL)
-	  {
-	    whaterr = N_("error getting datasec name during dedup");
-	    goto err;
-	  }
-	ctf_dedup_sha1_add (&hash, datasec_name, strlen (datasec_name) + 1,
-			    "var datasec name", depth);
+	    datasec_type = CTF_DEDUP_GID_TO_TYPE (datasec);
+	    component_idx = CTF_DEDUP_GID_TO_INPUT (datasec);
 
-	if ((entry = ctf_datasec_entry (input, datasec_type,
-					component_idx)) == NULL)
-	  {
-	    whaterr = N_("datasec component_idx out of range during dedup");
-	    goto err;
-	  }
+	    if (((datasec_name = ctf_type_name_raw (input, datasec_type)) == NULL)
+		|| (datasec_name = ctf_decorate_type_name (fp, datasec_name,
+							   CTF_K_DATASEC)) == NULL)
+	      {
+		whaterr = N_("error getting datasec name during dedup");
+		goto err;
+	      }
+	    ctf_dedup_sha1_add (&hash, datasec_name, strlen (datasec_name) + 1,
+				"var datasec name", depth);
 
-	ctf_dedup_sha1_add (&hash, &entry->cvs_offset,
-			    sizeof (entry->cvs_offset), "datasec offset", depth);
-	ctf_dedup_sha1_add (&hash, &entry->cvs_size,
-			    sizeof (entry->cvs_size), "datasec size", depth);
+	    if ((entry = ctf_datasec_entry (input, datasec_type,
+					    component_idx)) == NULL)
+	      {
+		whaterr = N_("datasec component_idx out of range during dedup");
+		goto err;
+	      }
+
+	    ctf_dedup_sha1_add (&hash, &entry->cvs_offset,
+				sizeof (entry->cvs_offset), "datasec offset", depth);
+	    ctf_dedup_sha1_add (&hash, &entry->cvs_size,
+				sizeof (entry->cvs_size), "datasec size", depth);
+	  }
 
 	child_type = ctf_type_reference (input, type);
 	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
@@ -3519,8 +3519,9 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	void *datasec;
 	ctf_id_t datasec_type;
 	int64_t component_idx;
-	const char *datasec_name;
-	ctf_var_secinfo_t *entry;
+	const char *datasec_name = NULL;
+	ctf_var_secinfo_t null_entry = { 0, 0, 0 };
+	ctf_var_secinfo_t *entry = &null_entry;
 	int linkage;
 
 	errtype = _("variable");
@@ -3528,20 +3529,21 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	if ((linkage = ctf_type_linkage (input, type)) < 0)
 	  goto err_input;
 
-	/* Dig out the relevant bit of datasec info for this variable.  */
+	/* Dig out the relevant bit of datasec info for this variable, if
+	   any.  */
 
-	if (!ctf_dynhash_lookup_kv (d->cd_var_datasec, id, NULL, &datasec))
-	  goto err_input;
+	if (ctf_dynhash_lookup_kv (d->cd_var_datasec, id, NULL, &datasec))
+	  {
+	    datasec_type = CTF_DEDUP_GID_TO_TYPE (datasec);
+	    component_idx = CTF_DEDUP_GID_TO_INPUT (datasec);
 
-	datasec_type = CTF_DEDUP_GID_TO_TYPE (datasec);
-	component_idx = CTF_DEDUP_GID_TO_INPUT (datasec);
+	    if ((datasec_name = ctf_type_name_raw (input, datasec_type)) == NULL)
+	      goto err_input;
 
-	if ((datasec_name = ctf_type_name_raw (input, datasec_type)) == NULL)
-	  goto err_input;
-
-	if ((entry = ctf_datasec_entry (input, datasec_type,
-					component_idx)) == NULL)
-	  goto err_input;
+	    if ((entry = ctf_datasec_entry (input, datasec_type,
+					    component_idx)) == NULL)
+	      goto err_input;
+	  }
 
 	ref = ctf_type_reference (input, type);
 	if ((ref = ctf_dedup_id_to_target (output, target, inputs, ninputs,

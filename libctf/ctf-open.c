@@ -809,7 +809,6 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
   uint32_t id;
   uint32_t *xp;
   ctf_id_t type;
-  ssize_t biggest_datasec = -1;
 
   unsigned long typemax = fp->ctf_typemax;
 
@@ -1036,13 +1035,6 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	  if (err != 0)
 	    return err * -1;
 
-	  /* Remember the biggest datasec we've seen.  */
-	  
-	  if ((ssize_t) vlen > biggest_datasec)
-	    {
-	      biggest_datasec = vlen;
-	      fp->ctf_default_var_datasec = id;
-	    }
 	  break;
 
 	case CTF_K_DECL_TAG:
@@ -1141,11 +1133,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
     return err;
 
   /* In the final pass, we traverse all datasecs and remember the variables in
-     each but the largest, so we can rapidly map from variable back to datasec.
-
-     For simplicity, the "any but the largest" optimization is only applied at
-     open time: if another datasec grows to be larger due to dynamic additions,
-     its membership is still recorded. */
+     each, so we can rapidly map from variable back to datasec.  */
 
   ctf_dprintf ("Getting variable datasec membership\n");
 
@@ -1153,9 +1141,6 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
     {
       ctf_next_t *i_sec = NULL;
       ctf_id_t var_type;
-
-      if (type == fp->ctf_default_var_datasec)
-	continue;
 
       while ((var_type = ctf_datasec_var_next (fp, type, &i_sec, NULL, NULL))
 	     != CTF_ERR)

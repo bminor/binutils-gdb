@@ -2494,7 +2494,7 @@ search_datasec_by_offset (const void *key_, const void *arr_)
 
 /* Search a datasec for a variable covering a given offset.
 
-   Errors with ECTF_NOTYPEDAT if not found.  */
+   Errors with ECTF_NODATASEC if not found.  */
 
 ctf_id_t
 ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
@@ -2524,7 +2524,7 @@ ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
 
   if ((el = bsearch (&offset, sec, vlen_len, sizeof (ctf_var_secinfo_t),
 		     search_datasec_by_offset)) == NULL)
-    return ctf_set_typed_errno (fp, ECTF_NOTYPE);
+    return ctf_set_typed_errno (fp, ECTF_NODATASEC);
 
   if (el->cvs_offset == offset)
     return el->cvs_type;
@@ -2533,7 +2533,7 @@ ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
     if (el->cvs_offset < offset && el->cvs_offset + size > offset)
       return el->cvs_type;
 
-  return ctf_set_typed_errno (fp, ECTF_NOTYPE);
+  return ctf_set_typed_errno (fp, ECTF_NODATASEC);
 }
 
 /* Return the entry corresponding to a given component_idx in a datasec.
@@ -2564,7 +2564,8 @@ ctf_datasec_entry (ctf_dict_t *fp, ctf_id_t datasec, int component_idx)
   return &sec[component_idx];
 }
 
-/* Return the datasec that a given variable appears in.  */
+/* Return the datasec that a given variable appears in, or ECTF_NODATASEC if
+   none.  */
 
 ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var)
 {
@@ -2577,7 +2578,7 @@ ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var)
 			     NULL, &sec))
     return (ctf_id_t) sec;
 
-  return fp->ctf_default_var_datasec;
+  return (ctf_set_typed_errno (fp, ECTF_NODATASEC));
 }
 
 /* Recursively visit the members of any type.  This function is used as the

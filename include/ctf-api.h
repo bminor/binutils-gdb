@@ -264,7 +264,8 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.") \
   _CTF_ITEM (ECTF_NOTTAG, "This function requires a type or decl tag.") \
   _CTF_ITEM (ECTF_KIND_PROHIBITED, "Writeout of suppressed kind attempted.") \
-  _CTF_ITEM (ECTF_NOTBTF, "Cannot write out this dict as BTF.")
+  _CTF_ITEM (ECTF_NOTBTF, "Cannot write out this dict as BTF.") \
+  _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -771,12 +772,14 @@ extern ssize_t ctf_member_count (ctf_dict_t *, ctf_id_t);
 
 /* Search a datasec for a variable covering a given offset.
 
-   Errors with ECTF_NOTYPEDAT if not found.  */
+   Errors with ECTF_NODATASEC if not found.  */
 
 extern ctf_id_t ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec,
 					uint32_t offset);
 
-/* Return the datasec that a given variable appears in.  */
+/* Return the datasec that a given variable appears in, or ECTF_NODATASEC if
+   none.  */
+
 extern ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var);
 
 /* Type and decl tags.  */
@@ -1022,6 +1025,10 @@ extern int ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
                                     const char *, ctf_id_t type,
                                     unsigned long bit_offset,
                                     int bit_width);
+
+/* ctf_add_variable adds variables to no datasec at all;
+   ctf_add_section_variable adds them to the given datasec, or to no datasec at
+   all if the datasec is NULL.  */
 
 extern ctf_id_t ctf_add_variable (ctf_dict_t *, const char *, int linkage,
 				  ctf_id_t);

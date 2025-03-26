@@ -1881,9 +1881,9 @@ ctf_add_variable (ctf_dict_t *fp, const char *name, int linkage, ctf_id_t ref)
 }
 
 /* Add variable, interning it in the specified DATASEC (which must be in the
-   same dict).  As with structs, an offset of -1 means "next natural
-   alignment".  A size of zero means "get it from the type" and is the common
-   case.  */
+   same dict, but which may be NULL, meaning "no datasec").  As with structs, an
+   offset of -1 means "next natural alignment".  A size of zero means "get it
+   from the type" and is the common case.  */
 ctf_id_t
 ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
 			  const char *name, int linkage, ctf_id_t type,
@@ -1912,10 +1912,6 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   if (linkage < 0 || linkage > 2)
     return (ctf_set_typed_errno (fp, ECTF_LINKAGE));
 
-  /* Dynamically added variables go into the unnamed datasec by default.  */
-  if (datasec == NULL)
-    datasec = "";
-
   if (ctf_lookup_by_rawname (fp, CTF_K_VAR, name) != 0)
     return (ctf_set_typed_errno (fp, ECTF_DUPLICATE));
 
@@ -1941,11 +1937,16 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   var_dtd->dtd_data->ctt_type = type;
   l->ctl_linkage = linkage;
 
-  /* Add it to the datasec, creating the datasec if need be.  */
+  /* Add it to the datasec, if requested, creating the datasec if need be.  */
 
-  if ((datasec_id = ctf_lookup_by_rawname (fp, CTF_K_DATASEC, datasec)) == 0)
+  if (!datasec)
+    return var_dtd->dtd_type;
+
+  if ((datasec_id = ctf_lookup_by_rawname (fp, CTF_K_DATASEC,
+					   datasec)) == 0)
     {
-      if ((datasec_id = ctf_add_datasec (fp, CTF_ADD_ROOT, datasec)) == CTF_ERR)
+      if ((datasec_id = ctf_add_datasec (fp, CTF_ADD_ROOT,
+					 datasec)) == CTF_ERR)
 	goto err;				/* errno is set for us.  */
     }
 
@@ -1967,7 +1968,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
       ctf_set_typed_errno (fp, ECTF_DTFULL);
       goto err;
     }
-
+    
   if (ctf_type_align (fp, type) < 0)
     {
       /* See the comment in ctf_add_member_bitfield.  We don't need to worry
@@ -2017,17 +2018,14 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
     } else if (offset == (unsigned long) -1)
 	offset = 0;
 
-  /* Remember the variable -> datasec mapping, if this is not the default
-     datasec for such things.  */
-  if (datasec_id != fp->ctf_default_var_datasec)
+  /* Remember the variable -> datasec mapping.  */
+
+  if (ctf_dynhash_insert (fp->ctf_var_datasecs,
+			  (void *) (ptrdiff_t) var_dtd->dtd_type,
+			  (void *) (ptrdiff_t) datasec_id) != 0)
     {
-      if (ctf_dynhash_insert (fp->ctf_var_datasecs,
-			      (void *) (ptrdiff_t) var_dtd->dtd_type,
-			      (void *) (ptrdiff_t) datasec_id) != 0)
-	{
-	  ctf_set_typed_errno (fp, ENOMEM);
-	  goto err;
-	}
+      ctf_set_typed_errno (fp, ENOMEM);
+      goto err;
     }
 
   if (ctf_grow_vlen (fp, sec_dtd, sizeof (ctf_var_secinfo_t) * (vlen + 1)) < 0)
