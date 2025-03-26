@@ -3558,6 +3558,54 @@ svr4_num_active_namespaces ()
   return info->active_namespaces.size ();
 }
 
+/* See solib_ops::get_solibs_in_ns in solist.h.  */
+static std::vector<const solib *>
+svr4_get_solibs_in_ns (int nsid)
+{
+  std::vector<const solib*> ns_solibs;
+  svr4_info *info = get_svr4_info (current_program_space);
+
+  /* If the namespace ID is inactive, there will be no active
+     libraries, so we can have an early exit, as a treat.  */
+  if (info->active_namespaces.count (nsid) != 1)
+    return ns_solibs;
+
+  /* Since we only have the names of solibs in a given namespace,
+     we'll need to walk through the solib list of the inferior and
+     find which solib objects correspond to which svr4_so.  We create
+     an unordered map with the names and lm_info to check things
+     faster, and to be able to remove SOs from the map, to avoid
+     returning the dynamic linker multiple times.  */
+  CORE_ADDR debug_base = info->namespace_id[nsid];
+  std::unordered_map<std::string, const lm_info_svr4 *> namespace_solibs;
+  for (svr4_so &so : info->solib_lists[debug_base])
+    {
+      namespace_solibs[so.name]
+	= gdb::checked_static_cast<const lm_info_svr4 *>
+	    (so.lm_info.get ());
+    }
+  for (const solib &so: current_program_space->solibs ())
+    {
+      auto *lm_inferior
+	= gdb::checked_static_cast<const lm_info_svr4 *> (so.lm_info.get ());
+
+      /* This is inspired by the svr4_same, by finding the svr4_so object
+	 in the map, and then double checking if the lm_info is considered
+	 the same.  */
+      if (namespace_solibs.count (so.so_original_name) > 0
+	  && namespace_solibs[so.so_original_name]->l_addr_inferior
+	      == lm_inferior->l_addr_inferior)
+	{
+	  ns_solibs.push_back (&so);
+	  /* Remove the SO from the map, so that we don't end up
+	     printing the dynamic linker multiple times.  */
+	  namespace_solibs.erase (so.so_original_name);
+	}
+    }
+
+  return ns_solibs;
+}
+
 const struct solib_ops svr4_so_ops =
 {
   svr4_relocate_section_addresses,
@@ -3575,6 +3623,7 @@ const struct solib_ops svr4_so_ops =
   svr4_find_solib_addr,
   svr4_find_solib_ns,
   svr4_num_active_namespaces,
+  svr4_get_solibs_in_ns,
 };
 
 void _initialize_svr4_solib ();

@@ -1149,6 +1149,96 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
     }
 }
 
+/* Implement the "info linker-namespaces" command.  If the current
+   gdbarch's solib_ops object does not support multiple namespaces,
+   this command would just look like "info sharedlibrary", so point
+   the user to that command instead.
+   If solib_ops does support multiple namespaces, this command
+   will group the libraries by linker namespace, or only print the
+   libraries in the supplied namespace.  */
+static void
+info_linker_namespace_command (const char *pattern, int from_tty)
+{
+  const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
+  /* This command only really makes sense for inferiors that support
+     linker namespaces, so we can leave early.  */
+  if (ops->num_active_namespaces == nullptr)
+    error (_("Current inferior does not support linker namespaces." \
+	     "Use \"info sharedlibrary\" instead"));
+
+  struct ui_out *uiout = current_uiout;
+  std::vector<std::pair<int, std::vector<const solib *>>> all_solibs_to_print;
+
+  if (pattern != nullptr)
+    while (*pattern == ' ')
+      pattern++;
+
+  if (pattern == nullptr || pattern[0] == '\0')
+    {
+      uiout->message (_ ("There are %d linker namespaces loaded\n"),
+		      ops->num_active_namespaces ());
+
+      int printed = 0;
+      for (int i = 0; printed < ops->num_active_namespaces (); i++)
+	{
+	  std::vector<const solib *> solibs_to_print
+	    = ops->get_solibs_in_ns (i);
+	  if (solibs_to_print.size () > 0)
+	    {
+	      all_solibs_to_print.push_back (std::make_pair
+					      (i, solibs_to_print));
+	      printed++;
+	    }
+	}
+    }
+  else
+    {
+      int ns;
+      /* Check if the pattern includes the optional [[ and ]] decorators.
+	 To match multiple occurrences, '+' needs to be escaped, and every
+	 escape sequence must be doubled to survive the compiler pass.  */
+      re_comp ("^\\[\\[[0-9]\\+\\]\\]$");
+      if (re_exec (pattern))
+	ns = strtol (pattern+2, nullptr, 10);
+      else
+	{
+	  char * end = nullptr;
+	  ns = strtol (pattern, &end, 10);
+	  if (end[0] != '\0')
+	    error (_ ("Invalid linker namespace identifier: %s"), pattern);
+	}
+
+      all_solibs_to_print.push_back
+	(std::make_pair (ns, ops->get_solibs_in_ns (ns)));
+    }
+
+  bool ns_separator = false;
+
+  for (auto &solibs_pair : all_solibs_to_print)
+    {
+      if (ns_separator)
+	uiout->message ("\n\n");
+      else
+	ns_separator = true;
+      int ns = solibs_pair.first;
+      std::vector<const solib *> solibs_to_print = solibs_pair.second;
+      if (solibs_to_print.size () == 0)
+	{
+	  uiout->message (_("Linker namespace [[%d]] is not active.\n"), ns);
+	  /* If we got here, a specific namespace was requested, so there
+	     will only be one vector.  We can leave early.  */
+	  break;
+	}
+      uiout->message
+	(_ ("There are %ld libraries loaded in linker namespace [[%d]]\n"),
+	 solibs_to_print.size (), ns);
+      uiout->message
+	(_ ("Displaying libraries for linker namespace [[%d]]:\n"), ns);
+
+      print_solib_list_table (solibs_to_print, false);
+    }
+}
+
 /* See solib.h.  */
 
 bool
@@ -1792,6 +1882,9 @@ _initialize_solib ()
   add_info_alias ("dll", info_sharedlibrary_cmd, 1);
   add_com ("nosharedlibrary", class_files, no_shared_libraries_command,
 	   _ ("Unload all shared object library symbols."));
+
+  add_info ("linker-namespaces", info_linker_namespace_command,
+      _ ("Get information about linker namespaces in the inferior."));
 
   add_setshow_boolean_cmd ("auto-solib-add", class_support, &auto_solib_add,
 			   _ ("\

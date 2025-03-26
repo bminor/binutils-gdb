@@ -194,6 +194,10 @@ struct solib_ops
 
   /* Returns the number of active namespaces in the inferior.  */
   int (*num_active_namespaces) ();
+
+  /* Returns all solibs for a given namespace.  If the namespace is not
+     active, returns an empty vector.  */
+  std::vector<const solib *> (*get_solibs_in_ns) (int ns);
 };
 
 /* A unique pointer to a so_list.  */

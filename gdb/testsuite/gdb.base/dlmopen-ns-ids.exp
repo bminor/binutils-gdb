@@ -159,5 +159,83 @@ proc_with_prefix test_conv_vars {} {
     gdb_continue_to_end "" continue 1
 }
 
+# Run several tests relating to the command "info namespaces".
+proc test_info_linker_namespaces {} {
+    clean_restart $::binfile
+
+    if { ![runto_main] } {
+	return
+    }
+
+    with_test_prefix "info linker-namespaces" {
+	gdb_breakpoint [gdb_get_line_number "TAG: first dlclose"]
+	gdb_continue_to_breakpoint "TAG: first dlclose"
+    }
+
+    # First, test printing a single namespace, and ensure all of
+    # them are correct, using both syntaxes.
+    set found_all_libs false
+    gdb_test_multiple "info linker-namespaces \[\[0\]\]" "print namespace 0" -lbl {
+	-re "^\r\nThere are ($::decimal) libraries loaded in linker namespace \\\[\\\[0\\\]\\\]" {
+	    # Some systems may add libc and libm to every loaded namespace,
+	    # others may load only one or neither, because the SO doesn't
+	    # actually use either library.  The best we can do is check if
+	    # we found the dynamic linker, and up to 2 more libraries.
+	    set libs $expect_out(1,string)
+	    set found_all_libs [expr $libs - 1 <= 2]
+	    exp_continue
+	}
+	-re "^\r\n$::gdb_prompt $" {
+	    gdb_assert $found_all_libs "the correct number of libraries was reported"
+	}
+	-re "(^\r\n)?\[^\r\n\]+(?=\r\n)" {
+	    exp_continue
+	}
+    }
+    foreach_with_prefix ns {1 2 3} {
+	set found_test_so false
+	set found_all_libs false
+	gdb_test_multiple "info linker-namespaces $ns" "print namespace $ns" -lbl {
+	    -re "^\r\nThere are ($::decimal) libraries loaded in linker namespace \\\[\\\[$ns\\\]\\\]" {
+		set libs $expect_out(1,string)
+		# Some systems may add libc and libm to every loaded namespace,
+		# others may load only one or neither, because the SO doesn't
+		# actually use either library.  The best we can do is check if
+		# we found the dynamic linker, the test SO, and maybe up to 2
+		# more libraries.
+		set found_all_libs [expr $libs - 2 <= 2]
+		exp_continue
+	    }
+	    -re "^\r\n\[^\r\n\]+${::binfile_lib}\[^\r\n\]*(?=\r\n)" {
+		set found_test_so true
+		exp_continue
+	    }
+	    -re "^\r\n$::gdb_prompt $" {
+		gdb_assert $found_test_so "this testfle's SO was reported"
+		gdb_assert $found_all_libs "the correct number of libraries was reported"
+	    }
+	    -re "(^\r\n)?\[^\r\n\]+(?=\r\n)" {
+		exp_continue
+	    }
+	}
+    }
+
+    # These patterns are simpler, and purposefully glob multiple lines.
+    # The point is to ensure that we find and display all the namespaces,
+    # without worrying about the libraries printed, since that was tested
+    # above.
+    gdb_test "info linker-namespaces" \
+	[multi_line "There are 4 linker namespaces loaded" \
+		    "There are $::decimal libraries loaded in linker namespace ..0.." \
+		    ".*" \
+		    "There are $::decimal libraries loaded in linker namespace ..1.." \
+		    ".*" \
+		    "There are $::decimal libraries loaded in linker namespace ..2.." \
+		    ".*" \
+		    "There are $::decimal libraries loaded in linker namespace ..3.." \
+		    ".*" ] "print namespaces with no argument"
+}
+
 test_info_shared
 test_conv_vars
+test_info_linker_namespaces

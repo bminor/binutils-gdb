@@ -22224,6 +22224,22 @@ less useful than setting a catchpoint, because it does not allow for
 conditions or commands as a catchpoint does.
 
 @table @code
+@kindex info linker-namespaces
+@item info linker-namespaces
+@item info linker-namespaces @code{[[@var{n}]]}
+
+With no argument, print the number of linker namespaces which are
+currently active --- that is, namespaces that have libraries loaded
+into them.  Then, it prints the number of libraries loaded into each
+namespace, and all the libraries loaded into them, in the same way
+as @code{info sharedlibrary}.
+
+If an argument @code{[[@var{n}]]} is provided, only prints the
+library count and the libraried for the provided namespace @var{n}.
+The surrounding square brackets are optional.
+@end table
+
+@table @code
 @item set stop-on-solib-events
 @kindex set stop-on-solib-events
 This command controls whether @value{GDBN} should give you control

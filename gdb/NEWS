@@ -62,6 +62,11 @@ show riscv numeric-register-names
   (e.g 'x1') or their abi names (e.g. 'ra').
   Defaults to 'off', matching the old behaviour (abi names).
 
+info linker-namespaces
+info linker-namespaces [[N]]
+  Print information about the given linker namespace (identified as N),
+  or about all the namespaces if no argument is given.
+
 * Changed commands
 
 info sharedlibrary
