@@ -22,7 +22,7 @@
 #include "gdbsupport/gdb-safe-ctype.h"
 #include "gdbsupport/selftest.h"
 
-/* See cooked-index.h.  */
+/* See cooked-index-entry.h.  */
 
 std::string
 to_string (cooked_index_flag flags)
@@ -38,7 +38,7 @@ to_string (cooked_index_flag flags)
   return flags.to_string (mapping);
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-entry.h.  */
 
 int
 cooked_index_entry::compare (const char *stra, const char *strb,
@@ -154,7 +154,7 @@ test_compare ()
 
 #endif /* GDB_SELF_TEST */
 
-/* See cooked-index.h.  */
+/* See cooked-index-entry.h.  */
 
 bool
 cooked_index_entry::matches (domain_search_flags kind) const
@@ -166,7 +166,7 @@ cooked_index_entry::matches (domain_search_flags kind) const
   return tag_matches_domain (tag, kind, lang);
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-entry.h.  */
 
 const char *
 cooked_index_entry::full_name (struct obstack *storage,
@@ -215,7 +215,7 @@ cooked_index_entry::full_name (struct obstack *storage,
   return (const char *) obstack_finish (storage);
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-entry.h.  */
 
 void
 cooked_index_entry::write_scope (struct obstack *storage,

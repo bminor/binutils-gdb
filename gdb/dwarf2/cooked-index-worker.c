@@ -88,7 +88,7 @@ bool cooked_index_worker_result::cutu_reader_eq::operator()
   return per_cu.index == reader->cu ()->per_cu->index;
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-worker.h.  */
 
 void
 cooked_index_worker::start ()
@@ -109,7 +109,7 @@ cooked_index_worker::start ()
   });
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-worker.h.  */
 
 bool
 cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
@@ -194,7 +194,7 @@ cooked_index_worker::wait (cooked_state desired_state, bool allow_quit)
   return done;
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-worker.h.  */
 
 void
 cooked_index_worker::set (cooked_state desired_state)
@@ -212,7 +212,7 @@ cooked_index_worker::set (cooked_state desired_state)
 #endif /* CXX_STD_THREAD */
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-worker.h.  */
 
 void
 cooked_index_worker::write_to_cache (const cooked_index *idx,

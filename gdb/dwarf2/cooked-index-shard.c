@@ -41,7 +41,7 @@ language_may_use_plain_main (enum language lang)
 	  || lang == language_minimal);
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-shard.h.  */
 
 cooked_index_entry *
 cooked_index_shard::create (sect_offset die_offset,
@@ -70,7 +70,7 @@ cooked_index_shard::create (sect_offset die_offset,
 					      per_cu);
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-shard.h.  */
 
 cooked_index_entry *
 cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
@@ -96,7 +96,7 @@ cooked_index_shard::add (sect_offset die_offset, enum dwarf_tag tag,
   return result;
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-shard.h.  */
 
 void
 cooked_index_shard::handle_gnat_encoded_entry
@@ -173,7 +173,7 @@ struct cooked_index_entry_name_ptr_eq
   }
 };
 
-/* See cooked-index.h.  */
+/* See cooked-index-shard.h.  */
 
 void
 cooked_index_shard::finalize (const parent_map_map *parent_maps)
@@ -301,7 +301,7 @@ cooked_index_shard::finalize (const parent_map_map *parent_maps)
 	     });
 }
 
-/* See cooked-index.h.  */
+/* See cooked-index-shard.h.  */
 
 cooked_index_shard::range
 cooked_index_shard::find (const std::string &name, bool completing) const
