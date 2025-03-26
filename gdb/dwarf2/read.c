@@ -2970,7 +2970,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
 			  dwarf2_cu *existing_cu,
 			  bool skip_partial,
 			  enum language pretend_language,
-			  const abbrev_table_cache *cache)
+			  const abbrev_table_cache *abbrev_cache)
 {
   struct objfile *objfile = per_objfile.objfile;
   struct dwarf2_section_info *section = this_cu.section;
@@ -3030,7 +3030,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
 	 indexer.  This assert is avoided in this case because (1) it
 	 is irrelevant, and (2) the get_cu method is not
 	 thread-safe.  */
-      gdb_assert (cache != nullptr
+      gdb_assert (abbrev_cache != nullptr
 		  || per_objfile.get_cu (&this_cu) == nullptr);
       m_new_cu = std::make_unique<dwarf2_cu> (&this_cu, &per_objfile);
       cu = m_new_cu.get ();
@@ -3092,9 +3092,9 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
 	gdb_assert (cu->header.abbrev_sect_off == abbrev_table->sect_off);
       else
 	{
-	  if (cache != nullptr)
-	    abbrev_table = cache->find (abbrev_section,
-					cu->header.abbrev_sect_off);
+	  if (abbrev_cache != nullptr)
+	    abbrev_table = abbrev_cache->find (abbrev_section,
+					       cu->header.abbrev_sect_off);
 	  if (abbrev_table == nullptr)
 	    {
 	      abbrev_section->read (objfile);

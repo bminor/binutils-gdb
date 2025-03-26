@@ -927,7 +927,7 @@ public:
 	       dwarf2_cu *existing_cu,
 	       bool skip_partial,
 	       enum language pretend_language,
-	       const abbrev_table_cache *cache = nullptr);
+	       const abbrev_table_cache *abbrev_cache = nullptr);
 
   cutu_reader (dwarf2_per_cu &this_cu,
 	       dwarf2_per_objfile &per_objfile,
