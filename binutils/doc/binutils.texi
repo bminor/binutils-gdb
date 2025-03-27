@@ -2701,6 +2701,23 @@ If you disassemble without giving a CPU selection, a default will be
 chosen from information gleaned by BFD from the object files headers,
 but the result again may not be as you expect.
 
+For RISC-V, the following options are supported:
+
+@table @code
+@item numeric
+Print numeric register names, rather than ABI names (e.g., print @code{x2}
+instead of @code{sp}).
+
+@item no-aliases
+Disassemble only into canonical instructions. For example, compressed
+instructions will be represented as such (@code{addi sp,sp,-128} will be
+@code{c.addi16sp sp,-128}).
+
+@item priv-spec=@var{SPEC}
+Print the CSR according to the chosen privilege spec version (e.g.,
+@code{1.10}, @code{1.11}, @code{1.12}).
+@end table
+
 For MIPS, this option controls the printing of instruction mnemonic
 names and register names in disassembled instructions.  Multiple
 selections from the following may be specified as a comma separated
