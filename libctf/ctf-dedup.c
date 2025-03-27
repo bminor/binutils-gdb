@@ -1347,7 +1347,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
       return NULL;		/* errno is set for us.  */
     }
 
-  kind = LCTF_KIND (input, tp);
+  kind = ctf_type_kind_tp (input, tp);
   name = ctf_strraw (input, suffix->ctt_name);
 
   if (suffix->ctt_name == 0 || !name || name[0] == '\0')
