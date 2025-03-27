@@ -948,7 +948,7 @@ struct ipa_trace_buffer_control
    who wrote last to the buffer control structure.  We need to freeze
    any inferior writing to the buffer while GDBserver touches memory,
    so that the inferior can correctly detect that GDBserver had been
-   there, otherwise, it could mistakingly think its commit was
+   there, otherwise, it could mistakenly think its commit was
    successful; that's implemented by simply having GDBserver set a
    breakpoint the inferior hits if it is the critical region.
 
