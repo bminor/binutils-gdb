@@ -81,7 +81,7 @@ struct file_handler
 
 #ifdef HAVE_POLL
 /* Do we use poll or select?  Some systems have poll, but then it's
-   not useable with all kinds of files.  We probe that whenever a new
+   not usable with all kinds of files.  We probe that whenever a new
    file handler is added.  */
 static bool use_poll = true;
 #endif

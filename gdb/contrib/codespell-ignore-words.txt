@@ -1,4 +1,2 @@
 configury
-invokable
-useable
 SME

@@ -215,7 +215,7 @@ private:
   bool m_disabled = false;
 };
 
-/* Implementation of is_debug_enabled when PT is an invokable type.  */
+/* Implementation of is_debug_enabled when PT is an invocable type.  */
 
 template<typename PT>
 inline bool
