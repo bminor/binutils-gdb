@@ -59,6 +59,7 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 
   gdb::unordered_set<sect_offset> debug_info_offset_seen;
   const bfd_endian dwarf5_byte_order = gdbarch_byte_order (gdbarch);
+  const int signed_addr_p = bfd_get_sign_extend_vma (abfd);
   const gdb_byte *addr = section->buffer;
   while (addr < section->buffer + section->size)
     {
@@ -167,8 +168,13 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 			  plongest (entry_addr - section->buffer));
 	      return false;
 	    }
-	  ULONGEST start = extract_unsigned_integer (addr, address_size,
-						     dwarf5_byte_order);
+	  ULONGEST start;
+	  if (signed_addr_p)
+	    start = extract_signed_integer (addr, address_size,
+					    dwarf5_byte_order);
+	  else
+	    start = extract_unsigned_integer (addr, address_size,
+					      dwarf5_byte_order);
 	  addr += address_size;
 	  ULONGEST length = extract_unsigned_integer (addr, address_size,
 						      dwarf5_byte_order);
