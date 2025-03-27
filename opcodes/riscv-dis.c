@@ -37,6 +37,9 @@
    disassemble_info::fprintf_func which is for unstyled output.  */
 #define fprintf_func please_use_fprintf_styled_func_instead
 
+/* The earliest privilege spec supported by disassembler. */
+#define PRIV_SPEC_EARLIEST PRIV_SPEC_CLASS_1P10
+
 struct riscv_private_data
 {
   bfd_vma gp;
@@ -139,7 +142,7 @@ parse_riscv_dis_option (const char *option, struct disassemble_info *info)
       const char *name = NULL;
 
       RISCV_GET_PRIV_SPEC_CLASS (value, priv_spec);
-      if (priv_spec == PRIV_SPEC_CLASS_NONE)
+      if (priv_spec < PRIV_SPEC_EARLIEST)
 	opcodes_error_handler (_("unknown privileged spec set by %s=%s"),
 			       option, value);
       else if (pd->default_priv_spec == PRIV_SPEC_CLASS_NONE)
@@ -1608,12 +1611,12 @@ disassembler_options_riscv (void)
       args = XNEWVEC (disasm_option_arg_t, num_args + 1);
 
       args[RISCV_OPTION_ARG_PRIV_SPEC].name = "SPEC";
-      priv_spec_count = PRIV_SPEC_CLASS_DRAFT - PRIV_SPEC_CLASS_NONE - 1;
+      priv_spec_count = PRIV_SPEC_CLASS_DRAFT - PRIV_SPEC_EARLIEST;
       args[RISCV_OPTION_ARG_PRIV_SPEC].values
         = XNEWVEC (const char *, priv_spec_count + 1);
       for (i = 0; i < priv_spec_count; i++)
 	args[RISCV_OPTION_ARG_PRIV_SPEC].values[i]
-          = riscv_priv_specs[i].name;
+	  = riscv_priv_specs[PRIV_SPEC_EARLIEST - PRIV_SPEC_CLASS_NONE - 1 + i].name;
       /* The array we return must be NULL terminated.  */
       args[RISCV_OPTION_ARG_PRIV_SPEC].values[i] = NULL;
 
