@@ -103,7 +103,7 @@ ctf_grow_vlen (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
       return (ctf_set_errno (fp, ENOMEM));
     }
 
-  memset (dtd->dtd_buf + old_size, 0, size - old_size);
+  memset (((unsigned char *) dtd->dtd_buf) + old_size, 0, size - old_size);
   dtd->dtd_data = dtd->dtd_buf + old_data_index;
   dtd->dtd_vlen = ((unsigned char *) dtd->dtd_buf) + old_vlen_offset;
   dtd->dtd_buf_size = size;
