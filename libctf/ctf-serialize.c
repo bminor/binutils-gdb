@@ -1324,8 +1324,6 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 			fp->ctf_parent->ctf_typemax - fp->ctf_header->cth_parent_ntypes);
 	  return -1;				/* errno is set for us.  */
 	}
-
-      fp->ctf_header->cth_parent_ntypes = fp->ctf_parent->ctf_typemax;
     }
   else
     {
