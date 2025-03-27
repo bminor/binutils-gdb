@@ -97,12 +97,19 @@ thread_fn (void *arg)
   return NULL;
 }
 
+static void
+setup_done (void)
+{
+}
+
 int
 main (void)
 {
   int i;
 
   global_var++;
+
+  setup_done ();
 
   for (i = 0; i < 4; i++)
     {
