@@ -667,10 +667,18 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
       if (vbytes < 0)
 	return ECTF_CORRUPT;
 
-      /* For forward declarations, ctt_type is the CTF_K_* kind for the tag,
-	 so bump that population count too.  */
+      /* For forward declarations, the kflag indicates what type to use, so bump
+	 that population count too.  For enums, vlen 0 indicates a forward, so
+	 bump the forward population count.  */
       if (kind == CTF_K_FORWARD)
-	pop[suffix->ctt_type]++;
+	{
+	  if (CTF_INFO_KFLAG (suffix->ctt_info))
+	    pop[CTF_K_UNION]++;
+	  else
+	    pop[CTF_K_STRUCT]++;
+	}
+      else if (kind == CTF_K_ENUM && vlen == 0)
+	pop[CTF_K_FORWARD]++;
 
       if (kind == CTF_K_ENUM || kind == CTF_K_ENUM64)
 	pop_enumerators += vlen;
