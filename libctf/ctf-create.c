@@ -1703,6 +1703,7 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
     {
       size_t bound;
       ssize_t off;
+      int added_padding = 0;
 
       if (bit_offset == (unsigned long) - 1)
 	{
@@ -1752,6 +1753,8 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 
       while (bit_offset > bound)
 	{
+	  added_padding = 1;
+
 	  off = bound;
 	  if (kflag)
 	    off = CTF_MEMBER_BIT_OFFSET (bound);
@@ -1766,10 +1769,11 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
       if (kflag)
 	off = CTF_MEMBER_BIT_OFFSET (off);
 
-      /* Hunt down the prefix and member list again: they may have been moved by
-	 the realloc()s involved in field additions.  */
+      /* Possibly hunt down the prefix and member list again: they may have been
+	 moved by the realloc()s involved in field additions.  */
 
-      if ((prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
+      if (added_padding
+	  && (prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
 	return (ctf_set_errno (ofp, ECTF_CORRUPT));
 
       vlen = LCTF_VLEN (fp, prefix);
@@ -1791,6 +1795,12 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
     return (ctf_set_errno (ofp, ctf_errno (fp)));
 
   dtd->dtd_vlen_size += sizeof (ctf_member_t);
+
+  /* Hunt down the prefix and member list yet again, since they may have been
+     reallocated by ctf_grow_vlen.  */
+
+  if ((prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
+    return (ctf_set_errno (ofp, ECTF_CORRUPT));
   memb = (ctf_member_t *) dtd->dtd_vlen;
 
   memb[vlen].ctm_name = ctf_str_add (fp, name);
