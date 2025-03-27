@@ -1002,12 +1002,15 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	    if (err != 0)
 	      return err * -1;
 
-	    /* Remember all enums for later rescanning.  */
+	    /* Remember all non-forward enums for later rescanning.  */
 
-	    err = ctf_dynset_insert (all_enums, (void *) (ptrdiff_t)
-				     ctf_index_to_type (fp, id));
-	    if (err != 0)
-	      return err * -1;
+	    if (vlen != 0)
+	      {
+		err = ctf_dynset_insert (all_enums, (void *) (ptrdiff_t)
+					 ctf_index_to_type (fp, id));
+		if (err != 0)
+		  return err * -1;
+	      }
 	    break;
 	  }
 
