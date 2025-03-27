@@ -930,28 +930,20 @@ _bfd_aarch64_elf_link_setup_gnu_properties (struct bfd_link_info *info)
      GNU properties (if found).  */
   bfd *pbfd = _bfd_elf_link_setup_gnu_properties (info);
 
-  /* If pbfd has any GNU_PROPERTY_AARCH64_FEATURE_1_AND properties, update
-     outprop accordingly.  */
   if (pbfd != NULL)
     {
-      /* The property list is sorted in order of type.  */
-      for (elf_property_list *p = elf_properties (pbfd);
-	   (p != NULL)
-	   && (GNU_PROPERTY_AARCH64_FEATURE_1_AND <= p->property.pr_type);
-	   p = p->next)
-	{
-	  /* This merge of features should happen only once as all the identical
-	     properties are supposed to have been merged at this stage by
-	     _bfd_elf_link_setup_gnu_properties().  */
-	  if (p->property.pr_type == GNU_PROPERTY_AARCH64_FEATURE_1_AND)
-	    {
-	      outprop = (p->property.u.number
-			 & (GNU_PROPERTY_AARCH64_FEATURE_1_BTI
-			  | GNU_PROPERTY_AARCH64_FEATURE_1_PAC
-			  | GNU_PROPERTY_AARCH64_FEATURE_1_GCS));
-	      break;
-	    }
-	}
+      elf_property_list *p;
+      elf_property_list *plist = elf_properties (pbfd);
+
+      /* If pbfd has any GNU_PROPERTY_AARCH64_FEATURE_1_AND properties, update
+	 outprop accordingly.  */
+      if ((p = _bfd_elf_find_property (plist,
+				       GNU_PROPERTY_AARCH64_FEATURE_1_AND, NULL))
+				       != NULL)
+        outprop = p->property.u.number
+		  & (GNU_PROPERTY_AARCH64_FEATURE_1_BTI
+		     | GNU_PROPERTY_AARCH64_FEATURE_1_PAC
+		     | GNU_PROPERTY_AARCH64_FEATURE_1_GCS);
     }
 
   tdata->gnu_property_aarch64_feature_1_and = outprop;
