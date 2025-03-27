@@ -682,6 +682,7 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
 {
   ctf_dtdef_t *dtd;
   uint32_t encoding;
+  int vlen = sizeof (uint32_t);
 
   if (ep == NULL)
     return (ctf_set_typed_errno (fp, EINVAL));
@@ -689,20 +690,27 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
   if (name == NULL || name[0] == '\0')
     return (ctf_set_typed_errno (fp, ECTF_NONAME));
 
-  if (!ctf_assert (fp, kind == CTF_K_INTEGER || kind == CTF_K_FLOAT))
-    return CTF_ERR;					/* errno is set for us.  */
+  if (!ctf_assert (fp, kind == CTF_K_INTEGER || kind == CTF_K_FLOAT
+		   || kind == CTF_K_BTF_FLOAT))
+    return CTF_ERR;				/* errno is set for us.  */
 
-  if ((dtd = ctf_add_generic (fp, flag, name, kind, 0, sizeof (uint32_t),
-			      0, NULL)) == NULL)
+  if (kind == CTF_K_BTF_FLOAT)
+    vlen = 0;
+
+  if ((dtd = ctf_add_generic (fp, flag, name, kind, 0, vlen, 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, 0, 0);
   dtd->dtd_data->ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT) / CHAR_BIT);
-  encoding = ep->cte_format;
-  if (kind == CTF_K_INTEGER)
-      encoding = CTF_INT_DATA (ep->cte_format, ep->cte_offset, ep->cte_bits);
 
-  memcpy (dtd->dtd_vlen, &encoding, sizeof (encoding));
+  if (kind != CTF_K_BTF_FLOAT)
+    {
+      encoding = ep->cte_format;
+      if (kind == CTF_K_INTEGER)
+	encoding = CTF_INT_DATA (ep->cte_format, ep->cte_offset, ep->cte_bits);
+
+      memcpy (dtd->dtd_vlen, &encoding, sizeof (encoding));
+    }
 
   return dtd->dtd_type;
 }

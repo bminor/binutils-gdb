@@ -1878,6 +1878,11 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
       ep->cte_offset = 0;
       ep->cte_bits = 0;
       break;
+    case CTF_K_BTF_FLOAT:
+      ep->cte_format = 0;
+      ep->cte_offset = 0;
+      ep->cte_bits = suffix->ctt_size * CHAR_BIT;
+      break;
     case CTF_K_SLICE:
       {
 	const ctf_slice_t *slice;
