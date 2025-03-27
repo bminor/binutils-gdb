@@ -117,20 +117,28 @@ static ctf_type_t *
 ctf_add_prefix (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
 {
   ctf_type_t *new_prefix;
-  size_t vlen_bytes = dtd->dtd_vlen_size;
+  size_t move_bytes = dtd->dtd_buf_size;
 
   /* Grow the type, then tweak the vlen forwards and move things around to leave
-     a gap.  */
-
-  if (vlen_bytes < vbytes)
-    vlen_bytes = vbytes;
+     a gap.  If we run off the end of the headers without finding a non-prefix,
+     something is wrong.  */
 
   if (ctf_grow_vlen (fp, dtd, vbytes + sizeof (ctf_type_t)) < 0)
     return NULL;				/* errno is set for us.  */
 
-  memmove (dtd->dtd_vlen + sizeof (ctf_type_t), dtd->dtd_vlen, dtd->dtd_vlen_size);
-  new_prefix = (ctf_type_t *) dtd->dtd_vlen;
+  new_prefix = dtd->dtd_buf;
+  while (LCTF_IS_PREFIXED_INFO (new_prefix->ctt_info))
+    {
+      new_prefix++;
+      move_bytes -= sizeof (ctf_type_t);
+
+      if (!ctf_assert (fp, (unsigned char *) new_prefix < dtd->dtd_vlen))
+	return NULL;				/* errno is set for us.  */
+    }
+
+  memmove (new_prefix + sizeof (ctf_type_t), new_prefix, move_bytes);
   dtd->dtd_vlen += sizeof (ctf_type_t);
+  dtd->dtd_data++;
   memset (new_prefix, 0, sizeof (ctf_type_t));
 
   return new_prefix;
