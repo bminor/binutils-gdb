@@ -145,6 +145,11 @@ using namespace expr;
     struct symtoken ssym;
     int voidval;
     const struct block *bval;
+    struct scope_val_type_i_guess {
+      bool has_namespace;
+      const struct block *bval;
+      LONGEST namespace_val;
+    } scope_val;
     enum exp_opcode opcode;
 
     struct stoken_vector svec;
@@ -265,7 +270,8 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 %right ARROW ARROW_STAR '.' DOT_STAR '[' OBJC_LBRAC '('
 %token <ssym> BLOCKNAME
 %token <bval> FILENAME
-%type <bval> block
+%type <typed_val_int> namespace
+%type <scope_val> block
 %left COLONCOLON
 
 %token DOTDOTDOT
@@ -1067,17 +1073,22 @@ exp     :       FALSEKEYWORD
 
 /* end of C++.  */
 
+namespace:	'[' '[' INT ']' ']'
+			{
+			    $$ = $3;
+			}
+	;
+
 block	:	BLOCKNAME
 			{
-			  if ($1.sym.symbol)
-			    $$ = $1.sym.symbol->value_block ();
-			  else
+			  if (!$1.sym.symbol)
 			    error (_("No file or function \"%s\"."),
 				   copy_name ($1.stoken).c_str ());
+			  $$.bval = $1.sym.symbol->value_block ();
 			}
 	|	FILENAME
 			{
-			  $$ = $1;
+			  $$.bval = $1;
 			}
 	;
 
@@ -1085,14 +1096,17 @@ block	:	block COLONCOLON name
 			{
 			  std::string copy = copy_name ($3);
 			  struct symbol *tem
-			    = lookup_symbol (copy.c_str (), $1,
+			    = lookup_symbol (copy.c_str (), $1.bval,
 					     SEARCH_FUNCTION_DOMAIN,
 					     nullptr).symbol;
 
 			  if (tem == nullptr)
 			    error (_("No function \"%s\" in specified context."),
 				   copy.c_str ());
-			  $$ = tem->value_block (); }
+			  $$.bval = tem->value_block ();
+			  $$.has_namespace = $1.has_namespace;
+			  $$.namespace_val = $1.namespace_val;
+			}
 	;
 
 variable:	name_not_typename ENTRY
@@ -1112,7 +1126,7 @@ variable:	block COLONCOLON name
 			{
 			  std::string copy = copy_name ($3);
 			  struct block_symbol sym
-			    = lookup_symbol (copy.c_str (), $1,
+			    = lookup_symbol (copy.c_str (), $1.bval,
 					     SEARCH_VFT, NULL);
 
 			  if (sym.symbol == 0)
@@ -1122,6 +1136,24 @@ variable:	block COLONCOLON name
 			    pstate->block_tracker->update (sym);
 
 			  pstate->push_new<var_value_operation> (sym);
+			}
+	|	namespace COLONCOLON name
+			{
+			    std::string sym_name = copy_name ($3);
+
+			    struct block_symbol bsym
+				= lookup_symbol_in_linker_namespace
+				    (sym_name.c_str (), $1.val, SEARCH_VFT);
+
+			    if (bsym.symbol == NULL)
+				error (_("Symbol %s not found in"
+					 " namespace [[%ld]]"),
+					 sym_name.c_str (), $1.val);
+
+			    if (symbol_read_needs_frame (bsym.symbol))
+				pstate->block_tracker->update (bsym);
+
+			    pstate->push_new<var_value_operation> (bsym);
 			}
 	;
 

@@ -2692,6 +2692,44 @@ lookup_static_symbol (const char *name, const domain_search_flags domain)
 /* See symtab.h.  */
 
 struct block_symbol
+lookup_symbol_in_linker_namespace (const char *name, int nsid,
+				   const domain_search_flags domain)
+{
+  struct gdbarch *gdbarch = current_inferior ()->arch ();
+  const solib_ops *ops = gdbarch_so_ops (gdbarch);
+
+  if (ops->get_solibs_in_ns == nullptr)
+    error (_("Namespaces are not supported by the inferior."));
+
+  std::vector<const solib *> sos_in_namespace = ops->get_solibs_in_ns (nsid);
+  if (sos_in_namespace.size() == 0)
+    error (_("Namespace [[%d]] is inactive"), nsid);
+
+  symbol_lookup_debug_printf ("lookup_symbol_in_linker_namespace (%d, %s, %s)",
+			      nsid, name, domain_name (domain).c_str ());
+
+  /* We look for both global and static symbols in here.  There is no reason
+     to pick one over the other to my knowledge, so we go alphabetical.  */
+  for (const solib *so : sos_in_namespace)
+    {
+      struct block_symbol bsym
+	= lookup_global_symbol_from_objfile (so->objfile, GLOBAL_BLOCK,
+					     name, domain);
+      if (bsym.symbol != nullptr)
+	return bsym;
+
+      bsym = lookup_global_symbol_from_objfile (so->objfile, STATIC_BLOCK,
+						name, domain);
+      if (bsym.symbol != nullptr)
+	return bsym;
+    }
+
+  return {};
+}
+
+/* See symtab.h.  */
+
+struct block_symbol
 lookup_global_symbol (const char *name,
 		      const struct block *block,
 		      const domain_search_flags domain)

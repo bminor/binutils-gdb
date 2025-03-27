@@ -48,6 +48,7 @@
 #include "gdbsupport/scoped_fd.h"
 #include "source.h"
 #include "cli/cli-style.h"
+#include "block.h"
 
 /* See solib.h.  */
 

@@ -2750,6 +2750,14 @@ extern struct block_symbol
 				     const char *name,
 				     const domain_search_flags domain);
 
+/* Lookup symbol NAME from DOMAIN in the linker namespace NSID.
+   This generates a list of all objfiles in NSID, then searches
+   those objfiles for the given symbol.  Searches for both global or
+   static symbols.  */
+extern struct block_symbol
+  lookup_symbol_in_linker_namespace (const char *name, int nsid,
+				     const domain_search_flags domain);
+
 extern unsigned int symtab_create_debug;
 
 /* Print a "symtab-create" debug statement.  */
