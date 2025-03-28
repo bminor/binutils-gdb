@@ -1694,7 +1694,7 @@ proc mix_pic_and_non_pic {xfails cflags ldflags exe} {
     }
 }
 
-mix_pic_and_non_pic [list "arm*-*-*"] "" "" "pr19719"
+mix_pic_and_non_pic [list "arm*-*-*"] "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" "pr19719"
 mix_pic_and_non_pic [] "-fPIE" "-pie" "pr19719pie"
 
 set AFLAGS_PIE ""
