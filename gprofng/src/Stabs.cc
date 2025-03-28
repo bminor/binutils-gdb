@@ -272,7 +272,7 @@ Stabs::Stabs (char *_path, char *_lo_name)
   stabsModules = NULL;
   textsz = 0;
   wsize = Wnone;
-  st_check_symtab = st_check_relocs = false;
+  st_check_symtab = false;
   status = DBGD_ERR_NONE;
 
   if (openElf (false) == NULL)
@@ -412,7 +412,6 @@ Stabs::read_symbols (Vector<Function*> *functions)
   if (openElf (true) == NULL)
     return false;
   check_Symtab ();
-  check_Relocs ();
   if (functions)
     {
       Function *fp;
@@ -1819,142 +1818,6 @@ Stabs::readSymSec (unsigned int sec, Elf *elf)
   get_save_addr (elf->need_swap_endian);
   dump ();
 }//check_Symtab
-
-void
-Stabs::check_Relocs ()
-{
-  // We may have many relocation tables to process: .rela.text%foo,
-  // rela.text%bar, etc. On Intel, compilers generate .rel.text sections
-  // which have to be processed as well. A lot of rework is needed here.
-  Symbol *sptr = NULL;
-  if (st_check_relocs)
-    return;
-  st_check_relocs = true;
-
-  Elf *elf = openElf (false);
-  if (elf == NULL)
-    return;
-  for (unsigned int sec = 1; sec < elf->elf_getehdr ()->e_shnum; sec++)
-    {
-      bool use_rela, use_PLT;
-      char *name = elf->get_sec_name (sec);
-      if (name == NULL)
-	continue;
-      if (strncmp (name, NTXT (".rela.text"), 10) == 0)
-	{
-	  use_rela = true;
-	  use_PLT = false;
-	}
-      else if (streq (name, NTXT (".rela.plt")))
-	{
-	  use_rela = true;
-	  use_PLT = true;
-	}
-      else if (strncmp (name, NTXT (".rel.text"), 9) == 0)
-	{
-	  use_rela = false;
-	  use_PLT = false;
-	}
-      else if (streq (name, NTXT (".rel.plt")))
-	{
-	  use_rela = false;
-	  use_PLT = true;
-	}
-      else
-	continue;
-
-      Elf_Internal_Shdr *shdr = elf->get_shdr (sec);
-      if (shdr == NULL)
-	continue;
-
-      // Get ELF data
-      Elf_Data *data = elf->elf_getdata (sec);
-      if (data == NULL)
-	continue;
-      uint64_t ScnSize = data->d_size;
-      uint64_t EntSize = shdr->sh_entsize;
-      if ((ScnSize == 0) || (EntSize == 0))
-	continue;
-      int tot = (int) (ScnSize / EntSize);
-
-      // Get corresponding text section
-      Elf_Internal_Shdr *shdr_txt = elf->get_shdr (shdr->sh_info);
-      if (shdr_txt == NULL)
-	continue;
-      if (!(shdr_txt->sh_flags & SHF_EXECINSTR))
-	    continue;
-
-      // Get corresponding symbol table section
-      Elf_Internal_Shdr *shdr_sym = elf->get_shdr (shdr->sh_link);
-      if (shdr_sym == NULL)
-	continue;
-      Elf_Data *data_sym = elf->elf_getdata (shdr->sh_link);
-
-      // Get corresponding string table section
-      Elf_Data *data_str = elf->elf_getdata (shdr_sym->sh_link);
-      if (data_str == NULL)
-	continue;
-      char *Strtab = (char*) data_str->d_buf;
-      for (int n = 0; n < tot; n++)
-	{
-	  Elf_Internal_Sym sym;
-	  Elf_Internal_Rela rela;
-	  char *symName;
-	  if (use_rela)
-	    elf->elf_getrela (data, n, &rela);
-	  else
-	    {
-	      // GElf_Rela is extended GElf_Rel
-	      elf->elf_getrel (data, n, &rela);
-	      rela.r_addend = 0;
-	    }
-
-	  int ndx = (int) GELF_R_SYM (rela.r_info);
-	  elf->elf_getsym (data_sym, ndx, &sym);
-	  switch (GELF_ST_TYPE (sym.st_info))
-	    {
-	    case STT_FUNC:
-	    case STT_OBJECT:
-	    case STT_NOTYPE:
-	      if (sym.st_name == 0 || sym.st_name >= data_str->d_size)
-		continue;
-	      symName = Strtab + sym.st_name;
-	      break;
-	    case STT_SECTION:
-	      {
-		Elf_Internal_Shdr *secHdr = elf->get_shdr (sym.st_shndx);
-		if (secHdr == NULL)
-		  continue;
-		if (sptr == NULL)
-		  sptr = new Symbol;
-		sptr->value = secHdr->sh_offset + rela.r_addend;
-		long index = SymLst->bisearch (0, -1, &sptr, SymFindCmp);
-		if (index == -1)
-		  continue;
-		Symbol *sp = SymLst->fetch (index);
-		if (sptr->value != sp->value)
-		  continue;
-		symName = sp->name;
-		break;
-	      }
-	    default:
-	      continue;
-	    }
-	  Reloc *reloc = new Reloc;
-	  reloc->name = dbe_strdup (symName);
-	  reloc->type = GELF_R_TYPE (rela.r_info);
-	  reloc->value = use_PLT ? rela.r_offset
-		  : rela.r_offset + shdr_txt->sh_offset;
-	  reloc->addend = rela.r_addend;
-	  if (use_PLT)
-	    RelPLTLst->append (reloc);
-	  else
-	    RelLst->append (reloc);
-	}
-    }
-  delete sptr;
-  RelLst->sort (RelValueCmp);
-} //check_Relocs
 
 void
 Stabs::get_save_addr (bool need_swap_endian)
