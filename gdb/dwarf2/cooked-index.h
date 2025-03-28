@@ -105,14 +105,8 @@ public:
   void start_reading () override;
 
   /* Called by cooked_index_worker to set the contents of this index
-     and transition to the MAIN_AVAILABLE state.  WARN is used to
-     collect any warnings that may arise when writing to the cache.
-     PARENT_MAPS is used when resolving pending parent links.
-     PARENT_MAPS may be NULL if there are no IS_PARENT_DEFERRED
-     entries in VEC.  */
-  void set_contents (std::vector<cooked_index_shard_up> &&vec,
-		     deferred_warnings *warn,
-		     const parent_map_map *parent_maps);
+     and transition to the MAIN_AVAILABLE state.  */
+  void set_contents ();
 
   /* A range over a vector of subranges.  */
   using range = range_chain<cooked_index_shard::range>;

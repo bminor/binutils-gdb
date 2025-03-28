@@ -224,6 +224,22 @@ public:
      cache writer.)  */
   bool wait (cooked_state desired_state, bool allow_quit);
 
+  /* Release all shards from the results.  */
+  std::vector<cooked_index_shard_up> release_shards ()
+  {
+    std::vector<cooked_index_shard_up> result;
+    for (auto &one_result : m_results)
+      result.push_back (one_result.release_shard ());
+    result.shrink_to_fit ();
+    return result;
+  }
+
+  /* Return the object holding all the parent maps.  */
+  const parent_map_map *get_parent_map_map () const
+  {
+    return &m_all_parents_map;
+  }
+
 protected:
 
   /* Let cooked_index call the 'set' and 'write_to_cache' methods.  */
@@ -233,8 +249,7 @@ protected:
   void set (cooked_state desired_state);
 
   /* Write to the index cache.  */
-  void write_to_cache (const cooked_index *idx,
-		       deferred_warnings *warn) const;
+  void write_to_cache (const cooked_index *idx);
 
   /* Helper function that does the work of reading.  This must be able
      to be run in a worker thread without problems.  */

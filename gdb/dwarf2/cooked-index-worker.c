@@ -226,8 +226,7 @@ cooked_index_worker::set (cooked_state desired_state)
 /* See cooked-index-worker.h.  */
 
 void
-cooked_index_worker::write_to_cache (const cooked_index *idx,
-				     deferred_warnings *warn) const
+cooked_index_worker::write_to_cache (const cooked_index *idx)
 {
   if (idx != nullptr)
     {
@@ -235,7 +234,7 @@ cooked_index_worker::write_to_cache (const cooked_index *idx,
 	 See PR symtab/30837.  This arranges to capture all such
 	 warnings.  This is safe because we know the deferred_warnings
 	 object isn't in use by any other thread at this point.  */
-      scoped_restore_warning_hook defer (warn);
+      scoped_restore_warning_hook defer (&m_warnings);
       m_cache_store.store ();
     }
 }
@@ -245,21 +244,12 @@ cooked_index_worker::write_to_cache (const cooked_index *idx,
 void
 cooked_index_worker::done_reading ()
 {
-  /* Only handle the scanning results here.  Complaints and exceptions
-     can only be dealt with on the main thread.  */
-  std::vector<cooked_index_shard_up> shards;
-
   for (auto &one_result : m_results)
-    {
-      shards.push_back (one_result.release_shard ());
-      m_all_parents_map.add_map (*one_result.get_parent_map ());
-    }
-
-  shards.shrink_to_fit ();
+    m_all_parents_map.add_map (*one_result.get_parent_map ());
 
   dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
   cooked_index *table
     = (gdb::checked_static_cast<cooked_index *>
        (per_bfd->index_table.get ()));
-  table->set_contents (std::move (shards), &m_warnings, &m_all_parents_map);
+  table->set_contents ();
 }
