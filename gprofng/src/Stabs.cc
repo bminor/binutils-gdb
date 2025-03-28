@@ -1702,43 +1702,31 @@ Stabs::check_Symtab ()
 	  pltSym->flags |= SYM_PLT;
 	}
     }
-  if (elf->symtab)
-    readSymSec (elf->symtab, elf);
-  else
-    {
-      readSymSec (elf->SUNW_ldynsym, elf);
-      readSymSec (elf->dynsym, elf);
-    }
+
+  // Read first static symbols
+  readSymSec (elf, false);
+
+  // Read dynamic symbols
+  readSymSec (elf, true);
 }
 
 void
-Stabs::readSymSec (unsigned int sec, Elf *elf)
+Stabs::readSymSec (Elf *elf, bool is_dynamic)
 {
   Symbol *sitem;
   Sp_lang_code local_lcode;
-  if (sec == 0)
-    return;
-  // Get ELF data
-  Elf_Data *data = elf->elf_getdata (sec);
-  if (data == NULL)
-    return;
-  uint64_t SymtabSize = data->d_size;
-  Elf_Internal_Shdr *shdr = elf->get_shdr (sec);
-
-  if ((SymtabSize == 0) || (shdr->sh_entsize == 0))
-    return;
-  Elf_Data *data_str = elf->elf_getdata (shdr->sh_link);
-  if (data_str == NULL)
-    return;
-  char *Strtab = (char *) data_str->d_buf;
+  unsigned int tot = elf->elf_getSymCount (is_dynamic);
 
   // read func symbolic table
-  for (unsigned int n = 0, tot = SymtabSize / shdr->sh_entsize; n < tot; n++)
+  for (unsigned int n = 0; n < tot; n++)
     {
       Elf_Internal_Sym Sym;
-      elf->elf_getsym (data, n, &Sym);
-      const char *st_name = Sym.st_name < data_str->d_size ?
-	  (Strtab + Sym.st_name) : NTXT ("no_name");
+      asymbol *asym;
+      asym = elf->elf_getsym (n, &Sym, is_dynamic);
+      // TBD: convert this check to an assert
+      if (asym == NULL)
+	break;
+      const char *st_name = bfd_asymbol_name (asym);
       switch (GELF_ST_TYPE (Sym.st_info))
 	{
 	case STT_FUNC:

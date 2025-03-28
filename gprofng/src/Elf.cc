@@ -533,42 +533,43 @@ Elf::elf_strptr (unsigned int sec, uint64_t off)
   return NULL;
 }
 
-Elf_Internal_Sym *
-Elf::elf_getsym (Elf_Data *edta, unsigned int ndx, Elf_Internal_Sym *dst)
+long
+Elf::elf_getSymCount (bool is_dynamic)
 {
-  if (dst == NULL || edta == NULL)
-    return NULL;
-  if (elf_getclass () == ELFCLASS32)
-    {
-      if (edta->d_size <= ndx * sizeof (Elf32_Sym))
-	return NULL;
-      Elf32_Sym *hdr = (Elf32_Sym*) bind (edta->d_off + ndx * sizeof (Elf32_Sym), sizeof (Elf32_Sym));
-      if (hdr == NULL)
-	return NULL;
-      dst->st_name = decode (hdr->st_name);
-      dst->st_value = decode (hdr->st_value);
-      dst->st_size = decode (hdr->st_size);
-      dst->st_info = ELF64_ST_INFO (ELF32_ST_BIND (decode (hdr->st_info)),
-				    ELF32_ST_TYPE (decode (hdr->st_info)));
-      dst->st_other = decode (hdr->st_other);
-      dst->st_shndx = decode (hdr->st_shndx);
-    }
+  if (bfd_dynsym == NULL && bfd_sym == NULL)
+    get_bfd_symbols ();
+  if (is_dynamic)
+    return bfd_dynsymcnt;
+  return bfd_symcnt;
+}
+
+/* Returns an ASYMBOL on index NDX if it exists.  If DST is defined,
+   the internal elf symbol at intex NDX is copied into it.  IS_DYNAMIC
+   selects the type of the symbol.  */
+
+asymbol *
+Elf::elf_getsym (unsigned int ndx, Elf_Internal_Sym *dst, bool is_dynamic)
+{
+  asymbol *asym;
+
+  if (bfd_dynsym == NULL && bfd_sym == NULL)
+    get_bfd_symbols ();
+
+  if (is_dynamic)
+    if (ndx < bfd_dynsymcnt)
+      asym = bfd_dynsym[ndx];
+    else
+      return NULL;
   else
-    {
-      if (edta->d_size <= ndx * sizeof (Elf64_Sym))
-	return NULL;
-      Elf64_Sym *hdr = (Elf64_Sym*) bind (edta->d_off + ndx * sizeof (Elf64_Sym),
-					  sizeof (Elf64_Sym));
-      if (hdr == NULL)
-	return NULL;
-      dst->st_name = decode (hdr->st_name);
-      dst->st_value = decode (hdr->st_value);
-      dst->st_size = decode (hdr->st_size);
-      dst->st_info = decode (hdr->st_info);
-      dst->st_other = decode (hdr->st_other);
-      dst->st_shndx = decode (hdr->st_shndx);
-    }
-  return dst;
+    if (ndx < bfd_symcnt)
+      asym = bfd_sym[ndx];
+    else
+      return NULL;
+
+  if (dst != NULL)
+    *dst = ((elf_symbol_type *) asym)->internal_elf_sym;
+
+  return asym;
 }
 
 Elf_Internal_Rela *

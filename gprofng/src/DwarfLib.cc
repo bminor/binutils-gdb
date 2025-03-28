@@ -204,12 +204,6 @@ ElfReloc::dump_rela_debug_sec (int sec)
   if (ScnSize == 0 || EntSize == 0)
     return;
 
-  Elf_Internal_Shdr *shdr_sym = elf->get_shdr (shdr->sh_link);
-  if (shdr_sym == NULL)
-    return;
-  Elf_Data *data_sym = elf->elf_getdata (shdr->sh_link);
-  Elf_Data *data_str = elf->elf_getdata (shdr_sym->sh_link);
-  char *Strtab = data_str ? (char*) data_str->d_buf : NULL;
   Elf_Internal_Rela rela;
   int n, cnt = (int) (ScnSize / EntSize);
 
@@ -233,7 +227,8 @@ ElfReloc::dump_rela_debug_sec (int sec)
       int ndx = (int) GELF_R_SYM (rela.r_info);
       Elf_Internal_Shdr *secHdr;
       Elf_Internal_Sym sym;
-      elf->elf_getsym (data_sym, ndx, &sym);
+      asymbol *asym;
+      asym = elf->elf_getsym (ndx, &sym, false);
       Dprintf (DUMP_RELA_SEC, NTXT ("%3d:%5d |%11lld |0x%016llx | %-15s|"),
 	       n, (int) rela.r_addend,
 	       (long long) rela.r_offset, (long long) rela.r_info,
@@ -243,12 +238,9 @@ ElfReloc::dump_rela_debug_sec (int sec)
 	case STT_FUNC:
 	case STT_OBJECT:
 	case STT_NOTYPE:
-	  secHdr = elf->get_shdr (sym.st_shndx);
-	  if (secHdr)
-	    Dprintf (DUMP_RELA_SEC, NTXT (" img_offset=0x%llx"),
-		     (long long) (sym.st_value + secHdr->sh_offset));
-	  if (Strtab && sym.st_name)
-	    Dprintf (DUMP_RELA_SEC, NTXT ("  %s"), Strtab + sym.st_name);
+	  Dprintf (DUMP_RELA_SEC, NTXT (" img_offset=0x%llx"),
+		   (long long) (bfd_asymbol_value (asym)));
+	  Dprintf (DUMP_RELA_SEC, NTXT ("  %s"),  bfd_asymbol_name (asym));
 	  break;
 	case STT_SECTION:
 	  secHdr = elf->get_shdr (sym.st_shndx);
@@ -311,10 +303,6 @@ ElfReloc::get_elf_reloc (Elf *elfp, char *sec_name, ElfReloc *rlc)
     return rlc;
 
   int cnt = (int) (data->d_size / shdr->sh_entsize);
-  Elf_Internal_Shdr *shdr_sym = elfp->get_shdr (shdr->sh_link);
-  if (shdr_sym == NULL)
-    return rlc;
-  Elf_Data *data_sym = elfp->elf_getdata (shdr->sh_link);
   Vector<Sreloc *> *vp = NULL;
 
   for (int n = 0; n < cnt; n++)
@@ -331,7 +319,7 @@ ElfReloc::get_elf_reloc (Elf *elfp, char *sec_name, ElfReloc *rlc)
 	}
       int ndx = (int) GELF_R_SYM (rela.r_info);
       Elf_Internal_Sym sym;
-      elfp->elf_getsym (data_sym, ndx, &sym);
+      elfp->elf_getsym (ndx, &sym, false);
 
       srlc = new Sreloc;
       srlc->offset = rela.r_offset;

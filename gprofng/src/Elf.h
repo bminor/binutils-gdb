@@ -92,7 +92,8 @@ public:
   int64_t elf_checksum ();
   uint64_t get_baseAddr();
   char *elf_strptr (unsigned int sec, uint64_t off);
-  Elf_Internal_Sym *elf_getsym (Elf_Data *edta, unsigned int ndx, Elf_Internal_Sym *dst);
+  long elf_getSymCount (bool is_dynamic);
+  asymbol *elf_getsym (unsigned int ndx, Elf_Internal_Sym *dst, bool is_dynamic);
   Elf_Internal_Rela *elf_getrel (Elf_Data *edta, unsigned int ndx, Elf_Internal_Rela *dst);
   Elf_Internal_Rela *elf_getrela (Elf_Data *edta, unsigned int ndx, Elf_Internal_Rela *dst);
   Elf64_Ancillary *elf_getancillary (Elf_Data *edta, unsigned int ndx, Elf64_Ancillary *dst);

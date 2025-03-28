@@ -129,7 +129,7 @@ class Stabs {
 
     // Interface with Elf Symbol Table
     void                check_Symtab();
-    void                readSymSec(unsigned int sec, Elf *elf);
+    void		readSymSec (Elf *elf, bool is_dynamic);
     void                get_save_addr(bool need_swap_endian);
     Symbol              *map_PC_to_sym(uint64_t pc);
     Symbol              *pltSym;
