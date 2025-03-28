@@ -2168,9 +2168,9 @@ if { [isnative] && [check_compiler_available] } {
     }
 
     undefined_weak "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS"
-    undefined_weak "-fPIE" ""
+    undefined_weak "-fPIE" "$NOPIE_LDFLAGS"
     undefined_weak "-fPIE" "-pie"
-    undefined_weak "-fPIE" "-Wl,-z,nodynamic-undefined-weak"
+    undefined_weak "-fPIE" "$NOPIE_LDFLAGS -Wl,-z,nodynamic-undefined-weak"
     undefined_weak "-fPIE" "-pie -Wl,-z,nodynamic-undefined-weak"
 }
 
