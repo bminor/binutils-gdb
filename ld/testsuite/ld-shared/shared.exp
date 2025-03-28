@@ -121,6 +121,7 @@ proc shared_test { progname testname main sh1 sh2 dat args } {
     global tmpdir
 
     if [llength $args] { set shldflags [lindex $args 0] } else { set shldflags "" }
+    if { [llength $args] >= 2 } { set ldflags [lindex $args 1] } else { set ldflags "" }
 
     # Build the shared library.
     set shared -shared
@@ -146,7 +147,7 @@ proc shared_test { progname testname main sh1 sh2 dat args } {
 	set rpath /lib:$tmpdir
 	set exportflag " -Wl,-bexpall"
     }
-    if ![ld_link $CC_FOR_TARGET $tmpdir/$progname "-Wl,-rpath,$rpath $tmpdir/$main $tmpdir/$progname.so $exportflag"] {
+    if ![ld_link $CC_FOR_TARGET $tmpdir/$progname "-Wl,-rpath,$rpath $ldflags $tmpdir/$main $tmpdir/$progname.so $exportflag"] {
     	fail "$testname"
     	return
     }
@@ -205,7 +206,9 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
 verbose "Using $picflag to compile PIC code"
 
 # Compile the main program.
-if ![ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
+global PLT_CFLAGS NOPIE_CFLAGS NOPIE_LDFLAGS
+verbose "Using $NOPIE_CFLAGS to compile and $NOPIE_LDFLAGS to link non PIC code"
+if ![ld_compile "$CC_FOR_TARGET $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
     unsupported "shared (non PIC)"
     unsupported "shared"
 } else {
@@ -215,12 +218,11 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.
     # will need to do more relocation work.  However, note that not
     # using -fpic will cause some of the tests to return different
     # results.  Make sure that PLT is used since PLT is expected.
-    global PLT_CFLAGS NOPIE_CFLAGS
     if { ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
-	 || ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $SHCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
+	 || ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	unsupported "shared (non PIC)"
     } else { if { [is_xcoff_format] } {
-	shared_test shnp "shared (nonPIC)" mainnp.o sh1np.o sh2np.o xcoff
+	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o xcoff "" $NOPIE_LDFLAGS
     } else {
 	# Solaris defaults to -z text.
 	setup_xfail "*-*-solaris2*"
@@ -243,7 +245,7 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.
 	    setup_xfail "arm*-*-linux*"
 	}
 	setup_xfail "aarch64*-*-linux*"
-	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o shared
+	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o shared "" $NOPIE_LDFLAGS
 
 	# Test ELF shared library relocations with a non-zero load
 	# address for the library.  Near as I can tell, the R_*_RELATIVE
@@ -273,7 +275,7 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.
 	setup_xfail "*-*-solaris2*"
 	shared_test shnp "shared (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o shared \
-		"-Wl,-T,$srcdir/$subdir/elf-offset.ld,--hash-style=sysv"
+		"-Wl,-T,$srcdir/$subdir/elf-offset.ld,--hash-style=sysv" $NOPIE_LDFLAGS
     } }
 
     # Now compile the code using -fpic.
@@ -283,13 +285,13 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.
 	unsupported "shared"
     } else {
 	if { [is_xcoff_format] } {
-	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o xcoff
+	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o xcoff "" $NOPIE_LDFLAGS
 	} else {
-	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o shared
-	    ld_compile "$CC_FOR_TARGET -DSYMBOLIC_TEST $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
+	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o shared "" $NOPIE_LDFLAGS
+	    ld_compile "$CC_FOR_TARGET $NOPIE_CFLAGS -DSYMBOLIC_TEST $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
 	    ld_compile "$CC_FOR_TARGET -DSYMBOLIC_TEST $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
-	    shared_test shp "shared -Bsymbolic" mainnp.o sh1p.o sh2p.o symbolic "-Bsymbolic"
-	    ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
+	    shared_test shp "shared -Bsymbolic" mainnp.o sh1p.o sh2p.o symbolic "-Bsymbolic" $NOPIE_LDFLAGS
+	    ld_compile "$CC_FOR_TARGET $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
 	    ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
 	}
     }
@@ -302,7 +304,7 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdi
 } else {
     if { [file exists $tmpdir/sh1np.o ] && [ file exists $tmpdir/sh2np.o ] } {
         if { [is_xcoff_format] } {
-	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o xcoff
+	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o xcoff "" $NOPIE_LDFLAGS
 	} else {
 	    # Solaris defaults to -z text.
 	    setup_xfail "*-*-solaris2*"
@@ -325,7 +327,7 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdi
 		setup_xfail "arm*-*-linux*"
 	    }
 	    setup_xfail "aarch64*-*-linux*"
-	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o shared
+	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o shared "" $NOPIE_LDFLAGS
 	}
     } else {
 	unsupported "shared (PIC main, non PIC so)"
@@ -333,9 +335,9 @@ if ![ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdi
 
     if { [file exists $tmpdir/sh1p.o ] && [ file exists $tmpdir/sh2p.o ] } {
         if { [is_xcoff_format] } {
-	    shared_test shmpp "shared (PIC main)" mainp.o sh1p.o sh2p.o xcoff
+	    shared_test shmpp "shared (PIC main)" mainp.o sh1p.o sh2p.o xcoff "" $NOPIE_LDFLAGS
 	} else {
-	    shared_test shmpp "shared (PIC main)" mainp.o sh1p.o sh2p.o shared
+	    shared_test shmpp "shared (PIC main)" mainp.o sh1p.o sh2p.o shared "" $NOPIE_LDFLAGS
 	}
     } else {
 	unsupported "shared (PIC main)"
