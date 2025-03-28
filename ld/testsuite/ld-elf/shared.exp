@@ -1618,12 +1618,12 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Run pr21964-4" \
-	    "" \
+	    "$NOPIE_LDFLAGS" \
 	    "" \
 	    {pr21964-4.c} \
 	    "pr21964-4" \
 	    "pass.out" \
-	    "" \
+	    "$NOPIE_CFLAGS" \
 	    "" \
 	    "" \
 	    "-ldl" \
