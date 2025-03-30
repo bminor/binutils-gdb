@@ -29,6 +29,11 @@ namespace selftests
 extern void
   register_test_foreach_arch (const std::string &name,
 			      self_test_foreach_arch_function *function);
+
+/* Return true if GDBARCH should be skipped in some selftests to avoid
+   warnings.  */
+
+extern bool selftest_skip_warning_arch (struct gdbarch *gdbarch);
 }
 
 #endif /* GDB_SELFTEST_ARCH_H */

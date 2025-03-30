@@ -127,6 +127,9 @@ register_to_value_test (struct gdbarch *gdbarch)
 static void
 register_name_test (struct gdbarch *gdbarch)
 {
+  if (selftest_skip_warning_arch (gdbarch))
+    return;
+
   scoped_mock_context<test_target_ops> mockctx (gdbarch);
 
   /* Track the number of times each register name appears.  */
