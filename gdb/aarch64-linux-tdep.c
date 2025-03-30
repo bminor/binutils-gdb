@@ -2275,7 +2275,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       SYSCALL_MAP (clone);
       SYSCALL_MAP (execve);
 
-      SYSCALL_MAP_RENAME (mmap, gdb_sys_mmap2);
+      SYSCALL_MAP_RENAME (mmap, gdb_old_mmap);
 
       SYSCALL_MAP (fadvise64);
       SYSCALL_MAP (swapon);
