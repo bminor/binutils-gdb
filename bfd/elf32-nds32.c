@@ -2692,7 +2692,7 @@ nds32_elf_do_9_pcrel_reloc (bfd *               abfd,
 			    bfd_vma             symbol_value,
 			    bfd_vma             addend)
 {
-  bfd_signed_vma relocation;
+  bfd_vma relocation;
   unsigned short x;
   bfd_reloc_status_type status;
 
@@ -2708,7 +2708,7 @@ nds32_elf_do_9_pcrel_reloc (bfd *               abfd,
      before doing pcrel calculations.  */
   relocation -= (offset & -(bfd_vma) 2);
 
-  if (relocation < -ACCURATE_8BIT_S1 || relocation >= ACCURATE_8BIT_S1)
+  if (relocation + ACCURATE_8BIT_S1 >= 2 * ACCURATE_8BIT_S1)
     status = bfd_reloc_overflow;
   else
     status = bfd_reloc_ok;
