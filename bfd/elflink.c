@@ -4965,6 +4965,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       asection *sec, *new_sec;
       flagword flags;
       const char *name;
+      const char *defvername;
       bool must_copy_name = false;
       struct elf_link_hash_entry *h;
       struct elf_link_hash_entry *hi;
@@ -5141,6 +5142,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       old_alignment = 0;
       old_bfd = NULL;
       new_sec = sec;
+      defvername = NULL;
 
       if (is_elf_hash_table (&htab->root))
 	{
@@ -5259,7 +5261,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		 default version of the symbol.  */
 	      if ((iver.vs_vers & VERSYM_HIDDEN) == 0
 		  && isym->st_shndx != SHN_UNDEF)
-		*p++ = ELF_VER_CHR;
+		*p++ = ELF_VER_CHR, defvername = name;
 	      memcpy (p, verstr, verlen + 1);
 
 	      name = newname;
@@ -5709,9 +5711,15 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		}
 	      else if (dynamic
 		       && h->root.u.def.section->owner == abfd)
-		/* Add this symbol to first hash if this shared
-		   object has the first definition.  */
-		elf_link_add_to_first_hash (abfd, info, name, must_copy_name);
+		{
+		  /* Add this symbol to first hash if this shared
+		     object has the first definition.  */
+		  elf_link_add_to_first_hash (abfd, info, name, must_copy_name);
+		  /* And if it was the default symbol version definition,
+		     also add the short name.  */
+		  if (defvername)
+		    elf_link_add_to_first_hash (abfd, info, defvername, false);
+		}
 	    }
 	}
     }
@@ -6273,12 +6281,28 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  if (h->type == bfd_link_hash_undefined)
 	    {
-	      /* If the archive element has already been loaded then one
-		 of the symbols defined by that element might have been
-		 made undefined due to being in a discarded section.  */
-	      if (is_elf_hash_table (info->hash)
-		  && ((struct elf_link_hash_entry *) h)->indx == -3)
-		continue;
+	      if (is_elf_hash_table (info->hash))
+		{
+		  /* If the archive element has already been loaded then one
+		     of the symbols defined by that element might have been
+		     made undefined due to being in a discarded section.  */
+		  if (((struct elf_link_hash_entry *) h)->indx == -3)
+		    continue;
+
+		  /* In the pre-LTO-plugin pass we must not mistakenly
+		     include this archive member if an earlier BFD
+		     defined this symbol.  */
+		  struct elf_link_hash_table *htab = elf_hash_table (info);
+		  if (htab->first_hash)
+		    {
+		      struct elf_link_first_hash_entry *e
+			  = ((struct elf_link_first_hash_entry *)
+			     bfd_hash_lookup (htab->first_hash, symdef->name,
+					      false, false));
+		      if (e && e->abfd != abfd)
+			continue;
+		    }
+		}
 	    }
 	  else if (h->type == bfd_link_hash_common)
 	    {

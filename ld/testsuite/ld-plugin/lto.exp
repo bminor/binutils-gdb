@@ -477,6 +477,12 @@ set lto_link_elf_tests [list \
   [list {liblto-19.so} \
    {-shared tmpdir/lto-19b.o tmpdir/liblto-19.a} {-O2 -fPIC} \
    {dummy.c} {} {liblto-19.so}] \
+  [list {liblto-20_static.a} \
+   {} {-fPIC} \
+   {lto-20b.c} {} {liblto-20_static.a}] \
+  [list {liblto-20.so} \
+   {-shared -Wl,--version-script=lto-20.ver} {-DSHARED -fPIC} \
+   {lto-20b.c} {} {liblto-20.so}] \
   [list {pr26806.so} \
    {-shared} {-fpic -O2 -flto} \
    {pr26806.c} {{nm {-D} pr26806.d}} {pr26806.so}] \
@@ -880,6 +886,10 @@ set lto_run_elf_shared_tests [list \
    {-Wl,--as-needed,-R,tmpdir} {} \
    {lto-19c.c} {lto-19.exe} {pass.out} {-flto -O2} {c} {} \
    {tmpdir/liblto-19.so tmpdir/liblto-19.a}] \
+  [list {lto-20} \
+   {-Wl,--as-needed,-R,tmpdir} {} \
+   {lto-20a.c} {lto-20.exe} {pass.out} {-flto} {c} {} \
+   {tmpdir/liblto-20.so tmpdir/liblto-20_static.a -Wl,--no-as-needed}] \
   [list {pr31482a} \
    {-Wl,--no-as-needed,-R,tmpdir} {} \
    {pr31482a.c} {pr31482a.exe} {pass.out} {-flto} {c} {} \
