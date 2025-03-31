@@ -627,7 +627,7 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 #define LCTF_IS_PREFIXED_KIND(kind) (kind == CTF_K_BIG || kind == CTF_K_CONFLICTING)
 #define LCTF_IS_PREFIXED_INFO(info)			\
   ((CTF_INFO_KIND ((info)) == CTF_K_BIG)		\
-   || (CTF_INFO_KIND ((info) == CTF_K_CONFLICTING)))
+   || (CTF_INFO_KIND ((info)) == CTF_K_CONFLICTING))
 
 #define LCTF_CHILD		0x0001	/* CTF dict is a child.  */
 #define LCTF_LINKING		0x0002  /* CTF link is underway: respect ctf_link_flags.  */
