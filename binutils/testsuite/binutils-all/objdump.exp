@@ -595,8 +595,8 @@ if { ![is_elf_format] } then {
        send_log "\n"
     }
 
-    set got [remote_exec host "tail -n +4 tmpdir/objdump.out" "" "/dev/null" "tmpdir/objdump.out"]
-    set output [remote_upload host tmpdir/objdump.out]
+    set got [remote_exec host "tail -n +4 tmpdir/objdump.out" "" "/dev/null" "tmpdir/objdump.tail"]
+    set output [remote_upload host tmpdir/objdump.tail]
 
     if ![file size $output] then {
        # If the output file is empty, then this target does not
@@ -606,7 +606,7 @@ if { ![is_elf_format] } then {
        return
     }
 
-    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/dw5-op.W] } then {
+    if { [regexp_diff tmpdir/objdump.tail $srcdir/$subdir/dw5-op.W] } then {
        fail "objdump -Wi for DW_OP_*"
     } else {
        pass "objdump -Wi for DW_OP_*"
