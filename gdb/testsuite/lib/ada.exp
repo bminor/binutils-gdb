@@ -181,12 +181,16 @@ proc find_ada_tool {tool} {
 # compiler does not appear to be GCC, this will always return false.
 
 proc gnat_version_compare {op l2} {
-    set gccvers [gcc_major_version]
-    if {$gccvers == -1} {
+    set gnatmake [find_gnatmake]
+    set gnatmake [lindex [split $gnatmake] 0]
+    if {[catch {exec $gnatmake --version} output]} {
+	return 0
+    }
+    if {![regexp {GNATMAKE ([0-9]+(\.[0-9]+)*)} $output match version]} {
 	return 0
     }
 
-    return [version_compare [split $gccvers .] $op $l2]
+    return [version_compare [split $version .] $op $l2]
 }
 
 # Return 1 if the GNAT runtime appears to have debug info.
