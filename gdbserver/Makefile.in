@@ -194,6 +194,7 @@ SFILES = \
 	$(srcdir)/linux-loongarch-low.cc \
 	$(srcdir)/linux-low.cc \
 	$(srcdir)/linux-m68k-low.cc \
+        $(srcdir)/linux-microblaze-low.cc \
 	$(srcdir)/linux-mips-low.cc \
 	$(srcdir)/linux-or1k-low.cc \
 	$(srcdir)/linux-ppc-low.cc \
