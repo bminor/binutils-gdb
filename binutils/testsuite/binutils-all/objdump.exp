@@ -454,7 +454,7 @@ if { ![is_elf_format] } then {
 	set compressed_testfile tmpdir/dw2-compressed.${obj}
     }
 
-    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -s -j .zdebug_abbrev $compressed_testfile" "" "/dev/null" "objdump.out"]
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -s -j .zdebug_abbrev $compressed_testfile" "" "/dev/null" "tmpdir/objdump.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "objdump -s -j .zdebug_abbrev (reason: unexpected output)"
@@ -462,7 +462,7 @@ if { ![is_elf_format] } then {
 	send_log "\n"
     }
 
-    if { [regexp_diff objdump.out $srcdir/$subdir/objdump.s] } then {
+    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/objdump.s] } then {
 	fail "objdump -s -j .zdebug_abbrev"
     } else {
 	pass "objdump -s -j .zdebug_abbrev"
@@ -470,7 +470,7 @@ if { ![is_elf_format] } then {
 
     # Test objdump -W on a file that contains some compressed .debug sections
 
-    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -W $compressed_testfile" "" "/dev/null" "objdump.out"]
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -W $compressed_testfile" "" "/dev/null" "tmpdir/objdump.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "objdump -W (reason: unexpected output)"
@@ -478,7 +478,7 @@ if { ![is_elf_format] } then {
 	send_log "\n"
     }
 
-    if { [regexp_diff objdump.out $srcdir/$subdir/objdump.W] } then {
+    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/objdump.W] } then {
 	fail "objdump -W"
     } else {
 	pass "objdump -W"
@@ -486,7 +486,7 @@ if { ![is_elf_format] } then {
 
     # Test objdump -Z -s on a file that contains some compressed .debug sections
 
-    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Z -s -j .zdebug_abbrev $compressed_testfile" "" "/dev/null" "objdump.out"]
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Z -s -j .zdebug_abbrev $compressed_testfile" "" "/dev/null" "tmpdir/objdump.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "objdump -Z -s (reason: unexpected output)"
@@ -494,7 +494,7 @@ if { ![is_elf_format] } then {
 	send_log "\n"
     }
 
-    if { [regexp_diff objdump.out $srcdir/$subdir/objdump.Zs] } then {
+    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/objdump.Zs] } then {
 	fail "objdump -Z -s"
     } else {
 	pass "objdump -Z -s"
@@ -530,7 +530,7 @@ if { ![is_elf_format]
 	set decodedline_testfile tmpdir/dw2-decodedline.${obj}
     }
 
-    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -WL $decodedline_testfile" "" "/dev/null" "objdump.out"]
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -WL $decodedline_testfile" "" "/dev/null" "tmpdir/objdump.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "objdump -WL (reason: unexpected output)"
@@ -538,7 +538,7 @@ if { ![is_elf_format]
 	send_log "\n"
     }
 
-    if { [regexp_diff objdump.out $srcdir/$subdir/objdump.WL] } then {
+    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/objdump.WL] } then {
 	fail "objdump -WL"
     } else {
 	pass "objdump -WL"
@@ -558,7 +558,7 @@ if { ![is_elf_format] } then {
 	set ranges_testfile tmpdir/dw2-ranges.${obj}
     }
 
-    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS --dwarf=Ranges $ranges_testfile" "" "/dev/null" "objdump.out"]
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS --dwarf=Ranges $ranges_testfile" "" "/dev/null" "tmpdir/objdump.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "objdump -W for debug_ranges (reason: unexpected output)"
@@ -567,7 +567,7 @@ if { ![is_elf_format] } then {
     }
 
     setup_xfail "msp430-*-*"
-    if { [regexp_diff objdump.out $srcdir/$subdir/dw2-ranges.W] } then {
+    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/dw2-ranges.W] } then {
 	fail "objdump -W for debug_ranges"
     } else {
 	pass "objdump -W for debug_ranges"
@@ -587,7 +587,7 @@ if { ![is_elf_format] } then {
        set op_testfile tmpdir/dw5-op.${obj}
     }
 
-    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wi $op_testfile" "" "/dev/null" "objdump.out"]
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wi $op_testfile" "" "/dev/null" "tmpdir/objdump.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
        fail "objdump -Wi (reason: unexpected output)"
@@ -595,8 +595,8 @@ if { ![is_elf_format] } then {
        send_log "\n"
     }
 
-    set got [remote_exec host "tail -n +4 objdump.out" "" "/dev/null" "objdump.out"]
-    set output [remote_upload host objdump.out]
+    set got [remote_exec host "tail -n +4 tmpdir/objdump.out" "" "/dev/null" "tmpdir/objdump.out"]
+    set output [remote_upload host tmpdir/objdump.out]
 
     if ![file size $output] then {
        # If the output file is empty, then this target does not
@@ -606,7 +606,7 @@ if { ![is_elf_format] } then {
        return
     }
 
-    if { [regexp_diff objdump.out $srcdir/$subdir/dw5-op.W] } then {
+    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/dw5-op.W] } then {
        fail "objdump -Wi for DW_OP_*"
     } else {
        pass "objdump -Wi for DW_OP_*"
@@ -712,7 +712,7 @@ if { [is_elf_format] } then {
 	set testfile tmpdir/debuglink.${obj}
     }
 
-    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wk -WN $testfile" "" "/dev/null" "objdump.out"]
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wk -WN $testfile" "" "/dev/null" "tmpdir/objdump.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "objdump -Wk (reason: unexpected output)"
@@ -720,7 +720,7 @@ if { [is_elf_format] } then {
 	send_log "\n"
     }
 
-    if { [regexp_diff objdump.out $srcdir/$subdir/objdump.Wk] } then {
+    if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/objdump.Wk] } then {
 	fail "objdump -Wk (reason: output does not match expectations)"
     } else {
 	pass "objdump -Wk"
@@ -764,7 +764,7 @@ proc test_follow_debuglink { options dumpfile } {
 
     if { [regexp_diff tmpdir/objdump.out $srcdir/$subdir/$dumpfile] } then {
 	fail $test
-	verbose "output is \n[file_contents objdump.out]" 2
+	verbose "output is \n[file_contents tmpdir/objdump.out]" 2
 	return
     }
 
