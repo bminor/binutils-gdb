@@ -148,6 +148,7 @@ class Stabs {
     bool	st_check_symtab;
     Function	*createFunction(LoadObject *lo, Module *module, Symbol *sym);
     void        fixSymtabAlias();
+    void	removeDupSyms ();
 
     // Interface with dwarf
     Dwarf       *openDwarf();

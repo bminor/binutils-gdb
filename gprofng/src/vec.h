@@ -112,6 +112,13 @@ public:
     return data[index];
   }
 
+  void
+  truncate (long ncount)
+  {
+    if (count > ncount && ncount >= 0)
+      count = ncount;
+  }
+
   // Return the first index in "this" that equals "item".
   // Return -1 if "item" is not found.
   long find (const ITEM item);

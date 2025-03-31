@@ -241,6 +241,40 @@ RelValueCmp (const void *a, const void *b)
 	  (item1->value == item2->value) ? 0 : -1;
 }
 
+/* Remove all duplicate symbols which can be in SymLst.  The
+   duplication is due to processing of both static and dynamic
+   symbols.  This function is called before computing symbol
+   aliases.  */
+
+void
+Stabs::removeDupSyms ()
+{
+  long ind, i, last;
+  Symbol *symA, *symB;
+  SymLst->sort (SymImgOffsetCmp);
+  dump ();
+
+  last = 0;
+  ind = SymLst->size ();
+  for (i = 0; i < ind; i++)
+    {
+      symA = SymLst->fetch (i);
+      if (symA->img_offset == 0) // Ignore this bad symbol
+	continue;
+
+      SymLst->put (last++, symA);
+      for (long k = i + 1; k < ind; k++, i++)
+	{
+	  symB = SymLst->fetch (k);
+	  if (symA->img_offset != symB->img_offset)
+	    break;
+	  if (strcmp (symA->name, symB->name) != 0)
+	    break;
+	}
+    }
+  SymLst->truncate (last);
+}
+
 Stabs *
 Stabs::NewStabs (char *_path, char *lo_name)
 {
@@ -1801,6 +1835,7 @@ Stabs::readSymSec (Elf *elf, bool is_dynamic)
 	  }
 	}
     }
+  removeDupSyms ();
   fixSymtabAlias ();
   SymLst->sort (SymValueCmp);
   get_save_addr (elf->need_swap_endian);
