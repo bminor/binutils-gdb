@@ -99,13 +99,6 @@ union cooked_index_entry_ref
 
 std::string to_string (cooked_index_flag flags);
 
-/* Return true if LANG requires canonicalization.  This is used
-   primarily to work around an issue computing the name of "main".
-   This function must be kept in sync with
-   cooked_index_shard::finalize.  */
-
-extern bool language_requires_canonicalization (enum language lang);
-
 /* A cooked_index_entry represents a single item in the index.  Note
    that two entries can be created for the same DIE -- one using the
    name, and another one using the linkage name, if any.

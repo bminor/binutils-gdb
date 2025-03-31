@@ -60,9 +60,12 @@ to_string (cooked_index_flag flags)
   return flags.to_string (mapping);
 }
 
-/* See cooked-index.h.  */
+/* Return true if LANG requires canonicalization.  This is used
+   primarily to work around an issue computing the name of "main".
+   This function must be kept in sync with
+   cooked_index_shard::finalize.  */
 
-bool
+static bool
 language_requires_canonicalization (enum language lang)
 {
   return (lang == language_ada
