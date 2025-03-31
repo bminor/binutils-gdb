@@ -697,7 +697,7 @@ go32_nat_target::create_inferior (const char *exec_file,
 		      "not enough memory.\n"));
 
   /* Parse the command line and create redirections.  */
-  if (strpbrk (args, "<>"))
+  if (strpbrk (args, "<>") != nullptr)
     {
       if (redir_cmdline_parse (args, &child_cmd) == 0)
 	args = child_cmd.command;

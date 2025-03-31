@@ -59,7 +59,7 @@ escape_characters (const char *arg, const char *special)
 #ifdef __MINGW32__
       bool quoted = false;
 
-      if (strpbrk (arg, special))
+      if (strpbrk (arg, special) != nullptr)
 	{
 	  quoted = true;
 	  result += quote;
