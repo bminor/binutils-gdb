@@ -317,16 +317,6 @@ addrmap_fixed::addrmap_fixed (struct obstack *obstack,
   gdb_assert (num_transitions == transition_count);
 }
 
-
-void
-addrmap_mutable::relocate (CORE_ADDR offset)
-{
-  /* Not needed yet.  */
-  internal_error (_("addrmap_relocate is not implemented yet "
-		    "for mutable addrmaps"));
-}
-
-
 /* This is a splay_tree_foreach_fn.  */
 
 static int
@@ -450,7 +440,7 @@ test_addrmap ()
   CHECK_ADDRMAP_FIND (map, array, 13, 19, nullptr);
 
   /* Create corresponding fixed addrmap.  */
-  struct addrmap *map2
+  addrmap_fixed *map2
     = new (&temp_obstack) addrmap_fixed (&temp_obstack, map.get ());
   SELF_CHECK (map2 != nullptr);
   CHECK_ADDRMAP_FIND (map2, array, 0, 9, nullptr);

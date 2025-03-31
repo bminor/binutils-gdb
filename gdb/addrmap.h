@@ -52,10 +52,6 @@ struct addrmap
   void *find (CORE_ADDR addr)
   { return this->do_find (addr); }
 
-  /* Relocate all the addresses in MAP by OFFSET.  (This can be applied
-     to either mutable or immutable maps.)  */
-  virtual void relocate (CORE_ADDR offset) = 0;
-
   /* Call FN for every address in MAP, following an in-order traversal.
      If FN ever returns a non-zero value, the iteration ceases
      immediately, and the value is returned.  Otherwise, this function
@@ -94,7 +90,8 @@ public:
   addrmap_fixed (addrmap_fixed &&other) = default;
   addrmap_fixed &operator= (addrmap_fixed &&) = default;
 
-  void relocate (CORE_ADDR offset) override;
+  /* Relocate all the addresses in this map by OFFSET.  */
+  void relocate (CORE_ADDR offset);
 
 private:
   void *do_find (CORE_ADDR addr) const override;
@@ -191,7 +188,6 @@ public:
      representation.  */
   void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 		  void *obj);
-  void relocate (CORE_ADDR offset) override;
 
   /* Clear this addrmap.  */
   void clear ();
