@@ -65,6 +65,12 @@ repos:
     - id: isort
       types_or: [file]
       files: 'gdb/.*\.py(\.in)?$'
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+    - id: codespell
+      files: '^(gdbsupport|gdbserver)/'
+      args: [--config, gdb/contrib/setup.cfg]
   - repo: local
     hooks:
     - id: check-include-guards
