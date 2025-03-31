@@ -1361,8 +1361,8 @@ arm_canonicalize_syscall (int syscall)
     case 86: return gdb_sys_uselib;
     case 87: return gdb_sys_swapon;
     case 88: return gdb_sys_reboot;
-    case 89: return gdb_old_readdir;
-    case 90: return gdb_old_mmap;
+    case 89: return gdb_sys_old_readdir;
+    case 90: return gdb_sys_old_mmap;
     case 91: return gdb_sys_munmap;
     case 92: return gdb_sys_truncate;
     case 93: return gdb_sys_ftruncate;

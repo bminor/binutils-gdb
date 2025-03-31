@@ -484,15 +484,15 @@ i386_canonicalize_syscall (int syscall)
       SYSCALL_MAP (settimeofday);
       SYSCALL_MAP_RENAME (getgroups, gdb_sys_getgroups16);
       SYSCALL_MAP_RENAME (setgroups, gdb_sys_setgroups16);
-      SYSCALL_MAP_RENAME (select, gdb_old_select);
+      SYSCALL_MAP_RENAME (select, gdb_sys_old_select);
       SYSCALL_MAP (symlink);
       SYSCALL_MAP_RENAME (oldlstat, gdb_sys_lstat);
       SYSCALL_MAP (readlink);
       SYSCALL_MAP (uselib);
       SYSCALL_MAP (swapon);
       SYSCALL_MAP (reboot);
-      SYSCALL_MAP_RENAME (readdir, gdb_old_readdir);
-      SYSCALL_MAP_RENAME (mmap, gdb_old_mmap);
+      SYSCALL_MAP_RENAME (readdir, gdb_sys_old_readdir);
+      SYSCALL_MAP_RENAME (mmap, gdb_sys_old_mmap);
       SYSCALL_MAP (munmap);
       SYSCALL_MAP (truncate);
       SYSCALL_MAP (ftruncate);

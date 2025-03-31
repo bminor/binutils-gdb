@@ -412,7 +412,7 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
 
   case amd64_sys_mmap:
   case amd64_x32_sys_mmap:
-    return gdb_old_mmap;
+    return gdb_sys_old_mmap;
 
   case amd64_sys_mprotect:
   case amd64_x32_sys_mprotect:

@@ -609,7 +609,7 @@ record_linux_system_call (enum gdb_syscall syscall,
     case gdb_sys_setgroups16:
       break;
 
-    case gdb_old_select:
+    case gdb_sys_old_select:
       {
 	unsigned long sz_sel_arg = tdep->size_long + tdep->size_pointer * 4;
 	gdb_byte *a = (gdb_byte *) alloca (sz_sel_arg);
@@ -668,12 +668,12 @@ record_linux_system_call (enum gdb_syscall syscall,
 	return 1;
       break;
 
-    case gdb_old_readdir:
+    case gdb_sys_old_readdir:
       if (record_mem_at_reg (regcache, tdep->arg2, tdep->size_old_dirent))
 	return -1;
       break;
 
-    case gdb_old_mmap:
+    case gdb_sys_old_mmap:
       break;
 
     case gdb_sys_munmap:
