@@ -1248,14 +1248,10 @@ static inline bool
 minimal_symbol_is_less_than (const minimal_symbol &fn1,
 			     const minimal_symbol &fn2)
 {
-  if ((&fn1)->unrelocated_address () < (&fn2)->unrelocated_address ())
-    {
-      return true;		/* addr 1 is less than addr 2.  */
-    }
-  else if ((&fn1)->unrelocated_address () > (&fn2)->unrelocated_address ())
-    {
-      return false;		/* addr 1 is greater than addr 2.  */
-    }
+  if (fn1.unrelocated_address () < fn2.unrelocated_address ())
+    return true;
+  else if (fn1.unrelocated_address () > fn2.unrelocated_address ())
+    return false;
   else
     /* addrs are equal: sort by name */
     {
