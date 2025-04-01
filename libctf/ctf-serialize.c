@@ -923,7 +923,8 @@ ctf_type_sect_size (ctf_dict_t *fp)
       uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
       ctf_type_t *tp = dtd->dtd_buf;
 
-      /* Check for suppressions.  */
+      /* Check for suppressions: a suppression consumes precisely one ctf_type_t
+	 record of space.  */
 
       if (fp->ctf_write_suppressions)
 	{
@@ -1029,16 +1030,17 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 				id, kind);
 		  return (ctf_set_errno (fp, ECTF_NOTBTF));
 		}
-	      else
-		{
-		  suppress = 1;
-		  break;
-		}
+	    }
+	  else
+	    {
+	      suppress = 1;
+	      break;
 	    }
 	  tp++;
 	}
 
       kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info);
+
       if (fp->ctf_write_suppressions
 	  && ctf_dynset_lookup (fp->ctf_write_suppressions,
 				(const void *) (uintptr_t) kind) != NULL)
