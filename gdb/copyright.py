@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# Copyright (C) 2011-2024 Free Software Foundation, Inc.
+# Copyright (C) 2011-2025 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -20,7 +20,7 @@
 # This script updates the list of years in the copyright notices in
 # most files maintained by the GDB project.
 #
-# Usage: cd src/gdb && ./copyright.py
+# Usage: ./gdb/copyright.py
 #
 # Always review the output of this script before committing it!
 #
@@ -46,39 +46,41 @@ def get_update_list():
     of the GDB source tree (NOT the gdb/ subdirectory!).  The names of
     the files are relative to that root directory.
     """
-    result = []
-    for gdb_dir in (
-        "gdb",
-        "gdbserver",
-        "gdbsupport",
-        "gnulib",
-        "sim",
-        "include/gdb",
-    ):
-        for root, dirs, files in os.walk(gdb_dir, topdown=True):
-            for dirname in dirs:
-                reldirname = "%s/%s" % (root, dirname)
-                if (
-                    dirname in EXCLUDE_ALL_LIST
-                    or reldirname in EXCLUDE_LIST
-                    or reldirname in NOT_FSF_LIST
-                    or reldirname in BY_HAND
-                ):
-                    # Prune this directory from our search list.
-                    dirs.remove(dirname)
-            for filename in files:
-                relpath = "%s/%s" % (root, filename)
-                if (
-                    filename in EXCLUDE_ALL_LIST
-                    or relpath in EXCLUDE_LIST
-                    or relpath in NOT_FSF_LIST
-                    or relpath in BY_HAND
-                ):
-                    # Ignore this file.
-                    pass
-                else:
-                    result.append(relpath)
-    return result
+    result = (
+        subprocess.check_output(
+            [
+                "git",
+                "ls-files",
+                "-z",
+                "--",
+                "gdb",
+                "gdbserver",
+                "gdbsupport",
+                "gnulib",
+                "sim",
+                "include/gdb",
+            ],
+            text=True,
+        )
+        .rstrip("\0")
+        .split("\0")
+    )
+
+    def include_file(filename):
+        (dirname, basename) = os.path.split(filename)
+        dirbasename = os.path.basename(dirname)
+        return not (
+            basename in EXCLUDE_ALL_LIST
+            or dirbasename in EXCLUDE_ALL_LIST
+            or dirname in EXCLUDE_LIST
+            or dirname in NOT_FSF_LIST
+            or dirname in BY_HAND
+            or filename in EXCLUDE_LIST
+            or filename in NOT_FSF_LIST
+            or filename in BY_HAND
+        )
+
+    return filter(include_file, result)
 
 
 def update_files(update_list):
@@ -168,13 +170,9 @@ def main(argv: List[str]) -> Optional[int]:
     """The main subprogram."""
     parser = get_parser()
     _ = parser.parse_args(argv)
-    root_dir = os.path.dirname(os.getcwd())
-    os.chdir(root_dir)
 
-    if not (
-        os.path.isdir("gdb") and os.path.isfile("gnulib/import/extra/update-copyright")
-    ):
-        sys.exit("Error: This script must be called from the gdb directory.")
+    if not os.path.isfile("gnulib/import/extra/update-copyright"):
+        sys.exit("Error: This script must be called from the top-level directory.")
 
     update_list = get_update_list()
     update_files(update_list)
@@ -214,9 +212,11 @@ def main(argv: List[str]) -> Optional[int]:
 #
 # Filenames are relative to the root directory.
 EXCLUDE_LIST = (
+    "gdb/copying.c",
     "gdb/nat/glibc_thread_db.h",
     "gdb/CONTRIBUTE",
     "gdbsupport/Makefile.in",
+    "gdbsupport/unordered_dense.h",
     "gnulib/doc/gendocs_template",
     "gnulib/doc/gendocs_template_min",
     "gnulib/import",
@@ -235,9 +235,7 @@ EXCLUDE_LIST = (
 EXCLUDE_ALL_LIST = (
     "COPYING",
     "COPYING.LIB",
-    "CVS",
     "configure",
-    "copying.c",
     "fdl.texi",
     "gpl.texi",
     "aclocal.m4",
@@ -296,131 +294,7 @@ NOT_FSF_LIST = (
     "sim/mips/sim-main.c",
     "sim/moxie/moxie-gdb.dts",
     # Not a single file in sim/ppc/ appears to be copyright FSF :-(.
-    "sim/ppc/filter.h",
-    "sim/ppc/gen-support.h",
-    "sim/ppc/ld-insn.h",
-    "sim/ppc/hw_sem.c",
-    "sim/ppc/hw_disk.c",
-    "sim/ppc/idecode_branch.h",
-    "sim/ppc/sim-endian.h",
-    "sim/ppc/table.c",
-    "sim/ppc/hw_core.c",
-    "sim/ppc/gen-support.c",
-    "sim/ppc/gen-semantics.h",
-    "sim/ppc/cpu.h",
-    "sim/ppc/sim_callbacks.h",
-    "sim/ppc/RUN",
-    "sim/ppc/Makefile.in",
-    "sim/ppc/emul_chirp.c",
-    "sim/ppc/hw_nvram.c",
-    "sim/ppc/dc-test.01",
-    "sim/ppc/hw_phb.c",
-    "sim/ppc/hw_eeprom.c",
-    "sim/ppc/bits.h",
-    "sim/ppc/hw_vm.c",
-    "sim/ppc/cap.h",
-    "sim/ppc/os_emul.h",
-    "sim/ppc/options.h",
-    "sim/ppc/gen-idecode.c",
-    "sim/ppc/filter.c",
-    "sim/ppc/corefile-n.h",
-    "sim/ppc/std-config.h",
-    "sim/ppc/ld-decode.h",
-    "sim/ppc/filter_filename.h",
-    "sim/ppc/hw_shm.c",
-    "sim/ppc/pk_disklabel.c",
-    "sim/ppc/dc-simple",
-    "sim/ppc/misc.h",
-    "sim/ppc/device_table.h",
-    "sim/ppc/ld-insn.c",
-    "sim/ppc/inline.c",
-    "sim/ppc/emul_bugapi.h",
-    "sim/ppc/hw_cpu.h",
-    "sim/ppc/debug.h",
-    "sim/ppc/hw_ide.c",
-    "sim/ppc/debug.c",
-    "sim/ppc/gen-itable.h",
-    "sim/ppc/interrupts.c",
-    "sim/ppc/hw_glue.c",
-    "sim/ppc/emul_unix.c",
-    "sim/ppc/sim_calls.c",
-    "sim/ppc/dc-complex",
-    "sim/ppc/ld-cache.c",
-    "sim/ppc/registers.h",
-    "sim/ppc/dc-test.02",
-    "sim/ppc/options.c",
-    "sim/ppc/igen.h",
-    "sim/ppc/registers.c",
-    "sim/ppc/device.h",
-    "sim/ppc/emul_chirp.h",
-    "sim/ppc/hw_register.c",
-    "sim/ppc/hw_init.c",
-    "sim/ppc/sim-endian-n.h",
-    "sim/ppc/filter_filename.c",
-    "sim/ppc/bits.c",
-    "sim/ppc/idecode_fields.h",
-    "sim/ppc/hw_memory.c",
-    "sim/ppc/misc.c",
-    "sim/ppc/double.c",
-    "sim/ppc/psim.h",
-    "sim/ppc/hw_trace.c",
-    "sim/ppc/emul_netbsd.h",
-    "sim/ppc/psim.c",
-    "sim/ppc/powerpc.igen",
-    "sim/ppc/tree.h",
-    "sim/ppc/README",
-    "sim/ppc/gen-icache.h",
-    "sim/ppc/gen-model.h",
-    "sim/ppc/ld-cache.h",
-    "sim/ppc/mon.c",
-    "sim/ppc/corefile.h",
-    "sim/ppc/vm.c",
-    "sim/ppc/INSTALL",
-    "sim/ppc/gen-model.c",
-    "sim/ppc/hw_cpu.c",
-    "sim/ppc/corefile.c",
-    "sim/ppc/hw_opic.c",
-    "sim/ppc/gen-icache.c",
-    "sim/ppc/events.h",
-    "sim/ppc/os_emul.c",
-    "sim/ppc/emul_generic.c",
-    "sim/ppc/main.c",
-    "sim/ppc/hw_com.c",
-    "sim/ppc/gen-semantics.c",
-    "sim/ppc/emul_bugapi.c",
-    "sim/ppc/device.c",
-    "sim/ppc/emul_generic.h",
-    "sim/ppc/tree.c",
-    "sim/ppc/mon.h",
-    "sim/ppc/interrupts.h",
-    "sim/ppc/cap.c",
-    "sim/ppc/cpu.c",
-    "sim/ppc/hw_phb.h",
-    "sim/ppc/device_table.c",
-    "sim/ppc/lf.c",
-    "sim/ppc/lf.c",
-    "sim/ppc/dc-stupid",
-    "sim/ppc/hw_pal.c",
-    "sim/ppc/ppc-spr-table",
-    "sim/ppc/emul_unix.h",
-    "sim/ppc/words.h",
-    "sim/ppc/basics.h",
-    "sim/ppc/hw_htab.c",
-    "sim/ppc/lf.h",
-    "sim/ppc/ld-decode.c",
-    "sim/ppc/sim-endian.c",
-    "sim/ppc/gen-itable.c",
-    "sim/ppc/idecode_expression.h",
-    "sim/ppc/table.h",
-    "sim/ppc/dgen.c",
-    "sim/ppc/events.c",
-    "sim/ppc/gen-idecode.h",
-    "sim/ppc/emul_netbsd.c",
-    "sim/ppc/igen.c",
-    "sim/ppc/vm_n.h",
-    "sim/ppc/vm.h",
-    "sim/ppc/hw_iobus.c",
-    "sim/ppc/inline.h",
+    "sim/ppc",
     "sim/testsuite/mips/mips32-dsp2.s",
 )
 
