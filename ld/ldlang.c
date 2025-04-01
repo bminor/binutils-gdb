@@ -151,6 +151,7 @@ struct lang_nocrossrefs *nocrossref_list;
 struct asneeded_minfo **asneeded_list_tail;
 #ifdef ENABLE_LIBCTF
 static ctf_dict_t *ctf_output;
+static int try_pure_btf;
 #endif
 
 /* Functions that traverse the linker script and might evaluate
@@ -3802,7 +3803,10 @@ lang_ctf_errs_warnings (ctf_dict_t *fp)
 static void
 ldlang_open_ctf (void)
 {
-  int any_ctf = 0;
+  int any_cbtf = 0;
+  int all_btf = 0;
+  int picked_ctf = 0;
+  int picked_btf = 0;
   int err;
 
   LANG_FOR_EACH_INPUT_STATEMENT (file)
@@ -3826,29 +3830,61 @@ ldlang_open_ctf (void)
 	  continue;
 	}
 
-      /* Prevent the contents of this section from being written, while
-	 requiring the section itself to be duplicated in the output, but only
-	 once.  */
+      /* Prevent the contents of this section from being written.  */
       /* One of these sections must exist if ctf_bfdopen() succeeded.  */
       if ((sect = bfd_get_section_by_name (file->the_bfd, ".ctf")) == NULL)
-	{
-	  sect = bfd_get_section_by_name (file->the_bfd, ".BTF");
-	  /* UPTODO don't keep this kludge */
-	  ctf_version (CTF_VERSION, sizeof (ctf_btf_header_t), LIBCTF_BTM_BTF);
-	}
+	sect = bfd_get_section_by_name (file->the_bfd, ".BTF");
+      else
+	all_btf = 0;
 
       sect->size = 0;
-      sect->flags |= SEC_NEVER_LOAD | SEC_HAS_CONTENTS | SEC_LINKER_CREATED;
+      sect->flags |= SEC_NEVER_LOAD | SEC_HAS_CONTENTS | SEC_LINKER_CREATED
+	| SEC_EXCLUDE;
+      any_cbtf = 1;
 
-      if (any_ctf)
-	sect->flags |= SEC_EXCLUDE;
-      any_ctf = 1;
+      /* CTF section found: output must be CTF.  */
+      if (!all_btf && !picked_ctf)
+	{
+	  sect->flags &= ~SEC_EXCLUDE;
+	  picked_ctf = 1;
+	}
     }
 
-  if (!any_ctf)
+  if (!any_cbtf)
     {
       ctf_output = NULL;
       return;
+    }
+
+  /* If we found no CTF sections, we may be generating BTF output: pick out a
+     BTF section to use for the output, and add a new CTF section -- which may
+     later be excluded -- to contain the CTF output if we later conclude we must
+     generate CTF in this case.  */
+
+  if (!picked_ctf)
+    {
+      try_pure_btf = 1;
+
+      LANG_FOR_EACH_INPUT_STATEMENT (dictfile)
+	{
+	  asection *sect;
+
+	  if ((sect = bfd_get_section_by_name (dictfile->the_bfd, ".BTF")) != NULL)
+	    {
+	      sect->flags &= ~SEC_EXCLUDE;
+	      picked_btf = 1;
+	    }
+
+	  if (!picked_ctf)
+	    {
+	      bfd_make_section_with_flags (dictfile->the_bfd, ".ctf",
+					   (SEC_NEVER_LOAD | SEC_HAS_CONTENTS
+					    | SEC_LINKER_CREATED));
+	      picked_ctf = 1;
+	    }
+	  if (picked_ctf && picked_btf)
+	    break;
+	}
     }
 
   if ((ctf_output = ctf_create (&err)) != NULL)
@@ -3867,17 +3903,17 @@ ldlang_open_ctf (void)
 static void
 lang_merge_ctf (void)
 {
-  asection *output_sect;
+  asection *btf_sect, *ctf_sect;
   int flags = 0;
 
   if (!ctf_output)
     return;
 
-  if ((output_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf")) == NULL)
-    output_sect = bfd_get_section_by_name (link_info.output_bfd, ".BTF");
+  btf_sect = bfd_get_section_by_name (link_info.output_bfd, ".BTF");
+  ctf_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf");
 
-  /* If the section was discarded, don't waste time merging.  */
-  if (output_sect == NULL)
+  /* If all relevant sections were discarded, don't waste time merging.  */
+  if (ctf_sect == NULL && btf_sect == NULL)
     {
       ctf_dict_close (ctf_output);
       ctf_output = NULL;
@@ -3921,10 +3957,16 @@ lang_merge_ctf (void)
       einfo (_("%P: warning: CTF linking failed; "
 	       "output will have no CTF section: %s\n"),
 	     ctf_errmsg (ctf_errno (ctf_output)));
-      if (output_sect)
+
+      if (ctf_sect)
 	{
-	  output_sect->size = 0;
-	  output_sect->flags |= SEC_EXCLUDE;
+	  ctf_sect->size = 0;
+	  ctf_sect->flags |= SEC_EXCLUDE;
+	}
+      if (btf_sect)
+	{
+	  btf_sect->size = 0;
+	  btf_sect->flags |= SEC_EXCLUDE;
 	}
     }
   /* Output any lingering errors that didn't come from ctf_link.  */
@@ -3954,8 +3996,12 @@ static void
 lang_write_ctf (int late)
 {
   size_t output_size;
-  asection *output_sect;
+  asection *btf_sect, *ctf_sect;
+  asection *output_sect, *nonoutput_sect;
   size_t compression_threshold = CTF_COMPRESSION_THRESHOLD;
+  unsigned char *contents = NULL;
+  int is_btf = 0;
+  int err = 0;
 
   if (!ctf_output)
     return;
@@ -3977,28 +4023,71 @@ lang_write_ctf (int late)
 
   ldemul_new_dynsym_for_ctf (ctf_output, 0, NULL);
 
-  /* Emit CTF or BTF, whichever was used (we do not support or even check using
-     both yet).  BTF has no compression.  */
-
-  if ((output_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf")) == NULL)
+  /* Figure out whether we're going to emit pure BTF or not.  */
+  if (try_pure_btf)
     {
-      output_sect = bfd_get_section_by_name (link_info.output_bfd, ".BTF");
-      compression_threshold = (size_t) -1;
+      if ((is_btf = ctf_link_output_is_btf (ctf_output)) < 0)
+	{
+	  einfo (_("%P: cannot determine whether to emit BTF or CTF output: %s\n"),
+		   ctf_errmsg (ctf_errno (ctf_output)));
+	  err = 1;
+	}
+    }
+
+  if (is_btf)
+    compression_threshold = (size_t) -1;
+
+  /* Finally serialize, taking note of whether what we actually generated was
+     CTF in the end.  Errors are handled below, if this section is actually
+     output.  */
+  if (!err)
+    contents = ctf_link_write (ctf_output, &output_size,
+			       compression_threshold, &is_btf);
+
+  /* Emit CTF or BTF, whichever was used and is needed.  */
+
+  btf_sect = bfd_get_section_by_name (link_info.output_bfd, ".BTF");
+  ctf_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf");
+
+  if (is_btf)
+    {
+      output_sect = btf_sect;
+      nonoutput_sect = ctf_sect;
+    }
+  else
+    {
+      output_sect = ctf_sect;
+      nonoutput_sect = btf_sect;
+    }
+
+  /* Discard the section we're not outputting to.  */
+
+  if (nonoutput_sect)
+    {
+      nonoutput_sect->size = 0;
+      nonoutput_sect->flags |= SEC_EXCLUDE;
     }
 
   if (output_sect)
     {
-      output_sect->contents = ctf_link_write (ctf_output, &output_size,
-					      compression_threshold);
+      output_sect->contents = contents;
       output_sect->size = output_size;
       output_sect->flags |= SEC_IN_MEMORY | SEC_KEEP;
+      output_sect->flags &= ~SEC_EXCLUDE;
 
       lang_ctf_errs_warnings (ctf_output);
+
       if (!output_sect->contents)
 	{
-	  einfo (_("%P: warning: CTF section emission failed; "
-		   "output will have no CTF section: %s\n"),
+	  einfo (_("%P: warning: %s section emission failed; "
+		   "output will have no %s section: %s\n"),
+		 is_btf ? "BTF" : "CTF", is_btf ? ".BTF" : ".ctf",
 		 ctf_errmsg (ctf_errno (ctf_output)));
+	  err = 1;
+	}
+
+      if (err)
+	{
 	  output_sect->size = 0;
 	  output_sect->flags |= SEC_EXCLUDE;
 	}
