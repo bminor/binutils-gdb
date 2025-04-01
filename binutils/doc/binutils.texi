@@ -2701,6 +2701,14 @@ but the result again may not be as you expect.
 For RISC-V, the following options are supported:
 
 @table @code
+@item max
+Disassemble without checking architecture string. This is a best effort mode, so
+for overlapping ISA extensions the first match (possibly incorrect in a given
+context) will be used to decode the instruction. It's useful, if the ELF file
+doesn't expose ISA string, preventing automatic ISA subset deduction, and the
+default fallback ISA string (@code{rv64gc}) doesn't cover all instructions in
+the binary.
+
 @item numeric
 Print numeric register names, rather than ABI names (e.g., print @code{x2}
 instead of @code{sp}).
