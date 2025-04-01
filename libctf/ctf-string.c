@@ -141,7 +141,7 @@ ctf_strraw (ctf_dict_t *fp, uint32_t name)
      BTF, because every string gets rescanned at that stage.)  */
 
   if (stid_tab == CTF_STRTAB_1 && fp->ctf_syn_ext_strtab != NULL
-      && !fp->ctf_serializing_is_btf)
+      && !fp->ctf_serialize.cs_is_btf)
     return ctf_dynhash_lookup (fp->ctf_syn_ext_strtab,
 			       (void *) (uintptr_t) name);
 
@@ -333,11 +333,11 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
 	atom->csa_flags |= CTF_STR_ATOM_NO_DEDUP;
 
       if (atom->csa_offset < get_prov_offset (fp)
-	  || (!fp->ctf_serializing_is_btf && atom->csa_external_offset))
+	  || (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset))
 	{
 	  if (flags & CTF_STR_ADD_REF)
 	    {
-	      if (!fp->ctf_serializing_is_btf && atom->csa_external_offset)
+	      if (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 		*ref = atom->csa_external_offset;
 	      else
 		*ref = atom->csa_offset + lookup_fp->ctf_header->cth_parent_strlen;
@@ -469,7 +469,7 @@ ctf_str_add_flagged (ctf_dict_t *fp, const char *str, uint32_t *ref,
   if (!atom)
     return 0;
 
-  if (!fp->ctf_serializing_is_btf && atom->csa_external_offset)
+  if (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
     offset = atom->csa_external_offset;
   else
     offset = atom->csa_offset;
@@ -722,7 +722,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 	goto err_strtab;
 
       if (atom->csa_str[0] == 0
-	  || (!fp->ctf_serializing_is_btf && atom->csa_external_offset)
+	  || (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 	  || atom->csa_offset < prov_offset
 	  || ctf_list_empty_p (&atom->csa_refs))
 	continue;
@@ -760,7 +760,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 	goto err_sorttab;
 
       if (atom->csa_str[0] == 0
-	  || (!fp->ctf_serializing_is_btf && atom->csa_external_offset)
+	  || (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 	  || atom->csa_offset < prov_offset
 	  || ctf_list_empty_p (&atom->csa_refs))
 	continue;
@@ -814,7 +814,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
       if (ctf_list_empty_p (&atom->csa_refs))
 	continue;
 
-      if (!fp->ctf_serializing_is_btf && atom->csa_external_offset)
+      if (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 	offset = atom->csa_external_offset;
       else
 	{

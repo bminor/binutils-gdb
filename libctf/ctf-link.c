@@ -1466,6 +1466,8 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
 	err = iter_arg.err;
     }
 
+  fp->ctf_serialize.cs_initialized = 0;
+
   if (err)
     ctf_set_errno (fp, err);
 
@@ -1629,6 +1631,9 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
       ctf_err_warn (fp, 0, err, _("error iterating over shuffled symbols"));
       goto err;
     }
+
+  fp->ctf_serialize.cs_initialized = 0;
+
   return 0;
 
  err:
@@ -1728,6 +1733,28 @@ ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst, const Elf64_Sym *src
   return dst;
 }
 
+/* Determine whether the archive that will be built from this linked dict is compatible
+   with pure BTF or would require CTF.  (Other things may nonetheless require CTF, in
+   particular, compression.)  */
+int
+ctf_link_output_is_btf (ctf_dict_t *fp)
+{
+  /* Can't call when nothing has been linked yet.  */
+
+  if (!fp->ctf_link_outputs)
+    return (ctf_set_errno (fp, EINVAL));
+
+  /* Cannot be BTF if child dicts are present.  */
+
+  if (ctf_dynhash_elements (fp->ctf_link_outputs) != 0)
+    return 0;
+
+  if (ctf_serialize_output_format (fp, 0) < 0)
+    return -1;					/* errno is set for us.  */
+
+  return fp->ctf_serialize.cs_is_btf;
+}
+
 typedef struct ctf_name_list_accum_cb_arg
 {
   char **names;
@@ -1808,9 +1835,12 @@ ctf_change_parent_name (void *key _libctf_unused_, void *value, void *arg)
 
 /* Write out a CTF archive (if there are per-CU CTF files) or a CTF file
    (otherwise) into a new dynamically-allocated string, and return it.
-   Members with sizes above THRESHOLD are compressed.  */
+   Members with sizes above THRESHOLD are compressed.
+
+   The optional arg IS_BTF is set to 1 if the written output is valid BTF
+   (no archives, no CTF-specific types).  */
 unsigned char *
-ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
+ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold, int *is_btf)
 {
   ctf_name_list_accum_cb_arg_t arg;
   char **names;
@@ -1837,11 +1867,18 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 	}
     }
 
+  if (is_btf)
+    is_btf = 0;
+
   /* No extra outputs?  Just write a simple ctf_dict_t.  */
   if (arg.i == 0)
     {
       unsigned char *ret = ctf_write_mem (fp, size, threshold);
       fp->ctf_flags &= ~LCTF_LINKING;
+
+      if (is_btf && fp->ctf_serialize.cs_is_btf)
+	*is_btf = 1;
+
       return ret;
     }
 

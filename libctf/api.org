@@ -70,8 +70,7 @@ int ctf_datasec_var_iter (ctf_dict_t *, ctf_id_t, ctf_datasec_var_f *,
 ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **, 
                                size_t *size, size_t *offset);
 ctf_id_t ctf_tag_next (ctf_dict_t *, const char *tag, ctf_next_t **);
-
-... more to come...
+int ctf_link_output_is_btf (ctf_dict_t *);
 
 * Changes
 
@@ -104,6 +103,8 @@ ctf_member_next gains bit_width arg
 ctf_member_count returns ssize_t
 
 ctf_version gains btf_hdr_len, btf_mode args.
+
+ctf_link_write gains is_btf argument
 
 * Behaviour
 
