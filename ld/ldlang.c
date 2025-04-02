@@ -151,7 +151,7 @@ struct lang_nocrossrefs *nocrossref_list;
 struct asneeded_minfo **asneeded_list_tail;
 #ifdef ENABLE_LIBCTF
 static ctf_dict_t *ctf_output;
-static int try_pure_btf;
+static int try_pure_btf, is_pure_btf;
 #endif
 
 /* Functions that traverse the linker script and might evaluate
@@ -3804,7 +3804,7 @@ static void
 ldlang_open_ctf (void)
 {
   int any_cbtf = 0;
-  int all_btf = 0;
+  int all_btf = 1;
   int picked_ctf = 0;
   int picked_btf = 0;
   int err;
@@ -3831,6 +3831,7 @@ ldlang_open_ctf (void)
 	}
 
       /* Prevent the contents of this section from being written.  */
+
       /* One of these sections must exist if ctf_bfdopen() succeeded.  */
       if ((sect = bfd_get_section_by_name (file->the_bfd, ".ctf")) == NULL)
 	sect = bfd_get_section_by_name (file->the_bfd, ".BTF");
@@ -3871,8 +3872,13 @@ ldlang_open_ctf (void)
 
 	  if ((sect = bfd_get_section_by_name (dictfile->the_bfd, ".BTF")) != NULL)
 	    {
-	      sect->flags &= ~SEC_EXCLUDE;
-	      picked_btf = 1;
+	      if (!picked_btf)
+		{
+		  sect->flags &= ~SEC_EXCLUDE;
+		  picked_btf = 1;
+		}
+	      else
+		sect->flags |= SEC_EXCLUDE;
 	    }
 
 	  if (!picked_ctf)
@@ -3989,18 +3995,79 @@ void ldlang_ctf_new_dynsym (int symidx, struct elf_internal_sym *sym)
   ldemul_new_dynsym_for_ctf (ctf_output, symidx, sym);
 }
 
-/* Write out the CTF section.  Called early, if the emulation isn't going to
-   need to dedup against the strtab and symtab, then possibly called from the
-   target linker code if the dedup has happened.  */
+/* Remove all unused BTF/CTF sections from the link.  Return 1 if
+   _bfd_fix_excluded_sec_syms needs to be called.  */
+
+static int
+lang_write_ctf_remove_section (int late)
+{
+  asection *remove_sect;
+  int needs_exclude = 0;
+
+  if (!ctf_output)
+    return 0;
+
+  /* Figure out whether we're going to emit pure BTF or not.  */
+  if (try_pure_btf)
+    {
+      if ((is_pure_btf = ctf_link_output_is_btf (ctf_output)) < 0)
+	{
+	  einfo (_("%P: cannot determine whether to emit BTF or CTF output: %s\n"),
+		   ctf_errmsg (ctf_errno (ctf_output)));
+	  is_pure_btf = -1;
+	  return 0;
+	}
+    }
+
+  /* Discard all instances of the section we're not outputting to.  */
+  if (is_pure_btf)
+    remove_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf");
+  else
+    remove_sect = bfd_get_section_by_name (link_info.output_bfd, ".BTF");
+
+  if (!remove_sect)
+    return 0;
+
+  do
+    {
+      if (remove_sect->flags & SEC_EXCLUDE)
+	continue;
+
+      remove_sect->size = 0;
+      remove_sect->flags |= SEC_EXCLUDE;
+
+      if (!late)
+	continue;
+
+      bfd_section_list_remove (link_info.output_bfd, remove_sect);
+      link_info.output_bfd->section_count--;
+      needs_exclude = 1;
+    } while ((remove_sect = bfd_get_next_section_by_name (NULL, remove_sect))
+	     != NULL);
+
+  return needs_exclude;
+}
+
+/* Remove unused BTF/CTF sections late, if not already removed by an early
+   call.  */
+int
+ldlang_ctf_remove_section (void)
+{
+  return lang_write_ctf_remove_section (1);
+}
+
+/* Write out the BTF or CTF section.  Called early, if the emulation isn't
+   going to need to dedup against the strtab and symtab, then possibly
+   called from the target linker code if the dedup has happened.  */
 static void
 lang_write_ctf (int late)
 {
   size_t output_size;
   asection *btf_sect, *ctf_sect;
-  asection *output_sect, *nonoutput_sect;
+  asection *output_sect;
   size_t compression_threshold = CTF_COMPRESSION_THRESHOLD;
   unsigned char *contents = NULL;
-  int is_btf = 0;
+  int really_btf;
   int err = 0;
 
   if (!ctf_output)
@@ -4023,18 +4090,15 @@ lang_write_ctf (int late)
 
   ldemul_new_dynsym_for_ctf (ctf_output, 0, NULL);
 
-  /* Figure out whether we're going to emit pure BTF or not.  */
-  if (try_pure_btf)
-    {
-      if ((is_btf = ctf_link_output_is_btf (ctf_output)) < 0)
-	{
-	  einfo (_("%P: cannot determine whether to emit BTF or CTF output: %s\n"),
-		   ctf_errmsg (ctf_errno (ctf_output)));
-	  err = 1;
-	}
-    }
+  /* If we are being called early, ldlang_ctf_remove_section has not yet
+     been called: do it by hand.  After this point, it's always been called,
+     either from here or from btf_elf_final_link.  */
+  if (!late)
+    lang_write_ctf_remove_section (late);
 
-  if (is_btf)
+  if (is_pure_btf < 0)
+    err = 1;
+  else if (is_pure_btf)
     compression_threshold = (size_t) -1;
 
   /* Finally serialize, taking note of whether what we actually generated was
@@ -4042,30 +4106,32 @@ lang_write_ctf (int late)
      output.  */
   if (!err)
     contents = ctf_link_write (ctf_output, &output_size,
-			       compression_threshold, &is_btf);
+			       compression_threshold, &really_btf);
 
-  /* Emit CTF or BTF, whichever was used and is needed.  */
+  /* Emit CTF or BTF, whichever was used and is needed.  We decide which to
+     emit to based on the decision taken by section removal, above, not
+     based on what ctf_link_write eventually emitted.  */
 
   btf_sect = bfd_get_section_by_name (link_info.output_bfd, ".BTF");
   ctf_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf");
 
-  if (is_btf)
-    {
-      output_sect = btf_sect;
-      nonoutput_sect = ctf_sect;
-    }
+  if (is_pure_btf)
+    output_sect = btf_sect;
   else
-    {
-      output_sect = ctf_sect;
-      nonoutput_sect = btf_sect;
-    }
+    output_sect = ctf_sect;
 
-  /* Discard the section we're not outputting to.  */
-
-  if (nonoutput_sect)
+  /* Complain and fail if we thought we were emitting BTF but now it's been
+     upgraded to CTF (which is not supposed to happen, though it's perfectly
+     fine to go the other way).  */
+  if (!err && is_pure_btf && !really_btf)
     {
-      nonoutput_sect->size = 0;
-      nonoutput_sect->flags |= SEC_EXCLUDE;
+      einfo (_("%P: warning: BTF section %pA unexpectedly upgraded to CTF "
+	       "after section assignment: "
+	       "output will have no BTF or CTF sections\n"),
+	     output_sect);
+      free (contents);
+      contents = NULL;
+      err = 1;
     }
 
   if (output_sect)
@@ -4081,16 +4147,15 @@ lang_write_ctf (int late)
 	{
 	  einfo (_("%P: warning: %s section emission failed; "
 		   "output will have no %s section: %s\n"),
-		 is_btf ? "BTF" : "CTF", is_btf ? ".BTF" : ".ctf",
+		 is_pure_btf ? "BTF" : "CTF", is_pure_btf ? ".BTF" : ".ctf",
 		 ctf_errmsg (ctf_errno (ctf_output)));
-	  err = 1;
 	}
 
+      /* There's nothing we can really do on error at this stage: BFD is
+	 committed to emitting the section.  Just leave it be and make sure
+	 it's empty.  */
       if (err)
-	{
-	  output_sect->size = 0;
-	  output_sect->flags |= SEC_EXCLUDE;
-	}
+	output_sect->size = 0;
     }
 
   /* This also closes every CTF input file used in the link.  */
