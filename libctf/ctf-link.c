@@ -1453,6 +1453,11 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
   if (fp->ctf_stypes > 0)
     return ctf_set_errno (fp, ECTF_RDONLY);
 
+  /* If emitting BTF, there is no external string table.   */
+
+  if (fp->ctf_serialize.cs_is_btf)
+    return 0;
+
   while ((str = add_string (&offset, arg)) != NULL)
     {
       ctf_link_out_string_cb_arg_t iter_arg = { str, offset, 0 };
@@ -1502,6 +1507,11 @@ ctf_link_add_linker_symbol (ctf_dict_t *fp, ctf_link_sym_t *sym)
   if (sym->st_type != STT_OBJECT && sym->st_type != STT_FUNC)
     return 0;
 
+  /* If emitting BTF, there is no symtypetab so linker symbols are ignored.  */
+
+  if (fp->ctf_serialize.cs_is_btf)
+    return 0;
+
   /* Add the symbol to the in-flight list.  */
 
   if ((cid = malloc (sizeof (ctf_in_flight_dynsym_t))) == NULL)
@@ -1533,6 +1543,11 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
 
   if (fp->ctf_stypes > 0)
     return ctf_set_errno (fp, ECTF_RDONLY);
+
+  /* If emitting BTF, there is no symtypetab to shuffle.  */
+
+  if (fp->ctf_serialize.cs_is_btf)
+    return 0;
 
   if (!fp->ctf_dynsyms)
     {
