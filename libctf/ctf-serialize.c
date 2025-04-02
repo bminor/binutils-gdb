@@ -1248,8 +1248,9 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	}
 
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
-      ctf_dprintf ("%p: provisional ID assignment: %lx -> %lx\n", (void *) fp,
-		   dtd->dtd_type, id);
+      if (dtd->dtd_type != id)
+	ctf_dprintf ("%p: provisional ID assignment: %lx -> %lx\n", (void *) fp,
+		     dtd->dtd_type, id);
 #endif
 
       t += dtd->dtd_vlen_size;
