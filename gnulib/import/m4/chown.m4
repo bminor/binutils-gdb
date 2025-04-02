@@ -1,8 +1,7 @@
 # serial 35
 # Determine whether we need the chown wrapper.
 
-dnl Copyright (C) 1997-2001, 2003-2005, 2007, 2009-2022 Free Software
-dnl Foundation, Inc.
+dnl Copyright (C) 1997-2025 Free Software Foundation, Inc.
 
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
