@@ -1360,7 +1360,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
   if (name)
     {
       if (kind == CTF_K_FORWARD)
-	ctf_type_kind_forwarded_tp (input, tp);
+	fwdkind = ctf_type_kind_forwarded_tp (input, tp);
 
       if ((decorated = ctf_decorate_type_name (fp, name, fwdkind)) == NULL)
 	return NULL;				/* errno is set for us.  */
