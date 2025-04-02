@@ -499,8 +499,10 @@ static const struct ld_option ld_options[] =
   { {"split-by-reloc", optional_argument, NULL, OPTION_SPLIT_BY_RELOC},
     '\0', N_("[=COUNT]"), N_("Split output sections every COUNT relocs"),
     TWO_DASHES },
-  { {"stats", no_argument, NULL, OPTION_STATS},
-    '\0', NULL, N_("Print memory usage statistics"), TWO_DASHES },
+  { {"stats", optional_argument, NULL, OPTION_STATS},
+    '\0', NULL, N_("Print resource usage statistics"), TWO_DASHES },
+  { {"no-stats", optional_argument, NULL, OPTION_NO_STATS},
+    '\0', NULL, N_("Do not print resource usage statistics"), TWO_DASHES },
   { {"target-help", no_argument, NULL, OPTION_TARGET_HELP},
     '\0', NULL, N_("Display target specific options"), TWO_DASHES },
   { {"task-link", required_argument, NULL, OPTION_TASK_LINK},
@@ -1412,6 +1414,17 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_STATS:
 	  config.stats = true;
+	  if (optarg)
+	    config.stats_filename = optarg;
+	  else
+	    {
+	      config.stats_filename = NULL;
+	      config.stats_file = stderr;
+	    }
+	  break;
+	case OPTION_NO_STATS:
+	  config.stats = false;
+	  config.stats_filename = NULL;
 	  break;
 	case OPTION_NO_SYMBOLIC:
 	  opt_symbolic = symbolic_unset;

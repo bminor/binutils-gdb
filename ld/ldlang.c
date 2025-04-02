@@ -3807,6 +3807,8 @@ ldlang_open_ctf (void)
   int any_ctf = 0;
   int err;
 
+  ld_start_phase (PHASE_CTF);
+
   LANG_FOR_EACH_INPUT_STATEMENT (file)
     {
       asection *sect;
@@ -3844,17 +3846,23 @@ ldlang_open_ctf (void)
   if (!any_ctf)
     {
       ctf_output = NULL;
+      ld_stop_phase (PHASE_CTF);
       return;
     }
 
   if ((ctf_output = ctf_create (&err)) != NULL)
-    return;
+    {
+      ld_stop_phase (PHASE_CTF);
+      return;
+    }
 
   einfo (_("%P: warning: CTF output not created: `%s'\n"),
 	 ctf_errmsg (err));
 
   LANG_FOR_EACH_INPUT_STATEMENT (errfile)
     ctf_close (errfile->the_ctf);
+
+  ld_stop_phase (PHASE_CTF);
 }
 
 /* Merge together CTF sections.  After this, only the symtab-dependent
@@ -3869,6 +3877,8 @@ lang_merge_ctf (void)
   if (!ctf_output)
     return;
 
+  ld_start_phase (PHASE_CTF);
+
   output_sect = bfd_get_section_by_name (link_info.output_bfd, ".ctf");
 
   /* If the section was discarded, don't waste time merging.  */
@@ -3882,6 +3892,8 @@ lang_merge_ctf (void)
 	  ctf_close (file->the_ctf);
 	  file->the_ctf = NULL;
 	}
+
+      ld_stop_phase (PHASE_CTF);
       return;
     }
 
@@ -3924,6 +3936,8 @@ lang_merge_ctf (void)
     }
   /* Output any lingering errors that didn't come from ctf_link.  */
   lang_ctf_errs_warnings (ctf_output);
+
+  ld_stop_phase (PHASE_CTF);
 }
 
 /* Let the emulation acquire strings from the dynamic strtab to help it optimize
@@ -3932,7 +3946,9 @@ lang_merge_ctf (void)
 void
 ldlang_ctf_acquire_strings (struct elf_strtab_hash *dynstrtab)
 {
+  ld_start_phase (PHASE_CTF);
   ldemul_acquire_strings_for_ctf (ctf_output, dynstrtab);
+  ld_stop_phase (PHASE_CTF);
 }
 
 /* Inform the emulation about the addition of a new dynamic symbol, in BFD
@@ -3954,16 +3970,24 @@ lang_write_ctf (int late)
   if (!ctf_output)
     return;
 
+  ld_start_phase (PHASE_CTF);
+
   if (late)
     {
       /* Emit CTF late if this emulation says it can do so.  */
       if (ldemul_emit_ctf_early ())
-	return;
+	{
+	  ld_stop_phase (PHASE_CTF);
+	  return;
+	}
     }
   else
     {
       if (!ldemul_emit_ctf_early ())
-	return;
+	{
+	  ld_stop_phase (PHASE_CTF);
+	  return;
+	}
     }
 
   /* Inform the emulation that all the symbols that will be received have
@@ -3998,6 +4022,8 @@ lang_write_ctf (int late)
 
   LANG_FOR_EACH_INPUT_STATEMENT (file)
     file->the_ctf = NULL;
+
+  ld_stop_phase (PHASE_CTF);
 }
 
 /* Write out the CTF section late, if the emulation needs that.  */
@@ -8547,12 +8573,16 @@ lang_process (void)
     {
       asection *found;
 
+      ld_start_phase (PHASE_MERGE);
+
       /* Merge SEC_MERGE sections.  This has to be done after GC of
 	 sections, so that GCed sections are not merged, but before
 	 assigning dynamic symbols, since removing whole input sections
 	 is hard then.  */
       if (!bfd_merge_sections (link_info.output_bfd, &link_info))
 	fatal (_("%P: bfd_merge_sections failed: %E\n"));
+
+      ld_stop_phase (PHASE_MERGE);
 
       /* Look for a text section and set the readonly attribute in it.  */
       found = bfd_get_section_by_name (link_info.output_bfd, ".text");

@@ -1,5 +1,14 @@
 -*- text -*-
 
+* The linker's --stats option can take an optional argument which if used is
+  interpreted as a filename into which resource usage information should be
+  stored.  As an alternative mechanism the LD_STATS environment variable can
+  also be used to achieve the same results.  Resource usage information for
+  various phases of the linking operation is now included in the report.
+  If a map file is being produced then the information is also included there.
+  The --no-stats option can be used to disable stat reporting, should it have
+  been enabled.
+
 * Remove the linker -taso option for Alpha target, as Linux/Alpha kernel
   support for 32-bit pointers has been removed.
 

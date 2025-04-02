@@ -2184,6 +2184,9 @@ Memory region         Used Size  Region Size  %age Used
              RAM:          32 B         2 GB      0.00%
 @end smallexample
 
+Note: if you want to find out about the memory usage of the linker
+itself, then the @option{--stats} option will do this.
+
 @cindex help
 @cindex usage
 @kindex --help
@@ -2706,9 +2709,75 @@ more than @var{count} relocations one output section will contain that
 many relocations.  @var{count} defaults to a value of 32768.
 
 @kindex --stats
-@item --stats
+@item --stats[=@var{filename}]
 Compute and display statistics about the operation of the linker, such
 as execution time and memory usage.
+
+If the optional @var{filename} argument is not supplied then only
+basic information is reported, and it is sent to the standard error
+output stream.  If the @var{filename} argument is supplied then
+extended information is written to the named file.  If @var{filename}
+is set to just the @var{-} symbol, then the extended information is
+sent to the standard output stream.  If the @var{filename} starts with
+@var{+} then the file is opened in append mode rather than overwrite
+mode.
+
+If the @option{-Map} option has been enabled then the information is
+also recorded in the map file as well.  Note: if both the
+@option{--stats} option and the @option{-Map} options have been given
+@var{filename} arguments and they match, then the information will
+only be written out once not twice.
+
+If the @code{LD_STATS} environment variable is defined then this
+behaves likes the @option{--stats} option.  If the variable's value is
+a string then this will used as the name of a file into which the
+information should be recorded.  Otherwise the information
+will be sent to the standard output stream.  Using the environment
+variable allows stats to be recorded without having to alter the
+linker's command line.  Note: if both the environment variable and the
+@option{--stats} option are used then the @option{--stats} option
+takes precedence.
+
+The extended information reported includes the cpu time used and, if
+the @var{getrusage()} system library call is available then memory use
+is recorded as well.  This information is reported for individual
+parts of the linking process which are referred to as @emph{phases}.
+In addition the information is also reported for a special phase
+called @emph{ALL} which covers the entire linking process.  Note that
+individual phases can contain or overlap with each other so it should
+not be assumed that the overall resources used by the linker is the
+sum of the resources used by the individual phases.
+
+In addition when extended information is being reported the linker
+version, command line arguments and linker start time are also
+included.  This makes it easier to handle the situation where multiple
+links are being invoked by a build system and to indentify exactly
+which arguments were responsible for producing the statistics that are
+reported.
+
+The extended output looks something like this:
+
+@smallexample
+Stats: linker version: (GNU Binutils) 2.44.50.20250401
+Stats: linker started: Wed Apr  2 09:36:41 2025
+Stats: args: ld -z norelro -z nomemory-seal -z no-separate-code -o a.out [...]
+
+Stats: phase               cpu time    memory      user time    system time    
+Stats: name                (microsec)   (KiB)      (seconds)      (seconds)    
+Stats: ALL                   390082    217740              0              0    
+Stats: ctf processing            12         0              0              0    
+Stats: string merge            1324         0              0              0    
+Stats: parsing                  349       288              0              0    
+Stats: plugins                    1         0              0              0    
+Stats: processing files      259616    214524              0              0    
+Stats: write                 116493         0              0              0    
+@end smallexample
+
+@kindex --no-stats
+@item --no-stats
+Disables the reporting of usage statistics, should it have been
+enabled via the @option{--stats} command line option or the
+@var{LD_STATS} environment variable.
 
 @kindex --sysroot=@var{directory}
 @item --sysroot=@var{directory}
@@ -4077,6 +4146,15 @@ If the PE/COFF specific @option{--insert-timestamp} is active and the
 @env{SOURCE_DATE_EPOCH} environment variable is defined, then the
 timestamp value in this variable will be inserted into the COFF header
 instead of the current time.
+
+@kindex LD_STATS
+@cindex LD_STATS
+If the @code{LD_STATS} environment variable is defined then linker
+resource use information will be recorded, just as if the
+@option{--stats} option had been used.  If the @code{LD_STATS}
+variable has a string value then this will used as the name of a file
+into which the information should be stored.  Otherwise the information
+will be sent to the standard output stream.
 
 @c man end
 @end ifset

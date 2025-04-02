@@ -606,14 +606,15 @@ gld${EMULATION_NAME}_finish (void)
     einfo (_("%X%P: can not build stubs: %E\n"));
 
   fflush (stdout);
+  FILE * out = config.stats_file ? config.stats_file : stderr;
   for (line = msg; line != NULL; line = endline)
     {
       endline = strchr (line, '\n');
       if (endline != NULL)
 	*endline++ = '\0';
-      fprintf (stderr, "%s: %s\n", program_name, line);
+      fprintf (out, "%s: %s\n", program_name, line);
     }
-  fflush (stderr);
+  fflush (out);
   free (msg);
 
   ldelf_finish ();
