@@ -2,7 +2,7 @@
 #source: bti-plt-1.s
 #target: [check_shared_lib_support]
 #as: -mabi=lp64 -defsym __property_bti__=1
-#ld: -shared -z force-bti -T bti-plt.ld -L./tmpdir -lbti-plt-so
+#ld: -shared -T bti-plt.ld -L./tmpdir -lbti-plt-so
 #objdump: -dr -j .plt
 
 [^:]*: *file format elf64-.*aarch64
