@@ -20,19 +20,14 @@
 #ifndef GDB_DWARF2_COOKED_INDEX_H
 #define GDB_DWARF2_COOKED_INDEX_H
 
-#include "dwarf2.h"
 #include "dwarf2/cooked-index-entry.h"
-#include "dwarf2/types.h"
 #include "symtab.h"
-#include "hashtab.h"
 #include "quick-symbol.h"
-#include "gdbsupport/gdb_obstack.h"
 #include "addrmap.h"
 #include "dwarf2/mapped-index.h"
 #include "dwarf2/read.h"
 #include "dwarf2/parent-map.h"
 #include "gdbsupport/range-chain.h"
-#include "complaints.h"
 #include "dwarf2/cooked-index-shard.h"
 #include "dwarf2/cooked-index-worker.h"
 

@@ -20,14 +20,10 @@
 #include "dwarf2/cooked-index.h"
 #include "dwarf2/read.h"
 #include "dwarf2/stringify.h"
-#include "dwarf2/index-cache.h"
 #include "event-top.h"
-#include "split-name.h"
 #include "observable.h"
 #include "run-on-main-thread.h"
-#include <algorithm>
 #include "gdbsupport/task-group.h"
-#include <chrono>
 #include "cli/cli-cmds.h"
 
 /* We don't want gdb to exit while it is in the process of writing to

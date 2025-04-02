@@ -20,7 +20,7 @@
 #ifndef GDB_DWARF2_COOKED_INDEXER_H
 #define GDB_DWARF2_COOKED_INDEXER_H
 
-#include "dwarf2/cooked-index.h"
+#include "dwarf2/cooked-index-entry.h"
 #include "dwarf2/parent-map.h"
 #include "dwarf2/types.h"
 #include <variant>

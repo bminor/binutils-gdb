@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "dwarf2/cooked-index.h"
+#include "dwarf2/cooked-index-entry.h"
 #include "dwarf2/read.h"
 #include "dwarf2/parent-map.h"
 
