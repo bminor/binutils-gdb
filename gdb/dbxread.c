@@ -31,35 +31,17 @@
    for real.  dbx_psymtab_to_symtab() is the function that does this */
 
 
-#include "event-top.h"
-#include "gdbsupport/gdb_obstack.h"
 #include <sys/stat.h>
 #include "symtab.h"
-#include "breakpoint.h"
 #include "target.h"
-#include "gdbcore.h"
 #include "libaout.h"
-#include "filenames.h"
 #include "objfiles.h"
-#include "buildsym-legacy.h"
 #include "stabsread.h"
 #include "gdb-stabs.h"
-#include "demangle.h"
-#include "complaints.h"
-#include "cp-abi.h"
 #include "cp-support.h"
-#include "c-lang.h"
-#include "psymtab.h"
-#include "block.h"
-#include "aout/aout64.h"
-#include "aout/stab_gnu.h"
-
+
 /* Required for the following registry.  */
 #include "gdb-stabs.h"
-
-
-
-
 
 /* Local function prototypes.  */
 
