@@ -73,7 +73,8 @@ ctf_arc_preserialize (ctf_dict_t **ctf_dicts, ssize_t ctf_dict_cnt,
   /* Preserialize everything, doing everything but strtab generation and things
      that depend on that.  */
   for (i = 0; i < ctf_dict_cnt; i++)
-    if (ctf_preserialize (ctf_dicts[i], threshold != (size_t) -1) < 0)
+    if (ctf_preserialize (ctf_dicts[i], threshold != (size_t) -1
+			  || ctf_dict_cnt > 1) < 0)
       goto err;
 
   ctf_dprintf ("Deduplicating strings.\n");
