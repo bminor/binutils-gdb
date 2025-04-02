@@ -1868,7 +1868,7 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold, int *is_btf)
     }
 
   if (is_btf)
-    is_btf = 0;
+    *is_btf = 0;
 
   /* No extra outputs?  Just write a simple ctf_dict_t.  */
   if (arg.i == 0)
