@@ -22,7 +22,7 @@ from .sources import make_source
 from .startup import in_gdb_thread
 from .varref import BaseReference
 
-# Map DAP frame IDs to scopes.  This ensures that scopes are re-used.
+# Map DAP frame IDs to scopes.  This ensures that scopes are reused.
 frame_to_scope = {}
 
 
