@@ -604,7 +604,7 @@ gdbscm_value_dynamic_type (SCM self)
 	type = value_rtti_type (value, NULL, NULL, NULL);
       else
 	{
-	  /* Re-use object's static type.  */
+	  /* Reuse object's static type.  */
 	  type = NULL;
 	}
     }
