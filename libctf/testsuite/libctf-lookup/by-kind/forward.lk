@@ -10,5 +10,5 @@ Types:
 
 0x1: \(kind 7\) struct foo
 0x2: \(kind 2\) struct foo \* .* -> 0x1: \(kind 7\) struct foo
-0x3: \(kind 14\) bar .* -> 0x2: \(kind 2\) struct foo \* .* -> 0x1: \(kind 7\) struct foo
+0x3: \(kind 14\) struct foo bar .* -> 0x2: \(kind 2\) struct foo \* .* -> 0x1: \(kind 7\) struct foo
 0x4: \(kind 15\) DATASEC \(".bss"\)

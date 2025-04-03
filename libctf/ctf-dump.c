@@ -614,6 +614,7 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
 {
   char *str;
   char *typestr;
+  int linkage;
   ctf_dump_state_t *state = arg;
   ctf_id_t otype = type;
 
@@ -625,7 +626,11 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
   /* Specialized var dumper: only dump the linkage, not the type kind or
      anything related.  */
 
-  if ((typestr = ctf_type_aname (fp, type)) == NULL)
+  if ((linkage = ctf_type_linkage (fp, type)) < 0
+    || asprintf (&typestr, "%s%s", linkage == 0 ? "static "
+		 : (linkage == 2 ? "extern " :
+		    (linkage == 1 ? "" : "(invalid linkage) ")),
+		 ctf_type_name_raw (fp, type)) < 0)
     {
       ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot format name dumping var 0x%lx"),
 		    type);

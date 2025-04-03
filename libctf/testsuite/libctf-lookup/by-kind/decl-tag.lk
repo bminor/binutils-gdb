@@ -15,9 +15,9 @@ Types:
      \[0x8\] b: ID 0x3: \(kind 1\) char .*
 0x3: \(kind 1\) char .*
 #...
-0x[45]: \(kind 14\) bar .*
+0x[45]: \(kind 14\) struct  bar .*
 #...
-0x[56]: \(kind 14\) foo .*
-0x[67]: \(kind 17\) btf_decl_tag \("dtag"\) .* -> 0x[56]: \(kind 14\) foo .*
-0x[78]: \(kind 17\) btf_decl_tag \("dtag2"\) .* -> 0x2: \(kind 4\) struct  .*
+0x[56]: \(kind 14\) int foo .*
+0x[67]: \(kind 17\) int foo btf_decl_tag \("dtag"\) .* -> 0x[56]: \(kind 14\) int foo .*
+0x[78]: \(kind 17\) struct  btf_decl_tag \("dtag2"\) .* -> 0x2: \(kind 4\) struct  .*
 #...
