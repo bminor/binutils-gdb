@@ -756,7 +756,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
      because later-added types will call grow_ptrtab() automatically, as
      needed.  */
 
-  fp->ctf_txlate = calloc (typemax + 1, sizeof (uint32_t));
+  fp->ctf_txlate = calloc (typemax + 1, sizeof (ctf_type_t *));
   fp->ctf_ptrtab = calloc (typemax + 1, sizeof (uint32_t));
   fp->ctf_ptrtab_len = typemax + 1;
   fp->ctf_stypes = typemax;
@@ -810,12 +810,10 @@ static int
 init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 				  ctf_dynset_t *all_enums)
 {
-  const ctf_type_t *tbuf;
-  const ctf_type_t *tend;
+  ctf_type_t *tbuf, *tend, *tp;
+  ctf_type_t **xp;
 
-  const ctf_type_t *tp;
   uint32_t id;
-  uint32_t *xp;
   ctf_id_t type;
 
   unsigned long typemax = fp->ctf_typemax;
@@ -831,8 +829,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 
   assert (!(fp->ctf_flags & LCTF_NO_STR));
 
-  xp = fp->ctf_txlate;
-  *xp++ = 0;			/* Type id 0 is used as a sentinel value.  */
+  xp = &fp->ctf_txlate[1];
 
   /* In this second pass through the types, we fill in each entry of the type
      and pointer tables and add names to the appropriate hashes.
@@ -871,7 +868,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
       /* Cannot fail: shielded by call in init_static_types.  */
       vbytes = LCTF_VBYTES (fp, suffix, size);
 
-      *xp = (uint32_t) ((uintptr_t) tp - (uintptr_t) fp->ctf_buf);
+      *xp = tp;
 
       switch (kind)
 	{

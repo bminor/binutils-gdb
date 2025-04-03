@@ -618,7 +618,7 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
       if (i->ctn_type > fp->ctf_stypes)
 	tp = ctf_dtd_lookup (fp, ctf_index_to_type (fp, i->ctn_type))->dtd_data;
       else
-	tp = (ctf_type_t *)((uintptr_t) fp->ctf_buf + fp->ctf_txlate[i->ctn_type]);
+	tp = fp->ctf_txlate[i->ctn_type];
 
       if ((!want_hidden) && (!LCTF_INFO_ISROOT (fp, tp->ctt_info)))
 	{
