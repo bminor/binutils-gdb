@@ -164,7 +164,7 @@ macho_symtab_read (minimal_symbol_reader &reader,
     S_NO_SO,
 
     /* First SO read.  Introduce an SO section, and may be followed by a second
-       SO.  The SO section should contain onl debugging symbols.  */
+       SO.  The SO section should contain only debugging symbols.  */
     S_FIRST_SO,
 
     /* Second non-null SO found, just after the first one.  Means that the first

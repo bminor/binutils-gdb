@@ -9202,7 +9202,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	{
 	  /* Integral values greater than one word are stored in consecutive
 	     registers starting with r0.  This will always be a multiple of
-	     the regiser size.  */
+	     the register size.  */
 	  int len = type->length ();
 	  int regno = ARM_A1_REGNUM;
 
@@ -10103,7 +10103,7 @@ arm_get_pc_address_flags (const frame_info_ptr &frame, CORE_ADDR pc)
 }
 
 /* Initialize the current architecture based on INFO.  If possible,
-   re-use an architecture from ARCHES, which is a list of
+   reuse an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
 
    Called e.g. at program startup, when reading a core file, and when

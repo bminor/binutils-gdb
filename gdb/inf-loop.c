@@ -74,7 +74,7 @@ inferior_event_handler (enum inferior_event_type event_type)
 	    {
 	      /* If the user was running a foreground execution
 		 command, then propagate the error so that the prompt
-		 can be reenabled.  Otherwise, the user already has
+		 can be re-enabled.  Otherwise, the user already has
 		 the prompt and is typing some unrelated command, so
 		 just inform the user and swallow the exception.  */
 	      if (current_ui->prompt_state == PROMPT_BLOCKED)

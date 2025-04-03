@@ -68,7 +68,7 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 	      value);
 }
 
-/* Same as HAVE_DOS_BASED_FILE_SYSTEM, but useable as an rvalue.  */
+/* Same as HAVE_DOS_BASED_FILE_SYSTEM, but usable as an rvalue.  */
 #if (HAVE_DOS_BASED_FILE_SYSTEM)
 #define DOS_BASED_FILE_SYSTEM 1
 #else

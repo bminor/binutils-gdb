@@ -898,7 +898,7 @@ elf_gnu_ifunc_resolve_name (const char *name, CORE_ADDR *addr_p)
   return false;
 }
 
-/* Call STT_GNU_IFUNC - a function returning addresss of a real function to
+/* Call STT_GNU_IFUNC - a function returning address of a real function to
    call.  PC is theSTT_GNU_IFUNC resolving function entry.  The value returned
    is the entry point of the resolved STT_GNU_IFUNC target function to call.
    */

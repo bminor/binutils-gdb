@@ -1647,7 +1647,7 @@ record_full_target::store_registers (struct regcache *regcache, int regno)
 
 /* "xfer_partial" method.  Behavior is conditional on
    RECORD_FULL_IS_REPLAY.
-   In replay mode, we cannot write memory unles we are willing to
+   In replay mode, we cannot write memory unless we are willing to
    invalidate the record/replay log from this point forward.  */
 
 enum target_xfer_status
@@ -2368,7 +2368,7 @@ record_full_restore (void)
   bfdcore_read (current_program_space->core_bfd (), osec, &magic,
 		sizeof (magic), &bfd_offset);
   if (magic != RECORD_FULL_FILE_MAGIC)
-    error (_("Version mis-match or file format error in core file %s."),
+    error (_("Version mismatch or file format error in core file %s."),
 	   bfd_get_filename (current_program_space->core_bfd ()));
   if (record_debug)
     gdb_printf (gdb_stdlog,

@@ -926,7 +926,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_UNION:
     case TYPE_CODE_ENUM:
-    /* NOTE: Handle modules here as well, because Fortran is re-using the C++
+    /* NOTE: Handle modules here as well, because Fortran is reusing the C++
        specific code to lookup nested symbols in modules, by calling the
        method lookup_symbol_nonlocal, which ends up here.  */
     case TYPE_CODE_MODULE:

@@ -9444,7 +9444,7 @@ struct stop_context
 
   ptid_t ptid;
 
-  /* If stopp for a thread event, this is the thread that caused the
+  /* If stopped for a thread event, this is the thread that caused the
      stop.  */
   thread_info_ref thread;
 

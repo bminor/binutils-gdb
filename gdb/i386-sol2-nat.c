@@ -25,7 +25,7 @@
 #include "target.h"
 #include "procfs.h"
 
-/* This file provids the (temporary) glue between the Solaris x86
+/* This file provides the (temporary) glue between the Solaris x86
    target dependent code and the machine independent SVR4 /proc
    support.  */
 

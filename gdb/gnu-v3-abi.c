@@ -1178,7 +1178,7 @@ gnuv3_get_type_from_type_info (struct value *type_info_ptr)
 {
   /* We have to parse the type name, since in general there is not a
      symbol for a type.  This is somewhat bogus since there may be a
-     mis-parse.  Another approach might be to re-use the demangler's
+     mis-parse.  Another approach might be to reuse the demangler's
      internal form to reconstruct the type somehow.  */
   std::string type_name = gnuv3_get_typename_from_type_info (type_info_ptr);
   expression_up expr (parse_expression (type_name.c_str ()));

@@ -137,7 +137,7 @@ amd64_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 
   /* There is no amd64_fxsave_supplies or amd64_xsave_supplies.
      Instead, the earlier register sets return early if the request
-     was for a specific register that was already satisified to avoid
+     was for a specific register that was already satisfied to avoid
      fetching the FPU/XSAVE state unnecessarily.  */
 
 #ifdef PT_GETXSTATE_INFO
@@ -214,7 +214,7 @@ amd64_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 
   /* There is no amd64_fxsave_supplies or amd64_xsave_supplies.
      Instead, the earlier register sets return early if the request
-     was for a specific register that was already satisified to avoid
+     was for a specific register that was already satisfied to avoid
      fetching the FPU/XSAVE state unnecessarily.  */
 
 #ifdef PT_GETXSTATE_INFO

@@ -240,7 +240,7 @@ moxie_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 		  return sal.end;
 		}
 	    }
-	  /* No useable line symbol.  Use result of prologue parsing
+	  /* No usable line symbol.  Use result of prologue parsing
 	     method.  */
 	  return plg_end;
 	}

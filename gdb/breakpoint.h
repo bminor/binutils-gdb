@@ -1740,7 +1740,7 @@ extern void disable_overlay_breakpoints (void);
 extern void set_std_terminate_breakpoint (void);
 extern void delete_std_terminate_breakpoint (void);
 
-/* These functions respectively disable or reenable all currently
+/* These functions respectively disable or re-enable all currently
    enabled watchpoints.  When disabled, the watchpoints are marked
    call_disabled.  When re-enabled, they are marked enabled.
 

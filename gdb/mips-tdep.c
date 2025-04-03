@@ -7027,7 +7027,7 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
 
   /* FIXME: cagney/2003-06-26: Is this even necessary?  The
      disassembler needs to be able to locally determine the ISA, and
-     not rely on GDB.  Otherwize the stand-alone 'objdump -d' will not
+     not rely on GDB.  Otherwise the stand-alone 'objdump -d' will not
      work.  */
   if (mips_pc_is_mips16 (gdbarch, memaddr))
     info->mach = bfd_mach_mips16;

@@ -2322,7 +2322,7 @@ static const struct frame_unwind_legacy i386_epilogue_frame_unwind (
 /* These trampolines are used on cross x86 targets, when taking the
    address of a nested function.  When executing these trampolines,
    no stack frame is set up, so we are in a similar situation as in
-   epilogues and i386_epilogue_frame_this_id can be re-used.  */
+   epilogues and i386_epilogue_frame_this_id can be reused.  */
 
 /* Static chain passed in register.  */
 
@@ -5015,7 +5015,7 @@ i386_record_vex (struct i386_record_s *ir, uint8_t vex_w, uint8_t vex_r,
     case 0x5e:	/* VDIV[P|S][S|D]  */
     case 0x5f:	/* VMAX[P|S][S|D]  */
       {
-	/* vpbroadcast and arithmethic operations are differentiated
+	/* vpbroadcast and arithmetic operations are differentiated
 	   by map_select, but it doesn't change the recording mechanics.  */
 	i386_record_modrm (ir);
 	int reg_offset = ir->reg + vex_r * 8;

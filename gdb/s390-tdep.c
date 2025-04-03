@@ -2488,7 +2488,7 @@ s390_prologue_frame_unwind_cache (const frame_info_ptr &this_frame,
 	 size zero.  This is only possible if the next frame is a sentinel
 	 frame, a dummy frame, or a signal trampoline frame.  */
       /* FIXME: cagney/2004-05-01: This sanity check shouldn't be
-	 needed, instead the code should simpliy rely on its
+	 needed, instead the code should simply rely on its
 	 analysis.  */
       next_frame = get_next_frame (this_frame);
       while (next_frame && get_frame_type (next_frame) == INLINE_FRAME)
@@ -2537,7 +2537,7 @@ s390_prologue_frame_unwind_cache (const frame_info_ptr &this_frame,
      code at a point where the frame pointer has already been restored.
      This can only happen in an innermost frame.  */
   /* FIXME: cagney/2004-05-01: This sanity check shouldn't be needed,
-     instead the code should simpliy rely on its analysis.  */
+     instead the code should simply rely on its analysis.  */
   next_frame = get_next_frame (this_frame);
   while (next_frame && get_frame_type (next_frame) == INLINE_FRAME)
     next_frame = get_next_frame (next_frame);

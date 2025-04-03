@@ -26,7 +26,7 @@
 #include "target.h"
 #include "procfs.h"
 
-/* This file provids the (temporary) glue between the Solaris SPARC
+/* This file provides the (temporary) glue between the Solaris SPARC
    target dependent code and the machine independent SVR4 /proc
    support.  */
 

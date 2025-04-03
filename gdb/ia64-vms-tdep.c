@@ -118,7 +118,7 @@ ia64_vms_get_dyn_info_list (unw_addr_space_t as,
   return -UNW_ENOINFO;
 }
 
-/* Set of libunwind callback acccessor functions.  */
+/* Set of libunwind callback accessor functions.  */
 static unw_accessors_t ia64_vms_unw_accessors;
 static unw_accessors_t ia64_vms_unw_rse_accessors;
 

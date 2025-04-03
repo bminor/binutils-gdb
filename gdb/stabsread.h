@@ -131,7 +131,7 @@ struct header_file
 /* The actual length of HEADER_FILES.  */
 #define N_HEADER_FILES(OBJFILE) (DBX_SYMFILE_INFO (OBJFILE)->n_header_files)
 
-/* The allocated lengh of HEADER_FILES.  */
+/* The allocated length of HEADER_FILES.  */
 #define N_ALLOCATED_HEADER_FILES(OBJFILE) \
   (DBX_SYMFILE_INFO (OBJFILE)->n_allocated_header_files)
 

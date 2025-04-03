@@ -1072,7 +1072,7 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 	    }
 	  else if (CSKY_32_IS_MOV_FP_SP (insn))
 	    {
-	      /* SP is saved to FP reg, means code afer prologue may
+	      /* SP is saved to FP reg, means code after prologue may
 		 modify SP.  */
 	      is_fp_saved = 1;
 	      adjust_fp = stacksize;
@@ -2667,7 +2667,7 @@ csky_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 }
 
 /* Initialize the current architecture based on INFO.  If possible,
-   re-use an architecture from ARCHES, which is a list of
+   reuse an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
 
    Called at program startup, when reading a core file, and when

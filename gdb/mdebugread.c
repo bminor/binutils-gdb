@@ -1119,7 +1119,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
     case_stBlock_code:
       found_ecoff_debugging_info = 1;
-      /* Beginnning of (code) block.  Value of symbol
+      /* Beginning of (code) block.  Value of symbol
 	 is the displacement from procedure start.  */
       push_parse_stack ();
 
@@ -2122,7 +2122,7 @@ parse_external (EXTR *es, int bigend, const section_offsets &section_offsets,
       /* There is no need to parse the external procedure symbols.
 	 If they are from objects compiled without -g, their index will
 	 be indexNil, and the symbol definition from the minimal symbol
-	 is preferrable (yielding a function returning int instead of int).
+	 is preferable (yielding a function returning int instead of int).
 	 If the index points to a local procedure symbol, the local
 	 symbol already provides the correct type.
 	 Note that the index of the external procedure symbol points
@@ -2488,7 +2488,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       switch (ext_in->asym.st)
 	{
 	case stProc:
-	  /* Beginnning of Procedure */
+	  /* Beginning of Procedure */
 	  break;
 	case stStaticProc:
 	  /* Load time only static procs */
@@ -2938,7 +2938,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 						   name SOs.  */
 
 		      /* Some other compilers (C++ ones in particular) emit
-			 useless SOs for non-existant .c files.  We ignore
+			 useless SOs for non-existent .c files.  We ignore
 			 all subsequent SOs that immediately follow the
 			 first.  */
 

@@ -714,7 +714,7 @@ struct arm_linux_hw_breakpoint
 
    The Linux ptrace interface to hardware break-/watch-points presents the 
    values in a vector centred around 0 (which is used fo generic information).
-   Positive indicies refer to breakpoint addresses/control registers, negative
+   Positive indices refer to breakpoint addresses/control registers, negative
    indices to watchpoint addresses/control registers.
 
    The Linux vector is indexed as follows:

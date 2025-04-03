@@ -1532,7 +1532,7 @@ ada_decode (const char *encoded, bool wrap, bool operators, bool wide)
 	{
 	  /* This is a X[bn]* sequence not separated from the previous
 	     part of the name with a non-alpha-numeric character (in other
-	     words, immediately following an alpha-numeric character), then
+	     words, immediately following an alphanumeric character), then
 	     verify that it is placed at the end of the encoded name.  If
 	     not, then the encoding is not valid and we should abort the
 	     decoding.  Otherwise, just skip it, it is used in body-nested
@@ -3047,7 +3047,7 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
 
    Note: Unlike what one would expect, this function is used instead of
    ada_value_subscript for basically all non-packed array types.  The reason
-   for this is that a side effect of doing our own pointer arithmetics instead
+   for this is that a side effect of doing our own pointer arithmetic instead
    of relying on value_subscript is that there is no implicit typedef peeling.
    This is important for arrays of array accesses, where it allows us to
    preserve the fact that the array's element is an array access, where the
@@ -5435,7 +5435,7 @@ ada_add_block_renamings (std::vector<struct block_symbol> &result,
 	 better in this case since, in DWARF, DW_AT_import is a DIE reference,
 	 not a simple name.  But in order to do this, we would need to enhance
 	 the DWARF reader to associate a symbol to this renaming, instead of a
-	 name.  So, for now, we do something simpler: re-use the C++/Fortran
+	 name.  So, for now, we do something simpler: reuse the C++/Fortran
 	 namespace machinery.  */
       r_name = (renaming->alias != NULL
 		? renaming->alias
@@ -9802,7 +9802,7 @@ ada_value_cast (struct type *type, struct value *arg2)
     The following description is a general guide as to what should be
     done (and what should NOT be done) in order to evaluate an expression
     involving such types, and when.  This does not cover how the semantic
-    information is encoded by GNAT as this is covered separatly.  For the
+    information is encoded by GNAT as this is covered separately.  For the
     document used as the reference for the GNAT encoding, see exp_dbug.ads
     in the GNAT sources.
 
@@ -11780,14 +11780,14 @@ ada_exception_support_info_sniffer (void)
       return;
     }
 
-  /* Try the v0 exception suport info.  */
+  /* Try the v0 exception support info.  */
   if (ada_has_this_exception_support (&exception_support_info_v0))
     {
       data->exception_info = &exception_support_info_v0;
       return;
     }
 
-  /* Try our fallback exception suport info.  */
+  /* Try our fallback exception support info.  */
   if (ada_has_this_exception_support (&exception_support_info_fallback))
     {
       data->exception_info = &exception_support_info_fallback;

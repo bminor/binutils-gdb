@@ -541,7 +541,7 @@ h8300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	/* Found a line number, use it as end of prologue.  */
 	return sal.end;
 
-      /* No useable line symbol.  Use prologue parsing method.  */
+      /* No usable line symbol.  Use prologue parsing method.  */
       h8300_init_frame_cache (gdbarch, &cache);
       return h8300_analyze_prologue (gdbarch, func_addr, func_end, &cache);
     }

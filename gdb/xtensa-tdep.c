@@ -1767,7 +1767,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	      arg_type = builtin_type (gdbarch)->builtin_long;
 	      arg = value_cast (arg_type, arg);
 	    }
-	  /* Aligment is equal to the type length for the basic types.  */
+	  /* Alignment is equal to the type length for the basic types.  */
 	  info->align = arg_type->length ();
 	  break;
 

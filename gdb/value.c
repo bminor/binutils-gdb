@@ -107,7 +107,7 @@ ranges_contain (const std::vector<range> &ranges, LONGEST offset,
      range, we can do a binary search for the position the given range
      would be inserted if we only considered the starting OFFSET of
      ranges.  We call that position I.  Since we also have LENGTH to
-     care for (this is a range afterall), we need to check if the
+     care for (this is a range after all), we need to check if the
      _previous_ range overlaps the I range.  E.g.,
 
 	 R
@@ -267,7 +267,7 @@ insert_into_bit_range_vector (std::vector<range> *vectorp,
   /* Do a binary search for the position the given range would be
      inserted if we only considered the starting OFFSET of ranges.
      Call that position I.  Since we also have LENGTH to care for
-     (this is a range afterall), we need to check if the _previous_
+     (this is a range after all), we need to check if the _previous_
      range overlaps the I range.  E.g., calling R the new range:
 
        #1 - overlaps with previous
@@ -2833,7 +2833,7 @@ value_as_address (struct value *val)
 #endif
 }
 
-/* Unpack raw data (copied from debugee, target byte order) at VALADDR
+/* Unpack raw data (copied from debuggee, target byte order) at VALADDR
    as a long, or as a double, assuming the raw data is described
    by type TYPE.  Knows how to convert different sizes of values
    and can convert between fixed and floating point.  We don't assume
@@ -2924,7 +2924,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     }
 }
 
-/* Unpack raw data (copied from debugee, target byte order) at VALADDR
+/* Unpack raw data (copied from debuggee, target byte order) at VALADDR
    as a CORE_ADDR, assuming the raw data is described by type TYPE.
    We don't assume any alignment for the raw data.  Return value is in
    host byte order.

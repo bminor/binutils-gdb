@@ -612,7 +612,7 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
     {
       std::string index_img = ada_varobj_scalar_image (index_type, real_index);
 
-      /* Enumeration litterals by themselves are potentially ambiguous.
+      /* Enumeration literals by themselves are potentially ambiguous.
 	 For instance, consider the following package spec:
 
 	    package Pck is
@@ -620,10 +620,10 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
 	       type Blood_Cells is (White, Red);
 	    end Pck;
 
-	 In this case, the litteral "red" for instance, or even
-	 the fully-qualified litteral "pck.red" cannot be resolved
+	 In this case, the literal "red" for instance, or even
+	 the fully-qualified literal "pck.red" cannot be resolved
 	 by itself.  Type qualification is needed to determine which
-	 enumeration litterals should be used.
+	 enumeration literals should be used.
 
 	 The following variable will be used to contain the name
 	 of the array index type when such type qualification is

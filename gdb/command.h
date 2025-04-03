@@ -558,7 +558,7 @@ extern struct cmd_list_element *lookup_cmd (const char **,
    the section of text it matched, set *RESULT_LIST to point to the list in
    which the last word was matched, and will return a pointer to the cmd
    list element which the text matches.  It will return NULL if no match at
-   all was possible.  It will return -1 (cast appropriately, ick) if ambigous
+   all was possible.  It will return -1 (cast appropriately, ick) if ambiguous
    matches are possible; in this case *RESULT_LIST will be set to point to
    the list in which there are ambiguous choices (and *TEXT will be set to
    the ambiguous text string).

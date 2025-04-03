@@ -9035,7 +9035,7 @@ remote_target::process_g_packet (struct regcache *regcache)
 
   /* Reply describes registers byte by byte, each byte encoded as two
      hex characters.  Suck them all up, then supply them to the
-     register cacheing/storage mechanism.  */
+     register caching/storage mechanism.  */
 
   p = rs->buf.data ();
   for (i = 0; i < rsa->sizeof_g_packet; i++)

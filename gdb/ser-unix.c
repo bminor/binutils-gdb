@@ -404,7 +404,7 @@ rate_to_code (int rate)
 
   for (i = 0; baudtab[i].rate != -1; i++)
     {
-      /* test for perfect macth.  */
+      /* test for perfect match.  */
       if (rate == baudtab[i].rate)
 	return baudtab[i].code;
       else

@@ -403,7 +403,7 @@ protected:
 
   /* Snapshot of the original ELF image taken during load.  This is done to
      support the situation where an inferior uses an in-memory image, and
-     releases or re-uses this memory before GDB is done using it.  */
+     releases or reuses this memory before GDB is done using it.  */
   gdb::byte_vector m_objfile_image;
 
   LONGEST size () override

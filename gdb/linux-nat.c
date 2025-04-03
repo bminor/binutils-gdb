@@ -133,7 +133,7 @@ process things as in sync mode, except that the we never block in
 sigsuspend.
 
 While processing an event, we may end up momentarily blocked in
-waitpid calls.  Those waitpid calls, while blocking, are guarantied to
+waitpid calls.  Those waitpid calls, while blocking, are guaranteed to
 return quickly.  E.g., in all-stop mode, before reporting to the core
 that an LWP hit a breakpoint, all LWPs are stopped by sending them
 SIGSTOP, and synchronously waiting for the SIGSTOP to be reported.
@@ -702,7 +702,7 @@ lwp_lwpid_htab_add_lwp (struct lwp_info *lp)
 
 /* Head of doubly-linked list of known LWPs.  Sorted by reverse
    creation order.  This order is assumed in some cases.  E.g.,
-   reaping status after killing alls lwps of a process: the leader LWP
+   reaping status after killing all lwps of a process: the leader LWP
    must be reaped last.  */
 
 static intrusive_list<lwp_info> lwp_list;

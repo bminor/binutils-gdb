@@ -2608,7 +2608,7 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
   if (next_sal.line != start_pc_sal.line)
     return pc;
 
-  /* START_PC can be from overlayed memory, ignored here.  */
+  /* START_PC can be from overlay memory, ignored here.  */
   if (target_read_code (next_sal.pc - 4, buf, sizeof (buf)) != 0)
     return pc;
 

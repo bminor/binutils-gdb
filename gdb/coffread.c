@@ -903,7 +903,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
   symnum = 0;
   while (symnum < nsyms)
     {
-      QUIT;			/* Make this command interruptable.  */
+      QUIT;			/* Make this command interruptible.  */
 
       read_one_sym (cs, &main_sym, &main_aux);
 

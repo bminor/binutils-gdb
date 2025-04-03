@@ -596,7 +596,7 @@ fetch_instruction (CORE_ADDR addr, ia64_instruction_type *it, long long *instr)
    If we would like to store the whole bundle to SHADOW_CONTENTS we would have
    to store already the base address (`address & ~0x0f') into PLACED_ADDRESS.
    In such case there is no other place where to store
-   SLOTNUM (`adress & 0x0f', value in the range <0..2>).  We need to know
+   SLOTNUM (`address & 0x0f', value in the range <0..2>).  We need to know
    SLOTNUM in ia64_memory_remove_breakpoint.
 
    There is one special case where we need to be extra careful:
@@ -3111,7 +3111,7 @@ static const struct frame_unwind_legacy ia64_libunwind_sigtramp_frame_unwind (
   ia64_libunwind_sigtramp_frame_sniffer
 );
 
-/* Set of libunwind callback acccessor functions.  */
+/* Set of libunwind callback accessor functions.  */
 unw_accessors_t ia64_unw_accessors =
 {
   ia64_find_proc_info_x,
@@ -3124,7 +3124,7 @@ unw_accessors_t ia64_unw_accessors =
   /* get_proc_name */
 };
 
-/* Set of special libunwind callback acccessor functions specific for accessing
+/* Set of special libunwind callback accessor functions specific for accessing
    the rse registers.  At the top of the stack, we want libunwind to figure out
    how to read r32 - r127.  Though usually they are found sequentially in
    memory starting from $bof, this is not always true.  */
@@ -3415,7 +3415,7 @@ slot_alignment_is_next_even (struct type *t)
 /* Attempt to find (and return) the global pointer for the given
    function.
 
-   This is a rather nasty bit of code searchs for the .dynamic section
+   This rather nasty bit of code searches for the .dynamic section
    in the objfile corresponding to the pc of the function we're trying
    to call.  Once it finds the addresses at which the .dynamic section
    lives in the child process, it scans the Elf64_Dyn entries for a

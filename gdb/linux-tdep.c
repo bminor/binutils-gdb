@@ -1073,7 +1073,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	    gdb_printf (_("Ignored signals bitmap: %s\n"),
 			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    gdb_printf (_("Catched signals bitmap: %s\n"),
+	    gdb_printf (_("Caught signals bitmap: %s\n"),
 			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
 	    gdb_printf (_("wchan (system call): %s\n"),
@@ -2749,7 +2749,7 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
      in the output, which requires scanning every thread in the thread
      group to check whether a VMA is actually a thread's stack.  With
      Linux 4.4 on an Intel i7-4810MQ @ 2.80GHz, with an inferior with
-     a few thousand threads, (1) takes a few miliseconds, while (2)
+     a few thousand threads, (1) takes a few milliseconds, while (2)
      takes several seconds.  Also note that "smaps", what we read for
      determining core dump mappings, is even slower than "maps".  */
   xsnprintf (filename, sizeof filename, "/proc/%ld/task/%ld/maps", pid, pid);

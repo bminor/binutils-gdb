@@ -246,7 +246,7 @@ private:
   std::vector<displaced_step_buffer> m_buffers;
 };
 
-/* Default implemention of target_ops::supports_displaced_step.
+/* Default implementation of target_ops::supports_displaced_step.
 
    Forwards the call to the architecture of THREAD.  */
 

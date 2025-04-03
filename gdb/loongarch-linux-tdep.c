@@ -938,7 +938,7 @@ loongarch_record_all_but_pc_registers (struct regcache *regcache)
   return 0;
 }
 
-/* Handler for LoongArch architechture system call instruction recording.  */
+/* Handler for LoongArch architecture system call instruction recording.  */
 
 static int
 loongarch_linux_syscall_record (struct regcache *regcache,

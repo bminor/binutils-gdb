@@ -348,7 +348,7 @@ iq2000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	/* Found a line number, use it as end of prologue.  */
 	return sal.end;
 
-      /* No useable line symbol.  Use prologue parsing method.  */
+      /* No usable line symbol.  Use prologue parsing method.  */
       iq2000_init_frame_cache (&cache);
       return iq2000_scan_prologue (gdbarch, func_addr, func_end, NULL, &cache);
     }

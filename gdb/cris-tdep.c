@@ -1467,7 +1467,7 @@ cris_register_size (struct gdbarch *gdbarch, int regno)
 }
 
 /* Nonzero if regno should not be fetched from the target.  This is the case
-   for unimplemented (size 0) and non-existant registers.  */
+   for unimplemented (size 0) and non-existent registers.  */
 
 static int
 cris_cannot_fetch_register (struct gdbarch *gdbarch, int regno)
@@ -1508,7 +1508,7 @@ cris_cannot_store_register (struct gdbarch *gdbarch, int regno)
 }
 
 /* Nonzero if regno should not be fetched from the target.  This is the case
-   for unimplemented (size 0) and non-existant registers.  */
+   for unimplemented (size 0) and non-existent registers.  */
 
 static int
 crisv32_cannot_fetch_register (struct gdbarch *gdbarch, int regno)

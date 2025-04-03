@@ -891,7 +891,7 @@ read_ofile_symtab (struct objfile *objfile, legacy_psymtab *pst)
        symnum < max_symnum;
        symnum++)
     {
-      QUIT;			/* Allow this to be interruptable.  */
+      QUIT;			/* Allow this to be interruptible.  */
       if (symbuf_idx == symbuf_end)
 	fill_symbuf (abfd, objfile);
       bufp = &symbuf[symbuf_idx++];
@@ -1301,7 +1301,7 @@ read_stabs_symtab_1 (minimal_symbol_reader &reader,
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
     {
       /* Get the symbol for this run and pull out some info.  */
-      QUIT;			/* Allow this to be interruptable.  */
+      QUIT;			/* Allow this to be interruptible.  */
       if (symbuf_idx == symbuf_end)
 	fill_symbuf (abfd, objfile);
       bufp = &symbuf[symbuf_idx++];
@@ -1540,7 +1540,7 @@ read_stabs_symtab_1 (minimal_symbol_reader &reader,
 	      }
 
 	    /* Some other compilers (C++ ones in particular) emit useless
-	       SOs for non-existant .c files.  We ignore all subsequent SOs
+	       SOs for non-existent .c files.  We ignore all subsequent SOs
 	       that immediately follow the first.  */
 
 	    if (!pst)
@@ -3511,7 +3511,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_aclass_index (LOC_STATIC);
       sym->set_domain (VAR_DOMAIN);
       /* Don't add symbol references to global_sym_chain.
-	 Symbol references don't have valid names and wont't match up with
+	 Symbol references don't have valid names and won't match up with
 	 minimal symbols when the global_sym_chain is relocated.
 	 We'll fixup symbol references when we fixup the defining symbol.  */
       if (sym->linkage_name () && sym->linkage_name ()[0] != '#')
@@ -4907,7 +4907,7 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 		int nbits;
 		/* virtual member function, followed by index.
 		   The sign bit is set to distinguish pointers-to-methods
-		   from virtual function indicies.  Since the array is
+		   from virtual function indices.  Since the array is
 		   in words, the quantity must be shifted left by 1
 		   on 16 bit machine, and by 2 on 32 bit machine, forcing
 		   the sign bit out, and usable as a valid index into

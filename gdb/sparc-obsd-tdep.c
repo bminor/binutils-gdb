@@ -147,7 +147,7 @@ static const struct frame_unwind_legacy sparc32obsd_sigtramp_frame_unwind (
 
 
 
-/* Offset wthin the thread structure where we can find %fp and %i7.  */
+/* Offset within the thread structure where we can find %fp and %i7.  */
 #define SPARC32OBSD_UTHREAD_FP_OFFSET	128
 #define SPARC32OBSD_UTHREAD_PC_OFFSET	132
 

@@ -1309,7 +1309,7 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
     {
       /* For values that are not changeable, we don't compare the values.
 	 However, we want to notice if a value was not NULL and now is NULL,
-	 or vise versa, so that we report when top-level varobjs come in scope
+	 or vice versa, so that we report when top-level varobjs come in scope
 	 and leave the scope.  */
       changed = (var->value != NULL) != (value != NULL);
     }

@@ -210,7 +210,7 @@ gdbarch_tdep (struct gdbarch *gdbarch)
    information obtained from INFO.ABFD or the global defaults.
 
    The ARCHES parameter is a linked list (sorted most recently used)
-   of all the previously created architures for this architecture
+   of all the previously created architectures for this architecture
    family.  The (possibly NULL) ARCHES->gdbarch can used to access
    values from the previously selected architecture for this
    architecture family.

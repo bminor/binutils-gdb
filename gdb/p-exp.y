@@ -765,7 +765,7 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			    = lookup_struct (copy_name ($2).c_str (),
 					     pstate->expression_context_block);
 			}
-	/* "const" and "volatile" are curently ignored.  A type qualifier
+	/* "const" and "volatile" are currently ignored.  A type qualifier
 	   after the type is handled in the ptype rule.  I think these could
 	   be too.  */
 	;

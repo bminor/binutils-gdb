@@ -1276,7 +1276,7 @@ call_function_by_hand_dummy (struct value *function,
 	/* A call dummy always consists of just a single breakpoint, so
 	   its address is the same as the address of the dummy.
 
-	   The actual breakpoint is inserted separatly so there is no need to
+	   The actual breakpoint is inserted separately so there is no need to
 	   write that out.  */
 	bp_addr = dummy_addr;
 	break;

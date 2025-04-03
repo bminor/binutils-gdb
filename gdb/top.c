@@ -381,7 +381,7 @@ check_frame_language_change (void)
   /* Warn the user if the working language does not match the language
      of the current frame.  Only warn the user if we are actually
      running the program, i.e. there is a stack.  */
-  /* FIXME: This should be cacheing the frame and only running when
+  /* FIXME: This should be caching the frame and only running when
      the frame changes.  */
 
   if (warn_frame_lang_mismatch && has_stack_frames ())

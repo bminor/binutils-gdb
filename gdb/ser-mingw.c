@@ -281,10 +281,10 @@ ser_windows_wait_handle (struct serial *scb, HANDLE *read, HANDLE *except)
      cleared, and we get a duplicated event, if the last batch
      of characters included at least two arriving close together.  */
   if (!SetCommMask (h, 0))
-    warning (_("ser_windows_wait_handle: reseting mask failed"));
+    warning (_("ser_windows_wait_handle: resetting mask failed"));
 
   if (!SetCommMask (h, EV_RXCHAR))
-    warning (_("ser_windows_wait_handle: reseting mask failed (2)"));
+    warning (_("ser_windows_wait_handle: resetting mask failed (2)"));
 
   /* There's a potential race condition here; we must check cbInQue
      and not wait if that's nonzero.  */

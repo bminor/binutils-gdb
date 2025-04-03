@@ -424,7 +424,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
 
      It follows that if there are DTrace is-enabled probes defined for
      some provider/name but no DTrace regular probes defined then the
-     GDB user wont be able to enable/disable these conditionals.  */
+     GDB user won't be able to enable/disable these conditionals.  */
 
   num_probes = DOF_UINT (dof, probe->dofpr_noffs);
   if (num_probes == 0)

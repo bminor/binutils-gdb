@@ -55,7 +55,7 @@ struct subfile
   struct subfile *next = nullptr;
   std::string name;
 
-  /* This field is analoguous in function to symtab::filename_for_id.
+  /* This field is analogous in function to symtab::filename_for_id.
 
      It is used to look up existing subfiles in calls to start_subfile.  */
   std::string name_for_id;

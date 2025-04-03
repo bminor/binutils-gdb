@@ -173,7 +173,7 @@ struct bcache
 				     added);
   }
 
-  /* Print statistics on this bcache's memory usage and efficacity at
+  /* Print statistics on this bcache's memory usage and efficacy at
      eliminating duplication.  TYPE should be a string describing the
      kind of data this bcache holds.  Statistics are printed using
      `gdb_printf' and its ilk.  */

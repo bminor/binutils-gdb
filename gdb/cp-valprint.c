@@ -100,7 +100,7 @@ cp_is_vtbl_member (struct type *type)
 	  /* The type name of the thunk pointer is NULL when using
 	     dwarf2.  We could test for a pointer to a function, but
 	     there is no type info for the virtual table either, so it
-	     wont help.  */
+	     won't help.  */
 	  return cp_is_vtbl_ptr_type (type);
 	}
     }

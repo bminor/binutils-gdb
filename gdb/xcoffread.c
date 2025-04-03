@@ -970,7 +970,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 
   while (symnum < max_symnum)
     {
-      QUIT;			/* make this command interruptable.  */
+      QUIT;			/* make this command interruptible.  */
 
       /* READ_ONE_SYMBOL (symbol, cs, symname_alloced); */
       /* read one symbol into `cs' structure.  After processing the
@@ -1371,7 +1371,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	case C_BINCL:
 	  /* beginning of include file */
 	  /* In xlc output, C_BINCL/C_EINCL pair doesn't show up in sorted
-	     order.  Thus, when wee see them, we might not know enough info
+	     order.  Thus, when we see them, we might not know enough info
 	     to process them.  Thus, we'll be saving them into a table 
 	     (inclTable) and postpone their processing.  */
 

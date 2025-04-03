@@ -722,7 +722,7 @@ extern void complete_nested_command_line (completion_tracker &tracker,
    This function is designed so that trying to complete '/' will offer no
    completions, the user needs to insert the format specification
    themselves.  Trying to complete '/FMT' (where FMT is any non-empty set
-   of alpha-numeric characters) will cause readline to insert a single
+   of alphanumeric characters) will cause readline to insert a single
    space, setting the user up to enter the expression.  */
 
 extern bool skip_over_slash_fmt (completion_tracker &tracker,

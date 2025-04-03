@@ -586,7 +586,7 @@ void set_current_sal_from_frame (const frame_info_ptr &);
    the old get_frame_base method was not sufficient.
 
    get_frame_base_address: get_frame_locals_address:
-   get_frame_args_address: A set of high-level debug-info dependant
+   get_frame_args_address: A set of high-level debug-info dependent
    addresses that fall within the frame.  These addresses almost
    certainly will not match the stack address part of a frame ID (as
    returned by get_frame_base).

@@ -307,7 +307,7 @@ bpf_return_value (struct gdbarch *gdbarch, struct value *function,
 }
 
 
-/* Initialize the current architecture based on INFO.  If possible, re-use an
+/* Initialize the current architecture based on INFO.  If possible, reuse an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.  */
 
