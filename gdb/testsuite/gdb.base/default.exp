@@ -253,10 +253,39 @@ gdb_test "h" "List of classes of commands:(\[^\r\n\]*\[\r\n\])+aliases -- User-d
 gdb_test "help" "List of classes of commands:(\[^\r\n\]*\[\r\n\])+aliases -- User-defined aliases of other commands(\[^\r\n\]*\[\r\n\])+breakpoints -- Making program stop at certain points(\[^\r\n\]*\[\r\n\])+data -- Examining data(\[^\r\n\]*\[\r\n\])+files -- Specifying and examining files(\[^\r\n\]*\[\r\n\])+obscure -- Obscure features(\[^\r\n\]*\[\r\n\])+running -- Running the program(\[^\r\n\]*\[\r\n\])+stack -- Examining the stack(\[^\r\n\]*\[\r\n\])+status -- Status inquiries(\[^\r\n\]*\[\r\n\])+support -- Support facilities(\[^\r\n\]*\[\r\n\])+user-defined -- User-defined commands(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by a class name for a list of commands in that class.(\[^\r\n\]*\[\r\n\])+Type \"help\" followed by command name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous."
 #test handle
 gdb_test "handle" "Argument required .signal to handle.*"
-#test info "i" abbreviation 
-gdb_test "i" "List of \"info\" subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help info\" followed by subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "info \"i\" abbreviation"
+
+proc test_info_command { command message } {
+    set saw_info_header 0
+    set saw_help_info 0
+    set saw_command_abbrev 0
+    gdb_test_multiple $command $message -lbl {
+	-re "\r\nList of \"info\" subcommands:" {
+	    verbose "Info header displayed"
+	    set saw_info_header 1
+	    exp_continue
+	}
+	-re "Type \"help info\" followed by subcommand name for full documentation\\." {
+	    verbose "Help info displayed"
+	    set saw_help_info 1
+	    exp_continue
+	}
+	-re "\r\nCommand name abbreviations are allowed if unambiguous\\." {
+	    verbose "Command name abbreviations displayed"
+	    set saw_command_abbrev 1
+	    exp_continue
+	}
+	-re -wrap "" {
+	    gdb_assert { $saw_info_header && $saw_help_info
+			 && $saw_command_abbrev } $gdb_test_name
+	}
+    }
+}
+
+#test info "i" abbreviation
+test_info_command "i" "info \"i\" abbreviation"
 #test info
-gdb_test "info" "List of \"info\" subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help info\" followed by subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous."
+test_info_command "info" "info"
+
 #test ignore
 gdb_test "ignore" "Argument required .a breakpoint number.*"
 #test info address
@@ -379,38 +408,52 @@ gdb_test "info registers" "The program has no registers now."
 gdb_test "info s" "No stack." "info stack \"s\" abbreviation"
 #test info stack
 gdb_test "info stack" "No stack."
-#test info set
-# Test improved to check three parts:
-# 1) confirm
-# 2) prompt
-# 3) write
-# And only succeed if all three are matched.
-# This should fix an old problem on native solaris 2.8,
-# where this test fails due to this line:
+
+#test "info set" and "show" commands
+# The test needs to match the "prompt: ..." part to fix an old problem on native
+# Solaris 2.8, where this test fails due to this line:
 #  prompt:  Gdb's prompt is "(gdb) ".^M
-set set_confirm_seen 0
-set set_prompt_seen 0
-gdb_test_multiple "info set" "info set" {
-    -re "confirm:  Whether to confirm potentially dangerous operations is o\[a-z\]*.(\[^\r\n\]*\[\r\n\])+history filename:  The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+listsize:  Number of source lines gdb will list by default is 10" {
-	verbose "Confirm dislayed"
-	set set_confirm_seen 1
-	exp_continue
-    }
-    -re "Gdb's prompt is \"$gdb_prompt \"" {
-	verbose "GDB prompt displayed"
-	set set_prompt_seen 1
-	exp_continue
-    }
-    -re "Writing into executable.*$gdb_prompt $" {
-	verbose "write displayed"
-	if { $set_prompt_seen && $set_confirm_seen } {
-	    pass "info set"
-	} else {
-	    verbose "prompt $set_prompt_seen confirm $set_confirm_seen"
-	    fail "info set (incomplete output)"
+proc test_info_set_show { command } {
+    set set_confirm_seen 0
+    set set_history_filename_seen 0
+    set set_listsize_seen 0
+    set set_prompt_seen 0
+    set set_write_seen 0
+    gdb_test_multiple $command $command -lbl {
+	-re "\r\nconfirm:  Whether to confirm potentially dangerous operations is o\[a-z\]+\\." {
+	    verbose "Confirm displayed"
+	    set set_confirm_seen 1
+	    exp_continue
+	}
+	-re "\r\nhistory filename:  The filename in which to record the command history is \[^\r\n\]+\\." {
+	    verbose "History filename displayed"
+	    set set_history_filename_seen 1
+	    exp_continue
+	}
+	-re "\r\nlistsize:  Number of source lines gdb will list by default is 10\\." {
+	    verbose "Listsize displayed"
+	    set set_listsize_seen 1
+	    exp_continue
+	}
+	-re "\r\nprompt:  Gdb's prompt is \"$::gdb_prompt \"" {
+	    verbose "GDB prompt displayed"
+	    set set_prompt_seen 1
+	    exp_continue
+	}
+	-re "write:  Writing into executable and core files is o\[a-z\]+\\." {
+	    verbose "Write displayed"
+	    set set_write_seen 1
+	    exp_continue
+	}
+	-re -wrap "" {
+	    gdb_assert { $set_confirm_seen && $set_history_filename_seen
+			 && $set_listsize_seen && $set_prompt_seen
+			 && $set_write_seen } $gdb_test_name
 	}
     }
 }
+test_info_set_show "info set"
+
 gdb_test "info symbol" "Argument required .address.."
 #test info source
 gdb_test  "info source" "No current source file..*"
@@ -591,12 +634,41 @@ gdb_test "set history" "List of \"set history\" subcommands:(\[^\r\n\]*\[\r\n\])
 gdb_test "set language" "Requires an argument. Valid arguments are auto, local, unknown, ada, asm, c, c.., d, fortran, go, minimal, modula-2, objective-c, opencl, pascal, rust."
 #test set listsize
 gdb_test "set listsize" "Argument required .integer to set it to.*"
+
+proc test_set_print { command message } {
+    set saw_info_header 0
+    set saw_help_info 0
+    set saw_command_abbrev 0
+    gdb_test_multiple $command $message -lbl {
+	-re "\r\nList of \"set print\" subcommands:" {
+	    verbose "Info header displayed"
+	    set saw_info_header 1
+	    exp_continue
+	}
+	-re "Type \"help set print\" followed by subcommand name for full documentation\\." {
+	    verbose "Help info displayed"
+	    set saw_help_info 1
+	    exp_continue
+	}
+	-re "\r\nCommand name abbreviations are allowed if unambiguous\\." {
+	    verbose "Command name abbreviations displayed"
+	    set saw_command_abbrev 1
+	    exp_continue
+	}
+	-re -wrap "" {
+	    gdb_assert { $saw_info_header && $saw_help_info
+			 && $saw_command_abbrev } $gdb_test_name
+	}
+    }
+}
+
 #test set print "p" abbreviation
-gdb_test "set p" "List of \"set print\" subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help set print\" followed by subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set print \"p\" abbreviation"
+test_set_print "set p" "set print \"p\" abbreviation"
 #test set print "pr" abbreviation
-gdb_test "set pr" "List of \"set print\" subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help set print\" followed by subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous." "set print \"pr\" abbreviation"
+test_set_print "set pr"  "set print \"pr\" abbreviation"
 #test set print
-gdb_test "set print" "List of \"set print\" subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help set print\" followed by subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous."
+test_set_print "set print" "set print"
+
 #test set print address
 gdb_test_no_output "set print address" "set print address"
 #test set print array
@@ -741,12 +813,47 @@ gdb_test "show history" "history expansion:  *History expansion on command input
 gdb_test "show language" "The current source language is \"auto; currently c\"."
 #test show listsize
 gdb_test "show listsize" "Number of source lines gdb will list by default is 10."
+
+proc test_show_print { command } {
+    set saw_print_address 0
+    set saw_print_frame_args 0
+    set saw_print_symbol 0
+    set saw_print_vtbl 0
+    gdb_test_multiple $command $command -lbl {
+	-re "\r\nprint address:  Printing of addresses is o\[a-z\]+\\." {
+	    verbose "Print address displayed"
+	    set saw_print_address 1
+	    exp_continue
+	}
+	-re "\r\nprint frame-arguments:  Printing of non-scalar frame arguments is \[^\r\n\]+\\." {
+	    verbose "Print frame-arguments displayed"
+	    set saw_print_frame_args 1
+	    exp_continue
+	}
+	-re "\r\nprint symbol:  Printing of symbols when printing pointers is o\[a-z\]+\\." {
+	    verbose "Print symbol displayed"
+	    set saw_print_symbol 1
+	    exp_continue
+	}
+	-re "\r\nprint vtbl:  Printing of C\\+\\+ virtual function tables is o\[a-z\]+\\." {
+	    verbose "Print vtbl displayed"
+	    set saw_print_vtbl 1
+	    exp_continue
+	}
+	-re -wrap "" {
+	    gdb_assert { $saw_print_address && $saw_print_frame_args
+			 && $saw_print_symbol && $saw_print_vtbl } $gdb_test_name
+	}
+    }
+}
+
 #test show print "p" abbreviation
-gdb_test "show p" ".*"
+test_show_print "show p"
 #test show print "pr" abbreviation
-gdb_test "show pr" ".*"
+test_show_print "show pr"
 #test show print
-gdb_test "show print" ".*"
+test_show_print "show print"
+
 #test show paths
 gdb_test "show paths" "Executable and object file path:.*"
 #test show print address
@@ -792,30 +899,10 @@ gdb_test "show width" "Number of characters gdb thinks are in a line is.*"
 #test show write
 # This is only supported on targets which use exec.o.
 gdb_test "show write" "Writing into executable and core files is o.*"
+
 #test show
-set show_confirm_seen 0
-set show_prompt_seen 0
-gdb_test_multiple "show" "show" {
-    -re "confirm:  *Whether to confirm potentially dangerous operations is on.(\[^\r\n\]*\[\r\n\])+history filename:  *The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+history save:  *Saving of the history record on exit is on.(\[^\r\n\]*\[\r\n\])+history size:  *The size of the command history is(\[^\r\n\]*\[\r\n\])+listsize:  *Number of source lines gdb will list by default is 10(\[^\r\n]*\[\r\n\])+print elements:  *Limit on string chars or array elements to print is 200." {
-	verbose "Confirm displayed"
-	set show_confirm_seen 1
-	exp_continue
-    }
-    -re "Gdb's prompt is \"$gdb_prompt \"" {
-	verbose "GDB prompt displayed"
-	set show_prompt_seen 1
-	exp_continue
-    }
-    -re "Writing into executable.*$gdb_prompt $" {
-	verbose "write displayed"
-	if { $show_prompt_seen && $show_confirm_seen } {
-	    pass "show"
-	} else {
-	    verbose "prompt $show_prompt_seen confirm $show_confirm_seen"
-	    fail "show (incomplete output)"
-	}
-    }
-}
+test_info_set_show "show"
+
 #history saving should stay disabled
 gdb_test_no_output "set history save off" "set history save off"
 #test stepi "si" abbreviation
