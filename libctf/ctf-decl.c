@@ -34,7 +34,7 @@
 
    The functions in this file build a set of stacks from the type graph nodes
    corresponding to the C operator precedence levels in the appropriate order.
-   The code in ctf_type_name() can then iterate over the levels and nodes in
+   The code in ctf_type_aname() can then iterate over the levels and nodes in
    lexical precedence order and construct the final C declaration string.  */
 
 #include <ctf-impl.h>
@@ -84,11 +84,17 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
 
   if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     {
-      cd->cd_err = fp->ctf_errno;
-      return;
+      if (ctf_errno (fp) != ECTF_NONREPRESENTABLE)
+	{
+	  cd->cd_err = fp->ctf_errno;
+	  return;
+	}
+      kind = CTF_K_UNKNOWN;
     }
+  else
+    kind = ctf_type_kind (fp, type);
 
-  switch (kind = ctf_type_kind (fp, type))
+  switch (kind)
     {
     case CTF_K_ARRAY:
       (void) ctf_array_info (fp, type, &ar);
@@ -119,6 +125,12 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
     case CTF_K_POINTER:
       ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = CTF_PREC_POINTER;
+      break;
+
+    case CTF_K_DECL_TAG:
+    case CTF_K_VAR:
+      ctf_decl_push (cd, fp, suffix->ctt_type);
+      prec = CTF_PREC_BASE; /* UPTODO probably wrong */
       break;
 
     case CTF_K_SLICE:
