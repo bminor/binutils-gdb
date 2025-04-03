@@ -411,7 +411,7 @@ struct ctf_dict
   uint32_t *ctf_sxlate;		  /* Translation table for unindexed symtypetab
 				     entries.  */
   unsigned long ctf_nsyms;	  /* Number of entries in symtab xlate table.  */
-  uint32_t *ctf_txlate;		  /* Translation table for type IDs.  */
+  ctf_type_t **ctf_txlate;	  /* Translation table for type IDs.  */
   uint32_t *ctf_ptrtab;		  /* Translation table for pointer-to lookups.  */
   size_t ctf_ptrtab_len;	  /* Num types storable in ptrtab currently.  */
   uint32_t *ctf_pptrtab;	  /* Parent types pointed to by child dicts.  */
@@ -601,8 +601,8 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 
 #define LCTF_INDEX_TO_TYPEPTR(fp, i)					\
   ((i > fp->ctf_stypes) ?						\
-   &(ctf_dtd_lookup (fp, ctf_index_to_type (fp, i))->dtd_data) :	\
-   (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]))
+   ctf_dtd_lookup (fp, ctf_index_to_type (fp, i))->dtd_data :		\
+   (fp)->ctf_txlate[(i)])
 
 /* The non *INFO variants of these macros acquire the relevant info from the
    suffixed type, if the type is prefixed.  (Internally to libctf, all types

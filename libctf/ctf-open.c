@@ -696,7 +696,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
      because later-added types will call grow_ptrtab() automatically, as
      needed.  */
 
-  fp->ctf_txlate = calloc (typemax + 1, sizeof (uint32_t));
+  fp->ctf_txlate = calloc (typemax + 1, sizeof (ctf_type_t *));
   fp->ctf_ptrtab = calloc (typemax + 1, sizeof (uint32_t));
   fp->ctf_ptrtab_len = typemax + 1;
   fp->ctf_stypes = typemax;
@@ -773,8 +773,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
   assert (!(fp->ctf_flags & LCTF_NO_STR));
 
-  xp = fp->ctf_txlate;
-  *xp++ = 0;			/* Type id 0 is used as a sentinel value.  */
+  xp = &fp->ctf_txlate[1];
 
   /* In this second pass through the types, we fill in each entry of the type
      and pointer tables and add names to the appropriate hashes.
