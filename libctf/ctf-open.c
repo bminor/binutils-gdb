@@ -798,6 +798,9 @@ init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
   return err;
 }
 
+static int
+init_void (ctf_dict_t *fp);
+
 /* Initialize the parts of the CTF dict whose initialization depends on name or
    type lookup.  This happens at open time except for child dicts, when (for
    CTFv4+ dicts) it happens at ctf_import time instead, because before then the
@@ -1106,6 +1109,9 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 
   ctf_dprintf ("%u total types processed\n", fp->ctf_typemax);
 
+  if ((err = init_void (fp) < 0))
+    return err;
+
   /* In the third pass, we traverse the enums we spotted earlier and track all
      the enumeration constants to aid in future detection of duplicates.
 
@@ -1178,6 +1184,52 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	       ctf_dynhash_elements (fp->ctf_unions));
   ctf_dprintf ("%zu base type names and identifiers hashed\n",
 	       ctf_dynhash_elements (fp->ctf_names));
+
+  return 0;
+}
+
+/* Prepare the void type.  If present, index 0 is pointed at it: otherwise, we
+   make one in the ctf_void_type member and point index 0 at that.  Because this
+   is index 0, it is not written out by serialization (which always starts at
+   index 1): because it is type 0, it is the type expected by BTF consumers:
+   because it is a real, queryable type, CTF consumers will get a proper type
+   back that they can query the properties of.
+
+   As an initialization function, this returns a positive error code, or
+   zero.  */
+
+static int
+init_void (ctf_dict_t *fp)
+{
+  ctf_id_t void_type;
+  ctf_type_t *void_tp;
+
+  void_type = ctf_dynhash_lookup_type (ctf_name_table (fp, CTF_K_INTEGER), "void");
+
+  if (void_type == 0)
+    {
+      uint32_t *vlen;
+
+      if ((void_tp = calloc (1, sizeof (ctf_type_t) + sizeof (uint32_t))) == NULL)
+	return ENOMEM;
+      vlen = (uint32_t *) (void_tp + 1);
+
+      void_tp->ctt_name = ctf_str_add (fp, "void");
+      void_tp->ctt_info = CTF_TYPE_INFO (CTF_K_INTEGER, 0, 0);
+      void_tp->ctt_size = 4;			/* (bytes)  */
+      *vlen = CTF_INT_DATA (CTF_INT_SIGNED, 0, 0);
+
+      fp->ctf_void_type = void_tp;
+    }
+  else
+    {
+      ctf_dict_t *tmp = fp;
+
+      void_tp = (ctf_type_t *) ctf_lookup_by_id (&tmp, void_type, NULL);
+      assert (void_tp != NULL);
+    }
+
+  fp->ctf_txlate[0] = void_tp;
 
   return 0;
 }
@@ -2389,6 +2441,7 @@ ctf_dict_close (ctf_dict_t *fp)
       free (err);
     }
 
+  free (fp->ctf_void_type);
   free (fp->ctf_sxlate);
   free (fp->ctf_txlate);
   free (fp->ctf_ptrtab);
@@ -2527,6 +2580,7 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   const char *old_parent_name = fp->ctf_parent_name;
   int old_unreffed = fp->ctf_parent_unreffed;
   int is_btf = 0;
+  size_t expected_prov_strings = 0;
 
   if (pfp == NULL || pfp == fp->ctf_parent)
     return 0;
@@ -2583,16 +2637,22 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 	      return (ctf_set_errno (fp, EINVAL));
 	    }
 	  fp->ctf_header->cth_parent_ntypes = pfp->ctf_typemax;
+
+	  /* We expect one provisional string in this new dict, for the name of
+	     the (non-reffed, non-written-out) void type.  */
+	  expected_prov_strings++;
 	}
     }
 
-  /* We might in time be able to lift this restriction, but it is unlikely to be
-     something anyone would want to do, so let's not bother for now.  */
+  /* No importing dicts with provisional strings in (except for the void one
+     added to all new dicts).  We might in time be able to lift this
+     restriction, but it is unlikely to be something anyone would want to do, so
+     let's not bother for now.  */
 
-  if (ctf_dynhash_elements (fp->ctf_prov_strtab) != 0)
+  if (ctf_dynhash_elements (fp->ctf_prov_strtab) != expected_prov_strings)
     {
       ctf_err_warn (fp, 0, EINVAL,
-		    _("ctf_import: child dict already has %zi bytes of strings, cannot import"),
+		    _("ctf_import: child dict already has %zi strings, cannot import"),
 		    ctf_dynhash_elements (fp->ctf_prov_strtab));
       return (ctf_set_errno (fp, EINVAL));
     }

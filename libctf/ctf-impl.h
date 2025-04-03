@@ -438,6 +438,8 @@ struct ctf_dict
   uint32_t *ctf_pptrtab;	  /* Parent types pointed to by child dicts.  */
   size_t ctf_pptrtab_len;	  /* Num types storable in pptrtab currently.  */
   uint32_t ctf_pptrtab_typemax;	  /* Max child type when pptrtab last updated.  */
+  ctf_type_t *ctf_void_type;	  /* void type, if dynamically constructed. (More
+				     space allocated, due to vlen.)  */
   ctf_dynset_t *ctf_conflicting_enums;	/* Tracks enum constants that conflict.  */
   uint32_t *ctf_funcidx_names;	  /* Name of each function symbol in symtypetab
 				     (if indexed).  */
