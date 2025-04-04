@@ -842,11 +842,11 @@ typy_lookup_typename (const char *type_name, const struct block *block)
   try
     {
       if (startswith (type_name, "struct "))
-	type = lookup_struct (type_name + 7, NULL);
+	type = lookup_struct (type_name + 7, block);
       else if (startswith (type_name, "union "))
-	type = lookup_union (type_name + 6, NULL);
+	type = lookup_union (type_name + 6, block);
       else if (startswith (type_name, "enum "))
-	type = lookup_enum (type_name + 5, NULL);
+	type = lookup_enum (type_name + 5, block);
       else
 	type = lookup_typename (current_language,
 				type_name, block, 0);

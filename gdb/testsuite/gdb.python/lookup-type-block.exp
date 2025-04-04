@@ -1,0 +1,68 @@
+# Copyright (C) 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test the 'block' argument to gdb.lookup_type.
+
+load_lib gdb-python.exp
+
+require allow_python_tests
+
+standard_testfile lookup1.c lookup2.c
+
+if {[prepare_for_testing "failed to prepare" ${testfile} \
+	 [list $srcfile $srcfile2]]} {
+    return
+}
+
+proc check_type {which type_name} {
+    if {$which == "one"} {
+	set fn_name function
+    } else {
+	set fn_name main
+    }
+
+    gdb_test_no_output \
+	"python block = gdb.decode_line(\"$fn_name\")\[1\]\[0\].symtab.static_block()" \
+	"compute block"
+    gdb_test_no_output \
+	"python ty = gdb.lookup_type(\"$type_name\", block).strip_typedefs()" \
+	"find the type"
+    gdb_test "python print(ty.fields()\[0\].name)" \
+	"$which" \
+	"examine first field"
+}
+
+proc check_all_types {} {
+    foreach_with_prefix which {one two} {
+	foreach_with_prefix type_name {
+	    "struct the_struct"
+	    "enum the_enum"
+	    "union the_union"
+	    "the_typedef"
+	} {
+	    check_type $which $type_name
+	}
+    }
+}
+
+check_all_types
+
+if {![runto_main]} {
+    return
+}
+
+with_test_prefix "while running" {
+    check_all_types
+}
