@@ -4642,14 +4642,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   PREDRES_INSN ("cpp", 0xd50b73e0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
   PREDRES2_INSN ("cosp", 0xd50b73c0, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
   BRBE_INSN ("brb", 0xd5097280, 0xffffffc0, OP2 (BRBOP, Rt_IN_SYS_ALIASES), QL_IMM_NIL_NIL, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
-  /* Armv8.4-a flag setting instruction, However this encoding has an encoding clash with the msr
-     below it.  Usually we can resolve this by setting an alias condition on the flags, however that
-     depends on the disassembly masks to be able to quickly find the alias.  The problem is the
-     cfinv instruction has no arguments, so all bits are set in the mask.  Which means it will
-     potentially alias with too many instructions and so the tree can't be constructed.   As a work
-     around we just place cfinv before msr.  This means the order between these two shouldn't be
-     changed.  */
   FLAGM_INSN ("cfinv",  0xd500401f, 0xffffffff, ic_system, OP0 (), {}, 0),
+  /* This msr entry has a lot of aliases, and some of these (such as "hint")
+     have their own (recursive) aliases.  We currently use a flat alias
+     structure, so to avoid creating an excessively long list of aliases for
+     the entire msr space we instead handle the top level of disambiguation
+     outside the alias infrastructure.  This requires that all of the top-level
+     aliases of msr must appear earlier in the opcode table, since normal
+     (non-alias) disassembly is done on a "first match" basis.  */
   CORE_INSN ("msr", 0xd5000000, 0xffe00000, ic_system, 0, OP2 (SYSREG, Rt), QL_SRC_X, F_SYS_WRITE),
   CORE_INSN ("sysl",0xd5280000, 0xfff80000, ic_system, 0, OP5 (Rt, UIMM3_OP1, CRn, CRm, UIMM3_OP2), QL_SYSL, 0),
   CORE_INSN ("mrs", 0xd5200000, 0xffe00000, ic_system, 0, OP2 (Rt, SYSREG), QL_DST_X, F_SYS_READ),
