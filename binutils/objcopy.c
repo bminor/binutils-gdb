@@ -4114,29 +4114,6 @@ power_of_two (bfd_vma val)
   return result;
 }
 
-static unsigned int
-image_scn_align (unsigned int alignment)
-{
-  switch (alignment)
-    {
-    case 8192: return IMAGE_SCN_ALIGN_8192BYTES;
-    case 4096: return IMAGE_SCN_ALIGN_4096BYTES;
-    case 2048: return IMAGE_SCN_ALIGN_2048BYTES;
-    case 1024: return IMAGE_SCN_ALIGN_1024BYTES;
-    case  512: return IMAGE_SCN_ALIGN_512BYTES;
-    case  256: return IMAGE_SCN_ALIGN_256BYTES;
-    case  128: return IMAGE_SCN_ALIGN_128BYTES;
-    case   64: return IMAGE_SCN_ALIGN_64BYTES;
-    case   32: return IMAGE_SCN_ALIGN_32BYTES;
-    case   16: return IMAGE_SCN_ALIGN_16BYTES;
-    case    8: return IMAGE_SCN_ALIGN_8BYTES;
-    case    4: return IMAGE_SCN_ALIGN_4BYTES;
-    case    2: return IMAGE_SCN_ALIGN_2BYTES;
-    case    1: return IMAGE_SCN_ALIGN_1BYTES;
-    default: return 0;
-    }
-}
-
 /* Create a section in OBFD with the same
    name and attributes as ISECTION in IBFD.  */
 
@@ -4302,24 +4279,9 @@ setup_section (bfd *ibfd, sec_ptr isection, bfd *obfd)
   if (p != NULL)
     alignment = p->alignment;
   else if (pe_section_alignment != (bfd_vma) -1
-	   && bfd_get_flavour (ibfd) == bfd_target_coff_flavour
-	   && bfd_get_flavour (obfd) == bfd_target_coff_flavour)
-    {
-      alignment = power_of_two (pe_section_alignment);
-
-      if (coff_section_data (ibfd, isection))
-	{
-	  struct pei_section_tdata * pei_data = pei_section_data (ibfd, isection);
-
-	  if (pei_data != NULL)
-	    {
-	      /* Set the alignment flag of the input section, which will
-		 be copied to the output section later on.  */
-	      pei_data->pe_flags &= ~IMAGE_SCN_ALIGN_POWER_BIT_MASK;
-	      pei_data->pe_flags |= image_scn_align (pe_section_alignment);
-	    }
-	}
-    }
+	   && bfd_get_flavour (obfd) == bfd_target_coff_flavour
+	   && bfd_pei_p (obfd))
+    alignment = power_of_two (pe_section_alignment);
   else
     alignment = bfd_section_alignment (isection);
 

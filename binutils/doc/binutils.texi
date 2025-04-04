@@ -2146,9 +2146,6 @@ Sets the section alignment field in the PE header - if one is present
 in the binary.  Sections in memory will always begin at addresses
 which are a multiple of this number.  Defaults to 0x1000.
 
-Note - this option will also set the alignment field in each section's
-flags.
-
 Note - if a section's LMA or VMA addresses are no longer aligned, and
 those addresses have not been set via the @option{--set-section-lma} or
 @option{--set-section-vma} options, and the file has been fully
