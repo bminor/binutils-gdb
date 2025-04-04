@@ -6227,7 +6227,8 @@ main (int argc, char *argv[])
 #ifndef is_strip
   if (is_strip < 0)
     {
-      int i = strlen (program_name);
+      size_t i = strlen (program_name);
+
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
       /* Drop the .exe suffix, if any.  */
       if (i > 4 && FILENAME_CMP (program_name + i - 4, ".exe") == 0)
