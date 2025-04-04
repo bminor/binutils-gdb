@@ -5943,6 +5943,11 @@ copy_main (int argc, char *argv[])
 
 	case OPTION_FILE_ALIGNMENT:
 	  pe_file_alignment = parse_vma (optarg, "--file-alignment");
+	  if (power_of_two (pe_file_alignment) == -1)
+	    {
+	      non_fatal (_("--file-alignment argument is not a power of two: %s - ignoring"), optarg);
+	      pe_file_alignment = (bfd_vma) -1;
+	    }
 	  break;
 
 	case OPTION_HEAP:
