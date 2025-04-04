@@ -287,13 +287,13 @@ endif
 
 cxxfilt_SOURCES = cxxfilt.c $(BULIBS)
 
-ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c binemul.c \
+ar_SOURCES = arparse.y arlex.l not-ranlib.c arsup.c rename.c binemul.c \
 	emul_$(EMULATION).c $(BULIBS)
 EXTRA_ar_SOURCES = $(CFILES)
 ar_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL)
 
-ranlib_SOURCES = ar.c is-ranlib.c arparse.y arlex.l arsup.c rename.c \
-	binemul.c emul_$(EMULATION).c $(BULIBS)
+ranlib_SOURCES = arparse.y arlex.l is-ranlib.c arsup.c rename.c binemul.c \
+	emul_$(EMULATION).c $(BULIBS)
 ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL)
 
 addr2line_SOURCES = addr2line.c $(BULIBS)

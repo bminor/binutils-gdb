@@ -208,9 +208,9 @@ AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-am_ar_OBJECTS = arparse.$(OBJEXT) arlex.$(OBJEXT) ar.$(OBJEXT) \
-	not-ranlib.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) \
-	binemul.$(OBJEXT) emul_$(EMULATION).$(OBJEXT) $(am__objects_1)
+am_ar_OBJECTS = arparse.$(OBJEXT) arlex.$(OBJEXT) not-ranlib.$(OBJEXT) \
+	arsup.$(OBJEXT) rename.$(OBJEXT) binemul.$(OBJEXT) \
+	emul_$(EMULATION).$(OBJEXT) $(am__objects_1)
 ar_OBJECTS = $(am_ar_OBJECTS)
 bfdtest1_SOURCES = bfdtest1.c
 bfdtest1_OBJECTS = bfdtest1.$(OBJEXT)
@@ -249,8 +249,8 @@ am_objdump_OBJECTS = objdump.$(OBJEXT) dwarf.$(OBJEXT) prdbg.$(OBJEXT) \
 	$(am__objects_2)
 objdump_OBJECTS = $(am_objdump_OBJECTS)
 @ENABLE_LIBCTF_TRUE@am__DEPENDENCIES_2 = ../libctf/libctf.la
-am_ranlib_OBJECTS = ar.$(OBJEXT) is-ranlib.$(OBJEXT) arparse.$(OBJEXT) \
-	arlex.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) \
+am_ranlib_OBJECTS = arparse.$(OBJEXT) arlex.$(OBJEXT) \
+	is-ranlib.$(OBJEXT) arsup.$(OBJEXT) rename.$(OBJEXT) \
 	binemul.$(OBJEXT) emul_$(EMULATION).$(OBJEXT) $(am__objects_1)
 ranlib_OBJECTS = $(am_ranlib_OBJECTS)
 am_readelf_OBJECTS = readelf.$(OBJEXT) version.$(OBJEXT) \
@@ -805,13 +805,13 @@ objdump_SOURCES = objdump.c dwarf.c prdbg.c demanguse.c $(DEBUG_SRCS) $(BULIBS) 
 EXTRA_objdump_SOURCES = od-elf32_avr.c od-macho.c od-xcoff.c od-pe.c
 objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(LIBCTF) $(BFDLIB) $(LIBIBERTY) $(LIBINTL) $(DEBUGINFOD_LIBS) $(LIBSFRAME)
 cxxfilt_SOURCES = cxxfilt.c $(BULIBS)
-ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c binemul.c \
+ar_SOURCES = arparse.y arlex.l not-ranlib.c arsup.c rename.c binemul.c \
 	emul_$(EMULATION).c $(BULIBS)
 
 EXTRA_ar_SOURCES = $(CFILES)
 ar_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL)
-ranlib_SOURCES = ar.c is-ranlib.c arparse.y arlex.l arsup.c rename.c \
-	binemul.c emul_$(EMULATION).c $(BULIBS)
+ranlib_SOURCES = arparse.y arlex.l is-ranlib.c arsup.c rename.c binemul.c \
+	emul_$(EMULATION).c $(BULIBS)
 
 ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL)
 addr2line_SOURCES = addr2line.c $(BULIBS)
