@@ -533,7 +533,9 @@ extern char *program_name;
 /* This flag distinguishes between strip and objcopy:
    1 means this is 'strip'; 0 means this is 'objcopy'.
    -1 means if we should use argv[0] to decide.  */
+#ifndef is_strip
 extern int is_strip;
+#endif
 
 /* The maximum length of an S record.  This variable is defined in srec.c
    and can be modified by the --srec-len parameter.  */
@@ -6222,6 +6224,7 @@ main (int argc, char *argv[])
     fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
+#ifndef is_strip
   if (is_strip < 0)
     {
       int i = strlen (program_name);
@@ -6235,6 +6238,7 @@ main (int argc, char *argv[])
 #endif
       is_strip = (i >= 5 && FILENAME_CMP (program_name + i - 5, "strip") == 0);
     }
+#endif /* is_strip */
 
   create_symbol_htabs ();
   xatexit (delete_symbol_htabs);

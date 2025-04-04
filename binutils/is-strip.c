@@ -17,7 +17,5 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-/* Linked with objcopy.o to flag that this program is 'strip' (not
-   'objcopy').  */
-
-int is_strip = 1;
+#define is_strip 1
+#include "objcopy.c"
