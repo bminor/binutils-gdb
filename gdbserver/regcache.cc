@@ -353,8 +353,7 @@ supply_register_by_name_zeroed (struct regcache *regcache,
 #endif
 
 /* Supply the whole register set whose contents are stored in BUF, to
-   REGCACHE.  If BUF is NULL, all the registers' values are recorded
-   as unavailable.  */
+   REGCACHE.  */
 
 void
 supply_regblock (struct regcache *regcache, const void *buf)
