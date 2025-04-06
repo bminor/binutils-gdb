@@ -331,6 +331,25 @@ print_and_clear_messages (struct per_xvec_messages *list,
 	free (iter);
       iter = next;
     }
+
+  /* Don't retain a pointer to free'd memory.  */
+  list->next = NULL;
+}
+
+/* Discard all messages associated with TARG in LIST.  Unlike
+   print_and_clear_messages, PER_XVEC_NO_TARGET is not valid for TARG.  */
+
+static void
+clear_messages (struct per_xvec_messages *list,
+		const bfd_target *targ)
+{
+  struct per_xvec_messages *iter;
+
+  for (iter = list; iter != NULL; iter = iter->next)
+    {
+      if (iter->targ == targ)
+	clear_warnmsg (&iter->messages);
+    }
 }
 
 /* This a copy of lto_section defined in GCC (lto-streamer.h).  */
@@ -544,6 +563,12 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 
       /* Change BFD's target temporarily.  */
       abfd->xvec = *target;
+
+      /* It is possible that targets appear multiple times in
+	 bfd_target_vector.  If this is the case, then we want to avoid
+	 accumulating duplicate messages for a target in MESSAGES, so
+	 discard any previous messages associated with this target.  */
+      clear_messages (&messages, abfd->xvec);
 
       if (bfd_seek (abfd, 0, SEEK_SET) != 0)
 	goto err_ret;
