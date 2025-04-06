@@ -243,6 +243,55 @@ xcoff_get_section_contents (bfd *abfd, asection *sec)
   return contents;
 }
 
+/* Read .loader and swap in the header.  Sanity check to prevent
+   buffer overflows.  Don't bother to check for overlap as that sort
+   of insanity shouldn't lead to incorrect program behaviour.  */
+
+static bfd_byte *
+xcoff_get_ldhdr (bfd *abfd, asection *lsec, struct internal_ldhdr *ldhdr)
+{
+  bfd_byte *contents = xcoff_get_section_contents (abfd, lsec);
+  if (contents)
+    {
+      bfd_xcoff_swap_ldhdr_in (abfd, contents, ldhdr);
+      if (ldhdr->l_nsyms != 0)
+	{
+	  bfd_vma symoff = bfd_xcoff_loader_symbol_offset (abfd, ldhdr);
+	  if (symoff > lsec->size)
+	    goto fail;
+	  bfd_size_type onesym = bfd_xcoff_ldsymsz (abfd);
+	  bfd_size_type syms;
+	  if (_bfd_mul_overflow (ldhdr->l_nsyms, onesym, &syms)
+	      || syms > lsec->size - symoff)
+	    goto fail;
+	}
+      if (ldhdr->l_stlen != 0
+	  && (ldhdr->l_stoff > lsec->size
+	      || ldhdr->l_stlen > lsec->size - ldhdr->l_stoff))
+	goto fail;
+      if (ldhdr->l_nreloc != 0)
+	{
+	  bfd_vma reloff = bfd_xcoff_loader_reloc_offset (abfd, ldhdr);
+	  if (reloff > lsec->size)
+	    goto fail;
+	  bfd_size_type onerel = bfd_xcoff_ldrelsz (abfd);
+	  bfd_size_type rels;
+	  if (_bfd_mul_overflow (ldhdr->l_nreloc, onerel, &rels)
+	      || rels > lsec->size - reloff)
+	    goto fail;
+	}
+      if (ldhdr->l_nimpid != 0
+	  && (ldhdr->l_impoff > lsec->size
+	      || ldhdr->l_istlen > lsec->size - ldhdr->l_impoff))
+	goto fail;
+    }
+  return contents;
+
+ fail:
+  bfd_set_error (bfd_error_file_truncated);
+  return NULL;
+}
+
 /* Get the size required to hold the dynamic symbols.  */
 
 long
@@ -265,11 +314,9 @@ _bfd_xcoff_get_dynamic_symtab_upper_bound (bfd *abfd)
       return -1;
     }
 
-  contents = xcoff_get_section_contents (abfd, lsec);
+  contents = xcoff_get_ldhdr (abfd, lsec, &ldhdr);
   if (!contents)
     return -1;
-
-  bfd_xcoff_swap_ldhdr_in (abfd, (void *) contents, &ldhdr);
 
   return (ldhdr.l_nsyms + 1) * sizeof (asymbol *);
 }
@@ -299,11 +346,9 @@ _bfd_xcoff_canonicalize_dynamic_symtab (bfd *abfd, asymbol **psyms)
       return -1;
     }
 
-  contents = xcoff_get_section_contents (abfd, lsec);
+  contents = xcoff_get_ldhdr (abfd, lsec, &ldhdr);
   if (!contents)
     return -1;
-
-  bfd_xcoff_swap_ldhdr_in (abfd, contents, &ldhdr);
 
   strings = (char *) contents + ldhdr.l_stoff;
 
@@ -384,11 +429,9 @@ _bfd_xcoff_get_dynamic_reloc_upper_bound (bfd *abfd)
       return -1;
     }
 
-  contents = xcoff_get_section_contents (abfd, lsec);
+  contents = xcoff_get_ldhdr (abfd, lsec, &ldhdr);
   if (!contents)
     return -1;
-
-  bfd_xcoff_swap_ldhdr_in (abfd, (struct external_ldhdr *) contents, &ldhdr);
 
   return (ldhdr.l_nreloc + 1) * sizeof (arelent *);
 }
@@ -419,11 +462,9 @@ _bfd_xcoff_canonicalize_dynamic_reloc (bfd *abfd,
       return -1;
     }
 
-  contents = xcoff_get_section_contents (abfd, lsec);
+  contents = xcoff_get_ldhdr (abfd, lsec, &ldhdr);
   if (!contents)
     return -1;
-
-  bfd_xcoff_swap_ldhdr_in (abfd, contents, &ldhdr);
 
   relbuf = bfd_alloc (abfd, ldhdr.l_nreloc * sizeof (arelent));
   if (relbuf == NULL)
@@ -905,15 +946,13 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
       return false;
     }
 
-  contents = xcoff_get_section_contents (abfd, lsec);
+  contents = xcoff_get_ldhdr (abfd, lsec, &ldhdr);
   if (!contents)
     return false;
 
   /* Remove the sections from this object, so that they do not get
      included in the link.  */
   bfd_section_list_clear (abfd);
-
-  bfd_xcoff_swap_ldhdr_in (abfd, contents, &ldhdr);
 
   strings = (char *) contents + ldhdr.l_stoff;
 
@@ -2368,11 +2407,9 @@ xcoff_link_check_dynamic_ar_symbols (bfd *abfd,
     /* There are no symbols, so don't try to include it.  */
     return true;
 
-  contents = xcoff_get_section_contents (abfd, lsec);
+  contents = xcoff_get_ldhdr (abfd, lsec, &ldhdr);
   if (!contents)
     return false;
-
-  bfd_xcoff_swap_ldhdr_in (abfd, contents, &ldhdr);
 
   strings = (char *) contents + ldhdr.l_stoff;
 
