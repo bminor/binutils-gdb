@@ -6343,7 +6343,7 @@ create_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
 	continue;
 
       std::optional<ULONGEST> signature
-	= lookup_dwo_id (cu, reader.top_level_die ());
+	= lookup_dwo_id (reader.cu (), reader.top_level_die ());
       if (!signature.has_value ())
 	{
 	  complaint (_(DWARF_ERROR_PREFIX
