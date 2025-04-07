@@ -22,6 +22,7 @@ try:
     from pygments import formatters, highlight, lexers
     from pygments.filters import TokenMergeFilter
     from pygments.token import Comment, Error, Text
+    from pygments.util import ClassNotFound
 
     _formatter = None
 
@@ -31,10 +32,13 @@ try:
             _formatter = formatters.TerminalFormatter()
         return _formatter
 
-    def colorize(filename, contents):
+    def colorize(filename, contents, lang):
         # Don't want any errors.
         try:
-            lexer = lexers.get_lexer_for_filename(filename, stripnl=False)
+            try:
+                lexer = lexers.get_lexer_by_name(lang, stripnl=False)
+            except ClassNotFound:
+                lexer = lexers.get_lexer_for_filename(filename, stripnl=False)
             formatter = get_formatter()
             return highlight(contents, lexer, formatter).encode(
                 gdb.host_charset(), "backslashreplace"
@@ -94,7 +98,7 @@ try:
 
 except ImportError:
 
-    def colorize(filename, contents):
+    def colorize(filename, contents, lang):
         return None
 
     def colorize_disasm(content, gdbarch):

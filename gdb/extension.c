@@ -974,7 +974,8 @@ xmethod_worker::get_result_type (value *object, gdb::array_view<value *> args)
 /* See extension.h.  */
 
 std::optional<std::string>
-ext_lang_colorize (const std::string &filename, const std::string &contents)
+ext_lang_colorize (const std::string &filename, const std::string &contents,
+		   enum language lang)
 {
   std::optional<std::string> result;
 
@@ -983,7 +984,7 @@ ext_lang_colorize (const std::string &filename, const std::string &contents)
       if (extlang->ops == nullptr
 	  || extlang->ops->colorize == nullptr)
 	continue;
-      result = extlang->ops->colorize (filename, contents);
+      result = extlang->ops->colorize (filename, contents, lang);
       if (result.has_value ())
 	return result;
     }

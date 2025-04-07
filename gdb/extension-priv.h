@@ -262,12 +262,13 @@ struct extension_language_ops
      const char *method_name,
      std::vector<xmethod_worker_up> *dm_vec);
 
-  /* Colorize a source file.  NAME is the source file's name, and
-     CONTENTS is the contents of the file.  This should either return
-     colorized (using ANSI terminal escapes) version of the contents,
+  /* Colorize a source file.  NAME is the source file's name, CONTENTS is the
+     contents of the file, and LANG is the language.  This should either
+     return colorized (using ANSI terminal escapes) version of the contents,
      or an empty option.  */
   std::optional<std::string> (*colorize) (const std::string &name,
-					  const std::string &contents);
+					  const std::string &contents,
+					  enum language lang);
 
   /* Colorize a single line of disassembler output, CONTENT.  This should
      either return colorized (using ANSI terminal escapes) version of the

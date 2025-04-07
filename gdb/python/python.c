@@ -128,7 +128,8 @@ static bool gdbpy_check_quit_flag (const struct extension_language_defn *);
 static enum ext_lang_rc gdbpy_before_prompt_hook
   (const struct extension_language_defn *, const char *current_gdb_prompt);
 static std::optional<std::string> gdbpy_colorize
-  (const std::string &filename, const std::string &contents);
+  (const std::string &filename, const std::string &contents,
+   enum language lang);
 static std::optional<std::string> gdbpy_colorize_disasm
 (const std::string &content, gdbarch *gdbarch);
 static ext_lang_missing_file_result gdbpy_handle_missing_debuginfo
@@ -1295,7 +1296,8 @@ gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
 /* This is the extension_language_ops.colorize "method".  */
 
 static std::optional<std::string>
-gdbpy_colorize (const std::string &filename, const std::string &contents)
+gdbpy_colorize (const std::string &filename, const std::string &contents,
+		enum language lang)
 {
   if (!gdb_python_initialized)
     return {};
@@ -1329,6 +1331,13 @@ gdbpy_colorize (const std::string &filename, const std::string &contents)
       return {};
     }
 
+  gdbpy_ref<> lang_arg (PyUnicode_FromString (language_str (lang)));
+  if (lang_arg == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
   /* The pygments library, which is what we currently use for applying
      styling, is happy to take input as a bytes object, and to figure out
      the encoding for itself.  This removes the need for us to figure out
@@ -1349,6 +1358,7 @@ gdbpy_colorize (const std::string &filename, const std::string &contents)
   gdbpy_ref<> result (PyObject_CallFunctionObjArgs (hook.get (),
 						    fname_arg.get (),
 						    contents_arg.get (),
+						    lang_arg.get (),
 						    nullptr));
   if (result == nullptr)
     {

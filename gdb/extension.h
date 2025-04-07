@@ -325,12 +325,14 @@ extern void get_matching_xmethod_workers
    std::vector<xmethod_worker_up> *workers);
 
 /* Try to colorize some source code.  FILENAME is the name of the file
-   holding the code.  CONTENTS is the source code itself.  This will
-   either a colorized (using ANSI terminal escapes) version of the
-   source code, or an empty value if colorizing could not be done.  */
+   holding the code.  CONTENTS is the source code itself.  LANG is the
+   language of the CONTENTS.  This will either a colorized (using ANSI
+   terminal escapes) version of the source code, or an empty value if
+   colorizing could not be done.  */
 
 extern std::optional<std::string> ext_lang_colorize
-  (const std::string &filename, const std::string &contents);
+  (const std::string &filename, const std::string &contents,
+   enum language lang);
 
 /* Try to colorize a single line of disassembler output, CONTENT for
    GDBARCH.  This will return either a colorized (using ANSI terminal

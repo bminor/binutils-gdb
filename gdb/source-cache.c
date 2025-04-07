@@ -364,7 +364,8 @@ source_cache::ensure (struct symtab *s)
       if (!styled_p)
 	{
 	  std::optional<std::string> ext_contents;
-	  ext_contents = ext_lang_colorize (fullname, contents);
+	  ext_contents = ext_lang_colorize (fullname, contents,
+					    s->language ());
 	  if (ext_contents.has_value ())
 	    {
 	      contents = std::move (*ext_contents);
