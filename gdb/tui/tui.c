@@ -67,7 +67,12 @@ show_tui_debug (struct ui_file *file, int from_tty,
 
 /* Tells whether the TUI is active or not.  */
 bool tui_active = false;
-static bool tui_finish_init = true;
+
+/* Tells whether the TUI should do deferred curses initialization.
+   If TRIBOOL_TRUE, then yes.  If TRIBOOL_FALSE. then no (because
+   initialization is already done).  If TRIBOOL_UNKNOWN, then no (because
+   initialization failed).  */
+static tribool tui_finish_init = TRIBOOL_TRUE;
 
 enum tui_key_mode tui_current_key_mode = TUI_COMMAND_MODE;
 
@@ -392,7 +397,13 @@ tui_enable (void)
   /* To avoid to initialize curses when gdb starts, there is a deferred
      curses initialization.  This initialization is made only once
      and the first time the curses mode is entered.  */
-  if (tui_finish_init)
+  if (tui_finish_init == TRIBOOL_UNKNOWN)
+    {
+      /* Initialization failed before, just throw a generic error, don't try
+	 again.  */
+      error (_("Cannot enable the TUI"));
+    }
+  else if (tui_finish_init == TRIBOOL_TRUE)
     {
       WINDOW *w;
       SCREEN *s;
@@ -411,6 +422,9 @@ tui_enable (void)
 	 characters) if we're not outputting to a terminal.  */
       if (!gdb_stderr->isatty ())
 	error (_("Cannot enable the TUI when output is not a terminal"));
+
+      /* Don't try initialization again.  */
+      tui_finish_init = TRIBOOL_UNKNOWN;
 
       s = newterm (NULL, stdout, stdin);
 #ifdef __MINGW32__
@@ -470,7 +484,7 @@ tui_enable (void)
       tui_set_win_focus_to (tui_src_win ());
       keypad (tui_cmd_win ()->handle.get (), TRUE);
       wrefresh (tui_cmd_win ()->handle.get ());
-      tui_finish_init = false;
+      tui_finish_init = TRIBOOL_FALSE;
     }
   else
     {
