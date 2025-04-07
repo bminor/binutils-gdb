@@ -80,6 +80,7 @@ struct extended_symbol_info
 #define SYM_STAB_OTHER(sym)  (sym->sinfo->stab_other)
 #define SYM_SIZE(sym) \
   (sym->elfinfo \
+   && sym->elfinfo->internal_elf_sym.st_size \
    ? sym->elfinfo->internal_elf_sym.st_size \
    : sym->coffinfo \
      && ISFCN (sym->coffinfo->native->u.syment.n_type) \
@@ -1088,6 +1089,7 @@ sort_symbols_by_size (bfd *abfd, bool is_dynamic, void *minisyms,
       asection *sec;
       bfd_vma sz;
       asymbol *temp;
+      const elf_symbol_type *elfsym;
       const coff_symbol_type *coffsym;
 
       if (from + size < fromend)
@@ -1108,8 +1110,9 @@ sort_symbols_by_size (bfd *abfd, bool is_dynamic, void *minisyms,
 	 we can't rely on that information for the symbol size.  Ditto for
 	 bfd/section.c:global_syms like *ABS*.  */
       if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0
-	  && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-	sz = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
+	  && (elfsym = elf_symbol_from (sym)) != NULL
+	  && elfsym->internal_elf_sym.st_size != 0)
+	sz = elfsym->internal_elf_sym.st_size;
       else if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0
 	       && (coffsym = coff_symbol_from (sym)) != NULL
 	       && ISFCN (coffsym->native->u.syment.n_type)
