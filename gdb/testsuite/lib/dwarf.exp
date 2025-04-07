@@ -1649,7 +1649,7 @@ namespace eval Dwarf {
 	}
 	if { $_cu_is_fission } {
 	    set section "$section.dwo"
-	    set _abbrev_section "$section.dwo"
+	    set _abbrev_section "$_abbrev_section.dwo"
 	}
 
 	_section $section
