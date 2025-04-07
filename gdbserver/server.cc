@@ -4107,9 +4107,14 @@ static void test_registers_raw_compare_zero_length ()
   dummy_tdesc.reg_defs.emplace_back ("r0", 0, 32);
   dummy_tdesc.reg_defs.emplace_back ("r1", 32, 32);
 
+  /* Create a dummy buffer that will serve as the register buffer for our
+     dummy regcache.  */
+  gdb_byte dummy_register_buffer[8];
+
   /* Create our dummy register cache so we can invoke the raw_compare method
      we want to validate.  */
-  regcache dummy_regcache (&dummy_tdesc);
+  regcache dummy_regcache;
+  init_register_cache (&dummy_regcache, &dummy_tdesc, dummy_register_buffer);
 
   /* Create a dummy byte buffer we can pass to the raw_compare method.  */
   gdb_byte dummy_buffer[8];
