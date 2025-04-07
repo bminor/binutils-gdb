@@ -704,12 +704,16 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ADDR_RI_U6x2,    /* SVE [<Xn|SP>, #<uimm6>*2].  */
   AARCH64_OPND_SVE_ADDR_RI_U6x4,    /* SVE [<Xn|SP>, #<uimm6>*4].  */
   AARCH64_OPND_SVE_ADDR_RI_U6x8,    /* SVE [<Xn|SP>, #<uimm6>*8].  */
-  AARCH64_OPND_SVE_ADDR_R,	    /* SVE [<Xn|SP>].  */
-  AARCH64_OPND_SVE_ADDR_RR,	    /* SVE [<Xn|SP>, <Xm|XZR>].  */
-  AARCH64_OPND_SVE_ADDR_RR_LSL1,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #1].  */
-  AARCH64_OPND_SVE_ADDR_RR_LSL2,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #2].  */
-  AARCH64_OPND_SVE_ADDR_RR_LSL3,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #3].  */
-  AARCH64_OPND_SVE_ADDR_RR_LSL4,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #4].  */
+  AARCH64_OPND_SVE_ADDR_RR,	    /* SVE [<Xn|SP>{, <Xm|XZR>}].  */
+  AARCH64_OPND_SVE_ADDR_RR_LSL1,    /* SVE [<Xn|SP>{, <Xm|XZR>, LSL #1}].  */
+  AARCH64_OPND_SVE_ADDR_RR_LSL2,    /* SVE [<Xn|SP>{, <Xm|XZR>, LSL #2}].  */
+  AARCH64_OPND_SVE_ADDR_RR_LSL3,    /* SVE [<Xn|SP>{, <Xm|XZR>, LSL #3}].  */
+  AARCH64_OPND_SVE_ADDR_RR_LSL4,    /* SVE [<Xn|SP>{, <Xm|XZR>, LSL #4}].  */
+  AARCH64_OPND_SVE_ADDR_RM,	    /* SVE [<Xn|SP>, <Xm|XZR>].  */
+  AARCH64_OPND_SVE_ADDR_RM_LSL1,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #1].  */
+  AARCH64_OPND_SVE_ADDR_RM_LSL2,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #2].  */
+  AARCH64_OPND_SVE_ADDR_RM_LSL3,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #3].  */
+  AARCH64_OPND_SVE_ADDR_RM_LSL4,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #4].  */
   AARCH64_OPND_SVE_ADDR_RX,	    /* SVE [<Xn|SP>, <Xm>].  */
   AARCH64_OPND_SVE_ADDR_RX_LSL1,    /* SVE [<Xn|SP>, <Xm>, LSL #1].  */
   AARCH64_OPND_SVE_ADDR_RX_LSL2,    /* SVE [<Xn|SP>, <Xm>, LSL #2].  */

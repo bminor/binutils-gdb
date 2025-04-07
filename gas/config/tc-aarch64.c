@@ -7806,8 +7806,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->addr.offset.imm = inst.reloc.exp.X_add_number;
 	  break;
 
-	case AARCH64_OPND_SVE_ADDR_R:
-	  /* [<Xn|SP>{, <R><m>}]
+	case AARCH64_OPND_SVE_ADDR_RR:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL1:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL2:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL4:
+	  /* [<Xn|SP>{, <R><m>{, lsl #<amount>}}]
 	     but recognizing SVE registers.  */
 	  po_misc_or_fail (parse_sve_address (&str, info, &base_qualifier,
 					      &offset_qualifier));
@@ -7816,15 +7820,20 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      offset_qualifier = AARCH64_OPND_QLF_X;
 	      info->addr.offset.is_reg = 1;
 	      info->addr.offset.regno = 31;
-	    }
-	  else
-	    {
-	      /* This operand is used for different shift types, so we have to
-		 reject explicit offsets.  */
-	      set_syntax_error (_("invalid addressing mode"));
-	      goto failure;
-	    }
 
+	      /* We set the shifter amount here, but let regoff_addr assign the
+		 shifter kind.  */
+	      if (operands[i] == AARCH64_OPND_SVE_ADDR_RR)
+		  info->shifter.amount = 0;
+	      else if (operands[i] == AARCH64_OPND_SVE_ADDR_RR_LSL1)
+		  info->shifter.amount = 1;
+	      else if (operands[i] == AARCH64_OPND_SVE_ADDR_RR_LSL2)
+		  info->shifter.amount = 2;
+	      else if (operands[i] == AARCH64_OPND_SVE_ADDR_RR_LSL3)
+		  info->shifter.amount = 3;
+	      else
+		  info->shifter.amount = 4;
+	    }
 	  if (base_qualifier != AARCH64_OPND_QLF_X
 	      || offset_qualifier != AARCH64_OPND_QLF_X)
 	    {
@@ -7833,11 +7842,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  goto regoff_addr;
 
-	case AARCH64_OPND_SVE_ADDR_RR:
-	case AARCH64_OPND_SVE_ADDR_RR_LSL1:
-	case AARCH64_OPND_SVE_ADDR_RR_LSL2:
-	case AARCH64_OPND_SVE_ADDR_RR_LSL3:
-	case AARCH64_OPND_SVE_ADDR_RR_LSL4:
+	case AARCH64_OPND_SVE_ADDR_RM:
+	case AARCH64_OPND_SVE_ADDR_RM_LSL1:
+	case AARCH64_OPND_SVE_ADDR_RM_LSL2:
+	case AARCH64_OPND_SVE_ADDR_RM_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RM_LSL4:
 	case AARCH64_OPND_SVE_ADDR_RX:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL2:
