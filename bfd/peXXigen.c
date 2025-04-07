@@ -4431,8 +4431,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       else
 	{
 	  _bfd_error_handler
-	    (_("%pB: unable to fill in DataDictionary[1] because .idata$2 is missing"),
-	     abfd);
+	    (_("%pB: unable to fill in DataDirectory[%d]: %s is missing"),
+	     abfd, PE_IMPORT_TABLE, ".idata$2");
 	  result = false;
 	}
 
@@ -4451,8 +4451,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       else
 	{
 	  _bfd_error_handler
-	    (_("%pB: unable to fill in DataDictionary[1] because .idata$4 is missing"),
-	     abfd);
+	    (_("%pB: unable to fill in DataDirectory[%d]: %s is missing"),
+	     abfd, PE_IMPORT_TABLE, ".idata$4");
 	  result = false;
 	}
 
@@ -4472,8 +4472,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       else
 	{
 	  _bfd_error_handler
-	    (_("%pB: unable to fill in DataDictionary[12] because .idata$5 is missing"),
-	     abfd);
+	    (_("%pB: unable to fill in DataDirectory[%d]: %s is missing"),
+	     abfd, PE_IMPORT_ADDRESS_TABLE, ".idata$5");
 	  result = false;
 	}
 
@@ -4492,8 +4492,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
       else
 	{
 	  _bfd_error_handler
-	    (_("%pB: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] because .idata$6 is missing"),
-	     abfd);
+	    (_("%pB: unable to fill in DataDirectory[%d]: %s is missing"),
+	     abfd, PE_IMPORT_ADDRESS_TABLE, ".idata$6");
 	  result = false;
 	}
     }
@@ -4534,8 +4534,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	  else
 	    {
 	      _bfd_error_handler
-		(_("%pB: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE(12)]"
-		   " because .idata$6 is missing"), abfd);
+		(_("%pB: unable to fill in DataDirectory[%d]: %s not defined correctly"),
+		 abfd, PE_IMPORT_ADDRESS_TABLE, "__IAT_end__");
 	      result = false;
 	    }
 	}
