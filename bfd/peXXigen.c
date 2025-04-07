@@ -593,7 +593,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
   PEAOUTHDR *aouthdr_out = (PEAOUTHDR *) out;
   bfd_vma sa, fa, ib;
-  IMAGE_DATA_DIRECTORY idata2, idata5, tls;
+  IMAGE_DATA_DIRECTORY idata2, idata5, tls, loadcfg;
 
   sa = extra->SectionAlignment;
   fa = extra->FileAlignment;
@@ -602,6 +602,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   idata2 = pe->pe_opthdr.DataDirectory[PE_IMPORT_TABLE];
   idata5 = pe->pe_opthdr.DataDirectory[PE_IMPORT_ADDRESS_TABLE];
   tls = pe->pe_opthdr.DataDirectory[PE_TLS_TABLE];
+  loadcfg = pe->pe_opthdr.DataDirectory[PE_LOAD_CONFIG_TABLE];
 
   if (aouthdr_in->tsize)
     {
@@ -651,6 +652,7 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
   extra->DataDirectory[PE_IMPORT_TABLE]  = idata2;
   extra->DataDirectory[PE_IMPORT_ADDRESS_TABLE] = idata5;
   extra->DataDirectory[PE_TLS_TABLE] = tls;
+  extra->DataDirectory[PE_LOAD_CONFIG_TABLE] = loadcfg;
 
   if (extra->DataDirectory[PE_IMPORT_TABLE].VirtualAddress == 0)
     /* Until other .idata fixes are made (pending patch), the entry for
@@ -4571,6 +4573,73 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 #else
       pe_data (abfd)->pe_opthdr.DataDirectory[PE_TLS_TABLE].Size = 0x28;
 #endif
+    }
+
+  name[0] = bfd_get_symbol_leading_char (abfd);
+  strcpy (name + !!name[0], "_load_config_used");
+  h1 = coff_link_hash_lookup (coff_hash_table (info), name, false, false, true);
+  if (h1 != NULL)
+    {
+      char data[4];
+      if ((h1->root.type == bfd_link_hash_defined
+	   || h1->root.type == bfd_link_hash_defweak)
+	  && h1->root.u.def.section != NULL
+	  && h1->root.u.def.section->output_section != NULL)
+	{
+	  pe_data (abfd)->pe_opthdr.DataDirectory[PE_LOAD_CONFIG_TABLE].VirtualAddress =
+	    (h1->root.u.def.value
+	     + h1->root.u.def.section->output_section->vma
+	     + h1->root.u.def.section->output_offset
+	     - pe_data (abfd)->pe_opthdr.ImageBase);
+
+	  if (pe_data (abfd)->pe_opthdr.DataDirectory[PE_LOAD_CONFIG_TABLE].VirtualAddress
+	      & (bfd_arch_bits_per_address (abfd) / bfd_arch_bits_per_byte (abfd)
+		- 1))
+	    {
+	      _bfd_error_handler
+		(_("%pB: unable to fill in DataDirectory[%d]: %s not properly aligned"),
+		 abfd, PE_LOAD_CONFIG_TABLE, name);
+	      result = false;
+	    }
+
+	  /* The size is stored as the first 4 bytes at _load_config_used.
+	     The Microsoft PE format documentation says for compatibility with
+	     Windows XP and earlier, the size must be 64 for x86 images.  If
+	     anyone cares about those versions, the size should be overridden
+	     for i386.  */
+	  if (bfd_get_section_contents (abfd,
+		h1->root.u.def.section->output_section, data,
+		h1->root.u.def.section->output_offset + h1->root.u.def.value,
+		4))
+	    {
+	      pe_data (abfd)->pe_opthdr.DataDirectory[PE_LOAD_CONFIG_TABLE].Size
+		= bfd_get_32 (abfd, data);
+
+	      if ((bfd_vma) pe_data (abfd)->pe_opthdr
+		  .DataDirectory[PE_LOAD_CONFIG_TABLE].Size
+		  > h1->root.u.def.section->size - h1->root.u.def.value)
+		{
+		  _bfd_error_handler
+		    (_("%pB: unable to fill in DataDirectory[%d]: size too large for the containing section"),
+		     abfd, PE_LOAD_CONFIG_TABLE);
+		  result = false;
+		}
+	    }
+	  else
+	    {
+	      _bfd_error_handler
+		(_("%pB: unable to fill in DataDirectory[%d]: size can't be read from %s"),
+		 abfd, PE_LOAD_CONFIG_TABLE, name);
+	      result = false;
+	    }
+	}
+      else
+	{
+	  _bfd_error_handler
+	    (_("%pB: unable to fill in DataDirectory[%d]: %s not defined correctly"),
+	     abfd, PE_LOAD_CONFIG_TABLE, name);
+	  result = false;
+	}
     }
 
 /* If there is a .pdata section and we have linked pdata finally, we
