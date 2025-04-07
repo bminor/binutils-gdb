@@ -1441,6 +1441,17 @@ namespace eval Dwarf {
     #                default = default
     # fission 0|1  - boolean indicating if generating Fission debug info
     #                default = 0
+    # dwo_id       - The value to use as the dwo_id field of skeleton and
+    #                split_compile unit headers.  May only be used with DWARF
+    #                version 5.
+    #
+    #                If a dwo_id value is specified (is non-zero), this unit is
+    #                assumed to be part of a skeleton/split_unit pair.  The unit
+    #                type will be chosen according to the `fission` value.
+    #
+    #                When using DWARF version 5 and fission is non-zero, it is
+    #                mandatory to provide a non-zero dwo_id value.
+    #                default = 0
     # label <label>
     #              - string indicating label to be defined at the start
     #                of the CU header.
@@ -1463,6 +1474,7 @@ namespace eval Dwarf {
 	set _cu_version 4
 	set _cu_addr_size default
 	set _cu_is_fission 0
+	set dwo_id 0
 	set section ".debug_info"
 	set _abbrev_section ".debug_abbrev"
 	set label ""
@@ -1474,6 +1486,7 @@ namespace eval Dwarf {
 		version { set _cu_version $value }
 		addr_size { set _cu_addr_size $value }
 		fission { set _cu_is_fission $value }
+		dwo_id { set dwo_id $value }
 		label { set label $value }
 		default { error "unknown option $name" }
 	    }
@@ -1524,12 +1537,42 @@ namespace eval Dwarf {
 
 	# The CU header for DWARF 4 and 5 are slightly different.
 	if { $_cu_version == 5 } {
-	    _op .byte 0x1 "DW_UT_compile"
+	    # The presence of a DWO_ID indicates that we generate a skeleton
+	    # or split_compile unit.
+	    if { $dwo_id != 0 } {
+		if { $_cu_is_fission } {
+		    set unit_type_name "DW_UT_split_compile"
+		} else {
+		    set unit_type_name "DW_UT_skeleton"
+		}
+	    } else {
+		set unit_type_name "DW_UT_compile"
+	    }
+
+	    _op .byte $_constants($unit_type_name) $unit_type_name
 	    _op .byte $_cu_addr_size "Pointer size"
 	    _op_offset $_cu_offset_size $my_abbrevs Abbrevs
+
+	    # Output DWO ID, if specified.
+	    if { $dwo_id != 0 } {
+		_op .8byte $dwo_id "DWO_ID"
+	    } else {
+		# To help catch user errors: if the caller asked to put this
+		# unit in the DWO file but didn't provide a DWO ID, it is likely
+		# an error.
+		if { $_cu_is_fission } {
+		    error "DWO ID not specified for DWARF 5 split compile"
+		}
+	    }
 	} else {
 	    _op_offset $_cu_offset_size $my_abbrevs Abbrevs
 	    _op .byte $_cu_addr_size "Pointer size"
+
+	    # For DWARF versions < 5, the DWO ID is not in the unit header,
+	    # so it makes not sense to specify one.
+	    if { $dwo_id != 0 } {
+		error "DWO ID specified for DWARF < 5 unit"
+	    }
 	}
 
 	_defer_output $_abbrev_section {
