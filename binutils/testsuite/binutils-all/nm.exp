@@ -163,6 +163,12 @@ if {   [is_elf_format]
     || [istarget wasm32-*-*]
     || [istarget bpf-*-*]} {
     set nm_1_src "nm-elf-1.s"
+} elseif {[is_coff_format] && ![istarget arm*-*-*]} {
+    if {[istarget *c4x-*-*] || [istarget *c54x-*-*]} {
+	set nm_1_src "nm-coff-sdef-1.s"
+    } else {
+	set nm_1_src "nm-coff-1.s"
+    }
 } else {
     set nm_1_src "nm-1.s"
 }

@@ -1887,8 +1887,8 @@ static const pseudo_typeS coff_pseudo_table[] =
   {"loc", obj_coff_loc, 0},
   {"optim", s_ignore, 0},	/* For sun386i cc (?) */
   {"weak", obj_coff_weak, 0},
-#if defined TC_TIC4X
-  /* The tic4x uses sdef instead of def.  */
+#if defined (TC_TIC4X) || defined (TC_TIC54X)
+  /* The tic4x and tic54x use sdef instead of def.  */
   {"sdef", obj_coff_def, 0},
 #endif
 #if defined(SEH_CMDS)

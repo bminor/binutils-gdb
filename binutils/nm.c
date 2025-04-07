@@ -79,7 +79,14 @@ struct extended_symbol_info
 #define SYM_STAB_DESC(sym)   (sym->sinfo->stab_desc)
 #define SYM_STAB_OTHER(sym)  (sym->sinfo->stab_other)
 #define SYM_SIZE(sym) \
-  (sym->elfinfo ? sym->elfinfo->internal_elf_sym.st_size: sym->ssize)
+  (sym->elfinfo \
+   ? sym->elfinfo->internal_elf_sym.st_size \
+   : sym->coffinfo \
+     && ISFCN (sym->coffinfo->native->u.syment.n_type) \
+     && sym->coffinfo->native->u.syment.n_numaux \
+     && sym->coffinfo->native[1].u.auxent.x_sym.x_misc.x_fsize \
+     ? sym->coffinfo->native[1].u.auxent.x_sym.x_misc.x_fsize \
+     : sym->ssize)
 
 /* The output formatting functions.  */
 static void print_object_filename_bsd (const char *);
@@ -1036,9 +1043,9 @@ size_forward2 (const void *P_x, const void *P_y)
     return sorters[0][reverse_sort] (x->minisym, y->minisym);
 }
 
-/* Sort the symbols by size.  ELF provides a size but for other formats
-   we have to make a guess by assuming that the difference between the
-   address of a symbol and the address of the next higher symbol is the
+/* Sort the symbols by size.  ELF and COFF may provide a size but for other
+   formats we have to make a guess by assuming that the difference between
+   the address of a symbol and the address of the next higher symbol is the
    size.  */
 
 static long
@@ -1081,6 +1088,7 @@ sort_symbols_by_size (bfd *abfd, bool is_dynamic, void *minisyms,
       asection *sec;
       bfd_vma sz;
       asymbol *temp;
+      const coff_symbol_type *coffsym;
 
       if (from + size < fromend)
 	{
@@ -1102,6 +1110,12 @@ sort_symbols_by_size (bfd *abfd, bool is_dynamic, void *minisyms,
       if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0
 	  && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	sz = ((elf_symbol_type *) sym)->internal_elf_sym.st_size;
+      else if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0
+	       && (coffsym = coff_symbol_from (sym)) != NULL
+	       && ISFCN (coffsym->native->u.syment.n_type)
+	       && coffsym->native->u.syment.n_numaux != 0
+	       && coffsym->native[1].u.auxent.x_sym.x_misc.x_fsize != 0)
+	sz = coffsym->native[1].u.auxent.x_sym.x_misc.x_fsize;
       else if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0
 	       && bfd_is_com_section (sec))
 	sz = sym->value;
