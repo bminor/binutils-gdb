@@ -4602,22 +4602,30 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	      result = false;
 	    }
 
-	  /* The size is stored as the first 4 bytes at _load_config_used.
-	     The Microsoft PE format documentation says for compatibility with
-	     Windows XP and earlier, the size must be 64 for x86 images.  If
-	     anyone cares about those versions, the size should be overridden
-	     for i386.  */
+	  /* The size is stored as the first 4 bytes at _load_config_used.  */
 	  if (bfd_get_section_contents (abfd,
 		h1->root.u.def.section->output_section, data,
 		h1->root.u.def.section->output_offset + h1->root.u.def.value,
 		4))
 	    {
+	      uint32_t size = bfd_get_32 (abfd, data);
+	      /* The Microsoft PE format documentation says for compatibility
+		 with Windows XP and earlier, the size must be 64 for x86
+		 images.  */
 	      pe_data (abfd)->pe_opthdr.DataDirectory[PE_LOAD_CONFIG_TABLE].Size
-		= bfd_get_32 (abfd, data);
+		= (bfd_get_arch (abfd) == bfd_arch_i386
+		   && ((bfd_get_mach (abfd) & ~bfd_mach_i386_intel_syntax)
+		       == bfd_mach_i386_i386)
+		   && ((pe_data (abfd)->pe_opthdr.Subsystem
+			== IMAGE_SUBSYSTEM_WINDOWS_GUI)
+		       || (pe_data (abfd)->pe_opthdr.Subsystem
+			   == IMAGE_SUBSYSTEM_WINDOWS_CUI))
+		   && (pe_data (abfd)->pe_opthdr.MajorSubsystemVersion * 256
+		       + pe_data (abfd)->pe_opthdr.MinorSubsystemVersion
+		       <= 0x0501))
+		? 64 : size;
 
-	      if ((bfd_vma) pe_data (abfd)->pe_opthdr
-		  .DataDirectory[PE_LOAD_CONFIG_TABLE].Size
-		  > h1->root.u.def.section->size - h1->root.u.def.value)
+	      if (size > h1->root.u.def.section->size - h1->root.u.def.value)
 		{
 		  _bfd_error_handler
 		    (_("%pB: unable to fill in DataDirectory[%d]: size too large for the containing section"),
