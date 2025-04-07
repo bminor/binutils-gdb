@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Free Software Foundation, Inc.
+# Copyright (C) 2024-2025 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,8 +60,10 @@ if { ![gdb_assert { ![expr {$res < 0 || $res == ""}] } $test] } {
 set test "got backtrace"
 set saw_backtrace false
 set no_awk false
+set location_re ${srcfile}:${decimal}
+
 gdb_test_multiple "" $test {
-    -i "$res" -re "#0 +(0x\[0-9a-f\]+ in )?main \(\).*\r\nGSTACK-END\r\n\$" {
+    -i "$res" -re "#0 +(0x\[0-9a-f\]+ in )?main \(\).*$location_re.*\r\nGSTACK-END\r\n\$" {
 	set saw_backtrace true
 	pass $test
 	exp_continue
