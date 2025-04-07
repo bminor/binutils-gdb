@@ -2495,7 +2495,6 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
       xcoff64_ppc_relocate_section,
       coff_rtype_to_howto,
       NULL,			/* _bfd_coff_adjust_symndx */
-      _bfd_generic_link_add_one_symbol,
       coff_link_output_has_begun,
       coff_final_link_postscript,
       NULL			/* print_pdata.  */
@@ -2768,7 +2767,6 @@ static const struct xcoff_backend_data_rec bfd_xcoff_aix5_backend_data =
       xcoff64_ppc_relocate_section,
       coff_rtype_to_howto,
       NULL,			/* _bfd_coff_adjust_symndx */
-      _bfd_generic_link_add_one_symbol,
       coff_link_output_has_begun,
       coff_final_link_postscript,
       NULL			/* print_pdata.  */

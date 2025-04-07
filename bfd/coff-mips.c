@@ -1316,7 +1316,7 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     _bfd_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
     _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL
+    NULL, NULL,
   },
   /* Supported architecture.  */
   bfd_arch_mips,

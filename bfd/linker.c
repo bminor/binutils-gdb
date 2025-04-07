@@ -1378,7 +1378,25 @@ hash_entry_bfd (struct bfd_link_hash_entry *h)
   /*NOTREACHED*/
 }
 
-/* Add a symbol to the global hash table.
+/*
+FUNCTION
+	_bfd_generic_link_add_one_symbol
+
+SYNOPSIS
+	bool _bfd_generic_link_add_one_symbol
+	  (struct bfd_link_info *info,
+	   bfd *abfd,
+	   const char *name,
+	   flagword flags,
+	   asection *section,
+	   bfd_vma value,
+	   const char *string,
+	   bool copy,
+	   bool collect,
+	   struct bfd_link_hash_entry **hashp);
+
+DESCRIPTION
+   Add a symbol to the global hash table.
    ABFD is the BFD the symbol comes from.
    NAME is the name of the symbol.
    FLAGS is the BSF_* bits associated with the symbol.

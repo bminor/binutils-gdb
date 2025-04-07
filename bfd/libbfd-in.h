@@ -645,12 +645,6 @@ extern bool _bfd_generic_link_add_archive_symbols
 /* Forward declaration to avoid prototype errors.  */
 typedef struct bfd_link_hash_entry _bfd_link_hash_entry;
 
-/* Generic routine to add a single symbol.  */
-extern bool _bfd_generic_link_add_one_symbol
-  (struct bfd_link_info *, bfd *, const char *name, flagword,
-   asection *, bfd_vma, const char *, bool copy,
-   bool constructor, struct bfd_link_hash_entry **) ATTRIBUTE_HIDDEN;
-
 /* Generic routine to mark section as supplying symbols only.  */
 extern void _bfd_generic_link_just_syms
   (asection *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;

@@ -445,7 +445,7 @@ coff_link_add_symbols (bfd *abfd,
 
 	  if (addit)
 	    {
-	      if (! (bfd_coff_link_add_one_symbol
+	      if (! (_bfd_generic_link_add_one_symbol
 		     (info, abfd, name, flags, section, value,
 		      (const char *) NULL, copy, false,
 		      (struct bfd_link_hash_entry **) sym_hash)))
