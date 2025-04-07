@@ -74,6 +74,7 @@ target_boards=(
     cc-with-gnu-debuglink
     debug-types
     dwarf4-gdb-index
+    dwarf5-fission-debug-types
     dwarf64
     fission
     fission-dwp
