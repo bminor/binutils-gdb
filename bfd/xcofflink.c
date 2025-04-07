@@ -367,9 +367,7 @@ _bfd_xcoff_canonicalize_dynamic_symtab (bfd *abfd, asymbol **psyms)
 
       symbuf->symbol.the_bfd = abfd;
 
-      if (ldsym._l._l_l._l_zeroes == 0)
-	symbuf->symbol.name = strings + ldsym._l._l_l._l_offset;
-      else
+      if (ldsym._l._l_l._l_zeroes != 0)
 	{
 	  char *c;
 
@@ -380,6 +378,10 @@ _bfd_xcoff_canonicalize_dynamic_symtab (bfd *abfd, asymbol **psyms)
 	  c[SYMNMLEN] = '\0';
 	  symbuf->symbol.name = c;
 	}
+      else if (ldsym._l._l_l._l_offset < ldhdr.l_stlen)
+	symbuf->symbol.name = strings + ldsym._l._l_l._l_offset;
+      else
+	symbuf->symbol.name = _("<corrupt>");
 
       if (ldsym.l_smclas == XMC_XO)
 	symbuf->symbol.section = bfd_abs_section_ptr;
@@ -973,14 +975,16 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
       if ((ldsym.l_smtype & L_EXPORT) == 0)
 	continue;
 
-      if (ldsym._l._l_l._l_zeroes == 0)
-	name = strings + ldsym._l._l_l._l_offset;
-      else
+      if (ldsym._l._l_l._l_zeroes != 0)
 	{
 	  memcpy (nambuf, ldsym._l._l_name, SYMNMLEN);
 	  nambuf[SYMNMLEN] = '\0';
 	  name = nambuf;
 	}
+      else if (ldsym._l._l_l._l_offset < ldhdr.l_stlen)
+	name = strings + ldsym._l._l_l._l_offset;
+      else
+	continue;
 
       /* Normally we could not call xcoff_link_hash_lookup in an add
 	 symbols routine, since we might not be using an XCOFF hash
@@ -2429,14 +2433,16 @@ xcoff_link_check_dynamic_ar_symbols (bfd *abfd,
       if ((ldsym.l_smtype & L_EXPORT) == 0)
 	continue;
 
-      if (ldsym._l._l_l._l_zeroes == 0)
-	name = strings + ldsym._l._l_l._l_offset;
-      else
+      if (ldsym._l._l_l._l_zeroes != 0)
 	{
 	  memcpy (nambuf, ldsym._l._l_name, SYMNMLEN);
 	  nambuf[SYMNMLEN] = '\0';
 	  name = nambuf;
 	}
+      else if (ldsym._l._l_l._l_offset < ldhdr.l_stlen)
+	name = strings + ldsym._l._l_l._l_offset;
+      else
+	continue;
 
       h = bfd_link_hash_lookup (info->hash, name, false, false, true);
 
