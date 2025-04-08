@@ -7817,7 +7817,15 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      info->addr.offset.is_reg = 1;
 	      info->addr.offset.regno = 31;
 	    }
-	  else if (base_qualifier != AARCH64_OPND_QLF_X
+	  else
+	    {
+	      /* This operand is used for different shift types, so we have to
+		 reject explicit offsets.  */
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+
+	  if (base_qualifier != AARCH64_OPND_QLF_X
 	      || offset_qualifier != AARCH64_OPND_QLF_X)
 	    {
 	      set_syntax_error (_("invalid addressing mode"));
