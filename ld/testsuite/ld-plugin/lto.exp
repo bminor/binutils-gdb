@@ -1212,6 +1212,38 @@ if { [is_elf_format] } {
 
 if { [is_elf_format] && [check_lto_shared_available] } {
     run_ld_link_exec_tests $lto_run_elf_shared_tests
+    if { [check_lto_fat_available] } {
+	run_cc_link_tests [list \
+	    [list \
+	    	"Build libpr32846a.a" \
+	    	"$plug_opt" "-O2 -flto $lto_no_fat" \
+	    	{pr32846a.c pr32846b.c} {} "libpr32846a.a" \
+	    ] \
+	    [list \
+		"Build libpr32846b.a" \
+	    	"$plug_opt" "-O2 -flto $lto_no_fat" \
+		{pr32846a.c pr32846b.c pr32846c.c} {} "libpr32846b.a" \
+	    ] \
+	    [list \
+	    	"Build pr32846d.o" \
+	    	"$plug_opt" "-O2 -flto $lto_no_fat" \
+	    	{pr32846d.c} {} \
+	    ] \
+	    [list \
+	    	"Build pr32846e.o" \
+	    	"$plug_opt" "-O2 -flto $lto_no_fat" \
+	    	{pr32846e.c} {} \
+	    ] \
+	    [list \
+		"Build pr32846" \
+		"-shared -fPIC -O2 -flto $lto_no_fat -Wl,--no-undefined \
+		 tmpdir/pr32846d.o tmpdir/libpr32846a.a \
+		 tmpdir/libpr32846b.a tmpdir/pr32846e.o" \
+		"-O2 -fPIC -flto $lto_no_fat" \
+		{dummy.c} {} "pr32846" \
+	    ] \
+	] \
+    }
 }
 
 proc pr20103 {cflags libs} {
