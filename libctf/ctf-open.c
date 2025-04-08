@@ -819,8 +819,6 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
   uint32_t id;
   ctf_id_t type;
 
-  unsigned long typemax = fp->ctf_typemax;
-
   ctf_next_t *i = NULL;
   void *k;
   int err;
@@ -837,16 +835,9 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
   /* In this second pass through the types, we fill in each entry of the type
      and pointer tables and add names to the appropriate hashes.
 
-     (Not all names are added in this pass, only type names.  See below.)
+     (Not all names are added in this pass, only type names.  See below.)  */
 
-     Reset ctf_typemax and bump it as we go, but keep it one higher than normal,
-     so that the type being read in is considered a valid type and it is at
-     least barely possible to run simple lookups on it: but higher types are
-     not, since their names are not yet known.  (It is kept at its standard
-     value before this function is called so that at least some type-related
-     operations work.  */
-
-  for (id = 1, fp->ctf_typemax = 1, tp = tbuf; tp < tend; xp++, id++, fp->ctf_typemax++)
+  for (id = 1, tp = tbuf; tp < tend; xp++, id++)
     {
       unsigned short kind = LCTF_KIND (fp, tp);
       unsigned short isroot = LCTF_INFO_ISROOT (fp, tp->ctt_info);
@@ -1104,10 +1095,9 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 	}
       tp = (ctf_type_t *) ((uintptr_t) tp + increment + vbytes);
     }
-  fp->ctf_typemax--;
-  assert (fp->ctf_typemax == typemax);
+  assert (fp->ctf_typemax == id - 1);
 
-  ctf_dprintf ("%u total types processed\n", fp->ctf_typemax);
+  ctf_dprintf ("%u total types processed\n", id - 1);
 
   if ((err = init_void (fp) < 0))
     return err;
