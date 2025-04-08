@@ -28,8 +28,6 @@
 #include "symtab.h"
 #include "block.h"
 #include "gdbtypes.h"
-#include "demangle.h"
-#include "gdbcore.h"
 #include "expression.h"
 #include "language.h"
 #include "symfile.h"
