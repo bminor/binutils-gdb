@@ -1244,7 +1244,6 @@ namespace eval Dwarf {
     # used, as indicated in the header of the section where the location
     # description is found.
     #
-    # (FIXME should use 'info complete' here.)
     # Each list's first element is the opcode, either short or long
     # forms are accepted.
     # FIXME argument handling
@@ -1252,9 +1251,18 @@ namespace eval Dwarf {
     proc _location { body dwarf_version addr_size offset_size } {
 	variable _constants
 
+	set collected_lines ""
 	foreach line [split $body \n] {
 	    # Ignore blank lines, and allow embedded comments.
-	    if {[lindex $line 0] == "" || [regexp -- {^[ \t]*#} $line]} {
+	    if {  [regexp -- {^[ \t]*$} $line] || [regexp -- {^[ \t]*#} $line] } {
+		continue
+	    }
+	    if { $collected_lines != "" } {
+		set line "$collected_lines\n$line"
+		set collected_lines ""
+	    }
+	    if { ! [info complete $line] } {
+		set collected_lines $line
 		continue
 	    }
 	    set opcode [_map_name [lindex $line 0] _OP]
@@ -1338,6 +1346,17 @@ namespace eval Dwarf {
 		DW_OP_bra {
 		    _get_args $line $opcode label
 		    _op .2byte $argvec(label)
+		}
+
+		DW_OP_entry_value {
+		    _get_args $line $opcode body
+		    set l1 [new_label "expr_start"]
+		    set l2 [new_label "expr_end"]
+		    _op .uleb128 "$l2 - $l1" "expression"
+		    define_label $l1
+		    _location $argvec(body) $dwarf_version $addr_size \
+			$offset_size
+		    define_label $l2
 		}
 
 		DW_OP_implicit_value {
