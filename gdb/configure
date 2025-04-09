@@ -29263,6 +29263,8 @@ $as_echo "#define STDC_HEADERS 1" >>confdefs.h
 fi
 
 for ac_header in  \
+  IOKit/serial/ioss.h \
+  asm/termios.h \
   machine/reg.h \
   nlist.h \
   ptrace.h \

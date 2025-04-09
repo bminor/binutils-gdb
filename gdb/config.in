@@ -96,6 +96,9 @@
 /* Define if amd-dbgapi is being linked in. */
 #undef HAVE_AMD_DBGAPI
 
+/* Define to 1 if you have the <asm/termios.h> header file. */
+#undef HAVE_ASM_TERMIOS_H
+
 /* Define to 1 if you have the `btowc' function. */
 #undef HAVE_BTOWC
 
@@ -246,6 +249,9 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <IOKit/serial/ioss.h> header file. */
+#undef HAVE_IOKIT_SERIAL_IOSS_H
 
 /* Define to 1 if you have the `kinfo_getfile' function. */
 #undef HAVE_KINFO_GETFILE
