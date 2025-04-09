@@ -46,7 +46,7 @@ thumb_insn_size (unsigned short inst1)
 int
 condition_true (unsigned long cond, unsigned long status_reg)
 {
-  if (cond == INST_AL || cond == INST_NV)
+  if (condition_always_true (cond))
     return 1;
 
   switch (cond)

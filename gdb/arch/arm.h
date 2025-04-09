@@ -194,6 +194,23 @@ struct reg_buffer_common;
    first halfword is INST1.  */
 int thumb_insn_size (unsigned short inst1);
 
+/* Returns true if COND always evaluates to true.  */
+
+static inline bool
+condition_always_true (unsigned long cond)
+{
+  return cond == INST_AL || cond == INST_NV;
+}
+
+/* Returns true if cond of INSN always evaluates to true.  */
+
+static inline bool
+insn_condition_always_true (uint32_t insn)
+{
+  unsigned long cond = bits (insn, 28, 31);
+  return condition_always_true (cond);
+}
+
 /* Returns true if the condition evaluates to true.  */
 int condition_true (unsigned long cond, unsigned long status_reg);
 
