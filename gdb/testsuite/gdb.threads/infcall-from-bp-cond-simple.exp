@@ -141,6 +141,8 @@ proc_with_prefix run_kill_and_restart_test { target_async target_non_stop } {
     gdb_start_cmd
 }
 
+set re_thread_exited {\[Thread [^\r\n]+ exited\]}
+
 # Create a conditional breakpoint which includes a call to a function that
 # segfaults.  Run GDB and check what happens when the inferior segfaults
 # during the inferior call.
@@ -176,7 +178,8 @@ proc_with_prefix run_bp_cond_segfaults { target_async target_non_stop } {
 	     "To change this behavior use \"set unwind-on-signal on\"\\." \
 	     "Evaluation of the expression containing the function" \
 	     "\\(function_that_segfaults\\) will be abandoned\\." \
-	     "When the function is done executing, GDB will silently stop\\."]
+	     "When the function is done executing, GDB will silently stop\\.(" \
+	     "$::re_thread_exited)?"]
 }
 
 # Create a conditional breakpoint which includes a call to a function that
@@ -210,7 +213,8 @@ proc_with_prefix run_bp_cond_hits_breakpoint { target_async target_non_stop } {
 	     "The program being debugged stopped while in a function called from GDB\\." \
 	     "Evaluation of the expression containing the function" \
 	     "\\(function_with_breakpoint\\) will be abandoned\\." \
-	     "When the function is done executing, GDB will silently stop\\."]
+	     "When the function is done executing, GDB will silently stop\\.(" \
+	     "$::re_thread_exited)?"]
 }
 
 foreach_with_prefix target_async { "on" "off" } {
