@@ -2883,7 +2883,7 @@ static void
 printf_command (const char *arg, int from_tty)
 {
   ui_printf (arg, gdb_stdout);
-  gdb_stdout->reset_style ();
+  gdb_stdout->emit_style_escape (ui_file_style ());
   gdb_stdout->wrap_here (0);
   gdb_stdout->flush ();
 }

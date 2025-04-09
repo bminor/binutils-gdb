@@ -50,7 +50,6 @@ public:
   }
 
   void emit_style_escape (const ui_file_style &style) override;
-  void reset_style () override;
 
   void flush () override;
 

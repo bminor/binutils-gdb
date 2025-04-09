@@ -1407,18 +1407,6 @@ pager_file::emit_style_escape (const ui_file_style &style)
     }
 }
 
-/* See pager.h.  */
-
-void
-pager_file::reset_style ()
-{
-  if (can_emit_style_escape ())
-    {
-      m_applied_style = ui_file_style ();
-      m_wrap_buffer.append (m_applied_style.to_ansi ());
-    }
-}
-
 /* Wait, so the user can read what's on the screen.  Prompt the user
    to continue by pressing RETURN.  'q' is also provided because
    telling users what to do in the prompt is more user-friendly than

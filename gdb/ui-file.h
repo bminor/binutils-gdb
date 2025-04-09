@@ -123,9 +123,6 @@ public:
   /* Emit an ANSI style escape for STYLE.  */
   virtual void emit_style_escape (const ui_file_style &style);
 
-  /* Rest the current output style to the empty style.  */
-  virtual void reset_style ();
-
   /* Print STR, bypassing any paging that might be done by this
      ui_file.  Note that nearly no code should call this -- it's
      intended for use by gdb_printf, but nothing else.  */
@@ -353,12 +350,6 @@ public:
     m_two->emit_style_escape (style);
   }
 
-  void reset_style () override
-  {
-    m_one->reset_style ();
-    m_two->reset_style ();
-  }
-
   void puts_unfiltered (const char *str) override
   {
     m_one->puts_unfiltered (str);
@@ -389,10 +380,6 @@ public:
   void emit_style_escape (const ui_file_style &style) override
   {
   }
-
-  void reset_style () override
-  {
-  }
 };
 
 /* A base class for ui_file types that wrap another ui_file.  */
@@ -418,10 +405,6 @@ public:
 
   void emit_style_escape (const ui_file_style &style) override
   { m_stream->emit_style_escape (style); }
-
-  /* Rest the current output style to the empty style.  */
-  void reset_style () override
-  { m_stream->reset_style (); }
 
   int fd () const override
   { return m_stream->fd (); }

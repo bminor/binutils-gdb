@@ -833,7 +833,7 @@ echo_command (const char *text, int from_tty)
 	  gdb_printf ("%c", c);
       }
 
-  gdb_stdout->reset_style ();
+  gdb_stdout->emit_style_escape (ui_file_style ());
 
   /* Force this output to appear now.  */
   gdb_flush (gdb_stdout);
