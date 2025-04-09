@@ -24,7 +24,8 @@ require allow_dlmopen_tests
 standard_testfile -main.c -lib.c
 
 set srcfile_lib $srcfile2
-set binfile_lib [standard_output_file dlmopen-lib.so]
+set so_name dlmopen-lib.so
+set binfile_lib [standard_output_file $so_name]
 
 if { [build_executable "build shlib" $binfile_lib $srcfile_lib \
 	  [list debug shlib]] == -1 } {
@@ -41,17 +42,18 @@ if { [build_executable "failed to build" $testfile $srcfile \
 # for the so
 proc get_first_so_ns {} {
     set ns -1
-    gdb_test_multiple "info sharedlibrary" "get SO namespace" -lbl {
-	-re "From\\s+To\\s+\(NS\\s+\)?Syms\\s+Read\\s+Shared Object Library\r\n" {
+    set lib_regexp [string_to_regexp ${::binfile_lib}]
+    gdb_test_multiple "info sharedlibrary $::so_name" "get SO namespace" -lbl {
+	-re "\r\nFrom\\s+To\\s+\(NS\\s+\)?Syms\\s+Read\\s+Shared Object Library(?=\r\n)" {
 	    exp_continue
 	}
-	-re "^$::hex\\s+$::hex\\s+\\\[\\\[($::decimal)\\\]\\\]\\s+\[^\r\n]+$::binfile_lib.*" {
-	    set ns $expect_out(1,string)
-	}
-	-re "^$::gdb_prompt $" {
-	}
-	-re "^\[^\r\n\]+\r\n" {
+	-re "\r\n$::hex\\s+$::hex\\s+\\\[\\\[($::decimal)\\\]\\\]\\s+\[^\r\n]+${lib_regexp}(?=\r\n)" {
+	    if {$ns == -1} {
+		set ns $expect_out(1,string)
+	    }
 	    exp_continue
+	}
+	-re -wrap "" {
 	}
     }
     return $ns
