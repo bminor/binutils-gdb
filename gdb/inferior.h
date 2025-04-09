@@ -730,6 +730,9 @@ extern struct inferior *find_inferior_ptid (process_stratum_target *targ,
 /* Search function to lookup an inferior by GDB 'num'.  */
 extern struct inferior *find_inferior_id (int num);
 
+/* Return true if inferior NUM exists, false otherwise.  */
+extern bool valid_inferior_id (int num);
+
 /* Find an inferior bound to PSPACE, giving preference to the current
    inferior.  */
 extern struct inferior *

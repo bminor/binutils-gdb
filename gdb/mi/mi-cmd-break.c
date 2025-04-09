@@ -30,6 +30,7 @@
 #include "linespec.h"
 #include <ctype.h>
 #include "tracepoint.h"
+#include "inferior.h"
 
 enum
   {
@@ -249,6 +250,8 @@ mi_cmd_break_insert_1 (int dprintf, const char *command,
 	  break;
 	case THREAD_GROUP_OPT:
 	  thread_group = mi_parse_thread_group_id (oarg);
+	  if (!valid_inferior_id (thread_group))
+	    error (_("Non-existent thread-group id '%d'"), thread_group);
 	  break;
 	case PENDING_OPT:
 	  pending = 1;

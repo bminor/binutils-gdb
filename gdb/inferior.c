@@ -397,6 +397,15 @@ find_inferior_id (int num)
   return NULL;
 }
 
+/* See inferior.h.  */
+
+bool
+valid_inferior_id (int num)
+{
+  inferior *inf = find_inferior_id (num);
+  return inf != nullptr;
+}
+
 struct inferior *
 find_inferior_pid (process_stratum_target *targ, int pid)
 {
