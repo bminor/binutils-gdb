@@ -106,6 +106,26 @@ enum windows_continue_flag
 
 DEF_ENUM_FLAGS_TYPE (windows_continue_flag, windows_continue_flags);
 
+/* We want to register windows_thread_info as struct thread_info
+   private data.  thread_info::priv must point to a class that
+   inherits from private_thread_info.  But we can't make
+   windows_thread_info inherit private_thread_info, because
+   windows_thread_info is shared with GDBserver.  So we make a new
+   class that inherits from both private_thread_info,
+   windows_thread_info, and register that one as thread_info::private.
+   This multiple inheritance is benign, because private_thread_info is
+   a java-style interface class with no data.  */
+struct windows_private_thread_info : private_thread_info, windows_thread_info
+{
+  windows_private_thread_info (windows_process_info *proc,
+			       DWORD tid, HANDLE h, CORE_ADDR tlb)
+    : windows_thread_info (proc, tid, h, tlb)
+  {}
+
+  ~windows_private_thread_info () override
+  {}
+};
+
 struct windows_per_inferior : public windows_process_info
 {
   windows_thread_info *find_thread (ptid_t ptid) override;
@@ -122,8 +142,6 @@ struct windows_per_inferior : public windows_process_info
 			    windows_continue_flags cont_flags);
 
   int windows_initialization_done = 0;
-
-  std::vector<std::unique_ptr<windows_thread_info>> thread_list;
 
   /* Counts of things.  */
   int saw_create = 0;
@@ -414,6 +432,82 @@ private:
   bool m_continued = false;
 };
 
+/* Get the windows_thread_info object associated with THR.  */
+
+static windows_thread_info *
+as_windows_thread_info (thread_info *thr)
+{
+  /* Cast to windows_private_thread_info, which inherits from
+     private_thread_info, and is implicitly convertible to
+     windows_thread_info, the return type.  */
+  return static_cast<windows_private_thread_info *> (thr->priv.get ());
+}
+
+/* Creates an iterator that works like all_matching_threads_iterator,
+   but that returns windows_thread_info pointers instead of
+   thread_info.  This could be replaced with a std::range::transform
+   when we require C++20.  */
+class all_windows_threads_iterator
+{
+public:
+  typedef all_windows_threads_iterator self_type;
+  typedef windows_thread_info *value_type;
+  typedef windows_thread_info *&reference;
+  typedef windows_thread_info **pointer;
+  typedef std::forward_iterator_tag iterator_category;
+  typedef int difference_type;
+
+  explicit all_windows_threads_iterator (all_non_exited_threads_iterator base_iter)
+    : m_base_iter (base_iter)
+  {}
+
+  windows_thread_info *operator* () const { return as_windows_thread_info (*m_base_iter); }
+
+  all_windows_threads_iterator &operator++ ()
+  {
+    ++m_base_iter;
+    return *this;
+  }
+
+  bool operator== (const all_windows_threads_iterator &other) const
+  { return m_base_iter == other.m_base_iter; }
+
+  bool operator!= (const all_windows_threads_iterator &other) const
+  { return !(*this == other); }
+
+private:
+  all_non_exited_threads_iterator m_base_iter;
+};
+
+/* The range for all_windows_threads, below.  */
+
+class all_windows_threads_range : public all_non_exited_threads_range
+{
+public:
+  all_windows_threads_range (all_non_exited_threads_range base_range)
+    : m_base_range (base_range)
+  {}
+
+  all_windows_threads_iterator begin () const
+  { return all_windows_threads_iterator (m_base_range.begin ()); }
+  all_windows_threads_iterator end () const
+  { return all_windows_threads_iterator (m_base_range.end ()); }
+
+private:
+  all_non_exited_threads_range m_base_range;
+};
+
+/* Return a range that can be used to walk over all non-exited Windows
+   threads of all inferiors, with range-for.  */
+
+inline all_windows_threads_range
+all_windows_threads ()
+{
+  auto *win_tgt = static_cast<windows_nat_target *> (get_native_target ());
+  return (all_windows_threads_range
+	  (all_non_exited_threads_range (win_tgt, minus_one_ptid)));
+}
+
 static void
 check (BOOL ok, const char *file, int line)
 {
@@ -566,10 +660,11 @@ windows_nat_target::continue_last_debug_event_main_thread
 windows_thread_info *
 windows_per_inferior::find_thread (ptid_t ptid)
 {
-  for (auto &th : thread_list)
-    if (th->tid == ptid.lwp ())
-      return th.get ();
-  return nullptr;
+  auto *win_tgt = static_cast<windows_nat_target *> (get_native_target ());
+  thread_info *thr = win_tgt->find_thread (ptid);
+  if (thr == nullptr)
+    return nullptr;
+  return as_windows_thread_info (thr);
 }
 
 /* Invalidate TH's context.  */
@@ -597,12 +692,11 @@ windows_thread_info *
 windows_nat_target::add_thread (ptid_t ptid, HANDLE h, void *tlb,
 				bool main_thread_p)
 {
-  windows_thread_info *th;
-
   gdb_assert (ptid.lwp () != 0);
 
-  if ((th = windows_process.find_thread (ptid)))
-    return th;
+  windows_thread_info *existing = windows_process.find_thread (ptid);
+  if (existing != nullptr)
+    return existing;
 
   CORE_ADDR base = (CORE_ADDR) (uintptr_t) tlb;
 #ifdef __x86_64__
@@ -611,33 +705,24 @@ windows_nat_target::add_thread (ptid_t ptid, HANDLE h, void *tlb,
   if (windows_process.wow64_process)
     base += 0x2000;
 #endif
-  th = new windows_thread_info (&windows_process, ptid.lwp (), h, base);
-  windows_process.thread_list.emplace_back (th);
+  windows_private_thread_info *th
+    = new windows_private_thread_info (&windows_process, ptid.lwp (), h, base);
 
   /* Add this new thread to the list of threads.
 
      To be consistent with what's done on other platforms, we add
      the main thread silently (in reality, this thread is really
      more of a process to the user than a thread).  */
-  if (main_thread_p)
-    add_thread_silent (this, ptid);
-  else
-    ::add_thread (this, ptid);
+  thread_info *gth = (main_thread_p
+		      ? ::add_thread_silent (this, ptid)
+		      : ::add_thread (this, ptid));
+  gth->priv.reset (th);
 
   /* It's simplest to always set this and update the debug
      registers.  */
   th->debug_registers_changed = true;
 
   return th;
-}
-
-/* Clear out any old thread list and reinitialize it to a
-   pristine state.  */
-static void
-windows_init_thread_list (void)
-{
-  DEBUG_EVENTS ("called");
-  windows_process.thread_list.clear ();
 }
 
 /* Delete a thread from the list of threads.
@@ -651,12 +736,6 @@ void
 windows_nat_target::delete_thread (ptid_t ptid, DWORD exit_code,
 				   bool main_thread_p)
 {
-  DWORD id;
-
-  gdb_assert (ptid.lwp () != 0);
-
-  id = ptid.lwp ();
-
   /* Note that no notification was printed when the main thread was
      created, and thus, unless in verbose mode, we should be symmetrical,
      and avoid an exit notification for the main thread here as well.  */
@@ -664,16 +743,6 @@ windows_nat_target::delete_thread (ptid_t ptid, DWORD exit_code,
   bool silent = (main_thread_p && !info_verbose);
   thread_info *to_del = this->find_thread (ptid);
   delete_thread_with_exit_code (to_del, exit_code, silent);
-
-  auto iter = std::find_if (windows_process.thread_list.begin (),
-			    windows_process.thread_list.end (),
-			    [=] (std::unique_ptr<windows_thread_info> &th)
-			    {
-			      return th->tid == id;
-			    });
-
-  if (iter != windows_process.thread_list.end ())
-    windows_process.thread_list.erase (iter);
 }
 
 /* Fetches register number R from the given windows_thread_info,
@@ -1322,7 +1391,7 @@ BOOL
 windows_nat_target::windows_continue (DWORD continue_status, int id,
 				      windows_continue_flags cont_flags)
 {
-  for (auto &th : windows_process.thread_list)
+  for (auto *th : all_windows_threads ())
     {
       if ((id == -1 || id == (int) th->tid)
 	  && !th->suspended
@@ -1340,9 +1409,9 @@ windows_nat_target::windows_continue (DWORD continue_status, int id,
 	}
     }
 
-  for (auto &th : windows_process.thread_list)
+  for (auto *th : all_windows_threads ())
     if (id == -1 || id == (int) th->tid)
-      windows_process.continue_one_thread (th.get (), cont_flags);
+      windows_process.continue_one_thread (th, cont_flags);
 
   continue_last_debug_event_main_thread
     (_("Failed to resume program execution"), continue_status,
@@ -1520,7 +1589,7 @@ windows_nat_target::get_windows_debug_event
   /* If there is a relevant pending stop, report it now.  See the
      comment by the definition of "windows_thread_info::pending_status"
      for details on why this is needed.  */
-  for (auto &th : windows_process.thread_list)
+  for (auto *th : all_windows_threads ())
     {
       if (!th->suspended
 	  && th->pending_status.kind () != TARGET_WAITKIND_IGNORE)
@@ -1533,7 +1602,7 @@ windows_nat_target::get_windows_debug_event
 	  *current_event = th->last_event;
 
 	  ptid_t ptid (windows_process.process_id, thread_id);
-	  windows_process.invalidate_context (th.get ());
+	  windows_process.invalidate_context (th);
 	  return ptid;
 	}
     }
@@ -1837,7 +1906,7 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 	      /* All-stop, suspend all threads until they are
 		 explicitly resumed.  */
-	      for (auto &thr : windows_process.thread_list)
+	      for (auto *thr : all_windows_threads ())
 		thr->suspend ();
 	    }
 
@@ -2007,7 +2076,6 @@ windows_nat_target::attach (const char *args, int from_tty)
     warning ("Failed to get SE_DEBUG_NAME privilege\n"
 	     "This can cause attach to fail on Windows NT/2K/XP");
 
-  windows_init_thread_list ();
   windows_process.saw_create = 0;
 
   std::optional<unsigned> err;
@@ -2760,7 +2828,6 @@ windows_nat_target::create_inferior (const char *exec_file,
 	}
     }
 
-  windows_init_thread_list ();
   do_synchronously ([&] ()
     {
       BOOL ok = create_process (nullptr, args, flags, w32_env,
@@ -2889,7 +2956,6 @@ windows_nat_target::create_inferior (const char *exec_file,
   /* Final nil string to terminate new env.  */
   *temp = 0;
 
-  windows_init_thread_list ();
   do_synchronously ([&] ()
     {
       BOOL ok = create_process (nullptr, /* image */
@@ -3258,7 +3324,7 @@ windows_set_dr (int i, CORE_ADDR addr)
   if (i < 0 || i > 3)
     internal_error (_("Invalid register %d in windows_set_dr.\n"), i);
 
-  for (auto &th : windows_process.thread_list)
+  for (auto *th : all_windows_threads ())
     th->debug_registers_changed = true;
 }
 
@@ -3268,7 +3334,7 @@ windows_set_dr (int i, CORE_ADDR addr)
 static void
 windows_set_dr7 (unsigned long val)
 {
-  for (auto &th : windows_process.thread_list)
+  for (auto *th : all_windows_threads ())
     th->debug_registers_changed = true;
 }
 
