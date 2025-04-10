@@ -91,6 +91,10 @@ if { [gdb_compile_shlib $dwo_asm_file $dwo_file nodebug] != "" } {
     return
 }
 
+if { [is_remote host] } {
+    gdb_remote_download host $dwo_file
+}
+
 clean_restart ${testfile}
 
 # This would cause an internal error.
