@@ -14408,7 +14408,8 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	  if (o->flags & SEC_GROUP)
 	    {
 	      asection *first = elf_next_in_group (o);
-	      o->gc_mark = first->gc_mark;
+	      if (first != NULL)
+		o->gc_mark = first->gc_mark;
 	    }
 
 	  if (o->gc_mark)
