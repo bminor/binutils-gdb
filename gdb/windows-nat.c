@@ -2164,6 +2164,30 @@ windows_nat_target::get_windows_debug_event
       gdb_assert (event_code != EXIT_THREAD_DEBUG_EVENT
 		  && event_code != EXIT_PROCESS_DEBUG_EVENT);
 
+      /* If the thread was indeed forced-exited, then it is no longer
+	 considered suspended by Windows, which unblocks the
+	 DBG_REPLY_LATER event, even if we thought the thread was
+	 suspended.  So try resuming and re-suspending.  If the thread
+	 is indeed gone, then suspend will fail and we will end up
+	 with suspended==-1.  This is important so that we take the
+	 path that does DBG_CONTINUE below instead of the
+	 DBG_REPLY_LATER path, so that we get past the reply-later
+	 event and get to the thread exit event.  */
+      if (result_th->suspended == 1)
+	{
+	  result_th->resume ();
+	  result_th->suspend ();
+
+	  if (result_th->suspended == -1)
+	    {
+	      /* Pending stop.  See the comment by the definition of
+		 "pending_status" for details on why this is needed.  */
+	      DEBUG_EVENTS ("XXX: unexpected reply-later stop in now-dead suspended thread 0x%x",
+			    result_th->tid);
+	      gdb_assert (0);
+	    }
+	}
+
       if (result_th->suspended == 1)
 	{
 	  /* Pending stop.  See the comment by the definition of
