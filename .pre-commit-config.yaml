@@ -69,7 +69,7 @@ repos:
     rev: v2.4.1
     hooks:
     - id: codespell
-      files: '^(gdbsupport|gdbserver|gdb/(tui|target|data-directory|po|system-gdbinit|mi|syscalls|arch|regformats|compile|python|guile|config|unittests))/'
+      files: '^(gdbsupport|gdbserver|gdb/(tui|target|data-directory|po|system-gdbinit|mi|syscalls|arch|regformats|compile|python|guile|config|unittests|cli))/'
       args: [--config, gdb/contrib/setup.cfg]
   - repo: local
     hooks:
