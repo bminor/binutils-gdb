@@ -32,7 +32,7 @@
 # options:
 #   -h, --help            show this help message and exit
 #   -i INPUT, --input INPUT
-#                         path to riscv linux syscalls (riscv-glibc/sysdeps/unix/sysv/linux/riscv/rv64/arch-syscall.h)
+#                         path to riscv linux syscalls (glibc/sysdeps/unix/sysv/linux/riscv/rv64/arch-syscall.h)
 
 import argparse
 import re
@@ -142,7 +142,7 @@ def setup_parser() -> argparse.ArgumentParser:
 		"--input",
 		type=_Path,
 		required=True,
-		help="path to riscv linux syscalls (riscv-glibc/sysdeps/unix/sysv/linux/riscv/rv64/arch-syscall.h)",
+		help="path to riscv linux syscalls (glibc/sysdeps/unix/sysv/linux/riscv/rv64/arch-syscall.h)",
 	)
 	return parser
 

@@ -270,7 +270,7 @@ riscv64_canonicalize_syscall (int syscall)
     case 239: return gdb_sys_move_pages;
     /* case 240: return gdb_sys_rt_tgsigqueueinfo;  */
     /* case 241: return gdb_sys_perf_event_open;  */
-    /* case 242: return gdb_sys_accept4;  */
+    case 242: return gdb_sys_accept4;
     /* case 243: return gdb_sys_recvmmsg;  */
     /* case 258: return gdb_sys_riscv_hwprobe;  */
     /* case 259: return gdb_sys_riscv_flush_icache;  */
@@ -336,6 +336,22 @@ riscv64_canonicalize_syscall (int syscall)
     /* case 448: return gdb_sys_process_mrelease;  */
     /* case 449: return gdb_sys_futex_waitv;  */
     /* case 450: return gdb_sys_set_mempolicy_home_node;  */
+    /* case 451: return gdb_sys_cachestat;  */
+    /* case 452: return gdb_sys_fchmodat2;  */
+    /* case 453: return gdb_sys_map_shadow_stack;  */
+    /* case 454: return gdb_sys_futex_wake;  */
+    /* case 455: return gdb_sys_futex_wait;  */
+    /* case 456: return gdb_sys_futex_requeue;  */
+    /* case 457: return gdb_sys_statmount;  */
+    /* case 458: return gdb_sys_listmount;  */
+    /* case 459: return gdb_sys_lsm_get_self_attr;  */
+    /* case 460: return gdb_sys_lsm_set_self_attr;  */
+    /* case 461: return gdb_sys_lsm_list_modules;  */
+    /* case 462: return gdb_sys_mseal;  */
+    /* case 463: return gdb_sys_setxattrat;  */
+    /* case 464: return gdb_sys_getxattrat;  */
+    /* case 465: return gdb_sys_listxattrat;  */
+    /* case 466: return gdb_sys_removexattrat;  */
     default:
       return gdb_sys_no_syscall;
     }
