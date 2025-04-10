@@ -123,7 +123,7 @@ do
 done
 
 # Now set the config shell. It is really needed, that the shell
-# points to a shell with full path and also it must conatain the
+# points to a shell with full path and also it must contain the
 # .exe suffix. I assume here, that bash is installed. If not,
 # install it. Additionally, the pathname must not contain a
 # drive letter, so use the /dev/x/foo format supported by versions
