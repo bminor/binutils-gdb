@@ -50,7 +50,7 @@ if [ -z "${tempdir}" ] ; then
   fi
 fi
 
-# Default location of generate index.hmtl web page.
+# Default location of generated index.html web page.
 if [ -z "${webdir}" ] ; then
 # Use 'branch' subdir name if Tag contains branch
   if [ -f "${srcdir}/gdb/CVS/Tag" ] ; then

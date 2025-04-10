@@ -261,7 +261,7 @@ echo "done."
 # Clean up build directory if necessary.
 if ${clean}
 then
-  echo "cleanning up $dir"
+  echo "cleaning up $dir"
   rm -rf ${dir}
 fi
 

@@ -265,7 +265,7 @@ INCSUPPORT = \
 	-I..
 
 #
-# CLI sub directory definitons
+# CLI sub directory definitions
 #
 SUBDIR_CLI_SRCS = \
 	cli/cli-cmds.c \
@@ -282,7 +282,7 @@ SUBDIR_CLI_SRCS = \
 SUBDIR_CLI_OBS = $(patsubst %.c,%.o,$(SUBDIR_CLI_SRCS))
 
 #
-# MI sub directory definitons
+# MI sub directory definitions
 #
 SUBDIR_MI_SRCS = \
 	mi/mi-cmd-break.c \
@@ -350,7 +350,7 @@ SUBDIR_GCC_COMPILE_SRCS = \
 SUBDIR_GCC_COMPILE_OBS = $(patsubst %.c,%.o,$(filter %.c,$(SUBDIR_GCC_COMPILE_SRCS)))
 
 #
-# Guile sub directory definitons for guile support.
+# Guile sub directory definitions for guile support.
 #
 SUBDIR_GUILE_SRCS = \
 	guile/guile.c \
@@ -387,7 +387,7 @@ SUBDIR_GUILE_LDFLAGS =
 SUBDIR_GUILE_CFLAGS =
 
 #
-# python sub directory definitons
+# python sub directory definitions
 #
 SUBDIR_PYTHON_SRCS = \
 	python/py-arch.c \

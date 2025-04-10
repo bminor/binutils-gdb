@@ -492,7 +492,7 @@ sim/			See sim/MAINTAINERS
 
 readline/		Master version: ftp://ftp.cwru.edu/pub/bash/
 			ALL
-			Host maintainers (host dependant parts)
+			Host maintainers (host dependent parts)
 			(but get your changes into the master version)
 
 tcl/ tk/ itcl/		ALL

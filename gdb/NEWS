@@ -7570,7 +7570,7 @@ for DW_OP_piece is still missing).
 
 A number of long standing bugs that caused GDB to die while starting a
 Java application have been fixed.  GDB's Java support is now
-considered "useable".
+considered "usable".
 
 * GNU/Linux support for fork, vfork, and exec.
 

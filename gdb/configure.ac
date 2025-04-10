@@ -1922,7 +1922,7 @@ if test "$gdb_cv_var_elf" = yes; then
 		gcore-elf.o elf-none-tdep.o"
   AC_DEFINE(HAVE_ELF, 1,
 	    [Define if ELF support should be included.])
-  # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
+  # -ldl is provided by bfd/Makefile.am (LIBDL) <PLUGINS>.
   if test "$plugins" = "yes"; then
     AC_SEARCH_LIBS(dlopen, dl)
   fi

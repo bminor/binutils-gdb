@@ -1669,7 +1669,7 @@ arm_analyze_load_stack_chk_guard(CORE_ADDR pc, struct gdbarch *gdbarch,
 
 	ldr	Rn, .Label
 	....
-	.Lable:
+	.Label:
 	.word	__stack_chk_guard
 
    Since ldr/str is a very popular instruction, we can't use them as

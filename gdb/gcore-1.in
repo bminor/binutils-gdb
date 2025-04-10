@@ -34,11 +34,11 @@ data_directory_opt=()
 
 function print_usage() {
     prefix="Usage: $0"
-    paddin=$(printf '%*s' ${#prefix})
+    padding=$(printf '%*s' ${#prefix})
 
     echo "$prefix [-h|--help] [-v|--version]"
-    echo "$paddin [-a] [-o prefix] [-d data-directory]"
-    echo "$paddin pid1 [pid2...pidN]"
+    echo "$padding [-a] [-o prefix] [-d data-directory]"
+    echo "$padding pid1 [pid2...pidN]"
 }
 
 function print_try_help() {
