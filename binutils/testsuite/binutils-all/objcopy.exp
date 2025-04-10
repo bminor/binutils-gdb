@@ -180,7 +180,7 @@ proc objcopy_test_verilog {testname} {
 	untested "verilog width-4 and width-8 tests"
 	return
     }
-    
+
     foreach width {4 8} {
 	set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width $width $binfile $verilog-$width.hex"]
 	if ![string equal "" $got] then {
@@ -194,7 +194,7 @@ proc objcopy_test_verilog {testname} {
 	}
     }
 
-    # Test generating endian correct output.    
+    # Test generating endian correct output.
     set testname "objcopy (verilog output endian-ness == input endian-ness)"
     set got [binutils_run $OBJCOPY "-O verilog --verilog-data-width 4 $binfile $verilog-I4.hex"]
     if ![string equal "" $got] then {
@@ -202,9 +202,9 @@ proc objcopy_test_verilog {testname} {
     }
     send_log "regexp_diff $verilog-I4.hex $srcdir/$subdir/verilog-I4.hex\n"
     if {! [regexp_diff "$verilog-I4.hex" "$srcdir/$subdir/verilog-I4.hex"]} {
-	pass $testname 
+	pass $testname
     } else {
-	fail $testname 
+	fail $testname
     }
 }
 
