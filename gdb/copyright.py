@@ -30,13 +30,15 @@
 #
 # This removes the bulk of the changes which are most likely to be correct.
 
+# pyright: strict
+
 import argparse
 import locale
 import os
 import os.path
 import subprocess
 import sys
-from typing import List, Optional
+from typing import Iterable
 
 
 def get_update_list():
@@ -66,7 +68,7 @@ def get_update_list():
         .split("\0")
     )
 
-    def include_file(filename):
+    def include_file(filename: str):
         (dirname, basename) = os.path.split(filename)
         dirbasename = os.path.basename(dirname)
         return not (
@@ -83,7 +85,7 @@ def get_update_list():
     return filter(include_file, result)
 
 
-def update_files(update_list):
+def update_files(update_list: Iterable[str]):
     """Update the copyright header of the files in the given list.
 
     We use gnulib's update-copyright script for that.
@@ -128,7 +130,7 @@ def update_files(update_list):
             print("*** " + line)
 
 
-def may_have_copyright_notice(filename):
+def may_have_copyright_notice(filename: str):
     """Check that the given file does not seem to have a copyright notice.
 
     The filename is relative to the root directory.
@@ -166,7 +168,7 @@ def get_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: List[str]) -> Optional[int]:
+def main(argv: list[str]) -> int | None:
     """The main subprogram."""
     parser = get_parser()
     _ = parser.parse_args(argv)
@@ -242,7 +244,7 @@ EXCLUDE_ALL_LIST = (
 )
 
 # The list of files to update by hand.
-BY_HAND = (
+BY_HAND: tuple[str, ...] = (
     # Nothing at the moment :-).
 )
 
