@@ -3173,7 +3173,10 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
      name already exists and is not a forward, or if this type is hidden on the
      input.  */
   if (cu_mapped && is_conflicting)
-    mark_type_conflicting = 1;
+    {
+      mark_type_conflicting = 1;
+      isroot = 0;
+    }
   else if (name
 	   && (maybe_dup = ctf_lookup_by_rawname (target, kind, name)) != 0)
     {
