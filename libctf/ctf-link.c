@@ -1026,6 +1026,9 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
       uint32_t noutputs;
       uint32_t *parents;
 
+      ctf_dprintf ("ctf_link_deduplicating_per_cu: deduplicating into %s\n",
+		   out_name);
+
       if ((ninputs = ctf_link_deduplicating_count_inputs (fp, in,
 							  &only_input)) == -1)
 	goto err_open_inputs;
