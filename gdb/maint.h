@@ -22,6 +22,9 @@
 #include "gdbsupport/run-time-clock.h"
 #include <chrono>
 
+struct obj_section;
+struct objfile;
+
 extern void set_per_command_time (int);
 
 extern void set_per_command_space (int);
