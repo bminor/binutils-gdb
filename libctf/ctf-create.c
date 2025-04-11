@@ -136,7 +136,7 @@ ctf_add_prefix (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
 	return NULL;				/* errno is set for us.  */
     }
 
-  memmove (new_prefix + sizeof (ctf_type_t), new_prefix, move_bytes);
+  memmove (new_prefix + 1, new_prefix, move_bytes);
   dtd->dtd_vlen += sizeof (ctf_type_t);
   dtd->dtd_data++;
   memset (new_prefix, 0, sizeof (ctf_type_t));
