@@ -1010,13 +1010,14 @@ get_child_debug_event (DWORD *continue_status,
       }
   }
 
+  OUTMSG2 (("gdbserver: kernel event %s for pid=%u tid=%x)\n",
+	    event_code_to_string (current_event->dwDebugEventCode).c_str (),
+	    (unsigned) current_event->dwProcessId,
+	    (unsigned) current_event->dwThreadId));
+
   switch (current_event->dwDebugEventCode)
     {
     case CREATE_THREAD_DEBUG_EVENT:
-      OUTMSG2 (("gdbserver: kernel event CREATE_THREAD_DEBUG_EVENT "
-		"for pid=%u tid=%x)\n",
-		(unsigned) current_event->dwProcessId,
-		(unsigned) current_event->dwThreadId));
 
       /* Record the existence of this thread.  */
       child_add_thread (current_event->dwProcessId,
@@ -1026,10 +1027,6 @@ get_child_debug_event (DWORD *continue_status,
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
-      OUTMSG2 (("gdbserver: kernel event EXIT_THREAD_DEBUG_EVENT "
-		"for pid=%u tid=%x\n",
-		(unsigned) current_event->dwProcessId,
-		(unsigned) current_event->dwThreadId));
       child_delete_thread (current_event->dwProcessId,
 			   current_event->dwThreadId);
 
@@ -1037,10 +1034,6 @@ get_child_debug_event (DWORD *continue_status,
       return 1;
 
     case CREATE_PROCESS_DEBUG_EVENT:
-      OUTMSG2 (("gdbserver: kernel event CREATE_PROCESS_DEBUG_EVENT "
-		"for pid=%u tid=%x\n",
-		(unsigned) current_event->dwProcessId,
-		(unsigned) current_event->dwThreadId));
       CloseHandle (current_event->u.CreateProcessInfo.hFile);
 
       if (windows_process.open_process_used)
@@ -1060,10 +1053,6 @@ get_child_debug_event (DWORD *continue_status,
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
-      OUTMSG2 (("gdbserver: kernel event EXIT_PROCESS_DEBUG_EVENT "
-		"for pid=%u tid=%x\n",
-		(unsigned) current_event->dwProcessId,
-		(unsigned) current_event->dwThreadId));
       {
 	DWORD exit_status = current_event->u.ExitProcess.dwExitCode;
 	/* If the exit status looks like a fatal exception, but we
@@ -1080,10 +1069,6 @@ get_child_debug_event (DWORD *continue_status,
       break;
 
     case LOAD_DLL_DEBUG_EVENT:
-      OUTMSG2 (("gdbserver: kernel event LOAD_DLL_DEBUG_EVENT "
-		"for pid=%u tid=%x\n",
-		(unsigned) current_event->dwProcessId,
-		(unsigned) current_event->dwThreadId));
       CloseHandle (current_event->u.LoadDll.hFile);
       if (! windows_process.child_initialization_done)
 	break;
@@ -1093,10 +1078,6 @@ get_child_debug_event (DWORD *continue_status,
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
-      OUTMSG2 (("gdbserver: kernel event UNLOAD_DLL_DEBUG_EVENT "
-		"for pid=%u tid=%x\n",
-		(unsigned) current_event->dwProcessId,
-		(unsigned) current_event->dwThreadId));
       if (! windows_process.child_initialization_done)
 	break;
       windows_process.handle_unload_dll (*current_event);
@@ -1104,10 +1085,6 @@ get_child_debug_event (DWORD *continue_status,
       break;
 
     case EXCEPTION_DEBUG_EVENT:
-      OUTMSG2 (("gdbserver: kernel event EXCEPTION_DEBUG_EVENT "
-		"for pid=%u tid=%x\n",
-		(unsigned) current_event->dwProcessId,
-		(unsigned) current_event->dwThreadId));
       if (windows_process.handle_exception (*current_event,
 					    ourstatus, debug_threads)
 	  == HANDLE_EXCEPTION_UNHANDLED)
@@ -1116,19 +1093,7 @@ get_child_debug_event (DWORD *continue_status,
 
     case OUTPUT_DEBUG_STRING_EVENT:
       /* A message from the kernel (or Cygwin).  */
-      OUTMSG2 (("gdbserver: kernel event OUTPUT_DEBUG_STRING_EVENT "
-		"for pid=%u tid=%x\n",
-		(unsigned) current_event->dwProcessId,
-		(unsigned) current_event->dwThreadId));
       windows_process.handle_output_debug_string (*current_event, nullptr);
-      break;
-
-    default:
-      OUTMSG2 (("gdbserver: kernel event unknown "
-		"for pid=%u tid=%x code=%x\n",
-		(unsigned) current_event->dwProcessId,
-		(unsigned) current_event->dwThreadId,
-		(unsigned) current_event->dwDebugEventCode));
       break;
     }
 

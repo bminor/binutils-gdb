@@ -1620,13 +1620,14 @@ windows_nat_target::get_windows_debug_event
   event_code = current_event->dwDebugEventCode;
   ourstatus->set_spurious ();
 
+  DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId,
+		event_code_to_string (event_code).c_str ());
+
   switch (event_code)
     {
     case CREATE_THREAD_DEBUG_EVENT:
-      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
-		    (unsigned) current_event->dwProcessId,
-		    (unsigned) current_event->dwThreadId,
-		    "CREATE_THREAD_DEBUG_EVENT");
       if (windows_process.saw_create != 1)
 	{
 	  inferior *inf = find_inferior_pid (this, current_event->dwProcessId);
@@ -1658,10 +1659,6 @@ windows_nat_target::get_windows_debug_event
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
-      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
-		    (unsigned) current_event->dwProcessId,
-		    (unsigned) current_event->dwThreadId,
-		    "EXIT_THREAD_DEBUG_EVENT");
       delete_thread (ptid_t (current_event->dwProcessId,
 			     current_event->dwThreadId, 0),
 		     current_event->u.ExitThread.dwExitCode,
@@ -1670,10 +1667,6 @@ windows_nat_target::get_windows_debug_event
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
-      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
-		    (unsigned) current_event->dwProcessId,
-		    (unsigned) current_event->dwThreadId,
-		    "CREATE_PROCESS_DEBUG_EVENT");
       CloseHandle (current_event->u.CreateProcessInfo.hFile);
       if (++windows_process.saw_create != 1)
 	break;
@@ -1690,10 +1683,6 @@ windows_nat_target::get_windows_debug_event
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
-      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
-		    (unsigned) current_event->dwProcessId,
-		    (unsigned) current_event->dwThreadId,
-		    "EXIT_PROCESS_DEBUG_EVENT");
       if (!windows_process.windows_initialization_done)
 	{
 	  target_terminal::ours ();
@@ -1722,10 +1711,6 @@ windows_nat_target::get_windows_debug_event
       break;
 
     case LOAD_DLL_DEBUG_EVENT:
-      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
-		    (unsigned) current_event->dwProcessId,
-		    (unsigned) current_event->dwThreadId,
-		    "LOAD_DLL_DEBUG_EVENT");
       CloseHandle (current_event->u.LoadDll.hFile);
       if (windows_process.saw_create != 1
 	  || ! windows_process.windows_initialization_done)
@@ -1743,10 +1728,6 @@ windows_nat_target::get_windows_debug_event
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
-      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
-		    (unsigned) current_event->dwProcessId,
-		    (unsigned) current_event->dwThreadId,
-		    "UNLOAD_DLL_DEBUG_EVENT");
       if (windows_process.saw_create != 1
 	  || ! windows_process.windows_initialization_done)
 	break;
@@ -1763,10 +1744,6 @@ windows_nat_target::get_windows_debug_event
       break;
 
     case EXCEPTION_DEBUG_EVENT:
-      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
-		    (unsigned) current_event->dwProcessId,
-		    (unsigned) current_event->dwThreadId,
-		    "EXCEPTION_DEBUG_EVENT");
       if (windows_process.saw_create != 1)
 	break;
       switch (windows_process.handle_exception (*current_event,
@@ -1786,10 +1763,6 @@ windows_nat_target::get_windows_debug_event
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:	/* Message from the kernel.  */
-      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
-		    (unsigned) current_event->dwProcessId,
-		    (unsigned) current_event->dwThreadId,
-		    "OUTPUT_DEBUG_STRING_EVENT");
       if (windows_process.saw_create != 1)
 	break;
       thread_id = windows_process.handle_output_debug_string (*current_event,

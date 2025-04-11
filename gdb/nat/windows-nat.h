@@ -284,6 +284,10 @@ private:
   int get_exec_module_filename (char *exe_name_ret, size_t exe_name_max_len);
 };
 
+/* Return a string version of EVENT_CODE.  */
+
+extern std::string event_code_to_string (DWORD event_code);
+
 /* A simple wrapper for ContinueDebugEvent that continues the last
    waited-for event.  If DEBUG_EVENTS is true, logging will be
    enabled.  */

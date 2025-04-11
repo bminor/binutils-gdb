@@ -689,6 +689,31 @@ windows_process_info::add_all_dlls ()
 
 /* See nat/windows-nat.h.  */
 
+std::string
+event_code_to_string (DWORD event_code)
+{
+#define CASE(X) \
+  case X: return #X
+
+  switch (event_code)
+    {
+    CASE (CREATE_THREAD_DEBUG_EVENT);
+    CASE (EXIT_THREAD_DEBUG_EVENT);
+    CASE (CREATE_PROCESS_DEBUG_EVENT);
+    CASE (EXIT_PROCESS_DEBUG_EVENT);
+    CASE (LOAD_DLL_DEBUG_EVENT);
+    CASE (UNLOAD_DLL_DEBUG_EVENT);
+    CASE (EXCEPTION_DEBUG_EVENT);
+    CASE (OUTPUT_DEBUG_STRING_EVENT);
+    default:
+      return string_printf ("unknown event code %u", (unsigned) event_code);
+    }
+
+#undef CASE
+}
+
+/* See nat/windows-nat.h.  */
+
 ptid_t
 get_last_debug_event_ptid ()
 {
