@@ -780,6 +780,11 @@ typedef struct ctf_var_secinfo
 #define CTF_FUNC_GLOBAL 1
 #define CTF_FUNC_EXTERN 2
 
+/* Kind-independent linkage constants.  Values must match those above.  */
+#define CTF_LINKAGE_STATIC 0
+#define CTF_LINKAGE_GLOBAL 1
+#define CTF_LINKAGE_EXTERN 2
+
 /* Linkage of a CTF_K_FUNC_LINKAGE and CTF_K_VAR (holds CTF_FUNC_*
    or CTF_VAR_*, depending; CTF_K_FUNC_LINKAGE is literally just
    the ctl_linkage field, stuffed into the vlen).  */
