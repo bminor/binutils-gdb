@@ -673,13 +673,16 @@ ctf_type_kind_next (ctf_dict_t *fp, ctf_next_t **it, int kind)
 
   while (i->ctn_type <= fp->ctf_typemax)
     {
-      if (ctf_type_kind (i->cu.ctn_fp, i->ctn_type) != kind)
+      ctf_id_t type = ctf_index_to_type (fp, i->ctn_type);
+
+      if (ctf_type_kind (i->cu.ctn_fp, type) != kind)
 	{
 	  i->ctn_type++;
 	  continue;
 	}
 
-      return ctf_index_to_type (fp, i->ctn_type++);
+      i->ctn_type++;
+      return type;
     }
   ctf_next_destroy (i);
   *it = NULL;
