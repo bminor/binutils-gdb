@@ -1942,7 +1942,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
   if (linkage < 0 || linkage > 2)
     return (ctf_set_typed_errno (fp, ECTF_LINKAGE));
 
-  if (ctf_lookup_by_rawname (fp, CTF_K_VAR, name) != 0)
+  if (flag == CTF_ADD_ROOT && ctf_lookup_by_rawname (fp, CTF_K_VAR, name) != 0)
     return (ctf_set_typed_errno (fp, ECTF_DUPLICATE));
 
   /* First, create the variable.  Make sure its type exists.  */
