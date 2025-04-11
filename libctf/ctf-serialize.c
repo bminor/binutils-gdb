@@ -982,10 +982,10 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
   ctf_dtdef_t *dtd;
   ctf_id_t id;
 
-  if (!(fp->ctf_flags & LCTF_CHILD))
-    id = fp->ctf_stypes + 1;
-  else
-    id = fp->ctf_header->cth_parent_ntypes + 1;
+  id = fp->ctf_stypes + 1;
+
+  if (fp->ctf_flags & LCTF_CHILD)
+    id += fp->ctf_parent->ctf_typemax;
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs);
        dtd != NULL; dtd = ctf_list_next (dtd), id++)
