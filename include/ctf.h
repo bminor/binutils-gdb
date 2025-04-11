@@ -261,16 +261,20 @@ typedef struct ctf_header
    were upgraded".)
 
    When upgrading to v4, we can simply record the boundary in
-   cth_parent_typemax.  */
+   cth_parent_typemax.
+
+   Version 5 is the same as version 4: it only exists to realign the version
+   numbers and the actual underlying integers.  */
 
 #define CTF_VERSION_1 1
 #define CTF_VERSION_1_UPGRADED_3 2
 #define CTF_VERSION_2 3
 #define CTF_VERSION_3 4
 
-#define CTF_VERSION_4 5
-#define CTF_VERSION CTF_VERSION_4 /* Current version.  */
-#define CTF_STABLE_VERSION 4
+#define CTF_VERSION_4 5		/* The same as 5.  */
+#define CTF_VERSION_5 5
+#define CTF_VERSION CTF_VERSION_5 /* Current version.  */
+#define CTF_STABLE_VERSION 5
 
 #define CTF_BTF_VERSION 1
 
