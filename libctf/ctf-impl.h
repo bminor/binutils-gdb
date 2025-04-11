@@ -313,6 +313,17 @@ typedef struct ctf_dedup
      pair identifying the corresponding datasec row.  */
   ctf_dynhash_t *cd_var_datasec;
 
+  /* Maps the type hash values of things with linkages (vars, functions) to the
+     intended final linkage of that type, accumulated from all types with that
+     ID across all inputs (so far).  Subject to hash replacement (see below).  */
+  ctf_dynhash_t *cd_linkages;
+
+  /* Maps from the type hash values of hashes that should be considered
+     "replaced" with the hash values that replace them.  Used to merge types
+     together at conflict-marking and emission time.  Only works for some type
+     kinds: right now, CTF_K_VAR.  */
+  ctf_dynhash_t *cd_replacing_hashes;
+
   /* Maps type hash values to a set of hash values of the types that cite them:
      i.e., pointing backwards up the type graph.  Used for recursive conflict
      marking.  Citations from tagged structures, unions, and forwards do not

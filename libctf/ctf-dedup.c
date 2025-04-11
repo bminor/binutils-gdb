@@ -1044,6 +1044,12 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	    whaterr = N_("error doing linkage determination during hashing");
 	    goto input_err;
 	  }
+
+	/* Promote extern to global, unifying them at emission time.  */
+
+	if (linkage == CTF_FUNC_EXTERN)
+	  linkage = CTF_FUNC_GLOBAL;
+
 	ctf_dedup_sha1_add (&hash, &linkage, sizeof (linkage),
 			    "type linkage", depth);
 
@@ -1156,8 +1162,26 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	    whaterr = N_("error doing linkage determination during hashing");
 	    goto input_err;
 	  }
+
+	/* Promote extern to global, unifying them at emission time.  */
+
+	if (linkage == CTF_VAR_GLOBAL_EXTERN)
+	  linkage = CTF_VAR_GLOBAL_ALLOCATED;
+
 	ctf_dedup_sha1_add (&hash, &linkage, sizeof (linkage),
 			    "var linkage", depth);
+
+	child_type = ctf_type_reference (input, type);
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
+					 flags, depth, populate_fun)) == NULL)
+	  {
+	    whaterr = N_("error doing referenced type hashing");
+	    goto err;
+	  }
+	ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "var type",
+			    depth);
+
+	citer = hval;
 
 	/* Hash the datasec info, if any (if none, use all zeroes).  The "input"
 	   here is the component_idx.  */
@@ -1169,6 +1193,23 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	    int component_idx;
 	    const char *datasec_name;
 	    ctf_var_secinfo_t *entry;
+	    ctf_sha1_t stub_hash;
+	    const char *stub_hval;
+
+	    /* We want to note the "stub hash" of purely the non-datasec part
+	       that is shared with extern vars, and note that if this variable
+	       is global allocated (non-static, non-extern), and such a hash is
+	       seen, it is to be treated as equivalent to this variable's
+	       hash.  */
+
+	    stub_hash = hash;
+	    ctf_sha1_fini (&stub_hash, hashbuf);
+
+	    if ((stub_hval = intern (fp, strdup (hashbuf))) == NULL)
+	      {
+		whaterr = N_("cannot intern var stub hash");
+		goto oom;
+	      }
 
 	    datasec_type = CTF_DEDUP_GID_TO_TYPE (datasec);
 	    component_idx = CTF_DEDUP_GID_TO_INPUT (datasec);
@@ -1194,18 +1235,29 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 				sizeof (entry->cvs_offset), "datasec offset", depth);
 	    ctf_dedup_sha1_add (&hash, &entry->cvs_size,
 				sizeof (entry->cvs_size), "datasec size", depth);
-	  }
 
-	child_type = ctf_type_reference (input, type);
-	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
-					 flags, depth, populate_fun)) == NULL)
-	  {
-	    whaterr = N_("error doing referenced type hashing");
-	    goto err;
+	    if (ctf_type_linkage (input, type) == CTF_VAR_GLOBAL_ALLOCATED)
+	      {
+		ctf_sha1_t final_hash;
+		const char *final_hval;
+
+		final_hash = hash;
+		ctf_sha1_fini (&final_hash, hashbuf);
+
+		if ((final_hval = intern (fp, strdup (hashbuf))) == NULL)
+		  {
+		    whaterr = N_("cannot intern var final hash");
+		    goto oom;
+		  }
+
+		if (ctf_dynhash_cinsert (d->cd_replacing_hashes, stub_hval,
+					 final_hval) < 0)
+		  {
+		    whaterr = N_("cannot intern var replacing hash");
+		    goto oom;
+		  }
+	      }
 	  }
-	ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "var type",
-			    depth);
-	citer = hval;
 
 	break;
       }
@@ -1542,13 +1594,48 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
   }
 #endif
 
+  /* If this is a type with linkage that is not already handled by the
+     cd_replacing_hashes machinery, keep the best-linkage-so-far updated.  (There
+     is no need to track this if cd_replacing_hashes is in use, since when that is
+     active, the replacing type always has the better linkage anyway.)
+
+     Extern + non-extern == non-extern.  Static is left alone.  Coupled with the
+     hashing machinery above: extern and non-extern hash to the same value.  */
+
+  kind = ctf_type_kind_unsliced (input, type);
+  if (kind == CTF_K_FUNC_LINKAGE)
+    {
+      void *linkage_;
+      int linkage = ctf_type_linkage (input, type);
+
+      if (linkage < 0)
+	return ctf_set_errno (fp, ctf_errno (input));
+
+      if (!ctf_dynhash_lookup_kv (d->cd_linkages, hval, NULL, &linkage_))
+	{
+	  linkage_ = (void *) (uintptr_t) linkage;
+	  if (ctf_dynhash_cinsert (d->cd_linkages, hval, linkage_) < 0)
+	    return ctf_set_errno (fp, errno);
+	}
+      else
+	{
+	  if ((int) (uintptr_t) linkage_ == CTF_FUNC_EXTERN
+	      && linkage == CTF_FUNC_GLOBAL)
+	    {
+	      linkage_ = (void *) (uintptr_t) linkage;
+
+	      if (ctf_dynhash_cinsert (d->cd_linkages, hval, linkage_) < 0)
+		return ctf_set_errno (fp, errno);
+	    }
+	}
+    }
+
   /* This function will be repeatedly called for the same types many times:
      don't waste time reinserting the same keys in that case.  */
   if (!ctf_dynset_exists (type_ids, id, NULL)
       && ctf_dynset_insert (type_ids, id) < 0)
     return ctf_set_errno (fp, errno);
 
-  kind = ctf_type_kind_unsliced (input, type);
   if (kind == CTF_K_ENUM || kind == CTF_K_ENUM64)
     {
       ctf_next_t *i = NULL;
@@ -1896,33 +1983,57 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 	     with the lowest type ID.  (See sort_output_mapping.)  */
 
 	  const void *key;
-	  const void *count;
+	  const void *count_;
 	  const char *hval;
 	  long max_hcount = -1;
 	  void *max_gid = NULL;
 	  const char *max_hval = NULL;
+	  const void *replaced_hval = NULL;
 
 	  if (ctf_dynhash_elements (name_counts) <= 1)
 	    continue;
 
 	  /* First find the most common.  */
-	  while ((err = ctf_dynhash_cnext (name_counts, &j, &key, &count)) == 0)
+	  while ((err = ctf_dynhash_cnext (name_counts, &j, &key, &count_)) == 0)
 	    {
+	      const void *replacing_key;
+	      void *replacing_count;
+	      long int count = (long int) (uintptr_t) count_;
+
 	      hval = (const char *) key;
 
-	      if ((long int) (uintptr_t) count > max_hcount)
+	      /* Consider replaced hashes' counts to be part of their replacees.
+		 All such things necessarily have the same name.  */
+
+	      if ((replacing_key = ctf_dynhash_lookup (d->cd_replacing_hashes,
+						       hval)) != NULL)
 		{
-		  max_hcount = (long int) (uintptr_t) count;
-		  max_hval = hval;
+		  if (ctf_dynhash_lookup_kv (name_counts, replacing_key,
+					     NULL, &replacing_count))
+		    count += (long int) (uintptr_t) replacing_count;
+		}
+
+	      if (count > max_hcount)
+		{
+		  max_hcount = count;
+		  if (replacing_key)
+		    {
+		      max_hval = (const char *) replacing_key;
+		      replaced_hval = hval;
+		      hval = max_hval;
+		    }
+		  else
+		    max_hval = hval;
+
 		  max_gid = ctf_dynhash_lookup (d->cd_output_first_gid, hval);
 		}
-	      else if ((long int) (uintptr_t) count == max_hcount)
+	      else if (count == max_hcount)
 		{
 		  void *gid = ctf_dynhash_lookup (d->cd_output_first_gid, hval);
 
-		  if (CTF_DEDUP_GID_TO_INPUT(gid) < CTF_DEDUP_GID_TO_INPUT(max_gid)
-		      || (CTF_DEDUP_GID_TO_INPUT(gid) == CTF_DEDUP_GID_TO_INPUT(max_gid)
-			  && CTF_DEDUP_GID_TO_TYPE(gid) < CTF_DEDUP_GID_TO_TYPE(max_gid)))
+		  if (CTF_DEDUP_GID_TO_INPUT (gid) < CTF_DEDUP_GID_TO_INPUT (max_gid)
+		      || (CTF_DEDUP_GID_TO_INPUT (gid) == CTF_DEDUP_GID_TO_INPUT (max_gid)
+			  && CTF_DEDUP_GID_TO_TYPE (gid) < CTF_DEDUP_GID_TO_TYPE (max_gid)))
 		    {
 		      max_hval = hval;
 		      max_gid = ctf_dynhash_lookup (d->cd_output_first_gid, hval);
@@ -1939,7 +2050,11 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 	  while ((err = ctf_dynhash_cnext (name_counts, &j, &key, NULL)) == 0)
 	    {
 	      hval = (const char *) key;
+
 	      if (strcmp (max_hval, hval) == 0)
+		continue;
+
+	      if (replaced_hval && strcmp (replaced_hval, hval) == 0)
 		continue;
 
 	      ctf_dprintf ("Marking %s, an uncommon hash for %s, conflicting\n",
@@ -2029,6 +2144,18 @@ ctf_dedup_init (ctf_dict_t *fp)
 			     NULL, NULL)) == NULL)
     goto oom;
 
+  if ((d->cd_linkages
+       = ctf_dynhash_create (ctf_hash_string,
+			     ctf_hash_eq_string,
+			     NULL, NULL)) == NULL)
+    goto oom;
+
+  if ((d->cd_replacing_hashes
+       = ctf_dynhash_create (ctf_hash_string,
+			     ctf_hash_eq_string,
+			     NULL, NULL)) == NULL)
+    goto oom;
+
   if ((d->cd_citers
        = ctf_dynhash_create (ctf_hash_string,
 			     ctf_hash_eq_string, NULL,
@@ -2102,6 +2229,8 @@ ctf_dedup_fini (ctf_dict_t *fp, ctf_dict_t **outputs, uint32_t noutputs)
   ctf_dynhash_destroy (d->cd_name_counts);
   ctf_dynhash_destroy (d->cd_type_hashes);
   ctf_dynhash_destroy (d->cd_struct_origin);
+  ctf_dynhash_destroy (d->cd_linkages);
+  ctf_dynhash_destroy (d->cd_replacing_hashes);
   ctf_dynhash_destroy (d->cd_var_datasec);
   ctf_dynhash_destroy (d->cd_citers);
   ctf_dynhash_destroy (d->cd_output_mapping);
@@ -2884,6 +3013,24 @@ ctf_dedup_walk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
   return -1;
 }
 
+/* Get the best linkage for the type with the given HVAL.  */
+static int
+ctf_dedup_best_linkage (ctf_dict_t *output, ctf_dict_t *input, ctf_id_t type,
+			const char *hval)
+{
+  ctf_dedup_t *d = &output->ctf_dedup;
+  void *linkage_;
+
+  /* Get the linkage from the cd_linkages, if present, in preference to the
+     actual type, since multiple identical inputs may have different linkages,
+     and we want to use the best seen over all the inputs.  */
+
+  if (ctf_dynhash_lookup_kv (d->cd_linkages, hval, NULL, &linkage_))
+    return (int) (uintptr_t) linkage_;
+
+  return ctf_type_linkage (input, type);
+}
+
 /* Possibly synthesise a synthetic forward in TARGET to subsitute for a
    conflicted per-TU type ID in INPUT with hash HVAL.  Return its CTF ID, or 0
    if none was needed.  */
@@ -3357,7 +3504,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 					 ref)) == CTF_ERR)
 	goto err_input;				/* errno is set for us.  */
 
-      if ((linkage = ctf_type_linkage (input, type)) < 0)
+      if ((linkage = ctf_dedup_best_linkage (output, input, type, hval)) < 0)
 	goto err_input;
 
       if ((new_type = ctf_add_function_linkage (target, isroot, ref, name,
@@ -3523,11 +3670,19 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	const char *datasec_name = NULL;
 	ctf_var_secinfo_t null_entry = { 0, 0, 0 };
 	ctf_var_secinfo_t *entry = &null_entry;
-	int linkage;
 
 	errtype = _("variable");
 
-	if ((linkage = ctf_type_linkage (input, type)) < 0)
+	/* Don't try to emit variables that have been replaced.  We will emit
+	   the replacing variable instead.  */
+
+	if (ctf_dynhash_lookup (d->cd_replacing_hashes, hval))
+	  {
+	    new_type = 0;
+	    break;
+	  }
+
+	if ((linkage = ctf_dedup_best_linkage (output, input, type, hval)) < 0)
 	  goto err_input;
 
 	/* Dig out the relevant bit of datasec info for this variable, if
