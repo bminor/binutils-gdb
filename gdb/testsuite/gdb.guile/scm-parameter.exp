@@ -388,6 +388,51 @@ with_test_prefix "previously-ambiguous" {
     gdb_test "help set print" "set print s -- This command is not documented.*" "general help"
 }
 
+gdb_test_multiline "create set/show foo1 prefix commands" \
+    "guile" "" \
+    "(register-command! (make-command \"set foo1\"" "" \
+    "   #:command-class COMMAND_OBSCURE" "" \
+    "   #:prefix? #t))" "" \
+    "(register-command! (make-command \"show foo1\"" "" \
+    "   #:command-class COMMAND_OBSCURE" "" \
+    "   #:prefix? #t))" "" \
+    "end"
+
+gdb_test_multiline "create 'foo bar' parameter" \
+    "guile" "" \
+    "(register-parameter! (make-parameter \"foo bar\"" "" \
+    "   #:command-class COMMAND_OBSCURE" "" \
+    "   #:parameter-type PARAM_BOOLEAN" "" \
+    "   #:show-func (lambda (self value)" "" \
+    "      (format #f \"The state of 'foo bar' is ~a.\" value))" "" \
+    "   #:initial-value #t))" "" \
+    "end"
+
+gdb_test "show foo1 bar" "^The state of 'foo bar' is on\\." "show parameter 'foo bar'"
+
+gdb_test_multiline "create set/show foo2 prefix commands" \
+    "guile" "" \
+    "(register-command! (make-command \"set foo2\"" "" \
+    "   #:command-class COMMAND_OBSCURE" "" \
+    "   #:prefix? #t))" "" \
+    "(register-command! (make-command \"show foo2\"" "" \
+    "   #:command-class COMMAND_OBSCURE" "" \
+    "   #:prefix? #t))" "" \
+    "end" ""
+
+gdb_test_multiline "create ambiguous 'foo baz' parameter" \
+    "guile" "" \
+    "(register-parameter! (make-parameter \"foo baz\"" "" \
+    "   #:command-class COMMAND_OBSCURE" "" \
+    "   #:parameter-type PARAM_BOOLEAN" "" \
+    "   #:show-func (lambda (self value)" "" \
+    "      (format #f \"The state of 'foo baz' is ~a.\" value))" "" \
+    "   #:initial-value #t))" "" \
+    "end" \
+    [multi_line \
+	 "Out of range: could not find command prefix 'foo' in position 1: \"foo baz\"" \
+	 "Error while executing Scheme code."]
+
 rename scm_param_test_maybe_no_output ""
 
 # Test a color parameter.

@@ -385,7 +385,7 @@ gdbpy_parse_command_name (const char *name,
 
   prefix_text2 = prefix_text.c_str ();
   elt = lookup_cmd_1 (&prefix_text2, *start_list, NULL, NULL, 1);
-  if (elt == NULL || elt == CMD_LIST_AMBIGUOUS)
+  if (elt == nullptr || elt == CMD_LIST_AMBIGUOUS || *prefix_text2 != '\0')
     {
       PyErr_Format (PyExc_RuntimeError, _("Could not find command prefix %s."),
 		    prefix_text.c_str ());

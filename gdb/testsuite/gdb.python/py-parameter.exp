@@ -669,6 +669,43 @@ proc_with_prefix test_ambiguous_parameter {} {
 	"Parameter .* is ambiguous.*Error occurred in Python.*"
     gdb_test "python print(gdb.parameter('test-ambiguous-value-1a'))" \
 	"Could not find parameter.*Error occurred in Python.*"
+
+    # Create command prefixs 'set foo1' and 'show foo1'.
+    gdb_test_no_output "python gdb.Command('set foo1', gdb.COMMAND_NONE, prefix=True)"
+    gdb_test_no_output "python gdb.Command('show foo1', gdb.COMMAND_NONE, prefix=True)"
+
+    # Create a parameter under 'foo1', but use a truncated prefix.  At
+    # this point though, the prefix is not ambiguous.
+    gdb_test_no_output "python gdb.Parameter('foo bar', gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)"
+    gdb_test "python print(gdb.parameter('foo1 bar'))" "False"
+
+    # Create another prefix command, similar in name to the first.
+    gdb_test_no_output "python gdb.Command('set foo2', gdb.COMMAND_NONE, prefix=True)"
+    gdb_test_no_output "python gdb.Command('show foo2', gdb.COMMAND_NONE, prefix=True)"
+
+    # An attempt to create a parameter using an ambiguous prefix will give an error.
+    gdb_test "python gdb.Parameter('foo baz', gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" \
+	[multi_line \
+	     "Python Exception <class 'RuntimeError'>: Could not find command prefix foo\\." \
+	     "Error occurred in Python: Could not find command prefix foo\\."]
+}
+
+# Check that creating a gdb.Parameter with an unknown command prefix results in an error.
+proc_with_prefix test_unknown_prefix {} {
+    gdb_test_multiline "create parameter" \
+	"python" "" \
+	"class UnknownPrefixParam(gdb.Parameter):" "" \
+	"   def __init__ (self, name):" "" \
+	"      super().__init__ (name, gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"      self.value = True" "" \
+	"end"
+
+    foreach prefix { "unknown-prefix" "style unknown-prefix" "style disassembler unknown-prefix"} {
+	gdb_test "python UnknownPrefixParam('$prefix new-param')" \
+	    [multi_line \
+		 "Python Exception <class 'RuntimeError'>: Could not find command prefix $prefix\\." \
+		 "Error occurred in Python: Could not find command prefix $prefix\\."]
+    }
 }
 
 test_directories
@@ -685,5 +722,6 @@ test_integer_parameter
 test_throwing_parameter
 test_language
 test_ambiguous_parameter
+test_unknown_prefix
 
 rename py_param_test_maybe_no_output ""
