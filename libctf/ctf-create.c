@@ -937,7 +937,7 @@ ctf_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
       if (ctf_grow_vlen (fp, dtd, dtd->dtd_vlen_size + sizeof (ctf_type_t)) < 0)
 	return (ctf_set_errno (ofp, ENOMEM));
 
-      memmove (dtd->dtd_buf + sizeof (ctf_type_t), dtd->dtd_buf, dtd->dtd_vlen_size);
+      memmove (dtd->dtd_buf + 1, dtd->dtd_buf, dtd->dtd_vlen_size);
       memset (dtd->dtd_buf, 0, sizeof (ctf_type_t));
       prefix = dtd->dtd_buf;
     }
