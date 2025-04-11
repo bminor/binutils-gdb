@@ -10,4 +10,4 @@ Types:
 
 0x1: \(kind 1\) int .*
 0x2: \(kind 14\) int foo .*
-0x3: \(kind 15\) DATASEC \(".bss"\)
+0x3: \(kind 15\) DATASEC \(".bss", 1\)

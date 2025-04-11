@@ -11,4 +11,4 @@ Types:
 0x1: \(kind 1\) int .*
 0x2: \(kind 10\) const int .*
 0x3: \(kind 14\) const int foo .*
-0x4: \(kind 15\) DATASEC \(".rodata"\)
+0x4: \(kind 15\) DATASEC \(".rodata", 1\)

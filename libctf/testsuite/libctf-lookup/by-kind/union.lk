@@ -14,4 +14,4 @@ Types:
      \[0x0\] c: .* int .*
 0x2: \(kind 1\) int .*
 0x3: \(kind 14\) union bar foo .*
-0x4: \(kind 15\) DATASEC \(".bss"\)
+0x4: \(kind 15\) DATASEC \(".bss", 1\)

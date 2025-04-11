@@ -1086,7 +1086,8 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	      if (cdp->cd_kind != CTF_K_DATASEC)
 		ctf_decl_sprintf (&cd, "%s", name);
 	      else
-		ctf_decl_sprintf (&cd, "DATASEC (\"%s\")", name);
+		ctf_decl_sprintf (&cd, "DATASEC (\"%s\", %i)", name,
+				  LCTF_VLEN (rfp, tp));
 	      break;
 	    case CTF_K_POINTER:
 	      ctf_decl_sprintf (&cd, "*");
