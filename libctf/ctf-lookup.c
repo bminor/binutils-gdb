@@ -580,12 +580,12 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 	  /* It's a shame we can't use ctf_type_kind_next here, but we're
 	     looking for two type kinds at once...  */
 	  do
-	    i->ctn_type = ctf_type_next (i->cu.ctn_fp, &i->ctn_next, NULL, 1);
-	  while (i->ctn_type != CTF_ERR
-		 && ((kind = ctf_type_kind_unsliced (i->cu.ctn_fp, i->ctn_type))
+	    i->i.ctn_type = ctf_type_next (i->cu.ctn_fp, &i->ctn_next, NULL, 1);
+	  while (i->i.ctn_type != CTF_ERR
+		 && ((kind = ctf_type_kind_unsliced (i->cu.ctn_fp, i->i.ctn_type))
 		     != CTF_K_ENUM && kind != CTF_K_ENUM64));
 
-	  if (i->ctn_type == CTF_ERR)
+	  if (i->i.ctn_type == CTF_ERR)
 	    {
 	      /* Conveniently, when the iterator over all types is done, so is the
 		 iteration as a whole: so we can just pass all errors from the
@@ -595,11 +595,11 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 	      return CTF_ERR;			/* errno is set for us.  */
 	    }
 
-	  if ((tp = ctf_lookup_by_id (&fp, i->ctn_type, &i->ctn_tp)) == NULL)
+	  if ((tp = ctf_lookup_by_id (&fp, i->i.ctn_type, &i->ctn_tp)) == NULL)
 	    return CTF_ERR;			/* errno is set for us.  */
 	  i->ctn_n = LCTF_VLEN (fp, tp);
 
-	  if ((dtd = ctf_dynamic_type (fp, i->ctn_type)) != NULL)
+	  if ((dtd = ctf_dynamic_type (fp, i->i.ctn_type)) != NULL)
 	    vlen = dtd->dtd_vlen;
 	  else
 	    {
@@ -644,7 +644,7 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
     }
   while (!found);
 
-  return i->ctn_type;
+  return i->i.ctn_type;
 }
 
 typedef struct ctf_symidx_sort_arg_cb

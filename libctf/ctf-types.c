@@ -268,7 +268,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
      the sub-struct until it later turns out that that iteration has ended.  */
 
  retry:
-  if (!i->ctn_type)
+  if (!i->i.ctn_type)
     {
       ctf_member_t *memb = (ctf_member_t *) vlen;
       const char *membname;
@@ -314,22 +314,22 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       if (membname[0] == 0
 	  && (ctf_type_kind (fp, memb[i->ctn_n].ctm_type) == CTF_K_STRUCT
 	      || ctf_type_kind (fp, memb[i->ctn_n].ctm_type) == CTF_K_UNION))
-	i->ctn_type = memb[i->ctn_n].ctm_type;
+	i->i.ctn_type = memb[i->ctn_n].ctm_type;
       i->ctn_n++;
 
       /* The callers might want automatic recursive sub-struct traversal.  */
       if (!(flags & CTF_MN_RECURSE))
-	i->ctn_type = 0;
+	i->i.ctn_type = 0;
 
       /* Sub-struct traversal starting?  Take note of the offset of this member,
 	 for later boosting of sub-struct members' offsets.  */
-      if (i->ctn_type)
+      if (i->i.ctn_type)
 	i->ctn_increment = offset;
     }
   /* Traversing a sub-struct?  Just return it, with the offset adjusted.  */
   else
     {
-      ssize_t ret = ctf_member_next (fp, i->ctn_type, &i->ctn_next, name,
+      ssize_t ret = ctf_member_next (fp, i->i.ctn_type, &i->ctn_next, name,
 				     membtype, bit_width, flags);
 
       if (ret >= 0)
@@ -339,7 +339,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 	{
 	  ctf_next_destroy (i);
 	  *it = NULL;
-	  i->ctn_type = 0;
+	  i->i.ctn_type = 0;
 	  ctf_set_errno (ofp, ctf_errno (fp));
 	  return ret;
 	}
@@ -347,7 +347,7 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       if (!ctf_assert (fp, (i->ctn_next == NULL)))
         return (ctf_set_errno (ofp, ctf_errno (fp)));
 
-      i->ctn_type = 0;
+      i->i.ctn_type = 0;
       /* This sub-struct has ended: on to the next real member.  */
       goto retry;
     }
@@ -600,7 +600,7 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
 	return ctf_set_typed_errno (fp, ENOMEM);
 
       i->cu.ctn_fp = fp;
-      i->ctn_type = 1;
+      i->i.ctn_idx = 1;
       i->ctn_iter_fun = (void (*) (void)) ctf_type_next;
       *it = i;
     }
@@ -611,24 +611,24 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
   if (fp != i->cu.ctn_fp)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
 
-  while (i->ctn_type <= fp->ctf_typemax)
+  while (i->i.ctn_idx <= fp->ctf_typemax)
     {
       const ctf_type_t *tp;
 
-      if (i->ctn_type > fp->ctf_stypes)
-	tp = ctf_dtd_lookup (fp, ctf_index_to_type (fp, i->ctn_type))->dtd_data;
+      if (i->i.ctn_idx > fp->ctf_stypes)
+	tp = ctf_dtd_lookup (fp, ctf_index_to_type (fp, i->i.ctn_idx))->dtd_data;
       else
-	tp = fp->ctf_txlate[i->ctn_type];
+	tp = fp->ctf_txlate[i->i.ctn_idx];
 
       if ((!want_hidden) && (!LCTF_INFO_ISROOT (fp, tp->ctt_info)))
 	{
-	  i->ctn_type++;
+	  i->i.ctn_idx++;
 	  continue;
 	}
 
       if (flag)
 	*flag = LCTF_INFO_ISROOT (fp, tp->ctt_info);
-      return ctf_index_to_type (fp, i->ctn_type++);
+      return ctf_index_to_type (fp, i->i.ctn_idx++);
     }
   ctf_next_destroy (i);
   *it = NULL;
@@ -660,7 +660,7 @@ ctf_type_kind_next (ctf_dict_t *fp, ctf_next_t **it, int kind)
 	return ctf_set_typed_errno (fp, ENOMEM);
 
       i->cu.ctn_fp = fp;
-      i->ctn_type = 1;
+      i->i.ctn_idx = 1;
       i->ctn_iter_fun = (void (*) (void)) ctf_type_kind_next;
       *it = i;
     }
@@ -671,17 +671,17 @@ ctf_type_kind_next (ctf_dict_t *fp, ctf_next_t **it, int kind)
   if (fp != i->cu.ctn_fp)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
 
-  while (i->ctn_type <= fp->ctf_typemax)
+  while (i->i.ctn_idx <= fp->ctf_typemax)
     {
-      ctf_id_t type = ctf_index_to_type (fp, i->ctn_type);
+      ctf_id_t type = ctf_index_to_type (fp, i->i.ctn_idx);
 
       if (ctf_type_kind (i->cu.ctn_fp, type) != kind)
 	{
-	  i->ctn_type++;
+	  i->i.ctn_idx++;
 	  continue;
 	}
 
-      i->ctn_type++;
+      i->i.ctn_idx++;
       return type;
     }
   ctf_next_destroy (i);

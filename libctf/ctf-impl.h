@@ -579,7 +579,11 @@ typedef struct ctf_next_hkv
 struct ctf_next
 {
   void (*ctn_iter_fun) (void);
-  ctf_id_t ctn_type;
+  union
+  {
+    ctf_id_t ctn_type;
+    ctf_id_t ctn_idx;
+  } i;
   size_t ctn_size;
   ssize_t ctn_increment;
   const ctf_type_t *ctn_tp;
