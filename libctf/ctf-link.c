@@ -580,6 +580,14 @@ ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 
       one_count = ctf_link_lazy_open (fp, one_input);
 
+      /* If this is an unnamed, zero-archive dict, propagate the input name into the
+	 dict itself, for the sake of deduplicator child dict naming.  */
+
+      if (ctf_archive_count (one_input->clin_arc) == 1
+	  && one_input->clin_arc->ctfi_dict != NULL &&
+	  ctf_cuname (one_input->clin_arc->ctfi_dict) == NULL)
+	ctf_cuname_set (one_input->clin_arc->ctfi_dict, name);
+
       if (one_count < 0)
 	{
 	  ctf_next_destroy (i);
