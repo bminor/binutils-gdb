@@ -6342,6 +6342,12 @@ create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
       if (reader.is_dummy())
 	continue;
 
+      /* DWARF 5 .debug_info.dwo sections may contain some type units.  Skip
+	 everything that is not a compile unit.  */
+      if (const auto ut = reader.cu ()->header.unit_type;
+	  ut != DW_UT_compile && ut != DW_UT_split_compile)
+	continue;
+
       std::optional<ULONGEST> signature
 	= lookup_dwo_id (reader.cu (), reader.top_level_die ());
       if (!signature.has_value ())
