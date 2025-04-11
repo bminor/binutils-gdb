@@ -2383,14 +2383,14 @@ read_abbrev_offset (dwarf2_per_objfile *per_objfile,
   return (sect_offset) read_offset (abfd, info_ptr, offset_size);
 }
 
-/* A helper for create_debug_types_hash_table.  Read types from SECTION
+/* A helper for create_dwo_debug_types_hash_table.  Read types from SECTION
    and fill them into DWO_FILE's type unit hash table.  It will process only
    type units, therefore DW_UT_type.  */
 
 static void
-create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
-			      dwo_file *dwo_file, dwarf2_section_info *section,
-			      rcuh_kind section_kind)
+create_dwo_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
+				  dwo_file *dwo_file, dwarf2_section_info *section,
+				  rcuh_kind section_kind)
 {
   struct objfile *objfile = per_objfile->objfile;
   struct dwarf2_section_info *abbrev_section;
@@ -2479,12 +2479,12 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
    Note: This function processes DWO files only, not DWP files.  */
 
 static void
-create_debug_types_hash_table
+create_dwo_debug_types_hash_table
   (dwarf2_per_objfile *per_objfile, dwo_file *dwo_file,
    gdb::array_view<dwarf2_section_info> type_sections)
 {
   for (dwarf2_section_info &section : type_sections)
-    create_debug_type_hash_table (per_objfile, dwo_file, &section,
+    create_dwo_debug_type_hash_table (per_objfile, dwo_file, &section,
 				  rcuh_kind::TYPE);
 }
 
@@ -6308,7 +6308,7 @@ lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
    Note: This function processes DWO files only, not DWP files.  */
 
 static void
-create_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
+create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
@@ -7630,14 +7630,15 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
     dwarf2_locate_dwo_sections (per_objfile->objfile, dwo_file->dbfd.get (),
 				sec, &dwo_file->sections);
 
-  create_cus_hash_table (cu, *dwo_file);
+  create_dwo_cus_hash_table (cu, *dwo_file);
 
   if (cu->header.version < 5)
-    create_debug_types_hash_table (per_objfile, dwo_file.get (),
-				   dwo_file->sections.types);
+    create_dwo_debug_types_hash_table (per_objfile, dwo_file.get (),
+				       dwo_file->sections.types);
   else
-    create_debug_type_hash_table (per_objfile, dwo_file.get (),
-				  &dwo_file->sections.info, rcuh_kind::COMPILE);
+    create_dwo_debug_type_hash_table (per_objfile, dwo_file.get (),
+				      &dwo_file->sections.info,
+				      rcuh_kind::COMPILE);
 
   dwarf_read_debug_printf ("DWO file found: %s", dwo_name);
 
