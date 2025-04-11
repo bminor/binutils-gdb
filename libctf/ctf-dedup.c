@@ -542,7 +542,7 @@ ctf_dedup_track_var (ctf_dict_t *fp, ctf_dict_t *input, int input_num,
     {
       if (ctf_dynhash_cinsert (d->cd_var_datasec,
 			       CTF_DEDUP_GID (fp, input_num, var),
-			       CTF_DEDUP_GID (fp, component_idx, datasec)) < 0)
+			       CTF_DEDUP_GID (fp, component_idx++, datasec)) < 0)
 	{
 	  ctf_next_destroy (it);
 	  return ctf_set_errno (fp, errno);
