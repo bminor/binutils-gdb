@@ -321,10 +321,10 @@ The version of the CTF dictionary can be determined by inspecting
 
 @tindex CTF_VERSION_3
 @cindex CTF versions, versions
-@multitable {@code{CTF_VERSION_1_UPGRADED_3}} {Number} {First version, rare.  Very similar to Solaris CTF.}
+@multitable {@code{CTF_VERSION_1_UPGRADED_3}} {Number} {First version, rare.  Very similar to Solaris CTF version 2.}
 @headitem Version @tab Number @tab Description
 @item @code{CTF_VERSION_1}
-@tab 1 @tab First version, rare. Very similar to Solaris CTF.
+@tab 1 @tab First version, rare. Very similar to Solaris CTF version 2.
 
 @item @code{CTF_VERSION_1_UPGRADED_3}
 @tab 2 @tab First version, upgraded to v3 or higher and written out again.
