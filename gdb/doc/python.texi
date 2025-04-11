@@ -5079,7 +5079,9 @@ string from the parameter's class, if there is one.  If there is no
 documentation string, a default value is used.  The documentation
 string is included in the output of the parameters @code{help set} and
 @code{help show} commands, and should be written taking this into
-account.
+account.  If the documentation string for the parameter's class is the
+empty string then @value{GDBN} will only use @code{Parameter.set_doc}
+or @code{Parameter.show_doc} (see below) in the @kbd{help} output.
 @end defun
 
 @defvar Parameter.set_doc

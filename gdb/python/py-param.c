@@ -495,7 +495,11 @@ get_doc_string (PyObject *object, enum doc_string_type doc_type,
 	}
     }
 
-  if (result == nullptr)
+  /* For the set/show docs, if these strings are empty then we set then to
+     a non-empty string.  This ensures that the command has some sane
+     documentation for its 'help' text.  */
+  if (result == nullptr
+      || (doc_type != doc_string_description && *result == '\0'))
     {
       if (doc_type == doc_string_description)
 	result.reset (xstrdup (_("This command is not documented.")));
@@ -903,6 +907,18 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   set_doc = get_doc_string (self, doc_string_set, name);
   show_doc = get_doc_string (self, doc_string_show, name);
   doc = get_doc_string (self, doc_string_description, cmd_name.get ());
+
+  /* The set/show docs should always be a non-empty string.  */
+  gdb_assert (set_doc != nullptr && *set_doc != '\0');
+  gdb_assert (show_doc != nullptr && *show_doc != '\0');
+
+  /* For the DOC string only, if it is the empty string, then we convert it
+     to NULL.  This means GDB will not even display a blank line for this
+     part of the help text, instead the set/show line is all the user will
+     get.  */
+  gdb_assert (doc != nullptr);
+  if (*doc == '\0')
+    doc = nullptr;
 
   Py_INCREF (self);
 

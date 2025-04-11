@@ -346,6 +346,91 @@ proc_with_prefix test_really_undocumented_parameter { } {
 	"test general help"
 }
 
+# Test a parameter in which the __doc__ string is empty or None.
+proc_with_prefix test_empty_doc_parameter {} {
+    gdb_test_multiline "empty __doc__ parameter" \
+	"python" "" \
+	"class EmptyDocParam(gdb.Parameter):" "" \
+	"   __doc__ = \"\"" "" \
+	"   def __init__(self, name):" "" \
+	"      super ().__init__(name, gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"      self.value = True" "" \
+	"test_empty_doc_param = EmptyDocParam('print test-empty-doc-param')" ""\
+	"end"
+
+    # Setting the __doc__ string to empty means GDB will completely
+    # elide it from the output.
+    gdb_test "help set print test-empty-doc-param" \
+	"^Set the current value of 'print test-empty-doc-param'\\."
+
+    gdb_test_multiline "None __doc__ parameter" \
+	"python" "" \
+	"class NoneDocParam(gdb.Parameter):" "" \
+	"   __doc__ = None" "" \
+	"   def __init__(self, name):" "" \
+	"      super ().__init__(name, gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"      self.value = True" "" \
+	"test_none_doc_param = NoneDocParam('print test-none-doc-param')" ""\
+	"end"
+
+    # Setting the __doc__ string to None, or anything else that isn't
+    # a string, causes GDB to use a default string instead.
+    gdb_test "help set print test-none-doc-param" \
+	[multi_line \
+	     "^Set the current value of 'print test-none-doc-param'\\." \
+	     "This command is not documented\\."]
+}
+
+# Test a parameter in which the set_doc/show_doc strings are either
+# empty, or None.
+proc_with_prefix test_empty_set_show_doc_parameter {} {
+    gdb_test_multiline "empty set/show doc parameter" \
+	"python" "" \
+	"class EmptySetShowParam(gdb.Parameter):" "" \
+	"   set_doc = \"\"" "" \
+	"   show_doc = \"\"" "" \
+	"   def __init__(self, name):" "" \
+	"      super ().__init__(name, gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"      self.value = True" "" \
+	"test_empty_set_show_param = EmptySetShowParam('print test-empty-set-show-param')" ""\
+	"end"
+
+    # Setting the set_doc/show_doc string to empty means GDB will use
+    # a suitable default string.
+    gdb_test "help set print test-empty-set-show-param" \
+	[multi_line \
+	     "^Set the current value of 'print test-empty-set-show-param'\\." \
+	     "This command is not documented\\."]
+
+    gdb_test "help show print test-empty-set-show-param" \
+	[multi_line \
+	     "^Show the current value of 'print test-empty-set-show-param'\\." \
+	     "This command is not documented\\."]
+
+    gdb_test_multiline "None set/show doc parameter" \
+	"python" "" \
+	"class NoneSetShowParam(gdb.Parameter):" "" \
+	"   set_doc = None" "" \
+	"   show_doc = None" "" \
+	"   def __init__(self, name):" "" \
+	"      super ().__init__(name, gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"      self.value = True" "" \
+	"test_none_set_show_param = NoneSetShowParam('print test-none-set-show-param')" ""\
+	"end"
+
+    # Setting the set_doc/show_doc string to None (or any non-string
+    # value) means GDB will use a suitable default string.
+    gdb_test "help set print test-none-set-show-param" \
+	[multi_line \
+	     "^Set the current value of 'print test-none-set-show-param'\\." \
+	     "This command is not documented\\."]
+
+    gdb_test "help show print test-none-set-show-param" \
+	[multi_line \
+	     "^Show the current value of 'print test-none-set-show-param'\\." \
+	     "This command is not documented\\."]
+}
+
 # Test deprecated API. Do not use in your own implementations.
 proc_with_prefix test_deprecated_api_parameter { } {
     clean_restart
@@ -716,6 +801,8 @@ test_color_parameter
 test_file_parameter
 test_undocumented_parameter
 test_really_undocumented_parameter
+test_empty_doc_parameter
+test_empty_set_show_doc_parameter
 test_deprecated_api_parameter
 test_gdb_parameter
 test_integer_parameter

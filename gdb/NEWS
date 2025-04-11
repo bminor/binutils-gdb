@@ -140,6 +140,10 @@ info threads [-gid] [-stopped] [-running] [ID]...
      when output is going to standard output, and False when output is
      going to a string.
 
+  ** Setting the documentation string (__doc__) of a gdb.Parameter
+     sub-class to the empty string, means GDB will only display the
+     set_doc or show_doc strings in the set/show help output.
+
 * Guile API
 
   ** New type <gdb:color> for dealing with colors.
