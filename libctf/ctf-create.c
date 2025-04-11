@@ -932,20 +932,11 @@ ctf_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
   if (dtd == NULL)
     return (ctf_set_errno (ofp, ECTF_BADID));
 
-  if (LCTF_INFO_ISROOT (fp, dtd->dtd_buf->ctt_info))
+  if ((prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf,
+						CTF_K_CONFLICTING)) == NULL)
     {
-      if (ctf_grow_vlen (fp, dtd, dtd->dtd_vlen_size + sizeof (ctf_type_t)) < 0)
-	return (ctf_set_errno (ofp, ENOMEM));
-
-      memmove (dtd->dtd_buf + 1, dtd->dtd_buf, dtd->dtd_vlen_size);
-      memset (dtd->dtd_buf, 0, sizeof (ctf_type_t));
-      prefix = dtd->dtd_buf;
-    }
-  else
-    {
-      prefix = dtd->dtd_buf;
-      while (CTF_INFO_KIND (prefix->ctt_info) != CTF_K_CONFLICTING)
-	prefix++;
+      if ((prefix = ctf_add_prefix (fp, dtd, 0)) == NULL)
+	return -1;			/* errno is set for us.  */
     }
   prefix->ctt_name = ctf_str_add (fp, cuname);
   prefix->ctt_info = CTF_TYPE_INFO (CTF_K_CONFLICTING, 0,
