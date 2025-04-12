@@ -308,13 +308,29 @@ pascm_is_valid (param_smob *p_smob)
   return p_smob->commands.set != nullptr;
 }
 
-/* A helper function which return the default documentation string for
-   a parameter (which is to say that it's undocumented).  */
+
+/* The different types of documentation string.  */
+
+enum doc_string_type
+{
+  doc_string_set,
+  doc_string_show,
+};
+
+/* A helper function which returns the default documentation string for
+   a parameter CMD_NAME.  The DOC_TYPE indicates which type of
+   documentation string is needed.  The returned string is dynamically
+   allocated.  */
 
 static char *
-get_doc_string (void)
+get_doc_string (doc_string_type doc_type, const char *cmd_name)
 {
-  return xstrdup (_("This command is not documented."));
+  if (doc_type == doc_string_show)
+    return xstrprintf (_("Show the current value of '%s'."),
+		       cmd_name).release ();
+  else
+    return xstrprintf (_("Set the current value of '%s'."),
+		       cmd_name).release ();
 }
 
 /* Subroutine of pascm_set_func, pascm_show_func to simplify them.
@@ -992,9 +1008,9 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
 
   /* If doc is NULL, leave it NULL.  See add_setshow_cmd_full.  */
   if (set_doc == NULL)
-    set_doc = get_doc_string ();
+    set_doc = get_doc_string (doc_string_set, name);
   if (show_doc == NULL)
-    show_doc = get_doc_string ();
+    show_doc = get_doc_string (doc_string_show, name);
 
   s = name;
   name = gdbscm_canonicalize_command_name (s, 0);
