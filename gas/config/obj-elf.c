@@ -781,7 +781,7 @@ change_section (const char *name,
 	  || startswith (name, ".note.gnu"))
 	flags |= SEC_ELF_OCTETS;
     }
-  
+
   if (old_sec == NULL)
     {
       symbolS *secsym;
