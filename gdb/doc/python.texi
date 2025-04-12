@@ -4525,6 +4525,7 @@ You can implement new @value{GDBN} CLI commands in Python.  A CLI
 command is implemented using an instance of the @code{gdb.Command}
 class, most commonly using a subclass.
 
+@anchor{Command.__init__}
 @defun Command.__init__ (name, command_class @r{[}, completer_class @r{[}, prefix@r{]]})
 The object initializer for @code{Command} registers the new command
 with @value{GDBN}.  This initializer is normally invoked from the
@@ -4582,6 +4583,17 @@ that the command came from elsewhere.
 
 If this method throws an exception, it is turned into a @value{GDBN}
 @code{error} call.  Otherwise, the return value is ignored.
+
+For non-prefix commands (@pxref{Command.__init__}), the @code{invoke}
+method is required.  For prefix commands the @code{invoke} method is
+optional.  Only prefix commands that need to handle unknown
+sub-commands should implement the @code{invoke} method.
+
+For prefix commands that don't implement @code{invoke}, if the prefix
+command is used without a sub-command name then @value{GDBN} will
+display the help text for every sub-command, unless the prefix command
+is a @kbd{show} sub-command, in which case @value{GDBN} will list the
+values of all sub-commands.
 
 @findex gdb.string_to_argv
 To break @var{argument} up into an argv-like string use

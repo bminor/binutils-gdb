@@ -478,6 +478,79 @@ with_test_prefix "empty doc string" {
     gdb_test "help show empty-doc-string" "^Show doc string\\."
 }
 
+with_test_prefix "set/show parameter" {
+    # This first set/show prefix command doesn't have an invoke
+    # method.  As such, GDB installs the default invoke behaviour; set
+    # prints the full list of sub-commands, and show prints all the
+    # sub-command values.
+    gdb_test_multiline "Setup set/show parameter prefix with no invoke" \
+	"guile" "" \
+	"(register-command! (make-command \"set test-prefix\"" "" \
+	"  #:prefix? #t" "" \
+	"  #:command-class COMMAND_NONE))" ""\
+	"(register-command! (make-command \"show test-prefix\"" "" \
+	"  #:prefix? #t" "" \
+	"  #:command-class COMMAND_NONE))" ""\
+	"(register-parameter! (make-parameter \"test-prefix param-1\"" "" \
+	"  #:command-class COMMAND_NONE" "" \
+	"  #:parameter-type PARAM_BOOLEAN))" "" \
+	"(register-parameter! (make-parameter \"test-prefix param-2\"" "" \
+	"  #:command-class COMMAND_NONE" "" \
+	"  #:parameter-type PARAM_UINTEGER))" "" \
+	"(register-parameter! (make-parameter \"test-prefix param-3\"" "" \
+	"  #:command-class COMMAND_NONE" "" \
+	"  #:parameter-type PARAM_STRING))" "" \
+	"end" ""
+
+    gdb_test "set test-prefix" \
+	[multi_line \
+	     "List of \"set test-prefix\" subcommands:" \
+	     "" \
+	     "set test-prefix param-1 -- Set the current value of 'test-prefix param-1'." \
+	     "set test-prefix param-2 -- Set the current value of 'test-prefix param-2'." \
+	     "set test-prefix param-3 -- Set the current value of 'test-prefix param-3'." \
+	     "" \
+	     "Type \"help set test-prefix\" followed by subcommand name for full documentation\\." \
+	     "Type \"apropos word\" to search for commands related to \"word\"\\." \
+	     "Type \"apropos -v word\" for full documentation of commands related to \"word\"\\." \
+	     "Command name abbreviations are allowed if unambiguous\\."]
+
+    gdb_test "show test-prefix" \
+	[multi_line \
+	     "test-prefix param-1:  The current value of 'test-prefix param-1' is off\\." \
+	     "test-prefix param-2:  The current value of 'test-prefix param-2' is 0\\." \
+	     "test-prefix param-3:  The current value of 'test-prefix param-3' is \"\"\\."]
+
+    # This next set/show prefix has an invoke method, which will be
+    # called instead of the default behaviour tested above.
+    gdb_test_multiline "Setup set/show parameter prefix with invoke" \
+	"guile" "" \
+	"(register-command! (make-command \"set test-prefix-2\"" "" \
+	"  #:prefix? #t" "" \
+	"  #:command-class COMMAND_NONE" ""\
+	"  #:invoke (lambda (self arg from-tty)" "" \
+	"    (display \"invoke -- set\\n\"))))" "" \
+	"(register-command! (make-command \"show test-prefix-2\"" "" \
+	"  #:prefix? #t" "" \
+	"  #:command-class COMMAND_NONE" ""\
+	"  #:invoke (lambda (self arg from-tty)" "" \
+	"    (display \"invoke -- show\\n\"))))" "" \
+	"(register-parameter! (make-parameter \"test-prefix-2 param-1\"" "" \
+	"  #:command-class COMMAND_NONE" "" \
+	"  #:parameter-type PARAM_BOOLEAN))" "" \
+	"(register-parameter! (make-parameter \"test-prefix-2 param-2\"" "" \
+	"  #:command-class COMMAND_NONE" "" \
+	"  #:parameter-type PARAM_UINTEGER))" "" \
+	"(register-parameter! (make-parameter \"test-prefix-2 param-3\"" "" \
+	"  #:command-class COMMAND_NONE" "" \
+	"  #:parameter-type PARAM_STRING))" "" \
+	"end" ""
+
+    gdb_test "set test-prefix-2" "^invoke -- set"
+
+    gdb_test "show test-prefix-2" "^invoke -- show"
+}
+
 rename scm_param_test_maybe_no_output ""
 
 # Test a color parameter.

@@ -150,6 +150,12 @@ info threads [-gid] [-stopped] [-running] [ID]...
      and 'show' gdb.Command prefixes, suitable for use with new
      gdb.Parameters.
 
+  ** Prefix commands (gdb.Command sub-classes) that don't have an
+     invoke method will now behave like builtin prefix commands when
+     invoked without a sub-command name.  This means printing the help
+     text for all sub-commands, unless the prefix command is a 'show'
+     command, in which case the value of all sub-commands is printed.
+
 * Guile API
 
   ** New type <gdb:color> for dealing with colors.
@@ -161,6 +167,12 @@ info threads [-gid] [-stopped] [-running] [ID]...
      will use a default documentation string.  Setting #:doc to the
      empty string for make-parameter means GDB will only display the
      #:set_doc or #:show_doc strings in the set/show help output.
+
+  ** Prefix commands (using make-command) that don't have a #:invoke
+     property will now behave like builtin prefix commands when
+     invoked without a sub-command name.  This means printing the help
+     text for all sub-commands, unless the prefix command is a 'show'
+     command, in which case the value of all sub-commands is printed.
 
 * New remote packets
 

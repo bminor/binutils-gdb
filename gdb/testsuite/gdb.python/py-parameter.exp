@@ -793,6 +793,67 @@ proc_with_prefix test_unknown_prefix {} {
     }
 }
 
+# Test the default behaviour of a set/show parameter prefix command.
+proc_with_prefix test_set_show_parameters {} {
+    # This first set/show prefix command doesn't have an invoke
+    # method.  As such, GDB installs the default invoke behaviour; set
+    # prints the full list of sub-commands, and show prints all the
+    # sub-command values.
+    gdb_test_multiline "Setup set/show parameter prefix with no invoke" \
+	"python" "" \
+	"class TestParamPrefix(gdb.Command):" "" \
+	"   \"\"\"TestParamPrefix documentation string.\"\"\"" "" \
+	"   def __init__(self, name):" "" \
+	"      super().__init__(name, gdb.COMMAND_NONE, prefix = True)" "" \
+	"TestParamPrefix('set test-prefix')" "" \
+	"TestParamPrefix('show test-prefix')" "" \
+	"gdb.Parameter('test-prefix param-1', gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"gdb.Parameter('test-prefix param-2', gdb.COMMAND_NONE, gdb.PARAM_INTEGER)" "" \
+	"gdb.Parameter('test-prefix param-3', gdb.COMMAND_NONE, gdb.PARAM_STRING)" "" \
+	"end"
+
+    gdb_test "set test-prefix" \
+	[multi_line \
+	     "List of \"set test-prefix\" subcommands:" \
+	     "" \
+	     "set test-prefix param-1 -- Set the current value of 'test-prefix param-1'." \
+	     "set test-prefix param-2 -- Set the current value of 'test-prefix param-2'." \
+	     "set test-prefix param-3 -- Set the current value of 'test-prefix param-3'." \
+	     "" \
+	     "Type \"help set test-prefix\" followed by subcommand name for full documentation\\." \
+	     "Type \"apropos word\" to search for commands related to \"word\"\\." \
+	     "Type \"apropos -v word\" for full documentation of commands related to \"word\"\\." \
+	     "Command name abbreviations are allowed if unambiguous\\."]
+
+    gdb_test "show test-prefix" \
+	[multi_line \
+	     "test-prefix param-1:  The current value of 'test-prefix param-1' is \"off\"\\." \
+	     "test-prefix param-2:  The current value of 'test-prefix param-2' is \"0\"\\." \
+	     "test-prefix param-3:  The current value of 'test-prefix param-3' is \"\"\\."]
+
+    # This next set/show prefix has an invoke method, which will be
+    # called instead of the default behaviour tested above.
+    gdb_test_multiline "Setup set/show parameter prefix with invoke" \
+	"python" "" \
+	"class TestParamPrefix(gdb.Command):" "" \
+	"   \"\"\"TestParamPrefix documentation string.\"\"\"" "" \
+	"   def __init__(self, name, mode):" "" \
+	"      self._mode = mode" "" \
+	"      super().__init__(self._mode + ' ' + name, gdb.COMMAND_NONE, prefix = True)" "" \
+	"   def invoke(self, args, from_tty):" "" \
+	"      print('invoke -- ' + self._mode)" "" \
+	"TestParamPrefix('test-prefix-2', 'set')" "" \
+	"TestParamPrefix('test-prefix-2', 'show')" "" \
+	"gdb.Parameter('test-prefix-2 param-1', gdb.COMMAND_NONE, gdb.PARAM_BOOLEAN)" "" \
+	"gdb.Parameter('test-prefix-2 param-2', gdb.COMMAND_NONE, gdb.PARAM_INTEGER)" "" \
+	"gdb.Parameter('test-prefix-2 param-3', gdb.COMMAND_NONE, gdb.PARAM_STRING)" "" \
+	"end"
+
+    gdb_test "set test-prefix-2" "^invoke -- set"
+
+    gdb_test "show test-prefix-2" "^invoke -- show"
+}
+
 test_directories
 test_data_directory
 test_boolean_parameter
@@ -810,5 +871,6 @@ test_throwing_parameter
 test_language
 test_ambiguous_parameter
 test_unknown_prefix
+test_set_show_parameters
 
 rename py_param_test_maybe_no_output ""

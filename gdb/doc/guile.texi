@@ -1772,6 +1772,16 @@ invoking it interactively.  If this function throws an exception,
 it is turned into a @value{GDBN} @code{error} call.
 Otherwise, the return value is ignored.
 
+For non-prefix commands, @var{invoke} is required.  For prefix
+commands @var{invoke} is optional.  Only prefix commands that need to
+handle unknown sub-commands should supply @var{invoke}.
+
+For prefix commands that don't supply @var{invoke}, if the prefix
+command is used without a sub-command name then @value{GDBN} will
+display the help text for every sub-command, unless the prefix command
+is a @kbd{show} sub-command, in which case @value{GDBN} will list the
+values of all sub-commands.
+
 The argument @var{command-class} is one of the @samp{COMMAND_} constants
 defined below.  This argument tells @value{GDBN} how to categorize the
 new command in the help system.  The default is @code{COMMAND_NONE}.

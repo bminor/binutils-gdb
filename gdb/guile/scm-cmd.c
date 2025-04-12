@@ -753,18 +753,47 @@ gdbscm_register_command_x (SCM self)
     {
       if (c_smob->is_prefix)
 	{
-	  /* If we have our own "invoke" method, then allow unknown
-	     sub-commands.  */
-	  int allow_unknown = gdbscm_is_true (c_smob->invoke);
+	  bool has_invoke = gdbscm_is_true (c_smob->invoke) == 1;
 
-	  cmd = add_prefix_cmd (c_smob->cmd_name, c_smob->cmd_class,
-				NULL, c_smob->doc, &c_smob->sub_list,
-				allow_unknown, cmd_list);
+	  if (has_invoke)
+	    {
+	      cmd = add_prefix_cmd (c_smob->cmd_name, c_smob->cmd_class,
+				    NULL, c_smob->doc, &c_smob->sub_list,
+				    1 /* allow_unknown */, cmd_list);
+	      cmd->func = cmdscm_function;
+	    }
+	  else
+	    {
+	      /* If there is no 'invoke' method, then create the prefix
+		 using the standard prefix callbacks.  This means that for
+		 'set prefix' the user will get the help text listing all
+		 of the sub-commands, and for 'show prefix', the user will
+		 see all of the sub-command values.  */
+	      cmd_list_element *first = *cmd_list;
+	      while (first->prefix != nullptr)
+		first = first->prefix;
+
+	      bool is_show = first->subcommands == &showlist;
+
+	      if (is_show)
+		cmd = add_show_prefix_cmd (c_smob->cmd_name,
+					   c_smob->cmd_class,
+					   c_smob->doc,
+					   &c_smob->sub_list,
+					   0 /* allow_unknown */, cmd_list);
+	      else
+		cmd = add_basic_prefix_cmd (c_smob->cmd_name,
+					    c_smob->cmd_class,
+					    c_smob->doc,
+					    &c_smob->sub_list,
+					    0 /* allow_unknown */, cmd_list);
+	    }
 	}
       else
 	{
 	  cmd = add_cmd (c_smob->cmd_name, c_smob->cmd_class,
 			 c_smob->doc, cmd_list);
+	  cmd->func = cmdscm_function;
 	}
     }
   catch (const gdb_exception &except)
@@ -777,7 +806,6 @@ gdbscm_register_command_x (SCM self)
      So no more errors after this point.  */
 
   /* There appears to be no API to set this.  */
-  cmd->func = cmdscm_function;
   cmd->destroyer = cmdscm_destroyer;
 
   c_smob->command = cmd;

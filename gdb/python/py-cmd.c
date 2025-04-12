@@ -105,19 +105,17 @@ cmdpy_function (const char *args, int from_tty, cmd_list_element *command)
 
   gdbpy_enter enter_py;
 
-  if (! obj)
+  if (obj == nullptr)
     error (_("Invalid invocation of Python command object."));
-  if (! PyObject_HasAttr ((PyObject *) obj, invoke_cst))
-    {
-      if (obj->command->is_prefix ())
-	{
-	  /* A prefix command does not need an invoke method.  */
-	  return;
-	}
-      error (_("Python command object missing 'invoke' method."));
-    }
 
-  if (! args)
+  /* If we get here for a prefix command then the prefix command had an
+     'invoke' method when it was created.  If the 'invoke' method is now
+     missing, then the user has done something weird (like deleting the
+     invoke method, yuck!).  */
+  if (!PyObject_HasAttr ((PyObject *) obj, invoke_cst))
+    error (_("Python command object missing 'invoke' method."));
+
+  if (args == nullptr)
     args = "";
   gdbpy_ref<> argobj (PyUnicode_Decode (args, strlen (args), host_charset (),
 					NULL));
@@ -507,26 +505,61 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 
       if (is_prefix)
 	{
-	  int allow_unknown;
+	  bool has_invoke = PyObject_HasAttr (self, invoke_cst) == 1;
+	  if (has_invoke)
+	    {
+	      /* If there's an 'invoke' method, then create the prefix
+		 command, but call cmdpy_function to dispatch to the invoke
+		 method when the user runs the prefix with no sub-command.  */
+	      cmd = add_prefix_cmd (cmd_name.get (),
+				    (enum command_class) cmdtype,
+				    nullptr,
+				    docstring.release (), &obj->sub_list,
+				    1 /* allow_unknown */, cmd_list);
+	      cmd->func = cmdpy_function;
+	    }
+	  else
+	    {
+	      /* If there is no 'invoke' method, then create the prefix
+		 using the standard prefix callbacks.  This means that for
+		 'set prefix' the user will get the help text listing all
+		 of the sub-commands, and for 'show prefix', the user will
+		 see all of the sub-command values.  */
+	      cmd_list_element *first = *cmd_list;
+	      while (first->prefix != nullptr)
+		first = first->prefix;
 
-	  /* If we have our own "invoke" method, then allow unknown
-	     sub-commands.  */
-	  allow_unknown = PyObject_HasAttr (self, invoke_cst);
-	  cmd = add_prefix_cmd (cmd_name.get (),
-				(enum command_class) cmdtype,
-				NULL, docstring.release (), &obj->sub_list,
-				allow_unknown, cmd_list);
+	      bool is_show = first->subcommands == &showlist;
+
+	      if (is_show)
+		cmd = add_show_prefix_cmd (cmd_name.get (),
+					   (enum command_class) cmdtype,
+					   docstring.release (),
+					   &obj->sub_list,
+					   0 /* allow_unknown */, cmd_list);
+	      else
+		cmd = add_basic_prefix_cmd (cmd_name.get (),
+					    (enum command_class) cmdtype,
+					    docstring.release (),
+					    &obj->sub_list,
+					    0 /* allow_unknown */, cmd_list);
+	    }
 	}
       else
-	cmd = add_cmd (cmd_name.get (), (enum command_class) cmdtype,
-		       docstring.release (), cmd_list);
+	{
+	  /* For non-prefix commands, arrange to call cmdpy_function, which
+	     invokes the Python 'invoke' method, or raises an exception if
+	     the 'invoke' method is missing.  */
+	  cmd = add_cmd (cmd_name.get (), (enum command_class) cmdtype,
+			 docstring.release (), cmd_list);
+	  cmd->func = cmdpy_function;
+	}
 
       /* If successful, the above takes ownership of the name, since we set
 	 name_allocated, so release it.  */
       cmd_name.release ();
 
-      /* There appears to be no API to set this.  */
-      cmd->func = cmdpy_function;
+      /* There appears to be no API to set these member variables.  */
       cmd->destroyer = cmdpy_destroyer;
       cmd->doc_allocated = 1;
       cmd->name_allocated = 1;

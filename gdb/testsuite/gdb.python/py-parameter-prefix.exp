@@ -23,25 +23,26 @@ require allow_python_tests
 
 clean_restart
 
-# Helper proc to generate the output of 'help MODE PREFIX', where MODE
-# will be either 'set' or 'show'.  The HELP_TEXT is the expected help
-# text for this prefix command, this should not be a regexp, as this
-# proc converts the text to a regexp.
-#
-# Return a single regexp which should match the output.
-proc make_help_re { mode prefix help_text } {
+# Helper proc to generate the output of 'show PREFIX' commands for the
+# case where the prefix command doesn't handle unknown sub-commands.
+# In this case GDB will list the value of every sub-command under
+# PREFIX.
+proc make_show_prefix_re { prefix } {
+    return "$prefix param-1:\\s+The current value of '$prefix param-1' is \"off\"\\."
+}
+
+# Helper proc to generate the help text that describes all of the sub
+# commands under PREFIX.  The MODE is either 'set' or 'show'.  This
+# output will appear for 'help MODE PREFIX' and also for 'set PREFIX'.
+proc make_sub_cmd_help_re { mode prefix } {
     if { $mode == "set" } {
 	set word "Set"
     } else {
 	set word "Show"
     }
 
-    set help_re [string_to_regexp $help_text]
-
     return \
 	[multi_line \
-	     "$help_re" \
-	     "" \
 	     "List of \"$mode $prefix\" subcommands:" \
 	     "" \
 	     "$mode $prefix param-1 -- $word the current value of '$prefix param-1'\\." \
@@ -50,6 +51,22 @@ proc make_help_re { mode prefix help_text } {
 	     "Type \"apropos word\" to search for commands related to \"word\"\\." \
 	     "Type \"apropos -v word\" for full documentation of commands related to \"word\"\\." \
 	     "Command name abbreviations are allowed if unambiguous\\."]
+}
+
+# Helper proc to generate the output of 'help MODE PREFIX', where MODE
+# will be either 'set' or 'show'.  The HELP_TEXT is the expected help
+# text for this prefix command, this should not be a regexp, as this
+# proc converts the text to a regexp.
+#
+# Return a single regexp which should match the output.
+proc make_help_re { mode prefix help_text } {
+    set help_re [string_to_regexp $help_text]
+
+    return \
+	[multi_line \
+	     "$help_re" \
+	     "" \
+	     [make_sub_cmd_help_re $mode $prefix]]
 }
 
 # Create gdb.ParameterPrefix without using a sub-class, both with, and
@@ -91,6 +108,14 @@ proc_with_prefix test_basic_usage {} {
 	    gdb_test "$mode $prefix xxx" \
 		"^Undefined $mode $prefix command: \"xxx\"\\.  Try \"help $mode $prefix\"\\."
 	}
+    }
+
+    foreach prefix { prefix-1 prefix-2 prefix-3 } {
+	gdb_test "set $prefix" \
+	    [make_sub_cmd_help_re "set" $prefix]
+
+	gdb_test "show $prefix" \
+	    [make_show_prefix_re $prefix]
     }
 }
 
@@ -152,6 +177,14 @@ proc_with_prefix test_simple_sub_class {} {
 	    gdb_test "$mode $prefix xxx" \
 		"^Undefined $mode $prefix command: \"xxx\"\\.  Try \"help $mode $prefix\"\\."
 	}
+    }
+
+    foreach prefix { prefix-4 prefix-5 prefix-6 prefix-7 } {
+	gdb_test "set $prefix" \
+	    [make_sub_cmd_help_re "set" $prefix]
+
+	gdb_test "show $prefix" \
+	    [make_show_prefix_re $prefix]
     }
 }
 
@@ -220,6 +253,24 @@ proc_with_prefix test_prefix_with_invoke {} {
     send_gdb "\n"
     gdb_test "" "^\r\ninvoke_show \\(d\\): \"xxx yyy\" True" \
 	"repeat show prefix-10 xxx yyy"
+
+    gdb_test "set prefix-8" \
+	"^invoke_set \\(a\\): \"\" True"
+
+    gdb_test "show prefix-8" \
+	[make_show_prefix_re "prefix-8"]
+
+    gdb_test "set prefix-9" \
+	[make_sub_cmd_help_re "set" "prefix-9"]
+
+    gdb_test "show prefix-9" \
+	"^invoke_show \\(b\\): \"\" True"
+
+    gdb_test "set prefix-10" \
+	"^invoke_set \\(c\\): \"\" True"
+
+    gdb_test "show prefix-10" \
+	"^invoke_show \\(d\\): \"\" True"
 }
 
 # Create ParameterPrefix sub-classes that make use of the

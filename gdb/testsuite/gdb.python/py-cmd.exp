@@ -354,5 +354,63 @@ proc_with_prefix test_unknown_prefix {} {
     }
 }
 
+# Check what happens if a command object is called without an 'invoke'
+# method.
+proc_with_prefix test_deleting_invoke_methods {} {
+    clean_restart
+
+    gdb_test_multiline "create 'foo' prefix command" \
+	"python" "" \
+	"class test_prefix(gdb.Command):" "" \
+	"  def __init__ (self):" "" \
+	"    super().__init__ (\"foo\", gdb.COMMAND_USER, prefix=True)" "" \
+	"  def invoke (self, arg, from_tty):" "" \
+	"    print(\"In 'foo' invoke: %s\" % arg)" "" \
+	"foo = test_prefix()" "" \
+	"end" ""
+
+    gdb_test_multiline "create 'foo bar' command" \
+	"python" "" \
+	"class test_cmd(gdb.Command):" "" \
+	"  def __init__ (self):" "" \
+	"    super().__init__ (\"foo bar\", gdb.COMMAND_USER)" "" \
+	"  def invoke (self, arg, from_tty):" "" \
+	"    print(\"In 'foo bar' invoke: %s\" % arg)" "" \
+	"foo_bar = test_cmd()" "" \
+	"end" ""
+
+    gdb_test "foo def" "In 'foo' invoke: def" \
+	"call 'foo' with an unknown sub-command"
+
+    gdb_test "foo bar def" "In 'foo bar' invoke: def" \
+	"call 'foo bar' with arguments"
+
+    gdb_test_no_output "python del(foo_bar.__class__.invoke)" \
+	"delete invoke from test_cmd class"
+
+    with_test_prefix "after deleting test_cmd.invoke" {
+	gdb_test "foo def" "In 'foo' invoke: def" \
+	    "call 'foo' with an unknown sub-command"
+
+	gdb_test "foo bar def" \
+	    "^Python command object missing 'invoke' method\\." \
+	    "call 'foo bar' with arguments"
+    }
+
+    gdb_test_no_output "python del(foo.__class__.invoke)" \
+	"delete invoke from test_prefix class"
+
+    with_test_prefix "after deleting test_prefix.invoke" {
+	gdb_test "foo def" \
+	    "^Python command object missing 'invoke' method\\." \
+	    "call 'foo' with an unknown sub-command"
+
+	gdb_test "foo bar def" \
+	    "^Python command object missing 'invoke' method\\." \
+	    "call 'foo bar' with arguments"
+    }
+}
+
 test_command_redefining_itself
 test_unknown_prefix
+test_deleting_invoke_methods
