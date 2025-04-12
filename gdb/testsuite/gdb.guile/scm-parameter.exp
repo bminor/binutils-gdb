@@ -67,9 +67,19 @@ with_test_prefix "test-param" {
     gdb_test_no_output "set print test-param off"
     gdb_test "show print test-param" "The state of the Test Parameter is off." "show parameter off"
     gdb_test "guile (print (parameter-value test-param))" "= #f" "parameter value, false"
-    gdb_test "help show print test-param" "Show the state of the boolean test-param.*" "show help"
-    gdb_test "help set print test-param" "Set the state of the boolean test-param.*" "set help"
-    gdb_test "help set print" "set print test-param -- Set the state of the boolean test-param.*" "general help"
+    gdb_test "help show print test-param" \
+	[multi_line \
+	     "^Show the state of the boolean test-param\\." \
+	     "When enabled, test param does something useful\\. When disabled, does nothing\\."] \
+	"show help"
+    gdb_test "help set print test-param" \
+	[multi_line \
+	     "^Set the state of the boolean test-param\\." \
+	     "When enabled, test param does something useful\\. When disabled, does nothing\\."] \
+	 "set help"
+    gdb_test "help set print" \
+	"set print test-param -- Set the state of the boolean test-param.*" \
+	"general help"
 
     gdb_test "guile (print (parameter? test-param))" "= #t"
     gdb_test "guile (print (parameter? 42))" "= #f"
@@ -315,12 +325,16 @@ with_test_prefix "test-undocumented-param" {
     gdb_test_no_output "set print test-undoc-param off"
     gdb_test "show print test-undoc-param" "The state of the Test Parameter is off." "show parameter off"
     gdb_test "help show print test-undoc-param" \
-	"Show the current value of 'print test-undoc-param'\\." "show help"
+	[multi_line \
+	     "^Show the current value of 'print test-undoc-param'\\." \
+	     "This command is not documented\\."] \
+	"show help"
     gdb_test "help set print test-undoc-param" \
-	"Set the current value of 'print test-undoc-param'\\." "set help"
-    gdb_test "help set print" \
-	"set print test-undoc-param -- Set the current value of 'print test-undoc-param'\\..*" \
-	"general help"
+	[multi_line \
+	     "Set the current value of 'print test-undoc-param'\\." \
+	     "This command is not documented\\."] \
+	 "set help"
+    gdb_test "help set print" "set print test-undoc-param -- Set the current value of 'print test-undoc-param'\\..*" "general help"
 }
 
 # Test a parameter with a restricted range, where we need to notify the user
@@ -390,9 +404,15 @@ with_test_prefix "previously-ambiguous" {
 	"The current value of 'print s' is on\\." "show parameter on"
     gdb_test "guile (print (parameter-value prev-ambig))" "= #t" "parameter value, true"
     gdb_test "help show print s" \
-	"Show the current value of 'print s'\\." "show help"
+	[multi_line \
+	     "^Show the current value of 'print s'\\." \
+	     "This command is not documented\\."] \
+	"show help"
     gdb_test "help set print s" \
-	"Set the current value of 'print s'\\." "set help"
+	[multi_line \
+	     "Set the current value of 'print s'\\." \
+	     "This command is not documented\\."] \
+	"set help"
     gdb_test "help set print" \
 	"set print s -- Set the current value of 'print s'\\..*" \
 	"general help"
@@ -442,6 +462,21 @@ gdb_test_multiline "create ambiguous 'foo baz' parameter" \
     [multi_line \
 	 "Out of range: could not find command prefix 'foo' in position 1: \"foo baz\"" \
 	 "Error while executing Scheme code."]
+
+with_test_prefix "empty doc string" {
+    gdb_test_multiline "empty doc string parameter" \
+	"guile" "" \
+	"(register-parameter! (make-parameter \"empty-doc-string\"" "" \
+	"   #:command-class COMMAND_NONE" "" \
+	"   #:parameter-type PARAM_ZINTEGER" "" \
+	"   #:doc \"\"" "" \
+	"   #:set-doc \"Set doc string.\"" "" \
+	"   #:show-doc \"Show doc string.\"))" "" \
+	"end"
+
+    gdb_test "help set empty-doc-string" "^Set doc string\\."
+    gdb_test "help show empty-doc-string" "^Show doc string\\."
+}
 
 rename scm_param_test_maybe_no_output ""
 

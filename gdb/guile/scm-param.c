@@ -315,6 +315,7 @@ enum doc_string_type
 {
   doc_string_set,
   doc_string_show,
+  doc_string_description
 };
 
 /* A helper function which returns the default documentation string for
@@ -325,12 +326,19 @@ enum doc_string_type
 static char *
 get_doc_string (doc_string_type doc_type, const char *cmd_name)
 {
-  if (doc_type == doc_string_show)
-    return xstrprintf (_("Show the current value of '%s'."),
-		       cmd_name).release ();
+  if (doc_type == doc_string_description)
+    return xstrdup (_("This command is not documented."));
   else
-    return xstrprintf (_("Set the current value of '%s'."),
-		       cmd_name).release ();
+    {
+      gdb_assert (cmd_name != nullptr);
+
+      if (doc_type == doc_string_show)
+	return xstrprintf (_("Show the current value of '%s'."),
+			   cmd_name).release ();
+      else
+	return xstrprintf (_("Set the current value of '%s'."),
+			   cmd_name).release ();
+    }
 }
 
 /* Subroutine of pascm_set_func, pascm_show_func to simplify them.
@@ -1006,7 +1014,10 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
 			      &show_doc_arg_pos, &show_doc,
 			      &initial_value_arg_pos, &initial_value_scm);
 
-  /* If doc is NULL, leave it NULL.  See add_setshow_cmd_full.  */
+  if (doc == nullptr)
+    doc = get_doc_string (doc_string_description, nullptr);
+  else if (*doc == '\0')
+    doc = nullptr;
   if (set_doc == NULL)
     set_doc = get_doc_string (doc_string_set, name);
   if (show_doc == NULL)

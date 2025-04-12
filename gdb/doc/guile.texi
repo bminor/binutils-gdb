@@ -2098,8 +2098,10 @@ is the @code{<gdb:parameter>} object representing the parameter, and
 This function must return a string, and will be displayed to the user.
 @value{GDBN} will add a trailing newline.
 
-The argument @var{doc} is the help text for the new parameter.
-If there is no documentation string, a default value is used.
+The argument @var{doc} is the help text for the new parameter.  If
+there is no documentation string, a default value is used.  If the
+documentation string is empty, then @value{GDBN} will print just the
+@var{set-doc} and @var{show-doc} strings (see below).
 
 The argument @var{set-doc} is the help text for this parameter's
 @code{set} command.

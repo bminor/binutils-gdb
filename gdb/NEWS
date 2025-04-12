@@ -151,6 +151,11 @@ info threads [-gid] [-stopped] [-running] [ID]...
   ** New constant PARAM_COLOR represents color type of a value
      of a <gdb:parameter> object.  Parameter's value is <gdb::color> instance.
 
+  ** Eliding the #:doc string from make-parameter now means that GDB
+     will use a default documentation string.  Setting #:doc to the
+     empty string for make-parameter means GDB will only display the
+     #:set_doc or #:show_doc strings in the set/show help output.
+
 * New remote packets
 
 binary-upload in qSupported reply
