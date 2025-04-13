@@ -4558,6 +4558,7 @@ documentation string is provided, the default value @samp{This command
 is not documented.} is used.
 @end defun
 
+@anchor{Command.dont_repeat}
 @cindex don't repeat Python command
 @defun Command.dont_repeat ()
 By default, a @value{GDBN} command is repeated when the user enters a
@@ -4568,6 +4569,7 @@ exception).  This is similar to the user command @code{dont-repeat},
 see @ref{Define, dont-repeat}.
 @end defun
 
+@anchor{Command.invoke}
 @defun Command.invoke (argument, from_tty)
 This method is called by @value{GDBN} when this command is invoked.
 
@@ -5259,6 +5261,99 @@ constants provided when the parameter is created.
 @item gdb.PARAM_COLOR
 The value is @code{gdb.Color} instance.
 @end table
+
+When creating multiple new parameters using @code{gdb.Parameter}, it
+is often desirable to create a prefix command that can be used to
+group related parameters together, for example, if you wished to add
+the parameters @kbd{plugin-name feature-1} and @kbd{plugin-name
+feature-2}, then the @kbd{plugin-name} would need to be a prefix
+command (@pxref{CLI Commands In Python}).
+
+However, when creating parameters, you will almost always need to
+create two prefix commands, one as a @kbd{set} sub-command, and one as
+a @kbd{show} sub-command.  @value{GDBN} provides the
+@code{gdb.ParameterPrefix} helper class to make creation of these two
+prefixes easier.
+
+@defun ParameterPrefix.__init__ (name, command_class, doc = @code{None})
+The object initializer for @code{ParameterPrefix} registers two new
+@code{gdb.Command} prefixes, one as a @kbd{set} sub-command, and the
+other as a @kbd{show} sub-command.
+
+@var{name}, a string, is the name of the new prefix, without either
+@kbd{set} or @kbd{show}, similar to the @var{name} passed to
+@code{gdb.Parameter} (@pxref{Parameters In Python}).  For example, to
+create the prefixes @kbd{set plugin-name} and @kbd{show plugin-name},
+you would pass the string @kbd{plugin-name}.
+
+@var{command_class} should be one of the @samp{COMMAND_} constants
+(@pxref{CLI Commands In Python}).  This argument tells @value{GDBN} how to
+categorize the new parameter prefixes in the help system.
+
+There are a number of ways in which the help text for the two new
+prefix commands can be provided.  If the @var{doc} parameter is not
+@code{None}, then this will be used as the documentation string for
+both prefix commands.
+
+If @var{doc} is @code{None}, but @code{gdb.ParameterPrefix} has been
+sub-classed, then the prefix command documentation will be taken from
+sub-classes documentation string (i.e., the @code{__doc__} attribute).
+
+If @var{doc} is @code{None}, and there is no @code{__doc__} string,
+then the default value @samp{This command is not documented.} is used.
+
+When writing the help text, keep in mind that the same text is used
+for both the @kbd{set} and @kbd{show} prefix commands.
+@end defun
+
+@defun ParameterPrefix.invoke_set (argument, from_tty)
+If a sub-class defines this method, then @value{GDBN} will call this
+when the prefix command is used with an unknown sub-command.  The
+@var{argument} and @var{from_tty} parameters are the same as for
+@code{gdb.Command.invoke} (@pxref{Command.invoke}).
+
+If this method throws an exception, it is turned into a @value{GDBN}
+@code{error} call.  Otherwise, the return value is ignored.
+
+It is not required that a @code{ParameterPrefix} sub-class override
+this method.  Usually, a parameter prefix only exists as a means to
+group related parameters together.  @value{GDBN} handles this use case
+automatically with no need to implement @code{invoke_set}.
+@end defun
+
+@defun ParameterPrefix.invoke_show (argument, from_tty)
+This is like the @code{invoke_set} method, but for the @kbd{show}
+prefix command.  As with @code{invoke_set}, implementation of this
+method is optional, and usually not required.
+@end defun
+
+@cindex don't repeat Python command
+@defun ParameterPrefix.dont_repeat ()
+Like @code{Command.dont_repeat} (@pxref{Command.dont_repeat}), this
+can be called from @code{ParameterPrefix.invoke_set} or
+@code{ParameterPrefix.invoke_show} to prevent the prefix commands from
+being repeated.
+@end defun
+
+Here is a small example that uses @code{gdb.ParameterPrefix} along
+with @code{gdb.Parameter} to create two new parameters
+@kbd{plugin-name feature-1} and @kbd{plugin-name feature-2}.  As
+neither @code{invoke_set} or @code{invoke_show} is needed, this
+example does not sub-class @code{gdb.ParameterPrefix}:
+
+@smallexample
+class ExampleParam(gdb.Parameter):
+   def __init__ (self, name):
+      super ().__init__ (name, gdb.COMMAND_DATA, gdb.PARAM_BOOLEAN)
+      self.value = True
+
+gdb.ParameterPrefix("plugin-name", gdb.COMMAND_NONE,
+                    """An example parameter prefix.
+
+                    This groups together some parameters.""")
+ExampleParam("plugin-name feature-1")
+ExampleParam("plugin-name feature-2")
+@end smallexample
 
 @node Functions In Python
 @subsubsection Writing new convenience functions

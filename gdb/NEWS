@@ -144,6 +144,10 @@ info threads [-gid] [-stopped] [-running] [ID]...
      sub-class to the empty string, means GDB will only display the
      set_doc or show_doc strings in the set/show help output.
 
+  ** New gdb.ParameterPrefix class.  This can be used to create 'set'
+     and 'show' gdb.Command prefixes, suitable for use with new
+     gdb.Parameters.
+
 * Guile API
 
   ** New type <gdb:color> for dealing with colors.

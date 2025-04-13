@@ -392,3 +392,121 @@ def _handle_missing_objfile(pspace, buildid, filename):
     return _handle_missing_files(
         pspace, "objfile", lambda h: h(pspace, buildid, filename)
     )
+
+
+class ParameterPrefix:
+    # A wrapper around gdb.Command for creating set/show prefixes.
+    #
+    # When creating a gdb.Parameter sub-classes, it is sometimes necessary
+    # to first create a gdb.Command object in order to create the needed
+    # command prefix.  However, for parameters, we actually need two
+    # prefixes, a 'set' prefix, and a 'show' prefix.  With this helper
+    # class, a single instance of this class will create both prefixes at
+    # once.
+    #
+    # It is important that this class-level documentation not be a __doc__
+    # string.  Users are expected to sub-class this ParameterPrefix class
+    # and add their own documentation.  If they don't, then GDB will
+    # generate a suitable doc string.  But, if this (parent) class has a
+    # __doc__ sting of its own, then sub-classes will inherit that __doc__
+    # string, and GDB will not understand that it needs to generate one.
+
+    class _PrefixCommand(Command):
+        """A gdb.Command used to implement both the set and show prefixes.
+
+        This documentation string is not used as the prefix command
+        documentation as it is overridden in the __init__ method below."""
+
+        # This private method is connected to the 'invoke' attribute within
+        # this _PrefixCommand object if the containing ParameterPrefix
+        # object has an invoke_set or invoke_show method.
+        #
+        # This method records within self.__delegate which _PrefixCommand
+        # object is currently active, and then calls the correct invoke
+        # method on the delegat object (the ParameterPrefix sub-class
+        # object).
+        #
+        # Recording the currently active _PrefixCommand object is important;
+        # if from the invoke method the user calls dont_repeat, then this is
+        # forwarded to the currently active _PrefixCommand object.
+        def __invoke(self, args, from_tty):
+
+            # A helper class for use as part of a Python 'with' block.
+            # Records which gdb.Command object is currently running its
+            # invoke method.
+            class MarkActiveCallback:
+                # The CMD is a _PrefixCommand object, and the DELEGATE is
+                # the ParameterPrefix class, or sub-class object.  At this
+                # point we simple record both of these within the
+                # MarkActiveCallback object.
+                def __init__(self, cmd, delegate):
+                    self.__cmd = cmd
+                    self.__delegate = delegate
+
+                # Record the currently active _PrefixCommand object within
+                # the outer ParameterPrefix sub-class object.
+                def __enter__(self):
+                    self.__delegate.active_prefix = self.__cmd
+
+                # Once the invoke method has completed, then clear the
+                # _PrefixCommand object that was stored into the outer
+                # ParameterPrefix sub-class object.
+                def __exit__(self, exception_type, exception_value, traceback):
+                    self.__delegate.active_prefix = None
+
+            # The self.__cb attribute is set when the _PrefixCommand object
+            # is created, and is either invoke_set or invoke_show within the
+            # ParameterPrefix sub-class object.
+            assert callable(self.__cb)
+
+            # Record the currently active _PrefixCommand object within the
+            # ParameterPrefix sub-class object, then call the relevant
+            # invoke method within the ParameterPrefix sub-class object.
+            with MarkActiveCallback(self, self.__delegate):
+                self.__cb(args, from_tty)
+
+        @staticmethod
+        def __find_callback(delegate, mode):
+            """The MODE is either 'set' or 'show'.  Look for an invoke_MODE method
+            on DELEGATE, if a suitable method is found, then return it, otherwise,
+            return None.
+            """
+            cb = getattr(delegate, "invoke_" + mode, None)
+            if callable(cb):
+                return cb
+            return None
+
+        def __init__(self, mode, name, cmd_class, delegate, doc=None):
+            """Setup this gdb.Command.  Mode is a string, either 'set' or 'show'.
+            NAME is the name for this prefix command, that is, the
+            words that appear after both 'set' and 'show' in the
+            command name.  CMD_CLASS is the usual enum.  And DELEGATE
+            is the gdb.ParameterPrefix object this prefix is part of.
+            """
+            assert mode == "set" or mode == "show"
+            if doc is None:
+                self.__doc__ = delegate.__doc__
+            else:
+                self.__doc__ = doc
+            self.__cb = self.__find_callback(delegate, mode)
+            self.__delegate = delegate
+            if not self.__cb is None:
+                self.invoke = self.__invoke
+            super().__init__(mode + " " + name, cmd_class, prefix=True)
+
+    def __init__(self, name, cmd_class, doc=None):
+        """Create a _PrefixCommand for both the set and show prefix commands.
+        NAME is the command name without either the leading 'set ' or
+        'show ' strings, and CMD_CLASS is the usual enum value.
+        """
+        self.active_prefix = None
+        self._set_prefix_cmd = self._PrefixCommand("set", name, cmd_class, self, doc)
+        self._show_prefix_cmd = self._PrefixCommand("show", name, cmd_class, self, doc)
+
+    # When called from within an invoke method the self.active_prefix
+    # attribute should be set to a gdb.Command sub-class (a _PrefixCommand
+    # object, see above).  Forward the dont_repeat call to this object to
+    # register the actual command as none repeating.
+    def dont_repeat(self):
+        if self.active_prefix is not None:
+            self.active_prefix.dont_repeat()
