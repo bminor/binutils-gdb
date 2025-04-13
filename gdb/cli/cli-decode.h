@@ -62,6 +62,8 @@ struct cmd_list_element
       type (not_set_cmd),
       doc (doc_)
   {
+    gdb_assert (name != nullptr);
+    gdb_assert (doc != nullptr);
     memset (&function, 0, sizeof (function));
   }
 
