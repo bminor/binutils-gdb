@@ -609,8 +609,7 @@ _bfd_elf_x86_get_local_sym_hash (struct elf_x86_link_hash_table *htab,
   return &ret->elf;
 }
 
-/* Create an entry in a x86 ELF linker hash table.  NB: THIS MUST BE IN
-   SYNC WITH _bfd_elf_link_hash_newfunc.  */
+/* Create an entry in an x86 ELF linker hash table.  */
 
 struct bfd_hash_entry *
 _bfd_x86_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
@@ -629,27 +628,14 @@ _bfd_x86_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
     }
 
   /* Call the allocation method of the superclass.  */
-  entry = _bfd_link_hash_newfunc (entry, table, string);
+  entry = _bfd_elf_link_hash_newfunc (entry, table, string);
   if (entry != NULL)
     {
       struct elf_x86_link_hash_entry *eh
        = (struct elf_x86_link_hash_entry *) entry;
-      struct elf_link_hash_table *htab
-	= (struct elf_link_hash_table *) table;
 
-      memset (&eh->elf.size, 0,
-	      (sizeof (struct elf_x86_link_hash_entry)
-	       - offsetof (struct elf_link_hash_entry, size)));
+      memset (&eh->elf + 1, 0, sizeof (*eh) - sizeof (eh->elf));
       /* Set local fields.  */
-      eh->elf.indx = -1;
-      eh->elf.dynindx = -1;
-      eh->elf.got = htab->init_got_refcount;
-      eh->elf.plt = htab->init_plt_refcount;
-      /* Assume that we have been called by a non-ELF symbol reader.
-	 This flag is then reset by the code which reads an ELF input
-	 file.  This ensures that a symbol created by a non-ELF symbol
-	 reader will have the flag set correctly.  */
-      eh->elf.non_elf = 1;
       eh->plt_second.offset = (bfd_vma) -1;
       eh->plt_got.offset = (bfd_vma) -1;
       eh->tlsdesc_got = (bfd_vma) -1;
