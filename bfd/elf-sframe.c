@@ -665,13 +665,11 @@ _bfd_elf_write_section_sframe (bfd *abfd, struct bfd_link_info *info)
 				 (file_ptr) sec->output_offset,
 				 sec->size))
     retval = false;
-  else if (!bfd_link_relocatable (info))
+  else
     {
       Elf_Internal_Shdr *hdr = &elf_section_data (sec)->this_hdr;
       hdr->sh_size = sec->size;
     }
-  /* For relocatable links, do not update the section size as the section
-     contents have not been relocated.  */
 
   sframe_encoder_free (&sfe_ctx);
 
