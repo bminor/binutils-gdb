@@ -631,15 +631,20 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
 		 : (linkage == 2 ? "extern " :
 		    (linkage == 1 ? "" : "(invalid linkage) ")),
 		 ctf_type_name_raw (fp, type)) < 0)
-    {
-      ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot format name dumping var 0x%lx"),
-		    type);
-      return 0;
-    }
+    goto err;
 
   str = str_append (str, typestr);
-  str = str_append (str, ": ");
   free (typestr);
+
+  if (size != 0)
+    {
+      if (asprintf (&typestr, " (datasec size: %zi)", size) < 0)
+	goto err;
+
+      str = str_append (str, typestr);
+      str = str_append (str, ": ");
+      free (typestr);
+    }
 
   if ((type = ctf_type_reference (fp, type)) == CTF_ERR)
     {
@@ -660,6 +665,10 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
   free (typestr);
 
   ctf_dump_append (fp, state, str);
+  return 0;
+err:
+  ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot print name dumping var 0x%lx"),
+		type);
   return 0;
 }
 
