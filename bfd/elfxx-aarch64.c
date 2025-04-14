@@ -708,7 +708,7 @@ static inline bool
 bfd_is_non_dynamic_elf_object (bfd *abfd, const struct elf_backend_data *out_be)
 {
   const struct elf_backend_data *in_be = get_elf_backend_data (abfd);
-  
+
   return bfd_get_flavour (abfd) == bfd_target_elf_flavour
     && bfd_count_sections (abfd) != 0
     && (abfd->flags & (DYNAMIC | BFD_PLUGIN | BFD_LINKER_CREATED)) == 0
