@@ -79,7 +79,6 @@ static const struct aout_backend_data MY (backend_data) =
   MY (set_sizes),
   1,				/* Exec header not counted.  */
   0,				/* Add_dynamic_symbols.  */
-  0,				/* Add_one_symbol.  */
   0,				/* Link_dynamic_object.  */
   0,				/* Write_dynamic_symbol.  */
   0,				/* Check_dynamic_reloc.  */

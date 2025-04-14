@@ -177,13 +177,6 @@ struct aout_backend_data
     (bfd *, struct bfd_link_info *, struct external_nlist **,
      bfd_size_type *, char **);
 
-  /* Callback from the add symbols phase of the linker code to handle
-     adding a single symbol to the global linker hash table.  */
-  bool (*add_one_symbol)
-    (struct bfd_link_info *, bfd *, const char *, flagword,
-     asection *, bfd_vma, const char *, bool, bool,
-     struct bfd_link_hash_entry **);
-
   /* Called to handle linking a dynamic object.  */
   bool (*link_dynamic_object)
     (struct bfd_link_info *, bfd *);

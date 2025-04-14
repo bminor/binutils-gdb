@@ -286,9 +286,6 @@ MY (set_sizes) (bfd *abfd)
 #ifndef MY_add_dynamic_symbols
 #define MY_add_dynamic_symbols 0
 #endif
-#ifndef MY_add_one_symbol
-#define MY_add_one_symbol 0
-#endif
 #ifndef MY_link_dynamic_object
 #define MY_link_dynamic_object 0
 #endif
@@ -312,7 +309,6 @@ static const struct aout_backend_data MY (backend_data) =
   MY_set_sizes,
   MY_exec_header_not_counted,
   MY_add_dynamic_symbols,
-  MY_add_one_symbol,
   MY_link_dynamic_object,
   MY_write_dynamic_symbol,
   MY_check_dynamic_reloc,
