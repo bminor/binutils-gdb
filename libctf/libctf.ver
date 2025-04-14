@@ -85,6 +85,7 @@ LIBCTF_2.0 {
 	ctf_type_visit;
 	ctf_type_cmp;
 	ctf_type_compat;
+	ctf_type_data;
 	ctf_tag;
 	ctf_decl_tag;
 

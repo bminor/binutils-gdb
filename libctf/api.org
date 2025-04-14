@@ -71,6 +71,7 @@ ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
                                size_t *size, size_t *offset);
 ctf_id_t ctf_tag_next (ctf_dict_t *, const char *tag, ctf_next_t **);
 int ctf_link_output_is_btf (ctf_dict_t *);
+ctf_type_t *ctf_type_data (ctf_dict_t *fp, ctf_id_t type, int prefix);
 
 * Changes
 
@@ -135,6 +136,7 @@ implemented, prototype only)
   _CTF_ITEM (ECTF_KIND_PROHIBITED, "Writeout of suppressed kind attempted.")
   _CTF_ITEM (ECTF_NOTBTF, "Cannot write out this dict as BTF.") \
   _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.")
+  _CTF_ITEM (ECTF_TOOLARGE, "Prefix required for correct representation.")
 
 A bit of reshuffling of the constants to put ECTF_NEXT_END at the top, for
 easier use in breakpoint conditions.
