@@ -55,7 +55,7 @@ static rc_res_resource *bin_to_res_group_icon (windres_bfd *, const bfd_byte *, 
 static rc_res_resource *bin_to_res_version (windres_bfd *, const bfd_byte *, rc_uint_type);
 static rc_res_resource *bin_to_res_userdata (windres_bfd *, const bfd_byte *, rc_uint_type);
 static rc_res_resource *bin_to_res_toolbar (windres_bfd *, const bfd_byte *, rc_uint_type);
-static void get_version_header (windres_bfd *, const bfd_byte *, rc_uint_type, const char *,
+static bool get_version_header (windres_bfd *, const bfd_byte *, rc_uint_type, const char *,
 				unichar **, rc_uint_type *, rc_uint_type *, rc_uint_type *,
 				rc_uint_type *);
 
@@ -116,7 +116,7 @@ bin_to_res (windres_bfd *wrbfd, rc_res_id type, const bfd_byte *data,
 static void
 toosmall (const char *msg)
 {
-  fatal (_("%s: not enough binary data"), msg);
+  non_fatal (_("%s: not enough binary data"), msg);
 }
 
 /* Swap in a NULL terminated unicode string.  */
@@ -132,7 +132,10 @@ get_unicode (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length,
   while (1)
     {
       if (length < c * 2 + 2)
-	toosmall (_("null terminated unicode string"));
+	{
+	  toosmall (_("null terminated unicode string"));
+	  return NULL;
+	}
       if (windres_get_16 (wrbfd, data + c * 2, 2) == 0)
 	break;
       ++c;
@@ -159,13 +162,19 @@ get_resid (windres_bfd *wrbfd, rc_res_id *id, const bfd_byte *data,
   rc_uint_type first;
 
   if (length < 2)
-    toosmall (_("resource ID"));
+    {
+      toosmall (_("resource ID"));
+      return -1;
+    }
 
   first = windres_get_16 (wrbfd, data, 2);
   if (first == 0xffff)
     {
       if (length < 4)
-	toosmall (_("resource ID"));
+	{
+	  toosmall (_("resource ID"));
+	  return -1;
+	}
       id->named = 0;
       id->u.id = windres_get_16 (wrbfd, data + 2, 2);
       return 4;
@@ -174,6 +183,8 @@ get_resid (windres_bfd *wrbfd, rc_res_id *id, const bfd_byte *data,
     {
       id->named = 1;
       id->u.n.name = get_unicode (wrbfd, data, length, &id->u.n.length);
+      if (id->u.n.name == NULL)
+	return -1;
       return id->u.n.length * 2 + 2;
     }
 }
@@ -204,7 +215,10 @@ bin_to_res_cursor (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
   rc_res_resource *r;
 
   if (length < 4)
-    toosmall (_("cursor"));
+    {
+      toosmall (_("cursor"));
+      return NULL;
+    }
 
   c = (rc_cursor *) res_alloc (sizeof (rc_cursor));
   c->xhotspot = windres_get_16 (wrbfd, data, 2);
@@ -235,32 +249,51 @@ bin_to_res_menu (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length)
   r->u.menu = m;
 
   if (length < 2)
-    toosmall (_("menu header"));
+    {
+      toosmall (_("menu header"));
+      return NULL;
+    }
 
   version = windres_get_16 (wrbfd, data, 2);
 
   if (version == 0)
     {
       if (length < 4)
-	toosmall (_("menu header"));
+	{
+	  toosmall (_("menu header"));
+	  return NULL;
+	}
       m->help = 0;
       m->items = bin_to_res_menuitems (wrbfd, data + 4, length - 4, &got);
+      if (m->items == NULL)
+	return NULL;
     }
   else if (version == 1)
     {
       rc_uint_type offset;
 
       if (length < 8)
-	toosmall (_("menuex header"));
+	{
+	  toosmall (_("menuex header"));
+	  return NULL;
+	}
       m->help = windres_get_32 (wrbfd, data + 4, 4);
       offset = windres_get_16 (wrbfd, data + 2, 2);
       if (offset + 4 >= length)
-	toosmall (_("menuex offset"));
+	{
+	  toosmall (_("menuex offset"));
+	  return NULL;
+	}
       m->items = bin_to_res_menuexitems (wrbfd, data + 4 + offset,
 					 length - (4 + offset), &got);
+      if (m->items == NULL)
+	return NULL;
     }
   else
-    fatal (_("unsupported menu version %d"), (int) version);
+    {
+      non_fatal (_("unsupported menu version %d"), (int) version);
+      return NULL;
+    }
 
   return r;
 }
@@ -285,7 +318,10 @@ bin_to_res_menuitems (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type len
       rc_menuitem *mi;
 
       if (length < 4)
-	toosmall (_("menuitem header"));
+	{
+	  toosmall (_("menuitem header"));
+	  return NULL;
+	}
 
       mi = (rc_menuitem *) res_alloc (sizeof *mi);
       mi->state = 0;
@@ -300,7 +336,10 @@ bin_to_res_menuitems (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type len
 	stroff = 2;
 
       if (length < stroff + 2)
-	toosmall (_("menuitem header"));
+	{
+	  toosmall (_("menuitem header"));
+	  return NULL;
+	}
 
       if (windres_get_16 (wrbfd, data + stroff, 2) == 0)
 	{
@@ -308,7 +347,11 @@ bin_to_res_menuitems (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type len
 	  mi->text = NULL;
 	}
       else
-	mi->text = get_unicode (wrbfd, data + stroff, length - stroff, &slen);
+	{
+	  mi->text = get_unicode (wrbfd, data + stroff, length - stroff, &slen);
+	  if (mi->text == NULL)
+	    return NULL;
+	}
 
       itemlen = stroff + slen * 2 + 2;
 
@@ -324,6 +367,8 @@ bin_to_res_menuitems (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type len
 	  mi->id = 0;
 	  mi->popup = bin_to_res_menuitems (wrbfd, data + itemlen, length - itemlen,
 	  				    &subread);
+	  if (mi->popup == NULL)
+	    return NULL;
 	  itemlen += subread;
 	}
 
@@ -362,7 +407,10 @@ bin_to_res_menuexitems (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type l
       rc_menuitem *mi;
 
       if (length < 16)
-	toosmall (_("menuitem header"));
+	{
+	  toosmall (_("menuitem header"));
+	  return NULL;
+	}
 
       mi = (rc_menuitem *) res_alloc (sizeof (rc_menuitem));
       mi->type = windres_get_32 (wrbfd, data, 4);
@@ -377,7 +425,11 @@ bin_to_res_menuexitems (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type l
 	  mi->text = NULL;
 	}
       else
-	mi->text = get_unicode (wrbfd, data + 14, length - 14, &slen);
+	{
+	  mi->text = get_unicode (wrbfd, data + 14, length - 14, &slen);
+	  if (mi->text == NULL)
+	    return NULL;
+	}
 
       itemlen = 14 + slen * 2 + 2;
       itemlen = (itemlen + 3) &~ 3;
@@ -392,12 +444,17 @@ bin_to_res_menuexitems (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type l
 	  rc_uint_type subread;
 
 	  if (length < itemlen + 4)
-	    toosmall (_("menuitem"));
+	    {
+	      toosmall (_("menuitem"));
+	      return NULL;
+	    }
 	  mi->help = windres_get_32 (wrbfd, data + itemlen, 4);
 	  itemlen += 4;
 
 	  mi->popup = bin_to_res_menuexitems (wrbfd, data + itemlen,
 					      length - itemlen, &subread);
+	  if (mi->popup == NULL)
+	    return NULL;
 	  itemlen += subread;
 	}
 
@@ -424,12 +481,16 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
   rc_uint_type signature;
   rc_dialog *d;
   rc_uint_type c, sublen, i;
+  int ilen;
   rc_uint_type off;
   rc_dialog_control **pp;
   rc_res_resource *r;
 
   if (length < 18)
-    toosmall (_("dialog header"));
+    {
+      toosmall (_("dialog header"));
+      return NULL;
+    }
 
   d = (rc_dialog *) res_alloc (sizeof (rc_dialog));
 
@@ -447,7 +508,10 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 
       version = windres_get_16 (wrbfd, data, 2);
       if (version != 1)
-	fatal (_("unexpected DIALOGEX version %d"), version);
+	{
+	  non_fatal (_("unexpected DIALOGEX version %d"), version);
+	  return NULL;
+	}
 
       d->ex = (rc_dialog_ex *) res_alloc (sizeof (rc_dialog_ex));
       d->ex->help = windres_get_32 (wrbfd, data + 4, 4);
@@ -457,7 +521,10 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
     }
 
   if (length < off + 10)
-    toosmall (_("dialog header"));
+    {
+      toosmall (_("dialog header"));
+      return NULL;
+    }
 
   c = windres_get_16 (wrbfd, data + off, 2);
   d->x = windres_get_16 (wrbfd, data + off + 2, 2);
@@ -467,13 +534,19 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 
   off += 10;
 
-  sublen = get_resid (wrbfd, &d->menu, data + off, length - off);
-  off += sublen;
+  ilen = get_resid (wrbfd, &d->menu, data + off, length - off);
+  if (ilen == -1)
+    return NULL;
+  off += ilen;
 
-  sublen = get_resid (wrbfd, &d->class, data + off, length - off);
-  off += sublen;
+  ilen = get_resid (wrbfd, &d->class, data + off, length - off);
+  if (ilen == -1)
+    return NULL;
+  off += ilen;
 
   d->caption = get_unicode (wrbfd, data + off, length - off, &sublen);
+  if (d->caption == NULL)
+    return NULL;
   off += sublen * 2 + 2;
   if (sublen == 0)
     d->caption = NULL;
@@ -492,7 +565,10 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
   else
     {
       if (length < off + 2)
-	toosmall (_("dialog font point size"));
+	{
+	  toosmall (_("dialog font point size"));
+	  return NULL;
+	}
 
       d->pointsize = windres_get_16 (wrbfd, data + off, 2);
       off += 2;
@@ -500,7 +576,10 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
       if (d->ex != NULL)
 	{
 	  if (length < off + 4)
-	    toosmall (_("dialogex font information"));
+	    {
+	      toosmall (_("dialogex font information"));
+	      return NULL;
+	    }
 	  d->ex->weight = windres_get_16 (wrbfd, data + off, 2);
 	  d->ex->italic = windres_get_8 (wrbfd, data + off + 2, 1);
 	  d->ex->charset = windres_get_8 (wrbfd, data + off + 3, 1);
@@ -508,6 +587,8 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	}
 
       d->font = get_unicode (wrbfd, data + off, length - off, &sublen);
+      if (d->font == NULL)
+	return NULL;
       off += sublen * 2 + 2;
     }
 
@@ -526,7 +607,10 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
       if (d->ex == NULL)
 	{
 	  if (length < off + 8)
-	    toosmall (_("dialog control"));
+	    {
+	      toosmall (_("dialog control"));
+	      return NULL;
+	    }
 
 	  dc->style = windres_get_32 (wrbfd, data + off, 4);
 	  dc->exstyle = windres_get_32 (wrbfd, data + off + 4, 4);
@@ -536,7 +620,10 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
       else
 	{
 	  if (length < off + 12)
-	    toosmall (_("dialogex control"));
+	    {
+	      toosmall (_("dialogex control"));
+	      return NULL;
+	    }
 	  dc->help = windres_get_32 (wrbfd, data + off, 4);
 	  dc->exstyle = windres_get_32 (wrbfd, data + off + 4, 4);
 	  dc->style = windres_get_32 (wrbfd, data + off + 8, 4);
@@ -544,7 +631,10 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	}
 
       if (length < off + (d->ex != NULL ? 2 : 0) + 10)
-	toosmall (_("dialog control"));
+	{
+	  toosmall (_("dialog control"));
+	  return NULL;
+	}
 
       dc->x = windres_get_16 (wrbfd, data + off, 2);
       dc->y = windres_get_16 (wrbfd, data + off + 2, 2);
@@ -558,14 +648,21 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 
       off += 10 + (d->ex != NULL ? 2 : 0);
 
-      sublen = get_resid (wrbfd, &dc->class, data + off, length - off);
-      off += sublen;
+      ilen = get_resid (wrbfd, &dc->class, data + off, length - off);
+      if (ilen == -1)
+	return NULL;
+      off += ilen;
 
-      sublen = get_resid (wrbfd, &dc->text, data + off, length - off);
-      off += sublen;
+      ilen = get_resid (wrbfd, &dc->text, data + off, length - off);
+      if (ilen == -1)
+	return NULL;
+      off += ilen;
 
       if (length < off + 2)
-	toosmall (_("dialog control end"));
+	{
+	  toosmall (_("dialog control end"));
+	  return NULL;
+	}
 
       datalen = windres_get_16 (wrbfd, data + off, 2);
       off += 2;
@@ -575,7 +672,10 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
       else
 	{
 	  if (length < off + datalen)
-	    toosmall (_("dialog control data"));
+	    {
+	      toosmall (_("dialog control data"));
+	      return NULL;
+	    }
 
 	  dc->data = ((rc_rcdata_item *)
 		      res_alloc (sizeof (rc_rcdata_item)));
@@ -615,7 +715,10 @@ bin_to_res_string (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
       unsigned int slen;
 
       if (length < 2)
-	toosmall (_("stringtable string length"));
+	{
+	  toosmall (_("stringtable string length"));
+	  return NULL;
+	}
       slen = windres_get_16 (wrbfd, data, 2);
       st->strings[i].length = slen;
 
@@ -625,7 +728,10 @@ bin_to_res_string (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	  unsigned int j;
 
 	  if (length < 2 + 2 * slen)
-	    toosmall (_("stringtable string"));
+	    {
+	      toosmall (_("stringtable string"));
+	      return NULL;
+	    }
 
 	  s = (unichar *) res_alloc (slen * sizeof (unichar));
 	  st->strings[i].string = s;
@@ -655,7 +761,10 @@ bin_to_res_fontdir (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
   rc_res_resource *r;
 
   if (length < 2)
-    toosmall (_("fontdir header"));
+    {
+      toosmall (_("fontdir header"));
+      return NULL;
+    }
 
   c = windres_get_16 (wrbfd, data, 2);
 
@@ -669,7 +778,10 @@ bin_to_res_fontdir (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
       unsigned int off;
 
       if (length < 56)
-	toosmall (_("fontdir"));
+	{
+	  toosmall (_("fontdir"));
+	  return NULL;
+	}
 
       bfi = (const struct bin_fontdir_item *) data;
       fd = (rc_fontdir *) res_alloc (sizeof *fd);
@@ -686,13 +798,19 @@ bin_to_res_fontdir (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
       while (off < length && data[off] != '\0')
 	++off;
       if (off >= length)
-	toosmall (_("fontdir device name"));
+	{
+	  toosmall (_("fontdir device name"));
+	  return NULL;
+	}
       ++off;
 
       while (off < length && data[off] != '\0')
 	++off;
       if (off >= length)
-	toosmall (_("fontdir face name"));
+	{
+	  toosmall (_("fontdir face name"));
+	  return NULL;
+	}
       ++off;
 
       fd->length = off;
@@ -732,7 +850,10 @@ bin_to_res_accelerators (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type 
       rc_accelerator *a;
 
       if (length < 8)
-	toosmall (_("accelerator"));
+	{
+	  toosmall (_("accelerator"));
+	  return NULL;
+	}
 
       a = (rc_accelerator *) res_alloc (sizeof (rc_accelerator));
 
@@ -791,11 +912,17 @@ bin_to_res_group_cursor (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type 
   rc_res_resource *r;
 
   if (length < 6)
-    toosmall (_("group cursor header"));
+    {
+      toosmall (_("group cursor header"));
+      return NULL;
+    }
 
   type = windres_get_16 (wrbfd, data + 2, 2);
   if (type != 2)
-    fatal (_("unexpected group cursor type %d"), type);
+    {
+      non_fatal (_("unexpected group cursor type %d"), type);
+      return NULL;
+    }
 
   c = windres_get_16 (wrbfd, data + 4, 2);
 
@@ -810,7 +937,10 @@ bin_to_res_group_cursor (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type 
       rc_group_cursor *gc;
 
       if (length < 14)
-	toosmall (_("group cursor"));
+	{
+	  toosmall (_("group cursor"));
+	  return NULL;
+	}
 
       gc = (rc_group_cursor *) res_alloc (sizeof *gc);
 
@@ -846,11 +976,17 @@ bin_to_res_group_icon (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type le
   rc_res_resource *r;
 
   if (length < 6)
-    toosmall (_("group icon header"));
+    {
+      toosmall (_("group icon header"));
+      return NULL;
+    }
 
   type = windres_get_16 (wrbfd, data + 2, 2);
   if (type != 1)
-    fatal (_("unexpected group icon type %d"), type);
+    {
+      non_fatal (_("unexpected group icon type %d"), type);
+      return NULL;
+    }
 
   c = windres_get_16 (wrbfd, data + 4, 2);
 
@@ -865,7 +1001,10 @@ bin_to_res_group_icon (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type le
       rc_group_icon *gi;
 
       if (length < 14)
-	toosmall (_("group icon"));
+	{
+	  toosmall (_("group icon"));
+	  return NULL;
+	}
 
       gi = (rc_group_icon *) res_alloc (sizeof (rc_group_icon));
 
@@ -897,14 +1036,17 @@ bin_to_res_group_icon (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type le
    sets *LEN to the total length, *VALLEN to the value length, *TYPE
    to the type, and *OFF to the offset to the children.  */
 
-static void
+static bool
 get_version_header (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length,
 		    const char *key, unichar **pkey,
 		    rc_uint_type *len, rc_uint_type *vallen, rc_uint_type *type,
 		    rc_uint_type *off)
 {
   if (length < 8)
-    toosmall (key);
+    {
+      toosmall (key);
+      return false;
+    }
 
   *len = (windres_get_16 (wrbfd, data, 2) + 3) & ~3;
   *vallen = windres_get_16 (wrbfd, data + 2, 2);
@@ -920,6 +1062,8 @@ get_version_header (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
       rc_uint_type sublen;
 
       *pkey = get_unicode (wrbfd, data, length, &sublen);
+      if (*pkey == NULL)
+	return false;
       *off += (sublen + 1) * sizeof (unichar);
     }
   else
@@ -927,9 +1071,15 @@ get_version_header (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
       while (1)
 	{
 	  if (length < 2)
-	    toosmall (key);
+	    {
+	      toosmall (key);
+	      return false;
+	    }
 	  if (windres_get_16 (wrbfd, data, 2) != (bfd_byte) *key)
-	    fatal (_("unexpected version string"));
+	    {
+	      non_fatal (_("unexpected version string"));
+	      return false;
+	    }
 
 	  *off += 2;
 	  length -= 2;
@@ -943,6 +1093,7 @@ get_version_header (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
     }
 
   *off = (*off + 3) &~ 3;
+  return true;
 }
 
 /* Convert a version resource from binary.  */
@@ -956,16 +1107,23 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
   rc_versioninfo *v;
   rc_res_resource *r;
 
-  get_version_header (wrbfd, data, length, "VS_VERSION_INFO",
-		      (unichar **) NULL, &verlen, &vallen, &type, &off);
+  if (!get_version_header (wrbfd, data, length, "VS_VERSION_INFO",
+			   (unichar **) NULL, &verlen, &vallen, &type, &off))
+    return NULL;
 
   /* PR 17512: The verlen field does not include padding length.  */
   if (verlen > length)
-    fatal (_("version length %lu greater than resource length %lu"),
-	   (unsigned long) verlen, (unsigned long) length);
+    {
+      non_fatal (_("version length %lu greater than resource length %lu"),
+		 (unsigned long) verlen, (unsigned long) length);
+      return NULL;
+    }
 
   if (type != 0)
-    fatal (_("unexpected version type %d"), (int) type);
+    {
+      non_fatal (_("unexpected version type %d"), (int) type);
+      return NULL;
+    }
 
   /* PR 27686: Ignore any padding bytes after the end of the version structure.  */
   length = verlen;
@@ -980,18 +1138,31 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
       unsigned long signature, fiv;
 
       if (vallen != 52)
-	fatal (_("unexpected fixed version information length %ld"), (long) vallen);
+	{
+	  non_fatal (_("unexpected fixed version information length %ld"),
+		     (long) vallen);
+	  return NULL;
+	}
 
       if (length < 52)
-	toosmall (_("fixed version info"));
+	{
+	  toosmall (_("fixed version info"));
+	  return NULL;
+	}
 
       signature = windres_get_32 (wrbfd, data, 4);
       if (signature != 0xfeef04bd)
-	fatal (_("unexpected fixed version signature %lu"), signature);
+	{
+	  non_fatal (_("unexpected fixed version signature %lu"), signature);
+	  return NULL;
+	}
 
       fiv = windres_get_32 (wrbfd, data + 4, 4);
       if (fiv != 0 && fiv != 0x10000)
-	fatal (_("unexpected fixed version info version %lu"), fiv);
+	{
+	  non_fatal (_("unexpected fixed version info version %lu"), fiv);
+	  return NULL;
+	}
 
       fi = (rc_fixed_versioninfo *) res_alloc (sizeof (rc_fixed_versioninfo));
 
@@ -1020,7 +1191,10 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
       int ch;
 
       if (length < 8)
-	toosmall (_("version var info"));
+	{
+	  toosmall (_("version var info"));
+	  return NULL;
+	}
 
       vi = (rc_ver_info *) res_alloc (sizeof (rc_ver_info));
 
@@ -1032,12 +1206,17 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 
 	  vi->type = VERINFO_STRING;
 
-	  get_version_header (wrbfd, data, length, "StringFileInfo",
-			      (unichar **) NULL, &verlen, &vallen, &type,
-			      &off);
+	  if (!get_version_header (wrbfd, data, length, "StringFileInfo",
+				   (unichar **) NULL, &verlen, &vallen, &type,
+				   &off))
+	    return NULL;
 
 	  if (vallen != 0)
-	    fatal (_("unexpected stringfileinfo value length %ld"), (long) vallen);
+	    {
+	      non_fatal (_("unexpected stringfileinfo value length %ld"),
+			 (long) vallen);
+	      return NULL;
+	    }
 
 	  data += off;
 	  length -= off;
@@ -1054,15 +1233,24 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	      rc_ver_stringinfo **ppvs;
 
 	      if (length < 8)
-		toosmall (_("version stringtable"));
+		{
+		  toosmall (_("version stringtable"));
+		  return NULL;
+		}
 
 	      vst = (rc_ver_stringtable *) res_alloc (sizeof (rc_ver_stringtable));
 
-	      get_version_header (wrbfd, data, length, (const char *) NULL,
-				  &vst->language, &stverlen, &vallen, &type, &off);
+	      if (!get_version_header (wrbfd, data, length, (const char *) NULL,
+				       &vst->language, &stverlen, &vallen,
+				       &type, &off))
+		return NULL;
 
 	      if (vallen != 0)
-		fatal (_("unexpected version stringtable value length %ld"), (long) vallen);
+		{
+		  non_fatal (_("unexpected version stringtable value length %ld"),
+			     (long) vallen);
+		  return NULL;
+		}
 
 	      data += off;
 	      length -= off;
@@ -1079,30 +1267,42 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	      rc_uint_type sverlen, vslen, valoff;
 
 	      if (length < 8)
-		toosmall (_("version string"));
+		{
+		  toosmall (_("version string"));
+		  return NULL;
+		}
 
 	      vs = (rc_ver_stringinfo *) res_alloc (sizeof (rc_ver_stringinfo));
 
-	      get_version_header (wrbfd, data, length, (const char *) NULL,
-				  &vs->key, &sverlen, &vallen, &type, &off);
+	      if (!get_version_header (wrbfd, data, length, (const char *) NULL,
+				       &vs->key, &sverlen, &vallen, &type, &off))
+		return NULL;
 
 	      data += off;
 	      length -= off;
 
 	      vs->value = get_unicode (wrbfd, data, length, &vslen);
+	      if (vs->value == NULL)
+		return NULL;
 	      valoff = vslen * 2 + 2;
 	      valoff = (valoff + 3) & ~3;
 
 	      if (off + valoff != sverlen)
-		fatal (_("unexpected version string length %ld != %ld + %ld"),
-		       (long) sverlen, (long) off, (long) valoff);
+		{
+		  non_fatal (_("unexpected version string length %ld != %ld + %ld"),
+			     (long) sverlen, (long) off, (long) valoff);
+		  return NULL;
+		}
 
 	      data += valoff;
 	      length -= valoff;
 
 	      if (stverlen < sverlen)
-		fatal (_("unexpected version string length %ld < %ld"),
-		       (long) verlen, (long) sverlen);
+		{
+		  non_fatal (_("unexpected version string length %ld < %ld"),
+			     (long) verlen, (long) sverlen);
+		  return NULL;
+		}
 	      stverlen -= sverlen;
 	      verlen -= sverlen;
 
@@ -1122,18 +1322,25 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 
 	  vi->type = VERINFO_VAR;
 
-	  get_version_header (wrbfd, data, length, "VarFileInfo",
-			      (unichar **) NULL, &verlen, &vallen, &type,
-			      &off);
+	  if (!get_version_header (wrbfd, data, length, "VarFileInfo",
+				   (unichar **) NULL, &verlen, &vallen,
+				   &type, &off))
+	    return NULL;
 
 	  if (vallen != 0)
-	    fatal (_("unexpected varfileinfo value length %ld"), (long) vallen);
+	    {
+	      non_fatal (_("unexpected varfileinfo value length %ld"),
+			 (long) vallen);
+	      return NULL;
+	    }
 
 	  data += off;
 	  length -= off;
 
-	  get_version_header (wrbfd, data, length, (const char *) NULL,
-			      &vi->u.var.key, &verlen, &vallen, &type, &off);
+	  if (!get_version_header (wrbfd, data, length, (const char *) NULL,
+				   &vi->u.var.key, &verlen, &vallen,
+				   &type, &off))
+	    return NULL;
 
 	  data += off;
 	  length -= off;
@@ -1146,7 +1353,10 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	      rc_ver_varinfo *vv;
 
 	      if (length < 4)
-		toosmall (_("version varfileinfo"));
+		{
+		  toosmall (_("version varfileinfo"));
+		  return NULL;
+		}
 
 	      vv = (rc_ver_varinfo *) res_alloc (sizeof (rc_ver_varinfo));
 
@@ -1161,7 +1371,11 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	      length -= 4;
 
 	      if (vallen < 4)
-		fatal (_("unexpected version value length %ld"), (long) vallen);
+		{
+		  non_fatal (_("unexpected version value length %ld"),
+			     (long) vallen);
+		  return NULL;
+		}
 
 	      vallen -= 4;
 	    }
@@ -1171,10 +1385,14 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
 	  if (length == 8)
 	    /* Padding - skip.  */
 	    break;
-	  fatal (_("nul bytes found in version string"));
+	  non_fatal (_("nul bytes found in version string"));
+	  return NULL;
 	}
       else
-	fatal (_("unexpected version string character: %x"), ch);
+	{
+	  non_fatal (_("unexpected version string character: %x"), ch);
+	  return NULL;
+	}
 
       vi->next = NULL;
       *pp = vi;
@@ -1224,7 +1442,10 @@ bin_to_res_toolbar (windres_bfd *wrbfd, const bfd_byte *data,
   rc_uint_type i;
 
   if (length < 12)
-    toosmall (_("toolbar"));
+    {
+      toosmall (_("toolbar"));
+      return NULL;
+    }
   ri = (rc_toolbar *) res_alloc (sizeof (rc_toolbar));
   ri->button_width = windres_get_32 (wrbfd, data, 4);
   ri->button_height = windres_get_32 (wrbfd, data + 4, 4);
@@ -1747,11 +1968,12 @@ res_to_bin_menuitems (windres_bfd *wrbfd, rc_uint_type off, const rc_menuitem *i
       if (wrbfd)
 	{
 	  windres_put_16 (wrbfd, bmi.flags, flags);
-      if (mi->popup == NULL)
+	  if (mi->popup == NULL)
 	    windres_put_16 (wrbfd, bmi.id, mi->id);
 	  set_windres_bfd_content (wrbfd, &bmi, off,
-				   mi->popup == NULL ? BIN_MENUITEM_SIZE
-				   		     : BIN_MENUITEM_POPUP_SIZE);
+				   (mi->popup == NULL
+				    ? BIN_MENUITEM_SIZE
+				    : BIN_MENUITEM_POPUP_SIZE));
 	}
       off += (mi->popup == NULL ? BIN_MENUITEM_SIZE : BIN_MENUITEM_POPUP_SIZE);
 
@@ -1862,22 +2084,22 @@ res_to_bin_rcdata (windres_bfd *wrbfd, rc_uint_type off, const rc_rcdata_item *i
 	      break;
 	    case RCDATA_STRING:
 	      hp = (bfd_byte *) ri->u.string.s;
-	  break;
-	case RCDATA_WSTRING:
-	  {
+	      break;
+	    case RCDATA_WSTRING:
+	      {
 		rc_uint_type i;
 
 		hp = (bfd_byte *) reswr_alloc (len);
-	    for (i = 0; i < ri->u.wstring.length; i++)
+		for (i = 0; i < ri->u.wstring.length; i++)
 		  windres_put_16 (wrbfd, hp + i * sizeof (unichar), ri->u.wstring.w[i]);
-	  }
+	      }
 	      break;
-	case RCDATA_BUFFER:
+	    case RCDATA_BUFFER:
 	      hp = (bfd_byte *) ri->u.buffer.data;
-	  break;
-	}
+	      break;
+	    }
 	  set_windres_bfd_content (wrbfd, hp, off, len);
-    }
+	}
       off += len;
     }
   return off;
@@ -1909,10 +2131,10 @@ res_to_bin_stringtable (windres_bfd *wrbfd, rc_uint_type off,
 	  hp = (bfd_byte *) reswr_alloc (length);
 	  windres_put_16 (wrbfd, hp, slen);
 
-      for (j = 0; j < slen; j++)
+	  for (j = 0; j < slen; j++)
 	    windres_put_16 (wrbfd, hp + 2 + j * 2, s[j]);
 	  set_windres_bfd_content (wrbfd, hp, off, length);
-    }
+	}
       off += length;
     }
   return off;

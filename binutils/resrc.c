@@ -1938,7 +1938,7 @@ indent (FILE *e, int c)
    refer to that file, we use the user-data model for that to express it binary
    without the need to store it somewhere externally.  */
 
-void
+bool
 write_rc_file (const char *filename, const rc_res_directory *res_dir)
 {
   FILE *e;
@@ -1950,12 +1950,17 @@ write_rc_file (const char *filename, const rc_res_directory *res_dir)
     {
       e = fopen (filename, FOPEN_WT);
       if (e == NULL)
-	fatal (_("can't open `%s' for output: %s"), filename, strerror (errno));
+	{
+	  non_fatal (_("can't open `%s' for output: %s"),
+		     filename, strerror (errno));
+	  return false;
+	}
     }
 
   language = (rc_uint_type) ((bfd_signed_vma) -1);
   write_rc_directory (e, res_dir, (const rc_res_id *) NULL,
 		      (const rc_res_id *) NULL, &language, 1);
+  return true;
 }
 
 /* Write out a directory.  E is the file to write to.  RD is the

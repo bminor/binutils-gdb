@@ -1056,23 +1056,24 @@ main (int argc, char **argv)
   /* Write the output file.  */
   reswr_init ();
 
+  bool ok;
   switch (output_format)
     {
     default:
       abort ();
     case RES_FORMAT_RC:
-      write_rc_file (output_filename, resources);
+      ok = write_rc_file (output_filename, resources);
       break;
     case RES_FORMAT_RES:
-      write_res_file (output_filename, resources);
+      ok = write_res_file (output_filename, resources);
       break;
     case RES_FORMAT_COFF:
-      write_coff_file (output_filename, target, resources);
+      ok = write_coff_file (output_filename, target, resources);
       break;
     }
 
-  xexit (0);
-  return 0;
+  xexit (ok ? 0 : 1);
+  return ok ? 0 : 1;
 }
 
 static void
@@ -1094,13 +1095,18 @@ windres_open_as_binary (const char *filename, int rdmode)
 {
   bfd *abfd;
 
-  abfd = (rdmode ? bfd_openr (filename, "binary") : bfd_openw (filename, "binary"));
-  if (! abfd)
-    fatal ("can't open `%s' for %s", filename, (rdmode ? "input" : "output"));
-
-  if (rdmode && ! bfd_check_format (abfd, bfd_object))
-    fatal ("can't open `%s' for input.", filename);
-
+  if (rdmode)
+    {
+      abfd = bfd_openr (filename, "binary");
+      if (abfd == NULL || !bfd_check_format (abfd, bfd_object))
+	fatal ("can't open `%s' for input", filename);
+    }
+  else
+    {
+      abfd = bfd_openw (filename, "binary");
+      if (abfd == NULL || !bfd_set_format (abfd, bfd_object))
+	fatal ("can't open `%s' for output", filename);
+    }
   return abfd;
 }
 
