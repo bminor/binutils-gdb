@@ -42,6 +42,7 @@
 #include "libbfd.h"
 #include "coff/internal.h"
 #include "libcoff.h"
+#include "elf-bfd.h"
 #include "hashtab.h"
 
 /* Extract a long section name at STRINDEX and copy it to the bfd objstack.
@@ -1270,9 +1271,24 @@ coff_write_alien_symbol (bfd *abfd,
 	if (c != (coff_symbol_type *) NULL)
 	  native->u.syment.n_flags = bfd_asymbol_bfd (&c->symbol)->flags;
       }
+
+      const elf_symbol_type *elfsym = elf_symbol_from (symbol);
+      if (elfsym
+	  && (symbol->flags & BSF_FUNCTION)
+	  && elfsym->internal_elf_sym.st_size)
+	{
+	  /* coff_data (abfd)->local_n_btshft is what ought to be used here,
+	     just that it's set only when reading in COFF objects.  */
+	  native->u.syment.n_type = DT_FCN << 4;
+	  native->u.syment.n_numaux = 1;
+	  native[1].u.auxent.x_sym.x_misc.x_fsize
+	    = elfsym->internal_elf_sym.st_size;
+	  /* FIXME .u.auxent.x_sym.x_fcnary.x_fcn.x_endndx would better also
+	     be set, which would require updating the field once the next
+	     function is seen.  */
+	}
     }
 
-  native->u.syment.n_type = 0;
   if (symbol->flags & BSF_FILE)
     native->u.syment.n_sclass = C_FILE;
   else if (symbol->flags & BSF_LOCAL)
