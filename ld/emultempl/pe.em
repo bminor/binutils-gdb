@@ -7,11 +7,11 @@ else
 fi
 
 case ${target} in
-  *-*-cygwin*)
-    cygwin_behavior=1
+  *-*-mingw*)
+    mingw_behavior=1
     ;;
   *)
-    cygwin_behavior=0;
+    mingw_behavior=0
     ;;
 esac
 
@@ -126,9 +126,10 @@ fragment <<EOF
 #define DEFAULT_PSEUDO_RELOC_VERSION 1
 #endif
 
-#define DEFAULT_DLL_CHARACTERISTICS	(${cygwin_behavior} ? 0 : \
-					   IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE \
-					 | IMAGE_DLL_CHARACTERISTICS_NX_COMPAT)
+#define DEFAULT_DLL_CHARACTERISTICS	(${mingw_behavior} \
+					 ? IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE \
+					   | IMAGE_DLL_CHARACTERISTICS_NX_COMPAT \
+					 : 0)
 
 #if defined(TARGET_IS_i386pe) || ! defined(DLL_SUPPORT)
 #define	PE_DEF_SUBSYSTEM		IMAGE_SUBSYSTEM_WINDOWS_CUI
