@@ -176,14 +176,14 @@ tdesc_start_reg (struct gdb_xml_parser *parser,
 {
   struct tdesc_parsing_data *data = (struct tdesc_parsing_data *) user_data;
   int ix = 0;
-  char *name, *group;
+  char *name, *group, *bitsize_attr;
   const char *type;
-  int bitsize, regnum, save_restore;
+  int regnum, save_restore;
 
   int length = attributes.size ();
 
   name = (char *) attributes[ix++].value.get ();
-  bitsize = * (ULONGEST *) attributes[ix++].value.get ();
+  bitsize_attr = (char *) attributes[ix++].value.get ();
 
   if (ix < length && strcmp (attributes[ix].name, "regnum") == 0)
     regnum = * (ULONGEST *) attributes[ix++].value.get ();
@@ -211,8 +211,19 @@ tdesc_start_reg (struct gdb_xml_parser *parser,
     gdb_xml_error (parser, _("Register \"%s\" has unknown type \"%s\""),
 		   name, type);
 
-  tdesc_create_reg (data->current_feature, name, regnum, save_restore, group,
-		    bitsize, type);
+  if (bitsize_attr[0] == '$')
+    {
+      // FIXME: Check whether the bitsize parameter is valid.
+      tdesc_create_reg (data->current_feature, name, regnum, save_restore,
+			group, &bitsize_attr[1], type);
+    }
+  else
+    {
+      int bitsize = (int) gdb_xml_parse_ulongest (parser, bitsize_attr);
+
+      tdesc_create_reg (data->current_feature, name, regnum, save_restore,
+			group, bitsize, type);
+    }
 
   data->next_regnum = regnum + 1;
 }
@@ -476,25 +487,38 @@ tdesc_start_vector (struct gdb_xml_parser *parser,
   struct tdesc_parsing_data *data = (struct tdesc_parsing_data *) user_data;
   struct tdesc_type *field_type;
   char *id, *field_type_id;
-  ULONGEST count;
 
   id = (char *) attributes[0].value.get ();
   field_type_id = (char *) attributes[1].value.get ();
-  count = * (ULONGEST *) attributes[2].value.get ();
-
-  if (count > MAX_VECTOR_SIZE)
-    {
-      gdb_xml_error (parser,
-		     _("Vector size %s is larger than maximum (%d)"),
-		     pulongest (count), MAX_VECTOR_SIZE);
-    }
 
   field_type = tdesc_named_type (data->current_feature, field_type_id);
   if (field_type == NULL)
     gdb_xml_error (parser, _("Vector \"%s\" references undefined type \"%s\""),
 		   id, field_type_id);
 
-  tdesc_create_vector (data->current_feature, id, field_type, count);
+  if (!strcmp (attributes[2].name, "count"))
+    {
+      ULONGEST count = * (ULONGEST *) attributes[2].value.get ();
+
+      if (count > MAX_VECTOR_SIZE)
+	gdb_xml_error (parser, _ ("Vector size %s is larger than maximum (%d)"),
+		       pulongest (count), MAX_VECTOR_SIZE);
+
+      tdesc_create_vector (data->current_feature, id, field_type, count);
+    }
+  else if (!strcmp (attributes[2].name, "bitsize"))
+    {
+      char *bitsize = (char *) attributes[2].value.get ();
+
+      if (bitsize[0] != '$')
+	gdb_xml_error (parser, _ ("Vector bitsize \"%s\" isn't a parameter"),
+		       bitsize);
+
+      // FIXME: Check whether the parameter exists.
+      tdesc_create_vector (data->current_feature, id, field_type, &bitsize[1]);
+    }
+  else
+    gdb_xml_error (parser, _ ("Vector doesn't have count nor size attribute"));
 }
 
 /* The elements and attributes of an XML target description.  */
@@ -527,7 +551,7 @@ static const struct gdb_xml_element enum_children[] = {
 
 static const struct gdb_xml_attribute reg_attributes[] = {
   { "name", GDB_XML_AF_NONE, NULL, NULL },
-  { "bitsize", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "bitsize", GDB_XML_AF_NONE, NULL, NULL },
   { "regnum", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
   { "type", GDB_XML_AF_OPTIONAL, NULL, NULL },
   { "group", GDB_XML_AF_OPTIONAL, NULL, NULL },
@@ -557,7 +581,8 @@ static const struct gdb_xml_attribute enum_attributes[] = {
 static const struct gdb_xml_attribute vector_attributes[] = {
   { "id", GDB_XML_AF_NONE, NULL, NULL },
   { "type", GDB_XML_AF_NONE, NULL, NULL },
-  { "count", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "count", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
+  { "bitsize", GDB_XML_AF_OPTIONAL, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 

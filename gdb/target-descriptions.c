@@ -160,7 +160,13 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 	return;
 
       type *element_gdb_type = make_gdb_type (m_gdbarch, e->element_type);
-      m_type = init_vector_type (element_gdb_type, e->count);
+      if (e->bitsize_parameter.length () == 0)
+	m_type = init_vector_type (element_gdb_type, e->count);
+      else
+	// FIXME: Is the lifetime of feature and tdesc_parameter correct?
+	// Probably not. e->name is duplicated below.
+	m_type = init_vector_type (element_gdb_type, e->feature.c_str (),
+				   e->bitsize_parameter.c_str ());
       m_type->set_name (xstrdup (e->name.c_str ()));
       return;
     }
@@ -1364,9 +1370,14 @@ public:
     gdb_printf
       ("  element_type = tdesc_named_type (feature, \"%s\");\n",
        type->element_type->name.c_str ());
-    gdb_printf
-      ("  tdesc_create_vector (feature, \"%s\", element_type, %d);\n",
-       type->name.c_str (), type->count);
+    if (type->bitsize_parameter.length () != 0)
+      gdb_printf
+	("  tdesc_create_vector (feature, \"%s\", element_type, \"%s\");\n",
+	 type->name.c_str (), type->bitsize_parameter.c_str ());
+    else
+      gdb_printf
+	("  tdesc_create_vector (feature, \"%s\", element_type, %d);\n",
+	 type->name.c_str (), type->count);
 
     gdb_printf ("\n");
   }
@@ -1486,7 +1497,11 @@ public:
       gdb_printf ("\"%s\", ", reg->group.c_str ());
     else
       gdb_printf ("NULL, ");
-    gdb_printf ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
+    if (reg->bitsize_parameter.length () != 0)
+      gdb_printf ("\"%s\", \"%s\");\n", reg->bitsize_parameter.c_str (),
+		  reg->type.c_str ());
+    else
+      gdb_printf ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
   }
 
 protected:
@@ -1629,7 +1644,11 @@ public:
       gdb_printf ("\"%s\", ", reg->group.c_str ());
     else
       gdb_printf ("NULL, ");
-    gdb_printf ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
+    if (reg->bitsize_parameter.length () != 0)
+      gdb_printf ("\"%s\", \"%s\");\n", reg->bitsize_parameter.c_str (),
+		  reg->type.c_str ());
+    else
+      gdb_printf ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
 
     m_next_regnum++;
   }

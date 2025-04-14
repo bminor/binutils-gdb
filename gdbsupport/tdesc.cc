@@ -33,6 +33,22 @@ tdesc_reg::tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
   tdesc_type = tdesc_named_type (feature, type.c_str ());
 }
 
+tdesc_reg::tdesc_reg (struct tdesc_feature *feature_, const std::string &name_,
+		      int regnum, int save_restore_, const char *group_,
+		      const std::string &bitsize_parameter_, const char *type_)
+  : name (name_), target_regnum (regnum),
+    save_restore (save_restore_),
+    group (group_ != NULL ? group_ : ""),
+    bitsize (TDESC_REG_VARIABLE_SIZE),
+    bitsize_parameter (bitsize_parameter_),
+    type (type_ != NULL ? type_ : "<unknown>")
+{
+  /* If the register's type is target-defined, look it up now.  We may not
+     have easy access to the containing feature when we want it later.  */
+  tdesc_type = tdesc_named_type (feature_, type.c_str ());
+  feature = feature_->name;
+}
+
 /* Predefined types.  */
 static tdesc_type_builtin tdesc_predefined_types[] =
 {
@@ -147,11 +163,39 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 
 /* See gdbsupport/tdesc.h.  */
 
+void
+tdesc_create_reg (struct tdesc_feature *feature, const char *name,
+		  int regnum, int save_restore, const char *group,
+		  const char *bitsize_parameter, const char *type)
+{
+  tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
+				  group, bitsize_parameter, type);
+
+  feature->registers.emplace_back (reg);
+}
+
+/* See gdbsupport/tdesc.h.  */
+
 struct tdesc_type *
 tdesc_create_vector (struct tdesc_feature *feature, const char *name,
 		     struct tdesc_type *field_type, int count)
 {
   tdesc_type_vector *type = new tdesc_type_vector (name, field_type, count);
+  feature->types.emplace_back (type);
+
+  return type;
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+struct tdesc_type *
+tdesc_create_vector (struct tdesc_feature *feature, const char *name,
+		     struct tdesc_type *field_type,
+		     const char *bitsize_parameter)
+{
+  tdesc_type_vector *type = new tdesc_type_vector (name, field_type,
+						   feature->name,
+						   bitsize_parameter);
   feature->types.emplace_back (type);
 
   return type;
@@ -311,8 +355,12 @@ void print_xml_feature::visit (const tdesc_type_builtin *t)
 
 void print_xml_feature::visit (const tdesc_type_vector *t)
 {
-  add_line ("<vector id=\"%s\" type=\"%s\" count=\"%d\"/>",
-	    t->name.c_str (), t->element_type->name.c_str (), t->count);
+  if (t->bitsize_parameter.length () != 0)
+    add_line ("<vector id=\"%s\" type=\"%s\" bitsize=\"$%s\"/>", t->name.c_str (),
+	      t->element_type->name.c_str (), t->bitsize_parameter.c_str ());
+  else
+    add_line ("<vector id=\"%s\" type=\"%s\" count=\"%d\"/>", t->name.c_str (),
+	      t->element_type->name.c_str (), t->count);
 }
 
 void print_xml_feature::visit (const tdesc_type_with_fields *t)
@@ -381,10 +429,16 @@ void print_xml_feature::visit (const tdesc_reg *r)
 {
   std::string tmp;
 
-  string_appendf (tmp,
-		  "<reg name=\"%s\" bitsize=\"%d\" type=\"%s\" regnum=\"%ld\"",
-		  r->name.c_str (), r->bitsize, r->type.c_str (),
-		  r->target_regnum);
+  if (r->bitsize_parameter.length () != 0)
+    string_appendf (tmp,
+		    "<reg name=\"%s\" bitsize=\"$%s\" type=\"%s\" regnum=\"%ld\"",
+		    r->name.c_str (), r->bitsize_parameter.c_str(),
+		    r->type.c_str (), r->target_regnum);
+  else
+    string_appendf (tmp,
+		    "<reg name=\"%s\" bitsize=\"%d\" type=\"%s\" regnum=\"%ld\"",
+		    r->name.c_str (), r->bitsize, r->type.c_str (),
+		    r->target_regnum);
 
   if (r->group.length () > 0)
     string_appendf (tmp, " group=\"%s\"", r->group.c_str ());

@@ -1043,6 +1043,32 @@ create_static_range_type (type_allocator &alloc, struct type *index_type,
   return result_type;
 }
 
+/* Create a range type using ALLOC.
+
+   Indices will be of type INDEX_TYPE, and will range from 0 to the value
+   calculated from the array length given by the given target description
+   parameter.  */
+
+static struct type *
+create_dynamic_range_type (type_allocator &alloc, struct type *index_type,
+			   const char *parameter_feature,
+			   const char *length_parameter)
+{
+  struct dynamic_prop low, high;
+
+  low.set_const_val (0);
+  // FIXME: Leaks memory.
+  std::pair<const char *, const char *> *parameter
+    = new std::pair<const char *, const char *>;
+  // FIXME: Is the lifetime of the following strings longer than of this
+  // object?
+  parameter->first = parameter_feature;
+  parameter->second = length_parameter;
+  high.set_tdesc_parameter (parameter);
+
+  return create_range_type (alloc, index_type, &low, &high, 0);
+}
+
 /* Predicate tests whether BOUNDS are static.  Returns 1 if all bounds values
    are static, otherwise returns 0.  */
 
@@ -1422,6 +1448,24 @@ lookup_array_range_type (struct type *element_type,
   return create_array_type (alloc, element_type, range_type);
 }
 
+/* Create type for array ranges where the low bound is 0 and the high bound is
+   calculated from the array length found in the given target description
+   parameter.  */
+
+static struct type *
+lookup_array_range_type (struct type *element_type,
+			 const char *parameter_feature,
+			 const char *length_parameter)
+{
+  type_allocator alloc (element_type);
+  struct type *index_type, *range_type;
+
+  index_type = builtin_type (element_type->arch ())->builtin_unsigned_int;
+  range_type = create_dynamic_range_type (alloc, index_type, parameter_feature,
+					  length_parameter);
+  return create_array_type (alloc, element_type, range_type);
+}
+
 /* See gdbtypes.h.  */
 
 struct type *
@@ -1506,6 +1550,20 @@ init_vector_type (struct type *elt_type, int n)
   struct type *array_type;
 
   array_type = lookup_array_range_type (elt_type, 0, n - 1);
+  make_vector_type (array_type);
+  return array_type;
+}
+
+/* Create vector type of elements of type ELT_TYPE, where its total length is
+   given by the given target description parameter.  */
+
+struct type *
+init_vector_type (struct type *elt_type, const char *parameter_feature,
+		  const char *length_parameter)
+{
+  struct type *array_type = lookup_array_range_type (elt_type,
+						     parameter_feature,
+						     length_parameter);
   make_vector_type (array_type);
   return array_type;
 }

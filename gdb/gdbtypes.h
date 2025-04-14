@@ -266,6 +266,7 @@ enum dynamic_prop_kind
   PROP_TYPE,	   /* Type.  */
   PROP_VARIABLE_NAME, /* Variable name.  */
   PROP_OPTIMIZED_OUT, /* Optimized out.  */
+  PROP_TDESC_PARAMETER, /* Parameter from target description.  */
 };
 
 union dynamic_prop_data
@@ -297,6 +298,10 @@ union dynamic_prop_data
      this property.  */
 
   const char *variable_name;
+
+  /* The first element is the feature name and the second is the parameter
+     name.  */
+  std::pair<const char *, const char *> *tdesc_parameter;
 };
 
 /* * Used to store a dynamic property.  */
@@ -410,6 +415,18 @@ struct dynamic_prop
   {
     m_kind = PROP_VARIABLE_NAME;
     m_data.variable_name = name;
+  }
+
+  std::pair<const char *, const char *> tdesc_parameter () const
+  {
+    gdb_assert (m_kind == PROP_TDESC_PARAMETER);
+    return *m_data.tdesc_parameter;
+  }
+
+  void set_tdesc_parameter (std::pair<const char *,const char *> *parameter)
+  {
+    m_kind = PROP_TDESC_PARAMETER;
+    m_data.tdesc_parameter = parameter;
   }
 
   /* Determine which field of the union dynamic_prop.data is used.  */
@@ -2438,6 +2455,9 @@ extern void append_flags_type_flag (struct type *type, int bitpos,
 
 extern void make_vector_type (struct type *array_type);
 extern struct type *init_vector_type (struct type *elt_type, int n);
+extern struct type *init_vector_type (struct type *elt_type,
+				      const char *parameter_feature,
+				      const char *length_parameter);
 
 extern struct type *lookup_reference_type (struct type *, enum type_code);
 extern struct type *lookup_lvalue_reference_type (struct type *);

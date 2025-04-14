@@ -64,6 +64,11 @@ public:
   virtual void accept (tdesc_element_visitor &v) const = 0;
 };
 
+/* Used in vector type element count or register bitsize to indicate that the
+   corresponding value is derived from a target description parameter.  */
+
+#define TDESC_REG_VARIABLE_SIZE -1
+
 /* An individual register from a target description.  */
 
 struct tdesc_reg : tdesc_element
@@ -71,6 +76,10 @@ struct tdesc_reg : tdesc_element
   tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
 	     int regnum, int save_restore_, const char *group_,
 	     int bitsize_, const char *type_);
+
+  tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
+	     int regnum, int save_restore_, const char *group_,
+	     const std::string &bitsize_parameter_, const char *type_);
 
   virtual ~tdesc_reg () = default;
 
@@ -99,8 +108,11 @@ struct tdesc_reg : tdesc_element
      strings are ignored (treated as empty).  */
   std::string group;
 
-  /* The size of the register, in bits.  */
+  /* The size of the register, in bits.
+     Ignored if BITSIZE_PARAMETER isn't empty.  */
   int bitsize;
+
+  std::string feature, bitsize_parameter;
 
   /* The type of the register.  This string corresponds to either
      a named type from the target description or a predefined
@@ -236,13 +248,26 @@ struct tdesc_type_vector : tdesc_type
     element_type (element_type_), count (count_)
   {}
 
+  tdesc_type_vector (const std::string &name, tdesc_type *element_type_,
+		     const std::string &feature_,
+		     const std::string &bitsize_parameter_)
+      : tdesc_type (name, TDESC_TYPE_VECTOR), element_type (element_type_),
+	count (TDESC_REG_VARIABLE_SIZE), feature (feature_),
+	bitsize_parameter (bitsize_parameter_)
+  {}
+
   void accept (tdesc_element_visitor &v) const override
   {
     v.visit (this);
   }
 
   struct tdesc_type *element_type;
+
+  /* Ignored if BITSIZE_PARAMETER isn't empty. */
   int count;
+
+  /* Target description parameter  providing total vector size.  */
+  std::string feature, bitsize_parameter;
 };
 
 /* A named type from a target description.  */
@@ -362,6 +387,13 @@ struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
 					struct tdesc_type *field_type,
 					int count);
 
+/* Return the created vector tdesc_type named NAME in FEATURE,
+   with number of elements derived by the given BITSIZE_PARAMETER.  */
+struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
+					const char *name,
+					struct tdesc_type *field_type,
+					const char *bitsize_parameter);
+
 /* Return the created struct tdesc_type named NAME in FEATURE.  */
 tdesc_type_with_fields *tdesc_create_struct (struct tdesc_feature *feature,
 					     const char *name);
@@ -416,6 +448,12 @@ void tdesc_add_enum_value (tdesc_type_with_fields *type, int value,
 void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		       int regnum, int save_restore, const char *group,
 		       int bitsize, const char *type);
+
+/* Create a register in feature FEATURE with size given by
+   BITSIZE_PARAMETER.  */
+void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
+		       int regnum, int save_restore, const char *group,
+		       const char *bitsize_parameter, const char *type);
 
 /* Return the tdesc in string XML format.  */
 

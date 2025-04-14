@@ -38,7 +38,8 @@
 <!ATTLIST vector
 	id		CDATA	#REQUIRED
 	type		CDATA	#REQUIRED
-	count		CDATA	#REQUIRED>
+	count		CDATA	#IMPLIED
+	bitsize		CDATA	#IMPLIED>
 
 <!ELEMENT flags		(field+)>
 <!ATTLIST flags
