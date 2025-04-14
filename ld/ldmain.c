@@ -423,8 +423,8 @@ ld_stop_phase (ld_phase phase)
 		
       if (pd->begin.ru_maxrss < usage.ru_maxrss)
 	pd->use.ru_maxrss += usage.ru_maxrss - pd->begin.ru_maxrss;
-#endif
     }
+#endif
 }
 
 static void
