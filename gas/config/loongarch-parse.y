@@ -207,29 +207,41 @@ emit_bin (int op)
       switch (op)
 	{
 	case '*':
-	  opr1 = opr1 * opr2;
+	  opr1 = (valueT) opr1 * (valueT) opr2;
 	  break;
 	case '/':
-	  opr1 = opr1 / opr2;
+	  if (opr2 == 0)
+	    {
+	      as_warn (_("Divide by zero!"));
+	      opr1 = 0;
+	    }
+	  else
+	    opr1 = opr1 / opr2;
 	  break;
 	case '%':
-	  opr1 = opr1 % opr2;
+	  if (opr2 == 0)
+	    {
+	      as_warn (_("Divide by zero!"));
+	      opr1 = 0;
+	    }
+	  else
+	    opr1 = opr1 % opr2;
 	  break;
 	case '+':
-	  opr1 = opr1 + opr2;
+	  opr1 = (valueT) opr1 + (valueT) opr2;
 	  break;
 	case '-':
-	  opr1 = opr1 - opr2;
+	  opr1 = (valueT) opr1 - (valueT) opr2;
 	  break;
 	case LEFT_OP:
-	  opr1 = opr1 << opr2;
+	  opr1 = (valueT) opr1 << opr2;
 	  break;
 	case RIGHT_OP:
 	  if (opr1 < 0)
-	    as_warn(_("Right shift of negative numbers may be changed "
-		  "from arithmetic right shift to logical right shift!"));
-	  /* Algorithm right shift.  */
-	  opr1 = (offsetT)opr1 >> (offsetT)opr2;
+	    as_warn (_("Right shift of negative numbers may be changed "
+		       "from arithmetic right shift to logical right shift!"));
+	  /* Arithmetic right shift.  */
+	  opr1 = opr1 >> opr2;
 	  break;
 	case '<':
 	  opr1 = opr1 < opr2;
