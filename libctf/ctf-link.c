@@ -546,9 +546,9 @@ ctf_link_sort_inputs (const ctf_next_hkv_t *one, const ctf_next_hkv_t *two,
 }
 
 /* Count the number of input dicts in the ctf_link_inputs, or that subset of the
-   ctf_link_inputs given by CU_NAMES if set.  Return the number of input dicts,
-   and optionally the name and ctf_link_input_t of the single input archive if
-   only one exists (no matter how many dicts it contains).  */
+   ctf_link_inputs given by CU_NAMES if set: open them if need be.  Return the number
+   of input dicts, and optionally the name and ctf_link_input_t of the single input
+   archive if only one exists (no matter how many dicts it contains).  */
 static ssize_t
 ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 				     ctf_link_input_t **only_one_input)
@@ -580,19 +580,20 @@ ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 
       one_count = ctf_link_lazy_open (fp, one_input);
 
-      /* If this is an unnamed, zero-archive dict, propagate the input name into the
-	 dict itself, for the sake of deduplicator child dict naming.  */
-
-      if (ctf_archive_count (one_input->clin_arc) == 1
-	  && one_input->clin_arc->ctfi_dict != NULL &&
-	  ctf_cuname (one_input->clin_arc->ctfi_dict) == NULL)
-	ctf_cuname_set (one_input->clin_arc->ctfi_dict, name);
-
       if (one_count < 0)
 	{
 	  ctf_next_destroy (i);
 	  return -1;				/* errno is set for us.  */
 	}
+
+      /* If this is an unnamed, zero-archive dict, propagate the input name into the
+	 dict itself, for the sake of deduplicator child dict naming.  */
+
+      if (one_input->clin_arc
+	  && ctf_archive_count (one_input->clin_arc) == 1
+	  && one_input->clin_arc->ctfi_dict != NULL &&
+	  ctf_cuname (one_input->clin_arc->ctfi_dict) == NULL)
+	ctf_cuname_set (one_input->clin_arc->ctfi_dict, name);
 
       count += one_count;
       narcs++;
