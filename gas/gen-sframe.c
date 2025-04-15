@@ -1038,7 +1038,9 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
     }
   sframe_fre_set_cfa_base_reg (cur_fre, cfi_insn->u.r);
-  sframe_fre_set_cfa_offset (cur_fre, last_fre->cfa_offset);
+  if (last_fre)
+    sframe_fre_set_cfa_offset (cur_fre, last_fre->cfa_offset);
+
   cur_fre->merge_candidate = false;
 
   return SFRAME_XLATE_OK;
