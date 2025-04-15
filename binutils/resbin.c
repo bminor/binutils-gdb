@@ -1460,7 +1460,10 @@ bin_to_res_toolbar (windres_bfd *wrbfd, const bfd_byte *data,
     it = (rc_toolbar_item *) res_alloc (sizeof (rc_toolbar_item));
     it->id.named = 0;
     if (length < 4)
-      toosmall (_("toolbar item"));
+      {
+	toosmall (_("toolbar item"));
+	return NULL;
+      }
     it->id.u.id = (int) windres_get_32 (wrbfd, data, 4);
     it->prev = it->next = NULL;
     data += 4;
