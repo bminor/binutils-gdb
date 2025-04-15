@@ -3950,9 +3950,9 @@ ada_type_match (struct type *ftype, struct type *atype)
   atype = ada_check_typedef (atype);
 
   if (ftype->code () == TYPE_CODE_REF)
-    ftype = ftype->target_type ();
+    ftype = ada_check_typedef (ftype->target_type ());
   if (atype->code () == TYPE_CODE_REF)
-    atype = atype->target_type ();
+    atype = ada_check_typedef (atype->target_type ());
 
   switch (ftype->code ())
     {
