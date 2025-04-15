@@ -1297,10 +1297,9 @@ extern struct value *value_struct_elt (struct value **argp,
 				       const char *name, int *static_memfuncp,
 				       const char *err);
 
-extern struct value *value_struct_elt_bitpos (struct value **argp,
+extern struct value *value_struct_elt_bitpos (struct value *val,
 					      int bitpos,
-					      struct type *field_type,
-					      const char *err);
+					      struct type *field_type);
 
 extern struct value *value_aggregate_elt (struct type *curtype,
 					  const char *name,

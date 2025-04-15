@@ -2420,47 +2420,42 @@ value_struct_elt (struct value **argp,
   return v;
 }
 
-/* Given *ARGP, a value of type structure or union, or a pointer/reference
+/* Given VAL, a value of type structure or union, or a pointer/reference
    to a structure or union, extract and return its component (field) of
    type FTYPE at the specified BITPOS.
    Throw an exception on error.  */
 
 struct value *
-value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
-			 const char *err)
+value_struct_elt_bitpos (struct value *val, int bitpos, struct type *ftype)
 {
   struct type *t;
   int i;
 
-  *argp = coerce_array (*argp);
+  val = coerce_array (val);
 
-  t = check_typedef ((*argp)->type ());
+  t = check_typedef (val->type ());
 
   while (t->is_pointer_or_reference ())
     {
-      *argp = value_ind (*argp);
-      if (check_typedef ((*argp)->type ())->code () != TYPE_CODE_FUNC)
-	*argp = coerce_array (*argp);
-      t = check_typedef ((*argp)->type ());
+      val = value_ind (val);
+      if (check_typedef (val->type ())->code () != TYPE_CODE_FUNC)
+	val = coerce_array (val);
+      t = check_typedef (val->type ());
     }
 
   if (t->code () != TYPE_CODE_STRUCT
       && t->code () != TYPE_CODE_UNION)
-    error (_("Attempt to extract a component of a value that is not a %s."),
-	   err);
+    error (_("Attempt to extract a component of non-aggregate value."));
 
   for (i = TYPE_N_BASECLASSES (t); i < t->num_fields (); i++)
     {
       if (!t->field (i).is_static ()
 	  && bitpos == t->field (i).loc_bitpos ()
 	  && types_equal (ftype, t->field (i).type ()))
-	return (*argp)->primitive_field (0, i, t);
+	return val->primitive_field (0, i, t);
     }
 
   error (_("No field with matching bitpos and type."));
-
-  /* Never hit.  */
-  return NULL;
 }
 
 /* Search through the methods of an object (and its bases) to find a
