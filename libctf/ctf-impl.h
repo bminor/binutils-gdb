@@ -845,6 +845,7 @@ extern char *ctf_str_append (char *, const char *);
 extern char *ctf_str_append_noerr (char *, const char *);
 
 extern ctf_id_t ctf_type_resolve_unsliced (ctf_dict_t *, ctf_id_t);
+extern ctf_id_t ctf_type_resolve_unrepresentable (ctf_dict_t *, ctf_id_t, int allow_zero);
 extern int ctf_type_kind_unsliced (ctf_dict_t *, ctf_id_t);
 extern int ctf_type_kind_unsliced_tp (ctf_dict_t *, const ctf_type_t *);
 extern int ctf_type_kind_tp (ctf_dict_t *, const ctf_type_t *);

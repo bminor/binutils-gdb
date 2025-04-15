@@ -1962,10 +1962,10 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
     return CTF_ERR;			/* errno is set for us.  */
 
   /* Make sure this type is representable: if a variable is nonrepresentable
-     there's nothing the end-user can do with it even if they know it's
-     there.  */
+     there's nothing the end-user can do with it even if they know it's there.
+     Allow type 0: this is used for const void variables in BTF input.  */
 
-  if ((ctf_type_resolve (fp, type) == CTF_ERR)
+  if ((ctf_type_resolve_unrepresentable (fp, type, 1) == CTF_ERR)
       && (ctf_errno (fp) == ECTF_NONREPRESENTABLE))
     return CTF_ERR;
 
@@ -2009,8 +2009,11 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
       ctf_set_typed_errno (fp, ECTF_DTFULL);
       goto err;
     }
-    
-  if (ctf_type_align (fp, type) < 0)
+
+  /* Allow for variables of void-like types.  */
+  if (type == 0)
+    is_incomplete = 1;
+  else if (ctf_type_align (fp, type) < 0)
     {
       /* See the comment in ctf_add_member_bitfield.  We don't need to worry
 	 about unrepresentable types, because we just added this one: we know
@@ -2074,7 +2077,7 @@ ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
 
   sec_dtd->dtd_vlen_size += sizeof (ctf_var_secinfo_t);
   sec = (ctf_var_secinfo_t *) sec_dtd->dtd_vlen;
-  
+
   sec[vlen].cvs_type = (uint32_t) var_dtd->dtd_type;
   sec[vlen].cvs_offset = (uint32_t) offset;
   sec[vlen].cvs_size = (uint32_t) size;
@@ -2418,7 +2421,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
   if ((src_prefix = ctf_lookup_by_id (&src_fp, src_type, &src_tp)) == NULL)
     return (ctf_set_typed_errno (dst_fp, ctf_errno (src_fp)));
 
-  if ((ctf_type_resolve (src_fp, src_type) == CTF_ERR)
+  if ((ctf_type_resolve_unrepresentable (src_fp, src_type, 1) == CTF_ERR)
       && (ctf_errno (src_fp) == ECTF_NONREPRESENTABLE))
     return (ctf_set_typed_errno (dst_fp, ECTF_NONREPRESENTABLE));
 

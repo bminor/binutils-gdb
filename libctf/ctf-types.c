@@ -906,12 +906,25 @@ ctf_tag_next (ctf_dict_t *fp, const char *tag, ctf_next_t **it)
 ctf_id_t
 ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 {
+  return ctf_type_resolve_unrepresentable (fp, type, 0);
+}
+
+/* As with ctf_type_resolve(), but optionally do not consider type 0
+   to be ECTF_NONREPRESENTABLE.  Internal only.  */
+ctf_id_t
+ctf_type_resolve_unrepresentable (ctf_dict_t *fp, ctf_id_t type, int allow_zero)
+{
   ctf_id_t prev = type, otype = type;
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp, *suffix;
 
   if (type == 0)
-    return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
+    {
+      if (allow_zero)
+	return 0;
+      else
+	return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
+    }
 
   while ((tp = ctf_lookup_by_id (&fp, type, &suffix)) != NULL)
     {
@@ -938,7 +951,12 @@ ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 	  return type;
 	}
       if (type == 0)
-	return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
+	{
+	  if (allow_zero)
+	    return 0;
+	  else
+	    return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
+	}
     }
 
   return CTF_ERR;		/* errno is set for us.  */
