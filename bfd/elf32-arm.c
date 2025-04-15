@@ -18394,6 +18394,9 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 	  struct arm_local_iplt_info **local_iplt;
 	  unsigned int i, num_syms;
 
+	  if (!is_arm_elf (input_bfd))
+	    continue;
+
 	  local_iplt = elf32_arm_local_iplt (input_bfd);
 	  if (local_iplt != NULL)
 	    {
