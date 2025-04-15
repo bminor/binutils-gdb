@@ -902,7 +902,7 @@ operator== (const dynamic_prop &l, const dynamic_prop &r)
       return true;
     case PROP_CONST:
       return l.const_val () == r.const_val ();
-    case PROP_ADDR_OFFSET:
+    case PROP_FIELD:
     case PROP_LOCEXPR:
     case PROP_LOCLIST:
       return l.baton () == r.baton ();

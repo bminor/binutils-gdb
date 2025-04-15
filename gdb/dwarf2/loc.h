@@ -202,23 +202,6 @@ struct dwarf2_loclist_baton
   unsigned char dwarf_version;
 };
 
-/* The baton used when a dynamic property is an offset to a parent
-   type.  This can be used, for instance, then the bound of an array
-   inside a record is determined by the value of another field inside
-   that record.  */
-
-struct dwarf2_offset_baton
-{
-  /* The offset from the parent type where the value of the property
-     is stored.  In the example provided above, this would be the offset
-     of the field being used as the array bound.  */
-  LONGEST offset;
-
-  /* The type of the object whose property is dynamic.  In the example
-     provided above, this would the array's index type.  */
-  struct type *type;
-};
-
 /* A dynamic property is either expressed as a single location expression
    or a location list.  If the property is an indirection, pointing to
    another die, keep track of the targeted type in PROPERTY_TYPE.
@@ -241,8 +224,8 @@ struct dwarf2_property_baton
     /* Location list to be evaluated in the context of PROPERTY_TYPE.  */
     struct dwarf2_loclist_baton loclist;
 
-    /* The location is an offset to PROPERTY_TYPE.  */
-    struct dwarf2_offset_baton offset_info;
+    /* The location is stored in a field of PROPERTY_TYPE.  */
+    struct field *field;
   };
 };
 

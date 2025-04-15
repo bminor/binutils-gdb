@@ -259,7 +259,7 @@ enum dynamic_prop_kind
 {
   PROP_UNDEFINED, /* Not defined.  */
   PROP_CONST,     /* Constant.  */
-  PROP_ADDR_OFFSET, /* Address offset.  */
+  PROP_FIELD,	  /* Field of a type.  */
   PROP_LOCEXPR,   /* Location expression.  */
   PROP_LOCLIST,    /* Location list.  */
   PROP_VARIANT_PARTS, /* Variant parts.  */
@@ -347,7 +347,7 @@ struct dynamic_prop
   {
     gdb_assert (m_kind == PROP_LOCEXPR
 		|| m_kind == PROP_LOCLIST
-		|| m_kind == PROP_ADDR_OFFSET);
+		|| m_kind == PROP_FIELD);
 
     return m_data.baton;
   }
@@ -364,9 +364,9 @@ struct dynamic_prop
     m_data.baton = baton;
   }
 
-  void set_addr_offset (const dwarf2_property_baton *baton)
+  void set_field (const dwarf2_property_baton *baton)
   {
-    m_kind = PROP_ADDR_OFFSET;
+    m_kind = PROP_FIELD;
     m_data.baton = baton;
   }
 

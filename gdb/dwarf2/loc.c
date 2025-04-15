@@ -1732,11 +1732,10 @@ dwarf2_evaluate_property (const dynamic_prop *prop,
       *value = prop->const_val ();
       return true;
 
-    case PROP_ADDR_OFFSET:
+    case PROP_FIELD:
       {
 	const dwarf2_property_baton *baton = prop->baton ();
 	const struct property_addr_info *pinfo;
-	struct value *val;
 
 	for (pinfo = addr_stack; pinfo != NULL; pinfo = pinfo->next)
 	  {
@@ -1747,14 +1746,40 @@ dwarf2_evaluate_property (const dynamic_prop *prop,
 	  }
 	if (pinfo == NULL)
 	  error (_("cannot find reference address for offset property"));
-	if (pinfo->valaddr.data () != NULL)
-	  val = value_from_contents
-		  (baton->offset_info.type,
-		   pinfo->valaddr.data () + baton->offset_info.offset);
-	else
-	  val = value_at (baton->offset_info.type,
-			  pinfo->addr + baton->offset_info.offset);
-	*value = value_as_address (val);
+
+	struct field resolved_field = *baton->field;
+	resolve_dynamic_field (resolved_field, pinfo, initial_frame);
+
+	/* Storage for memory if we need to read it.  */
+	gdb::byte_vector memory;
+	const gdb_byte *bytes = pinfo->valaddr.data ();
+	if (bytes == nullptr)
+	  {
+	    int bitpos = resolved_field.loc_bitpos ();
+	    int bitsize = resolved_field.bitsize ();
+	    if (bitsize == 0)
+	      bitsize = check_typedef (resolved_field.type ())->length () * 8;
+
+	    /* Read just the minimum number of bytes needed to satisfy
+	       unpack_field_as_long.  So, update the resolved field's
+	       starting offset to remove any unnecessary leading
+	       bytes.  */
+	    int byte_offset = bitpos / 8;
+
+	    bitpos %= 8;
+	    resolved_field.set_loc_bitpos (bitpos);
+
+	    /* Make sure to include any remaining bit offset in the
+	       size computation, in case the value straddles a
+	       byte.  */
+	    int byte_length = align_up (bitsize + bitpos, 8) / 8;
+	    memory.resize (byte_length);
+
+	    read_memory (pinfo->addr + byte_offset, memory.data (),
+			 byte_length);
+	    bytes = memory.data ();
+	  }
+	*value = unpack_field_as_long (bytes, &resolved_field);
 	return true;
       }
 

@@ -3266,6 +3266,9 @@ unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
 	}
     }
 
+  if (field_type->code () == TYPE_CODE_RANGE)
+    val += field_type->bounds ()->bias;
+
   return val;
 }
 

@@ -698,6 +698,12 @@ struct field_info
      we're reading.  */
   std::vector<variant_part_builder> variant_parts;
 
+  /* All the field batons that must be updated.  This is only used
+     when a type's property depends on a field of this structure; for
+     example in Ada when an array's length may come from a field of an
+     enclosing record.  */
+  gdb::unordered_map<dwarf2_property_baton *, sect_offset> field_batons;
+
   /* Return the total number of fields (including baseclasses).  */
   int nfields () const
   {
@@ -9861,54 +9867,6 @@ dwarf2_access_attribute (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Look for DW_AT_data_member_location or DW_AT_data_bit_offset.  Set
-   *OFFSET to the byte offset.  If the attribute was not found return
-   0, otherwise return 1.  If it was found but could not properly be
-   handled, set *OFFSET to 0.  */
-
-static int
-handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
-			LONGEST *offset)
-{
-  struct attribute *attr;
-
-  attr = dwarf2_attr (die, DW_AT_data_member_location, cu);
-  if (attr != NULL)
-    {
-      *offset = 0;
-      CORE_ADDR temp;
-
-      /* Note that we do not check for a section offset first here.
-	 This is because DW_AT_data_member_location is new in DWARF 4,
-	 so if we see it, we can assume that a constant form is really
-	 a constant and not a section offset.  */
-      if (attr->form_is_constant ())
-	*offset = attr->unsigned_constant ().value_or (0);
-      else if (attr->form_is_section_offset ())
-	dwarf2_complex_location_expr_complaint ();
-      else if (attr->form_is_block ()
-	       && decode_locdesc (attr->as_block (), cu, &temp))
-	{
-	  *offset = temp;
-	}
-      else
-	dwarf2_complex_location_expr_complaint ();
-
-      return 1;
-    }
-  else
-    {
-      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
-      if (attr != nullptr)
-	{
-	  *offset = attr->unsigned_constant ().value_or (0);
-	  return 1;
-	}
-    }
-
-  return 0;
-}
-
 /* Look for DW_AT_data_member_location or DW_AT_data_bit_offset and
    store the results in FIELD.  */
 
@@ -11269,6 +11227,56 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
     handle_variant (child_die, type, fi, template_args, cu);
 }
 
+/* Create a property baton for a field of the struct type currently
+   being processed.  OFFSET is the DIE offset of the field in the
+   structure.  If OFFSET is found among the fields that have already
+   been seen, then a new property baton is allocated on the objfile
+   obstack and returned.  The baton isn't fully filled in -- it will
+   be post-processed once the fields are finally created; see
+   update_field_batons.  If OFFSET is not found, NULL is returned.  */
+
+static dwarf2_property_baton *
+find_field_create_baton (dwarf2_cu *cu, sect_offset offset)
+{
+  field_info *fi = cu->field_info;
+  /* Defensive programming in case we see unusual DWARF.  */
+  if (fi == nullptr)
+    return nullptr;
+  for (const auto &fld : fi->fields)
+    if (fld.offset == offset)
+      {
+	dwarf2_property_baton *result
+	  = XOBNEW (&cu->per_objfile->objfile->objfile_obstack,
+		    struct dwarf2_property_baton);
+	fi->field_batons[result] = offset;
+	return result;
+      }
+  return nullptr;
+}
+
+/* Update all the stored field property batons.  FI is the field info
+   for the structure being created.  TYPE is the corresponding struct
+   type with its fields already filled in.  This fills in the correct
+   field for each baton that was stored while processing this
+   type.  */
+
+static void
+update_field_batons (field_info *fi, struct type *type)
+{
+  int n_bases = fi->baseclasses.size ();
+  for (auto &[baton, offset] : fi->field_batons)
+    {
+      for (int i = 0; i < fi->fields.size (); ++i)
+	{
+	  if (fi->fields[i].offset == offset)
+	    {
+	      baton->field = &type->field (n_bases + i);
+	      break;
+	    }
+	}
+    }
+}
+
 /* Finish creating a structure or union type, including filling in its
    members and creating a symbol for it. This function also handles Fortran
    namelist variables, their items or members and creating a symbol for
@@ -11289,6 +11297,9 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct field_info fi;
       std::vector<struct symbol *> template_args;
+
+      scoped_restore save_field_info
+	= make_scoped_restore (&cu->field_info, &fi);
 
       for (die_info *child_die : die->children ())
 	handle_struct_member_die (child_die, type, &fi, &template_args, cu);
@@ -11311,7 +11322,11 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       /* Attach fields and member functions to the type.  */
       if (fi.nfields () > 0)
-	dwarf2_attach_fields_to_type (&fi, type, cu);
+	{
+	  dwarf2_attach_fields_to_type (&fi, type, cu);
+	  update_field_batons (&fi, type);
+	}
+
       if (!fi.fnfieldlists.empty ())
 	{
 	  dwarf2_attach_fn_fields_to_type (&fi, type, cu);
@@ -13925,17 +13940,14 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 	  case DW_AT_data_member_location:
 	  case DW_AT_data_bit_offset:
 	    {
-	      LONGEST offset;
-
-	      if (!handle_member_location (target_die, target_cu, &offset))
+	      baton = find_field_create_baton (cu, target_die->sect_off);
+	      if (baton == nullptr)
 		return 0;
 
-	      baton = XOBNEW (obstack, struct dwarf2_property_baton);
 	      baton->property_type = read_type_die (target_die->parent,
-						      target_cu);
-	      baton->offset_info.offset = offset;
-	      baton->offset_info.type = die_type (target_die, target_cu);
-	      prop->set_addr_offset (baton);
+						    target_cu);
+	      baton->field = nullptr;
+	      prop->set_field (baton);
 	      break;
 	    }
 	}
