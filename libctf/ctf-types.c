@@ -908,12 +908,12 @@ ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_id_t prev = type, otype = type;
   ctf_dict_t *ofp = fp;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
 
   if (type == 0)
     return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
 
-  while ((tp = ctf_lookup_by_id (&fp, type, NULL)) != NULL)
+  while ((tp = ctf_lookup_by_id (&fp, type, &suffix)) != NULL)
     {
       switch (LCTF_KIND (fp, tp))
 	{
@@ -922,15 +922,15 @@ ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 	case CTF_K_CONST:
 	case CTF_K_RESTRICT:
 	case CTF_K_VAR:
-	  if (tp->ctt_type == type || tp->ctt_type == otype
-	      || tp->ctt_type == prev)
+	  if (suffix->ctt_type == type || suffix->ctt_type == otype
+	      || suffix->ctt_type == prev)
 	    {
 	      ctf_err_warn (ofp, 0, ECTF_CORRUPT, _("type %lx cycle detected"),
 			    otype);
 	      return (ctf_set_typed_errno (ofp, ECTF_CORRUPT));
 	    }
 	  prev = type;
-	  type = tp->ctt_type;
+	  type = suffix->ctt_type;
 	  break;
 	case CTF_K_UNKNOWN:
 	  return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
@@ -2386,7 +2386,7 @@ int
 ctf_func_type_info (ctf_dict_t *fp, ctf_id_t type, ctf_funcinfo_t *fip)
 {
   ctf_dict_t *ofp = fp;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
   uint32_t kind;
   unsigned char *vlen;
   const ctf_param_t *args;
@@ -2397,14 +2397,14 @@ ctf_func_type_info (ctf_dict_t *fp, ctf_id_t type, ctf_funcinfo_t *fip)
   if (ctf_type_kind (fp, type) == CTF_K_FUNC_LINKAGE)
     type = ctf_type_reference (fp, type);
 
-  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
 
   kind = LCTF_KIND (fp, tp);
   if (kind != CTF_K_FUNCTION)
     return (ctf_set_errno (ofp, ECTF_NOTFUNC));
 
-  fip->ctc_return = tp->ctt_type;
+  fip->ctc_return = suffix->ctt_type;
   fip->ctc_flags = 0;
 
   vlen = ctf_vlen (fp, type, tp, &fip->ctc_argc);
