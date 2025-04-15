@@ -610,7 +610,7 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
 static int
 ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
 	      unsigned long offset,
-	      size_t size _libctf_unused_, void *arg)
+	      size_t size, void *arg)
 {
   char *str;
   char *typestr;
