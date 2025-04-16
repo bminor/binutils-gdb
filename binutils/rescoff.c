@@ -218,7 +218,8 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
       return NULL;
     }
 
-  if ((size_t) (flaginfo->data_end - data) < sizeof (struct extern_res_directory))
+  size_t data_len = flaginfo->data_end - data;
+  if (data_len < sizeof (struct extern_res_directory))
     {
       overrun (flaginfo, _("directory"));
       return NULL;
@@ -249,7 +250,8 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
       const bfd_byte *ers;
       int length, j;
 
-      if ((const bfd_byte *) ere >= flaginfo->data_end)
+      if ((const bfd_byte *) ere > flaginfo->data_end
+	  || flaginfo->data_end - (const bfd_byte *) ere < 8)
 	{
 	  overrun (flaginfo, _("named directory entry"));
 	  return NULL;
@@ -261,31 +263,32 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
       /* For some reason the high bit in NAME is set.  */
       name &=~ 0x80000000;
 
-      if (name > (rc_uint_type) (flaginfo->data_end - flaginfo->data))
+      if (name > data_len)
 	{
 	  overrun (flaginfo, _("directory entry name"));
 	  return NULL;
 	}
 
       ers = flaginfo->data + name;
-
+      if (flaginfo->data_end - ers < 2)
+	{
+	  overrun (flaginfo, _("resource name"));
+	  return NULL;
+	}
+      length = windres_get_16 (wrbfd, ers, 2);
+      /* PR 17512: file: 05dc4a16.  */
+      if (length * 2 + 4 > flaginfo->data_end - ers)
+	{
+	  overrun (flaginfo, _("resource name"));
+	  return NULL;
+	}
       re = (rc_res_entry *) res_alloc (sizeof *re);
       re->next = NULL;
       re->id.named = 1;
-      length = windres_get_16 (wrbfd, ers, 2);
       re->id.u.n.length = length;
       re->id.u.n.name = (unichar *) res_alloc (length * sizeof (unichar));
       for (j = 0; j < length; j++)
-	{
-	  /* PR 17512: file: 05dc4a16.  */
-	  if (length < 0 || ers >= flaginfo->data_end
-	      || ers + j * 2 + 4 >= flaginfo->data_end)
-	    {
-	      overrun (flaginfo, _("resource name"));
-	      return NULL;
-	    }
-	  re->id.u.n.name[j] = windres_get_16 (wrbfd, ers + j * 2 + 2, 2);
-	}
+	re->id.u.n.name[j] = windres_get_16 (wrbfd, ers + j * 2 + 2, 2);
 
       if (level == 0)
 	type = &re->id;
@@ -293,24 +296,25 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
       if ((rva & 0x80000000) != 0)
 	{
 	  rva &=~ 0x80000000;
-	  if (rva >= (rc_uint_type) (flaginfo->data_end - flaginfo->data))
+	  if (rva >= data_len)
 	    {
 	      overrun (flaginfo, _("named subdirectory"));
 	      return NULL;
 	    }
 	  re->subdir = 1;
-	  re->u.dir = read_coff_res_dir (wrbfd, flaginfo->data + rva, flaginfo, type,
-					 level + 1);
+	  re->u.dir = read_coff_res_dir (wrbfd, flaginfo->data + rva, flaginfo,
+					 type, level + 1);
 	}
       else
 	{
-	  if (rva >= (rc_uint_type) (flaginfo->data_end - flaginfo->data))
+	  if (rva >= data_len)
 	    {
 	      overrun (flaginfo, _("named resource"));
 	      return NULL;
 	    }
 	  re->subdir = 0;
-	  re->u.res = read_coff_data_entry (wrbfd, flaginfo->data + rva, flaginfo, type);
+	  re->u.res = read_coff_data_entry (wrbfd, flaginfo->data + rva,
+					    flaginfo, type);
 	}
 
       *pp = re;
@@ -322,7 +326,8 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
       unsigned long name, rva;
       rc_res_entry *re;
 
-      if ((const bfd_byte *) ere >= flaginfo->data_end)
+      if ((const bfd_byte *) ere > flaginfo->data_end
+	  || flaginfo->data_end - (const bfd_byte *) ere < 8)
 	{
 	  overrun (flaginfo, _("ID directory entry"));
 	  return NULL;
@@ -342,24 +347,25 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
       if ((rva & 0x80000000) != 0)
 	{
 	  rva &=~ 0x80000000;
-	  if (rva >= (rc_uint_type) (flaginfo->data_end - flaginfo->data))
+	  if (rva >= data_len)
 	    {
 	      overrun (flaginfo, _("ID subdirectory"));
 	      return NULL;
 	    }
 	  re->subdir = 1;
-	  re->u.dir = read_coff_res_dir (wrbfd, flaginfo->data + rva, flaginfo, type,
-					 level + 1);
+	  re->u.dir = read_coff_res_dir (wrbfd, flaginfo->data + rva, flaginfo,
+					 type, level + 1);
 	}
       else
 	{
-	  if (rva >= (rc_uint_type) (flaginfo->data_end - flaginfo->data))
+	  if (rva >= data_len)
 	    {
 	      overrun (flaginfo, _("ID resource"));
 	      return NULL;
 	    }
 	  re->subdir = 0;
-	  re->u.res = read_coff_data_entry (wrbfd, flaginfo->data + rva, flaginfo, type);
+	  re->u.res = read_coff_data_entry (wrbfd, flaginfo->data + rva,
+					    flaginfo, type);
 	}
 
       *pp = re;
