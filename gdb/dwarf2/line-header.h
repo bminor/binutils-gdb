@@ -218,7 +218,7 @@ file_entry::include_dir (const line_header *lh) const
 
 extern line_header_up dwarf_decode_line_header
   (sect_offset sect_off, bool is_dwz, dwarf2_per_objfile *per_objfile,
-   struct dwarf2_section_info *section, const struct comp_unit_head *cu_header,
+   struct dwarf2_section_info *section, const struct unit_head *cu_header,
    const char *comp_dir);
 
 #endif /* GDB_DWARF2_LINE_HEADER_H */

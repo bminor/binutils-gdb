@@ -22,7 +22,7 @@
 
 #include <queue>
 #include "dwarf2/abbrev.h"
-#include "dwarf2/comp-unit-head.h"
+#include "dwarf2/unit-head.h"
 #include "dwarf2/file-and-dir.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/mapped-index.h"
@@ -233,14 +233,14 @@ public:
   /* Backlink to the owner of this.  */
   dwarf2_per_bfd *per_bfd;
 
-  /* DWARF header of this CU.  Note that dwarf2_cu reads its own version of the
-     header, which may differ from this one, since it may pass rcuh_kind::TYPE
-     to read_comp_unit_head, whereas for dwarf2_per_cu we always pass
-     rcuh_kind::COMPILE.
+  /* DWARF header of this unit.  Note that dwarf2_cu reads its own version of
+     the header, which may differ from this one, since it may pass
+     rch_kind::TYPE to read_unit_head, whereas for dwarf2_per_cu we always pass
+     ruh_kind::COMPILE.
 
      Don't access this field directly, use the get_header method instead.  It
      should be private, but we can't make it private at the moment.  */
-  mutable comp_unit_head m_header;
+  mutable unit_head m_header;
 
   /* The file and directory for this CU.  This is cached so that we
      don't need to re-examine the DWO in some situations.  This may be
@@ -271,7 +271,7 @@ public:
   std::vector<dwarf2_per_cu *> imported_symtabs;
 
   /* Get the header of this per_cu, reading it if necessary.  */
-  const comp_unit_head *get_header () const;
+  const unit_head *get_header () const;
 
   /* Return the address size given in the compilation unit header for
      this CU.  */
@@ -812,7 +812,7 @@ struct dwarf2_per_objfile
      BUF is assumed to be in a compilation unit described by CU_HEADER.
      Return *BYTES_READ_PTR count of bytes read from BUF.  */
   const char *read_line_string (const gdb_byte *buf,
-				const struct comp_unit_head *cu_header,
+				const struct unit_head *unit_header,
 				unsigned int *bytes_read_ptr);
 
   /* Return pointer to string at .debug_line_str offset as read from BUF.
@@ -1043,7 +1043,7 @@ private:
   void create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd,
 					 dwo_file *dwo_file,
 					 dwarf2_section_info *section,
-					 rcuh_kind section_kind);
+					 ruh_kind section_kind);
 
   dwo_unit *lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name,
 			     const char *comp_dir, ULONGEST signature,

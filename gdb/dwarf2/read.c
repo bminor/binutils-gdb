@@ -31,7 +31,7 @@
 #include "dwarf2/abbrev.h"
 #include "dwarf2/aranges.h"
 #include "dwarf2/attribute.h"
-#include "dwarf2/comp-unit-head.h"
+#include "dwarf2/unit-head.h"
 #include "dwarf2/cooked-index-worker.h"
 #include "dwarf2/cooked-indexer.h"
 #include "dwarf2/cu.h"
@@ -749,9 +749,9 @@ static unrelocated_addr read_addr_index (struct dwarf2_cu *cu,
 static sect_offset read_abbrev_offset (dwarf2_per_objfile *per_objfile,
 				       dwarf2_section_info *, sect_offset);
 
-static const char *read_indirect_string
-  (dwarf2_per_objfile *per_objfile, bfd *, const gdb_byte *,
-   const struct comp_unit_head *, unsigned int *);
+static const char *read_indirect_string (dwarf2_per_objfile *per_objfile, bfd *,
+					 const gdb_byte *, const unit_head *,
+					 unsigned int *);
 
 static unrelocated_addr read_addr_index_from_leb128 (struct dwarf2_cu *,
 						     const gdb_byte *,
@@ -2400,7 +2400,7 @@ void
 cutu_reader::create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd,
 					       dwo_file *dwo_file,
 					       dwarf2_section_info *section,
-					       rcuh_kind section_kind)
+					       ruh_kind section_kind)
 {
   struct dwarf2_section_info *abbrev_section;
   bfd *abfd;
@@ -2428,20 +2428,20 @@ cutu_reader::create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd,
   while (info_ptr < end_ptr)
     {
       const gdb_byte *ptr = info_ptr;
-      struct comp_unit_head header;
+      unit_head header;
       unsigned int length;
 
       sect_offset sect_off = (sect_offset) (ptr - section->buffer);
 
       /* Initialize it due to a false compiler warning.  */
       header.signature = -1;
-      header.type_cu_offset_in_tu = (cu_offset) -1;
+      header.type_offset_in_tu = (cu_offset) -1;
 
       /* We need to read the type's signature in order to build the hash
 	 table, but we don't need anything else just yet.  */
 
-      ptr = read_and_check_comp_unit_head (&header, section, abbrev_section,
-					   ptr, section_kind);
+      ptr = read_and_check_unit_head (&header, section, abbrev_section, ptr,
+				      section_kind);
 
       length = header.get_length_with_initial ();
 
@@ -2458,7 +2458,7 @@ cutu_reader::create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd,
       dwo_unit *dwo_tu = OBSTACK_ZALLOC (&per_bfd->obstack, dwo_unit);
       dwo_tu->dwo_file = dwo_file;
       dwo_tu->signature = header.signature;
-      dwo_tu->type_offset_in_tu = header.type_cu_offset_in_tu;
+      dwo_tu->type_offset_in_tu = header.type_offset_in_tu;
       dwo_tu->section = section;
       dwo_tu->sect_off = sect_off;
       dwo_tu->length = length;
@@ -2492,7 +2492,7 @@ cutu_reader::create_dwo_debug_types_hash_table
 {
   for (dwarf2_section_info &section : type_sections)
     create_dwo_debug_type_hash_table (per_bfd, dwo_file, &section,
-				      rcuh_kind::TYPE);
+				      ruh_kind::TYPE);
 }
 
 /* Add an entry for signature SIG to per_bfd->signatured_types.  */
@@ -2796,9 +2796,9 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
     {
       signatured_type *sig_type = (struct signatured_type *) per_cu;
 
-      m_info_ptr = read_and_check_comp_unit_head (&cu->header, section,
-						  dwo_abbrev_section,
-						  m_info_ptr, rcuh_kind::TYPE);
+      m_info_ptr = read_and_check_unit_head (&cu->header, section,
+					     dwo_abbrev_section, m_info_ptr,
+					     ruh_kind::TYPE);
 
       /* This is not an assert because it can be caused by bad debug info.  */
       if (sig_type->signature != cu->header.signature)
@@ -2815,7 +2815,7 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
       /* For DWOs coming from DWP files, we don't know the CU length
 	 nor the type's offset in the TU until now.  */
       dwo_unit->length = cu->header.get_length_with_initial ();
-      dwo_unit->type_offset_in_tu = cu->header.type_cu_offset_in_tu;
+      dwo_unit->type_offset_in_tu = cu->header.type_offset_in_tu;
 
       /* Establish the type offset that can be used to lookup the type.
 	 For DWO files, we don't know it until now.  */
@@ -2824,10 +2824,9 @@ cutu_reader::read_cutu_die_from_dwo (dwarf2_cu *cu, dwo_unit *dwo_unit,
     }
   else
     {
-      m_info_ptr
-	= read_and_check_comp_unit_head (&cu->header, section,
-					 dwo_abbrev_section, m_info_ptr,
-					 rcuh_kind::COMPILE);
+      m_info_ptr = read_and_check_unit_head (&cu->header, section,
+					     dwo_abbrev_section, m_info_ptr,
+					     ruh_kind::COMPILE);
       gdb_assert (dwo_unit->sect_off == cu->header.sect_off);
       /* For DWOs coming from DWP files, we don't know the CU length
 	 until now.  */
@@ -3045,26 +3044,26 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
     }
 
   /* Get the header.  */
-  if (to_underlying (cu->header.first_die_cu_offset) != 0 && !rereading_dwo_cu)
+  if (to_underlying (cu->header.first_die_offset_in_unit) != 0
+      && !rereading_dwo_cu)
     {
       /* We already have the header, there's no need to read it in again.  */
-      m_info_ptr += to_underlying (cu->header.first_die_cu_offset);
+      m_info_ptr += to_underlying (cu->header.first_die_offset_in_unit);
     }
   else
     {
       if (this_cu.is_debug_types)
 	{
-	  m_info_ptr
-	    = read_and_check_comp_unit_head (&cu->header, section,
-					     abbrev_section, m_info_ptr,
-					     rcuh_kind::TYPE);
+	  m_info_ptr = read_and_check_unit_head (&cu->header, section,
+						 abbrev_section, m_info_ptr,
+						 ruh_kind::TYPE);
 
 	  /* Since per_cu is the first member of struct signatured_type,
 	     we can go from a pointer to one to a pointer to the other.  */
 	  sig_type = (struct signatured_type *) &this_cu;
 	  gdb_assert (sig_type->signature == cu->header.signature);
 	  gdb_assert (sig_type->type_offset_in_tu
-		      == cu->header.type_cu_offset_in_tu);
+		      == cu->header.type_offset_in_tu);
 	  gdb_assert (this_cu.sect_off == cu->header.sect_off);
 
 	  /* LENGTH has not been set yet for type units if we're
@@ -3077,10 +3076,9 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
 	}
       else
 	{
-	  m_info_ptr
-	    = read_and_check_comp_unit_head (&cu->header, section,
-					     abbrev_section, m_info_ptr,
-					     rcuh_kind::COMPILE);
+	  m_info_ptr = read_and_check_unit_head (&cu->header, section,
+						 abbrev_section, m_info_ptr,
+						 ruh_kind::COMPILE);
 
 	  gdb_assert (this_cu.sect_off == cu->header.sect_off);
 	  this_cu.set_length (cu->header.get_length_with_initial ());
@@ -3212,11 +3210,11 @@ cutu_reader::cutu_reader (dwarf2_per_cu &this_cu,
 
   m_info_ptr = section->buffer + to_underlying (this_cu.sect_off);
   const gdb_byte *begin_info_ptr = m_info_ptr;
-  m_info_ptr = read_and_check_comp_unit_head (&m_new_cu->header, section,
-					      abbrev_section, m_info_ptr,
-					      (this_cu.is_debug_types
-						 ? rcuh_kind::TYPE
-						 : rcuh_kind::COMPILE));
+  m_info_ptr = read_and_check_unit_head (&m_new_cu->header, section,
+					 abbrev_section, m_info_ptr,
+					 (this_cu.is_debug_types
+					  ? ruh_kind::TYPE
+					  : ruh_kind::COMPILE));
 
   m_new_cu->str_offsets_base = parent_cu.str_offsets_base;
   m_new_cu->addr_base = parent_cu.addr_base;
@@ -3698,7 +3696,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 			      struct dwarf2_section_info *abbrev_section,
 			      unsigned int is_dwz,
 			      signatured_type_set &sig_types,
-			      rcuh_kind section_kind)
+			      ruh_kind section_kind)
 {
   const gdb_byte *info_ptr;
   struct objfile *objfile = per_objfile->objfile;
@@ -3718,9 +3716,9 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 
       sect_offset sect_off = (sect_offset) (info_ptr - section->buffer);
 
-      comp_unit_head cu_header;
-      read_and_check_comp_unit_head (&cu_header, section, abbrev_section,
-				     info_ptr, section_kind);
+      unit_head cu_header;
+      read_and_check_unit_head (&cu_header, section, abbrev_section, info_ptr,
+				section_kind);
 
       unsigned int length = cu_header.get_length_with_initial ();
 
@@ -3733,7 +3731,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 	    = per_bfd->allocate_signatured_type (section, sect_off, length,
 						 is_dwz, cu_header.signature);
 	  signatured_type *sig_ptr = sig_type.get ();
-	  sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
+	  sig_type->type_offset_in_tu = cu_header.type_offset_in_tu;
 	  this_cu.reset (sig_type.release ());
 
 	  auto inserted = sig_types.emplace (sig_ptr).second;
@@ -3775,17 +3773,17 @@ create_all_units (dwarf2_per_objfile *per_objfile)
   for (dwarf2_section_info &section : per_objfile->per_bfd->infos)
     read_comp_units_from_section (per_objfile, &section,
 				  &per_objfile->per_bfd->abbrev, 0, sig_types,
-				  rcuh_kind::COMPILE);
+				  ruh_kind::COMPILE);
   for (dwarf2_section_info &section : per_objfile->per_bfd->types)
     read_comp_units_from_section (per_objfile, &section,
 				  &per_objfile->per_bfd->abbrev, 0, sig_types,
-				  rcuh_kind::TYPE);
+				  ruh_kind::TYPE);
 
   dwz_file *dwz = per_objfile->per_bfd->get_dwz_file ();
   if (dwz != NULL)
     {
       read_comp_units_from_section (per_objfile, &dwz->info, &dwz->abbrev, 1,
-				    sig_types, rcuh_kind::COMPILE);
+				    sig_types, ruh_kind::COMPILE);
 
       if (!dwz->types.empty ())
 	{
@@ -7647,7 +7645,7 @@ cutu_reader::open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
   else
     create_dwo_debug_type_hash_table (per_bfd, dwo_file.get (),
 				      &dwo_file->sections.info,
-				      rcuh_kind::COMPILE);
+				      ruh_kind::COMPILE);
 
   dwarf_read_debug_printf ("DWO file found: %s", dwo_name);
 
@@ -8887,7 +8885,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  parameter->kind = CALL_SITE_PARAMETER_PARAM_OFFSET;
 
 	  sect_offset sect_off = origin->get_ref_die_offset ();
-	  if (!cu->header.offset_in_cu_p (sect_off))
+	  if (!cu->header.offset_in_unit_p (sect_off))
 	    {
 	      /* As DW_OP_GNU_parameter_ref uses CU-relative offset this
 		 binding can be done only inside one CU.  Such referenced DIE
@@ -9255,7 +9253,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
-  struct comp_unit_head *cu_header = &cu->header;
+  unit_head *cu_header = &cu->header;
   bfd *obfd = objfile->obfd.get ();
   unsigned int addr_size = cu_header->addr_size;
   CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
@@ -12618,7 +12616,7 @@ static struct type *
 read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct gdbarch *gdbarch = cu->per_objfile->objfile->arch ();
-  struct comp_unit_head *cu_header = &cu->header;
+  unit_head *cu_header = &cu->header;
   struct type *type;
   struct attribute *attr_byte_size;
   struct attribute *attr_address_class;
@@ -12733,7 +12731,7 @@ static struct type *
 read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu,
 			  enum type_code refcode)
 {
-  struct comp_unit_head *cu_header = &cu->header;
+  unit_head *cu_header = &cu->header;
   struct type *type, *target_type;
   struct attribute *attr;
 
@@ -14918,7 +14916,7 @@ cutu_reader::read_attribute_value (attribute *attr, unsigned form,
 {
   dwarf2_per_objfile *per_objfile = m_cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
-  struct comp_unit_head *cu_header = &m_cu->header;
+  unit_head *cu_header = &m_cu->header;
   unsigned int bytes_read;
   struct dwarf_block *blk;
 
@@ -15226,8 +15224,7 @@ read_indirect_string_at_offset (dwarf2_per_objfile *per_objfile,
 
 static const char *
 read_indirect_string (dwarf2_per_objfile *per_objfile, bfd *abfd,
-		      const gdb_byte *buf,
-		      const struct comp_unit_head *cu_header,
+		      const gdb_byte *buf, const unit_head *cu_header,
 		      unsigned int *bytes_read_ptr)
 {
   LONGEST str_offset = cu_header->read_offset (abfd, buf, bytes_read_ptr);
@@ -15251,7 +15248,7 @@ dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
 
 const char *
 dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
-				      const struct comp_unit_head *cu_header,
+				      const unit_head *cu_header,
 				      unsigned int *bytes_read_ptr)
 {
   bfd *abfd = objfile->obfd.get ();
@@ -16583,7 +16580,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
 		     struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->per_objfile->objfile;
-  struct comp_unit_head *cu_header = &cu->header;
+  unit_head *cu_header = &cu->header;
 
   /* NOTE drow/2003-01-30: There used to be a comment and some special
      code here to turn a symbol with DW_AT_external and a
@@ -17254,7 +17251,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
-  struct comp_unit_head *cu_header = &cu->header;
+  unit_head *cu_header = &cu->header;
   struct dwarf_block *blk;
   enum bfd_endian byte_order = (bfd_big_endian (objfile->obfd.get ()) ?
 				BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE);
@@ -18230,18 +18227,18 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 			     "source CU contains target offset: %d",
 			     sect_offset_str (source_cu->per_cu->sect_off),
 			     sect_offset_str (sect_off),
-			     source_cu->header.offset_in_cu_p (sect_off));
+			     source_cu->header.offset_in_unit_p (sect_off));
 
   if (source_cu->per_cu->is_debug_types)
     {
       /* .debug_types CUs cannot reference anything outside their CU.
 	 If they need to, they have to reference a signatured type via
 	 DW_FORM_ref_sig8.  */
-      if (!source_cu->header.offset_in_cu_p (sect_off))
+      if (!source_cu->header.offset_in_unit_p (sect_off))
 	return NULL;
     }
   else if (offset_in_dwz != source_cu->per_cu->is_dwz
-	   || !source_cu->header.offset_in_cu_p (sect_off))
+	   || !source_cu->header.offset_in_unit_p (sect_off))
     {
       dwarf2_per_cu *target_per_cu
 	= dwarf2_find_containing_comp_unit (sect_off, offset_in_dwz,
@@ -19261,7 +19258,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
 
 /* See read.h.  */
 
-const comp_unit_head *
+const unit_head *
 dwarf2_per_cu::get_header () const
 {
   if (!m_header_read_in)
@@ -19269,8 +19266,7 @@ dwarf2_per_cu::get_header () const
       const gdb_byte *info_ptr
 	= this->section->buffer + to_underlying (this->sect_off);
 
-      read_comp_unit_head (&m_header, info_ptr, this->section,
-			   rcuh_kind::COMPILE);
+      read_unit_head (&m_header, info_ptr, this->section, ruh_kind::COMPILE);
 
       m_header_read_in = true;
     }
@@ -19299,7 +19295,7 @@ dwarf2_per_cu::offset_size () const
 int
 dwarf2_per_cu::ref_addr_size () const
 {
-  const comp_unit_head *header = this->get_header ();
+  const unit_head *header = this->get_header ();
 
   if (header->version == 2)
     return header->addr_size;

@@ -21,7 +21,7 @@
 #define GDB_DWARF2_CU_H
 
 #include "buildsym.h"
-#include "dwarf2/comp-unit-head.h"
+#include "dwarf2/unit-head.h"
 #include <optional>
 #include "language.h"
 #include "gdbsupport/unordered_set.h"
@@ -109,7 +109,7 @@ struct dwarf2_cu
   }
 
   /* The header of the compilation unit.  */
-  struct comp_unit_head header;
+  struct unit_head header;
 
   /* Base address of this compilation unit.  */
   std::optional<unrelocated_addr> base_address;

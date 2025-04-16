@@ -1098,7 +1098,6 @@ COMMON_SFILES = \
 	dwarf2/ada-imported.c \
 	dwarf2/aranges.c \
 	dwarf2/attribute.c \
-	dwarf2/comp-unit-head.c \
 	dwarf2/cooked-index.c \
 	dwarf2/cooked-index-entry.c \
 	dwarf2/cooked-index-shard.c \
@@ -1123,6 +1122,7 @@ COMMON_SFILES = \
 	dwarf2/read-gdb-index.c \
 	dwarf2/section.c \
 	dwarf2/stringify.c \
+	dwarf2/unit-head.c \
 	extract-store-integer.c \
 	eval.c \
 	event-top.c \

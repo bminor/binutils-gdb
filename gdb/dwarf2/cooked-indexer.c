@@ -89,7 +89,7 @@ cooked_indexer::ensure_cu_exists (cutu_reader *reader,
   /* Lookups for type unit references are always in the CU, and
      cross-CU references will crash.  */
   if (reader->cu ()->per_cu->is_dwz == is_dwz
-      && reader->cu ()->header.offset_in_cu_p (sect_off))
+      && reader->cu ()->header.offset_in_unit_p (sect_off))
     return reader;
 
   dwarf2_per_objfile *per_objfile = reader->cu ()->per_objfile;
