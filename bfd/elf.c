@@ -8976,7 +8976,7 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
       if (elfsym->sym.st_name != 0)
 	elfsym->sym.st_name = _bfd_elf_strtab_offset (stt,
 						      elfsym->sym.st_name);
-      if (info && info->callbacks->ctf_new_symbol)
+      if (info && info->callbacks->ctf_new_symbol && !info->ctf_disabled)
 	info->callbacks->ctf_new_symbol (elfsym->dest_index,
 					 &elfsym->sym);
 

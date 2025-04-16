@@ -3809,6 +3809,9 @@ ldlang_open_ctf (void)
   int picked_btf = 0;
   int err;
 
+  if (link_info.ctf_disabled)
+    return;
+
   LANG_FOR_EACH_INPUT_STATEMENT (file)
     {
       asection *sect;
@@ -3985,14 +3988,16 @@ lang_merge_ctf (void)
 void
 ldlang_ctf_acquire_strings (struct elf_strtab_hash *dynstrtab)
 {
-  ldemul_acquire_strings_for_ctf (ctf_output, dynstrtab);
+  if (!link_info.ctf_disabled)
+    ldemul_acquire_strings_for_ctf (ctf_output, dynstrtab);
 }
 
 /* Inform the emulation about the addition of a new dynamic symbol, in BFD
    internal format.  */
 void ldlang_ctf_new_dynsym (int symidx, struct elf_internal_sym *sym)
 {
-  ldemul_new_dynsym_for_ctf (ctf_output, symidx, sym);
+  if (!link_info.ctf_disabled)
+    ldemul_new_dynsym_for_ctf (ctf_output, symidx, sym);
 }
 
 /* Remove all unused BTF/CTF sections from the link.  Return 1 if
@@ -4179,13 +4184,15 @@ ldlang_write_ctf_late (void)
 static void
 ldlang_open_ctf (void)
 {
+  if (link_info.ctf_disabled)
+    return;
+
   LANG_FOR_EACH_INPUT_STATEMENT (file)
     {
       asection *sect;
 
       /* If built without CTF or BTF, warn and delete all CTF sections from the
-	 output.  (The alternative would be to simply concatenate them, which
-	 does not yield a valid CTF section.)  */
+	 output.  */
 
       if (((sect = bfd_get_section_by_name (file->the_bfd, ".ctf")) != NULL) ||
 	  ((sect = bfd_get_section_by_name (file->the_bfd, ".BTF")) != NULL))

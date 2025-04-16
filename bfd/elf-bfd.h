@@ -37,6 +37,14 @@
 extern "C" {
 #endif
 
+#ifndef ATTRIBUTE_HIDDEN
+#if HAVE_HIDDEN
+#define ATTRIBUTE_HIDDEN __attribute__ ((__visibility__ ("hidden")))
+#else
+#define ATTRIBUTE_HIDDEN
+#endif
+#endif
+
 /* The number of entries in a section is its size divided by the size
    of a single entry.  This is normally only applicable to reloc and
    symbol table sections.
@@ -3156,6 +3164,9 @@ extern void _bfd_elf_link_munmap_section_contents
 extern struct elf_link_hash_entry * _bfd_elf_get_link_hash_entry
   (struct elf_link_hash_entry **, unsigned int, Elf_Internal_Shdr *);
 
+extern struct bfd_link_info *_bfd_elf_get_link_info (bfd *)
+  ATTRIBUTE_HIDDEN;
+
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;
 
@@ -3311,6 +3322,13 @@ static inline bool
 bfd_section_is_libctf_deduppable (const asection *sec)
 {
   const char *name = bfd_section_name (sec);
+  struct bfd_link_info *info;
+
+  info = _bfd_elf_get_link_info (sec->owner);
+
+  if (!info || info->ctf_disabled)
+    return false;
+
   return (startswith (name, ".ctf") || startswith (name, ".BTF"))
     && (name[4] == 0 || name[4] == '.');
 }
