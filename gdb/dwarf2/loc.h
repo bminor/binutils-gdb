@@ -99,7 +99,7 @@ struct property_addr_info
 
   /* If not NULL, a pointer to the info for the object containing
      the object described by this node.  */
-  struct property_addr_info *next;
+  const property_addr_info *next;
 };
 
 /* Converts a dynamic property into a static one.  FRAME is the frame in which

@@ -2146,7 +2146,7 @@ is_dynamic_type (struct type *type)
 }
 
 static struct type *resolve_dynamic_type_internal
-  (struct type *type, struct property_addr_info *addr_stack,
+  (struct type *type, const property_addr_info *addr_stack,
    const frame_info_ptr &frame, bool top_level);
 
 /* Given a dynamic range type (dyn_range_type) and a stack of
@@ -2167,7 +2167,7 @@ static struct type *resolve_dynamic_type_internal
 
 static struct type *
 resolve_dynamic_range (struct type *dyn_range_type,
-		       struct property_addr_info *addr_stack,
+		       const property_addr_info *addr_stack,
 		       const frame_info_ptr &frame,
 		       int rank, bool resolve_p = true)
 {
@@ -2269,7 +2269,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
 static struct type *
 resolve_dynamic_array_or_string_1 (struct type *type,
-				   struct property_addr_info *addr_stack,
+				   const property_addr_info *addr_stack,
 				   const frame_info_ptr &frame,
 				   int rank, bool resolve_p)
 {
@@ -2397,7 +2397,7 @@ resolve_dynamic_array_or_string_1 (struct type *type,
 
 static struct type *
 resolve_dynamic_array_or_string (struct type *type,
-				 struct property_addr_info *addr_stack,
+				 const property_addr_info *addr_stack,
 				 const frame_info_ptr &frame)
 {
   CORE_ADDR value;
@@ -2490,7 +2490,7 @@ resolve_dynamic_array_or_string (struct type *type,
 
 static struct type *
 resolve_dynamic_union (struct type *type,
-		       struct property_addr_info *addr_stack,
+		       const property_addr_info *addr_stack,
 		       const frame_info_ptr &frame)
 {
   struct type *resolved_type;
@@ -2534,7 +2534,7 @@ variant::matches (ULONGEST value, bool is_unsigned) const
 
 static void
 compute_variant_fields_inner (struct type *type,
-			      struct property_addr_info *addr_stack,
+			      const property_addr_info *addr_stack,
 			      const variant_part &part,
 			      std::vector<bool> &flags);
 
@@ -2549,7 +2549,7 @@ compute_variant_fields_inner (struct type *type,
 
 static void
 compute_variant_fields_recurse (struct type *type,
-				struct property_addr_info *addr_stack,
+				const property_addr_info *addr_stack,
 				const variant &variant,
 				std::vector<bool> &flags,
 				bool enabled)
@@ -2581,7 +2581,7 @@ compute_variant_fields_recurse (struct type *type,
 
 static void
 compute_variant_fields_inner (struct type *type,
-			      struct property_addr_info *addr_stack,
+			      const property_addr_info *addr_stack,
 			      const variant_part &part,
 			      std::vector<bool> &flags)
 {
@@ -2650,7 +2650,7 @@ compute_variant_fields_inner (struct type *type,
 static void
 compute_variant_fields (struct type *type,
 			struct type *resolved_type,
-			struct property_addr_info *addr_stack,
+			const property_addr_info *addr_stack,
 			const gdb::array_view<variant_part> &parts)
 {
   /* Assume all fields are included by default.  */
@@ -2682,7 +2682,7 @@ compute_variant_fields (struct type *type,
 
 static struct type *
 resolve_dynamic_struct (struct type *type,
-			struct property_addr_info *addr_stack,
+			const property_addr_info *addr_stack,
 			const frame_info_ptr &frame)
 {
   struct type *resolved_type;
@@ -2725,9 +2725,9 @@ resolve_dynamic_struct (struct type *type,
 	  struct dynamic_prop prop;
 	  prop.set_locexpr (&baton);
 
+	  CORE_ADDR vals[1] = { addr_stack->addr };
 	  CORE_ADDR addr;
-	  if (dwarf2_evaluate_property (&prop, frame, addr_stack, &addr,
-					{addr_stack->addr}))
+	  if (dwarf2_evaluate_property (&prop, frame, addr_stack, &addr, vals))
 	    resolved_type->field (i).set_loc_bitpos
 	      (TARGET_CHAR_BIT * (addr - addr_stack->addr));
 	}
@@ -2797,7 +2797,7 @@ resolve_dynamic_struct (struct type *type,
 
 static struct type *
 resolve_dynamic_type_internal (struct type *type,
-			       struct property_addr_info *addr_stack,
+			       const property_addr_info *addr_stack,
 			       const frame_info_ptr &frame,
 			       bool top_level)
 {
