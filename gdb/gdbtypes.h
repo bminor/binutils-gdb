@@ -2629,6 +2629,18 @@ extern struct type *resolve_dynamic_type
    "dynamic".  */
 extern bool is_dynamic_type (struct type *type);
 
+/* Resolve any dynamic components of FIELD.  FIELD is updated.
+   ADDR_STACK and FRAME are used where necessary to supply information
+   for the resolution process; see resolve_dynamic_type.
+   Specifically, after calling this, the field's bit position will be
+   a constant, and the field's type will not have dynamic properties.
+
+   This function assumes that FIELD is not a static field.  */
+
+extern void resolve_dynamic_field (struct field &field,
+				   const struct property_addr_info *addr_stack,
+				   const frame_info_ptr &frame);
+
 extern struct type *check_typedef (struct type *);
 
 extern void check_stub_method_group (struct type *, int);

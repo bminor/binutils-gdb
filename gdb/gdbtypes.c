@@ -2676,6 +2676,55 @@ compute_variant_fields (struct type *type,
     }
 }
 
+/* See gdbtypes.h.  */
+
+void
+resolve_dynamic_field (struct field &field,
+		       const property_addr_info *addr_stack,
+		       const frame_info_ptr &frame)
+{
+  gdb_assert (!field.is_static ());
+
+  if (field.loc_kind () == FIELD_LOC_KIND_DWARF_BLOCK)
+    {
+      struct dwarf2_property_baton baton;
+      baton.property_type = lookup_pointer_type (field.type ());
+      baton.locexpr = *field.loc_dwarf_block ();
+
+      struct dynamic_prop prop;
+      prop.set_locexpr (&baton);
+
+      CORE_ADDR vals[1] = {addr_stack->addr};
+      CORE_ADDR addr;
+      if (dwarf2_evaluate_property (&prop, frame, addr_stack, &addr, vals))
+	field.set_loc_bitpos (TARGET_CHAR_BIT * (addr - addr_stack->addr));
+    }
+
+  /* As we know this field is not a static field, the field's
+     field_loc_kind should be FIELD_LOC_KIND_BITPOS.  Verify
+     this is the case, but only trigger a simple error rather
+     than an internal error if that fails.  While failing
+     that verification indicates a bug in our code, the error
+     is not severe enough to suggest to the user he stops
+     his debugging session because of it.  */
+  if (field.loc_kind () != FIELD_LOC_KIND_BITPOS)
+    error (_("Cannot determine struct field location"
+	     " (invalid location kind)"));
+
+  struct property_addr_info pinfo;
+  pinfo.type = check_typedef (field.type ());
+  size_t offset = field.loc_bitpos () / TARGET_CHAR_BIT;
+  pinfo.valaddr = addr_stack->valaddr;
+  if (!pinfo.valaddr.empty ())
+    pinfo.valaddr = pinfo.valaddr.slice (offset);
+  pinfo.addr = addr_stack->addr + offset;
+  pinfo.next = addr_stack;
+
+  field.set_type (resolve_dynamic_type_internal (field.type (),
+						 &pinfo, frame, false));
+  gdb_assert (field.loc_kind () == FIELD_LOC_KIND_BITPOS);
+}
+
 /* Resolve dynamic bounds of members of the struct TYPE to static
    bounds.  ADDR_STACK is a stack of struct property_addr_info to
    be used if needed during the dynamic resolution.  */
@@ -2710,52 +2759,11 @@ resolve_dynamic_struct (struct type *type,
   for (i = 0; i < resolved_type->num_fields (); ++i)
     {
       unsigned new_bit_length;
-      struct property_addr_info pinfo;
 
       if (resolved_type->field (i).is_static ())
 	continue;
 
-      if (resolved_type->field (i).loc_kind () == FIELD_LOC_KIND_DWARF_BLOCK)
-	{
-	  struct dwarf2_property_baton baton;
-	  baton.property_type
-	    = lookup_pointer_type (resolved_type->field (i).type ());
-	  baton.locexpr = *resolved_type->field (i).loc_dwarf_block ();
-
-	  struct dynamic_prop prop;
-	  prop.set_locexpr (&baton);
-
-	  CORE_ADDR vals[1] = { addr_stack->addr };
-	  CORE_ADDR addr;
-	  if (dwarf2_evaluate_property (&prop, frame, addr_stack, &addr, vals))
-	    resolved_type->field (i).set_loc_bitpos
-	      (TARGET_CHAR_BIT * (addr - addr_stack->addr));
-	}
-
-      /* As we know this field is not a static field, the field's
-	 field_loc_kind should be FIELD_LOC_KIND_BITPOS.  Verify
-	 this is the case, but only trigger a simple error rather
-	 than an internal error if that fails.  While failing
-	 that verification indicates a bug in our code, the error
-	 is not severe enough to suggest to the user he stops
-	 his debugging session because of it.  */
-      if (resolved_type->field (i).loc_kind () != FIELD_LOC_KIND_BITPOS)
-	error (_("Cannot determine struct field location"
-		 " (invalid location kind)"));
-
-      pinfo.type = check_typedef (resolved_type->field (i).type ());
-      size_t offset = resolved_type->field (i).loc_bitpos () / TARGET_CHAR_BIT;
-      pinfo.valaddr = addr_stack->valaddr;
-      if (!pinfo.valaddr.empty ())
-	pinfo.valaddr = pinfo.valaddr.slice (offset);
-      pinfo.addr = addr_stack->addr + offset;
-      pinfo.next = addr_stack;
-
-      resolved_type->field (i).set_type
-	(resolve_dynamic_type_internal (resolved_type->field (i).type (),
-					&pinfo, frame, false));
-      gdb_assert (resolved_type->field (i).loc_kind ()
-		  == FIELD_LOC_KIND_BITPOS);
+      resolve_dynamic_field (resolved_type->field (i), addr_stack, frame);
 
       new_bit_length = resolved_type->field (i).loc_bitpos ();
       if (resolved_type->field (i).bitsize () != 0)
