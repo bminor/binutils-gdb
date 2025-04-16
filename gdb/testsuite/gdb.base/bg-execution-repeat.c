@@ -37,9 +37,9 @@ main (void)
 {
   alarm (60);
 
+  do_wait = 1;
   foo ();
 
-  do_wait = 1;
   wait ();
   /* do_wait set to 0 externally.  */
 
