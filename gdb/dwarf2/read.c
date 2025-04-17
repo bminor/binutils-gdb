@@ -19189,7 +19189,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
       /* .debug_loc{,.dwo} may not exist at all, or the offset may be outside
 	 the section.  If so, fall through to the complaint in the
 	 other branch.  */
-      && attr->as_unsigned () < section->get_size (objfile))
+      && attr->as_unsigned () < section->size)
     {
       struct dwarf2_loclist_baton *baton;
 

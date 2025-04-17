@@ -81,19 +81,6 @@ struct dwarf2_section_info
      If the section is compressed, uncompress it before returning.  */
   void read (struct objfile *objfile);
 
-  /* A helper function that returns the size of a section in a safe way.
-     If you are positive that the section has been read before using the
-     size, then it is safe to refer to the dwarf2_section_info object's
-     "size" field directly.  In other cases, you must call this
-     function, because for compressed sections the size field is not set
-     correctly until the section has been read.  */
-  bfd_size_type get_size (struct objfile *objfile)
-  {
-    if (!readin)
-      read (objfile);
-    return size;
-  }
-
   /* Issue a complaint that something was outside the bounds of this
      buffer.  */
   void overflow_complaint () const;

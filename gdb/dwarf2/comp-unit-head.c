@@ -156,8 +156,7 @@ error_check_comp_unit_head (dwarf2_per_objfile *per_objfile,
 {
   const char *filename = section->get_file_name ();
 
-  if (to_underlying (header->abbrev_sect_off)
-      >= abbrev_section->get_size (per_objfile->objfile))
+  if (to_underlying (header->abbrev_sect_off) >= abbrev_section->size)
     error (_(DWARF_ERROR_PREFIX
 	     "bad offset (%s) in compilation unit header "
 	     "(offset %s + 6) [in module %s]"),
