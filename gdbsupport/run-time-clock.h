@@ -51,6 +51,13 @@ struct system_cpu_time_clock
   static time_point now () noexcept = delete;
 };
 
+/* Return the user/system time as separate time points, if
+   supported.  If not supported, then the combined user+kernel time
+   is returned in USER and SYSTEM is set to zero.  */
+
+void get_run_time (user_cpu_time_clock::time_point &user,
+		   system_cpu_time_clock::time_point &system) noexcept;
+
 /* Count the total amount of time spent executing in userspace+kernel
    mode.  */
 
@@ -64,12 +71,6 @@ struct run_time_clock
   static constexpr bool is_steady = true;
 
   static time_point now () noexcept;
-
-  /* Return the user/system time as separate time points, if
-     supported.  If not supported, then the combined user+kernel time
-     is returned in USER and SYSTEM is set to zero.  */
-  static void now (user_cpu_time_clock::time_point &user,
-		   system_cpu_time_clock::time_point &system) noexcept;
 };
 
 #endif /* GDBSUPPORT_RUN_TIME_CLOCK_H */

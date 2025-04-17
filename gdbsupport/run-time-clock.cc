@@ -38,8 +38,8 @@ timeval_to_microseconds (struct timeval *tv)
 #endif
 
 void
-run_time_clock::now (user_cpu_time_clock::time_point &user,
-		     system_cpu_time_clock::time_point &system) noexcept
+get_run_time (user_cpu_time_clock::time_point &user,
+	      system_cpu_time_clock::time_point &system) noexcept
 {
 #ifdef HAVE_GETRUSAGE
   struct rusage rusage;
