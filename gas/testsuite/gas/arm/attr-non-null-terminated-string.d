@@ -6,4 +6,4 @@
 # readelf: --silent-truncation -A
 Attribute Section: aeabi
 File Attributes
-  Tag_CPU_raw_name: "ab"
+  Tag_CPU_raw_name: "ab<corrupt string tag>"

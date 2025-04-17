@@ -17779,13 +17779,17 @@ display_tag_value (signed int tag,
   else if (tag & 1)
     {
       /* PR 17531 file: 027-19978-0.004.  */
-      size_t maxlen = (end - p) - 1;
+      size_t maxlen = end - p;
 
       putchar ('"');
       if (maxlen > 0)
 	{
+	  maxlen -= 1; /* Remove \0 from the character count.  */
 	  print_symbol_name ((int) maxlen, (const char *) p);
-	  p += strnlen ((char *) p, maxlen) + 1;
+	  size_t len = strnlen ((char *) p, maxlen);
+	  if (len == maxlen && p[maxlen] != '\0')
+	    printf (_("<corrupt string tag>"));
+	  p += len + 1;
 	}
       else
 	{

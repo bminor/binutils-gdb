@@ -4,7 +4,6 @@
 # readelf: -T -A
 # This test is only valid on EABI based ports.
 # target: *-*-*eabi* *-*-nacl*
-# xfail: *
 
 Attribute Section: aeabi
 File Attributes
