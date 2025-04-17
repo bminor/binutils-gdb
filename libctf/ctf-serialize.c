@@ -936,7 +936,7 @@ ctf_type_sect_size (ctf_dict_t *fp)
 	      if ((kind != CTF_K_BIG) || tp->ctt_size != 0
 		  || LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) != 0)
 		if (ctf_dynset_lookup (fp->ctf_write_suppressions,
-				       (const void *) (uintptr_t) kind) == NULL)
+				       (const void *) (uintptr_t) kind) != NULL)
 		  {
 		    type_size += sizeof (ctf_type_t);
 		    suppress = 1;
