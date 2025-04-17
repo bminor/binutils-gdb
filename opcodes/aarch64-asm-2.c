@@ -608,6 +608,46 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1872:	/* sel */
       value = 1872;	/* --> sel.  */
       break;
+    case 2420:	/* mov */
+    case 2422:	/* mova */
+      value = 2422;	/* --> mova.  */
+      break;
+    case 2421:	/* mov */
+    case 2423:	/* mova */
+      value = 2423;	/* --> mova.  */
+      break;
+    case 2646:	/* mov */
+    case 2654:	/* mova */
+      value = 2654;	/* --> mova.  */
+      break;
+    case 2647:	/* mov */
+    case 2655:	/* mova */
+      value = 2655;	/* --> mova.  */
+      break;
+    case 2648:	/* mov */
+    case 2656:	/* mova */
+      value = 2656;	/* --> mova.  */
+      break;
+    case 2649:	/* mov */
+    case 2657:	/* mova */
+      value = 2657;	/* --> mova.  */
+      break;
+    case 2650:	/* mov */
+    case 2658:	/* mova */
+      value = 2658;	/* --> mova.  */
+      break;
+    case 2651:	/* mov */
+    case 2659:	/* mova */
+      value = 2659;	/* --> mova.  */
+      break;
+    case 2652:	/* mov */
+    case 2660:	/* mova */
+      value = 2660;	/* --> mova.  */
+      break;
+    case 2653:	/* mov */
+    case 2661:	/* mova */
+      value = 2661;	/* --> mova.  */
+      break;
     default: return NULL;
     }
 

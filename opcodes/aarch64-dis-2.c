@@ -127,8 +127,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                   /* 33222222222211111111110000000000
                                                      10987654321098765432109876543210
                                                      x1000000xx00000xxxxxxxxxxxxxxxxx
-                                                     mov.  */
-                                                  return 2421;
+                                                     mova.  */
+                                                  return 2423;
                                                 }
                                               else
                                                 {
@@ -201,8 +201,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                   /* 33222222222211111111110000000000
                                                      10987654321098765432109876543210
                                                      x1000000xx0x001xxxxxxx0xxxxxxxxx
-                                                     mov.  */
-                                                  return 2420;
+                                                     mova.  */
+                                                  return 2422;
                                                 }
                                               else
                                                 {
@@ -346,8 +346,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                       /* 33222222222211111111110000000000
                                                          10987654321098765432109876543210
                                                          x1000000xx0x010xxxxx00xxxxxxxxxx
-                                                         mov.  */
-                                                      return 2652;
+                                                         mova.  */
+                                                      return 2660;
                                                     }
                                                   else
                                                     {
@@ -356,8 +356,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                           /* 33222222222211111111110000000000
                                                              10987654321098765432109876543210
                                                              x1000000xx0x011xxxxx000xxxxxxxxx
-                                                             mov.  */
-                                                          return 2648;
+                                                             mova.  */
+                                                          return 2656;
                                                         }
                                                       else
                                                         {
@@ -583,8 +583,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                   /* 33222222222211111111110000000000
                                                      10987654321098765432109876543210
                                                      x1000000xx0xx10xxxxx10xxxxxxxxxx
-                                                     mov.  */
-                                                  return 2650;
+                                                     mova.  */
+                                                  return 2658;
                                                 }
                                               else
                                                 {
@@ -593,8 +593,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                       /* 33222222222211111111110000000000
                                                          10987654321098765432109876543210
                                                          x1000000xx0xx11xxxxx100xxxxxxxxx
-                                                         mov.  */
-                                                      return 2646;
+                                                         mova.  */
+                                                      return 2654;
                                                     }
                                                   else
                                                     {
@@ -616,8 +616,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                   /* 33222222222211111111110000000000
                                                      10987654321098765432109876543210
                                                      x1000000xx0xx10xxxxx01xxxxxxxxxx
-                                                     mov.  */
-                                                  return 2653;
+                                                     mova.  */
+                                                  return 2661;
                                                 }
                                               else
                                                 {
@@ -626,8 +626,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                       /* 33222222222211111111110000000000
                                                          10987654321098765432109876543210
                                                          x1000000xx0xx11xxxxx010xxxxxxxxx
-                                                         mov.  */
-                                                      return 2649;
+                                                         mova.  */
+                                                      return 2657;
                                                     }
                                                   else
                                                     {
@@ -679,8 +679,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                   /* 33222222222211111111110000000000
                                                      10987654321098765432109876543210
                                                      x1000000xx0xx10xxxxx11xxxxxxxxxx
-                                                     mov.  */
-                                                  return 2651;
+                                                     mova.  */
+                                                  return 2659;
                                                 }
                                               else
                                                 {
@@ -689,8 +689,8 @@ aarch64_opcode_lookup_1 (uint32_t word)
                                                       /* 33222222222211111111110000000000
                                                          10987654321098765432109876543210
                                                          x1000000xx0xx11xxxxx110xxxxxxxxx
-                                                         mov.  */
-                                                      return 2647;
+                                                         mova.  */
+                                                      return 2655;
                                                     }
                                                   else
                                                     {
@@ -34546,26 +34546,6 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
   int value;
   switch (key)
     {
-    case 2421: value = 2423; break;	/* mov --> mova.  */
-    case 2423: return NULL;		/* mova --> NULL.  */
-    case 2420: value = 2422; break;	/* mov --> mova.  */
-    case 2422: return NULL;		/* mova --> NULL.  */
-    case 2652: value = 2660; break;	/* mov --> mova.  */
-    case 2660: return NULL;		/* mova --> NULL.  */
-    case 2648: value = 2656; break;	/* mov --> mova.  */
-    case 2656: return NULL;		/* mova --> NULL.  */
-    case 2650: value = 2658; break;	/* mov --> mova.  */
-    case 2658: return NULL;		/* mova --> NULL.  */
-    case 2646: value = 2654; break;	/* mov --> mova.  */
-    case 2654: return NULL;		/* mova --> NULL.  */
-    case 2653: value = 2661; break;	/* mov --> mova.  */
-    case 2661: return NULL;		/* mova --> NULL.  */
-    case 2649: value = 2657; break;	/* mov --> mova.  */
-    case 2657: return NULL;		/* mova --> NULL.  */
-    case 2651: value = 2659; break;	/* mov --> mova.  */
-    case 2659: return NULL;		/* mova --> NULL.  */
-    case 2647: value = 2655; break;	/* mov --> mova.  */
-    case 2655: return NULL;		/* mova --> NULL.  */
     case 2506: value = 3288; break;	/* fclamp --> bfclamp.  */
     case 3288: return NULL;		/* bfclamp --> NULL.  */
     case 2507: value = 3289; break;	/* fclamp --> bfclamp.  */
@@ -35019,6 +34999,16 @@ aarch64_find_alias_opcode (const aarch64_opcode *opcode)
     case 1808: value = 1334; break;	/* orrs --> movs.  */
     case 1871: value = 1329; break;	/* sel --> mov.  */
     case 1872: value = 1332; break;	/* sel --> mov.  */
+    case 2422: value = 2420; break;	/* mova --> mov.  */
+    case 2423: value = 2421; break;	/* mova --> mov.  */
+    case 2654: value = 2646; break;	/* mova --> mov.  */
+    case 2655: value = 2647; break;	/* mova --> mov.  */
+    case 2656: value = 2648; break;	/* mova --> mov.  */
+    case 2657: value = 2649; break;	/* mova --> mov.  */
+    case 2658: value = 2650; break;	/* mova --> mov.  */
+    case 2659: value = 2651; break;	/* mova --> mov.  */
+    case 2660: value = 2652; break;	/* mova --> mov.  */
+    case 2661: value = 2653; break;	/* mova --> mov.  */
     default: return NULL;
     }
 
@@ -35218,6 +35208,16 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 1334: value = 1808; break;	/* movs --> orrs.  */
     case 1329: value = 1871; break;	/* mov --> sel.  */
     case 1332: value = 1872; break;	/* mov --> sel.  */
+    case 2420: value = 2422; break;	/* mov --> mova.  */
+    case 2421: value = 2423; break;	/* mov --> mova.  */
+    case 2646: value = 2654; break;	/* mov --> mova.  */
+    case 2647: value = 2655; break;	/* mov --> mova.  */
+    case 2648: value = 2656; break;	/* mov --> mova.  */
+    case 2649: value = 2657; break;	/* mov --> mova.  */
+    case 2650: value = 2658; break;	/* mov --> mova.  */
+    case 2651: value = 2659; break;	/* mov --> mova.  */
+    case 2652: value = 2660; break;	/* mov --> mova.  */
+    case 2653: value = 2661; break;	/* mov --> mova.  */
     default: return NULL;
     }
 
