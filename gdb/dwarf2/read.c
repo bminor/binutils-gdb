@@ -9897,8 +9897,6 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 
 	  field->set_loc_bitpos (offset * bits_per_byte);
 	}
-      else if (attr->form_is_section_offset ())
-	dwarf2_complex_location_expr_complaint ();
       else if (attr->form_is_block ())
 	{
 	  CORE_ADDR offset;
@@ -9924,7 +9922,8 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	    }
 	}
       else
-	dwarf2_complex_location_expr_complaint ();
+	complaint (_("Unsupported form %s for DW_AT_data_member_location"),
+		   dwarf_form_name (attr->form));
     }
   else
     {
