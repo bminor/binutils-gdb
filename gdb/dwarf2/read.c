@@ -2392,7 +2392,6 @@ create_dwo_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
 				  dwo_file *dwo_file, dwarf2_section_info *section,
 				  rcuh_kind section_kind)
 {
-  struct objfile *objfile = per_objfile->objfile;
   struct dwarf2_section_info *abbrev_section;
   bfd *abfd;
   const gdb_byte *info_ptr, *end_ptr;
@@ -2403,7 +2402,6 @@ create_dwo_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
 			   section->get_name (),
 			   abbrev_section->get_file_name ());
 
-  section->read (objfile);
   info_ptr = section->buffer;
 
   if (info_ptr == NULL)
@@ -6310,12 +6308,10 @@ static void
 create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
-  struct objfile *objfile = per_objfile->objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   const gdb_byte *info_ptr, *end_ptr;
   auto &section = dwo_file.sections.info;
 
-  section.read (objfile);
   info_ptr = section.buffer;
 
   if (info_ptr == NULL)
@@ -6538,7 +6534,6 @@ static struct dwp_hash_table *
 create_dwp_hash_table (dwarf2_per_objfile *per_objfile,
 		       struct dwp_file *dwp_file, int is_debug_types)
 {
-  struct objfile *objfile = per_objfile->objfile;
   bfd *dbfd = dwp_file->dbfd.get ();
   const gdb_byte *index_ptr, *index_end;
   struct dwarf2_section_info *index;
@@ -6552,7 +6547,6 @@ create_dwp_hash_table (dwarf2_per_objfile *per_objfile,
 
   if (index->empty ())
     return NULL;
-  index->read (objfile);
 
   index_ptr = index->buffer;
   index_end = index_ptr + index->size;
