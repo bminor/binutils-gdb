@@ -37,6 +37,7 @@
 
 
 #include <ctype.h>
+#include "maint.h"
 #include "symtab.h"
 #include "bfd.h"
 #include "filenames.h"
@@ -1481,6 +1482,8 @@ minimal_symbol_reader::install ()
       gdb::parallel_for_each (10, &msymbols[0], &msymbols[mcount],
 	 [&] (minimal_symbol *start, minimal_symbol *end)
 	 {
+	   scoped_time_it time_it ("minsyms install worker");
+
 	   for (minimal_symbol *msym = start; msym < end; ++msym)
 	     {
 	       size_t idx = msym - msymbols;

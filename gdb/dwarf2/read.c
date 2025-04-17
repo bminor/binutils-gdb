@@ -52,6 +52,7 @@
 #include "event-top.h"
 #include "exceptions.h"
 #include "gdbsupport/task-group.h"
+#include "maint.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "objfiles.h"
@@ -3515,6 +3516,8 @@ static void
 process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
 				 cooked_index_worker_result *storage)
 {
+  scoped_time_it time_it ("DWARF skeletonless type units");
+
   /* Skeletonless TUs in DWP files without .gdb_index is not supported yet.  */
   if (per_objfile->per_bfd->dwp_file == nullptr)
     for (const dwo_file_up &file : per_objfile->per_bfd->dwo_files)
@@ -3677,6 +3680,7 @@ cooked_index_worker_debug_info::do_reading ()
       gdb_assert (iter != last);
       workers.add_task ([this, task_count, iter, last] ()
 	{
+	  scoped_time_it time_it ("DWARF indexing worker");
 	  process_cus (task_count, iter, last);
 	});
 

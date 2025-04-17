@@ -20,6 +20,7 @@
 #include "dwarf2/cooked-index-worker.h"
 #include "dwarf2/cooked-index.h"
 #include "gdbsupport/thread-pool.h"
+#include "maint.h"
 #include "run-on-main-thread.h"
 #include "event-top.h"
 #include "exceptions.h"
@@ -244,8 +245,12 @@ cooked_index_worker::write_to_cache (const cooked_index *idx)
 void
 cooked_index_worker::done_reading ()
 {
-  for (auto &one_result : m_results)
-    m_all_parents_map.add_map (*one_result.get_parent_map ());
+  {
+    scoped_time_it time_it ("DWARF add parent map");
+
+    for (auto &one_result : m_results)
+      m_all_parents_map.add_map (*one_result.get_parent_map ());
+  }
 
   dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
   cooked_index *table

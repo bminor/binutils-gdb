@@ -21,6 +21,7 @@
 #include "dwarf2/read.h"
 #include "dwarf2/stringify.h"
 #include "event-top.h"
+#include "maint.h"
 #include "observable.h"
 #include "run-on-main-thread.h"
 #include "gdbsupport/task-group.h"
@@ -101,7 +102,11 @@ cooked_index::set_contents ()
     {
       auto this_shard = shard.get ();
       const parent_map_map *parent_maps = m_state->get_parent_map_map ();
-      finalizers.add_task ([=] () { this_shard->finalize (parent_maps); });
+      finalizers.add_task ([=] ()
+	{
+	  scoped_time_it time_it ("DWARF finalize worker");
+	  this_shard->finalize (parent_maps);
+	});
     }
 
   finalizers.start ();
