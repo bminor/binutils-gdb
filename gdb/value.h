@@ -1058,9 +1058,18 @@ extern gdb_mpz value_as_mpz (struct value *val);
 extern LONGEST unpack_long (struct type *type, const gdb_byte *valaddr);
 extern CORE_ADDR unpack_pointer (struct type *type, const gdb_byte *valaddr);
 
+/* Unpack a field FIELDNO of the specified TYPE, from the anonymous
+   object at VALADDR.  See unpack_bits_as_long for more details.  */
+
 extern LONGEST unpack_field_as_long (struct type *type,
 				     const gdb_byte *valaddr,
 				     int fieldno);
+
+/* Unpack a field, FIELD, from the anonymous object at VALADDR.  See
+   unpack_bits_as_long for more details.  */
+
+extern LONGEST unpack_field_as_long (const gdb_byte *valaddr,
+				     struct field *field);
 
 /* Unpack a bitfield of the specified FIELD_TYPE, from the object at
    VALADDR, and store the result in *RESULT.

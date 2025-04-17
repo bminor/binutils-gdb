@@ -3296,17 +3296,24 @@ unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
   return 1;
 }
 
-/* Unpack a field FIELDNO of the specified TYPE, from the anonymous
-   object at VALADDR.  See unpack_bits_as_long for more details.  */
+/* See value.h.  */
+
+LONGEST
+unpack_field_as_long (const gdb_byte *valaddr, struct field *field)
+{
+  int bitpos = field->loc_bitpos ();
+  int bitsize = field->bitsize ();
+  struct type *field_type = field->type ();
+
+  return unpack_bits_as_long (field_type, valaddr, bitpos, bitsize);
+}
+
+/* See value.h.  */
 
 LONGEST
 unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
 {
-  int bitpos = type->field (fieldno).loc_bitpos ();
-  int bitsize = type->field (fieldno).bitsize ();
-  struct type *field_type = type->field (fieldno).type ();
-
-  return unpack_bits_as_long (field_type, valaddr, bitpos, bitsize);
+  return unpack_field_as_long (valaddr, &type->field (fieldno));
 }
 
 /* See value.h.  */
