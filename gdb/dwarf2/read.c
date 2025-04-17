@@ -2388,8 +2388,8 @@ read_abbrev_offset (dwarf2_per_objfile *per_objfile,
    type units, therefore DW_UT_type.  */
 
 static void
-create_dwo_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
-				  dwo_file *dwo_file, dwarf2_section_info *section,
+create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd, dwo_file *dwo_file,
+				  dwarf2_section_info *section,
 				  rcuh_kind section_kind)
 {
   struct dwarf2_section_info *abbrev_section;
@@ -2445,8 +2445,7 @@ create_dwo_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
 	  continue;
 	}
 
-      dwo_unit *dwo_tu
-	= OBSTACK_ZALLOC (&per_objfile->per_bfd->obstack, dwo_unit);
+      dwo_unit *dwo_tu = OBSTACK_ZALLOC (&per_bfd->obstack, dwo_unit);
       dwo_tu->dwo_file = dwo_file;
       dwo_tu->signature = header.signature;
       dwo_tu->type_offset_in_tu = header.type_cu_offset_in_tu;
@@ -2478,12 +2477,12 @@ create_dwo_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
 
 static void
 create_dwo_debug_types_hash_table
-  (dwarf2_per_objfile *per_objfile, dwo_file *dwo_file,
+  (dwarf2_per_bfd *per_bfd, dwo_file *dwo_file,
    gdb::array_view<dwarf2_section_info> type_sections)
 {
   for (dwarf2_section_info &section : type_sections)
-    create_dwo_debug_type_hash_table (per_objfile, dwo_file, &section,
-				  rcuh_kind::TYPE);
+    create_dwo_debug_type_hash_table (per_bfd, dwo_file, &section,
+				      rcuh_kind::TYPE);
 }
 
 /* Add an entry for signature SIG to per_bfd->signatured_types.  */
@@ -6531,8 +6530,8 @@ create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
    Note: This function processes DWP files only, not DWO files.  */
 
 static struct dwp_hash_table *
-create_dwp_hash_table (dwarf2_per_objfile *per_objfile,
-		       struct dwp_file *dwp_file, dwarf2_section_info &index)
+create_dwp_hash_table (dwarf2_per_bfd *per_bfd, struct dwp_file *dwp_file,
+		       dwarf2_section_info &index)
 {
   bfd *dbfd = dwp_file->dbfd.get ();
   uint32_t version, nr_columns, nr_units, nr_slots;
@@ -6573,7 +6572,7 @@ create_dwp_hash_table (dwarf2_per_objfile *per_objfile,
 	     pulongest (nr_slots), dwp_file->name);
     }
 
-  htab = OBSTACK_ZALLOC (&per_objfile->per_bfd->obstack, struct dwp_hash_table);
+  htab = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwp_hash_table);
   htab->version = version;
   htab->nr_columns = nr_columns;
   htab->nr_units = nr_units;
@@ -7603,6 +7602,7 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 			const char *comp_dir)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   gdb_bfd_ref_ptr dbfd
     = open_dwo_file (per_objfile->per_bfd, dwo_name, comp_dir);
@@ -7625,10 +7625,10 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
   create_dwo_cus_hash_table (cu, *dwo_file);
 
   if (cu->header.version < 5)
-    create_dwo_debug_types_hash_table (per_objfile, dwo_file.get (),
+    create_dwo_debug_types_hash_table (per_bfd, dwo_file.get (),
 				       dwo_file->sections.types);
   else
-    create_dwo_debug_type_hash_table (per_objfile, dwo_file.get (),
+    create_dwo_debug_type_hash_table (per_bfd, dwo_file.get (),
 				      &dwo_file->sections.info,
 				      rcuh_kind::COMPILE);
 
@@ -7851,9 +7851,9 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
     dwarf2_locate_common_dwp_sections (objfile, dwp_file->dbfd.get (), sec,
 				       dwp_file.get ());
 
-  dwp_file->cus = create_dwp_hash_table (per_objfile, dwp_file.get (),
+  dwp_file->cus = create_dwp_hash_table (per_bfd, dwp_file.get (),
 					 dwp_file->sections.cu_index);
-  dwp_file->tus = create_dwp_hash_table (per_objfile, dwp_file.get (),
+  dwp_file->tus = create_dwp_hash_table (per_bfd, dwp_file.get (),
 					 dwp_file->sections.tu_index);
 
   /* The DWP file version is stored in the hash table.  Oh well.  */
