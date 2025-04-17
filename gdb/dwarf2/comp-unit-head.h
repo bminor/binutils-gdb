@@ -129,11 +129,8 @@ extern const gdb_byte *read_comp_unit_head
    The contents of the header are stored in HEADER.
    The result is a pointer to the start of the first DIE.  */
 extern const gdb_byte *read_and_check_comp_unit_head
-  (dwarf2_per_objfile *per_objfile,
-   struct comp_unit_head *header,
-   struct dwarf2_section_info *section,
-   struct dwarf2_section_info *abbrev_section,
-   const gdb_byte *info_ptr,
+  (comp_unit_head *header, dwarf2_section_info *section,
+   dwarf2_section_info *abbrev_section, const gdb_byte *info_ptr,
    rcuh_kind section_kind);
 
 #endif /* GDB_DWARF2_COMP_UNIT_HEAD_H */
