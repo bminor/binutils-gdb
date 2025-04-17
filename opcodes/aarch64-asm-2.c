@@ -149,8 +149,8 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 669:	/* csneg */
       value = 669;	/* --> csneg.  */
       break;
-    case 688:	/* rev */
     case 689:	/* rev64 */
+    case 688:	/* rev */
       value = 688;	/* --> rev.  */
       break;
     case 714:	/* lsl */

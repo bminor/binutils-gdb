@@ -34914,7 +34914,7 @@ aarch64_find_alias_opcode (const aarch64_opcode *opcode)
     case 663: value = 665; break;	/* csinc --> cset.  */
     case 666: value = 668; break;	/* csinv --> csetm.  */
     case 669: value = 670; break;	/* csneg --> cneg.  */
-    case 688: value = 688; break;	/* rev --> rev.  */
+    case 688: value = 689; break;	/* rev --> rev64.  */
     case 713: value = 714; break;	/* lslv --> lsl.  */
     case 715: value = 716; break;	/* lsrv --> lsr.  */
     case 717: value = 718; break;	/* asrv --> asr.  */
@@ -35074,7 +35074,7 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 668: value = 667; break;	/* csetm --> cinv.  */
     case 667: value = 666; break;	/* cinv --> csinv.  */
     case 670: value = 669; break;	/* cneg --> csneg.  */
-    case 688: value = 689; break;	/* rev --> rev64.  */
+    case 689: value = 688; break;	/* rev64 --> rev.  */
     case 714: value = 713; break;	/* lsl --> lslv.  */
     case 716: value = 715; break;	/* lsr --> lsrv.  */
     case 718: value = 717; break;	/* asr --> asrv.  */
