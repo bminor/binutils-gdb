@@ -12,6 +12,7 @@
 	wfi
 	sev
 	sevl
+	dgh
 	csdb
 	clearbhb
 

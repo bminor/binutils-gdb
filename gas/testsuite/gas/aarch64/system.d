@@ -15,6 +15,7 @@ Disassembly of section \.text:
 .*:	d503207f 	wfi
 .*:	d503209f 	sev
 .*:	d50320bf 	sevl
+.*:	d50320df 	dgh
 .*:	d503229f 	csdb
 .*:	d50322df 	clrbhb
 .*:	d503201f 	nop
