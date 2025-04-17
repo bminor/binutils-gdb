@@ -70,6 +70,33 @@ class scoped_command_stats
   int m_start_nr_blocks;
 };
 
+/* RAII structure used to measure the time spent by the current thread in a
+   given scope.  */
+
+struct scoped_time_it
+{
+  /* WHAT is the prefix to show when the summary line is printed.  */
+  scoped_time_it (const char *what);
+
+  DISABLE_COPY_AND_ASSIGN (scoped_time_it);
+  ~scoped_time_it ();
+
+private:
+  bool m_enabled;
+
+  /* Summary line prefix.  */
+  const char *m_what;
+
+  /* User time at the start of execution.  */
+  user_cpu_time_clock::time_point m_start_user;
+
+  /* System time at the start of execution.  */
+  system_cpu_time_clock::time_point m_start_sys;
+
+  /* Wall-clock time at the start of execution.  */
+  std::chrono::steady_clock::time_point m_start_wall;
+};
+
 extern obj_section *maint_obj_section_from_bfd_section (bfd *abfd,
 							asection *asection,
 							objfile *ofile);

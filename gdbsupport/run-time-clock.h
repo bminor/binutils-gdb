@@ -51,12 +51,25 @@ struct system_cpu_time_clock
   static time_point now () noexcept = delete;
 };
 
+/* Whether to measure time run time for the whole process or just one
+   thread.  */
+
+enum class run_time_scope
+{
+  process,
+  thread,
+};
+
 /* Return the user/system time as separate time points, if
    supported.  If not supported, then the combined user+kernel time
-   is returned in USER and SYSTEM is set to zero.  */
+   is returned in USER and SYSTEM is set to zero.
+
+   SCOPE indicates whether to return the run time for the whole process or
+   just for the calling thread.  */
 
 void get_run_time (user_cpu_time_clock::time_point &user,
-		   system_cpu_time_clock::time_point &system) noexcept;
+		   system_cpu_time_clock::time_point &system,
+		   run_time_scope scope) noexcept;
 
 /* Count the total amount of time spent executing in userspace+kernel
    mode.  */

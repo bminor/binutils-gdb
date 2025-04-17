@@ -1151,6 +1151,50 @@ set_per_command_cmd (const char *args, int from_tty)
       }
 }
 
+/* See maint.h.  */
+
+scoped_time_it::scoped_time_it (const char *what)
+  : m_enabled (per_command_time),
+    m_what (what),
+    m_start_wall (m_enabled
+		  ? std::chrono::steady_clock::now ()
+		  : std::chrono::steady_clock::time_point ())
+{
+  if (m_enabled)
+    get_run_time (m_start_user, m_start_sys, run_time_scope::thread);
+}
+
+/* See maint.h.  */
+
+scoped_time_it::~scoped_time_it ()
+{
+  if (!m_enabled)
+    return;
+
+  namespace chr = std::chrono;
+  auto end_wall = chr::steady_clock::now ();
+
+  user_cpu_time_clock::time_point end_user;
+  system_cpu_time_clock::time_point end_sys;
+  get_run_time (end_user, end_sys, run_time_scope::thread);
+
+  auto user = end_user - m_start_user;
+  auto sys = end_sys - m_start_sys;
+  auto wall = end_wall - m_start_wall;
+  auto user_ms = chr::duration_cast<chr::milliseconds> (user).count ();
+  auto sys_ms = chr::duration_cast<chr::milliseconds> (sys).count ();
+  auto wall_ms = chr::duration_cast<chr::milliseconds> (wall).count ();
+  auto user_plus_sys_ms = user_ms + sys_ms;
+
+  auto str
+    = string_printf ("Time for \"%s\": wall %.03f, user %.03f, sys %.03f, "
+		     "user+sys %.03f, %.01f %% CPU\n",
+		     m_what, wall_ms / 1000.0, user_ms / 1000.0,
+		     sys_ms / 1000.0, user_plus_sys_ms / 1000.0,
+		     user_plus_sys_ms * 100.0 / wall_ms);
+  gdb_stdlog->write_async_safe (str.data (), str.size ());
+}
+
 /* Options affecting the "maintenance selftest" command.  */
 
 struct maintenance_selftest_options
