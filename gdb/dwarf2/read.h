@@ -634,9 +634,6 @@ public:
   /* Set of dwo_file objects.  */
   dwo_file_up_set dwo_files;
 
-  /* True if we've checked for whether there is a DWP file.  */
-  bool dwp_checked = false;
-
   /* The DWP file if there is one, or NULL.  */
   dwp_file_up dwp_file;
 

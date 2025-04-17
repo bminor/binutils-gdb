@@ -1039,7 +1039,7 @@ static struct dwo_unit *lookup_dwo_unit_in_dwp
   (dwarf2_per_bfd *per_bfd, struct dwp_file *dwp_file,
    const char *comp_dir, ULONGEST signature, int is_debug_types);
 
-static struct dwp_file *get_dwp_file (dwarf2_per_objfile *per_objfile);
+static void open_and_init_dwp_file (dwarf2_per_objfile *per_objfile);
 
 static struct dwo_unit *lookup_dwo_comp_unit
   (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
@@ -1290,6 +1290,15 @@ dwarf2_has_info (struct objfile *objfile,
       try
 	{
 	  dwarf2_read_dwz_file (per_objfile);
+	}
+      catch (const gdb_exception_error &err)
+	{
+	  warning (_("%s"), err.what ());
+	}
+
+      try
+	{
+	  open_and_init_dwp_file (per_objfile);
 	}
       catch (const gdb_exception_error &err)
 	{
@@ -1632,7 +1641,7 @@ dw2_do_instantiate_symtab (dwarf2_per_cu *per_cu,
 	    && per_objfile->per_bfd->index_table != NULL
 	    && !per_objfile->per_bfd->index_table->version_check ()
 	    /* DWP files aren't supported yet.  */
-	    && get_dwp_file (per_objfile) == NULL)
+	    && per_objfile->per_bfd->dwp_file == nullptr)
 	  queue_and_load_all_dwo_tus (cu);
       }
 
@@ -2607,7 +2616,7 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-  struct dwp_file *dwp_file = get_dwp_file (per_objfile);
+  dwp_file *dwp_file = per_objfile->per_bfd->dwp_file.get ();
 
   gdb_assert (cu->dwo_unit);
   gdb_assert (dwp_file != NULL);
@@ -2649,7 +2658,7 @@ lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
     {
       /* We're in a DWO/DWP file, and we're using .gdb_index.
 	 These cases require special processing.  */
-      if (get_dwp_file (per_objfile) == NULL)
+      if (per_objfile->per_bfd->dwp_file == nullptr)
 	return lookup_dwo_signatured_type (cu, sig);
       else
 	return lookup_dwp_signatured_type (cu, sig);
@@ -3506,7 +3515,7 @@ process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
 				 cooked_index_worker_result *storage)
 {
   /* Skeletonless TUs in DWP files without .gdb_index is not supported yet.  */
-  if (get_dwp_file (per_objfile) == nullptr)
+  if (per_objfile->per_bfd->dwp_file == nullptr)
     for (const dwo_file_up &file : per_objfile->per_bfd->dwo_files)
       for (dwo_unit *unit : file->tus)
 	process_skeletonless_type_unit (unit, per_objfile, storage);
@@ -7796,10 +7805,9 @@ open_dwp_file (dwarf2_per_bfd *per_bfd, const char *file_name)
 }
 
 /* Initialize the use of the DWP file for the current objfile.
-   By convention the name of the DWP file is ${objfile}.dwp.
-   The result is NULL if it can't be found.  */
+   By convention the name of the DWP file is ${objfile}.dwp.  */
 
-static dwp_file_up
+static void
 open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
 {
   struct objfile *objfile = per_objfile->objfile;
@@ -7837,7 +7845,7 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
     {
       dwarf_read_debug_printf ("DWP file not found: %s", dwp_name.c_str ());
 
-      return dwp_file_up ();
+      return;
     }
 
   const char *name = bfd_get_filename (dbfd.get ());
@@ -7894,20 +7902,8 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
 
   bfd_cache_close (dwp_file->dbfd.get ());
 
-  return dwp_file;
-}
-
-/* Wrapper around open_and_init_dwp_file, only open it once.  */
-
-static struct dwp_file *
-get_dwp_file (dwarf2_per_objfile *per_objfile)
-{
-  if (!per_objfile->per_bfd->dwp_checked)
-    {
-      per_objfile->per_bfd->dwp_file = open_and_init_dwp_file (per_objfile);
-      per_objfile->per_bfd->dwp_checked = 1;
-    }
-  return per_objfile->per_bfd->dwp_file.get ();
+  /* Everything worked, install this dwp_file in the per_bfd.  */
+  per_objfile->per_bfd->dwp_file = std::move (dwp_file);
 }
 
 /* Subroutine of lookup_dwo_comp_unit, lookup_dwo_type_unit.
@@ -7934,14 +7930,14 @@ lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct objfile *objfile = per_objfile->objfile;
   const char *kind = is_debug_types ? "TU" : "CU";
-  struct dwp_file *dwp_file;
 
   /* First see if there's a DWP file.
      If we have a DWP file but didn't find the DWO inside it, don't
      look for the original DWO file.  It makes gdb behave differently
      depending on whether one is debugging in the build tree.  */
 
-  dwp_file = get_dwp_file (per_objfile);
+  dwp_file *dwp_file = per_objfile->per_bfd->dwp_file.get ();
+
   if (dwp_file != NULL)
     {
       const struct dwp_hash_table *dwp_htab =
@@ -8098,7 +8094,7 @@ queue_and_load_all_dwo_tus (dwarf2_cu *cu)
 
   gdb_assert (cu != nullptr);
   gdb_assert (!cu->per_cu->is_debug_types);
-  gdb_assert (get_dwp_file (cu->per_objfile) == nullptr);
+  gdb_assert (cu->per_objfile->per_bfd->dwp_file == nullptr);
 
   dwo_unit = cu->dwo_unit;
   gdb_assert (dwo_unit != NULL);
