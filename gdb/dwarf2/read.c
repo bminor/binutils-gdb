@@ -6532,24 +6532,17 @@ create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
 
 static struct dwp_hash_table *
 create_dwp_hash_table (dwarf2_per_objfile *per_objfile,
-		       struct dwp_file *dwp_file, int is_debug_types)
+		       struct dwp_file *dwp_file, dwarf2_section_info &index)
 {
   bfd *dbfd = dwp_file->dbfd.get ();
-  const gdb_byte *index_ptr, *index_end;
-  struct dwarf2_section_info *index;
   uint32_t version, nr_columns, nr_units, nr_slots;
   struct dwp_hash_table *htab;
 
-  if (is_debug_types)
-    index = &dwp_file->sections.tu_index;
-  else
-    index = &dwp_file->sections.cu_index;
-
-  if (index->empty ())
+  if (index.empty ())
     return NULL;
 
-  index_ptr = index->buffer;
-  index_end = index_ptr + index->size;
+  const gdb_byte *index_ptr = index.buffer;
+  const gdb_byte *index_end = index_ptr + index.size;
 
   /* For Version 5, the version is really 2 bytes of data & 2 bytes of padding.
      For now it's safe to just read 4 bytes (particularly as it's difficult to
@@ -7858,9 +7851,10 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
     dwarf2_locate_common_dwp_sections (objfile, dwp_file->dbfd.get (), sec,
 				       dwp_file.get ());
 
-  dwp_file->cus = create_dwp_hash_table (per_objfile, dwp_file.get (), 0);
-
-  dwp_file->tus = create_dwp_hash_table (per_objfile, dwp_file.get (), 1);
+  dwp_file->cus = create_dwp_hash_table (per_objfile, dwp_file.get (),
+					 dwp_file->sections.cu_index);
+  dwp_file->tus = create_dwp_hash_table (per_objfile, dwp_file.get (),
+					 dwp_file->sections.tu_index);
 
   /* The DWP file version is stored in the hash table.  Oh well.  */
   if (dwp_file->cus && dwp_file->tus
