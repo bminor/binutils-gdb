@@ -445,6 +445,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1245:	/* pacib1716 */
     case 1244:	/* pacia1716 */
     case 1243:	/* xpaclri */
+    case 1242:	/* dgh */
     case 1241:	/* sevl */
     case 1240:	/* sev */
     case 1239:	/* wfi */

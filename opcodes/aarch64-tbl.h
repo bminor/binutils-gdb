@@ -4598,7 +4598,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("wfi", 0xd503207f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("sev", 0xd503209f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("sevl",0xd50320bf, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
-  CORE_INSN ("dgh", 0xd50320df, 0xffffffff, ic_system, 0, OP0 (), {}, 0),
+  CORE_INSN ("dgh", 0xd50320df, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("xpaclri", 0xd50320ff, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("pacia1716", 0xd503211f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("pacib1716", 0xd503215f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),

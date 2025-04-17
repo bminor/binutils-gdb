@@ -34641,8 +34641,7 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
     case 1230: value = 1231; break;	/* smstop --> chkfeat.  */
     case 1231: value = 1232; break;	/* chkfeat --> msr.  */
     case 1232: value = 1233; break;	/* msr --> hint.  */
-    case 1233: value = 1242; break;	/* hint --> dgh.  */
-    case 1242: value = 1252; break;	/* dgh --> clrex.  */
+    case 1233: value = 1252; break;	/* hint --> clrex.  */
     case 1252: value = 1253; break;	/* clrex --> dsb.  */
     case 1253: value = 1254; break;	/* dsb --> dsb.  */
     case 1254: value = 1258; break;	/* dsb --> dmb.  */
@@ -35152,7 +35151,8 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 1246: value = 1245; break;	/* autia1716 --> pacib1716.  */
     case 1245: value = 1244; break;	/* pacib1716 --> pacia1716.  */
     case 1244: value = 1243; break;	/* pacia1716 --> xpaclri.  */
-    case 1243: value = 1241; break;	/* xpaclri --> sevl.  */
+    case 1243: value = 1242; break;	/* xpaclri --> dgh.  */
+    case 1242: value = 1241; break;	/* dgh --> sevl.  */
     case 1241: value = 1240; break;	/* sevl --> sev.  */
     case 1240: value = 1239; break;	/* sev --> wfi.  */
     case 1239: value = 1238; break;	/* wfi --> wfe.  */
