@@ -773,7 +773,7 @@ ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited)
 
   if (!set)
     {
-      set = ctf_dynset_create (ctf_hash_integer, ctf_hash_eq_integer, NULL);
+      set = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer, NULL);
       if (!set)
 	return (ctf_set_errno (fp, errno));
 
@@ -1322,8 +1322,7 @@ ctf_serialize_output_format (ctf_dict_t *fp, int force_ctf)
    machinery.)
 
    If FORCE_CTF is enabled, always emit CTF in LIBCTF_BTM_POSSIBLE mode, and
-   error in LIBCTF_BTM_BTF mode.
-*/
+   error in LIBCTF_BTM_BTF mode.  */
 
 int
 ctf_preserialize (ctf_dict_t *fp, int force_ctf)
