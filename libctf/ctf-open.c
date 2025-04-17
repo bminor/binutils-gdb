@@ -771,7 +771,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
   if (fp->ctf_txlate == NULL || fp->ctf_ptrtab == NULL)
     return ENOMEM;		/* Memory allocation failed.  */
 
-  if (child && cth->cth_parent_strlen != 0)
+  if (child || cth->cth_parent_strlen != 0)
     {
       fp->ctf_flags |= LCTF_NO_STR;
       return 0;
