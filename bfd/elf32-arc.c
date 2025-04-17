@@ -2909,7 +2909,7 @@ elf32_arc_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
    string or both.  */
 
 static int
-elf32_arc_obj_attrs_arg_type (int tag)
+elf32_arc_obj_attrs_arg_type (obj_attr_tag_t tag)
 {
   if (tag == Tag_ARC_CPU_name
 	   || tag == Tag_ARC_ISA_config

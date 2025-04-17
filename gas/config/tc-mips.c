@@ -20911,7 +20911,7 @@ mips_md_finish (void)
   file_mips_check_options ();
 
   /* Set a floating-point ABI if the user did not.  */
-  if (obj_elf_seen_attribute (OBJ_ATTR_GNU, Tag_GNU_MIPS_ABI_FP))
+  if (obj_attr_v1_rai_seen (OBJ_ATTR_GNU, Tag_GNU_MIPS_ABI_FP))
     {
       /* Perform consistency checks on the floating-point ABI.  */
       fpabi = bfd_elf_get_obj_attr_int (stdoutput, OBJ_ATTR_GNU,

@@ -13958,7 +13958,7 @@ enum
    string or both.  */
 
 static int
-elf32_arm_obj_attrs_arg_type (int tag)
+elf32_arm_obj_attrs_arg_type (obj_attr_tag_t tag)
 {
   if (tag == Tag_compatibility)
     return ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL;

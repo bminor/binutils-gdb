@@ -2539,7 +2539,7 @@ ppc_elf_abiversion (int ignore ATTRIBUTE_UNUSED)
 static void
 ppc_elf_gnu_attribute (int ignored ATTRIBUTE_UNUSED)
 {
-  int tag = obj_elf_vendor_attribute (OBJ_ATTR_GNU);
+  obj_attr_tag_t tag = obj_attr_v1_process_attribute (OBJ_ATTR_GNU);
 
   /* Check validity of defined powerpc tags.  */
   if (tag == Tag_GNU_Power_ABI_FP

@@ -994,6 +994,8 @@ struct elf_find_verdep_info
 
 struct bfd_elf_section_reloc_data;
 
+typedef uint32_t obj_attr_tag_t;
+
 struct elf_backend_data
 {
   /* The architecture for this backend.  */
@@ -1641,7 +1643,7 @@ struct elf_backend_data
 
   /* Return 1, 2 or 3 to indicate what type of arguments a
      processor-specific tag takes.  */
-  int (*obj_attrs_arg_type) (int);
+  int (*obj_attrs_arg_type) (obj_attr_tag_t);
 
   /* The section type to use for an attributes section.  */
   unsigned int obj_attrs_section_type;
@@ -1953,15 +1955,17 @@ typedef struct obj_attribute
 typedef struct obj_attribute_list
 {
   struct obj_attribute_list *next;
-  unsigned int tag;
+  obj_attr_tag_t tag;
   obj_attribute attr;
 } obj_attribute_list;
 
 /* Object attributes may either be defined by the processor ABI, index
    OBJ_ATTR_PROC in the *_obj_attributes arrays, or be GNU-specific
    (and possibly also processor-specific), index OBJ_ATTR_GNU.  */
-#define OBJ_ATTR_PROC 0
-#define OBJ_ATTR_GNU 1
+typedef enum {
+  OBJ_ATTR_PROC,
+  OBJ_ATTR_GNU,
+} obj_attr_vendor_t;
 #define OBJ_ATTR_FIRST OBJ_ATTR_PROC
 #define OBJ_ATTR_LAST OBJ_ATTR_GNU
 
@@ -3103,29 +3107,29 @@ extern bfd *_bfd_elf64_bfd_from_remote_memory
 
 extern bfd_vma bfd_elf_obj_attr_size (bfd *);
 extern void bfd_elf_set_obj_attr_contents (bfd *, bfd_byte *, bfd_vma);
-extern int bfd_elf_get_obj_attr_int (bfd *, int, unsigned int);
+extern int bfd_elf_get_obj_attr_int (bfd *, obj_attr_vendor_t, obj_attr_tag_t);
 extern obj_attribute *bfd_elf_add_obj_attr_int
-  (bfd *, int, unsigned int, unsigned int);
+  (bfd *, obj_attr_vendor_t, obj_attr_tag_t, unsigned int);
 #define bfd_elf_add_proc_attr_int(BFD, TAG, VALUE) \
   bfd_elf_add_obj_attr_int ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
 extern obj_attribute *bfd_elf_add_obj_attr_string
-  (bfd *, int, unsigned int, const char *);
+  (bfd *, obj_attr_vendor_t, obj_attr_tag_t, const char *);
 #define bfd_elf_add_proc_attr_string(BFD, TAG, VALUE) \
   bfd_elf_add_obj_attr_string ((BFD), OBJ_ATTR_PROC, (TAG), (VALUE))
 extern obj_attribute *bfd_elf_add_obj_attr_int_string
-  (bfd *, int, unsigned int, unsigned int, const char *);
+  (bfd *, obj_attr_vendor_t, obj_attr_tag_t, unsigned int, const char *);
 #define bfd_elf_add_proc_attr_int_string(BFD, TAG, INTVAL, STRVAL) \
   bfd_elf_add_obj_attr_int_string ((BFD), OBJ_ATTR_PROC, (TAG), \
 				   (INTVAL), (STRVAL))
 
-extern bool _bfd_elf_write_section_build_attributes
+extern bool _bfd_elf_write_section_object_attributes
   (bfd *, struct bfd_link_info *) ATTRIBUTE_HIDDEN;
 extern char *_bfd_elf_attr_strdup
   (bfd *, const char *) ATTRIBUTE_HIDDEN;
 extern void _bfd_elf_copy_obj_attributes
   (bfd *, bfd *) ATTRIBUTE_HIDDEN;
 extern int bfd_elf_obj_attrs_arg_type
-  (bfd *, int, unsigned int);
+  (bfd *, obj_attr_vendor_t, obj_attr_tag_t);
 extern void _bfd_elf_parse_attributes
   (bfd *, Elf_Internal_Shdr *) ATTRIBUTE_HIDDEN;
 extern bool _bfd_elf_merge_object_attributes

@@ -4917,7 +4917,7 @@ arc_extcorereg (int opertype)
 static void
 arc_attribute (int ignored ATTRIBUTE_UNUSED)
 {
-  int tag = obj_elf_vendor_attribute (OBJ_ATTR_PROC);
+  obj_attr_tag_t tag = obj_attr_v1_process_attribute (OBJ_ATTR_PROC);
 
   if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
     attributes_set_explicitly[tag] = true;
@@ -4926,7 +4926,7 @@ arc_attribute (int ignored ATTRIBUTE_UNUSED)
 /* Set an attribute if it has not already been set by the user.  */
 
 static void
-arc_set_attribute_int (int tag, int value)
+arc_set_attribute_int (obj_attr_tag_t tag, int value)
 {
   if (tag < 1
       || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
@@ -4937,7 +4937,7 @@ arc_set_attribute_int (int tag, int value)
 }
 
 static void
-arc_set_attribute_string (int tag, const char *value)
+arc_set_attribute_string (obj_attr_tag_t tag, const char *value)
 {
   if (tag < 1
       || tag >= NUM_KNOWN_OBJ_ATTRIBUTES

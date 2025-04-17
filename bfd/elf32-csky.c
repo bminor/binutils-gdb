@@ -5253,7 +5253,7 @@ csky_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
    string or both.  */
 
 static int
-elf32_csky_obj_attrs_arg_type (int tag)
+elf32_csky_obj_attrs_arg_type (obj_attr_tag_t tag)
 {
   switch (tag)
     {

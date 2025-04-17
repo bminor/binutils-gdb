@@ -3460,7 +3460,7 @@ elf32_tic6x_plt_sym_val (bfd_vma i, const asection *plt,
 }
 
 static int
-elf32_tic6x_obj_attrs_arg_type (int tag)
+elf32_tic6x_obj_attrs_arg_type (obj_attr_tag_t tag)
 {
   if (tag == Tag_ABI_compatibility)
     return ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL;

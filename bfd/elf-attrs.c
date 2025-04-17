@@ -236,7 +236,7 @@ bfd_elf_set_obj_attr_contents (bfd *abfd, bfd_byte *buffer, bfd_vma size)
 
 /* Allocate/find an object attribute.  */
 static obj_attribute *
-elf_new_obj_attr (bfd *abfd, int vendor, unsigned int tag)
+elf_new_obj_attr (bfd *abfd, obj_attr_vendor_t vendor, obj_attr_tag_t tag)
 {
   obj_attribute *attr;
   obj_attribute_list *list;
@@ -276,7 +276,9 @@ elf_new_obj_attr (bfd *abfd, int vendor, unsigned int tag)
 
 /* Return the value of an integer object attribute.  */
 int
-bfd_elf_get_obj_attr_int (bfd *abfd, int vendor, unsigned int tag)
+bfd_elf_get_obj_attr_int (bfd *abfd,
+			  obj_attr_vendor_t vendor,
+			  obj_attr_tag_t tag)
 {
   obj_attribute_list *p;
 
@@ -302,7 +304,10 @@ bfd_elf_get_obj_attr_int (bfd *abfd, int vendor, unsigned int tag)
 
 /* Add an integer object attribute.  */
 obj_attribute *
-bfd_elf_add_obj_attr_int (bfd *abfd, int vendor, unsigned int tag, unsigned int i)
+bfd_elf_add_obj_attr_int (bfd *abfd,
+			  obj_attr_vendor_t vendor,
+			  obj_attr_tag_t tag,
+			  unsigned int value)
 {
   obj_attribute *attr;
 
@@ -310,7 +315,7 @@ bfd_elf_add_obj_attr_int (bfd *abfd, int vendor, unsigned int tag, unsigned int 
   if (attr != NULL)
     {
       attr->type = bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
-      attr->i = i;
+      attr->i = value;
     }
   return attr;
 }
@@ -344,7 +349,7 @@ _bfd_elf_attr_strdup (bfd *abfd, const char *s)
 
 /* Add a string object attribute.  */
 static obj_attribute *
-elf_add_obj_attr_string (bfd *abfd, int vendor, unsigned int tag,
+elf_add_obj_attr_string (bfd *abfd, obj_attr_vendor_t vendor, obj_attr_tag_t tag,
 			 const char *s, const char *end)
 {
   obj_attribute *attr;
@@ -361,7 +366,9 @@ elf_add_obj_attr_string (bfd *abfd, int vendor, unsigned int tag,
 }
 
 obj_attribute *
-bfd_elf_add_obj_attr_string (bfd *abfd, int vendor, unsigned int tag,
+bfd_elf_add_obj_attr_string (bfd *abfd,
+			     obj_attr_vendor_t vendor,
+			     obj_attr_tag_t tag,
 			     const char *s)
 {
   return elf_add_obj_attr_string (abfd, vendor, tag, s, NULL);
@@ -369,8 +376,12 @@ bfd_elf_add_obj_attr_string (bfd *abfd, int vendor, unsigned int tag,
 
 /* Add a int+string object attribute.  */
 static obj_attribute *
-elf_add_obj_attr_int_string (bfd *abfd, int vendor, unsigned int tag,
-			     unsigned int i, const char *s, const char *end)
+elf_add_obj_attr_int_string (bfd *abfd,
+			     obj_attr_vendor_t vendor,
+			     obj_attr_tag_t tag,
+			     unsigned int i,
+			     const char *s,
+			     const char *end)
 {
   obj_attribute *attr;
 
@@ -387,8 +398,11 @@ elf_add_obj_attr_int_string (bfd *abfd, int vendor, unsigned int tag,
 }
 
 obj_attribute *
-bfd_elf_add_obj_attr_int_string (bfd *abfd, int vendor, unsigned int tag,
-				 unsigned int i, const char *s)
+bfd_elf_add_obj_attr_int_string (bfd *abfd,
+				 obj_attr_vendor_t vendor,
+				 obj_attr_tag_t tag,
+				 unsigned int i,
+				 const char *s)
 {
   return elf_add_obj_attr_int_string (abfd, vendor, tag, i, s, NULL);
 }
@@ -401,7 +415,7 @@ _bfd_elf_copy_obj_attributes (bfd *ibfd, bfd *obfd)
   obj_attribute *out_attr;
   obj_attribute_list *list;
   int i;
-  int vendor;
+  obj_attr_vendor_t vendor;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
@@ -459,7 +473,7 @@ _bfd_elf_copy_obj_attributes (bfd *ibfd, bfd *obfd)
 /* Determine whether a GNU object attribute tag takes an integer, a
    string or both.  */
 static int
-gnu_obj_attrs_arg_type (unsigned int tag)
+gnu_obj_attrs_arg_type (obj_attr_tag_t tag)
 {
   /* Except for Tag_compatibility, for GNU attributes we follow the
      same rule ARM ones > 32 follow: odd-numbered tags take strings
@@ -474,7 +488,9 @@ gnu_obj_attrs_arg_type (unsigned int tag)
 
 /* Determine what arguments an attribute tag takes.  */
 int
-bfd_elf_obj_attrs_arg_type (bfd *abfd, int vendor, unsigned int tag)
+bfd_elf_obj_attrs_arg_type (bfd *abfd,
+			    obj_attr_vendor_t vendor,
+			    obj_attr_tag_t tag)
 {
   switch (vendor)
     {

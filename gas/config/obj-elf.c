@@ -2075,7 +2075,7 @@ obj_elf_vtable_entry (int ignore ATTRIBUTE_UNUSED)
 #define skip_whitespace(str)  do { if (is_whitespace (*(str))) ++(str); } while (0)
 
 static inline int
-skip_past_char (char ** str, char c)
+skip_past_char (char **str, char c)
 {
   if (**str == c)
     {
@@ -2090,23 +2090,50 @@ skip_past_char (char ** str, char c)
 /* A list of attributes that have been explicitly set by the assembly code.
    VENDOR is the vendor id, BASE is the tag shifted right by the number
    of bits in MASK, and bit N of MASK is set if tag BASE+N has been set.  */
-struct recorded_attribute_info {
+typedef struct recorded_attribute_info {
   struct recorded_attribute_info *next;
-  int vendor;
+  obj_attr_vendor_t vendor;
   unsigned int base;
   unsigned long mask;
-};
-static struct recorded_attribute_info *recorded_attributes;
+} recorded_attribute_info_t;
+static recorded_attribute_info_t *recorded_attributes;
+
+static void
+oav1_attr_info_free (recorded_attribute_info_t *node)
+{
+  while (node != NULL)
+    {
+      recorded_attribute_info_t *next = node->next;
+      free (node);
+      node = next;
+    }
+}
+
+static void
+oav1_attr_info_init (void)
+{
+  /* Note: this "constructor" was added for symmetry with oav1_attr_info_exit.
+     recorded_attributes is a static variable which is automatically initialized
+     to NULL.  There is no need to initialize it another time except for a
+     cosmetic reason and to possibly help fuzzing.  */
+  recorded_attributes = NULL;
+}
+
+static void
+oav1_attr_info_exit (void)
+{
+  oav1_attr_info_free (recorded_attributes);
+}
 
 /* Record that we have seen an explicit specification of attribute TAG
    for vendor VENDOR.  */
 
 static void
-record_attribute (int vendor, unsigned int tag)
+oav1_attr_record_seen (obj_attr_vendor_t vendor, obj_attr_tag_t tag)
 {
   unsigned int base;
   unsigned long mask;
-  struct recorded_attribute_info *rai;
+  recorded_attribute_info_t *rai;
 
   base = tag / (8 * sizeof (rai->mask));
   mask = 1UL << (tag % (8 * sizeof (rai->mask)));
@@ -2117,7 +2144,7 @@ record_attribute (int vendor, unsigned int tag)
 	return;
       }
 
-  rai = XNEW (struct recorded_attribute_info);
+  rai = XNEW (recorded_attribute_info_t);
   rai->next = recorded_attributes;
   rai->vendor = vendor;
   rai->base = base;
@@ -2129,11 +2156,11 @@ record_attribute (int vendor, unsigned int tag)
    for vendor VENDOR.  */
 
 bool
-obj_elf_seen_attribute (int vendor, unsigned int tag)
+oav1_attr_seen (obj_attr_vendor_t vendor, obj_attr_tag_t tag)
 {
   unsigned int base;
   unsigned long mask;
-  struct recorded_attribute_info *rai;
+  recorded_attribute_info_t *rai;
 
   base = tag / (8 * sizeof (rai->mask));
   mask = 1UL << (tag % (8 * sizeof (rai->mask)));
@@ -2146,8 +2173,8 @@ obj_elf_seen_attribute (int vendor, unsigned int tag)
 /* Parse an attribute directive for VENDOR.
    Returns the attribute number read, or zero on error.  */
 
-int
-obj_elf_vendor_attribute (int vendor)
+obj_attr_tag_t
+obj_attr_v1_process_attribute (obj_attr_vendor_t vendor)
 {
   expressionS exp;
   int type;
@@ -2225,7 +2252,7 @@ obj_elf_vendor_attribute (int vendor)
       s = demand_copy_C_string (&len);
     }
 
-  record_attribute (vendor, tag);
+  oav1_attr_record_seen (vendor, tag);
   bool ok = false;
   switch (type & 3)
     {
@@ -2262,7 +2289,7 @@ obj_elf_vendor_attribute (int vendor)
 static void
 obj_elf_gnu_attribute (int ignored ATTRIBUTE_UNUSED)
 {
-  obj_elf_vendor_attribute (OBJ_ATTR_GNU);
+  obj_attr_v1_process_attribute (OBJ_ATTR_GNU);
 }
 
 void
@@ -3195,6 +3222,8 @@ elf_begin (void)
   previous_subsection = 0;
   comment_section = NULL;
   memset (&groups, 0, sizeof (groups));
+
+  oav1_attr_info_init ();
 }
 
 void
@@ -3206,17 +3235,12 @@ elf_end (void)
       section_stack = top->next;
       free (top);
     }
-  while (recorded_attributes)
-    {
-      struct recorded_attribute_info *rai = recorded_attributes;
-      recorded_attributes = rai->next;
-      free (rai);
-    }
   if (groups.indexes)
     {
       htab_delete (groups.indexes);
       free (groups.head);
     }
+  oav1_attr_info_exit ();
 }
 
 #ifdef USE_EMULATIONS

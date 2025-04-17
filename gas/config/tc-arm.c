@@ -4972,9 +4972,9 @@ s_arm_unwind_raw (int ignored ATTRIBUTE_UNUSED)
 static void
 s_arm_eabi_attribute (int ignored ATTRIBUTE_UNUSED)
 {
-  int tag = obj_elf_vendor_attribute (OBJ_ATTR_PROC);
+  obj_attr_tag_t tag = obj_attr_v1_process_attribute (OBJ_ATTR_PROC);
 
-  if (tag >= 0 && tag < NUM_KNOWN_OBJ_ATTRIBUTES)
+  if (tag < NUM_KNOWN_OBJ_ATTRIBUTES)
     attributes_set_explicitly[tag] = 1;
 }
 
@@ -32130,7 +32130,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
 /* Set an attribute if it has not already been set by the user.  */
 
 static void
-aeabi_set_attribute_int (int tag, int value)
+aeabi_set_attribute_int (obj_attr_tag_t tag, int value)
 {
   if (tag < 1
       || tag >= NUM_KNOWN_OBJ_ATTRIBUTES
@@ -32141,7 +32141,7 @@ aeabi_set_attribute_int (int tag, int value)
 }
 
 static void
-aeabi_set_attribute_string (int tag, const char *value)
+aeabi_set_attribute_string (obj_attr_tag_t tag, const char *value)
 {
   if (tag < 1
       || tag >= NUM_KNOWN_OBJ_ATTRIBUTES

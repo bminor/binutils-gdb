@@ -5835,7 +5835,7 @@ riscv_elf_object_p (bfd *abfd)
    string or both.  */
 
 static int
-riscv_elf_obj_attrs_arg_type (int tag)
+riscv_elf_obj_attrs_arg_type (obj_attr_tag_t tag)
 {
   return (tag & 1) != 0 ? ATTR_TYPE_FLAG_STR_VAL : ATTR_TYPE_FLAG_INT_VAL;
 }
