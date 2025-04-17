@@ -1124,6 +1124,7 @@ proc gdb_test_multiple { command message args } {
     global any_spawn_id
 
     set line_by_line 0
+    set lbl_anchor_re ""
     set prompt_regexp ""
     set prompt_anchor 1
     for {set i 0} {$i < [llength $args]} {incr i} {
@@ -1133,6 +1134,7 @@ proc gdb_test_multiple { command message args } {
 	    set prompt_regexp [lindex $args $i]
 	} elseif { $arg == "-lbl" } {
 	    set line_by_line 1
+	    set lbl_anchor_re "^"
 	} elseif { $arg == "-no-prompt-anchor" } {
 	    set prompt_anchor 0
 	} else {
@@ -1391,7 +1393,7 @@ proc gdb_test_multiple { command message args } {
 	    fail "$errmsg"
 	    set result -1
 	}
-	-re "\r\n$prompt_regexp" {
+	-re "${lbl_anchor_re}\r\n$prompt_regexp" {
 	    if {![string match "" $message]} {
 		fail "$message"
 	    }
