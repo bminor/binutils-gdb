@@ -1025,6 +1025,39 @@ private:
 
   const char *read_dwo_str_index (ULONGEST str_index);
 
+  gdb_bfd_ref_ptr open_dwo_file (dwarf2_per_bfd *per_bfd, const char *file_name,
+				 const char *comp_dir);
+
+  dwo_file_up open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
+				      const char *comp_dir);
+
+  void locate_dwo_sections (struct objfile *objfile, bfd *abfd, asection *sectp,
+			    struct dwo_sections *dwo_sections);
+
+  void create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file);
+
+  void create_dwo_debug_types_hash_table
+    (dwarf2_per_bfd *per_bfd, dwo_file *dwo_file,
+     gdb::array_view<dwarf2_section_info> type_sections);
+
+  void create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd,
+					 dwo_file *dwo_file,
+					 dwarf2_section_info *section,
+					 rcuh_kind section_kind);
+
+  dwo_unit *lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name,
+			     const char *comp_dir, ULONGEST signature,
+			     int is_debug_types);
+
+  dwo_unit *lookup_dwo_comp_unit (dwarf2_cu *cu, const char *dwo_name,
+				  const char *comp_dir, ULONGEST signature);
+
+  dwo_unit *lookup_dwo_type_unit (dwarf2_cu *cu, const char *dwo_name,
+				  const char *comp_dir);
+
+  dwo_unit *lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die,
+			     const char *dwo_name);
+
   /* The bfd of die_section.  */
   bfd *m_abfd;
 

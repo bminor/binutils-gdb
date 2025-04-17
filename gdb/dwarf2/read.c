@@ -1041,13 +1041,6 @@ static struct dwo_unit *lookup_dwo_unit_in_dwp
 
 static void open_and_init_dwp_file (dwarf2_per_objfile *per_objfile);
 
-static struct dwo_unit *lookup_dwo_comp_unit
-  (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
-   ULONGEST signature);
-
-static struct dwo_unit *lookup_dwo_type_unit
-  (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir);
-
 static void queue_and_load_all_dwo_tus (dwarf2_cu *cu);
 
 static void process_cu_includes (dwarf2_per_objfile *per_objfile);
@@ -2396,10 +2389,11 @@ read_abbrev_offset (dwarf2_per_objfile *per_objfile,
    and fill them into DWO_FILE's type unit hash table.  It will process only
    type units, therefore DW_UT_type.  */
 
-static void
-create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd, dwo_file *dwo_file,
-				  dwarf2_section_info *section,
-				  rcuh_kind section_kind)
+void
+cutu_reader::create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd,
+					       dwo_file *dwo_file,
+					       dwarf2_section_info *section,
+					       rcuh_kind section_kind)
 {
   struct dwarf2_section_info *abbrev_section;
   bfd *abfd;
@@ -2484,8 +2478,8 @@ create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd, dwo_file *dwo_file,
 
    Note: This function processes DWO files only, not DWP files.  */
 
-static void
-create_dwo_debug_types_hash_table
+void
+cutu_reader::create_dwo_debug_types_hash_table
   (dwarf2_per_bfd *per_bfd, dwo_file *dwo_file,
    gdb::array_view<dwarf2_section_info> type_sections)
 {
@@ -2879,8 +2873,9 @@ lookup_dwo_id (struct dwarf2_cu *cu, struct die_info* comp_unit_die)
 
    Returns nullptr if the specified DWO unit cannot be found.  */
 
-static struct dwo_unit *
-lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die, const char *dwo_name)
+dwo_unit *
+cutu_reader::lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die,
+			      const char *dwo_name)
 {
 #if CXX_STD_THREAD
   /* We need a lock here to handle the DWO hash table.  */
@@ -6312,8 +6307,8 @@ lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
 /* Create the dwo_units for the CUs in a DWO_FILE.
    Note: This function processes DWO files only, not DWP files.  */
 
-static void
-create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
+void
+cutu_reader::create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
@@ -7520,9 +7515,9 @@ try_open_dwop_file (dwarf2_per_bfd *per_bfd, const char *file_name, int is_dwp,
    Upon success, the canonicalized path of the file is stored in the bfd,
    same as symfile_bfd_open.  */
 
-static gdb_bfd_ref_ptr
-open_dwo_file (dwarf2_per_bfd *per_bfd, const char *file_name,
-	       const char *comp_dir)
+gdb_bfd_ref_ptr
+cutu_reader::open_dwo_file (dwarf2_per_bfd *per_bfd, const char *file_name,
+			    const char *comp_dir)
 {
   if (IS_ABSOLUTE_PATH (file_name))
     return try_open_dwop_file (per_bfd, file_name,
@@ -7557,9 +7552,9 @@ open_dwo_file (dwarf2_per_bfd *per_bfd, const char *file_name,
 /* This function is mapped across the sections and remembers the offset and
    size of each of the DWO debugging sections we are interested in.  */
 
-static void
-dwarf2_locate_dwo_sections (struct objfile *objfile, bfd *abfd,
-			    asection *sectp, dwo_sections *dwo_sections)
+void
+cutu_reader::locate_dwo_sections (struct objfile *objfile, bfd *abfd,
+				  asection *sectp, dwo_sections *dwo_sections)
 {
   const struct dwop_section_names *names = &dwop_section_names;
 
@@ -7606,9 +7601,9 @@ dwarf2_locate_dwo_sections (struct objfile *objfile, bfd *abfd,
    by PER_CU.  This is for the non-DWP case.
    The result is NULL if DWO_NAME can't be found.  */
 
-static dwo_file_up
-open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
-			const char *comp_dir)
+dwo_file_up
+cutu_reader::open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
+				     const char *comp_dir)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
@@ -7628,8 +7623,8 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
   dwo_file->dbfd = std::move (dbfd);
 
   for (asection *sec : gdb_bfd_sections (dwo_file->dbfd))
-    dwarf2_locate_dwo_sections (per_objfile->objfile, dwo_file->dbfd.get (),
-				sec, &dwo_file->sections);
+    this->locate_dwo_sections (per_objfile->objfile, dwo_file->dbfd.get (), sec,
+			       &dwo_file->sections);
 
   create_dwo_cus_hash_table (cu, *dwo_file);
 
@@ -7922,9 +7917,10 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
    The result is a pointer to the dwo_unit object or NULL if we didn't find it
    (dwo_id mismatch or couldn't find the DWO/DWP file).  */
 
-static struct dwo_unit *
-lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
-		 ULONGEST signature, int is_debug_types)
+dwo_unit *
+cutu_reader::lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name,
+			      const char *comp_dir, ULONGEST signature,
+			      int is_debug_types)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
@@ -8038,9 +8034,9 @@ lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
 /* Lookup the DWO CU DWO_NAME/SIGNATURE referenced from THIS_CU.
    See lookup_dwo_cutu_unit for details.  */
 
-static struct dwo_unit *
-lookup_dwo_comp_unit (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
-		      ULONGEST signature)
+dwo_unit *
+cutu_reader::lookup_dwo_comp_unit (dwarf2_cu *cu, const char *dwo_name,
+				   const char *comp_dir, ULONGEST signature)
 {
   gdb_assert (!cu->per_cu->is_debug_types);
 
@@ -8050,8 +8046,9 @@ lookup_dwo_comp_unit (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
 /* Lookup the DWO TU DWO_NAME/SIGNATURE referenced from THIS_TU.
    See lookup_dwo_cutu_unit for details.  */
 
-static struct dwo_unit *
-lookup_dwo_type_unit (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir)
+dwo_unit *
+cutu_reader::lookup_dwo_type_unit (dwarf2_cu *cu, const char *dwo_name,
+				   const char *comp_dir)
 {
   gdb_assert (cu->per_cu->is_debug_types);
 
