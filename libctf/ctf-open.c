@@ -596,7 +596,8 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
      is always 0 for parents and never 0 for children.  */
 
   int child = (cth->cth_parent_name != 0
-	       || fp->ctf_str[CTF_STRTAB_0].cts_strs[0] != 0);
+	       || (fp->ctf_str[CTF_STRTAB_0].cts_len > 0
+		   && fp->ctf_str[CTF_STRTAB_0].cts_strs[0] != 0));
 
   if (fp->ctf_version < CTF_VERSION_4)
     {
@@ -829,7 +830,8 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 
   /* See init_static_types.  */
   int child = (cth->cth_parent_name != 0
-	       || fp->ctf_str[CTF_STRTAB_0].cts_strs[0] != 0);
+	       || (fp->ctf_str[CTF_STRTAB_0].cts_len > 0
+		   && fp->ctf_str[CTF_STRTAB_0].cts_strs[0] != 0));
 
   tbuf = (ctf_type_t *) (fp->ctf_buf + cth->btf.bth_type_off);
   tend = (ctf_type_t *) ((uintptr_t) tbuf + cth->btf.bth_type_len);
