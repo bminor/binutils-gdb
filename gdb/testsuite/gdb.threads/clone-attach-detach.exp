@@ -74,7 +74,7 @@ set attempts 3
 for {set attempt 1} {$attempt <= $attempts} {incr attempt} {
     with_test_prefix "bg attach $attempt" {
 
-	gdb_test "attach $testpid &" \
+	gdb_test -no-prompt-anchor "attach $testpid &" \
 	    "Attaching to program.*process $testpid.*" \
 	    "attach"
 
