@@ -563,8 +563,8 @@ report_phases (FILE * file, time_t * start, char ** argv)
       COLUMN_ENTRY (pd->duration, "ld", 1);
 #if defined (HAVE_GETRUSAGE)
       COLUMN_ENTRY (pd->use.ru_maxrss, "ld", 2);
-      COLUMN_ENTRY (pd->use.ru_utime.tv_sec, "ld", 3);
-      COLUMN_ENTRY (pd->use.ru_stime.tv_sec, "ld", 4);
+      COLUMN_ENTRY ((int64_t) pd->use.ru_utime.tv_sec, PRId64, 3);
+      COLUMN_ENTRY ((int64_t) pd->use.ru_stime.tv_sec, PRId64, 4);
 #endif
       fprintf (file, "\n");
     }
