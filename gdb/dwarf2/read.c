@@ -9880,6 +9880,25 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
   attr = dwarf2_attr (die, DW_AT_data_member_location, cu);
   if (attr != NULL)
     {
+      bool has_bit_offset = false;
+      LONGEST bit_offset = 0;
+      LONGEST anonymous_size = 0;
+
+      attribute *attr2 = dwarf2_attr (die, DW_AT_bit_offset, cu);
+      if (attr2 != nullptr && attr2->form_is_constant ())
+	{
+	  has_bit_offset = true;
+	  bit_offset = attr2->unsigned_constant ().value_or (0);
+	  attr2 = dwarf2_attr (die, DW_AT_byte_size, cu);
+	  if (attr2 != nullptr && attr2->form_is_constant ())
+	    {
+	      /* The size of the anonymous object containing
+		 the bit field is explicit, so use the
+		 indicated size (in bytes).  */
+	      anonymous_size = attr2->unsigned_constant ().value_or (0);
+	    }
+	}
+
       if (attr->form_is_constant ())
 	{
 	  LONGEST offset = attr->unsigned_constant ().value_or (0);
@@ -9897,6 +9916,8 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	    }
 
 	  field->set_loc_bitpos (offset * bits_per_byte);
+	  if (has_bit_offset)
+	    apply_bit_offset_to_field (*field, bit_offset, anonymous_size);
 	}
       else if (attr->form_is_block ())
 	{
@@ -9907,9 +9928,20 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	    {
 	      dwarf2_per_objfile *per_objfile = cu->per_objfile;
 	      struct objfile *objfile = per_objfile->objfile;
-	      struct dwarf2_locexpr_baton *dlbaton
-		= OBSTACK_ZALLOC (&objfile->objfile_obstack,
-				  struct dwarf2_locexpr_baton);
+	      struct dwarf2_locexpr_baton *dlbaton;
+	      if (has_bit_offset)
+		{
+		  dwarf2_field_location_baton *flbaton
+		    = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				      dwarf2_field_location_baton);
+		  flbaton->is_field_location = true;
+		  flbaton->bit_offset = bit_offset;
+		  flbaton->explicit_byte_size = anonymous_size;
+		  dlbaton = flbaton;
+		}
+	      else
+		dlbaton = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+					  struct dwarf2_locexpr_baton);
 	      dlbaton->data = attr->as_block ()->data;
 	      dlbaton->size = attr->as_block ()->size;
 	      /* When using this baton, we want to compute the address
@@ -10003,23 +10035,6 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
       /* Get bit offset of field.  */
       handle_member_location (die, cu, fp);
-      attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
-      if (attr != nullptr && attr->form_is_constant ())
-	{
-	  LONGEST bit_offset = attr->unsigned_constant ().value_or (0);
-
-	  LONGEST anonymous_size = 0;
-	  attr = dwarf2_attr (die, DW_AT_byte_size, cu);
-	  if (attr != nullptr && attr->form_is_constant ())
-	    {
-	      /* The size of the anonymous object containing
-		 the bit field is explicit, so use the
-		 indicated size (in bytes).  */
-	      anonymous_size = attr->unsigned_constant ().value_or (0);
-	    }
-
-	  apply_bit_offset_to_field (*fp, bit_offset, anonymous_size);
-	}
 
       /* Get name of field.  */
       fieldname = dwarf2_name (die, cu);

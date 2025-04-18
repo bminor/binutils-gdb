@@ -167,12 +167,32 @@ struct dwarf2_locexpr_baton
      directly.  */
   bool is_reference;
 
+  /* True if this object is actually a dwarf2_field_location_baton.  */
+  bool is_field_location;
+
   /* The objfile that was used when creating this.  */
   dwarf2_per_objfile *per_objfile;
 
   /* The compilation unit containing the symbol whose location
      we're computing.  */
   dwarf2_per_cu *per_cu;
+};
+
+/* If the DWARF location for a field used DW_AT_bit_size, then an
+   object of this type is created to represent the field location.
+   This is then used to apply the bit offset after computing the
+   field's byte offset.  Objects of this type always set the
+   'is_field_location' member in dwarf2_locexpr_baton.  See also
+   apply_bit_offset_to_field.  */
+
+struct dwarf2_field_location_baton : public dwarf2_locexpr_baton
+{
+  /* The bit offset, coming from DW_AT_bit_offset.  */
+  LONGEST bit_offset;
+
+  /* The DW_AT_byte_size of the field.  If no explicit byte size was
+     specified, this is 0.  */
+  LONGEST explicit_byte_size;
 };
 
 struct dwarf2_loclist_baton

@@ -2725,9 +2725,12 @@ resolve_dynamic_field (struct field &field,
 
   if (field.loc_kind () == FIELD_LOC_KIND_DWARF_BLOCK)
     {
+      dwarf2_locexpr_baton *field_loc
+	= field.loc_dwarf_block ();
+
       struct dwarf2_property_baton baton;
       baton.property_type = lookup_pointer_type (field.type ());
-      baton.locexpr = *field.loc_dwarf_block ();
+      baton.locexpr = *field_loc;
 
       struct dynamic_prop prop;
       prop.set_locexpr (&baton);
@@ -2735,7 +2738,17 @@ resolve_dynamic_field (struct field &field,
       CORE_ADDR vals[1] = {addr_stack->addr};
       CORE_ADDR addr;
       if (dwarf2_evaluate_property (&prop, frame, addr_stack, &addr, vals))
-	field.set_loc_bitpos (TARGET_CHAR_BIT * (addr - addr_stack->addr));
+	{
+	  field.set_loc_bitpos (TARGET_CHAR_BIT * (addr - addr_stack->addr));
+
+	  if (field_loc->is_field_location)
+	    {
+	      dwarf2_field_location_baton *fl_baton
+		= static_cast<dwarf2_field_location_baton *> (field_loc);
+	      apply_bit_offset_to_field (field, fl_baton->bit_offset,
+					 fl_baton->explicit_byte_size);
+	    }
+	}
     }
 
   /* As we know this field is not a static field, the field's
