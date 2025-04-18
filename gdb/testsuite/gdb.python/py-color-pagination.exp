@@ -14,7 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This file is part of the GDB testsuite.  It tests gdb.Color and how this
-# interacts with GDB's pagination system.
+# interacts with GDB's pagination system.  The test also tests gdb.Style
+# because the tests are very similar.
 
 load_lib gdb-python.exp
 
@@ -130,7 +131,7 @@ proc test_pagination { type mode } {
     }
 }
 
-foreach_with_prefix type { color } {
+foreach_with_prefix type { color style } {
     foreach_with_prefix mode { write print } {
 	test_pagination $type $mode
     }

@@ -334,6 +334,12 @@ struct ui_file_style
     return m_intensity;
   }
 
+  /* Set the intensity of this style.  */
+  void set_intensity (intensity i)
+  {
+    m_intensity = i;
+  }
+
   /* Return true if this style specified italic display; false
      otherwise.  */
   bool is_italic () const

@@ -226,6 +226,7 @@ optional arguments while skipping others.  Example:
                                 using Python.
 * Lazy Strings In Python::      Python representation of lazy strings.
 * Colors In Python::            Python representation of colors.
+* Styles In Python::            Python representation of styles.
 * Architectures In Python::     Python representation of architectures.
 * Registers In Python::         Python representation of registers.
 * Connections In Python::       Python representation of connections.
@@ -7280,6 +7281,145 @@ Direct 24-bit RGB colors.
 @end table
 
 It is not possible to sub-class the @code{Color} class.
+
+@node Styles In Python
+@subsubsection Python representation of styles
+
+@cindex styles in python
+@tindex gdb.Style
+
+A style object contains the foreground and background colors
+(@pxref{Colors In Python}), along with an intensity, and can be used
+to apply this styling to output produced from Python.
+
+@value{GDBN} has many styles builtin (@pxref{Output Styling}), and
+style objects can be created that apply these builtin styles to Python
+output.
+
+The style class is called @code{gdb.Style}, and has the following
+methods and attributes:
+
+@defun Style.__init__ (style_name)
+Create a @code{gdb.Style} that represents a builtin named style.  The
+@var{style_name} must be a non-empty string that names a style that
+exists as a setting in @value{GDBN} within @samp{set style @dots{}}.  For
+example, the string @samp{"filename"} can be used to create a
+@code{gdb.Style} object representing the @samp{set style filename}
+style.
+
+If @var{style_name} names an unknown style then a @code{RuntimeError}
+exception is raised.
+@end defun
+
+@defun Style.__init__ (foreground=@code{None}, background=@code{None}, intensity=gdb.INTENSITY_NORMAL)
+Create a custom @code{gdb.Style}, manually specifying the three
+individual components.  All of the arguments are optional.  By
+default, if no arguments are given, then the default style will be
+created, this will produce output with the default terminal foreground
+and background colors, along with the normal level of intensity
+(i.e.@: neither bold, nor dim).
+
+The @var{foreground} and @var{background} arguments should either be
+@code{None}, in which case the terminal default colors are used, or a
+@code{gdb.Color} object (@pxref{Colors In Python}).  Any other object
+type will result in a @code{TypeError} exception being raised.
+
+The @var{intensity} argument should be one of the intensity constants
+defined below (@pxref{Style Intensities}).  Passing a none integer
+value results in a @code{TypeError} exception, and passing an invalid
+constant results in a @code{ValueError} exception.
+@end defun
+
+@defun Style.escape_sequence ()
+If styling is enabled (@pxref{Output Styling}, then this method
+returns the string which is the terminal escape sequence necessary to
+apply this @code{gdb.Style}.
+
+If styling is disabled then this method returns the empty string.
+
+If this is a named style, which for some reason can no longer be read,
+then a @code{RuntimeError} exception is raised.
+@end defun
+
+@defun Style.apply (string)
+This method returns @var{string}, which must be a @code{str} object,
+with an escape sequence at both the start, and at the end.  The escape
+sequence at the start applies this style, while the escape sequence at
+the end applies the terminal's default style.
+
+The effect of this is that, printing the result of this method, will
+print @var{string} with this style applied.  Future output will be
+printed with the terminal's default style.
+
+If styling is currently disabled (@pxref{Output Styling}), then
+@code{Style.apply} just returns a copy of @var{string} with no escape
+sequences added.
+
+If this is a named style, which for some reason can no longer be read,
+then a @code{RuntimeError} exception is raised.
+@end defun
+
+@defvar Style.foreground
+This read/write attribute contains the @code{gdb.Color} object
+representing this style's foreground color.  Writing to this attribute
+updates the style's foreground color.
+
+If the @code{gdb.Style} object was created using a named style (i.e.@:
+using the single argument @var{style_name} @code{__init__} method),
+then the underlying setting will be updated.
+
+For unnamed styles, only the @code{gdb.Style} object will change.
+@end defvar
+
+@defvar Style.background
+This read/write attribute contains the @code{gdb.Color} object
+representing this style's background color.  Writing to this attribute
+updates the style's background color.
+
+If the @code{gdb.Style} object was created using a named style (i.e.@:
+using the single argument @var{style_name} @code{__init__} method),
+then the underlying setting will be updated.
+
+For unnamed styles, only the @code{gdb.Style} object will change.
+@end defvar
+
+@defvar Style.intensity
+This read/write attribute contains the intensity for this style, and
+will be one of the constants defined below (@pxref{Style
+Intensities}).  Writing to this attribute updates the style's
+intensity.
+
+It is also possible to write @code{None} to this attribute, this is
+equivalent of writing @code{gdb.INTENSITY_NORMAL}.  This attribute
+will never read as @code{None}.
+
+If the @code{gdb.Style} object was created using a named style (i.e.@:
+using the single argument @var{style_name} @code{__init__} method),
+then the underlying setting will be updated.
+
+For unnamed styles, only the @code{gdb.Style} object will change.
+@end defvar
+
+@anchor{Style Intensities}
+The following constants are defined to represent the different style
+intensities:
+
+@table @code
+@findex INTENSITY_NORMAL
+@findex gdb.INTENSITY_NORMAL
+@item gdb.INTENSITY_NORMAL
+This is the terminal's default intensity.
+
+@findex INTENSITY_BOLD
+@findex gdb.INTENSITY_BOLD
+@item gdb.INTENSITY_BOLD
+This is for bold text.
+
+@findex INTENSITY_DIM
+@findex gdb.INTENSITY_DIM
+@item gdb.INTENSITY_DIM
+This is for dim text.
+@end table
 
 @node Architectures In Python
 @subsubsection Python representation of architectures

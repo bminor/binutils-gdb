@@ -1,0 +1,342 @@
+# Copyright (C) 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file is part of the GDB testsuite.  It tests gdb.Style.
+
+load_lib gdb-python.exp
+
+require allow_python_tests
+
+# Start GDB, allow styling.
+with_ansi_styling_terminal {
+    clean_restart
+}
+
+# Check the error for unknown style names.
+foreach unknown_style { "unknown-style" "disassembler unknown-style" } {
+    gdb_test "python filename_style = gdb.Style('$unknown_style')" \
+	[multi_line \
+	     "Python Exception <class 'RuntimeError'>: style '$unknown_style' cannot be found\\." \
+	     "Error occurred in Python: style '$unknown_style' cannot be found\\."] \
+	"attempt to create named style for '$unknown_style'"
+}
+
+# Check we can create a style using an abbreviated style name.
+gdb_test_no_output "python abbrev_style = gdb.Style('high')" \
+    "create style using abbreviated name 'high'"
+gdb_test "python print(abbrev_style)" \
+    "^<gdb.Style name='highlight', fg=red, bg=none, intensity=normal>" \
+    "print the 'highlight' style"
+
+gdb_test_no_output "python abbrev_style = gdb.Style('disas mnem')" \
+    "create style using abbreviated name 'disas mnem'"
+gdb_test "python print(abbrev_style)" \
+    "^<gdb.Style name='disassembler mnemonic', fg=green, bg=none, intensity=normal>" \
+    "print the 'disassembler mnemonic' style"
+
+# Creating a style using an ambiguous abbreviated name will give an error.
+gdb_test "python abbrev_style = gdb.Style('f')" \
+    [multi_line \
+	 "Python Exception <class 'RuntimeError'>: style 'f' cannot be found\\." \
+	 "Error occurred in Python: style 'f' cannot be found\\."] \
+    "create style using abbreviated name 'f'"
+
+# Check a couple of different styles can be read.  The 'tui-border' is
+# interesting as there is no 'intensity' for this one, the gdb.Style
+# object will show this as gdb.INTENSITY_NORMAL.  The disassembler
+# styles are interesting because they are two word style names, and
+# the comment style has a foreground and intensity set.
+foreach style_check { { "filename" green none NORMAL } \
+			  { "title" none none BOLD } \
+			  { "tui-border" cyan none NORMAL } \
+			  { "disassembler address" blue none NORMAL } \
+			  { "disassembler comment" white none DIM } } {
+    set style_name [lindex $style_check 0]
+    set fg [lindex $style_check 1]
+    set bg [lindex $style_check 2]
+    set intensity [lindex $style_check 3]
+
+    with_test_prefix "check style $style_name" {
+	gdb_test_no_output "python style_obj = gdb.Style('$style_name')" \
+	    "create named style for $style_name"
+
+	gdb_test "python print(style_obj.foreground)" "^$fg" \
+	    "print foreground color"
+	gdb_test "python print(style_obj.background)" "^$bg" \
+	    "print background color"
+	gdb_test "python print(style_obj.intensity == gdb.INTENSITY_$intensity)" \
+	    "^True" "print intensity"
+
+	gdb_test "python print(style_obj)" \
+	    "^<gdb.Style name='$style_name', fg=$fg, bg=$bg, intensity=[string tolower $intensity]>" \
+	    "print string representation"
+    }
+}
+
+# Check that the intensity of a named style with no intensity
+# (tui-border) cannot be changed.
+gdb_test_no_output "python tui_border_style = gdb.Style('tui-border')" \
+    "create named style for 'tui-border'"
+gdb_test "python tui_border_style.intensity = gdb.INTENSITY_BOLD" \
+    [multi_line \
+	 "Python Exception <class 'ValueError'>: the intensity of style 'tui-border' is not writable\\." \
+	 "Error occurred in Python: the intensity of style 'tui-border' is not writable\\."]
+
+# Change the attributes of a named style, check the settings update as
+# expected.
+gdb_test_no_output "python filename_style = gdb.Style('filename')" \
+    "create named style for 'filename'"
+gdb_test_no_output "python filename_style.foreground = gdb.Color('blue')" \
+    "assign blue to filename foreground color"
+gdb_test_no_output "python filename_style.background = gdb.Color('red')" \
+    "assign red to filename background color"
+gdb_test_no_output "python filename_style.intensity = gdb.INTENSITY_BOLD"
+
+# Use 'with style enabled off' so that there are no escape sequences
+# in the output.
+gdb_test "with style enabled off -- show style filename" \
+    [multi_line \
+	 "style filename background:  The \"filename\" style background color is: red" \
+	 "style filename foreground:  The \"filename\" style foreground color is: blue" \
+	 "style filename intensity:  The \"filename\" style display intensity is: bold"]
+
+gdb_test "python print(filename_style)" \
+    "^<gdb.Style name='filename', fg=blue, bg=red, intensity=bold>" \
+    "print string representation of filename_style"
+
+# Check some attempts to set the gdb.Style attributes to invalid types.
+foreach attr { foreground background } {
+    gdb_test "python filename_style.$attr = None" \
+	[multi_line \
+	     "Python Exception <class 'TypeError'>: value must be gdb.Color, not NoneType" \
+	     "Error occurred in Python: value must be gdb.Color, not NoneType"]
+
+    gdb_test "python filename_style.$attr = list()" \
+	[multi_line \
+	     "Python Exception <class 'TypeError'>: value must be gdb.Color, not list" \
+	     "Error occurred in Python: value must be gdb.Color, not list"]
+
+    gdb_test "python filename_style.$attr = 'red'" \
+	[multi_line \
+	     "Python Exception <class 'TypeError'>: value must be gdb.Color, not str" \
+	     "Error occurred in Python: value must be gdb.Color, not str"]
+}
+
+gdb_test "python filename_style.intensity = None" \
+    [multi_line \
+	 "Python Exception <class 'TypeError'>: value must be a Long \\(a gdb.INTENSITY constant\\), not NoneType" \
+	 "Error occurred in Python: value must be a Long \\(a gdb.INTENSITY constant\\), not NoneType"]
+
+gdb_test "python filename_style.intensity = 'dim'" \
+    [multi_line \
+	 "Python Exception <class 'TypeError'>: value must be a Long \\(a gdb.INTENSITY constant\\), not str" \
+	 "Error occurred in Python: value must be a Long \\(a gdb.INTENSITY constant\\), not str"]
+
+# Check attempts to set the intensity to an integer value work as
+# expected.  This is mostly about testing invalid integer values, but
+# we do also check that 0, 1, and 2 work as expected, though it is bad
+# practice to use the raw integer value rather than the defined
+# constants.
+set intensity_str { NORMAL BOLD DIM }
+for { set i -3 } { $i < 6 } { incr i } {
+    if { $i < 0 || $i > 2 } {
+	gdb_test "python filename_style.intensity = $i" \
+	    [multi_line \
+		 "Python Exception <class 'ValueError'>: invalid 'intensity' value $i\\." \
+		 "Error occurred in Python: invalid 'intensity' value $i\\."]
+    } else {
+	gdb_test_no_output "python filename_style.intensity = $i"
+
+	set str [lindex $intensity_str $i]
+	gdb_test "python print(filename_style.intensity == gdb.INTENSITY_$str)" \
+	    "^True" "check filename_style intensity is $str"
+    }
+}
+
+# Check the filename style has changed as expected.
+gdb_test "python print(filename_style)" \
+    "^<gdb.Style name='filename', fg=blue, bg=red, intensity=dim>" \
+    "check filename_style is now dim"
+
+# Check Style.escape_sequence and Style.apply when styling is disabled.
+gdb_test_no_output "with style enabled off -- python print(filename_style.escape_sequence(), end='')" \
+    "print escape sequence when styling is off"
+gdb_test "with style enabled off -- python print(filename_style.apply('xxx'))" "^xxx" \
+    "apply style to a string when styling is off"
+
+# Now check the escape sequences are emitted as expected.
+gdb_test "python print(filename_style.escape_sequence())" \
+    "\033\\\[34;41;2;23;24;27m" \
+    "print escape sequence when styling is on"
+gdb_test "python print(filename_style.apply('xxx'))" \
+    "\033\\\[34;41;2;23;24;27mxxx\033\\\[m" \
+    "apply a style when styling is on"
+
+# Test creating a style from component parts.
+gdb_test_no_output "python my_style_1 = gdb.Style(gdb.Color('red'), gdb.Color('blue'), gdb.INTENSITY_BOLD)" \
+    "create my_style_1"
+gdb_test "python print(my_style_1)" \
+    "^<gdb.Style fg=red, bg=blue, intensity=bold>" \
+    "check my_style_1"
+
+gdb_test_no_output "python my_style_2 = gdb.Style(background = gdb.Color('blue'))" \
+    "create my_style_2"
+gdb_test "python print(my_style_2)" \
+    "^<gdb.Style fg=none, bg=blue, intensity=normal>" \
+    "check my_style_2"
+
+gdb_test_no_output "python my_style_3 = gdb.Style(intensity = gdb.INTENSITY_DIM)" \
+    "create my_style_3"
+gdb_test "python print(my_style_3)" \
+    "^<gdb.Style fg=none, bg=none, intensity=dim>" \
+    "check my_style_3"
+
+# The precise error message, about 'None' not being an integer, varies
+# with Python version.  We just check that we get a TypeError and
+# assume that this is related to the argument type.
+gdb_test "python my_style_4 = gdb.Style(intensity = None)" \
+    [multi_line \
+	 "Python Exception <class 'TypeError'>: \[^\r\n\]+" \
+	 "Error occurred in Python: \[^\r\n\]+"] \
+    "attempt to create my_style_4"
+
+gdb_test "python my_style_5 = gdb.Style(foreground = list())" \
+    [multi_line \
+	 "Python Exception <class 'TypeError'>: 'foreground' argument must be gdb.Color or None, not list\\." \
+	 "Error occurred in Python: 'foreground' argument must be gdb.Color or None, not list\\."] \
+    "attempt to create my_style_5"
+
+gdb_test "python my_style_6 = gdb.Style(background = list())" \
+    [multi_line \
+	 "Python Exception <class 'TypeError'>: 'background' argument must be gdb.Color or None, not list\\." \
+	 "Error occurred in Python: 'background' argument must be gdb.Color or None, not list\\."] \
+    "attempt to create my_style_6"
+
+# Adjust the attributes of an unnamed style.
+gdb_test_no_output "python my_style_1.foreground = gdb.Color('green')" \
+    "change my_style_1.foreground to green"
+gdb_test_no_output "python my_style_1.background = gdb.Color('cyan')" \
+    "change my_style_1.background to cyan"
+gdb_test_no_output "python my_style_1.intensity = gdb.INTENSITY_DIM" \
+    "change my_style_1.intensity to dim"
+gdb_test "python print(my_style_1)" \
+    "^<gdb.Style fg=green, bg=cyan, intensity=dim>" \
+    "check my_style_1 after changes."
+
+# Setup some prefix commands under 'set/show style ...'.  Each prefix
+# command is called 'new-style-X' where X is an integer; 1, 2, 3, or 4.
+for { set i 1 } { $i < 5 } { incr i } {
+    gdb_test_no_output "python gdb.Command('set style new-style-$i', gdb.COMMAND_NONE, prefix = True)" \
+	"create set style new-style-$i"
+    gdb_test_no_output "python gdb.Command('show style new-style-$i', gdb.COMMAND_NONE, prefix = True)" \
+	"create show style new-style-$i"
+}
+
+# A helper class for creating color settings under the 'new-style-X'
+# prefix commands.  The NUM to the __init__ supplies the value of
+# 'X', and NAME is either 'foreground' or 'background'.
+gdb_test_multiline "Class to create color parameters" \
+    "python" "" \
+    "class color_param(gdb.Parameter):" "" \
+    "  def __init__(self, num, name):" "" \
+    "    super().__init__(f\"style new-style-{num} {name}\", gdb.COMMAND_NONE, gdb.PARAM_COLOR)" "" \
+    "    self.value = gdb.Color()" "" \
+    "end" ""
+
+# A helper class for creating intensity settings under the new
+# 'new-style-X' prefix commands.  The NUM in the __init__ supplies the
+# value of 'X'.
+gdb_test_multiline "Class to create intensity parameters" \
+    "python" "" \
+    "class intensity_param(gdb.Parameter):" "" \
+    "  def __init__(self, num):" "" \
+    "    super().__init__(f\"style new-style-{num} intensity\", gdb.COMMAND_NONE, gdb.PARAM_ENUM," "" \
+    "                     \[\"normal\", \"bold\", \"dim\"\])" "" \
+    "    self.value = \"normal\"" "" \
+    "end" ""
+
+# Within 'style new-style-1' we only have a 'foreground' setting.
+# This will not be usable as a gdb.Style.
+gdb_test_no_output "python color_param(1, 'foreground')" \
+    "setup new-style-1 foreground"
+
+# Within 'style new-style-2' we only have a 'background' setting.
+# This will not be usable as a gdb.Style.
+gdb_test_no_output "python color_param(2, 'background')" \
+    "setup new-style-2 background"
+
+# Within 'style new-style-3' we have both a 'foreground' and
+# 'background' setting.  Even though 'intensity' is missing, this is
+# still usable as a style.
+gdb_test_no_output "python color_param(3, 'foreground')" \
+    "setup new-style-3 foreground"
+gdb_test_no_output "python color_param(3, 'background')" \
+    "setup new-style-3 background"
+
+# Within 'style new-style-4' we have a 'foreground', 'background', and
+# 'intensity' setting.  This is a complete style setting group.
+gdb_test_no_output "python color_param(4, 'foreground')" \
+    "setup new-style-4 foreground"
+gdb_test_no_output "python color_param(4, 'background')" \
+    "setup new-style-4 background"
+gdb_test_no_output "python intensity_param(4)" \
+    "setup new-style-4 intensity"
+
+# Trying to create a style for 'new-style-1' should fail.
+gdb_test "python my_style_7 = gdb.Style('new-style-1')" \
+    [multi_line \
+	 "Python Exception <class 'RuntimeError'>: style 'new-style-1' missing 'background' component\\." \
+	 "Error occurred in Python: style 'new-style-1' missing 'background' component\\."] \
+    "try to create style for new-style-1"
+
+# Trying to create a style for 'new-style-2' should fail.
+gdb_test "python my_style_8 = gdb.Style('new-style-2')" \
+    [multi_line \
+	 "Python Exception <class 'RuntimeError'>: style 'new-style-2' missing 'foreground' component\\." \
+	 "Error occurred in Python: style 'new-style-2' missing 'foreground' component\\."] \
+    "try to create style for new-style-2"
+
+# Trying to create a style for 'new-style-3' should succeed.
+gdb_test_no_output "python my_style_9 = gdb.Style('new-style-3')" \
+    "create a style for new-style-3"
+gdb_test "python print(my_style_9)" \
+    "^<gdb.Style name='new-style-3', fg=none, bg=none, intensity=normal>" \
+    "print my_style_9"
+
+# Trying to create a style for 'new-style-4' should succeed too.
+gdb_test_no_output "python my_style_10 = gdb.Style('new-style-4')" \
+    "create a style for new-style-4"
+gdb_test "python print(my_style_10)" \
+    "^<gdb.Style name='new-style-4', fg=none, bg=none, intensity=normal>" \
+    "print my_style_10"
+
+# Adjust the settings directly, and check the gdb.Style updates.
+gdb_test_no_output "set style new-style-4 intensity bold"
+gdb_test_no_output "set style new-style-4 foreground red"
+gdb_test_no_output "set style new-style-4 background blue"
+gdb_test "python print(my_style_10)" \
+    "^<gdb.Style name='new-style-4', fg=red, bg=blue, intensity=bold>" \
+    "print my_style_10, intensity updated"
+
+# Check the reference counting on 'gdb.Style.apply' when global styling is disabled.
+gdb_test_no_output "python input_text = \"this is a unique string that is unlikely to appear elsewhere 12345\"" \
+    "setup an input string"
+gdb_test_no_output "with style enabled off -- python output_text = filename_style.apply(input_text)" \
+    "create an ouput string by applying filename_style"
+gdb_test_no_output "python input_text = \"a totally different string that is also, hopefully, unique\"" \
+    "replace the input string"
+gdb_test "python print(output_text)" \
+    "^this is a unique string that is unlikely to appear elsewhere 12345" \
+    "check the output_text is still valid"

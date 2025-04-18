@@ -67,6 +67,15 @@ qExecAndArgs
   which the server was started.  If no such information was given to
   the server then this is reflected in the reply.
 
+* Python API
+
+  ** New class gdb.Style for representing styles, a collection of
+     foreground and background gdb.Color objects, and an intensity.
+
+  ** New constants gdb.INTENSITY_NORMAL, gdb.INTENSITY_BOLD, and
+     gdb.INTENSITY_DIM for use with gdb.Style when representing
+     intensities.
+
 *** Changes in GDB 17
 
 * Debugging Linux programs that use x86-64 or x86-64 with 32-bit pointer

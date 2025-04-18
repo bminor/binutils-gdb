@@ -430,6 +430,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-registers.c \
 	python/py-signalevent.c \
 	python/py-stopevent.c \
+	python/py-style.c \
 	python/py-symbol.c \
 	python/py-symtab.c \
 	python/py-threadevent.c \
