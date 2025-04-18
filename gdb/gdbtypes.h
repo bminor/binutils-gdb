@@ -2641,6 +2641,29 @@ extern void resolve_dynamic_field (struct field &field,
 				   const struct property_addr_info *addr_stack,
 				   const frame_info_ptr &frame);
 
+/* A helper function that handles the DWARF semantics for
+   DW_AT_bit_offset.
+
+   DWARF 3 specified DW_AT_bit_offset in a funny way, making it simple
+   to use on big-endian targets but somewhat difficult for
+   little-endian.  This function handles the logic here.
+
+   While DW_AT_bit_offset was deprecated in DWARF 4 (and removed
+   entirely from DWARF 5), it is still useful because it is the only
+   way to describe a field that appears at a non-constant bit
+   offset.
+
+   FIELD is updated in-place.  It is assumed that FIELD already has a
+   constant bit position.  BIT_OFFSET is the value of the
+   DW_AT_bit_offset attribute, and EXPLICIT_BYTE_SIZE is either the
+   value of a DW_AT_byte_size from the field's DIE -- indicating an
+   explicit size of the enclosing anonymous object -- or it may be 0,
+   indicating that the field's type size should be used.  */
+
+extern void apply_bit_offset_to_field (struct field &field,
+				       LONGEST bit_offset,
+				       LONGEST explicit_byte_size);
+
 extern struct type *check_typedef (struct type *);
 
 extern void check_stub_method_group (struct type *, int);

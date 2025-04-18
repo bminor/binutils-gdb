@@ -9940,8 +9940,6 @@ static void
 dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		  struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->per_objfile->objfile;
-  struct gdbarch *gdbarch = objfile->arch ();
   struct nextfield *new_field;
   struct attribute *attr;
   struct field *fp;
@@ -10008,46 +10006,19 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
       if (attr != nullptr && attr->form_is_constant ())
 	{
-	  ULONGEST bit_offset = attr->unsigned_constant ().value_or (0);
-	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
-	    {
-	      /* For big endian bits, the DW_AT_bit_offset gives the
-		 additional bit offset from the MSB of the containing
-		 anonymous object to the MSB of the field.  We don't
-		 have to do anything special since we don't need to
-		 know the size of the anonymous object.  */
-	      fp->set_loc_bitpos (fp->loc_bitpos () + bit_offset);
-	    }
-	  else
-	    {
-	      /* For little endian bits, compute the bit offset to the
-		 MSB of the anonymous object, subtract off the number of
-		 bits from the MSB of the field to the MSB of the
-		 object, and then subtract off the number of bits of
-		 the field itself.  The result is the bit offset of
-		 the LSB of the field.  */
-	      int anonymous_size;
+	  LONGEST bit_offset = attr->unsigned_constant ().value_or (0);
 
-	      attr = dwarf2_attr (die, DW_AT_byte_size, cu);
-	      if (attr != nullptr && attr->form_is_constant ())
-		{
-		  /* The size of the anonymous object containing
-		     the bit field is explicit, so use the
-		     indicated size (in bytes).  */
-		  anonymous_size = attr->unsigned_constant ().value_or (0);
-		}
-	      else
-		{
-		  /* The size of the anonymous object containing
-		     the bit field must be inferred from the type
-		     attribute of the data member containing the
-		     bit field.  */
-		  anonymous_size = fp->type ()->length ();
-		}
-	      fp->set_loc_bitpos (fp->loc_bitpos ()
-				  + anonymous_size * bits_per_byte
-				  - bit_offset - fp->bitsize ());
+	  LONGEST anonymous_size = 0;
+	  attr = dwarf2_attr (die, DW_AT_byte_size, cu);
+	  if (attr != nullptr && attr->form_is_constant ())
+	    {
+	      /* The size of the anonymous object containing
+		 the bit field is explicit, so use the
+		 indicated size (in bytes).  */
+	      anonymous_size = attr->unsigned_constant ().value_or (0);
 	    }
+
+	  apply_bit_offset_to_field (*fp, bit_offset, anonymous_size);
 	}
 
       /* Get name of field.  */

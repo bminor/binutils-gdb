@@ -2679,6 +2679,44 @@ compute_variant_fields (struct type *type,
 /* See gdbtypes.h.  */
 
 void
+apply_bit_offset_to_field (struct field &field, LONGEST bit_offset,
+			   LONGEST explicit_byte_size)
+{
+  struct type *field_type = field.type ();
+  struct gdbarch *gdbarch = field_type->arch ();
+  LONGEST current_bitpos = field.loc_bitpos ();
+
+  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
+    {
+      /* For big endian bits, the DW_AT_bit_offset gives the
+	 additional bit offset from the MSB of the containing
+	 anonymous object to the MSB of the field.  We don't
+	 have to do anything special since we don't need to
+	 know the size of the anonymous object.  */
+      field.set_loc_bitpos (current_bitpos + bit_offset);
+    }
+  else
+    {
+      /* For little endian bits, compute the bit offset to the
+	 MSB of the anonymous object, subtract off the number of
+	 bits from the MSB of the field to the MSB of the
+	 object, and then subtract off the number of bits of
+	 the field itself.  The result is the bit offset of
+	 the LSB of the field.  */
+      LONGEST object_size = explicit_byte_size;
+      if (object_size == 0)
+	object_size = field_type->length ();
+
+      field.set_loc_bitpos (current_bitpos
+			    + 8 * object_size
+			    - bit_offset
+			    - field.bitsize ());
+    }
+}
+
+/* See gdbtypes.h.  */
+
+void
 resolve_dynamic_field (struct field &field,
 		       const property_addr_info *addr_stack,
 		       const frame_info_ptr &frame)
