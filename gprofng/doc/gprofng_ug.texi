@@ -310,9 +310,8 @@ Since there is no need to recompile, existing executables can be used
 and the profile measures the behaviour of exactly the same executable that is
 used in production runs.
 
-With sampling, one inherently profiles a different executable, because
-the calls to the instrumentation library may affect the compiler optimizations
-and run time behaviour.
+With tracing, one inherently profiles a different executable, because
+the calls to the instrumentation library may affect runtime behaviour.
 
 @item
 With sampling, there are very few restrictions on what can be profiled and
