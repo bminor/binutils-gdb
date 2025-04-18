@@ -8744,7 +8744,8 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       struct dwarf2_locexpr_baton *dlbaton;
       struct dwarf_block *block = attr->as_block ();
 
-      dlbaton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
+      dlbaton = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				struct dwarf2_locexpr_baton);
       dlbaton->data = block->data;
       dlbaton->size = block->size;
       dlbaton->per_objfile = per_objfile;
@@ -9907,8 +9908,8 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	      dwarf2_per_objfile *per_objfile = cu->per_objfile;
 	      struct objfile *objfile = per_objfile->objfile;
 	      struct dwarf2_locexpr_baton *dlbaton
-		= XOBNEW (&objfile->objfile_obstack,
-			  struct dwarf2_locexpr_baton);
+		= OBSTACK_ZALLOC (&objfile->objfile_obstack,
+				  struct dwarf2_locexpr_baton);
 	      dlbaton->data = attr->as_block ()->data;
 	      dlbaton->size = attr->as_block ()->size;
 	      /* When using this baton, we want to compute the address
@@ -12276,7 +12277,8 @@ mark_common_block_symbol_computed (struct symbol *sym,
   gdb_assert (member_loc->form_is_block ()
 	      || member_loc->form_is_constant ());
 
-  baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
+  baton = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+			  struct dwarf2_locexpr_baton);
   baton->per_objfile = per_objfile;
   baton->per_cu = cu->per_cu;
   gdb_assert (baton->per_cu);
@@ -17246,7 +17248,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 	/* Symbols of this form are reasonably rare, so we just
 	   piggyback on the existing location code rather than writing
 	   a new implementation of symbol_computed_ops.  */
-	*baton = XOBNEW (obstack, struct dwarf2_locexpr_baton);
+	*baton = OBSTACK_ZALLOC (obstack, struct dwarf2_locexpr_baton);
 	(*baton)->per_objfile = per_objfile;
 	(*baton)->per_cu = cu->per_cu;
 	gdb_assert ((*baton)->per_cu);
@@ -19197,7 +19199,8 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
     {
       struct dwarf2_locexpr_baton *baton;
 
-      baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
+      baton = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+			      struct dwarf2_locexpr_baton);
       baton->per_objfile = per_objfile;
       baton->per_cu = cu->per_cu;
       gdb_assert (baton->per_cu);
