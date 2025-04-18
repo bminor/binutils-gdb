@@ -45,7 +45,8 @@ static const char ansi_regex_text[] =
 
 /* The compiled form of ansi_regex_text.  */
 
-static regex_t ansi_regex;
+static compiled_regex ansi_regex (ansi_regex_text, REG_EXTENDED,
+  _("Error in ANSI terminal escape sequences regex"));
 
 /* This maps 8-color palette to RGB triples.  The values come from
    plain linux terminal.  */
@@ -364,7 +365,7 @@ ui_file_style::parse (const char *buf, size_t *n_read)
 {
   regmatch_t subexps[NUM_SUBEXPRESSIONS];
 
-  int match = regexec (&ansi_regex, buf, ARRAY_SIZE (subexps), subexps, 0);
+  int match = ansi_regex.exec (buf, ARRAY_SIZE (subexps), subexps, 0);
   if (match == REG_NOMATCH)
     {
       *n_read = 0;
@@ -531,22 +532,12 @@ skip_ansi_escape (const char *buf, int *n_read)
 {
   regmatch_t subexps[NUM_SUBEXPRESSIONS];
 
-  int match = regexec (&ansi_regex, buf, ARRAY_SIZE (subexps), subexps, 0);
+  int match = ansi_regex.exec (buf, ARRAY_SIZE (subexps), subexps, 0);
   if (match == REG_NOMATCH || buf[subexps[FINAL_SUBEXP].rm_so] != 'm')
     return false;
 
   *n_read = subexps[FINAL_SUBEXP].rm_eo;
   return true;
-}
-
-void _initialize_ui_style ();
-void
-_initialize_ui_style ()
-{
-  int code = regcomp (&ansi_regex, ansi_regex_text, REG_EXTENDED);
-  /* If the regular expression was incorrect, it was a programming
-     error.  */
-  gdb_assert (code == 0);
 }
 
 /* See ui-style.h.  */
