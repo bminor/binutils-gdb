@@ -140,7 +140,8 @@ er_archive::usage ()
     "See also:\n"
     "\n"
     "gprofng(1), gprofng-collect-app(1), gprofng-display-html(1), "
-    "gprofng-display-src(1), gprofng-display-text(1)\n"));
+    "gprofng-display-src(1), gprofng-display-text(1)\n"
+    "\nReport bugs to <https://sourceware.org/bugzilla/>\n"));
   exit (1);
 }
 

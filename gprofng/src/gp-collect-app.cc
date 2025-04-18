@@ -1481,7 +1481,8 @@ collect::usage ()
     "See also:\n"
     "\n"
     "gprofng(1), gprofng-archive(1), gprofng-display-html(1), "
-    "gpgprofng-display-src(1), gprofng-display-text(1)\n"));
+    "gpgprofng-display-src(1), gprofng-display-text(1)\n"
+    "\nReport bugs to <https://sourceware.org/bugzilla/>\n"));
 }
 
 void
