@@ -3061,7 +3061,7 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   if (is_w_pseudo_register (gdbarch, regnum))
     return w_name[regnum - tdep->w_pseudo_base];
 
-  if (tdep->has_sve ())
+  if (tdep->has_sve)
     {
       static const char *const sve_v_name[] =
 	{
@@ -3117,7 +3117,7 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (p_regnum >= AARCH64_B0_REGNUM && p_regnum < AARCH64_B0_REGNUM + 32)
     return aarch64_vnb_type (gdbarch);
 
-  if (tdep->has_sve () && p_regnum >= AARCH64_SVE_V0_REGNUM
+  if (tdep->has_sve && p_regnum >= AARCH64_SVE_V0_REGNUM
       && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
     return aarch64_vnv_type (gdbarch);
 
@@ -3157,7 +3157,7 @@ aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return group == all_reggroup || group == vector_reggroup;
   else if (p_regnum >= AARCH64_B0_REGNUM && p_regnum < AARCH64_B0_REGNUM + 32)
     return group == all_reggroup || group == vector_reggroup;
-  else if (tdep->has_sve () && p_regnum >= AARCH64_SVE_V0_REGNUM
+  else if (tdep->has_sve && p_regnum >= AARCH64_SVE_V0_REGNUM
 	   && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
     return group == all_reggroup || group == vector_reggroup;
   else if (is_sme_pseudo_register (gdbarch, regnum))
@@ -3352,7 +3352,7 @@ aarch64_pseudo_read_value (gdbarch *gdbarch, const frame_info_ptr &next_frame,
     return aarch64_pseudo_read_value_1 (next_frame, pseudo_reg_num,
 					pseudo_offset - AARCH64_B0_REGNUM);
 
-  if (tdep->has_sve () && pseudo_offset >= AARCH64_SVE_V0_REGNUM
+  if (tdep->has_sve && pseudo_offset >= AARCH64_SVE_V0_REGNUM
       && pseudo_offset < AARCH64_SVE_V0_REGNUM + 32)
     return aarch64_pseudo_read_value_1 (next_frame, pseudo_reg_num,
 					pseudo_offset - AARCH64_SVE_V0_REGNUM);
@@ -3495,7 +3495,7 @@ aarch64_pseudo_write (gdbarch *gdbarch, const frame_info_ptr &next_frame,
     return aarch64_pseudo_write_1 (gdbarch, next_frame,
 				   pseudo_offset - AARCH64_B0_REGNUM, buf);
 
-  if (tdep->has_sve () && pseudo_offset >= AARCH64_SVE_V0_REGNUM
+  if (tdep->has_sve && pseudo_offset >= AARCH64_SVE_V0_REGNUM
       && pseudo_offset < AARCH64_SVE_V0_REGNUM + 32)
     return aarch64_pseudo_write_1 (gdbarch, next_frame,
 				   pseudo_offset - AARCH64_SVE_V0_REGNUM, buf);
@@ -4030,10 +4030,6 @@ aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 const target_desc *
 aarch64_read_description (const aarch64_features &features)
 {
-  if (features.vq > AARCH64_MAX_SVE_VQ)
-    error (_("VQ is %" PRIu64 ", maximum supported value is %d"), features.vq,
-	   AARCH64_MAX_SVE_VQ);
-
   struct target_desc *tdesc = tdesc_aarch64_map[features];
 
   if (tdesc == NULL)
@@ -4044,27 +4040,6 @@ aarch64_read_description (const aarch64_features &features)
 
   return tdesc;
 }
-
-/* Return the VQ used when creating the target description TDESC.  */
-
-static uint64_t
-aarch64_get_tdesc_vq (const struct target_desc *tdesc)
-{
-  const struct tdesc_feature *feature_sve;
-
-  if (!tdesc_has_registers (tdesc))
-    return 0;
-
-  feature_sve = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve");
-
-  if (feature_sve == nullptr)
-    return 0;
-
-  uint64_t vl = tdesc_register_bitsize (feature_sve,
-					aarch64_sve_register_names[0]) / 8;
-  return sve_vq_from_vl (vl);
-}
-
 
 /* Return the svq (streaming vector quotient) used when creating the target
    description TDESC.  */
@@ -4102,7 +4077,8 @@ aarch64_features_from_target_desc (const struct target_desc *tdesc)
   if (tdesc == nullptr)
     return features;
 
-  features.vq = aarch64_get_tdesc_vq (tdesc);
+  features.sve
+      = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve") != nullptr;
 
   /* We need to look for a couple pauth feature name variations.  */
   features.pauth
@@ -4409,6 +4385,52 @@ aarch64_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
   return aarch64_remove_top_bits (pointer, mask);
 }
 
+static void
+aarch64_fetch_tdesc_parameter (gdbarch *gdbarch, readable_regcache *regcache,
+			       unsigned int parameter_id)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  if (tdep->param_sve_vector_length != UINT_MAX
+      && parameter_id == tdep->param_sve_vector_length)
+    {
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      register_status status;
+      gdb_byte buf[8];
+
+      status = regcache->raw_read (AARCH64_SVE_VG_REGNUM, buf);
+      if (status != REG_VALID)
+	return;
+
+      ULONGEST vg = extract_unsigned_integer (buf, byte_order);
+      ULONGEST vl = sve_vl_from_vg (vg);
+
+      /* In the XML, vector_length is used in bitsize fields, but internally
+	 GDB expects the size in bytes.  */
+      store_unsigned_integer (buf, byte_order, vl);
+      regcache->supply_parameter (parameter_id, buf);
+    }
+  else if (tdep->param_sve_predicate_length != UINT_MAX
+	   && parameter_id == tdep->param_sve_predicate_length)
+    {
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      register_status status;
+      gdb_byte buf[8];
+
+      status = regcache->raw_read (AARCH64_SVE_VG_REGNUM, buf);
+      if (status != REG_VALID)
+	return;
+
+      ULONGEST vg = extract_unsigned_integer (buf, byte_order);
+      ULONGEST predicate_length = vg;
+
+      /* In the XML, predicate_length is used in bitsize fields, but internally
+	 GDB expects the size in bytes.  */
+      store_unsigned_integer (buf, byte_order, predicate_length);
+      regcache->supply_parameter (parameter_id, buf);
+    }
+}
+
 /* Given NAMES, a vector of strings, initialize it with all the SME
    pseudo-register names for the current streaming vector length.  */
 
@@ -4454,12 +4476,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int i, num_regs = 0, num_pseudo_regs = 0;
   int first_pauth_regnum = -1, ra_sign_state_offset = -1;
   int first_mte_regnum = -1, first_tls_regnum = -1;
-  uint64_t vq = aarch64_get_tdesc_vq (info.target_desc);
+  bool has_sve = (info.target_desc == nullptr ? false
+		  : tdesc_find_feature (info.target_desc,
+					"org.gnu.gdb.aarch64.sve") != nullptr);
   uint64_t svq = aarch64_get_tdesc_svq (info.target_desc);
-
-  if (vq > AARCH64_MAX_SVE_VQ)
-    internal_error (_("VQ out of bounds: %s (max %d)"),
-		    pulongest (vq), AARCH64_MAX_SVE_VQ);
 
   if (svq > AARCH64_MAX_SVE_VQ)
     internal_error (_("Streaming vector quotient (svq) out of bounds: %s"
@@ -4473,18 +4493,17 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       aarch64_gdbarch_tdep *tdep
 	= gdbarch_tdep<aarch64_gdbarch_tdep> (best_arch->gdbarch);
-      if (tdep && tdep->vq == vq && tdep->sme_svq == svq)
+      if (tdep && tdep->has_sve == has_sve && tdep->sme_svq == svq)
 	return best_arch->gdbarch;
     }
 
   /* Ensure we always have a target descriptor, and that it is for the given VQ
      value.  */
   const struct target_desc *tdesc = info.target_desc;
-  if (!tdesc_has_registers (tdesc) || vq != aarch64_get_tdesc_vq (tdesc)
-      || svq != aarch64_get_tdesc_svq (tdesc))
+  if (!tdesc_has_registers (tdesc))
     {
       aarch64_features features;
-      features.vq = vq;
+      features.sve = has_sve;
       features.svq = svq;
       tdesc = aarch64_read_description (features);
     }
@@ -4741,7 +4760,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1;		/* Longjump support not enabled by default.  */
   tdep->jb_elt_size = 8;
-  tdep->vq = vq;
+  tdep->has_sve = feature_sve != nullptr;
   tdep->pauth_reg_base = first_pauth_regnum;
   tdep->pauth_reg_count = pauth_masks;
   tdep->ra_sign_state_regnum = -1;
@@ -4992,6 +5011,19 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   register_aarch64_ravenscar_ops (gdbarch);
 
+  tdesc_setup_parameters (gdbarch, tdesc);
+
+  std::optional<unsigned int> param_id
+    = tdesc_parameter_id (gdbarch, "org.gnu.gdb.aarch64.sve", "vector_length");
+  if (param_id.has_value ())
+    tdep->param_sve_vector_length = *param_id;
+  param_id = tdesc_parameter_id (gdbarch, "org.gnu.gdb.aarch64.sve",
+				 "predicate_length");
+  if (param_id.has_value ())
+    tdep->param_sve_predicate_length = *param_id;
+
+  set_gdbarch_fetch_tdesc_parameter (gdbarch, aarch64_fetch_tdesc_parameter);
+
   return gdbarch;
 }
 
@@ -5005,6 +5037,9 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 
   gdb_printf (file, _("aarch64_dump_tdep: Lowest pc = 0x%s\n"),
 	      paddress (gdbarch, tdep->lowest_pc));
+
+  gdb_printf (file, _ ("aarch64_dump_tdep: has_sve = %s\n"),
+	      tdep->has_sve ? "true" : "false");
 
   /* SME fields.  */
   gdb_printf (file, _("aarch64_dump_tdep: sme_tile_type_q = %s\n"),

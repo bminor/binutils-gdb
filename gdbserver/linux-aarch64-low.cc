@@ -923,11 +923,11 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
 	  break;
 	case NT_FPREGSET:
 	  /* This is unavailable when SVE is present.  */
-	  if (features.vq == 0)
+	  if (!features.sve)
 	    regset->size = sizeof (struct user_fpsimd_state);
 	  break;
 	case NT_ARM_SVE:
-	  if (features.vq > 0)
+	  if (features.sve)
 	    regset->size = SVE_PT_SIZE (AARCH64_MAX_SVE_VQ, SVE_PT_REGS_SVE);
 	  break;
 	case NT_ARM_PAC_MASK:
@@ -979,7 +979,7 @@ aarch64_target::low_arch_setup ()
       struct aarch64_features features;
       int pid = current_thread->id.pid ();
 
-      features.vq = aarch64_sve_get_vq (tid);
+      features.sve = aarch64_sve_get_vq (tid) != 0;
       /* A-profile PAC is 64-bit only.  */
       features.pauth = linux_get_hwcap (pid, 8) & AARCH64_HWCAP_PACA;
       /* A-profile MTE is 64-bit only.  */

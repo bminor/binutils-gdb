@@ -206,6 +206,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	aarch64-mte.xml \
 	aarch64-gcs.xml \
 	aarch64-gcs-linux.xml \
+	aarch64-sve.xml \
 	arc/v1-core.xml \
 	arc/v1-aux.xml \
 	arc/v2-core.xml \

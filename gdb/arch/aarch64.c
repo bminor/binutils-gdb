@@ -44,10 +44,10 @@ aarch64_create_target_description (const aarch64_features &features)
 
   regnum = create_feature_aarch64_core (tdesc.get (), regnum);
 
-  if (features.vq == 0)
-    regnum = create_feature_aarch64_fpu (tdesc.get (), regnum);
+  if (features.sve)
+    regnum = create_feature_aarch64_sve (tdesc.get (), regnum);
   else
-    regnum = create_feature_aarch64_sve (tdesc.get (), regnum, features.vq);
+    regnum = create_feature_aarch64_fpu (tdesc.get (), regnum);
 
   if (features.pauth)
     regnum = create_feature_aarch64_pauth (tdesc.get (), regnum);

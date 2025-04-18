@@ -648,7 +648,7 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
 
       /* We attempt to fetch SVE registers if there is support for either
 	 SVE or SME (due to the SSVE state of SME).  */
-      if (tdep->has_sve () || tdep->has_sme ())
+      if (tdep->has_sve || tdep->has_sme ())
 	fetch_sveregs_from_thread (regcache);
       else
 	fetch_fpregs_from_thread (regcache);
@@ -675,10 +675,10 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
   else if (regno < AARCH64_V0_REGNUM)
     fetch_gregs_from_thread (regcache);
   /* SVE register?  */
-  else if ((tdep->has_sve () || tdep->has_sme ())
+  else if ((tdep->has_sve || tdep->has_sme ())
 	   && regno < AARCH64_SVE_VG_REGNUM)
     fetch_sveregs_from_thread (regcache);
-  else if (tdep->has_sve () && regno == AARCH64_SVE_VG_REGNUM)
+  else if (tdep->has_sve && regno == AARCH64_SVE_VG_REGNUM)
     fetch_sve_vg_from_thread (regcache);
   /* FPSIMD register?  */
   else if (regno <= AARCH64_FPCR_REGNUM)
@@ -764,7 +764,7 @@ aarch64_store_registers (struct regcache *regcache, int regno)
 
       /* We attempt to store SVE registers if there is support for either
 	 SVE or SME (due to the SSVE state of SME).  */
-      if (tdep->has_sve () || tdep->has_sme ())
+      if (tdep->has_sve || tdep->has_sme ())
 	store_sveregs_to_thread (regcache);
       else
 	store_fpregs_to_thread (regcache);
@@ -788,10 +788,10 @@ aarch64_store_registers (struct regcache *regcache, int regno)
   else if (regno < AARCH64_V0_REGNUM)
     store_gregs_to_thread (regcache);
   /* SVE register?  */
-  else if ((tdep->has_sve () || tdep->has_sme ())
+  else if ((tdep->has_sve || tdep->has_sme ())
 	   && regno < AARCH64_SVE_VG_REGNUM)
     store_sveregs_to_thread (regcache);
-  else if (tdep->has_sve () && regno == AARCH64_SVE_VG_REGNUM)
+  else if (tdep->has_sve && regno == AARCH64_SVE_VG_REGNUM)
     store_sve_vg_to_thread (regcache);
   /* FPSIMD register?  */
   else if (regno <= AARCH64_FPCR_REGNUM)
@@ -989,7 +989,7 @@ aarch64_linux_nat_target::read_description ()
   /* SVE/SSVE check.  Reading VQ may return either the regular vector length
      or the streaming vector length, depending on whether streaming mode is
      active or not.  */
-  features.vq = aarch64_sve_get_vq (tid);
+  features.sve = aarch64_sve_get_vq (tid) != 0;
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
   features.gcs = features.gcs_linux = hwcap & HWCAP_GCS;
   features.mte = hwcap2 & HWCAP2_MTE;
@@ -1104,19 +1104,19 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
      the tdep.  */
   aarch64_gdbarch_tdep *tdep
     = gdbarch_tdep<aarch64_gdbarch_tdep> (inf->arch ());
-  uint64_t vq = aarch64_sve_get_vq (ptid.lwp ());
+  bool sve = aarch64_sve_get_vq (ptid.lwp ()) != 0;
   uint64_t svq = aarch64_za_get_svq (ptid.lwp ());
-  if (vq == tdep->vq && svq == tdep->sme_svq)
+  if (sve == tdep->has_sve && svq == tdep->sme_svq)
     return inf->arch ();
 
   /* We reach here if any vector length for the thread is different from its
      value at process start.  Lookup gdbarch via info (potentially creating a
-     new one) by using a target description that corresponds to the new vq/svq
-     value and the current architecture features.  */
+     new one) by using a target description that corresponds to the new
+     vector/matrix state and the current architecture features.  */
 
   const struct target_desc *tdesc = gdbarch_target_desc (inf->arch ());
   aarch64_features features = aarch64_features_from_target_desc (tdesc);
-  features.vq = vq;
+  features.sve = sve;
   features.svq = svq;
 
   /* Check for the SME2 feature.  */

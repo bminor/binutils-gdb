@@ -37,10 +37,6 @@ aarch64_linux_read_description (const aarch64_features &features)
      initialised.  */
   static gdb::unordered_map<aarch64_features, target_desc *> tdesc_aarch64_map;
 
-  if (features.vq > AARCH64_MAX_SVE_VQ)
-    error (_("VQ is %" PRIu64 ", maximum supported value is %d"), features.vq,
-	   AARCH64_MAX_SVE_VQ);
-
   if (features.svq > AARCH64_MAX_SVE_VQ)
     error (_("Streaming svq is %" PRIu8 ", maximum supported value is %d"),
 	   features.svq,
@@ -60,7 +56,7 @@ aarch64_linux_read_description (const aarch64_features &features)
       expedited_registers.push_back ("sp");
       expedited_registers.push_back ("pc");
 
-      if (features.vq > 0)
+      if (features.sve)
 	expedited_registers.push_back ("vg");
       if (features.svq > 0)
 	expedited_registers.push_back ("svg");

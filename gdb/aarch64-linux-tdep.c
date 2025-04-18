@@ -64,6 +64,7 @@
 #include "elf/common.h"
 #include "elf/aarch64.h"
 #include "arch/aarch64-insn.h"
+#include "target-descriptions.h"
 
 /* For std::pow */
 #include <cmath>
@@ -292,7 +293,8 @@ read_aarch64_ctx (CORE_ADDR ctx_addr, enum bfd_endian byte_order,
 static void
 aarch64_linux_restore_vregs (struct gdbarch *gdbarch,
 			     struct trad_frame_cache *cache,
-			     CORE_ADDR fpsimd_context)
+			     CORE_ADDR fpsimd_context,
+			     ULONGEST vl)
 {
   /* WARNING: SIMD state is laid out in memory in target-endian format.
 
@@ -352,7 +354,7 @@ aarch64_linux_restore_vregs (struct gdbarch *gdbarch,
 					  num_regs + AARCH64_B0_REGNUM
 					  + i, {buf, B_REGISTER_SIZE});
 
-	  if (tdep->has_sve ())
+	  if (tdep->has_sve)
 	    trad_frame_set_reg_value_bytes (cache,
 					    num_regs + AARCH64_SVE_V0_REGNUM
 					    + i, {buf, V_REGISTER_SIZE});
@@ -373,22 +375,22 @@ aarch64_linux_restore_vregs (struct gdbarch *gdbarch,
 	  trad_frame_set_reg_addr (cache, num_regs + AARCH64_B0_REGNUM + i,
 				   offset);
 
-	  if (tdep->has_sve ())
+	  if (tdep->has_sve)
 	    trad_frame_set_reg_addr (cache, num_regs + AARCH64_SVE_V0_REGNUM
 				     + i, offset);
 	}
 
-      if (tdep->has_sve ())
+      if (tdep->has_sve)
 	{
 	  /* If SVE is supported for this target, zero out the Z
 	     registers then copy the first 16 bytes of each of the V
 	     registers to the associated Z register.  Otherwise the Z
 	     registers will contain uninitialized data.  */
-	  std::vector<gdb_byte> z_buffer (tdep->vq * 16);
+	  std::vector<gdb_byte> z_buffer (vl);
 
 	  /* We have already handled the endianness swap above, so we don't need
 	     to worry about it here.  */
-	  memcpy (z_buffer.data (), buf, V_REGISTER_SIZE);
+	  memcpy (z_buffer.data (), buf, vl);
 	  trad_frame_set_reg_value_bytes (cache,
 					  AARCH64_SVE_Z0_REGNUM + i,
 					  z_buffer);
@@ -420,8 +422,8 @@ aarch64_linux_read_signal_frame_info (const frame_info_ptr &this_frame,
   CORE_ADDR section_end = signal_frame.section_end;
   uint32_t size, magic;
   bool extra_found = false;
-  enum bfd_endian byte_order
-    = gdbarch_byte_order (get_frame_arch (this_frame));
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   while ((magic = read_aarch64_ctx (section, byte_order, &size)) != 0
 	 && size != 0)
@@ -440,6 +442,11 @@ aarch64_linux_read_signal_frame_info (const frame_info_ptr &this_frame,
 	    /* Check if the section is followed by a full SVE dump, and set
 	       sve_regs if it is.  */
 	    gdb_byte buf[4];
+	    aarch64_gdbarch_tdep *tdep
+	      = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+	    if (!tdep->has_sve)
+	      break;
 
 	    /* Extract the vector length.  */
 	    if (target_read_memory (section + AARCH64_SVE_CONTEXT_VL_OFFSET,
@@ -452,6 +459,10 @@ aarch64_linux_read_signal_frame_info (const frame_info_ptr &this_frame,
 	      }
 
 	    signal_frame.vl = extract_unsigned_integer (buf, 2, byte_order);
+
+	    if (signal_frame.vl == 0)
+	      error (_ ("Invalid vector length in signal frame %" PRIu64 "."),
+		     signal_frame.vl);
 
 	    /* Extract the flags to check if we are in streaming mode.  */
 	    if (target_read_memory (section
@@ -648,7 +659,7 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
 
   /* Restore the SVE / FPSIMD registers.  */
-  if (tdep->has_sve () && signal_frame.sve_section != 0)
+  if (tdep->has_sve && signal_frame.sve_section != 0)
     {
       ULONGEST vq = sve_vq_from_vl (signal_frame.vl);
       CORE_ADDR sve_regs = signal_frame.sve_section;
@@ -698,8 +709,9 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 			       fpsimd + AARCH64_FPSIMD_FPCR_OFFSET);
 
       /* If there was no SVE section then set up the V registers.  */
-      if (!tdep->has_sve () || signal_frame.sve_section == 0)
-	aarch64_linux_restore_vregs (gdbarch, this_cache, fpsimd);
+      if (!tdep->has_sve || signal_frame.sve_section == 0)
+	aarch64_linux_restore_vregs (gdbarch, this_cache, fpsimd,
+				     tdep->has_sve ? signal_frame.vl : 0);
     }
 
   /* Restore the SME registers.  */
@@ -789,13 +801,53 @@ aarch64_linux_sigframe_prev_arch (const frame_info_ptr &this_frame,
   const struct target_desc *tdesc
     = gdbarch_target_desc (get_frame_arch (this_frame));
   aarch64_features features = aarch64_features_from_target_desc (tdesc);
-  features.vq = sve_vq_from_vl (signal_frame.vl);
+  features.sve = signal_frame.vl != 0;
   features.svq = (uint8_t) sve_vq_from_vl (signal_frame.svl);
 
   struct gdbarch_info info;
   info.bfd_arch_info = bfd_lookup_arch (bfd_arch_aarch64, bfd_mach_aarch64);
   info.target_desc = aarch64_read_description (features);
   return gdbarch_find_by_info (info);
+}
+
+/* Implements the "prev_tdesc_parameter" method of struct tramp_frame.  */
+
+static value *
+aarch64_linux_sigframe_prev_tdesc_parameter (const frame_info_ptr &this_frame,
+					     void **this_frame_cache,
+					     unsigned int parameter_id)
+{
+  gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+  struct aarch64_linux_sigframe signal_frame;
+  ULONGEST parameter_value;
+
+  aarch64_linux_read_signal_frame_info (this_frame, signal_frame);
+
+  if (tdep->param_sve_vector_length != UINT_MAX
+      && parameter_id == tdep->param_sve_vector_length)
+    {
+      /* In the XML, vector_length is used in bitsize fields, but internally
+	 GDB expects the size in bytes.  */
+      parameter_value = signal_frame.vl;
+    }
+  else if (tdep->param_sve_predicate_length != UINT_MAX
+	   && parameter_id == tdep->param_sve_predicate_length)
+    {
+      /* In the XML, predicate_length is used in bitsize fields, but internally
+	 GDB expects the size in bytes.  */
+      parameter_value = sve_vg_from_vl (signal_frame.vl);
+    }
+  else
+    return nullptr;
+
+  value *result = value::allocate (tdesc_parameter_type (gdbarch,
+							 parameter_id));
+
+  store_unsigned_integer (result->contents_raw (), byte_order, parameter_value);
+
+  return result;
 }
 
 static const struct tramp_frame aarch64_linux_rt_sigframe =
@@ -815,6 +867,7 @@ static const struct tramp_frame aarch64_linux_rt_sigframe =
   aarch64_linux_sigframe_init,
   nullptr, /* validate */
   aarch64_linux_sigframe_prev_arch, /* prev_arch */
+  aarch64_linux_sigframe_prev_tdesc_parameter,
 };
 
 /* Register maps.  */
@@ -1116,9 +1169,12 @@ collect_sve_regset (const struct regset *regset,
   gdb_byte *header = (gdb_byte *) buf;
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
-  uint64_t vq = tdep->vq;
+  ULONGEST vg;
+  // FIXME: Remove this cast.
+  enum register_status vg_status
+    = const_cast<struct regcache *> (regcache)->raw_read (AARCH64_SVE_VG_REGNUM, &vg);
 
+  gdb_assert (vg_status == REG_VALID);
   gdb_assert (buf != NULL);
   gdb_assert (size > SVE_HEADER_SIZE);
 
@@ -1130,7 +1186,7 @@ collect_sve_regset (const struct regset *regset,
   store_unsigned_integer (header + SVE_HEADER_MAX_SIZE_OFFSET,
 			  SVE_HEADER_MAX_SIZE_LENGTH, byte_order, max_size);
   store_unsigned_integer (header + SVE_HEADER_VL_OFFSET, SVE_HEADER_VL_LENGTH,
-			  byte_order, sve_vl_from_vq (vq));
+			  byte_order, sve_vl_from_vg (vg));
   uint16_t max_vl = SVE_CORE_DUMMY_MAX_VL;
   store_unsigned_integer (header + SVE_HEADER_MAX_VL_OFFSET,
 			  SVE_HEADER_MAX_VL_LENGTH, byte_order,
@@ -1497,14 +1553,15 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
   cb (".reg", AARCH64_LINUX_SIZEOF_GREGSET, AARCH64_LINUX_SIZEOF_GREGSET,
       &aarch64_linux_gregset, NULL, cb_data);
 
-  if (tdep->has_sve ())
+  if (tdep->has_sve)
     {
       /* Create this on the fly in order to handle vector register sizes.  */
+      // FIXME: Don't use maximum VQ.
       const struct regcache_map_entry sve_regmap[] =
 	{
-	  { 32, AARCH64_SVE_Z0_REGNUM, (int) (tdep->vq * 16) },
-	  { 16, AARCH64_SVE_P0_REGNUM, (int) (tdep->vq * 16 / 8) },
-	  { 1, AARCH64_SVE_FFR_REGNUM, (int) (tdep->vq * 16 / 8) },
+	  { 32, AARCH64_SVE_Z0_REGNUM, (int)(AARCH64_MAX_SVE_VQ * 16) },
+	  { 16, AARCH64_SVE_P0_REGNUM, (int)(AARCH64_MAX_SVE_VQ * 16 / 8) },
+	  { 1, AARCH64_SVE_FFR_REGNUM, (int)(AARCH64_MAX_SVE_VQ * 16 / 8) },
 	  { 1, AARCH64_FPSR_REGNUM, 4 },
 	  { 1, AARCH64_FPCR_REGNUM, 4 },
 	  { 0 }
@@ -1708,7 +1765,7 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
      Otherwise the SVE section is considered active.  This guarantees we will
      have the correct target description with the correct SVE vector
      length.  */
-  features.vq = aarch64_linux_core_read_vq_from_sections (gdbarch, abfd);
+  features.sve = aarch64_linux_core_read_vq_from_sections (gdbarch, abfd) != 0;
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
   features.gcs = features.gcs_linux = hwcap & HWCAP_GCS;
   features.mte = hwcap2 & HWCAP2_MTE;

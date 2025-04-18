@@ -26,12 +26,7 @@
    used to select register sets.  */
 struct aarch64_features
 {
-  /* A non zero VQ value indicates both the presence of SVE and the
-     Vector Quotient - the number of 128-bit chunks in an SVE Z
-     register.
-
-     The maximum value for VQ is 16 (5 bits).  */
-  uint64_t vq = 0;
+  bool sve = false;
   bool pauth = false;
   bool mte = false;
 
@@ -61,7 +56,7 @@ struct aarch64_features
 
 inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
 {
-  return lhs.vq == rhs.vq
+  return lhs.sve == rhs.sve
     && lhs.pauth == rhs.pauth
     && lhs.mte == rhs.mte
     && lhs.tls == rhs.tls
@@ -80,7 +75,7 @@ namespace std
     {
       std::size_t h;
 
-      h = features.vq;
+      h = features.sve;
       h = h << 1 | features.pauth;
       h = h << 1 | features.mte;
       /* Shift by two bits for now.  We may need to increase this in the future

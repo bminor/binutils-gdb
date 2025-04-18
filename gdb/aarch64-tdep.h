@@ -101,14 +101,14 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep_base
   int (*aarch64_syscall_record) (struct regcache *regcache,
 				 unsigned long svc_number) = nullptr;
 
-  /* The VQ value for SVE targets, or zero if SVE is not supported.  */
-  uint64_t vq = 0;
+  /* Whether SVE is supported.  */
+  bool has_sve = false;
 
-  /* Returns true if the target supports SVE.  */
-  bool has_sve () const
-  {
-    return vq != 0;
-  }
+  /* Internal ID of tdesc parameter for SVE vector_length, in bits.  */
+  unsigned int param_sve_vector_length = UINT_MAX;
+
+  /* Internal ID of tdesc parameter for SVE predicate_length, in bits.  */
+  unsigned int param_sve_predicate_length = UINT_MAX;
 
   int pauth_reg_base = 0;
   /* Number of pauth masks.  */
