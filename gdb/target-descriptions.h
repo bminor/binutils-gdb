@@ -194,6 +194,39 @@ const struct tdesc_feature *tdesc_find_feature (const struct target_desc *,
 
 const char *tdesc_feature_name (const struct tdesc_feature *feature);
 
+/* FIXME: Document.  */
+
+std::optional<unsigned int> tdesc_parameter_id (gdbarch *gdbarch,
+						const char *feature,
+						const char *param_name);
+
+/* FIXME: Document.  */
+
+const tdesc_parameter *tdesc_feature_parameter (const tdesc_feature &feature,
+						const char *parameter);
+
+/* FIXME: Document.  */
+
+std::optional<std::pair<const char *,const char *>> tdesc_parameter_name
+  (gdbarch *gdbarch, unsigned int param_id);
+
+/* FIXME: Document.  */
+
+type *tdesc_parameter_type (gdbarch *gdbarch, unsigned int param_id);
+
+/* FIXME: Document.  */
+
+ULONGEST tdesc_parameter_size (gdbarch *gdbarch, unsigned int param_id);
+
+/* FIXME: Document.  */
+
+unsigned int tdesc_num_parameters (gdbarch *gdbarch);
+
+/* Update TARGET_DESC to use parameters with GDBARCH.  */
+
+void tdesc_setup_parameters (struct gdbarch *gdbarch,
+			     const struct target_desc *target_desc);
+
 /* Return the name of register REGNO, from the target description or
    from an architecture-provided pseudo_register_name method.  */
 

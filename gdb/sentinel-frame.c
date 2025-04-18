@@ -78,6 +78,16 @@ sentinel_frame_prev_arch (const frame_info_ptr &this_frame,
   return cache->regcache->arch ();
 }
 
+static value *
+sentinel_frame_prev_tdesc_parameter (const frame_info_ptr &this_frame,
+				     void **this_prologue_cache,
+				     unsigned int parameter)
+{
+  frame_unwind_cache *cache = (frame_unwind_cache *) *this_prologue_cache;
+
+  return cache->regcache->tdesc_parameter_value (parameter);
+}
+
 const struct frame_unwind_legacy sentinel_frame_unwind (
   "sentinel",
   SENTINEL_FRAME,
@@ -88,5 +98,6 @@ const struct frame_unwind_legacy sentinel_frame_unwind (
   NULL,
   NULL,
   NULL,
-  sentinel_frame_prev_arch
+  sentinel_frame_prev_arch,
+  sentinel_frame_prev_tdesc_parameter
 );

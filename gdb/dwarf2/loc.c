@@ -46,6 +46,7 @@
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/byte-vector.h"
 #include "extract-store-integer.h"
+#include "target-descriptions.h"
 
 static struct value *dwarf2_evaluate_loc_desc_full
   (struct type *type, const frame_info_ptr &frame, const gdb_byte *data,
@@ -1793,6 +1794,20 @@ dwarf2_evaluate_property (const dynamic_prop *prop,
 	  }
       }
       break;
+
+      case PROP_TDESC_PARAMETER:
+	{
+	  gdbarch *gdbarch = get_frame_arch (frame);
+	  auto [feature, param_name, element_length] = prop->tdesc_parameter ();
+	  std::optional<unsigned int> param_id = tdesc_parameter_id (gdbarch,
+								     feature,
+								     param_name);
+	  if (!param_id.has_value ())
+	    return false;
+
+	  return read_frame_tdesc_parameter_unsigned (frame, *param_id, value);
+	}
+	break;
     }
 
   return false;

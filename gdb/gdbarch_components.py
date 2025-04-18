@@ -2873,3 +2873,17 @@ SHADOW_STACK_ENABLED to false.
     predefault="default_get_shadow_stack_pointer",
     invalid=False,
 )
+
+Method(
+    comment="""
+Obtain or calculate target description parameter.
+""",
+    type="void",
+    name="fetch_tdesc_parameter",
+    params=[
+        ("readable_regcache *", "regcache"),
+        ("unsigned int", "parameter_id"),
+    ],
+    predefault="default_fetch_tdesc_parameter",
+    invalid=False,
+)

@@ -213,9 +213,17 @@ tdesc_start_reg (struct gdb_xml_parser *parser,
 
   if (bitsize_attr[0] == '$')
     {
-      // FIXME: Check whether the bitsize parameter is valid.
+      const char *parameter_name = &bitsize_attr[1];
+      const tdesc_parameter *parameter
+	= tdesc_feature_parameter (*data->current_feature, parameter_name);
+
+      if (parameter == nullptr)
+	gdb_xml_error (parser,
+		       _("Register bitsize references non-existent parameter \"%s\""),
+		       parameter_name);
+
       tdesc_create_reg (data->current_feature, name, regnum, save_restore,
-			group, &bitsize_attr[1], type);
+			group, *parameter, type);
     }
   else
     {
@@ -508,17 +516,50 @@ tdesc_start_vector (struct gdb_xml_parser *parser,
     }
   else if (!strcmp (attributes[2].name, "bitsize"))
     {
-      char *bitsize = (char *) attributes[2].value.get ();
+      const char *bitsize = (const char *) attributes[2].value.get ();
 
       if (bitsize[0] != '$')
-	gdb_xml_error (parser, _ ("Vector bitsize \"%s\" isn't a parameter"),
+	gdb_xml_error (parser, _("Vector bitsize \"%s\" isn't a parameter"),
 		       bitsize);
 
-      // FIXME: Check whether the parameter exists.
-      tdesc_create_vector (data->current_feature, id, field_type, &bitsize[1]);
+      const char *parameter_name = &bitsize[1];
+      const tdesc_parameter *parameter
+	= tdesc_feature_parameter (*data->current_feature, parameter_name);
+
+      if (parameter == nullptr)
+	gdb_xml_error (parser,
+		       _("Vector bitsize references non-existent parameter \"%s\""),
+		       parameter_name);
+
+      tdesc_create_vector (data->current_feature, id, field_type, *parameter);
     }
   else
-    gdb_xml_error (parser, _ ("Vector doesn't have count nor size attribute"));
+    gdb_xml_error (parser, _("Vector doesn't have count nor bitsize attribute"));
+}
+
+/* Handle the start of a <parameter> element.  Initialize the type and
+   record it with the current feature.  */
+
+static void
+tdesc_start_parameter (struct gdb_xml_parser *parser,
+		       const struct gdb_xml_element *element, void *user_data,
+		       std::vector<gdb_xml_value> &attributes)
+{
+  struct tdesc_parsing_data *data = (struct tdesc_parsing_data *) user_data;
+
+  const char *name = (const char *) attributes[0].value.get ();
+  const char *type_id = (const char *) attributes[1].value.get ();
+
+  tdesc_type *type = tdesc_named_type (data->current_feature, type_id);
+  if (type == nullptr)
+    gdb_xml_error (parser, _("Parameter \"%s\" references undefined type \"%s\""),
+		   name, type_id);
+
+  if (data->current_feature->has_parameter (name))
+    gdb_xml_error (parser, _("Parameter \"%s\" duplicated in feature \"%s\""),
+		   name, data->current_feature->name.c_str ());
+
+  tdesc_create_parameter (*data->current_feature, name, type);
 }
 
 /* The elements and attributes of an XML target description.  */
@@ -586,6 +627,12 @@ static const struct gdb_xml_attribute vector_attributes[] = {
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
+static const struct gdb_xml_attribute parameter_attributes[] = {
+  { "name", GDB_XML_AF_NONE, NULL, NULL },
+  { "type", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
 static const struct gdb_xml_attribute feature_attributes[] = {
   { "name", GDB_XML_AF_NONE, NULL, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
@@ -610,6 +657,9 @@ static const struct gdb_xml_element feature_children[] = {
   { "vector", vector_attributes, NULL,
     GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
     tdesc_start_vector, NULL },
+  { "parameter", parameter_attributes, NULL,
+    GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
+    tdesc_start_parameter, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 

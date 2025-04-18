@@ -20,9 +20,14 @@
 <!ELEMENT compatible	(#PCDATA)>
 
 <!ELEMENT feature
-	((vector | flags | struct | union )*, reg*)>
+	(parameter*, (vector | flags | struct | union )*, reg*)>
 <!ATTLIST feature
 	name		ID	#REQUIRED>
+
+<!ELEMENT parameter	EMPTY>
+<!ATTLIST parameter
+	name		CDATA	#REQUIRED
+	type		CDATA	#REQUIRED>
 
 <!ELEMENT reg		(description*)>
 <!ATTLIST reg

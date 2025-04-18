@@ -1051,6 +1051,7 @@ create_static_range_type (type_allocator &alloc, struct type *index_type,
 
 static struct type *
 create_dynamic_range_type (type_allocator &alloc, struct type *index_type,
+			   ULONGEST element_length,
 			   const char *parameter_feature,
 			   const char *length_parameter)
 {
@@ -1058,12 +1059,12 @@ create_dynamic_range_type (type_allocator &alloc, struct type *index_type,
 
   low.set_const_val (0);
   // FIXME: Leaks memory.
-  std::pair<const char *, const char *> *parameter
-    = new std::pair<const char *, const char *>;
   // FIXME: Is the lifetime of the following strings longer than of this
   // object?
-  parameter->first = parameter_feature;
-  parameter->second = length_parameter;
+  std::tuple<const char *, const char *, ULONGEST> *parameter
+    = new std::tuple<const char *, const char *, ULONGEST> (parameter_feature,
+							    length_parameter,
+							    element_length);
   high.set_tdesc_parameter (parameter);
 
   return create_range_type (alloc, index_type, &low, &high, 0);
@@ -1461,7 +1462,8 @@ lookup_array_range_type (struct type *element_type,
   struct type *index_type, *range_type;
 
   index_type = builtin_type (element_type->arch ())->builtin_unsigned_int;
-  range_type = create_dynamic_range_type (alloc, index_type, parameter_feature,
+  range_type = create_dynamic_range_type (alloc, index_type, element_type->length (),
+					  parameter_feature,
 					  length_parameter);
   return create_array_type (alloc, element_type, range_type);
 }
@@ -2274,6 +2276,19 @@ resolve_dynamic_range (struct type *dyn_range_type,
       if (dwarf2_evaluate_property (prop, frame, addr_stack, &value,
 				    { (CORE_ADDR) rank }))
 	{
+	  /* In the case of a vector with tdesc parameter in the range, we
+	     should evaluate it to the number of elements in the vector.  */
+	  if (prop->kind () == PROP_TDESC_PARAMETER)
+	    {
+	      ULONGEST element_length = std::get<ULONGEST> (prop->tdesc_parameter ());
+
+	      if (element_length != ULONGEST_MAX)
+		value /= element_length;
+	      value -= 1;
+
+	      if (low_bound.kind () == PROP_CONST)
+		value += low_bound.const_val ();
+	    }
 	  high_bound.set_const_val (value);
 
 	  if (dyn_range_type->bounds ()->flag_upper_bound_is_count)

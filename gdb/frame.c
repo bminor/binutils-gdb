@@ -44,6 +44,7 @@
 #include "valprint.h"
 #include "cli/cli-option.h"
 #include "dwarf2/loc.h"
+#include "target-descriptions.h"
 
 /* The sentinel frame terminates the innermost end of the frame chain.
    If unwound, it returns the information needed to construct an
@@ -1624,6 +1625,70 @@ put_frame_register_bytes (const frame_info_ptr &next_frame, int regnum,
       offset = 0;
       regnum++;
     }
+}
+
+value *
+frame_unwind_tdesc_parameter_value (const frame_info_ptr &next_frame,
+				    unsigned int parameter)
+{
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
+
+  gdb_assert (next_frame != nullptr);
+  gdbarch *gdbarch = frame_unwind_arch (next_frame);
+
+  /* Find the unwinder.  */
+  if (next_frame->unwind == NULL)
+    frame_unwind_find_by_frame (next_frame, &next_frame->prologue_cache);
+
+  /* Ask this frame to unwind its register.  */
+  value *value
+    = next_frame->unwind->prev_tdesc_parameter (next_frame,
+						&next_frame->prologue_cache,
+						parameter);
+  if (value == nullptr)
+    {
+      auto maybe_param_name = tdesc_parameter_name (gdbarch, parameter);
+      const char *feature, *param_name;
+      if (maybe_param_name.has_value ())
+	{
+	  feature = maybe_param_name->first;
+	  param_name = maybe_param_name->second;
+	}
+      else
+	{
+	  feature = "unknown";
+	  param_name = "unknown";
+	}
+
+      error (_("Can't unwind value of parameter %d (%s:%s)"), parameter,
+	     feature, param_name);
+    }
+
+  return value;
+}
+
+value *
+get_frame_tdesc_parameter_value (const frame_info_ptr &frame,
+				 unsigned int parameter)
+{
+  return frame_unwind_tdesc_parameter_value (frame_info_ptr (frame->next),
+					     parameter);
+}
+
+bool
+read_frame_tdesc_parameter_unsigned (const frame_info_ptr &frame,
+				     unsigned int parameter, ULONGEST *val)
+{
+  value *value = get_frame_tdesc_parameter_value (frame, parameter);
+
+  if (!value->entirely_available ())
+    return false;
+
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  *val = extract_unsigned_integer (value->contents (), byte_order);
+  return true;
 }
 
 /* Create a sentinel frame.

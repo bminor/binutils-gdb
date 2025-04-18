@@ -749,6 +749,19 @@ extern void put_frame_register_bytes (const frame_info_ptr &next_frame,
 				      int regnum, CORE_ADDR offset,
 				      gdb::array_view<const gdb_byte> buffer);
 
+/* FIXME: Document.  */
+extern value *frame_unwind_tdesc_parameter_value
+  (const frame_info_ptr &next_frame, unsigned int parameter);
+
+/* FIXME: Document.  */
+extern value *get_frame_tdesc_parameter_value (const frame_info_ptr &frame,
+					       unsigned int parameter);
+
+/* FIXME: Document.  */
+extern bool read_frame_tdesc_parameter_unsigned (const frame_info_ptr &frame,
+						 unsigned int parameter,
+						 ULONGEST *val);
+
 /* Unwind the PC.  Strictly speaking return the resume address of the
    calling frame.  For GDB, `pc' is the resume address and not a
    specific register.  */

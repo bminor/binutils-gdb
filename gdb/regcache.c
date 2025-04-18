@@ -31,6 +31,7 @@
 #include "gdbsupport/unordered_map.h"
 #include <unordered_map>
 #include "cli/cli-cmds.h"
+#include "target-descriptions.h"
 
 /*
  * DATA STRUCTURE
@@ -77,6 +78,12 @@ struct regcache_descr
 
   /* Cached table containing the type of each register.  */
   struct type **register_type = nullptr;
+
+  /* Offset of each target description parameter.  */
+  std::vector<long> tdesc_parameter_offset;
+
+  /* Size of target description parameters buffer.  */
+  long sizeof_tdesc_parameters = 0;
 };
 
 static const registry<gdbarch>::key<struct regcache_descr>
@@ -166,6 +173,16 @@ init_regcache_descr (struct gdbarch *gdbarch)
     /* Set the real size of the readonly register cache buffer.  */
     descr->sizeof_fixed_size_cooked_registers = offset;
   }
+
+  /* Initialize list of target description parameter offsets.  */
+  long offset = 0;
+  descr->tdesc_parameter_offset.resize (tdesc_num_parameters (gdbarch));
+  for (i = 0; i < descr->tdesc_parameter_offset.size (); i++)
+    {
+      descr->tdesc_parameter_offset[i] = offset;
+      offset += tdesc_parameter_size (gdbarch, i);
+    }
+  descr->sizeof_tdesc_parameters = offset;
 
   return descr;
 }
@@ -311,6 +328,9 @@ reg_buffer::reg_buffer (gdbarch *gdbarch, bool has_pseudo)
       m_register_status.reset
 	(new register_status[gdbarch_num_regs (gdbarch)] ());
     }
+
+  m_tdesc_parameter_status.resize (tdesc_num_parameters (gdbarch), REG_UNKNOWN);
+  m_tdesc_parameters.resize (m_descr->sizeof_tdesc_parameters, 0);
 }
 
 regcache::regcache (inferior *inf_for_target_calls, gdbarch *gdbarch)
@@ -378,6 +398,63 @@ bool
 reg_buffer::has_variable_size_registers ()
 {
   return m_descr->has_variable_size_registers;
+}
+
+/* See regcache.h.  */
+
+gdb::array_view<gdb_byte>
+reg_buffer::tdesc_parameter_buffer (unsigned int param_id)
+{
+  gdb_assert (param_id < m_descr->tdesc_parameter_offset.size ());
+  gdb_byte *start;
+
+  start = &m_tdesc_parameters[m_descr->tdesc_parameter_offset[param_id]];
+
+  ULONGEST size = tdesc_parameter_size (m_descr->gdbarch, param_id);
+  return gdb::array_view<gdb_byte> (start, size);
+}
+
+/* See regcache.h.  */
+
+enum register_status
+reg_buffer::get_tdesc_parameter_status (unsigned int param_id) const
+{
+  gdb_assert (param_id < m_tdesc_parameter_status.size ());
+  return m_tdesc_parameter_status[param_id];
+}
+
+/* See regcache.h.  */
+
+void
+reg_buffer::invalidate_tdesc_parameter (unsigned int param_id)
+{
+  gdb_assert (param_id < m_tdesc_parameter_status.size ());
+  m_tdesc_parameter_status[param_id] = REG_UNKNOWN;
+}
+
+/* See regcache.h.  */
+
+void
+reg_buffer::supply_parameter (unsigned int param_id,
+			      gdb::array_view<const gdb_byte> src)
+{
+  gdb_assert (param_id < m_tdesc_parameter_status.size ());
+
+  gdb::array_view<gdb_byte> dst = tdesc_parameter_buffer (param_id);
+
+  if (src.data () != nullptr)
+    {
+      copy (src, dst);
+      m_tdesc_parameter_status[param_id] = REG_VALID;
+    }
+  else
+    {
+      /* This memset not strictly necessary, but better than garbage
+	 in case the parameter value manages to escape somewhere (due
+	 to a bug, no less).  */
+      memset (dst.data (), 0, dst.size ());
+      m_tdesc_parameter_status[param_id] = REG_UNAVAILABLE;
+    }
 }
 
 /* Helper for reg_buffer::register_buffer.  */
@@ -1288,6 +1365,56 @@ readable_regcache::cooked_read_part (int regnum, int offset,
 {
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_cooked_registers);
   return read_part (regnum, offset, dst, false);
+}
+
+/* See regcache.h.  */
+
+void
+readable_regcache::update_tdesc_parameter (unsigned int param_id)
+{
+  gdb_assert (param_id < m_tdesc_parameter_status.size ());
+
+  if (get_tdesc_parameter_status (param_id) == REG_UNKNOWN)
+    {
+      gdbarch_fetch_tdesc_parameter (m_descr->gdbarch, this, param_id);
+
+      if (m_tdesc_parameter_status[param_id] == REG_UNKNOWN)
+	m_tdesc_parameter_status[param_id] = REG_UNAVAILABLE;
+    }
+}
+
+/* See regcache.h.  */
+
+register_status
+readable_regcache::tdesc_parameter_value (unsigned int param_id,
+					  gdb::array_view<gdb_byte> dst)
+{
+  gdb_assert (param_id < m_tdesc_parameter_status.size ());
+
+  ULONGEST size = tdesc_parameter_size (m_descr->gdbarch, param_id);
+  gdb_assert (dst.size () == size);
+
+  update_tdesc_parameter (param_id);
+
+  if (m_tdesc_parameter_status[param_id] == REG_VALID)
+    copy (tdesc_parameter_buffer (param_id), dst);
+  else
+    memset (dst.data (), 0, dst.size ());
+
+  return m_tdesc_parameter_status[param_id];
+}
+
+value *
+readable_regcache::tdesc_parameter_value (unsigned int param_id)
+{
+  value *result = value::allocate (tdesc_parameter_type (m_descr->gdbarch,
+							 param_id));
+
+  if (tdesc_parameter_value (param_id,
+			     result->contents_raw ()) == REG_UNAVAILABLE)
+    result->mark_bytes_unavailable (0, result->type ()->length ());
+
+  return result;
 }
 
 /* See regcache.h.  */

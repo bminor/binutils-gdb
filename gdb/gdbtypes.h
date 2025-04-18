@@ -299,9 +299,10 @@ union dynamic_prop_data
 
   const char *variable_name;
 
-  /* The first element is the feature name and the second is the parameter
-     name.  */
-  std::pair<const char *, const char *> *tdesc_parameter;
+  /* The first element is the feature name, the second is the parameter
+     name and the third is the size of an element in the vector,
+     or ULONGEST_MAX if it should be ignored.  */
+  std::tuple<const char *,const char *,ULONGEST> *tdesc_parameter;
 };
 
 /* * Used to store a dynamic property.  */
@@ -417,13 +418,13 @@ struct dynamic_prop
     m_data.variable_name = name;
   }
 
-  std::pair<const char *, const char *> tdesc_parameter () const
+  std::tuple<const char *,const char *,ULONGEST> tdesc_parameter () const
   {
     gdb_assert (m_kind == PROP_TDESC_PARAMETER);
     return *m_data.tdesc_parameter;
   }
 
-  void set_tdesc_parameter (std::pair<const char *,const char *> *parameter)
+  void set_tdesc_parameter (std::tuple<const char *,const char *,ULONGEST> *parameter)
   {
     m_kind = PROP_TDESC_PARAMETER;
     m_data.tdesc_parameter = parameter;

@@ -144,6 +144,10 @@ typedef value *(frame_prev_register_ftype) (const frame_info_ptr &this_frame,
 					    void **this_prologue_cache,
 					    int regnum);
 
+typedef value *(frame_prev_tdesc_parameter_ftype)
+  (const frame_info_ptr &this_frame, void **this_prologue_cache,
+   unsigned int parameter);
+
 /* Deallocate extra memory associated with the frame cache if any.  */
 
 typedef void (frame_dealloc_cache_ftype) (frame_info *self,
@@ -226,6 +230,13 @@ public:
 				       void **this_prologue_cache,
 				       int regnum) const = 0;
 
+  /* Get the value of a target description parameter in a previous frame.  */
+
+  virtual value *prev_tdesc_parameter (const frame_info_ptr &this_frame,
+				       void **this_prologue_cache,
+				       unsigned int parameter) const
+  { return nullptr; }
+
   /* Properly deallocate the cache.  */
 
   virtual void dealloc_cache (frame_info *self, void *this_cache) const
@@ -274,11 +285,13 @@ struct frame_unwind_legacy : public frame_unwind
 		       const struct frame_data *data,
 		       frame_sniffer_ftype *sniffer_func,
 		       frame_dealloc_cache_ftype *dealloc_cache_func = nullptr,
-		       frame_prev_arch_ftype *prev_arch_func = nullptr)
+		       frame_prev_arch_ftype *prev_arch_func = nullptr,
+		       frame_prev_tdesc_parameter_ftype *prev_tdesc_parameter_func = nullptr)
   : frame_unwind (name, type, uclass, data), m_stop_reason (stop_reason_func),
     m_this_id (this_id_func), m_prev_register (prev_register_func),
     m_sniffer (sniffer_func), m_dealloc_cache (dealloc_cache_func),
-    m_prev_arch (prev_arch_func)
+    m_prev_arch (prev_arch_func),
+    m_prev_tdesc_parameter (prev_tdesc_parameter_func)
   { }
 
   /* This method just passes the parameters to the callback pointer.  */
@@ -313,6 +326,12 @@ struct frame_unwind_legacy : public frame_unwind
   struct gdbarch *prev_arch (const frame_info_ptr &this_frame,
 			     void **this_prologue_cache) const override;
 
+  /* This method just passes the parameters to the callback pointer.  */
+
+  value *prev_tdesc_parameter (const frame_info_ptr &this_frame,
+			       void **this_prologue_cache,
+			       unsigned int parameter) const override;
+
 private:
 
   frame_unwind_stop_reason_ftype *m_stop_reason;
@@ -321,6 +340,7 @@ private:
   frame_sniffer_ftype *m_sniffer;
   frame_dealloc_cache_ftype *m_dealloc_cache;
   frame_prev_arch_ftype *m_prev_arch;
+  frame_prev_tdesc_parameter_ftype *m_prev_tdesc_parameter;
 };
 
 /* Register a frame unwinder, _prepending_ it to the front of the

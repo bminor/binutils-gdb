@@ -270,6 +270,17 @@ public:
   /* See gdbsupport/common-regcache.h.  */
   int register_size (int regnum) const override;
 
+  /* FIXME: Document.
+     Assumes SRC contains an integer in target byte order.  */
+  void supply_parameter (unsigned int param_id,
+			 gdb::array_view<const gdb_byte> src);
+
+  /* FIXME: Document.  */
+  enum register_status get_tdesc_parameter_status (unsigned int param_id) const;
+
+  /* FIXME: Document.  */
+  void invalidate_tdesc_parameter (unsigned int param_id);
+
 protected:
   /* Assert on the range of REGNUM.  */
   void assert_regnum (int regnum) const;
@@ -285,6 +296,9 @@ protected:
   gdb::array_view<ElemType> register_buffer (int regnum) const;
   gdb::array_view<const gdb_byte> register_buffer (int regnum) const;
   gdb::array_view<gdb_byte> register_buffer (int regnum);
+
+  /* Return a view on target desc parameter PARAM_ID's buffer cache.  */
+  gdb::array_view<gdb_byte> tdesc_parameter_buffer (unsigned int param_id_id);
 
   /* Save a register cache.  The set of registers saved into the
      regcache determined by the save_reggroup.  COOKED_READ returns
@@ -312,6 +326,12 @@ protected:
 
   /* The offset of resolved types for variable-size registers (if any).  */
   std::vector<long> m_variable_size_register_offset;
+
+  /* The target description parameters buffers (if any).  */
+  std::vector<gdb_byte> m_tdesc_parameters;
+
+  /* Target description parameter cache status.  */
+  std::vector<register_status> m_tdesc_parameter_status;
 
   friend class regcache;
   friend class detached_regcache;
@@ -367,6 +387,16 @@ public:
   /* Read register REGNUM from the regcache and return a new value.  This
      will call mark_value_bytes_unavailable as appropriate.  */
   struct value *cooked_read_value (int regnum);
+
+  /* FIXME: Document.  */
+  void update_tdesc_parameter (unsigned int param_id);
+
+  /* FIXME: Document.  */
+  register_status tdesc_parameter_value (unsigned int param_id,
+					 gdb::array_view<gdb_byte> dst);
+
+  /* FIXME: Document.  */
+  value *tdesc_parameter_value (unsigned int param_id);
 
 protected:
 

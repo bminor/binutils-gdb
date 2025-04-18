@@ -1813,3 +1813,9 @@ extern void set_gdbarch_shadow_stack_push (struct gdbarch *gdbarch, gdbarch_shad
 typedef std::optional<CORE_ADDR> (gdbarch_get_shadow_stack_pointer_ftype) (struct gdbarch *gdbarch, regcache *regcache, bool &shadow_stack_enabled);
 extern std::optional<CORE_ADDR> gdbarch_get_shadow_stack_pointer (struct gdbarch *gdbarch, regcache *regcache, bool &shadow_stack_enabled);
 extern void set_gdbarch_get_shadow_stack_pointer (struct gdbarch *gdbarch, gdbarch_get_shadow_stack_pointer_ftype *get_shadow_stack_pointer);
+
+/* Obtain or calculate target description parameter. */
+
+typedef void (gdbarch_fetch_tdesc_parameter_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, unsigned int parameter_id);
+extern void gdbarch_fetch_tdesc_parameter (struct gdbarch *gdbarch, readable_regcache *regcache, unsigned int parameter_id);
+extern void set_gdbarch_fetch_tdesc_parameter (struct gdbarch *gdbarch, gdbarch_fetch_tdesc_parameter_ftype *fetch_tdesc_parameter);

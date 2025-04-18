@@ -1124,6 +1124,15 @@ default_update_call_site_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
   return pc;
 }
 
+static void
+default_fetch_tdesc_parameter (struct gdbarch *gdbarch,
+			       readable_regcache *regcache,
+			       unsigned int parameter_id)
+{
+  error (_("Architecture \"%s\" doesn't support target description parameters"),
+	 gdbarch_bfd_arch_info (get_current_arch ())->printable_name);
+}
+
 /* Non-zero if we want to trace architecture code.  */
 
 #ifndef GDBARCH_DEBUG

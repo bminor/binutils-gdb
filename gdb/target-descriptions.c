@@ -160,13 +160,15 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 	return;
 
       type *element_gdb_type = make_gdb_type (m_gdbarch, e->element_type);
-      if (e->bitsize_parameter.length () == 0)
+      if (e->bitsize_parameter == nullptr)
 	m_type = init_vector_type (element_gdb_type, e->count);
       else
 	// FIXME: Is the lifetime of feature and tdesc_parameter correct?
-	// Probably not. e->name is duplicated below.
-	m_type = init_vector_type (element_gdb_type, e->feature.c_str (),
-				   e->bitsize_parameter.c_str ());
+	// Probably not. e->name is duplicated below. OTOH, I think target
+	// descriptions and their associated objects are never destroyed.
+	m_type = init_vector_type (element_gdb_type,
+				   e->bitsize_parameter->feature.c_str (),
+				   e->bitsize_parameter->name.c_str ());
       m_type->set_name (xstrdup (e->name.c_str ()));
       return;
     }
@@ -427,6 +429,17 @@ struct tdesc_arch_reg
   struct type *type;
 };
 
+struct tdesc_arch_parameter
+{
+  tdesc_arch_parameter (const tdesc_parameter *parameter_)
+    : parameter (parameter_)
+  {}
+
+  const tdesc_parameter *parameter;
+
+  struct type *type = nullptr;
+};
+
 struct tdesc_arch_data
 {
   /* A list of register/type pairs, indexed by GDB's internal register number.
@@ -442,6 +455,8 @@ struct tdesc_arch_data
   gdbarch_register_name_ftype *pseudo_register_name = NULL;
   gdbarch_register_type_ftype *pseudo_register_type = NULL;
   gdbarch_register_reggroup_p_ftype *pseudo_register_reggroup_p = NULL;
+
+  std::vector<tdesc_arch_parameter> parameters;
 };
 
 /* A handle for architecture-specific data associated with the
@@ -681,6 +696,106 @@ const char *
 tdesc_feature_name (const struct tdesc_feature *feature)
 {
   return feature->name.c_str ();
+}
+
+/* See target-descriptions.h.  */
+
+std::optional<unsigned int>
+tdesc_parameter_id (gdbarch *gdbarch, const char *feature,
+		    const char *param_name)
+{
+  struct tdesc_arch_data *data = get_arch_data (gdbarch);
+
+  for (int i = 0; i < data->parameters.size (); i++)
+    {
+      const tdesc_arch_parameter &arch_param = data->parameters[i];
+      if (arch_param.parameter->feature == feature
+	  && arch_param.parameter->name == param_name)
+	return i;
+    }
+
+  return {};
+}
+
+/* See target-descriptions.h.  */
+
+const tdesc_parameter *
+tdesc_feature_parameter (const tdesc_feature &feature, const char *parameter)
+{
+  for (int i = 0; i < feature.parameters.size (); i++)
+    if (feature.parameters[i]->name == parameter)
+      return feature.parameters[i].get ();
+
+  return nullptr;
+}
+
+/* See target-descriptions.h.  */
+
+std::optional<std::pair<const char *,const char *>>
+tdesc_parameter_name (gdbarch *gdbarch, unsigned int param_id)
+{
+  struct tdesc_arch_data *data = get_arch_data (gdbarch);
+
+  if (param_id < data->parameters.size ())
+    {
+      const tdesc_arch_parameter &param = data->parameters[param_id];
+      return std::pair<const char *,const char *>
+	{ param.parameter->feature.c_str (), param.parameter->name.c_str () };
+    }
+  else
+    return {};
+}
+
+/* See target-descriptions.h.  */
+
+type *
+tdesc_parameter_type (gdbarch *gdbarch, unsigned int param_id)
+{
+  tdesc_arch_data *data = get_arch_data (gdbarch);
+
+  gdb_assert (param_id < data->parameters.size ());
+  tdesc_arch_parameter &arch_parameter = data->parameters[param_id];
+  const tdesc_parameter *parameter = arch_parameter.parameter;
+
+  if (arch_parameter.type == nullptr)
+    {
+      arch_parameter.type = make_gdb_type (gdbarch, parameter->type);
+      if (arch_parameter.type == nullptr)
+	internal_error ("Register \"%s\" has an unknown type \"%s\"",
+			parameter->name.c_str (),
+			parameter->type->name.c_str ());
+    }
+
+  return arch_parameter.type;
+}
+
+/* See target-descriptions.h.  */
+
+ULONGEST
+tdesc_parameter_size (gdbarch *gdbarch, unsigned int param_id)
+{
+  return tdesc_parameter_type (gdbarch, param_id)->length ();
+}
+
+unsigned int
+tdesc_num_parameters (gdbarch *gdbarch)
+{
+  return get_arch_data (gdbarch)->parameters.size ();
+}
+
+/* See target-descriptions.h.  */
+
+void
+tdesc_setup_parameters (gdbarch *gdbarch, const target_desc *target_desc)
+{
+  struct tdesc_arch_data *data = get_arch_data (gdbarch);
+
+  /* Ensure this is done only once.  */
+  gdb_assert (data->parameters.size () == 0);
+
+  for (const tdesc_feature_up &feature : target_desc->features)
+    for (const tdesc_parameter_up &parameter: feature->parameters)
+      data->parameters.emplace_back (parameter.get ());
 }
 
 /* Lookup type associated with ID.  */
@@ -1370,10 +1485,10 @@ public:
     gdb_printf
       ("  element_type = tdesc_named_type (feature, \"%s\");\n",
        type->element_type->name.c_str ());
-    if (type->bitsize_parameter.length () != 0)
+    if (type->bitsize_parameter != nullptr)
       gdb_printf
-	("  tdesc_create_vector (feature, \"%s\", element_type, \"%s\");\n",
-	 type->name.c_str (), type->bitsize_parameter.c_str ());
+	("  tdesc_create_vector (feature, \"%s\", element_type, param_%s);\n",
+	 type->name.c_str (), type->bitsize_parameter->name.c_str ());
     else
       gdb_printf
 	("  tdesc_create_vector (feature, \"%s\", element_type, %d);\n",
@@ -1497,11 +1612,26 @@ public:
       gdb_printf ("\"%s\", ", reg->group.c_str ());
     else
       gdb_printf ("NULL, ");
-    if (reg->bitsize_parameter.length () != 0)
-      gdb_printf ("\"%s\", \"%s\");\n", reg->bitsize_parameter.c_str (),
-		  reg->type.c_str ());
+    if (reg->bitsize_parameter != nullptr)
+      gdb_printf ("param_%s, ", reg->bitsize_parameter->name.c_str ());
     else
-      gdb_printf ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
+      gdb_printf ("%d, ", reg->bitsize);
+    gdb_printf ("\"%s\");\n", reg->type.c_str ());
+  }
+
+  void visit (const tdesc_parameter *p) override
+  {
+    if (!m_printed_param_type)
+      {
+	gdb_printf ("  tdesc_type *param_type;\n");
+	m_printed_param_type = true;
+      }
+
+    gdb_printf ("  param_type = tdesc_named_type (feature, \"%s\");\n",
+		p->type->name.c_str ());
+    gdb_printf
+      ("  const tdesc_parameter &param_%s = tdesc_create_parameter (*feature, \"%s\", param_type);\n",
+       p->name.c_str (), p->name.c_str ());
   }
 
 protected:
@@ -1538,6 +1668,9 @@ private:
 
   /* Did we print "struct tdesc_type *field_type;" yet?  */
   bool m_printed_field_type = false;
+
+  /* Did we print "struct tdesc_type *param_type;" yet?  */
+  bool m_printed_param_type = false;
 };
 
 /* Print target description feature in C.  */
@@ -1644,11 +1777,11 @@ public:
       gdb_printf ("\"%s\", ", reg->group.c_str ());
     else
       gdb_printf ("NULL, ");
-    if (reg->bitsize_parameter.length () != 0)
-      gdb_printf ("\"%s\", \"%s\");\n", reg->bitsize_parameter.c_str (),
-		  reg->type.c_str ());
+    if (reg->bitsize_parameter != nullptr)
+      gdb_printf ("param_%s, ", reg->bitsize_parameter->name.c_str ());
     else
-      gdb_printf ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
+      gdb_printf ("%d, ", reg->bitsize);
+    gdb_printf ("\"%s\");\n", reg->type.c_str ());
 
     m_next_regnum++;
   }

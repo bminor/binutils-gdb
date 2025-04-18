@@ -411,6 +411,19 @@ frame_unwind_legacy::prev_register (const frame_info_ptr &this_frame,
 
 /* See frame-unwind.h.  */
 
+struct value *
+frame_unwind_legacy::prev_tdesc_parameter (const frame_info_ptr &this_frame,
+					   void **this_prologue_cache,
+					   unsigned int parameter_id) const
+{
+  if (m_prev_tdesc_parameter == nullptr)
+    return frame_unwind::prev_tdesc_parameter (this_frame, this_prologue_cache,
+					       parameter_id);
+  return m_prev_tdesc_parameter (this_frame, this_prologue_cache, parameter_id);
+}
+
+/* See frame-unwind.h.  */
+
 int
 frame_unwind_legacy::sniff (const frame_info_ptr &this_frame,
 			    void **this_prologue_cache) const

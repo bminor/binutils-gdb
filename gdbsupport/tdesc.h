@@ -26,6 +26,7 @@ struct tdesc_type_builtin;
 struct tdesc_type_vector;
 struct tdesc_type_with_fields;
 struct tdesc_reg;
+struct tdesc_parameter;
 struct target_desc;
 
 /* The interface to visit different elements of target description.  */
@@ -56,6 +57,9 @@ public:
 
   virtual void visit (const tdesc_reg *e)
   {}
+
+  virtual void visit (const tdesc_parameter *e)
+  {}
 };
 
 class tdesc_element
@@ -79,7 +83,7 @@ struct tdesc_reg : tdesc_element
 
   tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
 	     int regnum, int save_restore_, const char *group_,
-	     const std::string &bitsize_parameter_, const char *type_);
+	     const tdesc_parameter &bitsize_parameter_, const char *type_);
 
   virtual ~tdesc_reg () = default;
 
@@ -109,10 +113,11 @@ struct tdesc_reg : tdesc_element
   std::string group;
 
   /* The size of the register, in bits.
-     Ignored if BITSIZE_PARAMETER isn't empty.  */
+     Ignored if BITSIZE_PARAMETER isn't nullptr.  */
   int bitsize;
 
-  std::string feature, bitsize_parameter;
+  /* FIXME: Document.  */
+  const tdesc_parameter *bitsize_parameter = nullptr;
 
   /* The type of the register.  This string corresponds to either
      a named type from the target description or a predefined
@@ -134,6 +139,7 @@ struct tdesc_reg : tdesc_element
        && save_restore == other.save_restore
        && bitsize == other.bitsize
        && group == other.group
+       && bitsize_parameter == other.bitsize_parameter
        && type == other.type);
   }
 
@@ -203,6 +209,9 @@ struct tdesc_type : tdesc_element
     : name (name_), kind (kind_)
   {}
 
+  tdesc_type (tdesc_type &&other)
+  { *this = std::move (other); }
+
   virtual ~tdesc_type () = default;
 
   DISABLE_COPY_AND_ASSIGN (tdesc_type);
@@ -222,9 +231,77 @@ struct tdesc_type : tdesc_element
   {
     return !(*this == other);
   }
+
+  tdesc_type &operator= (tdesc_type &&other)
+  {
+    this->name = std::move (other.name);
+    this->kind = other.kind;
+    return *this;
+  }
 };
 
 typedef std::unique_ptr<tdesc_type> tdesc_type_up;
+
+/* A parameter from a target description.  */
+
+struct tdesc_parameter : tdesc_element
+{
+  tdesc_parameter (const std::string &feature_, const std::string &name_,
+		   tdesc_type *type_)
+    : feature (feature_), name (name_), type (type_)
+  {}
+
+  tdesc_parameter (tdesc_parameter &&other)
+    : type (other.type)
+  {
+    *this = std::move (other);
+  }
+
+  virtual ~tdesc_parameter () = default;
+
+  DISABLE_COPY_AND_ASSIGN (tdesc_parameter);
+
+  /* FIXME: Document.  */
+  std::string feature;
+
+  /* The name of this parameter.  In standard features, it may be
+     recognized by the architecture support code.  */
+  std::string name;
+
+  /* The type of the parameter.  */
+  tdesc_type *type;
+
+  void accept (tdesc_element_visitor &v) const override
+  {
+    v.visit (this);
+  }
+
+  bool operator== (const tdesc_parameter &other) const
+  {
+    return (name == other.name
+	    && feature == other.feature
+	    && type == other.type);
+  }
+
+  bool operator!= (const tdesc_parameter &other) const
+  {
+    return !(*this == other);
+  }
+
+  tdesc_parameter &operator= (tdesc_parameter &&other)
+  {
+    if (this != &other)
+      {
+	this->feature = std::move (other.feature);
+	this->name = std::move (other.name);
+	this->type = other.type;
+      }
+
+    return *this;
+  }
+};
+
+typedef std::unique_ptr<tdesc_parameter> tdesc_parameter_up;
 
 struct tdesc_type_builtin : tdesc_type
 {
@@ -245,15 +322,13 @@ struct tdesc_type_vector : tdesc_type
   tdesc_type_vector (const std::string &name, tdesc_type *element_type_,
 		     int count_)
   : tdesc_type (name, TDESC_TYPE_VECTOR),
-    element_type (element_type_), count (count_)
+    element_type (element_type_), count (count_), bitsize_parameter (nullptr)
   {}
 
   tdesc_type_vector (const std::string &name, tdesc_type *element_type_,
-		     const std::string &feature_,
-		     const std::string &bitsize_parameter_)
+		     const tdesc_parameter &bitsize_parameter_)
       : tdesc_type (name, TDESC_TYPE_VECTOR), element_type (element_type_),
-	count (TDESC_REG_VARIABLE_SIZE), feature (feature_),
-	bitsize_parameter (bitsize_parameter_)
+	count (TDESC_REG_VARIABLE_SIZE), bitsize_parameter (&bitsize_parameter_)
   {}
 
   void accept (tdesc_element_visitor &v) const override
@@ -263,11 +338,11 @@ struct tdesc_type_vector : tdesc_type
 
   struct tdesc_type *element_type;
 
-  /* Ignored if BITSIZE_PARAMETER isn't empty. */
+  /* Ignored if BITSIZE_PARAMETER isn't nullptr. */
   int count;
 
   /* Target description parameter  providing total vector size.  */
-  std::string feature, bitsize_parameter;
+  const tdesc_parameter *bitsize_parameter;
 };
 
 /* A named type from a target description.  */
@@ -328,7 +403,12 @@ struct tdesc_feature : tdesc_element
   /* The types associated with this feature.  */
   std::vector<tdesc_type_up> types;
 
+  /* Paremeters defined in this feature.  */
+  std::vector<tdesc_parameter_up> parameters;
+
   void accept (tdesc_element_visitor &v) const override;
+
+  bool has_parameter (const char *parameter) const;
 
   bool operator== (const tdesc_feature &other) const;
 
@@ -392,7 +472,7 @@ struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
 struct tdesc_type *tdesc_create_vector (struct tdesc_feature *feature,
 					const char *name,
 					struct tdesc_type *field_type,
-					const char *bitsize_parameter);
+					const tdesc_parameter &bitsize_parameter);
 
 /* Return the created struct tdesc_type named NAME in FEATURE.  */
 tdesc_type_with_fields *tdesc_create_struct (struct tdesc_feature *feature,
@@ -453,7 +533,20 @@ void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
    BITSIZE_PARAMETER.  */
 void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		       int regnum, int save_restore, const char *group,
-		       const char *bitsize_parameter, const char *type);
+		       const tdesc_parameter &bitsize_parameter,
+		       const char *type);
+
+/* Return internal ID of PARAMETER from FEATURE.  */
+
+std::optional<unsigned int> tdesc_parameter_id (const target_desc *target_desc,
+						const char *feature,
+						const char *parameter);
+
+/* Add PARAMETER to FEATURE.  */
+
+const tdesc_parameter & tdesc_create_parameter (tdesc_feature &feature,
+						const char *parameter,
+						tdesc_type *type);
 
 /* Return the tdesc in string XML format.  */
 
@@ -477,6 +570,7 @@ public:
   void visit (const tdesc_type_vector *type) override;
   void visit (const tdesc_type_with_fields *type) override;
   void visit (const tdesc_reg *reg) override;
+  void visit (const tdesc_parameter *p) override;
 
 private:
 

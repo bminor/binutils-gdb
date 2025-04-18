@@ -35,18 +35,18 @@ tdesc_reg::tdesc_reg (struct tdesc_feature *feature, const std::string &name_,
 
 tdesc_reg::tdesc_reg (struct tdesc_feature *feature_, const std::string &name_,
 		      int regnum, int save_restore_, const char *group_,
-		      const std::string &bitsize_parameter_, const char *type_)
+		      const tdesc_parameter &bitsize_parameter_,
+		      const char *type_)
   : name (name_), target_regnum (regnum),
     save_restore (save_restore_),
     group (group_ != NULL ? group_ : ""),
     bitsize (TDESC_REG_VARIABLE_SIZE),
-    bitsize_parameter (bitsize_parameter_),
+    bitsize_parameter (&bitsize_parameter_),
     type (type_ != NULL ? type_ : "<unknown>")
 {
   /* If the register's type is target-defined, look it up now.  We may not
      have easy access to the containing feature when we want it later.  */
   tdesc_type = tdesc_named_type (feature_, type.c_str ());
-  feature = feature_->name;
 }
 
 /* Predefined types.  */
@@ -76,6 +76,9 @@ static tdesc_type_builtin tdesc_predefined_types[] =
 void tdesc_feature::accept (tdesc_element_visitor &v) const
 {
   v.visit_pre (this);
+
+  for (const tdesc_parameter_up &parameter : parameters)
+    parameter->accept (v);
 
   for (const tdesc_type_up &type : types)
     type->accept (v);
@@ -150,6 +153,32 @@ tdesc_named_type (const struct tdesc_feature *feature, const char *id)
 
 /* See gdbsupport/tdesc.h.  */
 
+bool
+tdesc_feature::has_parameter (const char *parameter) const
+{
+  for (int i = 0; i < this->parameters.size (); i++)
+    if (this->parameters[i]->name == parameter)
+      return true;
+
+  return false;
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+const tdesc_parameter &
+tdesc_create_parameter (tdesc_feature &feature, const char *parameter,
+			tdesc_type *type)
+{
+  gdb_assert (!feature.has_parameter (parameter));
+
+  feature.parameters.emplace_back (new tdesc_parameter (feature.name,
+							parameter, type));
+
+  return *feature.parameters.back ().get ();
+}
+
+/* See gdbsupport/tdesc.h.  */
+
 void
 tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		  int regnum, int save_restore, const char *group,
@@ -166,7 +195,7 @@ tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 void
 tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		  int regnum, int save_restore, const char *group,
-		  const char *bitsize_parameter, const char *type)
+		  const tdesc_parameter &bitsize_parameter, const char *type)
 {
   tdesc_reg *reg = new tdesc_reg (feature, name, regnum, save_restore,
 				  group, bitsize_parameter, type);
@@ -191,10 +220,9 @@ tdesc_create_vector (struct tdesc_feature *feature, const char *name,
 struct tdesc_type *
 tdesc_create_vector (struct tdesc_feature *feature, const char *name,
 		     struct tdesc_type *field_type,
-		     const char *bitsize_parameter)
+		     const tdesc_parameter &bitsize_parameter)
 {
   tdesc_type_vector *type = new tdesc_type_vector (name, field_type,
-						   feature->name,
 						   bitsize_parameter);
   feature->types.emplace_back (type);
 
@@ -355,9 +383,9 @@ void print_xml_feature::visit (const tdesc_type_builtin *t)
 
 void print_xml_feature::visit (const tdesc_type_vector *t)
 {
-  if (t->bitsize_parameter.length () != 0)
+  if (t->bitsize_parameter != nullptr)
     add_line ("<vector id=\"%s\" type=\"%s\" bitsize=\"$%s\"/>", t->name.c_str (),
-	      t->element_type->name.c_str (), t->bitsize_parameter.c_str ());
+	      t->element_type->name.c_str (), t->bitsize_parameter->name.c_str ());
   else
     add_line ("<vector id=\"%s\" type=\"%s\" count=\"%d\"/>", t->name.c_str (),
 	      t->element_type->name.c_str (), t->count);
@@ -429,10 +457,10 @@ void print_xml_feature::visit (const tdesc_reg *r)
 {
   std::string tmp;
 
-  if (r->bitsize_parameter.length () != 0)
+  if (r->bitsize_parameter != nullptr)
     string_appendf (tmp,
 		    "<reg name=\"%s\" bitsize=\"$%s\" type=\"%s\" regnum=\"%ld\"",
-		    r->name.c_str (), r->bitsize_parameter.c_str(),
+		    r->name.c_str (), r->bitsize_parameter->name.c_str(),
 		    r->type.c_str (), r->target_regnum);
   else
     string_appendf (tmp,
@@ -478,6 +506,12 @@ void print_xml_feature::visit_post (const target_desc *e)
 {
   indent (-1);
   add_line ("</target>");
+}
+
+void print_xml_feature::visit (const tdesc_parameter *p)
+{
+  add_line ("<parameter name=\"%s\" type=\"%s\"/>", p->name.c_str (),
+	    p->type->name.c_str ());
 }
 
 /* See gdbsupport/tdesc.h.  */
