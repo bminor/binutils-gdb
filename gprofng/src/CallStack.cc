@@ -527,14 +527,10 @@ CallStackP::add_stack (DataDescriptor *dDscr, long idx, FramePacket *frp,
 
       Vaddr va = frp->getFromStack (index);
       DbeInstr *cur_instr = experiment->map_Vaddr_to_PC (va, tstamp);
-#if ARCH(Intel)// TBR? FIXUP_XXX_SPARC_LINUX: switch should be on experiment ARCH, not dbe ARCH
       // We need to adjust return addresses on intel
-      // in order to attribute inclusive metrics to
-      // proper call instructions.
-      if (experiment->exp_maj_version <= 9)
-	if (!leaf && cur_instr->addr != 0)
-	  cur_instr = cur_instr->func->find_dbeinstr (0, cur_instr->addr - 1);
-#endif
+      // in order to attribute inclusive metrics to proper instructions.
+      if (experiment->platform == Intel && cur_instr->addr != 0)
+	cur_instr = cur_instr->func->find_dbeinstr (0, cur_instr->addr - 1);
 
       // Skip PC's from PLT, update leaf and state accordingly
       if ((cur_instr->func->flags & FUNC_FLAG_PLT)
