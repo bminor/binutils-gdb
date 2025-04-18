@@ -256,7 +256,6 @@ colorpy_init (PyObject *self, PyObject *args, PyObject *kwds)
       return gdbpy_handle_gdb_exception (-1, except);
     }
 
-  Py_INCREF (self);
   return 0;
 }
 
