@@ -80,33 +80,33 @@ gdbpy_get_color (PyObject *obj)
 static PyObject *
 get_attr (PyObject *obj, PyObject *attr_name)
 {
-  if (! PyUnicode_Check (attr_name))
+  if (!PyUnicode_Check (attr_name))
     return PyObject_GenericGetAttr (obj, attr_name);
 
   colorpy_object *self = (colorpy_object *) obj;
   const ui_file_style::color &color = self->color;
 
-  if (! PyUnicode_CompareWithASCIIString (attr_name, "colorspace"))
+  if (!PyUnicode_CompareWithASCIIString (attr_name, "colorspace"))
     {
       int value = static_cast<int> (color.colorspace ());
       return gdb_py_object_from_longest (value).release ();
     }
 
-  if (! PyUnicode_CompareWithASCIIString (attr_name, "is_none"))
+  if (!PyUnicode_CompareWithASCIIString (attr_name, "is_none"))
     return PyBool_FromLong (color.is_none ());
 
-  if (! PyUnicode_CompareWithASCIIString (attr_name, "is_indexed"))
+  if (!PyUnicode_CompareWithASCIIString (attr_name, "is_indexed"))
     return PyBool_FromLong (color.is_indexed ());
 
-  if (! PyUnicode_CompareWithASCIIString (attr_name, "is_direct"))
+  if (!PyUnicode_CompareWithASCIIString (attr_name, "is_direct"))
     return PyBool_FromLong (color.is_direct ());
 
   if (color.is_indexed ()
-      && ! PyUnicode_CompareWithASCIIString (attr_name, "index"))
+      && !PyUnicode_CompareWithASCIIString (attr_name, "index"))
     return gdb_py_object_from_longest (color.get_value ()).release ();
 
   if (color.is_direct ()
-      && ! PyUnicode_CompareWithASCIIString (attr_name, "components"))
+      && !PyUnicode_CompareWithASCIIString (attr_name, "components"))
     {
       uint8_t rgb[3];
       color.get_rgb (rgb);
@@ -144,7 +144,7 @@ colorpy_escape_sequence (PyObject *self, PyObject *is_fg_obj)
       return nullptr;
     }
 
-  if (! PyBool_Check (is_fg_obj))
+  if (!PyBool_Check (is_fg_obj))
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("A boolean argument is required."));
@@ -175,17 +175,17 @@ colorpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   PyObject *colorspace_obj = nullptr;
   color_space colorspace = color_space::MONOCHROME;
 
-  if (! PyArg_ParseTuple (args, "|OO", &value_obj, &colorspace_obj))
+  if (!PyArg_ParseTuple (args, "|OO", &value_obj, &colorspace_obj))
     return -1;
 
   try
     {
-      if (colorspace_obj)
+      if (colorspace_obj != nullptr)
 	{
 	  if (PyLong_Check (colorspace_obj))
 	    {
 	      long colorspace_id = -1;
-	      if (! gdb_py_int_as_long (colorspace_obj, &colorspace_id))
+	      if (!gdb_py_int_as_long (colorspace_obj, &colorspace_id))
 		return -1;
 	      if (!color_space_safe_cast (&colorspace, colorspace_id))
 		error (_("colorspace %ld is out of range."), colorspace_id);
@@ -201,11 +201,11 @@ colorpy_init (PyObject *self, PyObject *args, PyObject *kwds)
       else if (PyLong_Check (value_obj))
 	{
 	  long value = -1;
-	  if (! gdb_py_int_as_long (value_obj, &value))
+	  if (!gdb_py_int_as_long (value_obj, &value))
 	    return -1;
 	  if (value < 0 || value > INT_MAX)
 	    error (_("value %ld is out of range."), value);
-	  if (colorspace_obj)
+	  if (colorspace_obj != nullptr)
 	    obj->color = ui_file_style::color (colorspace, value);
 	  else
 	    obj->color = ui_file_style::color (value);
@@ -271,10 +271,10 @@ colorpy_str (PyObject *self)
 static int
 gdbpy_initialize_color (void)
 {
-  for (auto & pair : colorspace_constants)
-      if (PyModule_AddIntConstant (gdb_module, pair.name,
-				   static_cast<long> (pair.value)) < 0)
-	return -1;
+  for (auto &pair : colorspace_constants)
+    if (PyModule_AddIntConstant (gdb_module, pair.name,
+				 static_cast<long> (pair.value)) < 0)
+      return -1;
 
   colorpy_object_type.tp_new = PyType_GenericNew;
   return gdbpy_type_ready (&colorpy_object_type, gdb_module);
