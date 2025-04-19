@@ -470,7 +470,18 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   /* Avoid clashes with bfd_cache_close_all running in another
      thread.  */
   if (!bfd_cache_set_uncloseable (abfd, true, &old_in_format_matches))
-    return false;
+    {
+      free (matching_vector);
+      return false;
+    }
+
+  /* Locking is required here in order to manage _bfd_section_id.  */
+  if (!bfd_lock ())
+    {
+      bfd_cache_set_uncloseable (abfd, old_in_format_matches, NULL);
+      free (matching_vector);
+      return false;
+    }
 
   /* Presume the answer is yes.  */
   abfd->format = format;
@@ -479,10 +490,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   /* Don't report errors on recursive calls checking the first element
      of an archive.  */
   orig_messages = _bfd_set_error_handler_caching (&messages);
-
-  /* Locking is required here in order to manage _bfd_section_id.  */
-  if (!bfd_lock ())
-    return false;
 
   preserve_match.marker = NULL;
   if (!bfd_preserve_save (abfd, &preserve, NULL))
@@ -779,7 +786,8 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
  out:
   if (preserve_match.marker != NULL)
     bfd_preserve_finish (abfd, &preserve_match);
-  bfd_preserve_restore (abfd, &preserve);
+  if (preserve.marker != NULL)
+    bfd_preserve_restore (abfd, &preserve);
   _bfd_restore_error_handler_caching (orig_messages);
   print_and_clear_messages (&messages, PER_XVEC_NO_TARGET);
   bfd_cache_set_uncloseable (abfd, old_in_format_matches, NULL);
