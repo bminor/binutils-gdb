@@ -138,12 +138,14 @@ read_coff_rsrc (const char *filename, const char *target)
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
 	list_matching_formats (matching);
       free (matching);
+      bfd_close (abfd);
       return NULL;
     }
   if (bfd_get_flavour (abfd) != bfd_target_coff_flavour
       || !obj_pe (abfd))
     {
       non_fatal (_("%s: not a PE file"), filename);
+      bfd_close (abfd);
       return NULL;
     }
 
@@ -151,6 +153,7 @@ read_coff_rsrc (const char *filename, const char *target)
   if (sec == NULL)
     {
       non_fatal (_("%s: no resource section"), filename);
+      bfd_close (abfd);
       return NULL;
     }
 
@@ -163,6 +166,7 @@ read_coff_rsrc (const char *filename, const char *target)
   if (size > (bfd_size_type) get_file_size (filename))
     {
       non_fatal (_("%s: .rsrc section is bigger than the file!"), filename);
+      bfd_close (abfd);
       return NULL;
     }
 
@@ -528,6 +532,7 @@ write_coff_file (const char *filename, const char *target,
   if (! bfd_set_format (abfd, bfd_object))
     {
       bfd_nonfatal ("bfd_set_format");
+      bfd_close_all_done (abfd);
       return false;
     }
 
@@ -535,24 +540,28 @@ write_coff_file (const char *filename, const char *target,
   if (! bfd_set_arch_mach (abfd, bfd_arch_sh, 0))
     {
       bfd_nonfatal ("bfd_set_arch_mach(sh)");
+      bfd_close_all_done (abfd);
       return false;
     }
 #elif defined DLLTOOL_MIPS
   if (! bfd_set_arch_mach (abfd, bfd_arch_mips, 0))
     {
       bfd_nonfatal ("bfd_set_arch_mach(mips)");
+      bfd_close_all_done (abfd);
       return false;
     }
 #elif defined DLLTOOL_ARM
   if (! bfd_set_arch_mach (abfd, bfd_arch_arm, 0))
     {
       bfd_nonfatal ("bfd_set_arch_mach(arm)");
+      bfd_close_all_done (abfd);
       return false;
     }
 #elif defined DLLTOOL_AARCH64
   if (! bfd_set_arch_mach (abfd, bfd_arch_aarch64, 0))
     {
       bfd_nonfatal ("bfd_set_arch_mach(aarch64)");
+      bfd_close_all_done (abfd);
       return false;
     }
 #else
@@ -560,6 +569,7 @@ write_coff_file (const char *filename, const char *target,
   if (! bfd_set_arch_mach (abfd, bfd_arch_i386, 0))
     {
       bfd_nonfatal ("bfd_set_arch_mach(i386)");
+      bfd_close_all_done (abfd);
       return false;
     }
 #endif
@@ -567,6 +577,7 @@ write_coff_file (const char *filename, const char *target,
   if (! bfd_set_file_flags (abfd, HAS_SYMS | HAS_RELOC))
     {
       bfd_nonfatal ("bfd_set_file_flags");
+      bfd_close_all_done (abfd);
       return false;
     }
 
@@ -576,12 +587,14 @@ write_coff_file (const char *filename, const char *target,
   if (sec == NULL)
     {
       bfd_nonfatal ("bfd_make_section");
+      bfd_close_all_done (abfd);
       return false;
     }
 
   if (! bfd_set_symtab (abfd, &sec->symbol, 1))
     {
       bfd_nonfatal ("bfd_set_symtab");
+      bfd_close_all_done (abfd);
       return false;
     }
 
@@ -628,7 +641,11 @@ write_coff_file (const char *filename, const char *target,
 
   /* Actually convert the resources to binary.  */
   if (!coff_to_bin (resources, &cwi))
-    return false;
+    {
+      bfd_close_all_done (abfd);
+      free (cwi.relocs);
+      return false;
+    }
 
   /* Add another few bytes to the directory strings if needed for
      alignment.  */
@@ -655,6 +672,8 @@ write_coff_file (const char *filename, const char *target,
   if (!bfd_set_section_size (sec, length))
     {
       bfd_nonfatal ("bfd_set_section_size");
+      bfd_close_all_done (abfd);
+      free (cwi.relocs);
       return false;
     }
 
@@ -666,6 +685,8 @@ write_coff_file (const char *filename, const char *target,
       if (! bfd_set_section_contents (abfd, sec, d->data, offset, d->length))
 	{
 	  bfd_nonfatal ("bfd_set_section_contents");
+	  bfd_close_all_done (abfd);
+	  free (cwi.relocs);
 	  return false;
 	}
       offset += d->length;
@@ -684,7 +705,11 @@ write_coff_file (const char *filename, const char *target,
     {
       if (res_to_bin (cwi.wrbfd, (rc_uint_type) offset, rd->res)
 	  == (rc_uint_type) -1)
-	return false;
+	{
+	  bfd_close_all_done (abfd);
+	  free (cwi.relocs);
+	  return false;
+	}
       offset += rd->length;
     }
 
@@ -693,6 +718,7 @@ write_coff_file (const char *filename, const char *target,
   if (! bfd_close (abfd))
     {
       bfd_nonfatal ("bfd_close");
+      free (cwi.relocs);
       return false;
     }
 
