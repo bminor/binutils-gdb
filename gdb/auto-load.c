@@ -163,49 +163,33 @@ show_auto_load_dir (struct ui_file *file, int from_tty,
 	      value);
 }
 
-/* Substitute all occurrences of string FROM by string TO in *STRINGP.  *STRINGP
-   must come from xrealloc-compatible allocator and it may be updated.  FROM
-   needs to be delimited by IS_DIR_SEPARATOR or DIRNAME_SEPARATOR (or be
-   located at the start or end of *STRINGP.  */
+/* Substitute all occurrences of string FROM by string TO in STRING.
+   STRING will be updated in place as needed.  FROM needs to be
+   delimited by IS_DIR_SEPARATOR or DIRNAME_SEPARATOR (or be located
+   at the start or end of STRING.  */
 
 static void
-substitute_path_component (char **stringp, const char *from, const char *to)
+substitute_path_component (std::string &string, std::string_view from,
+			   std::string_view to)
 {
-  char *string = *stringp, *s;
-  const size_t from_len = strlen (from);
-  const size_t to_len = strlen (to);
-
-  for (s = string;;)
+  for (size_t s = 0;;)
     {
-      s = strstr (s, from);
-      if (s == NULL)
+      s = string.find (from, s);
+      if (s == std::string::npos)
 	break;
 
-      if ((s == string || IS_DIR_SEPARATOR (s[-1])
-	   || s[-1] == DIRNAME_SEPARATOR)
-	  && (s[from_len] == '\0' || IS_DIR_SEPARATOR (s[from_len])
-	      || s[from_len] == DIRNAME_SEPARATOR))
+      if ((s == 0 || IS_DIR_SEPARATOR (string[s - 1])
+	   || string[s - 1] == DIRNAME_SEPARATOR)
+	  && (s + from.size () == string.size ()
+	      || IS_DIR_SEPARATOR (string[s + from.size ()])
+	      || string[s + from.size ()] == DIRNAME_SEPARATOR))
 	{
-	  char *string_new;
-
-	  string_new
-	    = (char *) xrealloc (string, (strlen (string) + to_len + 1));
-
-	  /* Relocate the current S pointer.  */
-	  s = s - string + string_new;
-	  string = string_new;
-
-	  /* Replace from by to.  */
-	  memmove (&s[to_len], &s[from_len], strlen (&s[from_len]) + 1);
-	  memcpy (s, to, to_len);
-
-	  s += to_len;
+	  string.replace (s, from.size (), to);
+	  s += to.size ();
 	}
       else
 	s++;
     }
-
-  *stringp = string;
 }
 
 #if GDB_SELF_TEST
@@ -219,10 +203,8 @@ test_substitute_path_component ()
   auto test = [] (std::string s, const char *from, const char *to,
 		  const char *expected)
     {
-      char *temp = xstrdup (s.c_str ());
-      substitute_path_component (&temp, from, to);
-      SELF_CHECK (strcmp (temp, expected) == 0);
-      xfree (temp);
+      substitute_path_component (s, from, to);
+      SELF_CHECK (s == expected);
     };
 
   test ("/abc/$def/g", "abc", "xyz", "/xyz/$def/g");
@@ -258,16 +240,15 @@ static std::vector<gdb::unique_xmalloc_ptr<char>> auto_load_safe_path_vec;
 static std::vector<gdb::unique_xmalloc_ptr<char>>
 auto_load_expand_dir_vars (const char *string)
 {
-  char *s = xstrdup (string);
-  substitute_path_component (&s, "$datadir", gdb_datadir.c_str ());
-  substitute_path_component (&s, "$debugdir", debug_file_directory.c_str ());
+  std::string s = string;
+  substitute_path_component (s, "$datadir", gdb_datadir.c_str ());
+  substitute_path_component (s, "$debugdir", debug_file_directory.c_str ());
 
-  if (debug_auto_load && strcmp (s, string) != 0)
-    auto_load_debug_printf ("Expanded $-variables to \"%s\".", s);
+  if (debug_auto_load && s != string)
+    auto_load_debug_printf ("Expanded $-variables to \"%s\".", s.c_str ());
 
   std::vector<gdb::unique_xmalloc_ptr<char>> dir_vec
-    = dirnames_to_char_ptr_vec (s);
-  xfree(s);
+    = dirnames_to_char_ptr_vec (s.c_str ());
 
   return dir_vec;
 }
