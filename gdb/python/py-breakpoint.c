@@ -948,7 +948,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
       else
 	{
 	  PyErr_SetString (PyExc_RuntimeError,
-			   _("Line keyword should be an integer or a string. "));
+			   _("Line keyword should be an integer or a string."));
 	  return -1;
 	}
     }
