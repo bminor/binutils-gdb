@@ -1819,3 +1819,9 @@ extern void set_gdbarch_get_shadow_stack_pointer (struct gdbarch *gdbarch, gdbar
 typedef void (gdbarch_fetch_tdesc_parameter_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, unsigned int parameter_id);
 extern void gdbarch_fetch_tdesc_parameter (struct gdbarch *gdbarch, readable_regcache *regcache, unsigned int parameter_id);
 extern void set_gdbarch_fetch_tdesc_parameter (struct gdbarch *gdbarch, gdbarch_fetch_tdesc_parameter_ftype *fetch_tdesc_parameter);
+
+/* Can the size of this register change during runtime? */
+
+typedef bool (gdbarch_register_is_variable_size_ftype) (struct gdbarch *gdbarch, int regno);
+extern bool gdbarch_register_is_variable_size (struct gdbarch *gdbarch, int regno);
+extern void set_gdbarch_register_is_variable_size (struct gdbarch *gdbarch, gdbarch_register_is_variable_size_ftype *register_is_variable_size);

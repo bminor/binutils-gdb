@@ -1331,6 +1331,22 @@ dwarf2_frame_sniffer (const struct frame_unwind *self,
   return 1;
 }
 
+static value *
+dwarf2_frame_prev_tdesc_parameter (const frame_info_ptr &this_frame,
+				   void **this_prologue_cache,
+				   unsigned int parameter_id)
+{
+  /* There's no DWARF concept of target description parameter, so we can't
+     find it.  But sometimes we may be asked about it so forward the
+     question to next frame's unwinder.  This is analogous to the
+     DWARF2_FRAME_REG_UNSPECIFIED case in dwarf2_frame_prev_register.  */
+  frame_info_ptr next_frame = get_next_frame (this_frame);
+  if (next_frame == nullptr)
+    return nullptr;
+  else
+    return frame_unwind_tdesc_parameter_value (next_frame, parameter_id);
+}
+
 static const struct frame_unwind_legacy dwarf2_frame_unwind (
   "dwarf2",
   NORMAL_FRAME,
@@ -1340,7 +1356,9 @@ static const struct frame_unwind_legacy dwarf2_frame_unwind (
   dwarf2_frame_prev_register,
   NULL,
   dwarf2_frame_sniffer,
-  dwarf2_frame_dealloc_cache
+  dwarf2_frame_dealloc_cache,
+  nullptr, /* prev_arch */
+  dwarf2_frame_prev_tdesc_parameter
 );
 
 static const struct frame_unwind_legacy dwarf2_signal_frame_unwind (

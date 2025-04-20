@@ -80,6 +80,9 @@ struct tramp_frame
   /* Given the current frame in THIS_FRAME and a frame cache in FRAME_CACHE,
      return the architecture of the previous frame.  */
   frame_prev_arch_ftype *prev_arch;
+
+  /* FIXME: Document.  */
+  frame_prev_tdesc_parameter_ftype *prev_tdesc_parameter;
 };
 
 void tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,

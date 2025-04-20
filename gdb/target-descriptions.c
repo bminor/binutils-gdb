@@ -1041,6 +1041,16 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
   return arch_reg->type;
 }
 
+static bool
+tdesc_register_is_variable_size (struct gdbarch *gdbarch, int regno)
+{
+  struct tdesc_reg *reg = tdesc_find_register (gdbarch, regno);
+
+  gdb_assert (reg != nullptr);
+
+  return reg->bitsize_parameter != nullptr;
+}
+
 static int
 tdesc_remote_register_number (struct gdbarch *gdbarch, int regno)
 {
@@ -1234,6 +1244,8 @@ tdesc_use_registers (struct gdbarch *gdbarch,
   set_gdbarch_remote_register_number (gdbarch,
 				      tdesc_remote_register_number);
   set_gdbarch_register_reggroup_p (gdbarch, tdesc_register_reggroup_p);
+  set_gdbarch_register_is_variable_size (gdbarch,
+					 tdesc_register_is_variable_size);
 }
 
 /* See gdbsupport/tdesc.h.  */

@@ -316,8 +316,21 @@ struct value *
 frame_unwind_got_memory (const frame_info_ptr &frame, int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
-  struct value *v = value_at_lazy (register_type (gdbarch, regnum, &frame),
-				   addr);
+  const frame_info_ptr *prev_frame_ptr = nullptr;
+
+  if (gdbarch_register_is_variable_size (gdbarch, regnum))
+    {
+      /* Resolve type using previous frame, because, that's the context in
+	 which the type's dynamic properties need to be resolved.  It's not
+	 always possible to get the previous frame though (we may be in the
+	 process of computing its frame id) so only do it for variable-size
+	 registers, which is the case when register_type actually needs the
+	 frame argument.  */
+      frame_info_ptr prev_frame = get_prev_frame (frame);
+      prev_frame_ptr = &prev_frame;
+    }
+  struct value *v = value_at_lazy (register_type (gdbarch, regnum,
+						  prev_frame_ptr), addr);
 
   v->set_stack (true);
   return v;

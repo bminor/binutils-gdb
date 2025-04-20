@@ -263,6 +263,7 @@ struct gdbarch
   gdbarch_shadow_stack_push_ftype *shadow_stack_push = nullptr;
   gdbarch_get_shadow_stack_pointer_ftype *get_shadow_stack_pointer = default_get_shadow_stack_pointer;
   gdbarch_fetch_tdesc_parameter_ftype *fetch_tdesc_parameter = default_fetch_tdesc_parameter;
+  gdbarch_register_is_variable_size_ftype *register_is_variable_size = default_register_is_variable_size;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -537,6 +538,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of shadow_stack_push, has predicate.  */
   /* Skip verify of get_shadow_stack_pointer, invalid_p == 0.  */
   /* Skip verify of fetch_tdesc_parameter, invalid_p == 0.  */
+  /* Skip verify of register_is_variable_size, invalid_p == 0.  */
   if (!log.empty ())
     internal_error (_("verify_gdbarch: the following are invalid ...%s"),
 		    log.c_str ());
@@ -1414,6 +1416,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
 	      "gdbarch_dump: fetch_tdesc_parameter = <%s>\n",
 	      host_address_to_string (gdbarch->fetch_tdesc_parameter));
+  gdb_printf (file,
+	      "gdbarch_dump: register_is_variable_size = <%s>\n",
+	      host_address_to_string (gdbarch->register_is_variable_size));
   if (gdbarch->dump_tdep != NULL)
     gdbarch->dump_tdep (gdbarch, file);
 }
@@ -5582,4 +5587,21 @@ set_gdbarch_fetch_tdesc_parameter (struct gdbarch *gdbarch,
 				   gdbarch_fetch_tdesc_parameter_ftype fetch_tdesc_parameter)
 {
   gdbarch->fetch_tdesc_parameter = fetch_tdesc_parameter;
+}
+
+bool
+gdbarch_register_is_variable_size (struct gdbarch *gdbarch, int regno)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->register_is_variable_size != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_register_is_variable_size called\n");
+  return gdbarch->register_is_variable_size (gdbarch, regno);
+}
+
+void
+set_gdbarch_register_is_variable_size (struct gdbarch *gdbarch,
+				       gdbarch_register_is_variable_size_ftype register_is_variable_size)
+{
+  gdbarch->register_is_variable_size = register_is_variable_size;
 }

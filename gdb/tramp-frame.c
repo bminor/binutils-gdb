@@ -61,9 +61,10 @@ class frame_unwind_trampoline : public frame_unwind
 {
 public:
   frame_unwind_trampoline (enum frame_type type, const struct frame_data *data,
-			   frame_prev_arch_ftype *prev_arch_func)
+			   frame_prev_arch_ftype *prev_arch_func,
+			   frame_prev_tdesc_parameter_ftype *prev_tdesc_parameter_func)
     : frame_unwind ("trampoline", type, FRAME_UNWIND_GDB, data),
-      m_prev_arch (prev_arch_func)
+      m_prev_arch (prev_arch_func), m_prev_tdesc_parameter (prev_tdesc_parameter_func)
   { }
 
   int sniff (const frame_info_ptr &this_frame,
@@ -84,8 +85,22 @@ public:
     return m_prev_arch (this_frame, this_prologue_cache);
   }
 
+  /* Get the value of a target description parameter in a previous frame.  */
+
+  value *prev_tdesc_parameter (const frame_info_ptr &this_frame,
+			       void **this_prologue_cache,
+			       unsigned int parameter_id) const override
+  {
+    if (m_prev_tdesc_parameter == nullptr)
+      return frame_unwind::prev_tdesc_parameter (this_frame, this_prologue_cache,
+						 parameter_id);
+    return m_prev_tdesc_parameter (this_frame, this_prologue_cache, parameter_id);
+  }
+
 private:
   frame_prev_arch_ftype *m_prev_arch;
+
+  frame_prev_tdesc_parameter_ftype *m_prev_tdesc_parameter;
 };
 
 void
@@ -196,6 +211,7 @@ tramp_frame_prepend_unwinder (struct gdbarch *gdbarch,
   unwinder = obstack_new <frame_unwind_trampoline> (gdbarch_obstack (gdbarch),
 						    tramp_frame->frame_type,
 						    data,
-						    tramp_frame->prev_arch);
+						    tramp_frame->prev_arch,
+						    tramp_frame->prev_tdesc_parameter);
   frame_unwind_prepend_unwinder (gdbarch, unwinder);
 }

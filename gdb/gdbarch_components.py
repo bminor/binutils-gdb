@@ -2887,3 +2887,14 @@ Obtain or calculate target description parameter.
     predefault="default_fetch_tdesc_parameter",
     invalid=False,
 )
+
+Method(
+    comment="""
+Can the size of this register change during runtime?
+""",
+    type="bool",
+    name="register_is_variable_size",
+    params=[("int", "regno")],
+    predefault="default_register_is_variable_size",
+    invalid=False,
+)

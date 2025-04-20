@@ -375,9 +375,11 @@ reg_buffer::initialize_variable_size_registers ()
 	  continue;
 	}
 
+      /* Assume the register cache is for the current frame.  */
+      frame_info_ptr frame = get_current_frame ();
       m_variable_size_register_type[i]
 	= resolve_dynamic_type (m_descr->register_type[i], {},
-				/* Unused address.  */ 0, nullptr);
+				/* Unused address.  */ 0, &frame);
 
       ULONGEST size = m_variable_size_register_type[i]->length ();
       gdb_assert (size != 0);

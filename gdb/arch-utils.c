@@ -1133,6 +1133,12 @@ default_fetch_tdesc_parameter (struct gdbarch *gdbarch,
 	 gdbarch_bfd_arch_info (get_current_arch ())->printable_name);
 }
 
+static bool
+default_register_is_variable_size (struct gdbarch *gdbarch, int regno)
+{
+  return false;
+}
+
 /* Non-zero if we want to trace architecture code.  */
 
 #ifndef GDBARCH_DEBUG
