@@ -161,6 +161,9 @@ func:
 	logical	bic
 	logical	orn
 	logical	eon
+
+	logical ands
+	logical bics
 	
 	arith3	add	
 	arith3	sub

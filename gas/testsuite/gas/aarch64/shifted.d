@@ -317,6 +317,110 @@ Disassembly of section \.text:
  *[0-9a-f]+:	4ae31c41 	eon	w1, w2, w3, ror #7
  *[0-9a-f]+:	4ae33c41 	eon	w1, w2, w3, ror #15
  *[0-9a-f]+:	4ae37c41 	eon	w1, w2, w3, ror #31
+ *[0-9a-f]+:	ea030041 	ands	x1, x2, x3
+ *[0-9a-f]+:	ea030441 	ands	x1, x2, x3, lsl #1
+ *[0-9a-f]+:	ea030c41 	ands	x1, x2, x3, lsl #3
+ *[0-9a-f]+:	ea031c41 	ands	x1, x2, x3, lsl #7
+ *[0-9a-f]+:	ea033c41 	ands	x1, x2, x3, lsl #15
+ *[0-9a-f]+:	ea037c41 	ands	x1, x2, x3, lsl #31
+ *[0-9a-f]+:	ea03fc41 	ands	x1, x2, x3, lsl #63
+ *[0-9a-f]+:	ea430041 	ands	x1, x2, x3, lsr #0
+ *[0-9a-f]+:	ea430441 	ands	x1, x2, x3, lsr #1
+ *[0-9a-f]+:	ea430c41 	ands	x1, x2, x3, lsr #3
+ *[0-9a-f]+:	ea431c41 	ands	x1, x2, x3, lsr #7
+ *[0-9a-f]+:	ea433c41 	ands	x1, x2, x3, lsr #15
+ *[0-9a-f]+:	ea437c41 	ands	x1, x2, x3, lsr #31
+ *[0-9a-f]+:	ea43fc41 	ands	x1, x2, x3, lsr #63
+ *[0-9a-f]+:	ea830041 	ands	x1, x2, x3, asr #0
+ *[0-9a-f]+:	ea830441 	ands	x1, x2, x3, asr #1
+ *[0-9a-f]+:	ea830c41 	ands	x1, x2, x3, asr #3
+ *[0-9a-f]+:	ea831c41 	ands	x1, x2, x3, asr #7
+ *[0-9a-f]+:	ea833c41 	ands	x1, x2, x3, asr #15
+ *[0-9a-f]+:	ea837c41 	ands	x1, x2, x3, asr #31
+ *[0-9a-f]+:	ea83fc41 	ands	x1, x2, x3, asr #63
+ *[0-9a-f]+:	eac30041 	ands	x1, x2, x3, ror #0
+ *[0-9a-f]+:	eac30441 	ands	x1, x2, x3, ror #1
+ *[0-9a-f]+:	eac30c41 	ands	x1, x2, x3, ror #3
+ *[0-9a-f]+:	eac31c41 	ands	x1, x2, x3, ror #7
+ *[0-9a-f]+:	eac33c41 	ands	x1, x2, x3, ror #15
+ *[0-9a-f]+:	eac37c41 	ands	x1, x2, x3, ror #31
+ *[0-9a-f]+:	eac3fc41 	ands	x1, x2, x3, ror #63
+ *[0-9a-f]+:	6a030041 	ands	w1, w2, w3
+ *[0-9a-f]+:	6a030441 	ands	w1, w2, w3, lsl #1
+ *[0-9a-f]+:	6a030c41 	ands	w1, w2, w3, lsl #3
+ *[0-9a-f]+:	6a031c41 	ands	w1, w2, w3, lsl #7
+ *[0-9a-f]+:	6a033c41 	ands	w1, w2, w3, lsl #15
+ *[0-9a-f]+:	6a037c41 	ands	w1, w2, w3, lsl #31
+ *[0-9a-f]+:	6a430041 	ands	w1, w2, w3, lsr #0
+ *[0-9a-f]+:	6a430441 	ands	w1, w2, w3, lsr #1
+ *[0-9a-f]+:	6a430c41 	ands	w1, w2, w3, lsr #3
+ *[0-9a-f]+:	6a431c41 	ands	w1, w2, w3, lsr #7
+ *[0-9a-f]+:	6a433c41 	ands	w1, w2, w3, lsr #15
+ *[0-9a-f]+:	6a437c41 	ands	w1, w2, w3, lsr #31
+ *[0-9a-f]+:	6a830041 	ands	w1, w2, w3, asr #0
+ *[0-9a-f]+:	6a830441 	ands	w1, w2, w3, asr #1
+ *[0-9a-f]+:	6a830c41 	ands	w1, w2, w3, asr #3
+ *[0-9a-f]+:	6a831c41 	ands	w1, w2, w3, asr #7
+ *[0-9a-f]+:	6a833c41 	ands	w1, w2, w3, asr #15
+ *[0-9a-f]+:	6a837c41 	ands	w1, w2, w3, asr #31
+ *[0-9a-f]+:	6ac30041 	ands	w1, w2, w3, ror #0
+ *[0-9a-f]+:	6ac30441 	ands	w1, w2, w3, ror #1
+ *[0-9a-f]+:	6ac30c41 	ands	w1, w2, w3, ror #3
+ *[0-9a-f]+:	6ac31c41 	ands	w1, w2, w3, ror #7
+ *[0-9a-f]+:	6ac33c41 	ands	w1, w2, w3, ror #15
+ *[0-9a-f]+:	6ac37c41 	ands	w1, w2, w3, ror #31
+ *[0-9a-f]+:	ea230041 	bics	x1, x2, x3
+ *[0-9a-f]+:	ea230441 	bics	x1, x2, x3, lsl #1
+ *[0-9a-f]+:	ea230c41 	bics	x1, x2, x3, lsl #3
+ *[0-9a-f]+:	ea231c41 	bics	x1, x2, x3, lsl #7
+ *[0-9a-f]+:	ea233c41 	bics	x1, x2, x3, lsl #15
+ *[0-9a-f]+:	ea237c41 	bics	x1, x2, x3, lsl #31
+ *[0-9a-f]+:	ea23fc41 	bics	x1, x2, x3, lsl #63
+ *[0-9a-f]+:	ea630041 	bics	x1, x2, x3, lsr #0
+ *[0-9a-f]+:	ea630441 	bics	x1, x2, x3, lsr #1
+ *[0-9a-f]+:	ea630c41 	bics	x1, x2, x3, lsr #3
+ *[0-9a-f]+:	ea631c41 	bics	x1, x2, x3, lsr #7
+ *[0-9a-f]+:	ea633c41 	bics	x1, x2, x3, lsr #15
+ *[0-9a-f]+:	ea637c41 	bics	x1, x2, x3, lsr #31
+ *[0-9a-f]+:	ea63fc41 	bics	x1, x2, x3, lsr #63
+ *[0-9a-f]+:	eaa30041 	bics	x1, x2, x3, asr #0
+ *[0-9a-f]+:	eaa30441 	bics	x1, x2, x3, asr #1
+ *[0-9a-f]+:	eaa30c41 	bics	x1, x2, x3, asr #3
+ *[0-9a-f]+:	eaa31c41 	bics	x1, x2, x3, asr #7
+ *[0-9a-f]+:	eaa33c41 	bics	x1, x2, x3, asr #15
+ *[0-9a-f]+:	eaa37c41 	bics	x1, x2, x3, asr #31
+ *[0-9a-f]+:	eaa3fc41 	bics	x1, x2, x3, asr #63
+ *[0-9a-f]+:	eae30041 	bics	x1, x2, x3, ror #0
+ *[0-9a-f]+:	eae30441 	bics	x1, x2, x3, ror #1
+ *[0-9a-f]+:	eae30c41 	bics	x1, x2, x3, ror #3
+ *[0-9a-f]+:	eae31c41 	bics	x1, x2, x3, ror #7
+ *[0-9a-f]+:	eae33c41 	bics	x1, x2, x3, ror #15
+ *[0-9a-f]+:	eae37c41 	bics	x1, x2, x3, ror #31
+ *[0-9a-f]+:	eae3fc41 	bics	x1, x2, x3, ror #63
+ *[0-9a-f]+:	6a230041 	bics	w1, w2, w3
+ *[0-9a-f]+:	6a230441 	bics	w1, w2, w3, lsl #1
+ *[0-9a-f]+:	6a230c41 	bics	w1, w2, w3, lsl #3
+ *[0-9a-f]+:	6a231c41 	bics	w1, w2, w3, lsl #7
+ *[0-9a-f]+:	6a233c41 	bics	w1, w2, w3, lsl #15
+ *[0-9a-f]+:	6a237c41 	bics	w1, w2, w3, lsl #31
+ *[0-9a-f]+:	6a630041 	bics	w1, w2, w3, lsr #0
+ *[0-9a-f]+:	6a630441 	bics	w1, w2, w3, lsr #1
+ *[0-9a-f]+:	6a630c41 	bics	w1, w2, w3, lsr #3
+ *[0-9a-f]+:	6a631c41 	bics	w1, w2, w3, lsr #7
+ *[0-9a-f]+:	6a633c41 	bics	w1, w2, w3, lsr #15
+ *[0-9a-f]+:	6a637c41 	bics	w1, w2, w3, lsr #31
+ *[0-9a-f]+:	6aa30041 	bics	w1, w2, w3, asr #0
+ *[0-9a-f]+:	6aa30441 	bics	w1, w2, w3, asr #1
+ *[0-9a-f]+:	6aa30c41 	bics	w1, w2, w3, asr #3
+ *[0-9a-f]+:	6aa31c41 	bics	w1, w2, w3, asr #7
+ *[0-9a-f]+:	6aa33c41 	bics	w1, w2, w3, asr #15
+ *[0-9a-f]+:	6aa37c41 	bics	w1, w2, w3, asr #31
+ *[0-9a-f]+:	6ae30041 	bics	w1, w2, w3, ror #0
+ *[0-9a-f]+:	6ae30441 	bics	w1, w2, w3, ror #1
+ *[0-9a-f]+:	6ae30c41 	bics	w1, w2, w3, ror #3
+ *[0-9a-f]+:	6ae31c41 	bics	w1, w2, w3, ror #7
+ *[0-9a-f]+:	6ae33c41 	bics	w1, w2, w3, ror #15
+ *[0-9a-f]+:	6ae37c41 	bics	w1, w2, w3, ror #31
  *[0-9a-f]+:	8b030041 	add	x1, x2, x3
  *[0-9a-f]+:	8b030441 	add	x1, x2, x3, lsl #1
  *[0-9a-f]+:	8b030c41 	add	x1, x2, x3, lsl #3
