@@ -69,6 +69,13 @@ Disassembly of section \.text:
  *[0-9a-f]+:	0ec31441 	fsub	v1\.4h, v2\.4h, v3\.4h
  *[0-9a-f]+:	4ec01400 	fsub	v0\.8h, v0\.8h, v0\.8h
  *[0-9a-f]+:	4ec31441 	fsub	v1\.8h, v2\.8h, v3\.8h
+ *[0-9a-f]+:	6ee3d441 	fabd	v1.2d, v2.2d, v3.2d
+ *[0-9a-f]+:	2ea3d441 	fabd	v1.2s, v2.2s, v3.2s
+ *[0-9a-f]+:	6ea3d441 	fabd	v1.4s, v2.4s, v3.4s
+ *[0-9a-f]+:	2ec01400 	fabd	v0.4h, v0.4h, v0.4h
+ *[0-9a-f]+:	2ec31441 	fabd	v1.4h, v2.4h, v3.4h
+ *[0-9a-f]+:	6ec01400 	fabd	v0.8h, v0.8h, v0.8h
+ *[0-9a-f]+:	6ec31441 	fabd	v1.8h, v2.8h, v3.8h
  *[0-9a-f]+:	4e63dc41 	fmulx	v1\.2d, v2\.2d, v3\.2d
  *[0-9a-f]+:	0e23dc41 	fmulx	v1\.2s, v2\.2s, v3\.2s
  *[0-9a-f]+:	4e23dc41 	fmulx	v1\.4s, v2\.4s, v3\.4s
@@ -323,6 +330,10 @@ Disassembly of section \.text:
  *[0-9a-f]+:	6e21c820 	fcvtau	v0\.4s, v1\.4s
  *[0-9a-f]+:	2e79c820 	fcvtau	v0\.4h, v1\.4h
  *[0-9a-f]+:	6e79c820 	fcvtau	v0\.8h, v1\.8h
+ *[0-9a-f]+:	0ea1c820 	urecpe	v0.2s, v1.2s
+ *[0-9a-f]+:	4ea1c820 	urecpe	v0.4s, v1.4s
+ *[0-9a-f]+:	2ea1c820 	ursqrte	v0.2s, v1.2s
+ *[0-9a-f]+:	6ea1c820 	ursqrte	v0.4s, v1.4s
  *[0-9a-f]+:	4e61d820 	scvtf	v0\.2d, v1\.2d
  *[0-9a-f]+:	0e21d820 	scvtf	v0\.2s, v1\.2s
  *[0-9a-f]+:	4e21d820 	scvtf	v0\.4s, v1\.4s
