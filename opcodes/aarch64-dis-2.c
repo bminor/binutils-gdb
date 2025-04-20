@@ -34600,8 +34600,6 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
     case 2442: return NULL;		/* rprfm --> NULL.  */
     case 2449: value = 3265; break;	/* fclamp --> bfclamp.  */
     case 3265: return NULL;		/* bfclamp --> NULL.  */
-    case 1773: value = 1774; break;	/* ldr --> ldr.  */
-    case 1774: return NULL;		/* ldr --> NULL.  */
     case 1445: value = 3268; break;	/* fadd --> bfadd.  */
     case 3268: return NULL;		/* bfadd --> NULL.  */
     case 1512: value = 3269; break;	/* fmul --> bfmul.  */
@@ -34610,14 +34608,8 @@ aarch64_find_next_opcode (const aarch64_opcode *opcode)
     case 3270: return NULL;		/* bfsub --> NULL.  */
     case 1503: value = 3261; break;	/* fmla --> bfmla.  */
     case 3261: return NULL;		/* bfmla --> NULL.  */
-    case 1992: value = 1993; break;	/* str --> str.  */
-    case 1993: return NULL;		/* str --> NULL.  */
     case 1507: value = 3262; break;	/* fmls --> bfmls.  */
     case 3262: return NULL;		/* bfmls --> NULL.  */
-    case 2440: value = 2441; break;	/* psel --> psel.  */
-    case 2441: return NULL;		/* psel --> NULL.  */
-    case 1810: value = 1811; break;	/* pfalse --> pfalse.  */
-    case 1811: return NULL;		/* pfalse --> NULL.  */
     case 1446: value = 3256; break;	/* fadd --> bfadd.  */
     case 3256: return NULL;		/* bfadd --> NULL.  */
     case 1493: value = 3258; break;	/* fmaxnm --> bfmaxnm.  */
@@ -34992,14 +34984,18 @@ aarch64_find_alias_opcode (const aarch64_opcode *opcode)
     case 1459: value = 2094; break;	/* fcmgt --> fcmlt.  */
     case 1465: value = 1319; break;	/* fcpy --> fmov.  */
     case 1488: value = 1318; break;	/* fdup --> fmov.  */
+    case 1773: value = 1774; break;	/* ldr --> ldr.  */
     case 1804: value = 1320; break;	/* orr --> mov.  */
     case 1805: value = 2097; break;	/* orr --> orn.  */
     case 1807: value = 1324; break;	/* orr --> mov.  */
     case 1808: value = 1334; break;	/* orrs --> movs.  */
+    case 1810: value = 1811; break;	/* pfalse --> pfalse.  */
     case 1871: value = 1329; break;	/* sel --> mov.  */
     case 1872: value = 1332; break;	/* sel --> mov.  */
+    case 1992: value = 1993; break;	/* str --> str.  */
     case 2422: value = 2420; break;	/* mova --> mov.  */
     case 2423: value = 2421; break;	/* mova --> mov.  */
+    case 2440: value = 2441; break;	/* psel --> psel.  */
     case 2654: value = 2646; break;	/* mova --> mov.  */
     case 2655: value = 2647; break;	/* mova --> mov.  */
     case 2656: value = 2648; break;	/* mova --> mov.  */
@@ -35201,15 +35197,19 @@ aarch64_find_next_alias_opcode (const aarch64_opcode *opcode)
     case 2094: value = 1459; break;	/* fcmlt --> fcmgt.  */
     case 1319: value = 1465; break;	/* fmov --> fcpy.  */
     case 1318: value = 1488; break;	/* fmov --> fdup.  */
+    case 1774: value = 1773; break;	/* ldr --> ldr.  */
     case 1320: value = 1804; break;	/* mov --> orr.  */
     case 2097: value = 1805; break;	/* orn --> orr.  */
     case 1324: value = 1323; break;	/* mov --> mov.  */
     case 1323: value = 1807; break;	/* mov --> orr.  */
     case 1334: value = 1808; break;	/* movs --> orrs.  */
+    case 1811: value = 1810; break;	/* pfalse --> pfalse.  */
     case 1329: value = 1871; break;	/* mov --> sel.  */
     case 1332: value = 1872; break;	/* mov --> sel.  */
+    case 1993: value = 1992; break;	/* str --> str.  */
     case 2420: value = 2422; break;	/* mov --> mova.  */
     case 2421: value = 2423; break;	/* mov --> mova.  */
+    case 2441: value = 2440; break;	/* psel --> psel.  */
     case 2646: value = 2654; break;	/* mov --> mova.  */
     case 2647: value = 2655; break;	/* mov --> mova.  */
     case 2648: value = 2656; break;	/* mov --> mova.  */

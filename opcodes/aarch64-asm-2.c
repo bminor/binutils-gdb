@@ -584,6 +584,10 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1488:	/* fdup */
       value = 1488;	/* --> fdup.  */
       break;
+    case 1774:	/* ldr */
+    case 1773:	/* ldr */
+      value = 1773;	/* --> ldr.  */
+      break;
     case 1320:	/* mov */
     case 1804:	/* orr */
       value = 1804;	/* --> orr.  */
@@ -601,6 +605,10 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1808:	/* orrs */
       value = 1808;	/* --> orrs.  */
       break;
+    case 1811:	/* pfalse */
+    case 1810:	/* pfalse */
+      value = 1810;	/* --> pfalse.  */
+      break;
     case 1329:	/* mov */
     case 1871:	/* sel */
       value = 1871;	/* --> sel.  */
@@ -609,6 +617,10 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1872:	/* sel */
       value = 1872;	/* --> sel.  */
       break;
+    case 1993:	/* str */
+    case 1992:	/* str */
+      value = 1992;	/* --> str.  */
+      break;
     case 2420:	/* mov */
     case 2422:	/* mova */
       value = 2422;	/* --> mova.  */
@@ -616,6 +628,10 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 2421:	/* mov */
     case 2423:	/* mova */
       value = 2423;	/* --> mova.  */
+      break;
+    case 2441:	/* psel */
+    case 2440:	/* psel */
+      value = 2440;	/* --> psel.  */
       break;
     case 2646:	/* mov */
     case 2654:	/* mova */
