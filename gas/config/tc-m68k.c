@@ -6754,7 +6754,6 @@ s_mri_for (int qual)
   struct mri_control_info *n;
   char *buf;
   char *s;
-  char ex[2];
 
   /* The syntax is
        FOR.q var = init { TO | DOWNTO } end [ BY by ] DO.e
@@ -6935,12 +6934,14 @@ s_mri_for (int qual)
   mri_assemble (buf);
 
   /* bcc bottom.  */
-  ex[0] = TOLOWER (extent);
-  ex[1] = '\0';
-  if (up)
-    sprintf (buf, "blt%s %s", ex, n->bottom);
-  else
-    sprintf (buf, "bgt%s %s", ex, n->bottom);
+  s = buf;
+  *s++ = 'b';
+  *s++ = up ? 'l' : 'g';
+  *s++ = 't';
+  if (extent != '\0')
+    *s++ = TOLOWER (extent);
+  *s++ = ' ';
+  strcpy (s, n->bottom);
   mri_assemble (buf);
 
   /* Put together the add or sub instruction used by ENDF.  */
