@@ -8,12 +8,14 @@ Disassembly of section \.text:
 
 0+ <.*>:
 .*:	d6bf03e0 	drps
+.*:	d69f03e0 	eret
 .*:	d503201f 	nop
 .*:	d503203f 	yield
 .*:	d503205f 	wfe
 .*:	d503207f 	wfi
 .*:	d503209f 	sev
 .*:	d50320bf 	sevl
+.*:	d503229f 	csdb
 .*:	d50322df 	clrbhb
 .*:	d503201f 	nop
 .*:	d503203f 	yield
