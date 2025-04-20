@@ -285,7 +285,7 @@ struct value *
 frame_unwind_got_optimized (const frame_info_ptr &frame, int regnum)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
-  struct type *type = register_type (gdbarch, regnum);
+  struct type *type = register_type (gdbarch, regnum, &frame);
 
   return value::allocate_optimized_out (type);
 }
@@ -316,7 +316,8 @@ struct value *
 frame_unwind_got_memory (const frame_info_ptr &frame, int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
-  struct value *v = value_at_lazy (register_type (gdbarch, regnum), addr);
+  struct value *v = value_at_lazy (register_type (gdbarch, regnum, &frame),
+				   addr);
 
   v->set_stack (true);
   return v;
@@ -333,7 +334,7 @@ frame_unwind_got_constant (const frame_info_ptr &frame, int regnum,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct value *reg_val;
 
-  reg_val = value::zero (register_type (gdbarch, regnum), not_lval);
+  reg_val = value::zero (register_type (gdbarch, regnum, &frame), not_lval);
   store_unsigned_integer (reg_val->contents_writeable ().data (),
 			  register_size (gdbarch, regnum), byte_order, val);
   return reg_val;
@@ -346,7 +347,7 @@ frame_unwind_got_bytes (const frame_info_ptr &frame, int regnum,
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *reg_val;
 
-  reg_val = value::zero (register_type (gdbarch, regnum), not_lval);
+  reg_val = value::zero (register_type (gdbarch, regnum, &frame), not_lval);
   gdb::array_view<gdb_byte> val_contents = reg_val->contents_raw ();
 
   /* The value's contents buffer is zeroed on allocation so if buf is
@@ -373,10 +374,10 @@ frame_unwind_got_address (const frame_info_ptr &frame, int regnum,
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *reg_val;
+  struct type *type = register_type (gdbarch, regnum, &frame);
 
-  reg_val = value::zero (register_type (gdbarch, regnum), not_lval);
-  pack_long (reg_val->contents_writeable ().data (),
-	     register_type (gdbarch, regnum), addr);
+  reg_val = value::zero (type, not_lval);
+  pack_long (reg_val->contents_writeable ().data (), type, addr);
   return reg_val;
 }
 

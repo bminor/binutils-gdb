@@ -975,7 +975,11 @@ value::allocate_register_lazy (const frame_info_ptr &initial_next_frame,
 			       int regnum, struct type *type)
 {
   if (type == nullptr)
-    type = register_type (frame_unwind_arch (initial_next_frame), regnum);
+    {
+      frame_info_ptr this_frame = get_prev_frame (initial_next_frame);
+      type = register_type (frame_unwind_arch (initial_next_frame), regnum,
+			    &this_frame);
+    }
 
   value *result = value::allocate_lazy (type);
 

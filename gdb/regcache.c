@@ -206,7 +206,8 @@ regcache_descr (struct gdbarch *gdbarch)
 /* See gdb/regcache.h.  */
 
 struct type *
-register_type (struct gdbarch *gdbarch, int regnum)
+register_type (struct gdbarch *gdbarch, int regnum,
+	       const frame_info_ptr *this_frame)
 {
   struct regcache_descr *descr = regcache_descr (gdbarch);
 
@@ -215,10 +216,7 @@ register_type (struct gdbarch *gdbarch, int regnum)
   struct type *type = descr->register_type[regnum];
 
   if (descr->register_is_variable_size[regnum])
-    {
-      frame_info_ptr current_frame = get_current_frame ();
-      type = resolve_dynamic_type (type, {}, 0, &current_frame);
-    }
+    type = resolve_dynamic_type (type, {}, 0, this_frame);
 
   return type;
 }

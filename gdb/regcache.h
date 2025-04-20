@@ -162,7 +162,8 @@ extern bool regcache_map_supplies (const struct regcache_map_entry *map,
    then its gdbarch vector counterpart since it returns a precomputed
    value stored in a table.  */
 
-extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
+extern struct type *register_type (struct gdbarch *gdbarch, int regnum,
+				   const frame_info_ptr *this_frame = nullptr);
 
 /* Return the size of register REGNUM.  FRAME is needed in case regnum is a
    variable-size register.  */
