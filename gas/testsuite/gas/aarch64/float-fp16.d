@@ -41,6 +41,24 @@ Disassembly of section \.text:
  *[0-9a-f]+:	1ee1c020 	fsqrt	h0, h1
  *[0-9a-f]+:	1e21c020 	fsqrt	s0, s1
  *[0-9a-f]+:	1e61c020 	fsqrt	d0, d1
+ *[0-9a-f]+:	1ee24000 	fcvt	s0, h0
+ *[0-9a-f]+:	1ee2401f 	fcvt	s31, h0
+ *[0-9a-f]+:	1ee243e0 	fcvt	s0, h31
+ *[0-9a-f]+:	1ee2c000 	fcvt	d0, h0
+ *[0-9a-f]+:	1ee2c01f 	fcvt	d31, h0
+ *[0-9a-f]+:	1ee2c3e0 	fcvt	d0, h31
+ *[0-9a-f]+:	1e23c000 	fcvt	h0, s0
+ *[0-9a-f]+:	1e23c01f 	fcvt	h31, s0
+ *[0-9a-f]+:	1e23c3e0 	fcvt	h0, s31
+ *[0-9a-f]+:	1e22c000 	fcvt	d0, s0
+ *[0-9a-f]+:	1e22c01f 	fcvt	d31, s0
+ *[0-9a-f]+:	1e22c3e0 	fcvt	d0, s31
+ *[0-9a-f]+:	1e63c000 	fcvt	h0, d0
+ *[0-9a-f]+:	1e63c01f 	fcvt	h31, d0
+ *[0-9a-f]+:	1e63c3e0 	fcvt	h0, d31
+ *[0-9a-f]+:	1e624000 	fcvt	s0, d0
+ *[0-9a-f]+:	1e62401f 	fcvt	s31, d0
+ *[0-9a-f]+:	1e6243e0 	fcvt	s0, d31
  *[0-9a-f]+:	1ee44020 	frintn	h0, h1
  *[0-9a-f]+:	1e244020 	frintn	s0, s1
  *[0-9a-f]+:	1e644020 	frintn	d0, d1
@@ -151,6 +169,14 @@ Disassembly of section \.text:
  *[0-9a-f]+:	9e710001 	fcvtmu	x1, d0
  *[0-9a-f]+:	1ef10001 	fcvtmu	w1, h0
  *[0-9a-f]+:	9ef10001 	fcvtmu	x1, h0
+ *[0-9a-f]+:	1e380001 	fcvtzs	w1, s0
+ *[0-9a-f]+:	9e780001 	fcvtzs	x1, d0
+ *[0-9a-f]+:	1ef80001 	fcvtzs	w1, h0
+ *[0-9a-f]+:	9ef80001 	fcvtzs	x1, h0
+ *[0-9a-f]+:	1e390001 	fcvtzu	w1, s0
+ *[0-9a-f]+:	9e790001 	fcvtzu	x1, d0
+ *[0-9a-f]+:	1ef90001 	fcvtzu	w1, h0
+ *[0-9a-f]+:	9ef90001 	fcvtzu	x1, h0
  *[0-9a-f]+:	1e220020 	scvtf	s0, w1
  *[0-9a-f]+:	9e620020 	scvtf	d0, x1
  *[0-9a-f]+:	1ee20020 	scvtf	h0, w1
