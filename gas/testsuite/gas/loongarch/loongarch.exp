@@ -37,5 +37,6 @@ if [istarget loongarch*-*-*] {
     run_list_test "illegal-operand"
     run_list_test "pseudo_op_option_fail"
     run_list_test "negative_right_shift"
+    run_list_test "div_zero"
   }
 }
