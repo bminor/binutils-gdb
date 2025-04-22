@@ -309,7 +309,7 @@ extern bool aarch64_sframe_ra_tracking_p (void);
 extern offsetT aarch64_sframe_cfa_ra_offset (void);
 #define sframe_cfa_ra_offset aarch64_sframe_cfa_ra_offset
 
-/* The abi/arch indentifier for SFrame.  */
+/* The abi/arch identifier for SFrame.  */
 unsigned char aarch64_sframe_get_abi_arch (void);
 #define sframe_get_abi_arch aarch64_sframe_get_abi_arch
 

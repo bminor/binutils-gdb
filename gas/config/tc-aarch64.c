@@ -9121,7 +9121,7 @@ aarch64_sframe_cfa_ra_offset (void)
   return (offsetT) SFRAME_CFA_FIXED_RA_INVALID;
 }
 
-/* Get the abi/arch indentifier for SFrame.  */
+/* Get the abi/arch identifier for SFrame.  */
 
 unsigned char
 aarch64_sframe_get_abi_arch (void)

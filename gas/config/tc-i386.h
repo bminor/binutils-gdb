@@ -471,7 +471,7 @@ extern bool x86_sframe_ra_tracking_p (void);
 extern offsetT x86_sframe_cfa_ra_offset (void);
 #define sframe_cfa_ra_offset x86_sframe_cfa_ra_offset
 
-/* The abi/arch indentifier for SFrame.  */
+/* The abi/arch identifier for SFrame.  */
 extern unsigned char x86_sframe_get_abi_arch (void);
 #define sframe_get_abi_arch x86_sframe_get_abi_arch
 

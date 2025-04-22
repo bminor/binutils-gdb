@@ -11968,7 +11968,7 @@ x86_sframe_cfa_ra_offset (void)
   return (offsetT) -8;
 }
 
-/* The abi/arch indentifier for SFrame.  */
+/* The abi/arch identifier for SFrame.  */
 unsigned char
 x86_sframe_get_abi_arch (void)
 {
