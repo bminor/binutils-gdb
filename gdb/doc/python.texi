@@ -4554,8 +4554,8 @@ registered.
 
 The help text for the new command is taken from the Python
 documentation string for the command's class, if there is one.  If no
-documentation string is provided, the default value ``This command is
-not documented.'' is used.
+documentation string is provided, the default value @samp{This command
+is not documented.} is used.
 @end defun
 
 @cindex don't repeat Python command
