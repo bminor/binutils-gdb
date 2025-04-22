@@ -7136,6 +7136,8 @@ Direct 24-bit RGB colors.
 
 @end table
 
+It is not possible to sub-class the @code{Color} class.
+
 @node Architectures In Python
 @subsubsection Python representation of architectures
 @cindex Python architectures

@@ -97,3 +97,13 @@ gdb_test [concat "python print (c_red.escape_sequence (True) + " \
     "\033\\\[31m\033\\\[42mred on green\033\\\[49m red on default\033\\\[39m" \
     "escape sequences"
 
+gdb_test_multiline "Try to sub-class gdb.Color" \
+    "python" "" \
+    "class my_color(gdb.Color):" "" \
+    "  def __init__(self):" "" \
+    "    super().__init__('red')" "" \
+    "end" \
+    [multi_line \
+	 "Python Exception <class 'TypeError'>: type 'gdb\\.Color' is not an acceptable base type" \
+	 "Error occurred in Python: type 'gdb\\.Color' is not an acceptable base type"]
+
