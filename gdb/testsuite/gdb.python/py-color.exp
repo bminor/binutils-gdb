@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This file is part of the GDB testsuite.
-# It tests gdb.parameter and gdb.Parameter.
+# This file is part of the GDB testsuite.  It tests gdb.Color.
 
 load_lib gdb-python.exp
 
