@@ -42,7 +42,6 @@
  %C clever filename:linenumber with function
  %D like %C, but no function name
  %E current bfd error or errno
- %F error is fatal
  %G like %D, but only function name
  %H like %C but in addition emit section+offset
  %P print program name
@@ -70,7 +69,6 @@
 void
 vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 {
-  bool isfatal = false;
   const char *scan;
   int arg_type;
   unsigned int arg_count = 0;
@@ -278,11 +276,6 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 		sprintf (buf, "0x%" PRIx64, value);
 		fprintf (fp, "%10s", buf);
 	      }
-	      break;
-
-	    case 'F':
-	      /* Error is fatal.  */
-	      isfatal = true;
 	      break;
 
 	    case 'P':
@@ -586,9 +579,6 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 
   if (is_warning && config.fatal_warnings)
     config.make_executable = false;
-
-  if (isfatal)
-    xexit (1);
 }
 
 /* Format info message and print on stdout.  */
