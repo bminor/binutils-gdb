@@ -403,8 +403,7 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
 	PyErr_SetString (PyExc_ValueError, "Bad register");
     }
   /* The register could be a gdb.RegisterDescriptor object.  */
-  else if (PyObject_IsInstance (pyo_reg_id,
-			   (PyObject *) &register_descriptor_object_type))
+  else if (PyObject_TypeCheck (pyo_reg_id, &register_descriptor_object_type))
     {
       register_descriptor_object *reg
 	= (register_descriptor_object *) pyo_reg_id;
