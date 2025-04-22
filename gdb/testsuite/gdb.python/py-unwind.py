@@ -267,4 +267,24 @@ class validating_unwinder(Unwinder):
         return None
 
 
+class bad_object_unwinder(Unwinder):
+    def __init__(self, name):
+        super().__init__(name)
+
+    def __call__(self, pending_frame):
+
+        if pending_frame.level() != 1:
+            return None
+
+        class Blah:
+            def __init__(self):
+                pass
+
+            @property
+            def __class__(self):
+                raise RuntimeError("error in Blah.__class__")
+
+        return Blah()
+
+
 print("Python script imported")

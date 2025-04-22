@@ -245,6 +245,13 @@ with_test_prefix "frame-id 'pc' is invalid" {
 	"Python Exception <class 'ValueError'>: invalid literal for int\\(\\) with base 10: 'xyz'\r\n.*"
 }
 
+with_test_prefix "bad object unwinder" {
+    gdb_test_no_output "python obj = bad_object_unwinder(\"bad-object\")"
+    gdb_test_no_output "python gdb.unwinder.register_unwinder(None, obj, replace=True)"
+    gdb_test "backtrace" \
+	"Python Exception <class 'gdb.error'>: an Unwinder should return gdb.UnwindInfo, not Blah\\.\r\n.*"
+}
+
 # Gather information about every frame.
 gdb_test_no_output "python capture_all_frame_information()"
 gdb_test_no_output "python gdb.newest_frame().select()"

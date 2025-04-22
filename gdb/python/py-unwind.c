@@ -929,9 +929,9 @@ frame_unwind_python::sniff (const frame_info_ptr &this_frame,
 
   /* Received UnwindInfo, cache data.  */
   PyObject *pyo_unwind_info = PyTuple_GET_ITEM (pyo_execute_ret.get (), 0);
-  if (PyObject_IsInstance (pyo_unwind_info,
-			   (PyObject *) &unwind_info_object_type) <= 0)
-    error (_("A Unwinder should return gdb.UnwindInfo instance."));
+  if (!PyObject_TypeCheck (pyo_unwind_info, &unwind_info_object_type))
+    error (_("an Unwinder should return gdb.UnwindInfo, not %s."),
+	   Py_TYPE (pyo_unwind_info)->tp_name);
 
   {
     unwind_info_object *unwind_info =
