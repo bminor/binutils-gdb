@@ -64,7 +64,8 @@ create_color_object (const ui_file_style::color &color)
 bool
 gdbpy_is_color (PyObject *obj)
 {
-  return PyObject_IsInstance (obj, (PyObject *) &colorpy_object_type);
+  gdb_assert (obj != nullptr);
+  return PyObject_TypeCheck (obj, &colorpy_object_type) != 0;
 }
 
 /* See py-color.h.  */

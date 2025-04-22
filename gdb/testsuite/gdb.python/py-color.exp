@@ -107,3 +107,26 @@ gdb_test_multiline "Try to sub-class gdb.Color" \
 	 "Python Exception <class 'TypeError'>: type 'gdb\\.Color' is not an acceptable base type" \
 	 "Error occurred in Python: type 'gdb\\.Color' is not an acceptable base type"]
 
+gdb_test_multiline "Setup a color parameter and non gdb.Color object" \
+    "python" "" \
+    "class my_param(gdb.Parameter):" "" \
+    "  def __init__(self):" "" \
+    "    super().__init__('color-param', gdb.COMMAND_NONE, gdb.PARAM_COLOR)" "" \
+    "    self.value = gdb.Color('red')" "" \
+    "color_param = my_param()" "" \
+    " " "" \
+    "class bad_type:" "" \
+    "  @property" "" \
+    "  def __class__(self):" "" \
+    "    raise RuntimeError('__class__ error for bad_type')" "" \
+    "bad_obj = bad_type()" "" \
+    "end" ""
+
+gdb_test_no_output "python color_param.value = gdb.Color('blue')" \
+    "set color parameter to blue"
+
+gdb_test "python color_param.value = bad_obj" \
+    [multi_line \
+	 "Python Exception <class 'RuntimeError'>: color argument must be a gdb\\.Color object\\." \
+	 "Error occurred in Python: color argument must be a gdb\\.Color object\\."] \
+    "set color parameter to a non-color type"
