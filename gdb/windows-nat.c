@@ -527,6 +527,8 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   bool thread_alive (ptid_t ptid) override;
 
+  const char *extra_thread_info (thread_info *info) override;
+
   std::string pid_to_str (ptid_t) override;
 
   void interrupt () override;
@@ -4089,6 +4091,26 @@ windows_nat_target::thread_name (struct thread_info *thr)
   return th->thread_name ();
 }
 
+/* Implementation of the target_ops::extra_thread_info method.  */
+
+const char *
+windows_nat_target::extra_thread_info (thread_info *info)
+{
+  windows_thread_info *th = windows_process.find_thread (info->ptid);
+
+  if (!th->suspended)
+    return nullptr;
+
+  if (th->pending_status.kind () == TARGET_WAITKIND_THREAD_EXITED
+      || th->last_event.dwDebugEventCode == EXIT_THREAD_DEBUG_EVENT)
+    return "exiting";
+  else if (th->pending_status.kind () == TARGET_WAITKIND_EXITED
+	   || th->pending_status.kind () == TARGET_WAITKIND_SIGNALLED
+	   || th->last_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
+    return "exiting process";
+
+  return nullptr;
+}
 
 /* Implementation of the target_ops::supports_non_stop method.  */
 
