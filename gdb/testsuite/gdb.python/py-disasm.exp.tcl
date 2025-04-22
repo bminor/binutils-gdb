@@ -152,7 +152,10 @@ set test_plans \
 		   "Buffer returned from read_memory is sized $decimal instead of the expected $decimal"]] \
 	 [list "ResultOfWrongType" \
 	      [make_exception_pattern "TypeError" \
-		   "Result is not a DisassemblerResult."]] \
+		   "Result from Disassembler must be gdb.DisassemblerResult, not Blah."]] \
+	 [list "ResultOfVeryWrongType" \
+	      [make_exception_pattern "TypeError" \
+		   "Result from Disassembler must be gdb.DisassemblerResult, not Blah."]] \
 	 [list "ErrorCreatingTextPart_NoArgs" \
 	      [make_exception_pattern "TypeError" \
 		   [missing_arg_pattern "style" 1]]] \

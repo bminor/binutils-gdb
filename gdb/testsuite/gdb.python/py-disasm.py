@@ -294,6 +294,24 @@ class ResultOfWrongType(TestDisassembler):
         return self.Blah(1, "ABC")
 
 
+class ResultOfVeryWrongType(TestDisassembler):
+    """Return something that is not a DisassemblerResult from disassemble
+    method.  The thing returned will raise an exception if used in an
+    isinstance() call, or in PyObject_IsInstance from C++.
+    """
+
+    class Blah:
+        def __init__(self):
+            pass
+
+        @property
+        def __class__(self):
+            raise RuntimeError("error from __class__ in Blah")
+
+    def disassemble(self, info):
+        return self.Blah()
+
+
 class TaggingDisassembler(TestDisassembler):
     """A simple disassembler that just tags the output."""
 
