@@ -3972,7 +3972,8 @@ delete_just_stopped_threads_single_step_breakpoints (void)
 
 void
 print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
-			   const struct target_waitstatus &ws)
+			   const struct target_waitstatus &ws,
+			   process_stratum_target *proc_target)
 {
   infrun_debug_printf ("target_wait (%s [%s], status) =",
 		       waiton_ptid.to_string ().c_str (),
@@ -3981,6 +3982,20 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 		       result_ptid.to_string ().c_str (),
 		       target_pid_to_str (result_ptid).c_str ());
   infrun_debug_printf ("  %s", ws.to_string ().c_str ());
+
+  if (proc_target != nullptr)
+    infrun_debug_printf ("  from target %d (%s)",
+			 proc_target->connection_number,
+			 proc_target->shortname ());
+}
+
+/* Wrapper for print_target_wait_results above for convenience.  */
+
+static void
+print_target_wait_results (ptid_t waiton_ptid,
+			   const execution_control_state &ecs)
+{
+  print_target_wait_results (waiton_ptid, ecs.ptid, ecs.ws, ecs.target);
 }
 
 /* Select a thread at random, out of those which are resumed and have
@@ -4332,7 +4347,8 @@ prepare_for_detach (void)
 	  event.ptid = do_target_wait_1 (inf, pid_ptid, &event.ws, 0);
 
 	  if (debug_infrun)
-	    print_target_wait_results (pid_ptid, event.ptid, event.ws);
+	    print_target_wait_results (pid_ptid, event.ptid, event.ws,
+				       event.target);
 
 	  handle_one (event);
 	}
@@ -4388,7 +4404,7 @@ wait_for_inferior (inferior *inf)
       ecs.target = inf->process_target ();
 
       if (debug_infrun)
-	print_target_wait_results (minus_one_ptid, ecs.ptid, ecs.ws);
+	print_target_wait_results (minus_one_ptid, ecs);
 
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (&ecs);
@@ -4669,7 +4685,7 @@ fetch_inferior_event ()
       switch_to_target_no_thread (ecs.target);
 
     if (debug_infrun)
-      print_target_wait_results (minus_one_ptid, ecs.ptid, ecs.ws);
+      print_target_wait_results (minus_one_ptid, ecs);
 
     /* If an error happens while handling the event, propagate GDB's
        knowledge of the executing state to the frontend/user running
@@ -5232,7 +5248,8 @@ poll_one_curr_target (struct target_waitstatus *ws)
   event_ptid = target_wait (minus_one_ptid, ws, TARGET_WNOHANG);
 
   if (debug_infrun)
-    print_target_wait_results (minus_one_ptid, event_ptid, *ws);
+    print_target_wait_results (minus_one_ptid, event_ptid, *ws,
+			       current_inferior ()->process_target ());
 
   return event_ptid;
 }

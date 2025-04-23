@@ -4943,7 +4943,7 @@ remote_target::process_initial_stop_replies (int from_tty)
 
       event_ptid = target_wait (waiton_ptid, &ws, TARGET_WNOHANG);
       if (remote_debug)
-	print_target_wait_results (waiton_ptid, event_ptid, ws);
+	print_target_wait_results (waiton_ptid, event_ptid, ws, this);
 
       switch (ws.kind ())
 	{
