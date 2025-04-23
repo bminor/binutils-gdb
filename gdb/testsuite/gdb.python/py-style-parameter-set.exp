@@ -1,0 +1,366 @@
+# Copyright (C) 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file is part of the GDB testsuite.  It tests gdb.StyleParameterSet.
+
+load_lib gdb-python.exp
+
+require allow_python_tests
+
+# Create a regexp that can be used to match the output of a 'show style
+# NAME' command.  HAS_INTENSITY is a boolean and indicates if style NAME has
+# an intensity attribute.
+proc gen_show_style_re { name has_intensity } {
+    set output \
+	[list \
+	     "style ${name} background:  The \"${name}\" style background color is: none" \
+	     "style ${name} foreground:  The \"${name}\" style foreground color is: none"]
+
+    if { $has_intensity } {
+	lappend output \
+	    "style ${name} intensity:  The \"${name}\" style display intensity is: normal"
+    }
+
+    return [multi_line {*}$output]
+}
+
+# Create a regexp to match against the output of a 'set style NAME' command,
+# that is, a 'set' command that doesn't actually set an attribute of a
+# style, in this case GDB will print some useful help text. HAS_INTENSITY is
+# a boolean and indicates if style NAME has an intensity attribute or not.
+proc gen_set_style_re { name has_intensity } {
+    set output \
+	[list \
+	     "List of \"set style $name\" subcommands:" \
+	     "" \
+	     "set style $name background -- Set the background color for this property\\." \
+	     "set style $name foreground -- Set the foreground color for this property\\."]
+
+    if { $has_intensity } {
+	lappend output \
+	    "set style $name intensity -- Set the display intensity for this property\\."
+    }
+
+    lappend output \
+	"" \
+	"Type \"help set style $name\" followed by subcommand name for full documentation\\." \
+	"Type \"apropos word\" to search for commands related to \"word\"\\." \
+	"Type \"apropos -v word\" for full documentation of commands related to \"word\"\\." \
+	"Command name abbreviations are allowed if unambiguous\\."
+
+    return [multi_line {*}$output]
+}
+
+# Create a regexp to match against the output of a 'help show style NAME'
+# command.  HAS_INTENSITY is a boolean and indicates if style NAME has an
+# intensity attribute or not.  DOC is a regexp that matches the doc string
+# for style NAME.
+proc gen_help_show_style_re { name has_intensity doc } {
+    set output \
+	[list \
+	     $doc \
+	     "" \
+	     "List of \"show style ${name}\" subcommands:" \
+	     "" \
+	     "show style $name background -- Show the background color for this property\\." \
+	     "show style $name foreground -- Show the foreground color for this property\\."]
+    if { $has_intensity } {
+	lappend output \
+	    "show style $name intensity -- Show the display intensity for this property\\."
+    }
+
+    lappend output \
+	"" \
+	"Type \"help show style $name\" followed by subcommand name for full documentation\\." \
+	"Type \"apropos word\" to search for commands related to \"word\"\\." \
+	"Type \"apropos -v word\" for full documentation of commands related to \"word\"\\." \
+	"Command name abbreviations are allowed if unambiguous\\."
+
+    return [multi_line {*}$output]
+}
+
+# Create a regexp to match against the output of a 'help set style NAME'
+# command.  HAS_INTENSITY is a boolean and indicates if style NAME has an
+# intensity attribute or not.  DOC is a regexp that matches the doc string
+# for style NAME.
+proc gen_help_set_style_re { name has_intensity doc } {
+    return \
+	[multi_line \
+	     $doc \
+	     "" \
+	     [gen_set_style_re $name $has_intensity]]
+}
+
+# Create styles with and without intensity.  Use named and unnamed
+# argument passing, and vary the argument passing order.  Create
+# styles with and without documentation.
+#
+# Confirm that the styles contain the expected sub-commands, and that
+# the documentation is as expected.
+proc_with_prefix test_basic_usage {} {
+    gdb_test_no_output \
+	"python style_1 = gdb.StyleParameterSet(\"style-1\")" \
+	"create style-1"
+
+    gdb_test_no_output \
+	"python style_2 = gdb.StyleParameterSet(add_intensity=True, name=\"style-2\")" \
+	"create style-2"
+
+    gdb_test_no_output \
+	"python style_3 = gdb.StyleParameterSet(name=\"style-3\", doc=\"Style-3 display styling.\\nThis is a multi-line documentation\\nstring describing style-3.\")" \
+	"create style-3"
+
+    gdb_test_no_output \
+	"python style_4 = gdb.StyleParameterSet(\"style-4\", add_intensity=False)" \
+	"create style-4"
+
+    foreach style { style-1 style-2 style-3 } {
+	gdb_test "show style $style" \
+	    [gen_show_style_re $style true]
+	gdb_test "set style $style" \
+	    [gen_set_style_re $style true]
+    }
+
+    gdb_test "show style style-4" \
+	[gen_show_style_re "style-4" false]
+
+    foreach style { style-1 style-2 } {
+	gdb_test "help show style $style" \
+	    [gen_help_show_style_re $style true \
+		 [multi_line \
+		      "The $style display styling\\." \
+		      "Configure $style colors and display intensity\\."]]
+
+
+	set out 	    [gen_help_set_style_re $style true \
+		 [multi_line \
+		      "The $style display styling\\." \
+		      "Configure $style colors and display intensity\\."]]
+
+	gdb_test "help set style $style" \
+	    [gen_help_set_style_re $style true \
+		 [multi_line \
+		      "The $style display styling\\." \
+		      "Configure $style colors and display intensity\\."]]
+    }
+
+    gdb_test "help show style style-3" \
+	[gen_help_show_style_re "style-3" true \
+	     [multi_line \
+		  "Style-3 display styling\\." \
+		  "This is a multi-line documentation" \
+		  "string describing style-3\\."]]
+
+    gdb_test "help show style style-4" \
+	[gen_help_show_style_re "style-4" false \
+	     [multi_line \
+		  "The style-4 display styling\\." \
+		  "Configure style-4 colors and display intensity\\."]]
+
+    for { set i 1 } { $i < 5 } { incr i } {
+	gdb_test "python print(style_$i)" \
+	    "<gdb.StyleParameterSet name='style-$i'>" \
+	    "print repr of style_$i"
+    }
+
+    # There is no 'style-4 intensity' property.
+    gdb_test "show style style-4 foreground" \
+	"The \"style-4\" style foreground color is: none"
+    gdb_test "show style style-4 background" \
+	"The \"style-4\" style background color is: none"
+    gdb_test "show style style-4 intensity" \
+	"Undefined show style style-4 command: \"intensity\"\\.  Try \"help show style style-4\"\\."
+
+    # There is a 'style-1 intensity' property.
+    gdb_test "show style style-1 foreground" \
+	"The \"style-1\" style foreground color is: none" \
+	"show style-1 foreground before changes"
+    gdb_test "show style style-1 background" \
+	"The \"style-1\" style background color is: none" \
+	"show style-1 background before changes"
+    gdb_test "show style style-1 intensity" \
+	"The \"style-1\" style display intensity is: normal" \
+	"show style-1 intensity before changes"
+
+    # Grab the gdb.Style objects from 'style-1'.
+    gdb_test_no_output "python s1 = style_1.style"
+    gdb_test_no_output "python s2 = style_1.value"
+
+    # Check both represent the same style.
+    gdb_test "python print(s1)" \
+	"<gdb.Style name='style-1', fg=none, bg=none, intensity=normal>" \
+	"print s1 style before changes"
+    gdb_test "python print(s2)" \
+	"<gdb.Style name='style-1', fg=none, bg=none, intensity=normal>" \
+	"print s2 style before changes"
+
+    gdb_test_no_output \
+	"python s1.foreground=gdb.Color('red')" "set foreground"
+    gdb_test_no_output \
+	"python s1.background=gdb.Color('blue')" "set background"
+    gdb_test_no_output \
+	"python s1.intensity=gdb.INTENSITY_DIM" "set intensity"
+
+    gdb_test "python print(s1)" \
+	"<gdb.Style name='style-1', fg=red, bg=blue, intensity=dim>" \
+	"print s1 style after first set of changes"
+    gdb_test "python print(s2)" \
+	"<gdb.Style name='style-1', fg=red, bg=blue, intensity=dim>" \
+	"print s2 style after first set of changes"
+
+    # Check the style properties have updated.
+    gdb_test "show style style-1 foreground" \
+	"The \"style-1\" style foreground color is: red" \
+	"show style-1 foreground after first set of changes"
+    gdb_test "show style style-1 background" \
+	"The \"style-1\" style background color is: blue" \
+	"show style-1 background after first set of changes"
+    gdb_test "show style style-1 intensity" \
+	"The \"style-1\" style display intensity is: dim" \
+	"show style-1 intensity after first set of changes"
+
+    # Change the style properties, check gdb.Style objects update.
+    gdb_test_no_output "set style style-1 foreground yellow"
+    gdb_test_no_output "set style style-1 background cyan"
+    gdb_test_no_output "set style style-1 intensity bold"
+
+    gdb_test "python print(s1)" \
+	"<gdb.Style name='style-1', fg=yellow, bg=cyan, intensity=bold>" \
+	"print s1 style after second set of changes"
+    gdb_test "python print(s2)" \
+	"<gdb.Style name='style-1', fg=yellow, bg=cyan, intensity=bold>" \
+	"print s2 style after second set of changes"
+
+    # Assign a gdb.Style to set 'style-1'.  First create some unnamed
+    # style objects that can be used.
+    gdb_test_no_output \
+	"python uns1 = gdb.Style(foreground=gdb.Color('white'), background=gdb.Color('black'), intensity=gdb.INTENSITY_BOLD)" \
+	"create uns1"
+    gdb_test_no_output \
+	"python uns2 = gdb.Style(foreground=gdb.Color('black'), background=gdb.Color('white'), intensity=gdb.INTENSITY_DIM)" \
+	"create uns2"
+
+    gdb_test_no_output "python style_1.value = uns1"
+    gdb_test "show style style-1 foreground" \
+	"The \"style-1\" style foreground color is: white" \
+	"show style-1 foreground after assigning uns1"
+    gdb_test "show style style-1 background" \
+	"The \"style-1\" style background color is: black" \
+	"show style-1 background after assigning uns1"
+    gdb_test "show style style-1 intensity" \
+	"The \"style-1\" style display intensity is: bold" \
+	"show style-1 intensity after assigning uns1"
+
+    gdb_test_no_output "python style_1.style = uns2"
+    gdb_test "show style style-1 foreground" \
+	"The \"style-1\" style foreground color is: black" \
+	"show style-1 foreground after assigning uns2"
+    gdb_test "show style style-1 background" \
+	"The \"style-1\" style background color is: white" \
+	"show style-1 background after assigning uns2"
+    gdb_test "show style style-1 intensity" \
+	"The \"style-1\" style display intensity is: dim" \
+	"show style-1 intensity after assigning uns2"
+
+    # Assign a style with an intensity that is not 'NORMAL' to a
+    # StyleParameterSet that doesn't have an intensity.  The new
+    # intensity setting should be ignored.
+    gdb_test_no_output "python style_4.style = uns1"
+    gdb_test "show style style-4 foreground" \
+	"The \"style-4\" style foreground color is: white" \
+	"show style-4 foreground after assigning uns1"
+    gdb_test "show style style-4 background" \
+	"The \"style-4\" style background color is: black" \
+	"show style-4 background after assigning uns1"
+    gdb_test "show style style-4 intensity" \
+	"Undefined show style style-4 command: \"intensity\"\\.  Try \"help show style style-4\"\\." \
+	"show style-4 intensity after assigning uns1"
+
+    gdb_test "python print(style_4.style)" \
+	"<gdb.Style name='style-4', fg=white, bg=black, intensity=normal>" \
+	"print string repr of style_4's style"
+}
+
+# Test creating a style prefix with gdb.ParameterPrefix, then adding
+# some styles within the new prefix.  Change the style through the CLI
+# and confirm that the associated Python object updated as expected.
+proc_with_prefix test_style_prefix {} {
+    gdb_test_no_output \
+	"python gdb.ParameterPrefix(\"style my-style-group\", gdb.COMMAND_NONE)"
+    gdb_test_no_output \
+	"python style_1 = gdb.StyleParameterSet(\"my-style-group style-1\")" \
+	"create style-1"
+    gdb_test_no_output \
+	"python style_2 = gdb.StyleParameterSet(\"my-style-group style-2\")" \
+	"create style-2"
+
+    gdb_test "python print(style_1.style)" \
+	"<gdb.Style name='my-style-group style-1', fg=none, bg=none, intensity=normal>" \
+	"print 'my-style-group style-1' style before changes"
+    gdb_test "python print(style_2.style)" \
+	"<gdb.Style name='my-style-group style-2', fg=none, bg=none, intensity=normal>" \
+	"print 'my-style-group style-2' style before changes"
+
+    gdb_test_no_output "set style my-style-group style-1 foreground red"
+    gdb_test_no_output "set style my-style-group style-1 background yellow"
+    gdb_test_no_output "set style my-style-group style-1 intensity bold"
+    gdb_test_no_output "set style my-style-group style-2 foreground black"
+    gdb_test_no_output "set style my-style-group style-2 background blue"
+    gdb_test_no_output "set style my-style-group style-2 intensity dim"
+
+    gdb_test "python print(style_1.style)" \
+	"<gdb.Style name='my-style-group style-1', fg=red, bg=yellow, intensity=bold>" \
+	"print 'my-style-group style-1' style after changes"
+    gdb_test "python print(style_2.style)" \
+	"<gdb.Style name='my-style-group style-2', fg=black, bg=blue, intensity=dim>" \
+	"print 'my-style-group style-2' style after changes"
+}
+
+# Test that gdb.StyleParameterSet.apply() works as expected.
+proc_with_prefix test_applying {} {
+    # Create a new StyleParameterSet, and adjust its settings.
+    gdb_test_no_output \
+	"python style_1 = gdb.StyleParameterSet(\"style-1\")" \
+	"create style-1"
+    gdb_test_no_output \
+	"python uns1 = gdb.Style(foreground=gdb.Color('red'), background=gdb.Color('blue'), intensity=gdb.INTENSITY_BOLD)" \
+	"create uns1"
+    gdb_test_no_output "python style_1 = uns1"
+
+    # When styling is off (which it currently is), no escape sequences
+    # should be added.
+    gdb_test \
+	"python print(style_1.apply('xxx'))" "^xxx" \
+	"apply StyleParameterSet to a string when styling is off"
+
+    # When styling is on, we should see an escape sequence added.
+    gdb_test "with style enabled on -- python print(style_1.apply('xxx'))" \
+	"\033\\\[31;44;1;23;24;27mxxx\033\\\[m" \
+	"apply a style when styling is on"
+}
+
+# Start GDB.
+with_ansi_styling_terminal {
+    clean_restart
+}
+
+# Turn styling off so that the output of 'show style ...' isn't styled, this
+# makes it easier to match the output.
+gdb_test_no_output "set style enabled off"
+
+# Run the tests.
+test_basic_usage
+test_style_prefix
+test_applying

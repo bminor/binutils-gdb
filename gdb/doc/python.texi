@@ -5312,6 +5312,7 @@ the parameters @kbd{plugin-name feature-1} and @kbd{plugin-name
 feature-2}, then the @kbd{plugin-name} would need to be a prefix
 command (@pxref{CLI Commands In Python}).
 
+@anchor{gdb.ParameterPrefix}
 However, when creating parameters, you will almost always need to
 create two prefix commands, one as a @kbd{set} sub-command, and one as
 a @kbd{show} sub-command.  @value{GDBN} provides the
@@ -5397,6 +5398,117 @@ gdb.ParameterPrefix("plugin-name", gdb.COMMAND_NONE,
 ExampleParam("plugin-name feature-1")
 ExampleParam("plugin-name feature-2")
 @end smallexample
+
+@anchor{Creating Style Parameters}
+The helper class @code{gdb.StyleParameterSet} exists to make it easier
+to create new styles.  @value{GDBN} places style settings under
+@samp{show style @dots{}} and @samp{set style @dots{}}, an example of a style
+is @samp{filename}.  Each style is really a prefix command (@pxref{CLI
+Commands In Python}), with sub-commands @samp{foreground},
+@samp{background}, and optionally, @samp{intensity}.
+
+It is simple enough to create a new style using two @code{gdb.Command}
+objects for the prefix commands (one for @samp{set}, and one for
+@samp{show}), and three @code{gdb.Parameter} objects, one each for the
+@samp{foreground}, @samp{background}, and @samp{intensity}.  You would
+also want to take care to craft the help text so that the new style
+behaves the same as the existing styles.
+
+Or, you can use the @code{gdb.StyleParameterSet} class, which takes
+care of all this, as the following example shows:
+
+@smallexample
+@group
+(@value{GDBP}) python s = gdb.StyleParameterSet("my-style")
+(@value{GDBP}) show style my-style
+style my-style background:  The "my-style" style background color is: none
+style my-style foreground:  The "my-style" style foreground color is: none
+style my-style intensity:  The "my-style" style display intensity is: normal
+(@value{GDBP})
+@end group
+@end smallexample
+
+You might also want to group a number of styles within a new prefix,
+similar to how @value{GDBN} groups disassembler related styles within
+the @samp{style disassembler} prefix.  This can be done using
+@code{gdb.ParameterPrefix} (@pxref{gdb.ParameterPrefix}), as in this
+example:
+
+@smallexample
+@group
+(@value{GDBP}) python gdb.ParameterPrefix("style group", gdb.COMMAND_NONE)
+(@value{GDBP}) python s_a = gdb.StyleParameterSet("group aa")
+(@value{GDBP}) python s_b = gdb.StyleParameterSet("group bb")
+(@value{GDBP}) show style group
+style group aa background:  The "group aa" style background color is: none
+style group aa foreground:  The "group aa" style foreground color is: none
+style group aa intensity:  The "group aa" style display intensity is: normal
+style group bb background:  The "group bb" style background color is: none
+style group bb foreground:  The "group bb" style foreground color is: none
+style group bb intensity:  The "group bb" style display intensity is: normal
+(@value{GDBP})
+@end group
+@end smallexample
+
+The @code{gdb.StyleParameterSet} class has the following methods and
+attributes:
+
+@defun StyleParameterSet.__init__(name, @w{add_intensity=@code{True}}, @w{doc=@code{None}})
+Create a new style group based on @var{name}, which is a string.  For
+example if @var{name} is @samp{my-style}, then @value{GDBN} will
+create the prefix commands @samp{set style my-style} and @samp{show
+style my-style}.  Within these prefix commands will be
+@samp{foreground}, @samp{background}, and @samp{intensity} parameters
+with the appropriate types.
+
+It is also possible for @var{name} to consist of multiple words, so
+long as each prefix command (except the last one) already exists.  For
+example, it is valid to use a @var{name} value of @samp{disassembler
+my-style}, as the @samp{disassembler} prefix command already exists.
+@value{GDBN} would then create @samp{set style disassembler my-style}
+and @samp{show style disassembler my-style}, and within the
+@samp{my-style} prefixes will be the @samp{foreground},
+@samp{background}, and @samp{intensity} parameters with the
+appropriate types.
+
+Every style requires a @samp{foreground} and @samp{background}, but
+not every style needs an @samp{intensity}.  If @var{add_intensity} is
+@code{True} (the default), then the @samp{intensity} parameter will be
+created.  If @var{add_intensity} is @code{False}, then the
+@samp{intensity} parameter will not be created.
+
+If the @samp{intensity} parameter is not created, then the
+@code{gdb.Style} (@pxref{Styles In Python}) created from this
+@code{gdb.StyleParameterSet} will have @code{gdb.INTENSITY_NORMAL}.
+
+The @var{doc} should be a string which will be used as the help text
+for the @var{name} prefix command.  This text is used as the
+@code{Command.__doc__} value for the @code{gdb.Command} object that is
+the prefix command object (@pxref{CLI Commands In Python}).  If
+@var{doc} is @code{None} (the default) then a basic default help text
+is used.
+@end defun
+
+@defun StyleParameterSet.apply(string)
+Equivalent to @code{StyleParameterSet.style.apply(string)}.  Returns a
+copy of @var{string} with escape sequences added to the start and end.
+The escape sequence at the start applies this style, and the escape
+sequence at the end restores the terminal default.
+
+If styling is disabled (i.e.@: @samp{set style enabled off}), then no
+escape sequences are added and this method returns a copy of
+@var{string}.
+@end defun
+
+@defvar StyleParameterSet.style
+This read/write attribute holds a @code{gdb.Style} object
+(@pxref{Styles In Python}), that is a named style associated with this
+style parameter group.
+@end defvar
+
+@defvar StyleParameterSet.value
+This is an alias for @code{StyleParameterSet.style}, see above.
+@end defvar
 
 @node Functions In Python
 @subsubsection Writing new convenience functions
@@ -7294,7 +7406,8 @@ to apply this styling to output produced from Python.
 
 @value{GDBN} has many styles builtin (@pxref{Output Styling}), and
 style objects can be created that apply these builtin styles to Python
-output.
+output.  It is also possible to create new styles which can be used to
+style Python output (@pxref{Creating Style Parameters}).
 
 The style class is called @code{gdb.Style}, and has the following
 methods and attributes:

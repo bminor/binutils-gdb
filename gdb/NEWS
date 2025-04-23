@@ -76,6 +76,10 @@ qExecAndArgs
      gdb.INTENSITY_DIM for use with gdb.Style when representing
      intensities.
 
+  ** New gdb.StyleParameterSet for creating custom style settings.
+     Use gdb.StyleParameterSet(NAME) to create 'set style NAME ...'
+     and 'show style NAME ...' parameters.
+
 *** Changes in GDB 17
 
 * Debugging Linux programs that use x86-64 or x86-64 with 32-bit pointer
