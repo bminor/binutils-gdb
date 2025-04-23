@@ -176,7 +176,10 @@ colorpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   PyObject *colorspace_obj = nullptr;
   color_space colorspace = color_space::MONOCHROME;
 
-  if (!PyArg_ParseTuple (args, "|OO", &value_obj, &colorspace_obj))
+  static const char *keywords[] = { "value", "color_space", nullptr };
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwds, "|OO", keywords,
+					&value_obj, &colorspace_obj))
     return -1;
 
   try

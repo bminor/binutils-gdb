@@ -22,7 +22,10 @@ require allow_python_tests
 # Start with a fresh gdb.
 clean_restart
 
-gdb_test_no_output "python print_color_attrs = lambda c: print (c, c.colorspace, c.is_none, c.is_indexed, c.is_direct)" \
+gdb_test_no_output "python get_color_attrs = lambda c: \"%s %s %s %s %s\" % (str(c), c.colorspace, c.is_none, c.is_indexed, c.is_direct)" \
+    "get_color_attrs helper"
+
+gdb_test_no_output "python print_color_attrs = lambda c: print (get_color_attrs (c))" \
     "print_color_attrs helper"
 
 gdb_test_no_output "python c = gdb.Color ()" \
@@ -57,6 +60,15 @@ gdb_test "python print_color_attrs (c)" "green 1 False True False" \
     "print attrs of a basic color with ansi colorspace"
 gdb_test "python print (c.index)" "2" \
     "print index of a basic color with ansi colorspace"
+
+# Create a color using keyword arguments, and check it matches the
+# non-keyword color.
+gdb_test_no_output "python c2 = gdb.Color (color_space = gdb.COLORSPACE_ANSI_8COLOR, value = 2)" \
+    "create color from basic index and ansi colorspace using keywords"
+gdb_test "python print(get_color_attrs (c) == get_color_attrs (c2))" "True" \
+    "check attributes match"
+gdb_test "python print(c.index == c2.index)" "True" \
+    "check index matches"
 
 gdb_test_no_output "python c = gdb.Color (2, gdb.COLORSPACE_XTERM_256COLOR)" \
     "create color from basic index and xterm256 colorspace"
