@@ -769,6 +769,7 @@ ALL_64_TARGET_OBS = \
 	mips-sde-tdep.o \
 	mips-tdep.o \
 	mips64-obsd-tdep.o \
+	riscv-canonicalize-syscall-gen.o \
 	riscv-fbsd-tdep.o \
 	riscv-linux-tdep.o \
 	riscv-none-tdep.o \

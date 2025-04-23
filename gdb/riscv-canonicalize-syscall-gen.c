@@ -250,7 +250,7 @@ riscv64_canonicalize_syscall (int syscall)
     case 219: return gdb_sys_keyctl;
     case 220: return gdb_sys_clone;
     case 221: return gdb_sys_execve;
-    case 222: return gdb_old_mmap;
+    case 222: return gdb_sys_old_mmap;
     case 223: return gdb_sys_fadvise64;
     case 224: return gdb_sys_swapon;
     case 225: return gdb_sys_swapoff;
