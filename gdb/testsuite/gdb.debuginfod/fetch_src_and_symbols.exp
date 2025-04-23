@@ -152,7 +152,7 @@ proc_with_prefix no_url { } {
     # Test that GDB cannot find dwz without debuginfod.
     clean_restart
     gdb_test "file ${binfile}_alt.o" \
-	".*could not find '.gnu_debugaltlink'.*" \
+	".*could not find supplementary DWARF file .*" \
 	"file [file tail ${binfile}_alt.o]"
 
     # Generate a core file and test that GDB cannot find the
