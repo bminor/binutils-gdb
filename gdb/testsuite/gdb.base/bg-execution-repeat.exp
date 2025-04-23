@@ -67,6 +67,17 @@ proc test {continue_cmd} {
     # enable the "set var" command with an interrupt / continue& pair.
     gdb_test -no-prompt-anchor "interrupt"
 
+    set test "interrupt received"
+    set re [string_to_regexp "Program received signal SIGINT, Interrupt."]
+    gdb_expect {
+	-re $re {
+	    pass $test
+	}
+	timeout {
+	    fail "$test (timeout)"
+	}
+    }
+
     # Allow the breakpoint to trigger.
     gdb_test -no-prompt-anchor "set var do_wait=0"
 
