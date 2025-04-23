@@ -1231,7 +1231,7 @@ AC_ARG_ENABLE([gdb-compile],
 	      [GDB_CHECK_YES_NO_VAL([$enableval], [--enable-gdb-compile])],
 	      [enable_gdb_compile=yes])
 
-if test "${enable_gdb_compile}" == yes; then
+if test "${enable_gdb_compile}" = yes; then
     AC_DEFINE(HAVE_COMPILE, 1, [Define if compiling support to gdb compile.])
     CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_GCC_COMPILE_OBS)"
 else
