@@ -912,7 +912,7 @@ const solib_ops dsbt_so_ops =
   dsbt_current_sos,
   open_symbol_file_object,
   dsbt_in_dynsym_resolve_code,
-  solib_bfd_open,
+  solib_bfd_open_from_solib,
   nullptr,
   nullptr,
   nullptr,

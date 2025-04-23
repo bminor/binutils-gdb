@@ -25,6 +25,7 @@
 #include "symtab.h"
 #include "gdb_bfd.h"
 #include "gdbsupport/owning_intrusive_list.h"
+#include "gdbsupport/gdb_tilde_expand.h"
 #include "target-section.h"
 
 /* Base class for target-specific link map information.  */
@@ -95,6 +96,10 @@ struct solib : intrusive_list_node<solib>
      that supports outputting multiple segments once the related code
      supports them.  */
   CORE_ADDR addr_low = 0, addr_high = 0;
+
+  /* Get the full path to the binary file described by this solib.  */
+  std::string file_path () const
+  { return gdb_tilde_expand (so_name.c_str ()); }
 };
 
 struct solib_ops
@@ -134,7 +139,7 @@ struct solib_ops
   int (*in_dynsym_resolve_code) (CORE_ADDR pc);
 
   /* Find and open shared library binary file.  */
-  gdb_bfd_ref_ptr (*bfd_open) (const char *pathname);
+  gdb_bfd_ref_ptr (*bfd_open) (const solib &so);
 
   /* Given two so_list objects, one from the GDB thread list
      and another from the list returned by current_sos, return 1
@@ -215,7 +220,9 @@ extern gdb::unique_xmalloc_ptr<char> solib_find (const char *in_pathname,
 extern gdb_bfd_ref_ptr solib_bfd_fopen (const char *pathname, int fd);
 
 /* Find solib binary file and open it.  */
-extern gdb_bfd_ref_ptr solib_bfd_open (const char *in_pathname);
+extern gdb_bfd_ref_ptr solib_bfd_open (const char *pathname);
+
+extern gdb_bfd_ref_ptr solib_bfd_open_from_solib (const solib &so);
 
 /* A default implementation of the solib_ops::find_solib_addr callback.
    This just returns an empty std::optional<CORE_ADDR> indicating GDB is

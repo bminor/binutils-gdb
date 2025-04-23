@@ -613,15 +613,16 @@ darwin_relocate_section_addresses (solib &so, target_section *sec)
 }
 
 static gdb_bfd_ref_ptr
-darwin_bfd_open (const char *pathname)
+darwin_bfd_open (const solib &so)
 {
+  std::string pathname = so.file_path ();
   int found_file;
 
   /* Search for shared library file.  */
   gdb::unique_xmalloc_ptr<char> found_pathname
-    = solib_find (pathname, &found_file);
+    = solib_find (pathname.c_str (), &found_file);
   if (found_pathname == NULL)
-    perror_with_name (pathname);
+    perror_with_name (pathname.c_str ());
 
   /* Open bfd for shared library.  */
   gdb_bfd_ref_ptr abfd (solib_bfd_fopen (found_pathname.get (), found_file));
@@ -637,7 +638,7 @@ darwin_bfd_open (const char *pathname)
   /* The current filename for fat-binary BFDs is a name generated
      by BFD, usually a string containing the name of the architecture.
      Reset its value to the actual filename.  */
-  bfd_set_filename (res.get (), pathname);
+  bfd_set_filename (res.get (), pathname.c_str ());
 
   return res;
 }

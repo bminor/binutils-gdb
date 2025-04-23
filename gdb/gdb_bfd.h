@@ -100,7 +100,8 @@ typedef gdb::ref_ptr<struct bfd, gdb_bfd_ref_policy> gdb_bfd_ref_ptr;
    be slow.  */
 
 gdb_bfd_ref_ptr gdb_bfd_open (const char *name, const char *target,
-			      int fd = -1, bool warn_if_slow = true);
+			      int fd = -1, bool warn_if_slow = true,
+			      int linker_namespace = -1);
 
 /* Mark the CHILD BFD as being a member of PARENT.  Also, increment
    the reference count of CHILD.  Calling this function ensures that

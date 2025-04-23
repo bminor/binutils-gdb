@@ -93,11 +93,12 @@ static gdb::unordered_set<bfd *> all_bfds;
 struct gdb_bfd_data
 {
   /* Note that if ST is nullptr, then we simply fill in zeroes.  */
-  gdb_bfd_data (bfd *abfd, struct stat *st)
+  gdb_bfd_data (bfd *abfd, struct stat *st, int l_ns)
     : mtime (st == nullptr ? 0 : st->st_mtime),
       size (st == nullptr ? 0 : st->st_size),
       inode (st == nullptr ? 0 : st->st_ino),
       device_id (st == nullptr ? 0 : st->st_dev),
+      linker_namespace (l_ns),
       relocation_computed (0),
       needs_relocations (0),
       crc_computed (0)
@@ -122,6 +123,10 @@ struct gdb_bfd_data
 
   /* The device id of the file at the point the cache entry was made.  */
   dev_t device_id;
+
+  /* The Linker Namespace where the objfile that lead this file to be
+     read was loaded.  */
+  int linker_namespace;
 
   /* This is true if we have determined whether this BFD has any
      sections requiring relocation.  */
@@ -217,6 +222,11 @@ struct gdb_bfd_cache_search
   ino_t inode;
   /* The device id of the file.  */
   dev_t device_id;
+  /* The Linker Namespace where the solib was loaded.
+     We do this because, even if the file is exactly the same,
+     we'll want to read the file again to recalculate symbol
+     addresses.  */
+  int linker_namespace;
 };
 
 struct bfd_cache_hash
@@ -248,6 +258,7 @@ struct bfd_cache_eq
 	    && gdata->size == s.size
 	    && gdata->inode == s.inode
 	    && gdata->device_id == s.device_id
+	    && gdata->linker_namespace == s.linker_namespace
 	    && strcmp (bfd_get_filename (abfd), s.filename) == 0);
   }
 };
@@ -504,7 +515,7 @@ target_fileio_stream::stat (struct bfd *abfd, struct stat *sb)
    BFD.  */
 
 static void
-gdb_bfd_init_data (struct bfd *abfd, struct stat *st)
+gdb_bfd_init_data (struct bfd *abfd, struct stat *st, int linker_namespace)
 {
   struct gdb_bfd_data *gdata;
 
@@ -513,7 +524,7 @@ gdb_bfd_init_data (struct bfd *abfd, struct stat *st)
   /* Ask BFD to decompress sections in bfd_get_full_section_contents.  */
   abfd->flags |= BFD_DECOMPRESS;
 
-  gdata = new gdb_bfd_data (abfd, st);
+  gdata = new gdb_bfd_data (abfd, st, linker_namespace);
   bfd_set_usrdata (abfd, gdata);
 
   /* This is the first we've seen it, so add it to the hash table.  */
@@ -525,7 +536,7 @@ gdb_bfd_init_data (struct bfd *abfd, struct stat *st)
 
 gdb_bfd_ref_ptr
 gdb_bfd_open (const char *name, const char *target, int fd,
-	      bool warn_if_slow)
+	      bool warn_if_slow, int linker_namespace)
 {
   bfd *abfd;
   struct stat st;
@@ -579,6 +590,12 @@ gdb_bfd_open (const char *name, const char *target, int fd,
   search.size = st.st_size;
   search.inode = st.st_ino;
   search.device_id = st.st_dev;
+  search.linker_namespace = linker_namespace;
+
+  /* If a linker namespace was supplied, print it in the debug message.  */
+  std::string linker_ns_str;
+  if (linker_namespace != -1)
+    linker_ns_str = string_printf ("[[%d]]::", linker_namespace);
 
   if (bfd_sharing)
     {
@@ -586,8 +603,9 @@ gdb_bfd_open (const char *name, const char *target, int fd,
 	  iter != gdb_bfd_cache.end ())
 	{
 	  abfd = *iter;
-	  bfd_cache_debug_printf ("Reusing cached bfd %s for %s",
+	  bfd_cache_debug_printf ("Reusing cached bfd %s for %s%s",
 				  host_address_to_string (abfd),
+				  linker_ns_str.c_str (),
 				  bfd_get_filename (abfd));
 	  close (fd);
 	  return gdb_bfd_ref_ptr::new_reference (abfd);
@@ -600,8 +618,9 @@ gdb_bfd_open (const char *name, const char *target, int fd,
 
   bfd_set_cacheable (abfd, 1);
 
-  bfd_cache_debug_printf ("Creating new bfd %s for %s",
+  bfd_cache_debug_printf ("Creating new bfd %s for %s%s",
 			  host_address_to_string (abfd),
+			  linker_ns_str.c_str (),
 			  bfd_get_filename (abfd));
 
   /* It's important to pass the already-computed stat info here,
@@ -610,7 +629,7 @@ gdb_bfd_open (const char *name, const char *target, int fd,
      and since we will enter it into the hash table using this
      mtime, if the file changed at the wrong moment, the race would
      lead to a hash table corruption.  */
-  gdb_bfd_init_data (abfd, &st);
+  gdb_bfd_init_data (abfd, &st, linker_namespace);
 
   if (bfd_sharing)
     {
@@ -683,8 +702,13 @@ gdb_bfd_ref (struct bfd *abfd)
 
   gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
 
-  bfd_cache_debug_printf ("Increase reference count on bfd %s (%s)",
+  std::string linker_ns_str;
+  if (gdata && gdata->linker_namespace != -1)
+    linker_ns_str = string_printf ("[[%d]]::", gdata->linker_namespace);
+
+  bfd_cache_debug_printf ("Increase reference count on bfd %s (%s%s)",
 			  host_address_to_string (abfd),
+			  linker_ns_str.c_str (),
 			  bfd_get_filename (abfd));
 
   if (gdata != NULL)
@@ -695,7 +719,7 @@ gdb_bfd_ref (struct bfd *abfd)
 
   /* Caching only happens via gdb_bfd_open, so passing nullptr here is
      fine.  */
-  gdb_bfd_init_data (abfd, nullptr);
+  gdb_bfd_init_data (abfd, nullptr, -1);
 }
 
 /* See gdb_bfd.h.  */
@@ -716,17 +740,23 @@ gdb_bfd_unref (struct bfd *abfd)
   gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
   gdb_assert (gdata->refc >= 1);
 
+  std::string linker_ns_str;
+  if (gdata && gdata->linker_namespace != -1)
+    linker_ns_str = string_printf ("[[%d]]::", gdata->linker_namespace);
+
   gdata->refc -= 1;
   if (gdata->refc > 0)
     {
-      bfd_cache_debug_printf ("Decrease reference count on bfd %s (%s)",
+      bfd_cache_debug_printf ("Decrease reference count on bfd %s (%s%s)",
 			      host_address_to_string (abfd),
+			      linker_ns_str.c_str(),
 			      bfd_get_filename (abfd));
       return;
     }
 
-  bfd_cache_debug_printf ("Delete final reference count on bfd %s (%s)",
+  bfd_cache_debug_printf ("Delete final reference count on bfd %s (%s%s)",
 			  host_address_to_string (abfd),
+			  linker_ns_str.c_str (),
 			  bfd_get_filename (abfd));
 
   archive_bfd = gdata->archive_bfd;

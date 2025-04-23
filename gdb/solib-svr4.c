@@ -3737,8 +3737,16 @@ svr4_find_solib_addr (solib &so)
 static int
 svr4_find_solib_ns (const solib &so)
 {
-  CORE_ADDR debug_base = find_debug_base_for_solib (&so);
   svr4_info *info = get_svr4_info (current_program_space);
+
+  /* If we're reading the dynamic linker, there won't be any namespaces
+     registered yet.  Here, we hope that that is the only situation in
+     which this function is called with an empty namespace_id vector,
+     and in that case we'll just return 0.  */
+  if (info->namespace_id.empty ())
+    return 0;
+
+  CORE_ADDR debug_base = find_debug_base_for_solib (&so);
   for (int i = 0; i < info->namespace_id.size (); i++)
     {
       if (info->namespace_id[i] == debug_base)
@@ -3806,6 +3814,52 @@ svr4_get_solibs_in_ns (int nsid)
   return ns_solibs;
 }
 
+/* See solib_ops::bfd_open in solist.h.
+   This function is needed because svr4 implements support for
+   multiple namespaces, so we'll need to supply a linker_namespace
+   for the gdb_bfd_cache.  Otherwise, this function should be
+   mostly the same as gdb/solib.c's solib_bfd_open.  */
+static gdb_bfd_ref_ptr
+svr4_solib_bfd_open (const solib &so)
+{
+  int found_file;
+  const struct bfd_arch_info *b;
+  std::string pathname (so.file_path ());
+
+  /* Search for shared library file.  */
+  gdb::unique_xmalloc_ptr<char> found_pathname
+    = solib_find (pathname.c_str (), &found_file);
+  if (found_pathname == NULL)
+    {
+      /* Return failure if the file could not be found, so that we can
+	 accumulate messages about missing libraries.  */
+      if (errno == ENOENT)
+	return NULL;
+
+      perror_with_name (pathname.c_str ());
+    }
+
+  /* Open bfd for shared library.  */
+  gdb_bfd_ref_ptr abfd (gdb_bfd_open (found_pathname.get (), gnutarget,
+				      found_file, true,
+				      svr4_find_solib_ns (so)));
+
+  /* Check bfd format.  */
+  if (!bfd_check_format (abfd.get (), bfd_object))
+    error (_ ("`%s': not in executable format: %s"),
+	   bfd_get_filename (abfd.get ()), bfd_errmsg (bfd_get_error ()));
+
+  /* Check bfd arch.  */
+  b = gdbarch_bfd_arch_info (current_inferior ()->arch ());
+  if (!b->compatible (b, bfd_get_arch_info (abfd.get ())))
+    error (_ ("`%s': Shared library architecture %s is not compatible "
+	      "with target architecture %s."),
+	   bfd_get_filename (abfd.get ()),
+	   bfd_get_arch_info (abfd.get ())->printable_name, b->printable_name);
+
+  return abfd;
+}
+
 const struct solib_ops svr4_so_ops =
 {
   svr4_relocate_section_addresses,
@@ -3815,7 +3869,7 @@ const struct solib_ops svr4_so_ops =
   svr4_current_sos,
   open_symbol_file_object,
   svr4_in_dynsym_resolve_code,
-  solib_bfd_open,
+  svr4_solib_bfd_open,
   svr4_same,
   svr4_keep_data_in_core,
   svr4_update_solib_event_breakpoints,

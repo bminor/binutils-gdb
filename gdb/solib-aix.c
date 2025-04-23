@@ -509,7 +509,7 @@ solib_aix_in_dynsym_resolve_code (CORE_ADDR pc)
 /* Implement the "bfd_open" solib_ops method.  */
 
 static gdb_bfd_ref_ptr
-solib_aix_bfd_open (const char *pathname)
+solib_aix_bfd_open (const solib &so)
 {
   /* The pathname is actually a synthetic filename with the following
      form: "/path/to/sharedlib(member.o)" (double-quotes excluded).
@@ -517,6 +517,9 @@ solib_aix_bfd_open (const char *pathname)
 
      FIXME: This is a little hacky.  Perhaps we should provide access
      to the solib's lm_info here?  */
+  std::string path = so.file_path ();
+  /* WIP: this is a convenience thing, I should really convert all pathnames to pathname.c_str().  */
+  const char *pathname = path.c_str ();
   const int path_len = strlen (pathname);
   const char *sep;
   int filename_len;

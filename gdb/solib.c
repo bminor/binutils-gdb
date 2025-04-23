@@ -469,6 +469,17 @@ solib_bfd_open (const char *pathname)
   return abfd;
 }
 
+/* Default implementation for solib_ops::bfd_open.  Extract the pathname
+   from the solib object and call solib_bfd_open with it.  */
+
+gdb_bfd_ref_ptr
+solib_bfd_open_from_solib (const solib &so)
+{
+  std::string path = so.file_path ();
+
+  return solib_bfd_open (path.c_str ());
+}
+
 /* Given a pointer to one of the shared objects in our list of mapped
    objects, use the recorded name to open a bfd descriptor for the
    object, build a section table, relocate all the section addresses
@@ -486,8 +497,7 @@ solib_map_sections (solib &so)
 {
   const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
-  gdb::unique_xmalloc_ptr<char> filename (tilde_expand (so.so_name.c_str ()));
-  gdb_bfd_ref_ptr abfd (ops->bfd_open (filename.get ()));
+  gdb_bfd_ref_ptr abfd (ops->bfd_open (so));
 
   /* If we have a core target then the core target might have some helpful
      information (i.e. build-ids) about the shared libraries we are trying
@@ -521,7 +531,9 @@ solib_map_sections (solib &so)
 	     However, if it was good enough during the mapped file
 	     processing, we assume it's good enough now.  */
 	  if (!mapped_file_info->filename ().empty ())
-	    abfd = ops->bfd_open (mapped_file_info->filename ().c_str ());
+	    /* TODO: figure out if there's good reason to keep ops->bfd_open,
+	       and if there's a good way to do so.  */
+	    abfd = solib_bfd_open (mapped_file_info->filename ().c_str ());
 	  else
 	    abfd = nullptr;
 
@@ -534,7 +546,7 @@ solib_map_sections (solib &so)
 	    {
 	      warning (_ ("Build-id of %ps does not match core file."),
 		       styled_string (file_name_style.style (),
-				      filename.get ()));
+				      so.file_path ().c_str ()));
 	      abfd = nullptr;
 	    }
 	}
@@ -1414,9 +1426,8 @@ reload_shared_libraries_1 (int from_tty)
       if (from_tty)
 	add_flags |= SYMFILE_VERBOSE;
 
-      gdb::unique_xmalloc_ptr<char> filename (
-	tilde_expand (so.so_original_name.c_str ()));
-      gdb_bfd_ref_ptr abfd (solib_bfd_open (filename.get ()));
+      std::string path = so.file_path ();
+      gdb_bfd_ref_ptr abfd (solib_bfd_open (path.c_str ()));
       if (abfd != NULL)
 	found_pathname = bfd_get_filename (abfd.get ());
 

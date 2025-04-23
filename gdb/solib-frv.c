@@ -1083,7 +1083,7 @@ const solib_ops frv_so_ops =
   frv_current_sos,
   open_symbol_file_object,
   frv_in_dynsym_resolve_code,
-  solib_bfd_open,
+  solib_bfd_open_from_solib,
   nullptr,
   nullptr,
   nullptr,

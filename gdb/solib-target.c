@@ -408,7 +408,7 @@ const solib_ops solib_target_so_ops =
   solib_target_current_sos,
   solib_target_open_symbol_file_object,
   solib_target_in_dynsym_resolve_code,
-  solib_bfd_open,
+  solib_bfd_open_from_solib,
   nullptr,
   nullptr,
   nullptr,
