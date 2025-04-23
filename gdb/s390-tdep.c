@@ -41,6 +41,8 @@
 #include "value.h"
 #include "inferior.h"
 #include "dwarf2/loc.h"
+#include "gdbsupport/selftest.h"
+#include "gdb/disasm-selftests.h"
 
 #include "features/s390-linux32.c"
 #include "features/s390x-linux64.c"
@@ -7468,6 +7470,51 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
+#if GDB_SELF_TEST
+namespace selftests {
+
+/* Return bfd_arch_info representing s390x.  */
+
+static const bfd_arch_info *
+bfd_arch_info_s390x ()
+{
+  return bfd_lookup_arch (bfd_arch_s390, bfd_mach_s390_64);
+}
+
+/* Return gdbarch representing s390x.  */
+
+static gdbarch *
+gdbarch_s390x ()
+{
+  struct gdbarch_info info;
+  info.bfd_arch_info = bfd_arch_info_s390x ();
+  if (info.bfd_arch_info == nullptr)
+    return nullptr;
+
+  info.osabi = GDB_OSABI_NONE;
+  return gdbarch_find_by_info (info);
+}
+
+/* Check disassembly of s390x instructions.  */
+
+static void
+disassemble_s390x ()
+{
+  gdbarch *gdbarch = gdbarch_s390x ();
+  if (gdbarch == nullptr)
+    return;
+
+  scoped_restore disassembler_options_restore
+    = make_scoped_restore (&s390_disassembler_options, "zarch");
+
+  gdb::byte_vector insn = { 0xb9, 0x68, 0x00, 0x03 };
+  disassemble_insn (gdbarch, insn, "clzg\t%r0,%r3");
+}
+
+} /* namespace selftests */
+
+#endif /* GDB_SELF_TEST */
+
 void _initialize_s390_tdep ();
 void
 _initialize_s390_tdep ()
@@ -7477,4 +7524,9 @@ _initialize_s390_tdep ()
 
   initialize_tdesc_s390_linux32 ();
   initialize_tdesc_s390x_linux64 ();
+
+#if GDB_SELF_TEST
+  selftests::register_test ("disassemble-s390x",
+			    selftests::disassemble_s390x);
+#endif /* GDB_SELF_TEST */
 }
