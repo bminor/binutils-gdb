@@ -5062,7 +5062,8 @@ print_input_section (asection *i, bool is_discarded)
     }
   print_spaces (SECTION_NAME_MAP_LENGTH - len);
 
-  if (i->output_section != NULL
+  if ((i->flags & SEC_EXCLUDE) == 0
+      && i->output_section != NULL
       && i->output_section->owner == link_info.output_bfd)
     addr = i->output_section->vma + i->output_offset;
   else
