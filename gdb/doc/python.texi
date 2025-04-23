@@ -7049,13 +7049,13 @@ writable.
 
 @cindex colors in python
 @tindex gdb.Color
-You can assign instance of @code{Color} to the @code{value} of
+You can assign instance of @code{gdb.Color} to the @code{value} of
 a @code{Parameter} instance created with @code{PARAM_COLOR}.
 
-@code{Color} may refer to an index from color palette or contain components
-of a color from some colorspace.
+@code{gdb.Color} may refer to an index from a color palette or contain
+components of a color from some color space.
 
-@defun Color.__init__ (@r{[}@var{value} @r{[}, @var{color-space}@r{]}@r{]})
+@defun Color.__init__ (@r{[}value @r{[}, color_space@r{]}@r{]})
 
 @var{value} is @code{None} (meaning the terminal's default color),
 an integer index of a color in palette, tuple with color components
@@ -7065,8 +7065,9 @@ or one of the following color names:
 @samp{green}, @samp{yellow}, @samp{blue}, @samp{magenta}, @samp{cyan},
 or @samp{white}.
 
-@var{color-space} should be one of the @samp{COLORSPACE_} constants.  This
-argument tells @value{GDBN} which color space @var{value} belongs.
+@var{color_space} should be one of the @samp{COLORSPACE_} constants
+listed below.  This argument tells @value{GDBN} which color space
+@var{value} belongs.
 @end defun
 
 @defvar Color.is_none
@@ -7094,7 +7095,7 @@ This attribute exist if @code{is_direct} is @code{True}.  Its value is tuple
 with integer components of a color.
 @end defvar
 
-@defun Color.escape_sequence (@var{self}, @var{is_foreground})
+@defun Color.escape_sequence (is_foreground)
 Returns string to change terminal's color to this.
 
 If @var{is_foreground} is @code{True}, then the returned sequence will change
