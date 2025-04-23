@@ -136,21 +136,21 @@ get_attr (PyObject *obj, PyObject *attr_name)
 /* Implementation of Color.escape_sequence (self, is_fg) -> str.  */
 
 static PyObject *
-colorpy_escape_sequence (PyObject *self, PyObject *is_fg_obj)
+colorpy_escape_sequence (PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  if (!gdbpy_is_color (self))
-    {
-      PyErr_SetString (PyExc_RuntimeError,
-		       _("Object is not gdb.Color."));
-      return nullptr;
-    }
+  static const char *keywords[] = { "is_foreground", nullptr };
+  PyObject *is_fg_obj;
 
-  if (!PyBool_Check (is_fg_obj))
-    {
-      PyErr_SetString (PyExc_RuntimeError,
-		       _("A boolean argument is required."));
-      return nullptr;
-    }
+  /* Parse method arguments.  */
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kwargs, "O!", keywords,
+					&PyBool_Type, &is_fg_obj))
+    return nullptr;
+
+  /* Python ensures the type of SELF.  */
+  gdb_assert (gdbpy_is_color (self));
+
+  /* The argument parsing ensures we have a bool.  */
+  gdb_assert (PyBool_Check (is_fg_obj));
 
   bool is_fg = is_fg_obj == Py_True;
   std::string s = gdbpy_get_color (self).to_ansi (is_fg);
@@ -288,7 +288,8 @@ gdbpy_initialize_color (void)
 
 static PyMethodDef color_methods[] =
 {
-  { "escape_sequence", colorpy_escape_sequence, METH_O,
+  { "escape_sequence", (PyCFunction) colorpy_escape_sequence,
+    METH_VARARGS | METH_KEYWORDS,
     "escape_sequence (is_foreground) -> str.\n\
 Return the ANSI escape sequence for this color.\n\
 IS_FOREGROUND indicates whether this is a foreground or background color."},

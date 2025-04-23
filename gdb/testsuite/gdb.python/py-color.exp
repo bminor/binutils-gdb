@@ -108,6 +108,12 @@ gdb_test [concat "python print (c_red.escape_sequence (True) + " \
     "c_none.escape_sequence (True))"] \
     "\033\\\[31m\033\\\[42mred on green\033\\\[49m red on default\033\\\[39m" \
     "escape sequences"
+gdb_test [concat "python print (c_red.escape_sequence (is_foreground = True) + " \
+    "c_green.escape_sequence (is_foreground = False) + 'red on green' + " \
+    "c_none.escape_sequence (is_foreground = False) + ' red on default' + " \
+    "c_none.escape_sequence (is_foreground = True))"] \
+    "\033\\\[31m\033\\\[42mred on green\033\\\[49m red on default\033\\\[39m" \
+    "escape sequences using keyword arguments"
 
 gdb_test_multiline "Try to sub-class gdb.Color" \
     "python" "" \
@@ -142,3 +148,8 @@ gdb_test "python color_param.value = bad_obj" \
 	 "Python Exception <class 'RuntimeError'>: color argument must be a gdb\\.Color object\\." \
 	 "Error occurred in Python: color argument must be a gdb\\.Color object\\."] \
     "set color parameter to a non-color type"
+
+gdb_test "python c_none.escape_sequence(c_red)" \
+    [multi_line \
+	 "Python Exception <class 'TypeError'>: argument 1 must be bool, not gdb.Color" \
+	 "Error occurred in Python: argument 1 must be bool, not gdb.Color"]
