@@ -111,7 +111,7 @@ class Generator:
                         canon_syscalls[syscall_num] = value
                     # this is a place for corner cases
                     elif syscall_name == "mmap":
-                        gdb_old_syscall_name = "gdb_old_mmap"
+                        gdb_old_syscall_name = "gdb_sys_old_mmap"
                         value = (
                             f"    case {syscall_num}: return {gdb_old_syscall_name};\n"
                         )
