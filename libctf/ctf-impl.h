@@ -186,9 +186,15 @@ typedef struct ctf_dtdef
   ctf_id_t dtd_type;		/* Type identifier for this definition.  */
   ctf_id_t dtd_final_type;	/* Final (nonprovisional) id, if nonzero.  */
   ctf_list_t dtd_refs;		/* Refs to this DTD's dtd_type: see below.  */
-  ctf_type_t dtd_data;		/* Type node, including name.  */
-  size_t dtd_vlen_alloc;	/* Total vlen space allocated (vbytes).  */
-  unsigned char *dtd_vlen;	/* Variable-length data for this type.  */
+  ctf_type_t *dtd_buf;		/* Type nodes plus variable-length data for
+				   this type.  */
+  size_t dtd_buf_size;		/* Length of dtd_buf in bytes.  */
+  ctf_type_t *dtd_data;		/* True type node, including name (pointer into
+				   dtd_buf).  */
+  unsigned char *dtd_vlen;	/* Actual vlen data (pointer into dtd_buf).  */
+  size_t dtd_vlen_size;		/* Total vlen space so far (vbytes).  */
+  uint64_t dtd_last_offset;	/* Offset of the last struct field.  */
+  int dtd_flags;		/* Some of the DTD_F_ flags.  */
 } ctf_dtdef_t;
 
 typedef struct ctf_dvdef
@@ -558,11 +564,15 @@ typedef struct ctf_next_hkv
 struct ctf_next
 {
   void (*ctn_iter_fun) (void);
-  ctf_id_t ctn_type;
+  union
+  {
+    ctf_id_t ctn_type;
+    ctf_id_t ctn_idx;
+  } i;
   size_t ctn_size;
   ssize_t ctn_increment;
   const ctf_type_t *ctn_tp;
-  uint32_t ctn_n;
+  size_t ctn_n;
 
   /* Some iterators contain other iterators, in addition to their other
      state.  We allow for inner and outer iterators, for two-layer nested loops
@@ -572,13 +582,14 @@ struct ctf_next
 
   /* We can save space on this side of things by noting that a type is either
      dynamic or not, as a whole, and a given iterator can only iterate over one
-     kind of thing at once: so we can overlap the DTD and non-DTD members, and
-     the structure, variable and enum members, etc.  */
+     kind of thing at once: so we can overlap the DTD and non-DTD members, the
+     structure and enum members, etc.  */
   union
   {
-    unsigned char *ctn_vlen;
+    const ctf_dtdef_t *ctn_dtd;
     const ctf_enum_t *ctn_en;
-    const ctf_dvdef_t *ctn_dvd;
+    const ctf_enum64_t *ctn_en64;
+    const ctf_var_secinfo_t *ctn_datasec;
     ctf_next_hkv_t *ctn_sorted_hkv;
     void **ctn_hash_slot;
   } u;
@@ -642,6 +653,8 @@ extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
 extern ctf_id_t ctf_lookup_variable_here (ctf_dict_t *fp, const char *name);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t,
 					   const ctf_type_t **suffix);
+extern const ctf_type_t *ctf_find_prefix (ctf_dict_t *, const ctf_type_t *,
+					  int kind);
 extern ctf_id_t ctf_lookup_by_sym_or_name (ctf_dict_t *, unsigned long symidx,
 					   const char *symname, int try_parent,
 					   int is_function);
