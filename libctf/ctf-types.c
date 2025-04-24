@@ -21,6 +21,10 @@
 #include <assert.h>
 #include <string.h>
 
+#ifndef roundup
+#define roundup(x, y)  ((((x) + ((y) - 1)) / (y)) * (y))
+#endif
+
 /* Determine whether a type is a parent or a child.  Bad IDs are not
    diagnosed!  */
 
@@ -1818,6 +1822,25 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int *valp)
     }
 
   return ctf_set_errno (ofp, ECTF_NOENUMNAM);
+}
+
+/* Return nonzero if this struct or union uses bitfield encoding.  */
+int
+ctf_struct_bitfield (ctf_dict_t * fp, ctf_id_t type)
+{
+  int kind;
+  const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
+
+  if ((kind = ctf_type_kind (fp, type)) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
+    return (ctf_set_errno (fp, ECTF_NOTSOU));
+
+  if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  return CTF_INFO_KFLAG (tp->ctt_info);
 }
 
 /* Given a type ID relating to a function type, return info on return types and
