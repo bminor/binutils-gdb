@@ -144,10 +144,15 @@ typedef struct ctf_encoding
   uint32_t cte_bits;		 /* Size of storage in bits.  */
 } ctf_encoding_t;
 
+/* "Not bitfield" here really means "not recorded as a bitfield in the
+   structure". ctf_type_encoding() may reveal that the base type or an
+   intervening slice has bitfield encoding nonetheless.  */
+
 typedef struct ctf_membinfo
 {
   ctf_id_t ctm_type;		/* Type of struct or union member.  */
-  unsigned long ctm_offset;	/* Offset of member in bits.  */
+  size_t ctm_offset;		/* Offset of member in bits.  */
+  int ctm_bit_width;		/* Width of member in bits: -1: not bitfield */
 } ctf_membinfo_t;
 
 typedef struct ctf_arinfo
@@ -296,13 +301,13 @@ _CTF_ERRORS
 
 typedef int ctf_visit_f (const char *name, ctf_id_t type, unsigned long offset,
 			 int depth, void *arg);
-typedef int ctf_member_f (const char *name, ctf_id_t membtype,
-			  unsigned long offset, void *arg);
 typedef int ctf_enum_f (const char *name, int val, void *arg);
 typedef int ctf_variable_f (const char *name, ctf_id_t type, void *arg);
 typedef int ctf_type_f (ctf_id_t type, void *arg);
 typedef int ctf_type_all_f (ctf_id_t type, int flag, void *arg);
 			 void *arg);
+typedef int ctf_member_f (ctf_dict_t *, const char *name, ctf_id_t membtype,
+			  size_t offset, int bit_width, void *arg);
 typedef int ctf_archive_member_f (ctf_dict_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
 				      size_t len, void *arg);
@@ -679,7 +684,7 @@ extern int ctf_array_info (ctf_dict_t *, ctf_id_t, ctf_arinfo_t *);
 
 extern int ctf_member_info (ctf_dict_t *, ctf_id_t, const char *,
 			    ctf_membinfo_t *);
-extern int ctf_member_count (ctf_dict_t *, ctf_id_t);
+extern ssize_t ctf_member_count (ctf_dict_t *, ctf_id_t);
 
 /* Iterators.  */
 
@@ -690,7 +695,7 @@ extern int ctf_member_count (ctf_dict_t *, ctf_id_t);
 extern int ctf_member_iter (ctf_dict_t *, ctf_id_t, ctf_member_f *, void *);
 extern ssize_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				const char **name, ctf_id_t *membtype,
-				int flags);
+				int *bit_width, int flags);
 
 /* Return all enumeration constants in a given enum type.  */
 extern int ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);

@@ -426,6 +426,22 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, const ctf_type_t **suffix)
     }
 }
 
+/* Find a given prefix in some type, if any.  */
+const ctf_type_t *
+ctf_find_prefix (ctf_dict_t *fp, const ctf_type_t *tp, int kind)
+{
+  uint32_t kind_ = kind;
+
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info)
+	 && CTF_INFO_KIND (tp->ctt_info) != kind_)
+    tp++;
+
+  if (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info) != kind_)
+    return NULL;
+
+  return tp;
+}
+
 typedef struct ctf_lookup_idx_key
 {
   ctf_dict_t *clik_fp;
