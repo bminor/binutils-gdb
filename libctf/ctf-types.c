@@ -689,30 +689,44 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
 ctf_id_t
 ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 {
+  return ctf_type_resolve_nonrepresentable (fp, type, 0);
+}
+
+/* As with ctf_type_resolve(), but optionally do not consider type 0
+   to be ECTF_NONREPRESENTABLE.  Internal only.  */
+ctf_id_t
+ctf_type_resolve_nonrepresentable (ctf_dict_t *fp, ctf_id_t type, int allow_zero)
+{
   ctf_id_t prev = type, otype = type;
   ctf_dict_t *ofp = fp;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
 
   if (type == 0)
-    return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
-
-  while ((tp = ctf_lookup_by_id (&fp, type)) != NULL)
     {
-      switch (LCTF_INFO_KIND (fp, tp->ctt_info))
+      if (allow_zero)
+	return 0;
+      else
+	return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
+    }
+
+  while ((tp = ctf_lookup_by_id (&fp, type, &suffix)) != NULL)
+    {
+      switch (LCTF_KIND (fp, tp))
 	{
 	case CTF_K_TYPEDEF:
 	case CTF_K_VOLATILE:
 	case CTF_K_CONST:
 	case CTF_K_RESTRICT:
-	  if (tp->ctt_type == type || tp->ctt_type == otype
-	      || tp->ctt_type == prev)
+	case CTF_K_VAR:
+	  if (suffix->ctt_type == type || suffix->ctt_type == otype
+	      || suffix->ctt_type == prev)
 	    {
 	      ctf_err_warn (ofp, 0, ECTF_CORRUPT, _("type %lx cycle detected"),
 			    otype);
 	      return (ctf_set_typed_errno (ofp, ECTF_CORRUPT));
 	    }
 	  prev = type;
-	  type = tp->ctt_type;
+	  type = suffix->ctt_type;
 	  break;
 	case CTF_K_UNKNOWN:
 	  return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
@@ -720,7 +734,12 @@ ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 	  return type;
 	}
       if (type == 0)
-	return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
+	{
+	  if (allow_zero)
+	    return 0;
+	  else
+	    return (ctf_set_typed_errno (ofp, ECTF_NONREPRESENTABLE));
+	}
     }
 
   return CTF_ERR;		/* errno is set for us.  */
@@ -739,7 +758,7 @@ ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return CTF_ERR;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
   resolved_type = type;
 
@@ -747,17 +766,17 @@ ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
     {
       type = resolved_type;
 
-      if ((LCTF_INFO_KIND (fp, tp->ctt_info)) == CTF_K_SLICE)
+      if ((LCTF_KIND (fp, tp)) == CTF_K_SLICE)
 	if ((type = ctf_type_reference (fp, type)) == CTF_ERR)
 	  return (ctf_set_typed_errno (ofp, ctf_errno (fp)));
 
       if ((resolved_type = ctf_type_resolve (fp, type)) == CTF_ERR)
 	return CTF_ERR;
 
-      if ((tp = ctf_lookup_by_id (&fp, resolved_type)) == NULL)
+      if ((tp = ctf_lookup_by_id (&fp, resolved_type, NULL)) == NULL)
 	return CTF_ERR;		/* errno is set for us.  */
     }
-  while (LCTF_INFO_KIND (fp, tp->ctt_info) == CTF_K_SLICE);
+  while (LCTF_KIND (fp, tp) == CTF_K_SLICE);
 
   return type;
 }
