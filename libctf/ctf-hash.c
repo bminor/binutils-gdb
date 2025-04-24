@@ -804,6 +804,12 @@ ctf_dynset_destroy (ctf_dynset_t *hp)
     htab_delete ((struct htab *) hp);
 }
 
+void
+ctf_dynset_destroy_arg (ctf_dynset_t *hp, void *unused _libctf_unused_)
+{
+  ctf_dynset_destroy (hp);
+}
+
 void *
 ctf_dynset_lookup (ctf_dynset_t *hp, const void *key)
 {

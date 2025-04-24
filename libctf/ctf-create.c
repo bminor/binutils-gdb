@@ -105,13 +105,20 @@ ctf_grow_vlen (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vlen)
 ctf_dict_t *
 ctf_create (int *errp)
 {
-  static const ctf_header_t hdr = { .cth_preamble = { CTF_MAGIC, CTF_VERSION, 0 } };
+  static ctf_header_t hdr =
+    {
+      .btf.bth_preamble = { CTF_BTF_MAGIC, CTF_BTF_VERSION, 0 },
+      .btf.bth_hdr_len = sizeof (ctf_btf_header_t),
+    };
 
   ctf_dynhash_t *structs = NULL, *unions = NULL, *enums = NULL, *names = NULL;
+  ctf_dynhash_t *datasecs = NULL, *tags = NULL;
   ctf_sect_t cts;
   ctf_dict_t *fp;
 
   libctf_init_debug();
+
+  hdr.cth_preamble.ctp_magic_version = (CTFv4_MAGIC << 16) | CTF_VERSION;
 
   structs = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 				NULL, NULL);
@@ -121,7 +128,11 @@ ctf_create (int *errp)
 			      NULL, NULL);
   names = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 			      NULL, NULL);
-  if (!structs || !unions || !enums || !names)
+  datasecs = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+				 NULL, NULL);
+  tags = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+			     NULL, (ctf_hash_free_fun) ctf_dynset_destroy);
+  if (!structs || !unions || !enums || !names || !datasecs || !tags)
     {
       ctf_set_open_errno (errp, EAGAIN);
       goto err;
@@ -141,10 +152,14 @@ ctf_create (int *errp)
   ctf_dynhash_destroy (fp->ctf_unions);
   ctf_dynhash_destroy (fp->ctf_enums);
   ctf_dynhash_destroy (fp->ctf_names);
+  ctf_dynhash_destroy (fp->ctf_datasecs);
+  ctf_dynhash_destroy (fp->ctf_tags);
   fp->ctf_structs = structs;
   fp->ctf_unions = unions;
   fp->ctf_enums = enums;
   fp->ctf_names = names;
+  fp->ctf_datasecs = datasecs;
+  fp->ctf_tags = tags;
   fp->ctf_dtoldid = 0;
   fp->ctf_snapshot_lu = 0;
 
@@ -165,6 +180,8 @@ ctf_create (int *errp)
   ctf_dynhash_destroy (unions);
   ctf_dynhash_destroy (enums);
   ctf_dynhash_destroy (names);
+  ctf_dynhash_destroy (datasecs);
+  ctf_dynhash_destroy (tags);
   return NULL;
 }
 
