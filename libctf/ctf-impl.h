@@ -180,6 +180,8 @@ typedef struct ctf_decl
   int cd_enomem;		     /* Nonzero if OOM during printing.  */
 } ctf_decl_t;
 
+#define DTD_F_UNSORTED	0x0001	/* set on a datasec if it needs sorting.  */
+
 typedef struct ctf_dtdef
 {
   ctf_list_t dtd_list;		/* List forward/back pointers.  */
@@ -440,8 +442,6 @@ struct ctf_dict
   ctf_link_sym_t **ctf_dynsymidx;  /* Indexes ctf_dynsyms by symidx.  */
   uint32_t ctf_dynsymmax;	  /* Maximum ctf_dynsym index.  */
   ctf_list_t ctf_in_flight_dynsyms; /* Dynsyms during accumulation.  */
-  struct ctf_varent *ctf_vars;	  /* Sorted variable->type mapping.  */
-  unsigned long ctf_nvars;	  /* Number of variables in ctf_vars.  */
   uint32_t ctf_typemax;		  /* Maximum valid type index.  */
   uint32_t ctf_idmax;		  /* Maximum valid non-provisional type ID.  */
   uint32_t ctf_stypes;		  /* Number of static (non-dynamic) types.  */
@@ -639,7 +639,6 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 #define LCTF_PRESERIALIZED	0x0020  /* Already serialized all but the strtab.  */
 
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
-extern ctf_id_t ctf_lookup_variable_here (ctf_dict_t *fp, const char *name);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t,
 					   const ctf_type_t **suffix);
 extern const ctf_type_t *ctf_find_prefix (ctf_dict_t *, const ctf_type_t *,
@@ -753,7 +752,6 @@ extern ctf_id_t ctf_add_encoded (ctf_dict_t *, uint32_t, const char *,
 				 const ctf_encoding_t *, uint32_t kind);
 extern ctf_id_t ctf_add_reftype (ctf_dict_t *, uint32_t, ctf_id_t,
 				 uint32_t kind);
-extern int ctf_add_variable_forced (ctf_dict_t *, const char *, ctf_id_t);
 extern int ctf_add_funcobjt_sym_forced (ctf_dict_t *, int is_function,
 					const char *, ctf_id_t);
 
@@ -825,6 +823,9 @@ extern ctf_id_t ctf_type_resolve_nonrepresentable (ctf_dict_t *, ctf_id_t, int a
 extern int ctf_type_kind_unsliced (ctf_dict_t *, ctf_id_t);
 extern ssize_t ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
 				       ctf_id_t type, ssize_t bit_offset);
+extern ctf_var_secinfo_t *ctf_datasec_entry (ctf_dict_t *, ctf_id_t,
+					     int component_idx);
+extern void ctf_datasec_sort (ctf_dict_t *, ctf_dtdef_t *);
 
 _libctf_printflike_ (1, 2)
 extern void ctf_dprintf (const char *, ...);

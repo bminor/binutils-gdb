@@ -619,7 +619,7 @@ ctf_variable_iter (ctf_dict_t *fp, ctf_variable_f *func, void *arg)
   while ((type = ctf_variable_next (fp, &i, &name)) != CTF_ERR)
     {
       int rc;
-      if ((rc = func (name, type, arg)) != 0)
+      if ((rc = func (fp, name, type, arg)) != 0)
 	{
 	  ctf_next_destroy (i);
 	  return rc;
@@ -640,6 +640,7 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
 {
   ctf_next_t *i = *it;
   ctf_id_t id;
+  ctf_error_t err;
 
   /* (No need for a LCTF_NO_STR check: checking for a missing parent covers more
      cases, and we need to do that anyway.)  */
@@ -654,35 +655,128 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
 
       i->cu.ctn_fp = fp;
       i->ctn_iter_fun = (void (*) (void)) ctf_variable_next;
-      i->u.ctn_dvd = ctf_list_next (&fp->ctf_dvdefs);
+      i->ctn_next = NULL;
       *it = i;
     }
 
   if ((void (*) (void)) ctf_variable_next != i->ctn_iter_fun)
+    {
+      err = ECTF_NEXT_WRONGFUN;
+      goto end;
+    }
+
+  if (fp != i->cu.ctn_fp)
+    {
+      err = ECTF_NEXT_WRONGFP;
+      goto end;
+    }
+
+  if ((id = ctf_type_kind_next (fp, &i->ctn_next, CTF_K_VAR)) != CTF_ERR)
+    {
+      if (name)
+	*name = ctf_type_name_raw (fp, id);
+      return id;
+    }
+  err = ctf_errno (fp);
+  /* Fall through.  */
+end:
+  ctf_next_destroy (i);
+  *it = NULL;
+  return ctf_set_typed_errno (fp, err);
+}
+
+/* Iterate over every variable in the given DATASEC, in arbitrary order.  We
+   pass the type ID, datasec-recorded size (usually 0), and offset of each
+   variable to the specified callback function.  */
+
+int
+ctf_datasec_var_iter (ctf_dict_t *fp, ctf_id_t datasec,
+		      ctf_datasec_var_f *func, void *arg)
+{
+  ctf_next_t *i = NULL;
+  ctf_id_t type;
+  size_t size, offset;
+
+  while ((type = ctf_datasec_var_next (fp, datasec, &i, &size, &offset)) != CTF_ERR)
+    {
+      int rc;
+      if ((rc = func (fp, type, offset, size, arg)) != 0)
+	{
+	  ctf_next_destroy (i);
+	  return rc;
+	}
+    }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    return -1;					/* errno is set for us.  */
+
+  return 0;
+}
+
+/* Iterate over every variable in the given CTF datasec, in arbitrary order,
+   returning the name and type of each variable in turn.  Returns CTF_ERR on end
+   of iteration or error.
+
+   (The order is arbitrary so we don't need to worry about sorting unsorted
+   datasecs.)  */
+
+ctf_id_t
+ctf_datasec_var_next (ctf_dict_t *fp, ctf_id_t datasec, ctf_next_t **it,
+		      size_t *size, size_t *offset)
+{
+  ctf_next_t *i = *it;
+  ctf_id_t type;
+
+  if (!i)
+    {
+      const ctf_type_t *tp;
+      unsigned char *vlen;
+      ctf_dict_t *ofp = fp;
+
+      if ((datasec = ctf_type_resolve_unsliced (fp, datasec)) == CTF_ERR)
+	return CTF_ERR;			/* errno is set for us.  */
+
+      if (ctf_type_kind (fp, datasec) != CTF_K_DATASEC)
+	return (ctf_set_typed_errno (ofp, ECTF_NOTDATASEC));
+
+      if ((tp = ctf_lookup_by_id (&fp, datasec, NULL)) == NULL)
+	return CTF_ERR;			/* errno is set for us.  */
+
+      if ((i = ctf_next_create ()) == NULL)
+	return (ctf_set_typed_errno (ofp, ENOMEM));
+
+      i->cu.ctn_fp = ofp;
+      i->ctn_iter_fun = (void (*) (void)) ctf_datasec_var_next;
+      vlen = ctf_vlen (fp, datasec, tp, &i->ctn_n);
+
+      i->u.ctn_datasec = (const ctf_var_secinfo_t *) vlen;
+
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_datasec_var_next != i->ctn_iter_fun)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
 
   if (fp != i->cu.ctn_fp)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
 
-  if (i->ctn_n < fp->ctf_nvars)
-    {
-      *name = ctf_strptr (fp, fp->ctf_vars[i->ctn_n].ctv_name);
-      return fp->ctf_vars[i->ctn_n++].ctv_type;
-
-    }
-
-  if (i->u.ctn_dvd == NULL)
+  if (i->ctn_n == 0)
     goto end_iter;
 
-  *name = i->u.ctn_dvd->dvd_name;
-  id = i->u.ctn_dvd->dvd_type;
-  i->u.ctn_dvd = ctf_list_next (i->u.ctn_dvd);
-  return id;
+  if (size)
+    *size = i->u.ctn_datasec->cvs_size;
+  if (offset)
+    *offset = i->u.ctn_datasec->cvs_offset;
+  type = i->u.ctn_datasec->cvs_type;
+
+  i->u.ctn_datasec++;
+  i->ctn_n--;
+
+  return type;
 
  end_iter:
   ctf_next_destroy (i);
   *it = NULL;
-  return ctf_set_typed_errno (fp, ECTF_NEXT_END);
+  return (ctf_set_typed_errno (fp, ECTF_NEXT_END));
 }
 
 /* Follow a given type through the graph for TYPEDEF, VOLATILE, CONST, and
@@ -885,8 +979,10 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	    case CTF_K_INTEGER:
 	    case CTF_K_FLOAT:
 	    case CTF_K_TYPEDEF:
-	      /* Integers, floats, and typedefs must always be named types.  */
 	    case CTF_K_BTF_FLOAT:
+	    case CTF_K_DATASEC:
+	      /* Integers, floats, typedefs, and datasecs must always be named
+		 types.  */
 
 	      if (name[0] == '\0')
 		{
@@ -895,7 +991,11 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 		  return NULL;
 		}
 
-	      ctf_decl_sprintf (&cd, "%s", name);
+	      if (cdp->cd_kind != CTF_K_DATASEC)
+		ctf_decl_sprintf (&cd, "%s", name);
+	      else
+		ctf_decl_sprintf (&cd, "DATASEC (\"%s\", %i)", name,
+				  LCTF_VLEN (rfp, tp));
 	      break;
 	    case CTF_K_POINTER:
 	      ctf_decl_sprintf (&cd, "*");
@@ -1985,6 +2085,110 @@ ctf_func_type_args (ctf_dict_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv
     *argv++ = *args++;
 
   return 0;
+}
+
+/* bsearch_r comparison function for datasec searches.  */
+static int
+search_datasec_by_offset (const void *key_, const void *arr_)
+{
+  uint32_t *key = (uint32_t *) key_;
+  ctf_var_secinfo_t *arr = (ctf_var_secinfo_t *) arr_;
+
+  if (*key < arr->cvs_offset)
+    return -1;
+  else if (*key > arr->cvs_offset)
+    return 1;
+
+  return 0;
+}
+
+/* Search a datasec for a variable covering a given offset.
+
+   Errors with ECTF_NODATASEC if not found.  */
+
+ctf_id_t
+ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec, uint32_t offset)
+{
+  ctf_dtdef_t *dtd;
+  const ctf_type_t *tp;
+  unsigned char *vlen;
+  size_t vlen_len;
+  ctf_var_secinfo_t *sec;
+  ctf_var_secinfo_t *el;
+  ssize_t size;
+
+  if ((tp = ctf_lookup_by_id (&fp, datasec, NULL)) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  if (ctf_type_kind (fp, datasec) != CTF_K_DATASEC)
+    return ctf_set_typed_errno (fp, ECTF_NOTDATASEC);
+
+  if ((dtd = ctf_dynamic_type (fp, datasec)) != NULL)
+    {
+      if (dtd->dtd_flags & DTD_F_UNSORTED)
+	ctf_datasec_sort (fp, dtd);
+    }
+
+  vlen = ctf_vlen (fp, datasec, tp, &vlen_len);
+  sec = (ctf_var_secinfo_t *) vlen;
+
+  if ((el = bsearch (&offset, sec, vlen_len, sizeof (ctf_var_secinfo_t),
+		     search_datasec_by_offset)) == NULL)
+    return ctf_set_typed_errno (fp, ECTF_NODATASEC);
+
+  if (el->cvs_offset == offset)
+    return el->cvs_type;
+
+  if ((size = ctf_type_size (fp, el->cvs_type)) >= 0)
+    if (el->cvs_offset < offset && el->cvs_offset + size > offset)
+      return el->cvs_type;
+
+  return ctf_set_typed_errno (fp, ECTF_NODATASEC);
+}
+
+/* Return the entry corresponding to a given component_idx in a datasec.
+
+   Not currently public API.  */
+
+ctf_var_secinfo_t *
+ctf_datasec_entry (ctf_dict_t *fp, ctf_id_t datasec, int component_idx)
+{
+  const ctf_type_t *tp;
+  unsigned char *vlen;
+  size_t vlen_len;
+  ctf_var_secinfo_t *sec;
+
+  if ((tp = ctf_lookup_by_id (&fp, datasec, NULL)) == NULL)
+    return NULL;		/* errno is set for us.  */
+
+  /* No type kind check: internal function.  */
+  vlen = ctf_vlen (fp, datasec, tp, &vlen_len);
+  sec = (ctf_var_secinfo_t *) vlen;
+
+  if (component_idx < 0 || (size_t) component_idx > vlen_len)
+    {
+      ctf_set_errno (fp, EOVERFLOW);
+      return NULL;
+    }
+
+  return &sec[component_idx];
+}
+
+/* Return the datasec that a given variable appears in, or ECTF_NODATASEC if
+   none.  */
+
+ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var)
+{
+  void *sec;
+
+  if (ctf_type_kind (fp, var) != CTF_K_VAR)
+    return (ctf_set_typed_errno (fp, ECTF_NOTVAR));
+
+  if (ctf_dynhash_lookup_kv (fp->ctf_var_datasecs, (void *) (ptrdiff_t) var,
+			     NULL, &sec))
+    return (ctf_id_t) sec;
+
+  return (ctf_set_typed_errno (fp, ECTF_NODATASEC));
 }
 
 /* Recursively visit the members of any type.  This function is used as the

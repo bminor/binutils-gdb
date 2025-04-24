@@ -271,6 +271,8 @@ ctf_name_table (ctf_dict_t *fp, int kind)
     case CTF_K_ENUM:
     case CTF_K_ENUM64:
       return fp->ctf_enums;
+    case CTF_K_DATASEC:
+      return fp->ctf_datasecs;
     default:
       return fp->ctf_names;
     }
@@ -1655,60 +1657,200 @@ ctf_add_member (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   return ctf_add_member_offset (fp, souid, name, type, (unsigned long) - 1);
 }
 
-/* Add a variable regardless of whether or not it is already present.
+/* Add a DATASEC to hang variables off of.  */
 
-   Internal use only.  */
-int
-ctf_add_variable_forced (ctf_dict_t *fp, const char *name, ctf_id_t ref)
+static ctf_id_t
+ctf_add_datasec (ctf_dict_t *fp, uint32_t flag, const char *datasec)
 {
-  ctf_dvdef_t *dvd;
-  ctf_dict_t *tmp = fp;
+  ctf_dtdef_t *dtd;
+  size_t initial_vlen = sizeof (ctf_var_secinfo_t) * INITIAL_VLEN;
 
-  if (ctf_lookup_by_id (&tmp, ref) == NULL)
-    return -1;			/* errno is set for us.  */
+  if ((dtd = ctf_add_generic (fp, flag, datasec, CTF_K_DATASEC,
+			      0, 0, initial_vlen, NULL)) == NULL)
+    return CTF_ERR;		/* errno is set for us. */
 
-  /* Make sure this type is representable.  */
-  if ((ctf_type_resolve (fp, ref) == CTF_ERR)
-      && (ctf_errno (fp) == ECTF_NONREPRESENTABLE))
-    return -1;
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_DATASEC, 0, 0);
+  dtd->dtd_data->ctt_size = 0;
 
-  if ((dvd = malloc (sizeof (ctf_dvdef_t))) == NULL)
-    return (ctf_set_errno (fp, EAGAIN));
-
-  if (name != NULL && (dvd->dvd_name = strdup (name)) == NULL)
-    {
-      free (dvd);
-      return (ctf_set_errno (fp, EAGAIN));
-    }
-  dvd->dvd_type = ref;
-  dvd->dvd_snapshots = fp->ctf_snapshots;
-
-  if (ctf_dvd_insert (fp, dvd) < 0)
-    {
-      free (dvd->dvd_name);
-      free (dvd);
-      return -1;			/* errno is set for us.  */
-    }
-
-  return 0;
+  return dtd->dtd_type;
 }
 
-int
-ctf_add_variable (ctf_dict_t *fp, const char *name, ctf_id_t ref)
+ctf_id_t
+ctf_add_variable (ctf_dict_t *fp, const char *name, int linkage, ctf_id_t ref)
 {
+  return ctf_add_section_variable (fp, CTF_ADD_ROOT, NULL, name, linkage, ref,
+				   0, (unsigned long) -1);
+}
+
+/* Add variable, interning it in the specified DATASEC (which must be in the
+   same dict, but which may be NULL, meaning "no datasec").  As with structs, an
+   offset of -1 means "next natural alignment".  A size of zero means "get it
+   from the type" and is the common case.  */
+ctf_id_t
+ctf_add_section_variable (ctf_dict_t *fp, uint32_t flag, const char *datasec,
+			  const char *name, int linkage, ctf_id_t type,
+			  size_t size, size_t offset)
+{
+  ctf_dtdef_t *sec_dtd = NULL;
+  ctf_dtdef_t *var_dtd = NULL;
+
+  uint32_t kind, kflag;
+  size_t vlen;
+
+  ctf_linkage_t *l;
+  ctf_var_secinfo_t *sec;
+
+  ctf_dict_t *tmp = fp;
+  ctf_id_t datasec_id = 0;
+  int is_incomplete = 0;
+  ctf_snapshot_id_t err_snap = ctf_snapshot (fp);
+
   if (fp->ctf_flags & LCTF_NO_STR)
-    return (ctf_set_errno (fp, ECTF_NOPARENT));
+    return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
 
-  if (fp->ctf_flags & LCTF_NO_TYPE)
-    return (ctf_set_errno (fp, ECTF_NOTSERIALIZED));
+  if (name == NULL || name[0] == '\0')
+    return (ctf_set_typed_errno (fp, ECTF_NONAME));
 
-  if (ctf_lookup_variable_here (fp, name) != CTF_ERR)
-    return (ctf_set_errno (fp, ECTF_DUPLICATE));
+  if (linkage < 0 || linkage > 2)
+    return (ctf_set_typed_errno (fp, ECTF_LINKAGE));
 
-  if (ctf_errno (fp) != ECTF_NOTYPEDAT)
-    return -1;				/* errno is set for us.  */
+  if (flag == CTF_ADD_ROOT && ctf_lookup_by_rawname (fp, CTF_K_VAR, name) != 0)
+    return (ctf_set_typed_errno (fp, ECTF_DUPLICATE));
 
-  return ctf_add_variable_forced (fp, name, ref);
+  /* First, create the variable.  Make sure its type exists.  */
+
+  if (ctf_lookup_by_id (&tmp, type, NULL) == NULL)
+    return CTF_ERR;			/* errno is set for us.  */
+
+  /* Make sure this type is representable: if a variable is nonrepresentable
+     there's nothing the end-user can do with it even if they know it's there.
+     Allow type 0: this is used for const void variables in BTF input.  */
+
+  if ((ctf_type_resolve_nonrepresentable (fp, type, 1) == CTF_ERR)
+      && (ctf_errno (fp) == ECTF_NONREPRESENTABLE))
+    return CTF_ERR;
+
+  if ((var_dtd = ctf_add_generic (fp, flag, name, CTF_K_VAR, 0,
+				  sizeof (ctf_linkage_t), 0, NULL)) == NULL)
+    return CTF_ERR;			/* errno is set for us.  */
+
+  l = (ctf_linkage_t *) var_dtd->dtd_vlen;
+  var_dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_VAR, 0, 0);
+  var_dtd->dtd_data->ctt_type = type;
+  l->ctl_linkage = linkage;
+
+  /* Add it to the datasec, if requested, creating the datasec if need be.  */
+
+  if (!datasec)
+    return var_dtd->dtd_type;
+
+  if ((datasec_id = ctf_lookup_by_rawname (fp, CTF_K_DATASEC,
+					   datasec)) == 0)
+    {
+      if ((datasec_id = ctf_add_datasec (fp, CTF_ADD_ROOT,
+					 datasec)) == CTF_ERR)
+	goto err;				/* errno is set for us.  */
+    }
+
+  sec_dtd = ctf_dtd_lookup (fp, datasec_id);
+
+  kind = LCTF_KIND (fp, sec_dtd->dtd_buf);
+  kflag = CTF_INFO_KFLAG (sec_dtd->dtd_data->ctt_info);
+  vlen = LCTF_VLEN (fp, sec_dtd->dtd_buf);
+
+  if (vlen == CTF_MAX_RAW_VLEN)
+    {
+      ctf_set_typed_errno (fp, ECTF_DTFULL);
+      goto err;
+    }
+
+  /* DATASECs do not support CTF_K_BIG (yet).  */
+  if (vlen == CTF_MAX_RAW_VLEN)
+    {
+      ctf_set_typed_errno (fp, ECTF_DTFULL);
+      goto err;
+    }
+
+  /* Allow for variables of void-like types.  */
+  if (type == 0)
+    is_incomplete = 1;
+  else if (ctf_type_align (fp, type) < 0)
+    {
+      /* See the comment in ctf_add_member_bitfield.  We don't need to worry
+	 about norepresentable types, because we just added this one: we know
+	 it's representable.  We do not know it's complete.  */
+
+      if (ctf_errno (fp) == ECTF_INCOMPLETE)
+	is_incomplete = 1;
+      else
+	goto err;			/* errno is set for us.  */
+    }
+
+  /* Here we just add the var info to the end of the datasec, naturally aligning
+     the offset as with struct/union membership addition if no offset is
+     specified.  */
+
+  sec = (ctf_var_secinfo_t *) sec_dtd->dtd_vlen;
+
+  if (vlen != 0)
+    {
+      /* To avoid causing trouble with existing code promiscuously adding
+	 variables without caring about their types, if natural alignment fails
+	 due to incomplete types, just set the next offset to something aligned
+	 mod 8.  It might be a waste of space but it'll avoid an error and
+	 should suffice for a long time to come.  */
+
+      if (offset == (unsigned long) -1 && is_incomplete)
+	offset = roundup (offset, 8);
+      else if (offset == (unsigned long) -1)
+	{
+	  /* Natural alignment.  */
+
+	  ssize_t bit_offset = offset * 8;
+
+	  if ((bit_offset = ctf_type_align_natural (fp, sec[vlen - 1].cvs_type,
+						    type, sec[vlen -1].cvs_offset)) < 0)
+	    offset = roundup (offset, 8);
+	  else
+	    offset = bit_offset / CHAR_BIT;
+	}
+
+      /* This DTD may need sorting.  */
+
+      if (offset < sec[vlen - 1].cvs_offset)
+	sec_dtd->dtd_flags |= ~DTD_F_UNSORTED;
+
+    } else if (offset == (unsigned long) -1)
+	offset = 0;
+
+  /* Remember the variable -> datasec mapping.  */
+
+  if (ctf_dynhash_insert (fp->ctf_var_datasecs,
+			  (void *) (ptrdiff_t) var_dtd->dtd_type,
+			  (void *) (ptrdiff_t) datasec_id) != 0)
+    {
+      ctf_set_typed_errno (fp, ENOMEM);
+      goto err;
+    }
+
+  if (ctf_grow_vlen (fp, sec_dtd, sizeof (ctf_var_secinfo_t) * (vlen + 1)) < 0)
+    goto err;
+
+  sec_dtd->dtd_vlen_size += sizeof (ctf_var_secinfo_t);
+  sec = (ctf_var_secinfo_t *) sec_dtd->dtd_vlen;
+
+  sec[vlen].cvs_type = (uint32_t) var_dtd->dtd_type;
+  sec[vlen].cvs_offset = (uint32_t) offset;
+  sec[vlen].cvs_size = (uint32_t) size;
+  sec_dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, kflag, vlen + 1);
+
+  return var_dtd->dtd_type;
+
+err:
+  ctf_dynhash_remove (fp->ctf_var_datasecs,
+		      (void *) (ptrdiff_t) var_dtd->dtd_type);
+  ctf_rollback (fp, err_snap);
+  return CTF_ERR;
 }
 
 /* Add a function or object symbol regardless of whether or not it is already
@@ -1764,6 +1906,39 @@ int
 ctf_add_func_sym (ctf_dict_t *fp, const char *name, ctf_id_t id)
 {
   return (ctf_add_funcobjt_sym (fp, 1, name, id));
+}
+
+/* Sort function used by ctf_datasec_sort.  */
+
+static int
+ctf_datasec_sort_ascending (const void *one_, const void *two_)
+{
+  ctf_var_secinfo_t *one = (ctf_var_secinfo_t *) one_;
+  ctf_var_secinfo_t *two = (ctf_var_secinfo_t *) two_;
+
+  if (one->cvs_offset < two->cvs_offset)
+    return -1;
+  else if (one->cvs_offset > two->cvs_offset)
+    return 1;
+  return 0;
+}
+
+/* Sort a datasec into order.  Needed before serialization or query
+   operations.  */
+
+void
+ctf_datasec_sort (ctf_dict_t *fp, ctf_dtdef_t *dtd)
+{
+  size_t vlen;
+
+  if (!(dtd->dtd_flags & DTD_F_UNSORTED))
+    return;
+
+  vlen = LCTF_VLEN (fp, dtd->dtd_buf);
+
+  qsort (dtd->dtd_vlen, vlen, sizeof (ctf_var_secinfo_t),
+	 ctf_datasec_sort_ascending);
+  dtd->dtd_flags &= ~DTD_F_UNSORTED;
 }
 
 /* Add an enumeration constant observed in a given enum type as an identifier.
