@@ -67,6 +67,26 @@ ctf_set_open_errno (int *errp, int error)
   return NULL;
 }
 
+/* See ctf-inlines.h.  */
+
+#ifdef ENABLE_LIBCTF_HASH_DEBUGGING
+int
+ctf_set_errno (ctf_dict_t *fp, int err)
+{
+  fp->ctf_errno = err;
+  /* Don't rely on CTF_ERR here as it will not properly sign extend on 64-bit
+     Windows ABI.  */
+  return -1;
+}
+
+ctf_id_t
+ctf_set_typed_errno (ctf_dict_t *fp, int err)
+{
+  fp->ctf_errno = err;
+  return CTF_ERR;
+}
+#endif
+
 /* Get and set CTF dict-wide flags.  We are fairly strict about returning
    errors here, to make it easier to determine programmatically which flags are
    valid.  */
