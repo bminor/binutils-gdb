@@ -280,7 +280,7 @@ struct dwo_sections
   struct dwarf2_section_info str;
   struct dwarf2_section_info str_offsets;
   /* In the case of a virtual DWO file, these two are unused.  */
-  struct dwarf2_section_info info;
+  std::vector<dwarf2_section_info> infos;
   std::vector<dwarf2_section_info> types;
 };
 
@@ -7523,7 +7523,7 @@ cutu_reader::locate_dwo_sections (struct objfile *objfile, bfd *abfd,
   if (names->abbrev_dwo.matches (sectp->name))
     dw_sect = &dwo_sections->abbrev;
   else if (names->info_dwo.matches (sectp->name))
-    dw_sect = &dwo_sections->info;
+    dw_sect = &dwo_sections->infos.emplace_back (dwarf2_section_info {});
   else if (names->line_dwo.matches (sectp->name))
     dw_sect = &dwo_sections->line;
   else if (names->loc_dwo.matches (sectp->name))
@@ -7541,16 +7541,14 @@ cutu_reader::locate_dwo_sections (struct objfile *objfile, bfd *abfd,
   else if (names->str_offsets_dwo.matches (sectp->name))
     dw_sect = &dwo_sections->str_offsets;
   else if (names->types_dwo.matches (sectp->name))
-    {
-      struct dwarf2_section_info type_section;
-
-      memset (&type_section, 0, sizeof (type_section));
-      dwo_sections->types.push_back (type_section);
-      dw_sect = &dwo_sections->types.back ();
-    }
+    dw_sect = &dwo_sections->types.emplace_back (dwarf2_section_info {});
 
   if (dw_sect != nullptr)
     {
+      /* Make sure we don't overwrite a section info that has been filled in
+	 already.  */
+      gdb_assert (!dw_sect->readin);
+
       dw_sect->s.section = sectp;
       dw_sect->size = bfd_section_size (sectp);
       dw_sect->read (objfile);
@@ -7585,8 +7583,13 @@ cutu_reader::open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
     this->locate_dwo_sections (per_objfile->objfile, dwo_file->dbfd.get (), sec,
 			       &dwo_file->sections);
 
-  create_dwo_unit_hash_tables (*dwo_file, *cu, dwo_file->sections.info,
-			       ruh_kind::COMPILE);
+  /* There is normally just one .debug_info.dwo section in a DWO file.  But when
+     building with -fdebug-types-section, gcc produces multiple .debug_info.dwo
+     sections.  One for each produced type unit and one for the compile unit.
+     This is not expected, but we can easily enough deal with what gcc
+     produces.  This behavior has been observed with gcc 14.2.1.  */
+  for (dwarf2_section_info &section : dwo_file->sections.infos)
+    create_dwo_unit_hash_tables (*dwo_file, *cu, section, ruh_kind::COMPILE);
 
   for (dwarf2_section_info &section : dwo_file->sections.types)
     create_dwo_unit_hash_tables (*dwo_file, *cu, section, ruh_kind::TYPE);
@@ -7625,6 +7628,10 @@ dwarf2_locate_common_dwp_sections (struct objfile *objfile, bfd *abfd,
 
   if (dw_sect != nullptr)
     {
+      /* Make sure we don't overwrite a section info that has been filled in
+	 already.  */
+      gdb_assert (!dw_sect->readin);
+
       dw_sect->s.section = sectp;
       dw_sect->size = bfd_section_size (sectp);
       dw_sect->read (objfile);
@@ -7670,6 +7677,10 @@ dwarf2_locate_v2_dwp_sections (struct objfile *objfile, bfd *abfd,
 
   if (dw_sect != nullptr)
     {
+      /* Make sure we don't overwrite a section info that has been filled in
+	 already.  */
+      gdb_assert (!dw_sect->readin);
+
       dw_sect->s.section = sectp;
       dw_sect->size = bfd_section_size (sectp);
       dw_sect->read (objfile);
@@ -7713,6 +7724,10 @@ dwarf2_locate_v5_dwp_sections (struct objfile *objfile, bfd *abfd,
 
   if (dw_sect != nullptr)
     {
+      /* Make sure we don't overwrite a section info that has been filled in
+	 already.  */
+      gdb_assert (!dw_sect->readin);
+
       dw_sect->s.section = sectp;
       dw_sect->size = bfd_section_size (sectp);
       dw_sect->read (objfile);
