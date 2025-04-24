@@ -137,11 +137,13 @@ typedef struct ctf_lookup
 typedef struct ctf_dictops
 {
   uint32_t (*ctfo_get_kind) (uint32_t);
+  uint32_t (*ctfo_get_prefixed_kind) (const ctf_type_t *tp);
   uint32_t (*ctfo_get_root) (uint32_t);
   uint32_t (*ctfo_get_vlen) (uint32_t);
-  ssize_t (*ctfo_get_ctt_size) (const ctf_dict_t *, const ctf_type_t *,
+  uint32_t (*ctfo_get_prefixed_vlen) (const ctf_type_t *tp);
+  ssize_t (*ctfo_get_ctt_size) (const ctf_dict_t *, const ctf_type_t *tp,
 				ssize_t *, ssize_t *);
-  ssize_t (*ctfo_get_vbytes) (ctf_dict_t *, unsigned short, ssize_t, size_t);
+  ssize_t (*ctfo_get_vbytes) (ctf_dict_t *, const ctf_type_t *, ssize_t);
 } ctf_dictops_t;
 
 typedef struct ctf_list
@@ -602,11 +604,24 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
    &(ctf_dtd_lookup (fp, ctf_index_to_type (fp, i))->dtd_data) :	\
    (ctf_type_t *)((uintptr_t)(fp)->ctf_buf + (fp)->ctf_txlate[(i)]))
 
-#define LCTF_INFO_KIND(fp, info)	((fp)->ctf_dictops->ctfo_get_kind(info))
+/* The non *INFO variants of these macros acquire the relevant info from the
+   suffixed type, if the type is prefixed.  (Internally to libctf, all types
+   that may ever take a prefix are prefixed until they are written out, so that
+   nothing special needs to be done to handle them should their size later
+   expand past the limit where prefixing is needed.)  */
+
+#define LCTF_INFO_UNPREFIXED_KIND(fp, info) ((fp)->ctf_dictops->ctfo_get_kind(info))
+#define LCTF_KIND(fp, tp)		((fp)->ctf_dictops->ctfo_get_prefixed_kind(tp))
 #define LCTF_INFO_ISROOT(fp, info)	((fp)->ctf_dictops->ctfo_get_root(info))
-#define LCTF_INFO_VLEN(fp, info)	((fp)->ctf_dictops->ctfo_get_vlen(info))
-#define LCTF_VBYTES(fp, kind, size, vlen) \
-  ((fp)->ctf_dictops->ctfo_get_vbytes(fp, kind, size, vlen))
+#define LCTF_VLEN(fp, tp)		((fp)->ctf_dictops->ctfo_get_prefixed_vlen(tp))
+#define LCTF_INFO_UNPREFIXED_VLEN(fp, info)	((fp)->ctf_dictops->ctfo_get_vlen(info))
+#define LCTF_VBYTES(fp, tp, size) \
+  ((fp)->ctf_dictops->ctfo_get_vbytes (fp, tp, size))
+
+#define LCTF_IS_PREFIXED_KIND(kind) (kind == CTF_K_BIG || kind == CTF_K_CONFLICTING)
+#define LCTF_IS_PREFIXED_INFO(info)			\
+  ((CTF_INFO_KIND ((info)) == CTF_K_BIG)		\
+   || (CTF_INFO_KIND ((info)) == CTF_K_CONFLICTING))
 
 #define LCTF_CHILD		0x0001	/* CTF dict is a child.  */
 #define LCTF_LINKING		0x0002  /* CTF link is underway: respect ctf_link_flags.  */
@@ -816,6 +831,9 @@ extern ctf_link_sym_t *ctf_elf32_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *ds
 					      const Elf32_Sym *src, uint32_t symidx);
 extern ctf_link_sym_t *ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst,
 					      const Elf64_Sym *src, uint32_t symidx);
+
+ssize_t get_ctt_size_v2_unconverted (const ctf_dict_t *, const ctf_type_t *,
+				     ssize_t *sizep, ssize_t *incrementp);
 
 /* Variables, all underscore-prepended. */
 

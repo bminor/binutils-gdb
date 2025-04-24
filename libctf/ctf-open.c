@@ -44,9 +44,15 @@ get_kind_v1 (uint32_t info)
 }
 
 static uint32_t
+get_prefixed_kind_v1 (const ctf_type_t *tp)
+{
+  return (CTF_V1_INFO_KIND (tp->ctt_info));
+}
+
+static uint32_t
 get_root_v1 (uint32_t info)
 {
-  return (CTF_V1_INFO_ISROOT (info));
+  return !!(CTF_V1_INFO_ISROOT (info));
 }
 
 static uint32_t
@@ -56,15 +62,27 @@ get_vlen_v1 (uint32_t info)
 }
 
 static uint32_t
+get_prefixed_vlen_v1 (const ctf_type_t *tp)
+{
+  return (CTF_V1_INFO_VLEN (tp->ctt_info));
+}
+
+static uint32_t
 get_kind_v2 (uint32_t info)
 {
   return (CTF_V2_INFO_KIND (info));
 }
 
 static uint32_t
+get_prefixed_kind_v2 (const ctf_type_t *tp)
+{
+  return (CTF_V2_INFO_KIND (tp->ctt_info));
+}
+
+static uint32_t
 get_root_v2 (uint32_t info)
 {
-  return (CTF_V2_INFO_ISROOT (info));
+  return !!(CTF_V2_INFO_ISROOT (info));
 }
 
 static uint32_t
@@ -73,12 +91,72 @@ get_vlen_v2 (uint32_t info)
   return (CTF_V2_INFO_VLEN (info));
 }
 
+static uint32_t
+get_prefixed_vlen_v2 (const ctf_type_t *tp)
+{
+  return (CTF_V2_INFO_VLEN (tp->ctt_info));
+}
+
+static uint32_t
+get_kind_v4 (uint32_t info)
+{
+  return (CTF_INFO_KIND (info));
+}
+
+static uint32_t
+get_prefixed_kind_v4 (const ctf_type_t *tp)
+{
+  /* Resolve away as many prefixes as exist.  */
+
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info))
+    tp++;
+
+  return CTF_INFO_KIND (tp->ctt_info);
+}
+
+static uint32_t
+get_root_v4 (uint32_t info)
+{
+  return (CTF_INFO_KIND (info) != CTF_K_CONFLICTING);
+}
+
+static uint32_t
+get_vlen_v4 (uint32_t info)
+{
+  return (CTF_INFO_VLEN (info));
+}
+
+static uint32_t
+get_prefixed_vlen_v4 (const ctf_type_t *tp)
+{
+  const ctf_type_t *suffix;
+
+  /* Resolve away non-BIG prefixes (which have no affect on vlen).  */
+
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info)
+	 && CTF_INFO_KIND (tp->ctt_info) != CTF_K_BIG)
+    tp++;
+
+  if (!LCTF_IS_PREFIXED_INFO (tp->ctt_info))
+    return (CTF_INFO_VLEN (tp->ctt_info));
+
+  suffix = tp + 1;
+
+  /* Special case: CTF_K_FUNC_LINKAGE reuses the vlen field for the linkage: its
+     vlen is always zero.  */
+  if (CTF_INFO_KIND (suffix->ctt_info) == CTF_K_FUNC_LINKAGE)
+    return 0;
+
+  /* CTF_K_BIG.  */
+  return (CTF_INFO_VLEN (tp->ctt_info) << 16 | CTF_INFO_VLEN (suffix->ctt_info));
+}
+
 static inline ssize_t
-get_ctt_size_common (const ctf_dict_t *fp _libctf_unused_,
-		     const ctf_type_t *tp _libctf_unused_,
-		     ssize_t *sizep, ssize_t *incrementp, size_t lsize,
-		     size_t csize, size_t ctf_type_size,
-		     size_t ctf_stype_size, size_t ctf_lsize_sent)
+get_ctt_size_old (const ctf_dict_t *fp _libctf_unused_,
+		  const ctf_type_t *tp _libctf_unused_,
+		  ssize_t *sizep, ssize_t *incrementp, size_t lsize,
+		  size_t csize, size_t ctf_type_size,
+		  size_t ctf_stype_size, size_t ctf_lsize_sent)
 {
   ssize_t size, increment;
 
@@ -107,56 +185,91 @@ get_ctt_size_v1 (const ctf_dict_t *fp, const ctf_type_t *tp,
 {
   ctf_type_v1_t *t1p = (ctf_type_v1_t *) tp;
 
-  return (get_ctt_size_common (fp, tp, sizep, incrementp,
-			       CTF_TYPE_LSIZE (t1p), t1p->ctt_size,
-			       sizeof (ctf_type_v1_t), sizeof (ctf_stype_v1_t),
-			       CTF_LSIZE_SENT_V1));
+  return (get_ctt_size_old (fp, tp, sizep, incrementp,
+			    CTF_V3_TYPE_LSIZE (t1p), t1p->ctt_size,
+			    sizeof (ctf_type_v1_t), sizeof (ctf_stype_v1_t),
+			    CTF_LSIZE_SENT_V1));
 }
 
 /* Return the size that a v1 will be once it is converted to v2.  */
 
-static ssize_t
+ssize_t
 get_ctt_size_v2_unconverted (const ctf_dict_t *fp, const ctf_type_t *tp,
 			     ssize_t *sizep, ssize_t *incrementp)
 {
   ctf_type_v1_t *t1p = (ctf_type_v1_t *) tp;
 
-  return (get_ctt_size_common (fp, tp, sizep, incrementp,
-			       CTF_TYPE_LSIZE (t1p), t1p->ctt_size,
-			       sizeof (ctf_type_t), sizeof (ctf_stype_t),
-			       CTF_LSIZE_SENT));
+  return (get_ctt_size_old (fp, tp, sizep, incrementp,
+			    CTF_V3_TYPE_LSIZE (t1p), t1p->ctt_size,
+			    sizeof (ctf_type_v2_t), sizeof (ctf_stype_v2_t),
+			    CTF_LSIZE_SENT));
 }
 
 static ssize_t
 get_ctt_size_v2 (const ctf_dict_t *fp, const ctf_type_t *tp,
 		 ssize_t *sizep, ssize_t *incrementp)
 {
-  return (get_ctt_size_common (fp, tp, sizep, incrementp,
-			       CTF_TYPE_LSIZE (tp), tp->ctt_size,
-			       sizeof (ctf_type_t), sizeof (ctf_stype_t),
-			       CTF_LSIZE_SENT));
+  ctf_type_v2_t *t2p = (ctf_type_v2_t *) tp;
+
+  return (get_ctt_size_old (fp, tp, sizep, incrementp,
+			    CTF_V3_TYPE_LSIZE (t2p), t2p->ctt_size,
+			    sizeof (ctf_type_v2_t), sizeof (ctf_stype_v2_t),
+			    CTF_LSIZE_SENT));
 }
 
 static ssize_t
-get_vbytes_common (ctf_dict_t *fp, unsigned short kind,
-		   ssize_t size _libctf_unused_, size_t vlen)
+get_ctt_size_v4 (const ctf_dict_t *fp _libctf_unused_, const ctf_type_t *tp,
+		 ssize_t *sizep, ssize_t *incrementp)
+{
+  ssize_t size = 0;
+
+  /* Figure out how many prefixes there are, and adjust the size appropriately
+     if we pass a BIG.  */
+
+  if (incrementp)
+    *incrementp = 0;
+
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info))
+    {
+      if (CTF_INFO_KIND (tp->ctt_info) == CTF_K_BIG)
+	size = ((ssize_t) tp->ctt_size) << 32;
+
+      if (incrementp)
+	*incrementp += sizeof (ctf_type_t);
+
+      tp++;
+    }
+
+  if (incrementp)
+    *incrementp += sizeof (ctf_type_t);
+
+  size |= tp->ctt_size;
+
+  if (sizep)
+    *sizep = size;
+
+  return size;
+}
+
+static ssize_t
+get_vbytes_old (ctf_dict_t *fp, unsigned short kind, size_t vlen)
 {
   switch (kind)
     {
-    case CTF_K_INTEGER:
-    case CTF_K_FLOAT:
+    case CTF_V3_K_INTEGER:
+    case CTF_V3_K_FLOAT:
       return (sizeof (uint32_t));
-    case CTF_K_SLICE:
+    case CTF_V3_K_SLICE:
       return (sizeof (ctf_slice_t));
-    case CTF_K_ENUM:
+    case CTF_V3_K_ENUM:
       return (sizeof (ctf_enum_t) * vlen);
-    case CTF_K_FORWARD:
-    case CTF_K_UNKNOWN:
-    case CTF_K_POINTER:
-    case CTF_K_TYPEDEF:
-    case CTF_K_VOLATILE:
-    case CTF_K_CONST:
-    case CTF_K_RESTRICT:
+    case CTF_V3_K_FORWARD:
+    case CTF_V3_K_UNKNOWN:
+    case CTF_V3_K_POINTER:
+    case CTF_V3_K_TYPEDEF:
+    case CTF_V3_K_VOLATILE:
+    case CTF_V3_K_CONST:
+    case CTF_V3_K_RESTRICT:
       return 0;
     default:
       ctf_set_errno (fp, ECTF_CORRUPT);
@@ -166,57 +279,124 @@ get_vbytes_common (ctf_dict_t *fp, unsigned short kind,
 }
 
 static ssize_t
-get_vbytes_v1 (ctf_dict_t *fp, unsigned short kind, ssize_t size, size_t vlen)
+get_vbytes_v1 (ctf_dict_t *fp, const ctf_type_t *tp, ssize_t size)
 {
+  unsigned short kind = CTF_V1_INFO_KIND (tp->ctt_info);
+  size_t vlen = CTF_V1_INFO_VLEN (tp->ctt_info);
+
   switch (kind)
     {
-    case CTF_K_ARRAY:
+    case CTF_V3_K_ARRAY:
       return (sizeof (ctf_array_v1_t));
-    case CTF_K_FUNCTION:
+    case CTF_V3_K_FUNCTION:
       return (sizeof (unsigned short) * (vlen + (vlen & 1)));
-    case CTF_K_STRUCT:
-    case CTF_K_UNION:
+    case CTF_V3_K_STRUCT:
+    case CTF_V3_K_UNION:
       if (size < CTF_LSTRUCT_THRESH_V1)
 	return (sizeof (ctf_member_v1_t) * vlen);
       else
 	return (sizeof (ctf_lmember_v1_t) * vlen);
     }
 
-  return (get_vbytes_common (fp, kind, size, vlen));
+  return (get_vbytes_old (fp, kind, vlen));
 }
 
 static ssize_t
-get_vbytes_v2 (ctf_dict_t *fp, unsigned short kind, ssize_t size, size_t vlen)
+get_vbytes_v2 (ctf_dict_t *fp, const ctf_type_t *tp, ssize_t size)
 {
+  unsigned short kind = CTF_V2_INFO_KIND (tp->ctt_info);
+  size_t vlen = CTF_V2_INFO_VLEN (tp->ctt_info);
+
   switch (kind)
     {
-    case CTF_K_ARRAY:
+    case CTF_V3_K_ARRAY:
       return (sizeof (ctf_array_t));
-    case CTF_K_FUNCTION:
+    case CTF_V3_K_FUNCTION:
       return (sizeof (uint32_t) * (vlen + (vlen & 1)));
-    case CTF_K_STRUCT:
-    case CTF_K_UNION:
+    case CTF_V3_K_STRUCT:
+    case CTF_V3_K_UNION:
       if (size < CTF_LSTRUCT_THRESH)
-	return (sizeof (ctf_member_t) * vlen);
+	return (sizeof (ctf_member_v2_t) * vlen);
       else
-	return (sizeof (ctf_lmember_t) * vlen);
+	return (sizeof (ctf_lmember_v2_t) * vlen);
     }
 
-  return (get_vbytes_common (fp, kind, size, vlen));
+  return (get_vbytes_old (fp, kind, vlen));
+}
+
+static ssize_t
+get_vbytes_v4 (ctf_dict_t *fp, const ctf_type_t *tp,
+	       ssize_t size _libctf_unused_)
+{
+  unsigned short kind = LCTF_KIND (fp, tp);
+  ssize_t vlen = LCTF_VLEN (fp, tp);
+
+  switch (kind)
+    {
+    case CTF_K_INTEGER:
+    case CTF_K_FLOAT:
+      return (sizeof (uint32_t));
+    case CTF_K_SLICE:
+      return (sizeof (ctf_slice_t));
+    case CTF_K_ENUM:
+      return (sizeof (ctf_enum_t) * vlen);
+    case CTF_K_ENUM64:
+      return (sizeof (ctf_enum64_t) * vlen);
+    case CTF_K_ARRAY:
+      return (sizeof (ctf_array_t));
+    case CTF_K_STRUCT:
+    case CTF_K_UNION:
+      return (sizeof (ctf_member_t) * vlen);
+    case CTF_K_FUNCTION:
+      return (sizeof (ctf_param_t) * vlen);
+    case CTF_K_VAR:
+      return (sizeof (ctf_linkage_t));
+    case CTF_K_DATASEC:
+      return (sizeof (ctf_var_secinfo_t) * vlen);
+    case CTF_K_DECL_TAG:
+      return (sizeof (ctf_decl_tag_t));
+    case CTF_K_TYPE_TAG:
+    case CTF_K_FORWARD:
+    case CTF_K_UNKNOWN:
+    case CTF_K_POINTER:
+    case CTF_K_TYPEDEF:
+    case CTF_K_VOLATILE:
+    case CTF_K_CONST:
+    case CTF_K_RESTRICT:
+    case CTF_K_FUNC_LINKAGE:
+    case CTF_K_BTF_FLOAT:
+      return 0;
+    /* These should have been resolved away by LCTF_KIND.
+       If this somehow didn't work, fail.  */
+    case CTF_K_BIG:
+    case CTF_K_CONFLICTING:
+      ctf_set_errno (fp, ECTF_INTERNAL);
+      ctf_err_warn (fp, 0, 0, _("internal error: prefixed kind seen in get_vbytes_v4: %x"), kind);
+      return -1;
+    default:
+      ctf_set_errno (fp, ECTF_CORRUPT);
+      ctf_err_warn (fp, 0, 0, _("detected invalid CTF kind: %x"), kind);
+      return -1;
+    }
 }
 
 static const ctf_dictops_t ctf_dictops[] = {
-  {NULL, NULL, NULL, NULL, NULL},
+  {NULL, NULL, NULL, NULL, NULL, NULL, NULL},
   /* CTF_VERSION_1 */
-  {get_kind_v1, get_root_v1, get_vlen_v1, get_ctt_size_v1, get_vbytes_v1},
+  {get_kind_v1, get_prefixed_kind_v1, get_root_v1, get_vlen_v1,
+   get_prefixed_vlen_v1, get_ctt_size_v1, get_vbytes_v1},
   /* CTF_VERSION_1_UPGRADED_3 */
-  {get_kind_v2, get_root_v2, get_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
+  {get_kind_v2, get_prefixed_kind_v2, get_root_v2, get_vlen_v2,
+   get_prefixed_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
   /* CTF_VERSION_2 */
-  {get_kind_v2, get_root_v2, get_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
+  {get_kind_v2, get_prefixed_kind_v2, get_root_v2, get_vlen_v2,
+   get_prefixed_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
   /* CTF_VERSION_3, identical to 2: only new type kinds */
-  {get_kind_v2, get_root_v2, get_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
-  /* UPTODO: CTF_VERSION_4, identical to 3 at present (but not for long) */
-  {get_kind_v2, get_root_v2, get_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
+  {get_kind_v2, get_prefixed_kind_v2, get_root_v2, get_vlen_v2,
+   get_prefixed_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
+  /* CTF_VERSION_4, always BTF-compatible.  */
+  {get_kind_v4, get_prefixed_kind_v4, get_root_v4, get_vlen_v4,
+   get_prefixed_vlen_v4, get_ctt_size_v4, get_vbytes_v4},
 };
 
 /* Initialize the symtab translation table as appropriate for its indexing
