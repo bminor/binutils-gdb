@@ -99,6 +99,15 @@ struct dwarf2_cu
   void add_dependence (dwarf2_per_cu *ref_per_cu)
   { m_dependencies.emplace (ref_per_cu); }
 
+  /* Find the DIE at section offset SECT_OFF.
+
+     Return nullptr if not found.  */
+  die_info *find_die (sect_offset sect_off) const
+  {
+    auto it = die_hash.find (sect_off);
+    return it != die_hash.end () ? *it : nullptr;
+  }
+
   /* The header of the compilation unit.  */
   struct comp_unit_head header;
 

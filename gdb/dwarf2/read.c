@@ -18260,8 +18260,7 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 
   *ref_cu = target_cu;
 
-  auto it = target_cu->die_hash.find (sect_off);
-  return it != target_cu->die_hash.end () ? *it : nullptr;
+  return target_cu->find_die (sect_off);
 }
 
 /* Follow reference attribute ATTR of SRC_DIE.
@@ -18629,8 +18628,8 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
   gdb_assert (sig_cu != NULL);
   gdb_assert (to_underlying (sig_type->type_offset_in_section) != 0);
 
-  if (auto die_it = sig_cu->die_hash.find (sig_type->type_offset_in_section);
-      die_it != sig_cu->die_hash.end ())
+  if (die_info *die = sig_cu->find_die (sig_type->type_offset_in_section);
+      die != nullptr)
     {
       /* For .gdb_index version 7 keep track of included TUs.
 	 http://sourceware.org/bugzilla/show_bug.cgi?id=15021.  */
@@ -18639,7 +18638,7 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
 	(*ref_cu)->per_cu->imported_symtabs.push_back (sig_cu->per_cu);
 
       *ref_cu = sig_cu;
-      return *die_it;
+      return die;
     }
 
   return NULL;
