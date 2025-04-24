@@ -193,7 +193,7 @@ objfile::map_symtabs_matching_filename
   {
     /* The callback to iterate_over_some_symtabs returns false to keep
        going and true to continue, so we have to invert the result
-       here, for expand_symtabs_matching.  */
+       here, for search.  */
     bool result = !iterate_over_some_symtabs (name, real_path,
 					      this->compunit_symtabs,
 					      last_made,
@@ -204,14 +204,10 @@ objfile::map_symtabs_matching_filename
 
   for (const auto &iter : qf)
     {
-      if (!iter->expand_symtabs_matching (this,
-					  match_one_filename,
-					  nullptr,
-					  nullptr,
-					  on_expansion,
-					  (SEARCH_GLOBAL_BLOCK
-					   | SEARCH_STATIC_BLOCK),
-					  SEARCH_ALL_DOMAINS))
+      if (!iter->search (this, match_one_filename, nullptr, nullptr,
+			 on_expansion,
+			 SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
+			 SEARCH_ALL_DOMAINS))
 	{
 	  retval = false;
 	  break;
@@ -267,15 +263,11 @@ objfile::lookup_symbol (block_enum kind, const lookup_name_info &name,
 
   for (const auto &iter : qf)
     {
-      if (!iter->expand_symtabs_matching (this,
-					  nullptr,
-					  &name,
-					  nullptr,
-					  search_one_symtab,
-					  kind == GLOBAL_BLOCK
-					  ? SEARCH_GLOBAL_BLOCK
-					  : SEARCH_STATIC_BLOCK,
-					  domain))
+      if (!iter->search (this, nullptr, &name, nullptr, search_one_symtab,
+			 kind == GLOBAL_BLOCK
+			 ? SEARCH_GLOBAL_BLOCK
+			 : SEARCH_STATIC_BLOCK,
+			 domain))
 	break;
     }
 
@@ -336,43 +328,35 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
   };
 
   for (const auto &iter : qf)
-    iter->expand_symtabs_matching (this,
-				   file_matcher,
-				   nullptr,
-				   nullptr,
-				   nullptr,
-				   (SEARCH_GLOBAL_BLOCK
-				    | SEARCH_STATIC_BLOCK),
-				   SEARCH_ALL_DOMAINS);
+    iter->search (this, file_matcher, nullptr, nullptr, nullptr,
+		  SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
+		  SEARCH_ALL_DOMAINS);
 }
 
 bool
-objfile::expand_symtabs_matching
-  (expand_symtabs_file_matcher file_matcher,
-   const lookup_name_info *lookup_name,
-   expand_symtabs_symbol_matcher symbol_matcher,
-   expand_symtabs_expansion_listener expansion_notify,
-   block_search_flags search_flags,
-   domain_search_flags domain,
-   expand_symtabs_lang_matcher lang_matcher)
+objfile::search (search_symtabs_file_matcher file_matcher,
+		 const lookup_name_info *lookup_name,
+		 search_symtabs_symbol_matcher symbol_matcher,
+		 search_symtabs_expansion_listener listener,
+		 block_search_flags search_flags,
+		 domain_search_flags domain,
+		 search_symtabs_lang_matcher lang_matcher)
 {
-  /* This invariant is documented in quick-functions.h.  */
+  /* This invariant is documented in quick-symbol.h.  */
   gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
 
   if (debug_symfile)
     gdb_printf (gdb_stdlog,
-		"qf->expand_symtabs_matching (%s, %s, %s, %s, %s)\n",
+		"qf->search (%s, %s, %s, %s, %s)\n",
 		objfile_debug_name (this),
 		host_address_to_string (&file_matcher),
 		host_address_to_string (&symbol_matcher),
-		host_address_to_string (&expansion_notify),
+		host_address_to_string (&listener),
 		domain_name (domain).c_str ());
 
   for (const auto &iter : qf)
-    if (!iter->expand_symtabs_matching (this, file_matcher, lookup_name,
-					symbol_matcher, expansion_notify,
-					search_flags, domain,
-					lang_matcher))
+    if (!iter->search (this, file_matcher, lookup_name, symbol_matcher,
+		       listener, search_flags, domain, lang_matcher))
       return false;
   return true;
 }

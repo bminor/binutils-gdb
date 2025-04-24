@@ -1496,11 +1496,9 @@ add_symbol_overload_list_qualified (const char *func_name,
 	 /* Look through the partial symtabs for all symbols which
 	    begin by matching FUNC_NAME.  Make sure we read that
 	    symbol table in.  */
-	 obj->expand_symtabs_matching (nullptr, &lookup_name,
-				       nullptr, callback,
-				       (SEARCH_GLOBAL_BLOCK
-					| SEARCH_STATIC_BLOCK),
-				       SEARCH_FUNCTION_DOMAIN);
+	 obj->search (nullptr, &lookup_name, nullptr, callback,
+		      SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
+		      SEARCH_FUNCTION_DOMAIN);
 
 	 return 0;
        }, current_objfile);

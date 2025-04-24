@@ -2427,12 +2427,11 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
       return !accum.search (symtab, block, lookup_name, domain);
     };
 
-  objfile->expand_symtabs_matching (nullptr, &lookup_name, nullptr,
-				    searcher,
-				    block_index == GLOBAL_BLOCK
-				    ? SEARCH_GLOBAL_BLOCK
-				    : SEARCH_STATIC_BLOCK,
-				    domain);
+  objfile->search (nullptr, &lookup_name, nullptr, searcher,
+		   block_index == GLOBAL_BLOCK
+		   ? SEARCH_GLOBAL_BLOCK
+		   : SEARCH_STATIC_BLOCK,
+		   domain);
   if (accum.best_symtab == nullptr)
     {
       symbol_lookup_debug_printf_v
@@ -4780,11 +4779,11 @@ global_symbol_searcher::expand_symtabs
     {
       return file_matches (filename, m_filenames, basenames);
     };
-  expand_symtabs_file_matcher file_matcher = nullptr;
+  search_symtabs_file_matcher file_matcher = nullptr;
   if (!m_filenames.empty ())
     file_matcher = do_file_match;
 
-  objfile->expand_symtabs_matching
+  objfile->search
     (file_matcher,
      &lookup_name_info::match_any (),
      [&] (const char *symname)
@@ -6002,7 +6001,7 @@ default_collect_symbol_completion_matches_break_on
     {
       /* Look through the partial symtabs for all symbols which begin by
 	 matching SYM_TEXT.  Expand all CUs that you find to the list.  */
-      objfile->expand_symtabs_matching
+      objfile->search
 	(nullptr, &lookup_name, nullptr,
 	 [&] (compunit_symtab *symtab)
 	   {

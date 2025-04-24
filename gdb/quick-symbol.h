@@ -37,30 +37,29 @@ DEF_ENUM_FLAGS_TYPE (enum block_search_flag_values, block_search_flags);
 using symbol_filename_listener
   = gdb::function_view<void (const char *filename, const char *fullname)>;
 
-/* Callback for quick_symbol_functions::expand_symtabs_matching
-   to match a file name.  */
+/* Callback for quick_symbol_functions::search to match a file
+   name.  */
 
-using expand_symtabs_file_matcher
+using search_symtabs_file_matcher
   = gdb::function_view<bool (const char *filename, bool basenames)>;
 
-/* Callback for quick_symbol_functions::expand_symtabs_matching
-   to match a symbol name.  */
+/* Callback for quick_symbol_functions::search to match a symbol
+   name.  */
 
-using expand_symtabs_symbol_matcher
+using search_symtabs_symbol_matcher
   = gdb::function_view<bool (const char *name)>;
 
-/* Callback for quick_symbol_functions::expand_symtabs_matching
-   to match a language.  */
+/* Callback for quick_symbol_functions::search to match a
+   language.  */
 
-using expand_symtabs_lang_matcher
+using search_symtabs_lang_matcher
   = gdb::function_view<bool (enum language lang)>;
 
-/* Callback for quick_symbol_functions::expand_symtabs_matching
-   to be called after a symtab has been expanded.  If this returns
-   true, more symtabs are checked; if it returns false, iteration
-   stops.  */
+/* Callback for quick_symbol_functions::search to be called when
+   symtab matches (perhaps expanding it first).  If this returns true,
+   more symtabs are checked; if it returns false, iteration stops.  */
 
-using expand_symtabs_expansion_listener
+using search_symtabs_expansion_listener
   = gdb::function_view<bool (compunit_symtab *symtab)>;
 
 /* The "quick" symbol functions exist so that symbol readers can
@@ -70,13 +69,6 @@ using expand_symtabs_expansion_listener
 
    The quick symbol functions are generally opaque: the underlying
    representation is hidden from the caller.
-
-   In general, these functions should only look at whatever special
-   index the symbol reader creates -- looking through the symbol
-   tables themselves is handled by generic code.  If a function is
-   defined as returning a "symbol table", this means that the function
-   should only return a newly-created symbol table; it should not
-   examine pre-existing ones.
 
    The exact list of functions here was determined in an ad hoc way
    based on gdb's history.  */
@@ -130,11 +122,11 @@ struct quick_symbol_functions
   /* Read all symbol tables associated with OBJFILE.  */
   virtual void expand_all_symtabs (struct objfile *objfile) = 0;
 
-  /* Expand all symbol tables in OBJFILE matching some criteria.
+  /* Search all symbol tables in OBJFILE matching some criteria.
 
-     If LANG_MATCHER returns false, expansion of the symbol table may be
-     skipped.  It may also not be skipped, which the caller needs to take into
-     account.
+     If LANG_MATCHER returns false, search of the symbol table may be
+     skipped.  It may also not be skipped, which the caller needs to
+     take into account.
 
      FILE_MATCHER is called for each file in OBJFILE.  The file name
      is passed to it.  If the matcher returns false, the file is
@@ -144,7 +136,7 @@ struct quick_symbol_functions
      part).
 
      If the file is not skipped, and SYMBOL_MATCHER and LOOKUP_NAME are NULL,
-     the symbol table is expanded.
+     the symbol table is searched.
 
      Otherwise, individual symbols are considered.
 
@@ -156,19 +148,23 @@ struct quick_symbol_functions
      Note that if SYMBOL_MATCHER is non-NULL, then LOOKUP_NAME must
      also be provided.
 
-     Otherwise, the symbol's symbol table is expanded and EXPANSION_NOTIFY is
-     called.  If EXPANSION_NOTIFY returns false, execution stops and this method
-     returns false.  Otherwise, more files are considered.  This method returns
-     true if all calls to EXPANSION_NOTIFY return true.  */
-  virtual bool expand_symtabs_matching
+     Otherwise, the symbol's symbol table is expanded if needed.
+
+     Then (regardless of whether the symbol table was already
+     expanded, or just expanded in response to this search), LISTENER
+     is called.  If LISTENER returns false, execution stops and this
+     method returns false.  Otherwise, more files are considered.
+     This method returns true if all calls to LISTENER return
+     true.  */
+  virtual bool search
     (struct objfile *objfile,
-     expand_symtabs_file_matcher file_matcher,
+     search_symtabs_file_matcher file_matcher,
      const lookup_name_info *lookup_name,
-     expand_symtabs_symbol_matcher symbol_matcher,
-     expand_symtabs_expansion_listener expansion_notify,
+     search_symtabs_symbol_matcher symbol_matcher,
+     search_symtabs_expansion_listener listener,
      block_search_flags search_flags,
      domain_search_flags domain,
-     expand_symtabs_lang_matcher lang_matcher = nullptr) = 0;
+     search_symtabs_lang_matcher lang_matcher = nullptr) = 0;
 
   /* Return the comp unit from OBJFILE that contains PC and
      SECTION.  Return NULL if there is no such compunit.  This

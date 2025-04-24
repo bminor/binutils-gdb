@@ -851,10 +851,10 @@ static struct dwarf2_section_info *cu_debug_loc_section (struct dwarf2_cu *cu);
 static struct dwarf2_section_info *cu_debug_rnglists_section
   (struct dwarf2_cu *cu, dwarf_tag tag);
 
-static void dw_expand_symtabs_matching_file_matcher
+static void dw_search_file_matcher
   (dwarf2_per_objfile *per_objfile,
    auto_bool_vector &cus_to_skip,
-   expand_symtabs_file_matcher file_matcher);
+   search_symtabs_file_matcher file_matcher);
 
 static void get_scope_pc_bounds (struct die_info *,
 				 unrelocated_addr *, unrelocated_addr *,
@@ -1530,20 +1530,18 @@ struct readnow_functions : public dwarf2_base_index_functions
   {
   }
 
-  bool expand_symtabs_matching
-    (struct objfile *objfile,
-     expand_symtabs_file_matcher file_matcher,
-     const lookup_name_info *lookup_name,
-     expand_symtabs_symbol_matcher symbol_matcher,
-     expand_symtabs_expansion_listener expansion_notify,
-     block_search_flags search_flags,
-     domain_search_flags domain,
-     expand_symtabs_lang_matcher lang_matcher) override
+  bool search (struct objfile *objfile,
+	       search_symtabs_file_matcher file_matcher,
+	       const lookup_name_info *lookup_name,
+	       search_symtabs_symbol_matcher symbol_matcher,
+	       search_symtabs_expansion_listener listener,
+	       block_search_flags search_flags,
+	       domain_search_flags domain,
+	       search_symtabs_lang_matcher lang_matcher) override
   {
     dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
     auto_bool_vector cus_to_skip;
-    dw_expand_symtabs_matching_file_matcher (per_objfile, cus_to_skip,
-					     file_matcher);
+    dw_search_file_matcher (per_objfile, cus_to_skip, file_matcher);
 
     for (const auto &per_cu : per_objfile->per_bfd->all_units)
       {
@@ -1559,10 +1557,8 @@ struct readnow_functions : public dwarf2_base_index_functions
 	    || per_cu->unit_type (false) == 0
 	    || per_objfile->get_symtab (per_cu.get ()) == nullptr)
 	  continue;
-	if (!dw2_expand_symtabs_matching_one (per_cu.get (), per_objfile,
-					      cus_to_skip, file_matcher,
-					      expansion_notify,
-					      lang_matcher))
+	if (!dw2_search_one (per_cu.get (), per_objfile, cus_to_skip,
+			     file_matcher, listener, lang_matcher))
 	  return false;
       }
     return true;
@@ -2001,13 +1997,13 @@ dwarf2_base_index_functions::expand_all_symtabs (struct objfile *objfile)
 /* See read.h.  */
 
 bool
-dw2_expand_symtabs_matching_one
+dw2_search_one
   (dwarf2_per_cu *per_cu,
    dwarf2_per_objfile *per_objfile,
    auto_bool_vector &cus_to_skip,
-   expand_symtabs_file_matcher file_matcher,
-   expand_symtabs_expansion_listener expansion_notify,
-   expand_symtabs_lang_matcher lang_matcher)
+   search_symtabs_file_matcher file_matcher,
+   search_symtabs_expansion_listener listener,
+   search_symtabs_lang_matcher lang_matcher)
 {
   /* Already visited, or intentionally skipped.  */
   if (cus_to_skip.is_set (per_cu->index))
@@ -2026,10 +2022,10 @@ dw2_expand_symtabs_matching_one
     = dw2_instantiate_symtab (per_cu, per_objfile, false);
   gdb_assert (symtab != nullptr);
 
-  if (expansion_notify != nullptr)
+  if (listener != nullptr)
     {
       cus_to_skip.set (per_cu->index, true);
-      return expansion_notify (symtab);
+      return listener (symtab);
     }
 
   return true;
@@ -2039,10 +2035,10 @@ dw2_expand_symtabs_matching_one
    based on FILE_MATCHER.  */
 
 static void
-dw_expand_symtabs_matching_file_matcher
+dw_search_file_matcher
   (dwarf2_per_objfile *per_objfile,
    auto_bool_vector &cus_to_skip,
-   expand_symtabs_file_matcher file_matcher)
+   search_symtabs_file_matcher file_matcher)
 {
   if (file_matcher == NULL)
     return;
@@ -14597,23 +14593,22 @@ cooked_index_functions::find_compunit_symtab_by_address
 }
 
 bool
-cooked_index_functions::expand_symtabs_matching
+cooked_index_functions::search
   (objfile *objfile,
-   expand_symtabs_file_matcher file_matcher,
+   search_symtabs_file_matcher file_matcher,
    const lookup_name_info *lookup_name,
-   expand_symtabs_symbol_matcher symbol_matcher,
-   expand_symtabs_expansion_listener expansion_notify,
+   search_symtabs_symbol_matcher symbol_matcher,
+   search_symtabs_expansion_listener listener,
    block_search_flags search_flags,
    domain_search_flags domain,
-   expand_symtabs_lang_matcher lang_matcher)
+   search_symtabs_lang_matcher lang_matcher)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
   cooked_index *table = wait (objfile, true);
 
   auto_bool_vector cus_to_skip;
-  dw_expand_symtabs_matching_file_matcher (per_objfile, cus_to_skip,
-					   file_matcher);
+  dw_search_file_matcher (per_objfile, cus_to_skip, file_matcher);
 
   /* This invariant is documented in quick-functions.h.  */
   gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
@@ -14623,10 +14618,8 @@ cooked_index_functions::expand_symtabs_matching
 	{
 	  QUIT;
 
-	  if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile,
-						cus_to_skip, file_matcher,
-						expansion_notify,
-						lang_matcher))
+	  if (!dw2_search_one (per_cu, per_objfile, cus_to_skip, file_matcher,
+			       listener, lang_matcher))
 	    return false;
 	}
       return true;
@@ -14794,9 +14787,8 @@ cooked_index_functions::expand_symtabs_matching
 	  else if (!symbol_matcher (full_name))
 	    continue;
 
-	  if (!dw2_expand_symtabs_matching_one (entry->per_cu, per_objfile,
-						cus_to_skip, file_matcher,
-						expansion_notify, nullptr))
+	  if (!dw2_search_one (entry->per_cu, per_objfile, cus_to_skip,
+			       file_matcher, listener, nullptr))
 	    return false;
 	}
     }

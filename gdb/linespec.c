@@ -1170,11 +1170,8 @@ iterate_over_all_matching_symtabs
 	      return true;
 	    };
 
-	  objfile->expand_symtabs_matching (nullptr, &lookup_name,
-					    nullptr, expand_callback,
-					    (SEARCH_GLOBAL_BLOCK
-					     | SEARCH_STATIC_BLOCK),
-					    domain);
+	  objfile->search (nullptr, &lookup_name, nullptr, expand_callback,
+			   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK, domain);
 	}
     }
 }
@@ -3770,7 +3767,7 @@ find_linespec_symbols (struct linespec_state *state,
   if (canon != nullptr)
     lookup_name = canon.get ();
 
-  /* It's important to not call expand_symtabs_matching unnecessarily
+  /* It's important to not call search unnecessarily
      as it can really slow things down (by unnecessarily expanding
      potentially 1000s of symtabs, which when debugging some apps can
      cost 100s of seconds).  Avoid this to some extent by *first* calling

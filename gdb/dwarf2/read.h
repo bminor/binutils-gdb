@@ -1247,15 +1247,15 @@ private:
 };
 
 /* If FILE_MATCHER is NULL and if CUS_TO_SKIP does not include the
-   CU's index, expand the CU and call EXPANSION_NOTIFY on it.  */
+   CU's index, expand the CU and call LISTENER on it.  */
 
-extern bool dw2_expand_symtabs_matching_one
+extern bool dw2_search_one
   (dwarf2_per_cu *per_cu,
    dwarf2_per_objfile *per_objfile,
    auto_bool_vector &cus_to_skip,
-   expand_symtabs_file_matcher file_matcher,
-   expand_symtabs_expansion_listener expansion_notify,
-   expand_symtabs_lang_matcher lang_matcher);
+   search_symtabs_file_matcher file_matcher,
+   search_symtabs_expansion_listener listener,
+   search_symtabs_lang_matcher lang_matcher);
 
 /* Return pointer to string at .debug_str offset STR_OFFSET.  */
 

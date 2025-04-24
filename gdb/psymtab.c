@@ -790,7 +790,7 @@ psymtab_to_fullname (struct partial_symtab *ps)
   return ps->fullname;
 }
 
-/* A helper for psym_expand_symtabs_matching that handles searching
+/* A helper for psymbol_functions::search that handles searching
    included psymtabs.  This returns true if a symbol is found, and
    false otherwise.  It also updates the 'searched_flag' on the
    various psymtabs that it searches.  */
@@ -800,7 +800,7 @@ recursively_search_psymtabs (partial_symtab *ps, objfile *objfile,
 			     block_search_flags search_flags,
 			     domain_search_flags domain,
 			     const lookup_name_info &lookup_name,
-			     expand_symtabs_symbol_matcher sym_matcher)
+			     search_symtabs_symbol_matcher sym_matcher)
 {
   int keep_going = 1;
   enum psymtab_search_status result = PST_SEARCHED_AND_NOT_FOUND;
@@ -885,19 +885,19 @@ recursively_search_psymtabs (partial_symtab *ps, objfile *objfile,
   return result == PST_SEARCHED_AND_FOUND;
 }
 
-/* Psymtab version of expand_symtabs_matching.  See its definition in
+/* Psymtab version of search.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 
 bool
-psymbol_functions::expand_symtabs_matching
+psymbol_functions::search
   (struct objfile *objfile,
-   expand_symtabs_file_matcher file_matcher,
+   search_symtabs_file_matcher file_matcher,
    const lookup_name_info *lookup_name,
-   expand_symtabs_symbol_matcher symbol_matcher,
-   expand_symtabs_expansion_listener expansion_notify,
+   search_symtabs_symbol_matcher symbol_matcher,
+   search_symtabs_expansion_listener listener,
    block_search_flags search_flags,
    domain_search_flags domain,
-   expand_symtabs_lang_matcher lang_matcher ATTRIBUTE_UNUSED)
+   search_symtabs_lang_matcher lang_matcher ATTRIBUTE_UNUSED)
 {
   /* Clear the search flags.  */
   for (partial_symtab *ps : partial_symbols (objfile))
@@ -941,8 +941,8 @@ psymbol_functions::expand_symtabs_matching
 	{
 	  compunit_symtab *cust = psymtab_to_symtab (objfile, ps);
 
-	  if (cust != nullptr && expansion_notify != nullptr)
-	    if (!expansion_notify (cust))
+	  if (cust != nullptr && listener != nullptr)
+	    if (!listener (cust))
 	      return false;
 	}
     }

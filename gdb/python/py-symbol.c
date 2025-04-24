@@ -632,9 +632,8 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
 	      return true;
 	    };
 
-	  if (!objfile->expand_symtabs_matching
-	      (nullptr, &lookup_name, nullptr, callback,
-	       SEARCH_STATIC_BLOCK, flags))
+	  if (!objfile->search (nullptr, &lookup_name, nullptr, callback,
+				SEARCH_STATIC_BLOCK, flags))
 	    return nullptr;
 	}
     }

@@ -5519,12 +5519,9 @@ map_matching_symbols (struct objfile *objfile,
 					      domain, data);
     };
 
-  objfile->expand_symtabs_matching (nullptr, &lookup_name,
-				    nullptr, callback,
-				    global
-				    ? SEARCH_GLOBAL_BLOCK
-				    : SEARCH_STATIC_BLOCK,
-				    domain);
+  objfile->search (nullptr, &lookup_name, nullptr, callback,
+		   global ? SEARCH_GLOBAL_BLOCK : SEARCH_STATIC_BLOCK,
+		   domain);
 }
 
 /* Add to RESULT all non-local symbols whose name and domain match
@@ -13132,7 +13129,7 @@ ada_add_global_exceptions (compiled_regex *preg,
 	 the regular expression used to do the matching refers to the
 	 natural name.  So match against the decoded name.  */
       auto any = lookup_name_info::match_any ();
-      objfile->expand_symtabs_matching
+      objfile->search
 	(nullptr,
 	 &any,
 	 [&] (const char *search_name)
@@ -13752,7 +13749,7 @@ public:
 	    return true;
 	  };
 
-	objfile->expand_symtabs_matching
+	objfile->search
 	  (nullptr, &lookup_name, nullptr, callback,
 	   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
 	   SEARCH_ALL_DOMAINS);

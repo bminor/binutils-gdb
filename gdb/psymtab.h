@@ -626,15 +626,15 @@ struct psymbol_functions : public quick_symbol_functions
 
   void expand_all_symtabs (struct objfile *objfile) override;
 
-  bool expand_symtabs_matching
+  bool search
     (struct objfile *objfile,
-     expand_symtabs_file_matcher file_matcher,
+     search_symtabs_file_matcher file_matcher,
      const lookup_name_info *lookup_name,
-     expand_symtabs_symbol_matcher symbol_matcher,
-     expand_symtabs_expansion_listener expansion_notify,
+     search_symtabs_symbol_matcher symbol_matcher,
+     search_symtabs_expansion_listener listener,
      block_search_flags search_flags,
      domain_search_flags kind,
-     expand_symtabs_lang_matcher lang_matcher) override;
+     search_symtabs_lang_matcher lang_matcher) override;
 
   struct compunit_symtab *find_pc_sect_compunit_symtab
     (struct objfile *objfile, bound_minimal_symbol msymbol, CORE_ADDR pc,

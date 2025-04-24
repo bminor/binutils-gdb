@@ -918,7 +918,7 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 
   for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
-      objfile->expand_symtabs_matching
+      objfile->search
 	([&] (const char *filename, bool basenames)
 	   {
 	     /* KISS: Only apply the regexp to the complete file name.  */
