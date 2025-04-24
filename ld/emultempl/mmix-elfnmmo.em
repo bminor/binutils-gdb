@@ -113,7 +113,7 @@ mmix_after_allocation (void)
     bfd_set_section_vma (sec, 0);
 
   if (!_bfd_mmix_after_linker_allocation (link_info.output_bfd, &link_info))
-    fatal (_("%P: can't finalize linker-allocated global registers\n"));
+    fatal (_("%F%P: can't finalize linker-allocated global registers\n"));
 }
 EOF
 

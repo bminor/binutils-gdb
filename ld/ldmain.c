@@ -196,7 +196,7 @@ write_dependency_file (void)
   if (out == NULL)
     {
       bfd_set_error (bfd_error_system_call);
-      fatal (_("%P: cannot open dependency file %s: %E\n"),
+      fatal (_("%F%P: cannot open dependency file %s: %E\n"),
 	     config.dependency_file);
     }
 
@@ -289,7 +289,7 @@ main (int argc, char **argv)
   expandargv (&argc, &argv);
 
   if (bfd_init () != BFD_INIT_MAGIC)
-    fatal (_("%P: fatal error: libbfd ABI mismatch\n"));
+    fatal (_("%F%P: fatal error: libbfd ABI mismatch\n"));
 
   bfd_set_error_program_name (program_name);
 
@@ -495,14 +495,14 @@ main (int argc, char **argv)
     xexit (0);
 
   if (link_info.inhibit_common_definition && !bfd_link_dll (&link_info))
-    fatal (_("%P: --no-define-common may not be used without -shared\n"));
+    fatal (_("%F%P: --no-define-common may not be used without -shared\n"));
 
   if (!lang_has_input_file)
     {
       if (version_printed || command_line.print_output_format)
 	xexit (0);
       output_unknown_cmdline_warnings ();
-      fatal (_("%P: no input files\n"));
+      fatal (_("%F%P: no input files\n"));
     }
 
   if (verbose)
@@ -524,7 +524,7 @@ main (int argc, char **argv)
 	  if (config.map_file == (FILE *) NULL)
 	    {
 	      bfd_set_error (bfd_error_system_call);
-	      einfo (_("%P: cannot open map file %s: %E\n"),
+	      fatal (_("%F%P: cannot open map file %s: %E\n"),
 		     config.map_filename);
 	    }
 	}
@@ -599,7 +599,7 @@ main (int argc, char **argv)
       bfd *obfd = link_info.output_bfd;
       link_info.output_bfd = NULL;
       if (!bfd_close (obfd))
-	fatal (_("%P: %s: final close failed: %E\n"), output_filename);
+	fatal (_("%F%P: %s: final close failed: %E\n"), output_filename);
 
       link_info.output_bfd = NULL;
 
@@ -628,10 +628,10 @@ main (int argc, char **argv)
 	      dst = fopen (dst_name, FOPEN_WB);
 
 	      if (!src)
-		fatal (_("%P: unable to open for source of copy `%s'\n"),
+		fatal (_("%F%P: unable to open for source of copy `%s'\n"),
 		       output_filename);
 	      if (!dst)
-		fatal (_("%P: unable to open for destination of copy `%s'\n"),
+		fatal (_("%F%P: unable to open for destination of copy `%s'\n"),
 		       dst_name);
 	      while ((l = fread (buf, 1, bsize, src)) > 0)
 		{
@@ -745,7 +745,7 @@ get_emulation (int argc, char **argv)
 		  i++;
 		}
 	      else
-		fatal (_("%P: missing argument to -m\n"));
+		fatal (_("%F%P: missing argument to -m\n"));
 	    }
 	  else if (strcmp (argv[i], "-mips1") == 0
 		   || strcmp (argv[i], "-mips2") == 0
@@ -799,11 +799,11 @@ add_ysym (const char *name)
 				  bfd_hash_newfunc,
 				  sizeof (struct bfd_hash_entry),
 				  61))
-	fatal (_("%P: bfd_hash_table_init failed: %E\n"));
+	fatal (_("%F%P: bfd_hash_table_init failed: %E\n"));
     }
 
   if (bfd_hash_lookup (link_info.notice_hash, name, true, true) == NULL)
-    fatal (_("%P: bfd_hash_lookup failed: %E\n"));
+    fatal (_("%F%P: bfd_hash_lookup failed: %E\n"));
 }
 
 void
@@ -816,11 +816,11 @@ add_ignoresym (struct bfd_link_info *info, const char *name)
 				  bfd_hash_newfunc,
 				  sizeof (struct bfd_hash_entry),
 				  61))
-	fatal (_("%P: bfd_hash_table_init failed: %E\n"));
+	fatal (_("%F%P: bfd_hash_table_init failed: %E\n"));
     }
 
   if (bfd_hash_lookup (info->ignore_hash, name, true, true) == NULL)
-    fatal (_("%P: bfd_hash_lookup failed: %E\n"));
+    fatal (_("%F%P: bfd_hash_lookup failed: %E\n"));
 }
 
 /* Record a symbol to be wrapped, from the --wrap option.  */
@@ -836,11 +836,11 @@ add_wrap (const char *name)
 				  bfd_hash_newfunc,
 				  sizeof (struct bfd_hash_entry),
 				  61))
-	fatal (_("%P: bfd_hash_table_init failed: %E\n"));
+	fatal (_("%F%P: bfd_hash_table_init failed: %E\n"));
     }
 
   if (bfd_hash_lookup (link_info.wrap_hash, name, true, true) == NULL)
-    fatal (_("%P: bfd_hash_lookup failed: %E\n"));
+    fatal (_("%F%P: bfd_hash_lookup failed: %E\n"));
 }
 
 /* Handle the -retain-symbols-file option.  */
@@ -868,7 +868,7 @@ add_keepsyms_file (const char *filename)
       xmalloc (sizeof (struct bfd_hash_table));
   if (!bfd_hash_table_init (link_info.keep_hash, bfd_hash_newfunc,
 			    sizeof (struct bfd_hash_entry)))
-    fatal (_("%P: bfd_hash_table_init failed: %E\n"));
+    fatal (_("%F%P: bfd_hash_table_init failed: %E\n"));
 
   bufsize = 100;
   buf = (char *) xmalloc (bufsize);
@@ -898,7 +898,7 @@ add_keepsyms_file (const char *filename)
 	  buf[len] = '\0';
 
 	  if (bfd_hash_lookup (link_info.keep_hash, buf, true, true) == NULL)
-	    fatal (_("%P: bfd_hash_lookup for insertion failed: %E\n"));
+	    fatal (_("%F%P: bfd_hash_lookup for insertion failed: %E\n"));
 	}
     }
 
@@ -1310,7 +1310,7 @@ constructor_callback (struct bfd_link_info *info,
   if (bfd_reloc_type_lookup (info->output_bfd, BFD_RELOC_CTOR) == NULL
       && (bfd_link_relocatable (info)
 	  || bfd_reloc_type_lookup (abfd, BFD_RELOC_CTOR) == NULL))
-    fatal (_("%P: BFD backend error: BFD_RELOC_CTOR unsupported\n"));
+    fatal (_("%F%P: BFD backend error: BFD_RELOC_CTOR unsupported\n"));
 
   s = set_name;
   if (bfd_get_symbol_leading_char (abfd) != '\0')
@@ -1322,7 +1322,7 @@ constructor_callback (struct bfd_link_info *info,
 
   h = bfd_link_hash_lookup (info->hash, set_name, true, true, true);
   if (h == (struct bfd_link_hash_entry *) NULL)
-    fatal (_("%P: bfd_link_hash_lookup failed: %E\n"));
+    fatal (_("%F%P: bfd_link_hash_lookup failed: %E\n"));
   if (h->type == bfd_link_hash_new)
     {
       h->type = bfd_link_hash_undefined;
@@ -1355,7 +1355,7 @@ symbol_warning (const char *warning, const char *symbol, bfd *abfd)
   struct warning_callback_info cinfo;
 
   if (!bfd_generic_link_read_symbols (abfd))
-    fatal (_("%P: %pB: could not read symbols: %E\n"), abfd);
+    fatal (_("%F%P: %pB: could not read symbols: %E\n"), abfd);
 
   cinfo.found = false;
   cinfo.warning = warning;
@@ -1417,14 +1417,14 @@ warning_find_reloc (bfd *abfd, asection *sec, void *iarg)
 
   relsize = bfd_get_reloc_upper_bound (abfd, sec);
   if (relsize < 0)
-    fatal (_("%P: %pB: could not read relocs: %E\n"), abfd);
+    fatal (_("%F%P: %pB: could not read relocs: %E\n"), abfd);
   if (relsize == 0)
     return;
 
   relpp = (arelent **) xmalloc (relsize);
   relcount = bfd_canonicalize_reloc (abfd, sec, relpp, info->asymbols);
   if (relcount < 0)
-    fatal (_("%P: %pB: could not read relocs: %E\n"), abfd);
+    fatal (_("%F%P: %pB: could not read relocs: %E\n"), abfd);
 
   p = relpp;
   pend = p + relcount;

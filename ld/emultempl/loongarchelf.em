@@ -87,7 +87,7 @@ gld${EMULATION_NAME}_after_allocation (void)
       if (!_bfd_elf_map_sections_to_segments (link_info.output_bfd,
 					      &link_info,
 					      NULL))
-	fatal (_("%P: map sections to segments failed: %E\n"));
+        fatal (_("%F%P: map sections to segments failed: %E\n"));
     }
 
   /* Adjust program header size and .eh_frame_hdr size before

@@ -152,7 +152,7 @@ bfd_coff_reloc16_relax_section (bfd *abfd,
 
   if (bfd_link_relocatable (link_info))
     link_info->callbacks->fatal
-      (_("%P: --relax and -r may not be used together\n"));
+      (_("%P%F: --relax and -r may not be used together\n"));
 
   /* We only do global relaxation once.  It is not safe to do it multiple
      times (see discussion of the "shrinks" array below).  */

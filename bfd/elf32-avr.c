@@ -2480,7 +2480,7 @@ elf32_avr_relax_section (bfd *abfd,
 
   if (bfd_link_relocatable (link_info))
     link_info->callbacks->fatal
-      (_("%P: --relax and -r may not be used together\n"));
+      (_("%P%F: --relax and -r may not be used together\n"));
 
   htab = avr_link_hash_table (link_info);
   if (htab == NULL)

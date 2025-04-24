@@ -810,7 +810,7 @@ parse_args (unsigned argc, char **argv)
 	       && optc != argv[last_optind][1])
 	{
 	  if (optarg)
-	    fatal (_("%P: Error: unable to disambiguate: "
+	    fatal (_("%F%P: Error: unable to disambiguate: "
 		     "%s (did you mean -%s ?)\n"),
 		   argv[last_optind], argv[last_optind]);
 	  else
@@ -851,7 +851,7 @@ parse_args (unsigned argc, char **argv)
 	  /* Fall through.  */
 
 	default:
-	  fatal (_("%P: use the --help option for usage information\n"));
+	  fatal (_("%F%P: use the --help option for usage information\n"));
 	  break;
 
 	case 1:			/* File name.  */
@@ -870,7 +870,7 @@ parse_args (unsigned argc, char **argv)
 		   || strcmp (optarg, "default") == 0)
 	    input_flags.dynamic = true;
 	  else
-	    fatal (_("%P: unrecognized -a option `%s'\n"), optarg);
+	    fatal (_("%F%P: unrecognized -a option `%s'\n"), optarg);
 	  break;
 	case OPTION_ASSERT:
 	  /* FIXME: We just ignore these, but we should handle them.  */
@@ -883,7 +883,7 @@ parse_args (unsigned argc, char **argv)
 	  else if (strcmp (optarg, "pure-text") == 0)
 	    ;
 	  else
-	    fatal (_("%P: unrecognized -assert option `%s'\n"), optarg);
+	    fatal (_("%F%P: unrecognized -assert option `%s'\n"), optarg);
 	  break;
 	case 'A':
 	  ldfile_add_arch (optarg);
@@ -927,7 +927,7 @@ parse_args (unsigned argc, char **argv)
 
 	      style = cplus_demangle_name_to_style (optarg);
 	      if (style == unknown_demangling)
-		fatal (_("%P: unknown demangling style `%s'\n"), optarg);
+		fatal (_("%F%P: unknown demangling style `%s'\n"), optarg);
 
 	      cplus_demangle_set_style (style);
 	    }
@@ -1034,7 +1034,7 @@ parse_args (unsigned argc, char **argv)
 	    char *end;
 	    g_switch_value = strtoul (optarg, &end, 0);
 	    if (*end)
-	      fatal (_("%P: invalid number `%s'\n"), optarg);
+	      fatal (_("%F%P: invalid number `%s'\n"), optarg);
 	  }
 	  break;
 	case 'g':
@@ -1130,7 +1130,7 @@ parse_args (unsigned argc, char **argv)
 	      link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
 	    }
 	  else
-	    fatal (_("%P: bad --unresolved-symbols option: %s\n"), optarg);
+	    fatal (_("%F%P: bad --unresolved-symbols option: %s\n"), optarg);
 	  break;
 	case OPTION_WARN_UNRESOLVED_SYMBOLS:
 	  link_info.warn_unresolved_syms = true;
@@ -1217,7 +1217,7 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_PLUGIN_OPT:
 	  if (plugin_opt_plugin_arg (optarg))
-	    fatal (_("%P: bad -plugin-opt option\n"));
+	    fatal (_("%F%P: bad -plugin-opt option\n"));
 	  break;
 	case OPTION_PLUGIN_SAVE_TEMPS:
 	  config.plugin_save_temps = true;
@@ -1237,10 +1237,10 @@ parse_args (unsigned argc, char **argv)
 	       an error message here.  We cannot just make this a warning,
 	       increment optind, and continue because getopt is too confused
 	       and will seg-fault the next time around.  */
-	    fatal(_("%P: unrecognised option: %s\n"), argv[optind]);
+	    fatal(_("%F%P: unrecognised option: %s\n"), argv[optind]);
 
 	  if (bfd_link_pic (&link_info))
-	    fatal (_("%P: -r and %s may not be used together\n"),
+	    fatal (_("%F%P: -r and %s may not be used together\n"),
 		   bfd_link_dll (&link_info) ? "-shared" : "-pie");
 
 	  link_info.type = type_relocatable;
@@ -1350,7 +1350,7 @@ parse_args (unsigned argc, char **argv)
 	  if (config.has_shared)
 	    {
 	      if (bfd_link_relocatable (&link_info))
-		fatal (_("%P: -r and %s may not be used together\n"),
+		fatal (_("%F%P: -r and %s may not be used together\n"),
 		       "-shared");
 
 	      link_info.type = type_dll;
@@ -1362,7 +1362,7 @@ parse_args (unsigned argc, char **argv)
 		link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
 	    }
 	  else
-	    fatal (_("%P: -shared not supported\n"));
+	    fatal (_("%F%P: -shared not supported\n"));
 	  break;
 	case OPTION_NO_PIE:
 	  link_info.type = type_pde;
@@ -1371,12 +1371,12 @@ parse_args (unsigned argc, char **argv)
 	  if (config.has_shared)
 	    {
 	      if (bfd_link_relocatable (&link_info))
-		fatal (_("%P: -r and %s may not be used together\n"), "-pie");
+		fatal (_("%F%P: -r and %s may not be used together\n"), "-pie");
 
 	      link_info.type = type_pie;
 	    }
 	  else
-	    fatal (_("%P: -pie not supported\n"));
+	    fatal (_("%F%P: -pie not supported\n"));
 	  break;
 	case 'h':		/* Used on Solaris.  */
 	case OPTION_SONAME:
@@ -1393,7 +1393,7 @@ parse_args (unsigned argc, char **argv)
 	  else if (strcmp (optarg, N_("ascending")) == 0)
 	    config.sort_common = sort_ascending;
 	  else
-	    fatal (_("%P: invalid common section sorting option: %s\n"),
+	    fatal (_("%F%P: invalid common section sorting option: %s\n"),
 		   optarg);
 	  break;
 	case OPTION_SORT_SECTION:
@@ -1402,7 +1402,7 @@ parse_args (unsigned argc, char **argv)
 	  else if (strcmp (optarg, N_("alignment")) == 0)
 	    sort_section = by_alignment;
 	  else
-	    fatal (_("%P: invalid section sorting option: %s\n"), optarg);
+	    fatal (_("%F%P: invalid section sorting option: %s\n"), optarg);
 	  break;
 	case OPTION_SECTION_ORDERING_FILE:
 	  if (command_line.section_ordering_file != NULL
@@ -1444,14 +1444,14 @@ parse_args (unsigned argc, char **argv)
 	    /* Check for <something>=<somthing>...  */
 	    optarg2 = strchr (optarg, '=');
 	    if (optarg2 == NULL)
-	      fatal (_("%P: invalid argument to option"
+	      fatal (_("%F%P: invalid argument to option"
 		       " \"--section-start\"\n"));
 
 	    optarg2++;
 
 	    /* So far so good.  Are all the args present?  */
 	    if ((*optarg == '\0') || (*optarg2 == '\0'))
-	      fatal (_("%P: missing argument(s) to option"
+	      fatal (_("%F%P: missing argument(s) to option"
 		       " \"--section-start\"\n"));
 
 	    /* We must copy the section name as set_section_start
@@ -1498,7 +1498,7 @@ parse_args (unsigned argc, char **argv)
 	  /* Fall through.  */
 	case OPTION_UR:
 	  if (bfd_link_pic (&link_info))
-	    fatal (_("%P: -r and %s may not be used together\n"),
+	    fatal (_("%F%P: -r and %s may not be used together\n"),
 		   bfd_link_dll (&link_info) ? "-shared" : "-pie");
 
 	  link_info.type = type_relocatable;
@@ -1529,7 +1529,7 @@ parse_args (unsigned argc, char **argv)
 	      char *end;
 	      int level ATTRIBUTE_UNUSED = strtoul (optarg, &end, 0);
 	      if (*end)
-		fatal (_("%P: invalid number `%s'\n"), optarg);
+		fatal (_("%F%P: invalid number `%s'\n"), optarg);
 #if BFD_SUPPORTS_PLUGINS
 	      report_plugin_symbols = level > 1;
 #endif /* BFD_SUPPORTS_PLUGINS */
@@ -1724,7 +1724,7 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case ')':
 	  if (! ingroup)
-	    fatal (_("%P: group ended before it began (--help for usage)\n"));
+	    fatal (_("%F%P: group ended before it began (--help for usage)\n"));
 
 	  lang_leave_group ();
 	  ingroup--;
@@ -1740,7 +1740,7 @@ parse_args (unsigned argc, char **argv)
 
 	case OPTION_REMAP_INPUTS_FILE:
 	  if (! ldfile_add_remap_file (optarg))
-	    fatal (_("%P: failed to add remap file %s\n"), optarg);
+	    fatal (_("%F%P: failed to add remap file %s\n"), optarg);
 	  break;
 
 	case OPTION_REMAP_INPUTS:
@@ -1749,7 +1749,7 @@ parse_args (unsigned argc, char **argv)
 	    if (optarg2 == NULL)
 	      /* FIXME: Should we allow --remap-inputs=@myfile as a synonym
 		 for --remap-inputs-file=myfile ?  */
-	      fatal (_("%P: invalid argument to option --remap-inputs\n"));
+	      fatal (_("%F%P: invalid argument to option --remap-inputs\n"));
 	    size_t len = optarg2 - optarg;
 	    char * pattern = xmalloc (len + 1);
 	    memcpy (pattern, optarg, len);
@@ -1770,7 +1770,7 @@ parse_args (unsigned argc, char **argv)
 	    char *end;
 	    bfd_size_type cache_size = strtoul (optarg, &end, 0);
 	    if (*end != '\0')
-	      fatal (_("%P: invalid cache memory size: %s\n"), optarg);
+	      fatal (_("%F%P: invalid cache memory size: %s\n"), optarg);
 	    link_info.max_cache_size = cache_size;
 	  }
 	  break;
@@ -1795,7 +1795,7 @@ parse_args (unsigned argc, char **argv)
 
 	case OPTION_POP_STATE:
 	  if (input_flags.pushed == NULL)
-	    fatal (_("%P: no state pushed before popping\n"));
+	    fatal (_("%F%P: no state pushed before popping\n"));
 	  else
 	    {
 	      struct lang_input_statement_flags *oldp = input_flags.pushed;
@@ -1818,7 +1818,7 @@ parse_args (unsigned argc, char **argv)
 	  else if (strcasecmp (optarg, "discard") == 0)
 	    config.orphan_handling = orphan_handling_discard;
 	  else
-	    fatal (_("%P: invalid argument to option"
+	    fatal (_("%F%P: invalid argument to option"
 		     " \"--orphan-handling\"\n"));
 	  break;
 
@@ -1856,7 +1856,7 @@ parse_args (unsigned argc, char **argv)
 	  else if (strcmp (optarg, "share-duplicated") == 0)
 	    config.ctf_share_duplicated = true;
 	  else
-	    fatal (_("%P: bad --ctf-share-types option: %s\n"), optarg);
+	    fatal (_("%F%P: bad --ctf-share-types option: %s\n"), optarg);
 	  break;
 	}
     }
@@ -2042,7 +2042,7 @@ parse_args (unsigned argc, char **argv)
   if (config.no_section_header)
     {
       if (bfd_link_relocatable (&link_info))
-	fatal (_("%P: -r and -z nosectionheader may not be used together\n"));
+	fatal (_("%F%P: -r and -z nosectionheader may not be used together\n"));
 
       link_info.strip = strip_all;
     }
@@ -2050,9 +2050,9 @@ parse_args (unsigned argc, char **argv)
   if (!bfd_link_dll (&link_info))
     {
       if (command_line.filter_shlib)
-	fatal (_("%P: -F may not be used without -shared\n"));
+	fatal (_("%F%P: -F may not be used without -shared\n"));
       if (command_line.auxiliary_filters)
-	fatal (_("%P: -f may not be used without -shared\n"));
+	fatal (_("%F%P: -f may not be used without -shared\n"));
     }
 
   /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
@@ -2093,7 +2093,7 @@ set_section_start (char *sect, char *valstr)
   const char *end;
   bfd_vma val = bfd_scan_vma (valstr, &end, 16);
   if (*end)
-    fatal (_("%P: invalid hex number `%s'\n"), valstr);
+    fatal (_("%F%P: invalid hex number `%s'\n"), valstr);
   lang_section_start (sect, exp_intop (val), NULL);
 }
 
@@ -2106,7 +2106,7 @@ set_segment_start (const char *section, char *valstr)
 
   bfd_vma val = bfd_scan_vma (valstr, &end, 16);
   if (*end)
-    fatal (_("%P: invalid hex number `%s'\n"), valstr);
+    fatal (_("%F%P: invalid hex number `%s'\n"), valstr);
   /* If we already have an entry for this segment, update the existing
      value.  */
   name = section + 1;

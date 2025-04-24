@@ -907,7 +907,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	  }
 
 	default:
-	  info->callbacks->fatal (_("%P: Unhandled relocation type %u\n"),
+	  info->callbacks->fatal (_("%F%P: Unhandled relocation type %u\n"),
 				  rel->r_type);
 	}
     }

@@ -141,7 +141,7 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
     {
       info->callbacks->fatal
 	/* xgettext:c-format */
-	(_("%P: dynamic STT_GNU_IFUNC symbol `%s' with pointer "
+	(_("%F%P: dynamic STT_GNU_IFUNC symbol `%s' with pointer "
 	   "equality in `%pB' can not be used when making an "
 	   "executable; recompile with -fPIE and relink with -pie\n"),
 	 h->root.root.string,

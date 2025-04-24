@@ -324,7 +324,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 		if (abfd != NULL)
 		  {
 		    if (!bfd_generic_link_read_symbols (abfd))
-		      fatal (_("%P: %pB: could not read symbols: %E\n"), abfd);
+		      fatal (_("%F%P: %pB: could not read symbols: %E\n"), abfd);
 
 		    asymbols = bfd_get_outsymbols (abfd);
 		  }
@@ -713,7 +713,7 @@ output_unknown_cmdline_warnings (void)
 void
 info_assert (const char *file, unsigned int line)
 {
-  fatal (_("%P: internal error %s %d\n"), file, line);
+  fatal (_("%F%P: internal error %s %d\n"), file, line);
 }
 
 /* ('m' for map) Format info message and print on map.  */
@@ -782,7 +782,7 @@ ld_abort (const char *file, int line, const char *fn)
   else
     einfo (_("%P: internal error: aborting at %s:%d\n"),
 	   file, line);
-  fatal (_("%P: please report this bug\n"));
+  fatal (_("%F%P: please report this bug\n"));
 }
 
 /* Decode a hexadecimal character. Return -1 on error. */

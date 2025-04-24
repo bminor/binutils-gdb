@@ -362,7 +362,7 @@ elf64_ia64_relax_section (bfd *abfd, asection *sec,
 
   if (bfd_link_relocatable (link_info))
     link_info->callbacks->fatal
-      (_("%P: --relax and -r may not be used together\n"));
+      (_("%P%F: --relax and -r may not be used together\n"));
 
   /* Don't even try to relax for non-ELF outputs.  */
   if (!is_elf_hash_table (link_info->hash))

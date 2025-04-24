@@ -8367,7 +8367,7 @@ bfd_generic_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
 {
   if (bfd_link_relocatable (link_info))
     link_info->callbacks->fatal
-      (_("%P: --relax and -r may not be used together\n"));
+      (_("%P%F: --relax and -r may not be used together\n"));
 
   *again = false;
   return true;

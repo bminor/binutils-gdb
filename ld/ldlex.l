@@ -506,7 +506,7 @@ void
 lex_push_file (FILE *file, const char *name, unsigned int sysrooted)
 {
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
-    fatal (_("%P: includes nested too deeply\n"));
+    fatal (_("%F:includes nested too deeply\n"));
   file_name_stack[include_stack_ptr] = name;
   lineno_stack[include_stack_ptr] = lineno;
   sysrooted_stack[include_stack_ptr] = input_flags.sysrooted;
@@ -568,7 +568,7 @@ lex_redirect (const char *string, const char *fake_filename, unsigned int count)
 
   yy_init = 0;
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH)
-    fatal (_("%P: macros nested too deeply\n"));
+    fatal (_("%F: macros nested too deeply\n"));
   file_name_stack[include_stack_ptr] = fake_filename;
   lineno_stack[include_stack_ptr] = lineno;
   include_stack[include_stack_ptr] = YY_CURRENT_BUFFER;
@@ -672,7 +672,7 @@ yy_input (char *buf, int max_size)
 	{
 	  result = fread (buf, 1, max_size, yyin);
 	  if (result < max_size && ferror (yyin))
-	    fatal (_("%P: read in flex scanner failed\n"));
+	    fatal (_("%F%P: read in flex scanner failed\n"));
 	}
     }
   return result;
@@ -709,7 +709,7 @@ comment (void)
 
       if (c == 0)
 	{
-	  fatal (_("%P: EOF in comment\n"));
+	  fatal (_("%F%P: EOF in comment\n"));
 	  break;
 	}
     }
@@ -730,7 +730,7 @@ lex_warn_invalid (char *where, char *what)
   if (ldfile_assumed_script)
     {
       bfd_set_error (bfd_error_file_not_recognized);
-      fatal (_("%s: file not recognized: %E\n"), ldlex_filename ());
+      fatal (_("%F%s: file not recognized: %E\n"), ldlex_filename ());
     }
 
   if (! ISPRINT (*what))

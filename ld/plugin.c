@@ -252,7 +252,7 @@ plugin_opt_plugin (const char *plugin)
   newplug->name = plugin;
   newplug->dlhandle = dlopen (plugin, RTLD_NOW);
   if (!newplug->dlhandle)
-    fatal (_("%P: %s: error loading plugin: %s\n"), plugin, dlerror ());
+    fatal (_("%F%P: %s: error loading plugin: %s\n"), plugin, dlerror ());
 
   /* Check if plugin has been loaded already.  */
   while (curplug)
@@ -343,7 +343,7 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 	}
     }
  report_error:
-  fatal (_("%P: could not create dummy IR bfd: %E\n"));
+  fatal (_("%F%P: could not create dummy IR bfd: %E\n"));
   return NULL;
 }
 
@@ -424,7 +424,7 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
       unsigned char visibility;
 
       if (!elfsym)
-	fatal (_("%P: %s: non-ELF symbol in ELF BFD!\n"), asym->name);
+	fatal (_("%F%P: %s: non-ELF symbol in ELF BFD!\n"), asym->name);
 
       if (ldsym->def == LDPK_COMMON)
 	{
@@ -435,7 +435,7 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
       switch (ldsym->visibility)
 	{
 	default:
-	  fatal (_("%P: unknown ELF symbol visibility: %d!\n"),
+	  fatal (_("%F%P: unknown ELF symbol visibility: %d!\n"),
 		 ldsym->visibility);
 	  return LDPS_ERR;
 
@@ -557,7 +557,7 @@ get_view (const void *handle, const void **viewp)
 
   /* FIXME: einfo should support %lld.  */
   if ((off_t) size != input->filesize)
-    fatal (_("%P: unsupported input file size: %s (%ld bytes)\n"),
+    fatal (_("%F%P: unsupported input file size: %s (%ld bytes)\n"),
 	   input->name, (long) input->filesize);
 
   /* Check the cached view buffer.  */
@@ -833,7 +833,7 @@ get_symbols (const void *handle, int nsyms, struct ld_plugin_symbol *syms,
 	  && blhe->type != bfd_link_hash_common)
 	{
 	  /* We should not have a new, indirect or warning symbol here.  */
-	  fatal (_("%P: %s: plugin symbol table corrupt (sym type %d)\n"),
+	  fatal (_("%F%P: %s: plugin symbol table corrupt (sym type %d)\n"),
 		 called_plugin->name, blhe->type);
 	}
 
@@ -985,14 +985,13 @@ message (int level, const char *format, ...)
     case LDPL_ERROR:
     default:
       {
-	char *newfmt = concat (_("%X%P: error: "), format, "\n",
+	char *newfmt = concat (level == LDPL_FATAL ? "%F" : "%X",
+			       _("%P: error: "), format, "\n",
 			       (const char *) NULL);
 	fflush (stdout);
 	vfinfo (stderr, newfmt, args, true);
 	fflush (stderr);
 	free (newfmt);
-	if (level == LDPL_FATAL)
-	  fatal ("");
       }
       break;
     }
@@ -1135,14 +1134,14 @@ plugin_load_plugins (void)
       if (!onloadfn)
 	onloadfn = (ld_plugin_onload) dlsym (curplug->dlhandle, "_onload");
       if (!onloadfn)
-	fatal (_("%P: %s: error loading plugin: %s\n"),
+	fatal (_("%F%P: %s: error loading plugin: %s\n"),
 	       curplug->name, dlerror ());
       set_tv_plugin_args (curplug, &my_tv[tv_header_size]);
       called_plugin = curplug;
       rv = (*onloadfn) (my_tv);
       called_plugin = NULL;
       if (rv != LDPS_OK)
-	fatal (_("%P: %s: plugin error: %d\n"), curplug->name, rv);
+	fatal (_("%F%P: %s: plugin error: %d\n"), curplug->name, rv);
       curplug = curplug->next;
     }
 
@@ -1206,7 +1205,7 @@ plugin_strdup (bfd *abfd, const char *str)
   strlength = strlen (str) + 1;
   copy = bfd_alloc (abfd, strlength);
   if (copy == NULL)
-    fatal (_("%P: plugin_strdup failed to allocate memory: %s\n"),
+    fatal (_("%F%P: plugin_strdup failed to allocate memory: %s\n"),
 	   bfd_get_error ());
   memcpy (copy, str, strlength);
   return copy;
@@ -1248,7 +1247,7 @@ plugin_object_p (bfd *ibfd, bool known_used)
 
   input = bfd_alloc (abfd, sizeof (*input));
   if (input == NULL)
-    fatal (_("%P: plugin failed to allocate memory for input: %s\n"),
+    fatal (_("%F%P: plugin failed to allocate memory for input: %s\n"),
 	   bfd_get_error ());
 
   if (!bfd_plugin_open_input (ibfd, &file))
@@ -1277,7 +1276,7 @@ plugin_object_p (bfd *ibfd, bool known_used)
 
   if (plugin_call_claim_file (&file, &claimed, &claim_file_handler_v2,
 			      known_used))
-    fatal (_("%P: %s: plugin reported error claiming file\n"),
+    fatal (_("%F%P: %s: plugin reported error claiming file\n"),
 	   plugin_error_plugin ());
 
   if (input->fd != -1

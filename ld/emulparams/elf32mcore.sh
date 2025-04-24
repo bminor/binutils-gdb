@@ -42,6 +42,6 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_BASE_FILE:
       link_info.base_file = fopen (optarg, FOPEN_WB);
       if (link_info.base_file == NULL)
-	fatal (_("%P: cannot open base file %s\n"), optarg);
+	fatal (_("%F%P: cannot open base file %s\n"), optarg);
       break;
 '
