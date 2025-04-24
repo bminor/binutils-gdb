@@ -1027,39 +1027,71 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 /* Flip the endianness of the CTF header.  */
 
-void
-ctf_flip_header (ctf_header_t *cth)
+int
+ctf_flip_header (void *cthp, int is_btf, int ctf_version)
 {
-  swap_thing (cth->cth_preamble.ctp_magic);
-  swap_thing (cth->cth_preamble.ctp_version);
-  swap_thing (cth->cth_preamble.ctp_flags);
-  swap_thing (cth->cth_parlabel);
-  swap_thing (cth->cth_parname);
-  swap_thing (cth->cth_cuname);
-  swap_thing (cth->cth_parent_strlen);
-  swap_thing (cth->cth_objtoff);
-  swap_thing (cth->cth_funcoff);
-  swap_thing (cth->cth_objtidxoff);
-  swap_thing (cth->cth_funcidxoff);
-  swap_thing (cth->cth_varoff);
-  swap_thing (cth->cth_typeoff);
-  swap_thing (cth->cth_stroff);
-  swap_thing (cth->cth_strlen);
-}
+  ctf_header_t *cth = (ctf_header_t *) cthp;
 
-/* Flip the endianness of the label section, an array of ctf_lblent_t.  */
-
-static void
-flip_lbls (void *start, size_t len)
-{
-  ctf_lblent_t *lbl = start;
-  ssize_t i;
-
-  for (i = len / sizeof (struct ctf_lblent); i > 0; lbl++, i--)
+  if (is_btf)
     {
-      swap_thing (lbl->ctl_label);
-      swap_thing (lbl->ctl_type);
+      ctf_btf_header_t *bth = (ctf_btf_header_t *) cthp;
+
+      swap_thing (bth->bth_preamble.btf_magic);
+      swap_thing (bth->bth_preamble.btf_version);
+      swap_thing (bth->bth_preamble.btf_flags);
+      swap_thing (bth->bth_hdr_len);
+      swap_thing (bth->bth_type_off);
+      swap_thing (bth->bth_type_len);
+      swap_thing (bth->bth_str_off);
+      swap_thing (bth->bth_str_len);
+
+      /* Raw BTF?  */
+      if (ctf_version == 1)
+	return 0;
     }
+  else
+    {
+#if 0
+      ctf_header_v2_t *h2p = (ctf_header_v2_t *) cthp;
+      ctf_header_v3_t *h3p = (ctf_header_v3_t *) cthp;
+#endif
+
+      /* Non-BTF-compatible: old CTF release.  */
+      switch (ctf_version) {
+      case CTF_VERSION_1:
+      case CTF_VERSION_1_UPGRADED_3:
+      case CTF_VERSION_2:
+	ctf_err_warn (NULL, 0, ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+	return -ECTF_INTERNAL;
+/*	ctf_flip_header_v2 (h2p); */
+      break;
+      case CTF_VERSION_3:
+	ctf_err_warn (NULL, 0, ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+	return -ECTF_INTERNAL;
+
+/*	ctf_flip_header_v3 (h3p); */
+      }
+      return 0;
+    }
+
+  /* CTFv4.  */
+
+  swap_thing (cth->cth_preamble.ctp_magic_version);
+  swap_thing (cth->cth_preamble.ctp_flags);
+  swap_thing (cth->cth_cu_name);
+  swap_thing (cth->cth_parent_name);
+  swap_thing (cth->cth_parent_strlen);
+  swap_thing (cth->cth_parent_ntypes);
+  swap_thing (cth->cth_objt_off);
+  swap_thing (cth->cth_objt_len);
+  swap_thing (cth->cth_func_off);
+  swap_thing (cth->cth_func_len);
+  swap_thing (cth->cth_objtidx_off);
+  swap_thing (cth->cth_objtidx_len);
+  swap_thing (cth->cth_funcidx_off);
+  swap_thing (cth->cth_funcidx_len);
+
+  return 0;
 }
 
 /* Flip the endianness of the data-object or function sections or their indexes,
@@ -1075,23 +1107,8 @@ flip_objts (void *start, size_t len)
       swap_thing (*obj);
 }
 
-/* Flip the endianness of the variable section, an array of ctf_varent_t.  */
-
-static void
-flip_vars (void *start, size_t len)
-{
-  ctf_varent_t *var = start;
-  ssize_t i;
-
-  for (i = len / sizeof (struct ctf_varent); i > 0; var++, i--)
-    {
-      swap_thing (var->ctv_name);
-      swap_thing (var->ctv_type);
-    }
-}
-
-/* Flip the endianness of the type section, a tagged array of ctf_type or
-   ctf_stype followed by variable data.  */
+/* Flip the endianness of the type section, a tagged array of ctf_type followed
+   by variable data (which may itself be a ctf_type for prefixed kinds).  */
 
 static int
 flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
@@ -1101,45 +1118,60 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
   while ((uintptr_t) t < ((uintptr_t) start) + len)
     {
       uint32_t kind;
-      size_t size;
+      uint32_t raw_kind;
       uint32_t vlen;
       size_t vbytes;
+      ctf_type_t *tprefixed;
 
       if (to_foreign)
 	{
-	  kind = CTF_V2_INFO_KIND (t->ctt_info);
-	  size = t->ctt_size;
-	  vlen = CTF_V2_INFO_VLEN (t->ctt_info);
-	  vbytes = get_vbytes_v2 (fp, kind, size, vlen);
+	  kind = LCTF_KIND (fp, t);
+	  raw_kind = LCTF_INFO_UNPREFIXED_KIND (fp, t->ctt_info);
+	  vlen = LCTF_VLEN (fp, t);
+	  vbytes = get_vbytes_v4 (fp, t, 0);
 	}
 
       swap_thing (t->ctt_name);
       swap_thing (t->ctt_info);
       swap_thing (t->ctt_size);
 
+      /* Prefixed kind: flip the kind being prefixed too (for as many prefixes
+	 as there are).  */
+      tprefixed = t;
+      while (LCTF_IS_PREFIXED_KIND (raw_kind))
+	{
+	  tprefixed++;
+
+	  if ((uintptr_t) tprefixed > ((uintptr_t) start) + len)
+	    goto overflow;
+
+	  swap_thing (tprefixed->ctt_name);
+	  swap_thing (tprefixed->ctt_info);
+	  swap_thing (tprefixed->ctt_size);
+	  raw_kind = LCTF_INFO_UNPREFIXED_KIND (fp, tprefixed->ctt_info);
+	}
+
       if (!to_foreign)
 	{
-	  kind = CTF_V2_INFO_KIND (t->ctt_info);
-	  size = t->ctt_size;
-	  vlen = CTF_V2_INFO_VLEN (t->ctt_info);
-	  vbytes = get_vbytes_v2 (fp, kind, size, vlen);
+	  kind = LCTF_KIND (fp, t);
+	  raw_kind = LCTF_INFO_UNPREFIXED_KIND (fp, t->ctt_info);
+	  vlen = LCTF_VLEN (fp, t);
+	  vbytes = get_vbytes_v4 (fp, t, 0);
 	}
 
-      if (_libctf_unlikely_ (size == CTF_LSIZE_SENT))
+      /* Move on to the vlen region.  */
+      raw_kind = LCTF_INFO_UNPREFIXED_KIND (fp, t->ctt_info);
+      while (LCTF_IS_PREFIXED_KIND (raw_kind))
 	{
-	  if (to_foreign)
-	    size = CTF_TYPE_LSIZE (t);
-
-	  swap_thing (t->ctt_lsizehi);
-	  swap_thing (t->ctt_lsizelo);
-
-	  if (!to_foreign)
-	    size = CTF_TYPE_LSIZE (t);
-
-	  t = (ctf_type_t *) ((uintptr_t) t + sizeof (ctf_type_t));
+	  t++;
+	  raw_kind = LCTF_INFO_UNPREFIXED_KIND (fp, t->ctt_info);
 	}
-      else
-	t = (ctf_type_t *) ((uintptr_t) t + sizeof (ctf_stype_t));
+
+      if (((uintptr_t) t) + sizeof (ctf_type_t) + vbytes
+	  > ((uintptr_t) start) + len)
+	goto overflow;
+
+      t++;
 
       switch (kind)
 	{
@@ -1150,14 +1182,17 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	case CTF_K_VOLATILE:
 	case CTF_K_CONST:
 	case CTF_K_RESTRICT:
-	  /* These types have no vlen data to swap.  */
+	case CTF_K_TYPE_TAG:
+	case CTF_K_BTF_FLOAT:
+	case CTF_K_FUNC_LINKAGE:
+	  /* These kinds have no vlen data to swap.  */
 	  assert (vbytes == 0);
 	  break;
 
 	case CTF_K_INTEGER:
 	case CTF_K_FLOAT:
 	  {
-	    /* These types have a single uint32_t.  */
+	    /* These kinds have a single uint32_t.  */
 
 	    uint32_t *item = (uint32_t *) t;
 
@@ -1165,18 +1200,38 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	    break;
 	  }
 
-	case CTF_K_FUNCTION:
+	case CTF_K_VAR:
 	  {
-	    /* This type has a bunch of uint32_ts.  */
+	    /* This has a single ctf_linkage_t.  */
+	    ctf_linkage_t *l = (ctf_linkage_t *) t;
 
-	    uint32_t *item = (uint32_t *) t;
-	    ssize_t i;
-
-	    for (i = vlen; i > 0; item++, i--)
-	      swap_thing (*item);
+	    swap_thing (l->ctl_linkage);
 	    break;
 	  }
 
+	case CTF_K_DECL_TAG:
+	  {
+	    /* This has a single ctf_decl_tag_t.  */
+	    ctf_decl_tag_t *d = (ctf_decl_tag_t *) t;
+
+	    swap_thing (d->cdt_component_idx);
+	    break;
+	  }
+
+	case CTF_K_FUNCTION:
+	  {
+	    /* This kind has a bunch of ctf_param_t's.  */
+
+	    ctf_param_t *p = (ctf_param_t *) t;
+	    ssize_t i;
+
+	    for (i = vlen; i > 0; p++, i--)
+	      {
+		swap_thing (p->cfp_name);
+		swap_thing (p->cfp_type);
+	      }
+	    break;
+	  }
 	case CTF_K_ARRAY:
 	  {
 	    /* This has a single ctf_array_t.  */
@@ -1208,33 +1263,19 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	case CTF_K_STRUCT:
 	case CTF_K_UNION:
 	  {
-	    /* This has an array of ctf_member or ctf_lmember, depending on
-	       size.  We could consider it to be a simple array of uint32_t,
-	       but for safety's sake in case these structures ever acquire
+	    /* This has an array of ctf_member_t: the interpretation differs in
+	       prefixed types, but for the purposes of byteswapping we don't
+	       care.  We could consider it to be a simple array of uint32_t, but
+	       for safety's sake in case these structures ever acquire
 	       non-uint32_t members, do it member by member.  */
 
-	    if (_libctf_unlikely_ (size >= CTF_LSTRUCT_THRESH))
+	    ctf_member_t *m = (ctf_member_t *) t;
+	    ssize_t i;
+	    for (i = vlen; i > 0; i--, m++)
 	      {
-		ctf_lmember_t *lm = (ctf_lmember_t *) t;
-		ssize_t i;
-		for (i = vlen; i > 0; i--, lm++)
-		  {
-		    swap_thing (lm->ctlm_name);
-		    swap_thing (lm->ctlm_offsethi);
-		    swap_thing (lm->ctlm_type);
-		    swap_thing (lm->ctlm_offsetlo);
-		  }
-	      }
-	    else
-	      {
-		ctf_member_t *m = (ctf_member_t *) t;
-		ssize_t i;
-		for (i = vlen; i > 0; i--, m++)
-		  {
-		    swap_thing (m->ctm_name);
-		    swap_thing (m->ctm_offset);
-		    swap_thing (m->ctm_type);
-		  }
+		swap_thing (m->ctm_name);
+		swap_thing (m->ctm_type);
+		swap_thing (m->ctm_offset);
 	      }
 	    break;
 	  }
@@ -1253,6 +1294,39 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
 	      }
 	    break;
 	  }
+
+	case CTF_K_ENUM64:
+	  {
+	    /* This has an array of ctf_enum64_t.  */
+
+	    ctf_enum64_t *item = (ctf_enum64_t *) t;
+	    ssize_t i;
+
+	    for (i = vlen; i > 0; item++, i--)
+	      {
+		swap_thing (item->cte_name);
+		swap_thing (item->cte_val_low);
+		swap_thing (item->cte_val_high);
+	      }
+	    break;
+	  }
+
+	case CTF_K_DATASEC:
+	  {
+	    /* This has an array of ctf_var_secinfo_t.  */
+
+	    ctf_var_secinfo_t *item = (ctf_var_secinfo_t *) t;
+	    ssize_t i;
+
+	    for (i = vlen; i > 0; item++, i--)
+	      {
+		swap_thing (item->cvs_type);
+		swap_thing (item->cvs_offset);
+		swap_thing (item->cvs_size);
+	      }
+	    break;
+	  }
+
 	default:
 	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
 			_("unhandled CTF kind in endianness conversion: %x"),
@@ -1264,29 +1338,30 @@ flip_types (ctf_dict_t *fp, void *start, size_t len, int to_foreign)
     }
 
   return 0;
+
+ overflow:
+  ctf_err_warn (fp, 0, ECTF_CORRUPT, _("overflow byteswapping CTF"));
+  return ECTF_CORRUPT;
 }
 
 /* Flip the endianness of BUF, given the offsets in the (native-endianness) CTH.
-   If TO_FOREIGN is set, flip to foreign-endianness; if not, flip away.
-
-   All of this stuff happens before the header is fully initialized, so the
-   LCTF_*() macros cannot be used yet.  Since we do not try to endian-convert v1
-   data, this is no real loss.  */
+   If TO_FOREIGN is set, flip to foreign-endianness; if not, flip away.  */
 
 int
 ctf_flip (ctf_dict_t *fp, ctf_header_t *cth, unsigned char *buf,
-	  int to_foreign)
+	  int is_btf, int to_foreign)
 {
-  ctf_dprintf("flipping endianness\n");
+  ctf_dprintf ("Flipping endianness\n");
 
-  flip_lbls (buf + cth->cth_lbloff, cth->cth_objtoff - cth->cth_lbloff);
-  flip_objts (buf + cth->cth_objtoff, cth->cth_funcoff - cth->cth_objtoff);
-  flip_objts (buf + cth->cth_funcoff, cth->cth_objtidxoff - cth->cth_funcoff);
-  flip_objts (buf + cth->cth_objtidxoff, cth->cth_funcidxoff - cth->cth_objtidxoff);
-  flip_objts (buf + cth->cth_funcidxoff, cth->cth_varoff - cth->cth_funcidxoff);
-  flip_vars (buf + cth->cth_varoff, cth->cth_typeoff - cth->cth_varoff);
-  return flip_types (fp, buf + cth->cth_typeoff,
-		     cth->cth_stroff - cth->cth_typeoff, to_foreign);
+  if (!is_btf)
+    {
+      flip_objts (buf + cth->cth_objt_off, cth->cth_objt_len);
+      flip_objts (buf + cth->cth_func_off, cth->cth_func_len);
+      flip_objts (buf + cth->cth_objtidx_off, cth->cth_objtidx_len);
+      flip_objts (buf + cth->cth_funcidx_off, cth->cth_funcidx_len);
+    }
+  return flip_types (fp, buf + cth->btf.bth_type_off, cth->btf.bth_type_len,
+		     to_foreign);
 }
 
 /* Set up the ctl hashes in a ctf_dict_t.  Called by both writable and
