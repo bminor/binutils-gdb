@@ -560,7 +560,7 @@ ctf_set_base (ctf_dict_t *fp, const ctf_header_t *hp, unsigned char *base)
 }
 
 static int
-init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth);
+init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth, int is_btf);
 
 /* Populate statically-defined types (those loaded from a saved buffer).
 
@@ -591,50 +591,105 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
   fp->ctf_provtypemax = (uint32_t) -1;
 
   /* We determine whether the dict is a child or a parent based on the value of
-     cth_parname.  */
+     cth_parent_name: for BTF this is not enough, because there is no
+     cth_parent_name: instead, we can check the first byte of the strtab, which
+     is always 0 for parents and never 0 for children.  */
 
-  int child = cth->cth_parname != 0;
+  int child = (cth->cth_parent_name != 0
+	       || (fp->ctf_str[CTF_STRTAB_0].cts_len > 0
+		   && fp->ctf_str[CTF_STRTAB_0].cts_strs[0] != 0));
 
   if (fp->ctf_version < CTF_VERSION_4)
     {
+#if 0
       int err;
+
       if ((err = upgrade_types (fp, cth)) != 0)
 	return err;				/* Upgrade failed.  */
+#endif
+      ctf_err_warn (NULL, 0, ECTF_INTERNAL, "Implementation of backward-compatible CTF reading still underway\n");
+      return ECTF_INTERNAL;
     }
 
-  tbuf = (ctf_type_t *) (fp->ctf_buf + cth->cth_typeoff);
-  tend = (ctf_type_t *) (fp->ctf_buf + cth->cth_stroff);
+  tbuf = (ctf_type_t *) (fp->ctf_buf + cth->btf.bth_type_off);
+  tend = (ctf_type_t *) ((uintptr_t) tbuf + cth->btf.bth_type_len);
 
-  /* We make two passes through the entire type section, and one third pass
-     through part of it: but only the first is guaranteed to happen at this
-     stage.  The second and third passes require working string lookup, so in
-     child dicts can only happen at ctf_import time.
+  /* We make two passes through the entire type section, and more passes through
+     parts of it: but only the first is guaranteed to happen at this stage.  The
+     later passes require working string lookup, so in child dicts can only
+     happen at ctf_import time.
+
+     For prefixed kinds, we are interested in the thing we are prefixing:
+     that is the true type.
 
      In this first pass, we count the number of each type and type-like
      identifier (like enumerators) and the total number of types.  */
 
   for (tp = tbuf; tp < tend; typemax++)
     {
-      unsigned short kind = LCTF_INFO_KIND (fp, tp->ctt_info);
-      unsigned long vlen = LCTF_INFO_VLEN (fp, tp->ctt_info);
+      unsigned short kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info);
+      size_t vlen = LCTF_VLEN (fp, tp);
+      int nonroot = 0;
       ssize_t size, increment, vbytes;
+      const ctf_type_t *suffix = tp;
 
       (void) ctf_get_ctt_size (fp, tp, &size, &increment);
-      vbytes = LCTF_VBYTES (fp, kind, size, vlen);
+
+      /* Go to the first unprefixed type, incrementing all prefixed types'
+	 popcounts along the way.  If we find a CTF_K_CONFLICTING, stop: these
+	 counts are used to increment identifier hashtab sizes, and conflicting
+	 types do not appear in identifier hashtabs.  */
+
+      while (LCTF_IS_PREFIXED_KIND (kind))
+	{
+	  if (is_btf)
+	    return ECTF_CORRUPT;
+
+	  pop[suffix->ctt_type]++;
+
+	  if (kind == CTF_K_CONFLICTING)
+	    {
+	      nonroot = 1;
+	      break;
+	    }
+
+	  suffix++;
+	  if (suffix >= tend)
+	    return ECTF_CORRUPT;
+
+	  kind = LCTF_INFO_UNPREFIXED_KIND (fp, suffix->ctt_info);
+	}
+
+      if (is_btf && kind > CTF_BTF_K_MAX)
+	return ECTF_CORRUPT;
+
+      vbytes = LCTF_VBYTES (fp, suffix, size);
 
       if (vbytes < 0)
 	return ECTF_CORRUPT;
 
-      /* For forward declarations, ctt_type is the CTF_K_* kind for the tag,
-	 so bump that population count too.  */
-      if (kind == CTF_K_FORWARD)
-	pop[tp->ctt_type]++;
+      if (!nonroot)
+	{
+	  /* For forward declarations, the kflag indicates what type to use, so bump
+	     that population count too.  For enums, vlen 0 indicates a forward, so
+	     bump the forward population count.  */
+	  if (kind == CTF_K_FORWARD)
+	    {
+	      if (CTF_INFO_KFLAG (suffix->ctt_info))
+		pop[CTF_K_UNION]++;
+	      else
+		pop[CTF_K_STRUCT]++;
+	    }
+	  else if (kind == CTF_K_ENUM && vlen == 0)
+	    pop[CTF_K_FORWARD]++;
+
+	  if (kind == CTF_K_ENUM || kind == CTF_K_ENUM64)
+	    pop_enumerators += vlen;
+
+	  pop[kind]++;
+	}
 
       tp = (ctf_type_t *) ((uintptr_t) tp + increment + vbytes);
-      pop[kind]++;
-
-      if (kind == CTF_K_ENUM)
-	pop_enumerators += vlen;
     }
 
   if (child)
@@ -666,16 +721,34 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 				   NULL, NULL, NULL)) == NULL)
     return ENOMEM;
 
+  if ((fp->ctf_datasecs
+       = ctf_dynhash_create_sized (pop[CTF_K_DATASEC], ctf_hash_string,
+				   ctf_hash_eq_string,
+				   NULL, NULL, NULL)) == NULL)
+    return ENOMEM;
+
+  if ((fp->ctf_tags
+       = ctf_dynhash_create_sized (pop[CTF_K_DECL_TAG] + pop [CTF_K_TYPE_TAG],
+				   ctf_hash_string, ctf_hash_eq_string,
+				   NULL, (ctf_hash_free_arg_fun) ctf_dynset_destroy_arg,
+				   NULL)) == NULL)
+    return ENOMEM;
+
   if ((fp->ctf_names
        = ctf_dynhash_create_sized (pop[CTF_K_UNKNOWN] +
 				   pop[CTF_K_INTEGER] +
 				   pop[CTF_K_FLOAT] +
-				   pop[CTF_K_FUNCTION] +
+				   pop[CTF_K_FUNC_LINKAGE] +
 				   pop[CTF_K_TYPEDEF] +
 				   pop_enumerators,
 				   ctf_hash_string,
 				   ctf_hash_eq_string,
 				   NULL, NULL, NULL)) == NULL)
+    return ENOMEM;
+
+  if ((fp->ctf_var_datasecs
+       = ctf_dynhash_create (htab_hash_pointer, htab_eq_pointer, NULL, NULL))
+      == NULL)
     return ENOMEM;
 
   if ((fp->ctf_conflicting_enums
@@ -698,9 +771,7 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
   if (fp->ctf_txlate == NULL || fp->ctf_ptrtab == NULL)
     return ENOMEM;		/* Memory allocation failed.  */
 
-  /* UPTODO: BTF is like v4 here: no string lookups in children, which blocks
-     almost all operations until after ctf_import.  */
-  if (child && cth->cth_parent_strlen != 0)
+  if (child || cth->cth_parent_strlen != 0)
     {
       fp->ctf_flags |= LCTF_NO_STR;
       return 0;
@@ -708,17 +779,17 @@ init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 
   ctf_dprintf ("%u types initialized (other than names)\n", fp->ctf_typemax);
 
-  return init_static_types_names (fp, cth);
+  return init_static_types_names (fp, cth, is_btf);
 }
 
 static int
-init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
+init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 				  ctf_dynset_t *all_enums);
 
 /* A wrapper to simplify memory allocation.  */
 
 static int
-init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth)
+init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 {
   ctf_dynset_t *all_enums;
   int err;
@@ -727,41 +798,43 @@ init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth)
 				      NULL)) == NULL)
     return ENOMEM;
 
-  err = init_static_types_names_internal (fp, cth, all_enums);
+  err = init_static_types_names_internal (fp, cth, is_btf, all_enums);
   ctf_dynset_destroy (all_enums);
   return err;
 }
 
-/* Initialize the parts of the CTF dict whose initialization depends on name
-   lookup.  This happens at open time except for child dicts, when (for CTFv4+
-   dicts) it happens at ctf_import time instead, because before then the strtab
-   is truncated at the start.
+static int
+init_void (ctf_dict_t *fp);
+
+/* Initialize the parts of the CTF dict whose initialization depends on name or
+   type lookup.  This happens at open time except for child dicts, when (for
+   CTFv4+ dicts) it happens at ctf_import time instead, because before then the
+   strtab and type tables are truncated at the start.
 
    As a function largely called at open time, this function does not reliably
-   set the ctf_errno, but instead *returns* the error code.  */
+   set the ctf_errno, but instead returns a positive error code.  */
 
 static int
-init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
+init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth, int is_btf,
 				  ctf_dynset_t *all_enums)
 {
-  const ctf_type_t *tbuf;
-  const ctf_type_t *tend;
+  ctf_type_t *tbuf, *tend, *tp;
+  ctf_type_t **xp;
 
-  const ctf_type_t *tp;
   uint32_t id;
-  uint32_t *xp;
-
-  unsigned long typemax = fp->ctf_typemax;
+  ctf_id_t type;
 
   ctf_next_t *i = NULL;
   void *k;
   int err;
 
-  int child = cth->cth_parname != 0;
-  int nlstructs = 0, nlunions = 0;
+  /* See init_static_types.  */
+  int child = (cth->cth_parent_name != 0
+	       || (fp->ctf_str[CTF_STRTAB_0].cts_len > 0
+		   && fp->ctf_str[CTF_STRTAB_0].cts_strs[0] != 0));
 
-  tbuf = (ctf_type_t *) (fp->ctf_buf + cth->cth_typeoff);
-  tend = (ctf_type_t *) (fp->ctf_buf + cth->cth_stroff);
+  tbuf = (ctf_type_t *) (fp->ctf_buf + cth->btf.bth_type_off);
+  tend = (ctf_type_t *) ((uintptr_t) tbuf + cth->btf.bth_type_len);
 
   assert (!(fp->ctf_flags & LCTF_NO_STR));
 
@@ -770,30 +843,34 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
   /* In this second pass through the types, we fill in each entry of the type
      and pointer tables and add names to the appropriate hashes.
 
-     (Not all names are added in this pass, only type names.  See below.)
+     (Not all names are added in this pass, only type names.  See below.)  */
 
-     Reset ctf_typemax and bump it as we go, but keep it one higher than normal,
-     so that the type being read in is considered a valid type and it is at
-     least barely possible to run simple lookups on it: but higher types are
-     not, since their names are not yet known.  (It is kept at its standard
-     value before this function is called so that at least some type-related
-     operations work.  */
-
-  for (id = 1, fp->ctf_typemax = 1, tp = tbuf; tp < tend; xp++, id++, fp->ctf_typemax++)
+  for (id = 1, tp = tbuf; tp < tend; xp++, id++)
     {
-      unsigned short kind = LCTF_INFO_KIND (fp, tp->ctt_info);
+      unsigned short kind = LCTF_KIND (fp, tp);
       unsigned short isroot = LCTF_INFO_ISROOT (fp, tp->ctt_info);
-      unsigned long vlen = LCTF_INFO_VLEN (fp, tp->ctt_info);
+      size_t vlen = LCTF_VLEN (fp, tp);
       ssize_t size, increment, vbytes;
-
+      const ctf_type_t *suffix = tp;
       const char *name;
 
-      (void) ctf_get_ctt_size (fp, tp, &size, &increment);
-      name = ctf_strptr (fp, tp->ctt_name);
-      /* Cannot fail: shielded by call in loop above.  */
-      vbytes = LCTF_VBYTES (fp, kind, size, vlen);
+      /* Prefixed type: pull off the prefixes (for most purposes).  (We already
+	 know the prefixes cannot overflow.)  */
 
-      *xp = (uint32_t) ((uintptr_t) tp - (uintptr_t) fp->ctf_buf);
+      while (LCTF_IS_PREFIXED_INFO (suffix->ctt_info))
+	{
+	  if (is_btf)
+	    return ECTF_CORRUPT;
+
+	  suffix++;
+	}
+
+      (void) ctf_get_ctt_size (fp, tp, &size, &increment);
+      name = ctf_strptr (fp, suffix->ctt_name);
+      /* Cannot fail: shielded by call in init_static_types.  */
+      vbytes = LCTF_VBYTES (fp, suffix, size);
+
+      *xp = tp;
 
       switch (kind)
 	{
@@ -817,7 +894,10 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	       type as long as the new type is zero-offset and has a
 	       bit-width wider than the existing one, since the native type
 	       must necessarily have a bit-width at least as wide as any
-	       bitfield based on it. */
+	       bitfield based on it.
+
+	       BTF floats are more or less useless, having no encoding:
+	       the ctf_type_encoding check here suffices to replace them.  */
 
 	    if (((existing = ctf_dynhash_lookup_type (fp->ctf_names, name)) == 0)
 		|| ctf_type_encoding (fp, existing, &existing_en) != 0
@@ -828,10 +908,31 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	      {
 		err = ctf_dynhash_insert_type (fp, fp->ctf_names,
 					       ctf_index_to_type (fp, id),
-					       tp->ctt_name);
+					       suffix->ctt_name);
 		if (err != 0)
 		  return err * -1;
 	      }
+	    break;
+	  }
+
+	case CTF_K_BTF_FLOAT:
+	  {
+	    ctf_id_t existing;
+
+	    if (!isroot)
+	      break;
+
+	    /* Don't allow a float to be overwritten by a BTF float.  */
+
+	    if (((existing = ctf_dynhash_lookup_type (fp->ctf_names, name)) == 0)
+		&& ctf_type_kind (fp, existing) == CTF_K_FLOAT)
+	      break;
+
+	    err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+					   ctf_index_to_type (fp, id),
+					   suffix->ctt_name);
+	    if (err != 0)
+	      return err * -1;
 	    break;
 	  }
 
@@ -839,29 +940,30 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	     hashtables.  */
 	case CTF_K_ARRAY:
 	case CTF_K_SLICE:
+	case CTF_K_VOLATILE:
+	case CTF_K_CONST:
+	case CTF_K_RESTRICT:
+	case CTF_K_FUNCTION:
 	  break;
 
-	case CTF_K_FUNCTION:
+	case CTF_K_FUNC_LINKAGE:
 	  if (!isroot)
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 	  if (err != 0)
 	    return err * -1;
 	  break;
 
 	case CTF_K_STRUCT:
-	  if (size >= CTF_LSTRUCT_THRESH)
-	    nlstructs++;
-
 	  if (!isroot)
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_structs,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 
 	  if (err != 0)
 	    return err * -1;
@@ -869,38 +971,45 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	  break;
 
 	case CTF_K_UNION:
-	  if (size >= CTF_LSTRUCT_THRESH)
-	    nlunions++;
-
 	  if (!isroot)
 	    break;
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_unions,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 
 	  if (err != 0)
 	    return err * -1;
 	  break;
 
 	case CTF_K_ENUM:
+	case CTF_K_ENUM64:
 	  {
 	    if (!isroot)
 	      break;
 
+	    /* Only insert forward types if the type is not already present.  */
+	    if (vlen == 0
+		&& ctf_dynhash_lookup_type (ctf_name_table (fp, kind),
+					    name) != 0)
+	      break;
+
 	    err = ctf_dynhash_insert_type (fp, fp->ctf_enums,
 					   ctf_index_to_type (fp, id),
-					   tp->ctt_name);
+					   suffix->ctt_name);
 
 	    if (err != 0)
 	      return err * -1;
 
-	    /* Remember all enums for later rescanning.  */
+	    /* Remember all non-forward enums for later rescanning.  */
 
-	    err = ctf_dynset_insert (all_enums, (void *) (ptrdiff_t)
-				     ctf_index_to_type (fp, id));
-	    if (err != 0)
-	      return err * -1;
+	    if (vlen != 0)
+	      {
+		err = ctf_dynset_insert (all_enums, (void *) (ptrdiff_t)
+					 ctf_index_to_type (fp, id));
+		if (err != 0)
+		  return err * -1;
+	      }
 	    break;
 	  }
 
@@ -910,14 +1019,56 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 
 	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
 					 ctf_index_to_type (fp, id),
-					 tp->ctt_name);
+					 suffix->ctt_name);
 	  if (err != 0)
 	    return err * -1;
 	  break;
 
+	case CTF_K_VAR:
+	  if (!isroot)
+	    break;
+
+	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
+					 ctf_index_to_type (fp, id),
+					 suffix->ctt_name);
+	  if (err != 0)
+	    return err * -1;
+	  break;
+
+	case CTF_K_DATASEC:
+	  if (!isroot)
+	    break;
+
+	  err = ctf_dynhash_insert_type (fp, fp->ctf_datasecs,
+					 ctf_index_to_type (fp, id),
+					 suffix->ctt_name);
+	  if (err != 0)
+	    return err * -1;
+
+	  break;
+
+	case CTF_K_DECL_TAG:
+	case CTF_K_TYPE_TAG:
+	  {
+	    const char *str;
+
+	    if ((str = ctf_strptr_validate (fp, suffix->ctt_name)) == NULL)
+	      return ctf_errno (fp);
+
+	    if (!isroot)
+	      break;
+
+	    if (ctf_insert_type_decl_tag (fp, id, name, kind) < 0)
+	      return ctf_errno (fp);
+
+	    break;
+	  }
+
 	case CTF_K_FORWARD:
 	  {
-	    ctf_dynhash_t *h = ctf_name_table (fp, tp->ctt_type);
+	    int kflag = CTF_INFO_KFLAG (tp->ctt_info);
+	    ctf_dynhash_t *h = ctf_name_table (fp, kflag == 1
+					       ? CTF_K_UNION : CTF_K_STRUCT);
 
 	    if (!isroot)
 	      break;
@@ -927,7 +1078,7 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	    if (ctf_dynhash_lookup_type (h, name) == 0)
 	      {
 		err = ctf_dynhash_insert_type (fp, h, ctf_index_to_type (fp, id),
-					       tp->ctt_name);
+					       suffix->ctt_name);
 		if (err != 0)
 		  return err * -1;
 	      }
@@ -939,22 +1090,12 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	     store the index of the pointer type in fp->ctf_ptrtab[ index of
 	     referenced type ].  */
 
-	  if (ctf_type_ischild (fp, tp->ctt_type) == child
-	      && ctf_type_to_index (fp, tp->ctt_type) <= fp->ctf_typemax)
-	    fp->ctf_ptrtab[ctf_type_to_index (fp, tp->ctt_type)] = id;
-	 /*FALLTHRU*/
+	  if (ctf_type_ischild (fp, suffix->ctt_type) == child
+	      && ctf_type_to_index (fp, suffix->ctt_type) <= fp->ctf_typemax)
+	    fp->ctf_ptrtab[ctf_type_to_index (fp, suffix->ctt_type)] = id;
 
-	case CTF_K_VOLATILE:
-	case CTF_K_CONST:
-	case CTF_K_RESTRICT:
-	  if (!isroot)
-	    break;
-
-	  err = ctf_dynhash_insert_type (fp, fp->ctf_names,
-					 ctf_index_to_type (fp, id), 0);
-	  if (err != 0)
-	    return err * -1;
 	  break;
+
 	default:
 	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
 			_("init_static_types(): unhandled CTF kind: %x"), kind);
@@ -962,10 +1103,12 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
 	}
       tp = (ctf_type_t *) ((uintptr_t) tp + increment + vbytes);
     }
-  fp->ctf_typemax--;
-  assert (fp->ctf_typemax == typemax);
+  assert (fp->ctf_typemax == id - 1);
 
-  ctf_dprintf ("%u total types processed\n", fp->ctf_typemax);
+  ctf_dprintf ("%u total types processed\n", id - 1);
+
+  if ((err = init_void (fp) < 0))
+    return err;
 
   /* In the third pass, we traverse the enums we spotted earlier and track all
      the enumeration constants to aid in future detection of duplicates.
@@ -973,6 +1116,9 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
      Doing this in a third pass is necessary to avoid the case where an
      enum appears with a constant FOO, then later a type named FOO appears,
      too late to spot the conflict by checking the enum's constants.  */
+
+  ctf_dprintf ("Extracting enumeration constants from %zu enums\n",
+	       ctf_dynset_elements (all_enums));
 
   while ((err = ctf_dynset_next (all_enums, &i, &k)) == 0)
     {
@@ -998,16 +1144,90 @@ init_static_types_names_internal (ctf_dict_t *fp, ctf_header_t *cth,
   if (err != ECTF_NEXT_END)
     return err;
 
+  /* In the final pass, we traverse all datasecs and remember the variables in
+     each, so we can rapidly map from variable back to datasec.  */
+
+  ctf_dprintf ("Getting variable datasec membership\n");
+
+  while ((type = ctf_type_kind_next (fp, &i, CTF_K_DATASEC)) != CTF_ERR)
+    {
+      ctf_next_t *i_sec = NULL;
+      ctf_id_t var_type;
+
+      while ((var_type = ctf_datasec_var_next (fp, type, &i_sec, NULL, NULL))
+	     != CTF_ERR)
+	{
+	  err = ctf_dynhash_insert (fp->ctf_var_datasecs,
+				    (void *) (ptrdiff_t) var_type,
+				    (void *) (ptrdiff_t) type);
+	  if (err != 0)
+	    return err * -1;
+	}
+      if (ctf_errno (fp) != ECTF_NEXT_END)
+	{
+	  ctf_next_destroy (i);
+	  return ctf_errno (fp);
+	}
+    }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    return ctf_errno (fp);
+
   ctf_dprintf ("%zu enum names hashed\n",
 	       ctf_dynhash_elements (fp->ctf_enums));
   ctf_dprintf ("%zu conflicting enumerators identified\n",
 	       ctf_dynset_elements (fp->ctf_conflicting_enums));
-  ctf_dprintf ("%zu struct names hashed (%d long)\n",
-	       ctf_dynhash_elements (fp->ctf_structs), nlstructs);
-  ctf_dprintf ("%zu union names hashed (%d long)\n",
-	       ctf_dynhash_elements (fp->ctf_unions), nlunions);
+  ctf_dprintf ("%zu struct names hashed\n",
+	       ctf_dynhash_elements (fp->ctf_structs));
+  ctf_dprintf ("%zu union names hashed\n",
+	       ctf_dynhash_elements (fp->ctf_unions));
   ctf_dprintf ("%zu base type names and identifiers hashed\n",
 	       ctf_dynhash_elements (fp->ctf_names));
+
+  return 0;
+}
+
+/* Prepare the void type.  If present, index 0 is pointed at it: otherwise, we
+   make one in the ctf_void_type member and point index 0 at that.  Because this
+   is index 0, it is not written out by serialization (which always starts at
+   index 1): because it is type 0, it is the type expected by BTF consumers:
+   because it is a real, queryable type, CTF consumers will get a proper type
+   back that they can query the properties of.
+
+   As an initialization function, this returns a positive error code, or
+   zero.  */
+
+static int
+init_void (ctf_dict_t *fp)
+{
+  ctf_id_t void_type;
+  ctf_type_t *void_tp;
+
+  void_type = ctf_dynhash_lookup_type (ctf_name_table (fp, CTF_K_INTEGER), "void");
+
+  if (void_type == 0)
+    {
+      uint32_t *vlen;
+
+      if ((void_tp = calloc (1, sizeof (ctf_type_t) + sizeof (uint32_t))) == NULL)
+	return ENOMEM;
+      vlen = (uint32_t *) (void_tp + 1);
+
+      void_tp->ctt_name = ctf_str_add (fp, "void");
+      void_tp->ctt_info = CTF_TYPE_INFO (CTF_K_INTEGER, 0, 0);
+      void_tp->ctt_size = 4;			/* (bytes)  */
+      *vlen = CTF_INT_DATA (CTF_INT_SIGNED, 0, 0);
+
+      fp->ctf_void_type = void_tp;
+    }
+  else
+    {
+      ctf_dict_t *tmp = fp;
+
+      void_tp = (ctf_type_t *) ctf_lookup_by_id (&tmp, void_type, NULL);
+      assert (void_tp != NULL);
+    }
+
+  fp->ctf_txlate[0] = void_tp;
 
   return 0;
 }
@@ -1371,12 +1591,15 @@ void ctf_set_ctl_hashes (ctf_dict_t *fp)
   fp->ctf_lookups[2].ctl_prefix = "enum";
   fp->ctf_lookups[2].ctl_len = strlen (fp->ctf_lookups[2].ctl_prefix);
   fp->ctf_lookups[2].ctl_hash = fp->ctf_enums;
-  fp->ctf_lookups[3].ctl_prefix = _CTF_NULLSTR;
+  fp->ctf_lookups[3].ctl_prefix = "datasec";
   fp->ctf_lookups[3].ctl_len = strlen (fp->ctf_lookups[3].ctl_prefix);
-  fp->ctf_lookups[3].ctl_hash = fp->ctf_names;
-  fp->ctf_lookups[4].ctl_prefix = NULL;
-  fp->ctf_lookups[4].ctl_len = 0;
-  fp->ctf_lookups[4].ctl_hash = NULL;
+  fp->ctf_lookups[3].ctl_hash = fp->ctf_datasecs;
+  fp->ctf_lookups[4].ctl_prefix = _CTF_NULLSTR;
+  fp->ctf_lookups[4].ctl_len = strlen (fp->ctf_lookups[4].ctl_prefix);
+  fp->ctf_lookups[4].ctl_hash = fp->ctf_names;
+  fp->ctf_lookups[5].ctl_prefix = NULL;
+  fp->ctf_lookups[5].ctl_len = 0;
+  fp->ctf_lookups[5].ctl_hash = NULL;
 }
 
 /* Open a CTF file, mocking up a suitable ctf_sect.  */
@@ -2149,6 +2372,8 @@ ctf_dict_close (ctf_dict_t *fp)
   ctf_dynhash_destroy (fp->ctf_structs);
   ctf_dynhash_destroy (fp->ctf_unions);
   ctf_dynhash_destroy (fp->ctf_enums);
+  ctf_dynhash_destroy (fp->ctf_datasecs);
+  ctf_dynhash_destroy (fp->ctf_tags);
   ctf_dynhash_destroy (fp->ctf_names);
 
   for (dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL; dvd = nvd)
@@ -2157,6 +2382,7 @@ ctf_dict_close (ctf_dict_t *fp)
       ctf_dvd_delete (fp, dvd);
     }
   ctf_dynhash_destroy (fp->ctf_dvhash);
+  ctf_dynhash_destroy (fp->ctf_var_datasecs);
 
   ctf_dynhash_destroy (fp->ctf_symhash_func);
   ctf_dynhash_destroy (fp->ctf_symhash_objt);
@@ -2217,6 +2443,7 @@ ctf_dict_close (ctf_dict_t *fp)
       free (err);
     }
 
+  free (fp->ctf_void_type);
   free (fp->ctf_sxlate);
   free (fp->ctf_txlate);
   free (fp->ctf_ptrtab);
@@ -2439,7 +2666,8 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   fp->ctf_flags |= LCTF_CHILD;
   fp->ctf_flags &= ~LCTF_NO_STR;
 
-  if (no_strings && (err = init_static_types_names (fp, fp->ctf_header)) < 0)
+  if (no_strings && (err = init_static_types_names (fp, fp->ctf_header,
+						    fp->ctf_opened_btf) < 0))
     {
       /* Undo everything other than cache flushing.  */
 

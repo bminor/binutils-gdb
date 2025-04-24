@@ -541,9 +541,10 @@ extern ctf_id_t ctf_lookup_by_symbol_name (ctf_dict_t *, const char *);
 extern ctf_id_t ctf_symbol_next (ctf_dict_t *, ctf_next_t **,
 				 const char **name, int functions);
 
-/* Look up a type by name: some simple C type parsing is done, but this is by no
-   means comprehensive.  Structures, unions and enums need "struct ", "union "
-   or "enum " on the front, as usual in C.  */
+/* Look up a type or variable by name: some simple C type parsing is done, but
+   this is by no means comprehensive.  Structures, unions and enums need "struct
+   ", "union " or "enum " on the front, as usual in C.  Some prefixes not seen
+   in C exist as well: datasecs use "datasec ". */
 
 extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
 
