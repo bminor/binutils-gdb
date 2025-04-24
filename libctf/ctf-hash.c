@@ -396,7 +396,7 @@ ctf_dynhash_empty (ctf_dynhash_t *hp)
 }
 
 size_t
-ctf_dynhash_elements (ctf_dynhash_t *hp)
+ctf_dynhash_elements (const ctf_dynhash_t *hp)
 {
   return htab_elements (hp->htab);
 }
@@ -524,7 +524,7 @@ ctf_dynhash_iter_remove (ctf_dynhash_t *hp, ctf_hash_iter_remove_f fun,
    of this into some sort of errno or ctf_errno, which is invariably
    positive.  So doing this simplifies essentially all callers.  */
 int
-ctf_dynhash_next (ctf_dynhash_t *h, ctf_next_t **it, void **key, void **value)
+ctf_dynhash_next (const ctf_dynhash_t *h, ctf_next_t **it, void **key, void **value)
 {
   ctf_next_t *i = *it;
   ctf_helem_t *slot;
@@ -627,7 +627,7 @@ ctf_dynhash_sort_by_name (const ctf_next_hkv_t *one, const ctf_next_hkv_t *two,
 
    If SORT_FUN is null, thunks to ctf_dynhash_next.  */
 int
-ctf_dynhash_next_sorted (ctf_dynhash_t *h, ctf_next_t **it, void **key,
+ctf_dynhash_next_sorted (const ctf_dynhash_t *h, ctf_next_t **it, void **key,
 			 void **value, ctf_hash_sort_f sort_fun, void *sort_arg)
 {
   ctf_next_t *i = *it;
@@ -792,7 +792,7 @@ ctf_dynset_remove (ctf_dynset_t *hp, const void *key)
 }
 
 size_t
-ctf_dynset_elements (ctf_dynset_t *hp)
+ctf_dynset_elements (const ctf_dynset_t *hp)
 {
   return htab_elements ((struct htab *) hp);
 }
@@ -849,7 +849,7 @@ ctf_dynset_lookup_any (ctf_dynset_t *hp)
 
    Otherwise, just like ctf_dynhash_next.  */
 int
-ctf_dynset_next (ctf_dynset_t *hp, ctf_next_t **it, void **key)
+ctf_dynset_next (const ctf_dynset_t *hp, ctf_next_t **it, void **key)
 {
   struct htab *htab = (struct htab *) hp;
   ctf_next_t *i = *it;

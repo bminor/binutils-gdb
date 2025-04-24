@@ -685,7 +685,7 @@ extern ctf_dynhash_t *ctf_dynhash_create_sized (unsigned long, ctf_hash_fun,
 
 extern int ctf_dynhash_insert (ctf_dynhash_t *, void *, void *);
 extern void ctf_dynhash_remove (ctf_dynhash_t *, const void *);
-extern size_t ctf_dynhash_elements (ctf_dynhash_t *);
+extern size_t ctf_dynhash_elements (const ctf_dynhash_t *);
 extern void ctf_dynhash_empty (ctf_dynhash_t *);
 extern int ctf_dynhash_insert_type (ctf_dict_t *, ctf_dynhash_t *, uint32_t, uint32_t);
 extern ctf_id_t ctf_dynhash_lookup_type (ctf_dynhash_t *, const char *);
@@ -701,9 +701,9 @@ extern void *ctf_dynhash_iter_find (ctf_dynhash_t *, ctf_hash_iter_find_f,
 extern int ctf_dynhash_sort_by_name (const ctf_next_hkv_t *,
 				     const ctf_next_hkv_t *,
 				     void * _libctf_unused_);
-extern int ctf_dynhash_next (ctf_dynhash_t *, ctf_next_t **,
+extern int ctf_dynhash_next (const ctf_dynhash_t *, ctf_next_t **,
 			     void **key, void **value);
-extern int ctf_dynhash_next_sorted (ctf_dynhash_t *, ctf_next_t **,
+extern int ctf_dynhash_next_sorted (const ctf_dynhash_t *, ctf_next_t **,
 				    void **key, void **value, ctf_hash_sort_f,
 				    void *);
 extern int ctf_dynhash_next_remove (ctf_next_t * const *);
@@ -711,12 +711,12 @@ extern int ctf_dynhash_next_remove (ctf_next_t * const *);
 extern ctf_dynset_t *ctf_dynset_create (htab_hash, htab_eq, ctf_hash_free_fun);
 extern int ctf_dynset_insert (ctf_dynset_t *, void *);
 extern void ctf_dynset_remove (ctf_dynset_t *, const void *);
-extern size_t ctf_dynset_elements (ctf_dynset_t *);
+extern size_t ctf_dynset_elements (const ctf_dynset_t *);
 extern void ctf_dynset_destroy (ctf_dynset_t *);
 extern void *ctf_dynset_lookup (ctf_dynset_t *, const void *);
 extern int ctf_dynset_exists (ctf_dynset_t *, const void *key,
 			      const void **orig_key);
-extern int ctf_dynset_next (ctf_dynset_t *, ctf_next_t **, void **key);
+extern int ctf_dynset_next (const ctf_dynset_t *, ctf_next_t **, void **key);
 extern void *ctf_dynset_lookup_any (ctf_dynset_t *);
 
 extern void ctf_sha1_init (ctf_sha1_t *);
