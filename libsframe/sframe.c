@@ -204,7 +204,8 @@ flip_fde (sframe_func_desc_entry *fdep)
 static bool
 sframe_header_sanity_check_p (sframe_header *hp)
 {
-  unsigned char all_flags = SFRAME_F_FDE_SORTED | SFRAME_F_FRAME_POINTER;
+  uint8_t all_flags = (SFRAME_F_FDE_SORTED | SFRAME_F_FRAME_POINTER
+		       | SFRAME_F_FDE_FUNC_START_ADDR_PCREL);
   /* Check preamble is valid.  */
   if (hp->sfh_preamble.sfp_magic != SFRAME_MAGIC
       || (hp->sfh_preamble.sfp_version != SFRAME_VERSION_1

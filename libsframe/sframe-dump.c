@@ -61,10 +61,11 @@ dump_sframe_header_flags (sframe_decoder_ctx *sfd_ctx)
   /* PS: Keep SFRAME_FLAGS_STR_MAX_LEN in sync if adding more members to
      this array.  */
 #define SFRAME_FLAGS_STR_MAX_LEN 50
-#define MAX_NUM_FLAGS 2
+#define MAX_NUM_FLAGS 3
   const struct dump_flags_helper flags_helper[MAX_NUM_FLAGS] = {
       { SFRAME_F_FDE_SORTED, "SFRAME_F_FDE_SORTED"},
-      { SFRAME_F_FRAME_POINTER, "SFRAME_F_FRAME_POINTER"}
+      { SFRAME_F_FRAME_POINTER, "SFRAME_F_FRAME_POINTER"},
+      { SFRAME_F_FDE_FUNC_START_ADDR_PCREL, "SFRAME_F_FDE_FUNC_START_ADDR_PCREL"}
   };
 
   /* Prepare SFrame section flags string.  */
