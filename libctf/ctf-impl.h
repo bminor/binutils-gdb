@@ -91,7 +91,7 @@ extern "C"
 
 #if defined (ENABLE_LIBCTF_HASH_DEBUGGING) && !defined (NDEBUG)
 #include <assert.h>
-#define ctf_assert(fp, expr) (assert (expr), 1)
+#define ctf_assert(fp, expr) (assert (expr), fp || 1)
 #else
 #define ctf_assert(fp, expr)						\
   _libctf_unlikely_ (ctf_assert_internal (fp, __FILE__, __LINE__,	\
