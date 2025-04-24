@@ -882,6 +882,7 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	    case CTF_K_FLOAT:
 	    case CTF_K_TYPEDEF:
 	      /* Integers, floats, and typedefs must always be named types.  */
+	    case CTF_K_BTF_FLOAT:
 
 	      if (name[0] == '\0')
 		{
@@ -1398,24 +1399,19 @@ int
 ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 {
   ctf_dict_t *ofp = fp;
-  ctf_dtdef_t *dtd;
-  const ctf_type_t *tp;
-  ssize_t increment;
+  const ctf_type_t *tp, *suffix;
   const unsigned char *vlen;
   uint32_t data;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
-    vlen = dtd->dtd_vlen;
-  else
-    {
-      ctf_get_ctt_size (fp, tp, NULL, &increment);
-      vlen = (const unsigned char *) ((uintptr_t) tp + increment);
-    }
+  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
+    return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 
-  switch (LCTF_INFO_KIND (fp, tp->ctt_info))
+  vlen = ctf_vlen (fp, type, tp, NULL);
+
+  switch (LCTF_KIND (fp, tp))
     {
     case CTF_K_INTEGER:
       data = *(const uint32_t *) vlen;
@@ -1434,6 +1430,11 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
       ep->cte_format = CTF_INFO_KFLAG (suffix->ctt_info) ? CTF_INT_SIGNED : 0;
       ep->cte_offset = 0;
       ep->cte_bits = 0;
+      break;
+    case CTF_K_BTF_FLOAT:
+      ep->cte_format = 0;
+      ep->cte_offset = 0;
+      ep->cte_bits = suffix->ctt_size * CHAR_BIT;
       break;
     case CTF_K_SLICE:
       {

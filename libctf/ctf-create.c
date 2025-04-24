@@ -667,32 +667,29 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
   if (name == NULL || name[0] == '\0')
     return (ctf_set_typed_errno (fp, ECTF_NONAME));
 
-  if (!ctf_assert (fp, kind == CTF_K_INTEGER || kind == CTF_K_FLOAT))
-    return CTF_ERR;					/* errno is set for us.  */
+  if (!ctf_assert (fp, kind == CTF_K_INTEGER || kind == CTF_K_FLOAT
+		   || kind == CTF_K_BTF_FLOAT))
+    return CTF_ERR;				/* errno is set for us.  */
 
-  if ((type = ctf_add_generic (fp, flag, name, kind, sizeof (uint32_t),
-			       &dtd)) == CTF_ERR)
+  if (kind == CTF_K_BTF_FLOAT)
+    vlen = 0;
+
+  if ((dtd = ctf_add_generic (fp, flag, name, kind, 0, vlen, 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, flag, 0);
-  dtd->dtd_data.ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT)
-				 / CHAR_BIT);
-  switch (kind)
-    {
-    case CTF_K_INTEGER:
-      encoding = CTF_INT_DATA (ep->cte_format, ep->cte_offset, ep->cte_bits);
-      break;
-    case CTF_K_FLOAT:
-      encoding = CTF_FP_DATA (ep->cte_format, ep->cte_offset, ep->cte_bits);
-      break;
-    default:
-      /* ctf_assert is opaque with -fno-inline.  This dead code avoids
-	 a warning about "encoding" being used uninitialized.  */
-      return CTF_ERR;
-    }
-  memcpy (dtd->dtd_vlen, &encoding, sizeof (encoding));
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, 0, 0);
+  dtd->dtd_data->ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT) / CHAR_BIT);
 
-  return type;
+  if (kind != CTF_K_BTF_FLOAT)
+    {
+      encoding = ep->cte_format;
+      if (kind == CTF_K_INTEGER)
+	encoding = CTF_INT_DATA (ep->cte_format, ep->cte_offset, ep->cte_bits);
+
+      memcpy (dtd->dtd_vlen, &encoding, sizeof (encoding));
+    }
+
+  return dtd->dtd_type;
 }
 
 ctf_id_t
@@ -769,7 +766,7 @@ ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
   kind = ctf_type_kind_unsliced (fp, resolved_ref);
 
   if ((kind != CTF_K_INTEGER) && (kind != CTF_K_FLOAT) &&
-      (kind != CTF_K_ENUM)
+      (kind != CTF_K_ENUM) && (kind != CTF_K_BTF_FLOAT)
       && (ref != 0))
     return (ctf_set_typed_errno (fp, ECTF_NOTINTFP));
 
@@ -802,6 +799,13 @@ ctf_add_float (ctf_dict_t *fp, uint32_t flag,
 	       const char *name, const ctf_encoding_t *ep)
 {
   return (ctf_add_encoded (fp, flag, name, ep, CTF_K_FLOAT));
+}
+
+ctf_id_t
+ctf_add_btf_float (ctf_dict_t *fp, uint32_t flag,
+		   const char *name, const ctf_encoding_t *ep)
+{
+  return (ctf_add_encoded (fp, flag, name, ep, CTF_K_BTF_FLOAT));
 }
 
 ctf_id_t

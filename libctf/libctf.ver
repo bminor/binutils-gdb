@@ -116,6 +116,7 @@ LIBCTF_2.0 {
 	ctf_add_enum64;
 	ctf_add_enum64_encoded;
 	ctf_add_float;
+	ctf_add_btf_float;
 	ctf_add_forward;
 	ctf_add_function;
 	ctf_add_integer;
