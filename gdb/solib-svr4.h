@@ -112,4 +112,16 @@ extern struct link_map_offsets *svr4_lp64_fetch_link_map_offsets (void);
    SVR4 run time loader.  */
 int svr4_in_dynsym_resolve_code (CORE_ADDR pc);
 
+/* For the MUSL C library, given link map address LM_ADDR, return the
+   corresponding TLS module id, or 0 if not found.  */
+int musl_link_map_to_tls_module_id (CORE_ADDR lm_addr);
+
+/* For GLIBC, given link map address LM_ADDR, return the corresponding TLS
+   module id, or 0 if not found.  */
+int glibc_link_map_to_tls_module_id (CORE_ADDR lm_addr);
+
+/* Return program interpreter string.  */
+
+std::optional<gdb::byte_vector> svr4_find_program_interpreter ();
+
 #endif /* GDB_SOLIB_SVR4_H */
