@@ -898,6 +898,7 @@ ALL_TARGET_OBS = \
 	sparc-ravenscar-thread.o \
 	sparc-sol2-tdep.o \
 	sparc-tdep.o \
+	svr4-tls-tdep.o \
 	symfile-mem.o \
 	tic6x-linux-tdep.o \
 	tic6x-tdep.o \
@@ -1522,6 +1523,7 @@ HFILES_NO_SRCDIR = \
 	stabsread.h \
 	stack.h \
 	stap-probe.h \
+	svr4-tls-tdep.h \
 	symfile.h \
 	symtab.h \
 	target.h \
@@ -1885,6 +1887,7 @@ ALLDEPFILES = \
 	sparc64-obsd-tdep.c \
 	sparc64-sol2-tdep.c \
 	sparc64-tdep.c \
+	svr4-tls-tdep.c \
 	tilegx-linux-nat.c \
 	tilegx-linux-tdep.c \
 	tilegx-tdep.c \
