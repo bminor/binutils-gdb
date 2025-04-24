@@ -422,20 +422,20 @@ init_symtab (ctf_dict_t *fp, const ctf_header_t *hp, const ctf_sect_t *sp)
   uint32_t *xp = fp->ctf_sxlate;
   uint32_t *xend = PTR_ADD (xp, fp->ctf_nsyms);
 
-  uint32_t objtoff = hp->cth_objtoff;
-  uint32_t funcoff = hp->cth_funcoff;
+  uint32_t objtoff = hp->cth_objt_off;
+  uint32_t funcoff = hp->cth_func_off;
 
-  /* If the CTF_F_NEWFUNCINFO flag is not set, pretend the func info section
-     is empty: this compiler is too old to emit a function info section we
-     understand.  */
+  /* If this is a v3 dict, and the CTF_F_NEWFUNCINFO flag is not set, pretend
+     the func info section is empty: this compiler is too old to emit a function
+     info section we understand.  */
 
-  if (!(hp->cth_flags & CTF_F_NEWFUNCINFO))
+  if (fp->ctf_v3_header && (fp->ctf_v3_header->cth_flags & CTF_F_NEWFUNCINFO))
     skip_func_info = 1;
 
-  if (hp->cth_objtidxoff < hp->cth_funcidxoff)
-    fp->ctf_objtidx_names = (uint32_t *) (fp->ctf_buf + hp->cth_objtidxoff);
-  if (hp->cth_funcidxoff < hp->cth_varoff && !skip_func_info)
-    fp->ctf_funcidx_names = (uint32_t *) (fp->ctf_buf + hp->cth_funcidxoff);
+  if (hp->cth_objtidx_len > 0)
+    fp->ctf_objtidx_names = (uint32_t *) (fp->ctf_buf + hp->cth_objtidx_off);
+  if (hp->cth_funcidx_len > 0 && !skip_func_info)
+    fp->ctf_funcidx_names = (uint32_t *) (fp->ctf_buf + hp->cth_funcidx_off);
 
   /* Don't bother doing the rest if everything is indexed, or if we don't have a
      symbol table: we will never use it.  */
@@ -487,7 +487,7 @@ init_symtab (ctf_dict_t *fp, const ctf_header_t *hp, const ctf_sect_t *sp)
       switch (sym.st_type)
 	{
 	case STT_OBJECT:
-	  if (fp->ctf_objtidx_names || objtoff >= hp->cth_funcoff)
+	  if (fp->ctf_objtidx_names || (objtoff - hp->cth_objt_off) > hp->cth_objt_len)
 	    {
 	      *xp = -1u;
 	      break;
@@ -498,7 +498,7 @@ init_symtab (ctf_dict_t *fp, const ctf_header_t *hp, const ctf_sect_t *sp)
 	  break;
 
 	case STT_FUNC:
-	  if (fp->ctf_funcidx_names || funcoff >= hp->cth_objtidxoff
+	  if (fp->ctf_funcidx_names || (funcoff - hp->cth_func_off) > hp->cth_func_len
 	      || skip_func_info)
 	    {
 	      *xp = -1u;
@@ -531,13 +531,10 @@ ctf_set_base (ctf_dict_t *fp, const ctf_header_t *hp, unsigned char *base)
 {
   fp->ctf_buf = base + (fp->ctf_buf - fp->ctf_base);
   fp->ctf_base = base;
-  fp->ctf_vars = (ctf_varent_t *) ((const char *) fp->ctf_buf +
-				   hp->cth_varoff);
-  fp->ctf_nvars = (hp->cth_typeoff - hp->cth_varoff) / sizeof (ctf_varent_t);
 
   fp->ctf_str[CTF_STRTAB_0].cts_strs = (const char *) fp->ctf_buf
-    + hp->cth_stroff;
-  fp->ctf_str[CTF_STRTAB_0].cts_len = hp->cth_strlen;
+    + hp->btf.bth_str_off;
+  fp->ctf_str[CTF_STRTAB_0].cts_len = hp->btf.bth_str_len;
 
   /* If we have a parent dict name and label, store the relocated string
      pointers in the CTF dict for easy access later. */
@@ -551,20 +548,15 @@ ctf_set_base (ctf_dict_t *fp, const ctf_header_t *hp, unsigned char *base)
      the parent dict (and determining that this dict is a child) in the first
      place.  */
 
-  if (hp->cth_parlabel != 0)
-    fp->ctf_parlabel = ctf_strptr (fp, hp->cth_parlabel);
-  if (hp->cth_parname != 0)
-    fp->ctf_parname = ctf_strptr (fp, hp->cth_parname);
-  if (hp->cth_cuname != 0)
-    fp->ctf_cuname = ctf_strptr (fp, hp->cth_cuname);
+  if (hp->cth_parent_name != 0)
+    fp->ctf_parent_name = ctf_strptr (fp, hp->cth_parent_name);
+  if (hp->cth_cu_name != 0)
+    fp->ctf_cu_name = ctf_strptr (fp, hp->cth_cu_name);
 
-  if (fp->ctf_cuname)
-    ctf_dprintf ("ctf_set_base: CU name %s\n", fp->ctf_cuname);
-  if (fp->ctf_parname)
-    ctf_dprintf ("ctf_set_base: parent name %s (label %s)\n",
-	       fp->ctf_parname,
-	       fp->ctf_parlabel ? fp->ctf_parlabel : "<NULL>");
-
+  if (fp->ctf_cu_name)
+    ctf_dprintf ("ctf_set_base: CU name %s\n", fp->ctf_cu_name);
+  if (fp->ctf_parent_name)
+    ctf_dprintf ("ctf_set_base: parent name %s\n", fp->ctf_parent_name);
 }
 
 static int
@@ -583,7 +575,7 @@ init_static_types_names (ctf_dict_t *fp, ctf_header_t *cth);
    function that does all the actual work.  */
 
 static int
-init_static_types (ctf_dict_t *fp, ctf_header_t *cth)
+init_static_types (ctf_dict_t *fp, ctf_header_t *cth, int is_btf)
 {
   const ctf_type_t *tbuf;
   const ctf_type_t *tend;
@@ -1433,25 +1425,49 @@ ctf_dict_t *ctf_simple_open (const char *ctfsect, size_t ctfsect_size,
   return ctf_bufopen (ctfsectp, symsectp, strsectp, errp);
 }
 
-/* Decode the specified CTF buffer and optional symbol table, and create a new
-   CTF dict representing the symbolic debugging information.  This code can
-   be used directly by the debugger, or it can be used as the engine for
-   ctf_fdopen() or ctf_open(), below.  */
+/* Decode the specified CTF or BTF buffer and optional symbol table, and create
+   a new CTF dict representing the type information.  This code can be used
+   directly by users, or it can be used as the engine for ctf_fdopen() or
+   ctf_open(), below.  */
 
 ctf_dict_t *
 ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	     const ctf_sect_t *strsect, int *errp)
 {
-  const ctf_preamble_t *pp;
-  size_t hdrsz;
+  const ctf_preamble_v3_t *pp;
+  const ctf_btf_preamble_t *bp;
+  size_t hdrsz = 0;
   ctf_header_t *hp;
+  ctf_header_v3_t *header_v3 = NULL;
   ctf_dict_t *fp;
+  void *fliphp;
+  size_t ctf_adjustment = 0;
+
+  /* These match the CTF_VERSION definitions up to IS_BTF.  */
+  enum
+    {
+      IS_UNKNOWN = 0,
+      IS_CTFv1,
+      IS_CTFv1_UPGRADED_3,
+      IS_CTFv2,
+      IS_CTFv3,
+      IS_BTF,
+      IS_CTF
+    } format = IS_UNKNOWN;
+  int version = 0;
+
+  const char *desc;
   int foreign_endian = 0;
   int err;
 
   libctf_init_debug();
 
   ctf_set_open_errno (errp, 0);
+
+  ctf_dprintf ("ctf_bufopen %zi+%zi+%zi bytes: validating\n",
+	       ctfsect ? ctfsect->cts_size : 0,
+	       symsect ? symsect->cts_size : 0,
+	       strsect ? strsect->cts_size : 0);
 
   if ((ctfsect == NULL) || ((symsect != NULL) && (strsect == NULL)))
     return (ctf_set_open_errno (errp, EINVAL));
@@ -1467,183 +1483,365 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     return (ctf_set_open_errno (errp, ECTF_STRBAD));
 
   if (ctfsect->cts_data == NULL
-      || ctfsect->cts_size < sizeof (ctf_preamble_t))
+      || ctfsect->cts_size < sizeof (ctf_btf_preamble_t))
     return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
-
-  pp = (const ctf_preamble_t *) ctfsect->cts_data;
-
-  ctf_dprintf ("ctf_bufopen: magic=0x%x version=%u\n",
-	       pp->ctp_magic, pp->ctp_version);
 
   /* Validate each part of the CTF header.
 
-     First, we validate the preamble (common to all versions).  At that point,
-     we know the endianness and specific header version, and can validate the
-     version-specific parts including section offsets and alignments.  */
+     This is more complex than it used to be, because CTFv3 and below, BTF,
+     and CTFv4 have distinct preambles with distinct layouts.
 
-  if (_libctf_unlikely_ (pp->ctp_magic != CTF_MAGIC))
+     First, we validate the preamble.  At that point, we know the endianness and
+     specific header version, and can possibly swap and validate the
+     version-specific parts including section offsets and alignments.  None of
+     these portions are compressed, thankfully: compression starts after the
+     headers.  */
+
+  /* First, deal with the unprefixed cases: BTF, and CTFv1--v3: swap them into
+     native endianness if need be.  Verify the prefixed endiannesses first.  */
+
+  bp = (const ctf_btf_preamble_t *) ctfsect->cts_data;
+  pp = (const ctf_preamble_v3_t *) ctfsect->cts_data; /* CTFv3 or below.  */
+
+  if (_libctf_unlikely_ (bp->btf_magic != CTF_BTF_MAGIC))
     {
-      if (pp->ctp_magic == bswap_16 (CTF_MAGIC))
-	foreign_endian = 1;
+      if (bp->btf_magic == bswap_16 (CTF_BTF_MAGIC))
+	{
+	  format = IS_BTF;
+	  foreign_endian = 1;
+	  hdrsz = sizeof (struct ctf_btf_header);
+	  version = bp->btf_version;
+	}
+    }
+    else
+      {
+	format = IS_BTF;
+	hdrsz = sizeof (struct ctf_btf_header);
+	version = bp->btf_version;
+      }
+
+  if (format == IS_UNKNOWN)
+    {
+      if (pp->ctp_magic == CTF_MAGIC)
+	format = pp->ctp_version;
+      else if (format == IS_UNKNOWN && pp->ctp_magic == bswap_16 (CTF_MAGIC))
+	{
+	  format = pp->ctp_version;
+	  foreign_endian = 1;
+	}
       else
 	return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
     }
 
-  if (_libctf_unlikely_ ((pp->ctp_version < CTF_VERSION_1)
-			 || (pp->ctp_version > CTF_VERSION_4)))
-    return (ctf_set_open_errno (errp, ECTF_CTFVERS));
-
-  if ((symsect != NULL) && (pp->ctp_version < CTF_VERSION_2))
+  if (format != IS_UNKNOWN && format < IS_BTF)
     {
-      /* The symtab can contain function entries which contain embedded ctf
+      switch (format)
+	{
+	case IS_CTFv1:
+	case IS_CTFv2:
+	  hdrsz = sizeof (ctf_header_v2_t);
+	  break;
+	case IS_CTFv1_UPGRADED_3:
+	case IS_CTFv3:
+	  hdrsz = sizeof (ctf_header_v3_t);
+	  break;
+	default:
+	  /* Cannot happen: placate the compiler.  */
+	  hdrsz = sizeof (ctf_header_t);
+	}
+      version = pp->ctp_version;
+    }
+
+  /* Check for modern CTF.  If found, set the adjustment value that lets us
+     compensate for BTF offsets being relative to the end of the BTF header,
+     while everything else is relative to the end of the CTF header.  */
+
+  if (format == IS_BTF && ctfsect->cts_size >= sizeof (ctf_header_t))
+    {
+      hp = (ctf_header_t *) ctfsect->cts_data;
+
+      if (CTH_MAGIC (hp) == CTFv4_MAGIC)
+	{
+	  format = IS_CTF;
+	  version = CTH_VERSION (hp);
+	  hdrsz = sizeof (ctf_header_t);
+	  ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
+	}
+      else if (bswap_64 (hp->cth_preamble.ctp_magic_version) >> 16 == CTFv4_MAGIC)
+	{
+	  format = IS_CTF;
+	  foreign_endian = 1;
+	  version = bswap_64 (CTH_VERSION (hp));
+	  hdrsz = sizeof (ctf_header_t);
+	  ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
+	}
+      /* Neither hit: confirmed BTF, not CTFv4.  */
+    }
+
+  if (ctfsect->cts_size < hdrsz)
+    {
+      ctf_err_warn (NULL, 0, ECTF_NOCTFBUF,
+		    _("ctf_bufopen: size %zi too small for expected header size %zi"),
+		    ctfsect->cts_size, hdrsz);
+      return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
+    }
+
+  switch (format)
+    {
+    case IS_CTFv1: desc = "CTFv1"; break;
+    case IS_CTFv1_UPGRADED_3: desc = "CTFv1 upgraded to v3"; break;
+    case IS_CTFv2: desc = "CTFv2"; break;
+    case IS_CTFv3: desc = "CTFv3"; break;
+    case IS_BTF: desc = "BTF"; break;
+    case IS_CTF: desc = "CTFv4"; break;
+    default: desc = "unknown";
+    }
+
+  ctf_dprintf ("ctf_bufopen: %s, swap=%i\n", desc, foreign_endian);
+
+  /* Endian-flip and upgrade the header, if necessary.  Preserve it after
+     flipping (for possible later dumping, etc).  */
+
+  if ((fliphp = malloc (hdrsz)) == NULL)
+    return (ctf_set_open_errno (errp, ENOMEM));
+
+  memcpy (fliphp, ctfsect->cts_data, hdrsz);
+
+  if (foreign_endian)
+    {
+      if (ctf_flip_header (fliphp, format >= IS_BTF, version) < 0)
+	{
+	  free (fliphp);
+	  return (ctf_set_open_errno (errp, ECTF_INTERNAL));
+	}
+    }
+
+  if ((hp = malloc (sizeof (ctf_header_t))) == NULL)
+    {
+      free (fliphp);
+      return (ctf_set_open_errno (errp, ENOMEM));
+    }
+
+  memset (hp, 0, sizeof (ctf_header_t));
+  memcpy (hp, fliphp, hdrsz);
+  free (fliphp);
+
+  if (format < CTF_VERSION_3)
+    {
+      ctf_err_warn (NULL, 0, ECTF_INTERNAL,
+		    "Implementation of backward-compatible CTF reading still underway\n");
+      return (ctf_set_open_errno (errp, ECTF_INTERNAL));
+#if 0
+      upgrade_header_v2 (hp); /* Upgrades to v3 */
+#endif
+    }
+
+  if (format < CTF_VERSION_4)
+    {
+      header_v3 = (ctf_header_v3_t *) hp;
+
+      if ((hp = malloc (sizeof (ctf_header_t))) == NULL)
+	{
+	  free (header_v3);
+	  return (ctf_set_open_errno (errp, ENOMEM));
+	}
+      memcpy (hp, header_v3, sizeof (ctf_header_t));
+
+      ctf_err_warn (NULL, 0, ECTF_INTERNAL,
+		    "Implementation of backward-compatible CTF reading still underway\n");
+      return (ctf_set_open_errno (errp, ECTF_INTERNAL));
+#if 0
+      upgrade_header_v3 (hp);
+#endif
+    }
+
+  /* Validation.  */
+
+  if (_libctf_unlikely_ (format == IS_UNKNOWN))
+    {
+      ctf_set_open_errno (errp, ECTF_CTFVERS);
+      goto validation_fail;
+    }
+
+  if (_libctf_unlikely_ (format != IS_BTF
+			 && ((version < CTF_VERSION_1)
+			     || (version > CTF_VERSION_4))))
+    {
+      ctf_set_open_errno (errp, ECTF_CTFVERS);
+      goto validation_fail;
+    }
+
+  if (_libctf_unlikely_ (format == IS_BTF
+			 && (version != 1 || hp->btf.bth_hdr_len
+			     != sizeof (struct ctf_btf_header))))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CTFVERS,
+		    _("BTF version %i or header length %i unknown: expecting 1, %zi\n"),
+		   version, hp->btf.bth_hdr_len,
+		   sizeof (struct ctf_btf_header));
+      ctf_set_open_errno (errp, ECTF_CTFVERS);
+      goto validation_fail;
+    }
+
+  if (_libctf_unlikely_ (format != IS_BTF && (symsect != NULL)
+			 && (version < CTF_VERSION_2)))
+    {
+      /* The symtab can contain function entries which contain embedded CTF
 	 info.  We do not support dynamically upgrading such entries (none
 	 should exist in any case, since dwarf2ctf does not create them).  */
 
       ctf_err_warn (NULL, 0, ECTF_NOTSUP, _("ctf_bufopen: CTF version %d "
 					    "symsect not supported"),
-		    pp->ctp_version);
-      return (ctf_set_open_errno (errp, ECTF_NOTSUP));
+		    version);
+      ctf_set_open_errno (errp, ECTF_NOTSUP);
+      goto validation_fail;
     }
 
-  switch (pp->ctp_version)
-    {
-    case CTF_VERSION_1:
-    case CTF_VERSION_2:
-      hdrsz = sizeof (ctf_header_v2_t);
-      break;
-    case CTF_VERSION_1_UPGRADED_3:
-    case CTF_VERSION_3:
-      hdrsz = sizeof (ctf_header_v3_t);
-      break;
-    case CTF_VERSION_4:
-      hdrsz = sizeof (ctf_header_t);
-      break;
-    default:
-      ctf_err_warn (NULL, ECTF_INTERNAL, 0, "ctf_bufopen: CTF version %d "
-		    "not handled in header-length switch", pp->ctp_version);
-      return (ctf_set_open_errno (errp, ECTF_INTERNAL));
-    }
-
-  if (_libctf_unlikely_ (pp->ctp_flags > CTF_F_MAX))
+  if (_libctf_unlikely_ (format < IS_BTF && pp->ctp_flags > CTF_F_MAX_3))
     {
       ctf_err_warn (NULL, 0, ECTF_FLAGS, _("ctf_bufopen: invalid header "
 					   "flags: %x"),
 		    (unsigned int) pp->ctp_flags);
-      return (ctf_set_open_errno (errp, ECTF_FLAGS));
+      ctf_set_open_errno (errp, ECTF_FLAGS);
+      goto validation_fail;
     }
 
-  /* UPTODO: v4 flags: none valid, new header field likely needed.  */
+  if (_libctf_unlikely_ (format >= IS_BTF && bp->btf_flags != 0))
+    {
+      ctf_err_warn (NULL, 0, ECTF_FLAGS, _("ctf_bufopen: nonzero BTF header "
+					   "flags: %x"),
+		    (unsigned int) bp->btf_flags);
+      ctf_set_open_errno (errp, ECTF_FLAGS);
+      goto validation_fail;
+    }
 
-  if (ctfsect->cts_size < hdrsz)
-    return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
+  if (_libctf_unlikely_ (format == IS_CTF && (hp->cth_flags & ~(CTF_F_MAX)) != 0))
+    {
+      ctf_err_warn (NULL, 0, ECTF_FLAGS, _("ctf_bufopen: invalid header "
+					   "flags: %llx"),
+		    (unsigned long long) hp->cth_flags);
+      ctf_set_open_errno (errp, ECTF_FLAGS);
+      goto validation_fail;
+    }
+
+  /* Check for overlaps. BTF and v4 have a lot more freedom to reorder sections
+     than earlier versions do, but we assume for simplicity that they are
+     always emitted in the same order.  Because all the offsets are relative to
+     the end of the BTF header, we must also check that they don't overlap the
+     CTF header that can follow it.  We do allow such overlaps if the section
+     length is zero, since that lets us treat a BTF header stuffed into a
+     ctf_header_t as valid (with all remaining offsets zero).  */
+
+  if (_libctf_unlikely_
+      (hp->cth_objt_off + hp->cth_objt_len > hp->cth_func_off
+       || hp->cth_func_off + hp->cth_func_len > hp->cth_objtidx_off
+       || hp->cth_objtidx_off + hp->cth_objtidx_len > hp->cth_funcidx_off
+       || hp->cth_funcidx_off + hp->cth_funcidx_len > hp->btf.bth_type_off
+       || hp->btf.bth_type_off + hp->btf.bth_type_len > hp->btf.bth_str_off
+       || (hp->cth_objt_off < ctf_adjustment && hp->cth_objt_len != 0)
+       || (hp->cth_func_off < ctf_adjustment && hp->cth_func_len != 0)
+       || (hp->cth_objtidx_off < ctf_adjustment && hp->cth_objtidx_len != 0)
+       || (hp->cth_funcidx_off < ctf_adjustment && hp->cth_funcidx_len != 0)
+       || (hp->btf.bth_type_off < ctf_adjustment && hp->btf.bth_type_len != 0)
+       || (hp->btf.bth_str_off < ctf_adjustment && hp->btf.bth_str_len != 0)))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("overlapping or misordered BTF/CTF sections"));
+      ctf_set_open_errno (errp, ECTF_CORRUPT);
+      goto validation_fail;
+    }
+
+  if (_libctf_unlikely_
+      ((hp->cth_objt_off & 2)
+       || (hp->cth_func_off & 2) || (hp->cth_objtidx_off & 2)
+       || (hp->cth_funcidx_off & 2) || (hp->btf.bth_type_off & 3)))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+		    _("CTF sections not properly aligned"));
+      ctf_set_open_errno (errp, ECTF_CORRUPT);
+      goto validation_fail;
+    }
+
+  /* This invariant may be lifted in v5, but for now it is true.  */
+
+  if (_libctf_unlikely_ ((hp->cth_objtidx_len != 0) &&
+			 (hp->cth_objtidx_len != hp->cth_objt_len)))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+		    _("Object index section is neither empty nor the "
+		      "same length as the object section: %u versus %u "
+		      "bytes"), hp->cth_objt_len, hp->cth_objtidx_len);
+      ctf_set_open_errno (errp, ECTF_CORRUPT);
+      goto validation_fail;
+    }
+
+  /* v3 only needs this invariant if CTF_F_NEWFUNCINFO is set: if it's not, the
+     section is ignored anyway.  Always true for v4.  */
+  if (_libctf_unlikely_ ((hp->cth_funcidx_len != 0) &&
+			 (hp->cth_funcidx_len != hp->cth_func_len) &&
+			 ((header_v3 && hp->cth_flags & CTF_F_NEWFUNCINFO)
+			  || !header_v3)))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+		    _("Function index section is neither empty nor the "
+		      "same length as the function section: %u versus %u "
+		      "bytes"), hp->cth_func_len, hp->cth_funcidx_len);
+      ctf_set_open_errno (errp, ECTF_CORRUPT);
+      goto validation_fail;
+    }
+
+  if (_libctf_unlikely_
+      (hp->cth_parent_strlen != 0 &&
+       ((hp->cth_parent_name != 0 && hp->cth_parent_name < hp->cth_parent_strlen)
+	|| (hp->cth_cu_name != 0 && hp->cth_cu_name < hp->cth_parent_strlen))))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+		    _("Parent dict or CU name string offsets "
+		      "(at %x and %x, respectively) are themselves "
+		      "within the parent (upper bound: %x), thus "
+		      "unreachable.\n"), hp->cth_parent_name, hp->cth_cu_name,
+		      hp->cth_parent_strlen);
+      ctf_set_open_errno (errp, ECTF_CORRUPT);
+      goto validation_fail;
+    }
+
+  /* Start to fill out the in-memory dict.  */
 
   if ((fp = malloc (sizeof (ctf_dict_t))) == NULL)
     return (ctf_set_open_errno (errp, ENOMEM));
 
   memset (fp, 0, sizeof (ctf_dict_t));
 
-  if ((fp->ctf_header = malloc (sizeof (struct ctf_header))) == NULL)
-    {
-      free (fp);
-      return (ctf_set_open_errno (errp, ENOMEM));
-    }
-  hp = fp->ctf_header;
-  memcpy (hp, ctfsect->cts_data, hdrsz);
-  if (pp->ctp_version < CTF_VERSION_3)
-    upgrade_header_v2 (hp);
-  else if (pp->ctp_version < CTF_VERSION_4)
-    upgrade_header_v3 (hp);
+  fp->ctf_header = hp;
+  fp->ctf_v3_header = header_v3;
 
-  /* UPTODO: header "upgrade" from BTF -> CTFv4.  */
-
-  if (foreign_endian)
-    ctf_flip_header (hp);
   fp->ctf_openflags = hp->cth_flags;
-  fp->ctf_size = hp->cth_stroff + hp->cth_strlen;
+  fp->ctf_opened_btf = (format == IS_BTF);
+
+  /* The ctf_size includes the entire CTFv4 header excepting only the portion
+     shared with BTF (see ctf_adjustment).  */
+  fp->ctf_size = hp->btf.bth_str_off + hp->btf.bth_str_len;
+
+  if (_libctf_unlikely_ (hp->cth_objt_off > fp->ctf_size
+			 || hp->cth_func_off > fp->ctf_size
+			 || hp->cth_objtidx_off > fp->ctf_size
+			 || hp->cth_funcidx_off > fp->ctf_size
+			 || hp->btf.bth_type_off > fp->ctf_size))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("header offset or length exceeds CTF size"));
+      err = ECTF_CORRUPT;
+      goto bad;
+    }
 
   ctf_dprintf ("ctf_bufopen: uncompressed size=%lu\n",
 	       (unsigned long) fp->ctf_size);
-
-  if (hp->cth_lbloff > fp->ctf_size || hp->cth_objtoff > fp->ctf_size
-      || hp->cth_funcoff > fp->ctf_size || hp->cth_objtidxoff > fp->ctf_size
-      || hp->cth_funcidxoff > fp->ctf_size || hp->cth_typeoff > fp->ctf_size
-      || hp->cth_stroff > fp->ctf_size)
-    {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("header offset exceeds CTF size"));
-      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
-    }
-
-  if (hp->cth_lbloff > hp->cth_objtoff
-      || hp->cth_objtoff > hp->cth_funcoff
-      || hp->cth_funcoff > hp->cth_typeoff
-      || hp->cth_funcoff > hp->cth_objtidxoff
-      || hp->cth_objtidxoff > hp->cth_funcidxoff
-      || hp->cth_funcidxoff > hp->cth_varoff
-      || hp->cth_varoff > hp->cth_typeoff || hp->cth_typeoff > hp->cth_stroff)
-    {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("overlapping CTF sections"));
-      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
-    }
-
-  if ((hp->cth_lbloff & 3) || (hp->cth_objtoff & 2)
-      || (hp->cth_funcoff & 2) || (hp->cth_objtidxoff & 2)
-      || (hp->cth_funcidxoff & 2) || (hp->cth_varoff & 3)
-      || (hp->cth_typeoff & 3))
-    {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("CTF sections not properly aligned"));
-      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
-    }
-
-  /* This invariant may be lifted in v5, but for now it is true.  */
-
-  if ((hp->cth_funcidxoff - hp->cth_objtidxoff != 0) &&
-      (hp->cth_funcidxoff - hp->cth_objtidxoff
-       != hp->cth_funcoff - hp->cth_objtoff))
-    {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Object index section is neither empty nor the "
-		      "same length as the object section: %u versus %u "
-		      "bytes"), hp->cth_funcoff - hp->cth_objtoff,
-		    hp->cth_funcidxoff - hp->cth_objtidxoff);
-      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
-    }
-
-  if ((hp->cth_varoff - hp->cth_funcidxoff != 0) &&
-      (hp->cth_varoff - hp->cth_funcidxoff
-       != hp->cth_objtidxoff - hp->cth_funcoff) &&
-      (hp->cth_flags & CTF_F_NEWFUNCINFO))
-    {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Function index section is neither empty nor the "
-		      "same length as the function section: %u versus %u "
-		      "bytes"), hp->cth_objtidxoff - hp->cth_funcoff,
-		    hp->cth_varoff - hp->cth_funcidxoff);
-      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
-    }
-
-  if ((hp->cth_parname != 0 && hp->cth_parname < hp->cth_parent_strlen)
-      || (hp->cth_cuname != 0 && hp->cth_cuname < hp->cth_parent_strlen))
-    {
-      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Parent dict or CU name string offsets "
-		      "(at %x and %x, respectively) are themselves "
-		      "within the parent (upper bound: %x), thus "
-		      "unreachable.\n"), hp->cth_parname, hp->cth_cuname,
-		      hp->cth_parent_strlen);
-      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
-    }
 
   /* Once everything is determined to be valid, attempt to decompress the CTF
      data buffer if it is compressed, or copy it into new storage if it is not
      compressed but needs endian-flipping.  Otherwise we just put the data
      section's buffer pointer into ctf_buf, below.  */
 
-  /* Note: if this is a v1 buffer, it will be reallocated and expanded by
-     init_static_types().  */
-
-  /* UPTODO: may need to try unconditionally for BTF, and get flags from
-     somewhere else.  */
+  /* Note: if this is a v1 -- v3 buffer, it will be reallocated and expanded by
+     upgrade_types(), invoked by init_static_types().  */
 
   if (hp->cth_flags & CTF_F_COMPRESS)
     {
@@ -1651,9 +1849,6 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       uLongf dstlen;
       const void *src;
       int rc = Z_OK;
-
-      /* We are allocating this ourselves, so we can drop the ctf header
-	 copy in favour of ctf->ctf_header.  */
 
       if ((fp->ctf_base = malloc (fp->ctf_size)) == NULL)
 	{
@@ -1665,10 +1860,16 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
       src = (unsigned char *) ctfsect->cts_data + hdrsz;
       srclen = ctfsect->cts_size - hdrsz;
-      dstlen = fp->ctf_size;
+      dstlen = fp->ctf_size - ctf_adjustment;
       fp->ctf_buf = fp->ctf_base;
 
-      if ((rc = uncompress (fp->ctf_base, &dstlen, src, srclen)) != Z_OK)
+      /* Stick the CTF-only header portion into the buffer.  Not much use, but
+	 it makes sure all the header offsets are right. */
+      memcpy (fp->ctf_base, (unsigned char *) ctfsect->cts_data
+	      + sizeof (ctf_btf_header_t), ctf_adjustment);
+
+      if ((rc = uncompress (fp->ctf_base + ctf_adjustment, &dstlen,
+			    src, srclen)) != Z_OK)
 	{
 	  ctf_err_warn (NULL, 0, ECTF_DECOMPRESS, _("zlib inflate err: %s"),
 			zError (rc));
@@ -1676,23 +1877,24 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	  goto bad;
 	}
 
-      if ((size_t) dstlen != fp->ctf_size)
+      if ((size_t) dstlen != (fp->ctf_size - ctf_adjustment))
 	{
 	  ctf_err_warn (NULL, 0, ECTF_CORRUPT,
 			_("zlib inflate short: got %lu of %lu bytes"),
-			(unsigned long) dstlen, (unsigned long) fp->ctf_size);
+			(unsigned long) dstlen,
+			(unsigned long) (fp->ctf_size - ctf_adjustment));
 	  err = ECTF_CORRUPT;
 	  goto bad;
 	}
     }
   else
     {
-      if (_libctf_unlikely_ (ctfsect->cts_size < hdrsz + fp->ctf_size))
+      if (_libctf_unlikely_ (ctfsect->cts_size < fp->ctf_size + hdrsz - ctf_adjustment))
 	{
 	  ctf_err_warn (NULL, 0, ECTF_CORRUPT,
 			_("%lu byte long CTF dictionary overruns %lu byte long CTF section"),
 			(unsigned long) ctfsect->cts_size,
-			(unsigned long) (hdrsz + fp->ctf_size));
+			(unsigned long) (fp->ctf_size + hdrsz - ctf_adjustment));
 	  err = ECTF_CORRUPT;
 	  goto bad;
 	}
@@ -1705,38 +1907,51 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	      goto bad;
 	    }
 	  fp->ctf_dynbase = fp->ctf_base;
-	  memcpy (fp->ctf_base, ((unsigned char *) ctfsect->cts_data) + hdrsz,
-		  fp->ctf_size);
-	  fp->ctf_buf = fp->ctf_base;
+	  memcpy (fp->ctf_base, ((unsigned char *) ctfsect->cts_data)
+		  + sizeof (ctf_btf_header_t), fp->ctf_size);
 	}
       else
 	{
-	  /* We are just using the section passed in -- but its header may
-	     be an old version.  Point ctf_buf past the old header, and
-	     never touch it again.  */
 	  fp->ctf_base = (unsigned char *) ctfsect->cts_data;
 	  fp->ctf_dynbase = NULL;
-	  fp->ctf_buf = fp->ctf_base + hdrsz;
 	}
+
+      /* Ensure that the buffer we are using has offset 0 at the end of the BTF
+	 header, if there is one, to avoid breaking all offset lookups.  */
+
+      fp->ctf_buf = fp->ctf_base + hdrsz - ctf_adjustment;
     }
 
-  /* Once we have uncompressed and validated the CTF data buffer, we can
-     proceed with initializing the ctf_dict_t we allocated above.
+  /* Once we have uncompressed and validated the (BTF or) CTF data buffer, we
+     can proceed with initializing the ctf_dict_t we allocated above.
 
      Nothing that depends on buf or base should be set directly in this function
      before the init_static_types() call, because it may be reallocated during
      transparent upgrade if this recension of libctf is so configured: see
      ctf_set_base().  */
 
-  ctf_set_version (fp, hp, hp->cth_version);
+  /* We declare BTF to be a kind of CTF so that we can use a single incrementing
+     integer to describe all CTF field access operations.  This obliges CTF to
+     remain BTF-compatible, come what may.  We also note that, as far as we
+     know so far, this CTF dict can be written as BTF without losing
+     information.  */
+
+  if (format == IS_BTF)
+    {
+      hp->cth_preamble.ctp_magic_version = (CTFv4_MAGIC << 16) | CTF_VERSION;
+      version = CTF_VERSION;
+    }
+
+  fp->ctf_version = version;
+  fp->ctf_dictops = &ctf_dictops[fp->ctf_version];
 
   /* Temporary assignment, just enough to be able to initialize the atoms table.
      This does not guarantee that we can look up strings: in v4, child dicts
      cannot reliably look up strings until after ctf_import.  */
 
   fp->ctf_str[CTF_STRTAB_0].cts_strs = (const char *) fp->ctf_buf
-    + hp->cth_stroff;
-  fp->ctf_str[CTF_STRTAB_0].cts_len = hp->cth_strlen;
+    + hp->btf.bth_str_off;
+  fp->ctf_str[CTF_STRTAB_0].cts_len = hp->btf.bth_str_len;
   if (ctf_str_create_atoms (fp) < 0)
     {
       err = ENOMEM;
@@ -1804,7 +2019,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     }
 
   if (foreign_endian &&
-      (err = ctf_flip (fp, hp, fp->ctf_buf, 0)) != 0)
+      (err = ctf_flip (fp, hp, fp->ctf_buf, format == IS_BTF, 0)) != 0)
     {
       /* We can be certain that ctf_flip() will have endian-flipped everything
 	 other than the types table when we return.  In particular the header
@@ -1816,7 +2031,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   ctf_set_base (fp, hp, fp->ctf_base);
 
-  if ((err = init_static_types (fp, hp)) != 0)
+  if ((err = init_static_types (fp, hp, format == IS_BTF)) != 0)
     goto bad;
 
   /* Allocate and initialize the symtab translation table, pointed to by
@@ -1861,6 +2076,11 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   fp->ctf_refcnt = 1;
   return fp;
+
+validation_fail:
+  free (header_v3);
+  free (hp);
+  return NULL;
 
 bad:
   ctf_set_open_errno (errp, err);
@@ -1915,10 +2135,10 @@ ctf_dict_close (ctf_dict_t *fp)
     return;
 
   fp->ctf_refcnt--;
-  free (fp->ctf_dyncuname);
-  free (fp->ctf_dynparname);
   if (fp->ctf_parent && !fp->ctf_parent_unreffed)
     ctf_dict_close (fp->ctf_parent);
+  free (fp->ctf_dyn_cu_name);
+  free (fp->ctf_dyn_parent_name);
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs); dtd != NULL; dtd = ntd)
     {
@@ -2089,7 +2309,7 @@ ctf_parent_file (ctf_dict_t *fp)
 const char *
 ctf_parent_name (ctf_dict_t *fp)
 {
-  return fp->ctf_parname;
+  return fp->ctf_parent_name;
 }
 
 /* Set the parent name.  It is an error to call this routine without calling
@@ -2097,12 +2317,12 @@ ctf_parent_name (ctf_dict_t *fp)
 int
 ctf_parent_name_set (ctf_dict_t *fp, const char *name)
 {
-  if (fp->ctf_dynparname != NULL)
-    free (fp->ctf_dynparname);
+  if (fp->ctf_dyn_parent_name != NULL)
+    free (fp->ctf_dyn_parent_name);
 
-  if ((fp->ctf_dynparname = strdup (name)) == NULL)
+  if ((fp->ctf_dyn_parent_name = strdup (name)) == NULL)
     return (ctf_set_errno (fp, ENOMEM));
-  fp->ctf_parname = fp->ctf_dynparname;
+  fp->ctf_parent_name = fp->ctf_dyn_parent_name;
   return 0;
 }
 
@@ -2111,19 +2331,19 @@ ctf_parent_name_set (ctf_dict_t *fp, const char *name)
 const char *
 ctf_cuname (ctf_dict_t *fp)
 {
-  return fp->ctf_cuname;
+  return fp->ctf_cu_name;
 }
 
 /* Set the compilation unit name.  */
 int
 ctf_cuname_set (ctf_dict_t *fp, const char *name)
 {
-  if (fp->ctf_dyncuname != NULL)
-    free (fp->ctf_dyncuname);
+  if (fp->ctf_dyn_cu_name != NULL)
+    free (fp->ctf_dyn_cu_name);
 
-  if ((fp->ctf_dyncuname = strdup (name)) == NULL)
+  if ((fp->ctf_dyn_cu_name = strdup (name)) == NULL)
     return (ctf_set_errno (fp, ENOMEM));
-  fp->ctf_cuname = fp->ctf_dyncuname;
+  fp->ctf_cu_name = fp->ctf_dyn_cu_name;
   return 0;
 }
 
@@ -2134,7 +2354,7 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   int no_strings = fp->ctf_flags & LCTF_NO_STR;
   int old_flags = fp->ctf_flags;
   ctf_dict_t *old_parent = fp->ctf_parent;
-  const char *old_parname = fp->ctf_parname;
+  const char *old_parent_name = fp->ctf_parent_name;
   int old_unreffed = fp->ctf_parent_unreffed;
 
   if (pfp == NULL || pfp == fp->ctf_parent)
@@ -2205,7 +2425,7 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   fp->ctf_pptrtab_len = 0;
   fp->ctf_pptrtab_typemax = 0;
 
-  if (fp->ctf_parname == NULL)
+  if (fp->ctf_parent_name == NULL)
     if ((err = ctf_parent_name_set (fp, "PARENT")) < 0)
       return err;				/* errno is set for us.  */
 
@@ -2228,7 +2448,7 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
       fp->ctf_flags = old_flags;
       fp->ctf_parent_unreffed = old_unreffed;
       fp->ctf_parent = old_parent;
-      fp->ctf_parname = old_parname;
+      fp->ctf_parent_name = old_parent_name;
 
       if (fp->ctf_parent_unreffed)
 	old_parent->ctf_refcnt++;

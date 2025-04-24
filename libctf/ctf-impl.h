@@ -374,8 +374,11 @@ typedef struct ctf_dedup
 struct ctf_dict
 {
   const ctf_dictops_t *ctf_dictops; /* Version-specific dict operations.  */
-  struct ctf_header *ctf_header;    /* The header from this CTF dict.  */
+  ctf_header_t *ctf_header;	    /* The header from this CTF dict.  */
+  ctf_header_v3_t *ctf_v3_header;   /* The header from an upgraded CTF dict.  */
   unsigned char ctf_openflags;	    /* Flags the dict had when opened.  */
+  int ctf_opened_btf;		    /* Whether this dict was pure BTF when
+				       opened.  */
   ctf_sect_t ctf_data;		    /* CTF data from object file.  */
   ctf_sect_t ctf_ext_symtab;	    /* Symbol table from object file.  */
   ctf_sect_t ctf_ext_strtab;	    /* String table from object file.  */
@@ -402,7 +405,8 @@ struct ctf_dict
   size_t ctf_str_prov_len;	  /* Length of all unwritten provisional strings.  */
   unsigned char *ctf_base;	  /* CTF file pointer.  */
   unsigned char *ctf_dynbase;	  /* Freeable CTF file pointer. */
-  unsigned char *ctf_buf;	  /* Uncompressed CTF data buffer.  */
+  unsigned char *ctf_buf;	  /* Uncompressed CTF data buffer, including
+				     CTFv4 header portion.  */
   size_t ctf_size;		  /* Size of CTF header + uncompressed data.  */
   unsigned char *ctf_serializing_buf; /* CTF buffer in mid-serialization.  */
   size_t ctf_serializing_buf_size; /* Length of that buffer.  */
@@ -443,13 +447,12 @@ struct ctf_dict
 				     Counts down.  Parent only.  */
   uint32_t ctf_nprovtypes;	  /* Number of provisional types (convenience).  */
   const ctf_dmodel_t *ctf_dmodel; /* Data model pointer (see above).  */
-  const char *ctf_cuname;	  /* Compilation unit name (if any).  */
-  char *ctf_dyncuname;		  /* Dynamically allocated name of CU.  */
+  const char *ctf_cu_name;	  /* Compilation unit name (if any).  */
+  char *ctf_dyn_cu_name;	  /* Dynamically allocated name of CU.  */
   struct ctf_dict *ctf_parent;	  /* Parent CTF dict (if any).  */
   int ctf_parent_unreffed;	  /* Parent set by ctf_import_unref?  */
-  const char *ctf_parlabel;	  /* Label in parent dict (if any).  */
-  const char *ctf_parname;	  /* Basename of parent (if any).  */
-  char *ctf_dynparname;		  /* Dynamically allocated name of parent.  */
+  const char *ctf_parent_name;	  /* Basename of parent (if any).  */
+  char *ctf_dyn_parent_name;	  /* Dynamically allocated name of parent.  */
   uint32_t ctf_refcnt;		  /* Reference count (for parent links).  */
   uint32_t ctf_flags;		  /* Libctf flags (see below).  */
   uint32_t ctf_max_children;	  /* Max number of child dicts.  */
