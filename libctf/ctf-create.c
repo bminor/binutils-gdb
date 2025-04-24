@@ -1741,7 +1741,8 @@ enumadd (const char *name, int value, void *arg)
 }
 
 static int
-membcmp (const char *name, ctf_id_t type _libctf_unused_, unsigned long offset,
+membcmp (ctf_dict_t *src_fp _libctf_unused_, const char *name,
+	 ctf_id_t type _libctf_unused_, size_t offset, int bit_width,
 	 void *arg)
 {
   ctf_bundle_t *ctb = arg;
@@ -1763,8 +1764,16 @@ membcmp (const char *name, ctf_id_t type _libctf_unused_, unsigned long offset,
     {
       ctf_err_warn (ctb->ctb_dict, 1, ECTF_CONFLICT,
 		    _("conflict due to struct member %s offset change: "
-		      "%lx versus %lx"),
+		      "%zx versus %zx"),
 		    name, ctm.ctm_offset, offset);
+      return 1;
+    }
+  if (ctm.ctm_bit_width != bit_width)
+    {
+      ctf_err_warn (ctb->ctb_dict, 1, ECTF_CONFLICT,
+		    _("conflict due to struct member %s bit-width change: "
+		      "%i versus %i"),
+		    name, ctm.ctm_bit_width, bit_width);
       return 1;
     }
   return 0;
@@ -1883,9 +1892,10 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
   ctf_id_t tmp;
 
   const char *name;
-  uint32_t kind, forward_kind, flag, vlen;
+  uint32_t kind, forward_kind, flag, bitfields;
+  size_t vlen;
 
-  const ctf_type_t *src_tp, *dst_tp;
+  const ctf_type_t *src_prefix, *src_tp, *dst_prefix;
   ctf_bundle_t src, dst;
   ctf_encoding_t src_en, dst_en;
   ctf_arinfo_t src_ar, dst_ar;
@@ -1894,17 +1904,18 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 
   ctf_id_t orig_src_type = src_type;
 
-  if ((src_tp = ctf_lookup_by_id (&src_fp, src_type)) == NULL)
+  if ((src_prefix = ctf_lookup_by_id (&src_fp, src_type, &src_tp)) == NULL)
     return (ctf_set_typed_errno (dst_fp, ctf_errno (src_fp)));
 
-  if ((ctf_type_resolve (src_fp, src_type) == CTF_ERR)
+  if ((ctf_type_resolve_nonrepresentable (src_fp, src_type, 1) == CTF_ERR)
       && (ctf_errno (src_fp) == ECTF_NONREPRESENTABLE))
     return (ctf_set_typed_errno (dst_fp, ECTF_NONREPRESENTABLE));
 
   name = ctf_strptr (src_fp, src_tp->ctt_name);
-  kind = LCTF_INFO_KIND (src_fp, src_tp->ctt_info);
-  flag = LCTF_INFO_ISROOT (src_fp, src_tp->ctt_info);
-  vlen = LCTF_INFO_VLEN (src_fp, src_tp->ctt_info);
+  kind = ctf_type_kind (src_fp, src_type);
+  flag = LCTF_INFO_ISROOT (src_fp, src_prefix->ctt_info);
+  bitfields = CTF_INFO_KFLAG (src_tp->ctt_info);
+  vlen = LCTF_VLEN (src_fp, src_prefix);
 
   /* If this is a type we are currently in the middle of adding, hand it
      straight back.  (This lets us handle self-referential structures without
@@ -1928,8 +1939,8 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	  if (kind == CTF_K_STRUCT || kind == CTF_K_UNION
 	      || kind == CTF_K_ENUM)
 	    {
-	      if ((dst_tp = ctf_lookup_by_id (&tmp_fp, dst_type)) != NULL)
-		if (vlen == LCTF_INFO_VLEN (tmp_fp, dst_tp->ctt_info))
+	      if ((dst_prefix = ctf_lookup_by_id (&tmp_fp, dst_type, NULL)) != NULL)
+		if (vlen == LCTF_VLEN (tmp_fp, dst_prefix))
 		  return tmp;
 	    }
 	  else
@@ -1939,13 +1950,13 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 
   forward_kind = kind;
   if (kind == CTF_K_FORWARD)
-    forward_kind = src_tp->ctt_type;
+    forward_kind = ctf_type_kind_forwarded (src_fp, src_type);
 
   /* If the source type has a name and is a root type (visible at the top-level
-     scope), lookup the name in the destination dictionary and verify that it is
+     scope), look up the name in the destination dictionary and verify that it is
      of the same kind before we do anything else.  */
 
-  if ((flag & CTF_ADD_ROOT) && name[0] != '\0'
+  if (flag && name[0] != '\0'
       && (tmp = ctf_lookup_by_rawname (dst_fp, forward_kind, name)) != 0)
     {
       dst_type = tmp;
@@ -1995,13 +2006,13 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	{
 	  ctf_dict_t *fp = dst_fp;
 
-	  if ((dst_tp = ctf_lookup_by_id (&fp, dst_type)) == NULL)
+	  if ((dst_prefix = ctf_lookup_by_id (&fp, dst_type, NULL)) == NULL)
 	    return CTF_ERR;
 
 	  if (ctf_type_encoding (dst_fp, dst_type, &dst_en) != 0)
 	    return CTF_ERR;			/* errno set for us.  */
 
-	  if (LCTF_INFO_ISROOT (fp, dst_tp->ctt_info) & CTF_ADD_ROOT)
+	  if (LCTF_INFO_ISROOT (fp, dst_prefix->ctt_info))
 	    {
 	      /* The type that we found in the hash is also root-visible.  If
 		 the two types match then use the existing one; otherwise,
@@ -2124,7 +2135,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	    {
 	      ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
 			    _("conflict for type %s against ID %lx: array info "
-			      "differs, old %lx/%lx/%x; new: %lx/%lx/%x"),
+			      "differs, old %lx/%lx/%zx; new: %lx/%lx/%zx"),
 			    name, dst_type, src_ar.ctr_contents,
 			    src_ar.ctr_index, src_ar.ctr_nelems,
 			    dst_ar.ctr_contents, dst_ar.ctr_index,
@@ -2156,14 +2167,15 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	ssize_t offset;
 	const char *membname;
 	ctf_id_t src_membtype;
+	int bit_width;
 
-	/* Technically to match a struct or union we need to check both
-	   ways (src members vs. dst, dst members vs. src) but we make
-	   this more optimal by only checking src vs. dst and comparing
-	   the total size of the structure (which we must do anyway)
-	   which covers the possibility of dst members not in src.
-	   This optimization can be defeated for unions, but is so
-	   pathological as to render it irrelevant for our purposes.  */
+	/* Technically to match a struct or union we need to check both ways
+	   (src members vs. dst, dst members vs. src) but we make this cheaper
+	   by only checking src vs. dst and comparing the total size of the
+	   structure (which we must do anyway) which covers the possibility of
+	   dst members not in src.  This optimization can be defeated for
+	   unions, but is so pathological as to render it irrelevant for our
+	   purposes.  */
 
 	if (dst_type != CTF_ERR && kind != CTF_K_FORWARD
 	    && dst_kind != CTF_K_FORWARD)
@@ -2190,8 +2202,9 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	    break;
 	  }
 
-	dst_type = ctf_add_struct_sized (dst_fp, flag, name,
-					 ctf_type_size (src_fp, src_type));
+	dst_type = ctf_add_struct_sized (dst_fp, flag
+					 | (bitfields ? CTF_ADD_STRUCT_BITFIELDS : 0),
+					 name, ctf_type_size (src_fp, src_type));
 	if (dst_type == CTF_ERR)
 	  return CTF_ERR;			/* errno is set for us.  */
 
@@ -2200,7 +2213,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	ctf_add_type_mapping (src_fp, src_type, dst_fp, dst_type);
 
 	while ((offset = ctf_member_next (src_fp, src_type, &i, &membname,
-					  &src_membtype, 0)) >= 0)
+					  &src_membtype, &bit_width, 0)) >= 0)
 	  {
 	    ctf_dict_t *dst = dst_fp;
 	    ctf_id_t dst_membtype = ctf_type_mapping (src_fp, src_membtype, &dst);
@@ -2220,8 +2233,8 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 		  }
 	      }
 
-	    if (ctf_add_member_offset (dst_fp, dst_type, membname,
-				       dst_membtype, offset) < 0)
+	    if (ctf_add_member_bitfield (dst_fp, dst_type, membname,
+					 dst_membtype, offset, bit_width) < 0)
 	      {
 		ctf_next_destroy (i);
 		break;
