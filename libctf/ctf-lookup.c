@@ -371,12 +371,16 @@ ctf_lookup_by_name (ctf_dict_t *fp, const char *name)
   return ctf_lookup_by_name_internal (fp, NULL, name);
 }
 
-/* Return the pointer to the internal CTF type data corresponding to the
-   given type ID.  If the ID is invalid, the function returns NULL.
+/* Return the pointer to the internal CTF type data corresponding to the given
+   type ID.  If the ID is invalid, the function returns NULL.  The type data
+   returned is the prefix, if this is a a prefixed kind: if SUFFIX is set, also
+   provide the suffix.  If there is no prefix, the SUFFIX is the same as the
+   return value.  (See ctf-open.c's dictops for why.)
+
    This function is not exported outside of the library.  */
 
 const ctf_type_t *
-ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type)
+ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type, const ctf_type_t **suffix)
 {
   ctf_dict_t *fp = *fpp;
   ctf_id_t idx;
@@ -388,14 +392,38 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type)
     }
 
   idx = ctf_type_to_index (fp, type);
-  if (idx > 0 && (unsigned long) idx <= fp->ctf_typemax)
+  if ((unsigned long) idx > fp->ctf_typemax)
     {
-      *fpp = fp;		/* Possibly the parent CTF dict.  */
-      return (LCTF_INDEX_TO_TYPEPTR (fp, idx));
+      ctf_set_errno (*fpp, ECTF_BADID);
+      return NULL;
     }
 
-  (void) ctf_set_errno (*fpp, ECTF_BADID);
-  return NULL;
+  *fpp = fp;		/* Possibly the parent CTF dict.  */
+  if (idx > fp->ctf_stypes)
+    {
+      ctf_dtdef_t *dtd;
+
+      dtd = ctf_dtd_lookup (fp, ctf_index_to_type (fp, idx));
+      if (suffix)
+	*suffix = dtd->dtd_data;
+      return dtd->dtd_buf;
+    }
+  else
+    {
+      ctf_type_t *tp = fp->ctf_txlate[idx];
+
+      if (suffix)
+	{
+	  ctf_type_t *suff;
+
+	  suff = tp;
+	  while (LCTF_IS_PREFIXED_INFO (suff->ctt_info))
+	    suff++;
+
+	  *suffix = suff;
+	}
+      return tp;
+    }
 }
 
 typedef struct ctf_lookup_idx_key

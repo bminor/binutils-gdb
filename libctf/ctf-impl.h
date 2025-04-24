@@ -631,8 +631,9 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 #define LCTF_PRESERIALIZED	0x0020  /* Already serialized all but the strtab.  */
 
 extern ctf_dynhash_t *ctf_name_table (ctf_dict_t *, int);
-extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t);
 extern ctf_id_t ctf_lookup_variable_here (ctf_dict_t *fp, const char *name);
+extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t,
+					   const ctf_type_t **suffix);
 extern ctf_id_t ctf_lookup_by_sym_or_name (ctf_dict_t *, unsigned long symidx,
 					   const char *symname, int try_parent,
 					   int is_function);
