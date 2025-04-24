@@ -229,7 +229,7 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_RDONLY, "CTF container is read-only.") \
   _CTF_ITEM (ECTF_DTFULL, "CTF type is full (no more members allowed).") \
   _CTF_ITEM (ECTF_FULL, "CTF container is full.") \
-  _CTF_ITEM (ECTF_DUPLICATE, "Duplicate member, enumerator, or variable name.") \
+  _CTF_ITEM (ECTF_DUPLICATE, "Duplicate member, enumerator, datasec, or variable name.") \
   _CTF_ITEM (ECTF_CONFLICT, "Conflicting type is already defined.") \
   _CTF_ITEM (ECTF_OVERROLLBACK, "Attempt to roll back past a ctf_update.") \
   _CTF_ITEM (ECTF_COMPRESS, "Failed to compress CTF data.") \
@@ -255,6 +255,10 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.") \
   _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
   _CTF_ITEM (ECTF_DESCENDING, "Structure offsets may not descend.") \
+  _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
+  _CTF_ITEM (ECTF_NOTDATASEC, "This function requires a datasec.") \
+  _CTF_ITEM (ECTF_NOTVAR, "This function requires a variable.") \
+  _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.") \
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -306,7 +310,6 @@ _CTF_ERRORS
 
 typedef int ctf_visit_f (const char *name, ctf_id_t type, unsigned long offset,
 			 int depth, void *arg);
-typedef int ctf_variable_f (const char *name, ctf_id_t type, void *arg);
 typedef int ctf_type_f (ctf_id_t type, void *arg);
 typedef int ctf_type_all_f (ctf_id_t type, int flag, void *arg);
 			 void *arg);
@@ -314,6 +317,10 @@ typedef int ctf_member_f (ctf_dict_t *, const char *name, ctf_id_t membtype,
 			  size_t offset, int bit_width, void *arg);
 typedef int ctf_enum_f (const char *name, int64_t val, void *arg);
 typedef int ctf_unsigned_enum_f (const char *name, uint64_t val, void *arg);
+typedef int ctf_variable_f (ctf_dict_t *, const char *name, ctf_id_t type,
+			    void *arg);
+typedef int ctf_datasec_var_f (ctf_dict_t *fp, ctf_id_t type, size_t offset,
+			       size_t datasec_size, void *arg);
 typedef int ctf_archive_member_f (ctf_dict_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
 				      size_t len, void *arg);
@@ -563,7 +570,10 @@ extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
    relationship to a symbol table.  Before linking, everything with types in the
    symbol table will be in the variable table as well; after linking, only those
    typed functions and data objects that are not asssigned to symbols by the
-   linker are left in the variable table here.  */
+   linker are left in the variable table here.
+
+   Note: this looks up a variable's *type*, not the variable itself.
+   For that, use ctf_lookup_by_kind, below.  */
 
 extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 
@@ -713,6 +723,18 @@ extern int ctf_member_info (ctf_dict_t *, ctf_id_t, const char *,
 			    ctf_membinfo_t *);
 extern ssize_t ctf_member_count (ctf_dict_t *, ctf_id_t);
 
+/* Search a datasec for a variable covering a given offset.
+
+   Errors with ECTF_NODATASEC if not found.  */
+
+extern ctf_id_t ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec,
+					uint32_t offset);
+
+/* Return the datasec that a given variable appears in, or ECTF_NODATASEC if
+   none.  */
+
+extern ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var);
+
 /* Iterators.  */
 
 /* ctf_member_next is a _next-style iterator that can additionally traverse into
@@ -764,7 +786,10 @@ extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *nam
    of CTF_ADD_ROOT for such types.  ctf_type_next allows you to choose whether
    to see non-root types or not with the want_hidden arg: if set, the flag (if
    passed) returns the non-root state of each type in turn.  Types in parent
-   dictionaries are not returned.  */
+   dictionaries are not returned.
+
+   These days, even variables are included in the things returned by ctf_type*()
+   (type kind CTF_K_VAR).  */
 
 extern int ctf_type_iter (ctf_dict_t *, ctf_type_f *, void *);
 extern int ctf_type_iter_all (ctf_dict_t *, ctf_type_all_f *, void *);
@@ -774,6 +799,11 @@ extern ctf_id_t ctf_type_next (ctf_dict_t *, ctf_next_t **,
 extern int ctf_variable_iter (ctf_dict_t *, ctf_variable_f *, void *);
 extern ctf_id_t ctf_variable_next (ctf_dict_t *, ctf_next_t **,
 				   const char **);
+
+extern int ctf_datasec_var_iter (ctf_dict_t *, ctf_id_t, ctf_datasec_var_f *,
+				 void *);
+extern ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
+				      size_t *size, size_t *offset);
 
 /* ctf_archive_iter and ctf_archive_next open each member dict for you,
    automatically importing any parent dict as usual: ctf_archive_iter closes the
@@ -915,7 +945,16 @@ extern int ctf_add_member_bitfield (ctf_dict_t *, ctf_id_t souid,
                                     unsigned long bit_offset,
                                     int bit_width);
 
-extern int ctf_add_variable (ctf_dict_t *, const char *, ctf_id_t);
+/* ctf_add_variable adds variables to no datasec at all;
+   ctf_add_section_variable adds them to the given datasec, or to no datasec at
+   all if the datasec is NULL.  */
+
+extern ctf_id_t ctf_add_variable (ctf_dict_t *, const char *, int linkage,
+				  ctf_id_t);
+extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, uint32_t,
+					  const char *datasec, const char *name,
+					  int linkage, ctf_id_t type,
+					  size_t size, size_t offset);
 
 /* Set the size and member and index types of an array.  */
 
