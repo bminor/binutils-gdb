@@ -34,6 +34,10 @@ extern "C"
 {
 #endif
 
+/* Version of the libctf API.  */
+
+#define LIBCTF_API_VERSION 2
+
 /* Clients can open one or more CTF containers and obtain a pointer to an
    opaque ctf_dict_t.  Types are identified by an opaque ctf_id_t token.
    They can also open or create read-only archives of CTF containers in a
