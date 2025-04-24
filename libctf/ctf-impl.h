@@ -797,8 +797,9 @@ extern struct ctf_archive *ctf_arc_open_internal (const char *, int *);
 extern void ctf_arc_close_internal (struct ctf_archive *);
 extern const ctf_preamble_t *ctf_arc_bufpreamble (const ctf_sect_t *);
 extern void *ctf_set_open_errno (int *, int);
-extern void ctf_flip_header (ctf_header_t *);
-extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *, int);
+extern int ctf_flip_header (void *, int, int);
+extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *,
+		     int is_btf, int to_foreign);
 
 extern int ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp);
 
