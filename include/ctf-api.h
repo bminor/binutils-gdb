@@ -135,7 +135,9 @@ typedef enum ctf_sect_names
 
 /* Encoding information for integers, floating-point values, and certain other
    intrinsics can be obtained by calling ctf_type_encoding, below.  The flags
-   field will contain values appropriate for the type defined in <ctf.h>.  */
+   field will contain values appropriate for the type defined in <ctf.h>.
+
+   For floats, only the first of these fields is meaningful.  */
 
 typedef struct ctf_encoding
 {
@@ -846,6 +848,8 @@ extern ctf_id_t ctf_add_enum64 (ctf_dict_t *, uint32_t, const char *);
 extern ctf_id_t ctf_add_enum_encoded (ctf_dict_t *, uint32_t, const char *,
 				      const ctf_encoding_t *);
 extern ctf_id_t ctf_add_enum (ctf_dict_t *, uint32_t, const char *);
+extern ctf_id_t ctf_add_btf_float (ctf_dict_t *, uint32_t,
+				   const char *, const ctf_encoding_t *);
 extern ctf_id_t ctf_add_float (ctf_dict_t *, uint32_t,
 			       const char *, const ctf_encoding_t *);
 extern ctf_id_t ctf_add_forward (ctf_dict_t *, uint32_t, const char *,
