@@ -17,7 +17,7 @@ Unpacking and Installation -- quick overview
 'gdb-VERSION.tar.gz', where VERSION is the version of GDB.
 
    The GDB debugger sources, the generic GNU include
-files, the BFD ("binary file description") library, the readline
+files, the BFD ("Binary File Descriptor") library, the readline
 library, and other libraries all have directories of their own
 underneath the gdb-VERSION directory.  The idea is that a variety of GNU
 tools can share a common copy of these things.  Be aware of variation
