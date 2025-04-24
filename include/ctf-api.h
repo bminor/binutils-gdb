@@ -183,7 +183,8 @@ typedef struct ctf_snapshot_id
    and _CTF_ITEM to expand as you like, then mention the macro name.
    See the enum after this for an example.  */
 #define _CTF_ERRORS \
-  _CTF_FIRST (ECTF_FMT, "File is not in CTF or ELF format.")	\
+  _CTF_FIRST (ECTF_NEXT_END, "End of iteration.") \
+  _CTF_ITEM (ECTF_FMT, "File is not in CTF or ELF format.") \
   _CTF_ITEM (ECTF_BFDERR, "BFD error.")				\
   _CTF_ITEM (ECTF_CTFVERS, "CTF dict version is too new for libctf.") \
   _CTF_ITEM (ECTF_BFD_AMBIGUOUS, "Ambiguous BFD target.")	\
@@ -233,7 +234,6 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOTYET, "Feature not yet implemented.") \
   _CTF_ITEM (ECTF_INTERNAL, "Internal error: assertion failure.") \
   _CTF_ITEM (ECTF_NONREPRESENTABLE, "Type not representable in CTF.") \
-  _CTF_ITEM (ECTF_NEXT_END, "End of iteration.") \
   _CTF_ITEM (ECTF_NEXT_WRONGFUN, "Wrong iteration function called.") \
   _CTF_ITEM (ECTF_NEXT_WRONGFP, "Iteration entity changed in mid-iterate.") \
   _CTF_ITEM (ECTF_FLAGS, "CTF header contains flags unknown to libctf.") \
