@@ -934,8 +934,6 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (cutu_reader);
 
-  cutu_reader (cutu_reader &&) = default;
-
   /* Return true if either:
 
       - the unit is empty (just a header without any DIE)

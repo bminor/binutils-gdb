@@ -3196,15 +3196,17 @@ process_psymtab_comp_unit (dwarf2_per_cu *this_cu,
   cutu_reader *reader = storage->get_reader (this_cu);
   if (reader == nullptr)
     {
-      cutu_reader new_reader (*this_cu, *per_objfile, nullptr, nullptr, false,
-			      language_minimal,
-			      &storage->get_abbrev_table_cache ());
+      const abbrev_table_cache &abbrev_table_cache
+	= storage->get_abbrev_table_cache ();
+      auto new_reader = std::make_unique<cutu_reader> (*this_cu, *per_objfile,
+						       nullptr, nullptr, false,
+						       language_minimal,
+						       &abbrev_table_cache);
 
-      if (new_reader.cu () == nullptr || new_reader.is_dummy ())
+      if (new_reader->cu () == nullptr || new_reader->is_dummy ())
 	return;
 
-      auto copy = std::make_unique<cutu_reader> (std::move (new_reader));
-      reader = storage->preserve (std::move (copy));
+      reader = storage->preserve (std::move (new_reader));
     }
 
   if (reader->top_level_die () == nullptr || reader->is_dummy ())
