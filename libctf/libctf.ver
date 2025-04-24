@@ -16,15 +16,18 @@
    along with this program; see the file COPYING.  If not see
    <http://www.gnu.org/licenses/>.  */
 
-LIBCTF_1.0 {
+LIBCTF_2.0 {
     global:
 	/* In libctf and libctf-nobfd.  */
 
+	ctf_dict_open;
+	ctf_dict_open_sections;
 	ctf_bufopen;
 	ctf_simple_open;
 	ctf_create;
 	ctf_close;
 	ctf_ref;
+	ctf_dict_close;
 	ctf_file_close;
 
 	ctf_cuname;
@@ -32,6 +35,7 @@ LIBCTF_1.0 {
 	ctf_parent_file;
 	ctf_parent_name;
 	ctf_parent_name_set;
+	ctf_parent_dict;
 	ctf_type_isparent;
 	ctf_type_ischild;
 
@@ -53,6 +57,11 @@ LIBCTF_1.0 {
 
 	ctf_lookup_by_name;
 	ctf_lookup_by_symbol;
+	ctf_symbol_next;
+	ctf_lookup_by_symbol_name;
+	ctf_arc_lookup_symbol;
+	ctf_arc_lookup_symbol_name;
+
 	ctf_lookup_variable;
 
 	ctf_type_resolve;
@@ -82,6 +91,9 @@ LIBCTF_1.0 {
 
 	ctf_label_topmost;
 	ctf_label_info;
+	ctf_lookup_enumerator;
+	ctf_lookup_enumerator_next;
+	ctf_arc_lookup_enumerator_next;
 
 	ctf_member_iter;
 	ctf_enum_iter;
@@ -114,6 +126,7 @@ LIBCTF_1.0 {
 	ctf_add_union;
 	ctf_add_struct_sized;
 	ctf_add_union_sized;
+	ctf_add_unknown;
 	ctf_add_volatile;
 
 	ctf_add_enumerator;
@@ -133,6 +146,10 @@ LIBCTF_1.0 {
 	ctf_gzwrite;
 	ctf_compress_write;
 	ctf_getdatasect;
+	ctf_getsymsect;
+	ctf_getstrsect;
+	ctf_symsect_endianness;
+	ctf_arc_symsect_endianness;
 
 	ctf_arc_write;
 	ctf_arc_write_fd;
@@ -145,6 +162,7 @@ LIBCTF_1.0 {
 	ctf_archive_next;
 	ctf_archive_raw_iter;
 	ctf_get_arc;
+	ctf_arc_flush_caches;
 
 	ctf_dump;
 
@@ -161,6 +179,13 @@ LIBCTF_1.0 {
 	ctf_link_shuffle_syms;
 	ctf_link_write;
 
+	ctf_link_add_linker_symbol;
+	ctf_add_objt_sym;
+	ctf_add_func_sym;
+
+	ctf_dict_set_flag;
+	ctf_dict_get_flag;
+
 	ctf_fdopen;                             /* libctf only.  */
 	ctf_open;                               /* libctf only.  */
 	ctf_arc_open;                           /* libctf only.  */
@@ -169,41 +194,3 @@ LIBCTF_1.0 {
     local:
 	*;
 };
-
-LIBCTF_1.1 {
-    global:
-	ctf_dict_open;
-	ctf_dict_open_sections;
-	ctf_dict_close;
-	ctf_parent_dict;
-
-	ctf_symbol_next;
-	ctf_add_objt_sym;
-	ctf_add_func_sym;
-
-	ctf_link_add_linker_symbol;
-
-	ctf_arc_lookup_symbol;
-	ctf_arc_flush_caches;
-
-	ctf_getsymsect;
-	ctf_getstrsect;
-	ctf_symsect_endianness;
-	ctf_arc_symsect_endianness;
-} LIBCTF_1.0;
-
-LIBCTF_1.2 {
-    global:
-	ctf_lookup_by_symbol_name;
-	ctf_arc_lookup_symbol_name;
-	ctf_add_unknown;
-} LIBCTF_1.1;
-
-LIBCTF_1.3 {
-    global:
-	ctf_lookup_enumerator;
-	ctf_lookup_enumerator_next;
-	ctf_arc_lookup_enumerator_next;
-	ctf_dict_set_flag;
-	ctf_dict_get_flag;
-} LIBCTF_1.2;
