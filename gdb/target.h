@@ -2472,8 +2472,14 @@ extern void target_pre_inferior ();
 
 extern void target_preopen (int);
 
+/* Using the objfile specified in OBJFILE, find the address for the
+   current thread's thread-local storage with offset OFFSET.  If it's
+   provided, NAME might be used to indicate the relevant variable
+   in an error message.  */
+
 extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
-					       CORE_ADDR offset);
+					       CORE_ADDR offset,
+					       const char *name = nullptr);
 
 /* Return the "section" containing the specified address.  */
 const struct target_section *target_section_by_addr (struct target_ops *target,

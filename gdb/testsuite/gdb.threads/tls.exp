@@ -159,7 +159,7 @@ gdb_test_multiple "print a_thread_local" "" {
     -re -wrap "Cannot find thread-local variables on this target" {
 	kfail "gdb/25807" $gdb_test_name
     }
-    -re -wrap "Cannot read .a_thread_local. without registers" {
+    -re -wrap "Cannot (?:read|find address of TLS symbol) .a_thread_local. without registers" {
 	pass $gdb_test_name
     }
 }

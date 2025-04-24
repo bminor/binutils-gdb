@@ -485,7 +485,8 @@ language_defn::read_var_value (struct symbol *var,
 	/* Determine address of TLS variable. */
 	if (obj_section
 	    && (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
-	  addr = target_translate_tls_address (obj_section->objfile, addr);
+	  addr = target_translate_tls_address (obj_section->objfile, addr,
+					       var->print_name ());
       }
       break;
 

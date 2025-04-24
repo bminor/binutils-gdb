@@ -1688,7 +1688,8 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
     {
       /* Skip translation if caller does not need the address.  */
       if (address_p != NULL)
-	*address_p = target_translate_tls_address (objfile, addr);
+	*address_p = target_translate_tls_address
+		       (objfile, addr, bound_msym.minsym->print_name ());
       return builtin_type (objfile)->nodebug_tls_symbol;
     }
 

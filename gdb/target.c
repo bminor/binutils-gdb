@@ -1250,11 +1250,21 @@ generic_tls_error (void)
 	       _("Cannot find thread-local variables on this target"));
 }
 
-/* Using the objfile specified in OBJFILE, find the address for the
-   current thread's thread-local storage with offset OFFSET.  */
+/* See target.h.  */
+
 CORE_ADDR
-target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
+target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset,
+			      const char *name)
 {
+  if (!target_has_registers ())
+    {
+      if (name == nullptr)
+	error (_("Cannot translate TLS address without registers"));
+      else
+	error (_("Cannot find address of TLS symbol `%s' without registers"),
+	       name);
+    }
+
   volatile CORE_ADDR addr = 0;
   struct target_ops *target = current_inferior ()->top_target ();
   gdbarch *gdbarch = current_inferior ()->arch ();
