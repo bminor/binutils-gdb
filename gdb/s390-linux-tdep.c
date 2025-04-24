@@ -29,6 +29,7 @@
 #include "gdbcore.h"
 #include "linux-record.h"
 #include "linux-tdep.h"
+#include "svr4-tls-tdep.h"
 #include "objfiles.h"
 #include "osabi.h"
 #include "regcache.h"
@@ -40,6 +41,7 @@
 #include "target.h"
 #include "trad-frame.h"
 #include "xml-syscall.h"
+#include "inferior.h"
 
 #include "features/s390-linux32v1.c"
 #include "features/s390-linux32v2.c"
@@ -1124,6 +1126,45 @@ s390_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
   record_tdep->ioctl_FIOQSIZE = 0x545e;
 }
 
+/* Fetch and return the TLS DTV (dynamic thread vector) address for PTID.
+   Throw a suitable TLS error if something goes wrong.  */
+
+static CORE_ADDR
+s390_linux_get_tls_dtv_addr (struct gdbarch *gdbarch, ptid_t ptid,
+			     enum svr4_tls_libc libc)
+{
+  /* On S390, the thread pointer is found in two registers A0 and A1
+     (or, using gdb naming, acr0 and acr1) A0 contains the top 32
+     bits of the address and A1 contains the bottom 32 bits.  */
+  regcache *regcache
+    = get_thread_arch_regcache (current_inferior (), ptid, gdbarch);
+  target_fetch_registers (regcache, S390_A0_REGNUM);
+  target_fetch_registers (regcache, S390_A1_REGNUM);
+  ULONGEST thr_ptr_lo, thr_ptr_hi, thr_ptr;
+  if (regcache->cooked_read (S390_A0_REGNUM, &thr_ptr_hi) != REG_VALID
+      || regcache->cooked_read (S390_A1_REGNUM, &thr_ptr_lo) != REG_VALID)
+    throw_error (TLS_GENERIC_ERROR, _("Unable to fetch thread pointer"));
+  thr_ptr = (thr_ptr_hi << 32) + thr_ptr_lo;
+
+  /* The thread pointer points at the TCB (thread control block).  The
+     first two members of this struct are both pointers, where the
+     first will be a pointer to the TCB (i.e.  it points at itself)
+     and the second will be a pointer to the DTV (dynamic thread
+     vector).  There are many other fields too, but the one we care
+     about here is the DTV pointer.  Compute the address of the DTV
+     pointer, fetch it, and convert it to an address.  */
+  CORE_ADDR dtv_ptr_addr
+    = thr_ptr + gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
+  gdb::byte_vector buf (gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
+  if (target_read_memory (dtv_ptr_addr, buf.data (), buf.size ()) != 0)
+    throw_error (TLS_GENERIC_ERROR, _("Unable to fetch DTV address"));
+
+  const struct builtin_type *builtin = builtin_type (gdbarch);
+  CORE_ADDR dtv_addr = gdbarch_pointer_to_address
+			 (gdbarch, builtin->builtin_data_ptr, buf.data ());
+  return dtv_addr;
+}
+
 /* Initialize OSABI common for GNU/Linux on 31- and 64-bit systems.  */
 
 static void
@@ -1152,6 +1193,9 @@ s390_linux_init_abi_any (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
+  set_gdbarch_get_thread_local_address (gdbarch,
+					svr4_tls_get_thread_local_address);
+  svr4_tls_register_tls_methods (info, gdbarch, s390_linux_get_tls_dtv_addr);
 
   /* Support reverse debugging.  */
   set_gdbarch_process_record_signal (gdbarch, s390_linux_record_signal);

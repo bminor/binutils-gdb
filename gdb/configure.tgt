@@ -150,7 +150,7 @@ aarch64*-*-linux*)
 			arch/aarch64-scalable-linux.o \
 			arch/arm.o arch/arm-linux.o arch/arm-get-next-pcs.o \
 			arm-tdep.o arm-linux-tdep.o \
-			glibc-tdep.o linux-tdep.o solib-svr4.o \
+			glibc-tdep.o linux-tdep.o solib-svr4.o svr4-tls-tdep.o \
 			symfile-mem.o linux-record.o"
 	;;
 
@@ -503,7 +503,7 @@ powerpc-*-aix* | rs6000-*-* | powerpc64-*-aix*)
 powerpc*-*-linux*)
 	# Target: PowerPC running Linux
 	gdb_target_obs="rs6000-tdep.o ppc-linux-tdep.o ppc-sysv-tdep.o \
-			ppc64-tdep.o solib-svr4.o \
+			ppc64-tdep.o solib-svr4.o svr4-tls-tdep.o \
 			glibc-tdep.o symfile-mem.o linux-tdep.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o \
 			linux-record.o \
@@ -524,7 +524,8 @@ powerpc*-*-*)
 s390*-*-linux*)
 	# Target: S390 running Linux
 	gdb_target_obs="s390-linux-tdep.o s390-tdep.o solib-svr4.o \
-			linux-tdep.o linux-record.o symfile-mem.o"
+			linux-tdep.o linux-record.o symfile-mem.o \
+			svr4-tls-tdep.o"
 	;;
 
 riscv*-*-freebsd*)
@@ -536,7 +537,7 @@ riscv*-*-linux*)
 	# Target: Linux/RISC-V
 	gdb_target_obs="riscv-linux-tdep.o riscv-canonicalize-syscall-gen.o \
 			glibc-tdep.o linux-tdep.o solib-svr4.o symfile-mem.o \
-			linux-record.o"
+			linux-record.o svr4-tls-tdep.o"
 	;;
 
 riscv*-*-*)
@@ -706,7 +707,7 @@ x86_64-*-elf*)
 x86_64-*-linux*)
 	# Target: GNU/Linux x86-64
 	gdb_target_obs="amd64-linux-tdep.o ${i386_tobjs}  \
-			i386-linux-tdep.o glibc-tdep.o \
+			i386-linux-tdep.o glibc-tdep.o svr4-tls-tdep.o \
 			solib-svr4.o symfile-mem.o linux-tdep.o linux-record.o \
 			arch/i386-linux-tdesc.o arch/amd64-linux-tdesc.o \
 			arch/x86-linux-tdesc-features.o"

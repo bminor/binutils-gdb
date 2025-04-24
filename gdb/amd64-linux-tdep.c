@@ -33,7 +33,9 @@
 #include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
 #include "linux-tdep.h"
+#include "svr4-tls-tdep.h"
 #include "gdbsupport/x86-xstate.h"
+#include "inferior.h"
 
 #include "amd64-tdep.h"
 #include "solib-svr4.h"
@@ -1832,6 +1834,39 @@ amd64_linux_remove_non_address_bits_watchpoint (gdbarch *gdbarch,
   return (addr & amd64_linux_lam_untag_mask ());
 }
 
+/* Fetch and return the TLS DTV (dynamic thread vector) address for PTID.
+   Throw a suitable TLS error if something goes wrong.  */
+
+static CORE_ADDR
+amd64_linux_get_tls_dtv_addr (struct gdbarch *gdbarch, ptid_t ptid,
+			      enum svr4_tls_libc libc)
+{
+  /* On x86-64, the thread pointer is found in the fsbase register.  */
+  regcache *regcache
+    = get_thread_arch_regcache (current_inferior (), ptid, gdbarch);
+  target_fetch_registers (regcache, AMD64_FSBASE_REGNUM);
+  ULONGEST fsbase;
+  if (regcache->cooked_read (AMD64_FSBASE_REGNUM, &fsbase) != REG_VALID)
+    throw_error (TLS_GENERIC_ERROR, _("Unable to fetch thread pointer"));
+
+  /* The thread pointer (fsbase) points at the TCB (thread control
+     block).  The first two members of this struct are both pointers,
+     where the first will be a pointer to the TCB (i.e. it points at
+     itself) and the second will be a pointer to the DTV (dynamic
+     thread vector).  There are many other fields too, but the one
+     we care about here is the DTV pointer.  Compute the address
+     of the DTV pointer, fetch it, and convert it to an address.  */
+  CORE_ADDR dtv_ptr_addr = fsbase + gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
+  gdb::byte_vector buf (gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT);
+  if (target_read_memory (dtv_ptr_addr, buf.data (), buf.size ()) != 0)
+    throw_error (TLS_GENERIC_ERROR, _("Unable to fetch DTV address"));
+
+  const struct builtin_type *builtin = builtin_type (gdbarch);
+  CORE_ADDR dtv_addr = gdbarch_pointer_to_address
+			 (gdbarch, builtin->builtin_data_ptr, buf.data ());
+  return dtv_addr;
+}
+
 static void
 amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
 			    int num_disp_step_buffers)
@@ -1862,6 +1897,9 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
+  set_gdbarch_get_thread_local_address (gdbarch,
+					svr4_tls_get_thread_local_address);
+  svr4_tls_register_tls_methods (info, gdbarch, amd64_linux_get_tls_dtv_addr);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
