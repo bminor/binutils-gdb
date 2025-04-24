@@ -257,7 +257,7 @@ Python code must not override these, or even change the options using
 signals, @value{GDBN} will most likely stop working correctly.  Note
 that it is unfortunately common for GUI toolkits to install a
 @code{SIGCHLD} handler.  When creating a new Python thread, you can
-use @code{gdb.block_signals} or @code{gdb.Thread} to handle this
+use @code{gdb.blocked_signals} or @code{gdb.Thread} to handle this
 correctly; see @ref{Threading in GDB}.
 
 @item
@@ -654,22 +654,22 @@ threads, you must be careful to only call @value{GDBN}-specific
 functions in the @value{GDBN} thread.  @value{GDBN} provides some
 functions to help with this.
 
-@defun gdb.block_signals ()
+@defun gdb.blocked_signals ()
 As mentioned earlier (@pxref{Basic Python}), certain signals must be
-delivered to the @value{GDBN} main thread.  The @code{block_signals}
+delivered to the @value{GDBN} main thread.  The @code{blocked_signals}
 function returns a context manager that will block these signals on
 entry.  This can be used when starting a new thread to ensure that the
 signals are blocked there, like:
 
 @smallexample
-with gdb.block_signals():
+with gdb.blocked_signals():
    start_new_thread()
 @end smallexample
 @end defun
 
 @deftp {class} gdb.Thread
 This is a subclass of Python's @code{threading.Thread} class.  It
-overrides the @code{start} method to call @code{block_signals}, making
+overrides the @code{start} method to call @code{blocked_signals}, making
 this an easy-to-use drop-in replacement for creating threads that will
 work well in @value{GDBN}.
 @end deftp
