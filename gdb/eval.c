@@ -994,9 +994,10 @@ add_struct_fields (struct type *type, completion_list &output,
 		output.emplace_back (concat (prefix, type->field (i).name (),
 					     nullptr));
 	    }
-	  else if (type->field (i).type ()->code () == TYPE_CODE_UNION)
+	  else if (type->field (i).type ()->code () == TYPE_CODE_UNION
+		   || type->field (i).type ()->code () == TYPE_CODE_STRUCT)
 	    {
-	      /* Recurse into anonymous unions.  */
+	      /* Recurse into anonymous unions and structures.  */
 	      add_struct_fields (type->field (i).type (),
 				 output, fieldname, namelen, prefix);
 	    }
