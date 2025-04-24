@@ -3185,6 +3185,79 @@ get_type_unit_group_key (struct dwarf2_cu *cu, const struct attribute *stmt_list
   return {cu->dwo_unit, static_cast<sect_offset> (line_offset)};
 }
 
+/* A subclass of cooked_index_worker that handles scanning
+   .debug_info.  */
+
+class cooked_index_worker_debug_info : public cooked_index_worker
+{
+public:
+  cooked_index_worker_debug_info (dwarf2_per_objfile *per_objfile)
+    : cooked_index_worker (per_objfile)
+  {
+    gdb_assert (is_main_thread ());
+
+    struct objfile *objfile = per_objfile->objfile;
+    dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
+
+    dwarf_read_debug_printf ("Building psymtabs of objfile %s ...",
+			     objfile_name (objfile));
+
+    per_bfd->map_info_sections (objfile);
+  }
+
+private:
+  void do_reading () override;
+
+  /* Print collected type unit statistics.  */
+
+  void print_tu_stats (dwarf2_per_objfile *per_objfile)
+  {
+    struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
+
+    dwarf_read_debug_printf ("Type unit statistics:");
+    dwarf_read_debug_printf ("  %d TUs", tu_stats->nr_tus);
+    dwarf_read_debug_printf ("  %d uniq abbrev tables",
+			     tu_stats->nr_uniq_abbrev_tables);
+    dwarf_read_debug_printf ("  %d symtabs from stmt_list entries",
+			     tu_stats->nr_symtabs);
+    dwarf_read_debug_printf ("  %d symtab sharers",
+			     tu_stats->nr_symtab_sharers);
+    dwarf_read_debug_printf ("  %d type units without a stmt_list",
+			     tu_stats->nr_stmt_less_type_units);
+    dwarf_read_debug_printf ("  %d all_type_units reallocs",
+			     tu_stats->nr_all_type_units_reallocs);
+  }
+
+  void print_stats () override
+  {
+    if (dwarf_read_debug > 0)
+      print_tu_stats (m_per_objfile);
+
+    if (dwarf_read_debug > 1)
+      {
+	dwarf_read_debug_printf_v ("Final m_all_parents_map:");
+	m_all_parents_map.dump (m_per_objfile->per_bfd);
+      }
+  }
+
+  /* After the last DWARF-reading task has finished, this function
+     does the remaining work to finish the scan.  */
+  void done_reading () override;
+
+  /* An iterator for the comp units.  */
+  using unit_iterator = std::vector<dwarf2_per_cu_up>::iterator;
+
+  /* Process a batch of CUs.  This may be called multiple times in
+     separate threads.  TASK_NUMBER indicates which task this is --
+     the result is stored in that slot of M_RESULTS.  */
+  void process_cus (size_t task_number, unit_iterator first, unit_iterator end);
+
+  /* A storage object for "leftovers" -- see the 'start' method, but
+     essentially things not parsed during the normal CU parsing
+     passes.  */
+  cooked_index_worker_result m_index_storage;
+};
+
 /* Subroutine of dwarf2_build_psymtabs_hard to simplify it.
    Process compilation unit THIS_CU for a psymtab.  */
 
@@ -3353,27 +3426,6 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile,
     }
 }
 
-/* Print collected type unit statistics.  */
-
-static void
-print_tu_stats (dwarf2_per_objfile *per_objfile)
-{
-  struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
-
-  dwarf_read_debug_printf ("Type unit statistics:");
-  dwarf_read_debug_printf ("  %d TUs", tu_stats->nr_tus);
-  dwarf_read_debug_printf ("  %d uniq abbrev tables",
-			   tu_stats->nr_uniq_abbrev_tables);
-  dwarf_read_debug_printf ("  %d symtabs from stmt_list entries",
-			   tu_stats->nr_symtabs);
-  dwarf_read_debug_printf ("  %d symtab sharers",
-			   tu_stats->nr_symtab_sharers);
-  dwarf_read_debug_printf ("  %d type units without a stmt_list",
-			   tu_stats->nr_stmt_less_type_units);
-  dwarf_read_debug_printf ("  %d all_type_units reallocs",
-			   tu_stats->nr_all_type_units_reallocs);
-}
-
 /* Traversal function for process_skeletonless_type_units.
    Read a TU in a DWO file and build partial symbols for it.  */
 
@@ -3421,60 +3473,6 @@ process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
       for (dwo_unit *unit : file->tus)
 	process_skeletonless_type_unit (unit, per_objfile, storage);
 }
-
-/* A subclass of cooked_index_worker that handles scanning
-   .debug_info.  */
-
-class cooked_index_worker_debug_info : public cooked_index_worker
-{
-public:
-  cooked_index_worker_debug_info (dwarf2_per_objfile *per_objfile)
-    : cooked_index_worker (per_objfile)
-  {
-    gdb_assert (is_main_thread ());
-
-    struct objfile *objfile = per_objfile->objfile;
-    dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-
-    dwarf_read_debug_printf ("Building psymtabs of objfile %s ...",
-			     objfile_name (objfile));
-
-    per_bfd->map_info_sections (objfile);
-  }
-
-private:
-
-  void do_reading () override;
-
-  void print_stats () override
-  {
-    if (dwarf_read_debug > 0)
-      print_tu_stats (m_per_objfile);
-    if (dwarf_read_debug > 1)
-      {
-	dwarf_read_debug_printf_v ("Final m_all_parents_map:");
-	m_all_parents_map.dump (m_per_objfile->per_bfd);
-      }
-  }
-
-  /* After the last DWARF-reading task has finished, this function
-     does the remaining work to finish the scan.  */
-  void done_reading () override;
-
-  /* An iterator for the comp units.  */
-  using unit_iterator = std::vector<dwarf2_per_cu_up>::iterator;
-
-  /* Process a batch of CUs.  This may be called multiple times in
-     separate threads.  TASK_NUMBER indicates which task this is --
-     the result is stored in that slot of M_RESULTS.  */
-  void process_cus (size_t task_number, unit_iterator first,
- 		    unit_iterator end);
-
-  /* A storage object for "leftovers" -- see the 'start' method, but
-     essentially things not parsed during the normal CU parsing
-     passes.  */
-  cooked_index_worker_result m_index_storage;
-};
 
 void
 cooked_index_worker_debug_info::process_cus (size_t task_number,
