@@ -484,7 +484,7 @@ ctf_id_t
 ctf_lookup_enumerator (ctf_dict_t *fp, const char *name, int64_t *enum_value)
 {
   ctf_id_t type;
-  int enum_int_value;
+  int64_t enum_int_value;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
@@ -561,6 +561,7 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
   do
     {
       const char *this_name;
+      int is_enum64 = 0;
 
       /* At end of enum? Traverse to next one, if any are left.  */
 
@@ -568,14 +569,18 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 	{
 	  const ctf_type_t *tp;
 	  ctf_dtdef_t *dtd;
+	  int kind;
+	  unsigned char *vlen;
 
+	  /* It's a shame we can't use ctf_type_kind_next here, but we're
+	     looking for two type kinds at once...  */
 	  do
-	    i->ctn_type = ctf_type_next (i->cu.ctn_fp, &i->ctn_next, NULL, 1);
-	  while (i->ctn_type != CTF_ERR
-		 && ctf_type_kind_unsliced (i->cu.ctn_fp, i->ctn_type)
-		 != CTF_K_ENUM);
+	    i->i.ctn_type = ctf_type_next (i->cu.ctn_fp, &i->ctn_next, NULL, 1);
+	  while (i->i.ctn_type != CTF_ERR
+		 && ((kind = ctf_type_kind_unsliced (i->cu.ctn_fp, i->i.ctn_type))
+		     != CTF_K_ENUM && kind != CTF_K_ENUM64));
 
-	  if (i->ctn_type == CTF_ERR)
+	  if (i->i.ctn_type == CTF_ERR)
 	    {
 	      /* Conveniently, when the iterator over all types is done, so is the
 		 iteration as a whole: so we can just pass all errors from the
@@ -585,30 +590,43 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
 	      return CTF_ERR;			/* errno is set for us.  */
 	    }
 
-	  if ((tp = ctf_lookup_by_id (&fp, i->ctn_type)) == NULL)
+	  if ((tp = ctf_lookup_by_id (&fp, i->i.ctn_type, &i->ctn_tp)) == NULL)
 	    return CTF_ERR;			/* errno is set for us.  */
-	  i->ctn_n = LCTF_INFO_VLEN (fp, tp->ctt_info);
+	  i->ctn_n = LCTF_VLEN (fp, tp);
 
-	  dtd = ctf_dynamic_type (fp, i->ctn_type);
-
-	  if (dtd == NULL)
-	    {
-	      (void) ctf_get_ctt_size (fp, tp, NULL, &i->ctn_increment);
-	      i->u.ctn_en = (const ctf_enum_t *) ((uintptr_t) tp +
-						  i->ctn_increment);
-	    }
+	  if ((dtd = ctf_dynamic_type (fp, i->i.ctn_type)) != NULL)
+	    vlen = dtd->dtd_vlen;
 	  else
-	    i->u.ctn_en = (const ctf_enum_t *) dtd->dtd_vlen;
+	    {
+	      ctf_get_ctt_size (fp, tp, NULL, &i->ctn_increment);
+	      vlen = (unsigned char *) ((uintptr_t) tp + i->ctn_increment);
+	    }
+
+	  if (kind == CTF_K_ENUM)
+	    i->u.ctn_en = (const ctf_enum_t *) vlen;
+	  else
+	    i->u.ctn_en64 = (const ctf_enum64_t *) vlen;
 	}
 
-      this_name = ctf_strptr (fp, i->u.ctn_en->cte_name);
+      if (LCTF_KIND (fp, i->ctn_tp) == CTF_K_ENUM64)
+	is_enum64 = 1;
+
+      if (is_enum64)
+	  this_name = ctf_strptr (fp, i->u.ctn_en64->cte_name);
+	else
+	  this_name = ctf_strptr (fp, i->u.ctn_en->cte_name);
 
       i->ctn_n--;
 
       if (strcmp (name, this_name) == 0)
 	{
 	  if (val)
-	    *val = i->u.ctn_en->cte_value;
+	    {
+	      if (is_enum64)
+		*val = ((uint64_t) i->u.ctn_en64->cte_val_high) << 32 | (i->u.ctn_en64->cte_val_low);
+	      else
+		*val = i->u.ctn_en->cte_value;
+	    }
 	  found = 1;
 
 	  /* Constant found in this enum: try the next one.  (Constant names
@@ -621,7 +639,7 @@ ctf_lookup_enumerator_next (ctf_dict_t *fp, const char *name,
     }
   while (!found);
 
-  return i->ctn_type;
+  return i->i.ctn_type;
 }
 
 typedef struct ctf_symidx_sort_arg_cb

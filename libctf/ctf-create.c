@@ -269,6 +269,7 @@ ctf_name_table (ctf_dict_t *fp, int kind)
     case CTF_K_UNION:
       return fp->ctf_unions;
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       return fp->ctf_enums;
     default:
       return fp->ctf_names;
@@ -657,8 +658,8 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
 		 const char *name, const ctf_encoding_t *ep, uint32_t kind)
 {
   ctf_dtdef_t *dtd;
-  ctf_id_t type;
   uint32_t encoding;
+  int vlen = sizeof (uint32_t);
 
   if (ep == NULL)
     return (ctf_set_typed_errno (fp, EINVAL));
@@ -1003,70 +1004,119 @@ ctf_add_union (ctf_dict_t *fp, uint32_t flag, const char *name)
   return (ctf_add_union_sized (fp, flag, name, 0));
 }
 
-ctf_id_t
-ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
+static ctf_id_t
+ctf_add_enum_internal (ctf_dict_t *fp, uint32_t flag, const char *name,
+		       int kind, int is_signed)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
-  size_t initial_vbytes = sizeof (ctf_enum_t) * INITIAL_VLEN;
+  size_t initial_vbytes;
+  ctf_type_t *prefix;
+
+  if (!ctf_assert (fp, kind == CTF_K_ENUM || kind == CTF_K_ENUM64))
+    return -1;			/* errno is set for us. */
+
+  if (kind == CTF_K_ENUM)
+    initial_vbytes = sizeof (ctf_enum_t) * INITIAL_VLEN;
+  else
+    initial_vbytes = sizeof (ctf_enum64_t) * INITIAL_VLEN;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   /* Promote root-visible forwards to enums.  */
   if (name != NULL && flag == CTF_ADD_ROOT)
-    type = ctf_lookup_by_rawname (fp, CTF_K_ENUM, name);
+    type = ctf_lookup_by_rawname (fp, kind, name);
 
   /* Prohibit promotion if this type was ctf_open()ed.  */
   if (type > 0 && type < fp->ctf_stypes)
     return (ctf_set_errno (fp, ECTF_RDONLY));
 
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
-    dtd = ctf_dtd_lookup (fp, type);
-  else if ((type = ctf_add_generic (fp, flag, name, CTF_K_ENUM,
-				    initial_vbytes, &dtd)) == CTF_ERR)
+    {
+      dtd = ctf_dtd_lookup (fp, type);
+
+      if ((prefix = ctf_add_prefix (fp, dtd, initial_vbytes)) == NULL)
+	return CTF_ERR;		/* errno is set for us.  */
+    }
+  else if ((dtd = ctf_add_generic (fp, flag, name, kind, 1, 0, initial_vbytes,
+				   &prefix)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  /* Forwards won't have any vlen yet.  */
-  if (dtd->dtd_vlen_alloc == 0)
-    {
-      if ((dtd->dtd_vlen = calloc (1, initial_vbytes)) == NULL)
-	return (ctf_set_typed_errno (fp, ENOMEM));
-      dtd->dtd_vlen_alloc = initial_vbytes;
-    }
+  prefix->ctt_info = CTF_TYPE_INFO (CTF_K_BIG, 0, 0);
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, is_signed, 0);
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_ENUM, flag, 0);
-  dtd->dtd_data.ctt_size = fp->ctf_dmodel->ctd_int;
+  if (kind == CTF_K_ENUM)
+    dtd->dtd_data->ctt_size = fp->ctf_dmodel->ctd_int;
+  else
+    dtd->dtd_data->ctt_size = 8;
 
-  return type;
+  return dtd->dtd_type;
 }
 
 ctf_id_t
-ctf_add_enum_encoded (ctf_dict_t *fp, uint32_t flag, const char *name,
-		      const ctf_encoding_t *ep)
+ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
+{
+  return ctf_add_enum_internal (fp, flag, name, CTF_K_ENUM, 1);
+}
+
+ctf_id_t
+ctf_add_enum64 (ctf_dict_t *fp, uint32_t flag, const char *name)
+{
+  return ctf_add_enum_internal (fp, flag, name, CTF_K_ENUM64, 1);
+}
+
+static ctf_id_t
+ctf_add_enum_encoded_internal (ctf_dict_t *fp, uint32_t flag, const char *name,
+			       int kind, const ctf_encoding_t *ep)
 {
   ctf_id_t type = 0;
+  int is_signed = ((ep->cte_format & CTF_INT_SIGNED) != 0);
 
   /* First, create the enum if need be, using most of the same machinery as
      ctf_add_enum(), to ensure that we do not allow things past that are not
      enums or forwards to them.  (This includes other slices: you cannot slice a
      slice, which would be a useless thing to do anyway.)  */
 
-  if (name != NULL)
+  if (name != NULL && flag == CTF_ADD_ROOT)
     type = ctf_lookup_by_rawname (fp, CTF_K_ENUM, name);
 
   if (type != 0)
     {
       if ((ctf_type_kind (fp, type) != CTF_K_FORWARD) &&
-	  (ctf_type_kind_unsliced (fp, type) != CTF_K_ENUM))
+	  (ctf_type_kind_unsliced (fp, type) != CTF_K_ENUM) &&
+	  (ctf_type_kind_unsliced (fp, type) != CTF_K_ENUM64))
 	return (ctf_set_typed_errno (fp, ECTF_NOTINTFP));
     }
-  else if ((type = ctf_add_enum (fp, flag, name)) == CTF_ERR)
+  else if ((type = ctf_add_enum_internal (fp, flag, name, kind, is_signed))
+	   == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
+
+  /* If this is just changing the signedness of the enum, we don't need a
+     slice.  */
+
+  if ((ep->cte_format & ~CTF_INT_SIGNED) == 0
+      && ep->cte_bits == 0
+      && ep->cte_offset == 0)
+    return type;
 
   /* Now attach a suitable slice to it.  */
 
   return ctf_add_slice (fp, flag, type, ep);
+}
+
+ctf_id_t
+ctf_add_enum_encoded (ctf_dict_t *fp, uint32_t flag, const char *name,
+		      const ctf_encoding_t *ep)
+{
+  return ctf_add_enum_encoded_internal (fp, flag, name, CTF_K_ENUM, ep);
+}
+
+ctf_id_t
+ctf_add_enum64_encoded (ctf_dict_t *fp, uint32_t flag, const char *name,
+			const ctf_encoding_t *ep)
+{
+  return ctf_add_enum_encoded_internal (fp, flag, name, CTF_K_ENUM64, ep);
 }
 
 ctf_id_t
@@ -1094,13 +1144,19 @@ ctf_add_forward (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (type)
     return type;
 
-  if ((type = ctf_add_generic (fp, flag, name, kind, 0, &dtd)) == CTF_ERR)
+  if ((dtd = ctf_add_generic (fp, flag, name, kind, 0, 0, 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_FORWARD, flag, 0);
-  dtd->dtd_data.ctt_type = kind;
+  if (kind != CTF_K_ENUM &&
+      kind != CTF_K_ENUM64)
+    {
+      dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_FORWARD, 0, 0);
+      dtd->dtd_data->ctt_type = kind;
+    }
+  else
+    dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_ENUM, 0, 0);
 
-  return type;
+  return dtd->dtd_type;
 }
 
 ctf_id_t
@@ -1186,13 +1242,12 @@ ctf_add_restrict (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref)
 
 int
 ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
-		    int value)
+		    int64_t value)
 {
   ctf_dict_t *ofp = fp;
   ctf_dtdef_t *dtd;
-  ctf_enum_t *en;
 
-  uint32_t kind, vlen, root;
+  uint32_t kind, vlen, root, en_name;
 
   if (name == NULL)
     return (ctf_set_errno (fp, EINVAL));
@@ -1212,9 +1267,9 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (dtd == NULL)
     return (ctf_set_errno (ofp, ECTF_BADID));
 
-  kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-  root = LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info);
-  vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
+  kind = LCTF_KIND (fp, dtd->dtd_buf);
+  root = LCTF_INFO_ISROOT (fp, dtd->dtd_buf->ctt_info);
+  vlen = LCTF_VLEN (fp, dtd->dtd_buf);
 
   /* Enumeration constant names are only added, and only checked for duplicates,
      if the enum they are part of is a root-visible type.  */
@@ -1228,16 +1283,26 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 	return (ctf_set_errno (ofp, ctf_errno (fp)));
     }
 
-  if (kind != CTF_K_ENUM)
+  if ((kind != CTF_K_ENUM) && (kind != CTF_K_ENUM64))
     return (ctf_set_errno (ofp, ECTF_NOTENUM));
 
   if (vlen == CTF_MAX_VLEN)
     return (ctf_set_errno (ofp, ECTF_DTFULL));
 
-  if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum_t) * (vlen + 1)) < 0)
-    return -1;					/* errno is set for us.  */
+  if (kind == CTF_K_ENUM)
+    {
+      if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum_t) * (vlen + 1)) < 0)
+	return -1;				/* errno is set for us.  */
 
-  en = (ctf_enum_t *) dtd->dtd_vlen;
+      dtd->dtd_vlen_size += sizeof (ctf_enum_t);
+    }
+  else
+    {
+      if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum64_t) * (vlen + 1)) < 0)
+	return -1;				/* errno is set for us.  */
+
+      dtd->dtd_vlen_size += sizeof (ctf_enum64_t);
+    }
 
   /* Check for constant duplication within any given enum: only needed for
      non-root-visible types, since the duplicate detection above does the job
@@ -1247,15 +1312,46 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
     {
       size_t i;
 
-      for (i = 0; i < vlen; i++)
-	if (strcmp (ctf_strptr (fp, en[i].cte_name), name) == 0)
-	  return (ctf_set_errno (ofp, ECTF_DUPLICATE));
+      if (kind == CTF_K_ENUM)
+	{
+	  ctf_enum_t *en = (ctf_enum_t *) dtd->dtd_vlen;
+
+	  for (i = 0; i < vlen; i++)
+	    if (strcmp (ctf_strptr (fp, en[i].cte_name), name) == 0)
+	      return (ctf_set_errno (ofp, ECTF_DUPLICATE));
+	}
+      else
+	{
+	  ctf_enum64_t *en = (ctf_enum64_t *) dtd->dtd_vlen;
+
+	  for (i = 0; i < vlen; i++)
+	    if (strcmp (ctf_strptr (fp, en[i].cte_name), name) == 0)
+	      return (ctf_set_errno (ofp, ECTF_DUPLICATE));
+
+	}
     }
 
-  en[vlen].cte_name = ctf_str_add (fp, name);
-  en[vlen].cte_value = value;
+  if (kind == CTF_K_ENUM)
+    {
+      ctf_enum_t *en = (ctf_enum_t *) dtd->dtd_vlen;
 
-  if (en[vlen].cte_name == 0 && name != NULL && name[0] != '\0')
+      en[vlen].cte_name = ctf_str_add (fp, name);
+      en[vlen].cte_value = value;
+
+      en_name = en[vlen].cte_name;
+    }
+  else
+    {
+      ctf_enum64_t *en = (ctf_enum64_t *) dtd->dtd_vlen;
+
+      en[vlen].cte_name = ctf_str_add (fp, name);
+      en[vlen].cte_val_low = ((uint64_t) value) & 0xffffffff;
+      en[vlen].cte_val_high = ((uint64_t) value) >> 32;
+
+      en_name = en[vlen].cte_name;
+    }
+
+  if (en_name == 0 && name != NULL && name[0] != '\0')
     return (ctf_set_errno (ofp, ctf_errno (fp)));
 
   /* Put the newly-added enumerator name into the name table if this type is
@@ -1264,12 +1360,12 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (root == CTF_ADD_ROOT)
     {
       if (ctf_dynhash_insert (fp->ctf_names,
-			      (char *) ctf_strptr (fp, en[vlen].cte_name),
+			      (char *) ctf_strptr (fp, en_name),
 			      (void *) (uintptr_t) enid) < 0)
 	return ctf_set_errno (fp, ENOMEM);
     }
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, root, vlen + 1);
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, root, vlen + 1);
 
   return 0;
 }
@@ -1710,10 +1806,10 @@ typedef struct ctf_bundle
 } ctf_bundle_t;
 
 static int
-enumcmp (const char *name, int value, void *arg)
+enumcmp (const char *name, int64_t value, void *arg)
 {
   ctf_bundle_t *ctb = arg;
-  int bvalue;
+  int64_t bvalue;
 
   if (ctf_enum_value (ctb->ctb_dict, ctb->ctb_type, name, &bvalue) < 0)
     {
@@ -1724,7 +1820,7 @@ enumcmp (const char *name, int value, void *arg)
   if (value != bvalue)
     {
       ctf_err_warn (ctb->ctb_dict, 1, ECTF_CONFLICT,
-		    _("conflict due to enum value change: %i versus %i"),
+		    _("conflict due to enum value change: %li versus %li"),
 		    value, bvalue);
       return 1;
     }
@@ -1732,7 +1828,7 @@ enumcmp (const char *name, int value, void *arg)
 }
 
 static int
-enumadd (const char *name, int value, void *arg)
+enumadd (const char *name, int64_t value, void *arg)
 {
   ctf_bundle_t *ctb = arg;
 
@@ -2246,9 +2342,18 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
       }
 
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       if (dst_type != CTF_ERR && kind != CTF_K_FORWARD
 	  && dst_kind != CTF_K_FORWARD)
 	{
+	  if (ctf_enum_unsigned (src_fp, src_type)
+	      != ctf_enum_unsigned (dst_fp, dst_type))
+	    {
+	      ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
+			    _("conflict for enum %s against ID %lx: member "
+			      "signedness differs"), name, dst_type);
+	      return (ctf_set_typed_errno (dst_fp, ECTF_CONFLICT));
+	    }
 	  if (ctf_enum_iter (src_fp, src_type, enumcmp, &dst)
 	      || ctf_enum_iter (dst_fp, dst_type, enumcmp, &src))
 	    {
@@ -2262,7 +2367,10 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	{
 	  ctf_snapshot_id_t snap = ctf_snapshot (dst_fp);
 
-	  dst_type = ctf_add_enum (dst_fp, flag, name);
+	  if (src_type == CTF_K_ENUM)
+	    dst_type = ctf_add_enum (dst_fp, flag, name);
+	  else
+	    dst_type = ctf_add_enum64 (dst_fp, flag, name);
 	  if ((dst.ctb_type = dst_type) == CTF_ERR
 	      || ctf_enum_iter (src_fp, src_type, enumadd, &dst))
 	    {
