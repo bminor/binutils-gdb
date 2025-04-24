@@ -102,6 +102,8 @@ LIBCTF_2.0 {
 	ctf_type_iter;
 	ctf_type_next;
 	ctf_type_iter_all;
+	ctf_type_kind_iter;
+	ctf_type_kind_next;
 	ctf_variable_iter;
 	ctf_variable_next;
 	ctf_datasec_iter;

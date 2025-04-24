@@ -500,8 +500,8 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   return NULL;
 }
 
-/* Iterate over every root (user-visible) type in the given CTF dict.
-   We pass the type ID of each type to the specified callback function.
+/* Iterate over every root (user-visible) type in the given CTF dict.  We pass
+   the type ID of each type to the specified callback function.
 
    Does not traverse parent types: you have to do that explicitly.  This is by
    design, to avoid traversing them more than once if traversing many children
@@ -516,7 +516,7 @@ ctf_type_iter (ctf_dict_t *fp, ctf_type_f *func, void *arg)
   while ((type = ctf_type_next (fp, &i, NULL, 0)) != CTF_ERR)
     {
       int rc;
-      if ((rc = func (type, arg)) != 0)
+      if ((rc = func (fp, type, arg)) != 0)
 	{
 	  ctf_next_destroy (i);
 	  return rc;
@@ -528,12 +528,12 @@ ctf_type_iter (ctf_dict_t *fp, ctf_type_f *func, void *arg)
   return 0;
 }
 
-/* Iterate over every type in the given CTF dict, user-visible or not.
-   We pass the type ID of each type to the specified callback function.
+/* Iterate over every type in the given CTF dict, user-visible or not.  We pass
+   the type ID of each type to the specified callback function.
 
    Does not traverse parent types: you have to do that explicitly.  This is by
    design, to avoid traversing them more than once if traversing many children
-   of a single parent.  */
+  of a single parent.  */
 
 int
 ctf_type_iter_all (ctf_dict_t *fp, ctf_type_all_f *func, void *arg)
@@ -545,7 +545,42 @@ ctf_type_iter_all (ctf_dict_t *fp, ctf_type_all_f *func, void *arg)
   while ((type = ctf_type_next (fp, &i, &flag, 1)) != CTF_ERR)
     {
       int rc;
-      if ((rc = func (type, flag, arg)) != 0)
+      if ((rc = func (fp, type, flag, arg)) != 0)
+	{
+	  ctf_next_destroy (i);
+	  return rc;
+	}
+    }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    return -1;					/* errno is set for us.  */
+
+  return 0;
+}
+
+/* Iterate over every type of the given kind in the given CTF dict.
+   We pass the type ID of each type to the specified callback function.
+
+   Types returned may be prefixed (but this is normally invisible): you can also
+   specifically traverse prefixed types by asking for CTF_K_BIG or CTF_K_HIDDEN.
+   In this case, the kind of the type returned will be different (the kind
+   prefixed).  Using CTF_K_BIG may have unexpected results if types have been
+   added to this dict since it was opened, since types are only 'unbiggened'
+   upon being written out.
+
+   Does not traverse parent types: you have to do that explicitly.  This is by
+   design, to avoid traversing them more than once if traversing many children
+   of a single parent.  */
+
+int
+ctf_type_kind_iter (ctf_dict_t *fp, int kind, ctf_type_kind_f *func, void *arg)
+{
+  ctf_next_t *i = NULL;
+  ctf_id_t type;
+
+  while ((type = ctf_type_kind_next (fp, &i, kind)) != CTF_ERR)
+    {
+      int rc;
+      if ((rc = func (fp, type, kind, arg)) != 0)
 	{
 	  ctf_next_destroy (i);
 	  return rc;
@@ -576,7 +611,7 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
 	return ctf_set_typed_errno (fp, ENOMEM);
 
       i->cu.ctn_fp = fp;
-      i->ctn_type = 1;
+      i->i.ctn_idx = 1;
       i->ctn_iter_fun = (void (*) (void)) ctf_type_next;
       *it = i;
     }
@@ -587,19 +622,78 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
   if (fp != i->cu.ctn_fp)
     return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
 
-  while (i->ctn_type <= fp->ctf_typemax)
+  while (i->i.ctn_idx <= fp->ctf_typemax)
     {
-      const ctf_type_t *tp = LCTF_INDEX_TO_TYPEPTR (fp, i->ctn_type);
+      const ctf_type_t *tp;
+
+      if (i->i.ctn_idx > fp->ctf_stypes)
+	tp = ctf_dtd_lookup (fp, ctf_index_to_type (fp, i->i.ctn_idx))->dtd_data;
+      else
+	tp = fp->ctf_txlate[i->i.ctn_idx];
 
       if ((!want_hidden) && (!LCTF_INFO_ISROOT (fp, tp->ctt_info)))
 	{
-	  i->ctn_type++;
+	  i->i.ctn_idx++;
 	  continue;
 	}
 
       if (flag)
 	*flag = LCTF_INFO_ISROOT (fp, tp->ctt_info);
-      return ctf_index_to_type (fp, i->ctn_type++);
+      return ctf_index_to_type (fp, i->i.ctn_idx++);
+    }
+  ctf_next_destroy (i);
+  *it = NULL;
+  return ctf_set_typed_errno (fp, ECTF_NEXT_END);
+}
+
+/* UPTODO optimize this */
+
+/* Iterate over every type of a given kind in the given CTF dict, returning each
+   type ID in turn.  Returns CTF_ERR on end of iteration or error.  you can also
+   specifically traverse prefixed types by asking for CTF_K_BIG or CTF_K_HIDDEN.
+   In this case, the kind of the type returned will be different (the kind
+   prefixed).  Using CTF_K_BIG may have unexpected results if types have been
+   added to this dict since it was opened, since types are only 'unbiggened'
+   upon being written out.
+
+   Does not traverse parent types: you have to do that explicitly.  This is by
+   design, to avoid traversing them more than once if traversing many children
+   of a single parent.  */
+
+ctf_id_t
+ctf_type_kind_next (ctf_dict_t *fp, ctf_next_t **it, int kind)
+{
+  ctf_next_t *i = *it;
+
+  if (!i)
+    {
+      if ((i = ctf_next_create ()) == NULL)
+	return ctf_set_typed_errno (fp, ENOMEM);
+
+      i->cu.ctn_fp = fp;
+      i->i.ctn_idx = 1;
+      i->ctn_iter_fun = (void (*) (void)) ctf_type_kind_next;
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_type_kind_next != i->ctn_iter_fun)
+    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFUN));
+
+  if (fp != i->cu.ctn_fp)
+    return (ctf_set_typed_errno (fp, ECTF_NEXT_WRONGFP));
+
+  while (i->i.ctn_idx <= fp->ctf_typemax)
+    {
+      ctf_id_t type = ctf_index_to_type (fp, i->i.ctn_idx);
+
+      if (ctf_type_kind (i->cu.ctn_fp, type) != kind)
+	{
+	  i->i.ctn_idx++;
+	  continue;
+	}
+
+      i->i.ctn_idx++;
+      return type;
     }
   ctf_next_destroy (i);
   *it = NULL;
@@ -1359,17 +1453,84 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
     }
 }
 
-/* Return the kind (CTF_K_* constant) for the specified type ID.  */
+/* Return the kind (CTF_K_* constant) for the specified type pointer.
+   Internal use only.
+
+   Pretend that all forwards are of type CTF_K_FORWARD, for ease of
+   use and compatibility.  */
+
+int
+ctf_type_kind_unsliced_tp (ctf_dict_t *fp, const ctf_type_t *tp)
+{
+  if (LCTF_KIND (fp, tp) == CTF_K_ENUM
+      && LCTF_VLEN (fp, tp) == 0)
+    return CTF_K_FORWARD;
+
+  return (LCTF_KIND (fp, tp));
+}
+
+/* Return the kind (CTF_K_* constant) for the specified type pointer.
+   Slices are considered to be of the same kind as the type sliced.  */
+
+int
+ctf_type_kind_tp (ctf_dict_t *fp, const ctf_type_t *tp)
+{
+  int kind;
+
+  if ((kind = ctf_type_kind_unsliced_tp (fp, tp)) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if (kind == CTF_K_SLICE)
+    {
+      const ctf_slice_t *sp;
+      ssize_t increment;
+
+      ctf_get_ctt_size (fp, tp, NULL, &increment);
+      sp = (const ctf_slice_t *) tp + increment;
+
+      kind = ctf_type_kind_unsliced (fp, sp->cts_type);
+    }
+
+  return kind;
+}
+
+/* Return the kind of this type pointer, except, for forwards, return the kind
+   of thing this is a forward to.  */
+int
+ctf_type_kind_forwarded_tp (ctf_dict_t *fp, const ctf_type_t *tp)
+{
+  int kind;
+
+  if ((kind = ctf_type_kind_tp (fp, tp)) < 0)
+    return -1;			/* errno is set for us.  */
+
+  /* Covers forwards to enums, too.  */
+  if (kind != CTF_K_FORWARD)
+    return kind;
+
+  while (LCTF_IS_PREFIXED_INFO (tp->ctt_info))
+    tp++;
+
+  if (CTF_INFO_KFLAG (tp->ctt_info))
+    return CTF_K_UNION;
+  else
+    return CTF_K_STRUCT;
+}
+
+/* Return the kind (CTF_K_* constant) for the specified type ID.
+
+   Pretend that all forwards are of type CTF_K_FORWARD, for ease of
+   use and compatibility.  */
 
 int
 ctf_type_kind_unsliced (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  return (LCTF_INFO_KIND (fp, tp->ctt_info));
+  return (ctf_type_kind_unsliced_tp (fp, tp));
 }
 
 /* Return the kind (CTF_K_* constant) for the specified type ID.
@@ -1386,7 +1547,7 @@ ctf_type_kind (ctf_dict_t *fp, ctf_id_t type)
   if (kind == CTF_K_SLICE)
     {
       if ((type = ctf_type_reference (fp, type)) == CTF_ERR)
-	return -1;
+	return -1;		/* errno is set for us.  */
       kind = ctf_type_kind_unsliced (fp, type);
     }
 
@@ -1398,19 +1559,17 @@ ctf_type_kind (ctf_dict_t *fp, ctf_id_t type)
 int
 ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
 {
-  int kind;
-  const ctf_type_t *tp;
+  int ret;
+  ctf_dict_t *ofp = fp;
+  const ctf_type_t *tp, *suffix;
 
-  if ((kind = ctf_type_kind (fp, type)) < 0)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  if (kind != CTF_K_FORWARD)
-    return kind;
+  if ((ret = ctf_type_kind_forwarded_tp (fp, tp)) < 0)
+    return (ctf_set_errno (ofp, ctf_errno (fp)));
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return -1;			/* errno is set for us.  */
-
-  return tp->ctt_type;
+  return ret;
 }
 
 /* If the type is one that directly references another type (such as POINTER),

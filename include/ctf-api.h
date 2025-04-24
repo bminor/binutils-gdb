@@ -310,8 +310,6 @@ _CTF_ERRORS
 
 typedef int ctf_visit_f (const char *name, ctf_id_t type, unsigned long offset,
 			 int depth, void *arg);
-typedef int ctf_type_f (ctf_id_t type, void *arg);
-typedef int ctf_type_all_f (ctf_id_t type, int flag, void *arg);
 			 void *arg);
 typedef int ctf_member_f (ctf_dict_t *, const char *name, ctf_id_t membtype,
 			  size_t offset, int bit_width, void *arg);
@@ -321,6 +319,9 @@ typedef int ctf_variable_f (ctf_dict_t *, const char *name, ctf_id_t type,
 			    void *arg);
 typedef int ctf_datasec_var_f (ctf_dict_t *fp, ctf_id_t type, size_t offset,
 			       size_t datasec_size, void *arg);
+typedef int ctf_type_f (ctf_dict_t *, ctf_id_t type, void *arg);
+typedef int ctf_type_all_f (ctf_dict_t *, ctf_id_t type, int flag, void *arg);
+typedef int ctf_type_kind_f (ctf_dict_t *, ctf_id_t type, int kind, void *arg);
 typedef int ctf_archive_member_f (ctf_dict_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
 				      size_t len, void *arg);
@@ -793,8 +794,10 @@ extern ctf_id_t ctf_arc_lookup_enumerator_next (ctf_archive_t *, const char *nam
 
 extern int ctf_type_iter (ctf_dict_t *, ctf_type_f *, void *);
 extern int ctf_type_iter_all (ctf_dict_t *, ctf_type_all_f *, void *);
+extern int ctf_type_kind_iter (ctf_dict_t *, int kind, ctf_type_kind_f *, void *);
 extern ctf_id_t ctf_type_next (ctf_dict_t *, ctf_next_t **,
 			       int *flag, int want_hidden);
+extern ctf_id_t ctf_type_kind_next (ctf_dict_t *, ctf_next_t **, int kind);
 
 extern int ctf_variable_iter (ctf_dict_t *, ctf_variable_f *, void *);
 extern ctf_id_t ctf_variable_next (ctf_dict_t *, ctf_next_t **,
