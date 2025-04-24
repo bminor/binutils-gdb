@@ -46,7 +46,7 @@ repos:
         types_or: [file]
         files: 'gdb/.*\.py(\.in)?$'
   - repo:  https://github.com/pycqa/flake8
-    rev: 7.1.1
+    rev: 7.2.0
     hooks:
     - id: flake8
       types_or: [file]
@@ -60,7 +60,7 @@ repos:
       files: '^gdb/(gdb-gdb\.py\.in|[^/]+\.py|python/.+\.py|testsuite/[^/]+\.py)$'
       args: [--config, gdb/setup.cfg]
   - repo: https://github.com/pycqa/isort
-    rev: 6.0.0
+    rev: 6.0.1
     hooks:
     - id: isort
       types_or: [file]
