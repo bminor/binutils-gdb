@@ -73,28 +73,94 @@ ctf_grow_ptrtab (ctf_dict_t *fp)
   return 0;
 }
 
-/* Make sure a vlen has enough space: expand it otherwise.  Unlike the ptrtab,
-   which grows quite slowly, the vlen grows in big jumps because it is quite
-   expensive to expand: the caller has to scan the old vlen for string refs
-   first and remove them, then re-add them afterwards.  The initial size is
-   more or less arbitrary.  */
+/* Make sure a vlen has enough space: expand it otherwise.  Either grow it to
+   roughly enough space for VBYTES, or add precisely VBYTES on to the space
+   reserved for the vlen.  (In one mode, VBYTES is a minimum: in the other,
+   it's an addend.  */
+
 static int
-ctf_grow_vlen (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vlen)
+ctf_add_vlen (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes, int additive)
 {
-  unsigned char *old = dtd->dtd_vlen;
+  unsigned char *old = (unsigned char *) dtd->dtd_buf;
 
-  if (dtd->dtd_vlen_alloc > vlen)
-    return 0;
+  size_t size = dtd->dtd_buf_size;
+  size_t old_size = size;
+  size_t vlen_size = dtd->dtd_vlen_size;
+  size_t prefix_size = size - vlen_size;
+  size_t old_data_index = dtd->dtd_data - dtd->dtd_buf;
+  size_t old_vlen_offset = dtd->dtd_vlen - old;
 
-  if ((dtd->dtd_vlen = realloc (dtd->dtd_vlen,
-				dtd->dtd_vlen_alloc * 2)) == NULL)
+  if (!additive)
     {
-      dtd->dtd_vlen = old;
+      if ((size - vlen_size) > vbytes)
+	return 0;
+
+      while (vlen_size < vbytes)
+	{
+	  size *= 2;
+	  vlen_size = size - prefix_size;
+	}
+    }
+  else
+    {
+      vlen_size += vbytes;
+      size += vbytes;
+    }
+
+  if ((dtd->dtd_buf = realloc (dtd->dtd_buf, size)) == NULL)
+    {
+      dtd->dtd_buf = (ctf_type_t *) old;
       return (ctf_set_errno (fp, ENOMEM));
     }
-  memset (dtd->dtd_vlen + dtd->dtd_vlen_alloc, 0, dtd->dtd_vlen_alloc);
-  dtd->dtd_vlen_alloc *= 2;
+
+  memset (((unsigned char *) dtd->dtd_buf) + old_size, 0, size - old_size);
+  dtd->dtd_data = dtd->dtd_buf + old_data_index;
+  dtd->dtd_vlen = ((unsigned char *) dtd->dtd_buf) + old_vlen_offset;
+  dtd->dtd_buf_size = size;
+
   return 0;
+}
+
+/* Make sure a vlen has enough space: expand it otherwise.  Grow it in fairly
+   big jumps, for amortized-constant-time growth.  */
+
+static int
+ctf_grow_vlen (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
+{
+  return ctf_add_vlen (fp, dtd, vbytes, 0);
+}
+
+/* Add a prefix to a given DTD, at the end of the prefix chain, and return it.
+   Make sure the vlen has enough room for at least VBYTES bytes, too. */
+static ctf_type_t *
+ctf_add_prefix (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vbytes)
+{
+  ctf_type_t *new_prefix;
+  size_t old_buf_size = dtd->dtd_buf_size;
+
+  /* Grow the type, then tweak the vlen forwards and move things around to leave
+     a gap.  If we run off the end of the headers without finding a non-prefix,
+     something is wrong.  */
+
+  if (vbytes == 0)
+    {
+      if (ctf_add_vlen (fp, dtd, sizeof (ctf_type_t), 1) < 0)
+	return NULL;				/* errno is set for us.  */
+    }
+  else
+    {
+      if (ctf_grow_vlen (fp, dtd, vbytes + sizeof (ctf_type_t)) < 0)
+	return NULL;				/* errno is set for us.  */
+    }
+
+  new_prefix = dtd->dtd_data;
+  memmove (dtd->dtd_data + 1, dtd->dtd_data, old_buf_size
+	   - ((unsigned char *) dtd->dtd_data - (unsigned char *) dtd->dtd_buf));
+  dtd->dtd_vlen += sizeof (ctf_type_t);
+  dtd->dtd_data++;
+  memset (new_prefix, 0, sizeof (ctf_type_t));
+
+  return new_prefix;
 }
 
 /* To create an empty CTF dict, we just declare a zeroed header and call
