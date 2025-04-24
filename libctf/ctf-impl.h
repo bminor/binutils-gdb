@@ -551,7 +551,7 @@ struct ctf_next
 {
   void (*ctn_iter_fun) (void);
   ctf_id_t ctn_type;
-  ssize_t ctn_size;
+  size_t ctn_size;
   ssize_t ctn_increment;
   const ctf_type_t *ctn_tp;
   uint32_t ctn_n;
