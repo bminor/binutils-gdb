@@ -459,114 +459,6 @@ ctf_link_set_variable_filter (ctf_dict_t *fp, ctf_link_variable_filter_f *filter
   return 0;
 }
 
-/* Check if we can safely add a variable with the given type to this dict.  */
-
-static int
-check_variable (const char *name, ctf_dict_t *fp, ctf_id_t type,
-		ctf_dvdef_t **out_dvd)
-{
-  ctf_dvdef_t *dvd;
-
-  dvd = ctf_dynhash_lookup (fp->ctf_dvhash, name);
-  *out_dvd = dvd;
-  if (!dvd)
-    return 1;
-
-  if (dvd->dvd_type != type)
-    {
-      /* Variable here.  Wrong type: cannot add.  Just skip it, because there is
-	 no way to express this in CTF.  Don't even warn: this case is too
-	 common.  (This might be the parent, in which case we'll try adding in
-	 the child first, and only then give up.)  */
-      ctf_dprintf ("Inexpressible duplicate variable %s skipped.\n", name);
-    }
-
-  return 0;				      /* Already exists.  */
-}
-
-/* Link one variable named NAME of type TYPE found in IN_FP into FP.  */
-
-static int
-ctf_link_one_variable (ctf_dict_t *fp, ctf_dict_t *in_fp, const char *name,
-		       ctf_id_t type, int cu_mapped)
-{
-  ctf_dict_t *per_cu_out_fp;
-  ctf_id_t dst_type = 0;
-  ctf_dvdef_t *dvd;
-
-  /* See if this variable is filtered out.  */
-
-  if (fp->ctf_link_variable_filter)
-    {
-      void *farg = fp->ctf_link_variable_filter_arg;
-      if (fp->ctf_link_variable_filter (in_fp, name, type, farg))
-	return 0;
-    }
-
-  /* If this type is mapped to a type in the parent dict, we want to try to add
-     to that first: if it reports a duplicate, or if the type is in a child
-     already, add straight to the child.  */
-
-  if ((dst_type = ctf_dedup_type_mapping (fp, in_fp, type)) == CTF_ERR)
-    return -1;					/* errno is set for us.  */
-
-  if (dst_type != 0)
-    {
-      if (!ctf_assert (fp, ctf_type_isparent (fp, dst_type)))
-	return -1;				/* errno is set for us.  */
-
-      if (check_variable (name, fp, dst_type, &dvd))
-	{
-	  /* No variable here: we can add it.  */
-	  if (ctf_add_variable (fp, name, dst_type) < 0)
-	    return -1; 				/* errno is set for us.  */
-	  return 0;
-	}
-
-      /* Already present?  Nothing to do.  */
-      if (dvd && dvd->dvd_type == dst_type)
-	return 0;
-    }
-
-  /* Can't add to the parent due to a name clash, or because it references a
-     type only present in the child.  Try adding to the child, creating if need
-     be.  If we can't do that, skip it.  Don't add to a child if we're doing a
-     CU-mapped link, since that has only one output.  */
-
-  if (cu_mapped)
-    {
-      ctf_dprintf ("Variable %s in input file %s depends on a type %lx hidden "
-		   "due to conflicts: skipped.\n", name,
-		   ctf_unnamed_cuname (in_fp), type);
-      return 0;
-    }
-
-  if ((per_cu_out_fp = ctf_create_per_cu (fp, in_fp, NULL)) == NULL)
-    return -1;					/* errno is set for us.  */
-
-  /* If the type was not found, check for it in the child too.  */
-  if (dst_type == 0)
-    {
-      if ((dst_type = ctf_dedup_type_mapping (per_cu_out_fp,
-					      in_fp, type)) == CTF_ERR)
-	return -1;				/* errno is set for us.   */
-
-      if (dst_type == 0)
-	{
-	  ctf_err_warn (fp, 1, 0, _("type %lx for variable %s in input file %s "
-				    "not found: skipped"), type, name,
-			ctf_unnamed_cuname (in_fp));
-	  /* Do not terminate the link: just skip the variable.  */
-	  return 0;
-	}
-    }
-
-  if (check_variable (name, per_cu_out_fp, dst_type, &dvd))
-    if (ctf_add_variable (per_cu_out_fp, name, dst_type) < 0)
-      return (ctf_set_errno (fp, ctf_errno (per_cu_out_fp)));
-  return 0;
-}
-
 typedef struct link_sort_inputs_cb_arg
 {
   int is_cu_mapped;
@@ -900,72 +792,9 @@ ctf_link_deduplicating_close_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
   return 0;
 }
 
-/* Do a deduplicating link of all variables in the inputs.
-
-   Also, if we are not omitting the variable section, integrate all symbols from
-   the symtypetabs into the variable section too.  (Duplication with the
-   symtypetab section in the output will be eliminated at serialization time.)  */
-
-static int
-ctf_link_deduplicating_variables (ctf_dict_t *fp, ctf_dict_t **inputs,
-				  size_t ninputs, int cu_mapped)
-{
-  size_t i;
-
-  for (i = 0; i < ninputs; i++)
-    {
-      ctf_next_t *it = NULL;
-      ctf_id_t type;
-      const char *name;
-
-      /* First the variables on the inputs.  */
-
-      while ((type = ctf_variable_next (inputs[i], &it, &name)) != CTF_ERR)
-	{
-	  if (ctf_link_one_variable (fp, inputs[i], name, type, cu_mapped) < 0)
-	    {
-	      ctf_next_destroy (it);
-	      return -1;			/* errno is set for us.  */
-	    }
-	}
-      if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
-	return ctf_set_errno (fp, ctf_errno (inputs[i]));
-
-      /* Next the symbols.  We integrate data symbols even though the compiler
-	 is currently doing the same, to allow the compiler to stop in
-	 future.  */
-
-      while ((type = ctf_symbol_next (inputs[i], &it, &name, 0)) != CTF_ERR)
-	{
-	  if (ctf_link_one_variable (fp, inputs[i], name, type, 1) < 0)
-	    {
-	      ctf_next_destroy (it);
-	      return -1;			/* errno is set for us.  */
-	    }
-	}
-      if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
-	return ctf_set_errno (fp, ctf_errno (inputs[i]));
-
-      /* Finally the function symbols.  */
-
-      while ((type = ctf_symbol_next (inputs[i], &it, &name, 1)) != CTF_ERR)
-	{
-	  if (ctf_link_one_variable (fp, inputs[i], name, type, 1) < 0)
-	    {
-	      ctf_next_destroy (it);
-	      return -1;			/* errno is set for us.  */
-	    }
-	}
-      if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
-	return ctf_set_errno (fp, ctf_errno (inputs[i]));
-    }
-  return 0;
-}
-
-/* Check for symbol conflicts during linking.  Three possibilities: already
-   exists, conflicting, or nonexistent.  We don't have a dvd structure we can
-   use as a flag like check_variable does, so we use a tristate return
-   value instead: -1: conflicting; 1: nonexistent: 0: already exists.  */
+/* Check for symbol conflicts during linking.  Three possibilities: already exists,
+   conflicting, or nonexistent.  We use a tristate return value: -1: conflicting; 1:
+   nonexistent: 0: already exists.  */
 
 static int
 check_sym (ctf_dict_t *fp, const char *name, ctf_id_t type, int functions)
@@ -1272,15 +1101,6 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 	  goto err_inputs_outputs;
 	}
 
-      if (!(fp->ctf_link_flags & CTF_LINK_OMIT_VARIABLES_SECTION)
-	  && ctf_link_deduplicating_variables (out, inputs, ninputs, 1) < 0)
-	{
-	  ctf_set_errno (fp, ctf_errno (out));
-	  ctf_err_warn (fp, 0, 0, _("CU-mapped deduplicating link variable "
-				    "emission failed for %s"), out_name);
-	  goto err_inputs_outputs;
-	}
-
       ctf_dedup_fini (out, outputs, noutputs);
 
       /* For now, we omit symbol section linking for CU-mapped links, until it
@@ -1470,13 +1290,8 @@ ctf_link_deduplicating (ctf_dict_t *fp)
       goto err;
     }
 
-  if (!(fp->ctf_link_flags & CTF_LINK_OMIT_VARIABLES_SECTION)
-      && ctf_link_deduplicating_variables (fp, inputs, ninputs, 0) < 0)
-    {
-      ctf_err_warn (fp, 0, 0, _("deduplicating link variable emission failed for "
-				"%s"), ctf_link_input_name (fp));
-      goto err_clean_outputs;
-    }
+  /* UPTODO: variable section omission, possible integration of symtypetabs (?) et
+     al */
 
   if (ctf_link_deduplicating_syms (fp, inputs, ninputs, 0) < 0)
     {

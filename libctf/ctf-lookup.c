@@ -449,64 +449,28 @@ typedef struct ctf_lookup_idx_key
   uint32_t *clik_names;
 } ctf_lookup_idx_key_t;
 
-/* A bsearch function for variable names.  */
-
-static int
-ctf_lookup_var (const void *key_, const void *lookup_)
-{
-  const ctf_lookup_idx_key_t *key = key_;
-  const ctf_varent_t *lookup = lookup_;
-
-  return (strcmp (key->clik_name, ctf_strptr (key->clik_fp, lookup->ctv_name)));
-}
-
-/* Given a variable name, return the type of the variable with that name.
-   Look only in this dict, not in the parent. */
+/* Look up some kind of thing in the name tables.  */
 
 ctf_id_t
-ctf_lookup_variable_here (ctf_dict_t *fp, const char *name)
-{
-  ctf_dvdef_t *dvd = ctf_dvd_lookup (fp, name);
-  ctf_varent_t *ent;
-  ctf_lookup_idx_key_t key = { fp, name, NULL };
-
-  if (dvd != NULL)
-    return dvd->dvd_type;
-
-  /* This array is sorted, so we can bsearch for it.  */
-
-  ent = bsearch (&key, fp->ctf_vars, fp->ctf_nvars, sizeof (ctf_varent_t),
-		 ctf_lookup_var);
-
-  if (ent == NULL)
-      return (ctf_set_typed_errno (fp, ECTF_NOTYPEDAT));
-
-  return ent->ctv_type;
-}
-
-/* As above, but look in the parent too.  */
-
-ctf_id_t
-ctf_lookup_variable (ctf_dict_t *fp, const char *name)
+ctf_lookup_by_kind (ctf_dict_t *fp, int kind, const char *name)
 {
   ctf_id_t type;
 
-  if (fp->ctf_flags & LCTF_NO_STR)
-    return (ctf_set_typed_errno (fp, ECTF_NOPARENT));
+  if (kind == CTF_K_TYPE_TAG || kind == CTF_K_DECL_TAG)
+    return (ctf_set_typed_errno (fp, ECTF_NEVERTAG));
 
-  if ((type = ctf_lookup_variable_here (fp, name)) == CTF_ERR)
-    {
-      if (ctf_errno (fp) == ECTF_NOTYPEDAT && fp->ctf_parent != NULL)
-	{
-	  if ((type = ctf_lookup_variable_here (fp->ctf_parent, name)) != CTF_ERR)
-	    return type;
-	  return (ctf_set_typed_errno (fp, ctf_errno (fp->ctf_parent)));
-	}
+  if ((type = ctf_dynhash_lookup_type (ctf_name_table (fp, kind),
+				       name)) != CTF_ERR)
+    return type;
 
-      return -1;				/* errno is set for us.  */
-    }
+  if (fp->ctf_parent
+      && (type = ctf_dynhash_lookup_type (ctf_name_table (fp->ctf_parent, kind),
+					  name)) != CTF_ERR)
+    return type;
 
-  return type;
+  return ctf_set_typed_errno (fp, ECTF_NOTYPE);
+}
+
 }
 
 /* Look up a single enumerator by enumeration constant name.  Returns the ID of

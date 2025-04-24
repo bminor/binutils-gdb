@@ -363,38 +363,10 @@ ctf_static_type (const ctf_dict_t *fp, ctf_id_t type)
   return ((unsigned long) idx <= fp->ctf_stypes);
 }
 
-int
-ctf_dvd_insert (ctf_dict_t *fp, ctf_dvdef_t *dvd)
-{
-  if (ctf_dynhash_insert (fp->ctf_dvhash, dvd->dvd_name, dvd) < 0)
-    return ctf_set_errno (fp, ENOMEM);
-  ctf_list_append (&fp->ctf_dvdefs, dvd);
-  return 0;
-}
-
-void
-ctf_dvd_delete (ctf_dict_t *fp, ctf_dvdef_t *dvd)
-{
-  ctf_dynhash_remove (fp->ctf_dvhash, dvd->dvd_name);
-  free (dvd->dvd_name);
-
-  ctf_list_delete (&fp->ctf_dvdefs, dvd);
-  free (dvd);
-}
-
-ctf_dvdef_t *
-ctf_dvd_lookup (const ctf_dict_t *fp, const char *name)
-{
-  return (ctf_dvdef_t *) ctf_dynhash_lookup (fp->ctf_dvhash, name);
-}
-
-/* Discard all of the dynamic type definitions and variable definitions that
-   have been added to the dict since the last call to ctf_update().  We locate
-   such types by scanning the dtd list and deleting elements that have type IDs
-   greater than ctf_dtoldid, which is set by ctf_update(), above, and by
-   scanning the variable list and deleting elements that have update IDs equal
-   to the current value of the last-update snapshot count (indicating that they
-   were added after the most recent call to ctf_update()).  */
+/* Discard all of the dynamic type definitions that have been added to the dict
+   since the last call to ctf_update().  We locate such types by scanning the
+   dtd list and deleting elements that have indexes greater than ctf_dtoldid,
+   which is set by ctf_update(), above.  */
 int
 ctf_discard (ctf_dict_t *fp)
 {
@@ -419,7 +391,6 @@ int
 ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 {
   ctf_dtdef_t *dtd, *ntd;
-  ctf_dvdef_t *dvd, *nvd;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -451,16 +422,6 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 
       ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type);
       ctf_dtd_delete (fp, dtd);
-    }
-
-  for (dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL; dvd = nvd)
-    {
-      nvd = ctf_list_next (dvd);
-
-      if (dvd->dvd_snapshots <= id.snapshot_id)
-	continue;
-
-      ctf_dvd_delete (fp, dvd);
     }
 
   fp->ctf_typemax = id.dtd_id;

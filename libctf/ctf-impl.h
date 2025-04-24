@@ -197,14 +197,6 @@ typedef struct ctf_dtdef
   int dtd_flags;		/* Some of the DTD_F_ flags.  */
 } ctf_dtdef_t;
 
-typedef struct ctf_dvdef
-{
-  ctf_list_t dvd_list;		/* List forward/back pointers.  */
-  char *dvd_name;		/* Name associated with variable.  */
-  ctf_id_t dvd_type;		/* Type of variable.  */
-  unsigned long dvd_snapshots;	/* Snapshot count when inserted.  */
-} ctf_dvdef_t;
-
 typedef struct ctf_err_warning
 {
   ctf_list_t cew_list;		/* List forward/back pointers.  */
@@ -419,7 +411,6 @@ struct ctf_dict
   size_t ctf_size;		  /* Size of CTF header + uncompressed data.  */
   unsigned char *ctf_serializing_buf; /* CTF buffer in mid-serialization.  */
   size_t ctf_serializing_buf_size; /* Length of that buffer.  */
-  ctf_varent_t *ctf_serializing_vars; /* Unsorted vars in mid-serialization.  */
   size_t ctf_serializing_nvars;	  /* Number of those vars.  */
   uint32_t *ctf_sxlate;		  /* Translation table for unindexed symtypetab
 				     entries.  */
@@ -471,8 +462,6 @@ struct ctf_dict
   int ctf_version;		  /* CTF data version.  */
   ctf_dynhash_t *ctf_dthash;	  /* Hash of dynamic type definitions.  */
   ctf_list_t ctf_dtdefs;	  /* List of dynamic type definitions.  */
-  ctf_dynhash_t *ctf_dvhash;	  /* Hash of dynamic variable mappings.  */
-  ctf_list_t ctf_dvdefs;	  /* List of dynamic variable definitions.  */
   unsigned long ctf_dtoldid;	  /* Oldest id that has been committed.  */
   unsigned long ctf_snapshots;	  /* ctf_snapshot() plus ctf_update() count.  */
   unsigned long ctf_snapshot_lu;  /* ctf_snapshot() call count at last update.  */
@@ -759,10 +748,6 @@ extern int ctf_dtd_insert (ctf_dict_t *, ctf_dtdef_t *, int flag, int kind);
 extern void ctf_dtd_delete (ctf_dict_t *, ctf_dtdef_t *);
 extern ctf_dtdef_t *ctf_dtd_lookup (const ctf_dict_t *, ctf_id_t);
 extern ctf_dtdef_t *ctf_dynamic_type (const ctf_dict_t *, ctf_id_t);
-
-extern int ctf_dvd_insert (ctf_dict_t *, ctf_dvdef_t *);
-extern void ctf_dvd_delete (ctf_dict_t *, ctf_dvdef_t *);
-extern ctf_dvdef_t *ctf_dvd_lookup (const ctf_dict_t *, const char *);
 
 extern ctf_id_t ctf_add_encoded (ctf_dict_t *, uint32_t, const char *,
 				 const ctf_encoding_t *, uint32_t kind);

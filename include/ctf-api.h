@@ -571,6 +571,14 @@ extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 extern ctf_id_t ctf_lookup_enumerator (ctf_dict_t *, const char *,
 				       int64_t *enum_value);
 
+/* Look up a type of a given kind by name.  This serves to look up kinds in
+   their own namespaces which do not have explicit lookup functions above:
+   datasecs.  The only kinds you can't look up with this function are
+   CTF_K_TYPE_TAG and CTF_K_DECL_TAG, since they may be associated with many
+   types: use ctf_tag_next. */
+
+extern ctf_id_t ctf_lookup_by_kind (ctf_dict_t *, int kind, const char *);
+
 /* Type lookup functions.  */
 
 /* Strip qualifiers and typedefs off a type, returning the base type.
