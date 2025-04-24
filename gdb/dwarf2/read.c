@@ -3203,13 +3203,13 @@ process_psymtab_comp_unit (dwarf2_per_cu *this_cu,
 						       language_minimal,
 						       &abbrev_table_cache);
 
-      if (new_reader->cu () == nullptr || new_reader->is_dummy ())
+      if (new_reader->is_dummy ())
 	return;
 
       reader = storage->preserve (std::move (new_reader));
     }
 
-  if (reader->top_level_die () == nullptr || reader->is_dummy ())
+  if (reader->is_dummy ())
     return;
 
   if (this_cu->is_debug_types)

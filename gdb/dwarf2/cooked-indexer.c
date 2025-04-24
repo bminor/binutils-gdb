@@ -116,15 +116,13 @@ cooked_indexer::ensure_cu_exists (cutu_reader *reader,
 					 nullptr, false, language_minimal,
 					 &abbrev_table_cache);
 
-      if (new_reader->is_dummy () || new_reader->top_level_die () == nullptr
-	  || !new_reader->top_level_die ()->has_children)
+      if (new_reader->is_dummy ())
 	return nullptr;
 
       result = m_index_storage->preserve (std::move (new_reader));
     }
 
-  if (result->is_dummy () || result->top_level_die () == nullptr
-      || !result->top_level_die ()->has_children)
+  if (result->is_dummy ())
     return nullptr;
 
   if (for_scanning)
