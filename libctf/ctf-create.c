@@ -302,28 +302,20 @@ ctf_dtd_insert (ctf_dict_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
 void
 ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 {
-  int kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-  int name_kind = kind;
-  const char *name;
+  const char *name = ctf_type_name_raw (fp, dtd->dtd_type);
+  int name_kind = ctf_type_kind_forwarded (fp, dtd->dtd_type);
+
+  /* Repeated calls should do nothing.  */
+  if (name_kind < 0 && ctf_errno (fp) == ECTF_BADID)
+    return;
 
   ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type);
 
-  switch (kind)
-    {
-    case CTF_K_FORWARD:
-      name_kind = dtd->dtd_data.ctt_type;
-      break;
-    }
-  free (dtd->dtd_vlen);
-  dtd->dtd_vlen_alloc = 0;
+  if (name != NULL && name[0] != '\0'
+      && LCTF_INFO_ISROOT (fp, dtd->dtd_buf->ctt_info))
+    ctf_dynhash_remove (ctf_name_table (fp, name_kind), name);
 
-  if (dtd->dtd_data.ctt_name
-      && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL)
-    {
-      if (LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
-	ctf_dynhash_remove (ctf_name_table (fp, name_kind), name);
-    }
-
+  free (dtd->dtd_buf);
   ctf_list_delete (&fp->ctf_dtdefs, dtd);
   free (dtd);
 }
@@ -403,24 +395,10 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs); dtd != NULL; dtd = ntd)
     {
-      int kind;
-      const char *name;
-
       ntd = ctf_list_next (dtd);
 
       if (ctf_type_to_index (fp, dtd->dtd_type) <= id.dtd_id)
 	continue;
-
-      kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-      if (kind == CTF_K_FORWARD)
-	kind = dtd->dtd_data.ctt_type;
-
-      if (dtd->dtd_data.ctt_name
-	  && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL
-	  && LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info))
-	ctf_dynhash_remove (ctf_name_table (fp, kind), name);
-
-      ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type);
       ctf_dtd_delete (fp, dtd);
     }
 
@@ -523,12 +501,19 @@ ctf_assign_id (ctf_dict_t *fp)
   return ctf_index_to_type (fp, idx);
 }
 
-/* Note: vlen is the amount of space *allocated* for the vlen.  It may well not
-   be the amount of space used (yet): the space used is declared in per-kind
-   fashion in the dtd_data's info word.  */
-static ctf_id_t
+/* Note: vbytes is the amount of space needed by the vlen, plus as many as are
+   needed by the PREFIXES, plus any further prefixes (e.g. for hidden types).
+   It is required to be the amount of space used, as recorded in the per-kind
+   info word.  vbytes_extra is some extra space that can be allocated to reduce
+   realloc calls.
+
+   TYPEP is a pointer to either the actual type structure with the name in it,
+   or to the first prefix requested by PREFIXES, if nonzero.  */
+
+static ctf_dtdef_t *
 ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
-		 size_t vbytes, ctf_dtdef_t **rp)
+		 int prefixes, size_t vbytes, size_t vbytes_extra,
+		 ctf_type_t **typep)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type;
@@ -538,71 +523,116 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
     pfp = fp->ctf_parent;
 
   if (flag != CTF_ADD_NONROOT && flag != CTF_ADD_ROOT)
-    return (ctf_set_typed_errno (fp, EINVAL));
+    {
+      ctf_set_errno (fp, EINVAL);
+      return NULL;
+    }
 
   if (fp->ctf_typemax + 1 >= pfp->ctf_provtypemax)
-    return (ctf_set_typed_errno (fp, ECTF_FULL));
+    {
+      ctf_set_errno (fp, ECTF_FULL);
+      return NULL;
+    }
 
   /* Prohibit addition of types in the middle of serialization.  */
 
   if (fp->ctf_flags & LCTF_NO_TYPE)
-    return (ctf_set_errno (fp, ECTF_NOTSERIALIZED));
+    {
+      ctf_set_errno (fp, ECTF_NOTSERIALIZED);
+      return NULL;
+    }
 
   if (fp->ctf_flags & LCTF_NO_STR)
-    return (ctf_set_errno (fp, ECTF_NOPARENT));
+    {
+      ctf_set_errno (fp, ECTF_NOPARENT);
+      return NULL;
+    }
 
   if (fp->ctf_flags & LCTF_CHILD && fp->ctf_parent == NULL)
-    return (ctf_set_errno (fp, ECTF_NOPARENT));
+    {
+      ctf_set_errno (fp, ECTF_NOPARENT);
+      return NULL;
+    }
 
   /* Prohibit addition of a root-visible type that is already present
-     in the non-dynamic portion. */
+     in the non-dynamic portion.  Two exceptions: type and decl tags,
+     whose identifier tables are unusual (duplicates are expected).  */
 
-  if (flag == CTF_ADD_ROOT && name != NULL && name[0] != '\0')
+  if (flag == CTF_ADD_ROOT && name != NULL && name[0] != '\0'
+      && kind != CTF_K_TYPE_TAG && kind != CTF_K_DECL_TAG)
     {
       ctf_id_t existing;
 
       if (((existing = ctf_dynhash_lookup_type (ctf_name_table (fp, kind),
 						name)) > 0)
 	  && ctf_static_type (fp, existing))
-	return (ctf_set_typed_errno (fp, ECTF_RDONLY));
+	{
+	  ctf_set_errno (fp, ECTF_RDONLY);
+	  return NULL;
+	}
     }
 
   /* Make sure ptrtab always grows to be big enough for all types.  */
   if (ctf_grow_ptrtab (fp) < 0)
-    return CTF_ERR;				/* errno is set for us. */
+    return NULL;				/* errno is set for us. */
 
   if ((dtd = calloc (1, sizeof (ctf_dtdef_t))) == NULL)
-    return (ctf_set_typed_errno (fp, EAGAIN));
-
-  dtd->dtd_vlen_alloc = vbytes;
-  if (vbytes > 0)
     {
-      if ((dtd->dtd_vlen = calloc (1, vbytes)) == NULL)
-	goto oom;
+      ctf_set_typed_errno (fp, EAGAIN);
+      return NULL;
     }
-  else
-    dtd->dtd_vlen = NULL;
+
+  dtd->dtd_buf_size = vbytes + vbytes_extra + sizeof (ctf_type_t);
+  dtd->dtd_vlen_size = vbytes;
+
+  /* The non-root flag is implemented via prefixes.  */
+  if (flag == CTF_ADD_NONROOT)
+    dtd->dtd_buf_size += sizeof (ctf_type_t);
+
+  if (prefixes)
+    dtd->dtd_buf_size += (sizeof (ctf_type_t) * prefixes);
+
+  if ((dtd->dtd_buf = calloc (1, dtd->dtd_buf_size)) == NULL)
+    goto oom;
+  dtd->dtd_vlen = ((unsigned char *) dtd->dtd_buf) + dtd->dtd_buf_size
+    - vbytes - vbytes_extra;
+  dtd->dtd_data = (ctf_type_t *) (dtd->dtd_vlen - sizeof (ctf_type_t));
 
   type = ctf_assign_id (fp);
 
-  dtd->dtd_data.ctt_name = ctf_str_add (fp, name);
+  /* Populate a conflicting type kind if need be.  This has vlen-in-bytes filled
+     in if small enough to fit, to help prefix-unaware clients skip the prefix
+     easily, but the vlen is otherwise redundant (and not used by libctf).  */
+  if (flag == CTF_ADD_NONROOT)
+    dtd->dtd_buf->ctt_info = CTF_TYPE_INFO (CTF_K_CONFLICTING, 0,
+					    dtd->dtd_vlen_size < 65536
+					    ? dtd->dtd_vlen_size : 0);
+
+  dtd->dtd_data->ctt_name = ctf_str_add (fp, name);
   dtd->dtd_type = type;
 
-  if (dtd->dtd_data.ctt_name == 0 && name != NULL && name[0] != '\0')
+  if (dtd->dtd_data->ctt_name == 0 && name != NULL && name[0] != '\0')
     goto oom;
 
   if (ctf_dtd_insert (fp, dtd, flag, kind) < 0)
     goto err;					/* errno is set for us.  */
 
-  *rp = dtd;
-  return type;
+  /* Return a pointer to the first user-requested prefix, if any.  i.e., don't
+     return a pointer to the non-root CONFLICTING header.  */
+
+  if (typep)
+    *typep = dtd->dtd_buf + (flag == CTF_ADD_NONROOT);
+
+  fp->ctf_serialize.cs_initialized = 0;
+
+  return dtd;
 
  oom:
   ctf_set_errno (fp, EAGAIN);
  err:
-  free (dtd->dtd_vlen);
+  free (dtd->dtd_buf);
   free (dtd);
-  return CTF_ERR;
+  return NULL;
 }
 
 /* When encoding integer sizes, we want to convert a byte count in the range
