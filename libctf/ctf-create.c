@@ -930,48 +930,58 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
   if (ctc->ctc_flags & CTF_FUNC_VARARG)
     vdat[vlen - 1] = 0;		   /* Add trailing zero to indicate varargs.  */
 
-  return type;
+  return dtd->dtd_type;
+}
+
+static ctf_id_t
+ctf_add_sou_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
+		   size_t size, int kind)
+{
+  ctf_dtdef_t *dtd;
+  ctf_type_t *prefix;
+  ctf_id_t type = 0;
+  uint32_t idx;
+  size_t initial_vbytes = sizeof (ctf_member_t) * INITIAL_VLEN;
+  int root_flag = flag & (~CTF_ADD_STRUCT_BITFIELDS);
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
+  /* Promote root-visible forwards to structs/unions.  */
+  if (name != NULL && root_flag == CTF_ADD_ROOT)
+    type = ctf_lookup_by_rawname (fp, kind, name);
+
+  if (type > 0)
+    idx = ctf_type_to_index (fp, type);
+
+  /* Prohibit promotion if this type was ctf_open()ed.  */
+  if (type > 0 && idx < fp->ctf_stypes)
+    return (ctf_set_errno (fp, ECTF_RDONLY));
+
+  if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
+    {
+      dtd = ctf_dtd_lookup (fp, type);
+
+      if ((prefix = ctf_add_prefix (fp, dtd, initial_vbytes)) == NULL)
+	return CTF_ERR;				/* errno is set for us.  */
+    }
+  else if ((dtd = ctf_add_generic (fp, root_flag, name, kind, 1, 0,
+				   initial_vbytes, &prefix)) == NULL)
+    return CTF_ERR;				/* errno is set for us.  */
+
+  prefix->ctt_info = CTF_TYPE_INFO (CTF_K_BIG, 0, 0);
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, !!(flag & CTF_ADD_STRUCT_BITFIELDS), 0);
+  prefix->ctt_size = CTF_SIZE_TO_LSIZE_HI (size);
+  dtd->dtd_data->ctt_size = CTF_SIZE_TO_LSIZE_LO (size);
+
+  return dtd->dtd_type;
 }
 
 ctf_id_t
 ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
 		      size_t size)
 {
-  ctf_dtdef_t *dtd;
-  ctf_id_t type = 0;
-  size_t initial_vbytes = sizeof (ctf_lmember_t) * INITIAL_VLEN;
-
-  if (fp->ctf_flags & LCTF_NO_STR)
-    return (ctf_set_errno (fp, ECTF_NOPARENT));
-
-  /* Promote root-visible forwards to structs.  */
-  if (name != NULL && flag == CTF_ADD_ROOT)
-    type = ctf_lookup_by_rawname (fp, CTF_K_STRUCT, name);
-
-  /* Prohibit promotion if this type was ctf_open()ed.  */
-  if (type > 0 && type < fp->ctf_stypes)
-    return (ctf_set_errno (fp, ECTF_RDONLY));
-
-  if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
-    dtd = ctf_dtd_lookup (fp, type);
-  else if ((type = ctf_add_generic (fp, flag, name, CTF_K_STRUCT,
-				    initial_vbytes, &dtd)) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
-
-  /* Forwards won't have any vlen yet.  */
-  if (dtd->dtd_vlen_alloc == 0)
-    {
-      if ((dtd->dtd_vlen = calloc (1, initial_vbytes)) == NULL)
-	return (ctf_set_typed_errno (fp, ENOMEM));
-      dtd->dtd_vlen_alloc = initial_vbytes;
-    }
-
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_STRUCT, flag, 0);
-  dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
-  dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (size);
-  dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (size);
-
-  return type;
+  return ctf_add_sou_sized (fp, flag, name, size, CTF_K_STRUCT);
 }
 
 ctf_id_t
@@ -984,41 +994,7 @@ ctf_id_t
 ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
 		     size_t size)
 {
-  ctf_dtdef_t *dtd;
-  ctf_id_t type = 0;
-  size_t initial_vbytes = sizeof (ctf_lmember_t) * INITIAL_VLEN;
-
-  if (fp->ctf_flags & LCTF_NO_STR)
-    return (ctf_set_errno (fp, ECTF_NOPARENT));
-
-  /* Promote root-visible forwards to unions.  */
-  if (name != NULL && flag == CTF_ADD_ROOT)
-    type = ctf_lookup_by_rawname (fp, CTF_K_UNION, name);
-
-  /* Prohibit promotion if this type was ctf_open()ed.  */
-  if (type > 0 && type < fp->ctf_stypes)
-    return (ctf_set_errno (fp, ECTF_RDONLY));
-
-  if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
-    dtd = ctf_dtd_lookup (fp, type);
-  else if ((type = ctf_add_generic (fp, flag, name, CTF_K_UNION,
-				    initial_vbytes, &dtd)) == CTF_ERR)
-    return CTF_ERR;		/* errno is set for us.  */
-
-  /* Forwards won't have any vlen yet.  */
-  if (dtd->dtd_vlen_alloc == 0)
-    {
-      if ((dtd->dtd_vlen = calloc (1, initial_vbytes)) == NULL)
-	return (ctf_set_typed_errno (fp, ENOMEM));
-      dtd->dtd_vlen_alloc = initial_vbytes;
-    }
-
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_UNION, flag, 0);
-  dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
-  dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (size);
-  dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (size);
-
-  return type;
+  return ctf_add_sou_sized (fp, flag, name, size, CTF_K_UNION);
 }
 
 ctf_id_t

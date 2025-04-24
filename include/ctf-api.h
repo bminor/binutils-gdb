@@ -250,7 +250,9 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_UNSTABLE, "Attempt to write unstable file format version: set I_KNOW_LIBCTF_IS_UNSTABLE in the environment.") \
   _CTF_ITEM (ECTF_HASPARENT, "Cannot ctf_import: dict already has a parent.") \
   _CTF_ITEM (ECTF_WRONGPARENT, "Cannot ctf_import: incorrect parent provided.") \
-  _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.")
+  _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.") \
+  _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
+  _CTF_ITEM (ECTF_DESCENDING, "Structure offsets may not descend.") \
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -284,6 +286,7 @@ _CTF_ERRORS
 
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
+#define CTF_ADD_STRUCT_BITFIELDS 2 /* Struct/union field-level bitfields */
 
 /* Flags for ctf_member_next.  */
 
@@ -842,13 +845,15 @@ extern ctf_id_t ctf_add_restrict (ctf_dict_t *, uint32_t, ctf_id_t);
 /* Struct and union addition.  Straight addition uses possibly-confusing rules
    to guess the final size of the struct/union given its members: to explicitly
    state the size of the struct or union (to report compiler-generated padding,
-   etc) use the _sized variants.  */
+   etc) use the _sized variants.  The FLAG parameter can take the value
+   CTF_ADD_STRUCT_BITFIELDS, indicating that bitfields can be directly added
+   to this struct via ctf_add_member_bitfield.  */
 
-extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t, const char *);
-extern ctf_id_t ctf_add_union (ctf_dict_t *, uint32_t, const char *);
-extern ctf_id_t ctf_add_struct_sized (ctf_dict_t *, uint32_t, const char *,
+extern ctf_id_t ctf_add_struct (ctf_dict_t *, uint32_t flag, const char *);
+extern ctf_id_t ctf_add_union (ctf_dict_t *, uint32_t flag, const char *);
+extern ctf_id_t ctf_add_struct_sized (ctf_dict_t *, uint32_t flag, const char *,
 				      size_t);
-extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t, const char *,
+extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t flag, const char *,
 				     size_t);
 
 /* Note that CTF cannot encode a given type.  This usually returns an
