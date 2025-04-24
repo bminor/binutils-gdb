@@ -6339,43 +6339,69 @@ cutu_reader::create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
   while (info_ptr < end_ptr)
     {
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
+      ULONGEST signature;
+      unsigned int length;
 
-      /* The length of the CU gets set by the cutu_reader just below.  */
-      dwarf2_per_cu per_cu (per_bfd, &section, sect_off, 0 /* length */,
-			    false /* is_dwz */);
-      cutu_reader reader (per_cu, *per_objfile, language_minimal,
-			  *cu, dwo_file);
-
-      info_ptr += per_cu.length ();
-
-      if (reader.is_dummy())
-	continue;
-
-      /* DWARF 5 .debug_info.dwo sections may contain some type units.  Skip
-	 everything that is not a compile unit.  */
-      if (const auto ut = reader.cu ()->header.unit_type;
-	  ut != DW_UT_compile && ut != DW_UT_split_compile)
-	continue;
-
-      std::optional<ULONGEST> signature
-	= lookup_dwo_id (reader.cu (), reader.top_level_die ());
-      if (!signature.has_value ())
+      if (cu->header.version < 5)
 	{
-	  complaint (_(DWARF_ERROR_PREFIX
-		       "debug entry at offset %s is missing its dwo_id"
-		       " [in module %s]"),
-		     sect_offset_str (sect_off),
-		     dwo_file.dwo_name.c_str ());
-	  continue;
+	  /* The length of the CU gets set by the cutu_reader just below.  */
+	  dwarf2_per_cu per_cu (per_bfd, &section, sect_off, 0 /* length */,
+				false /* is_dwz */);
+	  cutu_reader reader (per_cu, *per_objfile, language_minimal, *cu,
+			      dwo_file);
+
+	  info_ptr += per_cu.length ();
+
+	  if (reader.is_dummy ())
+	    continue;
+
+	  std::optional<ULONGEST> opt_signature
+	    = lookup_dwo_id (reader.cu (), reader.top_level_die ());
+	  if (!opt_signature.has_value ())
+	    {
+	      complaint (_(DWARF_ERROR_PREFIX
+			   "debug entry at offset %s is missing its dwo_id"
+			   " [in module %s]"),
+			 sect_offset_str (sect_off),
+			 dwo_file.dwo_name.c_str ());
+	      continue;
+	    }
+
+	  signature = *opt_signature;
+	  length = per_cu.length ();
+	}
+      else
+	{
+	  unit_head header;
+	  dwarf2_section_info *abbrev_section = &dwo_file.sections.abbrev;
+	  const gdb_byte *info_ptr_post_header
+	    = read_and_check_unit_head (&header, &section, abbrev_section,
+					info_ptr, ruh_kind::COMPILE);
+
+	  length = header.get_length_with_initial ();
+	  info_ptr += length;
+
+	  /* Skip dummy units.  */
+	  if (info_ptr_post_header >= info_ptr
+	      || peek_abbrev_code (section.get_bfd_owner (),
+				   info_ptr_post_header) == 0)
+	    continue;
+
+	  /* DWARF 5 .debug_info.dwo sections may contain some type units.  Skip
+	     everything that is not a compile unit.  */
+	  if (header.unit_type != DW_UT_split_compile)
+	    continue;
+
+	  signature = header.signature;
 	}
 
       dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
 
       dwo_unit->dwo_file = &dwo_file;
-      dwo_unit->signature = *signature;
+      dwo_unit->signature = signature;
       dwo_unit->section = &section;
       dwo_unit->sect_off = sect_off;
-      dwo_unit->length = per_cu.length ();
+      dwo_unit->length = length;
 
       dwarf_read_debug_printf ("  offset %s, dwo_id %s",
 			       sect_offset_str (sect_off),
