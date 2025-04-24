@@ -69,7 +69,6 @@ class BaseReference(ABC):
         NAME is a string or None.  None means this does not have a
         name, e.g., the result of expression evaluation."""
 
-        global all_variables
         all_variables.append(self)
         self._ref = len(all_variables)
         self._name = name
@@ -267,7 +266,7 @@ class VariableReference(BaseReference):
 @in_gdb_thread
 def find_variable(ref):
     """Given a variable reference, return the corresponding variable object."""
-    global all_variables
+
     # Variable references are offset by 1.
     ref = ref - 1
     if ref < 0 or ref > len(all_variables):

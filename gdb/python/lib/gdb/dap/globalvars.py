@@ -78,7 +78,6 @@ def get_global_scope(frame):
     except RuntimeError:
         return None
 
-    global _id_to_scope
     block = block.static_block
     if block in _id_to_scope:
         return _id_to_scope[block]

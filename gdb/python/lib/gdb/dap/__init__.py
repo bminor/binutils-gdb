@@ -96,5 +96,4 @@ def pre_command_loop():
         # These are handy for bug reports.
         startup.exec_and_log("show version")
         startup.exec_and_log("show configuration")
-        global server
         startup.start_dap(server.main_loop)

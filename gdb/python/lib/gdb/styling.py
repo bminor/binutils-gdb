@@ -80,7 +80,6 @@ try:
             # ignore.
             pass
 
-        global _asm_lexers
         if lexer_type not in _asm_lexers:
             _asm_lexers[lexer_type] = lexers.get_lexer_by_name(lexer_type)
             _asm_lexers[lexer_type].add_filter(HandleNasmComments())

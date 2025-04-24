@@ -53,12 +53,11 @@ gdb.events.cont.connect(_clear_frame_ids)
 @in_gdb_thread
 def frame_for_id(id):
     """Given a frame identifier ID, return the corresponding frame."""
-    global thread_ids
     if id in thread_ids:
         thread_id = thread_ids[id]
         if thread_id != gdb.selected_thread().global_num:
             set_thread(thread_id)
-    global _all_frames
+
     return _all_frames[id]
 
 
@@ -103,10 +102,8 @@ def _frame_id_generator():
 
     # Helper function to assign an ID to a frame.
     def get_id(frame):
-        global _all_frames
         num = len(_all_frames)
         _all_frames.append(frame)
-        global thread_ids
         thread_ids[num] = gdb.selected_thread().global_num
         return num
 
@@ -128,7 +125,6 @@ def _frame_id_generator():
 @in_gdb_thread
 def _get_frame_iterator():
     thread_id = gdb.selected_thread().global_num
-    global _iter_map
     if thread_id not in _iter_map:
         _iter_map[thread_id] = _MemoizingIterator(_frame_id_generator())
     return _iter_map[thread_id]

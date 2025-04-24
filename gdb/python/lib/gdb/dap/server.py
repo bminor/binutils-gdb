@@ -307,7 +307,6 @@ class Server:
             args = {}
 
         def fn():
-            global _commands
             return _commands[params["command"]](**args)
 
         self.invoke_request(req, result, fn)
@@ -440,7 +439,6 @@ def send_event(event, body=None):
     """Send an event to the DAP client.
     EVENT is the name of the event, a string.
     BODY is the body of the event, an arbitrary object."""
-    global _server
     _server.send_event(event, body)
 
 
@@ -449,13 +447,11 @@ def send_event_maybe_later(event, body=None):
     within the dap thread and that request is configured to delay the event,
     wait until the response has been sent until the event is sent back to
     the client."""
-    global _server
     _server.send_event_maybe_later(event, body)
 
 
 def call_function_later(fn):
     """Call FN later -- after the current request's response has been sent."""
-    global _server
     _server.call_function_later(fn)
 
 
@@ -533,7 +529,6 @@ def request(
 
             if response:
                 if defer_stop_events:
-                    global _server
                     if _server is not None:
                         with _server.delayed_events_lock:
                             _server.defer_stop_events = True
@@ -555,7 +550,6 @@ def request(
         if expect_stopped:
             cmd = _check_not_running(cmd)
 
-        global _commands
         assert name not in _commands
         _commands[name] = cmd
         return cmd
@@ -568,7 +562,6 @@ def capability(name, value=True):
     the DAP capability NAME."""
 
     def wrap(func):
-        global _capabilities
         assert name not in _capabilities
         _capabilities[name] = value
         return func
@@ -581,7 +574,6 @@ def client_bool_capability(name, default=False):
 
     If the capability was not specified, or did not have boolean type,
     DEFAULT is returned.  DEFAULT defaults to False."""
-    global _server
     if name in _server.config and isinstance(_server.config[name], bool):
         return _server.config[name]
     return default
@@ -589,7 +581,6 @@ def client_bool_capability(name, default=False):
 
 @request("initialize", on_dap_thread=True)
 def initialize(**args):
-    global _server, _capabilities
     _server.config = args
     _server.send_event_later("initialized")
     global _lines_start_at_1
@@ -705,7 +696,6 @@ def export_line(line: int) -> int:
     """Rewrite LINE according to client capability.
     This applies the linesStartAt1 capability as needed,
     when sending a line number from gdb to the client."""
-    global _lines_start_at_1
     if not _lines_start_at_1:
         # In gdb, lines start at 1, so we only need to change this if
         # the client starts at 0.
@@ -717,7 +707,6 @@ def import_line(line: int) -> int:
     """Rewrite LINE according to client capability.
     This applies the linesStartAt1 capability as needed,
     when the client sends a line number to gdb."""
-    global _lines_start_at_1
     if not _lines_start_at_1:
         # In gdb, lines start at 1, so we only need to change this if
         # the client starts at 0.

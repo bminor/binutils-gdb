@@ -164,7 +164,6 @@ def attach(
 @request("configurationDone", on_dap_thread=True)
 def config_done(**args):
     # Handle the launch or attach.
-    global _launch_or_attach_promise
     if _launch_or_attach_promise is None:
         raise DAPException("launch or attach not specified")
     # Resolve the launch or attach, but only after the

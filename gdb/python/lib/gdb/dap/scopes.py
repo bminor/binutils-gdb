@@ -120,7 +120,6 @@ class _FinishScopeReference(_ScopeReference):
 
     def fetch_one_child(self, idx):
         assert idx == 0
-        global _last_return_value
         return ("(return)", _last_return_value)
 
 
@@ -145,8 +144,6 @@ class _RegisterReference(_ScopeReference):
 
 @request("scopes")
 def scopes(*, frameId: int, **extra):
-    global _last_return_value
-    global frame_to_scope
     if frameId in frame_to_scope:
         scopes = frame_to_scope[frameId]
     else:

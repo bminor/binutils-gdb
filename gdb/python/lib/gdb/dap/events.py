@@ -238,7 +238,6 @@ def _on_stop(event):
     ):
         obj["reason"] = "pause"
     else:
-        global stop_reason_map
         obj["reason"] = stop_reason_map[event.details["reason"]]
     _expected_pause = False
     send_event_maybe_later("stopped", obj)
