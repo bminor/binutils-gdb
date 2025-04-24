@@ -1275,18 +1275,21 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 }
 
 int
-ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
-		       ctf_id_t type, unsigned long bit_offset)
+ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
+			 ctf_id_t type, unsigned long bit_offset,
+			 int bit_width)
 {
   ctf_dict_t *ofp = fp;
   ctf_dict_t *tmp = fp;
-  ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, souid);
+  ctf_dtdef_t *dtd;
+  ctf_type_t *prefix;
 
-  ssize_t msize, malign, ssize;
-  uint32_t kind, vlen, root;
+  ssize_t msize, ssize;
+  uint32_t kind, kflag;
+  size_t vlen;
   size_t i;
   int is_incomplete = 0;
-  ctf_lmember_t *memb;
+  ctf_member_t *memb;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -1305,53 +1308,71 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
       fp = fp->ctf_parent;
     }
 
+  dtd = ctf_dtd_lookup (fp, souid);
+
   if (souid < fp->ctf_stypes)
     return (ctf_set_errno (ofp, ECTF_RDONLY));
 
   if (dtd == NULL)
     return (ctf_set_errno (ofp, ECTF_BADID));
 
-  if ((ctf_lookup_by_id (&tmp, type)) == NULL)
+  if ((ctf_lookup_by_id (&tmp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
   if (name != NULL && name[0] == '\0')
     name = NULL;
 
-  kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-  root = LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info);
-  vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
+  if ((prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
+    return (ctf_set_errno (ofp, ECTF_CORRUPT));
+
+  kind = LCTF_KIND (fp, prefix);
+  kflag = CTF_INFO_KFLAG (dtd->dtd_data->ctt_info);
+  vlen = LCTF_VLEN (fp, prefix);
 
   if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
     return (ctf_set_errno (ofp, ECTF_NOTSOU));
 
+  if (!kflag && bit_width != 0)
+    return (ctf_set_errno (ofp, ECTF_NOTBITSOU));
+
   if (vlen == CTF_MAX_VLEN)
     return (ctf_set_errno (ofp, ECTF_DTFULL));
 
-  if (ctf_grow_vlen (fp, dtd, sizeof (ctf_lmember_t) * (vlen + 1)) < 0)
-    return (ctf_set_errno (ofp, ctf_errno (fp)));
-  memb = (ctf_lmember_t *) dtd->dtd_vlen;
+  /* Figure out the offset of this field: all structures in DTDs
+     are CTF_K_BIG, which means their offsets are all encoded as
+     distances from the last field's.  */
+
+  if (bit_offset != (unsigned long) -1)
+    {
+      if (bit_offset < dtd->dtd_last_offset)
+	return (ctf_set_errno (ofp, ECTF_DESCENDING));
+
+      bit_offset -= dtd->dtd_last_offset;
+    }
+
+  memb = (ctf_member_t *) dtd->dtd_vlen;
 
   if (name != NULL)
     {
       for (i = 0; i < vlen; i++)
-	if (strcmp (ctf_strptr (fp, memb[i].ctlm_name), name) == 0)
+	if (strcmp (ctf_strptr (fp, memb[i].ctm_name), name) == 0)
 	  return (ctf_set_errno (ofp, ECTF_DUPLICATE));
     }
 
   if ((msize = ctf_type_size (fp, type)) < 0 ||
-      (malign = ctf_type_align (fp, type)) < 0)
+      (ctf_type_align (fp, type)) < 0)
     {
       /* The unimplemented type, and any type that resolves to it, has no size
 	 and no alignment: it can correspond to any number of compiler-inserted
 	 types.  We allow incomplete types through since they are routinely
 	 added to the ends of structures, and can even be added elsewhere in
-	 structures by the deduplicator.  They are assumed to be zero-size with
-	 no alignment: this is often wrong, but problems can be avoided in this
-	 case by explicitly specifying the size of the structure via the _sized
-	 functions.  The deduplicator always does this.  */
+	 structures by the deduplicator and by the padding inserter below.  They
+	 are assumed to be zero-size with no alignment: this is often wrong, but
+	 problems can be avoided in this case by explicitly specifying the size
+	 of the structure via the _sized functions.  The deduplicator always
+	 does this.  */
 
       msize = 0;
-      malign = 0;
       if (ctf_errno (fp) == ECTF_NONREPRESENTABLE)
 	ctf_set_errno (fp, 0);
       else if (ctf_errno (fp) == ECTF_INCOMPLETE)
@@ -1360,95 +1381,130 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	return -1;		/* errno is set for us.  */
     }
 
-  memb[vlen].ctlm_name = ctf_str_add (fp, name);
-  memb[vlen].ctlm_type = type;
-  if (memb[vlen].ctlm_name == 0 && name != NULL && name[0] != '\0')
-    return -1;			/* errno is set for us.  */
+  /* Figure out the right offset for naturally-aligned types, if need be,
+     and insert additional unnamed members as needed.  */
 
-  if (kind == CTF_K_STRUCT && vlen != 0)
+  if (kind == CTF_K_UNION || vlen == 0)
     {
+      bit_offset = 0;
+      ssize = ctf_get_ctt_size (fp, prefix, NULL, NULL);
+      ssize = MAX (ssize, msize);
+    }
+  else 				/* Subsequent struct member. */
+    {
+      size_t bound;
+      ssize_t off;
+      int added_padding = 0;
+
       if (bit_offset == (unsigned long) - 1)
 	{
 	  /* Natural alignment.  */
 
-	  ctf_id_t ltype = ctf_type_resolve (fp, memb[vlen - 1].ctlm_type);
-	  size_t off = CTF_LMEM_OFFSET(&memb[vlen - 1]);
-
-	  ctf_encoding_t linfo;
-	  ssize_t lsize;
-
-	  /* Propagate any error from ctf_type_resolve.  If the last member was
-	     of unimplemented type, this may be -ECTF_NONREPRESENTABLE: we
-	     cannot insert right after such a member without explicit offset
-	     specification, because its alignment and size is not known.  */
-	  if (ltype == CTF_ERR)
-	    return -1;				/* errno is set for us.  */
-
 	  if (is_incomplete)
 	    {
 	      ctf_err_warn (ofp, 1, ECTF_INCOMPLETE,
-			    _("ctf_add_member_offset: cannot add member %s of "
+			    _("ctf_add_member: cannot add member %s of "
 			      "incomplete type %lx to struct %lx without "
 			      "specifying explicit offset\n"),
 			    name ? name : _("(unnamed member)"), type, souid);
 	      return (ctf_set_errno (ofp, ECTF_INCOMPLETE));
 	    }
 
-	  if (ctf_type_encoding (fp, ltype, &linfo) == 0)
-	    off += linfo.cte_bits;
-	  else if ((lsize = ctf_type_size (fp, ltype)) > 0)
-	    off += lsize * CHAR_BIT;
-	  else if (lsize == -1 && ctf_errno (fp) == ECTF_INCOMPLETE)
+	  if ((off = ctf_type_align_natural (fp, memb[vlen - 1].ctm_type,
+					     type, dtd->dtd_last_offset)) < 0)
 	    {
-	      const char *lname = ctf_strraw (fp, memb[vlen - 1].ctlm_name);
+	      if (ctf_errno (fp) == ECTF_INCOMPLETE)
+		{
+		  const char *lname = ctf_strraw (fp, memb[vlen - 1].ctm_name);
 
-	      ctf_err_warn (ofp, 1, ECTF_INCOMPLETE,
-			    _("ctf_add_member_offset: cannot add member %s of "
-			      "type %lx to struct %lx without specifying "
-			      "explicit offset after member %s of type %lx, "
-			      "which is an incomplete type\n"),
-			    name ? name : _("(unnamed member)"), type, souid,
-			    lname ? lname : _("(unnamed member)"), ltype);
-	      return (ctf_set_errno (ofp, ECTF_INCOMPLETE));
+		  ctf_err_warn (ofp, 1, ECTF_INCOMPLETE,
+				_("ctf_add_member_offset: cannot add member %s "
+				  "of type %lx to struct %lx without "
+				  "specifying explicit offset after member %s"
+				  "of type %x, which is an incomplete type\n"),
+				name ? name : _("(unnamed member)"), type, souid,
+				lname ? lname : _("(unnamed member)"),
+				memb[vlen -1].ctm_type);
+		}
+	      return (ctf_set_errno (ofp, ctf_errno (fp)));
 	    }
 
-	  /* Round up the offset of the end of the last member to
-	     the next byte boundary, convert 'off' to bytes, and
-	     then round it up again to the next multiple of the
-	     alignment required by the new member.  Finally,
-	     convert back to bits and store the result in
-	     dmd_offset.  Technically we could do more efficient
-	     packing if the new member is a bit-field, but we're
-	     the "compiler" and ANSI says we can do as we choose.  */
-
-	  off = roundup (off, CHAR_BIT) / CHAR_BIT;
-	  off = roundup (off, MAX (malign, 1));
-	  memb[vlen].ctlm_offsethi = CTF_OFFSET_TO_LMEMHI (off * CHAR_BIT);
-	  memb[vlen].ctlm_offsetlo = CTF_OFFSET_TO_LMEMLO (off * CHAR_BIT);
-	  ssize = off + msize;
+	  /* Convert the offset to a gap-since-the-last.  */
+	  off -= dtd->dtd_last_offset;
+	  bit_offset = off;
 	}
+
+      /* Insert as many nameless members as needed.  */
+
+      if (kflag)
+	bound = CTF_MAX_BIT_OFFSET;
       else
+	bound = CTF_MAX_SIZE;
+
+      while (bit_offset > bound)
 	{
-	  /* Specified offset in bits.  */
+	  added_padding = 1;
 
-	  memb[vlen].ctlm_offsethi = CTF_OFFSET_TO_LMEMHI (bit_offset);
-	  memb[vlen].ctlm_offsetlo = CTF_OFFSET_TO_LMEMLO (bit_offset);
-	  ssize = ctf_get_ctt_size (fp, &dtd->dtd_data, NULL, NULL);
-	  ssize = MAX (ssize, ((signed) bit_offset / CHAR_BIT) + msize);
+	  off = bound;
+	  if (kflag)
+	    off = CTF_MEMBER_BIT_OFFSET (bound);
+
+	  if (ctf_add_member_bitfield (fp, souid, "", 0, off, 0) < 0)
+	    return -1;		/* errno is set for us.  */
+
+	  bit_offset =- off;
 	}
-    }
-  else
-    {
-      memb[vlen].ctlm_offsethi = 0;
-      memb[vlen].ctlm_offsetlo = 0;
-      ssize = ctf_get_ctt_size (fp, &dtd->dtd_data, NULL, NULL);
-      ssize = MAX (ssize, msize);
+
+      off = bit_offset;
+      if (kflag)
+	off = CTF_MEMBER_BIT_OFFSET (off);
+
+      /* Possibly hunt down the prefix and member list again: they may have been
+	 moved by the realloc()s involved in field additions.  */
+
+      if (added_padding
+	  && (prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
+	return (ctf_set_errno (ofp, ECTF_CORRUPT));
+
+      vlen = LCTF_VLEN (fp, prefix);
+      memb = (ctf_member_t *) dtd->dtd_vlen;
+      bit_offset = off;
+
+      ssize = ctf_get_ctt_size (fp, prefix, NULL, NULL);
+      ssize = MAX (ssize, ((signed) ((bit_offset + dtd->dtd_last_offset)) / CHAR_BIT) + msize);
     }
 
-  dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
-  dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (ssize);
-  dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (ssize);
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, root, vlen + 1);
+  if (kflag)
+    memb[vlen].ctm_offset = CTF_MEMBER_MAKE_BIT_OFFSET (bit_width, bit_offset);
+  else
+    memb[vlen].ctm_offset = bit_offset;
+
+  vlen = LCTF_VLEN (fp, prefix);
+
+  if (ctf_grow_vlen (fp, dtd, sizeof (ctf_member_t) * (vlen + 1)) < 0)
+    return (ctf_set_errno (ofp, ctf_errno (fp)));
+
+  dtd->dtd_vlen_size += sizeof (ctf_member_t);
+
+  /* Hunt down the prefix and member list yet again, since they may have been
+     reallocated by ctf_grow_vlen.  */
+
+  if ((prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf, CTF_K_BIG)) == NULL)
+    return (ctf_set_errno (ofp, ECTF_CORRUPT));
+  memb = (ctf_member_t *) dtd->dtd_vlen;
+
+  memb[vlen].ctm_name = ctf_str_add (fp, name);
+  memb[vlen].ctm_type = type;
+  if (memb[vlen].ctm_name == 0 && name != NULL && name[0] != '\0')
+    return -1;			/* errno is set for us.  */
+
+  dtd->dtd_data->ctt_size = CTF_SIZE_TO_LSIZE_LO (ssize);
+  prefix->ctt_size = CTF_SIZE_TO_LSIZE_HI (ssize);
+
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, kflag, CTF_VLEN_TO_VLEN_LO(vlen + 1));
+  prefix->ctt_info = CTF_TYPE_INFO (CTF_K_BIG, 0, CTF_VLEN_TO_VLEN_HI(vlen + 1));
+
+  dtd->dtd_last_offset += bit_offset;
 
   return 0;
 }
@@ -1465,15 +1521,31 @@ ctf_add_member_encoded (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   if (dtd == NULL)
     return (ctf_set_errno (fp, ECTF_BADID));
 
-  kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
+  kind = LCTF_KIND (fp, dtd->dtd_buf);
 
   if ((kind != CTF_K_INTEGER) && (kind != CTF_K_FLOAT) && (kind != CTF_K_ENUM))
     return (ctf_set_errno (fp, ECTF_NOTINTFP));
 
-  if ((type = ctf_add_slice (fp, CTF_ADD_NONROOT, otype, &encoding)) == CTF_ERR)
-    return -1;			/* errno is set for us.  */
+  /* Create a slice if need be.  */
 
-  return ctf_add_member_offset (fp, souid, name, type, bit_offset);
+  if (encoding.cte_offset != 0 ||
+      encoding.cte_format != 0 ||
+      (encoding.cte_bits != 0 && CTF_INFO_KFLAG (dtd->dtd_data->ctt_info) == 0))
+    {
+      if ((type = ctf_add_slice (fp, CTF_ADD_NONROOT, otype, &encoding)) == CTF_ERR)
+	return -1;			/* errno is set for us.  */
+    }
+  else
+    type = otype;
+
+  return ctf_add_member_bitfield (fp, souid, name, type, bit_offset, 0);
+}
+
+int
+ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
+		       ctf_id_t type, unsigned long bit_offset)
+{
+  return ctf_add_member_bitfield (fp, souid, name, type, bit_offset, 0);
 }
 
 int

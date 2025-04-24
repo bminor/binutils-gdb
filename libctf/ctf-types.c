@@ -1105,6 +1105,60 @@ ctf_type_size (ctf_dict_t *fp, ctf_id_t type)
     }
 }
 
+/* Determine the natural alignment (in bits) for some type, given the previous
+   TYPE at BIT_OFFSET.
+
+   Not public because doing this entirely right requires arch-dependent
+   attention: this is just to reduce code repetition in ctf-create.c.
+
+   Errors if the TYPE or PREV_TYPE are unsuitable for automatic alignment
+   determination: in particular, you can insert incomplete or nonrepresentable
+   TYPEs, but PREV_TYPE cannot be incomplete or nonrepresentable.  */
+
+ssize_t
+ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
+			ctf_id_t type, ssize_t bit_offset)
+{
+  ctf_encoding_t info;
+  ssize_t size;
+  ssize_t align;
+
+  if ((prev_type = ctf_type_resolve (fp, prev_type)) == CTF_ERR)
+    return -1;			/* errno is set for us.  */
+
+  if ((align = ctf_type_align (fp, type)) < 0)
+    {
+      /* Ignore incompleteness and nonrepresentability of the type we're
+	 inserting: just assume such a type has no alignment constraints of its
+	 own.  */
+      if (ctf_errno (fp) == ECTF_NONREPRESENTABLE
+	  || ctf_errno (fp) == ECTF_INCOMPLETE)
+	align = 0;
+      else
+	return -1;		/* errno is set for us.  */
+    }
+
+  if (ctf_type_encoding (fp, prev_type, &info) == 0)
+    bit_offset += info.cte_bits;
+  else if ((size = ctf_type_size (fp, prev_type)) > 0)
+    bit_offset += size * CHAR_BIT;
+  else if (size < 0)
+    return -1;			/* errno is set for us.  */
+
+  /* Round up the offset of the end of the last member to the next byte
+     boundary, convert 'off' to bytes, and then round it up again to the next
+     multiple of the alignment required by the new member.  Finally, convert
+     back to bits and store the result.  Technically we could do more efficient
+     packing within structs if the new member is a bit-field, but we're the
+     "compiler" and the Standard says we can do as we choose.  */
+
+  bit_offset = roundup (bit_offset, CHAR_BIT) / CHAR_BIT;
+  bit_offset = roundup (bit_offset, MAX (align, 1));
+  bit_offset *= CHAR_BIT;
+
+  return bit_offset;
+}
+
 /* Resolve the type down to a base type node, and then return the alignment
    needed for the type storage in bytes.
 

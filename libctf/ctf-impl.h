@@ -822,6 +822,8 @@ extern char *ctf_str_append_noerr (char *, const char *);
 
 extern ctf_id_t ctf_type_resolve_unsliced (ctf_dict_t *, ctf_id_t);
 extern int ctf_type_kind_unsliced (ctf_dict_t *, ctf_id_t);
+extern ssize_t ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
+				       ctf_id_t type, ssize_t bit_offset);
 
 _libctf_printflike_ (1, 2)
 extern void ctf_dprintf (const char *, ...);
