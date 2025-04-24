@@ -36,6 +36,14 @@ typedef struct sframe_encoder_ctx sframe_encoder_ctx;
 #define MAX_OFFSET_BYTES  \
   ((SFRAME_FRE_OFFSET_4B * 2 * MAX_NUM_STACK_OFFSETS))
 
+/* Set of all defined flags known to this implementation.  Any flag other than
+   these, if set, is deemed invalid.  This is used for sanity checking to
+   ensure that the implementation only admits sections with flags defined in
+   the specific version.  */
+#define SFRAME_F_ALL_FLAGS \
+  (SFRAME_F_FDE_SORTED | SFRAME_F_FRAME_POINTER \
+   | SFRAME_F_FDE_FUNC_START_ADDR_PCREL)
+
 /* User interfacing SFrame Row Entry.
    An abstraction provided by libsframe so the consumer is decoupled from
    the binary format representation of the same.

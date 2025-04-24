@@ -205,12 +205,11 @@ flip_fde (sframe_func_desc_entry *fdep)
 static bool
 sframe_header_sanity_check_p (sframe_header *hp)
 {
-  unsigned char all_flags = SFRAME_F_FDE_SORTED | SFRAME_F_FRAME_POINTER;
   /* Check preamble is valid.  */
   if (hp->sfh_preamble.sfp_magic != SFRAME_MAGIC
       || (hp->sfh_preamble.sfp_version != SFRAME_VERSION_1
 	  && hp->sfh_preamble.sfp_version != SFRAME_VERSION_2)
-      || (hp->sfh_preamble.sfp_flags | all_flags) != all_flags)
+      || hp->sfh_preamble.sfp_flags & ~SFRAME_F_ALL_FLAGS)
     return false;
 
   /* Check offsets are valid.  */
