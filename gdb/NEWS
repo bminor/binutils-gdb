@@ -74,6 +74,26 @@ info sharedlibrary
   command are now for the full memory range allocated to the shared
   library.
 
+* GDB-internal Thread Local Storage (TLS) support
+
+  ** Linux targets for the x86_64, aarch64, ppc64, s390x, and riscv
+     architectures now have GDB-internal support for TLS address
+     lookup in addition to that traditionally provided by the
+     libthread_db library.  This internal support works for programs
+     linked against either the GLIBC or MUSL C libraries.  For
+     programs linked against MUSL, this new internal support provides
+     new debug functionality, allowing access to TLS variables, due to
+     the fact that MUSL does not implement the libthread_db library.
+     Internal TLS support is also useful in cross-debugging
+     situations, debugging statically linked binaries, and debugging
+     programs linked against GLIBC 2.33 and earlier, but which are not
+     linked against libpthread.
+
+  ** The command 'maint set force-internal-tls-address-lookup on' may
+     be used to force the internal TLS lookup mechanisms to be used.
+     Otherwise, TLS lookup via libthread_db will still be preferred,
+     when available.
+
 * Python API
 
   ** New class gdb.Color for dealing with colors.

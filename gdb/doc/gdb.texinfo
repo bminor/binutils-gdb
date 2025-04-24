@@ -4090,6 +4090,56 @@ When @samp{on} @value{GDBN} will print additional messages when
 threads are created and deleted.
 @end table
 
+@cindex thread local storage
+@cindex @acronym{TLS}
+For some debugging targets, @value{GDBN} has support for accessing
+variables that reside in Thread Local Storage (@acronym{TLS}).
+@acronym{TLS} variables are similar to global variables, except that
+each thread has its own copy of the variable.  While often used in
+multi-threaded programs, @acronym{TLS} variables can also be used in
+programs without threads.  The C library variable @var{errno} is,
+perhaps, the most prominent example of a @acronym{TLS} variable that
+is frequently used in non-threaded programs.  For targets where
+@value{GDBN} does not have good @acronym{TLS} support, printing or
+changing the value of @var{errno} might not be directly possible.
+
+@sc{gnu}/Linux and FreeBSD targets have support for accessing
+@acronym{TLS} variables.  On @sc{gnu}/Linux, the helper library,
+@code{libthread_db}, is used to help resolve the addresses of
+@acronym{TLS} variables.  Some FreeBSD and some @sc{gnu}/Linux targets
+also have @value{GDBN}-internal @acronym{TLS} resolution code.
+@sc{gnu}/Linux targets will attempt to use the @acronym{TLS} address
+lookup functionality provided by @code{libthread_db}, but will fall
+back to using its internal @acronym{TLS} support when
+@code{libthread_db} is not available.  This can happen in
+cross-debugging scenarios or when debugging programs that are linked
+in such a way that @code{libthread_db} support is unavailable -- this
+includes statically linked programs, linking against @acronym{GLIBC}
+versions earlier than 2.34, but not with @code{libpthread}, and use of
+other (non-@acronym{GLIBC}) C libraries.
+
+@table @code
+@kindex maint set force-internal-tls-address-lookup
+@kindex maint show force-internal-tls-address-lookup
+@cindex internal @acronym{TLS} address lookup
+@item maint set force-internal-tls-address-lookup
+@itemx maint show force-internal-tls-address-lookup
+Turns on or off forced use of @value{GDBN}-internal @acronym{TLS}
+address lookup code.  Use @code{on} to enable and @code{off} to
+disable.  The default for this setting is @code{off}.
+
+When disabled, @value{GDBN} will attempt to use a helper
+@code{libthread_db} library if possible, but will fall back to use of
+its own internal @acronym{TLS} address lookup mechanisms if necessary.
+
+When enabled, @value{GDBN} will only use @value{GDBN}'s internal
+@acronym{TLS} address lookup mechanisms, if they exist.
+
+This command is only available for @sc{gnu}/Linux targets.  Its
+primary use is for testing -- certain tests in the @value{GDBN} test
+suite use this command to force use of internal TLS address lookup.
+@end table
+
 @node Forks
 @section Debugging Forks
 
