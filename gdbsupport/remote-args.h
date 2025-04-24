@@ -17,6 +17,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef GDBSUPPORT_REMOTE_ARGS_H
+#define GDBSUPPORT_REMOTE_ARGS_H
+
 /* The functions declared here are used when passing inferior arguments
    from GDB to gdbserver.
 
@@ -52,4 +55,6 @@ extern std::string join (const std::vector<char *> &args);
 
 } /* namespace remote_args */
 
-} /* namespac gdb */
+} /* namespace gdb */
+
+#endif /* GDBSUPPORT_REMOTE_ARGS_H */
