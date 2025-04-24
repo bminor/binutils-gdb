@@ -685,6 +685,9 @@ extern int ctf_type_cmp (ctf_dict_t *, ctf_id_t, ctf_dict_t *, ctf_id_t);
 
 extern const char *ctf_enum_name (ctf_dict_t *, ctf_id_t, int);
 extern int ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *, int *);
+/* Return nonzero if this struct or union uses bitfield encoding.  */
+
+extern int ctf_struct_bitfield (ctf_dict_t *, ctf_id_t);
 
 /* Get the size and member type of an array.  */
 

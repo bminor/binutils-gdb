@@ -86,6 +86,7 @@ LIBCTF_2.0 {
 	ctf_member_next;
 	ctf_array_info;
 	ctf_member_count;
+	ctf_struct_bitfield;
 
 	ctf_enum_name;
 	ctf_enum_value;
