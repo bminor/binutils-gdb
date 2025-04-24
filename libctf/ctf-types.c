@@ -363,12 +363,12 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 /* Iterate over the members of an ENUM.  We pass the string name and associated
    integer value of each enum element to the specified callback function.  */
 
-int
+int64_t
 ctf_enum_iter (ctf_dict_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
 {
   ctf_next_t *i = NULL;
   const char *name;
-  int val;
+  int64_t val;
 
   while ((name = ctf_enum_next (fp, type, &i, &val)) != NULL)
     {
@@ -391,7 +391,7 @@ ctf_enum_iter (ctf_dict_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
 
 const char *
 ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
-	       int *val)
+	       int64_t *val)
 {
   ctf_dict_t *ofp = fp;
   uint32_t kind;
@@ -407,12 +407,21 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   if (!i)
     {
       const ctf_type_t *tp;
-      ctf_dtdef_t *dtd;
+      unsigned char *en;
 
       if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
 	return NULL;			/* errno is set for us.  */
 
-      if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+      kind = ctf_type_kind (fp, type);
+
+      if ((kind != CTF_K_ENUM) && (kind != CTF_K_ENUM64))
+	{
+	  ctf_next_destroy (i);
+	  ctf_set_errno (ofp, ECTF_NOTENUM);
+	  return NULL;
+	}
+
+      if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
 	return NULL;			/* errno is set for us.  */
 
       if ((i = ctf_next_create ()) == NULL)
@@ -422,26 +431,13 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 	}
       i->cu.ctn_fp = ofp;
 
-      (void) ctf_get_ctt_size (fp, tp, NULL,
-			       &i->ctn_increment);
-      kind = LCTF_INFO_KIND (fp, tp->ctt_info);
-
-      if (kind != CTF_K_ENUM)
-	{
-	  ctf_next_destroy (i);
-	  ctf_set_errno (ofp, ECTF_NOTENUM);
-	  return NULL;
-	}
-
-      dtd = ctf_dynamic_type (fp, type);
       i->ctn_iter_fun = (void (*) (void)) ctf_enum_next;
-      i->ctn_n = LCTF_INFO_VLEN (fp, tp->ctt_info);
+      en = ctf_vlen (fp, type, tp, &i->ctn_n);
 
-      if (dtd == NULL)
-	i->u.ctn_en = (const ctf_enum_t *) ((uintptr_t) tp +
-					    i->ctn_increment);
-      else
-	i->u.ctn_en = (const ctf_enum_t *) dtd->dtd_vlen;
+      if (kind == CTF_K_ENUM)
+	i->u.ctn_en = (const ctf_enum_t *) en;
+      else /* CTF_K_ENUM64 */
+	i->u.ctn_en64 = (const ctf_enum64_t *) en;
 
       *it = i;
     }
@@ -468,10 +464,20 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   if (i->ctn_n == 0)
     goto end_iter;
 
-  name = ctf_strptr (fp, i->u.ctn_en->cte_name);
-  if (val)
-    *val = i->u.ctn_en->cte_value;
-  i->u.ctn_en++;
+  if (ctf_type_kind (fp, type) == CTF_K_ENUM)
+    {
+      name = ctf_strptr (fp, i->u.ctn_en->cte_name);
+      if (val)
+	*val = i->u.ctn_en->cte_value;
+      i->u.ctn_en++;
+    }
+  else
+    {
+      name = ctf_strptr (fp, i->u.ctn_en64->cte_name);
+      if (val)
+	*val = ((uint64_t) i->u.ctn_en64->cte_val_high) << 32 | (i->u.ctn_en64->cte_val_low);
+      i->u.ctn_en64++;
+    }
   i->ctn_n--;
 
   return name;
@@ -936,6 +942,7 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	      ctf_decl_sprintf (&cd, "union %s", name);
 	      break;
 	    case CTF_K_ENUM:
+	    case CTF_K_ENUM64:
 	      ctf_decl_sprintf (&cd, "enum %s", name);
 	      break;
 	    case CTF_K_FORWARD:
@@ -949,6 +956,7 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 		    ctf_decl_sprintf (&cd, "union %s", name);
 		    break;
 		  case CTF_K_ENUM:
+		  case CTF_K_ENUM64:
 		    ctf_decl_sprintf (&cd, "enum %s", name);
 		    break;
 		  default:
@@ -1089,8 +1097,6 @@ ctf_type_size (ctf_dict_t *fp, ctf_id_t type)
     case CTF_K_FUNCTION:
       return 0;		/* Function size is only known by symtab.  */
 
-    case CTF_K_ENUM:
-      return fp->ctf_dmodel->ctd_int;
 
     case CTF_K_ARRAY:
       /* ctf_add_array() does not directly encode the element size, but
@@ -1112,7 +1118,7 @@ ctf_type_size (ctf_dict_t *fp, ctf_id_t type)
       /* Forwards do not have a meaningful size.  */
       return (ctf_set_errno (ofp, ECTF_INCOMPLETE));
 
-    default: /* including slices of enums, etc */
+    default: /* including enums of all kinds, slices, etc */
       return (ctf_get_ctt_size (fp, tp, NULL, NULL));
     }
 }
@@ -1227,14 +1233,11 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 	return align;
       }
 
-    case CTF_K_ENUM:
-      return fp->ctf_dmodel->ctd_int;
-
     case CTF_K_FORWARD:
       /* Forwards do not have a meaningful alignment.  */
       return (ctf_set_errno (ofp, ECTF_INCOMPLETE));
 
-    default:  /* including slices of enums, etc */
+    default:  /* including enums of all kinds, slices, etc */
       return (ctf_get_ctt_size (fp, tp, NULL, NULL));
     }
 }
@@ -1416,8 +1419,8 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
       ep->cte_bits = CTF_FP_BITS (data);
       break;
     case CTF_K_ENUM:
-      /* v3 only: we must guess at the underlying integral format.  */
-      ep->cte_format = CTF_INT_SIGNED;
+    case CTF_K_ENUM64:
+      ep->cte_format = CTF_INFO_KFLAG (suffix->ctt_info) ? CTF_INT_SIGNED : 0;
       ep->cte_offset = 0;
       ep->cte_bits = 0;
       break;
@@ -1527,8 +1530,8 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
     same_names = (strcmp (ctf_strptr (lfp, ltp->ctt_name),
 			  ctf_strptr (rfp, rtp->ctt_name)) == 0);
 
-  if (((lkind == CTF_K_ENUM) && (rkind == CTF_K_INTEGER)) ||
-      ((rkind == CTF_K_ENUM) && (lkind == CTF_K_INTEGER)))
+  if ((((lkind == CTF_K_ENUM) || (lkind == CTF_K_ENUM64)) && (rkind == CTF_K_INTEGER)) ||
+      (((rkind == CTF_K_ENUM) || (lkind == CTF_K_ENUM64)) && (lkind == CTF_K_INTEGER)))
     return 1;
 
   if (lkind != rkind)
@@ -1556,6 +1559,7 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
     case CTF_K_UNION:
       return (same_names && (ctf_type_size (lfp, ltype)
 			     == ctf_type_size (rfp, rtype)));
+    case CTF_K_ENUM64:
     case CTF_K_ENUM:
       {
 	int lencoded, rencoded;
@@ -1715,14 +1719,13 @@ ctf_array_info (ctf_dict_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
    matching name can be found.  Otherwise NULL is returned.  */
 
 const char *
-ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int value)
+ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int64_t value)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
-  const ctf_enum_t *ep;
-  const ctf_dtdef_t *dtd;
-  ssize_t increment;
-  uint32_t n;
+  unsigned char *vlen;
+  int kind;
+  size_t n;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     {
@@ -1733,26 +1736,39 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int value)
   if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
     return NULL;		/* errno is set for us.  */
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return NULL;		/* errno is set for us.  */
 
-  if (LCTF_INFO_KIND (fp, tp->ctt_info) != CTF_K_ENUM)
+  kind = LCTF_KIND (fp, tp);
+  if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
     {
       ctf_set_errno (ofp, ECTF_NOTENUM);
       return NULL;
     }
 
-  ctf_get_ctt_size (fp, tp, NULL, &increment);
+  vlen = ctf_vlen (fp, type, tp, &n);
 
-  if ((dtd = ctf_dynamic_type (ofp, type)) == NULL)
-    ep = (const ctf_enum_t *) ((uintptr_t) tp + increment);
-  else
-    ep = (const ctf_enum_t *) dtd->dtd_vlen;
-
-  for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, ep++)
+  if (kind == CTF_K_ENUM)
     {
-      if (ep->cte_value == value)
-	return (ctf_strptr (fp, ep->cte_name));
+      const ctf_enum_t *ep = (const ctf_enum_t *) vlen;
+
+      for (; n != 0; n--, ep++)
+	{
+	  if (ep->cte_value == value)
+	    return (ctf_strptr (fp, ep->cte_name));
+	}
+    }
+  else
+    {
+      const ctf_enum64_t *ep = (const ctf_enum64_t *) vlen;
+
+      for (; n != 0; n--, ep++)
+	{
+	  int64_t this_value = ((uint64_t) ep->cte_val_high << 32) | (ep->cte_val_low);
+
+	  if (this_value == value)
+	    return (ctf_strptr (fp, ep->cte_name));
+	}
     }
 
   ctf_set_errno (ofp, ECTF_NOENUMNAM);
@@ -1763,14 +1779,13 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int value)
    matching name can be found.  Otherwise CTF_ERR is returned.  */
 
 int
-ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int *valp)
+ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int64_t *valp)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
-  const ctf_enum_t *ep;
-  const ctf_dtdef_t *dtd;
-  ssize_t increment;
-  uint32_t n;
+  unsigned char *vlen;
+  int kind;
+  size_t n;
 
   if (fp->ctf_flags & LCTF_NO_STR)
     return (ctf_set_errno (fp, ECTF_NOPARENT));
@@ -1778,30 +1793,76 @@ ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int *valp)
   if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  if (LCTF_INFO_KIND (fp, tp->ctt_info) != CTF_K_ENUM)
+  kind = LCTF_KIND (fp, tp);
+  if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
     return ctf_set_errno (ofp, ECTF_NOTENUM);
 
-  ctf_get_ctt_size (fp, tp, NULL, &increment);
+  vlen = ctf_vlen (fp, type, tp, &n);
 
-  if ((dtd = ctf_dynamic_type (ofp, type)) == NULL)
-    ep = (const ctf_enum_t *) ((uintptr_t) tp + increment);
-  else
-    ep = (const ctf_enum_t *) dtd->dtd_vlen;
-
-  for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, ep++)
+  if (kind == CTF_K_ENUM)
     {
-      if (strcmp (ctf_strptr (fp, ep->cte_name), name) == 0)
+      const ctf_enum_t *ep = (const ctf_enum_t *) vlen;
+
+      for (; n != 0; n--, ep++)
 	{
-	  if (valp != NULL)
-	    *valp = ep->cte_value;
-	  return 0;
+	  if (strcmp (ctf_strptr (fp, ep->cte_name), name) == 0)
+	    {
+	      if (valp != NULL)
+		*valp = ep->cte_value;
+	      return 0;
+	    }
+	}
+    }
+  else
+    {
+      const ctf_enum64_t *ep = (const ctf_enum64_t *) vlen;
+
+      for (; n != 0; n--, ep++)
+	{
+	  if (strcmp (ctf_strptr (fp, ep->cte_name), name) == 0)
+	    {
+	      if (valp != NULL)
+		*valp = ((uint64_t) ep->cte_val_high << 32) | ep->cte_val_low;
+	      return 0;
+	    }
 	}
     }
 
   return ctf_set_errno (ofp, ECTF_NOENUMNAM);
+}
+
+/* Like ctf_enum_value, but returns an unsigned int64_t instead.  */
+int
+ctf_enum_unsigned_value (ctf_dict_t *fp, ctf_id_t type, const char *name, uint64_t *valp)
+{
+  int ret;
+  int64_t retval;
+
+  ret = ctf_enum_value (fp, type, name, &retval);
+  *valp = (uint64_t) retval;
+  return ret;
+}
+
+/* Determine whether an enum's values are signed.  */
+int
+ctf_enum_unsigned (ctf_dict_t *fp, ctf_id_t type)
+{
+  int kind;
+  const ctf_type_t *tp;		/* The suffixed kind, if prefixed */
+
+  if ((kind = ctf_type_kind (fp, type)) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if (kind != CTF_K_ENUM && kind != CTF_K_ENUM64)
+    return (ctf_set_errno (fp, ECTF_NOTENUM));
+
+  if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  return !CTF_INFO_KFLAG (tp->ctt_info);
 }
 
 /* Return nonzero if this struct or union uses bitfield encoding.  */

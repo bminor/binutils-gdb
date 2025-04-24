@@ -304,13 +304,14 @@ _CTF_ERRORS
 
 typedef int ctf_visit_f (const char *name, ctf_id_t type, unsigned long offset,
 			 int depth, void *arg);
-typedef int ctf_enum_f (const char *name, int val, void *arg);
 typedef int ctf_variable_f (const char *name, ctf_id_t type, void *arg);
 typedef int ctf_type_f (ctf_id_t type, void *arg);
 typedef int ctf_type_all_f (ctf_id_t type, int flag, void *arg);
 			 void *arg);
 typedef int ctf_member_f (ctf_dict_t *, const char *name, ctf_id_t membtype,
 			  size_t offset, int bit_width, void *arg);
+typedef int ctf_enum_f (const char *name, int64_t val, void *arg);
+typedef int ctf_unsigned_enum_f (const char *name, uint64_t val, void *arg);
 typedef int ctf_archive_member_f (ctf_dict_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
 				      size_t len, void *arg);
@@ -634,7 +635,10 @@ extern ssize_t ctf_type_align (ctf_dict_t *, ctf_id_t);
 /* Return the kind of a type (CTF_K_* constant).  Slices are considered to be
    the kind they are a slice of.  Forwards to incomplete structs, etc, return
    CTF_K_FORWARD (but deduplication resolves most forwards to their concrete
-   types).  */
+   types).
+
+   CTFv4 note: forwards to enums also return CTF_K_FORWARD, even though they
+   are encoded differently.  */
 
 extern int ctf_type_kind (ctf_dict_t *, ctf_id_t);
 
@@ -683,8 +687,15 @@ extern int ctf_type_cmp (ctf_dict_t *, ctf_id_t, ctf_dict_t *, ctf_id_t);
 /* Get the name of an enumerator given its value, or vice versa.  If many
    enumerators have the same value, the first with that value is returned.  */
 
-extern const char *ctf_enum_name (ctf_dict_t *, ctf_id_t, int);
-extern int ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *, int *);
+extern const char *ctf_enum_name (ctf_dict_t *, ctf_id_t, int64_t);
+extern int ctf_enum_value (ctf_dict_t *, ctf_id_t, const char *, int64_t *);
+extern int ctf_enum_unsigned_value (ctf_dict_t *, ctf_id_t, const char *, uint64_t *);
+
+/* Return 1 if this enum's contents are unsigned, so you can tell which of the
+   above functions to use.  */
+
+extern int ctf_enum_unsigned (ctf_dict_t *, ctf_id_t);
+
 /* Return nonzero if this struct or union uses bitfield encoding.  */
 
 extern int ctf_struct_bitfield (ctf_dict_t *, ctf_id_t);
@@ -711,10 +722,11 @@ extern ssize_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				const char **name, ctf_id_t *membtype,
 				int *bit_width, int flags);
 
-/* Return all enumeration constants in a given enum type.  */
-extern int ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);
+/* Return all enumeration constants in a given enum type.  The return value, and
+   VAL argument, may need to be cast to uint64_t: see ctf_enum_unsigned().  */
+extern int64_t ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);
 extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
-				  int *);
+				  int64_t *);
 
 /* Return all enumeration constants with a given name in a given dict, similar
    to ctf_lookup_enumerator above but capable of returning multiple values.
@@ -821,6 +833,16 @@ extern ctf_dict_t *ctf_create (int *);
 extern ctf_id_t ctf_add_array (ctf_dict_t *, uint32_t,
 			       const ctf_arinfo_t *);
 extern ctf_id_t ctf_add_const (ctf_dict_t *, uint32_t, ctf_id_t);
+
+/* enums are created signed by default.  If you want an unsigned enum,
+   use ctf_add_enum_encoded() with an encoding of 0 (CTF_INT_SIGNED and
+   everything else off).  This will not create a slice, unlike all other
+   uses of ctf_add_enum_encoded(), and the result is still representable
+   as BTF.  */
+
+extern ctf_id_t ctf_add_enum64_encoded (ctf_dict_t *, uint32_t, const char *,
+					const ctf_encoding_t *);
+extern ctf_id_t ctf_add_enum64 (ctf_dict_t *, uint32_t, const char *);
 extern ctf_id_t ctf_add_enum_encoded (ctf_dict_t *, uint32_t, const char *,
 				      const ctf_encoding_t *);
 extern ctf_id_t ctf_add_enum (ctf_dict_t *, uint32_t, const char *);
@@ -866,10 +888,10 @@ extern ctf_id_t ctf_add_union_sized (ctf_dict_t *, uint32_t flag, const char *,
 extern ctf_id_t ctf_add_unknown (ctf_dict_t *, uint32_t, const char *);
 extern ctf_id_t ctf_add_volatile (ctf_dict_t *, uint32_t, ctf_id_t);
 
-/* Add an enumerator to an enum.  If the enum is non-root, so are all the
-   constants added to it by ctf_add_enumerator.  */
+/* Add an enumerator to an enum or enum64.  If the enum is non-root, so are all
+   the constants added to it by ctf_add_enumerator.  */
 
-extern int ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int);
+extern int ctf_add_enumerator (ctf_dict_t *, ctf_id_t, const char *, int64_t);
 
 /* Add a member to a struct or union, either at the next available offset (with
    suitable padding for the alignment) or at a specific offset, and possibly
