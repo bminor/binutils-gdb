@@ -89,8 +89,6 @@ LIBCTF_2.0 {
 	ctf_enum_name;
 	ctf_enum_value;
 
-	ctf_label_topmost;
-	ctf_label_info;
 	ctf_lookup_enumerator;
 	ctf_lookup_enumerator_next;
 	ctf_arc_lookup_enumerator_next;
@@ -101,7 +99,6 @@ LIBCTF_2.0 {
 	ctf_type_iter;
 	ctf_type_next;
 	ctf_type_iter_all;
-	ctf_label_iter;
 	ctf_variable_iter;
 	ctf_variable_next;
 
