@@ -1230,7 +1230,7 @@ info_linker_namespace_command (const char *pattern, int from_tty)
 	  break;
 	}
       uiout->message
-	(_ ("There are %ld libraries loaded in linker namespace [[%d]]\n"),
+	(_ ("There are %zu libraries loaded in linker namespace [[%d]]\n"),
 	 solibs_to_print.size (), ns);
       uiout->message
 	(_ ("Displaying libraries for linker namespace [[%d]]:\n"), ns);
