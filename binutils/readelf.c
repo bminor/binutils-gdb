@@ -17378,9 +17378,8 @@ static void
 dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, ctf_dict_t *parent,
 			 size_t member)
 {
-  const char *things[] = {"Header", "Labels", "Data objects",
-			  "Function objects", "Variables", "Types", "Strings",
-			  ""};
+  const char *things[] = {"Header", "Data objects", "Function objects",
+			  "Variables", "Types", "Strings", ""};
   const char **thing;
   size_t i;
 

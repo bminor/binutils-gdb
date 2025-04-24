@@ -760,14 +760,6 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	case CTF_SECT_HEADER:
 	  ctf_dump_header (fp, state);
 	  break;
-	case CTF_SECT_LABEL:
-	  if (ctf_label_iter (fp, ctf_dump_label, state) < 0)
-	    {
-	      if (ctf_errno (fp) != ECTF_NOLABELDATA)
-		goto end;		/* errno is set for us.  */
-	      ctf_set_errno (fp, 0);
-	    }
-	  break;
 	case CTF_SECT_OBJT:
 	  if (ctf_dump_objts (fp, state, 0) < 0)
 	    goto end;			/* errno is set for us.  */

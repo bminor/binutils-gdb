@@ -124,7 +124,6 @@ typedef struct ctf_link_sym
 typedef enum ctf_sect_names
   {
    CTF_SECT_HEADER,
-   CTF_SECT_LABEL,
    CTF_SECT_OBJT,
    CTF_SECT_OBJTIDX = CTF_SECT_OBJT,
    CTF_SECT_FUNC,
@@ -164,11 +163,6 @@ typedef struct ctf_funcinfo
   uint32_t ctc_argc;		/* Number of typed arguments to function.  */
   uint32_t ctc_flags;		/* Function attributes (see below).  */
 } ctf_funcinfo_t;
-
-typedef struct ctf_lblinfo
-{
-  ctf_id_t ctb_type;		/* Last type associated with the label.  */
-} ctf_lblinfo_t;
 
 typedef struct ctf_snapshot_id
 {
@@ -221,8 +215,6 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOFUNCDAT, "No function information available for function.") \
   _CTF_ITEM (ECTF_NOTDATA, "Symbol table entry does not refer to a data object.") \
   _CTF_ITEM (ECTF_NOTYPEDAT, "No type information available for symbol.") \
-  _CTF_ITEM (ECTF_NOLABEL, "No label found corresponding to name.") \
-  _CTF_ITEM (ECTF_NOLABELDATA, "File does not contain any labels.") \
   _CTF_ITEM (ECTF_NOTSUP, "Feature not supported.") \
   _CTF_ITEM (ECTF_NOENUMNAM, "Enumerator name not found.") \
   _CTF_ITEM (ECTF_NOMEMBNAM, "Member name not found.") \
@@ -310,7 +302,6 @@ typedef int ctf_enum_f (const char *name, int val, void *arg);
 typedef int ctf_variable_f (const char *name, ctf_id_t type, void *arg);
 typedef int ctf_type_f (ctf_id_t type, void *arg);
 typedef int ctf_type_all_f (ctf_id_t type, int flag, void *arg);
-typedef int ctf_label_f (const char *name, const ctf_lblinfo_t *info,
 			 void *arg);
 typedef int ctf_archive_member_f (ctf_dict_t *fp, const char *name, void *arg);
 typedef int ctf_archive_raw_member_f (const char *name, const void *content,
@@ -1024,13 +1015,6 @@ extern ctf_dict_t *ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
    decompression.  */
 
 extern int ctf_gzwrite (ctf_dict_t *fp, gzFile fd);
-
-/* Deprecated functions with no current use.  */
-
-extern const char *ctf_label_topmost (ctf_dict_t *);
-extern int ctf_label_info (ctf_dict_t *, const char *, ctf_lblinfo_t *);
-extern int ctf_label_iter (ctf_dict_t *, ctf_label_f *, void *);
-extern int ctf_label_next (ctf_dict_t *, ctf_next_t **, const char **); /* TBD */
 
 #ifdef	__cplusplus
 }
