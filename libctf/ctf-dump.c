@@ -206,7 +206,19 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	}
 
       if (nonroot_trailer[0] != 0)
-	str = str_append (str, nonroot_trailer);
+	{
+	  int conflicting;
+	  const char *conflicting_cu;
+
+	  if ((conflicting = ctf_type_conflicting (fp, id, &conflicting_cu)) < 0)
+	    goto oom;
+	  if (conflicting && conflicting_cu[0] != 0)
+	    {
+	      str = str_append (str, ": conflicting in ");
+	      str = str_append (str, conflicting_cu);
+	    }
+	  str = str_append (str, nonroot_trailer);
+	}
 
       /* Just exit after one iteration if we are not showing the types this type
 	 references.  */
