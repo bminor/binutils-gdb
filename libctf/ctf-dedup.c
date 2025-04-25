@@ -827,6 +827,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
     case CTF_K_POINTER:
+    case CTF_K_TYPE_TAG:
       /* Hash the referenced type, if not already hashed, and mix it in.  */
       child_type = ctf_type_reference (input, type);
       if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
@@ -2623,6 +2624,7 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
     case CTF_K_SLICE:
     case CTF_K_FUNC_LINKAGE:
     case CTF_K_VAR:
+    case CTF_K_TYPE_TAG:
       CTF_TYPE_WALK (ctf_type_reference (fp, type), err,
 		     N_("error during referenced type walk"));
       break;
@@ -3429,6 +3431,19 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	goto err_input;				/* errno is set for us.  */
 
       if ((new_type = ctf_add_reftype (target, isroot, ref, kind)) == CTF_ERR)
+	goto err_target;			/* errno is set for us.  */
+      break;
+
+    case CTF_K_TYPE_TAG:
+      errtype = _("type tag");
+
+      ref = ctf_type_reference (input, type);
+      if ((ref = ctf_dedup_id_to_target (output, target, inputs, ninputs,
+					 parents, input, input_num,
+					 ref)) == CTF_ERR)
+	goto err_input;				/* errno is set for us.  */
+
+      if ((new_type = ctf_add_type_tag (target, isroot, ref, name)) == CTF_ERR)
 	goto err_target;			/* errno is set for us.  */
       break;
 
