@@ -312,6 +312,11 @@ typedef struct ctf_dedup
      can be cited from multiple TUs.  Only populated in that link mode.  */
   ctf_dynhash_t *cd_struct_origin;
 
+  /* Maps the type hash values of things with linkages (vars, functions) to the
+     intended final linkage of that type, accumulated from all types with that
+     ID across all inputs (so far).  Subject to hash replacement (see below).  */
+  ctf_dynhash_t *cd_linkages;
+
   /* Maps type hash values to a set of hash values of the types that cite them:
      i.e., pointing backwards up the type graph.  Used for recursive conflict
      marking.  Citations from tagged structures, unions, and forwards do not

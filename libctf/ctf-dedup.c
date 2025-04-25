@@ -442,6 +442,7 @@ ctf_decorate_type_name (ctf_dict_t *fp, const char *name, int kind)
       i = 1;
       break;
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       k = "e ";
       i = 2;
       break;
@@ -830,6 +831,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       {
 	ctf_funcinfo_t fi;
 	ctf_id_t *args;
+	const char **arg_names;
 	uint32_t j;
 
 	if (ctf_func_type_info (input, type, &fi) < 0)
@@ -860,19 +862,41 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	    goto err;
 	  }
 
-	if (ctf_func_type_args (input, type, fi.ctc_argc, args) < 0)
+	if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
+	  {
+	    err = ENOMEM;
+	    whaterr = N_("error doing memory allocation");
+	    goto err;
+	  }
+
+	if ((arg_names = calloc (fi.ctc_argc, sizeof (const char **))) == NULL)
 	  {
 	    free (args);
-	    whaterr = N_("error getting func arg type");
+	    err = ENOMEM;
+	    whaterr = N_("error doing memory allocation");
+	    goto err;
+	  }
+
+	if ((ctf_func_type_args (input, type, fi.ctc_argc, args) < 0)
+	    || (ctf_func_type_arg_names (input, type, fi.ctc_argc, arg_names) < 0))
+	  {
+	    free (args);
+	    free (arg_names);
+	    whaterr = N_("error getting func arg info");
 	    goto input_err;
 	  }
+
 	for (j = 0; j < fi.ctc_argc; j++)
 	  {
+	    ctf_dedup_sha1_add (&hash, arg_names[j], strlen (arg_names[j]) + 1,
+				"func arg name", depth);
+
 	    if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num,
 					     args[j], flags, depth,
 					     populate_fun)) == NULL)
 	      {
 		free (args);
+		free (arg_names);
 		whaterr = N_("error doing func arg type hashing");
 		goto err;
 	      }
@@ -881,15 +905,54 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	    ADD_CITER (citers, hval);
 	  }
 	free (args);
+	free (arg_names);
+	break;
+      }
+    case CTF_K_FUNC_LINKAGE:
+      {
+	int linkage;
+
+	/* Hash the linkage.  */
+	if ((linkage = ctf_type_linkage (input, type)) < 0)
+	  {
+	    whaterr = N_("error doing linkage determination during hashing");
+	    goto input_err;
+	  }
+
+	/* Promote extern to global, unifying them at emission time.  */
+
+	if (linkage == CTF_FUNC_EXTERN)
+	  linkage = CTF_FUNC_GLOBAL;
+
+	ctf_dedup_sha1_add (&hash, &linkage, sizeof (linkage),
+			    "type linkage", depth);
+
+	/* Hash the referenced function, if not already hashed, and mix it in.  */
+	child_type = ctf_type_reference (input, type);
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
+					 flags, depth, populate_fun)) == NULL)
+	  {
+	    whaterr = N_("error doing referenced type hashing");
+	    goto err;
+	  }
+	ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "referenced type",
+			    depth);
+	citer = hval;
+
 	break;
       }
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       {
-	int val;
+	int64_t val;
 	const char *ename;
+	ssize_t size;
+	int enum_unsigned = ctf_enum_unsigned (input, type);
 
-	ctf_dedup_sha1_add (&hash, &tp->ctt_size, sizeof (uint32_t),
-			    "enum size", depth);
+	ctf_get_ctt_size (input, tp, &size, NULL);
+	ctf_dedup_sha1_add (&hash, &size, sizeof (size_t), "enum size", depth);
+	ctf_dedup_sha1_add (&hash, &enum_unsigned, sizeof (enum_unsigned),
+			    "enum unsignedness", depth);
 	while ((ename = ctf_enum_next (input, type, &i, &val)) != NULL)
 	  {
 	    ctf_dedup_sha1_add (&hash, ename, strlen (ename) + 1, "enumerator",
@@ -1197,6 +1260,7 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
   ctf_dedup_t *d = &fp->ctf_dedup;
   ctf_dynset_t *type_ids;
   void *root_visible;
+  int kind;
 
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
   ctf_dprintf ("Hash %s, %s, into output mapping for %i/%lx @ %s\n",
@@ -1283,6 +1347,42 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
   }
 #endif
 
+  /* If this is a type with linkage that is not already handled by the
+     cd_replacing_hashes machinery, keep the best-linkage-so-far updated.  (There
+     is no need to track this if cd_replacing_hashes is in use, since when that is
+     active, the replacing type always has the better linkage anyway.)
+
+     Extern + non-extern == non-extern.  Static is left alone.  Coupled with the
+     hashing machinery above: extern and non-extern hash to the same value.  */
+
+  kind = ctf_type_kind_unsliced (input, type);
+  if (kind == CTF_K_FUNC_LINKAGE)
+    {
+      void *linkage_;
+      int linkage = ctf_type_linkage (input, type);
+
+      if (linkage < 0)
+	return ctf_set_errno (fp, ctf_errno (input));
+
+      if (!ctf_dynhash_lookup_kv (d->cd_linkages, hval, NULL, &linkage_))
+	{
+	  linkage_ = (void *) (uintptr_t) linkage;
+	  if (ctf_dynhash_cinsert (d->cd_linkages, hval, linkage_) < 0)
+	    return ctf_set_errno (fp, errno);
+	}
+      else
+	{
+	  if ((int) (uintptr_t) linkage_ == CTF_FUNC_EXTERN
+	      && linkage == CTF_FUNC_GLOBAL)
+	    {
+	      linkage_ = (void *) (uintptr_t) linkage;
+
+	      if (ctf_dynhash_cinsert (d->cd_linkages, hval, linkage_) < 0)
+		return ctf_set_errno (fp, errno);
+	    }
+	}
+    }
+
   /* Track the consistency of the non-root flag for this type.
      0: all root-visible; 1: all non-root-visible; 2: inconsistent.  */
 
@@ -1315,7 +1415,7 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
       && ctf_dynset_insert (type_ids, id) < 0)
     return ctf_set_errno (fp, errno);
 
-  if (ctf_type_kind_unsliced (input, type) == CTF_K_ENUM)
+  if (kind == CTF_K_ENUM || kind == CTF_K_ENUM64)
     {
       ctf_next_t *i = NULL;
       const char *enumerator;
@@ -1747,6 +1847,12 @@ ctf_dedup_init (ctf_dict_t *fp)
 			     NULL, NULL)) == NULL)
     goto oom;
 
+  if ((d->cd_linkages
+       = ctf_dynhash_create (ctf_hash_string,
+			     ctf_hash_eq_string,
+			     NULL, NULL)) == NULL)
+    goto oom;
+
   if ((d->cd_citers
        = ctf_dynhash_create (ctf_hash_string,
 			     ctf_hash_eq_string, NULL,
@@ -1820,6 +1926,7 @@ ctf_dedup_fini (ctf_dict_t *fp, ctf_dict_t **outputs, uint32_t noutputs)
   ctf_dynhash_destroy (d->cd_name_counts);
   ctf_dynhash_destroy (d->cd_type_hashes);
   ctf_dynhash_destroy (d->cd_struct_origin);
+  ctf_dynhash_destroy (d->cd_linkages);
   ctf_dynhash_destroy (d->cd_citers);
   ctf_dynhash_destroy (d->cd_output_mapping);
   ctf_dynhash_destroy (d->cd_output_first_gid);
@@ -2215,6 +2322,7 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
     case CTF_K_INTEGER:
     case CTF_K_FLOAT:
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       /* No types referenced.  */
       break;
 
@@ -2224,6 +2332,7 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
     case CTF_K_RESTRICT:
     case CTF_K_POINTER:
     case CTF_K_SLICE:
+    case CTF_K_FUNC_LINKAGE:
       CTF_TYPE_WALK (ctf_type_reference (fp, type), err,
 		     N_("error during referenced type walk"));
       break;
@@ -2275,7 +2384,7 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
 
 	for (j = 0; j < fi.ctc_argc; j++)
 	  CTF_TYPE_WALK (args[j], err_free_args,
-			 N_("error during Func arg type walk"));
+			 N_("error during func arg type walk"));
 	free (args);
 	break;
 
@@ -2532,6 +2641,24 @@ ctf_dedup_walk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
   return -1;
 }
 
+/* Get the best linkage for the type with the given HVAL.  */
+static int
+ctf_dedup_best_linkage (ctf_dict_t *output, ctf_dict_t *input, ctf_id_t type,
+			const char *hval)
+{
+  ctf_dedup_t *d = &output->ctf_dedup;
+  void *linkage_;
+
+  /* Get the linkage from the cd_linkages, if present, in preference to the
+     actual type, since multiple identical inputs may have different linkages,
+     and we want to use the best seen over all the inputs.  */
+
+  if (ctf_dynhash_lookup_kv (d->cd_linkages, hval, NULL, &linkage_))
+    return (int) (uintptr_t) linkage_;
+
+  return ctf_type_linkage (input, type);
+}
+
 /* Possibly synthesise a synthetic forward in TARGET to subsitute for a
    conflicted per-TU type ID in INPUT with hash HVAL.  Return its CTF ID, or 0
    if none was needed.  */
@@ -2746,6 +2873,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   ctf_id_t ref;
   ctf_id_t maybe_dup = 0;
   ctf_encoding_t ep;
+  int linkage;
   const char *errtype;
 
   /* We don't want to re-emit something we've already emitted.  */
@@ -2923,8 +3051,10 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       break;
 
     case CTF_K_ENUM:
+    case CTF_K_ENUM64:
       {
-	int val;
+	int64_t val;
+	ctf_encoding_t en;
 	errtype = _("enum");
 
 	/* Check enumerands for duplication and nonrootify if clashing: this is
@@ -2948,7 +3078,15 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	      goto err_input;
 	  }
 
-	if ((new_type = ctf_add_enum (target, isroot, name)) == CTF_ERR)
+	if (ctf_type_encoding (input, type, &en) < 0)
+	  goto err_input;
+
+	if (kind == CTF_K_ENUM)
+	  new_type = ctf_add_enum_encoded (target, isroot, name, &en);
+	else
+	  new_type = ctf_add_enum64_encoded (target, isroot, name, &en);
+
+	if (new_type == CTF_ERR)
 	  goto err_input;				/* errno is set for us.  */
 
 	while ((name = ctf_enum_next (input, type, &i, &val)) != NULL)
@@ -3038,10 +3176,28 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	break;
       }
 
+    case CTF_K_FUNC_LINKAGE:
+      errtype = _("function linkage");
+
+      ref = ctf_type_reference (input, type);
+      if ((ref = ctf_dedup_id_to_target (output, target, inputs, ninputs,
+					 parents, input, input_num,
+					 ref)) == CTF_ERR)
+	goto err_input;				/* errno is set for us.  */
+
+      if ((linkage = ctf_dedup_best_linkage (output, input, type, hval)) < 0)
+	goto err_input;
+
+      if ((new_type = ctf_add_function_linkage (target, isroot, ref, name,
+						linkage)) == CTF_ERR)
+	goto err_target;			/* errno is set for us.  */
+      break;
+
     case CTF_K_FUNCTION:
       {
 	ctf_funcinfo_t fi;
 	ctf_id_t *args;
+	const char **arg_names;
 	uint32_t j;
 
 	errtype = _("function");
@@ -3076,13 +3232,29 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	      goto err_input;
 	  }
 
-	if ((new_type = ctf_add_function (target, isroot,
-					  &fi, args)) == CTF_ERR)
+	if ((arg_names = calloc (fi.ctc_argc, sizeof (const char **))) == NULL)
+	  {
+	    ctf_set_errno (input, ENOMEM);
+	    goto err_input;
+	  }
+
+	errtype = _("function arg names");
+	if (ctf_func_type_arg_names (input, type, fi.ctc_argc, arg_names) < 0)
 	  {
 	    free (args);
+	    free (arg_names);
+	    goto err_input;
+	  }
+
+	if ((new_type = ctf_add_function (target, isroot,
+					  &fi, args, arg_names)) == CTF_ERR)
+	  {
+	    free (args);
+	    free (arg_names);
 	    goto err_target;
 	  }
 	free (args);
+	free (arg_names);
 	break;
       }
 
@@ -3114,8 +3286,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	break;
       }
     default:
-      ctf_err_warn (output, 0, ECTF_CORRUPT, _("%s: unknown type kind for "
-					       "input type %lx"),
+      ctf_err_warn (output, 0, ECTF_CORRUPT,
+		    _("%s: unknown type kind for input type %lx"),
 		    ctf_link_input_name (input), type);
       return ctf_set_errno (output, ECTF_CORRUPT);
     }
@@ -3124,8 +3296,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       && ctf_dynhash_cinsert (target->ctf_dedup.cd_output_emission_hashes,
 			      hval, (void *) (uintptr_t) new_type) < 0)
     {
-      ctf_err_warn (output, 0, ENOMEM, _("out of memory tracking deduplicated "
-					 "global type IDs"));
+      ctf_err_warn (output, 0, ENOMEM,
+		    _("out of memory tracking deduplicated global type IDs"));
 	return ctf_set_errno (output, ENOMEM);
     }
 
