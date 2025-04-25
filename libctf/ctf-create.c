@@ -864,19 +864,18 @@ ctf_id_t
 ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
 {
   ctf_dtdef_t *dtd;
-  ctf_array_t cta;
-  ctf_id_t type;
+  ctf_array_t *cta;
   ctf_dict_t *tmp = fp;
 
   if (arp == NULL)
     return (ctf_set_typed_errno (fp, EINVAL));
 
   if (arp->ctr_contents != 0
-      && ctf_lookup_by_id (&tmp, arp->ctr_contents) == NULL)
+      && ctf_lookup_by_id (&tmp, arp->ctr_contents, NULL) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   tmp = fp;
-  if (ctf_lookup_by_id (&tmp, arp->ctr_index) == NULL)
+  if (ctf_lookup_by_id (&tmp, arp->ctr_index, NULL) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   if (ctf_type_kind (fp, arp->ctr_index) == CTF_K_FORWARD)
@@ -887,38 +886,41 @@ ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
       return (ctf_set_typed_errno (fp, ECTF_INCOMPLETE));
     }
 
-  if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_ARRAY,
-			       sizeof (ctf_array_t), &dtd)) == CTF_ERR)
+  if ((dtd = ctf_add_generic (fp, flag, NULL, CTF_K_ARRAY, 0,
+			      sizeof (ctf_array_t), 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  memset (&cta, 0, sizeof (ctf_array_t));
+  cta = (ctf_array_t *) dtd->dtd_vlen;
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_ARRAY, 0, 0);
+  dtd->dtd_data->ctt_size = 0;
+  cta->cta_contents = (uint32_t) arp->ctr_contents;
+  cta->cta_index = (uint32_t) arp->ctr_index;
+  cta->cta_nelems = arp->ctr_nelems;
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_ARRAY, flag, 0);
-  dtd->dtd_data.ctt_size = 0;
-  cta.cta_contents = (uint32_t) arp->ctr_contents;
-  cta.cta_index = (uint32_t) arp->ctr_index;
-  cta.cta_nelems = arp->ctr_nelems;
-  memcpy (dtd->dtd_vlen, &cta, sizeof (ctf_array_t));
-
-  return type;
+  return dtd->dtd_type;
 }
 
 int
 ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
 {
   ctf_dict_t *ofp = fp;
-  ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, type);
+  ctf_dtdef_t *dtd;
   ctf_array_t *vlen;
+  uint32_t idx;
 
-  fp = ctf_get_dict (fp, type);
+  if (ctf_lookup_by_id (&fp, type, NULL) == NULL)
+    return -1;				/* errno is set for us.  */
+
+  idx = ctf_type_to_index (fp, type);
+  dtd = ctf_dtd_lookup (fp, type);
 
   /* You can only call ctf_set_array on a type you have added, not a
-     type that was read in via ctf_open().  */
-  if (type < fp->ctf_stypes)
+     type that was read in via ctf_open.  */
+  if (idx < fp->ctf_stypes)
     return (ctf_set_errno (ofp, ECTF_RDONLY));
 
   if (dtd == NULL
-      || LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info) != CTF_K_ARRAY)
+      || LCTF_KIND (fp, dtd->dtd_buf) != CTF_K_ARRAY)
     return (ctf_set_errno (ofp, ECTF_BADID));
 
   vlen = (ctf_array_t *) dtd->dtd_vlen;

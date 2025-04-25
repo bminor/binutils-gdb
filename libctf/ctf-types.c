@@ -2224,23 +2224,18 @@ ctf_array_info (ctf_dict_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
+  unsigned char *vlen;
   const ctf_array_t *ap;
-  const ctf_dtdef_t *dtd;
-  ssize_t increment;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  if (LCTF_INFO_KIND (fp, tp->ctt_info) != CTF_K_ARRAY)
+  if (LCTF_KIND (fp, tp) != CTF_K_ARRAY)
     return (ctf_set_errno (ofp, ECTF_NOTARRAY));
 
-  if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
-    ap = (const ctf_array_t *) dtd->dtd_vlen;
-  else
-    {
-      ctf_get_ctt_size (fp, tp, NULL, &increment);
-      ap = (const ctf_array_t *) ((uintptr_t) tp + increment);
-    }
+  vlen = ctf_vlen (fp, type, tp, NULL);
+  ap = (const ctf_array_t *) vlen;
+
   arp->ctr_contents = ap->cta_contents;
   arp->ctr_index = ap->cta_index;
   arp->ctr_nelems = ap->cta_nelems;

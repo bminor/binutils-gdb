@@ -161,7 +161,7 @@ typedef struct ctf_arinfo
 {
   ctf_id_t ctr_contents;	/* Type of array contents.  */
   ctf_id_t ctr_index;		/* Type of array index.  */
-  uint32_t ctr_nelems;		/* Number of elements.  */
+  size_t ctr_nelems;		/* Number of elements.  */
 } ctf_arinfo_t;
 
 typedef struct ctf_funcinfo
