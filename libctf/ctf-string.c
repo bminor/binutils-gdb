@@ -46,11 +46,10 @@ set_prov_offset (ctf_dict_t *fp, uint32_t prov_offset)
     fp->ctf_str_prov_offset = prov_offset;
 }
 
-/* Convert an encoded CTF string name into a pointer to a C string, possibly
-   using an explicit internal provisional strtab rather than the fp-based
-   one.  */
+/* Convert an encoded CTF string name into a pointer to a C string by looking
+  up the appropriate string table buffer and then adding the offset.  */
 const char *
-ctf_strraw_explicit (ctf_dict_t *fp, uint32_t name, ctf_strs_t *strtab)
+ctf_strraw (ctf_dict_t *fp, uint32_t name)
 {
   int stid_tab = CTF_NAME_STID (name);
   ctf_strs_t *ctsp = &fp->ctf_str[stid_tab];
@@ -129,20 +128,20 @@ ctf_strraw_explicit (ctf_dict_t *fp, uint32_t name, ctf_strs_t *strtab)
       else
 	{
 	  name -= fp->ctf_header->cth_parent_strlen;
-
-	  if (strtab != NULL)
-	    ctsp = strtab;
-	  else
-	    ctsp = &fp->ctf_str[CTF_STRTAB_0];
+	  ctsp = &fp->ctf_str[CTF_STRTAB_0];
 	}
     }
 
   /* If this name is in the external strtab, and there is a synthetic strtab,
-     use it in preference.  (This is used to add the set of strings -- symbol
-     names, etc -- the linker knows about before the strtab is written out.
-     The set is added to every dict, so we don't need to scan the parent.)  */
+     and we are not serializing BTF right now, use it in preference.  (This is
+     used to add the set of strings -- symbol names, etc -- the linker knows
+     about before the strtab is written out.  The set is added to every dict, so
+     we don't need to scan the parent.  Preventing this from operating during
+     BTF serialization is sufficient to prevent external refs from appearing in
+     BTF, because every string gets rescanned at that stage.)  */
 
-  if (stid_tab == CTF_STRTAB_1 && fp->ctf_syn_ext_strtab != NULL)
+  if (stid_tab == CTF_STRTAB_1 && fp->ctf_syn_ext_strtab != NULL
+      && !fp->ctf_serialize.cs_is_btf)
     return ctf_dynhash_lookup (fp->ctf_syn_ext_strtab,
 			       (void *) (uintptr_t) name);
 
@@ -154,14 +153,6 @@ ctf_strraw_explicit (ctf_dict_t *fp, uint32_t name, ctf_strs_t *strtab)
 
   /* String table not loaded or corrupt offset.  */
   return NULL;
-}
-
-/* Convert an encoded CTF string name into a pointer to a C string by looking
-  up the appropriate string table buffer and then adding the offset.  */
-const char *
-ctf_strraw (ctf_dict_t *fp, uint32_t name)
-{
-  return ctf_strraw_explicit (fp, name, NULL);
 }
 
 /* Return a guaranteed-non-NULL pointer to the string with the given CTF
@@ -342,11 +333,11 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
 	atom->csa_flags |= CTF_STR_ATOM_NO_DEDUP;
 
       if (atom->csa_offset < get_prov_offset (fp)
-	  || atom->csa_external_offset != 0)
+	  || (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset))
 	{
 	  if (flags & CTF_STR_ADD_REF)
 	    {
-	      if (atom->csa_external_offset)
+	      if (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 		*ref = atom->csa_external_offset;
 	      else
 		*ref = atom->csa_offset + lookup_fp->ctf_header->cth_parent_strlen;
@@ -428,8 +419,7 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
 
      Special-case "" again: it gets a real offset of zero, not a high
      provisional one.  This atom's offset is never returned (see the special
-     case in ctf_strraw_explicit) and mostly exists for the sake of the
-     deduplicator.  */
+     case in ctf_strraw) and mostly exists for the sake of the deduplicator.  */
 
   if (flags & CTF_STR_PROVISIONAL)
     {
@@ -479,7 +469,7 @@ ctf_str_add_flagged (ctf_dict_t *fp, const char *str, uint32_t *ref,
   if (!atom)
     return 0;
 
-  if (atom->csa_external_offset)
+  if (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
     offset = atom->csa_external_offset;
   else
     offset = atom->csa_offset;
@@ -702,10 +692,11 @@ ctf_str_write_strtab (ctf_dict_t *fp)
 
   /* The strtab contains the existing string table at its start: figure out how
      many new strings we need to add.  We only need to add new strings that have
-     no external offset, that have refs, and that are found in the provisional
-     strtab.  If the existing strtab is empty and has no parent strings, we also
-     need to add the null string at its start.  (Dicts promoted from CTFv3 and
-     below always have no parent strings in this sense.)  */
+     no external offset (or are BTF, for which external offsets are ignored),
+     that have refs, and that are found in the provisional strtab.  If the
+     existing strtab is empty and has no parent strings, we also need to add the
+     null string at its start.  (Dicts promoted from CTFv3 and below always have
+     no parent strings in this sense.)  */
 
   strtab->cts_len = fp->ctf_str[CTF_STRTAB_0].cts_len;
 
@@ -730,7 +721,8 @@ ctf_str_write_strtab (ctf_dict_t *fp)
       if (!ctf_assert (fp, atom))
 	goto err_strtab;
 
-      if (atom->csa_str[0] == 0 || atom->csa_external_offset
+      if (atom->csa_str[0] == 0
+	  || (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 	  || atom->csa_offset < prov_offset
 	  || ctf_list_empty_p (&atom->csa_refs))
 	continue;
@@ -767,7 +759,8 @@ ctf_str_write_strtab (ctf_dict_t *fp)
       if (!ctf_assert (fp, atom))
 	goto err_sorttab;
 
-      if (atom->csa_str[0] == 0 || atom->csa_external_offset
+      if (atom->csa_str[0] == 0
+	  || (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 	  || atom->csa_offset < prov_offset
 	  || ctf_list_empty_p (&atom->csa_refs))
 	continue;
@@ -821,7 +814,7 @@ ctf_str_write_strtab (ctf_dict_t *fp)
       if (ctf_list_empty_p (&atom->csa_refs))
 	continue;
 
-      if (atom->csa_external_offset)
+      if (!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 	offset = atom->csa_external_offset;
       else
 	{

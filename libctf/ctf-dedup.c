@@ -3156,8 +3156,9 @@ ctf_dedup_emit (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
   return outputs;
 }
 
-/* Deduplicate strings.  This must be done after parent serialization.
-   The child dict ctf_parent_strlen is not updated yet.  */
+/* Deduplicate strings.  This must be done after parent serialization and child
+   preserialization.  The child dict ctf_parent_strlen is not updated yet.
+   (ctf_arc_write_*() does the right thing.)  */
 
 int
 ctf_dedup_strings (ctf_dict_t *fp)
@@ -3191,7 +3192,7 @@ ctf_dedup_strings (ctf_dict_t *fp)
 	  if (ctf_list_empty_p (&atom->csa_refs))
 	    continue;
 
-	  if (atom->csa_external_offset
+	  if ((!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 	      || atom->csa_str[0] == '\0'
 	      || atom->csa_flags & CTF_STR_ATOM_NO_DEDUP)
 	    continue;
@@ -3240,7 +3241,7 @@ ctf_dedup_strings (ctf_dict_t *fp)
 	  if (ctf_list_empty_p (&atom->csa_refs))
 	      continue;
 
-	  if (atom->csa_external_offset
+	  if ((!fp->ctf_serialize.cs_is_btf && atom->csa_external_offset)
 	      || atom->csa_str[0] == '\0'
 	      || atom->csa_flags & CTF_STR_ATOM_NO_DEDUP)
 	    continue;
