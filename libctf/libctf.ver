@@ -201,6 +201,7 @@ LIBCTF_2.0 {
 	ctf_link;
 	ctf_link_add_strtab;
 	ctf_link_shuffle_syms;
+	ctf_link_output_is_btf;
 	ctf_link_write;
 
 	ctf_link_add_linker_symbol;

@@ -803,6 +803,7 @@ extern void ctf_str_purge_refs (ctf_dict_t *fp);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
 extern const ctf_strs_writable_t *ctf_str_write_strtab (ctf_dict_t *);
 
+extern int ctf_serialize_output_format (ctf_dict_t *fp, int force_ctf);
 extern int ctf_preserialize (ctf_dict_t *fp, int force_ctf);
 extern void ctf_depreserialize (ctf_dict_t *fp);
 

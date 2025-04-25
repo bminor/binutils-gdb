@@ -40,10 +40,10 @@
 const char *
 ctf_link_input_name (ctf_dict_t *fp)
 {
-  if (fp->ctf_parent && fp->ctf_parent->ctf_cuname)
-    return fp->ctf_parent->ctf_cuname;
-  else if (fp->ctf_cuname)
-    return fp->ctf_cuname;
+  if (fp->ctf_parent && fp->ctf_parent->ctf_cu_name)
+    return fp->ctf_parent->ctf_cu_name;
+  else if (fp->ctf_cu_name)
+    return fp->ctf_cu_name;
   else
     return "(unnamed)";
 }
@@ -1479,6 +1479,11 @@ ctf_link_add_linker_symbol (ctf_dict_t *fp, ctf_link_sym_t *sym)
   if (sym->st_type != STT_OBJECT && sym->st_type != STT_FUNC)
     return 0;
 
+  /* If emitting BTF, there is no symtypetab so linker symbols are ignored.  */
+
+  if (fp->ctf_serialize.cs_is_btf)
+    return 0;
+
   /* Add the symbol to the in-flight list.  */
 
   if ((cid = malloc (sizeof (ctf_in_flight_dynsym_t))) == NULL)
@@ -1510,6 +1515,11 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
 
   if (fp->ctf_stypes > 0)
     return ctf_set_errno (fp, ECTF_RDONLY);
+
+  /* If emitting BTF, there is no symtypetab to shuffle.  */
+
+  if (fp->ctf_serialize.cs_is_btf)
+    return 0;
 
   if (!fp->ctf_dynsyms)
     {
@@ -1710,6 +1720,28 @@ ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst, const Elf64_Sym *src
   return dst;
 }
 
+/* Determine whether the archive that will be built from this linked dict is compatible
+   with pure BTF or would require CTF.  (Other things may nonetheless require CTF, in
+   particular, compression.)  */
+int
+ctf_link_output_is_btf (ctf_dict_t *fp)
+{
+  /* Can't call when nothing has been linked yet.  */
+
+  if (!fp->ctf_link_outputs)
+    return (ctf_set_errno (fp, EINVAL));
+
+  /* Cannot be BTF if child dicts are present.  */
+
+  if (ctf_dynhash_elements (fp->ctf_link_outputs) != 0)
+    return 0;
+
+  if (ctf_serialize_output_format (fp, 0) < 0)
+    return -1;					/* errno is set for us.  */
+
+  return fp->ctf_serialize.cs_is_btf;
+}
+
 typedef struct ctf_name_list_accum_cb_arg
 {
   char **names;
@@ -1841,9 +1873,12 @@ ctf_link_warn_outdated_inputs (ctf_dict_t *fp)
 
 /* Write out a CTF archive (if there are per-CU CTF files) or a CTF file
    (otherwise) into a new dynamically-allocated string, and return it.
-   Members with sizes above THRESHOLD are compressed.  */
+   Members with sizes above THRESHOLD are compressed.
+
+   The optional arg IS_BTF is set to 1 if the written output is valid BTF
+   (no archives, no CTF-specific types).  */
 unsigned char *
-ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
+ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold, int *is_btf)
 {
   ctf_name_list_accum_cb_arg_t arg;
   char **names;
@@ -1872,11 +1907,18 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 	}
     }
 
+  if (is_btf)
+    *is_btf = 0;
+
   /* No extra outputs?  Just write a simple ctf_dict_t.  */
   if (arg.i == 0)
     {
       unsigned char *ret = ctf_write_mem (fp, size, threshold);
       fp->ctf_flags &= ~LCTF_LINKING;
+
+      if (is_btf && fp->ctf_serialize.cs_is_btf)
+	*is_btf = 1;
+
       return ret;
     }
 

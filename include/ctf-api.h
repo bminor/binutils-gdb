@@ -1117,7 +1117,10 @@ extern int ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited);
    object files into a single .ctf section which is an archive possibly
    containing members containing types whose names collide across multiple
    compilation units, but they are usable by other programs as well and are not
-   private to the linker.  */
+   private to the linker.
+
+   They should be called in the order they appear below, though some are
+   optional.  */
 
 /* Add a CTF archive to the link with a given NAME (usually the name of the
    containing object file).  The dict added to is usually a new dict created
@@ -1136,7 +1139,7 @@ extern int ctf_link_add_ctf (ctf_dict_t *, ctf_archive_t *, const char *name);
 extern int ctf_link (ctf_dict_t *, int flags);
 
 /* Symtab linker handling, called after ctf_link to set up the symbol type
-   information used by ctf_*_lookup_symbol.  */
+   information used by ctf_*_lookup_symbol.  Optional.  */
 
 /* Add strings to the link from the ELF string table, repeatedly calling
    ADD_STRING to add each string and its corresponding offset in turn.  */
@@ -1153,19 +1156,28 @@ extern int ctf_link_add_strtab (ctf_dict_t *,
 extern int ctf_link_add_linker_symbol (ctf_dict_t *, ctf_link_sym_t *);
 
 /* Impose an ordering on symbols, as defined by the strtab and symbol
-   added by earlier calls to the above two functions.  */
+   added by earlier calls to the above two functions.  Optional.  */
 
 extern int ctf_link_shuffle_syms (ctf_dict_t *);
+
+/* Determine the file format of the dict that will be written out after the
+   calls above is compatible with pure BTF or would require CTF.  (Other things
+   may nonetheless require CTF, in particular, compression.)  */
+
+extern int ctf_link_output_is_btf (ctf_dict_t *);
 
 /* Return the serialized form of this ctf_linked dict as a new
    dynamically-allocated string, compressed if size over THRESHOLD.
 
    May be a CTF dict or a CTF archive (this library mostly papers over the
    differences so you can open both the same way, treat both as ctf_archive_t
-   and so on).  */
+   and so on).
+
+   If IS_BTF is set on return, the output is BTF-compatible and can be stored
+   in a .BTF section.  */
 
 extern unsigned char *ctf_link_write (ctf_dict_t *, size_t *size,
-				      size_t threshold);
+				      size_t threshold, int *is_btf);
 
 /* Specialist linker functions.  These functions are not used by ld, but can be
    used by other programs making use of the linker machinery for other purposes
