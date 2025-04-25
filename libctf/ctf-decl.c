@@ -34,7 +34,7 @@
 
    The functions in this file build a set of stacks from the type graph nodes
    corresponding to the C operator precedence levels in the appropriate order.
-   The code in ctf_type_name() can then iterate over the levels and nodes in
+   The code in ctf_type_aname() can then iterate over the levels and nodes in
    lexical precedence order and construct the final C declaration string.  */
 
 #include <ctf-impl.h>
@@ -79,16 +79,22 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
   uint32_t kind, n = 1;
   int is_qual = 0;
 
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
   ctf_arinfo_t ar;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     {
-      cd->cd_err = fp->ctf_errno;
-      return;
+      if (ctf_errno (fp) != ECTF_NONREPRESENTABLE)
+	{
+	  cd->cd_err = fp->ctf_errno;
+	  return;
+	}
+      kind = CTF_K_UNKNOWN;
     }
+  else
+    kind = ctf_type_kind (fp, type);
 
-  switch (kind = LCTF_INFO_KIND (fp, tp->ctt_info))
+  switch (kind)
     {
     case CTF_K_ARRAY:
       (void) ctf_array_info (fp, type, &ar);
@@ -98,21 +104,21 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
       break;
 
     case CTF_K_TYPEDEF:
-      if (ctf_strptr (fp, tp->ctt_name)[0] == '\0')
+      if (ctf_strptr (fp, suffix->ctt_name)[0] == '\0')
 	{
-	  ctf_decl_push (cd, fp, tp->ctt_type);
+	  ctf_decl_push (cd, fp, suffix->ctt_type);
 	  return;
 	}
       prec = CTF_PREC_BASE;
       break;
 
     case CTF_K_FUNCTION:
-      ctf_decl_push (cd, fp, tp->ctt_type);
+      ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = CTF_PREC_FUNCTION;
       break;
 
     case CTF_K_POINTER:
-      ctf_decl_push (cd, fp, tp->ctt_type);
+      ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = CTF_PREC_POINTER;
       break;
 
@@ -125,7 +131,7 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
     case CTF_K_VOLATILE:
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
-      ctf_decl_push (cd, fp, tp->ctt_type);
+      ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = cd->cd_qualp;
       is_qual++;
       break;
