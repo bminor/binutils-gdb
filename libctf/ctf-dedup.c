@@ -3336,8 +3336,10 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   int input_num = CTF_DEDUP_GID_TO_INPUT (id);
   int output_num = (uint32_t) -1;		/* 'shared' */
   int cu_mapping_phase = *(int *)arg;
+  int parent_cu_mapped = 0;
   int isroot = 1;
   int is_conflicting;
+  int mark_type_conflicting = 0;
 
   ctf_next_t *i = NULL;
   ctf_id_t new_type;
@@ -3355,12 +3357,17 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   ctf_dprintf ("%i: Emitting type with hash %s from %s: determining target\n",
 	       depth, hval, ctf_link_input_name (input));
 
-  /* Conflicting types go into a per-CU output dictionary, unless this is a
-     CU-mapped run.  The import is not refcounted, since it goes into the
-     ctf_link_outputs dict of the output that is its parent.  */
+  /* Conflicting types go into a per-CU output dictionary, unless this is the
+     final phase of a CU-mapped run and the input CU name is empty.  The import
+     is not refcounted, since it goes into the ctf_link_outputs dict of the
+     output that is its parent.  */
   is_conflicting = ctf_dynset_exists (d->cd_conflicting_types, hval, NULL);
 
-  if (is_conflicting && cu_mapping_phase != 1)
+  if (cu_mapping_phase == 2 && ctf_cuname (input) != NULL
+      && strcmp (ctf_cuname (input), "") == 0)
+    parent_cu_mapped = 1;
+
+  if (is_conflicting && cu_mapping_phase != 1 && !parent_cu_mapped)
     {
       ctf_dprintf ("%i: Type %s in %i/%lx is conflicted: "
 		   "inserting into per-CU target.\n",
@@ -3415,11 +3422,13 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
      child dict corresponding to every input dict they came from.  This means
      that if those dicts are mapped together, in phase 1 we can attempt to
      insert them *multiple times* into the same dict, which then causes them to
-     be duplicated in phase 2 as well.  Avoid this by making sure this hval
-     isn't already present in the emission hash in phase 1: if it is, we in
-     effect already visited this type, and can return as we did above.  */
+     be duplicated in phase 2 as well: in phase 2, further merging can happen
+     via the "" mapping target, which maps child dicts into the shared dict,
+     which can have the same effect.  Avoid this by making sure this hval isn't
+     already present in the emission hash in both phases 1 and 2: if it is, we
+     in effect already visited this type, and can return as we did above.  */
 
-  if (cu_mapping_phase == 1
+  if (cu_mapping_phase > 0
       && ctf_dynhash_lookup (target->ctf_dedup.cd_output_emission_hashes, hval))
     return 0;
 
@@ -3464,23 +3473,41 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
     {
     case 0: /* Normal link.  Root-visibility explicitly tracked.  */
       if (ctf_dynhash_lookup (d->cd_nonroot_consistency, hval))
-	isroot = 0;
+	{
+	  isroot = 0;
+	  mark_type_conflicting = 1;
+	}
       break;
-    case 1: /* cu-mapped link.  Never root-visible.  */
+    case 1: /* cu-mapped link.  Never root-visible, no explicit conflict
+	       marking.  */
       isroot = 0;
       break;
-    case 2: /* Final phase of cu-mapped link.  Non-root if already present.  */
-      if (is_conflicting && name
-	  && ((maybe_dup = ctf_lookup_by_rawname (target, kind, name)) != 0))
+    case 2: /* Final phase of cu-mapped link.  */
+      if (is_conflicting && name)
 	{
-	  if (ctf_type_kind (target, maybe_dup) != CTF_K_FORWARD)
+	  /* Non-root if conflicting and the target is cu-mapped into the parent
+	     dict (which must necessarily contain the non-conflicting type as
+	     well).  */
+	  if (parent_cu_mapped)
 	    {
-	      ctf_dprintf ("%s, kind %i, hval %s: conflicting type marked as "
-			   "non-root because of pre-existing type %s/%lx, "
-			   "kind %i.\n", name, kind, hval, ctf_cuname (target),
-			   maybe_dup, ctf_type_kind (target, maybe_dup));
 	      isroot = 0;
+	      mark_type_conflicting = 1;
 	    }
+	  else
+	    /* Non-root if already present (multiple conflicting types mapped
+	       into the same child dict).  */
+	    if ((maybe_dup = ctf_lookup_by_rawname (target, kind, name)) != 0)
+	      {
+		if (ctf_type_kind (target, maybe_dup) != CTF_K_FORWARD)
+		  {
+		    ctf_dprintf ("%s, kind %i, hval %s: conflicting type marked as "
+				 "non-root because of pre-existing type %s/%lx, "
+				 "kind %i.\n", name, kind, hval, ctf_cuname (target),
+				 maybe_dup, ctf_type_kind (target, maybe_dup));
+		    isroot = 0;
+		    mark_type_conflicting = 1;
+		  }
+	      }
 	}
       break;
     default:
@@ -3544,6 +3571,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 				 "as non-root because of pre-existing enumerand "
 				 "%s.\n", name, kind, hval, enumerand);
 		    isroot = 0;
+		    mark_type_conflicting = 1;
 		  }
 	      }
 	    if (ctf_errno (input) != ECTF_NEXT_END)
@@ -3920,6 +3948,12 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 		 "target %p (%s)\n", depth, hval, input_num, type, new_type,
 		 (void *) target, ctf_link_input_name (target));
 
+  /* If this type is meant to be marked conflicting in this dict rather than
+     moved into a child, mark it, and note which CU it came from.  */
+  if (new_type != 0 && mark_type_conflicting)
+    if (ctf_set_conflicting (target, new_type, ctf_cuname (input)) < 0)
+      goto err_target;
+
   return 0;
 
  oom_hash:
@@ -3930,15 +3964,15 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
  err_input:
   ctf_err_warn (output, 0, ctf_errno (input),
 		_("%s (%i): while emitting deduplicated %s, error getting "
-		  "input type %lx"), ctf_link_input_name (input),
-		input_num, errtype, type);
+		  "input type %lx (named %s)"), ctf_link_input_name (input),
+		input_num, errtype, type, name ? name : "(unnamed)");
   return ctf_set_errno (output, ctf_errno (input));
  err_target:
   ctf_err_warn (output, 0, ctf_errno (target),
 		_("%s (%i): while emitting deduplicated %s, error emitting "
-		  "target type from input type %lx"),
+		  "target type from input type %lx (named %s)"),
 		ctf_link_input_name (input), input_num,
-		errtype, type);
+		errtype, type, name ? name : "(unnamed)");
   return ctf_set_errno (output, ctf_errno (target));
 }
 

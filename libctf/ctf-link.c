@@ -335,7 +335,11 @@ ctf_create_per_cu (ctf_dict_t *fp, ctf_dict_t *input, const char *cu_name)
 
    We forcibly add a dict named TO in every case, even though it may well
    wind up empty, because clients that use this facility usually expect to find
-   every TO dict present, even if empty, and malfunction otherwise.  */
+   every TO dict present, even if empty, and malfunction otherwise.
+
+   The TO mapping named "" is special: types in this are merged directly and
+   unconditionally into the shared parent dict, and are hidden (marked conflicting) if
+   they clash, rather than being moved into child dicts.  */
 
 int
 ctf_link_add_cu_mapping (ctf_dict_t *fp, const char *from, const char *to)
