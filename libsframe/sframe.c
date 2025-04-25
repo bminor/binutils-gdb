@@ -988,6 +988,15 @@ sframe_decoder_get_version (sframe_decoder_ctx *dctx)
   return dhp->sfh_preamble.sfp_version;
 }
 
+/* Get the section flags from the SFrame decoder context DCTX.  */
+
+uint8_t
+sframe_decoder_get_flags (sframe_decoder_ctx *dctx)
+{
+  const sframe_header *dhp = sframe_decoder_get_header (dctx);
+  return dhp->sfh_preamble.sfp_flags;
+}
+
 /* Get the SFrame's fixed FP offset given the decoder context CTX.  */
 int8_t
 sframe_decoder_get_fixed_fp_offset (sframe_decoder_ctx *ctx)
@@ -1038,7 +1047,7 @@ sframe_get_funcdesc_with_addr_internal (sframe_decoder_ctx *ctx, int32_t addr,
     return sframe_ret_set_errno (errp, SFRAME_ERR_DCTX_INVAL);
   /* If the FDE sub-section is not sorted on PCs, skip the lookup because
      binary search cannot be used.  */
-  if ((dhp->sfh_preamble.sfp_flags & SFRAME_F_FDE_SORTED) == 0)
+  if ((sframe_decoder_get_flags (ctx) & SFRAME_F_FDE_SORTED) == 0)
     return sframe_ret_set_errno (errp, SFRAME_ERR_FDE_NOTSORTED);
 
   /* Do the binary search.  */
@@ -1402,6 +1411,15 @@ sframe_encoder_get_version (sframe_encoder_ctx *encoder)
   return ehp->sfh_preamble.sfp_version;
 }
 
+/* Get the section flags from the SFrame encoder context ENCODER.  */
+
+uint8_t
+sframe_encoder_get_flags (sframe_encoder_ctx *encoder)
+{
+  const sframe_header *ehp = sframe_encoder_get_header (encoder);
+  return ehp->sfh_preamble.sfp_flags;
+}
+
 /* Return the number of function descriptor entries in the SFrame encoder
    ENCODER.  */
 
@@ -1736,7 +1754,6 @@ sframe_encoder_write_sframe (sframe_encoder_ctx *encoder)
   size_t fre_size;
   size_t esz = 0;
   sframe_header *ehp;
-  unsigned char flags;
   sf_fde_tbl *fd_info;
   sf_fre_tbl *fr_info;
   uint32_t i, num_fdes;
@@ -1806,8 +1823,7 @@ sframe_encoder_write_sframe (sframe_encoder_ctx *encoder)
   /* Sanity checks:
      - the FDE section must have been sorted by now on the start address
      of each function.  */
-  flags = ehp->sfh_preamble.sfp_flags;
-  if (!(flags & SFRAME_F_FDE_SORTED)
+  if (!(sframe_encoder_get_flags (encoder) & SFRAME_F_FDE_SORTED)
       || (fd_info == NULL))
     return sframe_set_errno (&err, SFRAME_ERR_FDE_INVAL);
 
