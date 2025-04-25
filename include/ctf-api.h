@@ -264,6 +264,7 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.") \
   _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.") \
   _CTF_ITEM (ECTF_NOTTAG, "This function requires a type or decl tag.") \
+  _CTF_ITEM (ECTF_TOOLARGE, "Prefix required for correct representation.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -276,7 +277,7 @@ _CTF_ERRORS
 #undef _CTF_FIRST
   };
 
-#define ECTF_NERR (ECTF_NOTSERIALIZED - ECTF_BASE + 1) /* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_TOOLARGE - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */
@@ -650,6 +651,16 @@ extern ssize_t ctf_type_lname (ctf_dict_t *, ctf_id_t, char *, size_t);
    Consider using ctf_type_aname instead.  */
 
 extern char *ctf_type_name (ctf_dict_t *, ctf_id_t, char *, size_t);
+
+/* Retrieve raw (BTF or CTF-format) type data for the type with a given ID.
+   The vlen follows the record returned in the usual way for a type.
+
+   If PREFIX is 0, return only the data for the type itself: if the type is too
+   large to be accurately represented without a CTF_K_BIG prefix, this will
+   fail with ECTF_TOOLARGE.  Otherwise, return the entire type, includiung
+   any prefixes.  */
+
+extern const ctf_type_t *ctf_type_data (ctf_dict_t *, ctf_id_t, int prefix);
 
 /* Return the size or alignment of a type.  Types with no meaningful size, like
    function types, return 0 as their size; incomplete types set ECTF_INCOMPLETE.

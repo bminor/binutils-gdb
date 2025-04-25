@@ -1039,6 +1039,35 @@ ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *fp, int kind, const char *name)
     ctf_dynhash_lookup (ctf_name_table (fp, kind), name);
 }
 
+/* Retrieve raw type data.  */
+
+const ctf_type_t *
+ctf_type_data (ctf_dict_t *fp, ctf_id_t type, int prefix)
+{
+  const ctf_type_t *tp, *suffix, *big;
+
+  if (fp->ctf_flags & LCTF_NO_STR)
+    {
+      ctf_set_errno (fp, ECTF_NOPARENT);
+      return NULL;
+    }
+
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
+    return NULL;				/* errno is set for us.  */
+
+  if (!prefix && ((big = ctf_find_prefix (fp, tp, CTF_K_BIG)) != NULL)
+      && ((CTF_INFO_VLEN (big->ctt_info) != 0) || (big->ctt_size != 0)))
+    {
+      ctf_set_errno (fp, ECTF_TOOLARGE);
+      return NULL;
+    }
+
+  if (prefix)
+    return tp;
+  else
+    return suffix;
+}
+
 /* Lookup the given type ID and return its name as a new dynamically-allocated
    string.  */
 
