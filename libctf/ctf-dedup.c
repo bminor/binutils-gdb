@@ -732,6 +732,14 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 			    depth);
 	break;
       }
+    case CTF_K_BTF_FLOAT:
+      {
+	ssize_t size;
+
+	ctf_get_ctt_size (input, tp, &size, NULL);
+	ctf_dedup_sha1_add (&hash, &size, sizeof (size_t), "size", depth);
+	break;
+      }
       /* Types that reference other types.  */
     case CTF_K_TYPEDEF:
     case CTF_K_VOLATILE:
@@ -976,10 +984,19 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	ctf_id_t membtype;
 	ssize_t size;
 	int bit_width;
+	int is_bitfield;
 
 	ctf_get_ctt_size (input, tp, &size, NULL);
 	ctf_dedup_sha1_add (&hash, &size, sizeof (ssize_t), "struct size",
 			    depth);
+
+	if ((is_bitfield = ctf_struct_bitfield (input, type)) < 0)
+	  {
+	    whaterr = N_("error doing struct/union member bitfield checking");
+	    goto input_err;
+	  }
+	ctf_dedup_sha1_add (&hash, &is_bitfield, sizeof (is_bitfield),
+			    "struct/union bitfieldness", depth);
 
 	while ((offset = ctf_member_next (input, type, &i, &mname, &membtype,
 					  &bit_width, 0)) >= 0)
@@ -1004,6 +1021,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 				depth);
 	    ctf_dedup_sha1_add (&hash, &offset, sizeof (offset), "member offset",
 				depth);
+	    ctf_dedup_sha1_add (&hash, &bit_width, sizeof (bit_width),
+				"member bit width", depth);
 	    ADD_CITER (citers, hval);
 	  }
 	if (ctf_errno (input) != ECTF_NEXT_END)
@@ -2321,6 +2340,7 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
     case CTF_K_FORWARD:
     case CTF_K_INTEGER:
     case CTF_K_FLOAT:
+    case CTF_K_BTF_FLOAT:
     case CTF_K_ENUM:
     case CTF_K_ENUM64:
       /* No types referenced.  */
@@ -3041,6 +3061,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       break;
 
     case CTF_K_FLOAT:
+    case CTF_K_BTF_FLOAT:
     case CTF_K_INTEGER:
       errtype = _("float/int");
       if (ctf_type_encoding (input, type, &ep) < 0)
@@ -3261,11 +3282,22 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
     case CTF_K_STRUCT:
     case CTF_K_UNION:
       {
-	size_t size = ctf_type_size (input, type);
+	ssize_t size = ctf_type_size (input, type);
 	void *out_id;
+	int is_bitfield;
+
 	/* Insert the structure itself, so other types can refer to it.  */
 
 	errtype = _("structure/union");
+
+	is_bitfield = ctf_struct_bitfield (input, type);
+
+	if (is_bitfield < 0 || size < 0)
+	  goto err_input;
+
+	if (is_bitfield)
+	  isroot |= CTF_ADD_STRUCT_BITFIELDS;
+
 	if (kind == CTF_K_STRUCT)
 	  new_type = ctf_add_struct_sized (target, isroot, name, size);
 	else
@@ -3396,8 +3428,8 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
 	  ctf_dprintf ("Emitting %s, target-mapped type %lx, offset %zi\n", name, membtype, offset);
 #endif
-	  if (ctf_add_member_offset (target, target_type, name,
-				     membtype, offset) < 0)
+	  if (ctf_add_member_bitfield (target, target_type, name, membtype,
+				       offset, width) < 0)
 	    {
 	      ctf_next_destroy (j);
 	      goto err_target;
