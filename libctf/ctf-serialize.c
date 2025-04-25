@@ -1360,15 +1360,14 @@ int
 ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 {
   ctf_header_t hdr, *hdrp;
-  ctf_dvdef_t *dvd;
   ctf_dtdef_t *dtd;
   int sym_functions = 0;
+  size_t hdr_len;
+  int ctf_adjustment = 0;
 
   unsigned char *t;
-  unsigned long i;
   size_t buf_size, type_size, objt_size, func_size;
   size_t funcidx_size, objtidx_size;
-  size_t nvars;
   unsigned char *buf = NULL;
 
   emit_symtypetab_state_t symstate;
@@ -1406,16 +1405,14 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 	 read-in buffer.  You can emit such dicts using ctf_link, which can
 	 change type IDs arbitrarily, resolving all overlaps.  */
 
-      if (fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff > 0 &&
-	  fp->ctf_header->cth_parent_typemax < fp->ctf_parent->ctf_typemax)
+      if (fp->ctf_header->btf.bth_str_len > 0 &&
+	  fp->ctf_header->cth_parent_ntypes < fp->ctf_parent->ctf_typemax)
 	{
 	  ctf_set_errno (fp, ECTF_NOTSERIALIZED);
 	  ctf_err_warn (fp, 0, 0, _("cannot write out already-written child dict: parent has had %u types added"),
-			fp->ctf_parent->ctf_typemax - fp->ctf_header->cth_parent_typemax);
+			fp->ctf_parent->ctf_typemax - fp->ctf_header->cth_parent_ntypes);
 	  return -1;				/* errno is set for us.  */
 	}
-
-      fp->ctf_header->cth_parent_typemax = fp->ctf_parent->ctf_typemax;
     }
   else
     {
@@ -1437,23 +1434,22 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
     }
 
   /* Fill in an initial CTF header.  The type section begins at a 4-byte aligned
-     boundary past the CTF header itself (at relative offset zero).  The flag
-     indicating a new-style function info section (an array of CTF_K_FUNCTION
-     type IDs in the types section) is flipped on.  */
+     boundary past the CTF header itself (at relative offset zero).
+
+     It is quite possible that we will only write out the leading
+     ctf_btf_header_t portion of this structure.  */
 
   memset (&hdr, 0, sizeof (hdr));
-  hdr.cth_magic = CTF_MAGIC;
-  hdr.cth_version = CTF_VERSION;
+  hdr.btf.bth_preamble.btf_magic = CTF_BTF_MAGIC;
+  hdr.btf.bth_preamble.btf_version = CTF_BTF_VERSION;
+  hdr.btf.bth_preamble.btf_flags = 0;
+  hdr.btf.bth_hdr_len = sizeof (ctf_btf_header_t);
+  hdr.cth_preamble.ctp_magic_version = (CTFv4_MAGIC << 16) | CTF_VERSION;
 
-  /* This is a new-format func info section, and the symtab and strtab come out
-     of the dynsym and dynstr these days.  */
-
-  /* UPTODO: remove.  */
-  hdr.cth_flags = (CTF_F_NEWFUNCINFO | CTF_F_DYNSTR);
-
-  /* Propagate all symbols in the symtypetabs into the dynamic state, so that
-     we can put them back in the right order.  Symbols already in the dynamic
-     state, likely due to repeated serialization, are left unchanged.  */
+  /* Propagate all symbols in the symtypetabs into the dynamic state, so that we
+     can put them back in the right order during sizing.  Symbols already in the
+     dynamic state, likely due to repeated serialization, are left
+     unchanged.  */
   do
     {
       ctf_next_t *it = NULL;
@@ -1476,41 +1472,53 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 				 &objtidx_size, &funcidx_size) < 0)
     return -1;					/* errno is set for us.  */
 
-  /* Propagate all vars into the dynamic state, so we can put them back later.
-     Variables already in the dynamic state, likely due to repeated
-     serialization, are left unchanged.  */
-
-  for (i = 0; i < fp->ctf_nvars; i++)
+  if (!fp->ctf_serialize.cs_initialized)
     {
-      const char *name = ctf_strptr (fp, fp->ctf_vars[i].ctv_name);
-
-      if (name != NULL && !ctf_dvd_lookup (fp, name))
-	if (ctf_add_variable_forced (fp, name, fp->ctf_vars[i].ctv_type) < 0)
-	  return -1;				/* errno is set for us.  */
+      if (ctf_serialize_output_format (fp, force_ctf) < 0)
+	return -1;				/* errno is set for us.  */
     }
-
-  for (nvars = 0, dvd = ctf_list_next (&fp->ctf_dvdefs);
-       dvd != NULL; dvd = ctf_list_next (dvd), nvars++);
 
   type_size = ctf_type_sect_size (fp);
 
   /* Compute the size of the CTF buffer we need, sans only the string table,
      then allocate a new buffer and memcpy the finished header to the start of
-     the buffer.  (We will adjust this later with strtab length info.)  */
+     the buffer.  (We will adjust this later with strtab length info.)
 
-  hdr.cth_lbloff = hdr.cth_objtoff = 0;
-  hdr.cth_funcoff = hdr.cth_objtoff + objt_size;
-  hdr.cth_objtidxoff = hdr.cth_funcoff + func_size;
-  hdr.cth_funcidxoff = hdr.cth_objtidxoff + objtidx_size;
-  hdr.cth_varoff = hdr.cth_funcidxoff + funcidx_size;
-  hdr.cth_typeoff = hdr.cth_varoff + (nvars * sizeof (ctf_varent_t));
-  hdr.cth_stroff = hdr.cth_typeoff + type_size;
-  hdr.cth_strlen = 0;
+     Offsets in the BTF and CTF headers are relative to the end of te header in
+     question.  */
+
+  if (fp->ctf_serialize.cs_is_btf)
+    {
+      ctf_dprintf ("Writing out as BTF\n");
+
+      hdr_len = sizeof (ctf_btf_header_t);
+    }
+  else
+    {
+      ctf_dprintf ("Writing out as CTF\n");
+
+      hdr_len = sizeof (ctf_header_t);
+      ctf_adjustment = sizeof (ctf_header_t) - sizeof (ctf_btf_header_t);
+    }
+
+  hdr.cth_objt_off = 0;
+  hdr.cth_objt_len = objt_size;
+  hdr.cth_func_off = hdr.cth_objt_off + objt_size;
+  hdr.cth_func_len = func_size;
+  hdr.cth_objtidx_off = hdr.cth_func_off + func_size;
+  hdr.cth_objtidx_len = objtidx_size;
+  hdr.cth_funcidx_off = hdr.cth_objtidx_off + objtidx_size;
+  hdr.cth_funcidx_len = funcidx_size;
+  hdr.btf.bth_type_off = hdr.cth_funcidx_off + funcidx_size + ctf_adjustment;
+  hdr.btf.bth_type_len = type_size;
+  hdr.btf.bth_str_off = hdr.btf.bth_type_off + type_size;
+  hdr.btf.bth_str_len = 0;
   hdr.cth_parent_strlen = 0;
   if (fp->ctf_parent)
-    hdr.cth_parent_typemax = fp->ctf_parent->ctf_typemax;
+    hdr.cth_parent_ntypes = fp->ctf_parent->ctf_typemax;
 
-  buf_size = sizeof (ctf_header_t) + hdr.cth_stroff + hdr.cth_strlen;
+  /* No strings yet.  */
+  buf_size = sizeof (ctf_btf_header_t) + hdr.btf.bth_str_off;
 
   if ((buf = malloc (buf_size)) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
@@ -1518,53 +1526,38 @@ ctf_preserialize (ctf_dict_t *fp, int force_ctf)
   fp->ctf_serialize.cs_buf = buf;
   fp->ctf_serialize.cs_buf_size = buf_size;
 
-  memcpy (buf, &hdr, sizeof (ctf_header_t));
-  t = (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_objtoff;
+  memcpy (buf, &hdr, hdr_len);
+  t = (unsigned char *) buf + hdr_len + hdr.cth_objt_off;
 
   hdrp = (ctf_header_t *) buf;
-  if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parname != NULL))
-    ctf_str_add_no_dedup_ref (fp, fp->ctf_parname, &hdrp->cth_parname);
-  if (fp->ctf_cuname != NULL)
-    ctf_str_add_no_dedup_ref (fp, fp->ctf_cuname, &hdrp->cth_cuname);
 
-  if (ctf_emit_symtypetab_sects (fp, &symstate, &t, objt_size, func_size,
-				 objtidx_size, funcidx_size) < 0)
-    goto err;
-
-  assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_varoff);
-
-  /* Work over the variable list, translating everything into ctf_varent_t's and
-     prepping the string table.  */
-
-  fp->ctf_serializing_vars = (ctf_varent_t *) t;
-  for (i = 0, dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL;
-       dvd = ctf_list_next (dvd), i++)
+  if (!fp->ctf_serialize.cs_is_btf)
     {
-      ctf_varent_t *var = &fp->ctf_serializing_vars[i];
+      if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent_name != NULL))
+	ctf_str_add_no_dedup_ref (fp, fp->ctf_parent_name,
+				  &hdrp->cth_parent_name);
+      if (fp->ctf_cu_name != NULL)
+	ctf_str_add_no_dedup_ref (fp, fp->ctf_cu_name, &hdrp->cth_cu_name);
 
-      ctf_str_add_ref (fp, dvd->dvd_name, &var->ctv_name);
-      var->ctv_type = (uint32_t) dvd->dvd_type;
-
-      if (ctf_type_add_ref (fp, &var->ctv_type) < 0)
+      if (ctf_emit_symtypetab_sects (fp, &symstate, &t, objt_size, func_size,
+				     objtidx_size, funcidx_size) < 0)
 	goto err;
     }
-  assert (i == nvars);
-
-  t += sizeof (ctf_varent_t) * nvars;
-  fp->ctf_serializing_nvars = nvars;
-
-  assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_typeoff);
+  assert (t == (unsigned char *) buf + sizeof (ctf_btf_header_t)
+	  + hdr.btf.bth_type_off);
 
   /* Copy in existing static types, then emit new dynamic types.  */
 
-  memcpy (t, fp->ctf_buf + fp->ctf_header->cth_typeoff,
-	  fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff);
-  t += fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff;
+  memcpy (t, fp->ctf_buf + fp->ctf_header->btf.bth_type_off,
+	  fp->ctf_header->btf.bth_type_len);
+  t += fp->ctf_header->btf.bth_type_len;
 
-  if (ctf_emit_type_sect (fp, &t) < 0)
+  if (ctf_emit_type_sect (fp, &t, hdr.btf.bth_str_off
+			  - fp->ctf_header->btf.bth_type_len) < 0)
     goto err;
 
-  assert (t == (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_stroff);
+  assert (t == (unsigned char *) buf + sizeof (ctf_btf_header_t)
+	  + hdr.btf.bth_str_off);
 
   /* All types laid out: update all refs to types to cite the final IDs.  */
 
