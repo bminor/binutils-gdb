@@ -1425,6 +1425,11 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
   if (fp->ctf_stypes > 0)
     return ctf_set_errno (fp, ECTF_RDONLY);
 
+  /* If emitting BTF, there is no external string table.   */
+
+  if (fp->ctf_serialize.cs_is_btf)
+    return 0;
+
   while ((str = add_string (&offset, arg)) != NULL)
     {
       ctf_link_out_string_cb_arg_t iter_arg = { str, offset, 0 };

@@ -793,8 +793,6 @@ extern char *ctf_decl_buf (ctf_decl_t *cd);
 
 extern const char *ctf_strptr (ctf_dict_t *, uint32_t);
 extern const char *ctf_strraw (ctf_dict_t *, uint32_t);
-extern const char *ctf_strraw_explicit (ctf_dict_t *, uint32_t,
-					ctf_strs_t *);
 extern const char *ctf_strptr_validate (ctf_dict_t *, uint32_t);
 extern int ctf_str_create_atoms (ctf_dict_t *);
 extern void ctf_str_free_atoms (ctf_dict_t *);
