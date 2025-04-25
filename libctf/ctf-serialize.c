@@ -921,60 +921,57 @@ static size_t
 ctf_type_sect_size (ctf_dict_t *fp)
 {
   ctf_dtdef_t *dtd;
-  size_t type_size;
+  size_t type_size = 0;
 
-  for (type_size = 0, dtd = ctf_list_next (&fp->ctf_dtdefs);
+  for (dtd = ctf_list_next (&fp->ctf_dtdefs);
        dtd != NULL; dtd = ctf_list_next (dtd))
     {
-      uint32_t kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-      uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
-      size_t type_ctt_size = dtd->dtd_data.ctt_size;
+      uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
+      ctf_type_t *tp = dtd->dtd_buf;
 
-      /* Shrink ctf_type_t-using types from a ctf_type_t to a ctf_stype_t
-	 if possible.  */
+      /* Check for suppressions: a suppression consumes precisely one ctf_type_t
+	 record of space.  */
 
-      if (kind == CTF_K_STRUCT || kind == CTF_K_UNION)
+      if (fp->ctf_write_suppressions)
 	{
-	  size_t lsize = CTF_TYPE_LSIZE (&dtd->dtd_data);
+	  int suppress = 0;
 
-	  if (lsize <= CTF_MAX_SIZE)
-	    type_ctt_size = lsize;
+	  while (kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
+		 LCTF_IS_PREFIXED_KIND (kind))
+	    {
+	      if ((kind != CTF_K_BIG) || tp->ctt_size != 0
+		  || LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) != 0)
+		if (ctf_dynset_lookup (fp->ctf_write_suppressions,
+				       (const void *) (uintptr_t) kind) != NULL)
+		  {
+		    type_size += sizeof (ctf_type_t);
+		    suppress = 1;
+		    break;
+		  }
+
+	      tp++;
+	    }
+	  if (suppress)
+	    continue;
 	}
 
-      if (type_ctt_size != CTF_LSIZE_SENT)
-	type_size += sizeof (ctf_stype_t);
-      else
-	type_size += sizeof (ctf_type_t);
+      /* Type headers: elide CTF_K_BIG from types if possible.  Must match
+	 corresponding elision in ctf_emit_type_sect.  */
 
-      switch (kind)
+      tp = dtd->dtd_buf;
+      while (kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
+	     LCTF_IS_PREFIXED_KIND (kind))
 	{
-	case CTF_K_INTEGER:
-	case CTF_K_FLOAT:
-	  type_size += sizeof (uint32_t);
-	  break;
-	case CTF_K_ARRAY:
-	  type_size += sizeof (ctf_array_t);
-	  break;
-	case CTF_K_SLICE:
-	  type_size += sizeof (ctf_slice_t);
-	  break;
-	case CTF_K_FUNCTION:
-	  type_size += sizeof (uint32_t) * (vlen + (vlen & 1));
-	  break;
-	case CTF_K_STRUCT:
-	case CTF_K_UNION:
-	  if (type_ctt_size < CTF_LSTRUCT_THRESH)
-	    type_size += sizeof (ctf_member_t) * vlen;
-	  else
-	    type_size += sizeof (ctf_lmember_t) * vlen;
-	  break;
-	case CTF_K_ENUM:
-	  type_size += sizeof (ctf_enum_t) * vlen;
-	  break;
+	  if ((kind != CTF_K_BIG) || tp->ctt_size != 0
+	      || LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) != 0)
+	    type_size += sizeof (ctf_type_t);
+	  tp++;
 	}
+      type_size += sizeof (ctf_type_t);
+      type_size += dtd->dtd_vlen_size;
     }
 
-  return type_size + fp->ctf_header->cth_stroff - fp->ctf_header->cth_typeoff;
+  return type_size + fp->ctf_header->btf.bth_type_len;
 }
 
 /* Take a final lap through the dynamic type definition list and copy the
