@@ -2438,7 +2438,7 @@ ctf_dict_close (ctf_dict_t *fp)
   free (fp->ctf_txlate);
   free (fp->ctf_ptrtab);
   free (fp->ctf_pptrtab);
-  free (fp->ctf_serializing_buf);
+  free (fp->ctf_serialize.cs_buf);
 
   free (fp->ctf_header);
   free (fp);
