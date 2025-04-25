@@ -620,11 +620,6 @@ extern ctf_id_t ctf_index_to_type (const ctf_dict_t *, uint32_t);
 /* * If an offs is not aligned already then round it up and align it. */
 #define LCTF_ALIGN_OFFS(offs, align) ((offs + (align - 1)) & ~(align - 1))
 
-#define LCTF_INDEX_TO_TYPEPTR(fp, i)					\
-  ((i > fp->ctf_stypes) ?						\
-   ctf_dtd_lookup (fp, ctf_index_to_type (fp, i))->dtd_data :		\
-   (fp)->ctf_txlate[(i)])
-
 /* The non *INFO variants of these macros acquire the relevant info from the
    suffixed type, if the type is prefixed.  (Internally to libctf, all types
    that may ever take a prefix are prefixed until they are written out, so that
