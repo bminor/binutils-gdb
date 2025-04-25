@@ -1441,7 +1441,6 @@ ctf_add_typedef (ctf_dict_t *fp, uint32_t flag, const char *name,
 		 ctf_id_t ref)
 {
   ctf_dtdef_t *dtd;
-  ctf_id_t type;
   ctf_dict_t *tmp = fp;
 
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
@@ -1450,17 +1449,17 @@ ctf_add_typedef (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (name == NULL || name[0] == '\0')
     return (ctf_set_typed_errno (fp, ECTF_NONAME));
 
-  if (ref != 0 && ctf_lookup_by_id (&tmp, ref) == NULL)
+  if (ref != 0 && ctf_lookup_by_id (&tmp, ref, NULL) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  if ((type = ctf_add_generic (fp, flag, name, CTF_K_TYPEDEF, 0,
-			       &dtd)) == CTF_ERR)
+  if ((dtd = ctf_add_generic (fp, flag, name, CTF_K_TYPEDEF, 0, 0, 0,
+			      NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_TYPEDEF, flag, 0);
-  dtd->dtd_data.ctt_type = (uint32_t) ref;
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_TYPEDEF, 0, 0);
+  dtd->dtd_data->ctt_type = (uint32_t) ref;
 
-  return type;
+  return dtd->dtd_type;
 }
 
 ctf_id_t
