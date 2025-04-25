@@ -729,12 +729,26 @@ ctf_dump_member (ctf_dict_t *fp, const char *name, ctf_id_t id,
 				       | CTF_FT_ID)) == NULL)
     return -1;				/* errno is set for us.  */
 
-  if (asprintf (&bit, "[0x%lx] %s: %s\n", offset, name, typestr) < 0)
+  if (asprintf (&bit, "[0x%lx] %s:", offset, name) < 0)
     goto oom;
-
   *state->cdm_str = str_append (*state->cdm_str, bit);
+  free (bit);
+
+  if (bit_width > 0)
+    {
+      if (asprintf (&bit, "%i:", bit_width) < 0)
+	goto oom;
+      *state->cdm_str = str_append (*state->cdm_str, bit);
+      free (bit);
+    }
+
+  if (asprintf (&bit, " %s\n", typestr) < 0)
+    goto oom;
+  *state->cdm_str = str_append (*state->cdm_str, bit);
+
   free (typestr);
   free (bit);
+
   typestr = NULL;
   bit = NULL;
 
