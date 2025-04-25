@@ -127,6 +127,7 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
       prec = CTF_PREC_POINTER;
       break;
 
+    case CTF_K_DECL_TAG:
     case CTF_K_VAR:
       ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = CTF_PREC_BASE; /* UPTODO probably wrong */

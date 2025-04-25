@@ -253,13 +253,17 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_HASPARENT, "Cannot ctf_import: dict already has a parent.") \
   _CTF_ITEM (ECTF_WRONGPARENT, "Cannot ctf_import: incorrect parent provided.") \
   _CTF_ITEM (ECTF_NOTSERIALIZED, "CTF dict must be serialized first.") \
+  _CTF_ITEM (ECTF_BADCOMPONENT, "Declaration tag component_idx is invalid.") \
   _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
   _CTF_ITEM (ECTF_DESCENDING, "Structure offsets may not descend.") \
   _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
   _CTF_ITEM (ECTF_LINKKIND, "Only functions and variables have linkage.") \
+  _CTF_ITEM (ECTF_NEVERTAG, "Cannot call this function with a tag kind.") \
   _CTF_ITEM (ECTF_NOTDATASEC, "This function requires a datasec.") \
   _CTF_ITEM (ECTF_NOTVAR, "This function requires a variable.") \
   _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.") \
+  _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.") \
+  _CTF_ITEM (ECTF_NOTTAG, "This function requires a type or decl tag.") \
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -745,6 +749,20 @@ extern ctf_id_t ctf_datasec_var_offset (ctf_dict_t *fp, ctf_id_t datasec,
 
 extern ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var);
 
+/* Type and decl tags.  */
+
+/* Return the type ID of the type to which a given type tag is attached, or of
+   the type of the declaration to which a decl tag is attached (so a decl tag on
+   a function parameter would return the type ID of the parameter's type).  */
+
+extern ctf_id_t ctf_tag (ctf_dict_t *, ctf_id_t tag);
+
+/* Return the component ID and declaration to which a decl tag is attached.
+   -1 means "whole type".  */
+
+extern ctf_id_t ctf_decl_tag (ctf_dict_t *, ctf_id_t decl_tag,
+			      int64_t *component_idx);
+
 /* Iterators.  */
 
 /* ctf_member_next is a _next-style iterator that can additionally traverse into
@@ -816,6 +834,9 @@ extern int ctf_datasec_var_iter (ctf_dict_t *, ctf_id_t, ctf_datasec_var_f *,
 				 void *);
 extern ctf_id_t ctf_datasec_var_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				      size_t *size, size_t *offset);
+
+/* Iterate over all tags with the given TAG, returning the ID of each tag.  */
+extern ctf_id_t ctf_tag_next (ctf_dict_t *, const char *tag, ctf_next_t **);
 
 /* ctf_archive_iter and ctf_archive_next open each member dict for you,
    automatically importing any parent dict as usual: ctf_archive_iter closes the
@@ -919,6 +940,14 @@ extern ctf_id_t ctf_add_type (ctf_dict_t *, ctf_dict_t *, ctf_id_t);
 extern ctf_id_t ctf_add_typedef (ctf_dict_t *, uint32_t, const char *,
 				 ctf_id_t);
 extern ctf_id_t ctf_add_restrict (ctf_dict_t *, uint32_t, ctf_id_t);
+
+/* Add type and decl tags to whole types or (for decl tags) specific
+   components of types (parameter count for functions, member count for structs
+   and unions).  */
+extern ctf_id_t ctf_add_type_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *);
+extern ctf_id_t ctf_add_decl_type_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *);
+extern ctf_id_t ctf_add_decl_tag (ctf_dict_t *, uint32_t, ctf_id_t, const char *,
+				  int component_idx);
 
 /* Struct and union addition.  Straight addition uses possibly-confusing rules
    to guess the final size of the struct/union given its members: to explicitly
