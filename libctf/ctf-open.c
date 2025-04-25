@@ -2507,6 +2507,50 @@ ctf_symsect_endianness (ctf_dict_t *fp, int little_endian)
     assert (init_symtab (fp, fp->ctf_header, &fp->ctf_ext_symtab) == 0);
 }
 
+/* Return the size in bytes of a given CTF section, or 0 if none.  */
+
+size_t
+ctf_sect_size (ctf_dict_t *fp, ctf_sect_names_t sect)
+{
+  switch (sect)
+    {
+    case CTF_SECT_HEADER:
+      switch (CTH_VERSION (fp->ctf_header))
+	{
+	case CTF_VERSION_1:
+	case CTF_VERSION_1_UPGRADED_3:
+	case CTF_VERSION_2:
+	  return sizeof (ctf_header_v2_t);
+
+	case CTF_VERSION_3:
+	  return sizeof (ctf_header_v3_t);
+
+	case CTF_VERSION_4:
+	default:
+	  if (fp->ctf_opened_btf)
+	    return sizeof (ctf_btf_header_t);
+	  else
+	    return sizeof (ctf_header_t);
+	}
+    case CTF_SECT_OBJT:
+      return fp->ctf_header->cth_objtidx_len + fp->ctf_header->cth_objt_len;
+    case CTF_SECT_FUNC:
+      return fp->ctf_header->cth_funcidx_len + fp->ctf_header->cth_func_len;
+    case CTF_SECT_VAR:
+      if (fp->ctf_v3_header)
+	return fp->ctf_v3_header->cth_typeoff - fp->ctf_v3_header->cth_varoff;
+      else
+	return 0;
+    case CTF_SECT_TYPE:
+      return fp->ctf_header->btf.bth_type_len;
+    case CTF_SECT_STR:
+      return fp->ctf_header->btf.bth_str_len;
+    default:
+      ctf_set_errno (fp, ECTF_DUMPSECTUNKNOWN);
+      return 0;
+    }
+}
+
 /* Return the CTF handle for the parent CTF dict, if one exists.  Otherwise
    return NULL to indicate this dict has no imported parent.  */
 ctf_dict_t *

@@ -167,6 +167,7 @@ LIBCTF_2.0 {
 	ctf_write_mem;
 	ctf_gzwrite;
 	ctf_compress_write;
+	ctf_sect_size;
 	ctf_getdatasect;
 	ctf_getsymsect;
 	ctf_getstrsect;
