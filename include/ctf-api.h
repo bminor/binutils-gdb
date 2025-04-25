@@ -1187,7 +1187,11 @@ extern unsigned char *ctf_link_write (ctf_dict_t *, size_t *size,
    is only used if conflicting types are found in that compilation unit: they
    will instead be placed in the child dict named TO. Many FROMs can map to one
    TO: all the types are placed together in that dict, with any whose names
-   collide as a result being marked as non-root types.  */
+   collide as a result being marked as non-root types.
+
+   The TO mapping named "" is special: types in this are merged directly and
+   unconditionally into the shared parent dict, and are hidden (marked
+   conflicting) if they clash, rather than being moved into child dicts.  */
 
 extern int ctf_link_add_cu_mapping (ctf_dict_t *, const char *from,
 				    const char *to);

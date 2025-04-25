@@ -3263,6 +3263,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   int cu_mapped = *(int *)arg;
   int isroot;
   int is_conflicting;
+  int mark_type_conflicting = 0;
 
   ctf_next_t *i = NULL;
   ctf_id_t new_type;
@@ -3281,11 +3282,14 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	       depth, hval, ctf_link_input_name (input));
 
   /* Conflicting types go into a per-CU output dictionary, unless this is a
-     CU-mapped run.  The import is not refcounted, since it goes into the
-     ctf_link_outputs dict of the output that is its parent.  */
+     CU-mapped run or the input CU name is empty.  The import is not refcounted,
+     since it goes into the ctf_link_outputs dict of the output that is its
+     parent.  */
   is_conflicting = ctf_dynset_exists (d->cd_conflicting_types, hval, NULL);
 
-  if (is_conflicting && !cu_mapped)
+  if (is_conflicting && !cu_mapped
+      && (ctf_cuname (input) == NULL ||
+	  strcmp (ctf_cuname (input), "") != 0))
     {
       ctf_dprintf ("%i: Type %s in %i/%lx is conflicted: "
 		   "inserting into per-CU target.\n",
@@ -3340,7 +3344,10 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
      name already exists and is not a forward, or if this type is hidden on the
      input.  */
   if (cu_mapped && is_conflicting)
-    isroot = 0;
+    {
+      mark_type_conflicting = 1;
+      isroot = 0;
+    }
   else if (name
 	   && (maybe_dup = ctf_lookup_by_rawname (target, kind, name)) != 0)
     {
@@ -3770,6 +3777,12 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
     ctf_dprintf ("%i: Inserted %s, %i/%lx -> %lx into emission hash for "
 		 "target %p (%s)\n", depth, hval, input_num, type, new_type,
 		 (void *) target, ctf_link_input_name (target));
+
+  /* If this type is meant to be marked conflicting in this dict rather than
+     moved into a child, mark it, and note which CU it came from.  */
+  if (new_type != 0 && mark_type_conflicting)
+    if (ctf_set_conflicting (target, new_type, ctf_cuname (input)) < 0)
+      goto err_target;
 
   return 0;
 
