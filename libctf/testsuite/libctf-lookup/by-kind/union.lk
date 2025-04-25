@@ -1,0 +1,17 @@
+# lookup: open-and-dump.c
+# source: union.c
+
+#...
+Section \.bss:
+
+  0: 0x3: foo: 0x1: \(kind 5\) union bar .*
+
+Types: 
+
+0x1: \(kind 5\) union bar .*
+     \[0x0\] a:4: .* int .*
+     \[0x0\] b:4: .* int .*
+     \[0x0\] c: .* int .*
+0x2: \(kind 1\) int .*
+0x3: \(kind 14\) union bar foo .*
+0x4: \(kind 15\) DATASEC \(".bss", 1\)

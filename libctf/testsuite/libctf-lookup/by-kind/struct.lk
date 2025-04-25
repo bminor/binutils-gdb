@@ -1,0 +1,17 @@
+# lookup: open-and-dump.c
+# source: struct.c
+
+#...
+Section \.bss:
+
+  0: 0x3: foo: 0x1: \(kind 4\) struct .*
+
+Types: 
+
+0x1: \(kind 4\) struct .*
+     \[0x0\] a:4: .* int .*
+     \[0x4\] b:4: .* int .*
+     \[0x[0-9a-f]*\] c: .* int .*
+0x2: \(kind 1\) int .*
+0x3: \(kind 14\) struct  foo .*
+0x4: \(kind 15\) DATASEC \(".bss", 1\)

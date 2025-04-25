@@ -1,0 +1,14 @@
+# lookup: open-and-dump.c
+# source: datasec.c
+
+#...
+Section \.BAR:
+
+  0: 0x2: foo: 0x1: \(kind 1\) int .*
+
+Types: 
+
+0x1: \(kind 1\) int .*
+0x2: \(kind 14\) int foo .*
+0x3: \(kind 15\) DATASEC \(".BAR", 1\)
+
