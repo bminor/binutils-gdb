@@ -2623,16 +2623,16 @@ ctf_id_t ctf_variable_datasec (ctf_dict_t *fp, ctf_id_t var)
 
 static int
 ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
-		 void *arg, const char *name, unsigned long offset, int depth)
+		 void *arg, const char *name, unsigned long offset,
+		 int bit_width, int depth)
 {
-  ctf_dict_t *ofp = fp;
   ctf_id_t otype = type;
-  const ctf_type_t *tp = NULL;
-  const ctf_dtdef_t *dtd;
-  unsigned char *vlen;
-  ssize_t size, increment, vbytes;
-  uint32_t kind, n, i = 0;
   int nonrepresentable = 0;
+  uint32_t kind;
+  ctf_next_t *it = NULL;
+  ctf_id_t membtype;
+  ssize_t this_offset;
+  int this_bit_width;
   int rc;
 
   if (fp->ctf_flags & LCTF_NO_STR)
@@ -2645,43 +2645,20 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
       nonrepresentable = 1;
   }
 
-  if (!nonrepresentable)
-    if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-      return -1;		/* errno is set for us.  */
-
-  if ((rc = func (name, otype, offset, depth, arg)) != 0)
+  if ((rc = func (fp, name, otype, offset, bit_width, depth, arg)) != 0)
     return rc;
 
   if (!nonrepresentable)
-    kind = LCTF_INFO_KIND (fp, tp->ctt_info);
+    kind = ctf_type_kind (fp, type);
 
   if (nonrepresentable || (kind != CTF_K_STRUCT && kind != CTF_K_UNION))
     return 0;
 
-  ctf_get_ctt_size (fp, tp, &size, &increment);
-
-  n = LCTF_INFO_VLEN (fp, tp->ctt_info);
-  if ((dtd = ctf_dynamic_type (fp, type)) != NULL)
+  while ((this_offset = ctf_member_next (fp, type, &it, &name, &membtype,
+					 &this_bit_width, 0)) >= 0)
     {
-      vlen = dtd->dtd_vlen;
-      vbytes = dtd->dtd_vlen_alloc;
-    }
-  else
-    {
-      vlen = (unsigned char *) tp + increment;
-      vbytes = LCTF_VBYTES (fp, kind, size, n);
-    }
-
-  for (; n != 0; n--, i++)
-    {
-      ctf_lmember_t memb;
-
-      if (ctf_struct_member (fp, &memb, tp, vlen, vbytes, i) < 0)
-        return (ctf_set_errno (ofp, ctf_errno (fp)));
-
-      if ((rc = ctf_type_rvisit (fp, memb.ctlm_type,
-				 func, arg, ctf_strptr (fp, memb.ctlm_name),
-				 offset + (unsigned long) CTF_LMEM_OFFSET (&memb),
+      if ((rc = ctf_type_rvisit (fp, membtype, func, arg, name,
+				 offset + this_offset, this_bit_width,
 				 depth + 1)) != 0)
 	return rc;
     }
@@ -2694,5 +2671,5 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
 int
 ctf_type_visit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func, void *arg)
 {
-  return (ctf_type_rvisit (fp, type, func, arg, "", 0, 0));
+  return (ctf_type_rvisit (fp, type, func, arg, "", 0, 0, 0));
 }
