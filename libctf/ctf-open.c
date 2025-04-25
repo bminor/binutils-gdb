@@ -2629,11 +2629,11 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
     return (ctf_set_errno (fp, ECTF_HASPARENT));
 
   if (fp->ctf_header->cth_parent_strlen != 0 &&
-      pfp->ctf_header->cth_strlen != fp->ctf_header->cth_parent_strlen)
+      pfp->ctf_header->btf.bth_str_len != fp->ctf_header->cth_parent_strlen)
     {
       ctf_err_warn (fp, 0, ECTF_WRONGPARENT,
 		    _("ctf_import: incorrect parent dict: %u bytes of strings expected, %u found"),
-		    fp->ctf_header->cth_parent_strlen, pfp->ctf_header->cth_strlen);
+		    fp->ctf_header->cth_parent_strlen, pfp->ctf_header->btf.bth_str_len);
       return (ctf_set_errno (fp, ECTF_WRONGPARENT));
     }
 

@@ -620,6 +620,9 @@ extern ctf_id_t ctf_lookup_by_kind (ctf_dict_t *, int kind, const char *);
    typedef of a type with a *different width* (because this slice has not been
    applied to it).
 
+   May error with ECTF_NONREPRESENTABLE if type 0 is seen (rare, but can happen:
+   not only types GCC cannot encode, but also e.g. const void variables).
+
    Most of the time you don't need to call this: the type-querying functions
    will do it for you (as noted below).  */
 
