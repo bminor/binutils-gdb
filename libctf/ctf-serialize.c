@@ -795,6 +795,122 @@ ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited)
   return 0;
 }
 
+/* Determine whether newly-defined or modified types indicate that we will be
+   able to emit a BTF type section or must emit a CTF one.  Only called if we
+   have already verified that the CTF-specific sections (typetabs, etc) will be
+   empty, and that the input dict was freshly-created or read in from BTF.  */
+
+static int
+ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
+{
+  ctf_dtdef_t *dtd;
+  ctf_next_t *i = NULL;
+  ctf_next_t *prohibit_i = NULL;
+  void *pkind;
+  int err;
+
+  /* Verify prohibitions.  Do this first, for a fast return if a kind is
+     prohibited.  */
+
+  if (fp->ctf_write_prohibitions)
+    {
+      while ((err = ctf_dynset_next (fp->ctf_write_prohibitions,
+				     &prohibit_i, &pkind)) == 0)
+	{
+	  int kind = (uintptr_t) pkind;
+
+	  if (ctf_type_kind_next (fp, &i, kind) != CTF_ERR)
+	    {
+	      ctf_next_destroy (i);
+	      ctf_next_destroy (prohibit_i);
+	      ctf_err_warn (fp, 0, ECTF_KIND_PROHIBITED,
+			    _("Attempt to write out kind %i, which is prohibited by ctf_write_suppress_kind"),
+			    kind);
+	      return (ctf_set_errno (fp, ECTF_KIND_PROHIBITED));
+	    }
+	}
+      if (err != ECTF_NEXT_END)
+	{
+	  ctf_next_destroy (prohibit_i);
+	  ctf_err_warn (fp, 0, err, _("ctf_write: iteration error checking prohibited kinds"));
+	  return (ctf_set_errno (fp, err));
+	}
+    }
+
+  /* Prohibitions checked: if the user requested CTF come what may, we know this
+     cannot be BTF.  */
+
+  if (force_ctf)
+    return 0;
+
+  /* Check all types for invalid-in-BTF features.  */
+
+  for (dtd = ctf_list_next (&fp->ctf_dtdefs);
+       dtd != NULL; dtd = ctf_list_next (dtd))
+    {
+      ctf_type_t *tp = dtd->dtd_buf;
+      int kind;
+
+      /* Any un-suppressed prefixes other than an empty/redundant CTF_K_BIG must
+	 be CTF. (Redundant CTF_K_BIGs will be elided instead.)  */
+
+      while (kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
+	     LCTF_IS_PREFIXED_KIND (kind))
+	{
+	  if ((kind != CTF_K_BIG) || tp->ctt_size != 0
+	      || LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) != 0)
+	    if (!fp->ctf_write_suppressions
+		|| ctf_dynset_lookup (fp->ctf_write_suppressions,
+				      (const void *) (uintptr_t) kind) == NULL)
+	    return 0;
+
+	  tp++;
+	}
+
+      /* Prefixes checked.  If this kind is suppressed, it won't influence the
+	 result.  */
+
+      kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info);
+
+      if (fp->ctf_write_suppressions
+	  && ctf_dynset_lookup (fp->ctf_write_suppressions,
+				(const void *) (uintptr_t) kind))
+	continue;
+
+      if (kind == CTF_K_FLOAT || kind == CTF_K_SLICE)
+	return 0;
+
+      if (kind == CTF_K_STRUCT)
+	{
+	  ctf_member_t *memb = (ctf_member_t *) dtd->dtd_vlen;
+	  size_t off = 0;
+	  size_t j;
+
+	  for (j = 0; j < LCTF_VLEN (fp, dtd->dtd_buf); j++)
+	    {
+	      /* For bitfields, we must check if the individual members will
+		 still fit into a BTF type if they are encoded as offsets rather
+		 than offset-since-last.  (For non-bitfields, this is satisfied
+		 by a check of the ctt_size, which is equivalent to checking
+		 that the CTF_K_BIG's ctt_size is zero, done above.)  */
+
+	      if (CTF_INFO_KFLAG (tp->ctt_info))
+		{
+		  off += CTF_MEMBER_BIT_OFFSET (memb[j].ctm_offset);
+		  if (off > CTF_MAX_BIT_OFFSET)
+		    return 0;
+		}
+
+	      /* Check for nameless padding members.  */
+	      if (memb[j].ctm_name == 0 && memb[j].ctm_type == CTF_K_UNKNOWN)
+		return 0;
+	    }
+	}
+    }
+
+  return 1;
+}
+
 /* Iterate through the static types and the dynamic type definition list and
    compute the size of the CTF type section.
 
