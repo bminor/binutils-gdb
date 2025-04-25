@@ -110,7 +110,7 @@ public:
   int remove_breakpoint (struct gdbarch *, struct bp_target_info *,
 			 enum remove_bp_reason) override;
 
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
 
   void store_registers (struct regcache *, int) override;
   void prepare_to_store (struct regcache *) override;
@@ -1586,7 +1586,8 @@ record_btrace_target::remove_breakpoint (struct gdbarch *gdbarch,
 /* The fetch_registers method of target record-btrace.  */
 
 void
-record_btrace_target::fetch_registers (struct regcache *regcache, int regno)
+record_btrace_target::fetch_registers (struct regcache *regcache, int regno,
+				       bool only_this)
 {
   btrace_insn_iterator *replay = nullptr;
 
@@ -1619,7 +1620,7 @@ record_btrace_target::fetch_registers (struct regcache *regcache, int regno)
       regcache->raw_supply (regno, &insn->pc);
     }
   else
-    this->beneath ()->fetch_registers (regcache, regno);
+    this->beneath ()->fetch_registers (regcache, regno, only_this);
 }
 
 /* The store_registers method of target record-btrace.  */

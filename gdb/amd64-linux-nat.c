@@ -48,7 +48,7 @@
 struct amd64_linux_nat_target final : public x86_linux_nat_target
 {
   /* Add our register access methods.  */
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
   void store_registers (struct regcache *, int) override;
 
   bool low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
@@ -211,7 +211,8 @@ fill_fpregset (const struct regcache *regcache,
    registers).  */
 
 void
-amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum)
+amd64_linux_nat_target::fetch_registers (struct regcache *regcache, int regnum,
+					 bool only_this)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   const i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);

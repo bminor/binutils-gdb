@@ -3918,9 +3918,10 @@ target_options_to_string (target_wait_flags target_options)
 }
 
 void
-target_fetch_registers (struct regcache *regcache, int regno)
+target_fetch_registers (struct regcache *regcache, int regno, bool only_this)
 {
-  current_inferior ()->top_target ()->fetch_registers (regcache, regno);
+  current_inferior ()->top_target ()->fetch_registers (regcache, regno,
+						       only_this);
   target_debug_printf ("%s", regcache->register_debug_string (regno).c_str ());
 }
 

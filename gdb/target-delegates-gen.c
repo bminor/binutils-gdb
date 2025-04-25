@@ -36,7 +36,7 @@ struct dummy_target : public target_ops
   void resume (ptid_t arg0, int arg1, enum gdb_signal arg2) override;
   void commit_resumed () override;
   ptid_t wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_flags arg2) override;
-  void fetch_registers (struct regcache *arg0, int arg1) override;
+  void fetch_registers (struct regcache *arg0, int arg1, bool arg2) override;
   void store_registers (struct regcache *arg0, int arg1) override;
   void prepare_to_store (struct regcache *arg0) override;
   void files_info () override;
@@ -217,7 +217,7 @@ struct debug_target : public target_ops
   void resume (ptid_t arg0, int arg1, enum gdb_signal arg2) override;
   void commit_resumed () override;
   ptid_t wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_flags arg2) override;
-  void fetch_registers (struct regcache *arg0, int arg1) override;
+  void fetch_registers (struct regcache *arg0, int arg1, bool arg2) override;
   void store_registers (struct regcache *arg0, int arg1) override;
   void prepare_to_store (struct regcache *arg0) override;
   void files_info () override;
@@ -524,25 +524,26 @@ debug_target::wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_fla
 }
 
 void
-target_ops::fetch_registers (struct regcache *arg0, int arg1)
+target_ops::fetch_registers (struct regcache *arg0, int arg1, bool arg2)
 {
-  this->beneath ()->fetch_registers (arg0, arg1);
+  this->beneath ()->fetch_registers (arg0, arg1, arg2);
 }
 
 void
-dummy_target::fetch_registers (struct regcache *arg0, int arg1)
+dummy_target::fetch_registers (struct regcache *arg0, int arg1, bool arg2)
 {
 }
 
 void
-debug_target::fetch_registers (struct regcache *arg0, int arg1)
+debug_target::fetch_registers (struct regcache *arg0, int arg1, bool arg2)
 {
   target_debug_printf_nofunc ("-> %s->fetch_registers (...)", this->beneath ()->shortname ());
-  this->beneath ()->fetch_registers (arg0, arg1);
-  target_debug_printf_nofunc ("<- %s->fetch_registers (%s, %s)",
+  this->beneath ()->fetch_registers (arg0, arg1, arg2);
+  target_debug_printf_nofunc ("<- %s->fetch_registers (%s, %s, %s)",
 	      this->beneath ()->shortname (),
 	      target_debug_print_regcache_p (arg0).c_str (),
-	      target_debug_print_int (arg1).c_str ());
+	      target_debug_print_int (arg1).c_str (),
+	      target_debug_print_bool (arg2).c_str ());
 }
 
 void

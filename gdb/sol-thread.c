@@ -89,7 +89,7 @@ public:
   std::string pid_to_str (ptid_t) override;
   ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
   void store_registers (struct regcache *, int) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
@@ -468,7 +468,8 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 }
 
 void
-sol_thread_target::fetch_registers (struct regcache *regcache, int regnum)
+sol_thread_target::fetch_registers (struct regcache *regcache, int regnum,
+				    bool only_this)
 {
   thread_t thread;
   td_thrhandle_t thandle;
@@ -482,7 +483,7 @@ sol_thread_target::fetch_registers (struct regcache *regcache, int regnum)
   if (!ptid.tid_p ())
     {
       /* It's an LWP; pass the request on to the layer beneath.  */
-      beneath ()->fetch_registers (regcache, regnum);
+      beneath ()->fetch_registers (regcache, regnum, only_this);
       return;
     }
 

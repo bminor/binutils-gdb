@@ -90,7 +90,7 @@ struct ravenscar_thread_target final : public target_ops
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   void resume (ptid_t, int, enum gdb_signal) override;
 
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
   void store_registers (struct regcache *, int) override;
 
   void prepare_to_store (struct regcache *) override;
@@ -676,7 +676,7 @@ ravenscar_thread_target::get_fpu_state (struct regcache *regcache,
 
 void
 ravenscar_thread_target::fetch_registers (struct regcache *regcache,
-					  int regnum)
+					  int regnum, bool only_this)
 {
   ptid_t ptid = regcache->ptid ();
 
@@ -710,14 +710,14 @@ ravenscar_thread_target::fetch_registers (struct regcache *regcache,
 	  if (use_beneath)
 	    {
 	      temporarily_change_regcache_ptid changer (regcache, base);
-	      beneath ()->fetch_registers (regcache, i);
+	      beneath ()->fetch_registers (regcache, i, only_this);
 	    }
 	  else
 	    arch_ops->fetch_register (regcache, i);
 	}
     }
   else
-    beneath ()->fetch_registers (regcache, regnum);
+    beneath ()->fetch_registers (regcache, regnum, only_this);
 }
 
 void

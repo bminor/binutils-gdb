@@ -68,7 +68,7 @@ class aarch64_linux_nat_target final
 {
 public:
   /* Add our register access methods.  */
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
   void store_registers (struct regcache *, int) override;
 
   const struct target_desc *read_description () override;
@@ -740,7 +740,7 @@ aarch32_fetch_registers (struct regcache *regcache, int regno)
 
 void
 aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
-					   int regno)
+					   int regno, bool only_this)
 {
   if (gdbarch_bfd_arch_info (regcache->arch ())->bits_per_word == 32)
     aarch32_fetch_registers (regcache, regno);

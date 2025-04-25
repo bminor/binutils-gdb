@@ -196,7 +196,7 @@ public:
 
   void close () override;
   void detach (inferior *, int) override;
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
@@ -1371,10 +1371,11 @@ get_core_registers_cb (const char *sect_name, int supply_size, int collect_size,
    part, typically implemented in the xm-file for each
    architecture.  */
 
-/* We just get all the registers, so we don't use regno.  */
+/* We just get all the registers, so we don't use regno nor only_this.  */
 
 void
-core_target::fetch_registers (struct regcache *regcache, int regno)
+core_target::fetch_registers (struct regcache *regcache, int regno,
+			      bool only_this)
 {
   if (!(m_core_gdbarch != nullptr
 	&& gdbarch_iterate_over_regset_sections_p (m_core_gdbarch)))

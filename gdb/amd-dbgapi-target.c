@@ -284,7 +284,7 @@ struct amd_dbgapi_target final : public target_ops
   void commit_resumed () override;
   void stop (ptid_t ptid) override;
 
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
   void store_registers (struct regcache *, int) override;
 
   void update_thread_list () override;
@@ -1726,11 +1726,12 @@ amd_dbgapi_target::detach (inferior *inf, int from_tty)
 }
 
 void
-amd_dbgapi_target::fetch_registers (struct regcache *regcache, int regno)
+amd_dbgapi_target::fetch_registers (struct regcache *regcache, int regno,
+				    bool only_this)
 {
   if (!ptid_is_gpu (regcache->ptid ()))
     {
-      beneath ()->fetch_registers (regcache, regno);
+      beneath ()->fetch_registers (regcache, regno, only_this);
       return;
     }
 

@@ -526,7 +526,7 @@ struct target_ops
     virtual ptid_t wait (ptid_t, struct target_waitstatus *,
 			 target_wait_flags options)
       TARGET_DEFAULT_FUNC (default_target_wait);
-    virtual void fetch_registers (struct regcache *, int)
+    virtual void fetch_registers (struct regcache *, int, bool)
       TARGET_DEFAULT_IGNORE ();
     virtual void store_registers (struct regcache *, int)
       TARGET_DEFAULT_NORETURN (noprocess ());
@@ -1601,9 +1601,15 @@ extern ptid_t default_target_wait (struct target_ops *ops,
 
 extern bool target_has_pending_events ();
 
-/* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
+/* Fetch at least register REGNO, or all regs if regno == -1.  No result.
 
-extern void target_fetch_registers (struct regcache *regcache, int regno);
+   If ONLY_THIS is true, then try to minimize the number of registers
+   fetched in the process of updating REGNUM.  This may be required when
+   REGNUM is used by a target_description parameter.
+   */
+
+extern void target_fetch_registers (struct regcache *regcache, int regno,
+				    bool only_this = false);
 
 /* Store at least register REGNO, or all regs if REGNO == -1.
    It can store as many registers as it wants to, so target_prepare_to_store

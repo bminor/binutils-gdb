@@ -39,7 +39,7 @@ public:
 
   void disconnect (const char *, int) override;
 
-  void fetch_registers (struct regcache *, int) override = 0;
+  void fetch_registers (struct regcache *, int, bool) override = 0;
   void store_registers (struct regcache *, int) override = 0;
 
   void prepare_to_store (struct regcache *) override;

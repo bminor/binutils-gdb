@@ -54,7 +54,7 @@ class tfile_target final : public tracefile_target
   { return tfile_target_info; }
 
   void close () override;
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
   enum target_xfer_status xfer_partial (enum target_object object,
 						const char *annex,
 						gdb_byte *readbuf,
@@ -847,7 +847,8 @@ traceframe_find_block_type (char type_wanted, int pos)
    requested register from it.  */
 
 void
-tfile_target::fetch_registers (struct regcache *regcache, int regno)
+tfile_target::fetch_registers (struct regcache *regcache, int regno,
+			       bool only_this)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int offset, regn, regsize, dummy;

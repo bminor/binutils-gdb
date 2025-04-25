@@ -830,7 +830,7 @@ registers_changed (void)
 }
 
 void
-regcache::raw_update (int regnum)
+regcache::raw_update (int regnum, bool only_this)
 {
   assert_regnum (regnum);
 
@@ -844,7 +844,7 @@ regcache::raw_update (int regnum)
       std::optional<scoped_restore_current_thread> maybe_restore_thread
 	= maybe_switch_inferior (m_inf_for_target_calls);
 
-      target_fetch_registers (this, regnum);
+      target_fetch_registers (this, regnum, only_this);
 
       /* A number of targets can't access the whole set of raw
 	 registers (because the debug API provides no means to get at
@@ -855,12 +855,13 @@ regcache::raw_update (int regnum)
 }
 
 register_status
-readable_regcache::raw_read (int regnum, gdb::array_view<gdb_byte> dst)
+readable_regcache::raw_read (int regnum, gdb::array_view<gdb_byte> dst,
+			     bool only_this)
 {
   assert_regnum (regnum);
   gdb_assert (dst.size () == register_size (regnum));
 
-  raw_update (regnum);
+  raw_update (regnum, only_this);
 
   if (m_register_status[regnum] != REG_VALID)
     memset (dst.data (), 0, dst.size ());
@@ -2159,7 +2160,7 @@ public:
     xfer_partial_called = 0;
   }
 
-  void fetch_registers (regcache *regs, int regno) override;
+  void fetch_registers (regcache *regs, int regno, bool) override;
   void store_registers (regcache *regs, int regno) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
@@ -2174,7 +2175,8 @@ public:
 };
 
 void
-target_ops_no_register::fetch_registers (regcache *regs, int regno)
+target_ops_no_register::fetch_registers (regcache *regs, int regno,
+					 bool only_this)
 {
   /* Mark register available.  */
   regs->raw_supply_zeroed (regno);

@@ -838,7 +838,7 @@ public:
   { return ctf_target_info; }
 
   void close () override;
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
   enum target_xfer_status xfer_partial (enum target_object object,
 						const char *annex,
 						gdb_byte *readbuf,
@@ -1206,7 +1206,8 @@ ctf_target::files_info ()
    If no matched events are found, mark registers unavailable.  */
 
 void
-ctf_target::fetch_registers (struct regcache *regcache, int regno)
+ctf_target::fetch_registers (struct regcache *regcache, int regno,
+			     bool only_this)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct bt_ctf_event *event = NULL;

@@ -116,7 +116,7 @@ public:
   void resume (ptid_t, int, enum gdb_signal) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
   void store_registers (struct regcache *, int) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
@@ -1443,7 +1443,8 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
    thread/process connected to REGCACHE.  */
 
 void
-aix_thread_target::fetch_registers (struct regcache *regcache, int regno)
+aix_thread_target::fetch_registers (struct regcache *regcache, int regno,
+				    bool only_this)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
@@ -1453,7 +1454,7 @@ aix_thread_target::fetch_registers (struct regcache *regcache, int regno)
      exists.  */
 
   if (regcache->ptid ().tid () == 0)
-    beneath ()->fetch_registers (regcache, regno);
+    beneath ()->fetch_registers (regcache, regno, only_this);
   else
     {
       thread = current_inferior ()->find_thread (regcache->ptid ());

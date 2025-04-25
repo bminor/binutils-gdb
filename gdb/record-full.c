@@ -309,7 +309,7 @@ public:
   void resume (ptid_t, int, enum gdb_signal) override;
   void disconnect (const char *, int) override;
   void kill () override;
-  void fetch_registers (struct regcache *regcache, int regno) override;
+  void fetch_registers (struct regcache *regcache, int regno, bool) override;
   void prepare_to_store (struct regcache *regcache) override;
   void store_registers (struct regcache *, int) override;
   enum target_xfer_status xfer_partial (enum target_object object,
@@ -2103,7 +2103,7 @@ record_full_core_target::kill ()
 
 void
 record_full_core_target::fetch_registers (struct regcache *regcache,
-					  int regno)
+					  int regno, bool only_this)
 {
   if (regno < 0)
     {

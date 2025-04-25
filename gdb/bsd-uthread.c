@@ -49,7 +49,7 @@ struct bsd_uthread_target final : public target_ops
 
   void mourn_inferior () override;
 
-  void fetch_registers (struct regcache *, int) override;
+  void fetch_registers (struct regcache *, int, bool) override;
   void store_registers (struct regcache *, int) override;
 
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
@@ -311,7 +311,8 @@ bsd_uthread_target::mourn_inferior ()
 }
 
 void
-bsd_uthread_target::fetch_registers (struct regcache *regcache, int regnum)
+bsd_uthread_target::fetch_registers (struct regcache *regcache, int regnum,
+				     bool only_this)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct bsd_uthread_ops *uthread_ops = get_bsd_uthread (gdbarch);
@@ -325,7 +326,7 @@ bsd_uthread_target::fetch_registers (struct regcache *regcache, int regnum)
   inferior_ptid = ptid;
 
   /* Always fetch the appropriate registers from the layer beneath.  */
-  beneath ()->fetch_registers (regcache, regnum);
+  beneath ()->fetch_registers (regcache, regnum, only_this);
 
   /* FIXME: That might have gotten us more than we asked for.  Make
      sure we overwrite all relevant registers with values from the

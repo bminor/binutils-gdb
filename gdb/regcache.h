@@ -348,8 +348,13 @@ public:
   {}
 
   /* Transfer a raw register [0..NUM_REGS) from core-gdb to this regcache,
-     return its value in *BUF and return its availability status.  */
-  register_status raw_read (int regnum, gdb::array_view<gdb_byte> dst);
+     return its value in *BUF and return its availability status.
+
+     If ONLY_THIS is true, then don't try to fetch other registers in the
+     process of updating REGNUM.  This may be required when REGNUM is used
+     by a target_description parameter.  */
+  register_status raw_read (int regnum, gdb::array_view<gdb_byte> dst,
+			    bool only_this = false);
 
   /* Deprecated overload of the above.  */
   register_status raw_read (int regnum, gdb_byte *dst);
@@ -366,8 +371,12 @@ public:
 				 gdb_byte *dst)
   { return raw_read_part (regnum, offset, gdb::make_array_view (dst, len)); }
 
-  /* Make certain that the register REGNUM is up-to-date.  */
-  virtual void raw_update (int regnum) = 0;
+  /* Make certain that the register REGNUM is up-to-date.
+
+     If ONLY_THIS is true, then don't try to fetch other registers in the
+     process of updating REGNUM.  This may be required when REGNUM is used
+     by a target_description parameter.  */
+  virtual void raw_update (int regnum, bool only_this = false) = 0;
 
   /* Transfer a raw register [0..NUM_REGS+NUM_PSEUDO_REGS) from core-gdb to
      this regcache, return its value in DST and return its availability status.  */
@@ -416,7 +425,7 @@ public:
     : readable_regcache (gdbarch, has_pseudo)
   {}
 
-  void raw_update (int regnum) override
+  void raw_update (int regnum, bool only_this) override
   {}
 
   DISABLE_COPY_AND_ASSIGN (detached_regcache);
@@ -457,7 +466,7 @@ public:
   template<typename T, typename = RequireLongest<T>>
   void cooked_write (int regnum, T val);
 
-  void raw_update (int regnum) override;
+  void raw_update (int regnum, bool only_this = false) override;
 
   /* Partial transfer of raw registers.  Perform read, modify, write style
      operations.  */
@@ -579,7 +588,7 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (readonly_detached_regcache);
 
-  void raw_update (int regnum) override
+  void raw_update (int regnum, bool only_this = false) override
   {}
 };
 
