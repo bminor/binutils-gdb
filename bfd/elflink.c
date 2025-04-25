@@ -130,6 +130,12 @@ _bfd_elf_get_link_hash_entry (struct elf_link_hash_entry **  sym_hashes,
   return get_link_hash_entry (sym_hashes, symndx, symtab_hdr->sh_info);
 }
 
+struct bfd_link_info *
+_bfd_elf_get_link_info (bfd *abfd)
+{
+  return _bfd_get_link_info (abfd);
+}
+
 static struct elf_link_hash_entry *
 get_ext_sym_hash_from_cookie (struct elf_reloc_cookie *cookie, unsigned long r_symndx)
 {
@@ -10467,7 +10473,8 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
 
       /* Inform the linker of the addition of this symbol.  */
 
-      if (flinfo->info->callbacks->ctf_new_symbol)
+      if (flinfo->info->callbacks->ctf_new_symbol
+	  && !flinfo->info->ctf_disabled)
 	flinfo->info->callbacks->ctf_new_symbol (elfsym->dest_index,
 						 &elfsym->sym);
 
@@ -11096,7 +11103,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 
       /* Inform the linker of the addition of this symbol.  */
 
-      if (flinfo->info->callbacks->ctf_new_dynsym)
+      if (flinfo->info->callbacks->ctf_new_dynsym
+	  && !flinfo->info->ctf_disabled)
 	flinfo->info->callbacks->ctf_new_dynsym (h->dynindx, &sym);
 
       bed->s->swap_symbol_out (flinfo->output_bfd, &sym, esym, 0);
@@ -12918,7 +12926,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       esdo->rela.count = 0;
 
       if ((esdo->this_hdr.sh_offset == (file_ptr) -1)
-	  && !bfd_section_is_ctf (o))
+	  && !bfd_section_is_libctf_deduppable (o))
 	{
 	  /* Cache the section contents so that they can be compressed
 	     later.  Use bfd_malloc since it will be freed by
@@ -13291,7 +13299,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      /* Inform the linker of the addition of this symbol.  */
 
-	      if (info->callbacks->ctf_new_dynsym)
+	      if (info->callbacks->ctf_new_dynsym && !info->ctf_disabled)
 		info->callbacks->ctf_new_dynsym (dynindx, &sym);
 
 	      bed->s->swap_symbol_out (abfd, &sym, dest, 0);
@@ -13331,7 +13339,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      /* Inform the linker of the addition of this symbol.  */
 
-	      if (info->callbacks->ctf_new_dynsym)
+	      if (info->callbacks->ctf_new_dynsym && !info->ctf_disabled)
 		info->callbacks->ctf_new_dynsym (e->dynindx, &sym);
 
 	      dest = dynsym + e->dynindx * bed->s->sizeof_sym;
@@ -13798,7 +13806,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (! _bfd_elf_write_section_sframe (abfd, info))
     goto error_return;
 
-  if (info->callbacks->emit_ctf)
+  if (info->callbacks->emit_ctf && !info->ctf_disabled)
       info->callbacks->emit_ctf ();
 
   elf_final_link_free (abfd, &flinfo);
