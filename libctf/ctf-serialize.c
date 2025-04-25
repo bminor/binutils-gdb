@@ -795,6 +795,42 @@ ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited)
   return 0;
 }
 
+/* Figure out whether we can elide a given type prefix as unnecessary.
+
+   Prefixes can be elided iff they are BIG and zero-size and zero-vlen and (if
+   structs) the type as a whole is smallifiable.  If not elided, this prefix is
+   included.  */
+static int
+ctf_prefix_elidable (ctf_dict_t *fp, uint32_t kind, ctf_dtdef_t *dtd,
+		     ctf_type_t *prefix)
+{
+  int prefix_kind = LCTF_INFO_UNPREFIXED_KIND (fp, prefix->ctt_info);
+
+  if ((prefix_kind == CTF_K_BIG) && prefix->ctt_size == 0
+      && LCTF_INFO_UNPREFIXED_VLEN (fp, prefix->ctt_info) == 0)
+    {
+      ssize_t size;
+
+      if (kind != CTF_K_STRUCT)
+	return 1;
+
+      /* For bitfields, we must check if the individual member offsets will
+	 still fit if they are encoded as offsets rather than offset-since-last.
+	 We can check this for both cases without checking individual fields by
+	 looking at the ctt_size.  We need not check for nameless padding
+	 members, because these can only be produced at all if the struct would
+	 require CTF_K_BIG in the first place.  */
+
+      size = ctf_get_ctt_size (fp, dtd->dtd_buf, NULL, NULL);
+
+      if (CTF_INFO_KFLAG (dtd->dtd_data->ctt_info))
+	return (size <= CTF_MAX_BIT_OFFSET);
+      else
+	return (size <= CTF_MAX_SIZE);
+    }
+  return 0;
+}
+
 /* Determine whether newly-defined or modified types indicate that we will be
    able to emit a BTF type section or must emit a CTF one.  Only called if we
    have already verified that the CTF-specific sections (typetabs, etc) will be
@@ -849,19 +885,19 @@ ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
        dtd != NULL; dtd = ctf_list_next (dtd))
     {
       ctf_type_t *tp = dtd->dtd_buf;
-      int kind;
+      uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
+      uint32_t prefix_kind;
 
       /* Any un-suppressed prefixes other than an empty/redundant CTF_K_BIG must
 	 be CTF. (Redundant CTF_K_BIGs will be elided instead.)  */
 
-      while (kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
-	     LCTF_IS_PREFIXED_KIND (kind))
+      while (prefix_kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
+	     LCTF_IS_PREFIXED_KIND (prefix_kind))
 	{
-	  if ((kind != CTF_K_BIG) || tp->ctt_size != 0
-	      || LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) != 0)
+	  if (!ctf_prefix_elidable (fp, kind, dtd, tp))
 	    if (!fp->ctf_write_suppressions
 		|| ctf_dynset_lookup (fp->ctf_write_suppressions,
-				      (const void *) (uintptr_t) kind) == NULL)
+				      (const void *) (uintptr_t) prefix_kind) == NULL)
 	    return 0;
 
 	  tp++;
@@ -870,8 +906,6 @@ ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
       /* Prefixes checked.  If this kind is suppressed, it won't influence the
 	 result.  */
 
-      kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info);
-
       if (fp->ctf_write_suppressions
 	  && ctf_dynset_lookup (fp->ctf_write_suppressions,
 				(const void *) (uintptr_t) kind))
@@ -879,33 +913,6 @@ ctf_type_sect_is_btf (ctf_dict_t *fp, int force_ctf)
 
       if (kind == CTF_K_FLOAT || kind == CTF_K_SLICE)
 	return 0;
-
-      if (kind == CTF_K_STRUCT)
-	{
-	  ctf_member_t *memb = (ctf_member_t *) dtd->dtd_vlen;
-	  size_t off = 0;
-	  size_t j;
-
-	  for (j = 0; j < LCTF_VLEN (fp, dtd->dtd_buf); j++)
-	    {
-	      /* For bitfields, we must check if the individual members will
-		 still fit into a BTF type if they are encoded as offsets rather
-		 than offset-since-last.  (For non-bitfields, this is satisfied
-		 by a check of the ctt_size, which is equivalent to checking
-		 that the CTF_K_BIG's ctt_size is zero, done above.)  */
-
-	      if (CTF_INFO_KFLAG (tp->ctt_info))
-		{
-		  off += CTF_MEMBER_BIT_OFFSET (memb[j].ctm_offset);
-		  if (off > CTF_MAX_BIT_OFFSET)
-		    return 0;
-		}
-
-	      /* Check for nameless padding members.  */
-	      if (memb[j].ctm_name == 0 && memb[j].ctm_type == CTF_K_UNKNOWN)
-		return 0;
-	    }
-	}
     }
 
   return 1;
@@ -927,27 +934,27 @@ ctf_type_sect_size (ctf_dict_t *fp)
        dtd != NULL; dtd = ctf_list_next (dtd))
     {
       uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
+      uint32_t prefix_kind;
       ctf_type_t *tp = dtd->dtd_buf;
 
       /* Check for suppressions: a suppression consumes precisely one ctf_type_t
-	 record of space.  */
+	 record of space.  A suppressed prefix suppresses the whole type.  */
 
       if (fp->ctf_write_suppressions)
 	{
 	  int suppress = 0;
 
-	  while (kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
-		 LCTF_IS_PREFIXED_KIND (kind))
+	  while (prefix_kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
+		 LCTF_IS_PREFIXED_KIND (prefix_kind))
 	    {
-	      if ((kind != CTF_K_BIG) || tp->ctt_size != 0
-		  || LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) != 0)
-		if (ctf_dynset_lookup (fp->ctf_write_suppressions,
-				       (const void *) (uintptr_t) kind) != NULL)
-		  {
-		    type_size += sizeof (ctf_type_t);
-		    suppress = 1;
-		    break;
-		  }
+	      if (!ctf_prefix_elidable (fp, kind, dtd, tp)
+		  && (ctf_dynset_lookup (fp->ctf_write_suppressions,
+					 (const void *) (uintptr_t) prefix_kind) != NULL))
+		{
+		  type_size += sizeof (ctf_type_t);
+		  suppress = 1;
+		  break;
+		}
 
 	      tp++;
 	    }
@@ -955,15 +962,13 @@ ctf_type_sect_size (ctf_dict_t *fp)
 	    continue;
 	}
 
-      /* Type headers: elide CTF_K_BIG from types if possible.  Must match
-	 corresponding elision in ctf_emit_type_sect.  */
+      /* Type headers: elide CTF_K_BIG from types if possible.  */
 
       tp = dtd->dtd_buf;
-      while (kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
-	     LCTF_IS_PREFIXED_KIND (kind))
+      while (prefix_kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
+	     LCTF_IS_PREFIXED_KIND (prefix_kind))
 	{
-	  if ((kind != CTF_K_BIG) || tp->ctt_size != 0
-	      || LCTF_INFO_UNPREFIXED_VLEN (fp, tp->ctt_info) != 0)
+	  if (!ctf_prefix_elidable (fp, kind, dtd, tp))
 	    type_size += sizeof (ctf_type_t);
 	  tp++;
 	}
@@ -976,29 +981,35 @@ ctf_type_sect_size (ctf_dict_t *fp)
 
 /* Take a final lap through the dynamic type definition list and copy the
    appropriate type records to the output buffer, noting down the strings
-   and type IDs as we go.  */
+   and type IDs as we go.
+
+   By this stage we no longer need to worry about CTF-versus-BTF, only about
+   whether a type has been suppressed or not.  */
 
 static int
-ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
+ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr,
+		    size_t expected_size)
 {
   unsigned char *t = *tptr;
   ctf_dtdef_t *dtd;
   ctf_id_t id;
 
-  if (!(fp->ctf_flags & LCTF_CHILD))
-    id = fp->ctf_stypes + 1;
-  else
-    id = fp->ctf_header->cth_parent_typemax + 1;
+  id = fp->ctf_stypes + 1;
+
+  if (fp->ctf_flags & LCTF_CHILD)
+    id += fp->ctf_parent->ctf_typemax;
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs);
        dtd != NULL; dtd = ctf_list_next (dtd), id++)
     {
-      uint32_t kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
-      uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
-      size_t type_ctt_size = dtd->dtd_data.ctt_size;
-      size_t len;
-      ctf_stype_t *copied;
+      uint32_t prefix_kind;
+      uint32_t kind = LCTF_KIND (fp, dtd->dtd_buf);
+      size_t vlen = LCTF_VLEN (fp, dtd->dtd_buf);
+      ctf_type_t *tp = dtd->dtd_buf;
+      ctf_type_t *copied;
       const char *name;
+      int suppress = 0;
+      int big = 0, big_elided = 0;
       size_t i;
 
       /* Make sure the ID hasn't changed, if already assigned by a previous
@@ -1008,36 +1019,120 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  && !ctf_assert (fp, dtd->dtd_final_type == id))
 	return -1;				/* errno is set for us.  */
 
-      /* Shrink ctf_type_t-using types from a ctf_type_t to a ctf_stype_t
-	 if possible.  */
+      /* Suppress everything if this kind is suppressed.  */
 
-      if (kind == CTF_K_STRUCT || kind == CTF_K_UNION)
+      while (prefix_kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
+	     LCTF_IS_PREFIXED_KIND (prefix_kind))
 	{
-	  size_t lsize = CTF_TYPE_LSIZE (&dtd->dtd_data);
+	  /* Don't worry about BIGs that will be elided.  */
+	  if (ctf_prefix_elidable (fp, kind, dtd, tp))
+	    {
+	      tp++;
+	      continue;
+	    }
 
-	  if (lsize <= CTF_MAX_SIZE)
-	    type_ctt_size = lsize;
+	  if (!fp->ctf_write_suppressions
+	      || ctf_dynset_lookup (fp->ctf_write_suppressions,
+				    (const void *) (uintptr_t) prefix_kind) == NULL)
+	    {
+	      if (_libctf_btf_mode == LIBCTF_BTM_BTF)
+		{
+		  ctf_err_warn (fp, 0, ECTF_NOTBTF, _("type %lx: Attempt to write out CTF-specific kind %i as BTF"),
+				id, prefix_kind);
+		  return (ctf_set_errno (fp, ECTF_NOTBTF));
+		}
+	    }
+	  else
+	    {
+	      suppress = 1;
+	      break;
+	    }
+	  tp++;
 	}
 
-      if (type_ctt_size != CTF_LSIZE_SENT)
-	len = sizeof (ctf_stype_t);
-      else
-	len = sizeof (ctf_type_t);
+      if (fp->ctf_write_suppressions
+	  && ctf_dynset_lookup (fp->ctf_write_suppressions,
+				(const void *) (uintptr_t) kind) != NULL)
+	suppress = 1;
 
-      memcpy (t, &dtd->dtd_data, len);
-      copied = (ctf_stype_t *) t;  /* name is at the start: constant offset.  */
+      if (suppress)
+	{
+	  ctf_type_t suppressed = { 0 };
+
+	  if (!ctf_assert (fp, t - *tptr + sizeof (ctf_type_t) <= expected_size))
+	    return -1; 				/* errno is set for us.  */
+
+	  suppressed.ctt_info = CTF_TYPE_INFO (CTF_K_UNKNOWN, 0, 0);
+	  memcpy (t, &suppressed, sizeof (ctf_type_t));
+	  t += sizeof (ctf_type_t);
+
+	  continue;
+	}
+
+      /* Write out all the type headers, eliding empty CTF_K_BIG, and noting if
+	 this type is BIG.  */
+
+      tp = dtd->dtd_buf;
+      while (prefix_kind = LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info),
+	     LCTF_IS_PREFIXED_KIND (prefix_kind))
+	{
+	  if (prefix_kind == CTF_K_BIG)
+	    {
+	      big = 1;
+
+	      if (ctf_prefix_elidable (fp, kind, dtd, tp))
+		{
+		  big_elided = 1;
+		  tp++;
+		  continue;
+		}
+	    }
+
+	  if (!ctf_assert (fp, t - *tptr + sizeof (ctf_type_t) <= expected_size))
+	    return -1;				/* errno is set for us.  */
+
+	  memcpy (t, tp, sizeof (ctf_type_t));
+	  copied = (ctf_type_t *) t;
+
+	  /* CTF_K_CONFLICTING has a name to keep track of.  */
+
+	  if (copied->ctt_name
+	      && (name = ctf_strraw (fp, copied->ctt_name)) != NULL)
+	    ctf_str_add_ref (fp, name, &copied->ctt_name);
+
+	  /* No prefixed kinds have any ctt_types to deal with. */
+
+	  tp++;
+	  t += sizeof (ctf_type_t);
+	}
+
+      if (!ctf_assert (fp, t - *tptr + sizeof (ctf_type_t) <= expected_size))
+	return -1; 				/* errno is set for us.  */
+
+      memcpy (t, tp, sizeof (ctf_type_t));
+      copied = (ctf_type_t *) t;
       if (copied->ctt_name
 	  && (name = ctf_strraw (fp, copied->ctt_name)) != NULL)
         ctf_str_add_ref (fp, name, &copied->ctt_name);
-      copied->ctt_size = type_ctt_size;
-      t += len;
+      t += sizeof (ctf_type_t);
+
+      if (!ctf_assert (fp, t - *tptr + dtd->dtd_vlen_size <= expected_size))
+	return -1; 				/* errno is set for us.  */
+
+      memcpy (t, dtd->dtd_vlen, dtd->dtd_vlen_size);
 
       switch (kind)
 	{
-	case CTF_K_INTEGER:
-	case CTF_K_FLOAT:
-	  memcpy (t, dtd->dtd_vlen, sizeof (uint32_t));
-	  t += sizeof (uint32_t);
+	case CTF_K_ARRAY:
+	  {
+	    ctf_array_t *array = (ctf_array_t *) t;
+
+	    if (ctf_type_add_ref (fp, &array->cta_contents) < 0)
+	      return -1;			/* errno is set for us.  */
+
+	    if (ctf_type_add_ref (fp, &array->cta_index) < 0)
+	      return -1;			/* errno is set for us.  */
+	  }
 	  break;
 
 	case CTF_K_POINTER:
@@ -1045,6 +1140,10 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	case CTF_K_CONST:
 	case CTF_K_RESTRICT:
 	case CTF_K_TYPEDEF:
+	case CTF_K_FUNC_LINKAGE:
+	case CTF_K_TYPE_TAG:
+	case CTF_K_DECL_TAG:
+	case CTF_K_VAR:
 	  if (ctf_type_add_ref (fp, &copied->ctt_type) < 0)
 	    return -1;				/* errno is set for us.  */
 	  break;
@@ -1052,8 +1151,6 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	case CTF_K_SLICE:
 	  {
 	    ctf_slice_t *slice = (ctf_slice_t *) t;
-
-	    memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_slice));
 
 	    if (ctf_type_add_ref (fp, &slice->cts_type) < 0)
 	      return -1;			/* errno is set for us. */
@@ -1063,102 +1160,132 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 
 	  break;
 
-	case CTF_K_ARRAY:
-	  {
-	    ctf_array_t *array = (ctf_array_t *) t;
-
-	    memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_array));
-
-	    if (ctf_type_add_ref (fp, &array->cta_contents) < 0)
-	      return -1;			/* errno is set for us.  */
-
-	    if (ctf_type_add_ref (fp, &array->cta_index) < 0)
-	      return -1;			/* errno is set for us.  */
-	  }
-	  t += sizeof (struct ctf_array);
-	  break;
-
 	case CTF_K_FUNCTION:
 	  {
-	    uint32_t *args = (uint32_t *) t;
-
-	    /* Functions with no args also have no vlen.  */
-
-	    if (dtd->dtd_vlen)
-	      memcpy (t, dtd->dtd_vlen, sizeof (uint32_t) * (vlen + (vlen & 1)));
+	    ctf_param_t *args = (ctf_param_t *) t;
+	    ctf_param_t *dtd_args = (ctf_param_t *) dtd->dtd_vlen;
 
 	    if (ctf_type_add_ref (fp, &copied->ctt_type) < 0)
 	      return -1;			/* errno is set for us.  */
 
 	    for (i = 0; i < vlen; i++)
 	      {
-		if (ctf_type_add_ref (fp, &args[i]) < 0)
+		const char *name = ctf_strraw (fp, args[i].cfp_name);
+
+		ctf_str_add_ref (fp, name, &args[i].cfp_name);
+		ctf_str_add_ref (fp, name, &dtd_args[i].cfp_name);
+
+		if (ctf_type_add_ref (fp, &args[i].cfp_type) < 0)
 		  return -1;			/* errno is set for us.  */
 	      }
-
-	  t += sizeof (uint32_t) * (vlen + (vlen & 1));
-	  break;
+	    break;
 	  }
 
-	  /* These need to be copied across element by element, depending on
-	     their ctt_size.  */
+	  /* These may need all their offsets adjusting.  */
 	case CTF_K_STRUCT:
 	case CTF_K_UNION:
 	  {
-	    ctf_lmember_t *dtd_vlen = (ctf_lmember_t *) dtd->dtd_vlen;
-	    ctf_lmember_t *t_lvlen = (ctf_lmember_t *) t;
-	    ctf_member_t *t_vlen = (ctf_member_t *) t;
+	    size_t offset = 0;
+	    int bitwise = CTF_INFO_KFLAG (tp->ctt_info);
+	    int struct_is_prefixed_big = big;
+
+	    ctf_member_t *memb = (ctf_member_t *) t;
+	    ctf_member_t *dtd_memb = (ctf_member_t *) dtd->dtd_vlen;
+
+	    /* All structs and unions in a DTD must always be BIG.  */
+
+	    if (!ctf_assert (fp, struct_is_prefixed_big))
+	      return -1;			/* errno is set for us.  */
 
 	    for (i = 0; i < vlen; i++)
 	      {
-		const char *name = ctf_strraw (fp, dtd_vlen[i].ctlm_name);
+		const char *name = ctf_strraw (fp, memb[i].ctm_name);
 
-		ctf_str_add_ref (fp, name, &dtd_vlen[i].ctlm_name);
+		ctf_str_add_ref (fp, name, &memb[i].ctm_name);
+		ctf_str_add_ref (fp, name, &dtd_memb[i].ctm_name);
 
-		if (type_ctt_size < CTF_LSTRUCT_THRESH)
+		/* If we are reducing a struct to non-big, we must convert its
+		   offsets back to offset-from-start.  */
+
+		if (big_elided && kind == CTF_K_STRUCT)
 		  {
-		    t_vlen[i].ctm_name = dtd_vlen[i].ctlm_name;
-		    t_vlen[i].ctm_type = dtd_vlen[i].ctlm_type;
-		    t_vlen[i].ctm_offset = CTF_LMEM_OFFSET (&dtd_vlen[i]);
+		    size_t this_offset, this_size;
 
-		    ctf_str_add_ref (fp, name, &t_vlen[i].ctm_name);
-		    if (ctf_type_add_ref (fp, &t_vlen[i].ctm_type) < 0)
-		      return -1;		/* errno is set for us.  */
+		    if (bitwise)
+		      {
+			this_offset = CTF_MEMBER_BIT_OFFSET (memb[i].ctm_offset);
+			this_size = CTF_MEMBER_BIT_SIZE (memb[i].ctm_offset);
+			offset += this_offset;
+			memb[i].ctm_offset = CTF_MEMBER_MAKE_BIT_OFFSET (this_size,
+									 offset);
+		      }
+		    else
+		      {
+			offset += memb[i].ctm_offset;
+			memb[i].ctm_offset = offset;
+		      }
 		  }
-		else
-		  {
-		    t_lvlen[i] = dtd_vlen[i];
 
-		    ctf_str_add_ref (fp, name, &t_lvlen[i].ctlm_name);
-		    if (ctf_type_add_ref (fp, &t_lvlen[i].ctlm_type) < 0)
-		      return -1;		/* errno is set for us.  */
-		  }
+		if (ctf_type_add_ref (fp, &memb[i].ctm_type) < 0)
+		  return -1;			/* errno is set for us.  */
 	      }
 	  }
-
-	  if (type_ctt_size < CTF_LSTRUCT_THRESH)
-	    t += sizeof (ctf_member_t) * vlen;
-	  else
-	    t += sizeof (ctf_lmember_t) * vlen;
 	  break;
 
 	case CTF_K_ENUM:
 	  {
-	    ctf_enum_t *dtd_vlen = (struct ctf_enum *) dtd->dtd_vlen;
-	    ctf_enum_t *t_vlen = (struct ctf_enum *) t;
+	    ctf_enum_t *dtd_vlen = (ctf_enum_t *) dtd->dtd_vlen;
+	    ctf_enum_t *t_vlen = (ctf_enum_t *) t;
 
-	    memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_enum) * vlen);
 	    for (i = 0; i < vlen; i++)
 	      {
 		const char *name = ctf_strraw (fp, dtd_vlen[i].cte_name);
 
+		ctf_str_add_ref (fp, name, &dtd_vlen[i].cte_name);
 		ctf_str_add_ref (fp, name, &t_vlen[i].cte_name);
 	      }
-	    t += sizeof (struct ctf_enum) * vlen;
 
 	    break;
 	  }
+
+	case CTF_K_ENUM64:
+	  {
+	    ctf_enum64_t *dtd_vlen = (ctf_enum64_t *) dtd->dtd_vlen;
+	    ctf_enum64_t *t_vlen = (ctf_enum64_t *) t;
+
+	    for (i = 0; i < vlen; i++)
+	      {
+		const char *name = ctf_strraw (fp, dtd_vlen[i].cte_name);
+
+		ctf_str_add_ref (fp, name, &dtd_vlen[i].cte_name);
+		ctf_str_add_ref (fp, name, &t_vlen[i].cte_name);
+	      }
+
+	    break;
+	  }
+	case CTF_K_DATASEC:
+	  {
+	    ctf_var_secinfo_t *sec = (ctf_var_secinfo_t *) t;
+
+	    if (dtd->dtd_flags & DTD_F_UNSORTED)
+	      ctf_datasec_sort (fp, dtd);
+
+	    for (i = 0; i < vlen; i++)
+	      {
+		if (ctf_type_add_ref (fp, &sec[i].cvs_type) < 0)
+		  return -1;			/* errno is set for us.  */
+	      }
+	    break;
+	  }
 	}
+
+#ifdef ENABLE_LIBCTF_HASH_DEBUGGING
+      if (dtd->dtd_type != id)
+	ctf_dprintf ("%p: provisional ID assignment: %lx -> %lx\n", (void *) fp,
+		     dtd->dtd_type, id);
+#endif
+
+      t += dtd->dtd_vlen_size;
       dtd->dtd_final_type = id;
     }
 
