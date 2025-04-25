@@ -36,7 +36,6 @@ typedef struct ctf_dump_item
 struct ctf_dump_state
 {
   ctf_sect_names_t cds_sect;
-  ctf_dict_t *cds_fp;
   ctf_dump_item_t *cds_current;
   ctf_list_t cds_items;
 };
@@ -46,17 +45,16 @@ struct ctf_dump_state
 typedef struct ctf_dump_membstate
 {
   char **cdm_str;
-  ctf_dict_t *cdm_fp;
   const char *cdm_toplevel_indent;
 } ctf_dump_membstate_t;
 
 static int
-ctf_dump_append (ctf_dump_state_t *state, char *str)
+ctf_dump_append (ctf_dict_t *fp, ctf_dump_state_t *state, char *str)
 {
   ctf_dump_item_t *cdi;
 
   if ((cdi = malloc (sizeof (struct ctf_dump_item))) == NULL)
-    return (ctf_set_errno (state->cds_fp, ENOMEM));
+    return (ctf_set_errno (fp, ENOMEM));
 
   cdi->cdi_item = str;
   ctf_list_append (&state->cds_items, cdi);
@@ -146,7 +144,8 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       /* Report encodings of everything with an encoding other than enums:
 	 base-type enums cannot have a nonzero cte_offset or cte_bits value.
 	 (Slices of them can, but they are of kind CTF_K_SLICE.)  */
-      if (unsliced_kind != CTF_K_ENUM && ctf_type_encoding (fp, id, &ep) == 0)
+      if (unsliced_kind != CTF_K_ENUM && unsliced_kind != CTF_K_ENUM64
+	  && ctf_type_encoding (fp, id, &ep) == 0)
 	{
 	  if ((ssize_t) ep.cte_bits != ctf_type_size (fp, id) * CHAR_BIT
 	      && flag & CTF_FT_BITFIELD)
@@ -257,7 +256,7 @@ ctf_dump_header_strfield (ctf_dict_t *fp, ctf_dump_state_t *state,
     {
       if (asprintf (&str, "%s: %s\n", name, ctf_strptr (fp, value)) < 0)
 	goto err;
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
   return 0;
 
@@ -275,7 +274,7 @@ ctf_dump_header_sizefield (ctf_dict_t *fp, ctf_dump_state_t *state,
     {
       if (asprintf (&str, "%s: %x\n", name, value) < 0)
 	goto err;
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
   return 0;
 
@@ -295,7 +294,7 @@ ctf_dump_header_sectfield (ctf_dict_t *fp, ctf_dump_state_t *state,
 		    (unsigned long) off, (unsigned long) (nextoff - 1),
 		    (unsigned long) (nextoff - off)) < 0)
 	goto err;
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
   return 0;
 
@@ -303,80 +302,97 @@ ctf_dump_header_sectfield (ctf_dict_t *fp, ctf_dump_state_t *state,
   return (ctf_set_errno (fp, errno));
 }
 
-/* Dump the file header into the cds_items.  */
+/* Dump one section-offset+len field from the file header into the cds_items.  */
 static int
-ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
+ctf_dump_header_sectlenfield (ctf_dict_t *fp, ctf_dump_state_t *state,
+			   const char *sect, uint32_t off, uint32_t len)
+{
+  char *str;
+  if (len - off)
+    {
+      if (asprintf (&str, "%s:\t0x%lx -- 0x%lx (0x%lx bytes)\n", sect,
+		    (unsigned long) off, (unsigned long) (off + len),
+		    (unsigned long) len) < 0)
+	goto err;
+      ctf_dump_append (fp, state, str);
+    }
+  return 0;
+
+ err:
+  return (ctf_set_errno (fp, errno));
+}
+
+/* Dump the CTFv3-or-below file header into the cds_items.  */
+
+static int
+ctf_dump_v3_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   char *str;
   char *flagstr = NULL;
-  const ctf_header_t *hp = fp->ctf_header;
+  const ctf_header_v3_t *hp = fp->ctf_v3_header;
   const char *vertab[] =
     {
      NULL, "CTF_VERSION_1",
      "CTF_VERSION_1_UPGRADED_3 (latest format, version 1 type "
      "boundaries)",
      "CTF_VERSION_2",
-     "CTF_VERSION_3",
-     "CTF_VERSION_4",
-     NULL
+     "CTF_VERSION_3"
     };
   const char *verstr = NULL;
 
-  if (asprintf (&str, "Magic number: 0x%x\n", hp->cth_magic) < 0)
+  if (asprintf (&str, "Magic number: 0x%x\n", hp->cth_preamble.ctp_magic) < 0)
       goto err;
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
 
-  if (hp->cth_version <= CTF_VERSION)
-    verstr = vertab[hp->cth_version];
+  if (hp->cth_preamble.ctp_version < CTF_VERSION_4)
+    verstr = vertab[hp->cth_preamble.ctp_version];
 
   if (verstr == NULL)
     verstr = "(not a valid version)";
 
-  if (asprintf (&str, "Version: %i (%s)\n", hp->cth_version,
+  if (asprintf (&str, "Version: %i (%s)\n", hp->cth_preamble.ctp_version,
 		verstr) < 0)
     goto err;
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
 
   /* Everything else is only printed if present.  */
 
-  /* The flags are unusual in that they represent the ctf_dict_t *in memory*:
-     flags representing compression, etc, are turned off as the file is
-     decompressed.  So we store a copy of the flags before they are changed, for
-     the dumper.  */
+  /* We store the original version of the header, to let us dump un-upgraded
+     info that is lost or radically changed on upgrade.  */
 
-  if (fp->ctf_openflags > 0)
+  if (hp->cth_flags > 0)
     {
       if (asprintf (&flagstr, "%s%s%s%s%s%s%s%s%s",
-		    fp->ctf_openflags & CTF_F_COMPRESS
+		    hp->cth_flags & CTF_F_COMPRESS
 		    ? "CTF_F_COMPRESS": "",
-		    (fp->ctf_openflags & CTF_F_COMPRESS)
-		    && (fp->ctf_openflags & ~CTF_F_COMPRESS)
+		    (hp->cth_flags & CTF_F_COMPRESS)
+		    && (hp->cth_flags & ~CTF_F_COMPRESS)
 		    ? ", " : "",
-		    fp->ctf_openflags & CTF_F_NEWFUNCINFO
+		    hp->cth_flags & CTF_F_NEWFUNCINFO
 		    ? "CTF_F_NEWFUNCINFO" : "",
-		    (fp->ctf_openflags & (CTF_F_NEWFUNCINFO))
-		    && (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO))
+		    (hp->cth_flags & (CTF_F_NEWFUNCINFO))
+		    && (hp->cth_flags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO))
 		    ? ", " : "",
-		    fp->ctf_openflags & CTF_F_IDXSORTED
+		    hp->cth_flags & CTF_F_IDXSORTED
 		    ? "CTF_F_IDXSORTED" : "",
-		    fp->ctf_openflags & (CTF_F_IDXSORTED)
-		    && (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
-					      | CTF_F_IDXSORTED))
+		    hp->cth_flags & (CTF_F_IDXSORTED)
+		    && (hp->cth_flags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
+					  | CTF_F_IDXSORTED))
 		    ? ", " : "",
-		    fp->ctf_openflags & CTF_F_ARRNELEMS
+		    hp->cth_flags & CTF_F_ARRNELEMS
 		    ? "CTF_F_ARRNELEMS" : "",
-		    fp->ctf_openflags & (CTF_F_ARRNELEMS)
-		    && (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
-					      | CTF_F_IDXSORTED | CTF_F_ARRNELEMS))
+		    hp->cth_flags & (CTF_F_ARRNELEMS)
+		    && (hp->cth_flags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
+					  | CTF_F_IDXSORTED | CTF_F_ARRNELEMS))
 		    ? ", " : "",
-		    fp->ctf_openflags & CTF_F_DYNSTR
+		    hp->cth_flags & CTF_F_DYNSTR
 		    ? "CTF_F_DYNSTR" : "") < 0)
 	goto err;
 
-      if (asprintf (&str, "Flags: 0x%x (%s)", fp->ctf_openflags, flagstr) < 0)
+      if (asprintf (&str, "Flags: 0x%x (%s)", hp->cth_flags, flagstr) < 0)
 	goto err;
       free (flagstr);
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
     }
 
   if (ctf_dump_header_strfield (fp, state, "Parent label",
@@ -388,12 +404,6 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 
   if (ctf_dump_header_strfield (fp, state, "Compilation unit name",
 				hp->cth_cuname) < 0)
-    goto err;
-
-  if (ctf_dump_header_sizefield (fp, state, "Parent strlen", hp->cth_parent_strlen) < 0)
-    goto err;
-
-  if (ctf_dump_header_sizefield (fp, state, "Parent max type", hp->cth_parent_typemax) < 0)
     goto err;
 
   if (ctf_dump_header_sectfield (fp, state, "Label section", hp->cth_lbloff,
@@ -434,31 +444,110 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
   return (ctf_set_errno (fp, errno));
 }
 
-/* Dump a single label into the cds_items.  */
-
+/* Dump the file header into the cds_items.  */
 static int
-ctf_dump_label (const char *name, const ctf_lblinfo_t *info,
-		void *arg)
+ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   char *str;
-  char *typestr;
-  ctf_dump_state_t *state = arg;
-
-  if (asprintf (&str, "%s -> ", name) < 0)
-    return (ctf_set_errno (state->cds_fp, errno));
-
-  if ((typestr = ctf_dump_format_type (state->cds_fp, info->ctb_type,
-				       CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
+  char *flagstr = NULL;
+  const ctf_header_t *hp = fp->ctf_header;
+  const char *vertab[] =
     {
-      free (str);
-      return 0;				/* Swallow the error.  */
+     "CTF_VERSION_4"
+    };
+  const char *verstr = NULL;
+
+  /* Figure out what we're dumping, first.  */
+
+  if (fp->ctf_v3_header)
+    {
+      ctf_dump_v3_header (fp, state);
+      return 0;
     }
 
-  str = str_append (str, typestr);
-  free (typestr);
+  if (asprintf (&str, "Magic number: 0x%lx\n", CTH_MAGIC (hp)) < 0)
+      goto err;
+  ctf_dump_append (fp, state, str);
 
-  ctf_dump_append (state, str);
+  if (CTH_VERSION (hp) != CTF_VERSION_4)
+    verstr = "(not a valid version)";
+  else
+    verstr = vertab[CTH_VERSION (hp) - CTF_VERSION_4];
+
+  if (asprintf (&str, "Version: %li (%s)\n", CTH_VERSION (hp),
+		verstr) < 0)
+    goto err;
+  ctf_dump_append (fp, state, str);
+
+  /* Everything else is only printed if present.  */
+
+  /* The flags are unusual in that they represent the ctf_dict_t *in memory*:
+     flags representing compression, etc, are turned off as the file is
+     decompressed.  So we store a copy of the flags before they are changed, for
+     the dumper.  We also store the original version of the header, to let us
+     dump un-upgraded info that is lost or radically changed on upgrade.  */
+
+  if (fp->ctf_openflags > 0)
+    {
+      if (asprintf (&flagstr, "%s%s%s%s",
+		    fp->ctf_openflags & CTF_F_COMPRESS
+		    ? "CTF_F_COMPRESS": "",
+		    (fp->ctf_openflags & CTF_F_COMPRESS)
+		    && (fp->ctf_openflags & ~CTF_F_COMPRESS)
+		    ? ", " : "",
+		    fp->ctf_openflags & CTF_F_IDXSORTED
+		    ? "CTF_F_IDXSORTED" : "",
+		    (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_IDXSORTED))
+		    ? "; unknown flags present" : "") < 0)
+	goto err;
+
+      if (asprintf (&str, "Flags: 0x%x (%s)", fp->ctf_openflags, flagstr) < 0)
+	goto err;
+      free (flagstr);
+      ctf_dump_append (fp, state, str);
+    }
+
+  if (ctf_dump_header_strfield (fp, state, "Parent name", hp->cth_parent_name) < 0)
+    goto err;
+
+  if (ctf_dump_header_strfield (fp, state, "Compilation unit name",
+				hp->cth_cu_name) < 0)
+    goto err;
+
+  if (ctf_dump_header_sizefield (fp, state, "Parent strlen", hp->cth_parent_strlen) < 0)
+    goto err;
+
+  if (ctf_dump_header_sizefield (fp, state, "Parent types", hp->cth_parent_ntypes) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Data object section",
+				    hp->cth_objt_off, hp->cth_objt_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Function info section",
+				    hp->cth_func_off, hp->cth_func_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Object index section",
+				    hp->cth_objtidx_off, hp->cth_objtidx_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Function index section",
+				    hp->cth_funcidx_off, hp->cth_funcidx_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "Type section",
+				    hp->btf.bth_type_off, hp->btf.bth_type_len) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectlenfield (fp, state, "String section", hp->btf.bth_str_off,
+				    hp->btf.bth_str_off + hp->btf.bth_str_len + 1) < 0)
+    goto err;
+
   return 0;
+ err:
+  free (flagstr);
+  return (ctf_set_errno (fp, errno));
 }
 
 /* Dump all the object or function entries into the cds_items.  */
@@ -491,16 +580,16 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
       else
 	str = xstrdup ("");
 
-      if ((typestr = ctf_dump_format_type (state->cds_fp, id,
-					   CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
+      if ((typestr = ctf_dump_format_type (fp, id, CTF_ADD_ROOT
+					   | CTF_FT_REFS)) == NULL)
 	{
-	  ctf_dump_append (state, str);
+	  ctf_dump_append (fp, state, str);
 	  continue;				/* Swallow the error.  */
 	}
 
       str = str_append (str, typestr);
       free (typestr);
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
       continue;
 
     oom:
@@ -513,7 +602,9 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
 
 /* Dump a single variable into the cds_items.  */
 static int
-ctf_dump_var (const char *name, ctf_id_t type, void *arg)
+ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
+	      unsigned long offset,
+	      size_t size, void *arg)
 {
   char *str;
   char *typestr;
@@ -532,14 +623,14 @@ ctf_dump_var (const char *name, ctf_id_t type, void *arg)
   str = str_append (str, typestr);
   free (typestr);
 
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
   return 0;
 }
 
 /* Dump a single struct/union member into the string in the membstate.  */
 static int
-ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
-		 int depth, void *arg)
+ctf_dump_member (ctf_dict_t *fp, const char *name, ctf_id_t id,
+		 unsigned long offset, int bit_width, int depth, void *arg)
 {
   ctf_dump_membstate_t *state = arg;
   char *typestr = NULL;
@@ -554,8 +645,7 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
   *state->cdm_str = str_append (*state->cdm_str, bit);
   free (bit);
 
-  if ((typestr = ctf_dump_format_type (state->cdm_fp, id,
-				       CTF_ADD_ROOT | CTF_FT_BITFIELD
+  if ((typestr = ctf_dump_format_type (fp, id, CTF_ADD_ROOT | CTF_FT_BITFIELD
 				       | CTF_FT_ID)) == NULL)
     return -1;				/* errno is set for us.  */
 
@@ -573,7 +663,7 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
  oom:
   free (typestr);
   free (bit);
-  return (ctf_set_errno (state->cdm_fp, errno));
+  return (ctf_set_errno (fp, errno));
 }
 
 /* Report the number of digits in the hexadecimal representation of a type
@@ -593,37 +683,36 @@ type_hex_digits (ctf_id_t id)
 
 /* Dump a single type into the cds_items.  */
 static int
-ctf_dump_type (ctf_id_t id, int flag, void *arg)
+ctf_dump_type (ctf_dict_t *fp, ctf_id_t id, int flag, void *arg)
 {
   char *str;
   char *indent;
   ctf_dump_state_t *state = arg;
-  ctf_dump_membstate_t membstate = { &str, state->cds_fp, NULL };
+  ctf_dump_membstate_t membstate = { &str, NULL };
 
   /* Indent neatly.  */
   if (asprintf (&indent, "    %*s", type_hex_digits (id), "") < 0)
-    return (ctf_set_errno (state->cds_fp, ENOMEM));
+    return (ctf_set_errno (fp, ENOMEM));
 
   /* Dump the type itself.  */
-  if ((str = ctf_dump_format_type (state->cds_fp, id,
-				   flag | CTF_FT_REFS)) == NULL)
+  if ((str = ctf_dump_format_type (fp, id, flag | CTF_FT_REFS)) == NULL)
     goto err;
   str = str_append (str, "\n");
 
   membstate.cdm_toplevel_indent = indent;
 
   /* Member dumping for structs, unions...  */
-  if (ctf_type_kind (state->cds_fp, id) == CTF_K_STRUCT
-      || ctf_type_kind (state->cds_fp, id) == CTF_K_UNION)
+  if (ctf_type_kind (fp, id) == CTF_K_STRUCT
+      || ctf_type_kind (fp, id) == CTF_K_UNION)
     {
-      if ((ctf_type_visit (state->cds_fp, id, ctf_dump_member, &membstate)) < 0)
+      if ((ctf_type_visit (fp, id, ctf_dump_member, &membstate)) < 0)
 	{
-	  if (id == 0 || ctf_errno (state->cds_fp) == ECTF_NONREPRESENTABLE)
+	  if (id == 0 || ctf_errno (fp) == ECTF_NONREPRESENTABLE)
 	    {
-	      ctf_dump_append (state, str);
+	      ctf_dump_append (fp, state, str);
 	      return 0;
 	    }
-	  ctf_err_warn (state->cds_fp, 1, ctf_errno (state->cds_fp),
+	  ctf_err_warn (fp, 1, ctf_errno (fp),
 			_("cannot visit members dumping type 0x%lx"), id);
 	  goto err;
 	}
@@ -631,29 +720,38 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
 
   /* ... and enums, for which we dump the first and last few members and skip
      the ones in the middle.  */
-  if (ctf_type_kind (state->cds_fp, id) == CTF_K_ENUM)
+  if (ctf_type_kind (fp, id) == CTF_K_ENUM ||
+      ctf_type_kind (fp, id) == CTF_K_ENUM64)
     {
-      int enum_count = ctf_member_count (state->cds_fp, id);
+      int enum_count = ctf_member_count (fp, id);
       ctf_next_t *it = NULL;
       int i = 0;
       const char *enumerand;
       char *bit;
-      int value;
+      int64_t value;
 
-      while ((enumerand = ctf_enum_next (state->cds_fp, id,
+      while ((enumerand = ctf_enum_next (fp, id,
 					 &it, &value)) != NULL)
 	{
+	  int ret;
+
 	  i++;
 	  if ((i > 5) && (i < enum_count - 4))
 	    continue;
 
 	  str = str_append (str, indent);
 
-	  if (asprintf (&bit, "%s: %i\n", enumerand, value) < 0)
+	  if (!ctf_enum_unsigned (fp, id))
+	    ret = asprintf (&bit, "%s: %" PRIi64 "\n", enumerand, value);
+	  else
+	    ret = asprintf (&bit, "%s: %" PRIu64 "\n", enumerand, (uint64_t) value);
+
+	  if (ret < 0)
 	    {
 	      ctf_next_destroy (it);
 	      goto oom;
 	    }
+
 	  str = str_append (str, bit);
 	  free (bit);
 
@@ -663,15 +761,15 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
 	      str = str_append (str, "...\n");
 	    }
 	}
-      if (ctf_errno (state->cds_fp) != ECTF_NEXT_END)
+      if (ctf_errno (fp) != ECTF_NEXT_END)
 	{
-	  ctf_err_warn (state->cds_fp, 1, ctf_errno (state->cds_fp),
+	  ctf_err_warn (fp, 1, ctf_errno (fp),
 			_("cannot visit enumerands dumping type 0x%lx"), id);
 	  goto err;
 	}
     }
 
-  ctf_dump_append (state, str);
+  ctf_dump_append (fp, state, str);
   free (indent);
 
   return 0;
@@ -687,7 +785,7 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
  oom:
   free (indent);
   free (str);
-  return ctf_set_errno (state->cds_fp, ENOMEM);
+  return ctf_set_errno (fp, ENOMEM);
 }
 
 /* Dump the string table into the cds_items.  */
@@ -705,7 +803,7 @@ ctf_dump_str (ctf_dict_t *fp, ctf_dump_state_t *state)
 		    (unsigned long) (s - fp->ctf_str[CTF_STRTAB_0].cts_strs),
 		    s) < 0)
 	return (ctf_set_errno (fp, errno));
-      ctf_dump_append (state, str);
+      ctf_dump_append (fp, state, str);
       s += strlen (s) + 1;
     }
 
@@ -752,7 +850,6 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
       state = *statep;
 
       memset (state, 0, sizeof (struct ctf_dump_state));
-      state->cds_fp = fp;
       state->cds_sect = sect;
 
       switch (sect)
@@ -769,7 +866,7 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	    goto end;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_VAR:
-	  if (ctf_variable_iter (fp, ctf_dump_var, state) < 0)
+	  if (ctf_dump_datasecs (fp, state) < 0)
 	    goto end;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_TYPE:
