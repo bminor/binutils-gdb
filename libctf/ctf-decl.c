@@ -112,6 +112,11 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
       prec = CTF_PREC_BASE;
       break;
 
+    case CTF_K_FUNC_LINKAGE:
+      ctf_decl_push (cd, fp, suffix->ctt_type);
+      prec = CTF_PREC_FUNCTION;
+      break;
+
     case CTF_K_FUNCTION:
       ctf_decl_push (cd, fp, suffix->ctt_type);
       prec = CTF_PREC_FUNCTION;

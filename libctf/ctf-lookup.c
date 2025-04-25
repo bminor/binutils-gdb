@@ -1407,3 +1407,21 @@ ctf_func_args (ctf_dict_t *fp, unsigned long symidx, uint32_t argc,
 
   return ctf_func_type_args (fp, type, argc, argv);
 }
+
+/* Given a symbol table index, return the argument names for the function
+   described by the corresponding entry in the symbol table.  */
+
+int
+ctf_func_arg_names (ctf_dict_t *fp, unsigned long symidx, uint32_t argc,
+		    const char **arg_names)
+{
+  ctf_id_t type;
+
+  if ((type = ctf_lookup_by_symbol (fp, symidx)) == CTF_ERR)
+    return -1;					/* errno is set for us.  */
+
+  if (ctf_type_kind (fp, type) != CTF_K_FUNCTION)
+    return (ctf_set_errno (fp, ECTF_NOTFUNC));
+
+  return ctf_func_type_arg_names (fp, type, argc, arg_names);
+}
