@@ -740,25 +740,26 @@ ctf_id_t
 ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
 {
   ctf_dtdef_t *dtd;
-  ctf_id_t type;
   ctf_dict_t *typedict = fp;
   ctf_dict_t *refdict = fp;
   int child = fp->ctf_flags & LCTF_CHILD;
+  uint32_t type_idx;
+  uint32_t ref_idx;
 
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_typed_errno (fp, EINVAL));
 
-  if (ref != 0 && ctf_lookup_by_id (&refdict, ref) == NULL)
+  if (ref != 0 && ctf_lookup_by_id (&refdict, ref, NULL) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  if ((type = ctf_add_generic (fp, flag, NULL, kind, 0, &dtd)) == CTF_ERR)
+  if ((dtd = ctf_add_generic (fp, flag, NULL, kind, 0, 0, 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, flag, 0);
-  dtd->dtd_data.ctt_type = (uint32_t) ref;
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, 0, 0);
+  dtd->dtd_data->ctt_type = (uint32_t) ref;
 
   if (kind != CTF_K_POINTER)
-    return type;
+    return dtd->dtd_type;
 
   /* If we are adding a pointer, update the ptrtab, pointing at this type from
      the type it points to.  Note that ctf_typemax is at this point one higher
@@ -766,15 +767,16 @@ ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
      addition of this type.  The pptrtab is lazily-updated as needed, so is not
      touched here.  */
 
-  typedict = ctf_get_dict (fp, type);
-  uint32_t type_idx = ctf_type_to_index (typedict, type);
-  uint32_t ref_idx = ctf_type_to_index (refdict, ref);
+  typedict = ctf_get_dict (fp, dtd->dtd_type);
+
+  type_idx = ctf_type_to_index (typedict, dtd->dtd_type);
+  ref_idx = ctf_type_to_index (refdict, ref);
 
   if (ctf_type_ischild (fp, ref) == child
       && ref_idx < fp->ctf_typemax)
     fp->ctf_ptrtab[ref_idx] = type_idx;
 
-  return type;
+  return dtd->dtd_type;
 }
 
 ctf_id_t

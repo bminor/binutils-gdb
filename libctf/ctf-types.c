@@ -1868,7 +1868,7 @@ ctf_type_pointer (ctf_dict_t *fp, ctf_id_t type)
   ctf_id_t ntype;
   uint32_t idx;
 
-  if (ctf_lookup_by_id (&fp, type) == NULL)
+  if (ctf_lookup_by_id (&fp, type, NULL) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   idx = ctf_type_to_index (fp, type);
@@ -1883,7 +1883,7 @@ ctf_type_pointer (ctf_dict_t *fp, ctf_id_t type)
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 
-  if (ctf_lookup_by_id (&fp, type) == NULL)
+  if (ctf_lookup_by_id (&fp, type, NULL) == NULL)
     return (ctf_set_typed_errno (ofp, ECTF_NOTYPE));
 
   idx = ctf_type_to_index (fp, type);
@@ -2039,10 +2039,9 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
   if (lkind < 0 || rkind < 0)
     return -1;					/* errno is set for us.  */
 
-  ltp = ctf_lookup_by_id (&lfp, ltype);
-  rtp = ctf_lookup_by_id (&rfp, rtype);
-
-  if (ltp != NULL && rtp != NULL)
+  if (ctf_lookup_by_id (&lfp, ltype, &ltp) != NULL &&
+      ctf_lookup_by_id (&rfp, rtype, &rtp) != NULL
+      && ltp != NULL && rtp != NULL)
     same_names = (strcmp (ctf_strptr (lfp, ltp->ctt_name),
 			  ctf_strptr (rfp, rtp->ctt_name)) == 0);
 
@@ -2063,8 +2062,17 @@ ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
 	      && ctf_type_encoding (rfp, rtype, &re) == 0
 	      && memcmp (&le, &re, sizeof (ctf_encoding_t)) == 0);
     case CTF_K_POINTER:
-      return (ctf_type_compat (lfp, ctf_type_reference (lfp, ltype),
-			       rfp, ctf_type_reference (rfp, rtype)));
+      {
+	ctf_id_t lref = ctf_type_reference (lfp, ltype);
+	ctf_id_t rref = ctf_type_reference (rfp, rtype);
+
+	/* void * is only compatible with itself.  */
+
+	if (lref == 0 && rref == 0)
+	  return 1;
+	else
+	  return (ctf_type_compat (lfp, lref, rfp, rref));
+      }
     case CTF_K_ARRAY:
       return (ctf_array_info (lfp, ltype, &la) == 0
 	      && ctf_array_info (rfp, rtype, &ra) == 0
