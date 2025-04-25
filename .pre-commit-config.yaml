@@ -38,6 +38,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 
 minimum_pre_commit_version: 3.2.0
+default_install_hook_types: [pre-commit, commit-msg]
 repos:
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 25.1.0
@@ -80,3 +81,10 @@ repos:
       # All gdb header files, but not headers in the test suite.
       files: '^(gdb(support|server)?)/.*\.h$'
       exclude: '.*/testsuite/.*'
+    - id: codespell-log
+      name: codespell-log
+      language: script
+      entry: gdb/contrib/codespell-log.sh
+      verbose: true
+      always_run: true
+      stages: [commit-msg]
