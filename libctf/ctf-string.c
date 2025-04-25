@@ -313,11 +313,12 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
   int added = 0;
   ctf_dict_t *lookup_fp = fp;
 
-  /* Check for existing atoms in the parent as well.  */
+  /* Check for existing atoms in the parent as well, unless they are marked
+     non-deduplicable.  */
 
   atom = ctf_dynhash_lookup (fp->ctf_str_atoms, str);
 
-  if (!atom && fp->ctf_parent)
+  if (!atom && fp->ctf_parent && !(flags & CTF_STR_NO_DEDUP))
     {
       lookup_fp = fp->ctf_parent;
       atom = ctf_dynhash_lookup (lookup_fp->ctf_str_atoms, str);
