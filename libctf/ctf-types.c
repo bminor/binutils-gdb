@@ -864,8 +864,12 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	   cdp != NULL; cdp = ctf_list_next (cdp))
 	{
 	  ctf_dict_t *rfp = fp;
-	  const ctf_type_t *tp = ctf_lookup_by_id (&rfp, cdp->cd_type);
-	  const char *name = ctf_strptr (rfp, tp->ctt_name);
+	  const ctf_type_t *tp = NULL;
+	  const char *name;
+
+	  ctf_lookup_by_id (&rfp, cdp->cd_type, &tp);
+	  assert (tp);
+	  name = ctf_strptr (rfp, tp->ctt_name);
 
 	  if (k != CTF_K_POINTER && k != CTF_K_ARRAY)
 	    ctf_decl_sprintf (&cd, " ");
@@ -987,6 +991,7 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	    case CTF_K_RESTRICT:
 	      ctf_decl_sprintf (&cd, "restrict");
 	      break;
+
 	    case CTF_K_UNKNOWN:
 	      if (name[0] == '\0')
 		ctf_decl_sprintf (&cd, _("(nonrepresentable type)"));
@@ -1061,7 +1066,7 @@ ctf_type_name_raw (ctf_dict_t *fp, ctf_id_t type)
       return NULL;
     }
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if (ctf_lookup_by_id (&fp, type, &tp) == NULL)
     return NULL;		/* errno is set for us.  */
 
   if (tp->ctt_name == 0)
