@@ -552,6 +552,15 @@ ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 	  return -1;				/* errno is set for us.  */
 	}
 
+      /* If this is an unnamed, zero-archive dict, propagate the input name into the
+	 dict itself, for the sake of deduplicator child dict naming.  */
+
+      if (one_input->clin_arc
+	  && ctf_archive_count (one_input->clin_arc) == 1
+	  && one_input->clin_arc->ctfi_dict != NULL &&
+	  ctf_cuname (one_input->clin_arc->ctfi_dict) == NULL)
+	ctf_cuname_set (one_input->clin_arc->ctfi_dict, name);
+
       count += one_count;
       narcs++;
     }
