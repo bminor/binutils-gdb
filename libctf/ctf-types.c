@@ -40,7 +40,7 @@ ctf_type_isparent (const ctf_dict_t *fp, ctf_id_t id)
      have been added.  Simple range check.  */
 
   if (!fp->ctf_parent)
-    return (fp->ctf_header->cth_parent_typemax >= id);
+    return (fp->ctf_header->cth_parent_ntypes >= id);
 
   /* Types in the parent's idmax range (which encompasses its stypes range) are
      in the parent.  */
@@ -76,16 +76,16 @@ ctf_type_to_index_internal (const ctf_dict_t *fp, ctf_id_t type)
 {
   uint32_t idx = type;
 
-  assert (((fp->ctf_flags & LCTF_CHILD) && (type > fp->ctf_header->cth_parent_typemax)) ||
+  assert (((fp->ctf_flags & LCTF_CHILD) && (type > fp->ctf_header->cth_parent_ntypes)) ||
 	  (!(fp->ctf_flags & LCTF_CHILD)));
 
   if (fp->ctf_flags & LCTF_CHILD)
     {
       /* Non-dynamic type in parent: no index permitted.  */
 
-      assert (type > fp->ctf_header->cth_parent_typemax);
+      assert (type > fp->ctf_header->cth_parent_ntypes);
 
-      idx -= fp->ctf_header->cth_parent_typemax;
+      idx -= fp->ctf_header->cth_parent_ntypes;
     }
 
   if (idx <= fp->ctf_stypes)
@@ -130,7 +130,7 @@ ctf_id_t
 ctf_index_to_type (const ctf_dict_t *fp, uint32_t idx)
 {
   if (fp->ctf_flags & LCTF_CHILD)
-    return idx + fp->ctf_header->cth_parent_typemax;
+    return idx + fp->ctf_header->cth_parent_ntypes;
 
   if (idx <= (fp->ctf_typemax - fp->ctf_nprovtypes))
     return idx;

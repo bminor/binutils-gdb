@@ -2643,20 +2643,30 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
      number of types.  (Provisional types excepted: they go at the top of the
      type ID space, and will not overlap any child types.)  */
 
-  if (pfp->ctf_idmax != fp->ctf_header->cth_parent_typemax)
+  if (pfp->ctf_idmax != fp->ctf_header->cth_parent_ntypes)
     {
-      if (fp->ctf_header->cth_parent_typemax != 0)
+      if (fp->ctf_header->cth_parent_ntypes != 0)
 	{
 	  ctf_err_warn (fp, 0, ECTF_WRONGPARENT,
 			_("ctf_import: incorrect parent dict: %u types expected, %u found"),
-			fp->ctf_header->cth_parent_typemax, pfp->ctf_idmax);
+			fp->ctf_header->cth_parent_ntypes, pfp->ctf_idmax);
 	  return (ctf_set_errno (fp, ECTF_WRONGPARENT));
 	}
-      else if (fp->ctf_header->cth_parent_typemax == 0)
+      else if (fp->ctf_opened_btf)
+	{
+	  /* A pure BTF dict does not track the number of types in the parent:
+	     just update and hope.  */
+
+	  fp->ctf_header->cth_parent_ntypes = pfp->ctf_idmax;
+	}
+      else if (fp->ctf_header->cth_parent_ntypes == 0)
 	{
 	  /* If we are importing into a parent dict, the child dict had better
 	     be empty.  Set its starting type ID, which need not be zero: the
-	     parent can already have types.  */
+	     parent can already have types.  We assign typemax rather than
+	     idmax because when this is a new dict we want the types to count
+	     up from the number of types currently in the parent, not the number
+	     in the parent when it was opened.  */
 
 	  if (fp->ctf_typemax != 0)
 	    {
@@ -2665,17 +2675,23 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
 			    fp->ctf_typemax);
 	      return (ctf_set_errno (fp, EINVAL));
 	    }
-	  fp->ctf_header->cth_parent_typemax = pfp->ctf_typemax;
+	  fp->ctf_header->cth_parent_ntypes = pfp->ctf_typemax;
 	}
     }
 
-  /* We might in time be able to lift this restriction, but it is unlikely to be
-     something anyone would want to do, so let's not bother for now.  */
+  /* No importing dicts with provisional strings in (except for the void one
+     added to all new dicts).  We might in time be able to lift this
+     restriction, but it is unlikely to be something anyone would want to do, so
+     let's not bother for now.  If we have a system-created void type, it might
+     have instantiated a new string.  */
 
-  if (ctf_dynhash_elements (fp->ctf_prov_strtab) != 0)
+  if ((fp->ctf_void_type == NULL
+       && ctf_dynhash_elements (fp->ctf_prov_strtab) != 0)
+      || (fp->ctf_void_type != NULL
+	  && ctf_dynhash_elements (fp->ctf_prov_strtab) > 1))
     {
       ctf_err_warn (fp, 0, EINVAL,
-		    _("ctf_import: child dict already has %zi bytes of strings, cannot import"),
+		    _("ctf_import: child dict already has %zi strings, cannot import"),
 		    ctf_dynhash_elements (fp->ctf_prov_strtab));
       return (ctf_set_errno (fp, EINVAL));
     }
@@ -2696,8 +2712,16 @@ ctf_import_internal (ctf_dict_t *fp, ctf_dict_t *pfp, int unreffed)
   fp->ctf_parent_unreffed = unreffed;
   fp->ctf_parent = pfp;
 
+  /* BTF dicts don't have any parent strlen in the header, but we need to know
+     it to dereference strings.  */
+
+  if (fp->ctf_opened_btf)
+    fp->ctf_header->cth_parent_strlen = pfp->ctf_str[CTF_STRTAB_0].cts_len;
+
   /* If this is a dict that hasn't previously allowed string lookups,
-     we can allow them now, and finish initialization.  */
+     we can allow them now, and finish initialization.  (This requires us to
+     figure out whether the buffer contains pure BTF or not: we can do that by
+     checking the CTF-specific magic number in the header we read in.)  */
 
   fp->ctf_flags |= LCTF_CHILD;
   fp->ctf_flags &= ~LCTF_NO_STR;
