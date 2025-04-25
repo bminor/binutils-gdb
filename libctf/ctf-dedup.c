@@ -3380,7 +3380,7 @@ ctf_dedup_strings (ctf_dict_t *fp)
 
 	  if ((err = ctf_dynhash_insert (str_counts, atom->csa_str, (void *) count)) < 0)
 	    {
-	      ctf_set_errno (fp, err);
+	      ctf_set_errno (fp, -err);
 	      ctf_next_destroy (j);
 	      goto err;
 	    }
