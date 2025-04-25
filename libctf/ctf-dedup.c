@@ -898,6 +898,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  }
 	if (ctf_errno (input) != ECTF_NEXT_END)
 	  {
+	    ctf_next_destroy (i);
 	    whaterr = N_("error doing enum member iteration");
 	    goto input_err;
 	  }
@@ -1129,8 +1130,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
   /* We have never seen this type before, and must figure out its hash and the
      hashes of the types it cites.
 
-     Hash this type, and call ourselves recursively.  (The hashing part is
-     optional, and is disabled if overidden_hval is set.)  */
+     Hash this type, and call ourselves recursively.  */
 
   if ((hval = ctf_dedup_rhash_type (fp, input, inputs, input_num,
 				    type, type_id, tp, name, decorated,
@@ -1242,45 +1242,45 @@ ctf_dedup_populate_mappings (ctf_dict_t *fp, ctf_dict_t *input _libctf_unused_,
 	}
     }
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
-    {
-      /* Verify that all types with this hash are of the same kind, and that the
-	 first TU a type was seen in never falls.  */
+  {
+    /* Verify that all types with this hash are of the same kind, and that the
+       first TU a type was seen in never falls.  */
 
-      int err;
-      const void *one_id;
-      ctf_next_t *i = NULL;
-      int orig_kind = ctf_type_kind_unsliced (input, type);
-      int orig_first_tu;
+    int err;
+    const void *one_id;
+    ctf_next_t *i = NULL;
+    int orig_kind = ctf_type_kind_unsliced (input, type);
+    int orig_first_tu;
 
-      orig_first_tu = CTF_DEDUP_GID_TO_INPUT
-	(ctf_dynhash_lookup (d->cd_output_first_gid, hval));
-      if (!ctf_assert (fp, orig_first_tu <= CTF_DEDUP_GID_TO_INPUT (id)))
-	return -1;
+    orig_first_tu = CTF_DEDUP_GID_TO_INPUT
+      (ctf_dynhash_lookup (d->cd_output_first_gid, hval));
+    if (!ctf_assert (fp, orig_first_tu <= CTF_DEDUP_GID_TO_INPUT (id)))
+      return -1;
 
-      while ((err = ctf_dynset_cnext (type_ids, &i, &one_id)) == 0)
-	{
-	  ctf_dict_t *foo = inputs[CTF_DEDUP_GID_TO_INPUT (one_id)];
-	  ctf_id_t bar = CTF_DEDUP_GID_TO_TYPE (one_id);
-	  if (ctf_type_kind_unsliced (foo, bar) != orig_kind)
-	    {
-	      ctf_err_warn (fp, 1, 0, "added wrong kind to output mapping "
-			    "for hash %s named %s: %p/%lx from %s is "
-			    "kind %i, but newly-added %p/%lx from %s is "
-			    "kind %i", hval,
-			    decorated_name ? decorated_name : "(unnamed)",
-			    (void *) foo, bar,
-			    ctf_link_input_name (foo),
-			    ctf_type_kind_unsliced (foo, bar),
-			    (void *) input, type,
-			    ctf_link_input_name (input), orig_kind);
-	      if (!ctf_assert (fp, ctf_type_kind_unsliced (foo, bar)
-			       == orig_kind))
-		return -1;
-	    }
-	}
-      if (err != ECTF_NEXT_END)
-	return ctf_set_errno (fp, err);
-    }
+    while ((err = ctf_dynset_cnext (type_ids, &i, &one_id)) == 0)
+      {
+	ctf_dict_t *foo = inputs[CTF_DEDUP_GID_TO_INPUT (one_id)];
+	ctf_id_t bar = CTF_DEDUP_GID_TO_TYPE (one_id);
+	if (ctf_type_kind_unsliced (foo, bar) != orig_kind)
+	  {
+	    ctf_err_warn (fp, 1, 0, "added wrong kind to output mapping "
+			  "for hash %s named %s: %p/%lx from %s is "
+			  "kind %i, but newly-added %p/%lx from %s is "
+			  "kind %i", hval,
+			  decorated_name ? decorated_name : "(unnamed)",
+			  (void *) foo, bar,
+			  ctf_link_input_name (foo),
+			  ctf_type_kind_unsliced (foo, bar),
+			  (void *) input, type,
+			  ctf_link_input_name (input), orig_kind);
+	    if (!ctf_assert (fp, ctf_type_kind_unsliced (foo, bar)
+			     == orig_kind))
+	      return -1;
+	  }
+      }
+    if (err != ECTF_NEXT_END)
+      return ctf_set_errno (fp, err);
+  }
 #endif
 
   /* Track the consistency of the non-root flag for this type.
