@@ -17483,9 +17483,9 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
       strsect.cts_data = strdata;
     }
 
-  /* Load the CTF file and dump it.  It may be a raw CTF section, or an archive:
-     libctf papers over the difference, so we can pretend it is always an
-     archive.  */
+  /* Load the section and dump it.  It may be a raw CTF or BTF section, or an
+     archive: libctf papers over the difference, so we can pretend it is always
+     an archive.  */
 
   if ((ctfa = ctf_arc_bufopen (&ctfsect, symsectp, strsectp, &err)) == NULL)
     {
@@ -17509,11 +17509,11 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   ret = true;
 
   if (filedata->is_separate)
-    printf (_("\nDump of CTF section '%s' in linked file %s:\n"),
+    printf (_("\nDump of type section '%s' in linked file %s:\n"),
 	    printable_section_name (filedata, section),
 	    filedata->file_name);
   else
-    printf (_("\nDump of CTF section '%s':\n"),
+    printf (_("\nDump of type section '%s':\n"),
 	    printable_section_name (filedata, section));
 
  while ((fp = ctf_archive_next (ctfa, &i, &name, 0, &err)) != NULL)
