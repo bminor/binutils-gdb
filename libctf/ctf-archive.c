@@ -724,7 +724,7 @@ static ctf_dict_t *
 ctf_dict_open_cached (ctf_archive_t *arc, const char *name, int *errp)
 {
   ctf_dict_t *fp;
-  char *dupname;
+  char *dupname = NULL;
 
   /* Just return from the cache if possible.  */
   if (arc->ctfi_dicts
@@ -735,10 +735,10 @@ ctf_dict_open_cached (ctf_archive_t *arc, const char *name, int *errp)
     }
 
   /* Not yet cached: open it.  */
-  fp = ctf_dict_open (arc, name, errp);
-  dupname = strdup (name);
+  if ((fp = ctf_dict_open (arc, name, errp)) == NULL)
+    goto err;
 
-  if (!fp || !dupname)
+  if ((dupname = strdup (name)) == NULL)
     goto oom;
 
   if (arc->ctfi_dicts == NULL)
@@ -769,10 +769,11 @@ ctf_dict_open_cached (ctf_archive_t *arc, const char *name, int *errp)
   return fp;
 
  oom:
-  ctf_dict_close (fp);
-  free (dupname);
   if (errp)
     *errp = ENOMEM;
+ err:
+  ctf_dict_close (fp);
+  free (dupname);
   return NULL;
 }
 
