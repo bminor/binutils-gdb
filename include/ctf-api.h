@@ -313,8 +313,8 @@ _CTF_ERRORS
    can be used with the iteration and visit functions below.  There is also a
    family of iteration functions that do not require callbacks.  */
 
-typedef int ctf_visit_f (const char *name, ctf_id_t type, unsigned long offset,
-			 int depth, void *arg);
+typedef int ctf_visit_f (ctf_dict_t *, const char *name, ctf_id_t type,
+			 size_t offset, int bit_width, int depth,
 			 void *arg);
 typedef int ctf_member_f (ctf_dict_t *, const char *name, ctf_id_t membtype,
 			  size_t offset, int bit_width, void *arg);
