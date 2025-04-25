@@ -1820,57 +1820,6 @@ ctf_change_parent_name (void *key _libctf_unused_, void *value, void *arg)
   ctf_parent_name_set (fp, name);
 }
 
-/* Warn if we may suffer information loss because the CTF input files are too
-   old.  Usually we provide complete backward compatibility, but compiler
-   changes etc which never hit a release may have a flag in the header that
-   simply prevents those changes from being used.  */
-static void
-ctf_link_warn_outdated_inputs (ctf_dict_t *fp)
-{
-  ctf_next_t *i = NULL;
-  void *name_;
-  void *input_;
-  int err;
-
-  while ((err = ctf_dynhash_next (fp->ctf_link_inputs, &i, &name_, &input_)) == 0)
-    {
-      const char *name = (const char *) name_;
-      ctf_link_input_t *input = (ctf_link_input_t *) input_;
-      ctf_next_t *j = NULL;
-      ctf_dict_t *ifp;
-      int err;
-
-      /* We only care about CTF archives by this point: lazy-opened archives
-	 have always been opened by this point, and short-circuited entries have
-	 a matching corresponding archive member. Entries with NULL clin_arc can
-	 exist, and constitute old entries renamed via a name changer: the
-	 renamed entries exist elsewhere in the list, so we can just skip
-	 those.  */
-
-      if (!input->clin_arc)
-	continue;
-
-      /* All entries in the archive will necessarily contain the same
-	 CTF_F_NEWFUNCINFO flag, so we only need to check the first. We don't
-	 even need to do that if we can't open it for any reason at all: the
-	 link will fail later on regardless, since an input can't be opened. */
-
-      ifp = ctf_archive_next (input->clin_arc, &j, NULL, 0, &err);
-      if (!ifp)
-	continue;
-      ctf_next_destroy (j);
-
-      if (!(ifp->ctf_header->cth_flags & CTF_F_NEWFUNCINFO)
-	  && (ifp->ctf_header->cth_varoff - ifp->ctf_header->cth_funcoff) > 0)
-	ctf_err_warn (fp, 1, 0, _("linker input %s has CTF func info but uses "
-				  "an old, unreleased func info format: "
-				  "this func info section will be dropped."),
-		      name);
-    }
-  if (err != ECTF_NEXT_END)
-    ctf_err_warn (fp, 0, err, _("error checking for outdated inputs"));
-}
-
 /* Write out a CTF archive (if there are per-CU CTF files) or a CTF file
    (otherwise) into a new dynamically-allocated string, and return it.
    Members with sizes above THRESHOLD are compressed.
@@ -1894,8 +1843,6 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold, int *is_btf)
   memset (&arg, 0, sizeof (ctf_name_list_accum_cb_arg_t));
   arg.fp = fp;
   fp->ctf_flags |= LCTF_LINKING;
-
-  ctf_link_warn_outdated_inputs (fp);
 
   if (fp->ctf_link_outputs)
     {
