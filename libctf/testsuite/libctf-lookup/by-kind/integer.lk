@@ -1,0 +1,13 @@
+# lookup: open-and-dump.c
+# source: integer.c
+
+#...
+Section \.bss:
+
+  0: 0x2: foo: 0x1: \(kind 1\) int .*
+
+Types: 
+
+0x1: \(kind 1\) int .*
+0x2: \(kind 14\) int foo .*
+0x3: \(kind 15\) DATASEC \(".bss", 1\)

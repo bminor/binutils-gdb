@@ -1,0 +1,14 @@
+# lookup: open-and-dump.c
+# source: type-tag.c
+
+#...
+Section \.bss:
+
+  0: 0x[23]: foo: 0x[234]: \(kind 18\) ttag .* -> 0x1: \(kind 1\) int .*
+
+Types: 
+
+0x1: \(kind 1\) int .*
+#...
+0x[23]: \(kind 18\) ttag .* -> 0x1: \(kind 1\) int .*
+#...

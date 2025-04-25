@@ -1,0 +1,15 @@
+# lookup: open-and-dump.c
+# source: restrict.c
+
+#...
+Section \.bss:
+
+  0: 0x4: foo: 0x3: \(kind 11\) int \*restrict .*
+
+Types: 
+
+0x1: \(kind 1\) int .*
+0x2: \(kind 2\) int \* .*
+0x3: \(kind 11\) int \*restrict .*
+0x4: \(kind 14\) int foo .*
+0x5: \(kind 15\) DATASEC \(".bss", 1\)

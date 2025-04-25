@@ -1,0 +1,9 @@
+# lookup: open-and-dump.c
+# source: function.c
+
+#...
+Types: 
+
+0x1: \(kind 1\) int .*
+0x2: \(kind 13\) int \(\*\) \(int foo\) .*
+0x3: \(kind 12\) int \(\*\) \(int foo\) func .*

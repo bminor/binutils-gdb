@@ -1,0 +1,23 @@
+# lookup: open-and-dump.c
+# source: decl-tag.c
+
+#...
+Section \.bss:
+
+  0: 0x[45]: bar: 0x2: \(kind 4\) struct  .*
+  0: 0x[56]: foo: 0x1: \(kind 1\) int .*
+
+Types: 
+
+0x1: \(kind 1\) int .*
+0x2: \(kind 4\) struct  .*
+     \[0x0\] a: ID 0x3: \(kind 1\) char .*
+     \[0x8\] b: ID 0x3: \(kind 1\) char .*
+0x3: \(kind 1\) char .*
+#...
+0x[45]: \(kind 14\) struct  bar .*
+#...
+0x[56]: \(kind 14\) int foo .*
+0x[67]: \(kind 17\) int foo btf_decl_tag \("dtag"\) .* -> 0x[56]: \(kind 14\) int foo .*
+0x[78]: \(kind 17\) struct  btf_decl_tag \("dtag2"\) .* -> 0x2: \(kind 4\) struct  .*
+#...
