@@ -2448,6 +2448,55 @@ gld${EMULATION_NAME}_find_potential_libraries
 {
   return ldfile_open_file_search (name, entry, "", ".lib");
 }
+
+static struct bfd_link_hash_entry *
+gld${EMULATION_NAME}_find_alt_start_symbol
+  (struct bfd_sym_chain *entry)
+{
+#if defined (TARGET_IS_i386pe)
+  bool entry_has_stdcall_suffix;
+#endif
+  struct bfd_link_hash_entry *h;
+  size_t entry_name_len;
+  char *symbol_name;
+  const char *prefix;
+  const char *suffix;
+
+  entry_name_len = strlen (entry->name);
+
+  if (is_underscoring ())
+    prefix = "_";
+  else
+    prefix = "";
+
+#if defined (TARGET_IS_i386pe)
+  if ((entry_name_len > 2 && entry->name[entry_name_len-2] == '@' && ISDIGIT (entry->name[entry_name_len-1]))
+      || (entry_name_len > 3 && entry->name[entry_name_len-3] == '@' && ISDIGIT (entry->name[entry_name_len-2]) && ISDIGIT (entry->name[entry_name_len-1]))
+      || (entry_name_len > 4 && entry->name[entry_name_len-4] == '@' && ISDIGIT (entry->name[entry_name_len-3]) && ISDIGIT (entry->name[entry_name_len-2]) && ISDIGIT (entry->name[entry_name_len-1])))
+    entry_has_stdcall_suffix = true;
+  else
+    entry_has_stdcall_suffix = false;
+
+  if (!entry_has_stdcall_suffix && (bfd_link_dll (&link_info) || dll))
+    suffix = "@12";
+  else if (!entry_has_stdcall_suffix && pe_subsystem == 1 /* NT kernel driver */)
+    suffix = "@8";
+  else
+#endif
+    suffix = "";
+
+  if (*prefix == '\0' && *suffix == '\0')
+    return NULL;
+
+  symbol_name = xmalloc (entry_name_len + 5);
+  strcpy (symbol_name, prefix);
+  strcat (symbol_name, entry->name);
+  strcat (symbol_name, suffix);
+
+  h = bfd_link_hash_lookup (link_info.hash, symbol_name, false, false, true);
+  free (symbol_name);
+  return h;
+}
 
 static char *
 gld${EMULATION_NAME}_get_script (int *isfile)
@@ -2526,5 +2575,6 @@ LDEMUL_UNRECOGNIZED_FILE=gld${EMULATION_NAME}_unrecognized_file
 LDEMUL_LIST_OPTIONS=gld${EMULATION_NAME}_list_options
 LDEMUL_RECOGNIZED_FILE=gld${EMULATION_NAME}_recognized_file
 LDEMUL_FIND_POTENTIAL_LIBRARIES=gld${EMULATION_NAME}_find_potential_libraries
+LDEMUL_FIND_START_SYMBOL=gld${EMULATION_NAME}_find_alt_start_symbol
 
 source_em ${srcdir}/emultempl/emulation.em

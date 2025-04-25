@@ -35,6 +35,14 @@
 
 static ld_emulation_xfer_type *ld_emulation;
 
+struct bfd_link_hash_entry *
+ldemul_find_alt_start_symbol (struct bfd_sym_chain *entry)
+{
+  if (ld_emulation->find_alt_start_symbol)
+    return ld_emulation->find_alt_start_symbol (entry);
+  return NULL;
+}
+
 void
 ldemul_hll (char *name)
 {

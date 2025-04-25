@@ -2486,11 +2486,18 @@ lang_map (void)
 }
 
 static bool
+is_defined (struct bfd_link_hash_entry *h)
+{
+  return h != NULL
+    && (h->type == bfd_link_hash_defined
+	|| h->type == bfd_link_hash_defweak);
+}
+
+static bool
 sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
 		 void *info ATTRIBUTE_UNUSED)
 {
-  if ((hash_entry->type == bfd_link_hash_defined
-       || hash_entry->type == bfd_link_hash_defweak)
+  if (is_defined (hash_entry)
       && hash_entry->u.def.section->owner != link_info.output_bfd
       && hash_entry->u.def.section->owner != NULL)
     {
@@ -4184,9 +4191,7 @@ ldlang_check_require_defined_symbols (void)
 
       h = bfd_link_hash_lookup (link_info.hash, ptr->name,
 				false, false, true);
-      if (h == NULL
-	  || (h->type != bfd_link_hash_defined
-	      && h->type != bfd_link_hash_defweak))
+      if (! is_defined (h))
 	einfo(_("%X%P: required symbol `%s' not defined\n"), ptr->name);
     }
 }
@@ -4892,9 +4897,7 @@ print_assignment (lang_assignment_statement_type *assignment,
 
 	  h = bfd_link_hash_lookup (link_info.hash, assignment->exp->assign.dst,
 				    false, false, true);
-	  if (h != NULL
-	      && (h->type == bfd_link_hash_defined
-		  || h->type == bfd_link_hash_defweak))
+	  if (is_defined (h))
 	    {
 	      value = h->u.def.value;
 	      value += h->u.def.section->output_section->vma;
@@ -4939,8 +4942,7 @@ print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
 {
   asection *sec = (asection *) ptr;
 
-  if ((hash_entry->type == bfd_link_hash_defined
-       || hash_entry->type == bfd_link_hash_defweak)
+  if (is_defined (hash_entry)
       && sec == hash_entry->u.def.section)
     {
       print_spaces (SECTION_NAME_MAP_LENGTH);
@@ -7234,9 +7236,7 @@ lang_end (void)
 	{
 	  h = bfd_link_hash_lookup (link_info.hash, sym->name,
 				    false, false, false);
-	  if (h != NULL
-	      && (h->type == bfd_link_hash_defined
-		  || h->type == bfd_link_hash_defweak)
+	  if (is_defined (h)
 	      && !bfd_is_const_section (h->u.def.section))
 	    break;
 	}
@@ -7255,9 +7255,11 @@ lang_end (void)
 
   h = bfd_link_hash_lookup (link_info.hash, entry_symbol.name,
 			    false, false, true);
-  if (h != NULL
-      && (h->type == bfd_link_hash_defined
-	  || h->type == bfd_link_hash_defweak)
+
+  if (! is_defined (h) || h->u.def.section->output_section == NULL)
+    h = ldemul_find_alt_start_symbol (&entry_symbol);
+
+  if (is_defined (h)
       && h->u.def.section->output_section != NULL)
     {
       bfd_vma val;

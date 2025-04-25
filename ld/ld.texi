@@ -531,7 +531,9 @@ named @var{entry}, the linker will try to parse @var{entry} as a number,
 and use that as the entry address (the number will be interpreted in
 base 10; you may use a leading @samp{0x} for base 16, or a leading
 @samp{0} for base 8).  @xref{Entry Point}, for a discussion of defaults
-and other ways of specifying the entry point.
+and other ways of specifying the entry point.  For i386 PE, @var{entry}
+can be also the original function name (without the leading underscore
+and/or the trailing stdcall @samp{@@number} when applicable).
 
 @kindex --exclude-libs
 @item --exclude-libs @var{lib},@var{lib},...
