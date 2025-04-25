@@ -56,7 +56,8 @@ ctf_bfdopen (struct bfd *abfd, int *errp)
 
   libctf_init_debug();
 
-  if ((ctf_asect = bfd_get_section_by_name (abfd, _CTF_SECTION)) == NULL)
+  if (((ctf_asect = bfd_get_section_by_name (abfd, _CTF_SECTION)) == NULL)
+      && ((ctf_asect = bfd_get_section_by_name (abfd, ".BTF")) == NULL))
     {
       return (ctf_set_open_errno (errp, ECTF_NOCTFDATA));
     }
@@ -257,26 +258,32 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
   struct stat st;
   ssize_t nbytes;
 
-  ctf_preamble_t ctfhdr;
+  ctf_preamble_v3_t *ctfhdr;
+  ctf_btf_preamble_t btfhdr;
   uint64_t arc_magic;
 
-  memset (&ctfhdr, 0, sizeof (ctfhdr));
+  memset (&btfhdr, 0, sizeof (btfhdr));
 
   libctf_init_debug();
 
   if (fstat (fd, &st) == -1)
     return (ctf_set_open_errno (errp, errno));
 
-  if ((nbytes = ctf_pread (fd, &ctfhdr, sizeof (ctfhdr), 0)) <= 0)
+  if ((nbytes = ctf_pread (fd, &btfhdr, sizeof (btfhdr) > sizeof (ctfhdr)
+			   ? sizeof (btfhdr) : sizeof (ctfhdr), 0)) <= 0)
     return (ctf_set_open_errno (errp, nbytes < 0 ? errno : ECTF_FMT));
+  ctfhdr = (ctf_preamble_v3_t *) &btfhdr;
 
-  /* If we have read enough bytes to form a CTF header and the magic string
-     matches, in either endianness, attempt to interpret the file as raw
-     CTF.  */
+  /* If we have read enough bytes to form a CTF or BTF header and the magic
+     string matches, in either endianness, attempt to interpret the file as raw
+     CTF/BTF.  */
 
-  if ((size_t) nbytes >= sizeof (ctf_preamble_t)
-      && (ctfhdr.ctp_magic == CTF_MAGIC
-	  || ctfhdr.ctp_magic == bswap_16 (CTF_MAGIC)))
+  if (((size_t) nbytes >= sizeof (ctf_preamble_v3_t)
+      && (ctfhdr->ctp_magic == CTF_MAGIC
+	  || ctfhdr->ctp_magic == bswap_16 (CTF_MAGIC)))
+      || ((size_t) nbytes >= sizeof (ctf_btf_preamble_t)
+	  && (btfhdr.btf_magic == CTF_BTF_MAGIC
+	      || btfhdr.btf_magic == bswap_16 (CTF_BTF_MAGIC))))
     {
       ctf_dict_t *fp = NULL;
       void *data;
