@@ -27,33 +27,63 @@
 #define ENOTSUP ENOSYS
 #endif
 
-int _libctf_version = CTF_VERSION;	      /* Library client version.  */
-int _libctf_debug = 0;			      /* Debugging messages enabled.  */
+static int _libctf_version = CTF_VERSION;     /* Library client version.  */
+static size_t _btf_hdr_len = sizeof (ctf_btf_header_t);
+static int _libctf_debug = 0;		      /* Debugging messages enabled.  */
 
-/* Set the CTF library client version to the specified version.  If version is
-   zero, we just return the default library version number.  */
+ctf_btf_mode_t _libctf_btf_mode = LIBCTF_BTM_POSSIBLE;	/* BTF writeout mode.  */
+
+/* Set the CTF library client version to the specified version: this is the
+   version of dicts written out by the ctf_write* functions.  If version is
+   zero, we just return the default library version number.  The BTF version
+   (for CTFv4 and above) is indicated via btf_hdr_len, also zero for "no
+   change".
+
+   btf_mode has three levels:
+
+    - LIBCTF_BTM_ALWAYS writes out full-blown CTFv4 at all times
+    - LIBCTF_BTM_POSSIBLE writes out CTFv4 if needed to avoid
+      information loss, BTF otherwise (and always writes out CTFv4
+      if compressing)
+    - LIBCTF_BTM_BTF writes out BTF always, and errors otherwise (e.g.
+      if compressing)
+
+    You can influence what type kinds are written out to a CTFv4 dict via the
+    ctf_write_suppress_kind() function.  */
 int
-ctf_version (int version)
+ctf_version (int ctf_version_, size_t btf_hdr_len, ctf_btf_mode_t btf_mode)
 {
-  if (version < 0)
+  if (ctf_version_ < 0 || btf_mode < 0 || btf_mode > 2)
     {
       errno = EINVAL;
       return -1;
     }
 
-  if (version > 0)
+  if (ctf_version_ > 0)
     {
       /*  Dynamic version switching is not presently supported. */
-      if (version != CTF_VERSION)
-	{
-	  errno = ENOTSUP;
-	  return -1;
-	}
-      ctf_dprintf ("ctf_version: client using version %d\n", version);
-      _libctf_version = version;
+      if (ctf_version_ != _libctf_version)
+	goto err;
+
+      ctf_dprintf ("ctf_version: client using version %i\n", ctf_version_);
     }
 
-  return _libctf_version;
+  if (btf_hdr_len > 0)
+    {
+      /*  Dynamic version switching is not presently supported. */
+      if (btf_hdr_len != _btf_hdr_len)
+	goto err;
+
+      ctf_dprintf ("ctf_version: client using BTF header length %zi\n", btf_hdr_len);
+    }
+
+  _libctf_btf_mode = btf_mode;
+
+  return ctf_version_;
+
+ err:
+  errno = ENOTSUP;
+  return -1;
 }
 
 /* Store the specified error code into errp if it is non-NULL, and then

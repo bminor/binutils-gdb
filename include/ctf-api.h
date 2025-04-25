@@ -533,13 +533,38 @@ extern void *ctf_getspecific (ctf_dict_t *);
 extern int ctf_errno (ctf_dict_t *);
 extern const char *ctf_errmsg (int);
 
-/* Return the version of CTF dicts written by writeout functions.  The
-   argument must currently be zero.  All dicts with versions below the value
-   returned by this function can be read by the library.  CTF dicts written
-   by other non-GNU CTF libraries (e.g. that in FreeBSD) are not compatible
-   and cannot be read by this library.  */
+/* BTF/CTF writeout version info.
 
-extern int ctf_version (int);
+   ctf_btf_mode has three levels:
+
+   - LIBCTF_BTM_ALWAYS writes out full-blown CTFv4 at all times
+   - LIBCTF_BTM_POSSIBLE writes out CTFv4 if needed to avoid information loss,
+     BTF otherwise.  If compressing, the same as LIBCTF_BTM_ALWAYS.
+   - LIBCTF_BTM_BTF writes out BTF always, and errors otherwise.
+
+   Note that no attempt is made to downgrade existing CTF dicts to BTF: if you
+   read in a CTF dict and turn on LIBCTF_BTM_POSSIBLE, you'll get a CTF dict; if
+   you turn on LIBCTF_BTM_BTF, you'll get an unconditional error.  Thus, this is
+   really useful only when reading in BTF dicts or when creating new dicts.  */
+
+typedef enum ctf_btf_mode
+  {
+    LIBCTF_BTM_BTF = 0,
+    LIBCTF_BTM_POSSIBLE = 1,
+    LIBCTF_BTM_ALWAYS = 2
+  } ctf_btf_mode_t;
+
+/* Set the CTF library client version to the specified version: this is the
+   version of dicts written out by the ctf_write* functions.  If version is
+   zero, we just return the default library version number.  The BTF version
+   (for CTFv4 and above) is indicated via btf_hdr_len, also zero for "no
+   change".
+
+    You can influence what type kinds are written out to a CTFv4 dict via the
+    ctf_write_suppress_kind() function.  */
+
+extern int ctf_version (int ctf_version_, size_t btf_hdr_len,
+			ctf_btf_mode_t btf_mode);
 
 /* Given a symbol table index corresponding to a function symbol, return info on
    the type of a given function's arguments or return value, or its parameter
@@ -1057,13 +1082,17 @@ extern ctf_snapshot_id_t ctf_snapshot (ctf_dict_t *);
 extern int ctf_rollback (ctf_dict_t *, ctf_snapshot_id_t);
 extern int ctf_discard (ctf_dict_t *);
 
-/* Dict writeout.
+/* Dict writeout.  See ctf_version().
 
    ctf_write: write out an uncompressed dict to an fd.
    ctf_compress_write: write out a compressed dict to an fd (currently always
    gzip, but this may change in future).
    ctf_write_mem: write out a dict to a buffer and return it and its size,
-   compressing it if its uncompressed size is over THRESHOLD.  */
+   compressing it if its uncompressed size is over THRESHOLD.
+
+   If the ctf_btf_mode is not LIBCTF_BTM_ALWAYS and the threshold is -1,
+   the resulting dict may be pure BTF.
+  */
 
 extern int ctf_write (ctf_dict_t *, int);
 extern int ctf_compress_write (ctf_dict_t * fp, int fd);
