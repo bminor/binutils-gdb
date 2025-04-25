@@ -786,9 +786,7 @@ ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
   ctf_dtdef_t *dtd;
   ctf_slice_t slice;
   ctf_id_t resolved_ref = ref;
-  ctf_id_t type;
   int kind;
-  const ctf_type_t *tp;
   ctf_dict_t *tmp = fp;
 
   if (ep == NULL)
@@ -800,7 +798,7 @@ ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_typed_errno (fp, EINVAL));
 
-  if (ref != 0 && ((tp = ctf_lookup_by_id (&tmp, ref)) == NULL))
+  if (ref != 0 && (ctf_lookup_by_id (&tmp, ref, NULL) == NULL))
     return CTF_ERR;		/* errno is set for us.  */
 
   /* Make sure we ultimately point to an integral type.  We also allow slices to
@@ -816,21 +814,20 @@ ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
       && (ref != 0))
     return (ctf_set_typed_errno (fp, ECTF_NOTINTFP));
 
-  if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_SLICE,
-			       sizeof (ctf_slice_t), &dtd)) == CTF_ERR)
+  if ((dtd = ctf_add_generic (fp, flag, NULL, CTF_K_SLICE, 0,
+			      sizeof (ctf_slice_t), 0, NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   memset (&slice, 0, sizeof (ctf_slice_t));
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_SLICE, flag, 0);
-  dtd->dtd_data.ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT)
-				 / CHAR_BIT);
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_SLICE, 0, 0);
+  dtd->dtd_data->ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT) / CHAR_BIT);
   slice.cts_type = (uint32_t) ref;
   slice.cts_bits = ep->cte_bits;
   slice.cts_offset = ep->cte_offset;
   memcpy (dtd->dtd_vlen, &slice, sizeof (ctf_slice_t));
 
-  return type;
+  return dtd->dtd_type;
 }
 
 ctf_id_t

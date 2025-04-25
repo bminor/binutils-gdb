@@ -1469,7 +1469,7 @@ ctf_type_align_natural (ctf_dict_t *fp, ctf_id_t prev_type,
 /* Resolve the type down to a base type node, and then return the alignment
    needed for the type storage in bytes.
 
-   XXX may need arch-dependent attention.  */
+   TODO may need arch-dependent attention.  */
 
 ssize_t
 ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
@@ -1722,19 +1722,11 @@ ctf_type_reference (ctf_dict_t *fp, ctf_id_t type)
       /* Slices store their type in an unusual place.  */
     case CTF_K_SLICE:
       {
-	ctf_dtdef_t *dtd;
+	unsigned char *vlen;
 	const ctf_slice_t *sp;
 
-	if ((dtd = ctf_dynamic_type (ofp, type)) == NULL)
-	  {
-	    ssize_t increment;
-
-	    (void) ctf_get_ctt_size (fp, tp, NULL, &increment);
-	    sp = (const ctf_slice_t *) ((uintptr_t) tp + increment);
-	  }
-	else
-	  sp = (const ctf_slice_t *) dtd->dtd_vlen;
-
+	vlen = ctf_vlen (fp, type, tp, NULL);
+	sp = (const ctf_slice_t *) vlen;
 	return sp->cts_type;
       }
     default:
