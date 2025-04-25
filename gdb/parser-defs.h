@@ -389,4 +389,7 @@ extern bool fits_in_type (int n_sign, const gdb_mpz &n, int type_bits,
 
 extern void parser_fprintf (FILE *, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
+/* True if an expression parser should set yydebug.  */
+extern bool parser_debug;
+
 #endif /* GDB_PARSER_DEFS_H */

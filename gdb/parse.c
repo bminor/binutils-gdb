@@ -60,8 +60,8 @@ show_expressiondebug (struct ui_file *file, int from_tty,
 }
 
 
-/* True if an expression parser should set yydebug.  */
-static bool parser_debug;
+/* See parser-defs.h.  */
+bool parser_debug;
 
 static void
 show_parserdebug (struct ui_file *file, int from_tty,

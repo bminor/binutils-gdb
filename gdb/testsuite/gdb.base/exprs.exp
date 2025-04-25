@@ -284,3 +284,21 @@ gdb_test "print v_short + " \
 # Test for a syntax error in the middle of an expression.
 gdb_test "print v_short =}{= 3" \
     "A syntax error in expression, near `\\}\\{= 3'\\."
+
+gdb_test_no_output "set debug parse 1"
+set saw_start 0
+set saw_val 0
+gdb_test_multiple "print 23" "print with debugging" -lbl {
+    -re "\r\nStarting parse(?=\r\n)" {
+	set saw_start 1
+	exp_continue
+    }
+    -re "\r\n.$decimal = 23(?=\r\n)" {
+	set saw_val 1
+	exp_continue
+    }
+
+    -re -wrap "" {
+	gdb_assert {$saw_start && $saw_val} $gdb_test_name
+    }
+}

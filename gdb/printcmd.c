@@ -1320,7 +1320,9 @@ process_print_command_args (const char *args, value_print_options *print_opts,
 	 value, so invert it for parse_expression.  */
       parser_flags flags = 0;
       if (!voidprint)
-	flags = PARSER_VOID_CONTEXT;
+	flags |= PARSER_VOID_CONTEXT;
+      if (parser_debug)
+	flags |= PARSER_DEBUG;
       expression_up expr = parse_expression (exp, nullptr, flags);
       return expr->evaluate ();
     }
