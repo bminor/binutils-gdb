@@ -165,11 +165,14 @@ proc compile_link_one_host_cc { src output additional_args } {
 #
 # Each option may occur at most once unless otherwise mentioned.
 #
+# Boolean options may also be passed as arguments to run_lookup_test:
+# one option per word: options with a trailing colon are turned off.
+#
 # After the option lines come regexp lines.  run_lookup_test calls
 # regexp_diff to compare the output of the lookup program against the
 # regexps in FILE.d.
 #
-proc run_lookup_test { name } {
+proc run_lookup_test { name args } {
     global CC_FOR_TARGET CFLAGS_FOR_TARGET LIBS TEST_CROSS
     global copyfile env runtests srcdir subdir verbose
 
@@ -222,6 +225,13 @@ proc run_lookup_test { name } {
 	set opts($opt_name) [concat $opts($opt_name) $opt_val]
     }
 
+    foreach arg $args {
+	set opt_name [lindex [split $arg ":"] 0]
+	set opt_value [lindex [split $arg ":"] 1]
+
+	set opts($opt_name) [concat $opts($opt_name) $opt_val]
+    }
+
     if { [llength $opts(no_cross)] != 0
 	 && "$TEST_CROSS" eq "yes" } {
 	untested "$file4log not tested when cross-compiling"
@@ -264,7 +274,7 @@ proc run_lookup_test { name } {
 	return 0
     }
 
-    # Compile the inputs and posibly link them together.
+    # Compile the inputs and possibly link them together.
 
     set lookup_output ""
     set objs {}
