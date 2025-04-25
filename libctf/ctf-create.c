@@ -1427,13 +1427,14 @@ ctf_add_unknown (ctf_dict_t *fp, uint32_t flag, const char *name)
 	}
     }
 
-  if ((type = ctf_add_generic (fp, flag, name, CTF_K_UNKNOWN, 0, &dtd)) == CTF_ERR)
+  if ((dtd = ctf_add_generic (fp, flag, name, CTF_K_UNKNOWN, 0, 0, 0,
+			      NULL)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_UNKNOWN, flag, 0);
-  dtd->dtd_data.ctt_type = 0;
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (CTF_K_UNKNOWN, flag, 0);
+  dtd->dtd_data->ctt_type = 0;
 
-  return type;
+  return dtd->dtd_type;
 }
 
 ctf_id_t
