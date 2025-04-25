@@ -602,12 +602,17 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
     }									\
   while (0)
 
+  /* We never directly hash prefix kinds.  */
+
+  if (!ctf_assert (fp, kind != CTF_K_BIG && kind != CTF_K_CONFLICTING))
+    return NULL;				/* errno is set for us.  */
+
   /* If this is a named struct or union or a forward to one, and this is a child
      traversal, treat this type as if it were a forward -- do not recurse to
      children, ignore all content not already hashed in, and hash in the
      decorated name of the type instead.  */
 
-  if (ctf_dedup_is_stub (name, kind, tp->ctt_type, flags))
+  if (ctf_dedup_is_stub (name, kind, ctf_type_kind_forwarded_tp (input, tp), flags))
     {
 #ifdef ENABLE_LIBCTF_HASH_DEBUGGING
       ctf_dprintf ("Struct/union/forward citation: substituting forwarding "
@@ -677,7 +682,9 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
      possible.  Equally, we do not want to hash in the isroot flag: both the
      compiler and the deduplicator set the nonroot flag to indicate clashes with
      *other types in the same TU* with the same name: so two types can easily
-     have distinct nonroot flags, yet be exactly the same type.*/
+     have distinct nonroot flags, yet be exactly the same type.  For the same
+     reason, type prefixes are not hashed: one of them indicates only
+     nonrootness, and the other is merely an implementation detail.  */
 
   ctf_sha1_init (&hash);
   if (name)
@@ -691,19 +698,24 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       /* No extra state.  */
       break;
     case CTF_K_FORWARD:
+      {
+	int fwdkind = ctf_type_kind_forwarded_tp (input, tp);
 
-      /* Add the forwarded kind, stored in the ctt_type.  */
-      ctf_dedup_sha1_add (&hash, &tp->ctt_type, sizeof (tp->ctt_type),
-			  "forwarded kind", depth);
-      break;
+	/* Add the forwarded kind.  */
+	ctf_dedup_sha1_add (&hash, &fwdkind, sizeof (fwdkind), "forwarded kind",
+			    depth);
+	break;
+      }
     case CTF_K_INTEGER:
     case CTF_K_FLOAT:
       {
 	ctf_encoding_t ep;
+	ssize_t size;
+
 	memset (&ep, 0, sizeof (ctf_encoding_t));
 
-	ctf_dedup_sha1_add (&hash, &tp->ctt_size, sizeof (uint32_t), "size",
-			    depth);
+	ctf_get_ctt_size (input, tp, &size, NULL);
+	ctf_dedup_sha1_add (&hash, &size, sizeof (uint32_t), "size", depth);
 	if (ctf_type_encoding (input, type, &ep) < 0)
 	  {
 	    whaterr = N_("error getting encoding");
@@ -893,13 +905,14 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	const char *mname;
 	ctf_id_t membtype;
 	ssize_t size;
+	int bit_width;
 
 	ctf_get_ctt_size (input, tp, &size, NULL);
 	ctf_dedup_sha1_add (&hash, &size, sizeof (ssize_t), "struct size",
 			    depth);
 
 	while ((offset = ctf_member_next (input, type, &i, &mname, &membtype,
-					  0)) >= 0)
+					  &bit_width, 0)) >= 0)
 	  {
 	    if (mname == NULL)
 	      mname = "";
@@ -1031,7 +1044,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
 					  const char *hash))
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
   void *type_id;
   const char *hval = NULL;
   const char *name;
@@ -1056,7 +1069,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
 
   type_id = CTF_DEDUP_GID (fp, input_num, type);
 
-  if ((tp = ctf_lookup_by_id (&input, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&input, type, &suffix)) == NULL)
     {
       ctf_set_errno (fp, ctf_errno (input));
       ctf_err_warn (fp, 0, 0, _("%s (%i): lookup failure for type %lx: "
@@ -1065,10 +1078,10 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
       return NULL;		/* errno is set for us.  */
     }
 
-  kind = LCTF_INFO_KIND (input, tp->ctt_info);
-  name = ctf_strraw (input, tp->ctt_name);
+  kind = ctf_type_kind_tp (input, tp);
+  name = ctf_strraw (input, suffix->ctt_name);
 
-  if (tp->ctt_name == 0 || !name || name[0] == '\0')
+  if (suffix->ctt_name == 0 || !name || name[0] == '\0')
     name = NULL;
 
   /* Decorate the name appropriately for the namespace it appears in: forwards
@@ -1078,7 +1091,7 @@ ctf_dedup_hash_type (ctf_dict_t *fp, ctf_dict_t *input,
   if (name)
     {
       if (kind == CTF_K_FORWARD)
-	fwdkind = tp->ctt_type;
+	fwdkind = ctf_type_kind_forwarded_tp (input, tp);
 
       if ((decorated = ctf_decorate_type_name (fp, name, fwdkind)) == NULL)
 	return NULL;				/* errno is set for us.  */
@@ -2646,7 +2659,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   const char *name;
   ctf_dict_t *target = output;
   ctf_dict_t *real_input;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
   int input_num = CTF_DEDUP_GID_TO_INPUT (id);
   int output_num = (uint32_t) -1;		/* 'shared' */
   int cu_mapped = *(int *)arg;
@@ -2659,7 +2672,6 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
   ctf_id_t maybe_dup = 0;
   ctf_encoding_t ep;
   const char *errtype;
-  int emission_hashed = 0;
 
   /* We don't want to re-emit something we've already emitted.  */
 
@@ -2710,7 +2722,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
     }
 
   real_input = input;
-  if ((tp = ctf_lookup_by_id (&real_input, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&real_input, type, &suffix)) == NULL)
     {
       ctf_err_warn (output, 0, ctf_errno (input),
 		    _("%s: lookup failure for type %lx"),
@@ -2718,7 +2730,11 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       return ctf_set_errno (output, ctf_errno (input));
     }
 
-  name = ctf_strraw (real_input, tp->ctt_name);
+  /* Using isroot here throws away any filename attached to the underlying
+     CTF_K_CONFLICTING entry, but we cannot usefully retain this in any case,
+     since a cu-mapped link will want to emit a *different* CTF_K_CONFLICTING
+     entry in its place.  */
+  name = ctf_strraw (real_input, suffix->ctt_name);
   isroot = LCTF_INFO_ISROOT (real_input, tp->ctt_info);
 
   /* Hide conflicting types, if we were asked to: also hide if a type with this
@@ -2954,8 +2970,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
       return ctf_set_errno (output, ECTF_CORRUPT);
     }
 
-  if (!emission_hashed
-      && new_type != 0
+  if (new_type != 0
       && ctf_dynhash_cinsert (target->ctf_dedup.cd_output_emission_hashes,
 			      hval, (void *) (uintptr_t) new_type) < 0)
     {
@@ -2964,7 +2979,7 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	return ctf_set_errno (output, ENOMEM);
     }
 
-  if (!emission_hashed && new_type != 0)
+  if (new_type != 0)
     ctf_dprintf ("%i: Inserted %s, %i/%lx -> %lx into emission hash for "
 		 "target %p (%s)\n", depth, hval, input_num, type, new_type,
 		 (void *) target, ctf_link_input_name (target));
@@ -3014,9 +3029,10 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
       ctf_dict_t *target;
       uint32_t target_num;
       ctf_id_t input_type, target_type;
-      ssize_t offset;
-      ctf_id_t membtype;
       const char *name;
+      ctf_id_t membtype;
+      ssize_t offset;
+      int width;
 
       input_num = CTF_DEDUP_GID_TO_INPUT (input_id);
       input_fp = inputs[input_num];
@@ -3040,7 +3056,7 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
       target_type = CTF_DEDUP_GID_TO_TYPE (target_id);
 
       while ((offset = ctf_member_next (input_fp, input_type, &j, &name,
-					&membtype, 0)) >= 0)
+					&membtype, &width, 0)) >= 0)
 	{
 	  err_fp = target;
 	  err_type = target_type;
