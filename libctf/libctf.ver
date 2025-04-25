@@ -84,6 +84,8 @@ LIBCTF_2.0 {
 	ctf_type_visit;
 	ctf_type_cmp;
 	ctf_type_compat;
+	ctf_tag;
+	ctf_decl_tag;
 
 	ctf_member_info;
 	ctf_member_next;
@@ -111,6 +113,7 @@ LIBCTF_2.0 {
 	ctf_variable_next;
 	ctf_datasec_iter;
 	ctf_datasec_next;
+	ctf_tag_next;
 
 	ctf_next_create;
 	ctf_next_destroy;
@@ -118,6 +121,8 @@ LIBCTF_2.0 {
 
 	ctf_add_array;
 	ctf_add_const;
+	ctf_add_decl_tag;
+	ctf_add_decl_type_tag;
 	ctf_add_enum;
 	ctf_add_enum_encoded;
 	ctf_add_enum64;
@@ -131,6 +136,7 @@ LIBCTF_2.0 {
 	ctf_add_pointer;
 	ctf_add_type;
 	ctf_add_typedef;
+	ctf_add_type_tag;
 	ctf_add_restrict;
 	ctf_add_section_variable;
 	ctf_add_slice;

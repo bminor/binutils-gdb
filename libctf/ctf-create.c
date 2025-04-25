@@ -271,11 +271,45 @@ ctf_name_table (ctf_dict_t *fp, int kind)
     case CTF_K_ENUM:
     case CTF_K_ENUM64:
       return fp->ctf_enums;
+    case CTF_K_TYPE_TAG:
+    case CTF_K_DECL_TAG:
+      return fp->ctf_tags;
     case CTF_K_DATASEC:
       return fp->ctf_datasecs;
     default:
       return fp->ctf_names;
     }
+}
+
+int
+ctf_insert_type_decl_tag (ctf_dict_t *fp, ctf_id_t type, const char *name,
+			  int kind)
+{
+  ctf_dynset_t *types;
+  ctf_dynhash_t *h = ctf_name_table (fp, kind);
+  int err;
+
+  if ((types = ctf_dynhash_lookup (h, name)) == NULL)
+    {
+      types = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer, NULL);
+
+      if (!types)
+	return (ctf_set_errno (fp, ENOMEM));
+
+      err = ctf_dynhash_cinsert (h, name, types);
+      if (err != 0)
+	{
+	  err *= -1;
+	  return (ctf_set_errno (fp, err));
+	}
+    }
+
+  if ((err = ctf_dynset_insert (types, (void *) (uintptr_t) type)) != 0)
+    {
+      err *= -1;
+      return (ctf_set_errno (fp, err));
+    }
+  return 0;
 }
 
 int
@@ -286,17 +320,25 @@ ctf_dtd_insert (ctf_dict_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
 			  dtd) < 0)
     return ctf_set_errno (fp, ENOMEM);
 
-  if (flag == CTF_ADD_ROOT && dtd->dtd_data.ctt_name
-      && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL)
+  if (flag == CTF_ADD_ROOT && dtd->dtd_data->ctt_name
+      && (name = ctf_strraw (fp, dtd->dtd_data->ctt_name)) != NULL)
     {
-      if (ctf_dynhash_insert (ctf_name_table (fp, kind),
-			      (char *) name, (void *) (uintptr_t)
-			      dtd->dtd_type) < 0)
+      /* Type and decl tags have unusual name tables, since their names are not
+	 unique.  */
+
+      if (kind != CTF_K_TYPE_TAG && kind != CTF_K_DECL_TAG)
 	{
-	  ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t)
-			      dtd->dtd_type);
-	  return ctf_set_errno (fp, ENOMEM);
+	  if (ctf_dynhash_insert (ctf_name_table (fp, kind),
+				  (char *) name, (void *) (uintptr_t)
+				  dtd->dtd_type) < 0)
+	    {
+	      ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t)
+				  dtd->dtd_type);
+	      return ctf_set_errno (fp, ENOMEM);
+	    }
 	}
+      else if (ctf_insert_type_decl_tag (fp, dtd->dtd_type, name, kind) < 0)
+	return -1;			/* errno is set for us.  */
     }
   ctf_list_append (&fp->ctf_dtdefs, dtd);
   return 0;
@@ -883,6 +925,125 @@ ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
   vlen->cta_nelems = arp->ctr_nelems;
 
   return 0;
+}
+
+/* Add a type or decl tag applying to some whole type, or to some
+   component of a type.  Component -1 is a whole type.  */
+
+static ctf_id_t
+ctf_add_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
+	     int is_decl, int32_t component_idx)
+{
+  ctf_dtdef_t *dtd;
+  size_t vlen_size = 0;
+  int kind = is_decl ? CTF_K_DECL_TAG : CTF_K_TYPE_TAG;
+  int ref_kind = ctf_type_kind (fp, type);
+
+  if (component_idx < -1)
+    return (ctf_set_typed_errno (fp, ECTF_BADCOMPONENT));
+
+  if (is_decl)
+    {
+      vlen_size = sizeof (ctf_decl_tag_t);
+
+      /* Whole-type declarations.  */
+
+      if (component_idx == 0)
+	{
+	  switch (ref_kind)
+	    {
+	    case CTF_K_TYPEDEF:
+	    case CTF_K_STRUCT:
+	    case CTF_K_UNION:
+	    case CTF_K_VAR:
+	      /* TODO: support addition and querying on CTF_K_FUNCTION too, chasing back
+		 to relevant CTF_K_FUNC_LINKAGEs.  */
+	    case CTF_K_FUNC_LINKAGE:
+	      break;
+	    default:
+	      return (ctf_set_typed_errno (fp, ECTF_BADID));
+	    }
+	}
+    }
+  else if (component_idx != -1)
+    {
+      ctf_id_t func_type = type;
+
+      /* Within-type declarations.  */
+
+      switch (ref_kind)
+	{
+	case CTF_K_STRUCT:
+	case CTF_K_UNION:
+
+	  if (component_idx >= ctf_member_count (fp, type))
+	    return (ctf_set_typed_errno (fp, ECTF_BADCOMPONENT));
+	  break;
+
+	case CTF_K_FUNC_LINKAGE:
+	  if ((func_type = ctf_type_reference (fp, type)) == CTF_ERR)
+	    return (ctf_set_typed_errno (fp, ECTF_BADID));
+	  /* FALLTHRU */
+
+	case CTF_K_FUNCTION:
+	  {
+	    ctf_funcinfo_t fi;
+
+	    if (ctf_func_type_info (fp, func_type, &fi) < 0)
+	      return -1;	/* errno is set for us.  */
+
+	    if ((size_t) component_idx >= fi.ctc_argc)
+	      return (ctf_set_typed_errno (fp, ECTF_BADCOMPONENT));
+
+	    break;
+	  }
+	default:
+	  return (ctf_set_typed_errno (fp, ECTF_BADCOMPONENT));
+	}
+    }
+
+  if (tag == NULL || tag[0] == '\0')
+    return (ctf_set_typed_errno (fp, ECTF_NONAME));
+
+  if ((dtd = ctf_add_generic (fp, flag, tag, kind, 0, vlen_size,
+			      0, NULL)) == NULL)
+    return CTF_ERR;		/* errno is set for us.  */
+
+  dtd->dtd_data->ctt_info = CTF_TYPE_INFO (kind, flag, 0);
+  dtd->dtd_data->ctt_type = (uint32_t) type;
+
+  if (is_decl)
+    {
+      ctf_decl_tag_t *vlen = (ctf_decl_tag_t *) dtd->dtd_vlen;
+      vlen->cdt_component_idx = component_idx;
+    }
+
+  return dtd->dtd_type;
+}
+
+/* Create a type tag.  */
+
+ctf_id_t
+ctf_add_type_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag)
+{
+  return ctf_add_tag (fp, flag, type, tag, 0, -1);
+}
+
+/* Create a decl tag applied to an entire type.  */
+
+ctf_id_t
+ctf_add_decl_type_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag)
+{
+  return ctf_add_tag (fp, flag, type, tag, 1, -1);
+}
+
+/* Create a decl tag applied to one element of a type.
+   component_idx must be >= 0.  */
+ctf_id_t
+ctf_add_decl_tag (ctf_dict_t *fp, uint32_t flag, ctf_id_t type, const char *tag,
+		  int component_idx)
+{
+  return ctf_add_tag (fp, flag, type, tag, 1, component_idx);
 }
 
 ctf_id_t
