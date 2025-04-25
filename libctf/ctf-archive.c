@@ -846,11 +846,31 @@ ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
 static int
 ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp, int *errp)
 {
-  if ((fp->ctf_flags & LCTF_CHILD) && fp->ctf_parname && !fp->ctf_parent)
+  if ((fp->ctf_flags & LCTF_CHILD) && !fp->ctf_parent)
     {
       int err = 0;
-      ctf_dict_t *parent = ctf_dict_open_cached ((ctf_archive_t *) arc,
-						 fp->ctf_parname, &err);
+      ctf_dict_t *parent;
+      const char *parent_name = fp->ctf_parent_name;
+
+      /* If no parent is set, and this is an archive, assume that the parent
+	 is the first dict in the archive, which matches what ctf_link
+	 produces.  UPTODO: add a dedicated header entry for parent
+	 name.  */
+
+      if (!parent_name && arc->ctfi_archive)
+	{
+	  struct ctf_archive_modent *modent;
+	  const char *nametbl;
+
+	  modent = (ctf_archive_modent_t *) ((char *) arc->ctfi_archive
+					     + sizeof (struct ctf_archive));
+
+	  nametbl = (((const char *) arc->ctfi_archive)
+		     + le64toh (arc->ctfi_archive->ctfa_names));
+	  parent_name = &nametbl[le64toh (modent[0].name_offset)];
+	}
+
+      parent = ctf_dict_open_cached ((ctf_archive_t *) arc, parent_name, &err);
       if (errp)
 	*errp = err;
 
