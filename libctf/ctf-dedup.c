@@ -128,6 +128,11 @@
     - all cycles in C depend on the presence of tagged structs/unions
     - all tagged structs/unions have a unique name they can be disambiguated by
 
+   Datasecs and vars are a special case.  We skip datasecs entirely, treat decl
+   tags into datasecs as if they pointed at the variable their decl cites, and
+   hash the name and datasec content that references a given variable into the
+   variable's hash, uniquifying variables and their datasec portion as one unit.
+
    [ctf_dedup_is_stub]
    This means that we can break all cycles by ceasing to hash in cited types at
    every tagged struct/union and instead hashing in a stub consisting of the
@@ -173,7 +178,9 @@
    this popularity contest: if their names are ambiguous, they are just
    duplicated, and only a forward appears in the shared dict.
 
-   [ctf_dedup_propagate_conflictedness]
+   Datasecs are again ignored, and so are tags: their names are always
+   nonconflicting.
+
    The process of marking types conflicted is itself recursive: we recursively
    traverse the cd_citers graph populated in the hashing pass above and mark
    everything that we encounter conflicted (without wasting time re-marking
@@ -230,6 +237,9 @@
    simply noting that the members of this structure need emission later on:
    because you cannot cite a single structure member from another type, we avoid
    emitting the members at this stage to keep recursion depths down a bit.
+
+   Variable emission naturally emits the relevant piece of the datasec as well,
+   in the appropriate dict.
 
    At this point, if we have by some mischance decided that two different types
    with child types that hash to different values have in fact got the same hash
@@ -446,9 +456,27 @@ ctf_decorate_type_name (ctf_dict_t *fp, const char *name, int kind)
       k = "e ";
       i = 2;
       break;
+
+    /* These decorated names have an underscore in because of an optimization in
+       a hot path in ctf_dedup_detect_name/ambiguity: all non-default C
+       namespaces contain only types that can have forwards to them
+       ("forwardable kinds"); so we check to see if the second character is a
+       space to see if the kind is forwardable.  The next two namespaces, being
+       non-C and more-or-less internal implementation details, indicate this
+       with a leading underscore. */
+
+    case CTF_K_TYPE_TAG:
+    case CTF_K_DECL_TAG:
+      k = "_t ";
+      i = 3;
+      break;
+    case CTF_K_DATASEC:
+      k = "_s ";
+      i = 4;
+      break;
     default:
       k = "";
-      i = 3;
+      i = 5;
     }
 
   if ((ret = ctf_dynhash_lookup (d->cd_decorated_names[i], name)) == NULL)
@@ -473,6 +501,45 @@ ctf_decorate_type_name (ctf_dict_t *fp, const char *name, int kind)
  oom:
   ctf_set_errno (fp, ENOMEM);
   return NULL;
+}
+
+/* Keep track of the variable -> datasec mappings for one datasec in one
+   input.  */
+
+static int
+ctf_dedup_track_var (ctf_dict_t *fp, ctf_dict_t *input, int input_num,
+		     ctf_id_t datasec)
+{
+  ctf_dedup_t *d = &fp->ctf_dedup;
+  ctf_next_t *it = NULL;
+  ctf_id_t var;
+  int component_idx = 0;
+
+  /* This is a hash of variable GID -> (datasec type ID, component_idx),
+     but since the types match we can abuse the GID machinery to
+     make it look like a hash of GID -> GID by tracking
+     (component_idx, datasec type ID).  */
+
+  while ((var = ctf_datasec_var_next (input, datasec, &it,
+				      NULL, NULL)) != CTF_ERR)
+    {
+      if (ctf_dynhash_cinsert (d->cd_var_datasec,
+			       CTF_DEDUP_GID (fp, input_num, var),
+			       CTF_DEDUP_GID (fp, component_idx++, datasec)) < 0)
+	{
+	  ctf_next_destroy (it);
+	  return ctf_set_errno (fp, errno);
+	}
+    }
+  if (ctf_errno (input) != ECTF_NEXT_END)
+    {
+      ctf_next_destroy (it);
+      ctf_err_warn (fp, 0, ctf_errno (input),
+		    _("iteration failure tracking datasec vars"));
+      return ctf_set_typed_errno (fp, ctf_errno (input));
+    }
+
+  return 0;
 }
 
 /* Hash a type, possibly debugging-dumping something about it as well.  */
@@ -584,6 +651,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
   const char *hval = NULL;
   const char *whaterr;
   int err = 0;
+  int64_t component_idx = -1;
 
   /* "citer" is for types that reference only one other type: "citers" can store
      many of them, but is more expensive to both populate and traverse.  */
@@ -604,6 +672,19 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	goto oom;							\
     }									\
   while (0)
+
+  /* We never directly hash datasecs.  Make sure of that, even if a corrupted
+     type graph has some type somehow point to one.  */
+
+  if (_libctf_unlikely_ (kind == CTF_K_DATASEC))
+    {
+      ctf_set_errno (fp, ECTF_CORRUPT);
+      ctf_err_warn (fp, 0, ECTF_CORRUPT, _("%s (%i): some type points to a datasec, "
+					   "during type hashing for type %lx, "
+					   "kind %i"), ctf_link_input_name (input),
+		    input_num, type, kind);
+      return NULL;
+    }
 
   /* We never directly hash prefix kinds.  */
 
@@ -1032,6 +1113,120 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  }
 	break;
       }
+    case CTF_K_VAR:
+      {
+	void *datasec;
+	ctf_id_t datasec_type;
+	int linkage;
+
+	/* Hash the linkage.  */
+	if ((linkage = ctf_type_linkage (input, type)) < 0)
+	  {
+	    whaterr = N_("error doing linkage determination during hashing");
+	    goto input_err;
+	  }
+
+	/* Promote extern to global, unifying them at emission time.  */
+
+	if (linkage == CTF_VAR_GLOBAL_EXTERN)
+	  linkage = CTF_VAR_GLOBAL_ALLOCATED;
+
+	ctf_dedup_sha1_add (&hash, &linkage, sizeof (linkage),
+			    "var linkage", depth);
+
+	child_type = ctf_type_reference (input, type);
+	if ((hval = ctf_dedup_hash_type (fp, input, inputs, input_num, child_type,
+					 flags, depth, populate_fun)) == NULL)
+	  {
+	    whaterr = N_("error doing referenced type hashing");
+	    goto err;
+	  }
+	ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "var type",
+			    depth);
+
+	citer = hval;
+
+	/* Hash the datasec info, if any (if none, use all zeroes).  The "input"
+	   here is the component_idx.  */
+
+	if (ctf_dynhash_lookup_kv (d->cd_var_datasec,
+				   CTF_DEDUP_GID (fp, input_num, type), NULL,
+				   &datasec))
+	  {
+	    int component_idx;
+	    const char *datasec_name;
+	    ctf_var_secinfo_t *entry;
+	    ctf_sha1_t stub_hash;
+	    const char *stub_hval;
+
+	    /* We want to note the "stub hash" of purely the non-datasec part
+	       that is shared with extern vars, and note that if this variable
+	       is global allocated (non-static, non-extern), and such a hash is
+	       seen, it is to be treated as equivalent to this variable's
+	       hash.  */
+
+	    stub_hash = hash;
+	    ctf_sha1_fini (&stub_hash, hashbuf);
+
+	    if ((stub_hval = intern (fp, strdup (hashbuf))) == NULL)
+	      {
+		whaterr = N_("cannot intern var stub hash");
+		goto oom;
+	      }
+
+	    datasec_type = CTF_DEDUP_GID_TO_TYPE (datasec);
+	    component_idx = CTF_DEDUP_GID_TO_INPUT (datasec);
+
+	    if (((datasec_name = ctf_type_name_raw (input, datasec_type)) == NULL)
+		|| (datasec_name = ctf_decorate_type_name (fp, datasec_name,
+							   CTF_K_DATASEC)) == NULL)
+	      {
+		whaterr = N_("error getting datasec name during dedup");
+		goto err;
+	      }
+	    ctf_dedup_sha1_add (&hash, datasec_name, strlen (datasec_name) + 1,
+				"var datasec name", depth);
+
+	    if ((entry = ctf_datasec_entry (input, datasec_type,
+					    component_idx)) == NULL)
+	      {
+		whaterr = N_("datasec component_idx out of range during dedup");
+		goto err;
+	      }
+
+	    ctf_dedup_sha1_add (&hash, &entry->cvs_offset,
+				sizeof (entry->cvs_offset), "datasec offset", depth);
+	    ctf_dedup_sha1_add (&hash, &entry->cvs_size,
+				sizeof (entry->cvs_size), "datasec size", depth);
+
+	    if (ctf_type_linkage (input, type) == CTF_VAR_GLOBAL_ALLOCATED)
+	      {
+		ctf_sha1_t final_hash;
+		const char *final_hval;
+
+		final_hash = hash;
+		ctf_sha1_fini (&final_hash, hashbuf);
+
+		if ((final_hval = intern (fp, strdup (hashbuf))) == NULL)
+		  {
+		    whaterr = N_("cannot intern var final hash");
+		    goto oom;
+		  }
+
+		if (ctf_dynhash_cinsert (d->cd_replacing_hashes, stub_hval,
+					 final_hval) < 0)
+		  {
+		    whaterr = N_("cannot intern var replacing hash");
+		    goto oom;
+		  }
+	      }
+	  }
+
+	break;
+      }
+    case CTF_K_DATASEC:
+      whaterr = N_("error: attempt to hash datasec");
+      goto err;
     default:
       whaterr = N_("error: unknown type kind");
       goto err;
@@ -1734,38 +1929,63 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 	     that this type is conflicting.  TODO: improve this in future by
 	     setting such forwards non-root-visible.)
 
-	     If multiple distinct types are "most common", pick the one that
-	     appears first on the link line, and within that, the one with the
-	     lowest type ID.  (See sort_output_mapping.)  */
+	     If multiple distinct types are "most common" (common for things
+	     like variables that cannot be pointed to by other types), pick the
+	     one that appears first on the link line, and within that, the one
+	     with the lowest type ID.  (See sort_output_mapping.)  */
 
 	  const void *key;
-	  const void *count;
+	  const void *count_;
 	  const char *hval;
 	  long max_hcount = -1;
 	  void *max_gid = NULL;
 	  const char *max_hval = NULL;
+	  const void *replaced_hval = NULL;
 
 	  if (ctf_dynhash_elements (name_counts) <= 1)
 	    continue;
 
 	  /* First find the most common.  */
-	  while ((err = ctf_dynhash_cnext (name_counts, &j, &key, &count)) == 0)
+	  while ((err = ctf_dynhash_cnext (name_counts, &j, &key, &count_)) == 0)
 	    {
+	      const void *replacing_key;
+	      void *replacing_count;
+	      long int count = (long int) (uintptr_t) count_;
+
 	      hval = (const char *) key;
 
-	      if ((long int) (uintptr_t) count > max_hcount)
+	      /* Consider replaced hashes' counts to be part of their replacees.
+		 All such things necessarily have the same name.  */
+
+	      if ((replacing_key = ctf_dynhash_lookup (d->cd_replacing_hashes,
+						       hval)) != NULL)
 		{
-		  max_hcount = (long int) (uintptr_t) count;
-		  max_hval = hval;
+		  if (ctf_dynhash_lookup_kv (name_counts, replacing_key,
+					     NULL, &replacing_count))
+		    count += (long int) (uintptr_t) replacing_count;
+		}
+
+	      if (count > max_hcount)
+		{
+		  max_hcount = count;
+		  if (replacing_key)
+		    {
+		      max_hval = (const char *) replacing_key;
+		      replaced_hval = hval;
+		      hval = max_hval;
+		    }
+		  else
+		    max_hval = hval;
+
 		  max_gid = ctf_dynhash_lookup (d->cd_output_first_gid, hval);
 		}
-	      else if ((long int) (uintptr_t) count == max_hcount)
+	      else if (count == max_hcount)
 		{
 		  void *gid = ctf_dynhash_lookup (d->cd_output_first_gid, hval);
 
-		  if (CTF_DEDUP_GID_TO_INPUT(gid) < CTF_DEDUP_GID_TO_INPUT(max_gid)
-		      || (CTF_DEDUP_GID_TO_INPUT(gid) == CTF_DEDUP_GID_TO_INPUT(max_gid)
-			  && CTF_DEDUP_GID_TO_TYPE(gid) < CTF_DEDUP_GID_TO_TYPE(max_gid)))
+		  if (CTF_DEDUP_GID_TO_INPUT (gid) < CTF_DEDUP_GID_TO_INPUT (max_gid)
+		      || (CTF_DEDUP_GID_TO_INPUT (gid) == CTF_DEDUP_GID_TO_INPUT (max_gid)
+			  && CTF_DEDUP_GID_TO_TYPE (gid) < CTF_DEDUP_GID_TO_TYPE (max_gid)))
 		    {
 		      max_hval = hval;
 		      max_gid = ctf_dynhash_lookup (d->cd_output_first_gid, hval);
@@ -1782,7 +2002,11 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 	  while ((err = ctf_dynhash_cnext (name_counts, &j, &key, NULL)) == 0)
 	    {
 	      hval = (const char *) key;
+
 	      if (strcmp (max_hval, hval) == 0)
+		continue;
+
+	      if (replaced_hval && strcmp (replaced_hval, hval) == 0)
 		continue;
 
 	      ctf_dprintf ("Marking %s, an uncommon hash for %s, conflicting\n",
@@ -1840,7 +2064,7 @@ ctf_dedup_init (ctf_dict_t *fp)
     goto oom;
 #endif
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 6; i++)
     {
       if ((d->cd_decorated_names[i] = ctf_dynhash_create (ctf_hash_string,
 							  ctf_hash_eq_string,
@@ -1866,7 +2090,19 @@ ctf_dedup_init (ctf_dict_t *fp)
 			     NULL, NULL)) == NULL)
     goto oom;
 
+  if ((d->cd_var_datasec
+       = ctf_dynhash_create (ctf_hash_integer,
+			     ctf_hash_eq_integer,
+			     NULL, NULL)) == NULL)
+    goto oom;
+
   if ((d->cd_linkages
+       = ctf_dynhash_create (ctf_hash_string,
+			     ctf_hash_eq_string,
+			     NULL, NULL)) == NULL)
+    goto oom;
+
+  if ((d->cd_replacing_hashes
        = ctf_dynhash_create (ctf_hash_string,
 			     ctf_hash_eq_string,
 			     NULL, NULL)) == NULL)
@@ -1940,12 +2176,14 @@ ctf_dedup_fini (ctf_dict_t *fp, ctf_dict_t **outputs, uint32_t noutputs)
 #if IDS_NEED_ALLOCATION
   ctf_dynhash_destroy (d->cd_id_to_dict_t);
 #endif
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < 6; i++)
     ctf_dynhash_destroy (d->cd_decorated_names[i]);
   ctf_dynhash_destroy (d->cd_name_counts);
   ctf_dynhash_destroy (d->cd_type_hashes);
   ctf_dynhash_destroy (d->cd_struct_origin);
   ctf_dynhash_destroy (d->cd_linkages);
+  ctf_dynhash_destroy (d->cd_replacing_hashes);
+  ctf_dynhash_destroy (d->cd_var_datasec);
   ctf_dynhash_destroy (d->cd_citers);
   ctf_dynhash_destroy (d->cd_output_mapping);
   ctf_dynhash_destroy (d->cd_output_first_gid);
@@ -2184,15 +2422,46 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
     {
       ctf_id_t id;
 
-      while ((id = ctf_type_next (inputs[i], &it, NULL, 1)) != CTF_ERR)
+      /* First, populate the variable -> datasec mappings.  We do this first so
+	 that we do not depend on any particular ordering between datasecs and
+	 the variables they contain.  */
+
+      while ((id = ctf_type_kind_next (inputs[i], &it, CTF_K_DATASEC)) != CTF_ERR)
 	{
-	  if (ctf_dedup_hash_type (output, inputs[i], inputs,
-				   i, id, 0, 0,
-				   ctf_dedup_populate_mappings) == NULL)
-	    goto err;				/* errno is set for us.  */
+	  if (ctf_dedup_track_var (output, inputs[i], i, id) < 0)
+	    {
+	      ctf_next_destroy (it);
+	      goto err;
+	    }
 	}
       if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
 	{
+	  ctf_next_destroy (it);
+	  ctf_set_errno (output, ctf_errno (inputs[i]));
+	  ctf_err_warn (output, 0, 0, _("iteration failure "
+					"tracking datasec membership"));
+	  goto err;
+	}
+
+      /* Now hash the types.  */
+      while ((id = ctf_type_next (inputs[i], &it, NULL, 1)) != CTF_ERR)
+	{
+	  /* Skip datasecs (handled above).  */
+
+	  if (ctf_type_kind_unsliced (inputs[i], id) == CTF_K_DATASEC)
+	    continue;
+
+	  if (ctf_dedup_hash_type (output, inputs[i], inputs,
+				   i, id, 0, 0,
+				   ctf_dedup_populate_mappings) == NULL)
+	    {
+	      ctf_next_destroy (it);
+	      goto err;				/* errno is set for us.  */
+	    }
+	}
+      if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
+	{
+	  ctf_next_destroy (it);
 	  ctf_set_errno (output, ctf_errno (inputs[i]));
 	  ctf_err_warn (output, 0, 0, _("iteration failure "
 					"computing type hashes"));
@@ -2353,6 +2622,7 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
     case CTF_K_POINTER:
     case CTF_K_SLICE:
     case CTF_K_FUNC_LINKAGE:
+    case CTF_K_VAR:
       CTF_TYPE_WALK (ctf_type_reference (fp, type), err,
 		     N_("error during referenced type walk"));
       break;
@@ -2417,6 +2687,11 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
       /* We do not recursively traverse the members of structures: they are
 	 emitted later, in a separate pass.  */
 	break;
+    case CTF_K_DATASEC:
+    case CTF_K_CONFLICTING:
+    case CTF_K_BIG:
+      whaterr = N_("CTF dict corruption: attempt to directly emit prefix type kind or datasec");
+      goto err_msg;
     default:
       whaterr = N_("CTF dict corruption: unknown type kind");
       goto err_msg;
@@ -3317,6 +3592,77 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	  }
 	break;
       }
+    case CTF_K_VAR:
+      {
+	void *datasec;
+	ctf_id_t datasec_type;
+	int64_t component_idx;
+	const char *datasec_name = NULL;
+	ctf_var_secinfo_t null_entry = { 0, 0, 0 };
+	ctf_var_secinfo_t *entry = &null_entry;
+
+	errtype = _("variable");
+
+	/* Don't try to emit variables that have been replaced.  We will emit
+	   the replacing variable instead.  */
+
+	if (ctf_dynhash_lookup (d->cd_replacing_hashes, hval))
+	  {
+	    new_type = 0;
+	    break;
+	  }
+
+	if ((linkage = ctf_dedup_best_linkage (output, input, type, hval)) < 0)
+	  goto err_input;
+
+	/* Dig out the relevant bit of datasec info for this variable, if
+	   any.  */
+
+	if (ctf_dynhash_lookup_kv (d->cd_var_datasec, id, NULL, &datasec))
+	  {
+	    datasec_type = CTF_DEDUP_GID_TO_TYPE (datasec);
+	    component_idx = CTF_DEDUP_GID_TO_INPUT (datasec);
+
+	    if ((datasec_name = ctf_type_name_raw (input, datasec_type)) == NULL)
+	      goto err_input;
+
+	    if ((entry = ctf_datasec_entry (input, datasec_type,
+					    component_idx)) == NULL)
+	      goto err_input;
+	  }
+
+	ref = ctf_type_reference (input, type);
+	if ((ref = ctf_dedup_id_to_target (output, target, inputs, ninputs,
+					   parents, input, input_num,
+					   ref)) == CTF_ERR)
+	  goto err_input;			/* errno is set for us.  */
+
+	if ((new_type = ctf_add_section_variable (target, isroot, datasec_name,
+						  name, linkage, ref,
+						  entry->cvs_size,
+						  entry->cvs_offset)) == CTF_ERR)
+	  goto err_target;			/* errno is set for us.  */
+
+	break;
+      }
+
+    /* If datasecs appear in the output mapping, something is wrong.  */
+    case CTF_K_DATASEC:
+      ctf_err_warn (output, 0, ECTF_INTERNAL,
+		    _("%s: unexpected datasec in output mapping for input "
+		      "type %lx"),
+		    ctf_link_input_name (input), type);
+      return ctf_set_errno (output, ECTF_INTERNAL);
+
+      /* Prefix types even more so.  */
+    case CTF_K_BIG:
+    case CTF_K_CONFLICTING:
+      ctf_err_warn (output, 0, ECTF_INTERNAL,
+		    _("%s: attempt to directly emit prefix type in output "
+		      "mapping for input type %lx"),
+		    ctf_link_input_name (input), type);
+      return ctf_set_errno (output, ECTF_INTERNAL);
+
     default:
       ctf_err_warn (output, 0, ECTF_CORRUPT,
 		    _("%s: unknown type kind for input type %lx"),

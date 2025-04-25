@@ -289,8 +289,9 @@ typedef struct ctf_dedup
   /* Atoms tables of decorated names: maps undecorated name to decorated name.
      (The actual allocations are in the CTF dict for the former and the real
      atoms table for the latter).  Uses the same namespaces as ctf_lookups,
-     below, but has no need for null-termination.  */
-  ctf_dynhash_t *cd_decorated_names[4];
+     below, with the addition of type and decl tags, and with no need for
+     null-termination.  */
+  ctf_dynhash_t *cd_decorated_names[6];
 
   /* Map type names to a hash from type hash value -> number of times each value
      has appeared.  Enumeration constants are tracked via the enum they appear
@@ -312,10 +313,20 @@ typedef struct ctf_dedup
      can be cited from multiple TUs.  Only populated in that link mode.  */
   ctf_dynhash_t *cd_struct_origin;
 
+  /* Maps from the GID of variables on the input to a (type ID, component_idx)
+     pair identifying the corresponding datasec row.  */
+  ctf_dynhash_t *cd_var_datasec;
+
   /* Maps the type hash values of things with linkages (vars, functions) to the
      intended final linkage of that type, accumulated from all types with that
      ID across all inputs (so far).  Subject to hash replacement (see below).  */
   ctf_dynhash_t *cd_linkages;
+
+  /* Maps from the type hash values of hashes that should be considered
+     "replaced" with the hash values that replace them.  Used to merge types
+     together at conflict-marking and emission time.  Only works for some type
+     kinds: right now, CTF_K_VAR.  */
+  ctf_dynhash_t *cd_replacing_hashes;
 
   /* Maps type hash values to a set of hash values of the types that cite them:
      i.e., pointing backwards up the type graph.  Used for recursive conflict
