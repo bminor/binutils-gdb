@@ -76,7 +76,7 @@ typedef struct emit_symtypetab_state
    updated later on to change the type ID recorded in this location.  The ref
    may not be emitted if the value is already known and cannot change.
 
-   All refs must point within the ctf_serializing_buf.  */
+   All refs must point within the ctf_serialize.cs_buf.  */
 
 static int
 ctf_type_add_ref (ctf_dict_t *fp, uint32_t *ref)
@@ -92,9 +92,9 @@ ctf_type_add_ref (ctf_dict_t *fp, uint32_t *ref)
   if (!ctf_assert (fp, dtd))
     return 0;
 
-  if (!ctf_assert (fp, fp->ctf_serializing_buf != NULL
-		   && (unsigned char *) ref > fp->ctf_serializing_buf
-		   && (unsigned char *) ref < fp->ctf_serializing_buf + fp->ctf_serializing_buf_size))
+  if (!ctf_assert (fp, fp->ctf_serialize.cs_buf != NULL
+		   && (unsigned char *) ref > fp->ctf_serialize.cs_buf
+		   && (unsigned char *) ref < fp->ctf_serialize.cs_buf + fp->ctf_serialize.cs_buf_size))
     return -1;
 
   /* Simple case: final ID different from what is recorded, but already known.
@@ -1023,14 +1023,19 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 
 /* Overall serialization.  */
 
-/* Do all aspects of serialization up to strtab writeout and variable table
-   sorting, including final type ID assignment.  The resulting dict will have
-   the LCTF_PRESERIALIZED flag on and must not be modified in any way before
-   serialization.  (This is only lightly enforced, as this feature is internal-
-   only, employed by the linker machinery.)  */
 
 int
-ctf_preserialize (ctf_dict_t *fp)
+/* Do all aspects of serialization up to strtab writeout, including final type
+   ID assignment.  The resulting dict will have the LCTF_PRESERIALIZED flag on
+   and must not be modified in any way before serialization.  (This is only
+   lightly enforced, as this feature is internal-only, employed by the linker
+   machinery.)
+
+   If FORCE_CTF is enabled, always emit CTF in LIBCTF_BTM_POSSIBLE mode, and
+   error in LIBCTF_BTM_BTF mode.  */
+
+int
+ctf_preserialize (ctf_dict_t *fp, int force_ctf)
 {
   ctf_header_t hdr, *hdrp;
   ctf_dvdef_t *dvd;
@@ -1188,8 +1193,8 @@ ctf_preserialize (ctf_dict_t *fp)
   if ((buf = malloc (buf_size)) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
-  fp->ctf_serializing_buf = buf;
-  fp->ctf_serializing_buf_size = buf_size;
+  fp->ctf_serialize.cs_buf = buf;
+  fp->ctf_serialize.cs_buf_size = buf_size;
 
   memcpy (buf, &hdr, sizeof (ctf_header_t));
   t = (unsigned char *) buf + sizeof (ctf_header_t) + hdr.cth_objtoff;
@@ -1259,8 +1264,9 @@ ctf_preserialize (ctf_dict_t *fp)
   return 0;
 
  err:
-  fp->ctf_serializing_buf = NULL;
-  fp->ctf_serializing_buf_size = 0;
+  fp->ctf_serialize.cs_initialized = 0;
+  fp->ctf_serialize.cs_buf = NULL;
+  fp->ctf_serialize.cs_buf_size = 0;
 
   free (buf);
   ctf_str_purge_refs (fp);
@@ -1276,11 +1282,10 @@ ctf_depreserialize (ctf_dict_t *fp)
   ctf_str_purge_refs (fp);
   ctf_type_purge_refs (fp);
 
-  free (fp->ctf_serializing_buf);
-  fp->ctf_serializing_buf = NULL;
-  fp->ctf_serializing_vars = NULL;
-  fp->ctf_serializing_buf_size = 0;
-  fp->ctf_serializing_nvars = 0;
+  fp->ctf_serialize.cs_initialized = 0;
+  free (fp->ctf_serialize.cs_buf);
+  fp->ctf_serialize.cs_buf = NULL;
+  fp->ctf_serialize.cs_buf_size = 0;
 
   fp->ctf_flags &= ~(LCTF_NO_STR | LCTF_NO_TYPE);
 }
@@ -1295,11 +1300,11 @@ ctf_depreserialize (ctf_dict_t *fp)
    on visible operation).  */
 
 static unsigned char *
-ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
+ctf_serialize (ctf_dict_t *fp, size_t *bufsiz, int force_ctf)
 {
   const ctf_strs_writable_t *strtab;
   unsigned char *buf, *newbuf;
-  ctf_header_t *hdrp;
+  ctf_btf_header_t *hdrp;
 
   /* Stop unstable file formats (subject to change) getting out into the
      wild.  */
@@ -1314,13 +1319,11 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
 
   /* Preserialize, if we need to.  */
 
-  if (!fp->ctf_serializing_buf)
-    if (ctf_preserialize (fp) < 0)
+  if (!fp->ctf_serialize.cs_buf)
+    if (ctf_preserialize (fp, force_ctf) < 0)
       return NULL;				/* errno is set for us.  */
 
-  /* UPTODO: prevent writing of BTF dicts when upgrading from CTFv3.  */
-
-  /* Allow string lookup again, now we need it to sort the vartab.  */
+  /* Allow string lookup again.  */
   fp->ctf_flags &= ~LCTF_NO_STR;
 
   /* Construct the final string table and fill out all the string refs with the
@@ -1333,33 +1336,38 @@ ctf_serialize (ctf_dict_t *fp, size_t *bufsiz)
   if ((fp->ctf_flags & LCTF_LINKING) && fp->ctf_parent)
     fp->ctf_header->cth_parent_strlen = fp->ctf_parent->ctf_str[CTF_STRTAB_0].cts_len;
 
-  hdrp = (ctf_header_t *) fp->ctf_serializing_buf;
-
   ctf_dprintf ("Writing strtab for %s\n", ctf_cuname (fp));
   strtab = ctf_str_write_strtab (fp);
 
   if (strtab == NULL)
     goto err;
 
-  if ((newbuf = realloc (fp->ctf_serializing_buf, fp->ctf_serializing_buf_size
+  if ((newbuf = realloc (fp->ctf_serialize.cs_buf, fp->ctf_serialize.cs_buf_size
 			 + strtab->cts_len)) == NULL)
     goto oom;
 
-  fp->ctf_serializing_buf = newbuf;
-  memcpy (fp->ctf_serializing_buf + fp->ctf_serializing_buf_size, strtab->cts_strs,
+  fp->ctf_serialize.cs_buf = newbuf;
+  memcpy (fp->ctf_serialize.cs_buf + fp->ctf_serialize.cs_buf_size, strtab->cts_strs,
 	  strtab->cts_len);
-  hdrp = (ctf_header_t *) fp->ctf_serializing_buf;
-  hdrp->cth_strlen = strtab->cts_len;
-  hdrp->cth_parent_strlen = fp->ctf_header->cth_parent_strlen;
-  fp->ctf_serializing_buf_size += hdrp->cth_strlen;
-  *bufsiz = fp->ctf_serializing_buf_size;
 
-  buf = fp->ctf_serializing_buf;
+  hdrp = (ctf_btf_header_t *) fp->ctf_serialize.cs_buf;
+  hdrp->bth_str_len = strtab->cts_len;
+  fp->ctf_serialize.cs_buf_size += hdrp->bth_str_len;
 
-  fp->ctf_serializing_buf = NULL;
-  fp->ctf_serializing_vars = NULL;
-  fp->ctf_serializing_buf_size = 0;
-  fp->ctf_serializing_nvars = 0;
+  if (!fp->ctf_serialize.cs_is_btf)
+    {
+      ctf_header_t *ctf_hdrp;
+
+      ctf_hdrp = (ctf_header_t *) (void *) hdrp;
+      ctf_hdrp->cth_parent_strlen = fp->ctf_header->cth_parent_strlen;
+    }
+
+  *bufsiz = fp->ctf_serialize.cs_buf_size;
+
+  buf = fp->ctf_serialize.cs_buf;
+
+  fp->ctf_serialize.cs_buf = NULL;
+  fp->ctf_serialize.cs_buf_size = 0;
   fp->ctf_flags &= ~LCTF_NO_TYPE;
 
   return buf;
@@ -1379,7 +1387,7 @@ err:
    the header uncompressed, and the CTF opening functions work on them without
    manual decompression.)
 
-   No support for (testing-only) endian-flipping.  */
+   No support for (testing-only) endian-flipping or pure BTF writing.  */
 int
 ctf_gzwrite (ctf_dict_t *fp, gzFile fd)
 {
@@ -1388,7 +1396,7 @@ ctf_gzwrite (ctf_dict_t *fp, gzFile fd)
   size_t bufsiz;
   size_t len, written = 0;
 
-  if ((buf = ctf_serialize (fp, &bufsiz)) == NULL)
+  if ((buf = ctf_serialize (fp, &bufsiz, 1)) == NULL)
     return -1;					/* errno is set for us.  */
 
   p = buf;
@@ -1420,26 +1428,33 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
   unsigned char *src;
   size_t rawbufsiz;
   size_t alloc_len = 0;
+  size_t hdrlen;
   int uncompressed = 0;
   int flip_endian;
   int rc;
 
   flip_endian = getenv ("LIBCTF_WRITE_FOREIGN_ENDIAN") != NULL;
 
-  if ((rawbuf = ctf_serialize (fp, &rawbufsiz)) == NULL)
+  if ((rawbuf = ctf_serialize (fp, &rawbufsiz,
+			       threshold != (size_t) -1)) == NULL)
     return NULL;				/* errno is set for us.  */
 
-  if (!ctf_assert (fp, rawbufsiz >= sizeof (ctf_header_t)))
+  if (fp->ctf_serialize.cs_is_btf)
+    hdrlen = sizeof (ctf_btf_header_t);
+  else
+    hdrlen = sizeof (ctf_header_t);
+
+  if (!ctf_assert (fp, rawbufsiz >= hdrlen))
     goto err;
 
-  if (rawbufsiz >= threshold)
+  if (rawbufsiz >= threshold && !fp->ctf_serialize.cs_is_btf)
     alloc_len = compressBound (rawbufsiz - sizeof (ctf_header_t))
       + sizeof (ctf_header_t);
 
   /* Trivial operation if the buffer is too small to bother compressing, and
      we're not doing a forced write-time flip.  */
 
-  if (rawbufsiz < threshold)
+  if (rawbufsiz < threshold || fp->ctf_serialize.cs_is_btf)
     {
       alloc_len = rawbufsiz;
       uncompressed = 1;
@@ -1461,28 +1476,31 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
 
   rawhp = (ctf_header_t *) rawbuf;
   hp = (ctf_header_t *) buf;
-  memcpy (hp, rawbuf, sizeof (ctf_header_t));
-  bp = buf + sizeof (ctf_header_t);
-  *size = sizeof (ctf_header_t);
 
-  if (!uncompressed)
+  memcpy (hp, rawbuf, hdrlen);
+  bp = buf + hdrlen;
+  *size = hdrlen;
+
+  if (!uncompressed && !fp->ctf_serialize.cs_is_btf)
     hp->cth_flags |= CTF_F_COMPRESS;
 
-  src = rawbuf + sizeof (ctf_header_t);
+  src = rawbuf + hdrlen;
 
   if (flip_endian)
     {
-      ctf_flip_header (hp);
-      if (ctf_flip (fp, rawhp, src, 1) < 0)
+      if (ctf_flip_header (hp, fp->ctf_serialize.cs_is_btf, 0) < 0)
+	goto err;				/* errno is set for us.  */
+      if (ctf_flip (fp, rawhp, src, fp->ctf_serialize.cs_is_btf, 1) < 0)
 	goto err;				/* errno is set for us.  */
     }
 
+  /* Must be CTFv4.  */
   if (!uncompressed)
     {
       size_t compress_len = alloc_len - sizeof (ctf_header_t);
 
       if ((rc = compress (bp, (uLongf *) &compress_len,
-			  src, rawbufsiz - sizeof (ctf_header_t))) != Z_OK)
+			  src, rawbufsiz - hdrlen)) != Z_OK)
 	{
 	  ctf_set_errno (fp, ECTF_COMPRESS);
 	  ctf_err_warn (fp, 0, 0, _("zlib deflate err: %s"), zError (rc));
@@ -1492,8 +1510,8 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
     }
   else
     {
-      memcpy (bp, src, rawbufsiz - sizeof (ctf_header_t));
-      *size += rawbufsiz - sizeof (ctf_header_t);
+      memcpy (bp, src, rawbufsiz - hdrlen);
+      *size += rawbufsiz - hdrlen;
     }
 
   free (rawbuf);

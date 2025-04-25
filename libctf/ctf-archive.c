@@ -61,7 +61,8 @@ static ctf_dict_t enosym;
    Updates the first dict in the archive with the errno value.  */
 
 static int
-ctf_arc_preserialize (ctf_dict_t **ctf_dicts, ssize_t ctf_dict_cnt)
+ctf_arc_preserialize (ctf_dict_t **ctf_dicts, ssize_t ctf_dict_cnt,
+		      size_t threshold)
 {
   uint64_t old_parent_strlen, all_strlens = 0;
   ssize_t i;
@@ -72,7 +73,8 @@ ctf_arc_preserialize (ctf_dict_t **ctf_dicts, ssize_t ctf_dict_cnt)
   /* Preserialize everything, doing everything but strtab generation and things
      that depend on that.  */
   for (i = 0; i < ctf_dict_cnt; i++)
-    if (ctf_preserialize (ctf_dicts[i]) < 0)
+    if (ctf_preserialize (ctf_dicts[i], threshold != (size_t) -1
+			  || ctf_dict_cnt > 1) < 0)
       goto err;
 
   ctf_dprintf ("Deduplicating strings.\n");
@@ -134,7 +136,7 @@ ctf_arc_write_fd (int fd, ctf_dict_t **ctf_dicts, size_t ctf_dict_cnt,
   /* Prepare by serializing everything.  Done first because it allocates a lot
      of space and thus is more likely to fail.  */
   if (ctf_dict_cnt > 0 &&
-      (err = ctf_arc_preserialize (ctf_dicts, ctf_dict_cnt)) < 0)
+      (err = ctf_arc_preserialize (ctf_dicts, ctf_dict_cnt, threshold)) < 0)
     return err;
 
   ctf_dprintf ("Writing CTF archive with %lu files\n",

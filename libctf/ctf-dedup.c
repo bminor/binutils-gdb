@@ -3322,6 +3322,9 @@ ctf_dedup_strings (ctf_dict_t *fp)
   ctf_next_t *i = NULL;
   void *dict;
 
+  if (!fp->ctf_serialize.cs_initialized)
+    return ctf_set_errno (fp, ECTF_NOTSERIALIZED);
+
   str_counts = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 				   NULL, NULL);
   if (!str_counts)

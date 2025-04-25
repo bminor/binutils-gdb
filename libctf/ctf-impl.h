@@ -365,6 +365,19 @@ typedef struct ctf_dedup
   ctf_dict_t *cd_output;
 } ctf_dedup_t;
 
+/* Serializer state.
+
+   This connects the various stages of serialization (ctf_link_output_is_btf,
+   ctf_preserialize, ctf_serialize).  */
+
+typedef struct ctf_serialize
+{
+  int cs_initialized;		/* If 0, needs reinitialization.  */
+  unsigned char *cs_buf;	/* CTF buffer in mid-serialization.  */
+  size_t cs_buf_size;		/* Length of that buffer.  */
+  int cs_is_btf;
+} ctf_serialize_t;
+
 /* The ctf_dict is the structure used to represent a CTF dictionary to library
    clients, who see it only as an opaque pointer.  Modifications can therefore
    be made freely to this structure without regard to client versioning.  The
@@ -411,9 +424,7 @@ struct ctf_dict
   unsigned char *ctf_buf;	  /* Uncompressed CTF data buffer, including
 				     CTFv4 header portion.  */
   size_t ctf_size;		  /* Size of CTF header + uncompressed data.  */
-  unsigned char *ctf_serializing_buf; /* CTF buffer in mid-serialization.  */
-  size_t ctf_serializing_buf_size; /* Length of that buffer.  */
-  size_t ctf_serializing_nvars;	  /* Number of those vars.  */
+  ctf_serialize_t ctf_serialize;  /* State internal to ctf-serialize.c.  */
   uint32_t *ctf_sxlate;		  /* Translation table for unindexed symtypetab
 				     entries.  */
   unsigned long ctf_nsyms;	  /* Number of entries in symtab xlate table.  */
@@ -792,7 +803,7 @@ extern void ctf_str_purge_refs (ctf_dict_t *fp);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);
 extern const ctf_strs_writable_t *ctf_str_write_strtab (ctf_dict_t *);
 
-extern int ctf_preserialize (ctf_dict_t *fp);
+extern int ctf_preserialize (ctf_dict_t *fp, int force_ctf);
 extern void ctf_depreserialize (ctf_dict_t *fp);
 
 extern struct ctf_archive_internal *

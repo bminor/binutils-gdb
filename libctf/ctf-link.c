@@ -1438,6 +1438,8 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
 	err = iter_arg.err;
     }
 
+  fp->ctf_serialize.cs_initialized = 0;
+
   if (err)
     ctf_set_errno (fp, err);
 
@@ -1601,6 +1603,9 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
       ctf_err_warn (fp, 0, err, _("error iterating over shuffled symbols"));
       goto err;
     }
+
+  fp->ctf_serialize.cs_initialized = 0;
+
   return 0;
 
  err:

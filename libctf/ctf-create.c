@@ -962,6 +962,8 @@ ctf_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
 				    dtd->dtd_vlen_size < 65536
 				    ? dtd->dtd_vlen_size : 0);
 
+  fp->ctf_serialize.cs_initialized = 0;
+
   return 0;
 }
 
@@ -1843,6 +1845,8 @@ ctf_add_member_bitfield (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 
   dtd->dtd_last_offset += bit_offset;
 
+  fp->ctf_serialize.cs_initialized = 0;
+
   return 0;
 }
 
@@ -2127,6 +2131,8 @@ ctf_add_funcobjt_sym (ctf_dict_t *fp, int is_function, const char *name, ctf_id_
 {
   if (ctf_lookup_by_sym_or_name (fp, 0, name, 0, is_function) != CTF_ERR)
     return (ctf_set_errno (fp, ECTF_DUPLICATE));
+
+  fp->ctf_serialize.cs_initialized = 0;
 
   return ctf_add_funcobjt_sym_forced (fp, is_function, name, id);
 }
