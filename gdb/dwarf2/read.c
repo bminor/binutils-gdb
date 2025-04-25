@@ -13634,7 +13634,6 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *type;
   struct attribute *attr;
   ULONGEST encoding = 0;
-  int bits = 0;
   const char *name;
 
   attr = dwarf2_attr (die, DW_AT_encoding, cu);
@@ -13644,9 +13643,33 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       if (value.has_value ())
 	encoding = *value;
     }
+
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
+  std::optional<ULONGEST> byte_size;
   if (attr != nullptr)
-    bits = attr->unsigned_constant ().value_or (0) * TARGET_CHAR_BIT;
+    byte_size = attr->unsigned_constant ();
+  attr = dwarf2_attr (die, DW_AT_bit_size, cu);
+  std::optional<ULONGEST> bit_size;
+  if (attr != nullptr)
+    bit_size = attr->unsigned_constant ();
+
+  attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
+  std::optional<ULONGEST> bit_offset;
+  if (attr != nullptr)
+    bit_offset = attr->unsigned_constant ();
+
+  int bits = 0;
+  if (byte_size.has_value ())
+    bits = TARGET_CHAR_BIT * *byte_size;
+  else if (bit_size.has_value ())
+    bits = align_up (*bit_size, 8);
+  else
+    {
+      /* No size, so arrange for an error type.  */
+      complaint (_("DW_TAG_base_type has neither bit- nor byte-size"));
+      encoding = (ULONGEST) -1;
+    }
+
   name = dwarf2_full_name (nullptr, die, cu);
   if (!name)
     complaint (_("DW_AT_name missing from DW_TAG_base_type"));
@@ -13792,35 +13815,21 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 
   type->set_endianity_is_not_default (not_default);
 
-  if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_INT)
+  /* If both a byte size and bit size were provided, then that means
+     that not every bit in the object contributes to the value.  */
+  if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_INT
+      && byte_size.has_value ()
+      && bit_size.has_value ())
     {
-      attr = dwarf2_attr (die, DW_AT_bit_size, cu);
-      if (attr != nullptr && attr->form_is_constant ())
+      /* DWARF says: If this attribute is omitted a default data bit
+	 offset of zero is assumed.  */
+      ULONGEST offset = bit_offset.value_or (0);
+
+      /* Only use the attributes if they make sense together.  */
+      if (*bit_size + offset <= 8 * type->length ())
 	{
-	  unsigned real_bit_size = attr->unsigned_constant ().value_or (0);
-	  if (real_bit_size >= 0 && real_bit_size <= 8 * type->length ())
-	    {
-	      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
-	      /* Only use the attributes if they make sense together.  */
-	      std::optional<ULONGEST> bit_offset;
-	      if (attr == nullptr)
-		bit_offset = 0;
-	      else if (attr->form_is_constant ())
-		{
-		  bit_offset = attr->unsigned_constant ();
-		  if (bit_offset.has_value ()
-		      && *bit_offset + real_bit_size > 8 * type->length ())
-		    bit_offset.reset ();
-		}
-	      if (bit_offset.has_value ())
-		{
-		  TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_size
-		    = real_bit_size;
-		  if (attr != nullptr)
-		    TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_offset
-		      = *bit_offset;
-		}
-	    }
+	  TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_size = *bit_size;
+	  TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_offset = offset;
 	}
     }
 
