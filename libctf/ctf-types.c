@@ -1651,6 +1651,49 @@ ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
   return ret;
 }
 
+/* Return nonzero if this type is conflicting, nonzero if it's not, < 0 on
+   error; if CUNAME is set, set it to the name of the conflicting compilation
+   unit for the passed-in type (which may be a null string if the cuname is not
+   known).  */
+
+int
+ctf_type_conflicting (ctf_dict_t *fp, ctf_id_t type, const char **cuname)
+{
+  ctf_dict_t *ofp = fp;
+  const ctf_type_t *tp;
+
+  /* The unimplemented / void type is never conflicting.  */
+  if (type == 0)
+    return 0;
+
+  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
+    return -1;			/* errno is set for us.  */
+
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  if (cuname)
+    *cuname = 0;
+
+  if (LCTF_INFO_ISROOT (fp, tp->ctt_info))
+    return 0;
+
+  if (!cuname)
+    return 1;
+
+  while (LCTF_INFO_UNPREFIXED_KIND (fp, tp->ctt_info) != CTF_K_CONFLICTING
+	 && LCTF_IS_PREFIXED_INFO (tp->ctt_info))
+    tp++;
+
+  /* We already checked that this is a non-root-visible type, so this must be
+     CTF_K_CONFLICTING.  */
+  if (!ctf_assert (ofp, LCTF_IS_PREFIXED_INFO (tp->ctt_info)))
+    return -1;					/* errno is set for us.  */
+
+  *cuname = ctf_strptr (fp, tp->ctt_name);
+  return 1;
+}
+
 /* If the type is one that directly references another type (such as POINTER),
    then return the ID of the type to which it refers.  */
 

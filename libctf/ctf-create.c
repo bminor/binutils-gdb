@@ -927,6 +927,43 @@ ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
   return 0;
 }
 
+/* Set this type as conflicting in compilation unit CUNAME.  */
+int
+ctf_set_conflicting (ctf_dict_t *fp, ctf_id_t type, const char *cuname)
+{
+  ctf_dict_t *ofp = fp;
+  ctf_dtdef_t *dtd;
+  ctf_type_t *prefix;
+  uint32_t idx;
+
+  if (ctf_lookup_by_id (&fp, type, NULL) == NULL)
+    return -1;				/* errno is set for us.  */
+
+  idx = ctf_type_to_index (fp, type);
+  dtd = ctf_dtd_lookup (fp, type);
+
+  /* You can only call ctf_set_conflicting on a type you have added, not a type
+     that was read in via ctf_open.  */
+  if (idx < fp->ctf_stypes)
+    return (ctf_set_errno (ofp, ECTF_RDONLY));
+
+  if (dtd == NULL)
+    return (ctf_set_errno (ofp, ECTF_BADID));
+
+  if ((prefix = (ctf_type_t *) ctf_find_prefix (fp, dtd->dtd_buf,
+						CTF_K_CONFLICTING)) == NULL)
+    {
+      if ((prefix = ctf_add_prefix (fp, dtd, 0)) == NULL)
+	return -1;			/* errno is set for us.  */
+    }
+  prefix->ctt_name = ctf_str_add (fp, cuname);
+  prefix->ctt_info = CTF_TYPE_INFO (CTF_K_CONFLICTING, 0,
+				    dtd->dtd_vlen_size < 65536
+				    ? dtd->dtd_vlen_size : 0);
+
+  return 0;
+}
+
 /* Add a type or decl tag applying to some whole type, or to some
    component of a type.  Component -1 is a whole type.  */
 
