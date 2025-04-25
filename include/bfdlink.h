@@ -915,8 +915,15 @@ struct bfd_link_callbacks
   /* Likewise, for dynamic symbols.  */
   void (*ctf_new_dynsym)
     (int symidx, struct elf_internal_sym *sym);
-  /* This callback should emit the CTF section into a non-loadable section in
-     the output BFD named .ctf or a name beginning with ".ctf.".  */
+  /* This callback gives the CTF machinery a choice to decide which section
+     to emit its output into (and remove any others it may have added): it
+     is called at the last moment section removal is possible.  Returns 1
+     if any sections were removed.  */
+  int (*ctf_remove_section)
+    (void);
+  /* This callback should emit the CTF or BTF section into a non-loadable
+     section in the output BFD: its name has been decided in
+     ctf_remove_section above, likely .ctf or .BTF.  */
   void (*emit_ctf)
     (void);
 };

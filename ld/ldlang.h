@@ -732,6 +732,8 @@ extern void ldlang_ctf_acquire_strings
   (struct elf_strtab_hash *);
 extern void ldlang_ctf_new_dynsym
   (int symidx, struct elf_internal_sym *);
+extern int ldlang_ctf_remove_section
+  (void);
 extern void ldlang_write_ctf_late
   (void);
 extern bool

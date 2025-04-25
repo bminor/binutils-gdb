@@ -158,6 +158,7 @@ static struct bfd_link_callbacks link_callbacks =
   ldlang_ctf_acquire_strings,
   NULL,
   ldlang_ctf_new_dynsym,
+  ldlang_ctf_remove_section,
   ldlang_write_ctf_late
 };
 

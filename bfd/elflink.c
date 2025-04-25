@@ -12672,6 +12672,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 			       sizeof (struct local_hash_entry)))
     return false;
 
+  sections_removed = false;
+
+  /* Give the CTF machinery a chance to remove sections from the link.  */
+  if (info->callbacks->ctf_remove_section
+      && !info->ctf_disabled)
+    sections_removed |= info->callbacks->ctf_remove_section ();
+
   /* The object attributes have been merged.  Remove the input
      sections from the link, and set the contents of the output
      section.  */
@@ -12719,7 +12726,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  o->flags |= SEC_EXCLUDE;
 	  bfd_section_list_remove (abfd, o);
 	  abfd->section_count--;
-	  sections_removed = true;
+	  sections_removed |= true;
 	}
     }
   if (sections_removed)
