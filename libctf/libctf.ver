@@ -77,6 +77,7 @@ LIBCTF_2.0 {
 	ctf_type_align;
 	ctf_type_kind;
 	ctf_type_kind_forwarded;
+	ctf_type_conflicting;
 	ctf_type_reference;
 	ctf_type_linkage;
 	ctf_type_pointer;
@@ -155,6 +156,7 @@ LIBCTF_2.0 {
 	ctf_add_member_bitfield;
 
 	ctf_set_array;
+	ctf_set_conflicting;
 
 	ctf_update;
 	ctf_discard;

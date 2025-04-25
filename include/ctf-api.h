@@ -674,6 +674,13 @@ extern int ctf_type_kind (ctf_dict_t *, ctf_id_t);
 
 extern int ctf_type_kind_forwarded (ctf_dict_t *, ctf_id_t);
 
+/* Return nonzero if this type is conflicting, zero if it's not, < 0 on error; if
+   CUNAME is set, set it to the name of the conflicting compilation unit for the
+   passed-in type (which may be a null string if the cuname is not known, or if
+   this is not a conflicting type).  */
+
+extern int ctf_type_conflicting (ctf_dict_t *, ctf_id_t, const char **cuname);
+
 /* Return the type a pointer, typedef, cvr-qual, or slice refers to, or return
    an ECTF_NOTREF error otherwise.  ctf_type_kind pretends that slices are
    actually the type they are a slice of: this is usually want you want, but if
@@ -1008,7 +1015,13 @@ extern ctf_id_t ctf_add_section_variable (ctf_dict_t *, uint32_t,
 
 extern int ctf_set_array (ctf_dict_t *, ctf_id_t, const ctf_arinfo_t *);
 
-/* Add a function oor object symbol type with a particular name, without saying
+/* Mark a type as conflicting, residing in some other translation unit with a
+   given name.  The type is hidden from all name lookups, just like
+   CTF_ADD_NONROOT.  */
+
+extern int ctf_set_conflicting (ctf_dict_t *, ctf_id_t, const char *);
+
+/* Add a function or object symbol type with a particular name, without saying
    anything about the actual symbol index.  (The linker will then associate them
    with actual symbol indexes using the ctf_link functions below.)  */
 
