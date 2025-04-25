@@ -453,7 +453,9 @@ ctf_link_set_memb_name_changer (ctf_dict_t *fp,
   fp->ctf_link_memb_name_changer_arg = arg;
 }
 
-/* Set a function which is used to filter out unwanted variables from the link.  */
+/* Set a function which is used to filter out unwanted variables from the link.
+
+   UPTODO: call this somewhere (ctf-dedup, probably). */
 int
 ctf_link_set_variable_filter (ctf_dict_t *fp, ctf_link_variable_filter_f *filter,
 			      void *arg)
@@ -510,9 +512,9 @@ ctf_link_sort_inputs (const ctf_next_hkv_t *one, const ctf_next_hkv_t *two,
 }
 
 /* Count the number of input dicts in the ctf_link_inputs, or that subset of the
-   ctf_link_inputs given by CU_NAMES if set.  Return the number of input dicts,
-   and optionally the name and ctf_link_input_t of the single input archive if
-   only one exists (no matter how many dicts it contains).  */
+   ctf_link_inputs given by CU_NAMES if set: open them if need be.  Return the number
+   of input dicts, and optionally the name and ctf_link_input_t of the single input
+   archive if only one exists (no matter how many dicts it contains).  */
 static ssize_t
 ctf_link_deduplicating_count_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 				     ctf_link_input_t **only_one_input)
@@ -981,6 +983,9 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
       ctf_link_input_t *only_input;
       uint32_t noutputs;
       uint32_t *parents;
+
+      ctf_dprintf ("ctf_link_deduplicating_per_cu: deduplicating into %s\n",
+		   out_name);
 
       if ((ninputs = ctf_link_deduplicating_count_inputs (fp, in,
 							  &only_input)) == -1)

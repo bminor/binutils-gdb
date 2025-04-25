@@ -337,8 +337,7 @@ typedef struct ctf_dedup
   ctf_dynhash_t *cd_citers;
 
   /* Maps type hash values to input global type IDs.  The value is a set (a
-     hash) of global type IDs.  Discarded before each rehashing.  The result of
-     the ctf_dedup function.  */
+     hash) of global type IDs.  The result of the ctf_dedup function.  */
   ctf_dynhash_t *cd_output_mapping;
 
   /* A map giving the GID of the first appearance of each type for each type
