@@ -167,7 +167,7 @@ typedef struct ctf_arinfo
 typedef struct ctf_funcinfo
 {
   ctf_id_t ctc_return;		/* Function return type.  */
-  uint32_t ctc_argc;		/* Number of typed arguments to function.  */
+  size_t ctc_argc;		/* Number of typed arguments to function.  */
   uint32_t ctc_flags;		/* Function attributes (see below).  */
 } ctf_funcinfo_t;
 
@@ -256,6 +256,7 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NOTBITSOU, "Type is not a bitfield-capable struct or union.") \
   _CTF_ITEM (ECTF_DESCENDING, "Structure offsets may not descend.") \
   _CTF_ITEM (ECTF_LINKAGE, "Invalid linkage.") \
+  _CTF_ITEM (ECTF_LINKKIND, "Only functions and variables have linkage.") \
   _CTF_ITEM (ECTF_NOTDATASEC, "This function requires a datasec.") \
   _CTF_ITEM (ECTF_NOTVAR, "This function requires a variable.") \
   _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.") \
@@ -536,16 +537,24 @@ extern const char *ctf_errmsg (int);
 extern int ctf_version (int);
 
 /* Given a symbol table index corresponding to a function symbol, return info on
-   the type of a given function's arguments or return value.  Vararg functions
-   have a final arg with CTF_FUNC_VARARG on in ctc_flags.  */
+   the type of a given function's arguments or return value, or its parameter
+   names.  Vararg functions have a final arg with CTF_FUNC_VARARG on in
+   ctc_flags.  */
 
 extern int ctf_func_info (ctf_dict_t *, unsigned long, ctf_funcinfo_t *);
 extern int ctf_func_args (ctf_dict_t *, unsigned long, uint32_t, ctf_id_t *);
+extern int ctf_func_arg_names (ctf_dict_t *, unsigned long, uint32_t, const char **);
 
-/* As above, but for CTF_K_FUNCTION types in CTF dicts.  */
+/* As above, but for CTF_K_FUNCTION or CTF_K_FUNC_LINKAGE types in CTF dicts.  */
 
 extern int ctf_func_type_info (ctf_dict_t *, ctf_id_t, ctf_funcinfo_t *);
 extern int ctf_func_type_args (ctf_dict_t *, ctf_id_t, uint32_t, ctf_id_t *);
+extern int ctf_func_type_arg_names (ctf_dict_t *, ctf_id_t, uint32_t,
+				    const char **);
+
+/* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
+
+extern int ctf_type_linkage (ctf_dict_t *, ctf_id_t);
 
 /* Look up function or data symbols by name and return their CTF type ID,
   if any.  (For both function symbols and data symbols that are function
@@ -887,10 +896,17 @@ extern ctf_id_t ctf_add_float (ctf_dict_t *, uint32_t,
 			       const char *, const ctf_encoding_t *);
 extern ctf_id_t ctf_add_forward (ctf_dict_t *, uint32_t, const char *,
 				 uint32_t);
-extern ctf_id_t ctf_add_function (ctf_dict_t *, uint32_t,
-				  const ctf_funcinfo_t *, const ctf_id_t *);
 extern ctf_id_t ctf_add_integer (ctf_dict_t *, uint32_t, const char *,
 				 const ctf_encoding_t *);
+
+/* ctf_add_function adds an unnamed function with a bundle of arguments and a
+   return type.  ctf_add_function_linkage provides a function with a name
+   and linkage, which is one of the CTF_FUNC_LINKAGE_* constants.  */
+extern ctf_id_t ctf_add_function (ctf_dict_t *, uint32_t,
+				  const ctf_funcinfo_t *, const ctf_id_t *,
+				  const char **arg_names);
+extern ctf_id_t ctf_add_function_linkage (ctf_dict_t *, uint32_t,
+					  ctf_id_t, const char *, int linkage);
 
 /* Add a "slice", which wraps some integral type and changes its encoding
    (useful for bitfields, etc).  In most respects slices are treated the same

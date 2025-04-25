@@ -1082,6 +1082,7 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 		size_t i;
 		ctf_funcinfo_t fi;
 		ctf_id_t *argv = NULL;
+		const char **arg_names = NULL;
 
 		if (ctf_func_type_info (rfp, cdp->cd_type, &fi) < 0)
 		  goto err;		/* errno is set for us.  */
@@ -1092,8 +1093,18 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 		    goto err;
 		  }
 
+		if ((arg_names = calloc (fi.ctc_argc, sizeof (const char *))) == NULL)
+		  {
+		    ctf_set_errno (rfp, errno);
+		    goto err;
+		  }
+
 		if (ctf_func_type_args (rfp, cdp->cd_type,
 					fi.ctc_argc, argv) < 0)
+		  goto err;		/* errno is set for us.  */
+
+		if (ctf_func_type_arg_names (rfp, cdp->cd_type,
+					     fi.ctc_argc, arg_names) < 0)
 		  goto err;		/* errno is set for us.  */
 
 		ctf_decl_sprintf (&cd, "(*) (");
@@ -1103,7 +1114,9 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 
 		    if (arg == NULL)
 		      goto err;		/* errno is set for us.  */
-		    ctf_decl_sprintf (&cd, "%s", arg);
+		    ctf_decl_sprintf (&cd, "%s%s%s", arg, arg_names[i] != 0 ?
+				      " ":"", arg_names[i] != 0
+				      ? arg_names[i] : "");
 		    free (arg);
 
 		    if ((i < fi.ctc_argc - 1)
@@ -1121,6 +1134,7 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	      err:
 		ctf_set_errno (fp, ctf_errno (rfp));
 		free (argv);
+		free (arg_names);
 		ctf_decl_fini (&cd);
 		return NULL;
 	      }
@@ -1135,6 +1149,23 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	    case CTF_K_ENUM64:
 	      ctf_decl_sprintf (&cd, "enum %s", name);
 	      break;
+	    case CTF_K_FUNC_LINKAGE:
+	    case CTF_K_VAR:
+	      {
+		int linkage;
+		if ((linkage = ctf_type_linkage (fp, cdp->cd_type)) < 0)
+		  {
+		    ctf_set_errno (fp, ECTF_CORRUPT);
+		    ctf_decl_fini (&cd);
+		    return NULL;
+		  }
+
+		ctf_decl_sprintf (&cd, "%s%s", linkage == 0 ? "static "
+				  : (linkage == 2 ? "extern " :
+				     (linkage == 1 ? "" : "(invalid linkage) ")),
+				  name);
+		break;
+	      }
 	    case CTF_K_FORWARD:
 	      {
 		switch (ctf_type_kind_forwarded (fp, cdp->cd_type))
@@ -1277,17 +1308,17 @@ ctf_type_size (ctf_dict_t *fp, ctf_id_t type)
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  switch (LCTF_INFO_KIND (fp, tp->ctt_info))
+  switch (LCTF_KIND (fp, tp))
     {
     case CTF_K_POINTER:
       return fp->ctf_dmodel->ctd_pointer;
 
     case CTF_K_FUNCTION:
-      return 0;		/* Function size is only known by symtab.  */
-
+    case CTF_K_FUNC_LINKAGE:
+      return 0;			/* Function size is only known by symtab.  */
 
     case CTF_K_ARRAY:
       /* ctf_add_array() does not directly encode the element size, but
@@ -1383,14 +1414,15 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  kind = LCTF_INFO_KIND (fp, tp->ctt_info);
+  kind = LCTF_KIND (fp, tp);
   switch (kind)
     {
     case CTF_K_POINTER:
     case CTF_K_FUNCTION:
+    case CTF_K_FUNC_LINKAGE:
       return fp->ctf_dmodel->ctd_pointer;
 
     case CTF_K_ARRAY:
@@ -1559,19 +1591,22 @@ ctf_id_t
 ctf_type_reference (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_dict_t *ofp = fp;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  switch (LCTF_INFO_KIND (fp, tp->ctt_info))
+  switch (LCTF_KIND (fp, tp))
     {
     case CTF_K_POINTER:
     case CTF_K_TYPEDEF:
     case CTF_K_VOLATILE:
     case CTF_K_CONST:
     case CTF_K_RESTRICT:
-      return tp->ctt_type;
+    case CTF_K_FUNCTION:
+    case CTF_K_FUNC_LINKAGE:
+    case CTF_K_VAR:
+      return suffix->ctt_type;
       /* Slices store their type in an unusual place.  */
     case CTF_K_SLICE:
       {
@@ -2147,34 +2182,31 @@ int
 ctf_func_type_info (ctf_dict_t *fp, ctf_id_t type, ctf_funcinfo_t *fip)
 {
   ctf_dict_t *ofp = fp;
-  const ctf_type_t *tp;
+  const ctf_type_t *tp, *suffix;
   uint32_t kind;
-  const uint32_t *args;
-  const ctf_dtdef_t *dtd;
-  ssize_t size, increment;
+  unsigned char *vlen;
+  const ctf_param_t *args;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if (ctf_type_kind (fp, type) == CTF_K_FUNC_LINKAGE)
+    type = ctf_type_reference (fp, type);
+
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  (void) ctf_get_ctt_size (fp, tp, &size, &increment);
-  kind = LCTF_INFO_KIND (fp, tp->ctt_info);
-
+  kind = LCTF_KIND (fp, tp);
   if (kind != CTF_K_FUNCTION)
     return (ctf_set_errno (ofp, ECTF_NOTFUNC));
 
-  fip->ctc_return = tp->ctt_type;
+  fip->ctc_return = suffix->ctt_type;
   fip->ctc_flags = 0;
-  fip->ctc_argc = LCTF_INFO_VLEN (fp, tp->ctt_info);
 
-  if ((dtd = ctf_dynamic_type (fp, type)) == NULL)
-    args = (uint32_t *) ((uintptr_t) tp + increment);
-  else
-    args = (uint32_t *) dtd->dtd_vlen;
+  vlen = ctf_vlen (fp, type, tp, &fip->ctc_argc);
+  args = (const ctf_param_t *) vlen;
 
-  if (fip->ctc_argc != 0 && args[fip->ctc_argc - 1] == 0)
+  if (fip->ctc_argc != 0 && args[fip->ctc_argc - 1].cfp_type == 0)
     {
       fip->ctc_flags |= CTF_FUNC_VARARG;
       fip->ctc_argc--;
@@ -2190,31 +2222,93 @@ int
 ctf_func_type_args (ctf_dict_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv)
 {
   const ctf_type_t *tp;
-  const uint32_t *args;
-  const ctf_dtdef_t *dtd;
-  ssize_t size, increment;
+  const ctf_param_t *args;
+  unsigned char *vlen;
   ctf_funcinfo_t f;
-
-  if (ctf_func_type_info (fp, type, &f) < 0)
-    return -1;			/* errno is set for us.  */
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
 
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+  if (ctf_type_kind (fp, type) == CTF_K_FUNC_LINKAGE)
+    type = ctf_type_reference (fp, type);
+
+  if (ctf_func_type_info (fp, type, &f) < 0)
     return -1;			/* errno is set for us.  */
 
-  (void) ctf_get_ctt_size (fp, tp, &size, &increment);
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
+    return -1;			/* errno is set for us.  */
 
-  if ((dtd = ctf_dynamic_type (fp, type)) == NULL)
-    args = (uint32_t *) ((uintptr_t) tp + increment);
-  else
-    args = (uint32_t *) dtd->dtd_vlen;
+  vlen = ctf_vlen (fp, type, tp, NULL);
+  args = (const ctf_param_t *) vlen;
 
   for (argc = MIN (argc, f.ctc_argc); argc != 0; argc--)
-    *argv++ = *args++;
+    *argv++ = (args++)->cfp_type;
 
   return 0;
+}
+
+/* Given a type ID relating to a function type, return the argument names for
+   the function.  */
+
+int
+ctf_func_type_arg_names (ctf_dict_t *fp, ctf_id_t type, uint32_t argc,
+			 const char **arg_names)
+{
+  const ctf_type_t *tp;
+  const ctf_param_t *args;
+  unsigned char *vlen;
+  ctf_funcinfo_t f;
+
+  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
+    return -1;			/* errno is set for us.  */
+
+  if (ctf_type_kind (fp, type) == CTF_K_FUNC_LINKAGE)
+    type = ctf_type_reference (fp, type);
+
+  if (ctf_func_type_info (fp, type, &f) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if ((tp = ctf_lookup_by_id (&fp, type, NULL)) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  vlen = ctf_vlen (fp, type, tp, NULL);
+  args = (const ctf_param_t *) vlen;
+
+  for (argc = MIN (argc, f.ctc_argc); argc != 0; argc--)
+    *arg_names++ = ctf_strptr (fp, (args++)->cfp_name);
+
+  return 0;
+}
+
+/* Get the linkage of a CTF_K_FUNC_LINKAGE or variable.  */
+
+int
+ctf_type_linkage (ctf_dict_t *fp, ctf_id_t type)
+{
+  const ctf_type_t *tp;
+  const ctf_type_t *suffix;
+  unsigned char *vlen;
+  ctf_linkage_t *l;
+
+  int kind;
+
+  if ((tp = ctf_lookup_by_id (&fp, type, &suffix)) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  kind = ctf_type_kind_unsliced (fp, type);
+  if (kind != CTF_K_FUNC_LINKAGE && kind != CTF_K_VAR)
+    return ctf_set_errno (fp, ECTF_LINKKIND);
+
+  if (kind == CTF_K_VAR)
+    {
+      vlen = ctf_vlen (fp, type, tp, NULL);
+      l = (ctf_linkage_t *) vlen;
+
+      return l->ctl_linkage;
+    }
+
+  /* CTF_K_FUNC_LINKAGE.  */
+  return CTF_INFO_VLEN (suffix->ctt_info);
 }
 
 /* bsearch_r comparison function for datasec searches.  */

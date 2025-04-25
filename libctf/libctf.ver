@@ -52,8 +52,10 @@ LIBCTF_2.0 {
 
 	ctf_func_info;
 	ctf_func_args;
+	ctf_func_arg_names;
 	ctf_func_type_info;
 	ctf_func_type_args;
+	ctf_func_type_arg_names;
 
 	ctf_lookup_by_name;
 	ctf_lookup_by_symbol;
@@ -76,6 +78,7 @@ LIBCTF_2.0 {
 	ctf_type_kind;
 	ctf_type_kind_forwarded;
 	ctf_type_reference;
+	ctf_type_linkage;
 	ctf_type_pointer;
 	ctf_type_encoding;
 	ctf_type_visit;
@@ -123,6 +126,7 @@ LIBCTF_2.0 {
 	ctf_add_btf_float;
 	ctf_add_forward;
 	ctf_add_function;
+	ctf_add_function_linkage;
 	ctf_add_integer;
 	ctf_add_pointer;
 	ctf_add_type;
