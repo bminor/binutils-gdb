@@ -643,6 +643,11 @@ static const struct ld_option ld_options[] =
 		   "                                <method> is: share-unconflicted (default),\n"
 		   "                                             share-duplicated"),
     TWO_DASHES },
+  { {"disable-ctf-dedup", no_argument, NULL, OPTION_DISABLE_CTF_DEDUP},
+    '\0', NULL, N_("Disable CTF and BTF deduplication: just concatenate\n"),
+    TWO_DASHES },
+  { {"enable-ctf-dedup", no_argument, NULL, OPTION_ENABLE_CTF_DEDUP},
+    '\0', NULL, NULL, NO_HELP }
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -1859,6 +1864,14 @@ parse_args (unsigned argc, char **argv)
 	    config.ctf_share_duplicated = true;
 	  else
 	    fatal (_("%P: bad --ctf-share-types option: %s\n"), optarg);
+	  break;
+
+	case OPTION_DISABLE_CTF_DEDUP:
+	  link_info.ctf_disabled = true;
+	  break;
+
+	case OPTION_ENABLE_CTF_DEDUP:
+	  link_info.ctf_disabled = false;
 	  break;
 	}
     }

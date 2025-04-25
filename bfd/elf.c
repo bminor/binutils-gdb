@@ -3061,6 +3061,7 @@ bfd_section_from_elf_index (bfd *abfd, unsigned int sec_index)
 
 static const struct bfd_elf_special_section special_sections_b[] =
 {
+  { STRING_COMMA_LEN (".BTF"),	0, SHT_PROGBITS,    0 },
   { STRING_COMMA_LEN (".bss"), -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
   { NULL,		    0,	0, 0,		 0 }
 };
@@ -6660,7 +6661,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	       || (abfd->is_linker_output
 		   && hdr->bfd_section != NULL
 		   && (hdr->sh_name == -1u
-		       || bfd_section_is_ctf (hdr->bfd_section)))
+		       || bfd_section_is_libctf_deduppable (hdr->bfd_section)))
 	       || hdr == i_shdrpp[elf_onesymtab (abfd)]
 	       || (elf_symtab_shndx_list (abfd) != NULL
 		   && hdr == i_shdrpp[elf_symtab_shndx_list (abfd)->ndx])
@@ -6849,13 +6850,16 @@ find_section_in_list (unsigned int i, elf_section_list * list)
    VMAs must be known before this is called.
 
    Reloc sections come in two flavours: Those processed specially as
-   "side-channel" data attached to a section to which they apply, and
-   those that bfd doesn't process as relocations.  The latter sort are
-   stored in a normal bfd section by bfd_section_from_shdr.  We don't
-   consider the former sort here, unless they form part of the loadable
-   image.  Reloc sections not assigned here (and compressed debugging
-   sections and CTF sections which nothing else in the file can rely
-   upon) will be handled later by assign_file_positions_for_relocs.
+   "side-channel" data attached to a section to which they apply, and those
+   that bfd doesn't process as relocations.  The latter sort are stored in a
+   normal bfd section by bfd_section_from_shdr.  We don't consider the
+   former sort here, unless they form part of the loadable image.  Reloc
+   sections not assigned here (and compressed debugging sections and CTF or
+   BTF sections which nothing else in the file can rely upon) will be
+   handled later by assign_file_positions_for_relocs.
+
+   XXX UPTODO BTF sections can be depended upon by other sections: what to do
+   about them?
 
    We also don't set the positions of the .symtab and .strtab here.  */
 
@@ -6895,7 +6899,7 @@ assign_file_positions_except_relocs (bfd *abfd,
 	      || (abfd->is_linker_output
 		  && hdr->bfd_section != NULL
 		  && (hdr->sh_name == -1u
-		      || bfd_section_is_ctf (hdr->bfd_section)))
+		      || bfd_section_is_libctf_deduppable (hdr->bfd_section)))
 	      || i == elf_onesymtab (abfd)
 	      || (elf_symtab_shndx_list (abfd) != NULL
 		  && hdr == i_shdrpp[elf_symtab_shndx_list (abfd)->ndx])
@@ -7145,7 +7149,7 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 	      || shdrp->sh_type == SHT_REL
 	      || shdrp->sh_type == SHT_RELA)
 	    ;
-	  else if (bfd_section_is_ctf (sec))
+	  else if (bfd_section_is_libctf_deduppable (sec))
 	    {
 	      /* Update section size and contents.	*/
 	      shdrp->sh_size = sec->size;
@@ -9069,7 +9073,7 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
       if (elfsym->sym.st_name != 0)
 	elfsym->sym.st_name = _bfd_elf_strtab_offset (stt,
 						      elfsym->sym.st_name);
-      if (info && info->callbacks->ctf_new_symbol)
+      if (info && info->callbacks->ctf_new_symbol && !info->ctf_disabled)
 	info->callbacks->ctf_new_symbol (elfsym->dest_index,
 					 &elfsym->sym);
 
@@ -10067,7 +10071,7 @@ _bfd_elf_set_section_contents (bfd *abfd,
     {
       unsigned char *contents;
 
-      if (bfd_section_is_ctf (section))
+      if (bfd_section_is_libctf_deduppable (section))
 	/* Nothing to do with this section: the contents are generated
 	   later.  */
 	return true;

@@ -2012,6 +2012,16 @@ large projects this may speed up opening the CTF and save memory in the CTF
 consumer at runtime.
 @end table
 
+@kindex --disable-ctf-dedup
+@kindex --disable-ctf-dedup
+@item --disable-ctf-dedup
+Disable CTF and BTF deduplication entirely.  The input sections are concatenated
+just like any other section.  Note that concatenated CTF and BTF sections are
+not in general useful: libctf and other consumers will typically read the first
+portion and ignore any subsequent portions.  Nonetheless, this is sometimes
+useful in special circumstances, such as when the section's format is not
+actually that of a CTF or BTF section but merely shares the same name.
+
 @cindex common allocation
 @kindex --no-define-common
 @item --no-define-common

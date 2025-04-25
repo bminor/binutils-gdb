@@ -3821,6 +3821,9 @@ ldlang_open_ctf (void)
   int any_ctf = 0;
   int err;
 
+  if (link_info.ctf_disabled)
+    return;
+
   ld_start_phase (PHASE_CTF);
 
   LANG_FOR_EACH_INPUT_STATEMENT (file)
@@ -3923,6 +3926,7 @@ lang_merge_ctf (void)
 		 file->the_bfd, ctf_errmsg (ctf_errno (ctf_output)));
 	  ctf_close (file->the_ctf);
 	  file->the_ctf = NULL;
+	  ld_stop_phase (PHASE_CTF);
 	  continue;
 	}
     }
@@ -3961,7 +3965,8 @@ void
 ldlang_ctf_acquire_strings (struct elf_strtab_hash *dynstrtab)
 {
   ld_start_phase (PHASE_CTF);
-  ldemul_acquire_strings_for_ctf (ctf_output, dynstrtab);
+  if (!link_info.ctf_disabled)
+    ldemul_acquire_strings_for_ctf (ctf_output, dynstrtab);
   ld_stop_phase (PHASE_CTF);
 }
 
@@ -3969,7 +3974,8 @@ ldlang_ctf_acquire_strings (struct elf_strtab_hash *dynstrtab)
    internal format.  */
 void ldlang_ctf_new_dynsym (int symidx, struct elf_internal_sym *sym)
 {
-  ldemul_new_dynsym_for_ctf (ctf_output, symidx, sym);
+  if (!link_info.ctf_disabled)
+    ldemul_new_dynsym_for_ctf (ctf_output, symidx, sym);
 }
 
 /* Write out the CTF section.  Called early, if the emulation isn't going to
@@ -4053,6 +4059,9 @@ ldlang_write_ctf_late (void)
 static void
 ldlang_open_ctf (void)
 {
+  if (link_info.ctf_disabled)
+    return;
+
   LANG_FOR_EACH_INPUT_STATEMENT (file)
     {
       asection *sect;
