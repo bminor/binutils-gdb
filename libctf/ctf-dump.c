@@ -181,7 +181,8 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	}
 
       size = ctf_type_size (fp, id);
-      if (kind != CTF_K_FUNCTION && size >= 0)
+      if (kind != CTF_K_FUNCTION && kind != CTF_K_FUNC_LINKAGE
+	  && kind != CTF_K_DATASEC && size >= 0)
 	{
 	  if (asprintf (&bit, " (size 0x%lx)", (unsigned long int) size) < 0)
 	    goto oom;
@@ -192,7 +193,8 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	}
 
       align = ctf_type_align (fp, id);
-      if (align >= 0)
+      if (kind != CTF_K_FUNCTION && kind != CTF_K_FUNC_LINKAGE
+	  && kind != CTF_K_DATASEC && align >= 0)
 	{
 	  if (asprintf (&bit, " (aligned at 0x%lx)",
 			(unsigned long int) align) < 0)
@@ -608,23 +610,101 @@ ctf_dump_var (ctf_dict_t *fp, ctf_id_t type,
 {
   char *str;
   char *typestr;
+  int linkage;
   ctf_dump_state_t *state = arg;
+  ctf_id_t otype = type;
 
-  if (asprintf (&str, "%s -> ", name) < 0)
-    return (ctf_set_errno (state->cds_fp, errno));
+  /* UPTODO check for a decl tag.  */
 
-  if ((typestr = ctf_dump_format_type (state->cds_fp, type,
-				       CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
-    {
-      free (str);
-      return 0;			/* Swallow the error.  */
-    }
+  if (asprintf (&str, "  %lx: 0x%lx: ", offset, type) < 0)
+    return (ctf_set_errno (fp, errno));
+
+  /* Specialized var dumper: only dump the linkage, not the type kind or
+     anything related.  */
+
+  if ((linkage = ctf_type_linkage (fp, type)) < 0
+    || asprintf (&typestr, "%s%s", linkage == 0 ? "static "
+		 : (linkage == 2 ? "extern " :
+		    (linkage == 1 ? "" : "(invalid linkage) ")),
+		 ctf_type_name_raw (fp, type)) < 0)
+    goto err;
 
   str = str_append (str, typestr);
   free (typestr);
 
+  if (size != 0)
+    {
+      if (asprintf (&typestr, " (datasec size: %zi)", size) < 0)
+	goto err;
+
+      str = str_append (str, typestr);
+      str = str_append (str, ": ");
+      free (typestr);
+    }
+
+  if ((type = ctf_type_reference (fp, type)) == CTF_ERR)
+    {
+      ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot deref dumping var 0x%lx"),
+		    otype);
+      return 0;
+    }
+
+  if ((typestr = ctf_dump_format_type (fp, type, CTF_ADD_ROOT
+				       | CTF_FT_REFS)) == NULL)
+    {
+      free (str);
+      return 0;					/* Swallow the error.  */
+    }
+
+  str = str_append (str, typestr);
+  str = str_append (str, "\n");
+  free (typestr);
+
   ctf_dump_append (fp, state, str);
   return 0;
+err:
+  ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot print name dumping var 0x%lx"),
+		type);
+  return 0;
+}
+
+/* Dump all DATASECs with associated vars.  */
+static int
+ctf_dump_datasecs (ctf_dict_t *fp, ctf_dump_state_t *arg)
+{
+  ctf_dump_state_t *state = arg;
+  char *str = NULL;
+  ctf_id_t type;
+  ctf_next_t *next = NULL;
+  int first = 1;
+
+  while ((type = ctf_type_kind_next (fp, &next, CTF_K_DATASEC)) != CTF_ERR)
+    {
+      /* Dump DATASEC name.  */
+
+      if (asprintf (&str, "%sSection %s:\n\n", first ? "" : "\n",
+		    ctf_type_name_raw (fp, type)) < 0)
+        return (ctf_set_errno (fp, errno));
+      ctf_dump_append (fp, state, str);
+
+      first = 0;
+
+      /* Dump all variables in the datasec.  */
+      if (ctf_datasec_var_iter (fp, type, ctf_dump_var, state) < 0)
+        goto err;
+    }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    {
+      ctf_err_warn (fp, 1, ctf_errno (fp), _("cannot visit datasecs\n"));
+      goto err;
+    }
+
+  return 0;
+
+ err:
+  free (str);
+  ctf_next_destroy (next);
+  return -1;
 }
 
 /* Dump a single struct/union member into the string in the membstate.  */
