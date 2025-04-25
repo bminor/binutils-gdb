@@ -389,6 +389,8 @@ struct ctf_dict
   const ctf_dictops_t *ctf_dictops; /* Version-specific dict operations.  */
   ctf_header_t *ctf_header;	    /* The header from this CTF dict.  */
   ctf_header_v3_t *ctf_v3_header;   /* The header from an upgraded CTF dict.  */
+  ctf_dynset_t *ctf_write_prohibitions; /* Kinds writeout causes error for.  */
+  ctf_dynset_t *ctf_write_suppressions;	/* Kinds that are skipped on write.  */
   unsigned char ctf_openflags;	    /* Flags the dict had when opened.  */
   int ctf_opened_btf;		    /* Whether this dict was pure BTF when
 				       opened.  */

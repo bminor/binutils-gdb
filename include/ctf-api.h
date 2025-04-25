@@ -264,6 +264,8 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NODATASEC, "Variable not found in datasec.") \
   _CTF_ITEM (ECTF_NOTDECLTAG, "This function requires a decl tag.") \
   _CTF_ITEM (ECTF_NOTTAG, "This function requires a type or decl tag.") \
+  _CTF_ITEM (ECTF_KIND_PROHIBITED, "Writeout of suppressed kind attempted.") \
+  _CTF_ITEM (ECTF_NOTBTF, "Cannot write out this dict as BTF.") \
   _CTF_ITEM (ECTF_TOOLARGE, "Prefix required for correct representation.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
@@ -1105,6 +1107,11 @@ extern int ctf_arc_write (const char *file, ctf_dict_t **ctf_dicts, size_t,
 			  const char **names, size_t);
 extern int ctf_arc_write_fd (int, ctf_dict_t **, size_t, const char **,
 			     size_t);
+
+/* Prohibit writeout of this type kind: attempts to write it out cause
+   an ECTF_KIND_PROHIBITED error.  */
+
+extern int ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited);
 
 /* Linking.  These functions are used by ld to link .ctf sections in input
    object files into a single .ctf section which is an archive possibly

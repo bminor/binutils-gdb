@@ -762,6 +762,39 @@ symerr:
 
 /* Type section.  */
 
+/* Kind suppression.  */
+
+int
+ctf_write_suppress_kind (ctf_dict_t *fp, int kind, int prohibited)
+{
+  ctf_dynset_t *set;
+
+  if (kind < CTF_K_UNKNOWN || kind > CTF_K_MAX)
+    return (ctf_set_errno (fp, EINVAL));
+
+  if (prohibited)
+    set = fp->ctf_write_prohibitions;
+  else
+    set = fp->ctf_write_suppressions;
+
+  if (!set)
+    {
+      set = ctf_dynset_create (htab_hash_pointer, htab_eq_pointer, NULL);
+      if (!set)
+	return (ctf_set_errno (fp, errno));
+
+      if (prohibited)
+	fp->ctf_write_prohibitions = set;
+      else
+	fp->ctf_write_suppressions = set;
+    }
+
+  if ((ctf_dynset_cinsert (set, (const void *) (uintptr_t) kind)) < 0)
+    return (ctf_set_errno (fp, errno));
+
+  return 0;
+}
+
 /* Iterate through the static types and the dynamic type definition list and
    compute the size of the CTF type section.
 
