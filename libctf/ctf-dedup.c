@@ -160,13 +160,23 @@
    *type hash values*, so it's small: in effect it is automatically
    deduplicated.)
 
+   One caveat: decl tags to struct and union members are only considered the
+   same type if they have the same name; so decl tags to one conflicting
+   structure in several different inputs can be considered unconflicting even
+   though they are citing a specific member in an input struct, as long as that
+   member has the same component index in both!  So we pay a small efficiency
+   cost and generate a citers graph from decl tags to struct/union members
+   specifically, so that when structs or unions are marked conflicted, we chase
+   down all the decl tags that cite any of their members and mark them conflicted
+   too.
+
    2) COLLISIONAL MARKING.
 
-   [ctf_dedup_detect_name_ambiguity, ctf_dedup_mark_conflicting_hash]
-   We identify types whose names collide during the hashing process, and count
-   the rough number of uses of each name (caching may throw it off a bit: this
+   [ctf_dedup_detect_name_ambiguity, ctf_dedup_mark_conflicting_hash] We
+   identify types whose names collide during the hashing process, and count the
+   rough number of uses of each name (caching may throw it off a bit: this
    doesn't need to be accurate).  We then mark the less-frequently-cited types
-   with each names conflicting: the most-frequently-cited one goes into the
+   with each name conflicting: the most-frequently-cited one goes into the
    shared type dictionary, while all others are duplicated into per-TU
    dictionaries, named after the input TU, that have the shared dictionary as a
    parent.  For structures and unions this is not quite good enough: we'd like
@@ -187,7 +197,8 @@
    anything that is already marked).  This naturally terminates just where we
    want it to (at types that are cited by no other types, and at structures and
    unions) and suffices to ensure that types that cite conflicted types are
-   always marked conflicted.
+   always marked conflicted.  We also do a single-step nonrecursive marking
+   of decl tags that refer to conflicted structures, as noted above.
 
    [ctf_dedup_conflictify_unshared, ctf_dedup_multiple_input_dicts]
    When linking in CTF_LINK_SHARE_DUPLICATED mode, we would like all types that
@@ -266,6 +277,12 @@
    Walk over all structures with members that need emission and emit all of
    them. Every type has been emitted at this stage, so emission cannot
    fail.
+
+   [ctf_dedup_emit_decl_tags]
+   This has to be done last, because it can point at individual struct members,
+   which are not emitted until this stage.  Nonetheless, since structs do not
+   change at emission time, the actual component_idx of struct member decl tags
+   never changes from its source.
 
    [ctf_dedup_strings]
    Accumulate a (string -> dict count) hash for all strings with refs in
@@ -821,6 +838,23 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	ctf_dedup_sha1_add (&hash, &size, sizeof (size_t), "size", depth);
 	break;
       }
+    case CTF_K_DECL_TAG:
+      {
+	ctf_id_t ref;
+
+	/* Decl tags with component indexes mix in the index.  We mix in the
+	   component index unconditionally, because an index of -1 is fine
+	   too.  */
+
+	if ((ref = ctf_decl_tag (input, type, &component_idx)) == CTF_ERR)
+	  {
+	    whaterr = N_("error doing decl tag hashing");
+	    goto err;
+	  }
+	ctf_dedup_sha1_add (&hash, &component_idx, sizeof (component_idx),
+			    "component index", depth);
+      }
+      /* FALLTHRU */
       /* Types that reference other types.  */
     case CTF_K_TYPEDEF:
     case CTF_K_VOLATILE:
@@ -839,6 +873,38 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       ctf_dedup_sha1_add (&hash, hval, strlen (hval) + 1, "referenced type",
 			  depth);
       citer = hval;
+
+      /* Note: for references to structs/unions, the citer will be a stub: this
+	 is basically unused.  However, for decl tags with a component_idx where
+	 the referenced type is a struct or union, we add a citer entry which
+	 maps from the struct/union's decorated name to the hash value of the
+	 decl_tag.  */
+
+      if (kind == CTF_K_DECL_TAG && component_idx > -1)
+	{
+	  int child_kind = ctf_type_kind (input, child_type);
+
+	  if (child_kind == CTF_K_STRUCT || child_kind == CTF_K_UNION)
+	    {
+	      ctf_dynset_t *citer_hashes;
+	      const char *child_name;
+
+	      if (((child_name = ctf_type_name_raw (input, child_type)) == NULL)
+		  || (child_name = ctf_decorate_type_name (fp, child_name,
+							   child_kind)) == NULL)
+		{
+		  whaterr = N_("error tracking struct -> decl tag mappings");
+		  goto err;
+		}
+
+	      if ((citer_hashes = make_set_element (d->cd_citers, child_name)) == NULL
+		  || ctf_dynset_cinsert (citer_hashes, hval) < 0)
+		{
+		  whaterr = N_("error tracking struct -> decl tag mappings");
+		  goto oom;
+		}
+	    }
+	}
 
       break;
 
@@ -1720,61 +1786,11 @@ ctf_dedup_count_name (ctf_dict_t *fp, const char *name, void *id)
   return 0;
 }
 
-/* Mark a single hash as corresponding to a conflicting type.  Mark all types
-   that cite it as conflicting as well, terminating the recursive walk only when
-   types that are already conflicted or types do not cite other types are seen.
-   (Tagged structures and unions do not appear in the cd_citers graph, so the
-   walk also terminates there, since any reference to a conflicting structure is
-   just going to reference an unconflicting forward instead: see
-   ctf_dedup_maybe_synthesize_forward.)  */
-
+/* Look up a type kind from the output mapping, given a type hash value.
+   Optionally return its GID as well.  */
 static int
-ctf_dedup_mark_conflicting_hash (ctf_dict_t *fp, const char *hval)
-{
-  ctf_dedup_t *d = &fp->ctf_dedup;
-  ctf_next_t *i = NULL;
-  int err;
-  const void *k;
-  ctf_dynset_t *citers;
-
-  /* Mark conflicted if not already so marked.  */
-  if (ctf_dynset_exists (d->cd_conflicting_types, hval, NULL))
-    return 0;
-
-  ctf_dprintf ("Marking %s as conflicted\n", hval);
-
-  if (ctf_dynset_cinsert (d->cd_conflicting_types, hval) < 0)
-    {
-      ctf_dprintf ("Out of memory marking %s as conflicted\n", hval);
-      return ctf_set_errno (fp, errno);
-    }
-
-  /* If any types cite this type, mark them conflicted too.  */
-  if ((citers = ctf_dynhash_lookup (d->cd_citers, hval)) == NULL)
-    return 0;
-
-  while ((err = ctf_dynset_cnext (citers, &i, &k)) == 0)
-    {
-      const char *hv = (const char *) k;
-
-      if (ctf_dynset_exists (d->cd_conflicting_types, hv, NULL))
-	continue;
-
-      if (ctf_dedup_mark_conflicting_hash (fp, hv) < 0)
-	{
-	  ctf_next_destroy (i);
-	  return -1;				/* errno is set for us.  */
-	}
-    }
-  if (err != ECTF_NEXT_END)
-    return ctf_set_errno (fp, err);
-
-  return 0;
-}
-
-/* Look up a type kind from the output mapping, given a type hash value.  */
-static int
-ctf_dedup_hash_kind (ctf_dict_t *fp, ctf_dict_t **inputs, const char *hash)
+ctf_dedup_hash_kind_gid (ctf_dict_t *fp, ctf_dict_t **inputs, const char *hash,
+			 void **gid)
 {
   ctf_dedup_t *d = &fp->ctf_dedup;
   void *id;
@@ -1799,8 +1815,126 @@ ctf_dedup_hash_kind (ctf_dict_t *fp, ctf_dict_t **inputs, const char *hash)
   if (!ctf_assert (fp, id))
     return -1;
 
+  if (gid)
+    *gid = id;
+
   return ctf_type_kind_unsliced (inputs[CTF_DEDUP_GID_TO_INPUT (id)],
 				 CTF_DEDUP_GID_TO_TYPE (id));
+}
+
+static int
+ctf_dedup_mark_conflicting_hash (ctf_dict_t *fp, ctf_dict_t **inputs,
+				 const char *hval);
+
+/* Mark the types that cite a type with a given hash as a conflicting type.
+   Internal implementation detail of ctf_dedup_mark_conflicting_hash(),
+   which see.  */
+
+static int
+ctf_dedup_mark_conflicting_hash_citers (ctf_dict_t *fp, ctf_dict_t **inputs,
+					const char *hval)
+{
+  ctf_dedup_t *d = &fp->ctf_dedup;
+  ctf_next_t *i = NULL;
+  const void *k;
+  ctf_dynset_t *citers;
+  int err;
+
+  /* If any types cite this type, mark them conflicted too.  */
+  if ((citers = ctf_dynhash_lookup (d->cd_citers, hval)) == NULL)
+    return 0;
+
+  while ((err = ctf_dynset_cnext (citers, &i, &k)) == 0)
+    {
+      const char *hv = (const char *) k;
+
+      if (ctf_dynset_exists (d->cd_conflicting_types, hv, NULL))
+	continue;
+
+      if (ctf_dedup_mark_conflicting_hash (fp, inputs, hv) < 0)
+	{
+	  ctf_next_destroy (i);
+	  return -1;				/* errno is set for us.  */
+	}
+    }
+  if (err != ECTF_NEXT_END)
+    return ctf_set_errno (fp, err);
+
+  return 0;
+}
+
+/* Mark a single hash as corresponding to a conflicting type.  Mark all types
+   that cite it as conflicting as well, terminating the recursive walk only when
+   types that are already conflicted or types do not cite other types are seen.
+   Tagged structures and unions appear in the cd_citers graph only as stubs, so
+   the walk also terminates there, since any reference to a conflicting
+   structure is just going to reference an unconflicting forward instead: see
+   ctf_dedup_maybe_synthesize_forward.)
+
+   One exception is decl tags pointing to struct or union members, which appear
+   in the citers graph as a *decorated struct/union name* mapping to a set of
+   decl tags: we check for these separately, below.  */
+
+static int
+ctf_dedup_mark_conflicting_hash (ctf_dict_t *fp, ctf_dict_t **inputs,
+				 const char *hval)
+{
+  ctf_dedup_t *d = &fp->ctf_dedup;
+  const char *name;
+  int kind;
+  void *id;
+  ctf_dict_t *input;
+
+  /* Mark conflicted if not already so marked.  */
+  if (ctf_dynset_exists (d->cd_conflicting_types, hval, NULL))
+    return 0;
+
+  ctf_dprintf ("Marking %s as conflicted\n", hval);
+
+  if (ctf_dynset_cinsert (d->cd_conflicting_types, hval) < 0)
+    {
+      ctf_dprintf ("Out of memory marking %s as conflicted\n", hval);
+      return ctf_set_errno (fp, errno);
+    }
+
+  if (ctf_dedup_mark_conflicting_hash_citers (fp, inputs, hval) < 0)
+    return -1;					/* errno is set for us.  */
+
+  /* If this is a struct or union, see if it has any decl tags we want to drag
+     into the conflicting set.  These are identified in the citers graph with
+     the decorated name as the key.  Nothing ever cites a decl tag, so the
+     marking will terminate at this point, dragging the decl tags and only the
+     decl tags in.  */
+
+  kind = ctf_dedup_hash_kind_gid (fp, inputs, hval, &id);
+
+  if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
+    return 0;
+
+  input = inputs[CTF_DEDUP_GID_TO_INPUT (id)];
+
+  if ((name = ctf_type_name_raw (input, CTF_DEDUP_GID_TO_TYPE (id))) == NULL)
+    {
+      ctf_set_errno (fp, ctf_errno (input));
+      goto err;
+    }
+
+  if ((name = ctf_decorate_type_name (fp, name, kind)) == NULL)
+    goto err;
+
+  /* We can reuse the same mark-as-conflcting code, pretending the decorated
+     name is a type hash value.  */
+
+  if (ctf_dedup_mark_conflicting_hash_citers (fp, inputs, name) < 0)
+    return -1;					/* errno is set for us. */
+
+  return 0;
+
+err:
+  ctf_err_warn (fp, 0, 0, _("Cannot decorate type name during conflict marking "
+			    "for type %i/%lx with hval %s"),
+		CTF_DEDUP_GID_TO_INPUT (id), CTF_DEDUP_GID_TO_TYPE (id), hval);
+  return -1;
 }
 
 /* Used to keep a count of types: i.e. distinct type hash values.  */
@@ -1819,10 +1953,10 @@ ctf_dedup_count_types (void *key_, void *value _libctf_unused_, void *arg_)
   int kind;
   ctf_dedup_type_counter_t *arg = (ctf_dedup_type_counter_t *) arg_;
 
-  kind = ctf_dedup_hash_kind (arg->fp, arg->inputs, hval);
+  kind = ctf_dedup_hash_kind_gid (arg->fp, arg->inputs, hval, NULL);
 
-  /* We rely on ctf_dedup_hash_kind setting the fp to -ECTF_INTERNAL on error to
-     smuggle errors out of here.  */
+  /* We rely on ctf_dedup_hash_kind_gid setting the fp to -ECTF_INTERNAL on
+     error to smuggle errors out of here.  */
 
   if (kind != CTF_K_FORWARD)
     {
@@ -1909,7 +2043,7 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 		      ctf_dprintf ("Marking %p, with hash %s, conflicting: one "
 				   "of many non-forward GIDs for %s\n", id,
 				   hval, (char *) k);
-		      ctf_dedup_mark_conflicting_hash (fp, hval);
+		      ctf_dedup_mark_conflicting_hash (fp, inputs, hval);
 		    }
 		}
 	      if (err != ECTF_NEXT_END)
@@ -2012,7 +2146,7 @@ ctf_dedup_detect_name_ambiguity (ctf_dict_t *fp, ctf_dict_t **inputs)
 
 	      ctf_dprintf ("Marking %s, an uncommon hash for %s, conflicting\n",
 			   hval, (const char *) k);
-	      if (ctf_dedup_mark_conflicting_hash (fp, hval) < 0)
+	      if (ctf_dedup_mark_conflicting_hash (fp, inputs, hval) < 0)
 		{
 		  whaterr = N_("error marking hashes as conflicting");
 		  goto err;
@@ -2152,6 +2286,12 @@ ctf_dedup_init (ctf_dict_t *fp)
 			     NULL, NULL)) == NULL)
     goto oom;
 
+  if ((d->cd_emission_struct_decl_tags
+       = ctf_dynhash_create (ctf_hash_integer,
+			     ctf_hash_eq_integer,
+			     NULL, NULL)) == NULL)
+    goto oom;
+
   if ((d->cd_conflicting_types
        = ctf_dynset_create (htab_hash_string,
 			    htab_eq_string, NULL)) == NULL)
@@ -2194,6 +2334,7 @@ ctf_dedup_fini (ctf_dict_t *fp, ctf_dict_t **outputs, uint32_t noutputs)
 #endif
   ctf_dynhash_destroy (d->cd_input_nums);
   ctf_dynhash_destroy (d->cd_emission_struct_members);
+  ctf_dynhash_destroy (d->cd_emission_struct_decl_tags);
   ctf_dynset_destroy (d->cd_conflicting_types);
 
   /* Free the per-output state.  */
@@ -2344,7 +2485,7 @@ ctf_dedup_conflictify_unshared (ctf_dict_t *output, ctf_dict_t **inputs)
     {
       const char *hval = (const char *) k;
 
-      if (ctf_dedup_mark_conflicting_hash (output, hval) < 0)
+      if (ctf_dedup_mark_conflicting_hash (output, inputs, hval) < 0)
 	goto err;
     }
   if (err != ECTF_NEXT_END)
@@ -2500,6 +2641,25 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
   return -1;
 }
 
+/* Return 1 if this decl tag points to a structure/union member.  */
+static int
+ctf_dedup_member_decl_tag (ctf_dict_t *fp, ctf_id_t type)
+{
+  int ref_kind = ctf_type_kind (fp, ctf_type_reference (fp, type));
+
+  if (ref_kind == CTF_K_STRUCT || ref_kind == CTF_K_UNION)
+    {
+      int64_t component_idx;
+
+      if (ctf_decl_tag (fp, type, &component_idx) == CTF_ERR)
+	return -1;
+
+      if (component_idx > -1)
+	return 1;
+    }
+  return 0;
+}
+
 static int
 ctf_dedup_rwalk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
 				uint32_t ninputs, uint32_t *parents,
@@ -2615,6 +2775,20 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
     case CTF_K_ENUM64:
       /* No types referenced.  */
       break;
+
+    case CTF_K_DECL_TAG:
+      {
+	int to_sou_member = ctf_dedup_member_decl_tag (fp, type);
+
+	if (to_sou_member < 0)
+	  {
+	    whaterr = N_("error during referenced type decl tag check");
+	    goto err_msg;
+	  }
+	if (to_sou_member)
+	  break;
+      }
+      /* FALLTHRU */
 
     case CTF_K_TYPEDEF:
     case CTF_K_VOLATILE:
@@ -3607,6 +3781,53 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	  }
 	break;
       }
+
+    case CTF_K_DECL_TAG:
+      {
+	int to_sou_member = ctf_dedup_member_decl_tag (input, type);
+	int64_t component_idx;
+
+	errtype = _("decl tag");
+
+	ref = ctf_type_reference (input, type);
+	if ((ref = ctf_dedup_id_to_target (output, target, inputs, ninputs,
+					   parents, input, input_num,
+					   ref)) == CTF_ERR)
+	  goto err_input;			/* errno is set for us.  */
+
+	if (to_sou_member < 0)
+	  goto err_input;
+
+	/* Decl tags to SoU members get remembered for later emission, because
+	   we can't emit them until the struct members are emitted.  No need to
+	   remember where to emit them: they are always emitted into the same
+	   dict as the structure they tag, which can be found in
+	   cd_emission_struct_members.  */
+
+	if (to_sou_member)
+	  {
+	    void *out_id;
+
+	    out_id = CTF_DEDUP_GID (output, output_num, ref);
+	    if (ctf_dynhash_insert (d->cd_emission_struct_decl_tags, id, out_id) < 0)
+	      {
+		ctf_set_errno (target, errno);
+		goto err_target;
+	      }
+	    new_type = 0;
+	    break;
+	  }
+
+	if (ctf_decl_tag (input, type, &component_idx) == CTF_ERR)
+	  goto err_input;
+
+	if ((new_type = ctf_add_decl_tag (target, isroot, ref,
+					  name, component_idx)) == CTF_ERR)
+	  goto err_target;			/* errno is set for us.  */
+
+	break;
+      }
+
     case CTF_K_VAR:
       {
 	void *datasec;
@@ -3723,7 +3944,9 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 
 /* Traverse the cd_emission_struct_members and emit the members of all
    structures and unions.  All other types are emitted and complete by this
-   point.  */
+   point, other than decl tags referencing struct/union members, which cannot be
+   emitted until the members have been (and which are not C types, so cannot be
+   referenced by struct members).  */
 
 static int
 ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
@@ -3737,6 +3960,8 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
   int input_num;
   ctf_id_t err_type;
 
+  /* TODO: deduplicate this bit and the corresponding bit in
+     ctf_dedup_emit_decl_tags(), below.  */
   while ((err = ctf_dynhash_next (d->cd_emission_struct_members, &i,
 				  &input_id, &target_id)) == 0)
     {
@@ -3819,6 +4044,122 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
   return ctf_set_errno (output, err);
 }
 
+/* Traverse the cd_emission_struct_decl_tags and emit all the decl tags
+   mentioned there.  All other types are emitted and complete by this
+   point.  */
+
+static int
+ctf_dedup_emit_decl_tags (ctf_dict_t *output, ctf_dict_t **inputs)
+{
+  ctf_dedup_t *d = &output->ctf_dedup;
+  ctf_next_t *i = NULL;
+  void *input_id, *struct_id;
+  int err;
+  ctf_dict_t *err_fp, *input_fp;
+  int input_num;
+  ctf_id_t err_type;
+
+  while ((err = ctf_dynhash_next (d->cd_emission_struct_decl_tags, &i,
+				  &input_id, &struct_id)) == 0)
+    {
+      ctf_dict_t *target;
+      uint32_t target_num;
+      ctf_id_t input_type, struct_type, new_type;
+      const char *name;
+      int64_t component_idx;
+      int isroot;
+      const char *hval;
+
+      input_num = CTF_DEDUP_GID_TO_INPUT (input_id);
+      input_fp = inputs[input_num];
+      input_type = CTF_DEDUP_GID_TO_TYPE (input_id);
+
+      /* The output we want is either -1 (for the shared, parent output dict) or
+	 the number of the input corresponding to the struct we are a decl tag
+	 for.  */
+      target_num = CTF_DEDUP_GID_TO_INPUT (struct_id);
+      if (target_num == (uint32_t) -1)
+	target = output;
+      else
+	{
+	  target = inputs[target_num]->ctf_dedup.cd_output;
+	  if (!ctf_assert (output, target))
+	    {
+	      err_fp = output;
+	      err_type = input_type;
+	      goto err_target;
+	    }
+	}
+      struct_type = CTF_DEDUP_GID_TO_TYPE (struct_id);
+
+      err_fp = input_fp;
+      err_type = input_type;
+
+      if ((isroot = !ctf_type_conflicting (input_fp, input_type, NULL)) < 0)
+	goto err_input;
+
+      if (ctf_decl_tag (input_fp, input_type, &component_idx) == CTF_ERR)
+	goto err_input;
+
+      if ((name = ctf_type_name_raw (input_fp, input_type)) == NULL)
+	goto err_input;
+
+      if ((new_type = ctf_add_decl_tag (target, isroot ? CTF_ADD_ROOT
+					: CTF_ADD_NONROOT,
+					struct_type, name,
+					component_idx)) == CTF_ERR)
+	{
+	  err_fp = target;
+	  err_type = struct_type;
+	  goto err_target;
+	}
+
+      hval = ctf_dynhash_lookup (d->cd_type_hashes,
+				 CTF_DEDUP_GID (output, input_num, input_type));
+
+      if (!ctf_assert (output, hval != NULL))
+	return -1;				/* errno is set for us.  */
+
+      if (new_type != 0
+	  && ctf_dynhash_cinsert (target->ctf_dedup.cd_output_emission_hashes,
+				  hval, (void *) (uintptr_t) new_type) < 0)
+	{
+	  ctf_err_warn (output, 0, ENOMEM,
+			_("out of memory tracking deduplicated global type IDs"));
+	  return ctf_set_errno (output, ENOMEM);
+	}
+
+      if (new_type != 0)
+	ctf_dprintf ("Inserted %s, %i/%lx -> %lx into emission hash for "
+		     "target %p (%s)\n", hval, input_num, input_type,
+		     new_type, (void *) target, ctf_link_input_name (target));
+    }
+  if (err != ECTF_NEXT_END)
+    goto iterr;
+
+  return 0;
+
+ err_input:
+  ctf_next_destroy (i);
+  ctf_set_errno (output, ctf_errno (input_fp));
+  ctf_err_warn (output, 0, ctf_errno (err_fp),
+		_("%s (%i): error looking at decl tag %lx while emitting decl tags"),
+		ctf_link_input_name (input_fp), input_num, err_type);
+  return ctf_set_errno (output, ctf_errno (err_fp));
+
+ err_target:
+  ctf_next_destroy (i);
+  ctf_err_warn (output, 0, ctf_errno (err_fp),
+		_("%s (%i): error emitting decl tag for structure type %lx"),
+		ctf_link_input_name (input_fp), input_num, err_type);
+  return ctf_set_errno (output, ctf_errno (err_fp));
+
+ iterr:
+  ctf_err_warn (output, 0, err, _("iteration failure emitting "
+				  "structure members"));
+  return ctf_set_errno (output, err);
+}
+
 /* Emit deduplicated types into the outputs.  The shared type repository is
    OUTPUT, on which the ctf_dedup function must have already been called.  The
    PARENTS array contains the INPUTS index of the parent dict for every child
@@ -3850,6 +4191,10 @@ ctf_dedup_emit (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
   ctf_dprintf ("Populating struct members.\n");
   if (ctf_dedup_emit_struct_members (output, inputs, ninputs, parents) < 0)
     return NULL;				/* errno is set for us.  */
+
+  ctf_dprintf ("Populating decl tags pointing at struct members.\n");
+  if (ctf_dedup_emit_decl_tags (output, inputs) < 0)
+    return NULL;
 
   for (i = 0; i < ninputs; i++)
     {

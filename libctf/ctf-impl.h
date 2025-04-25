@@ -331,7 +331,9 @@ typedef struct ctf_dedup
   /* Maps type hash values to a set of hash values of the types that cite them:
      i.e., pointing backwards up the type graph.  Used for recursive conflict
      marking.  Citations from tagged structures, unions, and forwards do not
-     appear in this graph.  */
+     appear in this graph, except that decorated names of tagged structs and
+     unions are mapped to hash values of decl tags that cite specific struct
+     fields.  */
   ctf_dynhash_t *cd_citers;
 
   /* Maps type hash values to input global type IDs.  The value is a set (a
@@ -358,6 +360,11 @@ typedef struct ctf_dedup
      ID represents a *target* ID (i.e. the cd_output_mapping of some specified
      input): we encode the shared (parent) dict with an ID of -1.  */
   ctf_dynhash_t *cd_emission_struct_members;
+
+  /* Maps the global type IDs of input decl tags that cite structure members to
+     the global type IDs of the structures they tag: these are all emitted
+     late.  */
+  ctf_dynhash_t *cd_emission_struct_decl_tags;
 
   /* A set (a hash) of hash values of conflicting types.  */
   ctf_dynset_t *cd_conflicting_types;
