@@ -96,6 +96,12 @@ public:
   bool store_memtags (CORE_ADDR address, size_t len,
 		      const gdb::byte_vector &tags, int type) override;
 
+  ULONGEST tdesc_parameter_value (regcache *regcache,
+				  unsigned int param_id) override;
+
+  bool is_register_relevant_for_tdesc_parameter (const target_desc *tdesc,
+						 int regnum) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -144,6 +150,8 @@ protected:
   bool low_supports_catch_syscall () override;
 
   void low_get_syscall_trapinfo (regcache *regcache, int *sysno) override;
+
+  bool low_fetch_register (regcache *regcache, int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -1078,6 +1086,24 @@ aarch64_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
     }
   else
     collect_register_by_name (regcache, "r7", sysno);
+}
+
+bool
+aarch64_target::low_fetch_register (regcache *regcache, int regno)
+{
+  if (regno != AARCH64_SVE_VG_REGNUM)
+    return false;
+
+  user_sve_header header;
+  if (!read_sve_header (current_thread->id.lwp (), header))
+    return false;
+
+  uint64_t vg = sve_vg_from_vl (header.vl);
+  regcache->raw_supply (AARCH64_SVE_VG_REGNUM,
+			gdb::make_array_view ((const gdb_byte *) &vg,
+					      sizeof (vg)));
+
+  return true;
 }
 
 /* List of condition codes that we need.  */
@@ -3496,6 +3522,68 @@ aarch64_target::store_memtags (CORE_ADDR address, size_t len,
     return aarch64_mte_store_memtags (tid, address, len, tags);
 
   return false;
+}
+
+/* FIXME: Document.  */
+/* Note: In the XML, vector_length is used in bitsize fields, but internally
+   GDB expects the size in bytes.  */
+
+ULONGEST
+aarch64_target::tdesc_parameter_value (regcache *regcache,
+				       unsigned int param_id)
+{
+  gdb_assert (param_id != UINT_MAX);
+
+  /* FIXME: Find some place to cache these values.  */
+  unsigned int sve_vector_length, sve_predicate_length;
+  ULONGEST ret;
+
+  std::optional<unsigned int> maybe_param_id
+    = tdesc_parameter_id (regcache->tdesc, "org.gnu.gdb.aarch64.sve",
+			  "vector_length");
+  if (maybe_param_id.has_value ())
+    sve_vector_length = *maybe_param_id;
+  else
+    sve_vector_length = UINT_MAX;
+
+  maybe_param_id = tdesc_parameter_id (regcache->tdesc,
+				       "org.gnu.gdb.aarch64.sve",
+				       "predicate_length");
+  if (maybe_param_id.has_value ())
+    sve_predicate_length = *maybe_param_id;
+  else
+    sve_predicate_length = UINT_MAX;
+
+  if (param_id == sve_vector_length)
+    {
+      register_status status
+	= regcache_raw_read_unsigned (regcache, AARCH64_SVE_VG_REGNUM, &ret);
+      gdb_assert (status == REG_VALID);
+
+      ret = sve_vl_from_vg (ret);
+    }
+  else if (param_id == sve_predicate_length)
+    {
+      register_status status
+	= regcache_raw_read_unsigned (regcache, AARCH64_SVE_VG_REGNUM, &ret);
+      gdb_assert (status == REG_VALID);
+    } else
+      gdb_assert_not_reached ("Unknown parameter %u requested.", param_id);
+
+  return ret;
+}
+
+/* FIXME: Document.  */
+
+bool
+aarch64_target::is_register_relevant_for_tdesc_parameter (const target_desc *tdesc,
+							  int regnum)
+{
+  if (tdesc->parameters.size () == 0)
+    return false;
+  else
+    /* All current AArch64 parameters depend on VG.  */
+    return regnum == AARCH64_SVE_VG_REGNUM;
 }
 
 /* The linux target ops object.  */
