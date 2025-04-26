@@ -530,6 +530,13 @@ public:
      Returns true if successful and false otherwise.  */
   virtual bool store_memtags (CORE_ADDR address, size_t len,
 			      const gdb::byte_vector &tags, int type);
+
+
+  virtual ULONGEST tdesc_parameter_value (regcache *regcache,
+					  unsigned int param_id);
+
+  virtual bool is_register_relevant_for_tdesc_parameter
+    (const target_desc *tdesc, int regnum);
 };
 
 extern process_stratum_target *the_target;
@@ -753,6 +760,19 @@ static inline std::string
 target_thread_id_str (thread_info *thread)
 {
   return the_target->thread_id_str (thread);
+}
+
+static inline ULONGEST
+target_desc_parameter_value (regcache *regcache, unsigned int param_id)
+{
+  return the_target->tdesc_parameter_value (regcache, param_id);
+}
+
+static inline bool
+target_is_register_relevant_for_tdesc_parameter (const target_desc *tdesc,
+						 int regnum)
+{
+  return the_target->is_register_relevant_for_tdesc_parameter (tdesc, regnum);
 }
 
 #endif /* GDBSERVER_TARGET_H */

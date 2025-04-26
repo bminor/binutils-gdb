@@ -51,6 +51,65 @@ void target_desc::accept (tdesc_element_visitor &v) const
 #endif
 }
 
+/* Return bit size of given TYPE.  */
+
+static unsigned int
+tdesc_type_bitsize (const tdesc_type *type)
+{
+  switch (type->kind) {
+  case TDESC_TYPE_INT8:
+  case TDESC_TYPE_UINT8:
+    return 8;
+  case TDESC_TYPE_IEEE_HALF:
+  case TDESC_TYPE_INT16:
+  case TDESC_TYPE_UINT16:
+  case TDESC_TYPE_BFLOAT16:
+    return 16;
+  case TDESC_TYPE_IEEE_SINGLE:
+  case TDESC_TYPE_INT32:
+  case TDESC_TYPE_UINT32:
+    return 32;
+  case TDESC_TYPE_IEEE_DOUBLE:
+  case TDESC_TYPE_INT64:
+  case TDESC_TYPE_UINT64:
+    return 64;
+  case TDESC_TYPE_I387_EXT:
+    return 80;
+  case TDESC_TYPE_ARM_FPA_EXT:
+    return 96;
+  case TDESC_TYPE_INT128:
+  case TDESC_TYPE_UINT128:
+    return 128;
+  default:
+    /* The other types require a gdbarch to determine their size.  */
+    error ("Target description uses unsupported type in variable-size register.");
+  }
+}
+
+/* FIXME: Document.  */
+
+std::optional<unsigned int>
+tdesc_parameter_id (const target_desc *tdesc, const char *feature,
+		    const char *param_name)
+{
+  for (int i = 0; i < tdesc->parameters.size (); i++)
+    {
+      const tdesc_arch_parameter &parameter = tdesc->parameters[i];
+      if (parameter.feature == feature && parameter.name == param_name)
+	return i;
+    }
+
+  return {};
+}
+
+/* FIXME: Document.  */
+
+unsigned int
+tdesc_parameter_size (const target_desc *tdesc, unsigned param_id)
+{
+  return tdesc->parameters[param_id].size;
+}
+
 void
 init_target_desc (struct target_desc *tdesc,
 		  const char **expedite_regs,
@@ -60,20 +119,26 @@ init_target_desc (struct target_desc *tdesc,
 
   /* Go through all the features and populate reg_defs.  */
   for (const tdesc_feature_up &feature : tdesc->features)
-    for (const tdesc_reg_up &treg : feature->registers)
-      {
-	int regnum = treg->target_regnum;
+    {
+      for (const tdesc_parameter_up &parameter: feature->parameters)
+	tdesc->parameters.emplace_back (parameter->feature, parameter->name,
+					tdesc_type_bitsize (parameter->type) / 8);
 
-	/* Register number will increase (possibly with gaps) or be zero.  */
-	gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
+      for (const tdesc_reg_up &treg : feature->registers)
+	{
+	  int regnum = treg->target_regnum;
 
-	if (regnum != 0)
-	  tdesc->reg_defs.resize (regnum, gdb::reg (offset));
+	  /* Register number will increase (possibly with gaps) or be zero.  */
+	  gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
 
-	tdesc->reg_defs.emplace_back (treg->name.c_str (), offset,
-				      treg->bitsize);
-	offset += treg->bitsize;
-      }
+	  if (regnum != 0)
+	    tdesc->reg_defs.resize (regnum, gdb::reg (offset));
+
+	  tdesc->reg_defs.emplace_back (treg->name.c_str (), offset,
+					treg->bitsize);
+	  offset += treg->bitsize;
+	}
+    }
 
   tdesc->registers_size = offset / 8;
 

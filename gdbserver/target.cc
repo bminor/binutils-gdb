@@ -857,3 +857,17 @@ process_stratum_target::get_ipa_tdesc_idx ()
 {
   return 0;
 }
+
+ULONGEST
+process_stratum_target::tdesc_parameter_value (regcache *regcache,
+					       unsigned int param_id)
+{
+  error (_("Target does not support target description parameters."));
+}
+
+bool
+process_stratum_target::is_register_relevant_for_tdesc_parameter
+  (const target_desc *tdesc, int regnum)
+{
+  return false;
+}

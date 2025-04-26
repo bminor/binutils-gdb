@@ -536,12 +536,6 @@ void tdesc_create_reg (struct tdesc_feature *feature, const char *name,
 		       const tdesc_parameter &bitsize_parameter,
 		       const char *type);
 
-/* Return internal ID of PARAMETER from FEATURE.  */
-
-std::optional<unsigned int> tdesc_parameter_id (const target_desc *target_desc,
-						const char *feature,
-						const char *parameter);
-
 /* Add PARAMETER to FEATURE.  */
 
 const tdesc_parameter & tdesc_create_parameter (tdesc_feature &feature,

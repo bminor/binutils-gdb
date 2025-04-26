@@ -25,6 +25,23 @@
 #include "regdef.h"
 #include <vector>
 
+struct tdesc_arch_parameter
+{
+  tdesc_arch_parameter (std::string &feature_, std::string &name_,
+			unsigned int size_)
+    : feature (feature_), name (name_), size (size_)
+  {}
+
+  /* Feature to which the parameter belongs.  */
+  std::string feature;
+
+  /* The name of the parameter.  */
+  std::string name;
+
+  /* The size of a parameter value.  */
+  unsigned int size;
+};
+
 /* A target description.  Inherit from tdesc_feature so that target_desc
    can be used as tdesc_feature.  */
 
@@ -39,6 +56,9 @@ struct target_desc final : tdesc_element
 
   /* XML features in this target description.  */
   std::vector<tdesc_feature_up> features;
+
+  /* The index into the vector is the internal ID for the parameter. */
+  std::vector<tdesc_arch_parameter> parameters;
 
 #ifndef IN_PROCESS_AGENT
   /* A vector of register names.  These are the "expedite" registers:
@@ -97,5 +117,13 @@ const struct target_desc *current_target_desc (void);
    Return false otherwise.  */
 bool tdesc_contains_feature (const target_desc *tdesc,
 			     const std::string &feature);
+
+/* FIXME: Document.  */
+unsigned int tdesc_parameter_size (const target_desc *tdesc, unsigned param_id);
+
+/* FIXME: Document.  */
+std::optional<unsigned int> tdesc_parameter_id (const target_desc *tdesc,
+						const char *feature,
+						const char *param_name);
 
 #endif /* GDBSERVER_TDESC_H */
