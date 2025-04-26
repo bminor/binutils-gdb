@@ -112,7 +112,7 @@ regcache_invalidate (void)
 #endif
 
 regcache::regcache (const target_desc *tdesc, unsigned char *regbuf)
-  : tdesc (tdesc), registers (regbuf)
+  : tdesc (tdesc), fixed_size_registers (regbuf)
 {
   gdb_assert (regbuf != nullptr);
 }
@@ -122,14 +122,14 @@ regcache::regcache (const target_desc *tdesc, unsigned char *regbuf)
 regcache::regcache (const target_desc *tdesc)
   : tdesc (tdesc), registers_owned (true)
 {
-  gdb_assert (tdesc->registers_size != 0);
+  gdb_assert (tdesc->fixed_registers_size != 0);
 
   /* Make sure to zero-initialize the register cache when it is
      created, in case there are registers the target never
      fetches.  This way they'll read as zero instead of
      garbage.  */
-  this->registers
-    = (unsigned char *) xmalloc (tdesc->registers_size);
+  this->fixed_size_registers
+    = (unsigned char *) xmalloc (tdesc->fixed_registers_size);
   size_t num_regs = tdesc->reg_defs.size ();
   m_register_status.reset (new enum register_status[num_regs]);
   reset (REG_UNKNOWN);
@@ -138,7 +138,7 @@ regcache::regcache (const target_desc *tdesc)
 regcache::~regcache ()
 {
   if (registers_owned)
-    free (registers);
+    free (fixed_size_registers);
 }
 
 #endif
@@ -149,10 +149,14 @@ regcache::reset (enum register_status status)
   /* Zero-initialize the register cache, in case there are registers
      the target never fetches.  This way they'll read as zero instead
      of garbage.  */
-  memset (this->registers, 0, this->tdesc->registers_size);
+  memset (this->fixed_size_registers, 0, this->tdesc->fixed_registers_size);
 #ifndef IN_PROCESS_AGENT
+  this->variable_size_registers.reset ();
+
   for (int i = 0; i < this->tdesc->reg_defs.size (); i++)
     set_register_status (i, status);
+
+  invalidate_variable_size_registers ();
 #endif
 }
 
@@ -163,7 +167,7 @@ regcache::copy_from (regcache *src)
   gdb_assert (src->tdesc == this->tdesc);
   gdb_assert (src != this);
 
-  memcpy (this->registers, src->registers, src->tdesc->registers_size);
+  memcpy (this->fixed_size_registers, src->fixed_size_registers, src->tdesc->fixed_registers_size);
 #ifndef IN_PROCESS_AGENT
   if (m_register_status != nullptr && src->m_register_status != nullptr)
     memcpy (m_register_status.get (), src->m_register_status.get (),
@@ -217,7 +221,7 @@ registers_to_string (struct regcache *regcache, char *buf)
   for (int i = 0; i < tdesc->reg_defs.size (); ++i)
     {
       collect_register_as_string (regcache, i, buf);
-      buf += register_size (tdesc, i) * 2;
+      buf += regcache->register_size (i) * 2;
     }
 }
 
@@ -225,17 +229,32 @@ void
 registers_from_string (struct regcache *regcache, char *buf)
 {
   int len = strlen (buf);
-  unsigned char *registers = regcache->registers;
+  unsigned char *registers = regcache->fixed_size_registers;
+  unsigned char *var_size_registers = regcache->variable_size_registers.get ();
   const struct target_desc *tdesc = regcache->tdesc;
+  int expected_len = (tdesc->fixed_registers_size + regcache->variable_registers_size) * 2;
 
-  if (len != tdesc->registers_size * 2)
+  if (len != expected_len)
     {
       warning ("Wrong sized register packet (expected %d bytes, got %d)",
-	       2 * tdesc->registers_size, len);
-      if (len > tdesc->registers_size * 2)
-	len = tdesc->registers_size * 2;
+	       expected_len, len);
+      if (len > expected_len)
+	len = expected_len;
     }
-  hex2bin (buf, registers, len / 2);
+
+  for (int i = 0; i < tdesc->reg_defs.size (); ++i)
+    {
+      int reg_size = regcache->register_size (i);
+      unsigned char *regs;
+
+      if (tdesc->reg_defs[i].size == TDESC_REG_VARIABLE_SIZE)
+	regs = var_size_registers;
+      else
+	regs = registers;
+
+      hex2bin (buf, regs, reg_size);
+      buf += reg_size * 2;
+    }
 }
 
 /* See regcache.h */
@@ -282,16 +301,77 @@ regcache_release (void)
 }
 #endif
 
+#ifndef IN_PROCESS_AGENT
+/* See regcache.h */
+
+void
+regcache::initialize_variable_size_registers ()
+{
+  const unsigned int num_regs = tdesc->reg_defs.size ();
+  int total_size = 0;
+
+  variable_size_sizes.resize (num_regs);
+  variable_size_offsets.resize (num_regs);
+
+  for (int i = 0; i < num_regs; i++)
+    {
+      const gdb::reg &reg = tdesc->reg_defs[i];
+      if (reg.size != TDESC_REG_VARIABLE_SIZE)
+	{
+	  variable_size_sizes[i] = -1;
+	  variable_size_offsets[i] = -1;
+	  continue;
+	}
+
+      long size = target_desc_parameter_value (this, reg.bitsize_parameter);
+      variable_size_sizes[i] = size;
+      variable_size_offsets[i] = total_size;
+      total_size += size;
+    }
+
+  variable_size_registers.reset (new unsigned char[total_size]);
+  variable_registers_size = total_size;
+}
+
+/* See regcache.h */
+
+void
+regcache::invalidate_variable_size_registers ()
+{
+  /* There's nothing to do if there are already no variable-size register
+     contents.  */
+  if (variable_size_registers == nullptr)
+    return;
+
+  for (unsigned int i = 0; i < tdesc->reg_defs.size (); i++)
+    {
+      const gdb::reg &reg = tdesc->reg_defs[i];
+      if (reg.size == TDESC_REG_VARIABLE_SIZE)
+	set_register_status (i, REG_UNKNOWN);
+    }
+
+  variable_size_registers = nullptr;
+  variable_size_sizes.clear ();
+  variable_size_offsets.clear ();
+}
+#endif
+
 int
 register_cache_size (const struct target_desc *tdesc)
 {
-  return tdesc->registers_size;
+  /* Variable-size registers aren't considered here because this function is
+     only used for tracepoints.  */
+  return tdesc->fixed_registers_size;
 }
 
 int
 register_size (const struct target_desc *tdesc, int n)
 {
-  return find_register_by_number (tdesc, n).size / 8;
+  const gdb::reg &reg = find_register_by_number (tdesc, n);
+
+  gdb_assert (reg.size != TDESC_REG_VARIABLE_SIZE);
+
+  return reg.size / 8;
 }
 
 /* See gdbsupport/common-regcache.h.  */
@@ -299,15 +379,46 @@ register_size (const struct target_desc *tdesc, int n)
 int
 regcache::register_size (int regnum) const
 {
-  return ::register_size (tdesc, regnum);
+  const gdb::reg &reg = find_register_by_number (tdesc, regnum);
+
+  if (reg.size == TDESC_REG_VARIABLE_SIZE)
+    {
+#ifndef IN_PROCESS_AGENT
+      if (!variable_size_registers)
+	// FIXME: Remove cast.
+	const_cast<struct regcache *> (this)->initialize_variable_size_registers ();
+
+      return variable_size_sizes[regnum];
+#else
+      gdb_assert_not_reached ("Variable-size registers not supported.");
+#endif
+    }
+  else
+    return reg.size / 8;
 }
 
 static gdb::array_view<gdb_byte>
 register_data (const struct regcache *regcache, int n)
 {
   const gdb::reg &reg = find_register_by_number (regcache->tdesc, n);
-  return gdb::make_array_view (regcache->registers + reg.offset / 8,
-			       reg.size / 8);
+
+  if (reg.size == TDESC_REG_VARIABLE_SIZE)
+    {
+#ifndef IN_PROCESS_AGENT
+      if (!regcache->variable_size_registers)
+	// FIXME: Remove cast.
+	const_cast<struct regcache *> (regcache)->initialize_variable_size_registers ();
+
+      return gdb::make_array_view (regcache->variable_size_registers.get ()
+				   + regcache->variable_size_offsets[n],
+				   regcache->variable_size_sizes[n]);
+#else
+      gdb_assert_not_reached ("Variable-size registers not supported.");
+#endif
+    }
+  else
+    return gdb::make_array_view (regcache->fixed_size_registers + reg.offset / 8,
+				 reg.size / 8);
 }
 
 void
@@ -339,6 +450,12 @@ regcache::raw_supply (int n, gdb::array_view<const gdb_byte> src)
       set_register_status (n, REG_UNAVAILABLE);
 #endif
     }
+
+#ifndef IN_PROCESS_AGENT
+  if (target_is_register_relevant_for_tdesc_parameter (this->tdesc, n))
+    /* Invalidate variable-size registers.  */
+    this->invalidate_variable_size_registers ();
+#endif
 }
 
 /* Supply register N with value zero to REGCACHE.  */
@@ -385,7 +502,7 @@ supply_regblock (struct regcache *regcache, const void *buf)
   gdb_assert (buf != nullptr);
   const struct target_desc *tdesc = regcache->tdesc;
 
-  memcpy (regcache->registers, buf, tdesc->registers_size);
+  memcpy (regcache->fixed_size_registers, buf, tdesc->fixed_registers_size);
 #ifndef IN_PROCESS_AGENT
   for (int i = 0; i < tdesc->reg_defs.size (); i++)
     regcache->set_register_status (i, REG_VALID);
@@ -429,7 +546,7 @@ regcache_raw_read_unsigned (reg_buffer_common *reg_buf, int regnum,
 
   gdb_assert (regcache != NULL);
 
-  size = register_size (regcache->tdesc, regnum);
+  size = regcache->register_size (regnum);
 
   if (size > (int) sizeof (ULONGEST))
     error (_("That operation is not available on integers of more than"
@@ -457,7 +574,7 @@ regcache_raw_get_unsigned_by_name (struct regcache *regcache,
 void
 collect_register_as_string (struct regcache *regcache, int n, char *buf)
 {
-  int reg_size = register_size (regcache->tdesc, n);
+  int reg_size = regcache->register_size (n);
 
   if (regcache->get_register_status (n) == REG_VALID)
     bin2hex (register_data (regcache, n), buf);

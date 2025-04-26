@@ -52,7 +52,7 @@ struct target_desc final : tdesc_element
   std::vector<struct gdb::reg> reg_defs;
 
   /* The register cache size, in bytes.  */
-  int registers_size;
+  int fixed_registers_size;
 
   /* XML features in this target description.  */
   std::vector<tdesc_feature_up> features;
@@ -82,7 +82,7 @@ struct target_desc final : tdesc_element
 
 public:
   target_desc ()
-    : registers_size (0)
+    : fixed_registers_size (0)
   {}
 
   bool operator== (const target_desc &other) const;

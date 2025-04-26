@@ -4738,7 +4738,7 @@ traceframe_walk_blocks (unsigned char *database, unsigned int datasize,
 	{
 	case 'R':
 	  /* Skip over the registers block.  */
-	  dataptr += current_target_desc ()->registers_size;
+	  dataptr += current_target_desc ()->fixed_registers_size;
 	  break;
 	case 'M':
 	  /* Skip over the memory block.  */
@@ -5361,14 +5361,14 @@ gdb_collect (struct tracepoint *tpoint, unsigned char *regs)
 
   /* Wrap the regblock in a register cache (in the stack, we don't
      want to malloc here).  */
-  ctx.regspace = (unsigned char *) alloca (ipa_tdesc->registers_size);
+  ctx.regspace = (unsigned char *) alloca (ipa_tdesc->fixed_registers_size);
   if (ctx.regspace == NULL)
     {
       trace_debug ("Trace buffer block allocation failed, skipping");
       return;
     }
 
-  memset (ctx.regspace, 0, ipa_tdesc->registers_size);
+  memset (ctx.regspace, 0, ipa_tdesc->fixed_registers_size);
 
   for (ctx.tpoint = tpoint;
        ctx.tpoint != NULL && ctx.tpoint->address == tpoint->address;

@@ -21,6 +21,11 @@
 
 namespace gdb {
 
+/* Copied from gdbsupport/tdesc.h because I couldn't find an appropriate
+   header that would work for gdbserver/regcache.cc.  */
+
+#define TDESC_REG_VARIABLE_SIZE -1
+
 struct reg
 {
   reg (int _offset)
@@ -32,7 +37,15 @@ struct reg
   reg (const char *_name, int _offset, int _size)
     : name (_name),
       offset (_offset),
-      size (_size)
+      size (_size),
+      bitsize_parameter (UINT_MAX)
+  {}
+
+  reg (const char *_name, int _offset, unsigned int _bitsize_parameter)
+    : name (_name),
+      offset (_offset),
+      size (TDESC_REG_VARIABLE_SIZE),
+      bitsize_parameter (_bitsize_parameter)
   {}
 
   /* The name of this register - NULL for pad entries.  */
@@ -46,14 +59,26 @@ struct reg
   /* The offset (in bits) of the value of this register in the buffer.  */
   int offset;
 
-  /* The size (in bits) of the value of this register, as transmitted.  */
+  /* The size (in bits) of the value of this register, as transmitted.  If
+     it's TDESC_REG_VARIABLE_SIZE then this register contains a vector with
+     total vector size given by BITSIZE_PARAMETER, and each element has a
+     size of ELEMENT_BITSIZE.  */
   int size;
+
+  /* Size of each element in the vector.  Only valid if
+     size == TDESC_REG_VARIABLE_SIZE.  */
+  unsigned int element_bitsize;
+
+  /* Target description parameter giving the bitsize of the vector.  Only
+     valid if size == TDESC_REG_VARIABLE_SIZE.  */
+  unsigned int bitsize_parameter;
 
   bool operator== (const reg &other) const
   {
     return (strcmp (name, other.name) == 0
 	    && offset == other.offset
-	    && size == other.size);
+	    && size == other.size
+	    && bitsize_parameter == other.bitsize_parameter);
   }
 
   bool operator!= (const reg &other) const

@@ -1048,7 +1048,7 @@ outreg (struct regcache *regcache, int regno, char *buf)
   *buf++ = tohex (regno & 0xf);
   *buf++ = ':';
   collect_register_as_string (regcache, regno, buf);
-  buf += 2 * register_size (regcache->tdesc, regno);
+  buf += 2 * regcache->register_size (regno);
   *buf++ = ';';
 
   return buf;

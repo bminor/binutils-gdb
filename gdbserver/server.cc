@@ -4135,7 +4135,7 @@ static void test_registers_raw_compare_zero_length ()
   target_desc dummy_tdesc;
 
   /* Make it 8 bytes long.  */
-  dummy_tdesc.registers_size = 8;
+  dummy_tdesc.fixed_registers_size = 8;
 
   /* Add a couple dummy 32-bit registers.  */
   dummy_tdesc.reg_defs.emplace_back ("r0", 0, 32);

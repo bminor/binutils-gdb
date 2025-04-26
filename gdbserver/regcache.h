@@ -42,12 +42,30 @@ struct regcache : public reg_buffer_common
      below.  */
   bool registers_fetched = false;
   bool registers_owned = false;
-  unsigned char *registers = nullptr;
+  unsigned char *fixed_size_registers = nullptr;
 #ifndef IN_PROCESS_AGENT
+  /* The variable-size register buffers (if any).  */
+  std::unique_ptr<unsigned char[]> variable_size_registers;
+
+  /* Size of the variable_size_registers buffer, if there is one.  */
+  int variable_registers_size;
+
+  /* Offsets into variable_size_registers.  */
+  std::vector<long> variable_size_offsets;
+
+  /* Size of each variable-size register.  */
+  std::vector<long> variable_size_sizes;
+
   /* Construct a regcache using the register layout described by TDESC.
 
      The regcache dynamically allocates its register buffer.  */
   regcache (const target_desc *tdesc);
+
+  /* Initialize information about variable-size registers in this regcache.  */
+  void initialize_variable_size_registers ();
+
+  /* Reset information about variable-size registers in this regcache.  */
+  void invalidate_variable_size_registers ();
 
   /* Destructor.  */
   ~regcache ();

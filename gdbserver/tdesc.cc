@@ -110,6 +110,40 @@ tdesc_parameter_size (const target_desc *tdesc, unsigned param_id)
   return tdesc->parameters[param_id].size;
 }
 
+/* Sets up REG's size information using TYPE.  */
+
+static void
+setup_variable_size_reg (const target_desc *tdesc, tdesc_type *type,
+			 gdb::reg &reg)
+{
+  /* We only support vector types or unions containing vector types as
+     variable-size.  */
+  gdb_assert (type->kind == TDESC_TYPE_UNION
+	      || type->kind == TDESC_TYPE_VECTOR);
+
+  if (type->kind == TDESC_TYPE_VECTOR)
+    {
+      tdesc_type_vector *vec_type = static_cast<tdesc_type_vector *> (type);
+
+      reg.element_bitsize = tdesc_type_bitsize (vec_type->element_type);
+      std::optional<unsigned int> maybe_param_id
+	= tdesc_parameter_id (tdesc, vec_type->bitsize_parameter->feature.c_str (),
+			      vec_type->bitsize_parameter->name.c_str ());
+      gdb_assert (maybe_param_id.has_value ());
+
+      reg.bitsize_parameter = *maybe_param_id;
+    }
+  else
+    {
+      tdesc_type_with_fields *union_type
+	= static_cast<tdesc_type_with_fields *> (type);
+
+      /* We assume that all fields in the union have the same size, so
+	 just get the first one.  */
+      setup_variable_size_reg (tdesc, union_type->fields.front ().type, reg);
+    }
+}
+
 void
 init_target_desc (struct target_desc *tdesc,
 		  const char **expedite_regs,
@@ -136,15 +170,24 @@ init_target_desc (struct target_desc *tdesc,
 
 	  tdesc->reg_defs.emplace_back (treg->name.c_str (), offset,
 					treg->bitsize);
-	  offset += treg->bitsize;
+
+	  if (treg->bitsize == TDESC_REG_VARIABLE_SIZE)
+	    {
+	      tdesc_type *type
+		  = tdesc_named_type (feature.get (), treg->type.c_str ());
+
+	      setup_variable_size_reg (tdesc, type, tdesc->reg_defs.back ());
+	    }
+	  else
+	    offset += treg->bitsize;
 	}
     }
 
-  tdesc->registers_size = offset / 8;
+  tdesc->fixed_registers_size = offset / 8;
 
   /* Make sure PBUFSIZ is large enough to hold a full register
      packet.  */
-  gdb_assert (2 * tdesc->registers_size + 32 <= PBUFSIZ);
+  gdb_assert (2 * tdesc->fixed_registers_size + 32 <= PBUFSIZ);
 
 #ifndef IN_PROCESS_AGENT
   /* Drop the contents of the previous vector, if any.  */
@@ -185,7 +228,7 @@ copy_target_description (struct target_desc *dest,
 {
   dest->reg_defs = src->reg_defs;
   dest->expedite_regs = src->expedite_regs;
-  dest->registers_size = src->registers_size;
+  dest->fixed_registers_size = src->fixed_registers_size;
   dest->xmltarget = src->xmltarget;
 }
 
