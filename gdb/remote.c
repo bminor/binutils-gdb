@@ -8954,8 +8954,14 @@ remote_target::supply_expedited_registers (regcache *regcache,
     }
 
   if (regcache->has_variable_size_registers ())
-    rs->get_remote_arch_state (regcache->arch ())
-      ->update_packet_size (regcache, rs);
+    {
+      /* Presumably, the expedited registers allow recalculating the target
+	 description parameters.  */
+      regcache->update_tdesc_parameters ();
+
+      rs->get_remote_arch_state (regcache->arch ())
+	->update_packet_size (regcache, rs);
+    }
 }
 
 /* Called when it is decided that STOP_REPLY holds the info of the
@@ -9507,6 +9513,15 @@ remote_target::process_g_packet (struct regcache *regcache)
 void
 remote_target::fetch_registers_using_g (struct regcache *regcache)
 {
+  if (regcache->has_variable_size_registers ())
+    {
+      regcache->update_tdesc_parameters ();
+
+      remote_state *rs = get_remote_state ();
+      remote_arch_state *rsa = rs->get_remote_arch_state (regcache->arch ());
+      rsa->update_packet_size (regcache, rs);
+    }
+
   send_g_packet ();
   process_g_packet (regcache);
 }

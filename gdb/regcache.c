@@ -1408,6 +1408,15 @@ readable_regcache::update_tdesc_parameter (unsigned int param_id)
 
 /* See regcache.h.  */
 
+void
+readable_regcache::update_tdesc_parameters ()
+{
+  for (unsigned int i = 0; i < m_tdesc_parameter_status.size (); i++)
+    update_tdesc_parameter (i);
+}
+
+/* See regcache.h.  */
+
 register_status
 readable_regcache::tdesc_parameter_value (unsigned int param_id,
 					  gdb::array_view<gdb_byte> dst)

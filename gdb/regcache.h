@@ -405,6 +405,9 @@ public:
   void update_tdesc_parameter (unsigned int param_id);
 
   /* FIXME: Document.  */
+  void update_tdesc_parameters ();
+
+  /* FIXME: Document.  */
   register_status tdesc_parameter_value (unsigned int param_id,
 					 gdb::array_view<gdb_byte> dst);
 
