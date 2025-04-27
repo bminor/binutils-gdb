@@ -6292,26 +6292,27 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    }
 	  else
 	    {
-	      if (p->p_type == PT_LOAD)
+	      if (this_hdr->sh_type == SHT_NOBITS
+		  && (this_hdr->sh_flags & SHF_TLS) != 0
+		  && this_hdr->sh_offset == 0)
+		{
+		  /* Set sh_offset for .tbss sections to their nominal
+		     offset after aligning.  They are not loaded from
+		     disk so the value doesn't really matter, except
+		     when the .tbss section is the first one in a
+		     PT_TLS segment.  In that case it sets the
+		     p_offset for the PT_TLS segment, which according
+		     to the ELF gABI ought to satisfy
+		     p_offset % p_align == p_vaddr % p_align.  */
+		  bfd_vma adjust = vma_page_aligned_bias (this_hdr->sh_addr,
+							  off, align);
+		  this_hdr->sh_offset = sec->filepos = off + adjust;
+		}
+	      else if (p->p_type == PT_LOAD)
 		{
 		  this_hdr->sh_offset = sec->filepos = off;
 		  if (this_hdr->sh_type != SHT_NOBITS)
 		    off += this_hdr->sh_size;
-		}
-	      else if (this_hdr->sh_type == SHT_NOBITS
-		       && (this_hdr->sh_flags & SHF_TLS) != 0
-		       && this_hdr->sh_offset == 0)
-		{
-		  /* This is a .tbss section that didn't get a PT_LOAD.
-		     (See _bfd_elf_map_sections_to_segments "Create a
-		     final PT_LOAD".)  Set sh_offset to the value it
-		     would have if we had created a zero p_filesz and
-		     p_memsz PT_LOAD header for the section.  This
-		     also makes the PT_TLS header have the same
-		     p_offset value.  */
-		  bfd_vma adjust = vma_page_aligned_bias (this_hdr->sh_addr,
-							  off, align);
-		  this_hdr->sh_offset = sec->filepos = off + adjust;
 		}
 
 	      if (this_hdr->sh_type != SHT_NOBITS)
