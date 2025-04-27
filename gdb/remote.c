@@ -700,6 +700,9 @@ public: /* data */
      immediately, so queue is not needed for them.  */
   std::vector<stop_reply_up> stop_reply_queue;
 
+  /* Contains the stop reply packet when first starting the inferior.  */
+  gdb::char_vector first_stop_reply;
+
   /* FIXME: cagney/1999-09-23: Even though getpkt was called with
      ``forever'' still use the normal timeout mechanism.  This is
      currently used by the ASYNC code to guarantee that target reads
@@ -1324,6 +1327,8 @@ public: /* Remote specific methods.  */
   ptid_t select_thread_for_ambiguous_stop_reply
     (const struct target_waitstatus &status);
 
+  void supply_early_registers (regcache *regcache) override;
+
   void remote_notice_new_inferior (ptid_t currthread, bool executing);
 
   void print_one_stopped_thread (thread_info *thread);
@@ -1526,6 +1531,9 @@ private:
   remote_exec_and_args_info fetch_remote_executable_and_arguments ();
 
   bool start_remote_1 (int from_tty, int extended_p);
+
+  void supply_expedited_registers (regcache *regcache,
+				   std::vector<cached_reg_t> &expedited_regs);
 
   /* The remote state.  Don't reference this directly.  Use the
      get_remote_state method instead.  */
@@ -8931,6 +8939,25 @@ remote_target::select_thread_for_ambiguous_stop_reply
     return first_resumed_thread->ptid;
 }
 
+/* Supply the contents of EXPEDITED_REGS to REGCACHE.  */
+
+void
+remote_target::supply_expedited_registers (regcache *regcache,
+					   std::vector<cached_reg_t> &expedited_regs)
+{
+  remote_state *rs = get_remote_state ();
+
+  for (cached_reg_t &reg : expedited_regs)
+    {
+      regcache->raw_supply (reg.num, reg.data);
+      rs->last_seen_expedited_registers.insert (reg.num);
+    }
+
+  if (regcache->has_variable_size_registers ())
+    rs->get_remote_arch_state (regcache->arch ())
+      ->update_packet_size (regcache, rs);
+}
+
 /* Called when it is decided that STOP_REPLY holds the info of the
    event that is to be returned to the core.  This function always
    destroys STOP_REPLY.  */
@@ -8969,16 +8996,7 @@ remote_target::process_stop_reply (stop_reply_up stop_reply,
 	  regcache *regcache
 	    = get_thread_arch_regcache (find_inferior_ptid (this, ptid), ptid,
 					stop_reply->arch);
-
-	  for (cached_reg_t &reg : stop_reply->regcache)
-	    {
-	      regcache->raw_supply (reg.num, reg.data);
-	      rs->last_seen_expedited_registers.insert (reg.num);
-	    }
-
-	  if (regcache->has_variable_size_registers ())
-	    rs->get_remote_arch_state (regcache->arch ())
-	      ->update_packet_size (regcache, rs);
+	  supply_expedited_registers (regcache, stop_reply->regcache);
 	}
 
       remote_thread_info *remote_thr = get_remote_thread_info (this, ptid);
@@ -9002,6 +9020,28 @@ remote_target::process_stop_reply (stop_reply_up stop_reply,
     }
 
   return ptid;
+}
+
+/* See gdb/process-stratum-target.h.  */
+
+void
+remote_target::supply_early_registers (regcache *regcache)
+{
+  remote_state *rs = get_remote_state ();
+
+  if (rs->first_stop_reply.empty ())
+    return;
+
+  notif_event_up reply
+    = remote_notif_parse (this, &notif_client_stop,
+			  rs->first_stop_reply.data ());
+  std::vector<cached_reg_t> &expedited_regs
+    = ((struct stop_reply *) reply.get ())->regcache;
+
+  if (!expedited_regs.empty ())
+    supply_expedited_registers (regcache, expedited_regs);
+
+  rs->first_stop_reply.clear ();
 }
 
 /* The non-stop mode version of target_wait.  */
@@ -11386,7 +11426,6 @@ extended_remote_target::create_inferior (const char *exec_file,
 					 char **env, int from_tty)
 {
   int run_worked;
-  char *stop_reply;
   struct remote_state *rs = get_remote_state ();
   const std::string &remote_exec_file = get_remote_exec_file ();
 
@@ -11419,7 +11458,10 @@ Remote replied unexpectedly while setting startup-with-shell: %s"),
 
   /* Now restart the remote server.  */
   run_worked = extended_remote_run (remote_exec_file, args) != -1;
-  if (!run_worked)
+  if (run_worked)
+    /* vRun's success return is a stop reply.  */
+    rs->first_stop_reply = rs->buf;
+  else
     {
       /* vRun was not supported.  Fail if we need it to do what the
 	 user requested.  */
@@ -11432,9 +11474,7 @@ Remote replied unexpectedly while setting startup-with-shell: %s"),
       extended_remote_restart ();
     }
 
-  /* vRun's success return is a stop reply.  */
-  stop_reply = run_worked ? rs->buf.data () : NULL;
-  add_current_inferior_and_thread (stop_reply);
+  add_current_inferior_and_thread (run_worked ? rs->buf.data () : nullptr);
 
   /* Get updated offsets, if the stub uses qOffsets.  */
   get_offsets ();

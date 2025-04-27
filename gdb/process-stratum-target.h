@@ -54,6 +54,11 @@ public:
      gdbarch.  */
   struct gdbarch *thread_architecture (ptid_t ptid) override;
 
+  /* Supply to REGCACHE registers which may be already available when it's
+     first created.  */
+  virtual void supply_early_registers (regcache *regcache)
+  {};
+
   /* Default implementations for process_stratum targets.  Return true
      if there's a selected inferior, false otherwise.  */
   bool has_all_memory () override;

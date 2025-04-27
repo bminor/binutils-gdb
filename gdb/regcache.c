@@ -638,6 +638,8 @@ get_thread_arch_regcache (inferior *inf_for_target_calls, ptid_t ptid,
      constructor explicitly instead of implicitly.  */
   ptid_regc_map.insert (std::make_pair (ptid, regcache_up (new_regcache)));
 
+  proc_target->supply_early_registers (new_regcache);
+
   return new_regcache;
 }
 
