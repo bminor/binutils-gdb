@@ -394,6 +394,26 @@ reg_buffer::initialize_variable_size_registers ()
 
 /* See regcache.h.  */
 
+void
+reg_buffer::invalidate_variable_size_registers ()
+{
+  /* There's nothing to do if there are already no variable-size register
+     contents.  */
+  if (m_variable_size_registers == nullptr)
+    return;
+
+  for (unsigned int i = 0; i < m_descr->nr_cooked_registers; i++)
+    if (m_descr->register_is_variable_size[i])
+      invalidate (i);
+
+  m_variable_size_registers = nullptr;
+  m_variable_size_register_type.clear ();
+  m_variable_size_register_sizeof.clear ();
+  m_variable_size_register_offset.clear ();
+}
+
+/* See regcache.h.  */
+
 bool
 reg_buffer::has_variable_size_registers ()
 {
@@ -1439,6 +1459,12 @@ reg_buffer::raw_supply (int regnum, gdb::array_view<const gdb_byte> src)
 
   if (src.data () != nullptr)
     {
+      if (memcmp (src.data (), dst.data (), dst.size ())
+	  && gdbarch_invalidate_tdesc_parameters (m_descr->gdbarch, regnum,
+						  this))
+	/* Invalidate variable-size registers.  */
+	this->invalidate_variable_size_registers ();
+
       copy (src, dst);
       m_register_status[regnum] = REG_VALID;
     }
@@ -1471,6 +1497,11 @@ reg_buffer::raw_supply_integer (int regnum, const gdb_byte *addr, int addr_len,
 {
   gdb::array_view<gdb_byte> dst = register_buffer (regnum);
   bfd_endian byte_order = gdbarch_byte_order (m_descr->gdbarch);
+
+  if (memcmp (addr, dst.data (), dst.size ())
+      && gdbarch_invalidate_tdesc_parameters (m_descr->gdbarch, regnum, this))
+    /* Invalidate variable-size registers.  */
+    this->invalidate_variable_size_registers ();
 
   copy_integer_to_size (dst.data (), dst.size (), addr, addr_len, is_signed,
 			byte_order);

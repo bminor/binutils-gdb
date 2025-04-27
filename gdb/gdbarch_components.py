@@ -2898,3 +2898,16 @@ Can the size of this register change during runtime?
     predefault="default_register_is_variable_size",
     invalid=False,
 )
+
+Method(
+    comment="""
+Invalidate all target description parameters in REGCACHE which depend on the
+value of REGNO.  Returns true if any parameter was invalidated, false
+otherwise.
+""",
+    type="bool",
+    name="invalidate_tdesc_parameters",
+    params=[("int", "regno"), ("reg_buffer *", "regcache")],
+    predefault="default_invalidate_tdesc_parameters",
+    invalid=False,
+)

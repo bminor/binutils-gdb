@@ -4431,6 +4431,22 @@ aarch64_fetch_tdesc_parameter (gdbarch *gdbarch, readable_regcache *regcache,
     }
 }
 
+static bool
+aarch64_invalidate_tdesc_parameters (struct gdbarch *gdbarch, int regno,
+				     reg_buffer *regcache)
+{
+  /* All current AArch64 parameters depend on VG.  */
+  if (tdesc_num_parameters (gdbarch) == 0 || regno != AARCH64_SVE_VG_REGNUM)
+    return false;
+
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  regcache->invalidate_tdesc_parameter (tdep->param_sve_vector_length);
+  regcache->invalidate_tdesc_parameter (tdep->param_sve_predicate_length);
+
+  return true;
+}
+
 /* Given NAMES, a vector of strings, initialize it with all the SME
    pseudo-register names for the current streaming vector length.  */
 
@@ -5023,6 +5039,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     tdep->param_sve_predicate_length = *param_id;
 
   set_gdbarch_fetch_tdesc_parameter (gdbarch, aarch64_fetch_tdesc_parameter);
+  set_gdbarch_invalidate_tdesc_parameters (gdbarch,
+					   aarch64_invalidate_tdesc_parameters);
 
   return gdbarch;
 }

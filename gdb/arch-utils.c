@@ -1139,6 +1139,13 @@ default_register_is_variable_size (struct gdbarch *gdbarch, int regno)
   return false;
 }
 
+static bool
+default_invalidate_tdesc_parameters (struct gdbarch *gdbarch, int regno,
+				     reg_buffer *regcache)
+{
+  return false;
+}
+
 /* Non-zero if we want to trace architecture code.  */
 
 #ifndef GDBARCH_DEBUG

@@ -292,6 +292,9 @@ protected:
      reg_buffer.  */
   void initialize_variable_size_registers ();
 
+  /* Reset information about variable-size registers in this reg_buffer.  */
+  void invalidate_variable_size_registers ();
+
   /* Return a view on register REGNUM's buffer cache.  */
   template <typename ElemType>
   gdb::array_view<ElemType> register_buffer (int regnum) const;

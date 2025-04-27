@@ -1825,3 +1825,11 @@ extern void set_gdbarch_fetch_tdesc_parameter (struct gdbarch *gdbarch, gdbarch_
 typedef bool (gdbarch_register_is_variable_size_ftype) (struct gdbarch *gdbarch, int regno);
 extern bool gdbarch_register_is_variable_size (struct gdbarch *gdbarch, int regno);
 extern void set_gdbarch_register_is_variable_size (struct gdbarch *gdbarch, gdbarch_register_is_variable_size_ftype *register_is_variable_size);
+
+/* Invalidate all target description parameters in REGCACHE which depend on the
+   value of REGNO.  Returns true if any parameter was invalidated, false
+   otherwise. */
+
+typedef bool (gdbarch_invalidate_tdesc_parameters_ftype) (struct gdbarch *gdbarch, int regno, reg_buffer *regcache);
+extern bool gdbarch_invalidate_tdesc_parameters (struct gdbarch *gdbarch, int regno, reg_buffer *regcache);
+extern void set_gdbarch_invalidate_tdesc_parameters (struct gdbarch *gdbarch, gdbarch_invalidate_tdesc_parameters_ftype *invalidate_tdesc_parameters);
