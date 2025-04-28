@@ -199,6 +199,8 @@ public:
      recognizes SIGTRAP only.  */
   virtual bool low_status_is_event (int status);
 
+  void supply_early_registers (regcache *regcache) override;
+
 protected:
 
     void post_startup_inferior (ptid_t) override;

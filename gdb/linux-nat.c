@@ -4655,6 +4655,17 @@ linux_nat_target::supports_set_thread_options (gdb_thread_options options)
   return ((options & supported_options) == options);
 }
 
+/* See gdb/process-stratum-target.h.  */
+
+void
+linux_nat_target::supply_early_registers (regcache *regcache)
+{
+  if (regcache->has_variable_size_registers ())
+    /* We need the values of target description parameter early, so make
+       sure they're available.  */
+    regcache->update_tdesc_parameters ();
+}
+
 linux_nat_target::linux_nat_target ()
 {
   /* We don't change the stratum; this target will sit at
