@@ -375,11 +375,9 @@ reg_buffer::initialize_variable_size_registers ()
 	  continue;
 	}
 
-      /* Assume the register cache is for the current frame.  */
-      frame_info_ptr frame = get_current_frame ();
       m_variable_size_register_type[i]
 	= resolve_dynamic_type (m_descr->register_type[i], {},
-				/* Unused address.  */ 0, &frame);
+				/* Unused address.  */ 0, nullptr, this);
 
       ULONGEST size = m_variable_size_register_type[i]->length ();
       gdb_assert (size != 0);
@@ -450,6 +448,18 @@ reg_buffer::invalidate_tdesc_parameter (unsigned int param_id)
 {
   gdb_assert (param_id < m_tdesc_parameter_status.size ());
   m_tdesc_parameter_status[param_id] = REG_UNKNOWN;
+}
+
+/* See regcache.h.  */
+
+void
+reg_buffer::collect_tdesc_parameter (unsigned int param_id,
+				     gdb::array_view<gdb_byte> dst)
+{
+  gdb::array_view<gdb_byte> buf = tdesc_parameter_buffer (param_id);
+  gdb_assert (buf.size () == dst.size ());
+
+  copy (buf, dst);
 }
 
 /* See regcache.h.  */
@@ -1421,8 +1431,6 @@ register_status
 readable_regcache::tdesc_parameter_value (unsigned int param_id,
 					  gdb::array_view<gdb_byte> dst)
 {
-  gdb_assert (param_id < m_tdesc_parameter_status.size ());
-
   ULONGEST size = tdesc_parameter_size (m_descr->gdbarch, param_id);
   gdb_assert (dst.size () == size);
 

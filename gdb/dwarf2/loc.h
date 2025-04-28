@@ -307,8 +307,10 @@ extern struct value *indirect_synthetic_pointer
    etc.  This means the during evaluation PUSH_VALUES[0] will be at the
    bottom of the stack.  */
 
+struct reg_buffer;
 bool dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			       const frame_info_ptr &frame,
+			       reg_buffer *regcache,
 			       const property_addr_info *addr_stack,
 			       CORE_ADDR *value,
 			       gdb::array_view<CORE_ADDR> push_values = {});

@@ -3259,7 +3259,8 @@ frame_follow_static_link (const frame_info_ptr &initial_frame)
 
   CORE_ADDR upper_frame_base;
 
-  if (!dwarf2_evaluate_property (static_link, initial_frame, NULL, &upper_frame_base))
+  if (!dwarf2_evaluate_property (static_link, initial_frame, nullptr, nullptr,
+				 &upper_frame_base))
     return {};
 
   /* Now climb up the stack frame until we reach the frame we are interested

@@ -494,7 +494,7 @@ gnuv3_baseclass_offset (struct type *type, int index,
       addr_stack.next = nullptr;
 
       CORE_ADDR result;
-      if (dwarf2_evaluate_property (&prop, nullptr, &addr_stack, &result,
+      if (dwarf2_evaluate_property (&prop, nullptr, nullptr, &addr_stack, &result,
 				    {addr_stack.addr}))
 	return (int) (result - addr_stack.addr);
     }

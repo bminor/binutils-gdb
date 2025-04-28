@@ -271,6 +271,10 @@ public:
   /* See gdbsupport/common-regcache.h.  */
   int register_size (int regnum) const override;
 
+  /* FIXME: Document.  */
+  void collect_tdesc_parameter (unsigned int param_id,
+				gdb::array_view<gdb_byte> dst);
+
   /* FIXME: Document.
      Assumes SRC contains an integer in target byte order.  */
   void supply_parameter (unsigned int param_id,

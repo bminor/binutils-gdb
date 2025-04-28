@@ -1642,6 +1642,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 bool
 dwarf2_evaluate_property (const dynamic_prop *prop,
 			  const frame_info_ptr &initial_frame,
+			  reg_buffer *regcache,
 			  const property_addr_info *addr_stack,
 			  CORE_ADDR *value,
 			  gdb::array_view<CORE_ADDR> push_values)
@@ -1749,7 +1750,7 @@ dwarf2_evaluate_property (const dynamic_prop *prop,
 	  error (_("cannot find reference address for offset property"));
 
 	struct field resolved_field = baton->field;
-	resolve_dynamic_field (resolved_field, pinfo, initial_frame);
+	resolve_dynamic_field (resolved_field, pinfo, initial_frame, regcache);
 
 	/* Storage for memory if we need to read it.  */
 	gdb::byte_vector memory;
@@ -1797,7 +1798,8 @@ dwarf2_evaluate_property (const dynamic_prop *prop,
 
       case PROP_TDESC_PARAMETER:
 	{
-	  gdbarch *gdbarch = get_frame_arch (frame);
+	  gdbarch *gdbarch = (regcache == nullptr ?
+			      get_frame_arch (frame) : regcache->arch ());
 	  auto [feature, param_name, element_length] = prop->tdesc_parameter ();
 	  std::optional<unsigned int> param_id = tdesc_parameter_id (gdbarch,
 								     feature,
@@ -1805,7 +1807,21 @@ dwarf2_evaluate_property (const dynamic_prop *prop,
 	  if (!param_id.has_value ())
 	    return false;
 
-	  return read_frame_tdesc_parameter_unsigned (frame, *param_id, value);
+	  if (regcache == nullptr)
+	    return read_frame_tdesc_parameter_unsigned (frame, *param_id, value);
+	  else
+	    {
+	      if (regcache->get_tdesc_parameter_status (*param_id) != REG_VALID)
+		return false;
+
+	      gdb::byte_vector buf (tdesc_parameter_size (gdbarch, *param_id));
+
+	      regcache->collect_tdesc_parameter (*param_id, buf);
+
+	      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+	      *value = extract_unsigned_integer (buf, byte_order);
+	      return true;
+	    }
 	}
 	break;
     }

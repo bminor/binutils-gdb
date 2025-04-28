@@ -59,6 +59,7 @@ struct language_defn;
 struct dwarf2_per_cu;
 struct dwarf2_per_objfile;
 struct dwarf2_property_baton;
+struct reg_buffer;
 
 /* * Different kinds of data types are distinguished by the `code'
    field.  */
@@ -2672,9 +2673,11 @@ extern CORE_ADDR get_pointer_type_max (struct type *);
    have a different type when resolved (depending on the contents of
    memory).  In this situation, 'is_dynamic_type' will still return
    true for the return value of this function.  */
+
 extern struct type *resolve_dynamic_type
   (struct type *type, gdb::array_view<const gdb_byte> valaddr,
-   CORE_ADDR addr, const frame_info_ptr *frame = nullptr);
+   CORE_ADDR addr, const frame_info_ptr *frame = nullptr,
+   reg_buffer *regcache = nullptr);
 
 /* * Predicate if the type has dynamic values, which are not resolved yet.
    See the caveat in 'resolve_dynamic_type' to understand a scenario
@@ -2692,7 +2695,8 @@ extern bool is_dynamic_type (struct type *type);
 
 extern void resolve_dynamic_field (struct field &field,
 				   const struct property_addr_info *addr_stack,
-				   const frame_info_ptr &frame);
+				   const frame_info_ptr &frame,
+				   reg_buffer *regcache = nullptr);
 
 /* A helper function that handles the DWARF semantics for
    DW_AT_bit_offset.
