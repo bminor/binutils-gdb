@@ -16,8 +16,6 @@
 # Exercise unwinding AArch64's SVE registers from a signal frame.
 
 require allow_aarch64_sve_tests
-# Remote targets can't communicate vector length changes to GDB via the RSP.
-require !gdb_protocol_is_remote
 
 set first_vl 0
 set second_vl 0
