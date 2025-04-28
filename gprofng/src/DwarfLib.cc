@@ -1847,7 +1847,7 @@ DwrCU::DwrCU (Dwarf *_dwarf)
 	       (long long) cu_offset, (long long) cu_offset,
 	       (long long) next_cu_offset, (long long) next_cu_offset,
 	       (long long) debug_abbrev_offset, (long long) debug_abbrev_offset,
-	       (long long) (next_cu_offset - cu_offset),
+	       (long long) (next_cu_offset),
 	       (int) version, (int) address_size,
 	       debug_infoSec->fmt64 ? "true" : "false",
 	       debug_infoSec->need_swap_endian ? "true" : "false",
@@ -1945,7 +1945,7 @@ DwrCU::set_die (Dwarf_Die die)
       || debug_infoSec->offset >= debug_infoSec->size)
     return DW_DLV_ERROR;
   dwrTag.offset = debug_infoSec->offset;
-  dwrTag.die = debug_infoSec->offset - cu_offset;
+  dwrTag.die = debug_infoSec->offset;
   dwrTag.num = debug_infoSec->GetULEB128_32 ();
   if (dwrTag.num == 0)
     return DW_DLV_NO_ENTRY;
@@ -1994,19 +1994,19 @@ DwrCU::set_die (Dwarf_Die die)
 	  atf->u.str = debug_infoSec->GetData (atf->len);
 	  break;
 	case DW_FORM_ref1:
-	  atf->u.offset = debug_infoSec->Get_8 ();
+	  atf->u.offset = debug_infoSec->Get_8 () + cu_offset;
 	  break;
 	case DW_FORM_ref2:
-	  atf->u.offset = debug_infoSec->Get_16 ();
+	  atf->u.offset = debug_infoSec->Get_16 () + cu_offset;
 	  break;
 	case DW_FORM_ref4:
-	  atf->u.offset = debug_infoSec->Get_32 ();
+	  atf->u.offset = debug_infoSec->Get_32 () + cu_offset;
 	  break;
 	case DW_FORM_ref8:
-	  atf->u.offset = debug_infoSec->Get_64 ();
+	  atf->u.offset = debug_infoSec->Get_64 () + cu_offset;
 	  break;
 	case DW_FORM_ref_udata:
-	  atf->u.offset = debug_infoSec->GetULEB128 ();
+	  atf->u.offset = debug_infoSec->GetULEB128 () + cu_offset;
 	  break;
 	case DW_FORM_data1:
 	  atf->u.offset = debug_infoSec->Get_8 ();

@@ -454,7 +454,7 @@ DwrCU::parseChild (Dwarf_cnt *ctx)
   Dwarf_Die next_die;
   if (read_ref_attr (DW_AT_sibling, &next_die) == DW_DLV_OK)
     {
-      next_die_offset = next_die + cu_offset;
+      next_die_offset = next_die;
       if (next_die_offset <= debug_infoSec->offset)
 	{
 	  Dprintf (DEBUG_ERR_MSG, NTXT ("DwrCU::parseChild: next_die(0x%llx) <= debug_infoSec->offset(%llx)\n"),
@@ -723,7 +723,7 @@ DwrCU::read_hwcprof_info (Dwarf_cnt *ctx)
   Dwarf_Die next_die;
   if (read_ref_attr (DW_AT_sibling, &next_die) == DW_DLV_OK)
     {
-      next_die_offset = next_die + cu_offset;
+      next_die_offset = next_die;
       if (next_die_offset <= debug_infoSec->offset)
 	next_die_offset = 0;
       else if (debug_infoSec->size > next_die_offset)
