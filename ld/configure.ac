@@ -495,11 +495,11 @@ do
       EMUL=$targ_emul
     fi
 
-    if test x${enable_64_bit_bfd} = xno; then
+    if test x${have_64_bit_bfd} = xno; then
       . ${srcdir}/../bfd/config.bfd
     fi
 
-    if test x${enable_64_bit_bfd} = xyes; then
+    if test x${have_64_bit_bfd} = xyes; then
       targ_extra_emuls="$targ_extra_emuls $targ64_extra_emuls"
       targ_extra_libpath="$targ_extra_libpath $targ64_extra_libpath"
     fi
@@ -686,7 +686,7 @@ AC_SUBST(TDIRS)
 AM_SUBST_NOTMAKE(TDIRS)
 
 if test x${all_targets} = xtrue; then
-  if test x${enable_64_bit_bfd} = xyes; then
+  if test x${have_64_bit_bfd} = xyes; then
     EMULATION_OFILES='$(ALL_EMULATIONS) $(ALL_64_EMULATIONS)'
     EMUL_EXTRA_OFILES='$(ALL_EMUL_EXTRA_OFILES) $(ALL_64_EMUL_EXTRA_OFILES)'
   else

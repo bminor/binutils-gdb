@@ -81,7 +81,13 @@ if test x$ac_checking != x ; then
   AC_DEFINE(ENABLE_CHECKING, 1, [Define if you want run-time sanity checks.])
 fi
 
-BFD_64_BIT
+AC_ARG_ENABLE(64-bit-bfd,
+  AS_HELP_STRING([--enable-64-bit-bfd],
+		 [64-bit support (on hosts with narrower word sizes)]),
+  [AS_CASE([$enableval],
+	   [yes|no], [],
+	   [*], [AC_MSG_ERROR(bad value ${enableval} for 64-bit-bfd option)])],
+  [enable_64_bit_bfd=no])
 if test $enable_64_bit_bfd = yes ; then
   want64=true
 else
