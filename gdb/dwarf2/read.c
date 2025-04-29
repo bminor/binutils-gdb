@@ -2392,109 +2392,6 @@ read_abbrev_offset (dwarf2_per_objfile *per_objfile,
   return (sect_offset) read_offset (abfd, info_ptr, offset_size);
 }
 
-/* A helper for create_dwo_debug_types_hash_table.  Read types from SECTION
-   and fill them into DWO_FILE's type unit hash table.  It will process only
-   type units, therefore DW_UT_type.  */
-
-void
-cutu_reader::create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd,
-					       dwo_file *dwo_file,
-					       dwarf2_section_info *section,
-					       ruh_kind section_kind)
-{
-  struct dwarf2_section_info *abbrev_section;
-  bfd *abfd;
-  const gdb_byte *info_ptr, *end_ptr;
-
-  abbrev_section = &dwo_file->sections.abbrev;
-
-  dwarf_read_debug_printf ("Reading %s for %s",
-			   section->get_name (),
-			   abbrev_section->get_file_name ());
-
-  info_ptr = section->buffer;
-
-  if (info_ptr == NULL)
-    return;
-
-  /* We can't set abfd until now because the section may be empty or
-     not present, in which case the bfd is unknown.  */
-  abfd = section->get_bfd_owner ();
-
-  /* We don't use cutu_reader here because we don't need to read
-     any dies: the signature is in the header.  */
-
-  end_ptr = info_ptr + section->size;
-  while (info_ptr < end_ptr)
-    {
-      const gdb_byte *ptr = info_ptr;
-      unit_head header;
-      unsigned int length;
-
-      sect_offset sect_off = (sect_offset) (ptr - section->buffer);
-
-      /* Initialize it due to a false compiler warning.  */
-      header.signature = -1;
-      header.type_offset_in_tu = (cu_offset) -1;
-
-      /* We need to read the type's signature in order to build the hash
-	 table, but we don't need anything else just yet.  */
-
-      ptr = read_and_check_unit_head (&header, section, abbrev_section, ptr,
-				      section_kind);
-
-      length = header.get_length_with_initial ();
-
-      /* Skip dummy type units.  */
-      if (ptr >= info_ptr + length
-	  || peek_abbrev_code (abfd, ptr) == 0
-	  || (header.unit_type != DW_UT_type
-	      && header.unit_type != DW_UT_split_type))
-	{
-	  info_ptr += length;
-	  continue;
-	}
-
-      dwo_unit *dwo_tu = OBSTACK_ZALLOC (&per_bfd->obstack, dwo_unit);
-      dwo_tu->dwo_file = dwo_file;
-      dwo_tu->signature = header.signature;
-      dwo_tu->type_offset_in_tu = header.type_offset_in_tu;
-      dwo_tu->section = section;
-      dwo_tu->sect_off = sect_off;
-      dwo_tu->length = length;
-
-      auto [it, inserted] = dwo_file->tus.emplace (dwo_tu);
-      if (!inserted)
-	complaint (_("debug type entry at offset %s is duplicate to"
-		     " the entry at offset %s, signature %s"),
-		   sect_offset_str (sect_off),
-		   sect_offset_str ((*it)->sect_off),
-		   hex_string (header.signature));
-
-      dwarf_read_debug_printf_v ("  offset %s, signature %s",
-				 sect_offset_str (sect_off),
-				 hex_string (header.signature));
-
-      info_ptr += length;
-    }
-}
-
-/* Create the hash table of all entries in the .debug_types
-   (or .debug_types.dwo) section(s).
-   DWO_FILE is a pointer to the DWO file object.
-
-   Note: This function processes DWO files only, not DWP files.  */
-
-void
-cutu_reader::create_dwo_debug_types_hash_table
-  (dwarf2_per_bfd *per_bfd, dwo_file *dwo_file,
-   gdb::array_view<dwarf2_section_info> type_sections)
-{
-  for (dwarf2_section_info &section : type_sections)
-    create_dwo_debug_type_hash_table (per_bfd, dwo_file, &section,
-				      ruh_kind::TYPE);
-}
-
 /* Add an entry for signature SIG to per_bfd->signatured_types.  */
 
 static signatured_type_set::iterator
@@ -6315,105 +6212,131 @@ lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
   return it != per_bfd->dwo_files.end () ? it->get() : nullptr;
 }
 
-/* Create the dwo_units for the CUs in a DWO_FILE.
-   Note: This function processes DWO files only, not DWP files.  */
-
 void
-cutu_reader::create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file)
+cutu_reader::create_dwo_unit_hash_tables (dwo_file &dwo_file,
+					  dwarf2_cu &skeleton_cu,
+					  dwarf2_section_info &section,
+					  ruh_kind section_kind)
 {
-  dwarf2_per_objfile *per_objfile = cu->per_objfile;
-  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-  const gdb_byte *info_ptr, *end_ptr;
-  auto &section = dwo_file.sections.info;
+  dwarf2_per_objfile &per_objfile = *skeleton_cu.per_objfile;
+  dwarf2_per_bfd &per_bfd = *per_objfile.per_bfd;
 
-  info_ptr = section.buffer;
+  const gdb_byte *info_ptr = section.buffer;
 
   if (info_ptr == NULL)
     return;
 
-  dwarf_read_debug_printf ("Reading %s for %s:",
-			   section.get_name (),
+  dwarf_read_debug_printf ("Reading %s for %s:", section.get_name (),
 			   section.get_file_name ());
 
-  end_ptr = info_ptr + section.size;
+  const gdb_byte *end_ptr = info_ptr + section.size;
+
   while (info_ptr < end_ptr)
     {
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
+      unit_head header;
+      dwarf2_section_info *abbrev_section = &dwo_file.sections.abbrev;
+      const gdb_byte *info_ptr_post_header
+	= read_and_check_unit_head (&header, &section, abbrev_section,
+				    info_ptr, section_kind);
+
+      unsigned int length = header.get_length_with_initial ();
+      info_ptr += length;
+
+      /* Skip dummy units.  */
+      if (info_ptr_post_header >= info_ptr
+	  || peek_abbrev_code (section.get_bfd_owner (),
+			       info_ptr_post_header) == 0)
+	continue;
+
+      if (header.unit_type != DW_UT_compile
+	  && header.unit_type != DW_UT_split_compile
+	  && header.unit_type != DW_UT_type
+	  && header.unit_type != DW_UT_split_type)
+	continue;
+
       ULONGEST signature;
-      unsigned int length;
 
-      if (cu->header.version < 5)
+      /* For type units (all DWARF versions) and DWARF 5 compile units, the
+	 signature/DWO ID is already available in the header.  For compile
+	 units in DWARF < 5, we need to read the DW_AT_GNU_dwo_id attribute
+	 from the top-level DIE.
+
+	 For DWARF < 5 compile units, the unit type will be set to DW_UT_compile
+	 by read_and_check_comp_unit_head.  */
+      if (header.version < 5 && header.unit_type == DW_UT_compile)
 	{
-	  /* The length of the CU gets set by the cutu_reader just below.  */
-	  dwarf2_per_cu per_cu (per_bfd, &section, sect_off, 0 /* length */,
+	  /* The length of the CU is not necessary.  */
+	  dwarf2_per_cu per_cu (&per_bfd, &section, sect_off, length,
 				false /* is_dwz */);
-	  cutu_reader reader (per_cu, *per_objfile, language_minimal, *cu,
-			      dwo_file);
-
-	  info_ptr += per_cu.length ();
-
-	  if (reader.is_dummy ())
-	    continue;
+	  cutu_reader reader (per_cu, per_objfile, language_minimal,
+			      skeleton_cu, dwo_file);
 
 	  std::optional<ULONGEST> opt_signature
 	    = lookup_dwo_id (reader.cu (), reader.top_level_die ());
+
 	  if (!opt_signature.has_value ())
 	    {
-	      complaint (_(DWARF_ERROR_PREFIX
-			   "debug entry at offset %s is missing its dwo_id"
-			   " [in module %s]"),
+	      complaint (_ (DWARF_ERROR_PREFIX
+			    "debug entry at offset %s is missing its dwo_id"
+			    " [in module %s]"),
 			 sect_offset_str (sect_off),
 			 dwo_file.dwo_name.c_str ());
 	      continue;
 	    }
 
 	  signature = *opt_signature;
-	  length = per_cu.length ();
 	}
       else
-	{
-	  unit_head header;
-	  dwarf2_section_info *abbrev_section = &dwo_file.sections.abbrev;
-	  const gdb_byte *info_ptr_post_header
-	    = read_and_check_unit_head (&header, &section, abbrev_section,
-					info_ptr, ruh_kind::COMPILE);
+	signature = header.signature;
 
-	  length = header.get_length_with_initial ();
-	  info_ptr += length;
+      dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd.obstack, struct dwo_unit);
 
-	  /* Skip dummy units.  */
-	  if (info_ptr_post_header >= info_ptr
-	      || peek_abbrev_code (section.get_bfd_owner (),
-				   info_ptr_post_header) == 0)
-	    continue;
-
-	  /* DWARF 5 .debug_info.dwo sections may contain some type units.  Skip
-	     everything that is not a compile unit.  */
-	  if (header.unit_type != DW_UT_split_compile)
-	    continue;
-
-	  signature = header.signature;
-	}
-
-      dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
-
+      /* Set the fields common to compile and type units.  */
       dwo_unit->dwo_file = &dwo_file;
       dwo_unit->signature = signature;
       dwo_unit->section = &section;
       dwo_unit->sect_off = sect_off;
       dwo_unit->length = length;
 
-      dwarf_read_debug_printf ("  offset %s, dwo_id %s",
-			       sect_offset_str (sect_off),
-			       hex_string (dwo_unit->signature));
+      switch (header.unit_type)
+	{
+	case DW_UT_compile:
+	case DW_UT_split_compile:
+	{
+	  dwarf_read_debug_printf ("  compile unit at offset %s, dwo_id %s",
+				   sect_offset_str (sect_off),
+				   hex_string (dwo_unit->signature));
 
-      auto [it, inserted] = dwo_file.cus.emplace (dwo_unit);
-      if (!inserted)
-	complaint (_("debug cu entry at offset %s is duplicate to"
-		     " the entry at offset %s, signature %s"),
-		   sect_offset_str (sect_off),
-		   sect_offset_str ((*it)->sect_off),
-		   hex_string (dwo_unit->signature));
+	  auto [it, inserted] = dwo_file.cus.emplace (dwo_unit);
+	  if (!inserted)
+	    complaint (_("debug cu entry at offset %s is duplicate to"
+			 " the entry at offset %s, signature %s"),
+		       sect_offset_str (sect_off),
+		       sect_offset_str ((*it)->sect_off),
+		       hex_string (dwo_unit->signature));
+	  break;
+	}
+
+	case DW_UT_type:
+	case DW_UT_split_type:
+	{
+	  dwo_unit->type_offset_in_tu = header.type_offset_in_tu;
+
+	  dwarf_read_debug_printf ("  type unit at offset %s, signature %s",
+				   sect_offset_str (sect_off),
+				   hex_string (dwo_unit->signature));
+
+	  auto [it, inserted] = dwo_file.tus.emplace (dwo_unit);
+	  if (!inserted)
+	    complaint (_("debug type entry at offset %s is duplicate to"
+			 " the entry at offset %s, signature %s"),
+		       sect_offset_str (sect_off),
+		       sect_offset_str ((*it)->sect_off),
+		       hex_string (header.signature));
+	  break;
+	}
+	}
     }
 }
 
@@ -7643,7 +7566,6 @@ cutu_reader::open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 				     const char *comp_dir)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
-  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   gdb_bfd_ref_ptr dbfd
     = open_dwo_file (per_objfile->per_bfd, dwo_name, comp_dir);
@@ -7663,15 +7585,11 @@ cutu_reader::open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
     this->locate_dwo_sections (per_objfile->objfile, dwo_file->dbfd.get (), sec,
 			       &dwo_file->sections);
 
-  create_dwo_cus_hash_table (cu, *dwo_file);
+  create_dwo_unit_hash_tables (*dwo_file, *cu, dwo_file->sections.info,
+			       ruh_kind::COMPILE);
 
-  if (cu->header.version < 5)
-    create_dwo_debug_types_hash_table (per_bfd, dwo_file.get (),
-				       dwo_file->sections.types);
-  else
-    create_dwo_debug_type_hash_table (per_bfd, dwo_file.get (),
-				      &dwo_file->sections.info,
-				      ruh_kind::COMPILE);
+  for (dwarf2_section_info &section : dwo_file->sections.types)
+    create_dwo_unit_hash_tables (*dwo_file, *cu, section, ruh_kind::TYPE);
 
   dwarf_read_debug_printf ("DWO file found: %s", dwo_name);
 

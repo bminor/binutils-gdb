@@ -1034,16 +1034,9 @@ private:
   void locate_dwo_sections (struct objfile *objfile, bfd *abfd, asection *sectp,
 			    struct dwo_sections *dwo_sections);
 
-  void create_dwo_cus_hash_table (dwarf2_cu *cu, dwo_file &dwo_file);
-
-  void create_dwo_debug_types_hash_table
-    (dwarf2_per_bfd *per_bfd, dwo_file *dwo_file,
-     gdb::array_view<dwarf2_section_info> type_sections);
-
-  void create_dwo_debug_type_hash_table (dwarf2_per_bfd *per_bfd,
-					 dwo_file *dwo_file,
-					 dwarf2_section_info *section,
-					 ruh_kind section_kind);
+  void create_dwo_unit_hash_tables (dwo_file &dwo_file, dwarf2_cu &skeleton_cu,
+				    dwarf2_section_info &section,
+				    ruh_kind section_kind);
 
   dwo_unit *lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name,
 			     const char *comp_dir, ULONGEST signature,
