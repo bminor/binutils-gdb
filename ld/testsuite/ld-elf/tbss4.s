@@ -5,11 +5,11 @@
 	.section	.gcc_except_table,"aw",%progbits
 # Alignment is needed -- otherwise gcc_except_table start position seems to
 # be adjusted so that the tbss section is fully aligned.
-	.align 4
+	.balign 4
 	.ascii "Odd number of chars"
 
 	.section	.tbss,"awT",%nobits
-	.align 4
+	.balign 4
 	.type	xyz, %object
 	.size	xyz, 4
 xyz:
@@ -17,7 +17,7 @@ xyz:
 
 	.data
 dataval:
-	.align 4
+	.balign 4
 	.ascii "x"
 
 	.text

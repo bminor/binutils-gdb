@@ -1,9 +1,13 @@
-#ld: -e _start --rosegment -z separate-code -z max-page-size=0x1000 -z common-page-size=0x1000
-#readelf: -l --wide
-#target: x86_64-*-linux* i?86-*-linux-gnu i?86-*-gnu*
+#ld: -e _start -Ttext=0x1000 -z max-page-size=0x1000 -z common-page-size=0x1000 -z noseparate-code
+#readelf: -lSW
+#target: *-linux* *-gnu*
+#notarget: hppa64-*-* ia64-*-*
 
 #...
- +TLS +0x0+1014 .*
+.* \.tbss +NOBITS +0+1014 +0+1014 +0+4 +0+ +WAT +0 +0 +4
+
+#...
+ +TLS +0x0*1014 +0x0+1014 +0x0+1014 +0x0+ +0x0+4 R +0x4
 #...
 .* \.tbss 
 #pass
