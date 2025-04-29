@@ -45,7 +45,10 @@ gdb_internal_backtrace_set_cmd (const char *args, int from_tty,
 void
 sig_write (const char *msg)
 {
-  gdb_stderr->write_async_safe (msg, strlen (msg));
+  if (gdb_stderr == nullptr || gdb_stderr->fd () == -1)
+    std::ignore = ::write (2, msg, strlen (msg));
+  else
+    gdb_stderr->write_async_safe (msg, strlen (msg));
 }
 
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE
@@ -130,7 +133,10 @@ gdb_internal_backtrace_1 ()
   void *buffer[25];
   int frames = backtrace (buffer, ARRAY_SIZE (buffer));
 
-  backtrace_symbols_fd (buffer, frames, gdb_stderr->fd ());
+  int fd = ((gdb_stderr == nullptr || gdb_stderr->fd () == -1)
+	    ? 2
+	    : gdb_stderr->fd ());
+  backtrace_symbols_fd (buffer, frames, fd);
   if (frames == ARRAY_SIZE (buffer))
     sig_write (_("Backtrace might be incomplete.\n"));
 }
@@ -166,10 +172,7 @@ gdb_internal_backtrace ()
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE
   sig_write (str_backtrace);
 
-  if (gdb_stderr->fd () > -1)
-    gdb_internal_backtrace_1 ();
-  else
-    sig_write (str_backtrace_unavailable);
+  gdb_internal_backtrace_1 ();
 
   sig_write ("---------------------\n");
 #endif
