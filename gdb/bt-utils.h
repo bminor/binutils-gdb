@@ -75,4 +75,9 @@ extern void gdb_internal_backtrace_set_cmd (const char *args, int from_tty,
 
 extern void gdb_internal_backtrace_init_str ();
 
+/* Print MSG to gdb_stderr or stderr in a way that is safe to do from an
+   interrupt handler.  */
+
+extern void sig_write (const char *msg);
+
 #endif /* GDB_BT_UTILS_H */

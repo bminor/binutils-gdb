@@ -40,6 +40,14 @@ gdb_internal_backtrace_set_cmd (const char *args, int from_tty,
 #endif
 }
 
+/* See bt-utils.h.  */
+
+void
+sig_write (const char *msg)
+{
+  gdb_stderr->write_async_safe (msg, strlen (msg));
+}
+
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE_USING_LIBBACKTRACE
 
@@ -52,11 +60,6 @@ libbacktrace_error (void *data, const char *errmsg, int errnum)
      skip printing a backtrace in this case.  */
   if (errnum < 0)
     return;
-
-  const auto sig_write = [] (const char *msg) -> void
-  {
-    gdb_stderr->write_async_safe (msg, strlen (msg));
-  };
 
   sig_write ("error creating backtrace: ");
   sig_write (errmsg);
@@ -77,11 +80,6 @@ static int
 libbacktrace_print (void *data, uintptr_t pc, const char *filename,
 		    int lineno, const char *function)
 {
-  const auto sig_write = [] (const char *msg) -> void
-  {
-    gdb_stderr->write_async_safe (msg, strlen (msg));
-  };
-
   /* Buffer to print addresses and line numbers into.  An 8-byte address
      with '0x' prefix and a null terminator requires 20 characters.  This
      also feels like it should be enough to represent line numbers in most
@@ -128,11 +126,6 @@ gdb_internal_backtrace_1 ()
 static void
 gdb_internal_backtrace_1 ()
 {
-  const auto sig_write = [] (const char *msg) -> void
-  {
-    gdb_stderr->write_async_safe (msg, strlen (msg));
-  };
-
   /* Allow up to 25 frames of backtrace.  */
   void *buffer[25];
   int frames = backtrace (buffer, ARRAY_SIZE (buffer));
@@ -171,11 +164,6 @@ gdb_internal_backtrace ()
     return;
 
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE
-  const auto sig_write = [] (const char *msg) -> void
-  {
-    gdb_stderr->write_async_safe (msg, strlen (msg));
-  };
-
   sig_write (str_backtrace);
 
   if (gdb_stderr->fd () > -1)
