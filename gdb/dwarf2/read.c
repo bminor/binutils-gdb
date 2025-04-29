@@ -734,9 +734,6 @@ show_dwarf_synchronous (struct ui_file *file, int from_tty,
 
 /* local function prototypes */
 
-static void build_type_psymtabs_reader (cutu_reader *reader,
-					cooked_index_worker_result *storage);
-
 static void var_decode_location (struct attribute *attr,
 				 struct symbol *sym,
 				 struct dwarf2_cu *cu);
@@ -3250,7 +3247,32 @@ private:
   /* Process a batch of CUs.  This may be called multiple times in
      separate threads.  TASK_NUMBER indicates which task this is --
      the result is stored in that slot of M_RESULTS.  */
-  void process_cus (size_t task_number, unit_iterator first, unit_iterator end);
+  void process_units (size_t task_number, unit_iterator first,
+		      unit_iterator end);
+
+  /* Process unit THIS_CU.  */
+  void process_unit (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile,
+		     cooked_index_worker_result *storage);
+
+  /* Process all type units existing in PER_OBJFILE::PER_BFD::ALL_UNITS.  */
+  void process_type_units (dwarf2_per_objfile *per_objfile,
+			   cooked_index_worker_result *storage);
+
+  /* Process the type unit wrapped in READER.  */
+  void process_type_unit (cutu_reader *reader,
+			  cooked_index_worker_result *storage);
+
+  /* Process all type units of all DWO files.
+
+     This is needed in case a TU was emitted without its skeleton.
+     Note: This can't be done until we know what all the DWO files are.  */
+  void process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
+					cooked_index_worker_result *storage);
+
+  /* Process the type unit represented by DWO_UNIT.  */
+  void process_skeletonless_type_unit (dwo_unit *dwo_unit,
+				       dwarf2_per_objfile *per_objfile,
+				       cooked_index_worker_result *storage);
 
   /* A storage object for "leftovers" -- see the 'start' method, but
      essentially things not parsed during the normal CU parsing
@@ -3258,13 +3280,10 @@ private:
   cooked_index_worker_result m_index_storage;
 };
 
-/* Subroutine of dwarf2_build_psymtabs_hard to simplify it.
-   Process compilation unit THIS_CU for a psymtab.  */
-
-static void
-process_psymtab_comp_unit (dwarf2_per_cu *this_cu,
-			   dwarf2_per_objfile *per_objfile,
-			   cooked_index_worker_result *storage)
+void
+cooked_index_worker_debug_info::process_unit
+  (dwarf2_per_cu *this_cu, dwarf2_per_objfile *per_objfile,
+   cooked_index_worker_result *storage)
 {
   cutu_reader *reader = storage->get_reader (this_cu);
   if (reader == nullptr)
@@ -3286,7 +3305,7 @@ process_psymtab_comp_unit (dwarf2_per_cu *this_cu,
     return;
 
   if (this_cu->is_debug_types)
-    build_type_psymtabs_reader (reader, storage);
+    process_type_unit (reader, storage);
   else if (reader->top_level_die ()->tag != DW_TAG_partial_unit)
     {
       bool nope = false;
@@ -3299,11 +3318,9 @@ process_psymtab_comp_unit (dwarf2_per_cu *this_cu,
     }
 }
 
-/* Reader function for build_type_psymtabs.  */
-
-static void
-build_type_psymtabs_reader (cutu_reader *reader,
-			    cooked_index_worker_result *storage)
+void
+cooked_index_worker_debug_info::process_type_unit
+  (cutu_reader *reader, cooked_index_worker_result *storage)
 {
   struct dwarf2_cu *cu = reader->cu ();
   dwarf2_per_cu *per_cu = cu->per_cu;
@@ -3337,26 +3354,9 @@ struct tu_abbrev_offset
   sect_offset abbrev_offset;
 };
 
-/* Efficiently read all the type units.
-
-   The efficiency is because we sort TUs by the abbrev table they use and
-   only read each abbrev table once.  In one program there are 200K TUs
-   sharing 8K abbrev tables.
-
-   The main purpose of this function is to support building the
-   dwarf2_per_objfile->per_bfd->type_unit_groups table.
-   TUs typically share the DW_AT_stmt_list of the CU they came from, so we
-   can collapse the search space by grouping them by stmt_list.
-   The savings can be significant, in the same program from above the 200K TUs
-   share 8K stmt_list tables.
-
-   FUNC is expected to call get_type_unit_group, which will create the
-   struct type_unit_group if necessary and add it to
-   dwarf2_per_objfile->per_bfd->type_unit_groups.  */
-
-static void
-build_type_psymtabs (dwarf2_per_objfile *per_objfile,
-		     cooked_index_worker_result *storage)
+void
+cooked_index_worker_debug_info::process_type_units
+  (dwarf2_per_objfile *per_objfile, cooked_index_worker_result *storage)
 {
   struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
   abbrev_table_up abbrev_table;
@@ -3422,17 +3422,14 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile,
 			  abbrev_table.get (), nullptr, false,
 			  language_minimal);
       if (!reader.is_dummy ())
-	build_type_psymtabs_reader (&reader, storage);
+	process_type_unit (&reader, storage);
     }
 }
 
-/* Traversal function for process_skeletonless_type_units.
-   Read a TU in a DWO file and build partial symbols for it.  */
-
-static void
-process_skeletonless_type_unit (dwo_unit *dwo_unit,
-				dwarf2_per_objfile *per_objfile,
-				cooked_index_worker_result *storage)
+void
+cooked_index_worker_debug_info::process_skeletonless_type_unit
+  (dwo_unit *dwo_unit, dwarf2_per_objfile *per_objfile,
+   cooked_index_worker_result *storage)
 {
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
@@ -3454,16 +3451,12 @@ process_skeletonless_type_unit (dwo_unit *dwo_unit,
   cutu_reader reader (**sig_type_it, *per_objfile, nullptr, nullptr, false,
 		      language_minimal);
   if (!reader.is_dummy ())
-    build_type_psymtabs_reader (&reader, storage);
+    process_type_unit (&reader, storage);
 }
 
-/* Scan all TUs of DWO files, verifying we've processed them.
-   This is needed in case a TU was emitted without its skeleton.
-   Note: This can't be done until we know what all the DWO files are.  */
-
-static void
-process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
-				 cooked_index_worker_result *storage)
+void
+cooked_index_worker_debug_info::process_skeletonless_type_units
+  (dwarf2_per_objfile *per_objfile, cooked_index_worker_result *storage)
 {
   scoped_time_it time_it ("DWARF skeletonless type units");
 
@@ -3475,9 +3468,9 @@ process_skeletonless_type_units (dwarf2_per_objfile *per_objfile,
 }
 
 void
-cooked_index_worker_debug_info::process_cus (size_t task_number,
-					     unit_iterator first,
-					     unit_iterator end)
+cooked_index_worker_debug_info::process_units (size_t task_number,
+					       unit_iterator first,
+					       unit_iterator end)
 {
   SCOPE_EXIT { bfd_thread_cleanup (); };
 
@@ -3492,7 +3485,7 @@ cooked_index_worker_debug_info::process_cus (size_t task_number,
 
       try
 	{
-	  process_psymtab_comp_unit (per_cu, m_per_objfile, &thread_storage);
+	  process_unit (per_cu, m_per_objfile, &thread_storage);
 	}
       catch (gdb_exception &except)
 	{
@@ -3522,7 +3515,7 @@ cooked_index_worker_debug_info::do_reading ()
   dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
 
   create_all_units (m_per_objfile);
-  build_type_psymtabs (m_per_objfile, &m_index_storage);
+  process_type_units (m_per_objfile, &m_index_storage);
 
   if (!per_bfd->debug_aranges.empty ())
     read_addrmap_from_aranges (m_per_objfile, &per_bfd->debug_aranges,
@@ -3576,7 +3569,7 @@ cooked_index_worker_debug_info::do_reading ()
       workers.add_task ([this, task_count, iter, last] ()
 	{
 	  scoped_time_it time_it ("DWARF indexing worker");
-	  process_cus (task_count, iter, last);
+	  process_units (task_count, iter, last);
 	});
 
       ++task_count;
