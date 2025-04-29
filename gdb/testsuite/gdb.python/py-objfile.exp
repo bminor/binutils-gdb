@@ -144,7 +144,8 @@ gdb_test "python print (sep_objfile.owner.filename)" "${testfile}2" \
 gdb_test "python print (sep_objfile.owner.username)" "${testfile}2" \
     "Test user-name of owner of separate debug file"
 
-gdb_test "p main" "= {int \\(\\)} $hex <main>" \
+set re_prototype [string_to_regexp "int (void)"]
+gdb_test "p main" "= {$re_prototype} $hex <main>" \
     "print main with debug info"
 
 # Separate debug files are not findable.

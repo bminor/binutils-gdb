@@ -19,7 +19,7 @@ int global_var = 42;
 static int __attribute__ ((used)) static_var = 50;
 
 int
-main ()
+main (void)
 {
   int some_var = 0;
   return 0;

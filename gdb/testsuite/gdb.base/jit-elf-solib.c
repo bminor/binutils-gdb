@@ -22,4 +22,4 @@
 #error "Must define the FUNCTION_NAME macro to set a jited function name"
 #endif
 
-int FUNCTION_NAME() { return 42; }
+int FUNCTION_NAME(void) { return 42; }
