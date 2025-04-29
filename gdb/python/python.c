@@ -1612,16 +1612,19 @@ gdbpy_flush (PyObject *self, PyObject *args, PyObject *kw)
     {
     case 1:
       {
-	gdb_flush (gdb_stderr);
+	if (gdb_stderr != nullptr)
+	  gdb_flush (gdb_stderr);
 	break;
       }
     case 2:
       {
-	gdb_flush (gdb_stdlog);
+	if (gdb_stdlog != nullptr)
+	  gdb_flush (gdb_stdlog);
 	break;
       }
     default:
-      gdb_flush (gdb_stdout);
+      if (gdb_stdout != nullptr)
+	gdb_flush (gdb_stdout);
     }
 
   Py_RETURN_NONE;
