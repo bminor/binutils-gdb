@@ -24,6 +24,7 @@
 #include "language.h"
 #include "arch-utils.h"
 #include "guile-internal.h"
+#include "cli/cli-style.h"
 
 /* A GDB color.  */
 
@@ -354,8 +355,14 @@ gdbscm_color_escape_sequence (SCM self, SCM is_fg_scm)
   const ui_file_style::color &color = coscm_get_color (self);
   SCM_ASSERT_TYPE (gdbscm_is_bool (is_fg_scm), is_fg_scm, SCM_ARG2, FUNC_NAME,
 		   _("boolean"));
-  bool is_fg = gdbscm_is_true (is_fg_scm);
-  std::string s = color.to_ansi (is_fg);
+
+  std::string s;
+  if (term_cli_styling ())
+    {
+      bool is_fg = gdbscm_is_true (is_fg_scm);
+      s = color.to_ansi (is_fg);
+    }
+
   return gdbscm_scm_from_host_string (s.c_str (), s.size ());
 }
 

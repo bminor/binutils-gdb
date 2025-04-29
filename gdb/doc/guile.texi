@@ -3899,6 +3899,9 @@ Return string to change terminal's color to this.
 If @var{is_foreground} is @code{#t}, then the returned sequence will change
 foreground color.  Otherwise, the returned sequence will change background
 color.
+
+If styling is currently disabled (@pxref{Output Styling,,@kbd{set style
+enabled}}), then this procedure will return an empty string.
 @end deffn
 
 When color is initialized, its color space must be specified.  The

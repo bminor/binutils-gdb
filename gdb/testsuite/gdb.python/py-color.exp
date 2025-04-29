@@ -19,8 +19,10 @@ load_lib gdb-python.exp
 
 require allow_python_tests
 
-# Start with a fresh gdb.
-clean_restart
+# Start with a fresh GDB, but enable color support.
+with_ansi_styling_terminal {
+    clean_restart
+}
 
 gdb_test_no_output "python get_color_attrs = lambda c: \"%s %s %s %s %s\" % (str(c), c.colorspace, c.is_none, c.is_indexed, c.is_direct)" \
     "get_color_attrs helper"
@@ -114,6 +116,12 @@ gdb_test [concat "python print (c_red.escape_sequence (is_foreground = True) + "
     "c_none.escape_sequence (is_foreground = True))"] \
     "\033\\\[31m\033\\\[42mred on green\033\\\[49m red on default\033\\\[39m" \
     "escape sequences using keyword arguments"
+
+# Ensure that turning styling off means no escape sequences.
+gdb_test_no_output "set style enabled off"
+gdb_test_no_output "python print (c_red.escape_sequence (True), end='')"
+gdb_test_no_output "python print (c_red.escape_sequence (False), end='')"
+gdb_test_no_output "set style enabled on"
 
 gdb_test_multiline "Try to sub-class gdb.Color" \
     "python" "" \

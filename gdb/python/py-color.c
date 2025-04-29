@@ -21,6 +21,7 @@
 #include "python-internal.h"
 #include "py-color.h"
 #include "cli/cli-decode.h"
+#include "cli/cli-style.h"
 
 /* Colorspace constants and their values.  */
 static struct {
@@ -152,8 +153,12 @@ colorpy_escape_sequence (PyObject *self, PyObject *args, PyObject *kwargs)
   /* The argument parsing ensures we have a bool.  */
   gdb_assert (PyBool_Check (is_fg_obj));
 
-  bool is_fg = is_fg_obj == Py_True;
-  std::string s = gdbpy_get_color (self).to_ansi (is_fg);
+  std::string s;
+  if (term_cli_styling ())
+    {
+      bool is_fg = is_fg_obj == Py_True;
+      s = gdbpy_get_color (self).to_ansi (is_fg);
+    }
 
   return host_string_to_python_string (s.c_str ()).release ();
 }
