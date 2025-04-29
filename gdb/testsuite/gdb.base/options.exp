@@ -62,8 +62,7 @@ proc check_completion_result {expected test} {
 # just checking whether GDB recognizes the option and auto-appends a
 # space.
 proc test_completer_recognizes {res input_line} {
-    set expected_re [string_to_regexp $input_line]
-    test_gdb_complete_unique $input_line $expected_re
+    test_gdb_complete_unique $input_line $input_line
     check_completion_result $res $input_line
 }
 
