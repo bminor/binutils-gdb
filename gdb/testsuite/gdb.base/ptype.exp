@@ -544,10 +544,10 @@ proc ptype_maybe_prototyped { id prototyped plain { overprototyped "NO-MATCH" } 
             fail "ptype $id (compiler doesn't emit prototyped types)"
         }
         -re "type = $overprototyped\[\r\n\]+$gdb_prompt $" {
-            if { [test_compiler_info "armcc-*"] } {
-		setup_xfail "*-*-*"
-	    }
-            fail "ptype $id (compiler doesn't emit unprototyped types)"
+	    # C23 no longer supports non-prototype function declaration, in which
+	    # case the overprototyped regexp is the expected one.  Simply pass
+	    # in all cases.
+	    pass "ptype $id (overprototyped)"
         }
     }
 }
