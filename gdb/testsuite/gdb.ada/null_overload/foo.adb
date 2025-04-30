@@ -13,6 +13,8 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+with pck; use pck;
+
 procedure Foo is
 
    type R_Type is null record;
@@ -38,5 +40,5 @@ procedure Foo is
    U_Ptr : U_P_T := null;
 
 begin
-   null; -- START
+   Do_Nothing (U_Ptr'Address); -- START
 end Foo;

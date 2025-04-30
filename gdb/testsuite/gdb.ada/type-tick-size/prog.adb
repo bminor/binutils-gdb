@@ -50,6 +50,8 @@ procedure Prog is
    Rec_Type_Size : Integer := Rec'Object_Size;
 
 begin
+   Do_Nothing (Simple_Val'Address);
+   Do_Nothing (Rec_Val'Address);
    Do_Nothing (Static_Blob'Address);
    Do_Nothing (Dynamic_Blob'Address);
    null;                        -- STOP

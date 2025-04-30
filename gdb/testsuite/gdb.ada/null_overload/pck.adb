@@ -1,4 +1,4 @@
---  Copyright 2008-2025 Free Software Foundation, Inc.
+--  Copyright 2020-2025 Free Software Foundation, Inc.
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -13,18 +13,11 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-procedure P is
-   --  Make this large enough to force it into memory with gnat-llvm.
-   type Table is array (1 .. 15) of Integer;
+package body Pck is
 
-   function Create (I : Integer) return Table is
+   procedure Do_Nothing (A : System.Address) is
    begin
-      return (4 + I, 8 * I, 7 * I + 4, others => 72);
-   end Create;
+      null;
+   end Do_Nothing;
 
-   A : Table := Create (7);
-   C : Integer;
-begin
-   C := A (1) + A (2);  -- STOP
-end P;
-
+end Pck;
