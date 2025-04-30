@@ -440,14 +440,15 @@ expect-read1 expect-readmore:
 # function, making it read one byte at a time.  Running the testsuite
 # with this catches racy tests.
 read1.so: lib/read1.c
-	$(ECHO_CC) $(CC) -o $@ ${srcdir}/lib/read1.c -Wall -g -shared -fPIC $(CFLAGS)
+	$(ECHO_CC) $(CC) -o $@ ${srcdir}/lib/read1.c -Wall -g -shared -fPIC \
+	  $(filter-out -fsanitize=%,$(CFLAGS))
 
 # Build the readmore.so preload library.  This overrides the `read'
 # function, making it try harder to read more at a time.  Running the
 # testsuite with this catches racy tests.
 readmore.so: lib/read1.c
 	$(ECHO_CC) $(CC) -o $@ ${srcdir}/lib/read1.c -Wall -g -shared -fPIC \
-	  $(CFLAGS) -DREADMORE
+	  $(filter-out -fsanitize=%,$(CFLAGS)) -DREADMORE
 
 # Build the read1 machinery.
 .PHONY: read1 readmore
