@@ -205,7 +205,7 @@ program_space::exec_close ()
 	 Clear ebfd before doing so to prevent recursion.  We
 	 move it to another ref_ptr instead of saving it to a raw
 	 pointer to avoid it looking like possible use-after-free.  */
-      gdb_bfd_ref_ptr saved_ebfd = std::move(ebfd);
+      gdb_bfd_ref_ptr saved_ebfd = std::move (ebfd);
       ebfd.reset (nullptr);
       ebfd_mtime = 0;
 
