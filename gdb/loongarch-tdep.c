@@ -74,7 +74,9 @@ loongarch_insn_is_cond_branch (insn_t insn)
       || (insn & 0xfc000000) == 0x68000000	/* bltu  */
       || (insn & 0xfc000000) == 0x6c000000	/* bgeu  */
       || (insn & 0xfc000000) == 0x40000000	/* beqz  */
-      || (insn & 0xfc000000) == 0x44000000)	/* bnez  */
+      || (insn & 0xfc000000) == 0x44000000	/* bnez  */
+      || (insn & 0xfc000300) == 0x48000000	/* bceqz  */
+      || (insn & 0xfc000300) == 0x48000100)	/* bcnez  */
     return true;
   return false;
 }
@@ -312,6 +314,20 @@ loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc)
       LONGEST rj = regcache_raw_get_signed (regcache,
 		     loongarch_decode_imm ("5:5", insn, 0));
       if (rj != 0)
+	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000300) == 0x48000000)		/* bceqz cj, offs21  */
+    {
+      LONGEST cj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:3", insn, 0) + LOONGARCH_FIRST_FCC_REGNUM);
+      if (cj == 0)
+	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000300) == 0x48000100)		/* bcnez cj, offs21  */
+    {
+      LONGEST cj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:3", insn, 0) + LOONGARCH_FIRST_FCC_REGNUM);
+      if (cj != 0)
 	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
     }
   else if ((insn & 0xffff8000) == 0x002b0000)		/* syscall  */
