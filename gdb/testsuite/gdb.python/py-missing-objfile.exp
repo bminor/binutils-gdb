@@ -79,6 +79,16 @@ proc setup_debugdir { dirname files } {
 # executable (when EXEC_LOADED is true) and/or the library (when LIB_LOADED
 # is true).
 proc check_loaded_debug { exec_loaded lib_loaded } {
+    set re_warn \
+	[string_to_regexp \
+	     "Warning: the current language does not match this frame."]
+    set cmd "set lang c"
+    gdb_test_multiple $cmd "" {
+	-re -wrap "${cmd}(\r\n$re_warn)?" {
+	    pass $gdb_test_name
+	}
+    }
+
     if { $exec_loaded } {
 	gdb_test "whatis global_exec_var" "^type = volatile struct exec_type"
 
