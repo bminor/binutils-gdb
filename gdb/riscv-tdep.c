@@ -4884,7 +4884,7 @@ try_read (struct regcache *regcache, int regnum, ULONGEST &addr)
   if (regcache->raw_read (regnum, &addr)
       != register_status::REG_VALID)
     {
-      warning (_("Can not read at address %lx"), addr);
+      warning (_("Can not read at address %s"), hex_string (addr));
       return false;
     }
   return true;
@@ -5270,8 +5270,8 @@ private:
 	|| try_save_pc_rd_mem (ival, regcache))
       return !has_error ();
 
-    warning (_("Currently this instruction with len 4(%lx) is unsupported"),
-	     ival);
+    warning (_("Currently this instruction with len 4(%s) is unsupported"),
+	     hex_string (ival));
     return false;
   }
 
@@ -5380,8 +5380,8 @@ private:
 	       || !save_mem (addr + offset, 4) || set_ordinary_record_type ());
       }
 
-    warning (_("Currently this instruction with len 2(%lx) is unsupported"),
-	     ival);
+    warning (_("Currently this instruction with len 2(%s) is unsupported"),
+	     hex_string (ival));
     return false;
   }
 
@@ -5415,7 +5415,8 @@ public:
        are not defined yet, so just ignore it.  */
     gdb_assert (m_length > 0 && m_length % 2 == 0);
 
-    warning (_("Can not record unknown instruction (opcode = %lx)"), ival);
+    warning (_("Can not record unknown instruction (opcode = %s)"),
+	     hex_string (ival));
     return false;
   }
 
