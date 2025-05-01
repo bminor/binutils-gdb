@@ -89,7 +89,7 @@ void
 arc_add (Sym *parent, Sym *child, unsigned long count)
 {
   static unsigned int maxarcs = 0;
-  Arc *arc, **newarcs;
+  Arc *arc;
 
   DBG (TALLYDEBUG, printf ("[arc_add] %lu arcs from %s to %s\n",
 			   count, parent->name, child->name));
@@ -124,17 +124,7 @@ arc_add (Sym *parent, Sym *child, unsigned long count)
 	    maxarcs = 1;
 	  maxarcs *= 2;
 
-	  /* Allocate the new array.  */
-	  newarcs = (Arc **)xmalloc(sizeof (Arc *) * maxarcs);
-
-	  /* Copy the old array's contents into the new array.  */
-	  memcpy (newarcs, arcs, numarcs * sizeof (Arc *));
-
-	  /* Free up the old array.  */
-	  free (arcs);
-
-	  /* And make the new array be the current array.  */
-	  arcs = newarcs;
+	  arcs = xrealloc (arcs, sizeof (*arcs) * maxarcs);
 	}
 
       /* Place this arc in the arc array.  */
