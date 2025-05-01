@@ -10658,6 +10658,15 @@ elfcore_grok_aarch_zt (bfd *abfd, Elf_Internal_Note *note)
   return elfcore_make_note_pseudosection (abfd, ".reg-aarch-zt", note);
 }
 
+/* Convert NOTE into a bfd_section called ".reg-aarch-gcs".  Return TRUE if
+   successful, otherwise return FALSE.  */
+
+static bool
+elfcore_grok_aarch_gcs (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-aarch-gcs", note);
+}
+
 static bool
 elfcore_grok_arc_v2 (bfd *abfd, Elf_Internal_Note *note)
 {
@@ -11398,6 +11407,12 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 6
 	  && strcmp (note->namedata, "LINUX") == 0)
 	return elfcore_grok_aarch_zt (abfd, note);
+      else
+	return true;
+
+    case NT_ARM_GCS:
+      if (note->namesz == 6 && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_aarch_gcs (abfd, note);
       else
 	return true;
 
@@ -13071,6 +13086,20 @@ elfcore_write_aarch_zt (bfd *abfd,
 			     size);
 }
 
+/* Write the buffer of GCS register values in AARCH_GCS (length SIZE) into
+   the note buffer BUF and update *BUFSIZ.  ABFD is the bfd the note is being
+   written into.  Return a pointer to the new start of the note buffer, to
+   replace BUF which may no longer be valid.  */
+
+static char *
+elfcore_write_aarch_gcs (bfd *abfd, char *buf, int *bufsiz,
+			 const void *aarch_gcs, int size)
+{
+  const char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz, note_name, NT_ARM_GCS,
+			     aarch_gcs, size);
+}
+
 char *
 elfcore_write_arc_v2 (bfd *abfd,
 		      char *buf,
@@ -13260,6 +13289,8 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_aarch_za (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-aarch-zt") == 0)
     return elfcore_write_aarch_zt (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-aarch-gcs") == 0)
+    return elfcore_write_aarch_gcs (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-arc-v2") == 0)
     return elfcore_write_arc_v2 (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".gdb-tdesc") == 0)
