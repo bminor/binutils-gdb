@@ -159,6 +159,18 @@ static const char *const aarch64_mte_register_names[] =
   "tag_ctl"
 };
 
+static const char *const aarch64_gcs_register_names[] = {
+  /* Guarded Control Stack Pointer Register.  */
+  "gcspr"
+};
+
+static const char *const aarch64_gcs_linux_register_names[] = {
+  /* Field in struct user_gcs.  */
+  "gcs_features_enabled",
+  /* Field in struct user_gcs.  */
+  "gcs_features_locked",
+};
+
 static int aarch64_stack_frame_destroyed_p (struct gdbarch *, CORE_ADDR);
 
 /* AArch64 prologue cache structure.  */
@@ -1873,6 +1885,39 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
     default:
       return false;
     }
+}
+
+/* Push LR_VALUE to the Guarded Control Stack.  */
+
+static void
+aarch64_push_gcs_entry (regcache *regs, CORE_ADDR lr_value)
+{
+  gdbarch *arch = regs->arch ();
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (arch);
+  CORE_ADDR gcs_addr;
+
+  enum register_status status = regs->cooked_read (tdep->gcs_reg_base,
+						   &gcs_addr);
+  if (status != REG_VALID)
+    error ("Can't read $gcspr.");
+
+  gcs_addr -= 8;
+  gdb_byte buf[8];
+  store_integer (buf, gdbarch_byte_order (arch), lr_value);
+  if (target_write_memory (gcs_addr, buf, sizeof (buf)) != 0)
+    error ("Can't write to Guarded Control Stack.");
+
+  /* Update GCSPR.  */
+  regcache_cooked_write_unsigned (regs, tdep->gcs_reg_base, gcs_addr);
+}
+
+/* Implement the "shadow_stack_push" gdbarch method.  */
+
+static void
+aarch64_shadow_stack_push (gdbarch *gdbarch, CORE_ADDR new_addr,
+			   regcache *regcache)
+{
+  aarch64_push_gcs_entry (regcache, new_addr);
 }
 
 /* Implement the "push_dummy_call" gdbarch method.  */
@@ -4046,6 +4091,14 @@ aarch64_features_from_target_desc (const struct target_desc *tdesc)
   features.sme2 = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sme2")
 		   != nullptr);
 
+  /* Check for the GCS feature.  */
+  features.gcs = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.gcs")
+		  != nullptr);
+
+  /* Check for the GCS Linux feature.  */
+  features.gcs_linux = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.gcs.linux")
+			!= nullptr);
+
   return features;
 }
 
@@ -4590,6 +4643,46 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     int first_w_regnum = num_pseudo_regs;
     num_pseudo_regs += 31;
 
+  const struct tdesc_feature *feature_gcs
+      = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.gcs");
+  int first_gcs_regnum = -1;
+  /* Add the GCS registers.  */
+  if (feature_gcs != nullptr)
+    {
+      first_gcs_regnum = num_regs;
+      /* Validate the descriptor provides the mandatory GCS registers and
+	 allocate their numbers.  */
+      for (i = 0; i < ARRAY_SIZE (aarch64_gcs_register_names); i++)
+	valid_p &= tdesc_numbered_register (feature_gcs, tdesc_data.get (),
+					    first_gcs_regnum + i,
+					    aarch64_gcs_register_names[i]);
+
+      num_regs += i;
+    }
+
+  if (!valid_p)
+    return nullptr;
+
+  const struct tdesc_feature *feature_gcs_linux
+      = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.gcs.linux");
+  int first_gcs_linux_regnum = -1;
+  /* Add the GCS Linux registers.  */
+  if (feature_gcs_linux != nullptr)
+    {
+      first_gcs_linux_regnum = num_regs;
+      /* Validate the descriptor provides the mandatory GCS Linux registers
+	 and allocate their numbers.  */
+      for (i = 0; i < ARRAY_SIZE (aarch64_gcs_linux_register_names); i++)
+	valid_p &= tdesc_numbered_register (feature_gcs_linux, tdesc_data.get (),
+					    first_gcs_linux_regnum + i,
+					    aarch64_gcs_linux_register_names[i]);
+
+      /* This feature depends on the GCS feature.  */
+      valid_p &= feature_gcs != nullptr;
+
+      num_regs += i;
+    }
+
   if (!valid_p)
     return nullptr;
 
@@ -4611,6 +4704,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->mte_reg_base = first_mte_regnum;
   tdep->tls_regnum_base = first_tls_regnum;
   tdep->tls_register_count = tls_register_count;
+  tdep->gcs_reg_base = first_gcs_regnum;
+  tdep->gcs_linux_reg_base = first_gcs_linux_regnum;
 
   /* Set the SME register set details.  The pseudo-registers will be adjusted
      later.  */
@@ -4732,6 +4827,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_gen_return_address (gdbarch, aarch64_gen_return_address);
 
   set_gdbarch_get_pc_address_flags (gdbarch, aarch64_get_pc_address_flags);
+
+  if (tdep->has_gcs ())
+    set_gdbarch_shadow_stack_push (gdbarch, aarch64_shadow_stack_push);
 
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
@@ -4905,6 +5003,9 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 	      pulongest (tdep->sme_tile_pseudo_base));
   gdb_printf (file, _("aarch64_dump_tdep: sme_svq = %s\n"),
 	      pulongest (tdep->sme_svq));
+
+  gdb_printf (file, _ ("aarch64_dump_tdep: gcs_reg_base = %d\n"),
+	      tdep->gcs_reg_base);
 }
 
 #if GDB_SELF_TEST

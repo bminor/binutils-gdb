@@ -203,6 +203,8 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	aarch64-fpu.xml \
 	aarch64-pauth.xml \
 	aarch64-mte.xml \
+	aarch64-gcs.xml \
+	aarch64-gcs-linux.xml \
 	arc/v1-core.xml \
 	arc/v1-aux.xml \
 	arc/v2-core.xml \

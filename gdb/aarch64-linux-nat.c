@@ -51,6 +51,7 @@
 #include "gdb_proc_service.h"
 #include "arch-utils.h"
 
+#include "arch/aarch64-gcs-linux.h"
 #include "arch/aarch64-mte-linux.h"
 
 #include "nat/aarch64-mte-linux-ptrace.h"
@@ -542,6 +543,67 @@ store_tlsregs_to_thread (struct regcache *regcache)
     perror_with_name (_("unable to store TLS register"));
 }
 
+/* Fill GDB's register array with the GCS register values from
+   the current thread.  */
+
+static void
+fetch_gcsregs_from_thread (struct regcache *regcache)
+{
+  aarch64_gdbarch_tdep *tdep
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
+
+  gdb_assert (tdep->gcs_reg_base != -1);
+  gdb_assert (tdep->gcs_linux_reg_base != -1);
+
+  struct user_gcs user_gcs;
+  struct iovec iovec;
+
+  iovec.iov_base = &user_gcs;
+  iovec.iov_len = sizeof (user_gcs);
+
+  int tid = get_ptrace_pid (regcache->ptid ());
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_GCS, &iovec) != 0)
+      perror_with_name (_("unable to fetch GCS registers"));
+
+  regcache->raw_supply (tdep->gcs_reg_base, &user_gcs.gcspr_el0);
+  regcache->raw_supply (tdep->gcs_linux_reg_base, &user_gcs.features_enabled);
+  regcache->raw_supply (tdep->gcs_linux_reg_base + 1,
+			&user_gcs.features_locked);
+}
+
+/* Store to the current thread the valid GCS register set in the GDB's
+   register array.  */
+
+static void
+store_gcsregs_to_thread (struct regcache *regcache)
+{
+  aarch64_gdbarch_tdep *tdep
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
+
+  gdb_assert (tdep->gcs_reg_base != -1);
+  gdb_assert (tdep->gcs_linux_reg_base != -1);
+
+  if (REG_VALID != regcache->get_register_status (tdep->gcs_reg_base)
+      || REG_VALID != regcache->get_register_status (tdep->gcs_linux_reg_base)
+      || REG_VALID
+	     != regcache->get_register_status (tdep->gcs_linux_reg_base + 1))
+    return;
+
+  struct user_gcs user_gcs;
+  regcache->raw_collect (tdep->gcs_reg_base, &user_gcs.gcspr_el0);
+  regcache->raw_collect (tdep->gcs_linux_reg_base, &user_gcs.features_enabled);
+  regcache->raw_collect (tdep->gcs_linux_reg_base + 1,
+			 &user_gcs.features_locked);
+
+  struct iovec iovec;
+  iovec.iov_base = &user_gcs;
+  iovec.iov_len = sizeof (user_gcs);
+
+  int tid = get_ptrace_pid (regcache->ptid ());
+  if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_GCS, &iovec) != 0)
+    perror_with_name (_("unable to store GCS registers"));
+}
+
 /* The AArch64 version of the "fetch_registers" target_ops method.  Fetch
    REGNO from the target and place the result into REGCACHE.  */
 
@@ -577,6 +639,9 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
 
       if (tdep->has_sme2 ())
 	fetch_zt_from_thread (regcache);
+
+      if (tdep->has_gcs ())
+	fetch_gcsregs_from_thread (regcache);
     }
   /* General purpose register?  */
   else if (regno < AARCH64_V0_REGNUM)
@@ -609,6 +674,11 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
 	   && regno >= tdep->tls_regnum_base
 	   && regno < tdep->tls_regnum_base + tdep->tls_register_count)
     fetch_tlsregs_from_thread (regcache);
+  /* GCS register?  */
+  else if (tdep->has_gcs ()
+	   && (regno == tdep->gcs_reg_base || regno == tdep->gcs_linux_reg_base
+	       || regno == tdep->gcs_linux_reg_base + 1))
+    fetch_gcsregs_from_thread (regcache);
 }
 
 /* A version of the "fetch_registers" target_ops method used when running
@@ -680,6 +750,9 @@ aarch64_store_registers (struct regcache *regcache, int regno)
 
       if (tdep->has_sme2 ())
 	store_zt_to_thread (regcache);
+
+      if (tdep->has_gcs ())
+	store_gcsregs_to_thread (regcache);
     }
   /* General purpose register?  */
   else if (regno < AARCH64_V0_REGNUM)
@@ -706,6 +779,11 @@ aarch64_store_registers (struct regcache *regcache, int regno)
 	   && regno >= tdep->tls_regnum_base
 	   && regno < tdep->tls_regnum_base + tdep->tls_register_count)
     store_tlsregs_to_thread (regcache);
+  /* GCS register?  */
+  else if (tdep->has_gcs ()
+	   && (regno == tdep->gcs_reg_base || regno == tdep->gcs_linux_reg_base
+	       || regno == tdep->gcs_linux_reg_base + 1))
+    store_gcsregs_to_thread (regcache);
 
   /* PAuth registers are read-only.  */
 }
@@ -881,6 +959,7 @@ aarch64_linux_nat_target::read_description ()
      active or not.  */
   features.vq = aarch64_sve_get_vq (tid);
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
+  features.gcs = features.gcs_linux = hwcap & HWCAP_GCS;
   features.mte = hwcap2 & HWCAP2_MTE;
   features.tls = aarch64_tls_register_count (tid);
   /* SME feature check.  */

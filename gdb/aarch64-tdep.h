@@ -182,6 +182,20 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep_base
   {
     return sme2_zt0_regnum > 0;
   }
+
+  /* First GCS register.  This is -1 if no GCS registers are available.  */
+  int gcs_reg_base = -1;
+
+  /* First GCS Linux-specific register.  This is -1 if no GCS Linux feature is
+     available.  */
+  int gcs_linux_reg_base = -1;
+
+  /* Returns true if the target supports GCS.  */
+  bool
+  has_gcs () const
+  {
+    return gcs_reg_base != -1;
+  }
 };
 
 const target_desc *aarch64_read_description (const aarch64_features &features);

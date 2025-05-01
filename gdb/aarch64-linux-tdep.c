@@ -50,6 +50,7 @@
 #include "record-full.h"
 #include "linux-record.h"
 
+#include "arch/aarch64-gcs-linux.h"
 #include "arch/aarch64-mte.h"
 #include "arch/aarch64-mte-linux.h"
 #include "arch/aarch64-scalable-linux.h"
@@ -1604,6 +1605,27 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       cb (".reg-aarch-tls", sizeof_tls_regset, sizeof_tls_regset,
 	  &aarch64_linux_tls_regset, "TLS register", cb_data);
     }
+
+  /* Handle GCS registers.  */
+  if (tdep->has_gcs ())
+    {
+      /* Create this on the fly in order to handle the variable regnums.  */
+      const struct regcache_map_entry gcs_regmap[] =
+	{
+	  { 1, tdep->gcs_linux_reg_base, 8 },      /* features_enabled */
+	  { 1, tdep->gcs_linux_reg_base + 1, 8 },  /* features_locked */
+	  { 1, tdep->gcs_reg_base, 8 },            /* GCSPR */
+	  { 0 }
+	};
+
+      const struct regset aarch64_linux_gcs_regset =
+	{
+	  gcs_regmap, regcache_supply_regset, regcache_collect_regset
+	};
+
+      cb (".reg-aarch-gcs", sizeof (struct user_gcs), sizeof (struct user_gcs),
+	  &aarch64_linux_gcs_regset, "GCS registers", cb_data);
+    }
 }
 
 /* Implement the "core_read_description" gdbarch method.  */
@@ -1628,6 +1650,7 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
      length.  */
   features.vq = aarch64_linux_core_read_vq_from_sections (gdbarch, abfd);
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
+  features.gcs = features.gcs_linux = hwcap & HWCAP_GCS;
   features.mte = hwcap2 & HWCAP2_MTE;
 
   /* Handle the TLS section.  */
