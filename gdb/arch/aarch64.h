@@ -51,6 +51,12 @@ struct aarch64_features
 
   /* Whether SME2 is supported.  */
   bool sme2 = false;
+
+  /* Whether Guarded Control Stack is supported.  */
+  bool gcs = false;
+
+  /* Whether Guarded Control Stack Linux features are supported.  */
+  bool gcs_linux = false;
 };
 
 inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
@@ -60,7 +66,9 @@ inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
     && lhs.mte == rhs.mte
     && lhs.tls == rhs.tls
     && lhs.svq == rhs.svq
-    && lhs.sme2 == rhs.sme2;
+    && lhs.sme2 == rhs.sme2
+    && lhs.gcs == rhs.gcs
+    && lhs.gcs_linux == rhs.gcs_linux;
 }
 
 namespace std
