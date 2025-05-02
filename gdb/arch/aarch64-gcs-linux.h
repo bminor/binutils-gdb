@@ -41,4 +41,8 @@ struct user_gcs
 
 #endif /* GCS_MAGIC */
 
+#ifndef SEGV_CPERR
+#define SEGV_CPERR 10 /* Control protection error.  */
+#endif
+
 #endif /* ARCH_AARCH64_GCS_LINUX_H */

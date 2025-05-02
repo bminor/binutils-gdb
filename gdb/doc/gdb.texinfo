@@ -26994,6 +26994,14 @@ information, see the
 @uref{https://www.kernel.org/doc/html/latest/arch/arm64/gcs.html,ignored,
 documentation} in the Linux kernel.
 
+To aid debugging, @value{GDBN} will note when SIGSEGV signals are generated
+as a result of a Guarded Control Stack error:
+
+@smallexample
+Program received signal SIGSEGV, Segmentation fault
+Guarded Control Stack error.
+@end smallexample
+
 @node x86
 @subsection x86
 

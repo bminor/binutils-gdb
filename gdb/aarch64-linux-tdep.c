@@ -165,6 +165,7 @@
 #define AARCH64_ZA_MAGIC			0x54366345
 #define AARCH64_TPIDR2_MAGIC			0x54504902
 #define AARCH64_ZT_MAGIC			0x5a544e01
+#define AARCH64_GCS_MAGIC			0x47435300
 
 /* Defines for the extra_context that follows an AARCH64_EXTRA_MAGIC.  */
 #define AARCH64_EXTRA_DATAP_OFFSET		8
@@ -206,6 +207,11 @@
    the signal context state.  */
 #define AARCH64_SME2_CONTEXT_REGS_OFFSET	16
 
+/* GCSPR register value offset in the GCS signal frame context.  */
+#define AARCH64_GCS_CONTEXT_GCSPR_OFFSET	8
+/* features_enabled value offset in the GCS signal frame context.  */
+#define AARCH64_GCS_CONTEXT_FEATURES_ENABLED_OFFSET	16
+
 /* Holds information about the signal frame.  */
 struct aarch64_linux_sigframe
 {
@@ -246,6 +252,13 @@ struct aarch64_linux_sigframe
   bool za_payload = false;
   /* True if we have a ZT entry in the signal context, false otherwise.  */
   bool zt_available = false;
+
+  /* True if we have a GCS entry in the signal context, false otherwise.  */
+  bool gcs_availabe = false;
+  /* The Guarded Control Stack Pointer Register.  */
+  uint64_t gcspr;
+  /* Flags indicating which GCS features are enabled for the thread.  */
+  uint64_t gcs_features_enabled;
 };
 
 /* Read an aarch64_ctx, returning the magic value, and setting *SIZE to the
@@ -529,6 +542,39 @@ aarch64_linux_read_signal_frame_info (const frame_info_ptr &this_frame,
 	    section += size;
 	    break;
 	  }
+	case AARCH64_GCS_MAGIC:
+	  {
+	    gdb_byte buf[8];
+
+	    /* Extract the GCSPR.  */
+	    if (target_read_memory (section + AARCH64_GCS_CONTEXT_GCSPR_OFFSET,
+				    buf, 8) != 0)
+	      {
+		warning (_("Failed to read the GCSPR from the GCS signal frame"
+			   " context."));
+		section += size;
+		break;
+	      }
+
+	    signal_frame.gcspr = extract_unsigned_integer (buf, byte_order);
+
+	    /* Extract the features_enabled field.  */
+	    if (target_read_memory (section
+				    + AARCH64_GCS_CONTEXT_FEATURES_ENABLED_OFFSET,
+				    buf, sizeof (buf)) != 0)
+	      {
+		warning (_("Failed to read the enabled features from the GCS"
+			   " signal frame context."));
+		section += size;
+		break;
+	      }
+
+	    signal_frame.gcs_features_enabled
+		= extract_unsigned_integer (buf, byte_order);
+	    signal_frame.gcs_availabe = true;
+	    section += size;
+	    break;
+	  }
 	case AARCH64_EXTRA_MAGIC:
 	  {
 	    /* Extra is always the last valid section in reserved and points to
@@ -701,6 +747,19 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
       trad_frame_set_reg_addr (this_cache, tdep->tls_regnum_base + 1,
 			       signal_frame.tpidr2_section
 			       + AARCH64_TPIDR2_CONTEXT_TPIDR2_OFFSET);
+    }
+
+  /* Restore the GCS registers, if the target supports it and if there is
+     an entry for them.  */
+  if (signal_frame.gcs_availabe && tdep->has_gcs ())
+    {
+      /* Restore GCSPR.  */
+      trad_frame_set_reg_value (this_cache, tdep->gcs_reg_base,
+				signal_frame.gcspr);
+      /* Restore gcs_features_enabled.  */
+      trad_frame_set_reg_value (this_cache, tdep->gcs_linux_reg_base,
+				signal_frame.gcs_features_enabled);
+      /* gcs_features_locked isn't present in the GCS signal context.  */
     }
 
   trad_frame_set_id (this_cache, frame_id_build (signal_frame.sp, func));
@@ -2486,17 +2545,18 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
 {
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
 
-  if (!tdep->has_mte () || siggnal != GDB_SIGNAL_SEGV)
+  if (!(tdep->has_mte () || tdep->has_gcs ()) || siggnal != GDB_SIGNAL_SEGV)
     return;
 
   CORE_ADDR fault_addr = 0;
-  long si_code = 0;
+  long si_code = 0, si_errno = 0;
 
   try
     {
       /* Sigcode tells us if the segfault is actually a memory tag
 	 violation.  */
       si_code = parse_and_eval_long ("$_siginfo.si_code");
+      si_errno = parse_and_eval_long ("$_siginfo.si_errno");
 
       fault_addr
 	= parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
@@ -2507,13 +2567,18 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
       return;
     }
 
-  /* If this is not a memory tag violation, just return.  */
-  if (si_code != SEGV_MTEAERR && si_code != SEGV_MTESERR)
+  const char *meaning;
+
+  if (si_code == SEGV_MTEAERR || si_code == SEGV_MTESERR)
+    meaning = _("Memory tag violation");
+  else if (si_code == SEGV_CPERR && si_errno == 0)
+    meaning = _("Guarded Control Stack error");
+  else
     return;
 
   uiout->text ("\n");
 
-  uiout->field_string ("sigcode-meaning", _("Memory tag violation"));
+  uiout->field_string ("sigcode-meaning", meaning);
 
   /* For synchronous faults, show additional information.  */
   if (si_code == SEGV_MTESERR)
@@ -2539,7 +2604,7 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
 	  uiout->field_string ("logical-tag", hex_string (ltag));
 	}
     }
-  else
+  else if (si_code != SEGV_CPERR)
     {
       uiout->text ("\n");
       uiout->text (_("Fault address unavailable"));
@@ -2838,9 +2903,6 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       /* Register a hook for checking if an address is tagged or not.  */
       set_gdbarch_tagged_address_p (gdbarch, aarch64_linux_tagged_address_p);
 
-      set_gdbarch_report_signal_info (gdbarch,
-				      aarch64_linux_report_signal_info);
-
       /* Core file helpers.  */
 
       /* Core file helper to create a memory tag section for a particular
@@ -2856,6 +2918,9 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       set_gdbarch_decode_memtag_section (gdbarch,
 					 aarch64_linux_decode_memtag_section);
     }
+
+  if (tdep->has_mte () || tdep->has_gcs ())
+    set_gdbarch_report_signal_info (gdbarch, aarch64_linux_report_signal_info);
 
   /* Initialize the aarch64_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system
