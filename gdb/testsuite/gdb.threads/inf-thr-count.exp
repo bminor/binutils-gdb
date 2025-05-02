@@ -163,7 +163,7 @@ gdb_test "with print thread-events on -- p \$_inferior_thread_count" \
 
 # Set a variable in the inferior, this will cause the second thread to
 # exit.
-gdb_test_no_output "set variable spin = 0" \
+gdb_test_no_output -no-prompt-anchor "set variable spin = 0" \
     "set 'spin' flag to allow main thread to exit"
 
 # When the second thread exits, the main thread joins with it, and
