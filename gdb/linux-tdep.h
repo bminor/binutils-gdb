@@ -27,6 +27,10 @@
 struct inferior;
 struct regcache;
 
+#ifndef SEGV_CPERR
+#define SEGV_CPERR 10 /* Control protection error.  */
+#endif
+
 /* Enum used to define the extra fields of the siginfo type used by an
    architecture.  */
 enum linux_siginfo_extra_field_values
