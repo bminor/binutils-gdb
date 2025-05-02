@@ -136,7 +136,7 @@ get_unicode (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length,
 	  toosmall (_("null terminated unicode string"));
 	  return NULL;
 	}
-      if (windres_get_16 (wrbfd, data + c * 2, 2) == 0)
+      if (windres_get_16 (wrbfd, data + c * 2) == 0)
 	break;
       ++c;
     }
@@ -144,7 +144,7 @@ get_unicode (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length,
   ret = res_alloc ((c + 1) * sizeof (unichar));
 
   for (i = 0; i < c; i++)
-    ret[i] = windres_get_16 (wrbfd, data + i * 2, 2);
+    ret[i] = windres_get_16 (wrbfd, data + i * 2);
   ret[i] = 0;
 
   if (retlen != NULL)
@@ -167,7 +167,7 @@ get_resid (windres_bfd *wrbfd, rc_res_id *id, const bfd_byte *data,
       return -1;
     }
 
-  first = windres_get_16 (wrbfd, data, 2);
+  first = windres_get_16 (wrbfd, data);
   if (first == 0xffff)
     {
       if (length < 4)
@@ -176,7 +176,7 @@ get_resid (windres_bfd *wrbfd, rc_res_id *id, const bfd_byte *data,
 	  return -1;
 	}
       id->named = 0;
-      id->u.id = windres_get_16 (wrbfd, data + 2, 2);
+      id->u.id = windres_get_16 (wrbfd, data + 2);
       return 4;
     }
   else
@@ -221,8 +221,8 @@ bin_to_res_cursor (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
     }
 
   c = res_alloc (sizeof (rc_cursor));
-  c->xhotspot = windres_get_16 (wrbfd, data, 2);
-  c->yhotspot = windres_get_16 (wrbfd, data + 2, 2);
+  c->xhotspot = windres_get_16 (wrbfd, data);
+  c->yhotspot = windres_get_16 (wrbfd, data + 2);
   c->length = length - 4;
   c->data = data + 4;
 
@@ -254,7 +254,7 @@ bin_to_res_menu (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length)
       return NULL;
     }
 
-  version = windres_get_16 (wrbfd, data, 2);
+  version = windres_get_16 (wrbfd, data);
 
   if (version == 0)
     {
@@ -277,8 +277,8 @@ bin_to_res_menu (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length)
 	  toosmall (_("menuex header"));
 	  return NULL;
 	}
-      m->help = windres_get_32 (wrbfd, data + 4, 4);
-      offset = windres_get_16 (wrbfd, data + 2, 2);
+      m->help = windres_get_32 (wrbfd, data + 4);
+      offset = windres_get_16 (wrbfd, data + 2);
       if (offset + 4 >= length)
 	{
 	  toosmall (_("menuex offset"));
@@ -327,7 +327,7 @@ bin_to_res_menuitems (windres_bfd *wrbfd, const bfd_byte *data,
       mi->state = 0;
       mi->help = 0;
 
-      flags = windres_get_16 (wrbfd, data, 2);
+      flags = windres_get_16 (wrbfd, data);
       mi->type = flags &~ (MENUITEM_POPUP | MENUITEM_ENDMENU);
 
       if ((flags & MENUITEM_POPUP) == 0)
@@ -341,7 +341,7 @@ bin_to_res_menuitems (windres_bfd *wrbfd, const bfd_byte *data,
 	  return NULL;
 	}
 
-      if (windres_get_16 (wrbfd, data + stroff, 2) == 0)
+      if (windres_get_16 (wrbfd, data + stroff) == 0)
 	{
 	  slen = 0;
 	  mi->text = NULL;
@@ -358,7 +358,7 @@ bin_to_res_menuitems (windres_bfd *wrbfd, const bfd_byte *data,
       if ((flags & MENUITEM_POPUP) == 0)
 	{
 	  mi->popup = NULL;
-	  mi->id = windres_get_16 (wrbfd, data + 2, 2);
+	  mi->id = windres_get_16 (wrbfd, data + 2);
 	}
       else
 	{
@@ -413,13 +413,13 @@ bin_to_res_menuexitems (windres_bfd *wrbfd, const bfd_byte *data,
 	}
 
       mi = res_alloc (sizeof (rc_menuitem));
-      mi->type = windres_get_32 (wrbfd, data, 4);
-      mi->state = windres_get_32 (wrbfd, data + 4, 4);
-      mi->id = windres_get_32 (wrbfd, data + 8, 4);
+      mi->type = windres_get_32 (wrbfd, data);
+      mi->state = windres_get_32 (wrbfd, data + 4);
+      mi->id = windres_get_32 (wrbfd, data + 8);
 
-      flags = windres_get_16 (wrbfd, data + 12, 2);
+      flags = windres_get_16 (wrbfd, data + 12);
 
-      if (windres_get_16 (wrbfd, data + 14, 2) == 0)
+      if (windres_get_16 (wrbfd, data + 14) == 0)
 	{
 	  slen = 0;
 	  mi->text = NULL;
@@ -448,7 +448,7 @@ bin_to_res_menuexitems (windres_bfd *wrbfd, const bfd_byte *data,
 	      toosmall (_("menuitem"));
 	      return NULL;
 	    }
-	  mi->help = windres_get_32 (wrbfd, data + itemlen, 4);
+	  mi->help = windres_get_32 (wrbfd, data + itemlen);
 	  itemlen += 4;
 
 	  mi->popup = bin_to_res_menuexitems (wrbfd, data + itemlen,
@@ -494,19 +494,19 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 
   d = res_alloc (sizeof (rc_dialog));
 
-  signature = windres_get_16 (wrbfd, data + 2, 2);
+  signature = windres_get_16 (wrbfd, data + 2);
   if (signature != 0xffff)
     {
       d->ex = NULL;
-      d->style = windres_get_32 (wrbfd, data, 4);
-      d->exstyle = windres_get_32 (wrbfd, data + 4, 4);
+      d->style = windres_get_32 (wrbfd, data);
+      d->exstyle = windres_get_32 (wrbfd, data + 4);
       off = 8;
     }
   else
     {
       int version;
 
-      version = windres_get_16 (wrbfd, data, 2);
+      version = windres_get_16 (wrbfd, data);
       if (version != 1)
 	{
 	  non_fatal (_("unexpected DIALOGEX version %d"), version);
@@ -514,9 +514,9 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	}
 
       d->ex = res_alloc (sizeof (rc_dialog_ex));
-      d->ex->help = windres_get_32 (wrbfd, data + 4, 4);
-      d->exstyle = windres_get_32 (wrbfd, data + 8, 4);
-      d->style = windres_get_32 (wrbfd, data + 12, 4);
+      d->ex->help = windres_get_32 (wrbfd, data + 4);
+      d->exstyle = windres_get_32 (wrbfd, data + 8);
+      d->style = windres_get_32 (wrbfd, data + 12);
       off = 16;
     }
 
@@ -526,11 +526,11 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
       return NULL;
     }
 
-  c = windres_get_16 (wrbfd, data + off, 2);
-  d->x = windres_get_16 (wrbfd, data + off + 2, 2);
-  d->y = windres_get_16 (wrbfd, data + off + 4, 2);
-  d->width = windres_get_16 (wrbfd, data + off + 6, 2);
-  d->height = windres_get_16 (wrbfd, data + off + 8, 2);
+  c = windres_get_16 (wrbfd, data + off);
+  d->x = windres_get_16 (wrbfd, data + off + 2);
+  d->y = windres_get_16 (wrbfd, data + off + 4);
+  d->width = windres_get_16 (wrbfd, data + off + 6);
+  d->height = windres_get_16 (wrbfd, data + off + 8);
 
   off += 10;
 
@@ -570,7 +570,7 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	  return NULL;
 	}
 
-      d->pointsize = windres_get_16 (wrbfd, data + off, 2);
+      d->pointsize = windres_get_16 (wrbfd, data + off);
       off += 2;
 
       if (d->ex != NULL)
@@ -580,9 +580,9 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	      toosmall (_("dialogex font information"));
 	      return NULL;
 	    }
-	  d->ex->weight = windres_get_16 (wrbfd, data + off, 2);
-	  d->ex->italic = windres_get_8 (wrbfd, data + off + 2, 1);
-	  d->ex->charset = windres_get_8 (wrbfd, data + off + 3, 1);
+	  d->ex->weight = windres_get_16 (wrbfd, data + off);
+	  d->ex->italic = windres_get_8 (wrbfd, data + off + 2);
+	  d->ex->charset = windres_get_8 (wrbfd, data + off + 3);
 	  off += 4;
 	}
 
@@ -612,8 +612,8 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	      return NULL;
 	    }
 
-	  dc->style = windres_get_32 (wrbfd, data + off, 4);
-	  dc->exstyle = windres_get_32 (wrbfd, data + off + 4, 4);
+	  dc->style = windres_get_32 (wrbfd, data + off);
+	  dc->exstyle = windres_get_32 (wrbfd, data + off + 4);
 	  dc->help = 0;
 	  off += 8;
 	}
@@ -624,9 +624,9 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	      toosmall (_("dialogex control"));
 	      return NULL;
 	    }
-	  dc->help = windres_get_32 (wrbfd, data + off, 4);
-	  dc->exstyle = windres_get_32 (wrbfd, data + off + 4, 4);
-	  dc->style = windres_get_32 (wrbfd, data + off + 8, 4);
+	  dc->help = windres_get_32 (wrbfd, data + off);
+	  dc->exstyle = windres_get_32 (wrbfd, data + off + 4);
+	  dc->style = windres_get_32 (wrbfd, data + off + 8);
 	  off += 12;
 	}
 
@@ -636,15 +636,15 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	  return NULL;
 	}
 
-      dc->x = windres_get_16 (wrbfd, data + off, 2);
-      dc->y = windres_get_16 (wrbfd, data + off + 2, 2);
-      dc->width = windres_get_16 (wrbfd, data + off + 4, 2);
-      dc->height = windres_get_16 (wrbfd, data + off + 6, 2);
+      dc->x = windres_get_16 (wrbfd, data + off);
+      dc->y = windres_get_16 (wrbfd, data + off + 2);
+      dc->width = windres_get_16 (wrbfd, data + off + 4);
+      dc->height = windres_get_16 (wrbfd, data + off + 6);
 
       if (d->ex != NULL)
-	dc->id = windres_get_32 (wrbfd, data + off + 8, 4);
+	dc->id = windres_get_32 (wrbfd, data + off + 8);
       else
-	dc->id = windres_get_16 (wrbfd, data + off + 8, 2);
+	dc->id = windres_get_16 (wrbfd, data + off + 8);
 
       off += 10 + (d->ex != NULL ? 2 : 0);
 
@@ -664,7 +664,7 @@ bin_to_res_dialog (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	  return NULL;
 	}
 
-      datalen = windres_get_16 (wrbfd, data + off, 2);
+      datalen = windres_get_16 (wrbfd, data + off);
       off += 2;
 
       if (datalen == 0)
@@ -718,7 +718,7 @@ bin_to_res_string (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	  toosmall (_("stringtable string length"));
 	  return NULL;
 	}
-      slen = windres_get_16 (wrbfd, data, 2);
+      slen = windres_get_16 (wrbfd, data);
       st->strings[i].length = slen;
 
       if (slen > 0)
@@ -736,7 +736,7 @@ bin_to_res_string (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type length
 	  st->strings[i].string = s;
 
 	  for (j = 0; j < slen; j++)
-	    s[j] = windres_get_16 (wrbfd, data + 2 + j * 2, 2);
+	    s[j] = windres_get_16 (wrbfd, data + 2 + j * 2);
 	}
 
       data += 2 + 2 * slen;
@@ -766,7 +766,7 @@ bin_to_res_fontdir (windres_bfd *wrbfd, const bfd_byte *data,
       return NULL;
     }
 
-  c = windres_get_16 (wrbfd, data, 2);
+  c = windres_get_16 (wrbfd, data);
 
   first = NULL;
   pp = &first;
@@ -785,7 +785,7 @@ bin_to_res_fontdir (windres_bfd *wrbfd, const bfd_byte *data,
 
       bfi = (const struct bin_fontdir_item *) data;
       fd = res_alloc (sizeof *fd);
-      fd->index = windres_get_16 (wrbfd, bfi->index, 2);
+      fd->index = windres_get_16 (wrbfd, bfi->index);
 
       /* To work out the length of the fontdir data, we must get the
          length of the device name and face name strings, even though
@@ -858,9 +858,9 @@ bin_to_res_accelerators (windres_bfd *wrbfd, const bfd_byte *data,
 
       a = res_alloc (sizeof (rc_accelerator));
 
-      a->flags = windres_get_16 (wrbfd, data, 2);
-      a->key = windres_get_16 (wrbfd, data + 2, 2);
-      a->id = windres_get_16 (wrbfd, data + 4, 2);
+      a->flags = windres_get_16 (wrbfd, data);
+      a->key = windres_get_16 (wrbfd, data + 2);
+      a->id = windres_get_16 (wrbfd, data + 4);
 
       a->next = NULL;
       *pp = a;
@@ -919,14 +919,14 @@ bin_to_res_group_cursor (windres_bfd *wrbfd, const bfd_byte *data,
       return NULL;
     }
 
-  type = windres_get_16 (wrbfd, data + 2, 2);
+  type = windres_get_16 (wrbfd, data + 2);
   if (type != 2)
     {
       non_fatal (_("unexpected group cursor type %d"), type);
       return NULL;
     }
 
-  c = windres_get_16 (wrbfd, data + 4, 2);
+  c = windres_get_16 (wrbfd, data + 4);
 
   data += 6;
   length -= 6;
@@ -946,12 +946,12 @@ bin_to_res_group_cursor (windres_bfd *wrbfd, const bfd_byte *data,
 
       gc = res_alloc (sizeof *gc);
 
-      gc->width = windres_get_16 (wrbfd, data, 2);
-      gc->height = windres_get_16 (wrbfd, data + 2, 2);
-      gc->planes = windres_get_16 (wrbfd, data + 4, 2);
-      gc->bits = windres_get_16 (wrbfd, data + 6, 2);
-      gc->bytes = windres_get_32 (wrbfd, data + 8, 4);
-      gc->index = windres_get_16 (wrbfd, data + 12, 2);
+      gc->width = windres_get_16 (wrbfd, data);
+      gc->height = windres_get_16 (wrbfd, data + 2);
+      gc->planes = windres_get_16 (wrbfd, data + 4);
+      gc->bits = windres_get_16 (wrbfd, data + 6);
+      gc->bytes = windres_get_32 (wrbfd, data + 8);
+      gc->index = windres_get_16 (wrbfd, data + 12);
 
       gc->next = NULL;
       *pp = gc;
@@ -984,14 +984,14 @@ bin_to_res_group_icon (windres_bfd *wrbfd, const bfd_byte *data,
       return NULL;
     }
 
-  type = windres_get_16 (wrbfd, data + 2, 2);
+  type = windres_get_16 (wrbfd, data + 2);
   if (type != 1)
     {
       non_fatal (_("unexpected group icon type %d"), type);
       return NULL;
     }
 
-  c = windres_get_16 (wrbfd, data + 4, 2);
+  c = windres_get_16 (wrbfd, data + 4);
 
   data += 6;
   length -= 6;
@@ -1011,13 +1011,13 @@ bin_to_res_group_icon (windres_bfd *wrbfd, const bfd_byte *data,
 
       gi = res_alloc (sizeof (rc_group_icon));
 
-      gi->width = windres_get_8 (wrbfd, data, 1);
-      gi->height = windres_get_8 (wrbfd, data + 1, 1);
-      gi->colors = windres_get_8 (wrbfd, data + 2, 1);
-      gi->planes = windres_get_16 (wrbfd, data + 4, 2);
-      gi->bits = windres_get_16 (wrbfd, data + 6, 2);
-      gi->bytes = windres_get_32 (wrbfd, data + 8, 4);
-      gi->index = windres_get_16 (wrbfd, data + 12, 2);
+      gi->width = windres_get_8 (wrbfd, data);
+      gi->height = windres_get_8 (wrbfd, data + 1);
+      gi->colors = windres_get_8 (wrbfd, data + 2);
+      gi->planes = windres_get_16 (wrbfd, data + 4);
+      gi->bits = windres_get_16 (wrbfd, data + 6);
+      gi->bytes = windres_get_32 (wrbfd, data + 8);
+      gi->index = windres_get_16 (wrbfd, data + 12);
 
       gi->next = NULL;
       *pp = gi;
@@ -1051,9 +1051,9 @@ get_version_header (windres_bfd *wrbfd, const bfd_byte *data,
       return false;
     }
 
-  *len = (windres_get_16 (wrbfd, data, 2) + 3) & ~3;
-  *vallen = windres_get_16 (wrbfd, data + 2, 2);
-  *type = windres_get_16 (wrbfd, data + 4, 2);
+  *len = (windres_get_16 (wrbfd, data) + 3) & ~3;
+  *vallen = windres_get_16 (wrbfd, data + 2);
+  *type = windres_get_16 (wrbfd, data + 4);
 
   *off = 6;
 
@@ -1078,7 +1078,7 @@ get_version_header (windres_bfd *wrbfd, const bfd_byte *data,
 	      toosmall (key);
 	      return false;
 	    }
-	  if (windres_get_16 (wrbfd, data, 2) != (bfd_byte) *key)
+	  if (windres_get_16 (wrbfd, data) != (bfd_byte) *key)
 	    {
 	      non_fatal (_("unexpected version string"));
 	      return false;
@@ -1155,14 +1155,14 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data,
 	  return NULL;
 	}
 
-      signature = windres_get_32 (wrbfd, data, 4);
+      signature = windres_get_32 (wrbfd, data);
       if (signature != 0xfeef04bd)
 	{
 	  non_fatal (_("unexpected fixed version signature %lu"), signature);
 	  return NULL;
 	}
 
-      fiv = windres_get_32 (wrbfd, data + 4, 4);
+      fiv = windres_get_32 (wrbfd, data + 4);
       if (fiv != 0 && fiv != 0x10000)
 	{
 	  non_fatal (_("unexpected fixed version info version %lu"), fiv);
@@ -1171,17 +1171,17 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data,
 
       fi = res_alloc (sizeof (rc_fixed_versioninfo));
 
-      fi->file_version_ms = windres_get_32 (wrbfd, data + 8, 4);
-      fi->file_version_ls = windres_get_32 (wrbfd, data + 12, 4);
-      fi->product_version_ms = windres_get_32 (wrbfd, data + 16, 4);
-      fi->product_version_ls = windres_get_32 (wrbfd, data + 20, 4);
-      fi->file_flags_mask = windres_get_32 (wrbfd, data + 24, 4);
-      fi->file_flags = windres_get_32 (wrbfd, data + 28, 4);
-      fi->file_os = windres_get_32 (wrbfd, data + 32, 4);
-      fi->file_type = windres_get_32 (wrbfd, data + 36, 4);
-      fi->file_subtype = windres_get_32 (wrbfd, data + 40, 4);
-      fi->file_date_ms = windres_get_32 (wrbfd, data + 44, 4);
-      fi->file_date_ls = windres_get_32 (wrbfd, data + 48, 4);
+      fi->file_version_ms = windres_get_32 (wrbfd, data + 8);
+      fi->file_version_ls = windres_get_32 (wrbfd, data + 12);
+      fi->product_version_ms = windres_get_32 (wrbfd, data + 16);
+      fi->product_version_ls = windres_get_32 (wrbfd, data + 20);
+      fi->file_flags_mask = windres_get_32 (wrbfd, data + 24);
+      fi->file_flags = windres_get_32 (wrbfd, data + 28);
+      fi->file_os = windres_get_32 (wrbfd, data + 32);
+      fi->file_type = windres_get_32 (wrbfd, data + 36);
+      fi->file_subtype = windres_get_32 (wrbfd, data + 40);
+      fi->file_date_ms = windres_get_32 (wrbfd, data + 44);
+      fi->file_date_ls = windres_get_32 (wrbfd, data + 48);
 
       data += 52;
       length -= 52;
@@ -1203,7 +1203,7 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data,
 
       vi = res_alloc (sizeof (rc_ver_info));
 
-      ch = windres_get_16 (wrbfd, data + 6, 2);
+      ch = windres_get_16 (wrbfd, data + 6);
 
       if (ch == 'S')
 	{
@@ -1366,8 +1366,8 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data,
 
 	      vv = res_alloc (sizeof (rc_ver_varinfo));
 
-	      vv->language = windres_get_16 (wrbfd, data, 2);
-	      vv->charset = windres_get_16 (wrbfd, data + 2, 2);
+	      vv->language = windres_get_16 (wrbfd, data);
+	      vv->charset = windres_get_16 (wrbfd, data + 2);
 
 	      vv->next = NULL;
 	      *ppvv = vv;
@@ -1453,9 +1453,9 @@ bin_to_res_toolbar (windres_bfd *wrbfd, const bfd_byte *data,
       return NULL;
     }
   ri = res_alloc (sizeof (rc_toolbar));
-  ri->button_width = windres_get_32 (wrbfd, data, 4);
-  ri->button_height = windres_get_32 (wrbfd, data + 4, 4);
-  ri->nitems = windres_get_32 (wrbfd, data + 8, 4);
+  ri->button_width = windres_get_32 (wrbfd, data);
+  ri->button_height = windres_get_32 (wrbfd, data + 4);
+  ri->nitems = windres_get_32 (wrbfd, data + 8);
   ri->items = NULL;
 
   data += 12;
@@ -1470,7 +1470,7 @@ bin_to_res_toolbar (windres_bfd *wrbfd, const bfd_byte *data,
 	  toosmall (_("toolbar item"));
 	  return NULL;
 	}
-      it->id.u.id = (int) windres_get_32 (wrbfd, data, 4);
+      it->id.u.id = (int) windres_get_32 (wrbfd, data);
       it->prev = it->next = NULL;
       data += 4;
       length -= 4;

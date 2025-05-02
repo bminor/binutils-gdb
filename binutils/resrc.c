@@ -299,7 +299,7 @@ run_cmd (char *cmd, const char *redir)
       if (WEXITSTATUS (wait_status) != 0)
 	{
 	  fatal (_("%s exited with status %d"), cmd,
-	         WEXITSTATUS (wait_status));
+		 WEXITSTATUS (wait_status));
 	  retcode = 1;
 	}
     }
@@ -331,7 +331,7 @@ open_input_stream (char *cmd)
 
       if (verbose)
 	fprintf (stderr,
-	         _("Using temporary file `%s' to read preprocessor output\n"),
+		 _("Using temporary file `%s' to read preprocessor output\n"),
 		 cpp_temp_file);
     }
   else
@@ -359,15 +359,15 @@ filename_need_quotes (const char *filename)
   while (*filename != 0)
     {
       switch (*filename)
-        {
-        case '&':
-        case ' ':
-        case '<':
-        case '>':
-        case '|':
-        case '%':
-          return 1;
-        }
+	{
+	case '&':
+	case ' ':
+	case '<':
+	case '>':
+	case '|':
+	case '%':
+	  return 1;
+	}
       ++filename;
     }
   return 0;
@@ -529,7 +529,7 @@ read_rc_file (const char *filename, const char *preprocessor,
       if (slash && ! cpp_pipe)
 	{
 	  /* Next, try looking for a gcc in the same directory as
-             that windres */
+	     that windres */
 
 	  cpp_pipe = look_for_default (cmd, program_name, slash - program_name + 1,
 				       preprocargs, filename);
@@ -586,11 +586,11 @@ close_input_stream (void)
   else
     {
       if (cpp_pipe != NULL)
-        {
+	{
 	  int err;
 	  err = pclose (cpp_pipe);
 	  /* We are reading from a pipe, therefore we don't
-             know if cpp failed or succeeded until pclose.  */
+	     know if cpp failed or succeeded until pclose.  */
 	  if (err != 0 || errno == ECHILD)
 	    {
 	      /* Since this is also run via xatexit, safeguard.  */
@@ -598,7 +598,7 @@ close_input_stream (void)
 	      cpp_temp_file = NULL;
 	      fatal (_("preprocessing failed."));
 	    }
-        }
+	}
     }
 
   /* Since this is also run via xatexit, safeguard.  */
@@ -678,6 +678,22 @@ get_data (FILE *e, bfd_byte *p, rc_uint_type c, const char *msg)
 
   fatal (_("%s: read of %lu returned %lu"),
 	 msg, (unsigned long) c, (unsigned long) got);
+}
+
+static rc_uint_type
+target_get_16 (const void *p, size_t len)
+{
+  if (len < 2)
+    fatal (_("not enough data"));
+  return windres_get_16 (&wrtarget, p);
+}
+
+static rc_uint_type
+target_get_32 (const void *p, size_t len)
+{
+  if (len < 4)
+    fatal (_("not enough data"));
+  return windres_get_32 (&wrtarget, p);
 }
 
 /* Define an accelerator resource.  */
@@ -1094,7 +1110,7 @@ define_fontdir_rcdata (rc_res_id id,const rc_res_res_info *resinfo,
   if (pb_data)
     {
       rc_uint_type off = 2;
-      c = windres_get_16 (&wrtarget, pb_data, len_data);
+      c = target_get_16 (pb_data, len_data);
       for (; c > 0; c--)
 	{
 	  size_t len;
@@ -1103,7 +1119,7 @@ define_fontdir_rcdata (rc_res_id id,const rc_res_res_info *resinfo,
 
 	  bfi = (const struct bin_fontdir_item *) pb_data + off;
 	  fd = (rc_fontdir *) res_alloc (sizeof (rc_fontdir));
-	  fd->index = windres_get_16 (&wrtarget, bfi->index, len_data - off);
+	  fd->index = target_get_16 (bfi->index, len_data - off);
 	  fd->data = pb_data + off;
 	  off += 56;
 	  len = strlen ((char *) bfi->device_name) + 1;
@@ -1230,8 +1246,8 @@ define_icon (rc_res_id id, const rc_res_res_info *resinfo,
       rc_group_icon *cg;
 
       /* For some reason, at least in some files the planes and bits
-         are zero.  We instead set them from the color.  This is
-         copied from rcl.  */
+	 are zero.  We instead set them from the color.  This is
+	 copied from rcl.  */
 
       cg = (rc_group_icon *) res_alloc (sizeof (rc_group_icon));
       cg->next = NULL;
@@ -1288,10 +1304,10 @@ define_group_icon_rcdata (rc_res_id id, const rc_res_res_info *resinfo,
     {
       int c, i;
       unsigned short type;
-      type = windres_get_16 (&wrtarget, pb_data + 2, len_data - 2);
+      type = target_get_16 (pb_data + 2, len_data - 2);
       if (type != 1)
 	fatal (_("unexpected group icon type %d"), type);
-      c = windres_get_16 (&wrtarget, pb_data + 4, len_data - 4);
+      c = target_get_16 (pb_data + 4, len_data - 4);
       len_data -= 6;
       pb_data += 6;
 
@@ -1304,10 +1320,10 @@ define_group_icon_rcdata (rc_res_id id, const rc_res_res_info *resinfo,
 	  cg->width = pb_data[0];
 	  cg->height = pb_data[1];
 	  cg->colors = pb_data[2];
-	  cg->planes = windres_get_16 (&wrtarget, pb_data + 4, len_data - 4);
-	  cg->bits =  windres_get_16 (&wrtarget, pb_data + 6, len_data - 6);
-	  cg->bytes = windres_get_32 (&wrtarget, pb_data + 8, len_data - 8);
-	  cg->index = windres_get_16 (&wrtarget, pb_data + 12, len_data - 12);
+	  cg->planes = target_get_16 (pb_data + 4, len_data - 4);
+	  cg->bits =  target_get_16 (pb_data + 6, len_data - 6);
+	  cg->bytes = target_get_32 (pb_data + 8, len_data - 8);
+	  cg->index = target_get_16 (pb_data + 12, len_data - 12);
 	  if (! first)
 	    first = cg;
 	  else
@@ -1341,10 +1357,10 @@ define_group_cursor_rcdata (rc_res_id id, const rc_res_res_info *resinfo,
     {
       int c, i;
       unsigned short type;
-      type = windres_get_16 (&wrtarget, pb_data + 2, len_data - 2);
+      type = target_get_16 (pb_data + 2, len_data - 2);
       if (type != 2)
 	fatal (_("unexpected group cursor type %d"), type);
-      c = windres_get_16 (&wrtarget, pb_data + 4, len_data - 4);
+      c = target_get_16 (pb_data + 4, len_data - 4);
       len_data -= 6;
       pb_data += 6;
 
@@ -1354,12 +1370,12 @@ define_group_cursor_rcdata (rc_res_id id, const rc_res_res_info *resinfo,
 	    fatal ("too small group icon rcdata");
 	  cg = (rc_group_cursor *) res_alloc (sizeof (rc_group_cursor));
 	  cg->next = NULL;
-	  cg->width = windres_get_16 (&wrtarget, pb_data, len_data);
-	  cg->height = windres_get_16 (&wrtarget, pb_data + 2, len_data - 2);
-	  cg->planes = windres_get_16 (&wrtarget, pb_data + 4, len_data - 4);
-	  cg->bits =  windres_get_16 (&wrtarget, pb_data + 6, len_data - 6);
-	  cg->bytes = windres_get_32 (&wrtarget, pb_data + 8, len_data - 8);
-	  cg->index = windres_get_16 (&wrtarget, pb_data + 12, len_data - 12);
+	  cg->width = target_get_16 (pb_data, len_data);
+	  cg->height = target_get_16 (pb_data + 2, len_data - 2);
+	  cg->planes = target_get_16 (pb_data + 4, len_data - 4);
+	  cg->bits =  target_get_16 (pb_data + 6, len_data - 6);
+	  cg->bytes = target_get_32 (pb_data + 8, len_data - 8);
+	  cg->index = target_get_16 (pb_data + 12, len_data - 12);
 	  if (! first)
 	    first = cg;
 	  else
@@ -1389,8 +1405,8 @@ define_cursor_rcdata (rc_res_id id, const rc_res_res_info *resinfo,
   pb_data = rcdata_render_as_buffer (data, &len_data);
 
   c = (rc_cursor *) res_alloc (sizeof (rc_cursor));
-  c->xhotspot = windres_get_16 (&wrtarget, pb_data, len_data);
-  c->yhotspot = windres_get_16 (&wrtarget, pb_data + 2, len_data - 2);
+  c->xhotspot = target_get_16 (pb_data, len_data);
+  c->yhotspot = target_get_16 (pb_data + 2, len_data - 2);
   c->length = len_data - BIN_CURSOR_SIZE;
   c->data = (const bfd_byte *) (data + BIN_CURSOR_SIZE);
 
@@ -1994,9 +2010,9 @@ write_rc_directory (FILE *e, const rc_res_directory *rd,
 	{
 	case 1:
 	  /* If we're at level 1, the key of this resource is the
-             type.  This normally duplicates the information we have
-             stored with the resource itself, but we need to remember
-             the type if this is a user define resource type.  */
+	     type.  This normally duplicates the information we have
+	     stored with the resource itself, but we need to remember
+	     the type if this is a user define resource type.  */
 	  type = &re->id;
 	  break;
 
@@ -2031,10 +2047,10 @@ write_rc_directory (FILE *e, const rc_res_directory *rd,
 	  if (level == 3)
 	    {
 	      /* This is the normal case: the three levels are
-                 TYPE/NAME/LANGUAGE.  NAME will have been set at level
-                 2, and represents the name to use.  We probably just
-                 set LANGUAGE, and it will probably match what the
-                 resource itself records if anything.  */
+		 TYPE/NAME/LANGUAGE.  NAME will have been set at level
+		 2, and represents the name to use.  We probably just
+		 set LANGUAGE, and it will probably match what the
+		 resource itself records if anything.  */
 	      write_rc_resource (e, type, name, re->u.res, language);
 	    }
 	  else
@@ -2493,7 +2509,7 @@ write_rc_cursor (FILE *e, const rc_cursor *cursor)
 	   (unsigned int) cursor->xhotspot, (unsigned int) cursor->yhotspot,
 	   (int) cursor->xhotspot, (int) cursor->yhotspot);
   write_rc_datablock (e, (rc_uint_type) cursor->length, (const bfd_byte *) cursor->data,
-  		      0, 0, 0);
+		      0, 0, 0);
   fprintf (e, "END\n");
 }
 
@@ -2654,10 +2670,10 @@ write_rc_dialog_control (FILE *e, const rc_dialog_control *control)
   /* For EDITTEXT, COMBOBOX, LISTBOX, and SCROLLBAR don't dump text.  */
   if ((control->text.named || control->text.u.id != 0)
       && (!ci
-          || (ci->class != CTL_EDIT
-              && ci->class != CTL_COMBOBOX
-              && ci->class != CTL_LISTBOX
-              && ci->class != CTL_SCROLLBAR)))
+	  || (ci->class != CTL_EDIT
+	      && ci->class != CTL_COMBOBOX
+	      && ci->class != CTL_LISTBOX
+	      && ci->class != CTL_SCROLLBAR)))
     {
       fprintf (e, " ");
       res_id_print (e, control->text, 1);
@@ -2906,8 +2922,8 @@ test_rc_datablock_text (rc_uint_type length, const bfd_byte *data)
   for (i = 0, c = 0; i < length; i++)
     {
       if (! ISPRINT (data[i]) && data[i] != '\n'
-      	  && ! (data[i] == '\r' && (i + 1) < length && data[i + 1] == '\n')
-      	  && data[i] != '\t'
+	  && ! (data[i] == '\r' && (i + 1) < length && data[i + 1] == '\n')
+	  && data[i] != '\t'
 	  && ! (data[i] == 0 && (i + 1) != length))
 	{
 	  if (data[i] <= 7)
@@ -2944,7 +2960,7 @@ write_rc_messagetable (FILE *e, rc_uint_type length, const bfd_byte *data)
 	rc_uint_type m, i;
 
 	mt = (const struct bin_messagetable *) data;
-	m = windres_get_32 (&wrtarget, mt->cblocks, length);
+	m = target_get_32 (mt->cblocks, length);
 
 	if (length < (BIN_MESSAGETABLE_SIZE + m * BIN_MESSAGETABLE_BLOCK_SIZE))
 	  {
@@ -2956,9 +2972,9 @@ write_rc_messagetable (FILE *e, rc_uint_type length, const bfd_byte *data)
 	    rc_uint_type low, high, offset;
 	    const struct bin_messagetable_item *mti;
 
-	    low = windres_get_32 (&wrtarget, mt->items[i].lowid, 4);
-	    high = windres_get_32 (&wrtarget, mt->items[i].highid, 4);
-	    offset = windres_get_32 (&wrtarget, mt->items[i].offset, 4);
+	    low = windres_get_32 (&wrtarget, mt->items[i].lowid);
+	    high = windres_get_32 (&wrtarget, mt->items[i].highid);
+	    offset = windres_get_32 (&wrtarget, mt->items[i].offset);
 
 	    while (low <= high)
 	      {
@@ -2969,8 +2985,8 @@ write_rc_messagetable (FILE *e, rc_uint_type length, const bfd_byte *data)
 		    break;
 		  }
 		mti = (const struct bin_messagetable_item *) &data[offset];
-		elen = windres_get_16 (&wrtarget, mti->length, 2);
-		flags = windres_get_16 (&wrtarget, mti->flags, 2);
+		elen = windres_get_16 (&wrtarget, mti->length);
+		flags = windres_get_16 (&wrtarget, mti->flags);
 		if ((offset + elen) > length)
 		  {
 		    has_error = 1;
@@ -3008,8 +3024,8 @@ write_rc_messagetable (FILE *e, rc_uint_type length, const bfd_byte *data)
 }
 
 static void
-write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_next,
-		    int hasblock, int show_comment)
+write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data,
+		    int has_next, int hasblock, int show_comment)
 {
   int plen;
 
@@ -3031,23 +3047,23 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
 	      if (i < length && data[i] == '\n')
 		++i, ++c;
 	      ascii_print(e, (const char *) &data[i - c], c);
-	    fprintf (e, "\"");
+	      fprintf (e, "\"");
 	      if (i < length)
 		fprintf (e, "\n");
 	    }
 
 	  if (i == 0)
-	      {
+	    {
 	      indent (e, 2);
 	      fprintf (e, "\"\"");
-	      }
+	    }
 	  if (has_next)
 	    fprintf (e, ",");
 	  fprintf (e, "\n");
 	  if (hasblock)
 	    fprintf (e, "END\n");
 	  return;
-	  }
+	}
       if (test_rc_datablock_unicode (length, data))
 	{
 	  rc_uint_type i, c;
@@ -3057,20 +3073,20 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
 
 	      u = (const unichar *) &data[i];
 	      indent (e, 2);
-	  fprintf (e, "L\"");
+	      fprintf (e, "L\"");
 
 	      for (c = 0; i < length && c < 160 && u[c] != '\n'; c++, i += 2)
 		;
 	      if (i < length && u[c] == '\n')
 		i += 2, ++c;
 	      unicode_print (e, u, c);
-	  fprintf (e, "\"");
+	      fprintf (e, "\"");
 	      if (i < length)
 		fprintf (e, "\n");
 	    }
 
 	  if (i == 0)
-	  {
+	    {
 	      indent (e, 2);
 	      fprintf (e, "L\"\"");
 	    }
@@ -3086,14 +3102,14 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
     }
 
   if (length != 0)
-	      {
+    {
       rc_uint_type i, max_row;
       int first = 1;
 
       max_row = (show_comment ? 4 : 8);
       indent (e, 2);
       for (i = 0; i + 3 < length;)
-		  {
+	{
 	  rc_uint_type k;
 	  rc_uint_type comment_start;
 
@@ -3103,65 +3119,68 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
 	    indent (e, 2);
 
 	  for (k = 0; k < max_row && i + 3 < length; k++, i += 4)
-		      {
+	    {
 	      if (k == 0)
-		plen  = fprintf (e, "0x%lxL",
-				 (unsigned long) windres_get_32 (&wrtarget, data + i, length - i));
-			else
+		plen = fprintf (e, "0x%lxL",
+				(unsigned long) target_get_32 (data + i,
+							       length - i));
+	      else
 		plen = fprintf (e, " 0x%lxL",
-				(unsigned long) windres_get_32 (&wrtarget, data + i, length - i)) - 1;
+				(unsigned long) target_get_32 (data + i,
+							       length - i)) - 1;
 	      if (has_next || (i + 4) < length)
-			  {
+		{
 		  if (plen>0 && plen < 11)
 		    indent (e, 11 - plen);
 		  fprintf (e, ",");
-			  }
-		      }
+		}
+	    }
 	  if (show_comment)
 	    {
 	      fprintf (e, "\t/* ");
-	      ascii_print (e, (const char *) &data[comment_start], i - comment_start);
+	      ascii_print (e, (const char *) &data[comment_start],
+			   i - comment_start);
 	      fprintf (e, ".  */");
-		  }
-		fprintf (e, "\n");
-		first = 0;
-	      }
+	    }
+	  fprintf (e, "\n");
+	  first = 0;
+	}
 
       if (i + 1 < length)
-	      {
-		if (! first)
+	{
+	  if (! first)
 	    indent (e, 2);
 	  plen = fprintf (e, "0x%x",
-	  		  (int) windres_get_16 (&wrtarget, data + i, length - i));
+			  (int) target_get_16 (data + i, length - i));
 	  if (has_next || i + 2 < length)
-		  {
+	    {
 	      if (plen > 0 && plen < 11)
 		indent (e, 11 - plen);
 	      fprintf (e, ",");
-		      }
+	    }
 	  if (show_comment)
 	    {
 	      fprintf (e, "\t/* ");
 	      ascii_print (e, (const char *) &data[i], 2);
 	      fprintf (e, ".  */");
-		  }
-		fprintf (e, "\n");
-		i += 2;
-		first = 0;
-	      }
+	    }
+	  fprintf (e, "\n");
+	  i += 2;
+	  first = 0;
+	}
 
       if (i < length)
-	      {
-		if (! first)
+	{
+	  if (! first)
 	    indent (e, 2);
 	  fprintf (e, "\"");
 	  ascii_print (e, (const char *) &data[i], 1);
 	  fprintf (e, "\"");
 	  if (has_next)
-		  fprintf (e, ",");
-		fprintf (e, "\n");
-		first = 0;
-	      }
+	    fprintf (e, ",");
+	  fprintf (e, "\n");
+	  first = 0;
+	}
     }
   if (hasblock)
     fprintf (e, "END\n");
@@ -3214,9 +3233,9 @@ write_rc_rcdata (FILE *e, const rc_rcdata_item *rcdata, int ind)
 
 	case RCDATA_BUFFER:
 	  write_rc_datablock (e, (rc_uint_type) ri->u.buffer.length,
-	  		      (const bfd_byte *) ri->u.buffer.data,
-	    		      ri->next != NULL, 0, -1);
-	    break;
+			      (const bfd_byte *) ri->u.buffer.data,
+			      ri->next != NULL, 0, -1);
+	  break;
 	}
 
       if (ri->type != RCDATA_BUFFER)
@@ -3257,7 +3276,7 @@ write_rc_stringtable (FILE *e, const rc_res_id *name,
 	{
 	  fprintf (e, "  %lu, ", (unsigned long) offset + i);
 	  unicode_print_quoted (e, stringtable->strings[i].string,
-			 stringtable->strings[i].length);
+				stringtable->strings[i].length);
 	  fprintf (e, "\n");
 	}
     }
@@ -3298,7 +3317,7 @@ write_rc_versioninfo (FILE *e, const rc_versioninfo *versioninfo)
     fprintf (e, " FILESUBTYPE 0x%x\n", (unsigned int) f->file_subtype);
   if (f->file_date_ms != 0 || f->file_date_ls != 0)
     fprintf (e, "/* Date: %u, %u.  */\n",
-    	     (unsigned int) f->file_date_ms, (unsigned int) f->file_date_ls);
+	     (unsigned int) f->file_date_ms, (unsigned int) f->file_date_ls);
 
   fprintf (e, "BEGIN\n");
 
@@ -3366,7 +3385,7 @@ rcdata_copy (const rc_rcdata_item *src, bfd_byte *dst)
   if (! src)
     return 0;
   switch (src->type)
-	{
+    {
     case RCDATA_WORD:
       if (dst)
 	windres_put_16 (&wrtarget, dst, (rc_uint_type) src->u.word);

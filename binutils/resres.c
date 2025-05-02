@@ -201,11 +201,11 @@ read_resource_entry (windres_bfd *wrbfd, rc_uint_type *off, rc_uint_type omax)
 
   /* Read additional resource header */
   read_res_data (wrbfd, off, omax, &l, BIN_RES_INFO_SIZE);
-  resinfo.version = windres_get_32 (wrbfd, l.version, 4);
-  resinfo.memflags = windres_get_16 (wrbfd, l.memflags, 2);
-  resinfo.language = windres_get_16 (wrbfd, l.language, 2);
-  /* resinfo.version2 = windres_get_32 (wrbfd, l.version2, 4); */
-  resinfo.characteristics = windres_get_32 (wrbfd, l.characteristics, 4);
+  resinfo.version = windres_get_32 (wrbfd, l.version);
+  resinfo.memflags = windres_get_16 (wrbfd, l.memflags);
+  resinfo.language = windres_get_16 (wrbfd, l.language);
+  /* resinfo.version2 = windres_get_32 (wrbfd, l.version2); */
+  resinfo.characteristics = windres_get_32 (wrbfd, l.characteristics);
 
   off[0] = (off[0] + 3) & ~3;
 
@@ -464,8 +464,8 @@ read_res_data_hdr (windres_bfd *wrbfd, rc_uint_type *off, rc_uint_type omax,
     fatal ("%s: unexpected end of file %ld/%ld", filename,(long) off[0], (long) omax);
 
   get_windres_bfd_content (wrbfd, &brh, off[0], BIN_RES_HDR_SIZE);
-  reshdr->data_size = windres_get_32 (wrbfd, brh.data_size, 4);
-  reshdr->header_size = windres_get_32 (wrbfd, brh.header_size, 4);
+  reshdr->data_size = windres_get_32 (wrbfd, brh.data_size);
+  reshdr->header_size = windres_get_32 (wrbfd, brh.header_size);
   off[0] += BIN_RES_HDR_SIZE;
 }
 
@@ -542,12 +542,12 @@ read_res_id (windres_bfd *wrbfd, rc_uint_type *off, rc_uint_type omax, rc_res_id
   rc_uint_type len;
 
   read_res_data (wrbfd, off, omax, &bid, BIN_RES_ID - 2);
-  ord = (unsigned short) windres_get_16 (wrbfd, bid.sig, 2);
+  ord = (unsigned short) windres_get_16 (wrbfd, bid.sig);
   if (ord == 0xFFFF)		/* an ordinal id */
     {
       read_res_data (wrbfd, off, omax, bid.id, BIN_RES_ID - 2);
       id->named = 0;
-      id->u.id = windres_get_16 (wrbfd, bid.id, 2);
+      id->u.id = windres_get_16 (wrbfd, bid.id);
     }
   else
     /* named id */
@@ -575,7 +575,7 @@ read_unistring (windres_bfd *wrbfd, rc_uint_type *off, rc_uint_type omax,
   do
     {
       read_res_data (wrbfd, &soff, omax, d, sizeof (unichar));
-      c = windres_get_16 (wrbfd, d, 2);
+      c = windres_get_16 (wrbfd, d);
     }
   while (c != 0);
   l = ((soff - off[0]) / sizeof (unichar));
@@ -585,7 +585,7 @@ read_unistring (windres_bfd *wrbfd, rc_uint_type *off, rc_uint_type omax,
   do
     {
       read_res_data (wrbfd, off, omax, d, sizeof (unichar));
-      c = windres_get_16 (wrbfd, d, 2);
+      c = windres_get_16 (wrbfd, d);
       *p++ = c;
     }
   while (c != 0);

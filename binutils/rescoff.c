@@ -232,14 +232,14 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
   erd = (const struct extern_res_directory *) data;
 
   rd = (rc_res_directory *) res_alloc (sizeof (rc_res_directory));
-  rd->characteristics = windres_get_32 (wrbfd, erd->characteristics, 4);
-  rd->time = windres_get_32 (wrbfd, erd->time, 4);
-  rd->major = windres_get_16 (wrbfd, erd->major, 2);
-  rd->minor = windres_get_16 (wrbfd, erd->minor, 2);
+  rd->characteristics = windres_get_32 (wrbfd, erd->characteristics);
+  rd->time = windres_get_32 (wrbfd, erd->time);
+  rd->major = windres_get_16 (wrbfd, erd->major);
+  rd->minor = windres_get_16 (wrbfd, erd->minor);
   rd->entries = NULL;
 
-  name_count = windres_get_16 (wrbfd, erd->name_count, 2);
-  id_count = windres_get_16 (wrbfd, erd->id_count, 2);
+  name_count = windres_get_16 (wrbfd, erd->name_count);
+  id_count = windres_get_16 (wrbfd, erd->id_count);
 
   pp = &rd->entries;
 
@@ -261,8 +261,8 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
 	  return NULL;
 	}
 
-      name = windres_get_32 (wrbfd, ere->name, 4);
-      rva = windres_get_32 (wrbfd, ere->rva, 4);
+      name = windres_get_32 (wrbfd, ere->name);
+      rva = windres_get_32 (wrbfd, ere->rva);
 
       /* For some reason the high bit in NAME is set.  */
       name &=~ 0x80000000;
@@ -279,7 +279,7 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
 	  overrun (flaginfo, _("resource name"));
 	  return NULL;
 	}
-      length = windres_get_16 (wrbfd, ers, 2);
+      length = windres_get_16 (wrbfd, ers);
       /* PR 17512: file: 05dc4a16.  */
       if (length * 2 + 4 > flaginfo->data_end - ers)
 	{
@@ -292,7 +292,7 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
       re->id.u.n.length = length;
       re->id.u.n.name = (unichar *) res_alloc (length * sizeof (unichar));
       for (j = 0; j < length; j++)
-	re->id.u.n.name[j] = windres_get_16 (wrbfd, ers + j * 2 + 2, 2);
+	re->id.u.n.name[j] = windres_get_16 (wrbfd, ers + j * 2 + 2);
 
       if (level == 0)
 	type = &re->id;
@@ -337,8 +337,8 @@ read_coff_res_dir (windres_bfd *wrbfd, const bfd_byte *data,
 	  return NULL;
 	}
 
-      name = windres_get_32 (wrbfd, ere->name, 4);
-      rva = windres_get_32 (wrbfd, ere->rva, 4);
+      name = windres_get_32 (wrbfd, ere->name);
+      rva = windres_get_32 (wrbfd, ere->rva);
 
       re = (rc_res_entry *) res_alloc (sizeof *re);
       re->next = NULL;
@@ -405,8 +405,8 @@ read_coff_data_entry (windres_bfd *wrbfd, const bfd_byte *data,
 
   erd = (const struct extern_res_data *) data;
 
-  size = windres_get_32 (wrbfd, erd->size, 4);
-  rva = windres_get_32 (wrbfd, erd->rva, 4);
+  size = windres_get_32 (wrbfd, erd->size);
+  rva = windres_get_32 (wrbfd, erd->rva);
   if (rva < flaginfo->secaddr
       || rva - flaginfo->secaddr >= (rc_uint_type) (flaginfo->data_end - flaginfo->data))
     {
@@ -426,8 +426,8 @@ read_coff_data_entry (windres_bfd *wrbfd, const bfd_byte *data,
   if (r != NULL)
     {
       memset (&r->res_info, 0, sizeof (rc_res_res_info));
-      r->coff_info.codepage = windres_get_32 (wrbfd, erd->codepage, 4);
-      r->coff_info.reserved = windres_get_32 (wrbfd, erd->reserved, 4);
+      r->coff_info.codepage = windres_get_32 (wrbfd, erd->codepage);
+      r->coff_info.reserved = windres_get_32 (wrbfd, erd->reserved);
     }
 
   return r;

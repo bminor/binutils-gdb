@@ -1210,23 +1210,15 @@ target_put_32 (void *p, rc_uint_type value)
 }
 
 static rc_uint_type
-target_get_8 (const void *p, rc_uint_type length)
+target_get_8 (const void *p)
 {
-  rc_uint_type ret;
-
-  if (length < 1)
-    fatal ("Resource too small for getting 8-bit value.");
-
-  ret = (rc_uint_type) *((const bfd_byte *) p);
+  rc_uint_type ret = *((const bfd_byte *) p);
   return ret & 0xff;
 }
 
 static rc_uint_type
-target_get_16 (const void *p, rc_uint_type length)
+target_get_16 (const void *p)
 {
-  if (length < 2)
-    fatal ("Resource too small for getting 16-bit value.");
-
   if (target_is_bigendian)
     return bfd_getb16 (p);
   else
@@ -1234,11 +1226,8 @@ target_get_16 (const void *p, rc_uint_type length)
 }
 
 static rc_uint_type
-target_get_32 (const void *p, rc_uint_type length)
+target_get_32 (const void *p)
 {
-  if (length < 4)
-    fatal ("Resource too small for getting 32-bit value.");
-
   if (target_is_bigendian)
     return bfd_getb32 (p);
   else
@@ -1304,14 +1293,12 @@ windres_put_32 (windres_bfd *wrbfd, void *data, rc_uint_type value)
 }
 
 rc_uint_type
-windres_get_8 (windres_bfd *wrbfd, const void *data, rc_uint_type length)
+windres_get_8 (windres_bfd *wrbfd, const void *data)
 {
-  if (length < 1)
-    fatal ("windres_get_8: unexpected eob.");
   switch (WR_KIND(wrbfd))
     {
     case WR_KIND_TARGET:
-      return target_get_8 (data, length);
+      return target_get_8 (data);
     case WR_KIND_BFD:
     case WR_KIND_BFD_BIN_B:
     case WR_KIND_BFD_BIN_L:
@@ -1323,14 +1310,12 @@ windres_get_8 (windres_bfd *wrbfd, const void *data, rc_uint_type length)
 }
 
 rc_uint_type
-windres_get_16 (windres_bfd *wrbfd, const void *data, rc_uint_type length)
+windres_get_16 (windres_bfd *wrbfd, const void *data)
 {
-  if (length < 2)
-    fatal ("windres_get_16: unexpected eob.");
   switch (WR_KIND(wrbfd))
     {
     case WR_KIND_TARGET:
-      return target_get_16 (data, length);
+      return target_get_16 (data);
     case WR_KIND_BFD:
     case WR_KIND_BFD_BIN_B:
       return bfd_get_16 (WR_BFD(wrbfd), data);
@@ -1343,14 +1328,12 @@ windres_get_16 (windres_bfd *wrbfd, const void *data, rc_uint_type length)
 }
 
 rc_uint_type
-windres_get_32 (windres_bfd *wrbfd, const void *data, rc_uint_type length)
+windres_get_32 (windres_bfd *wrbfd, const void *data)
 {
-  if (length < 4)
-    fatal ("windres_get_32: unexpected eob.");
   switch (WR_KIND(wrbfd))
     {
     case WR_KIND_TARGET:
-      return target_get_32 (data, length);
+      return target_get_32 (data);
     case WR_KIND_BFD:
     case WR_KIND_BFD_BIN_B:
       return bfd_get_32 (WR_BFD(wrbfd), data);
