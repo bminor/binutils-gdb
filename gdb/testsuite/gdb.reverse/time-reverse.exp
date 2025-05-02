@@ -20,6 +20,7 @@
 #
 
 require supports_reverse
+require supports_process_record
 
 standard_testfile
 
@@ -38,23 +39,25 @@ proc test {mode} {
 	return
     }
 
-    runto marker1
-
-    if [supports_process_record] {
-	# Activate process record/replay
-	gdb_test_no_output "record" "turn on process record"
+    if { ![runto marker1] } {
+	return
     }
 
+    # Activate process record/replay
+    gdb_test_no_output "record" "turn on process record"
+
+    set re_srcfile [string_to_regexp $::srcfile]
+
     gdb_test "break marker2" \
-	"Breakpoint $::decimal at $::hex: file .*$::srcfile, line $::decimal.*" \
+	"Breakpoint $::decimal at $::hex: file .*$re_srcfile, line $::decimal.*" \
 	"set breakpoint at marker2"
 
-    gdb_continue_to_breakpoint "marker2" ".*$::srcfile:.*"
+    gdb_continue_to_breakpoint "marker2" ".*$re_srcfile:.*"
 
     # Show how many instructions we've recorded.
     gdb_test "info record" "Active record target: .*"
 
-    gdb_test "reverse-continue" ".*$::srcfile:$::decimal.*" "reverse to marker1"
+    gdb_test "reverse-continue" ".*$re_srcfile:$::decimal.*" "reverse to marker1"
 
     # If the variable was recorded properly, the old contents (-1)
     # will be remembered.  If not, new contents (current time) will be
