@@ -78,6 +78,7 @@ CCSOURCES = \
 	Stabs.cc \
 	Stats_data.cc \
 	StringBuilder.cc \
+	Symbol.cc \
 	Table.cc \
 	QLParser.tab.cc \
 	dbe_collctrl.cc \

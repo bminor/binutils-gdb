@@ -27,9 +27,9 @@
 #include "Elf.h"
 #include "Function.h"
 #include "Module.h"
-#include "StringBuilder.h"
 #include "DbeArray.h"
 #include "DbeSession.h"
+#include "Symbol.h"
 
 #define NO_STMT_LIST ((uint64_t) -1)
 #define CASE_S(x)   case x: s = (char *) #x; break
@@ -1795,6 +1795,8 @@ DwrLineRegs::getPath (int fn)
 DwrCU::DwrCU (Dwarf *_dwarf)
 {
   dwarf = _dwarf;
+  symbols = NULL;
+  symbols_sorted_by_name = NULL;
   cu_offset = dwarf->debug_infoSec->offset;
   debug_infoSec = new DwrSec (dwarf->debug_infoSec, cu_offset);
   next_cu_offset = debug_infoSec->ReadLength ();
@@ -1883,6 +1885,8 @@ DwrCU::~DwrCU ()
   Destroy (dwrInlinedSubrs);
   delete srcFiles;
   delete dwrLineReg;
+  delete symbols;
+  delete symbols_sorted_by_name;
   free (comp_dir);
 }
 
@@ -2187,7 +2191,78 @@ DwrCU::parse_cu_header (LoadObject *lo)
   else
     path = dbe_strdup (dwarf->stabs->path);
   module->set_name (path);
+
+  // create a list of functions in this CU
+  Vector <Range *> *ranges = get_ranges ();
+  if (ranges)
+    {
+      Vector <Symbol *> *syms = dwarf->stabs->get_symbols ();
+      symbols = Symbol::find_symbols (syms, ranges);
+      symbols_sorted_by_name = Symbol::sort_by_name (syms);
+      Destroy (ranges);
+    }
   return module;
+}
+
+Vector <Range *> *
+DwrCU::get_ranges ()
+{
+  Vector <Range *> *ranges = NULL;
+  Dwr_Attr *dwrAttr = dwrTag.get_attr (DW_AT_ranges);
+  if (dwrAttr)
+    {
+      Dprintf (DUMP_DWARFLIB, "DwrCU::get_ranges: 0x%llx\n",
+	       (long long) dwrAttr->u.offset);
+      ranges = dwarf->get_ranges (dwrAttr->u.offset);
+    }
+  else
+    {
+      uint64_t low_pc = Dwarf_addr (DW_AT_low_pc);
+      if (low_pc > 0)
+	{
+	  uint64_t high_pc = get_high_pc (low_pc);
+	  ranges = new Vector <Range *> (1);
+	  ranges->append (new Range (low_pc, high_pc));
+	  Dprintf (DUMP_DWARFLIB, "DwrCU::get_ranges: pc=0x%llx\n",
+		   (long long) low_pc);
+	}
+    }
+  if (ranges && DUMP_DWARFLIB)
+    ranges->dump (" ");
+  return ranges;
+}
+
+void
+DwrCU::set_source (Function *func)
+{
+  int lineno = (int) Dwarf_data (DW_AT_decl_line);
+  func->setLineFirst (lineno);
+
+  int fileno = (int) Dwarf_data (DW_AT_decl_file);
+  if (fileno > 0 && fileno < VecSize (srcFiles))
+    func->setDefSrc (srcFiles->get (fileno));
+}
+
+Symbol *
+DwrCU::find_declaration (int64_t offset)
+{
+  int64_t old_offset = dwrTag.offset;
+  Symbol *sym = NULL;
+  if (set_die (offset) == DW_DLV_OK)
+    {
+      sym = Symbol::get_symbol (symbols_sorted_by_name, get_linkage_name ());
+      if (sym && sym->func == NULL)
+	{
+	  Function *func = sym->createFunction (module);
+	  int lineno = (int) Dwarf_data (DW_AT_decl_line);
+	  func->setLineFirst (lineno);
+	  int fileno = (int) Dwarf_data (DW_AT_decl_file);
+	  if (fileno > 0 && fileno < VecSize (srcFiles))
+	    func->setDefSrc (srcFiles->get (fileno));
+	}
+    }
+  set_die (old_offset);
+  return sym;
 }
 
 Dwr_Attr *
@@ -2357,7 +2432,7 @@ DwrCU::map_dwarf_lines (Module *mod)
 	  InlinedSubr *p = func->inlinedSubr + func->inlinedSubrCnt;
 	  func->inlinedSubrCnt++;
 	  int fileno = inlinedSubr->file - 1;
-	  SourceFile *sf = ((fileno >= 0) && (fileno < VecSize (srcFiles))) ?
+	  SourceFile *sf = ((fileno > 0) && (fileno < VecSize (srcFiles))) ?
 		  srcFiles->get (fileno) : dbeSession->get_Unknown_Source ();
 	  p->dbeLine = sf->find_dbeline (inlinedSubr->line);
 	  p->high_pc = inlinedSubr->high_pc - low_pc;

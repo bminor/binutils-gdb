@@ -29,6 +29,7 @@
 #include "LoadObject.h"
 #include "Module.h"
 #include "DefaultMap.h"
+#include "Symbol.h"
 
 static int
 datatypeCmp (const void *a, const void *b)
@@ -45,7 +46,6 @@ targetOffsetCmp (const void *a, const void *b)
   uint32_t o2 = ((target_info_t *) b)->offset;
   return o1 == o2 ? 0 : (o1 < o2 ? -1 : 1);
 }
-
 
 //////////////////////////////////////////////////////////
 //  class Dwr_type
@@ -441,7 +441,12 @@ DwrCU::get_linkage_name ()
   nm = Dwarf_string (DW_AT_SUN_link_name);
   if (nm != NULL)
     return nm;
-  return Dwarf_string (DW_AT_MIPS_linkage_name);
+  if (nm != NULL)
+    return nm;
+  nm = Dwarf_string (DW_AT_MIPS_linkage_name);
+  if (nm != NULL)
+    return nm;
+  return Dwarf_string (DW_AT_name);
 }
 
 void
@@ -490,8 +495,10 @@ DwrCU::parseChild (Dwarf_cnt *ctx)
 	    }
 	  break;
 	case DW_TAG_subprogram:
+	{
 	  if (dwrTag.get_attr (DW_AT_abstract_origin))
 	    break;
+	  Symbol *sym = NULL;
 	  if (dwrTag.get_attr (DW_AT_declaration))
 	    {
 	      // Only declaration
@@ -499,26 +506,71 @@ DwrCU::parseChild (Dwarf_cnt *ctx)
 		{
 		  char *link_name = Dwarf_string (DW_AT_name);
 		  if (link_name && streq (link_name, NTXT ("MAIN")))
-		    ctx->fortranMAIN = Stabs::find_func (NTXT ("MAIN"), ctx->module->functions, true, true);
+		    ctx->fortranMAIN = Stabs::find_func (NTXT ("MAIN"),
+					    ctx->module->functions, true, true);
+		  }
+		sym = Symbol::get_symbol (symbols_sorted_by_name,
+					 get_linkage_name ());
+		if (sym == NULL)
+		  break;
+		func = append_Function (sym, ctx->name);
+		break;
+	    }
+
+	  Dwr_Attr *dwrAttr = dwrTag.get_attr (DW_AT_specification);
+	  if (dwrAttr)
+	    {
+	      // Find previous declaration to inherit settings.
+	      sym = find_declaration (dwrAttr->u.offset);
+	      if (sym == NULL)
+		break;
+	      func = sym->func;
+	      if (func == NULL)
+		break;
+	      set_source (func);
+
+	      Vector <Range *> *ranges = get_ranges ();
+	      if (ranges)
+		{
+		  Vector<Symbol *> *syms = Symbol::find_symbols (symbols, ranges);
+		  Destroy (ranges);
+		  for (int i = 0, sz = VecSize (syms); i < sz; i++)
+		    {
+		      Symbol *sp = syms->get (i);
+		      if (sp->alias)
+			sp = sp->alias;
+		      Function *f = sp->func;
+		      if (f == NULL)
+			f = sp->createFunction (func->module);
+		      f->setLineFirst (func->line_first);
+		      f->setDefSrc (func->def_source);
+		    }
+		  delete (syms);
 		}
 	      break;
 	    }
-	  func = append_Function (ctx);
-	  if (func)
-	    {
-	      if (Stabs::is_fortran (ctx->module->lang_code) &&
-		  streq (func->get_match_name (), NTXT ("MAIN")))
-		ctx->fortranMAIN = func;
-	      old_name = ctx->name;
-	      Function *old_func = ctx->func;
-	      ctx->name = func->get_match_name ();
-	      ctx->func = func;
-	      parseChild (ctx);
-	      hasChild = 0;
-	      ctx->name = old_name;
-	      ctx->func = old_func;
-	    }
+
+	  sym = Symbol::get_symbol (symbols_sorted_by_name, get_linkage_name ());
+	  if (sym == NULL)
+	    sym = Symbol::get_symbol (symbols, get_low_pc ());
+	  if (sym == NULL)
+	    break;
+	  func = append_Function (sym, ctx->name);
+	  if (Stabs::is_fortran (ctx->module->lang_code) &&
+	      streq (func->get_match_name (), "MAIN"))
+	    ctx->fortranMAIN = func;
+	  set_source (func);
+
+	  old_name = ctx->name;
+	  Function *old_func = ctx->func;
+	  ctx->name = func->get_match_name ();
+	  ctx->func = func;
+	  parseChild (ctx);
+	  hasChild = 0;
+	  ctx->name = old_name;
+	  ctx->func = old_func;
 	  break;
+	}
 	case DW_TAG_module:
 	  old_name = ctx->name;
 	  ctx->name = Dwarf_string (DW_AT_SUN_link_name);
@@ -631,6 +683,21 @@ Dwarf::archive_Dwarf (LoadObject *lo)
 			STR (lo_name), STR (mod->get_name ()));
 	      dwrCU->dwrInlinedSubrs->dump (msg);
 	    }
+	  for (int i = 0, sz = VecSize (dwrCU->symbols); i < sz; i++)
+	    {
+	      Symbol *sp = dwrCU->symbols->get (i);
+	      Function *f = sp->func;
+	      if (f == NULL)
+		{
+		  f = sp->createFunction (mod);
+		  if (sp->alias && sp->alias->func)
+		    {
+		      Function *func = sp->alias->func;
+		      f->setLineFirst (func->line_first);
+		      f->setDefSrc (func->def_source);
+		    }
+		}
+	    }
 	}
     }
   return true;
@@ -645,6 +712,38 @@ Dwarf::srcline_Dwarf (Module *module)
   dwrCU->map_dwarf_lines (module);
 }
 
+static int
+rangeCmp (const void *a, const void *b)
+{
+  Range *item1 = *((Range **) a);
+  Range *item2 = *((Range **) b);
+  return item1->low < item2->low ? -1 : (item1->low == item2->low ? 0 : 1);
+}
+
+Vector<Range *> *
+Dwarf::get_ranges (uint64_t offset)
+{
+  if (debug_rangesSec == NULL)
+    return NULL;
+  if (offset >= debug_rangesSec->size)
+    {
+      Dprintf (DUMP_DWARFLIB, "ERROR: Dwarf::get_ranges(0x%llx). size=0x%llx\n",
+	       (long long) offset, (long long) debug_rangesSec->size);
+      return NULL;
+    }
+  Vector<Range*> *ranges = new Vector<Range*>();
+  debug_rangesSec->offset = offset;
+  for (;;)
+    {
+      uint64_t low_pc = debug_rangesSec->GetADDR ();
+      uint64_t high_pc = debug_rangesSec->GetADDR ();
+      if (low_pc == 0 || low_pc > high_pc)
+	break;
+      ranges->append (new Range (low_pc, high_pc));
+    }
+  ranges->sort (rangeCmp);
+  return ranges;
+}
 
 // parse hwcprof info for given module in loadobject
 
@@ -797,11 +896,17 @@ DwrCU::read_hwcprof_info (Dwarf_cnt *ctx)
 	case DW_TAG_subprogram:
 	  {
 	    Function *old_func = ctx->func;
-	    if (dwrTag.get_attr (DW_AT_abstract_origin)
-				 || dwrTag.get_attr (DW_AT_declaration))
-	      ctx->func = NULL;
-	    else
-	      ctx->func = append_Function (ctx);
+	    ctx->func = NULL;
+	    if (dwrTag.get_attr (DW_AT_abstract_origin) == NULL
+				 && dwrTag.get_attr (DW_AT_declaration) == NULL)
+	      {
+		Symbol *sym = Symbol::get_symbol (symbols_sorted_by_name,
+						 get_linkage_name ());
+		if (sym == NULL)
+		  sym = Symbol::get_symbol (symbols, get_low_pc ());
+		if (sym != NULL)
+		  ctx->func = sym->func;
+	      }
 	    read_hwcprof_info (ctx);
 	    ctx->func = old_func;
 	    break;
@@ -955,49 +1060,31 @@ DwrCU::read_hwcprof_info (Dwarf_cnt *ctx)
 
 // Append function to module
 Function *
-DwrCU::append_Function (Dwarf_cnt *ctx)
+DwrCU::append_Function (Symbol *sym, const char *outerName)
 {
-  char *outerName = ctx->name, *name, tmpname[2048];
-  Function *func;
+  if (sym->func != NULL)
+    return sym->func;
+  Function *func = sym->createFunction (module);
+
   char *fname = Dwarf_string (DW_AT_name);
-  if (fname && outerName && !strchr (fname, '.'))
+  if (fname)
     {
-      size_t outerlen = strlen (outerName);
-      if (outerlen > 0 && outerName[outerlen - 1] == '_')
+      if (outerName && !strchr (fname, '.'))
 	{
-	  outerlen--;
-	  snprintf (tmpname, sizeof (tmpname), NTXT ("%s"), outerName);
-	  snprintf (tmpname + outerlen, sizeof (tmpname) - outerlen, NTXT (".%s_"), fname);
+	  char *tmpname;
+	  int outerlen = (int) strlen (outerName);
+	  if (outerlen > 0 && outerName[outerlen - 1] == '_')
+	    tmpname = dbe_sprintf ("%.*s.%s_", outerlen - 1, outerName, fname);
+	  else
+	    tmpname = dbe_sprintf ("%s.%s", outerName, fname);
+	  func->set_match_name (tmpname);
+	  Dprintf (DUMP_DWARFLIB, "Generated innerfunc name %s\n", tmpname);
+	  free(tmpname);
 	}
       else
-	snprintf (tmpname, sizeof (tmpname), NTXT ("%s.%s"), outerName, fname);
-      name = tmpname;
-      Dprintf (DUMP_DWARFLIB, NTXT ("Generated innerfunc name %s\n"), name);
+	func->set_match_name (fname);
     }
-  else
-    name = fname;
-
-  char *link_name = get_linkage_name ();
-  if (link_name == NULL)
-    link_name = name;
-
-  uint64_t pc = get_low_pc ();
-  func = dwarf->stabs->append_Function (module, link_name, pc);
-  if (func != NULL)
-    {
-      int lineno = (int) Dwarf_data (DW_AT_decl_line);
-      func->set_match_name (name);
-      if (lineno > 0)
-	{
-	  func->setLineFirst (lineno);
-	  int fileno = ((int) Dwarf_data (DW_AT_decl_file));
-	  SourceFile *sf = ((fileno >= 0) && (fileno < VecSize (srcFiles))) ? srcFiles->get (fileno)
-		  : module->getMainSrc ();
-	  func->setDefSrc (sf);
-	  func->pushSrcFile (func->def_source, 0);
-	  func->popSrcFile ();
-	}
-    }
+  set_source (func);
   return func;
 }
 

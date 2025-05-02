@@ -174,7 +174,7 @@ am__objects_1 = Application.lo BaseMetric.lo BaseMetricTreeNode.lo \
 	MemorySpace.lo Metric.lo MetricList.lo Module.lo Ovw_data.lo \
 	PRBTree.lo PathTree.lo PreviewExp.lo Print.lo \
 	SAXParserFactory.lo Sample.lo Settings.lo SourceFile.lo \
-	Stabs.lo Stats_data.lo StringBuilder.lo Table.lo \
+	Stabs.lo Stats_data.lo StringBuilder.lo Symbol.lo Table.lo \
 	QLParser.tab.lo dbe_collctrl.lo i18n.lo parse.lo UserLabel.lo \
 	util.lo Dbe.lo
 am__objects_2 = dbe_hwcdrv.lo dbe_hwcfuncs.lo dbe_hwctable.lo \
@@ -505,6 +505,7 @@ CCSOURCES = \
 	Stabs.cc \
 	Stats_data.cc \
 	StringBuilder.cc \
+	Symbol.cc \
 	Table.cc \
 	QLParser.tab.cc \
 	dbe_collctrl.cc \
@@ -777,6 +778,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Stabs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Stats_data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StringBuilder.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Symbol.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UserLabel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checks.Po@am__quote@

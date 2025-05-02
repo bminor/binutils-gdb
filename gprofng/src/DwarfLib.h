@@ -25,6 +25,8 @@
 
 class ElfReloc;
 class Dwr_type;
+class Function;
+class Range;
 class SourceFile;
 
 template <class ITEM> class Vector;
@@ -72,12 +74,6 @@ public:
   {
     return (uint32_t) GetULEB128 ();
   }
-
-  bool
-  inRange (uint64_t left, uint64_t right)
-  {
-    return (offset >= left) && (offset < right);
-  };
 
   ElfReloc *reloc;
   uint64_t sizeSec;
@@ -280,6 +276,8 @@ public:
   uint64_t cu_header_offset;
   uint64_t cu_offset;
   uint64_t next_cu_offset;
+  Vector<Symbol*> *symbols;    // all symbols in this CU are sorted by pc
+  Vector<Symbol*> *symbols_sorted_by_name;
   Vector<DwrInlinedSubr*> *dwrInlinedSubrs;
   Vector<SourceFile *> *srcFiles;
   bool isMemop;
@@ -287,7 +285,10 @@ public:
 
 private:
   void build_abbrevTable (DwrSec *debug_abbrevSec, uint64_t stmt_list_offset);
-  Function *append_Function (Dwarf_cnt *ctx);
+  Function *append_Function (Symbol *sym, const char *outerName);
+  Symbol *find_declaration(int64_t offset);
+  Vector <Range *> *get_ranges();
+  void set_source (Function *func);
   void parse_inlined_subroutine (Dwarf_cnt *ctx);
   uint64_t get_low_pc ();
   uint64_t get_high_pc (uint64_t low_pc);

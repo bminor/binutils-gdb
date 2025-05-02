@@ -86,6 +86,7 @@ class Stabs {
     Platform_t	get_platform()	{ return platform; }
     WSize_t	get_class()	{ return wsize;}
     Stab_status	get_status()    { return status;}
+    Vector<Symbol *> *get_symbols() { return SymLst; }
 
     Stab_status	read_stabs(ino64_t srcInode, Module *module, Vector<ComC*> *comComs, bool readDwarf = false);
     Stab_status	read_archive(LoadObject *lo);

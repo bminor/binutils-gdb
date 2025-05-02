@@ -20,6 +20,7 @@
 
 #include "config.h"
 #include <errno.h>
+#include <libgen.h>
 
 #include "util.h"
 #include "StringBuilder.h"
@@ -303,13 +304,16 @@ LoadObject::dump_functions (FILE *out)
 	  {
 	    mname = fitem->module ? fitem->module->file_name : noname->file_name;
 	    sname = fitem->getDefSrcName ();
-	    fprintf (out,
-		     "id %6llu, @0x%llx - 0x%llx [save 0x%llx] o-%lld sz-%lld %s (module = %s)",
-		     (ull_t) fitem->id, (ull_t) fitem->img_offset,
-		     (ull_t) (fitem->img_offset + fitem->size),
-		     (ull_t) fitem->save_addr, (ull_t) fitem->img_offset,
-		     (ll_t) fitem->size, fitem->get_name (), mname);
-	    if (sname && !streq (sname, mname))
+	    fprintf (out, "id %6llu, @0x%llx-0x%llx sz-%lld", (ull_t) fitem->id,
+		    (ull_t) fitem->img_offset,
+		    (ull_t) (fitem->img_offset + fitem->size),
+		    (ll_t) fitem->size);
+	    if (fitem->save_addr != 0)
+	      fprintf (out, " [save 0x%llx]", (ull_t) fitem->save_addr);
+	    if (strcmp (fitem->get_mangled_name (), fitem->get_name ()) != 0)
+	      fprintf (out, " [%s]", fitem->get_mangled_name ());
+	    fprintf (out, " %s (module = %s)", fitem->get_name (), mname);
+	    if (sname && strcmp (basename (sname), basename (mname)) != 0)
 	      fprintf (out, " (Source = %s)", sname);
 	    fprintf (out, "\n");
 	  }
