@@ -13165,7 +13165,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
    a given gmp_mpz given an attribute.  */
 
 static void
-get_mpz (struct dwarf2_cu *cu, gdb_mpz *value, struct attribute *attr)
+get_mpz_for_rational (dwarf2_cu *cu, gdb_mpz *value, attribute *attr)
 {
   /* GCC will sometimes emit a 16-byte constant value as a DWARF
      location expression that pushes an implicit value.  */
@@ -13199,10 +13199,11 @@ get_mpz (struct dwarf2_cu *cu, gdb_mpz *value, struct attribute *attr)
 		   ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE,
 		   true);
     }
-  else if (attr->form_is_strictly_unsigned ())
-    *value = gdb_mpz (attr->as_unsigned ());
   else
-    *value = gdb_mpz (attr->signed_constant ().value_or (1));
+    {
+      /* Rational constants for Ada are always unsigned.  */
+      *value = gdb_mpz (attr->unsigned_constant ().value_or (1));
+    }
 }
 
 /* Assuming DIE is a rational DW_TAG_constant, read the DIE's
@@ -13231,8 +13232,8 @@ get_dwarf2_rational_constant (struct die_info *die, struct dwarf2_cu *cu,
   if (num_attr == nullptr || denom_attr == nullptr)
     return;
 
-  get_mpz (cu, numerator, num_attr);
-  get_mpz (cu, denominator, denom_attr);
+  get_mpz_for_rational (cu, numerator, num_attr);
+  get_mpz_for_rational (cu, denominator, denom_attr);
 }
 
 /* Same as get_dwarf2_rational_constant, but extracting an unsigned
