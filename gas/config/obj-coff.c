@@ -569,7 +569,7 @@ obj_coff_ident (int ignore ATTRIBUTE_UNUSED)
 #define SKIP_WHITESPACES()	while (is_whitespace (*input_line_pointer)) \
                                   input_line_pointer++;
 
-static void
+void
 obj_coff_def (int what ATTRIBUTE_UNUSED)
 {
   if (def_symbol_in_progress != NULL)

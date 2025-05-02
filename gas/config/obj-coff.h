@@ -330,7 +330,7 @@ extern void pecoff_obj_clear_weak_hook   (symbolS *);
 #endif
 extern void obj_coff_section             (int);
 extern segT obj_coff_add_segment         (const char *);
-extern void obj_coff_section             (int);
+extern void obj_coff_def                 (int);
 extern segT s_get_segment                (symbolS *);
 #ifndef tc_coff_symbol_emit_hook
 extern void tc_coff_symbol_emit_hook     (symbolS *);
