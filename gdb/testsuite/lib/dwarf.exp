@@ -678,6 +678,11 @@ namespace eval Dwarf {
 	    }
 	}
 	close $fd
+
+	variable _constants
+
+	# Add DW_FORM_strx_id as alias of DW_FORM_strx.
+	_process_one_constant DW_FORM_strx_id $_constants(DW_FORM_strx)
     }
 
     proc _quote {string} {
@@ -822,6 +827,12 @@ namespace eval Dwarf {
 	    DW_FORM_ref2 -
 	    DW_FORM_indirect -
 	    DW_FORM_exprloc -
+
+	    # Generate a DW_FORM_str index, but assume generation of .debug_str and
+	    # .debug_str_offsets is taken care of elsewhere.
+	    DW_FORM_strx_id {
+		_op .uleb128 $value
+	    }
 
 	    DW_FORM_strx -
 	    DW_FORM_strx1 -
@@ -3383,6 +3394,37 @@ namespace eval Dwarf {
 
 	# Section end.
 	debug_names_end:
+    }
+
+    # Add the strings in ARGS to the .debug_str section, and create a
+    # .debug_str_offsets section pointing to those strings.
+    # BASE_OFFSET is the label for DW_AT_str_offsets_base.
+    proc debug_str_offsets { base_offset args } {
+	_section .debug_str
+	set num 0
+	foreach arg $args {
+	    set str_label [_compute_label "str_${num}"]
+	    define_label $str_label
+	    _op .asciz \"$arg\" ".debug_str_offsets string $num"
+	    incr num
+	}
+
+	declare_labels debug_str_offsets_start debug_str_offsets_end
+	set initial_length "$debug_str_offsets_end - $debug_str_offsets_start"
+
+	_section .debug_str_offsets
+	_op .4byte $initial_length "Initial_length"
+	debug_str_offsets_start:
+	_op .2byte 0x5 "version"
+	_op .2byte 0x0 "padding"
+	$base_offset:
+	set num 0
+	foreach arg $args {
+	    set str_label [_compute_label "str_${num}"]
+	    _op .4byte $str_label "string $num"
+	    incr num
+	}
+	debug_str_offsets_end:
     }
 
     # The top-level interface to the DWARF assembler.
