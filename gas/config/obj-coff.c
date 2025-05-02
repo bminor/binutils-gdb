@@ -1345,8 +1345,8 @@ coff_frob_symbol (symbolS *symp, int *punt)
 	      if (S_GET_NUMBER_AUXILIARY (symp) < 1)
 		S_SET_NUMBER_AUXILIARY (symp, 1);
 	      auxp = SYM_AUXENT (symp);
-	      memset (auxp->x_sym.x_fcnary.x_ary.x_dimen, 0,
-		      sizeof (auxp->x_sym.x_fcnary.x_ary.x_dimen));
+	      memset (&auxp->x_sym.x_fcnary.x_fcn, 0,
+		      sizeof (auxp->x_sym.x_fcnary.x_fcn));
 	    }
 
 	  if (S_GET_STORAGE_CLASS (symp) == C_EFCN
