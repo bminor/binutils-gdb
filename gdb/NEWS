@@ -48,6 +48,9 @@
 
  * Add record full support for rv64gc architectures
 
+* Debugging Linux programs that use AArch64 Guarded Control Stacks are now
+  supported.
+
 * New commands
 
 maintenance check psymtabs

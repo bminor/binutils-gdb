@@ -1911,6 +1911,24 @@ aarch64_push_gcs_entry (regcache *regs, CORE_ADDR lr_value)
   regcache_cooked_write_unsigned (regs, tdep->gcs_reg_base, gcs_addr);
 }
 
+/* Remove the newest entry from the Guarded Control Stack.  */
+
+static void
+aarch64_pop_gcs_entry (regcache *regs)
+{
+  gdbarch *arch = regs->arch ();
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (arch);
+  CORE_ADDR gcs_addr;
+
+  enum register_status status = regs->cooked_read (tdep->gcs_reg_base,
+						   &gcs_addr);
+  if (status != REG_VALID)
+    error ("Can't read $gcspr.");
+
+  /* Update GCSPR.  */
+  regcache_cooked_write_unsigned (regs, tdep->gcs_reg_base, gcs_addr + 8);
+}
+
 /* Implement the "shadow_stack_push" gdbarch method.  */
 
 static void
@@ -3602,6 +3620,9 @@ struct aarch64_displaced_step_copy_insn_closure
   /* PC adjustment offset after displaced stepping.  If 0, then we don't
      write the PC back, assuming the PC is already the right address.  */
   int32_t pc_adjust = 0;
+
+  /* True if it's a branch instruction that saves the link register.  */
+  bool linked_branch = false;
 };
 
 /* Data when visiting instructions for displaced stepping.  */
@@ -3653,6 +3674,12 @@ aarch64_displaced_step_b (const int is_bl, const int32_t offset,
       /* Update LR.  */
       regcache_cooked_write_unsigned (dsd->regs, AARCH64_LR_REGNUM,
 				      data->insn_addr + 4);
+      dsd->dsc->linked_branch = true;
+      bool gcs_is_enabled;
+      gdbarch_get_shadow_stack_pointer (dsd->regs->arch (), dsd->regs,
+					gcs_is_enabled);
+      if (gcs_is_enabled)
+	aarch64_push_gcs_entry (dsd->regs, data->insn_addr + 4);
     }
 }
 
@@ -3811,6 +3838,12 @@ aarch64_displaced_step_others (const uint32_t insn,
       aarch64_emit_insn (dsd->insn_buf, insn & 0xffdfffff);
       regcache_cooked_write_unsigned (dsd->regs, AARCH64_LR_REGNUM,
 				      data->insn_addr + 4);
+      dsd->dsc->linked_branch = true;
+      bool gcs_is_enabled;
+      gdbarch_get_shadow_stack_pointer (dsd->regs->arch (), dsd->regs,
+					gcs_is_enabled);
+      if (gcs_is_enabled)
+	aarch64_push_gcs_entry (dsd->regs, data->insn_addr + 4);
     }
   else
     aarch64_emit_insn (dsd->insn_buf, insn);
@@ -3907,19 +3940,23 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 			      CORE_ADDR from, CORE_ADDR to,
 			      struct regcache *regs, bool completed_p)
 {
+  aarch64_displaced_step_copy_insn_closure *dsc
+    = (aarch64_displaced_step_copy_insn_closure *) dsc_;
   CORE_ADDR pc = regcache_read_pc (regs);
 
-  /* If the displaced instruction didn't complete successfully then all we
-     need to do is restore the program counter.  */
+  /* If the displaced instruction didn't complete successfully then we need
+     to restore the program counter, and perhaps the Guarded Control Stack.  */
   if (!completed_p)
     {
+      bool gcs_is_enabled;
+      gdbarch_get_shadow_stack_pointer (gdbarch, regs, gcs_is_enabled);
+      if (dsc->linked_branch && gcs_is_enabled)
+	aarch64_pop_gcs_entry (regs);
+
       pc = from + (pc - to);
       regcache_write_pc (regs, pc);
       return;
     }
-
-  aarch64_displaced_step_copy_insn_closure *dsc
-    = (aarch64_displaced_step_copy_insn_closure *) dsc_;
 
   displaced_debug_printf ("PC after stepping: %s (was %s).",
 			  paddress (gdbarch, pc), paddress (gdbarch, to));

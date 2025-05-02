@@ -26,6 +26,13 @@
 struct inferior;
 struct regcache;
 
+/* Flag which enables shadow stack in PR_SET_SHADOW_STACK_STATUS prctl.  */
+#ifndef PR_SHADOW_STACK_ENABLE
+#define PR_SHADOW_STACK_ENABLE (1UL << 0)
+#define PR_SHADOW_STACK_WRITE (1UL << 1)
+#define PR_SHADOW_STACK_PUSH (1UL << 2)
+#endif
+
 /* Enum used to define the extra fields of the siginfo type used by an
    architecture.  */
 enum linux_siginfo_extra_field_values

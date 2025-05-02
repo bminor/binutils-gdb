@@ -2534,6 +2534,32 @@ aarch64_linux_tagged_address_p (struct gdbarch *gdbarch, CORE_ADDR address)
   return true;
 }
 
+/* Implement the "get_shadow_stack_pointer" gdbarch method.  */
+
+static std::optional<CORE_ADDR>
+aarch64_linux_get_shadow_stack_pointer (gdbarch *gdbarch, regcache *regcache,
+					bool &shadow_stack_enabled)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+  shadow_stack_enabled = false;
+
+  if (!tdep->has_gcs ())
+    return {};
+
+  uint64_t features_enabled;
+  enum register_status status = regcache->cooked_read (tdep->gcs_linux_reg_base,
+						       &features_enabled);
+  if (status != REG_VALID)
+    error (_("Can't read $gcs_features_enabled."));
+
+  CORE_ADDR gcspr;
+  status = regcache->cooked_read (tdep->gcs_reg_base, &gcspr);
+  if (status != REG_VALID)
+    error (_("Can't read $gcspr."));
+
+  shadow_stack_enabled = features_enabled & PR_SHADOW_STACK_ENABLE;
+  return gcspr;
+}
 
 /* AArch64 Linux implementation of the report_signal_info gdbarch
    hook.  Displays information about possible memory tag violations.  */
@@ -3103,6 +3129,10 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      sections.  */
   set_gdbarch_use_target_description_from_corefile_notes (gdbarch,
 			    aarch64_use_target_description_from_corefile_notes);
+
+  if (tdep->has_gcs ())
+    set_gdbarch_get_shadow_stack_pointer (gdbarch,
+					aarch64_linux_get_shadow_stack_pointer);
 }
 
 #if GDB_SELF_TEST
