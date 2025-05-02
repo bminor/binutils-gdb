@@ -17,13 +17,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This file is divided in two parts:
-   - FOR_EACH-undefined, and
-   - FOR_EACH-defined.
-   The former includes the latter, more than once, with different values for
-   FOR_EACH.  The FOR_EACH-defined part reads like a regular function.  */
-#ifndef FOR_EACH
-
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/parallel-for.h"
 
@@ -49,37 +42,70 @@ struct save_restore_n_threads
   int n_threads;
 };
 
-/* Define test_par using TEST in the FOR_EACH-defined part.  */
-#define TEST test_par
-#define FOR_EACH gdb::parallel_for_each
-#include "parallel-for-selftests.c"
-#undef FOR_EACH
-#undef TEST
-
-/* Define test_seq using TEST in the FOR_EACH-defined part.  */
-#define TEST test_seq
-#define FOR_EACH gdb::sequential_for_each
-#include "parallel-for-selftests.c"
-#undef FOR_EACH
-#undef TEST
+using foreach_callback_t = gdb::function_view<void (int first, int last)>;
+using do_foreach_t = gdb::function_view<void (int first, int last,
+					     foreach_callback_t)>;
 
 static void
-test (int n_threads)
+test_one (int n_threads, do_foreach_t do_foreach)
 {
-  test_par (n_threads);
-  test_seq (n_threads);
+  save_restore_n_threads saver;
+  gdb::thread_pool::g_thread_pool->set_thread_count (n_threads);
+
+  {
+    constexpr int upper_bound = 1000;
+    std::atomic<int> counter (0);
+    do_foreach (0, upper_bound,
+		[&] (int start, int end) { counter += end - start; });
+    SELF_CHECK (counter == upper_bound);
+  }
+
+  {
+    std::atomic<int> counter (0);
+    do_foreach (0, 0, [&] (int start, int end) { counter += end - start; });
+    SELF_CHECK (counter == 0);
+  }
+
+  {
+    /* Check that if there are fewer tasks than threads, then we won't
+       end up with a null result.  */
+    std::vector<std::unique_ptr<int>> intresults;
+    std::atomic<bool> any_empty_tasks (false);
+
+    do_foreach (0, 1,
+		[&] (int start, int end)
+		  {
+		    if (start == end)
+		      any_empty_tasks = true;
+
+		    return std::make_unique<int> (end - start);
+		  });
+
+    SELF_CHECK (!any_empty_tasks);
+    SELF_CHECK (std::all_of (intresults.begin (), intresults.end (),
+			     [] (const std::unique_ptr<int> &entry)
+			       { return entry != nullptr; }));
+  }
 }
 
 static void
-test_n_threads ()
+test_parallel_for_each ()
 {
-  test (0);
-  test (1);
-  test (3);
+  const std::vector<do_foreach_t> for_each_functions
+    {
+      [] (int start, int end, foreach_callback_t callback)
+      { gdb::parallel_for_each (1, start, end, callback); },
+      [] (int start, int end, foreach_callback_t callback)
+      { gdb::sequential_for_each (1, start, end, callback);}
+    };
+
+  for (int n_threads : { 0, 1, 3 })
+    for (const auto &for_each_function : for_each_functions)
+      test_one (n_threads, for_each_function);
 }
 
-}
-}
+} /* namespace parallel_for */
+} /* namespace selftests */
 
 #endif /* CXX_STD_THREAD */
 
@@ -89,57 +115,6 @@ _initialize_parallel_for_selftests ()
 {
 #ifdef CXX_STD_THREAD
   selftests::register_test ("parallel_for",
-			    selftests::parallel_for::test_n_threads);
+			    selftests::parallel_for::test_parallel_for_each);
 #endif /* CXX_STD_THREAD */
 }
-
-#else /* FOR_EACH */
-
-static void
-TEST (int n_threads)
-{
-  save_restore_n_threads saver;
-  gdb::thread_pool::g_thread_pool->set_thread_count (n_threads);
-
-#define NUMBER 10000
-
-  std::atomic<int> counter (0);
-  FOR_EACH (1, 0, NUMBER,
-	    [&] (int start, int end)
-	    {
-	      counter += end - start;
-	    });
-  SELF_CHECK (counter == NUMBER);
-
-  counter = 0;
-  FOR_EACH (1, 0, 0,
-	    [&] (int start, int end)
-	    {
-	      counter += end - start;
-	    });
-  SELF_CHECK (counter == 0);
-
-#undef NUMBER
-
-  /* Check that if there are fewer tasks than threads, then we won't
-     end up with a null result.  */
-  std::vector<std::unique_ptr<int>> intresults;
-  std::atomic<bool> any_empty_tasks (false);
-
-  FOR_EACH (1, 0, 1,
-	    [&] (int start, int end)
-	      {
-		if (start == end)
-		  any_empty_tasks = true;
-		return std::make_unique<int> (end - start);
-	      });
-  SELF_CHECK (!any_empty_tasks);
-  SELF_CHECK (std::all_of (intresults.begin (),
-			   intresults.end (),
-			   [] (const std::unique_ptr<int> &entry)
-			     {
-			       return entry != nullptr;
-			     }));
-}
-
-#endif /* FOR_EACH */
