@@ -4,7 +4,7 @@
 	        operator,
 	        flags
 	};
-	 
+
 	enum token what= operator;
 
    Type numbers have been converted to decimal to make this test pass on

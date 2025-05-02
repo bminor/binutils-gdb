@@ -330,21 +330,6 @@ switch -glob $target_triplet {
     }
 }
 
-# This test is for any COFF target.
-# We omit the ARM toolchains because they define locals to
-#  start with '.', which eliminates .eos, .text etc from the output.
-# Omit c54x, since .tag and .def mean something different on that target
-if {   ([istarget *-*-coff*] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff]) \
-     ||([istarget *-*-pe*] && ![istarget arm*-*-pe*]) \
-     || [istarget i*86-*-aix*] \
-     || [istarget i*86-*-go32*] \
-     || [istarget i*86-*-cygwin*] \
-     || [istarget x86_64-*-mingw*] \
-     || [istarget i*86-*-*nt] \
-     || [istarget i*86-*-interix*] } {
-    run_dump_test cofftag
-}
-
 # Test omitting conditionals from listings.
 proc test_cond {} {
     global comp_output

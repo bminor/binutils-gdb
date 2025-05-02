@@ -5,7 +5,7 @@
 
 SYMBOL TABLE:
 \[  0\]\(sec -2\)\(fl 0x00\)\(ty    0\)\(scl 103\) \(nx 1\) 0x0+0000 foo.c
-File 
+File *
 \[  2\]\(sec  1\)\(fl 0x00\)\(ty    0\)\(scl   6\) \(nx 0\) 0x0+0000 gcc2_compiled.
 \[  3\]\(sec  1\)\(fl 0x00\)\(ty    0\)\(scl   6\) \(nx 0\) 0x0+0000 ___gnu_compiled_c
 \[  4\]\(sec -2\)\(fl 0x00\)\(ty    a\)\(scl  15\) \(nx 1\) 0x0+0000 _token
