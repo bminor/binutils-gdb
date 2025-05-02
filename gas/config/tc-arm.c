@@ -3106,7 +3106,7 @@ find_real_start (symbolS * symbolP)
 
   if (new_target == NULL)
     {
-      as_warn (_("Failed to find real start of function: %s\n"), name);
+      as_warn (_("Failed to find real start of function: %s"), name);
       new_target = symbolP;
     }
 
@@ -4260,7 +4260,7 @@ s_arm_unwind_save_pseudo (int regno)
       add_unwind_opcode (op, 1);
       break;
     default:
-      as_bad (_("Unknown register no. encountered: %d\n"), regno);
+      as_bad (_("Unknown register no. encountered: %d"), regno);
     }
 }
 
@@ -31859,7 +31859,7 @@ arm_parse_arch (const char *str)
 	return true;
       }
 
-  as_bad (_("unknown architecture `%s'\n"), str);
+  as_bad (_("unknown architecture `%s'"), str);
   return false;
 }
 
@@ -31875,7 +31875,7 @@ arm_parse_fpu (const char * str)
 	return true;
       }
 
-  as_bad (_("unknown floating point format `%s'\n"), str);
+  as_bad (_("unknown floating point format `%s'"), str);
   return false;
 }
 
@@ -31891,7 +31891,7 @@ arm_parse_float_abi (const char * str)
 	return true;
       }
 
-  as_bad (_("unknown floating point abi `%s'\n"), str);
+  as_bad (_("unknown floating point abi `%s'"), str);
   return false;
 }
 
@@ -31907,7 +31907,7 @@ arm_parse_eabi (const char * str)
 	meabi_flags = opt->value;
 	return true;
       }
-  as_bad (_("unknown EABI `%s'\n"), str);
+  as_bad (_("unknown EABI `%s'"), str);
   return false;
 }
 #endif
@@ -32419,7 +32419,7 @@ aeabi_set_public_attributes (void)
   if (arch == -1)
     arch = get_aeabi_cpu_arch_from_fset (&flags_arch, &flags_ext, &profile, 0);
   if (arch == -1)
-    as_bad (_("no architecture contains all the instructions used\n"));
+    as_bad (_("no architecture contains all the instructions used"));
 
   /* Tag_CPU_name.  */
   if (selected_cpu_name[0])
@@ -32679,7 +32679,7 @@ s_arm_arch (int ignored ATTRIBUTE_UNUSED)
 	return;
       }
 
-  as_bad (_("unknown architecture `%s'\n"), name);
+  as_bad (_("unknown architecture `%s'"), name);
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
 }
@@ -32715,7 +32715,7 @@ s_arm_object_arch (int ignored ATTRIBUTE_UNUSED)
 	return;
       }
 
-  as_bad (_("unknown architecture `%s'\n"), name);
+  as_bad (_("unknown architecture `%s'"), name);
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
 }
@@ -32817,7 +32817,7 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
       }
 
   if (opt->name == NULL)
-    as_bad (_("unknown architecture extension `%s'\n"), name);
+    as_bad (_("unknown architecture extension `%s'"), name);
 
   *input_line_pointer = saved_char;
 }
@@ -32858,7 +32858,7 @@ s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
 	return;
       }
 
-  as_bad (_("unknown floating point format `%s'\n"), name);
+  as_bad (_("unknown floating point format `%s'"), name);
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
 }
