@@ -242,7 +242,6 @@
 extern int text_lineno_number;
 extern int coff_line_base;
 extern int coff_n_line_nos;
-extern symbolS *coff_last_function;
 
 #define obj_emit_lineno(WHERE, LINE, FILE_START)	abort ()
 #define obj_app_file(name)           c_dot_file_symbol (name)

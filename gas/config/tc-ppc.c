@@ -6140,9 +6140,6 @@ ppc_frob_symbol (symbolS *sym)
 
   if (SF_GET_FUNCTION (sym))
     {
-      /* Make sure coff_last_function is reset. Otherwise, we won't create
-         the auxent for the next function.  */
-      coff_last_function = 0;
       ppc_last_function = sym;
       if (symbol_get_tc (sym)->u.size != (symbolS *) NULL)
 	{
@@ -6170,10 +6167,6 @@ ppc_frob_symbol (symbolS *sym)
 	{
 	  set_end = ppc_last_function;
 	  ppc_last_function = NULL;
-
-	  /* We don't have a C_EFCN symbol, but we need to force the
-	     COFF backend to believe that it has seen one.  */
-	  coff_last_function = NULL;
 	}
     }
 

@@ -30,3 +30,11 @@ if {    ![istarget arm*-*-*]
      && ![istarget *c54x*-*-*] } {
     run_dump_test tag
 }
+
+# Omit c4x and c54x, since .def means something different there.
+if { ![istarget *c4x*-*-*] && ![istarget *c54x*-*-*] } {
+    run_dump_test func1
+    run_dump_test func2
+    run_dump_test func3
+    run_dump_test func4
+}
