@@ -503,7 +503,7 @@ ravenscar_thread_target::pid_to_str (ptid_t ptid)
     return beneath ()->pid_to_str (ptid);
 
   return string_printf ("Ravenscar Thread 0x%s",
-			phex_nz (ptid.tid (), sizeof (ULONGEST)));
+			phex_nz (ptid.tid ()));
 }
 
 CORE_ADDR

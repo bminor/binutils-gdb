@@ -1322,7 +1322,7 @@ dwarf2_per_bfd::locate_sections (asection *sectp,
       bfd_size_type size = sectp->size;
       warning (_("Discarding section %s which has an invalid size (%s) "
 		 "[in module %s]"),
-	       bfd_section_name (sectp), phex_nz (size, sizeof (size)),
+	       bfd_section_name (sectp), phex_nz (size),
 	       this->filename ());
     }
   else if (names.info.matches (sectp->name))

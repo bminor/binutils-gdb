@@ -2864,7 +2864,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	{
 	  char *end_buf = own_buf + strlen (own_buf);
 	  sprintf (end_buf, ";QThreadOptions=%s",
-		   phex_nz (supported_options, sizeof (supported_options)));
+		   phex_nz (supported_options));
 	}
 
       strcat (own_buf, ";QThreadEvents+");

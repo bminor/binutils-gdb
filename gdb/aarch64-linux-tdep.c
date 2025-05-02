@@ -2599,8 +2599,8 @@ aarch64_linux_fill_memtag_section (struct gdbarch *gdbarch, asection *osec)
 				 static_cast<int> (memtag_type::allocation)))
 	{
 	  warning (_("Failed to read MTE tags from memory range [%s,%s)."),
-		     phex_nz (start_address, sizeof (start_address)),
-		     phex_nz (end_address, sizeof (end_address)));
+		     phex_nz (start_address),
+		     phex_nz (end_address));
 	  return false;
 	}
 

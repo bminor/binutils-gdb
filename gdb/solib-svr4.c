@@ -2058,9 +2058,9 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
 
       /* Unknown key=value pairs are ignored by the gdbstub.  */
       xsnprintf (annex, sizeof (annex), "lmid=%s;start=%s;prev=%s",
-		 phex_nz (debug_base, sizeof (debug_base)),
-		 phex_nz (lm, sizeof (lm)),
-		 phex_nz (prev_lm, sizeof (prev_lm)));
+		 phex_nz (debug_base),
+		 phex_nz (lm),
+		 phex_nz (prev_lm));
       if (!svr4_current_sos_via_xfer_libraries (&library_list, annex))
 	return 0;
 

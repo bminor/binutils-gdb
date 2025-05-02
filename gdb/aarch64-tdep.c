@@ -4236,7 +4236,7 @@ aarch64_memtag_to_string (struct gdbarch *gdbarch, struct value *tag_value)
 
   CORE_ADDR tag = value_as_address (tag_value);
 
-  return string_printf ("0x%s", phex_nz (tag, sizeof (tag)));
+  return string_printf ("0x%s", phex_nz (tag));
 }
 
 /* See aarch64-tdep.h.  */

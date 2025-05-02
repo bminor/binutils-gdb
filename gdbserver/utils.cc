@@ -102,5 +102,5 @@ internal_vwarning (const char *file, int line, const char *fmt, va_list args)
 const char *
 paddress (CORE_ADDR addr)
 {
-  return phex_nz (addr, sizeof (CORE_ADDR));
+  return phex_nz (addr);
 }
