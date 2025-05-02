@@ -15333,9 +15333,16 @@ read_str_index (struct dwarf2_cu *cu,
 	     " in CU at offset %s [in module %s]"),
 	   form_name, str_section->get_name (),
 	   sect_offset_str (cu->header.sect_off), objf_name);
-  info_ptr = (str_offsets_section->buffer
-	      + str_offsets_base
-	      + str_index * offset_size);
+
+  ULONGEST str_offsets_offset = str_offsets_base + str_index * offset_size;
+  if (str_offsets_offset >= str_offsets_section->size)
+    error (_(DWARF_ERROR_PREFIX
+	     "Offset from %s pointing outside of %s section in CU at offset %s"
+	     " [in module %s]"),
+	   form_name, str_offsets_section->get_name (),
+	   sect_offset_str (cu->header.sect_off), objf_name);
+  info_ptr = str_offsets_section->buffer + str_offsets_offset;
+
   if (offset_size == 4)
     str_offset = bfd_get_32 (abfd, info_ptr);
   else
