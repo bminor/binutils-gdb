@@ -45,6 +45,8 @@ proc test {mode} {
 
     # Activate process record/replay
     gdb_test_no_output "record" "turn on process record"
+    gdb_test_no_output "set record full stop-at-limit on"
+    gdb_test_no_output "set record full insn-number-max 2000"
 
     set re_srcfile [string_to_regexp $::srcfile]
 
@@ -52,7 +54,29 @@ proc test {mode} {
 	"Breakpoint $::decimal at $::hex: file .*$re_srcfile, line $::decimal.*" \
 	"set breakpoint at marker2"
 
-    gdb_continue_to_breakpoint "marker2" ".*$re_srcfile:.*"
+    set re_question \
+	[string_list_to_regexp \
+	     "Do you want to auto delete previous execution log entries when" \
+	     " record/replay buffer becomes full" \
+	     { (record full stop-at-limit)?([y] or n)}]
+    set re_program_stopped \
+	[multi_line \
+	     [string_to_regexp "Process record: stopped by user."] \
+	     "" \
+	     [string_to_regexp "Program stopped."]]
+    set re_marker2 [string_to_regexp "marker2 ()"]
+    gdb_test_multiple "continue" "continue to breakpoint: marker2" {
+	-re "$re_question " {
+	    send_gdb "n\n"
+	    exp_continue
+	}
+	-re -wrap "Breakpoint $::decimal, $re_marker2 .*" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "\r\n$re_program_stopped\r\n.*" {
+	    unsupported $gdb_test_name
+	}
+    }
 
     # Show how many instructions we've recorded.
     gdb_test "info record" "Active record target: .*"
