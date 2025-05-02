@@ -10987,7 +10987,7 @@ aarch64_parse_arch (const char *str)
 	return aarch64_parse_features (ext, &march_cpu_opt, false);
       }
 
-  as_bad (_("unknown architecture `%s'\n"), str);
+  as_bad (_("unknown architecture `%s'"), str);
   return 0;
 }
 
@@ -11025,7 +11025,7 @@ aarch64_parse_abi (const char *str)
 	return 1;
       }
 
-  as_bad (_("unknown abi `%s'\n"), str);
+  as_bad (_("unknown abi `%s'"), str);
   return 0;
 }
 
@@ -11224,7 +11224,7 @@ s_aarch64_arch (int ignored ATTRIBUTE_UNUSED)
 	return;
       }
 
-  as_bad (_("unknown architecture `%s'\n"), name);
+  as_bad (_("unknown architecture `%s'"), name);
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
 }
