@@ -30,6 +30,8 @@
 #include "coff/internal.h"
 #include "libcoff.h"
 #include "safe-ctype.h"
+#include "plugin-api.h"
+#include "plugin.h"
 
 /* FIXME: See bfd/peXXigen.c for why we include an architecture specific
    header in generic PE code.  */
@@ -164,6 +166,11 @@ static struct section_list *change_sections;
 
 /* TRUE if some sections are to be removed.  */
 static bool sections_removed;
+
+#if BFD_SUPPORTS_PLUGINS
+/* TRUE if all GCC LTO sections are to be removed.  */
+static bool lto_sections_removed;
+#endif
 
 /* TRUE if only some sections are to be copied.  */
 static bool sections_copied;
@@ -359,6 +366,7 @@ enum command_line_switch
   OPTION_RENAME_SECTION,
   OPTION_REVERSE_BYTES,
   OPTION_PE_SECTION_ALIGNMENT,
+  OPTION_PLUGIN,
   OPTION_SET_SECTION_FLAGS,
   OPTION_SET_SECTION_ALIGNMENT,
   OPTION_SET_START,
@@ -402,6 +410,7 @@ static struct option strip_options[] =
   {"output-file", required_argument, 0, 'o'},
   {"output-format", required_argument, 0, 'O'},	/* Obsolete */
   {"output-target", required_argument, 0, 'O'},
+  {"plugin", required_argument, 0, OPTION_PLUGIN},
   {"preserve-dates", no_argument, 0, 'p'},
   {"remove-section", required_argument, 0, 'R'},
   {"remove-relocations", required_argument, 0, OPTION_REMOVE_RELOCS},
@@ -758,6 +767,10 @@ strip_usage (FILE *stream, int exit_status)
      --info                        List object formats & architectures supported\n\
   -o <file>                        Place stripped output into <file>\n\
 "));
+#if BFD_SUPPORTS_PLUGINS
+  fprintf (stream, _("\
+      --plugin NAME                Load the specified plugin\n"));
+#endif
 
   list_supported_targets (program_name, stream);
   if (REPORT_BUGS_TO[0] && exit_status == 0)
@@ -1916,20 +1929,11 @@ add_redefine_syms_file (const char *filename)
    Returns TRUE upon success, FALSE otherwise.  */
 
 static bool
-copy_unknown_object (bfd *ibfd, bfd *obfd)
+copy_unknown_file (bfd *ibfd, bfd *obfd, off_t size, unsigned int mode)
 {
   char *cbuf;
   bfd_size_type tocopy;
-  off_t size;
-  struct stat buf;
 
-  if (bfd_stat_arch_elt (ibfd, &buf) != 0)
-    {
-      bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
-      return false;
-    }
-
-  size = buf.st_size;
   if (size < 0)
     {
       non_fatal (_("stat returns negative size for `%s'"),
@@ -1974,8 +1978,28 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
 
   /* We should at least to be able to read it back when copying an
      unknown object in an archive.  */
-  chmod (bfd_get_filename (obfd), buf.st_mode | S_IRUSR);
+  chmod (bfd_get_filename (obfd), mode | S_IRUSR);
   free (cbuf);
+  return true;
+}
+
+/* Copy unknown object file archive member IBFD onto OBFD.
+   Returns TRUE upon success, FALSE otherwise.  */
+
+static bool
+copy_unknown_object (bfd *ibfd, bfd *obfd)
+{
+  struct stat buf;
+
+  if (bfd_stat_arch_elt (ibfd, &buf) != 0)
+    {
+      bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
+      return false;
+    }
+
+  if (!copy_unknown_file (ibfd, obfd, buf.st_size, buf.st_mode))
+    return false;
+
   return true;
 }
 
@@ -3744,6 +3768,12 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	  goto cleanup_and_exit;
 	}
 
+#if BFD_SUPPORTS_PLUGINS
+      /* Copy LTO IR file as unknown object.  */
+      if (bfd_plugin_target_p (ibfd->xvec))
+	ok_object = false;
+      else
+#endif
       if (ok_object)
 	{
 	  ok = copy_object (this_element, output_element, input_arch);
@@ -3845,6 +3875,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
   char **obj_matching;
   char **core_matching;
   off_t size = get_file_size (input_filename);
+  const char *target = input_target;
 
   if (size < 1)
     {
@@ -3855,9 +3886,16 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
       return;
     }
 
+#if BFD_SUPPORTS_PLUGINS
+  /* Enable LTO plugin in strip unless all LTO sections should be
+     removed.  */
+  if (is_strip && !target && !lto_sections_removed)
+    target = "plugin";
+#endif
+
   /* To allow us to do "strip *" without dying on the first
      non-object file, failures are nonfatal.  */
-  ibfd = bfd_openr (input_filename, input_target);
+  ibfd = bfd_openr (input_filename, target);
   if (ibfd == NULL || bfd_stat (ibfd, in_stat) != 0)
     {
       bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
@@ -3974,17 +4012,31 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
  	  return;
  	}
 
-      if (! copy_object (ibfd, obfd, input_arch))
-	status = 1;
-
-      /* PR 17512: file: 0f15796a.
-	 If the file could not be copied it may not be in a writeable
-	 state.  So use bfd_close_all_done to avoid the possibility of
-	 writing uninitialised data into the file.  */
-      if (! (status ? bfd_close_all_done (obfd) : bfd_close (obfd)))
+#if BFD_SUPPORTS_PLUGINS
+      if (bfd_plugin_target_p (ibfd->xvec))
 	{
-	  status = 1;
-	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
+	  /* Copy LTO IR file as unknown file.  */
+	  if (!copy_unknown_file (ibfd, obfd, in_stat->st_size,
+				  in_stat->st_mode))
+	    status = 1;
+	  else if (!bfd_close_all_done (obfd))
+	    status = 1;
+	}
+      else
+#endif
+	{
+	  if (! copy_object (ibfd, obfd, input_arch))
+	    status = 1;
+
+	  /* PR 17512: file: 0f15796a.
+	     If the file could not be copied it may not be in a writeable
+	     state.  So use bfd_close_all_done to avoid the possibility of
+	     writing uninitialised data into the file.  */
+	  if (! (status ? bfd_close_all_done (obfd) : bfd_close (obfd)))
+	    {
+	      status = 1;
+	      bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
+	    }
 	}
 
       if (!bfd_close (ibfd))
@@ -4837,6 +4889,10 @@ strip_main (int argc, char *argv[])
   char *output_file = NULL;
   bool merge_notes_set = false;
 
+#if BFD_SUPPORTS_PLUGINS
+  bfd_plugin_set_program_name (argv[0]);
+#endif
+
   while ((c = getopt_long (argc, argv, "I:O:F:K:MN:R:o:sSpdgxXHhVvwDU",
 			   strip_options, (int *) 0)) != EOF)
     {
@@ -4927,6 +4983,13 @@ strip_main (int argc, char *argv[])
 	case OPTION_KEEP_SECTION_SYMBOLS:
 	  keep_section_symbols = true;
 	  break;
+	case OPTION_PLUGIN:	/* --plugin */
+#if BFD_SUPPORTS_PLUGINS
+	  bfd_plugin_set_plugin (optarg);
+#else
+	  fatal (_("sorry - this program has been built without plugin support\n"));
+#endif
+	  break;
 	case 0:
 	  /* We've been given a long option.  */
 	  break;
@@ -4970,6 +5033,14 @@ strip_main (int argc, char *argv[])
 
   if (output_target == NULL)
     output_target = input_target;
+
+#if BFD_SUPPORTS_PLUGINS
+  /* Check if all GCC LTO sections should be removed, assuming all LTO
+     sections will be removed with -R .gnu.lto_.*.  * Remove .gnu.lto_.*
+     sections will also remove .gnu.debuglto_.  sections.  */
+  lto_sections_removed = !!find_section_list (".gnu.lto_.*", false,
+					      SECTION_CONTEXT_REMOVE);
+#endif
 
   i = optind;
   if (i == argc

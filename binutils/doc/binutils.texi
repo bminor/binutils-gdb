@@ -3566,6 +3566,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{--keep-section-symbols}]
       [@option{--keep-file-symbols}]
       [@option{--only-keep-debug}]
+      [@option{--plugin} @var{name}]
       [@option{-v} |@option{--verbose}] [@option{-V}|@option{--version}]
       [@option{--help}] [@option{--info}]
       @var{objfile}@dots{}
@@ -3824,6 +3825,26 @@ information may be incomplete.  Besides the gnu_debuglink feature
 currently only supports the presence of one filename containing
 debugging information, not multiple filenames on a one-per-object-file
 basis.
+
+@item --plugin @var{name}
+@cindex plugins
+Load the plugin called @var{name} to add support for extra target
+types.  This option is only available if the toolchain has been built
+with plugin support enabled.
+
+If @option{--plugin} is not provided, but plugin support has been
+enabled then @command{strip} iterates over the files in
+@file{$@{libdir@}/bfd-plugins} in alphabetic order and the first
+plugin that claims the object in question is used.
+
+Please note that this plugin search directory is @emph{not} the one
+used by @command{ld}'s @option{-plugin} option.  In order to make
+@command{strip} use the  linker plugin it must be copied into the
+@file{$@{libdir@}/bfd-plugins} directory.  For GCC based compilations
+the linker plugin is called @file{liblto_plugin.so.0.0.0}.  For Clang
+based compilations it is called @file{LLVMgold.so}.  The GCC plugin
+is always backwards compatible with earlier versions, so it is
+sufficient to just copy the newest one.
 
 @item -V
 @itemx --version
