@@ -2047,9 +2047,11 @@ cp_demangled_name_to_comp (const char *demangled_name,
   auto result = std::make_unique<demangle_parse_info> ();
   cpname_state state (demangled_name, result.get ());
 
-  scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
-							parser_debug);
-
+  /* Note that we can't set yydebug here, as is done in the other
+     parsers.  Bison implements yydebug as a global, even with a pure
+     parser, and this parser is run from worker threads.  So, changing
+     yydebug causes TSan reports.  If you need to debug this parser,
+     debug gdb and set the global from the outer gdb.  */
   if (yyparse (&state))
     {
       if (state.global_errmsg && errmsg)
