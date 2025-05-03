@@ -23,10 +23,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#include <queue>
+
 #include "vec.h"
 #include "util.h"
 #include "ipcio.h"

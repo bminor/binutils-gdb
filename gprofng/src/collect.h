@@ -32,7 +32,6 @@ class Coll_Ctrl;
 class Elf;
 
 #define MAXLABELS       10      /* maximum number of -C arguments */
-#define STDEBUFSIZE     24000
 
 enum { MAX_LD_PRELOAD_TYPES = 3 };
 

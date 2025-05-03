@@ -285,9 +285,6 @@ env_ld_preload_strip (char *envv)
   for (int v = 0; SP_PRELOAD[v]; v++)
     if (env_strip (envv, sp_preloads[v]))
       return 0;
-  if (line_mode != LM_CLOSED)
-    TprintfT (DBG_LT2, "env_ld_preload_strip(): WARNING - could not strip SP_PRELOADS from '%s'\n",
-	      envv);
   return -2;
 }
 

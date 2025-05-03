@@ -37,10 +37,10 @@
 #define LT_MAXNAMELEN 1024
 #define LT_MAXPATHLEN 1024
 
-int __collector_linetrace_shutdown_hwcs_6830763_XXXX = 0;
+static int __collector_linetrace_shutdown_hwcs_6830763_XXXX = 0;
 int dbg_current_mode = FOLLOW_NONE; /* for debug only */
 unsigned line_key = COLLECTOR_TSD_INVALID_KEY;
-line_mode_t line_mode = LM_DORMANT;
+static line_mode_t line_mode = LM_DORMANT;
 int user_follow_mode = FOLLOW_ON;
 int java_mode = 0;
 

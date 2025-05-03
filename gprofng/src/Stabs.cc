@@ -37,10 +37,6 @@
 #include "StringMap.h"
 #include "Symbol.h"
 
-#define DISASM_REL_NONE     0     /* symtab search only */
-#define DISASM_REL_ONLY     1     /* relocation search only */
-#define DISASM_REL_TARG     2     /* relocatoin then symtab */
-
 ///////////////////////////////////////////////////////////////////////////////
 // class StabReader
 class StabReader
@@ -62,34 +58,6 @@ private:
   int StrTabSize;
   int StabEntSize;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-// class Reloc
-class Reloc
-{
-public:
-  Reloc ();
-  ~Reloc ();
-  uint64_t type;
-  uint64_t value;
-  uint64_t addend;
-  char *name;
-};
-
-Reloc::Reloc ()
-{
-  type = 0;
-  value = 0;
-  addend = 0;
-  name = NULL;
-}
-
-Reloc::~Reloc ()
-{
-  free (name);
-}
-// end of class Reloc
-///////////////////////////////////////////////////////////////////////////////
 
 enum
 {
@@ -162,15 +130,6 @@ SymImgOffsetCmp (const void *a, const void *b)
 	  (item1->img_offset == item2->img_offset) ? SymNameCmp (a, b) : -1;
 }
 
-static int
-RelValueCmp (const void *a, const void *b)
-{
-  Reloc *item1 = *((Reloc **) a);
-  Reloc *item2 = *((Reloc **) b);
-  return (item1->value > item2->value) ? 1 :
-	  (item1->value == item2->value) ? 0 : -1;
-}
-
 /* Remove all duplicate symbols which can be in SymLst.  The
    duplication is due to processing of both static and dynamic
    symbols.  This function is called before computing symbol
@@ -223,8 +182,6 @@ Stabs::Stabs (char *_path, char *_lo_name)
   SymLstByName = NULL;
   pltSym = NULL;
   SymLst = new Vector<Symbol*>;
-  RelLst = new Vector<Reloc*>;
-  RelPLTLst = new Vector<Reloc*>;
   LocalLst = new Vector<Symbol*>;
   LocalFile = new Vector<char*>;
   LocalFileIdx = new Vector<int>;
@@ -270,8 +227,6 @@ Stabs::~Stabs ()
 {
   delete SymLstByName;
   Destroy (SymLst);
-  Destroy (RelLst);
-  Destroy (RelPLTLst);
   Destroy (LocalFile);
   delete elfDis;
   delete dwarf;
@@ -385,42 +340,6 @@ Stabs::read_symbols (Vector<Function*> *functions)
       }
     }
   return true;
-}
-
-char *
-Stabs::sym_name (uint64_t target, uint64_t instr, int flag)
-{
-  long index;
-  if (flag == DISASM_REL_ONLY || flag == DISASM_REL_TARG)
-    {
-      Reloc *relptr = new Reloc;
-      relptr->value = instr;
-      index = RelLst->bisearch (0, -1, &relptr, RelValueCmp);
-      if (index >= 0)
-	{
-	  delete relptr;
-	  return RelLst->fetch (index)->name;
-	}
-      if (!is_relocatable ())
-	{
-	  relptr->value = target;
-	  index = RelPLTLst->bisearch (0, -1, &relptr, RelValueCmp);
-	  if (index >= 0)
-	    {
-	      delete relptr;
-	      return RelPLTLst->fetch (index)->name;
-	    }
-	}
-      delete relptr;
-    }
-  if (flag == DISASM_REL_NONE || flag == DISASM_REL_TARG || !is_relocatable ())
-    {
-      Symbol *sptr;
-      sptr = map_PC_to_sym (target);
-      if (sptr && sptr->value == target)
-	return sptr->name;
-    }
-  return NULL;
 }
 
 Symbol *

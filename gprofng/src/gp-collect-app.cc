@@ -44,8 +44,6 @@
 #include "collect.h"
 #include "StringBuilder.h"
 
-#define SP_COLLECTOR_FOUNDER "SP_COLLECTOR_FOUNDER"
-
 extern char **environ;
 
 static volatile int interrupt = 0;

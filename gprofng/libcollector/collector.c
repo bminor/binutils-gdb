@@ -182,11 +182,12 @@ static void
 init_tracelevel ()
 {
 #if DEBUG
-  char *s = CALL_UTIL (getenv)("SP_COLLECTOR_TRACELEVEL");
+  char *s = CALL_UTIL (getenv)(SP_COLLECTOR_TRACELEVEL);
   if (s != NULL)
     __collector_tracelevel = CALL_UTIL (atoi)(s);
-  TprintfT (DBG_LT0, "collector: SP_COLLECTOR_TRACELEVEL=%d\n", __collector_tracelevel);
-  s = CALL_UTIL (getenv)("SP_COLLECTOR_DEBUG");
+  TprintfT (DBG_LT0, "collector: %s=%d\n", SP_COLLECTOR_TRACELEVEL,
+	   __collector_tracelevel);
+  s = CALL_UTIL (getenv)(SP_COLLECTOR_DEBUG);
   if (s != NULL)
     collector_debug_opt = CALL_UTIL (atoi)(s) & ~(SP_DUMP_TIME | SP_DUMP_FLAG);
 #endif
@@ -239,21 +240,24 @@ collector_init ()
   collector_module_init (get_collector_interface ());
 
   /* determine experiment name */
-  char *exp = CALL_UTIL (getenv)("SP_COLLECTOR_EXPNAME");
+  char *exp = CALL_UTIL (getenv)(SP_COLLECTOR_EXPNAME);
   if ((exp == NULL) || (CALL_UTIL (strlen)(exp) == 0))
     {
-      TprintfT (DBG_LT0, "collector_init: SP_COLLECTOR_EXPNAME undefined - no experiment to start\n");
+      TprintfT (DBG_LT0, "collector_init: %s undefined. no experiment to start\n",
+		SP_COLLECTOR_EXPNAME);
       /* not set -- no experiment to run */
       return;
     }
   else
-    TprintfT (DBG_LT1, "collector_init: found SP_COLLECTOR_EXPNAME = %s\n", exp);
+    TprintfT (DBG_LT1, "collector_init: found %s = %s\n",
+		SP_COLLECTOR_EXPNAME, exp);
 
   /* determine the data descriptor for the experiment */
-  char *params = CALL_UTIL (getenv)("SP_COLLECTOR_PARAMS");
+  char *params = CALL_UTIL (getenv)(SP_COLLECTOR_PARAMS);
   if (params == NULL)
     {
-      TprintfT (0, "collector_init: SP_COLLECTOR_PARAMS undefined - no experiment to start\n");
+      TprintfT (0, "collector_init: %s undefined - no experiment to start\n",
+		SP_COLLECTOR_EXPNAME);
       return;
     }
 
@@ -494,7 +498,8 @@ __collector_open_experiment (const char *exp, const char *params, sp_origin_t or
       return COL_ERROR_EXPOPEN;
     }
   __collector_start_time = collector_interface.getHiResTime ();
-  TprintfT (DBG_LT1, "\n\t\t__collector_open_experiment(SP_COLLECTOR_EXPNAME=%s, params=%s, origin=%d); setting start_time\n",
+  TprintfT (DBG_LT1, "\n\t\t__collector_open_experiment(%s=%s, params=%s, "
+		     "origin=%d); setting start_time\n", SP_COLLECTOR_EXPNAME,
 	    exp, params, origin);
   if (environ)
     __collector_env_printall ("__collector_open_experiment", environ);
@@ -548,23 +553,20 @@ __collector_open_experiment (const char *exp, const char *params, sp_origin_t or
   is_founder = getpid ();
   if (origin != SP_ORIGIN_DBX_ATTACH)
     {
-      envar = CALL_UTIL (getenv)("SP_COLLECTOR_FOUNDER");
+      envar = CALL_UTIL (getenv)(SP_COLLECTOR_FOUNDER);
       if (envar)
 	is_founder = CALL_UTIL (atoi)(envar);
       if (is_founder != 0)
 	{
 	  if (is_founder != getpid ())
 	    {
-	      TprintfT (0, "__collector_open_experiment SP_COLLECTOR_FOUNDER=%d != pid(%d)\n",
-			is_founder, getpid ());
-	      //CALL_UTIL(fprintf)(stderr, "__collector_open_experiment SP_COLLECTOR_FOUNDER=%d != pid(%d); not recording experiment\n",
-	      //is_founder, getpid() );
-	      //return COL_ERROR_UNEXP_FOUNDER;
+	      TprintfT (0, "__collector_open_experiment %s=%d != pid(%d)\n",
+			SP_COLLECTOR_FOUNDER, is_founder, getpid ());
 	      is_founder = 0; // Special case (CR 22917352)
 	    }
 	  /* clear FOUNDER for descendant experiments */
-	  TprintfT (0, "__collector_open_experiment setting SP_COLLECTOR_FOUNDER=0\n");
-	  CALL_UTIL (strlcpy)(buffer, "SP_COLLECTOR_FOUNDER=0", sizeof (buffer));
+	  TprintfT (0, "__collector_open_experiment setting %s=0\n", SP_COLLECTOR_FOUNDER);
+	  CALL_UTIL (snprintf)(buffer, sizeof (buffer), "%s=0", SP_COLLECTOR_FOUNDER);
 	  CALL_UTIL (putenv)(buffer);
 	}
     }
@@ -617,8 +619,10 @@ __collector_open_experiment (const char *exp, const char *params, sp_origin_t or
 	  return COL_ERROR_BADDIR;
 	}
       static char exp_name_env[MAXPATHLEN + 1];
-      TprintfT (DBG_LT1, "collector_open_experiment: setting SP_COLLECTOR_EXPNAME to %s\n", __collector_exp_dir_name);
-      CALL_UTIL (snprintf)(exp_name_env, sizeof (exp_name_env), "SP_COLLECTOR_EXPNAME=%s", __collector_exp_dir_name);
+      TprintfT (DBG_LT1, "collector_open_experiment: setting %s to %s\n",
+		SP_COLLECTOR_EXPNAME, __collector_exp_dir_name);
+      CALL_UTIL (snprintf)(exp_name_env, sizeof (exp_name_env), "%s=%s",
+			   SP_COLLECTOR_EXPNAME, __collector_exp_dir_name);
       CALL_UTIL (putenv)(exp_name_env);
     }
   /* Check that the name is that of a directory (new structure) */
@@ -1049,8 +1053,10 @@ collector_tail_init (const char *parent_exp_name)
       if (collector_exp_dir_append_x (linenum, parent_exp_name) != 0)
 	return COL_ERROR_BADDIR;
       static char exp_name_env[MAXPATHLEN + 1];
-      CALL_UTIL (snprintf)(exp_name_env, sizeof (exp_name_env), "SP_COLLECTOR_EXPNAME=%s", __collector_exp_dir_name);
-      TprintfT (DBG_LT1, "collector_tail_init: setting SP_COLLECTOR_EXPNAME to %s\n", __collector_exp_dir_name);
+      CALL_UTIL (snprintf)(exp_name_env, sizeof (exp_name_env), "%s=%s",
+		 SP_COLLECTOR_EXPNAME, __collector_exp_dir_name);
+      TprintfT (DBG_LT1, "collector_tail_init: setting %s to %s\n",
+		SP_COLLECTOR_EXPNAME, __collector_exp_dir_name);
       CALL_UTIL (putenv)(exp_name_env);
     }
   /* initialize the segments map and mmap interposition */
