@@ -512,6 +512,7 @@ static struct loongarch_opcode loongarch_fix_opcodes[] =
   { 0x00080000, 0xfffe0000,	"bytepick.w",	"r0:5,r5:5,r10:5,u15:2",	0,			0,	0,	0 },
   { 0x000c0000, 0xfffc0000,	"bytepick.d",	"r0:5,r5:5,r10:5,u15:3",	0,			0,	0,	0 },
   { 0x00100000, 0xffff8000,	"add.w",	"r0:5,r5:5,r10:5",		0,			0,	0,	0 },
+  { 0x00100000, 0xffff8000,	"add.w",	"r0:5,r5:5,r10:5,t",		0,			0,	0,	0 },
   { 0x00108000, 0xffff8000,	"add.d",	"r0:5,r5:5,r10:5",		0,			0,	0,	0 },
   { 0x00108000, 0xffff8000,	"add.d",	"r0:5,r5:5,r10:5,t",		0,			0,	0,	0 },
   { 0x00110000, 0xffff8000,	"sub.w",	"r0:5,r5:5,r10:5",		0,			0,	0,	0 },
