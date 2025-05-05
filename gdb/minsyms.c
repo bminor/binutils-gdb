@@ -1479,7 +1479,7 @@ minimal_symbol_reader::install ()
 
       msymbols = m_objfile->per_bfd->msymbols.get ();
       /* Arbitrarily require at least 10 elements in a thread.  */
-      gdb::parallel_for_each (10, &msymbols[0], &msymbols[mcount],
+      gdb::parallel_for_each<10> (&msymbols[0], &msymbols[mcount],
 	 [&] (minimal_symbol *start, minimal_symbol *end)
 	 {
 	   scoped_time_it time_it ("minsyms install worker");

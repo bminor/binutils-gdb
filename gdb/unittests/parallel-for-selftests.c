@@ -94,9 +94,9 @@ test_parallel_for_each ()
   const std::vector<do_foreach_t> for_each_functions
     {
       [] (int start, int end, foreach_callback_t callback)
-      { gdb::parallel_for_each (1, start, end, callback); },
+      { gdb::parallel_for_each<1> (start, end, callback); },
       [] (int start, int end, foreach_callback_t callback)
-      { gdb::sequential_for_each (1, start, end, callback);}
+      { gdb::sequential_for_each (start, end, callback);}
     };
 
   for (int n_threads : { 0, 1, 3 })
