@@ -13,10 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+load_lib rocm.exp
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-require can_spawn_for_attach
+require can_spawn_for_attach allow_hipcc_tests
 
 standard_testfile .cpp
 
