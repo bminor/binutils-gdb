@@ -150,6 +150,21 @@ input_scrub_reinit (void)
   memcpy (buffer_start, BEFORE_STRING, (int) BEFORE_SIZE);
 }
 
+/* Finish off old buffers.  */
+
+static void
+input_scrub_free (void)
+{
+  if (sb_index != (size_t) -1)
+    {
+      sb_kill (&from_sb);
+      sb_index = -1;
+    }
+  free (buffer_start);
+  buffer_start = NULL;
+  input_file_end ();
+}
+
 /* Push the state of input reading and scrubbing so that we can #include.
    The return value is a 'void *' (fudged for old compilers) to a save
    area, which can be restored by passing it to input_scrub_pop().  */
@@ -188,7 +203,7 @@ input_scrub_pop (struct input_save *saved)
 {
   char *saved_position;
 
-  input_scrub_end ();		/* Finish off old buffer */
+  input_scrub_free ();
 
   input_file_pop (saved->input_file_save);
   saved_position = saved->saved_position;
@@ -241,12 +256,9 @@ input_scrub_begin (void)
 void
 input_scrub_end (void)
 {
-  if (buffer_start)
-    {
-      free (buffer_start);
-      buffer_start = 0;
-      input_file_end ();
-    }
+  while (next_saved_file != NULL)
+    input_scrub_pop (next_saved_file);
+  input_scrub_free ();
 }
 
 /* Start reading input from a new file.
@@ -341,7 +353,6 @@ input_scrub_next_buffer (char **bufp)
     {
       if (sb_index >= from_sb.len)
 	{
-	  sb_kill (&from_sb);
 	  if (from_sb_expansion == expanding_macro)
 	    {
 	      cond_finish_check (macro_nest);
