@@ -1029,8 +1029,7 @@ private:
   dwo_file_up open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 				      const char *comp_dir);
 
-  void locate_dwo_sections (struct objfile *objfile, bfd *abfd, asection *sectp,
-			    struct dwo_sections *dwo_sections);
+  void locate_dwo_sections (objfile *objfile, dwo_file &dwo_file);
 
   void create_dwo_unit_hash_tables (dwo_file &dwo_file, dwarf2_cu &skeleton_cu,
 				    dwarf2_section_info &section,

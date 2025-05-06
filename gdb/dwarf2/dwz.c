@@ -56,35 +56,37 @@ dwz_file::read_string (struct objfile *objfile, LONGEST str_offset)
 /* A helper function to find the sections for a .dwz file.  */
 
 static void
-locate_dwz_sections (struct objfile *objfile, bfd *abfd, asection *sectp,
-		     dwz_file *dwz_file)
+locate_dwz_sections (objfile *objfile, dwz_file &dwz_file)
 {
-  dwarf2_section_info *sect = nullptr;
-
-  /* Note that we only support the standard ELF names, because .dwz
-     is ELF-only (at the time of writing).  */
-  if (dwarf2_elf_names.abbrev.matches (sectp->name))
-    sect = &dwz_file->abbrev;
-  else if (dwarf2_elf_names.info.matches (sectp->name))
-    sect = &dwz_file->info;
-  else if (dwarf2_elf_names.str.matches (sectp->name))
-    sect = &dwz_file->str;
-  else if (dwarf2_elf_names.line.matches (sectp->name))
-    sect = &dwz_file->line;
-  else if (dwarf2_elf_names.macro.matches (sectp->name))
-    sect = &dwz_file->macro;
-  else if (dwarf2_elf_names.gdb_index.matches (sectp->name))
-    sect = &dwz_file->gdb_index;
-  else if (dwarf2_elf_names.debug_names.matches (sectp->name))
-    sect = &dwz_file->debug_names;
-  else if (dwarf2_elf_names.types.matches (sectp->name))
-    sect = &dwz_file->types;
-
-  if (sect != nullptr)
+  for (asection *sec : gdb_bfd_sections (dwz_file.dwz_bfd))
     {
-      sect->s.section = sectp;
-      sect->size = bfd_section_size (sectp);
-      sect->read (objfile);
+      dwarf2_section_info *sect = nullptr;
+
+      /* Note that we only support the standard ELF names, because .dwz
+     is ELF-only (at the time of writing).  */
+      if (dwarf2_elf_names.abbrev.matches (sec->name))
+	sect = &dwz_file.abbrev;
+      else if (dwarf2_elf_names.info.matches (sec->name))
+	sect = &dwz_file.info;
+      else if (dwarf2_elf_names.str.matches (sec->name))
+	sect = &dwz_file.str;
+      else if (dwarf2_elf_names.line.matches (sec->name))
+	sect = &dwz_file.line;
+      else if (dwarf2_elf_names.macro.matches (sec->name))
+	sect = &dwz_file.macro;
+      else if (dwarf2_elf_names.gdb_index.matches (sec->name))
+	sect = &dwz_file.gdb_index;
+      else if (dwarf2_elf_names.debug_names.matches (sec->name))
+	sect = &dwz_file.debug_names;
+      else if (dwarf2_elf_names.types.matches (sec->name))
+	sect = &dwz_file.types;
+
+      if (sect != nullptr)
+	{
+	  sect->s.section = sec;
+	  sect->size = bfd_section_size (sec);
+	  sect->read (objfile);
+	}
     }
 }
 
@@ -392,9 +394,7 @@ dwz_file::read_dwz_file (dwarf2_per_objfile *per_objfile)
 
   dwz_file_up result (new dwz_file (std::move (dwz_bfd)));
 
-  for (asection *sec : gdb_bfd_sections (result->dwz_bfd))
-    locate_dwz_sections (per_objfile->objfile, result->dwz_bfd.get (),
-			 sec, result.get ());
+  locate_dwz_sections (per_objfile->objfile, *result);
 
   gdb_bfd_record_inclusion (per_bfd->obfd, result->dwz_bfd.get ());
   bfd_cache_close (result->dwz_bfd.get ());
