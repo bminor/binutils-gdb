@@ -1712,7 +1712,7 @@ linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
     = (struct linux_make_mappings_data *) data;
   gdb_byte buf[sizeof (ULONGEST)];
 
-  if (*filename == '\0')
+  if (*filename == '\0' || inode == 0)
     return 0;
 
   ++map_data->file_count;
