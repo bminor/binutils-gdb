@@ -433,6 +433,11 @@ bin_to_res_menuexitems (windres_bfd *wrbfd, const bfd_byte *data,
 
       itemlen = 14 + slen * 2 + 2;
       itemlen = (itemlen + 3) &~ 3;
+      /* Don't allow rounding up of itemlen to exceed length.  This
+	 is an anti-fuzzer measure to cope with unexpected offsets and
+	 lengths.   */
+      if (itemlen > length)
+	itemlen = length;
 
       if ((flags & 1) == 0)
 	{
