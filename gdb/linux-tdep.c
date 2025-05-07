@@ -801,6 +801,14 @@ dump_mapping_p (filter_flags filterflags, const smaps_data &map)
 static bool
 dump_note_entry_p (filter_flags filterflags, const smaps_data &map)
 {
+  /* No NT_FILE entry for mappings with no filename.  */
+  if (map.filename.length () == 0)
+    return false;
+
+  /* Don't add NT_FILE entries for mappings with a zero inode.  */
+  if (map.inode == 0)
+    return false;
+
   /* vDSO and vsyscall mappings will end up in the core file.  Don't
      put them in the NT_FILE note.  */
   if (map.filename == "[vdso]" || map.filename == "[vsyscall]")
@@ -1315,7 +1323,7 @@ linux_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
 }
 
 typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
-					    ULONGEST offset, ULONGEST inode,
+					    ULONGEST offset,
 					    int read, int write,
 					    int exec, int modified,
 					    bool memory_tagged,
@@ -1589,7 +1597,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
       if (should_dump_mapping_p (filterflags, map))
 	{
 	  func (map.start_address, map.end_address - map.start_address,
-		map.offset, map.inode, map.read, map.write, map.exec,
+		map.offset, map.read, map.write, map.exec,
 		1, /* MODIFIED is true because we want to dump
 		      the mapping.  */
 		map.vmflags.memory_tagging != 0,
@@ -1619,7 +1627,7 @@ struct linux_find_memory_regions_data
 
 static int
 linux_find_memory_regions_thunk (ULONGEST vaddr, ULONGEST size,
-				 ULONGEST offset, ULONGEST inode,
+				 ULONGEST offset,
 				 int read, int write, int exec, int modified,
 				 bool memory_tagged,
 				 const char *filename, void *arg)
@@ -1678,7 +1686,7 @@ static linux_find_memory_region_ftype linux_make_mappings_callback;
 
 static int
 linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
-			      ULONGEST offset, ULONGEST inode,
+			      ULONGEST offset,
 			      int read, int write, int exec, int modified,
 			      bool memory_tagged,
 			      const char *filename, void *data)
@@ -1687,8 +1695,7 @@ linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
     = (struct linux_make_mappings_data *) data;
   gdb_byte buf[sizeof (ULONGEST)];
 
-  if (*filename == '\0' || inode == 0)
-    return 0;
+  gdb_assert (filename != nullptr && *filename != '\0');
 
   ++map_data->file_count;
 
