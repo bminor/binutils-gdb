@@ -805,13 +805,12 @@ dump_note_entry_p (filter_flags filterflags, const smaps_data &map)
   if (map.filename.length () == 0)
     return false;
 
-  /* Don't add NT_FILE entries for mappings with a zero inode.  */
-  if (map.inode == 0)
-    return false;
-
-  /* vDSO and vsyscall mappings will end up in the core file.  Don't
-     put them in the NT_FILE note.  */
-  if (map.filename == "[vdso]" || map.filename == "[vsyscall]")
+  /* Special kernel mappings, those with names like '[vdso]' and
+     '[vsyscall]' will be placed in the core file, but shouldn't get an
+     NT_FILE entry.  These special mappings all have a zero inode.  */
+  if (map.inode == 0
+      && map.filename.front () == '['
+      && map.filename.back () == ']')
     return false;
 
   /* Otherwise, any other file-based mapping should be placed in the
