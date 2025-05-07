@@ -1,0 +1,215 @@
+# Copyright (C) 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# On Linux, exiting the main thread with scheduler locking on results
+# in an inferior exit immediately.  On Windows, however, it results in
+# a normal thread exit of the main thread, with the other threads
+# staying listed.  Test this, and then test iterating over all the
+# other threads and continuing then too, one by one, with
+# scheduler-locking on.  Also test schedlock off, for completeness.
+
+standard_testfile
+
+if {[build_executable "failed to prepare" $testfile $srcfile {debug pthreads}]} {
+    return -1
+}
+
+# Run "info threads" and return a list of various information:
+#
+#  Element 0 - the highest numbered thread, zero if no thread is found.
+#  Element 1 - the "(exiting process)" thread, zero if not found.
+#  Element 2 - a list of "(exiting)" threads.
+#  Element 3 - a list of the other threads.
+
+proc info_threads {} {
+    set highest_thread 0
+    set exit_process_thread 0
+    set exit_thread_threads {}
+    set other_threads {}
+    set any "\[^\r\n\]*"
+    set ws "\[ \t\]*"
+    set eol "(?=\r\n)"
+    set common_prefix "^\r\n(?:\\*)?${ws}($::decimal)\[ \t\]*${::tdlabel_re}${any}"
+    gdb_test_multiple "info threads" "" -lbl {
+	-re "${common_prefix}\\(exiting process\\)${any}${eol}" {
+	    set highest_thread $expect_out(1,string)
+	    verbose -log "\nhighest_thread=$highest_thread, exiting process\n"
+	    set exit_process_thread $highest_thread
+	    exp_continue
+	}
+	-re "${common_prefix}\\(exiting\\)${any}${eol}" {
+	    set highest_thread $expect_out(1,string)
+	    verbose -log "\nhighest_thread=$highest_thread, exiting thread\n"
+	    lappend exit_thread_threads $highest_thread
+	    exp_continue
+	}
+	-re "${common_prefix}${eol}" {
+	    set highest_thread $expect_out(1,string)
+	    verbose -log "\nhighest_thread=$highest_thread, other thread\n"
+	    lappend other_threads $highest_thread
+	    exp_continue
+	}
+	-re "^\r\n$::gdb_prompt $" {
+	    verbose -log "\nhighest_thread=$highest_thread, prompt\n"
+	    gdb_assert {$highest_thread > 0} $gdb_test_name
+	}
+    }
+    verbose -log "info_threads: highest_thread=$highest_thread"
+    verbose -log "info_threads: exit_thread_threads=$exit_thread_threads"
+    verbose -log "info_threads: other_threads=$other_threads"
+    verbose -log "info_threads: exit_process_thread=$exit_process_thread"
+
+    return [list \
+		$highest_thread \
+		$exit_process_thread \
+		$exit_thread_threads \
+		$other_threads]
+}
+
+# If EXIT-THREADS-FIRST is true, continues all threads which have a
+# pending exit-thread event first, before continuing the thread with
+# the pending exit-process event.
+proc test {target-non-stop exit-threads-first schedlock} {
+    save_vars ::GDBFLAGS {
+	append ::GDBFLAGS " -ex \"maintenance set target-non-stop ${target-non-stop}\""
+	clean_restart $::binfile
+    }
+
+    set is_windows [expr [istarget *-*-mingw*] || [istarget *-*-cygwin*]]
+    set is_linux [istarget *-*-linux*]
+
+    if {!$is_windows && ${exit-threads-first}} {
+	# No point in exercising this combination because we will
+	# return before we reach the point where it is tested.
+	return
+    }
+
+    if ![runto_main] {
+	return
+    }
+
+    gdb_breakpoint [gdb_get_line_number "break-here"]
+    gdb_continue_to_breakpoint "break-here" ".* break-here .*"
+
+    gdb_test_no_output "set scheduler-locking $schedlock"
+
+    # Continuing the main thread on Linux makes the whole process
+    # exit.  This makes GDB report all threads exits immediately, and
+    # then the inferior exit.  The thread exits don't stay pending
+    # because Linux supports per-thread thread-exit control, while
+    # Windows is per-target.
+    if {!$is_windows || $schedlock == off} {
+	gdb_test_multiple "c" "continue exit-process thread to exit" {
+	    -re -wrap "Inferior.*exited normally.*" {
+		pass $gdb_test_name
+	    }
+	    -re -wrap "No unwaited-for children left.*" {
+		# On Linux, GDB may briefly see the main thread turn
+		# zombie before seeing its exit event.
+		gdb_assert $is_linux $gdb_test_name
+	    }
+	}
+
+	return
+    }
+
+    # On Windows, continuing the thread that calls TerminateProcess
+    # (the main thread when it returns from main in our case) with
+    # scheduler-locking enabled exits the whole process, but core of
+    # GDB won't see the exit process event right away.  Windows only
+    # reports it to the last thread that exits, whichever that is.
+    # Due to scheduler locking, that won't happen until we resume all
+    # other threads.  The TerminateProcess-caller thread gets a plain
+    # thread exit event.
+    gdb_test "c" "No unwaited-for children left\\." "continue main thread"
+
+    if {${target-non-stop} == "on"} {
+	# With non-stop. GDB issues ContinueDebugEvent as soon as it
+	# seens a debug event, so after a bit, the windows backend
+	# will have seen all the thread and process exit events, even
+	# while the user has the prompt.  Give it a bit of time for
+	# that to happen, so we can tell which threads have exited by
+	# looking for (exiting) and "(exiting process) in "info
+	# threads" output.
+	sleep 2
+    }
+
+    with_test_prefix "initial threads info" {
+	lassign [info_threads] \
+	    highest_thread \
+	    exit_process_thread \
+	    exit_thread_threads \
+	    other_threads
+
+	gdb_assert {$highest_thread > 0}
+    }
+
+    # Continue one thread at a time, collecting the exit status.
+    set thread_count $highest_thread
+    for {set i 2} {$i <= $thread_count} {incr i} {
+	with_test_prefix "thread $i" {
+	    lassign [info_threads] \
+		highest_thread \
+		exit_process_thread \
+		exit_thread_threads \
+		other_threads
+
+	    # Default to a value that forces FAILs below.
+	    set thr 0
+	    # Whether we expect to find a thread with "(exiting process)":
+	    #   0 - not expected - it's a failure if we see one.
+	    #   1 - possible - we may or may not see one.
+	    #   2 - required - it's a failure if we don't see one.
+	    set process_exit_expected 0
+
+	    if {$i == $thread_count} {
+		set thr $highest_thread
+		set process_exit_expected 2
+		gdb_test "p/d \$_inferior_thread_count == 1" " = 1" "one thread left"
+	    } else {
+		if {${exit-threads-first} && [llength $exit_thread_threads] != 0} {
+		    set thr [lindex $exit_thread_threads 0]
+		} elseif {$exit_process_thread > 0} {
+		    set thr $exit_process_thread
+		    set process_exit_expected 2
+		} elseif {[llength $other_threads] != 0} {
+		    set thr [lindex $other_threads 0]
+		    set process_exit_expected 1
+		}
+	    }
+
+	    gdb_test "thread $thr" \
+		"Switching to .*" \
+		"switch to thread"
+	    gdb_test_multiple "c" "continue thread to exit" {
+		-re -wrap "No unwaited-for children left\\." {
+		    gdb_assert {$process_exit_expected != 2} $gdb_test_name
+		}
+		-re -wrap "Inferior.*exited normally.*" {
+		    gdb_assert {$process_exit_expected != 0} $gdb_test_name
+		    return
+		}
+	    }
+	}
+    }
+}
+
+foreach_with_prefix target-non-stop {off on} {
+    foreach_with_prefix exit-threads-first {0 1} {
+	foreach_with_prefix schedlock {off on} {
+	    test ${target-non-stop} ${exit-threads-first} $schedlock
+	}
+    }
+}
