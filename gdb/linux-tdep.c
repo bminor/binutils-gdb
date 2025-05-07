@@ -1676,8 +1676,6 @@ struct linux_make_mappings_data
   struct type *long_type;
 };
 
-static linux_find_memory_region_ftype linux_make_mappings_callback;
-
 /* A callback for linux_find_memory_regions_full that updates the
    mappings data for linux_make_mappings_corefile_notes.
 
