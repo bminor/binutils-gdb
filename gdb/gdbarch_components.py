@@ -2848,3 +2848,19 @@ which all assume current_inferior() is the one to read from.
     predefault="default_core_parse_exec_context",
     invalid=False,
 )
+
+Method(
+    comment="""
+Some targets support special hardware-assisted control-flow protection
+technologies.  For example, Intel's Control-flow Enforcement Technology (CET)
+provides a shadow stack and indirect branch tracking.
+To enable inferior calls the function shadow_stack_push has to be provided.
+
+Push the address NEW_ADDR on the shadow stack and update the shadow stack
+pointer.
+""",
+    type="void",
+    name="shadow_stack_push",
+    params=[("CORE_ADDR", "new_addr"), ("regcache *", "regcache")],
+    predicate=True,
+)
