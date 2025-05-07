@@ -677,7 +677,7 @@ mapping_is_anonymous_p (const char *filename)
      header (of a DSO or an executable, for example).  If it is, and
      if the user is interested in dump it, then we should dump it.  */
 
-static int
+static bool
 dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 		int maybe_private_p, int mapping_anon_p, int mapping_file_p,
 		const char *filename, ULONGEST addr, ULONGEST offset)
@@ -690,24 +690,23 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
      (assuming that the version of the Linux kernel being used
      supports it, of course).  */
   int private_p = maybe_private_p;
-  int dump_p;
 
   /* We always dump vDSO and vsyscall mappings, because it's likely that
      there'll be no file to read the contents from at core load time.
      The kernel does the same.  */
   if (strcmp ("[vdso]", filename) == 0
       || strcmp ("[vsyscall]", filename) == 0)
-    return 1;
+    return true;
 
   if (v->initialized_p)
     {
       /* We never dump I/O mappings.  */
       if (v->io_page)
-	return 0;
+	return false;
 
       /* Check if we should exclude this mapping.  */
       if (!dump_excluded_mappings && v->exclude_coredump)
-	return 0;
+	return false;
 
       /* Update our notion of whether this mapping is shared or
 	 private based on a trustworthy value.  */
@@ -718,12 +717,13 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 	{
 	  if ((private_p && (filterflags & COREFILTER_HUGETLB_PRIVATE))
 	      || (!private_p && (filterflags & COREFILTER_HUGETLB_SHARED)))
-	    return 1;
+	    return true;
 
-	  return 0;
+	  return false;
 	}
     }
 
+  bool dump_p;
   if (private_p)
     {
       if (mapping_anon_p && mapping_file_p)
@@ -783,7 +783,7 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 	    {
 	      /* This mapping contains an ELF header, so we
 		 should dump it.  */
-	      dump_p = 1;
+	      dump_p = true;
 	    }
 	}
     }
@@ -794,7 +794,7 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
 /* As above, but return true only when we should dump the NT_FILE
    entry.  */
 
-static int
+static bool
 dump_note_entry_p (filter_flags filterflags, const struct smaps_vmflags *v,
 		int maybe_private_p, int mapping_anon_p, int mapping_file_p,
 		const char *filename, ULONGEST addr, ULONGEST offset)
@@ -803,11 +803,11 @@ dump_note_entry_p (filter_flags filterflags, const struct smaps_vmflags *v,
      put them in the NT_FILE note.  */
   if (strcmp ("[vdso]", filename) == 0
       || strcmp ("[vsyscall]", filename) == 0)
-    return 0;
+    return false;
 
   /* Otherwise, any other file-based mapping should be placed in the
      note.  */
-  return 1;
+  return true;
 }
 
 /* Implement the "info proc" command.  */
@@ -1321,7 +1321,7 @@ typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
 					    const char *filename,
 					    void *data);
 
-typedef int linux_dump_mapping_p_ftype (filter_flags filterflags,
+typedef bool linux_dump_mapping_p_ftype (filter_flags filterflags,
 					const struct smaps_vmflags *v,
 					int maybe_private_p,
 					int mapping_anon_p,
@@ -1590,7 +1590,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 
   for (const struct smaps_data &map : smaps)
     {
-      int should_dump_p = 0;
+      bool should_dump_p = false;
 
       if (map.has_anonymous)
 	{
@@ -1607,7 +1607,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	{
 	  /* Older Linux kernels did not support the "Anonymous:" counter.
 	     If it is missing, we can't be sure - dump all the pages.  */
-	  should_dump_p = 1;
+	  should_dump_p = true;
 	}
 
       /* Invoke the callback function to create the corefile segment.  */
