@@ -680,6 +680,11 @@ mapping_is_anonymous_p (const char *filename)
 static bool
 dump_mapping_p (filter_flags filterflags, const smaps_data &map)
 {
+  /* Older Linux kernels did not support the "Anonymous:" counter.
+     If it is missing, we can't be sure what to dump, so dump everything.  */
+  if (!map.has_anonymous)
+    return true;
+
   /* Initially, we trust in what we received from our caller.  This
      value may not be very precise (i.e., it was probably gathered
      from the permission line in the /proc/PID/smaps list, which
@@ -1580,19 +1585,8 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 
   for (const struct smaps_data &map : smaps)
     {
-      bool should_dump_p = false;
-
-      if (map.has_anonymous)
-	should_dump_p = should_dump_mapping_p (filterflags, map);
-      else
-	{
-	  /* Older Linux kernels did not support the "Anonymous:" counter.
-	     If it is missing, we can't be sure - dump all the pages.  */
-	  should_dump_p = true;
-	}
-
       /* Invoke the callback function to create the corefile segment.  */
-      if (should_dump_p)
+      if (should_dump_mapping_p (filterflags, map))
 	{
 	  func (map.start_address, map.end_address - map.start_address,
 		map.offset, map.inode, map.read, map.write, map.exec,
