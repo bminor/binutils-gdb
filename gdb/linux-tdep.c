@@ -1327,7 +1327,7 @@ typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
 					    int read, int write,
 					    int exec, int modified,
 					    bool memory_tagged,
-					    const char *filename,
+					    const std::string &filename,
 					    void *data);
 
 typedef bool linux_dump_mapping_p_ftype (filter_flags filterflags,
@@ -1601,7 +1601,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 		1, /* MODIFIED is true because we want to dump
 		      the mapping.  */
 		map.vmflags.memory_tagging != 0,
-		map.filename.c_str (), obfd);
+		map.filename, obfd);
 	}
     }
 
@@ -1630,7 +1630,7 @@ linux_find_memory_regions_thunk (ULONGEST vaddr, ULONGEST size,
 				 ULONGEST offset,
 				 int read, int write, int exec, int modified,
 				 bool memory_tagged,
-				 const char *filename, void *arg)
+				 const std::string &filename, void *arg)
 {
   struct linux_find_memory_regions_data *data
     = (struct linux_find_memory_regions_data *) arg;
@@ -1687,13 +1687,13 @@ linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
 			      ULONGEST offset,
 			      int read, int write, int exec, int modified,
 			      bool memory_tagged,
-			      const char *filename, void *data)
+			      const std::string &filename, void *data)
 {
   struct linux_make_mappings_data *map_data
     = (struct linux_make_mappings_data *) data;
   gdb_byte buf[sizeof (ULONGEST)];
 
-  gdb_assert (filename != nullptr && *filename != '\0');
+  gdb_assert (filename.length () > 0);
 
   ++map_data->file_count;
 
@@ -1704,7 +1704,7 @@ linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
   pack_long (buf, map_data->long_type, offset);
   obstack_grow (map_data->data_obstack, buf, map_data->long_type->length ());
 
-  obstack_grow_str0 (map_data->filename_obstack, filename);
+  obstack_grow_str0 (map_data->filename_obstack, filename.c_str ());
 
   return 0;
 }
