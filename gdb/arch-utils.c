@@ -1218,6 +1218,15 @@ default_gdbarch_return_value
 				readbuf, writebuf);
 }
 
+/* See arch-utils.h.  */
+
+std::optional<CORE_ADDR>
+default_get_shadow_stack_pointer (gdbarch *gdbarch, regcache *regcache,
+				  bool &shadow_stack_enabled)
+{
+  return {};
+}
+
 obstack *gdbarch_obstack (gdbarch *arch)
 {
   return &arch->obstack;
