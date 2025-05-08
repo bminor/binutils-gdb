@@ -374,6 +374,22 @@ function
 		|	colon_ext_only function_arglist start_opt
 			{ $$ = state->fill_comp (DEMANGLE_COMPONENT_TYPED_NAME, $1, $2.comp);
 			  if ($3) $$ = state->fill_comp (DEMANGLE_COMPONENT_LOCAL_NAME, $$, $3); }
+		|	colon_ext_only
+			{
+			  /* This production is a hack to handle
+			     something like "name::operator new[]" --
+			     without arguments, this ordinarily would
+			     not parse, but canonicalizing it is
+			     important.  So we infer the "()" and then
+			     remove it when converting back to string.
+			     Note that this works because this
+			     production is terminal.  */
+			  demangle_component *comp
+			    = state->fill_comp (DEMANGLE_COMPONENT_FUNCTION_TYPE,
+						nullptr, nullptr);
+			  $$ = state->fill_comp (DEMANGLE_COMPONENT_TYPED_NAME, $1, comp);
+			  state->demangle_info->added_parens = true;
+			}
 
 		|	conversion_op_name start_opt
 			{ $$ = $1.comp;
@@ -2111,6 +2127,12 @@ canonicalize_tests ()
 
   should_be_the_same ("Foozle<int>::fogey<Empty<int> > (Empty<int>)",
 		      "Foozle<int>::fogey<Empty<int>> (Empty<int>)");
+
+  should_be_the_same ("something :: operator new [ ]",
+		      "something::operator new[]");
+  should_be_the_same ("something :: operator   new",
+		      "something::operator new");
+  should_be_the_same ("operator()", "operator ()");
 }
 
 #endif

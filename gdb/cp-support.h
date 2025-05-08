@@ -63,6 +63,10 @@ struct demangle_parse_info
   /* Any memory used during processing.  */
   auto_obstack obstack;
 
+  /* True if the parser had to add a dummy '()' at the end of the
+     input text to make it parse.  */
+  bool added_parens = false;
+
   /* Any other objects referred to by this object, and whose storage
      lifetime must be linked.  */
   std::vector<std::unique_ptr<demangle_parse_info>> infos;

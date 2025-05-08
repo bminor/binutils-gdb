@@ -573,6 +573,17 @@ replace_typedefs (struct demangle_parse_info *info,
     }
 }
 
+/* A helper to strip a trailing "()" from PTR.  The string is modified
+   in place.  */
+
+static void
+maybe_strip_parens (char *ptr)
+{
+  size_t len = strlen (ptr);
+  if (len > 2 && ptr[len - 2] == '(' && ptr[len - 1] == ')')
+    ptr[len - 2] = '\0';
+}
+
 /* Parse STRING and convert it to canonical form, resolving any
    typedefs.  If parsing fails, or if STRING is already canonical,
    return nullptr.  Otherwise return the canonical form.  If
@@ -598,6 +609,9 @@ cp_canonicalize_string_full (const char *string,
       gdb::unique_xmalloc_ptr<char> us = cp_comp_to_string (info->tree,
 							    estimated_len);
       gdb_assert (us);
+
+      if (info->added_parens)
+	maybe_strip_parens (us.get ());
 
       /* Finally, compare the original string with the computed
 	 name, returning NULL if they are the same.  */
@@ -646,6 +660,9 @@ cp_canonicalize_string (const char *string)
 	       string);
       return nullptr;
     }
+
+  if (info->added_parens)
+    maybe_strip_parens (us.get ());
 
   if (strcmp (us.get (), string) == 0)
     return nullptr;
