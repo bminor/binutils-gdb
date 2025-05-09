@@ -4,7 +4,9 @@ L:
 	lh	a0, hval
 	lhu	a0, hval
 	lw	a0, wval
+.ifdef __64_bit__
 	lwu	a0, wval
+.endif
 	ld	a0, dval
 
 S:

@@ -161,6 +161,7 @@ riscv_get_sp_base (insn_t opcode, unsigned int xlen)
 #define MASK_RS2 (OP_MASK_RS2 << OP_SH_RS2)
 #define MASK_RD (OP_MASK_RD << OP_SH_RD)
 #define MASK_CRS2 (OP_MASK_CRS2 << OP_SH_CRS2)
+#define MASK_CRS2S (OP_MASK_CRS2S << OP_SH_CRS2S)
 #define MASK_IMM ENCODE_ITYPE_IMM (-1U)
 #define MASK_RVC_IMM ENCODE_CITYPE_IMM (-1U)
 #define MASK_UIMM ENCODE_UTYPE_IMM (-1U)
@@ -206,6 +207,20 @@ match_rs2_rd_even (const struct riscv_opcode *op, insn_t insn)
 }
 
 static int
+match_rd_even (const struct riscv_opcode *op, insn_t insn)
+{
+  int rd = (insn & MASK_RD) >> OP_SH_RD;
+  return ((rd & 1) == 0) && match_opcode (op, insn);
+}
+
+static int
+match_rs2_even (const struct riscv_opcode *op, insn_t insn)
+{
+  int rs2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  return ((rs2 & 1) == 0) && match_opcode (op, insn);
+}
+
+static int
 match_rd_nonzero (const struct riscv_opcode *op, insn_t insn)
 {
   return (op->pinfo == INSN_MACRO || match_opcode (op, insn))
@@ -213,9 +228,35 @@ match_rd_nonzero (const struct riscv_opcode *op, insn_t insn)
 }
 
 static int
+match_rd_even_nonzero (const struct riscv_opcode *op, insn_t insn)
+{
+  return match_rd_nonzero (op, insn) && match_rd_even (op, insn);
+}
+
+static int
 match_rs1_nonzero (const struct riscv_opcode *op ATTRIBUTE_UNUSED, insn_t insn)
 {
   return (insn & MASK_RS1) != 0;
+}
+
+static int
+match_rs1_nonzero_rs2_even (const struct riscv_opcode *op ATTRIBUTE_UNUSED, insn_t insn)
+{
+  return match_rs1_nonzero (op, insn) && match_rs2_even (op, insn);
+}
+
+static int
+match_crs2s_even (const struct riscv_opcode *op, insn_t insn)
+{
+  int crs2s = (insn & MASK_CRS2S) >> OP_SH_CRS2S;
+  return ((crs2s & 1) == 0) && match_opcode (op, insn);
+}
+
+static int
+match_crs2_even (const struct riscv_opcode *op, insn_t insn)
+{
+  int crs2 = (insn & MASK_CRS2) >> OP_SH_CRS2;
+  return ((crs2 & 1) == 0) && match_opcode (op, insn);
 }
 
 static int
@@ -625,10 +666,18 @@ const struct riscv_opcode riscv_opcodes[] =
 {"ld",         64, INSN_CLASS_C, "Ct,Cl(Cs)", MATCH_C_LD, MASK_C_LD, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"ld",         64, INSN_CLASS_I, "d,o(s)",    MATCH_LD, MASK_LD, match_opcode, INSN_DREF|INSN_8_BYTE },
 {"ld",         64, INSN_CLASS_I, "d,A",       0, (int) M_Lx, match_rd_nonzero, INSN_MACRO },
+{"ld",         32, INSN_CLASS_ZCLSD, "d,Cn(Cc)",  MATCH_C_LDSP, MASK_C_LDSP, match_rd_even_nonzero, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
+{"ld",         32, INSN_CLASS_ZCLSD, "Ct,Cl(Cs)", MATCH_C_LD, MASK_C_LD, match_crs2s_even, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
+{"ld",         32, INSN_CLASS_ZILSD, "d,o(s)",    MATCH_LD, MASK_LD, match_rd_even, INSN_DREF|INSN_8_BYTE },
+{"ld",         32, INSN_CLASS_ZILSD, "d,A",       0, (int) M_Lx, match_rd_even_nonzero, INSN_MACRO },
 {"sd",         64, INSN_CLASS_C, "CV,CN(Cc)", MATCH_C_SDSP, MASK_C_SDSP, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"sd",         64, INSN_CLASS_C, "Ct,Cl(Cs)", MATCH_C_SD, MASK_C_SD, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"sd",         64, INSN_CLASS_I, "t,q(s)",    MATCH_SD, MASK_SD, match_opcode, INSN_DREF|INSN_8_BYTE },
 {"sd",         64, INSN_CLASS_I, "t,A,s",     0, (int) M_Sx_FSx, match_rs1_nonzero, INSN_MACRO },
+{"sd",         32, INSN_CLASS_ZCLSD, "CV,CN(Cc)", MATCH_C_SDSP, MASK_C_SDSP, match_crs2_even, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
+{"sd",         32, INSN_CLASS_ZCLSD, "Ct,Cl(Cs)", MATCH_C_SD, MASK_C_SD, match_crs2s_even, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
+{"sd",         32, INSN_CLASS_ZILSD, "t,q(s)",    MATCH_SD, MASK_SD, match_rs2_even, INSN_DREF|INSN_8_BYTE },
+{"sd",         32, INSN_CLASS_ZILSD, "t,A,s",     0, (int) M_Sx_FSx, match_rs1_nonzero_rs2_even, INSN_MACRO },
 {"sext.w",     64, INSN_CLASS_C, "d,CU",      MATCH_C_ADDIW, MASK_C_ADDIW|MASK_RVC_IMM, match_rd_nonzero, INSN_ALIAS },
 {"sext.w",     64, INSN_CLASS_I, "d,s",       MATCH_ADDIW, MASK_ADDIW|MASK_IMM, match_opcode, INSN_ALIAS },
 {"addiw",      64, INSN_CLASS_C, "d,CU,Co",   MATCH_C_ADDIW, MASK_C_ADDIW, match_rd_nonzero, INSN_ALIAS },
@@ -1160,9 +1209,13 @@ const struct riscv_opcode riscv_opcodes[] =
 {"c.addiw",   64, INSN_CLASS_C,   "d,Co",      MATCH_C_ADDIW, MASK_C_ADDIW, match_rd_nonzero, 0 },
 {"c.addw",    64, INSN_CLASS_C,   "Cs,Ct",     MATCH_C_ADDW, MASK_C_ADDW, match_opcode, 0 },
 {"c.subw",    64, INSN_CLASS_C,   "Cs,Ct",     MATCH_C_SUBW, MASK_C_SUBW, match_opcode, 0 },
+{"c.ldsp",    32, INSN_CLASS_ZCLSD, "d,Cn(Cc)",  MATCH_C_LDSP, MASK_C_LDSP, match_rd_even_nonzero, INSN_DREF|INSN_8_BYTE },
 {"c.ldsp",    64, INSN_CLASS_C,   "d,Cn(Cc)",  MATCH_C_LDSP, MASK_C_LDSP, match_rd_nonzero, INSN_DREF|INSN_8_BYTE },
+{"c.ld",      32, INSN_CLASS_ZCLSD, "Ct,Cl(Cs)", MATCH_C_LD, MASK_C_LD, match_crs2s_even, INSN_DREF|INSN_8_BYTE },
 {"c.ld",      64, INSN_CLASS_C,   "Ct,Cl(Cs)", MATCH_C_LD, MASK_C_LD, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"c.sdsp",    32, INSN_CLASS_ZCLSD, "CV,CN(Cc)", MATCH_C_SDSP, MASK_C_SDSP, match_crs2_even, INSN_DREF|INSN_8_BYTE },
 {"c.sdsp",    64, INSN_CLASS_C,   "CV,CN(Cc)", MATCH_C_SDSP, MASK_C_SDSP, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"c.sd",      32, INSN_CLASS_ZCLSD, "Ct,Cl(Cs)", MATCH_C_SD, MASK_C_SD, match_crs2s_even, INSN_DREF|INSN_8_BYTE },
 {"c.sd",      64, INSN_CLASS_C,   "Ct,Cl(Cs)", MATCH_C_SD, MASK_C_SD, match_opcode, INSN_DREF|INSN_8_BYTE },
 {"c.fldsp",    0, INSN_CLASS_D_AND_C, "D,Cn(Cc)",  MATCH_C_FLDSP, MASK_C_FLDSP, match_opcode, INSN_DREF|INSN_8_BYTE },
 {"c.fld",      0, INSN_CLASS_D_AND_C, "CD,Cl(Cs)", MATCH_C_FLD, MASK_C_FLD, match_opcode, INSN_DREF|INSN_8_BYTE },

@@ -1,5 +1,6 @@
-#as: -march=rv64i -defsym __64_bit__=1
-#name: Lx/Sx macro insns
+#as: -march=rv32i_zilsd
+#name: Lx/Sx macro insns for Zilsd
+#source: l-s-macro.s
 #objdump: -dwr
 
 .*:[ 	]+file format .*
@@ -27,10 +28,6 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+00000517[ 	]+auipc[ 	]+a0,0x0[ 	]+[0-9a-f]+:[ 	]+R_RISCV_PCREL_HI20[ 	]+wval
 [ 	]+[0-9a-f]+:[ 	]+R_RISCV_RELAX.*
 [ 	]+[0-9a-f]+:[ 	]+00052503[ 	]+lw[ 	]+a0,0\(a0\) # [0-9a-f]+( <.*>)?[ 	]+[0-9a-f]+:[ 	]+R_RISCV_PCREL_LO12_I[ 	]+.*
-[ 	]+[0-9a-f]+:[ 	]+R_RISCV_RELAX.*
-[ 	]+[0-9a-f]+:[ 	]+00000517[ 	]+auipc[ 	]+a0,0x0[ 	]+[0-9a-f]+:[ 	]+R_RISCV_PCREL_HI20[ 	]+wval
-[ 	]+[0-9a-f]+:[ 	]+R_RISCV_RELAX.*
-[ 	]+[0-9a-f]+:[ 	]+00056503[ 	]+lwu[ 	]+a0,0\(a0\) # [0-9a-f]+( <.*>)?[ 	]+[0-9a-f]+:[ 	]+R_RISCV_PCREL_LO12_I[ 	]+.*
 [ 	]+[0-9a-f]+:[ 	]+R_RISCV_RELAX.*
 [ 	]+[0-9a-f]+:[ 	]+00000517[ 	]+auipc[ 	]+a0,0x0[ 	]+[0-9a-f]+:[ 	]+R_RISCV_PCREL_HI20[ 	]+dval
 [ 	]+[0-9a-f]+:[ 	]+R_RISCV_RELAX.*
