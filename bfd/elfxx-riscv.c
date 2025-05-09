@@ -1165,6 +1165,18 @@ check_implicit_for_i (riscv_parse_subset_t *rps ATTRIBUTE_UNUSED,
 	      && subset->minor_version < 1));
 }
 
+/* Add the IMPLICIT only when the 'f' extension is also available
+   and XLEN is 32.  */
+
+static bool
+check_implicit_for_zcf (riscv_parse_subset_t *rps,
+			const riscv_subset_t *subset ATTRIBUTE_UNUSED)
+{
+  riscv_subset_t *tmp = NULL;
+  return *rps->xlen == 32
+	 && riscv_lookup_subset (rps->subset_list, "f", &tmp);
+}
+
 /* Record all implicit information for the subsets.  */
 struct riscv_implicit_subset
 {
@@ -1216,6 +1228,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zvl128b", "+zvl64b", check_implicit_always},
   {"zvl64b", "+zvl32b", check_implicit_always},
 
+  {"zce", "+zca,+zcb,+zcmp,+zcmt", check_implicit_always},
+  {"zce", "+zcf", check_implicit_for_zcf},
   {"zcb", "+zca", check_implicit_always},
   {"zcd", "+d,+zca", check_implicit_always},
   {"zcf", "+f,+zca", check_implicit_always},
@@ -1442,6 +1456,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"ztso",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zca",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zce",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcf",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcd",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zcmop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
