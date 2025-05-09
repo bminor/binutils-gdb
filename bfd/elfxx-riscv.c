@@ -1148,7 +1148,8 @@ riscv_elf_ignore_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 /* Always add implicit extensions for the SUBSET.  */
 
 static bool
-check_implicit_always (riscv_subset_t *subset ATTRIBUTE_UNUSED)
+check_implicit_always (riscv_parse_subset_t *rps ATTRIBUTE_UNUSED,
+		       const riscv_subset_t *subset ATTRIBUTE_UNUSED)
 {
   return true;
 }
@@ -1156,7 +1157,8 @@ check_implicit_always (riscv_subset_t *subset ATTRIBUTE_UNUSED)
 /* Add implicit extensions only when the version of SUBSET less than 2.1.  */
 
 static bool
-check_implicit_for_i (riscv_subset_t *subset)
+check_implicit_for_i (riscv_parse_subset_t *rps ATTRIBUTE_UNUSED,
+		      const riscv_subset_t *subset ATTRIBUTE_UNUSED)
 {
   return (subset->major_version < 2
 	  || (subset->major_version == 2
@@ -1169,7 +1171,8 @@ struct riscv_implicit_subset
   const char *ext;
   const char *implicit_exts;
   /* A function to determine if we need to add the implicit subsets.  */
-  bool (*check_func) (riscv_subset_t *);
+  bool (*check_func) (riscv_parse_subset_t *,
+		      const riscv_subset_t *);
 };
 /* Please added in order since this table is only run once time.  */
 static struct riscv_implicit_subset riscv_implicit_subsets[] =
@@ -2083,7 +2086,7 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
     {
       riscv_subset_t *subset = NULL;
       if (riscv_lookup_subset (rps->subset_list, t->ext, &subset)
-	&& t->check_func (subset))
+	&& t->check_func (rps, subset))
       riscv_update_subset1 (rps, subset, t->implicit_exts);
     }
 }
