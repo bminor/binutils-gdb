@@ -32566,6 +32566,9 @@ method in use supports multiple recording formats, @var{format} will be present
 and contain the currently used format.  @xref{Process Record and Replay},
 for existing method and format values.
 
+If recording was stopped for the btrace method, threads move to the
+end of their execution history.
+
 @item =cmd-param-changed,param=@var{param},value=@var{value}
 Reports that a parameter of the command @code{set @var{param}} is
 changed to @var{value}.  In the multi-word @code{set} command,

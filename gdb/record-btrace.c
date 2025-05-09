@@ -80,7 +80,7 @@ public:
 
   enum record_method record_method (ptid_t ptid) override;
 
-  void stop_recording () override;
+  bool stop_recording () override;
   void info_record () override;
 
   void insn_history (int size, gdb_disassembly_flags flags) override;
@@ -408,17 +408,20 @@ record_btrace_target_open (const char *args, int from_tty)
 
 /* The stop_recording method of target record-btrace.  */
 
-void
+bool
 record_btrace_target::stop_recording ()
 {
   DEBUG ("stop recording");
 
+  bool is_replaying = record_is_replaying (inferior_ptid);
   record_stop_replaying ();
   record_btrace_auto_disable ();
 
   for (thread_info &tp : current_inferior ()->non_exited_threads ())
     if (tp.btrace.target != NULL)
       btrace_disable (&tp);
+
+  return is_replaying;
 }
 
 /* The disconnect method of target record-btrace.  */
