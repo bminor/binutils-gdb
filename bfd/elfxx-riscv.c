@@ -1223,6 +1223,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zicfilp", "+zicsr", check_implicit_always},
   {"zicfiss", "+zimop,+zicsr", check_implicit_always},
 
+  {"sha", "+h,+ssstateen,+shcounterenw,+shvstvala,+shtvala,+shvstvecd,+shvsatpa,+shgatpa", check_implicit_always},
+
   {"shcounterenw", "+h", check_implicit_always},
   {"shgatpa", "+h", check_implicit_always},
   {"shtvala", "+h", check_implicit_always},
@@ -1447,6 +1449,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
 
 static struct riscv_supported_ext riscv_supported_std_s_ext[] =
 {
+  {"sha",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"shcounterenw",	ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"shgatpa",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"shtvala",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },

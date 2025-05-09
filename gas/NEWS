@@ -11,7 +11,8 @@
 * Add support for RISC-V privileged version 1.13.
 
 * Add support for RISC-V standard extensions:
-  ssqosid v1.0, ssnpm v1.0, smnpm v1.0, smmpm v1.0, sspm v1.0, supm v1.0.
+  ssqosid v1.0, ssnpm v1.0, smnpm v1.0, smmpm v1.0, sspm v1.0, supm v1.0,
+  sha v1.0.
 
 * Add support for RISC-V vendor extensions:
   T-Head: xtheadvdot v1.0.

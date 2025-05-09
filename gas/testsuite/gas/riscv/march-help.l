@@ -107,6 +107,7 @@ All available -march extensions for RISC-V:
 	zcmop                                   1.0
 	zcmp                                    1.0
 	zcmt                                    1.0
+	sha                                     1.0
 	shcounterenw                            1.0
 	shgatpa                                 1.0
 	shtvala                                 1.0
