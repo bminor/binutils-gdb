@@ -28000,6 +28000,9 @@ is used.  Otherwise, if @value{GDBN} was configured with Python
 scripting support, and if the Python Pygments package is available,
 then it will be used.
 
+@item show style sources
+Show the current state of source code styling.
+
 @item set style warning-prefix
 @itemx show style warning-prefix
 @itemx set style error-prefix
@@ -28010,9 +28013,6 @@ errors, respectively.  This functionality is intended for use with
 emoji display, and so the prefixes are only displayed if emoji styling
 is enabled.  The defaults are the warning sign emoji for warnings, and
 and the cross mark emoji for errors.
-
-@item show style sources
-Show the current state of source code styling.
 
 @item set style tui-current-position @samp{on|off}
 Enable or disable styling of the source and assembly code highlighted
