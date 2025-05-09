@@ -513,6 +513,11 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    print (info->stream, dis_style_immediate, "0");
 	  break;
 
+	case 'r':
+	  print (info->stream, dis_style_register, "%s",
+		 pd->riscv_gpr_names[EXTRACT_OPERAND (RS3, l)]);
+	  break;
+
 	case 's':
 	  if ((l & MASK_JALR) == MATCH_JALR)
 	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 0);
@@ -879,6 +884,37 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		      break;
 		    }
 		  break;
+		}
+	      break;
+	    case 'm': /* Vendor-specific (MIPS) operands.  */
+	      switch (*++oparg)
+		{
+		case '@':
+		  print (info->stream, dis_style_register, "0x%x",
+			 (unsigned) EXTRACT_OPERAND (MIPS_HINT, l));
+		  break;
+		case '#':
+		  print (info->stream, dis_style_register, "0x%x",
+			 (unsigned) EXTRACT_OPERAND (MIPS_IMM9, l));
+		  break;
+		case '$':
+		  print (info->stream, dis_style_immediate, "%d",
+			 (unsigned)EXTRACT_MIPS_LDP_IMM (l));
+		  break;
+		case '%':
+		  print (info->stream, dis_style_immediate, "%d",
+			 (unsigned)EXTRACT_MIPS_LWP_IMM (l));
+		  break;
+		case '^':
+		  print (info->stream, dis_style_immediate, "%d",
+			 (unsigned)EXTRACT_MIPS_SDP_IMM (l));
+		  break;
+		case '&':
+		  print (info->stream, dis_style_immediate, "%d",
+			 (unsigned)EXTRACT_MIPS_SWP_IMM (l));
+		  break;
+		default:
+		  goto undefined_modifier;
 		}
 	      break;
 	    default:

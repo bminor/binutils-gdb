@@ -892,4 +892,25 @@ XSfCease provides an instruction to instigates power-down sequence.
 
 It is documented in @url{https://sifive.cdn.prismic.io/sifive/767804da-53b2-4893-97d5-b7c030ae0a94_s76mc_core_complex_manual_21G3.pdf}.
 
+@item XMipsCbop
+The XMipsCbop extension provides instruction mips.pref.
+
+It is documented in @url{https://mips.com/wp-content/uploads/2025/03/P8700-F_Programmers_Reference_Manual_Rev1.82_3-19-2025.pdf}.
+
+@item XMipsCmov
+The XMipsCmov extension provides instruction mips.ccmov.
+
+It is documented in @url{https://mips.com/wp-content/uploads/2025/03/P8700-F_Programmers_Reference_Manual_Rev1.82_3-19-2025.pdf}.
+
+@item XMipsExectl
+The XMipsExectl extension provides instructions mips.ehb, mips.ihb and mips.pause.
+
+It is documented in @url{https://mips.com/wp-content/uploads/2025/03/P8700-F_Programmers_Reference_Manual_Rev1.82_3-19-2025.pdf}.
+
+@item XMipsSlsp
+
+The XMipsSlsp extension provides instructions mips.ldp, mips.lwp, mips.sdp and mips.swp.
+
+It is documented in @url{https://mips.com/wp-content/uploads/2025/03/P8700-F_Programmers_Reference_Manual_Rev1.82_3-19-2025.pdf}.
+
 @end table

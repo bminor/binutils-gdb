@@ -173,3 +173,7 @@ All available -march extensions for RISC-V:
 	xsfvqmaccqoq                            1.0
 	xsfvqmaccdod                            1.0
 	xsfvfnrclipxfqf                         1.0
+	xmipscbop                               1.0
+	xmipscmov                               1.0
+	xmipsexectl                             1.0
+	xmipslsp                                1.0

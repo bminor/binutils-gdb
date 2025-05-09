@@ -13,6 +13,7 @@
 
 * Add support for RISC-V vendor extensions:
   T-Head: xtheadvdot v1.0.
+  MIPS: xmipscbop v1.0, xmipscmov v1.0, xmipsexectl v1.0, xmipslsp v1.0.
 
 * Add support for the x86 Zhaoxin PadLock XMODX instructions.
 

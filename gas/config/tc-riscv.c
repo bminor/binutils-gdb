@@ -1752,6 +1752,21 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		    goto unknown_validate_operand;
 		}
 		break;
+	    case 'm': /* Vendor-specific (MIPS) operands.  */
+	      switch (*++oparg)
+		{
+		  case '@': USE_BITS (OP_MASK_MIPS_HINT, OP_SH_MIPS_HINT);
+			    break;
+		  case '#': USE_BITS (OP_MASK_MIPS_IMM9, OP_SH_MIPS_IMM9);
+			    break;
+		  case '$': used_bits |= ENCODE_MIPS_LDP_IMM (-1U); break;
+		  case '%': used_bits |= ENCODE_MIPS_LWP_IMM (-1U); break;
+		  case '^': used_bits |= ENCODE_MIPS_SDP_IMM (-1U); break;
+		  case '&': used_bits |= ENCODE_MIPS_SWP_IMM (-1U); break;
+		  default:
+		    goto unknown_validate_operand;
+		}
+		break;
 	    default:
 	      goto unknown_validate_operand;
 	    }
@@ -4171,6 +4186,92 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    }
 #undef UIMM_BITFIELD_VAL
 #undef ENCODE_UIMM_BIT_FIELD
+		  break;
+
+		case 'm': /* Vendor-specific (MIPS) operands.  */
+		  switch (*++oparg)
+		    {
+		    case '@': /* hint 0 - 31.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, FALSE);
+		      if ((unsigned long)imm_expr->X_add_number > 31)
+			as_bad(_("Improper hint amount (%lu)"),
+			       (unsigned long)imm_expr->X_add_number);
+		      INSERT_OPERAND(MIPS_HINT, *ip, imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+
+		    case '#': /* immediate 0 - 511.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, FALSE);
+		      if ((unsigned long)imm_expr->X_add_number > 511)
+			as_bad(_("Improper immediate amount (%lu)"),
+			       (unsigned long)imm_expr->X_add_number);
+		      INSERT_OPERAND(MIPS_IMM9, *ip, imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+
+		    case '$': /* LDP offset 0 to (1<<7)-8.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, FALSE);
+		      if ((unsigned long)imm_expr->X_add_number >= (1 << 7)
+			  || ((unsigned long)imm_expr->X_add_number & 0x7) != 0)
+			as_bad(_("Improper LDP offset amount (%lu)"),
+			       (unsigned long)imm_expr->X_add_number);
+		      INSERT_OPERAND(MIPS_LDP_OFFSET, *ip,
+				     (imm_expr->X_add_number >> 3));
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+
+		    case '%': /* LWP offset 0 to (1<<7)-4.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, FALSE);
+		      if ((unsigned long)imm_expr->X_add_number >= (1 << 7)
+			  || ((unsigned long)imm_expr->X_add_number & 0x3) != 0)
+			as_bad(_("Improper LWP offset amount (%lu)"),
+			       (unsigned long)imm_expr->X_add_number);
+		      INSERT_OPERAND(MIPS_LWP_OFFSET, *ip,
+				     (imm_expr->X_add_number >> 2));
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+
+		    case '^': /* SDP offset 0 to (1<<7)-8.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, FALSE);
+		      if ((unsigned long)imm_expr->X_add_number >= (1 << 7)
+			  || ((unsigned long)imm_expr->X_add_number & 0x7) != 0)
+			as_bad(_("Improper SDP offset amount (%lu)"),
+			       (unsigned long)imm_expr->X_add_number);
+		      INSERT_OPERAND(MIPS_SDP_OFFSET10, *ip,
+				     (imm_expr->X_add_number >> 3));
+		      INSERT_OPERAND(MIPS_SDP_OFFSET25, *ip,
+				     (imm_expr->X_add_number >> 5));
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+
+		    case '&': /* SWP offset 0 to (1<<7)-4.  */
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, FALSE);
+		      if ((unsigned long)imm_expr->X_add_number >= (1 << 7)
+			  || ((unsigned long)imm_expr->X_add_number & 0x3) != 0)
+			as_bad(_("Improper SWP offset amount (%lu)"),
+			       (unsigned long)imm_expr->X_add_number);
+		      INSERT_OPERAND(MIPS_SWP_OFFSET9, *ip,
+				     (imm_expr->X_add_number >> 2));
+		      INSERT_OPERAND(MIPS_SWP_OFFSET25, *ip,
+				     (imm_expr->X_add_number >> 5));
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+
+		    default:
+		      goto unknown_riscv_ip_operand;
+		    }
 		  break;
 
 		default:
