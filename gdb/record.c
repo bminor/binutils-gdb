@@ -152,12 +152,12 @@ record_read_memory (struct gdbarch *gdbarch,
 
 /* Stop recording.  */
 
-static void
+static bool
 record_stop (struct target_ops *t)
 {
   DEBUG ("stop %s", t->shortname ());
 
-  t->stop_recording ();
+  return t->stop_recording ();
 }
 
 /* Unpush the record target.  */
@@ -179,7 +179,7 @@ record_disconnect (struct target_ops *t, const char *args, int from_tty)
 
   DEBUG ("disconnect %s", t->shortname ());
 
-  record_stop (t);
+  (void) record_stop (t);
   record_unpush (t);
 
   target_disconnect (args, from_tty);
@@ -194,7 +194,7 @@ record_detach (struct target_ops *t, inferior *inf, int from_tty)
 
   DEBUG ("detach %s", t->shortname ());
 
-  record_stop (t);
+  (void) record_stop (t);
   record_unpush (t);
 
   target_detach (inf, from_tty);
@@ -306,15 +306,16 @@ cmd_record_delete (const char *args, int from_tty)
 static void
 cmd_record_stop (const char *args, int from_tty)
 {
-  struct target_ops *t;
-
-  t = require_record_target ();
-
-  record_stop (t);
+  struct target_ops *t = require_record_target ();
+  bool notify_stop = record_stop (t);
   record_unpush (t);
 
   gdb_printf (_("Process record is stopped and all execution "
 		"logs are deleted.\n"));
+
+  /* INFERIOR_PTID may have moved when we stopped recording.  */
+  if (notify_stop)
+    notify_normal_stop (nullptr, true);
 
   interps_notify_record_changed (current_inferior (), 0, NULL, NULL);
 }

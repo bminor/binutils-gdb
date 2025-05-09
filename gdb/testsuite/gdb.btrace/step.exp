@@ -50,7 +50,7 @@ with_test_prefix "replay" {
 
 # Stop recording and try to step live (pr19340).
 with_test_prefix "live" {
-    gdb_test "record stop" "Process record is stopped.*"
+    gdb_test "record stop" "Process record is stopped.*fun4\.4.*"
     gdb_test "reverse-next" "Target .* does not support this command.*"
     gdb_test "step" ".*fun3\.2.*"
 }

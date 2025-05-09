@@ -172,7 +172,7 @@ struct dummy_target : public target_ops
   enum btrace_error read_btrace (struct btrace_data *arg0, struct btrace_target_info *arg1, enum btrace_read_type arg2) override;
   const struct btrace_config *btrace_conf (const struct btrace_target_info *arg0) override;
   enum record_method record_method (ptid_t arg0) override;
-  void stop_recording () override;
+  bool stop_recording () override;
   void info_record () override;
   void save_record (const char *arg0) override;
   bool supports_delete_record () override;
@@ -353,7 +353,7 @@ struct debug_target : public target_ops
   enum btrace_error read_btrace (struct btrace_data *arg0, struct btrace_target_info *arg1, enum btrace_read_type arg2) override;
   const struct btrace_config *btrace_conf (const struct btrace_target_info *arg0) override;
   enum record_method record_method (ptid_t arg0) override;
-  void stop_recording () override;
+  bool stop_recording () override;
   void info_record () override;
   void save_record (const char *arg0) override;
   bool supports_delete_record () override;
@@ -3794,24 +3794,28 @@ debug_target::record_method (ptid_t arg0)
   return result;
 }
 
-void
+bool
 target_ops::stop_recording ()
 {
-  this->beneath ()->stop_recording ();
+  return this->beneath ()->stop_recording ();
 }
 
-void
+bool
 dummy_target::stop_recording ()
 {
+  return false;
 }
 
-void
+bool
 debug_target::stop_recording ()
 {
   target_debug_printf_nofunc ("-> %s->stop_recording (...)", this->beneath ()->shortname ());
-  this->beneath ()->stop_recording ();
-  target_debug_printf_nofunc ("<- %s->stop_recording ()",
-	      this->beneath ()->shortname ());
+  bool result
+    = this->beneath ()->stop_recording ();
+  target_debug_printf_nofunc ("<- %s->stop_recording () = %s",
+	      this->beneath ()->shortname (),
+	      target_debug_print_bool (result).c_str ());
+  return result;
 }
 
 void

@@ -1236,9 +1236,9 @@ struct target_ops
     virtual enum record_method record_method (ptid_t ptid)
       TARGET_DEFAULT_RETURN (RECORD_METHOD_NONE);
 
-    /* Stop trace recording.  */
-    virtual void stop_recording ()
-      TARGET_DEFAULT_IGNORE ();
+    /* Stop trace recording.  Return whether the selected thread moved.  */
+    virtual bool stop_recording ()
+      TARGET_DEFAULT_RETURN (false);
 
     /* Print information about the recording.  */
     virtual void info_record ()
