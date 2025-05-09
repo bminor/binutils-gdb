@@ -175,6 +175,8 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+30159073[ 	]+csrw[ 	]+misa,a1
 [ 	]+[0-9a-f]+:[ 	]+30202573[ 	]+csrr[ 	]+a0,medeleg
 [ 	]+[0-9a-f]+:[ 	]+30259073[ 	]+csrw[ 	]+medeleg,a1
+[ 	]+[0-9a-f]+:[ 	]+31202573[ 	]+csrr[ 	]+a0,0x312
+[ 	]+[0-9a-f]+:[ 	]+31259073[ 	]+csrw[ 	]+0x312,a1
 [ 	]+[0-9a-f]+:[ 	]+30302573[ 	]+csrr[ 	]+a0,mideleg
 [ 	]+[0-9a-f]+:[ 	]+30359073[ 	]+csrw[ 	]+mideleg,a1
 [ 	]+[0-9a-f]+:[ 	]+30402573[ 	]+csrr[ 	]+a0,mie
@@ -555,6 +557,8 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+60059073[ 	]+csrw[ 	]+hstatus,a1
 [ 	]+[0-9a-f]+:[ 	]+60202573[ 	]+csrr[ 	]+a0,hedeleg
 [ 	]+[0-9a-f]+:[ 	]+60259073[ 	]+csrw[ 	]+hedeleg,a1
+[ 	]+[0-9a-f]+:[ 	]+61202573[ 	]+csrr[ 	]+a0,0x612
+[ 	]+[0-9a-f]+:[ 	]+61259073[ 	]+csrw[ 	]+0x612,a1
 [ 	]+[0-9a-f]+:[ 	]+60302573[ 	]+csrr[ 	]+a0,hideleg
 [ 	]+[0-9a-f]+:[ 	]+60359073[ 	]+csrw[ 	]+hideleg,a1
 [ 	]+[0-9a-f]+:[ 	]+60402573[ 	]+csrr[ 	]+a0,hie

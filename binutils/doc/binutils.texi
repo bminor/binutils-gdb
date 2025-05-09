@@ -2720,7 +2720,7 @@ instructions will be represented as such (@code{addi sp,sp,-128} will be
 
 @item priv-spec=@var{SPEC}
 Print the CSR according to the chosen privilege spec version (e.g.,
-@code{1.10}, @code{1.11}, @code{1.12}).
+@code{1.10}, @code{1.11}, @code{1.12}, @code{1.13}).
 @end table
 
 For MIPS, this option controls the printing of instruction mnemonic

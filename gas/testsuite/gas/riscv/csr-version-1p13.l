@@ -255,10 +255,6 @@
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw hpmcounter31h,a1'
 .*Info: macro .*
-.*Warning: invalid CSR `senvcfg' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `senvcfg' for the privileged spec `1.10'
-.*Info: macro .*
 .*Warning: read-only CSR is written `csrw mvendorid,a1'
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw marchid,a1'
@@ -267,59 +263,23 @@
 .*Info: macro .*
 .*Warning: read-only CSR is written `csrw mhartid,a1'
 .*Info: macro .*
-.*Warning: invalid CSR `mconfigptr' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mconfigptr' for the privileged spec `1.10'
-.*Info: macro .*
 .*Warning: read-only CSR is written `csrw mconfigptr,a1'
 .*Info: macro .*
 .*Warning: invalid CSR `medelegh', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `medelegh' for the privileged spec `1.10'
-.*Info: macro .*
 .*Warning: invalid CSR `medelegh', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `medelegh' for the privileged spec `1.10'
+.*Warning: invalid CSR `mstatush', needs rv32i extension
 .*Info: macro .*
 .*Warning: invalid CSR `mstatush', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `mstatush' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mstatush', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `mstatush' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mtinst' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mtinst' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mtval2' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mtval2' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `menvcfg' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `menvcfg' for the privileged spec `1.10'
+.*Warning: invalid CSR `menvcfgh', needs rv32i extension
 .*Info: macro .*
 .*Warning: invalid CSR `menvcfgh', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `menvcfgh' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `menvcfgh', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `menvcfgh' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mseccfg' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mseccfg' for the privileged spec `1.10'
-.*Info: macro .*
 .*Warning: invalid CSR `mseccfgh', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `mseccfgh' for the privileged spec `1.10'
-.*Info: macro .*
 .*Warning: invalid CSR `mseccfgh', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `mseccfgh' for the privileged spec `1.10'
 .*Info: macro .*
 .*Warning: invalid CSR `pmpcfg1', needs rv32i extension
 .*Info: macro .*
@@ -329,269 +289,29 @@
 .*Info: macro .*
 .*Warning: invalid CSR `pmpcfg3', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `pmpcfg4' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg4' for the privileged spec `1.10'
+.*Warning: invalid CSR `pmpcfg5', needs rv32i extension
 .*Info: macro .*
 .*Warning: invalid CSR `pmpcfg5', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `pmpcfg5' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg5', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg5' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg6' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg6' for the privileged spec `1.10'
+.*Warning: invalid CSR `pmpcfg7', needs rv32i extension
 .*Info: macro .*
 .*Warning: invalid CSR `pmpcfg7', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `pmpcfg7' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg7', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg7' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg8' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg8' for the privileged spec `1.10'
+.*Warning: invalid CSR `pmpcfg9', needs rv32i extension
 .*Info: macro .*
 .*Warning: invalid CSR `pmpcfg9', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `pmpcfg9' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg9', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg9' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg10' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg10' for the privileged spec `1.10'
+.*Warning: invalid CSR `pmpcfg11', needs rv32i extension
 .*Info: macro .*
 .*Warning: invalid CSR `pmpcfg11', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `pmpcfg11' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg11', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg11' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg12' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg12' for the privileged spec `1.10'
+.*Warning: invalid CSR `pmpcfg13', needs rv32i extension
 .*Info: macro .*
 .*Warning: invalid CSR `pmpcfg13', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `pmpcfg13' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg13', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg13' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg14' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg14' for the privileged spec `1.10'
-.*Info: macro .*
 .*Warning: invalid CSR `pmpcfg15', needs rv32i extension
 .*Info: macro .*
-.*Warning: invalid CSR `pmpcfg15' for the privileged spec `1.10'
-.*Info: macro .*
 .*Warning: invalid CSR `pmpcfg15', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `pmpcfg15' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr16' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr16' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr17' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr17' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr18' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr18' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr19' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr19' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr20' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr20' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr21' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr21' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr22' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr22' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr23' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr23' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr24' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr24' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr25' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr25' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr26' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr26' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr27' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr27' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr28' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr28' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr29' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr29' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr30' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr30' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr31' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr31' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr32' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr32' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr33' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr33' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr34' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr34' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr35' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr35' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr36' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr36' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr37' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr37' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr38' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr38' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr39' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr39' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr40' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr40' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr41' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr41' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr42' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr42' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr43' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr43' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr44' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr44' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr45' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr45' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr46' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr46' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr47' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr47' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr48' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr48' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr49' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr49' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr50' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr50' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr51' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr51' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr52' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr52' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr53' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr53' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr54' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr54' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr55' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr55' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr56' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr56' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr57' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr57' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr58' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr58' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr59' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr59' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr60' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr60' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr61' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr61' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr62' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr62' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr63' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `pmpaddr63' for the privileged spec `1.10'
 .*Info: macro .*
 .*Warning: invalid CSR `mcycleh', needs rv32i extension
 .*Info: macro .*
@@ -716,10 +436,6 @@
 .*Warning: invalid CSR `mhpmcounter31h', needs rv32i extension
 .*Info: macro .*
 .*Warning: invalid CSR `mhpmcounter31h', needs rv32i extension
-.*Info: macro .*
-.*Warning: invalid CSR `mcountinhibit' for the privileged spec `1.10'
-.*Info: macro .*
-.*Warning: invalid CSR `mcountinhibit' for the privileged spec `1.10'
 .*Info: macro .*
 .*Warning: invalid CSR `hstatus', needs `h' extension
 .*Info: macro .*
@@ -1678,6 +1394,46 @@
 .*Warning: invalid CSR `mctrctl', needs `smctr' extension
 .*Info: macro .*
 .*Warning: invalid CSR `mctrctl', needs `smctr' extension
+.*Info: macro .*
+.*Warning: invalid CSR `ustatus' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `ustatus' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `uie' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `uie' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `utvec' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `utvec' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `uscratch' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `uscratch' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `uepc' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `uepc' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `ucause' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `ucause' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `utval' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `utval' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `uip' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `uip' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `sedeleg' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `sedeleg' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `sideleg' for the privileged spec `1.13'
+.*Info: macro .*
+.*Warning: invalid CSR `sideleg' for the privileged spec `1.13'
 .*Info: macro .*
 .*Warning: invalid CSR `fflags', needs `f' extension
 .*Info: macro .*
