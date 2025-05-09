@@ -453,7 +453,7 @@ no_emojis ()
 /* Emoji warning prefix.  */
 static std::string warning_prefix = "⚠️ ";
 
-/* Implement 'show warning-prefix'.  */
+/* Implement 'show style warning-prefix'.  */
 
 static void
 show_warning_prefix (struct ui_file *file, int from_tty,
@@ -475,7 +475,7 @@ print_warning_prefix (ui_file *file)
 /* Emoji error prefix.  */
 static std::string error_prefix = "❌️ ";
 
-/* Implement 'show error-prefix'.  */
+/* Implement 'show style error-prefix'.  */
 
 static void
 show_error_prefix (struct ui_file *file, int from_tty,
