@@ -64,9 +64,9 @@ def decode_source(source):
     """Decode a Source object.
 
     Finds and returns the filename of a given Source object."""
-    if "path" in source:
-        return source["path"]
-    if "sourceReference" not in source:
+    if "sourceReference" not in source or source["sourceReference"] <= 0:
+        if "path" in source:
+            return source["path"]
         raise DAPException("either 'path' or 'sourceReference' must appear in Source")
     ref = source["sourceReference"]
     if ref not in _id_map:
