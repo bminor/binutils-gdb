@@ -41,9 +41,11 @@ Generate position-independent code
 @item -fno-pic
 Don't generate position-independent code (default)
 
-@cindex @samp{-march=ISA} option, RISC-V
-@item -march=ISA
-Select the base isa, as specified by ISA.  For example -march=rv32ima.
+@cindex @samp{-march=ISA|Profiles|Profiles_ISA} option, RISC-V
+@item -march=ISA|Profiles|Profiles_ISA
+Select the base isa, as specified by ISA or Profiles or Profies_ISA.
+For example @samp{-march=rv32ima} @samp{-march=RVI20U64}
+@samp{-march=RVI20U64_d}.
 If this option and the architecture attributes aren't set, then assembler
 will check the default configure setting --with-arch=ISA.
 
@@ -737,7 +739,12 @@ to be recorded in the attribute as @code{RV32I2P0} in which @code{2P0} stands
 for the default version of its base ISA.  On the other hand, the architecture
 @code{RV32G} has to be presented as @code{RV32I2P0_M2P0_A2P0_F2P0_D2P0} in
 which the abbreviation @code{G} is expanded to the @code{IMAFD} combination
-with default versions of the standard extensions.
+with default versions of the standard extensions. All Profiles are expanded
+ to the mandatory extensions it includes then processing.  For example,
+@code{RVI20U32} is expanded to @code{RV32I2P0} for processing, which contains
+the mandatory extensions @code{I} as it defined.  And you can also combine
+Profiles with ISA use underline, like @code{RVI20U32_D} is expanded to the
+@code{RV32I2P0_F2P0_D2P0}.
 
 @item Tag_RISCV_unaligned_access (6)
 Tag_RISCV_unaligned_access is 0 for files that do not allow any unaligned

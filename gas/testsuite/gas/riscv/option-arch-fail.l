@@ -1,5 +1,5 @@
 .*Assembler messages:
-.*Error: m2p0: ISA string must begin with rv32 or rv64
+.*Error: m2p0: ISA string must begin with rv32, rv64 or Profiles
 .*Error: cannot \+ or \- base extension `i' in .option arch `\-i'
 .*Error: cannot \+ or \- base extension `e' in .option arch `\+e'
 .*Error: cannot \+ or \- base extension `g' in .option arch `\-g'
