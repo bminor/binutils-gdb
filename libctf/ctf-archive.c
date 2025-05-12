@@ -552,6 +552,10 @@ ctf_arc_open_internal (const char *filename, int *errp)
      is private.)  */
   arc->ctfa_magic = s.st_size;
   close (fd);
+
+  if (errp)
+    *errp = 0;
+
   return arc;
 
 err_unmap:
@@ -655,6 +659,9 @@ ctf_dict_open_sections (const ctf_archive_t *arc,
 			const char *name,
 			int *errp)
 {
+  if (errp)
+    *errp = 0;
+
   if (arc->ctfi_is_archive)
     {
       ctf_dict_t *ret;
@@ -841,7 +848,7 @@ ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp, int *errp)
 {
   if ((fp->ctf_flags & LCTF_CHILD) && !fp->ctf_parent)
     {
-      int err;
+      int err = 0;
       ctf_dict_t *parent;
       const char *parent_name = fp->ctf_parent_name;
 

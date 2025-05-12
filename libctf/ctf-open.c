@@ -1685,6 +1685,8 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   libctf_init_debug();
 
+  ctf_set_open_errno (errp, 0);
+
   ctf_dprintf ("ctf_bufopen %zi+%zi+%zi bytes: validating\n",
 	       ctfsect ? ctfsect->cts_size : 0,
 	       symsect ? symsect->cts_size : 0,
