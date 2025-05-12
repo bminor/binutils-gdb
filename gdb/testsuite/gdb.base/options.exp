@@ -508,12 +508,26 @@ proc_with_prefix test-thread-apply {} {
 proc_with_prefix test-info-threads {} {
     test_gdb_complete_multiple "info threads " "" "" {
 	"-gid"
+	"-running"
+	"-stopped"
 	"ID"
     }
 
+    test_gdb_complete_multiple "info threads " "-" "" {
+	"-gid"
+	"-running"
+	"-stopped"
+    }
+
     test_gdb_complete_unique \
-	"info threads -" \
+	"info threads -g" \
 	"info threads -gid"
+    test_gdb_complete_unique \
+	"info threads -r" \
+	"info threads -running"
+    test_gdb_complete_unique \
+	"info threads -s" \
+	"info threads -stopped"
 
     # "ID" isn't really something the user can type.
     test_gdb_complete_none "info threads I"

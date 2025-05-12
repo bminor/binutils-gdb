@@ -3807,7 +3807,7 @@ Thread 1 "main" received signal SIGINT, Interrupt.
 @table @code
 @anchor{info_threads}
 @kindex info threads
-@item info threads @r{[}-gid@r{]} @r{[}@var{thread-id-list}@r{]}
+@item info threads @r{[}-gid@r{]} @r{[}-stopped@r{]} @r{[}-running@r{]} @r{[}@var{thread-id-list}@r{]}
 
 Display information about one or more threads.  With no arguments
 displays information about all threads.  You can specify the list of
@@ -3856,6 +3856,14 @@ For example,
 If you're debugging multiple inferiors, @value{GDBN} displays thread
 IDs using the qualified @var{inferior-num}.@var{thread-num} format.
 Otherwise, only @var{thread-num} is shown.
+
+If you specify the @samp{-stopped} option, @value{GDBN} filters the
+output of the command to print the stopped threads only.  Similarly,
+if you specify the @samp{-running} option, @value{GDBN} filters the
+output to print the running threads only.  These options can be
+helpful to reduce the output list if there is a large number of
+threads.  If you specify both options, @value{GDBN} prints both
+stopped and running threads.
 
 If you specify the @samp{-gid} option, @value{GDBN} displays a column
 indicating each thread's global thread ID:

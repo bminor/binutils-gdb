@@ -90,12 +90,17 @@ info sharedlibrary
   command are now for the full memory range allocated to the shared
   library.
 
-info threads [-gid] [ID]...
-  If no threads match the given ID(s), GDB now prints
+info threads [-gid] [-stopped] [-running] [ID]...
+  If no threads match the given ID(s) or filter options, GDB now prints
 
     No threads matched.
 
-  without printing the provided argument.
+  without printing the provided arguments.  The newly added '-stopped'
+  option makes GDB list the stopped threads only.  Similarly,
+  '-running' makes GDB list the running threads only.  If both options
+  are given together, both stopped and running threads are listed.
+  These new flags can be useful to get a reduced list when there is a
+  large number of threads.
 
 * GDB-internal Thread Local Storage (TLS) support
 

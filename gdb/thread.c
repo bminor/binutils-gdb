@@ -1044,6 +1044,10 @@ struct info_threads_opts
 {
   /* For "-gid".  */
   bool show_global_ids = false;
+  /* For "-running".  */
+  bool show_running_threads = false;
+  /* For "-stopped".  */
+  bool show_stopped_threads = false;
 };
 
 static const gdb::option::option_def info_threads_option_defs[] = {
@@ -1053,7 +1057,16 @@ static const gdb::option::option_def info_threads_option_defs[] = {
     [] (info_threads_opts *opts) { return &opts->show_global_ids; },
     N_("Show global thread IDs."),
   },
-
+  gdb::option::flag_option_def<info_threads_opts> {
+    "running",
+    [] (info_threads_opts *opts) { return &opts->show_running_threads; },
+    N_("Show running threads only."),
+  },
+  gdb::option::flag_option_def<info_threads_opts> {
+    "stopped",
+    [] (info_threads_opts *opts) { return &opts->show_stopped_threads; },
+    N_("Show stopped threads only."),
+  },
 };
 
 /* Helper for print_thread_info.  Returns true if THR should be
@@ -1095,7 +1108,17 @@ should_print_thread (const char *requested_threads,
   if (thr->state == THREAD_EXITED)
     return false;
 
-  return true;
+  bool is_stopped = (thr->state == THREAD_STOPPED);
+  if (opts.show_stopped_threads && is_stopped)
+    return true;
+
+  bool is_running = (thr->state == THREAD_RUNNING);
+  if (opts.show_running_threads && is_running)
+    return true;
+
+  /* If the user did not pass a filter flag, show the thread.  */
+  return (!opts.show_stopped_threads
+	  && !opts.show_running_threads);
 }
 
 /* Return the string to display in "info threads"'s "Target Id"
@@ -1254,13 +1277,15 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
       list_emitter.emplace (uiout, "threads");
     else
       {
-	int n_threads = 0;
+	int n_matching_threads = 0;
 	/* The width of the "Target Id" column.  Grown below to
 	   accommodate the largest entry.  */
 	size_t target_id_col_width = 17;
 
 	for (thread_info *tp : all_threads ())
 	  {
+	    any_thread = true;
+
 	    /* In case REQUESTED_THREADS contains $_thread.  */
 	    if (current_thread != nullptr)
 	      switch_to_thread (current_thread);
@@ -1277,12 +1302,12 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	      = std::max (target_id_col_width,
 			  thread_target_id_str (tp).size ());
 
-	    ++n_threads;
+	    ++n_matching_threads;
 	  }
 
-	if (n_threads == 0)
+	if (n_matching_threads == 0)
 	  {
-	    if (requested_threads == NULL || *requested_threads == '\0')
+	    if (!any_thread)
 	      uiout->message (_("No threads.\n"));
 	    else
 	      uiout->message (_("No threads matched.\n"));
@@ -1290,7 +1315,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	  }
 
 	table_emitter.emplace (uiout, opts.show_global_ids ? 5 : 4,
-			       n_threads, "threads");
+			       n_matching_threads, "threads");
 
 	uiout->table_header (1, ui_left, "current", "");
 	uiout->table_header (4, ui_left, "id-in-tg", "Id");
@@ -1305,8 +1330,6 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
     for (inferior *inf : all_inferiors ())
       for (thread_info *tp : inf->threads ())
 	{
-	  any_thread = true;
-
 	  if (tp == current_thread && tp->state == THREAD_EXITED)
 	    current_exited = true;
 
