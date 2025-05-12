@@ -827,7 +827,8 @@ update_wait_timeout (void)
       /* Update the timeout for select/ poll.  */
 #ifdef HAVE_POLL
       if (use_poll)
-	gdb_notifier.poll_timeout = timeout.tv_sec * 1000;
+	gdb_notifier.poll_timeout = (timeout.tv_sec * 1000 +
+				     (timeout.tv_usec + 1000 - 1) / 1000);
       else
 #endif /* HAVE_POLL */
 	{
