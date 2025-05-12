@@ -299,6 +299,9 @@ struct dwo_unit
   /* The section this CU/TU lives in, in the DWO file.  */
   dwarf2_section_info *section = nullptr;
 
+  /* This is set if SECTION is owned by this dwo_unit.  */
+  dwarf2_section_info_up section_holder;
+
   /* Same as dwarf2_per_cu::{sect_off,length} but in the DWO section.  */
   sect_offset sect_off {};
   unsigned int length = 0;
@@ -6938,7 +6941,8 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
   auto dwo_unit = std::make_unique<struct dwo_unit> ();
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
-  dwo_unit->section = XOBNEW (&per_bfd->obstack, struct dwarf2_section_info);
+  dwo_unit->section_holder = std::make_unique<dwarf2_section_info> ();
+  dwo_unit->section = dwo_unit->section_holder.get ();
   *dwo_unit->section = sections.info_or_types;
   /* dwo_unit->{offset,length,type_offset_in_tu} are set later.  */
 
@@ -7143,7 +7147,8 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
   auto dwo_unit = std::make_unique<struct dwo_unit> ();
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
-  dwo_unit->section = XOBNEW (&per_bfd->obstack, struct dwarf2_section_info);
+  dwo_unit->section_holder = std::make_unique<dwarf2_section_info> ();
+  dwo_unit->section = dwo_unit->section_holder.get ();
   *dwo_unit->section = create_dwp_v2_or_v5_section
 			 (per_bfd,
 			  is_debug_types

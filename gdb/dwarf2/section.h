@@ -112,4 +112,6 @@ struct dwarf2_section_info
   bool is_virtual;
 };
 
+using dwarf2_section_info_up = std::unique_ptr<dwarf2_section_info>;
+
 #endif /* GDB_DWARF2_SECTION_H */
