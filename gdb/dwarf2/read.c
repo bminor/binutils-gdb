@@ -604,6 +604,11 @@ struct dwp_file
   dwo_unit_set loaded_cus;
   dwo_unit_set loaded_tus;
 
+#if CXX_STD_THREAD
+  /* Mutex to synchronize access to LOADED_CUS and LOADED_TUS.  */
+  std::mutex loaded_cutus_lock;
+#endif
+
   /* Table to map ELF section numbers to their sections.
      This is only needed for the DWP V1 file format.  */
   unsigned int num_sections = 0;
@@ -2782,13 +2787,6 @@ dwo_unit *
 cutu_reader::lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die,
 			      const char *dwo_name)
 {
-#if CXX_STD_THREAD
-  /* We need a lock here to handle the DWO hash table.  */
-  static std::mutex dwo_lock;
-
-  std::lock_guard<std::mutex> guard (dwo_lock);
-#endif
-
   dwarf2_per_cu *per_cu = cu->per_cu;
   struct dwo_unit *dwo_unit;
   const char *comp_dir;
@@ -6205,9 +6203,31 @@ static dwo_file *
 lookup_dwo_file (dwarf2_per_bfd *per_bfd, const char *dwo_name,
 		 const char *comp_dir)
 {
+#if CXX_STD_THREAD
+  std::lock_guard<std::mutex> guard (per_bfd->dwo_files_lock);
+#endif
+
   auto it = per_bfd->dwo_files.find (dwo_file_search {dwo_name, comp_dir});
 
   return it != per_bfd->dwo_files.end () ? it->get() : nullptr;
+}
+
+/* Add DWO_FILE to the per-BFD DWO file hash table.
+
+   Return the dwo_file actually kept in the hash table.
+
+   If another thread raced with this one, opening the exact same DWO file and
+   inserting it first in the hash table, then keep that other thread's copy
+   and DWO_FILE gets freed.  */
+
+static dwo_file *
+add_dwo_file (dwarf2_per_bfd *per_bfd, dwo_file_up dwo_file)
+{
+#if CXX_STD_THREAD
+  std::lock_guard<std::mutex> lock (per_bfd->dwo_files_lock);
+#endif
+
+  return per_bfd->dwo_files.emplace (std::move (dwo_file)).first->get ();
 }
 
 void
@@ -6929,10 +6949,7 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
 	 types we'll grow the vector and eventually have to reallocate space
 	 for it, invalidating all copies of pointers into the previous
 	 contents.  */
-      auto [it, inserted]
-	= per_bfd->dwo_files.emplace (std::move (new_dwo_file));
-      gdb_assert (inserted);
-      dwo_file = it->get ();
+      dwo_file = add_dwo_file (per_bfd, std::move (new_dwo_file));
     }
   else
     dwarf_read_debug_printf ("Using existing virtual DWO: %s",
@@ -7135,10 +7152,7 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
 	 types we'll grow the vector and eventually have to reallocate space
 	 for it, invalidating all copies of pointers into the previous
 	 contents.  */
-      auto [it, inserted]
-	= per_bfd->dwo_files.emplace (std::move (new_dwo_file));
-      gdb_assert (inserted);
-      dwo_file = it->get ();
+      dwo_file = add_dwo_file (per_bfd, std::move (new_dwo_file));
     }
   else
     dwarf_read_debug_printf ("Using existing virtual DWO: %s",
@@ -7306,10 +7320,7 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_bfd *per_bfd,
 	 types we'll grow the vector and eventually have to reallocate space
 	 for it, invalidating all copies of pointers into the previous
 	 contents.  */
-      auto [it, inserted]
-	= per_bfd->dwo_files.emplace (std::move (new_dwo_file));
-      gdb_assert (inserted);
-      dwo_file = it->get ();
+      dwo_file = add_dwo_file (per_bfd, std::move (new_dwo_file));
     }
   else
     dwarf_read_debug_printf ("Using existing virtual DWO: %s",
@@ -7346,9 +7357,15 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
   auto &dwo_unit_set
     = is_debug_types ? dwp_file->loaded_tus : dwp_file->loaded_cus;
 
-  if (auto it = dwo_unit_set.find (signature);
-      it != dwo_unit_set.end ())
-    return it->get ();
+  {
+#if CXX_STD_THREAD
+    std::lock_guard<std::mutex> guard (dwp_file->loaded_cutus_lock);
+#endif
+
+    if (auto it = dwo_unit_set.find (signature);
+	it != dwo_unit_set.end ())
+      return it->get ();
+  }
 
   /* Use a for loop so that we don't loop forever on bad debug info.  */
   for (unsigned int i = 0; i < dwp_htab->nr_slots; ++i)
@@ -7377,8 +7394,13 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
 	      = create_dwo_unit_in_dwp_v5 (per_bfd, dwp_file, unit_index,
 					   comp_dir, signature, is_debug_types);
 
+	  /* If another thread raced with this one, opening the exact same
+	     DWO unit, then we'll keep that other thread's copy.  */
+#if CXX_STD_THREAD
+	  std::lock_guard<std::mutex> guard (dwp_file->loaded_cutus_lock);
+#endif
+
 	  auto [it, inserted] = dwo_unit_set.emplace (std::move (dwo_unit));
-	  gdb_assert (inserted);
 	  return it->get ();
 	}
 
@@ -7456,14 +7478,23 @@ try_open_dwop_file (dwarf2_per_bfd *per_bfd, const char *file_name, int is_dwp,
   if (sym_bfd == NULL)
     return NULL;
 
-  if (!bfd_check_format (sym_bfd.get (), bfd_object))
-    return NULL;
+  {
+#if CXX_STD_THREAD
+    /* The operations below are not thread-safe, use a lock to synchronize
+       concurrent accesses.  */
+    static std::mutex mutex;
+    std::lock_guard<std::mutex> lock (mutex);
+#endif
 
-  /* Success.  Record the bfd as having been included by the objfile's bfd.
+    if (!bfd_check_format (sym_bfd.get (), bfd_object))
+      return NULL;
+
+    /* Success.  Record the bfd as having been included by the objfile's bfd.
      This is important because things like demangled_names_hash lives in the
      objfile's per_bfd space and may have references to things like symbol
      names that live in the DWO/DWP file's per_bfd space.  PR 16426.  */
-  gdb_bfd_record_inclusion (per_bfd->obfd, sym_bfd.get ());
+    gdb_bfd_record_inclusion (per_bfd->obfd, sym_bfd.get ());
+  }
 
   return sym_bfd;
 }
@@ -7958,12 +7989,7 @@ cutu_reader::lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name,
 	    = open_and_init_dwo_file (cu, dwo_name, comp_dir);
 
 	  if (new_dwo_file != nullptr)
-	    {
-	      auto [it, inserted]
-		= per_bfd->dwo_files.emplace (std::move (new_dwo_file));
-	      gdb_assert (inserted);
-	      dwo_file = (*it).get ();
-	    }
+	    dwo_file = add_dwo_file (per_bfd, std::move (new_dwo_file));
 	}
 
       if (dwo_file != NULL)

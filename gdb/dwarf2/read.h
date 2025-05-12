@@ -634,6 +634,11 @@ public:
   /* Set of dwo_file objects.  */
   dwo_file_up_set dwo_files;
 
+#if CXX_STD_THREAD
+  /* Mutex to synchronize access to DWO_FILES.  */
+  std::mutex dwo_files_lock;
+#endif
+
   /* The DWP file if there is one, or NULL.  */
   dwp_file_up dwp_file;
 
