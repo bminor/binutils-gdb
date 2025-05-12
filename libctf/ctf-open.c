@@ -2293,6 +2293,7 @@ ctf_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   else
     (void) ctf_setmodel (fp, CTF_MODEL_NATIVE);
 
+  ctf_set_open_errno (errp, 0);
   fp->ctf_refcnt = 1;
   return fp;
 

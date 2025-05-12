@@ -841,7 +841,7 @@ ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp, int *errp)
 {
   if ((fp->ctf_flags & LCTF_CHILD) && !fp->ctf_parent)
     {
-      int err;
+      int err = 0;
       ctf_dict_t *parent;
       const char *parent_name = fp->ctf_parent_name;
 
@@ -864,7 +864,7 @@ ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp, int *errp)
 	}
 
       parent = ctf_dict_open_cached ((ctf_archive_t *) arc, parent_name, &err);
-      if (errp)
+      if (errp && err)
 	*errp = err;
 
       if (parent)
