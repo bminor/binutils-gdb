@@ -147,7 +147,7 @@ if {$is_remote} {
 	    exp_continue
 	}
 
-	-re "No threads match '99'\\.\r\n$gdb_prompt $" {
+	-re "No threads matched\\.\r\n$gdb_prompt $" {
 	    if {!$saw_thread_exited && !$saw_bp_deleted && $attempt_count > 0} {
 		sleep 1
 		incr attempt_count -1

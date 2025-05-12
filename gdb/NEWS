@@ -90,6 +90,13 @@ info sharedlibrary
   command are now for the full memory range allocated to the shared
   library.
 
+info threads [-gid] [ID]...
+  If no threads match the given ID(s), GDB now prints
+
+    No threads matched.
+
+  without printing the provided argument.
+
 * GDB-internal Thread Local Storage (TLS) support
 
   ** Linux targets for the x86_64, aarch64, ppc64, s390x, and riscv

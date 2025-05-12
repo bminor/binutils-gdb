@@ -1285,8 +1285,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	    if (requested_threads == NULL || *requested_threads == '\0')
 	      uiout->message (_("No threads.\n"));
 	    else
-	      uiout->message (_("No threads match '%s'.\n"),
-			      requested_threads);
+	      uiout->message (_("No threads matched.\n"));
 	    return;
 	  }
 
