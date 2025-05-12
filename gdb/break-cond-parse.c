@@ -569,10 +569,10 @@ test (const char *input, const char *condition, int thread = -1,
   gdb::unique_xmalloc_ptr<char> extracted_rest;
   int extracted_thread, extracted_inferior, extracted_task;
   bool extracted_force_condition;
-  std::string exception_msg, error_str;
+  std::string exception_msg;
 
-  if (error_msg != nullptr)
-    error_str = std::string (error_msg) + "\n";
+  if (error_msg == nullptr)
+    error_msg = "";
 
   try
     {
@@ -584,10 +584,7 @@ test (const char *input, const char *condition, int thread = -1,
     }
   catch (const gdb_exception_error &ex)
     {
-      string_file buf;
-
-      exception_print (&buf, ex);
-      exception_msg = buf.release ();
+      exception_msg = ex.what ();
     }
 
   if ((condition == nullptr) != (extracted_condition.get () == nullptr)
@@ -599,7 +596,7 @@ test (const char *input, const char *condition, int thread = -1,
       || inferior != extracted_inferior
       || task != extracted_task
       || force != extracted_force_condition
-      || exception_msg != error_str)
+      || exception_msg != error_msg)
     {
       if (run_verbose ())
 	{
