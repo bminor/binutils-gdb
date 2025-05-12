@@ -289,23 +289,25 @@ struct dwo_sections
 struct dwo_unit
 {
   /* Backlink to the containing struct dwo_file.  */
-  struct dwo_file *dwo_file;
+  struct dwo_file *dwo_file = nullptr;
 
   /* The "id" that distinguishes this CU/TU.
      .debug_info calls this "dwo_id", .debug_types calls this "signature".
      Since signatures came first, we stick with it for consistency.  */
-  ULONGEST signature;
+  ULONGEST signature = 0;
 
   /* The section this CU/TU lives in, in the DWO file.  */
-  struct dwarf2_section_info *section;
+  dwarf2_section_info *section = nullptr;
 
   /* Same as dwarf2_per_cu::{sect_off,length} but in the DWO section.  */
-  sect_offset sect_off;
-  unsigned int length;
+  sect_offset sect_off {};
+  unsigned int length = 0;
 
   /* For types, offset in the type's DIE of the type defined by this TU.  */
   cu_offset type_offset_in_tu;
 };
+
+using dwo_unit_up = std::unique_ptr<dwo_unit>;
 
 /* Hash function for dwo_unit objects, based on the signature.  */
 
@@ -316,7 +318,7 @@ struct dwo_unit_hash
   std::size_t operator() (ULONGEST signature) const noexcept
   { return signature; }
 
-  std::size_t operator() (const dwo_unit *unit) const noexcept
+  std::size_t operator() (const dwo_unit_up &unit) const noexcept
   { return (*this) (unit->signature); }
 };
 
@@ -330,16 +332,16 @@ struct dwo_unit_eq
 {
   using is_transparent = void;
 
-  bool operator() (ULONGEST sig, const dwo_unit *unit) const noexcept
+  bool operator() (ULONGEST sig, const dwo_unit_up  &unit) const noexcept
   { return sig == unit->signature; }
 
-  bool operator() (const dwo_unit *a, const dwo_unit *b) const noexcept
+  bool operator() (const dwo_unit_up &a, const dwo_unit_up &b) const noexcept
   { return (*this) (a->signature, b); }
 };
 
 /* Set of dwo_unit object, using their signature as identity.  */
 
-using dwo_unit_set = gdb::unordered_set<dwo_unit *, dwo_unit_hash, dwo_unit_eq>;
+using dwo_unit_set = gdb::unordered_set<dwo_unit_up, dwo_unit_hash, dwo_unit_eq>;
 
 /* include/dwarf2.h defines the DWP section codes.
    It defines a max value but it doesn't define a min value, which we
@@ -2487,7 +2489,7 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (it == dwo_file->tus.end ())
     return nullptr;
 
-  dwo_unit *dwo_entry = *it;
+  dwo_unit *dwo_entry = it->get ();
 
   /* If the global table doesn't have an entry for this TU, add one.  */
   if (sig_type_it == per_bfd->signatured_types.end ())
@@ -3463,8 +3465,8 @@ cooked_index_worker_debug_info::process_skeletonless_type_units
   /* Skeletonless TUs in DWP files without .gdb_index is not supported yet.  */
   if (per_objfile->per_bfd->dwp_file == nullptr)
     for (const dwo_file_up &file : per_objfile->per_bfd->dwo_files)
-      for (dwo_unit *unit : file->tus)
-	process_skeletonless_type_unit (unit, per_objfile, storage);
+      for (const dwo_unit_up &unit : file->tus)
+	process_skeletonless_type_unit (unit.get (), per_objfile, storage);
 }
 
 void
@@ -6283,7 +6285,7 @@ cutu_reader::create_dwo_unit_hash_tables (dwo_file &dwo_file,
       else
 	signature = header.signature;
 
-      dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd.obstack, struct dwo_unit);
+      auto dwo_unit = std::make_unique<struct dwo_unit> ();
 
       /* Set the fields common to compile and type units.  */
       dwo_unit->dwo_file = &dwo_file;
@@ -6301,7 +6303,7 @@ cutu_reader::create_dwo_unit_hash_tables (dwo_file &dwo_file,
 				   sect_offset_str (sect_off),
 				   hex_string (dwo_unit->signature));
 
-	  auto [it, inserted] = dwo_file.cus.emplace (dwo_unit);
+	  auto [it, inserted] = dwo_file.cus.emplace (std::move (dwo_unit));
 	  if (!inserted)
 	    complaint (_("debug cu entry at offset %s is duplicate to"
 			 " the entry at offset %s, signature %s"),
@@ -6320,7 +6322,7 @@ cutu_reader::create_dwo_unit_hash_tables (dwo_file &dwo_file,
 				   sect_offset_str (sect_off),
 				   hex_string (dwo_unit->signature));
 
-	  auto [it, inserted] = dwo_file.tus.emplace (dwo_unit);
+	  auto [it, inserted] = dwo_file.tus.emplace (std::move (dwo_unit));
 	  if (!inserted)
 	    complaint (_("debug type entry at offset %s is duplicate to"
 			 " the entry at offset %s, signature %s"),
@@ -6801,7 +6803,7 @@ locate_v1_virtual_dwo_sections (asection *sectp,
    COMP_DIR is the DW_AT_comp_dir attribute of the referencing CU.
    This is for DWP version 1 files.  */
 
-static struct dwo_unit *
+static dwo_unit_up
 create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
 			   struct dwp_file *dwp_file,
 			   uint32_t unit_index,
@@ -6933,7 +6935,7 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_bfd *per_bfd,
     dwarf_read_debug_printf ("Using existing virtual DWO: %s",
 			     virtual_dwo_name.c_str ());
 
-  dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
+  auto dwo_unit = std::make_unique<struct dwo_unit> ();
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
   dwo_unit->section = XOBNEW (&per_bfd->obstack, struct dwarf2_section_info);
@@ -6994,7 +6996,7 @@ create_dwp_v2_or_v5_section (dwarf2_per_bfd *per_bfd,
    COMP_DIR is the DW_AT_comp_dir attribute of the referencing CU.
    This is for DWP version 2 files.  */
 
-static struct dwo_unit *
+static dwo_unit_up
 create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
 			   struct dwp_file *dwp_file,
 			   uint32_t unit_index,
@@ -7138,7 +7140,7 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
     dwarf_read_debug_printf ("Using existing virtual DWO: %s",
 			     virtual_dwo_name.c_str ());
 
-  dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
+  auto dwo_unit = std::make_unique<struct dwo_unit> ();
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
   dwo_unit->section = XOBNEW (&per_bfd->obstack, struct dwarf2_section_info);
@@ -7159,7 +7161,7 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_bfd *per_bfd,
    COMP_DIR is the DW_AT_comp_dir attribute of the referencing CU.
    This is for DWP version 5 files.  */
 
-static struct dwo_unit *
+static dwo_unit_up
 create_dwo_unit_in_dwp_v5 (dwarf2_per_bfd *per_bfd,
 			   struct dwp_file *dwp_file,
 			   uint32_t unit_index,
@@ -7308,7 +7310,7 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_bfd *per_bfd,
     dwarf_read_debug_printf ("Using existing virtual DWO: %s",
 			     virtual_dwo_name.c_str ());
 
-  dwo_unit *dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack, struct dwo_unit);
+  auto dwo_unit = std::make_unique<struct dwo_unit> ();
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
   dwo_unit->section
@@ -7341,7 +7343,7 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
 
   if (auto it = dwo_unit_set.find (signature);
       it != dwo_unit_set.end ())
-    return *it;
+    return it->get ();
 
   /* Use a for loop so that we don't loop forever on bad debug info.  */
   for (unsigned int i = 0; i < dwp_htab->nr_slots; ++i)
@@ -7355,7 +7357,7 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
 	  uint32_t unit_index =
 	    read_4_bytes (dbfd,
 			  dwp_htab->unit_table + hash * sizeof (uint32_t));
-	  dwo_unit *dwo_unit;
+	  dwo_unit_up dwo_unit;
 
 	  if (dwp_file->version == 1)
 	    dwo_unit
@@ -7370,9 +7372,9 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
 	      = create_dwo_unit_in_dwp_v5 (per_bfd, dwp_file, unit_index,
 					   comp_dir, signature, is_debug_types);
 
-	  auto [it, inserted] = dwo_unit_set.emplace (dwo_unit);
+	  auto [it, inserted] = dwo_unit_set.emplace (std::move (dwo_unit));
 	  gdb_assert (inserted);
-	  return *it;
+	  return it->get ();
 	}
 
       if (signature_in_table == 0)
@@ -7967,13 +7969,13 @@ cutu_reader::lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name,
 	    {
 	      if (auto it = dwo_file->tus.find (signature);
 		  it != dwo_file->tus.end ())
-		dwo_cutu = *it;
+		dwo_cutu = it->get ();
 	    }
 	  else if (!is_debug_types && !dwo_file->cus.empty ())
 	    {
 	      if (auto it = dwo_file->cus.find (signature);
 		  it != dwo_file->cus.end ())
-		dwo_cutu = *it;
+		dwo_cutu = it->get ();
 	    }
 
 	  if (dwo_cutu != NULL)
@@ -8080,8 +8082,8 @@ queue_and_load_all_dwo_tus (dwarf2_cu *cu)
 
   dwo_file = dwo_unit->dwo_file;
 
-  for (struct dwo_unit *unit : dwo_file->tus)
-    queue_and_load_dwo_tu (unit, cu);
+  for (const dwo_unit_up &unit : dwo_file->tus)
+    queue_and_load_dwo_tu (unit.get (), cu);
 }
 
 /* Read in various DIEs.  */
