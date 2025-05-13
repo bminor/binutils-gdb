@@ -408,10 +408,10 @@ class ParameterPrefix:
     # string.  Users are expected to sub-class this ParameterPrefix class
     # and add their own documentation.  If they don't, then GDB will
     # generate a suitable doc string.  But, if this (parent) class has a
-    # __doc__ sting of its own, then sub-classes will inherit that __doc__
+    # __doc__ string of its own, then sub-classes will inherit that __doc__
     # string, and GDB will not understand that it needs to generate one.
 
-    class _PrefixCommand(Command):
+    class _PrefixCommand(_gdb.Command):
         """A gdb.Command used to implement both the set and show prefixes.
 
         This documentation string is not used as the prefix command
@@ -490,7 +490,7 @@ class ParameterPrefix:
                 self.__doc__ = doc
             self.__cb = self.__find_callback(delegate, mode)
             self.__delegate = delegate
-            if not self.__cb is None:
+            if self.__cb is not None:
                 self.invoke = self.__invoke
             super().__init__(mode + " " + name, cmd_class, prefix=True)
 
