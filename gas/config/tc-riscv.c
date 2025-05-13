@@ -4848,7 +4848,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  bfd_vma delta = target - md_pcrel_from (fixP);
 	  bfd_putl32 (bfd_getl32 (buf) | ENCODE_JTYPE_IMM (delta), buf);
 	  if (!riscv_opts.relax && S_IS_LOCAL (fixP->fx_addsy))
-	    fixP->fx_done = 1;
+	    {
+	      if (!VALID_JTYPE_IMM (delta))
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("invalid J-type offset (%+lld)"),
+			      (long long) delta);
+	      fixP->fx_done = 1;
+	    }
 	}
       break;
 
@@ -4860,7 +4866,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  bfd_vma delta = target - md_pcrel_from (fixP);
 	  bfd_putl32 (bfd_getl32 (buf) | ENCODE_BTYPE_IMM (delta), buf);
 	  if (!riscv_opts.relax && S_IS_LOCAL (fixP->fx_addsy))
-	    fixP->fx_done = 1;
+	    {
+	      if (!VALID_BTYPE_IMM (delta))
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("invalid B-type offset (%+lld)"),
+			      (long long) delta);
+	      fixP->fx_done = 1;
+	    }
 	}
       break;
 
@@ -4872,7 +4884,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  bfd_vma delta = target - md_pcrel_from (fixP);
 	  bfd_putl16 (bfd_getl16 (buf) | ENCODE_CBTYPE_IMM (delta), buf);
 	  if (!riscv_opts.relax && S_IS_LOCAL (fixP->fx_addsy))
-	    fixP->fx_done = 1;
+	    {
+	      if (!VALID_CBTYPE_IMM (delta))
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("invalid CB-type offset (%+lld)"),
+			      (long long) delta);
+	      fixP->fx_done = 1;
+	    }
 	}
       break;
 
@@ -4884,7 +4902,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  bfd_vma delta = target - md_pcrel_from (fixP);
 	  bfd_putl16 (bfd_getl16 (buf) | ENCODE_CJTYPE_IMM (delta), buf);
 	  if (!riscv_opts.relax && S_IS_LOCAL (fixP->fx_addsy))
-	    fixP->fx_done = 1;
+	    {
+	      if (!VALID_CJTYPE_IMM (delta))
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("invalid CJ-type offset (%+lld)"),
+			      (long long) delta);
+	      fixP->fx_done = 1;
+	    }
 	}
       break;
 
@@ -4919,7 +4943,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 		      | ENCODE_UTYPE_IMM (RISCV_CONST_HIGH_PART (value)),
 		      buf);
 	  if (!riscv_opts.relax)
-	    fixP->fx_done = 1;
+	    {
+	      if (xlen > 32
+		  && !VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (value)))
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("invalid pcrel_hi offset (%+lld)"),
+			      (long long) value);
+	      fixP->fx_done = 1;
+	    }
 	}
       relaxable = true;
       break;
@@ -4945,7 +4976,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	      bfd_putl32 (bfd_getl32 (buf) | ENCODE_STYPE_IMM (value), buf);
 	    else
 	      bfd_putl32 (bfd_getl32 (buf) | ENCODE_ITYPE_IMM (value), buf);
-	    /* Relaxations should never be enabled by `.option relax'.  */
+	    /* Relaxations should never be enabled by `.option relax'.
+	       The offset is checked by corresponding %pcrel_hi entry.  */
 	    if (!riscv_opts.relax)
 	      fixP->fx_done = 1;
 	  }
