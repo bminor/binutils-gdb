@@ -27,8 +27,6 @@
 #include "gdbsupport/unordered_set.h"
 #include "dwarf2/die.h"
 
-struct field_info;
-
 /* Type used for delaying computation of method physnames.
    See comments for compute_delayed_physnames.  */
 struct delayed_method_info
@@ -400,15 +398,6 @@ public:
      value is often implicit and is the size of the header of
      .debug_str_offsets section (8 or 4, depending on the address size).  */
   std::optional<ULONGEST> str_offsets_base;
-
-  /* We may encounter a DIE where a property refers to a field in some
-     outer type.  For example, in Ada, an array length may depend on a
-     field in some outer record.  In this case, we need to be able to
-     stash a pointer to the 'struct field' into the appropriate
-     dynamic property baton.  However, the fields aren't created until
-     the type has been fully processed, so we need a temporary
-     back-link to this object.  */
-  struct field_info *field_info = nullptr;
 
   /* Mark used when releasing cached dies.  */
   bool m_mark : 1;

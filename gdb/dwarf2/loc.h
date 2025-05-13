@@ -20,6 +20,7 @@
 #ifndef GDB_DWARF2_LOC_H
 #define GDB_DWARF2_LOC_H
 
+#include "gdbtypes.h"
 #include "dwarf2/expr.h"
 
 struct symbol_computed_ops;
@@ -245,7 +246,7 @@ struct dwarf2_property_baton
     struct dwarf2_loclist_baton loclist;
 
     /* The location is stored in a field of PROPERTY_TYPE.  */
-    struct field *field;
+    struct field field;
   };
 };
 

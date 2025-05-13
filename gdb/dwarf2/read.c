@@ -698,12 +698,6 @@ struct field_info
      we're reading.  */
   std::vector<variant_part_builder> variant_parts;
 
-  /* All the field batons that must be updated.  This is only used
-     when a type's property depends on a field of this structure; for
-     example in Ada when an array's length may come from a field of an
-     enclosing record.  */
-  gdb::unordered_map<dwarf2_property_baton *, sect_offset> field_batons;
-
   /* Return the total number of fields (including baseclasses).  */
   int nfields () const
   {
@@ -9985,6 +9979,29 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
     }
 }
 
+/* A helper that computes the location of a field.  The CU and the
+   DW_TAG_member DIE are passed in.  The results are stored in
+   *FP.  */
+
+static void
+compute_field_location (dwarf2_cu *cu, die_info *die, field *fp)
+{
+  /* Get type of field.  */
+  fp->set_type (die_type (die, cu));
+
+  fp->set_loc_bitpos (0);
+
+  /* Get bit size of field (zero if none).  */
+  attribute *attr = dwarf2_attr (die, DW_AT_bit_size, cu);
+  if (attr != nullptr)
+    fp->set_bitsize (attr->unsigned_constant ().value_or (0));
+  else
+    fp->set_bitsize (0);
+
+  /* Get bit offset of field.  */
+  handle_member_location (die, cu, fp);
+}
+
 /* Add an aggregate field to the field list.  */
 
 static void
@@ -10040,20 +10057,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	}
       /* Data member other than a C++ static data member.  */
 
-      /* Get type of field.  */
-      fp->set_type (die_type (die, cu));
-
-      fp->set_loc_bitpos (0);
-
-      /* Get bit size of field (zero if none).  */
-      attr = dwarf2_attr (die, DW_AT_bit_size, cu);
-      if (attr != nullptr)
-	fp->set_bitsize (attr->unsigned_constant ().value_or (0));
-      else
-	fp->set_bitsize (0);
-
-      /* Get bit offset of field.  */
-      handle_member_location (die, cu, fp);
+      compute_field_location (cu, die, fp);
 
       /* Get name of field.  */
       fieldname = dwarf2_name (die, cu);
@@ -11241,45 +11245,14 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
    update_field_batons.  If OFFSET is not found, NULL is returned.  */
 
 static dwarf2_property_baton *
-find_field_create_baton (dwarf2_cu *cu, sect_offset offset)
+find_field_create_baton (dwarf2_cu *cu, die_info *die)
 {
-  field_info *fi = cu->field_info;
-  /* Defensive programming in case we see unusual DWARF.  */
-  if (fi == nullptr)
-    return nullptr;
-  for (const auto &fld : fi->fields)
-    if (fld.offset == offset)
-      {
-	dwarf2_property_baton *result
-	  = XOBNEW (&cu->per_objfile->objfile->objfile_obstack,
-		    struct dwarf2_property_baton);
-	fi->field_batons[result] = offset;
-	return result;
-      }
-  return nullptr;
-}
-
-/* Update all the stored field property batons.  FI is the field info
-   for the structure being created.  TYPE is the corresponding struct
-   type with its fields already filled in.  This fills in the correct
-   field for each baton that was stored while processing this
-   type.  */
-
-static void
-update_field_batons (field_info *fi, struct type *type)
-{
-  int n_bases = fi->baseclasses.size ();
-  for (auto &[baton, offset] : fi->field_batons)
-    {
-      for (int i = 0; i < fi->fields.size (); ++i)
-	{
-	  if (fi->fields[i].offset == offset)
-	    {
-	      baton->field = &type->field (n_bases + i);
-	      break;
-	    }
-	}
-    }
+  dwarf2_property_baton *result
+    = XOBNEW (&cu->per_objfile->objfile->objfile_obstack,
+	      struct dwarf2_property_baton);
+  memset (&result->field, 0, sizeof (result->field));
+  compute_field_location (cu, die, &result->field);
+  return result;
 }
 
 /* Finish creating a structure or union type, including filling in its
@@ -11303,9 +11276,6 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
       struct field_info fi;
       std::vector<struct symbol *> template_args;
 
-      scoped_restore save_field_info
-	= make_scoped_restore (&cu->field_info, &fi);
-
       for (die_info *child_die : die->children ())
 	handle_struct_member_die (child_die, type, &fi, &template_args, cu);
 
@@ -11327,11 +11297,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       /* Attach fields and member functions to the type.  */
       if (fi.nfields () > 0)
-	{
-	  dwarf2_attach_fields_to_type (&fi, type, cu);
-	  update_field_batons (&fi, type);
-	}
-
+	dwarf2_attach_fields_to_type (&fi, type, cu);
       if (!fi.fnfieldlists.empty ())
 	{
 	  dwarf2_attach_fn_fields_to_type (&fi, type, cu);
@@ -13946,13 +13912,12 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 	  case DW_AT_data_member_location:
 	  case DW_AT_data_bit_offset:
 	    {
-	      baton = find_field_create_baton (cu, target_die->sect_off);
+	      baton = find_field_create_baton (cu, target_die);
 	      if (baton == nullptr)
 		return 0;
 
 	      baton->property_type = read_type_die (target_die->parent,
 						    target_cu);
-	      baton->field = nullptr;
 	      prop->set_field (baton);
 	      break;
 	    }

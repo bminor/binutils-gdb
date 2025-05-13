@@ -1747,7 +1747,7 @@ dwarf2_evaluate_property (const dynamic_prop *prop,
 	if (pinfo == NULL)
 	  error (_("cannot find reference address for offset property"));
 
-	struct field resolved_field = *baton->field;
+	struct field resolved_field = baton->field;
 	resolve_dynamic_field (resolved_field, pinfo, initial_frame);
 
 	/* Storage for memory if we need to read it.  */
