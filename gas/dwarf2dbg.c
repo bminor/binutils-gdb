@@ -678,18 +678,17 @@ get_directory_table_entry (const char *dirname,
 }
 
 static bool
-assign_file_to_slot (unsigned int i, const char *file, unsigned int dir)
+assign_file_to_slot (valueT i, const char *file, unsigned int dir)
 {
   if (i >= files_allocated)
     {
       unsigned int want = i + 32;
 
-      /* Catch wraparound.  */
-      if (want < files_allocated
-	  || want < i
-	  || want > UINT_MAX / sizeof (struct file_entry))
+      /* If this array is taking 1G or more, someone is using silly
+	 file numbers.  */
+      if (want < i || want > UINT_MAX / 4 / sizeof (struct file_entry))
 	{
-	  as_bad (_("file number %u is too big"), i);
+	  as_bad (_("file number %" PRIu64 " is too big"), (uint64_t) i);
 	  return false;
 	}
 
@@ -843,7 +842,7 @@ purge_generated_debug (bool thelot)
 static bool
 allocate_filename_to_slot (const char *dirname,
 			   const char *filename,
-			   unsigned int num,
+			   valueT num,
 			   bool with_md5)
 {
   const char *file;
@@ -921,8 +920,9 @@ allocate_filename_to_slot (const char *dirname,
 	}
 
     fail:
-      as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
-	      num,
+      as_bad (_("file table slot %u is already occupied by a different file"
+		" (%s%s%s vs %s%s%s)"),
+	      (unsigned int) num,
 	      dir == NULL ? "" : dir,
 	      dir == NULL ? "" : "/",
 	      files[num].filename,
@@ -968,7 +968,7 @@ allocate_filename_to_slot (const char *dirname,
   d = get_directory_table_entry (dirname, file0_dirname, dirlen, num == 0);
   i = num;
 
-  if (! assign_file_to_slot (i, file, d))
+  if (!assign_file_to_slot (num, file, d))
     return false;
 
   if (with_md5)
@@ -1228,15 +1228,7 @@ dwarf2_directive_filename (void)
     purge_generated_debug (false);
   debug_type = DEBUG_NONE;
 
-  if (num != (unsigned int) num
-      || num >= (size_t) -1 / sizeof (struct file_entry) - 32)
-    {
-      as_bad (_("file number %lu is too big"), (unsigned long) num);
-      return NULL;
-    }
-
-  if (! allocate_filename_to_slot (dirname, filename, (unsigned int) num,
-				   with_md5))
+  if (!allocate_filename_to_slot (dirname, filename, num, with_md5))
     return NULL;
 
   return filename;
