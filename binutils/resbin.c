@@ -1250,7 +1250,7 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data,
 
 	      vst = res_alloc (sizeof (rc_ver_stringtable));
 
-	      if (!get_version_header (wrbfd, data, length, (const char *) NULL,
+	      if (!get_version_header (wrbfd, data, length, "version stringtable",
 				       &vst->language, &stverlen, &vallen,
 				       &type, &off))
 		return NULL;
@@ -1284,9 +1284,9 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data,
 
 		  vs = res_alloc (sizeof (rc_ver_stringinfo));
 
-		  if (!get_version_header (wrbfd, data, length,
-					   (const char *) NULL, &vs->key,
-					   &sverlen, &vallen, &type, &off))
+		  if (!get_version_header (wrbfd, data, length, "version string",
+					   &vs->key, &sverlen, &vallen,
+					   &type, &off))
 		    return NULL;
 
 		  data += off;
@@ -1348,7 +1348,7 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data,
 	  data += off;
 	  length -= off;
 
-	  if (!get_version_header (wrbfd, data, length, (const char *) NULL,
+	  if (!get_version_header (wrbfd, data, length, "version varfileinfo",
 				   &vi->u.var.key, &verlen, &vallen,
 				   &type, &off))
 	    return NULL;
