@@ -2163,13 +2163,6 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 	 domain_name (domain).c_str (), language_str (language));
     }
 
-  /* Make sure we do something sensible with is_a_field_of_this, since
-     the callers that set this parameter to some non-null value will
-     certainly use it later.  If we don't set it, the contents of
-     is_a_field_of_this are undefined.  */
-  if (is_a_field_of_this != NULL)
-    memset (is_a_field_of_this, 0, sizeof (*is_a_field_of_this));
-
   langdef = language_def (language);
 
   /* Search specified block and its superiors.  Don't search

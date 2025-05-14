@@ -2101,17 +2101,17 @@ struct field_of_this_result
      symbol was not found in 'this'.  If non-NULL, then one of the
      other fields will be non-NULL as well.  */
 
-  struct type *type;
+  struct type *type = nullptr;
 
   /* If the symbol was found as an ordinary field of 'this', then this
      is non-NULL and points to the particular field.  */
 
-  struct field *field;
+  struct field *field = nullptr;
 
   /* If the symbol was found as a function field of 'this', then this
      is non-NULL and points to the particular field.  */
 
-  struct fn_fieldlist *fn_field;
+  struct fn_fieldlist *fn_field = nullptr;
 };
 
 /* Find the definition for a specified symbol name NAME

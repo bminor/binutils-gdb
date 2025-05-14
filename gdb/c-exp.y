@@ -3042,10 +3042,6 @@ classify_name (struct parser_state *par_state, const struct block *block,
 
   std::string copy = copy_name (yylval.sval);
 
-  /* Initialize this in case we *don't* use it in this call; that way
-     we can refer to it unconditionally below.  */
-  memset (&is_a_field_of_this, 0, sizeof (is_a_field_of_this));
-
   bsym = lookup_symbol (copy.c_str (), block, SEARCH_VFT,
 			par_state->language ()->name_of_this ()
 			? &is_a_field_of_this : NULL);
