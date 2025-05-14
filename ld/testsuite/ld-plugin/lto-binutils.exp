@@ -47,8 +47,6 @@ if { [check_lto_fat_available] } {
   set no_lto "-fno-lto"
 }
 
-set lto_plugin [string trim [run_host_cmd "$CC_FOR_TARGET" "-print-prog-name=liblto_plugin.so"]]
-
 # List contains test-items:
 #  0:program name
 #  1:program options
@@ -64,7 +62,7 @@ proc run_lto_binutils_test { lto_tests } {
     global objdump
     global READELF
     global strip
-    global lto_plugin
+    global plug_opt
 
     foreach testitem $lto_tests {
 	set prog_name [lindex $testitem 0]
@@ -101,7 +99,7 @@ proc run_lto_binutils_test { lto_tests } {
 	    remote_file host delete $output
 	}
 
-	append prog_options " --plugin $lto_plugin"
+	append prog_options " $plug_opt"
 
 	set cmd_options "$prog_options $prog_output $input"
 	set test_name "$prog_name $cmd_options"
@@ -192,7 +190,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build libstrip-1a.a" \
-	"--plugin $lto_plugin" \
+	"$plug_opt" \
 	"-O2 -flto $lto_no_fat" \
 	{ strip-1a.c } \
 	{} \
@@ -206,7 +204,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build libstrip-1a-fat.a" \
-	"--plugin $lto_plugin" \
+	"$plug_opt" \
 	"-O2 -flto $lto_fat" \
 	{ strip-1a-fat.c } \
 	{} \
