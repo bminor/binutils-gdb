@@ -1,0 +1,66 @@
+# This testcase is part of GDB, the GNU debugger.
+
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test stepping over an exit syscall from both the main thread, and a
+# non-main thread.
+
+if { [target_info exists exit_is_reliable] } {
+    set exit_is_reliable [target_info exit_is_reliable]
+} else {
+    set exit_is_reliable [expr ! [target_info exists use_gdb_stub]]
+}
+require {expr $exit_is_reliable}
+
+standard_testfile
+
+if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthread}] } {
+    return -1
+}
+
+# WHICH is which thread exits the process.  Can be "main" for main
+# thread, or "other" for the non-main thread.
+
+proc test {which} {
+    if ![runto_main] {
+	return -1
+    }
+
+    set other [expr {$which == "other"}]
+    gdb_test "p other_thread_exits = $other" " = $other"
+
+    set break_line [gdb_get_line_number "break here $which"]
+    gdb_breakpoint $break_line
+    gdb_continue_to_breakpoint "exit syscall"
+
+    set target_non_stop [is_target_non_stop]
+
+    gdb_test_multiple "next" "" {
+	-re -wrap "$::inferior_exited_re normally\\\]" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "Further execution is probably impossible\\." {
+	    # With a target in all-stop, this is the best we can do.
+	    # We should not see this with a target backend in non-stop
+	    # mode, however.
+	    gdb_assert !$target_non_stop $gdb_test_name
+	}
+    }
+}
+
+foreach_with_prefix which {main other} {
+    test $which
+}
