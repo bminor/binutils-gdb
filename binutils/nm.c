@@ -801,10 +801,7 @@ filter_symbols (bfd *abfd, bool is_dynamic, void *minisyms,
       if (sym == NULL)
 	continue;
 
-      if (sym->name != NULL
-	  && sym->name[0] == '_'
-	  && sym->name[1] == '_'
-	  && strcmp (sym->name + (sym->name[2] == '_'), "__gnu_lto_slim") == 0
+      if (bfd_lto_slim_symbol_p (abfd, sym->name)
 	  && report_plugin_err)
 	{
 	  report_plugin_err = false;

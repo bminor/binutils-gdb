@@ -2399,12 +2399,8 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 			  map = new_map;
 			}
 
-		      if (syms[src_count]->name != NULL
-			  && syms[src_count]->name[0] == '_'
-			  && syms[src_count]->name[1] == '_'
-			  && strcmp (syms[src_count]->name
-				     + (syms[src_count]->name[2] == '_'),
-				     "__gnu_lto_slim") == 0
+		      if (bfd_lto_slim_symbol_p (current,
+						 syms[src_count]->name)
 			  && report_plugin_err)
 			{
 			  report_plugin_err = false;

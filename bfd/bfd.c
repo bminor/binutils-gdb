@@ -470,6 +470,16 @@ EXTERNAL
 .  return abfd->lto_type;
 .}
 .
+.static inline bool
+.bfd_lto_slim_symbol_p (const bfd *abfd, const char *name)
+.{
+.  return (bfd_get_lto_type (abfd) != lto_non_ir_object
+.	   && name != NULL
+.	   && name[0] == '_'
+.	   && name[1] == '_'
+.	   && strcmp (name + (name[2] == '_'), "__gnu_lto_slim") == 0);
+.}
+.
 .static inline flagword
 .bfd_get_file_flags (const bfd *abfd)
 .{
