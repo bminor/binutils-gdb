@@ -110,6 +110,8 @@ static bool step_over_info_valid_p (void);
 
 static bool schedlock_applies (struct thread_info *tp);
 
+static void handle_process_exited (struct execution_control_state *ecs);
+
 /* Asynchronous signal handler registered as event loop source for
    when we have pending events ready to be passed to the core.  */
 static struct async_event_handler *infrun_async_inferior_event_token;
@@ -4767,7 +4769,68 @@ fetch_inferior_event ()
 	       don't want to stop all the other threads.  */
 	    if (ecs.event_thread == nullptr
 		|| !ecs.event_thread->control.in_cond_eval)
-	      stop_all_threads_if_all_stop_mode ();
+	      {
+		stop_all_threads_if_all_stop_mode ();
+
+		/* Say the user does "next" over an exit(0) call, or
+		   out of main, either of which make the whole process
+		   exit.  If the target supports target_thread_events,
+		   then that is activated while "next" is in progress,
+		   and consequently we may be processing a thread-exit
+		   event (caused by the process exit) for a thread
+		   that reported its exit before the
+		   whole-process-exit event is reported for another
+		   thread (which is normally going to be the last
+		   event out of the inferior, but we don't know for
+		   which thread it will be).
+
+		   If we're in 'all-stop on top of non-stop' mode, and
+		   indeed the inferior process is exiting, then the
+		   stop_all_threads_if_all_stop_mode call above must
+		   have seen the process-exit event, as it will see
+		   one stop for each and every (running) thread of the
+		   process.  Look at the pending statuses of all
+		   threads, and see if we have a process-exit status.
+		   If so, prefer handling it now and report the
+		   inferior exit to the user instead of reporting the
+		   original thread exit.
+
+		   Do not do this if are handling any other kind of
+		   event, like e.g., a breakpoint hit, which the user
+		   may be interested in knowing was hit before the
+		   process exited.  If we ever have a "catch
+		   thread-exit" or something similar, we may want to
+		   skip this "prefer process-exit" if such a
+		   catchpoint is installed.  */
+		if (ecs.ws.kind () == TARGET_WAITKIND_THREAD_EXITED
+		    && !non_stop && exists_non_stop_target ())
+		  {
+		    for (thread_info *tp : inf->non_exited_threads ())
+		      {
+			if (tp->has_pending_waitstatus ()
+			    && ((tp->pending_waitstatus ().kind ()
+				 == TARGET_WAITKIND_EXITED)
+				|| (tp->pending_waitstatus ().kind ()
+				    == TARGET_WAITKIND_SIGNALLED)))
+			  {
+			    /* Found a pending process-exit event.
+			       Prefer handling and reporting it now
+			       over the thread-exit event.  */
+			    infrun_debug_printf
+			      ("found pending process-exit event, preferring it");
+			    ecs.ws = tp->pending_waitstatus ();
+			    tp->clear_pending_waitstatus ();
+			    ecs.event_thread = nullptr;
+			    ecs.ptid = tp->ptid;
+			    /* Re-record the last target status.  */
+			    set_last_target_status (ecs.target, ecs.ptid,
+						    ecs.ws);
+			    handle_process_exited (&ecs);
+			    break;
+			  }
+		      }
+		  }
+	      }
 
 	    clean_up_just_stopped_threads_fsms (&ecs);
 
@@ -6091,6 +6154,81 @@ handle_thread_exited (execution_control_state *ecs)
   return true;
 }
 
+/* Handle a process exit event.  */
+
+static void
+handle_process_exited (execution_control_state *ecs)
+{
+  /* Depending on the system, ecs->ptid may point to a thread or to a
+     process.  On some targets, target_mourn_inferior may need to have
+     access to the just-exited thread.  That is the case of
+     GNU/Linux's "checkpoint" support, for example.  Call the
+     switch_to_xxx routine as appropriate.  */
+  thread_info *thr = ecs->target->find_thread (ecs->ptid);
+  if (thr != nullptr)
+    switch_to_thread (thr);
+  else
+    {
+      inferior *inf = find_inferior_ptid (ecs->target, ecs->ptid);
+      switch_to_inferior_no_thread (inf);
+    }
+
+  handle_vfork_child_exec_or_exit (0);
+  target_terminal::ours ();	/* Must do this before mourn anyway.  */
+
+  /* Clearing any previous state of convenience variables.  */
+  clear_exit_convenience_vars ();
+
+  if (ecs->ws.kind () == TARGET_WAITKIND_EXITED)
+    {
+      /* Record the exit code in the convenience variable $_exitcode,
+	 so that the user can inspect this again later.  */
+      set_internalvar_integer (lookup_internalvar ("_exitcode"),
+			       (LONGEST) ecs->ws.exit_status ());
+
+      /* Also record this in the inferior itself.  */
+      current_inferior ()->has_exit_code = true;
+      current_inferior ()->exit_code = (LONGEST) ecs->ws.exit_status ();
+
+      /* Support the --return-child-result option.  */
+      return_child_result_value = ecs->ws.exit_status ();
+
+      interps_notify_exited (ecs->ws.exit_status ());
+    }
+  else
+    {
+      struct gdbarch *gdbarch = current_inferior ()->arch ();
+
+      if (gdbarch_gdb_signal_to_target_p (gdbarch))
+	{
+	  /* Set the value of the internal variable $_exitsignal,
+	     which holds the signal uncaught by the inferior.  */
+	  set_internalvar_integer (lookup_internalvar ("_exitsignal"),
+				   gdbarch_gdb_signal_to_target (gdbarch,
+								 ecs->ws.sig ()));
+	}
+      else
+	{
+	  /* We don't have access to the target's method used for
+	     converting between signal numbers (GDB's internal
+	     representation <-> target's representation).
+	     Therefore, we cannot do a good job at displaying this
+	     information to the user.  It's better to just warn
+	     her about it (if infrun debugging is enabled), and
+	     give up.  */
+	  infrun_debug_printf ("Cannot fill $_exitsignal with the correct "
+			       "signal number.");
+	}
+
+      interps_notify_signal_exited (ecs->ws.sig ());
+    }
+
+  gdb_flush (gdb_stdout);
+  target_mourn_inferior (inferior_ptid);
+  stop_print_frame = false;
+  stop_waiting (ecs);
+}
+
 /* Given an execution control state that has been freshly filled in by
    an event from the inferior, figure out what it means and take
    appropriate action.
@@ -6300,74 +6438,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
     case TARGET_WAITKIND_EXITED:
     case TARGET_WAITKIND_SIGNALLED:
-      {
-	/* Depending on the system, ecs->ptid may point to a thread or
-	   to a process.  On some targets, target_mourn_inferior may
-	   need to have access to the just-exited thread.  That is the
-	   case of GNU/Linux's "checkpoint" support, for example.
-	   Call the switch_to_xxx routine as appropriate.  */
-	thread_info *thr = ecs->target->find_thread (ecs->ptid);
-	if (thr != nullptr)
-	  switch_to_thread (thr);
-	else
-	  {
-	    inferior *inf = find_inferior_ptid (ecs->target, ecs->ptid);
-	    switch_to_inferior_no_thread (inf);
-	  }
-      }
-      handle_vfork_child_exec_or_exit (0);
-      target_terminal::ours ();	/* Must do this before mourn anyway.  */
-
-      /* Clearing any previous state of convenience variables.  */
-      clear_exit_convenience_vars ();
-
-      if (ecs->ws.kind () == TARGET_WAITKIND_EXITED)
-	{
-	  /* Record the exit code in the convenience variable $_exitcode, so
-	     that the user can inspect this again later.  */
-	  set_internalvar_integer (lookup_internalvar ("_exitcode"),
-				   (LONGEST) ecs->ws.exit_status ());
-
-	  /* Also record this in the inferior itself.  */
-	  current_inferior ()->has_exit_code = true;
-	  current_inferior ()->exit_code = (LONGEST) ecs->ws.exit_status ();
-
-	  /* Support the --return-child-result option.  */
-	  return_child_result_value = ecs->ws.exit_status ();
-
-	  interps_notify_exited (ecs->ws.exit_status ());
-	}
-      else
-	{
-	  struct gdbarch *gdbarch = current_inferior ()->arch ();
-
-	  if (gdbarch_gdb_signal_to_target_p (gdbarch))
-	    {
-	      /* Set the value of the internal variable $_exitsignal,
-		 which holds the signal uncaught by the inferior.  */
-	      set_internalvar_integer (lookup_internalvar ("_exitsignal"),
-				       gdbarch_gdb_signal_to_target (gdbarch,
-							  ecs->ws.sig ()));
-	    }
-	  else
-	    {
-	      /* We don't have access to the target's method used for
-		 converting between signal numbers (GDB's internal
-		 representation <-> target's representation).
-		 Therefore, we cannot do a good job at displaying this
-		 information to the user.  It's better to just warn
-		 her about it (if infrun debugging is enabled), and
-		 give up.  */
-	      infrun_debug_printf ("Cannot fill $_exitsignal with the correct "
-				   "signal number.");
-	    }
-
-	  interps_notify_signal_exited (ecs->ws.sig ());
-	}
-
-      gdb_flush (gdb_stdout);
-      target_mourn_inferior (inferior_ptid);
-      stop_print_frame = false;
+      handle_process_exited (ecs);
       stop_waiting (ecs);
       return;
 
