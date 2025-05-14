@@ -322,7 +322,7 @@ spec_match (const struct wildcard_spec *spec, const char *name)
 }
 
 static char *
-ldirname (const char *name)
+stat_ldirname (const char *name)
 {
   const char *base = lbasename (name);
 
@@ -1266,7 +1266,7 @@ new_afile (const char *name,
       /* If name is a relative path, search the directory of the current linker
 	 script first. */
       if (from_filename && !IS_ABSOLUTE_PATH (name))
-	p->extra_search_path = ldirname (from_filename);
+	p->extra_search_path = stat_ldirname (from_filename);
       p->flags.real = true;
       p->flags.search_dirs = true;
       break;
