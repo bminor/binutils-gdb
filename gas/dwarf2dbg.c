@@ -650,9 +650,8 @@ get_directory_table_entry (const char *dirname,
 		 is set to the current build directory).  Since we are
 		 about to create a directory entry that is not the
 		 same, allocate the current directory first.  */
-	      (void) get_directory_table_entry (pwd, file0_dirname,
-						strlen (pwd), true);
-	      d = 1;
+	      (void) get_directory_table_entry (pwd, pwd, strlen (pwd), true);
+	      d = dirs_in_use;
 	    }
 	  else
 	    d = 0;
