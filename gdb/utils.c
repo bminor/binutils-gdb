@@ -3333,7 +3333,7 @@ gdb_argv_as_array_view_test ()
    argument.  */
 
 std::string
-ldirname (const char *filename)
+gdb_ldirname (const char *filename)
 {
   std::string dirname;
   const char *base = lbasename (filename);

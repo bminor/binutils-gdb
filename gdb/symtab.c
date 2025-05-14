@@ -4492,7 +4492,7 @@ info_sources_filter::matches (const char *fullname) const
       switch (m_match_type)
 	{
 	case match_on::DIRNAME:
-	  dirname = ldirname (fullname);
+	  dirname = gdb_ldirname (fullname);
 	  to_match = dirname.c_str ();
 	  break;
 	case match_on::BASENAME:

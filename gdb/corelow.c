@@ -957,7 +957,7 @@ locate_exec_from_corefile_exec_context (bfd *cbfd,
     execbfd = open_and_check_build_id (exec_name);
   else
     {
-      std::string p = (ldirname (bfd_get_filename (cbfd))
+      std::string p = (gdb_ldirname (bfd_get_filename (cbfd))
 		       + '/'
 		       + exec_name);
       execbfd = open_and_check_build_id (p.c_str ());
@@ -971,7 +971,7 @@ locate_exec_from_corefile_exec_context (bfd *cbfd,
   if (execbfd == nullptr)
     {
       const char *base_name = lbasename (exec_name);
-      std::string p = (ldirname (bfd_get_filename (cbfd))
+      std::string p = (gdb_ldirname (bfd_get_filename (cbfd))
 		       + '/'
 		       + base_name);
       execbfd = open_and_check_build_id (p.c_str ());

@@ -1853,7 +1853,7 @@ copy_shell_to_cache (const char *shell, const std::string &new_name)
     error (_("Could not open shell (%s) for reading: %s"),
 	   shell, safe_strerror (errno));
 
-  std::string new_dir = ldirname (new_name.c_str ());
+  std::string new_dir = gdb_ldirname (new_name.c_str ());
   if (!mkdir_recursive (new_dir.c_str ()))
     error (_("Could not make cache directory \"%s\": %s"),
 	   new_dir.c_str (), safe_strerror (errno));

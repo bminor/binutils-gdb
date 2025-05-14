@@ -319,7 +319,7 @@ xml_init_syscalls_info (const char *filename)
   if (!full_file)
     return NULL;
 
-  const std::string dirname = ldirname (filename);
+  const std::string dirname = gdb_ldirname (filename);
   auto fetch_another = [&dirname] (const char *name)
     {
       return xml_fetch_content_from_file (name, dirname.c_str ());

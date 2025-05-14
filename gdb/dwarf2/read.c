@@ -5859,7 +5859,7 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
       && res.get_name () != nullptr
       && IS_ABSOLUTE_PATH (res.get_name ()))
     {
-      res.set_comp_dir (ldirname (res.get_name ()));
+      res.set_comp_dir (gdb_ldirname (res.get_name ()));
       res.set_name (make_unique_xstrdup (lbasename (res.get_name ())));
     }
 
@@ -7434,7 +7434,7 @@ try_open_dwop_file (dwarf2_per_bfd *per_bfd, const char *file_name, int is_dwp,
     search_path = per_bfd->captured_debug_dir.c_str ();
 
   /* Add the path for the executable binary to the list of search paths.  */
-  std::string objfile_dir = ldirname (per_bfd->filename ());
+  std::string objfile_dir = gdb_ldirname (per_bfd->filename ());
   search_path_holder.reset (concat (objfile_dir.c_str (),
 				    dirname_separator_string,
 				    search_path, nullptr));
@@ -7807,7 +7807,7 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
       struct objfile *backlink = objfile->separate_debug_objfile_backlink;
       const char *backlink_basename = lbasename (backlink->original_name);
 
-      dwp_name = ldirname (objfile->original_name) + SLASH_STRING + backlink_basename;
+      dwp_name = gdb_ldirname (objfile->original_name) + SLASH_STRING + backlink_basename;
     }
   else
     dwp_name = objfile->original_name;

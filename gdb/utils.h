@@ -133,7 +133,7 @@ private:
 extern int gdb_filename_fnmatch (const char *pattern, const char *string,
 				 int flags);
 
-std::string ldirname (const char *filename);
+std::string gdb_ldirname (const char *filename);
 
 extern int count_path_elements (const char *path);
 

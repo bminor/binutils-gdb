@@ -343,7 +343,7 @@ dwz_file::read_dwz_file (dwarf2_per_objfile *per_objfile)
     {
       gdb::unique_xmalloc_ptr<char> abs = gdb_realpath (per_bfd->filename ());
 
-      filename = ldirname (abs.get ()) + SLASH_STRING + filename;
+      filename = gdb_ldirname (abs.get ()) + SLASH_STRING + filename;
     }
 
   /* First try the file name given in the section.  If that doesn't

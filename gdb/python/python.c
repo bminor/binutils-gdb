@@ -2446,7 +2446,7 @@ py_initialize ()
      /foo/lib/pythonX.Y/...
      This must be done before calling Py_Initialize.  */
   gdb::unique_xmalloc_ptr<char> progname
-    (concat (ldirname (python_libdir.c_str ()).c_str (), SLASH_STRING, "bin",
+    (concat (gdb_ldirname (python_libdir.c_str ()).c_str (), SLASH_STRING, "bin",
 	      SLASH_STRING, "python", (char *) NULL));
 
   {
