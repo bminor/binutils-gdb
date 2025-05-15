@@ -2312,6 +2312,10 @@
   QLF3(S_S,S_S,S_S),                                    \
   QLF3(S_D,S_D,S_D),                                    \
 }
+#define OP_SVE_BBQ                                  \
+{                                                       \
+  QLF3(S_B, S_B, S_Q)                                   \
+}
 #define OP_SVE_VVV_D                                    \
 {                                                       \
   QLF3(S_D,S_D,S_D),                                    \
@@ -2867,7 +2871,7 @@ static const aarch64_feature_set aarch64_feature_tme =
 static const aarch64_feature_set aarch64_feature_sve2 =
   AARCH64_FEATURE (SVE2);
 static const aarch64_feature_set aarch64_feature_sve2aes =
-  AARCH64_FEATURES (2, SVE2, SVE2_AES);
+  AARCH64_FEATURES (2, SVE_AES, SVE2_SSVE_AES);
 static const aarch64_feature_set aarch64_feature_sve2sha3 =
   AARCH64_FEATURES (2, SVE2, SVE2_SHA3);
 static const aarch64_feature_set aarch64_feature_sve2sm4 =
@@ -2944,6 +2948,8 @@ static const aarch64_feature_set aarch64_feature_f8f16mm =
   AARCH64_FEATURE (F8F16MM);
 static const aarch64_feature_set aarch64_feature_f8f16mm_sve2 =
   AARCH64_FEATURES (2, SVE2, F8F16MM);
+static const aarch64_feature_set aarch64_feature_sve_aes2 =
+  AARCH64_FEATURES (2, SVE_AES2, SVE2_SSVE_AES);
 static const aarch64_feature_set aarch64_feature_rcpc3 =
   AARCH64_FEATURE (RCPC3);
 static const aarch64_feature_set aarch64_feature_cpa =
@@ -3085,6 +3091,7 @@ static const aarch64_feature_set aarch64_feature_sve2p2_sme2p2 =
 #define F8F32MM_SVE2  &aarch64_feature_f8f32mm_sve2
 #define F8F16MM  &aarch64_feature_f8f16mm
 #define F8F16MM_SVE2  &aarch64_feature_f8f16mm_sve2
+#define SVE_AES2  &aarch64_feature_sve_aes2
 #define RCPC3	  &aarch64_feature_rcpc3
 #define CPA	  &aarch64_feature_cpa
 #define CPA_SVE   &aarch64_feature_cpa_sve
@@ -3232,6 +3239,9 @@ static const aarch64_feature_set aarch64_feature_sve2p2_sme2p2 =
     FLAGS | F_STRICT, CONSTRAINTS, TIED, NULL }
 #define SVE2AES_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2_AES, OPS, QUALS, \
+    FLAGS | F_STRICT, 0, TIED, NULL }
+#define SVE_AES2_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
+  { NAME, OPCODE, MASK, CLASS, OP, SVE_AES2, OPS, QUALS, \
     FLAGS | F_STRICT, 0, TIED, NULL }
 #define SVE2SHA3_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS,TIED) \
   { NAME, OPCODE, MASK, CLASS, OP, SVE2_SHA3, OPS, QUALS, \
@@ -6062,6 +6072,17 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SVE2BITPERM_INSN ("bdep", 0x4500b400, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, 0),
   SVE2BITPERM_INSN ("bext", 0x4500b000, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, 0),
   SVE2BITPERM_INSN ("bgrp", 0x4500b800, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, 0),
+  /* SVE_AES2 instructions */
+  SVE_AES2_INSN ("aesdimc", 0x4523ec00, 0xffe7fc01, sve_misc, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zn_INDEX2_19), OP_SVE_BBQ, 0, 1),
+  SVE_AES2_INSN ("aesdimc", 0x4527ec00, 0xffe7fc03, sve_misc, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zn_INDEX2_19), OP_SVE_BBQ, 0, 1),
+  SVE_AES2_INSN ("aesd", 0x4522ec00, 0xffe7fc01, sve_misc, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zn_INDEX2_19), OP_SVE_BBQ, 0, 1),
+  SVE_AES2_INSN ("aesd", 0x4526ec00, 0xffe7fc03, sve_misc, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zn_INDEX2_19), OP_SVE_BBQ, 0, 1),
+  SVE_AES2_INSN ("aesemc", 0x4523e800, 0xffe7fc01, sve_misc, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zn_INDEX2_19), OP_SVE_BBQ, 0, 1),
+  SVE_AES2_INSN ("aesemc", 0x4527e800, 0xffe7fc03, sve_misc, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zn_INDEX2_19), OP_SVE_BBQ, 0, 1),
+  SVE_AES2_INSN ("aese", 0x4522e800, 0xffe7fc01, sve_misc, 0, OP3 (SME_Zdnx2, SME_Zdnx2, SME_Zn_INDEX2_19), OP_SVE_BBQ, 0, 1),
+  SVE_AES2_INSN ("aese", 0x4526e800, 0xffe7fc03, sve_misc, 0, OP3 (SME_Zdnx4, SME_Zdnx4, SME_Zn_INDEX2_19), OP_SVE_BBQ, 0, 1),
+  SVE_AES2_INSN ("pmlal", 0x4520fc00, 0xffe0fc01, sve_misc, 0, OP3 (SME_Zdnx2, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_Q_D, 0, 0),
+  SVE_AES2_INSN ("pmull", 0x4520f800, 0xffe0fc01, sve_misc, 0, OP3 (SME_Zdnx2, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_Q_D, 0, 0),
   /* SME instructions.  */
   SME_INSN ("addha", 0xc0900000, 0xffff001c, sme_misc, 0, OP4 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn), OP_SVE_SMMS, 0, 0),
   SME_I16I64_INSN ("addha", 0xc0d00000, 0xffff0018, sme_misc, 0, OP4 (SME_ZAda_3b, SVE_Pg3, SME_Pm, SVE_Zn), OP_SVE_DMMD, 0, 0),
@@ -8135,6 +8156,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_SVE_Zn, FLD_imm2_15), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX2_16", 0,			\
       F(FLD_SVE_Zn, FLD_imm2_16), "an indexed SVE vector register")	\
+    Y(SVE_REG, simple_index, "SME_Zn_INDEX2_19", 0,			\
+      F(FLD_SVE_Zn, FLD_imm2_19), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX3_14", 0,			\
       F(FLD_SVE_Zn, FLD_imm3_14), "an indexed SVE vector register")	\
     Y(SVE_REG, simple_index, "SME_Zn_INDEX3_15", 0,			\

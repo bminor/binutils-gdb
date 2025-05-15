@@ -333,6 +333,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX1_16", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm1_16}, "an indexed SVE vector register"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX2_15", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm2_15}, "an indexed SVE vector register"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX2_16", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm2_16}, "an indexed SVE vector register"},
+  {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX2_19", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm2_19}, "an indexed SVE vector register"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX3_14", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm3_14}, "an indexed SVE vector register"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX3_15", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm3_15}, "an indexed SVE vector register"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_Zn_INDEX4_14", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zn, FLD_imm4_14}, "an indexed SVE vector register"},

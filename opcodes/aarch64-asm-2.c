@@ -514,7 +514,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1316:	/* movz */
       value = 1316;	/* --> movz.  */
       break;
-    case 3363:	/* clrbhb */
+    case 3373:	/* clrbhb */
     case 1398:	/* autibsp */
     case 1397:	/* autibz */
     case 1396:	/* autiasp */
@@ -555,7 +555,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1353:	/* dsb */
       value = 1353;	/* --> dsb.  */
       break;
-    case 3364:	/* trcit */
+    case 3374:	/* trcit */
     case 1384:	/* brb */
     case 1383:	/* cosp */
     case 1382:	/* cpp */
@@ -710,49 +710,49 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 2091:	/* str */
       value = 2091;	/* --> str.  */
       break;
-    case 2519:	/* mov */
-    case 2521:	/* mova */
-      value = 2521;	/* --> mova.  */
+    case 2529:	/* mov */
+    case 2531:	/* mova */
+      value = 2531;	/* --> mova.  */
       break;
-    case 2520:	/* mov */
-    case 2522:	/* mova */
-      value = 2522;	/* --> mova.  */
+    case 2530:	/* mov */
+    case 2532:	/* mova */
+      value = 2532;	/* --> mova.  */
       break;
-    case 2540:	/* psel */
-    case 2539:	/* psel */
-      value = 2539;	/* --> psel.  */
+    case 2550:	/* psel */
+    case 2549:	/* psel */
+      value = 2549;	/* --> psel.  */
       break;
-    case 2745:	/* mov */
-    case 2753:	/* mova */
-      value = 2753;	/* --> mova.  */
+    case 2755:	/* mov */
+    case 2763:	/* mova */
+      value = 2763;	/* --> mova.  */
       break;
-    case 2746:	/* mov */
-    case 2754:	/* mova */
-      value = 2754;	/* --> mova.  */
+    case 2756:	/* mov */
+    case 2764:	/* mova */
+      value = 2764;	/* --> mova.  */
       break;
-    case 2747:	/* mov */
-    case 2755:	/* mova */
-      value = 2755;	/* --> mova.  */
+    case 2757:	/* mov */
+    case 2765:	/* mova */
+      value = 2765;	/* --> mova.  */
       break;
-    case 2748:	/* mov */
-    case 2756:	/* mova */
-      value = 2756;	/* --> mova.  */
+    case 2758:	/* mov */
+    case 2766:	/* mova */
+      value = 2766;	/* --> mova.  */
       break;
-    case 2749:	/* mov */
-    case 2757:	/* mova */
-      value = 2757;	/* --> mova.  */
+    case 2759:	/* mov */
+    case 2767:	/* mova */
+      value = 2767;	/* --> mova.  */
       break;
-    case 2750:	/* mov */
-    case 2758:	/* mova */
-      value = 2758;	/* --> mova.  */
+    case 2760:	/* mov */
+    case 2768:	/* mova */
+      value = 2768;	/* --> mova.  */
       break;
-    case 2751:	/* mov */
-    case 2759:	/* mova */
-      value = 2759;	/* --> mova.  */
+    case 2761:	/* mov */
+    case 2769:	/* mova */
+      value = 2769;	/* --> mova.  */
       break;
-    case 2752:	/* mov */
-    case 2760:	/* mova */
-      value = 2760;	/* --> mova.  */
+    case 2762:	/* mov */
+    case 2770:	/* mova */
+      value = 2770;	/* --> mova.  */
       break;
     default: return NULL;
     }
@@ -834,14 +834,14 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 276:
     case 277:
     case 278:
-    case 312:
-    case 316:
+    case 313:
+    case 317:
       return aarch64_ins_regno (self, info, code, inst, errors);
     case 6:
     case 122:
     case 123:
-    case 322:
-    case 325:
+    case 323:
+    case 326:
       return aarch64_ins_none (self, info, code, inst, errors);
     case 17:
       return aarch64_ins_reg_extended (self, info, code, inst, errors);
@@ -856,7 +856,7 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 37:
     case 38:
     case 39:
-    case 327:
+    case 328:
       return aarch64_ins_reglane (self, info, code, inst, errors);
     case 40:
     case 41:
@@ -883,12 +883,13 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 309:
     case 310:
     case 311:
-    case 313:
+    case 312:
     case 314:
     case 315:
-    case 317:
+    case 316:
     case 318:
     case 319:
+    case 320:
       return aarch64_ins_simple_index (self, info, code, inst, errors);
     case 43:
       return aarch64_ins_reglist (self, info, code, inst, errors);
@@ -942,13 +943,13 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 219:
     case 220:
     case 281:
-    case 320:
     case 321:
-    case 323:
+    case 322:
     case 324:
-    case 326:
-    case 331:
+    case 325:
+    case 327:
     case 332:
+    case 333:
       return aarch64_ins_imm (self, info, code, inst, errors);
     case 52:
     case 53:
@@ -1166,16 +1167,16 @@ aarch64_insert_operand (const aarch64_operand *self,
       return aarch64_ins_sme_pred_reg_with_index (self, info, code, inst, errors);
     case 293:
       return aarch64_ins_plain_shrimm (self, info, code, inst, errors);
-    case 328:
     case 329:
     case 330:
+    case 331:
       return aarch64_ins_x0_to_x30 (self, info, code, inst, errors);
-    case 333:
     case 334:
     case 335:
     case 336:
-      return aarch64_ins_rcpc3_addr_opt_offset (self, info, code, inst, errors);
     case 337:
+      return aarch64_ins_rcpc3_addr_opt_offset (self, info, code, inst, errors);
+    case 338:
       return aarch64_ins_rcpc3_addr_offset (self, info, code, inst, errors);
     default: assert (0); abort ();
     }

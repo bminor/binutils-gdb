@@ -244,6 +244,12 @@ enum aarch64_feature_bit {
   AARCH64_FEATURE_F8F32MM,
   /* F8F16MM instructions.  */
   AARCH64_FEATURE_F8F16MM,
+  /* SVE_PMULL128 extension. */
+  AARCH64_FEATURE_SVE_AES,
+  /* SVE AES2 instructions.  */
+  AARCH64_FEATURE_SVE_AES2,
+  /* SSVE_AES extension. */
+  AARCH64_FEATURE_SSVE_AES,
   /* RCPC3 instructions.  */
   AARCH64_FEATURE_RCPC3,
   /* Enhanced Software Step Extension. */
@@ -305,6 +311,8 @@ enum aarch64_feature_bit {
 
   /* Virtual features.  These are used to gate instructions that are enabled
      by either of two (or more) sets of command line flags.  */
+  /* +sve2 or +ssve-aes */
+  AARCH64_FEATURE_SVE2_SSVE_AES,
   /* +fp8fma+sve or +ssve-fp8fma  */
   AARCH64_FEATURE_FP8FMA_SVE,
   /* +fp8dot4+sve or +ssve-fp8dot4  */
@@ -977,6 +985,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_Zn_INDEX1_16,    /* Zn[index], bits [9:5] and [16:16].  */
   AARCH64_OPND_SME_Zn_INDEX2_15,    /* Zn[index], bits [9:5] and [16:15].  */
   AARCH64_OPND_SME_Zn_INDEX2_16,    /* Zn[index], bits [9:5] and [17:16].  */
+  AARCH64_OPND_SME_Zn_INDEX2_19,    /* Zn[index], bits [9:5] and [20:19].  */
   AARCH64_OPND_SME_Zn_INDEX3_14,    /* Zn[index], bits [9:5] and [16:14].  */
   AARCH64_OPND_SME_Zn_INDEX3_15,    /* Zn[index], bits [9:5] and [17:15].  */
   AARCH64_OPND_SME_Zn_INDEX4_14,    /* Zn[index], bits [9:5] and [17:14].  */

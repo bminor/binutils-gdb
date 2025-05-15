@@ -1898,6 +1898,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    return 0;
 	  break;
 
+	case AARCH64_OPND_SME_Zn_INDEX2_19:
 	case AARCH64_OPND_SVE_Zm2_22_INDEX:
 	  size = get_operand_fields_width (get_operand_from_code (type));
 	  if (!check_reglane (opnd, mismatch_detail, idx, "z", 0, 31, 0, 3))
@@ -4387,6 +4388,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_Zn_INDEX1_16:
     case AARCH64_OPND_SME_Zn_INDEX2_15:
     case AARCH64_OPND_SME_Zn_INDEX2_16:
+    case AARCH64_OPND_SME_Zn_INDEX2_19:
     case AARCH64_OPND_SME_Zn_INDEX3_14:
     case AARCH64_OPND_SME_Zn_INDEX3_15:
     case AARCH64_OPND_SME_Zn_INDEX4_14:
