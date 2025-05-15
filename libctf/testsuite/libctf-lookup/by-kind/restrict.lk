@@ -4,7 +4,7 @@
 #...
 Section \.bss:
 
-  0: 0x4: foo: 0x3: \(kind 11\) int \*restrict .*
+  0: 0x4: foo \(datasec size: .*\): 0x3: \(kind 11\) int \*restrict .*
 
 Types: 
 

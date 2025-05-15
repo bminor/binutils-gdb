@@ -4,8 +4,8 @@
 #...
 Section \.bss:
 
-  [0-9]*: 0x[0-9]*: bar: 0x3: \(kind 19\) enum big .*
-  [0-9]*: 0x[0-9]*: foo: 0x1: \(kind 6\) enum baz .*
+  [0-9]*: 0x[0-9]*: bar \(datasec size: .*\): 0x3: \(kind 19\) enum big .*
+  [0-9]*: 0x[0-9]*: foo \(datasec size: .*\): 0x1: \(kind 6\) enum baz .*
 
 Types: 
 
