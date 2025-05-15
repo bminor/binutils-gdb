@@ -189,23 +189,22 @@ SECTIONS
     ${RELOCATING+*(.vectors)
     KEEP(*(.vectors))
 
-    /* For data that needs to reside in the lower 64k of progmem.  */
-    *(.progmem.gcc*)
+    /* For data that needs to reside in the lower 64k of progmem.
+       For data accessed with ELPM use .progmemx.* instead
+       so that no lower 64k .progmem addresses are wasted.  */
+    __progmem_start = . ;
+    *(.progmem)
+    *(.progmem.*)
+    __progmem_end = . ;
+    ASSERT (__progmem_start == __progmem_end || __progmem_end <= 0x10000,
+            \".progmem section exceeds 0x10000\");
 
-    /* PR 13812: Placing the trampolines here gives a better chance
-       that they will be in range of the code that uses them.  */
     . = ALIGN(2);
     __trampolines_start = . ;
     /* The jump trampolines for the 16-bit limited relocs will reside here.  */
     *(.trampolines)
     *(.trampolines*)
     __trampolines_end = . ;
-
-    /* avr-libc expects these data to reside in lower 64K. */
-    *libprintf_flt.a:*(.progmem.data)
-    *libc.a:*(.progmem.data)
-
-    *(.progmem.*)
 
     . = ALIGN(2);
 
@@ -273,6 +272,7 @@ SECTIONS
     *(.hightext)
     *(.hightext*)
 
+    *(.progmemx)
     *(.progmemx.*)
 
     . = ALIGN(2);

@@ -12,6 +12,11 @@
 * Remove the linker -taso option for Alpha target, as Linux/Alpha kernel
   support for 32-bit pointers has been removed.
 
+* On avr, the default linker scripts now assert that the .progmem sections
+  don't extend past 0xffff since they are accessed by means of LPM.
+  For data in program memory that may be located past 0xffff, a .progmemx
+  section should be used.
+
 * On s390, generate ".eh_frame" unwind information for the linker generated
   .plt section.  Enabled by default.  Can be disabled using linker option
   --no-ld-generated-unwind-info.
