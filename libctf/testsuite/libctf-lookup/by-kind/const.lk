@@ -4,7 +4,7 @@
 #...
 Section \.rodata:
 
-  0: 0x3: foo: 0x2: \(kind 10\) const int .*
+  0: 0x3: foo \(datasec size: .*\): 0x2: \(kind 10\) const int .*
 
 Types: 
 
