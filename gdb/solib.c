@@ -1818,13 +1818,13 @@ default_find_solib_addr (solib &so)
   return {};
 }
 
-/* Implementation of the current_linker_namespace convenience variable.
+/* Implementation of the linker_namespace convenience variable.
    This returns the GDB internal identifier of the linker namespace,
    for the current frame, as an integer.  If the inferior doesn't support
    linker namespaces, this always returns 0.  */
 
 static value *
-current_linker_namespace_make_value (gdbarch *gdbarch, internalvar *var,
+linker_namespace_make_value (gdbarch *gdbarch, internalvar *var,
 				     void *ignore)
 {
   const solib_ops *ops = gdbarch_so_ops (gdbarch);
@@ -1846,11 +1846,11 @@ current_linker_namespace_make_value (gdbarch *gdbarch, internalvar *var,
   return value_from_longest (builtin_type (gdbarch)->builtin_int, nsid);
 }
 
-/* Implementation of `$_current_linker_namespace' variable.  */
+/* Implementation of `$_linker_namespace' variable.  */
 
-static const struct internalvar_funcs current_linker_namespace_funcs =
+static const struct internalvar_funcs linker_namespace_funcs =
 {
-  current_linker_namespace_make_value,
+  linker_namespace_make_value,
   nullptr,
 };
 
@@ -1869,8 +1869,8 @@ _initialize_solib ()
   /* Convenience variables for debugging linker namespaces.  These are
      set here, even if the solib_ops doesn't support them,
      for consistency.  */
-  create_internalvar_type_lazy ("_current_linker_namespace",
-				&current_linker_namespace_funcs, nullptr);
+  create_internalvar_type_lazy ("_linker_namespace",
+				&linker_namespace_funcs, nullptr);
   set_internalvar_integer (lookup_internalvar ("_active_linker_namespaces"), 1);
 
   add_com (

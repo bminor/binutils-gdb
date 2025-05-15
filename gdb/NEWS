@@ -41,7 +41,7 @@
   is active.
 
 * New built-in convenience variables $_active_linker_namespaces and
-  $_current_linker_namespace.  These show the number of active linker
+  $_linker_namespace.  These show the number of active linker
   namespaces, and the namespace to which the current location belongs to.
   In systems that don't support linker namespaces, these always return
   the integers 1 and 0 respectively.

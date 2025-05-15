@@ -112,7 +112,7 @@ proc_with_prefix test_conv_vars {} {
 
     gdb_test "print \$_active_linker_namespaces" "1" \
 	"1 namespace before starting inferior"
-    gdb_test "print \$_current_linker_namespace" "No registers." \
+    gdb_test "print \$_linker_namespace" "No registers." \
 	"No current namespace before starting inferior"
 
     if { ![runto_main] } {
@@ -121,7 +121,7 @@ proc_with_prefix test_conv_vars {} {
 
     gdb_test "print \$_active_linker_namespaces" "1" \
 	"Before activating namespaces"
-    gdb_test "print \$_current_linker_namespace" ".* = 0" \
+    gdb_test "print \$_linker_namespace" ".* = 0" \
 	"Still in the default namespace"
 
     gdb_breakpoint "inc" allow-pending
@@ -130,7 +130,7 @@ proc_with_prefix test_conv_vars {} {
     foreach_with_prefix dl {3 2 1} {
 	gdb_continue_to_breakpoint "inc"
 
-	gdb_test "print \$_current_linker_namespace" ".* = $dl" \
+	gdb_test "print \$_linker_namespace" ".* = $dl" \
 	    "Verify we're in namespace $dl"
     }
 
@@ -154,7 +154,7 @@ proc_with_prefix test_conv_vars {} {
     # breakpoints and pending breakpoints at the same time with
     # gdb_breakpoint.
     gdb_test "next" ".*assert.*" "load the first SO"
-    gdb_breakpoint "inc if \$_current_linker_namespace == 2"
+    gdb_breakpoint "inc if \$_linker_namespace == 2"
     gdb_continue_to_breakpoint "inc"
     gdb_continue_to_end "" continue 1
 }
