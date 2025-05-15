@@ -4,7 +4,7 @@
 #...
 Section \.bss:
 
-  0: 0x3: bar: 0x2: \(kind 2\) struct foo \* .* -> 0x1: \(kind 7\) struct foo
+  0: 0x3: bar \(datasec size: .*\): 0x2: \(kind 2\) struct foo \* .* -> 0x1: \(kind 7\) struct foo
 
 Types: 
 

@@ -4,8 +4,8 @@
 #...
 Section \.bss:
 
-  0: 0x[45]: bar: 0x2: \(kind 4\) struct  .*
-  0: 0x[56]: foo: 0x1: \(kind 1\) int .*
+  0: 0x[45]: bar \(datasec size: .*\): 0x2: \(kind 4\) struct  .*
+  0: 0x[56]: foo \(datasec size: .*\): 0x1: \(kind 1\) int .*
 
 Types: 
 
