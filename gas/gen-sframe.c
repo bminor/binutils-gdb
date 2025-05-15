@@ -688,9 +688,9 @@ output_sframe_internal (void)
 
   unsigned int num_fdes = get_num_sframe_fdes ();
   unsigned int num_fres = get_num_sframe_fres ();
-  symbolS **fre_symbols = XNEWVEC (symbolS *, num_fres);
-  for (i = 0; i < num_fres; i++)
-    fre_symbols[i] = symbol_temp_make ();
+  symbolS **fde_fre_symbols = XNEWVEC (symbolS *, num_fdes);
+  for (i = 0; i < num_fdes; i++)
+    fde_fre_symbols[i] = symbol_temp_make ();
 
   end_of_frame_hdr = symbol_temp_make ();
   start_of_fre_section = symbol_temp_make ();
@@ -764,8 +764,8 @@ output_sframe_internal (void)
   for (sframe_fde = all_sframe_fdes; sframe_fde; sframe_fde = sframe_fde->next)
     {
       output_sframe_funcdesc (start_of_fre_section,
-			      fre_symbols[i], sframe_fde);
-      i += sframe_fde->num_fres;
+			      fde_fre_symbols[i], sframe_fde);
+      i++;
     }
 
   symbol_set_value_now (start_of_fre_section);
@@ -776,16 +776,16 @@ output_sframe_internal (void)
 
   for (sframe_fde = all_sframe_fdes; sframe_fde; sframe_fde = sframe_fde_next)
     {
+      symbol_set_value_now (fde_fre_symbols[i]);
       for (sframe_fre = sframe_fde->sframe_fres;
 	   sframe_fre;
 	   sframe_fre = sframe_fre->next)
 	{
-	  symbol_set_value_now (fre_symbols[i]);
 	  output_sframe_row_entry (get_dw_fde_start_addrS (sframe_fde->dw_fde),
 				   get_dw_fde_end_addrS (sframe_fde->dw_fde),
 				   sframe_fre);
-	  i++;
 	}
+      i++;
       sframe_fde_next = sframe_fde->next;
       sframe_fde_free (sframe_fde);
     }
@@ -794,10 +794,10 @@ output_sframe_internal (void)
 
   symbol_set_value_now (end_of_frame_section);
 
-  gas_assert (i == num_fres);
+  gas_assert (i == num_fdes);
 
-  free (fre_symbols);
-  fre_symbols = NULL;
+  free (fde_fre_symbols);
+  fde_fre_symbols = NULL;
 }
 
 static unsigned int
