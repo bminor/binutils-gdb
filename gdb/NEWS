@@ -35,16 +35,16 @@
   a -h or --help option, which prints each options and a brief
   description.
 
-* On systems that support linkage namespaces, the output of the command
+* On systems that support linker namespaces, the output of the command
   "info sharedlibraries" may add one more column, NS, which identifies the
   namespace into which the library was loaded, if more than one namespace
   is active.
 
 * New built-in convenience variables $_active_linker_namespaces and
-  $_current_linker_namespace.  These show the number of active linkage
+  $_current_linker_namespace.  These show the number of active linker
   namespaces, and the namespace to which the current location belongs to.
-  In systems that don't support linkage namespaces, these always return 1
-  and [[0]] respectively.
+  In systems that don't support linker namespaces, these always return
+  the integers 1 and 0 respectively.
 
 * Add record full support for rv64gc architectures
 

@@ -13112,9 +13112,9 @@ support for linkage namespaces, this variable will always be set to @samp{1}.
 @vindex $_current_linker_namespace@r{, convenience variable}
 @item $_current_linker_namespace
 The namespace which contains the current location in the inferior.  This
-returns GDB's internal identifier for namespaces, which is @samp{[[@var{n}]]}
-where @var{n} is a zero-based namespace number.  In systems with no support
-for linkage namespaces, this variable will always be set to @samp{[[0]]}.
+returns @value{GDBN}'s internal numbering for the namespace.  In systems with no
+support for linker namespaces, this variable will always be set to
+@samp{0}.
 
 @end table
 

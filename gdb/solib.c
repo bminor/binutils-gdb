@@ -1820,24 +1820,22 @@ default_find_solib_addr (solib &so)
 
 /* Implementation of the current_linker_namespace convenience variable.
    This returns the GDB internal identifier of the linker namespace,
-   for the current frame, in the form '[[<number>]]'.  If the inferior
-   doesn't support linker namespaces, this always returns [[0]].  */
+   for the current frame, as an integer.  If the inferior doesn't support
+   linker namespaces, this always returns 0.  */
 
 static value *
 current_linker_namespace_make_value (gdbarch *gdbarch, internalvar *var,
 				     void *ignore)
 {
   const solib_ops *ops = gdbarch_so_ops (gdbarch);
-  const language_defn *lang = language_def (get_frame_language
-					      (get_current_frame ()));
-  std::string nsid = "[[0]]";
+  int nsid = 0;
   if (ops->find_solib_ns != nullptr)
     {
       CORE_ADDR curr_pc = get_frame_pc (get_current_frame ());
       for (const solib &so : current_program_space->solibs ())
 	if (solib_contains_address_p (so, curr_pc))
 	  {
-	    nsid = string_printf ("[[%d]]", ops->find_solib_ns (so));
+	    nsid = ops->find_solib_ns (so);
 	    break;
 	  }
     }
@@ -1845,7 +1843,7 @@ current_linker_namespace_make_value (gdbarch *gdbarch, internalvar *var,
 
   /* If the PC is not in an SO, or the solib_ops doesn't support
      linker namespaces, the inferior is in the default namespace.  */
-  return lang->value_string (gdbarch, nsid.c_str (), nsid.length ());
+  return value_from_longest (builtin_type (gdbarch)->builtin_int, nsid);
 }
 
 /* Implementation of `$_current_linker_namespace' variable.  */
