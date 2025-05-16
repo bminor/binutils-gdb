@@ -1,0 +1,91 @@
+# Copyright 2025 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test continuing with a software watchpoint installed, when there are
+# multiple threads, and previously we stepped over a breakpoint.
+#
+# This is a regression test for a GDB bug where stepping over a
+# breakpoint in-line made GDB insert a software single-step breakpoint
+# in some threads by mistake, which later would cause an assertion to
+# fail.
+#
+# The issue only triggered when:
+#
+#  - The program has multiple threads.
+#  - The target backend is working in non-stop mode.
+#  - Displaced stepping is not available.
+#  - The target supports hardware single-step.
+#
+# However, we exercise more combinations for completeness.
+
+standard_testfile .c
+
+if { [build_executable "failed to prepare" $testfile $srcfile \
+	  {debug pthreads}] \
+	 == -1 } {
+    return
+}
+
+proc test {target-non-stop displaced-stepping} {
+
+    save_vars ::GDBFLAGS {
+	append ::GDBFLAGS " -ex \"maintenance set target-non-stop ${target-non-stop}\""
+	append ::GDBFLAGS " -ex \"set displaced ${displaced-stepping}\""
+	clean_restart $::binfile
+    }
+
+    if ![runto_main] {
+	return
+    }
+
+    # Run to a breakpoint, and leave it installed, so that GDB needs
+    # to step over it before continuing.
+    gdb_breakpoint [gdb_get_line_number "break here start"]
+    gdb_continue_to_breakpoint "started"
+
+    # GDB should know about at least two threads by now.
+    gdb_test "p \$_inferior_thread_count >= 2" " = 1"
+
+    # Set a software watchpoint.  This makes GDB single-step all
+    # instructions when we next continue.
+    gdb_test_no_output "set can-use-hw-watchpoints 0"
+    gdb_test "watch watched_global" "Watchpoint $::decimal: watched_global"
+
+    # Continue with the software watchpoint in place.  In the original
+    # bug, with displaced stepping disabled, this would make GDB
+    # incorrectly install a software single-step breakpoint on threads
+    # other than the main one.
+    gdb_test_multiple "cont" "continue to watchpoint" {
+	-re -wrap "Continuing.*Watchpoint.*watched_global.*Old value = 0.*New value = 1.*" {
+	    pass $gdb_test_name
+	}
+    }
+
+    # The final continue, with the software watchpoint set, so that
+    # GDB single-steps all threads (if the target is non-stop).  With
+    # the buggy GDB, the non-main thread had a software single-step
+    # breakpoint set, and on hardware single-step targets, GDB would
+    # fail an assertion that checks that we never ask the target to
+    # hardware single-step a thread when we have a software
+    # single-step breakpoint set for that thread.
+    gdb_breakpoint [gdb_get_line_number "break here end"]
+    gdb_continue_to_breakpoint "end"
+}
+
+foreach_with_prefix target-non-stop {auto on off} {
+    foreach_with_prefix displaced-stepping {auto on off} {
+	test ${target-non-stop} ${displaced-stepping}
+    }
+}

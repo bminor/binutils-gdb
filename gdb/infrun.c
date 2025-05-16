@@ -87,7 +87,7 @@ static void sig_print_header (void);
 
 static void follow_inferior_reset_breakpoints (void);
 
-static bool currently_stepping (struct thread_info *tp);
+static bool should_step (thread_info *tp);
 
 static void insert_hp_step_resume_breakpoint_at_frame (const frame_info_ptr &);
 
@@ -2656,7 +2656,7 @@ resume_1 (enum gdb_signal sig)
 	 "status %s (currently_stepping=%d).",
 	 tp->ptid.to_string ().c_str (),
 	 tp->pending_waitstatus ().to_string ().c_str (),
-	 currently_stepping (tp));
+	 tp->control.currently_stepping);
 
       tp->inf->process_target ()->threads_executing = true;
       tp->set_resumed (true);
@@ -2685,7 +2685,7 @@ resume_1 (enum gdb_signal sig)
   tp->stepped_breakpoint = 0;
 
   /* Depends on stepped_breakpoint.  */
-  step = currently_stepping (tp);
+  step = tp->control.currently_stepping = should_step (tp);
 
   if (current_inferior ()->thread_waiting_for_vfork_done != nullptr)
     {
@@ -3060,7 +3060,7 @@ clear_proceed_status_thread (struct thread_info *tp)
 	    ("thread %s has pending wait status %s (currently_stepping=%d).",
 	     tp->ptid.to_string ().c_str (),
 	     tp->pending_waitstatus ().to_string ().c_str (),
-	     currently_stepping (tp));
+	     tp->control.currently_stepping);
 	}
     }
 
@@ -5041,7 +5041,7 @@ adjust_pc_after_break (struct thread_info *thread,
 	 we also need to back up to the breakpoint address.  */
 
       if (thread_has_single_step_breakpoints_set (thread)
-	  || !currently_stepping (thread)
+	  || !thread->control.currently_stepping
 	  || (thread->stepped_breakpoint
 	      && thread->prev_pc == breakpoint_pc))
 	regcache_write_pc (regcache, breakpoint_pc);
@@ -5368,7 +5368,7 @@ save_waitstatus (struct thread_info *tp, const target_waitstatus &ws)
 	       && software_breakpoint_inserted_here_p (aspace, pc))
 	tp->set_stop_reason (TARGET_STOPPED_BY_SW_BREAKPOINT);
       else if (!thread_has_single_step_breakpoints_set (tp)
-	       && currently_stepping (tp))
+	       && tp->control.currently_stepping)
 	tp->set_stop_reason (TARGET_STOPPED_BY_SINGLE_STEP);
     }
 }
@@ -5563,7 +5563,7 @@ handle_one (const wait_one_event &event)
 			       paddress (current_inferior ()->arch (),
 					 t->stop_pc ()),
 			       t->ptid.to_string ().c_str (),
-			       currently_stepping (t));
+			       t->control.currently_stepping);
 	}
     }
 
@@ -6668,7 +6668,7 @@ restart_threads (struct thread_info *event_thread, inferior *inf)
 			  tp->ptid.to_string ().c_str ());
 	}
 
-      if (currently_stepping (tp))
+      if (tp->control.currently_stepping)
 	{
 	  infrun_debug_printf ("restart threads: [%s] was stepping",
 			       tp->ptid.to_string ().c_str ());
@@ -6795,7 +6795,7 @@ finish_step_over (struct execution_control_state *ecs)
 			       paddress (current_inferior ()->arch (),
 					 tp->stop_pc ()),
 			       tp->ptid.to_string ().c_str (),
-			       currently_stepping (tp));
+			       tp->control.currently_stepping);
 
 	  /* This in-line step-over finished; clear this so we won't
 	     start a new one.  This is what handle_signal_stop would
@@ -7204,7 +7204,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   /* If not, perhaps stepping/nexting can.  */
   if (random_signal)
     random_signal = !(ecs->event_thread->stop_signal () == GDB_SIGNAL_TRAP
-		      && currently_stepping (ecs->event_thread));
+		      && ecs->event_thread->control.currently_stepping);
 
   /* Perhaps the thread hit a single-step breakpoint of _another_
      thread.  Single-step breakpoints are transparent to the
@@ -8632,12 +8632,12 @@ keep_going_stepped_thread (struct thread_info *tp)
   return true;
 }
 
-/* Is thread TP in the middle of (software or hardware)
-   single-stepping?  (Note the result of this function must never be
-   passed directly as target_resume's STEP parameter.)  */
+/* Should thread TP be stepped (software or hardware)?  (Note the
+   result of this function must never be passed directly as
+   target_resume's STEP parameter.)  */
 
 static bool
-currently_stepping (struct thread_info *tp)
+should_step (thread_info *tp)
 {
   return ((tp->control.step_range_end
 	   && tp->control.step_resume_breakpoint == nullptr)
