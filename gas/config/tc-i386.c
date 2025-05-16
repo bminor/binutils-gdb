@@ -2604,11 +2604,6 @@ operand_size_match (const insn_template *t)
 	  break;
 	}
 
-      if (i.types[j].bitfield.class != Reg
-	  && i.types[j].bitfield.class != RegSIMD
-	  && t->opcode_modifier.operandconstraint == ANY_SIZE)
-	continue;
-
       if (i.types[j].bitfield.class == Reg
 	  && (t->operand_types[j].bitfield.class == Reg
 	      || (t->operand_types[j].bitfield.instance == Accum
@@ -2636,6 +2631,7 @@ operand_size_match (const insn_template *t)
 
       if ((i.flags[j] & Operand_Mem)
 	  && operand_type_check (t->operand_types[j], anymem)
+	  && t->opcode_modifier.operandconstraint != ANY_SIZE
 	  && !match_mem_size (t, j, j))
 	{
 	  match = 0;
