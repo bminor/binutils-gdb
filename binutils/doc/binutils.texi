@@ -879,7 +879,7 @@ symbol is defined anywhere, the common symbols are treated as undefined
 references.
 @ifclear man
 For more details on common symbols, see the discussion of
---warn-common in @ref{Options,,Linker options,ld.info,The GNU linker}.
+--warn-common in @ref{Options,,Linker options,ld,The GNU linker}.
 @end ifclear
 The lower case @var{c} character is used when the symbol is in a
 special section for small commons.
@@ -1362,7 +1362,7 @@ between any two formats may not work as expected.
 deletes them afterward.  @command{objcopy} uses @sc{bfd} to do all its
 translation work; it has access to all the formats described in @sc{bfd}
 and thus is able to recognize most formats without being told
-explicitly.  @xref{BFD,,BFD,ld.info,Using LD}.
+explicitly.  @xref{BFD,,BFD,ld,Using LD}.
 
 @command{objcopy} can be used to generate S-records by using an output
 target of @samp{srec} (e.g., use @samp{-O srec}).
