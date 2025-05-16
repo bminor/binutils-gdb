@@ -152,6 +152,10 @@ struct thread_control_state
      the finished single step.  */
   int trap_expected = 0;
 
+  /* True if the thread TP is in the middle of (software or hardware)
+     single-stepping.  */
+  bool currently_stepping = false;
+
   /* Nonzero if the thread is being proceeded for a "finish" command
      or a similar situation when return value should be printed.  */
   int proceed_to_finish = 0;
