@@ -1598,7 +1598,13 @@ s_align (signed int arg, int bytes_p)
       else
 	{
 	  ++input_line_pointer;
-	  max = get_absolute_expression ();
+	  offsetT val = get_absolute_expression ();
+	  max = val;
+	  if (val < 0 || max != val)
+	    {
+	      as_warn (_("ignoring out of range alignment maximum"));
+	      max = 0;
+	    }
 	}
     }
 
