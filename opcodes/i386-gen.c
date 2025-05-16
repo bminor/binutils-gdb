@@ -540,6 +540,7 @@ static const struct {
 } operand_classes[] = {
   CLASS (Reg),
   CLASS (SReg),
+  CLASS (RegFP),
   CLASS (RegCR),
   CLASS (RegDR),
   CLASS (RegTR),

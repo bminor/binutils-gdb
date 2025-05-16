@@ -44,7 +44,7 @@
 #define InOutPortReg RegD|Word
 
 #define FloatAcc Acc|Tbyte
-#define FloatReg Class=Reg|Tbyte
+#define FloatReg Class=RegFP|Tbyte
 
 #define SReg  Class=SReg
 

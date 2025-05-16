@@ -863,8 +863,9 @@ typedef struct i386_opcode_modifier
 enum operand_class
 {
   ClassNone,
-  Reg, /* GPRs and FP regs, distinguished by operand size */
+  Reg, /* GPRs, distinguished by operand size */
   SReg, /* Segment register */
+  RegFP, /* FP regs */
   RegCR, /* Control register */
   RegDR, /* Debug register */
   RegTR, /* Test register */
