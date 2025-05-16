@@ -2518,7 +2518,6 @@ match_operand_size (const insn_template *t, unsigned int wanted,
 		   || (intel_syntax
 		       && flag_code != CODE_64BIT
 		       && (t->operand_types[wanted].bitfield.class == Reg
-			   || t->operand_types[wanted].bitfield.class == Accum
 			   || t->opcode_modifier.isstring))))
 	   || (i.types[given].bitfield.tbyte
 	       && !t->operand_types[wanted].bitfield.tbyte));
