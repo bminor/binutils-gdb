@@ -1694,7 +1694,7 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
     }
 
   /* Bias the line delta by the base.  */
-  tmp = line_delta - DWARF2_LINE_BASE;
+  tmp = (unsigned) line_delta - DWARF2_LINE_BASE;
 
   /* If the line increment is out of range of a special opcode, we
      must encode it with DW_LNS_advance_line.  */
