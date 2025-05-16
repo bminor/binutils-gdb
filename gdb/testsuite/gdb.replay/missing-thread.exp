@@ -1,0 +1,231 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+# This test confirms how GDB handles a badly behaving remote target.  The
+# remote target reports a stop event (signal delivery), then, as GDB is
+# processing the stop it syncs the thread list with the remote.
+#
+# The badly behaving remote target was dropping the signaled thread from the
+# thread list at this point, that is, the thread appeared to exit before an
+# exit event had been sent to (and seen by) GDB.
+#
+# At one point this was causing an assertion failed.  GDB would try to
+# process the signal stop event, and to do this would try to read some
+# registers.  Reading registers requires a regcache, and GDB will only
+# create a regcache for a non-exited thread.
+
+load_lib gdbserver-support.exp
+load_lib gdbreplay-support.exp
+
+require allow_gdbserver_tests
+require has_gdbreplay
+
+standard_testfile
+
+if { [build_executable "failed to build exec" $testfile $srcfile {debug pthreads}] } {
+    return -1
+}
+
+# Start the inferior and record a remote log for our interaction with it.
+# All we do is start the inferior and wait for thread 2 to receive a signal.
+# Check that GDB correctly shows the signal as received.  LOG_FILENAME is
+# where we should write the remote log.
+proc_with_prefix record_initial_logfile { log_filename } {
+    clean_restart $::binfile
+
+    # Make sure we're disconnected, in case we're testing with an
+    # extended-remote board, therefore already connected.
+    gdb_test "disconnect" ".*"
+
+    gdb_test_no_output "set sysroot" \
+	"setting sysroot before starting gdbserver"
+
+    # Start gdbserver like:
+    #   gdbserver :PORT ....
+    set res [gdbserver_start "" $::binfile]
+    set gdbserver_protocol [lindex $res 0]
+    set gdbserver_gdbport [lindex $res 1]
+
+    gdb_test_no_output "set remotelogfile $log_filename" \
+	"setup remotelogfile"
+
+    # Connect to gdbserver.
+    if {![gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport] == 0} {
+	unsupported "$testfile (couldn't start gdbserver)"
+	return
+    }
+
+    gdb_breakpoint main
+    gdb_continue_to_breakpoint "continuing to main"
+
+    gdb_test "continue" \
+	"Thread $::decimal \[^\r\n\]+ received signal SIGTRAP, .*"
+
+    gdb_test "disconnect" ".*" \
+	"disconnect after seeing signal"
+}
+
+# Copy the remote log from IN_FILENAME to OUT_FILENAME, but modify one
+# particular line.
+#
+# The line to be modified is the last <threads>...</threads> line, this is
+# the reply from the remote that indicates the thread list.  It is expected
+# that the thread list will contain two threads.
+#
+# Whn DROP_BOTH is true then both threads will be removed from the modified
+# line.  Otherwise, only the second thread is removed.
+proc update_replay_log { in_filename out_filename drop_both } {
+    # Read IN_FILENAME into a list.
+    set fd [open $in_filename]
+    set data [read $fd]
+    close $fd
+    set lines [split $data "\n"]
+
+    # Find the last line in LINES that contains the <threads> list.
+    set idx -1
+    for { set i 0 } { $i < [llength $lines] } { incr i } {
+	if { [regexp "^r.*<threads>.*</threads>" [lindex $lines $i]] } {
+	    set idx $i
+	}
+    }
+
+    # Modify the line by dropping the second thread.  This does assume
+    # the thread order as seen in the <threads>...</threads> list, but
+    # this seems stable for now.
+    set line [lindex $lines $idx]
+    set fixed_log false
+    if {[regexp "^(r .*<threads>\\\\n)(<thread id.*/>\\\\n)(<thread id.*/>\\\\n)(</threads>.*)$" $line \
+	     match part1 part2 part3 part4]} {
+	if { $drop_both } {
+	    set line $part1$part4
+	} else {
+	    set line $part1$part2$part4
+	}
+	set lines [lreplace $lines $idx $idx $line]
+	set fixed_log true
+    }
+
+    # Write all the lines to OUT_FILENAME
+    set fd [open $out_filename "w"]
+    foreach l $lines {
+	puts $fd $l
+    }
+    close $fd
+
+    # Did we manage to update the log file?
+    return $fixed_log
+}
+
+# Replay the test process using REMOTE_LOG as the logfile to replay.  If
+# EXPECT_ERROR is true then after the final 'continue' we expect GDB to give
+# an error as the required thread is missing.  When EXPECT_ERROR is false
+# then we expect the test to complete as normal.
+proc_with_prefix replay_with_log { remote_log expect_error } {
+    clean_restart $::binfile
+
+    # Make sure we're disconnected, in case we're testing with an
+    # extended-remote board, therefore already connected.
+    gdb_test "disconnect" ".*"
+
+    gdb_test_no_output "set sysroot"
+
+    set res [gdbreplay_start $remote_log]
+    set gdbserver_protocol [lindex $res 0]
+    set gdbserver_gdbport [lindex $res 1]
+
+    # Connect to gdbserver.
+    if {![gdb_target_cmd $gdbserver_protocol $gdbserver_gdbport] == 0} {
+	fail "couldn't connect to gdbreplay"
+	return
+    }
+
+    gdb_breakpoint main
+    gdb_continue_to_breakpoint "continuing to main"
+
+    if { $expect_error } {
+	gdb_test "continue" \
+	    [multi_line \
+		 "\\\[Thread \[^\r\n\]+ exited\\\]" \
+		 "warning: Thread \[^\r\n\]+ unexpectedly exited after non-exit event" \
+		 "Command aborted, thread exited\\."]
+    } else {
+	# This is the original behaviour, we see this when running
+	# with the unmodified log.
+	gdb_test "continue" \
+	    "Thread ${::decimal}(?: \[^\r\n\]+)? received signal SIGTRAP, .*"
+
+	gdb_test "disconnect" ".*" \
+	    "disconnect after seeing signal"
+    }
+}
+
+# Run the complete test cycle; generate an initial log file, modify the log
+# file, then check that GDB correctly handles replaying the modified log
+# file.
+#
+# SUFFIX is added into the names of the generated, and modified, log files.
+proc run_test { suffix } {
+    # The replay log is placed in 'replay.log'.
+    set remote_log [standard_output_file replay${suffix}.log]
+    set missing_1_log [standard_output_file replay-missing-1${suffix}.log]
+    set missing_2_log [standard_output_file replay-missing-2${suffix}.log]
+
+    record_initial_logfile $remote_log
+
+    if { ![update_replay_log $remote_log $missing_1_log false] } {
+	fail "couldn't update remote replay log (drop 1 case)"
+    }
+
+    if { ![update_replay_log $remote_log $missing_2_log true] } {
+	fail "couldn't update remote replay log (drop 2 case)"
+    }
+
+    with_test_prefix "with unmodified log" {
+	# Replay with the unmodified log.  This confirms that we can replay this
+	# scenario correctly.
+	replay_with_log $remote_log false
+    }
+
+    with_test_prefix "missing 1 thread log" {
+	# Now replay with the modified log, this time the thread that receives
+	# the event should be missing from the thread list, GDB will give an
+	# error when the inferior stops.
+	replay_with_log $missing_1_log true
+    }
+
+    with_test_prefix "missing 2 threads log" {
+	# When we drop both threads from the <threads> reply, GDB doesn't
+	# actually remove both threads from the inferior; an inferior must
+	# always have at least one thread.  So in this case, as the primary
+	# thread is first, GDB drops this, then retains the second thread, which
+	# is the one we're stopping in, and so, we don't expect to see the error
+	# in this case.
+	replay_with_log $missing_2_log false
+    }
+}
+
+# Run the test twice, with non-stop on and off.
+foreach_with_prefix non_stop { on off } {
+    save_vars { ::GDBFLAGS } {
+	if { $non_stop } {
+	    set suffix "-ns"
+	} else {
+	    set suffix ""
+	}
+
+	append ::GDBFLAGS " -ex \"set non-stop $non_stop\""
+	run_test $suffix
+    }
+}

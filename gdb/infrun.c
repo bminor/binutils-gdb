@@ -9555,6 +9555,37 @@ normal_stop ()
      instead of after.  */
   update_thread_list ();
 
+  /* Calling update_thread_list pulls information from the target.  For
+     native targets we can be (reasonably) sure that the information we
+     get back is sane, but for remote targets, we cannot reply on the
+     returned thread list to be consistent.
+
+     Specifically, a remote target (not gdbserver), has been seen to
+     prematurely remove threads from the thread list after sending a
+     signal stop event.  The consequence of this, is that the thread might
+     now be exited.  This is bad as, while trying to print the stop
+     reason, GDB can ask for registers from the thread, and asking for
+     registers from an exited thread will trigger an assertion.
+
+     Here we check that, if the stop event is not one that should cause
+     the thread to exit, but the thread is now exited, then warn the user
+     that weird things are going on, and change the last event to be a
+     fake thread exited event.  */
+  if (last.kind () != TARGET_WAITKIND_SIGNALLED
+      && last.kind () != TARGET_WAITKIND_EXITED
+      && last.kind () != TARGET_WAITKIND_THREAD_EXITED
+      && inferior_thread ()->state == THREAD_EXITED)
+    {
+      warning (_("%s unexpectedly exited after non-exit event"),
+	       target_pid_to_str (inferior_thread ()->ptid).c_str ());
+
+      /* This thread exit status is completely bogus, especially the exit
+	 status value.  But what else can we do?  The target has removed
+	 the thread from the thread list without sending a thread exit
+	 event.  */
+      last.set_thread_exited (0);
+    }
+
   if (last.kind () == TARGET_WAITKIND_STOPPED && stopped_by_random_signal)
     notify_signal_received (inferior_thread ()->stop_signal ());
 
