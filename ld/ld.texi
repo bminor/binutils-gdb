@@ -1024,7 +1024,7 @@ Write a @dfn{dependency file} to @var{depfile}.  This file contains a rule
 suitable for @code{make} describing the output file and all the input files
 that were read to produce it.  The output is similar to the compiler's
 output with @samp{-M -MP} (@pxref{Preprocessor Options,, Options
-Controlling the Preprocessor, gcc.info, Using the GNU Compiler
+Controlling the Preprocessor, gcc, Using the GNU Compiler
 Collection}).  Note that there is no option like the compiler's @samp{-MM},
 to exclude ``system files'' (which is not a well-specified concept in the
 linker, unlike ``system headers'' in the compiler).  So the output from
@@ -9686,7 +9686,7 @@ format can be supported simply by creating a new BFD back end and adding
 it to the library.  To conserve runtime memory, however, the linker and
 associated tools are usually configured to support only a subset of the
 object file formats available.  You can use @code{objdump -i}
-(@pxref{objdump,,objdump,binutils.info,The GNU Binary Utilities}) to
+(@pxref{objdump,,objdump,binutils,The GNU Binary Utilities}) to
 list all the formats available for your configuration.
 
 @cindex BFD requirements
