@@ -2609,22 +2609,19 @@ operand_size_match (const insn_template *t)
 	  && t->opcode_modifier.operandconstraint == ANY_SIZE)
 	continue;
 
-      if (t->operand_types[j].bitfield.class == Reg
+      if (i.types[j].bitfield.class == Reg
+	  && (t->operand_types[j].bitfield.class == Reg
+	      || t->operand_types[j].bitfield.instance == Accum)
 	  && !match_operand_size (t, j, j))
 	{
 	  match = 0;
 	  break;
 	}
 
-      if (t->operand_types[j].bitfield.class == RegSIMD
+      if (i.types[j].bitfield.class == RegSIMD
+	  && (t->operand_types[j].bitfield.class == RegSIMD
+	      || t->operand_types[j].bitfield.instance == Accum)
 	  && !match_simd_size (t, j, j))
-	{
-	  match = 0;
-	  break;
-	}
-
-      if (t->operand_types[j].bitfield.instance == Accum
-	  && (!match_operand_size (t, j, j) || !match_simd_size (t, j, j)))
 	{
 	  match = 0;
 	  break;
@@ -2656,17 +2653,17 @@ operand_size_match (const insn_template *t)
 	  || is_cpu (t, CpuAPX_F))
 	given = j < 2 ? 1 - j : j;
 
-      if (t->operand_types[j].bitfield.class == Reg
+      if (i.types[given].bitfield.class == Reg
+	  && (t->operand_types[j].bitfield.class == Reg
+	      || t->operand_types[j].bitfield.instance == Accum)
 	  && !match_operand_size (t, j, given))
 	return match;
 
-      if (t->operand_types[j].bitfield.class == RegSIMD
+      /* No need to check for Accum here: There are no such templates with D
+	 set.  */
+      if (i.types[given].bitfield.class == RegSIMD
+	  && t->operand_types[j].bitfield.class == RegSIMD
 	  && !match_simd_size (t, j, given))
-	return match;
-
-      if (t->operand_types[j].bitfield.instance == Accum
-	  && (!match_operand_size (t, j, given)
-	      || !match_simd_size (t, j, given)))
 	return match;
 
       if ((i.flags[given] & Operand_Mem)
