@@ -11236,13 +11236,9 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
     handle_variant (child_die, type, fi, template_args, cu);
 }
 
-/* Create a property baton for a field of the struct type currently
-   being processed.  OFFSET is the DIE offset of the field in the
-   structure.  If OFFSET is found among the fields that have already
-   been seen, then a new property baton is allocated on the objfile
-   obstack and returned.  The baton isn't fully filled in -- it will
-   be post-processed once the fields are finally created; see
-   update_field_batons.  If OFFSET is not found, NULL is returned.  */
+/* Create a property baton for a field.  DIE is the field's DIE.  The
+   baton's "field" member is filled in, but the other members of the
+   baton are not.  The new property baton is returned.  */
 
 static dwarf2_property_baton *
 find_field_create_baton (dwarf2_cu *cu, die_info *die)
