@@ -2611,7 +2611,12 @@ operand_size_match (const insn_template *t)
 
       if (i.types[j].bitfield.class == Reg
 	  && (t->operand_types[j].bitfield.class == Reg
-	      || t->operand_types[j].bitfield.instance == Accum)
+	      || (t->operand_types[j].bitfield.instance == Accum
+		  && (t->operand_types[j].bitfield.byte
+		      || t->operand_types[j].bitfield.word
+		      || t->operand_types[j].bitfield.dword
+		      || t->operand_types[j].bitfield.qword
+		      || t->operand_types[j].bitfield.tbyte)))
 	  && !match_operand_size (t, j, j))
 	{
 	  match = 0;
@@ -2620,7 +2625,9 @@ operand_size_match (const insn_template *t)
 
       if (i.types[j].bitfield.class == RegSIMD
 	  && (t->operand_types[j].bitfield.class == RegSIMD
-	      || t->operand_types[j].bitfield.instance == Accum)
+	      || (t->operand_types[j].bitfield.instance == Accum
+		  /* Note: %ymm0, %zmm0, and %tmm0 aren't marked Accum.  */
+		  && t->operand_types[j].bitfield.xmmword))
 	  && !match_simd_size (t, j, j))
 	{
 	  match = 0;
@@ -2655,7 +2662,12 @@ operand_size_match (const insn_template *t)
 
       if (i.types[given].bitfield.class == Reg
 	  && (t->operand_types[j].bitfield.class == Reg
-	      || t->operand_types[j].bitfield.instance == Accum)
+	      || (t->operand_types[j].bitfield.instance == Accum
+		  && (t->operand_types[j].bitfield.byte
+		      || t->operand_types[j].bitfield.word
+		      || t->operand_types[j].bitfield.dword
+		      || t->operand_types[j].bitfield.qword
+		      || t->operand_types[j].bitfield.tbyte)))
 	  && !match_operand_size (t, j, given))
 	return match;
 
@@ -2694,6 +2706,23 @@ operand_type_match (i386_operand_type overlap,
   temp.bitfield.tmmword = 0;
   if (operand_type_all_zero (&temp))
     goto mismatch;
+
+  /* When a (register) instance is expected, operand size needs checking
+     to disambiguate.  */
+  if (overlap.bitfield.instance != InstanceNone
+      && !overlap.bitfield.byte
+      && !overlap.bitfield.word
+      && !overlap.bitfield.dword
+      && !overlap.bitfield.qword
+      && !overlap.bitfield.tbyte
+      && !overlap.bitfield.xmmword
+      && !overlap.bitfield.ymmword
+      && !overlap.bitfield.zmmword
+      && !overlap.bitfield.tmmword)
+    {
+      gas_assert (overlap.bitfield.class == ClassNone);
+      goto mismatch;
+    }
 
   if (given.bitfield.baseindex == overlap.bitfield.baseindex)
     return 1;
