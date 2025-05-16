@@ -234,7 +234,6 @@ static unsigned int bundle_lock_depth;
 #endif
 
 static void do_s_func (int end_p, const char *default_prefix);
-static void s_align (int, int);
 static void s_altmacro (int);
 static void s_bad_end (int);
 static void s_reloc (int);
@@ -1514,13 +1513,19 @@ s_abort (int ignore ATTRIBUTE_UNUSED)
   as_fatal (_(".abort detected.  Abandoning ship."));
 }
 
+#ifndef TC_ALIGN_LIMIT
+/* Limit alignment in code to 1G, to limit the amount of memory used
+   by rs_code_align frags.  */
+#define TC_ALIGN_LIMIT \
+  ((subseg_text_p (now_seg)				\
+    && stdoutput->arch_info->bits_per_address >= 32)	\
+   ? 30 : stdoutput->arch_info->bits_per_address - 1)
+#endif
+
 /* Handle the .align pseudo-op.  A positive ARG is a default alignment
    (in bytes).  A negative ARG is the negative of the length of the
    fill pattern.  BYTES_P is non-zero if the alignment value should be
    interpreted as the byte boundary, rather than the power of 2.  */
-#ifndef TC_ALIGN_LIMIT
-#define TC_ALIGN_LIMIT (stdoutput->arch_info->bits_per_address - 1)
-#endif
 
 static void
 s_align (signed int arg, int bytes_p)
@@ -1573,7 +1578,8 @@ s_align (signed int arg, int bytes_p)
   if (align > align_limit)
     {
       align = align_limit;
-      as_warn (_("alignment too large: %u assumed"), align_limit);
+      as_warn (_("alignment too large: %u assumed"),
+	       bytes_p ? 1u << align_limit : align_limit);
     }
 
   if (*input_line_pointer != ',')
