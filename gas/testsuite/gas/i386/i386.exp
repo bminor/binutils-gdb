@@ -833,6 +833,7 @@ if {![istarget "i*86-*-elfiamcu"] && [gas_64_check]} then {
 }
 run_list_test "string-bad" ""
 run_list_test "reg-bad" ""
+run_list_test "inval-type"
 run_list_test "space1" "-al"
 if {![istarget "i*86-*-elfiamcu"]} then {
     run_list_test "xmmword"

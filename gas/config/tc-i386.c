@@ -2630,7 +2630,9 @@ operand_size_match (const insn_template *t)
 	  break;
 	}
 
-      if ((i.flags[j] & Operand_Mem) && !match_mem_size (t, j, j))
+      if ((i.flags[j] & Operand_Mem)
+	  && operand_type_check (t->operand_types[j], anymem)
+	  && !match_mem_size (t, j, j))
 	{
 	  match = 0;
 	  break;
@@ -2667,7 +2669,9 @@ operand_size_match (const insn_template *t)
 	      || !match_simd_size (t, j, given)))
 	return match;
 
-      if ((i.flags[given] & Operand_Mem) && !match_mem_size (t, j, given))
+      if ((i.flags[given] & Operand_Mem)
+	  && operand_type_check (t->operand_types[j], anymem)
+	  && !match_mem_size (t, j, given))
 	return match;
     }
 
@@ -9363,7 +9367,10 @@ match_template (char mnem_suffix)
 	{
 	case 1:
 	  if (!operand_type_match (overlap0, i.types[0]))
-	    continue;
+	    {
+	      specific_error = progress (i.error);
+	      continue;
+	    }
 
 	  /* Allow the ModR/M encoding to be requested by using the {load} or
 	     {store} pseudo prefix on an applicable insn.  */
