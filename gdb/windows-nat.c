@@ -569,6 +569,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
   }
 
   bool supports_non_stop () override;
+  bool always_non_stop_p () override;
 
   void async (bool enable) override;
 
@@ -4120,6 +4121,15 @@ windows_nat_target::supports_non_stop ()
   /* Non-stop support requires DBG_REPLY_LATER, which only exists on
      Windows 10 and later.  */
   return dbg_reply_later_available ();
+}
+
+/* Implementation of the target_ops::always_non_stop_p method.  */
+
+bool
+windows_nat_target::always_non_stop_p ()
+{
+  /* If we can do non-stop, prefer it.  */
+  return supports_non_stop ();
 }
 
 void _initialize_windows_nat ();
