@@ -9582,7 +9582,38 @@ normal_stop ()
   update_thread_list ();
 
   if (last.kind () == TARGET_WAITKIND_STOPPED && stopped_by_random_signal)
-    notify_signal_received (inferior_thread ()->stop_signal ());
+    {
+      gdb_assert (inferior_ptid != null_ptid);
+
+      /* Calling update_thread_list pulls information from the target.  For
+	 native targets we can be (reasonably) sure that the information we
+	 get back is sane, but for remote targets, we cannot reply on the
+	 returned thread list to be correct.
+
+	 Specifically, a remote target (not gdbserver), has been seen to
+	 prematurely remove threads from the thread list after sending a
+	 signal stop event.  The consequence of this, is that the thread
+	 might now be exited.  This is bad as, trying to calling
+	 notify_signal_received will cause GDB to read registers for the
+	 current thread, but requesting the regcache for an exited thread
+	 will trigger an assertion.
+
+	 Check for the exited thread case here, and convert the stop reason
+	 to a spurious stop event.  The thread exiting will have already
+	 been reported (when the thread list was parsed), so making this a
+	 spurious stop will cause GDB to drop back to the prompt.  */
+      if (inferior_thread ()->state != THREAD_EXITED)
+	notify_signal_received (inferior_thread ()->stop_signal ());
+      else
+	{
+	  warning (_("command aborted, %s unexpectedly exited after signal stop event"),
+		   target_pid_to_str (inferior_thread ()->ptid).c_str ());
+
+	  /* Mark this as a spurious stop.  GDB will return to the
+	     prompt.  The warning above tells the user why.  */
+	  last.set_spurious ();
+	}
+    }
 
   /* As with the notification of thread events, we want to delay
      notifying the user that we've switched thread context until
