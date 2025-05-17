@@ -344,8 +344,9 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 
       the_target->wait (minus_one_ptid, &status, 0);
 
-      /* Note win32_wait doesn't return thread events.  */
-      if (status.kind () != TARGET_WAITKIND_LOADED)
+      if (status.kind () == TARGET_WAITKIND_EXITED
+	  || status.kind () == TARGET_WAITKIND_SIGNALLED
+	  || status.kind () == TARGET_WAITKIND_STOPPED)
 	{
 	  windows_process.cached_status = status;
 	  break;
@@ -604,7 +605,7 @@ win32_process_target::attach (unsigned long pid)
 
 /* See nat/windows-nat.h.  */
 
-DWORD
+bool
 gdbserver_windows_process::handle_output_debug_string
   (const DEBUG_EVENT &current_event,
    struct target_waitstatus *ourstatus)
@@ -615,7 +616,7 @@ gdbserver_windows_process::handle_output_debug_string
   DWORD nbytes = current_event.u.DebugString.nDebugStringLength;
 
   if (nbytes == 0)
-    return 0;
+    return false;
 
   if (nbytes > READ_BUFFER_LEN)
     nbytes = READ_BUFFER_LEN;
@@ -634,7 +635,7 @@ gdbserver_windows_process::handle_output_debug_string
   else
     {
       if (read_inferior_memory (addr, (unsigned char *) s, nbytes) != 0)
-	return 0;
+	return false;
     }
 
   if (!startswith (s, "cYg"))
@@ -642,14 +643,14 @@ gdbserver_windows_process::handle_output_debug_string
       if (!server_waiting)
 	{
 	  OUTMSG2(("%s", s));
-	  return 0;
+	  return false;
 	}
 
       monitor_output (s);
     }
 #undef READ_BUFFER_LEN
 
-  return 0;
+  return false;
 }
 
 static void
