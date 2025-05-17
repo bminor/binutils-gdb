@@ -74,6 +74,7 @@ extern int epiphany_cgen_parse_fix_exp (int, expressionS *);
 
 #define HANDLE_ALIGN(s, f) epiphany_handle_align (f)
 extern void epiphany_handle_align (fragS *);
+#define MAX_MEM_FOR_RS_ALIGN_CODE (1 + 2)
 
 #define TARGET_FORMAT "elf32-epiphany"
 

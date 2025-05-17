@@ -2518,16 +2518,15 @@ kvx_force_reloc_sub_same (fixS * fixP, segT sec)
   return 1;
 }
 
-/* Implement HANDLE_ALIGN.  */
+/* Pads code section with bundle of nops when possible, 0 if not. */
 
-static void
-kvx_make_nops (char *buf, bfd_vma bytes)
+void
+kvx_handle_align (fragS *fragP)
 {
-  bfd_vma i = 0;
-  unsigned int j;
+  if (fragP->fr_type != rs_align_code)
+    return;
 
   static unsigned int nop_single = 0;
-
   if (!nop_single)
     {
       const struct kvxopc *opcode =
@@ -2540,52 +2539,49 @@ kvx_make_nops (char *buf, bfd_vma bytes)
       nop_single = opcode->codewords[0].opcode;
     }
 
-  /* KVX instructions are always 4-bytes aligned. If we are at a position */
-  /* that is not 4 bytes aligned, it means this is not part of an instruction, */
-  /* so it is safe to use a zero byte for padding. */
+  bfd_signed_vma bytes = (fragP->fr_next->fr_address
+			  - fragP->fr_address - fragP->fr_fix);
+  if (bytes <= 0)
+    return;
 
-  for (j = bytes % 4; j > 0; j--)
-    buf[i++] = 0;
+  char *p = fragP->fr_literal + fragP->fr_fix;
 
-  for (j = 0; j < (bytes - i); j += 4)
+  /* KVX instructions are always 4-bytes aligned.  If we are at a
+     position that is not 4 bytes aligned, it means this is not part
+     of an instruction, so it is safe to use a zero byte for padding.  */
+  int fix = bytes & 3;
+  if (fix != 0)
     {
-      unsigned nop = nop_single;
-
-      // nop has bundle end only if #4 nop or last padding nop.
-      // Sets the parallel bit when neither conditions are matched.
-      // 4*4 = biggest nop bundle we can get
-      // 12 = offset when writting the last nop possible in a 4 nops bundle
-      // bytes-i-4 = offset for the last 4-words in the padding
-      if (j % (4 * 4) != 12 && j != (bytes - i - 4))
-	nop |= PARALLEL_BIT;
-
-      memcpy (buf + i + j, &nop, sizeof (nop));
+      memset (p, 0, fix);
+      p += fix;
+      bytes -= fix;
     }
-}
 
-/* Pads code section with bundle of nops when possible, 0 if not. */
-void
-kvx_handle_align (fragS *fragP)
-{
-  switch (fragP->fr_type)
+  /* Output any nops that don't make a full bundle.  */
+  while (bytes & 15)
     {
-    case rs_align_code:
-      {
-	bfd_signed_vma bytes = (fragP->fr_next->fr_address
-				- fragP->fr_address - fragP->fr_fix);
-	char *p = fragP->fr_literal + fragP->fr_fix;
+      unsigned int nop = nop_single;
+      bytes -= 4;
+      if (bytes & 15)
+	nop |= PARALLEL_BIT;
+      memcpy (p, &nop, 4);
+      p += 4;
+      fix += 4;
+    }
+  fragP->fr_fix += fix;
 
-	if (bytes <= 0)
-	  break;
-
-	/* Insert zeros or nops to get 4 byte alignment.  */
-	kvx_make_nops (p, bytes);
-	fragP->fr_fix += bytes;
-      }
-      break;
-
-    default:
-      break;
+  /* Any more are repeated copies of this full bundle of nops.  */
+  if (bytes)
+    {
+      unsigned int nop = nop_single | PARALLEL_BIT;
+      memcpy (p, &nop, 4);
+      p += 4;
+      memcpy (p, &nop, 4);
+      p += 4;
+      memcpy (p, &nop, 4);
+      p += 4;
+      memcpy (p, &nop_single, 4);
+      fragP->fr_var = 16;
     }
 }
 /*

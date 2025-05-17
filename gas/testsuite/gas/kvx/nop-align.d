@@ -20,9 +20,9 @@ Disassembly of section .text:
 
 [0-9a-f]+ <g\+0xc> nop
 [0-9a-f]+ <g\+0x10> nop
-[0-9a-f]+ <g\+0x14> nop
-[0-9a-f]+ <g\+0x18> nop;;
+[0-9a-f]+ <g\+0x14> nop;;
 
+[0-9a-f]+ <g\+0x18> nop
 [0-9a-f]+ <g\+0x1c> nop
 [0-9a-f]+ <g\+0x20> nop
 [0-9a-f]+ <g\+0x24> nop;;

@@ -4633,16 +4633,15 @@ nds32_handle_align (fragS *fragp)
 {
   static const unsigned char nop16[] = { 0x92, 0x00 };
   static const unsigned char nop32[] = { 0x40, 0x00, 0x00, 0x09 };
-  int bytes;
-  char *p;
 
   if (fragp->fr_type != rs_align_code)
     return;
 
-  bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
-  p = fragp->fr_literal + fragp->fr_fix;
+  int bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+  char *p = fragp->fr_literal + fragp->fr_fix;
+  int fix = bytes & 1;
 
-  if (bytes & 1)
+  if (fix != 0)
     {
       *p++ = 0;
       bytes--;
@@ -4658,18 +4657,12 @@ nds32_handle_align (fragS *fragp)
 		   BFD_RELOC_NDS32_INSN16);
       memcpy (p, nop16, 2);
       p += 2;
-      bytes -= 2;
+      fix += 2;
     }
+  fragp->fr_fix += fix;
 
-  while (bytes >= 4)
-    {
-      memcpy (p, nop32, 4);
-      p += 4;
-      bytes -= 4;
-    }
-
-  bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
-  fragp->fr_fix += bytes;
+  fragp->fr_var = 4;
+  memcpy (p, nop32, 4);
 }
 
 /* md_flush_pending_output  */

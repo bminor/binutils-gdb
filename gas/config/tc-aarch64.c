@@ -9061,8 +9061,7 @@ aarch64_handle_align (fragS * fragP)
       fragP->fr_fix += fix;
     }
 
-  if (noop_size)
-    memcpy (p, aarch64_noop, noop_size);
+  memcpy (p, aarch64_noop, noop_size);
   fragP->fr_var = noop_size;
 }
 

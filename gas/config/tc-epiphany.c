@@ -314,7 +314,7 @@ static const unsigned char nop_pattern[] = { 0xa2, 0x01 };
 void
 epiphany_handle_align (fragS *fragp)
 {
-  int bytes, fix;
+  int bytes;
   char *p;
 
   if (fragp->fr_type != rs_align_code)
@@ -322,23 +322,15 @@ epiphany_handle_align (fragS *fragp)
 
   bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
   p = fragp->fr_literal + fragp->fr_fix;
-  fix = 0;
 
   if (bytes & 1)
     {
-      fix = 1;
       *p++ = 0;
-      bytes--;
+      fragp->fr_fix++;
     }
 
-  if (bytes & 2)
-    {
-      memcpy (p, nop_pattern, 2);
-      p += 2;
-      bytes -= 2;
-      fix += 2;
-    }
-  fragp->fr_fix += fix;
+  memcpy (p, nop_pattern, 2);
+  fragp->fr_var = 2;
 }
 
 /* Read a comma separated incrementing list of register names

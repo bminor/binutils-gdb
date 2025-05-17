@@ -355,18 +355,11 @@ frag_align_pattern (int alignment, const char *fill_pattern,
 #define NOP_OPCODE 0x00
 #endif
 
-/* Use this to restrict the amount of memory allocated for representing
-   the alignment code.  Needs to be large enough to hold any fixed sized
+/* Use this to specify the amount of memory allocated for representing
+   the alignment code.  Needs to be large enough to hold any fixed size
    prologue plus the replicating portion.  */
 #ifndef MAX_MEM_FOR_RS_ALIGN_CODE
-  /* Assume that if HANDLE_ALIGN is not defined then no special action
-     is required to code fill, which means that we get just repeat the
-     one NOP_OPCODE byte.  */
-# ifndef HANDLE_ALIGN
-#  define MAX_MEM_FOR_RS_ALIGN_CODE  1
-# else
-#  define MAX_MEM_FOR_RS_ALIGN_CODE  (((size_t) 1 << alignment) - 1)
-# endif
+# define MAX_MEM_FOR_RS_ALIGN_CODE 1
 #endif
 
 void

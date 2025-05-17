@@ -555,30 +555,16 @@ visium_handle_align (fragS *fragP)
   if (count == 0)
     return;
 
-  fragP->fr_var = 4;
-
   if (count > 4 * nop_limit && count <= 131068)
     {
-      struct frag *rest;
-
-      /* Make a branch, then follow with nops.  Insert another
-         frag to handle the nops.  */
+      /* Make a branch, then follow with nops.  */
       md_number_to_chars (p, 0x78000000 + (count >> 2), 4);
       visium_update_parity_bit (p);
-
-      rest = xmalloc (SIZEOF_STRUCT_FRAG + 4);
-      memcpy (rest, fragP, SIZEOF_STRUCT_FRAG);
-      fragP->fr_next = rest;
-      rest->fr_address += rest->fr_fix + 4;
-      rest->fr_fix = 0;
-      /* If we leave the next frag as rs_align_code we'll come here
-	 again, resulting in a bunch of branches rather than a
-	 branch followed by nops.  */
-      rest->fr_type = rs_align;
-      p = rest->fr_literal;
+      p += 4;
+      fragP->fr_fix += 4;
     }
 
-  memset (p, 0, 4);
+  *p = 0;
 }
 
 /* Apply a fixS to the frags, now that we know the value it ought to

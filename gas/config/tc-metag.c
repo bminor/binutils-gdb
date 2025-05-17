@@ -6842,33 +6842,21 @@ void
 metag_handle_align (fragS * fragP)
 {
   static unsigned char const noop[4] = { 0xfe, 0xff, 0xff, 0xa0 };
-  int bytes, fix;
-  char *p;
 
   if (fragP->fr_type != rs_align_code)
     return;
 
-  bytes = fragP->fr_next->fr_address - fragP->fr_address - fragP->fr_fix;
-  p = fragP->fr_literal + fragP->fr_fix;
-  fix = 0;
-
-  if (bytes & 3)
+  int bytes = fragP->fr_next->fr_address - fragP->fr_address - fragP->fr_fix;
+  char *p = fragP->fr_literal + fragP->fr_fix;
+  int fix = bytes & 3;
+  if (fix != 0)
     {
-      fix = bytes & 3;
       memset (p, 0, fix);
       p += fix;
-      bytes -= fix;
+      fragP->fr_fix += fix;
     }
 
-  while (bytes >= 4)
-    {
-      memcpy (p, noop, 4);
-      p += 4;
-      bytes -= 4;
-      fix += 4;
-    }
-
-  fragP->fr_fix += fix;
+  memcpy (p, noop, 4);
   fragP->fr_var = 4;
 }
 

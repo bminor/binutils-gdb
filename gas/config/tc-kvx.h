@@ -297,6 +297,7 @@ extern void kvx_cons_fix_new (fragS *f, int where, int nbytes,
 /* Enable special handling for the alignment directive.  */
 extern void kvx_handle_align (fragS *);
 #define HANDLE_ALIGN(s, f) kvx_handle_align (f)
+#define MAX_MEM_FOR_RS_ALIGN_CODE (3 + 12 + 16)
 
 #ifdef OBJ_ELF
 

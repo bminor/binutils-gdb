@@ -75,7 +75,6 @@ extern int wasm32_force_relocation (struct fix *);
 #define elf_tc_final_processing()
 #define md_post_relax_hook
 #define md_start_line_hook()
-#define HANDLE_ALIGN(sec, fragP)
 
 
 extern bool wasm32_fix_adjustable (struct fix *);
