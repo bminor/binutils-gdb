@@ -37,12 +37,33 @@ timeval_to_microseconds (struct timeval *tv)
 }
 #endif
 
+/* See run-time-clock.h.  */
+
+bool
+get_run_time_thread_scope_available ()
+{
+#if defined HAVE_GETRUSAGE && defined RUSAGE_THREAD
+  return true;
+#else
+  return false;
+#endif
+}
+
 void
 get_run_time (user_cpu_time_clock::time_point &user,
 	      system_cpu_time_clock::time_point &system,
 	      run_time_scope scope) noexcept
 {
 #ifdef HAVE_GETRUSAGE
+
+  /* If we can't provide thread scope run time usage, fallback to
+     process scope.  This will at least be right if GDB is built
+     without threading support in the first place (or is set to use
+     zero worker threads).  */
+# ifndef RUSAGE_THREAD
+#  define RUSAGE_THREAD RUSAGE_SELF
+# endif
+
   struct rusage rusage;
   int who;
 

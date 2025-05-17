@@ -52,6 +52,40 @@ if {[prepare_for_testing "failed to prepare" $testfile \
     return -1
 }
 
+# Check "maint set per-command" warnings.  We do this early so that
+# the following tests don't need to expect them, as GDB only warns
+# once.
+
+with_test_prefix "warnings" {
+    # Potential warning given by "maint set per-command time".
+    set maybe_per_command_warning \
+	"(?:warning: per-thread run time information not available on this platform)?"
+
+    # This one should not issue the "per-command time" warning.
+    with_test_prefix "per-command space" {
+	gdb_test_no_output "mt set per-command space on"
+	gdb_test_no_output "mt set per-command space off"
+    }
+
+    # These might warn.  "per-command on" enables all sub commands, so
+    # might trigger the "per-command time" warning.
+    foreach cmd {"per-command" "per-command time"} {
+	with_test_prefix $cmd {
+	    # GDB only warns once, so restart between commands.
+	    clean_restart $binfile
+	    gdb_test "mt set $cmd on" "$maybe_per_command_warning"
+	    gdb_test "mt set $cmd off" "command started"
+	    gdb_test_no_output "mt set $cmd on"  \
+		"mt set $cmd on, again"
+	    gdb_test "mt set $cmd off" "command started" \
+		"mt set $cmd off, again"
+	}
+    }
+
+    # We've already warned once above, so the following tests don't
+    # need to expect the warning.
+}
+
 set readnow_p [readnow]
 
 # The commands we test here produce many lines of output; disable "press
