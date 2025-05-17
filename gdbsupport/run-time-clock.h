@@ -64,12 +64,19 @@ enum class run_time_scope
    supported.  If not supported, then the combined user+kernel time
    is returned in USER and SYSTEM is set to zero.
 
-   SCOPE indicates whether to return the run time for the whole process or
-   just for the calling thread.  */
+   SCOPE indicates whether to return the run time for the whole
+   process or just for the calling thread.  If the latter isn't
+   supported, then returns the run time for the whole process even if
+   run_time_scope::thread is requested.  */
 
 void get_run_time (user_cpu_time_clock::time_point &user,
 		   system_cpu_time_clock::time_point &system,
 		   run_time_scope scope) noexcept;
+
+/* Returns true if is it possible for get_run_time above to return the
+   run time for just the calling thread.  */
+
+bool get_run_time_thread_scope_available ();
 
 /* Count the total amount of time spent executing in userspace+kernel
    mode.  */
