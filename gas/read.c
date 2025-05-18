@@ -1514,12 +1514,7 @@ s_abort (int ignore ATTRIBUTE_UNUSED)
 }
 
 #ifndef TC_ALIGN_LIMIT
-/* Limit alignment in code to 1G, to limit the amount of memory used
-   by rs_code_align frags.  */
-#define TC_ALIGN_LIMIT \
-  ((subseg_text_p (now_seg)				\
-    && stdoutput->arch_info->bits_per_address >= 32)	\
-   ? 30 : stdoutput->arch_info->bits_per_address - 1)
+#define TC_ALIGN_LIMIT (stdoutput->arch_info->bits_per_address - 1)
 #endif
 
 /* Handle the .align pseudo-op.  A positive ARG is a default alignment
