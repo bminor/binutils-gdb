@@ -1548,40 +1548,6 @@ static const unsigned char *const alt64_patt[] = {
   alt64_9, alt64_10, alt64_11,alt64_12, alt64_13, alt64_14, alt64_15
 };
 
-/* Genenerate COUNT bytes of NOPs to WHERE from PATT with the maximum
-   size of a single NOP instruction MAX_SINGLE_NOP_SIZE.  */
-
-static void
-i386_output_nops (char *where, const unsigned char *const *patt,
-		  int count, int max_single_nop_size)
-
-{
-  /* Place the longer NOP first.  */
-  int last;
-  int offset;
-  const unsigned char *nops;
-
-  if (max_single_nop_size < 1)
-    {
-      as_fatal (_("i386_output_nops called to generate nops of at most %d bytes!"),
-		max_single_nop_size);
-      return;
-    }
-
-  nops = patt[max_single_nop_size - 1];
-  last = count % max_single_nop_size;
-
-  count -= last;
-  for (offset = 0; offset < count; offset += max_single_nop_size)
-    memcpy (where + offset, nops, max_single_nop_size);
-
-  if (last)
-    {
-      nops = patt[last - 1];
-      memcpy (where + offset, nops, last);
-    }
-}
-
 static INLINE int
 fits_in_imm7 (offsetT num)
 {
@@ -1737,20 +1703,14 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
   if (limit == 0)
     limit = max_single_nop_size;
 
-  if (fragP->fr_type == rs_fill_nop)
+  if (limit > max_single_nop_size || limit < 1)
     {
-      /* Output NOPs for .nop directive.  */
-      if (limit > max_single_nop_size)
-	{
-	  as_bad_where (fragP->fr_file, fragP->fr_line,
-			_("invalid single nop size: %d "
-			  "(expect within [0, %d])"),
-			limit, max_single_nop_size);
-	  return;
-	}
+      as_bad_where (fragP->fr_file, fragP->fr_line,
+		    _("invalid single nop size: %d "
+		      "(expect within [0, %d])"),
+		    limit, max_single_nop_size);
+      return;
     }
-  else if (fragP->fr_type != rs_machine_dependent)
-    fragP->fr_var = count;
 
   /* Emit a plain NOP first when the last thing we saw may not have been
      a proper instruction (e.g. a stand-alone prefix or .byte).  */
@@ -1801,8 +1761,32 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	}
     }
 
-  /* Generate multiple NOPs.  */
-  i386_output_nops (where, patt, count, limit);
+  int non_repeat = count % limit;
+  if (non_repeat)
+    {
+      memcpy (where, patt[non_repeat - 1], non_repeat);
+      where += non_repeat;
+      count -= non_repeat;
+    }
+
+  if (fragP->fr_type == rs_align_code)
+    {
+      /* Set up the frag so that everything we have emitted so far is
+	 included in fr_fix.  The repeating larger nop only needs to
+	 be written once to the frag memory.  */
+      fragP->fr_fix = where - fragP->fr_literal;
+      fragP->fr_var = limit;
+      if (count != 0)
+	count = limit;
+    }
+
+  const unsigned char *nops = patt[limit - 1];
+  while (count)
+    {
+      memcpy (where, nops, limit);
+      where += limit;
+      count -= limit;
+    }
 }
 
 static INLINE int

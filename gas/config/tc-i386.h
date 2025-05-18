@@ -230,9 +230,6 @@ if ((n)									\
     goto around;							\
   }
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE \
-  (alignment ? ((size_t) 1 << alignment) - 1 : (size_t) 1)
-
 extern void i386_cons_align (int);
 #define md_cons_align(nbytes) i386_cons_align (nbytes)
 
@@ -385,11 +382,14 @@ if (fragP->fr_type == rs_align_code) 					\
     offsetT __count = (fragP->fr_next->fr_address			\
 		       - fragP->fr_address				\
 		       - fragP->fr_fix);				\
-    if (__count > 0							\
-	&& (unsigned int) __count <= fragP->tc_frag_data.max_bytes)	\
+    if (__count > 0)							\
       md_generate_nops (fragP, fragP->fr_literal + fragP->fr_fix,	\
 			__count, 0);					\
   }
+/* Possible plain nop, branch, twice largest nop less 1.
+   Yes, the branch might be one byte longer in CODE_16BIT but then the
+   largest nop is smaller.  */
+#define MAX_MEM_FOR_RS_ALIGN_CODE (1 + 5 + 2 * 15 - 1)
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP 1
