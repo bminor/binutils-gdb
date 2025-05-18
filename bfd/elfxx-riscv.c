@@ -2155,10 +2155,10 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       no_conflict = false;
     }
   if (riscv_lookup_subset (rps->subset_list, "xtheadvector", &subset)
-      && riscv_lookup_subset (rps->subset_list, "v", &subset))
+      && riscv_lookup_subset (rps->subset_list, "zve32x", &subset))
     {
       rps->error_handler
-	(_("`xtheadvector' is conflict with the `v' extension"));
+	(_("`xtheadvector' is conflict with the `v/zve32x' extension"));
       no_conflict = false;
     }
   if (riscv_lookup_subset (rps->subset_list, "zclsd", &subset)
