@@ -26,6 +26,7 @@ imply xsfvqmaccdod
 imply xsfvfnrclipxfqf
 
 imply xtheadvector
+imply xtheadzvamo
 
 imply v
 imply zvfh
