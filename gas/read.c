@@ -2263,8 +2263,8 @@ void
 s_fill (int ignore ATTRIBUTE_UNUSED)
 {
   expressionS rep_exp;
-  long size = 1;
-  long fill = 0;
+  offsetT size = 1;
+  valueT fill = 0;
   char *p;
 
 #ifdef md_flush_pending_output
@@ -2330,7 +2330,7 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
   if (size && !need_pass_2)
     {
       if (now_seg == absolute_section)
-	abs_section_offset += rep_exp.X_add_number * size;
+	abs_section_offset += (valueT) rep_exp.X_add_number * size;
 
       if (rep_exp.X_op == O_constant)
 	{
@@ -2373,7 +2373,7 @@ s_fill (int ignore ATTRIBUTE_UNUSED)
 	 bytes from a 4-byte expression and they forgot to sign
 	 extend.  */
 #define BSD_FILL_SIZE_CROCK_4 (4)
-      md_number_to_chars (p, (valueT) fill,
+      md_number_to_chars (p, fill,
 			  (size > BSD_FILL_SIZE_CROCK_4
 			   ? BSD_FILL_SIZE_CROCK_4
 			   : (int) size));
