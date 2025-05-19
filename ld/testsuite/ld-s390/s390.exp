@@ -125,6 +125,14 @@ set s390xtests {
      "-m elf64_s390 tmpdir/libpltlib_64.so" "" "-m64" {plt_64-1.s}
      {{objdump "-dzrj.plt" plt_64-1.pd} {readelf "-wf" plt_64-1_eh.wf}}
      "plt_64-1_eh"}
+    {"PR32969-1: do not rewrite load of misaligned COMDAT symbol address"
+     "-m elf64_s390" "" "-m64" {pr32969a.s pr32969b.s pr32969c.s}
+     {{objdump "-dzrj.text" pr32969_64-1.dd}}
+     "pr32969_64-1"}
+    {"PR32969-2: rewrite load of aligned COMDAT symbol address"
+     "-m elf64_s390" "" "-m64" {pr32969a.s pr32969c.s pr32969b.s}
+     {{objdump "-dzrj.text" pr32969_64-2.dd}}
+     "pr32969_64-2"}
 }
 
 if [istarget "s390-*-*"] {

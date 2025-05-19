@@ -2277,7 +2277,6 @@ elf_s390_relocate_section (bfd *output_bfd,
 		       || resolved_to_zero)
 		{
 		  Elf_Internal_Sym *isym;
-		  asection *sym_sec;
 
 		  /* This is actually a static link, or it is a
 		     -Bsymbolic link and the symbol is defined
@@ -2324,10 +2323,9 @@ elf_s390_relocate_section (bfd *output_bfd,
 		      && h != htab->elf.hdynamic
 		      && h != htab->elf.hgot
 		      && h != htab->elf.hplt
-		      && !(isym->st_value & 1)
-		      && (sym_sec = bfd_section_from_elf_index (input_bfd,
-								isym->st_shndx))
-		      && sym_sec->alignment_power)
+		      && !((h->root.u.def.value
+			    + sec->output_section->vma
+			    + sec->output_offset) & 1))
 		    {
 		      unsigned short new_insn =
 			(0xc000 | (bfd_get_8 (input_bfd,
