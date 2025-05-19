@@ -3204,13 +3204,14 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%pB(%pA+%#" PRIx64 "): "
-	       "misaligned symbol `%s' (%#" PRIx64 ") for relocation %s"),
+	       "relocation %s against misaligned symbol `%s' (%#" PRIx64 ") in %pB"),
 	     input_bfd,
 	     input_section,
 	     (uint64_t) rel->r_offset,
+	     howto->name,
 	     h->root.root.string,
 	     (uint64_t)relocation,
-	     howto->name);
+	     sec->owner);
 	  return false;
 	}
 
