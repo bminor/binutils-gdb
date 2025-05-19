@@ -1,5 +1,4 @@
-# If max < -0x80000000, max becomes a positive number because type conversion
-# (bfd_signed_vma -> unsigned int).
+# Range of max: 0<= max <= 0xffffffff
   .text
 .L1:
   ret
@@ -13,6 +12,9 @@
   ret
   .align 4, , 12
   ret
+  .align 4, , 0xffffffff
+  ret
+# ignore out of range alignment maxumum
   .align 4, , -1
   ret
   .align 4, , -0x80000000

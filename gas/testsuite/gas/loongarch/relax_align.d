@@ -1,6 +1,7 @@
 #as:
 #objdump: -dr
 #skip: loongarch32-*-*
+#warning_output: relax_align.l
 
 .*:[    ]+file format .*
 
@@ -44,3 +45,8 @@ Disassembly of section .text:
 [ 	]+68:[ 	]+03400000[ 	]+nop
 [ 	]+6c:[ 	]+03400000[ 	]+nop
 [ 	]+70:[ 	]+4c000020[ 	]+ret
+[ 	]+74:[ 	]+03400000[ 	]+nop
+[ 	]+74: R_LARCH_ALIGN[ 	]+\*ABS\*\+0xc
+[ 	]+78:[ 	]+03400000[ 	]+nop
+[ 	]+7c:[ 	]+03400000[ 	]+nop
+[ 	]+80:[ 	]+4c000020[ 	]+ret
