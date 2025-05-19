@@ -1,5 +1,5 @@
 #as: --gsframe
-#warning: skipping SFrame FDE; \.cfi_def_cfa_offset without CFA base register in effect
+#warning: \.cfi_def_cfa_offset without CFA base register in effect
 #objdump: --sframe=.sframe
 #name: SFrame supports only FP/SP based CFA
 #...

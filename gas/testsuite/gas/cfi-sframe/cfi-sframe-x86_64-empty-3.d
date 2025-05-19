@@ -1,5 +1,5 @@
 #as: --gsframe
-#warning: skipping SFrame FDE; \.cfi\_escape with op \(0x14\)
+#warning: \.cfi\_escape with op \(0x14\)
 #objdump: --sframe=.sframe
 #name: CFI_escape with multiple DWARF expr
 #...

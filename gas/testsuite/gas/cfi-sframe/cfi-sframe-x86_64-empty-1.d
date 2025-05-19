@@ -1,5 +1,5 @@
 #as: --gsframe
-#warning: skipping SFrame FDE; \.cfi_escape DW\_CFA\_expression with SP reg 7
+#warning: \.cfi_escape DW\_CFA\_expression with SP reg 7
 #objdump: --sframe=.sframe
 #name: CFI_escape with register of significance to SFrame
 #...

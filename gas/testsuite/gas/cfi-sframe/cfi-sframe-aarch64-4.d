@@ -1,7 +1,7 @@
 #as: --gsframe
 #objdump: --sframe=.sframe
 #name: SFrame cfi_negate_ra_state_with_pc test
-#warning: Warning: skipping SFrame FDE; \.cfi_negate_ra_state_with_pc
+#warning: \.cfi_negate_ra_state_with_pc
 
 ## The support for .cfi_negate_ra_state_with_pc is currently pending on SFrame
 ## v3 (currently in development). The unimplemented support is reported to the

@@ -981,7 +981,8 @@ sframe_xlate_do_def_cfa (struct sframe_xlate_ctx *xlate_ctx,
   if (cfi_insn->u.ri.reg != SFRAME_CFA_SP_REG
       && cfi_insn->u.ri.reg != SFRAME_CFA_FP_REG)
     {
-      as_warn (_("skipping SFrame FDE; non-SP/FP register %u in .cfi_def_cfa"),
+      as_warn (_("no SFrame FDE emitted; "
+		 "non-SP/FP register %u in .cfi_def_cfa"),
 	       cfi_insn->u.ri.reg);
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
     }
@@ -1010,7 +1011,7 @@ sframe_xlate_do_def_cfa_register (struct sframe_xlate_ctx *xlate_ctx,
   if (cfi_insn->u.r != SFRAME_CFA_SP_REG
       && cfi_insn->u.r != SFRAME_CFA_FP_REG)
     {
-      as_warn (_("skipping SFrame FDE; "
+      as_warn (_("no SFrame FDE emitted; "
 		 "non-SP/FP register %u in .cfi_def_cfa_register"),
 	       cfi_insn->u.r);
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
@@ -1050,7 +1051,7 @@ sframe_xlate_do_def_cfa_offset (struct sframe_xlate_ctx *xlate_ctx,
     {
       /* No CFA base register in effect.  Non-SP/FP CFA base register should
 	 not occur, as sframe_xlate_do_def_cfa[_register] would detect this.  */
-      as_warn (_("skipping SFrame FDE; "
+      as_warn (_("no SFrame FDE emitted; "
 		 ".cfi_def_cfa_offset without CFA base register in effect"));
       return SFRAME_XLATE_ERR_NOTREPRESENTED;
     }
@@ -1111,7 +1112,7 @@ sframe_xlate_do_val_offset (const struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_U
       /* Ignore SP reg, if offset matches assumed default rule.  */
       || (cfi_insn->u.ri.reg == SFRAME_CFA_SP_REG && cfi_insn->u.ri.offset != 0))
     {
-      as_warn (_("skipping SFrame FDE; %s with %s reg %u"),
+      as_warn (_("no SFrame FDE emitted; %s with %s reg %u"),
 	       cfi_esc_p ? ".cfi_escape DW_CFA_val_offset" : ".cfi_val_offset",
 	       sframe_register_name (cfi_insn->u.ri.reg), cfi_insn->u.ri.reg);
       return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
@@ -1137,7 +1138,7 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
       /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
       )
     {
-      as_warn (_("skipping SFrame FDE; %s register %u in .cfi_register"),
+      as_warn (_("no SFrame FDE emitted; %s register %u in .cfi_register"),
 	       sframe_register_name (cfi_insn->u.rr.reg1), cfi_insn->u.rr.reg1);
       return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
     }
@@ -1159,7 +1160,7 @@ sframe_xlate_do_remember_state (struct sframe_xlate_ctx *xlate_ctx)
      info for the function involved.  */
   if (!last_fre)
     {
-      as_warn (_("skipping SFrame FDE; "
+      as_warn (_("no SFrame FDE emitted; "
 		 ".cfi_remember_state without prior SFrame FRE state"));
       return SFRAME_XLATE_ERR_INVAL;
     }
@@ -1253,7 +1254,7 @@ static int
 sframe_xlate_do_aarch64_negate_ra_state_with_pc (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
 						 struct cfi_insn_data *cfi_insn ATTRIBUTE_UNUSED)
 {
-  as_warn (_("skipping SFrame FDE; .cfi_negate_ra_state_with_pc"));
+  as_warn (_("no SFrame FDE emitted; .cfi_negate_ra_state_with_pc"));
   /* The used signing method should be encoded inside the FDE in SFrame v3.
      For now, PAuth_LR extension is not supported with SFrame.  */
   return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
@@ -1280,7 +1281,7 @@ sframe_xlate_do_gnu_window_save (struct sframe_xlate_ctx *xlate_ctx,
       || abi_arch == SFRAME_ABI_AARCH64_ENDIAN_LITTLE)
     return sframe_xlate_do_aarch64_negate_ra_state (xlate_ctx, cfi_insn);
 
-  as_warn (_("skipping SFrame FDE; .cfi_window_save"));
+  as_warn (_("no SFrame FDE emitted; .cfi_window_save"));
   return SFRAME_XLATE_ERR_NOTREPRESENTED;  /* Not represented.  */
 }
 
@@ -1338,7 +1339,7 @@ sframe_xlate_do_escape_expr (const struct sframe_xlate_ctx *xlate_ctx,
       || (sframe_ra_tracking_p () && reg == SFRAME_CFA_RA_REG)
       || reg == xlate_ctx->cur_fre->cfa_base_reg)
     {
-      as_warn (_("skipping SFrame FDE; "
+      as_warn (_("no SFrame FDE emitted; "
 		 ".cfi_escape DW_CFA_expression with %s reg %u"),
 	       sframe_register_name (reg), reg);
       err = SFRAME_XLATE_ERR_NOTREPRESENTED;
@@ -1499,7 +1500,7 @@ sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
 	 OS-specific CFI opcodes), skip inspecting the DWARF expression.
 	 This may impact the asynchronicity due to loss of coverage.
 	 Continue to warn the user and bail out.  */
-      as_warn (_("skipping SFrame FDE; .cfi_escape with op (%#lx)"),
+      as_warn (_("no SFrame FDE emitted; .cfi_escape with op (%#lx)"),
 	       (unsigned long)firstop);
       err = SFRAME_XLATE_ERR_NOTREPRESENTED;
     }
@@ -1619,7 +1620,7 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
 
 	if (!cfi_name)
 	  cfi_name = _("(unknown)");
-	as_warn (_("skipping SFrame FDE; CFI insn %s (%#x)"),
+	as_warn (_("no SFrame FDE emitted; CFI insn %s (%#x)"),
 		 cfi_name, op);
 	err = SFRAME_XLATE_ERR_NOTREPRESENTED;
       }
@@ -1643,7 +1644,7 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
   /* SFrame format cannot represent a non-default DWARF return column reg.  */
   if (xlate_ctx->dw_fde->return_column != DWARF2_DEFAULT_RETURN_COLUMN)
     {
-      as_warn (_("skipping SFrame FDE; non-default RA register %u"),
+      as_warn (_("no SFrame FDE emitted; non-default RA register %u"),
 	       xlate_ctx->dw_fde->return_column);
       return SFRAME_XLATE_ERR_NOTREPRESENTED;
     }
@@ -1686,7 +1687,7 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
 	  if (fre->ra_loc != SFRAME_FRE_ELEM_LOC_STACK
 	      && fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
 	    {
-	      as_warn (_("skipping SFrame FDE; FP without RA on stack"));
+	      as_warn (_("no SFrame FDE emitted; FP without RA on stack"));
 	      return SFRAME_XLATE_ERR_NOTREPRESENTED;
 	    }
 	}

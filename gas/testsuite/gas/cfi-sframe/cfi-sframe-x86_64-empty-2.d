@@ -1,5 +1,5 @@
 #as: --gsframe
-#warning: skipping SFrame FDE; \.cfi\_escape DW\_CFA\_val\_offset with FP reg 6
+#warning: \.cfi\_escape DW\_CFA\_val\_offset with FP reg 6
 #objdump: --sframe=.sframe
 #name: CFI_escape with register of significance to SFrame II
 #...

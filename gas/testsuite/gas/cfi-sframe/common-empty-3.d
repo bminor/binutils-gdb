@@ -1,5 +1,5 @@
 #as: --gsframe
-#warning: skipping SFrame FDE; non-default RA register 0
+#warning: non-default RA register 0
 #objdump: --sframe=.sframe
 #name: SFrame supports only default return column
 #...
