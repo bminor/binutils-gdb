@@ -1508,6 +1508,32 @@ sframe_xlate_do_cfi_escape (const struct sframe_xlate_ctx *xlate_ctx,
   return err;
 }
 
+/* Translate DW_CFA_undefined into SFrame context.
+
+   DW_CFA_undefined op indicates that from now on, the previous value of
+   register can’t be restored anymore.  In SFrame stack trace, we cannot
+   represent such a semantic.  So, we skip generating an SFrame FDE for this,
+   when a register of interest is used with DW_CFA_undefined.
+
+   Return SFRAME_XLATE_OK if success.  */
+
+static int
+sframe_xlate_do_cfi_undefined (const struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
+			       const struct cfi_insn_data *cfi_insn)
+{
+  if (cfi_insn->u.r == SFRAME_CFA_FP_REG
+      || cfi_insn->u.r == SFRAME_CFA_RA_REG
+      || cfi_insn->u.r == SFRAME_CFA_SP_REG)
+    {
+      as_warn (_("no SFrame FDE emitted; %s reg %u in .cfi_undefined"),
+	       sframe_register_name (cfi_insn->u.r), cfi_insn->u.r);
+      return SFRAME_XLATE_ERR_NOTREPRESENTED; /* Not represented.  */
+    }
+
+  /* Safe to skip.  */
+  return SFRAME_XLATE_OK;
+}
+
 /* Returns the DWARF call frame instruction name or fake CFI name for the
    specified CFI opcode, or NULL if the value is not recognized.  */
 
@@ -1611,6 +1637,8 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
        These do not impact the coverage of the basic stack tracing
        information as conveyed in the SFrame format.  */
     case DW_CFA_undefined:
+      err = sframe_xlate_do_cfi_undefined (xlate_ctx, cfi_insn);
+      break;
     case DW_CFA_same_value:
       break;
     default:
