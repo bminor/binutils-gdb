@@ -135,13 +135,13 @@ Symbol::sort_by_name (Vector<Symbol *> *syms)
 }
 
 Vector<Symbol *> *
-Symbol::find_symbols (Vector<Symbol*> *syms, Vector<Range *> *ranges)
+Symbol::find_symbols (Vector<Symbol*> *syms, Vector<Range *> *ranges,
+		      Vector<Symbol *> *symbols)
 {
   // 'syms' and 'ranges' must already be sorted.
   // return symbols matched by 'ranges'
   if (VecSize (syms) == 0 || VecSize (ranges) == 0)
     return NULL;
-  Vector<Symbol *> *symbols = new Vector<Symbol*> ();
 
   // Use binary search to find a suitable index in 'syms'
   int ind = 0;
@@ -182,15 +182,7 @@ Symbol::find_symbols (Vector<Symbol*> *syms, Vector<Range *> *ranges)
       if (i >= r_sz)
 	break;
     }
-  if (DUMP_ELF_SYM)
-    {
-      syms->dump ( "Symbol::find_symbols: syms");
-      symbols->dump ("Symbol::find_symbols: symbols");
-    }
-  if (symbols->size () != 0)
-    return symbols;
-  delete symbols;
-  return NULL;
+  return symbols;
 }
 
 /* Create and append a new function to the 'module'.

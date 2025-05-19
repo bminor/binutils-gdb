@@ -998,7 +998,6 @@ Dwr_Tag::dump ()
 	case DW_FORM_strx2:
 	case DW_FORM_strx3:
 	case DW_FORM_strx4:
-	case DW_FORM_implicit_const:
 	  Dprintf (DUMP_DWARFLIB, "  \"%s\"", atrp->u.str ? atrp->u.str : "<NULL>");
 	  break;
 	case DW_FORM_block:
@@ -1037,6 +1036,7 @@ Dwr_Tag::dump ()
 	case DW_FORM_exprloc:
 	case DW_FORM_ref_sig8:
 	case DW_FORM_flag_present:
+	case DW_FORM_implicit_const:
 	  Dprintf (DUMP_DWARFLIB, "  0x%llx (%lld)", (long long) atrp->u.val,
 		   (long long) atrp->u.val);
 	  break;
@@ -1095,6 +1095,7 @@ DwrSec::bounds_violation (uint64_t sz)
     {
       Dprintf (DEBUG_ERR_MSG, "DwrSec::bounds_violation: offset=%lld + sz=%lld > size=%lld\n",
 	       (long long) offset, (long long) sz, (long long) size);
+      offset = size;
       return true;
     }
   return false;
@@ -1795,6 +1796,10 @@ DwrLineRegs::getPath (int fn)
 DwrCU::DwrCU (Dwarf *_dwarf)
 {
   dwarf = _dwarf;
+  tmp_syms = new Vector<Symbol*>();
+  rng_list = NULL;
+  rng_list_inited = false;
+  base_address = 0;
   symbols = NULL;
   symbols_sorted_by_name = NULL;
   cu_offset = dwarf->debug_infoSec->offset;
@@ -1887,6 +1892,7 @@ DwrCU::~DwrCU ()
   delete dwrLineReg;
   delete symbols;
   delete symbols_sorted_by_name;
+  delete tmp_syms;
   free (comp_dir);
 }
 
@@ -1929,7 +1935,7 @@ DwrCU::build_abbrevTable (DwrSec *_debug_abbrevSec, uint64_t _offset)
 	  switch (atf.at_form)
 	    {
 	    case DW_FORM_implicit_const:
-	      atf.len = debug_abbrevSec->GetSLEB128 ();
+	      atf.u.val = debug_abbrevSec->GetSLEB128 ();
 	      break;
 	    }
 	  abbrevAtForm->append (atf);
@@ -2113,7 +2119,7 @@ DwrCU::set_die (Dwarf_Die die)
 	  atf->len = 0;
 	  break;
 	case DW_FORM_implicit_const:
-	  atf->u.str = NULL;
+	  // atf->u.val is already set
 	  break;
 	default:
 	  DEBUG_CODE
@@ -2193,15 +2199,44 @@ DwrCU::parse_cu_header (LoadObject *lo)
   module->set_name (path);
 
   // create a list of functions in this CU
+  base_address = get_low_pc ();
   Vector <Range *> *ranges = get_ranges ();
   if (ranges)
     {
       Vector <Symbol *> *syms = dwarf->stabs->get_symbols ();
-      symbols = Symbol::find_symbols (syms, ranges);
-      symbols_sorted_by_name = Symbol::sort_by_name (syms);
+      symbols = Symbol::find_symbols (syms, ranges, new Vector <Symbol *> ());
+      symbols_sorted_by_name = Symbol::sort_by_name (symbols);
+      if (DUMP_ELF_SYM)
+	symbols->dump ("DwrCU::parse_cu_header: symbols");
       Destroy (ranges);
     }
   return module;
+}
+
+
+static int
+cmp_ExtRange (const void *a, const void *b)
+{
+  uint64_t a1 = *((uint64_t *) a);
+  ExtRange *rng = *((ExtRange **) b);
+  uint64_t b1 = rng->offset;
+  return a1 < b1 ? -1 : (a1 == b1 ? 0 : 1);
+}
+
+static int
+cmp_offset (const void *a, const void *b)
+{
+  uint64_t off = *((uint64_t *) a);
+  Dwr_rng_entry *rng = *((Dwr_rng_entry **) b);
+  return off < rng->offset ? -1 : (off < rng->length ? 0 : 1);
+}
+
+static int
+rangeCmp (const void *a, const void *b)
+{
+  Range *item1 = *((Range **) a);
+  Range *item2 = *((Range **) b);
+  return item1->low < item2->low ? -1 : (item1->low == item2->low ? 0 : 1);
 }
 
 Vector <Range *> *
@@ -2211,9 +2246,48 @@ DwrCU::get_ranges ()
   Dwr_Attr *dwrAttr = dwrTag.get_attr (DW_AT_ranges);
   if (dwrAttr)
     {
-      Dprintf (DUMP_DWARFLIB, "DwrCU::get_ranges: 0x%llx\n",
-	       (long long) dwrAttr->u.offset);
-      ranges = dwarf->get_ranges (dwrAttr->u.offset);
+      uint64_t offset = dwrAttr->u.offset;
+      Dprintf (DUMP_DWARFLIB, "DwrCU::get_ranges: 0x%llx\n", (long long) offset);
+      if (version < 5)
+	ranges = dwarf->get_ranges (offset);
+      else
+	{
+	  if (rng_list == NULL && !rng_list_inited)
+	    {
+	      rng_list_inited = true;
+	      // Find the corresponding section in .debug_rnglists
+	      Vector <Dwr_rng_entry *> *rng_entrys = dwarf->get_debug_rnglists ();
+	      if (rng_entrys == NULL)
+		return NULL;
+	      int ind = rng_entrys->bisearch (0, -1, &offset, cmp_offset);
+	      if (ind != -1)
+		rng_list = rng_entrys->get (ind);
+	      else
+		{
+		  Dprintf (1, "Cannot find rnglist. DW_AT_ranges=0x%llx\n",
+			   (long long) offset);
+		  return NULL;
+		}
+	    }
+	  if (rng_list == NULL)
+	    return NULL;
+	  int ind = rng_list->ranges->bisearch (0, -1, &offset, cmp_ExtRange);
+	  if (ind == -1)
+	    {
+	      Dprintf (1, "Cannot find rnglist. DW_AT_ranges=0x%llx\n",
+		       (long long) offset);
+	      return NULL;
+	    }
+	  ranges = new Vector <Range *> ();
+	  for (long i = ind, sz = VecSize (rng_list->ranges); i < sz; i++)
+	    {
+	      ExtRange *r = rng_list->ranges->get (i);
+	      if (r->high == 0)
+		break;
+	      ranges->append (new Range (r->low + base_address,
+				       r->high + base_address));
+	    }
+	}
     }
   else
     {
@@ -2227,9 +2301,36 @@ DwrCU::get_ranges ()
 		   (long long) low_pc);
 	}
     }
-  if (ranges && DUMP_DWARFLIB)
-    ranges->dump (" ");
+  if (ranges)
+    {
+      ranges->sort (rangeCmp);
+      if (DUMP_DWARFLIB)
+	ranges->dump ("DwrCU::get_ranges:");
+    }
   return ranges;
+}
+
+Vector<Symbol *> *
+DwrCU::get_symbols (Vector<Symbol *> *syms)
+{
+  if (syms)
+    syms->reset ();
+  Vector <Range *> *ranges = get_ranges ();
+  if (ranges)
+    {
+      syms = Symbol::find_symbols (symbols, ranges, syms);
+      Destroy (ranges);
+    }
+  if (syms)
+    {
+      Symbol *sym = Symbol::get_symbol (symbols_sorted_by_name,
+					get_linkage_name ());
+      if (sym)
+	syms->append (sym);
+    }
+  if (syms && DUMP_ELF_SYM)
+    syms->dump ("DwrCU::get_symbols:");
+  return syms;
 }
 
 void
@@ -2239,27 +2340,93 @@ DwrCU::set_source (Function *func)
   func->setLineFirst (lineno);
 
   int fileno = (int) Dwarf_data (DW_AT_decl_file);
+  func->setDefSrc (get_source (fileno));
+}
+
+SourceFile *
+DwrCU::get_source (int fileno)
+{
   if (fileno > 0 && fileno < VecSize (srcFiles))
-    func->setDefSrc (srcFiles->get (fileno));
+    return srcFiles->get (fileno);
+  return NULL;
+}
+
+void
+DwrCU::inherit_prop (int64_t offset, source_t *src)
+{
+  if (src->lineno == 0)
+    src->lineno = (int) Dwarf_data (DW_AT_decl_line);
+  if (src->sf == NULL)
+    src->sf = get_source ((int) Dwarf_data (DW_AT_decl_file));
+
+  int64_t old_offset = dwrTag.offset;
+  if (set_die (offset) == DW_DLV_OK)
+    {
+      if (src->lineno == 0)
+	src->lineno = (int) Dwarf_data (DW_AT_decl_line);
+      if (src->sf == NULL)
+	src->sf = get_source ((int) Dwarf_data (DW_AT_decl_file));
+
+      Dwr_Attr *dwrAttr = dwrTag.get_attr (DW_AT_specification);
+      if (dwrAttr)
+	inherit_prop (dwrAttr->u.offset, src);
+      else
+	{
+	  Symbol *sym = Symbol::get_symbol (symbols_sorted_by_name,
+					  get_linkage_name ());
+	  if (sym)
+	    update_source (sym, src);
+	}
+    }
+  set_die (old_offset);
+}
+
+void
+DwrCU::set_up_funcs (int64_t offset)
+{
+  // get symbols from DW_AT_ranges, DW_AT_low_pc, DW_AT_linkage_name
+  Vector<Symbol *> *syms = get_symbols (tmp_syms);
+  if (VecSize (syms) == 0)
+    return;
+
+  // Find previous declaration to inherit settings.
+  source_t src = {.lineno = 0, .sf = NULL};
+  inherit_prop (offset, &src);
+
+  for (int i = 0, sz = VecSize (syms); i < sz; i++)
+    {
+      Symbol *sym = syms->get (i);
+      update_source (sym, &src);
+      if (sym->alias)
+	update_source (sym->alias, &src);
+    }
+}
+
+/* Create a function if necessary.
+ * Update the source information  */
+void
+DwrCU::update_source (Symbol *sym, source_t *src)
+{
+  Function *f = sym->createFunction (module);
+  f->setLineFirst (src->lineno);
+  f->setDefSrc (src->sf);
 }
 
 Symbol *
-DwrCU::find_declaration (int64_t offset)
+DwrCU::find_declaration (int64_t offset, source_t *src)
 {
   int64_t old_offset = dwrTag.offset;
   Symbol *sym = NULL;
   if (set_die (offset) == DW_DLV_OK)
     {
+      if (src->lineno == 0)
+	src->lineno = (int) Dwarf_data (DW_AT_decl_line);
+      if (src->sf == NULL)
+	src->sf = get_source ((int) Dwarf_data (DW_AT_decl_file));
+
       sym = Symbol::get_symbol (symbols_sorted_by_name, get_linkage_name ());
       if (sym && sym->func == NULL)
-	{
-	  Function *func = sym->createFunction (module);
-	  int lineno = (int) Dwarf_data (DW_AT_decl_line);
-	  func->setLineFirst (lineno);
-	  int fileno = (int) Dwarf_data (DW_AT_decl_file);
-	  if (fileno > 0 && fileno < VecSize (srcFiles))
-	    func->setDefSrc (srcFiles->get (fileno));
-	}
+	update_source (sym, src);
     }
   set_die (old_offset);
   return sym;
@@ -2344,6 +2511,7 @@ DwrCU::read_data_attr (Dwarf_Half attr, int64_t *retVal)
       case DW_FORM_data16:
       case DW_FORM_udata:
       case DW_FORM_sec_offset:
+      case DW_FORM_implicit_const:
 	*retVal = dwrAttr->u.val;
 	return DW_DLV_OK;
 
@@ -2577,3 +2745,69 @@ DwrInlinedSubr::dump ()
 	   (int) level, (long long) abstract_origin, (long long) low_pc,
 	   (long long) high_pc, (int) file, (int) line);
 }
+
+
+//////////////////////////////////////////////////////////
+//  class Dwr_rng_entry
+Dwr_rng_entry::Dwr_rng_entry ()
+{
+  ranges = new Vector <ExtRange *>();
+}
+
+Dwr_rng_entry::~Dwr_rng_entry ()
+{
+  delete ranges;
+}
+
+void
+Dwr_rng_entry::dump ()
+{
+  Dprintf (DUMP_DWARFLIB, "offset=0x%08llx length=0x%08llx fmt=%d version=%d "
+	   "addr_size=%d seg_size=%d offset_entry_count=0x%llx\n",
+	   (long long) offset, (long long) (length - offset), fmt64 ? 64 : 32,
+	   (int) version, (int) address_size, (int) segment_selector_size,
+	   (long long) offset_entry_count);
+  for (long i = 0, sz = VecSize (ranges); i < sz; i++)
+    {
+      ExtRange *p = ranges->get (i);
+      Dprintf (DUMP_DWARFLIB, " %8ld: 0x%08llx 0x%08llx-0x%08llx [%lld-%lld)\n",
+	     i, (long long) p->offset, (long long) p->low, (long long) p->high,
+	     (long long) p->low, (long long) p->high);
+    }
+}
+
+char *
+Dwr_rng_entry::rng_entry2str (int val)
+{
+  char *s;
+  switch (val)
+    {
+      CASE_S (DW_RLE_end_of_list);
+      CASE_S (DW_RLE_base_address);
+      CASE_S (DW_RLE_start_length);
+      CASE_S (DW_RLE_offset_pair);
+      CASE_S (DW_RLE_start_end);
+      CASE_S (DW_RLE_base_addressx);
+      CASE_S (DW_RLE_startx_endx);
+      CASE_S (DW_RLE_startx_length);
+    default: s = (char *) "???";
+      break;
+    }
+  return s;
+}
+
+template<> void Vector<Dwr_rng_entry *>::dump (const char *msg)
+{
+  if (!DUMP_DWARFLIB)
+    return;
+  if (msg == NULL)
+    msg = "#";
+  Dprintf (1, NTXT ("\n%s Vector<Dwr_rng_entry *> [%lld]\n"), msg, (long long) size ());
+  for (long i = 0, sz = size (); i < sz; i++)
+    {
+      Dwr_rng_entry *p = get (i);
+      Dprintf (1, "  %3ld ", i);
+      p->dump ();
+    }
+}
+

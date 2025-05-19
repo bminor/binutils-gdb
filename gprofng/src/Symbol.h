@@ -18,6 +18,9 @@
    Foundation, 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#ifndef _Symbol_h_
+#define _Symbol_h_
+
 class Function;
 class Module;
 
@@ -54,7 +57,7 @@ public:
 
   // Find symbols in 'syms' matched by 'ranges'.
   static Vector<Symbol *> *find_symbols (Vector<Symbol *> *syms,
-					 Vector<Range *> *ranges);
+		    Vector<Range *> *ranges, Vector<Symbol *> *symbols = NULL);
   static Vector<Symbol *> *sort_by_name (Vector<Symbol *> *syms);
 
   // Find symbol in CU corresponding to pc or linker_name.
@@ -62,7 +65,7 @@ public:
   static Symbol *get_symbol (Vector<Symbol *> *syms, char *linker_name);
 
   // Create and append a new function to the 'module'.
-  // Copy attributes (size, name, etc) from Simbol,
+  // Copy attributes (size, name, etc) from Symbol,
   Function *createFunction(Module *module);
   void dump (const char *msg = NULL);
 
@@ -78,3 +81,4 @@ public:
   int flags;
   bool defined;
 };
+#endif

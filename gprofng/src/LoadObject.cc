@@ -299,7 +299,7 @@ LoadObject::dump_functions (FILE *out)
 	if (fitem->alias && fitem->alias != fitem)
 	  fprintf (out, "id %6llu, @0x%llx -        %s == alias of '%s'\n",
 		   (ull_t) fitem->id, (ull_t) fitem->img_offset,
-		   fitem->get_name (), fitem->alias->get_name ());
+		   fitem->get_mangled_name (), fitem->alias->get_mangled_name ());
 	else
 	  {
 	    mname = fitem->module ? fitem->module->file_name : noname->file_name;

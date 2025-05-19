@@ -390,6 +390,7 @@ Dwarf::Dwarf (Stabs *_stabs)
   debug_lineSec = dwrGetSec (NTXT (".debug_line"));
   debug_rangesSec = dwrGetSec (NTXT (".debug_ranges"));
   debug_line_strSec = dwrGetSec (".debug_line_str");
+  debug_rnglists = NULL;
 
   if ((debug_infoSec == NULL) || (debug_abbrevSec == NULL) || (debug_lineSec == NULL))
     {
@@ -496,9 +497,24 @@ DwrCU::parseChild (Dwarf_cnt *ctx)
 	  break;
 	case DW_TAG_subprogram:
 	{
-	  if (dwrTag.get_attr (DW_AT_abstract_origin))
-	    break;
 	  Symbol *sym = NULL;
+	  Vector<Symbol *> *syms = NULL;
+	  Dwr_Attr *dwrAttr = dwrTag.get_attr (DW_AT_abstract_origin);
+	  if (dwrAttr)
+	    {
+	      // Set up functions from DW_AT_{ranges,low_pc,linkage_name}
+	      set_up_funcs (dwrAttr->u.offset);
+	      break;
+	    }
+
+	  dwrAttr = dwrTag.get_attr (DW_AT_specification);
+	  if (dwrAttr)
+	    {
+	      // Set up functions from DW_AT_{ranges,low_pc,linkage_name}
+	      set_up_funcs (dwrAttr->u.offset);
+	      break;
+	    }
+
 	  if (dwrTag.get_attr (DW_AT_declaration))
 	    {
 	      // Only declaration
@@ -508,58 +524,26 @@ DwrCU::parseChild (Dwarf_cnt *ctx)
 		  if (link_name && streq (link_name, NTXT ("MAIN")))
 		    ctx->fortranMAIN = Stabs::find_func (NTXT ("MAIN"),
 					    ctx->module->functions, true, true);
-		  }
-		sym = Symbol::get_symbol (symbols_sorted_by_name,
-					 get_linkage_name ());
-		if (sym == NULL)
-		  break;
-		func = append_Function (sym, ctx->name);
-		break;
-	    }
-
-	  Dwr_Attr *dwrAttr = dwrTag.get_attr (DW_AT_specification);
-	  if (dwrAttr)
-	    {
-	      // Find previous declaration to inherit settings.
-	      sym = find_declaration (dwrAttr->u.offset);
-	      if (sym == NULL)
-		break;
-	      func = sym->func;
-	      if (func == NULL)
-		break;
-	      set_source (func);
-
-	      Vector <Range *> *ranges = get_ranges ();
-	      if (ranges)
-		{
-		  Vector<Symbol *> *syms = Symbol::find_symbols (symbols, ranges);
-		  Destroy (ranges);
-		  for (int i = 0, sz = VecSize (syms); i < sz; i++)
-		    {
-		      Symbol *sp = syms->get (i);
-		      if (sp->alias)
-			sp = sp->alias;
-		      Function *f = sp->func;
-		      if (f == NULL)
-			f = sp->createFunction (func->module);
-		      f->setLineFirst (func->line_first);
-		      f->setDefSrc (func->def_source);
-		    }
-		  delete (syms);
 		}
+	      sym = Symbol::get_symbol (symbols_sorted_by_name,
+				       get_linkage_name ());
+	      if (sym != NULL)
+		func = append_Function (sym, ctx->name);
 	      break;
 	    }
 
-	  sym = Symbol::get_symbol (symbols_sorted_by_name, get_linkage_name ());
-	  if (sym == NULL)
-	    sym = Symbol::get_symbol (symbols, get_low_pc ());
-	  if (sym == NULL)
-	    break;
-	  func = append_Function (sym, ctx->name);
-	  if (Stabs::is_fortran (ctx->module->lang_code) &&
+	  func = NULL;
+	  syms = get_symbols (tmp_syms);
+	  for (int i = 0, sz = VecSize (syms); i < sz; i++)
+	    {
+	      sym = syms->get (i);
+	      func = append_Function (sym, ctx->name);
+	      if (Stabs::is_fortran (ctx->module->lang_code) &&
 	      streq (func->get_match_name (), "MAIN"))
-	    ctx->fortranMAIN = func;
-	  set_source (func);
+		ctx->fortranMAIN = func;
+	    }
+	  if (func == NULL)
+	    break;
 
 	  old_name = ctx->name;
 	  Function *old_func = ctx->func;
@@ -712,14 +696,6 @@ Dwarf::srcline_Dwarf (Module *module)
   dwrCU->map_dwarf_lines (module);
 }
 
-static int
-rangeCmp (const void *a, const void *b)
-{
-  Range *item1 = *((Range **) a);
-  Range *item2 = *((Range **) b);
-  return item1->low < item2->low ? -1 : (item1->low == item2->low ? 0 : 1);
-}
-
 Vector<Range *> *
 Dwarf::get_ranges (uint64_t offset)
 {
@@ -741,7 +717,6 @@ Dwarf::get_ranges (uint64_t offset)
 	break;
       ranges->append (new Range (low_pc, high_pc));
     }
-  ranges->sort (rangeCmp);
   return ranges;
 }
 
@@ -1126,4 +1101,95 @@ DwrCU::Dwarf_lang ()
     case DW_LANG_lo_user:
       return Sp_lang_unknown;
     }
+}
+
+Vector <Dwr_rng_entry *> *
+Dwarf::get_debug_rnglists ()
+{
+  if (debug_rnglists != NULL)
+    return debug_rnglists;
+  debug_rnglists = new Vector <Dwr_rng_entry *> ();
+
+  DwrSec *debug_rnglistsSec = dwrGetSec (".debug_rnglists");
+  if (debug_rnglistsSec == NULL)
+    {
+      Dprintf (1, "No section .debug_rnglists\n");
+      return debug_rnglists;
+    }
+  while (debug_rnglistsSec->offset < debug_rnglistsSec->sizeSec)
+    {
+      uint64_t base_address = 0;
+      uint64_t length = debug_rnglistsSec->ReadLength ();
+      Dwr_rng_entry *rng = new Dwr_rng_entry ();
+      debug_rnglists->append (rng);
+      rng->offset = debug_rnglistsSec->offset;
+      rng->length = length;
+      rng->fmt64 = debug_rnglistsSec->fmt64;
+      rng->version = debug_rnglistsSec->Get_16 ();
+      rng->address_size = debug_rnglistsSec->Get_8 ();
+      rng->segment_selector_size = debug_rnglistsSec->Get_8 ();
+      rng->offset_entry_count = debug_rnglistsSec->Get_32 ();
+      while (debug_rnglistsSec->offset < debug_rnglistsSec->size)
+	{
+	  uint64_t off = debug_rnglistsSec->offset;
+	  uint64_t low_pc;
+	  uint64_t high_pc;
+	  int re = debug_rnglistsSec->Get_8 ();
+	  switch (re)
+	    {
+	    case DW_RLE_end_of_list:
+	      low_pc = 0;
+	      high_pc = 0;
+	      break;
+	    case DW_RLE_base_address:
+	      base_address = debug_rnglistsSec->GetADDR ();
+	      low_pc = base_address;
+	      high_pc = 0;
+	      continue;
+	    case DW_RLE_start_length:
+	      low_pc = debug_rnglistsSec->GetADDR ();
+	      high_pc = low_pc + debug_rnglistsSec->GetULEB128 ();
+	      break;
+	    case DW_RLE_offset_pair:
+	      low_pc = base_address + debug_rnglistsSec->GetULEB128 ();
+	      high_pc = base_address + debug_rnglistsSec->GetULEB128 ();
+	      break;
+	    case DW_RLE_start_end:
+	      low_pc = debug_rnglistsSec->GetADDR ();
+	      high_pc = debug_rnglistsSec->GetADDR ();
+	      break;
+	    case DW_RLE_base_addressx:
+	      base_address = debug_rnglistsSec->GetULEB128 ();
+	      low_pc = base_address;
+	      high_pc = 0;
+	      continue;
+
+	      // TODO x-variants need .debug_addr support used for split-dwarf
+	    case DW_RLE_startx_endx:
+	      low_pc = debug_rnglistsSec->GetRef ();
+	      high_pc = debug_rnglistsSec->GetRef ();
+	      Dprintf (1, "DW_RLE_startx_endx is not implemented\n");
+	      continue;
+	    case DW_RLE_startx_length:
+	      low_pc = debug_rnglistsSec->GetRef ();
+	      high_pc = low_pc + debug_rnglistsSec->GetULEB128 ();
+	      Dprintf (1, "DW_RLE_startx_length is not implemented\n");
+	      continue;
+	    default:
+	      Dprintf (1, "Unknown tag DW_RLE: %d, offset=0x%llx\n", re,
+		       (long long) off);
+	      debug_rnglistsSec->offset = debug_rnglistsSec->size;
+	      continue;
+	    }
+	  Dprintf (DUMP_DWARFLIB, "0x%08llx %d-%-20s [0x%08llx - 0x%08llx)\n",
+		   (long long) off, re, Dwr_rng_entry::rng_entry2str (re),
+		   (long long) low_pc, (long long) high_pc);
+	  rng->ranges->append (new ExtRange (off, low_pc, high_pc));
+	}
+      debug_rnglistsSec->size = debug_rnglistsSec->sizeSec;
+      debug_rnglistsSec->offset = length;
+    }
+  delete debug_rnglistsSec;
+  debug_rnglists->dump ("Dwarf::get_debug_rnglists");
+  return debug_rnglists;
 }

@@ -1554,7 +1554,8 @@ Stabs::fixSymtabAlias ()
       for (; i < k; i++)
 	{
 	  sym = SymLst->fetch (i);
-	  sym->alias = bestAlias;
+	  if (sym != bestAlias)
+	    sym->alias = bestAlias;
 	  sym->size = maxSize;
 	}
       i--;
