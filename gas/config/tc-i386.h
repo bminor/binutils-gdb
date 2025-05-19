@@ -413,6 +413,9 @@ extern void tc_x86_frame_initial_instructions (void);
 #define REG_FP 6
 /* DWARF register number of the stack-pointer register in 64-bit mode.  */
 #define REG_SP 7
+/* DWARF register number of the (pseudo) return address register in 64-bit
+   mode.  This is the same as reg RIP in i386-reg.tbl.  */
+#define REG_RA 16
 
 #define md_elf_section_type(str,len) i386_elf_section_type (str, len)
 extern int i386_elf_section_type (const char *, size_t);
@@ -455,12 +458,18 @@ extern bool x86_support_sframe_p (void);
 #define support_sframe_p x86_support_sframe_p
 
 /* The stack pointer DWARF register number for SFrame CFA tracking.  */
-extern unsigned int x86_sframe_cfa_sp_reg;
+extern const unsigned int x86_sframe_cfa_sp_reg;
 #define SFRAME_CFA_SP_REG x86_sframe_cfa_sp_reg
 
 /* The frame pointer DWARF register number for SFrame CFA and FP tracking.  */
-extern unsigned int x86_sframe_cfa_fp_reg;
+extern const unsigned int x86_sframe_cfa_fp_reg;
 #define SFRAME_CFA_FP_REG x86_sframe_cfa_fp_reg
+
+/* The return address DWARF register number for SFrame purposes.  Although for
+   AMD64, RA tracking is disabled, specific constructs, like for indicating
+   the _start function, may use it.  */
+extern const unsigned int x86_sframe_cfa_ra_reg;
+#define SFRAME_CFA_RA_REG x86_sframe_cfa_ra_reg
 
 /* Whether SFrame return address tracking is needed.  */
 extern bool x86_sframe_ra_tracking_p (void);

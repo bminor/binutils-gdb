@@ -678,9 +678,13 @@ static int use_big_obj = 0;
 /* 1 if generating code for a shared library.  */
 static int shared = 0;
 
-unsigned int x86_sframe_cfa_sp_reg;
+const unsigned int x86_sframe_cfa_sp_reg = REG_SP;
 /* The other CFA base register for SFrame stack trace info.  */
-unsigned int x86_sframe_cfa_fp_reg;
+const unsigned int x86_sframe_cfa_fp_reg = REG_FP;
+/* The return address register for SFrame stack trace info.  For AMD64, RA
+   tracking is not needed, but some directives like .cfi_undefined may use
+   RA to indicate the outermost frame.  */
+const unsigned int x86_sframe_cfa_ra_reg = REG_RA;
 
 static ginsnS *x86_ginsn_new (const symbolS *, enum ginsn_gen_mode);
 #endif
@@ -3702,13 +3706,9 @@ md_begin (void)
 #if defined (OBJ_COFF) && defined (TE_PE)
       x86_dwarf2_return_column = 32;
 #else
-      x86_dwarf2_return_column = 16;
+      x86_dwarf2_return_column = REG_RA;
 #endif
       x86_cie_data_alignment = -8;
-#ifdef OBJ_ELF
-      x86_sframe_cfa_sp_reg = REG_SP;
-      x86_sframe_cfa_fp_reg = REG_FP;
-#endif
     }
   else
     {

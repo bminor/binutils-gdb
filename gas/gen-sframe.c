@@ -30,18 +30,6 @@
 # define sizeof_member(type, member)	(sizeof (((type *)0)->member))
 #endif
 
-/* Whether frame row entries track RA.
-
-   A target may not need return address tracking for stack tracing.  If it
-   does need the same, SFRAME_CFA_RA_REG must be defined with the return
-   address register number.  */
-
-#if defined (sframe_ra_tracking_p) && defined (SFRAME_CFA_RA_REG)
-# ifndef SFRAME_FRE_RA_TRACKING
-# define SFRAME_FRE_RA_TRACKING 1
-# endif
-#endif
-
 /* SFrame FRE type selection optimization is an optimization for size.
 
    There are three flavors of SFrame FRE representation in the binary format:
@@ -154,7 +142,6 @@ sframe_fre_set_cfa_offset (struct sframe_row_entry *fre,
   fre->merge_candidate = false;
 }
 
-#ifdef SFRAME_FRE_RA_TRACKING
 static void
 sframe_fre_set_ra_track (struct sframe_row_entry *fre, offsetT ra_offset)
 {
@@ -162,7 +149,6 @@ sframe_fre_set_ra_track (struct sframe_row_entry *fre, offsetT ra_offset)
   fre->ra_offset = ra_offset;
   fre->merge_candidate = false;
 }
-#endif
 
 static void
 sframe_fre_set_bp_track (struct sframe_row_entry *fre, offsetT bp_offset)
@@ -352,11 +338,9 @@ get_fre_num_offsets (struct sframe_row_entry *sframe_fre)
 
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     fre_num_offsets++;
-#ifdef SFRAME_FRE_RA_TRACKING
   if (sframe_ra_tracking_p ()
       && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
     fre_num_offsets++;
-#endif
   return fre_num_offsets;
 }
 
@@ -377,11 +361,9 @@ sframe_get_fre_offset_size (struct sframe_row_entry *sframe_fre)
   cfa_offset_size = get_offset_size_in_bytes (sframe_fre->cfa_offset);
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     bp_offset_size = get_offset_size_in_bytes (sframe_fre->bp_offset);
-#ifdef SFRAME_FRE_RA_TRACKING
   if (sframe_ra_tracking_p ()
       && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
     ra_offset_size = get_offset_size_in_bytes (sframe_fre->ra_offset);
-#endif
 
   /* Get the maximum size needed to represent the offsets.  */
   max_offset_size = cfa_offset_size;
@@ -587,14 +569,12 @@ output_sframe_row_entry (symbolS *fde_start_addr,
   fre_offset_func_map[idx].out_func (sframe_fre->cfa_offset);
   fre_write_offsets++;
 
-#ifdef SFRAME_FRE_RA_TRACKING
   if (sframe_ra_tracking_p ()
       && sframe_fre->ra_loc == SFRAME_FRE_ELEM_LOC_STACK)
     {
       fre_offset_func_map[idx].out_func (sframe_fre->ra_offset);
       fre_write_offsets++;
     }
-#endif
   if (sframe_fre->bp_loc == SFRAME_FRE_ELEM_LOC_STACK)
     {
       fre_offset_func_map[idx].out_func (sframe_fre->bp_offset);
@@ -926,10 +906,8 @@ sframe_register_name (unsigned int reg)
     return "SP";
   else if (reg == SFRAME_CFA_FP_REG)
     return "FP";
-#ifdef SFRAME_FRE_RA_TRACKING
   else if (reg == SFRAME_CFA_RA_REG)
     return "RA";
-#endif
   else
     return NULL;
 }
@@ -1102,14 +1080,12 @@ sframe_xlate_do_offset (struct sframe_xlate_ctx *xlate_ctx,
       sframe_fre_set_bp_track (cur_fre, cfi_insn->u.ri.offset);
       cur_fre->merge_candidate = false;
     }
-#ifdef SFRAME_FRE_RA_TRACKING
   else if (sframe_ra_tracking_p ()
 	   && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG)
     {
       sframe_fre_set_ra_track (cur_fre, cfi_insn->u.ri.offset);
       cur_fre->merge_candidate = false;
     }
-#endif
   /* This is used to track changes to non-rsp registers, skip all others
      except FP / RA for now.  */
   return SFRAME_XLATE_OK;
@@ -1131,9 +1107,7 @@ sframe_xlate_do_val_offset (const struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_U
      DW_CFA_val_offset instruction can be safely skipped without sacrificing
      the asynchronicity of stack trace information.  */
   if (cfi_insn->u.ri.reg == SFRAME_CFA_FP_REG
-#ifdef SFRAME_FRE_RA_TRACKING
       || (sframe_ra_tracking_p () && cfi_insn->u.ri.reg == SFRAME_CFA_RA_REG)
-#endif
       /* Ignore SP reg, if offset matches assumed default rule.  */
       || (cfi_insn->u.ri.reg == SFRAME_CFA_SP_REG && cfi_insn->u.ri.offset != 0))
     {
@@ -1159,9 +1133,7 @@ sframe_xlate_do_register (struct sframe_xlate_ctx *xlate_ctx ATTRIBUTE_UNUSED,
      instruction can be safely skipped without sacrificing the asynchronicity of
      stack trace information.  */
   if (cfi_insn->u.rr.reg1 == SFRAME_CFA_FP_REG
-#ifdef SFRAME_FRE_RA_TRACKING
       || (sframe_ra_tracking_p () && cfi_insn->u.rr.reg1 == SFRAME_CFA_RA_REG)
-#endif
       /* Ignore SP reg, as it can be recovered from the CFA tracking info.  */
       )
     {
@@ -1246,7 +1218,6 @@ sframe_xlate_do_restore (struct sframe_xlate_ctx *xlate_ctx,
       cur_fre->bp_offset = cie_fre->bp_offset;
       cur_fre->merge_candidate = false;
     }
-#ifdef SFRAME_FRE_RA_TRACKING
   else if (sframe_ra_tracking_p ()
 	   && cfi_insn->u.r == SFRAME_CFA_RA_REG)
     {
@@ -1255,7 +1226,6 @@ sframe_xlate_do_restore (struct sframe_xlate_ctx *xlate_ctx,
       cur_fre->ra_offset = cie_fre->ra_offset;
       cur_fre->merge_candidate = false;
     }
-#endif
   return SFRAME_XLATE_OK;
 }
 
@@ -1365,9 +1335,7 @@ sframe_xlate_do_escape_expr (const struct sframe_xlate_ctx *xlate_ctx,
 #undef CFI_ESC_NUM_EXP
 
   if (reg == SFRAME_CFA_SP_REG || reg == SFRAME_CFA_FP_REG
-#ifdef SFRAME_FRE_RA_TRACKING
       || (sframe_ra_tracking_p () && reg == SFRAME_CFA_RA_REG)
-#endif
       || reg == xlate_ctx->cur_fre->cfa_base_reg)
     {
       as_warn (_("skipping SFrame FDE; "
@@ -1707,7 +1675,6 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
 	= get_dw_fde_end_addrS (xlate_ctx->dw_fde);
     }
 
-#ifdef SFRAME_FRE_RA_TRACKING
   if (sframe_ra_tracking_p ())
     {
       struct sframe_row_entry *fre;
@@ -1724,7 +1691,6 @@ sframe_do_fde (struct sframe_xlate_ctx *xlate_ctx,
 	    }
 	}
     }
-#endif /* SFRAME_FRE_RA_TRACKING  */
 
   return SFRAME_XLATE_OK;
 }
