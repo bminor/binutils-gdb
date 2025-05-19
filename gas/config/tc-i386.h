@@ -390,6 +390,7 @@ if (fragP->fr_type == rs_align_code) 					\
    Yes, the branch might be one byte longer in CODE_16BIT but then the
    largest nop is smaller.  */
 #define MAX_MEM_FOR_RS_ALIGN_CODE (1 + 5 + 2 * 15 - 1)
+#define MAX_MEM_FOR_RS_SPACE_NOP MAX_MEM_FOR_RS_ALIGN_CODE
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP 1

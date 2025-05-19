@@ -1769,7 +1769,7 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
       count -= non_repeat;
     }
 
-  if (fragP->fr_type == rs_align_code)
+  if (fragP->fr_type != rs_machine_dependent)
     {
       /* Set up the frag so that everything we have emitted so far is
 	 included in fr_fix.  The repeating larger nop only needs to

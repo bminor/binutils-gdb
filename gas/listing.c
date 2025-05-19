@@ -826,7 +826,7 @@ calc_hex (list_info_type *list)
 	  data_buffer_size += 2;
 	  octet_in_frag++;
 	}
-      if (frag_ptr->fr_type == rs_fill)
+      if (frag_ptr->fr_type == rs_fill || frag_ptr->fr_type == rs_fill_nop)
 	{
 	  unsigned int var_rep_max = octet_in_frag;
 	  unsigned int var_rep_idx = octet_in_frag;
@@ -850,27 +850,6 @@ calc_hex (list_info_type *list)
 	      if (var_rep_idx >= frag_ptr->fr_fix + frag_ptr->fr_var)
 		var_rep_idx = var_rep_max;
 	    }
-	}
-      else if (frag_ptr->fr_type == rs_fill_nop && frag_ptr->fr_opcode)
-	{
-	  /* Print as many bytes from fr_opcode as is sensible.  */
-	  octet_in_frag = 0;
-	  while (octet_in_frag < (unsigned int) frag_ptr->fr_offset
-		 && data_buffer_size < MAX_BYTES - 3)
-	    {
-	      if (address == ~(unsigned int) 0)
-		address = frag_ptr->fr_address / OCTETS_PER_BYTE;
-
-	      sprintf (data_buffer + data_buffer_size,
-		       "%02X",
-		       frag_ptr->fr_opcode[octet_in_frag] & 0xff);
-	      data_buffer_size += 2;
-
-	      octet_in_frag++;
-	    }
-
-	  free (frag_ptr->fr_opcode);
-	  frag_ptr->fr_opcode = NULL;
 	}
 
       frag_ptr = frag_ptr->fr_next;

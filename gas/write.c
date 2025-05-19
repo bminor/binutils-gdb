@@ -1653,6 +1653,19 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
       offsetT count;
 
       gas_assert (f->fr_type == rs_fill || f->fr_type == rs_fill_nop);
+
+      count = f->fr_offset;
+      fill_literal = f->fr_literal + f->fr_fix;
+      if (f->fr_type == rs_fill_nop && count > 0)
+	{
+	  md_generate_nops (f, fill_literal, count, *fill_literal);
+	  /* md_generate_nops updates fr_fix and fr_var.  */
+	  f->fr_offset = (f->fr_next->fr_address - f->fr_address
+			  - f->fr_fix) / f->fr_var;
+	  count = f->fr_offset;
+	  fill_literal = f->fr_literal + f->fr_fix;
+	}
+
       if (f->fr_fix)
 	{
 	  x = bfd_set_section_contents (stdoutput, sec,
@@ -1671,39 +1684,6 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 	}
 
       fill_size = f->fr_var;
-      count = f->fr_offset;
-      fill_literal = f->fr_literal + f->fr_fix;
-
-      if (f->fr_type == rs_fill_nop)
-	{
-	  gas_assert (count >= 0 && fill_size == 1);
-	  if (count > 0)
-	    {
-	      char *buf = xmalloc (count);
-	      md_generate_nops (f, buf, count, *fill_literal);
-	      x = bfd_set_section_contents
-		(stdoutput, sec, buf, (file_ptr) offset,
-		 (bfd_size_type) count);
-	      if (!x)
-		as_fatal (ngettext ("can't fill %ld byte "
-				    "in section %s of %s: '%s'",
-				    "can't fill %ld bytes "
-				    "in section %s of %s: '%s'",
-				    (long) count),
-			  (long) count,
-			  bfd_section_name (sec),
-			  bfd_get_filename (stdoutput),
-			  bfd_errmsg (bfd_get_error ()));
-	      offset += count;
-#ifndef NO_LISTING
-	      if (listing & LISTING_LISTING)
-		f->fr_opcode = buf;
-	      else
-#endif
-		free (buf);
-	    }
-	  continue;
-	}
 
       gas_assert (count >= 0);
       if (fill_size && count)

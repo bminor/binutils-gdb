@@ -3617,6 +3617,13 @@ s_nop (int ignore ATTRIBUTE_UNUSED)
 	     && frag_off + frag_now_fix () < start_off + exp.X_add_number);
 }
 
+/* Use this to specify the amount of memory allocated for representing
+   the nops.  Needs to be large enough to hold any fixed size prologue
+   plus the replicating portion.  */
+#ifndef MAX_MEM_FOR_RS_SPACE_NOP
+# define MAX_MEM_FOR_RS_SPACE_NOP 1
+#endif
+
 void
 s_nops (int ignore ATTRIBUTE_UNUSED)
 {
@@ -3665,8 +3672,7 @@ s_nops (int ignore ATTRIBUTE_UNUSED)
   /* Store the no-op instruction control byte in the first byte of frag.  */
   char *p;
   symbolS *sym = make_expr_symbol (&exp);
-  p = frag_var (rs_space_nop, 1, 1, (relax_substateT) 0,
-		sym, (offsetT) 0, (char *) 0);
+  p = frag_var (rs_space_nop, MAX_MEM_FOR_RS_SPACE_NOP, 1, 0, sym, 0, NULL);
   *p = val.X_add_number;
 }
 
