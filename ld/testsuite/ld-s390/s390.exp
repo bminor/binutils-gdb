@@ -101,6 +101,14 @@ set s390xtests {
     {"WEAKUNDEF2: overflow test (PLT32DBL)"
      "-m elf64_s390 -dT 8GB.ld --no-error-rwx-segments -no-pie" "" "-m64" {weakundef-2.s}
      {{objdump "-dzrj.text" weakundef-2.dd}} "weakundef-2"}
+    {"PR32969-1: do not rewrite load of misaligned COMDAT symbol address"
+     "-m elf64_s390" "" "-m64" {pr32969a.s pr32969b.s pr32969c.s}
+     {{objdump "-dzrj.text" pr32969_64-1.dd}}
+     "pr32969_64-1"}
+    {"PR32969-2: rewrite load of aligned COMDAT symbol address"
+     "-m elf64_s390" "" "-m64" {pr32969a.s pr32969c.s pr32969b.s}
+     {{objdump "-dzrj.text" pr32969_64-2.dd}}
+     "pr32969_64-2"}
 }
 
 if [istarget "s390-*-*"] {
