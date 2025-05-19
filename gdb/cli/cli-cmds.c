@@ -952,6 +952,21 @@ shell_command (const char *arg, int from_tty)
   shell_escape (arg, from_tty);
 }
 
+/* Completion for the shell command.  Currently, this just uses filename
+   completion, but we could, potentially, complete command names from $PATH
+   for the first word, which would make this even more shell like.  */
+
+static void
+shell_command_completer (struct cmd_list_element *ignore,
+			 completion_tracker &tracker,
+			 const char *text, const char * /* word */)
+{
+  tracker.set_use_custom_word_point (true);
+  const char *word
+    = advance_to_filename_maybe_quoted_complete_word_point (tracker, text);
+  filename_maybe_quoted_completer (ignore, tracker, text, word);
+}
+
 static void
 edit_command (const char *arg, int from_tty)
 {
@@ -2803,7 +2818,7 @@ the previous command number shown."),
     = add_com ("shell", class_support, shell_command, _("\
 Execute the rest of the line as a shell command.\n\
 With no arguments, run an inferior shell."));
-  set_cmd_completer (shell_cmd, deprecated_filename_completer);
+  set_cmd_completer_handle_brkchars (shell_cmd, shell_command_completer);
 
   add_com_alias ("!", shell_cmd, class_support, 0);
 

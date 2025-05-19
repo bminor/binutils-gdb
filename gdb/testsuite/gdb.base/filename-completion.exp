@@ -385,7 +385,7 @@ proc run_quoting_and_escaping_tests { root } {
 		      remove-symbol-file \
 		      "target core" "target exec" "target tfile" \
 		      "maint print c-tdesc" "save gdb-index"
-		      "save gdb-index -dwarf-5" }
+		      "save gdb-index -dwarf-5" "shell ls"}
     if { [allow_compile_tests] } {
 	lappend all_cmds "compile file"
     }
@@ -406,6 +406,31 @@ proc run_quoting_and_escaping_tests { root } {
 	set cmd "maintenance test-options $sub_cmd -filename"
 	with_test_prefix "cmd=$cmd" {
 	    run_quoting_and_escaping_tests_1 $root $cmd
+	}
+    }
+
+    # Some additional testing of shell command.  Test 'shell' and '!'
+    # when there are multiple filenames on the command line.  This
+    # focuses on completion of the final filename.  There is also some
+    # testing of the shell command above, this tests completion within
+    # the line.
+    foreach_with_prefix shell_cmd { "shell " "!" } {
+	foreach suffix { "aaa/aa bb" "bb2/dir 1/unique file" } {
+	    set dir $root/$suffix
+
+	    regsub -all " " "$dir" "\\ " dir_with_backslash
+
+	    with_test_prefix "suffix='$suffix'" {
+		with_test_prefix "with_backslash" {
+		    run_quoting_and_escaping_tests_1 $root "${shell_cmd}ls $dir_with_backslash"
+		}
+		with_test_prefix "with double quotes" {
+		    run_quoting_and_escaping_tests_1 $root "${shell_cmd}ls \"$dir\""
+		}
+		with_test_prefix "with single quotes" {
+		    run_quoting_and_escaping_tests_1 $root "${shell_cmd}ls '$dir'"
+		}
+	    }
 	}
     }
 }
