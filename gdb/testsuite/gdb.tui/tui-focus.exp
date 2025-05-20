@@ -73,7 +73,7 @@ foreach spec {{src true} {cmd true} {status true} {regs false} \
     }
 }
 
-# Use the Python TUI API to exercise some of the ambigous window name
+# Use the Python TUI API to exercise some of the ambiguous window name
 # handling parts of the 'focus' command.
 Term::clean_restart 24 80 $binfile
 if {[allow_python_tests]} {
