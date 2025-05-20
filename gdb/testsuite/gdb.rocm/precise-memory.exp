@@ -59,7 +59,7 @@ proc do_test { } {
 	    return
 	}
 
-	# Get to the begining of the GPU kernel without precise memory enabled.
+	# Get to the beginning of the GPU kernel without precise memory enabled.
 	with_test_prefix "goto gpu code" {
 	    gdb_test_no_output "set amdgpu precise-memory off"
 	    gdb_breakpoint "kernel" allow-pending
