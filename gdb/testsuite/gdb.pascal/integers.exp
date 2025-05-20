@@ -59,7 +59,7 @@ gdb_test "next" "l := k;" "next to 'l := k' line"
 gdb_test "print j" " = 2"
 # k should be equal to 3
 gdb_test "print k" " = 3"
-# But l shoud still be zero
+# But l should still be zero
 if { $pascal_compiler_is_gpc } {
   setup_xfail *-*-*
 }
