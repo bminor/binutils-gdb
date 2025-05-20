@@ -18,6 +18,8 @@
 # Correct index.
 set int_str_idx 0
 
+set prepare_for_testing_done 0
 source $srcdir/$subdir/dw-form-strx.exp.tcl
+require {expr $prepare_for_testing_done == 1}
 
 gdb_test "ptype global_var" "type = int"

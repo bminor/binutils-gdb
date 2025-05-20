@@ -56,5 +56,9 @@ Dwarf::assemble $asm_file {
 
 if { [prepare_for_testing "failed to prepare" ${testfile} \
 	  [list $srcfile $asm_file] {nodebug}] } {
-    return -1
+    return
 }
+
+# Let includers know prepare_for_testing was done, without having to check
+# source return status.
+set prepare_for_testing_done 1
