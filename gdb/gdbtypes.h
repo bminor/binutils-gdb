@@ -480,7 +480,10 @@ enum field_loc_kind
     FIELD_LOC_KIND_ENUMVAL,	/**< enumval */
     FIELD_LOC_KIND_PHYSADDR,	/**< physaddr */
     FIELD_LOC_KIND_PHYSNAME,	/**< physname */
-    FIELD_LOC_KIND_DWARF_BLOCK	/**< dwarf_block */
+    /* A DWARF block that computes the address of the field.  */
+    FIELD_LOC_KIND_DWARF_BLOCK_ADDR,	/**< dwarf_block */
+    /* A DWARF block that computes the bit offset of the field.  */
+    FIELD_LOC_KIND_DWARF_BLOCK_BITPOS,
   };
 
 /* * A discriminant to determine which field in the
@@ -616,6 +619,13 @@ struct field
     return m_loc_kind;
   }
 
+  /* Return true if this location has either "DWARF block" kind.  */
+  bool loc_is_dwarf_block () const
+  {
+    return (m_loc_kind == FIELD_LOC_KIND_DWARF_BLOCK_ADDR
+	    || m_loc_kind == FIELD_LOC_KIND_DWARF_BLOCK_BITPOS);
+  }
+
   LONGEST loc_bitpos () const
   {
     gdb_assert (m_loc_kind == FIELD_LOC_KIND_BITPOS);
@@ -666,13 +676,19 @@ struct field
 
   dwarf2_locexpr_baton *loc_dwarf_block () const
   {
-    gdb_assert (m_loc_kind == FIELD_LOC_KIND_DWARF_BLOCK);
+    gdb_assert (loc_is_dwarf_block ());
     return m_loc.dwarf_block;
   }
 
-  void set_loc_dwarf_block (dwarf2_locexpr_baton *dwarf_block)
+  void set_loc_dwarf_block_addr (dwarf2_locexpr_baton *dwarf_block)
   {
-    m_loc_kind = FIELD_LOC_KIND_DWARF_BLOCK;
+    m_loc_kind = FIELD_LOC_KIND_DWARF_BLOCK_ADDR;
+    m_loc.dwarf_block = dwarf_block;
+  }
+
+  void set_loc_dwarf_block_bitpos (dwarf2_locexpr_baton *dwarf_block)
+  {
+    m_loc_kind = FIELD_LOC_KIND_DWARF_BLOCK_BITPOS;
     m_loc.dwarf_block = dwarf_block;
   }
 

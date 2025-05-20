@@ -2121,7 +2121,7 @@ is_dynamic_type_internal (struct type *type, bool top_level)
 	      return true;
 	    /* If the field is at a fixed offset, then it is not
 	       dynamic.  */
-	    if (type->field (i).loc_kind () != FIELD_LOC_KIND_DWARF_BLOCK)
+	    if (!type->field (i).loc_is_dwarf_block ())
 	      continue;
 	    /* Do not consider C++ virtual base types to be dynamic
 	       due to the field's offset being dynamic; these are
@@ -2723,7 +2723,7 @@ resolve_dynamic_field (struct field &field,
 {
   gdb_assert (!field.is_static ());
 
-  if (field.loc_kind () == FIELD_LOC_KIND_DWARF_BLOCK)
+  if (field.loc_is_dwarf_block ())
     {
       dwarf2_locexpr_baton *field_loc
 	= field.loc_dwarf_block ();
@@ -2736,10 +2736,15 @@ resolve_dynamic_field (struct field &field,
       prop.set_locexpr (&baton);
 
       CORE_ADDR vals[1] = {addr_stack->addr};
-      CORE_ADDR addr;
-      if (dwarf2_evaluate_property (&prop, frame, addr_stack, &addr, vals))
+      CORE_ADDR addr_or_bitpos;
+      if (dwarf2_evaluate_property (&prop, frame, addr_stack,
+				    &addr_or_bitpos, vals))
 	{
-	  field.set_loc_bitpos (TARGET_CHAR_BIT * (addr - addr_stack->addr));
+	  if (field.loc_kind () == FIELD_LOC_KIND_DWARF_BLOCK_ADDR)
+	    field.set_loc_bitpos (TARGET_CHAR_BIT
+				  * (addr_or_bitpos - addr_stack->addr));
+	  else
+	    field.set_loc_bitpos (addr_or_bitpos);
 
 	  if (field_loc->is_field_location)
 	    {
@@ -4415,7 +4420,8 @@ check_types_equal (struct type *type1, struct type *type2,
 					       field2->loc_physname ()))
 		return false;
 	      break;
-	    case FIELD_LOC_KIND_DWARF_BLOCK:
+	    case FIELD_LOC_KIND_DWARF_BLOCK_ADDR:
+	    case FIELD_LOC_KIND_DWARF_BLOCK_BITPOS:
 	      {
 		struct dwarf2_locexpr_baton *block1, *block2;
 
@@ -5560,8 +5566,12 @@ copy_type_recursive (struct type *type, copied_types_hash_t &copied_types)
 	      new_type->field (i).set_loc_physname
 		(xstrdup (type->field (i).loc_physname ()));
 	      break;
-	    case FIELD_LOC_KIND_DWARF_BLOCK:
-	      new_type->field (i).set_loc_dwarf_block
+	    case FIELD_LOC_KIND_DWARF_BLOCK_ADDR:
+	      new_type->field (i).set_loc_dwarf_block_addr
+		(type->field (i).loc_dwarf_block ());
+	      break;
+	    case FIELD_LOC_KIND_DWARF_BLOCK_BITPOS:
+	      new_type->field (i).set_loc_dwarf_block_bitpos
 		(type->field (i).loc_dwarf_block ());
 	      break;
 	    default:
