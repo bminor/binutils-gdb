@@ -985,7 +985,7 @@ proc_with_prefix test_mi_stack_select_frame { mode } {
 
 	# Now use the '-stack-select-frame' command with the --frame
 	# option, this verifies that even when the frame GDB would
-	# swith to is the same as the frame specified with --frame, an
+	# switch to is the same as the frame specified with --frame, an
 	# event is still sent to the CLI.
 
 	set cli_re [make_cli_re $mode -1 -1 0]

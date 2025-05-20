@@ -16,7 +16,7 @@
 # Check that when GDB fails to evaluate the condition of a conditional
 # breakpoint we only get one *stopped notification.  In this test case
 # the breakpoint condition fails due to throwing an uncaught C++
-# excpetion.
+# exception.
 
 require allow_cplus_tests
 

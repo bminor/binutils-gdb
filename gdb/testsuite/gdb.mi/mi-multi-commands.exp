@@ -90,7 +90,7 @@ proc run_test { args } {
 	# looking for.  However, due to the unpredictable
 	# intermingling, it's much easier if we drop the ^ anchor.
 	# However, with this gone dejagnu would sometimes match the
-	# second comand output before the first commands output.
+	# second command output before the first commands output.
 	#
 	# This approach just looks for the first command output, then,
 	# once that has been found, we start looking for the second
