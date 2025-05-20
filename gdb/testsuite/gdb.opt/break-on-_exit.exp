@@ -25,7 +25,7 @@
 # for libc, then the breakpoint is set on the exec-local _exit@plt instead,
 # and that functionality will also not be used.
 #
-# We may get the required setup in case of a libc with misssing separate
+# We may get the required setup in case of a libc with missing separate
 # debuginfo, but we want the same effect if that debuginfo is installed.
 #
 # So, we use -readnever to read minimal symbols, but not non-miminal symbols.
