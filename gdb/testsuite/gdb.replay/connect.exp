@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #
-# Starts a communication with gdbsever setting the remotelog file.
+# Starts a communication with gdbserver setting the remotelog file.
 # Modifies the remotelog with update_log proc, injects an error message
 # instead of the expected replay to the vMustReplyEmpty packet in order
 # to test GDB reacts to the error response properly. After the remotelog
