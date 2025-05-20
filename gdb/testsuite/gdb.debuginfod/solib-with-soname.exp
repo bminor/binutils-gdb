@@ -89,7 +89,7 @@ if {[lindex $status 0] != 0} {
 }
 
 # Build the executable.  This links against libfoo.so, which is
-# poining at libfoo_1.so.  Just to confuse things even more, this
+# pointing at libfoo_1.so.  Just to confuse things even more, this
 # executable uses dlopen to load libfoo_2.so.  Weird!
 if { [build_executable "build executable" ${binfile} ${srcfile2} \
 	  [list debug shlib=${library_filename} shlib_load]] == -1 } {

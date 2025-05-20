@@ -49,7 +49,7 @@
 #
 # This obviously needs fixing, but is a separate problem from the one being
 # tested here, so this test deliberately checks the mapping using a file that
-# is mmaped rather than loaded as a shared library, as such the file is in the
+# is mmapped rather than loaded as a shared library, as such the file is in the
 # core-files list of mapped files, but is not in the shared library list.
 #
 # Despite this test living in the gdb.debuginfod/ directory, only the last
@@ -260,7 +260,7 @@ proc load_core_file { testname { line_re "" } } {
 	# We expect RES to be 2 (TCL_RETURN) or 1 (TCL_ERROR).  If we get
 	# here then somehow the 'catch' above finished without hitting
 	# either of those cases, which is .... weird.
-	perror "unexepcted return value, code = $res, value = $string"
+	perror "unexpected return value, code = $res, value = $string"
 	return -1
     }
 }
