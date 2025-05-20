@@ -397,7 +397,7 @@ gdb_test_no_output "set \$ymm15.v2_int128 = {0x0, 0xcafeface}" "set ymm15 for vp
 if {[record_full_function "vzeroupper"] == true} {
     # Since vzeroupper needs to save 8 or 16 registers, let's check what was
     # actually recorded, instead of just undoing an instruction.  Only
-    # really check the values of egisters 0, 1, 2 and 15 because those are
+    # really check the values of registers 0, 1, 2 and 15 because those are
     # the only ones we're setting.
     gdb_test "maint print record-instruction" \
 	[multi_line "Register ymm0h changed: 74565" \

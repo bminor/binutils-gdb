@@ -140,7 +140,7 @@ gdb_test_multiple "reverse-step" "reverse-step into solib function one" {
 	pass $gdb_test_name
     }
 }
-# Depending on wether the closing } has a line associated, we might have
+# Depending on whether the closing } has a line associated, we might have
 # different acceptable results here
 gdb_test_multiple "reverse-step" "reverse-step within solib function one" {
     -re -wrap "return y;.*" {
