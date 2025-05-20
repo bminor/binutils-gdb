@@ -200,6 +200,8 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "bad_pcrel20_s2_global"
     run_dump_test "bad_pcrel20_s2_weak"
     run_dump_test "weak-undef-hidden-shared"
+    run_dump_test "overflow_32_pcrel"
+    run_dump_test "underflow_32_pcrel"
   }
 
   if [check_pie_support] {

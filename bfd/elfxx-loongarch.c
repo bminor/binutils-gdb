@@ -1390,7 +1390,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 	 0xffffffff,				/* dst_mask */
 	 false,					/* pcrel_offset */
 	 BFD_RELOC_LARCH_32_PCREL,		/* bfd_reloc_code_real_type */
-	 NULL,					/* adjust_reloc_bits */
+	 reloc_sign_bits,			/* adjust_reloc_bits */
 	 NULL),					/* larch_reloc_type_name */
 
   /* The paired relocation may be relaxed.  */
