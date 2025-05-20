@@ -70,7 +70,7 @@ repos:
     rev: v2.4.1
     hooks:
     - id: codespell
-      files: '^(gdbsupport|gdbserver|gdb/(tui|target|data-directory|po|system-gdbinit|mi|syscalls|arch|regformats|compile|python|guile|config|unittests|cli|testsuite/gdb.(ctf|dap|gdb|go|modula2|objc|opencl|perf|replay|server|testsuite|tui)))/'
+      files: '^(gdbsupport|gdbserver|gdb/(tui|target|data-directory|po|system-gdbinit|mi|syscalls|arch|regformats|compile|python|guile|config|unittests|cli|testsuite/gdb.(ctf|dap|gdb|go|modula2|objc|opencl|perf|replay|server|testsuite|tui|xml)))/'
       args: [--config, gdb/contrib/setup.cfg]
   - repo: local
     hooks:
