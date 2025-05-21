@@ -218,28 +218,32 @@ validate_exec_file (int from_tty)
   if (exec_file_mismatch_mode == exec_file_mismatch_off)
     return;
 
+  /* If there's no current executable, then there's nothing to
+     validate against, so we're done.  */
   const char *current_exec_file = current_program_space->exec_filename ();
-  struct inferior *inf = current_inferior ();
-  /* Try to determine a filename from the process itself.  */
-  const char *pid_exec_file = target_pid_to_exec_file (inf->pid);
-  bool build_id_mismatch = false;
-
-  /* If we cannot validate the exec file, return.  */
-  if (current_exec_file == NULL || pid_exec_file == NULL)
+  if (current_exec_file == nullptr)
     return;
 
-  /* Try validating via build-id, if available.  This is the most
-     reliable check.  */
+  /* Try to determine a filename from the process itself.  If we
+     cannot get an executable from the process, then no validation is
+     possible.  */
+  const char *pid_exec_file
+    = target_pid_to_exec_file (current_inferior ()->pid);
+  if (pid_exec_file == nullptr)
+    return;
 
-  /* In case current_exec_file was changed, reopen_exec_file ensures
-     an up to date build_id (will do nothing if the file timestamp
-     did not change).  If exec file changed, reopen_exec_file has
-     allocated another file name, so get_exec_file again.  */
+  /* In case current_exec_file was changed, reopen_exec_file ensures an up
+     to date build_id (will do nothing if the file timestamp did not
+     change).  If exec file changed, reopen_exec_file has allocated another
+     file name, so get_exec_file again.  */
   reopen_exec_file ();
   current_exec_file = current_program_space->exec_filename ();
 
+  /* Try validating via build-id, if available.  This is the most reliable
+     check.  */
   const bfd_build_id *exec_file_build_id
     = build_id_bfd_get (current_program_space->exec_bfd ());
+  bool build_id_mismatch = false;
   if (exec_file_build_id != nullptr)
     {
       /* Prepend the target prefix, to force gdb_bfd_open to open the
