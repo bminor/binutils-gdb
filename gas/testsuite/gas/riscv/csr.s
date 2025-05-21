@@ -418,6 +418,9 @@
 	csr vsieh
 	csr vsiph
 
+	# Ssccfg or Smcdeleg
+	csr scountinhibit
+
 	# Zicfiss
 	csr ssp
 

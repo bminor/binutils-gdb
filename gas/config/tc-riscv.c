@@ -93,6 +93,7 @@ enum riscv_csr_class
   CSR_CLASS_SSAIA_AND_H_32,	/* Ssaia with H, rv32 only */
   CSR_CLASS_SSAIA_OR_SSCSRIND,		/* Ssaia/Smcsrind */
   CSR_CLASS_SSAIA_OR_SSCSRIND_AND_H,	/* Ssaia/Smcsrind with H */
+  CSR_CLASS_SSCCFG,		/* Ssccfg */
   CSR_CLASS_SSCSRIND,		/* Sscsrind */
   CSR_CLASS_SSCSRIND_AND_H,	/* Sscsrind with H */
   CSR_CLASS_SSSTATEEN,		/* S[ms]stateen only */
@@ -1117,6 +1118,9 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_SSAIA_OR_SSCSRIND_AND_H:
       is_h_required = (csr_class == CSR_CLASS_SSAIA_OR_SSCSRIND_AND_H);
       extension = "ssaia or sscsrind";
+      break;
+    case CSR_CLASS_SSCCFG:
+      extension = "ssccfg";
       break;
     case CSR_CLASS_SSCSRIND:
     case CSR_CLASS_SSCSRIND_AND_H:
