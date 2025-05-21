@@ -23,8 +23,6 @@
 #include <inttypes.h>
 #include "sframe-impl.h"
 
-#define SFRAME_HEADER_FLAGS_STR_MAX_LEN 50
-
 /* Return TRUE if the SFrame section is associated with the aarch64 ABIs.  */
 
 static bool
@@ -40,12 +38,63 @@ is_sframe_abi_arch_aarch64 (sframe_decoder_ctx *sfd_ctx)
   return aarch64_p;
 }
 
+struct dump_flags_helper
+{
+  uint8_t flag;
+  const char *flag_str;
+};
+
+static void
+dump_sframe_header_flags (sframe_decoder_ctx *sfd_ctx)
+{
+  uint8_t flags;
+  char *flags_str;
+  bool first_p = true;
+
+  flags = sframe_decoder_get_flags (sfd_ctx);
+  if (!flags)
+    {
+      printf ("    Flags: NONE\n");
+      return;
+    }
+
+  /* PS: Keep SFRAME_FLAGS_STR_MAX_LEN in sync if adding more members to
+     this array.  */
+#define SFRAME_FLAGS_STR_MAX_LEN 50
+#define MAX_NUM_FLAGS 2
+  const struct dump_flags_helper flags_helper[MAX_NUM_FLAGS] = {
+      { SFRAME_F_FDE_SORTED, "SFRAME_F_FDE_SORTED"},
+      { SFRAME_F_FRAME_POINTER, "SFRAME_F_FRAME_POINTER"}
+  };
+
+  /* Prepare SFrame section flags string.  */
+  flags_str = (char*) calloc (SFRAME_FLAGS_STR_MAX_LEN, sizeof (char));
+
+  for (unsigned int i = 0; i < MAX_NUM_FLAGS; i++)
+    {
+      if (flags & flags_helper[i].flag)
+	{
+	  strcpy (flags_str, flags_helper[i].flag_str);
+	  flags = (flags & ~flags_helper[i].flag);
+	  if (flags)
+	    strcat (flags_str, ",");
+
+	  if (first_p)
+	    {
+	      printf ("    Flags: %s\n", flags_str);
+	      first_p = false;
+	    }
+	  else
+	    printf ("           %s\n", flags_str);
+	}
+    }
+  free (flags_str);
+}
+
 static void
 dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
 {
   uint8_t ver;
-  uint8_t flags;
-  char *flags_str;
   const char *ver_str = NULL;
   int8_t cfa_fixed_fp_offset;
   int8_t cfa_fixed_ra_offset;
@@ -57,32 +106,9 @@ dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
 	"SFRAME_VERSION_1",
 	"SFRAME_VERSION_2" };
 
-  /* PS: Keep SFRAME_HEADER_FLAGS_STR_MAX_LEN in sync if adding more members to
-     this array.  */
-  const char *flag_names[]
-    = { "SFRAME_F_FDE_SORTED",
-	"SFRAME_F_FRAME_POINTER" };
-
   ver = sframe_decoder_get_version (sfd_ctx);
   if (ver <= SFRAME_VERSION)
     ver_str = version_names[ver];
-
-  /* Prepare SFrame section flags string.  */
-  flags = header->sfh_preamble.sfp_flags;
-  flags_str = (char*) calloc (SFRAME_HEADER_FLAGS_STR_MAX_LEN, sizeof (char));
-  if (flags)
-    {
-      if (flags & SFRAME_F_FDE_SORTED)
-	strcpy (flags_str, flag_names[0]);
-      if (flags & SFRAME_F_FRAME_POINTER)
-	{
-	  if (strlen (flags_str) > 0)
-	    strcpy (flags_str, ",");
-	  strcpy (flags_str, flag_names[1]);
-	}
-    }
-  else
-    strcpy (flags_str, "NONE");
 
   /* CFA fixed FP and RA offsets.  */
   cfa_fixed_fp_offset = header->sfh_cfa_fixed_fp_offset;
@@ -93,15 +119,15 @@ dump_sframe_header (sframe_decoder_ctx *sfd_ctx)
   printf ("  %s :\n", subsec_name);
   printf ("\n");
   printf ("    Version: %s\n", ver_str);
-  printf ("    Flags: %s\n", flags_str);
+
+  dump_sframe_header_flags (sfd_ctx);
+
   if (cfa_fixed_fp_offset != SFRAME_CFA_FIXED_FP_INVALID)
     printf ("    CFA fixed FP offset: %d\n", cfa_fixed_fp_offset);
   if (cfa_fixed_ra_offset != SFRAME_CFA_FIXED_RA_INVALID)
     printf ("    CFA fixed RA offset: %d\n", cfa_fixed_ra_offset);
   printf ("    Num FDEs: %d\n", sframe_decoder_get_num_fidx (sfd_ctx));
   printf ("    Num FREs: %d\n", header->sfh_num_fres);
-
-  free (flags_str);
 }
 
 static void
