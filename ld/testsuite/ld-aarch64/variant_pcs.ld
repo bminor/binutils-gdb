@@ -19,5 +19,5 @@ SECTIONS
   .rela.plt       : { *(.rela.plt) *(.rela.iplt) }
   . = 0x12340000;
   .far : { *(.far) }
-  .ARM.attributes 0 : { *(.ARM.atttributes) }
+  .ARM.attributes 0 : { *(.ARM.attributes) }
 }

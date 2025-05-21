@@ -10,5 +10,5 @@ SECTIONS
   .text           : { *(.text) }
   . = 0x28000;
   .got            : { *(.got) *(.got.plt) }
-  .ARM.attributes 0 : { *(.ARM.atttributes) }
+  .ARM.attributes 0 : { *(.ARM.attributes) }
 }
