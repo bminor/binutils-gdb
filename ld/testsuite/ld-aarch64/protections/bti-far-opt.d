@@ -13,7 +13,7 @@ Disassembly of section \.plt:
 0000000000018000 <\.plt>:
    18000:	d503245f 	bti	c
    18004:	a9bf7bf0 	stp	x16, x30, \[sp, #-16\]!
-   18008:	900000d0 	adrp	x16, 30000 <_GLOBAL_OFFSET_TABLE_>
+   18008:	[[:xdigit:]]{8} 	adrp	x16, [[:xdigit:]]+ <_GLOBAL_OFFSET_TABLE_>
    1800c:	f9400e11 	ldr	x17, \[x16, #24\]
    18010:	91006210 	add	x16, x16, #0x18
    18014:	d61f0220 	br	x17
@@ -21,7 +21,7 @@ Disassembly of section \.plt:
    1801c:	d503201f 	nop
 
 0000000000018020 <foo@plt>:
-   18020:	900000d0 	adrp	x16, 30000 <_GLOBAL_OFFSET_TABLE_>
+   18020:	[[:xdigit:]]{8} 	adrp	x16, [[:xdigit:]]+ <_GLOBAL_OFFSET_TABLE_>
    18024:	f9401211 	ldr	x17, \[x16, #32\]
    18028:	91008210 	add	x16, x16, #0x20
    1802c:	d61f0220 	br	x17
