@@ -2990,7 +2990,7 @@ offset_in_range (offsetT val, int size)
     default: abort ();
     }
 
-  if ((val & ~mask) != 0 && (-val & ~mask) != 0)
+  if ((val & ~mask) != 0 && (-(addressT) val & ~mask) != 0)
     as_warn (_("0x%" PRIx64 " shortened to 0x%" PRIx64),
 	     (uint64_t) val, (uint64_t) (val & mask));
 
