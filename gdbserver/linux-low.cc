@@ -751,7 +751,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
       /* Set the event status.  */
       event_lwp->waitstatus.set_execd
 	(make_unique_xstrdup
-	   (linux_proc_pid_to_exec_file (event_thr->id.lwp ())));
+	   (pid_to_exec_file (event_thr->id.lwp ())));
 
       /* Mark the exec status as pending.  */
       event_lwp->stopped = 1;
@@ -6033,7 +6033,7 @@ linux_process_target::supports_pid_to_exec_file ()
 const char *
 linux_process_target::pid_to_exec_file (int pid)
 {
-  return linux_proc_pid_to_exec_file (pid);
+  return linux_proc_pid_to_exec_file (pid, linux_ns_same (pid, LINUX_NS_MNT));
 }
 
 bool

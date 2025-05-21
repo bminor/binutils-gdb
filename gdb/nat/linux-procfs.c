@@ -424,7 +424,7 @@ linux_proc_task_list_dir_exists (pid_t pid)
 /* See linux-procfs.h.  */
 
 const char *
-linux_proc_pid_to_exec_file (int pid)
+linux_proc_pid_to_exec_file (int pid, bool is_local_fs)
 {
   static char buf[PATH_MAX];
   char name[PATH_MAX];
@@ -437,9 +437,31 @@ linux_proc_pid_to_exec_file (int pid)
   else
     buf[len] = '\0';
 
-  /* Use /proc/PID/exe if the actual file can't be read, but /proc/PID/exe
-     can be.  */
-  if (access (buf, R_OK) != 0 && access (name, R_OK) == 0)
+  /* If the inferior and GDB can see the same filesystem, and NAME
+     cannot be read, maybe the file has been deleted, then we can
+     potentially use /proc/PID/exe instead.
+
+     GDB always interprets the results of this function within the
+     current sysroot (which is 'target:' by default).  This means
+     that, if we return /proc/PID/exe, GDB will try to find this file
+     within the sysroot.
+
+     This doesn't make sense if GDB is using a sysroot like:
+     '/some/random/directory/', not only is it possible that NAME
+     could be found within the sysroot, it is unlikely that
+     /proc/PID/exe will exist within the sysroot.
+
+     Similarly, if the sysroot is 'target:', but the inferior is
+     running within a separate MNT namespace, then it is more than
+     likely that the inferior will also be running in a separate PID
+     namespace, in this case PID is the pid on the host system,
+     /proc/PID/exe will not be correct within the inferiors MNT/PID
+     namespace.
+
+     So, we can fallback to use /proc/PID/exe only if IS_LOCAL_FS is
+     true, this indicates that GDB and the inferior are using the same
+     MNT namespace, and GDB's sysroot is either empty, or 'target:'.  */
+  if (is_local_fs && access (buf, R_OK) != 0 && access (name, R_OK) == 0)
     strcpy (buf, name);
 
   return buf;
