@@ -1329,6 +1329,15 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 
   if (opcode == 0xff)
     {
+      switch (modrm & 0x38)
+	{
+	case 0x10: /* CALL */
+	case 0x20: /* JMP */
+	  break;
+	default:
+	  return true;
+	}
+
       /* We have "call/jmp *foo@GOT[(%reg)]".  */
       if ((h->root.type == bfd_link_hash_defined
 	   || h->root.type == bfd_link_hash_defweak)
