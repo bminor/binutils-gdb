@@ -570,9 +570,7 @@ clear_syscall_counts (struct inferior *inf)
   inf_data->syscalls_counts.clear ();
 }
 
-void _initialize_break_catch_syscall ();
-void
-_initialize_break_catch_syscall ()
+INIT_GDB_FILE (break_catch_syscall)
 {
   gdb::observers::inferior_exit.attach (clear_syscall_counts,
 					"break-catch-syscall");

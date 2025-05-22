@@ -14765,9 +14765,7 @@ static struct cmd_list_element *enablebreaklist = NULL;
 
 cmd_list_element *commands_cmd_element = nullptr;
 
-void _initialize_breakpoint ();
-void
-_initialize_breakpoint ()
+INIT_GDB_FILE (breakpoint)
 {
   struct cmd_list_element *c;
 

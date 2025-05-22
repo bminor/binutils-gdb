@@ -2475,10 +2475,8 @@ maybe_reset_amd_dbgapi ()
 	   get_status_string (status));
 }
 
-extern initialize_file_ftype _initialize_amd_dbgapi_target;
-
 void
-_initialize_amd_dbgapi_target ()
+INIT_GDB_FILE (amd_dbgapi_target)
 {
   /* Make sure the loaded debugger library version is greater than or equal to
      the one used to build GDB.  */

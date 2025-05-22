@@ -1313,9 +1313,7 @@ show_jit_reader_directory (const char *args, int from_tty)
 			     jit_reader_dir.c_str ()));
 }
 
-void _initialize_jit ();
-void
-_initialize_jit ()
+INIT_GDB_FILE (jit)
 {
   jit_reader_dir = relocate_gdb_directory (JIT_READER_DIR,
 					   JIT_READER_DIR_RELOCATABLE);

@@ -609,9 +609,7 @@ show_osabi (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 		gdbarch_osabi_name (GDB_OSABI_DEFAULT));
 }
 
-void _initialize_gdb_osabi ();
-void
-_initialize_gdb_osabi ()
+INIT_GDB_FILE (gdb_osabi)
 {
   /* Register a generic sniffer for ELF flavoured files.  */
   gdbarch_register_osabi_sniffer (bfd_arch_unknown,

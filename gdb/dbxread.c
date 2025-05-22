@@ -248,9 +248,7 @@ static const struct sym_fns aout_sym_fns =
   NULL,				/* sym_probe_fns */
 };
 
-void _initialize_dbxread ();
-void
-_initialize_dbxread ()
+INIT_GDB_FILE (dbxread)
 {
   add_symtab_fns (bfd_target_aout_flavour, &aout_sym_fns);
 }

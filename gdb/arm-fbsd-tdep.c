@@ -322,9 +322,7 @@ arm_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_software_single_step (gdbarch, arm_software_single_step);
 }
 
-void _initialize_arm_fbsd_tdep ();
-void
-_initialize_arm_fbsd_tdep ()
+INIT_GDB_FILE (arm_fbsd_tdep)
 {
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_FREEBSD,
 			  arm_fbsd_init_abi);

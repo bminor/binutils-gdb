@@ -8722,9 +8722,7 @@ ppc_insn_prefix_dform (unsigned int insn1, unsigned int insn2)
 
 /* Initialization code.  */
 
-void _initialize_rs6000_tdep ();
-void
-_initialize_rs6000_tdep ()
+INIT_GDB_FILE (rs6000_tdep)
 {
   gdbarch_register (bfd_arch_rs6000, rs6000_gdbarch_init, rs6000_dump_tdep);
   gdbarch_register (bfd_arch_powerpc, rs6000_gdbarch_init, rs6000_dump_tdep);

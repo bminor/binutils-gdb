@@ -383,9 +383,7 @@ fill_fpregset (const struct regcache *regcache,
    }
 }
 
-void _initialize_hppa_linux_nat ();
-void
-_initialize_hppa_linux_nat ()
+INIT_GDB_FILE (hppa_linux_nat)
 {
   /* Register the target.  */
   linux_target = &the_hppa_linux_nat_target;

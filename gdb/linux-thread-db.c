@@ -1981,9 +1981,7 @@ maintenance_check_libthread_db (const char *args, int from_tty)
   check_thread_db (info, true);
 }
 
-void _initialize_thread_db ();
-void
-_initialize_thread_db ()
+INIT_GDB_FILE (thread_db)
 {
   /* Defer loading of libthread_db.so until inferior is running.
      This allows gdb to load correct libthread_db for a given

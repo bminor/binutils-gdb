@@ -46,9 +46,7 @@ cris_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 }
 
-void _initialize_cris_linux_tdep ();
-void
-_initialize_cris_linux_tdep ()
+INIT_GDB_FILE (cris_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_cris, 0, GDB_OSABI_LINUX,
 			  cris_linux_init_abi);

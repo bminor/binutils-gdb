@@ -19694,9 +19694,7 @@ show_check_physname (struct ui_file *file, int from_tty,
 	      value);
 }
 
-void _initialize_dwarf2_read ();
-void
-_initialize_dwarf2_read ()
+INIT_GDB_FILE (dwarf2_read)
 {
   add_setshow_prefix_cmd ("dwarf", class_maintenance,
 			  _("\

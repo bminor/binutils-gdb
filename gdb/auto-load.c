@@ -1568,9 +1568,7 @@ found and/or loaded."),
 
 gdb::observers::token auto_load_new_objfile_observer_token;
 
-void _initialize_auto_load ();
-void
-_initialize_auto_load ()
+INIT_GDB_FILE (auto_load)
 {
   struct cmd_list_element *cmd;
   gdb::unique_xmalloc_ptr<char> scripts_directory_help, gdb_name_help,

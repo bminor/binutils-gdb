@@ -89,9 +89,7 @@ run_tests ()
 } /* namespace selftests */
 
 
-void _initialize_search_memory_selftests ();
-void
-_initialize_search_memory_selftests ()
+INIT_GDB_FILE (search_memory_selftests)
 {
   selftests::register_test ("search_memory",
 			    selftests::search_memory_tests::run_tests);

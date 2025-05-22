@@ -219,9 +219,7 @@ command_structure_invariants_tests ()
 
 } /* namespace selftests */
 
-void _initialize_command_def_selftests ();
-void
-_initialize_command_def_selftests ()
+INIT_GDB_FILE (command_def_selftests)
 {
   selftests::register_test
     ("help_doc_invariants",

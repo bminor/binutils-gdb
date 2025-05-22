@@ -2311,9 +2311,7 @@ static const struct internalvar_funcs inferior_thread_count_funcs =
   NULL,
 };
 
-void _initialize_thread ();
-void
-_initialize_thread ()
+INIT_GDB_FILE (thread)
 {
   static struct cmd_list_element *thread_apply_list = NULL;
   cmd_list_element *c;

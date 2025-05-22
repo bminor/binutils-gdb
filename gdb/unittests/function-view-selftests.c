@@ -250,9 +250,7 @@ run_tests ()
 } /* namespace function_view */
 } /* namespace selftests */
 
-void _initialize_function_view_selftests ();
-void
-_initialize_function_view_selftests ()
+INIT_GDB_FILE (function_view_selftests)
 {
   selftests::register_test ("function_view",
 			    selftests::function_view::run_tests);

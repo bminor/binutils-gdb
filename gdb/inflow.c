@@ -944,9 +944,7 @@ initialize_stdin_serial (void)
   stdin_serial = serial_fdopen (0);
 }
 
-void _initialize_inflow ();
-void
-_initialize_inflow ()
+INIT_GDB_FILE (inflow)
 {
   add_info ("terminal", info_terminal_command,
 	    _("Print inferior's saved terminal status."));

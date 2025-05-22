@@ -3811,9 +3811,7 @@ const struct solib_ops svr4_so_ops =
   svr4_get_solibs_in_ns,
 };
 
-void _initialize_svr4_solib ();
-void
-_initialize_svr4_solib ()
+INIT_GDB_FILE (svr4_solib)
 {
   gdb::observers::free_objfile.attach (svr4_free_objfile_observer,
 				       "solib-svr4");

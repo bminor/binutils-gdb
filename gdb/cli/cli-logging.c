@@ -202,9 +202,7 @@ show_logging_enabled (struct ui_file *file, int from_tty,
     gdb_printf (file, _("off: Logging is disabled.\n"));
 }
 
-void _initialize_cli_logging ();
-void
-_initialize_cli_logging ()
+INIT_GDB_FILE (cli_logging)
 {
   static struct cmd_list_element *set_logging_cmdlist, *show_logging_cmdlist;
 

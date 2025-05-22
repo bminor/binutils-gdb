@@ -309,9 +309,7 @@ ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
 }
 
 /* Suppress warning from -Wmissing-prototypes.  */
-void _initialize_arc_linux_nat ();
-void
-_initialize_arc_linux_nat ()
+INIT_GDB_FILE (arc_linux_nat)
 {
   /* Register the target.  */
   linux_target = &the_arc_linux_nat_target;

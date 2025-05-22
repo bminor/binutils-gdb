@@ -156,10 +156,7 @@ self_test ()
 } /* namespace remote_args_tests */
 } /* namespace selftests */
 
-void _initialize_remote_arg_selftests ();
-
-void
-_initialize_remote_arg_selftests ()
+INIT_GDB_FILE (remote_arg_selftests)
 {
   selftests::register_test ("remote-args",
 			    selftests::remote_args_tests::self_test);

@@ -2421,9 +2421,7 @@ loongarch_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   return ret;
 }
 
-void _initialize_loongarch_tdep ();
-void
-_initialize_loongarch_tdep ()
+INIT_GDB_FILE (loongarch_tdep)
 {
   gdbarch_register (bfd_arch_loongarch, loongarch_gdbarch_init, nullptr);
 }

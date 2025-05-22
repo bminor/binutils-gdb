@@ -52,9 +52,7 @@ unpack_field_as_long_tests (struct gdbarch *arch)
 }
 }
 
-void _initialize_unpack_selftests ();
-void
-_initialize_unpack_selftests ()
+INIT_GDB_FILE (unpack_selftests)
 {
   selftests::register_test_foreach_arch
     ("unpack_field_as_long", selftests::unpack::unpack_field_as_long_tests);

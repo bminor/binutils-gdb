@@ -499,9 +499,7 @@ static const struct internalvar_funcs exception_funcs =
 
 
 
-void _initialize_break_catch_throw ();
-void
-_initialize_break_catch_throw ()
+INIT_GDB_FILE (break_catch_throw)
 {
   /* Add catch and tcatch sub-commands.  */
   add_catch_command ("catch", _("\

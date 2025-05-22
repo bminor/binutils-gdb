@@ -479,9 +479,7 @@ test_addrmap ()
 } /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
-void _initialize_addrmap ();
-void
-_initialize_addrmap ()
+INIT_GDB_FILE (addrmap)
 {
 #if GDB_SELF_TEST
   selftests::register_test ("addrmap", selftests::test_addrmap);

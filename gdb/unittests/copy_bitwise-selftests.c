@@ -151,9 +151,7 @@ copy_bitwise_tests (void)
 
 } /* namespace selftests */
 
-void _initialize_copy_bitwise_utils_selftests ();
-void
-_initialize_copy_bitwise_utils_selftests ()
+INIT_GDB_FILE (copy_bitwise_utils_selftests)
 {
   selftests::register_test ("copy_bitwise", selftests::copy_bitwise_tests);
 }

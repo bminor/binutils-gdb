@@ -100,9 +100,7 @@ amd64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
 }
 
-void _initialize_amd64_sol2_tdep ();
-void
-_initialize_amd64_sol2_tdep ()
+INIT_GDB_FILE (amd64_sol2_tdep)
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
 			  GDB_OSABI_SOLARIS, amd64_sol2_init_abi);

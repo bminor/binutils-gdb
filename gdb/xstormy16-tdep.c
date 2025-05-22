@@ -828,9 +828,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
    Initializer function for the Sanyo Xstormy16a module.
    Called by gdb at start-up.  */
 
-void _initialize_xstormy16_tdep ();
-void
-_initialize_xstormy16_tdep ()
+INIT_GDB_FILE (xstormy16_tdep)
 {
   gdbarch_register (bfd_arch_xstormy16, xstormy16_gdbarch_init);
 }

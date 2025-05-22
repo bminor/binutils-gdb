@@ -3768,9 +3768,7 @@ amd64_insn_decode (void)
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
-void _initialize_amd64_tdep ();
-void
-_initialize_amd64_tdep ()
+INIT_GDB_FILE (amd64_tdep)
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_NONE,
 			  amd64_none_init_abi);

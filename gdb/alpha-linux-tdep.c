@@ -386,9 +386,7 @@ alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				    alpha_linux_gdb_signal_to_target);
 }
 
-void _initialize_alpha_linux_tdep ();
-void
-_initialize_alpha_linux_tdep ()
+INIT_GDB_FILE (alpha_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_LINUX,
 			  alpha_linux_init_abi);

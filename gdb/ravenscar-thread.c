@@ -921,9 +921,7 @@ Support for Ravenscar task/thread switching is disabled\n"));
 /* Module startup initialization function, automagically called by
    init.c.  */
 
-void _initialize_ravenscar ();
-void
-_initialize_ravenscar ()
+INIT_GDB_FILE (ravenscar)
 {
   /* Notice when the inferior is created in order to push the
      ravenscar ops if needed.  */

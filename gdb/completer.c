@@ -3513,9 +3513,7 @@ skip_over_slash_fmt (completion_tracker &tracker, const char **args)
   return false;
 }
 
-void _initialize_completer ();
-void
-_initialize_completer ()
+INIT_GDB_FILE (completer)
 {
   /* Setup some readline completion globals.  */
   rl_completion_word_break_hook = gdb_completion_word_break_characters;

@@ -2086,9 +2086,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-void _initialize_nds32_tdep ();
-void
-_initialize_nds32_tdep ()
+INIT_GDB_FILE (nds32_tdep)
 {
   /* Initialize gdbarch.  */
   gdbarch_register (bfd_arch_nds32, nds32_gdbarch_init);

@@ -2387,9 +2387,7 @@ find_toplevel_char (const char *s, char c)
   return 0;
 }
 
-void _initialize_cp_support ();
-void
-_initialize_cp_support ()
+INIT_GDB_FILE (cp_support)
 {
   cmd_list_element *maintenance_cplus
     = add_basic_prefix_cmd ("cplus", class_maintenance,

@@ -114,9 +114,7 @@ mips64_obsd_nat_target::store_registers (struct regcache *regcache, int regnum)
     perror_with_name (_("Couldn't write registers"));
 }
 
-void _initialize_mips64obsd_nat ();
-void
-_initialize_mips64obsd_nat ()
+INIT_GDB_FILE (mips64obsd_nat)
 {
   add_inf_child_target (&the_mips64_obsd_nat_target);
 }

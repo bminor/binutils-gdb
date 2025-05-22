@@ -1183,9 +1183,7 @@ loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 /* Initialize LoongArch Linux target support.  */
 
-void _initialize_loongarch_linux_tdep ();
-void
-_initialize_loongarch_linux_tdep ()
+INIT_GDB_FILE (loongarch_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_loongarch, bfd_mach_loongarch32,
 			  GDB_OSABI_LINUX, loongarch_linux_init_abi);

@@ -327,9 +327,7 @@ maintenance_wait_for_index_cache (const char *args, int from_tty)
   wait_for_index_cache (0);
 }
 
-void _initialize_cooked_index ();
-void
-_initialize_cooked_index ()
+INIT_GDB_FILE (cooked_index)
 {
   add_cmd ("wait-for-index-cache", class_maintenance,
 	   maintenance_wait_for_index_cache, _("\

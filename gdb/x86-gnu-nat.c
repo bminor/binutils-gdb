@@ -491,9 +491,7 @@ x86_gnu_dr_get_control (void)
 }
 #endif /* i386_DEBUG_STATE */
 
-void _initialize_x86_gnu_nat ();
-void
-_initialize_x86_gnu_nat ()
+INIT_GDB_FILE (x86_gnu_nat)
 {
 #ifdef i386_DEBUG_STATE
   x86_dr_low.set_control = x86_gnu_dr_set_control;

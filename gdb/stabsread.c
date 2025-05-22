@@ -7200,9 +7200,7 @@ hashname (const char *name)
 
 /* Initializer for this module.  */
 
-void _initialize_stabsread ();
-void
-_initialize_stabsread ()
+INIT_GDB_FILE (stabsread)
 {
   undef_types_allocated = 20;
   undef_types_length = 0;

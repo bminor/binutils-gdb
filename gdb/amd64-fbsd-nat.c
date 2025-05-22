@@ -324,9 +324,7 @@ amd64_fbsd_nat_target::read_description ()
     return i386_target_description (X86_XSTATE_SSE_MASK, true);
 }
 
-void _initialize_amd64fbsd_nat ();
-void
-_initialize_amd64fbsd_nat ()
+INIT_GDB_FILE (amd64fbsd_nat)
 {
   add_inf_child_target (&the_amd64_fbsd_nat_target);
 

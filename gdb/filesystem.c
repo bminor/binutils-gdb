@@ -76,9 +76,7 @@ is \"%s\".\n"),
 		value);
 }
 
-void _initialize_filesystem ();
-void
-_initialize_filesystem ()
+INIT_GDB_FILE (filesystem)
 {
   add_setshow_enum_cmd ("target-file-system-kind",
 			class_files,

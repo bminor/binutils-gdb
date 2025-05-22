@@ -66,9 +66,7 @@ test_user_created_frame ()
 
 } /* namespace selftests */
 
-void _initialize_frame_info_ptr_selftests ();
-void
-_initialize_frame_info_ptr_selftests ()
+INIT_GDB_FILE (frame_info_ptr_selftests)
 {
   selftests::register_test ("frame_info_ptr_user",
 			    selftests::test_user_created_frame);

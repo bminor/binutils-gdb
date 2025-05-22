@@ -1133,9 +1133,7 @@ sol_thread_target::get_ada_task_ptid (long lwp, ULONGEST thread)
   return (thread_info->ptid);
 }
 
-void _initialize_sol_thread ();
-void
-_initialize_sol_thread ()
+INIT_GDB_FILE (sol_thread)
 {
   void *dlhandle;
 

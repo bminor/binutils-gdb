@@ -1910,9 +1910,7 @@ source_lines_range::source_lines_range (int startline,
 }
 
 
-void _initialize_source ();
-void
-_initialize_source ()
+INIT_GDB_FILE (source)
 {
   init_source_path ();
 

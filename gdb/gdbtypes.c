@@ -6202,9 +6202,7 @@ call_site::pc () const
 #endif
 }
 
-void _initialize_gdbtypes ();
-void
-_initialize_gdbtypes ()
+INIT_GDB_FILE (gdbtypes)
 {
   add_setshow_zuinteger_cmd ("overload", no_class, &overload_debug,
 			     _("Set debugging of C++ overloading."),

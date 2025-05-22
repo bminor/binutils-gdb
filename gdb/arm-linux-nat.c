@@ -1393,9 +1393,7 @@ arm_linux_nat_target::low_new_fork (struct lwp_info *parent, pid_t child_pid)
   *child_state = *parent_state;
 }
 
-void _initialize_arm_linux_nat ();
-void
-_initialize_arm_linux_nat ()
+INIT_GDB_FILE (arm_linux_nat)
 {
   /* Register the target.  */
   linux_target = &the_arm_linux_nat_target;

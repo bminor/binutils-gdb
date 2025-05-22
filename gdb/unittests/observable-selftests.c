@@ -237,9 +237,7 @@ run_tests ()
 } /* namespace observers */
 } /* namespace selftests */
 
-void _initialize_observer_selftest ();
-void
-_initialize_observer_selftest ()
+INIT_GDB_FILE (observer_selftest)
 {
   selftests::register_test ("gdb::observers",
 			    selftests::observers::run_tests);

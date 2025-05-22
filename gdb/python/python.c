@@ -2717,9 +2717,7 @@ test_python ()
 /* See python.h.  */
 cmd_list_element *python_cmd_element = nullptr;
 
-void _initialize_python ();
-void
-_initialize_python ()
+INIT_GDB_FILE (python)
 {
   cmd_list_element *python_interactive_cmd
     =	add_com ("python-interactive", class_obscure,

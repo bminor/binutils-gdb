@@ -200,9 +200,7 @@ ppcfbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   return 1;
 }
 
-void _initialize_ppcfbsd_nat ();
-void
-_initialize_ppcfbsd_nat ()
+INIT_GDB_FILE (ppcfbsd_nat)
 {
   add_inf_child_target (&the_ppc_fbsd_nat_target);
 

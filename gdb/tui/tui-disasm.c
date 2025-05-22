@@ -546,9 +546,7 @@ run_tests ()
 } /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
-void _initialize_tui_disasm ();
-void
-_initialize_tui_disasm ()
+INIT_GDB_FILE (tui_disasm)
 {
 #if GDB_SELF_TEST
   selftests::register_test ("tui-disasm", selftests::tui::disasm::run_tests);

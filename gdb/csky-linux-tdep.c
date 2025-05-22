@@ -426,9 +426,7 @@ csky_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				&csky_linux_rt_sigreturn_tramp_frame_kernel_4x);
 }
 
-void _initialize_csky_linux_tdep ();
-void
-_initialize_csky_linux_tdep ()
+INIT_GDB_FILE (csky_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_csky, 0, GDB_OSABI_LINUX,
 			  csky_linux_init_abi);

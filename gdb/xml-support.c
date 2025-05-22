@@ -999,10 +999,7 @@ xml_fetch_content_from_file (const char *filename, const char *dirname)
   return text;
 }
 
-void _initialize_xml_support ();
-void _initialize_xml_support ();
-void
-_initialize_xml_support ()
+INIT_GDB_FILE (xml_support)
 {
   add_setshow_boolean_cmd ("xml", class_maintenance, &debug_xml,
 			   _("Set XML parser debugging."),

@@ -511,9 +511,7 @@ static void extract_lines_test ()
 }
 #endif
 
-void _initialize_source_cache ();
-void
-_initialize_source_cache ()
+INIT_GDB_FILE (source_cache)
 {
   add_cmd ("source-cache", class_maintenance, source_cache_flush_command,
 	   _("Force gdb to flush its source code cache."),

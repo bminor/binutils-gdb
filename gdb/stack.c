@@ -3262,9 +3262,7 @@ static struct cmd_list_element *select_frame_cmd_list = NULL;
 /* Commands with a prefix of `info frame'.  */
 static struct cmd_list_element *info_frame_cmd_list = NULL;
 
-void _initialize_stack ();
-void
-_initialize_stack ()
+INIT_GDB_FILE (stack)
 {
   struct cmd_list_element *cmd;
 

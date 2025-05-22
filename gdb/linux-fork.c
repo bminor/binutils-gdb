@@ -1115,9 +1115,7 @@ restart_command (const char *args, int from_tty)
   linux_fork_context (fp, from_tty, inf);
 }
 
-void _initialize_linux_fork ();
-void
-_initialize_linux_fork ()
+INIT_GDB_FILE (linux_fork)
 {
   /* Checkpoint command: create a fork of the inferior process
      and set it aside for later debugging.  */

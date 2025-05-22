@@ -2421,9 +2421,7 @@ rust_lex_tests (void)
 
 
 
-void _initialize_rust_exp ();
-void
-_initialize_rust_exp ()
+INIT_GDB_FILE (rust_exp)
 {
   int code = regcomp (&number_regex, number_regex_text, REG_EXTENDED);
   /* If the regular expression was incorrect, it was a programming

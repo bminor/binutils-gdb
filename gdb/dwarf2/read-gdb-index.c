@@ -1562,10 +1562,7 @@ dwarf2_read_gdb_index
   return true;
 }
 
-void _initialize_read_gdb_index ();
-
-void
-_initialize_read_gdb_index ()
+INIT_GDB_FILE (read_gdb_index)
 {
   add_setshow_boolean_cmd ("use-deprecated-index-sections",
 			   no_class, &use_deprecated_index_sections, _("\

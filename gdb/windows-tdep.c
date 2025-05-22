@@ -1182,9 +1182,7 @@ windows_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
-void _initialize_windows_tdep ();
-void
-_initialize_windows_tdep ()
+INIT_GDB_FILE (windows_tdep)
 {
   init_w32_command_list ();
   cmd_list_element *info_w32_thread_information_block_cmd

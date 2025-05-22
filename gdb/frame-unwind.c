@@ -614,9 +614,7 @@ maintenance_enable_frame_unwinders (const char *args, int from_tty)
   enable_disable_frame_unwinders (args, from_tty, true);
 }
 
-void _initialize_frame_unwind ();
-void
-_initialize_frame_unwind ()
+INIT_GDB_FILE (frame_unwind)
 {
   /* Add "maint info frame-unwinders".  */
   add_cmd ("frame-unwinders",

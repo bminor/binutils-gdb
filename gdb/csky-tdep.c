@@ -2882,9 +2882,7 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-void _initialize_csky_tdep ();
-void
-_initialize_csky_tdep ()
+INIT_GDB_FILE (csky_tdep)
 {
 
   gdbarch_register (bfd_arch_csky, csky_gdbarch_init);

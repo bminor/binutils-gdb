@@ -1854,10 +1854,7 @@ static const struct internalvar_funcs linker_namespace_funcs =
   nullptr,
 };
 
-void _initialize_solib ();
-
-void
-_initialize_solib ()
+INIT_GDB_FILE (solib)
 {
   gdb::observers::free_objfile.attach (remove_user_added_objfile, "solib");
   gdb::observers::inferior_execd.attach (

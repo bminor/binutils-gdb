@@ -342,9 +342,7 @@ show_index_cache_stats_command (const char *arg, int from_tty)
 	      indent, global_index_cache.n_misses ());
 }
 
-void _initialize_index_cache ();
-void
-_initialize_index_cache ()
+INIT_GDB_FILE (index_cache)
 {
   /* Set the default index cache directory.  */
   std::string cache_dir = get_standard_cache_dir ();

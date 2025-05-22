@@ -4778,9 +4778,7 @@ riscv_supply_regset (const struct regset *regset,
     }
 }
 
-void _initialize_riscv_tdep ();
-void
-_initialize_riscv_tdep ()
+INIT_GDB_FILE (riscv_tdep)
 {
   riscv_init_reggroups ();
 

@@ -3501,9 +3501,7 @@ show_maint_btrace_pt_skip_pad  (struct ui_file *file, int from_tty,
 
 /* Initialize btrace maintenance commands.  */
 
-void _initialize_btrace ();
-void
-_initialize_btrace ()
+INIT_GDB_FILE (btrace)
 {
   add_cmd ("btrace", class_maintenance, maint_info_btrace_cmd,
 	   _("Info about branch tracing data."), &maintenanceinfolist);

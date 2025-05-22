@@ -751,9 +751,7 @@ loongarch_linux_nat_target::low_forget_process (pid_t pid)
 
 /* Initialize LoongArch Linux native support.  */
 
-void _initialize_loongarch_linux_nat ();
-void
-_initialize_loongarch_linux_nat ()
+INIT_GDB_FILE (loongarch_linux_nat)
 {
   linux_target = &the_loongarch_linux_nat_target;
   add_inf_child_target (&the_loongarch_linux_nat_target);

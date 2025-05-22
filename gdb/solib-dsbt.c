@@ -910,9 +910,7 @@ const solib_ops dsbt_so_ops =
   default_find_solib_addr,
 };
 
-void _initialize_dsbt_solib ();
-void
-_initialize_dsbt_solib ()
+INIT_GDB_FILE (dsbt_solib)
 {
   /* Debug this file's internals.  */
   add_setshow_zuinteger_cmd ("solib-dsbt", class_maintenance,

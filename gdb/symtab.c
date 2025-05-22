@@ -7109,9 +7109,7 @@ info_module_var_func_command_completer (struct cmd_list_element *ignore,
 
 
 
-void _initialize_symtab ();
-void
-_initialize_symtab ()
+INIT_GDB_FILE (symtab)
 {
   cmd_list_element *c;
 

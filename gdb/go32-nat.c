@@ -2057,9 +2057,7 @@ go32_pte_for_address (const char *arg, int from_tty)
 
 static struct cmd_list_element *info_dos_cmdlist = NULL;
 
-void _initialize_go32_nat ();
-void
-_initialize_go32_nat ()
+INIT_GDB_FILE (go32_nat)
 {
   x86_dr_low.set_control = go32_set_dr7;
   x86_dr_low.set_addr = go32_set_dr;

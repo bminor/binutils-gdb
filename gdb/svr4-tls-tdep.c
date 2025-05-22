@@ -233,9 +233,7 @@ svr4_tls_register_tls_methods (struct gdbarch_info info, struct gdbarch *gdbarch
   gdbarch_data->get_tls_dtp_offset = get_tls_dtp_offset;
 }
 
-void _initialize_svr4_tls_tdep ();
-void
-_initialize_svr4_tls_tdep ()
+INIT_GDB_FILE (svr4_tls_tdep)
 {
   add_setshow_boolean_cmd ("force-internal-tls-address-lookup", class_obscure,
 			   &force_internal_tls_address_lookup, _("\

@@ -348,9 +348,7 @@ aarch64_notify_debug_reg_change (ptid_t ptid,
 }
 #endif
 
-void _initialize_aarch64_fbsd_nat ();
-void
-_initialize_aarch64_fbsd_nat ()
+INIT_GDB_FILE (aarch64_fbsd_nat)
 {
 #ifdef HAVE_DBREG
   aarch64_initialize_hw_point ();

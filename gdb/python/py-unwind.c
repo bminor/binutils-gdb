@@ -1029,9 +1029,7 @@ gdbpy_initialize_unwind (void)
   return 0;
 }
 
-void _initialize_py_unwind ();
-void
-_initialize_py_unwind ()
+INIT_GDB_FILE (py_unwind)
 {
   add_setshow_boolean_cmd
       ("py-unwind", class_maintenance, &pyuw_debug,

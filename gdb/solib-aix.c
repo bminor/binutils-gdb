@@ -677,9 +677,7 @@ const solib_ops solib_aix_so_ops =
   default_find_solib_addr,
 };
 
-void _initialize_solib_aix ();
-void
-_initialize_solib_aix ()
+INIT_GDB_FILE (solib_aix)
 {
   gdb::observers::normal_stop.attach (solib_aix_normal_stop_observer,
 				      "solib-aix");

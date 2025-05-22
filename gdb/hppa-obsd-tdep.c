@@ -166,9 +166,7 @@ hppaobsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, hppaobsd_iterate_over_regset_sections);
 }
 
-void _initialize_hppabsd_tdep ();
-void
-_initialize_hppabsd_tdep ()
+INIT_GDB_FILE (hppabsd_tdep)
 {
   gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_OPENBSD,
 			  hppaobsd_init_abi);

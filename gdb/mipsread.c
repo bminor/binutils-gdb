@@ -370,9 +370,7 @@ static const struct sym_fns ecoff_sym_fns =
   NULL,				/* sym_probe_fns */
 };
 
-void _initialize_mipsread ();
-void
-_initialize_mipsread ()
+INIT_GDB_FILE (mipsread)
 {
   add_symtab_fns (bfd_target_ecoff_flavour, &ecoff_sym_fns);
 }

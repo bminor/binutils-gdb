@@ -3183,9 +3183,7 @@ memory_tag_check_command (const char *args, int from_tty)
     }
 }
 
-void _initialize_printcmd ();
-void
-_initialize_printcmd ()
+INIT_GDB_FILE (printcmd)
 {
   struct cmd_list_element *c;
 

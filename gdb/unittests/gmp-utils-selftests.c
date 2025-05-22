@@ -498,10 +498,7 @@ gdb_mpq_write_fixed_point ()
 
 }
 
-void _initialize_gmp_utils_selftests ();
-
-void
-_initialize_gmp_utils_selftests ()
+INIT_GDB_FILE (gmp_utils_selftests)
 {
   selftests::register_test ("gdb_mpz_as_integer",
 			    selftests::gdb_mpz_as_integer);

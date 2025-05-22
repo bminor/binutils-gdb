@@ -11015,9 +11015,7 @@ static void arm_analyze_prologue_test ();
 }
 #endif
 
-void _initialize_arm_tdep ();
-void
-_initialize_arm_tdep ()
+INIT_GDB_FILE (arm_tdep)
 {
   long length;
   int i, j;

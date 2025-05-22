@@ -2470,9 +2470,7 @@ fbsd_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
   return (true);
 }
 
-void _initialize_fbsd_nat ();
-void
-_initialize_fbsd_nat ()
+INIT_GDB_FILE (fbsd_nat)
 {
   add_setshow_boolean_cmd ("fbsd-lwp", class_maintenance,
 			   &debug_fbsd_lwp, _("\

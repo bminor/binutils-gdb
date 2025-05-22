@@ -797,9 +797,7 @@ test_print_fields (gdbarch *arch)
 #endif
 
 
-void _initialize_cp_valprint ();
-void
-_initialize_cp_valprint ()
+INIT_GDB_FILE (cp_valprint)
 {
 #if GDB_SELF_TEST
   selftests::register_test_foreach_arch ("print-fields", test_print_fields);

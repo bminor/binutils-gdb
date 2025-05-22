@@ -1537,9 +1537,7 @@ PyTypeObject breakpoint_object_type =
   0,				  /* tp_alloc */
 };
 
-void _initialize_py_breakpoint ();
-void
-_initialize_py_breakpoint ()
+INIT_GDB_FILE (py_breakpoint)
 {
   add_setshow_boolean_cmd
       ("py-breakpoint", class_maintenance, &pybp_debug,

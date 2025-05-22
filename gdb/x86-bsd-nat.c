@@ -128,9 +128,7 @@ x86bsd_dr_get_control (void)
 
 #endif /* PT_GETDBREGS */
 
-void _initialize_x86_bsd_nat ();
-void
-_initialize_x86_bsd_nat ()
+INIT_GDB_FILE (x86_bsd_nat)
 {
 #ifdef HAVE_PT_GETDBREGS
   x86_dr_low.set_control = x86bsd_dr_set_control;

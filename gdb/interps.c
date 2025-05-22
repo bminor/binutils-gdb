@@ -575,9 +575,7 @@ interps_notify_memory_changed (inferior *inf, CORE_ADDR addr, ssize_t len,
 }
 
 /* This just adds the "interpreter-exec" command.  */
-void _initialize_interpreter ();
-void
-_initialize_interpreter ()
+INIT_GDB_FILE (interpreter)
 {
   struct cmd_list_element *c;
 

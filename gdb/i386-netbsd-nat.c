@@ -72,9 +72,7 @@ i386nbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 
 static i386_bsd_nat_target<nbsd_nat_target> the_i386_nbsd_nat_target;
 
-void _initialize_i386nbsd_nat ();
-void
-_initialize_i386nbsd_nat ()
+INIT_GDB_FILE (i386nbsd_nat)
 {
   add_inf_child_target (&the_i386_nbsd_nat_target);
 

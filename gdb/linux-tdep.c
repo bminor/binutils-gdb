@@ -3081,9 +3081,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 				       linux_corefile_parse_exec_context);
 }
 
-void _initialize_linux_tdep ();
-void
-_initialize_linux_tdep ()
+INIT_GDB_FILE (linux_tdep)
 {
   /* Observers used to invalidate the cache when needed.  */
   gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf,

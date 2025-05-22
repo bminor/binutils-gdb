@@ -58,9 +58,7 @@ test ()
 }
 }
 
-void _initialize_child_path_selftests ();
-void
-_initialize_child_path_selftests ()
+INIT_GDB_FILE (child_path_selftests)
 {
   selftests::register_test ("child_path",
 			    selftests::child_path::test);

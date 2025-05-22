@@ -1021,9 +1021,7 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-void _initialize_tilegx_tdep ();
-void
-_initialize_tilegx_tdep ()
+INIT_GDB_FILE (tilegx_tdep)
 {
   gdbarch_register (bfd_arch_tilegx, tilegx_gdbarch_init);
 }

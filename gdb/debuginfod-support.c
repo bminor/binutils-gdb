@@ -594,9 +594,7 @@ maint_get_debuginfod_download_sections ()
 
 /* Register debuginfod commands.  */
 
-void _initialize_debuginfod ();
-void
-_initialize_debuginfod ()
+INIT_GDB_FILE (debuginfod)
 {
   /* set/show debuginfod */
   add_setshow_prefix_cmd ("debuginfod", class_run,

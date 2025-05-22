@@ -494,9 +494,7 @@ print_error_prefix (ui_file *file)
     gdb_puts (error_prefix.c_str (), file);
 }
 
-void _initialize_cli_style ();
-void
-_initialize_cli_style ()
+INIT_GDB_FILE (cli_style)
 {
   add_setshow_prefix_cmd ("style", no_class,
 			  _("\

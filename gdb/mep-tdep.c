@@ -2459,9 +2459,7 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-void _initialize_mep_tdep ();
-void
-_initialize_mep_tdep ()
+INIT_GDB_FILE (mep_tdep)
 {
   mep_csr_reggroup = reggroup_new ("csr", USER_REGGROUP);
   mep_cr_reggroup  = reggroup_new ("cr", USER_REGGROUP); 

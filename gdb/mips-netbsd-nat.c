@@ -115,9 +115,7 @@ mips_nbsd_nat_target::store_registers (struct regcache *regcache, int regno)
     }
 }
 
-void _initialize_mipsnbsd_nat ();
-void
-_initialize_mipsnbsd_nat ()
+INIT_GDB_FILE (mipsnbsd_nat)
 {
   add_inf_child_target (&the_mips_nbsd_nat_target);
 }

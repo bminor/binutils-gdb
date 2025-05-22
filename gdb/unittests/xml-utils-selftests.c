@@ -47,9 +47,7 @@ static void test_xml_escape_text_append ()
 }
 }
 
-void _initialize_xml_utils ();
-void
-_initialize_xml_utils ()
+INIT_GDB_FILE (xml_utils)
 {
   selftests::register_test ("xml_escape_text",
 			    selftests::xml_utils::test_xml_escape_text);

@@ -735,9 +735,7 @@ Display of struct members offsets and sizes in hexadecimal is %s\n"),
 	      value);
 }
 
-void _initialize_typeprint ();
-void
-_initialize_typeprint ()
+INIT_GDB_FILE (typeprint)
 {
   struct cmd_list_element *c;
 

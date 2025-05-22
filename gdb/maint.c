@@ -1301,9 +1301,7 @@ Selftests have been disabled for this build.\n"));
 }
 
 
-void _initialize_maint_cmds ();
-void
-_initialize_maint_cmds ()
+INIT_GDB_FILE (maint_cmds)
 {
   struct cmd_list_element *cmd;
 

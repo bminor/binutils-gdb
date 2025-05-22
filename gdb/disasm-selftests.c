@@ -418,9 +418,7 @@ disassemble_insn (gdbarch *gdbarch, gdb::byte_vector &insn,
 
 } /* namespace selftests */
 
-void _initialize_disasm_selftests ();
-void
-_initialize_disasm_selftests ()
+INIT_GDB_FILE (disasm_selftests)
 {
   selftests::register_test_foreach_arch ("print_one_insn",
 					 selftests::print_one_insn_test);

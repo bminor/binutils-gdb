@@ -2137,9 +2137,7 @@ canonicalize_tests ()
 
 #endif
 
-void _initialize_cp_name_parser ();
-void
-_initialize_cp_name_parser ()
+INIT_GDB_FILE (cp_name_parser)
 {
 #if GDB_SELF_TEST
   selftests::register_test ("canonicalize", canonicalize_tests);

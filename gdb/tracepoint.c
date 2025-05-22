@@ -3919,9 +3919,7 @@ static const struct internalvar_funcs sdata_funcs =
 cmd_list_element *while_stepping_cmd_element = nullptr;
 
 /* module initialization */
-void _initialize_tracepoint ();
-void
-_initialize_tracepoint ()
+INIT_GDB_FILE (tracepoint)
 {
   struct cmd_list_element *c;
 

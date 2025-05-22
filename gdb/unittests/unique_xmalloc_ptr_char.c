@@ -47,9 +47,7 @@ unique_xmalloc_ptr_char ()
 }
 }
 
-void _initialize_unique_xmalloc_ptr_char ();
-void
-_initialize_unique_xmalloc_ptr_char ()
+INIT_GDB_FILE (unique_xmalloc_ptr_char)
 {
   selftests::register_test ("unique_xmalloc_ptr_char",
 			    selftests::unpack::unique_xmalloc_ptr_char);

@@ -529,9 +529,7 @@ adi_assign_command (const char *args, int from_tty)
   do_assign (next_address, cnt, version);
 }
 
-void _initialize_sparc64_adi_tdep ();
-void
-_initialize_sparc64_adi_tdep ()
+INIT_GDB_FILE (sparc64_adi_tdep)
 {
   add_basic_prefix_cmd ("adi", class_support,
 			_("ADI version related commands."),

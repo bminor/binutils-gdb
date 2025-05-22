@@ -3186,9 +3186,7 @@ set_record_pt_event_tracing_value (const char *args, int from_tty,
 
 /* Initialize btrace commands.  */
 
-void _initialize_record_btrace ();
-void
-_initialize_record_btrace ()
+INIT_GDB_FILE (record_btrace)
 {
   cmd_list_element *record_btrace_cmd
     = add_prefix_cmd ("btrace", class_obscure, cmd_record_btrace_start,

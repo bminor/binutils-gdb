@@ -574,9 +574,7 @@ libunwind_is_initialized (void)
   return libunwind_initialized;
 }
 
-void _initialize_libunwind_frame ();
-void
-_initialize_libunwind_frame ()
+INIT_GDB_FILE (libunwind_frame)
 {
   libunwind_initialized = libunwind_load ();
 }

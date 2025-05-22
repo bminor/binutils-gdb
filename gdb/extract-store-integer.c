@@ -337,9 +337,7 @@ extract_integer_test ()
 
 #endif
 
-void _initialize_extract_store_integer ();
-void
-_initialize_extract_store_integer ()
+INIT_GDB_FILE (extract_store_integer)
 {
 #if GDB_SELF_TEST
   selftests::register_test ("copy_integer_to_size",

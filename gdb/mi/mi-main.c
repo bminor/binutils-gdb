@@ -2768,9 +2768,7 @@ mi_parse_thread_group_id (const char *id)
   return (int) num;
 }
 
-void _initialize_mi_main ();
-void
-_initialize_mi_main ()
+INIT_GDB_FILE (mi_main)
 {
   set_show_commands mi_async_cmds
     = add_setshow_boolean_cmd ("mi-async", class_run,

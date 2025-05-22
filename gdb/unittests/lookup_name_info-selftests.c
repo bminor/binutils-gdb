@@ -105,9 +105,7 @@ run_tests ()
 
 }} /* namespace selftests::lookup_name */
 
-void _initialize_lookup_name_info_selftests ();
-void
-_initialize_lookup_name_info_selftests ()
+INIT_GDB_FILE (lookup_name_info_selftests)
 {
   selftests::register_test ("lookup_name_info",
 			    selftests::lookup_name::run_tests);

@@ -428,9 +428,7 @@ connpy_send_packet (PyObject *self, PyObject *args, PyObject *kw)
 
 /* Global initialization for this file.  */
 
-void _initialize_py_connection ();
-void
-_initialize_py_connection ()
+INIT_GDB_FILE (py_connection)
 {
   gdb::observers::connection_removed.attach (connpy_connection_removed,
 					     "py-connection");

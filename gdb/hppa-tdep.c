@@ -3119,9 +3119,7 @@ hppa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
 }
 
-void _initialize_hppa_tdep ();
-void
-_initialize_hppa_tdep ()
+INIT_GDB_FILE (hppa_tdep)
 {
   gdbarch_register (bfd_arch_hppa, hppa_gdbarch_init, hppa_dump_tdep);
 

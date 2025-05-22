@@ -1091,9 +1091,7 @@ bool tui_left_margin_verbose = false;
 /* Function to initialize gdb commands, for tui window
    manipulation.  */
 
-void _initialize_tui_win ();
-void
-_initialize_tui_win ()
+INIT_GDB_FILE (tui_win)
 {
   static struct cmd_list_element *tui_setlist;
   static struct cmd_list_element *tui_showlist;

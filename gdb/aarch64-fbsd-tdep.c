@@ -261,9 +261,7 @@ aarch64_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     }
 }
 
-void _initialize_aarch64_fbsd_tdep ();
-void
-_initialize_aarch64_fbsd_tdep ()
+INIT_GDB_FILE (aarch64_fbsd_tdep)
 {
   gdbarch_register_osabi (bfd_arch_aarch64, 0, GDB_OSABI_FREEBSD,
 			  aarch64_fbsd_init_abi);

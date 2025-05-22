@@ -73,9 +73,7 @@ agent_new_objfile (struct objfile *objfile)
   agent_look_up_symbols (objfile);
 }
 
-void _initialize_agent ();
-void
-_initialize_agent ()
+INIT_GDB_FILE (agent)
 {
   gdb::observers::new_objfile.attach (agent_new_objfile,
 				      "agent");

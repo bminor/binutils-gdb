@@ -8970,9 +8970,7 @@ i386_target_description (uint64_t xcr0, bool segments)
   return *tdesc;
 }
 
-void _initialize_i386_tdep ();
-void
-_initialize_i386_tdep ()
+INIT_GDB_FILE (i386_tdep)
 {
   gdbarch_register (bfd_arch_i386, i386_gdbarch_init);
 

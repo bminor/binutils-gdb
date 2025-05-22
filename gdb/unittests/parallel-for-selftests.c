@@ -109,9 +109,7 @@ test_parallel_for_each ()
 
 #endif /* CXX_STD_THREAD */
 
-void _initialize_parallel_for_selftests ();
-void
-_initialize_parallel_for_selftests ()
+INIT_GDB_FILE (parallel_for_selftests)
 {
 #ifdef CXX_STD_THREAD
   selftests::register_test ("parallel_for",

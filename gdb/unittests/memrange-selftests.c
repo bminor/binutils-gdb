@@ -105,9 +105,7 @@ normalize_mem_ranges_tests ()
 } /* namespace memrange_tests */
 } /* namespace selftests */
 
-void _initialize_memrange_selftests ();
-void
-_initialize_memrange_selftests ()
+INIT_GDB_FILE (memrange_selftests)
 {
   selftests::register_test
     ("normalize_mem_ranges",

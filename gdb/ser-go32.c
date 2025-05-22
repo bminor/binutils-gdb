@@ -914,9 +914,7 @@ info_serial_command (const char *arg, int from_tty)
 #endif
 }
 
-void _initialize_ser_dos ();
-void
-_initialize_ser_dos ()
+INIT_GDB_FILE (ser_dos)
 {
   serial_add_interface (&dos_ops);
 

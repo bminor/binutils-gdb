@@ -429,9 +429,7 @@ maintenance_test_options_unknown_is_operand_command_completer
 static cmd_list_element *maintenance_test_options_list;
 
 
-void _initialize_maint_test_options ();
-void
-_initialize_maint_test_options ()
+INIT_GDB_FILE (maint_test_options)
 {
   cmd_list_element *cmd;
 

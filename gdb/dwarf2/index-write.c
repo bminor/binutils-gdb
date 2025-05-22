@@ -1768,9 +1768,7 @@ gdb_index ()
 } /* selftests namespace.  */
 #endif
 
-void _initialize_dwarf_index_write ();
-void
-_initialize_dwarf_index_write ()
+INIT_GDB_FILE (dwarf_index_write)
 {
 #if GDB_SELF_TEST
   selftests::register_test ("gdb_index", selftests::gdb_index);

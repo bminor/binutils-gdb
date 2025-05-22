@@ -409,9 +409,7 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_report_signal_info (gdbarch, sparc64_linux_report_signal_info);
 }
 
-void _initialize_sparc64_linux_tdep ();
-void
-_initialize_sparc64_linux_tdep ()
+INIT_GDB_FILE (sparc64_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
 			  GDB_OSABI_LINUX, sparc64_linux_init_abi);

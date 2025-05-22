@@ -104,9 +104,7 @@ arm_fbsd_nat_target::read_description ()
   return desc;
 }
 
-void _initialize_arm_fbsd_nat ();
-void
-_initialize_arm_fbsd_nat ()
+INIT_GDB_FILE (arm_fbsd_nat)
 {
   add_inf_child_target (&the_arm_fbsd_nat_target);
 }

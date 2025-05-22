@@ -3194,9 +3194,7 @@ test_print_flags (gdbarch *arch)
 
 #endif
 
-void _initialize_valprint ();
-void
-_initialize_valprint ()
+INIT_GDB_FILE (valprint)
 {
 #if GDB_SELF_TEST
   selftests::register_test_foreach_arch ("print-flags", test_print_flags);

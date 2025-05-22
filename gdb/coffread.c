@@ -2248,9 +2248,7 @@ static const struct sym_fns coff_sym_fns =
   NULL,				/* sym_probe_fns */
 };
 
-void _initialize_coffread ();
-void
-_initialize_coffread ()
+INIT_GDB_FILE (coffread)
 {
   add_symtab_fns (bfd_target_coff_flavour, &coff_sym_fns);
 

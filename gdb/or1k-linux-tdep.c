@@ -167,9 +167,7 @@ or1k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 /* Initialize OpenRISC Linux target support.  */
 
-void _initialize_or1k_linux_tdep ();
-void
-_initialize_or1k_linux_tdep ()
+INIT_GDB_FILE (or1k_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_or1k, 0, GDB_OSABI_LINUX,
 			  or1k_linux_init_abi);

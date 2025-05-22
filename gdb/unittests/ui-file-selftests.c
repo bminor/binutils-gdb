@@ -53,9 +53,7 @@ run_tests ()
 } /* namespace file*/
 } /* namespace selftests */
 
-void _initialize_ui_file_selftest ();
-void
-_initialize_ui_file_selftest ()
+INIT_GDB_FILE (ui_file_selftest)
 {
   selftests::register_test ("ui-file",
 			    selftests::file::run_tests);

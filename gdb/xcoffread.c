@@ -2999,9 +2999,7 @@ xcoff_get_n_import_files (bfd *abfd)
   return l_nimpid - 1;
 }
 
-void _initialize_xcoffread ();
-void
-_initialize_xcoffread ()
+INIT_GDB_FILE (xcoffread)
 {
   add_symtab_fns (bfd_target_xcoff_flavour, &xcoff_sym_fns);
 }

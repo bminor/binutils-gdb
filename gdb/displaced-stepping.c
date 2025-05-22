@@ -315,9 +315,7 @@ displaced_step_buffers::restore_in_ptid (ptid_t ptid)
     }
 }
 
-void _initialize_displaced_stepping ();
-void
-_initialize_displaced_stepping ()
+INIT_GDB_FILE (displaced_stepping)
 {
   add_setshow_boolean_cmd ("displaced", class_maintenance,
 			   &debug_displaced, _("\

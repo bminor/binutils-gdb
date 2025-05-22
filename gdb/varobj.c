@@ -2424,9 +2424,7 @@ eq_varobj_and_string (const void *a, const void *b)
   return obj->obj_name == name;
 }
 
-void _initialize_varobj ();
-void
-_initialize_varobj ()
+INIT_GDB_FILE (varobj)
 {
   varobj_table = htab_create_alloc (5, hash_varobj, eq_varobj_and_string,
 				    nullptr, xcalloc, xfree);

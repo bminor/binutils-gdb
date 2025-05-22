@@ -234,9 +234,7 @@ cooked_index_entry::write_scope (struct obstack *storage,
   obstack_grow (storage, sep, strlen (sep));
 }
 
-void _initialize_dwarf2_entry ();
-void
-_initialize_dwarf2_entry ()
+INIT_GDB_FILE (dwarf2_entry)
 {
 #if GDB_SELF_TEST
   selftests::register_test ("cooked_index_entry::compare", test_compare);

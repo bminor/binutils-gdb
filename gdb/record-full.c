@@ -2877,9 +2877,7 @@ maintenance_print_record_instruction (const char *args, int from_tty)
     }
 }
 
-void _initialize_record_full ();
-void
-_initialize_record_full ()
+INIT_GDB_FILE (record_full)
 {
   struct cmd_list_element *c;
 

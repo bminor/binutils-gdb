@@ -1293,9 +1293,7 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-void _initialize_tic6x_tdep ();
-void
-_initialize_tic6x_tdep ()
+INIT_GDB_FILE (tic6x_tdep)
 {
   gdbarch_register (bfd_arch_tic6x, tic6x_gdbarch_init);
 }

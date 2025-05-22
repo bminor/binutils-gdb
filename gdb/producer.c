@@ -335,9 +335,7 @@ Version 18.0 Beta";
 }
 #endif
 
-void _initialize_producer ();
-void
-_initialize_producer ()
+INIT_GDB_FILE (producer)
 {
 #if defined GDB_SELF_TEST
   selftests::register_test

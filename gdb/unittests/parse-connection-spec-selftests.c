@@ -238,9 +238,7 @@ run_tests ()
 } /* namespace parse_connection_spec_tests */
 } /* namespace selftests */
 
-void _initialize_parse_connection_spec_selftests ();
-void
-_initialize_parse_connection_spec_selftests ()
+INIT_GDB_FILE (parse_connection_spec_selftests)
 {
   selftests::register_test ("parse_connection_spec",
 			    selftests::parse_connection_spec_tests::run_tests);

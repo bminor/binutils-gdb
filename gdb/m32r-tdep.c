@@ -908,9 +908,7 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-void _initialize_m32r_tdep ();
-void
-_initialize_m32r_tdep ()
+INIT_GDB_FILE (m32r_tdep)
 {
   gdbarch_register (bfd_arch_m32r, m32r_gdbarch_init);
 }

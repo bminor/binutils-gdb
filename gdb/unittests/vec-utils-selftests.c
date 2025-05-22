@@ -65,9 +65,7 @@ unordered_remove_tests ()
 } /* namespace vector_utils_tests */
 } /* namespace selftests */
 
-void _initialize_vec_utils_selftests ();
-void
-_initialize_vec_utils_selftests ()
+INIT_GDB_FILE (vec_utils_selftests)
 {
   selftests::register_test
     ("unordered_remove",

@@ -578,9 +578,7 @@ PyTypeObject micmdpy_object_type = {
   0,						   /* tp_alloc */
 };
 
-void _initialize_py_micmd ();
-void
-_initialize_py_micmd ()
+INIT_GDB_FILE (py_micmd)
 {
   add_setshow_boolean_cmd
     ("py-micmd", class_maintenance, &pymicmd_debug,

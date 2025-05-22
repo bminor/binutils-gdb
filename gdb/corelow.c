@@ -2157,9 +2157,7 @@ core_target_find_mapped_file (const char *filename,
   return targ->lookup_mapped_file_info (filename, addr);
 }
 
-void _initialize_corelow ();
-void
-_initialize_corelow ()
+INIT_GDB_FILE (corelow)
 {
   add_target (core_target_info, core_target_open,
 	      filename_maybe_quoted_completer);

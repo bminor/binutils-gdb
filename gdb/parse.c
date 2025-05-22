@@ -617,9 +617,7 @@ parser_fprintf (FILE *x, const char *y, ...)
   va_end (args);
 }
 
-void _initialize_parse ();
-void
-_initialize_parse ()
+INIT_GDB_FILE (parse)
 {
   add_setshow_zuinteger_cmd ("expression", class_maintenance,
 			     &expressiondebug,

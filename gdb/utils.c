@@ -3716,9 +3716,7 @@ test_assign_set_return_if_changed ()
 }
 #endif
 
-void _initialize_utils ();
-void
-_initialize_utils ()
+INIT_GDB_FILE (utils)
 {
   add_setshow_uinteger_cmd ("width", class_support, &chars_per_line, _("\
 Set number of characters where GDB should wrap lines of its output."), _("\

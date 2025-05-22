@@ -87,9 +87,7 @@ fill_fpregset (const struct regcache *regcache,
   sparc64_collect_fpregset (&sparc64_bsd_fpregmap, regcache, regnum, fpregs);
 }
 
-void _initialize_sparc64_linux_nat ();
-void
-_initialize_sparc64_linux_nat ()
+INIT_GDB_FILE (sparc64_linux_nat)
 {
   sparc_fpregmap = &sparc64_bsd_fpregmap;
 

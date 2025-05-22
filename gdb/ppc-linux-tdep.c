@@ -2392,9 +2392,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
 }
 
-void _initialize_ppc_linux_tdep ();
-void
-_initialize_ppc_linux_tdep ()
+INIT_GDB_FILE (ppc_linux_tdep)
 {
   /* Register for all sub-families of the POWER/PowerPC: 32-bit and
      64-bit PowerPC, and the older rs6k.  */

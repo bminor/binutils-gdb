@@ -1101,9 +1101,7 @@ moxie_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 /* Register this machine's init routine.  */
 
-void _initialize_moxie_tdep ();
-void
-_initialize_moxie_tdep ()
+INIT_GDB_FILE (moxie_tdep)
 {
   gdbarch_register (bfd_arch_moxie, moxie_gdbarch_init);
 }

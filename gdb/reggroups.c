@@ -259,9 +259,7 @@ const reggroup *const all_reggroup = &all_group;
 const reggroup *const save_reggroup = &save_group;
 const reggroup *const restore_reggroup = &restore_group;
 
-void _initialize_reggroup ();
-void
-_initialize_reggroup ()
+INIT_GDB_FILE (reggroup)
 {
   add_cmd ("reggroups", class_maintenance,
 	   maintenance_print_reggroups, _("\

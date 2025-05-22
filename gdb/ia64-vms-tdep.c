@@ -153,9 +153,7 @@ ia64_openvms_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 #endif
 }
 
-void _initialize_ia64_vms_tdep ();
-void
-_initialize_ia64_vms_tdep ()
+INIT_GDB_FILE (ia64_vms_tdep)
 {
   gdbarch_register_osabi (bfd_arch_ia64, 0, GDB_OSABI_OPENVMS,
 			  ia64_openvms_init_abi);

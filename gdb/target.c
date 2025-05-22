@@ -4502,10 +4502,7 @@ set_write_memory_registers_permission (const char *args, int from_tty,
   update_observer_mode ();
 }
 
-void _initialize_target ();
-
-void
-_initialize_target ()
+INIT_GDB_FILE (target)
 {
   the_debug_target = new debug_target ();
 

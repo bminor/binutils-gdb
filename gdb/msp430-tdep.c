@@ -996,9 +996,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 /* Register the initialization routine.  */
 
-void _initialize_msp430_tdep ();
-void
-_initialize_msp430_tdep ()
+INIT_GDB_FILE (msp430_tdep)
 {
   gdbarch_register (bfd_arch_msp430, msp430_gdbarch_init);
 }

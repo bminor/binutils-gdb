@@ -80,9 +80,7 @@ test ()
 }
 }
 
-void _initialize_mkdir_recursive_selftests ();
-void
-_initialize_mkdir_recursive_selftests ()
+INIT_GDB_FILE (mkdir_recursive_selftests)
 {
   selftests::register_test ("mkdir_recursive",
 			    selftests::mkdir_recursive::test);

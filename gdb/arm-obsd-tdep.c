@@ -114,9 +114,7 @@ armobsd_init_abi (struct gdbarch_info info,
     }
 }
 
-void _initialize_armobsd_tdep ();
-void
-_initialize_armobsd_tdep ()
+INIT_GDB_FILE (armobsd_tdep)
 {
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_OPENBSD,
 			  armobsd_init_abi);

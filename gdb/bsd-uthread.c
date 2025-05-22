@@ -540,9 +540,7 @@ bsd_uthread_target::pid_to_str (ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
-void _initialize_bsd_uthread ();
-void
-_initialize_bsd_uthread ()
+INIT_GDB_FILE (bsd_uthread)
 {
   gdb::observers::inferior_created.attach (bsd_uthread_inferior_created,
 					   "bsd-uthread");

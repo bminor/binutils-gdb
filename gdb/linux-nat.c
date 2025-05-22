@@ -4728,9 +4728,7 @@ maintenance_info_lwps (const char *arg, int from_tty)
     }
 }
 
-void _initialize_linux_nat ();
-void
-_initialize_linux_nat ()
+INIT_GDB_FILE (linux_nat)
 {
   add_setshow_boolean_cmd ("linux-nat", class_maintenance,
 			   &debug_linux_nat, _("\

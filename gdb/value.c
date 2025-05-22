@@ -4496,9 +4496,7 @@ test_value_copy ()
 } /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
-void _initialize_values ();
-void
-_initialize_values ()
+INIT_GDB_FILE (values)
 {
   cmd_list_element *show_convenience_cmd
     = add_cmd ("convenience", no_class, show_convenience, _("\

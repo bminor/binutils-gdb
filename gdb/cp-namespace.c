@@ -1049,9 +1049,7 @@ maintenance_cplus_namespace (const char *args, int from_tty)
   gdb_printf (_("The `maint namespace' command was removed.\n"));
 }
 
-void _initialize_cp_namespace ();
-void
-_initialize_cp_namespace ()
+INIT_GDB_FILE (cp_namespace)
 {
   struct cmd_list_element *cmd;
 

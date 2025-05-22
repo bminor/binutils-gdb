@@ -408,9 +408,7 @@ macro_list_command (const char *exp, int from_tty)
 
 /* Initializing the `macrocmd' module.  */
 
-void _initialize_macrocmd ();
-void
-_initialize_macrocmd ()
+INIT_GDB_FILE (macrocmd)
 {
   /* We introduce a new command prefix, `macro', under which we'll put
      the various commands for working with preprocessor macros.  */

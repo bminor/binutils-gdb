@@ -391,9 +391,7 @@ set_gnutarget (const char *newtarget)
   set_gnutarget_command (NULL, 0, NULL);
 }
 
-void _initialize_core ();
-void
-_initialize_core ()
+INIT_GDB_FILE (core)
 {
   cmd_list_element *core_file_cmd
     = add_cmd ("core-file", class_files, core_file_command, _("\

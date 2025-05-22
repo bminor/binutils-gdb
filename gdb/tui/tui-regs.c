@@ -566,9 +566,7 @@ tui_reggroup_completer (struct cmd_list_element *ignore,
   complete_on_enum (tracker, extra, text, word);
 }
 
-void _initialize_tui_regs ();
-void
-_initialize_tui_regs ()
+INIT_GDB_FILE (tui_regs)
 {
   struct cmd_list_element **tuicmd, *cmd;
 

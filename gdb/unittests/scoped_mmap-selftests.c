@@ -135,9 +135,7 @@ run_tests ()
 
 #endif /* !defined(HAVE_SYS_MMAN_H) */
 
-void _initialize_scoped_mmap_selftests ();
-void
-_initialize_scoped_mmap_selftests ()
+INIT_GDB_FILE (scoped_mmap_selftests)
 {
 #if defined(HAVE_SYS_MMAN_H)
   selftests::register_test ("scoped_mmap",

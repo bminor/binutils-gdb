@@ -220,9 +220,7 @@ sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_unwinder (gdbarch, &sparc32_sol2_sigtramp_frame_unwind);
 }
 
-void _initialize_sparc_sol2_tdep ();
-void
-_initialize_sparc_sol2_tdep ()
+INIT_GDB_FILE (sparc_sol2_tdep)
 {
   gdbarch_register_osabi (bfd_arch_sparc, 0,
 			  GDB_OSABI_SOLARIS, sparc32_sol2_init_abi);

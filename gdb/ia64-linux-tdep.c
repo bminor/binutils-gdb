@@ -257,9 +257,7 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				      ia64_linux_stap_is_single_operand);
 }
 
-void _initialize_ia64_linux_tdep ();
-void
-_initialize_ia64_linux_tdep ()
+INIT_GDB_FILE (ia64_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_ia64, 0, GDB_OSABI_LINUX,
 			  ia64_linux_init_abi);

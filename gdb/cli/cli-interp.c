@@ -321,9 +321,7 @@ cli_interp_factory (const char *name)
 
 /* Standard gdb initialization hook.  */
 
-void _initialize_cli_interp ();
-void
-_initialize_cli_interp ()
+INIT_GDB_FILE (cli_interp)
 {
   interp_factory_register (INTERP_CONSOLE, cli_interp_factory);
 }

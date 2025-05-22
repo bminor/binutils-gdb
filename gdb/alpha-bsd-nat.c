@@ -156,9 +156,7 @@ alphabsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 }
 
 
-void _initialize_alphabsd_nat ();
-void
-_initialize_alphabsd_nat ()
+INIT_GDB_FILE (alphabsd_nat)
 {
   add_inf_child_target (&the_alpha_bsd_nat_target);
 

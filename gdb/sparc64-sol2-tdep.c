@@ -225,9 +225,7 @@ sparc64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_software_single_step (gdbarch, NULL);
 }
 
-void _initialize_sparc64_sol2_tdep ();
-void
-_initialize_sparc64_sol2_tdep ()
+INIT_GDB_FILE (sparc64_sol2_tdep)
 {
   gdbarch_register_osabi (bfd_arch_sparc, bfd_mach_sparc_v9,
 			  GDB_OSABI_SOLARIS, sparc64_sol2_init_abi);

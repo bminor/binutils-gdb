@@ -183,9 +183,7 @@ ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   return 1;
 }
 
-void _initialize_ppcnbsd_nat ();
-void
-_initialize_ppcnbsd_nat ()
+INIT_GDB_FILE (ppcnbsd_nat)
 {
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (ppcnbsd_supply_pcb);

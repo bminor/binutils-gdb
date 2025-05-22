@@ -254,9 +254,7 @@ sparc32obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   bsd_uthread_set_collect_uthread (gdbarch, sparc32obsd_collect_uthread);
 }
 
-void _initialize_sparc32obsd_tdep ();
-void
-_initialize_sparc32obsd_tdep ()
+INIT_GDB_FILE (sparc32obsd_tdep)
 {
   gdbarch_register_osabi (bfd_arch_sparc, 0, GDB_OSABI_OPENBSD,
 			  sparc32obsd_init_abi);

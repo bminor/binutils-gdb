@@ -621,9 +621,7 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 /* Register this machine's init routine.  */
 
-void _initialize_ft32_tdep ();
-void
-_initialize_ft32_tdep ()
+INIT_GDB_FILE (ft32_tdep)
 {
   gdbarch_register (bfd_arch_ft32, ft32_gdbarch_init);
 }

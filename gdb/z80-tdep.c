@@ -1455,10 +1455,7 @@ z80_get_insn_info (struct gdbarch *gdbarch, const gdb_byte *buf, int *size)
   while (1);
 }
 
-extern initialize_file_ftype _initialize_z80_tdep;
-
-void
-_initialize_z80_tdep ()
+INIT_GDB_FILE (z80_tdep)
 {
   gdbarch_register (bfd_arch_z80, z80_gdbarch_init);
   initialize_tdesc_z80 ();

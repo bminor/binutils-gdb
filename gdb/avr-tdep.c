@@ -1629,9 +1629,7 @@ avr_io_reg_read_command (const char *args, int from_tty)
     }
 }
 
-void _initialize_avr_tdep ();
-void
-_initialize_avr_tdep ()
+INIT_GDB_FILE (avr_tdep)
 {
   gdbarch_register (bfd_arch_avr, avr_gdbarch_init);
 

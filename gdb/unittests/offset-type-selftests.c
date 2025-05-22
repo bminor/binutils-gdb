@@ -170,9 +170,7 @@ run_tests ()
 } /* namespace offset_type */
 } /* namespace selftests */
 
-void _initialize_offset_type_selftests ();
-void
-_initialize_offset_type_selftests ()
+INIT_GDB_FILE (offset_type_selftests)
 {
   selftests::register_test ("offset_type", selftests::offset_type::run_tests);
 }

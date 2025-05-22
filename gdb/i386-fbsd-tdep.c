@@ -411,9 +411,7 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					i386fbsd_get_thread_local_address);
 }
 
-void _initialize_i386fbsd_tdep ();
-void
-_initialize_i386fbsd_tdep ()
+INIT_GDB_FILE (i386fbsd_tdep)
 {
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_FREEBSD,
 			  i386fbsd_init_abi);

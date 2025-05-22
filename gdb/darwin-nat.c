@@ -2469,9 +2469,7 @@ darwin_nat_target::supports_multi_process ()
   return true;
 }
 
-void _initialize_darwin_nat ();
-void
-_initialize_darwin_nat ()
+INIT_GDB_FILE (darwin_nat)
 {
   kern_return_t kret;
 

@@ -2347,9 +2347,7 @@ gdb_init ()
   init_colorsupport_var ();
 }
 
-void _initialize_top ();
-void
-_initialize_top ()
+INIT_GDB_FILE (top)
 {
   /* Determine a default value for the history filename.  */
   const char *tmpenv = getenv ("GDBHISTFILE");

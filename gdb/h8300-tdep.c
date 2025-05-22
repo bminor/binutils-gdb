@@ -1374,9 +1374,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 }
 
-void _initialize_h8300_tdep ();
-void
-_initialize_h8300_tdep ()
+INIT_GDB_FILE (h8300_tdep)
 {
   gdbarch_register (bfd_arch_h8300, h8300_gdbarch_init);
 }

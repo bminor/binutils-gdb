@@ -65,9 +65,7 @@ riscv_fbsd_nat_target::store_registers (struct regcache *regcache,
 				    PT_SETFPREGS, &riscv_fbsd_fpregset);
 }
 
-void _initialize_riscv_fbsd_nat ();
-void
-_initialize_riscv_fbsd_nat ()
+INIT_GDB_FILE (riscv_fbsd_nat)
 {
   add_inf_child_target (&the_riscv_fbsd_nat_target);
 }

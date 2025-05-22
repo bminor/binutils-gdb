@@ -697,9 +697,7 @@ static const struct serial_ops hardwire_ops =
   ser_unix_write_prim
 };
 
-void _initialize_ser_hardwire ();
-void
-_initialize_ser_hardwire ()
+INIT_GDB_FILE (ser_hardwire)
 {
   serial_add_interface (&hardwire_ops);
 

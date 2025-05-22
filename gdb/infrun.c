@@ -10531,9 +10531,7 @@ infrun_thread_ptid_changed ()
 
 #endif /* GDB_SELF_TEST */
 
-void _initialize_infrun ();
-void
-_initialize_infrun ()
+INIT_GDB_FILE (infrun)
 {
   struct cmd_list_element *c;
 

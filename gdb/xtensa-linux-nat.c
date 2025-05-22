@@ -327,9 +327,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
   return PS_OK;
 }
 
-void _initialize_xtensa_linux_nat ();
-void
-_initialize_xtensa_linux_nat ()
+INIT_GDB_FILE (xtensa_linux_nat)
 {
   const xtensa_regtable_t *ptr;
 

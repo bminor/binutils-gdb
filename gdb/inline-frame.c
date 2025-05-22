@@ -615,9 +615,7 @@ maintenance_info_inline_frames (const char *arg, int from_tty)
 
 
 
-void _initialize_inline_frame ();
-void
-_initialize_inline_frame ()
+INIT_GDB_FILE (inline_frame)
 {
   add_cmd ("inline-frames", class_maintenance, maintenance_info_inline_frames,
 	   _("\

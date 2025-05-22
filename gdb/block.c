@@ -924,9 +924,7 @@ maintenance_info_blocks (const char *arg, int from_tty)
 
 
 
-void _initialize_block ();
-void
-_initialize_block ()
+INIT_GDB_FILE (block)
 {
   add_cmd ("blocks", class_maintenance, maintenance_info_blocks,
 	   _("\

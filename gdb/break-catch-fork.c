@@ -242,9 +242,7 @@ catch_fork_command_1 (const char *arg, int from_tty,
     }
 }
 
-void _initialize_break_catch_fork ();
-void
-_initialize_break_catch_fork ()
+INIT_GDB_FILE (break_catch_fork)
 {
   add_catch_command ("fork", _("Catch calls to fork."),
 		     catch_fork_command_1,

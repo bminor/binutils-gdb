@@ -1748,9 +1748,7 @@ info_probes_stap_command (const char *arg, int from_tty)
   info_probes_for_spops (arg, from_tty, &stap_static_probe_ops);
 }
 
-void _initialize_stap_probe ();
-void
-_initialize_stap_probe ()
+INIT_GDB_FILE (stap_probe)
 {
   all_static_probe_ops.push_back (&stap_static_probe_ops);
 

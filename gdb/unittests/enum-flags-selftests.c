@@ -607,10 +607,7 @@ self_test ()
 } /* namespace enum_flags_tests */
 } /* namespace selftests */
 
-void _initialize_enum_flags_selftests ();
-
-void
-_initialize_enum_flags_selftests ()
+INIT_GDB_FILE (enum_flags_selftests)
 {
   selftests::register_test ("enum-flags",
 			    selftests::enum_flags_tests::self_test);

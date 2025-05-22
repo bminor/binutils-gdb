@@ -1836,9 +1836,7 @@ builtin_f_type (struct gdbarch *gdbarch)
 static struct cmd_list_element *set_fortran_list;
 static struct cmd_list_element *show_fortran_list;
 
-void _initialize_f_language ();
-void
-_initialize_f_language ()
+INIT_GDB_FILE (f_language)
 {
   add_setshow_prefix_cmd
     ("fortran", no_class,

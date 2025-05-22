@@ -199,9 +199,7 @@ or1k_linux_nat_target::store_registers (struct regcache *regcache, int regnum)
 
 /* Initialize OpenRISC Linux native support.  */
 
-void _initialize_or1k_linux_nat ();
-void
-_initialize_or1k_linux_nat ()
+INIT_GDB_FILE (or1k_linux_nat)
 {
   /* Register the target.  */
   linux_target = &the_or1k_linux_nat_target;

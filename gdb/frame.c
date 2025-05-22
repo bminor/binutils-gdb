@@ -3424,9 +3424,7 @@ frame_info_ptr::reinflate () const
   return m_ptr;
 }
 
-void _initialize_frame ();
-void
-_initialize_frame ()
+INIT_GDB_FILE (frame)
 {
   obstack_init (&frame_cache_obstack);
 

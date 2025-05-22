@@ -16162,9 +16162,7 @@ test_packet_check_result ()
 } /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
-void _initialize_remote ();
-void
-_initialize_remote ()
+INIT_GDB_FILE (remote)
 {
   add_target (remote_target_info, remote_target::open);
   add_target (extended_remote_target_info, extended_remote_target::open);

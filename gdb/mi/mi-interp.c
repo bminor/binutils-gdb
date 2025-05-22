@@ -935,9 +935,7 @@ mi_interp_factory (const char *name)
   return new mi_interp (name);
 }
 
-void _initialize_mi_interp ();
-void
-_initialize_mi_interp ()
+INIT_GDB_FILE (mi_interp)
 {
   /* The various interpreter levels.  */
   interp_factory_register (INTERP_MI2, mi_interp_factory);

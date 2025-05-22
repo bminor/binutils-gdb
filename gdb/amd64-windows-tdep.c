@@ -1404,9 +1404,7 @@ amd64_cygwin_core_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
-void _initialize_amd64_windows_tdep ();
-void
-_initialize_amd64_windows_tdep ()
+INIT_GDB_FILE (amd64_windows_tdep)
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_WINDOWS,
 			  amd64_windows_init_abi);

@@ -1051,9 +1051,7 @@ s390_linux_nat_target::read_description ()
 	  tdesc_s390_linux32);
 }
 
-void _initialize_s390_nat ();
-void
-_initialize_s390_nat ()
+INIT_GDB_FILE (s390_nat)
 {
   /* Register the target.  */
   linux_target = &the_s390_linux_nat_target;

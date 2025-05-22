@@ -60,9 +60,7 @@ static void test_hex2str ()
 } /* namespace rsp_low */
 } /* namespace selftests */
 
-void _initialize_rsp_low_selftests ();
-void
-_initialize_rsp_low_selftests ()
+INIT_GDB_FILE (rsp_low_selftests)
 {
   selftests::register_test ("hex2bin_byte_vector",
 			    selftests::rsp_low::test_hex2bin_byte_vector);

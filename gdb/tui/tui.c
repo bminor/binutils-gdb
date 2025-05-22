@@ -618,9 +618,7 @@ tui_get_command_dimension (unsigned int *width,
   return true;
 }
 
-void _initialize_tui ();
-void
-_initialize_tui ()
+INIT_GDB_FILE (tui)
 {
   struct cmd_list_element **tuicmd;
 

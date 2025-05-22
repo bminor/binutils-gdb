@@ -75,9 +75,7 @@ parse_memory_map_tests ()
 
 #endif /* HAVE_LIBEXPAT */
 
-void _initialize_memory_map_selftests ();
-void
-_initialize_memory_map_selftests ()
+INIT_GDB_FILE (memory_map_selftests)
 {
 #if defined(HAVE_LIBEXPAT)
   selftests::register_test

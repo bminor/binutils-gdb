@@ -61,9 +61,7 @@ i386_coff_osabi_sniffer (bfd *abfd)
 }
 
 
-void _initialize_i386_go32_tdep ();
-void
-_initialize_i386_go32_tdep ()
+INIT_GDB_FILE (i386_go32_tdep)
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
 				  i386_coff_osabi_sniffer);

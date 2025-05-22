@@ -1395,9 +1395,7 @@ gcc_cp_plugin::pop_binding_level (const char *debug_name)
   return pop_binding_level ();
 }
 
-void _initialize_compile_cplus_types ();
-void
-_initialize_compile_cplus_types ()
+INIT_GDB_FILE (compile_cplus_types)
 {
   add_setshow_boolean_cmd ("compile-cplus-types", no_class,
 			     &debug_compile_cplus_types, _("\

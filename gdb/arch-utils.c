@@ -1525,9 +1525,7 @@ core_file_exec_context::environment () const
   return e;
 }
 
-void _initialize_gdbarch_utils ();
-void
-_initialize_gdbarch_utils ()
+INIT_GDB_FILE (gdbarch_utils)
 {
   add_setshow_enum_cmd ("endian", class_support,
 			endian_enum, &set_endian_string, 

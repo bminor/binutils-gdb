@@ -369,9 +369,7 @@ mi_cmd_lookup (const char *command)
   return it->second.get ();
 }
 
-void _initialize_mi_cmds ();
-void
-_initialize_mi_cmds ()
+INIT_GDB_FILE (mi_cmds)
 {
   add_builtin_mi_commands ();
 }

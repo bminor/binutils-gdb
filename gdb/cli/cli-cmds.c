@@ -2617,9 +2617,7 @@ shell_internal_fn (struct gdbarch *gdbarch,
     return value::allocate_optimized_out (int_type);
 }
 
-void _initialize_cli_cmds ();
-void
-_initialize_cli_cmds ()
+INIT_GDB_FILE (cli_cmds)
 {
   struct cmd_list_element *c;
 

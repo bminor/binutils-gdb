@@ -3447,9 +3447,7 @@ proc_untrace_sysexit_cmd (const char *args, int from_tty)
   proc_trace_syscalls (args, from_tty, PR_SYSEXIT, FLAG_RESET);
 }
 
-void _initialize_procfs ();
-void
-_initialize_procfs ()
+INIT_GDB_FILE (procfs)
 {
   add_com ("proc-trace-entry", no_class, proc_trace_sysentry_cmd,
 	   _("Give a trace of entries into the syscall."));

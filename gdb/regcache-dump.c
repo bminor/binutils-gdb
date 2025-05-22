@@ -346,9 +346,7 @@ maintenance_print_remote_registers (const char *args, int from_tty)
 		  "maintenance print remote-registers");
 }
 
-void _initialize_regcache_dump ();
-void
-_initialize_regcache_dump ()
+INIT_GDB_FILE (regcache_dump)
 {
   add_cmd ("registers", class_maintenance, maintenance_print_registers,
 	   _("Print the internal register configuration.\n"

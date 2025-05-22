@@ -114,9 +114,7 @@ test_sigpipe ()
 } /* namespace scoped_ignore_sig */
 } /* namespace selftests */
 
-void _initialize_scoped_ignore_signal_selftests ();
-void
-_initialize_scoped_ignore_signal_selftests ()
+INIT_GDB_FILE (scoped_ignore_signal_selftests)
 {
 #ifdef SIGPIPE
   selftests::register_test ("scoped_ignore_sigpipe",

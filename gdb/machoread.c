@@ -940,9 +940,7 @@ static const struct sym_fns macho_sym_fns = {
   NULL,				/* sym_get_probes */
 };
 
-void _initialize_machoread ();
-void
-_initialize_machoread ()
+INIT_GDB_FILE (machoread)
 {
   add_symtab_fns (bfd_target_mach_o_flavour, &macho_sym_fns);
 

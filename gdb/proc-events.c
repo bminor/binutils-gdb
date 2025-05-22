@@ -759,9 +759,7 @@ proc_prettyprint_actionset (struct sigaction *actions, int verbose)
 {
 }
 
-void _initialize_proc_events ();
-void
-_initialize_proc_events ()
+INIT_GDB_FILE (proc_events)
 {
   init_syscall_table ();
 }

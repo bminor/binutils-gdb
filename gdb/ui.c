@@ -237,9 +237,7 @@ new_ui_command (const char *args, int from_tty)
   gdb_printf ("New UI allocated\n");
 }
 
-void _initialize_ui ();
-void
-_initialize_ui ()
+INIT_GDB_FILE (ui)
 {
   cmd_list_element *c = add_cmd ("new-ui", class_support, new_ui_command, _("\
 Create a new UI.\n\

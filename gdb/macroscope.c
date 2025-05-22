@@ -149,9 +149,7 @@ standard_macro_lookup (const char *name, const macro_scope &ms)
   return result;
 }
 
-void _initialize_macroscope ();
-void
-_initialize_macroscope ()
+INIT_GDB_FILE (macroscope)
 {
   macro_user_macros = new_macro_table (NULL, NULL, NULL);
   macro_set_main (macro_user_macros, "<user-defined>");

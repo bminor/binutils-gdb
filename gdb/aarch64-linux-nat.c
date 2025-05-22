@@ -1068,9 +1068,7 @@ aarch64_linux_nat_target::is_address_tagged (gdbarch *gdbarch, CORE_ADDR address
   return gdbarch_tagged_address_p (gdbarch, address);
 }
 
-void _initialize_aarch64_linux_nat ();
-void
-_initialize_aarch64_linux_nat ()
+INIT_GDB_FILE (aarch64_linux_nat)
 {
   aarch64_initialize_hw_point ();
 

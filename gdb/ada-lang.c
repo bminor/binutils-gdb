@@ -13928,9 +13928,7 @@ static const char * const gnat_source_charsets[] =
   nullptr
 };
 
-void _initialize_ada_language ();
-void
-_initialize_ada_language ()
+INIT_GDB_FILE (ada_language)
 {
   add_setshow_prefix_cmd
     ("ada", no_class,

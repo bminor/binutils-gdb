@@ -424,9 +424,7 @@ amd64_linux_nat_target::low_siginfo_fixup (siginfo_t *ptrace,
     return false;
 }
 
-void _initialize_amd64_linux_nat ();
-void
-_initialize_amd64_linux_nat ()
+INIT_GDB_FILE (amd64_linux_nat)
 {
   amd64_native_gregset32_reg_offset = amd64_linux_gregset32_reg_offset;
   amd64_native_gregset32_num_regs = I386_LINUX_NUM_REGS;

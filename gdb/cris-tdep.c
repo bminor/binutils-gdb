@@ -3816,9 +3816,7 @@ static void cris_iterate_over_regset_sections (struct gdbarch *gdbarch,
       &cris_regset, NULL, cb_data);
 }
 
-void _initialize_cris_tdep ();
-void
-_initialize_cris_tdep ()
+INIT_GDB_FILE (cris_tdep)
 {
   gdbarch_register (bfd_arch_cris, cris_gdbarch_init, cris_dump_tdep);
   

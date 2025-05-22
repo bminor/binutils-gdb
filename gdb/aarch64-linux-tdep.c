@@ -3041,9 +3041,7 @@ aarch64_linux_ltag_tests (void)
 } /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
-void _initialize_aarch64_linux_tdep ();
-void
-_initialize_aarch64_linux_tdep ()
+INIT_GDB_FILE (aarch64_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_aarch64, 0, GDB_OSABI_LINUX,
 			  aarch64_linux_init_abi);

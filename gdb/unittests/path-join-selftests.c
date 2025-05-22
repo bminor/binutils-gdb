@@ -63,9 +63,7 @@ test ()
 }
 }
 
-void _initialize_path_join_selftests ();
-void
-_initialize_path_join_selftests ()
+INIT_GDB_FILE (path_join_selftests)
 {
   selftests::register_test ("path_join",
 			    selftests::path_join::test);

@@ -1294,9 +1294,7 @@ tui_new_layout_command (const char *spec, int from_tty)
 /* Function to initialize gdb commands, for tui window layout
    manipulation.  */
 
-void _initialize_tui_layout ();
-void
-_initialize_tui_layout ()
+INIT_GDB_FILE (tui_layout)
 {
   struct cmd_list_element *layout_cmd
     = add_basic_prefix_cmd ("layout", class_tui, _("\

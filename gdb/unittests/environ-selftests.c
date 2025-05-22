@@ -297,9 +297,7 @@ run_tests ()
 } /* namespace gdb_environ */
 } /* namespace selftests */
 
-void _initialize_environ_selftests ();
-void
-_initialize_environ_selftests ()
+INIT_GDB_FILE (environ_selftests)
 {
   selftests::register_test ("gdb_environ",
 			    selftests::gdb_environ_tests::run_tests);

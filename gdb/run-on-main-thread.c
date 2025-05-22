@@ -130,9 +130,7 @@ is_main_thread ()
 #endif
 }
 
-void _initialize_run_on_main_thread ();
-void
-_initialize_run_on_main_thread ()
+INIT_GDB_FILE (run_on_main_thread)
 {
 #if CXX_STD_THREAD
   /* The variable main_thread_id should be initialized when entering main, or

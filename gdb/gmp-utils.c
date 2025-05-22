@@ -250,10 +250,7 @@ xfree_for_gmp (void *ptr, size_t size)
   xfree (ptr);
 }
 
-void _initialize_gmp_utils ();
-
-void
-_initialize_gmp_utils ()
+INIT_GDB_FILE (gmp_utils)
 {
   /* Tell GMP to use GDB's memory management routines.  */
   mp_set_memory_functions (xmalloc, xrealloc_for_gmp, xfree_for_gmp);

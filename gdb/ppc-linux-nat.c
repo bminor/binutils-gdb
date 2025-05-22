@@ -3232,9 +3232,7 @@ ppc_linux_nat_target::get_arch_lwp_info (struct lwp_info *lp)
   return lwp_arch_private_info (lp);
 }
 
-void _initialize_ppc_linux_nat ();
-void
-_initialize_ppc_linux_nat ()
+INIT_GDB_FILE (ppc_linux_nat)
 {
   linux_target = &the_ppc_linux_nat_target;
 

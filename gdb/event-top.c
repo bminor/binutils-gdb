@@ -1650,9 +1650,7 @@ show_debug_event_loop_command (struct ui_file *file, int from_tty,
   gdb_printf (file, _("Event loop debugging is %s.\n"), value);
 }
 
-void _initialize_event_top ();
-void
-_initialize_event_top ()
+INIT_GDB_FILE (event_top)
 {
   add_setshow_enum_cmd ("event-loop", class_maintenance,
 			debug_event_loop_enum,

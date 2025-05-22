@@ -102,9 +102,7 @@ run_tests ()
 } /* namespace scoped_restore_tests */
 } /* namespace selftests */
 
-void _initialize_scoped_restore_selftests ();
-void
-_initialize_scoped_restore_selftests ()
+INIT_GDB_FILE (scoped_restore_selftests)
 {
   selftests::register_test ("scoped_restore",
 			    selftests::scoped_restore_tests::run_tests);

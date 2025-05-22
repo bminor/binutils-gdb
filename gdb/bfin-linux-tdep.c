@@ -161,9 +161,7 @@ bfin_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				  bfin_linux_get_syscall_number);
 }
 
-void _initialize_bfin_linux_tdep ();
-void
-_initialize_bfin_linux_tdep ()
+INIT_GDB_FILE (bfin_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_bfin, 0, GDB_OSABI_LINUX,
 			  bfin_linux_init_abi);

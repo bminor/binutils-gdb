@@ -207,9 +207,7 @@ sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tramp_frame_prepend_unwinder (gdbarch, &sh_linux_rt_sigreturn_tramp_frame);
 }
 
-void _initialize_sh_linux_tdep ();
-void
-_initialize_sh_linux_tdep ()
+INIT_GDB_FILE (sh_linux_tdep)
 {
   gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_LINUX, sh_linux_init_abi);
 }

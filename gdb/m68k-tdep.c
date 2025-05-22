@@ -1365,9 +1365,7 @@ m68k_osabi_sniffer (bfd *abfd)
   return osabi;
 }
 
-void _initialize_m68k_tdep ();
-void
-_initialize_m68k_tdep ()
+INIT_GDB_FILE (m68k_tdep)
 {
   gdbarch_register (bfd_arch_m68k, m68k_gdbarch_init, m68k_dump_tdep);
 
