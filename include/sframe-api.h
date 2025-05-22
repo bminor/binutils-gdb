@@ -128,6 +128,12 @@ sframe_decoder_get_version (sframe_decoder_ctx *dctx);
 extern uint8_t
 sframe_decoder_get_flags (sframe_decoder_ctx *dctx);
 
+/* Get the offset of the SFrame FDE function start address field in the SFrame
+   decoder context DCTX.  */
+uint32_t
+sframe_decoder_get_offsetof_fde_start_addr (sframe_decoder_ctx *dctx,
+					    uint32_t func_idx, int *errp);
+
 /* Return the number of function descriptor entries in the SFrame decoder
    DCTX.  */
 extern uint32_t
@@ -245,6 +251,12 @@ sframe_encoder_get_version (sframe_encoder_ctx *encoder);
 /* Get the flags from the SFrame decoder context DCTX.  */
 extern uint8_t
 sframe_encoder_get_flags (sframe_encoder_ctx *encoder);
+
+/* Get the offset of the SFrame FDE function start address field in the SFrame
+   encoder context ENCODER.  */
+uint32_t
+sframe_encoder_get_offsetof_fde_start_addr (sframe_encoder_ctx *encoder,
+					    uint32_t func_idx, int *errp);
 
 /* Return the number of function descriptor entries in the SFrame encoder
    ENCODER.  */

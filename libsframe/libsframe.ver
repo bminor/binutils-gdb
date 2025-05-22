@@ -41,5 +41,7 @@ LIBSFRAME_1.0 {
 
 LIBSFRAME_1.1 {
     sframe_decoder_get_flags;
+    sframe_decoder_get_offsetof_fde_start_addr;
     sframe_encoder_get_flags;
+    sframe_encoder_get_offsetof_fde_start_addr;
 } LIBSFRAME_1.0;
