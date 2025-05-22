@@ -1930,6 +1930,15 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
       /* Convert R_X86_64_GOTPCRELX and R_X86_64_REX_GOTPCRELX to
 	 R_X86_64_PC32.  */
       modrm = bfd_get_8 (abfd, contents + roff - 1);
+      switch (modrm & 0x38)
+	{
+	case 0x10: /* CALL */
+	case 0x20: /* JMP */
+	  break;
+	default:
+	  return true;
+	}
+
       if (modrm == 0x25)
 	{
 	  /* Convert to "jmp foo nop".  */
