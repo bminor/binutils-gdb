@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <stddef.h>
 #include "sframe-impl.h"
 #include "swap.h"
 
@@ -1015,6 +1016,29 @@ sframe_decoder_get_fixed_ra_offset (sframe_decoder_ctx *ctx)
   return dhp->sfh_cfa_fixed_ra_offset;
 }
 
+/* Get the offset of the sfde_func_start_address field (from the start of the
+   on-disk layout of the SFrame section) of the FDE at FUNC_IDX in the decoder
+   context DCTX.
+
+   If FUNC_IDX is more than the number of SFrame FDEs in the section, sets
+   error code in ERRP, but returns the (hypothetical) offset.  This is useful
+   for the linker when arranging input FDEs into the output section to be
+   emitted.  */
+
+uint32_t
+sframe_decoder_get_offsetof_fde_start_addr (sframe_decoder_ctx *dctx,
+					    uint32_t func_idx, int *errp)
+{
+  if (func_idx >= sframe_decoder_get_num_fidx (dctx))
+    sframe_ret_set_errno (errp, SFRAME_ERR_FDE_NOTFOUND);
+  else if (errp)
+    *errp = 0;
+
+  return (sframe_decoder_get_hdr_size (dctx)
+	  + func_idx * sizeof (sframe_func_desc_entry)
+	  + offsetof (sframe_func_desc_entry, sfde_func_start_address));
+}
+
 /* Find the function descriptor entry which contains the specified address
    ADDR.
    This function is deprecated and will be removed from libsframe.so.2.  */
@@ -1432,6 +1456,29 @@ sframe_encoder_get_num_fidx (sframe_encoder_ctx *encoder)
   if (ehp)
     num_fdes = ehp->sfh_num_fdes;
   return num_fdes;
+}
+
+/* Get the offset of the sfde_func_start_address field (from the start of the
+   on-disk layout of the SFrame section) of the FDE at FUNC_IDX in the encoder
+   context ENCODER.
+
+   If FUNC_IDX is more than the number of SFrame FDEs in the section, sets
+   error code in ERRP, but returns the (hypothetical) offset.  This is useful
+   for the linker when arranging input FDEs into the output section to be
+   emitted.  */
+
+uint32_t
+sframe_encoder_get_offsetof_fde_start_addr (sframe_encoder_ctx *encoder,
+					    uint32_t func_idx, int *errp)
+{
+  if (func_idx >= sframe_encoder_get_num_fidx (encoder))
+    sframe_ret_set_errno (errp, SFRAME_ERR_FDE_INVAL);
+  else if (errp)
+    *errp = 0;
+
+  return (sframe_encoder_get_hdr_size (encoder)
+	  + func_idx * sizeof (sframe_func_desc_entry)
+	  + offsetof (sframe_func_desc_entry, sfde_func_start_address));
 }
 
 /* Add an FRE to function at FUNC_IDX'th function descriptor entry in
