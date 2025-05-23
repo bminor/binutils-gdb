@@ -160,7 +160,11 @@ d:
 	.byte	0
 	.byte	0
 	.byte	0
-	.section	.debug_str
+#ifdef __arm__
+	.section	.debug_str,"MS",%progbits,1
+#else
+	.section	.debug_str,"MS",@progbits,1
+#endif
 .LASF2:
 	.string	"GNU C 4.7.0 20110727 (experimental)"
 .LASF0:

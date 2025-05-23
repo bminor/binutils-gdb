@@ -163,7 +163,11 @@
 	.byte		0x0			/* Terminator */
 
 /* String table */
-	.section .debug_str
+#ifdef __arm__
+	.section .debug_str,"MS",%progbits,1
+#else
+	.section .debug_str,"MS",@progbits,1
+#endif
 .Lproducer:
 	.string		"GNU C 3.3.3"
 .Lchar_str:

@@ -114,7 +114,11 @@ die221:
 
 	.byte	0x0
 
-	.section	.debug_str
+#ifdef __arm__
+	.section	.debug_str,"MS",%progbits,1
+#else
+	.section	.debug_str,"MS",@progbits,1
+#endif
 .LASF1:
 	.string	"2.mod"
 .LASF0:

@@ -1072,7 +1072,10 @@ namespace eval Dwarf {
     }
 
     proc _section {name {flags ""} {type ""}} {
-	if {$flags == "" && $type == ""} {
+	if {$name == ".debug_str"} {
+	    # Hard-code this because it's always desirable.
+	    _emit "        .section $name, \"MS\", %progbits, 1"
+	} elseif {$flags == "" && $type == ""} {
 	    _emit "        .section $name"
 	} elseif {$type == ""} {
 	    _emit "        .section $name, \"$flags\""
