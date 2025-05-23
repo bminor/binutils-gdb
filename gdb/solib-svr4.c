@@ -1728,6 +1728,10 @@ glibc_link_map_to_tls_module_id (CORE_ADDR lm_addr)
 static void
 tls_maybe_fill_slot (solib &so)
 {
+  auto *li = dynamic_cast<lm_info_svr4 *> (so.lm_info.get ());
+  if (li == nullptr)
+    return;
+
   struct svr4_info *info = get_svr4_info (current_program_space);
   if (!info->glibc_tls_slots_inited)
     {
@@ -1753,7 +1757,6 @@ tls_maybe_fill_slot (solib &so)
       auto it = std::find (info->glibc_tls_slots.begin (),
 			   info->glibc_tls_slots.end (),
 			   0);
-      auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
       if (it == info->glibc_tls_slots.end ())
 	info->glibc_tls_slots.push_back (li->lm_addr);
       else
@@ -1771,8 +1774,11 @@ tls_maybe_erase_slot (program_space *pspace, const solib &so,
   if (still_in_use)
     return;
 
+  auto *li = dynamic_cast<lm_info_svr4 *> (so.lm_info.get ());
+  if (li == nullptr)
+    return;
+
   struct svr4_info *info = get_svr4_info (pspace);
-  auto *li = gdb::checked_static_cast<lm_info_svr4 *> (so.lm_info.get ());
   auto it = std::find (info->glibc_tls_slots.begin (),
 		       info->glibc_tls_slots.end (),
 		       li->lm_addr);
