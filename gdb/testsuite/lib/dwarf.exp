@@ -3398,9 +3398,24 @@ namespace eval Dwarf {
 
     # Add the strings in ARGS to the .debug_str section, and create a
     # .debug_str_offsets section pointing to those strings.
-    # BASE_OFFSET is the label for DW_AT_str_offsets_base.
-    proc debug_str_offsets { base_offset args } {
-	_section .debug_str
+    # Current options are:
+    # dwo 0|1 - boolean indicating if the sections have the dwo suffix.
+    #           default = 0 (no .dwo suffix)
+    # base_offset label
+    #         - generate label, to be used in DW_AT_str_offsets_base.
+    #           default = "" (don't generate a label).
+    proc debug_str_offsets { options args } {
+	parse_options {
+	    { dwo 0 }
+	    { base_offset "" }
+	}
+
+	if { $dwo } {
+	    _section .debug_str.dwo
+	} else {
+	    _section .debug_str
+	}
+
 	set num 0
 	foreach arg $args {
 	    set str_label [_compute_label "str_${num}"]
@@ -3412,12 +3427,18 @@ namespace eval Dwarf {
 	declare_labels debug_str_offsets_start debug_str_offsets_end
 	set initial_length "$debug_str_offsets_end - $debug_str_offsets_start"
 
-	_section .debug_str_offsets
+	if { $dwo } {
+	    _section .debug_str_offsets.dwo
+	} else {
+	    _section .debug_str_offsets
+	}
 	_op .4byte $initial_length "Initial_length"
 	debug_str_offsets_start:
 	_op .2byte 0x5 "version"
 	_op .2byte 0x0 "padding"
-	$base_offset:
+	if { $base_offset != "" } {
+	    $base_offset:
+	}
 	set num 0
 	foreach arg $args {
 	    set str_label [_compute_label "str_${num}"]

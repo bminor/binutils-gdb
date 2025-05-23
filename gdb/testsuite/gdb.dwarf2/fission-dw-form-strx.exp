@@ -13,33 +13,46 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Check support for a DW_FORM_strx attribute in a dwo file.
+
 load_lib dwarf.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
 require dwarf2_support
 
-standard_testfile main.c -dw.S
+standard_testfile main.c -dw.S -dwo.S
 
-set asm_file [standard_output_file $srcfile2]
+set main_asm_file [standard_output_file $srcfile2]
+set dwo_asm_file [standard_output_file $srcfile3]
 
 # Debug info in the main file.
-Dwarf::assemble $asm_file {
-    declare_labels base_offset_cu1
-
-    debug_str_offsets { base_offset base_offset_cu1 } int
-
+Dwarf::assemble $main_asm_file {
     cu {
 	version 5
+	dwo_id 0xF00D
     } {
-	DW_TAG_compile_unit {
-	    {DW_AT_str_offsets_base $base_offset_cu1 sec_offset}
-	} {
+	compile_unit {
+	    {DW_AT_dwo_name ${::gdb_test_file_name}.dwo DW_FORM_strp}
+	} {}
+    }
+}
+
+# Debug info in the DWO file.
+Dwarf::assemble $dwo_asm_file {
+    debug_str_offsets { dwo 1 } int
+
+    cu {
+	fission 1
+	version 5
+	dwo_id 0xF00D
+    } {
+	compile_unit {} {
 	    declare_labels int4_type
 
 	    int4_type: DW_TAG_base_type {
 		{DW_AT_byte_size 4 DW_FORM_sdata}
 		{DW_AT_encoding  @DW_ATE_signed}
-		{DW_AT_name      $::int_str_idx DW_FORM_strx_id}
+		{DW_AT_name      0 DW_FORM_strx_id}
 	    }
 
 	    DW_TAG_variable {
@@ -54,11 +67,22 @@ Dwarf::assemble $asm_file {
     }
 }
 
-if { [prepare_for_testing "failed to prepare" ${testfile} \
-	  [list $srcfile $asm_file] {nodebug}] } {
+# Build main file.
+if { [build_executable "${testfile}.exp" $binfile \
+	[list ${srcfile} ${main_asm_file}] {nodebug}] } {
     return
 }
 
-# Let includers know prepare_for_testing was done, without having to check
-# source return status.
-set prepare_for_testing_done 1
+# Build DWO file.
+set dwo_file [standard_output_file ${testfile}.dwo]
+if { [gdb_compile_shlib $dwo_asm_file $dwo_file nodebug] != "" } {
+    return
+}
+
+if { [is_remote host] } {
+    gdb_remote_download host $dwo_file
+}
+
+clean_restart $binfile
+
+gdb_test "ptype global_var" "type = int"
