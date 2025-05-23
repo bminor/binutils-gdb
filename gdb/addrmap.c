@@ -427,21 +427,20 @@ test_addrmap ()
 
   /* Create mutable addrmap.  */
   auto_obstack temp_obstack;
-  auto map = std::make_unique<struct addrmap_mutable> ();
-  SELF_CHECK (map != nullptr);
+  addrmap_mutable map;
 
   /* Check initial state.  */
-  check_addrmap_find (*map, array, 0, 19, nullptr);
+  check_addrmap_find (map, array, 0, 19, nullptr);
 
   /* Insert address range into mutable addrmap.  */
-  map->set_empty (core_addr (&array[10]), core_addr (&array[12]), val1);
-  check_addrmap_find (*map, array, 0, 9, nullptr);
-  check_addrmap_find (*map, array, 10, 12, val1);
-  check_addrmap_find (*map, array, 13, 19, nullptr);
+  map.set_empty (core_addr (&array[10]), core_addr (&array[12]), val1);
+  check_addrmap_find (map, array, 0, 9, nullptr);
+  check_addrmap_find (map, array, 10, 12, val1);
+  check_addrmap_find (map, array, 13, 19, nullptr);
 
   /* Create corresponding fixed addrmap.  */
   addrmap_fixed *map2
-    = new (&temp_obstack) addrmap_fixed (&temp_obstack, map.get ());
+    = new (&temp_obstack) addrmap_fixed (&temp_obstack, &map);
   SELF_CHECK (map2 != nullptr);
   check_addrmap_find (*map2, array, 0, 9, nullptr);
   check_addrmap_find (*map2, array, 10, 12, val1);
@@ -460,7 +459,7 @@ test_addrmap ()
 	SELF_CHECK (false);
       return 0;
     };
-  SELF_CHECK (map->foreach (callback) == 0);
+  SELF_CHECK (map.foreach (callback) == 0);
   SELF_CHECK (map2->foreach (callback) == 0);
 
   /* Relocate fixed addrmap.  */
@@ -470,11 +469,11 @@ test_addrmap ()
   check_addrmap_find (*map2, array, 14, 19, nullptr);
 
   /* Insert partially overlapping address range into mutable addrmap.  */
-  map->set_empty (core_addr (&array[11]), core_addr (&array[13]), val2);
-  check_addrmap_find (*map, array, 0, 9, nullptr);
-  check_addrmap_find (*map, array, 10, 12, val1);
-  check_addrmap_find (*map, array, 13, 13, val2);
-  check_addrmap_find (*map, array, 14, 19, nullptr);
+  map.set_empty (core_addr (&array[11]), core_addr (&array[13]), val2);
+  check_addrmap_find (map, array, 0, 9, nullptr);
+  check_addrmap_find (map, array, 10, 12, val1);
+  check_addrmap_find (map, array, 13, 13, val2);
+  check_addrmap_find (map, array, 14, 19, nullptr);
 }
 
 } /* namespace selftests */
