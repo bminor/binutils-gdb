@@ -43,7 +43,7 @@ echo "/* Do not modify this file.  */"
 echo "/* It is created automatically by the Makefile.  */"
 echo "#include <algorithm>"
 echo ""
-sed -n -e 's/^\(_initialize_[a-zA-Z0-9_]*\) ()$/\1/p' "$@" | while read -r name; do
+sed -n -e 's/^\(void \|\)\(_initialize_[a-zA-Z0-9_]*\) ()$/\2/p' "$@" | while read -r name; do
   echo "extern initialize_file_ftype $name;"
 done
 echo ""
@@ -53,7 +53,7 @@ echo "initialize_all_files ()"
 echo "{"
 echo "  std::vector<initialize_file_ftype *> functions ="
 echo "    {"
-sed -n -e 's/^\(_initialize_[a-zA-Z0-9_]*\) ()$/\1/p' "$@" | while read -r name; do
+sed -n -e 's/^\(void \|\)\(_initialize_[a-zA-Z0-9_]*\) ()$/\2/p' "$@" | while read -r name; do
   echo "      $name,"
 done
 echo "    };"
