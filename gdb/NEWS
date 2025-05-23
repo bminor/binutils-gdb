@@ -46,7 +46,7 @@
   In systems that don't support linkage namespaces, these always return 1
   and [[0]] respectively.
 
- * Add record full support for rv64gc architectures
+* Add record full support for rv64gc architectures
 
 * New commands
 
