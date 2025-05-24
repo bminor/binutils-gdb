@@ -20,7 +20,9 @@
 #ifndef GDB_DWARF2_READ_H
 #define GDB_DWARF2_READ_H
 
+#if CXX_STD_THREAD
 #include <mutex>
+#endif
 #include <queue>
 #include "dwarf2/abbrev.h"
 #include "dwarf2/unit-head.h"
