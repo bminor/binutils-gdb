@@ -7400,7 +7400,7 @@ lookup_dwo_unit_in_dwp (dwarf2_per_bfd *per_bfd,
 	  std::lock_guard<std::mutex> guard (dwp_file->loaded_cutus_lock);
 #endif
 
-	  auto [it, inserted] = dwo_unit_set.emplace (std::move (dwo_unit));
+	  auto it = dwo_unit_set.emplace (std::move (dwo_unit)).first;
 	  return it->get ();
 	}
 
