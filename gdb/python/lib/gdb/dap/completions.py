@@ -39,8 +39,11 @@ def completions(
         line = 1
     else:
         line = import_line(line)
-    text = text.splitlines()[line - 1]
-    text = text[: column - 1]
+    if text:
+        text = text.splitlines()[line - 1]
+        text = text[: column - 1]
+    else:
+        text = ""
     mi_result = exec_mi_and_log("-complete", text)
     result = []
     completion = None
