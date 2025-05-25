@@ -4657,12 +4657,16 @@ nds32_handle_align (fragS *fragp)
 		   BFD_RELOC_NDS32_INSN16);
       memcpy (p, nop16, 2);
       p += 2;
+      bytes -= 2;
       fix += 2;
     }
   fragp->fr_fix += fix;
 
-  fragp->fr_var = 4;
-  memcpy (p, nop32, 4);
+  if (bytes != 0)
+    {
+      fragp->fr_var = 4;
+      memcpy (p, nop32, 4);
+    }
 }
 
 /* md_flush_pending_output  */

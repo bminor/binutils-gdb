@@ -26602,7 +26602,6 @@ arm_handle_align (fragS * fragP)
 
   bytes = fragP->fr_next->fr_address - fragP->fr_address - fragP->fr_fix;
   p = fragP->fr_literal + fragP->fr_fix;
-  fix = 0;
 
   gas_assert ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) != 0);
 
@@ -26633,9 +26632,9 @@ arm_handle_align (fragS * fragP)
 #endif
     }
 
-  if (bytes & (noop_size - 1))
+  fix = bytes & (noop_size - 1);
+  if (fix != 0)
     {
-      fix = bytes & (noop_size - 1);
 #ifdef OBJ_ELF
       insert_data_mapping_symbol (state, fragP->fr_fix, fragP, fix);
 #endif
@@ -26660,8 +26659,11 @@ arm_handle_align (fragS * fragP)
     }
 
   fragP->fr_fix += fix;
-  fragP->fr_var = noop_size;
-  memcpy (p, noop, noop_size);
+  if (bytes != 0)
+    {
+      fragP->fr_var = noop_size;
+      memcpy (p, noop, noop_size);
+    }
 }
 
 /* Perform target specific initialisation of a frag.

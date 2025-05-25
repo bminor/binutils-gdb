@@ -326,11 +326,15 @@ epiphany_handle_align (fragS *fragp)
   if (bytes & 1)
     {
       *p++ = 0;
+      bytes--;
       fragp->fr_fix++;
     }
 
-  memcpy (p, nop_pattern, 2);
-  fragp->fr_var = 2;
+  if (bytes != 0)
+    {
+      fragp->fr_var = 2;
+      memcpy (p, nop_pattern, 2);
+    }
 }
 
 /* Read a comma separated incrementing list of register names

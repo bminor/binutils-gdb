@@ -6887,6 +6887,9 @@ ppc_handle_align (segT sec, struct frag *fragP)
 {
   valueT count = (fragP->fr_next->fr_address
 		  - (fragP->fr_address + fragP->fr_fix));
+  if (count == 0)
+    return;
+
   char *dest = fragP->fr_literal + fragP->fr_fix;
   enum ppc_nop_encoding_for_rs_align_code nop_select = *dest & 0xff;
 
@@ -6894,8 +6897,7 @@ ppc_handle_align (segT sec, struct frag *fragP)
      We could pad with zeros up to an instruction boundary then follow
      with nops but odd counts indicate data in an executable section
      so padding with zeros is most appropriate.  */
-  if (count == 0
-      || (nop_select == PPC_NOP_VLE ? (count & 1) != 0 : (count & 3) != 0))
+  if (nop_select == PPC_NOP_VLE ? (count & 1) != 0 : (count & 3) != 0)
     {
       *dest = 0;
       return;

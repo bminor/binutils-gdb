@@ -1775,9 +1775,11 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	 included in fr_fix.  The repeating larger nop only needs to
 	 be written once to the frag memory.  */
       fragP->fr_fix = where - fragP->fr_literal;
-      fragP->fr_var = limit;
       if (count != 0)
-	count = limit;
+	{
+	  fragP->fr_var = limit;
+	  count = limit;
+	}
     }
 
   const unsigned char *nops = patt[limit - 1];

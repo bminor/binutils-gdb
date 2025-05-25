@@ -9058,11 +9058,15 @@ aarch64_handle_align (fragS * fragP)
 #endif
       memset (p, 0, fix);
       p += fix;
+      bytes -= fix;
       fragP->fr_fix += fix;
     }
 
-  memcpy (p, aarch64_noop, noop_size);
-  fragP->fr_var = noop_size;
+  if (bytes != 0)
+    {
+      fragP->fr_var = noop_size;
+      memcpy (p, aarch64_noop, noop_size);
+    }
 }
 
 /* Perform target specific initialisation of a frag.

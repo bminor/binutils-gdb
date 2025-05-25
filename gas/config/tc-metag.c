@@ -6853,11 +6853,15 @@ metag_handle_align (fragS * fragP)
     {
       memset (p, 0, fix);
       p += fix;
+      bytes -= fix;
       fragP->fr_fix += fix;
     }
 
-  memcpy (p, noop, 4);
-  fragP->fr_var = 4;
+  if (bytes != 0)
+    {
+      fragP->fr_var = 4;
+      memcpy (p, noop, 4);
+    }
 }
 
 static char *
