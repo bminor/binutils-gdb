@@ -1007,7 +1007,7 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 	    unsigned int size = rel->addend & 0xff;
 	    unsigned int startbyte = offset >> 3;
 	    unsigned int endbyte = (offset + size + 7) >> 3;
-	    unsigned int bytes = endbyte + 1 - startbyte;
+	    unsigned int bytes = endbyte - startbyte;
 
 	    if (bytes <= 8
 		&& rel->address + startbyte + bytes >= rel->address
@@ -1019,7 +1019,6 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 		  val = (val << 8) | data[rel->address + startbyte + off];
 
 		offset -= startbyte << 3;
-		size -= startbyte << 3;
 		uint64_t mask = (((uint64_t) 1 << size) - 1) << offset;
 		val = (val & ~mask) | ((stack[--tos] << offset) & mask);
 
@@ -1781,7 +1780,7 @@ alpha_relocate_section (bfd *output_bfd,
 	    {
 	      unsigned int startbyte = r_offset >> 3;
 	      unsigned int endbyte = (r_offset + r_size + 7) >> 3;
-	      unsigned int bytes = endbyte + 1 - startbyte;
+	      unsigned int bytes = endbyte - startbyte;
 
 	      if (bytes <= 8
 		  && r_vaddr >= input_section->vma
@@ -1795,7 +1794,6 @@ alpha_relocate_section (bfd *output_bfd,
 		    val = (val << 8) | p[startbyte + off];
 
 		  r_offset -= startbyte << 3;
-		  r_size -= startbyte << 3;
 		  uint64_t mask = (((uint64_t) 1 << r_size) - 1) << r_offset;
 		  val = (val & ~mask) | ((stack[--tos] << r_offset) & mask);
 
