@@ -1023,7 +1023,7 @@ sframe_get_funcdesc_with_addr_internal (sframe_decoder_ctx *ctx, int32_t addr,
 {
   sframe_header *dhp;
   sframe_func_desc_entry *fdp;
-  int low, high, cnt;
+  int low, high;
 
   if (ctx == NULL)
     return sframe_ret_set_errno (errp, SFRAME_ERR_INVAL);
@@ -1041,22 +1041,19 @@ sframe_get_funcdesc_with_addr_internal (sframe_decoder_ctx *ctx, int32_t addr,
   fdp = (sframe_func_desc_entry *) ctx->sfd_funcdesc;
   low = 0;
   high = dhp->sfh_num_fdes;
-  cnt = high;
   while (low <= high)
     {
       int mid = low + (high - low) / 2;
 
-      if (fdp[mid].sfde_func_start_address == addr)
+      /* Given sfde_func_start_address <= addr,
+	 addr - sfde_func_start_address must be positive.  */
+      if (fdp[mid].sfde_func_start_address <= addr
+	  && ((uint32_t)(addr - fdp[mid].sfde_func_start_address)
+	      < fdp[mid].sfde_func_size))
 	return fdp + mid;
 
       if (fdp[mid].sfde_func_start_address < addr)
-	{
-	  if (mid == (cnt - 1)) 	/* Check if it's the last one.  */
-	    return fdp + (cnt - 1);
-	  else if (fdp[mid+1].sfde_func_start_address > addr)
-	    return fdp + mid;
-	  low = mid + 1;
-	}
+	low = mid + 1;
       else
 	high = mid - 1;
     }

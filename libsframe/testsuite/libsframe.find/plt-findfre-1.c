@@ -128,6 +128,10 @@ void test_plt_findfre (uint32_t plt_vaddr, uint32_t sframe_vaddr)
   TEST ("plt-findfre-1: Find last FRE in PLT4",
 	(err == 0 && sframe_fre_get_cfa_offset (dctx, &frep, &err) == 0x3));
 
+  /* Find no FRE for out of range PLT6.  */
+  err = sframe_find_fre (dctx, (plt_vaddr + 16*5 + 0x0 - sframe_vaddr), &frep);
+  TEST ("plt-findfre-1: Find no FRE for out of range PLT6", err != 0);
+
   sframe_encoder_free (&ectx);
   sframe_decoder_free (&dctx);
 }
