@@ -1891,7 +1891,7 @@ _bfd_x86_elf_create_sframe_plt (bfd *output_bfd,
     }
 
   *ectx = sframe_encode (SFRAME_VERSION_2,
-			 0,
+			 SFRAME_F_FDE_FUNC_START_ADDR_PCREL,
 			 SFRAME_ABI_AMD64_ENDIAN_LITTLE,
 			 SFRAME_CFA_FIXED_FP_INVALID,
 			 -8, /*  Fixed RA offset.  */

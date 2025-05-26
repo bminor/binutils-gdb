@@ -133,8 +133,15 @@ dump_sframe_func_with_fres (sframe_decoder_ctx *sfd_ctx,
   /* Get the SFrame function descriptor.  */
   sframe_decoder_get_funcdesc (sfd_ctx, funcidx, &num_fres,
 			       &func_size, &func_start_address, &func_info);
-  /* Calculate the virtual memory address for function start pc.  */
+/* Calculate the virtual memory address for function start pc.  Some older
+   SFrame V2 sections in ET_DYN or ET_EXEC may still have the
+   SFRAME_F_FDE_FUNC_START_ADDR_PCREL flag unset, and hence may be using the
+   old encoding.  Continue to support dumping the sections at least.  */
   func_start_pc_vma = func_start_address + sec_addr;
+  if (sframe_decoder_get_flags (sfd_ctx) & SFRAME_F_FDE_FUNC_START_ADDR_PCREL)
+    func_start_pc_vma += sframe_decoder_get_offsetof_fde_start_addr (sfd_ctx,
+								     funcidx,
+								     NULL);
 
   /* Mark FDEs with [m] where the FRE start address is interpreted as a
      mask.  */

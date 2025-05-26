@@ -328,6 +328,8 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
   int8_t sfd_ctx_fixed_ra_offset;
   uint8_t dctx_version;
   uint8_t ectx_version;
+  uint8_t dctx_flags;
+  uint8_t ectx_flags;
   int encerr = 0;
 
   struct elf_link_hash_table *htab;
@@ -351,6 +353,8 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
   if (sfd_ctx == NULL || sfe_info == NULL)
     return false;
 
+  dctx_flags = sframe_decoder_get_flags (sfd_ctx);
+
   if (htab->sfe_info.sfe_ctx == NULL)
     {
       sfd_ctx_abi_arch = sframe_decoder_get_abi_arch (sfd_ctx);
@@ -361,8 +365,18 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
       if (!sfd_ctx_abi_arch)
 	return false;
 
+      /* In-memory FDEs in the encoder object are unsorted during linking and
+	 will be sorted before emission.  Reset SFRAME_F_FDE_SORTED to aptly
+	 reflect that (doing so has no other functional value at this time
+	 though).  */
+      uint8_t tflags = dctx_flags & ~SFRAME_F_FDE_SORTED;
+      /* ld always generates an output section with
+	 SFRAME_F_FDE_FUNC_START_ADDR_PCREL flag set.  Later using
+	 SFRAME_F_LD_MUSTHAVE_FLAGS, it is enforced that the provided input
+	 sections also have this flag set.  */
+      tflags |= SFRAME_F_FDE_FUNC_START_ADDR_PCREL;
       htab->sfe_info.sfe_ctx = sframe_encode (SFRAME_VERSION_2,
-					      0, /* SFrame flags.  */
+					      tflags, /* SFrame flags.  */
 					      sfd_ctx_abi_arch,
 					      sfd_ctx_fixed_fp_offset,
 					      sfd_ctx_fixed_ra_offset,
@@ -410,7 +424,15 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 	  " .sframe generation"));
       return false;
     }
-
+  /* Check that all SFrame sections being linked have harmonious flags.  */
+  ectx_flags = sframe_encoder_get_flags (sfe_ctx);
+  if ((dctx_flags ^ ectx_flags) & SFRAME_F_LD_MUSTHAVE_FLAGS)
+    {
+      _bfd_error_handler
+	(_("input SFrame sections with different FDE encoding prevent"
+	  " .sframe generation"));
+      return false;
+    }
 
   /* Iterate over the function descriptor entries and the FREs of the
      function from the decoder context.  Add each of them to the encoder
@@ -431,6 +453,7 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
       bool pltn_reloc_by_hand = false;
       unsigned int pltn_r_offset = 0;
       uint8_t rep_block_size = 0;
+      uint32_t offsetof_fde_in_sec = 0;
 
       if (!sframe_decoder_get_funcdesc_v2 (sfd_ctx, i, &num_fres, &func_size,
 					   &func_start_addr, &func_info,
@@ -481,6 +504,15 @@ _bfd_elf_merge_section_sframe (bfd *abfd,
 		address += sframe_read_value (abfd, contents,
 					      pltn_r_offset, 4);
 	      address += (sec->output_offset + r_offset);
+	      /* SFrame FDE function start address is an offset from the
+		 sfde_func_start_address field to the start PC.  The
+		 calculation below is the distance of sfde_func_start_address
+		 field from the start of the output SFrame section.  */
+	      offsetof_fde_in_sec
+		= sframe_encoder_get_offsetof_fde_start_addr (sfe_ctx,
+							      cur_fidx + num_enc_fidx,
+							      NULL);
+	      address -= offsetof_fde_in_sec;
 
 	      /* FIXME For testing only. Cleanup later.  */
 	      // address += (sec->output_section->vma);
