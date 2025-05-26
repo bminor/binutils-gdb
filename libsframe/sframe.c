@@ -372,40 +372,27 @@ sframe_fre_check_range_p (sframe_func_desc_entry *fdep,
 			  int32_t start_ip_offset, int32_t end_ip_offset,
 			  int32_t pc)
 {
-  int32_t start_ip, end_ip;
   int32_t func_start_addr;
   uint8_t rep_block_size;
   uint32_t fde_type;
-  int32_t masked_pc;
+  int32_t pc_offset;
   bool mask_p;
-  bool ret;
-
-  ret = false;
 
   if (!fdep)
-    return ret;
+    return false;
 
   func_start_addr = fdep->sfde_func_start_address;
   fde_type = sframe_get_fde_type (fdep);
   mask_p = (fde_type == SFRAME_FDE_TYPE_PCMASK);
   rep_block_size = fdep->sfde_func_rep_size;
 
-  if (!mask_p)
-    {
-      start_ip = start_ip_offset + func_start_addr;
-      end_ip = end_ip_offset + func_start_addr;
-      ret = ((start_ip <= pc) && (end_ip >= pc));
-    }
-  else
-    {
-      /* For FDEs for repetitive pattern of insns, we need to return the FRE
-	 where pc % rep_block_size is between start_ip_offset and
-	 end_ip_offset.  */
-      masked_pc = pc % rep_block_size;
-      ret = ((start_ip_offset <= masked_pc) && (end_ip_offset >= masked_pc));
-    }
+  pc_offset = pc - func_start_addr;
+  /* For SFrame FDEs encoding information for repetitive pattern of insns,
+     masking with the rep_block_size is necessary to find the matching FRE.  */
+  if (mask_p)
+    pc_offset = pc_offset % rep_block_size;
 
-  return ret;
+  return (start_ip_offset <= pc_offset) && (end_ip_offset >= pc_offset);
 }
 
 static int
