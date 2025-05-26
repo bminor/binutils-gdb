@@ -1325,8 +1325,10 @@ solib_create_inferior_hook (int from_tty)
 bool
 in_solib_dynsym_resolve_code (CORE_ADDR pc)
 {
-  return (gdbarch_so_ops (current_inferior ()->arch ())
-	  ->in_dynsym_resolve_code (pc));
+  const auto in_dynsym_resolve_code
+    = gdbarch_so_ops (current_inferior ()->arch ())->in_dynsym_resolve_code;
+
+  return in_dynsym_resolve_code && in_dynsym_resolve_code (pc);
 }
 
 /* Implements the "sharedlibrary" command.  */

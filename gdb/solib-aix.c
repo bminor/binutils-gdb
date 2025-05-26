@@ -489,14 +489,6 @@ solib_aix_current_sos ()
   return sos;
 }
 
-/* Implement the "in_dynsym_resolve_code" solib_ops method.  */
-
-static bool
-solib_aix_in_dynsym_resolve_code (CORE_ADDR pc)
-{
-  return false;
-}
-
 /* Implement the "bfd_open" solib_ops method.  */
 
 static gdb_bfd_ref_ptr
@@ -676,7 +668,7 @@ const solib_ops solib_aix_so_ops =
   solib_aix_solib_create_inferior_hook,
   solib_aix_current_sos,
   nullptr,
-  solib_aix_in_dynsym_resolve_code,
+  nullptr,
   solib_aix_bfd_open,
   nullptr,
   nullptr,

@@ -353,15 +353,6 @@ darwin_read_exec_load_addr_at_init (struct darwin_info *info)
   return darwin_validate_exec_header (load_addr);
 }
 
-/* Return true if PC lies in the dynamic symbol resolution code of the
-   run time loader.  */
-
-static bool
-darwin_in_dynsym_resolve_code (CORE_ADDR pc)
-{
-  return false;
-}
-
 /* A wrapper for bfd_mach_o_fat_extract that handles reference
    counting properly.  This will either return NULL, or return a new
    reference to a BFD.  */
@@ -640,7 +631,7 @@ const solib_ops darwin_so_ops =
   darwin_solib_create_inferior_hook,
   darwin_current_sos,
   nullptr,
-  darwin_in_dynsym_resolve_code,
+  nullptr,
   darwin_bfd_open,
   nullptr,
   nullptr,
