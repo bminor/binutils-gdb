@@ -499,10 +499,10 @@ solib_aix_open_symbol_file_object (int from_tty)
 
 /* Implement the "in_dynsym_resolve_code" solib_ops method.  */
 
-static int
+static bool
 solib_aix_in_dynsym_resolve_code (CORE_ADDR pc)
 {
-  return 0;
+  return false;
 }
 
 /* Implement the "bfd_open" solib_ops method.  */

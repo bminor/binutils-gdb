@@ -1802,10 +1802,10 @@ match_main (const char *soname)
   return (0);
 }
 
-/* Return 1 if PC lies in the dynamic symbol resolution code of the
+/* Return true if PC lies in the dynamic symbol resolution code of the
    SVR4 run time loader.  */
 
-int
+bool
 svr4_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   struct svr4_info *info = get_svr4_info (current_program_space);

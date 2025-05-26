@@ -629,10 +629,10 @@ dsbt_current_sos (void)
   return sos;
 }
 
-/* Return 1 if PC lies in the dynamic symbol resolution code of the
+/* Return true if PC lies in the dynamic symbol resolution code of the
    run time loader.  */
 
-static int
+static bool
 dsbt_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   dsbt_info *info = get_dsbt_info (current_program_space);

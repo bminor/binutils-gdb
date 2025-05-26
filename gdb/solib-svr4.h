@@ -108,9 +108,9 @@ extern CORE_ADDR svr4_fetch_objfile_link_map (struct objfile *objfile);
 extern struct link_map_offsets *svr4_ilp32_fetch_link_map_offsets (void);
 extern struct link_map_offsets *svr4_lp64_fetch_link_map_offsets (void);
 
-/* Return 1 if PC lies in the dynamic symbol resolution code of the
+/* Return true if PC lies in the dynamic symbol resolution code of the
    SVR4 run time loader.  */
-int svr4_in_dynsym_resolve_code (CORE_ADDR pc);
+bool svr4_in_dynsym_resolve_code (CORE_ADDR pc);
 
 /* For the MUSL C library, given link map address LM_ADDR, return the
    corresponding TLS module id, or 0 if not found.  */

@@ -150,7 +150,7 @@ struct solib_ops
 
   /* Determine if PC lies in the dynamic symbol resolution code of
      the run time loader.  */
-  int (*in_dynsym_resolve_code) (CORE_ADDR pc);
+  bool (*in_dynsym_resolve_code) (CORE_ADDR pc);
 
   /* Find and open shared library binary file.  */
   gdb_bfd_ref_ptr (*bfd_open) (const char *pathname);

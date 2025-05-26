@@ -989,10 +989,10 @@ extern struct obj_section *find_pc_section (CORE_ADDR pc);
 /* Return true if PC is in a section called NAME.  */
 extern bool pc_in_section (CORE_ADDR, const char *);
 
-/* Return non-zero if PC is in a SVR4-style procedure linkage table
+/* Return true  if PC is in a SVR4-style procedure linkage table
    section.  */
 
-static inline int
+static inline bool
 in_plt_section (CORE_ADDR pc)
 {
   return (pc_in_section (pc, ".plt")

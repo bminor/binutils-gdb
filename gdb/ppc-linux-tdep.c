@@ -310,22 +310,22 @@ static const struct ppc_insn_pattern powerpc32_plt_stub_so_2[] =
    section.  For secure PLT, stub is in .text and we need to check
    instruction patterns.  */
 
-static int
+static bool
 powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   /* Check whether PC is in the dynamic linker.  This also checks
      whether it is in the .plt section, used by non-PIC executables.  */
   if (svr4_in_dynsym_resolve_code (pc))
-    return 1;
+    return true;
 
   /* Check if we are in the resolver.  */
   bound_minimal_symbol sym = lookup_minimal_symbol_by_pc (pc);
-  if (sym.minsym != NULL
-      && (strcmp (sym.minsym->linkage_name (), "__glink") == 0
-	  || strcmp (sym.minsym->linkage_name (), "__glink_PLTresolve") == 0))
-    return 1;
 
-  return 0;
+  if (sym.minsym == nullptr)
+    return false;
+
+  return (strcmp (sym.minsym->linkage_name (), "__glink") == 0
+	  || strcmp (sym.minsym->linkage_name (), "__glink_PLTresolve") == 0);
 }
 
 /* Follow PLT stub to actual routine.

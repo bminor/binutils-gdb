@@ -666,24 +666,24 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc)
   return 1;
 }
 
-/* Return non-zero iff PC belongs to the dynamic linker resolution
+/* Return true iff PC belongs to the dynamic linker resolution
    code, a PLT entry, or a lazy binding stub.  */
 
-static int
+static bool
 mips_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   /* Check whether PC is in the dynamic linker.  This also checks
      whether it is in the .plt section, used by non-PIC executables.  */
   if (svr4_in_dynsym_resolve_code (pc))
-    return 1;
+    return true;
 
   /* Likewise for the stubs.  They live in the .MIPS.stubs section these
      days, so we check if the PC is within, than fall back to a pattern
      match.  */
   if (mips_linux_in_dynsym_stub (pc))
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
 /* See the comments for SKIP_SOLIB_RESOLVER at the top of infrun.c,
