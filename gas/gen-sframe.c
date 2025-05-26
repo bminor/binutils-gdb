@@ -1534,6 +1534,63 @@ sframe_xlate_do_cfi_undefined (const struct sframe_xlate_ctx *xlate_ctx ATTRIBUT
   return SFRAME_XLATE_OK;
 }
 
+/* Translate DW_CFA_same_value into SFrame context.
+
+   DW_CFA_same_value op indicates that current value of register is the same as
+   in the previous frame, i.e. no restoration needed.  In SFrame stack trace
+   format, the handling is done similar to DW_CFA_restore.
+
+   For SFRAME_CFA_RA_REG, if RA-tracking is enabled, reset the SFrame FRE state
+   for REG_RA to indicate that register does not need restoration.  P.S.: Even
+   though resetting just REG_RA may be contradicting the AArch64 ABI (as Frame
+   Record contains for FP and LR), sframe_xlate_do_same_value () does not
+   detect the case and assumes the users' DW_CFA_same_value SFRAME_CFA_RA_REG
+   has a sound reason.  For ABIs, where RA-tracking is disabled, handle it
+   similar to DW_CFA_restore: ignore the directive, it is safe to skip.  The
+   reasoning is similar to that for DW_CFA_restore: if such a restoration was
+   meant to be of any consequence, there must have been the necessary CFI
+   directives for updating the CFA rule too such that the recovered RA from
+   stack is valid.
+
+   SFrame based stacktracers will implement CFA-based SP recovery for all ABIs:
+   SP for previous frame is based on the applicable CFA-rule.  There is no
+   representation in SFrame to indicate "no restoration needed" for REG_SP,
+   when going to the previous frame.  That said, if DW_CFA_same_value is seen
+   for SFRAME_CFA_SP_REG, handle it similar to DW_CFA_restore: ignore the
+   directive, it is safe to skip.  The reasoning is similar to that for
+   DW_CFA_restore: if such a restoration was meant to be of any consequence,
+   there must have been the necessary CFI directives for updating the CFA rule
+   too.  The latter will be duly processed by the SFrame generation code, as
+   expected.
+
+   For SFRAME_CFA_FP_REG, reset the state of the current FRE to indicate that
+   the value is the same as previous frame.
+
+   Return SFRAME_XLATE_OK if success.  */
+
+static int
+sframe_xlate_do_same_value (const struct sframe_xlate_ctx *xlate_ctx,
+			    const struct cfi_insn_data *cfi_insn)
+{
+  struct sframe_row_entry *cur_fre = xlate_ctx->cur_fre;
+
+  if (sframe_ra_tracking_p () && cfi_insn->u.r == SFRAME_CFA_RA_REG)
+    {
+      cur_fre->ra_loc = SFRAME_FRE_ELEM_LOC_REG;
+      cur_fre->ra_offset = 0;
+      cur_fre->merge_candidate = false;
+    }
+  else if (cfi_insn->u.r == SFRAME_CFA_FP_REG)
+    {
+      cur_fre->bp_loc = SFRAME_FRE_ELEM_LOC_REG;
+      cur_fre->bp_offset = 0;
+      cur_fre->merge_candidate = false;
+    }
+
+  /* Safe to skip.  */
+  return SFRAME_XLATE_OK;
+}
+
 /* Returns the DWARF call frame instruction name or fake CFI name for the
    specified CFI opcode, or NULL if the value is not recognized.  */
 
@@ -1633,13 +1690,11 @@ sframe_do_cfi_insn (struct sframe_xlate_ctx *xlate_ctx,
     case CFI_escape:
       err = sframe_xlate_do_cfi_escape (xlate_ctx, cfi_insn);
       break;
-    /* Following CFI opcodes are not processed at this time.
-       These do not impact the coverage of the basic stack tracing
-       information as conveyed in the SFrame format.  */
     case DW_CFA_undefined:
       err = sframe_xlate_do_cfi_undefined (xlate_ctx, cfi_insn);
       break;
     case DW_CFA_same_value:
+      err = sframe_xlate_do_same_value (xlate_ctx, cfi_insn);
       break;
     default:
       /* Other skipped operations may, however, impact the asynchronicity.  */

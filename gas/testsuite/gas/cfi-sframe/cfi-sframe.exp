@@ -80,6 +80,7 @@ if  { ([istarget "x86_64-*-*"] || [istarget "aarch64*-*-*"]) \
     run_dump_test "cfi-sframe-common-8"
     run_dump_test "cfi-sframe-common-9"
     run_dump_test "cfi-sframe-common-10"
+    run_dump_test "cfi-sframe-common-11"
 
     run_dump_test "common-empty-1"
     run_dump_test "common-empty-2"
