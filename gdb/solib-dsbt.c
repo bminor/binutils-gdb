@@ -21,7 +21,6 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "solib.h"
-#include "solist.h"
 #include "objfiles.h"
 #include "symtab.h"
 #include "command.h"
@@ -393,7 +392,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 static void dsbt_relocate_main_executable (void);
 static int enable_break (void);
 
-/* See solist.h. */
+/* See solib.h. */
 
 static int
 open_symbol_file_object (int from_tty)

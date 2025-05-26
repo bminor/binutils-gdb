@@ -36,7 +36,6 @@
 #include "gdbcore.h"
 #include "coff/internal.h"
 #include "libcoff.h"
-#include "solist.h"
 
 #define CYGWIN_DLL_NAME "cygwin1.dll"
 

@@ -1511,7 +1511,6 @@ HFILES_NO_SRCDIR = \
 	solib-darwin.h \
 	solib-svr4.h \
 	solib-target.h \
-	solist.h \
 	source.h \
 	source-cache.h \
 	sparc-nat.h \

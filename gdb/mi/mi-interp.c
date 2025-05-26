@@ -34,7 +34,7 @@
 #include "mi-common.h"
 #include "observable.h"
 #include "gdbthread.h"
-#include "solist.h"
+#include "solib.h"
 #include "objfiles.h"
 #include "tracepoint.h"
 #include "cli-out.h"

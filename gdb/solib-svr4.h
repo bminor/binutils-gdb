@@ -20,7 +20,7 @@
 #ifndef GDB_SOLIB_SVR4_H
 #define GDB_SOLIB_SVR4_H
 
-#include "solist.h"
+#include "solib.h"
 
 struct objfile;
 struct solib_ops;

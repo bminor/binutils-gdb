@@ -56,7 +56,6 @@
 #include "cli/cli-style.h"
 #include <unistd.h>
 #include "exec.h"
-#include "solist.h"
 #include "solib.h"
 #include "xml-support.h"
 #include "inttypes.h"

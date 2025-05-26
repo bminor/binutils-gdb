@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "objfiles.h"
-#include "solist.h"
+#include "solib.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "target.h"

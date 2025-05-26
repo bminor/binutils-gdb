@@ -37,7 +37,6 @@
 #include "elf/common.h"
 #include "filenames.h"
 #include "exec.h"
-#include "solist.h"
 #include "observable.h"
 #include "readline/tilde.h"
 #include "solib.h"
@@ -582,7 +581,7 @@ solib_map_sections (solib &so)
   return 1;
 }
 
-/* See solist.h.  */
+/* See solib.h.  */
 
 void
 solib::clear ()

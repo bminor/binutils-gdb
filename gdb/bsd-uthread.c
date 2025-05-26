@@ -25,7 +25,6 @@
 #include "observable.h"
 #include "regcache.h"
 #include "solib.h"
-#include "solist.h"
 #include "symfile.h"
 #include "target.h"
 

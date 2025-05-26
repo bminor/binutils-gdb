@@ -32,7 +32,6 @@
 #include "regset.h"
 #include "solib-svr4.h"
 #include "solib.h"
-#include "solist.h"
 #include "ppc-tdep.h"
 #include "ppc64-tdep.h"
 #include "ppc-linux-tdep.h"

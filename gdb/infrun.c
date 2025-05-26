@@ -58,7 +58,6 @@
 #include "target-descriptions.h"
 #include "target-dcache.h"
 #include "terminal.h"
-#include "solist.h"
 #include "gdbsupport/event-loop.h"
 #include "thread-fsm.h"
 #include "gdbsupport/enum-flags.h"

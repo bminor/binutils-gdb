@@ -24,7 +24,7 @@
 #include "cli/cli-decode.h"
 #include "mi/mi-common.h"
 #include "progspace.h"
-#include "solist.h"
+#include "solib.h"
 #include "target.h"
 #include "valprint.h"
 

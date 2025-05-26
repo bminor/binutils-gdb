@@ -50,7 +50,6 @@
 #include "cli/cli-script.h"
 #include "block.h"
 #include "solib.h"
-#include "solist.h"
 #include "observable.h"
 #include "memattr.h"
 #include "ada-lang.h"

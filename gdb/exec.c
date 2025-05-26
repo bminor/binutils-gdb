@@ -44,7 +44,7 @@
 
 #include <ctype.h>
 #include <sys/stat.h>
-#include "solist.h"
+#include "solib.h"
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"

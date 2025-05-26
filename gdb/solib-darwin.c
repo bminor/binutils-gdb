@@ -27,7 +27,7 @@
 #include "regcache.h"
 #include "gdb_bfd.h"
 
-#include "solist.h"
+#include "solib.h"
 #include "solib-darwin.h"
 
 #include "mach-o.h"

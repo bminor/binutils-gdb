@@ -35,7 +35,6 @@
 #include "regcache.h"
 #include "observable.h"
 
-#include "solist.h"
 #include "solib.h"
 #include "solib-svr4.h"
 
@@ -951,7 +950,7 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
   return (name_lm >= vaddr && name_lm < vaddr + size);
 }
 
-/* See solist.h.  */
+/* See solib.h.  */
 
 static int
 open_symbol_file_object (int from_tty)

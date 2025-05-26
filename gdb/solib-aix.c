@@ -17,7 +17,6 @@
 
 #include "solib-aix.h"
 #include "solib.h"
-#include "solist.h"
 #include "inferior.h"
 #include "gdb_bfd.h"
 #include "objfiles.h"

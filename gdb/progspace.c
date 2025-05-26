@@ -21,7 +21,6 @@
 #include "objfiles.h"
 #include "gdbcore.h"
 #include "solib.h"
-#include "solist.h"
 #include "gdbthread.h"
 #include "inferior.h"
 #include <algorithm>

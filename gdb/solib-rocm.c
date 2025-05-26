@@ -29,7 +29,6 @@
 #include "observable.h"
 #include "solib.h"
 #include "solib-svr4.h"
-#include "solist.h"
 #include "symfile.h"
 
 #include <unordered_map>

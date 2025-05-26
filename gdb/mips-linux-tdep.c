@@ -30,7 +30,6 @@
 #include "gdbtypes.h"
 #include "objfiles.h"
 #include "solib.h"
-#include "solist.h"
 #include "symtab.h"
 #include "target-descriptions.h"
 #include "regset.h"

@@ -24,9 +24,9 @@
 #include "target.h"
 #include "gdb_bfd.h"
 #include "registry.h"
-#include "solist.h"
 #include "gdbsupport/safe-iterator.h"
 #include "gdbsupport/intrusive_list.h"
+#include "gdbsupport/owning_intrusive_list.h"
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/gdb_ref_ptr.h"
 #include <vector>
