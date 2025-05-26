@@ -721,7 +721,8 @@ all_tracepoints ()
 			   tracepoint_iterator (breakpoint_chain.end ()));
 }
 
-/* Array is sorted by bp_location_is_less_than - primarily by the ADDRESS.  */
+/* Array is sorted by bp_location_ptr_is_less_than - primarily by the
+   ADDRESS.  */
 
 static std::vector<bp_location *> bp_locations;
 
@@ -7504,7 +7505,7 @@ breakpoint_locations_match (const struct bp_location *loc1,
   else
     /* We compare bp_location.length in order to cover ranged
        breakpoints.  Keep this in sync with
-       bp_location_is_less_than.  */
+       bp_location_ptr_is_less_than.  */
     return (breakpoint_address_match (loc1->pspace->aspace.get (),
 				      loc1->address,
 				      loc2->pspace->aspace.get (),
@@ -11205,14 +11206,17 @@ breakpoint_auto_delete (bpstat *bs)
       delete_breakpoint (&b);
 }
 
-/* A comparison function for bp_location AP and BP being interfaced to
-   std::sort.  Sort elements primarily by their ADDRESS (no matter what
-   bl_address_is_meaningful says), secondarily by ordering first
-   permanent elements and tertiarily just ensuring the array is sorted
-   stable way despite std::sort being an unstable algorithm.  */
+/* A comparison function for bp_location pointers A and B being interfaced to
+   std::sort, for instance to sort an std::vector<bp_location *>.  Sort
+   elements:
+   - primarily by their ADDRESS (no matter what bl_address_is_meaningful
+     says),
+   - secondarily by ordering first permanent elements, and
+   - tertiarily just ensuring the array is sorted in a stable way despite
+     std::sort being an unstable algorithm.  */
 
-static int
-bp_location_is_less_than (const bp_location *a, const bp_location *b)
+static bool
+bp_location_ptr_is_less_than (const bp_location *a, const bp_location *b)
 {
   if (a->address != b->address)
     return a->address < b->address;
@@ -11455,7 +11459,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 	handle_automatic_hardware_breakpoints (loc);
 
   std::sort (bp_locations.begin (), bp_locations.end (),
-	     bp_location_is_less_than);
+	     bp_location_ptr_is_less_than);
 
   bp_locations_target_extensions_update ();
 
