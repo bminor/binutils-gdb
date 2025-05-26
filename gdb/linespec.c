@@ -3422,6 +3422,15 @@ compare_pspace (const struct program_space *a, const struct program_space *b)
   return 0;
 }
 
+/* An std::sort comparison function for pointers.  Don't use this if stable
+   sorting results are required.  */
+
+static bool
+compare_pointers (void *a, void *b)
+{
+  return (uintptr_t)a < (uintptr_t)b;
+}
+
 /* An std::sort comparison function for symbols.  The requirement is that
    symbols with the same program space end up next to each other.  This is for
    the purpose of iterating over the symbols and doing something once for each
@@ -3441,14 +3450,9 @@ compare_symbols (const block_symbol &a, const block_symbol &b)
   if (cmp == 1)
     return false;
 
-  uintptr_t uia, uib;
-  uia = (uintptr_t) a.symbol;
-  uib = (uintptr_t) b.symbol;
-
-  if (uia < uib)
-    return true;
-
-  return false;
+  /* This gives unstable sorting results.  We assume that this doesn't
+     matter.  */
+  return compare_pointers (a.symbol, b.symbol);
 }
 
 /* Like compare_symbols but for minimal symbols.  */
@@ -3463,14 +3467,9 @@ compare_msymbols (const bound_minimal_symbol &a, const bound_minimal_symbol &b)
   if (cmp == 1)
     return false;
 
-  uintptr_t uia, uib;
-  uia = (uintptr_t) a.minsym;
-  uib = (uintptr_t) b.minsym;
-
-  if (uia < uib)
-    return true;
-
-  return false;
+  /* This gives unstable sorting results.  We assume that this doesn't
+     matter.  */
+  return compare_pointers (a.minsym, b.minsym);
 }
 
 /* Look for all the matching instances of each symbol in NAMES.  Only
