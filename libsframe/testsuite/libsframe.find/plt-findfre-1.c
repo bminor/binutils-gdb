@@ -42,7 +42,10 @@ add_plt_fde1 (sframe_encoder_ctx *ectx, uint32_t plt_vaddr,
 
   unsigned char finfo = sframe_fde_create_func_info (SFRAME_FRE_TYPE_ADDR1,
 						     SFRAME_FDE_TYPE_PCMASK);
-  int32_t func_start_addr = plt_vaddr - sframe_vaddr;
+  uint32_t offsetof_fde_in_sec
+    = sframe_encoder_get_offsetof_fde_start_addr (ectx, idx, NULL);
+  int32_t func_start_addr = (plt_vaddr
+			     - (sframe_vaddr + offsetof_fde_in_sec));
 
   /* 5 pltN entries of 16 bytes each.  */
   int err = sframe_encoder_add_funcdesc_v2 (ectx, func_start_addr,
@@ -81,7 +84,8 @@ void test_plt_findfre (uint32_t plt_vaddr, uint32_t sframe_vaddr)
     }                                                                         \
     while (0)
 
-  ectx = sframe_encode (SFRAME_VERSION, 0, SFRAME_ABI_AMD64_ENDIAN_LITTLE,
+  ectx = sframe_encode (SFRAME_VERSION, SFRAME_F_FDE_FUNC_START_ADDR_PCREL,
+			SFRAME_ABI_AMD64_ENDIAN_LITTLE,
 			SFRAME_CFA_FIXED_FP_INVALID,
 			-8, /* Fixed RA offset for AMD64.  */
 			&err);

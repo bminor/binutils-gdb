@@ -665,6 +665,10 @@ output_sframe_internal (void)
   /* The function descriptor entries as dumped by the assembler are not
      sorted on PCs.  */
   unsigned char sframe_flags = 0;
+  /* Fix PR ld/32666 - Incorrect .rela.sframe when using ld -r.
+     With the fix now in place, we indicate the new encoding with an additional
+     flag in SFrame Version 2.  */
+  sframe_flags |= SFRAME_F_FDE_FUNC_START_ADDR_PCREL;
 
   unsigned int num_fdes = get_num_sframe_fdes ();
   unsigned int num_fres = get_num_sframe_fres ();
