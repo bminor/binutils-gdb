@@ -11254,6 +11254,15 @@ bp_location_ptr_is_less_than (const bp_location *a, const bp_location *b)
   return a < b;
 }
 
+/* A comparison function for bp_locations A and B being interfaced to
+   std::sort, for instance to sort an std::vector<bp_location>.  */
+
+static bool
+bp_location_is_less_than (const bp_location &a, const bp_location &b)
+{
+  return bp_location_ptr_is_less_than (&a, &b);
+}
+
 /* Set bp_locations_placed_address_before_address_max and
    bp_locations_shadow_len_after_address_max according to the current
    content of the bp_locations array.  */
@@ -11907,9 +11916,7 @@ breakpoint::add_location (bp_location &loc)
 
   auto ub = std::upper_bound (m_locations.begin (), m_locations.end (),
 			      loc,
-			      [] (const bp_location &left,
-				  const bp_location &right)
-				{ return left.address < right.address; });
+			      bp_location_is_less_than);
   m_locations.insert (ub, loc);
 }
 
