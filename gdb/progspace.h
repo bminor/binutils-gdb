@@ -233,7 +233,7 @@ struct program_space
 
   /* Return the list of all the solibs in this program space.  */
   owning_intrusive_list<solib> &solibs ()
-  { return so_list; }
+  { return m_solib_list; }
 
   /* Similar to `bfd_get_filename (exec_bfd ())` but in original form given
      by user, without symbolic links and pathname resolved.  It is not nullptr
@@ -337,10 +337,6 @@ struct program_space
      (e.g. the argument to the "symbol-file" or "file" command).  */
   struct objfile *symfile_object_file = NULL;
 
-  /* List of shared objects mapped into this space.  Managed by
-     solib.c.  */
-  owning_intrusive_list<solib> so_list;
-
   /* Number of calls to solib_add.  */
   unsigned int solib_add_generation = 0;
 
@@ -358,6 +354,10 @@ struct program_space
 private:
   /* All known objfiles are kept in a linked list.  */
   owning_intrusive_list<objfile> m_objfiles_list;
+
+  /* List of shared objects mapped into this space.  Managed by
+     solib.c.  */
+  owning_intrusive_list<solib> m_solib_list;
 
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */

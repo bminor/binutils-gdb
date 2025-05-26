@@ -765,8 +765,8 @@ update_solib_list (int from_tty)
 
   owning_intrusive_list<solib> inferior = ops->current_sos ();
   owning_intrusive_list<solib>::iterator gdb_iter
-    = current_program_space->so_list.begin ();
-  while (gdb_iter != current_program_space->so_list.end ())
+    = current_program_space->solibs ().begin ();
+  while (gdb_iter != current_program_space->solibs ().end ())
     {
       intrusive_list<solib>::iterator inferior_iter = inferior.begin ();
 
@@ -820,7 +820,7 @@ update_solib_list (int from_tty)
 	     sections from so.abfd; remove them.  */
 	  current_program_space->remove_target_sections (&*gdb_iter);
 
-	  gdb_iter = current_program_space->so_list.erase (gdb_iter);
+	  gdb_iter = current_program_space->solibs ().erase (gdb_iter);
 	}
     }
 
@@ -861,7 +861,7 @@ update_solib_list (int from_tty)
 	}
 
       /* Add the new shared objects to GDB's list.  */
-      current_program_space->so_list.splice (std::move (inferior));
+      current_program_space->solibs ().splice (std::move (inferior));
 
       /* If a library was not found, issue an appropriate warning
 	 message.  We have to use a single call to warning in case the
@@ -1265,7 +1265,7 @@ solib_contains_address_p (const solib &solib, CORE_ADDR address)
 const char *
 solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
 {
-  for (const solib &so : pspace->so_list)
+  for (const solib &so : pspace->solibs ())
     if (solib_contains_address_p (so, address))
       return so.name.c_str ();
 
@@ -1292,7 +1292,7 @@ clear_solib (program_space *pspace)
 {
   const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
-  for (solib &so : pspace->so_list)
+  for (solib &so : pspace->solibs ())
     {
       bool still_in_use
 	= (so.objfile != nullptr && solib_used (pspace, so));
@@ -1301,7 +1301,7 @@ clear_solib (program_space *pspace)
       pspace->remove_target_sections (&so);
     };
 
-  pspace->so_list.clear ();
+  pspace->solibs ().clear ();
 
   if (ops->clear_solib != nullptr)
     ops->clear_solib (pspace);
