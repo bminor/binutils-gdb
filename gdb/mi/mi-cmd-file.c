@@ -163,10 +163,10 @@ mi_cmd_file_list_shared_libraries (const char *command,
 
   for (const solib &so : current_program_space->solibs ())
     {
-      if (so.so_name.empty ())
+      if (so.name.empty ())
 	continue;
 
-      if (pattern != nullptr && !re_exec (so.so_name.c_str ()))
+      if (pattern != nullptr && !re_exec (so.name.c_str ()))
 	continue;
 
       ui_out_emit_tuple tuple_emitter (uiout, NULL);

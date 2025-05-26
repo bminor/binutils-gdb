@@ -612,8 +612,8 @@ dsbt_current_sos (void)
 		gdb_printf (gdb_stdlog, "current_sos: name = %s\n",
 			    name_buf.get ());
 
-	      sop.so_name = name_buf.get ();
-	      sop.so_original_name = sop.so_name;
+	      sop.name = name_buf.get ();
+	      sop.original_name = sop.name;
 	    }
 
 	  sop.lm_info = std::move (li);

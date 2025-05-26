@@ -214,8 +214,8 @@ so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
       auto &newobj = dst.emplace_back ();
 
       newobj.lm_info = std::make_unique<lm_info_svr4> (*so.lm_info);
-      newobj.so_name = so.name;
-      newobj.so_original_name = so.unique_name;
+      newobj.name = so.name;
+      newobj.original_name = so.unique_name;
     }
 
   return dst;

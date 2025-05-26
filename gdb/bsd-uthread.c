@@ -280,13 +280,13 @@ bsd_uthread_solib_loaded (solib &so)
 
   for (names = bsd_uthread_solib_names; *names; names++)
     {
-      if (startswith (so.so_original_name, *names))
+      if (startswith (so.original_name, *names))
 	{
 	  solib_read_symbols (so, 0);
 
 	  if (bsd_uthread_activate (so.objfile))
 	    {
-	      bsd_uthread_solib_name = so.so_original_name;
+	      bsd_uthread_solib_name = so.original_name;
 	      return;
 	    }
 	}
@@ -300,7 +300,7 @@ bsd_uthread_solib_unloaded (program_space *pspace, const solib &so,
   if (bsd_uthread_solib_name.empty () || still_in_use)
     return;
 
-  if (so.so_original_name == bsd_uthread_solib_name)
+  if (so.original_name == bsd_uthread_solib_name)
     bsd_uthread_deactivate ();
 }
 

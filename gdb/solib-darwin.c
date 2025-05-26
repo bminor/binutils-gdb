@@ -264,8 +264,8 @@ darwin_current_sos ()
 
       auto li = std::make_unique<lm_info_darwin> ();
 
-      newobj.so_name = file_path.get ();
-      newobj.so_original_name = newobj.so_name;
+      newobj.name = file_path.get ();
+      newobj.original_name = newobj.name;
       li->lm_addr = load_addr;
 
       newobj.lm_info = std::move (li);

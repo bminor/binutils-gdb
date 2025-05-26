@@ -397,8 +397,8 @@ frv_current_sos ()
 	    warning (_("Can't read pathname for link map entry."));
 	  else
 	    {
-	      sop.so_name = name_buf.get ();
-	      sop.so_original_name = sop.so_name;
+	      sop.name = name_buf.get ();
+	      sop.original_name = sop.name;
 	    }
 	}
       else

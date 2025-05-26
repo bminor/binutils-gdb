@@ -65,10 +65,10 @@ struct solib : intrusive_list_node<solib>
      which needs to be looked up in LD_LIBRARY_PATH, etc.  We use it
      to tell which entries in the inferior's dynamic linker's link
      map we've already loaded.  */
-  std::string so_original_name;
+  std::string original_name;
 
   /* Shared object file name, expanded to something GDB can open.  */
-  std::string so_name;
+  std::string name;
 
   /* The following fields of the structure are built from
      information gathered from the shared object file itself, and
@@ -139,8 +139,7 @@ struct solib_ops
   /* Given two so_list objects, one from the GDB thread list
      and another from the list returned by current_sos, return 1
      if they represent the same library.
-     Falls back to using strcmp on so_original_name field when set
-     to NULL.  */
+     Falls back to using strcmp on ORIGINAL_NAME when set to nullptr.  */
   int (*same) (const solib &gdb, const solib &inferior);
 
   /* Return whether a region of memory must be kept in a core file
