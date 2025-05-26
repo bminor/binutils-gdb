@@ -30,6 +30,7 @@
 #include "gdb/gdb-index.h"
 #include "filenames.h"
 #include "safe-ctype.h"
+#include "sframe-api.h"
 #include <assert.h>
 
 #ifdef HAVE_LIBDEBUGINFOD
@@ -102,6 +103,7 @@ int do_debug_str;
 int do_debug_str_offsets;
 int do_debug_loc;
 int do_gdb_index;
+int do_sframe;
 int do_trace_info;
 int do_trace_abbrevs;
 int do_trace_aranges;
@@ -7689,6 +7691,37 @@ display_trace_info (struct dwarf_section *section, void *file)
 }
 
 static int
+display_sframe (struct dwarf_section *section, void *file ATTRIBUTE_UNUSED)
+{
+  sframe_decoder_ctx *sfd_ctx = NULL;
+  unsigned char *data = section->start;
+  size_t sf_size = section->size;
+  int err = 0;
+
+  if (strcmp (section->name, "") == 0)
+    {
+      error (_("Section name must be provided \n"));
+      return false;
+    }
+
+  /* Decode the contents of the section.  */
+  sfd_ctx = sframe_decode ((const char*)data, sf_size, &err);
+  if (!sfd_ctx || err)
+    {
+      error (_("SFrame decode failure: %s\n"), sframe_errmsg (err));
+      return false;
+    }
+
+  printf (_("Contents of the SFrame section %s:"), section->name);
+  /* Dump the contents as text.  */
+  dump_sframe (sfd_ctx, section->address);
+
+  sframe_decoder_free (&sfd_ctx);
+
+  return true;
+}
+
+static int
 display_debug_aranges (struct dwarf_section *section,
 		       void *file ATTRIBUTE_UNUSED)
 {
@@ -12671,6 +12704,7 @@ static const debug_dump_long_opts debug_option_table[] =
   /* For compatibility with earlier versions of readelf.  */
   { 'r', "ranges", &do_debug_aranges, 1 },
   { 's', "str", &do_debug_str, 1 },
+  { '\0', "sframe-internal-only", &do_sframe, 1 },
   { 'T', "trace_aranges", &do_trace_aranges, 1 },
   { 't', "pubtypes", &do_debug_pubtypes, 1 },
   { 'U', "trace_info", &do_trace_info, 1 },
@@ -12829,6 +12863,7 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_weaknames",   ".zdebug_weaknames",     "",	 NO_ABBREVS },	    display_debug_not_supported, NULL,		false },
   { { ".gdb_index",	    "",			     "",	 NO_ABBREVS },	    display_gdb_index,	    &do_gdb_index,	false },
   { { ".debug_names",	    "",			     "",	 NO_ABBREVS },	    display_debug_names,    &do_gdb_index,	false },
+  { { ".sframe",	    "",			     "",	 NO_ABBREVS },	    display_sframe,	    &do_sframe,		false },
   { { ".trace_info",	    "",			     "",	 ABBREV (trace_abbrev) }, display_trace_info, &do_trace_info,	true },
   { { ".trace_abbrev",	    "",			     "",	 NO_ABBREVS },	    display_debug_abbrev,   &do_trace_abbrevs,	false },
   { { ".trace_aranges",	    "",			     "",	 NO_ABBREVS },	    display_debug_aranges,  &do_trace_aranges,	false },
