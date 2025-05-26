@@ -1085,7 +1085,7 @@ print_solib_list_table (std::vector<const solib *> solib_list,
 	  }
 
 	if (!top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()
-	    && so->symbols_loaded && !objfile_has_symbols (so->objfile))
+	    && so->symbols_loaded && !so->objfile->has_symbols ())
 	  {
 	    so_missing_debug_info = true;
 	    uiout->field_string ("syms-read", "Yes (*)");

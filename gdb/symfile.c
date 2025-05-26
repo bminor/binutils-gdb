@@ -1101,7 +1101,7 @@ symbol_file_add_with_addrs (const gdb_bfd_ref_ptr &abfd, const char *name,
      no separate debug file.  If there is a separate debug file which
      does not have symbols, we'll have emitted this message for that
      file, and so printing it twice is just redundant.  */
-  if (should_print && !objfile_has_symbols (objfile)
+  if (should_print && !objfile->has_symbols ()
       && objfile->separate_debug_objfile == nullptr)
     gdb_printf (_("(No debugging symbols found in %ps)\n"),
 		styled_string (file_name_style.style (), name));
@@ -2323,7 +2323,7 @@ add_symbol_file_command (const char *args, int from_tty)
 
   objf = symbol_file_add (filename.get (), add_flags, &section_addrs,
 			  flags);
-  if (!objfile_has_symbols (objf) && objf->per_bfd->minimal_symbol_count <= 0)
+  if (!objf->has_symbols () && objf->per_bfd->minimal_symbol_count <= 0)
     warning (_("newly-added symbol file \"%ps\" does not provide any symbols"),
 	     styled_string (file_name_style.style (), filename.get ()));
 
@@ -2662,7 +2662,7 @@ reread_symbols (int from_tty)
 	      objfile->expand_all_symtabs ();
 	    }
 
-	  if (!objfile_has_symbols (objfile))
+	  if (!objfile->has_symbols ())
 	    {
 	      gdb_stdout->wrap_here (0);
 	      gdb_printf (_("(no debugging symbols found)\n"));

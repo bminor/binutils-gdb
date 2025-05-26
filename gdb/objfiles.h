@@ -515,9 +515,15 @@ public:
     return per_bfd->gdbarch;
   }
 
-  /* Return true if OBJFILE has partial symbols.  */
-
+  /* Return true if this objfile has partial symbols.  */
   bool has_partial_symbols ();
+
+  /* Return true if this objfile has full symbols.  */
+  bool has_full_symbols ();
+
+  /* Return true if this objfile has full or partial symbols, either directly
+     or through a separate debug file.  */
+  bool has_symbols ();
 
   /* Look for a separate debug symbol file for this objfile, make use of
      build-id, debug-link, and debuginfod as necessary.  If a suitable
@@ -937,15 +943,6 @@ extern void free_objfile_separate_debug (struct objfile *);
 
 extern void objfile_relocate (struct objfile *, const section_offsets &);
 extern void objfile_rebase (struct objfile *, CORE_ADDR);
-
-/* Return true if OBJFILE has full symbols.  */
-
-extern bool objfile_has_full_symbols (objfile *objfile);
-
-/* Return true if OBJFILE has full or partial symbols, either directly
-   or through a separate debug file.  */
-
-extern bool objfile_has_symbols (objfile *objfile);
 
 /* Return true if any objfile of PSPACE has partial symbols.  */
 
