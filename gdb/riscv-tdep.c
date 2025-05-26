@@ -5158,7 +5158,7 @@ private:
   {
     return (is_csrrw_insn (ival) || is_csrrs_insn (ival) || is_csrrc_insn (ival)
 	   || is_csrrwi_insn (ival) || is_csrrsi_insn (ival)
-	   || is_csrrc_insn (ival));
+	   || is_csrrci_insn (ival));
   }
 
   /* Returns true if instruction is classified.  This function can set
