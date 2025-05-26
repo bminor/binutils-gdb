@@ -392,15 +392,6 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 static void dsbt_relocate_main_executable (void);
 static int enable_break (void);
 
-/* See solib.h. */
-
-static int
-open_symbol_file_object (int from_tty)
-{
-  /* Unimplemented.  */
-  return 0;
-}
-
 /* Given a loadmap and an address, return the displacement needed
    to relocate the address.  */
 
@@ -909,7 +900,7 @@ const solib_ops dsbt_so_ops =
   dsbt_clear_solib,
   dsbt_solib_create_inferior_hook,
   dsbt_current_sos,
-  open_symbol_file_object,
+  nullptr,
   dsbt_in_dynsym_resolve_code,
   solib_bfd_open,
   nullptr,

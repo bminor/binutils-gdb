@@ -723,7 +723,8 @@ update_solib_list (int from_tty)
 	 have not opened a symbol file, we may be able to get its
 	 symbols now!  */
       if (inf->attach_flag
-	  && current_program_space->symfile_object_file == NULL)
+	  && current_program_space->symfile_object_file == nullptr
+	  && ops->open_symbol_file_object != nullptr)
 	{
 	  try
 	    {

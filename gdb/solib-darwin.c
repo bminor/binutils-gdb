@@ -188,16 +188,6 @@ find_program_interpreter (void)
   return buf;
 }
 
-/*  Not used.  I don't see how the main symbol file can be found: the
-    interpreter name is needed and it is known from the executable file.
-    Note that darwin-nat.c implements pid_to_exec_file.  */
-
-static int
-open_symbol_file_object (int from_tty)
-{
-  return 0;
-}
-
 /* Build a list of currently loaded shared objects.  See solib-svr4.c.  */
 
 static owning_intrusive_list<solib>
@@ -649,7 +639,7 @@ const solib_ops darwin_so_ops =
   darwin_clear_solib,
   darwin_solib_create_inferior_hook,
   darwin_current_sos,
-  open_symbol_file_object,
+  nullptr,
   darwin_in_dynsym_resolve_code,
   darwin_bfd_open,
   nullptr,

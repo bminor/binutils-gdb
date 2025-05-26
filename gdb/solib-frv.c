@@ -236,15 +236,6 @@ static void frv_relocate_main_executable (void);
 static CORE_ADDR main_got (void);
 static int enable_break2 (void);
 
-/* Implement the "open_symbol_file_object" solib_ops method.  */
-
-static int
-open_symbol_file_object (int from_tty)
-{
-  /* Unimplemented.  */
-  return 0;
-}
-
 /* Cached value for lm_base(), below.  */
 static CORE_ADDR lm_base_cache = 0;
 
@@ -1080,7 +1071,7 @@ const solib_ops frv_so_ops =
   frv_clear_solib,
   frv_solib_create_inferior_hook,
   frv_current_sos,
-  open_symbol_file_object,
+  nullptr,
   frv_in_dynsym_resolve_code,
   solib_bfd_open,
   nullptr,

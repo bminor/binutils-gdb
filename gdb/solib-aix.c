@@ -489,14 +489,6 @@ solib_aix_current_sos ()
   return sos;
 }
 
-/* Implement the "open_symbol_file_object" solib_ops method.  */
-
-static int
-solib_aix_open_symbol_file_object (int from_tty)
-{
-  return 0;
-}
-
 /* Implement the "in_dynsym_resolve_code" solib_ops method.  */
 
 static bool
@@ -683,7 +675,7 @@ const solib_ops solib_aix_so_ops =
   nullptr,
   solib_aix_solib_create_inferior_hook,
   solib_aix_current_sos,
-  solib_aix_open_symbol_file_object,
+  nullptr,
   solib_aix_in_dynsym_resolve_code,
   solib_aix_bfd_open,
   nullptr,

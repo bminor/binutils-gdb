@@ -382,14 +382,6 @@ Could not relocate shared library \"%s\": bad offsets"), so.name.c_str ());
   sec->endaddr += offset;
 }
 
-static int
-solib_target_open_symbol_file_object (int from_tty)
-{
-  /* We can't locate the main symbol file based on the target's
-     knowledge; the user has to specify it.  */
-  return 0;
-}
-
 static bool
 solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
 {
@@ -406,7 +398,7 @@ const solib_ops solib_target_so_ops =
   nullptr,
   solib_target_solib_create_inferior_hook,
   solib_target_current_sos,
-  solib_target_open_symbol_file_object,
+  nullptr,
   solib_target_in_dynsym_resolve_code,
   solib_bfd_open,
   nullptr,
