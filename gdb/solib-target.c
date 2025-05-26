@@ -257,12 +257,6 @@ solib_target_current_sos (void)
 }
 
 static void
-solib_target_solib_create_inferior_hook (int from_tty)
-{
-  /* Nothing needed.  */
-}
-
-static void
 solib_target_relocate_section_addresses (solib &so, target_section *sec)
 {
   CORE_ADDR offset;
@@ -396,7 +390,7 @@ const solib_ops solib_target_so_ops =
   solib_target_relocate_section_addresses,
   nullptr,
   nullptr,
-  solib_target_solib_create_inferior_hook,
+  nullptr,
   solib_target_current_sos,
   nullptr,
   solib_target_in_dynsym_resolve_code,

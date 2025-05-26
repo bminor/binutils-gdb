@@ -1317,7 +1317,8 @@ solib_create_inferior_hook (int from_tty)
 {
   const solib_ops *ops = gdbarch_so_ops (current_inferior ()->arch ());
 
-  ops->solib_create_inferior_hook (from_tty);
+  if (ops->solib_create_inferior_hook != nullptr)
+    ops->solib_create_inferior_hook (from_tty);
 }
 
 /* See solib.h.  */
