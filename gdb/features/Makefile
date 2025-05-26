@@ -100,6 +100,7 @@ OUTPUTS = $(patsubst %,$(outdir)/%.dat,$(WHICH))
 # --enable-targets=all GDB.  You can override this by passing XMLTOC
 # to make on the command line.
 XMLTOC = \
+	alpha.xml \
 	microblaze-with-stack-protect.xml \
 	microblaze.xml \
 	mips-dsp-linux.xml \

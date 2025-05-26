@@ -236,6 +236,8 @@ vFile:stat
   debug information to be disabled at configure time.  The flag to do
   that is --disable-gdb-mdebug-support.
 
+* The Alpha target now supports target descriptions.
+
 *** Changes in GDB 16
 
 * Support for Nios II targets has been removed as this architecture

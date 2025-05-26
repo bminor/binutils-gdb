@@ -49237,6 +49237,7 @@ registers using the capitalization used in the description.
 
 @menu
 * AArch64 Features::
+* Alpha Features::
 * ARC Features::
 * ARM Features::
 * i386 Features::
@@ -49542,6 +49543,47 @@ of bytes.
 
 Extra registers are allowed in this feature, but they will not affect
 @value{GDBN}.
+
+@node Alpha Features
+@subsection Alpha Features
+@cindex target descriptions, Alpha Features
+
+The @samp{org.gnu.gdb.alpha.core} feature is required for Alpha targets.  It
+must contain the following 64-bit registers; note that @value{GDBN} uses the
+software names for Alpha registers:
+
+@itemize @minus
+@item
+@samp{v0}: function return value
+@item
+@samp{t0} through @samp{t12}: temporary registers
+@item
+@samp{s0} through @samp{s5}: saved registers
+@item
+@samp{fp}: frame pointer
+@item
+@samp{a0} through @samp{a5}: argument registers
+@item
+@samp{ra}: return address
+@item
+@samp{at}: assembler temporary register
+@item
+@samp{gp}: global pointer
+@item
+@samp{sp}: stack pointer
+@item
+@samp{zero}: always zero
+@item
+@samp{f0} through @samp{f30}: floating-point registers
+@item
+@samp{fpcr}: floating-point control register
+@item
+@samp{pc}: program counter
+@item
+@samp{}: an anonymous register for historical purpose
+@item
+@samp{unique}: PALcode memory slot
+@end itemize
 
 @node ARC Features
 @subsection ARC Features
