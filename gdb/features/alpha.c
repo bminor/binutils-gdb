@@ -12,6 +12,33 @@ initialize_tdesc_alpha (void)
   struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result.get (), "org.gnu.gdb.alpha.core");
+  tdesc_type_with_fields *type_with_fields;
+  type_with_fields = tdesc_create_enum (feature, "dyn_rm_enum", 8);
+  tdesc_add_enum_value (type_with_fields, 0, "chop");
+  tdesc_add_enum_value (type_with_fields, 1, "-inf");
+  tdesc_add_enum_value (type_with_fields, 2, "norm");
+  tdesc_add_enum_value (type_with_fields, 3, "+inf");
+
+  type_with_fields = tdesc_create_flags (feature, "fpcr_flags", 8);
+  tdesc_add_flag (type_with_fields, 47, "DNOD");
+  tdesc_add_flag (type_with_fields, 48, "DNZ");
+  tdesc_add_flag (type_with_fields, 49, "INVD");
+  tdesc_add_flag (type_with_fields, 50, "DZED");
+  tdesc_add_flag (type_with_fields, 51, "OVFD");
+  tdesc_add_flag (type_with_fields, 52, "INV");
+  tdesc_add_flag (type_with_fields, 53, "DZE");
+  tdesc_add_flag (type_with_fields, 54, "OVF");
+  tdesc_add_flag (type_with_fields, 55, "UNF");
+  tdesc_add_flag (type_with_fields, 56, "INE");
+  tdesc_add_flag (type_with_fields, 57, "IOV");
+  tdesc_type *field_type;
+  field_type = tdesc_named_type (feature, "dyn_rm_enum");
+  tdesc_add_typed_bitfield (type_with_fields, "DYN_RM", 58, 59, field_type);
+  tdesc_add_flag (type_with_fields, 60, "UNDZ");
+  tdesc_add_flag (type_with_fields, 61, "UNFD");
+  tdesc_add_flag (type_with_fields, 62, "INED");
+  tdesc_add_flag (type_with_fields, 63, "SUM");
+
   tdesc_create_reg (feature, "v0", 0, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "t0", 1, 1, NULL, 64, "int64");
   tdesc_create_reg (feature, "t1", 2, 1, NULL, 64, "int64");
@@ -75,7 +102,7 @@ initialize_tdesc_alpha (void)
   tdesc_create_reg (feature, "f28", 60, 1, "float", 64, "float");
   tdesc_create_reg (feature, "f29", 61, 1, "float", 64, "float");
   tdesc_create_reg (feature, "f30", 62, 1, "float", 64, "float");
-  tdesc_create_reg (feature, "fpcr", 63, 1, "float", 64, "int64");
+  tdesc_create_reg (feature, "fpcr", 63, 1, "float", 64, "fpcr_flags");
   tdesc_create_reg (feature, "pc", 64, 1, NULL, 64, "code_ptr");
   tdesc_create_reg (feature, "", 65, 0, NULL, 64, "int64");
   tdesc_create_reg (feature, "unique", 66, 1, "system", 64, "int64");

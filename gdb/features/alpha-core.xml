@@ -7,6 +7,54 @@
 
 <!DOCTYPE feature SYSTEM "gdb-target.dtd">
 <feature name="org.gnu.gdb.alpha.core">
+  <!-- IEEE rounding mode values -->
+  <enum id="dyn_rm_enum" size="8">
+    <!-- Chopped rounding mode -->
+    <evalue name="chop" value="0"/>
+    <!-- Minus infinity -->
+    <evalue name="-inf" value="1"/>
+    <!-- Normal rounding -->
+    <evalue name="norm" value="2"/>
+    <!-- Plus infinity -->
+    <evalue name="+inf" value="3"/>
+  </enum>
+
+  <!-- Floating-Point Control Register Flags -->
+  <flags id="fpcr_flags" size="8">
+    <!-- Denormal Operand Exception Disable -->
+    <field name="DNOD"   start="47" end="47"/>
+    <!-- Denormal Operands to Zero -->
+    <field name="DNZ"    start="48" end="48"/>
+    <!-- Invalid Operation Disable -->
+    <field name="INVD"   start="49" end="49"/>
+    <!-- Division by Zero Disable -->
+    <field name="DZED"   start="50" end="50"/>
+    <!-- Overflow Disable -->
+    <field name="OVFD"   start="51" end="51"/>
+    <!-- Invalid Operation -->
+    <field name="INV"    start="52" end="52"/>
+    <!-- Division by Zero -->
+    <field name="DZE"    start="53" end="53"/>
+    <!-- Overflow -->
+    <field name="OVF"    start="54" end="54"/>
+    <!-- Underflow -->
+    <field name="UNF"    start="55" end="55"/>
+    <!-- Inexact Result -->
+    <field name="INE"    start="56" end="56"/>
+    <!-- Integer Overflow -->
+    <field name="IOV"    start="57" end="57"/>
+    <!-- Dynamic Rounding Mode -->
+    <field name="DYN_RM" start="58" end="59" type="dyn_rm_enum"/>
+    <!-- Underflow to Zero -->
+    <field name="UNDZ"   start="60" end="60"/>
+    <!-- Underflow Disable -->
+    <field name="UNFD"   start="61" end="61"/>
+    <!-- Inexact Disable -->
+    <field name="INED"   start="62" end="62"/>
+    <!-- Summary Bit -->
+    <field name="SUM"    start="63" end="63"/>
+  </flags>
+
   <!-- Integer Registers -->
   <reg name="v0"   bitsize="64" type="int64"/>
   <reg name="t0"   bitsize="64" type="int64"/>
@@ -75,7 +123,7 @@
   <reg name="f30" bitsize="64" type="float" group="float"/>
 
   <!-- Floating-Point Control Register -->
-  <reg name="fpcr" bitsize="64" type="int64" group="float"/>
+  <reg name="fpcr" bitsize="64" type="fpcr_flags" group="float"/>
 
   <!-- Program Counter -->
   <reg name="pc" bitsize="64" type="code_ptr"/>
