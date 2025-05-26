@@ -109,7 +109,7 @@ struct solib_ops
   void (*clear_so) (const solib &so);
 
   /* Free private data structures associated to PSPACE.  This method
-     should not free resources associated to individual so_list entries,
+     should not free resources associated to individual solib entries,
      those are cleared by the clear_so method.  */
   void (*clear_solib) (program_space *pspace);
 
@@ -136,7 +136,7 @@ struct solib_ops
   /* Find and open shared library binary file.  */
   gdb_bfd_ref_ptr (*bfd_open) (const char *pathname);
 
-  /* Given two so_list objects, one from the GDB thread list
+  /* Given two solib objects, one from the GDB thread list
      and another from the list returned by current_sos, return 1
      if they represent the same library.
      Falls back to using strcmp on ORIGINAL_NAME when set to nullptr.  */
@@ -199,7 +199,7 @@ struct solib_ops
   std::vector<const solib *> (*get_solibs_in_ns) (int ns);
 };
 
-/* A unique pointer to a so_list.  */
+/* A unique pointer to an solib.  */
 using solib_up = std::unique_ptr<solib>;
 
 /* Find main executable binary file.  */

@@ -1480,7 +1480,7 @@ reload_shared_libraries (const char *ignored, int from_tty,
   if (target_has_execution ())
     {
       /* Reset or free private data structures not associated with
-	 so_list entries.  */
+	 solib entries.  */
       if (ops->clear_solib != nullptr)
 	ops->clear_solib (current_program_space);
 

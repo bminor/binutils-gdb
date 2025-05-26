@@ -1046,10 +1046,10 @@ svr4_clear_so (const solib &so)
     li->l_addr_p = 0;
 }
 
-/* Create the so_list objects equivalent to the svr4_sos in SOS.  */
+/* Create the solib objects equivalent to the svr4_sos in SOS.  */
 
 static owning_intrusive_list<solib>
-so_list_from_svr4_sos (const std::vector<svr4_so> &sos)
+solib_from_svr4_sos (const std::vector<svr4_so> &sos)
 {
   owning_intrusive_list<solib> dst;
 
@@ -1176,11 +1176,10 @@ static const struct gdb_xml_element svr4_library_list_elements[] =
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 
-/* Parse qXfer:libraries:read packet into *SO_LIST_RETURN.  Return 1 if
+/* Parse qXfer:libraries:read packet into *LIST.
 
-   Return 0 if packet not supported, *SO_LIST_RETURN is not modified in such
-   case.  Return 1 if *SO_LIST_RETURN contains the library list, it may be
-   empty, caller is responsible for freeing all its entries.  */
+   Return 0 if packet not supported, *LIST is not modified in such case.
+   Return 1 if *LIST contains the library list.  */
 
 static int
 svr4_parse_libraries (const char *document, struct svr4_library_list *list)
@@ -1202,11 +1201,11 @@ svr4_parse_libraries (const char *document, struct svr4_library_list *list)
   return 0;
 }
 
-/* Attempt to get so_list from target via qXfer:libraries-svr4:read packet.
+/* Attempt to get the shared object list from target via
+   qXfer:libraries-svr4:read packet.
 
-   Return 0 if packet not supported, *SO_LIST_RETURN is not modified in such
-   case.  Return 1 if *SO_LIST_RETURN contains the library list, it may be
-   empty, caller is responsible for freeing all its entries.
+   Return 0 if packet not supported, *LIST is not modified in such case.
+   Return 1 if *LIST contains the library list.
 
    Note that ANNEX must be NULL if the remote does not explicitly allow
    qXfer:libraries-svr4:read packets with non-empty annexes.  Support for
@@ -1450,7 +1449,7 @@ svr4_collect_probes_sos (svr4_info *info)
   for (const auto &tuple : info->solib_lists)
     {
       const std::vector<svr4_so> &sos = tuple.second;
-      res.splice (so_list_from_svr4_sos (sos));
+      res.splice (solib_from_svr4_sos (sos));
     }
 
   return res;

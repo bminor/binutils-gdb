@@ -27,7 +27,7 @@ struct solib_ops;
 
 extern const solib_ops svr4_so_ops;
 
-/* Link map info to include in an allocated so_list entry.  */
+/* Link map info to include in an allocated solib entry.  */
 
 struct lm_info_svr4 final : public lm_info
 {

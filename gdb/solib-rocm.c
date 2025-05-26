@@ -202,10 +202,10 @@ rocm_solib_handle_event ()
   rocm_update_solib_list ();
 }
 
-/* Create so_list objects from rocm_so objects in SOS.  */
+/* Create solib objects from rocm_so objects in SOS.  */
 
 static owning_intrusive_list<solib>
-so_list_from_rocm_sos (const std::vector<rocm_so> &sos)
+solibs_from_rocm_sos (const std::vector<rocm_so> &sos)
 {
   owning_intrusive_list<solib> dst;
 
@@ -236,13 +236,13 @@ rocm_solib_current_sos ()
   if (dev_sos.empty ())
     return sos;
 
-  owning_intrusive_list<solib> dev_so_list = so_list_from_rocm_sos (dev_sos);
+  owning_intrusive_list<solib> dev_solibs = solibs_from_rocm_sos (dev_sos);
 
   if (sos.empty ())
-    return dev_so_list;
+    return dev_solibs;
 
   /* Append our libraries to the end of the list.  */
-  sos.splice (std::move (dev_so_list));
+  sos.splice (std::move (dev_solibs));
 
   return sos;
 }

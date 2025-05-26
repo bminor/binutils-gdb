@@ -194,7 +194,7 @@ struct ext_link_map
   ext_ptr l_next, l_prev;	/* struct link_map *l_next, *l_prev; */
 };
 
-/* Link map info to include in an allocated so_list entry.  */
+/* Link map info to include in an allocated solib entry.  */
 
 struct lm_info_frv final : public lm_info
 {

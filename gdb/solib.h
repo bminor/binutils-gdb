@@ -89,7 +89,8 @@ extern void no_shared_libraries (program_space *pspace);
    Extract the list of currently loaded shared objects from the
    inferior, and compare it with the list of shared objects in the
    current program space's list of shared libraries.  Edit
-   so_list_head to bring it in sync with the inferior's new list.
+   the current program space's solib list to bring it in sync with the
+   inferior's new list.
 
    If we notice that the inferior has unloaded some shared objects,
    free any symbolic info GDB had read about those shared objects.

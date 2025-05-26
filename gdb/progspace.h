@@ -231,7 +231,7 @@ struct program_space
      is outside all objfiles in this progspace.  */
   struct objfile *objfile_for_address (CORE_ADDR address);
 
-  /* Return the list of  all the solibs in this program space.  */
+  /* Return the list of all the solibs in this program space.  */
   owning_intrusive_list<solib> &solibs ()
   { return so_list; }
 

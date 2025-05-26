@@ -133,7 +133,7 @@ darwin_load_image_infos (struct darwin_info *info)
     (buf + 8 + ptr_type->length (), ptr_type);
 }
 
-/* Link map info to include in an allocated so_list entry.  */
+/* Link map info to include in an allocated solib entry.  */
 
 struct lm_info_darwin final : public lm_info
 {

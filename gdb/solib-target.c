@@ -30,7 +30,7 @@
 struct lm_info_target final : public lm_info
 {
   /* The library's name.  The name is normally kept in the struct
-     so_list; it is only here during XML parsing.  */
+     solib; it is only here during XML parsing.  */
   std::string name;
 
   /* The target can either specify segment bases or section bases, not
