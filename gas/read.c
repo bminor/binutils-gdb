@@ -667,12 +667,15 @@ start_bundle (void)
 {
   fragS *frag = frag_now;
 
-  frag_align_code (0, 0);
+  frag_align_code (bundle_align_p2, 0);
 
   while (frag->fr_type != rs_align_code)
     frag = frag->fr_next;
 
   gas_assert (frag != frag_now);
+
+  /* Set initial alignment to zero.  */
+  frag->fr_offset = 0;
 
   return frag;
 }
@@ -720,9 +723,9 @@ finish_bundle (fragS *frag, unsigned int size)
 
   if (size > 1)
     {
-      /* If there is more than a single byte, then we need to set up the
-	 alignment frag.  Otherwise we leave it at its initial state from
-	 calling frag_align_code (0, 0), so that it does nothing.  */
+      /* If there is more than a single byte, then we need to set up
+	 the alignment frag.  Otherwise we leave it at its initial
+	 state with zero alignment so that it does nothing.  */
       frag->fr_offset = bundle_align_p2;
       frag->fr_subtype = size - 1;
     }

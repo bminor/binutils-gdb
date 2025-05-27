@@ -45,7 +45,7 @@
 #define tc_fix_adjustable(FIXP) visium_fix_adjustable (FIXP)
 extern bool visium_fix_adjustable (struct fix *);
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE (4 + 1)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (4 + 1)
 #define HANDLE_ALIGN(SEC, FRAGP)		 \
   if ((FRAGP)->fr_type == rs_align_code) \
     visium_handle_align (FRAGP);

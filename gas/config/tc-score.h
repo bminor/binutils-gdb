@@ -30,7 +30,7 @@
 #define DIFF_EXPR_OK
 #define RELOC_EXPANSION_POSSIBLE
 #define MAX_RELOC_EXPANSION         2
-#define MAX_MEM_FOR_RS_ALIGN_CODE  (3 + 4)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (3 + 4)
 
 #define md_undefined_symbol(name)  NULL
 

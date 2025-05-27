@@ -359,7 +359,7 @@ frag_align_pattern (int alignment, const char *fill_pattern,
    the alignment code.  Needs to be large enough to hold any fixed size
    prologue plus the replicating portion.  */
 #ifndef MAX_MEM_FOR_RS_ALIGN_CODE
-# define MAX_MEM_FOR_RS_ALIGN_CODE 1
+# define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) 1
 #endif
 
 void
@@ -367,7 +367,7 @@ frag_align_code (int alignment, int max)
 {
   char *p;
 
-  p = frag_var (rs_align_code, MAX_MEM_FOR_RS_ALIGN_CODE, 1,
+  p = frag_var (rs_align_code, MAX_MEM_FOR_RS_ALIGN_CODE (alignment, max), 1,
 		(relax_substateT) max, (symbolS *) 0,
 		(offsetT) alignment, (char *) 0);
   *p = NOP_OPCODE;

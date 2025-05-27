@@ -65,7 +65,7 @@ extern long m32r_relax_frag (segT, fragS *, long);
 extern void m32r_handle_align (fragS *);
 #define HANDLE_ALIGN(s, f)  m32r_handle_align (f)
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE  (1 + 2 + 4)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (1 + 2 + 4)
 
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0

@@ -376,21 +376,43 @@ extern void i386_generate_nops (fragS *, char *, offsetT, int);
 #define md_generate_nops(frag, where, amount, control) \
   i386_generate_nops ((frag), (where), (amount), (control))
 
-#define HANDLE_ALIGN(sec, fragP)						\
+#define HANDLE_ALIGN(sec, fragP) \
 if (fragP->fr_type == rs_align_code) 					\
   {									\
     offsetT __count = (fragP->fr_next->fr_address			\
 		       - fragP->fr_address				\
 		       - fragP->fr_fix);				\
     if (__count > 0)							\
-      md_generate_nops (fragP, fragP->fr_literal + fragP->fr_fix,	\
-			__count, 0);					\
+      {									\
+	know (fragP->tc_frag_data.max_bytes >= (valueT) __count		\
+	      || (fragP->tc_frag_data.max_bytes				\
+		  >= MAX_MEM_FOR_RS_ALIGN_CODE (fragP->fr_offset,	\
+						fragP->fr_subtype)));	\
+	md_generate_nops (fragP, fragP->fr_literal + fragP->fr_fix,	\
+			  __count, 0);					\
+      }									\
   }
 /* Possible plain nop, branch, twice largest nop less 1.
    Yes, the branch might be one byte longer in CODE_16BIT but then the
    largest nop is smaller.  */
-#define MAX_MEM_FOR_RS_ALIGN_CODE (1 + 5 + 2 * 15 - 1)
-#define MAX_MEM_FOR_RS_SPACE_NOP MAX_MEM_FOR_RS_ALIGN_CODE
+#define MAX_MEM_FOR_RS_SPACE_NOP (1 + 5 + 2 * 15 - 1)
+
+static inline unsigned int
+max_mem_for_rs_align_code (unsigned int p2align, unsigned int max)
+{
+  unsigned int bytes = 1;
+  if (p2align != 0)
+    {
+      bytes = MAX_MEM_FOR_RS_SPACE_NOP;
+      if (bytes > (1ull << p2align) - 1)
+	bytes = (1ull << p2align) - 1;
+      if (max != 0 && bytes > max)
+	bytes = max;
+    }
+  return bytes;
+}
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) \
+  max_mem_for_rs_align_code (p2align, max)
 
 /* We want .cfi_* pseudo-ops for generating unwind info.  */
 #define TARGET_USE_CFIPOP 1

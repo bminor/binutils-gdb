@@ -106,7 +106,7 @@ extern const char *arc_target_format;
 /* [ ] is index operator.  */
 #define NEED_INDEX_OPERATOR
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE (1+2)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (1 + 2)
 
 /* HANDLE_ALIGN called after all the assembly has been done,
    so we can fill in all the rs_align_code type frags with

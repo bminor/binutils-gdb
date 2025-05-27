@@ -96,7 +96,7 @@ extern void rx_cons_fix_new (fragS *, int, int, expressionS *,
       goto around;							\
     }
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE 8
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) 8
 #define HANDLE_ALIGN(SEC, FRAG) rx_handle_align (FRAG)
 extern void rx_handle_align (fragS *);
 

@@ -78,7 +78,7 @@ extern void sparc_cons_align (int);
 #define HANDLE_ALIGN(sec, fragp) sparc_handle_align (fragp)
 extern void sparc_handle_align (struct frag *);
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE  (3 + 4 + 4)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (3 + 4 + 4)
 
 #define DIFF_EXPR_OK    /* foo-. gets turned into PC relative relocs */
 

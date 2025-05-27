@@ -111,7 +111,7 @@ extern void alpha_cons_align (int);
 #define HANDLE_ALIGN(sec, fragp) alpha_handle_align (fragp)
 extern void alpha_handle_align (struct frag *);
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE  (3 + 4 + 8)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (3 + 4 + 8)
 
 #ifdef OBJ_ECOFF
 #define tc_frob_file_before_adjust() alpha_frob_file_before_adjust ()

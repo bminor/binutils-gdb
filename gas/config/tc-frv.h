@@ -98,7 +98,7 @@ extern void frv_frob_file (void);
    code actually happens to run, but this is probably too much effort
    for little gain.  This code is not meant to be run anyway, so just
    emit nops.  */
-#define MAX_MEM_FOR_RS_ALIGN_CODE (3 + 4)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (3 + 4)
 #define HANDLE_ALIGN(SEC, FRAGP) do						\
   if ((FRAGP)->fr_type == rs_align_code) 				\
     {									\

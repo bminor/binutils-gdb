@@ -104,6 +104,6 @@ extern symbolS *section_symbol (asection *);
 extern void spu_handle_align (fragS *);
 #define HANDLE_ALIGN(sec, frag)  spu_handle_align (frag)
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE  (7 + 8)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (7 + 8)
 
 #endif /* TC_SPU */

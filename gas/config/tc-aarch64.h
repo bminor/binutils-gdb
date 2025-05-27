@@ -181,7 +181,7 @@ struct aarch64_frag_type
 #define HANDLE_ALIGN(sec, fragp) aarch64_handle_align (fragp)
 /* Max space for a rs_align_code fragment is 3 unaligned bytes
    (fr_fix) plus 4 bytes to contain the repeating NOP (fr_var).  */
-#define MAX_MEM_FOR_RS_ALIGN_CODE (3 + 4)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (3 + 4)
 
 #define md_do_align(N, FILL, LEN, MAX, LABEL)					\
   if (FILL == NULL && (N) != 0 && ! need_pass_2 && subseg_text_p (now_seg))	\

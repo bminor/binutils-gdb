@@ -56,7 +56,7 @@ extern int sh_optimize_expr (expressionS *, operatorT, expressionS *);
 #define HANDLE_ALIGN(sec, frag) sh_handle_align (frag)
 extern void sh_handle_align (fragS *);
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE (1 + 2)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (1 + 2)
 
 /* We need to force out some relocations when relaxing.  */
 #define TC_FORCE_RELOCATION(fix) sh_force_relocation (fix)

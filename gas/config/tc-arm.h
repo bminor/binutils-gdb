@@ -228,7 +228,7 @@ arm_min (int am_p1, int am_p2)
 #define TC_FRAG_INIT(fragp, max_bytes) arm_init_frag (fragp, max_bytes)
 #define TC_ALIGN_ZERO_IS_DEFAULT 1
 #define HANDLE_ALIGN(sec, fragp) arm_handle_align (fragp)
-#define MAX_MEM_FOR_RS_ALIGN_CODE (3 + 4)
+#define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (3 + 4)
 /* PR gas/19276: COFF/PE segment alignment is already handled in coff_frob_section().  */
 #ifndef TE_PE
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)				\
