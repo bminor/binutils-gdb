@@ -216,6 +216,22 @@ attribute::signed_constant () const
 
 /* See attribute.h.  */
 
+std::optional<LONGEST>
+attribute::confused_constant () const
+{
+  if (form_is_strictly_signed ())
+    return u.snd;
+  else if (form_is_constant ())
+    return u.unsnd;
+
+  /* For DW_FORM_data16 see attribute::form_is_constant.  */
+  complaint (_("Attribute value is not a constant (%s)"),
+	     dwarf_form_name (form));
+  return {};
+}
+
+/* See attribute.h.  */
+
 bool
 attribute::form_is_unsigned () const
 {

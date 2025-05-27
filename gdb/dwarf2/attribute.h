@@ -123,6 +123,25 @@ struct attribute
      empty value is returned.  */
   std::optional<LONGEST> signed_constant () const;
 
+  /* Return a signed constant value.  However, for narrow forms like
+     DW_FORM_data1, sign extension is not done.
+
+     DWARF advises compilers to generally use DW_FORM_[su]data to
+     avoid ambiguity.  However, both GCC and LLVM ignore this for
+     certain attributes.  Furthermore in DWARF, whether a narrower
+     form causes sign-extension depends on the attribute -- for
+     attributes that can only assume non-negative values, sign
+     extension is not done.
+
+     Unfortunately, both compilers also emit certain attributes in a
+     "confused" way, using DW_FORM_sdata for signed values, and
+     possibly choosing a narrow form (e.g., DW_FORM_data1) otherwise
+     -- assuming that sign-extension will not be done.
+
+     This method should only be called when this "confused" treatment
+     is necessary.  */
+  std::optional<LONGEST> confused_constant () const;
+
   /* Return non-zero if ATTR's value falls in the 'constant' class, or
      zero otherwise.  When this function returns true, you can apply
      the constant_value method to it.
