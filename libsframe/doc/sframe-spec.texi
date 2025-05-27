@@ -128,6 +128,17 @@ the data structure.
 @item
 The above two imply that each SFrame function descriptor entry has a fixed size
 of 20 bytes instead of its size of 17 bytes in SFrame format version 1.
+@item
+A new flag SFRAME_F_FDE_FUNC_START_ADDR_PCREL, released as an errata to SFrame
+Version 2, to indicate the encoding of the SFrame FDE function start address
+field:
+ @itemize @minus
+  @item if set, @code{sfde_func_start_address} field contains the offset in
+bytes to the start PC of the associated function from the field itself.
+  @item if unset, @code{sfde_func_start_address} field contains the offset in
+bytes to the start PC of the associated function from the start of the SFrame
+section.
+ @end itemize
 @end itemize
 
 SFrame version 1 is now obsolete and should not be used.
@@ -234,14 +245,20 @@ describe various section-wide properties.
 
 The following flags are currently defined.
 
-@multitable {@code{SFRAME_F_FRAME_POINTER}} {Versions} {Value} {Function Descriptor Entries}
-@headitem Flag @tab Versions @tab Value @tab Meaning
+@multitable {@code{SFRAME_F_FRAME_POINTER}} {Version} {Value} {Function Descriptor Entries are sorted}
+@headitem Flag @tab Version @tab Value @tab Meaning
 @tindex SFRAME_F_FDE_SORTED
 @item @code{SFRAME_F_FDE_SORTED} @tab All @tab 0x1 @tab Function Descriptor
 Entries are sorted on PC.
 @tindex SFRAME_F_FRAME_POINTER
 @item @code{SFRAME_F_FRAME_POINTER} @tab All @tab 0x2
 @tab All functions in the object file preserve frame pointer.
+@tindex SFRAME_F_FDE_FUNC_START_ADDR_PCREL
+@item @code{SFRAME_F_FDE_FUNC_START_ADDR_PCREL} @tab 2 @tab 0x4
+@tab The @code{sfde_func_start_address} field in the SFrame FDE is an offset in
+bytes to the function's start address, from the field itself.  If unset, the
+@code{sfde_func_start_address} field in the SFrame FDE is an offset in bytes to
+the function's start address, from the start of the SFrame section.
 @end multitable
 
 The purpose of SFRAME_F_FRAME_POINTER flag is to facilitate stack tracers to
