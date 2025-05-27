@@ -478,9 +478,11 @@ Following table describes each component of the SFrame FDE structure:
 @tab @code{int32_t}
 @tab @code{sfde_func_start_address}
 @tab Signed 32-bit integral field denoting the virtual memory address of the
-described function, for which the SFrame FDE applies.  The value encoded in
-the @code{sfde_func_start_address} field is the offset in bytes of the
-function's start address, from the SFrame section.
+described function, for which the SFrame FDE applies.  If the flag
+@code{SFRAME_F_FDE_FUNC_START_ADDR_PCREL}, @xref{SFrame Flags}, in the SFrame
+header is set, the value encoded in the @code{sfde_func_start_address} field is
+the offset in bytes to the function's start address, from the SFrame
+@code{sfde_func_start_address} field.
 
 @item 0x04
 @tab @code{uint32_t}
