@@ -2506,7 +2506,7 @@ write_dwarf_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
   /* FIXME: octets_per_byte.  */
   if (!bfd_set_section_contents (abfd, sec->output_section, contents,
 				 (file_ptr) sec->output_offset,
-				 sec->size))
+				 size))
     retval = false;
  out:
   free (contents);
