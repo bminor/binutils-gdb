@@ -561,18 +561,21 @@ struct ctf_archive_internal
   int ctfi_is_archive;
   int ctfi_unmap_on_close;
   ctf_dict_t *ctfi_dict;
-  struct ctf_archive *ctfi_archive;
-  ctf_dynhash_t *ctfi_dicts;	  /* Dicts we have opened and cached.  */
+  unsigned char *ctfi_archive;
+  struct ctf_archive *ctfi_hdr;	    /* Always malloced.  Header only.  */
+  size_t ctfi_hdr_len;
+  int ctfi_archive_v1;		    /* If set, this is a v1 archive.  */
+  ctf_dynhash_t *ctfi_dicts;	    /* Dicts we have opened and cached.  */
   ctf_dict_t *ctfi_crossdict_cache; /* Cross-dict caching.  */
-  ctf_dict_t **ctfi_symdicts;	  /* Array of index -> ctf_dict_t *.  */
+  ctf_dict_t **ctfi_symdicts;	    /* Array of index -> ctf_dict_t *.  */
   ctf_dynhash_t *ctfi_symnamedicts; /* Hash of name -> ctf_dict_t *.  */
   ctf_sect_t ctfi_symsect;
-  int ctfi_symsect_little_endian; /* -1 for unknown / do not set.  */
+  int ctfi_symsect_little_endian;   /* -1 for unknown / do not set.  */
   ctf_sect_t ctfi_strsect;
   int ctfi_free_symsect;
   int ctfi_free_strsect;
   void *ctfi_data;
-  bfd *ctfi_abfd;		  /* Optional source of section data.  */
+  bfd *ctfi_abfd;		    /* Optional source of section data.  */
   void (*ctfi_bfd_close) (struct ctf_archive_internal *);
 };
 
@@ -825,13 +828,12 @@ extern int ctf_preserialize (ctf_dict_t *fp, int force_ctf);
 extern void ctf_depreserialize (ctf_dict_t *fp);
 
 extern struct ctf_archive_internal *
-ctf_new_archive_internal (int is_archive, int unmap_on_close,
-			  struct ctf_archive *, ctf_dict_t *,
-			  const ctf_sect_t *symsect,
+ctf_new_archive_internal (int is_archive, int is_v1, int unmap_on_close,
+			  struct ctf_archive *, size_t,
+			  ctf_dict_t *, const ctf_sect_t *symsect,
 			  const ctf_sect_t *strsect, int *errp);
-extern struct ctf_archive *ctf_arc_open_internal (const char *, int *);
-extern void ctf_arc_close_internal (struct ctf_archive *);
-extern const ctf_preamble_t *ctf_arc_bufpreamble (const ctf_sect_t *);
+extern struct ctf_archive_internal *ctf_arc_open_internal (const char *, int *);
+extern const ctf_preamble_t *ctf_arc_bufpreamble_v1 (const ctf_sect_t *);
 extern void *ctf_set_open_errno (int *, int);
 extern int ctf_flip_header (void *, int, int);
 extern int ctf_flip (ctf_dict_t *, ctf_header_t *, unsigned char *,

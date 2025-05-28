@@ -1143,7 +1143,7 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 	 equal to the CU name.  We have to wrap it in an archive wrapper
 	 first.  */
 
-      if ((in_arc = ctf_new_archive_internal (0, 0, NULL, outputs[0], NULL,
+      if ((in_arc = ctf_new_archive_internal (0, 0, 0, NULL, 0, outputs[0], NULL,
 					      NULL, &err)) == NULL)
 	{
 	  ctf_set_errno (fp, err);
