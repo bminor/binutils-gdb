@@ -3019,6 +3019,11 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
   int len;
   int first_file = DWARF2_LINE_VERSION > 4 ? 0 : 1;
 
+  if (files_in_use == 0)
+    abort ();
+  if (first_file == 0 && files[first_file].filename == NULL)
+    first_file = 1;
+
   subseg_set (str_seg, 0);
 
   /* DW_AT_name.  We don't have the actual file name that was present
@@ -3026,8 +3031,7 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
      We're not supposed to get called unless at least one line number
      entry was emitted, so this should always be defined.  */
   *name_sym = symbol_temp_new_now_octets ();
-  if (files_in_use == 0)
-    abort ();
+
   if (files[first_file].dir)
     {
       char *dirname = remap_debug_filename (dirs[files[first_file].dir]);
