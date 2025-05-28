@@ -4206,12 +4206,12 @@ disassemble_data (bfd *abfd)
 	abfd->arch_info = inf;
     }
 
+  const struct bfd_target *old_xvec = NULL;
   if (endian != BFD_ENDIAN_UNKNOWN)
     {
-      struct bfd_target *xvec;
-
-      xvec = (struct bfd_target *) xmalloc (sizeof (struct bfd_target));
-      memcpy (xvec, abfd->xvec, sizeof (struct bfd_target));
+      struct bfd_target *xvec = xmalloc (sizeof (*xvec));
+      old_xvec = abfd->xvec;
+      memcpy (xvec, old_xvec, sizeof (*xvec));
       xvec->byteorder = endian;
       abfd->xvec = xvec;
     }
@@ -4225,8 +4225,7 @@ disassemble_data (bfd *abfd)
       non_fatal (_("can't disassemble for architecture %s\n"),
 		 bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
       exit_status = 1;
-      free (sorted_syms);
-      return;
+      goto out;
     }
 
   disasm_info.flavour = bfd_get_flavour (abfd);
@@ -4280,8 +4279,15 @@ disassemble_data (bfd *abfd)
 
   free (disasm_info.dynrelbuf);
   disasm_info.dynrelbuf = NULL;
-  free (sorted_syms);
   disassemble_free_target (&disasm_info);
+ out:
+  free (sorted_syms);
+  sorted_syms = NULL;
+  if (old_xvec)
+    {
+      free ((void *) abfd->xvec);
+      abfd->xvec = old_xvec;
+    }
 }
 
 static bool
