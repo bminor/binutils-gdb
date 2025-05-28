@@ -2552,7 +2552,13 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
 
       howto = elf_x86_64_rtype_to_howto (abfd, r_type);
-      if (rel->r_offset + bfd_get_reloc_size (howto) > sec->size)
+      if (howto == NULL)
+	{
+	  _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			      abfd, r_type);
+	  goto error_return;
+	}
+      if (!bfd_reloc_offset_in_range (howto, abfd, sec, rel->r_offset))
 	{
 	  /* xgettext:c-format */
 	  _bfd_error_handler
