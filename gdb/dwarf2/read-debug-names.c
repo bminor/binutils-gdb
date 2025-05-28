@@ -416,15 +416,11 @@ cooked_index_worker_debug_names::do_reading ()
 {
   complaint_interceptor complaint_handler;
 
-  try
+  /* Arbitrarily put all exceptions into the first result.  */
+  m_map.indices[0].catch_error ([&] ()
     {
       m_map.scan_all_names ();
-    }
-  catch (gdb_exception &exc)
-    {
-      /* Arbitrarily put all exceptions into the first result.  */
-      m_map.indices[0].note_error (std::move (exc));
-    }
+    });
 
   bool first = true;
   for (auto &iter : m_map.indices)

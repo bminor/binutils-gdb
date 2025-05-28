@@ -107,11 +107,20 @@ public:
     return &m_parent_map;
   }
 
-  /* Add an exception to the list of exceptions caught while reading.
-     These are passed forward and printed by the main thread.  */
-  void note_error (gdb_exception &&except)
+  /* Catch exceptions from calling F (), and add them to the list of caught
+     exceptions.  These are passed forward and printed by the main thread.  */
+  template <typename F>
+  void
+  catch_error (F &&f)
   {
-    m_exceptions.push_back (std::move (except));
+    try
+      {
+	f ();
+      }
+    catch (gdb_exception &ex)
+      {
+	m_exceptions.push_back (std::move (ex));
+      }
   }
 
   /* Called when the thread using this object is done with its work.

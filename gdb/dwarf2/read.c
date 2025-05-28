@@ -3425,7 +3425,10 @@ cooked_index_worker_debug_info::process_type_units
 			  abbrev_table.get (), nullptr, false,
 			  language_minimal);
       if (!reader.is_dummy ())
-	process_type_unit (&reader, storage);
+	storage->catch_error ([&] ()
+	  {
+	    process_type_unit (&reader, storage);
+	  });
     }
 }
 
@@ -3467,7 +3470,10 @@ cooked_index_worker_debug_info::process_skeletonless_type_units
   if (per_objfile->per_bfd->dwp_file == nullptr)
     for (const dwo_file_up &file : per_objfile->per_bfd->dwo_files)
       for (const dwo_unit_up &unit : file->tus)
-	process_skeletonless_type_unit (unit.get (), per_objfile, storage);
+	storage->catch_error ([&] ()
+	  {
+	    process_skeletonless_type_unit (unit.get (), per_objfile, storage);
+	  });
 }
 
 void
@@ -3486,14 +3492,10 @@ cooked_index_worker_debug_info::process_units (size_t task_number,
     {
       dwarf2_per_cu *per_cu = inner->get ();
 
-      try
+      thread_storage.catch_error ([&] ()
 	{
 	  process_unit (per_cu, m_per_objfile, &thread_storage);
-	}
-      catch (gdb_exception &except)
-	{
-	  thread_storage.note_error (std::move (except));
-	}
+	});
     }
 
   thread_storage.done_reading (complaint_handler.release ());
