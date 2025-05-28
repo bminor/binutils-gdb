@@ -4163,6 +4163,20 @@ riscv_gnu_triplet_regexp (struct gdbarch *gdbarch)
   return "riscv(32|64)?";
 }
 
+/* Implement the "print_insn" gdbarch method.  */
+
+static int
+riscv_print_insn (bfd_vma addr, struct disassemble_info *info)
+{
+  /* Initialize the BFD section to enable ISA string detection depending on the
+     object in scope.  */
+  struct obj_section *s = find_pc_section (addr);
+  if (s != nullptr)
+    info->section = s->the_bfd_section;
+
+  return default_print_insn (addr, info);
+}
+
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
    gdbarch.h.  */
 
@@ -4428,6 +4442,9 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_valid_disassembler_options (gdbarch,
 					  disassembler_options_riscv ());
   set_gdbarch_disassembler_options (gdbarch, &riscv_disassembler_options);
+
+  /* Disassembler print_insn.  */
+  set_gdbarch_print_insn (gdbarch, riscv_print_insn);
 
   /* SystemTap Support.  */
   set_gdbarch_stap_is_single_operand (gdbarch, riscv_stap_is_single_operand);
