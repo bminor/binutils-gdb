@@ -621,7 +621,7 @@ struct ctf_next
     void **ctn_hash_slot;
   } u;
 
-  /* This union is of various sorts of dict we can iterate over: currently
+  /* This union is of various sorts of entity we can iterate over: currently
      archives, dictionaries, dynhashes, and dynsets.  ctn_fp is non-const
      because we need to set errors on it.  */
 
