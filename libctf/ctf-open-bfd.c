@@ -119,9 +119,20 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
       bfderrstr = N_("CTF section is NULL");
       goto err;
     }
-  preamble = ctf_arc_bufpreamble (ctfsect);
 
-  if (preamble->ctp_flags & CTF_F_DYNSTR)
+  /* v3 dicts may cite the symtab or the dynsymtab, without using sh_link to
+     indicate which: pick the right one.  v4 dicts always use the dynsymtab (for
+     now).  */
+
+  errno = 0;
+  preamble = ctf_arc_bufpreamble_v1 (ctfsect);
+  if (!preamble && errno == EOVERFLOW)
+    {
+      bfderrstr = N_("section too short to be CTF or BTF");
+      goto err;
+    }
+
+  if (!preamble || (preamble && preamble->ctp_flags & CTF_F_DYNSTR))
     {
       symhdr = &elf_tdata (abfd)->dynsymtab_hdr;
       strtab_name = ".dynstr";
@@ -301,21 +312,16 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
       fp->ctf_data_mmapped = data;
       fp->ctf_data_mmapped_len = (size_t) st.st_size;
 
-      return ctf_new_archive_internal (0, 1, NULL, fp, NULL, NULL, errp);
+      return ctf_new_archive_internal (0, 0, 1, NULL, 0, fp, NULL, NULL, errp);
     }
 
   if ((nbytes = ctf_pread (fd, &arc_magic, sizeof (arc_magic), 0)) <= 0)
     return (ctf_set_open_errno (errp, nbytes < 0 ? errno : ECTF_FMT));
 
-  if ((size_t) nbytes >= sizeof (uint64_t) && le64toh (arc_magic) == CTFA_MAGIC)
-    {
-      struct ctf_archive *arc;
-
-      if ((arc = ctf_arc_open_internal (filename, errp)) == NULL)
-	return NULL;			/* errno is set for us.  */
-
-      return ctf_new_archive_internal (1, 1, arc, NULL, NULL, NULL, errp);
-    }
+  if ((size_t) nbytes >= sizeof (uint64_t)
+      && (arc_magic == CTFA_MAGIC || bswap_64 (arc_magic) == CTFA_MAGIC
+	  || le64toh (arc_magic) == CTFA_V1_MAGIC))
+      return ctf_arc_open_internal (filename, errp);
 
   /* Attempt to open the file with BFD.  We must dup the fd first, since bfd
      takes ownership of the passed fd.  */

@@ -829,18 +829,74 @@ typedef struct ctf_enum64
    greater care taken with integral types.  All CTF files in an archive
    must have the same data model.  (This is not validated.)
 
-   All integers in this structure are stored in little-endian byte order.
+   All integers in the ctfa_archive_v1 structure are stored in little-endian byte
+   order.
 
-   The code relies on the fact that everything in this header is a uint64_t
-   and thus the header needs no padding (in particular, that no padding is
-   needed between ctfa_ctfs and the unnamed ctfa_archive_modent array
-   that follows it).
+   The generation code relies on the fact that everything in this header is a
+   uint64_t and thus the header needs no padding (in particular, that no padding
+   is needed between ctfa_ctfs and the unnamed ctfa_modent array that follows
+   it.  However, this is only an assumption of the generation code: the
+   read-side code in libctf and the file format do not have any such
+   requirements).
+
+   The shared properties and CTF dict storage have the same (length-prepended)
+   format and identical string/value mapping via struct ctf_archive_modent, but
+   are pointed to by different header fields: ctfa_modents for CTFs,
+   ctfa_propents for properties: their names are intermingled in ctfa_names but
+   the CTF dicts and property values are stashed in distinct tables, ctfa_ctfs
+   and ctfa_prop_values.  Implementations may interpret properties however they
+   wish, and their presence must not be mandatory (though dictionaries may be
+   modified given the presence of a particular property, making use of that
+   property mandatory for reading those dicts: the intent here is to allow
+   optional movement of shared header fields into the shared properties table in
+   the future.  For now, only parent_name=... is present.)
+
+   In format v1, the dict size uint64_t prepended to dictionaries is one
+   uint64_t too long: it contains the length of the size byte too.  In dict v2,
+   this is corrected (at open time, libctf fixes up v1 dicts too).
 
    This is *not* the same as the data structure returned by the ctf_arc_*()
    functions:  this is the low-level on-disk representation.  */
 
-#define CTFA_MAGIC 0x8b47f2a4d7623eeb	/* Random.  */
+#define CTFA_MAGIC 0x8b47f2a4d7623eec	/* V1, below, incremented.  */
 struct ctf_archive
+{
+  /* Magic number.  (In loaded files, overwritten with the file size
+     so ctf_arc_close() knows how much to munmap()).  */
+  uint64_t ctfa_magic;
+
+  /* CTF data model.  */
+  uint64_t ctfa_model;
+
+  /* Number of CTF dicts in the archive.  */
+  uint64_t ctfa_ndicts;
+
+  /* Number of shared properties.  */
+  uint64_t ctfa_nprops;
+
+  /* Offset of the name table, used for both CTF member names and property
+     names.  */
+  uint64_t ctfa_names;
+
+  /* Offset of the CTF table.  Each element starts with a size (a little-
+     endian uint64_t) then a ctf_dict_t of that size.  */
+  uint64_t ctfa_ctfs;
+
+  /* Offset of the shared properties value table: identical format, except the
+     size is followed by an arbitrary (property-dependent) binary blob.  */
+  uint64_t ctfa_prop_values;
+
+  /* Offset of the modent table mapping names to CTFs.  */
+  uint64_t ctfa_modents;
+
+  /* Offset of the modent table mapping names to properties.  Ignored if
+     nprops is 0.  */
+  uint64_t ctfa_propents;
+};
+
+#define CTFA_V1_MAGIC 0x8b47f2a4d7623eeb /* Random.  */
+
+struct ctf_archive_v1
 {
   /* Magic number.  (In loaded files, overwritten with the file size
      so ctf_arc_close() knows how much to munmap()).  */
@@ -860,9 +916,16 @@ struct ctf_archive
   uint64_t ctfa_ctfs;
 };
 
-/* An array of ctfa_ndicts of this structure lies at
-   ctf_archive[sizeof(struct ctf_archive)] and gives the ctfa_ctfs or
-   ctfa_names-relative offsets of each name or ctf_dict_t.  */
+/* An array of ctfa_ndicts of this structure lies at the offset given by
+   ctfa_modents (or, in v1, at ctf_archive[sizeof(struct ctf_archive)]) and gives
+   the ctfa_ctfs or ctfa_names-relative offsets of each name or ctf_dict_t.
+
+   Another array of ctfa_nprops of this structure lies at the ctfa_propents
+   offset: for this, the ctf_offset is the ctfa_propents-relative offset of
+   proprty values.
+
+   Both property values and CTFs are prepended by a uint64 giving their length.
+   The names are just a strtab (\0-separated).  */
 
 typedef struct ctf_archive_modent
 {
