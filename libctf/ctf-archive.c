@@ -24,6 +24,7 @@
 #include "ctf-endian.h"
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -41,6 +42,16 @@
 static off_t arc_write_one_ctf (ctf_dict_t * f, int fd, size_t threshold);
 static off_t arc_write_one (int fd, const void *item, size_t size, int align);
 static int ctf_arc_value_write (int fd, const void *, size_t, uint64_t *start_off);
+static int ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
+		      unsigned char *ents, uint64_t base, size_t arc_len,
+		      int *errp);
+static int ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t,
+				    int *errp);
+static int ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
+					struct ctf_archive *arc_hdr,
+					unsigned char *arc_bytes,
+					uint64_t ctf_base, size_t ctf_els,
+					size_t arc_len, int fixup_v1, int *errp);
 static ctf_dict_t *ctf_dict_open_by_offset (const struct ctf_archive_internal *,
 					    const ctf_sect_t *symsect,
 					    const ctf_sect_t *strsect,
@@ -508,6 +519,332 @@ search_modent_by_name (const void *key, const void *ent, void *arg)
   return strcmp (k, &search_nametbl[v->name_offset]);
 }
 
+/* Byteswap an archive (but not its members) if necessary.  After this,
+   the entire archive is in native-endian byte order.  */
+
+static int
+ctf_arc_flip_archive (struct ctf_archive_internal *arci, size_t arc_len,
+		      int *errp)
+{
+  struct ctf_archive *hdr = arci->ctfi_hdr;
+  int needs_flipping = 0;
+  ctf_archive_modent_t *modent;
+  unsigned char *arc_bytes = arci->ctfi_archive;
+  unsigned char *ents;
+
+  if (bswap_64 (hdr->ctfa_magic) == CTFA_MAGIC)
+    needs_flipping = 1;
+  else if (arci->ctfi_archive_v1
+	   && bswap_64 (hdr->ctfa_magic) == CTFA_V1_MAGIC)
+    needs_flipping = 1;
+
+  if (!needs_flipping)
+    return 0;
+
+  /* Headers.  Some headers are v2-only.  The layout has already been
+     adjusted to be v2-compatible.  */
+
+  swap_thing (hdr->ctfa_magic);
+  swap_thing (hdr->ctfa_model);
+  swap_thing (hdr->ctfa_ndicts);
+  swap_thing (hdr->ctfa_names);
+  swap_thing (hdr->ctfa_ctfs);
+
+  if (!arci->ctfi_archive_v1)
+    {
+      swap_thing (hdr->ctfa_nprops);
+      swap_thing (hdr->ctfa_prop_values);
+      swap_thing (hdr->ctfa_modents);
+      swap_thing (hdr->ctfa_propents);
+    }
+
+  /* Swap the tables and the sizes of things therein.
+
+     ctfa_modents for v1 is populated by ctf_new_archive_internal, below.
+
+     We must range-check first to be sure that the modent arrays are not out
+     of range.  */
+
+  if (ctf_arc_range_check_hdr (arci, arc_len, errp) < 0)
+    return -1;					/* errp is set for us.  */
+
+  modent = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->ctfa_modents);
+  ents = (unsigned char *) (arc_bytes + arci->ctfi_hdr->ctfa_ctfs);
+  if (ctf_arc_flip_modents (modent, arci->ctfi_hdr->ctfa_ndicts, ents,
+			    arci->ctfi_hdr->ctfa_ctfs, arc_len, errp) < 0)
+    return -1;					/* errp is set for us.  */
+
+  modent = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->ctfa_propents);
+  ents = (unsigned char *) (arc_bytes + arci->ctfi_hdr->ctfa_prop_values);
+  if (ctf_arc_flip_modents (modent, arci->ctfi_hdr->ctfa_nprops, ents,
+			    arci->ctfi_hdr->ctfa_prop_values, arc_len, errp) < 0)
+    return -1;					/* errp is set for us.  */
+
+  return 0;
+}
+
+/* Byteswap a modent table with offsets rooted at BASE, including the size
+   entries preceding the elements themselves.  */
+
+static int
+ctf_arc_flip_modents (ctf_archive_modent_t *modent, uint64_t els,
+		      unsigned char *ents, uint64_t base, size_t arc_len,
+		      int *errp)
+{
+  uint64_t i;
+
+  for (i = 0; i < els; i++)
+    {
+      uint64_t *ctf_size;
+
+      swap_thing (modent[i].name_offset);
+      swap_thing (modent[i].ctf_offset);
+
+      if (base + modent[i].ctf_offset + sizeof (uint64_t) > arc_len)
+	{
+	  ctf_err_warn (NULL, 0, EOVERFLOW,
+			"CTF archive overflow in CTF offset for member %" PRIu64
+		       " of %zi + %zi", i, base, modent[i].ctf_offset);
+	  ctf_set_open_errno (errp, EOVERFLOW);
+	  return -1;
+	}
+
+      ctf_size = (uint64_t *) (ents + modent[i].ctf_offset);
+      swap_thing (*ctf_size);
+    }
+
+  return 0;
+}
+
+/* Range- and overlap-check the archive header.  At this stage, only the
+   modent and name offsets, and overlaps of the starts of tables, are
+   checkable.  The rest gets checked further down, in
+   ctf_arc_range_check.  */
+
+static int
+ctf_arc_range_check_hdr (struct ctf_archive_internal *arci, size_t arc_len,
+			 int *errp)
+{
+  const char *err;
+  uint64_t ndict_end, nprop_end;
+
+  ndict_end = arci->ctfi_hdr->ctfa_modents +
+    (sizeof (ctf_archive_modent_t) * arci->ctfi_hdr->ctfa_ndicts);
+
+  if (ndict_end > arc_len)
+    {
+      ctf_err_warn (NULL, 0, EOVERFLOW, "CTF archive overflow: archive is %zi bytes, but ctfs end at %zi + (%zi * %zi) = %zi",
+		   arc_len, arci->ctfi_hdr->ctfa_modents,
+		   sizeof (ctf_archive_modent_t),
+		   arci->ctfi_hdr->ctfa_ndicts, ndict_end);
+
+      ctf_set_open_errno (errp, EOVERFLOW);
+      return -1;
+    }
+
+  if ((arci->ctfi_hdr->ctfa_modents < arci->ctfi_hdr->ctfa_names
+       && ndict_end > arci->ctfi_hdr->ctfa_names)
+      || (arci->ctfi_hdr->ctfa_modents < arci->ctfi_hdr->ctfa_ctfs
+	  && ndict_end > arci->ctfi_hdr->ctfa_ctfs)
+      || (arci->ctfi_hdr->ctfa_modents < arci->ctfi_hdr->ctfa_prop_values
+	  && ndict_end > arci->ctfi_hdr->ctfa_prop_values)
+      || (arci->ctfi_hdr->ctfa_modents < arci->ctfi_hdr->ctfa_propents
+	  && ndict_end > arci->ctfi_hdr->ctfa_propents)
+      || arci->ctfi_hdr->ctfa_names == arci->ctfi_hdr->ctfa_ctfs
+      || (arci->ctfi_hdr->ctfa_names == arci->ctfi_hdr->ctfa_prop_values
+	  && arci->ctfi_hdr->ctfa_prop_values != 0)
+      || arci->ctfi_hdr->ctfa_names == arci->ctfi_hdr->ctfa_modents
+      || (arci->ctfi_hdr->ctfa_names == arci->ctfi_hdr->ctfa_propents
+	  && arci->ctfi_hdr->ctfa_propents != 0)
+      || (arci->ctfi_hdr->ctfa_ctfs == arci->ctfi_hdr->ctfa_prop_values
+	  && arci->ctfi_hdr->ctfa_prop_values != 0)
+      || arci->ctfi_hdr->ctfa_ctfs == arci->ctfi_hdr->ctfa_modents
+      || (arci->ctfi_hdr->ctfa_ctfs == arci->ctfi_hdr->ctfa_propents
+	  && arci->ctfi_hdr->ctfa_propents != 0)
+      || (arci->ctfi_hdr->ctfa_prop_values != 0
+	  && arci->ctfi_hdr->ctfa_prop_values == arci->ctfi_hdr->ctfa_modents
+	  && arci->ctfi_hdr->ctfa_prop_values == arci->ctfi_hdr->ctfa_propents)
+      || (arci->ctfi_hdr->ctfa_propents != 0
+	  && arci->ctfi_hdr->ctfa_modents == arci->ctfi_hdr->ctfa_propents))
+    {
+      err = "ctf table";
+      goto err;
+    }
+
+  nprop_end = arci->ctfi_hdr->ctfa_propents +
+    (sizeof (ctf_archive_modent_t) * arci->ctfi_hdr->ctfa_nprops);
+
+  if (nprop_end > arc_len)
+    {
+      err = "props table";
+      goto err;
+    }
+
+  if (arci->ctfi_hdr->ctfa_names > arc_len)
+    {
+      err = "name table";
+      goto err;
+    }
+
+  if (arci->ctfi_hdr->ctfa_ctfs > arc_len)
+    {
+      err = "member table";
+      goto err;
+    }
+
+  return 0;
+
+ err:
+  ctf_err_warn (NULL, 0, EOVERFLOW, "CTF archive overflow: overlapping %s in archive",
+	       err);
+  ctf_set_open_errno (errp, EOVERFLOW);
+  return -1;
+}
+
+/* Range check the archive modent tables.  By this stage the tables are all
+   in native endianness.  */
+
+static int
+ctf_arc_range_check (struct ctf_archive_internal *arci, size_t arc_len,
+		     int *errp)
+{
+  unsigned char *arc_bytes = arci->ctfi_archive;
+  ctf_archive_modent_t *modents;
+
+  if (ctf_arc_range_check_hdr (arci, arc_len, errp) < 0)
+    return -1;					/* errno is set for us.  */
+
+  modents = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->ctfa_modents);
+
+  if (ctf_arc_range_check_modents (modents, arci->ctfi_hdr, arc_bytes,
+				   arci->ctfi_hdr->ctfa_ctfs,
+				   arci->ctfi_hdr->ctfa_ndicts, arc_len,
+				   arci->ctfi_archive_v1, errp) < 0)
+    return -1;					/* errno is set for us.  */
+
+  modents = (ctf_archive_modent_t *) (arc_bytes + arci->ctfi_hdr->ctfa_propents);
+
+  if (ctf_arc_range_check_modents (modents, arci->ctfi_hdr, arc_bytes,
+				   arci->ctfi_hdr->ctfa_prop_values,
+				   arci->ctfi_hdr->ctfa_nprops, arc_len,
+				   0, errp) < 0)
+    return -1;					/* errno is set for us.  */
+
+  return 0;
+}
+
+/* Find the closest section to BASE that is located after it.  If none, the
+   archive length is returned.  */
+
+static uint64_t
+ctf_arc_closest_section (struct ctf_archive *arc_hdr, uint64_t base,
+			 size_t arc_len)
+{
+  uint64_t closest = arc_len;
+
+  if (arc_hdr->ctfa_names > base
+      && arc_hdr->ctfa_ctfs < closest)
+    closest = arc_hdr->ctfa_names;
+
+  if (arc_hdr->ctfa_ctfs > base
+      && arc_hdr->ctfa_ctfs < closest)
+    closest = arc_hdr->ctfa_ctfs;
+
+  if (arc_hdr->ctfa_prop_values > base
+      && arc_hdr->ctfa_prop_values < closest)
+    closest = arc_hdr->ctfa_prop_values;
+
+  if (arc_hdr->ctfa_modents > base
+      && arc_hdr->ctfa_modents < closest)
+    closest = arc_hdr->ctfa_modents;
+
+  if (arc_hdr->ctfa_propents > base
+      && arc_hdr->ctfa_propents < closest)
+    closest = arc_hdr->ctfa_propents;
+
+  return closest;
+}
+
+/* Range-check a single modent array.  */
+
+static int
+ctf_arc_range_check_modents (ctf_archive_modent_t *modent,
+			     struct ctf_archive *arc_hdr,
+			     unsigned char *arc_bytes,
+			     uint64_t ctf_base, size_t ctf_els, size_t arc_len,
+			     int fixup_v1, int *errp)
+{
+  uint64_t i;
+  char *names = (char *) arc_bytes + arc_hdr->ctfa_names;
+  uint64_t name_base = arc_hdr->ctfa_names;
+  unsigned char *ctfs = (unsigned char *) arc_bytes + ctf_base;
+  size_t closest_names_offset, closest_ctfs_offset;
+
+  /* Figure out the offset of the thing that is closest to, but after the
+     end of, the names section, or the end of the file if none.  */
+
+  closest_names_offset = arc_len;
+
+  closest_names_offset = ctf_arc_closest_section (arc_hdr, name_base, arc_len);
+  closest_ctfs_offset = ctf_arc_closest_section (arc_hdr, ctf_base, arc_len);
+
+  for (i = 0; i < ctf_els; i++)
+    {
+      uint64_t name_off = modent[i].name_offset + name_base;
+      uint64_t ctf_off = modent[i].ctf_offset + ctf_base;
+      ssize_t space_left;
+      uint64_t *ctf_size;
+
+      /* We already checked for modent table overflow and overlap, but we
+	 cannot check for name table overlap except member-by-member.  We
+	 have to check the name offset first to make sure that strlen()ing
+	 the string is safe, then check that.  */
+
+      if (name_off > closest_names_offset
+	  || (ctf_off + sizeof (uint64_t) > closest_ctfs_offset))
+	goto err;
+
+      space_left = closest_names_offset - name_off;
+
+      if (space_left < 0)
+	goto err;
+
+      if (strnlen (&names[modent[i].name_offset], space_left)
+	  == (size_t) space_left)
+	goto err;
+
+      /* Checking the CTF offset is simpler: we already checked that the
+	 actual size didn't overflow, so now we just need to make sure that
+	 the entire dict (or, depending on the call, property value) fits.  */
+
+      ctf_size = (uint64_t *) (ctfs + modent[i].ctf_offset);
+
+      /* If this was a v1 archive, the size is actually wrong: it includes
+	 the size of the size uint64_t itself, so all archive opens opened
+	 one uint64_t too much.  Fix this up, since the values are otherwise
+	 valid.  If the ctf_size is zero in v1, ironically, we know this is
+	 an underflow! */
+
+      if (fixup_v1)
+	{
+	  if (*ctf_size < sizeof (uint64_t))
+	    goto err;
+	  *ctf_size -= sizeof (uint64_t);
+	}
+
+      if (ctf_off + sizeof (uint64_t) + *ctf_size > closest_ctfs_offset)
+	goto err;
+    }
+
+  return 0;
+
+err:
+  ctf_err_warn (NULL, 0, EOVERFLOW, "CTF archive overflow: modent array element %" PRIu64
+		" overflow/overlap", i);
+  ctf_set_open_errno (errp, EOVERFLOW);
+  return -1;
+}
+
 /* Make a new struct ctf_archive_internal wrapper for a ctf_archive or a
    ctf_dict: endian-swap the archive header as necessary, and check all its
    offsets for validity.  Close ARC and/or FP on error.  Arrange to free or
@@ -537,6 +874,14 @@ ctf_new_archive_internal (int is_archive, int is_v1, int unmap_on_close,
 	arci->ctfi_hdr_len = sizeof (struct ctf_archive_v1);
       else
 	arci->ctfi_hdr_len = sizeof (struct ctf_archive);
+
+      if (arc_len < arci->ctfi_hdr_len)
+	{
+	  errno = EOVERFLOW;
+	  ctf_err_warn (NULL, 0, EOVERFLOW, "CTF archive underflow: archive is %zi bytes, shorter than the archive header length of %zi bytes\n",
+			arc_len, arci->ctfi_hdr_len);
+	  goto err;
+	}
 
       if ((arci->ctfi_hdr = malloc (sizeof (struct ctf_archive))) == NULL)
 	goto err;
