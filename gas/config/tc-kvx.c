@@ -2355,16 +2355,11 @@ kvx_endp (int start ATTRIBUTE_UNUSED)
 	if (exp.X_op == O_constant)
 	  {
 	    S_SET_SIZE (last_proc_sym, exp.X_add_number);
-	    if (symbol_get_obj (last_proc_sym)->size)
-	      {
-		xfree (symbol_get_obj (last_proc_sym)->size);
-		symbol_get_obj (last_proc_sym)->size = NULL;
-	      }
+	    symbol_get_obj (last_proc_sym)->size = NULL;
 	  }
 	else
 	  {
-	    symbol_get_obj (last_proc_sym)->size =
-	      (expressionS *) xmalloc (sizeof (expressionS));
+	    symbol_get_obj (last_proc_sym)->size = notes_alloc (sizeof (exp));
 	    *symbol_get_obj (last_proc_sym)->size = exp;
 	  }
 

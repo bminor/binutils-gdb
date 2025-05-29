@@ -2273,39 +2273,25 @@ elf_obj_symbol_new_hook (symbolS *symbolP)
 #endif
 }
 
-/* Deduplicate size expressions.  We might get into trouble with
-   multiple freeing or use after free if we leave them pointing to the
-   same expressionS.  */
-
+/* If size is unset, copy size from src.  Because we don't track whether
+   .size has been used, we can't differentiate .size dest, 0 from the case
+   where dest's size is unset.  */
 void
-elf_obj_symbol_clone_hook (symbolS *newsym, symbolS *orgsym ATTRIBUTE_UNUSED)
+elf_copy_symbol_size (symbolS *dest, symbolS *src)
 {
-  struct elf_obj_sy *newelf = symbol_get_obj (newsym);
-  if (newelf->size)
+  struct elf_obj_sy *srcelf = symbol_get_obj (src);
+  struct elf_obj_sy *destelf = symbol_get_obj (dest);
+  if (!destelf->size && S_GET_SIZE (dest) == 0)
     {
-      expressionS *exp = XNEW (expressionS);
-      *exp = *newelf->size;
-      newelf->size = exp;
+      destelf->size = srcelf->size;
+      S_SET_SIZE (dest, S_GET_SIZE (src));
     }
 }
 
 void
 elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
 {
-  struct elf_obj_sy *srcelf = symbol_get_obj (src);
-  struct elf_obj_sy *destelf = symbol_get_obj (dest);
-  /* If size is unset, copy size from src.  Because we don't track whether
-     .size has been used, we can't differentiate .size dest, 0 from the case
-     where dest's size is unset.  */
-  if (!destelf->size && S_GET_SIZE (dest) == 0)
-    {
-      if (srcelf->size)
-	{
-	  destelf->size = XNEW (expressionS);
-	  *destelf->size = *srcelf->size;
-	}
-      S_SET_SIZE (dest, S_GET_SIZE (src));
-    }
+  elf_copy_symbol_size (dest, src);
   /* Don't copy visibility.  */
   S_SET_OTHER (dest, (ELF_ST_VISIBILITY (S_GET_OTHER (dest))
 		      | (S_GET_OTHER (src) & ~ELF_ST_VISIBILITY (-1))));
@@ -2404,12 +2390,11 @@ obj_elf_size (int ignore ATTRIBUTE_UNUSED)
   if (exp.X_op == O_constant)
     {
       S_SET_SIZE (sym, exp.X_add_number);
-      xfree (symbol_get_obj (sym)->size);
       symbol_get_obj (sym)->size = NULL;
     }
   else
     {
-      symbol_get_obj (sym)->size = XNEW (expressionS);
+      symbol_get_obj (sym)->size = notes_alloc (sizeof (exp));
       *symbol_get_obj (sym)->size = exp;
     }
 
@@ -2805,7 +2790,6 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 	    as_warn (_(".size expression for %s "
 		       "does not evaluate to a constant"), S_GET_NAME (symp));
 	}
-      free (sy_obj->size);
       sy_obj->size = NULL;
     }
 
@@ -3336,7 +3320,7 @@ const struct format_ops elf_format_ops =
 #endif
   elf_obj_read_begin_hook,
   elf_obj_symbol_new_hook,
-  elf_obj_symbol_clone_hook,
+  0,
   elf_adjust_symtab
 };
 

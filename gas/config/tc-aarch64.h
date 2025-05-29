@@ -133,9 +133,17 @@ void aarch64_copy_symbol_attributes (symbolS *, symbolS *);
 #endif
 
 #ifdef OBJ_ELF
-void aarch64_elf_copy_symbol_attributes (symbolS *, symbolS *);
+/* Don't copy st_other.
+   This is needed so AArch64 specific st_other values can be independently
+   specified for an IFUNC resolver (that is called by the dynamic linker)
+   and the symbol it resolves (aliased to the resolver).  In particular,
+   if a function symbol has special st_other value set via directives,
+   then attaching an IFUNC resolver to that symbol should not override
+   the st_other setting.  Requiring the directive on the IFUNC resolver
+   symbol would be unexpected and problematic in C code, where the two
+   symbols appear as two independent function declarations.  */
 #define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST, SRC) \
-  aarch64_elf_copy_symbol_attributes (DEST, SRC)
+  elf_copy_symbol_size (DEST, SRC)
 #endif
 
 #define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR)			\

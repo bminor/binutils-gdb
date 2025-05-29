@@ -224,11 +224,7 @@ void elf_obj_symbol_new_hook (symbolS *);
 #define obj_symbol_new_hook	elf_obj_symbol_new_hook
 #endif
 
-void elf_obj_symbol_clone_hook (symbolS *, symbolS *);
-#ifndef obj_symbol_clone_hook
-#define obj_symbol_clone_hook	elf_obj_symbol_clone_hook
-#endif
-
+void elf_copy_symbol_size (symbolS *, symbolS *);
 void elf_copy_symbol_attributes (symbolS *, symbolS *);
 #ifndef OBJ_COPY_SYMBOL_ATTRIBUTES
 #define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST, SRC) \

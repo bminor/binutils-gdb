@@ -3789,7 +3789,7 @@ s_alpha_end (int dummy ATTRIBUTE_UNUSED)
 	  if (sym && cur_frame_data)
 	    {
 	      OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (sym);
-	      expressionS *exp = XNEW (expressionS);
+	      expressionS *exp = notes_alloc (sizeof (*exp));
 
 	      obj->size = exp;
 	      exp->X_op = O_subtract;

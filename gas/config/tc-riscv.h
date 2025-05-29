@@ -175,8 +175,16 @@ extern void riscv_init_frag (struct frag *, int);
 #define obj_adjust_symtab() riscv_adjust_symtab ()
 extern void riscv_adjust_symtab (void);
 
-void riscv_elf_copy_symbol_attributes (symbolS *, symbolS *);
+/* Don't copy st_other.
+   This is needed so RISC-V specific st_other values can be independently
+   specified for an IFUNC resolver (that is called by the dynamic linker)
+   and the symbol it resolves (aliased to the resolver).  In particular,
+   if a function symbol has special st_other value set via directives,
+   then attaching an IFUNC resolver to that symbol should not override
+   the st_other setting.  Requiring the directive on the IFUNC resolver
+   symbol would be unexpected and problematic in C code, where the two
+   symbols appear as two independent function declarations.  */
 #define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST, SRC)  \
-  riscv_elf_copy_symbol_attributes (DEST, SRC)
+  elf_copy_symbol_size (DEST, SRC)
 
 #endif /* TC_RISCV */

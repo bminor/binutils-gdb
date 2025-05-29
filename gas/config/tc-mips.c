@@ -19809,7 +19809,7 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
   if (p && cur_proc_ptr)
     {
       OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (p);
-      expressionS *exp = XNEW (expressionS);
+      expressionS *exp = notes_alloc (sizeof (*exp));
 
       obj->size = exp;
       exp->X_op = O_subtract;

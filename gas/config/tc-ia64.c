@@ -4476,13 +4476,14 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
 		    S_SET_SIZE (sym, frag_now_fix () - S_GET_VALUE (sym));
 		  else
 		    {
-		      symbol_get_obj (sym)->size = XNEW (expressionS);
-		      symbol_get_obj (sym)->size->X_op = O_subtract;
-		      symbol_get_obj (sym)->size->X_add_symbol
+		      OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (sym);
+		      obj->size = notes_alloc (sizeof (*obj->size));
+		      obj->size->X_op = O_subtract;
+		      obj->size->X_add_symbol
 			= symbol_new (FAKE_LABEL_NAME, now_seg,
 				      frag_now, frag_now_fix ());
-		      symbol_get_obj (sym)->size->X_op_symbol = sym;
-		      symbol_get_obj (sym)->size->X_add_number = 0;
+		      obj->size->X_op_symbol = sym;
+		      obj->size->X_add_number = 0;
 		    }
 		}
 	    }
