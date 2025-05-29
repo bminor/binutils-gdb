@@ -1016,7 +1016,7 @@ linespec_lexer_consume_token (linespec_parser *parser)
       if (*parser->lexer.stream != '\0')
 	{
 	  parser->completion_quote_char = '\0';
-	  parser->completion_quote_end = NULL;;
+	  parser->completion_quote_end = NULL;
 	}
     }
 

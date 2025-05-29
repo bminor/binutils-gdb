@@ -2578,7 +2578,7 @@ record_btrace_maybe_mark_async_event
    const std::vector<thread_info *> &no_history)
 {
   bool more_moving = !moving.empty ();
-  bool more_no_history = !no_history.empty ();;
+  bool more_no_history = !no_history.empty ();
 
   if (!more_moving && !more_no_history)
     return;

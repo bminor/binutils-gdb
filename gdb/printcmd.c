@@ -2394,7 +2394,7 @@ printf_c_string (struct ui_file *stream, const char *format,
     }
   else
     {
-      CORE_ADDR tem = value_as_address (value);;
+      CORE_ADDR tem = value_as_address (value);
 
       if (tem == 0)
 	{

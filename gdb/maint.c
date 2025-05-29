@@ -1168,7 +1168,7 @@ maintenance_set_command_time_cmd (const char *args, int from_tty,
     {
       warning (_("\
 per-thread run time information not available on this platform"));
-      already_warned = true;;
+      already_warned = true;
     }
 #endif
 }

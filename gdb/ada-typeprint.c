@@ -702,7 +702,7 @@ print_variant_part (const variant_part &part,
     name = "?";
   else
     {
-      name = type->field (part.discriminant_index).name ();;
+      name = type->field (part.discriminant_index).name ();
       discr_type = type->field (part.discriminant_index).type ();
     }
 

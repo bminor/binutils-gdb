@@ -2465,7 +2465,7 @@ fbsd_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
   if (ptrace (PT_LWPINFO, pid, (caddr_t) &pl, sizeof pl) == -1)
     return false;
   if (!(pl.pl_flags & PL_FLAG_SI))
-    return false;;
+    return false;
   *siginfo = pl.pl_siginfo;
   return (true);
 }

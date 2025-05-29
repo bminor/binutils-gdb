@@ -183,7 +183,7 @@ xnewvar (size_t s)
 {
   static_assert (IsMallocable<T>::value, "Trying to use XNEWVAR with a \
 non-POD data type.");
-  return XNEWVAR (T, s);;
+  return XNEWVAR (T, s);
 }
 
 #undef XNEWVAR
