@@ -6198,8 +6198,6 @@ default_collect_symbol_completion_matches_break_on
   if (current_language->macro_expansion () == macro_expansion_c
       && code == TYPE_CODE_UNDEF)
     {
-      gdb::unique_xmalloc_ptr<struct macro_scope> scope;
-
       /* This adds a macro's name to the current completion list.  */
       auto add_macro_name = [&] (const char *macro_name,
 				 const macro_definition *,
@@ -6217,10 +6215,9 @@ default_collect_symbol_completion_matches_break_on
 	 resulting expression will be evaluated at "file:line" -- but
 	 at there does not seem to be a way to detect this at
 	 completion time.  */
-      scope = default_macro_scope ();
-      if (scope)
-	macro_for_each_in_scope (scope->file, scope->line,
-				 add_macro_name);
+      macro_scope scope = default_macro_scope ();
+      if (scope.is_valid ())
+	macro_for_each_in_scope (scope.file, scope.line, add_macro_name);
 
       /* User-defined macros are always visible.  */
       macro_for_each (macro_user_macros, add_macro_name);

@@ -34,28 +34,29 @@
 struct macro_table *macro_user_macros;
 
 
-gdb::unique_xmalloc_ptr<struct macro_scope>
+macro_scope
 sal_macro_scope (struct symtab_and_line sal)
 {
+  macro_scope result;
   struct macro_source_file *main_file, *inclusion;
   struct compunit_symtab *cust;
 
   if (sal.symtab == NULL)
-    return NULL;
+    return result;
 
   cust = sal.symtab->compunit ();
   if (cust->macro_table () == NULL)
-    return NULL;
+    return result;
 
-  gdb::unique_xmalloc_ptr<struct macro_scope> ms (XNEW (struct macro_scope));
+  macro_scope ms;
 
   main_file = macro_main (cust->macro_table ());
   inclusion = macro_lookup_inclusion (main_file, sal.symtab->filename_for_id);
 
   if (inclusion)
     {
-      ms->file = inclusion;
-      ms->line = sal.line;
+      ms.file = inclusion;
+      ms.line = sal.line;
     }
   else
     {
@@ -73,8 +74,8 @@ sal_macro_scope (struct symtab_and_line sal)
 
 	 For the time being, though, we'll just treat these as
 	 occurring at the end of the main source file.  */
-      ms->file = main_file;
-      ms->line = -1;
+      ms.file = main_file;
+      ms.line = -1;
 
       complaint (_("symtab found for `%s', but that file\n"
 		 "is not covered in the compilation unit's macro information"),
@@ -85,20 +86,16 @@ sal_macro_scope (struct symtab_and_line sal)
 }
 
 
-gdb::unique_xmalloc_ptr<struct macro_scope>
-user_macro_scope (void)
+macro_scope
+user_macro_scope ()
 {
-  gdb::unique_xmalloc_ptr<struct macro_scope> ms (XNEW (struct macro_scope));
-  ms->file = macro_main (macro_user_macros);
-  ms->line = -1;
-  return ms;
+  return { macro_main (macro_user_macros), -1 };
 }
 
-gdb::unique_xmalloc_ptr<struct macro_scope>
-default_macro_scope (void)
+macro_scope
+default_macro_scope ()
 {
   struct symtab_and_line sal;
-  gdb::unique_xmalloc_ptr<struct macro_scope> ms;
   frame_info_ptr frame;
   CORE_ADDR pc;
 
@@ -128,8 +125,8 @@ default_macro_scope (void)
       sal.line = cursal.line;
     }
 
-  ms = sal_macro_scope (sal);
-  if (! ms)
+  macro_scope ms = sal_macro_scope (sal);
+  if (!ms.is_valid ())
     ms = user_macro_scope ();
 
   return ms;

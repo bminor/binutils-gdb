@@ -3392,18 +3392,18 @@ c_parse (struct parser_state *par_state)
   c_parse_state cstate;
   scoped_restore cstate_restore = make_scoped_restore (&cpstate, &cstate);
 
-  gdb::unique_xmalloc_ptr<struct macro_scope> macro_scope;
+  macro_scope macro_scope;
 
   if (par_state->expression_context_block)
     macro_scope
       = sal_macro_scope (find_pc_line (par_state->expression_context_pc, 0));
   else
     macro_scope = default_macro_scope ();
-  if (! macro_scope)
+  if (!macro_scope.is_valid ())
     macro_scope = user_macro_scope ();
 
   scoped_restore restore_macro_scope
-    = make_scoped_restore (&expression_macro_scope, macro_scope.get ());
+    = make_scoped_restore (&expression_macro_scope, &macro_scope);
 
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
 							par_state->debug);
