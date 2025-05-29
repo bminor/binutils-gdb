@@ -812,17 +812,14 @@ symbol_clone (symbolS *orgsymP, int replace)
 
   if (replace)
     {
-      if (symbol_rootP == orgsymP)
+      if (orgsymP->x->previous != NULL)
+	orgsymP->x->previous->x->next = newsymP;
+      else
 	symbol_rootP = newsymP;
-      else if (orgsymP->x->previous)
-	{
-	  orgsymP->x->previous->x->next = newsymP;
-	  orgsymP->x->previous = NULL;
-	}
-      if (symbol_lastP == orgsymP)
-	symbol_lastP = newsymP;
-      else if (orgsymP->x->next)
+      if (orgsymP->x->next != NULL)
 	orgsymP->x->next->x->previous = newsymP;
+      else
+	symbol_lastP = newsymP;
 
       /* Symbols that won't be output can't be external.  */
       S_CLEAR_EXTERNAL (orgsymP);
@@ -1033,17 +1030,12 @@ symbol_append (symbolS *addme, symbolS *target,
       *rootPP = addme;
       *lastPP = addme;
       return;
-    }				/* if the list is empty  */
+    }
 
   if (target->x->next != NULL)
-    {
-      target->x->next->x->previous = addme;
-    }
+    target->x->next->x->previous = addme;
   else
-    {
-      know (*lastPP == target);
-      *lastPP = addme;
-    }				/* if we have a next  */
+    *lastPP = addme;
 
   addme->x->next = target->x->next;
   target->x->next = addme;
@@ -1071,25 +1063,15 @@ symbol_remove (symbolS *symbolP, symbolS **rootPP, symbolS **lastPP)
   if (symbolP->flags.local_symbol)
     abort ();
 
-  if (symbolP == *rootPP)
-    {
-      *rootPP = symbolP->x->next;
-    }				/* if it was the root  */
-
-  if (symbolP == *lastPP)
-    {
-      *lastPP = symbolP->x->previous;
-    }				/* if it was the tail  */
+  if (symbolP->x->previous != NULL)
+    symbolP->x->previous->x->next = symbolP->x->next;
+  else
+    *rootPP = symbolP->x->next;
 
   if (symbolP->x->next != NULL)
-    {
-      symbolP->x->next->x->previous = symbolP->x->previous;
-    }				/* if not last  */
-
-  if (symbolP->x->previous != NULL)
-    {
-      symbolP->x->previous->x->next = symbolP->x->next;
-    }				/* if not first  */
+    symbolP->x->next->x->previous = symbolP->x->previous;
+  else
+    *lastPP = symbolP->x->previous;
 
   debug_verify_symchain (*rootPP, *lastPP);
 }
@@ -1109,14 +1091,9 @@ symbol_insert (symbolS *addme, symbolS *target,
     abort ();
 
   if (target->x->previous != NULL)
-    {
-      target->x->previous->x->next = addme;
-    }
+    target->x->previous->x->next = addme;
   else
-    {
-      know (*rootPP == target);
-      *rootPP = addme;
-    }				/* if not first  */
+    *rootPP = addme;
 
   addme->x->previous = target->x->previous;
   target->x->previous = addme;
