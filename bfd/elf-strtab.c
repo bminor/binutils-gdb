@@ -285,11 +285,12 @@ _bfd_elf_strtab_offset (struct elf_strtab_hash *tab, size_t idx)
 {
   struct elf_strtab_hash_entry *entry;
 
-  if (idx == 0 || idx >= tab->size || tab->sec_size == 0)
+  if (idx == 0)
     return 0;
+  BFD_ASSERT (idx < tab->size);
+  BFD_ASSERT (tab->sec_size);
   entry = tab->array[idx];
-  if (entry == NULL || entry->refcount == 0)
-    return 0;
+  BFD_ASSERT (entry->refcount > 0);
   entry->refcount--;
   return tab->array[idx]->u.index;
 }
