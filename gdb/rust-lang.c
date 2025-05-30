@@ -1142,13 +1142,22 @@ rust_slice_type (const char *name, struct type *elt_type,
 
 
 
-/* A helper for rust_evaluate_subexp that handles OP_RANGE.  */
+namespace expr
+{
 
 struct value *
-rust_range (struct type *expect_type, struct expression *exp,
-	    enum noside noside, enum range_flag kind,
-	    struct value *low, struct value *high)
+rust_range_operation::evaluate (struct type *expect_type,
+				struct expression *exp,
+				enum noside noside)
 {
+  auto kind = std::get<0> (m_storage);
+  value *low = nullptr;
+  if (std::get<1> (m_storage) != nullptr)
+    low = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  value *high = nullptr;
+  if (std::get<2> (m_storage) != nullptr)
+    high = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+
   struct value *addrval, *result;
   CORE_ADDR addr;
   struct type *range_type;
@@ -1225,6 +1234,8 @@ rust_range (struct type *expect_type, struct expression *exp,
   return result;
 }
 
+} /* namespace expr */
+
 /* A helper function to compute the range and kind given a range
    value.  TYPE is the type of the range value.  RANGE is the range
    value.  LOW, HIGH, and KIND are out parameters.  The LOW and HIGH
@@ -1266,13 +1277,16 @@ rust_compute_range (struct type *type, struct value *range,
     }
 }
 
-/* A helper for rust_evaluate_subexp that handles BINOP_SUBSCRIPT.  */
+namespace expr
+{
 
 struct value *
-rust_subscript (struct type *expect_type, struct expression *exp,
-		enum noside noside, bool for_addr,
-		struct value *lhs, struct value *rhs)
+rust_subscript_operation::subscript (struct expression *exp,
+				     enum noside noside, bool for_addr)
 {
+  value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  value *rhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+
   struct value *result;
   struct type *rhstype;
   LONGEST low, high_bound;
@@ -1412,9 +1426,6 @@ rust_subscript (struct type *expect_type, struct expression *exp,
 
   return result;
 }
-
-namespace expr
-{
 
 struct value *
 rust_unop_ind_operation::evaluate (struct type *expect_type,
